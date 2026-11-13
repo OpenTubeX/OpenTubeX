@@ -1,328 +1,635 @@
 <template>
   <div
-    class="ft-list-video ft-list-item"
+    class="videoSwipeFrame"
     :class="{
-      list: effectiveListTypeIsList,
-      grid: !effectiveListTypeIsList,
-      [appearance]: true,
-      watched: addWatchedStyle
+      thumbnailSwipeEnabled,
+      videoSwipeActive: thumbnailSwipe,
+      videoSwipeDragging: thumbnailSwipe && !thumbnailSwipe.settling,
     }"
+    :style="{
+      '--video-swipe-offset': `${thumbnailSwipe?.offset ?? 0}px`,
+      '--video-swipe-progress': thumbnailSwipe?.progress ?? 0,
+    }"
+    @pointerdown="startThumbnailSwipe"
+    @pointermove="moveThumbnailSwipe"
+    @pointerup="finishThumbnailSwipe"
+    @pointercancel="abortThumbnailSwipe"
+    @lostpointercapture.self="abortThumbnailSwipe"
   >
     <div
-      v-if="showGrabBar"
-      class="grabBar"
+      v-if="thumbnailSwipe"
+      :key="thumbnailSwipe.direction"
+      class="thumbnailSwipeFeedback"
       :class="{
-        grabBarDisabled: !grabBarEnabled,
+        thumbnailSwipeReady: thumbnailSwipe.progress === 1,
+        thumbnailSwipeLeft: thumbnailSwipe.direction === 'left',
       }"
+      :title="thumbnailSwipe.action.label"
+      aria-hidden="true"
     >
-      <FontAwesomeIcon
-        :icon="['fas', 'fa-bars']"
-      />
+      <FtIcon :icon="thumbnailSwipe.action.icon" />
     </div>
     <div
-      class="videoThumbnail"
-      draggable="true"
-      @dragstart="onDragStart"
+      class="ft-list-video ft-list-item"
+      :class="{
+        list: effectiveListTypeIsList,
+        grid: !effectiveListTypeIsList,
+        [appearance]: true,
+        watched: addWatchedStyle
+      }"
+      @contextmenu="openVideoContextMenu"
+      @pointerdown="startMenuHold"
+      @pointermove="moveMenuHold"
+      @pointerup="cancelMenuHold"
+      @pointercancel="cancelMenuHold"
+      @dragstart="handleMenuHoldDragStart"
+      @keydown="handleTileKeydown"
     >
-      <RouterLink
-        class="thumbnailLink"
-        tabindex="-1"
-        :to="watchVideoRouterLink"
-        @click.capture="handleWatchPageLinkClick"
-      >
-        <img
-          :src="thumbnail"
-          class="thumbnailImage"
-          :class="{ blur: blurThumbnails }"
-          alt=""
-        >
-      </RouterLink>
       <div
-        v-if="isLive || isUpcoming || isStation || (displayDuration !== '' && displayDuration !== '0:00')"
-        class="videoDuration"
+        v-if="showGrabBar"
+        class="grabBar"
         :class="{
-          live: (isLive || isStation ),
-          upcoming: isUpcoming
+          grabBarDisabled: !grabBarEnabled,
         }"
+        :role="grabBarEnabled ? 'button' : null"
+        :tabindex="grabBarEnabled ? 0 : null"
+        :aria-label="grabBarEnabled ? t('User Playlists.Reorder Hint') : null"
+        :title="grabBarEnabled ? t('User Playlists.Reorder Hint') : null"
+        :aria-keyshortcuts="grabBarEnabled ? 'ArrowUp ArrowDown Home End' : null"
       >
-        <template v-if="isLive">
-          <FontAwesomeIcon
-            :icon="['fa', 'tower-broadcast']"
-            class="liveIcon"
-          />
-          {{ isPremiere ? t("Video.Premiere") : t("Video.Live") }}
-        </template>
-        <template v-else-if="isUpcoming">
-          {{ t("Video.Upcoming") }}
-        </template>
-        <template v-else-if="isStation">
-          <FontAwesomeIcon
-            :icon="['fa', 'tower-broadcast']"
-            class="liveIcon"
-          />
-          {{ t("Video.Station") }}
-        </template>
-        <template v-else>
-          <FontAwesomeIcon
-            v-if="isMusic"
-            :icon="['fa', 'music']"
-            class="musicIcon"
-          />
-          {{ displayDuration }}
-        </template>
+        <FtIcon
+          :icon="['fas', 'bars']"
+        />
       </div>
-      <FtIconButton
-        v-if="externalPlayer !== '' && !externalPlayerIsDefaultViewingMode"
-        :title="t('Video.External Player.OpenInTemplate', { externalPlayer })"
-        :icon="['fas', 'external-link-alt']"
-        class="externalPlayerIcon"
-        theme="base"
-        :padding="appearance === 'watchPlaylistItem' ? 6 : 7"
-        :size="appearance === 'watchPlaylistItem' ? 12 : 16"
-        draggable="true"
-        @click="handleExternalPlayer"
-        @dragstart="onDragStart"
-      />
-      <span
-        class="playlistIcons"
+      <div
+        class="videoThumbnail"
         draggable="true"
         @dragstart="onDragStart"
       >
-        <FtIconButton
-          v-if="showPlaylists"
-          :title="t('User Playlists.Add to Playlist')"
-          :icon="['fas', 'plus']"
-          class="addToPlaylistIcon"
-          :class="alwaysShowAddToPlaylistButton ? 'alwaysVisible' : ''"
-          :padding="playlistIconPadding"
-          :size="playlistIconSize"
-          @click="togglePlaylistPrompt"
-        />
-        <FtIconButton
-          v-if="isQuickBookmarkEnabled && quickBookmarkButtonEnabled"
-          :title="quickBookmarkIconText"
-          :icon="isInQuickBookmarkPlaylist ? ['fas', 'check'] : ['fas', 'bookmark']"
-          class="quickBookmarkVideoIcon"
-          :class="{
-            bookmarked: isInQuickBookmarkPlaylist,
-            alwaysVisible: alwaysShowAddToPlaylistButton,
-          }"
-          :theme="quickBookmarkIconTheme"
-          :padding="playlistIconPadding"
-          :size="playlistIconSize"
-          @click="toggleQuickBookmarked"
-        />
-        <FtIconButton
-          v-if="inUserPlaylist && canMoveVideoUp"
-          :title="t('User Playlists.Move Video Up')"
-          :icon="effectiveListTypeIsList ? ['fas', 'arrow-up'] : ['fas', 'arrow-left']"
-          class="upArrowIcon"
-          :padding="playlistIconPadding"
-          :size="playlistIconSize"
-          @click="moveVideoUp"
-        />
-        <FtIconButton
-          v-if="inUserPlaylist && canMoveVideoDown"
-          :title="t('User Playlists.Move Video Down')"
-          :icon="effectiveListTypeIsList ? ['fas', 'arrow-down'] : ['fas', 'arrow-right']"
-          class="downArrowIcon"
-          :padding="playlistIconPadding"
-          :size="playlistIconSize"
-          @click="moveVideoDown"
-        />
-        <FtIconButton
-          v-if="inUserPlaylist && canRemoveFromPlaylist"
-          :title="t('User Playlists.Remove from Playlist')"
-          :icon="['fas', 'trash']"
-          class="trashIcon"
-          :padding="playlistIconPadding"
-          :size="playlistIconSize"
-          @click="removeFromPlaylist"
-        />
-      </span>
-      <div
-        v-if="addWatchedStyle"
-        class="videoWatched"
-      >
-        {{ t("Video.Watched") }}
-      </div>
-      <div
-        v-if="historyEntryExists"
-        class="watchedProgressBar"
-        :style="{ inlineSize: progressPercentage + '%' }"
-      />
-    </div>
-    <div
-      class="info"
-      draggable="true"
-      @dragstart="onDragStart"
-    >
-      <RouterLink
-        class="title"
-        :to="watchVideoRouterLink"
-        @click.capture="handleWatchPageLinkClick"
-      >
-        <h3
-          class="h3Title"
-          dir="auto"
-        >
-          {{ displayTitle }}
-        </h3>
-      </RouterLink>
-      <div class="infoLine">
         <RouterLink
-          v-if="!disableChannelLinks && channelId !== null"
-          class="channelName"
-          dir="auto"
-          :to="`/channel/${channelId}`"
+          class="thumbnailLink"
+          tabindex="-1"
+          :to="watchVideoRouterLink"
+          :aria-label="title"
+          @click.capture="handleWatchPageLinkClick"
+          @auxclick="handleWatchPageLinkClick"
+          @pointerenter="startThumbnailPreview"
+          @pointerleave="stopThumbnailPreview"
         >
-          {{ channelName }}
-        </RouterLink>
-        <bdi v-else-if="channelName !== null">
-          {{ channelName }}
-        </bdi>
-        <span
-          v-if="!isLive && !isUpcoming && !isPremium && !isStation && !hideViews && viewCount != null"
-          class="viewCount"
-        >
-          <template v-if="channelId !== null || channelName !== null"> • </template>
-          {{ t('Global.Counts.View Count', { count: formattedViewCount }, viewCount) }}
-        </span>
-        <span
-          v-if="uploadedTime !== '' && !isLive && !isStation"
-          class="uploadedTime"
-        > • {{ uploadedTime }}</span>
-        <span
-          v-if="(isLive || isStation) && !hideViews"
-          class="viewCount"
-        > • {{ t('Global.Counts.Watching Count', { count: parsedViewCount }, viewCount) }}</span>
-      </div>
-      <div
-        v-if="is4k || hasCaptions || is8k || isNew || isVr180 || isVr360 || is3D"
-        class="videoTagLine"
-      >
-        <div
-          v-if="isNew"
-          class="videoTag"
-          :aria-label="t('Search Listing.Label.New')"
-          role="img"
-        >
-          {{ t('Search Listing.Label.New') }}
-        </div>
-        <div
-          v-if="is4k"
-          class="videoTag"
-          :aria-label="t('Search Listing.Label.4K')"
-          role="img"
-        >
-          {{ t('Search Listing.Label.4K') }}
-        </div>
-        <div
-          v-if="is8k"
-          class="videoTag"
-          :aria-label="t('Search Listing.Label.8K')"
-          role="img"
-        >
-          {{ t('Search Listing.Label.8K') }}
-        </div>
-        <div
-          v-if="isVr180"
-          class="videoTag"
-          :aria-label="t('Search Listing.Label.VR180')"
-          role="img"
-        >
-          {{ t('Search Listing.Label.VR180') }}
-        </div>
-        <div
-          v-if="isVr360"
-          class="videoTag"
-          :aria-label="t('Search Listing.Label.360 Video')"
-          role="img"
-        >
-          {{ t('Search Listing.Label.360 Video') }}
-        </div>
-        <div
-          v-if="is3D"
-          class="videoTag"
-          :aria-label="t('Search Listing.Label.3D')"
-          role="img"
-        >
-          {{ t('Search Listing.Label.3D') }}
-        </div>
-        <div
-          v-if="hasCaptions"
-          class="videoTag"
-          :aria-label="t('Search Listing.Label.Closed Captions')"
-          role="img"
-        >
-          {{ t('Search Listing.Label.Subtitles') }}
-        </div>
-      </div>
-      <div class="buttonStack">
-        <FtIconButton
-          class="optionsButton"
-          :icon="['fas', 'ellipsis-v']"
-          :title="t('Video.More Options')"
-          theme="base-no-default"
-          :size="16"
-          :use-shadow="false"
-          dropdown-position-x="left"
-          :dropdown-options="dropdownOptions"
-          @click="handleOptionsClick"
-        />
-        <button
-          v-if="deArrowChangedContent || deArrowTogglePinned"
-          :title="deArrowToggleTitle"
-          class="optionsButton deArrowToggleButton"
-          :class="{ alwaysVisible: deArrowTogglePinned }"
-          @click="toggleDeArrow"
-        >
-          <FontAwesomeIcon
-            class="deArrowToggleIcon"
-            :icon="['far', 'dot-circle']"
+          <FtRetryImage
+            :src="thumbnail"
+            class="thumbnailImage"
+            :class="{
+              blur: blurThumbnails,
+              deArrowThumbnail: appearance !== 'youtubeShort' && showDeArrowThumbnail && deArrowCache?.thumbnail != null
+            }"
+            alt=""
           />
-        </button>
+          <img
+            v-if="thumbnailPreviewActive && thumbnailPreviewLoaded"
+            :src="thumbnailPreviewUrl"
+            class="thumbnailImage thumbnailPreview active loaded"
+            :class="{ blur: blurThumbnails }"
+            alt=""
+            aria-hidden="true"
+            @error="resetThumbnailPreview"
+          >
+          <FtEmbeddedProgress
+            v-if="historyEntryExists && progressPercentage > 0"
+            class="watchedProgressBar"
+            :progress="progressPercentage"
+            :corner-radius="thumbnailProgressRadius"
+            :end-arc-fraction="0.5"
+            :line-width="3"
+            :start-arc-fraction="0.5"
+          />
+        </RouterLink>
+        <div
+          v-if="thumbnailIndex !== null"
+          class="playlistIndexBadge"
+        >
+          {{ thumbnailIndex + 1 }}
+        </div>
+        <div
+          v-if="isLive || isUpcoming || isStation || localDownloadId !== undefined || (displayDuration !== '' && displayDuration !== '0:00')"
+          class="videoDuration"
+          :class="{
+            live: isLive || isStation,
+            upcoming: isUpcoming
+          }"
+        >
+          <FtIcon
+            v-if="isStation"
+            :icon="['fa', 'tower-broadcast']"
+            class="subscriptionIcon"
+          />
+          <FtIcon
+            v-if="localDownloadId !== undefined"
+            :icon="['fas', 'circle-down']"
+            class="downloadedIcon"
+            role="img"
+            :aria-label="t('Downloads.Downloaded')"
+          />
+          <FtIcon
+            v-if="isMusic"
+            :icon="['fas', 'music']"
+            role="img"
+            :aria-label="t('Video.Music Video Badge')"
+          />
+          {{ displayDurationLabel === '0:00' ? '' : displayDurationLabel }}
+        </div>
+        <!-- Watch playlist and queue thumbnails only fit the icon, so it opens the -->
+        <!-- category in a prompt for touch and keyboard users. -->
+        <!-- Watch page shortcuts must not take Space and Enter from it. A middle -->
+        <!-- mousedown would start autoscroll, which swallows the next key press. -->
+        <component
+          :is="sponsorBlockLabelOpensPrompt ? 'button' : 'div'"
+          v-if="useSponsorBlock && sponsorBlockFullVideoCategory"
+          class="sponsorBlockVideoLabel"
+          :type="sponsorBlockLabelOpensPrompt ? 'button' : null"
+          :aria-haspopup="sponsorBlockLabelOpensPrompt ? 'dialog' : null"
+          :title="sponsorBlockFullVideoTitle"
+          @click="sponsorBlockLabelOpensPrompt && (sponsorBlockPromptOpen = true)"
+          @keydown.space.enter.stop
+          @mousedown.middle.prevent
+        >
+          <FtIcon :icon="sponsorBlockFullVideoIcon" />
+          <span>{{ sponsorBlockFullVideoLabel }}</span>
+        </component>
+        <FtIconButton
+          v-if="externalPlayer !== '' && !externalPlayerIsDefaultViewingMode"
+          :title="t('Video.External Player.OpenInTemplate', { externalPlayer })"
+          :icon="['fas', 'external-link-alt']"
+          class="externalPlayerIcon"
+          theme="base"
+          :padding="appearance === 'watchPlaylistItem' ? 6 : 7"
+          :size="appearance === 'watchPlaylistItem' ? 12 : 16"
+          draggable="true"
+          @click="handleExternalPlayer"
+          @dragstart="onDragStart"
+        />
+        <span
+          class="playlistIcons"
+          :class="{ mobileThumbnailActions: useMobileThumbnailActions }"
+          draggable="true"
+          @dragstart="onDragStart"
+        >
+          <FtIconButton
+            v-if="!useMobileThumbnailActions && extraThumbnailActionButton"
+            :title="extraThumbnailActionButton.title"
+            :icon="extraThumbnailActionButton.icon"
+            class="extraThumbnailActionIcon"
+            theme="base"
+            :padding="appearance === 'watchPlaylistItem' ? 5 : 6"
+            :size="appearance === 'watchPlaylistItem' ? 14 : 18"
+            @click="handleExtraThumbnailAction"
+          />
+          <FtIconButton
+            v-if="showPlaylists && !showQuickRemoveButton"
+            :title="t('User Playlists.Add to Playlist')"
+            :icon="isInAnyPlaylist ? ['fac', 'playlist-check'] : ['fac', 'playlist-add']"
+            class="addToPlaylistIcon"
+            :class="alwaysShowAddToPlaylistButton ? 'alwaysVisible' : ''"
+            :padding="playlistIconPadding"
+            :size="playlistIconSize"
+            force-dropdown
+            mobile-sheet
+            dropdown-position-x="left"
+            :dropdown-portal="appearance === 'watchPlaylistItem'"
+            :dropdown-position-y="appearance === 'watchPlaylistItem' ? 'top' : 'bottom'"
+          >
+            <FtAddToPlaylistDropdown :video-data="addToPlaylistVideoData" />
+          </FtIconButton>
+          <FtIconButton
+            v-if="isQuickBookmarkEnabled && quickBookmarkButtonEnabled"
+            :title="quickBookmarkIconText"
+            :icon="quickBookmarkIcon"
+            class="quickBookmarkVideoIcon"
+            :class="{
+              bookmarked: isInQuickBookmarkPlaylist,
+              alwaysVisible: alwaysShowAddToPlaylistButton,
+            }"
+            :theme="quickBookmarkIconTheme"
+            :padding="playlistIconPadding"
+            :size="playlistIconSize"
+            @click="toggleQuickBookmarked"
+          />
+          <FtIconButton
+            v-if="!playlistRowMenu && inUserPlaylist && canMoveVideoUp"
+            :title="t('User Playlists.Move Video Up')"
+            :icon="verticalMoveControls ? ['fas', 'arrow-up'] : ['fas', 'arrow-left']"
+            class="upArrowIcon"
+            :padding="playlistIconPadding"
+            :size="playlistIconSize"
+            @click="moveVideoUp"
+          />
+          <FtIconButton
+            v-if="!playlistRowMenu && inUserPlaylist && canMoveVideoDown"
+            :title="t('User Playlists.Move Video Down')"
+            :icon="verticalMoveControls ? ['fas', 'arrow-down'] : ['fas', 'arrow-right']"
+            class="downArrowIcon"
+            :padding="playlistIconPadding"
+            :size="playlistIconSize"
+            @click="moveVideoDown"
+          />
+          <FtIconButton
+            v-if="inUserPlaylist && canRemoveFromPlaylist"
+            :title="t('User Playlists.Remove from Playlist')"
+            :icon="['fas', 'trash']"
+            class="trashIcon"
+            :padding="playlistIconPadding"
+            :size="playlistIconSize"
+            @click="removeFromPlaylist"
+          />
+          <FtIconButton
+            v-if="canToggleLiveReminder"
+            :title="liveReminderActive ? t('Video.Notification on') : t('Video.Notify me')"
+            :icon="['fas', 'calendar-days']"
+            :aria-pressed="liveReminderActive"
+            :disabled="liveReminderLoading"
+            class="liveReminderIcon"
+            :class="{ reminderActive: liveReminderActive }"
+            theme="base"
+            :padding="playlistIconPadding"
+            :size="playlistIconSize"
+            @click="toggleLiveReminder"
+          />
+        </span>
+        <div
+          v-if="addWatchedStyle"
+          class="videoWatched"
+        >
+          {{ t("Video.Watched") }}
+        </div>
       </div>
-      <p
-        v-if="description && effectiveListTypeIsList && appearance === 'result'"
-        v-safer-html="description"
-        class="description"
-        dir="auto"
-      />
+
       <div
-        v-if="effectiveListTypeIsList"
-        class="restArea"
+        class="info"
+        draggable="true"
+        @dragstart="onDragStart"
       >
+        <!-- Like the DeArrow extension, its toggle follows the title. -->
+        <div class="titleRow">
+          <RouterLink
+            class="title"
+            :to="watchVideoRouterLink"
+            :title="fullTitleTooltip"
+            @click.capture="handleWatchPageLinkClick"
+            @auxclick="handleWatchPageLinkClick"
+          >
+            <h3
+              class="h3Title"
+              dir="auto"
+            >
+              <FtNewContentDot v-if="showNewSubscriptionFeedIndicator" />
+              {{ displayTitle }}
+            </h3>
+          </RouterLink>
+          <button
+            v-if="deArrowChangedContent || deArrowTogglePinned"
+            :title="deArrowToggleTitle"
+            class="optionsButton deArrowToggleButton"
+            :class="{ alwaysVisible: deArrowTogglePinned || showDeArrowBadge, showingOriginal: deArrowTogglePinned }"
+            @click="toggleDeArrow"
+          >
+            <!-- DeArrow's logo, so the button reads as the service's mark -->
+            <svg
+              class="deArrowToggleIcon"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="12"
+                fill="#1213bd"
+              />
+              <circle
+                cx="12"
+                cy="12"
+                r="8.3"
+                fill="#88c9f9"
+              />
+              <circle
+                cx="12"
+                cy="12"
+                r="3.8"
+                fill="#0a62a5"
+              />
+            </svg>
+          </button>
+        </div>
+        <div class="infoLine">
+          <button
+            v-if="shouldShowChannelResolverButton"
+            type="button"
+            class="channelName channelResolverButton"
+            dir="auto"
+            :disabled="isFetchingCollaborators"
+            @click.stop.prevent="openChannelByline"
+            @mousedown.middle.prevent
+            @auxclick.middle.stop.prevent="openChannelByline"
+          >
+            <FtChannelAvatarStack
+              v-if="showChannelAvatar"
+              :thumbnails="channelThumbnails"
+            />
+            <span class="channelNameText">{{ channelName }}</span>
+          </button>
+          <component
+            :is="disableChannelLinks ? 'span' : 'router-link'"
+            v-else-if="channelId !== null"
+            class="channelName"
+            dir="auto"
+            :to="`/channel/${channelId}`"
+            @auxclick="handleChannelLinkClick"
+          >
+            <FtChannelAvatarStack
+              v-if="showChannelAvatar"
+              :thumbnails="channelThumbnails"
+            />
+            <span class="channelNameText"><FtVerifiedBadge
+              :name="channelName"
+              :verified="data.authorVerified"
+              :artist="data.authorVerifiedArtist"
+            /></span>
+          </component>
+          <bdi
+            v-else-if="channelName !== null"
+            class="channelName"
+          >
+            <FtChannelAvatarStack
+              v-if="showChannelAvatar"
+              :thumbnails="channelThumbnails"
+            />
+            <span class="channelNameText"><FtVerifiedBadge
+              :name="channelName"
+              :verified="data.authorVerified"
+              :artist="data.authorVerifiedArtist"
+            /></span>
+          </bdi>
+          <FtInlineMetadata
+            class="videoInfo"
+            icon-labels
+          >
+            <span
+              v-if="!isLive && !isUpcoming && !isPremium && !isStation && !hideViews && viewCount != null"
+              class="viewCount"
+            ><FtIcon
+              :icon="['fas', 'eye']"
+              class="statIcon"
+              aria-hidden="true"
+            />{{ t('Global.Counts.View Count', { count: parsedViewCount }, viewCount) }}</span>
+            <span
+              v-if="displayedUploadedTime !== '' && !isLive && !isStation"
+              class="uploadedTime"
+            ><FtIcon
+              :icon="['fas', 'clock']"
+              class="statIcon"
+              aria-hidden="true"
+            />{{ displayedUploadedTime }}</span>
+            <span
+              v-if="subscriptionHiddenVideoCount > 0"
+              class="subscriptionHiddenVideoCount"
+            ><FtIcon
+              :icon="['fas', 'eye-slash']"
+              class="statIcon"
+              aria-hidden="true"
+            />{{ t('Channel.More videos hidden', { count: subscriptionHiddenVideoCount }, subscriptionHiddenVideoCount) }}</span>
+            <span
+              v-if="(isLive || isStation) && !hideViews"
+              class="viewCount"
+            ><FtIcon
+              :icon="['fas', 'users']"
+              class="statIcon"
+              aria-hidden="true"
+            />{{ t('Global.Counts.Watching Count', { count: parsedViewCount }, viewCount) }}</span>
+          </FtInlineMetadata>
+        </div>
+        <FtCollaboratorsPrompt
+          v-if="showCollaboratorsPrompt"
+          :collaborators="channelCollaborators"
+          @close="showCollaboratorsPrompt = false"
+        />
+        <div
+          v-if="isAiSlopWarned || isMembersOnly || is4k || hasCaptions || is8k || isNew || isVr180 || isVr360 || is3D"
+          class="videoTagLine"
+        >
+          <div
+            v-if="isAiSlopWarned"
+            class="videoTag aiSlopTag"
+          >
+            <FtIcon
+              :icon="['fas', 'robot']"
+              aria-hidden="true"
+            />
+            {{ t('Search Listing.Label.Possibly AI-generated') }}
+          </div>
+          <div
+            v-if="isMembersOnly"
+            class="videoTag membersOnlyTag"
+          >
+            <FtIcon
+              :icon="['fas', 'users']"
+              aria-hidden="true"
+            />
+            {{ t('Search Listing.Label.Members Only') }}
+          </div>
+          <div
+            v-if="isNew"
+            class="videoTag"
+            :aria-label="t('Search Listing.Label.New')"
+            role="img"
+          >
+            {{ t('Search Listing.Label.New') }}
+          </div>
+          <div
+            v-if="is4k"
+            class="videoTag"
+            :aria-label="t('Search Listing.Label.4K')"
+            role="img"
+          >
+            {{ t('Search Listing.Label.4K') }}
+          </div>
+          <div
+            v-if="is8k"
+            class="videoTag"
+            :aria-label="t('Search Listing.Label.8K')"
+            role="img"
+          >
+            {{ t('Search Listing.Label.8K') }}
+          </div>
+          <div
+            v-if="isVr180"
+            class="videoTag"
+            :aria-label="t('Search Listing.Label.VR180')"
+            role="img"
+          >
+            {{ t('Search Listing.Label.VR180') }}
+          </div>
+          <div
+            v-if="isVr360"
+            class="videoTag"
+            :aria-label="t('Search Listing.Label.360 Video')"
+            role="img"
+          >
+            {{ t('Search Listing.Label.360 Video') }}
+          </div>
+          <div
+            v-if="is3D"
+            class="videoTag"
+            :aria-label="t('Search Listing.Label.3D')"
+            role="img"
+          >
+            {{ t('Search Listing.Label.3D') }}
+          </div>
+          <div
+            v-if="hasCaptions"
+            class="videoTag"
+            :aria-label="t('Search Listing.Label.Closed Captions')"
+            role="img"
+          >
+            {{ t('Search Listing.Label.Subtitles') }}
+          </div>
+        </div>
+        <div class="buttonStack">
+          <FtIconButton
+            v-if="showVideoMenuButton"
+            ref="videoMenuButton"
+            class="optionsButton"
+            :icon="['fas', 'ellipsis-v']"
+            :title="t('Video.More Options')"
+            theme="base-no-default"
+            :size="16"
+            @click="openVideoOptionsMenu"
+          />
+        </div>
+        <p
+          v-if="description && effectiveListTypeIsList && appearance === 'result'"
+          v-safer-html="description"
+          class="description"
+          dir="auto"
+        />
+        <div
+          v-if="effectiveListTypeIsList"
+          class="restArea"
+        >
         &nbsp;
+        </div>
       </div>
     </div>
+    <FtAddToPlaylistDropdown
+      v-if="mobilePlaylistPickerOpen"
+      :video-data="addToPlaylistVideoData"
+      force-sheet
+      @closed="mobilePlaylistPickerOpen = false"
+    />
+    <FtPrompt
+      v-if="sponsorBlockPromptOpen"
+      autosize
+      theme="slim"
+      :label="sponsorBlockFullVideoTitle"
+      :option-names="[t('Close')]"
+      :option-values="[null]"
+      :option-icons="[['fas', 'xmark']]"
+      @click="sponsorBlockPromptOpen = false"
+    />
+    <FtPrompt
+      v-if="pendingSwipeRemoval"
+      autosize
+      is-first-option-destructive
+      :label="t('Downloads.Remove File Confirmation')"
+      :extra-labels="[IS_CAPACITOR ? t('Downloads.Remove File Permanently Warning', { title: pendingSwipeRemoval.title }) : t('Downloads.Remove File Warning', { title: pendingSwipeRemoval.title })]"
+      :option-names="[t('Downloads.Remove File'), t('Cancel')]"
+      :option-values="['remove', 'cancel']"
+      :option-icons="[['fas', 'trash'], ['fas', 'xmark']]"
+      @click="removeSwipeDownload"
+    />
+    <WatchVideoDownloadPrompt
+      v-if="enableDownloads && showDownloadPrompt"
+      :video-id="id"
+      :title="title"
+      :thumbnail="thumbnail"
+      @close="showDownloadPrompt = false"
+    />
   </div>
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, ref } from 'vue'
+import { getSyncServerDeviceIcon } from '../../helpers/sync-server-sessions'
+import FtInlineMetadata from '../FtInlineMetadata/FtInlineMetadata.vue'
+import { getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
+import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
+import { useThumbnailSwipe } from '../../composables/useThumbnailSwipe'
+import { useContextMenuHold } from '../../composables/useContextMenuHold'
+import { lightHaptic } from '../../helpers/mobileHaptics'
+import { PHONE_LAYOUT_QUERY, usePhoneLayout } from '../../composables/usePhoneLayout'
+import FtRetryImage from '../FtRetryImage.vue'
+import FtPrompt from '../FtPrompt/FtPrompt.vue'
+import { ytDlp } from '../../helpers/ytDlp'
+import { cardDownloadId, playDownloadedFile, refreshDownloadRecords } from '../../helpers/downloadPlayback'
+import { queueSwipeAction, findSwipeDownload, downloadSwipeAction } from '../../helpers/videoSwipeActions'
+import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
+import { FtIcon } from '@opentubex/icons'
+import { computed, inject, onBeforeUnmount, onMounted, ref, toRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 
+import FtAddToPlaylistDropdown from '../FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue'
+import FtChannelAvatarStack from '../FtChannelAvatar/FtChannelAvatarStack.vue'
+import FtCollaboratorsPrompt from '../FtCollaboratorsPrompt/FtCollaboratorsPrompt.vue'
+import FtEmbeddedProgress from '../FtEmbeddedProgress/FtEmbeddedProgress.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
+import FtNewContentDot from '../FtNewContentDot/FtNewContentDot.vue'
+import FtVerifiedBadge from '../FtVerifiedBadge/FtVerifiedBadge.vue'
+import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
 import { vSaferHtml } from '../../directives/vSaferHtml.js'
 
 import store from '../../store/index'
+import { usesInvidiousInstance } from '../../../apiBackends'
 
 import {
   copyToClipboard,
   formatDurationAsTimestamp,
-  formatNumber,
+  formatViewCount,
+  getCachedOembedTitle,
+  getOembedTitle,
   getRelativeTimeFromDate,
-  isNumberRounded,
+  getShortThumbnailUrl,
+  getVideoThumbnailUrl,
   openExternalLink,
+  openInExternalPlayer as openExternalPlayer,
+  openInternalPath,
+  isUnloadedBackgroundTabClick,
+  shareLink,
   showToast,
   toDistractionFreeTitle,
   deepCopy,
   debounce
 } from '../../helpers/utils.js'
-import { deArrowData, deArrowThumbnail } from '../../helpers/sponsorblock.js'
+import { getLocalVideoChannels } from '../../helpers/api/local.js'
+import { invidiousGetVideoInformation } from '../../helpers/api/invidious.js'
+import { requestWithFallback } from '../../helpers/api/fallback.js'
+import { isOnAiSlopList } from '../../helpers/aiSlopList.js'
+import { isHistoryEntryWatched } from '../../helpers/history.js'
+import { liveReminder, supportsLiveReminders } from '../../helpers/liveReminders'
+import { withThumbnail } from '../../helpers/notificationHistory'
+import { getUpcomingPremiereTimestamp } from '../../helpers/subscription-entries.js'
+import { isThumbnailPreviewImageUsable } from '../../helpers/thumbnailPreview.js'
+import { deArrowData, deArrowThumbnail, getSponsorBlockVideoLabel } from '../../helpers/sponsorblock.js'
+import {
+  morphThumbnailIntoNewTab,
+  requestWatchPageViewTransition
+} from '../../helpers/viewTransitions.js'
+import { setCollaboratorsLoading } from './collaboratorsLoading.js'
+import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock.js'
+import { thumbnailSizeSettingKey, VIEW_TYPE_SETTINGS } from '../../composables/useThumbnailSizeSlider'
+import { useHideSubscriptionFeedType } from '../../composables/useHideSubscriptionFeedType'
+import { useResultChannelAvatar } from '../../composables/useResultChannelAvatar.js'
+import { formatDate, formatDateTime } from '../../helpers/dateFormat.js'
+import { getYoutubeVideoShareUrl } from '../../helpers/share'
+import { isTileMarkShortcut, tileKeyboardShortcutsKey } from '../../helpers/tileNavigation'
+import { playInBackgroundKey, watchNavigationKey } from '../../tabs/TabContext'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 
 const props = defineProps({
@@ -342,7 +649,15 @@ const props = defineProps({
     type: String,
     default: null
   },
+  downloadId: {
+    type: String,
+    default: ''
+  },
   playlistIndex: {
+    type: Number,
+    default: null
+  },
+  thumbnailIndex: {
     type: Number,
     default: null
   },
@@ -370,6 +685,10 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  showWatchedStyleInHistory: {
+    type: Boolean,
+    default: false,
+  },
   alwaysShowAddToPlaylistButton: {
     type: Boolean,
     default: false,
@@ -377,6 +696,11 @@ const props = defineProps({
   quickBookmarkButtonEnabled: {
     type: Boolean,
     default: true,
+  },
+  // The row reorders through its own menu, so the thumbnail keeps only removal.
+  playlistRowMenu: {
+    type: Boolean,
+    default: false,
   },
   canMoveVideoUp: {
     type: Boolean,
@@ -390,10 +714,6 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  layout: {
-    type: String,
-    default: 'list',
-  },
   showGrabBar: {
     type: Boolean,
     default: false,
@@ -405,30 +725,59 @@ const props = defineProps({
 })
 
 const emit = defineEmits([
+  'display-title-change',
   'move-video-down',
-  'move-video-up',
-  'move-video-to-the-top',
   'move-video-to-the-bottom',
+  'move-video-to-the-top',
+  'move-video-up',
+  'open-video',
   'pause-player',
   'remove-from-playlist'
 ])
 
 const { locale, t } = useI18n()
 const route = useRoute()
+const dateFormat = computed(() => store.getters.getDateFormat)
+const timeFormat = computed(() => store.getters.getTimeFormat)
+
+const subscriptionHiddenVideoCount = computed(() => (
+  Number.isInteger(props.data.subscriptionHiddenVideoCount)
+    ? props.data.subscriptionHiddenVideoCount
+    : 0
+))
 
 const id = ref('')
 const title = ref('')
 const channelName = ref(null)
 const channelId = ref(null)
-const collaborators = ref([])
+const channelCollaborators = ref([])
 const viewCount = ref(0)
-const parsedViewCount = ref('')
 const uploadedTime = ref('')
+const uploadedTimeIsRelative = ref(false)
+const relativeTimeNow = useRelativeTimeClock()
+const relativeTimeDataLoadedAt = ref(Date.now())
+const relativeTimeClockAtLoad = ref(relativeTimeNow.value)
 const lengthSeconds = ref(0)
 const duration = ref('')
 const description = ref('')
 const published = ref(undefined)
+const displayedUploadedTime = computed(() => {
+  if (uploadedTimeIsRelative.value && published.value) {
+    const clockNow = relativeTimeNow.value
+    // Use the load-time clock while the shared tick is unchanged so reused cards
+    // aren't formatted against a stale value. Follow later ticks, including
+    // backward clock corrections.
+    const now = clockNow === relativeTimeClockAtLoad.value
+      ? relativeTimeDataLoadedAt.value
+      : clockNow
+
+    return getRelativeTimeFromDate(published.value, false, true, now)
+  }
+
+  return uploadedTime.value
+})
 const isLive = ref(false)
+const isPremiere = ref(false)
 const is4k = ref(false)
 const is8k = ref(false)
 const isNew = ref(false)
@@ -436,19 +785,97 @@ const isVr180 = ref(false)
 const isVr360 = ref(false)
 const is3D = ref(false)
 const hasCaptions = ref(false)
+const isMembersOnly = ref(false)
+const isMusic = ref(false)
+/** Channels on the AiSList warnlist are labelled instead of being hidden */
+const isAiSlopWarned = computed(() => isOnAiSlopList(store.getters.getAiSlopWarnedChannels, props.data))
 const isUpcoming = ref(false)
 const isStation = ref(false)
-const isPremiere = ref(false)
-const isMusic = ref(false)
+const showDownloadPrompt = ref(false)
+const pendingSwipeRemoval = ref(null)
+const IS_CAPACITOR = !!process.env.IS_CAPACITOR
+const enableDownloads = computed(() => store.getters.getEnableDownloads)
+
+const localDownloadId = computed(() => supportsYtDlp && enableDownloads.value
+  ? store.getters.getLocalPlaybackDownloadIds.get(id.value)
+  : undefined)
+
+const cardDownload = computed(() => cardDownloadId(store.getters.getYtDlpDownloads, id.value, props.downloadId, localDownloadId.value))
+// iOS plays downloads natively from the card click instead of on the watch page.
+const linkDownloadId = computed(() => process.env.IS_IOS ? props.downloadId : cardDownload.value)
+
+watch(enableDownloads, (enabled) => {
+  if (!enabled) showDownloadPrompt.value = false
+})
 const isPremium = ref(false)
 const hideViews = ref(false)
+const thumbnailPreviewActive = ref(false)
+const thumbnailPreviewLoaded = ref(false)
+const THUMBNAIL_PREVIEW_DELAY = 250
+let thumbnailPreviewLoader = null
+let thumbnailPreviewLoaderUrl = null
+let thumbnailPreviewTimer = null
 const deArrowTogglePinned = ref(false)
-const showDeArrowTitle = ref(false)
-const showDeArrowThumbnail = ref(false)
+const showCollaboratorsPrompt = ref(false)
+const isFetchingCollaborators = ref(false)
+const sponsorBlockFullVideoCategory = ref(null)
+const liveReminderActive = ref(false)
+const liveReminderLoading = ref(false)
+let liveReminderLoadGeneration = 0
+let removeLiveReminderUpdatedListener = null
 
 const historyEntry = computed(() => store.getters.getHistoryCacheById[id.value])
 
 const historyEntryExists = computed(() => historyEntry.value !== undefined)
+
+const isWatched = computed(() => isHistoryEntryWatched(historyEntry.value))
+
+const premiereTimestamp = computed(() => getUpcomingPremiereTimestamp(props.data))
+const premiereNow = ref(Date.now())
+const MAX_TIMEOUT_DELAY = 2_147_483_647
+const LIVE_REMINDER_TITLE_TIMEOUT_MS = 5000
+let premiereStartTimer = null
+
+const canToggleLiveReminder = computed(() => (
+  supportsLiveReminders &&
+  store.getters.getNotificationMode !== 'off' &&
+  premiereTimestamp.value != null &&
+  premiereTimestamp.value > premiereNow.value
+))
+
+// A scheduled premiere can only be watched once its start time has passed,
+// even if a cached entry still carries a stale upcoming flag.
+const upcoming = computed(() => premiereTimestamp.value != null
+  ? premiereTimestamp.value > premiereNow.value
+  : isUpcoming.value)
+
+const canMarkAsWatched = computed(() => !isLive.value && !upcoming.value)
+
+function clearPremiereStartTimer() {
+  if (premiereStartTimer != null) {
+    clearTimeout(premiereStartTimer)
+    premiereStartTimer = null
+  }
+}
+
+function schedulePremiereStartInvalidation() {
+  clearPremiereStartTimer()
+
+  const timestamp = premiereTimestamp.value
+  const now = Date.now()
+  premiereNow.value = now
+  if (timestamp == null || timestamp <= now) {
+    return
+  }
+
+  premiereStartTimer = setTimeout(() => {
+    premiereStartTimer = null
+    schedulePremiereStartInvalidation()
+  }, Math.min(timestamp - now + 1, MAX_TIMEOUT_DELAY))
+}
+
+const canMarkAsFullySeen = computed(() => canMarkAsWatched.value &&
+  Number.isFinite(lengthSeconds.value) && lengthSeconds.value > 0)
 
 const watchProgress = computed(() => {
   if (!historyEntryExists.value || !watchedProgressSavingEnabled.value) {
@@ -458,12 +885,23 @@ const watchProgress = computed(() => {
   return historyEntry.value.watchProgress
 })
 
-/** @type {import('vue').ComputedRef<'grid' | 'list'>} */
+/** @type {import('vue').ComputedRef<'grid' | 'fullWidth' | 'list'>} */
 const listType = computed(() => store.getters.getListType)
 
 const effectiveListTypeIsList = computed(() => {
   return (listType.value === 'list' || props.forceListType === 'list') &&
     props.forceListType !== 'grid'
+})
+
+const thumbnailSizeSetting = inject(thumbnailSizeSettingKey, 'thumbnailSize')
+const tileKeyboardShortcuts = inject(tileKeyboardShortcutsKey, false)
+const playInBackground = inject(playInBackgroundKey, null)
+// Videos listed on a Watch page would replace the video that the page plays.
+const listedOnWatchPage = inject(watchNavigationKey, null) !== null
+// Full width grid cards form a single column, so moving them goes up and down.
+const verticalMoveControls = computed(() => {
+  return effectiveListTypeIsList.value ||
+    store.state.settings[VIEW_TYPE_SETTINGS[thumbnailSizeSetting]] === 'fullWidth'
 })
 
 /** @type {import('vue').ComputedRef<'' | 'start' | 'middle' | 'end' | 'hidden' | 'blur'>} */
@@ -472,13 +910,184 @@ const thumbnailPreference = computed(() => store.getters.getThumbnailPreference)
 /** @type {import('vue').ComputedRef<boolean>} */
 const blurThumbnails = computed(() => store.getters.getBlurThumbnails)
 
+const thumbnailPreviewUrl = computed(() => {
+  if (
+    !store.getters.getShowThumbnailPreviews ||
+    thumbnailPreference.value === 'hidden' ||
+    props.appearance === 'youtubeShort'
+  ) {
+    return null
+  }
+
+  return typeof props.data.thumbnailPreviewUrl === 'string'
+    ? props.data.thumbnailPreviewUrl
+    : null
+})
+
+function clearThumbnailPreviewTimer() {
+  if (thumbnailPreviewTimer !== null) {
+    clearTimeout(thumbnailPreviewTimer)
+    thumbnailPreviewTimer = null
+  }
+}
+
+function startThumbnailPreview() {
+  clearThumbnailPreviewTimer()
+
+  const previewUrl = thumbnailPreviewUrl.value
+  if (!previewUrl) {
+    return
+  }
+
+  if (thumbnailPreviewLoaderUrl !== previewUrl) {
+    const loader = new Image()
+    thumbnailPreviewLoader = loader
+    thumbnailPreviewLoaderUrl = previewUrl
+    thumbnailPreviewLoaded.value = false
+
+    loader.onload = () => {
+      if (
+        thumbnailPreviewLoader === loader &&
+        thumbnailPreviewUrl.value === previewUrl
+      ) {
+        if (isThumbnailPreviewImageUsable(loader)) {
+          thumbnailPreviewLoaded.value = true
+        } else {
+          resetThumbnailPreview()
+        }
+      }
+    }
+    loader.onerror = () => {
+      if (thumbnailPreviewLoader === loader) {
+        thumbnailPreviewLoader = null
+        thumbnailPreviewLoaderUrl = null
+        thumbnailPreviewLoaded.value = false
+      }
+    }
+    loader.src = previewUrl
+  }
+
+  thumbnailPreviewTimer = setTimeout(() => {
+    thumbnailPreviewTimer = null
+    if (thumbnailPreviewUrl.value === previewUrl) {
+      thumbnailPreviewActive.value = true
+    }
+  }, THUMBNAIL_PREVIEW_DELAY)
+}
+
+function stopThumbnailPreview() {
+  clearThumbnailPreviewTimer()
+  thumbnailPreviewActive.value = false
+}
+
+function resetThumbnailPreview() {
+  stopThumbnailPreview()
+  if (thumbnailPreviewLoader !== null) {
+    thumbnailPreviewLoader.onload = null
+    thumbnailPreviewLoader.onerror = null
+  }
+  thumbnailPreviewLoader = null
+  thumbnailPreviewLoaderUrl = null
+  thumbnailPreviewLoaded.value = false
+}
+
+watch(thumbnailPreviewUrl, resetThumbnailPreview)
+
 /** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
 const backendPreference = computed(() => store.getters.getBackendPreference)
 
 /** @type {import('vue').ComputedRef<string>} */
 const currentInvidiousInstanceUrl = computed(() => store.getters.getCurrentInvidiousInstanceUrl)
 
+const showChannelAvatar = computed(() => (
+  !store.getters.getHideChannelAvatars &&
+  ['result', 'youtubeShort', 'communityPost'].includes(props.appearance) &&
+  channelName.value !== null
+))
+
+const { channelThumbnails } = useResultChannelAvatar(
+  toRef(props, 'data'),
+  channelId,
+  showChannelAvatar
+)
+
 const showPlaylists = computed(() => !store.getters.getHidePlaylists)
+// One-tap removal takes the place of Add to Playlist, which moves to the row menu,
+// so the thumbnail shortcuts keep fitting (#2342).
+const showQuickRemoveButton = computed(() => props.playlistRowMenu && inUserPlaylist.value && props.canRemoveFromPlaylist)
+const useSponsorBlock = computed(() => store.getters.getUseSponsorBlock)
+
+const sponsorBlockFullVideoIcon = computed(() => {
+  switch (sponsorBlockFullVideoCategory.value) {
+    case 'exclusive_access':
+      return ['fas', 'ticket']
+    case 'selfpromo':
+      return ['fas', 'bullhorn']
+    default:
+      return ['fas', 'rectangle-ad']
+  }
+})
+
+const sponsorBlockFullVideoLabel = computed(() => {
+  switch (sponsorBlockFullVideoCategory.value) {
+    case 'exclusive_access':
+      return t('Video.Sponsor Block category.exclusive access')
+    case 'selfpromo':
+      return t('Video.Sponsor Block category.self-promotion')
+    default:
+      return t('Video.Sponsor Block category.sponsor')
+  }
+})
+
+const sponsorBlockFullVideoTitle = computed(() => t('Video.Player.SponsorBlock.FullVideoLabel', {
+  segmentCategory: sponsorBlockFullVideoLabel.value
+}))
+
+const sponsorBlockLabelOpensPrompt = computed(() => props.appearance === 'watchPlaylistItem')
+const sponsorBlockPromptOpen = ref(false)
+
+const extraThumbnailAction = computed(() => store.getters.getExtraThumbnailAction)
+
+const extraThumbnailActionButton = computed(() => {
+  switch (extraThumbnailAction.value) {
+    case 'history':
+      if (!canMarkAsWatched.value) {
+        return null
+      }
+      return {
+        title: isWatched.value
+          ? t('Video.Unmark As Watched')
+          : t('Video.Mark As Watched'),
+        icon: isWatched.value ? ['fas', 'eye-slash'] : ['fas', 'eye']
+      }
+    case 'markAsFullySeen':
+      return canMarkAsFullySeen.value
+        ? {
+            title: t('Video.Mark As Fully Watched'),
+            icon: ['fas', 'flag-checkered']
+          }
+        : null
+    case 'copyYoutube':
+      return {
+        title: t('Video.Copy YouTube Link'),
+        icon: ['fas', 'link']
+      }
+    case 'openYoutube':
+      return {
+        title: t('Video.Open in YouTube'),
+        icon: ['fab', 'youtube']
+      }
+    case 'download':
+      return supportsYtDlp && enableDownloads.value
+        ? {
+            title: t('Downloads.Download Video'),
+            icon: ['fas', 'download']
+          }
+        : null
+    default:
+      return null
+  }
+})
 
 const inHistory = computed(() => {
   // When in the history page, showing relative dates isn't very useful.
@@ -506,14 +1115,11 @@ const progressPercentage = computed(() => {
   return Math.min(percentage, 100)
 })
 
-/** @type {import('vue').ComputedRef<Set<string>>} */
-const hiddenChannelsIdSet = computed(() => store.getters.getChannelsHiddenIdSet)
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const useSponsorBlock = computed(() => store.getters.getUseSponsorBlock)
+// Matches --shape-corner-medium on .thumbnailLink.
+const thumbnailProgressRadius = computed(() => 12 * store.getters.getUiRoundness / 100)
 
 /** @type {import('vue').ComputedRef<any[]>} */
-const sponsorBlockExcludedChannels = computed(() => JSON.parse(store.getters.getSponsorBlockExcludedChannels))
+const hiddenChannels = computed(() => store.getters.getChannelsHiddenParsed)
 
 const playlistSharable = computed(() => {
   // `playlistId` can be undefined
@@ -522,155 +1128,334 @@ const playlistSharable = computed(() => {
 })
 
 /** @type {import('vue').ComputedRef<boolean>} */
-const hideSharingActions = computed(() => store.getters.getHideSharingActions)
+const showInvidiousShareOptions = computed(() => usesInvidiousInstance(backendPreference.value, store.getters.getBackendFallback))
 
-/** @type {import('vue').ComputedRef<boolean>} */
-const showInvidiousShareOptions = computed(() => backendPreference.value === 'invidious' || store.getters.getBackendFallback)
+const { hideSubscriptionFeedType, hideSubscriptionFeedTypeOption } = useHideSubscriptionFeedType(() => channelId.value)
 
-const dropdownOptions = computed(() => {
+// Only the mobile mini bar can dock an audio-only player. iOS plays most
+// downloads natively, so their Watch page would stream them instead.
+const canPlayInBackground = computed(() => process.env.IS_CAPACITOR && playInBackground !== null &&
+  !listedOnWatchPage && !upcoming.value && props.data.isShort !== true &&
+  !(process.env.IS_IOS && localDownloadId.value !== undefined && !linkDownloadId.value))
+
+const videoMenuOptions = computed(() => {
   const options = [
+    ...(store.getters.getTabsEnabled
+      ? [{
+          label: t('Context Menu.Open in a New Tab'),
+          value: 'openNewTab',
+          icon: ['fas', 'arrow-up-right-from-square']
+        }]
+      : []),
+    ...(process.env.IS_ELECTRON
+      ? [{
+          label: t('Context Menu.Open in a New Window'),
+          value: 'openNewWindow',
+          icon: ['fas', 'external-link-alt']
+        }]
+      : []),
+    { type: 'divider' },
+    ...(canPlayInBackground.value
+      ? [{
+          label: t('Video.Play in Background'),
+          value: 'playInBackground',
+          icon: ['fas', 'headphones']
+        }]
+      : []),
     {
-      label: historyEntryExists.value
-        ? t('Video.Remove From History')
-        : t('Video.Mark As Watched'),
-      value: 'history'
+      label: t('Video.Play Next'),
+      value: 'playNext',
+      icon: ['fas', 'play-next']
     },
+    {
+      label: t('Video.Add to Queue'),
+      value: 'addToQueue',
+      icon: ['fas', 'add-to-queue']
+    },
+    {
+      type: 'divider'
+    },
+    ...showMarkAsSeen.value
+      ? [{
+          label: t('Subscriptions.Mark As Seen'),
+          value: 'markAsSeen',
+          icon: ['fas', 'check']
+        }]
+      : [],
+    ...inSubscriptions.value && props.data.isNewInSubscriptionFeed === false
+      ? [{
+          label: t('Subscriptions.Mark As Unseen'),
+          value: 'markAsUnseen',
+          icon: ['fas', 'eye-slash']
+        }]
+      : [],
+    ...canMarkAsWatched.value
+      ? [{
+          label: isWatched.value
+            ? t('Video.Unmark As Watched')
+            : t('Video.Mark As Watched'),
+          value: 'history',
+          icon: isWatched.value ? ['fas', 'eye-slash'] : ['fas', 'eye']
+        }]
+      : [],
+    ...canMarkAsFullySeen.value
+      ? [{
+          label: t('Video.Mark As Fully Watched'),
+          value: 'markAsFullySeen',
+          icon: ['fas', 'flag-checkered']
+        }]
+      : [],
+    ...historyEntryExists.value
+      ? [{
+          label: t('Video.Remove From History'),
+          value: 'removeHistory',
+          icon: ['fas', 'trash']
+        }]
+      : [],
+    ...(supportsYtDlp && enableDownloads.value && !isUpcoming.value
+      ? [{
+          label: t('Downloads.Download Video'),
+          value: 'download',
+          icon: ['fas', 'download']
+        }]
+      : [])
   ]
+  if (hideSubscriptionFeedTypeOption.value) {
+    options.push(hideSubscriptionFeedTypeOption.value)
+  }
   if (inUserPlaylist.value) {
     if (props.canMoveVideoUp || props.canMoveVideoDown) {
-      options.push({
-        type: 'divider'
-      })
+      options.push({ type: 'divider' })
     }
     if (props.canMoveVideoUp) {
       options.push({
         label: t('User Playlists.Move Video to the Top'),
-        value: 'moveVideoTop'
+        value: 'moveVideoTop',
+        icon: ['fas', 'arrow-up']
       })
     }
     if (props.canMoveVideoDown) {
       options.push({
         label: t('User Playlists.Move Video to the Bottom'),
-        value: 'moveVideoBottom'
+        value: 'moveVideoBottom',
+        icon: ['fas', 'arrow-down']
       })
     }
   }
-  if (!hideSharingActions.value) {
+  options.push(
+    {
+      type: 'divider'
+    },
+    {
+      label: t('Context Menu.Copy YouTube Link'),
+      value: 'copyYoutube',
+      icon: ['fab', 'youtube']
+    },
+    ...playlistSharable.value
+      ? [{
+          label: t('Context Menu.Copy {service} link without playlist', { service: 'YouTube' }),
+          value: 'copyYoutubeWithoutPlaylist',
+          icon: ['fab', 'youtube']
+        }]
+      : [],
+    {
+      label: t('Video.Open in YouTube'),
+      value: 'openYoutube',
+      icon: ['fab', 'youtube']
+    },
+    ...showInvidiousShareOptions.value
+      ? [
+          {
+            type: 'divider'
+          },
+          {
+            label: t('Context Menu.Copy Invidious Link'),
+            value: 'copyVideoInvidious',
+            icon: ['fas', 'link']
+          },
+          ...playlistSharable.value
+            ? [{
+                label: t('Context Menu.Copy {service} link without playlist', { service: 'Invidious' }),
+                value: 'copyInvidiousWithoutPlaylist',
+                icon: ['fas', 'link']
+              }]
+            : [],
+          {
+            label: t('Video.Open in Invidious'),
+            value: 'openInvidious',
+            icon: ['fas', 'external-link-alt']
+          }
+        ]
+      : [],
+  )
+  if (channelId.value !== null) {
     options.push(
       {
         type: 'divider'
       },
       {
-        label: t('Video.Copy YouTube Link'),
-        value: 'copyYoutube'
-      },
-      {
-        label: t('Video.Copy YouTube Embedded Player Link'),
-        value: 'copyYoutubeEmbed'
+        label: t('Video.Open Channel in YouTube'),
+        value: 'openYoutubeChannel',
+        icon: ['fab', 'youtube']
       },
       ...showInvidiousShareOptions.value
-        ? [{
-            label: t('Video.Copy Invidious Link'),
-            value: 'copyInvidious'
-          }]
+        ? [
+            {
+              type: 'divider'
+            },
+            {
+              label: t('Video.Open Channel in Invidious'),
+              value: 'openInvidiousChannel',
+              icon: ['fas', 'external-link-alt']
+            }
+          ]
         : [],
+    )
+  }
+
+  if (channelId.value !== null && !inSubscriptions.value) {
+    const channelShouldBeHidden = store.getters.getChannelsHiddenNames.has(channelId.value)
+
+    options.push(
       {
         type: 'divider'
       },
-      {
-        label: t('Video.Open in YouTube'),
-        value: 'openYoutube'
-      },
-      {
-        label: t('Video.Open YouTube Embedded Player'),
-        value: 'openYoutubeEmbed'
-      },
-      ...showInvidiousShareOptions.value
-        ? [{
-            label: t('Video.Open in Invidious'),
-            value: 'openInvidious'
-          }]
-        : [],
+
+      channelShouldBeHidden
+        ? {
+            label: t('Video.Unhide Channel'),
+            value: 'unhideChannel',
+            icon: ['fas', 'user-check']
+          }
+        : {
+            label: t('Video.Hide Channel'),
+            value: 'hideChannel',
+            icon: ['fas', 'user-lock']
+          }
     )
-    if (channelId.value !== null) {
-      options.push(
-        {
-          type: 'divider'
-        },
-        {
-          label: t('Video.Copy YouTube Channel Link'),
-          value: 'copyYoutubeChannel'
-        },
-        ...showInvidiousShareOptions.value
-          ? [{
-              label: t('Video.Copy Invidious Channel Link'),
-              value: 'copyInvidiousChannel'
-            }]
-          : [],
-        {
-          type: 'divider'
-        },
-        {
-          label: t('Video.Open Channel in YouTube'),
-          value: 'openYoutubeChannel'
-        },
-        ...showInvidiousShareOptions.value
-          ? [{
-              label: t('Video.Open Channel in Invidious'),
-              value: 'openInvidiousChannel'
-            }]
-          : [],
-      )
-    }
   }
 
-  if (channelId.value !== null) {
-    if (!inSubscriptions.value) {
-      const channelShouldBeHidden = hiddenChannelsIdSet.value.has(channelId.value)
-
-      options.push(
-        {
-          type: 'divider'
-        },
-
-        channelShouldBeHidden
-          ? {
-              label: t('Video.Unhide Channel'),
-              value: 'unhideChannel'
-            }
-          : {
-              label: t('Video.Hide Channel'),
-              value: 'hideChannel'
-            }
-      )
+  const normalizedOptions = []
+  for (const option of options) {
+    if (
+      option.type === 'divider' &&
+      (normalizedOptions.length === 0 || normalizedOptions.at(-1).type === 'divider')
+    ) {
+      continue
     }
-
-    if (useSponsorBlock.value) {
-      const isSponsorBlockChannelExcluded = sponsorBlockExcludedChannels.value.some(c => c.name === channelId.value)
-
-      options.push(
-        {
-          type: 'divider'
-        },
-
-        isSponsorBlockChannelExcluded
-          ? {
-              label: t('Video.Enable SponsorBlock on Channel'),
-              value: 'enableSponsorBlockOnChannel'
-            }
-          : {
-              label: t('Video.Disable SponsorBlock on Channel'),
-              value: 'disableSponsorBlockOnChannel'
-            }
-      )
-    }
+    normalizedOptions.push(option)
   }
-
-  return options
+  if (normalizedOptions.at(-1)?.type === 'divider') {
+    normalizedOptions.pop()
+  }
+  return normalizedOptions
 })
 
-function getYoutubeEmbedUrl() {
-  return `https://www.youtube-nocookie.com/embed/${id.value}`
+/** Callers check that the card still shows the video before scheduling the payload. */
+async function getLiveReminderPayload() {
+  const videoId = id.value
+  let videoTitle = title.value
+  // The original title may still be loading, or have failed to load, for the shown title.
+  // Requests wait out network outages, so fall back to the shown title instead of
+  // holding the reminder back. Close to the start, a lookup could outlast the
+  // premiere, and a reminder for a past start cannot be scheduled.
+  if (store.getters.getAvoidTranslation === 'entire_app' &&
+    premiereTimestamp.value - Date.now() > LIVE_REMINDER_TITLE_TIMEOUT_MS) {
+    const timeout = new Promise(resolve => setTimeout(resolve, LIVE_REMINDER_TITLE_TIMEOUT_MS, null))
+    videoTitle = await Promise.race([getOembedTitle(videoId), timeout]) ?? videoTitle
+  }
+  return {
+    videoId,
+    // Read after the lookup, so a premiere time that changed meanwhile is scheduled.
+    startTimestamp: premiereTimestamp.value,
+    notificationTitle: t('Video.Scheduled video starting'),
+    notificationBody: t('Video.Live notification body', { videoTitle }),
+    ...withThumbnail(id.value)
+  }
+}
+
+async function syncLiveReminder() {
+  const generation = ++liveReminderLoadGeneration
+  const videoId = id.value
+  const startTimestamp = premiereTimestamp.value
+
+  if (!canToggleLiveReminder.value) {
+    liveReminderActive.value = false
+    return
+  }
+
+  try {
+    const reminder = await liveReminder.get(videoId)
+    if (
+      generation !== liveReminderLoadGeneration ||
+      videoId !== id.value ||
+      startTimestamp !== premiereTimestamp.value
+    ) {
+      return
+    }
+
+    if (reminder && reminder.startTimestamp !== startTimestamp) {
+      const payload = await getLiveReminderPayload()
+      // A toggle or newer sync during the title lookup takes over.
+      if (
+        generation !== liveReminderLoadGeneration ||
+        videoId !== id.value ||
+        payload.startTimestamp !== startTimestamp
+      ) return
+      liveReminderActive.value = await liveReminder.schedule(payload)
+    } else {
+      liveReminderActive.value = reminder !== null
+    }
+  } catch (error) {
+    console.error('Failed to load live stream reminder', error)
+  }
+}
+
+async function toggleLiveReminder() {
+  if (liveReminderLoading.value || !canToggleLiveReminder.value) return
+
+  const videoId = id.value
+  // Invalidates a pending sync, so it cannot reschedule a canceled reminder.
+  liveReminderLoadGeneration++
+  liveReminderLoading.value = true
+  try {
+    if (liveReminderActive.value) {
+      await liveReminder.cancel(videoId)
+      if (videoId !== id.value) return
+      liveReminderActive.value = false
+      showToast({
+        message: t('Video.Notification cancelled'),
+        image: toastThumbnail.value,
+        icon: ['fas', 'calendar-days']
+      })
+    } else {
+      const payload = await getLiveReminderPayload()
+      if (videoId !== id.value) return
+      const scheduled = await liveReminder.schedule(payload)
+      if (videoId !== id.value) return
+      liveReminderActive.value = scheduled
+      showToast({
+        message: scheduled
+          ? t('Video.Notification enabled')
+          : t('Video.Notification unavailable'),
+        image: toastThumbnail.value,
+        icon: scheduled ? ['fas', 'calendar-days'] : ['fas', 'circle-exclamation']
+      })
+    }
+  } catch (error) {
+    console.error('Failed to update live stream reminder', error)
+    if (videoId === id.value) {
+      showToast({
+        message: t('Video.Notification unavailable'),
+        image: toastThumbnail.value,
+        icon: ['fas', 'circle-exclamation']
+      })
+    }
+  } finally {
+    // The flag belongs to the card, which may show another video by now. The
+    // guard above keeps toggles from overlapping, so no newer toggle is running.
+    liveReminderLoading.value = false
+  }
 }
 
 function getYoutubeChannelUrl() {
@@ -691,23 +1476,371 @@ function getInvidiousChannelUrl() {
   return `${currentInvidiousInstanceUrl.value}/channel/${channelId.value}`
 }
 
+const quickActionShortLabels = computed(() => ({
+  openNewTab: t('New Tab'),
+  openNewWindow: t('New Window'),
+  playNext: t('Video.Play Next'),
+  addToQueue: t('Video.Queue')
+}))
+
+const videoContextMenuItems = computed(() => {
+  const items = videoMenuOptions.value.map(option => option.type === 'divider'
+    ? { type: 'separator' }
+    : {
+        label: option.label,
+        actionId: option.value,
+        quickAction: option.value in quickActionShortLabels.value,
+        shortLabel: quickActionShortLabels.value[option.value],
+        icon: option.icon,
+        enabled: !option.disabled,
+        run: () => handleOptionsClick(option.value)
+      })
+  const copyItems = items.filter(item => item.actionId?.startsWith('copy'))
+  const openItems = items.filter(item => ['openYoutube', 'openInvidious', 'openYoutubeChannel', 'openInvidiousChannel'].includes(item.actionId))
+  const rows = items.filter(item => !copyItems.includes(item) && !openItems.includes(item))
+  if (copyItems.length || openItems.length) rows.push({ type: 'separator' })
+  if (copyItems.length) {
+    rows.push(copyItems.length === 1
+      ? copyItems[0]
+      : {
+          label: t('Share.Copy Link'),
+          icon: ['fas', 'link'],
+          enabled: true,
+          submenu: copyItems
+        })
+  }
+  if (openItems.length) {
+    rows.push(openItems.length === 1
+      ? openItems[0]
+      : {
+          label: t('Share.Open Link'),
+          icon: ['fas', 'external-link-alt'],
+          enabled: true,
+          submenu: openItems
+        })
+  }
+  if (store.getters.getSyncServerEnabled && store.getters.getSyncServerLiveSupported) {
+    const devices = store.getters.getSyncServerDevices
+    rows.push({
+      label: t('Settings.Sync Settings.Open On Device'),
+      icon: ['fas', 'devices'],
+      enabled: devices.length > 0,
+      submenu: devices.map(device => ({
+        label: device.name,
+        icon: getSyncServerDeviceIcon(device.platform),
+        enabled: true,
+        run: () => sendToDevice(device.id),
+      })),
+    })
+  }
+  if (process.env.IS_CAPACITOR) {
+    rows.push({
+      label: t('Share.Share Link'),
+      actionId: 'share',
+      icon: ['fas', 'share-alt'],
+      enabled: true,
+      run: () => shareLink(getYoutubeVideoShareUrl(id.value, playlistSharable.value ? playlistIdFinal.value : ''))
+    })
+  }
+  return rows
+})
+
+async function sendToDevice(recipient) {
+  try {
+    await store.dispatch('sendSyncServerVideo', { recipient, videoId: id.value, title: title.value })
+    showToast({ message: t('Settings.Sync Settings.Video Sent'), icon: ['fas', 'devices'] })
+  } catch (error) {
+    showToast({ message: error.message, icon: ['fas', 'circle-exclamation'] })
+  }
+}
+
+const phoneLayout = usePhoneLayout()
+const useMobileThumbnailActions = computed(() => process.env.IS_CAPACITOR || phoneLayout.value)
+const mobilePlaylistPickerOpen = ref(false)
+const mobileThumbnailActions = computed(() => {
+  const actions = []
+  if ((process.env.IS_ELECTRON || process.env.IS_CAPACITOR) && store.getters.getTabsEnabled) {
+    actions.push({
+      label: t('Context Menu.Open in a Background Tab'),
+      shortLabel: t('Context Menu.Background Tab'),
+      icon: ['fas', 'clone'],
+      run: () => handleOptionsClick('openBackgroundTab')
+    })
+  }
+  if (showPlaylists.value) {
+    actions.push({
+      label: t('User Playlists.Add to Playlist'),
+      shortLabel: t('User Playlists.Save'),
+      actionId: 'addToPlaylist',
+      icon: isInAnyPlaylist.value ? ['fac', 'playlist-check'] : ['fac', 'playlist-add'],
+      run: () => { mobilePlaylistPickerOpen.value = true }
+    })
+  }
+  if (isQuickBookmarkEnabled.value && props.quickBookmarkButtonEnabled) {
+    actions.push({
+      label: quickBookmarkIconText.value,
+      shortLabel: quickBookmarkPlaylist.value.playlistName,
+      actionId: 'quickBookmark',
+      icon: quickBookmarkIcon.value,
+      pressed: isInQuickBookmarkPlaylist.value,
+      run: toggleQuickBookmarked
+    })
+  }
+  if (inUserPlaylist.value && props.canMoveVideoUp) {
+    actions.push({
+      label: t('User Playlists.Move Video Up'),
+      shortLabel: t('User Playlists.Move Up'),
+      icon: verticalMoveControls.value ? ['fas', 'arrow-up'] : ['fas', 'arrow-left'],
+      run: moveVideoUp
+    })
+  }
+  if (inUserPlaylist.value && props.canMoveVideoDown) {
+    actions.push({
+      label: t('User Playlists.Move Video Down'),
+      shortLabel: t('User Playlists.Move Down'),
+      icon: verticalMoveControls.value ? ['fas', 'arrow-down'] : ['fas', 'arrow-right'],
+      run: moveVideoDown
+    })
+  }
+  if (inUserPlaylist.value && props.canRemoveFromPlaylist) {
+    actions.push({ label: t('User Playlists.Remove from Playlist'), shortLabel: t('User Playlists.Remove'), actionId: 'removeFromPlaylist', icon: ['fas', 'trash'], run: removeFromPlaylist })
+  }
+  if (canToggleLiveReminder.value) {
+    actions.push({
+      label: liveReminderActive.value ? t('Video.Notification on') : t('Video.Notify me'),
+      icon: ['fas', 'calendar-days'],
+      pressed: liveReminderActive.value,
+      enabled: !liveReminderLoading.value,
+      run: toggleLiveReminder
+    })
+  }
+  return actions
+})
+
+const openMobileContextActions = inject('openMobileContextActions')
+
+const { startMenuHold, moveMenuHold, cancelMenuHold, handleMenuHoldDragStart, suppressMenuHoldClick } = useContextMenuHold(openVideoContextMenu)
+
+async function removeSwipeDownload(option) {
+  const download = pendingSwipeRemoval.value
+  pendingSwipeRemoval.value = null
+  if (option !== 'remove' || !download) return
+  if (await ytDlp.ytDlpRemoveDownload(download.id)) {
+    store.commit('removeYtDlpDownload', download.id)
+  } else {
+    const refreshed = (await refreshDownloadRecords(ytDlp, store)).find(record => record.id === download.id)
+    const filesRemain = ['available', 'partial'].includes(refreshed?.availability)
+    showToast({ message: filesRemain ? t('Downloads.Remove File Failed') : t('Downloads.File Not Found'), icon: ['fas', 'circle-exclamation'] })
+  }
+}
+
+function getThumbnailSwipeAction(direction) {
+  let actionId = direction === 'left'
+    ? store.getters.getThumbnailLeftSwipeAction
+    : store.getters.getThumbnailRightSwipeAction
+  if (actionId === 'disabled') return null
+  if (actionId === 'markAsFullySeen' && canMarkAsWatched.value && isWatched.value) actionId = 'history'
+  if (actionId === 'addToQueue' || actionId === 'playNext') {
+    return queueSwipeAction(actionId, [{ ...props.data, videoId: id.value }], store.getters.getWatchQueue, {
+      t, commit: store.commit, add: addToWatchQueue,
+    })
+  }
+  if (actionId === 'download' && supportsYtDlp && enableDownloads.value) {
+    const reverse = downloadSwipeAction(findSwipeDownload(store.getters.getYtDlpDownloads, id.value), {
+      t,
+      cancel: download => ytDlp.ytDlpCancelDownload(download.id),
+      remove: download => { pendingSwipeRemoval.value = download },
+    })
+    if (reverse) return reverse
+  }
+  // In the bookmark playlist, the bookmark shortcut removes the swiped entry.
+  const isQuickBookmarkPlaylist = () => selectedUserPlaylist.value != null &&
+    selectedUserPlaylist.value._id === quickBookmarkPlaylist.value?._id
+  if (inUserPlaylist.value && props.canRemoveFromPlaylist &&
+    (actionId === 'addToPlaylist' || (actionId === 'quickBookmark' && isQuickBookmarkPlaylist()))) {
+    actionId = 'removeFromPlaylist'
+  }
+  const action = [...mobileThumbnailActions.value, ...videoContextMenuItems.value]
+    .flatMap(item => item.submenu ?? item)
+    .find(item => item.actionId === actionId)
+  return action?.enabled !== false && action?.run ? action : null
+}
+
+const {
+  enabled: thumbnailSwipeEnabled, swipe: thumbnailSwipe,
+  startSwipe: startThumbnailSwipe, moveSwipe: moveThumbnailSwipe,
+  finishSwipe: finishThumbnailSwipe, abortSwipe: abortThumbnailSwipe, cancelSwipe: cancelThumbnailSwipe,
+} = useThumbnailSwipe({
+  getAction: getThumbnailSwipeAction,
+  cancelHold: cancelMenuHold,
+  suppressClick: suppressMenuHoldClick,
+  getSettleDuration: () => isReducedMotionEnabled() ? 0 : 200 / getAnimationSpeedMultiplier(store.getters.getAnimationSpeed),
+  onCommit: action => {
+    lightHaptic()
+    action.run()
+  },
+})
+
+watch([id, () => store.getters.getThumbnailLeftSwipeAction, () => store.getters.getThumbnailRightSwipeAction], cancelThumbnailSwipe)
+
+onBeforeUnmount(() => {
+  window.dispatchEvent(new CustomEvent('opentubex:close-context-menu', { detail: videoContextMenuItems }))
+})
+
+const showVideoMenuButton = computed(() => store.getters.getShowVideoMenuButton)
+
+const videoMenuButton = useTemplateRef('videoMenuButton')
+
+function openVideoOptionsMenu() {
+  cancelMenuHold()
+  if (process.env.IS_CAPACITOR || window.matchMedia(PHONE_LAYOUT_QUERY).matches) {
+    openMobileContextActions({
+      title: title.value,
+      actions: videoContextMenuItems,
+      thumbnailActions: mobileThumbnailActions,
+      trigger: videoMenuButton.value.$el.querySelector('button')
+    })
+    return
+  }
+  const button = videoMenuButton.value.$el.querySelector('button')
+  button.focus({ preventScroll: true })
+  const bounds = button.getBoundingClientRect()
+  window.dispatchEvent(new CustomEvent('opentubex:context-menu', {
+    detail: {
+      x: document.body.dir === 'rtl' ? bounds.right : bounds.left,
+      y: bounds.bottom,
+      items: videoContextMenuItems
+    }
+  }))
+}
+
+function openVideoContextMenu(event) {
+  cancelThumbnailSwipe()
+  const target = event.target
+  // Channel names, dialogs, and dropdowns keep their own context menus.
+  const nestedControl = target.closest('.channelName, [role="dialog"], [role="menu"], .iconDropdown')
+  if (target.closest('.ft-list-video')?.contains(nestedControl)) return
+
+  if (event.pointerType === 'touch') {
+    event.preventDefault()
+    event.stopPropagation()
+    cancelMenuHold()
+    suppressMenuHoldClick()
+    openMobileContextActions({
+      title: title.value,
+      actions: videoContextMenuItems,
+      thumbnailActions: mobileThumbnailActions
+    })
+    lightHaptic()
+    return
+  }
+
+  if (!process.env.IS_ELECTRON) {
+    const selection = window.getSelection()
+    // Only Electron can merge native image and selection actions into our menu.
+    if (target.closest('img, video') || (selection && !selection.isCollapsed && selection.containsNode(target, true))) return
+  }
+
+  event.preventDefault()
+  event.stopPropagation()
+  cancelMenuHold()
+  const bounds = target.getBoundingClientRect()
+  const keyboard = event.type === 'keydown' || (event.clientX === 0 && event.clientY === 0)
+  window.dispatchEvent(new CustomEvent('opentubex:context-menu', {
+    detail: {
+      x: keyboard ? bounds.left : event.clientX,
+      y: keyboard ? bounds.bottom : event.clientY,
+      items: videoContextMenuItems,
+      contextEvent: event
+    }
+  }))
+}
+
+function handleTileKeydown(event) {
+  if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
+    openVideoContextMenu(event)
+  } else if (tileKeyboardShortcuts && isTileMarkShortcut(event)) {
+    // Like the menu, a new subscription video is marked as seen first.
+    if (showMarkAsSeen.value) {
+      event.preventDefault()
+      markSubscriptionVideoAsSeen()
+    } else if (canMarkAsWatched.value) {
+      event.preventDefault()
+      if (isWatched.value) {
+        unmarkAsWatched()
+      } else {
+        markAsWatched()
+      }
+    }
+  }
+}
+
 /**
  * @param {string} option
  */
 function handleOptionsClick(option) {
   switch (option) {
+    case 'openNewTab':
+    case 'openBackgroundTab':
+    case 'openNewWindow':
+      openInternalPath({
+        path: `/watch/${id.value}`,
+        query: watchPageLinkQuery.value,
+        title: title.value,
+        thumbnail: toastThumbnail.value,
+        doCreateNewTab: option !== 'openNewWindow',
+        doCreateNewWindow: option === 'openNewWindow',
+        makeActive: option !== 'openBackgroundTab'
+      })
+      break
+    case 'copyYoutubeWithoutPlaylist':
+      copyToClipboard(`https://youtu.be/${id.value}`, { messageOnSuccess: t('Share.YouTube URL copied to clipboard') })
+      break
+    case 'copyVideoInvidious':
+      copyToClipboard(getInvidiousUrl())
+      break
+    case 'copyInvidiousWithoutPlaylist':
+      copyToClipboard(`${currentInvidiousInstanceUrl.value}/watch?v=${id.value}`)
+      break
+    case 'hideSubscriptionFeedType':
+      hideSubscriptionFeedType()
+      break
+    case 'playInBackground':
+      markSubscriptionVideoAsSeen()
+      playInBackground({ path: `/watch/${id.value}`, query: watchPageLinkQuery.value })
+      break
+    case 'playNext':
+      addToWatchQueue(true)
+      break
+    case 'addToQueue':
+      addToWatchQueue(false)
+      break
+    case 'markAsUnseen':
+      store.dispatch('markSubscriptionVideoAsUnseen', id.value)
+      break
+    case 'markAsSeen':
+      markSubscriptionVideoAsSeen()
+      break
     case 'history':
-      if (historyEntryExists.value) {
-        removeFromWatched()
+      if (isWatched.value) {
+        unmarkAsWatched()
       } else {
         markAsWatched()
       }
       break
+    case 'markAsFullySeen':
+      if (canMarkAsFullySeen.value) {
+        markAsWatched(true)
+      }
+      break
+    case 'removeHistory':
+      removeFromHistory()
+      break
     case 'moveVideoTop':
-      moveVideoToTheTop()
+      emit('move-video-to-the-top', id.value, props.playlistItemId)
       break
     case 'moveVideoBottom':
-      moveVideoToTheBottom()
+      emit('move-video-to-the-bottom', id.value, props.playlistItemId)
       break
     case 'copyYoutube': {
       let videoUrl = `https://youtu.be/${id.value}`
@@ -731,47 +1864,43 @@ function handleOptionsClick(option) {
       openExternalLink(videoUrl)
       break
     }
-    case 'copyYoutubeEmbed':
-      copyToClipboard(getYoutubeEmbedUrl(), { messageOnSuccess: t('Share.YouTube Embed URL copied to clipboard') })
-      break
-    case 'openYoutubeEmbed':
-      openExternalLink(getYoutubeEmbedUrl())
-      break
-    case 'copyInvidious':
-      copyToClipboard(getInvidiousUrl(), { messageOnSuccess: t('Share.Invidious URL copied to clipboard') })
-      break
     case 'openInvidious':
       openExternalLink(getInvidiousUrl())
       break
-    case 'copyYoutubeChannel':
-      copyToClipboard(getYoutubeChannelUrl(), { messageOnSuccess: t('Share.YouTube Channel URL copied to clipboard') })
-      break
     case 'openYoutubeChannel':
       openExternalLink(getYoutubeChannelUrl())
-      break
-    case 'copyInvidiousChannel':
-      copyToClipboard(getInvidiousChannelUrl(), { messageOnSuccess: t('Share.Invidious Channel URL copied to clipboard') })
       break
     case 'openInvidiousChannel':
       openExternalLink(getInvidiousChannelUrl())
       break
     case 'hideChannel': {
-      const name = collaborators.value.length > 0 ? collaborators.value[0].name : channelName.value
+      const name = channelCollaborators.value.length > 0 ? channelCollaborators.value[0].name : channelName.value
       hideChannel(name, channelId.value)
       break
     }
     case 'unhideChannel': {
-      const name = collaborators.value.length > 0 ? collaborators.value[0].name : channelName.value
+      const name = channelCollaborators.value.length > 0 ? channelCollaborators.value[0].name : channelName.value
       unhideChannel(name, channelId.value)
       break
     }
-    case 'disableSponsorBlockOnChannel':
-      disableSponsorBlockOnChannel(channelName.value, channelId.value)
-      break
-    case 'enableSponsorBlockOnChannel':
-      enableSponsorBlockOnChannel(channelName.value, channelId.value)
+    case 'download':
+      showDownloadPrompt.value = true
       break
   }
+}
+
+function addToWatchQueue(playNext) {
+  store.commit('addVideoToWatchQueue', {
+    video: deepCopy(props.data),
+    playNext
+  })
+  showToast({
+    message: playNext
+      ? t('Video.Added to Play Next')
+      : t('Video.Added to Queue'),
+    image: toastThumbnail.value,
+    icon: ['fas', 'list'],
+  })
 }
 
 const thumbnail = computed(() => {
@@ -783,29 +1912,45 @@ const thumbnail = computed(() => {
     return deArrowCache.value.thumbnail
   }
 
-  let baseUrl
-  if (backendPreference.value === 'invidious') {
-    baseUrl = currentInvidiousInstanceUrl.value
-  } else {
-    baseUrl = 'https://i.ytimg.com'
+  if (props.appearance === 'youtubeShort') {
+    return getShortThumbnailUrl(
+      props.data,
+      backendPreference.value,
+      currentInvidiousInstanceUrl.value,
+      thumbnailPreference.value,
+      store.getters.getThumbnailDataSaver
+    ) ?? thumbnailPlaceholder
   }
 
-  switch (thumbnailPreference.value) {
-    case 'start':
-      return `${baseUrl}/vi/${id.value}/mq1.jpg`
-    case 'middle':
-      return `${baseUrl}/vi/${id.value}/mq2.jpg`
-    case 'end':
-      return `${baseUrl}/vi/${id.value}/mq3.jpg`
-    default:
-      return `${baseUrl}/vi/${id.value}/mqdefault.jpg`
-  }
+  return getVideoThumbnailUrl(
+    id.value,
+    backendPreference.value,
+    currentInvidiousInstanceUrl.value,
+    thumbnailPreference.value
+  ) ?? thumbnailPlaceholder
 })
+
+// The placeholder is fine in the list, but in a toast it would just be a grey
+// box in place of the toast's fallback icon, so leave the image out instead
+const toastThumbnail = computed(() => thumbnailPreference.value === 'hidden' ? null : thumbnail.value)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideVideoViews = computed(() => store.getters.getHideVideoViews)
 
-const addWatchedStyle = computed(() => historyEntryExists.value && !inHistory.value)
+/** @type {import('vue').ComputedRef<boolean>} */
+const shortenViewCounts = computed(() => store.getters.getShortenViewCounts)
+
+const parsedViewCount = computed(() => {
+  if (props.data.viewCount != null) {
+    return formatViewCount(props.data.viewCount, shortenViewCounts.value)
+  }
+
+  return props.data.viewCountText?.replace(' views', '') ?? ''
+})
+
+const addWatchedStyle = computed(() => {
+  return isWatched.value && (!inHistory.value || props.showWatchedStyleInHistory)
+})
 
 /** @type {import('vue').ComputedRef<string>} */
 const externalPlayer = computed(() => store.getters.getExternalPlayer)
@@ -822,6 +1967,8 @@ const watchedProgressSavingEnabled = computed(() => {
   return ['auto', 'semi-auto'].includes(store.getters.getWatchedProgressSavingMode)
 })
 
+const watchedPercentageThreshold = computed(() => store.getters.getWatchedPercentageThreshold)
+
 /** @type {import('vue').ComputedRef<boolean>} */
 const rememberHistory = computed(() => store.getters.getRememberHistory)
 
@@ -830,6 +1977,18 @@ const saveVideoHistoryWithLastViewedPlaylist = computed(() => store.getters.getS
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const showDistractionFreeTitles = computed(() => store.getters.getShowDistractionFreeTitles)
+
+const showNewSubscriptionFeedIndicator = computed(() => {
+  return store.getters.getShowNewSubscriptionFeedIndicators &&
+    props.data.isNewInSubscriptionFeed === true &&
+    props.data.hideNewSubscriptionFeedIndicator !== true &&
+    !isHistoryEntryWatched(historyEntry.value)
+})
+
+const showMarkAsSeen = computed(() => {
+  return props.data.isNewInSubscriptionFeed === true &&
+    (props.data.isInNewSubscriptionFeed === true || showNewSubscriptionFeedIndicator.value)
+})
 
 /** @type {import('vue').ComputedRef<string>} */
 const displayTitle = computed(() => {
@@ -847,12 +2006,24 @@ const displayTitle = computed(() => {
   }
 })
 
+// Clamped titles show their full text on hover.
+const fullTitleTooltip = computed(() => store.getters.getTitleLineLimit > 0 ? displayTitle.value : null)
+
 const displayDuration = computed(() => {
   if (useDeArrowTitles.value && (duration.value === '' || duration.value === '0:00') && deArrowCache.value?.videoDuration) {
     return formatDurationAsTimestamp(deArrowCache.value.videoDuration)
   }
 
   return duration.value
+})
+
+const displayDurationLabel = computed(() => {
+  if (isPremiere.value) return t('Video.Premiere')
+  if (isLive.value) return t('Video.Live')
+  if (isUpcoming.value) return t('Video.Upcoming')
+  if (isStation.value) return t('Video.Station')
+
+  return displayDuration.value
 })
 
 /** @type {import('vue').ComputedRef<{ playlistId: string | undefined, playlistType: string | undefined, playlistItemId: string | undefined } | undefined>} */
@@ -882,23 +2053,14 @@ const playlistTypeFinal = computed(() => playlistIdTypePairFinal.value?.playlist
 const playlistItemIdFinal = computed(() => playlistIdTypePairFinal.value?.playlistItemId)
 
 const quickBookmarkPlaylist = computed(() => store.getters.getQuickBookmarkPlaylist)
+const isInAnyPlaylist = computed(() => store.getters.getPlaylistVideoCounts.has(id.value))
 
 const isQuickBookmarkEnabled = computed(() => quickBookmarkPlaylist.value != null)
+const quickBookmarkIcon = computed(() => store.getters.getQuickBookmarkIcon)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const isInQuickBookmarkPlaylist = computed(() => {
-  if (!isQuickBookmarkEnabled.value) { return false }
-
-  // Accessing a ref has a negligible amount of overhead,
-  // however as we know that some users have playlists that have more than 10k items in them
-  // it adds up quickly, especially as there are usually lots of FtListVideo instances active at the same time.
-  // So create a temporary variable outside of the array, so we only have to do it once.
-  // Also the search is retriggered every time any playlist is modified.
-  const id_ = id.value
-
-  return quickBookmarkPlaylist.value.videos.some((video) => {
-    return video.videoId === id_
-  })
+  return store.getters.getQuickBookmarkVideoIds.has(id.value)
 })
 
 const quickBookmarkIconText = computed(() => {
@@ -933,12 +2095,35 @@ const watchPageLinkQuery = computed(() => {
     query.playlistItemId = playlistItemIdFinal.value
   }
 
-  return query
+  if (linkDownloadId.value) {
+    query.downloadId = linkDownloadId.value
+  }
+
+  if (typeof props.data.isShort === 'boolean') {
+    query.short = String(props.data.isShort)
+  }
+
+  if (props.data.isMusic === true) {
+    query.musicVideo = 'true'
+  }
+
+  if (props.data.isShort === true) {
+    if (props.data.shortSource === 'channel' && props.data.shortChannelId) {
+      query.shortSource = 'channel'
+      query.shortChannelId = props.data.shortChannelId
+    } else if (inSubscriptions.value) {
+      query.shortSource = 'subscriptions'
+    }
+  }
+
+  // Queued downloads link to the exact file they were queued from
+  return { ...query, ...props.data.route?.query }
 })
 
 const watchVideoRouterLink = computed(() => ({
   path: `/watch/${id.value}`,
   query: watchPageLinkQuery.value,
+  state: { tabTitle: title.value },
 }))
 
 /** @type {import('vue').ComputedRef<boolean>} */
@@ -947,11 +2132,18 @@ const useDeArrowTitles = computed(() => store.getters.getUseDeArrowTitles)
 /** @type {import('vue').ComputedRef<boolean>} */
 const useDeArrowThumbnails = computed(() => store.getters.getUseDeArrowThumbnails)
 
+const showDeArrowTitle = computed(() => useDeArrowTitles.value && !deArrowTogglePinned.value)
+const showDeArrowThumbnail = computed(() => useDeArrowThumbnails.value && !deArrowTogglePinned.value)
+
 const deArrowChangedContent = computed(() => {
-  return (useDeArrowThumbnails.value && deArrowCache.value?.thumbnail) ||
+  return (useDeArrowThumbnails.value && thumbnailPreference.value !== 'hidden' && deArrowCache.value?.thumbnail) ||
       (useDeArrowTitles.value && deArrowCache.value?.title &&
         props.data.title.localeCompare(deArrowCache.value.title, undefined, { sensitivity: 'accent' }) !== 0)
 })
+
+// Keeps the DeArrow toggle visible as a badge on cards whose details DeArrow changed.
+/** @type {import('vue').ComputedRef<boolean>} */
+const showDeArrowBadge = computed(() => store.getters.getShowDeArrowBadge)
 
 const deArrowToggleTitle = computed(() => {
   return deArrowTogglePinned.value
@@ -963,24 +2155,126 @@ const deArrowCache = computed(() => store.getters.getDeArrowCache[id.value])
 
 const disableChannelLinks = computed(() => store.getters.getDisableChannelLinks)
 
-/**
- * @param {PointerEvent} event
- */
-function handleWatchPageLinkClick(event) {
+const shouldShowChannelResolverButton = computed(() => !disableChannelLinks.value && channelName.value !== null && (
+  !!props.data.hasCollaborators || channelCollaborators.value.length > 1 || channelId.value === null
+))
+
+async function handleWatchPageLinkClick(event) {
+  // `auxclick` also fires for the right mouse button after `contextmenu`.
+  // Treat only middle clicks as opening the video so a new-feed entry is not
+  // marked as seen (and removed) while its context menu is open.
+  if (event?.type === 'auxclick' && event.button !== 1) {
+    return
+  }
+
+  markSubscriptionVideoAsSeen()
+  // Lists such as the queue consume a video that a plain click plays here.
+  const plainLeftClick = event?.button === 0 && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey
+
   if (externalPlayerIsDefaultViewingMode.value) {
+    event?.preventDefault()
+    if (await openInExternalPlayer() && plainLeftClick) emit('open-video')
+    return
+  }
+
+  if (process.env.IS_IOS && localDownloadId.value !== undefined && event?.type === 'click') {
     event.preventDefault()
-    handleExternalPlayer()
+    if (plainLeftClick) emit('pause-player')
+    let played = true
+    await playDownloadedFile(Number(cardDownload.value), { videoId: id.value }, {
+      refreshDownloads: () => refreshDownloadRecords(ytDlp, store),
+      playNative: (downloadId, path) => ytDlp.ytDlpPlayDownload(downloadId, path),
+      navigate: () => {},
+      fileNotFound: () => {
+        played = false
+        showToast({ message: t('Downloads.File Not Found'), icon: ['fas', 'circle-exclamation'] })
+      }
+    })
+    // A file that could not play stays wherever it was listed, such as the queue.
+    if (played && plainLeftClick) emit('open-video')
+    return
+  }
+
+  const opensActiveTab = process.env.IS_ELECTRON &&
+    event?.button === 0 &&
+    (event.ctrlKey || event.metaKey) &&
+    !event.shiftKey &&
+    !event.altKey
+
+  if (opensActiveTab) {
+    event.preventDefault()
+    requestWatchPageViewTransition(event.currentTarget, {
+      isShort: props.data.isShort === true && store.getters.getUseCustomShortsPlayer,
+      allowVisiblePlayer: props.appearance === 'recommendation'
+    })
+    openInternalPath({
+      path: `/watch/${id.value}`,
+      query: watchPageLinkQuery.value,
+      title: title.value,
+      doCreateNewTab: true
+    })
+    return
+  }
+
+  if (process.env.IS_ELECTRON && event?.button === 1) {
+    event.preventDefault()
+
+    const openVideo = () => openInternalPath({
+      path: `/watch/${id.value}`,
+      query: watchPageLinkQuery.value,
+      title: title.value,
+      doCreateNewWindow: event.shiftKey,
+      doCreateNewTab: !event.shiftKey,
+      makeActive: false,
+      lazyLoad: isUnloadedBackgroundTabClick(event)
+    })
+
+    if (event.shiftKey) {
+      openVideo()
+    } else {
+      try {
+        await morphThumbnailIntoNewTab(event.currentTarget, openVideo)
+      } catch (error) {
+        console.error('Failed to open the video in a new tab:', error)
+      }
+    }
+    return
+  }
+
+  // Plain left click navigates in this tab: morph the thumbnail into the player
+  if (plainLeftClick) {
+    emit('open-video')
+    requestWatchPageViewTransition(event.currentTarget, {
+      isShort: props.data.isShort === true && store.getters.getUseCustomShortsPlayer,
+      allowVisiblePlayer: props.appearance === 'recommendation'
+    })
   }
 }
 
-async function fetchDeArrowThumbnail() {
-  if (thumbnailPreference.value === 'hidden') { return }
+function handleChannelLinkClick(event) {
+  if (!process.env.IS_ELECTRON || event?.button !== 1 || channelId.value === null) {
+    return
+  }
 
-  const videoId = id.value
-  const thumbnail = await deArrowThumbnail(videoId, deArrowCache.value.thumbnailTimestamp)
+  event.preventDefault()
+
+  openInternalPath({
+    path: `/channel/${channelId.value}`,
+    title: channelName.value,
+    doCreateNewWindow: event.shiftKey,
+    doCreateNewTab: !event.shiftKey,
+    makeActive: false,
+    lazyLoad: isUnloadedBackgroundTabClick(event)
+  })
+}
+
+async function fetchDeArrowThumbnail() {
+  if (thumbnailPreference.value === 'hidden' || !showDeArrowThumbnail.value || !deArrowCache.value) { return }
+
+  const deArrowCacheClone = deepCopy(deArrowCache.value)
+  const thumbnail = await deArrowThumbnail(deArrowCacheClone.videoId, deArrowCacheClone.thumbnailTimestamp)
 
   if (thumbnail) {
-    const deArrowCacheClone = deepCopy(deArrowCache.value)
     deArrowCacheClone.thumbnail = thumbnail
     store.commit('addThumbnailToDeArrowCache', deArrowCacheClone)
   }
@@ -988,11 +2282,16 @@ async function fetchDeArrowThumbnail() {
 
 const debounceGetDeArrowThumbnail = debounce(fetchDeArrowThumbnail, 1000)
 
-async function fetchDeArrowData() {
-  const videoId = id.value
+async function fetchDeArrowData(videoId) {
   const cacheData = { videoId, title: null, videoDuration: null, thumbnail: null, thumbnailTimestamp: null }
 
-  const data = await deArrowData(videoId)
+  let data
+  try {
+    data = await deArrowData(videoId)
+  } catch {
+    // Already logged. Leave the cache empty so the next card load retries.
+    return
+  }
 
   if (Array.isArray(data?.titles) && data.titles.length > 0 && (data.titles[0].locked || data.titles[0].votes >= 0)) {
     // remove dearrow formatting markers https://github.com/ajayyy/DeArrow/blob/0da266485be902fe54259214c3cd7c942f2357c5/src/titles/titleFormatter.ts#L460
@@ -1011,28 +2310,35 @@ async function fetchDeArrowData() {
   store.commit('addVideoToDeArrowCache', cacheData)
 
   // fetch dearrow thumbnails if enabled
-  if (showDeArrowThumbnail.value && deArrowCache.value?.thumbnail === null) {
+  if (id.value === videoId && showDeArrowThumbnail.value && deArrowCache.value?.thumbnail === null) {
     debounceGetDeArrowThumbnail()
   }
 }
 
 function toggleDeArrow() {
-  if (!deArrowChangedContent.value) {
+  if (!deArrowChangedContent.value && !deArrowTogglePinned.value) {
     return
   }
 
   deArrowTogglePinned.value = !deArrowTogglePinned.value
+}
 
-  if (useDeArrowTitles.value) {
-    showDeArrowTitle.value = !showDeArrowTitle.value
-  }
-
-  if (useDeArrowThumbnails.value) {
-    showDeArrowThumbnail.value = !showDeArrowThumbnail.value
+function markSubscriptionVideoAsSeen() {
+  if (props.data.isNewInSubscriptionFeed === true && id.value) {
+    store.dispatch('markSubscriptionVideoAsSeen', id.value)
   }
 }
 
 function handleExternalPlayer() {
+  markSubscriptionVideoAsSeen()
+  openInExternalPlayer()
+}
+
+/**
+ * Marks the video as watched only once the player has started.
+ * @returns {Promise<boolean>} whether the player started
+ */
+async function openInExternalPlayer() {
   emit('pause-player')
 
   const payload = {
@@ -1056,30 +2362,174 @@ function handleExternalPlayer() {
     })
   }
 
-  if (process.env.IS_ELECTRON) {
-    window.ftElectron.openInExternalPlayer(payload)
+  if (!process.env.IS_ELECTRON || !await openExternalPlayer(payload)) {
+    return false
   }
 
-  if (rememberHistory.value) {
+  if (rememberHistory.value && canMarkAsWatched.value) {
     markAsWatched()
+  }
+  return true
+}
+
+/**
+ * Only the local API lists the collaborators of a video. The Invidious API returns
+ * its main channel without contacting YouTube from this device.
+ * @param {string} videoId
+ */
+async function getVideoChannels(videoId) {
+  const { result } = await requestWithFallback({
+    local: () => getLocalVideoChannels(videoId),
+    invidious: async () => {
+      const video = await invidiousGetVideoInformation(videoId)
+      return video.authorId
+        ? [{ id: video.authorId, name: video.author, thumbnail: video.authorThumbnails?.at(-1)?.url ?? '', subtitle: '' }]
+        : []
+    }
+  }, { backend: backendPreference.value, fallback: store.getters.getBackendFallback })
+  return result
+}
+
+/**
+ * Opens the collaborators prompt for collaboration videos, or the single
+ * channel otherwise. In Electron, a middle click opens that channel in a
+ * background tab like the regular channel link. Elsewhere a new tab can't be
+ * opened reliably after the lookup, so a middle click shows the prompt instead
+ * of navigating the current tab.
+ * @param {MouseEvent} event
+ */
+async function openChannelByline(event) {
+  if (disableChannelLinks.value || isFetchingCollaborators.value) {
+    return
+  }
+
+  if (channelCollaborators.value.length > 1) {
+    showCollaboratorsPrompt.value = true
+    return
+  }
+
+  isFetchingCollaborators.value = true
+  setCollaboratorsLoading(true)
+  const videoId = id.value
+
+  try {
+    const collaborators = await getVideoChannels(videoId)
+
+    if (id.value !== videoId || disableChannelLinks.value) {
+      return
+    }
+
+    channelCollaborators.value = collaborators
+    const isMiddleClick = event?.type === 'auxclick'
+
+    if (channelCollaborators.value.length > 1 || (channelCollaborators.value.length === 1 && isMiddleClick && !process.env.IS_ELECTRON)) {
+      showCollaboratorsPrompt.value = true
+    } else if (channelCollaborators.value.length === 1) {
+      const { id: collaboratorId, name } = channelCollaborators.value[0]
+      openInternalPath({
+        path: `/channel/${collaboratorId}`,
+        title: name,
+        doCreateNewWindow: isMiddleClick && event.shiftKey,
+        doCreateNewTab: isMiddleClick && !event.shiftKey,
+        makeActive: !isMiddleClick,
+        lazyLoad: isUnloadedBackgroundTabClick(event)
+      })
+    }
+  } catch (error) {
+    if (id.value === videoId) {
+      console.error(`Failed to fetch collaborators for ${videoId}`, error)
+      showToast({ message: t('Video.Failed to load collaborators'), icon: ['fas', 'circle-exclamation'] })
+    }
+  } finally {
+    isFetchingCollaborators.value = false
+    setCollaboratorsLoading(false)
+  }
+}
+
+function handleExtraThumbnailAction() {
+  handleOptionsClick(extraThumbnailAction.value)
+}
+
+function updateUploadedTime() {
+  uploadedTime.value = ''
+  uploadedTimeIsRelative.value = false
+  published.value = undefined
+
+  if (props.data.premiereDate != null) {
+    let premiereDate = props.data.premiereDate
+
+    // premiereDate will be a string when the subscriptions are restored from the cache
+    if (typeof premiereDate === 'string') {
+      premiereDate = new Date(premiereDate)
+    }
+    uploadedTime.value = formatDateTime(
+      premiereDate,
+      locale.value,
+      dateFormat.value,
+      { year: 'numeric', month: 'numeric', day: 'numeric' },
+      { hour: 'numeric', minute: '2-digit', second: '2-digit' },
+      timeFormat.value
+    )
+    published.value = premiereDate.getTime()
+  } else if (props.data.premiereTimestamp > 0) {
+    const premiereDate = new Date(props.data.premiereTimestamp * 1000)
+    uploadedTime.value = formatDateTime(
+      premiereDate,
+      locale.value,
+      dateFormat.value,
+      { year: 'numeric', month: 'numeric', day: 'numeric' },
+      { hour: 'numeric', minute: '2-digit', second: '2-digit' },
+      timeFormat.value
+    )
+    published.value = props.data.premiereTimestamp * 1000
+  } else if (typeof props.data.published === 'number' && props.data.published > 0 && !isLive.value && !isStation.value) {
+    published.value = props.data.published
+
+    if (inHistory.value) {
+      uploadedTime.value = formatDate(
+        props.data.published,
+        locale.value,
+        dateFormat.value,
+        { year: 'numeric', month: 'numeric', day: 'numeric' }
+      )
+    } else {
+      // Use 30 days per month, just like calculatePublishedDate
+      uploadedTime.value = getRelativeTimeFromDate(props.data.published, false)
+      uploadedTimeIsRelative.value = true
+    }
   }
 }
 
 function parseVideoData() {
+  if (id.value !== props.data.videoId) {
+    channelCollaborators.value = []
+    showCollaboratorsPrompt.value = false
+  }
+  relativeTimeDataLoadedAt.value = Date.now()
+  relativeTimeClockAtLoad.value = relativeTimeNow.value
   id.value = props.data.videoId
   title.value = props.data.title
 
-  channelName.value = props.data.author ?? null
-  collaborators.value = props.data.collaborators ?? []
-
-  if (props.data.authorId) {
-    channelId.value = props.data.authorId
-  } else if (collaborators.value.length > 0) {
-    // When video has collaborators, authorId is null and the first element in the collaborator array is the main author
-    channelId.value = collaborators.value[0].id
-  } else {
-    channelId.value = null
+  if (store.getters.getAvoidTranslation === 'entire_app' && id.value) {
+    const cachedTitle = getCachedOembedTitle(id.value)
+    if (cachedTitle !== null) {
+      title.value = cachedTitle
+    } else {
+      getOembedTitle(id.value).then((oembedTitle) => {
+        if (oembedTitle) {
+          title.value = oembedTitle
+        }
+      })
+    }
   }
+
+  channelName.value = props.data.author ?? null
+  // A channel-page refresh can omit collaborators that the byline lookup resolved.
+  if (props.data.collaborators?.length > 0) {
+    channelCollaborators.value = props.data.collaborators
+  }
+  // Collaboration videos have no authorId; the first collaborator is the main author
+  channelId.value = props.data.authorId ?? channelCollaborators.value[0]?.id ?? null
 
   if ((props.data.lengthSeconds === '' || props.data.lengthSeconds === '0:00') && historyEntryExists.value) {
     lengthSeconds.value = historyEntry.value.lengthSeconds
@@ -1091,10 +2541,10 @@ function parseVideoData() {
 
   description.value = props.data.description
   isStation.value = props.data.isStation === true
-  isPremiere.value = props.data.isPremiere === true
-  isLive.value = !isStation.value && (props.data.liveNow || props.data.lengthSeconds === undefined)
+  isLive.value = !isStation.value && (props.data.isLive || props.data.liveNow || props.data.lengthSeconds === undefined)
+  isPremiere.value = props.data.isPremiere === true ||
+    (isLive.value && props.data.premiereTimestamp > 0)
   isUpcoming.value = props.data.isUpcoming || props.data.premiere
-  isMusic.value = props.data.isMusic === true
   is4k.value = props.data.is4k
   is8k.value = props.data.is8k
   isNew.value = props.data.isNew
@@ -1102,53 +2552,36 @@ function parseVideoData() {
   isVr360.value = props.data.isVr360
   is3D.value = props.data.is3d
   hasCaptions.value = props.data.hasCaptions
+  isMembersOnly.value = props.data.isMembersOnly === true
+  isMusic.value = props.data.isMusic === true
   isPremium.value = props.data.premium || false
   viewCount.value = props.data.viewCount
+  updateUploadedTime()
 
-  if (props.data.premiereDate !== undefined) {
-    let premiereDate = props.data.premiereDate
+  hideViews.value = hideVideoViews.value ||
+    (props.data.viewCount == null && props.data.viewCountText === undefined)
+}
 
-    // premiereDate will be a string when the subscriptions are restored from the cache
-    if (typeof premiereDate === 'string') {
-      premiereDate = new Date(premiereDate)
+async function fetchSponsorBlockVideoLabel(videoId) {
+  try {
+    const label = await getSponsorBlockVideoLabel(videoId)
+    if (useSponsorBlock.value && id.value === videoId) {
+      sponsorBlockFullVideoCategory.value = label?.category ?? null
     }
-    uploadedTime.value = premiereDate.toLocaleString([locale.value, 'en'])
-    published.value = premiereDate.getTime()
-  } else if (props.data.premiereTimestamp !== undefined) {
-    uploadedTime.value = new Date(props.data.premiereTimestamp * 1000).toLocaleString([locale.value, 'en'])
-    published.value = props.data.premiereTimestamp * 1000
-  } else if (typeof props.data.published === 'number' && !isLive.value && !isStation.value) {
-    published.value = props.data.published
-
-    if (inHistory.value) {
-      uploadedTime.value = new Date(props.data.published).toLocaleDateString([locale.value, 'en'])
-    } else {
-      // Use 30 days per month, just like calculatePublishedDate
-      uploadedTime.value = getRelativeTimeFromDate(props.data.published, false)
+  } catch {
+    if (id.value === videoId) {
+      sponsorBlockFullVideoCategory.value = null
     }
-  }
-
-  if (hideVideoViews.value) {
-    hideViews.value = true
-  } else if (props.data.viewCount !== undefined && props.data.viewCount !== null) {
-    parsedViewCount.value = formatNumber(props.data.viewCount)
-  } else if (props.data.viewCountText !== undefined) {
-    parsedViewCount.value = props.data.viewCountText.replace(' views', '')
-  } else {
-    hideViews.value = true
   }
 }
 
-const formattedViewCount = computed(() => {
-  if (isNumberRounded(viewCount.value)) {
-    return formatNumber(viewCount.value, { notation: 'compact' })
-  } else {
-    return parsedViewCount.value
+function markAsWatched(fullySeen = false) {
+  if (!canMarkAsWatched.value) {
+    return
   }
-})
 
-function markAsWatched() {
   const videoData = {
+    ...historyEntry.value,
     videoId: id.value,
     title: title.value,
     author: channelName.value,
@@ -1156,63 +2589,83 @@ function markAsWatched() {
     published: published.value,
     description: description.value,
     viewCount: viewCount.value,
-    lengthSeconds: props.data.lengthSeconds,
-    watchProgress: 0,
-    timeWatched: Date.now(),
+    lengthSeconds: lengthSeconds.value,
+    watchProgress: fullySeen ? lengthSeconds.value : historyEntry.value?.watchProgress ?? 0,
+    isWatched: true,
+    timeWatched: historyEntry.value?.timeWatched ?? Date.now(),
     isLive: false,
     isStation: false,
-    isPremiere: false,
+    isUpcoming: false,
+    isMembersOnly: isMembersOnly.value,
     type: 'video'
   }
 
   store.dispatch('updateHistory', videoData)
 
-  if (!historyEntryExists.value) {
-    showToast(t('Video.Video has been marked as watched'))
-  }
+  showToast({
+    message: t('Video.Video has been marked as watched'),
+    image: toastThumbnail.value,
+    icon: ['fas', 'eye'],
+  })
 }
 
-function removeFromWatched() {
+async function unmarkAsWatched() {
+  if (watchedPercentageThreshold.value === 0) {
+    await store.dispatch('removeFromHistory', id.value)
+  } else {
+    await store.dispatch('updateHistory', {
+      ...historyEntry.value,
+      isWatched: false,
+    })
+  }
+
+  showToast({
+    message: t('Video.Video has been unmarked as watched'),
+    image: toastThumbnail.value,
+    icon: ['fas', 'eye-slash'],
+  })
+}
+
+function removeFromHistory() {
   store.dispatch('removeFromHistory', id.value)
 
-  showToast(t('Video.Video has been removed from your history'))
+  showToast({
+    message: t('Video.Video has been removed from your history'),
+    image: toastThumbnail.value,
+    icon: ['fas', 'trash'],
+  })
 }
 
-function moveVideoToTheTop() {
-  emit('move-video-to-the-top', id.value, props.playlistItemId)
+function openAddToPlaylistPrompt() {
+  store.dispatch('showAddToPlaylistPromptForManyVideos', { videos: [addToPlaylistVideoData.value] })
 }
 
-function moveVideoToTheBottom() {
-  emit('move-video-to-the-bottom', id.value, props.playlistItemId)
-}
+defineExpose({ openAddToPlaylistPrompt })
 
-function togglePlaylistPrompt() {
-  const videoData = {
-    videoId: id.value,
-    title: title.value,
-    author: channelName.value,
-    authorId: channelId.value,
-    description: description.value,
-    viewCount: viewCount.value,
-    lengthSeconds: props.data.lengthSeconds,
-    published: published.value,
-    premiereDate: props.data.premiereDate,
-    premiereTimestamp: props.data.premiereTimestamp,
-  }
-
-  store.dispatch('showAddToPlaylistPromptForManyVideos', { videos: [videoData] })
-}
+// Descriptions are omitted from saved playlist entries.
+const addToPlaylistVideoData = computed(() => ({
+  videoId: id.value,
+  title: title.value,
+  author: channelName.value,
+  authorId: channelId.value,
+  lengthSeconds: props.data.lengthSeconds,
+  published: published.value,
+  ...(viewCount.value != null ? { viewCount: viewCount.value } : {}),
+  premiereDate: props.data.premiereDate,
+  premiereTimestamp: props.data.premiereTimestamp,
+  isMembersOnly: isMembersOnly.value,
+}))
 
 /**
  * @param {string} channelName
  * @param {string} channelId
  */
 function hideChannel(channelName, channelId) {
-  const newHiddenChannels = [...JSON.parse(store.getters.getChannelsHidden), { name: channelId, preferredName: channelName }]
+  const newHiddenChannels = [...hiddenChannels.value, { name: channelId, preferredName: channelName }]
 
   store.dispatch('updateChannelsHidden', JSON.stringify(newHiddenChannels))
 
-  showToast(t('Channel Hidden', { channel: channelName }))
+  showToast({ message: t('Channel Hidden', { channel: channelName }), icon: ['fas', 'eye-slash'] })
 }
 
 /**
@@ -1220,31 +2673,9 @@ function hideChannel(channelName, channelId) {
  * @param {string} channelId
  */
 function unhideChannel(channelName, channelId) {
-  store.dispatch('updateChannelsHidden', JSON.stringify(JSON.parse(store.getters.getChannelsHidden).filter(c => c.name !== channelId)))
+  store.dispatch('updateChannelsHidden', JSON.stringify(hiddenChannels.value.filter(c => c.name !== channelId)))
 
-  showToast(t('Channel Unhidden', { channel: channelName }))
-}
-
-/**
- * @param {string} channelName
- * @param {string} channelId
- */
-function disableSponsorBlockOnChannel(channelName, channelId) {
-  const newExcludedChannels = [...sponsorBlockExcludedChannels.value, { name: channelId, preferredName: channelName }]
-
-  store.dispatch('updateSponsorBlockExcludedChannels', JSON.stringify(newExcludedChannels))
-
-  showToast(t('SponsorBlock Disabled on Channel', { channel: channelName }))
-}
-
-/**
- * @param {string} channelName
- * @param {string} channelId
- */
-function enableSponsorBlockOnChannel(channelName, channelId) {
-  store.dispatch('updateSponsorBlockExcludedChannels', JSON.stringify(sponsorBlockExcludedChannels.value.filter(c => c.name !== channelId)))
-
-  showToast(t('SponsorBlock Enabled on Channel', { channel: channelName }))
+  showToast({ message: t('Channel Unhidden', { channel: channelName }), icon: ['fas', 'eye'] })
 }
 
 function toggleQuickBookmarked() {
@@ -1260,7 +2691,7 @@ function toggleQuickBookmarked() {
   }
 }
 
-function addToQuickBookmarkPlaylist() {
+async function addToQuickBookmarkPlaylist() {
   const videoData = {
     videoId: id.value,
     title: title.value,
@@ -1268,28 +2699,44 @@ function addToQuickBookmarkPlaylist() {
     authorId: channelId.value,
     lengthSeconds: props.data.lengthSeconds,
     published: published.value,
+    ...(viewCount.value != null ? { viewCount: viewCount.value } : {}),
     premiereDate: props.data.premiereDate,
     premiereTimestamp: props.data.premiereTimestamp,
+    isMembersOnly: isMembersOnly.value,
   }
 
-  store.dispatch('addVideo', {
+  const playlistName = quickBookmarkPlaylist.value.playlistName
+
+  const saved = await store.dispatch('addVideo', {
     _id: quickBookmarkPlaylist.value._id,
     videoData,
   })
 
-  // TODO: Maybe show playlist name
-  showToast(t('Video.Video has been saved'))
+  showToast({
+    message: saved
+      ? t('Video.Video has been saved to {playlistName}', { playlistName })
+      : t('Video.There was a problem saving the video to {playlistName}', { playlistName }),
+    image: toastThumbnail.value,
+    icon: saved ? ['fas', 'bookmark'] : ['fas', 'circle-exclamation'],
+  })
 }
 
-function removeFromQuickBookmarkPlaylist() {
-  store.dispatch('removeVideo', {
+async function removeFromQuickBookmarkPlaylist() {
+  const playlistName = quickBookmarkPlaylist.value.playlistName
+
+  const removed = await store.dispatch('removeVideo', {
     _id: quickBookmarkPlaylist.value._id,
     // Remove all playlist items with same videoId
     videoId: id.value,
   })
 
-  // TODO: Maybe show playlist name
-  showToast(t('Video.Video has been removed from your saved list'))
+  showToast({
+    message: removed
+      ? t('Video.Video has been removed from {playlistName}', { playlistName })
+      : t('Video.There was a problem removing the video from {playlistName}', { playlistName }),
+    image: toastThumbnail.value,
+    icon: removed ? ['fas', 'trash'] : ['fas', 'circle-exclamation'],
+  })
 }
 
 function moveVideoUp() {
@@ -1315,18 +2762,61 @@ function onDragStart(event) {
   }
 }
 
-parseVideoData()
+watch(() => props.data, parseVideoData, { immediate: true })
+watch(displayTitle, title => emit('display-title-change', title), { immediate: true })
+watch([locale, dateFormat, timeFormat], updateUploadedTime)
 
-showDeArrowTitle.value = useDeArrowTitles.value
-showDeArrowThumbnail.value = useDeArrowThumbnails.value
+watch([useDeArrowTitles, useDeArrowThumbnails], ([titles, thumbnails]) => {
+  if (!titles && !thumbnails) deArrowTogglePinned.value = false
+})
 
-if ((showDeArrowTitle.value || showDeArrowThumbnail.value) && !deArrowCache.value) {
-  fetchDeArrowData()
-}
+watch(id, () => {
+  deArrowTogglePinned.value = false
+  debounceGetDeArrowThumbnail.cancel()
+})
 
-if (showDeArrowThumbnail.value && deArrowCache.value && deArrowCache.value.thumbnail == null) {
-  debounceGetDeArrowThumbnail()
-}
+watch([id, showDeArrowTitle, showDeArrowThumbnail], async ([videoId, titles, thumbnails]) => {
+  if (!videoId || (!titles && !thumbnails)) return
+
+  if (!deArrowCache.value) {
+    await fetchDeArrowData(videoId)
+  } else if (thumbnails && deArrowCache.value.thumbnail == null) {
+    debounceGetDeArrowThumbnail()
+  }
+}, { immediate: true })
+
+watch(premiereTimestamp, schedulePremiereStartInvalidation, { immediate: true })
+watch([id, premiereTimestamp], syncLiveReminder, { immediate: true })
+
+onMounted(() => {
+  removeLiveReminderUpdatedListener = liveReminder.onUpdated((videoId, scheduled) => {
+    if (videoId === id.value) {
+      liveReminderActive.value = scheduled
+    }
+  })
+})
+
+onBeforeUnmount(() => {
+  debounceGetDeArrowThumbnail.cancel()
+  resetThumbnailPreview()
+  clearPremiereStartTimer()
+  removeLiveReminderUpdatedListener?.()
+})
+
+watch([useSponsorBlock, id], ([enabled, videoId]) => {
+  sponsorBlockFullVideoCategory.value = null
+  sponsorBlockPromptOpen.value = false
+  if (enabled && videoId) {
+    fetchSponsorBlockVideoLabel(videoId)
+  }
+}, { immediate: true })
 </script>
 
 <style scoped src="./FtListVideo.scss" lang="scss" />
+
+<style>
+body.collaboratorsLoading,
+body.collaboratorsLoading * {
+  cursor: wait !important;
+}
+</style>

@@ -1,0 +1,2836 @@
+# Optional AI-generated translations for keys missing from ../hr.yaml.
+Color Picker:
+  Hue: Nijansa
+  Opacity: Neprozirnost
+  Backdrop Blur: Zamućenje pozadine
+  Hex Color: Heksadekadska boja
+  Apply Color: Primijeni
+  Reset Color: Poništi
+  Copy Color: Kopiraj
+  Copy From Another Color: Kopiraj iz druge boje
+  Color Copied: Boja je kopirana
+  Invalid Color: Unesite valjanu heksadekadsku boju
+  Clipboard Unavailable: Međuspremnik nije dostupan
+  Saturation and Brightness: Zasićenost i svjetlina
+New Tab: Nova kartica
+Maximize: Maksimiziraj
+Restore: Vrati
+Close Tab: Zatvori karticu
+App Menu:
+  About App: O aplikaciji {appName}
+  Services: Usluge
+  Hide App: Sakrij {appName}
+  Hide Others: Sakrij ostale
+  Show All: Prikaži sve
+  Quit App: Zatvori {appName}
+  Reopen Closed Window: Ponovo otvori zatvoreni prozor
+  Paste and Match Style: Zalijepi i prilagodi stil
+  View: Prikaz
+  Enter Inspect Element Mode: Način pregledavanja elemenata
+  GPU Internals: Interni podaci GPU-a (chrome://gpu)
+  Navigate: Navigacija
+  Next Tab: Sljedeća kartica
+  Previous Tab: Prethodna kartica
+  Help: Pomoć
+Close Confirmation:
+  Background Sync Warning: Izlaskom će se zaustaviti osvježavanje pretplata u pozadini.
+  Hide Window: Sakrij prozor
+  Title: Zatvoriti OpenTubeX?
+  Message: Jeste li sigurni da želite zatvoriti OpenTubeX?
+  Quit: Zatvori
+  Never Ask Again: Ne pitaj ponovno
+Close Window Confirmation:
+  Title: Zatvoriti prozor?
+  Message: Ovaj prozor sadrži {count} karticu. Jeste li sigurni da ga želite zatvoriti? | Ovaj prozor sadrži {count} kartice. Jeste li sigurni da ga želite zatvoriti? | Ovaj prozor sadrži {count} kartica. Jeste li sigurni da ga želite zatvoriti?
+  Close Window: Zatvori prozor
+Confirmations:
+  Never Ask Again: Ne pitaj ponovno
+  Settings Hint: Ovu potvrdu možete ponovno omogućiti u Postavke → Općenito → Potvrdi prije…
+Close Multiple Tabs Confirmation:
+  Title: Zatvoriti više kartica?
+  Message: Time će se zatvoriti {count} kartica. | Time će se zatvoriti {count} kartice. | Time će se zatvoriti {count} kartica.
+  Close Tabs: Zatvori {count} karticu | Zatvori {count} kartice | Zatvori {count} kartica
+Load Multiple Tabs Confirmation:
+  Title: Učitati više kartica?
+  Message: Time će se učitati {count} kartica. | Time će se učitati {count} kartice. | Time će se učitati {count} kartica.
+  Load Tabs: Učitaj {count} karticu | Učitaj {count} kartice | Učitaj {count} kartica
+Unload Multiple Tabs Confirmation:
+  Title: Ukloniti više kartica iz memorije?
+  Message: Time će se iz memorije ukloniti {count} kartica. | Time će se iz memorije ukloniti {count} kartice. | Time će se iz memorije ukloniti {count} kartica.
+  Unload Tabs: Ukloni {count} karticu iz memorije | Ukloni {count} kartice iz memorije | Ukloni {count} kartica iz memorije
+Tabs Unloaded To Free Memory: Radi oslobađanja memorije uklonjena je {count} kartica koju niste nedavno koristili | Radi oslobađanja memorije uklonjene su {count} kartice koje niste nedavno koristili | Radi oslobađanja memorije uklonjeno je {count} kartica koje niste nedavno koristili
+Resize Tab Bar: Promijeni veličinu trake kartica
+Find in page: Pronađi na stranici
+Previous match: Prethodno podudaranje
+Next match: Sljedeće podudaranje
+Close find bar: Zatvori traku za pretraživanje
+No matches: Nema podudaranja
+Version {versionNumber} is now available.: Sada je dostupna verzija {versionNumber}.
+See changes and update: Pogledaj promjene i ažuriraj
+Dismiss: Odbaci
+Update to {version}: Ažuriraj na {version}
+Global:
+  Ambient Mode: Ambijentalni način rada
+  Loading More: Učitavanje dodatnog sadržaja
+  New: Novo
+  Show Blocked Item: Prikaži blokiranu stavku
+Search Listing:
+  Label:
+    Members Only: Samo za članove
+    Possibly AI-generated: Možda generirano umjetnom inteligencijom
+Stats:
+  Left of daily limit: "Preostalo je {duration} od vašeg dnevnog ograničenja od {limit}"
+  Daily limit reached: "Dosegnuto je dnevno ograničenje od {limit}"
+  Replace old device: "Zamijeni stari uređaj"
+  Replacement explanation: "Spojite {device} s ovim uređajem samo ako oba unosa pripadaju istom fizičkom uređaju."
+  Overlapping days: "Dani u obje povijesti: {count}"
+  Overlapping watch time: "Preklapajuće vrijeme gledanja"
+  Keep larger daily total: "Zadrži veći dnevni zbroj"
+  Larger total explanation: "Za duplicirane povijesti. Može izostaviti dodatno gledanje istog dana."
+  Add daily totals: "Zbroji dnevne iznose"
+  Add totals explanation: "Za odvojene povijesti. Može dvaput brojiti duplicirano gledanje."
+  Replacement preservation: "Dani koji se nalaze samo u jednoj povijesti ostaju sačuvani. Izvorne povijesti ostaju spremljene u šifriranoj sinkronizaciji."
+  Combined watch time: "Spojeno vrijeme gledanja"
+  Replacement changed: "Vrijeme gledanja se promijenilo. Zatvorite i ponovno otvorite ovaj pregled kako biste provjerili nove zbrojeve."
+  Replacement success: "Statistike uređaja spojene"
+  All devices: Svi uređaji
+  Stats: Statistika
+  Watch time summary: Sažetak vremena gledanja
+  Today: Danas
+  This week: Ovaj tjedan
+  Total watch time: Ukupno vrijeme gledanja
+  Daily average: Dnevni prosjek
+  So far today: Danas dosad
+  Since: Od {day}
+  All recorded time: Sve zabilježeno vrijeme
+  Per calendar day: Po kalendarskom danu
+  Day by day: Po danima
+  Highest: 'Najviše: {duration}'
+  Week by week: Po tjednima
+  Last 14 days: Posljednjih 14 dana
+  Last 8 weeks: Posljednjih 8 tjedana
+  Daily chart aria: Dnevno vrijeme gledanja u posljednjih 14 dana
+  Weekly chart aria: Tjedno vrijeme gledanja u posljednjih 8 tjedana
+  No data: Vrijeme gledanja pojavit će se ovdje dok gledate videozapise.
+  Estimate note: Vrijeme gledanja prije ovog ažuriranja procijenjeno je iz spremljenog napretka reprodukcije.
+  Adjust imported watch time: Prilagodi uvezeno vrijeme gledanja
+  Imported watch time: Uvezeno vrijeme gledanja
+  Imported watch time explanation: Odaberite brzinu reprodukcije koju ste obično koristili. Trajanje uvezenih videozapisa podijelit će se tom brzinom kako bi se procijenilo stvarno vrijeme koje ste proveli gledajući ih.
+  Playback speed: Brzina reprodukcije
+  Channel speed note: Ako su dostupne spremljene brzine reprodukcije za kanale, upotrebljavaju se umjesto toga.
+  Apply playback speed: Primijeni brzinu reprodukcije
+  Imported watch time adjusted: Prilagođeno je uvezeno vrijeme gledanja
+  Reset statistics: Poništi statistiku
+  Reset: Poništi
+  Reset confirmation: Jeste li sigurni da želite poništiti svu statistiku gledanja? To se ne može poništiti.
+  Reset success: Poništena je statistika gledanja
+  Less than a minute: < 1 min
+  Minutes: '{minutes} min'
+  Hours: '{hours} h'
+  Hours and minutes: '{hours} h {minutes} min'
+Home Page:
+  Keep disabled and hide this section: "Ostavi isključeno i sakrij ovaj odjeljak"
+  Familiar description: "Daj prednost nepogledanim videozapisima s kanala koje već voliš."
+  Balanced description: "Kombiniraj poznate kanale s novima koji odgovaraju tvojim interesima."
+  Explore description: "Daj više prostora novim kanalima povezanima s tvojim interesima."
+  Turn off recommendations: Isključi preporuke
+  Recommended for you: "Preporučeno za vas"
+  Recommendations description: "Rangirajte videozapise na svom uređaju na temelju povijesti gledanja. Identifikatori kanala i pretraživanja po temama šalju se odabranom pozadinskom sustavu radi pronalaženja videozapisa."
+  Enable recommendations: "Omogući preporuke"
+  Recommendations need history: "Pogledajte nekoliko videozapisa s uključenom poviješću kako biste dobili preporuke."
+  No recommendations: "Nema pronađenih preporuka. Pokušajte osvježiti nakon što pogledate još videozapisa."
+  Recommendations unavailable: "Preporuke nije bilo moguće učitati. Pokušajte ponovno kasnije."
+  More like this: "Više sličnog sadržaja"
+  Not interested: "Ne zanima me"
+  Hide this channel: "Sakrij ovaj kanal"
+  Channel hidden: "{channel} skriven je iz preporuka"
+  Reset recommendations: "Poništi preporuke"
+  Discovery: "Otkrivanje"
+  Familiar: "Poznato"
+  Balanced: "Uravnoteženo"
+  Explore: "Istraži"
+  Related to: "Povezano s {title}"
+  More from: "Više s kanala {channel}"
+  Matches interest: "Odgovara vašem interesu za {topic}"
+  Related discovery privacy: "Šalju se i identifikatori videozapisa radi pronalaženja povezanih videozapisa."
+  Home: Početna
+  Description: Nastavite gdje ste stali i pogledajte nedavnu aktivnost.
+  Customize: Prilagodi početnu
+  Done: Gotovo
+  Customize description: Odaberite koji će se odjeljci prikazivati i rasporedite ih željenim redoslijedom.
+  Continue watching: Nastavi gledati
+  New since last visit: Novo od posljednjeg posjeta
+  Watch queue: Red čekanja za gledanje
+  Recent playlists: Nedavni popisi za reprodukciju
+  Recent downloads: Nedavna preuzimanja
+  Upcoming reminders: Predstojeći podsjetnici
+  Watch statistics: Statistika gledanja
+  View all: Prikaži sve
+  Previous shelf page: Prethodna stranica odjeljka {section}
+  Next shelf page: Sljedeća stranica odjeljka {section}
+  Shelf page status: '{section}, stranica {page} od {total}.'
+  Move section up: Pomakni {section} gore
+  Move section down: Pomakni {section} dolje
+  Section moved: '{section} je premješten na položaj {position} od {total}.'
+  Nothing here yet: Ovdje još nema ničega
+  Empty description: Videozapisi koje pokrenete, popisi za reprodukciju koje koristite, preuzimanja i podsjetnici pojavit će se ovdje.
+  All sections hidden: Svi su odjeljci skriveni
+  All sections hidden description: Prilagodite početnu stranicu kako biste ponovno prikazali odjeljak.
+Subscriptions:
+  Channel Errors:
+    Summary: "{count} kanal nije moguće osvježiti. | {count} kanala nije moguće osvježiti. | {count} kanala nije moguće osvježiti."
+    Toast: "Neke pretplaćene kanale nije moguće osvježiti. Kliknite za prikaz."
+    Retry Channel: "Pokušaj ponovno: {channel}"
+    Show All: "Prikaži sve"
+    Show Fewer: "Prikaži manje"
+  Cache Load Error: Spremljeni feedovi pretplata nisu se mogli učitati.
+  New video from {channel}: Novi video s kanala {channel}
+  New short from {channel}: Novi kratki video s kanala {channel}
+  '{channel} is live': "{channel} emitira uživo"
+  New post from {channel}: Nova objava s kanala {channel}
+  Mark As Unseen: Označi kao neviđeno
+  Copy Error Details: "Kopiraj tehničke pojedinosti"
+  Never show {type} from this channel in feeds again: Nikad više ne prikazuj {type} s ovog kanala u sažecima sadržaja
+  Refreshing Subscription Videos: Osvježavanje videozapisa iz pretplata
+  Refreshing Subscription Shorts: Osvježavanje sadržaja Shorts iz pretplata
+  Refreshing Subscription Live Streams: Osvježavanje prijenosa uživo iz pretplata
+  Refreshing Subscription Posts: Osvježavanje objava iz pretplata
+  New Content: Novi sadržaj
+  New Feed Refresh Warning Title: Osvježiti sve izvore pretplata?
+  New Feed Refresh Warning: Osvježavanje svih vrsta sadržaja za {count} pretplatu može dugo trajati. Želite li nastaviti? | Osvježavanje svih vrsta sadržaja za {count} pretplate može dugo trajati. Želite li nastaviti? | Osvježavanje svih vrsta sadržaja za {count} pretplata može dugo trajati. Želite li nastaviti?
+  New Since Last Refresh: Novo od posljednjeg osvježavanja
+  Mark As Seen: Označi kao pregledano
+  Mark All as Seen: Označi sve kao pregledano
+  No New Content: Nema novog sadržaja.
+  New Content Tabs: Kartice novog sadržaja
+  Show Tabbed View: Prikaži prikaz s karticama
+  Show Combined View: Prikaži objedinjeni prikaz
+  Newest First: Najnovije prvo
+  Oldest First: Najstarije prvo
+  Posts:
+    RSS Message: 'YouTube ne pruža RSS izvore za objave. Isključite postavku "{rssSetting}" za prikaz objava ili uključite postavku "{hideSetting}" kako biste sakrili ovu karticu.'
+  RSS Feeds:
+    Refreshing: Osvježavanje RSS izvora
+    Tab: RSS
+    Followed Feeds: Praćeni RSS izvori
+    Add Feed: Dodaj izvor
+    Feed URL: URL RSS ili Atom izvora
+    Remove Feed: Ukloni {feed}
+    Invalid Feed URL: Unesite web-adresu koja počinje s http:// ili https://.
+    Feed Already Followed: Već pratite ovaj izvor.
+    Feed Could Not Be Loaded: Izvor nije moguće učitati. Provjerite vodi li adresa na RSS ili Atom izvor.
+    Feed Requires Browser Check: Ova stranica traži provjeru preglednika koju OpenTubeX ne može dovršiti. Pokušajte drugu adresu ili drugu RSSHub instancu za ovaj feed.
+    Refresh Errors: '{count} izvor nije moguće osvježiti. | {count} izvora nije moguće osvježiti. | {count} izvora nije moguće osvježiti.'
+    Description: Dodajte RSS ili Atom izvor kako biste pratili autore s drugih platformi. {rssHub} instance pružaju izvore za mnoge web-stranice, primjerice Twitch.
+    Empty Items: Vaši izvori trenutačno nemaju nijednu stavku.
+    No Feeds: Još ne pratite nijedan RSS izvor.
+    RSSHub:
+      Browse: Pregledaj RSSHub
+      Title: Dodaj feed s RSSHuba
+      Description: Odaberite RSSHub instancu, uslugu i što želite pratiti. Adresa feeda stvara se automatski.
+      Instance: RSSHub instanca
+      Service: Usluga
+      Search Services: Pretraži usluge
+      Loading Services: Učitavanje usluga…
+      Services Could Not Be Loaded: Ova instanca nije vratila svoje usluge. Provjerite adresu ili odaberite drugu instancu.
+      Feed Type: Vrsta feeda
+      Requires Configuration: Ovaj feed treba dodatno postavljanje na instanci pa možda neće raditi na javnim instancama.
+      Optional Parameter: '{parameter} (neobavezno)'
+      Not Set: Nije postavljeno
+    Retry Feed: Pokušaj ponovno učitati {feed}
+    Reloading Feed: Ponovno učitavanje {feed}
+  Platforms:
+    Tab: Platforme
+    Platform: Platforma
+    All Platforms: Sve platforme
+    Followed Channels: Praćeni kanali na drugim platformama
+    Description: Pratite kanale na platformama Twitch, SoundCloud, PeerTube, Rumble i Odysee kako biste vidjeli njihove objave na kartici Platforme u svojim pretplatama. Pronađite kanale pretraživanjem ili ih dodajte prema adresi njihove stranice. Njihovi se mediji reproduciraju pomoću yt-dlp.
+    Add Channel: Dodaj kanal
+    Channel URL: Adresa kanala
+    Invalid Channel: Unesite adresu stranice kanala na platformi Twitch, SoundCloud, PeerTube, Rumble ili Odysee.
+    Channel Not Found: Na ovoj adresi nema kanala.
+    Channel Already Followed: Već pratite ovaj kanal.
+    Channel Could Not Be Loaded: Kanal se nije mogao učitati.
+    No Channels: Još ne pratite nijedan kanal na drugim platformama.
+    Unfollow Channel: Prestani pratiti {channel}
+    Go To Channel: Idi na kanal {channel}
+    Follow: Prati
+    Following: Praćeno
+    Clips: Isječci
+    Refresh Errors: '{count} kanal nije moguće osvježiti. | {count} kanala nije moguće osvježiti. | {count} kanala nije moguće osvježiti.'
+    Content Tabs: Kartice sadržaja platformi
+Trending:
+  Music: Glazba
+  Load Error: Popularni sadržaj nije moguće učitati.
+  Unsupported Backend: Popularni sadržaj zahtijeva Local API. Odaberite Local API ili omogućite pričuvni pozadinski sustav.
+Most Popular Feed Empty: Izvor Najpopularnije na ovoj Invidious instanci je prazan.
+Most Popular Load Error: "Izvor Najpopularnije nije moguće učitati."
+Feed:
+  Cancel Refresh: Otkaži osvježavanje
+  Next Auto Refresh: 'Sljedeće automatsko osvježavanje: {date}'
+User Playlists:
+  Refresh Saved Playlists: 'Osvježi spremljene popise za reprodukciju'
+  Saved Playlists Refresh Failed: 'Neke spremljene popise za reprodukciju nije bilo moguće osvježiti.'
+  Save: "Spremi"
+  Edit: "Uredi"
+  This playlist is private or does not exist.: "Ovaj popis za reprodukciju je privatan ili ne postoji."
+  Pin to Navigation: "Prikvači na navigaciju"
+  Unpin from Navigation: "Otkvači s navigacije"
+  Pin to Top: "Prikvači na vrh"
+  Unpin from Top: "Otkvači s vrha"
+  Pinned to Top: "Prikvačeno na vrh"
+  Reorder Hint: Povucite ili koristite tipke sa strelicama za promjenu redoslijeda
+  Add new videos to the top (custom order): "Dodaj nove videozapise na vrh (prilagođeni redoslijed)"
+  Shuffle videos by default: "Prema zadanim postavkama reproduciraj videozapise nasumično"
+  Remove videos once watched: "Ukloni videozapise nakon gledanja"
+  Remove videos once watched Tooltip: "Kada reproduciraš ovaj popis za reprodukciju, svaki se videozapis uklanja s njega čim dosegne prag postotka gledanja postavljen u postavkama privatnosti."
+  Repair Playlists: Popravi popise za reprodukciju
+  Repair Description: Vrati nedostajuće podatke o videozapisima nakon uvoza ZIP datoteke iz usluge YouTube Takeout. Redoslijed u popisima ostaje isti.
+  Remove Unavailable Videos: "Uklonite nedostupne videozapise"
+  Remove Unavailable Videos Confirmation: "Ukloniti nedostupne videozapise? Pronađeno: {count}. Nije moguće provjeriti: {uncertain}. Neprovjereni videozapisi će se zadržati."
+  Add Missing Videos: "Dodaj videozapise koji nedostaju iz izvornog popisa za reprodukciju"
+  Source Playlist: "Izvorni popis za reprodukciju"
+  Save Playlist: "Spremi popis za reprodukciju"
+  Remove Saved Playlist: "Ukloni spremljeni popis za reprodukciju"
+  Load More Playlists: Učitaj još popisa za reprodukciju
+  Save to: Spremi u…
+  Quick Bookmark Icon: Ikona brze oznake
+  Custom Emoji: Prilagođeni emoji
+  Choose Image: Odaberi sliku
+  Use Bookmark Icon: Upotrijebi ikonu oznake
+  SinglePlaylistView:
+    Retry: Pokušaj ponovno
+    This playlist could not be loaded.: Ovaj popis za reprodukciju nije moguće učitati.
+    More videos could not be loaded.: Dodatne videozapise nije moguće učitati.
+  Playlist Thumbnail: "Sličica popisa za reprodukciju"
+  Restore Default Thumbnail: "Vrati zadanu sličicu"
+  AddVideoPrompt:
+    And N more videos: 'i još {count} videozapis | i još {count} videozapisa | i još {count} videozapisa'
+  Move Up: Gore
+  Move Down: Dolje
+  Remove: Ukloni
+  Background Tasks:
+    Loading videos from {playlistName}: 'Učitavanje videozapisa iz {playlistName}'
+    Adding missing videos to {playlistName}: 'Dodavanje nedostajućih videozapisa u {playlistName}'
+    Checking {playlistName} for unavailable videos: 'Provjera nedostupnih videozapisa u {playlistName} ({checked}/{total})'
+  Synced with YouTube: "Sinkronizirano s YouTubeom"
+  Delete YouTube Playlist Confirmation: "Izbrisati ovu zbirku ovdje i na YouTubeu? To se ne može poništiti."
+  CreatePlaylistPrompt:
+    Create on YouTube: "Stvori i na YouTubeu"
+History:
+  From Date: 'Od'
+  To Date: 'Do'
+  Channel Filter: 'Kanal'
+  All Channels: 'Svi kanali'
+  Clear Filters: 'Očisti filtre'
+  Invalid Date Range: 'Početni datum mora biti prije završnog datuma ili jednak njemu.'
+  Empty Filter Message: 'Nijedan videozapis u vašoj povijesti ne odgovara ovim filtrima.'
+  Repair Compact: "Popravi"
+  Mark All Watched Compact: "Sve pogledano"
+  Repair Use Cookies: "Koristi konfigurirane yt-dlp kolačiće"
+  Repair Cookies Hint: "Potrebno je provjeriti više od 500 videozapisa. Konfigurirajte kolačiće u postavkama yt-dlp i omogućite ih ovdje kako biste smanjili rizik od ograničavanja zahtjeva."
+  Repair Description: "Koristite nakon uvoza povijesti ili kada videozapisima nedostaju podaci ili imaju pogrešnu oznaku LIVE."
+  Repair Details: "Dopunjava naslove, kanale i datume objave koji nedostaju te provjerava trajanja i oznake LIVE. Napredak gledanja i status pogledanog ostaju nepromijenjeni."
+  Repair Notice: "Velika povijest može potrajati. Neuspješni zahtjevi automatski se ponavljaju. Izbrisani ili privatni videozapisi mogu ostati nepotpuni."
+  Start Repair: "Pokreni popravak"
+  Repair Checking: "Provjera podataka o videozapisima"
+  Repair Waiting: "Čekanje na YouTube. Popravak će se automatski nastaviti."
+  Repair Retrying: "Ponavljanje neuspješnih zahtjeva"
+  Repair Finished: "Popravak dovršen"
+  Repair Stopped: "Popravak zaustavljen"
+  Repair: "Popravi povijest"
+  Repair Progress: "Provjereno {checked}/{total} · Popravljeno {repaired} · Neuspjelo {failed}"
+  Mark All As Watched: Označi sve kao pogledano
+  Mark All As Watched Confirmation: Jeste li sigurni da sve videozapise u povijesti želite označiti kao pogledane?
+  All History Marked as Watched: Svi videozapisi u povijesti označeni su kao pogledani
+  Select History Age: Odaberite koliko zapis mora biti star da bi se izbrisao.
+  Delete Entries Older Than: Izbriši zapise starije od
+  Number of Days: Broj dana
+  History Cleanup Warning: Time se trajno brišu odgovarajući zapisi povijesti gledanja.
+  1 Day: 1 dan
+  1 Week: 1 tjedan
+  1 Month: 1 mjesec
+  3 Months: 3 mjeseca
+  1 Year: 1 godina
+  All Time: Cijelo vrijeme
+  Custom: Prilagođeno
+  History Older Than Days Removed: Uklonjena je povijest gledanja starija od {days} dana | Uklonjena je povijest gledanja starija od {days} dana | Uklonjena je povijest gledanja starija od {days} dana
+Settings:
+  Experimental Badge: Eksperimentalno
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube račun"
+    Unofficial App Warning: "OpenTubeX nije službena YouTube aplikacija. Prijavom se ono što ovdje radiš povezuje s tvojim Google računom, a Google može ograničiti ili zabraniti račune koji koriste neslužbene aplikacije. Prijavi se samo računom čiji ti gubitak ne bi smetao."
+    Sign In Explanation: "OpenTubeX se prijavljuje kao TV aplikacija: prijavu odobravaš na Googleovoj web-stranici, a OpenTubeX nikad ne vidi tvoju lozinku. Prijava ostaje na ovom uređaju i ne sinkronizira se niti sprema u sigurnosne kopije."
+    Sign In: "Prijavi se"
+    Sign In Anyway: "Svejedno se prijavi"
+    Sign Out: "Odjavi se"
+    Getting Sign-In Code: "Dohvaćanje koda za prijavu"
+    Sign In Instructions: "Otvori stranicu za prijavu i odaberi svoj Google račun. Kod se ispunjava automatski."
+    Other Device Instructions: "Na drugom uređaju idi na ovu adresu i upiši kod:"
+    YouTube Channel: "YouTube kanal"
+    Using Channel: "Sada koristiš YouTube kao {name}"
+    Switch Channel Failed: "Promjena YouTube kanala nije uspjela: {error}"
+    Open Sign-In Page: "Otvori stranicu za prijavu"
+    Copy Code: "Kopiraj kod"
+    Code Copied: "Kod je kopiran"
+    Waiting for Approval: "Čeka se da odobriš prijavu"
+    Sign-In Denied: "Prijava je odbijena."
+    Sign-In Code Expired: "Kod je istekao. Pokušaj ponovno za novi kod."
+    Sign-In Failed: "Prijava nije uspjela: {error}"
+    Signed In As: "Prijavljeno na YouTube kao {name}"
+    Signed Out: "Odjavljeno s YouTubea"
+    Sign Out Failed: "Odjava nije uspjela: {error}"
+    Revoke Failed: "Odjava s YouTubea je uspjela, ali Google nije potvrdio da je prijava prekinuta. Možeš je ukloniti u vezama s trećim stranama na svom Google računu."
+    Signed out by YouTube: "YouTube je prekinuo prijavu. Ponovno se prijavi u postavkama za daljnje korištenje računa."
+    Add to YouTube Watch History: "Dodaj gledane videozapise u YouTube povijest"
+    Sync Subscriptions: "Sinkroniziraj pretplate s YouTubeom"
+    Sync Playlists: "Sinkroniziraj zbirke s YouTubeom"
+    Sync Now: "Sinkroniziraj sada"
+    Synced: "Sinkronizirano s YouTubeom"
+    Sync Failed: "Sinkronizacija s YouTubeom nije uspjela: {error}"
+  Diagnostics:
+    Diagnostics: Dijagnostika
+    Description: Dok je dijagnostički zapisnik uključen, OpenTubeX čuva nedavne poruke zapisnika u memoriji kako biste ih mogli priložiti izvješćima o greškama. Nikad ih ne sprema niti šalje sam, a isključivanje zapisnika ih briše. Izvješća izostavljaju kolačiće, tokene, IP adrese i URL parametre, ali mogu sadržavati ID-ove videozapisa koje ste reproducirali, stoga provjerite izvješće prije dijeljenja.
+    Enable Logging: Omogući dijagnostički zapisnik
+    Copy Report: Kopiraj izvješće
+    Save Report: Spremi izvješće
+    Clear Log: Očisti zapisnik
+    Report Copied: Dijagnostičko izvješće kopirano
+    Report Saved: Dijagnostičko izvješće spremljeno
+    Report File: Dijagnostičko izvješće
+    Save Failed: Nije moguće spremiti dijagnostičko izvješće
+    Log Cleared Message: Dijagnostički zapisnik očišćen
+  Tab Unloading:
+    Automatically unload tabs: "Automatski ukloni kartice iz memorije"
+    Memory threshold: "Prag memorije"
+    Tabs to unload: "Kartice za uklanjanje iz memorije"
+    Automatic unloading help: "Uklanja najstarije pozadinske kartice iz memorije. Aktivne kartice i kartice s reprodukcijom ostaju učitane."
+    Memory threshold help: "Postotak ograničenja memorije procesa iscrtavanja, a ne ukupnog RAM-a sustava."
+  Password Settings:
+    Failed to Save Password: "Spremanje lozinke nije uspjelo."
+    Confirm Password: "Potvrdite lozinku"
+    Passwords Do Not Match: "Lozinke se ne podudaraju."
+  Navigation and Controls: "Navigacija i kontrole"
+  Control Bar:
+    Title: "Upravljačka traka"
+    Customize: "Prilagodi upravljačku traku"
+    Hidden: "Skriveno"
+    Empty: "Nema kontrola"
+    Move to Control Bar: "Premjesti {control} na upravljačku traku"
+    Move to Player Menu: "Premjesti {control} u izbornik playera"
+    Hide: "Sakrij {control}"
+  Fullscreen Actions:
+    Recommended Videos: "Preporučeni videozapisi"
+    Title: "Radnje na cijelom zaslonu"
+    Customize: "Prilagodi radnje na cijelom zaslonu"
+    Add Action: "Dodaj radnju"
+    Empty: "Nisu odabrane radnje na cijelom zaslonu"
+    Quick Bookmark: "Brza oznaka"
+    Availability Hint: "Radnje se prikazuju samo na videozapisima na koje se odnose."
+    Disabled: "(onemogućeno)"
+  Quick Settings:
+    Quick Settings: Brze postavke
+    Customize Quick Settings: Prilagodi brze postavke
+    Add Setting: Dodaj postavku
+    Appearance: Izgled
+    Playback: Reprodukcija
+    Content: Sadržaj
+    Language and Region: Jezik i regija
+    All Settings: Sve postavke
+    Profile Selector Hint: Profil možete promijeniti i desnim klikom na ikonu profila
+    Profile Selector Touch Hint: Profil možete promijeniti i dugim pritiskom na ikonu profila
+  Categories:
+    General Description: Jezik, pokretanje, kartice i prijevod
+    Appearance: Izgled
+    Appearance Description: Tema, raspored, navigacija i popisi videozapisa
+    Content appearance: Popisi videozapisa i minijature
+    Layout: Raspored
+    Playback Description: Zadane postavke reproduktora, titlovi i postavke po kanalu
+    Subscriptions Description: Osvježavanje izvora, obavijesti o novim videozapisima i RSS izvori
+    Downloads Description: Mapa za preuzimanja, predlošci i automatska preuzimanja
+    Focus: Fokus
+    Focus Description: Skriveni sadržaj, ograničenja gledanja, podsjetnici i roditeljski nadzor
+    Add-ons: Dodaci
+    Add-ons Description: SponsorBlock, DeArrow, negativne ocjene, AiSList i glasovni prijevod
+    Privacy Description: Povijest, prijedlozi pretraživanja, poveznice i lozinka aplikacije
+    Data And Storage Description: Sigurnosne kopije, uvoz i izvoz, zauzeće diska i čišćenje
+    Sync Description: Račun poslužitelja za sinkronizaciju, uparivanje uređaja i sinkronizirani podaci
+    Advanced: Napredno
+    Advanced Description: Pozadinski servisi, međuspremnik, vanjski alati, proxy i dijagnostika
+    Alternative providers: Pružatelji videozapisa i metapodataka
+  Highlight Changed Settings: Istakni postavke koje se razlikuju od zadanih
+  Reset Setting to Default: Vrati ovu postavku na zadanu vrijednost
+  Performance Impact:
+    Show Performance Impact: Prikaži pokazatelje utjecaja na performanse
+    Moderate: Umjeren utjecaj
+    High: Velik utjecaj
+    Description: Ova postavka može povećati upotrebu resursa {resources}
+    Resources:
+      CPU: CPU-a
+      GPU: GPU-a
+      Memory: memorije
+      Network: mreže
+      Disk: diska
+  General Settings:
+    Built-in Streams:
+      Built-in Streams: "Ugrađeni streamovi"
+      Automatic: "Automatski"
+      SABR Only: "Samo SABR"
+    Link Underlines:
+      Link Underlines: "Podcrtavanje poveznica"
+      On Hover: "Podcrtaj poveznice pri prelasku pokazivačem"
+      Never: "Nikad ne podcrtavaj poveznice"
+      Always: "Uvijek podcrtaj poveznice"
+    Title Lines:
+      Title Lines: "Retci naslova"
+      Unlimited: "Neograničeno"
+    Close Window With Last Tab: 'Zatvori prozor pri zatvaranju posljednje kartice'
+    Preferred Video Codec: Preferirani videokodek
+    Always Use Backup Media Server: "Uvijek koristi pričuvni medijski poslužitelj"
+    Automatically switch stream extraction methods: "Automatski mijenjaj metode izdvajanja streamova"
+    Enable Tabs: "Omogući kartice"
+    Thumbnail Swipe Gestures:
+      Left: Povlačenje ulijevo po sličicama
+      Right: Povlačenje udesno po sličicama
+      Description: Povucite vodoravno po sličici videozapisa i otpustite za izvođenje odabrane radnje.
+    Data Saver Thumbnails: "Sličice za uštedu podataka"
+    Use tray icon: "Koristi ikonu u sistemskoj traci"
+    Close to system tray: "Zatvori u sistemsku traku"
+    Tray required for background refresh: "Ikona u sistemskoj traci potrebna je dok je omogućeno osvježavanje pretplata u pozadini."
+    Show Video Menu Button: Prikaži gumb izbornika videozapisa
+    Swipe to refresh: Povucite za osvježavanje
+    Blur Thumbnails: Zamuti minijature
+    Navigation:
+      Always Show Navigation Bar: Uvijek prikaži navigacijsku traku kada je na dnu
+      Compact Tab Labels: Kompaktna navigacijska traka kada je na dnu
+      Show Active Subscriptions: Prikaži aktivne pretplate u bočnoj traci
+      Navigation: Navigacija
+      Customize Navigation: Prilagodi navigaciju
+      Add Item: Dodaj stavku
+    Date Format: Format datuma
+    Time Format: Format vremena
+    Language Default: Zadano za jezik
+    Update Relative Timestamps: Ažuriraj relativne vremenske oznake
+    Stream Extraction Method:
+      Stream Extraction Method: Način izdvajanja medijskog toka
+      yt-dlp: yt-dlp
+      Built-in: Ugrađeno
+    Confirm Before: Potvrdi prije…
+    Confirmation Options:
+      Closing App: Zatvaranja aplikacije OpenTubeX
+      Closing Window: Zatvaranja prozora s više kartica
+      Closing Tabs: Zatvaranja više kartica
+      Loading Tabs: Učitavanja više kartica
+      Unloading Tabs: Uklanjanja više kartica iz memorije
+      Refreshing All Feeds: Osvježavanja mnogo pretplata
+    Remember Tab Navigation History: Zapamti povijest kretanja po karticama
+    New Tab Position:
+      New Tab Position: Položaj nove kartice
+      At the end: Na kraju
+      After current tab: Nakon trenutačne kartice
+      After current tab in opened order: Nakon trenutačne kartice, redoslijedom otvaranja
+    Tab Close Focus:
+      Last active tab: "Posljednja aktivna kartica"
+      Next tab in tab order: "Sljedeća kartica u redoslijedu kartica"
+      Previous tab in tab order: "Prethodna kartica u redoslijedu kartica"
+      Tab Close Focus: Nakon zatvaranja aktivne kartice
+    Startup Behavior:
+      Startup Behavior: Pri pokretanju
+      Load all tabs: Učitaj sve kartice
+      Load previously loaded tabs: Učitaj prethodno učitane kartice
+      Load last active tab: Učitaj posljednju aktivnu karticu
+      Start with an empty session: Pokreni s praznom sesijom
+      Load landing page, keep other tabs unloaded: Učitaj početnu stranicu, ostale kartice ostavi neučitanima
+    Use AI Translation Completions: Dopuni prijevode koji nedostaju onima koje je generirala umjetna inteligencija
+    Reduced Motion:
+      Reduced Motion: Smanjeno kretanje
+      System: Sustav
+      Force On: Uvijek uključeno
+      Force Off: Uvijek isključeno
+    Comment Translation:
+      Title: Prijevodi komentara
+      Enable: Omogući prijevode komentara
+      Never Translate: Nikad ne prevodi komentare na jeziku
+      Choose Language: Odaberi jezik
+      Description: Komentari na jeziku aplikacije već su izuzeti. Dodajte druge jezike koje razumijete.
+      Remove Language: Ponovno prevodi komentare ({language})
+    Avoid translation:
+      Avoid translation: Daj prednost neprevedenom tekstu videozapisa
+      Disabled: Onemogućeno
+      Watch Only: Samo sučelje videozapisa
+      Entire App: Cijela aplikacija
+    Playlist View Type:
+      Playlist View Type: Vrsta prikaza popisa za reprodukciju
+    Show Thumbnail Previews: Prikaži pretpreglede minijatura
+    Extra Thumbnail Action Button:
+      Extra Thumbnail Action Button: Dodatni akcijski gumb na minijaturi
+      None: Ništa
+      Mark as Watched: Označi kao pogledano
+      Copy YouTube Link: Kopiraj poveznicu na YouTube
+      Open in YouTube: Otvori na YouTubeu
+    Mobile Layout:
+      Mobile Layout: 'Mobilni raspored'
+      Automatic: 'Automatski'
+      Phone: 'Telefon'
+      Tablet: 'Tablet'
+    Video View Type:
+      Full Width: Puna širina
+    Grid Columns:
+      Grid Columns: Stupci rešetke
+      Playlist Grid Columns: Stupci rešetke popisa za reprodukciju
+      Auto: Automatski
+    Preferred API Backend:
+      Yattee Server: Yattee poslužitelj
+    Yattee Server:
+      Server URL: URL Yattee poslužitelja
+      Username: Korisničko ime
+      Password: Lozinka
+      Proxy Videos: Koristi Yattee poslužitelj kao proxy videa
+      Test Connection: Testiraj vezu
+      Testing: Testiranje veze…
+      Connected: Povezano s Yattee poslužiteljem {version}
+      Errors:
+        Invalid URL: Unesite URL poslužitelja koji počinje s https:// ili http://.
+        Unreachable: Poslužitelj nije dostupan. Provjerite URL i radi li poslužitelj.
+        Media not allowed: 'Povezano, ali poslužitelj ne dopušta ovoj aplikaciji učitavanje videa. Postavite CORS_ORIGINS={origins} u varijablama okruženja poslužitelja.'
+        Not a Yattee server: Poslužitelj je odgovorio, ali nije Yattee poslužitelj.
+        Credentials required: Poslužitelj zahtijeva korisničko ime i lozinku.
+        Invalid credentials: Poslužitelj je odbio korisničko ime ili lozinku.
+        Rate limited: Poslužitelj blokira prijave nakon previše neuspjelih pokušaja. Pokušajte ponovno kasnije.
+        Server error: Poslužitelj je vratio grešku (HTTP {status}).
+    Notifications:
+      Notifications: Obavijesti
+      System and In-App: Sustav i u aplikaciji
+      System Only: Samo sustav
+      Off: Isključeno
+    Auto Load Next Page:
+      Lists Tooltip: Automatski učitaj dodatne stranice feedova, rezultata pretraživanja i drugih popisa.
+    Auto Load Comments:
+      Label: Automatski učitaj komentare
+      Tooltip: Učitaj komentare pri otvaranju stranice i učitavaj još komentara dok se pomičeš.
+    Haptic Feedback: Haptička povratna informacija
+    Ignore System Haptics Setting: Zanemari postavku haptike sustava
+  Context Menu Search Settings:
+    Context Menu Search Settings: Pretraživanje iz kontekstnog izbornika
+    Description: Odaberite tražilice koje se prikazuju kada desnom tipkom miša kliknete odabrani tekst. Pretraživanja se otvaraju u zadanom pregledniku.
+    Icon Hint: Omogućivanjem tražilice uspostavlja se veza s njezinim web-mjestom radi učitavanja ikone web-mjesta.
+    Engine Name: Naziv tražilice
+    Search URL: URL za pretraživanje
+    URL Hint: Upotrijebite %s na mjestu na kojem URL treba sadržavati kodirani odabrani tekst.
+    Add Custom Engine: Dodaj prilagođenu tražilicu
+    Add Engine: Dodaj tražilicu
+    Remove Engine: Ukloni {engine}
+    Invalid Engine: Unesite naziv i valjani HTTP ili HTTPS URL za pretraživanje koji sadrži %s.
+    Engine Limit: Možete dodati najviše {count} prilagođenih tražilica.
+  Theme Settings:
+    Theme and Colors: "Tema i boje"
+    Font Size: Veličina fonta
+    Sections:
+      Interface: "Sučelje"
+      Side Bar and Header: "Bočna traka i zaglavlje"
+      Tabs: "Kartice"
+      Player: "Player"
+      Scrolling: "Pomicanje"
+      Notifications: "Obavijesti"
+    Only Show Important Notifications: Prikaži samo važne obavijesti
+    Visible Search Suggestions: "Vidljivi prijedlozi pretraživanja"
+    Material Accent Color: "Material boja naglaska"
+    Tally Accent Color: "Tally boja naglaska"
+    Material Wallpaper Colors: "Boje pozadinske slike"
+    Material System Accent Color: "Boja isticanja sustava"
+    Tab Loading Indicator:
+      Tab Loading Indicator: Pokazatelj učitavanja kartice
+      Bar: Traka
+      Dot: Točka (klasična)
+    Compact Settings Categories: "Kompaktne kategorije postavki"
+    Playlist Thumbnail Size: "Veličina sličica popisa za reprodukciju"
+    Compact Mobile Mini Player: "Kompaktni mobilni mini reproduktor"
+    Always Show Mobile Search Bar: "Uvijek prikaži traku za pretraživanje na mobitelu"
+    Frosted Glass Player UI: "Sučelje reproduktora s efektom matiranog stakla"
+    Main Color Theme:
+      Catppuccin Macchiato Rosewater: "Catppuccin Macchiato ružina vodica"
+      Catppuccin Macchiato Flamingo: "Catppuccin Macchiato flamingo"
+      Catppuccin Macchiato Pink: "Catppuccin Macchiato ružičasta"
+      Catppuccin Macchiato Mauve: "Catppuccin Macchiato ljubičasta"
+      Catppuccin Macchiato Red: "Catppuccin Macchiato crvena"
+      Catppuccin Macchiato Maroon: "Catppuccin Macchiato kestenjasta"
+      Catppuccin Macchiato Peach: "Catppuccin Macchiato breskva"
+      Catppuccin Macchiato Yellow: "Catppuccin Macchiato žuta"
+      Catppuccin Macchiato Green: "Catppuccin Macchiato zelena"
+      Catppuccin Macchiato Teal: "Catppuccin Macchiato plavozelena"
+      Catppuccin Macchiato Sky: "Catppuccin Macchiato nebo"
+      Catppuccin Macchiato Sapphire: "Catppuccin Macchiato safir"
+      Catppuccin Macchiato Blue: "Catppuccin Macchiato plava"
+      Catppuccin Macchiato Lavender: "Catppuccin Macchiato lavanda"
+    Move Downloads to App Header: Premjesti preuzimanja u zaglavlje aplikacije
+    Move Settings to App Header: Premjesti postavke u zaglavlje aplikacije
+    Hide Side Bar on Watch Pages: Sakrij bočnu traku na stranicama za gledanje
+    UI Roundness: Zaobljenost sučelja
+    Scrollbar Width: Širina klizne trake
+    Scroll Speed: Brzina pomicanja
+    Animation Speed: Brzina animacije
+    Thumbnail Size: Veličina minijature
+    Show Tab Icons: Prikaži ikone kartica
+    Load Missing Tab Icons: Učitaj ikone kartica koje nedostaju
+    Loading Missing Tab Icons: Učitavanje ikona kartica koje nedostaju…
+    No Missing Tab Icons: Sve podržane ikone kartica već su učitane
+    Loaded Tab Icons: 'Učitana je {count} ikona kartice koja je nedostajala | Učitane su {count} ikone kartica koje su nedostajale | Učitano je {count} ikona kartica koje su nedostajale'
+    Loaded Tab Icons With Failures: Uspješno učitane ikone kartica ({loaded}); neuspjela učitavanja ({failed})
+    Show Tab Previews: Prikaži pretpreglede kartica
+    Use Fixed Tab Width: Koristi fiksnu širinu kartica u vodoravnom načinu
+    Use Custom Title Bar: Koristi prilagođenu naslovnu traku
+    Tab Width: Širina kartice
+    Vertical Tab Height: Visina okomitih kartica
+    Tab Layout:
+      Tab Layout: Raspored kartica
+      Horizontal Top: Vodoravno na vrhu
+      Horizontal Bottom: Vodoravno na dnu
+      Vertical Left: Okomito lijevo
+      Vertical Right: Okomito desno
+    Show Toast Timeout Indicator: Prikaži pokazatelj trajanja skočne obavijesti
+    Use Grid Player Menu: Koristi rešetkasti izbornik reproduktora
+    Show Progress as Notification: Prikaži napredak kao obavijest
+    Operation in Progress: Radnja je u tijeku
+    Toast Position:
+      Test Toast: Testna obavijest
+      Toast Position: Položaj skočne obavijesti
+      Bottom Left: Dolje lijevo
+      Bottom Center: Dolje u sredini
+      Bottom Right: Dolje desno
+      Top Left: Gore lijevo
+      Top Center: Gore u sredini
+      Top Right: Gore desno
+    Icon Pack:
+      Icon Pack: Paket ikona
+      Material Symbols: Material Symbols
+      Remix Icon: Remix Icon
+    Font:
+      App Font: Font aplikacije
+      System Default: Zadani font sustava
+      Unable to Load: Instalirane fontove sustava nije moguće učitati
+      Bundled Fonts: Ugrađeni fontovi
+      System Fonts: Fontovi sustava
+    Always Show Scrollbars: Uvijek prikaži klizne trake
+    Base Theme:
+      Material Light: "Material Svijetla"
+      Material Dark: "Material Tamna"
+      Material Black: "Material Crna"
+      Dynamic colors: Dinamičke boje
+      Tokyo Night Night: Tokyo Night Night
+      Tokyo Night Storm: Tokyo Night Storm
+      Tokyo Night Moon: Tokyo Night Moon
+      Tokyo Night Day: Tokyo Night Day
+      Rosé Pine: Rosé Pine
+      Rosé Pine Moon: Rosé Pine Moon
+      Rosé Pine Dawn: Rosé Pine Dawn
+      Kanagawa Wave: Kanagawa Wave
+      Kanagawa Dragon: Kanagawa Dragon
+      Kanagawa Lotus: Kanagawa Lotus
+      Ayu Dark: Ayu Dark
+      Ayu Mirage: Ayu Mirage
+      Ayu Light: Ayu Light
+      One Dark: One Dark
+      Carbonfox: Carbonfox
+      Catppuccin Macchiato: Catppuccin Macchiato
+      Tally Light: "Tally Svijetla"
+      Tally Dark: "Tally Tamna"
+      Custom: Prilagođena
+      Built-in Themes: Ugrađene teme
+      Custom Themes: Prilagođene teme
+    Light Theme: Svijetla tema
+    Dark Theme: Tamna tema
+    Custom Theme:
+      Share Restrictions Prompt: "Opisi mogu sadržavati do 500 znakova, uključujući Markdown. Dopuštene su samo poveznice i slike smještene na GitHubu, uključujući izravne prijenose ovdje. Bot uklanja vanjske poveznice i slike, skraćuje duge opise i ostavlja komentar s objašnjenjem promjena."
+      Import from Clipboard: "Uvezi iz međuspremnika"
+      Invalid Clipboard Theme: "Međuspremnik ne sadrži valjanu temu. Kopirajte JSON teme i pokušajte ponovno."
+      Create Custom Theme: Izradi prilagođenu temu
+      Edit Custom Theme: Uredi prilagođenu temu
+      Custom Theme Creator: Izrada prilagođene teme
+      Theme Name: Naziv teme
+      Based On: Temelji se na
+      Import Theme: Uvezi temu
+      Export Theme: Izvezi temu
+      Share Theme: Podijeli temu
+      Share Description Prompt: Opišite temu i sve što bi drugi trebali znati prije njezine uporabe.
+      Share Screenshots Prompt: "Ovdje povucite i ispustite jednu ili više snimki zaslona. Ostavite ovaj odjeljak praznim kako bi bot dodao tri pretpregleda s oglednim sadržajem, bez vaših osobnih podataka."
+      Delete Theme: Izbriši temu
+      Delete Theme Confirmation: Izbrisati “{name}”? Ovu radnju nije moguće poništiti.
+      Save and Apply: Spremi i primijeni
+      Discard Changes: Odbaci promjene
+      Reset Colors: Vrati na osnovnu temu
+      Theme File: Datoteka teme za OpenTubeX
+      Theme Saved: Prilagođena tema spremljena je i primijenjena
+      Theme Imported: Tema je uvezena u uređivač
+      Theme Exported: Tema je izvezena
+      Theme Deleted: Prilagođena tema izbrisana je
+      Unable to Load: Nije moguće učitati prilagođenu temu
+      Unable to Save: Nije moguće spremiti prilagođenu temu
+      Unable to Export: Nije moguće izvesti prilagođenu temu
+      Unable to Share: Nije moguće podijeliti prilagođenu temu
+      Unable to Delete: Nije moguće izbrisati prilagođenu temu
+      Invalid Theme File: Neispravna datoteka prilagođene teme
+      Colors:
+        Watched thumbnail overlay: "Prekrivanje sličica pogledanih videozapisa"
+        Thumbnail badge background: "Pozadina oznaka na sličicama"
+        Main text: Glavni tekst
+        Secondary text: Sporedni tekst
+        Subtle text: Nenaglašeni tekst
+        Borders and dividers: Obrubi i razdjelnici
+        Subtle surfaces and indicators: Nenaglašene površine i pokazatelji
+        Title text: Tekst naslova
+        Selected text background: Pozadina odabranog teksta
+        Selected text: Odabrani tekst
+        Logo icon: Ikona logotipa
+        Logo text: Tekst logotipa
+        Logo hover: Logotip pri prelasku pokazivačem
+        Logo pressed: Pritisnuti logotip
+        Page background: Pozadina stranice
+        Card background: Pozadina kartice
+        Secondary card background: Pozadina sporedne kartice
+        Favorite icon: Ikona favorita
+        Error color: Boja pogreške
+        Scrollbar thumb: Klizač trake za pomicanje
+        Scrollbar thumb hover: Klizač trake za pomicanje pri prelasku pokazivačem
+        Scrollbar thumb pressed: Pritisnuti klizač trake za pomicanje
+        Dropdown item hover text: Tekst stavke padajućeg izbornika pri prelasku pokazivačem
+        Dropdown item hover background: Pozadina stavke padajućeg izbornika pri prelasku pokazivačem
+        Navigation and panel background: Pozadina navigacije i ploče
+        Neutral item hover and focus background: Pozadina neutralne stavke pri prelasku pokazivačem i u fokusu
+        Neutral item hover and focus text and icons: Tekst i ikone neutralne stavke pri prelasku pokazivačem i u fokusu
+        Neutral item pressed background: Pozadina pritisnute neutralne stavke
+        Neutral item pressed text and icons: Tekst i ikone pritisnute neutralne stavke
+        Header button hover and focus background: Pozadina gumba zaglavlja pri prelasku pokazivačem i u fokusu
+        Header button hover and focus text and icons: Tekst i ikone gumba zaglavlja pri prelasku pokazivačem i u fokusu
+        Header button pressed background: Pozadina pritisnutog gumba zaglavlja
+        Header button pressed text and icons: Tekst i ikone pritisnutog gumba zaglavlja
+        Search and dropdown background: Pozadina pretraživanja i padajućeg izbornika
+        Settings search background: Pozadina pretraživanja postavki
+        Instance menu: Izbornik instance
+        Shadow color: Boja sjene
+        Primary controls and highlights: Primarne kontrole i istaknute stavke
+        Primary control hover and focus: Primarna kontrola pri prelasku pokazivačem i u fokusu
+        Primary control pressed: Pritisnuta primarna kontrola
+        Text and icons on primary controls: Tekst i ikone na primarnim kontrolama
+        Secondary controls and highlights: Sekundarne kontrole i istaknute stavke
+        Secondary control hover and focus: Sekundarna kontrola pri prelasku pokazivačem i u fokusu
+        Secondary control pressed: Pritisnuta sekundarna kontrola
+        Light secondary color: Svijetla sekundarna boja
+        Visited accent: Boja naglaska za posjećene stavke
+        Text and icons on secondary controls: Tekst i ikone na sekundarnim kontrolama
+        Links: Poveznice
+        Visited links: Posjećene poveznice
+        Destructive action: Destruktivna radnja
+        Destructive hover and focus: Destruktivna radnja pri prelasku pokazivačem i u fokusu
+        Destructive pressed: Pritisnuta destruktivna radnja
+        Text and icons on destructive actions: Tekst i ikone na destruktivnim radnjama
+    Modal Backdrop:
+      Modal Backdrop: "Pozadina dijaloga"
+      Dim and Blur: "Zatamni i zamuti"
+      Dim Only: "Samo zatamni"
+    Click Scrollbar Track to Scroll: "Pomicanje klikom na traku za pomicanje"
+  Player Settings:
+    Rewind on Resume: "Premotaj unatrag pri nastavku"
+    Minimum Pause Before Rewinding: "Minimalna pauza prije premotavanja"
+    Mono Audio: 'Mono zvuk'
+    Normalize Loudness: 'Normaliziraj glasnoću'
+    Show Mono Audio Toggle: 'Prikaži prekidač za mono zvuk'
+    Default Media Format:
+      Default Media Format: 'Standardni format medija'
+    Pause on Stream Recovery: "Pauziraj pri oporavku streama"
+    Buffering:
+      Buffering: Međuspremanje
+      Description: Odaberi koliko videozapisa reproduktor učitava unaprijed i zadržava učitanim.
+      Buffer Ahead Hint: Veći međuspremnik unaprijed održava reprodukciju tijekom duljih prekida veze, ali preuzima videozapis koji možda nećeš gledati.
+      Rewind Buffer Hint: Veći međuspremnik za premotavanje natrag omogućuje ti skok unatrag bez ponovnog preuzimanja, ali troši više memorije.
+      Buffer Before Playing Hint: Čekanje da se učita veći dio trenutačnog videozapisa prije reprodukcije sprječava ponovljena zaustavljanja na nestabilnim vezama, ali reprodukcija počinje kasnije i sporije se nastavlja nakon premotavanja.
+      Preset: Predložak međuspremanja
+      Presets:
+        Data Saver: Ušteda podataka
+        Default: Standardno
+        Smooth Playback: Glatka reprodukcija
+        Custom: Prilagođeno
+      Buffer Ahead: Međuspremnik unaprijed
+      Buffer Ahead Tooltip: 'Koliko se daleko ispred trenutačnog položaja učitava. Pri visokim kvalitetama ograničenja memorije mogu ograničiti vrlo visoke vrijednosti. Standardno: {value}'
+      Rewind Buffer: Međuspremnik za premotavanje natrag
+      Rewind Buffer Tooltip: 'Koliko već pogledanog videozapisa ostaje učitano. Standardno: {value}'
+      Buffer Before Playing: Međuspremnik prije reprodukcije
+      Buffer Before Playing Tooltip: 'Koliko se videozapisa mora učitati prije nego što reprodukcija započne ili se nastavi nakon pražnjenja međuspremnika. Standardno: {value}'
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: "Najveća kvaliteta na mrežama s ograničenjem podataka"
+      No Limit: "Bez ograničenja"
+      Tooltip: "Na mobilnim podacima i drugim mrežama s ograničenjem podataka videozapisi počinju u ovoj ili nižoj kvaliteti. U playeru i dalje možete odabrati višu kvalitetu."
+    Show Music Mode Toggle: "Prikaži prekidač glazbenog načina"
+    Enable DLNA Casting: "Omogući DLNA emitiranje"
+    Skip Unavailable Playlist Videos: "Preskoči nedostupne videozapise na popisima za reprodukciju"
+    Lights Off: Ugasi svjetla
+    Show Lights Off Toggle: Prikaži prekidač za gašenje svjetala
+    Show Volume Boost Toggle: "Prikaži prekidač za pojačanje glasnoće"
+    Swipe Gestures:
+      Fullscreen Brightness: Najveća svjetlina preko cijelog zaslona
+      Left: Povlačenje s lijeve strane
+      Right: Povlačenje s desne strane
+      Disabled: Onemogućeno
+      Brightness: Svjetlina
+      Volume: Glasnoća
+      Hint: Na cijelom zaslonu povucite gore ili dolje uz rub videozapisa.
+      Unavailable: Nije moguće prilagoditi kontrole reprodukcije.
+    yt-dlp Streaming: "yt-dlp strujanje"
+    Continue Playback When Screen Is Locked: 'Nastavi reprodukciju kada je zaslon zaključan'
+    Music Visualizer: Vizualizator glazbe
+    Automatically Open Chapters: Automatski otvori poglavlja
+    Caption Appearance:
+      Caption Appearance: Izgled titlova
+      Captions: Titlovi
+      Preferred Language: Preferirani jezik titlova
+      Application Language: Jezik aplikacije
+      Enable Translations: Omogući prijevode titlova
+      Text Color: Boja teksta
+      Background Color: Boja pozadine
+      Background Opacity: Neprozirnost pozadine
+      Font Size: Veličina fonta
+      Anchor:
+        Anchor: Sidrište
+        Top Left: Gore lijevo
+        Top Center: Gore u sredini
+        Top Right: Gore desno
+        Bottom Left: Dolje lijevo
+        Bottom Center: Dolje u sredini
+        Bottom Right: Dolje desno
+        Center Left: Sredina lijevo
+        Center: Sredina
+        Center Right: Sredina desno
+      Edge Style:
+        Edge Style: Stil ruba
+        None: Bez ruba
+        Outline: Kontura
+        Drop Shadow: Sjena
+        Raised: Povišeno
+        Depressed: Sniženo
+      Reset: Vrati izgled titlova
+      Default: Zadano
+      Text Opacity: Prozirnost fonta
+      Font Family:
+        Font Family: Obitelj fontova
+        Monospaced Serif: Neproporcionalni Serif
+        Proportional Serif: Proporcionalni Serif
+        Monospaced Sans-Serif: Neproporcionalni Sans-Serif
+        Proportional Sans-Serif: Proporcionalni Sans-Serif
+      Colors:
+        White: Bijela
+        Yellow: Žuta
+        Green: Zelena
+        Cyan: Cijan
+        Blue: Plava
+        Magenta: Magenta
+        Red: Crvena
+        Black: Crna
+    Auto Picture in Picture:
+      Auto Picture in Picture: Automatski uključi prikaz slike u slici
+      On Tab Change: Pri promjeni kartice
+      On Window Minimize: Pri minimiziranju prozora
+      On Window Hide: Kada prozor izgubi fokus ili se prijeđe na drugi prozor
+      Wayland Minimize Unsupported: Wayland aplikacijama ne dojavljuje minimiziranje prozora, pa ovaj okidač nije dostupan. Umjesto toga upotrijebite "Kada prozor izgubi fokus ili se prijeđe na drugi prozor", što obuhvaća i minimiziranje.
+      On Tab Change Mini Player: Pri promjeni kartice umjesto toga prikazuje se minireproduktor. Za korištenje ove opcije postavite „Pri napuštanju videozapisa” na „Zaustavi reprodukciju”.
+    Scroll Mini Player:
+      Scroll Player Mode: Pri pomicanju prema dolje
+      Scroll Player Mode Tooltip: Player se prikvači samo dok zauzima najviše polovicu visine prozora. Inače, primjerice na telefonima u vodoravnom položaju ili u širokim prozorima, umjesto toga prikazuje se mini player.
+      Scroll Player Modes:
+        Mini: Prikaži minireproduktor
+        Pin: Prikvači player na vrh ako ima mjesta
+        Off: Pomiči sa stranicom
+      Leaving Video: Pri napuštanju videozapisa
+      Leaving Video Modes:
+        Keep Playing: Nastavi reprodukciju u minireproduktoru
+        Stop: Zaustavi reprodukciju
+    Multiply Seek Interval by Playback Rate: Pomnoži interval premotavanja brzinom reprodukcije
+    Show Playback Rate Adjusted Timestamp: Prikaži vremensku oznaku prilagođenu brzini reprodukcije
+    Use YouTube-style Shorts: Upotrebljavaj Shorts u stilu YouTubea
+    Loop Shorts: Ponavljaj Shorts
+    Remember Volume: Zapamti glasnoću
+    Skip Silence: Preskoči tišinu
+    Show Skip Silence Toggle: Prikaži prekidač za preskakanje tišine
+    Enable Skip Silence by Default: Zadano omogući preskakanje tišine
+    Enable Video Zoom: Omogući zumiranje videozapisa
+    Enable Seek History: Omogući povijest premotavanja
+    Show Seek Bar Filmstrip: "Prikaži filmsku traku trake za premotavanje"
+    Voice-over Translation:
+      Title: Glasovni prijevod
+      Attribution: (pokreće Yandex)
+      Enable: Omogući glasovni prijevod
+      Prepare in Background: Započni pripremu glasovnih prijevoda u pozadini
+      Background Preparation Tooltip: Šalje ID trenutačnog videozapisa, njegovo trajanje i odabrani jezik usluzi za prevođenje čim se učita podržani videozapis.
+      Language: Jezik glasovnog prijevoda
+      Supported Source Languages: 'Podržani izvorni jezici: ruski, engleski, kineski, korejski, arapski, francuski, talijanski, španjolski, njemački i japanski.'
+      Voice Volume: Glasnoća prevedenog glasa
+      Original Volume: Glasnoća izvornog zvuka
+      Russian: Ruski
+      English: Engleski
+      Kazakh: Kazaški
+    Hold to Speed Up:
+      Hold to Speed Up: Držite za ubrzavanje
+      Off: Isključeno
+    Use Quick Playback Speed Bar: Upotrebljavaj traku za brzi odabir brzine reprodukcije
+    Customize Quick Playback Speed Bar: Prilagodi traku za brzi odabir brzine reprodukcije
+    Quick Playback Speed Bar Manager: Traka za brzi odabir brzine reprodukcije
+    Add Playback Speed: Dodaj brzinu reprodukcije
+    Reset Quick Playback Speed Bar: Vrati zadane vrijednosti
+    Playback Speed Name: Naziv
+    Edit Playback Speed Name: Uredi naziv brzine reprodukcije
+    Use Automatic Playback Speed Name: Automatski imenuj brzinu reprodukcije
+    Reorder Playback Speed: Povucite za promjenu redoslijeda brzine reprodukcije
+    Playback Speed: Brzina reprodukcije
+    Parallel Segment Loading: Paralelno učitavanje segmenata
+    Rotate Wide Videos to Landscape in Fullscreen: 'Zakreni široke videozapise vodoravno preko cijelog zaslona'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'Povucite gore ili dolje za ulazak u prikaz preko cijelog zaslona ili izlazak iz njega'
+    Preload Upcoming Videos: "Predučitaj sljedeće videozapise"
+    Upcoming Videos to Preload: "Broj videozapisa za predučitavanje"
+    Concurrent Preloads: "Istodobna predučitavanja"
+    Ignore System Rotation Lock for Fullscreen: Zanemari zaključavanje rotacije sustava za cijeli zaslon
+    Swipe Left or Right to Seek in Fullscreen: Povucite ulijevo ili udesno za premotavanje na cijelom zaslonu
+    Show Swipe to Seek Preview: Prikaži pretpregled pri premotavanju povlačenjem
+    Enable Google Cast: "Omogući Google Cast"
+    Sections:
+      Playback: Reprodukcija
+      Autoplay: Automatska reprodukcija
+      Playback Speed: Brzina reprodukcije
+      Player Controls: Kontrole playera
+      Gestures: Geste
+      Viewing Modes: Načini prikaza
+      Shorts: Shorts
+      Screenshots: Snimke zaslona
+    Enable FCast: "Omogući FCast"
+    Screenshot:
+      Legacy Formats: "Stariji formati"
+      Modern Formats: "Moderni formati"
+    Ask Before Preloading Large Playlists: "Pitaj prije predučitavanja velikih popisa za reprodukciju"
+  Channel Settings:
+    Channel Settings: Postavke kanala
+    Channel Settings Description: Postavke koje odaberete tijekom gledanja pamte se zasebno za svaki kanal kako bi se ponovno primijenile kada sljedeći put gledate neki njegov videozapis.
+    Enable Channel Playback Settings: Omogući postavke reprodukcije po kanalu
+    Auto Save Playback Speed: Automatski spremi promjene brzine reprodukcije
+    Auto Save Video Quality: Automatski spremi promjene kvalitete videa
+    Auto Save Subtitles State: Automatski spremi promjene stanja titlova
+    Auto Save Volume: Automatski spremi promjene glasnoće
+    Manage Saved Channels: Upravljaj spremljenim kanalima ({channelCount})
+    Saved Channels: Spremljene postavke kanala
+    Enable Saved Channel Settings Sync: Sinkroniziraj spremljene postavke kanala
+    Disable Saved Channel Settings Sync: Zaustavi sinkronizaciju spremljenih postavki kanala
+    Search Channels: Pretraži kanale
+    No Saved Channels: Još nisu spremljene postavke ni za jedan kanal
+    No Matching Channels: Nijedan kanal ne odgovara pretraživanju
+    Forget Channel: Zaboravi sve postavke za ovaj kanal
+    Forget Value: Zaboravi ovu postavku
+    Add Setting: Zapamti još jednu postavku za ovaj kanal
+    Add Subscribed Channel: Dodaj kanal na koji ste pretplaćeni
+    Video Quality: Kvaliteta videozapisa
+    Subtitles Enabled: Titlovi su omogućeni
+    Volume: Glasnoća
+  Download Settings:
+    Download Settings: Preuzimanja
+    Enable Downloads: Omogući preuzimanja
+    Managed Tools Download Started Template: 'Nije pronađen potreban vanjski softver: {tools}. Preuzimanje kopija kojima upravlja aplikacija…'
+    Managed Tools Download Finished Template: Dovršeno je preuzimanje alata {tools}
+    Managed Tools Update Started Template: Pronađeno je ažuriranje za {tools}. Preuzimanje…
+    Managed Tools Update Finished Template: Dovršeno je ažuriranje alata {tools}
+    Managed Tools Update Available Template: Dostupno je ažuriranje za {tools}.
+    Managed Tools Update Source Notice: "OpenTubeX ga preuzima izravno s GitHuba, pa ga F-Droid i druge trgovine aplikacija ne provjeravaju."
+    Update Managed Tools: Ažuriraj
+    Managed Tools Download Error Template: 'Nije moguće preuzeti alate kojima upravlja aplikacija: {errors}'
+    Download Folder: Mapa za preuzimanja
+    Global Additional yt-dlp Arguments: Dodatni argumenti yt-dlp
+    Concurrent Downloads: Istodobna preuzimanja
+    Bandwidth Limit: Ograničenje propusnosti (KiB/s)
+    Download Templates: Predlošci za preuzimanje
+    Manage Download Templates: Upravljaj predlošcima za preuzimanje ({templateCount})
+    New Template: Novi predložak
+    Template Source: Predložak za uređivanje ili uporabu kao osnova
+    Built-in Template: '{name} (ugrađeni)'
+    Custom Template Name: '{name} (prilagođeni)'
+    Create Template Copy: Izradi kopiju
+    Template Copy Name: '{name} – kopija'
+    Automatic Downloads: Automatska preuzimanja
+    Manage Automatic Downloads: Upravljaj automatskim preuzimanjima ({channelCount})
+    Automatic Downloads Description: Odaberite predložak za preuzimanje i filtre za svaki kanal na koji ste pretplaćeni. Odgovarajući videozapisi preuzimaju se u pozadini pri osvježavanju sažetaka pretplata.
+    Automatic Downloads New Only: Omogućivanjem kanala preuzimanje počinje od njegove sljedeće nove objave. Postojeći videozapisi i starije objave kanala neće se preuzeti.
+    Automatic Downloads No Channels: Pretplatite se na kanal prije postavljanja automatskih preuzimanja.
+    No Matching Automatic Download Channels: Nijedan kanal ne odgovara pretraživanju.
+    Automatic Downloads Livestreams: Prijenosi uživo
+    Minimum Duration Seconds: Najkraće trajanje (sekunde)
+    Maximum Duration Seconds: Najdulje trajanje (sekunde)
+    Minimum File Size MB: Najmanja veličina datoteke (MB)
+    Maximum File Size MB: Najveća veličina datoteke (MB)
+    Maximum Age Days: Najveća starost (dani)
+    Title Includes: Naslov sadržava
+    Title Excludes: Naslov ne sadržava
+    Title Filter Hint: Više pojmova za naslov odvojite zarezima. Videozapis mora sadržavati barem jedan uključeni pojam i ne smije sadržavati nijedan isključeni pojam.
+    Automatic Downloads Require Unmetered Network: "Samo na mrežama bez ograničenja podataka"
+    Automatic Downloads Require Charging: "Samo tijekom punjenja"
+  External Software Settings:
+    Create YouTube session: "Stvori YouTube sesiju"
+    YouTube session hint: "Prijavite se po potrebi i spremite sesiju. U postavkama odaberite hoće li se koristiti za preuzimanja, reprodukciju ili titlove."
+    Use cookies for downloads: "Koristi kolačiće za preuzimanja"
+    YouTube session failed: "Nije moguće spremiti YouTube sesiju."
+    Checking FFmpeg and FFprobe: Provjera alata FFmpeg/FFprobe…
+    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe još nisu preuzeti. Kliknite gumb u nastavku da biste ih preuzeli.
+    External Software Settings: Vanjski softver
+    yt-dlp Source: Izvor za yt-dlp
+    yt-dlp Channel: Kanal za yt-dlp
+    Sources:
+      System: Sustav (PATH ili prilagođena putanja)
+      Managed: Upravlja OpenTubeX
+    Detected Version Template: 'Otkrivena verzija alata yt-dlp: {version}'
+    Managed Not Downloaded: yt-dlp još nije preuzet. Kliknite gumb u nastavku da biste ga preuzeli.
+    System yt-dlp Missing Warning: yt-dlp nije pronađen na sustavu. Instalirajte ga, u nastavku postavite prilagođenu putanju ili promijenite izvor na "Upravlja OpenTubeX".
+    Download yt-dlp: Preuzmi yt-dlp
+    Update yt-dlp: Ažuriraj yt-dlp
+    Checking yt-dlp: Provjera alata yt-dlp…
+    Downloading yt-dlp: Preuzimanje alata yt-dlp…
+    yt-dlp Downloaded Template: Preuzet je yt-dlp {version}
+    yt-dlp Download Error Template: 'Preuzimanje alata yt-dlp nije uspjelo: {error}'
+    FFmpeg Source: Izvor za FFmpeg
+    Detected FFmpeg Version Template: 'Otkrivena verzija alata FFmpeg: {version}'
+    Detected FFmpeg and FFprobe Version Template: 'Otkrivena verzija alata FFmpeg/FFprobe: {version}'
+    FFmpeg Managed Not Downloaded: FFmpeg još nije preuzet. Kliknite gumb u nastavku da biste ga preuzeli.
+    System FFmpeg Missing Warning: FFmpeg nije pronađen na sustavu. Potreban je za spajanje videozapisa i zvuka te za pretvorbu zvuka. Instalirajte ga, u nastavku postavite prilagođenu putanju ili promijenite izvor na "Upravlja OpenTubeX".
+    Download FFmpeg: Preuzmi FFmpeg
+    Update FFmpeg: Ažuriraj FFmpeg
+    Checking FFmpeg: Provjera alata FFmpeg…
+    Downloading FFmpeg: Preuzimanje alata FFmpeg…
+    Detected FFprobe Version Template: 'Otkrivena verzija alata FFprobe: {version}'
+    FFprobe Managed Not Downloaded: FFprobe još nije preuzet. Kliknite gumb u nastavku da biste ga preuzeli zajedno s alatom FFmpeg.
+    System FFprobe Missing Warning: FFprobe nije pronađen na sustavu. Potreban je za pregled medijskih sadržaja tijekom naknadne obrade. Instalirajte ga uz FFmpeg ili promijenite izvor na "Upravlja OpenTubeX".
+    Checking FFprobe: Provjera alata FFprobe…
+    Download FFmpeg and FFprobe: Preuzmi FFmpeg i FFprobe
+    Update FFmpeg and FFprobe: Ažuriraj FFmpeg i FFprobe
+    Downloading FFmpeg and FFprobe: Preuzimanje alata FFmpeg i FFprobe…
+    FFmpeg and FFprobe Downloaded Template: Preuzeti su FFmpeg i FFprobe {version}
+    FFmpeg and FFprobe Download Error Template: 'Preuzimanje alata FFmpeg i FFprobe nije uspjelo: {error}'
+    Managed Tool Already Current Template: '{tool} {version} već je ažuran'
+    Managed Tool Errors:
+      Removed: 'Preuzeta datoteka je uklonjena, najvjerojatnije od strane antivirusnog softvera'
+      Unusable: 'Preuzeti program nije moguće pokrenuti. Možda ga blokira antivirusni softver ili ne podržava ovaj sustav'
+      Release Not Found: 'Nije moguće pronaći najnovije izdanje'
+      Verification Failed: 'Nije moguće potvrditi da je preuzimanje službeno izdanje'
+      Downgrade: 'Preuzeto izdanje starije je od instaliranog'
+      Invalid Archive: 'Preuzeta arhiva nije valjana'
+      Rollback Failed: 'Ažuriranje nije uspjelo i prethodnu verziju nije bilo moguće u potpunosti vratiti'
+    Managed Tool Updates: Ažuriranja alata kojima upravlja aplikacija
+    Update Modes:
+      Automatic: Ažuriraj automatski
+      Ask: Pitaj prije ažuriranja
+      Manual: Ažuriraj samo ručno
+    yt-dlp Executable Path: Izvršna datoteka yt-dlp
+    FFmpeg Executable Path: Izvršna datoteka FFmpeg
+    Restricted Playback Authentication: "yt-dlp kolačići"
+    Cookie Source: Izvor kolačića
+    Cookie Sources:
+      None: Nijedan
+      File: Datoteka
+      Browser: Preglednik
+    Cookie File: Datoteka kolačića
+    Browser for Cookies: Preglednik za kolačiće
+    Browser Profile: Profil preglednika (neobavezno)
+    Browser Profile Placeholder: Naziv profila ili putanja
+    Browser Profile Invalid: "Unesite naziv profila ili odaberite mapu profila gumbom za mapu."
+    Select Browser: Odaberi preglednik
+    Always Use Cookies: Uvijek upotrebljavaj kolačiće
+    Restricted Playback Authentication Hint: OpenTubeX prema zadanim postavkama prosljeđuje ove kolačiće alatu yt-dlp tek nakon što odaberete "Pokušaj s postavljenim kolačićima" na videozapisu s dobnim ograničenjem ili samo za članove.
+    Restricted Playback Authentication Warning: Uporaba alata yt-dlp s Google računom može dovesti do privremenih ili trajnih ograničenja računa.
+    Use cookies for subtitles: "Koristi kolačiće za titlove"
+  Privacy Settings:
+    Internet Connectivity Checks: "Provjere internetske veze"
+    Internet Connectivity Checks Tooltip: "Šalje male zahtjeve poslužitelju kojim upravlja GrapheneOS radi provjere pristupa internetu."
+    Automatic History Retention: Automatsko čuvanje povijesti (dani)
+    Automatic History Retention Placeholder: Ostavite prazno za trajno čuvanje
+    Automatic History Retention Tooltip: Ostavite prazno kako biste trajno čuvali povijest. Spremanjem broja stariji se unosi odmah uklanjaju, a zatim i automatski dok je aplikacija otvorena.
+    Automatic Search History Retention: Automatsko čuvanje povijesti pretraživanja (dani)
+    Automatic Search History Retention Tooltip: Ostavite prazno kako biste trajno čuvali povijest pretraživanja. Spremanjem broja starija se pretraživanja odmah uklanjaju, a zatim i automatski dok je aplikacija otvorena.
+    History Retention Saved: Postavka čuvanja povijesti spremljena je
+    Invalid History Retention Days: Unesite cijeli broj dana veći od nule
+    Enable Watch Statistics: Omogući statistiku gledanja
+    Week Starts On: Početak tjedna
+    Cache Video Metadata: Povijest metapodataka
+    Cache Video Metadata Tooltip: Čuva svaku inačicu podržanih metapodataka posjećenih videozapisa, uključujući naslove, minijature i opise. Čuva i naslove prikazane u vašim feedovima pretplata. Zadano je onemogućeno jer čuvanje povijesti metapodataka povećava zauzeće diska.
+    Watched Percentage Threshold: Prag postotka gledanja
+    Watched Percentage Threshold Tooltip: Videozapisi se označavaju kao pogledani nakon što dosegnu odabrani postotak i preostanu im najviše 2 minute. Pri 0 % označavaju se na početku reprodukcije. Pri 100 % označavaju se na završetku reprodukcije.
+    Clear Video Metadata Cache: Očisti predmemoriju metapodataka videozapisa
+    Are you sure you want to clear the video metadata cache?: Želite li doista iz predmemorije izbrisati naslove, minijature i opise videozapisa?
+    Failed to clear video metadata cache: Čišćenje predmemorije metapodataka videozapisa nije uspjelo
+    Video Metadata Cache Size: 'Predmemorija metapodataka videozapisa: {size}'
+  Storage Settings:
+    Storage: Pohrana
+    Downloaded Media: Evidentirane preuzete medijske datoteke
+    Storage Breakdown: Raščlamba prostora za pohranu
+    Shown Total: Prikazana ukupna veličina
+    Calculating: Izračunavanje…
+    Not Available: Točna veličina nije dostupna
+    At Least: Najmanje {size}
+    Failed To Read Storage: Neke veličine pohranjenih podataka nije bilo moguće očitati
+    Downloaded Media Description: Datoteke videozapisa, zvuka i titlova koje se još evidentiraju u povijesti preuzimanja.
+    Selected Download Folders: Mape za preuzimanje koje je odabrao korisnik
+    Download History Records: Zapisi povijesti preuzimanja
+    Download History Records Description: '{count} dovršen zapis preuzimanja. Taj zapis prati stanje i lokacije datoteka, ali ne sadržava preuzete medijske datoteke. | {count} dovršena zapisa preuzimanja. Ti zapisi prate stanje i lokacije datoteka, ali ne sadržavaju preuzete medijske datoteke. | {count} dovršenih zapisa preuzimanja. Ti zapisi prate stanje i lokacije datoteka, ali ne sadržavaju preuzete medijske datoteke.'
+    Clear Download History Records: Očisti zapise povijesti preuzimanja
+    Clear Download History Confirmation: Očistiti sve zapise dovršenih preuzimanja?
+    Download Files Stay On Disk: Preuzete datoteke ostat će na disku, ali se više neće prikazivati na stranici Preuzimanja.
+    Clear Records: Očisti zapise
+    Replaceable Caches: Predmemorije koje se mogu ponovno stvoriti
+    Application Caches: Predmemorije aplikacije
+    Browser Caches: Predmemorije preglednika
+    Browser Caches Hint: Chromiumove predmemorije za HTTP, GPU, kôd, sjenčare, servisne radnike i rječnike.
+    Clear Android Cache Confirmation: Očistiti predmemoriju preglednika Androida?
+    Stored App Data: Pohranjeni podaci aplikacije
+    Included In App Data: Uključeno u gore prikazane podatke aplikacije
+    Browser Runtime Data: Podaci preglednika tijekom rada
+    Browser Runtime Data Hint: Chromiumova pohrana sesije i lokalna pohrana, kolačići, stanje privatnosti i mreže te datoteke rušenja.
+    Subscription Feed Cache: Predmemorija pretplata i sažetka sadržaja
+    Subscription Feed Cache Description: Pohranjuje dohvaćene videozapise iz pretplata, Shorts videozapise, prijenose uživo i objave. OpenTubeX ponovno je stvara pri sljedećem osvježavanju sažetka sadržaja.
+    Clear Subscription Feed Cache: Očisti predmemoriju pretplata i sažetka sadržaja
+    Clear Subscription Feed Cache Confirmation: Očistiti predmemoriju pretplata i sažetka sadržaja?
+    Subscription Feed Cache Effect: Sažeci sadržaja pretplata mogu biti prazni dok se ne osvježe. Vaše pretplate i profili neće se promijeniti.
+    Session Search Cache: Predmemorija pretraživanja sesije
+    In Memory: U memoriji
+    Session Search Cache Description: '{count} pretraživanje predmemorirano je za brži povratak. Ta se predmemorija odbacuje kada se OpenTubeX zatvori. | {count} pretraživanja predmemorirana su za brži povratak. Ta se predmemorija odbacuje kada se OpenTubeX zatvori. | {count} pretraživanja predmemorirano je za brži povratak. Ta se predmemorija odbacuje kada se OpenTubeX zatvori.'
+    Clear Session Search Cache: Očisti predmemoriju pretraživanja sesije
+    Clear Session Search Cache Confirmation: Očistiti predmemoriju pretraživanja sesije?
+    Session Search Cache Effect: Predmemorirane stranice rezultata bit će odbačene. Spremljena povijest pretraživanja neće se promijeniti.
+    HTTP Cache: HTTP predmemorija
+    HTTP Cache Description: Electron pohranjuje mrežne odgovore na disk kako bi se ponovljeni zahtjevi učitali bez ponovnog preuzimanja istih podataka. OpenTubeX po potrebi ponovno stvara tu predmemoriju.
+    Managed By Electron: Upravlja Electron
+    Clear HTTP Cache: Očisti HTTP predmemoriju
+    Clear HTTP Cache Confirmation: Očistiti Electronovu HTTP predmemoriju?
+    HTTP Cache Effect: Slike i drugi mrežni resursi mogu se prvi put sporije učitati dok se predmemorija ponovno stvara.
+    Tab Image Cache: Minijature kartica i avatari kanala
+    Tab Image Cache Description: Pohranjuje slike pretpregleda i avatare kanala za otvorene i obnovljene kartice. OpenTubeX ponovno ih stvara tijekom uporabe kartica.
+    Clear Tab Image Cache: Očisti predmemoriju slika kartica
+    Clear Tab Image Cache Confirmation: Očistiti minijature kartica i avatare kanala?
+    Tab Image Cache Effect: Slike kartica mogu nakratko nestati i ponovno će se stvoriti tijekom uporabe tih kartica.
+    Playback Caches: Predmemorije reprodukcije
+    Playback Caches Description: Pohranjuje URL-ove yt-dlp tokova između sesija aplikacije i datoteke YouTube reproduktora. Predmemorija URL-ova primjenjuje se samo na tokove dohvaćene pomoću yt-dlp-a.
+    Playback URL Cache Entry Size: Ograničenje predmemorije URL-ova yt-dlp tokova
+    Playback URL Cache Entry Size Tooltip: Postavlja najveću veličinu svakog predmemoriranog unosa yt-dlp toka. Postavite na 0 MB kako biste isključili trajno predmemoriranje yt-dlp tokova.
+    Clear Playback Caches: Očisti predmemorije reprodukcije
+    Clear Playback Caches Confirmation: Očistiti predmemorije yt-dlp-a i reproduktora?
+    Playback Caches Effect: Sljedeći zahtjev za lokalnu reprodukciju može potrajati dulje dok se podaci o toku i reproduktoru ponovno dohvate.
+    Clear Cache: Očisti predmemoriju
+    History Data: Pohranjeni podaci povijesti
+    Video Metadata Description: Pohranjuje prethodne naslove, minijature i opise podržanih videozapisa. Stare se inačice nakon brisanja ne mogu ponovno stvoriti.
+    Video Metadata Effect: Spremljene inačice metapodataka trajno će se izbrisati. Trenutačni podaci o videozapisu i dalje se mogu ponovno dohvatiti.
+    Watch History: Povijest gledanja i statistika
+    Watch History Description: Povijest gledanja bilježi pogledane videozapise i napredak. Statistika gledanja pohranjuje dnevne zbirne podatke o gledanju. Razdoblje čuvanja primjenjuje se samo na povijest gledanja.
+    Clear Watch Statistics: Očisti statistiku gledanja
+    Watch History Effect: Zapisi pogledanih videozapisa i spremljeni napredak bit će izbrisani. Statistika gledanja ostat će spremljena.
+    Clear Watch Statistics Confirmation: Izbrisati svu statistiku gledanja?
+    Watch Statistics Effect: Dnevni zbirni podaci o gledanju bit će izbrisani. Povijest gledanja ostat će spremljena.
+    Search History: Povijest pretraživanja
+    Search History Description: Pohranjuje pretraživanja koja ste odabrali zapamtiti.
+    Delete Search History: Izbriši povijest pretraživanja
+    Delete Search History Confirmation: Izbrisati svu spremljenu povijest pretraživanja?
+    Search History Effect: Spremljeni prijedlozi iz prethodnih pretraživanja nestat će. Predmemorija trenutačne sesije ostat će spremljena.
+    Other User Data: Ostali korisnički podaci
+    Other Profile Files: Ostale datoteke profila
+    Other Profile Files Hint: Sigurnosne kopije, privremene datoteke i unosi profila koje OpenTubeX još ne prepoznaje.
+    Subscriptions And Profiles: Pretplate i profili
+    Subscriptions And Profiles Description: Pohranjuje kanale na koje ste pretplaćeni, nazive profila i pripadnost profilima.
+    Subscriptions And Profiles Effect: Sve pretplate i dodatni profili trajno će se izbrisati. Izbrisat će se i podaci predmemorije sažetka sadržaja.
+    Playlists Description: Pohranjuje nazive i opise popisa za reprodukciju te spremljene videozapise.
+    Playlists Effect: Svaki popis za reprodukciju i njegov popis spremljenih videozapisa trajno će se izbrisati. Preuzete medijske datoteke ostat će spremljene.
+    Settings And Sessions: Postavke, sesije kartica i podsjetnici
+    Settings And Sessions Description: Pohranjuje postavke aplikacije, kartice koje se mogu obnoviti i podsjetnike na prijenose uživo. Otvorite mapu profila da biste pregledali te datoteke ili izradili njihovu sigurnosnu kopiju. Ova ih stranica ne briše.
+    Cleanup Complete: Čišćenje prostora za pohranu dovršeno
+    Cleanup Failed: Čišćenje prostora za pohranu nije uspjelo
+  Subscription Settings:
+    Fetch Feed on Startup: Dohvati sažetak sadržaja pri pokretanju
+    Show New Content Feed: Prikaži sažetak novog sadržaja
+    RSS Feeds: RSS izvori
+    Enable RSS Feeds: Aktiviraj RSS izvore za druge platforme
+    Manage RSS Feeds: Upravljaj RSS izvorima
+    Show New Content Indicators: Prikaži pokazatelje novog sadržaja
+    Show Scheduled Live Streams / Premieres First: Najprije prikaži zakazane prijenose uživo / premijere
+    Auto Refresh Interval: Razmak automatskog osvježavanja
+    Videos Auto Refresh Interval: Razmak automatskog osvježavanja videozapisa
+    Shorts Auto Refresh Interval: Razmak automatskog osvježavanja Shorts videozapisa
+    Live Auto Refresh Interval: Razmak automatskog osvježavanja prijenosa uživo
+    Posts Auto Refresh Interval: Razmak automatskog osvježavanja objava
+    Refresh Subscriptions While App Is Closed: "Osvježavaj pretplate dok je aplikacija zatvorena"
+    Notify About New Uploads: Obavijesti o novom sadržaju
+    RSS Feeds Auto Refresh Interval: Razmak automatskog osvježavanja RSS izvora
+    Faster Subscription Refresh: "Brže osvježavanje pretplata"
+    Platforms:
+      Other Platforms: Druge platforme
+      Manage Channels: Upravljanje praćenim kanalima
+      Notify When Live: Obavijesti kada praćeni Twitch kanali počnu prijenos uživo
+      Auto Refresh Interval: Razmak automatskog osvježavanja drugih platformi
+  Distraction Free Settings:
+    Digital Wellbeing:
+      Count Watch Time From: "Brojanje vremena gledanja s"
+      Break Reminder Action: "Kada je vrijeme za odmor"
+      Grayscale: "Sivi tonovi"
+      Apply Grayscale To: "Primijeni sive tonove na"
+      Off: "Isključeno"
+      Always: "Uvijek"
+      During Bedtime: "Tijekom vremena za spavanje"
+      After the Daily Limit: "Nakon dnevnog ograničenja"
+      Whole App: "Cijelu aplikaciju"
+      Videos and Images: "Videozapise i slike"
+      Daily Watch Time Limit: "Dnevno ograničenje vremena gledanja"
+      Daily Shorts Limit: "Dnevno ograničenje Shorts videozapisa"
+      When a Limit Is Reached: "Kada se dosegne ograničenje"
+      Remind Me: "Podsjeti me"
+      Pause Playback: "Pauziraj reprodukciju"
+      Take a Break Reminder: "Podsjetnik za odmor"
+      Every: "Svakih {duration}"
+      Bedtime Reminder: "Podsjetnik za spavanje"
+      Bedtime Start: "Početak vremena za spavanje"
+      Bedtime End: "Kraj vremena za spavanje"
+      Wait Until the Video Ends: "Pričekaj do kraja videozapisa"
+      Silence Upload Notifications at Bedtime: "Utišaj obavijesti o novom sadržaju tijekom vremena za spavanje"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Zaustavi automatsku reprodukciju tijekom vremena za spavanje i nakon dnevnog ograničenja"
+    Hide Popularity Graph: "Sakrij grafikon popularnosti"
+    Enable Block Lists: "Omogući popise blokiranih"
+    AI Video Summaries: AI sažeci videozapisa
+    Hide: Sakrij
+    Collapsed: Sažeti
+    Expanded: Prošireni
+    Video Descriptions: Opisi videozapisa
+    Video Description Modes:
+      Hide: Sakrij
+      Collapsed: Sažeti
+      Expanded: Prošireni
+    Playing Interface Hide Delay: Odgoda skrivanja sučelja tijekom reprodukcije
+    Hide Startup Splash: Sakrij početni zaslon
+    Hide Header Sync Indicator: Sakrij pokazatelj sinkronizacije u zaglavlju aplikacije
+    Hide Repeat Stats: Sakrij statistiku ponavljanja
+    Hide Playlist Stats: Sakrij statistiku popisa za reprodukciju
+    Sections:
+      Digital Wellbeing: "Digitalna dobrobit"
+      Visible While Paused: Vidljivo tijekom pauze u punom prozoru / preko cijelog zaslona
+    Hide Channel Avatars: Sakrij avatare kanala
+    Shorten View Counts: Skrati prikaz broja pregleda, komentara i oznaka „sviđa mi se” na komentarima
+    Hide Live Chat Replay: Sakrij ponovnu reprodukciju razgovora uživo
+    Hide Home: Sakrij početnu
+    Disable A-B Repeat: Onemogući A-B ponavljanje
+    Hide End-Screen Annotations: Sakrij napomene na završnom zaslonu
+    Hide End-Screen Recommendations: "Sakrij preporuke na završnom zaslonu"
+    Hide Paid Promotion Badge: Sakrij oznaku plaćene promocije
+    Show Player Controls: Prikaži kontrole reproduktora
+    Show Video Title: Prikaži naslov videozapisa
+    Show Bottom Right Actions Dock: Prikaži traku radnji u donjem desnom kutu
+    Paused Interface Hide Delay: Odgoda skrivanja sučelja tijekom pauze
+    Add: Dodaj
+    Remove: Ukloni
+    Hide Channel Shows: Sakrij karticu "Emisije" kanala
+    Blur Blocked Items: Zamuti blokirane stavke umjesto skrivanja
+    More Items Count: "+{count} više…"
+  Data Settings:
+    Settings could not be imported: "Postavke nije bilo moguće uvesti"
+    Some settings could not be imported: "Nije bilo moguće uvesti sve postavke (neuspjelo: {failed} od {total})"
+    Scheduled backups: "Zakazane sigurnosne kopije"
+    Scheduled backup description: "Spremajte potpune ZIP kopije dok je OpenTubeX otvoren. Propuštene kopije izrađuju se pri pokretanju. Ograničenje vrijedi samo za zakazane kopije u ovoj mapi."
+    Choose backup folder: "Odaberi mapu sigurnosnih kopija"
+    No backup folder selected: "Nije odabrana mapa sigurnosnih kopija"
+    Enable scheduled backups: "Omogući zakazane sigurnosne kopije"
+    Backup frequency: "Učestalost izrade kopija"
+    Backups to keep: "Broj kopija za zadržavanje"
+    Daily: "Dnevno"
+    Weekly: "Tjedno"
+    Every 30 days: "Svakih 30 dana"
+    Last scheduled backup: "Posljednja zakazana kopija: {date}"
+    No scheduled backup yet: "Još nema zakazane sigurnosne kopije"
+    Scheduled backup failed: "Izrada kopije nije uspjela. Provjerite može li se pisati u mapu. Novi pokušaj za pet minuta."
+    Import Preview:
+      Title: Pregled promjena
+      New: "Novi: {count}"
+      Existing: "Postojeći: {count}"
+      Skipped: "Preskočeni: {count}"
+      Unreadable files: "Nečitljive datoteke: {count}"
+      Settings effect: Podudarne postavke zamjenjuju se. Privatne i nepoznate postavke preskaču se.
+      Details effect: Postojeće pretplate ili videozapisi zadržavaju se. Uvezeni detalji profila ili zbirki zamjenjuju trenutačne.
+      Merge effect: Postojeći podaci zadržavaju se i spajaju s podudarnim zapisima.
+      Subscriptions effect: Postojeće pretplate zadržavaju se. Dodaju se samo novi kanali.
+      History merge effect: Podudarni videozapisi spajaju se s vašom poviješću, uz zadržavanje spremljenih pojedinosti i najnovijeg datuma gledanja. Ostala povijest zadržava se.
+    Select export data: "Odaberite podatke za izvoz"
+    Export selected data: "Izvezi odabrane podatke"
+    Complete backup: "Potpuna sigurnosna kopija"
+    Import backup: "Uvezi sigurnosnu kopiju"
+    Export backup: "Izvezite sigurnosnu kopiju"
+    Backup description: "Spremite profile, popise za reprodukciju, povijest, statistiku i prenosive postavke u jednu ZIP datoteku. Uvoz ih spaja s podacima koji su već na ovom uređaju."
+    Select backup data: "Odaberite podatke za uvoz"
+    Profiles and subscriptions: "Profili i pretplate"
+    Backup exported: "Sigurnosna kopija je uspješno izvezena"
+    Backup imported: "Sigurnosna kopija uspješno je uvezena"
+    Import YouTube Takeout ZIP: "Uvezi YouTube Takeout ZIP"
+    Select Takeout data: "Odaberite podatke za uvoz"
+    Import selected data: "Uvezi odabrane podatke"
+    No supported Takeout data: "U ovom ZIP-u nisu pronađeni podržani YouTube podaci."
+    Data And Storage: Podaci i pohrana
+    Profile Directory: Mapa profila
+    Open Profile Directory: Otvori mapu profila
+    Invalid JSON row, skipping item: Neispravan JSON u retku {row}, stavka se preskače
+    Import subscriptions formats: 'Podržani formati: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), sigurnosna kopija LibreTubea ili izvoz iz FreeTubea (.json)'
+    Import history formats: 'Podržani formati: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), sigurnosna kopija LibreTubea (.json)'
+    Import playlists formats: 'Podržani formati: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import search history formats: 'Podržani formati: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Channel playback speeds: "Brzine reprodukcije kanala"
+    Import channel playback speeds: "Uvezi brzine reprodukcije kanala"
+    Channel playback speeds file: "Datoteka brzina reprodukcije kanala"
+    Import channel playback speeds formats: "Podržani formati: pohrana korisničke skripte {script} (.json)"
+    Invalid channel playback speeds file: "U ovoj datoteci nisu pronađene brzine reprodukcije kanala"
+    Channel playback speeds imported: "Uvezena je brzina reprodukcije za {count} kanal | Uvezene su brzine reprodukcije za {count} kanala | Uvezene su brzine reprodukcije za {count} kanala"
+    Channels not found: "{count} kanal nije pronađen | {count} kanala nisu pronađena | {count} kanala nije pronađeno"
+    Playlists have been successfully imported: "Uspješno uvezena {count}/{total} zbirka | Uspješno uvezene {count}/{total} zbirke | Uspješno uvezeno {count}/{total} zbirki"
+  Sync Settings:
+    Signed Out After Restore: 'Sinkronizacija je odjavljena jer su ovi podaci aplikacije vraćeni iz sigurnosne kopije ili s drugog uređaja. Ponovno se prijavite kako biste sinkronizirali ovaj uređaj.'
+    Revoke Session Tabs Warning: "Sinkronizirani skupovi kartica ovog uređaja također će biti izbrisani."
+    Revoke Session Partial Failure: "Sinkronizirani skupovi kartica su izbrisani, ali opoziv pristupa nije moguće potvrditi. Pokušajte ponovno opozvati pristup."
+    Tab Sync Revocation Pending: "Sinkronizacija kartica je pauzirana dok je opoziv ove prijave na čekanju. Ponovno pokušajte opoziv u postavkama sinkronizacije."
+    Show More: "Prikaži više"
+    Sync Automatically: "Automatski sinkroniziraj"
+    Activity: "Aktivnost računa"
+    No Activity: "Nema nedavnih aktivnosti"
+    Clear Activity: "Očisti na ovom uređaju"
+    Clear Activity Hint: "Sakrij postojeću aktivnost računa na ovom uređaju. Aktivnost na poslužitelju i drugim uređajima ostaje nepromijenjena. Nova aktivnost i dalje će se prikazivati."
+    Setting Changed: "{device} je promijenio {setting} na {value}"
+    Item Updated: "{device} je ažurirao {setting}"
+    Item Added: "{device} dodao je {item} u {setting}"
+    Item Removed: "{device} uklonio je {item} iz {setting}"
+    Item Renamed: "{device} preimenovao je {item} u {value}"
+    Saved Playlists: "Spremljeni popisi za reprodukciju"
+    No Feed Types: "Ništa"
+    Open On Device: "Otvori na drugom uređaju"
+    Video Sent: "Videozapis je poslan. Izvanmrežni uređaji primit će ga pri ponovnom povezivanju unutar 24 sata."
+    Video Received: "Primljen videozapis: {title}"
+    Previous Auto Sync Notice: "Automatska sinkronizacija je isključena. Ranija verzija možda ju je isključila kako bi spriječila gubitak podataka."
+    Enable Automatic Sync: "Uključi automatsku sinkronizaciju"
+    Destructive Sync Blocked: "Sinkronizacija je zaustavljena kako bi se spriječio gubitak podataka. Automatska sinkronizacija je isključena. Otvorite postavke sinkronizacije da biste pregledali brisanja."
+    Devices: "Uređaji"
+    Devices Hint: "Pregledajte uređaje koji mogu pristupiti ovom računu za sinkronizaciju."
+    Change Password: "Promijeni lozinku"
+    Refresh Devices: "Osvježi uređaje"
+    Current Device: "Trenutačni uređaj"
+    Revoke Session: "Opozovi pristup"
+    Session Created: "Stvorena"
+    Last Active: "Posljednja aktivnost"
+    Session Expires: "Istječe"
+    Unknown Device: "Nepoznat uređaj"
+    Operating System: "Operacijski sustav"
+    Rename Device: "Preimenuj uređaj"
+    Save Device Name: "Spremi naziv"
+    Device Name Invalid: "Nazivi uređaja mogu sadržavati najviše 80 znakova i ne smiju sadržavati kontrolne znakove."
+    Device Renamed: "Uređaj je preimenovan"
+    Revoke Session Confirmation: "Opozvati ovu sesiju?"
+    Revoke Current Session Warning: "Opozivanje ove sesije odspojit će ovaj uređaj s računa za sinkronizaciju."
+    Revoke Session Warning: "{device} izgubit će pristup ovom računu za sinkronizaciju."
+    Confirm Revoke Session: "Opozovi sesiju"
+    Session Revoked: "Sesija je opozvana"
+    Change Password Warning: "Promjena lozinke odjavit će sve ostale uređaje. Ovaj će uređaj ostati povezan."
+    Current Password: "Trenutačna lozinka"
+    New Password: "Nova lozinka"
+    Confirm New Password: "Potvrdi novu lozinku"
+    Save New Password: "Spremi novu lozinku"
+    Account Management Failed: "Nije moguće učitati pojedinosti računa za sinkronizaciju."
+    All Password Fields Required: "Ispunite sva polja za lozinku."
+    New Password Too Short: "Nova lozinka mora sadržavati najmanje 8 znakova."
+    New Passwords Do Not Match: "Nove lozinke se ne podudaraju."
+    Password Changed: "Lozinka je promijenjena. Ostali uređaji su odjavljeni."
+    Sync Settings: Sinkronizacija
+    Watch stats: "Statistika gledanja"
+    Enable Sync: Omogući sinkronizaciju
+    Privacy Passphrase: Pristupna fraza za privatnost
+    Privacy Passphrase Hint: Upotrijebite pristupnu frazu koja se razlikuje od lozinke računa. Ona nikada ne napušta ovaj uređaj i potrebna je na svakom uređaju. Ako je izgubite, šifrirani podaci sinkronizacije neće se moći oporaviti.
+    Privacy Policy: Pravila o privatnosti ovog poslužitelja
+    Enhanced Privacy Enabled: Poboljšana privatnost je omogućena. Poslužitelj pohranjuje samo šifrirane podatke sinkronizacije.
+    Enhanced Privacy Unsupported: Upozorenje — ovaj poslužitelj ne podržava poboljšanu privatnost. Sinkronizirani podaci vidljivi su njegovu administratoru.
+    Description: 'Sinkronizirajte pretplate, profile, popise za reprodukciju, povijest gledanja i podržane postavke s OpenTubeX ili LibreTube poslužiteljem za sinkronizaciju. LibreTube poslužitelji možda ne podržavaju sve značajke sinkronizacije.'
+    Server URL: URL poslužitelja sinkronizacije
+    Checking Server: Provjera poslužitelja za sinkronizaciju…
+    Server Unavailable: Povezivanje s ovim poslužiteljem za sinkronizaciju nije moguće. Provjerite URL i pokušajte ponovno.
+    Username: Korisničko ime
+    Log In: Prijavi se
+    Register: Registriraj se
+    Pair Another Device: Upari drugi uređaj
+    Pair With Existing Device: Upari s postojećim uređajem
+    Device Name: Naziv uređaja
+    This Device: Ovaj uređaj
+    Device Name Required: Unesite naziv ovog uređaja.
+    Pairing Device Name Hint: Odaberite naziv koji ćete prepoznati na uređaju s kojeg ćete odobriti ovaj zahtjev.
+    Create Pairing Code: Izradi kôd za uparivanje
+    Creating Pairing Code: Izrada sigurnog kôda za uparivanje…
+    Pairing QR Alt: QR kôd za uparivanje uređaja {device}
+    Scan Pairing Code: Na već povezanom uređaju otvorite "Upari drugi uređaj" i skenirajte ovaj kôd.
+    Pairing Code: Kôd za uparivanje
+    Use Text Pairing Code: Umjesto toga upotrijebi tekstni kôd
+    Show QR Code: Prikaži QR kôd
+    Text Pairing Code Hint: Kopirajte ovaj kôd na postojeći uređaj. Sadržava tajni podatak za uparivanje pa ga nakon uparivanja izbrišite iz povijesti međuspremnika.
+    Pairing QR Warning: Ovaj kôd pokažite samo pouzdanom, već povezanom uređaju s kojeg ćete odobriti ovaj zahtjev. Istječe nakon dvije minute.
+    Pairing Expires: Kôd za uparivanje istječe u {time}.
+    Verifying Pairing: Provjera prenesenog ključa za zaštitu privatnosti…
+    Completing Pairing: Dovršavanje uparivanja uređaja…
+    Compare Pairing Codes: Usporedi kodove za uparivanje
+    Pairing Code Match Hint: Potvrdite samo ako se ovaj kôd podudara s kodom na postojećem uređaju.
+    Pairing Codes Match: Kodovi se podudaraju
+    Pairing Approval Code Hint: Ostavite ovaj prozor otvoren i usporedite ovaj kôd s kodom na novom uređaju. Novi uređaj ne smije nastaviti ako se kodovi razlikuju.
+    Pairing Scan Hint: Skenirajte kôd za uparivanje prikazan na uređaju koji dodajete.
+    Enter Pairing Code: Ručno unesi kôd
+    Pairing Code Entry Hint: Zalijepite kôd za uparivanje prikazan na uređaju koji dodajete.
+    Check Pairing Code: Provjeri kôd
+    Scan QR Code: Skeniraj QR kôd
+    Waiting For Pairing Code: Čekanje kôda za uparivanje…
+    Checking Pairing Request: Provjera zahtjeva za uparivanje…
+    Approving Pairing Request: Šifriranje i slanje ključa za zaštitu privatnosti…
+    Pairing Approval Warning: Odobrite samo ako ovaj zahtjev vidite na uređaju koji dodajete. Uparivanjem se omogućuje pristup računu i prenosi ključ za zaštitu privatnosti.
+    Approve Pairing: Odobri uparivanje
+    Try Again: Pokušaj ponovno
+    Scan Again: Skeniraj ponovno
+    Camera Unavailable: OpenTubeX nije mogao pristupiti kameri. Provjerite dopuštenje za kameru ili ručno unesite kôd za uparivanje.
+    Pairing Unsupported: Ovaj poslužitelj za sinkronizaciju ne podržava sigurno uparivanje uređaja.
+    Pairing Failed: Uparivanje uređaja nije uspjelo. Pokušajte ponovno s novim kodom.
+    Pairing Request Changed: Zahtjev za uparivanje promijenjen je, istekao ili je već iskorišten. Izradite novi kôd.
+    Pairing Server Mismatch: Ovaj kôd pripada drugom poslužitelju za sinkronizaciju.
+    Pairing Verification Unavailable: Nije dostupna nijedna šifrirana zbirka sinkronizacije za provjeru prenesenog ključa. Sinkronizirajte postojeći uređaj, a zatim pokušajte ponovno.
+    Pairing Completed: Uparivanje uređaja dovršeno
+    Pairing Approved: Uparivanje uređaja odobreno
+    Use Pairing Invite: Upotrijebi kôd s povezanog uređaja
+    Show Pairing Invite: Prikaži kôd za uparivanje
+    Scan Pairing Invite: Na uređaju koji dodajete otvorite "Upari s postojećim uređajem", odaberite "Upotrijebi kôd s povezanog uređaja" i skenirajte ovaj kôd.
+    Pairing Invite QR Alt: QR kôd za uparivanje uređaja koji dodajete
+    Pairing Invite Text Hint: Kopirajte ovaj kôd na uređaj koji dodajete. Omogućuje uređaju da zatraži pristup vašem računu pa ga nakon uparivanja izbrišite iz povijesti međuspremnika.
+    Pairing Invite Warning: Ovaj kôd pokažite samo uređaju koji dodajete. Njegov zahtjev i dalje morate odobriti na ovom uređaju.
+    Pairing Invite Scan Hint: Skenirajte kôd za uparivanje prikazan na vašem povezanom uređaju.
+    Pairing Invite Entry Hint: Zalijepite kôd za uparivanje prikazan na vašem povezanom uređaju.
+    Pairing Invite Code Hint: Zahtjev na povezanom uređaju odobrite samo ako se na njemu prikazuje ovaj kôd. Uparivanje se zatim automatski dovršava.
+    Pairing Invite Approval Hint: Odobrite samo ako uređaj koji dodajete prikazuje ovaj kôd.
+    Pairing Invite Approved: Uparivanje odobreno. Novi uređaj automatski dovršava uparivanje.
+    Disconnect: Prekini vezu
+    Delete Account: Izbriši račun za sinkronizaciju
+    Delete Account Confirmation: Izbrisati račun za sinkronizaciju?
+    Delete Account Warning: Time ćete trajno izbrisati račun za sinkronizaciju i sve podatke pohranjene na ovom poslužitelju. Lokalni podaci aplikacije OpenTubeX neće se izbrisati.
+    Confirm Delete Account: Izbriši račun
+    Password Required: Lozinka je obvezna
+    Account Deleted: Račun za sinkronizaciju izbrisan
+    Connected as: Povezani ste kao {username}
+    Profiles: Profili
+    Open Tabs: Otvorene kartice i sesija
+    Disable Setting Sync: Prestani sinkronizirati ovu postavku
+    Enable Setting Sync: Sinkroniziraj ovu postavku
+    Sync Now: Sinkroniziraj sada
+    Downloading encrypted data: Preuzimanje šifriranih podataka sinkronizacije…
+    Syncing subscriptions: Sinkroniziranje pretplata…
+    Syncing playlists: Sinkroniziranje popisa za reprodukciju…
+    Syncing history: Sinkroniziranje povijesti gledanja…
+    Syncing statistics: Sinkronizacija statistike gledanja…
+    Syncing profiles: Sinkroniziranje profila…
+    Syncing open tabs: Sinkroniziranje otvorenih kartica i sesije…
+    Syncing settings: Sinkroniziranje postavki…
+    Uploading encrypted data: Slanje šifriranih podataka sinkronizacije…
+    Finishing sync: Dovršavanje sinkronizacije…
+    Sync progress percentage: '{percentage}%'
+    Last synced: 'Posljednja sinkronizacija: {date}'
+    History not supported: Ova inačica poslužitelja ne podržava sinkronizaciju povijesti gledanja.
+    Settings not supported: Ova inačica poslužitelja ne podržava sinkronizaciju postavki.
+    Sync completed: Sinkronizacija dovršena
+    Sync failed: 'Sinkronizacija nije uspjela: {error}'
+    Data Loss Confirmation: Potvrditi sinkronizaciju koja briše podatke?
+    Data Loss Warning: Sinkronizacija bi na svim uređajima izbrisala {deleted} od {previous} prethodno sinkroniziranih stavki u „{collection}”. Ako ih niste izbrisali vi, primjerice zato što je poslužitelj ponovno postavljen, zadržite ih kako biste ih vratili posvuda.
+    Keep Deleted Items: Zadrži stavke
+    Confirm Data Loss: Izbriši i nastavi
+    Use Shared Tabs: 'Upotrebljavaj jedan zajednički skup kartica na svim uređajima'
+    Shared Tabs Warning: 'Otvorene kartice na ovom uređaju postaju zajednički skup. Drugi uređaji pri sinkronizaciji zamjenjuju svoje otvorene kartice tim skupom; kartice s različitih uređaja ne spajaju se.'
+    Tabs From Other Devices: 'Kartice s drugih uređaja'
+    Mobile Device: 'Mobilni uređaj'
+    Desktop Device: 'Računalo'
+    Open All Tabs: 'Otvori sve kartice'
+    Open All Tabs Confirmation: "Otvoriti sve kartice?"
+    Server Update Required: "Ažurirajte ovaj poslužitelj za podršku šifriranoj sinkronizaciji u stvarnom vremenu."
+    Log In with Provider: 'Prijava putem {provider}'
+    Log In with Single Sign-On: 'Prijava jedinstvenom prijavom'
+    Continue in Browser: 'Nastavite u pregledniku. OpenTubeX nastavlja kada završite.'
+    Connected with Single Sign-On: 'Povezano jedinstvenom prijavom'
+    Delete Single Sign-On Account Hint: 'Otvorit će se preglednik kako biste brisanje potvrdili kod svog pružatelja prijave.'
+  Proxy Settings:
+    IP Block Recovery Script Path: Skripta za oporavak od blokiranja IP-a
+    Running IP block recovery script: Izvršavanje skripte za oporavak nakon blokiranja IP adrese
+    IP block recovery script failed: 'Skripta za oporavak nakon blokiranja IP adrese nije uspjela (izlazni kôd: {exitCode})'
+    IP block recovery script finished: Skripta za oporavak nakon blokiranja IP adrese završila je s radom
+    Reloading video after IP block recovery: Ponovno učitavanje videozapisa nakon oporavka od blokiranja IP adrese
+    Failed to select IP block recovery script: Odabir skripte za oporavak nakon blokiranja IP adrese nije uspio
+  SponsorBlock Settings:
+    Excluded Channels:
+      Excluded Channels: "Izuzeti kanali"
+      Tooltip: "Unesite ID kanala kako se segmenti SponsorBlocka ne bi preskakali u njegovim videozapisima. ID se mora točno podudarati i razlikuje velika i mala slova."
+    Enable SponsorBlock Submission: Omogući slanje podataka u SponsorBlock
+    SponsorBlock Private User ID (optional): Privatni korisnički ID (neobavezno)
+    SponsorBlock Private User ID Tooltip: Zalijepite privatni korisnički ID za SponsorBlock iz proširenja preglednika. Ostavite prazno da biste upotrijebili ID koji je stvorila aplikacija.
+    Generated SponsorBlock User ID: Stvoreni korisnički ID za SponsorBlock
+    Generated SponsorBlock User ID Tooltip: Ovaj korisnički ID za SponsorBlock koji je stvorila aplikacija možete upotrijebiti u proširenju preglednika ili pri uporabi aplikacije na drugom računalu.
+    Reveal Generated User ID: Prikaži stvoreni korisnički ID
+    Generated SponsorBlock User ID Copy Button: Kopiraj stvoreni korisnički ID za SponsorBlock
+    Generated SponsorBlock User ID Copied: Stvoreni korisnički ID za SponsorBlock kopiran je u međuspremnik
+    Skip notification timeout: Trajanje obavijesti o preskakanju
+    Custom Color: Prilagođena boja
+    DeArrow Settings: DeArrow
+    Always Show DeArrow Badge: Uvijek prikaži DeArrow oznaku
+  Return YouTube Dislike Settings:
+    Return YouTube Dislike Settings: Return YouTube Dislike
+    Enable Return YouTube Dislike: Omogući Return YouTube Dislike
+    Return YouTube Dislike Url: URL API-ja
+  Password Dialog:
+    Incorrect Password: Neispravna lozinka
+    Unlock: Otključaj
+    Unlocking: Otključavanje…
+  Search Settings: Postavke pretraživanja
+  No Settings Found: Nisu pronađene postavke
+  Experimental Settings:
+    Disable Hardware Acceleration: Onemogući hardversko ubrzanje
+  Interface Customizer:
+    Customize Interface: "Prilagodi sučelje"
+    Preview: "Pregled"
+    Player: "Player"
+    Desktop: "Računalo"
+    Mobile: "Mobitel"
+    Playing: "Reproducira se"
+    Player Menu: "Izbornik playera"
+    Fullscreen: "Cijeli zaslon"
+    Paused: "Pauzirano"
+    Controls: "Kontrole"
+    Example Video Title: "Primjer videa"
+    Resolution: "Razlučivost"
+    Loop: "Ponavljanje"
+    Off: "Isključeno"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Sakrij kanale s nekvalitetnim AI sadržajem
+    Hide AI Slop Channels Tooltip: Skriva kanale s popisa blokiranja AiSList koji održava zajednica (aisloplist.com) iz rezultata pretrage, trendova i preporuka te označava videozapise kanala s njegova popisa upozorenja. Pretplate nisu obuhvaćene. Popisi se preuzimaju s GitHuba jednom dnevno i primjenjuju se samo na rezultate učitane putem lokalnog sučelja.
+    Downloading: Preuzimanje popisa…
+    Failed to Download: Nije moguće preuzeti popise
+    Loaded Status: "Blokirani kanali: {blocked} · Označeni kanali: {warned} · Ažurirano: {date}"
+Tutorial:
+  Skip: Preskoči
+  Next: Dalje
+  Finish: Završi
+  Welcome:
+    Title: Dobro došli u OpenTubeX
+    Description: Počnite ispočetka ili prenesite svoje pretplate, povijest i popise za reprodukciju iz druge aplikacije ili sigurnosne kopije.
+    Start Fresh: Počni ispočetka
+    Import Data: Uvezi podatke
+  Preferences:
+    Title: Prilagodite aplikaciju sebi
+    Description: Odaberite temu, početnu stranicu i regiju. To i još mnogo toga možete bilo kada promijeniti u postavkama.
+  Playback:
+    Title: Reprodukcija i privatnost
+    Description: Odaberite kako se reproduciraju videozapisi, pamti li OpenTubeX što gledate te koje dodatke zajednice koristi.
+  Navigation:
+    Title: Vaša je zbirka uvijek nadohvat ruke
+    Description: Pomoću navigacije pristupite pretplatama, popisima za reprodukciju, povijesti i ostalom sadržaju.
+  Search:
+    Title: Pretražite ili zalijepite poveznicu
+    Description: Pronađite videozapise i kanale ili zalijepite podržani URL videozapisa izravno u polje za pretraživanje.
+  Tabs:
+    Title: Držite stranice otvorene u karticama
+    Description: Otvorite više stranica odjednom bez gubljenja mjesta na kojem ste stali.
+  Profile Menu:
+    Title: Postavke i profili
+    Description: Izbornik profila sadrži brze postavke, preuzimanja i sve ostale postavke. Desnom tipkom miša kliknite na njega za promjenu profila.
+    Touch Description: Izbornik profila sadrži brze postavke, preuzimanja i sve ostale postavke. Dodirnite ga i zadržite za promjenu profila.
+About:
+  Project: Projekt
+  Community: Zajednica
+  Contribute: Doprinesi
+  Documentation: Dokumentacija
+  Downloads: Preuzimanja
+  Changelog: Dnevnik promjena
+  Commit: Commit
+  Matrix: Matrix
+  Email: E-pošta
+  Show tutorial: Prikaži vodič
+Profile:
+  Customization: Prilagodba
+  Manage Profile Subscriptions: Upravljaj pretplatama profila
+  Icon Names:
+    Person: Osoba
+    People: Ljudi
+    Headphones: Slušalice
+    Gaming: Igre
+    Film: Film
+    Art: Umjetnost
+    Science: Znanost
+    Globe: Globus
+    Heart: Srce
+    Sun: Sunce
+    Moon: Mjesec
+    Trophy: Trofej
+  Profile Icon: Ikona profila
+  Choose an Emoji: Odaberi emoji
+  Custom Emoji: Prilagođeni emoji
+  Choose Image: Odaberi sliku
+  Crop Image: Obreži sliku
+  Zoom: Zumiranje
+  Apply Crop: Primijeni obrezivanje
+  Transparent: Prozirno
+  Use Initial: Upotrijebi početno slovo
+  The selected image could not be loaded: Odabranu sliku nije moguće učitati
+  Theme Color: Boja teme
+  Go To Profile Manager: Otvori upravitelja profila
+Channel:
+  Hide Watched: Sakrij pogledane
+  Fewer videos per day: "Manje videozapisa dnevno"
+  More videos per day: "Više videozapisa dnevno"
+  Verified: Potvrđeno
+  Official Artist Channel: Službeni kanal izvođača
+  About:
+    Links: Poveznice
+  Subscription settings: Postavke pretplate
+  Failed to save subscription settings: Nije moguće spremiti postavke kanala
+  Videos per day: Videozapisa dnevno
+  Use global setting: Koristi globalnu postavku
+  Unlimited: Neograničeno
+  More videos hidden: '+{count} više | +{count} više | +{count} više'
+  Show in subscription feed: Prikaži u sažetku pretplata
+  Notify about new uploads: Obavijesti o novom sadržaju
+  Show members-only videos: Prikaži videozapise samo za članove
+  Upload Notifications On: "Primat ćete obavijesti o novom sadržaju kanala {channelName} kad se pretplate osvježe"
+  Upload Notifications Off: "Nećete primati obavijesti o novom sadržaju kanala {channelName}"
+  Upload Notifications Disabled In Settings: "Obavijesti za {channelName} su uključene, ali obavijesti o novom sadržaju isključene su u postavkama"
+  Turn On Upload Notifications: "Uključi"
+  Channel Name Unavailable: Naziv kanala nije dostupan
+  Search Result Types: Vrste rezultata pretraživanja
+  All Results: Sve
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "Ovaj kanal ima videozapise, ali nijedan se nije mogao prikazati. Pokušajte učitati još"
+  Posts:
+    Original post unavailable: "Izvorna objava nije dostupna"
+    Members-only video hidden by OpenTubeX: "OpenTubeX je sakrio videozapis samo za članove"
+    Video hidden by OpenTubeX because of its title: "OpenTubeX je sakrio videozapis jer njegov naslov sadrži skriveni tekst"
+  Shows:
+    Shows: Emisije
+    This channel does not currently have any shows: Ovaj kanal trenutno nema emisije
+Video:
+  Play in Background: "Reproduciraj u pozadini"
+  Info panel source: 'Izvor: {source}'
+  External DRM Protected: "DRM-om zaštićena videa ne mogu se reproducirati u OpenTubeXu jer zahtijevaju vlasničke komponente zatvorenog koda."
+  Invalid Media URL: "Nevažeći URL medija"
+  Mark As Fully Watched: Označi kao pogledano do kraja
+  AI-generated video summary: "Sažetak videozapisa generiran umjetnom inteligencijom"
+  Quality and accuracy may vary: "Kvaliteta i točnost mogu varirati"
+  Includes paid promotion: Sadržava plaćenu promociju
+  Age Restricted Badge: Dobno ograničeno
+  Music Video Badge: Glazbeni video
+  Queue: Red čekanja
+  Play Next: Reproduciraj sljedeće
+  Add to Queue: Dodaj u red čekanja
+  Added to Play Next: Videozapis će se reproducirati kao sljedeći
+  Added to Queue: Videozapis je dodan u red čekanja
+  Clear Queue: Očisti red čekanja
+  Queue Video Count: '{count} videozapis | {count} videozapisa | {count} videozapisa'
+  Remove from Queue: Ukloni {title} iz reda čekanja
+  Remove Video from Queue: Ukloni iz reda čekanja
+  Drag to Reorder Queue: Povucite {title} da biste promijenili redoslijed u redu čekanja
+  Reorder Queue Item: Promijeni redoslijed stavke {title}
+  Reorder Queue Item Instructions: Tipkama sa strelicama gore i dolje pomaknite ovaj videozapis u redu čekanja.
+  Queue Item Moved: Stavka {title} premještena je na položaj {position} od {total}.
+  Queue Item Cannot Move Up: Stavku {title} nije moguće pomaknuti prema gore. Već je na položaju 1 od {total}.
+  Queue Item Cannot Move Down: Stavku {title} nije moguće pomaknuti prema dolje. Već je na položaju {total} od {total}.
+  Metadata: Podaci o videozapisu
+  Close Metadata: Zatvori podatke o videozapisu
+  Metadata Cache:
+    Title History: Povijest naslova
+    Thumbnail History: Povijest minijatura
+    Description History: Povijest opisa
+    Previous Version: Prethodna verzija {number}
+    Empty: (prazno)
+  Fetching Streams: Dohvaćanje tokova putem yt-dlp-a…
+  Waiting For Connection: "Poslužitelj nije dostupan. Automatski ponovni pokušaj…"
+  Retry Now: "Pokušaj ponovo sada"
+  Transcript:
+    Title: Prijepis
+    Search: Pretraži prijepis
+    Language: Jezik prijepisa
+    Save: Spremi
+    Show: Prikaži prijepis
+    Hide: Sakrij prijepis
+    Close: Zatvori prijepis
+    Copied: Prijepis je kopiran u međuspremnik
+    Saved: Prijepis je spremljen
+    Save Error: Prijepis nije moguće spremiti
+    Text File: Tekstna datoteka
+    Unavailable: Prijepis nije dostupan za ovaj videozapis.
+    Load Error: Prijepis nije moguće učitati.
+    Empty: Ovaj prijepis ne sadrži tekst.
+    No Results: Nijedan dio prijepisa ne odgovara vašem pretraživanju.
+  Retry With Built-in Extraction: Pokušaj ponovno s ugrađenim izdvajanjem
+  Retry With yt-dlp Extraction: Pokušaj ponovno s izdvajanjem putem yt-dlp-a
+  Reloading video after streaming URL error: Ponovno učitavanje videozapisa nakon pogreške URL-a toka
+  Configure Restricted Playback Cookies Hint: "Konfigurirajte kolačiće u Postavke → Napredno → Vanjski softver → yt-dlp kolačići."
+  Try With Configured Cookies: Pokušaj s konfiguriranim kolačićima
+  Restricted Playback Authentication Failed Template: 'yt-dlp nije mogao pristupiti ovom videozapisu s konfiguriranim kolačićima: {error}'
+  Collapse Playlist: Sažmi popis za reprodukciju
+  Expand Playlist: Proširi popis za reprodukciju
+  Unmark As Watched: Označi kao neodgledano
+  Video has been unmarked as watched: Videozapis je označen kao neodgledan
+  Save Channel Playback Speed: Spremi brzinu reprodukcije kanala
+  Channel Playback Speed Saved: Brzina reprodukcije kanala spremljena je
+  Save Channel Video Quality: Spremi kvalitetu videozapisa za kanal
+  Channel Video Quality Saved: Kvaliteta videozapisa za kanal spremljena je
+  Save Channel Subtitles State: Spremi stanje titlova za kanal
+  Channel Subtitles State Saved: Stanje titlova za kanal spremljeno je
+  Save Channel Volume: Spremi glasnoću za kanal
+  Channel Volume Saved: Glasnoća za kanal spremljena je
+  Save Channel Setting: Spremi postavku kanala…
+  Channel Setting Already Set: 'Postavka {setting} već ima vrijednost {value}'
+  Video has been saved to {playlistName}: Videozapis je spremljen na popis za reprodukciju {playlistName}
+  Video has been removed from {playlistName}: Videozapis je uklonjen s popisa za reprodukciju {playlistName}
+  There was a problem saving the video to {playlistName}: Došlo je do problema pri spremanju videozapisa na popis za reprodukciju {playlistName}
+  There was a problem removing the video from {playlistName}: Došlo je do problema pri uklanjanju videozapisa s popisa za reprodukciju {playlistName}
+  Failed to load collaborators: Suradnike nije moguće učitati
+  Notify me: Obavijesti me
+  Notification on: Obavijesti su uključene
+  Notification enabled: Primit ćete obavijest kada ovaj videozapis počne
+  Notification cancelled: Obavijest o početku otkazana je
+  Notification unavailable: Obavijesti sustava nisu dostupne
+  Scheduled video starting: Zakazani videozapis počinje
+  Live notification body: '{videoTitle} počinje sada'
+  Premiere: Premijera
+  AI: AI
+  AI-generated content: Sadržaj koji je generirala umjetna inteligencija
+  Collaborators: Suradnici
+  Live Chat Replay: Ponovna reprodukcija razgovora uživo
+  Show Live Chat: Prikaži razgovor uživo
+  Show Live Chat Replay: Prikaži ponovnu reprodukciju razgovora uživo
+  Close Live Chat: Zatvori razgovor uživo
+  Close Live Chat Replay: Zatvori ponovnu reprodukciju razgovora uživo
+  Live Chat Settings: Postavke razgovora uživo
+  Show Live Chat Timestamps: Prikaži vremenske oznake
+  Chat Filter: Filtar razgovora
+  Top Chat: Istaknute poruke
+  All Messages: Sve poruke
+  Live chat replay is enabled. Chat messages will appear here as the video plays.: Omogućena je ponovna reprodukcija razgovora uživo. Poruke će se prikazivati ovdje tijekom reprodukcije videozapisa.
+  Premiere started: Premijera je u tijeku. Započela je {timeAgo}
+  Sponsor Block category:
+    hook: Uvod/pozdravi
+  Sponsor Block category short:
+    filler: Digresije
+  Player:
+    Playing in Picture-in-Picture: Reproducira se u načinu slika u slici
+    Stream Recovery:
+      DASH Fallback: "Audio stream nije uspio, prebacivanje na DASH formate: {error}"
+      Error Copied: "Greška kopirana u međuspremnik"
+      Legacy Fallback: "Stream nije uspio, prebacivanje na starije formate: {error}"
+    Caption Timing:
+      Adjust Timing: Prilagodi vrijeme…
+      Caption Timing: Vrijeme titlova
+      Offset: Pomak (sekunde)
+      Hint: Negativne vrijednosti prikazuju titlove ranije, a pozitivne kasnije. Samo za ovaj video.
+      Earlier: Ranije
+      Later: Kasnije
+      Reset: Poništi
+    Most Replayed: "Najčešće ponovno reproducirano"
+    Pull up for precise seeking: "Povucite prema gore za precizno premotavanje"
+    Precise seeking, drag down to exit: "Precizno premotavanje · Povucite prema dolje za izlaz"
+    Cast: "Emitiraj"
+    Music Mode: "Glazbeni način"
+    Music Mode Description: "Reproducirajte videozapise brzinom 1× i pokrenite nove videozapise od početka u ovoj kartici. Vaše spremljene zadane postavke reprodukcije ostaju nepromijenjene."
+    DLNA:
+      Cast: "Prijenos na DLNA uređaj"
+      Stop: "Zaustavi prijenos"
+      No Devices: "Nisu pronađeni DLNA uređaji"
+      No MP4 Source: "Nema kompatibilnog MP4 toka za ovaj videozapis"
+      Error: "Videozapis nije moguće prenijeti"
+    Repeat Stats:
+      Repeat Stats: Statistika ponavljanja
+      Looping: Ponavljanje uključeno
+      Repeats: Ponavljanje | Ponavljanja | Ponavljanja
+      Time Spent: Provedeno vrijeme
+    Voice-over Translation:
+      Start: Prevedi
+      Cancel: Odustani
+      Progress: Priprema glasovnog prijevoda…
+      Retry: Pokušaj ponovno
+      Error: Glasovni prijevod nije uspio. Pokušajte ponovno poslije.
+      Duration Error: Glasovni prijevod dostupan je samo za videozapise koji traju do četiri sata.
+    Caption Appearance:
+      Options: Mogućnosti
+      Sample: Ovako izgledaju titlovi
+    Auto-translate: Automatski prijevod
+    Sleep Timer:
+      Sleep Timer: Mjerač vremena za isključivanje
+      'Off': 'Isključeno'
+      Minutes: '{minutes} min'
+      End of video: Na kraju videozapisa
+      End of current chapter: Kraj trenutačnog poglavlja
+      Remaining: 'Preostalo: {time}'
+      Cancel timer: Otkaži mjerač vremena
+      Timer ended: Mjerač vremena za isključivanje je istekao
+    A-B Repeat:
+      A-B Repeat: A-B ponavljanje
+      'Off': Isključeno
+      Point A: Točka A
+      Point B: Točka B
+      Set Repeat Start: Postavi početak ponavljanja
+      Set Repeat End: Postavi kraj ponavljanja
+      Pause Repeat: Pauziraj A-B ponavljanje
+      Resume Repeat: Nastavi A-B ponavljanje
+      Adjust Point: 'Prilagodi točku {point}, trenutačno {timestamp}'
+      Clear Range: Očisti raspon A-B ponavljanja
+      End Before Start: Točka B mora biti nakon točke A.
+      Outside Duration: Vremenska oznaka mora biti unutar videozapisa.
+      Cleared: A-B ponavljanje je očišćeno
+    Seek History:
+      Seek History: Povijest premotavanja
+      Positions: '{count} položaj | {count} položaja | {count} položaja'
+      Nothing to undo: Nema ništa za poništavanje
+      Nothing to redo: Nema ništa za ponavljanje
+    Zoom:
+      Zoom: Zumiranje
+      'Off': 'Isključeno'
+    Volume Boost:
+      Volume Boost: "Pojačanje glasnoće"
+      'Off': "Isključeno"
+    Auto-generated Caption Template: '{language} (automatski generirano)'
+    Up next in {seconds}: Sljedeći videozapis za {seconds}
+    Resize dock: Promijeni veličinu usidrenog okna
+    Resize dock width: Promijeni širinu usidrenog okna
+    Play now: Reproduciraj sada
+    MusicPlaybackRateOverride: Otkriven je glazbeni videozapis pa se reproducira brzinom 1x
+    Normal: Uobičajeno
+    Set Default: Postavi kao zadano
+    Hide Annotations: Sakrij napomene
+    Show Annotations: Prikaži napomene
+    Hide: Sakrij
+    Show: Prikaži
+    Scroll Mini Player:
+      Collapse Controls: "Sažmi kontrole"
+      Expand Controls: "Proširi kontrole"
+      Back to Top: Povratak na vrh
+      Return to Video Tab: Povratak na karticu videozapisa
+      Hide: Sakrij mini reproduktor
+      Play: Reproduciraj
+      Pause: Pauziraj
+      Drag Handle: Premjesti minireproduktor
+      Rewind 10 seconds: Premotaj 10 sekundi unatrag
+      Forward 10 seconds: Premotaj 10 sekundi unaprijed
+    SponsorBlock:
+      CancelCurrentSegment: Odustani od izrade segmenta
+      ClearSegments: Očisti segmente
+      ClearSegmentsPrompt: Jeste li sigurni da želite ukloniti sve nacrte segmenata SponsorBlocka za ovaj videozapis?
+      CompleteSegmentsBeforeSubmitting: Dovršite svaki nacrt segmenta prije slanja.
+      CategoryLabel: Kategorija
+      ActionTypeLabel: Vrsta segmenta
+      DuplicateSegments: Jednaki nacrti segmenata nisu dopušteni.
+      EndAction: (Kraj)
+      EndActionLabel: Kraj
+      EndTimeAfterStart: Vrijeme završetka segmenta mora biti nakon vremena početka.
+      EndTimeBeforeVideoEnd: Vrijeme završetka segmenta mora biti unutar trajanja videozapisa.
+      EndTimeLabel: Vrijeme završetka segmenta
+      Guidelines: Smjernice
+      InspectSegment: Pregledaj
+      InvalidStartTime: Unesite valjano vrijeme početka segmenta.
+      NoSegmentsToSubmit: Izradite barem jedan dovršen segment prije slanja.
+      NowAction: (Sada)
+      CloseInfoPanel: Zatvori informacije o SponsorBlocku
+      OpenInfoPanel: Otvori informacije o SponsorBlocku
+      OpenSubmissionMenu: Otvori izbornik za slanje
+      PreviewRequired: Pregledajte svaki segment prije slanja.
+      PreviewSegment: Pregledaj
+      SaveSegment: Spremi
+      SetSegmentEndNow: Završi segment sada
+      StartAction: (Početak)
+      StartSegmentNow: Započni segment sada
+      SubmissionBadRequest: SponsorBlock je odbio zahtjev za slanje.
+      SubmissionDuplicate: Ovo je već poslano.
+      SubmissionFailed: Slanje segmenata SponsorBlocka nije uspjelo.
+      SubmissionForbidden: SponsorBlock je odbio slanje.
+      SubmissionRateLimited: SponsorBlock je ograničio učestalost slanja.
+      SubmissionSuccess: Segmenti SponsorBlocka poslani su.
+      SubmitSegment: Pošalji segment
+      SubmitSegments: Pošalji
+      StartTimeLabel: Vrijeme početka segmenta
+      TimeDivider: do
+      SkipPrompt: Preskočiti {segmentCategory}?
+      SkipPromptAction: Preskoči
+      SkipToHighlight: Preskočiti na istaknuti dio?
+      SkippedToHighlight: Preskočeno na istaknuti dio
+      SkipToastUnskip: Poništi preskakanje
+      SkipToastReskip: Ponovno preskoči
+      MutedSegment: 'Utišano: {segmentCategory}'
+      MuteToastUnmute: Uključi zvuk
+      InfoPanelLoading: Segmenti se još učitavaju…
+      InfoPanelHasSegments: Ovaj videozapis ima segmente u bazi podataka!
+      InfoPanelNoSegments: Nisu pronađeni segmenti
+      RefreshInfo: Osvježi informacije o SponsorBlocku
+      ContributionStatsTitle: Vaši doprinosi
+      ContributionStatsLoading: Učitavanje statistike doprinosa…
+      ContributionStatsError: Statistika doprinosa nije dostupna. Pokušajte je osvježiti.
+      ContributionStatsNoUserId: Pošaljite segment ili uvezite svoj korisnički ID za SponsorBlock kako biste vidjeli statistiku doprinosa.
+      Submissions: Poslani segmenti
+      Segments: Segmenti
+      TimeSaved: Ušteđeno vrijeme
+      AutoSkipEnabled: Automatski preskači segmente
+      AutoSkipOn: 'Uključeno'
+      AutoSkipOff: 'Isključeno'
+      WhitelistChannel: Dodaj kanal na popis dopuštenih
+      ChannelWhitelisted: Na popisu dopuštenih
+      RemoveChannelFromWhitelist: Ukloni kanal s popisa dopuštenih
+      MuteSegment: Utišaj segment
+      SkipSegment: Preskoči segment
+      CloseSegmentActions: Zatvori radnje segmenta
+      FullVideo: Cijeli videozapis
+      FullVideoLabel: '{segmentCategory} · Cijeli videozapis'
+      MuteActionType: Utišaj
+      MutePrompt: Utišati {segmentCategory}?
+      SkipActionType: Preskoči
+      LockedSegment: Zaključani segment
+      UpvoteSegment: Glasaj za
+      DownvoteSegment: Glasaj protiv
+      VoteFailed: Slanje glasa u SponsorBlock nije uspjelo.
+      ChangeCategory: Promijeni kategoriju
+      CopyAndDownvote: Kopiraj i glasaj protiv
+      SubmitCategoryVote: Pošalji glas za kategoriju
+      CategoryVoteSuccess: Glas za kategoriju je poslan.
+    Google Cast:
+      Position: "Položaj reprodukcije"
+      Invalid Authentication: "Prijamnik je poslao nevažeći odgovor za provjeru autentičnosti."
+      Authentication Declined: "Prijamnik je odbio provjeru autentičnosti."
+      Audio Only Receiver: "Prijamnik podržava samo emitiranje zvuka."
+      Disconnected: "Prijamnik se odspojio."
+      Timeout: "Prijamnik nije odgovorio."
+      Busy: "Drugi prozor već emitira."
+      Not Authorized: "Aktivirajte ovaj prozor i pokušajte ponovno."
+      Invalid Request: "Nevažeći zahtjev za emitiranje."
+      IPv4 Required: "Potrebna je IPv4 veza."
+      Launch Failed: "Prijamnik nije moguće pokrenuti."
+      Load Failed: "Prijamnik nije mogao učitati video."
+      Cancelled: "Emitiranje je otkazano."
+      Private Not Authorized: "Pristup privatnim medijima nije odobren."
+      Invalid Subtitles: "Nevažeći titlovi za emitiranje."
+      Discovery Failed: "Prijamnike nije moguće potražiti."
+      Preparing Video: "Priprema videozapisa za emitiranje…"
+      Connecting: "Povezivanje s {device}…"
+      Starting Receiver: "Pokretanje Cast prijamnika…"
+      Loading Video: "Učitavanje videozapisa na prijamniku…"
+      Buffering: "Spremanje u međuspremnik na {device}…"
+      Allow Private Instance: "Dopustiti ovom emitiranju čitanje medija s privatne instance Invidious {instance}?"
+      Cast: "Emitiraj na uređaj Google Cast"
+      Connected: "Emitiranje na {device}"
+      Rewind: "Natrag 10 sekundi"
+      Forward: "Naprijed 10 sekundi"
+      Subtitles Off: "Isključi titlove"
+      Return: "Vrati se na lokalnu reprodukciju"
+      No Devices: "Nisu pronađeni uređaji Google Cast"
+      No Source: "Nema kompatibilnog toka za Google Cast"
+      Error: "Videozapis nije moguće prenijeti"
+      Error With Details: "Videozapis nije moguće prenijeti: {error}"
+      Untrusted Receiver: "Certifikat prijamnika nije pouzdan. Upotrijebite autentificirani Google Cast prijamnik."
+    FCast:
+      Cast: "Emitiraj na prijamnik FCast"
+      No Devices: "Nisu pronađeni prijamnici FCast"
+      No Source: "Nema kompatibilnog toka za FCast"
+    Secondary Captions: Sekundarni titlovi
+    Subtitle File:
+      Load: "Učitaj datoteku titlova…"
+      Subtitle Files: "Datoteke titlova"
+      Error: "Datoteku titlova nije moguće učitati. Odaberite SRT ili WebVTT datoteku."
+  Station: Postaja
+  Playlist:
+    Unavailable videos are hidden: '{count} nedostupan videozapis je skriven | {count} nedostupna videozapisa su skrivena | {count} nedostupnih videozapisa je skriveno'
+  External Media:
+    Dislikes: "Nesviđanje | Nesviđanja | Nesviđanja"
+    Reposts: "Ponovna objava | Ponovne objave | Ponovnih objava"
+    Saves: "Spremanje | Spremanja | Spremanja"
+    Series: "Serija"
+    Season: "Sezona"
+    Season Number: "Broj sezone"
+    Episode: "Epizoda"
+    Episode Number: "Broj epizode"
+    Track: "Glazbeni zapis"
+    Track Number: "Broj zapisa"
+    Artists: "Umjetnici"
+    Album: "Album"
+    Genres: "Žanrovi"
+    Media Type: "Vrsta medija"
+    Availability: "Dostupnost"
+    Age Limit: "Dobna granica"
+    Release Date: "Datum izdavanja"
+    Availability Values:
+      public: "Javno"
+      private: "Privatno"
+      premium_only: "Samo Premium"
+      subscriber_only: "Samo pretplatnici"
+      needs_auth: "Potrebna je prijava"
+      unlisted: "Nije javno navedeno"
+  How this was made: Kako je ovo izrađeno
+  Save Queue to Playlist: "Spremi red čekanja u zbirku"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Razgovor uživo trenutačno nije podržan s Yattee poslužiteljem. Potrebna je izravna veza s YouTubeom.
+  External Player:
+    LaunchFailedTemplate: Nije moguće pokrenuti {externalPlayer}. Provjerite je li instaliran ili postavite putanju izvršne datoteke u postavkama vanjskog playera.
+    Confirm Arguments Title: "Pokrenuti vanjski player s prilagođenim argumentima?"
+    Confirm Arguments Message: "{externalPlayer} će se pokrenuti s ovim prilagođenim argumentima:"
+    Confirm Arguments Warning: "Neki argumenti mogu pokretati programe ili prepisivati datoteke. Nastavite samo ako ste ih sami dodali."
+    Run: "Pokreni"
+    LaunchCanceledTemplate: "{externalPlayer} nije otvoren"
+Playlist:
+  Playlist Already Preloaded: "Svi videozapisi na popisu već su predučitani"
+  Playlist Preload Progress: "Predučitavanje videozapisa: {completed} od {requested}"
+  Close Playlist: Zatvori popis za reprodukciju
+  Preload Playlist: "Predučitaj sve videozapise"
+  Preload Playlist Warning Title: "Predučitati sve videozapise?"
+  Preload Playlist Warning: "Predučitavanje od YouTubea traži svaki videozapis s ovog popisa za reprodukciju. Slanje mnogo zahtjeva u kratkom vremenu može dovesti do toga da YouTube privremeno blokira vašu IP adresu. Želite li nastaviti?"
+  Preloading Playlist: "Predučitavanje svih videozapisa..."
+  Playlist Preload Complete: "Predučitani videozapisi: {count}."
+  Playlist Preload Partial: "Predučitano je {preloaded} od {requested} videozapisa. Predučitavanje {failed} videozapisa nije uspjelo."
+  Playlist Preload Pagination Failed: "Cijeli popis nije se mogao učitati pa je predučitavanje otkazano."
+  Unavailable videos are hidden: Nedostupni videozapisi su skriveni
+  Add Playlist to Queue: "Dodaj zbirku u red čekanja"
+  Playlist Added to Queue: "Zbirka je dodana u red čekanja"
+Change Format:
+  yt-dlp Error Template: "yt-dlp nije mogao pružiti streamove: {error}"
+  Local Video File: Lokalna videodatoteka
+  Local Audio File: Lokalna audiodatoteka
+  Online Video: Mrežni videozapis
+  Stream Source: Izvor toka
+  Stream Extraction Method: Način izdvajanja toka
+  Playback Engine: Modul za reprodukciju
+  Streaming Protocol: Protokol strujanja
+  Not Available For This Video: Nije dostupno za ovaj videozapis
+  Protocols:
+    Progressive: Progresivni
+  Descriptions:
+    Local File: Reproducira se izravno iz preuzete datoteke na ovom uređaju
+    Online Video: Učitaj formate tokova iz konfiguriranog mrežnog izvora
+    Dash: Prilagodljiva kvaliteta, više zvučnih zapisa i najveće razlučivosti
+    Legacy: Jedna datoteka sa spojenim videozapisom i zvukom, ograničena na niže razlučivosti
+    Audio: Samo zvuk, korisno za uštedu podatkovnog prometa ili slušanje u pozadini
+  yt-dlp Fallback Template: 'yt-dlp nije mogao dohvatiti tokove pa se umjesto njega upotrebljava ugrađeni modul: {error}'
+  yt-dlp Default Clients Fallback: Preferirani klijenti yt-dlp-a nisu mogli dohvatiti tokove koji se mogu reproducirati pa se pokušava sa zadanim klijentima yt-dlp-a
+  Built-in Fallback Template: 'Ugrađeni modul nije mogao reproducirati tok pa se pokušava putem yt-dlp-a: {error}'
+Share:
+  Shared YouTube Link: "Podijeljena YouTube poveznica"
+  Open in Player: "Otvori u reproduktoru"
+  No YouTube Link: "Podijeljeni tekst ne sadrži podržanu YouTube poveznicu."
+  Loading Video Information: "Učitavanje podataka o videozapisu…"
+  Video Information Failed: "Nije moguće učitati podatke o videozapisu. Pokušajte ponovno ili otvorite poveznicu."
+  Share Link: "Podijeli poveznicu"
+  Share failed: "Poveznicu nije moguće podijeliti"
+  Timestamp Link Copied: Poveznica s vremenskom oznakom kopirana je u međuspremnik
+Context Menu:
+  Opened in a Background Tab: "Otvoreno u pozadinskoj kartici"
+  Open in a Background Tab: "Otvori u kartici u pozadini"
+  Select Tab: Odaberi karticu
+  Close Tabs Before: Zatvori prethodne kartice
+  Close Tabs After: Zatvori sljedeće kartice
+  Close Other Tabs: Zatvori ostale kartice
+  Copy {service} link without playlist: "Kopiraj poveznicu za {service} bez popisa za reprodukciju"
+  Context Menu: Kontekstni izbornik
+  Select All: Odaberi sve
+  Save Image As…: Spremi sliku kao…
+  Copy Image: Kopiraj sliku
+  Copy Image Address: Kopiraj adresu slike
+  Cancel Refresh: Otkaži osvježavanje
+  Reload Videos: Ponovno učitaj videozapise
+  Reload Shorts: Ponovno učitaj Shorts
+  Reload Live: Ponovno učitaj sadržaj uživo
+  Reload Posts: Ponovno učitaj objave
+  Reload All Feeds: Ponovno učitaj sve sažetke
+  Reload RSS Feeds: Ponovno učitaj RSS izvore
+  Reload Platforms: Ponovno učitaj platforme
+  Close Multiple Tabs: Zatvori {count} karticu | Zatvori {count} kartice | Zatvori {count} kartica
+  Duplicate Tab: Dupliciraj karticu
+  Duplicate Multiple Tabs: Dupliciraj {count} karticu | Dupliciraj {count} kartice | Dupliciraj {count} kartica
+  Move Tab: Premjesti karticu
+  Move Tabs: Premjesti kartice
+  Move Tab to Group: Premjesti karticu u grupu
+  Collapse Group: Sažmi grupu
+  Expand Group: Proširi grupu
+  Move Tabs to Group: Premjesti kartice u grupu
+  Manage Tab Groups…: Upravljaj grupama kartica…
+  To Beginning: Na početak
+  To End: Na kraj
+  Close Tabs: Zatvori kartice
+  To the Top: Na vrh
+  To the Left: Lijevo
+  To the Bottom: Na dno
+  To the Right: Desno
+  Other Tabs: Ostale kartice
+  Copy YouTube Link: Kopiraj poveznicu za YouTube
+  Copy YouTube Links: Kopiraj poveznice za YouTube
+  Pin Tab: Prikvači karticu
+  Pin Tabs: Prikvači kartice
+  Unpin Tab: Otkvači karticu
+  Unpin Tabs: Otkvači kartice
+  Tab Color: Boja kartice
+  Default: Zadana
+  Purple: Ljubičasta
+  Reopen Closed Tab: Ponovno otvori zatvorenu karticu
+  Reload Tab: Ponovno učitaj karticu
+  Reload Tabs: Ponovno učitaj kartice
+  Load Tab: Učitaj karticu
+  Load Tabs: Učitaj kartice
+  Unload Tab: Ukloni karticu iz memorije
+  Unload Tabs: Ukloni kartice iz memorije
+  Unload Tabs Failed: "Odabrane kartice nije bilo moguće ukloniti iz memorije."
+  Move Tab to Window: Premjesti karticu u prozor
+  Move Tabs to Window: Premjesti kartice u prozor
+  Open in a New Tab: Otvori u novoj kartici
+  Open in a New Window: Otvori u novom prozoru
+  Copy Link: Kopiraj poveznicu
+  Copy Invidious Link: Kopiraj poveznicu za Invidious
+  Search Selection in New Tab: Pretraži "{selection}" u novoj kartici
+  Search Selection in New Window: Pretraži "{selection}" u novom prozoru
+  Search With: Pretraži s pomoću tražilice {engine}
+  Search With Multiple: Pretraži s pomoću…
+  Selection Too Long: Odabir je predug za pretraživanje (> {count} znakova)
+  Background Tab: Kartica u pozadini
+Tab Organizer:
+  Tab History: "Povijest kartice"
+  Current Page: "Trenutna stranica"
+  Icon Labels:
+    Podcast: 'Podcast'
+    Clock: 'Sat'
+    Puzzle Piece: 'Dio slagalice'
+    People: 'Ljudi'
+    Chart: 'Grafikon'
+    Calendar: 'Kalendar'
+    Images: 'Slike'
+    Music: 'Glazba'
+    Folder: Mapa
+    Bookmark: Oznaka
+    Favorites: Favoriti
+    Videos: Videozapisi
+    Gaming: Igre
+    Research: Istraživanje
+    Art: Umjetnost
+    Travel: Putovanja
+  Group Icon: Ikona grupe
+  Title: Organizator kartica
+  Open Tab Count: '{count} otvorena kartica | {count} otvorene kartice | {count} otvorenih kartica'
+  Search Label: Pretraži kartice
+  Selected Count: '{count} odabrana kartica | {count} odabrane kartice | {count} odabranih kartica'
+  Tab Count: '{count} kartica | {count} kartice | {count} kartica'
+  Select All: Odaberi sve
+  Select None: Poništi odabir
+  Move To Group: Premjesti odabrane kartice u grupu
+  Choose Group: Odaberi grupu
+  Ungrouped: Bez grupe
+  Pin: Prikvači
+  Unpin: Otkvači
+  Load: Učitaj
+  Unload: Ukloni iz memorije
+  Unload All: Ukloni sve iz memorije
+  Close All: Zatvori sve
+  Ungroup: Ukloni iz grupe
+  Group Name: Naziv grupe
+  No Color: Bez boje
+  Create Group: Stvori grupu
+  Expand Group: Proširi grupu
+  Collapse Group: Sažmi grupu
+  Expand Group Label: Proširi {name}, {count} kartica | Proširi {name}, {count} kartice | Proširi {name}, {count} kartica
+  Rename Group: Preimenuj {name}
+  Change Group Color: Promijeni boju grupe {name}
+  Move To Window: Premjesti u prozor
+  Choose Window: Odaberi prozor
+  Select Tab: Odaberi {title}
+  Active: Aktivna
+  Pinned: Prikvačena
+  Unloaded: Uklonjena iz memorije
+  Playing: Reproducira se
+  Close Tab: Zatvori {title}
+  No Open Results: Nijedna otvorena kartica ne odgovara ovom pretraživanju.
+  Recently Closed: Nedavno zatvoreno
+  Clear: Očisti
+  No Closed Results: Nijedna nedavno zatvorena kartica ne odgovara ovom pretraživanju.
+  Drag Tab: Povucite za premještanje u grupu
+Chapters:
+  Auto-generated: Ova su poglavlja automatski generirana
+  Open Chapters: Otvori poglavlja
+  Close Chapters: Zatvori poglavlja
+  Copy Timestamp Link: Kopiraj poveznicu na {timestamp}
+  Loop Chapter: 'Ponavljaj poglavlje: {chapter}'
+  Looping Chapter: 'Ponavlja se poglavlje: {chapter}'
+  Chapter Loop Stopped: 'Ponavljanje poglavlja zaustavljeno'
+  Sync to Video Time: 'Sinkroniziraj s vremenom videozapisa'
+Comments:
+  Image unavailable: "Slika nije dostupna"
+  Comment Count: '{count} komentar | {count} komentara | {count} komentara'
+  Show Comments: Prikaži komentare
+  Getting comment replies, please wait: Pričekajte, dohvaćaju se odgovori na komentar
+  Reload Comments: Ponovno učitaj komentare
+  Reply Count: '{replyCount} odgovor | {replyCount} odgovora | {replyCount} odgovora'
+  Comments are turned off: Komentari su isključeni
+  YouTube did not provide advertised replies: YouTube je prikazao da ovaj komentar ima odgovore, ali ih nije poslao. Možda su izbrisani ili skriveni pa je uklonjen gumb za prikaz odgovora.
+  Pinned by you: Prikvačili ste ovaj komentar
+  A reply is pinned: Odgovor je prikvačen
+  Filter loaded comments: Filtriraj učitane komentare
+  Comment filters: Filtri komentara
+  From creator: Od autora
+  Contains timestamps: Sadrži vremenske oznake
+  Pin comment by author: Prikvači komentar autora {author}
+  Unpin comment by author: Otkvači komentar autora {author}
+  Edited: (uređeno)
+  Highlighted comment: Istaknuti komentar
+  Highlighted reply: Istaknuti odgovor
+  Search loaded comments: Pretraži učitane komentare
+  Loaded comment search result count: '{count} od {total} učitanih komentara | {count} od {total} učitanih komentara | {count} od {total} učitanih komentara'
+  No loaded comments match your filters: Nijedan učitani komentar ne odgovara vašim filtrima
+  YouTube comment link copied to clipboard: Poveznica na YouTube komentar kopirana je u međuspremnik
+  Translate to {language}: Prevedi na {language}
+  Show original: Prikaži izvornik
+  Translating comment, please wait: Pričekajte, komentar se prevodi
+  Comment translation failed: Prevođenje komentara nije uspjelo
+Description:
+  Title: Opis
+  Copy Description: Kopiraj opis
+  Description Copied: Opis je kopiran u međuspremnik
+  Video Category: 'Kategorija videozapisa:'
+  Video Tags: Oznake videozapisa
+  Games: Igre
+  Music: Glazba
+Tooltips:
+  YouTube Account Settings:
+    Add to YouTube Watch History: "Videozapisi koje pokrećeš dodaju se u tvoju povijest gledanja na YouTubeu, tako da YouTubeove preporuke uče iz njih. Ništa se ne dodaje dok je povijest pauzirana na YouTubeu."
+    Sync Subscriptions: "Kanali na koje se pretplatiš na YouTubeu dodaju se u „Svi kanali”, a kanali s kojih tamo otkažeš pretplatu uklanjaju se iz svih profila. Pretplata ili otkazivanje pretplate ovdje u „Svi kanali” čini isto na YouTubeu."
+    Sync Playlists: "Tvoje YouTube zbirke, „Pogledaj kasnije” i „Videozapisi koji mi se sviđaju” prikazuju se u „Tvoje zbirke”, a promjene koje u njima ovdje napraviš primjenjuju se i na YouTubeu. Ne sinkroniziraju se s tvojim drugim uređajima i nisu uključene kada izvoziš sve zbirke ili izrađuješ sigurnosnu kopiju svojih podataka. Isključivanjem ovoga uklanjaju se s ovog uređaja, ali ne i s YouTubea."
+  General Settings:
+    Built-in Streams: |
+      Automatski način reproducira većinu videozapisa putem YouTubeova visionOS klijenta, koji se pokreće brže i podržava automatsku kvalitetu. Prijenosi uživo i videozapisi koje ne može reproducirati koriste SABR.
+      Samo SABR uvijek koristi YouTubeov web-klijent, koji se pokreće sporije i nema automatsku kvalitetu.
+    Title Lines: "Skraćuje naslove videozapisa i popisa za reprodukciju u popisima i rešetkama na odabrani broj redaka s trotočjem, za ujednačenije kartice. Zadržite pokazivač iznad naslova da biste ga vidjeli u cijelosti."
+    Close Window With Last Tab: 'Kada je isključeno, zatvaranje posljednje kartice umjesto toga otvara novu karticu, pa prozor ostaje otvoren dok ga ne zatvorite.'
+    Preferred Video Codec: |
+      Automatski način daje prednost kodecima koje vaš uređaj može hardverski dekodirati.
+      AV1: najbolja kvaliteta uz najmanje podataka, ali nema ga svaki videozapis. Bez hardverskog dekodiranja može prazniti bateriju ili ispuštati sličice.
+      VP9: ravnoteža učinkovitosti i kompatibilnosti, obično dostupan do najviše rezolucije.
+      H.264: najlakši za dekodiranje na gotovo svakom uređaju, ali troši više podataka i obično staje na 1080p.
+      Promjene se primjenjuju na sljedeći videozapis. Ako željeni kodek nije dostupan, koristi se drugi.
+    Always Use Backup Media Server: "Reproducira videozapise s pričuvnog poslužitelja koji navodi YouTube umjesto s dodijeljenog, na primjer kad je predmemorija vašeg pružatelja interneta često spora. Inače OpenTubeX prebacuje samo kad dodijeljeni poslužitelj ne odgovara."
+    Automatically switch stream extraction methods: "Pokušaj s yt-dlp ako ugrađena reprodukcija ne uspije ili s ugrađenom reprodukcijom ako yt-dlp ne uspije."
+    Enable Tabs: "Trenutačna stranica ostaje otvorena. Ostale kartice čuvaju se do ponovnog pokretanja aplikacije; ponovno omogućite kartice da biste ih vratili."
+    Data Saver Thumbnails: "Koristite sličice niže razlučivosti kako biste smanjili potrošnju podataka."
+    Use AI Translation Completions: Popunjava praznine u ljudskim prijevodima tekstom koji generira umjetna inteligencija. Ljudski prijevodi uvijek imaju prednost.
+    Update Relative Timestamps: Ažurira relativne vremenske oznake u cijeloj aplikaciji dok je stranica otvorena. Kada je isključeno, ažuriraju se tek nakon ponovnog učitavanja ili ponovnog posjeta stranici.
+    Stream Extraction Method: |
+      Odaberite kako OpenTubeX dohvaća tokove videozapisa. yt-dlp mora biti dostupan kada je odabran.
+      Pri upotrebi alata yt-dlp pokretanje videozapisa može trajati dulje.
+    Avoid translation: |
+      Onemogućuje YouTubeov automatski prijevod naslova, opisa i poglavlja videozapisa.
+      „Cijela aplikacija” prikazuje i nazive i opise kanala na izvornom jeziku.
+      Previše zahtjeva, primjerice pri dohvaćanju naslova videozapisa na popisima, može privremeno
+      utjecati na pouzdanost aplikacije.
+    Show Thumbnail Previews: Prikazuje animirane pretpreglede pri prelasku pokazivačem preko minijatura videozapisa.
+    Startup Behavior: |
+      Odaberite što OpenTubeX čini pri pokretanju.
+      Mogućnost "Učitaj sve kartice" odmah vraća svaku spremljenu karticu, ali videozapisi se neće automatski reproducirati na karticama u pozadini.
+      Mogućnost "Učitaj prethodno učitane kartice" ponovno učitava kartice koje su bile učitane pri zatvaranju aplikacije OpenTubeX, a ostale ostavlja neučitanima.
+      Mogućnost "Učitaj posljednju aktivnu karticu" vraća prethodnu sesiju s ostalim otvorenim, ali neučitanim karticama; učitat će se kada ih kliknete.
+      Mogućnost "Pokreni s praznom sesijom" preskače spremljene kartice i otvara novi prozor.
+    Remember Tab Navigation History: Povijest kretanja unatrag i naprijed sprema se za svaku karticu i vraća pri ponovnom pokretanju aplikacije OpenTubeX.
+    Yattee Server: yattee-server instanca iz koje OpenTubeX učitava videa, kanale, zbirke i rezultate pretraživanja. Korisničko ime i lozinka spremaju se samo na ovom uređaju.
+    Proxy Videos Through Yattee Server: Prosljeđuje video i audio tokove putem poslužitelja. Ostavite ovo uključeno, osim ako poslužitelj dijeli vašu internetsku vezu, jer YouTube šalje tokove samo na adresu koja ih je zatražila. Minijature se uvijek učitavaju izravno s YouTubea.
+    Notifications: Odaberi kako te OpenTubeX obavještava o prijenosima uživo, novim videozapisima i automatskim preuzimanjima. Uz Sustav i u aplikaciji obavijesti se prikazuju u OpenTubeXu dok ga koristiš, a inače kao obavijesti sustava, i zvono ih čuva. Isključeno skriva i opcije obavijesti.
+    Ignore System Haptics Setting: Vibriraj pri dugom pritisku i gestama čak i kada je povratna informacija na dodir isključena u postavkama Androida.
+  Proxy Settings:
+    IP Block Recovery Script Path: Putanja datoteke skripte koja se pokreće kada se otkrije blokada IP adrese. OpenTubeX čeka da završi, a zatim ponovno učitava videozapis. Ako je pričuvna metoda omogućena, skripta se pokreće samo ako ni pričuvna metoda ne uspije.
+  Player Settings:
+    Rewind on Resume: "Vraća se toliko sekundi unatrag kad nastavite pauzirani videozapis, kako biste ponovno vidjeli posljednje trenutke. Postavite na 0 za isključivanje."
+    Minimum Pause Before Rewinding: "Premotava unatrag samo ako je videozapis bio pauziran barem toliko dugo. Postavite na 0 za premotavanje nakon svake pauze."
+    Mono Audio: 'Reproducira lijevi i desni audiokanal u oba uha. Koristite kada zvuk videozapisa dolazi samo s jedne strane slušalica.'
+    Normalize Loudness: 'Utišava videozapise koji su glasniji od većine, kako glasnoća ne bi skakala između videozapisa. Tihi videozapisi zadržavaju svoju glasnoću. Radi samo za videozapise učitane putem lokalnog sučelja.'
+    Pause on Stream Recovery: "Kada video stream ne uspije, a player ga ponovno učita ili prijeđe na drugi format ili pogon, reprodukcija se pauzira i greška ostaje na vrhu playera dok je ne odbaciš. Kada je isključeno, reprodukcija se nastavlja, a greška se kratko prikazuje kao obavijest."
+    Continue Playback When Screen Is Locked: 'Nastavlja reprodukciju zvuka u pozadini i pruža Android kontrole medija. Isključite ovo za pauziranje kada aplikacija više nije vidljiva.'
+    Enable Caption Translations: Kada je omogućeno, gumb za titlove i prečac C daju prednost automatski prevedenom zapisu na željenom jeziku titlova ako videozapis nema odgovarajući izvorni zapis.
+    Use Quick Playback Speed Bar: Prikazuje traku za brzu promjenu brzine reprodukcije među kontrolama reproduktora s desne strane. Ako je omogućeno ručno spremanje brzine reprodukcije po kanalu, traka sadrži i gumb za spremanje brzine za trenutačni kanal.
+    Multiply Seek Interval by Playback Rate: Kada je omogućeno, razmaci premotavanja (tipke sa strelicama i J/L) množe se trenutačnom brzinom reprodukcije. Kada je isključeno, ostaju jednaki bez obzira na brzinu reprodukcije.
+    Show Playback Rate Adjusted Timestamp: Kada je omogućeno i brzina reprodukcije nije 1x, reproduktor iza uobičajenog prikaza vremena u zagradama prikazuje vremenske oznake prilagođene brzini reprodukcije.
+    Use YouTube-style Shorts: Prikazuje Shorts videozapise u okomitoj mreži na stranicama pretplata i kanala te upotrebljava reproduktor za Shorts videozapise u stilu YouTubea.
+    Loop Shorts: Kada je omogućeno, Shorts videozapisi automatski se ponovno pokreću. Kada je isključeno, zaustavljaju se na kraju i prikazuju gumb za ponovnu reprodukciju.
+    Show Skip Silence Toggle: Prikazuje prekidač za preskakanje tišine u izborniku postavki reproduktora.
+    Enable Skip Silence by Default: Omogućuje preskakanje tišine za nove kartice. Promjena na jednoj kartici ne utječe na ostale.
+    Enable Video Zoom: Prikazuje kontrolu Zumiranje u izborniku postavki reproduktora te omogućuje njezine tipkovne prečace i kontrole pomicanja.
+    Enable Seek History: Pamti odakle ste premotali u svakom videozapisu dok se aplikacija ne zatvori. Prikazuje popis povijesti premotavanja u izborniku postavki reproduktora i omogućuje njegove tipkovničke prečace.
+    Show Seek Bar Filmstrip: "Povlačenje klizača trake za premotavanje prikazuje traku sličica oko mjesta na koje ćete stići, a povlačenje prema gore na nju omogućuje precizno premotavanje. Kada je onemogućeno, povlačenje prikazuje jednu minijaturu, kao pri prelasku pokazivačem."
+    Voice-over Translation: Pri zahtjevu za prijevod šalje ID videozapisa, trajanje i odabrani jezik neslužbenoj Yandexovoj usluzi glasovnog prijevoda. Prema zadanim je postavkama isključena.
+    Hold to Speed Up: Držite razmaknicu ili lijevu tipku miša iznad reproduktora kako biste privremeno pomnožili trenutačnu brzinu reprodukcije odabranom vrijednošću.
+    Ambient Mode: Stapa boje videozapisa s područjem oko reproduktora.
+    Default Volume: Onemogućeno dok je uključena postavka Zapamti glasnoću. Isključite je kako biste postavili stalnu početnu glasnoću za svaki videozapis.
+    Parallel Segment Loading: |
+      Broj segmenata videozapisa i zvuka koji se istodobno unaprijed učitavaju.
+      Veće vrijednosti mogu pomoći na sporim ili nestabilnim vezama, ali troše više propusnosti i memorije.
+      Zbog njih Automatski odabir također može podcijeniti brzinu veze i odabrati nižu kvalitetu.
+      Tokovi ograničeni na jedan zahtjev istodobno zanemaruju ovu postavku.
+    Preload Upcoming Videos: "Dohvaća i sprema yt-dlp adrese za sljedeće videozapise. Red čekanja ima prednost pred popisima i preporukama."
+    Upcoming Videos to Preload: "Najveći broj sljedećih videozapisa čije se yt-dlp adrese dohvaćaju u pozadini."
+    Concurrent Preloads: "Najveći broj yt-dlp procesa koji se koriste za istodobno predučitavanje videozapisa. Veće vrijednosti koriste više procesora, memorije i mrežne propusnosti."
+    Ignore System Rotation Lock for Fullscreen: Fizički okrenite uređaj za ulazak i izlazak iz cijelog zaslona, čak i kada je automatska rotacija u Androidu isključena.
+    Ask Before Preloading Large Playlists: "Traži potvrdu prije predučitavanja svih videozapisa s popisa za reprodukciju s više od {count} videozapisa."
+  Download Settings:
+    Download Folder: Videozapisi se spremaju u ovu mapu. Ostavite prazno za upotrebu sustavske mape Preuzimanja.
+    Global Additional yt-dlp Arguments: Dodatni argumenti naredbenog retka koji se prosljeđuju alatu yt-dlp pri svakom preuzimanju, primjerice --cookies-from-browser firefox.
+    Concurrent Downloads: Najveći broj yt-dlp zadataka koji se mogu istodobno izvoditi.
+    Bandwidth Limit: Ograničava ukupnu brzinu prijenosa reda čekanja dijeljenjem ovog ograničenja među istodobnim zadacima. Unesite 0 za neograničenu brzinu.
+  External Software Settings:
+    yt-dlp Source: OpenTubeX može upotrebljavati yt-dlp instaliran na sustavu ili preuzeti vlastitu kopiju alata yt-dlp, upravljati njome i pohraniti je u mapu korisničkih podataka.
+    yt-dlp Channel: Odaberite kanal izdanja alata yt-dlp koji OpenTubeX preuzima i kojim upravlja. Stabilni kanal preporučuje se većini korisnika.
+    FFmpeg Source: OpenTubeX može upotrebljavati FFmpeg i FFprobe instalirane na sustavu ili preuzeti vlastita statička izdanja, upravljati njima i pohraniti ih u mapu korisničkih podataka.
+    Managed Tool Updates: Odaberite hoće li se alati kojima se upravlja ažurirati automatski, zatražiti potvrdu prije ažuriranja ili ažurirati samo ručnim gumbima. Alati koji nedostaju i dalje se preuzimaju kada su potrebni.
+    yt-dlp Executable Path: OpenTubeX prema zadanim postavkama pretpostavlja da se yt-dlp može pronaći putem varijable okruženja PATH. Ovdje po potrebi možete postaviti prilagođenu putanju.
+    Cookie Source: Odaberite treba li yt-dlp za reprodukciju uz prijavu čitati Netscape datoteku kolačića ili kolačiće iz instaliranog preglednika.
+    Cookie File: Odaberite datoteku kolačića u formatu Netscape za reprodukciju uz prijavu.
+    Browser for Cookies: Podrška za preglednike očitava se iz odabrane izvršne datoteke alata yt-dlp. Pri zahtjevu za reprodukciju uz prijavu OpenTubeX traži od alata yt-dlp da čita podatke iz ovog preglednika.
+    Browser Profile: Neobavezan naziv ili mapa profila preglednika. Ostavite prazno za upotrebu posljednjeg korištenog profila.
+    Always Use Cookies: "Koristite konfigurirane kolačiće za preuzimanja, titlove i kad god yt-dlp dohvaća streamove. Time se način izdvajanja tokova ne prebacuje na yt-dlp. Kada je yt-dlp odabran, mogu postati dostupni formati samo za prijavljene račune, uključujući poboljšanu brzinu prijenosa usluge YouTube Premium ako račun ima pristup toj usluzi."
+    FFmpeg Executable Path: FFmpeg je potreban za spajanje odvojenih tokova videozapisa i zvuka te za pretvorbu zvuka. OpenTubeX prema zadanim postavkama pretpostavlja da se FFmpeg može pronaći putem varijable okruženja PATH. Ovdje po potrebi možete postaviti prilagođenu putanju.
+    Use cookies for subtitles: "Koristi postavljene kolačiće za titlove i automatske prijevode. Uključuje se i opcijom „Uvijek koristi kolačiće”."
+  Distraction Free Settings:
+    Hide Playlist Stats: Skriva broj videozapisa, broj pregleda, datum zadnjeg ažuriranja i ukupno trajanje na stranicama popisa za reprodukciju.
+    Count Watch Time From: "„Svi uređaji” broji svaki uređaj koji sinkronizira statistiku gledanja. „Ovaj uređaj” broji samo ono što gledate ovdje."
+    When a Limit Is Reached: "„Pauziraj reprodukciju” omogućuje dodavanje 15 minuta ili zanemarivanje ograničenja za danas. Uz lozinku postavki ograničenje možete povećati samo u Postavkama."
+    Grayscale: "Prikazuje aplikaciju u nijansama sive kako bi manje privlačila pažnju. „Tijekom vremena za spavanje” prati raspored podsjetnika za spavanje."
+    Apply Grayscale To: "„Videozapise i slike” zadržava boje sučelja i u sivo pretvara sadržaj poput videozapisa, minijatura i avatara."
+    Daily Watch Time Limit: "Broji što ste danas gledali na svim uređajima koji sinkroniziraju statistiku gledanja, uključujući Shorts videozapise."
+    Daily Shorts Limit: "Broji Shorts videozapise koje ste danas gledali na ovom uređaju."
+    Take a Break Reminder: "Pauzira videozapis nakon ovoliko gledanja. Stanka od 10 ili više minuta ponovno pokreće brojanje."
+    Bedtime Reminder: "Pauzira videozapis i podsjeća vas da prestanete gledati između vremena početka i završetka."
+    Shorten View Counts: Prikazuje skraćene brojeve pregleda, komentara i oznaka sviđanja komentara koje je YouTube već zaokružio, primjerice 14 tis. umjesto 14.000. Točni brojevi uvijek se prikazuju u cijelosti.
+  Subscription Settings:
+    Fetch Feed on Startup: Kada je omogućeno, OpenTubeX automatski dohvaća sažetak pretplata pri pokretanju i otvaranju novog prozora.
+    Show New Content Feed: Prikazuje karticu Novo sa stavkama sažetka pretplata kojih nije bilo pri prethodnom dohvaćanju.
+    Enable RSS Feeds: Prikazuje karticu RSS na stranici Pretplate sa stavkama RSS ili Atom izvora kako biste mogli pratiti autore na drugim platformama. Njezine stavke otvaraju se pomoću yt-dlp-a.
+    Show New Content Indicators: Prikazuje malu točku uz stavke sažetka pretplata kojih nije bilo pri prethodnom dohvaćanju.
+    Show Scheduled Live Streams / Premieres First: Zadržava predstojeće prijenose uživo i premijere na vrhu sažetka pretplata. Kada je isključeno, ostaju na mjestu svoje najave sve do početka. Nakon isključivanja jednom osvježite sažetak pretplata kako biste dohvatili datume najave za postojeće zakazane stavke.
+    Auto Refresh Interval: "Učestalost kojom OpenTubeX automatski osvježava sažetak pretplata dok je aplikacija otvorena. Na Androidu interval koji nije nula osvježava sažetak i dok je aplikacija zatvorena."
+    Refresh Subscriptions While App Is Closed: "Osvježava sadržaj prema odabranim postavkama. Na računalu OpenTubeX ostaje u sistemskoj traci do izlaska. Android određuje vrijeme osvježavanja u pozadini."
+    Notify About New Uploads: Prikazuje obavijesti sustava na ovom uređaju za kanale kojima ste uključili obavijesti u njihovim postavkama pretplate. OpenTubeX provjerava novi sadržaj pri osvježavanju pretplata, stoga odaberite razmak automatskog osvježavanja. Za obavijesti dok je aplikacija zatvorena uključite i osvježavanje dok je aplikacija zatvorena.
+    RSS Feeds Auto Refresh Interval: Koliko često OpenTubeX automatski osvježava vaše RSS izvore dok je aplikacija otvorena.
+    Faster Subscription Refresh: "Najprije provjerava RSS feed svakog kanala i učitava videozapise, Shorts i prijenose uživo samo s kanala s novim sadržajem. Automatska osvježavanja također preskaču kanale učitane u posljednjih 10 minuta. Za kanale bez novog sadržaja broj pregleda, uklonjeni videozapisi i promijenjeni naslovi ažuriraju se samo svakih nekoliko sati, a novi sadržaj može se pojaviti kasnije kad RSS feed kasni. Nije dostupno s Invidious API-jem."
+    Platforms Auto Refresh Interval: Koliko često OpenTubeX automatski osvježava kanale koje pratite na drugim platformama dok je aplikacija otvorena.
+    Twitch Notify When Live: Obavještava vas kada neki od Twitch kanala koje pratite počne s prijenosom. OpenTubeX provjerava svakih nekoliko minuta dok je otvoren, a i dok je zatvoren ako tada osvježava pretplate.
+  Theme Settings:
+    Only Show Important Notifications: Skriva obavijesti u aplikaciji koje samo potvrđuju radnju ili javljaju stanje, uključujući one koje nude Poništi. Pogreške, upozorenja, podsjetnici koje ste postavili i obavijesti koje traže odluku, poput upita za ažuriranje, i dalje se prikazuju. Napredak pozadinskih radnji, poput osvježavanja pretplata, prikazuje se na globalnoj traci napretka umjesto u obavijesti. Obavijesti sustava nisu obuhvaćene.
+    Visible Search Suggestions: "Određuje koliko unosa povijesti pretraživanja i prijedloga traka za pretraživanje prikazuje prije nego što se njezin popis počne pomicati. Popis se nikada ne proteže ispod donjeg ruba prozora."
+    Thumbnail Size: "Mijenja veličinu sličica videozapisa u rešetkama i popisima. Rešetke s fiksnim brojem stupaca ili prikaz Puna širina umjesto toga popunjavaju svaki redak, pa tamo mijenja samo sličice popisa i Shorts. U prozorima veličine telefona sličice rešetke ograničene su na 100 %."
+    Playlist Thumbnail Size: "Mijenja veličinu sličica videozapisa na stranicama popisa za reprodukciju. Rešetke s fiksnim brojem stupaca ili prikaz Puna širina umjesto toga popunjavaju svaki redak, pa tamo mijenja samo sličice popisa i Shorts. U prozorima veličine telefona sličice rešetke ograničene su na 100 %."
+    Compact Settings Categories: "Skriva opise i smanjuje visinu kategorija postavki."
+    Show Progress as Notification: Umjesto opće trake napretka prikazuje trajnu obavijest s trenutačnim napretkom pozadinskih postupaka, poput osvježavanja pretplata i preuzimanja alata kojima se upravlja.
+    Always Show Scrollbars: Drži klizne trake uvijek vidljivima. Kada je isključeno, nestaju ubrzo nakon što prestanete pomicati miš i ponovno se pojavljuju čim ga pomaknete.
+    Scroll Speed: Mijenja udaljenost pomicanja gestama kotačića miša i dodirne pločice.
+    Use Fixed Tab Width: Daje svim karticama na vodoravnoj traci kartica jednaku širinu umjesto da se širina prilagođava njihovim naslovima.
+    Use Custom Title Bar: Zamjenjuje naslovnu traku sustava trakom kartica ili gornjom navigacijom kada kartice nisu na vrhu kako bi se uštedio okomiti prostor. Kontrole prozora prikazuju se u kutu te trake.
+    Use Grid Player Menu: Raspoređuje izbornik postavki reproduktora videozapisa kao mrežu pločica umjesto popisa redaka.
+    Modal Backdrop: "Određuje kako aplikacija izgleda iza dijaloga i izbornika. Zamućivanje može biti sporo na slabijim uređajima."
+    Click Scrollbar Track to Scroll: "Klik na traku za pomicanje izvan njezina klizača pomiče sadržaj za otprilike jednu stranicu u smjeru klika. Dok je ovo uključeno, vidljiva traka za pomicanje hvata klikove namijenjene stavkama ispod nje. Traka za pomicanje trake kartica uvijek radi ovako."
+  Experimental Settings:
+    Disable Hardware Acceleration: Onemogućuje hardversko ubrzanje GPU-a. Može riješiti grafičke probleme, ali će vjerojatno smanjiti performanse.
+  SponsorBlock Settings:
+    Always Show DeArrow Badge: Zadrži DeArrow gumb vidljivim na videozapisima čiji je naslov ili minijaturu zamijenio DeArrow, umjesto samo pri prelasku mišem.
+The playlist is at the beginning. Enable loop to continue playing: Popis za reprodukciju je na početku. Omogućite ponavljanje za nastavak reprodukcije
+External link opening has been disabled in Settings → Privacy: Otvaranje vanjskih poveznica onemogućeno je u Postavke → Privatnost
+KeyboardShortcutPrompt:
+  Mark Seen or Watched: "Označi odabranu stavku kao viđenu ili promijeni je li pogledana"
+  Toggle Quick Bookmark: Dodaj na popis za reprodukciju brzih zabilješki ili ukloni s njega
+  Reopen Closed Window: Ponovno otvori posljednji zatvoreni prozor
+  Edit Hint: Odaberite prečac, a zatim pritisnite novu kombinaciju tipki. Pritisnite Backspace ili Delete da biste uklonili dodjelu.
+  Change Shortcut: Promijeni prečac za {action}
+  Press Shortcut: Pritisnite prečac…
+  Unassigned: Nije dodijeljeno
+  Reset Shortcut: Vrati zadani prečac za {action}
+  Reset to Defaults: Vrati na zadano
+  Shortcut Already Assigned: Prečac je već dodijeljen
+  Shortcut Conflict: '{shortcut} je već dodijeljen radnjama {actions}. Želite li ga ponovno dodijeliti?'
+  Reserved Shortcut Conflict: '{shortcut} je rezerviran za radnje {actions} i ne može se ponovno dodijeliti.'
+  Reassign: Ponovno dodijeli
+  Sections:
+    App:
+      Tabs: "Aplikacija:\_Kartice"
+      Search and Page: "Aplikacija:\_Pretraživanje i stranica"
+      Window and View: "Aplikacija:\_Prozor i prikaz"
+  New Tab: Stvori novu karticu
+  Close Tab: Zatvori trenutačnu karticu
+  Reload Tab: Ponovno učitaj trenutačnu karticu
+  Reopen Closed Tab: Ponovno otvori posljednju zatvorenu karticu
+  Next Tab: Prijeđi na sljedeću karticu
+  Previous Tab: Prijeđi na prethodnu karticu
+  Switch to Tab: Prijeđi na karticu 1–9
+  Toggle Tab Orientation: Promijeni raspored kartica
+  Find in Page: Pronađi tekst na trenutačnoj stranici
+  Find Next Match: Prijeđi na sljedeće podudaranje
+  Find Previous Match: Prijeđi na prethodno podudaranje
+  Toggle Normal Playback Speed: Prebacuj između brzine 1x i prethodne brzine reprodukcije
+  Toggle Skip Silence: Uključi ili isključi preskakanje tišine
+  Set A-B Repeat Point A: Postavi točku A A-B ponavljanja
+  Set A-B Repeat Point B: Postavi točku B A-B ponavljanja
+  Clear A-B Repeat: Očisti A-B ponavljanje
+  Video Zoom In: Povećaj videozapis
+  Video Zoom Out: Smanji videozapis
+  Tab Switcher: Prebacivanje kartica
+  Undo Seek: Poništi posljednje premotavanje
+  Redo Seek: Ponovi poništeno premotavanje
+CommandPalette:
+  Title: Paleta naredbi
+  Open: Otvori paletu naredbi
+  Search Label: "Pretraži naredbe, postavke i lokalne videozapise"
+  Search Placeholder: Pretraži naredbe, postavke i lokalne videozapise…
+  Results: "Rezultati"
+  No Results: "Nema odgovarajućih rezultata"
+  Result Count: "Rezultati: {count} | Rezultati: {count} | Rezultati: {count}"
+  Move: Pomakni
+  Run: Pokreni
+  Keys:
+    Up: ↑
+    Down: ↓
+    Escape: Esc
+  Switch to Tab: 'Prijeđi na karticu: {title}'
+  Switch Profile: 'Promijeni profil: {name}'
+  Open Playlist: 'Otvori popis za reprodukciju: {name}'
+  Cancel Download: 'Otkaži preuzimanje: {title}'
+  Groups:
+    App: Aplikacija
+    Navigation: Navigacija
+    Tabs: Kartice
+    Local Videos: Lokalni videozapisi
+  Unavailable:
+    Current Page: Već ste na ovoj stranici
+    No History: Nema stranice u ovom smjeru
+    Desktop: Dostupno samo u aplikaciji za računala
+    Build: Nije dostupno u ovoj verziji aplikacije
+    One Tab: Najprije otvorite drugu karticu
+    Active Tab: Ovo je aktivna kartica
+    Active Profile: Ovo je aktivni profil
+    Download Finished: Ovo preuzimanje više nije u tijeku
+    Video: Najprije otvorite videozapis
+Downloads:
+  File Name Template Invalid: 'Koristite relativnu putanju unutar mape za preuzimanja bez "..", "~", "$", "%" ili prefiksa poput "thumbnail:".'
+  Search Completed: "Pretraži dovršena preuzimanja po naslovu ili kanalu"
+  Format: "Format"
+  All Formats: "Svi formati"
+  Largest First: "Najveće prvo"
+  Smallest First: "Najmanje prvo"
+  No Matching Downloads: "Nema odgovarajućih dovršenih preuzimanja. Pokušajte drugu pretragu ili filtar."
+  Add Download: Dodaj preuzimanje
+  Preparing: Priprema…
+  Export Failed: "Preuzetu datoteku nije moguće spremiti. Odaberite mapu za preuzimanja s dozvolom pisanja i pokušajte ponovno."
+  Native Code Blocked: "Android je spriječio yt-dlp da učita svoje izvorne biblioteke. U GrapheneOS-u otvorite informacije o ovoj aplikaciji, u odjeljku “Exploit protection” postavite “Dynamic code loading via storage” na “Allowed” i pokušajte ponovno."
+  Download Stopped Unexpectedly: "Preuzimanje se neočekivano zaustavilo."
+  Remove File Permanently Warning: "Time ćete trajno izbrisati „{title}“."
+  Download: Preuzmi
+  Download Video: Preuzmi videozapis
+  Download Playlist: Preuzmi popis za reprodukciju
+  Downloading: Preuzimanje
+  Queue: Red čekanja
+  Downloaded: Preuzeto
+  Canceled: Otkazano
+  Open Downloads: Otvori preuzimanja
+  No Downloads: Još nema preuzimanja
+  No Downloads Description: Preuzimanja koja pokrenete prikazat će se ovdje.
+  Clear Failed Canceled Skipped And Missing: Očisti neuspjela, otkazana, preskočena i nedostupna preuzimanja
+  Clear From List: Ukloni s popisa
+  Show in Folder: Prikaži u mapi
+  Play Download: Reproduciraj preuzetu datoteku
+  Retry Download: Ponovi preuzimanje
+  Pause Download: Pauziraj preuzimanje
+  Resume Download: Nastavi preuzimanje
+  Move Earlier: Premjesti ranije
+  Move Later: Premjesti kasnije
+  Pause All: Pauziraj sve
+  Resume All: Nastavi sve
+  Retry All: Ponovi sva neuspjela preuzimanja
+  Total Size: 'Ukupna veličina: {size}'
+  Local File: Lokalna datoteka
+  Available Offline: Dostupno izvan mreže
+  Remove File: Ukloni datoteku
+  Remove File Confirmation: Ukloniti preuzetu datoteku?
+  Remove File Warning: Time ćete premjestiti "{title}" u smeće uređaja.
+  File Not Found: Preuzeta datoteka nije pronađena.
+  Files Missing: Preuzeta datoteka više nije dostupna u datotečnom sustavu. | Preuzete datoteke više nisu dostupne u datotečnom sustavu. | Preuzete datoteke više nisu dostupne u datotečnom sustavu.
+  Files Available: 'Dostupno je {available} od {total} preuzetih datoteka.'
+  More Files: Još {count} datoteka | Još {count} datoteke | Još {count} datoteka
+  Template Used: 'Predložak: {name}'
+  Template: Predložak
+  Unsaved: Nije spremljeno
+  Media Type: Vrsta medija
+  Video: Videozapis
+  Audio: Zvuk
+  Maximum Resolution: Najveća razlučivost
+  Best Available: Najbolja dostupna
+  Automatic: Automatski
+  Container: Spremnik
+  Video Codec: Videokodek
+  Audio Codec: Audiokodek
+  File Name Template: Predložak naziva datoteke
+  File Name Template Help: 'Dostupna polja: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
+  Time Range and Chapters: Vremenski raspon i poglavlja
+  Start Time: Vrijeme početka
+  End Time: Vrijeme završetka
+  Split by Chapters: Podijeli u zasebne datoteke po poglavljima
+  Remove Segments: Ukloni segmente
+  Subtitles and Metadata: Titlovi i metapodaci
+  Include Subtitles: Uključi titlove
+  Embed Subtitles: Ugradi titlove u medijsku datoteku
+  Subtitle Format: Format titlova
+  Subtitle Languages: Jezici titlova
+  Subtitle Languages Help: 'Odabirnici jezika za yt-dlp odvojeni zarezima, primjerice: en.*,de.*'
+  Embed Cover Art: Ugradi minijaturu kao omot
+  Embed Metadata: Ugradi naslov, autora, opis i poglavlja
+  Additional yt-dlp Arguments: Dodatni argumenti za yt-dlp
+  Template Name: Naziv predloška
+  Save Template: Spremi predložak
+  Delete Template: Izbriši predložak
+  Template Saved: Spremljen je predložak preuzimanja "{name}"
+  Template Name Exists: Predložak preuzimanja naziva "{name}" već postoji.
+  Choose Folder: Promijeni
+  Select Folder: Odaberi mapu
+  Folder Required: Odaberite mapu za preuzimanja kako biste omogućili preuzimanje.
+  System Downloads Folder: Sustavska mapa Preuzimanja
+  Processing: Obrada…
+  Queued: U redu čekanja
+  Queued Position: U redu čekanja, položaj {position}
+  Paused: Pauzirano
+  Pausing: Trenutačni će zadatak završiti, a zatim će se red čekanja pauzirati
+  Download Complete: Preuzimanje je dovršeno
+  Download Cancelled: Preuzimanje je otkazano
+  Download Failed: Preuzimanje nije uspjelo
+  File Name Shortened: Naziv datoteke skraćen je jer je naslov videozapisa bio predug.
+  Some Videos Not Downloaded: Neke videozapise s ovog popisa za reprodukciju nije bilo moguće preuzeti.
+  Playlist Video Position: Videozapis {index} od {count}
+  Insufficient Disk Space: Nema dovoljno prostora na disku. Potrebno je oko {required}, a dostupno je {available}.
+  Unknown Download Size: Veličina preuzimanja nije poznata. Na odredišnom datotečnom sustavu dostupno je {available}.
+  Disk Space Check Unavailable: Dostupni prostor na disku nije bilo moguće provjeriti prije pokretanja ovog preuzimanja.
+  Download Failure Hint: Provjerite {issuesLink}, a zatim pokušajte prebaciti kanal alata yt-dlp na Nightly ili Master u Postavke → Napredno → Vanjski softver.
+  yt-dlp YouTube Issues: nedavni problemi alata yt-dlp s YouTubeom
+  Automatic Download Started: Automatsko preuzimanje je pokrenuto
+  Automatic Download Started Body: U pozadini se preuzima "{title}" s kanala {channel}.
+  Automatic Download Complete: Automatsko preuzimanje je dovršeno
+  Automatic Download Failed: Automatsko preuzimanje nije uspjelo
+  Automatic Download Could Not Start: Nije moguće pokrenuti automatsko preuzimanje za "{title}".
+  Automatic Download Skipped: Preskočeno prema filtrima automatskog preuzimanja
+  Cancel Download: Otkaži preuzimanje
+  yt-dlp Not Found: yt-dlp nije pronađen. Instalirajte ga ili postavite njegovu putanju u Postavke → Napredno → Vanjski softver.
+  Download Complete Template: Preuzimanje za "{title}" je dovršeno
+  Download Failed Template: Preuzimanje za "{title}" nije uspjelo
+  Templates:
+    Video Best: Videozapis - najbolja kvaliteta
+    Video Resolution: Videozapis - {resolution}
+    Audio Best: Zvuk - najbolja kvaliteta
+    Audio Format: Zvuk - {format}
+    Subtitles Format: Titlovi - {format}
+  Waiting for Unmetered Network: "Čeka se mreža bez ograničenja podataka"
+  Waiting for Charging: "Čeka se punjač"
+  Remove File Failed: Nije moguće ukloniti preuzetu datoteku.
+Channels:
+  Load More Channels: "Učitaj više kanala"
+Search Bar:
+  Use Suggestion: Upotrijebi prijedlog
+  Open Search Container: Otvori polje za pretraživanje
+  Search: Pretraži
+Theme Discovery:
+  Discover Themes: "Otkrij teme"
+  Refresh: "Osvježi"
+  View on GitHub: "Pogledaj na GitHubu"
+  Load Error: "Nije moguće učitati teme. Pokušaj osvježiti."
+  Loading: "Učitavanje…"
+  No Themes: "Nisu pronađene teme za instalaciju."
+  No Preview: "Snimka zaslona nije dostupna"
+  Load More: "Učitaj više"
+  Applied: "Primijenjeno"
+  Apply Theme: "Primijeni temu"
+  Install and Apply: "Instaliraj i primijeni"
+  Update and Apply: "Ažuriraj i primijeni"
+
+Connection:
+  Offline: Izvan mreže
+  Reconnecting: "Veza je izgubljena. Pokušaj ponovnog povezivanja…"
+  Back Online: "Ponovno na mreži"
+
+App Icon:
+  Restart: "Ponovno pokreni aplikaciju"
+  Saved Message: "Ikona je spremljena. Ažuriranje pokretača može potrajati trenutak."
+  Title: "Ikona aplikacije"
+  Error: "Nije moguće učitati ili promijeniti ikonu aplikacije"
+
+Tray:
+  Hide All Windows: "Sakrij sve prozore"
+  Show All Windows: "Prikaži sve prozore"
+
+Tray Icon:
+  Title: "Ikona u sistemskoj traci"
+  Follow App Theme: "Prati temu aplikacije"
+  Monochrome: "Jednobojna"
+
+Form Inputs:
+  Browse: "Pregledaj"
+  Use Default Path: "Koristi zadano"
+  Enter Password Hint: "Unesite svoju lozinku"
+  Choose Password Hint: "Odaberite lozinku"
+  Confirm Password Hint: "Ponovite novu lozinku"
+  Encryption Passphrase Hint: "Unesite svoju zaporku za šifriranje"
+  Show Password: "Prikaži lozinku"
+  Hide Password: "Sakrij lozinku"
+  Search Text Hint: "Unesite pojmove za pretraživanje"
+  Playlist Description Hint: "Opišite ovaj popis za reprodukciju"
+  Filename Preview: "Pregled naziva datoteke"
+  Enter Channels: "Unesite kanale"
+  Enter Text: "Unesite tekst"
+  Video URL: URL videozapisa ili popisa
+  Paste Link: Zalijepite poveznicu na videozapis ili popis
+  Example: npr. {example}
+  No Minimum: Bez minimuma
+  No Maximum: Bez maksimuma
+  Any Age: Bilo koja starost
+  Included Terms Example: npr. vodič, recenzija
+  Excluded Terms Example: npr. najava, pregled
+  Global Arguments Hint: Neobavezni argumenti za svako preuzimanje
+  Unlimited Hint: 0 za neograničeno
+  Add Argument: Dodajte argument
+  Template Name Example: npr. Samo zvuk
+  Download Arguments Hint: Neobavezni argumenti za ovo preuzimanje
+  Generated ID Hint: Ostavite prazno za generiranje ID-a
+  Default Value: "Zadano: {value}"
+
+Search Filters:
+  Possible Age Restriction Hint: "YouTube je možda postavio dobno ograničenje za ovaj upit za pretraživanje."
+  Cookie Search Failed: "Pretraživanje s konfiguriranim kolačićima nije uspjelo."
+  Showing results for: "Prikazuju se rezultati za {query}"
+  Search instead for: "Umjesto toga traži {query}"
+  Including results for: "Uključujući rezultate za {query}"
+  Search only for: "Traži samo {query}"
+  Did you mean: "Jeste li mislili {query}?"
+
+Storage Startup Error:
+  Title: "Nije moguće učitati podatke aplikacije"
+  Message: "Oslobodite prostor na uređaju i pokušajte ponovno. Sinkronizacija je pauzirana dok se vaši podaci ne učitaju."
+  Web Message: "Ako je OpenTubeX otvoren u drugoj kartici, zatvori je i pokušaj ponovno."
+  Insecure Web Message: "OpenTubeX može spremati tvoje podatke samo kad je otvoren putem HTTPS-a ili na localhostu. Umjesto toga otvori ovu adresu s https://."
+  Retry: "Pokušaj ponovno"
+Native Permissions:
+  Local Network Denied: "Dopuštenje za uređaje u blizini je odbijeno."
+  Local Network: "Pronađite uređaje na lokalnoj mreži i emitirajte videozapise na njih te sinkronizirajte postavke i podatke između uređaja."
+
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Početna"
+  subscriptions: "Pretplate"
+  userplaylists: "Zbirke"
+  history: "Povijest"
+  subscribedchannels: "Kanali"
+  trending: "Trendovi"
+  popular: "Popularno"
+  stats: "Statistika"
+  more: "Još"
+
+Installer:
+  Create Desktop Shortcut: Stvori prečac na radnoj površini
+Older Version Changes:
+  Title: "Promjene iz starije verzije"
+  Message: "Promjene koje ste napravili u starijoj verziji OpenTubeXa primijenjene su na vašu biblioteku."
+  Detail: "Ako je stavka promijenjena u obje verzije, zadržana je promjena iz starije verzije. Sigurnosna kopija vaše prethodne biblioteke nalazi se u mapi profila."
+Library Format Changed:
+  Title: "Biblioteka je premještena u novi format"
+  Message: "Vaša biblioteka sada koristi novi format pohrane."
+  Detail: "Starije verzije OpenTubeXa i dalje mogu otvoriti vašu biblioteku, ali je prikazuju onakvom kakva je bila prije ovog ažuriranja. Promjene koje napravite u starijoj verziji dodaju se kada se vratite na ovu verziju."
+Invidious Fallback Warning: "Ovaj zahtjev zaobilazi postavljenu instancu Invidiousa i povezuje se izravno s YouTubeom, otkrivajući tvoju IP adresu."
+Automatically unloaded to free memory: "Automatski uklonjeno radi oslobađanja memorije"
+Home Widgets:
+  Continue Watching: "Nastavi gledati"
+  Continue Watching Description: "Nastavi videozapise koje si počeo gledati"
+  Continue Watching Empty: "Ovdje se prikazuju videozapisi koje počneš gledati"
+  Quick Access: "Brzi pristup"
+  Quick Access Description: "Otvori do 4 stranice po izboru"
+  Choose Pages: "Odaberi do 4 stranice"
+  Pages: "Stranice"
+  Search: "Pretraži"
+  Subscriptions: "Pretplate"
+  Watch Later: "Pogledaj kasnije"
+  History: "Povijest"
+  Playlists: "Zbirke"
+  Downloads: "Preuzimanja"
+  Watch Time: "Vrijeme gledanja"
+  Watch Time Description: "Tvoje vrijeme gledanja u posljednjih 7 dana"
+  Today: "Danas"
+  Last 7 Days: "Posljednjih 7 dana"
+  Recent Downloads: "Nedavna preuzimanja"
+  Recent Downloads Description: "Reproduciraj videozapise koje si preuzeo"
+  Recent Downloads Empty: "Ovdje se prikazuju videozapisi koje preuzmeš"
+Subscription Groups:
+  Groups: Grupe
+  All: Sve
+  New Group: Nova grupa
+  Edit Group: Uredi grupu
+  Group Name: Naziv grupe
+  Create: Stvori
+  Save: Spremi
+  Delete Group: Izbriši grupu
+  Delete Prompt: Izbrisati grupu „{groupName}”? Pretplate na njezine kanale ostaju.
+  Empty Group: Ova grupa nema kanala iz trenutačnog profila.
+  Save Failed: Nije moguće spremiti grupu.
+  Delete Failed: Nije moguće izbrisati grupu.
+  Group Icon: Ikona grupe
+  No Icon: Bez ikone
+Yattee Server:
+  API Error (Click to copy): Greška Yattee poslužitelja (pritisni za kopiranje)
+  Unsupported page: Ova stranica nije dostupna s Yattee poslužiteljem. Uključite „{fallbackSetting}” kako biste je učitali lokalnim sučeljem.
+  Posts unavailable: Yattee poslužitelji ne pružaju objave. Uključite „{fallbackSetting}” kako biste ih učitali lokalnim sučeljem.
+  Errors:
+    Invalid credentials: Yattee poslužitelj je odbio korisničko ime ili lozinku. Provjerite ih u odjeljku Postavke → Napredno.
+    Rate limited: Yattee poslužitelj blokira prijave nakon previše neuspjelih pokušaja. Pokušajte ponovno kasnije.
+    Streams not relayed: Yattee poslužitelj nije proslijedio tokove ovog videa. Dok se videa prosljeđuju putem poslužitelja, OpenTubeX se ne povezuje izravno s YouTubeom.
+    Not configured: Unesite URL svog Yattee poslužitelja u odjeljku Postavke → Napredno.
+    HTTPS required: Android može reproducirati videa samo s Yattee poslužitelja koji koriste HTTPS.
+    Streams unavailable: Streamove ovog videozapisa nije moguće učitati s Yattee poslužitelja. Provjerite poslužitelj pomoću „Testiraj vezu” u odjeljku Postavke → Napredno.
+Yattee Fallback Warning: Ovaj zahtjev zaobilazi postavljeni Yattee poslužitelj i povezuje se izravno s YouTubeom, otkrivajući vašu IP adresu.
+Update With Package Manager: 'Ažuriraj pomoću {packageManager}:'
+Update Command Copied: 'Naredba za ažuriranje kopirana'
+Digital Wellbeing:
+  Watch time limit almost reached: "Do dnevnog ograničenja vremena gledanja preostalo je {duration}"
+  Shorts limit almost reached: "Do dnevnog ograničenja Shorts videozapisa preostalo je {duration}"
+  Daily watch time limit reached: "Dosegnuto je dnevno ograničenje vremena gledanja"
+  Daily Shorts limit reached: "Dosegnuto je dnevno ograničenje Shorts videozapisa"
+  Watched today: "Danas ste gledali {duration}."
+  Shorts watched today: "Danas ste gledali Shorts videozapise {duration}."
+  15 More Minutes: "Još 15 minuta"
+  Ignore for Today: "Zanemari za danas"
+  Time to take a break: "Vrijeme je za odmor"
+  Watching for: "Gledate već {duration}."
+  Time for bed: "Vrijeme je za spavanje"
+  Bedtime started at: "Vaše vrijeme za spavanje počelo je u {time}."
+  Remind Me in 10 Minutes: "Podsjeti me za 10 minuta"
+Notification Center:
+  Notifications: "Obavijesti"
+  Notifications With Unread: "Obavijesti (nepročitane: {count})"
+  Mark as Read: "Označi kao pročitano"
+  Mark All as Read: "Označi sve kao pročitano"
+  Clear All: "Izbriši sve"
+  Clear: "Izbriši"
+  Empty: "Još nema obavijesti"
+  Empty Hint: "Ovdje će se pojaviti podsjetnici za prijenose uživo i novi prijenosi s kanala s uključenim obavijestima."
+Platforms:
+  Tracks: Pjesme
+  Playlists: Zbirke
+  Follower Count: '{count} pratitelj | {count} pratitelja | {count} pratitelja'
+  Open Website: Otvori na platformi {platform}
+  Channel Not Found: Ovaj kanal nije pronađen.
+  Playlist Not Found: Ova zbirka nije pronađena.
+  Load Error: Ova se stranica nije mogla učitati s platforme {platform}.
+  Empty Tab: Ovdje još nema ničega.
+YouTube Account:
+  Like: "Sviđa mi se"
+  Dislike: "Ne sviđa mi se"
+  Rating Failed: "Ocjenjivanje na YouTubeu nije uspjelo: {error}"
+  Subscribe Failed: "Pretplata na YouTubeu nije uspjela: {error}"
+  Unsubscribe Failed: "Otkazivanje pretplate na YouTubeu nije uspjelo: {error}"
+  Add a comment: "Dodaj komentar"
+  Add a reply: "Dodaj odgovor"
+  Switch Channel: "Promijeni kanal"
+  Comment: "Komentiraj"
+  Reply: "Odgovori"
+  Comment Posted: "Komentar je objavljen"
+  Reply Posted: "Odgovor je objavljen"
+  Comment Failed: "Objavljivanje komentara nije uspjelo: {error}"
+  Delete Comment: "Izbriši komentar"
+  Delete Comment Confirmation: "Izbrisati svoj komentar s YouTubea?"
+  Comment Deleted: "Komentar je izbrisan"
+  Delete Comment Failed: "Brisanje komentara nije uspjelo: {error}"
+  Edit Comment: "Uredi komentar"
+  Save: "Spremi"
+  Comment Edited: "Komentar je uređen"
+  Edit Comment Failed: "Uređivanje komentara nije uspjelo: {error}"
+  Recommendations: "YouTube preporuke"
+  Recommendations Failed: "Nije moguće učitati tvoje YouTube preporuke."
+  Subscriptions Synced: "Pretplate sinkronizirane s YouTubea: dodano {added}, uklonjeno {removed}"
+  Playlist Update Failed: "Ažuriranje zbirke {playlistName} na YouTubeu nije uspjelo: {error}"

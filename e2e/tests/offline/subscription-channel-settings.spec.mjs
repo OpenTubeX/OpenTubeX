@@ -1,0 +1,692 @@
+import {
+  test,
+  expect,
+  expectScrollAtRenderedEnd,
+  goTo,
+  goToSettingsSection,
+  openNewWindowFromTabBar,
+  waitForAppReady,
+  setWindowSize,
+  readDatastore,
+} from '../../helpers/app.mjs'
+
+const CHANNEL_ID = `UC${'0'.repeat(22)}`
+const subscriptions = Array.from({ length: 18 }, (_, index) => ({
+  id: `UC${String(index).padStart(22, '0')}`,
+  name: index === 0 ? 'Alpha Channel' : `Channel ${String(index).padStart(2, '0')}`,
+  thumbnail: '',
+  ...(index === 0 ? { feedTypes: ['videos'] } : {}),
+  ...(index === 1 ? { dailyVideoLimit: 1, showMembersOnly: true } : {})
+}))
+
+const baseSettings = {
+  currentLocale: 'en-US',
+  fetchSubscriptionsAutomatically: false,
+  ytDlpPlaybackAuthMode: 'browser',
+  ytDlpPlaybackCookiesBrowser: 'firefox'
+}
+const profiles = [
+  {
+    _id: 'allChannels',
+    name: 'All Channels',
+    bgColor: '#000000',
+    textColor: '#FFFFFF',
+    subscriptions
+  },
+  {
+    _id: 'profile-1',
+    name: 'Profile 1',
+    bgColor: '#000000',
+    textColor: '#FFFFFF',
+    subscriptions: [subscriptions[0]]
+  }
+]
+
+test.use({ seed: { settings: { ...baseSettings, uiScale: 125 }, profiles } })
+
+test.describe('subscription settings layout', { tag: '@scale' }, () => {
+  test.use({ seed: { settings: baseSettings, profiles } })
+
+  test('subscription cards keep their controls within the card', async ({ app, page, uiScale }, testInfo) => {
+    await page.evaluate(() => localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({ x: 40, y: 40, width: 1400, height: 900 })))
+    const settings = await goToSettingsSection(page, 'subscription')
+    await settings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
+    for (const width of [1600, 480]) {
+      await app.electronApp.evaluate(({ BrowserWindow }, width) => BrowserWindow.getAllWindows()[0].setBounds({ width, height: 1000 }), width)
+      await expect.poll(() => page.evaluate(() => innerWidth)).toBeCloseTo(width * 100 / uiScale, 0)
+      const card = page.locator('.channelSettings').first()
+      await card.scrollIntoViewIfNeeded()
+      expect.soft(await card.evaluate(element => {
+        const bounds = element.getBoundingClientRect()
+        return [...element.querySelectorAll('.preferenceChip, .dailyVideoLimit, .membersOnlyPreference')].some(control => {
+          const rect = control.getBoundingClientRect()
+          return rect.left < bounds.left - 0.5 || rect.right > bounds.right + 0.5 || control.scrollWidth > control.clientWidth + 1
+        })
+      }), `controls overflow at ${width}px`).toBe(false)
+      expect(await card.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
+      await card.screenshot({ path: testInfo.outputPath(`subscription-card-${width}.png`) })
+    }
+  })
+
+  test('keeps subscription popover controls within the popover', async ({ app, page }, testInfo) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await goTo(page, 'subscribedchannels')
+    const alpha = page.locator('.channel', { hasText: 'Alpha Channel' })
+    await alpha.getByRole('button', { name: 'Subscription settings' }).click()
+    const popover = page.locator('.profileDropdown')
+    for (const width of [1200, 400]) {
+      await setWindowSize(app, page, { width, height: width === 1200 ? 800 : 900 })
+      for (const direction of ['ltr', 'rtl']) {
+        await page.evaluate(value => { document.body.dir = value }, direction)
+        const overflow = await popover.evaluate(element => {
+          const bounds = element.getBoundingClientRect()
+          return [...element.querySelectorAll('.preferenceChip, .dailyVideoLimit, .membersOnlyPreference')].some(control => {
+            const rect = control.getBoundingClientRect()
+            return rect.left < bounds.left - 0.5 || rect.right > bounds.right + 0.5 || control.scrollWidth > control.clientWidth + 1
+          })
+        })
+        expect.soft(overflow, `${direction} controls overflow at ${width}px`).toBe(false)
+        await expect(popover.getByRole('checkbox', { name: 'Show members-only videos' })).toBeVisible()
+        // The members-only label leads and its switch ends the row.
+        expect.soft(await popover.locator('.membersOnlyPreference').evaluate((row, direction) => {
+          const bounds = row.getBoundingClientRect()
+          const text = row.querySelector('.switch-label-text').getBoundingClientRect()
+          const thumb = row.querySelector('.switch-thumb').getBoundingClientRect()
+          return direction === 'ltr'
+            ? thumb.left > text.right && thumb.right < bounds.right
+            : thumb.right < text.left && thumb.left > bounds.left
+        }, direction), `${direction} members-only switch trails its label`).toBe(true)
+        if (width === 1200) {
+          const rowCounts = await popover.locator('.feedTypePreferences .preferenceChips').evaluateAll(groups => groups.map(group => (
+            new Set([...group.children].map(chip => Math.round(chip.getBoundingClientRect().top))).size
+          )))
+          expect.soft(rowCounts, `${direction} feed type chips wrap`).toEqual([1, 1])
+        }
+      }
+      await page.evaluate(() => { document.body.dir = 'ltr' })
+      await popover.screenshot({ path: testInfo.outputPath(`subscription-popover-${width}.png`) })
+    }
+    await page.evaluate(() => window.$store.dispatch('updateYtDlpPlaybackAuthMode', 'none'))
+    await expect(popover.getByRole('checkbox', { name: 'Show members-only videos' })).toHaveCount(0)
+    await expect(popover.getByRole('button', { name: 'Use global setting', exact: true })).toBeVisible()
+  })
+
+  test('keeps the selection toolbar fixed with equal search and list gaps', async ({ app, page, uiScale }, testInfo) => {
+    await page.evaluate(() => window.$store.dispatch('updateBaseTheme', 'dark'))
+    const settings = await goToSettingsSection(page, 'subscription')
+    await settings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
+    const toolbar = page.locator('.channelSelectionToolbar')
+    const scroller = page.locator('.channelSettingsScroller')
+    for (const width of [1600, 480]) {
+      await app.electronApp.evaluate(({ BrowserWindow }, width) => BrowserWindow.getAllWindows()[0].setBounds({ width, height: 1000 }), width)
+      await expect.poll(() => page.evaluate(() => innerWidth)).toBeCloseTo(width * 100 / uiScale, 0)
+      await scroller.evaluate(element => { element.scrollTop = 0 })
+      await expect.poll(() => page.evaluate(() => {
+        const search = document.querySelector('.channelSettingsHeader .ft-input').getBoundingClientRect()
+        const toolbar = document.querySelector('.channelSelectionToolbar').getBoundingClientRect()
+        const card = document.querySelector('.channelSettings').getBoundingClientRect()
+        return Math.abs(toolbar.top - search.bottom - (card.top - toolbar.bottom))
+      })).toBeLessThanOrEqual(1)
+      await page.locator('.settingsWindow').screenshot({ path: testInfo.outputPath(`subscription-settings-${width}.png`) })
+      const initialBounds = await toolbar.boundingBox()
+      await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+      // IntersectionObserver can round full visibility below 1 at fractional zoom.
+      await expect(toolbar).toBeInViewport({ ratio: 0.999 })
+      expect((await toolbar.boundingBox()).y).toBeCloseTo(initialBounds.y, 0)
+      await expectScrollAtRenderedEnd(scroller)
+      await toolbar.getByRole('button', { name: 'Select All' }).click()
+      await expect(toolbar).toContainText(`${subscriptions.length} selected`)
+      const bulkMembers = toolbar.getByRole('checkbox', { name: 'Show members-only videos' })
+      expect.soft(await bulkMembers.evaluate(element => element.tagName), 'bulk members setting uses the standard switch').toBe('INPUT')
+      await expect(toolbar).toBeInViewport({ ratio: 0.999 })
+      await page.locator('.settingsWindow').screenshot({ path: testInfo.outputPath(`subscription-settings-selected-${width}.png`) })
+      await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await expectScrollAtRenderedEnd(scroller)
+      await toolbar.getByRole('button', { name: 'Select None' }).click()
+      await expect(toolbar).toContainText('0 selected')
+      await expectScrollAtRenderedEnd(scroller)
+    }
+
+    const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
+    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+    const previousRange = await scroller.evaluate(element => element.scrollHeight - element.clientHeight)
+    await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setBounds({ width: 1600, height: 1000 }))
+    await expect.poll(async () => Math.abs(await page.evaluate(() => innerWidth) - 1600 * 100 / uiScale)).toBeLessThanOrEqual(1)
+    await expect.poll(() => scroller.evaluate(element => element.scrollHeight - element.clientHeight)).toBeLessThan(previousRange)
+    await expectScrollAtRenderedEnd(scroller)
+    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+  })
+})
+
+test('keeps the popover and Subscription Settings manager in sync', async ({ app, page }) => {
+  // Two app launches and a full edit round trip exceed the default budget when workers run in parallel.
+  test.slow()
+  const subscriptionSettings = await goToSettingsSection(page, 'subscription')
+  await subscriptionSettings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
+  await expect.poll(() => page.evaluate(() => {
+    const scroller = document.querySelector('.channelSettingsScroller')
+    return Math.max(
+      document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      scroller.scrollWidth - scroller.clientWidth
+    )
+  })).toBeLessThanOrEqual(1)
+
+  const alphaSettings = page.getByRole('group', { name: 'Alpha Channel' })
+  const alphaFeed = alphaSettings.getByRole('group', { name: 'Show in subscription feed', exact: true })
+  const videos = alphaFeed.getByRole('checkbox', { name: 'Videos' })
+  const shorts = alphaFeed.getByRole('checkbox', { name: 'Shorts' })
+  await expect(videos).toHaveAttribute('aria-checked', 'true')
+  await expect(shorts).toHaveAttribute('aria-checked', 'false')
+  await shorts.click()
+  await videos.click()
+  const membersOnly = alphaSettings.getByRole('checkbox', { name: 'Show members-only videos' })
+  await expect(membersOnly).not.toBeChecked()
+  await alphaSettings.locator('label', { hasText: 'Show members-only videos' }).click()
+  await expect(membersOnly).toBeChecked()
+
+  await expect(alphaSettings.getByRole('button', { name: 'Use global setting', exact: true }))
+    .toHaveAttribute('aria-pressed', 'true')
+  // The stepper starts at one, so one step sets a limit of two.
+  await alphaSettings.getByRole('button', { name: 'More videos per day', exact: true }).click()
+
+  await expect.poll(async () => {
+    const contents = readDatastore(app.userDataDir, 'profiles')
+    const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
+    const latestProfiles = new Map(records.map(record => [record._id, record]))
+    return ['allChannels', 'profile-1'].map(profileId => {
+      const channel = latestProfiles.get(profileId).subscriptions
+        .find(subscription => subscription.id === CHANNEL_ID)
+      return {
+        dailyVideoLimit: channel.dailyVideoLimit,
+        feedTypes: channel.feedTypes,
+        showMembersOnly: channel.showMembersOnly
+      }
+    })
+  }).toEqual([
+    { dailyVideoLimit: 2, feedTypes: ['shorts'], showMembersOnly: true },
+    { dailyVideoLimit: 2, feedTypes: ['shorts'], showMembersOnly: true }
+  ])
+
+  ;({ page } = await app.relaunch())
+  await goTo(page, 'subscribedchannels')
+  const alpha = page.locator('.channel', { hasText: 'Alpha Channel' })
+  await alpha.getByRole('button', { name: 'Subscription settings' }).click()
+  const popover = page.locator('.profileDropdown')
+  await expect(popover).toHaveClass(/profileDropdownPositioned/)
+  await expect.poll(() => page.evaluate(() => (
+    document.documentElement.scrollWidth - document.documentElement.clientWidth
+  ))).toBeLessThanOrEqual(1)
+  const [popoverBounds, viewport] = await Promise.all([
+    popover.boundingBox(),
+    page.evaluate(() => ({ width: window.innerWidth, height: window.innerHeight }))
+  ])
+  expect(popoverBounds.x).toBeGreaterThanOrEqual(0)
+  expect(popoverBounds.y).toBeGreaterThanOrEqual(0)
+  expect(popoverBounds.x + popoverBounds.width).toBeLessThanOrEqual(viewport.width + 1)
+  expect(popoverBounds.y + popoverBounds.height).toBeLessThanOrEqual(viewport.height + 1)
+  const popoverScroller = popover.locator('.profileDropdownScroller')
+  await expect(popoverScroller).toHaveAttribute('data-overlayscrollbars-viewport')
+  await expect(popoverScroller.locator(':scope > .os-scrollbar-vertical'))
+    .toHaveClass(/os-scrollbar-unusable/)
+  const popoverFeed = popover.getByRole('group', { name: 'Show in subscription feed' })
+  const popoverVideos = popoverFeed.getByRole('checkbox', { name: 'Videos' })
+  const popoverShorts = popoverFeed.getByRole('checkbox', { name: 'Shorts' })
+  await expect.poll(async () => {
+    const [videosBounds, shortsBounds] = await Promise.all([
+      popoverVideos.boundingBox(),
+      popoverShorts.boundingBox()
+    ])
+    return Math.abs(videosBounds.y - shortsBounds.y) <= 1 &&
+      shortsBounds.x > videosBounds.x
+  }).toBe(true)
+  await expect(popoverVideos)
+    .toHaveAttribute('aria-checked', 'false')
+  await expect(popoverShorts)
+    .toHaveAttribute('aria-checked', 'true')
+  const popoverMembersOnly = popover.getByRole('checkbox', { name: 'Show members-only videos' })
+  await expect(popoverMembersOnly).toBeChecked()
+  await popover.locator('label', { hasText: 'Show members-only videos' }).click()
+  await expect(popoverMembersOnly).not.toBeChecked()
+  await popoverFeed.getByRole('checkbox', { name: 'Live' }).click()
+  const popoverLimit = popover.locator('.dailyVideoLimitCount')
+  await expect(popoverLimit).toHaveText('2')
+  await expect(popoverLimit).toHaveAttribute('aria-pressed', 'true')
+
+  await popover.getByRole('button', { name: 'Unlimited', exact: true }).click()
+  await expect.poll(async () => {
+    const contents = readDatastore(app.userDataDir, 'profiles')
+    const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
+    const channel = records.filter(record => record._id === 'allChannels').at(-1).subscriptions
+      .find(subscription => subscription.id === CHANNEL_ID)
+    return {
+      dailyVideoLimit: channel.dailyVideoLimit,
+      showMembersOnly: channel.showMembersOnly
+    }
+  }).toEqual({ dailyVideoLimit: null, showMembersOnly: false })
+
+  const reopenedSubscriptionSettings = await goToSettingsSection(page, 'subscription')
+  await reopenedSubscriptionSettings
+    .getByRole('button', { name: 'Subscription settings', exact: true })
+    .click()
+  const syncedAlphaSettings = page.getByRole('group', { name: 'Alpha Channel' })
+  await expect(syncedAlphaSettings.getByRole('group', { name: 'Show in subscription feed', exact: true })
+    .getByRole('checkbox', { name: 'Live' })).toHaveAttribute('aria-checked', 'true')
+  await expect(syncedAlphaSettings.getByRole('checkbox', { name: 'Show members-only videos' }))
+    .not.toBeChecked()
+  await expect(syncedAlphaSettings.getByRole('button', { name: 'Unlimited', exact: true }))
+    .toHaveAttribute('aria-pressed', 'true')
+})
+
+test('changes subscription settings for selected channels', async ({ app, attachScreenshot, page }) => {
+  const subscriptionSettings = await goToSettingsSection(page, 'subscription')
+  await subscriptionSettings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
+
+  const selectionToolbar = page.locator('.channelSelectionToolbar')
+  const selectAll = selectionToolbar.getByRole('button', { name: 'Select All' })
+  const selectNone = selectionToolbar.getByRole('button', { name: 'Select None' })
+  await expect(selectAll.locator('.channelSelectionActionIcon')).toHaveCount(1)
+  await expect(selectNone.locator('.channelSelectionActionIcon')).toHaveCount(1)
+  for (const button of [selectAll, selectNone]) {
+    await expect.poll(() => button.evaluate(element => {
+      const label = element.querySelector(':scope > span')
+      const icon = element.querySelector(':scope > .channelSelectionActionIcon')
+      return label?.getBoundingClientRect().right <= icon?.getBoundingClientRect().left
+    })).toBe(true)
+  }
+  await expect(selectionToolbar).toContainText('0 selected')
+  await expect(page.locator('.bulkFeedTypeSettings')).toHaveCount(0)
+
+  await selectAll.click()
+  await expect(selectionToolbar).toContainText(`${subscriptions.length} selected`)
+  await expect(page.getByRole('checkbox', { name: 'Alpha Channel' }))
+    .toHaveAttribute('aria-checked', 'true')
+  await selectNone.click()
+
+  await page.getByRole('checkbox', { name: 'Alpha Channel' }).click()
+  await page.getByRole('checkbox', { name: 'Channel 01' }).click()
+  await expect(selectionToolbar).toContainText('2 selected')
+
+  const bulkSettings = page.locator('.bulkFeedTypeSettings')
+  const bulkFeed = bulkSettings.getByRole('group', { name: 'Show in subscription feed', exact: true })
+  const bulkVideos = bulkFeed.getByRole('checkbox', { name: 'Videos' })
+  const bulkShorts = bulkFeed.getByRole('checkbox', { name: 'Shorts' })
+  const bulkMembersOnly = bulkSettings.getByRole('checkbox', { name: 'Show members-only videos' })
+  const bulkDailyLimit = bulkSettings.locator('.dailyVideoLimit')
+  await expect(bulkVideos).toHaveAttribute('aria-checked', 'true')
+  await expect(bulkShorts).toHaveAttribute('aria-checked', 'mixed')
+  await expect(bulkMembersOnly).toHaveAttribute('aria-checked', 'mixed')
+  await expect(bulkMembersOnly).toHaveJSProperty('indeterminate', true)
+  // The channels use different limits, so no option is selected.
+  await expect(bulkDailyLimit.locator('[aria-pressed="true"]')).toHaveCount(0)
+
+  await setWindowSize(app, page, { width: 375, height: 700 })
+  await expect.poll(() => page.locator('.settingsContent').evaluate(element => (
+    element.scrollWidth - element.clientWidth
+  ))).toBeLessThanOrEqual(1)
+  await attachScreenshot('compact subscription channel selection controls')
+  await bulkDailyLimit.scrollIntoViewIfNeeded()
+  await expect(bulkMembersOnly).toBeVisible()
+  await expect(bulkDailyLimit).toBeVisible()
+  await attachScreenshot('compact subscription channel batch settings')
+
+  await bulkVideos.click()
+  await bulkShorts.click()
+  await bulkMembersOnly.focus()
+  await bulkMembersOnly.press('Space')
+  await expect(bulkMembersOnly).toBeChecked()
+  await expect(bulkMembersOnly).toHaveJSProperty('indeterminate', false)
+  await bulkSettings.locator('.membersOnlyPreference .switch-label').click()
+  await expect(bulkMembersOnly).not.toBeChecked()
+  await bulkMembersOnly.focus()
+  await bulkMembersOnly.press('Space')
+  await bulkSettings.getByRole('button', { name: 'More videos per day', exact: true }).click()
+  await expect(bulkVideos).toHaveAttribute('aria-checked', 'false')
+  await expect(bulkShorts).toHaveAttribute('aria-checked', 'true')
+  await expect(bulkMembersOnly).toBeChecked()
+  await expect(bulkMembersOnly).toHaveJSProperty('indeterminate', false)
+  await expect(bulkSettings.locator('.dailyVideoLimitCount')).toHaveText('2')
+  await expect(bulkSettings.locator('.dailyVideoLimitCount')).toHaveAttribute('aria-pressed', 'true')
+
+  await expect.poll(async () => {
+    const contents = readDatastore(app.userDataDir, 'profiles')
+    const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
+    const latestProfiles = new Map(records.map(record => [record._id, record]))
+    return ['allChannels', 'profile-1'].map(profileId => (
+      latestProfiles.get(profileId).subscriptions
+        .filter(channel => [subscriptions[0].id, subscriptions[1].id].includes(channel.id))
+        .sort((left, right) => left.id.localeCompare(right.id))
+        .map(channel => ({
+          dailyVideoLimit: channel.dailyVideoLimit,
+          feedTypes: channel.feedTypes,
+          showMembersOnly: channel.showMembersOnly
+        }))
+    ))
+  }).toEqual([
+    [
+      { dailyVideoLimit: 2, feedTypes: ['shorts'], showMembersOnly: true },
+      { dailyVideoLimit: 2, feedTypes: ['shorts', 'live', 'posts'], showMembersOnly: true }
+    ],
+    [
+      { dailyVideoLimit: 2, feedTypes: ['shorts'], showMembersOnly: true }
+    ]
+  ])
+
+  const scroller = page.locator('.channelSettingsScroller')
+  const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
+  // Consume the setup scroll before clearing selection changes the header height.
+  await scroller.evaluate(element => new Promise(resolve => {
+    const settle = () => {
+      element.removeEventListener('scroll', settle)
+      requestAnimationFrame(() => requestAnimationFrame(resolve))
+    }
+    element.addEventListener('scroll', settle, { once: true })
+    const previous = element.scrollTop
+    element.scrollTop = element.scrollHeight
+    if (element.scrollTop === previous) settle()
+  }))
+  await expectScrollAtRenderedEnd(scroller)
+  await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+
+  await selectNone.evaluate(button => button.click())
+  await expect(selectionToolbar).toContainText('0 selected')
+  await expect(page.locator('.bulkFeedTypeSettings')).toHaveCount(0)
+  await expectScrollAtRenderedEnd(scroller)
+  await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+  await setWindowSize(app, page, { width: 1600, height: 900 })
+  await expectScrollAtRenderedEnd(scroller)
+  await expect(page.locator('.channelSettings').last()).toBeInViewport()
+  await attachScreenshot('subscription list stays at the bottom after clearing the selection')
+})
+
+test('does not carry a failed popover edit into a later update', async ({ app, page }) => {
+  await goTo(page, 'subscribedchannels')
+  const alpha = page.locator('.channel', { hasText: 'Alpha Channel' })
+  await alpha.getByRole('button', { name: 'Subscription settings' }).click()
+  const popover = page.locator('.profileDropdown')
+
+  await page.evaluate(() => {
+    const store = window.$store
+    const updateChannelSettings = store._actions.updateChannelSettings[0]
+    let updateCount = 0
+    store._actions.updateChannelSettings = [payload => {
+      updateCount++
+      if (updateCount === 1) {
+        return new Promise(resolve => {
+          window.resolveFirstChannelSettingsWrite = () => resolve(false)
+        })
+      }
+      return updateChannelSettings(payload)
+    }]
+    window.channelSettingsUpdateCount = () => updateCount
+  })
+
+  await popover.locator('label', { hasText: 'Show members-only videos' }).click()
+  await expect.poll(() => page.evaluate(() => window.channelSettingsUpdateCount())).toBe(1)
+
+  // The stepper starts at one, so one step sets a limit of two.
+  await popover.getByRole('button', { name: 'More videos per day', exact: true }).click()
+  await page.evaluate(() => window.resolveFirstChannelSettingsWrite())
+
+  await expect.poll(async () => {
+    const contents = readDatastore(app.userDataDir, 'profiles')
+    const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
+    const channel = records.filter(record => record._id === 'allChannels').at(-1).subscriptions
+      .find(subscription => subscription.id === CHANNEL_ID)
+    return {
+      dailyVideoLimit: channel.dailyVideoLimit,
+      showMembersOnly: channel.showMembersOnly ?? false
+    }
+  }).toEqual({ dailyVideoLimit: 2, showMembersOnly: false })
+  await expect(page.locator('.toast', {
+    hasText: 'Failed to save channel settings'
+  })).toBeVisible()
+})
+
+test('reports subscription setting write failures from the settings manager', async ({ page }) => {
+  const subscriptionSettings = await goToSettingsSection(page, 'subscription')
+  await subscriptionSettings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
+  const alphaSettings = page.getByRole('group', { name: 'Alpha Channel' })
+  const shorts = alphaSettings.getByRole('group', { name: 'Show in subscription feed', exact: true })
+    .getByRole('checkbox', { name: 'Shorts' })
+  await expect(shorts).toHaveAttribute('aria-checked', 'false')
+
+  await page.evaluate(() => {
+    const store = window.$store
+    store._actions.updateChannelSettings = [() => Promise.resolve(false)]
+  })
+  await shorts.click()
+
+  await expect(page.locator('.toast', {
+    hasText: 'Failed to save channel settings'
+  })).toBeVisible()
+  await expect(shorts).toHaveAttribute('aria-checked', 'false')
+})
+
+for (const future of [false, true]) {
+  test(`saves Select All members-only changes together before leaving the manager, future timestamps: ${future}`, async ({ app, page }) => {
+    const futureTimestamp = future ? Date.now() + 86400000 : 0
+    if (future) {
+      await page.evaluate(async updatedAt => {
+        const store = window.$store
+        const channel = store.getters.getProfileList[0].subscriptions[0]
+        const saved = await store.dispatch('updateChannelSettings', {
+          channelId: channel.id, settings: { showMembersOnly: channel.showMembersOnly }, fromSync: true, updatedAt
+        })
+        if (!saved) throw new Error('Failed to seed a future subscription timestamp')
+      }, futureTimestamp)
+    }
+    const settings = await goToSettingsSection(page, 'subscription')
+    await settings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
+    await page.locator('.channelSelectionToolbar').getByRole('button', { name: 'Select All' }).click()
+    await page.evaluate(() => {
+      const store = window.$store
+      window.subscriptionSettingsSaves = 0
+      store.subscribeAction(({ type }) => {
+        if (type === 'updateChannelSettings' || type === 'batchUpdateChannelSettings') {
+          window.subscriptionSettingsSaves += 1
+        }
+      })
+    })
+    const members = page.locator('.bulkFeedTypeSettings .membersOnlyPreference')
+    await expect(members.getByRole('checkbox')).toHaveAttribute('aria-checked', 'mixed')
+    await members.locator('.switch-label').click()
+    await expect(members.getByRole('checkbox')).toBeChecked()
+    await members.locator('.switch-label').click()
+    await expect(members.getByRole('checkbox')).not.toBeChecked()
+    await page.locator('.settingsWindow').getByRole('button', { name: 'Close', exact: true }).click()
+    await expect.poll(() => page.evaluate(({ timestamp, channelId }) => (
+      window.$store
+        .getters.getProfileList.every(profile => profile.subscriptions.every(channel => (
+          channel.showMembersOnly === false && (channel.id === channelId
+            ? channel.subscriptionSettingsUpdatedAt > timestamp
+            : channel.subscriptionSettingsUpdatedAt > 0 && (timestamp === 0 || channel.subscriptionSettingsUpdatedAt < timestamp))
+        )))
+    ), { timestamp: futureTimestamp, channelId: CHANNEL_ID })).toBe(true)
+    expect(await page.evaluate(() => window.subscriptionSettingsSaves)).toBe(2)
+    ;({ page } = await app.relaunch())
+    expect(await page.evaluate(() => (
+      window.$store
+        .getters.getProfileList.every(profile => profile.subscriptions.every(channel => channel.showMembersOnly === false))
+    ))).toBe(true)
+  })
+}
+
+test('keeps queued bulk changes for remaining channels after another window unsubscribes', async ({ app, page }) => {
+  const other = await openNewWindowFromTabBar(app, page)
+  await waitForAppReady(other)
+  const settings = await goToSettingsSection(page, 'subscription')
+  await settings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
+  await page.locator('.channelSelectionToolbar').getByRole('button', { name: 'Select All' }).click()
+  await page.evaluate(() => {
+    const store = window.$store
+    const save = store._actions.batchUpdateChannelSettings[0]
+    let first = true
+    store._actions.batchUpdateChannelSettings = [async updates => {
+      if (first) {
+        first = false
+        await new Promise(resolve => { window.releaseBulkSave = resolve })
+      }
+      return save(updates)
+    }]
+  })
+  const members = page.locator('.bulkFeedTypeSettings .membersOnlyPreference')
+  await members.locator('.switch-label').click()
+  await expect(members.getByRole('checkbox')).toBeChecked()
+  await members.locator('.switch-label').click()
+  await expect(members.getByRole('checkbox')).not.toBeChecked()
+  await other.evaluate(channelId => (
+    window.$store.dispatch('removeChannelFromProfiles', {
+      channelIds: [channelId], profileIds: ['allChannels', 'profile-1']
+    })
+  ), CHANNEL_ID)
+  await expect.poll(() => page.evaluate(() => (
+    window.$store.getters.getActiveProfile.subscriptions.length
+  ))).toBe(subscriptions.length - 1)
+  await page.evaluate(() => window.releaseBulkSave())
+  for (const window of [page, other]) {
+    await expect.poll(() => window.evaluate(() => (
+      window.$store.getters.getProfileList
+        .every(profile => profile.subscriptions.every(channel => channel.showMembersOnly === false))
+    ))).toBe(true)
+  }
+  await expect(page.locator('.toast', { hasText: 'Failed to save channel settings' })).toHaveCount(1)
+  ;({ page } = await app.relaunch())
+  expect(await page.evaluate(() => {
+    const channels = window.$store.getters.getActiveProfile.subscriptions
+    return { count: channels.length, allDisabled: channels.every(channel => channel.showMembersOnly === false) }
+  })).toEqual({ count: subscriptions.length - 1, allDisabled: true })
+})
+
+for (const overlapping of [false, true]) {
+  test(`merges a pending bulk save with another window’s preferences and preserves explicit resets, overlapping: ${overlapping}`, async ({ app, page }) => {
+    const other = await openNewWindowFromTabBar(app, page)
+    await waitForAppReady(other)
+    await app.electronApp.evaluate(({ ipcMain }) => {
+      const handler = ipcMain._invokeHandlers.get('db-profiles')
+      ipcMain.removeHandler('db-profiles')
+      ipcMain.handle('db-profiles', async (event, request) => {
+        if (request.action === 24) {
+          await new Promise(resolve => { globalThis.releaseBulkSettingsSave = resolve })
+          ipcMain.removeHandler('db-profiles')
+          ipcMain.handle('db-profiles', handler)
+        }
+        return handler(event, request)
+      })
+    })
+    const settings = await goToSettingsSection(page, 'subscription')
+    await settings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
+    await page.locator('.channelSelectionToolbar').getByRole('button', { name: 'Select All' }).click()
+    await page.locator('.bulkFeedTypeSettings .membersOnlyPreference .switch-label').click()
+    await expect.poll(() => app.electronApp.evaluate(() => typeof globalThis.releaseBulkSettingsSave)).toBe('function')
+    expect(await other.evaluate(({ channelId, overlapping }) => (
+      window.$store.dispatch('updateChannelSettings', {
+        channelId, settings: { dailyVideoLimit: 7, ...(overlapping ? { showMembersOnly: false } : {}) }
+      })
+    ), { channelId: CHANNEL_ID, overlapping })).toBe(true)
+    await app.electronApp.evaluate(() => globalThis.releaseBulkSettingsSave())
+    for (const window of [page, other]) {
+      await expect.poll(() => window.evaluate(({ channelId, overlapping }) => (
+        window.$store.getters.getProfileList
+          .every(profile => profile.subscriptions.every(channel => channel.showMembersOnly === !(overlapping && channel.id === channelId)) &&
+            profile.subscriptions.find(channel => channel.id === channelId)?.dailyVideoLimit === 7)
+      ), { channelId: CHANNEL_ID, overlapping })).toBe(true)
+    }
+    // A reset must survive the real renderer-to-main IPC boundary.
+    expect(await page.evaluate(channelId => (
+      window.$store.dispatch('batchUpdateChannelSettings', [
+        { channelId, settings: { dailyVideoLimit: undefined } },
+        { channelId: 'UC0000000000000000000001', settings: { dailyVideoLimit: null } }
+      ])
+    ), CHANNEL_ID)).toBe(true)
+    ;({ page } = await app.relaunch())
+    expect(await page.evaluate(({ channelId, overlapping }) => (
+      window.$store.getters.getProfileList
+        .every(profile => {
+          const channel = profile.subscriptions.find(channel => channel.id === channelId)
+          return !Object.hasOwn(channel, 'dailyVideoLimit') && channel.showMembersOnly === !overlapping &&
+            channel.feedTypes.join(',') === 'videos'
+        })
+    ), { channelId: CHANNEL_ID, overlapping })).toBe(true)
+    expect(await page.evaluate(() => (
+      window.$store.getters.getProfileList[0]
+        .subscriptions[1].dailyVideoLimit
+    ))).toBe(null)
+  })
+}
+
+test('reports a partial write when a requested profile no longer exists', async ({ page }) => {
+  const result = await page.evaluate(async () => {
+    const store = window.$store
+    store.state.profiles.profileList.push({
+      _id: 'removed-profile',
+      name: 'Removed profile',
+      bgColor: '#000000',
+      textColor: '#FFFFFF',
+      subscriptions: [{
+        id: 'UC0000000000000000000000',
+        name: 'Alpha Channel',
+        thumbnail: '',
+        feedTypes: ['videos']
+      }]
+    })
+
+    const saved = await store.dispatch('updateChannelSettings', {
+      channelId: 'UC0000000000000000000000',
+      settings: { feedTypes: ['shorts'] }
+    })
+
+    return {
+      saved,
+      feedTypesByProfile: Object.fromEntries(store.getters.getProfileList.map(profile => [
+        profile._id,
+        profile.subscriptions.find(channel => channel.id === 'UC0000000000000000000000')
+          ?.feedTypes
+      ]))
+    }
+  })
+
+  expect(result).toEqual({
+    saved: false,
+    feedTypesByProfile: {
+      allChannels: ['shorts'],
+      'profile-1': ['shorts'],
+      'removed-profile': ['videos']
+    }
+  })
+})
+
+test('clamps the channel list after searching', async ({ page }) => {
+  const subscriptionSettings = await goToSettingsSection(page, 'subscription')
+  await subscriptionSettings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
+
+  const scroller = page.locator('.channelSettingsScroller')
+  const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
+  await expect(scroller).toHaveAttribute('data-overlayscrollbars-viewport')
+  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+  await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+
+  await page.getByLabel('Search channels').fill('Alpha Channel')
+  await expect(page.locator('.channelSettings')).toHaveCount(1)
+  await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBe(0)
+  await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+})
+
+test('records edit times per channel and does not retimestamp received settings', async ({ page }) => {
+  const result = await page.evaluate(async (channelId) => {
+    const store = window.$store
+    const secondChannelId = store.state.profiles.profileList[0].subscriptions[1].id
+    const timestamps = () => Object.fromEntries(store.state.profiles.profileList[0].subscriptions.map(channel => [channel.id, channel.subscriptionSettingsUpdatedAt]))
+    await store.dispatch('updateChannelSettings', { channelId, settings: { dailyVideoLimit: 2 } })
+    const firstEdit = timestamps()
+    await store.dispatch('updateChannelSettings', { channelId: secondChannelId, settings: { dailyVideoLimit: 3 } })
+    const secondEdit = timestamps()
+    await store.dispatch('updateChannelSettings', { channelId, settings: { dailyVideoLimit: 4 }, fromSync: true, updatedAt: 123 })
+    return { firstEdit, secondEdit, afterSync: timestamps(), secondChannelId }
+  }, CHANNEL_ID)
+  expect(result.firstEdit[CHANNEL_ID]).toBeGreaterThan(0)
+  expect(result.secondEdit[CHANNEL_ID]).toBe(result.firstEdit[CHANNEL_ID])
+  expect(result.secondEdit[result.secondChannelId]).toBeGreaterThan(0)
+  expect(result.afterSync).toEqual({ ...result.secondEdit, [CHANNEL_ID]: 123 })
+})

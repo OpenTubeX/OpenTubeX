@@ -1,0 +1,421 @@
+import { chooseSelectOption, test, expect, goTo, goToSettingsSection, latestSettings, readDatastore } from '../../helpers/app.mjs'
+import { waitForPlayback } from '../../helpers/player.mjs'
+import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
+
+const LONG_TITLE = 'An unusually long video title that keeps going with more and more words, so that it wraps across several lines in every grid and list layout, even in the wide list view where each title gets most of the window width to itself, which takes a title far longer than most channels would ever write'
+const SHORT_TITLE = 'Short title'
+const LONG_PLAYLIST = 'A playlist with an unusually long name that keeps going with more and more words, so that it wraps across several lines in the playlist grid'
+// Playlist cards cut names after 255 characters.
+const OVERLONG_PLAYLIST = `${LONG_PLAYLIST}, and then goes on for so long that the card itself cuts it off after 255 characters, which the tooltip must never do to the name`
+
+function historyEntry(videoId, title, timeWatched) {
+  return {
+    _id: videoId,
+    videoId,
+    title,
+    author: 'Test Channel',
+    authorId: 'UC-test-channel-id',
+    published: Date.now() - 86_400_000,
+    description: '',
+    viewCount: 1234,
+    lengthSeconds: 60,
+    watchProgress: 0,
+    isWatched: false,
+    timeWatched,
+    isLive: false,
+    type: 'video'
+  }
+}
+
+/**
+ * @param {import('@playwright/test').Locator} heading
+ */
+function measure(heading) {
+  return heading.evaluate(element => {
+    const style = getComputedStyle(element)
+    return {
+      lines: element.getBoundingClientRect().height / Number.parseFloat(style.lineHeight),
+      truncated: element.scrollHeight > element.clientHeight,
+      tooltip: element.closest('a.title')?.getAttribute('title') ?? null
+    }
+  })
+}
+
+/**
+ * @param {import('@playwright/test').Page} page
+ * @param {number} lines
+ */
+async function chooseTitleLines(page, lines) {
+  const appearance = await goToSettingsSection(page, 'appearance')
+  const select = appearance.locator('.select').filter({
+    has: page.getByRole('combobox', { name: 'Title Lines' })
+  }).locator('select')
+  await chooseSelectOption(select, String(lines))
+  await expect(select).toHaveValue(String(lines))
+  await page.locator('.settingsWindow').getByRole('button', { name: 'Close', exact: true }).click()
+  await expect(page.locator('.settingsWindow')).toBeHidden()
+}
+
+/**
+ * @param {import('@playwright/test').Locator} heading
+ * @param {string} title
+ * @param {number} limit the expected line limit, 0 for none
+ */
+async function expectClamped(heading, title, limit) {
+  await expect.poll(async () => {
+    const { lines, truncated, tooltip } = await measure(heading)
+    // Exactly the limit's line boxes, so descenders on the last line stay visible
+    return { atLimit: Math.abs(lines - limit) < 0.05, truncated, tooltip }
+  }).toEqual(limit > 0 ? { atLimit: true, truncated: true, tooltip: title } : { atLimit: false, truncated: false, tooltip: null })
+  if (limit === 0) expect((await measure(heading)).lines).toBeGreaterThan(2.5)
+}
+
+test.describe('title line limit', { tag: '@scale' }, () => {
+  test.use({
+    seed: {
+      settings: { currentLocale: 'en-US' },
+      history: [
+        historyEntry('longtitle01', LONG_TITLE, Date.now() - 1000),
+        historyEntry('shorttitle1', SHORT_TITLE, Date.now() - 2000)
+      ],
+      playlists: [{
+        _id: 'long-playlist',
+        playlistName: LONG_PLAYLIST,
+        description: '',
+        protected: false,
+        videos: [],
+        lastUpdatedAt: 1700000000000
+      }, {
+        _id: 'overlong-playlist',
+        playlistName: OVERLONG_PLAYLIST,
+        description: '',
+        protected: false,
+        videos: [],
+        lastUpdatedAt: 1700000000001
+      }]
+    }
+  })
+
+  test('clamps video and playlist titles in grids and lists to two lines by default and to the chosen limit', async ({ app, page }) => {
+    await goTo(page, 'history')
+    const long = page.getByRole('heading', { name: LONG_TITLE, exact: true })
+    const short = page.getByRole('heading', { name: SHORT_TITLE, exact: true })
+    await expect(long).toBeVisible()
+    await expect(page.locator(':root')).toHaveClass(/\blimitTitleLines\b/)
+    for (const listType of ['grid', 'list']) {
+      await page.evaluate(listType => window.$store.dispatch('updateListType', listType), listType)
+      await expect(page.locator(`.ft-list-video.${listType}`).first()).toBeVisible()
+      await expectClamped(long, LONG_TITLE, 2)
+      const shortTitle = await measure(short)
+      expect(shortTitle.lines, listType).toBeCloseTo(1, 1)
+      expect(shortTitle.truncated, listType).toBe(false)
+    }
+    await page.evaluate(() => window.$store.dispatch('updateListType', 'grid'))
+
+    // Keyboard users cannot open the hover tooltip, so a focused title shows in full.
+    const longLink = page.locator('a.title').filter({ has: long })
+    await page.keyboard.press('Shift')
+    await longLink.focus()
+    await expect.poll(() => longLink.evaluate(element => element.matches(':focus-visible'))).toBe(true)
+    await expect.poll(async () => (await measure(long)).lines).toBeGreaterThan(2.5)
+    await longLink.blur()
+    await expectClamped(long, LONG_TITLE, 2)
+
+    await goTo(page, 'userplaylists')
+    const playlist = page.getByRole('heading', { name: LONG_PLAYLIST, exact: true })
+    await expect(playlist).toBeVisible()
+    await expectClamped(playlist, LONG_PLAYLIST, 2)
+    const overlong = page.getByRole('heading', { name: `${OVERLONG_PLAYLIST.slice(0, 255)}...`, exact: true })
+    await expect(overlong).toBeVisible()
+    expect((await measure(overlong)).tooltip).toBe(OVERLONG_PLAYLIST)
+
+    await chooseTitleLines(page, 1)
+    await expectClamped(playlist, LONG_PLAYLIST, 1)
+    await expect.poll(() => latestSettings(readDatastore(app.userDataDir, 'settings')).titleLineLimit).toBe(1)
+
+    await chooseTitleLines(page, 0)
+    await expect(page.locator(':root')).not.toHaveClass(/\blimitTitleLines\b/)
+    await expectClamped(playlist, LONG_PLAYLIST, 0)
+    await expect.poll(() => latestSettings(readDatastore(app.userDataDir, 'settings')).titleLineLimit).toBe(0)
+    await goTo(page, 'history')
+    await expectClamped(long, LONG_TITLE, 0)
+  })
+})
+
+const PLAYLIST_VIDEOS = Array.from({ length: 14 }, (_, index) => ({
+  videoId: index === 0 ? 'jNQXAC9IVRw' : `clampvideo${String(index).padStart(2, '0')}`,
+  title: `Video ${index + 1}: ${LONG_TITLE}`,
+  author: 'Test Channel',
+  authorId: 'UC-test-channel-id',
+  lengthSeconds: 120,
+  viewCount: 1234,
+  published: Date.now() - 86_400_000,
+  timeAdded: Date.now() + index,
+  playlistItemId: `clamp-item-${index}`,
+  type: 'video'
+}))
+
+/**
+ * Checks that a scroller scrolled to its old end has a valid offset after its
+ * content got shorter: no offset past the range, no empty space after the last
+ * item, and a scrollbar that matches the new range. Scroll anchoring may keep
+ * the visible rows in place instead of staying at the end.
+ * @param {import('@playwright/test').Locator} scroller
+ * @param {string} itemSelector
+ */
+async function expectValidScrollRange(scroller, itemSelector) {
+  await expect.poll(() => scroller.evaluate((element, itemSelector) => {
+    const page = element === document.body
+    const scrollElement = page ? document.documentElement : element
+    const viewportEnd = page ? window.innerHeight : element.getBoundingClientRect().bottom
+    const lastItem = [...element.querySelectorAll(itemSelector)].at(-1)
+    // The overlay scrollbar follows the rows, so the last row keeps its gap.
+    const end = lastItem.getBoundingClientRect().bottom + (Number.parseFloat(getComputedStyle(lastItem).marginBlockEnd) || 0)
+    const maximum = scrollElement.scrollHeight - scrollElement.clientHeight
+    const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+    const handle = scrollbar?.querySelector('.os-scrollbar-handle')?.getBoundingClientRect()
+    const track = scrollbar?.querySelector('.os-scrollbar-track')?.getBoundingClientRect()
+    return {
+      // scrollHeight and clientHeight are rounded, while offsets at a
+      // fractional UI scale are not. Allow both roundings, in device pixels.
+      offsetValid: (scrollElement.scrollTop - Math.max(0, maximum)) * devicePixelRatio <= 2,
+      scrolled: scrollElement.scrollTop > 0,
+      // The list still reaches the bottom of the viewport, so nothing empty trails it.
+      contentEndValid: end >= viewportEnd - 2 || page,
+      // The thumb sits where the offset puts it within the new range.
+      scrollbarValid: !scrollbar || (maximum > 0
+        ? scrollbar.classList.contains('os-scrollbar-visible') && !scrollbar.classList.contains('os-scrollbar-unusable') &&
+          Math.abs((handle.top - track.top) - (track.height - handle.height) * scrollElement.scrollTop / maximum) * devicePixelRatio <= 2
+        : !scrollbar.classList.contains('os-scrollbar-visible') || scrollbar.classList.contains('os-scrollbar-unusable'))
+    }
+  }, itemSelector)).toEqual({ offsetValid: true, scrolled: true, contentEndValid: true, scrollbarValid: true })
+}
+
+/**
+ * @param {import('@playwright/test').Locator} scroller
+ */
+async function scrollToEnd(scroller) {
+  await scroller.evaluate(async element => {
+    const scrollElement = element === document.body ? document.documentElement : element
+    for (let attempt = 0; attempt < 3; attempt++) {
+      scrollElement.scrollTop = scrollElement.scrollHeight
+      await new Promise(resolve => requestAnimationFrame(resolve))
+    }
+  })
+}
+
+/**
+ * @param {import('@playwright/test').Locator} scroller
+ */
+function scrollHeight(scroller) {
+  return scroller.evaluate(element => (element === document.body ? document.documentElement : element).scrollHeight)
+}
+
+test.describe('limiting title lines while scrolled to the end', { tag: '@scale' }, () => {
+  test.describe.configure({ timeout: 120_000 })
+  test.use({
+    seed: {
+      settings: {
+        currentLocale: 'en-US',
+        titleLineLimit: 0,
+        animationSpeed: 0,
+        userPlaylistSortOrder: 'custom',
+        videoPlaybackEngine: 'built-in',
+        ytDlpPlaybackEngineDefaultMigration: true
+      },
+      history: PLAYLIST_VIDEOS.slice(1).map((video, index) => historyEntry(video.videoId, video.title, Date.now() - index * 1000)),
+      playlists: [{
+        _id: 'clamp-playlist',
+        playlistName: 'Long title playlist',
+        protected: false,
+        description: '',
+        videos: PLAYLIST_VIDEOS,
+        createdAt: Date.now(),
+        lastUpdatedAt: Date.now()
+      }]
+    }
+  })
+
+  test('clamps the page and the watch-page playlist panel to their shorter ranges', async ({ app, page }) => {
+    const enable = value => page.evaluate(value => window.$store.dispatch('updateTitleLineLimit', value ? 2 : 0), value)
+
+    await goTo(page, 'history')
+    await expect(page.getByRole('heading', { name: PLAYLIST_VIDEOS[1].title, exact: true })).toBeVisible()
+    const body = page.locator('body')
+    await scrollToEnd(body)
+    const pageHeight = await scrollHeight(body)
+    await enable(true)
+    await expect.poll(() => scrollHeight(body)).toBeLessThan(pageHeight)
+    await expectValidScrollRange(body, '.ft-list-video')
+
+    await enable(false)
+    await mockPlayableWatchPage(app, page)
+    await goTo(page, 'userplaylists')
+    await page.getByText('Long title playlist', { exact: true }).click()
+    await page.getByRole('heading', { name: PLAYLIST_VIDEOS[0].title, exact: true }).click()
+    await waitForPlayback(page)
+    const panel = page.locator('.watchVideoPlaylist .playlistItemsWrapper').filter({ visible: true })
+    await expect(panel.locator(':scope > .playlistItem')).toHaveCount(PLAYLIST_VIDEOS.length)
+    await scrollToEnd(panel)
+    const panelHeight = await scrollHeight(panel)
+    await enable(true)
+    await expect.poll(() => scrollHeight(panel)).toBeLessThan(panelHeight)
+    await expectValidScrollRange(panel, ':scope > .playlistItem')
+  })
+})
+
+const MANY_VIDEOS = Array.from({ length: 50 }, (_, index) => ({
+  ...PLAYLIST_VIDEOS[1],
+  videoId: index === 0 ? 'jNQXAC9IVRw' : `windowvid${String(index).padStart(2, '0')}`,
+  title: `Video ${String(index + 1).padStart(2, '0')}: ${LONG_TITLE}`,
+  timeAdded: Date.now() + index,
+  playlistItemId: `window-item-${index}`
+}))
+
+/**
+ * Scrolls to the end in steps, so the rows on the way mount and are then
+ * replaced by measured shells.
+ * @param {import('@playwright/test').Locator} scroller
+ */
+async function scrollThrough(scroller) {
+  await scroller.evaluate(async element => {
+    const scrollElement = element === document.body ? document.documentElement : element
+    const viewport = element === document.body ? window.innerHeight : element.clientHeight
+    while (scrollElement.scrollTop < scrollElement.scrollHeight - scrollElement.clientHeight - 1) {
+      scrollElement.scrollTop += viewport / 2
+      for (let frame = 0; frame < 3; frame++) await new Promise(resolve => requestAnimationFrame(resolve))
+    }
+  })
+}
+
+/**
+ * Counts rows replaced by shells that keep their measured height.
+ * @param {import('@playwright/test').Locator} container
+ * @param {string} rowSelector
+ */
+function shellCount(container, rowSelector) {
+  return container.evaluate((element, rowSelector) =>
+    [...element.querySelectorAll(rowSelector)].filter(row => row.style.blockSize !== '').length, rowSelector)
+}
+
+/**
+ * Rows scrolled far away are replaced by shells that keep their measured
+ * height. After the titles change height, no shell may keep the old height.
+ * @param {import('@playwright/test').Locator} container
+ * @param {string} rowSelector
+ */
+async function expectShellsMatchRows(container, rowSelector) {
+  await expect.poll(() => container.evaluate((element, rowSelector) => {
+    const rows = [...element.querySelectorAll(rowSelector)]
+    const rowHeight = Math.max(...rows.filter(row => row.querySelector('.ft-list-video')).map(row => row.getBoundingClientRect().height))
+    return rows.filter(row => row.style.blockSize !== '')
+      .filter(shell => shell.getBoundingClientRect().height > rowHeight + 1).length
+  }, rowSelector)).toBe(0)
+}
+
+/**
+ * The rows that were in view at the end stay in view instead of jumping away.
+ * @param {import('@playwright/test').Locator} scroller
+ */
+async function expectAtEnd(scroller) {
+  await expect.poll(() => scroller.evaluate(element => {
+    const scrollElement = element === document.body ? document.documentElement : element
+    return (scrollElement.scrollHeight - scrollElement.clientHeight - scrollElement.scrollTop) * devicePixelRatio
+  })).toBeLessThanOrEqual(2)
+}
+
+test.describe('changing the title line limit with windowed rows', { tag: '@scale' }, () => {
+  test.describe.configure({ timeout: 120_000 })
+  test.use({
+    seed: {
+      settings: {
+        currentLocale: 'en-US',
+        titleLineLimit: 0,
+        listType: 'list',
+        animationSpeed: 0,
+        userPlaylistSortOrder: 'custom',
+        videoPlaybackEngine: 'built-in',
+        ytDlpPlaybackEngineDefaultMigration: true
+      },
+      history: MANY_VIDEOS.slice(1).map((video, index) => historyEntry(video.videoId, video.title, Date.now() - index * 1000)),
+      playlists: [{
+        _id: 'window-playlist',
+        playlistName: 'Windowed title playlist',
+        protected: false,
+        description: '',
+        videos: MANY_VIDEOS,
+        createdAt: Date.now(),
+        lastUpdatedAt: Date.now()
+      }]
+    }
+  })
+
+  test('remeasures rows that were scrolled out of the page and the playlist panel', async ({ app, page }) => {
+    const enable = value => page.evaluate(value => window.$store.dispatch('updateTitleLineLimit', value ? 2 : 0), value)
+
+    await goTo(page, 'history')
+    await expect(page.getByRole('heading', { name: MANY_VIDEOS[1].title, exact: true })).toBeVisible()
+    const body = page.locator('body')
+    await scrollThrough(body)
+    await expect.poll(() => shellCount(body, '[data-feed-item-key]')).toBeGreaterThan(0)
+    await enable(true)
+    await expectShellsMatchRows(body, '[data-feed-item-key]')
+    await expectValidScrollRange(body, '[data-feed-item-key]')
+    await expectAtEnd(body)
+
+    await enable(false)
+    await mockPlayableWatchPage(app, page)
+    await goTo(page, 'userplaylists')
+    await page.getByText('Windowed title playlist', { exact: true }).click()
+    await page.getByRole('heading', { name: MANY_VIDEOS[0].title, exact: true }).click()
+    await waitForPlayback(page)
+    const panel = page.locator('.watchVideoPlaylist .playlistItemsWrapper').filter({ visible: true })
+    await expect(panel.locator(':scope > .playlistItem')).toHaveCount(MANY_VIDEOS.length)
+    await scrollThrough(panel)
+    await expect.poll(() => shellCount(panel, ':scope > .playlistItem')).toBeGreaterThan(0)
+    // Shells are remeasured a few at a time instead of all mounting at once.
+    const mountsPerFrame = await panel.evaluate(async element => {
+      const counts = [0]
+      const isCard = node => node instanceof Element && (node.matches('.ft-list-video') || node.querySelector('.ft-list-video') !== null)
+      const observer = new MutationObserver(records => {
+        for (const record of records) {
+          for (const node of record.addedNodes) {
+            if (isCard(node)) counts[counts.length - 1]++
+          }
+        }
+      })
+      observer.observe(element, { childList: true, subtree: true })
+      await window.$store.dispatch('updateTitleLineLimit', 2)
+      for (let frame = 0; frame < 30; frame++) {
+        await new Promise(resolve => requestAnimationFrame(resolve))
+        observer.takeRecords().forEach(record => record.addedNodes.forEach(node => {
+          if (isCard(node)) counts[counts.length - 1]++
+        }))
+        counts.push(0)
+      }
+      observer.disconnect()
+      return counts
+    })
+    // Two distant rows per frame, plus the few rows that enter the overscan
+    // as the rows above them shrink. Remounting every shell at once put 45
+    // cards into one frame.
+    expect(Math.max(...mountsPerFrame), JSON.stringify(mountsPerFrame)).toBeLessThanOrEqual(6)
+    expect(mountsPerFrame.filter(count => count > 0).length, JSON.stringify(mountsPerFrame)).toBeGreaterThanOrEqual(10)
+    await expectShellsMatchRows(panel, ':scope > .playlistItem')
+    await expectValidScrollRange(panel, ':scope > .playlistItem')
+    await expectAtEnd(panel)
+  })
+
+  test('remeasures grid rows that were scrolled out of the page when the font size changes', async ({ page }) => {
+    await page.evaluate(() => window.$store.dispatch('updateListType', 'grid'))
+    await goTo(page, 'history')
+    await expect(page.getByRole('heading', { name: MANY_VIDEOS[1].title, exact: true })).toBeVisible()
+    const body = page.locator('body')
+    await scrollThrough(body)
+    await expect.poll(() => shellCount(body, '[data-feed-item-key]')).toBeGreaterThan(0)
+    await page.evaluate(() => window.$store.dispatch('updateFontSize', 75))
+    await expectShellsMatchRows(body, '[data-feed-item-key]')
+    await expectValidScrollRange(body, '[data-feed-item-key]')
+    await expectAtEnd(body)
+  })
+})

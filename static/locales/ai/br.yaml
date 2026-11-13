@@ -1,0 +1,2806 @@
+# Optional AI-generated translations for keys missing from ../br.yaml.
+Color Picker:
+  Hue: "Arliv"
+  Opacity: "Divoullder"
+  Backdrop Blur: "Ruzadur an drekleur"
+  Hex Color: "Liv c'hwezekredel"
+  Apply Color: "Arloañ"
+  Reset Color: "Adderaouekaat"
+  Copy Color: "Eilañ"
+  Copy From Another Color: "Eilañ diouzh ul liv all"
+  Color Copied: "Eilet eo bet al liv"
+  Invalid Color: "Lakait ul liv c'hwezekredel talvoudek"
+  Clipboard Unavailable: "N'eo ket hegerz ar golver"
+  Saturation and Brightness: "Peurvec'hiañ ha lintr"
+New Tab: "Ivinell nevez"
+Maximize: "Brasaat"
+Restore: "Assav"
+Close Tab: "Serriñ an ivinell"
+App Menu:
+  About App: Diwar-benn {appName}
+  Services: Servijoù
+  Hide App: Kuzhat {appName}
+  Hide Others: Kuzhat ar re all
+  Show All: Diskouez pep tra
+  Quit App: Kuitaat {appName}
+  Reopen Closed Window: Digeriñ en-dro ar prenestr serret
+  Paste and Match Style: Pegañ hag azasaat ar stil
+  View: Gwel
+  Enter Inspect Element Mode: Mod ensellout an elfennoù
+  GPU Internals: Titouroù diabarzh ar GPU (chrome://gpu)
+  Navigate: Merdeiñ
+  Next Tab: Ivinell da-heul
+  Previous Tab: Ivinell kent
+  Help: Skoazell
+Close Confirmation:
+  Background Sync Warning: Kuitaat a vo paouez gant hizivaat an enskrivadurioù en drekleur.
+  Hide Window: Kuzhat ar prenestr
+  Title: "Kuitaat OpenTubeX?"
+  Message: "Ha sur oc'h e faot deoc'h kuitaat OpenTubeX?"
+  Quit: "Kuitaat"
+  Never Ask Again: "Na c'houlenn ken"
+Close Window Confirmation:
+  Title: "Serriñ ar prenestr?"
+  Message: "Bez ez eus {count} ivinell er prenestr-mañ. Ha sur oc'h e faot deoc'h e serriñ? | Bez ez eus {count} ivinell er prenestr-mañ. Ha sur oc'h e faot deoc'h e serriñ? | Bez ez eus {count} ivinell er prenestr-mañ. Ha sur oc'h e faot deoc'h e serriñ? | Bez ez eus {count} ivinell er prenestr-mañ. Ha sur oc'h e faot deoc'h e serriñ? | Bez ez eus {count} ivinell er prenestr-mañ. Ha sur oc'h e faot deoc'h e serriñ?"
+  Close Window: "Serriñ ar prenestr"
+Confirmations:
+  Never Ask Again: "Na c'houlenn ken"
+  Settings Hint: "Gallout a rit adweredekaat ar gadarnadenn-mañ en Arventennoù → Hollek → Kadarnaat a-raok…"
+Close Multiple Tabs Confirmation:
+  Title: "Serriñ meur a ivinell?"
+  Message: "Serret e vo {count} ivinell. | Serret e vo {count} ivinell. | Serret e vo {count} ivinell. | Serret e vo {count} ivinell. | Serret e vo {count} ivinell."
+  Close Tabs: "Serriñ {count} ivinell | Serriñ {count} ivinell | Serriñ {count} ivinell | Serriñ {count} ivinell | Serriñ {count} ivinell"
+Load Multiple Tabs Confirmation:
+  Title: "Kargañ meur a ivinell?"
+  Message: "Karget e vo {count} ivinell. | Karget e vo {count} ivinell. | Karget e vo {count} ivinell. | Karget e vo {count} ivinell. | Karget e vo {count} ivinell."
+  Load Tabs: "Kargañ {count} ivinell | Kargañ {count} ivinell | Kargañ {count} ivinell | Kargañ {count} ivinell | Kargañ {count} ivinell"
+Unload Multiple Tabs Confirmation:
+  Title: "Diskargañ meur a ivinell?"
+  Message: "Diskarget e vo {count} ivinell. | Diskarget e vo {count} ivinell. | Diskarget e vo {count} ivinell. | Diskarget e vo {count} ivinell. | Diskarget e vo {count} ivinell."
+  Unload Tabs: "Diskargañ {count} ivinell | Diskargañ {count} ivinell | Diskargañ {count} ivinell | Diskargañ {count} ivinell | Diskargañ {count} ivinell"
+Tabs Unloaded To Free Memory: 'Diskarget eo bet {count} ivinell n''ho peus ket implijet nevez zo evit frankaat memor | Diskarget eo bet {count} ivinell n''ho peus ket implijet nevez zo evit frankaat memor | Diskarget eo bet {count} ivinell n''ho peus ket implijet nevez zo evit frankaat memor | Diskarget eo bet {count} ivinell n''ho peus ket implijet nevez zo evit frankaat memor | Diskarget eo bet {count} ivinell n''ho peus ket implijet nevez zo evit frankaat memor'
+Resize Tab Bar: "Kemmañ ment barrenn an ivinelloù"
+Find in page: "Klask er bajenn"
+Previous match: "Kenglotadenn gent"
+Next match: "Kenglotadenn da-heul"
+Close find bar: "Serriñ ar varrenn glask"
+No matches: "Kenglotadenn ebet"
+Version {versionNumber} is now available.: "Hegerz eo ar stumm {versionNumber} bremañ."
+See changes and update: "Gwelet ar c'hemmoù ha hizivaat"
+Dismiss: "Leuskel a-gostez"
+Update to {version}: "Hizivaat da {version}"
+Global:
+  Ambient Mode: "Mod endro"
+  Loading More: "O kargañ muioc'h"
+  New: "Nevez"
+  Show Blocked Item: Diskouez an elfenn stanket
+Search Listing:
+  Label:
+    Members Only: "Evit an izili hepken"
+    Possibly AI-generated: Krouet gant an IA marteze
+Stats:
+  Left of daily limit: "{duration} a chom eus ho pevenn bemdeziek a {limit}"
+  Daily limit reached: "Tizhet eo ar vevenn bemdeziek a {limit}"
+  Replace old device: "Erlec'hiañ an trevnad kozh"
+  Replacement explanation: "Kendeuzit {device} gant an trevnad-mañ nemet ma'z eo an daou enmoned eus an hevelep trevnad fizikel."
+  Overlapping days: "Deizioù en daou istor: {count}"
+  Overlapping watch time: "Amzer sellet a grog war an daou"
+  Keep larger daily total: "Mirout ar sammad pemdeziek brasañ"
+  Larger total explanation: "Evit istorioù doubl. Gallout a ra leuskel a-gostez selladennoù ouzhpenn en hevelep deiz."
+  Add daily totals: "Sammañ ar sammadoù pemdeziek"
+  Add totals explanation: "Evit istorioù disparti. Gallout a ra kontañ div wech ar selladennoù doubl."
+  Replacement preservation: "Miret e vez an deizioù a zo en un istor hepken. Miret e chom an istorioù orin er c'henstrollañ sifret."
+  Combined watch time: "Amzer sellet kendeuzet"
+  Replacement changed: "Kemmet eo an amzer sellet. Serrit hag adigorit ar rakwel-mañ evit gwiriañ ar sammadoù nevez."
+  Replacement success: "Stadegoù an trevnadoù kendeuzet"
+  All devices: An holl drevnadoù
+  Stats: "Stadegoù"
+  Watch time summary: "Diverradenn eus an amzer sellout"
+  Today: "Hiziv"
+  This week: "Er sizhun-mañ"
+  Total watch time: "Hollad an amzer sellout"
+  Daily average: "Keidenn bemdeziek"
+  So far today: "Hiziv betek-henn"
+  Since: "Abaoe {day}"
+  All recorded time: "An holl amzer enrollet"
+  Per calendar day: "Dre zevezh deiziataer"
+  Day by day: "Deiz ha deiz"
+  Highest: "Uhelañ: {duration}"
+  Week by week: "Sizhun ha sizhun"
+  Last 14 days: "Ar 14 devezh diwezhañ"
+  Last 8 weeks: "An 8 sizhun diwezhañ"
+  Daily chart aria: "Amzer sellout bemdeziek evit ar 14 devezh diwezhañ"
+  Weekly chart aria: "Amzer sellout sizhuniek evit an 8 sizhun diwezhañ"
+  No data: "Diskouezet e vo an amzer sellout amañ pa sellot ouzh videoioù."
+  Estimate note: "Jedadennet eo an amzer sellout a-raok an hizivadenn-mañ diwar ho araokadur lenn enrollet."
+  Adjust imported watch time: "Reizhañ an amzer sellout enporzhiet"
+  Imported watch time: "Amzer sellout enporzhiet"
+  Imported watch time explanation: "Dibabit an tizh lenn a implijent ar muiañ. Rannet e vo padelezh ar videoioù enporzhiet dre an tizh-mañ evit priziañ an amzer tremenet ganeoc'h o sellet outo."
+  Playback speed: "Tizh lenn"
+  Channel speed note: "Implijet e vez tizhioù lenn enrollet ar chadennoù pa vezont hegerz."
+  Apply playback speed: "Arloañ an tizh lenn"
+  Imported watch time adjusted: "Reizhet eo bet an amzer sellout enporzhiet"
+  Reset statistics: "Adderaouekaat ar stadegoù"
+  Reset: "Adderaouekaat"
+  Reset confirmation: "Ha sur oc'h e faot deoc'h adderaouekaat an holl stadegoù sellout? Ne c'hallo ket bezañ disgraet."
+  Reset success: "Adderaouekaet eo bet ar stadegoù sellout"
+  Less than a minute: "< 1 min"
+  Minutes: "{minutes} min"
+  Hours: "{hours} e"
+  Hours and minutes: "{hours} e {minutes} min"
+Home Page:
+  Keep disabled and hide this section: "Lezel diweredekaet ha kuzhat ar rann-mañ"
+  Familiar description: "Roit ar c'hentañ plas d'ar videoioù n'ho peus ket gwelet eus chadennoù a blij deoc'h dija."
+  Balanced description: "Meskit chadennoù anavezet gant re nevez a glot gant ho tec'hoù."
+  Explore description: "Roit muioc'h a blas da chadennoù nevez liammet ouzh ho tec'hoù."
+  Turn off recommendations: Diweredekaat an erbedadennoù
+  Recommended for you: "Erbedet evidoc'h"
+  Recommendations description: "Renkit ar videoioù war ho trevnad hervez ho roll istor gweladenniñ. Kaset e vez anavezerioù ar chadennoù ha klaskoù dre sujed d'ar backend hoc'h eus dibabet evit kavout videoioù."
+  Enable recommendations: "Gweredekaat an erbedadennoù"
+  Recommendations need history: "Sellit ouzh un nebeud videoioù gant ar roll istor gweladenniñ gweredekaet evit kaout erbedadennoù."
+  No recommendations: "N'eus bet kavet erbedadenn ebet. Klaskit freskaat goude bezañ sellet ouzh muioc'h a videoioù."
+  Recommendations unavailable: "N'eus ket bet gallet kargañ an erbedadennoù. Klaskit en-dro diwezhatoc'h."
+  More like this: "Muioc’h a draoù heñvel"
+  Not interested: "N’on ket dedennet"
+  Hide this channel: "Kuzhat ar chadenn-mañ"
+  Channel hidden: "{channel} kuzhet diouzh an erbedadennoù"
+  Reset recommendations: "Adderaouekaat an erbedadennoù"
+  Discovery: "Dizoleiñ"
+  Familiar: "Anavezet"
+  Balanced: "Kempouezet"
+  Explore: "Ergerzhout"
+  Related to: "Liammet ouzh {title}"
+  More from: "Muioc’h digant {channel}"
+  Matches interest: "Klotañ a ra gant hoc’h dedenn evit {topic}"
+  Related discovery privacy: "Kaset e vez ivez anaouderioù videoioù evit kavout videoioù kar."
+  Home: Degemer
+  Description: "Kenderc'hel adalek al lec'h ma oa bet paouezet ha gwelet an obererezh nevez."
+  Customize: Personelaat ar bajenn degemer
+  Done: Graet
+  Customize description: "Dibabit ar rannoù da ziskouez hag urzhiit anezho evel ma fell deoc'h."
+  Continue watching: "Kenderc'hel da sellet"
+  New since last visit: Nevez abaoe ho kweladenn ziwezhañ
+  Watch queue: Lost sellet
+  Recent playlists: Rolloù-lenn nevez
+  Recent downloads: Pellgargadurioù nevez
+  Upcoming reminders: "Kounadurioù da zont"
+  Watch statistics: Stadegoù sellet
+  View all: Gwelet pep tra
+  Previous shelf page: Pajenn gent {section}
+  Next shelf page: Pajenn da-heul {section}
+  Shelf page status: '{section}, pajenn {page} diwar {total}.'
+  Move section up: "Dilec'hiañ {section} d'ar c'hrec'h"
+  Move section down: "Dilec'hiañ {section} d'an traoñ"
+  Section moved: "Dilec'hiet eo bet {section} d'al lec'h {position} diwar {total}."
+  Nothing here yet: Netra amañ evit poent
+  Empty description: "Amañ e vo diskouezet ar videoioù krog ganeoc'h, ar rolloù-lenn implijet, ar pellgargadurioù hag ar c'hounadurioù."
+  All sections hidden: Kuzhet eo an holl rannoù
+  All sections hidden description: Personelait ar bajenn degemer evit diskouez ur rann en-dro.
+Subscriptions:
+  Channel Errors:
+    Summary: "N'eus ket bet gallet adkargañ {count} chadenn. | N'eus ket bet gallet adkargañ {count} chadenn. | N'eus ket bet gallet adkargañ {count} chadenn. | N'eus ket bet gallet adkargañ {count} a chadennoù. | N'eus ket bet gallet adkargañ {count} chadenn."
+    Toast: "N'eus ket bet gallet adkargañ chadennoù koumanantet zo. Klikit evit o gwelout."
+    Retry Channel: "Klask en-dro {channel}"
+    Show All: "Diskouez pep tra"
+    Show Fewer: "Diskouez nebeutoc'h"
+  Cache Load Error: 'N''eus ket bet gallet kargañ ho lanvioù koumanantoù enrollet.'
+  New video from {channel}: Video nevez gant {channel}
+  New short from {channel}: Video berr nevez gant {channel}
+  '{channel} is live': "{channel} zo war-eeun"
+  New post from {channel}: Pennad nevez gant {channel}
+  Mark As Unseen: Merkañ evel nann gwelet
+  Copy Error Details: "Eilañ ar munudoù teknikel"
+  Never show {type} from this channel in feeds again: Na ziskouez biken {type} eus ar chadenn-mañ er gwazhioù en-dro
+  Refreshing Subscription Videos: "Oc'h adkargañ videoioù ar c'houmanantoù"
+  Refreshing Subscription Shorts: "Oc'h adkargañ videoioù berr (Shorts) ar c'houmanantoù"
+  Refreshing Subscription Live Streams: "Oc'h adkargañ skignadoù war-eeun ar c'houmanantoù"
+  Refreshing Subscription Posts: "Oc'h adkargañ pennadoù ar c'houmanantoù"
+  New Content: "Endalc'had nevez"
+  New Feed Refresh Warning Title: "Adkargañ holl wazhioù ar c'houmanantoù?"
+  New Feed Refresh Warning: "Adkargañ an holl zoareoù endalc'had evit {count} c'houmanant a c'hall padout pell. Kenderc'hel? | Adkargañ an holl zoareoù endalc'had evit {count} goumanant a c'hall padout pell. Kenderc'hel? | Adkargañ an holl zoareoù endalc'had evit {count} c'houmanant a c'hall padout pell. Kenderc'hel? | Adkargañ an holl zoareoù endalc'had evit {count} c'houmanant a c'hall padout pell. Kenderc'hel? | Adkargañ an holl zoareoù endalc'had evit {count} koumanant a c'hall padout pell. Kenderc'hel?"
+  New Since Last Refresh: "Nevez abaoe an adkargañ diwezhañ"
+  Mark As Seen: "Merkañ evel gwelet"
+  Mark All as Seen: "Merkañ pep tra evel gwelet"
+  No New Content: "N'eus endalc'had nevez ebet."
+  New Content Tabs: "Ivinelloù an endalc'had nevez"
+  Show Tabbed View: "Diskouez dre ivinelloù"
+  Show Combined View: "Diskouez asambles"
+  Newest First: "Ar re nevesañ da gentañ"
+  Oldest First: "Ar re goshañ da gentañ"
+  RSS Feeds:
+    Refreshing: O freskaat ar gwazhioù RSS
+    Tab: RSS
+    Followed Feeds: Gwazhioù RSS heuliet
+    Add Feed: Ouzhpennañ ur gwazh
+    Feed URL: URL ar gwazh RSS pe Atom
+    Remove Feed: Dilemel {feed}
+    Invalid Feed URL: Enankit ur chomlec'h web a grog gant http:// pe https://.
+    Feed Already Followed: Heuliañ a rit ar gwazh-mañ dija.
+    Feed Could Not Be Loaded: N'eus ket bet gallet kargañ ar gwazh. Gwiriit e kas ar chomlec'h d'ur gwazh RSS pe Atom.
+    Feed Requires Browser Check: Ul gwiriadur merdeer a c’houlenn al lec’hienn-mañ ha n’hall ket OpenTubeX e seveniñ. Klaskit ur chomlec’h all pe un istañs RSSHub all evit al lanvad-mañ.
+    Refresh Errors: N'eus ket bet gallet adkargañ {count} gwazh. | N'eus ket bet gallet adkargañ {count} wazh. | N'eus ket bet gallet adkargañ {count} gwazh. | N'eus ket bet gallet adkargañ {count} a wazhioù. | N'eus ket bet gallet adkargañ {count} gwazh.
+    Description: Ouzhpennit ur gwazh RSS pe Atom evit heuliañ krouerien war savennoù all. An istañsoù {rssHub} a bourchas gwazhioù evit kalz lec'hiennoù, evel Twitch.
+    Empty Items: N'eus elfenn ebet en ho kwazhioù evit poent.
+    No Feeds: N'heuliit gwazh RSS ebet c'hoazh.
+    RSSHub:
+      Browse: Furchal RSSHub
+      Title: Ouzhpennañ ul lanvad eus RSSHub
+      Description: Dibabit un istañs RSSHub, ur servij hag ar pezh da heuliañ. Savet e vez chomlec’h al lanvad evidoc’h.
+      Instance: Istañs RSSHub
+      Service: Servij
+      Search Services: Klask servijoù
+      Loading Services: O kargañ ar servijoù…
+      Services Could Not Be Loaded: N’en deus ket kaset an istañs-mañ e servijoù. Gwiriit ar chomlec’h pe dibabit un istañs all.
+      Feed Type: Seurt lanvad
+      Requires Configuration: Ret eo kefluniañ muioc’h an istañs evit al lanvad-mañ, marteze ne zay ket en-dro war an istañsoù publik.
+      Optional Parameter: '{parameter} (diret)'
+      Not Set: Nann-termenet
+    Retry Feed: Klask en-dro {feed}
+    Reloading Feed: O adkargañ {feed}
+  Platforms:
+    Tab: Savennoù
+    Platform: Savenn
+    All Platforms: An holl savennoù
+    Followed Channels: Chadennoù heuliet war savennoù all
+    Description: Heuliit chadennoù war Twitch, SoundCloud, PeerTube, Rumble hag Odysee evit gwelet ar pezh a embannont en ivinell Savennoù ho koumanantoù. Kavit chadennoù gant an enklask, pe ouzhpennit anezho gant chomlec'h o fajenn. Lennet e vez o mediaoù gant yt-dlp.
+    Add Channel: Ouzhpennañ ur chadenn
+    Channel URL: Chomlec'h ar chadenn
+    Invalid Channel: Skrivit chomlec'h pajenn ur chadenn war Twitch, SoundCloud, PeerTube, Rumble pe Odysee.
+    Channel Not Found: N'eus chadenn ebet er chomlec'h-mañ.
+    Channel Already Followed: Heuliañ a rit ar chadenn-mañ dija.
+    Channel Could Not Be Loaded: N'eus ket bet gallet kargañ ar chadenn.
+    No Channels: Ne heuliit chadenn ebet war savennoù all c'hoazh.
+    Unfollow Channel: Paouez da heuliañ {channel}
+    Go To Channel: Mont d'ar chadenn {channel}
+    Follow: Heuliañ
+    Following: O heuliañ
+    Clips: Klipoù
+    Refresh Errors: N'eus ket bet gallet adkargañ {count} chadenn. | N'eus ket bet gallet adkargañ {count} chadenn. | N'eus ket bet gallet adkargañ {count} chadenn. | N'eus ket bet gallet adkargañ {count} a chadennoù. | N'eus ket bet gallet adkargañ {count} chadenn.
+    Content Tabs: Ivinelloù endalc'had ar savennoù
+Trending:
+  Music: Sonerezh
+  Load Error: "N'eus ket bet gallet kargañ ar re diouzh ar c'hiz."
+  Unsupported Backend: "Ezhomm ez eus eus an API lec'hel evit ar re diouzh ar c'hiz. Dibabit an API lec'hel pe gweredekait an diskoulm backend erlec'hiañ."
+Most Popular Feed Empty: "Goullo eo gwazh «Ar muiañ a verzh» an istañs Invidious-mañ."
+Most Popular Load Error: "N'eus ket bet gallet kargañ ar gwazh «Ar muiañ a verzh»."
+Feed:
+  Cancel Refresh: "Nullañ an adkargañ"
+  Next Auto Refresh: "Adkargañ emgefreek da-heul: {date}"
+User Playlists:
+  Refresh Saved Playlists: 'Adkargañ ar rolloù-lenn enrollet'
+  Saved Playlists Refresh Failed: 'N''eus ket bet gallet adkargañ rolloù-lenn enrollet zo.'
+  Save: "Enrollañ"
+  Edit: "Kemmañ"
+  Pin to Navigation: "Spilhennañ er merdeiñ"
+  Unpin from Navigation: "Dispilhennañ eus ar merdeiñ"
+  Pin to Top: "Spilhennañ e penn"
+  Unpin from Top: "Dispilhennañ eus ar penn"
+  Pinned to Top: "Spilhennet e penn"
+  Reorder Hint: Riklit pe implijit an touchennoù biroù evit adkempenn
+  Add new videos to the top (custom order): "Ouzhpennañ ar videoioù nevez e penn al listenn (urzh personelaet)"
+  Shuffle videos by default: "Meskañ ar videoioù dre ziouer"
+  Remove videos once watched: "Dilemel ar videoioù goude bezañ sellet outo"
+  Remove videos once watched Tooltip: "Pa lennit ar roll-lenn-mañ, e vez dilamet pep video diouti kerkent ha ma tizh an dregantad sellet termenet en arventennoù prevezded."
+  Repair Playlists: Ratreañ ar rolloù lenn
+  Repair Description: Adkavit titouroù ar videoioù a vank goude enporzhiañ ur ZIP YouTube Takeout. Urzh ar rolloù lenn a chom digemm.
+  Remove Unavailable Videos: "Dilemel ar videoioù n'int ket hegerz"
+  Remove Unavailable Videos Confirmation: "Dilemel ar videoioù n'int ket hegerz ? Kavet : {count}. N'haller ket gwiriañ : {uncertain}. Miret e vo ar videoioù na oant ket gwiriet."
+  Add Missing Videos: "Ouzhpennañ ar videoioù a vank eus ar roll-lenn orin"
+  Source Playlist: "Roll-lenn orin"
+  Save Playlist: "Enrollañ ar roll-lenn"
+  Remove Saved Playlist: "Lemel ar roll-lenn enrollet"
+  Load More Playlists: "Kargañ muioc'h a rolloù-videoioù"
+  Save to: "Enrollañ e…"
+  Quick Bookmark Icon: "Arlun ar sined prim"
+  Custom Emoji: "Emoji personelaet"
+  Choose Image: "Dibab ur skeudenn"
+  Use Bookmark Icon: "Implijout arlun ar sined"
+  SinglePlaylistView:
+    Retry: "Klask en-dro"
+    This playlist could not be loaded.: "N'eus ket bet gallet kargañ ar roll-videoioù-mañ."
+    More videos could not be loaded.: "N'eus ket bet gallet kargañ muioc'h a videoioù."
+  Playlist Thumbnail: "Skeudennig ar roll-lenn"
+  Restore Default Thumbnail: "Adlakaat ar skeudennig dre ziouer"
+  AddVideoPrompt:
+    And N more videos: 'ha {count} video all | ha {count} video all | ha {count} video all | ha {count} video all | ha {count} video all'
+  Move Up: Uheloc'h
+  Move Down: Izeloc'h
+  Remove: Tennañ
+  Background Tasks:
+    Loading videos from {playlistName}: 'O kargañ ar videoioù eus {playlistName}'
+    Adding missing videos to {playlistName}: 'Oc''h ouzhpennañ ar videoioù a vank da {playlistName}'
+    Checking {playlistName} for unavailable videos: 'O wiriañ ar videoioù dihegerz e {playlistName} ({checked}/{total})'
+  Synced with YouTube: "Goubredet gant YouTube"
+  Delete YouTube Playlist Confirmation: "Dilemel ar roll-videoioù-mañ amañ ha war YouTube ? Ne vo ket moaien da nullañ war-lerc'h."
+  CreatePlaylistPrompt:
+    Create on YouTube: "Krouiñ war YouTube ivez"
+History:
+  From Date: 'Adalek'
+  To Date: 'Betek'
+  Channel Filter: 'Chadenn'
+  All Channels: 'An holl chadennoù'
+  Clear Filters: 'Diverkañ ar siloù'
+  Invalid Date Range: 'An deiziad deraouiñ a rank bezañ a-raok pe war an deiziad echuiñ.'
+  Empty Filter Message: 'N''eus video ebet en ho roll istor a glot gant ar siloù-mañ.'
+  Repair Compact: "Ratreañ"
+  Mark All Watched Compact: "Merkañ pep tra gwelet"
+  Repair Use Cookies: "Implijout toupinoù yt-dlp kefluniet"
+  Repair Cookies Hint: "Ouzhpenn 500 video a rank bezañ gwiriekaet. Kefluniit toupinoù e arventennoù yt-dlp ha gweredekait anezho amañ evit digreskiñ ar riskl da vezañ bevennet an azgoulennoù."
+  Repair Description: "Implijit kement-mañ goude enporzhiañ an istor, pe pa vank titouroù d'ar videoioù pe pa vez ar merk LIVE dre fazi."
+  Repair Details: "Klokaat a ra an titloù, ar chadennoù hag an deiziadoù embann a vank, ha gwiriañ a ra ar padelezhioù hag ar merkoù LIVE. Ne cheñch ket ho araokadenn sellout na stad ar videoioù gwelet."
+  Repair Notice: "Gallout a ra an istorioù bras kemer amzer. Klasket e vez en-dro ent emgefre ar goulennoù c'hwitet. Gallout a ra ar videoioù diverket pe prevez chom diglok."
+  Start Repair: "Kregiñ da gempenn"
+  Repair Checking: "O wiriañ titouroù ar videoioù"
+  Repair Waiting: "O c'hortoz YouTube. Kenderc'hel a raio ar c'hempenn ent emgefre."
+  Repair Retrying: "O klask en-dro ar goulennoù c'hwitet"
+  Repair Finished: "Kempenn echuet"
+  Repair Stopped: "Kempenn paouezet"
+  Repair: "Kempenn an istor"
+  Repair Progress: "Gwiriet {checked}/{total} · Kempennet {repaired} · C’hwitet {failed}"
+  Mark All As Watched: "Merkañ pep tra evel sellet"
+  Mark All As Watched Confirmation: "Ha sur oc'h e faot deoc'h merkañ an holl videoioù en hoc'h istor evel sellet?"
+  All History Marked as Watched: "Merket eo bet holl videoioù hoc'h istor evel sellet"
+  Select History Age: "Dibabit an oad a rank un elfenn kaout a-raok bezañ dilamet."
+  Delete Entries Older Than: "Dilemel an elfennoù koshoc'h eget"
+  Number of Days: "Niver a zevezhioù"
+  History Cleanup Warning: "Dilamet e vo da viken elfennoù an istor sellout a glot."
+  1 Day: "1 devezh"
+  1 Week: "1 sizhun"
+  1 Month: "1 miz"
+  3 Months: "3 miz"
+  1 Year: "1 bloaz"
+  All Time: An holl amzer
+  Custom: "Personelaet"
+  History Older Than Days Removed: "Dilamet eo bet an istor sellout koshoc'h eget {days} devezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} zevezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} devezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} devezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} devezh."
+Settings:
+  Experimental Badge: Arnodel
+  YouTube Account Settings:
+    YouTube Account Settings: "Kont YouTube"
+    Unofficial App Warning: "OpenTubeX n'eo ket un arload ofisiel YouTube. Pa gennaskit e vez liammet ar pezh a rit amañ ouzh ho kont Google, ha Google a c'hall bevenniñ pe stankañ ar c'hontoù a implij arloadoù n'int ket ofisiel. Na gennaskit nemet gant ur gont a c'hallit koll hep keuz."
+    Sign In Explanation: "OpenTubeX a gennask evel un arload skinwel: aprouiñ a rit anezhañ war lec'hienn Google, ha ne wel morse OpenTubeX ho ker-tremen. Ar c'hennaskañ a chom war an trobarzhell-mañ ha n'eo ket goubredet nag enrollet en un enrolladenn gwarez."
+    Sign In: "Kennaskañ"
+    Sign In Anyway: "Kennaskañ memes tra"
+    Sign Out: "Digennaskañ"
+    Getting Sign-In Code: "O kaout ur c'hod kennaskañ"
+    Sign In Instructions: "Digorit ar bajenn gennaskañ ha dibabit ho kont Google. Leuniet e vo ar c'hod ent emgefreek."
+    Other Device Instructions: "War ur benveg all, it d'ar chomlec'h-mañ ha roit ar c'hod:"
+    YouTube Channel: "Chadenn YouTube"
+    Using Channel: "Implijout a rit YouTube evel {name} bremañ"
+    Switch Channel Failed: "N'eus ket bet gallet cheñch ar chadenn YouTube: {error}"
+    Open Sign-In Page: "Digeriñ ar bajenn gennaskañ"
+    Copy Code: "Eilañ ar c'hod"
+    Code Copied: "Kod eilet"
+    Waiting for Approval: "O c'hortoz ma aprouot ar c'hennaskañ"
+    Sign-In Denied: "Nac'het eo bet ar c'hennaskañ."
+    Sign-In Code Expired: "Aet eo ar c'hod d'e dermen. Klaskit en-dro evit kaout unan nevez."
+    Sign-In Failed: "N'eus ket bet gallet kennaskañ: {error}"
+    Signed In As: "Kennasket ouzh YouTube evel {name}"
+    Signed Out: "Digennasket eus YouTube"
+    Sign Out Failed: "N'haller ket digennaskañ: {error}"
+    Revoke Failed: "Digennasket eus YouTube, met n'en deus ket kadarnaet Google eo bet echuet ar c'hennaskañ. Gallout a rit e zilemel e-touez ar c'hennaskoù gant an trede strolladoù en ho kont Google."
+    Signed out by YouTube: "YouTube en deus echuet ar c'hennaskañ. Kennaskit en-dro en Arventennoù evit kenderc'hel da implijout ho kont."
+    Sync Subscriptions: "Goubredañ ar c'houmanantoù gant YouTube"
+    Sync Playlists: "Goubredañ ar rolloù-videoioù gant YouTube"
+    Add to YouTube Watch History: "Ouzhpennañ ar videoioù sellet ouzh roll istor YouTube"
+    Sync Now: "Goubredañ bremañ"
+    Synced: "Goubredet gant YouTube"
+    Sync Failed: "N'haller ket goubredañ gant YouTube: {error}"
+  Diagnostics:
+    Diagnostics: Diagnoz
+    Description: E-pad ma vez gweredekaet an deizlevr diagnoz, OpenTubeX a vir ar c'hemennadennoù deizlevr nevez er memor evit ma c'hallfec'h o stagañ ouzh danevelloù fazioù. Biskoazh ne enrollo na ne gaso anezho e-unan, ha diweredekaat an deizlevr a ziverk anezho. An danevelloù n'int ket enno toupinoù, jedouerioù, chomlec'hioù IP na arventennoù URL, met gallout a reont kaout IDoù ar videoioù ho peus lennet, setu gwiriit an danevell a-raok he rannañ.
+    Enable Logging: Gweredekaat an deizlevr diagnoz
+    Copy Report: Eilañ an danevell
+    Save Report: Enrollañ an danevell
+    Clear Log: Skarzhañ an deizlevr
+    Report Copied: Danevell diagnoz eilet
+    Report Saved: Danevell diagnoz enrollet
+    Report File: Danevell diagnoz
+    Save Failed: N'haller ket enrollañ an danevell diagnoz
+    Log Cleared Message: Deizlevr diagnoz skarzhet
+  Tab Unloading:
+    Automatically unload tabs: "Diskargañ an ivinelloù ent emgefre"
+    Memory threshold: "Treuzoù ar vemor"
+    Tabs to unload: "Ivinelloù da ziskargañ"
+    Automatic unloading help: "Diskargañ an ivinelloù koshañ en drekleur evit dieubiñ memor. Chom a ra karget an ivinelloù oberiant hag ar re o lenn."
+    Memory threshold help: "Dregantad eus bevenn vemor ar c'hewerier deouez, ha n'eo ket eus holl RAM ar reizhiad."
+  Password Settings:
+    Failed to Save Password: "N'eus ket bet gallet enrollañ ar ger-tremen."
+    Confirm Password: "Kadarnaat ar ger-tremen"
+    Passwords Do Not Match: "Ne glot ket ar gerioù-tremen."
+  Navigation and Controls: "Merdeiñ ha reolerezhioù"
+  Control Bar:
+    Title: "Barrenn reoliñ"
+    Customize: "Personelaat ar varrenn reoliñ"
+    Hidden: "Kuzhet"
+    Empty: "Reoliñ ebet"
+    Move to Control Bar: "Dilec'hiañ {control} d'ar varrenn reoliñ"
+    Move to Player Menu: "Dilec'hiañ {control} da lañser al lenner"
+    Hide: "Kuzhat {control}"
+  Fullscreen Actions:
+    Recommended Videos: "Videoioù erbedet"
+    Title: "Oberoù skramm leun"
+    Customize: "Personelaat an oberoù skramm leun"
+    Add Action: "Ouzhpennañ un ober"
+    Empty: "N'eus ober skramm leun ebet diuzet"
+    Quick Bookmark: "Sined buan"
+    Availability Hint: "N’en em ziskouez an oberoù nemet war ar videoioù a sell outo."
+    Disabled: "(diweredekaet)"
+  Quick Settings:
+    Quick Settings: "Arventennoù prim"
+    Customize Quick Settings: Personelaat an arventennoù prim
+    Add Setting: Ouzhpennañ un arventenn
+    Appearance: "Neuz"
+    Playback: "Lenn"
+    Content: "Endalc'had"
+    Language and Region: "Yezh ha rannvro"
+    All Settings: "An holl arventennoù"
+    Profile Selector Hint: "Gallout a rit ivez klikañ a-zehou war arlun ar profil evit cheñch profil"
+    Profile Selector Touch Hint: Gallout a rit ivez pouezañ hir war arlun ar profil evit cheñch profil
+  Categories:
+    General Description: Yezh, loc'hañ, ivinelloù ha troidigezh
+    Appearance: "Neuz"
+    Appearance Description: Neuz, pajennaozañ, merdeiñ ha rolloù videoioù
+    Content appearance: "Rolloù videoioù ha skeudennigoù"
+    Layout: "Aozadur"
+    Playback Description: Arventennoù dre ziouer al lenner, istitloù hag arventennoù evit pep chadenn
+    Subscriptions Description: Adkargañ ar gwazhioù, kemennoù videoioù nevez ha gwazhioù RSS
+    Downloads Description: Teuliad pellgargañ, patromoù ha pellgargadurioù emgefreek
+    Focus: Fokus
+    Focus Description: Endalc'had kuzhet, bevennoù sellout, degasoù-soñj ha kontroll ar gerent
+    Add-ons: "Askouezhioù"
+    Add-ons Description: SponsorBlock, DeArrow, displijadennoù, AiSList ha treiñ ar vouezh
+    Privacy Description: Roll-istor, kinnigoù klask, liammoù ha ger-tremen an arload
+    Data And Storage Description: Gwaredoù, enporzhiañ hag ezporzhiañ, implij ar gantenn ha naetaat
+    Sync Description: Kont ar servijer goubredañ, koublañ an trevnadoù ha roadennoù goubredet
+    Advanced: "Araokaet"
+    Advanced Description: Backendoù, skurzer, ostilhoù diavaez, proksi ha diagnostik
+    Alternative providers: "Pourvezerien videoioù ha metaroadennoù"
+  Highlight Changed Settings: "Usskediñ an arventennoù disheñvel diouzh ar re dre ziouer"
+  Reset Setting to Default: "Adlakaat an arventenn-mañ d'he gwerzh dre ziouer"
+  Performance Impact:
+    Show Performance Impact: "Diskouez merkerioù efed war an digonusted"
+    Moderate: "Efed krenn"
+    High: "Efed bras"
+    Description: "Gallout a ra an arventenn-mañ kreskiñ implij {resources}"
+    Resources:
+      CPU: CPU
+      GPU: GPU
+      Memory: "ar vemor"
+      Network: "ar rouedad"
+      Disk: "ar bladenn"
+  General Settings:
+    Built-in Streams:
+      Built-in Streams: "Froudoù enframmet"
+      Automatic: "Emgefreek"
+      SABR Only: "SABR hepken"
+    Link Underlines:
+      Link Underlines: "Islinennañ al liammoù"
+      On Hover: "Islinennañ al liammoù pa vez tremenet warno"
+      Never: "Na islinennañ biken al liammoù"
+      Always: "Islinennañ al liammoù bepred"
+    Title Lines:
+      Title Lines: "Linennoù an titl"
+      Unlimited: "Divevenn"
+    Close Window With Last Tab: 'Serriñ ar prenestr pa vez serret an ivinell ziwezhañ'
+    Preferred Video Codec: Kodek video gwellañ karet
+    Always Use Backup Media Server: "Implijout atav ar servijer media a-gein"
+    Automatically switch stream extraction methods: "Cheñch hentennadoù eztennañ al lanvioù ent emgefre"
+    Enable Tabs: "Gweredekaat an ivinelloù"
+    Thumbnail Swipe Gestures:
+      Left: Riklañ a-gleiz war ar skeudennigoù
+      Right: Riklañ a-zehou war ar skeudennigoù
+      Description: Riklit a-blaen war skeudennig ur video ha laoskit evit seveniñ an ober dibabet.
+    Data Saver Thumbnails: "Skeudennoù bihan evit espern roadennoù"
+    Use tray icon: "Implijout un arlun er maez reizhiad"
+    Close to system tray: "Serriñ er maez reizhiad"
+    Tray required for background refresh: "Ret eo an arlun er maez reizhiad pa vez gweredekaet hizivaat ar c’houmanantoù en drekleur."
+    Show Video Menu Button: Diskouez afell lañser ar video
+    Swipe to refresh: Riklañ evit freskaat
+    Blur Thumbnails: Lakaat ar skeudennoùigoù da vezañ dispis
+    Navigation:
+      Always Show Navigation Bar: Diskouez ar varrenn verdeiñ atav pa vez en traoñ
+      Compact Tab Labels: Barrenn verdeiñ gompakt pa vez en traoñ
+      Show Active Subscriptions: Diskouez ar c’houmanantoù oberiant er varrenn gostez
+      Navigation: Merdeiñ
+      Customize Navigation: Personelaat ar merdeiñ
+      Add Item: Ouzhpennañ un elfenn
+    Date Format: Mentrezh an deiziad
+    Time Format: Mentrezh an eur
+    Language Default: Dre ziouer ar yezh
+    Update Relative Timestamps: "Hizivaat an deiziadoù hag eurioù keñverel"
+    Stream Extraction Method:
+      Stream Extraction Method: "Doare eztennañ ar gwazh"
+      yt-dlp: yt-dlp
+      Built-in: "Enframmat"
+    Confirm Before: "Kadarnaat a-raok…"
+    Confirmation Options:
+      Closing App: "Kuitaat OpenTubeX"
+      Closing Window: "Serriñ ur prenestr gant meur a ivinell"
+      Closing Tabs: "Serriñ meur a ivinell"
+      Loading Tabs: "Kargañ meur a ivinell"
+      Unloading Tabs: "Diskargañ meur a ivinell"
+      Refreshing All Feeds: "Freskaat kalz a goumanantoù"
+    Remember Tab Navigation History: "Derc'hel soñj eus istor merdeiñ an ivinelloù"
+    New Tab Position:
+      New Tab Position: "Lec'h an ivinell nevez"
+      At the end: "En dibenn"
+      After current tab: "War-lerc'h an ivinell vremanel"
+      After current tab in opened order: "War-lerc'h an ivinell vremanel, hervez urzh an digeriñ"
+    Tab Close Focus:
+      Last active tab: "Ivinell oberiant diwezhañ"
+      Next tab in tab order: "Ivinell da-heul e urzh an ivinelloù"
+      Previous tab in tab order: "Ivinell gent e urzh an ivinelloù"
+      Tab Close Focus: Goude serriñ an ivinell oberiant
+    Startup Behavior:
+      Startup Behavior: "El loc'hañ"
+      Load all tabs: "Kargañ an holl ivinelloù"
+      Load previously loaded tabs: "Kargañ an ivinelloù a oa karget a-raok"
+      Load last active tab: "Kargañ an ivinell oberiant diwezhañ"
+      Start with an empty session: "Loc'hañ gant un estez goullo"
+      Load landing page, keep other tabs unloaded: Kargañ ar bajenn degemer, lezel an ivinelloù all hep bezañ karget
+    Use AI Translation Completions: "Leuniañ an troidigezhioù a vank gant reoù savet gant an IA"
+    Reduced Motion:
+      Reduced Motion: "Fiñvoù digresket"
+      System: "Reizhiad"
+      Force On: "Bepred gweredekaet"
+      Force Off: "Bepred diweredekaet"
+    Comment Translation:
+      Title: "Treiñ an evezhiadennoù"
+      Enable: "Gweredekaat treiñ an evezhiadennoù"
+      Never Translate: "Na dreiñ morse an evezhiadennoù e"
+      Choose Language: "Dibab ur yezh"
+      Description: "Laosket e vez a-gostez dija an evezhiadennoù e yezh an arload. Ouzhpennit ar yezhoù all a c'hallit lenn."
+      Remove Language: "Adkregiñ da dreiñ an evezhiadennoù e {language}"
+    Avoid translation:
+      Avoid translation: "Gwell eo kaout testenn ar videoioù hep treiñ"
+      Disabled: "Diweredekaet"
+      Watch Only: "Etrefas ar videoioù hepken"
+      Entire App: "An arload a-bezh"
+    Playlist View Type:
+      Playlist View Type: "Doare diskouez ar rolloù-videoioù"
+    Show Thumbnail Previews: "Diskouez rakwelioù ar skeudennigoù"
+    Extra Thumbnail Action Button:
+      Extra Thumbnail Action Button: "Bouton ober ouzhpenn war ar skeudennigoù"
+      None: "Hini ebet"
+      Mark as Watched: "Merkañ evel sellet"
+      Copy YouTube Link: "Eilañ al liamm YouTube"
+      Open in YouTube: "Digeriñ e YouTube"
+    Mobile Layout:
+      Mobile Layout: 'Doare pellgomzer'
+      Automatic: 'Emgefreek'
+      Phone: 'Pellgomzer'
+      Tablet: 'Tablezenn'
+    Video View Type:
+      Full Width: Led klok
+    Grid Columns:
+      Grid Columns: Bannoù ar gael
+      Playlist Grid Columns: Bannoù gael ar rolloù-lenn
+      Auto: Emgefreek
+    Preferred API Backend:
+      Yattee Server: Servijer Yattee
+    Yattee Server:
+      Server URL: URL ar servijer Yattee
+      Username: Anv implijer
+      Password: Ger-tremen
+      Proxy Videos: Proksi video dre ar servijer Yattee
+      Test Connection: Amprouiñ ar c'hennask
+      Testing: Oc'h amprouiñ ar c'hennask…
+      Connected: Kennasket ouzh Yattee Server {version}
+      Errors:
+        Invalid URL: Roit URL ar servijer, o kregiñ gant https:// pe http://.
+        Unreachable: N'eus ket bet gallet tizhout ar servijer. Gwiriit an URL ha gwelit hag-eñ emañ ar servijer o vont en-dro.
+        Media not allowed: 'Kennasket, met ne aotre ket ar servijer an arload-mañ da gargañ videoioù. Lakait CORS_ORIGINS={origins} e endro ar servijer.'
+        Not a Yattee server: Respontet en deus ar servijer, met n'eo ket ur servijer Yattee.
+        Credentials required: Ezhomm en deus ar servijer eus un anv implijer hag ur ger-tremen.
+        Invalid credentials: Nac'het en deus ar servijer an anv implijer pe ar ger-tremen.
+        Rate limited: Stankañ a ra ar servijer ar c'hennaskadennoù goude re a daolioù-esae c'hwitet. Klaskit en-dro diwezhatoc'h.
+        Server error: Distroet en deus ar servijer ur fazi (HTTP {status}).
+    Notifications:
+      Notifications: Kemennoù
+      System and In-App: Reizhiad hag en arload
+      System Only: Reizhiad hepken
+      Off: Diweredekaet
+    Auto Load Next Page:
+      Lists Tooltip: Kargañ pajennoù ouzhpenn eus ar gwazhioù, an disoc'hoù klask hag ar rolloù all ent emgefreek.
+    Auto Load Comments:
+      Label: Kargañ an evezhiadennoù ent emgefreek
+      Tooltip: Kargañ an evezhiadennoù pa vez digoret ar bajenn ha kargañ muioc'h a evezhiadennoù en ur zibunañ.
+    Haptic Feedback: Adstumm haptek
+    Ignore System Haptics Setting: Na deurvout arventenn haptek ar reizhiad
+  Context Menu Search Settings:
+    Context Menu Search Settings: "Klask diwar ar roll lañser"
+    Description: "Dibabit ar c'hefluskerioù enklask a vo diskouezet pa glikot a-zehou war destenn diuzet. Digoret e vo an enklaskoù en ho merdeer dre ziouer."
+    Icon Hint: "Gweredekaat ur c'heflusker a ya e darempred gant e lec'hienn evit kargañ ar favicon."
+    Engine Name: "Anv ar c'heflusker"
+    Search URL: "URL enklask"
+    URL Hint: "Implijit %s el lec'h ma rank an URL enderc'hel an destenn diuzet boneget."
+    Add Custom Engine: "Ouzhpennañ ur c'heflusker personelaet"
+    Add Engine: "Ouzhpennañ ur c'heflusker"
+    Remove Engine: "Dilemel {engine}"
+    Invalid Engine: "Lakait un anv hag un URL enklask HTTP pe HTTPS talvoudek ennañ %s."
+    Engine Limit: "Gallout a rit ouzhpennañ betek {count} keflusker enklask personelaet."
+  Theme Settings:
+    Theme and Colors: "Tem ha livioù"
+    Font Size: "Ment an nodrezh"
+    Sections:
+      Interface: "Etrefas"
+      Side Bar and Header: "Barrenn gostez ha talbenn"
+      Tabs: "Ivinelloù"
+      Player: "Lenner"
+      Scrolling: "Dibunañ"
+      Notifications: "Kemennoù"
+    Only Show Important Notifications: Diskouez ar c'hemennoù pouezus hepken
+    Visible Search Suggestions: "Kinnigoù klask gwelus"
+    Material Accent Color: "Liv pouez Material"
+    Tally Accent Color: "Liv pouez Tally"
+    Material Wallpaper Colors: "Livioù ar skeudenn drekleur"
+    Material System Accent Color: "Liv pouez ar reizhiad"
+    Tab Loading Indicator:
+      Tab Loading Indicator: Merker kargañ an ivinell
+      Bar: Barrenn
+      Dot: Pik (klasel)
+    Compact Settings Categories: "Rummadoù arventennoù stank"
+    Playlist Thumbnail Size: "Ment skeudennoù bihan ar roll-lenn"
+    Compact Mobile Mini Player: "Lenner bihan hezoug stank"
+    Always Show Mobile Search Bar: "Diskouez barrenn enklask ar pellgomzer atav"
+    Frosted Glass Player UI: "Etrefas al lenner gant efed gwer skornet"
+    Main Color Theme:
+      Catppuccin Macchiato Rosewater: "Catppuccin Macchiato Roz sklaer"
+      Catppuccin Macchiato Flamingo: "Catppuccin Macchiato Flammeg boutin"
+      Catppuccin Macchiato Pink: "Catppuccin Macchiato Roz"
+      Catppuccin Macchiato Mauve: "Catppuccin Macchiato Mouk"
+      Catppuccin Macchiato Red: "Catppuccin Macchiato Ruz"
+      Catppuccin Macchiato Maroon: "Catppuccin Macchiato Gell"
+      Catppuccin Macchiato Peach: "Catppuccin Macchiato Pechez"
+      Catppuccin Macchiato Yellow: "Catppuccin Macchiato Melen"
+      Catppuccin Macchiato Green: "Catppuccin Macchiato Gwer"
+      Catppuccin Macchiato Teal: "Catppuccin Macchiato Glas-gwer"
+      Catppuccin Macchiato Sky: "Catppuccin Macchiato Glas oabl"
+      Catppuccin Macchiato Sapphire: "Catppuccin Macchiato Safir"
+      Catppuccin Macchiato Blue: "Catppuccin Macchiato Glas"
+      Catppuccin Macchiato Lavender: "Catppuccin Macchiato Lavand"
+    Move Downloads to App Header: "Kas ar pellgargadennoù da dalbenn an arload"
+    Move Settings to App Header: "Kas an arventennoù da dalbenn an arload"
+    Hide Side Bar on Watch Pages: "Kuzhat ar varrenn gostez war ar pajennoù sellout"
+    UI Roundness: "Ronded an etrefas"
+    Scrollbar Width: "Ledander ar varrenn dibunañ"
+    Scroll Speed: "Tizh dibunañ"
+    Animation Speed: "Tizh ar bliverezhioù"
+    Thumbnail Size: "Ment ar skeudennigoù"
+    Show Tab Icons: "Diskouez arlunioù an ivinelloù"
+    Load Missing Tab Icons: "Kargañ arlunioù an ivinelloù a vank"
+    Loading Missing Tab Icons: "O kargañ arlunioù an ivinelloù a vank…"
+    No Missing Tab Icons: "Karget eo dija holl arlunioù an ivinelloù skoret"
+    Loaded Tab Icons: "Karget eo bet {count} arlun ivinell a vanke. | Karget eo bet {count} arlun ivinell a vanke. | Karget eo bet {count} arlun ivinell a vanke. | Karget eo bet {count} arlun ivinell a vanke. | Karget eo bet {count} arlun ivinell a vanke."
+    Loaded Tab Icons With Failures: "Karget ez eus bet {loaded} arlun ivinell; n'eus ket bet gallet kargañ {failed} anezho"
+    Show Tab Previews: "Diskouez rakwelioù an ivinelloù"
+    Use Fixed Tab Width: "Implijout ul ledander ivinell digemm er mod a-blaen"
+    Use Custom Title Bar: Implijout ur varrenn-ditl personelaet
+    Tab Width: "Ledander an ivinelloù"
+    Vertical Tab Height: Uhelder an ivinelloù a-serzh
+    Tab Layout:
+      Tab Layout: "Aozadur an ivinelloù"
+      Horizontal Top: "A-blaen en nec'h"
+      Horizontal Bottom: "A-blaen en traoñ"
+      Vertical Left: "A-serzh a-gleiz"
+      Vertical Right: "A-serzh a-zehou"
+    Show Toast Timeout Indicator: "Diskouez merker padelezh ar c'hemennadennoù berr"
+    Use Grid Player Menu: "Implijout ur gael evit lañser al lenner"
+    Show Progress as Notification: "Diskouez an araokadur evel ur rebuad"
+    Operation in Progress: "Oberiadur war ober"
+    Toast Position:
+      Test Toast: Kemennadenn amprouiñ
+      Toast Position: "Lec'h ar c'hemennadennoù berr"
+      Bottom Left: "En traoñ a-gleiz"
+      Bottom Center: "En traoñ e-kreiz"
+      Bottom Right: "En traoñ a-zehou"
+      Top Left: "En nec'h a-gleiz"
+      Top Center: "En nec'h e-kreiz"
+      Top Right: "En nec'h a-zehou"
+    Icon Pack:
+      Icon Pack: "Pakad arlunioù"
+      Material Symbols: Material Symbols
+      Remix Icon: Remix Icon
+    Font:
+      App Font: "Nodrezh an arload"
+      System Default: "Re ar reizhiad dre ziouer"
+      Unable to Load: "N'eus ket bet gallet kargañ nodrezhoù ar reizhiad staliet"
+      Bundled Fonts: Nodrezhoù enframmet
+      System Fonts: Nodrezhoù ar reizhiad
+    Always Show Scrollbars: "Diskouez ar barrennoù dibunañ bepred"
+    Base Theme:
+      Material Light: "Material Sklaer"
+      Material Dark: "Material Teñval"
+      Material Black: "Material Du"
+      Dynamic colors: Livioù dinamek
+      Tokyo Night Night: Tokyo Night Night
+      Tokyo Night Storm: Tokyo Night Storm
+      Tokyo Night Moon: Tokyo Night Moon
+      Tokyo Night Day: Tokyo Night Day
+      Rosé Pine: Rosé Pine
+      Rosé Pine Moon: Rosé Pine Moon
+      Rosé Pine Dawn: Rosé Pine Dawn
+      Kanagawa Wave: Kanagawa Wave
+      Kanagawa Dragon: Kanagawa Dragon
+      Kanagawa Lotus: Kanagawa Lotus
+      Ayu Dark: Ayu Dark
+      Ayu Mirage: Ayu Mirage
+      Ayu Light: Ayu Light
+      One Dark: One Dark
+      Carbonfox: Carbonfox
+      Catppuccin Macchiato: Catppuccin Macchiato
+      Tally Light: "Tally Sklaer"
+      Tally Dark: "Tally Teñval"
+      Custom: "Personelaet"
+      Built-in Themes: Neuzioù enframmet
+      Custom Themes: Neuzioù personelaet
+    Light Theme: "Neuz sklaer"
+    Dark Theme: "Neuz teñval"
+    Custom Theme:
+      Share Restrictions Prompt: "An deskrivadurioù a c’hall kaout betek 500 arouezenn, Markdown en o zouez. Nemet liammoù ha skeudennoù herberc’hiet war GitHub a zo aotreet, en o zouez ar re pellgaset war-eeun amañ. Ar bot a zilemel al liammoù hag ar skeudennoù diavaez, a verra an deskrivadurioù re hir hag a zispleg ar c’hemmoù en un evezhiadenn."
+      Import from Clipboard: "Enporzhiañ eus ar golver"
+      Invalid Clipboard Theme: "N’eus tem reizh ebet er golver. Eilit JSON an tem ha klaskit en-dro."
+      Create Custom Theme: "Krouiñ un neuz personelaet"
+      Edit Custom Theme: "Kemmañ an neuz personelaet"
+      Custom Theme Creator: "Krouer neuzioù personelaet"
+      Theme Name: "Anv an neuz"
+      Based On: "Diazezet war"
+      Import Theme: "Enporzhiañ un neuz"
+      Export Theme: "Ezporzhiañ an neuz"
+      Share Theme: "Rannañ an neuz"
+      Share Description Prompt: "Deskrivit an neuz ha kement tra a rank an dud gouzout a-raok e implijout."
+      Share Screenshots Prompt: "Riklit ha lakait ur pakad skramm pe meur a hini amañ. Lezit ar rann-mañ goullo evit ma ouzhpenno ar bot tri rakwel gant danvez skouer, hep ho roadennoù personel."
+      Delete Theme: "Dilemel an neuz"
+      Delete Theme Confirmation: "Dilemel «{name}»? Ne c'hallo ket bezañ disgraet."
+      Save and Apply: "Enrollañ hag arloañ"
+      Discard Changes: "Nullañ ar c'hemmoù"
+      Reset Colors: "Adlakaat livioù an neuz diazez"
+      Theme File: "Restr neuz OpenTubeX"
+      Theme Saved: "Enrollet hag arloet eo bet an neuz personelaet"
+      Theme Imported: "Enporzhiet eo bet an neuz en aozer"
+      Theme Exported: "Ezporzhiet eo bet an neuz"
+      Theme Deleted: "Dilamet eo bet an neuz personelaet"
+      Unable to Load: "N'eus ket bet gallet kargañ an neuz personelaet"
+      Unable to Save: "N'eus ket bet gallet enrollañ an neuz personelaet"
+      Unable to Export: "N'eus ket bet gallet ezporzhiañ an neuz personelaet"
+      Unable to Share: "N'eus ket bet gallet rannañ an neuz personelaet"
+      Unable to Delete: "N'eus ket bet gallet dilemel an neuz personelaet"
+      Invalid Theme File: "Restr neuz personelaet didalvoudek"
+      Colors:
+        Watched thumbnail overlay: "Gwiskad ar skeudennoùigoù ar videoioù gwelet"
+        Thumbnail badge background: "Drekleur ar badjoù war ar skeudennoùigoù"
+        Main text: "Testenn bennañ"
+        Secondary text: "Testenn eil renk"
+        Subtle text: "Testenn disked"
+        Borders and dividers: "Riblennoù ha dispartierioù"
+        Subtle surfaces and indicators: "Gorreadoù ha merkerioù disked"
+        Title text: "Testenn an titloù"
+        Selected text background: "Drekleur an destenn diuzet"
+        Selected text: "Testenn diuzet"
+        Logo icon: "Arlun al logo"
+        Logo text: "Testenn al logo"
+        Logo hover: "Logo dindan al logodenn"
+        Logo pressed: "Logo pouezet"
+        Page background: "Drekleur ar bajenn"
+        Card background: "Drekleur ar c'hartennoù"
+        Secondary card background: "Drekleur ar c'hartennoù eil renk"
+        Favorite icon: "Arlun ar muiañ-karet"
+        Error color: "Liv ar fazioù"
+        Scrollbar thumb: "Rikell ar varrenn dibunañ"
+        Scrollbar thumb hover: "Rikell ar varrenn dibunañ dindan al logodenn"
+        Scrollbar thumb pressed: "Rikell ar varrenn dibunañ pouezet"
+        Dropdown item hover text: "Testenn un elfenn eus al lañser dindan al logodenn"
+        Dropdown item hover background: "Drekleur un elfenn eus al lañser dindan al logodenn"
+        Navigation and panel background: "Drekleur ar merdeiñ hag ar panelloù"
+        Neutral item hover and focus background: "Drekleur un elfenn neptu dindan al logodenn pe gant ar fokus"
+        Neutral item hover and focus text and icons: "Testenn hag arlunioù un elfenn neptu dindan al logodenn pe gant ar fokus"
+        Neutral item pressed background: "Drekleur un elfenn neptu pouezet"
+        Neutral item pressed text and icons: "Testenn hag arlunioù un elfenn neptu pouezet"
+        Header button hover and focus background: "Drekleur bouton an talbenn dindan al logodenn pe gant ar fokus"
+        Header button hover and focus text and icons: "Testenn hag arlunioù bouton an talbenn dindan al logodenn pe gant ar fokus"
+        Header button pressed background: "Drekleur bouton an talbenn pouezet"
+        Header button pressed text and icons: "Testenn hag arlunioù bouton an talbenn pouezet"
+        Search and dropdown background: "Drekleur an enklask hag al lañserioù"
+        Settings search background: "Drekleur enklask an arventennoù"
+        Instance menu: "Lañser an istañs"
+        Shadow color: "Liv ar skeud"
+        Primary controls and highlights: "Reolerezhioù pennañ hag usskedoù"
+        Primary control hover and focus: "Reoler pennañ dindan al logodenn pe gant ar fokus"
+        Primary control pressed: "Reoler pennañ pouezet"
+        Text and icons on primary controls: "Testenn hag arlunioù war ar reolerezhioù pennañ"
+        Secondary controls and highlights: "Reolerezhioù eil renk hag usskedoù"
+        Secondary control hover and focus: "Reoler eil renk dindan al logodenn pe gant ar fokus"
+        Secondary control pressed: "Reoler eil renk pouezet"
+        Light secondary color: "Liv sklaer eil renk"
+        Visited accent: "Liv pouez ar pezh zo bet gweladennet"
+        Text and icons on secondary controls: "Testenn hag arlunioù war ar reolerezhioù eil renk"
+        Links: "Liammoù"
+        Visited links: "Liammoù gweladennet"
+        Destructive action: "Ober distrujus"
+        Destructive hover and focus: "Ober distrujus dindan al logodenn pe gant ar fokus"
+        Destructive pressed: "Ober distrujus pouezet"
+        Text and icons on destructive actions: "Testenn hag arlunioù war an oberoù distrujus"
+    Modal Backdrop:
+      Modal Backdrop: "Drekleur ar boestoù-emziviz"
+      Dim and Blur: "Teñvalaat ha dispisaat"
+      Dim Only: "Teñvalaat hepken"
+    Click Scrollbar Track to Scroll: "Klikañ war ar varrenn dibunañ evit dibunañ"
+  Player Settings:
+    Rewind on Resume: "Distreiñ en ur adkregiñ"
+    Minimum Pause Before Rewinding: "Ehan izek a-raok distreiñ"
+    Mono Audio: 'Son mono'
+    Normalize Loudness: 'Reizhañ an ampled'
+    Show Mono Audio Toggle: 'Diskouez an afell son mono'
+    Pause on Stream Recovery: "Ehan pa vez adtapet al lanv"
+    Buffering:
+      Buffering: Memor c'hortoz
+      Description: Dibabit pegement a video a vez karget a-raok ha miret karget gant al lenner.
+      Buffer Ahead Hint: Gant muioc'h a vemor c'hortoz a-raok e kendalc'h al lenn e-pad troc'hoù kennask hiroc'h, met pellgarget e vez video na sellot ket outañ marteze.
+      Rewind Buffer Hint: Gant ur vemor c'hortoz brasoc'h evit mont war-gil e c'hallit lammat war-gil hep pellgargañ en-dro, met muioc'h a vemor a vez implijet.
+      Buffer Before Playing Hint: Gortoz ma vefe karget muioc'h a video a-raok al lenn a vir ouzh an ehanoù liesaet gant ur c'hennask diston, met hiroc'h e vez ar videoioù o loc'hañ hag oc'h adkregiñ goude lammat.
+      Preset: Rakarventenn ar vemor c'hortoz
+      Presets:
+        Data Saver: Espern roadennoù
+        Default: Dre ziouer
+        Smooth Playback: Lenn flour
+        Custom: Personelaet
+      Buffer Ahead: Memor c'hortoz a-raok
+      Buffer Ahead Tooltip: 'Pegen pell goude al lec''h a-vremañ e vez karget. Gant galiteoù uhel e c''hall bevennoù ar vemor bevenniñ an talvoudoù uhel-tre. Dre ziouer: {value}'
+      Rewind Buffer: Memor c'hortoz evit mont war-gil
+      Rewind Buffer Tooltip: 'Pegement eus ar video sellet outañ dija a chom karget. Dre ziouer: {value}'
+      Buffer Before Playing: Memor c'hortoz a-raok al lenn
+      Buffer Before Playing Tooltip: 'Pegement a video a rank bezañ karget a-raok ma krog al lenn, pe ma kendalc''h goude bezañ ehanet. Dre ziouer: {value}'
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: "Bevenn ar galite war ar rouedadoù muzuliet"
+      No Limit: "Bevenn ebet"
+      Tooltip: "War ar roadennoù hezoug hag ar rouedadoù muzuliet all e krog ar videoioù gant ar galite-mañ pe unan izeloc'h. Gallout a rit dibab ur galite uheloc'h el lenner c'hoazh."
+    Show Music Mode Toggle: "Diskouez ar bouton mod sonerezh"
+    Enable DLNA Casting: "Gweredekaat skignañ DLNA"
+    Skip Unavailable Playlist Videos: "Tremen ar videoioù dizimplij er rolloù lenn"
+    Lights Off: Gouloù lazhet
+    Show Lights Off Toggle: Diskouez an afell evit lazhañ ar gouloù
+    Show Volume Boost Toggle: "Diskouez an afell kreskiñ an ampled"
+    Swipe Gestures:
+      Fullscreen Brightness: Sklerijenn uhelañ e skramm leun
+      Left: Riklañ a-gleiz
+      Right: Riklañ a-zehoù
+      Disabled: Diweredekaet
+      Brightness: Sklerijenn
+      Volume: Ampled
+      Hint: Riklit war-zu al laez pe an traoñ war gostez ar video e skramm a-bezh.
+      Unavailable: N'eus ket bet gallet reizhañ ar reolerezhioù lenn.
+    yt-dlp Streaming: "Skignañ yt-dlp"
+    Continue Playback When Screen Is Locked: 'Kenderc’hel da lenn pa vez prennet ar skramm'
+    Music Visualizer: Gweladur sonerezh
+    Automatically Open Chapters: "Digeriñ ar chabistroù ent emgefreek"
+    Caption Appearance:
+      Caption Appearance: "Neuz an istitloù"
+      Captions: "Istitloù"
+      Preferred Language: "Yezh istitloù gwellañ-garet"
+      Application Language: "Yezh an arload"
+      Enable Translations: "Gweredekaat treiñ an istitloù"
+      Text Color: "Liv an destenn"
+      Background Color: "Liv an drekleur"
+      Background Opacity: "Divoullder an drekleur"
+      Font Size: "Ment an nodrezh"
+      Anchor:
+        Anchor: "Eor"
+        Top Left: "En nec'h a-gleiz"
+        Top Center: "En nec'h e-kreiz"
+        Top Right: "En nec'h a-zehou"
+        Bottom Left: "En traoñ a-gleiz"
+        Bottom Center: "En traoñ e-kreiz"
+        Bottom Right: "En traoñ a-zehou"
+        Center Left: E-kreiz a-gleiz
+        Center: E-kreiz
+        Center Right: E-kreiz a-zehoù
+      Edge Style:
+        Edge Style: "Stil an amlinenn"
+        None: "Hini ebet"
+        Outline: "Trolinenn"
+        Drop Shadow: "Skeud taolet"
+        Raised: Bosennet
+        Depressed: Kleuzet
+      Reset: "Adderaouekaat neuz an istitloù"
+      Default: Emgefreek
+      Text Opacity: Demerez an nodrezh
+      Font Family:
+        Font Family: Familh nodrezhoù
+        Monospaced Serif: Serif monospas
+        Proportional Serif: Serif kenfeur
+        Monospaced Sans-Serif: Sans-serif monospas
+        Proportional Sans-Serif: Sans-serif kenfeur
+      Colors:
+        White: Gwenn
+        Yellow: Melen
+        Green: Gwer
+        Cyan: Glaswer
+        Blue: Glas
+        Magenta: Majenta
+        Red: Ruz
+        Black: Du
+    Auto Picture in Picture:
+      Auto Picture in Picture: "Tremen er mod Skeudenn e-barzh skeudenn ent emgefreek"
+      On Tab Change: "Pa vez cheñchet ivinell"
+      On Window Minimize: "Pa vez izekaet ar prenestr"
+      On Window Hide: "Pa goll ar prenestr ar fokus pe pa vez kuzh"
+      Wayland Minimize Unsupported: "Wayland ne gemenn ket izelaat ar prenestr d'an arloadoù, setu n'eo ket hegerz an deraouer-mañ. Implijit «Pa goll ar prenestr ar fokus pe pa vez kuzh» en e lec'h; talvezout a ra ivez evit an izelaat."
+      On Tab Change Mini Player: Pa vez cheñchet ivinell e vez diskouezet al lenner bihan en e lec'h. Evit implijout an dra-se, lakait “Pa guitaer ur video” war “Paouez da lenn”.
+    Scroll Mini Player:
+      Scroll Player Mode: Pa ziskenner er bajenn
+      Scroll Player Mode Tooltip: "Ne vez spilhennet al lenner nemet e-pad ma ne bak ket muioc'h eget hanter uhelder ar prenestr. A-hend-all, evel war ar pellgomzerioù e mod gweledva pe er prenestroù ledan, e vez diskouezet ar mini-lenner en e lec'h."
+      Scroll Player Modes:
+        Mini: Diskouez ul lenner bihan
+        Pin: "Spilhennañ al lenner e krec'h ma'z eus lec'h"
+        Off: Dibunañ gant ar bajenn
+      Leaving Video: Pa guitaer ur video
+      Leaving Video Modes:
+        Keep Playing: Kenderc'hel da lenn en ul lenner bihan
+        Stop: Paouez da lenn
+    Multiply Seek Interval by Playback Rate: "Lieskementiñ etrevez ar mont en-dro gant an tizh lenn"
+    Show Playback Rate Adjusted Timestamp: "Diskouez ar mare reizhet diouzh an tizh lenn"
+    Use YouTube-style Shorts: "Implijout videoioù berr (Shorts) doare YouTube"
+    Loop Shorts: "Lenn ar videoioù berr (Shorts) en ur voul"
+    Remember Volume: "Derc'hel soñj eus live ar son"
+    Skip Silence: "Lammat dre ar sioulder"
+    Show Skip Silence Toggle: "Diskouez an afell da lammat dre ar sioulder"
+    Enable Skip Silence by Default: "Gweredekaat al lamm dre ar sioulder dre ziouer"
+    Enable Video Zoom: "Gweredekaat zoum ar video"
+    Enable Seek History: Gweredekaat roll istor al lammoù
+    Show Seek Bar Filmstrip: "Diskouez stribed skeudennoù ar varrenn glask"
+    Voice-over Translation:
+      Title: "Treiñ ar vouezh"
+      Attribution: "(kaset en-dro gant Yandex)"
+      Enable: "Gweredekaat treiñ ar vouezh"
+      Prepare in Background: "Kregiñ da brientiñ troidigezhioù ar vouezh en drekleur"
+      Background Preparation Tooltip: "Kas a ra naoudi ar video vremanel, e badelezh hag ar yezh diuzet d'ar gwazerezh treiñ kerkent ha ma vez karget ur video skoret."
+      Language: "Yezh troidigezh ar vouezh"
+      Supported Source Languages: "Yezhoù tarzh skoret: rusianeg, saozneg, sinaeg, koreeg, arabeg, galleg, italianeg, spagnoleg, alamaneg ha japaneg."
+      Voice Volume: "Live ar vouezh troet"
+      Original Volume: "Live ar son orin"
+      Russian: "Rusianeg"
+      English: "Saozneg"
+      Kazakh: "Kazakheg"
+    Hold to Speed Up:
+      Hold to Speed Up: Derc'hel evit buanaat
+      Off: Lazhet
+    Use Quick Playback Speed Bar: "Implijout barrenn prim an tizh lenn"
+    Customize Quick Playback Speed Bar: "Personelaat barrenn prim an tizh lenn"
+    Quick Playback Speed Bar Manager: "Barrenn prim an tizh lenn"
+    Add Playback Speed: "Ouzhpennañ un tizh lenn"
+    Reset Quick Playback Speed Bar: "Adlakaat ar gwerzhioù dre ziouer"
+    Playback Speed Name: "Anv"
+    Edit Playback Speed Name: "Kemmañ anv an tizh lenn"
+    Use Automatic Playback Speed Name: "Implijout anv emgefreek an tizh lenn"
+    Reorder Playback Speed: "Riklañ evit adurzhiañ an tizh lenn"
+    Playback Speed: "Tizh lenn"
+    Parallel Segment Loading: "Kargañ ar rannoù a-stroll"
+    Rotate Wide Videos to Landscape in Fullscreen: 'C’hwelañ ar videoioù ledan d’ar mod gweledva er skramm leun'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'Riklañ war-grec’h pe war-draoñ evit mont er skramm leun pe kuitaat anezhañ'
+    Preload Upcoming Videos: "Rakgargañ ar videoioù da-heul"
+    Upcoming Videos to Preload: "Niver a videoioù da rakgargañ"
+    Concurrent Preloads: "Rakgargadennoù war un dro"
+    Ignore System Rotation Lock for Fullscreen: Na ober van eus prenn troadur ar reizhiad evit ar skramm leun
+    Swipe Left or Right to Seek in Fullscreen: Riklañ a-gleiz pe a-zehou evit mont war-raok pe war-gil e skramm leun
+    Show Swipe to Seek Preview: Diskouez ar rakwel pa rikler evit mont en a-raok pe war-gil
+    Enable Google Cast: "Gweredekaat Google Cast"
+    Sections:
+      Playback: Lenn
+      Autoplay: Lenn emgefreek
+      Playback Speed: Tizh lenn
+      Player Controls: Kontrolloù al lenner
+      Gestures: Jestroù
+      Viewing Modes: Modoù gwelout
+      Shorts: Shorts
+      Screenshots: Tapadennoù skramm
+    Enable FCast: "Gweredekaat FCast"
+    Screenshot:
+      Legacy Formats: "Furmadoù kozh"
+      Modern Formats: "Furmadoù modern"
+    Ask Before Preloading Large Playlists: "Goulenn a-raok rakgargañ rolloù-lenn bras"
+  Channel Settings:
+    Channel Settings: "Arventennoù ar chadennoù"
+    Channel Settings Description: "Derc'hel soñj, evit pep chadenn, eus an arventennoù a zibabit pa sellit. Arloet e vint en-dro ar wech da-heul ma sellot ouzh unan eus he videoioù."
+    Enable Channel Playback Settings: "Gweredekaat arventennoù al lenn evit ar chadennoù"
+    Auto Save Playback Speed: "Enrollañ ent emgefreek ar c'hemmoù d'an tizh lenn"
+    Auto Save Video Quality: "Enrollañ ent emgefreek ar c'hemmoù d'ar perzhded video"
+    Auto Save Subtitles State: "Enrollañ ent emgefreek ar c'hemmoù da stad an istitloù"
+    Auto Save Volume: "Enrollañ ent emgefreek ar c'hemmoù da live ar son"
+    Manage Saved Channels: "Merañ ar chadennoù enrollet ({channelCount})"
+    Saved Channels: "Arventennoù ar chadennoù enrollet"
+    Enable Saved Channel Settings Sync: "Goubredañ arventennoù ar chadennoù enrollet"
+    Disable Saved Channel Settings Sync: "Paouez da c'houbredañ arventennoù ar chadennoù enrollet"
+    Search Channels: "Klask chadennoù"
+    No Saved Channels: "N'eus ket bet enrollet arventenn ebet evit ur chadenn resis c'hoazh"
+    No Matching Channels: "N'eus chadenn ebet o klotañ gant ho klask"
+    Forget Channel: "Ankouaat holl arventennoù ar chadenn-mañ"
+    Forget Value: "Ankouaat an arventenn-mañ"
+    Add Setting: "Derc'hel soñj eus un arventenn all evit ar chadenn-mañ"
+    Add Subscribed Channel: Ouzhpennañ ur chadenn koumanantet
+    Video Quality: "Perzhded ar video"
+    Subtitles Enabled: "Istitloù gweredekaet"
+    Volume: "Live ar son"
+  Download Settings:
+    Download Settings: "Pellgargadennoù"
+    Enable Downloads: "Gweredekaat ar pellgargadennoù"
+    Managed Tools Download Started Template: "N'eo ket bet kavet ar meziant diavaez rekis: {tools}. O pellgargañ eiloù meret…"
+    Managed Tools Download Finished Template: "Echu eo pellgargañ {tools}"
+    Managed Tools Update Started Template: "Kavet ez eus bet un hizivadenn evit {tools}. O pellgargañ…"
+    Managed Tools Update Finished Template: "Echu eo hizivaat {tools}"
+    Managed Tools Update Available Template: "Un hizivadenn zo hegerz evit {tools}."
+    Managed Tools Update Source Notice: "OpenTubeX a bellgarg anezhañ war-eeun diwar GitHub, setu ne vez ket gwiriet gant F-Droid hag ar stalioù arloadoù all."
+    Update Managed Tools: "Hizivaat"
+    Managed Tools Download Error Template: "N'eus ket bet gallet pellgargañ an ostilhoù meret: {errors}"
+    Download Folder: "Teuliad pellgargañ"
+    Global Additional yt-dlp Arguments: Arventennoù ouzhpenn yt-dlp
+    Concurrent Downloads: "Pellgargadennoù war un dro"
+    Bandwidth Limit: Bevenn ledander-bann (KiB/s)
+    Download Templates: "Patromoù pellgargañ"
+    Manage Download Templates: "Merañ ar patromoù pellgargañ ({templateCount})"
+    New Template: "Patrom nevez"
+    Template Source: "Patrom da gemmañ pe da implijout evel diazez"
+    Built-in Template: "{name} (enframmat)"
+    Custom Template Name: "{name} (personelaet)"
+    Create Template Copy: "Krouiñ un eilad"
+    Template Copy Name: "Eilad {name}"
+    Automatic Downloads: "Pellgargadennoù emgefreek"
+    Manage Automatic Downloads: "Merañ ar pellgargadennoù emgefreek ({channelCount})"
+    Automatic Downloads Description: "Dibabit ur patrom pellgargañ ha siloù evit pep chadenn koumanantet. Pellgarget e vez ar videoioù a glot en drekleur pa vez adkarget gwazhioù ar c'houmanantoù."
+    Automatic Downloads New Only: "Pa vez gweredekaet ur chadenn e krog gant he c'hargadenn nevez da-heul. Ne vez ket pellgarget ar videoioù a zo anezho dija na re goshañ ar chadenn."
+    Automatic Downloads No Channels: "Koumanantit d'ur chadenn a-raok kefluniañ ar pellgargadennoù emgefreek."
+    No Matching Automatic Download Channels: "N'eus chadenn ebet o klotañ gant ho klask."
+    Automatic Downloads Livestreams: "Skignadoù war-eeun"
+    Minimum Duration Seconds: "Padelezh verrañ (eilennoù)"
+    Maximum Duration Seconds: "Padelezh hirañ (eilennoù)"
+    Minimum File Size MB: "Ment restr bihanañ (MB)"
+    Maximum File Size MB: "Ment restr brasañ (MB)"
+    Maximum Age Days: "Oad brasañ (devezhioù)"
+    Title Includes: "An titl a endalc'h"
+    Title Excludes: "An titl n'endalc'h ket"
+    Title Filter Hint: "Dispartiit termenoù an titl gant skejoù. Ur video a rank klotañ gant un termen enkorfet da vihanañ ha gant termen ezkorfet ebet."
+    Automatic Downloads Require Unmetered Network: "War ar rouedadoù hep muzuliañ hepken"
+    Automatic Downloads Require Charging: "E-pad ar c'hargañ hepken"
+  External Software Settings:
+    Create YouTube session: "Krouiñ un estez YouTube"
+    YouTube session hint: "Kevreit ma vez ezhomm ha saveteit an estez. Dibabit en arventennoù he implijout evit ar pellgargañ, al lenn pe an istitloù."
+    Use cookies for downloads: "Implijout toupinoù evit ar pellgargañ"
+    YouTube session failed: "N'eus ket bet gallet saveteiñ an estez YouTube."
+    Checking FFmpeg and FFprobe: O wiriañ FFmpeg/FFprobe…
+    FFmpeg and FFprobe Managed Not Downloaded: N'eo ket bet pellgarget FFmpeg/FFprobe c'hoazh. Klikit war ar bouton amañ dindan evit o fellgargañ.
+    External Software Settings: "Meziantoù diavaez"
+    yt-dlp Source: "Tarzh yt-dlp"
+    yt-dlp Channel: "Kanol yt-dlp"
+    Sources:
+      System: "Reizhiad (PATH pe hent personelaet)"
+      Managed: "Meret gant OpenTubeX"
+    Detected Version Template: "Stumm yt-dlp dinoet: {version}"
+    Managed Not Downloaded: "N'eo ket bet pellgarget yt-dlp c'hoazh. Klikit war ar bouton amañ dindan evit e bellgargañ."
+    System yt-dlp Missing Warning: "N'eo ket bet kavet yt-dlp war ho reizhiad. Staliit anezhañ, lakait un hent personelaet amañ dindan pe dibabit «Meret gant OpenTubeX» evel tarzh."
+    Download yt-dlp: "Pellgargañ yt-dlp"
+    Update yt-dlp: "Hizivaat yt-dlp"
+    Checking yt-dlp: "O wiriañ yt-dlp…"
+    Downloading yt-dlp: "O pellgargañ yt-dlp…"
+    yt-dlp Downloaded Template: "Pellgarget eo bet yt-dlp {version}"
+    yt-dlp Download Error Template: "C'hwitet eo pellgargañ yt-dlp: {error}"
+    FFmpeg Source: "Tarzh FFmpeg"
+    Detected FFmpeg Version Template: "Stumm FFmpeg dinoet: {version}"
+    Detected FFmpeg and FFprobe Version Template: "Stumm FFmpeg/FFprobe dinoet: {version}"
+    FFmpeg Managed Not Downloaded: "N'eo ket bet pellgarget FFmpeg c'hoazh. Klikit war ar bouton amañ dindan evit e bellgargañ."
+    System FFmpeg Missing Warning: "N'eo ket bet kavet FFmpeg war ho reizhiad. Rekis eo evit kendeuziñ ar video hag ar son hag evit amdreiñ ar son. Staliit anezhañ, lakait un hent personelaet amañ dindan pe dibabit «Meret gant OpenTubeX» evel tarzh."
+    Download FFmpeg: "Pellgargañ FFmpeg"
+    Update FFmpeg: "Hizivaat FFmpeg"
+    Checking FFmpeg: "O wiriañ FFmpeg…"
+    Downloading FFmpeg: "O pellgargañ FFmpeg…"
+    Detected FFprobe Version Template: "Stumm FFprobe dinoet: {version}"
+    FFprobe Managed Not Downloaded: "N'eo ket bet pellgarget FFprobe c'hoazh. Klikit war ar bouton amañ dindan evit e bellgargañ gant FFmpeg."
+    System FFprobe Missing Warning: "N'eo ket bet kavet FFprobe war ho reizhiad. Rekis eo evit ensellet ar mediaoù e-pad an eiltretañ. Staliit anezhañ e-kichen FFmpeg pe dibabit «Meret gant OpenTubeX» evel tarzh."
+    Checking FFprobe: "O wiriañ FFprobe…"
+    Download FFmpeg and FFprobe: "Pellgargañ FFmpeg ha FFprobe"
+    Update FFmpeg and FFprobe: "Hizivaat FFmpeg ha FFprobe"
+    Downloading FFmpeg and FFprobe: "O pellgargañ FFmpeg ha FFprobe…"
+    FFmpeg and FFprobe Downloaded Template: "Pellgarget eo bet FFmpeg ha FFprobe {version}"
+    FFmpeg and FFprobe Download Error Template: "C'hwitet eo pellgargañ FFmpeg ha FFprobe: {error}"
+    Managed Tool Already Current Template: "Hizivaet eo dija {tool} {version}"
+    Managed Tool Errors:
+      Removed: 'Dilamet eo bet ar restr pellgarget, gant ur meziant enep-viruz moarvat'
+      Unusable: 'N''eus ket bet gallet lañsañ ar programm pellgarget. Marteze e vez stanket gant ur meziant enep-viruz, pe ne vez ket skoret ar reizhiad-mañ gantañ'
+      Release Not Found: 'N''eus ket bet gallet kavout an handelv diwezhañ'
+      Verification Failed: 'N''eus ket bet gallet gwiriañ ez eo ar pellgargadenn un handelv ofisiel'
+      Downgrade: 'Koshoc’h eo an handelv pellgarget eget an hini staliet'
+      Invalid Archive: 'Direizh eo an diell pellgarget'
+      Rollback Failed: 'C''hwitet eo bet an hizivadenn ha n''eus ket bet gallet assevel an handelv kent en he fezh'
+    Managed Tool Updates: "Hizivadennoù an ostilhoù meret"
+    Update Modes:
+      Automatic: "Hizivaat ent emgefreek"
+      Ask: "Goulenn a-raok hizivaat"
+      Manual: "Hizivaat gant an dorn hepken"
+    yt-dlp Executable Path: Restr erounezadus yt-dlp
+    FFmpeg Executable Path: Restr erounezadus FFmpeg
+    Restricted Playback Authentication: "Toupinoù yt-dlp"
+    Cookie Source: "Tarzh an toupinoù"
+    Cookie Sources:
+      None: "Hini ebet"
+      File: "Restr"
+      Browser: "Merdeer"
+    Cookie File: "Restr toupinoù"
+    Browser for Cookies: "Merdeer evit an toupinoù"
+    Browser Profile: "Profil ar merdeer (diret)"
+    Browser Profile Placeholder: "Anv pe hent ar profil"
+    Browser Profile Invalid: "Enankit anv ur profil, pe dibabit un teuliad profil gant ar bouton teuliad."
+    Select Browser: "Dibab ur merdeer"
+    Always Use Cookies: "Implijout an toupinoù bepred"
+    Restricted Playback Authentication Hint: "Dre ziouer, OpenTubeX ne dremen an toupinoù-mañ da yt-dlp nemet goude ma tibabit «Klask gant an toupinoù kefluniet» war ur video bevennet diouzh an oad pe miret d'an izili."
+    Restricted Playback Authentication Warning: "Implijout yt-dlp gant ur gont Google a c'hall degas bevennoù padennek pe da viken war ar gont."
+    Use cookies for subtitles: "Implijout toupinoù evit an istitloù"
+  Privacy Settings:
+    Internet Connectivity Checks: "Gwiriañ ar genrouedad"
+    Internet Connectivity Checks Tooltip: "Kas a ra goulennoù bihan da ur servijer herberc’hiet gant GrapheneOS evit gwiriañ ar moned d’ar genrouedad."
+    Automatic History Retention: "Mirout an istor ent emgefreek (devezhioù)"
+    Automatic History Retention Placeholder: "Leuskel goullo evit mirout da viken"
+    Automatic History Retention Tooltip: "Leuskit goullo evit mirout an istor da viken. Enrollañ un niver a zilam an elfennoù koshoc'h bremañ, hag ent emgefreek pa vez digor an arload."
+    Automatic Search History Retention: Mirout istor an enklaskoù ent emgefreek (devezhioù)
+    Automatic Search History Retention Tooltip: Leuskit goullo evit mirout istor an enklaskoù da viken. Enrollañ un niver a zilam an enklaskoù koshoc'h bremañ, hag ent emgefreek pa vez digor an arload.
+    History Retention Saved: "Enrollet eo bet padelezh mirout an istor"
+    Invalid History Retention Days: "Lakait un niver anterin a zevezhioù brasoc'h eget mann"
+    Enable Watch Statistics: "Gweredekaat ar stadegoù sellout"
+    Week Starts On: "Derou ar sizhun"
+    Cache Video Metadata: "Istor ar metaroadennoù"
+    Cache Video Metadata Tooltip: "Mirout a ra pep stumm eus metaroadennoù skoret ar videoioù a weladennit, en o zouez an titloù, ar skeudennigoù hag an deskrivadurioù. Mirout a ra ivez an titloù diskouezet en ho lanvoù koumanantoù. Diweredekaet eo dre ziouer rak mirout istor ar metaroadennoù a gresk implij ar bladenn."
+    Watched Percentage Threshold: "Gwehin evit dregantad sellet"
+    Watched Percentage Threshold Tooltip: "Merket e vez ar videoioù evel sellet goude tizhout an dregantad diuzet pa chom 2 vunutenn d'ar muiañ. Gant 0% e vezont merket pa grog al lenn. Gant 100% e vezont merket pa echu al lenn."
+    Clear Video Metadata Cache: "Skarzhañ krubuilh metaroadennoù ar videoioù"
+    Are you sure you want to clear the video metadata cache?: "Ha sur oc'h e faot deoc'h skarzhañ titloù, skeudennigoù ha deskrivadurioù ar videoioù er grubuilh?"
+    Failed to clear video metadata cache: "C'hwitet eo skarzhañ krubuilh metaroadennoù ar videoioù"
+    Video Metadata Cache Size: "Krubuilh metaroadennoù ar videoioù: {size}"
+  Storage Settings:
+    Storage: "Kadaviñ"
+    Downloaded Media: "Mediaoù pellgarget heuliet"
+    Storage Breakdown: "Munudoù ar c'hadaviñ"
+    Shown Total: "Hollad diskouezet"
+    Calculating: "O jediñ…"
+    Not Available: "N'eo ket hegerz ar ment resis"
+    At Least: "{size} da vihanañ"
+    Failed To Read Storage: "N'eus ket bet gallet lenn mentoù kadaviñ zo"
+    Downloaded Media Description: "Restroù video, son hag istitloù a vez heuliet c'hoazh gant istor ar pellgargadennoù."
+    Selected Download Folders: "Teuliadoù pellgargañ diuzet gant an implijer"
+    Download History Records: "Enroladennoù istor ar pellgargadennoù"
+    Download History Records Description: "{count} enrolladenn bellgargañ echu. Heuliañ a ra ar stad ha lec'hiadurioù ar restroù met n'endalc'h ket ar media pellgarget. | {count} enrolladenn bellgargañ echu. Heuliañ a reont ar stad ha lec'hiadurioù ar restroù met n'endalc'hont ket ar mediaoù pellgarget. | {count} enrolladenn bellgargañ echu. Heuliañ a reont ar stad ha lec'hiadurioù ar restroù met n'endalc'hont ket ar mediaoù pellgarget. | {count} enrolladenn bellgargañ echu. Heuliañ a reont ar stad ha lec'hiadurioù ar restroù met n'endalc'hont ket ar mediaoù pellgarget. | {count} enrolladenn bellgargañ echu. Heuliañ a reont ar stad ha lec'hiadurioù ar restroù met n'endalc'hont ket ar mediaoù pellgarget."
+    Clear Download History Records: "Skarzhañ enrolladennoù istor ar pellgargadennoù"
+    Clear Download History Confirmation: "Skarzhañ holl enrolladennoù ar pellgargadennoù echu?"
+    Download Files Stay On Disk: "Chom a raio ar restroù pellgarget war ar bladenn, met ne vint ket diskouezet ken war pajenn ar Pellgargadennoù."
+    Clear Records: "Skarzhañ an enrolladennoù"
+    Replaceable Caches: "Krubuilhoù adkrouadus"
+    Application Caches: "Krubuilhoù an arload"
+    Browser Caches: "Krubuilhoù ar merdeer"
+    Browser Caches Hint: "Krubuilhoù HTTP, GPU, kod, skeuderaozer, worker gwazerezh ha geriadur Chromium."
+    Clear Android Cache Confirmation: "Skarzhañ memor kuzh merdeer Android?"
+    Stored App Data: "Roadennoù an arload kadavet"
+    Included In App Data: "E-barzh roadennoù an arload diskouezet a-us"
+    Browser Runtime Data: "Roadennoù erounit ar merdeer"
+    Browser Runtime Data Hint: "Estez ha kadaviñ lec'hel Chromium, toupinoù, stad ar prevezded hag ar rouedad, ha restroù sac'hadenn."
+    Subscription Feed Cache: "Krubuilh ar c'houmanantoù hag ar gwazhioù"
+    Subscription Feed Cache Description: "Kadaviñ a ra videoioù, videoioù berr (Shorts), skignadoù war-eeun ha pennadoù adtapet ar c'houmanantoù. Adkrouet e vez gant OpenTubeX pa vez adkarget ar gwazh da-heul."
+    Clear Subscription Feed Cache: "Skarzhañ krubuilh ar c'houmanantoù hag ar gwazhioù"
+    Clear Subscription Feed Cache Confirmation: "Skarzhañ krubuilh ar c'houmanantoù hag ar gwazhioù?"
+    Subscription Feed Cache Effect: "Gallout a ra gwazhioù ar c'houmanantoù bezañ goullo betek ma vint adkarget. Ne vo ket kemmet ho koumanantoù nag ho profiloù."
+    Session Search Cache: "Krubuilh enklask an estez"
+    In Memory: "Er vemor"
+    Session Search Cache Description: "{count} enklask zo er grubuilh er vemor evit distreiñ buanoc'h. Dilezet e vez ar grubuilh-mañ pa vez serret OpenTubeX. | {count} enklask zo er grubuilh er vemor evit distreiñ buanoc'h. Dilezet e vez ar grubuilh-mañ pa vez serret OpenTubeX. | {count} enklask zo er grubuilh er vemor evit distreiñ buanoc'h. Dilezet e vez ar grubuilh-mañ pa vez serret OpenTubeX. | {count} enklask zo er grubuilh er vemor evit distreiñ buanoc'h. Dilezet e vez ar grubuilh-mañ pa vez serret OpenTubeX. | {count} enklask zo er grubuilh er vemor evit distreiñ buanoc'h. Dilezet e vez ar grubuilh-mañ pa vez serret OpenTubeX."
+    Clear Session Search Cache: "Skarzhañ krubuilh enklask an estez"
+    Clear Session Search Cache Confirmation: "Skarzhañ krubuilh enklask an estez?"
+    Session Search Cache Effect: "Dilezet e vo pajennoù disoc'hoù ar grubuilh. Ne vo ket kemmet istor an enklaskoù enrollet."
+    HTTP Cache: "Krubuilh HTTP"
+    HTTP Cache Description: "Kadaviñ a ra Electron respontoù ar rouedad war ar bladenn evit kargañ azgoulennoù zo hep pellgargañ ar memes roadennoù en-dro. Adkrouiñ a ra OpenTubeX ar grubuilh-mañ pa vez ezhomm."
+    Managed By Electron: "Meret gant Electron"
+    Clear HTTP Cache: "Skarzhañ ar grubuilh HTTP"
+    Clear HTTP Cache Confirmation: "Skarzhañ krubuilh HTTP Electron?"
+    HTTP Cache Effect: "Gallout a ra ar skeudennoù ha pourvezioù rouedad all kargañ gorrekoc'h ur wech e-pad ma vez adkrouet ar grubuilh."
+    Tab Image Cache: "Skeudennigoù an ivinelloù ha skeudennoù ar chadennoù"
+    Tab Image Cache Description: "Kadaviñ a ra rakwelioù ha skeudennoù ar chadennoù evit an ivinelloù digor hag assavet. Adkrouiñ a ra OpenTubeX anezho pa vez implijet an ivinelloù."
+    Clear Tab Image Cache: "Skarzhañ krubuilh skeudennoù an ivinelloù"
+    Clear Tab Image Cache Confirmation: "Skarzhañ skeudennigoù an ivinelloù ha skeudennoù ar chadennoù?"
+    Tab Image Cache Effect: "Gallout a ra skeudennoù an ivinelloù mont diwar wel berr-ha-berr. Adkrouet e vint pa vo implijet an ivinelloù."
+    Playback Caches: "Krubuilhoù lenn"
+    Playback Caches Description: "Kadaviñ a ra URLioù gwazh yt-dlp etre estezioù an arload, hag ivez restroù lenner YouTube. Ar grubuilh URL a dalvez hepken evit ar gwazhioù adtapet gant yt-dlp."
+    Playback URL Cache Entry Size: "Bevenn krubuilh URL gwazh yt-dlp"
+    Playback URL Cache Entry Size Tooltip: "Termenañ a ra ment brasañ pep elfenn gwazh yt-dlp er grubuilh. Lakit 0 MB evit diweredekaat ar grubuilh padus evit gwazhioù yt-dlp."
+    Clear Playback Caches: "Skarzhañ ar c'hrubuilhoù lenn"
+    Clear Playback Caches Confirmation: "Skarzhañ krubuilhoù yt-dlp hag al lenner?"
+    Playback Caches Effect: "Gallout a ra an azgoulenn lenn lec'hel da-heul padout pelloc'h tra ma vez adtapet roadennoù ar gwazh hag al lenner en-dro."
+    Clear Cache: "Skarzhañ ar grubuilh"
+    History Data: "Istorioù kadavet"
+    Video Metadata Description: "Kadaviñ a ra titloù, skeudennigoù ha deskrivadurioù kozh ar videoioù skoret. Ne c'hall ket ar stummoù kozh bezañ adkrouet goude bezañ dilamet."
+    Video Metadata Effect: "Dilamet e vo da viken ar stummoù metaroadennoù enrollet. Gallout a reer adtapout munudoù bremanel ar video en-dro."
+    Watch History: "Istor ha stadegoù sellout"
+    Watch History Description: "Enrollañ a ra an istor sellout ar videoioù gwelet hag an araokadur. Kadaviñ a ra ar stadegoù sellout an holladoù bemdeziek. An istor sellout hepken a vez levezonet gant ar padelezh mirout."
+    Clear Watch Statistics: "Skarzhañ ar stadegoù sellout"
+    Watch History Effect: "Dilamet e vo enrolladennoù ar videoioù gwelet hag an araokadur enrollet. Chom a raio ar stadegoù sellout."
+    Clear Watch Statistics Confirmation: "Dilemel an holl stadegoù sellout?"
+    Watch Statistics Effect: "Dilamet e vo an holladoù sellout bemdeziek. Chom a raio an istor sellout."
+    Search History: "Istor enklask"
+    Search History Description: "Kadaviñ a ra an enklaskoù ho peus dibabet derc'hel soñj anezho."
+    Delete Search History: "Dilemel an istor enklask"
+    Delete Search History Confirmation: "Dilemel an holl istor enklask enrollet?"
+    Search History Effect: "Aet e vo kuit an alioù enklask enrollet diwar hoc'h enklaskoù kent. Chom a raio krubuilh an estez vremanel."
+    Other User Data: "Roadennoù implijer all"
+    Other Profile Files: "Restroù profil all"
+    Other Profile Files Hint: "Eiladennoù-gwarediñ, restroù padennek hag elfennoù profil na anavez ket OpenTubeX c'hoazh."
+    Subscriptions And Profiles: "Koumanantoù ha profiloù"
+    Subscriptions And Profiles Description: "Kadaviñ a ra ar chadennoù koumanantet, anvioù ar profiloù hag izili ar profiloù."
+    Subscriptions And Profiles Effect: "Dilamet e vo da viken an holl goumanantoù hag ar profiloù ouzhpenn. Skarzhet e vo ivez roadennoù krubuilh ar gwazhioù."
+    Playlists Description: "Kadaviñ a ra anvioù ha deskrivadurioù ar rolloù-videoioù hag ar videoioù enrollet."
+    Playlists Effect: "Dilamet e vo da viken pep roll-videoioù hag e roll videoioù enrollet. Chom a raio ar restroù media pellgarget."
+    Settings And Sessions: "Arventennoù, estezioù ivinelloù ha kounadurioù"
+    Settings And Sessions Description: "Kadaviñ a ra gwellvezioù an arload, an ivinelloù adlakaadus ha kounadurioù ar skignadoù war-eeun. Digerit teuliad ar profil evit ensellet pe warediñ ar restroù-mañ; ne vezont ket dilamet gant ar bajenn-mañ."
+    Cleanup Complete: "Echu eo naetaat ar c'hadaviñ"
+    Cleanup Failed: "C'hwitet eo naetaat ar c'hadaviñ"
+  Subscription Settings:
+    Fetch Feed on Startup: "Adtapout ar gwazh el loc'hañ"
+    Show New Content Feed: "Diskouez gwazh an endalc'had nevez"
+    RSS Feeds: Gwazhioù RSS
+    Enable RSS Feeds: Gweredekaat ar gwazhioù RSS evit savennoù all
+    Manage RSS Feeds: Merañ ar gwazhioù RSS
+    Show New Content Indicators: "Diskouez merkerioù an endalc'had nevez"
+    Show Scheduled Live Streams / Premieres First: "Diskouez ar skignadoù war-eeun hag ar c'hentañ skignadennoù rakluniet da gentañ"
+    Auto Refresh Interval: "Etrevez adkargañ emgefreek"
+    Videos Auto Refresh Interval: "Etrevez adkargañ emgefreek ar videoioù"
+    Shorts Auto Refresh Interval: "Etrevez adkargañ emgefreek ar videoioù berr (Shorts)"
+    Live Auto Refresh Interval: "Etrevez adkargañ emgefreek ar skignadoù war-eeun"
+    Posts Auto Refresh Interval: "Etrevez adkargañ emgefreek ar pennadoù"
+    Refresh Subscriptions While App Is Closed: "Freskañ ar c'houmanantoù pa vez serret an arload"
+    Notify About New Uploads: Rebuadiñ diwar-benn an endalc'had nevez
+    RSS Feeds Auto Refresh Interval: Etrevez adkargañ emgefreek ar gwazhioù RSS
+    Faster Subscription Refresh: "Freskaat ar c'houmanantoù buanoc'h"
+    Platforms:
+      Other Platforms: Savennoù all
+      Manage Channels: Merañ ar chadennoù heuliet
+      Notify When Live: Kemenn pa grog ar chadennoù Twitch heuliet da skignañ war-eeun
+      Auto Refresh Interval: Etrevez adkargañ emgefreek ar savennoù all
+  Distraction Free Settings:
+    Digital Wellbeing:
+      Count Watch Time From: "Kontañ an amzer sellet diwar"
+      Break Reminder Action: "Pa vez poent ober un ehan"
+      Grayscale: "Arlivioù louet"
+      Apply Grayscale To: "Lakaat an arlivioù louet war"
+      Off: "Lazhet"
+      Always: "Atav"
+      During Bedtime: "Da vare kousket"
+      After the Daily Limit: "Goude ar vevenn bemdeziek"
+      Whole App: "An arload a-bezh"
+      Videos and Images: "Videoioù ha skeudennoù"
+      Daily Watch Time Limit: "Bevenn bemdeziek an amzer sellet"
+      Daily Shorts Limit: "Bevenn bemdeziek ar Shorts"
+      When a Limit Is Reached: "Pa vez tizhet ur vevenn"
+      Remind Me: "Degas da soñj din"
+      Pause Playback: "Ehanañ al lenn"
+      Take a Break Reminder: "Kounadur evit ober un ehan"
+      Every: "Bep {duration}"
+      Bedtime Reminder: "Kounadur mare kousket"
+      Bedtime Start: "Deroù mare kousket"
+      Bedtime End: "Fin mare kousket"
+      Wait Until the Video Ends: "Gortoz fin ar video"
+      Silence Upload Notifications at Bedtime: "Mudañ ar rebuzadurioù a endalc'had nevez da vare kousket"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Paouez al lenn emgefreek da vare kousket ha goude ar vevenn bemdeziek"
+    Hide Popularity Graph: "Kuzhat ar graf poblegezh"
+    Enable Block Lists: "Gweredekaat ar rolloù stankañ"
+    AI Video Summaries: Diverradennoù video an IA
+    Hide: Kuzhat
+    Collapsed: Serret
+    Expanded: Digoret
+    Video Descriptions: Deskrivadurioù ar videoioù
+    Video Description Modes:
+      Hide: Kuzhat
+      Collapsed: Serret
+      Expanded: Digoret
+    Playing Interface Hide Delay: Dale kuzhat an etrefas e-pad al lenn
+    Hide Startup Splash: Kuzhat ar skramm locʼhañ
+    Hide Header Sync Indicator: Kuzhat meneger ar sinkronelaat e talbenn an arload
+    Hide Repeat Stats: Kuzhat stadegoù an adlenn
+    Hide Playlist Stats: Kuzhat stadegoù ar roll-lenn
+    Sections:
+      Digital Wellbeing: "Yec'hed niverel"
+      Visible While Paused: "Gwelus e-pad un ehan er prenestr leun pe er skramm leun"
+    Hide Channel Avatars: "Kuzhat skeudennoù ar chadennoù"
+    Shorten View Counts: "Berraat niver ar selladennoù, evezhiadennoù ha plijadennoù an evezhiadennoù"
+    Hide Home: "Kuzhat ar bajenn degemer"
+    Hide Live Chat Replay: "Kuzhat adlenn ar flapañ war-eeun"
+    Disable A-B Repeat: "Diweredekaat an adlenn A-B"
+    Hide End-Screen Annotations: "Kuzhat notennoù ar skramm echuiñ"
+    Hide End-Screen Recommendations: "Kuzhat erbedadennoù ar skramm echuiñ"
+    Hide Paid Promotion Badge: "Kuzhat ar badj bruderezh paeet"
+    Show Player Controls: "Diskouez reolerezhioù al lenner"
+    Show Video Title: "Diskouez titl ar video"
+    Show Bottom Right Actions Dock: "Diskouez kael an oberoù en traoñ a-zehou"
+    Paused Interface Hide Delay: "Dale a-raok kuzhat an etrefas en ehan"
+    Blur Blocked Items: Lakaat an elfennoù stanket da vezañ dispis e-lec'h o kuzhat
+    More Items Count: "+{count} ouzhpenn…"
+  Data Settings:
+    Settings could not be imported: "N'eus ket bet gallet enporzhiañ an arventennoù"
+    Some settings could not be imported: "N'eus ket bet gallet enporzhiañ an holl arventennoù ({failed} diwar {total} c'hwitet)"
+    Scheduled backups: "Eiladennoù gwareziñ steuñvet"
+    Scheduled backup description: "Enrollañ eiladennoù ZIP klok pa vez OpenTubeX digor. An eiladennoù manket a vez graet d’ar loc’hañ. An harz a dalvez evit an eiladennoù steuñvet en teuliad-mañ hepken."
+    Choose backup folder: "Dibab teuliad ar gwareziñ"
+    No backup folder selected: "Teuliad gwareziñ ebet dibabet"
+    Enable scheduled backups: "Gweredekaat ar gwareziñ steuñvet"
+    Backup frequency: "Stankted ar gwareziñ"
+    Backups to keep: "Niver a eiladennoù da virout"
+    Daily: "Bemdez"
+    Weekly: "Bep sizhun"
+    Every 30 days: "Bep 30 deiz"
+    Last scheduled backup: "Eiladenn steuñvet ziwezhañ: {date}"
+    No scheduled backup yet: "Eiladenn steuñvet ebet c’hoazh"
+    Scheduled backup failed: "C’hwitet eo ar gwareziñ. Gwiriit e c’haller skrivañ en teuliad. Klasket e vo adarre a-benn pemp munut."
+    Import Preview:
+      Title: Rakwel ar cʼhemmoù
+      New: "Nevez: {count}"
+      Existing: "A zo anezho: {count}"
+      Skipped: "Laosket a-gostez: {count}"
+      Unreadable files: "Restroù dilennus: {count}"
+      Settings effect: Arventennoù a glot a vez erlecʼhiet. Arventennoù prevez ha dianav a vez laosket a-gostez.
+      Details effect: Ar cʼhoumanantoù pe videoioù a zo anezho a vez miret. Munudoù ar profil pe roll-lenn enporzhiet a erlecʼh ar munudoù bremañ.
+      Merge effect: Ar roadennoù a zo anezho a vez miret ha kendeuzet gant an enrolladennoù a glot.
+      Subscriptions effect: Ar cʼhoumanantoù a zo anezho a vez miret. Chadennoù nevez hepken a vez ouzhpennet.
+      History merge effect: Ar videoioù a glot a vez kendeuzet gant hocʼh istor, en ur virout ar munudoù enrollet hag an deiziad sellet diwezhañ. An istor all a vez miret.
+    Select export data: "Dibabit ar roadennoù da ezporzhiañ"
+    Export selected data: "Ezporzhiañ ar roadennoù dibabet"
+    Complete backup: "Gwareziñ klok"
+    Import backup: "Enporzhiañ gwareziñ"
+    Export backup: "Ezporzhiañ gwareziñ"
+    Backup description: "Enrollañ ar profiloù, ar rolloù-c'hoari, an istor, ar stadegoù hag an arventennoù treuzkas en ur restr ZIP. Gant an enporzhiañ e vez kendeuzet anezho gant roadennoù a zo dija war an dafariad-mañ."
+    Select backup data: "Dibabit ar roadennoù da enporzhiañ"
+    Profiles and subscriptions: "Profiloù ha koumanantoù"
+    Backup exported: "Ezporzhiet eo bet an enrolladenn gant berzh"
+    Backup imported: "Enporzhiet eo bet an enrolladenn gant berzh"
+    Import YouTube Takeout ZIP: "Enporzhiañ ZIP YouTube Takeout"
+    Select Takeout data: "Diuzañ ar roadennoù da enporzhiañ"
+    Import selected data: "Enporzhiañ ar roadennoù diuzet"
+    No supported Takeout data: "N’eus bet kavet roadenn YouTube skoret ebet er ZIP-mañ."
+    Data And Storage: "Roadennoù ha kadaviñ"
+    Profile Directory: "Teuliad ar profil"
+    Open Profile Directory: "Digeriñ teuliad ar profil"
+    Invalid JSON row, skipping item: "JSON didalvoudek war al linenn {row}; lezet eo an elfenn a-gostez"
+    Import subscriptions formats: "Mentrezhioù skoret: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), gwaredadenn LibreTube pe ezporzhadenn FreeTube (.json)"
+    Import history formats: "Mentrezhioù skoret: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), gwaredadenn LibreTube (.json)"
+    Import playlists formats: "Mentrezhioù skoret: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)"
+    Import search history formats: "Mentrezhioù skoret: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)"
+    Channel playback speeds: "Tizhoù lenn ar chadennoù"
+    Import channel playback speeds: "Enporzhiañ tizhoù lenn ar chadennoù"
+    Channel playback speeds file: "Restr tizhoù lenn ar chadennoù"
+    Import channel playback speeds formats: "Mentrezhioù skoret: stokadur ar skript implijer {script} (.json)"
+    Invalid channel playback speeds file: "N'eus bet kavet tizh lenn chadenn ebet er restr-mañ"
+    Channel playback speeds imported: "Enporzhiet eo bet tizh lenn {count} chadenn | Enporzhiet eo bet tizhoù lenn {count} chadenn | Enporzhiet eo bet tizhoù lenn {count} chadenn | Enporzhiet eo bet tizhoù lenn {count} chadenn | Enporzhiet eo bet tizhoù lenn {count} chadenn"
+    Channels not found: "N'eus ket bet gallet kavout {count} chadenn | N'eus ket bet gallet kavout {count} chadenn | N'eus ket bet gallet kavout {count} chadenn | N'eus ket bet gallet kavout {count} chadenn | N'eus ket bet gallet kavout {count} chadenn"
+    Playlists have been successfully imported: "{count}/{total} roll-lenn enporzhiet gant berzh | {count}/{total} roll-lenn enporzhiet gant berzh | {count}/{total} roll-lenn enporzhiet gant berzh | {count}/{total} roll-lenn enporzhiet gant berzh | {count}/{total} roll-lenn enporzhiet gant berzh"
+  Sync Settings:
+    Signed Out After Restore: 'Digennasket eo bet ar goubredañ peogwir eo bet assavet roadennoù an arload-mañ eus un enrolladenn gwarez pe eus ur benveg all. Kevreit en-dro evit goubredañ ar benveg-mañ.'
+    Revoke Session Tabs Warning: "Holladoù ivinelloù sinkronizet an trevnad-mañ a vo diverket ivez."
+    Revoke Session Partial Failure: "Dilamet eo bet ar strolladoù ivinelloù goubredet, met n'eo ket bet kadarnaet torriñ ar moned. Klaskit en-dro torriñ ar moned."
+    Tab Sync Revocation Pending: "Ehanet eo kenempunañ an ivinelloù e-pad ma c’hortoz tennadur aotre ar c’hennask-mañ. Klaskit adarre tennadur an aotre en Arventennoù kenempunañ."
+    Show More: "Diskouez muioc'h"
+    Sync Automatically: "Goubredañ ent emgefreek"
+    Activity: "Obererezh ar gont"
+    No Activity: "Obererezh nevez ebet"
+    Clear Activity: "Diverkañ war an trevnad-mañ"
+    Clear Activity Hint: "Kuzhat obererezh ar gont a zo dija war an trevnad-mañ. Obererezh ar servijer hag an trevnadoù all a chom digemm. An obererezh nevez a vo diskouezet c’hoazh."
+    Setting Changed: "Kemmet eo bet {setting} da {value} gant {device}"
+    Item Updated: "Hizivaet eo bet {setting} gant {device}"
+    Item Added: "Ouzhpennet en deus {device} {item} da {setting}"
+    Item Removed: "Tennet en deus {device} {item} eus {setting}"
+    Item Renamed: "Adenvet en deus {device} {item} da {value}"
+    Saved Playlists: "Rolloù-lenn enrollet"
+    No Feed Types: "Hini ebet"
+    Open On Device: "Digeriñ war un trevnad all"
+    Video Sent: "Kaset eo bet ar video. An trevnadoù ezlinenn a resevo anezhañ pa gevreint en-dro a-benn 24 eur."
+    Video Received: "Video resevet: {title}"
+    Previous Auto Sync Notice: "Diweredekaet eo ar c'hengerc'hañ emgefreek. Ur stumm koshoc'h en deus marteze e ziweredekaet evit mirout ouzh koll roadennoù."
+    Enable Automatic Sync: "Gweredekaat ar c'hengerc'hañ emgefreek"
+    Destructive Sync Blocked: "Paouezet eo bet ar goubredañ evit mirout ouzh koll roadennoù. Diweredekaet eo ar c'houbredañ emgefreek. Digorit arventennoù ar c'houbredañ evit gwiriañ an dilamadurioù."
+    Devices: "Trobarzhelloù"
+    Devices Hint: "Gwiriañ an trobarzhelloù a c’hall haeziñ ar gont sinkronelaat-mañ."
+    Change Password: "Cheñch ar ger-tremen"
+    Refresh Devices: "Freskaat an trobarzhelloù"
+    Current Device: "Trobarzhell bremañ"
+    Revoke Session: "Tennañ an haeziñ"
+    Session Created: "Krouet"
+    Last Active: "Obererezh diwezhañ"
+    Session Expires: "A echu"
+    Unknown Device: "Trobarzhell dianav"
+    Operating System: "Reizhiad korvoiñ"
+    Rename Device: "Adenvel an trevnad"
+    Save Device Name: "Enrollañ an anv"
+    Device Name Invalid: "Anvioù an trevnadoù a c'hall kaout betek 80 arouezenn ha ne c'hallont ket kaout arouezennoù reoliñ."
+    Device Renamed: "Trevnad adanvet"
+    Revoke Session Confirmation: "Tennañ an estez-mañ?"
+    Revoke Current Session Warning: "Tennañ an estez-mañ a ziskonektay an trobarzhell-mañ diouzh ar gont sinkronelaat."
+    Revoke Session Warning: "Kollet e vo an haeziñ d’ar gont sinkronelaat-mañ gant {device}."
+    Confirm Revoke Session: "Tennañ an estez"
+    Session Revoked: "Estez tennet"
+    Change Password Warning: "Cheñch ho ker-tremen a ziskonektay an holl drobarzhelloù all. Chom a raio an trobarzhell-mañ kevreet."
+    Current Password: "Ger-tremen bremañ"
+    New Password: "Ger-tremen nevez"
+    Confirm New Password: "Kadarnaat ar ger-tremen nevez"
+    Save New Password: "Enrollañ ar ger-tremen nevez"
+    Account Management Failed: "N’haller ket kargañ munudoù ar gont sinkronelaat."
+    All Password Fields Required: "Leugnit an holl vaeziennoù ger-tremen."
+    New Password Too Short: "An ger-tremen nevez a rank kaout 8 arouezenn da nebeutañ."
+    New Passwords Do Not Match: "Ne glot ket ar gerioù-tremen nevez."
+    Password Changed: "Ger-tremen cheñchet. Diskonektet eo bet an trobarzhelloù all."
+    Sync Settings: "Goubredañ"
+    Watch stats: "Stadegoù sellet"
+    Enable Sync: "Gweredekaat ar goubredañ"
+    Privacy Passphrase: "Lavarenn-dremen brevezded"
+    Privacy Passphrase Hint: "Implijit ul lavarenn-dremen disheñvel diouzh ger-tremen ho kont. Ne guita morse an trevnad-mañ ha rekis eo war bep trevnad; ma kollit anezhi ne c'hallo ket ar roadennoù goubredañ sifret bezañ adtapet."
+    Privacy Policy: "Reolenn brevezded ar servijer-mañ"
+    Enhanced Privacy Enabled: "Gweredekaet eo ar prevezded kreñvaet. Roadennoù goubredañ sifret hepken a vez kadavet gant ar servijer."
+    Enhanced Privacy Unsupported: "Diwallit: ar servijer-mañ ne skor ket ar prevezded kreñvaet. Gallout a ra e verour gwelet ar roadennoù goubredet."
+    Description: 'Goubredit ar c’houmanantoù, ar profiloù, ar rolloù-lenn, istor ar selladennoù hag an arventennoù skoret gant ur servijer goubredañ OpenTubeX pe LibreTube. Marteze ne skor ket servijerioù LibreTube an holl arc’hwelioù goubredañ.'
+    Server URL: URL ar servijer goubredañ
+    Checking Server: "O wiriañ ar servijer goubredañ…"
+    Server Unavailable: "N'eus ket bet gallet kennaskañ ouzh ar servijer goubredañ-mañ. Gwiriit an URL ha klaskit en-dro."
+    Username: "Anv implijer"
+    Log In: "Kennaskañ"
+    Register: "En em enskrivañ"
+    Pair Another Device: "Parañ un trevnad all"
+    Pair With Existing Device: "Parañ gant un trevnad a zo anezhañ dija"
+    Device Name: "Anv an trevnad"
+    This Device: "An trevnad-mañ"
+    Device Name Required: "Lakait un anv evit an trevnad-mañ."
+    Pairing Device Name Hint: "Dibabit un anv a anavezot war an trevnad a asanto an azgoulenn-mañ."
+    Create Pairing Code: "Krouiñ ur c'hod parañ"
+    Creating Pairing Code: "O krouiñ ur c'hod parañ diogel…"
+    Pairing QR Alt: "Kod QR parañ evit {device}"
+    Scan Pairing Code: "War un trevnad kennasket dija, digerit «Parañ un trevnad all» ha c'hwilervit ar c'hod-mañ."
+    Pairing Code: "Kod parañ"
+    Use Text Pairing Code: "Implijout ur c'hod testenn en e lec'h"
+    Show QR Code: "Diskouez ar c'hod QR"
+    Text Pairing Code Hint: "Eilit ar c'hod-mañ war an trevnad a zo anezhañ dija. Enderc'hel a ra ar sekred parañ, setu skarzhañ anezhañ eus istor ar golver goude ar parañ."
+    Pairing QR Warning: "Na ziskouezit ar c'hod-mañ nemet d'an trevnad fiziet, kennasket dija, a asanto an azgoulenn-mañ. Diamzeret e vo goude div vunutenn."
+    Pairing Expires: "Diamzeret e vo ar c'hod parañ da {time}."
+    Verifying Pairing: "O wiriañ an alc'hwez prevezded treuzkaset…"
+    Completing Pairing: "Oc'h echuiñ parañ an trevnad…"
+    Compare Pairing Codes: "Keñveriañ ar c'hodoù parañ"
+    Pairing Code Match Hint: "Kadarnait hepken ma klot ar c'hod-mañ gant ar c'hod war an trevnad a zo ganeoc'h dija."
+    Pairing Codes Match: "Ar c'hodoù a glot"
+    Pairing Approval Code Hint: "Laoskit ar prenestr-mañ digor ha keñveriit ar c'hod-mañ gant an trevnad nevez. An trevnad nevez ne rank ket kenderc'hel ma ne glot ket ar c'hodoù."
+    Pairing Scan Hint: "C'hwilervit ar c'hod parañ diskouezet war an trevnad emaoc'h oc'h ouzhpennañ."
+    Enter Pairing Code: "Lakait ar c'hod gant an dorn"
+    Pairing Code Entry Hint: "Pegit ar c'hod parañ diskouezet war an trevnad emaoc'h oc'h ouzhpennañ."
+    Check Pairing Code: "Gwiriañ ar c'hod"
+    Scan QR Code: "C'hwilerviñ ur c'hod QR"
+    Waiting For Pairing Code: "O c'hortoz ur c'hod parañ…"
+    Checking Pairing Request: "O wiriañ an azgoulenn parañ…"
+    Approving Pairing Request: "O sifrañ hag o kas an alc'hwez prevezded…"
+    Pairing Approval Warning: "Na asantit nemet ma welit an azgoulenn-mañ war an trevnad emaoc'h oc'h ouzhpennañ. Ar parañ a ro haeziñ d'ar gont hag a dreuzkas an alc'hwez prevezded."
+    Approve Pairing: "Asantiñ ar parañ"
+    Try Again: "Klask en-dro"
+    Scan Again: "C'hwilerviñ en-dro"
+    Camera Unavailable: "N'eus ket bet gallet da OpenTubeX haeziñ ur c'hamera. Gwiriit an aotre kamera pe lakait ar c'hod parañ gant an dorn."
+    Pairing Unsupported: "Ar servijer goubredañ-mañ ne skor ket parañ diogel an trevnadoù."
+    Pairing Failed: "C'hwitet eo parañ an trevnad. Klaskit en-dro gant ur c'hod nevez."
+    Pairing Request Changed: "Kemmet pe diamzeret eo an azgoulenn parañ, pe implijet eo bet dija. Krouit ur c'hod nevez."
+    Pairing Server Mismatch: "D'ur servijer goubredañ all eo ar c'hod-mañ."
+    Pairing Verification Unavailable: "N'eus dastumad goubredañ sifret ebet evit gwiriañ an alc'hwez treuzkaset. Goubredañ an trevnad a zo ganeoc'h dija, ha klaskit en-dro."
+    Pairing Completed: "Echu eo parañ an trevnad"
+    Pairing Approved: "Asantet eo bet parañ an trevnad"
+    Use Pairing Invite: "Implijout ar c'hod eus an trevnad kennasket"
+    Show Pairing Invite: "Diskouez ar c'hod parañ"
+    Scan Pairing Invite: "War an trevnad emaoc'h oc'h ouzhpennañ, digerit «Parañ gant un trevnad a zo anezhañ dija», dibabit «Implijout ar c'hod eus an trevnad kennasket» ha c'hwilervit ar c'hod-mañ."
+    Pairing Invite QR Alt: "Kod QR parañ evit an trevnad emaoc'h oc'h ouzhpennañ"
+    Pairing Invite Text Hint: "Eilit ar c'hod-mañ war an trevnad emaoc'h oc'h ouzhpennañ. Gant ar c'hod-mañ e c'hall un trevnad goulenn haeziñ d'ho kont, setu skarzhit anezhañ eus istor ar golver goude ar parañ."
+    Pairing Invite Warning: "Na ziskouezit ar c'hod-mañ nemet d'an trevnad emaoc'h oc'h ouzhpennañ. Ret e vo deoc'h asantiñ e azgoulenn war an trevnad-mañ c'hoazh."
+    Pairing Invite Scan Hint: "C'hwilervit ar c'hod parañ diskouezet war ho trevnad kennasket."
+    Pairing Invite Entry Hint: "Pegit ar c'hod parañ diskouezet war ho trevnad kennasket."
+    Pairing Invite Code Hint: "Na asantit an azgoulenn war ho trevnad kennasket nemet ma tiskouez ar c'hod-mañ. Goude-se e vo echuet ar parañ ent emgefreek."
+    Pairing Invite Approval Hint: "Na asantit nemet ma tiskouez an trevnad emaoc'h oc'h ouzhpennañ ar c'hod-mañ."
+    Pairing Invite Approved: "Asantet eo ar parañ. Echuiñ a raio an trevnad nevez ar parañ ent emgefreek."
+    Disconnect: "Digennaskañ"
+    Delete Account: "Dilemel ar gont goubredañ"
+    Delete Account Confirmation: "Dilemel ar gont goubredañ?"
+    Delete Account Warning: "Dilemel a ra da viken ho kont goubredañ hag an holl roadennoù kadavet war ar servijer-mañ. Ne vo ket dilamet roadennoù lec'hel OpenTubeX."
+    Confirm Delete Account: "Dilemel ar gont"
+    Password Required: "Rekis eo ar ger-tremen"
+    Account Deleted: "Dilamet eo bet ar gont goubredañ"
+    Connected as: "Kennasket evel {username}"
+    Profiles: "Profiloù"
+    Open Tabs: "Ivinelloù digor hag estez"
+    Disable Setting Sync: "Paouez da c'houbredañ an arventenn-mañ"
+    Enable Setting Sync: "Goubredañ an arventenn-mañ"
+    Sync Now: "Goubredañ bremañ"
+    Downloading encrypted data: "O pellgargañ ar roadennoù goubredañ sifret…"
+    Syncing subscriptions: "O c'houbredañ ar c'houmanantoù…"
+    Syncing playlists: "O c'houbredañ ar rolloù-videoioù…"
+    Syncing history: "O c'houbredañ an istor sellout…"
+    Syncing statistics: "O c'houbredañ ar stadegoù…"
+    Syncing profiles: "O c'houbredañ ar profiloù…"
+    Syncing open tabs: "O c'houbredañ an ivinelloù digor hag an estez…"
+    Syncing settings: "O c'houbredañ an arventennoù…"
+    Uploading encrypted data: "Oc'h enporzhiañ ar roadennoù goubredañ sifret…"
+    Finishing sync: "Oc'h echuiñ ar goubredañ…"
+    Sync progress percentage: '{percentage}%'
+    Last synced: "Goubredañ diwezhañ: {date}"
+    History not supported: "Stumm ar servijer-mañ ne skor ket goubredañ an istor sellout."
+    Settings not supported: "Stumm ar servijer-mañ ne skor ket goubredañ an arventennoù."
+    Sync completed: "Echu eo ar goubredañ"
+    Sync failed: "C'hwitet eo ar goubredañ: {error}"
+    Data Loss Confirmation: "Kadarnaat ar goubredañ distrujus?"
+    Data Loss Warning: "Ar goubredañ a zilamfe {deleted} diwar {previous} elfenn bet goubredet a-raok e «{collection}» war an holl drevnadoù. Ma n'ho peus ket dilamet anezho, da skouer peogwir eo bet adderaouekaet ar servijer, mirit anezho evit o adsevel e pep lec'h."
+    Keep Deleted Items: "Mirout an elfennoù"
+    Confirm Data Loss: "Dilemel ha kenderc'hel"
+    Use Shared Tabs: 'Arverañ an hevelep strollad ivinelloù war an holl drevnadoù'
+    Shared Tabs Warning: 'An ivinelloù digor war an trevnad-mañ a zeu da vezañ an hollad rannet. Pa vez sinkronet an trevnadoù all, e vez erlec’hiet o ivinelloù digor gant an hollad-se; ne vez ket kendeuzet ivinelloù an trevnadoù disheñvel.'
+    Tabs From Other Devices: 'Ivinelloù eus trevnadoù all'
+    Mobile Device: 'Pellgomzer'
+    Desktop Device: 'Urzhiataer'
+    Open All Tabs: 'Digeriñ an holl ivinelloù'
+    Open All Tabs Confirmation: "Digeriñ an holl ivinelloù?"
+    Server Update Required: "Hizivait ar servijer-mañ evit ma vo skoret ar c’henamzeriañ sifret en amzer wir."
+    Log In with Provider: 'Kevreañ gant {provider}'
+    Log In with Single Sign-On: 'Kevreañ gant an anaouadur unel'
+    Continue in Browser: 'Kendalc''hit en ho merdeer. OpenTubeX a gendalc''ho pa vo echu ganeoc''h.'
+    Connected with Single Sign-On: 'Kevreet gant an anaouadur unel'
+    Delete Single Sign-On Account Hint: 'Digoret e vo ho merdeer evit ma kadarnafec''h an dilemel gant ho pourchaser kevreañ.'
+  Proxy Settings:
+    IP Block Recovery Script Path: Skript adtapout goude ur stankadur IP
+    Running IP block recovery script: "Oc'h erounit ar skript adtapout goude ur stankadur IP"
+    IP block recovery script failed: "C'hwitet eo ar skript adtapout goude ur stankadur IP (kod ermaeziañ: {exitCode})"
+    IP block recovery script finished: "Echu eo ar skript adtapout goude ur stankadur IP"
+    Reloading video after IP block recovery: "Oc'h adkargañ ar video goude an adtapout diwar ur stankadur IP"
+    Failed to select IP block recovery script: "N'eus ket bet gallet dibab ar skript adtapout goude ur stankadur IP"
+  SponsorBlock Settings:
+    Enable SponsorBlock Submission: "Gweredekaat ar c'hasadennoù da SponsorBlock"
+    SponsorBlock Private User ID (optional): ID prevez an implijer (diret)
+    SponsorBlock Private User ID Tooltip: "Pegit an naoudi implijer prevez SponsorBlock eus askouezh ar merdeer. Laoskit goullo evit implijout un naoudi krouet gant an arload."
+    Generated SponsorBlock User ID: "Naoudi implijer SponsorBlock krouet"
+    Generated SponsorBlock User ID Tooltip: "Gallout a reer implijout an naoudi implijer SponsorBlock krouet gant an arload en askouezh ar merdeer pe pa vez implijet an arload war un urzhiataer all."
+    Reveal Generated User ID: Diskouez an naoudi implijer krouet
+    Generated SponsorBlock User ID Copy Button: "Eilañ an naoudi implijer SponsorBlock krouet"
+    Generated SponsorBlock User ID Copied: "Eilet eo bet an naoudi implijer SponsorBlock krouet er golver"
+    Skip notification timeout: "Padelezh rebuad al lamm"
+    Custom Color: "Liv personelaet"
+    DeArrow Settings: DeArrow
+    Always Show DeArrow Badge: Diskouez atav ar badj DeArrow
+  Return YouTube Dislike Settings:
+    Return YouTube Dislike Settings: Return YouTube Dislike
+    Enable Return YouTube Dislike: "Gweredekaat Return YouTube Dislike"
+    Return YouTube Dislike Url: URL an API
+  Password Dialog:
+    Incorrect Password: "Ger-tremen direizh"
+    Unlock: "Dibrennañ"
+    Unlocking: "O tibrennañ…"
+  Search Settings: "Klask en arventennoù"
+  No Settings Found: "N'eus bet kavet arventenn ebet"
+  Interface Customizer:
+    Customize Interface: "Personelaat an etrefas"
+    Preview: "Rakwel"
+    Player: "Lenner"
+    Desktop: "Burev"
+    Mobile: "Hezoug"
+    Playing: "O lenn"
+    Player Menu: "Lañser al lenner"
+    Fullscreen: "Skramm a-bezh"
+    Paused: "Ehanet"
+    Controls: "Kontrolloù"
+    Example Video Title: "Video skouer"
+    Resolution: "Spisder"
+    Loop: "Adlenn"
+    Off: "Lazhet"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Kuzhat ar chadennoù gant danvez izel krouet gant an IA
+    Hide AI Slop Channels Tooltip: Kuzhat a ra ar chadennoù zo war roll-stankañ AiSList meret gant ar gumuniezh (aisloplist.com) en disoc'hoù klask, an traoù diouzh ar c'hiz hag ar c'hinnigoù, hag ouzhpennañ a ra ur skritellig d'ar videoioù eus ar chadennoù zo war e roll-diwall. N'eo ket tizhet ar c'houmanantoù. Pellgarget e vez ar rolloù diwar GitHub ur wech bemdez ha ne dalvezont nemet evit an disoc'hoù karget gant an API lec'hel.
+    Downloading: O pellgargañ ar rolloù…
+    Failed to Download: N'eus ket bet gallet pellgargañ ar rolloù
+    Loaded Status: "Chadennoù stanket: {blocked} · Chadennoù merket: {warned} · Hizivaet: {date}"
+Tutorial:
+  Skip: "Lammat"
+  Next: "War-lerc'h"
+  Finish: "Echuiñ"
+  Welcome:
+    Title: "Degemer mat e OpenTubeX"
+    Description: Kregit a-nevez, pe degasit ho koumanantoù, ho roll istor hag ho rolloù-videoioù eus un arload all pe eus un eilenn gwarez.
+    Start Fresh: Kregiñ a-nevez
+    Import Data: "Enporzhiañ roadennoù"
+  Preferences:
+    Title: "Personelait an arload"
+    Description: Dibabit ho tem, ho pajenn degemer hag ho rannvro. Gallout a rit cheñch an dra-se ha kalz muioc'h en arventennoù forzh pegoulz.
+  Playback:
+    Title: Lenn ha prevezded
+    Description: Dibabit penaos e vez lennet ar videoioù, hag-eñ e talc'h OpenTubeX soñj eus ar pezh a sellit outañ, ha peseurt askouezhioù ar gumuniezh a implij.
+  Navigation:
+    Title: "Ho levraoueg zo atav tost"
+    Description: "Implijit ar merdeiñ evit mont d'ar c'houmanantoù, d'ar rolloù-videoioù, d'an istor ha d'ar peurrest."
+  Search:
+    Title: "Klask pe begañ ul liamm"
+    Description: "Kavit videoioù ha chadennoù, pe begit URL ur video skoret er vaezienn glask."
+  Tabs:
+    Title: "Derc'hel pajennoù digor en ivinelloù"
+    Description: Digorit meur a bajenn war un dro hep koll ho lec’h.
+  Profile Menu:
+    Title: Arventennoù ha profiloù
+    Description: E lañser ho profil e kavit an arventennoù prim, ar pellgargadennoù hag an holl arventennoù all. Klikit a-zehou warnañ evit cheñch profil.
+    Touch Description: E lañser ho profil e kavit an arventennoù prim, ar pellgargadennoù hag an holl arventennoù all. Pouezit ha dalc’hit warnañ evit cheñch profil.
+About:
+  Project: Raktres
+  Community: Kumuniezh
+  Contribute: Kenlabourat
+  Documentation: Teuliadur
+  Downloads: Pellgargañ
+  Changelog: Deizlevr ar cheñchamantoù
+  Commit: "Engouestl"
+  Matrix: Matrix
+  Email: "Postel"
+  Show tutorial: Diskouez ar c’helenn
+Profile:
+  Customization: Personelaat
+  Manage Profile Subscriptions: Merañ koumanantoù ar profil
+  Icon Names:
+    Person: Den
+    People: Tud
+    Headphones: Selaouelloù
+    Gaming: Cʼhoarioù
+    Film: Film
+    Art: Arz
+    Science: Skiant
+    Globe: Boul douar
+    Heart: Kalon
+    Sun: Heol
+    Moon: Loar
+    Trophy: Trofell
+  Profile Icon: "Arlun ar profil"
+  Choose an Emoji: "Dibab un emoji"
+  Custom Emoji: "Emoji personelaet"
+  Choose Image: "Dibab ur skeudenn"
+  Crop Image: "Didroc'hañ ar skeudenn"
+  Zoom: "Zoum"
+  Apply Crop: "Arloañ an didroc'hadenn"
+  Transparent: "Treuzwelus"
+  Use Initial: "Implijout al lizherenn gentañ"
+  The selected image could not be loaded: "N'eus ket bet gallet kargañ ar skeudenn diuzet"
+  Theme Color: "Liv an neuz"
+Channel:
+  Hide Watched: Kuzhat ar re sellet
+  Fewer videos per day: "Nebeutoc’h a videoioù dre zevezh"
+  More videos per day: "Muioc’h a videoioù dre zevezh"
+  Verified: Gwiriet
+  Official Artist Channel: Chadenn ofisiel an arzour
+  Subscription settings: Arventennoù ar c'houmanant
+  Failed to save subscription settings: N'eus ket bet gallet enrollañ arventennoù ar chadenn
+  Videos per day: Videoioù dre zevezh
+  Use global setting: Ober gant an arventenn hollek
+  Unlimited: Didermen
+  More videos hidden: '+{count} ouzhpenn | +{count} ouzhpenn | +{count} ouzhpenn | +{count} ouzhpenn | +{count} ouzhpenn'
+  Show in subscription feed: Diskouez el lanv koumanantoù
+  Notify about new uploads: Rebuadiñ diwar-benn an endalc'had nevez
+  Show members-only videos: Diskouez ar videoioù evit an izili hepken
+  Upload Notifications On: "Rebuzet e vo diwar-benn an endalc'had nevez eus {channelName} pa vo freskaet ho koumanantoù"
+  Upload Notifications Off: "Ne vo ket rebuzet diwar-benn an endalc'had nevez eus {channelName}"
+  Upload Notifications Disabled In Settings: "Gweredekaet eo ar rebuzadurioù evit {channelName}, met diweredekaet eo ar rebuzadurioù endalc'had nevez en ho arventennoù"
+  Turn On Upload Notifications: "Gweredekaat"
+  Channel Name Unavailable: "N'eo ket hegerz anv ar chadenn"
+  Search Result Types: "Doareoù disoc'hoù enklask"
+  All Results: "Pep tra"
+  Posts:
+    Original post unavailable: "N'eo ket hegerz an embann orin"
+    Members-only video hidden by OpenTubeX: "Video evit an izili hepken kuzhet gant OpenTubeX"
+    Video hidden by OpenTubeX because of its title: "Video kuzhet gant OpenTubeX peogwir e titl a endalc'h testenn guzhet"
+Video:
+  Play in Background: "Lenn en drekleur"
+  Info panel source: 'Mammenn: {source}'
+  External DRM Protected: "Ne c'heller ket lenn ar videoioù gwarezet gant DRM war OpenTubeX, peogwir e vije ezhomm implijout elfennoù perc'hennet gant gwirioù ha n'int ket digor."
+  Invalid Media URL: "URL media didalvoudek"
+  Mark As Fully Watched: Merkañ evel gwelet penn-da-benn
+  AI-generated video summary: "Diverradenn ar video ganet gant an IA"
+  Quality and accuracy may vary: "Gallout a ra ar perzhded hag ar resisted cheñch"
+  Includes paid promotion: "Enderc'hel a ra bruderezh paeet"
+  Age Restricted Badge: "Bevennet diouzh an oad"
+  Music Video Badge: Video sonerezh
+  Queue: "Lost"
+  Play Next: "Lenn da-heul"
+  Add to Queue: "Ouzhpennañ d'al lost"
+  Added to Play Next: "Lennet e vo ar video da-heul"
+  Added to Queue: "Ouzhpennet eo bet ar video d'al lost"
+  Clear Queue: "Goullonderiñ al lost"
+  Queue Video Count: "{count} video | {count} video | {count} video | {count} video | {count} video"
+  Remove from Queue: "Tennañ {title} kuit eus al lost"
+  Remove Video from Queue: Tennañ kuit eus al lost
+  Drag to Reorder Queue: "Riklañ {title} evit adurzhiañ al lost"
+  Reorder Queue Item: "Adurzhiañ {title}"
+  Reorder Queue Item Instructions: "Implijit ar birioù War-grec'h ha War-draoñ evit dilec'hiañ ar video-mañ el lost."
+  Queue Item Moved: "Dilec'hiet eo bet {title} d'al lec'h {position} diwar {total}."
+  Queue Item Cannot Move Up: "Ne c'hall ket {title} bezañ dilec'hiet uheloc'h. Emañ dija el lec'h 1 diwar {total}."
+  Queue Item Cannot Move Down: "Ne c'hall ket {title} bezañ dilec'hiet izeloc'h. Emañ dija el lec'h {total} diwar {total}."
+  Metadata: "Titouroù ar video"
+  Close Metadata: "Serriñ titouroù ar video"
+  Metadata Cache:
+    Title History: "Istor an titloù"
+    Thumbnail History: "Istor ar skeudennigoù"
+    Description History: "Istor an deskrivadurioù"
+    Previous Version: "Stumm kent {number}"
+    Empty: "(goullo)"
+  Fetching Streams: "Oc'h adtapout ar gwazhioù gant yt-dlp…"
+  Waiting For Connection: "N'eus ket bet tu da dizhout ar servijer. Klasket a vez en-dro ent emgefreek…"
+  Retry Now: "Klask en-dro bremañ"
+  Transcript:
+    Title: "Treuzskrivadur"
+    Search: "Klask en treuzskrivadur"
+    Language: "Yezh an treuzskrivadur"
+    Save: "Enrollañ"
+    Show: "Diskouez an treuzskrivadur"
+    Hide: "Kuzhat an treuzskrivadur"
+    Close: "Serriñ an treuzskrivadur"
+    Copied: "Eilet eo bet an treuzskrivadur er golver"
+    Saved: "Enrollet eo bet an treuzskrivadur"
+    Save Error: "N'eus ket bet gallet enrollañ an treuzskrivadur"
+    Text File: "Restr testenn"
+    Unavailable: "N'eus treuzskrivadur ebet evit ar video-mañ."
+    Load Error: "N'eus ket bet gallet kargañ an treuzskrivadur."
+    Empty: "N'endalc'h ket an treuzskrivadur-mañ testenn ebet."
+    No Results: "N'eus tamm ebet eus an treuzskrivadur o klotañ gant ho klask."
+  Retry With Built-in Extraction: "Klask en-dro gant an eztennañ enframmat"
+  Retry With yt-dlp Extraction: "Klask en-dro gant eztennañ yt-dlp"
+  Reloading video after streaming URL error: "Oc'h adkargañ ar video goude ur fazi URL gwazh"
+  Configure Restricted Playback Cookies Hint: "Kefluniit an toupinoù en Arventennoù → Araokaet → Meziantoù diavaez → Toupinoù yt-dlp."
+  Try With Configured Cookies: "Klask gant an toupinoù kefluniet"
+  Restricted Playback Authentication Failed Template: "N'eus ket bet gallet da yt-dlp haeziñ ar video-mañ gant an toupinoù kefluniet: {error}"
+  Unmark As Watched: "Tennañ ar merk sellet"
+  Video has been unmarked as watched: "Tennet eo bet ar merk sellet diwar ar video"
+  Save Channel Playback Speed: "Enrollañ tizh lenn ar chadenn"
+  Channel Playback Speed Saved: "Enrollet eo bet tizh lenn ar chadenn"
+  Save Channel Video Quality: "Enrollañ perzhded video ar chadenn"
+  Channel Video Quality Saved: "Enrollet eo bet perzhded video ar chadenn"
+  Save Channel Subtitles State: "Enrollañ stad istitloù ar chadenn"
+  Channel Subtitles State Saved: "Enrollet eo bet stad istitloù ar chadenn"
+  Save Channel Volume: "Enrollañ live son ar chadenn"
+  Channel Volume Saved: "Enrollet eo bet live son ar chadenn"
+  Save Channel Setting: "Enrollañ un arventenn evit ar chadenn…"
+  Channel Setting Already Set: "Termenet eo dija {setting} da {value}"
+  Video has been saved to {playlistName}: "Enrollet eo bet ar video e {playlistName}"
+  Video has been removed from {playlistName}: "Dilamet eo bet ar video diwar {playlistName}"
+  There was a problem saving the video to {playlistName}: "Ur gudenn zo bet en ur enrollañ ar video e {playlistName}"
+  There was a problem removing the video from {playlistName}: "Ur gudenn zo bet en ur zilemel ar video diwar {playlistName}"
+  Failed to load collaborators: "N'eus ket bet gallet kargañ ar genlabourerien"
+  Notify me: "Rebuadañ ac'hanon"
+  Notification on: "Rebuad gweredekaet"
+  Notification enabled: "Rebuadet e viot pa grogo ar video-mañ"
+  Notification cancelled: "Nullet eo bet rebuad deroù ar video"
+  Notification unavailable: "N'eo ket hegerz rebuadoù ar reizhiad"
+  Scheduled video starting: "Ar video rakluniet a grog"
+  Live notification body: "{videoTitle} a grog bremañ"
+  Collaborators: "Kenlabourerien"
+  Live Chat Replay: "Adlenn ar flapañ war-eeun"
+  Show Live Chat: "Diskouez ar flapañ war-eeun"
+  Show Live Chat Replay: "Diskouez adlenn ar flapañ war-eeun"
+  Close Live Chat: "Serriñ ar flapañ war-eeun"
+  Close Live Chat Replay: "Serriñ adlenn ar flapañ war-eeun"
+  Live Chat Settings: "Arventennoù ar flapañ war-eeun"
+  Show Live Chat Timestamps: "Diskouez ar mareoù"
+  Chat Filter: "Sil ar flapañ"
+  Top Chat: "Flap pennañ"
+  All Messages: "An holl gemennadennoù"
+  Live chat replay is enabled. Chat messages will appear here as the video plays.: "Gweredekaet eo adlenn ar flapañ war-eeun. Diskouezet e vo ar c'hemennadennoù amañ e-pad ma vo lennet ar video."
+  Premiere started: "Ar c'hentañ skignadenn zo war ober. Kroget eo {timeAgo}"
+  Sponsor Block category:
+    hook: "Digoradur/Saludoù"
+    highlight: "Poent pouezus"
+    exclusive access: "Haeziñ miret"
+  Sponsor Block category short:
+    intro: "Ehan"
+    interaction: "Kounadur etregwerediñ"
+    music offtopic: "N'eo ket sonerezh"
+    filler: "Dihanadennoù"
+  Player:
+    Playing in Picture-in-Picture: O vezañ lennet e mod Skeudenn e-barzh skeudenn
+    Stream Recovery:
+      DASH Fallback: "C'hwitet eo al lanv son, o tremen d'ar furmadoù DASH: {error}"
+      Error Copied: "Eilet eo bet ar fazi er golver"
+      Legacy Fallback: "C'hwitet eo al lanv, o tremen d'ar furmadoù kozh: {error}"
+    Caption Timing:
+      Adjust Timing: Kempenn an amzer…
+      Caption Timing: Amzer an istitloù
+      Offset: Dilecʼhiadur (eilennoù)
+      Hint: An talvoudoù negativel a ziskouez an istitloù abretocʼh, ar re bozitivel diwezhatocʼh. Evit ar video-mañ hepken.
+      Earlier: Abretocʼh
+      Later: Diwezhatocʼh
+      Reset: Adderaouekaat
+    Most Replayed: "Adwelet ar muiañ"
+    Pull up for precise seeking: "Tennit war-laez evit klask resis"
+    Precise seeking, drag down to exit: "Klask resis · Tennit war-draoñ evit kuitaat"
+    Cast: "Skignañ"
+    Music Mode: "Mod sonerezh"
+    Music Mode Description: "Lennit ar videoioù gant un tizh 1× ha krogit ar videoioù nevez adalek an deroù en ivinell-mañ. Ho arventennoù lenn dre ziouer enrollet a chom digemm."
+    DLNA:
+      Cast: "Skignañ war un trevnad DLNA"
+      Stop: "Paouez da skignañ"
+      No Devices: "N’eus bet kavet trevnad DLNA ebet"
+      No MP4 Source: "N’eus red MP4 kenglotus ebet evit ar video-mañ"
+      Error: "N’eo ket bet gallet skignañ ar video"
+    Repeat Stats:
+      Repeat Stats: Stadegoù an adlenn
+      Looping: Adlenn oberiant
+      Repeats: Adlenn | Adlenn | Adlennoù | Adlennoù | Adlennoù
+      Time Spent: Amzer tremenet
+    Voice-over Translation:
+      Start: "Treiñ"
+      Cancel: "Nullañ"
+      Progress: "O prientiñ troidigezh ar vouezh…"
+      Retry: "Klask en-dro"
+      Error: "C'hwitet eo treiñ ar vouezh. Klaskit en-dro diwezhatoc'h."
+      Duration Error: "Troidigezh ar vouezh zo hegerz evit videoioù a beder eurvezh d'ar muiañ."
+    Caption Appearance:
+      Options: "Dibarzhioù"
+      Sample: "Setu neuz an istitloù"
+    Auto-translate: "Treiñ ent emgefreek"
+    Sleep Timer:
+      Sleep Timer: "Munuter kousket"
+      'Off': "Lazhet"
+      Minutes: "{minutes} munutenn"
+      End of video: "Dibenn ar video"
+      End of current chapter: Dibenn ar pennad a-vremañ
+      Remaining: "{time} a chom"
+      Cancel timer: "Nullañ ar munuter"
+      Timer ended: "Echu eo ar munuter kousket"
+    A-B Repeat:
+      A-B Repeat: "Adlenn A-B"
+      Off: "Diweredekaet"
+      Point A: "Poent A"
+      Point B: "Poent B"
+      Set Repeat Start: "Lakaat deroù an adlenn"
+      Set Repeat End: "Lakaat dibenn an adlenn"
+      Pause Repeat: "Ehanañ an adlenn A-B"
+      Resume Repeat: "Adkregiñ gant an adlenn A-B"
+      Adjust Point: "Kempenn ar poent {point}, bremañ {timestamp}"
+      Clear Range: "Skarzhañ tachenn an adlenn A-B"
+      End Before Start: "Ret eo d'ar poent B bezañ goude ar poent A."
+      Outside Duration: "Ret eo d'ar merk-amzer bezañ e-barzh ar video."
+      Cleared: "Skarzhet eo bet an adlenn A-B"
+    Seek History:
+      Seek History: Roll istor al lammoù
+      Positions: '{count} lec''hiadur | {count} lec''hiadur | {count} lec''hiadur | {count} a lec''hiadurioù | {count} lec''hiadur'
+      Nothing to undo: Netra da zizober
+      Nothing to redo: Netra da adober
+    Zoom:
+      Zoom: "Zoum"
+      'Off': "Lazhet"
+    Volume Boost:
+      Volume Boost: "Kreskiñ an ampled"
+      'Off': "Lazhet"
+    Auto-generated Caption Template: "{language} (savet ent emgefreek)"
+    Up next in {seconds}: "Da-heul a-benn {seconds}"
+    Resize dock: "Kemmañ ment ar gael"
+    Resize dock width: "Kemmañ led ar gael"
+    Play now: "Lenn bremañ"
+    MusicPlaybackRateOverride: "Video sonerezh dinoet; lenn gant un tizh 1x"
+    Normal: "Reizh"
+    Set Default: "Lakaat dre ziouer"
+    Hide Annotations: "Kuzhat an notennoù"
+    Show Annotations: "Diskouez an notennoù"
+    Hide: "Kuzhat"
+    Show: "Diskouez"
+    Scroll Mini Player:
+      Collapse Controls: "Plegañ ar reolerezhioù"
+      Expand Controls: "Astenn ar reolerezhioù"
+      Back to Top: "Distreiñ e penn ar bajenn"
+      Return to Video Tab: "Distreiñ da ivinell ar video"
+      Hide: "Kuzhat al lenner bihan"
+      Play: "Lenn"
+      Pause: "Ehan"
+      Drag Handle: "Dilec'hiañ al lenner bihan"
+      Rewind 10 seconds: Mont 10 eilenn war-gil
+      Forward 10 seconds: Mont 10 eilenn war-raok
+    SponsorBlock:
+      CancelCurrentSegment: "Nullañ krouidigezh ar rann"
+      ClearSegments: "Skarzhañ ar rannoù"
+      ClearSegmentsPrompt: "Ha sur oc'h e faot deoc'h skarzhañ holl rannoù SponsorBlock ar video-mañ en hollbrouf?"
+      CompleteSegmentsBeforeSubmitting: "Echuit pep rann en hollbrouf a-raok kas anezho."
+      CategoryLabel: "Rummad"
+      ActionTypeLabel: "Doare rann"
+      DuplicateSegments: "Ne vez ket aotreet rannoù doubl en hollbrouf."
+      EndAction: "(Dibenn)"
+      EndActionLabel: "Dibenn"
+      EndTimeAfterStart: "Mare dibenn ar rann a rank bezañ goude ar mare deroù."
+      EndTimeBeforeVideoEnd: "Mare dibenn ar rann a rank bezañ e-pad ar video."
+      EndTimeLabel: "Mare dibenn ar rann"
+      Guidelines: "Sturiadurioù"
+      InspectSegment: "Ensellet"
+      InvalidStartTime: "Lakait ur mare deroù rann talvoudek."
+      NoSegmentsToSubmit: "Krouit ur rann glok da vihanañ a-raok kas."
+      NowAction: "(Bremañ)"
+      CloseInfoPanel: "Serriñ titouroù SponsorBlock"
+      OpenInfoPanel: "Digeriñ titouroù SponsorBlock"
+      OpenSubmissionMenu: "Digeriñ al lañser kas"
+      PreviewRequired: "Rakwelit pep rann a-raok kas anezho."
+      PreviewSegment: "Rakwel"
+      SaveSegment: "Enrollañ"
+      SetSegmentEndNow: "Echuiñ ar rann bremañ"
+      StartAction: "(Deroù)"
+      StartSegmentNow: "Kregiñ ar rann bremañ"
+      SubmissionBadRequest: "Nac'het eo bet an azgoulenn kas gant SponsorBlock."
+      SubmissionDuplicate: "Kaset eo bet an dra-mañ dija."
+      SubmissionFailed: "N'eus ket bet gallet kas rannoù SponsorBlock."
+      SubmissionForbidden: "Nac'het eo bet ar c'has gant SponsorBlock."
+      SubmissionRateLimited: "Bevennet eo bet fonnder ar c'has-mañ gant SponsorBlock."
+      SubmissionSuccess: "Kaset eo bet rannoù SponsorBlock."
+      SubmitSegment: "Kas ar rann"
+      SubmitSegments: "Kas"
+      StartTimeLabel: "Mare deroù ar rann"
+      TimeDivider: "da"
+      SkipPrompt: "Lammat dre {segmentCategory}?"
+      SkipPromptAction: "Lammat"
+      SkipToHighlight: "Lammat d'ar poent pouezus?"
+      SkippedToHighlight: "Lammet d'ar poent pouezus"
+      SkipToastUnskip: "Nullañ al lamm"
+      SkipToastReskip: "Lammat en-dro"
+      MutedSegment: "Mudet eo bet {segmentCategory}"
+      MuteToastUnmute: "Adlakaat ar son"
+      InfoPanelLoading: "Ar rannoù zo o kargañ c'hoazh…"
+      InfoPanelHasSegments: "Rannoù eus ar video-mañ zo er stlennvon!"
+      InfoPanelNoSegments: "N'eus bet kavet rann ebet"
+      RefreshInfo: "Adkargañ titouroù SponsorBlock"
+      ContributionStatsTitle: "Ho tegasadennoù"
+      ContributionStatsLoading: "O kargañ stadegoù an degasadennoù…"
+      ContributionStatsError: "N'eo ket hegerz stadegoù an degasadennoù. Klaskit adkargañ."
+      ContributionStatsNoUserId: "Kasit ur rann pe enporzhiit hoc'h naoudi implijer SponsorBlock evit gwelet stadegoù an degasadennoù."
+      Submissions: "Kasadennoù"
+      Segments: "Rannoù"
+      TimeSaved: "Amzer gounezet"
+      AutoSkipEnabled: "Lammat dre ar rannoù ent emgefreek"
+      AutoSkipOn: "Enaouet"
+      AutoSkipOff: "Lazhet"
+      WhitelistChannel: "Ouzhpennañ ar chadenn d'ar roll aotreet"
+      ChannelWhitelisted: "War ar roll aotreet"
+      RemoveChannelFromWhitelist: "Tennañ ar chadenn kuit eus ar roll aotreet"
+      MuteSegment: "Mudañ ar rann"
+      SkipSegment: "Lammat dre ar rann"
+      CloseSegmentActions: "Serriñ oberoù ar rann"
+      FullVideo: "Video a-bezh"
+      FullVideoLabel: "{segmentCategory} · Video a-bezh"
+      MuteActionType: "Mudañ"
+      MutePrompt: "Mudañ {segmentCategory}?"
+      SkipActionType: "Lammat"
+      LockedSegment: "Rann prennet"
+      UpvoteSegment: "Mouezhiañ a-du"
+      DownvoteSegment: "Mouezhiañ a-enep"
+      VoteFailed: "N'eus ket bet gallet kas ar vouezh SponsorBlock."
+      ChangeCategory: Cheñch ar rummad
+      CopyAndDownvote: Eilañ ha votiñ a-enep
+      SubmitCategoryVote: Kas ar vot evit ar rummad
+      CategoryVoteSuccess: Kaset eo ar vot evit ar rummad.
+    Google Cast:
+      Position: "Lec’hiadur al lenn"
+      Invalid Authentication: "Ur respont dilesa direizh en deus kaset ar resever."
+      Authentication Declined: "Nac'het en deus ar resever an dilesa."
+      Audio Only Receiver: "Skignañ aodio hepken a vez skoret gant ar resever."
+      Disconnected: "Digevreet eo ar resever."
+      Timeout: "N'en deus ket respontet ar resever."
+      Busy: "Ur prenestr all a zo o skignañ dija."
+      Not Authorized: "Gweredekait ar prenestr-mañ ha klaskit adarre."
+      Invalid Request: "Reked skignañ direizh."
+      IPv4 Required: "Ur c'hevread IPv4 zo ret."
+      Launch Failed: "N'eo ket bet gallet loc'hañ ar resever."
+      Load Failed: "N'en deus ket gallet ar resever kargañ ar video."
+      Cancelled: "Nullet eo bet ar skignañ."
+      Private Not Authorized: "N'eo ket bet aotreet ar moned d'ar mediaoù prevez."
+      Invalid Subtitles: "Istitloù skignañ direizh."
+      Discovery Failed: "N'eo ket bet gallet kavout reseverioù."
+      Preparing Video: "O prientiñ ar video evit skignañ…"
+      Connecting: "O kennaskañ ouzh {device}…"
+      Starting Receiver: "O loc'hañ ar resever Cast…"
+      Loading Video: "O kargañ ar video war ar resever…"
+      Buffering: "O lakaat er vemor c'hortoz war {device}…"
+      Allow Private Instance: "Aotren ar skignañ-mañ da lenn media eus an eriolenn brevez Invidious {instance}?"
+      Cast: "Kas d’un trevnad Google Cast"
+      Connected: "O kas da {device}"
+      Rewind: "Distreiñ 10 eilenn"
+      Forward: "Mont war-raok 10 eilenn"
+      Subtitles Off: "Istitloù diweredekaet"
+      Return: "Distreiñ d’al lenn lec’hel"
+      No Devices: "N’eus trevnad Google Cast ebet kavet"
+      No Source: "N’eus gwazh kenglotus ebet evit Google Cast"
+      Error: "N’eo ket bet gallet skignañ ar video"
+      Error With Details: "N’eo ket bet gallet skignañ ar video: {error}"
+      Untrusted Receiver: "N’eo ket fiziet e testeni ar resever. Implijit ur resever Google Cast dilesaet."
+    FCast:
+      Cast: "Kas d’ur resever FCast"
+      No Devices: "N’eus resever FCast ebet kavet"
+      No Source: "N’eus gwazh kenglotus ebet evit FCast"
+    Secondary Captions: Eil istitloù
+    Subtitle File:
+      Load: "Kargañ ur restr istitloù…"
+      Subtitle Files: "Restroù istitloù"
+      Error: "N'eus ket bet gallet kargañ ar restr istitloù. Dibabit ur restr SRT pe WebVTT."
+  External Media:
+    Dislikes: "Displijadenn | Displijadennoù | Displijadennoù | Displijadennoù | Displijadennoù"
+    Reposts: "Adkasadenn | Adkasadennoù | Adkasadennoù | Adkasadennoù | Adkasadennoù"
+    Saves: "Enrolladenn | Enrolladennoù | Enrolladennoù | Enrolladennoù | Enrolladennoù"
+    Series: "Stirad"
+    Season: "Prantad"
+    Season Number: "Niverenn ar prantad"
+    Episode: "Abadenn"
+    Episode Number: "Niverenn an abadenn"
+    Track: "Roudenn sonerezh"
+    Track Number: "Niver ar roudenn"
+    Artists: "Arzourien"
+    Album: "Albom"
+    Genres: "Doareoù"
+    Media Type: "Seurt media"
+    Availability: "Hegerzder"
+    Age Limit: "Bevenn oad"
+    Release Date: "Deiziad embann"
+    Availability Values:
+      public: "Publik"
+      private: "Prevez"
+      premium_only: "Premium hepken"
+      subscriber_only: "Enskrivadurioù hepken"
+      needs_auth: "Ret eo kevreañ"
+      unlisted: "Anlistennet"
+  Save Queue to Playlist: "Enrollañ al lost en ur roll-videoioù"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: N'eo ket skoret ar flapañ war-eeun gant ar servijer Yattee evit poent. Ret eo bezañ kennasket war-eeun ouzh YouTube.
+  External Player:
+    LaunchFailedTemplate: N’eus ket bet gallet loc’hañ {externalPlayer}. Gwiriit eo staliet, pe termenit hent ar restr seveniñ e arventennoù al lenner diavaez.
+    Confirm Arguments Title: "Lañsañ al lenner diavaez gant arguzennoù personelaet?"
+    Confirm Arguments Message: "{externalPlayer} a vo lañset gant an arguzennoù personelaet-mañ:"
+    Confirm Arguments Warning: "Arguzennoù zo a c’hall lañsañ programmoù pe flastrañ restroù. Kendalc’hit hepken m’ho peus o ouzhpennet hoc’h-unan."
+    Run: "Lañsañ"
+    LaunchCanceledTemplate: "N’eo ket bet digoret {externalPlayer}"
+Playlist:
+  Playlist Already Preloaded: "Karget eo bet holl videoioù ar roll-lenn en a-raok"
+  Playlist Preload Progress: "O kargañ videoioù en a-raok: {completed} diwar {requested}"
+  Close Playlist: "Serriñ ar roll-videoioù"
+  Preload Playlist: "Rakgargañ an holl videoioù"
+  Preload Playlist Warning Title: "Rakgargañ an holl videoioù?"
+  Preload Playlist Warning: "Ar rakgargañ a c'houlenn pep video eus ar roll-c'hoari-mañ digant YouTube. Kas kalz goulennoù e berr amzer a c'hall lakaat YouTube da stankañ ho chomlec'h IP evit ur mare. Kenderc'hel?"
+  Preloading Playlist: "O rakgargañ an holl videoioù..."
+  Playlist Preload Complete: "Videoioù rakgarget: {count}."
+  Playlist Preload Partial: "{preloaded} diwar {requested} video rakgarget. C’hwitet ez eus bet war {failed}."
+  Playlist Preload Pagination Failed: "N’haller ket kargañ ar roll lenn a-bezh, setu eo bet nullet ar rakgargañ."
+  Add Playlist to Queue: "Ouzhpennañ ar roll-videoioù d'al lost"
+  Playlist Added to Queue: "Ouzhpennet eo bet ar roll-videoioù d'al lost"
+Change Format:
+  yt-dlp Error Template: "N’en deus ket gallet yt-dlp pourchas al lanvioù: {error}"
+  Local Video File: "Restr video lec'hel"
+  Local Audio File: "Restr son lec'hel"
+  Online Video: "Video enlinenn"
+  Stream Source: "Tarzh ar gwazh"
+  Stream Extraction Method: "Doare eztennañ ar gwazh"
+  Playback Engine: "Keflusker lenn"
+  Streaming Protocol: "Komenad gwazhañ"
+  Not Available For This Video: "N'eo ket hegerz evit ar video-mañ"
+  Protocols:
+    Progressive: "Araokaat"
+  Descriptions:
+    Local File: "Lennet war-eeun eus ar restr pellgarget war an trevnad-mañ"
+    Online Video: "Kargañ mentrezhioù gwazhañ eus an tarzh enlinenn kefluniet"
+    Dash: "Perzhded azasaus, meur a roudenn son hag an diarunusted uhelañ"
+    Legacy: "Ur restr hepken gant video ha son kendeuziñ, bevennet d'an diarunusted izelañ"
+    Audio: "Son hepken, evit espern ledander-bann pe selaou en drekleur"
+  yt-dlp Fallback Template: "N'eus ket bet gallet da yt-dlp pourchas ar gwazhioù; implijet e vo ar c'heflusker enframmat en e lec'h: {error}"
+  yt-dlp Default Clients Fallback: "N'eus ket bet gallet da arvalien yt-dlp gwellañ-garet pourchas gwazhioù lennadus; o klask gant arvalien dre ziouer yt-dlp"
+  Built-in Fallback Template: "N'eus ket bet gallet d'ar c'heflusker enframmat lenn ar gwazh; o klask gant yt-dlp en e lec'h: {error}"
+Share:
+  Shared YouTube Link: "Liamm YouTube rannet"
+  Open in Player: "Digeriñ el lenner"
+  No YouTube Link: "N’eus liamm YouTube skoret ebet en destenn rannet."
+  Loading Video Information: "O kargañ titouroù ar video…"
+  Video Information Failed: "N’haller ket kargañ titouroù ar video. Klaskit en-dro pe digorit al liamm."
+  Share Link: "Rannañ al liamm"
+  Share failed: "N’eus ket bet gallet rannañ al liamm"
+  Timestamp Link Copied: "Eilet eo bet al liamm gant ar mare er golver"
+Context Menu:
+  Opened in a Background Tab: "Digoret en un ivinell en drekleur"
+  Open in a Background Tab: "Digeriñ en un ivinell en drekleur"
+  Select Tab: Diuzañ an ivinell
+  Close Tabs Before: Serriñ an ivinelloù a-raok
+  Close Tabs After: Serriñ an ivinelloù war-lerc’h
+  Close Other Tabs: Serriñ an ivinelloù all
+  Copy {service} link without playlist: "Eilañ al liamm {service} hep ar roll-lenn"
+  Context Menu: "Roll lañser"
+  Select All: "Diuzañ pep tra"
+  Save Image As…: "Enrollañ ar skeudenn evel…"
+  Copy Image: "Eilañ ar skeudenn"
+  Copy Image Address: "Eilañ chomlec'h ar skeudenn"
+  Cancel Refresh: "Nullañ an adkargañ"
+  Reload Videos: "Adkargañ ar videoioù"
+  Reload Shorts: "Adkargañ ar videoioù berr (Shorts)"
+  Reload Live: "Adkargañ ar skignadoù war-eeun"
+  Reload Posts: "Adkargañ ar pennadoù"
+  Reload All Feeds: "Adkargañ an holl wazhioù"
+  Reload RSS Feeds: Adkargañ ar gwazhioù RSS
+  Reload Platforms: Adkargañ ar savennoù
+  Close Multiple Tabs: "Serriñ {count} ivinell | Serriñ {count} ivinell | Serriñ {count} ivinell | Serriñ {count} ivinell | Serriñ {count} ivinell"
+  Duplicate Tab: "Eilañ an ivinell"
+  Duplicate Multiple Tabs: "Eilañ {count} ivinell | Eilañ {count} ivinell | Eilañ {count} ivinell | Eilañ {count} ivinell | Eilañ {count} ivinell"
+  Move Tab: "Dilec'hiañ an ivinell"
+  Move Tabs: "Dilec'hiañ an ivinelloù"
+  Move Tab to Group: "Dilec'hiañ an ivinell d'ur strollad"
+  Collapse Group: "Bihanaat ar strollad"
+  Expand Group: "Astenn ar strollad"
+  Move Tabs to Group: "Dilec'hiañ an ivinelloù d'ur strollad"
+  Manage Tab Groups…: "Merañ strolladoù an ivinelloù…"
+  To Beginning: "D'an deroù"
+  To End: "D'an dibenn"
+  Close Tabs: "Serriñ an ivinelloù"
+  To the Top: "D'an nec'h"
+  To the Left: "D'an tu kleiz"
+  To the Bottom: "D'an traoñ"
+  To the Right: "D'an tu dehou"
+  Other Tabs: "Ivinelloù all"
+  Copy YouTube Link: "Eilañ al liamm YouTube"
+  Copy YouTube Links: "Eilañ al liammoù YouTube"
+  Pin Tab: "Spilhennañ an ivinell"
+  Pin Tabs: "Spilhennañ an ivinelloù"
+  Unpin Tab: "Dispilhennañ an ivinell"
+  Unpin Tabs: "Dispilhennañ an ivinelloù"
+  Tab Color: "Liv an ivinell"
+  Default: "Dre ziouer"
+  Purple: "Mouk"
+  Reopen Closed Tab: "Addigeriñ an ivinell serret"
+  Reload Tab: "Adkargañ an ivinell"
+  Reload Tabs: "Adkargañ an ivinelloù"
+  Load Tab: "Kargañ an ivinell"
+  Load Tabs: "Kargañ an ivinelloù"
+  Unload Tab: "Diskargañ an ivinell"
+  Unload Tabs: "Diskargañ an ivinelloù"
+  Unload Tabs Failed: "N'eo ket bet posupl diskargañ an ivinelloù dibabet."
+  Move Tab to Window: "Dilec'hiañ an ivinell d'ur prenestr"
+  Move Tabs to Window: "Dilec'hiañ an ivinelloù d'ur prenestr"
+  Open in a New Tab: "Digeriñ en un ivinell nevez"
+  Open in a New Window: "Digeriñ en ur prenestr nevez"
+  Copy Link: "Eilañ al liamm"
+  Copy Invidious Link: "Eilañ al liamm Invidious"
+  Search Selection in New Tab: "Klask «{selection}» en un ivinell nevez"
+  Search Selection in New Window: "Klask «{selection}» en ur prenestr nevez"
+  Search With: "Klask gant {engine}"
+  Search With Multiple: "Klask gant…"
+  Selection Too Long: "Re hir eo an diuzadenn evit klask (> {count} arouezenn)"
+  Background Tab: Ivinell en drekleur
+Tab Organizer:
+  Tab History: "Istor an ivinell"
+  Current Page: "Pajenn vremanel"
+  Icon Labels:
+    Podcast: 'Podkast'
+    Clock: 'Eurier'
+    Puzzle Piece: 'Pezh ur miltamm'
+    People: 'Tud'
+    Chart: 'Grafik'
+    Calendar: 'Deiziadur'
+    Images: 'Skeudennoù'
+    Music: 'Sonerezh'
+    Folder: Teuliad
+    Bookmark: Sined
+    Favorites: Ma re well
+    Videos: Videoioù
+    Gaming: C'hoarioù
+    Research: Enklask
+    Art: Arz
+    Travel: Beajoù
+  Group Icon: Arlun ar strollad
+  Title: "Aozer ivinelloù"
+  Open Tab Count: "{count} ivinell digor | {count} ivinell digor | {count} ivinell digor | {count} ivinell digor | {count} ivinell digor"
+  Search Label: "Klask en ivinelloù"
+  Selected Count: "{count} ivinell diuzet | {count} ivinell diuzet | {count} ivinell diuzet | {count} ivinell diuzet | {count} ivinell diuzet"
+  Tab Count: "{count} ivinell | {count} ivinell | {count} ivinell | {count} ivinell | {count} ivinell"
+  Select All: "Diuzañ pep tra"
+  Select None: "Diziuzañ pep tra"
+  Move To Group: "Dilec'hiañ an ivinelloù diuzet d'ur strollad"
+  Choose Group: "Dibab ur strollad"
+  Ungrouped: "Hep strollad"
+  Pin: "Spilhennañ"
+  Unpin: "Dispilhennañ"
+  Load: "Kargañ"
+  Unload: "Diskargañ"
+  Unload All: "Diskargañ pep tra"
+  Close All: "Serriñ pep tra"
+  Ungroup: "Tennañ diouzh ar strollad"
+  Group Name: "Anv ar strollad"
+  No Color: "Liv ebet"
+  Create Group: "Krouiñ ur strollad"
+  Expand Group: "Astenn ar strollad"
+  Collapse Group: "Bihanaat ar strollad"
+  Expand Group Label: "Astenn {name}, {count} ivinell | Astenn {name}, {count} ivinell | Astenn {name}, {count} ivinell | Astenn {name}, {count} ivinell | Astenn {name}, {count} ivinell"
+  Rename Group: "Adenvel {name}"
+  Change Group Color: "Kemmañ liv {name}"
+  Move To Window: "Dilec'hiañ d'ur prenestr"
+  Choose Window: "Dibab ur prenestr"
+  Select Tab: "Diuzañ {title}"
+  Active: "Oberiant"
+  Pinned: "Spilhennet"
+  Unloaded: "Diskarget"
+  Playing: "O lenn"
+  Close Tab: "Serriñ {title}"
+  No Open Results: "N'eus ivinell digor ebet o klotañ gant ar c'hlask-mañ."
+  Recently Closed: "Serret nevez zo"
+  Clear: "Skarzhañ"
+  No Closed Results: "N'eus ivinell serret nevez zo ebet o klotañ gant ar c'hlask-mañ."
+  Drag Tab: "Riklañ evit dilec'hiañ d'ur strollad"
+Chapters:
+  Auto-generated: Krouet eo bet ar chabistroù-mañ ent emgefre
+  Open Chapters: "Digeriñ ar chabistroù"
+  Close Chapters: "Serriñ ar chabistroù"
+  Copy Timestamp Link: "Eilañ al liamm da {timestamp}"
+  Loop Chapter: 'Lenn ar chabistr en-dro: {chapter}'
+  Looping Chapter: 'O lenn ar chabistr en-dro: {chapter}'
+  Chapter Loop Stopped: 'Paouezet eo da lenn ar chabistr en-dro'
+  Sync to Video Time: 'Sinkronelaat gant amzer ar video'
+Comments:
+  Image unavailable: "Skeudenn n'eo ket hegerz"
+  Comment Count: "{count} evezhiadenn | {count} evezhiadenn | {count} evezhiadenn | {count} evezhiadenn | {count} evezhiadenn"
+  Show Comments: "Diskouez an evezhiadennoù"
+  Getting comment replies, please wait: "Oc'h adtapout respontoù an evezhiadenn, gortozit"
+  Reload Comments: "Adkargañ an evezhiadennoù"
+  Reply Count: "{replyCount} respont | {replyCount} respont | {replyCount} respont | {replyCount} respont | {replyCount} respont"
+  YouTube did not provide advertised replies: "YouTube en deus diskouezet ez eus respontoù d'an evezhiadenn-mañ, met n'en deus ket pourchaset anezho. Gallout a reont bezañ bet dilamet pe guzh, setu perak eo bet lamet ar bouton respont."
+  Pinned by you: "Spilhennet ganeoc'h"
+  A reply is pinned: "Spilhennet ez eus ur respont"
+  Filter loaded comments: "Silañ an evezhiadennoù karget"
+  Comment filters: "Siloù an evezhiadennoù"
+  From creator: "Eus ar c'hrouer"
+  Contains timestamps: "Enderc'hel a ra mareoù"
+  Pin comment by author: "Spilhennañ evezhiadenn {author}"
+  Unpin comment by author: "Dispilhennañ evezhiadenn {author}"
+  Edited: "(kemmet)"
+  Highlighted comment: "Evezhiadenn usskedet"
+  Highlighted reply: "Respont usskedet"
+  Search loaded comments: "Klask en evezhiadennoù karget"
+  Loaded comment search result count: "{count} diwar {total} evezhiadenn garg | {count} diwar {total} evezhiadenn garg | {count} diwar {total} evezhiadenn garg | {count} diwar {total} evezhiadenn garg | {count} diwar {total} evezhiadenn garg"
+  No loaded comments match your filters: "N'eus evezhiadenn garg ebet o klotañ gant ho siloù"
+  YouTube comment link copied to clipboard: "Eilet eo bet liamm an evezhiadenn YouTube er golver"
+  Translate to {language}: "Treiñ e {language}"
+  Show original: "Diskouez an orin"
+  Translating comment, please wait: "O treiñ an evezhiadenn, gortozit"
+  Comment translation failed: "C'hwitet eo treiñ an evezhiadenn"
+Description:
+  Title: Deskrivadur
+  Copy Description: "Eilañ an deskrivadur"
+  Description Copied: "Eilet eo bet an deskrivadur er golver"
+  Video Category: "Rummad ar video:"
+  Video Tags: "Tikedennoù ar video"
+  Games: "C'hoarioù"
+  Music: Sonerezh
+Tooltips:
+  YouTube Account Settings:
+    Sync Subscriptions: "Ar chadennoù a goumanantit dezho war YouTube a vez ouzhpennet en « An holl chadennoù », hag ar chadennoù a zigoumanantit diouto eno a vez lamet eus an holl brofiloù. Koumanantiñ pe digoumanantiñ en « An holl chadennoù » amañ a ra kement all war YouTube."
+    Sync Playlists: "Ho rolloù-videoioù YouTube, « Da sellet diwezhatoc'h » ha « Videoioù a blij din » a zeu war wel en « Ho rolloù videoioù », hag ar c'hemmoù a rit dezho amañ a vez graet war YouTube ivez. N'int ket goubredet gant ho penvegoù all, ha n'int ket lakaet e-barzh pa ezporzhiit an holl rolloù-videoioù pe pa warezit ho roadennoù. Diweredekaat an dibarzh-mañ a lam anezho eus ar benveg-mañ, met n'eo ket eus YouTube."
+    Add to YouTube Watch History: "Ar videoioù a lennit a vez ouzhpennet ouzh ho roll istor YouTube, evel-se e c'hall erbedadennoù YouTube deskiñ diouto. Netra ne vez ouzhpennet keit ha ma vez ehanet ar roll istor war YouTube."
+  General Settings:
+    Built-in Streams: |
+      Emgefreek a lenn al lodenn vrasañ eus ar videoioù dre arval visionOS YouTube, a grog buanoc'h hag a skor ar perzhded emgefreek. Ar froudoù war-eeun hag ar videoioù n'hall ket lenn a implij SABR.
+      SABR hepken a implij atav arval web YouTube, a grog gorrekoc'h ha n'en deus perzhded emgefreek ebet.
+    Title Lines: "Berraat a ra titloù ar videoioù hag al listennoù lenn er rolloù hag er c'hrilhoù d'an niver a linennoù dibabet gant poentoù kendalc'h, evit kartennoù unvanoc'h. Lakait al logodenn war un titl evit e welet en e bezh."
+    Close Window With Last Tab: 'Pa vez lazhet, serriñ an ivinell ziwezhañ a zigor un ivinell nevez e-lec’h, ha chom a ra digor ar prenestr betek ma vo serret ganeoc’h.'
+    Preferred Video Codec: |
+      Ar mod emgefreek a ro lañs d'ar c'hodekoù a c'hall bezañ digodet gant periant ho trevnad.
+      AV1: ar perzhded gwellañ gant an nebeutañ a roadennoù, met n'eo ket gant pep video. Hep digodañ dre beriant e c'hall goullonderiñ ar batiri pe kolliñ skeudennoù.
+      VP9: ur c'hempouez etre efedusted ha kenglotadusted, hegerz peurliesañ betek an diarunusted uhelañ.
+      H.264: an aesañ da zigodañ war kazi pep trevnad, met implijout a ra muioc'h a roadennoù hag a-wechoù n'a ket pelloc'h eget 1080p.
+      Arloet e vo ar c'hemmoù d'ar video da-heul. Ma n'eo ket hegerz ar c'hodek dibabet, e vo implijet unan all.
+    Always Use Backup Media Server: "Kas a ra ar videoioù diwar ar servijer a-gein meneget gant YouTube e-lec'h an hini roet, da skouer pa vez gorrek alies krubuilh ho pourchaser kenrouedad. A-hend-all ne cheñch OpenTubeX nemet pa ne respont ket ar servijer roet."
+    Automatically switch stream extraction methods: "Klask yt-dlp ma c’hwit al lenn enkorfet, pe al lenn enkorfet ma c’hwit yt-dlp."
+    Enable Tabs: "Chom a ra ar bajenn vremanel digor. Miret e vez an ivinelloù all betek adlocʼhañ an arload; gweredekait an ivinelloù en-dro evit o adsevel."
+    Data Saver Thumbnails: "Implijit skeudennoù bihan gant un diarunusted izeloc’h evit espern roadennoù."
+    Use AI Translation Completions: "Leuniañ ar pezh a vank en troidigezhioù denel gant testenn savet gant an IA. An troidigezhioù denel a vez implijet da gentañ bepred."
+    Update Relative Timestamps: "Hizivaat an deiziadoù hag eurioù keñverel en arload a-bezh keit ha ma chom ur bajenn digor. Pa vez diweredekaet ne vezont hizivaet nemet goude adkargañ pe addigeriñ ar bajenn."
+    Stream Extraction Method: |
+      Dibabit penaos e tap OpenTubeX gwazhioù ar videoioù. yt-dlp a rank bezañ hegerz pa vez diuzet.
+      Gallout a ra ar videoioù lakaat muioc'h a amzer da gregiñ gant yt-dlp.
+    Avoid translation: |
+      Diweredekaat troidigezh emgefreek YouTube evit titl, deskrivadur ha chabistroù ur video.
+      "An arload a-bezh" a ziskouez ivez anvioù ha deskrivadurioù ar chadennoù en o yezh orin.
+      Re a azgoulennoù, evel adtapout titloù videoioù e meur a roll, a c'hall lakaat
+      an arload da vezañ digredus evit ur pennad.
+    Show Thumbnail Previews: "Diskouez rakwelioù fiñv pa vez al logodenn war skeudennigoù ar videoioù."
+    Startup Behavior: |
+      Dibabit pezh a ra OpenTubeX pa loc'h.
+      Kargañ an holl ivinelloù a assav diouzhtu pep ivinell enrollet, met ar videoioù ne vezont ket lennet ent emgefreek en ivinelloù en drekleur.
+      Kargañ an ivinelloù a oa karget a-raok a adkarg an ivinelloù a oa karget pa oa bet serret OpenTubeX hag a zalc'h ar re all diskarget.
+      Kargañ an ivinell oberiant diwezhañ a assav an estez kent gant an ivinelloù all digor met diskarget; karget e vezont pa glikit warno.
+      Loc'hañ gant un estez goullo a laosk an ivinelloù enrollet a-gostez hag a zigor ur prenestr nevez.
+    Remember Tab Navigation History: "Enrollet ha graet e vez assav eus istor merdeiñ war-raok ha war-gil pep ivinell pa vez adloc'het OpenTubeX."
+    Yattee Server: An istañs yattee-server a vez implijet gant OpenTubeX evit kargañ videoioù, chadennoù, rolloù videoioù ha disoc'hoù klask. Ne vez enrollet an anv implijer hag ar ger-tremen nemet war an trevnad-mañ.
+    Proxy Videos Through Yattee Server: Treuzkas a ra ar gwazhioù video ha son dre ar servijer. Lezit an dra-se gweredekaet nemet ma implij ar servijer an hevelep kennask internet ha c'hwi, rak YouTube ne gas ar gwazhioù nemet d'ar chomlec'h en deus o goulennet. Ar skeudennoùigoù a vez karget war-eeun diouzh YouTube bepred.
+    Notifications: Dibabit penaos e kas OpenTubeX kemennoù deoc’h diwar-benn ar c’hwitelladennoù war-eeun, ar pellgasadennoù nevez hag ar pellgargadennoù emgefreek. Gant Reizhiad hag en arload e teu ar c’hemennoù war wel en OpenTubeX e-pad ma implijit anezhañ, ha evel kemennoù reizhiad en un doare all, hag ar c’hloc’h a vir anezho. Diweredekaet a guzh ivez dibarzhioù ar c’hemennoù.
+    Ignore System Haptics Setting: Bransellat pa vez pouezet pell hag e-pad ar jestroù, ha pa vez lazhet an adstumm stok en arventennoù Android zoken.
+  Proxy Settings:
+    IP Block Recovery Script Path: "Hent ar restr skript da erounit pa vez dinoet ur stankadur IP. Gortoz a ra OpenTubeX ma vo echu, hag adkargañ a ra ar video. Ma vez gweredekaet an diskoulm erlec'hiañ ne vez erounit ar skript nemet pa c'hwit an diskoulm-se ivez."
+  Player Settings:
+    Rewind on Resume: "Distreiñ a ra kement-se a eilennoù pa adkregit gant ur video ehanet, evit gwelet ar mareoù diwezhañ en-dro. Lakait 0 evit e lazhañ."
+    Minimum Pause Before Rewinding: "Distreiñ a ra hepken pa oa ehanet ar video da nebeutañ e-pad an amzer-se. Lakait 0 evit distreiñ goude pep ehan."
+    Mono Audio: 'Seniñ a ra ar c''hanolioù son kleiz ha dehou en div skouarn. Implijit anezhañ pa ne zeu son ur video nemet eus un tu eus ho selaouelloù.'
+    Normalize Loudness: 'Digreskiñ a ra ampled ar videoioù a zo kreñvoc''h eget ar peurliesañ, evit na lammfe ket an ampled etre ar videoioù. Ar videoioù sioul a vir o ampled. Ne ya en-dro nemet evit ar videoioù karget gant an API lec''hel.'
+    Pause on Stream Recovery: "Pa c'hwit al lanv video hag e adkarg al lenner anezhañ pe e tremen d'ur furmad pe d'ur c'heflusker all, e vez ehanet al lenn hag e chom ar fazi e krec'h al lenner betek ma vo kuzhet ganeoc'h. Diweredekaet, e kendalc'h al lenn hag e vez diskouezet ar fazi berr evel ur gemenadenn."
+    Continue Playback When Screen Is Locked: 'Dalc’h a ra ar son o vont en-dro en drekleur ha reiñ a ra reolerezhioù media Android. Diweredekait evit lakaat war ehan pa ne vez ket mui gwelet an arload.'
+    Enable Caption Translations: "Pa vez gweredekaet e tibab bouton an istitloù hag ar verradenn C ur roudenn troet ent emgefreek er yezh istitloù gwellañ-garet, ma ne bourchas ket ar video ur roudenn orin o klotañ."
+    Use Quick Playback Speed Bar: "Diskouez ur varrenn prim evit an tizh lenn e reolerezhioù al lenner war an tu dehou. Ma vez gweredekaet enrollañ tizh lenn pep chadenn gant an dorn, enderc'hel a ra ar varrenn ivez ar bouton da enrollañ an tizh evit ar chadenn vremanel."
+    Multiply Seek Interval by Playback Rate: "Pa vez gweredekaet e vez lieskementet etrevezioù ar mont en-dro, gant ar birioù ha J/L, dre an tizh lenn bremanel. Pa vez diweredekaet e chom digemm an etrevezioù forzh an tizh lenn."
+    Show Playback Rate Adjusted Timestamp: "Pa vez gweredekaet ha disheñvel an tizh lenn diouzh 1x, diskouez a ra al lenner mareoù reizhet diouzh an tizh lenn goude ar mare reizh."
+    Use YouTube-style Shorts: "Diskouez ar videoioù berr (Shorts) en ur gael a-serzh war pajennoù ar c'houmanantoù hag ar chadennoù hag implijout al lenner videoioù berr doare YouTube."
+    Loop Shorts: "Pa vez gweredekaet e adkrog ar videoioù berr (Shorts) ent emgefreek. Pa vez diweredekaet e paouezont en dibenn hag e tiskouezont ur bouton adlenn."
+    Show Skip Silence Toggle: "Diskouez un afell enaouiñ pe lazhañ al lamm dre ar sioulder e lañser arventennoù al lenner."
+    Enable Skip Silence by Default: "Gweredekaat al lamm dre ar sioulder evit an ivinelloù nevez. Kemmañ anezhañ en un ivinell ne cheñch ket an ivinelloù all."
+    Enable Video Zoom: "Diskouez ar reoler Zoum e lañser arventennoù al lenner ha gweredekaat e verradennoù klavier hag e reolerezhioù zilec'hiañ."
+    Enable Seek History: Derc'hel a ra soñj eus al lec'hioù ma oac'h lammet diouto e pep video betek ma vez serret an arload. Diskouez a ra roll istor al lammoù e lañser arventennoù al lenner hag e weredeka e berradennoù klavier.
+    Show Seek Bar Filmstrip: "Riklañ bouton ar varrenn glask a ziskouez ur stribed skeudennoù tro-dro d'al lec'h ma tizhot, ha tennañ war-laez warnañ a glask resis. Pa vez diweredekaet, riklañ a ziskouez ur skeudennig hepken, evel pa dremenit a-us dezhi."
+    Voice-over Translation: "Kas naoudi ar video, e badelezh hag ar yezh diuzet da wazerezh troidigezh ar vouezh dieub Yandex pa c'houlennit un droidigezh. Diweredekaet eo dre ziouer."
+    Hold to Speed Up: Dalc'hit ar varrenn esaouiñ pe bouton kleiz al logodenn war al lenner evit liesaat an tizh lenn bremanel gant an talvoud dibabet evit ur pennad.
+    Ambient Mode: "Meskañ livioù ar video gant an takad tro-dro d'al lenner."
+    Default Volume: "Diweredekaet eo pa vez gweredekaet Derc'hel soñj eus live ar son. Diweredekait anezhañ evit termenañ ul live son loc'hañ digemm evit pep video."
+    Parallel Segment Loading: |
+      Niver a rannoù video ha son da gargañ war un dro a-raok al lenn.
+      Gallout a ra gwerzhioù uheloc'h sikour gant kennaskoù gorrek pe distabil, met muioc'h a ledander-bann hag a vemor a vez implijet ganto.
+      Gallout a reont ivez lakaat ar mod Emgefreek da briziañ tizh ar c'hennask re izel ha da zibab ur berzhded izeloc'h.
+      Ar gwazhioù bevennet d'un azgoulenn war un dro ne zalc'hont ket kont eus an arventenn-mañ.
+    Preload Upcoming Videos: "Kargañ ha krubuilhañ a ra liammoù yt-dlp ar videoioù da-heul. Ar steudad a zo kentoc’h eget ar rolloù lenn hag an erbedadennoù."
+    Upcoming Videos to Preload: "Niver brasañ a videoioù da-heul a vez karget o liammoù yt-dlp en drekleur."
+    Concurrent Preloads: "Niver brasañ a argerzhioù yt-dlp a vez implijet evit rakgargañ videoioù war un dro. An talvoudoù uheloc'h a implij muioc'h a c'halloud ar c'hewerier, a vemor hag a ledander rouedad."
+    Ignore System Rotation Lock for Fullscreen: Troit an trevnad evit mont e skramm leun hag er-maez anezhañ, zoken pa vez diweredekaet an troadur emgefreek en Android.
+    Ask Before Preloading Large Playlists: "Goulenn a ra ur gadarnaat a-raok rakgargañ holl videoioù ur roll-lenn gant muioc’h eget {count} video."
+  Download Settings:
+    Download Folder: "Enrollet e vez ar videoioù en teuliad-mañ. Laoskit goullo evit implijout teuliad Pellgargadennoù ho reizhiad."
+    Global Additional yt-dlp Arguments: "Arventennoù arc'had ouzhpenn tremenet da yt-dlp evit pep pellgargadenn, da skouer --cookies-from-browser firefox."
+    Concurrent Downloads: "Niver brasañ a labourioù yt-dlp a c'hall bezañ erounit war un dro."
+    Bandwidth Limit: "Bevenniñ a ra fonnder treuzkas bodaet al lost en ur rannañ ar vevenn-mañ etre al labourioù war un dro. Lakait 0 evit chom hep bevenn."
+  External Software Settings:
+    yt-dlp Source: "Gallout a ra OpenTubeX implijout yt-dlp staliet war ho reizhiad, pe bellgargañ ha merañ e eiladenn dezhañ e-unan. Kadavet e vez e teuliad roadennoù an implijer."
+    yt-dlp Channel: "Dibabit kanol stummoù yt-dlp pellgarget ha meret gant OpenTubeX. Ar ganol stabil zo erbedet evit an darn vrasañ eus an implijerien."
+    FFmpeg Source: "Gallout a ra OpenTubeX implijout FFmpeg ha FFprobe staliet war ho reizhiad, pe bellgargañ ha merañ e stummoù statek dezhañ e-unan. Kadavet e vezont e teuliad roadennoù an implijer."
+    Managed Tool Updates: "Dibabit ma vez hizivaet an ostilhoù meret ent emgefreek, ma vez goulennet a-raok hizivaat, pe ma vezont hizivaet gant ar boutonoù dorn hepken. Pellgarget e vez an ostilhoù a vank pa vezont rekis."
+    yt-dlp Executable Path: "Dre ziouer e soñj OpenTubeX e c'haller kavout yt-dlp dre argemmenn endro PATH. Gallout a reer lakaat un hent personelaet amañ ma vez ezhomm."
+    Cookie Source: "Dibabit ma rank yt-dlp lenn ur restr toupinoù Netscape pe toupinoù eus ur merdeer staliet evit al lenn dilesaet."
+    Cookie File: "Dibabit ur restr toupinoù er mentrezh Netscape evit al lenn dilesaet."
+    Browser for Cookies: "Lennet e vez skor ar merdeer diwar erounezadus yt-dlp diuzet. OpenTubeX a c'houlenn digant yt-dlp lenn ar merdeer-mañ pa vez goulennet al lenn dilesaet."
+    Browser Profile: "Anv pe deuliad profil merdeer diret. Laoskit goullo evit implijout ar profil haeziñ diwezhañ."
+    Always Use Cookies: "Implijit an toupinoù kefluniet evit ar pellgargañ, an istitloù ha bep tro ma tenn yt-dlp gwazhioù. Ne cheñch ket an dra-mañ an doare eztennañ gwazhioù da yt-dlp. Gant yt-dlp diuzet e c'hall mentrezhioù miret d'ar c'hontoù bezañ hegerz, en o zouez fonnder gwell YouTube Premium pa vez aotreet ar gont."
+    FFmpeg Executable Path: "Rekis eo FFmpeg evit kendeuziñ gwazhioù video ha son distag hag evit amdreiñ ar son. Dre ziouer e soñj OpenTubeX e c'haller kavout FFmpeg dre argemmenn endro PATH. Gallout a reer lakaat un hent personelaet amañ ma vez ezhomm."
+    Use cookies for subtitles: "Implijout an toupinoù kefluniet evit an istitloù hag an troidigezhioù emgefreek. Gweredekaet ivez gant « Implijout toupinoù atav »."
+  Distraction Free Settings:
+    Hide Playlist Stats: Kuzhat a ra niver ar videoioù, niver ar sellerezhioù, deiziad an hizivadur diwezhañ hag an amzer hollek war pajennoù ar rolloù-lenn.
+    Count Watch Time From: "\"An holl drevnadoù\" a gont kement trevnad a goubred ar stadegoù sellout. \"An trevnad-mañ\" a gont ar pezh a sellit amañ hepken."
+    When a Limit Is Reached: "\"Ehanañ al lenn\" a laosk ac'hanoc'h da ouzhpennañ 15 munutenn pe da lezel ar vevenn a-gostez evit hiziv. Gant ur ger-tremen evit an arventennoù, ne c'hallit kreskiñ ur vevenn nemet en Arventennoù."
+    Grayscale: "Diskouez an arload en arlivioù louet, evit ma tenno nebeutoc'h an evezh. \"Da vare kousket\" a heul deiziataer ar c'hounadur mare kousket."
+    Apply Grayscale To: "\"Videoioù ha skeudennoù\" a vir livioù an etrefas hag a lak an endalc'had e louet, evel ar videoioù, ar skeudennigoù hag an avataroù."
+    Daily Watch Time Limit: "Kontañ ar pezh ho peus sellet hiziv war an holl drevnadoù a goubred ar stadegoù sellout, ar Shorts en o zouez."
+    Daily Shorts Limit: "Kontañ ar Shorts ho peus sellet hiziv war an trevnad-mañ."
+    Take a Break Reminder: "Ehanañ ar video goude kement-se a amzer sellet. Un ehan a 10 munutenn pe muioc'h a adlañs ar c'hont."
+    Bedtime Reminder: "Ehanañ ar video ha degas da soñj deoc'h paouez da sellet etre an eur deroù hag an eur fin."
+    Shorten View Counts: "Diskouez niver ar selladennoù, evezhiadennoù ha plijadennoù an evezhiadennoù er stumm berr rontaet dija gant YouTube, da skouer 14K e-lec'h 14 000. Diskouezet e vez an niver resis en e bezh bepred."
+  Subscription Settings:
+    Fetch Feed on Startup: "Pa vez gweredekaet e adtap OpenTubeX gwazh ho koumanantoù ent emgefreek el loc'hañ ha pa vez digoret ur prenestr nevez."
+    Show New Content Feed: "Diskouez un ivinell Nevez gant elfennoù eus gwazh ar c'houmanantoù na oant ket aze en adtapout kent."
+    Enable RSS Feeds: Diskouez a ra un ivinell RSS war pajenn ar c'houmanantoù gant elfennoù gwazhioù RSS pe Atom, evit ma c'hallfec'h heuliañ krouerien war savennoù all. Digoret e vez e elfennoù gant yt-dlp.
+    Show New Content Indicators: "Diskouez ur pik bihan e-kichen elfennoù eus gwazh ar c'houmanantoù na oant ket aze en adtapout kent."
+    Show Scheduled Live Streams / Premieres First: "Derc'hel ar skignadoù war-eeun hag ar c'hentañ skignadennoù da zont e penn gwazh ar c'houmanantoù. Pa vez diweredekaet e chomont el lec'h ma oant bet embannet betek ma krogont. Adkargit gwazh ar c'houmanantoù ur wech goude diweredekaat evit adtapout deiziadoù embann an elfennoù rakluniet a zo anezho dija."
+    Auto Refresh Interval: "Alies ma adkarg OpenTubeX gwazh ho koumanantoù ent emgefreek pa vez digor an arload. War Android, un etremez anvannel a freska ar gwazh ivez pa vez serret an arload."
+    Refresh Subscriptions While App Is Closed: "Hizivaat a ra al lanvioù gant an arventennoù dibabet. War an urzhiataer e chom OpenTubeX e takad ar c'hemennoù betek kuitaat. Android a ziviz pegoulz e vez hizivaet en drekleur."
+    Notify About New Uploads: Diskouez a ra rebuadoù reizhiad war an trevnad-mañ evit ar chadennoù ho peus gweredekaet o rebuadoù en o arventennoù koumanant. OpenTubeX a wir ha bez ez eus endalc'had nevez pa vez freskaet ar c'houmanantoù, setu dibabit un etrevez adkargañ emgefreek. Evit bezañ kelaouet pa vez serret an arload, gweredekait ivez ar freskañ pa vez serret an arload.
+    RSS Feeds Auto Refresh Interval: Pegen alies e vez adkarget ho kwazhioù RSS ent emgefreek gant OpenTubeX e-pad ma vez digor an arload.
+    Faster Subscription Refresh: "Gwiriañ a ra lanv RSS pep chadenn da gentañ ha ne garg nemet videoioù, Shorts ha skignadennoù war-eeun ar chadennoù o deus pellgasadennoù nevez. Ar freskadurioù emgefre a lez a-gostez ivez ar chadennoù karget e-pad an 10 munutenn diwezhañ. Evit ar chadennoù hep pellgasadennoù nevez, ne vez hizivaet an niver a selloù, ar videoioù dilamet hag an titloù kemmet nemet bep un nebeud eurioù, ha gallout a ra ar pellgasadennoù nevez dont war wel diwezhatoc'h pa vez dale gant al lanv RSS. N'eo ket hegerz gant API Invidious."
+    Platforms Auto Refresh Interval: Pegen alies e vez adkarget ar chadennoù a heuliit war savennoù all ent emgefreek gant OpenTubeX e-pad ma vez digor an arload.
+    Twitch Notify When Live: Ho kemenn a ra pa grog unan eus ar chadennoù Twitch a heuliit da skignañ. Gwiriañ a ra OpenTubeX bep un nebeud munutennoù keit ha ma vez digor, hag ivez keit ha ma vez serret ma nevesa ar c'houmanantoù neuze.
+  Theme Settings:
+    Only Show Important Notifications: Kuzhat a ra ar c'hemennoù en arload na reont nemet kadarnaat un ober pe reiñ ur stad, en o zouez ar re a ginnig Dizober. Diskouezet e vez c'hoazh ar fazioù, ar c'hemennoù-diwall, an degasoù-koun ho peus kefluniet hag ar c'hemennoù a c'houlenn un diviz, evel ar c'hinnigoù hizivaat. Diskouezet e vez araokadur an oberoù en drekleur, evel freskaat ar c'houmanantoù, er varrenn araokadur hollek e-lec'h en ur c'hemenn. Ar c'hemennoù reizhiad n'int ket tizhet.
+    Visible Search Suggestions: "Termeniñ a ra pet enmont eus ar roll-istor klask ha pet kinnig a ziskouez ar varrenn glask a-raok ma ranker dibunañ he roll. Ne ya morse ar roll en tu all da draoñ ar prenestr."
+    Thumbnail Size: "Cheñch a ra ment ar skeudennigoù videoioù er gaelioù hag el listennoù. Ar gaelioù gant un niver a vannoù start pe gant ar gwel Led klok a leugn pep renk e-lec'h, neuze ne cheñch nemet skeudennigoù al listennoù hag ar Shorts eno. War ar prenestroù ment ur pellgomzer eo bevennet skeudennigoù ar gael da 100%."
+    Playlist Thumbnail Size: "Cheñch a ra ment ar skeudennigoù videoioù war pajennoù ar rolloù-lenn. Ar gaelioù gant un niver a vannoù start pe gant ar gwel Led klok a leugn pep renk e-lec'h, neuze ne cheñch nemet skeudennigoù al listennoù hag ar Shorts eno. War ar prenestroù ment ur pellgomzer eo bevennet skeudennigoù ar gael da 100%."
+    Compact Settings Categories: "Kuzhat a ra an deskrivadurioù ha bihanaat a ra uhelder rummadoù an arventennoù."
+    Show Progress as Notification: "Diskouez ur rebuad padus gant araokadur diouzhtu evit an oberoù en drekleur, evel adkargañ ar c'houmanantoù ha pellgargañ ostilhoù meret, e-lec'h implijout ar varrenn araokadur hollek."
+    Always Show Scrollbars: "Derc'hel ar barrennoù dibunañ gwelus bepred. Pa vez diweredekaet e steuziont nebeut goude ma paouezit da zilec'hiañ al logodenn hag e tistroont kerkent ha ma tilec'hiit anezhi en-dro."
+    Scroll Speed: "Kemmañ ar pellder dibunañ gant rod al logodenn ha jestroù rod ar c'horreenn-stok."
+    Use Fixed Tab Width: "Reiñ ar memes ledander da bep ivinell er varrenn ivinelloù a-blaen e-lec'h azasaat anezho diouzh o zitl."
+    Use Custom Title Bar: Erlec'hiañ a ra barrenn-ditl ar reizhiad gant barrenn an ivinelloù, pe gant ar merdeiñ uhel pa n'emañ ket an ivinelloù e krec'h, evit espern lec'h a-serzh. Boutonoù ar prenestr a zeu war wel e korn ar varrenn-se.
+    Use Grid Player Menu: "Aozadur lañser arventennoù al lenner video evel ur gael karrelloù e-lec'h ur roll linennoù."
+    Modal Backdrop: "Termeniñ a ra penaos e weler an arload a-dreñv ar boestoù-emziviz hag al lañserioù. Gorrek e c’hall bezañ an dispisaat war ar binvioù nebeutoc’h galloudek."
+    Click Scrollbar Track to Scroll: "Klikañ war ur varrenn dibunañ er-maez eus he dorn a zibun war-dro ur bajenn war-du ar c'hlik. E-pad m'eo gweredekaet, ur varrenn dibunañ gwelus a dap ar c'hlikoù evit an elfennoù dindani. Barrenn dibunañ barrenn an ivinelloù a ya en doare-se bepred."
+  SponsorBlock Settings:
+    Always Show DeArrow Badge: Lakaat afell DeArrow da chom gwelus war ar videoioù ma'z eo bet erlec'hiet o zitl pe o skeudennig gant DeArrow, e plas nemet pa dremen al logodenn warnañ.
+The playlist is at the beginning. Enable loop to continue playing: "Ar roll-videoioù zo en e zerou. Gweredekait al lenn en ur voul evit kenderc'hel da lenn"
+External link opening has been disabled in Settings → Privacy: "Diweredekaet eo bet digeriñ al liammoù diavaez en Arventennoù → Prevezded"
+KeyboardShortcutPrompt:
+  Mark Seen or Watched: "Merkañ an elfenn diuzet evel gwelet, pe cheñch ma 'z eo bet sellet outañ"
+  Toggle Quick Bookmark: Ouzhpennañ d'ar roll-lenn sined prim pe dilemel diouti
+  Reopen Closed Window: Digeriñ ar prenestr diwezhañ serret en-dro
+  Edit Hint: "Diuzit ur verradenn, ha pouezit war ur c'hediad stokelloù nevez. Pouezit war Kilennañ pe Dilemel evit distagañ anezhi."
+  Change Shortcut: "Kemmañ ar verradenn evit {action}"
+  Press Shortcut: "Pouezit war ur verradenn…"
+  Unassigned: "Distaget"
+  Reset Shortcut: "Adderaouekaat ar verradenn evit {action}"
+  Reset to Defaults: "Adlakaat ar gwerzhioù dre ziouer"
+  Shortcut Already Assigned: "Deverket eo ar verradenn dija"
+  Shortcut Conflict: "Deverket eo dija {shortcut} da {actions}. E adverkañ?"
+  Reserved Shortcut Conflict: "Miret eo {shortcut} evit {actions} ha ne c'hall ket bezañ adverker."
+  Reassign: "Adverkañ"
+  Sections:
+    App:
+      Tabs: "Arload:\_Ivinelloù"
+      Search and Page: "Arload:\_Klask & Pajenn"
+      Window and View: "Arload:\_Prenestr & Gwel"
+  New Tab: "Krouiñ un ivinell nevez"
+  Close Tab: "Serriñ an ivinell vremanel"
+  Reload Tab: "Adkargañ an ivinell vremanel"
+  Reopen Closed Tab: "Addigeriñ an ivinell serret diwezhañ"
+  Next Tab: "Tremen d'an ivinell da-heul"
+  Previous Tab: "Tremen d'an ivinell gent"
+  Switch to Tab: "Tremen d'an ivinell 1 da 9"
+  Toggle Tab Orientation: "Cheñch etre aozadurioù an ivinelloù"
+  Find in Page: "Klask testenn er bajenn vremanel"
+  Find Next Match: "Mont d'ar genglotadenn da-heul"
+  Find Previous Match: "Mont d'ar genglotadenn gent"
+  Toggle Normal Playback Speed: "Cheñch etre an tizh 1x hag an tizh lenn kent"
+  Toggle Skip Silence: "Gweredekaat pe ziweredekaat al lamm dre ar sioulder"
+  Set A-B Repeat Point A: "Lakaat poent A an adlenn A-B"
+  Set A-B Repeat Point B: "Lakaat poent B an adlenn A-B"
+  Clear A-B Repeat: "Skarzhañ an adlenn A-B"
+  Video Zoom In: "Brasaat ar video"
+  Video Zoom Out: "Bihanaat ar video"
+  Tab Switcher: "Cheñcher ivinelloù"
+  Undo Seek: Dizober al lamm diwezhañ
+  Redo Seek: Adober ul lamm dizobereet
+CommandPalette:
+  Title: "Paled arc'hadoù"
+  Open: "Digeriñ ar baled arc'hadoù"
+  Search Label: "Klask arc'hadoù, arventennoù ha videoioù lec’hel"
+  Search Placeholder: "Klask arc'hadoù, arventennoù ha videoioù lec’hel…"
+  Results: "Disoc'hoù"
+  No Results: "N'eus disoc'h ebet o klotañ"
+  Result Count: "Disoc'hoù: {count} | Disoc'hoù: {count} | Disoc'hoù: {count} | Disoc'hoù: {count} | Disoc'hoù: {count}"
+  Move: "Dilec'hiañ"
+  Run: "Erounit"
+  Keys:
+    Up: ↑
+    Down: ↓
+    Escape: Esc
+  Switch to Tab: "Tremen d'an ivinell: {title}"
+  Switch Profile: "Cheñch profil: {name}"
+  Open Playlist: "Digeriñ ar roll-videoioù: {name}"
+  Cancel Download: "Nullañ ar pellgargadenn: {title}"
+  Groups:
+    App: "Arload"
+    Navigation: "Merdeiñ"
+    Tabs: "Ivinelloù"
+    Local Videos: Videoioù lec’hel
+  Unavailable:
+    Current Page: "War ar bajenn-mañ emaoc'h dija"
+    No History: "N'eus pajenn ebet war an tu-mañ"
+    Desktop: "Hegerz en arload burev hepken"
+    Build: "N'eo ket hegerz er stumm-mañ"
+    One Tab: "Digerit un ivinell all da gentañ"
+    Active Tab: "An ivinell oberiant eo homañ"
+    Active Profile: "Ar profil oberiant eo hemañ"
+    Download Finished: "N'emañ ket ar pellgargadenn-mañ war ober ken"
+    Video: "Digerit ur video da gentañ"
+Downloads:
+  File Name Template Invalid: 'Implijit un hent keñverel e-barzh an teuliad pellgargañ hep "..", "~", "$", "%" pe ur rakger evel "thumbnail:".'
+  Search Completed: "Klask en pellgargadennoù echuet dre ditl pe dre chadenn"
+  Format: "Furmad"
+  All Formats: "An holl furmadoù"
+  Largest First: "Ar re vrasañ da gentañ"
+  Smallest First: "Ar re vihanañ da gentañ"
+  No Matching Downloads: "N’eus pellgargadenn echuet ebet a glot. Klaskit pe silit en un doare all."
+  Add Download: Ouzhpennañ ur bellgargadenn
+  Preparing: O prientiñ…
+  Export Failed: "N'eo ket bet posupl enrollañ ar restr pellgarget. Dibabit un teuliad pellgargañ a c'haller skrivañ ennañ ha klaskit en-dro."
+  Native Code Blocked: "Stanket eo bet gant Android karga levraouegoù genidik yt-dlp. War GrapheneOS, digorit titouroù an arload-mañ, lakait “Dynamic code loading via storage” e “Exploit protection” war “Allowed” ha klaskit en-dro."
+  Download Stopped Unexpectedly: "Paouezet eo ar pellgargañ dic’hortoz."
+  Remove File Permanently Warning: "Diverket e vo \"{title}\" da vat."
+  Download: "Pellgargañ"
+  Download Video: "Pellgargañ ar video"
+  Download Playlist: "Pellgargañ ar roll-videoioù"
+  Downloading: "O pellgargañ"
+  Queue: "Lost"
+  Downloaded: "Pellgarget"
+  Canceled: "Nullet"
+  Open Downloads: "Digeriñ ar pellgargadennoù"
+  No Downloads: "Pellgargadenn ebet c'hoazh"
+  No Downloads Description: "Diskouezet e vo amañ ar pellgargadennoù a loc'hit."
+  Clear Failed Canceled Skipped And Missing: "Skarzhañ ar re c'hwitet, nullet, lammet hag a vank"
+  Clear From List: "Tennañ kuit eus ar roll"
+  Show in Folder: "Diskouez en teuliad"
+  Play Download: "Lenn ar pellgargadenn"
+  Retry Download: "Adloc'hañ ar pellgargadenn"
+  Pause Download: "Lakaat ar pellgargadenn en ehan"
+  Resume Download: "Adkregiñ gant ar pellgargadenn"
+  Move Earlier: "Dilec'hiañ a-raok"
+  Move Later: "Dilec'hiañ war-lerc'h"
+  Pause All: "Lakaat pep tra en ehan"
+  Resume All: "Adkregiñ gant pep tra"
+  Retry All: "Adloc'hañ an holl bellgargadennoù c'hwitet"
+  Total Size: "Ment hollek: {size}"
+  Local File: "Restr lec'hel"
+  Available Offline: "Hegerz ezlinenn"
+  Remove File: "Dilemel ar restr"
+  Remove File Confirmation: "Dilemel ar restr pellgarget?"
+  Remove File Warning: "Kaset e vo «{title}» da lastez ho trevnad."
+  File Not Found: "N'eus ket bet gallet kavout ar restr pellgarget."
+  Files Missing: "N'eo ket hegerz ken ar restr pellgarget war ar reizhiad restroù. | N'eo ket hegerz ken ar restroù pellgarget war ar reizhiad restroù. | N'eo ket hegerz ken ar restroù pellgarget war ar reizhiad restroù. | N'eo ket hegerz ken ar restroù pellgarget war ar reizhiad restroù. | N'eo ket hegerz ken ar restroù pellgarget war ar reizhiad restroù."
+  Files Available: "{available} diwar {total} restr pellgarget zo hegerz."
+  More Files: "{count} restr ouzhpenn | {count} restr ouzhpenn | {count} restr ouzhpenn | {count} restr ouzhpenn | {count} restr ouzhpenn"
+  Template Used: "Patrom: {name}"
+  Template: "Patrom"
+  Unsaved: "Dienroll"
+  Media Type: "Doare media"
+  Video: "Video"
+  Audio: "Son"
+  Maximum Resolution: "Diarunusted brasañ"
+  Best Available: "An hini gwellañ hegerz"
+  Automatic: "Emgefreek"
+  Container: "Endalc'her"
+  Video Codec: "Boneger-eziger video"
+  Audio Codec: "Boneger-eziger son"
+  File Name Template: "Patrom anv restr"
+  File Name Template Help: "Maeziennoù hegerz: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}"
+  Time Range and Chapters: "Etremez amzer ha chabistroù"
+  Start Time: Mare deroù
+  End Time: Mare dibenn
+  Split by Chapters: "Dispartiañ e restroù distag dre chabistr"
+  Remove Segments: "Dilemel rannoù"
+  Subtitles and Metadata: "Istitloù ha metaroadennoù"
+  Include Subtitles: "Enkorfañ an istitloù"
+  Embed Subtitles: "Enframmañ an istitloù er restr media"
+  Subtitle Format: "Mentrezh an istitloù"
+  Subtitle Languages: "Yezhoù an istitloù"
+  Subtitle Languages Help: "Diuzerioù yezh yt-dlp dispartiet gant skejoù, da skouer: en.*,de.*"
+  Embed Cover Art: "Enframmañ ar skeudennig evel golo"
+  Embed Metadata: "Enframmañ an titl, an aozer, an deskrivadur hag ar chabistroù"
+  Additional yt-dlp Arguments: "Arventennoù yt-dlp ouzhpenn"
+  Template Name: "Anv ar patrom"
+  Save Template: "Enrollañ ar patrom"
+  Delete Template: "Dilemel ar patrom"
+  Template Saved: "Enrollet eo bet ar patrom pellgargañ «{name}»"
+  Template Name Exists: "Ur patrom pellgargañ anvet «{name}» zo anezhañ dija."
+  Choose Folder: "Kemmañ"
+  Select Folder: "Dibab un teuliad"
+  Folder Required: "Dibabit un teuliad pellgargañ evit gweredekaat ar pellgargadennoù."
+  System Downloads Folder: "Teuliad Pellgargadennoù ar reizhiad"
+  Processing: "O tretañ…"
+  Queued: "El lost"
+  Queued Position: "El lost, el lec'h {position}"
+  Paused: "En ehan"
+  Pausing: "Echuiñ a raio al labour vremanel, ha lakaet e vo al lost en ehan"
+  Download Complete: "Pellgargadenn echu"
+  Download Cancelled: "Pellgargadenn nullet"
+  Download Failed: "Pellgargadenn c'hwitet"
+  File Name Shortened: "Berreet eo bet anv ar restr rak re hir e oa titl ar video."
+  Some Videos Not Downloaded: Ul lodenn eus ar videoioù er roll-lenn-mañ n'int ket bet pellgarget.
+  Playlist Video Position: Video {index} diwar {count}
+  Insufficient Disk Space: "N'eus ket trawalc'h a blas war ar bladenn. War-dro {required} zo rekis ha {available} zo hegerz."
+  Unknown Download Size: "Dianav eo ment ar pellgargadenn. {available} zo hegerz war ar reizhiad restroù pal."
+  Disk Space Check Unavailable: "N'eus ket bet gallet gwiriañ ar plas dieub war ar bladenn a-raok loc'hañ ar pellgargadenn-mañ."
+  Download Failure Hint: "Gwiriit {issuesLink}, ha klaskit cheñch kanol yt-dlp da Nightly pe Master en Arventennoù → Araokaet → Meziantoù diavaez."
+  yt-dlp YouTube Issues: "kudennoù yt-dlp nevez evit YouTube"
+  Automatic Download Started: "Loc'het eo ar pellgargadenn emgefreek"
+  Automatic Download Started Body: "O pellgargañ «{title}» eus {channel} en drekleur."
+  Automatic Download Complete: "Echu eo ar pellgargadenn emgefreek"
+  Automatic Download Failed: "C'hwitet eo ar pellgargadenn emgefreek"
+  Automatic Download Could Not Start: "N'eus ket bet gallet loc'hañ pellgargadenn emgefreek «{title}»."
+  Automatic Download Skipped: "Lammet eo bet gant siloù ar pellgargañ emgefreek"
+  Cancel Download: "Nullañ ar pellgargadenn"
+  yt-dlp Not Found: "N'eo ket bet kavet yt-dlp. Staliit anezhañ pe lakait e hent en Arventennoù → Araokaet → Meziantoù diavaez."
+  Download Complete Template: "Echu eo pellgargañ «{title}»"
+  Download Failed Template: "C'hwitet eo pellgargañ «{title}»"
+  Templates:
+    Video Best: "Video: perzhded gwellañ"
+    Video Resolution: "Video: {resolution}"
+    Audio Best: "Son: perzhded gwellañ"
+    Audio Format: "Son: {format}"
+    Subtitles Format: "Istitloù: {format}"
+  Waiting for Unmetered Network: "O c'hortoz ur rouedad hep muzuliañ"
+  Waiting for Charging: "O c'hortoz ur garger"
+  Remove File Failed: N’eus ket bet gallet dilemel ar restr pellgarget.
+Channels:
+  Load More Channels: "Kargañ muioc'h a chadennoù"
+Theme Discovery:
+  Discover Themes: "Dizoleiñ neuzioù"
+  Refresh: "Freskaat"
+  View on GitHub: "Gwelet war GitHub"
+  Load Error: "N'eus ket bet gallet kargañ an neuzioù. Klaskit freskaat."
+  Loading: "O kargañ…"
+  No Themes: "N'eus bet kavet neuz ebet da staliañ."
+  No Preview: "Tapadenn skramm dihegerz"
+  Load More: "Kargañ muioc'h"
+  Applied: "Arloet"
+  Apply Theme: "Arloañ an neuz"
+  Install and Apply: "Staliañ hag arloañ"
+  Update and Apply: "Hizivaat hag arloañ"
+
+Connection:
+  Offline: Ezlinenn
+  Reconnecting: "Kollet eo ar cʼhennask. O klask adkennaskañ…"
+  Back Online: "Enlinenn en-dro"
+
+App Icon:
+  Restart: "Adloc'hañ an arload"
+  Saved Message: "Enrollet eo an arlun. Un tamm amzer a c'hall bezañ ret d'al lañser evit hizivaat anezhañ."
+  Title: "Arlun an arload"
+  Error: "N'eus ket bet gallet kargañ pe cheñch arlun an arload"
+
+Tray:
+  Hide All Windows: "Kuzhat an holl brenestroù"
+  Show All Windows: "Diskouez an holl brenestroù"
+
+Tray Icon:
+  Title: "Arlun ar maez reizhiad"
+  Follow App Theme: "Heuliañ neuz an arload"
+  Monochrome: "Unliv"
+
+Form Inputs:
+  Browse: "Furchal"
+  Use Default Path: "Implijout an hini dre ziouer"
+  Enter Password Hint: "Enlakait ho ker-tremen"
+  Choose Password Hint: "Dibabit ur ger-tremen"
+  Confirm Password Hint: "Adskrivit ho ker-tremen nevez"
+  Encryption Passphrase Hint: "Enlakait ho frazenn-tremen sifrañ"
+  Show Password: "Diskouez ar ger-tremen"
+  Hide Password: "Kuzhat ar ger-tremen"
+  Search Text Hint: "Enlakait gerioù klask"
+  Playlist Description Hint: "Deskrivit ar roll-lenn-mañ"
+  Filename Preview: "Alberz eus anv ar restr"
+  Enter Channels: "Merkit ar chadennoù"
+  Enter Text: "Merkit un destenn"
+  Video URL: URL video pe roll-lenn
+  Paste Link: Pegit ul liamm video pe roll-lenn
+  Example: da skouer {example}
+  No Minimum: Hep izelañ
+  No Maximum: Hep uhelañ
+  Any Age: Oad forzh pe hini
+  Included Terms Example: da skouer kentel, selladenn
+  Excluded Terms Example: da skouer tañva, rakwel
+  Global Arguments Hint: Arventennoù diret evit pep pellgargadenn
+  Unlimited Hint: 0 evit didermenet
+  Add Argument: Ouzhpennañ un arventenn
+  Template Name Example: da skouer Son hepken
+  Download Arguments Hint: Arventennoù diret evit ar bellgargadenn-mañ
+  Generated ID Hint: Lezit goullo evit genel un ID
+  Default Value: "Dre ziouer: {value}"
+
+Search Filters:
+  Possible Age Restriction Hint: "YouTube en deus marteze lakaet un harz oad war ar goulenn klask-mañ."
+  Cookie Search Failed: "Cʼhwitet eo ar cʼhlask gant an toupinoù kefluniet."
+  Showing results for: "O tiskouez disoc'hoù evit {query}"
+  Search instead for: "Klask {query} kentoc'h"
+  Including results for: "En ur lakaat disoc'hoù evit {query}"
+  Search only for: "Klask {query} hepken"
+  Did you mean: "Ha soñjal a raes e {query}?"
+
+Storage Startup Error:
+  Title: "N'eus ket bet gallet kargañ roadennoù an arload"
+  Message: "Dieubit plas war an trevnad ha klaskit en-dro. Ehanet eo ar goubredañ betek ma vo karget ho roadennoù."
+  Web Message: "Ma'z eo digor OpenTubeX en ivinell all, serrit anezhi hag klaskit en-dro."
+  Insecure Web Message: "Ne c'hall OpenTubeX enrollañ ho roadennoù nemet pa vez digoret dre HTTPS pe war localhost. Digorit ar chomlec'h-mañ gant https:// e-lec'h."
+  Retry: "Klask en-dro"
+Search Bar:
+  Use Suggestion: Implij ar c’hinnig
+
+Native Permissions:
+  Local Network Denied: "Nac’het eo bet an aotre evit an trevnadoù tost."
+  Local Network: "Kavout trevnadoù war ho rouedad lec'hel ha skignañ videoioù warno, ha goubredañ an arventennoù hag ar roadennoù etre trevnadoù."
+
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Degemer"
+  subscriptions: "Kouman."
+  userplaylists: "Rolloù"
+  history: "Istor"
+  subscribedchannels: "Chadennoù"
+  trending: "Er cʼhiz"
+  popular: "Poblek"
+  stats: "Stadegoù"
+  more: "Muioc'h"
+
+Installer:
+  Create Desktop Shortcut: Krouiñ ur verradenn war ar burev
+Older Version Changes:
+  Title: "Kemmoù eus ur stumm koshoc'h"
+  Message: "Ar c'hemmoù graet ganeoc'h en ur stumm koshoc'h eus OpenTubeX a zo bet lakaet en ho levraoueg."
+  Detail: "Ma oa bet kemmet un elfenn en daou stumm, eo bet miret ar c'hemm eus ar stumm koshañ. Un eilenn gwarez eus ho levraoueg a-raok a zo en teuliad ar profil."
+Library Format Changed:
+  Title: "Dilec'hiet eo al levraoueg d'ur stumm nevez"
+  Message: "Ul lakadur stokañ nevez a vez implijet gant ho levraoueg bremañ."
+  Detail: "Gallout a ra stummoù koshoc'h OpenTubeX digeriñ ho levraoueg c'hoazh, met diskouez a reont anezhi evel ma oa a-raok an hizivadenn-mañ. Ar c'hemmoù a rit en ur stumm koshoc'h a vez ouzhpennet pa zistroit d'ar stumm-mañ."
+Invidious Fallback Warning: "An azgoulenn-mañ a dremen heb ho skouer Invidious kefluniet hag a gennask war-eeun ouzh YouTube, o tiskouez ho chomlec’h IP."
+Automatically unloaded to free memory: "Diskarget ent emgefre evit dieubiñ memor"
+Home Widgets:
+  Continue Watching: "Kenderc'hel da sellet"
+  Continue Watching Description: "Kenderc'hel gant ar videoioù boulc'het ganeoc'h"
+  Continue Watching Empty: "Ar videoioù a vez boulc'het ganeoc'h a zeuio war wel amañ"
+  Quick Access: "Haeziñ prim"
+  Quick Access Description: "Digeriñ betek 4 pajenn dibabet ganeoc'h"
+  Choose Pages: "Dibabit betek 4 pajenn"
+  Pages: "Pajennoù"
+  Search: "Klask"
+  Subscriptions: "Koumanantoù"
+  Watch Later: "Da sellet diwezhatoc'h"
+  History: "Istor"
+  Playlists: "Rolloù"
+  Downloads: "Pellgargadennoù"
+  Watch Time: "Amzer sellout"
+  Watch Time Description: "Hoc'h amzer sellout e-pad ar 7 devezh diwezhañ"
+  Today: "Hiziv"
+  Last 7 Days: "Ar 7 devezh diwezhañ"
+  Recent Downloads: "Pellgargadennoù nevez"
+  Recent Downloads Description: "Lenn ar videoioù pellgarget ganeoc'h"
+  Recent Downloads Empty: "Ar videoioù a bellgargit a zeuio war wel amañ"
+Subscription Groups:
+  Groups: Strolladoù
+  All: An holl
+  New Group: Strollad nevez
+  Edit Group: Kemmañ ar strollad
+  Group Name: Anv ar strollad
+  Create: Krouiñ
+  Save: Enrollañ
+  Delete Group: Dilemel ar strollad
+  Delete Prompt: Dilemel ar strollad "{groupName}" ? Ar chadennoù ennañ a chomo koumanantet.
+  Empty Group: N'eus chadenn ebet eus ar profil red er strollad-mañ.
+  Save Failed: N'eus ket bet gallet enrollañ ar strollad.
+  Delete Failed: N'eus ket bet gallet dilemel ar strollad.
+  Group Icon: Arlun ar strollad
+  No Icon: Arlun ebet
+Yattee Server:
+  API Error (Click to copy): Fazi gant ar servijer Yattee (Klikit evit eilañ)
+  Unsupported page: "N'eo ket hegerz ar bajenn-mañ gant ar servijer Yattee. Gweredekait «\_{fallbackSetting}\_» evit he c'hargañ gant an API lec'hel."
+  Posts unavailable: "Ne bourchas ket ar servijerioù Yattee pennadoù. Gweredekait «\_{fallbackSetting}\_» evit o c'hargañ gant an API lec'hel."
+  Errors:
+    Invalid credentials: Nac'het en deus ar servijer Yattee an anv implijer pe ar ger-tremen. Gwiriit anezho en Arventennoù → Araokaet.
+    Rate limited: Stankañ a ra ar servijer Yattee ar c'hennaskadennoù goude re a daolioù-esae c'hwitet. Klaskit en-dro diwezhatoc'h.
+    Streams not relayed: N'en deus ket treuzkaset ar servijer Yattee gwazhioù ar video-mañ. E-pad ma vez kaset ar videoioù dre ar servijer, ne gennask ket OpenTubeX war-eeun ouzh YouTube.
+    Not configured: Roit URL ho servijer Yattee en Arventennoù → Araokaet.
+    HTTPS required: Ne c'hall Android lenn videoioù nemet eus servijerioù Yattee a implij HTTPS.
+    Streams unavailable: N'haller ket kargañ froudoù ar video-mañ eus ar servijer Yattee. Implijit « Amprouiñ ar c'hennask » en Arventennoù → Araokaet evit gwiriañ ar servijer.
+Yattee Fallback Warning: An azgoulenn-mañ a dremen heb ho servijer Yattee kefluniet hag a gennask war-eeun ouzh YouTube, o tiskouez ho chomlec'h IP.
+Update With Package Manager: 'Hizivaat gant {packageManager}:'
+Update Command Copied: 'Eilet eo bet an urzhiad hizivaat'
+Digital Wellbeing:
+  Watch time limit almost reached: "{duration} a chom a-raok ho pevenn bemdeziek amzer sellet"
+  Shorts limit almost reached: "{duration} a chom a-raok ho pevenn bemdeziek Shorts"
+  Daily watch time limit reached: "Tizhet eo ar vevenn bemdeziek amzer sellet"
+  Daily Shorts limit reached: "Tizhet eo ar vevenn bemdeziek Shorts"
+  Watched today: "Sellet ho peus e-pad {duration} hiziv."
+  Shorts watched today: "Sellet ho peus ouzh Shorts e-pad {duration} hiziv."
+  15 More Minutes: "15 munutenn ouzhpenn"
+  Ignore for Today: "Leuskel a-gostez evit hiziv"
+  Time to take a break: "Poent eo ober un ehan"
+  Watching for: "Emaoc'h o sellet abaoe {duration}."
+  Time for bed: "Poent eo mont da gousket"
+  Bedtime started at: "Kroget eo ho mare kousket da {time}."
+  Remind Me in 10 Minutes: "Degas da soñj din a-benn 10 munutenn"
+Notification Center:
+  Notifications: "Kemennoù"
+  Notifications With Unread: "Kemennoù (n’int ket bet lennet: {count})"
+  Mark as Read: "Merkañ evel lennet"
+  Mark All as Read: "Merkañ pep tra evel lennet"
+  Clear All: "Skarzhañ pep tra"
+  Clear: "Skarzhañ"
+  Empty: "Kemenn ebet evit c’hoazh"
+  Empty Hint: "An dalc’hoù-soñj evit ar c’hwitelladennoù war-eeun hag ar pellgasadennoù nevez eus ar chadennoù gant kemennoù gweredekaet a zeuio war wel amañ."
+Platforms:
+  Tracks: Tonioù
+  Playlists: Rolloù lenn
+  Follower Count: '{count} heulier | {count} heulier | {count} heulier | {count} a heulierien | {count} heulier'
+  Open Website: Digeriñ war {platform}
+  Channel Not Found: N'eus ket bet kavet ar chadenn-mañ.
+  Playlist Not Found: N'eus ket bet kavet ar roll lenn-mañ.
+  Load Error: N'eus ket bet gallet kargañ ar bajenn-mañ diwar {platform}.
+  Empty Tab: N'eus netra amañ c'hoazh.
+YouTube Account:
+  Like: "Plijout a ra din"
+  Dislike: "Ne blij ket din"
+  Rating Failed: "N'eus ket bet gallet notenniñ war YouTube: {error}"
+  Subscribe Failed: "N'eus ket bet gallet koumanantiñ war YouTube: {error}"
+  Unsubscribe Failed: "N'eus ket bet gallet digoumanantiñ war YouTube: {error}"
+  Subscriptions Synced: "Koumanantoù goubredet eus YouTube: {added} ouzhpennet, {removed} lamet"
+  Playlist Update Failed: "N'haller ket hizivaat {playlistName} war YouTube: {error}"
+  Add a comment: "Ouzhpennañ un evezhiadenn"
+  Add a reply: "Ouzhpennañ ur respont"
+  Switch Channel: "Cheñch chadenn"
+  Comment: "Embann"
+  Reply: "Respont"
+  Comment Posted: "Embannet eo an evezhiadenn"
+  Reply Posted: "Embannet eo ar respont"
+  Comment Failed: "N'eus ket bet gallet embann an evezhiadenn: {error}"
+  Delete Comment: "Dilemel an evezhiadenn"
+  Delete Comment Confirmation: "Dilemel hoc'h evezhiadenn eus YouTube?"
+  Comment Deleted: "Dilamet eo an evezhiadenn"
+  Delete Comment Failed: "N'eus ket bet gallet dilemel an evezhiadenn: {error}"
+  Edit Comment: "Kemmañ an evezhiadenn"
+  Save: "Enrollañ"
+  Comment Edited: "Kemmet eo an evezhiadenn"
+  Edit Comment Failed: "N'eus ket bet gallet kemmañ an evezhiadenn: {error}"
+  Recommendations: "Erbedadennoù YouTube"
+  Recommendations Failed: "N'eus ket bet gallet kargañ hoc'h erbedadennoù YouTube."

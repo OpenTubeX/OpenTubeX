@@ -1,37 +1,92 @@
 <template>
   <FtPrompt
     theme="flex-column"
+    fixed-layout
     :label="title"
     :inert="showingCreatePlaylistPrompt"
     @click="hide"
   >
-    <p class="selected-count">
-      {{ t('User Playlists.AddVideoPrompt.N playlists selected', {
-        playlistCount: selectedPlaylistCount,
-      }, selectedPlaylistCount) }}
-    </p>
-    <template
-      v-if="allPlaylists.length > 1"
-    >
+    <template #label="{ labelId }">
+      <h2
+        :id="labelId"
+        class="playlistPromptHeading"
+      >
+        {{ title }}
+      </h2>
+      <ul class="videoSummary">
+        <li
+          v-for="(video, index) in previewVideos"
+          :key="index"
+          class="videoSummaryItem"
+        >
+          <img
+            v-if="video.thumbnail"
+            :src="video.thumbnail"
+            class="videoSummaryThumbnail"
+            alt=""
+          >
+          <div class="videoSummaryText">
+            <span class="videoSummaryTitle">{{ video.title }}</span>
+            <span
+              v-if="video.author"
+              class="videoSummaryAuthor"
+            >{{ video.author }}</span>
+          </div>
+        </li>
+        <li
+          v-if="hiddenVideoCount > 0"
+          class="videoSummaryMore"
+        >
+          {{ t('User Playlists.AddVideoPrompt.And N more videos', { count: hiddenVideoCount }, hiddenVideoCount) }}
+        </li>
+      </ul>
+      <p class="selected-count">
+        {{ t('User Playlists.AddVideoPrompt.N playlists selected', {
+          playlistCount: selectedPlaylistCount,
+        }, selectedPlaylistCount) }}
+      </p>
       <div
-        class="searchInputsRow"
+        v-if="allPlaylists.length > 1"
+        class="controlsRow"
       >
         <FtInput
           ref="searchBar"
-          :placeholder="t('User Playlists.AddVideoPrompt.Search in Playlists')"
-          :show-clear-text-button="true"
+          class="searchInput"
+          input-type="search"
+          :label="t('User Playlists.AddVideoPrompt.Search in Playlists')"
+          :icon="['fas', 'search']"
+          :placeholder="t('Form Inputs.Search Text Hint')"
           :show-action-button="false"
           :maxlength="255"
           @input="updateQueryDebounce"
-          @clear="updateQueryDebounce('')"
+        />
+        <FtIconButton
+          v-if="phoneLayout"
+          :title="t('Search Filters.Search Filters')"
+          :icon="['fas', 'filter']"
+          :aria-expanded="showFilters"
+          theme="secondary"
+          @click="showFilters = !showFilters"
+        />
+        <div
+          :id="optionsTargetId"
+          class="optionsTarget"
         />
       </div>
+    </template>
+    <Teleport
+      v-if="allPlaylists.length > 1"
+      defer
+      :to="`#${optionsTargetId}`"
+      :disabled="phoneLayout"
+    >
+      <!-- Phones hide the filters behind a button, but keep the duplicate switch in view while it applies -->
       <div
+        v-show="!filtersHidden || anyPlaylistContainsVideosToBeAdded"
         class="optionsRow"
+        :class="{ filtersHidden }"
       >
-        <div
-          class="tightOptions"
-        >
+        <div class="optionToggles">
           <FtToggleSwitch
             class="matchingVideoToggle"
             :label="t('User Playlists.Playlists with Matching Videos')"
@@ -58,8 +113,13 @@
           @change="sortBy = $event"
         />
       </div>
-    </template>
-    <div class="playlists-container">
+    </Teleport>
+    <div
+      ref="playlistsContainer"
+      class="playlists-container"
+      :class="playlistAppearance"
+      :style="{ minBlockSize: searchMinHeight === null ? null : `${searchMinHeight}px` }"
+    >
       <FtFlexBox>
         <div
           v-for="playlist in activePlaylists"
@@ -73,6 +133,7 @@
           <FtPlaylistSelector
             :tabindex="playlistDisabled(playlist._id) ? -1 : 0"
             :playlist="playlist"
+            :appearance="playlistAppearance"
             :selected="selectedPlaylistIdList.includes(playlist._id)"
             :disabled="playlistDisabled(playlist._id)"
             :adding-duplicate-videos-enabled="addingDuplicateVideosEnabled"
@@ -81,49 +142,71 @@
         </div>
       </FtFlexBox>
     </div>
-    <div class="actions-container">
-      <FtFlexBox>
-        <FtButton
-          :label="t('User Playlists.Create New Playlist')"
-          @click="openCreatePlaylistPrompt"
-        />
-        <FtButton
-          :label="t('User Playlists.AddVideoPrompt.Save')"
-          @click="addSelectedToPlaylists"
-        />
-        <FtButton
-          :label="t('User Playlists.Cancel')"
-          :text-color="null"
-          :background-color="null"
-          @click="hide"
-        />
-      </FtFlexBox>
-    </div>
+    <template #footer>
+      <div class="actions-container">
+        <FtButtonGroup>
+          <FtButton
+            :label="t('User Playlists.Create New Playlist')"
+            :icon="['fas', 'playlist-add']"
+            @click="openCreatePlaylistPrompt"
+          />
+          <FtButton
+            theme="primary"
+            :label="t('User Playlists.AddVideoPrompt.Save')"
+            :icon="['fas', 'floppy-disk']"
+            :disabled="saving"
+            @click="addSelectedToPlaylists"
+          />
+          <FtButton
+            :label="t('User Playlists.Cancel')"
+            :icon="['fas', 'xmark']"
+            :text-color="null"
+            :background-color="null"
+            @click="hide"
+          />
+        </FtButtonGroup>
+      </div>
+    </template>
   </FtPrompt>
 </template>
 
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import FtButtonGroup from '../FtButtonGroup/FtButtonGroup.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtButton from '../FtButton/FtButton.vue'
+import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtPlaylistSelector from '../FtPlaylistSelector/FtPlaylistSelector.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../../store/index'
+import { usePhoneLayout } from '../../composables/usePhoneLayout'
 
 import {
   debounce,
   showToast,
   ctrlFHandler,
-  getIconForSortPreference
+  getIconForSortPreference,
+  getVideoThumbnailUrl
 } from '../../helpers/utils'
 
 const { locale, t } = useI18n()
+
+// Phones keep the playlist options in the scrolling content and preview fewer videos, so the fixed header leaves room for the playlists
+const phoneLayout = usePhoneLayout()
+const optionsTargetId = useId()
+const showFilters = ref(false)
+const filtersHidden = computed(() => phoneLayout.value && !showFilters.value)
+
+// Grid tiles take a whole phone screen each, so phones always list the playlists as rows
+const playlistAppearance = computed(() => {
+  return phoneLayout.value || store.getters.getListType === 'list' ? 'list' : 'grid'
+})
 
 const SORT_BY_VALUES = {
   NameAscending: 'name_ascending',
@@ -183,10 +266,34 @@ const title = computed(() => {
 
 const selectedPlaylistCount = computed(() => selectedPlaylistIdList.value.length)
 
+const backendPreference = computed(() => store.getters.getBackendPreference)
+
+const currentInvidiousInstanceUrl = computed(() => store.getters.getCurrentInvidiousInstanceUrl)
+
+const thumbnailPreference = computed(() => store.getters.getThumbnailPreference)
+
 /** @type {import('vue').ComputedRef<{ videoId: string, [key: string]: any }[]>} */
 const toBeAddedToPlaylistVideoList = computed(() => store.getters.getToBeAddedToPlaylistVideoList)
 
-const toBeAddedToPlaylistVideoCount = computed(() => toBeAddedToPlaylistVideoList.value.length)
+/** @type {import('vue').ComputedRef<{ promise: Promise<object[] | null>, videoCount: number, previewVideos: object[] } | null>} */
+const pendingVideos = computed(() => store.getters.getToBeAddedToPlaylistPendingVideos)
+
+// While the videos load, the prompt shows the count and preview of the playlist they come from
+const toBeAddedToPlaylistVideoCount = computed(() => pendingVideos.value?.videoCount ?? toBeAddedToPlaylistVideoList.value.length)
+
+// Phones only preview one video, so the playlists keep enough room
+const maxPreviewVideos = computed(() => phoneLayout.value ? 1 : 3)
+
+const previewVideos = computed(() => {
+  const videos = pendingVideos.value?.previewVideos ?? toBeAddedToPlaylistVideoList.value
+  return videos.slice(0, maxPreviewVideos.value).map((video) => ({
+    title: video.title,
+    author: video.author,
+    thumbnail: getVideoThumbnailUrl(video.videoId, backendPreference.value, currentInvidiousInstanceUrl.value, thumbnailPreference.value),
+  }))
+})
+
+const hiddenVideoCount = computed(() => Math.max(0, toBeAddedToPlaylistVideoCount.value - maxPreviewVideos.value))
 
 const toBeAddedToPlaylistVideoIdList = computed(() => {
   return toBeAddedToPlaylistVideoList.value.map((v) => v.videoId)
@@ -268,6 +375,8 @@ const getPlaylistIdsFiltered = (filter) => {
   const ids = new Set()
 
   const toBeAddedToPlaylistVideoIdList_ = toBeAddedToPlaylistVideoIdList.value
+  // Nothing is known about videos that are still loading
+  if (toBeAddedToPlaylistVideoIdList_.length === 0) return ids
 
   allPlaylists.value.forEach((playlist) => {
     const playlistVideoIdSet = playlist.videos.reduce((s, v) => s.add(v.videoId), new Set())
@@ -297,6 +406,32 @@ const anyPlaylistContainsVideosToBeAdded = computed(() => {
 })
 
 const searchBar = useTemplateRef('searchBar')
+const playlistsContainer = useTemplateRef('playlistsContainer')
+
+/**
+ * Keeps the prompt from shrinking and jumping while search results filter the playlists.
+ * @type {import('vue').Ref<number | null>}
+ */
+const searchMinHeight = ref(null)
+
+// The watcher runs before the DOM updates, so this measures the playlists shown before searching
+watch(processedQuery, (processedQuery_) => {
+  if (processedQuery_ === '') {
+    searchMinHeight.value = null
+  } else if (searchMinHeight.value === null && playlistsContainer.value) {
+    const container = playlistsContainer.value
+    const scroller = container.closest('.promptContentScroller')
+    const { height, bottom } = container.getBoundingClientRect()
+    // Only keep the part that fits in the scroll viewport, so the list cannot leave empty space to scroll through
+    const overflow = scroller ? Math.max(0, bottom + scroller.scrollTop - scroller.getBoundingClientRect().bottom) : 0
+    searchMinHeight.value = height - overflow
+  }
+})
+
+// The kept height no longer fits a resized window
+function releaseSearchMinHeight() {
+  searchMinHeight.value = null
+}
 
 watch(allPlaylistsLength, (val, oldVal) => {
   const allPlaylistIds = new Set()
@@ -349,7 +484,8 @@ watch(showingCreatePlaylistPrompt, (val) => {
   }
 })
 
-watch(addingDuplicateVideosEnabled, (val) => {
+// Videos that finish loading can disable playlists selected in the meantime
+watch([addingDuplicateVideosEnabled, toBeAddedToPlaylistVideoList], ([val]) => {
   if (!val) {
     // Only care when addingDuplicateVideosEnabled disabled
     // Remove disabled playlists
@@ -376,44 +512,97 @@ function countSelected(playlistId) {
   }
 }
 
-function addSelectedToPlaylists() {
-  const addedPlaylistIds = new Set()
+const saving = ref(false)
+
+async function addSelectedToPlaylists() {
+  if (saving.value) return
 
   if (selectedPlaylistIdList.value.length === 0) {
-    showToast(t('User Playlists.AddVideoPrompt.Toast["You haven\'t selected any playlist yet."]'))
+    showToast({
+      message: t('User Playlists.AddVideoPrompt.Toast["You haven\'t selected any playlist yet."]'),
+      icon: ['fas', 'circle-exclamation'],
+    })
     return
   }
 
-  const allPlaylists_ = allPlaylists.value
-  const toBeAddedToPlaylistVideoList_ = toBeAddedToPlaylistVideoList.value
+  const playlistIds = [...selectedPlaylistIdList.value]
+  const allowDuplicates = addingDuplicateVideosEnabled.value
+  const pending = pendingVideos.value
+  if (pending) {
+    // Hand the loading videos over to the save, so closing the prompt does not cancel them
+    store.commit('setToBeAddedToPlaylistPendingVideos', null)
+    hide()
+    const videos = await pending.promise
+    if (videos) await addVideosToPlaylists(playlistIds, videos, allowDuplicates)
+    return
+  }
 
-  selectedPlaylistIdList.value.forEach((selectedPlaylistId) => {
-    const playlist = allPlaylists_.find((list) => list._id === selectedPlaylistId)
-    if (playlist == null) { return }
+  saving.value = true
+  try {
+    await addVideosToPlaylists(playlistIds, toBeAddedToPlaylistVideoList.value, allowDuplicates)
+    hide()
+  } finally {
+    saving.value = false
+  }
+}
+
+/**
+ * Runs after the prompt has closed when the videos were still loading, so it
+ * only relies on the store.
+ * @param {string[]} playlistIds
+ * @param {object[]} videos
+ * @param {boolean} allowDuplicates
+ */
+async function addVideosToPlaylists(playlistIds, videos, allowDuplicates) {
+  const addedPlaylistIds = new Set()
+  const failedPlaylistNames = []
+
+  for (const playlistId of playlistIds) {
+    const playlist = store.getters.getPlaylist(playlistId)
+    if (playlist == null) {
+      failedPlaylistNames.push(null)
+      continue
+    }
 
     let videosToBeAdded
 
-    if (!addingDuplicateVideosEnabled.value) {
-      const playlistVideoIds = playlist.videos.map((v) => v.videoId)
-      videosToBeAdded = toBeAddedToPlaylistVideoList_.filter((v) => !playlistVideoIds.includes(v.videoId))
+    if (!allowDuplicates) {
+      const playlistVideoIds = new Set(playlist.videos.map((v) => v.videoId))
+      videosToBeAdded = videos.filter((v) => !playlistVideoIds.has(v.videoId))
     } else {
       // Use slice() to avoid `do not mutate vuex store state outside mutation handlers`
-      videosToBeAdded = toBeAddedToPlaylistVideoList_.slice()
+      videosToBeAdded = videos.slice()
     }
 
-    store.dispatch('addVideos', {
+    if (videosToBeAdded.length === 0) continue
+
+    const saved = await store.dispatch('addVideos', {
       _id: playlist._id,
       videos: videosToBeAdded,
     })
+    if (saved) addedPlaylistIds.add(playlist._id)
+    else failedPlaylistNames.push(playlist.playlistName)
+  }
 
-    addedPlaylistIds.add(playlist._id)
-  })
-
-  showToast(t('User Playlists.AddVideoPrompt.Toast.Video(s) added to {playlistCount} playlists', {
-    playlistCount: addedPlaylistIds.size,
-  }, addedPlaylistIds.size))
-
-  hide()
+  if (addedPlaylistIds.size > 0) {
+    showToast({
+      message: t('User Playlists.AddVideoPrompt.Toast.Video(s) added to {playlistCount} playlists', {
+        playlistCount: addedPlaylistIds.size,
+      }, addedPlaylistIds.size),
+      // Show the thumbnail when a single video was added
+      image: videos.length === 1
+        ? getVideoThumbnailUrl(videos[0].videoId, store.getters.getBackendPreference, store.getters.getCurrentInvidiousInstanceUrl, store.getters.getThumbnailPreference)
+        : null,
+      icon: ['fac', 'playlist-check'],
+    })
+  }
+  for (const playlistName of failedPlaylistNames) {
+    const message = t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]')
+    showToast({
+      message: playlistName == null ? message : `${playlistName}: ${message}`,
+      icon: ['fas', 'circle-exclamation'],
+    })
+  }
 }
 
 /** @type {import('vue').ComputedRef<object>} */
@@ -422,6 +611,8 @@ const newPlaylistDefaultProperties = computed(() => store.getters.getNewPlaylist
 function openCreatePlaylistPrompt() {
   store.dispatch('showCreatePlaylistPrompt', {
     title: newPlaylistDefaultProperties.value.title || '',
+    description: newPlaylistDefaultProperties.value.description || '',
+    sourcePlaylistId: newPlaylistDefaultProperties.value.sourcePlaylistId,
   })
 }
 
@@ -431,6 +622,7 @@ const updateQueryDebounce = debounce(/** @param {string} query_ */(query_) => {
 
 onMounted(() => {
   document.addEventListener('keydown', keyboardShortcutHandler)
+  window.addEventListener('resize', releaseSearchMinHeight)
 
   // User might want to search first if they have many playlists
   nextTick(() => {
@@ -440,6 +632,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   document.removeEventListener('keydown', keyboardShortcutHandler)
+  window.removeEventListener('resize', releaseSearchMinHeight)
 })
 
 /**

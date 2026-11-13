@@ -1,0 +1,227 @@
+import { test, expect, setWindowSize } from '../../helpers/app.mjs'
+import { expectImagesLoaded, fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
+
+const video = (index) => ({
+  videoId: `video${String(index).padStart(6, '0')}`,
+  title: `Video number ${index}`,
+  author: `Channel ${index}`,
+  lengthSeconds: 60,
+})
+
+async function showPrompt(page, videos) {
+  await page.evaluate(videos => window.$store.dispatch('showAddToPlaylistPromptForManyVideos', { videos }), videos)
+}
+
+// The content must end at the bottom of the scroll range, with the scrollbar thumb matching it.
+// Fractional UI scales round clientHeight, so measure the viewport's bounding box instead.
+async function expectValidScrollRange(scroller) {
+  await expect.poll(() => scroller.evaluate((element) => {
+    const viewport = element.getBoundingClientRect()
+    const end = element.querySelector('.promptContent').getBoundingClientRect().bottom - viewport.top + element.scrollTop
+    return element.scrollTop - Math.max(0, end - viewport.height)
+  })).toBeLessThanOrEqual(1)
+  await scroller.evaluate((element) => { element.scrollTop = element.scrollHeight })
+  await expect.poll(() => scroller.evaluate((element) => {
+    const viewport = element.getBoundingClientRect()
+    const end = element.querySelector('.promptContent').getBoundingClientRect().bottom - viewport.top + element.scrollTop
+    const scrollbar = element.querySelector('.os-scrollbar-vertical')
+    const track = scrollbar.querySelector('.os-scrollbar-track').getBoundingClientRect()
+    const handle = scrollbar.querySelector('.os-scrollbar-handle')
+    const thumb = handle.getBoundingClientRect()
+    const expectedHeight = Math.max(Number.parseFloat(getComputedStyle(handle).minHeight) || 0,
+      track.height * viewport.height / end)
+    return Math.abs(element.scrollTop - Math.max(0, end - viewport.height)) <= 1 &&
+      !scrollbar.classList.contains('os-scrollbar-unusable') &&
+      Math.abs(track.bottom - thumb.bottom) <= 1 && Math.abs(thumb.height - expectedHeight) <= 1
+  })).toBe(true)
+}
+
+// Without overflow the content must fill the viewport exactly, with nothing left to scroll
+async function expectNoScrollRange(scroller) {
+  await expect.poll(() => scroller.evaluate((element) => {
+    const viewport = element.getBoundingClientRect()
+    const end = element.querySelector('.promptContent').getBoundingClientRect().bottom - viewport.top + element.scrollTop
+    return element.scrollTop <= 1 && Math.abs(end - viewport.height) <= 1 &&
+      element.querySelector('.os-scrollbar-vertical').classList.contains('os-scrollbar-unusable')
+  })).toBe(true)
+}
+
+test.beforeEach(async ({ page }) => {
+  await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
+})
+
+test('lists the first videos and counts the rest when adding many', async ({ page, attachScreenshot }) => {
+  await showPrompt(page, [1, 2, 3, 4, 5].map(video))
+  const prompt = page.getByRole('dialog', { name: 'Select a playlist to add your 5 videos to', exact: true })
+
+  await expect(prompt.locator('.videoSummaryTitle')).toHaveText(['Video number 1', 'Video number 2', 'Video number 3'])
+  await expect(prompt.locator('.videoSummaryMore')).toHaveText('and 2 more videos')
+  await expectImagesLoaded(prompt.locator('.videoSummaryThumbnail'))
+  await attachScreenshot('add-to-playlist-many-videos')
+})
+
+test('previews only one video in the phone layout', async ({ app, page }) => {
+  await setWindowSize(app, page, { width: 480, height: 800 })
+  await showPrompt(page, [1, 2, 3, 4, 5].map(video))
+  const prompt = page.getByRole('dialog', { name: 'Select a playlist to add your 5 videos to', exact: true })
+
+  await expect(prompt.locator('.videoSummaryTitle')).toHaveText(['Video number 1'])
+  await expect(prompt.locator('.videoSummaryMore')).toHaveText('and 4 more videos')
+})
+
+test.describe('with hidden thumbnails', () => {
+  test.use({ seed: { settings: { thumbnailPreference: 'hidden' } } })
+
+  test('omits the thumbnails and the channel of videos without one', async ({ page }) => {
+    await showPrompt(page, [video(1), { ...video(2), author: undefined }])
+    const prompt = page.getByRole('dialog', { name: 'Select a playlist to add your 2 videos to', exact: true })
+
+    await expect(prompt.locator('.videoSummaryTitle')).toHaveText(['Video number 1', 'Video number 2'])
+    await expect(prompt.locator('.videoSummaryAuthor')).toHaveText(['Channel 1'])
+    await expect(prompt.locator('.videoSummaryThumbnail')).toHaveCount(0)
+    await expect(prompt.locator('.videoSummaryMore')).toHaveCount(0)
+  })
+})
+
+test.describe('with several playlists', () => {
+  test.use({
+    seed: {
+      playlists: [
+        { _id: 'first', playlistName: 'First', protected: false, videos: [] },
+        { _id: 'second', playlistName: 'Second', protected: false, videos: [] },
+      ],
+    },
+  })
+
+  test('puts the playlist options beside the search outside the phone layout, and behind a button with rows in it @scale', async ({ app, page }) => {
+    await showPrompt(page, [video(1)])
+    const prompt = page.getByRole('dialog', { name: 'Select a playlist to add your video to', exact: true })
+    const toggle = prompt.getByRole('checkbox', { name: 'Playlists with matching videos', exact: true })
+    const searchRow = prompt.locator('.controlsRow')
+
+    await expect(searchRow.locator('.matchingVideoToggle')).toBeVisible()
+    await expect(searchRow.locator('.sortSelect')).toBeVisible()
+    // Measure in one frame, as the prompt may still be animating open
+    await expect.poll(() => searchRow.evaluate((row) => {
+      const center = (selector) => {
+        const box = row.querySelector(selector).getBoundingClientRect()
+        return box.top + box.height / 2
+      }
+      return Math.abs(center('.searchInput') - center('.sortSelect'))
+    })).toBeLessThan(4)
+
+    await prompt.getByText('Playlists with matching videos', { exact: true }).click()
+    await expect(toggle).toBeChecked()
+
+    await setWindowSize(app, page, { width: 480, height: 800 })
+    await expect(searchRow.locator('.matchingVideoToggle')).toHaveCount(0)
+    // Grid tiles left room for only one playlist on a phone screen
+    await expect(prompt.locator('.ft-playlist-selector.list')).toHaveCount(2)
+    await expect(prompt.locator('.ft-playlist-selector', { hasText: 'Second' })).toBeInViewport({ ratio: 1 })
+    await expect(prompt.locator('.promptContent .matchingVideoToggle')).toBeHidden()
+
+    await prompt.getByRole('button', { name: 'Search filters', exact: true }).click()
+    await expect(prompt.locator('.promptContent .matchingVideoToggle')).toBeVisible()
+    await expect(toggle).toBeChecked()
+  })
+})
+
+test.describe('with long option labels', () => {
+  test.use({
+    seed: {
+      settings: { currentLocale: 'de-DE' },
+      playlists: [
+        { _id: 'first', playlistName: 'First', protected: false, videos: [{ ...video(1), playlistItemId: 'item', type: 'video', timeAdded: 1 }] },
+        { _id: 'second', playlistName: 'Second', protected: false, videos: [] },
+      ],
+    },
+  })
+
+  test('wraps the playlist options inside a narrow prompt @scale', async ({ app, page, uiScale }) => {
+    // Just wider than the phone layout in CSS pixels
+    await setWindowSize(app, page, { width: Math.round(610 * uiScale / 100), height: Math.round(800 * uiScale / 100) })
+    await showPrompt(page, [video(1), video(2)])
+    const searchRow = page.locator('.prompt .controlsRow')
+
+    await expect(searchRow.locator('.allowDuplicateToggle')).toBeVisible()
+    // Measure in one frame, as the prompt may still be animating open
+    await expect.poll(() => searchRow.evaluate((row) => {
+      const rowBox = row.getBoundingClientRect()
+      return ['.matchingVideoToggle', '.allowDuplicateToggle', '.sortSelect'].filter((selector) => {
+        const box = row.querySelector(selector).getBoundingClientRect()
+        return box.left < rowBox.left - 0.5 || box.right > rowBox.right + 0.5
+      })
+    })).toEqual([])
+  })
+
+  test('keeps the switches\' touch targets apart in the phone layout @scale', async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 480, height: 800 })
+    await showPrompt(page, [video(1), video(2)])
+    const toggles = page.locator('.prompt .promptContent .optionToggles')
+
+    // The duplicate switch stays visible while the filters are collapsed
+    await expect(toggles.locator('.allowDuplicateToggle')).toBeVisible()
+    await page.locator('.prompt').getByRole('button', { name: 'Suchfilter', exact: true }).click()
+    await expect(toggles.locator('.matchingVideoToggle')).toBeVisible()
+    await expect.poll(() => toggles.evaluate((element) => {
+      const [first, second] = [...element.querySelectorAll('.switch-label')].map(label => label.getBoundingClientRect())
+      return first.bottom - second.top
+    // Fractional UI Scale can leave a rounding overlap far below a pixel
+    })).toBeLessThanOrEqual(0.01)
+  })
+})
+
+test.describe('with many playlists', () => {
+  test.use({
+    seed: {
+      playlists: Array.from({ length: 12 }, (_, index) => ({ _id: `playlist${index}`, playlistName: `Playlist ${index}`, protected: false, videos: [] })),
+    },
+  })
+
+  test('keeps a valid scroll range when the filters collapse in the phone layout @scale', async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 480, height: 800 })
+    await showPrompt(page, [video(1)])
+    const prompt = page.getByRole('dialog', { name: 'Select a playlist to add your video to', exact: true })
+    const scroller = prompt.locator('.promptContentScroller')
+    const filters = prompt.getByRole('button', { name: 'Search filters', exact: true })
+
+    await filters.click()
+    await expect(prompt.locator('.sortSelect')).toBeVisible()
+    await scroller.evaluate((element) => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+    await filters.click()
+    await expect(prompt.locator('.sortSelect')).toBeHidden()
+    await expectValidScrollRange(scroller)
+  })
+
+  test('keeps its size while searching and fits a resized window @scale', async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 480, height: 800 })
+    await showPrompt(page, [video(1)])
+    const prompt = page.getByRole('dialog', { name: 'Select a playlist to add your video to', exact: true })
+    const card = page.locator('.promptCard')
+    const scroller = prompt.locator('.promptContentScroller')
+    await expect(prompt.locator('.playlist-selector-container')).toHaveCount(12)
+    await scroller.evaluate((element) => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    await card.evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
+    const before = await card.boundingBox()
+
+    await prompt.getByRole('searchbox').fill('Playlist 11')
+    await expect(prompt.locator('.playlist-selector-container')).toHaveCount(1)
+    await expectNoScrollRange(scroller)
+    const after = await card.boundingBox()
+    expect(Math.abs(after.y - before.y)).toBeLessThanOrEqual(1)
+    expect(Math.abs(after.height - before.height)).toBeLessThanOrEqual(1)
+
+    // A smaller window drops the kept height, so no empty space follows the last playlist
+    await setWindowSize(app, page, { width: 500, height: 600 })
+    await expect.poll(() => scroller.evaluate((element) => {
+      const viewport = element.getBoundingClientRect()
+      const container = element.querySelector('.playlists-container').getBoundingClientRect()
+      const lastRow = [...element.querySelectorAll('.playlist-selector-container')].at(-1).getBoundingClientRect()
+      const end = container.bottom - viewport.top + element.scrollTop
+      return container.bottom - lastRow.bottom <= 8 && element.scrollTop <= Math.max(0, end - viewport.height) + 1
+    })).toBe(true)
+  })
+})

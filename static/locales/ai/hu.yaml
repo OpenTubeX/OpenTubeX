@@ -1,0 +1,2796 @@
+# Optional AI-generated translations for keys missing from ../hu.yaml.
+Color Picker:
+  Hue: Színárnyalat
+  Opacity: Átlátszatlanság
+  Backdrop Blur: Háttér elmosása
+  Hex Color: Hexadecimális szín
+  Apply Color: Alkalmazás
+  Reset Color: Alaphelyzet
+  Copy Color: Másolás
+  Copy From Another Color: Másolás másik színből
+  Color Copied: A szín a vágólapra másolva
+  Invalid Color: Adjon meg érvényes hexadecimális színt
+  Clipboard Unavailable: A vágólap nem érhető el
+  Saturation and Brightness: Telítettség és fényerő
+New Tab: Új lap
+Maximize: Teljes méret
+Restore: Visszaállítás
+Close Tab: Lap bezárása
+App Menu:
+  About App: A(z) {appName} névjegye
+  Services: Szolgáltatások
+  Hide App: '{appName} elrejtése'
+  Hide Others: Többi elrejtése
+  Show All: Az összes megjelenítése
+  Quit App: 'Kilépés: {appName}'
+  Reopen Closed Window: Bezárt ablak újranyitása
+  Paste and Match Style: Beillesztés stílusillesztéssel
+  View: Nézet
+  Enter Inspect Element Mode: Elemvizsgáló mód
+  GPU Internals: GPU belső adatai (chrome://gpu)
+  Navigate: Navigáció
+  Next Tab: Következő lap
+  Previous Tab: Előző lap
+  Help: Súgó
+Close Confirmation:
+  Background Sync Warning: A kilépés leállítja a feliratkozások háttérben történő frissítését.
+  Hide Window: Ablak elrejtése
+  Title: Kilép az OpenTubeX alkalmazásból?
+  Message: Biztosan kilép az OpenTubeX alkalmazásból?
+  Quit: Kilépés
+  Never Ask Again: Ne kérdezze újra
+Close Window Confirmation:
+  Title: Bezárja az ablakot?
+  Message: Ez az ablak {count} lapot tartalmaz. Biztosan bezárja?
+  Close Window: Ablak bezárása
+Confirmations:
+  Never Ask Again: Ne kérdezze újra
+  Settings Hint: Ezt a megerősítést a Beállítások → Általános → Megerősítés a következők előtt… menüpontban kapcsolhatja be újra.
+Close Multiple Tabs Confirmation:
+  Title: Bezár több lapot?
+  Message: Ezzel bezár {count} lapot.
+  Close Tabs: Lapok bezárása ({count})
+Load Multiple Tabs Confirmation:
+  Title: Betölt több lapot?
+  Message: Ezzel betölt {count} lapot.
+  Load Tabs: Lapok betöltése ({count})
+Unload Multiple Tabs Confirmation:
+  Title: Kiürít több lapot?
+  Message: Ezzel kiürít {count} lapot.
+  Unload Tabs: Lapok kiürítése ({count})
+Tabs Unloaded To Free Memory: '{count} nemrég nem használt lap kiürítve a memória felszabadításához | {count} nemrég nem használt lap kiürítve a memória felszabadításához'
+Resize Tab Bar: Lapsáv átméretezése
+Find in page: Keresés az oldalon
+Previous match: Előző találat
+Next match: Következő találat
+Close find bar: Keresősáv bezárása
+No matches: Nincs találat
+Version {versionNumber} is now available.: Megjelent a(z) {versionNumber} verzió.
+See changes and update: Változások megtekintése és frissítés
+Dismiss: Bezárás
+Update to {version}: Frissítés a(z) {version} verzióra
+Global:
+  Ambient Mode: Hangulatvilágítás
+  Loading More: Továbbiak betöltése
+  New: Új
+  Show Blocked Item: Letiltott elem megjelenítése
+Search Listing:
+  Label:
+    Members Only: Csak tagoknak
+    Possibly AI-generated: Lehet, hogy MI által generált
+Stats:
+  Left of daily limit: "Még {duration} van hátra a napi korlátjából ({limit})"
+  Daily limit reached: "Elérte a napi korlátot ({limit})"
+  Replace old device: "Régi eszköz lecserélése"
+  Replacement explanation: "Csak akkor egyesítsd a(z) {device} bejegyzést ezzel az eszközzel, ha mindkét bejegyzés ugyanahhoz a fizikai eszközhöz tartozik."
+  Overlapping days: "Napok mindkét előzményben: {count}"
+  Overlapping watch time: "Átfedő nézési idő"
+  Keep larger daily total: "Nagyobb napi összeg megtartása"
+  Larger total explanation: "Duplikált előzményekhez. Kimaradhat az ugyanazon napi további nézés."
+  Add daily totals: "Napi összegek összeadása"
+  Add totals explanation: "Különálló előzményekhez. Kétszer számolhatja a duplikált nézést."
+  Replacement preservation: "Az egyetlen előzményben szereplő napok megmaradnak. Az eredeti előzmények a titkosított szinkronizálásban maradnak."
+  Combined watch time: "Egyesített nézési idő"
+  Replacement changed: "A nézési idő megváltozott. Zárd be és nyisd meg újra ezt az előnézetet az új összegek ellenőrzéséhez."
+  Replacement success: "Eszközstatisztikák egyesítve"
+  All devices: Összes eszköz
+  Stats: Statisztika
+  Watch time summary: Nézési idő összesítése
+  Today: Ma
+  This week: Ezen a héten
+  Total watch time: Teljes nézési idő
+  Daily average: Napi átlag
+  So far today: Ma eddig
+  Since: Az időszak kezdete {day}
+  All recorded time: Teljes rögzített időszak
+  Per calendar day: Naptári naponként
+  Day by day: Napokra bontva
+  Highest: 'Legmagasabb: {duration}'
+  Week by week: Hetekre bontva
+  Last 14 days: Az elmúlt 14 nap
+  Last 8 weeks: Az elmúlt 8 hét
+  Daily chart aria: Napi nézési idő az elmúlt 14 napban
+  Weekly chart aria: Heti nézési idő az elmúlt 8 hétben
+  No data: A videók megtekintése során itt jelenik meg a nézési idő.
+  Estimate note: A frissítés előtti nézési idő becslése a mentett lejátszási állapoton alapul.
+  Adjust imported watch time: Importált nézési idő módosítása
+  Imported watch time: Importált nézési idő
+  Imported watch time explanation: Válassza ki az általában használt lejátszási sebességet. A tényleges nézési idő becsléséhez az importált videók hosszát elosztjuk ezzel a sebességgel.
+  Playback speed: Lejátszási sebesség
+  Channel speed note: Ha elérhetők mentett csatornánkénti lejátszási sebességek, akkor ezeket használjuk.
+  Apply playback speed: Lejátszási sebesség alkalmazása
+  Imported watch time adjusted: Az importált nézési idő módosítva
+  Reset statistics: Statisztika alaphelyzetbe állítása
+  Reset: Alaphelyzet
+  Reset confirmation: Biztosan alaphelyzetbe állítja az összes nézési statisztikát? Ez nem vonható vissza.
+  Reset success: A nézési statisztika alaphelyzetbe állítva
+  Less than a minute: < 1 perc
+  Minutes: '{minutes} perc'
+  Hours: '{hours} óra'
+  Hours and minutes: '{hours} óra {minutes} perc'
+Home Page:
+  Keep disabled and hide this section: "Maradjon kikapcsolva, és rejtse el ezt a szakaszt"
+  Familiar description: "Még nem látott videók előnyben részesítése már kedvelt csatornákról."
+  Balanced description: "Ismert csatornák keverése az érdeklődésedhez illő újakkal."
+  Explore description: "Több hely az érdeklődésedhez kapcsolódó új csatornáknak."
+  Turn off recommendations: Ajánlások kikapcsolása
+  Recommended for you: "Neked ajánlott"
+  Recommendations description: "Rangsorold a videókat az eszközödön a megtekintési előzményeid alapján. A csatornaazonosítókat és a témák szerinti kereséseket a kiválasztott háttérszolgáltatás kapja meg a videók kereséséhez."
+  Enable recommendations: "Ajánlások engedélyezése"
+  Recommendations need history: "Nézz meg néhány videót bekapcsolt előzményekkel, hogy ajánlásokat kapj."
+  No recommendations: "Nem találhatók ajánlások. Próbálj frissíteni, miután több videót megnéztél."
+  Recommendations unavailable: "Nem sikerült betölteni az ajánlásokat. Próbáld újra később."
+  More like this: "Több hasonlót"
+  Not interested: "Nem érdekel"
+  Hide this channel: "Csatorna elrejtése"
+  Channel hidden: "{channel} elrejtve az ajánlások közül"
+  Reset recommendations: "Ajánlások alaphelyzetbe állítása"
+  Discovery: "Felfedezés"
+  Familiar: "Ismerős"
+  Balanced: "Kiegyensúlyozott"
+  Explore: "Felfedezés"
+  Related to: "Kapcsolódik ehhez: {title}"
+  More from: "További videók innen: {channel}"
+  Matches interest: "Megfelel a(z) {topic} iránti érdeklődésednek"
+  Related discovery privacy: "A kapcsolódó videók kereséséhez videóazonosítók is elküldésre kerülnek."
+  Home: Kezdőlap
+  Description: Folytassa onnan, ahol abbahagyta, és tekintse meg a legutóbbi tevékenységeket.
+  Customize: Kezdőlap testreszabása
+  Done: Kész
+  Customize description: Válassza ki a megjelenő szakaszokat, és rendezze őket a kívánt sorrendbe.
+  Continue watching: Megtekintés folytatása
+  New since last visit: Újdonságok a legutóbbi látogatás óta
+  Watch queue: Lejátszási sor
+  Recent playlists: Legutóbbi lejátszási listák
+  Recent downloads: Legutóbbi letöltések
+  Upcoming reminders: Közelgő emlékeztetők
+  Watch statistics: Megtekintési statisztikák
+  View all: Összes megtekintése
+  Previous shelf page: '{section} előző oldala'
+  Next shelf page: '{section} következő oldala'
+  Shelf page status: '{section}, {page}. oldal / {total}.'
+  Move section up: '{section} feljebb mozgatása'
+  Move section down: '{section} lejjebb mozgatása'
+  Section moved: '{section} áthelyezve a(z) {position}. helyre, összesen {total} közül.'
+  Nothing here yet: Itt még nincs semmi
+  Empty description: Az elindított videók, a használt lejátszási listák, a letöltések és az emlékeztetők itt jelennek meg.
+  All sections hidden: Minden szakasz el van rejtve
+  All sections hidden description: Szabja testre a kezdőlapot egy szakasz újbóli megjelenítéséhez.
+Subscriptions:
+  Channel Errors:
+    Summary: "1 csatornát nem sikerült frissíteni. | {count} csatornát nem sikerült frissíteni."
+    Toast: "Néhány feliratkozott csatornát nem sikerült frissíteni. Kattintson a megtekintésükhöz."
+    Retry Channel: "{channel} újrapróbálása"
+    Show All: "Összes megjelenítése"
+    Show Fewer: "Kevesebb megjelenítése"
+  Cache Load Error: A mentett feliratkozási hírfolyamokat nem sikerült betölteni.
+  New video from {channel}: "Új videó: {channel}"
+  New short from {channel}: "Új rövid videó: {channel}"
+  '{channel} is live': "{channel} élőben közvetít"
+  New post from {channel}: "Új bejegyzés: {channel}"
+  Mark As Unseen: Megjelölés nem látottként
+  Copy Error Details: "Technikai részletek másolása"
+  Never show {type} from this channel in feeds again: Soha többé ne jelenjen meg {type} típusú tartalom ettől a csatornától a hírcsatornákban
+  Refreshing Subscription Videos: Feliratkozások videóinak frissítése
+  Refreshing Subscription Shorts: Feliratkozások rövid videóinak frissítése
+  Refreshing Subscription Live Streams: Feliratkozások élő közvetítéseinek frissítése
+  Refreshing Subscription Posts: Feliratkozások bejegyzéseinek frissítése
+  New Content: Új tartalom
+  New Feed Refresh Warning Title: Frissíti az összes feliratkozási hírfolyamot?
+  New Feed Refresh Warning: Az összes tartalomtípus frissítése 1 feliratkozásnál sokáig tarthat. Folytatja? | Az összes tartalomtípus frissítése {count} feliratkozásnál sokáig tarthat. Folytatja?
+  New Since Last Refresh: Új az utolsó frissítés óta
+  Mark As Seen: Megjelölés látottként
+  Mark All as Seen: Összes megjelölése látottként
+  No New Content: Nincs új tartalom.
+  New Content Tabs: Új tartalmak lapjai
+  Show Tabbed View: Lapokra osztott nézet
+  Show Combined View: Egyesített nézet
+  Newest First: Legújabb elöl
+  Oldest First: Legrégebbi elöl
+  RSS Feeds:
+    Refreshing: RSS-hírcsatornák frissítése
+    Tab: RSS
+    Followed Feeds: Követett RSS-hírcsatornák
+    Add Feed: Hírcsatorna hozzáadása
+    Feed URL: RSS- vagy Atom-hírcsatorna URL-címe
+    Remove Feed: '{feed} eltávolítása'
+    Invalid Feed URL: Adjon meg egy http:// vagy https:// kezdetű webcímet.
+    Feed Already Followed: Már követi ezt a hírcsatornát.
+    Feed Could Not Be Loaded: A hírcsatornát nem sikerült betölteni. Ellenőrizze, hogy a cím RSS- vagy Atom-hírcsatornára mutat-e.
+    Feed Requires Browser Check: Ez a webhely böngészőellenőrzést kér, amelyet az OpenTubeX nem tud teljesíteni. Próbáljon másik címet vagy másik RSSHub-példányt ehhez a hírcsatornához.
+    Refresh Errors: 1 hírcsatornát nem sikerült frissíteni. | {count} hírcsatornát nem sikerült frissíteni.
+    Description: Adjon hozzá egy RSS- vagy Atom-hírcsatornát, hogy más platformok alkotóit kövesse. Az {rssHub}-példányok számos webhelyhez biztosítanak hírcsatornákat, például a Twitchhez.
+    Empty Items: A hírcsatornáiban jelenleg nincsenek elemek.
+    No Feeds: Még nem követ egyetlen RSS-hírcsatornát sem.
+    RSSHub:
+      Browse: RSSHub böngészése
+      Title: Hírcsatorna hozzáadása RSSHubról
+      Description: Válasszon egy RSSHub-példányt, egy szolgáltatást és azt, amit követni szeretne. A hírcsatorna címe automatikusan elkészül.
+      Instance: RSSHub-példány
+      Service: Szolgáltatás
+      Search Services: Szolgáltatások keresése
+      Loading Services: Szolgáltatások betöltése…
+      Services Could Not Be Loaded: Ez a példány nem adta vissza a szolgáltatásait. Ellenőrizze a címet, vagy válasszon másik példányt.
+      Feed Type: Hírcsatorna típusa
+      Requires Configuration: Ehhez a hírcsatornához további beállítás kell a példányon, ezért nyilvános példányokon lehet, hogy nem működik.
+      Optional Parameter: '{parameter} (nem kötelező)'
+      Not Set: Nincs beállítva
+    Retry Feed: '{feed} újrapróbálása'
+    Reloading Feed: '{feed} újratöltése'
+  Platforms:
+    Tab: Platformok
+    Platform: Platform
+    All Platforms: Összes platform
+    Followed Channels: Követett csatornák más platformokon
+    Description: Kövessen csatornákat a Twitch, SoundCloud, PeerTube, Rumble és Odysee platformon, hogy feltöltéseiket a feliratkozásai Platformok lapján lássa. Keressen csatornákat a keresővel, vagy adja hozzá őket az oldaluk címével. Médiatartalmaik a yt-dlp segítségével játszhatók le.
+    Add Channel: Csatorna hozzáadása
+    Channel URL: Csatorna címe
+    Invalid Channel: Adja meg egy Twitch-, SoundCloud-, PeerTube-, Rumble- vagy Odysee-csatornaoldal címét.
+    Channel Not Found: Ezen a címen nincs csatorna.
+    Channel Already Followed: Már követi ezt a csatornát.
+    Channel Could Not Be Loaded: A csatornát nem sikerült betölteni.
+    No Channels: Még nem követ egyetlen csatornát sem más platformokon.
+    Unfollow Channel: '{channel} követésének megszüntetése'
+    Go To Channel: Ugrás a(z) {channel} csatornára
+    Follow: Követés
+    Following: Követve
+    Clips: Klipek
+    Refresh Errors: 1 csatornát nem sikerült frissíteni. | {count} csatornát nem sikerült frissíteni.
+    Content Tabs: Platformtartalmak lapjai
+Trending:
+  Music: Zene
+  Load Error: A felkapott tartalmak nem tölthetők be.
+  Unsupported Backend: A felkapott tartalmakhoz a Local API szükséges. Válassza a Local API-t, vagy engedélyezze a tartalék háttérszolgáltatást.
+Most Popular Feed Empty: Ennek az Invidious-példánynak üres a Legnépszerűbb hírfolyama.
+Most Popular Load Error: "Nem sikerült betölteni a Legnépszerűbb hírfolyamot."
+Feed:
+  Cancel Refresh: Frissítés megszakítása
+  Next Auto Refresh: 'Következő automatikus frissítés: {date}'
+User Playlists:
+  Refresh Saved Playlists: 'Mentett lejátszási listák frissítése'
+  Saved Playlists Refresh Failed: 'Néhány mentett lejátszási listát nem sikerült frissíteni.'
+  Save: "Mentés"
+  Edit: "Szerkesztés"
+  Pin to Navigation: "Rögzítés a navigációban"
+  Unpin from Navigation: "Rögzítés feloldása a navigációban"
+  Pin to Top: "Rögzítés felülre"
+  Unpin from Top: "Rögzítés feloldása felülről"
+  Pinned to Top: "Felülre rögzítve"
+  Reorder Hint: Húzza el, vagy használja a nyílbillentyűket az átrendezéshez
+  Add new videos to the top (custom order): "Új videók hozzáadása felülre (egyéni sorrend)"
+  Shuffle videos by default: "Videók alapértelmezetten véletlenszerű sorrendben"
+  Remove videos once watched: "Videók eltávolítása megnézés után"
+  Remove videos once watched Tooltip: "Amikor lejátssza ezt a lejátszási listát, minden videó lekerül róla, amint eléri az adatvédelmi beállításokban megadott megtekintési százalékküszöböt."
+  Repair Playlists: Lejátszási listák javítása
+  Repair Description: Állítsa vissza a hiányzó videóadatokat egy YouTube Takeout ZIP importálása után. A listák sorrendje nem változik.
+  Remove Unavailable Videos: "Távolítsa el a nem elérhető videókat"
+  Remove Unavailable Videos Confirmation: "Eltávolítja a nem elérhető videókat? Talált: {count}. Nem sikerült ellenőrizni: {uncertain}. A nem ellenőrzött videók megmaradnak."
+  Add Missing Videos: "Hiányzó videók hozzáadása a forráslejátszási listából"
+  Source Playlist: "Forráslejátszási lista"
+  Save Playlist: "Lejátszási lista mentése"
+  Remove Saved Playlist: "Mentett lejátszási lista eltávolítása"
+  Load More Playlists: További lejátszási listák betöltése
+  Save to: Mentés ide…
+  Quick Bookmark Icon: Gyors könyvjelző ikonja
+  Custom Emoji: Egyéni emoji
+  Choose Image: Kép kiválasztása
+  Use Bookmark Icon: Könyvjelzőikon használata
+  SinglePlaylistView:
+    Retry: Újrapróbálkozás
+    This playlist could not be loaded.: A lejátszási lista nem tölthető be.
+    More videos could not be loaded.: Nem tölthető be több videó.
+  Playlist Thumbnail: "Lejátszási lista bélyegképe"
+  Restore Default Thumbnail: "Alapértelmezett bélyegkép visszaállítása"
+  AddVideoPrompt:
+    And N more videos: 'és még {count} videó | és még {count} videó'
+  Move Up: Fel
+  Move Down: Le
+  Remove: Eltávolítás
+  Background Tasks:
+    Loading videos from {playlistName}: 'Videók betöltése innen: {playlistName}'
+    Adding missing videos to {playlistName}: 'Hiányzó videók hozzáadása ehhez: {playlistName}'
+    Checking {playlistName} for unavailable videos: 'Nem elérhető videók keresése itt: {playlistName} ({checked}/{total})'
+  Synced with YouTube: "Szinkronizálva a YouTube-bal"
+  Delete YouTube Playlist Confirmation: "Törli ezt a lejátszási listát itt és a YouTube-on is? Ez a művelet nem vonható vissza."
+  CreatePlaylistPrompt:
+    Create on YouTube: "Létrehozás a YouTube-on is"
+History:
+  From Date: 'Kezdő dátum'
+  To Date: 'Záró dátum'
+  Channel Filter: 'Csatorna'
+  All Channels: 'Összes csatorna'
+  Clear Filters: 'Szűrők törlése'
+  Invalid Date Range: 'A kezdő dátumnak meg kell előznie a záró dátumot, vagy azonosnak kell lennie vele.'
+  Empty Filter Message: 'Az előzményekben nincs ezeknek a szűrőknek megfelelő videó.'
+  Repair Compact: "Javítás"
+  Mark All Watched Compact: "Mind megtekintve"
+  Repair Use Cookies: "Beállított yt-dlp sütik használata"
+  Repair Cookies Hint: "Több mint 500 videót kell ellenőrizni. Állítsa be a sütiket a yt-dlp beállításaiban, és engedélyezze őket itt, hogy csökkentse a kérések korlátozásának kockázatát."
+  Repair Description: "Használd az előzmények importálása után, illetve ha a videók adatai hiányosak, vagy téves LIVE címkét kaptak."
+  Repair Details: "Pótolja a hiányzó címeket, csatornákat és közzétételi dátumokat, és ellenőrzi az időtartamokat és a LIVE címkéket. A lejátszási pozíció és a megtekintési állapot változatlan marad."
+  Repair Notice: "A nagy előzmények feldolgozása időbe telhet. A sikertelen kéréseket automatikusan újrapróbálja. A törölt vagy privát videók adatai hiányosak maradhatnak."
+  Start Repair: "Javítás indítása"
+  Repair Checking: "Videóadatok ellenőrzése"
+  Repair Waiting: "Várakozás a YouTube-ra. A javítás automatikusan folytatódik."
+  Repair Retrying: "Sikertelen kérések újrapróbálása"
+  Repair Finished: "Javítás befejezve"
+  Repair Stopped: "Javítás leállítva"
+  Repair: "Előzmények javítása"
+  Repair Progress: "Ellenőrizve: {checked}/{total} · Javítva: {repaired} · Sikertelen: {failed}"
+  Mark All As Watched: Összes megjelölése megtekintettként
+  Mark All As Watched Confirmation: Biztosan megtekintettként jelöli meg az előzmények összes videóját?
+  All History Marked as Watched: Az előzmények összes videója megtekintettként megjelölve
+  Select History Age: Válassza ki, milyen régi bejegyzéseket szeretne törölni.
+  Delete Entries Older Than: Ennél régebbi bejegyzések törlése
+  Number of Days: Napok száma
+  History Cleanup Warning: Ez véglegesen törli a feltételeknek megfelelő megtekintési előzményeket.
+  1 Day: 1 nap
+  1 Week: 1 hét
+  1 Month: 1 hónap
+  3 Months: 3 hónap
+  1 Year: 1 év
+  All Time: Teljes időszak
+  Custom: Egyéni
+  History Older Than Days Removed: Az 1 napnál régebbi megtekintési előzmények eltávolítva | A(z) {days} napnál régebbi megtekintési előzmények eltávolítva
+Settings:
+  Experimental Badge: Kísérleti
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube-fiók"
+    Unofficial App Warning: "Az OpenTubeX nem hivatalos YouTube-alkalmazás. Bejelentkezéskor az itt végzett tevékenysége a Google-fiókjához kapcsolódik, és a Google korlátozhatja vagy letilthatja a nem hivatalos alkalmazásokat használó fiókokat. Csak olyan fiókkal jelentkezzen be, amelynek elvesztését megengedheti magának."
+    Sign In Explanation: "Az OpenTubeX úgy jelentkezik be, mint egy tévéalkalmazás: a bejelentkezést a Google webhelyén hagyja jóvá, és az OpenTubeX soha nem látja a jelszavát. A bejelentkezés ezen az eszközön marad, és nem kerül szinkronizálásra vagy biztonsági mentésre."
+    Sign In: "Bejelentkezés"
+    Sign In Anyway: "Bejelentkezés ennek ellenére"
+    Sign Out: "Kijelentkezés"
+    Getting Sign-In Code: "Bejelentkezési kód lekérése"
+    Sign In Instructions: "Nyissa meg a bejelentkezési oldalt, és válassza ki Google-fiókját. A kód automatikusan kitöltődik."
+    Other Device Instructions: "Egy másik eszközön nyissa meg ezt a címet, és írja be a kódot:"
+    YouTube Channel: "YouTube-csatorna"
+    Using Channel: "Most {name} néven használja a YouTube-ot"
+    Switch Channel Failed: "Nem sikerült YouTube-csatornát váltani: {error}"
+    Open Sign-In Page: "Bejelentkezési oldal megnyitása"
+    Copy Code: "Kód másolása"
+    Code Copied: "Kód másolva"
+    Waiting for Approval: "Várakozás a bejelentkezés jóváhagyására"
+    Sign-In Denied: "A bejelentkezést elutasították."
+    Sign-In Code Expired: "A kód lejárt. Próbálja újra, hogy újat kapjon."
+    Sign-In Failed: "Nem sikerült bejelentkezni: {error}"
+    Signed In As: "Bejelentkezve a YouTube-ra {name} néven"
+    Signed Out: "Kijelentkezve a YouTube-ról"
+    Sign Out Failed: "Nem sikerült kijelentkezni: {error}"
+    Revoke Failed: "Kijelentkezett a YouTube-ról, de a Google nem erősítette meg, hogy a bejelentkezés megszűnt. Eltávolíthatja a Google-fiókja harmadik féltől származó kapcsolatai között."
+    Signed out by YouTube: "A YouTube megszüntette a bejelentkezést. Jelentkezzen be újra a Beállításokban, hogy továbbra is használhassa fiókját."
+    Add to YouTube Watch History: "Megtekintett videók hozzáadása a YouTube-előzményekhez"
+    Sync Subscriptions: "Feliratkozások szinkronizálása a YouTube-bal"
+    Sync Playlists: "Lejátszási listák szinkronizálása a YouTube-bal"
+    Sync Now: "Szinkronizálás most"
+    Synced: "Szinkronizálva a YouTube-bal"
+    Sync Failed: "Nem sikerült szinkronizálni a YouTube-bal: {error}"
+  Diagnostics:
+    Diagnostics: Diagnosztika
+    Description: Amíg a diagnosztikai naplózás be van kapcsolva, az OpenTubeX a legutóbbi naplóüzeneteket a memóriában tartja, hogy hibajelentésekhez csatolhasd őket. Soha nem menti és nem küldi el őket magától, a naplózás kikapcsolása pedig törli őket. A jelentések nem tartalmaznak sütiket, tokeneket, IP-címeket és URL-paramétereket, de tartalmazhatják a lejátszott videók azonosítóit, ezért megosztás előtt ellenőrizd a jelentést.
+    Enable Logging: Diagnosztikai naplózás bekapcsolása
+    Copy Report: Jelentés másolása
+    Save Report: Jelentés mentése
+    Clear Log: Napló törlése
+    Report Copied: Diagnosztikai jelentés másolva
+    Report Saved: Diagnosztikai jelentés mentve
+    Report File: Diagnosztikai jelentés
+    Save Failed: Nem sikerült menteni a diagnosztikai jelentést
+    Log Cleared Message: Diagnosztikai napló törölve
+  Tab Unloading:
+    Automatically unload tabs: "Lapok automatikus kiürítése"
+    Memory threshold: "Memóriaküszöb"
+    Tabs to unload: "Kiürítendő lapok"
+    Automatic unloading help: "A legrégebbi háttérlapok kiürítése memóriát szabadít fel. Az aktív és lejátszó lapok betöltve maradnak."
+    Memory threshold help: "A megjelenítőfolyamat memóriakorlátjának százaléka, nem a rendszer teljes RAM-jáé."
+  Password Settings:
+    Failed to Save Password: "Nem sikerült menteni a jelszót."
+    Confirm Password: "Jelszó megerősítése"
+    Passwords Do Not Match: "A jelszavak nem egyeznek."
+  Navigation and Controls: "Navigáció és vezérlők"
+  Control Bar:
+    Title: "Vezérlősáv"
+    Customize: "Vezérlősáv testreszabása"
+    Hidden: "Rejtett"
+    Empty: "Nincsenek vezérlők"
+    Move to Control Bar: "{control} áthelyezése a vezérlősávra"
+    Move to Player Menu: "{control} áthelyezése a lejátszó menübe"
+    Hide: "{control} elrejtése"
+  Fullscreen Actions:
+    Recommended Videos: "Ajánlott videók"
+    Title: "Teljes képernyős műveletek"
+    Customize: "Teljes képernyős műveletek testreszabása"
+    Add Action: "Művelet hozzáadása"
+    Empty: "Nincsenek kiválasztva teljes képernyős műveletek"
+    Quick Bookmark: "Gyors könyvjelző"
+    Availability Hint: "A műveletek csak azoknál a videóknál jelennek meg, amelyekre vonatkoznak."
+    Disabled: "(letiltva)"
+  Quick Settings:
+    Quick Settings: Gyorsbeállítások
+    Customize Quick Settings: Gyorsbeállítások testreszabása
+    Add Setting: Beállítás hozzáadása
+    Appearance: Megjelenés
+    Playback: Lejátszás
+    Content: Tartalom
+    Language and Region: Nyelv és régió
+    All Settings: Minden beállítás
+    Profile Selector Hint: A profilok között a profilikonra jobb gombbal kattintva is válthat
+    Profile Selector Touch Hint: A profilok között a profilikon hosszú megnyomásával is válthat
+  Categories:
+    General Description: Nyelv, indítás, lapok és fordítás
+    Appearance: Megjelenés
+    Appearance Description: Téma, elrendezés, navigáció és videólisták
+    Content appearance: Videólisták és bélyegképek
+    Layout: Elrendezés
+    Playback Description: Lejátszó alapértelmezései, feliratok és csatornánkénti beállítások
+    Subscriptions Description: Hírfolyam-frissítés, értesítések új videókról és RSS-hírcsatornák
+    Downloads Description: Letöltési mappa, sablonok és automatikus letöltések
+    Focus: Fókusz
+    Focus Description: Elrejtett tartalom, nézési korlátok, emlékeztetők és szülői felügyelet
+    Add-ons: Kiegészítők
+    Add-ons Description: SponsorBlock, DeArrow, negatív értékelések, AiSList és hangalámondás fordítása
+    Privacy Description: Előzmények, keresési javaslatok, hivatkozások és alkalmazásjelszó
+    Data And Storage Description: Biztonsági mentések, importálás és exportálás, lemezhasználat és tisztítás
+    Sync Description: Szinkronizálási szerverfiók, eszközpárosítás és szinkronizált adatok
+    Advanced: Speciális
+    Advanced Description: Háttérszolgáltatások, pufferelés, külső eszközök, proxy és diagnosztika
+    Alternative providers: Videó- és metaadat-szolgáltatók
+  Highlight Changed Settings: Az alapértéktől eltérő beállítások kiemelése
+  Reset Setting to Default: A beállítás alapértékének visszaállítása
+  Performance Impact:
+    Show Performance Impact: Teljesítményhatás-jelzők megjelenítése
+    Moderate: Közepes hatás
+    High: Nagy hatás
+    Description: Ez a beállítás növelheti a(z) {resources} használatát
+    Resources:
+      CPU: CPU
+      GPU: GPU
+      Memory: memória
+      Network: hálózat
+      Disk: lemez
+  General Settings:
+    Built-in Streams:
+      Built-in Streams: "Beépített streamek"
+      Automatic: "Automatikus"
+      SABR Only: "Csak SABR"
+    Link Underlines:
+      Link Underlines: "Hivatkozások aláhúzása"
+      On Hover: "Hivatkozások aláhúzása rámutatáskor"
+      Never: "Soha ne húzza alá a hivatkozásokat"
+      Always: "Mindig húzza alá a hivatkozásokat"
+    Title Lines:
+      Title Lines: "Cím sorainak száma"
+      Unlimited: "Korlátlan"
+    Close Window With Last Tab: 'Ablak bezárása az utolsó lap bezárásakor'
+    Preferred Video Codec: Előnyben részesített videokodek
+    Always Use Backup Media Server: "Mindig a tartalék médiaszerver használata"
+    Automatically switch stream extraction methods: "Adatfolyam-kinyerési módszerek automatikus váltása"
+    Enable Tabs: "Lapok engedélyezése"
+    Thumbnail Swipe Gestures:
+      Left: Balra húzás a bélyegképeken
+      Right: Jobbra húzás a bélyegképeken
+      Description: Húzza vízszintesen a videó bélyegképét, majd engedje el a kiválasztott művelet végrehajtásához.
+    Data Saver Thumbnails: "Adattakarékos bélyegképek"
+    Use tray icon: "Rendszertálcaikon használata"
+    Close to system tray: "Bezárás a rendszertálcára"
+    Tray required for background refresh: "A rendszertálcaikon szükséges, amíg a feliratkozások háttérben történő frissítése engedélyezve van."
+    Show Video Menu Button: Videómenü gombjának megjelenítése
+    Swipe to refresh: Frissítés húzással
+    Blur Thumbnails: Bélyegképek elhomályosítása
+    Navigation:
+      Always Show Navigation Bar: Navigációs sáv megjelenítése mindig, amikor alul van
+      Compact Tab Labels: Kompakt navigációs sáv, amikor alul van
+      Show Active Subscriptions: Aktív feliratkozások megjelenítése az oldalsávban
+      Navigation: Navigáció
+      Customize Navigation: Navigáció testreszabása
+      Add Item: Elem hozzáadása
+    Date Format: Dátumformátum
+    Time Format: Időformátum
+    Language Default: Nyelvi alapértelmezés
+    Update Relative Timestamps: Relatív időbélyegek folyamatos frissítése
+    Stream Extraction Method:
+      Stream Extraction Method: Adatfolyam-kinyerési mód
+      yt-dlp: yt-dlp
+      Built-in: Beépített
+    Confirm Before: Megerősítés a következők előtt…
+    Confirmation Options:
+      Closing App: Kilépés az OpenTubeX alkalmazásból
+      Closing Window: Több lapot tartalmazó ablak bezárása
+      Closing Tabs: Több lap bezárása
+      Loading Tabs: Több lap betöltése
+      Unloading Tabs: Több lap kiürítése
+      Refreshing All Feeds: Sok feliratkozás frissítése
+    Remember Tab Navigation History: Lapnavigációs előzmények megjegyzése
+    New Tab Position:
+      New Tab Position: Új lap helye
+      At the end: A végén
+      After current tab: Az aktuális lap után
+      After current tab in opened order: Az aktuális lap után, megnyitási sorrendben
+    Tab Close Focus:
+      Last active tab: "Legutóbb aktív lap"
+      Next tab in tab order: "Következő lap a lapok sorrendjében"
+      Previous tab in tab order: "Előző lap a lapok sorrendjében"
+      Tab Close Focus: Az aktív lap bezárása után
+    Startup Behavior:
+      Startup Behavior: Indításkor
+      Load all tabs: Összes lap betöltése
+      Load previously loaded tabs: Korábban betöltött lapok betöltése
+      Load last active tab: Legutóbb aktív lap betöltése
+      Start with an empty session: Indítás üres munkamenettel
+      Load landing page, keep other tabs unloaded: Kezdőlap betöltése, a többi lap maradjon betöltetlen
+    Use AI Translation Completions: Hiányzó fordítások kiegészítése MI által készítettekkel
+    Reduced Motion:
+      Reduced Motion: Csökkentett mozgás
+      System: Rendszerbeállítás
+      Force On: Mindig bekapcsolva
+      Force Off: Mindig kikapcsolva
+    Comment Translation:
+      Title: Hozzászólások fordítása
+      Enable: Hozzászólások fordításának engedélyezése
+      Never Translate: Ne fordítsa az ilyen nyelvű hozzászólásokat
+      Choose Language: Nyelv kiválasztása
+      Description: Az alkalmazás nyelvén írt hozzászólások már ki vannak zárva. Adja hozzá az összes többi nyelvet, amelyen tud olvasni.
+      Remove Language: A(z) {language} nyelvű hozzászólások ismételt fordítása
+    Avoid translation:
+      Avoid translation: Fordítatlan videószöveg előnyben részesítése
+      Disabled: Kikapcsolva
+      Watch Only: Csak a videó kezelőfelülete
+      Entire App: Teljes alkalmazás
+    Playlist View Type:
+      Playlist View Type: Lejátszási lista nézettípusa
+    Show Thumbnail Previews: Bélyegkép-előnézetek megjelenítése
+    Extra Thumbnail Action Button:
+      Extra Thumbnail Action Button: További műveletgomb a bélyegképen
+      None: Nincs
+      Mark as Watched: Megjelölés megtekintettként
+      Copy YouTube Link: YouTube-hivatkozás másolása
+      Open in YouTube: Megnyitás a YouTube-on
+    Mobile Layout:
+      Mobile Layout: 'Mobilos elrendezés'
+      Automatic: 'Automatikus'
+      Phone: 'Telefon'
+      Tablet: 'Táblagép'
+    Video View Type:
+      Full Width: Teljes szélesség
+    Grid Columns:
+      Grid Columns: Rácsoszlopok
+      Playlist Grid Columns: Lejátszási listák rácsoszlopai
+      Auto: Automatikus
+    Preferred API Backend:
+      Yattee Server: Yattee-kiszolgáló
+    Yattee Server:
+      Server URL: Yattee-kiszolgáló URL-je
+      Username: Felhasználónév
+      Password: Jelszó
+      Proxy Videos: Videók közvetítése a Yattee-kiszolgálón keresztül
+      Test Connection: Kapcsolat tesztelése
+      Testing: Kapcsolat tesztelése…
+      Connected: 'Csatlakozva: Yattee-kiszolgáló {version}'
+      Errors:
+        Invalid URL: Adja meg a kiszolgáló URL-jét https:// vagy http:// előtaggal.
+        Unreachable: A kiszolgáló nem érhető el. Ellenőrizze az URL-t, és hogy fut-e a kiszolgáló.
+        Media not allowed: 'Csatlakozva, de a kiszolgáló nem engedélyezi, hogy ez az alkalmazás videókat töltsön be. Állítsa be a CORS_ORIGINS={origins} értéket a kiszolgáló környezeti változóiban.'
+        Not a Yattee server: A kiszolgáló válaszolt, de nem Yattee-kiszolgáló.
+        Credentials required: A kiszolgáló felhasználónevet és jelszót kér.
+        Invalid credentials: A kiszolgáló elutasította a felhasználónevet vagy a jelszót.
+        Rate limited: A kiszolgáló túl sok sikertelen próbálkozás miatt blokkolja a bejelentkezéseket. Próbálja újra később.
+        Server error: A kiszolgáló hibát adott vissza (HTTP {status}).
+    Notifications:
+      Notifications: Értesítések
+      System and In-App: Rendszer és alkalmazáson belül
+      System Only: Csak rendszer
+      Off: Ki
+    Auto Load Next Page:
+      Lists Tooltip: A hírfolyamok, keresési találatok és más listák további oldalainak automatikus betöltése.
+    Auto Load Comments:
+      Label: Hozzászólások automatikus betöltése
+      Tooltip: A hozzászólások betöltése az oldal megnyitásakor, görgetéskor pedig további hozzászólások betöltése.
+    Haptic Feedback: Haptikus visszajelzés
+    Ignore System Haptics Setting: Rendszer haptikus beállításának figyelmen kívül hagyása
+  Context Menu Search Settings:
+    Context Menu Search Settings: Keresés a helyi menüből
+    Description: Válassza ki, mely keresőmotorok jelenjenek meg a kijelölt szövegre jobb gombbal kattintva. A keresések az alapértelmezett böngészőben nyílnak meg.
+    Icon Hint: Egy keresőmotor engedélyezésekor az alkalmazás kapcsolatba lép a webhelyével a webhelyikon betöltéséhez.
+    Engine Name: Keresőmotor neve
+    Search URL: Keresési URL
+    URL Hint: Az URL-ben %s helyére kerül a kódolt kijelölt szöveg.
+    Add Custom Engine: Egyéni keresőmotor hozzáadása
+    Add Engine: Keresőmotor hozzáadása
+    Remove Engine: A(z) {engine} eltávolítása
+    Invalid Engine: Adjon meg egy nevet és egy érvényes, %s elemet tartalmazó HTTP vagy HTTPS keresési URL-t.
+    Engine Limit: Legfeljebb {count} egyéni keresőmotort adhat hozzá.
+  Theme Settings:
+    Theme and Colors: "Téma és színek"
+    Font Size: Betűméret
+    Sections:
+      Interface: "Felület"
+      Side Bar and Header: "Oldalsáv és fejléc"
+      Tabs: "Lapok"
+      Player: "Lejátszó"
+      Scrolling: "Görgetés"
+      Notifications: "Értesítések"
+    Only Show Important Notifications: Csak a fontos értesítések megjelenítése
+    Visible Search Suggestions: "Látható keresési javaslatok"
+    Material Accent Color: "Material kiemelőszín"
+    Tally Accent Color: "Tally kiemelőszín"
+    Material Wallpaper Colors: "Háttérkép színei"
+    Material System Accent Color: "Rendszer kiemelőszíne"
+    Tab Loading Indicator:
+      Tab Loading Indicator: Lapbetöltés jelzője
+      Bar: Sáv
+      Dot: Pont (klasszikus)
+    Compact Settings Categories: "Kompakt beállításkategóriák"
+    Playlist Thumbnail Size: "Lejátszási lista bélyegképeinek mérete"
+    Compact Mobile Mini Player: "Kompakt mobil minilejátszó"
+    Always Show Mobile Search Bar: "A mobilos keresősáv mindig látható"
+    Frosted Glass Player UI: "Deres üveg hatású lejátszófelület"
+    Main Color Theme:
+      Catppuccin Macchiato Rosewater: "Catppuccin Macchiato rózsavíz"
+      Catppuccin Macchiato Flamingo: "Catppuccin Macchiato flamingó"
+      Catppuccin Macchiato Pink: "Catppuccin Macchiato rózsaszín"
+      Catppuccin Macchiato Mauve: "Catppuccin Macchiato mályva"
+      Catppuccin Macchiato Red: "Catppuccin Macchiato vörös"
+      Catppuccin Macchiato Maroon: "Catppuccin Macchiato gesztenyebarna"
+      Catppuccin Macchiato Peach: "Catppuccin Macchiato barackvirág"
+      Catppuccin Macchiato Yellow: "Catppuccin Macchiato sárga"
+      Catppuccin Macchiato Green: "Catppuccin Macchiato zöld"
+      Catppuccin Macchiato Teal: "Catppuccin Macchiato pávakék"
+      Catppuccin Macchiato Sky: "Catppuccin Macchiato égszínkék"
+      Catppuccin Macchiato Sapphire: "Catppuccin Macchiato zafír"
+      Catppuccin Macchiato Blue: "Catppuccin Macchiato kék"
+      Catppuccin Macchiato Lavender: "Catppuccin Macchiato levendula"
+    Move Downloads to App Header: Letöltések áthelyezése az alkalmazás fejlécébe
+    Move Settings to App Header: Beállítások áthelyezése az alkalmazás fejlécébe
+    Hide Side Bar on Watch Pages: Oldalsáv elrejtése a videóoldalakon
+    UI Roundness: Kezelőfelület lekerekítése
+    Scrollbar Width: Görgetősáv szélessége
+    Scroll Speed: Görgetési sebesség
+    Animation Speed: Animáció sebessége
+    Thumbnail Size: Bélyegkép mérete
+    Show Tab Icons: Lapikonok megjelenítése
+    Load Missing Tab Icons: Hiányzó lapikonok betöltése
+    Loading Missing Tab Icons: Hiányzó lapikonok betöltése…
+    No Missing Tab Icons: Már minden támogatott lapikon be van töltve
+    Loaded Tab Icons: 'Hiányzó lapikon betöltve: {count} | Hiányzó lapikonok betöltve: {count}'
+    Loaded Tab Icons With Failures: Betöltve {loaded} lapikon; {failed} nem tölthető be
+    Show Tab Previews: Lapelőnézetek megjelenítése
+    Use Fixed Tab Width: Rögzített lapszélesség vízszintes módban
+    Use Custom Title Bar: Egyéni címsor használata
+    Tab Width: Lapszélesség
+    Vertical Tab Height: Függőleges lapok magassága
+    Tab Layout:
+      Tab Layout: Lapok elrendezése
+      Horizontal Top: Vízszintesen felül
+      Horizontal Bottom: Vízszintesen alul
+      Vertical Left: Függőlegesen bal oldalon
+      Vertical Right: Függőlegesen jobb oldalon
+    Show Toast Timeout Indicator: Értesítés hátralévő idejének jelzése
+    Use Grid Player Menu: Rácsos lejátszómenü használata
+    Show Progress as Notification: Folyamat megjelenítése értesítésként
+    Operation in Progress: Művelet folyamatban
+    Toast Position:
+      Test Toast: Tesztértesítés
+      Toast Position: Értesítés helye
+      Bottom Left: Balra lent
+      Bottom Center: Középen lent
+      Bottom Right: Jobbra lent
+      Top Left: Balra fent
+      Top Center: Középen fent
+      Top Right: Jobbra fent
+    Icon Pack:
+      Icon Pack: Ikonkészlet
+      Material Symbols: Material Symbols
+      Remix Icon: Remix Icon
+    Font:
+      App Font: Alkalmazás betűkészlete
+      System Default: A rendszer alapértelmezettje
+      Unable to Load: A rendszerre telepített betűkészletek nem tölthetők be
+      Bundled Fonts: Mellékelt betűtípusok
+      System Fonts: Rendszerbetűtípusok
+    Always Show Scrollbars: Görgetősávok mindig láthatók
+    Base Theme:
+      Material Light: "Material Világos"
+      Material Dark: "Material Sötét"
+      Material Black: "Material Fekete"
+      Dynamic colors: Dinamikus színek
+      Tokyo Night Night: Tokyo Night Night
+      Tokyo Night Storm: Tokyo Night Storm
+      Tokyo Night Moon: Tokyo Night Moon
+      Tokyo Night Day: Tokyo Night Day
+      Rosé Pine: Rosé Pine
+      Rosé Pine Moon: Rosé Pine Moon
+      Rosé Pine Dawn: Rosé Pine Dawn
+      Kanagawa Wave: Kanagawa Wave
+      Kanagawa Dragon: Kanagawa Dragon
+      Kanagawa Lotus: Kanagawa Lotus
+      Ayu Dark: Ayu Dark
+      Ayu Mirage: Ayu Mirage
+      Ayu Light: Ayu Light
+      One Dark: One Dark
+      Carbonfox: Carbonfox
+      Catppuccin Macchiato: Catppuccin Macchiato
+      Tally Light: "Tally Világos"
+      Tally Dark: "Tally Sötét"
+      Custom: Egyéni
+      Built-in Themes: Beépített témák
+      Custom Themes: Egyéni témák
+    Light Theme: Világos téma
+    Dark Theme: Sötét téma
+    Custom Theme:
+      Share Restrictions Prompt: "A leírás legfeljebb 500 karaktert tartalmazhat, a Markdown-jelölésekkel együtt. Csak a GitHubon tárolt hivatkozások és képek engedélyezettek, beleértve az ide közvetlenül feltöltötteket is. A bot eltávolítja a külső hivatkozásokat és képeket, lerövidíti a hosszú leírásokat, és hozzászólásban magyarázza el a változtatásokat."
+      Import from Clipboard: "Importálás a vágólapról"
+      Invalid Clipboard Theme: "A vágólap nem tartalmaz érvényes témát. Másolja a téma JSON-kódját, és próbálja újra."
+      Create Custom Theme: Egyéni téma létrehozása
+      Edit Custom Theme: Egyéni téma szerkesztése
+      Custom Theme Creator: Egyénitéma-készítő
+      Theme Name: Téma neve
+      Based On: Alaptéma
+      Import Theme: Téma importálása
+      Export Theme: Téma exportálása
+      Share Theme: Téma megosztása
+      Share Description Prompt: Írja le a témát és mindazt, amit másoknak érdemes tudniuk a használata előtt.
+      Share Screenshots Prompt: "Húzzon ide egy vagy több képernyőképet. Hagyd üresen ezt a részt, és a bot három előnézetet ad hozzá mintatartalommal, a személyes adataid nélkül."
+      Delete Theme: Téma törlése
+      Delete Theme Confirmation: Törli a(z) „{name}” témát? Ez nem vonható vissza.
+      Save and Apply: Mentés és alkalmazás
+      Discard Changes: Módosítások elvetése
+      Reset Colors: Visszaállítás az alaptémára
+      Theme File: OpenTubeX-témafájl
+      Theme Saved: Az egyéni téma mentve és alkalmazva
+      Theme Imported: A téma importálva a szerkesztőbe
+      Theme Exported: A téma exportálva
+      Theme Deleted: Az egyéni téma törölve
+      Unable to Load: Nem sikerült betölteni az egyéni témát
+      Unable to Save: Nem sikerült menteni az egyéni témát
+      Unable to Export: Nem sikerült exportálni az egyéni témát
+      Unable to Share: Nem sikerült megosztani az egyéni témát
+      Unable to Delete: Nem sikerült törölni az egyéni témát
+      Invalid Theme File: Érvénytelen egyénitéma-fájl
+      Colors:
+        Watched thumbnail overlay: "Megtekintett videók bélyegképeinek fedőrétege"
+        Thumbnail badge background: "Bélyegképcímkék háttere"
+        Main text: Főszöveg
+        Secondary text: Másodlagos szöveg
+        Subtle text: Halvány szöveg
+        Borders and dividers: Szegélyek és elválasztók
+        Subtle surfaces and indicators: Halvány felületek és jelzők
+        Title text: Címszöveg
+        Selected text background: Kijelölt szöveg háttere
+        Selected text: Kijelölt szöveg
+        Logo icon: Logóikon
+        Logo text: Logószöveg
+        Logo hover: Logó rámutatáskor
+        Logo pressed: Logó lenyomáskor
+        Page background: Oldal háttere
+        Card background: Kártya háttere
+        Secondary card background: Másodlagos kártya háttere
+        Favorite icon: Kedvenc ikonja
+        Error color: Hiba színe
+        Scrollbar thumb: Görgetősáv csúszkája
+        Scrollbar thumb hover: Görgetősáv csúszkája rámutatáskor
+        Scrollbar thumb pressed: Görgetősáv csúszkája lenyomáskor
+        Dropdown item hover text: Legördülő lista elemének szövege rámutatáskor
+        Dropdown item hover background: Legördülő lista elemének háttere rámutatáskor
+        Navigation and panel background: Navigáció és panel háttere
+        Neutral item hover and focus background: Semleges elem háttere rámutatáskor és fókuszban
+        Neutral item hover and focus text and icons: Semleges elem szövege és ikonjai rámutatáskor és fókuszban
+        Neutral item pressed background: Semleges elem háttere lenyomáskor
+        Neutral item pressed text and icons: Semleges elem szövege és ikonjai lenyomáskor
+        Header button hover and focus background: Fejlécgomb háttere rámutatáskor és fókuszban
+        Header button hover and focus text and icons: Fejlécgomb szövege és ikonjai rámutatáskor és fókuszban
+        Header button pressed background: Fejlécgomb háttere lenyomáskor
+        Header button pressed text and icons: Fejlécgomb szövege és ikonjai lenyomáskor
+        Search and dropdown background: Kereső és legördülő lista háttere
+        Settings search background: Beállításkereső háttere
+        Instance menu: Példánymenü
+        Shadow color: Árnyék színe
+        Primary controls and highlights: Elsődleges vezérlők és kiemelések
+        Primary control hover and focus: Elsődleges vezérlő rámutatáskor és fókuszban
+        Primary control pressed: Elsődleges vezérlő lenyomáskor
+        Text and icons on primary controls: Elsődleges vezérlők szövege és ikonjai
+        Secondary controls and highlights: Másodlagos vezérlők és kiemelések
+        Secondary control hover and focus: Másodlagos vezérlő rámutatáskor és fókuszban
+        Secondary control pressed: Másodlagos vezérlő lenyomáskor
+        Light secondary color: Világos másodlagos szín
+        Visited accent: Meglátogatott elem kiemelése
+        Text and icons on secondary controls: Másodlagos vezérlők szövege és ikonjai
+        Links: Hivatkozások
+        Visited links: Meglátogatott hivatkozások
+        Destructive action: Törlő művelet
+        Destructive hover and focus: Törlő művelet rámutatáskor és fókuszban
+        Destructive pressed: Törlő művelet lenyomáskor
+        Text and icons on destructive actions: Törlő műveletek szövege és ikonjai
+    Modal Backdrop:
+      Modal Backdrop: "Párbeszédablakok háttere"
+      Dim and Blur: "Sötétítés és elmosás"
+      Dim Only: "Csak sötétítés"
+    Click Scrollbar Track to Scroll: "Görgetés a görgetősávra kattintva"
+  Player Settings:
+    Rewind on Resume: "Visszatekerés folytatáskor"
+    Minimum Pause Before Rewinding: "Minimális szünet a visszatekerés előtt"
+    Mono Audio: 'Monó hang'
+    Normalize Loudness: 'Hangerő kiegyenlítése'
+    Show Mono Audio Toggle: 'Monó hang kapcsoló megjelenítése'
+    Pause on Stream Recovery: "Szüneteltetés a stream helyreállításakor"
+    Buffering:
+      Buffering: Pufferelés
+      Description: Válassza ki, hogy a lejátszó mennyit töltsön be előre a videóból, és mennyit tartson betöltve.
+      Buffer Ahead Hint: A nagyobb előretöltési puffer hosszabb kapcsolatkiesések alatt is folytatja a lejátszást, de olyan videórészt is letölt, amelyet talán meg sem néz.
+      Rewind Buffer Hint: A nagyobb visszatekerési puffer lehetővé teszi, hogy újbóli letöltés nélkül ugorjon vissza, de több memóriát használ.
+      Buffer Before Playing Hint: Ha lejátszás előtt megvárja, hogy az aktuális videóból nagyobb rész töltődjön be, az megelőzi az ismétlődő megakadásokat instabil kapcsolatnál, de a lejátszás lassabban indul, és tekerés után később folytatódik.
+      Preset: Pufferelési előbeállítás
+      Presets:
+        Data Saver: Adattakarékos
+        Default: Alapértelmezett
+        Smooth Playback: Akadásmentes lejátszás
+        Custom: Egyéni
+      Buffer Ahead: Előretöltési puffer
+      Buffer Ahead Tooltip: 'Milyen messzire töltődjön be a videó az aktuális pozíción túl. Magas minőségnél a memóriakorlátok korlátozhatják a nagyon magas értékeket. Alapértelmezett: {value}'
+      Rewind Buffer: Visszatekerési puffer
+      Rewind Buffer Tooltip: 'A már megnézett videóból mennyi maradjon betöltve. Alapértelmezett: {value}'
+      Buffer Before Playing: Puffer lejátszás előtt
+      Buffer Before Playing Tooltip: 'A videóból mennyinek kell betöltődnie, mielőtt a lejátszás elindul, vagy a puffer kiürülése után folytatódik. Alapértelmezett: {value}'
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: "Felbontáskorlát forgalomkorlátos hálózatokon"
+      No Limit: "Nincs korlát"
+      Tooltip: "Mobilinterneten és más forgalomkorlátos hálózatokon a videók ezen a felbontáson vagy alacsonyabbon indulnak. A lejátszóban továbbra is választhat magasabb felbontást."
+    Show Music Mode Toggle: "Zenei mód kapcsolójának megjelenítése"
+    Enable DLNA Casting: "DLNA-átküldés engedélyezése"
+    Skip Unavailable Playlist Videos: "Nem elérhető videók kihagyása a lejátszási listákban"
+    Lights Off: Fények lekapcsolása
+    Show Lights Off Toggle: Fények lekapcsolása kapcsolójának megjelenítése
+    Show Volume Boost Toggle: "Hangerő-erősítés kapcsoló megjelenítése"
+    Swipe Gestures:
+      Fullscreen Brightness: Maximális fényerő teljes képernyőn
+      Left: Bal oldali húzás
+      Right: Jobb oldali húzás
+      Disabled: Kikapcsolva
+      Brightness: Fényerő
+      Volume: Hangerő
+      Hint: Teljes képernyőn húzza felfelé vagy lefelé a videó egyik oldalán.
+      Unavailable: Nem sikerült módosítani a lejátszás vezérlőit.
+    yt-dlp Streaming: "yt-dlp streamelés"
+    Continue Playback When Screen Is Locked: 'Lejátszás folytatása zárolt képernyőnél'
+    Music Visualizer: Zenevizualizáció
+    Automatically Open Chapters: Fejezetek automatikus megnyitása
+    Caption Appearance:
+      Caption Appearance: Feliratok megjelenése
+      Captions: Feliratok
+      Preferred Language: Felirat előnyben részesített nyelve
+      Application Language: Alkalmazás nyelve
+      Enable Translations: Feliratfordítások engedélyezése
+      Text Color: Szövegszín
+      Background Color: Háttérszín
+      Background Opacity: Háttér átlátszatlansága
+      Font Size: Betűméret
+      Anchor:
+        Anchor: Igazítás
+        Top Left: Balra fent
+        Top Center: Középen fent
+        Top Right: Jobbra fent
+        Bottom Left: Balra lent
+        Bottom Center: Középen lent
+        Bottom Right: Jobbra lent
+        Center Left: Középen balra
+        Center: Középen
+        Center Right: Középen jobbra
+      Edge Style:
+        Edge Style: Szegély stílusa
+        None: Nincs
+        Outline: Körvonal
+        Drop Shadow: Vetett árnyék
+        Raised: Kiemelt
+        Depressed: Süllyesztett
+      Reset: Feliratok megjelenésének visszaállítása
+      Default: Alapértelmezett
+      Text Opacity: Betűk átlátszatlansága
+      Font Family:
+        Font Family: Betűtípuscsalád
+        Monospaced Serif: Azonos szélességű talpas
+        Proportional Serif: Arányos talpas
+        Monospaced Sans-Serif: Azonos szélességű talpatlan
+        Proportional Sans-Serif: Arányos talpatlan
+      Colors:
+        White: Fehér
+        Yellow: Sárga
+        Green: Zöld
+        Cyan: Világoskék
+        Blue: Kék
+        Magenta: Bíborvörös
+        Red: Piros
+        Black: Fekete
+    Auto Picture in Picture:
+      Auto Picture in Picture: Automatikus váltás Kép a képben módra
+      On Tab Change: Lapváltáskor
+      On Window Minimize: Az ablak kis méretűre állításakor
+      On Window Hide: Amikor az ablak elveszti a fókuszt, vagy másik ablakra vált
+      Wayland Minimize Unsupported: A Wayland nem jelzi az alkalmazásoknak az ablak kis méretűre állítását, ezért ez az eseményindító nem érhető el. Használja helyette az „Amikor az ablak elveszti a fókuszt, vagy másik ablakra vált” lehetőséget, amely a kis méretűre állítást is lefedi.
+      On Tab Change Mini Player: Lapváltáskor helyette a minilejátszó jelenik meg. A használatához állítsa a „Videó elhagyásakor” beállítást „Lejátszás leállítása” értékre.
+    Scroll Mini Player:
+      Scroll Player Mode: Lefelé görgetéskor
+      Scroll Player Mode Tooltip: A lejátszó csak akkor rögzül, ha legfeljebb az ablak magasságának felét foglalja el. Ellenkező esetben, például fekvő tájolású telefonokon vagy széles ablakokban, helyette a minilejátszó jelenik meg.
+      Scroll Player Modes:
+        Mini: Minilejátszó megjelenítése
+        Pin: Lejátszó rögzítése felül, ha van hely
+        Off: Görgetés az oldallal együtt
+      Leaving Video: Videó elhagyásakor
+      Leaving Video Modes:
+        Keep Playing: Lejátszás folytatása minilejátszóban
+        Stop: Lejátszás leállítása
+    Multiply Seek Interval by Playback Rate: Keresési időköz szorzása a lejátszási sebességgel
+    Show Playback Rate Adjusted Timestamp: Lejátszási sebességhez igazított időbélyeg megjelenítése
+    Use YouTube-style Shorts: YouTube-stílusú Shorts használata
+    Loop Shorts: Shorts ismétlése
+    Remember Volume: Hangerő megjegyzése
+    Skip Silence: Csend átugrása
+    Show Skip Silence Toggle: Csendátugrás kapcsolójának megjelenítése
+    Enable Skip Silence by Default: Csendátugrás alapértelmezett engedélyezése
+    Enable Video Zoom: Videónagyítás engedélyezése
+    Enable Seek History: Ugrási előzmények engedélyezése
+    Show Seek Bar Filmstrip: "Tekerősáv filmszalagjának megjelenítése"
+    Voice-over Translation:
+      Title: Szinkronfordítás
+      Attribution: (a Yandex szolgáltatásával)
+      Enable: Szinkronfordítás engedélyezése
+      Prepare in Background: Szinkronfordítások előkészítése a háttérben
+      Background Preparation Tooltip: A támogatott videók betöltésekor azonnal elküldi az aktuális videó azonosítóját, időtartamát és a kiválasztott nyelvet a fordítási szolgáltatásnak.
+      Language: Szinkronfordítás nyelve
+      Supported Source Languages: 'Támogatott forrásnyelvek: orosz, angol, kínai, koreai, arab, francia, olasz, spanyol, német és japán.'
+      Voice Volume: Fordított beszéd hangereje
+      Original Volume: Eredeti hangsáv hangereje
+      Russian: Orosz
+      English: Angol
+      Kazakh: Kazah
+    Hold to Speed Up:
+      Hold to Speed Up: Nyomva tartás a gyorsításhoz
+      Off: Ki
+    Use Quick Playback Speed Bar: Gyors lejátszásisebesség-sáv használata
+    Customize Quick Playback Speed Bar: Gyors lejátszásisebesség-sáv testreszabása
+    Quick Playback Speed Bar Manager: Gyors lejátszásisebesség-sáv
+    Add Playback Speed: Lejátszási sebesség hozzáadása
+    Reset Quick Playback Speed Bar: Alapértékek visszaállítása
+    Playback Speed Name: Név
+    Edit Playback Speed Name: Lejátszási sebesség nevének szerkesztése
+    Use Automatic Playback Speed Name: Automatikus lejátszásisebesség-név használata
+    Reorder Playback Speed: Húzza a lejátszási sebesség átrendezéséhez
+    Playback Speed: Lejátszási sebesség
+    Parallel Segment Loading: Szakaszok párhuzamos betöltése
+    Rotate Wide Videos to Landscape in Fullscreen: 'A széles videók elforgatása fekvő helyzetbe teljes képernyőn'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'Húzd felfelé vagy lefelé a teljes képernyő megnyitásához vagy bezárásához'
+    Preload Upcoming Videos: "Következő videók előtöltése"
+    Upcoming Videos to Preload: "Előtöltendő videók száma"
+    Concurrent Preloads: "Egyidejű előtöltések"
+    Ignore System Rotation Lock for Fullscreen: Rendszerszintű forgatászár figyelmen kívül hagyása teljes képernyőhöz
+    Swipe Left or Right to Seek in Fullscreen: Húzás balra vagy jobbra a tekeréshez teljes képernyőn
+    Show Swipe to Seek Preview: Előnézet megjelenítése csúsztatásos tekeréskor
+    Enable Google Cast: "Google Cast engedélyezése"
+    Sections:
+      Playback: Lejátszás
+      Autoplay: Automatikus lejátszás
+      Playback Speed: Lejátszási sebesség
+      Player Controls: Lejátszóvezérlők
+      Gestures: Kézmozdulatok
+      Viewing Modes: Megtekintési módok
+      Shorts: Shorts
+      Screenshots: Képernyőképek
+    Enable FCast: "FCast engedélyezése"
+    Screenshot:
+      Legacy Formats: "Régebbi formátumok"
+      Modern Formats: "Modern formátumok"
+    Ask Before Preloading Large Playlists: "Kérdezzen nagy lejátszási listák előtöltése előtt"
+  Channel Settings:
+    Channel Settings: Csatornabeállítások
+    Channel Settings Description: Csatornánként megjegyzi a videónézés közben kiválasztott beállításokat, és a csatorna következő videójánál újra alkalmazza őket.
+    Enable Channel Playback Settings: Csatornánkénti lejátszási beállítások engedélyezése
+    Auto Save Playback Speed: Lejátszási sebesség módosításainak automatikus mentése
+    Auto Save Video Quality: Videóminőség módosításainak automatikus mentése
+    Auto Save Subtitles State: Feliratállapot módosításainak automatikus mentése
+    Auto Save Volume: Hangerő módosításainak automatikus mentése
+    Manage Saved Channels: Mentett csatornák kezelése ({channelCount})
+    Saved Channels: Mentett csatornabeállítások
+    Enable Saved Channel Settings Sync: Mentett csatornabeállítások szinkronizálása
+    Disable Saved Channel Settings Sync: Mentett csatornabeállítások szinkronizálásának leállítása
+    Search Channels: Csatornák keresése
+    No Saved Channels: Még nincsenek mentett csatornaspecifikus beállítások
+    No Matching Channels: Nincs a keresésnek megfelelő csatorna
+    Forget Channel: A csatorna összes beállításának elfelejtése
+    Forget Value: Beállítás elfelejtése
+    Add Setting: További beállítás megjegyzése ennél a csatornánál
+    Add Subscribed Channel: Feliratkozott csatorna hozzáadása
+    Video Quality: Videóminőség
+    Subtitles Enabled: Feliratok engedélyezve
+    Volume: Hangerő
+  Download Settings:
+    Download Settings: Letöltések
+    Enable Downloads: Letöltések engedélyezése
+    Managed Tools Download Started Template: 'Nem található a szükséges külső szoftver: {tools}. Felügyelt példányok letöltése…'
+    Managed Tools Download Finished Template: A(z) {tools} letöltése befejeződött
+    Managed Tools Update Started Template: Frissítés érhető el a(z) {tools} eszközhöz. Letöltés…
+    Managed Tools Update Finished Template: A(z) {tools} frissítése befejeződött
+    Managed Tools Update Available Template: Frissítés érhető el a(z) {tools} eszközhöz.
+    Managed Tools Update Source Notice: "Az OpenTubeX közvetlenül a GitHubról tölti le, ezért az F-Droid és más alkalmazásboltok nem ellenőrzik."
+    Update Managed Tools: Frissítés
+    Managed Tools Download Error Template: 'Nem sikerült letölteni a felügyelt eszközöket: {errors}'
+    Download Folder: Letöltési mappa
+    Global Additional yt-dlp Arguments: További yt-dlp argumentumok
+    Concurrent Downloads: Egyidejű letöltések
+    Bandwidth Limit: Sávszélességkorlát (KiB/s)
+    Download Templates: Letöltési sablonok
+    Manage Download Templates: Letöltési sablonok kezelése ({templateCount})
+    New Template: Új sablon
+    Template Source: Szerkesztendő vagy alapként használt sablon
+    Built-in Template: '{name} (beépített)'
+    Custom Template Name: '{name} (egyéni)'
+    Create Template Copy: Másolat létrehozása
+    Template Copy Name: '{name} másolata'
+    Automatic Downloads: Automatikus letöltések
+    Manage Automatic Downloads: Automatikus letöltések kezelése ({channelCount})
+    Automatic Downloads Description: Válasszon letöltési sablont és szűrőket minden feliratkozott csatornához. Az egyező videók a háttérben töltődnek le, amikor frissülnek a feliratkozási hírcsatornák.
+    Automatic Downloads New Only: A csatorna engedélyezésekor a következő új feltöltéstől indul a letöltés. A meglévő videók és a csatorna korábbi tartalmai nem töltődnek le.
+    Automatic Downloads No Channels: Az automatikus letöltések beállítása előtt iratkozzon fel egy csatornára.
+    No Matching Automatic Download Channels: Nincs a keresésnek megfelelő csatorna.
+    Automatic Downloads Livestreams: Élő közvetítések
+    Minimum Duration Seconds: Legrövidebb időtartam (másodperc)
+    Maximum Duration Seconds: Leghosszabb időtartam (másodperc)
+    Minimum File Size MB: Legkisebb fájlméret (MB)
+    Maximum File Size MB: Legnagyobb fájlméret (MB)
+    Maximum Age Days: Legrégebbi kor (nap)
+    Title Includes: A cím tartalmazza
+    Title Excludes: A cím nem tartalmazza
+    Title Filter Hint: A cím több keresőkifejezését vesszővel válassza el. A videónak legalább egy megadott kifejezést tartalmaznia kell, a kizárt kifejezések egyikét sem tartalmazhatja.
+    Automatic Downloads Require Unmetered Network: "Csak nem forgalomkorlátos hálózaton"
+    Automatic Downloads Require Charging: "Csak töltés közben"
+  External Software Settings:
+    Create YouTube session: "YouTube-munkamenet létrehozása"
+    YouTube session hint: "Szükség esetén jelentkezz be, majd mentsd a munkamenetet. A beállításokban válaszd ki, hogy letöltésekhez, lejátszáshoz vagy feliratokhoz használod-e."
+    Use cookies for downloads: "Sütik használata letöltésekhez"
+    YouTube session failed: "Nem sikerült menteni a YouTube-munkamenetet."
+    Checking FFmpeg and FFprobe: FFmpeg/FFprobe ellenőrzése…
+    FFmpeg and FFprobe Managed Not Downloaded: Az FFmpeg/FFprobe még nincs letöltve. A letöltéshez kattintson az alábbi gombra.
+    External Software Settings: Külső szoftverek
+    yt-dlp Source: yt-dlp forrása
+    yt-dlp Channel: yt-dlp csatornája
+    Sources:
+      System: Rendszer (PATH vagy egyéni elérési út)
+      Managed: Az OpenTubeX felügyeletével
+    Detected Version Template: 'Észlelt yt-dlp-verzió: {version}'
+    Managed Not Downloaded: Az yt-dlp még nincs letöltve. A letöltéshez kattintson az alábbi gombra.
+    System yt-dlp Missing Warning: Az yt-dlp nem található a rendszeren. Telepítse, adjon meg alább egy egyéni elérési utat, vagy váltson „Az OpenTubeX felügyeletével” forrásra.
+    Download yt-dlp: yt-dlp letöltése
+    Update yt-dlp: yt-dlp frissítése
+    Checking yt-dlp: yt-dlp ellenőrzése…
+    Downloading yt-dlp: yt-dlp letöltése…
+    yt-dlp Downloaded Template: Az yt-dlp {version} letöltve
+    yt-dlp Download Error Template: 'Nem sikerült letölteni az yt-dlp programot: {error}'
+    FFmpeg Source: FFmpeg forrása
+    Detected FFmpeg Version Template: 'Észlelt FFmpeg-verzió: {version}'
+    Detected FFmpeg and FFprobe Version Template: 'Észlelt FFmpeg/FFprobe-verzió: {version}'
+    FFmpeg Managed Not Downloaded: Az FFmpeg még nincs letöltve. A letöltéshez kattintson az alábbi gombra.
+    System FFmpeg Missing Warning: Az FFmpeg nem található a rendszeren. A videó és a hang egyesítéséhez, valamint a hang átalakításához szükséges. Telepítse, adjon meg alább egy egyéni elérési utat, vagy váltson „Az OpenTubeX felügyeletével” forrásra.
+    Download FFmpeg: FFmpeg letöltése
+    Update FFmpeg: FFmpeg frissítése
+    Checking FFmpeg: FFmpeg ellenőrzése…
+    Downloading FFmpeg: FFmpeg letöltése…
+    Detected FFprobe Version Template: 'Észlelt FFprobe-verzió: {version}'
+    FFprobe Managed Not Downloaded: Az FFprobe még nincs letöltve. Az FFmpeg programmal együtt az alábbi gombra kattintva töltheti le.
+    System FFprobe Missing Warning: Az FFprobe nem található a rendszeren. Az utófeldolgozás során a média vizsgálatához szükséges. Telepítse az FFmpeg mellé, vagy váltson „Az OpenTubeX felügyeletével” forrásra.
+    Checking FFprobe: FFprobe ellenőrzése…
+    Download FFmpeg and FFprobe: FFmpeg és FFprobe letöltése
+    Update FFmpeg and FFprobe: FFmpeg és FFprobe frissítése
+    Downloading FFmpeg and FFprobe: FFmpeg és FFprobe letöltése…
+    FFmpeg and FFprobe Downloaded Template: Az FFmpeg és az FFprobe {version} letöltve
+    FFmpeg and FFprobe Download Error Template: 'Nem sikerült letölteni az FFmpeg és az FFprobe programot: {error}'
+    Managed Tool Already Current Template: 'A(z) {tool} {version} már naprakész'
+    Managed Tool Errors:
+      Removed: 'A letöltött fájlt eltávolították, valószínűleg egy víruskereső program'
+      Unusable: 'A letöltött program nem indítható el. Lehet, hogy egy víruskereső program blokkolja, vagy nem támogatja ezt a rendszert'
+      Release Not Found: 'Nem található a legújabb kiadás'
+      Verification Failed: 'Nem sikerült ellenőrizni, hogy a letöltés hivatalos kiadás-e'
+      Downgrade: 'A letöltött kiadás régebbi a telepítettnél'
+      Invalid Archive: 'A letöltött archívum érvénytelen'
+      Rollback Failed: 'A frissítés nem sikerült, és az előző verziót nem lehetett teljesen visszaállítani'
+    Managed Tool Updates: Felügyelt eszközök frissítései
+    Update Modes:
+      Automatic: Automatikus frissítés
+      Ask: Rákérdezés frissítés előtt
+      Manual: Csak kézi frissítés
+    yt-dlp Executable Path: yt-dlp végrehajtható fájl
+    FFmpeg Executable Path: FFmpeg végrehajtható fájl
+    Restricted Playback Authentication: "yt-dlp sütik"
+    Cookie Source: Sütik forrása
+    Cookie Sources:
+      None: Nincs
+      File: Fájl
+      Browser: Böngésző
+    Cookie File: Sütifájl
+    Browser for Cookies: Sütikhez használt böngésző
+    Browser Profile: Böngészőprofil (nem kötelező)
+    Browser Profile Placeholder: Profil neve vagy elérési útja
+    Browser Profile Invalid: "Adjon meg egy profilnevet, vagy válasszon profilmappát a mappa gombbal."
+    Select Browser: Böngésző kiválasztása
+    Always Use Cookies: Sütik használata mindig
+    Restricted Playback Authentication Hint: Az OpenTubeX alapértelmezés szerint csak akkor adja át ezeket a sütiket az yt-dlp programnak, ha egy korhatáros vagy csak tagoknak szóló videónál a „Próbálkozás a beállított sütikkel” lehetőséget választja.
+    Restricted Playback Authentication Warning: Ha az yt-dlp programot Google-fiókkal használja, a fiókot ideiglenesen vagy véglegesen korlátozhatják.
+    Use cookies for subtitles: "Sütik használata a feliratokhoz"
+  Privacy Settings:
+    Internet Connectivity Checks: "Internetkapcsolat ellenőrzése"
+    Internet Connectivity Checks Tooltip: "Kis kéréseket küld egy GrapheneOS által üzemeltetett kiszolgálónak az internetelérés ellenőrzéséhez."
+    Automatic History Retention: Előzmények automatikus megőrzése (nap)
+    Automatic History Retention Placeholder: Hagyja üresen a korlátlan megőrzéshez
+    Automatic History Retention Tooltip: Hagyja üresen az előzmények korlátlan megőrzéséhez. Egy szám mentése azonnal törli a régebbi bejegyzéseket, és ezt az alkalmazás futása közben automatikusan megismétli.
+    Automatic Search History Retention: Keresési előzmények automatikus megőrzése (nap)
+    Automatic Search History Retention Tooltip: Hagyja üresen a keresési előzmények korlátlan megőrzéséhez. Egy szám mentése azonnal törli a régebbi kereséseket, és ezt az alkalmazás futása közben automatikusan megismétli.
+    History Retention Saved: Előzménymegőrzés mentve
+    Invalid History Retention Days: Adjon meg nullánál nagyobb egész számú napot
+    Enable Watch Statistics: Megtekintési statisztikák engedélyezése
+    Week Starts On: A hét első napja
+    Cache Video Metadata: Metaadatok előzményei
+    Cache Video Metadata Tooltip: Megőrzi a meglátogatott videók támogatott metaadatainak minden változatát, beleértve a címeket, a bélyegképeket és a leírásokat. A feliratkozási hírfolyamokban megjelenő címeket is megőrzi. Alapértelmezés szerint ki van kapcsolva, mert a metaadat-előzmények tárolása növeli a lemezhasználatot.
+    Watched Percentage Threshold: Megtekintési százalék küszöbértéke
+    Watched Percentage Threshold Tooltip: A videó akkor lesz megtekintettként megjelölve, ha eléri a kiválasztott százalékot, és legfeljebb 2 perc van hátra. 0%-nál a lejátszás kezdetekor, 100%-nál a lejátszás végén kap jelölést.
+    Clear Video Metadata Cache: Videómetaadatok gyorsítótárának törlése
+    Are you sure you want to clear the video metadata cache?: Biztosan törli a gyorsítótárazott videócímeket, bélyegképeket és leírásokat?
+    Failed to clear video metadata cache: Nem sikerült törölni a videómetaadatok gyorsítótárát
+    Video Metadata Cache Size: 'Videómetaadatok gyorsítótára: {size}'
+  Storage Settings:
+    Storage: Tárhely
+    Downloaded Media: Nyilvántartott letöltött média
+    Storage Breakdown: Tárhely részletezése
+    Shown Total: Megjelenített összeg
+    Calculating: Számítás…
+    Not Available: A pontos méret nem érhető el
+    At Least: Legalább {size}
+    Failed To Read Storage: Egyes tárhelyméretek nem olvashatók
+    Downloaded Media Description: A letöltési előzményekben még nyilvántartott videó-, hang- és feliratfájlok.
+    Selected Download Folders: A felhasználó által kiválasztott letöltési mappák
+    Download History Records: Letöltési előzmények bejegyzései
+    Download History Records Description: '{count} befejezett letöltési bejegyzés. Ez a bejegyzés az állapotot és a fájlok helyét tartja nyilván, de nem tartalmazza a letöltött médiát. | {count} befejezett letöltési bejegyzés. Ezek a bejegyzések az állapotot és a fájlok helyét tartják nyilván, de nem tartalmazzák a letöltött médiát.'
+    Clear Download History Records: Letöltési előzmények bejegyzéseinek törlése
+    Clear Download History Confirmation: Törli az összes befejezett letöltési bejegyzést?
+    Download Files Stay On Disk: A letöltött fájlok a lemezen maradnak, de többé nem jelennek meg a Letöltések oldalon.
+    Clear Records: Bejegyzések törlése
+    Replaceable Caches: Újra létrehozható gyorsítótárak
+    Application Caches: Alkalmazás gyorsítótárai
+    Browser Caches: Böngésző gyorsítótárai
+    Browser Caches Hint: A Chromium HTTP-, GPU-, kód-, shader-, service worker- és szótár-gyorsítótárai.
+    Clear Android Cache Confirmation: Törli az Android böngésző-gyorsítótárát?
+    Stored App Data: Tárolt alkalmazásadatok
+    Included In App Data: A fent megjelenített alkalmazásadatok része
+    Browser Runtime Data: Böngésző futásidejű adatai
+    Browser Runtime Data Hint: A Chromium munkamenet- és helyi tárhelye, sütijei, adatvédelmi és hálózati állapota, valamint összeomlási fájljai.
+    Subscription Feed Cache: Feliratkozások és hírfolyam gyorsítótára
+    Subscription Feed Cache Description: A lekért feliratkozási videókat, Shorts-videókat, élő közvetítéseket és bejegyzéseket tárolja. Az OpenTubeX a hírfolyam következő frissítésekor újra létrehozza.
+    Clear Subscription Feed Cache: Feliratkozások és hírfolyam gyorsítótárának törlése
+    Clear Subscription Feed Cache Confirmation: Törli a feliratkozások és a hírfolyam gyorsítótárát?
+    Subscription Feed Cache Effect: A feliratkozási hírfolyamok a frissítésükig üresnek tűnhetnek. A feliratkozások és a profilok nem változnak.
+    Session Search Cache: Munkamenet keresési gyorsítótára
+    In Memory: Memóriában
+    Session Search Cache Description: '{count} keresés van a memóriában gyorsítótárazva a gyorsabb visszalépéshez. Ez a gyorsítótár az OpenTubeX bezárásakor törlődik. | {count} keresés van a memóriában gyorsítótárazva a gyorsabb visszalépéshez. Ez a gyorsítótár az OpenTubeX bezárásakor törlődik.'
+    Clear Session Search Cache: Munkamenet keresési gyorsítótárának törlése
+    Clear Session Search Cache Confirmation: Törli a munkamenet keresési gyorsítótárát?
+    Session Search Cache Effect: A gyorsítótárazott találati oldalak törlődnek. A mentett keresési előzmények nem változnak.
+    HTTP Cache: HTTP-gyorsítótár
+    HTTP Cache Description: Az Electron a hálózati válaszokat lemezen tárolja, így ismételt kéréskor nem kell újra letölteni ugyanazokat az adatokat. Az OpenTubeX szükség szerint újra létrehozza ezt a gyorsítótárat.
+    Managed By Electron: Az Electron kezeli
+    Clear HTTP Cache: HTTP-gyorsítótár törlése
+    Clear HTTP Cache Confirmation: Törli az Electron HTTP-gyorsítótárát?
+    HTTP Cache Effect: A képek és más hálózati erőforrások egyszer lassabban tölthetnek be a gyorsítótár újbóli felépítése közben.
+    Tab Image Cache: Lapok bélyegképei és csatornaavatarok
+    Tab Image Cache Description: A megnyitott és visszaállított lapok előnézeti képeit és csatornaavatarjait tárolja. Az OpenTubeX a lapok használata közben újra létrehozza őket.
+    Clear Tab Image Cache: Lapképek gyorsítótárának törlése
+    Clear Tab Image Cache Confirmation: Törli a lapok bélyegképeit és a csatornaavatarokat?
+    Tab Image Cache Effect: A lapok képei rövid időre eltűnhetnek, majd a lapok használatakor újra létrejönnek.
+    Playback Caches: Lejátszási gyorsítótárak
+    Playback Caches Description: Az yt-dlp adatfolyam-URL-jeit tárolja az alkalmazás munkamenetei között, valamint a YouTube lejátszófájljait. Az URL-gyorsítótár csak az yt-dlp használatával lekért adatfolyamokra vonatkozik.
+    Playback URL Cache Entry Size: yt-dlp adatfolyam-URL gyorsítótárának korlátja
+    Playback URL Cache Entry Size Tooltip: Beállítja az yt-dlp gyorsítótárazott adatfolyam-bejegyzéseinek legnagyobb méretét. Az yt-dlp adatfolyamok tartós gyorsítótárazásának kikapcsolásához állítsa 0 MB-ra.
+    Clear Playback Caches: Lejátszási gyorsítótárak törlése
+    Clear Playback Caches Confirmation: Törli az yt-dlp és a lejátszó gyorsítótárait?
+    Playback Caches Effect: A következő helyi lejátszási kérés tovább tarthat, amíg az alkalmazás újra lekéri az adatfolyam és a lejátszó adatait.
+    Clear Cache: Gyorsítótár törlése
+    History Data: Tárolt előzmények
+    Video Metadata Description: A támogatott videók korábbi címeit, bélyegképeit és leírásait tárolja. A régi változatok törlés után nem állíthatók vissza.
+    Video Metadata Effect: A mentett metaadat-változatok véglegesen törlődnek. A videó jelenlegi adatai később is újra lekérhetők.
+    Watch History: Megtekintési előzmények és statisztikák
+    Watch History Description: A megtekintési előzmények rögzítik a megtekintett videókat és a lejátszási pozíciót. A megtekintési statisztikák a napi összesítéseket tárolják. A megőrzési idő csak a megtekintési előzményekre vonatkozik.
+    Clear Watch Statistics: Megtekintési statisztikák törlése
+    Watch History Effect: A megtekintett videók bejegyzései és a mentett lejátszási pozíciók törlődnek. A megtekintési statisztikák megmaradnak.
+    Clear Watch Statistics Confirmation: Törli az összes megtekintési statisztikát?
+    Watch Statistics Effect: A napi megtekintési összesítések törlődnek. A megtekintési előzmények megmaradnak.
+    Search History: Keresési előzmények
+    Search History Description: A megjegyzésre kijelölt kereséseket tárolja.
+    Delete Search History: Keresési előzmények törlése
+    Delete Search History Confirmation: Törli az összes mentett keresési előzményt?
+    Search History Effect: Eltűnnek a korábbi keresések alapján mentett keresési javaslatok. A jelenlegi munkamenet gyorsítótára megmarad.
+    Other User Data: Egyéb felhasználói adatok
+    Other Profile Files: Egyéb profilfájlok
+    Other Profile Files Hint: Biztonsági másolatok, ideiglenes fájlok és az OpenTubeX által még nem felismert profilbejegyzések.
+    Subscriptions And Profiles: Feliratkozások és profilok
+    Subscriptions And Profiles Description: A feliratkozott csatornákat, a profilneveket és a profilok tagságát tárolja.
+    Subscriptions And Profiles Effect: Minden feliratkozás és további profil véglegesen törlődik. A hírfolyam gyorsítótárának adatai is törlődnek.
+    Playlists Description: A lejátszási listák nevét, leírását és mentett videóit tárolja.
+    Playlists Effect: Minden lejátszási lista és a bennük mentett videók listája véglegesen törlődik. A letöltött médiafájlok megmaradnak.
+    Settings And Sessions: Beállítások, lapmunkamenetek és emlékeztetők
+    Settings And Sessions Description: Az alkalmazás beállításait, a visszaállítható lapokat és az élő közvetítések emlékeztetőit tárolja. A fájlok ellenőrzéséhez vagy biztonsági mentéséhez nyissa meg a profilmappát; ez az oldal nem törli őket.
+    Cleanup Complete: Tárhelytisztítás befejezve
+    Cleanup Failed: A tárhelytisztítás sikertelen
+  Subscription Settings:
+    Fetch Feed on Startup: Hírfolyam lekérése indításkor
+    Show New Content Feed: Új tartalmak hírfolyamának megjelenítése
+    RSS Feeds: RSS-hírcsatornák
+    Enable RSS Feeds: RSS-hírcsatornák engedélyezése más platformokhoz
+    Manage RSS Feeds: RSS-hírcsatornák kezelése
+    Show New Content Indicators: Új tartalmak jelzőinek megjelenítése
+    Show Scheduled Live Streams / Premieres First: Ütemezett élő közvetítések és premierek megjelenítése elsőként
+    Auto Refresh Interval: Automatikus frissítés időköze
+    Videos Auto Refresh Interval: Videók automatikus frissítésének időköze
+    Shorts Auto Refresh Interval: Shorts-videók automatikus frissítésének időköze
+    Live Auto Refresh Interval: Élő közvetítések automatikus frissítésének időköze
+    Posts Auto Refresh Interval: Bejegyzések automatikus frissítésének időköze
+    Refresh Subscriptions While App Is Closed: "Feliratkozások frissítése bezárt alkalmazásnál"
+    Notify About New Uploads: Értesítés új feltöltésekről
+    RSS Feeds Auto Refresh Interval: RSS-hírcsatornák automatikus frissítésének időköze
+    Faster Subscription Refresh: "Gyorsabb feliratkozásfrissítés"
+    Platforms:
+      Other Platforms: Más platformok
+      Manage Channels: Követett csatornák kezelése
+      Notify When Live: Értesítés, amikor a követett Twitch-csatornák élő adást indítanak
+      Auto Refresh Interval: Más platformok automatikus frissítésének időköze
+  Distraction Free Settings:
+    Digital Wellbeing:
+      Count Watch Time From: "Nézési idő számításának forrása"
+      Break Reminder Action: "Amikor ideje szünetet tartani"
+      Grayscale: "Szürkeárnyalat"
+      Apply Grayscale To: "Szürkeárnyalat alkalmazása"
+      Off: "Ki"
+      Always: "Mindig"
+      During Bedtime: "Lefekvési időben"
+      After the Daily Limit: "A napi korlát elérése után"
+      Whole App: "Az egész alkalmazásra"
+      Videos and Images: "Videókra és képekre"
+      Daily Watch Time Limit: "Napi nézési időkorlát"
+      Daily Shorts Limit: "Napi Shorts-korlát"
+      When a Limit Is Reached: "Korlát elérésekor"
+      Remind Me: "Emlékeztetés"
+      Pause Playback: "Lejátszás szüneteltetése"
+      Take a Break Reminder: "Szünetemlékeztető"
+      Every: "{duration} időközönként"
+      Bedtime Reminder: "Lefekvési emlékeztető"
+      Bedtime Start: "Lefekvési idő kezdete"
+      Bedtime End: "Lefekvési idő vége"
+      Wait Until the Video Ends: "Várakozás a videó végéig"
+      Silence Upload Notifications at Bedtime: "Új feltöltésekről szóló értesítések némítása lefekvési időben"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Automatikus lejátszás leállítása lefekvési időben és a napi korlát elérése után"
+    Hide Popularity Graph: "Népszerűségi grafikon elrejtése"
+    Enable Block Lists: "Tiltólisták engedélyezése"
+    AI Video Summaries: MI-videóösszefoglalók
+    Hide: Elrejtés
+    Collapsed: Összecsukva
+    Expanded: Kibontva
+    Video Descriptions: Videóleírások
+    Video Description Modes:
+      Hide: Elrejtés
+      Collapsed: Összecsukva
+      Expanded: Kibontva
+    Playing Interface Hide Delay: Felület elrejtésének késleltetése lejátszás közben
+    Hide Startup Splash: Indítóképernyő elrejtése
+    Hide Header Sync Indicator: Alkalmazásfejléc szinkronizálási jelzőjének elrejtése
+    Hide Repeat Stats: Ismétlési statisztikák elrejtése
+    Hide Playlist Stats: Lejátszási lista statisztikáinak elrejtése
+    Sections:
+      Digital Wellbeing: "Digitális jóllét"
+      Visible While Paused: Szüneteltetéskor látható teljes ablakos vagy teljes képernyős módban
+    Hide Channel Avatars: Csatornaavatarok elrejtése
+    Shorten View Counts: Megtekintések, hozzászólások és hozzászóláskedvelések számának rövidítése
+    Hide Live Chat Replay: Élő csevegés visszajátszásának elrejtése
+    Hide Home: Kezdőlap elrejtése
+    Disable A-B Repeat: A-B ismétlés letiltása
+    Hide End-Screen Annotations: Záróképernyő elemeinek elrejtése
+    Hide End-Screen Recommendations: "Záróképernyős ajánlások elrejtése"
+    Hide Paid Promotion Badge: Fizetett promóció jelvényének elrejtése
+    Show Player Controls: Lejátszó vezérlőinek megjelenítése
+    Show Video Title: Videó címének megjelenítése
+    Show Bottom Right Actions Dock: Jobb alsó műveletsáv megjelenítése
+    Paused Interface Hide Delay: Szüneteltetett kezelőfelület elrejtési késleltetése
+    Blur Blocked Items: Letiltott elemek elhomályosítása elrejtés helyett
+  Data Settings:
+    Settings could not be imported: "A beállításokat nem sikerült importálni"
+    Some settings could not be imported: "Nem minden beállítást sikerült importálni ({total} beállításból {failed} sikertelen)"
+    Scheduled backups: "Ütemezett biztonsági mentések"
+    Scheduled backup description: "Teljes ZIP-mentések készítése, amíg az OpenTubeX nyitva van. A kimaradt mentések indításkor készülnek el. A korlát csak az ebben a mappában lévő ütemezett mentésekre vonatkozik."
+    Choose backup folder: "Mentési mappa kiválasztása"
+    No backup folder selected: "Nincs kiválasztva mentési mappa"
+    Enable scheduled backups: "Ütemezett mentések engedélyezése"
+    Backup frequency: "Mentés gyakorisága"
+    Backups to keep: "Megtartandó mentések száma"
+    Daily: "Naponta"
+    Weekly: "Hetente"
+    Every 30 days: "30 naponta"
+    Last scheduled backup: "Utolsó ütemezett mentés: {date}"
+    No scheduled backup yet: "Még nincs ütemezett mentés"
+    Scheduled backup failed: "A mentés sikertelen. Ellenőrizze, hogy a mappa írható-e. Újabb kísérlet öt perc múlva."
+    Import Preview:
+      Title: Változások előnézete
+      New: "Új: {count}"
+      Existing: "Meglévő: {count}"
+      Skipped: "Kihagyott: {count}"
+      Unreadable files: "Olvashatatlan fájlok: {count}"
+      Settings effect: Az egyező beállítások lecserélődnek. A privát és ismeretlen beállítások kimaradnak.
+      Details effect: A meglévő feliratkozások vagy videók megmaradnak. Az importált profil- vagy lejátszólista-adatok lecserélik a jelenlegieket.
+      Merge effect: A meglévő adatok megmaradnak, és egyesülnek az egyező bejegyzésekkel.
+      Subscriptions effect: A meglévő feliratkozások megmaradnak. Csak új csatornák kerülnek hozzáadásra.
+      History merge effect: Az egyező videók egyesülnek az előzményekkel, a mentett részletek és a legutóbbi megtekintési dátum megmarad. A többi előzmény megmarad.
+    Select export data: "Válassza ki az exportálni kívánt adatokat"
+    Export selected data: "Kijelölt adatok exportálása"
+    Complete backup: "Teljes biztonsági mentés"
+    Import backup: "Biztonsági mentés importálása"
+    Export backup: "Biztonsági mentés exportálása"
+    Backup description: "Mentse a profilokat, lejátszási listákat, előzményeket, statisztikákat és átvihető beállításokat egyetlen ZIP-fájlba. Az importálás egyesíti ezeket az eszközön már meglévő adatokkal."
+    Select backup data: "Válassza ki az importálni kívánt adatokat"
+    Profiles and subscriptions: "Profilok és feliratkozások"
+    Backup exported: "A biztonsági mentés exportálása sikeres volt"
+    Backup imported: "A biztonsági mentés importálása sikeres volt"
+    Import YouTube Takeout ZIP: "YouTube Takeout ZIP importálása"
+    Select Takeout data: "Válassza ki az importálandó adatokat"
+    Import selected data: "Kijelölt adatok importálása"
+    No supported Takeout data: "Ebben a ZIP-ben nem találhatók támogatott YouTube-adatok."
+    Data And Storage: Adatok és tárhely
+    Profile Directory: Profilmappa
+    Open Profile Directory: Profilmappa megnyitása
+    Invalid JSON row, skipping item: Érvénytelen JSON a(z) {row}. sorban, az elem kihagyva
+    Import subscriptions formats: 'Támogatott formátumok: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube biztonsági másolat vagy FreeTube exportálás (.json)'
+    Import history formats: 'Támogatott formátumok: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube biztonsági másolat (.json)'
+    Import playlists formats: 'Támogatott formátumok: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import search history formats: 'Támogatott formátumok: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Channel playback speeds: "Csatornák lejátszási sebességei"
+    Import channel playback speeds: "Csatornák lejátszási sebességeinek importálása"
+    Channel playback speeds file: "Csatornák lejátszási sebességeit tartalmazó fájl"
+    Import channel playback speeds formats: "Támogatott formátumok: {script} felhasználói szkript tárolója (.json)"
+    Invalid channel playback speeds file: "Ebben a fájlban nem találhatók csatornákhoz tartozó lejátszási sebességek"
+    Channel playback speeds imported: "{count} csatorna lejátszási sebessége importálva | {count} csatorna lejátszási sebessége importálva"
+    Channels not found: "{count} csatorna nem található | {count} csatorna nem található"
+    Playlists have been successfully imported: "1/{total} lejátszási lista sikeresen importálva | {count}/{total} lejátszási lista sikeresen importálva"
+  Sync Settings:
+    Signed Out After Restore: 'A szinkronizálás kijelentkezett, mert ezeket az alkalmazásadatokat biztonsági mentésből vagy másik eszközről állították vissza. Jelentkezz be újra az eszköz szinkronizálásához.'
+    Revoke Session Tabs Warning: "Az eszköz szinkronizált lapkészletei is törlődnek."
+    Revoke Session Partial Failure: "A szinkronizált lapkészletek törlődtek, de a hozzáférés visszavonását nem sikerült megerősíteni. Próbáld újra visszavonni a hozzáférést."
+    Tab Sync Revocation Pending: "A lapok szinkronizálása szünetel, amíg ennek a bejelentkezésnek a visszavonása függőben van. Próbáld újra a visszavonást a szinkronizálási beállításokban."
+    Show More: "Több megjelenítése"
+    Sync Automatically: "Automatikus szinkronizálás"
+    Activity: "Fióktevékenység"
+    No Activity: "Nincs legutóbbi tevékenység"
+    Clear Activity: "Törlés ezen az eszközön"
+    Clear Activity Hint: "A fiók meglévő tevékenységének elrejtése ezen az eszközön. A kiszolgálón és más eszközökön lévő tevékenység változatlan marad. Az új tevékenység továbbra is megjelenik."
+    Setting Changed: "{device} módosította ezt: {setting}, új érték: {value}"
+    Item Updated: "{device} frissítette ezt: {setting}"
+    Item Added: "{device} hozzáadta ezt: {item}, ehhez: {setting}"
+    Item Removed: "{device} eltávolította ezt: {item}, innen: {setting}"
+    Item Renamed: "{device} átnevezte ezt: {item}, erre: {value}"
+    Saved Playlists: "Mentett lejátszási listák"
+    No Feed Types: "Nincs"
+    Open On Device: "Megnyitás másik eszközön"
+    Video Sent: "Videó elküldve. Az offline eszközök 24 órán belüli újracsatlakozáskor kapják meg."
+    Video Received: "Fogadott videó: {title}"
+    Previous Auto Sync Notice: "Az automatikus szinkronizálás ki van kapcsolva. Egy korábbi verzió kikapcsolhatta az adatvesztés megelőzése érdekében."
+    Enable Automatic Sync: "Automatikus szinkronizálás bekapcsolása"
+    Destructive Sync Blocked: "A szinkronizálás leállt az adatvesztés megelőzése érdekében. Az automatikus szinkronizálás ki van kapcsolva. Nyissa meg a szinkronizálási beállításokat a törlések áttekintéséhez."
+    Devices: "Eszközök"
+    Devices Hint: "Tekintse át azokat az eszközöket, amelyek hozzáférhetnek ehhez a szinkronizálási fiókhoz."
+    Change Password: "Jelszó módosítása"
+    Refresh Devices: "Eszközök frissítése"
+    Current Device: "Jelenlegi eszköz"
+    Revoke Session: "Hozzáférés visszavonása"
+    Session Created: "Létrehozva"
+    Last Active: "Legutóbbi aktivitás"
+    Session Expires: "Lejárat"
+    Unknown Device: "Ismeretlen eszköz"
+    Operating System: "Operációs rendszer"
+    Rename Device: "Eszköz átnevezése"
+    Save Device Name: "Név mentése"
+    Device Name Invalid: "Az eszköznév legfeljebb 80 karakterből állhat, és nem tartalmazhat vezérlőkaraktereket."
+    Device Renamed: "Eszköz átnevezve"
+    Revoke Session Confirmation: "Visszavonja ezt a munkamenetet?"
+    Revoke Current Session Warning: "A munkamenet visszavonása leválasztja ezt az eszközt a szinkronizálási fiókról."
+    Revoke Session Warning: "{device} elveszíti a hozzáférést ehhez a szinkronizálási fiókhoz."
+    Confirm Revoke Session: "Munkamenet visszavonása"
+    Session Revoked: "Munkamenet visszavonva"
+    Change Password Warning: "A jelszó módosítása kijelentkezteti az összes többi eszközt. Ez az eszköz csatlakoztatva marad."
+    Current Password: "Jelenlegi jelszó"
+    New Password: "Új jelszó"
+    Confirm New Password: "Új jelszó megerősítése"
+    Save New Password: "Új jelszó mentése"
+    Account Management Failed: "A szinkronizálási fiók adatai nem tölthetők be."
+    All Password Fields Required: "Töltse ki az összes jelszómezőt."
+    New Password Too Short: "Az új jelszónak legalább 8 karakterből kell állnia."
+    New Passwords Do Not Match: "Az új jelszavak nem egyeznek."
+    Password Changed: "A jelszó megváltozott. A többi eszközt kijelentkeztettük."
+    Sync Settings: Szinkronizálás
+    Watch stats: "Megtekintési statisztikák"
+    Enable Sync: Szinkronizálás engedélyezése
+    Privacy Passphrase: Adatvédelmi jelmondat
+    Privacy Passphrase Hint: A fiók jelszavától eltérő jelmondatot használjon. Ez soha nem hagyja el az eszközt, és minden eszközön szükséges; elvesztése esetén a titkosított szinkronizálási adatok nem állíthatók vissza.
+    Privacy Policy: A kiszolgáló adatvédelmi irányelvei
+    Enhanced Privacy Enabled: A fokozott adatvédelem be van kapcsolva. A kiszolgáló csak titkosított szinkronizálási adatokat tárol.
+    Enhanced Privacy Unsupported: Figyelmeztetés — ez a kiszolgáló nem támogatja a fokozott adatvédelmet. A szinkronizált adatokat a kiszolgáló üzemeltetője láthatja.
+    Description: 'Szinkronizáld a feliratkozásokat, profilokat, lejátszási listákat, megtekintési előzményeket és támogatott beállításokat egy OpenTubeX- vagy LibreTube-szinkronizálási kiszolgálóval. Előfordulhat, hogy a LibreTube-kiszolgálók nem támogatnak minden szinkronizálási funkciót.'
+    Server URL: Szinkronizálási kiszolgáló URL-je
+    Checking Server: Szinkronizálási kiszolgáló ellenőrzése…
+    Server Unavailable: Nem lehet kapcsolódni ehhez a szinkronizálási kiszolgálóhoz. Ellenőrizze az URL-t, majd próbálja újra.
+    Username: Felhasználónév
+    Log In: Bejelentkezés
+    Register: Regisztráció
+    Pair Another Device: Másik eszköz párosítása
+    Pair With Existing Device: Párosítás meglévő eszközzel
+    Device Name: Eszköz neve
+    This Device: Ez az eszköz
+    Device Name Required: Adja meg az eszköz nevét.
+    Pairing Device Name Hint: Olyan nevet válasszon, amelyet a kérést jóváhagyó eszközön felismer.
+    Create Pairing Code: Párosítási kód létrehozása
+    Creating Pairing Code: Biztonságos párosítási kód létrehozása…
+    Pairing QR Alt: A(z) {device} eszköz párosítási QR-kódja
+    Scan Pairing Code: Egy már csatlakoztatott eszközön nyissa meg a „Másik eszköz párosítása” menüpontot, és olvassa be ezt a kódot.
+    Pairing Code: Párosítási kód
+    Use Text Pairing Code: Szöveges kód használata
+    Show QR Code: QR-kód megjelenítése
+    Text Pairing Code Hint: Másolja ezt a kódot a meglévő eszközre. A párosítási titkot is tartalmazza, ezért a párosítás után törölje a vágólap előzményeiből.
+    Pairing QR Warning: Ezt a kódot csak annak a megbízható, már csatlakoztatott eszköznek mutassa meg, amely jóváhagyja a kérést. Két perc után lejár.
+    Pairing Expires: A párosítási kód {time} időpontban jár le.
+    Verifying Pairing: Az átvitt adatvédelmi kulcs ellenőrzése…
+    Completing Pairing: Eszközpárosítás befejezése…
+    Compare Pairing Codes: Párosítási kódok összehasonlítása
+    Pairing Code Match Hint: Csak akkor erősítse meg, ha ez a kód megegyezik a meglévő eszközön láthatóval.
+    Pairing Codes Match: A kódok egyeznek
+    Pairing Approval Code Hint: Hagyja nyitva ezt az ablakot, és hasonlítsa össze a kódot az új eszközön láthatóval. Ha a kódok eltérnek, az új eszközön ne folytassa a műveletet.
+    Pairing Scan Hint: Olvassa be a hozzáadni kívánt eszközön megjelenő párosítási kódot.
+    Enter Pairing Code: Kód kézi megadása
+    Pairing Code Entry Hint: Illessze be a hozzáadni kívánt eszközön megjelenő párosítási kódot.
+    Check Pairing Code: Kód ellenőrzése
+    Scan QR Code: QR-kód beolvasása
+    Waiting For Pairing Code: Várakozás párosítási kódra…
+    Checking Pairing Request: Párosítási kérés ellenőrzése…
+    Approving Pairing Request: Adatvédelmi kulcs titkosítása és elküldése…
+    Pairing Approval Warning: Csak akkor hagyja jóvá, ha a kérés látható a hozzáadni kívánt eszközön. A párosítás hozzáférést ad a fiókhoz, és átviszi az adatvédelmi kulcsot.
+    Approve Pairing: Párosítás jóváhagyása
+    Try Again: Újrapróbálkozás
+    Scan Again: Újbóli beolvasás
+    Camera Unavailable: Az OpenTubeX nem tudott hozzáférni a kamerához. Ellenőrizze a kameraengedélyt, vagy adja meg kézzel a párosítási kódot.
+    Pairing Unsupported: Ez a szinkronizálási kiszolgáló nem támogatja a biztonságos eszközpárosítást.
+    Pairing Failed: Az eszközpárosítás sikertelen. Próbálja újra egy új kóddal.
+    Pairing Request Changed: A párosítási kérés megváltozott, lejárt vagy már felhasználták. Hozzon létre új kódot.
+    Pairing Server Mismatch: Ez a kód egy másik szinkronizálási kiszolgálóhoz tartozik.
+    Pairing Verification Unavailable: Nem érhető el titkosított szinkronizálási gyűjtemény az átvitt kulcs ellenőrzéséhez. Szinkronizálja a meglévő eszközt, majd próbálja újra.
+    Pairing Completed: Eszközpárosítás befejezve
+    Pairing Approved: Eszközpárosítás jóváhagyva
+    Use Pairing Invite: Csatlakoztatott eszköz kódjának használata
+    Show Pairing Invite: Párosítási kód megjelenítése
+    Scan Pairing Invite: A hozzáadni kívánt eszközön nyissa meg a „Párosítás meglévő eszközzel” menüpontot, válassza a „Csatlakoztatott eszköz kódjának használata” lehetőséget, és olvassa be ezt a kódot.
+    Pairing Invite QR Alt: Párosítási QR-kód a hozzáadni kívánt eszközhöz
+    Pairing Invite Text Hint: Másolja ezt a kódot a hozzáadni kívánt eszközre. Ezzel egy eszköz hozzáférést kérhet a fiókjához, ezért a párosítás után törölje a vágólap előzményeiből.
+    Pairing Invite Warning: Ezt a kódot csak a hozzáadni kívánt eszköznek mutassa meg. A kérését továbbra is jóvá kell hagynia ezen az eszközön.
+    Pairing Invite Scan Hint: Olvassa be a csatlakoztatott eszközén megjelenő párosítási kódot.
+    Pairing Invite Entry Hint: Illessze be a csatlakoztatott eszközén megjelenő párosítási kódot.
+    Pairing Invite Code Hint: Csak akkor hagyja jóvá a kérést a csatlakoztatott eszközén, ha az ezt a kódot mutatja. A párosítás ezután automatikusan befejeződik.
+    Pairing Invite Approval Hint: Csak akkor hagyja jóvá, ha a hozzáadni kívánt eszköz ezt a kódot mutatja.
+    Pairing Invite Approved: Párosítás jóváhagyva. Az új eszköz automatikusan befejezi a párosítást.
+    Disconnect: Leválasztás
+    Delete Account: Szinkronizálási fiók törlése
+    Delete Account Confirmation: Törli a szinkronizálási fiókot?
+    Delete Account Warning: Ez véglegesen törli a szinkronizálási fiókot és a kiszolgálón tárolt összes adatot. A helyi OpenTubeX-adatok nem törlődnek.
+    Confirm Delete Account: Fiók törlése
+    Password Required: Jelszó szükséges
+    Account Deleted: Szinkronizálási fiók törölve
+    Connected as: Csatlakozva mint {username}
+    Profiles: Profilok
+    Open Tabs: Megnyitott lapok és munkamenet
+    Disable Setting Sync: A beállítás szinkronizálásának leállítása
+    Enable Setting Sync: A beállítás szinkronizálása
+    Sync Now: Szinkronizálás most
+    Downloading encrypted data: Titkosított szinkronizálási adatok letöltése…
+    Syncing subscriptions: Feliratkozások szinkronizálása…
+    Syncing playlists: Lejátszási listák szinkronizálása…
+    Syncing history: Megtekintési előzmények szinkronizálása…
+    Syncing statistics: Megtekintési statisztikák szinkronizálása…
+    Syncing profiles: Profilok szinkronizálása…
+    Syncing open tabs: Megnyitott lapok és munkamenet szinkronizálása…
+    Syncing settings: Beállítások szinkronizálása…
+    Uploading encrypted data: Titkosított szinkronizálási adatok feltöltése…
+    Finishing sync: Szinkronizálás befejezése…
+    Sync progress percentage: '{percentage}%'
+    Last synced: 'Utolsó szinkronizálás: {date}'
+    History not supported: Ez a kiszolgálóverzió nem támogatja a megtekintési előzmények szinkronizálását.
+    Settings not supported: Ez a kiszolgálóverzió nem támogatja a beállítások szinkronizálását.
+    Sync completed: Szinkronizálás befejezve
+    Sync failed: 'A szinkronizálás sikertelen: {error}'
+    Data Loss Confirmation: Jóváhagyja az adatvesztéssel járó szinkronizálást?
+    Data Loss Warning: A szinkronizálás minden eszközön törölne {deleted} elemet a(z) „{collection}” {previous} korábban szinkronizált eleme közül. Ha nem Ön törölte őket, például mert a kiszolgálót alaphelyzetbe állították, tartsa meg őket, hogy mindenhol visszaálljanak.
+    Keep Deleted Items: Elemek megtartása
+    Confirm Data Loss: Törlés és folytatás
+    Use Shared Tabs: 'Egy közös lapkészlet használata minden eszközön'
+    Shared Tabs Warning: 'Az ezen az eszközön nyitott lapok alkotják majd a megosztott készletet. A többi eszköz szinkronizáláskor erre a készletre cseréli a nyitott lapjait; a különböző eszközök lapjai nem egyesülnek.'
+    Tabs From Other Devices: 'Más eszközök lapjai'
+    Mobile Device: 'Mobil'
+    Desktop Device: 'Asztali gép'
+    Open All Tabs: 'Összes lap megnyitása'
+    Open All Tabs Confirmation: "Megnyitja az összes lapot?"
+    Server Update Required: "Frissítse ezt a kiszolgálót a titkosított, valós idejű szinkronizálás támogatásához."
+    Log In with Provider: 'Bejelentkezés ezzel: {provider}'
+    Log In with Single Sign-On: 'Bejelentkezés egyszeri bejelentkezéssel'
+    Continue in Browser: 'Folytasd a böngészőben. Az OpenTubeX folytatja, amikor végeztél.'
+    Connected with Single Sign-On: 'Egyszeri bejelentkezéssel csatlakoztatva'
+    Delete Single Sign-On Account Hint: 'Megnyílik a böngésző, hogy a bejelentkezési szolgáltatódnál megerősíthesd a törlést.'
+  Proxy Settings:
+    IP Block Recovery Script Path: IP-blokkolás helyreállítási szkriptje
+    Running IP block recovery script: IP-tiltás helyreállító parancsfájljának futtatása
+    IP block recovery script failed: 'Az IP-tiltás helyreállító parancsfájlja hibával leállt (kilépési kód: {exitCode})'
+    IP block recovery script finished: Az IP-tiltás helyreállító parancsfájlja befejeződött
+    Reloading video after IP block recovery: Videó újratöltése az IP-tiltás helyreállítása után
+    Failed to select IP block recovery script: Nem sikerült kiválasztani az IP-tiltás helyreállító parancsfájlját
+  SponsorBlock Settings:
+    Enable SponsorBlock Submission: SponsorBlock-beküldések engedélyezése
+    SponsorBlock Private User ID (optional): Privát felhasználói azonosító (opcionális)
+    SponsorBlock Private User ID Tooltip: Illessze be a böngészőbővítményből a privát SponsorBlock felhasználói azonosítót. Hagyja üresen az alkalmazás által létrehozott azonosító használatához.
+    Generated SponsorBlock User ID: Létrehozott SponsorBlock felhasználói azonosító
+    Generated SponsorBlock User ID Tooltip: Az alkalmazás által létrehozott SponsorBlock felhasználói azonosító használható a böngészőbővítményben, illetve akkor, ha az alkalmazást másik számítógépen használja.
+    Reveal Generated User ID: Létrehozott felhasználói azonosító megjelenítése
+    Generated SponsorBlock User ID Copy Button: Létrehozott SponsorBlock felhasználói azonosító másolása
+    Generated SponsorBlock User ID Copied: A létrehozott SponsorBlock felhasználói azonosító a vágólapra másolva
+    Skip notification timeout: Átugrási értesítés időtúllépése
+    Custom Color: Egyéni szín
+    DeArrow Settings: DeArrow
+    Always Show DeArrow Badge: DeArrow-jelvény mindig látható
+  Return YouTube Dislike Settings:
+    Return YouTube Dislike Settings: Return YouTube Dislike
+    Enable Return YouTube Dislike: Return YouTube Dislike engedélyezése
+    Return YouTube Dislike Url: API URL-je
+  Password Dialog:
+    Incorrect Password: Hibás jelszó
+    Unlock: Feloldás
+    Unlocking: Feloldás…
+  No Settings Found: Nem találhatók beállítások
+  Interface Customizer:
+    Customize Interface: "Felület testreszabása"
+    Preview: "Előnézet"
+    Player: "Lejátszó"
+    Desktop: "Asztali"
+    Mobile: "Mobil"
+    Playing: "Lejátszás"
+    Player Menu: "Lejátszó menü"
+    Fullscreen: "Teljes képernyő"
+    Paused: "Szüneteltetve"
+    Controls: "Vezérlők"
+    Example Video Title: "Példavideó"
+    Resolution: "Felbontás"
+    Loop: "Ismétlés"
+    Off: "Ki"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Gyenge minőségű MI-tartalmat gyártó csatornák elrejtése
+    Hide AI Slop Channels Tooltip: Elrejti a közösség által karbantartott AiSList tiltólistán (aisloplist.com) szereplő csatornákat a keresési eredményekből, a felkapott videók közül és az ajánlásokból, valamint megjelöli a figyelmeztető listáján szereplő csatornák videóit. A feliratkozásokat nem érinti. A listák naponta egyszer töltődnek le a GitHubról, és csak a helyi API-val betöltött találatokra vonatkoznak.
+    Downloading: Listák letöltése…
+    Failed to Download: Nem sikerült letölteni a listákat
+    Loaded Status: "Letiltott csatornák: {blocked} · Megjelölt csatornák: {warned} · Frissítve: {date}"
+Tutorial:
+  Skip: Kihagyás
+  Next: Tovább
+  Finish: Befejezés
+  Welcome:
+    Title: Üdvözli az OpenTubeX
+    Description: Kezdjen tiszta lappal, vagy hozza át feliratkozásait, előzményeit és lejátszási listáit egy másik alkalmazásból vagy biztonsági mentésből.
+    Start Fresh: Kezdés tiszta lappal
+    Import Data: Adatok importálása
+  Preferences:
+    Title: Szabja személyre
+    Description: Válassza ki a témát, a kezdőlapot és a régiót. Ezeket és sok mást bármikor módosíthat a Beállításokban.
+  Playback:
+    Title: Lejátszás és adatvédelem
+    Description: Válassza ki, hogyan játssza le az OpenTubeX a videókat, megjegyezze-e, mit néz meg, és mely közösségi kiegészítőket használjon.
+  Navigation:
+    Title: A könyvtára mindig kéznél van
+    Description: A navigációval elérheti a feliratkozásokat, lejátszási listákat, előzményeket és további tartalmakat.
+  Search:
+    Title: Keressen, vagy illesszen be egy hivatkozást
+    Description: Keressen videókat és csatornákat, vagy illesszen be egy támogatott videó-URL-t közvetlenül a keresőmezőbe.
+  Tabs:
+    Title: Tartsa nyitva az oldalakat lapokon
+    Description: Nyisson meg egyszerre több oldalt anélkül, hogy elveszítené, hol tartott.
+  Profile Menu:
+    Title: Beállítások és profilok
+    Description: A profilmenüben megtalálja a gyorsbeállításokat, a letöltéseket és az összes többi beállítást. Profilváltáshoz kattintson rá a jobb gombbal.
+    Touch Description: A profilmenüben megtalálja a gyorsbeállításokat, a letöltéseket és az összes többi beállítást. Profilváltáshoz érintse meg és tartsa lenyomva.
+About:
+  Project: Projekt
+  Community: Közösség
+  Contribute: Közreműködés
+  Documentation: Dokumentáció
+  Downloads: Letöltések
+  Changelog: Változáslista
+  Commit: Commit
+  Matrix: Matrix
+  Email: E-mail
+  Show tutorial: Bemutató megjelenítése
+Profile:
+  Customization: Testreszabás
+  Manage Profile Subscriptions: Profil feliratkozásainak kezelése
+  Icon Names:
+    Person: Személy
+    People: Emberek
+    Headphones: Fejhallgató
+    Gaming: Játék
+    Film: Film
+    Art: Művészet
+    Science: Tudomány
+    Globe: Földgömb
+    Heart: Szív
+    Sun: Nap
+    Moon: Hold
+    Trophy: Trófea
+  Profile Icon: Profilikon
+  Choose an Emoji: Emoji kiválasztása
+  Custom Emoji: Egyéni emoji
+  Choose Image: Kép kiválasztása
+  Crop Image: Kép körülvágása
+  Zoom: Nagyítás
+  Apply Crop: Körülvágás alkalmazása
+  Transparent: Átlátszó
+  Use Initial: Monogram használata
+  The selected image could not be loaded: A kiválasztott kép nem tölthető be
+  Theme Color: Téma színe
+Channel:
+  Hide Watched: Megtekintettek elrejtése
+  Fewer videos per day: "Kevesebb videó naponta"
+  More videos per day: "Több videó naponta"
+  Verified: Ellenőrzött
+  Official Artist Channel: Hivatalos előadói csatorna
+  Subscription settings: Feliratkozási beállítások
+  Failed to save subscription settings: Nem sikerült menteni a csatornabeállításokat
+  Videos per day: Videók naponta
+  Use global setting: Globális beállítás használata
+  Unlimited: Korlátlan
+  More videos hidden: '+{count} további | +{count} további'
+  Show in subscription feed: Megjelenítés a feliratkozási hírfolyamban
+  Notify about new uploads: Értesítés új feltöltésekről
+  Show members-only videos: Csak tagoknak szóló videók megjelenítése
+  Upload Notifications On: "Értesítést kapsz {channelName} új feltöltéseiről, amikor a feliratkozásaid frissülnek"
+  Upload Notifications Off: "Nem kapsz értesítést {channelName} új feltöltéseiről"
+  Upload Notifications Disabled In Settings: "{channelName} értesítései be vannak kapcsolva, de az új feltöltésekről szóló értesítések ki vannak kapcsolva a beállításokban"
+  Turn On Upload Notifications: "Bekapcsolás"
+  Channel Name Unavailable: A csatorna neve nem érhető el
+  Search Result Types: Keresési találatok típusai
+  All Results: Összes
+  Posts:
+    Original post unavailable: "Az eredeti bejegyzés nem érhető el"
+    Members-only video hidden by OpenTubeX: "Az OpenTubeX elrejtett egy csak tagoknak szóló videót"
+    Video hidden by OpenTubeX because of its title: "Az OpenTubeX elrejtette a videót, mert a címe rejtett szöveget tartalmaz"
+Video:
+  Play in Background: "Lejátszás a háttérben"
+  Info panel source: 'Forrás: {source}'
+  External DRM Protected: "A DRM-védelemmel ellátott videók nem játszhatók le az OpenTubeX-ban, mivel ezekhez zárt forráskódú, tulajdonosi komponensekre van szükség."
+  Invalid Media URL: "Érvénytelen média-URL"
+  Mark As Fully Watched: Megjelölés teljesen megtekintettként
+  AI-generated video summary: "MI által készített videóösszefoglaló"
+  Quality and accuracy may vary: "A minőség és a pontosság változó lehet"
+  Includes paid promotion: Fizetett promóciót tartalmaz
+  Age Restricted Badge: Korhatáros
+  Music Video Badge: Zenei videó
+  Queue: Lejátszási sor
+  Play Next: Lejátszás következőként
+  Add to Queue: Hozzáadás a lejátszási sorhoz
+  Added to Play Next: A videó következőként lesz lejátszva
+  Added to Queue: A videó hozzáadva a lejátszási sorhoz
+  Clear Queue: Lejátszási sor törlése
+  Queue Video Count: '{count} videó | {count} videó'
+  Remove from Queue: A(z) {title} eltávolítása a lejátszási sorból
+  Remove Video from Queue: Eltávolítás a lejátszási sorból
+  Drag to Reorder Queue: Húzza el a(z) {title} elemet a sorrend módosításához
+  Reorder Queue Item: A(z) {title} átrendezése
+  Reorder Queue Item Instructions: A Fel és Le nyílbillentyűkkel helyezheti át ezt a videót a lejátszási sorban.
+  Queue Item Moved: A(z) {title} áthelyezve a(z) {position}. helyre, összesen {total} közül.
+  Queue Item Cannot Move Up: A(z) {title} nem helyezhető feljebb. Már az 1. helyen van, összesen {total} közül.
+  Queue Item Cannot Move Down: A(z) {title} nem helyezhető lejjebb. Már a(z) {total}. helyen van, összesen {total} közül.
+  Metadata: Videó adatai
+  Close Metadata: Videó adatainak bezárása
+  Metadata Cache:
+    Title History: Címelőzmények
+    Thumbnail History: Bélyegkép-előzmények
+    Description History: Leíráselőzmények
+    Previous Version: Előző verzió ({number})
+    Empty: (üres)
+  Fetching Streams: Adatfolyamok lekérése az yt-dlp-vel…
+  Waiting For Connection: "Nem sikerült elérni a kiszolgálót. Automatikus újrapróbálkozás…"
+  Retry Now: "Újrapróbálás most"
+  Transcript:
+    Title: Átirat
+    Search: Keresés az átiratban
+    Language: Átirat nyelve
+    Save: Mentés
+    Show: Átirat megjelenítése
+    Hide: Átirat elrejtése
+    Close: Átirat bezárása
+    Copied: Az átirat a vágólapra másolva
+    Saved: Átirat mentve
+    Save Error: Nem sikerült menteni az átiratot
+    Text File: Szövegfájl
+    Unavailable: Ehhez a videóhoz nem érhető el átirat.
+    Load Error: Nem sikerült betölteni az átiratot.
+    Empty: Ez az átirat nem tartalmaz szöveget.
+    No Results: Az átirat egyetlen részlete sem felel meg a keresésnek.
+  Retry With Built-in Extraction: Újrapróbálkozás a beépített kinyeréssel
+  Retry With yt-dlp Extraction: Újrapróbálkozás yt-dlp-kinyeréssel
+  Reloading video after streaming URL error: Videó újratöltése az adatfolyam URL-jének hibája után
+  Configure Restricted Playback Cookies Hint: "Állítsa be a sütiket a Beállítások → Speciális → Külső szoftverek → yt-dlp sütik menüpontban."
+  Try With Configured Cookies: Próbálkozás a beállított sütikkel
+  Restricted Playback Authentication Failed Template: 'Az yt-dlp nem tudta elérni ezt a videót a beállított sütikkel: {error}'
+  Unmark As Watched: Megjelölés nem látottként
+  Video has been unmarked as watched: A videó már nincs megtekintettként megjelölve
+  Save Channel Playback Speed: Csatorna lejátszási sebességének mentése
+  Channel Playback Speed Saved: A csatorna lejátszási sebessége mentve
+  Save Channel Video Quality: Csatorna videóminőségének mentése
+  Channel Video Quality Saved: A csatorna videóminősége mentve
+  Save Channel Subtitles State: Csatorna feliratállapotának mentése
+  Channel Subtitles State Saved: A csatorna feliratállapota mentve
+  Save Channel Volume: Csatorna hangerejének mentése
+  Channel Volume Saved: A csatorna hangereje mentve
+  Save Channel Setting: Csatornabeállítás mentése…
+  Channel Setting Already Set: 'A(z) {setting} értéke már {value}'
+  Video has been saved to {playlistName}: A videó mentve a(z) {playlistName} lejátszási listára
+  Video has been removed from {playlistName}: A videó eltávolítva a(z) {playlistName} lejátszási listáról
+  There was a problem saving the video to {playlistName}: Hiba történt a videó {playlistName} lejátszási listára mentésekor
+  There was a problem removing the video from {playlistName}: Hiba történt a videó {playlistName} lejátszási listáról való eltávolításakor
+  Failed to load collaborators: Nem sikerült betölteni a közreműködőket
+  Notify me: Értesítést kérek
+  Notification on: Értesítés bekapcsolva
+  Notification enabled: Értesítést kap, amikor elindul ez a videó
+  Notification cancelled: Indítási értesítés lemondva
+  Notification unavailable: A rendszerértesítések nem érhetők el
+  Scheduled video starting: Ütemezett videó indul
+  Live notification body: 'A(z) {videoTitle} most indul'
+  Collaborators: Közreműködők
+  Live Chat Replay: Élő csevegés visszajátszása
+  Show Live Chat: Élő csevegés megjelenítése
+  Show Live Chat Replay: Élő csevegés visszajátszásának megjelenítése
+  Close Live Chat: Élő csevegés bezárása
+  Close Live Chat Replay: Élő csevegés visszajátszásának bezárása
+  Live Chat Settings: Élő csevegés beállításai
+  Show Live Chat Timestamps: Időbélyegek megjelenítése
+  Chat Filter: Csevegésszűrő
+  Top Chat: Kiemelt csevegés
+  All Messages: Összes üzenet
+  Live chat replay is enabled. Chat messages will appear here as the video plays.: Az élő csevegés visszajátszása be van kapcsolva.  A csevegés üzenetei a videó lejátszása közben itt jelennek meg.
+  Premiere started: A premier folyamatban van, {timeAgo} kezdődött
+  Player:
+    Playing in Picture-in-Picture: Lejátszás kép a képben módban
+    Stream Recovery:
+      DASH Fallback: "A hangstream sikertelen, váltás DASH formátumokra: {error}"
+      Error Copied: "Hiba a vágólapra másolva"
+      Legacy Fallback: "A stream sikertelen, váltás a régi formátumokra: {error}"
+    Caption Timing:
+      Adjust Timing: Időzítés módosítása…
+      Caption Timing: Feliratok időzítése
+      Offset: Eltolás (másodperc)
+      Hint: A negatív értékek korábban, a pozitív értékek később jelenítik meg a feliratokat. Csak erre a videóra vonatkozik.
+      Earlier: Korábban
+      Later: Később
+      Reset: Visszaállítás
+    Most Replayed: "Legtöbbször újrajátszott"
+    Pull up for precise seeking: "Húzza felfelé a pontos tekeréshez"
+    Precise seeking, drag down to exit: "Pontos tekerés · A kilépéshez húzza lefelé"
+    Cast: "Átküldés"
+    Music Mode: "Zenei mód"
+    Music Mode Description: "A videók lejátszása 1× sebességgel, az új videók indítása az elejéről ezen a lapon. A mentett alapértelmezett lejátszási beállítások változatlanok maradnak."
+    DLNA:
+      Cast: "Átküldés DLNA-eszközre"
+      Stop: "Átküldés leállítása"
+      No Devices: "Nem található DLNA-eszköz"
+      No MP4 Source: "Ehhez a videóhoz nincs kompatibilis MP4-adatfolyam"
+      Error: "Nem sikerült átküldeni a videót"
+    Repeat Stats:
+      Repeat Stats: Ismétlési statisztikák
+      Looping: Ismétlés bekapcsolva
+      Repeats: Ismétlés | Ismétlések
+      Time Spent: Eltöltött idő
+    Voice-over Translation:
+      Start: Fordítás
+      Cancel: Mégse
+      Progress: Hangalámondásos fordítás előkészítése…
+      Retry: Újrapróbálkozás
+      Error: Nem sikerült a hangalámondásos fordítás. Próbálja újra később.
+      Duration Error: A hangalámondásos fordítás csak legfeljebb négyórás videókhoz érhető el.
+    Caption Appearance:
+      Options: Beállítások
+      Sample: A feliratok így jelennek meg
+    Auto-translate: Automatikus fordítás
+    Sleep Timer:
+      Sleep Timer: Elalvásidőzítő
+      'Off': 'Ki'
+      Minutes: '{minutes} perc'
+      End of video: A videó végén
+      End of current chapter: Az aktuális fejezet vége
+      Remaining: '{time} van hátra'
+      Cancel timer: Időzítő törlése
+      Timer ended: Az elalvásidőzítő lejárt
+    A-B Repeat:
+      A-B Repeat: A-B ismétlés
+      'Off': Ki
+      Point A: A pont
+      Point B: B pont
+      Set Repeat Start: Ismétlés kezdetének beállítása
+      Set Repeat End: Ismétlés végének beállítása
+      Pause Repeat: A-B ismétlés szüneteltetése
+      Resume Repeat: A-B ismétlés folytatása
+      Adjust Point: 'A(z) {point} pont módosítása, jelenleg {timestamp}'
+      Clear Range: A-B ismétlési tartomány törlése
+      End Before Start: A B pontnak az A pont után kell lennie.
+      Outside Duration: Az időbélyegnek a videón belül kell lennie.
+      Cleared: A-B ismétlés törölve
+    Seek History:
+      Seek History: Ugrási előzmények
+      Positions: '{count} pozíció | {count} pozíció'
+      Nothing to undo: Nincs mit visszavonni
+      Nothing to redo: Nincs mit újra végrehajtani
+    Zoom:
+      Zoom: Nagyítás
+      'Off': 'Ki'
+    Volume Boost:
+      Volume Boost: "Hangerő-erősítés"
+      'Off': "Ki"
+    Auto-generated Caption Template: '{language} (automatikusan létrehozott)'
+    Up next in {seconds}: Következik {seconds} múlva
+    Resize dock: Dokkolt panel átméretezése
+    Resize dock width: Dokkolt panel szélességének módosítása
+    Play now: Lejátszás most
+    MusicPlaybackRateOverride: Zenei videó észlelve, lejátszás 1×-es sebességgel
+    Normal: Normál
+    Set Default: Beállítás alapértelmezettként
+    Hide Annotations: Magyarázatok elrejtése
+    Show Annotations: Magyarázatok megjelenítése
+    Hide: Elrejtés
+    Show: Megjelenítés
+    Scroll Mini Player:
+      Collapse Controls: "Vezérlők összecsukása"
+      Expand Controls: "Vezérlők kibontása"
+      Back to Top: Vissza a tetejére
+      Return to Video Tab: Vissza a videó lapjára
+      Hide: Mini lejátszó elrejtése
+      Play: Lejátszás
+      Pause: Szünet
+      Drag Handle: Minilejátszó áthelyezése
+      Rewind 10 seconds: Visszatekerés 10 másodperccel
+      Forward 10 seconds: Előretekerés 10 másodperccel
+    SponsorBlock:
+      CancelCurrentSegment: Szakasz létrehozásának megszakítása
+      ClearSegments: Szakaszok törlése
+      ClearSegmentsPrompt: Biztosan törli a videó összes piszkozatként mentett SponsorBlock-szakaszát?
+      CompleteSegmentsBeforeSubmitting: Beküldés előtt fejezze be az összes piszkozatként mentett szakaszt.
+      CategoryLabel: Kategória
+      ActionTypeLabel: Szakasz típusa
+      DuplicateSegments: A piszkozat nem tartalmazhat ismétlődő szakaszokat.
+      EndAction: (Vége)
+      EndActionLabel: Vége
+      EndTimeAfterStart: A szakasz végének a kezdete után kell lennie.
+      EndTimeBeforeVideoEnd: A szakasz végének a videó időtartamán belül kell lennie.
+      EndTimeLabel: Szakasz vége
+      Guidelines: Irányelvek
+      InspectSegment: Ellenőrzés
+      InvalidStartTime: Adjon meg érvényes kezdési időt a szakaszhoz.
+      NoSegmentsToSubmit: Beküldés előtt hozzon létre legalább egy teljes szakaszt.
+      NowAction: (Most)
+      CloseInfoPanel: SponsorBlock-információk bezárása
+      OpenInfoPanel: SponsorBlock-információk megnyitása
+      OpenSubmissionMenu: Beküldési menü megnyitása
+      PreviewRequired: Beküldés előtt nézze meg minden szakasz előnézetét.
+      PreviewSegment: Előnézet
+      SaveSegment: Mentés
+      SetSegmentEndNow: Szakasz befejezése most
+      StartAction: (Kezdet)
+      StartSegmentNow: Szakasz indítása most
+      SubmissionBadRequest: A SponsorBlock elutasította a beküldési kérelmet.
+      SubmissionDuplicate: Ezt már korábban beküldték.
+      SubmissionFailed: Nem sikerült beküldeni a SponsorBlock-szakaszokat.
+      SubmissionForbidden: A SponsorBlock elutasította a beküldést.
+      SubmissionRateLimited: A SponsorBlock korlátozta a beküldés gyakoriságát.
+      SubmissionSuccess: SponsorBlock-szakaszok beküldve.
+      SubmitSegment: Szakasz beküldése
+      SubmitSegments: Beküldés
+      StartTimeLabel: Szakasz kezdete
+      TimeDivider: –
+      SkipPrompt: Átugorja a(z) {segmentCategory} szakaszt?
+      SkipPromptAction: Átugrás
+      SkipToHighlight: Ugrás a kiemelt részhez?
+      SkippedToHighlight: A lejátszás a kiemelt részhez ugrott
+      SkipToastUnskip: Átugrás visszavonása
+      SkipToastReskip: Újbóli átugrás
+      MutedSegment: '{segmentCategory} némítva'
+      MuteToastUnmute: Némítás feloldása
+      InfoPanelLoading: A szakaszok még töltődnek...
+      InfoPanelHasSegments: A videóhoz tartoznak szakaszok az adatbázisban!
+      InfoPanelNoSegments: Nem találhatók szakaszok
+      RefreshInfo: SponsorBlock-információk frissítése
+      ContributionStatsTitle: Saját közreműködések
+      ContributionStatsLoading: Közreműködési statisztikák betöltése...
+      ContributionStatsError: A közreműködési statisztikák nem érhetők el. Próbálja meg frissíteni.
+      ContributionStatsNoUserId: A közreműködési statisztikák megtekintéséhez küldjön be egy szakaszt, vagy importálja SponsorBlock-felhasználóazonosítóját.
+      Submissions: Beküldések
+      Segments: Szakaszok
+      TimeSaved: Megtakarított idő
+      AutoSkipEnabled: Szakaszok automatikus átugrása
+      AutoSkipOn: 'Be'
+      AutoSkipOff: 'Ki'
+      WhitelistChannel: Csatorna hozzáadása az engedélyezési listához
+      ChannelWhitelisted: Az engedélyezési listán
+      RemoveChannelFromWhitelist: Csatorna eltávolítása az engedélyezettek közül
+      MuteSegment: Szakasz némítása
+      SkipSegment: Szakasz átugrása
+      CloseSegmentActions: Szakaszműveletek bezárása
+      FullVideo: Teljes videó
+      FullVideoLabel: '{segmentCategory} · Teljes videó'
+      MuteActionType: Némítás
+      MutePrompt: Némítja a(z) {segmentCategory} szakaszt?
+      SkipActionType: Átugrás
+      LockedSegment: Zárolt szakasz
+      UpvoteSegment: Pozitív szavazat
+      DownvoteSegment: Negatív szavazat
+      VoteFailed: Nem sikerült elküldeni a SponsorBlock-szavazatot.
+      ChangeCategory: Kategória módosítása
+      CopyAndDownvote: Másolás és leszavazás
+      SubmitCategoryVote: Kategóriaszavazat elküldése
+      CategoryVoteSuccess: Kategóriaszavazat elküldve.
+    Google Cast:
+      Position: "Lejátszási pozíció"
+      Invalid Authentication: "A fogadó érvénytelen hitelesítési választ küldött."
+      Authentication Declined: "A fogadó elutasította a hitelesítést."
+      Audio Only Receiver: "A fogadó csak hangközvetítést támogat."
+      Disconnected: "A fogadó kapcsolata megszakadt."
+      Timeout: "A fogadó nem válaszolt."
+      Busy: "Egy másik ablak már közvetít."
+      Not Authorized: "Aktiváld ezt az ablakot, és próbáld újra."
+      Invalid Request: "Érvénytelen közvetítési kérés."
+      IPv4 Required: "IPv4-kapcsolat szükséges."
+      Launch Failed: "A fogadót nem sikerült elindítani."
+      Load Failed: "A fogadó nem tudta betölteni a videót."
+      Cancelled: "A közvetítés megszakítva."
+      Private Not Authorized: "A privát médiához való hozzáférést nem engedélyezték."
+      Invalid Subtitles: "Érvénytelen feliratok a közvetítéshez."
+      Discovery Failed: "A fogadók keresése sikertelen."
+      Preparing Video: "Videó előkészítése az átküldéshez…"
+      Connecting: "Csatlakozás ehhez: {device}…"
+      Starting Receiver: "A Cast-vevő indítása…"
+      Loading Video: "Videó betöltése a vevőn…"
+      Buffering: "Pufferelés ezen: {device}…"
+      Allow Private Instance: "Engedélyezi, hogy ez az átküldés médiát olvasson a privát Invidious-példányról: {instance}?"
+      Cast: "Átküldés Google Cast-eszközre"
+      Connected: "Átküldés ide: {device}"
+      Rewind: "Vissza 10 másodpercet"
+      Forward: "Előre 10 másodpercet"
+      Subtitles Off: "Feliratok kikapcsolása"
+      Return: "Visszatérés a helyi lejátszáshoz"
+      No Devices: "Nem találhatók Google Cast-eszközök"
+      No Source: "Nincs kompatibilis adatfolyam a Google Casthoz"
+      Error: "Nem sikerült átküldeni a videót"
+      Error With Details: "Nem sikerült átküldeni a videót: {error}"
+      Untrusted Receiver: "A fogadó tanúsítványa nem megbízható. Használj hitelesített Google Cast fogadót."
+    FCast:
+      Cast: "Átküldés FCast-fogadóra"
+      No Devices: "Nem találhatók FCast-fogadók"
+      No Source: "Nincs kompatibilis adatfolyam az FCasthoz"
+    Secondary Captions: Másodlagos feliratok
+    Subtitle File:
+      Load: "Feliratfájl betöltése…"
+      Subtitle Files: "Feliratfájlok"
+      Error: "Nem sikerült betölteni a feliratfájlt. Válasszon SRT vagy WebVTT fájlt."
+  External Media:
+    Dislikes: "Nemtetszés | Nemtetszés"
+    Reposts: "Újbóli bejegyzés | Újbóli bejegyzés"
+    Saves: "Mentés | Mentés"
+    Series: "Sorozat"
+    Season: "Évad"
+    Season Number: "Évad száma"
+    Episode: "Epizód"
+    Episode Number: "Epizód száma"
+    Track: "Zeneszám"
+    Track Number: "Zeneszám sorszáma"
+    Artists: "Művészek"
+    Album: "Album"
+    Genres: "Műfajok"
+    Media Type: "Média típusa"
+    Availability: "Elérhetőség"
+    Age Limit: "Korhatár"
+    Release Date: "Kiadás dátuma"
+    Availability Values:
+      public: "Nyilvános"
+      private: "Privát"
+      premium_only: "Csak prémium"
+      subscriber_only: "Csak előfizetők"
+      needs_auth: "Bejelentkezés szükséges"
+      unlisted: "Listázatlan"
+  Save Queue to Playlist: "Lejátszási sor mentése lejátszási listába"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Az élő csevegést jelenleg nem támogatja a Yattee-kiszolgáló. Közvetlen kapcsolat szükséges a YouTube-hoz.
+  External Player:
+    LaunchFailedTemplate: A(z) {externalPlayer} nem indítható el. Ellenőrizze, hogy telepítve van-e, vagy adja meg a végrehajtható fájl útvonalát a külső lejátszó beállításaiban.
+    Confirm Arguments Title: "Elindítja a külső lejátszót egyéni argumentumokkal?"
+    Confirm Arguments Message: "A(z) {externalPlayer} ezekkel az egyéni argumentumokkal indul:"
+    Confirm Arguments Warning: "Egyes argumentumok programokat futtathatnak vagy fájlokat írhatnak felül. Csak akkor folytassa, ha saját maga adta hozzá őket."
+    Run: "Futtatás"
+    LaunchCanceledTemplate: "A(z) {externalPlayer} nem nyílt meg"
+Playlist:
+  Playlist Already Preloaded: "A lejátszási lista összes videója már elő van töltve"
+  Playlist Preload Progress: "Videók előtöltése: {completed}/{requested}"
+  Close Playlist: Lejátszási lista bezárása
+  Preload Playlist: "Összes videó előtöltése"
+  Preload Playlist Warning Title: "Előtölti az összes videót?"
+  Preload Playlist Warning: "Az előtöltés a lejátszási lista minden videóját lekéri a YouTube-tól. Ha rövid idő alatt sok kérés érkezik, a YouTube ideiglenesen letilthatja az IP-címét. Folytatja?"
+  Preloading Playlist: "Az összes videó előtöltése..."
+  Playlist Preload Complete: "Előtöltött videók: {count}."
+  Playlist Preload Partial: "{requested} videóból {preloaded} előtöltve. {failed} előtöltése sikertelen."
+  Playlist Preload Pagination Failed: "A teljes lejátszási lista nem tölthető be, ezért az előtöltés megszakadt."
+  Add Playlist to Queue: "Lejátszási lista hozzáadása a lejátszási sorhoz"
+  Playlist Added to Queue: "A lejátszási lista hozzáadva a lejátszási sorhoz"
+Change Format:
+  yt-dlp Error Template: "A yt-dlp nem tudta biztosítani az adatfolyamokat: {error}"
+  Local Video File: Helyi videófájl
+  Local Audio File: Helyi hangfájl
+  Online Video: Online videó
+  Stream Source: Adatfolyam forrása
+  Stream Extraction Method: Adatfolyam kinyerési módja
+  Playback Engine: Lejátszómotor
+  Streaming Protocol: Adatfolyam-protokoll
+  Not Available For This Video: Ehhez a videóhoz nem érhető el
+  Protocols:
+    Progressive: Progresszív
+  Descriptions:
+    Local File: Közvetlen lejátszás az eszközre letöltött fájlból
+    Online Video: Adatfolyam-formátumok betöltése a beállított online forrásból
+    Dash: Alkalmazkodó minőség, több hangsáv és a legnagyobb felbontások
+    Legacy: Egyetlen, videót és hangot tartalmazó fájl, csak kisebb felbontásokkal
+    Audio: Csak hang, sávszélesség megtakarításához vagy háttérben történő hallgatáshoz
+  yt-dlp Fallback Template: 'Az yt-dlp nem tudta biztosítani az adatfolyamokat, ezért a beépített motor veszi át a lejátszást: {error}'
+  yt-dlp Default Clients Fallback: Az előnyben részesített yt-dlp-kliensek nem biztosítottak lejátszható adatfolyamokat, ezért az yt-dlp alapértelmezett klienseivel folytatódik a próbálkozás
+  Built-in Fallback Template: 'A beépített motor nem tudta lejátszani az adatfolyamot, ezért az yt-dlp veszi át a lejátszást: {error}'
+Share:
+  Shared YouTube Link: "Megosztott YouTube-hivatkozás"
+  Open in Player: "Megnyitás a lejátszóban"
+  No YouTube Link: "A megosztott szöveg nem tartalmaz támogatott YouTube-hivatkozást."
+  Loading Video Information: "Videóadatok betöltése…"
+  Video Information Failed: "Nem sikerült betölteni a videó adatait. Próbáld újra, vagy nyisd meg a hivatkozást."
+  Share Link: "Hivatkozás megosztása"
+  Share failed: "Nem sikerült megosztani a hivatkozást"
+  Timestamp Link Copied: Időbélyeges hivatkozás a vágólapra másolva
+Context Menu:
+  Opened in a Background Tab: "Megnyitva egy háttérben lévő lapon"
+  Open in a Background Tab: "Megnyitás háttérlapon"
+  Select Tab: Lap kijelölése
+  Close Tabs Before: Előző lapok bezárása
+  Close Tabs After: Következő lapok bezárása
+  Close Other Tabs: Többi lap bezárása
+  Copy {service} link without playlist: "{service}-hivatkozás másolása lejátszási lista nélkül"
+  Context Menu: Helyi menü
+  Select All: Összes kijelölése
+  Save Image As…: Kép mentése másként…
+  Copy Image: Kép másolása
+  Copy Image Address: Kép címének másolása
+  Cancel Refresh: Frissítés megszakítása
+  Reload Videos: Videók újratöltése
+  Reload Shorts: Shorts-videók újratöltése
+  Reload Live: Élő adások újratöltése
+  Reload Posts: Bejegyzések újratöltése
+  Reload All Feeds: Összes hírfolyam újratöltése
+  Reload RSS Feeds: RSS-hírcsatornák újratöltése
+  Reload Platforms: Platformok újratöltése
+  Close Multiple Tabs: Lapok bezárása ({count})
+  Duplicate Tab: Lap megkettőzése
+  Duplicate Multiple Tabs: Lapok megkettőzése ({count})
+  Move Tab: Lap áthelyezése
+  Move Tabs: Lapok áthelyezése
+  Move Tab to Group: Lap áthelyezése csoportba
+  Collapse Group: Csoport összecsukása
+  Expand Group: Csoport kibontása
+  Move Tabs to Group: Lapok áthelyezése csoportba
+  Manage Tab Groups…: Lapcsoportok kezelése…
+  To Beginning: Az elejére
+  To End: A végére
+  Close Tabs: Lapok bezárása
+  To the Top: Felülre
+  To the Left: Balra
+  To the Bottom: Alulra
+  To the Right: Jobbra
+  Other Tabs: Egyéb lapok
+  Copy YouTube Link: YouTube-hivatkozás másolása
+  Copy YouTube Links: YouTube-hivatkozások másolása
+  Pin Tab: Lap rögzítése
+  Pin Tabs: Lapok rögzítése
+  Unpin Tab: Lap rögzítésének feloldása
+  Unpin Tabs: Lapok rögzítésének feloldása
+  Tab Color: Lap színe
+  Default: Alapértelmezett
+  Purple: Lila
+  Reopen Closed Tab: Bezárt lap újranyitása
+  Reload Tab: Lap újratöltése
+  Reload Tabs: Lapok újratöltése
+  Load Tab: Lap betöltése
+  Load Tabs: Lapok betöltése
+  Unload Tab: Lap kiürítése
+  Unload Tabs: Lapok kiürítése
+  Unload Tabs Failed: "Nem sikerült eltávolítani a kijelölt lapokat a memóriából."
+  Move Tab to Window: Lap áthelyezése ablakba
+  Move Tabs to Window: Lapok áthelyezése ablakba
+  Open in a New Tab: Megnyitás új lapon
+  Open in a New Window: Megnyitás új ablakban
+  Copy Link: Hivatkozás másolása
+  Copy Invidious Link: Invidious-hivatkozás másolása
+  Search Selection in New Tab: Keresés új lapon a(z) "{selection}" kifejezésre
+  Search Selection in New Window: Keresés új ablakban a(z) "{selection}" kifejezésre
+  Search With: Keresés a(z) {engine} használatával
+  Search With Multiple: Keresés ezzel...
+  Selection Too Long: A kijelölt szöveg túl hosszú a kereséshez (> {count} karakter)
+  Background Tab: Háttérlap
+Tab Organizer:
+  Tab History: "Lap előzményei"
+  Current Page: "Jelenlegi oldal"
+  Icon Labels:
+    Podcast: 'Podcast'
+    Clock: 'Óra'
+    Puzzle Piece: 'Kirakósdarab'
+    People: 'Emberek'
+    Chart: 'Diagram'
+    Calendar: 'Naptár'
+    Images: 'Képek'
+    Music: 'Zene'
+    Folder: Mappa
+    Bookmark: Könyvjelző
+    Favorites: Kedvencek
+    Videos: Videók
+    Gaming: Játékok
+    Research: Kutatás
+    Art: Művészet
+    Travel: Utazás
+  Group Icon: Csoportikon
+  Title: Lapok rendezése
+  Open Tab Count: '{count} nyitott lap | {count} nyitott lap'
+  Search Label: Keresés a lapok között
+  Selected Count: '{count} lap kijelölve | {count} lap kijelölve'
+  Tab Count: '{count} lap | {count} lap'
+  Select All: Összes kijelölése
+  Select None: Kijelölés megszüntetése
+  Move To Group: Kijelölt lapok áthelyezése csoportba
+  Choose Group: Csoport kiválasztása
+  Ungrouped: Csoportosítatlan
+  Pin: Rögzítés
+  Unpin: Rögzítés feloldása
+  Load: Betöltés
+  Unload: Kiürítés
+  Unload All: Összes kiürítése
+  Close All: Összes bezárása
+  Ungroup: Eltávolítás a csoportból
+  Group Name: Csoport neve
+  No Color: Szín nélkül
+  Create Group: Csoport létrehozása
+  Expand Group: Csoport kibontása
+  Collapse Group: Csoport összecsukása
+  Expand Group Label: A(z) {name} kibontása, {count} lap | A(z) {name} kibontása, {count} lap
+  Rename Group: A(z) {name} átnevezése
+  Change Group Color: A(z) {name} színének módosítása
+  Move To Window: Áthelyezés ablakba
+  Choose Window: Ablak kiválasztása
+  Select Tab: A(z) {title} kijelölése
+  Active: Aktív
+  Pinned: Rögzített
+  Unloaded: Kiürített
+  Playing: Lejátszás alatt
+  Close Tab: A(z) {title} bezárása
+  No Open Results: Egyik nyitott lap sem felel meg a keresésnek.
+  Recently Closed: Nemrég bezárt lapok
+  Clear: Törlés
+  No Closed Results: A nemrég bezárt lapok egyike sem felel meg a keresésnek.
+  Drag Tab: Húzza át egy csoportba
+Chapters:
+  Auto-generated: Ezek a fejezetek automatikusan jöttek létre
+  Open Chapters: Fejezetek megnyitása
+  Close Chapters: Fejezetek bezárása
+  Copy Timestamp Link: Hivatkozás másolása a(z) {timestamp} időponttól
+  Loop Chapter: 'Fejezet ismétlése: {chapter}'
+  Looping Chapter: 'A fejezet ismétlődik: {chapter}'
+  Chapter Loop Stopped: 'A fejezet ismétlése leállítva'
+  Sync to Video Time: 'Szinkronizálás a videó idejével'
+Comments:
+  Image unavailable: "A kép nem érhető el"
+  Comment Count: 1 hozzászólás | {count} hozzászólás
+  Show Comments: Hozzászólások megjelenítése
+  Getting comment replies, please wait: Válaszok lekérése, kis türelmet
+  Reload Comments: Hozzászólások újratöltése
+  Reply Count: 1 válasz | {replyCount} válasz
+  Comments are turned off: A hozzászólások ki vannak kapcsolva
+  YouTube did not provide advertised replies: A YouTube jelezte, hogy a hozzászóláshoz válaszok tartoznak, de nem adta át őket. Lehet, hogy törölték vagy elrejtették őket, ezért a válasz gombot eltávolítottuk.
+  Pinned by you: Ön által kitűzve
+  A reply is pinned: Egy válasz ki van tűzve
+  Filter loaded comments: Betöltött hozzászólások szűrése
+  Comment filters: Hozzászólásszűrők
+  From creator: A készítőtől
+  Contains timestamps: Időbélyeget tartalmaz
+  Pin comment by author: '{author} hozzászólásának kitűzése'
+  Unpin comment by author: '{author} hozzászólásának levétele'
+  Edited: (szerkesztve)
+  Highlighted comment: Kiemelt hozzászólás
+  Highlighted reply: Kiemelt válasz
+  Search loaded comments: Keresés a betöltött hozzászólásokban
+  Loaded comment search result count: 1 / {total} betöltött hozzászólás | {count} / {total} betöltött hozzászólás
+  No loaded comments match your filters: Egy betöltött hozzászólás sem felel meg a szűrőknek
+  YouTube comment link copied to clipboard: A YouTube-hozzászólás hivatkozása a vágólapra másolva
+  Translate to {language}: Fordítás {language} nyelvre
+  Show original: Eredeti megjelenítése
+  Translating comment, please wait: Hozzászólás fordítása, kis türelmet
+  Comment translation failed: Nem sikerült lefordítani a hozzászólást
+Description:
+  Title: Leírás
+  Copy Description: Leírás másolása
+  Description Copied: A leírás a vágólapra másolva
+  Video Category: 'Videókategória:'
+  Video Tags: Videócímkék
+  Games: Játékok
+  Music: Zene
+Tooltips:
+  YouTube Account Settings:
+    Add to YouTube Watch History: "A lejátszott videók bekerülnek a YouTube megtekintési előzményeibe, így a YouTube ajánlásai tanulhatnak belőlük. Amíg az előzmények szüneteltetve vannak a YouTube-on, semmi sem kerül be."
+    Sync Subscriptions: "Azok a csatornák, amelyekre a YouTube-on feliratkozik, bekerülnek az „Összes csatorna” profilba, azok pedig, amelyekről ott leiratkozik, minden profilból törlődnek. Ha itt az „Összes csatorna” profilban feliratkozik vagy leiratkozik, az a YouTube-on is megtörténik."
+    Sync Playlists: "A YouTube-lejátszási listái, a „Megnézendő” és a „Kedvelt videók” megjelennek a „Saját lejátszási listák” között, és az itt rajtuk végzett módosítások a YouTube-on is megtörténnek. Nem szinkronizálódnak a többi eszközére, és nem kerülnek bele, amikor az összes lejátszási listát exportálja, vagy biztonsági mentést készít az adatairól. Ha ezt kikapcsolja, eltűnnek erről az eszközről, de a YouTube-ról nem."
+  General Settings:
+    Built-in Streams: |
+      Az automatikus mód a legtöbb videót a YouTube visionOS-kliensével játssza le, amely gyorsabban indul és támogatja az automatikus minőséget. Az élő közvetítések és az általa nem lejátszható videók SABR-t használnak.
+      A Csak SABR mindig a YouTube webes kliensét használja, amely lassabban indul, és nincs automatikus minősége.
+    Title Lines: "A listákban és rácsokban a kiválasztott számú sorra rövidíti a videók és lejátszási listák címét három ponttal, hogy a kártyák egységesebbek legyenek. A teljes címet a kurzort fölé víve láthatja."
+    Close Window With Last Tab: 'Kikapcsolva az utolsó lap bezárása helyette új lapot nyit, így az ablak nyitva marad, amíg be nem zárod.'
+    Preferred Video Codec: |
+      Az automatikus mód azokat a kodekeket részesíti előnyben, amelyeket az eszköz hardveresen tud dekódolni.
+      AV1: a legjobb minőség a legkevesebb adatforgalommal, de nem minden videóhoz érhető el. Hardveres dekódolás nélkül merítheti az akkumulátort vagy képkockákat hagyhat ki.
+      VP9: egyensúly a hatékonyság és a kompatibilitás között, általában a legnagyobb felbontásig elérhető.
+      H.264: szinte minden eszközön a legkönnyebben dekódolható, de több adatot használ, és általában 1080p-nél véget ér.
+      A módosítások a következő videótól érvényesek. Ha az előnyben részesített kodek nem érhető el, egy másikat használ.
+    Always Use Backup Media Server: "A videókat a YouTube által megadott tartalék szerverről játssza le a kijelölt helyett, például ha az internetszolgáltató gyorsítótára gyakran lassú. Egyébként az OpenTubeX csak akkor vált, ha a kijelölt szerver nem válaszol."
+    Automatically switch stream extraction methods: "A yt-dlp kipróbálása, ha a beépített lejátszás sikertelen, vagy a beépített lejátszás kipróbálása, ha a yt-dlp sikertelen."
+    Enable Tabs: "Nyitva tartja az aktuális oldalt. A többi lap az alkalmazás újraindításáig megmarad; visszaállításukhoz engedélyezd újra a lapokat."
+    Data Saver Thumbnails: "Alacsonyabb felbontású bélyegképek használata az adatforgalom csökkentéséhez."
+    Use AI Translation Completions: Az emberi fordítások hiányzó részeinek kitöltése mesterséges intelligenciával létrehozott szöveggel. Az emberi fordítások mindig elsőbbséget élveznek.
+    Update Relative Timestamps: A relatív időbélyegek frissítése az egész alkalmazásban, amíg nyitva van egy oldal. Kikapcsolva csak az oldal újratöltésekor vagy újbóli megnyitásakor frissülnek.
+    Stream Extraction Method: |
+      Válassza ki, hogyan szerezze be az OpenTubeX a videó-adatfolyamokat. A yt-dlp használatához annak elérhetőnek kell lennie.
+      A videók indítása tovább tarthat a yt-dlp használatakor.
+    Avoid translation: |
+      A videócímek, -leírások és -fejezetek YouTube általi automatikus fordításának kikapcsolása.
+      A „Teljes alkalmazás” beállítás a csatornák nevét és leírását is az eredeti nyelven jeleníti meg.
+      A túl sok kérés, például a videócímek lekérése több listán keresztül, átmenetileg
+      ronthatja az alkalmazás megbízhatóságát.
+    Show Thumbnail Previews: Animált előnézet megjelenítése, amikor az egér a videó bélyegképe fölött van.
+    Startup Behavior: |
+      Válassza ki, mit tegyen az OpenTubeX indításkor.
+      Az összes lap betöltése azonnal visszaállít minden mentett lapot, de a háttérben lévő lapokon nem indulnak el automatikusan a videók.
+      A korábban betöltött lapok betöltése újratölti az OpenTubeX bezárásakor betöltött lapokat, a többit pedig betöltetlenül hagyja.
+      A legutóbb aktív lap betöltése visszaállítja az előző munkamenetet, a többi lapot pedig nyitva, de betöltetlenül hagyja; azok kattintáskor töltődnek be.
+      Az üres munkamenet indítása kihagyja a mentett lapokat, és új ablakot nyit.
+    Remember Tab Navigation History: Az egyes lapok vissza- és előrelépési előzményeinek mentése, majd visszaállítása az OpenTubeX újraindításakor.
+    Yattee Server: Az a yattee-server-példány, amelyről az OpenTubeX a videókat, csatornákat, lejátszási listákat és keresési találatokat tölti be. A felhasználónév és a jelszó csak ezen az eszközön tárolódik.
+    Proxy Videos Through Yattee Server: A videó- és hangadatfolyamokat a kiszolgálón keresztül továbbítja. Hagyja bekapcsolva, kivéve ha a kiszolgáló ugyanazt az internetkapcsolatot használja, mint Ön, mert a YouTube csak annak a címnek küldi az adatfolyamokat, amely kérte őket. A bélyegképek mindig közvetlenül a YouTube-ról töltődnek be.
+    Notifications: Válaszd ki, hogyan értesítsen az OpenTubeX élő közvetítésekről, új feltöltésekről és automatikus letöltésekről. A Rendszer és alkalmazáson belül beállításnál az értesítések használat közben az OpenTubeX-ben jelennek meg, egyébként rendszerértesítésként, és a csengő megőrzi őket. A Ki az értesítési beállításokat is elrejti.
+    Ignore System Haptics Setting: Rezgés hosszú nyomáskor és kézmozdulatoknál akkor is, ha az érintési visszajelzés ki van kapcsolva az Android beállításaiban.
+  Proxy Settings:
+    IP Block Recovery Script Path: Az IP-cím letiltásának észlelésekor futtatandó parancsfájl elérési útja. Az OpenTubeX megvárja a befejezését, majd újratölti a videót. Ha a tartalék módszer engedélyezett, csak akkor fut le, ha az is sikertelen.
+  Player Settings:
+    Rewind on Resume: "Szüneteltetett videó folytatásakor ennyi másodpercet ugrik vissza, hogy újra láthasd az utolsó pillanatokat. A kikapcsoláshoz állítsd 0-ra."
+    Minimum Pause Before Rewinding: "Csak akkor teker vissza, ha a videó legalább ennyi ideig szünetelt. Állítsd 0-ra, hogy minden szünet után visszatekerjen."
+    Mono Audio: 'A bal és a jobb hangcsatornát mindkét fülben lejátssza. Használd, ha egy videó hangja csak a fejhallgató egyik oldalán szól.'
+    Normalize Loudness: 'Lehalkítja a legtöbbnél hangosabb videókat, hogy a hangerő ne ugráljon a videók között. A halk videók megtartják a hangerejüket. Csak a helyi API-val betöltött videóknál működik.'
+    Pause on Stream Recovery: "Ha a videostream meghiúsul, és a lejátszó újratölti, vagy másik formátumra vagy motorra vált, a lejátszás szünetel, és a hiba a lejátszó tetején marad, amíg el nem veted. Kikapcsolva a lejátszás folytatódik, és a hiba röviden értesítésként jelenik meg."
+    Continue Playback When Screen Is Locked: 'A háttérben folytatja a hang lejátszását, és Android-médiavezérlőket biztosít. Kapcsold ki, ha az alkalmazás elrejtésekor szüneteltetni szeretnéd a lejátszást.'
+    Enable Caption Translations: Bekapcsolva a feliratok gomb és a C billentyűparancs az előnyben részesített feliratnyelvre automatikusan lefordított sávot választja, ha a videóhoz nincs ezen a nyelven eredeti sáv.
+    Use Quick Playback Speed Bar: Gyors lejátszásisebesség-sáv megjelenítése a lejátszó jobb oldali vezérlői között. Ha engedélyezett a lejátszási sebesség csatornánkénti kézi mentése, a sávon az aktuális csatorna sebességének mentésére szolgáló gomb is megjelenik.
+    Multiply Seek Interval by Playback Rate: Bekapcsolva a tekerési időközök (nyílbillentyűk és J/L) az aktuális lejátszási sebességgel szorzódnak. Kikapcsolva az időközök a lejátszási sebességtől függetlenül változatlanok maradnak.
+    Show Playback Rate Adjusted Timestamp: Bekapcsolva, ha a lejátszási sebesség eltér az 1x értéktől, a lejátszó a szokásos időbélyeg után zárójelben megjeleníti a lejátszási sebességhez igazított időbélyeget.
+    Use YouTube-style Shorts: A Shorts-videók álló tájolású rácsban jelennek meg a feliratkozások és a csatornák oldalain, és a YouTube-stílusú Shorts-lejátszót használják.
+    Loop Shorts: Bekapcsolva a Shorts-videók automatikusan újraindulnak. Kikapcsolva a végükön megállnak, és megjelenik az újrajátszás gomb.
+    Show Skip Silence Toggle: A csend átugrására szolgáló kapcsoló megjelenítése a lejátszó beállítási menüjében.
+    Enable Skip Silence by Default: A csend átugrásának engedélyezése az új lapokon. Az egyik lapon végzett módosítás nincs hatással a többi lapra.
+    Enable Video Zoom: A nagyítási vezérlő megjelenítése a lejátszó beállítási menüjében, valamint a hozzá tartozó billentyűparancsok és pásztázási vezérlők engedélyezése.
+    Enable Seek History: Az alkalmazás bezárásáig megjegyzi, honnan ugrott el az egyes videókban. Megjeleníti az ugrási előzmények listáját a lejátszó beállítások menüjében, és engedélyezi a hozzá tartozó billentyűparancsokat.
+    Show Seek Bar Filmstrip: "A tekerősáv csúszkájának húzásakor egy képkockasáv jelenik meg a célpont körül, és ha felfelé húzza rá, pontosan tekerhet. Kikapcsolva a húzás egyetlen bélyegképet mutat, mint az egérrel való rámutatáskor."
+    Voice-over Translation: Fordítás kérésekor elküldi a videó azonosítóját, hosszát és a kiválasztott nyelvet a Yandex nem hivatalos szinkronfordítási szolgáltatásának. Alapértelmezés szerint ki van kapcsolva.
+    Hold to Speed Up: Tartsa lenyomva a szóközbillentyűt vagy a bal egérgombot a lejátszó fölött az aktuális lejátszási sebesség ideiglenes megszorzásához a kiválasztott értékkel.
+    Ambient Mode: A videó színeinek kiterjesztése a lejátszó körüli területre.
+    Default Volume: Nem érhető el, amíg a hangerő megjegyzése engedélyezett. Kapcsolja ki a hangerő megjegyzését, hogy minden videóhoz rögzített kezdő hangerőt állíthasson be.
+    Parallel Segment Loading: |
+      A lejátszás előtt egyszerre betöltendő videó- és hangszegmensek száma.
+      A nagyobb érték lassú vagy instabil kapcsolatnál segíthet, de több sávszélességet és memóriát használ.
+      Emiatt az Auto alábecsülheti a kapcsolat sebességét, és gyengébb minőséget választhat.
+      Az egyszerre egy kérésre korlátozott adatfolyamok figyelmen kívül hagyják ezt a beállítást.
+    Preload Upcoming Videos: "Lekéri és gyorsítótárazza a következő videók yt-dlp-címeit. A várólista elsőbbséget élvez a lejátszási listákkal és ajánlásokkal szemben."
+    Upcoming Videos to Preload: "A háttérben lekért yt-dlp-címmel rendelkező következő videók legnagyobb száma."
+    Concurrent Preloads: "A videók egyidejű előtöltésére használt yt-dlp-folyamatok legnagyobb száma. A magasabb értékek több processzort, memóriát és hálózati sávszélességet használnak."
+    Ignore System Rotation Lock for Fullscreen: A készülék fizikai elforgatásával léphet teljes képernyőre és ki onnan akkor is, ha az Android automatikus forgatása ki van kapcsolva.
+    Ask Before Preloading Large Playlists: "Megerősítést kér, mielőtt egy {count} videónál többet tartalmazó lejátszási lista összes videóját előtöltené."
+  Download Settings:
+    Download Folder: A videók ebbe a mappába kerülnek. Hagyja üresen a rendszer Letöltések mappájának használatához.
+    Global Additional yt-dlp Arguments: Minden letöltésnél a yt-dlp számára átadott további parancssori argumentumok, például --cookies-from-browser firefox.
+    Concurrent Downloads: Az egyszerre futtatható yt-dlp-feladatok legnagyobb száma.
+    Bandwidth Limit: A várólista összesített átviteli sebességének korlátozása az érték egyidejű feladatok közötti elosztásával. A 0 korlátlan sebességet jelent.
+  External Software Settings:
+    yt-dlp Source: Az OpenTubeX használhatja a rendszerre telepített yt-dlp-t, vagy letöltheti és kezelheti a saját, a felhasználói adatok mappájában tárolt példányát.
+    yt-dlp Channel: Válassza ki, melyik yt-dlp kiadási csatornát töltse le és kezelje az OpenTubeX. A legtöbb felhasználónak a Stable ajánlott.
+    FFmpeg Source: Az OpenTubeX használhatja a rendszerre telepített FFmpeg és FFprobe programot, vagy letöltheti és kezelheti a saját, a felhasználói adatok mappájában tárolt statikus összeállításait.
+    Managed Tool Updates: Válassza ki, hogy a kezelt eszközök automatikusan frissüljenek, frissítés előtt kérdezzenek rá, vagy csak a kézi gombokkal frissüljenek. A hiányzó eszközök szükség esetén továbbra is letöltődnek.
+    yt-dlp Executable Path: Az OpenTubeX alapértelmezés szerint azt feltételezi, hogy a yt-dlp megtalálható a PATH környezeti változó alapján. Szükség esetén itt egyéni elérési út adható meg.
+    Cookie Source: Válassza ki, hogy a yt-dlp egy Netscape cookie-fájlból vagy egy telepített böngészőből olvassa-e be a cookie-kat a hitelesített lejátszáshoz.
+    Cookie File: Válasszon Netscape-formátumú cookie-fájlt a hitelesített lejátszáshoz.
+    Browser for Cookies: A böngészőtámogatás adatait a kiválasztott yt-dlp végrehajtható fájlból olvassa be az alkalmazás. Hitelesített lejátszás kérésekor az OpenTubeX arra utasítja a yt-dlp-t, hogy ebből a böngészőből olvassa be a cookie-kat.
+    Browser Profile: Nem kötelező böngészőprofilnév vagy -mappa. Hagyja üresen a legutóbb használt profil kiválasztásához.
+    Always Use Cookies: "Használd a beállított sütiket a letöltésekhez, feliratokhoz és amikor a yt-dlp adatfolyamokat nyer ki. Ez nem állítja át az adatfolyam-kinyerési módszert yt-dlp-re. A yt-dlp kiválasztásával csak fiókkal elérhető formátumok is megjelenhetnek, köztük a YouTube Premium nagyobb bitrátája, ha a fiók hozzáfér."
+    FFmpeg Executable Path: Az FFmpeg szükséges a különálló videó- és hangadatfolyamok egyesítéséhez, valamint a hangkonvertáláshoz. Az OpenTubeX alapértelmezés szerint azt feltételezi, hogy az FFmpeg megtalálható a PATH környezeti változó alapján. Szükség esetén itt egyéni elérési út adható meg.
+    Use cookies for subtitles: "A beállított sütik használata a feliratokhoz és az automatikus fordításokhoz. A „Sütik használata mindig” beállítás is engedélyezi."
+  Distraction Free Settings:
+    Hide Playlist Stats: Elrejti a videók számát, a megtekintések számát, az utolsó frissítés dátumát és a teljes időtartamot a lejátszási listák oldalain.
+    Count Watch Time From: "Az „Összes eszköz” minden olyan eszközt beszámít, amely szinkronizálja a nézési statisztikákat. Az „Ez az eszköz” csak az itt megnézett tartalmat számítja be."
+    When a Limit Is Reached: "A „Lejátszás szüneteltetése” lehetővé teszi, hogy 15 percet hozzáadjon, vagy mára figyelmen kívül hagyja a korlátot. Ha a beállítások jelszóval védettek, korlátot csak a Beállításokban emelhet."
+    Grayscale: "Szürkeárnyalatosan jeleníti meg az alkalmazást, hogy kevésbé vonja el a figyelmet. A „Lefekvési időben” lehetőség a lefekvési emlékeztető ütemezését követi."
+    Apply Grayscale To: "A „Videókra és képekre” lehetőség megtartja a felület színeit, és szürkévé teszi a tartalmat, például a videókat, a bélyegképeket és az avatarokat."
+    Daily Watch Time Limit: "Azt számolja, amit ma az összes, nézési statisztikákat szinkronizáló eszközön megnézett, a Shorts-videókat is beleértve."
+    Daily Shorts Limit: "Azokat a Shorts-videókat számolja, amelyeket ma ezen az eszközön nézett meg."
+    Take a Break Reminder: "Ennyi nézés után szünetelteti a videót. Egy legalább 10 perces szünet újraindítja a számlálást."
+    Bedtime Reminder: "Szünetelteti a videót, és a kezdési és befejezési idő között emlékezteti, hogy hagyja abba a nézést."
+    Shorten View Counts: A YouTube által már kerekített megtekintés-, hozzászólás- és hozzászóláskedvelési számok rövidített megjelenítése, például 14 E a 14 000 helyett. A pontos számok mindig teljesen jelennek meg.
+  Subscription Settings:
+    Fetch Feed on Startup: Bekapcsolva az OpenTubeX automatikusan lekéri a feliratkozási hírfolyamot indításkor és új ablak megnyitásakor.
+    Show New Content Feed: Egy Új lap megjelenítése azokkal a feliratkozási hírfolyamelemekkel, amelyek az előző lekéréskor még nem szerepeltek.
+    Enable RSS Feeds: Egy RSS lapot jelenít meg a Feliratkozások oldalon RSS- vagy Atom-hírcsatornák elemeivel, így más platformok alkotóit is követheti. Elemei a yt-dlp segítségével nyílnak meg.
+    Show New Content Indicators: Egy kis pont megjelenítése azok mellett a feliratkozási hírfolyamelemek mellett, amelyek az előző lekéréskor még nem szerepeltek.
+    Show Scheduled Live Streams / Premieres First: A közelgő élő közvetítések és premierek a feliratkozási hírfolyam tetején maradnak. Kikapcsolva a kezdésükig a bejelentésük helyén maradnak. Kikapcsolás után frissítse egyszer a feliratkozási hírfolyamot a meglévő ütemezett bejegyzések bejelentési dátumának lekéréséhez.
+    Auto Refresh Interval: "Milyen gyakran frissítse automatikusan az OpenTubeX a feliratkozási hírfolyamot, amíg az alkalmazás nyitva van. Androidon a nullától eltérő időköz akkor is frissíti a hírfolyamot, amikor az alkalmazás be van zárva."
+    Refresh Subscriptions While App Is Closed: "A kiválasztott beállításokkal frissíti a hírcsatornákat. Számítógépen az OpenTubeX kilépésig a rendszertálcán marad. Androidon a rendszer határozza meg a háttérfrissítések idejét."
+    Notify About New Uploads: Rendszerértesítéseket jelenít meg ezen az eszközön azokról a csatornákról, amelyeknek a feliratkozási beállításaiban bekapcsolta az értesítéseket. Az OpenTubeX a feliratkozások frissítésekor keres új tartalmat, ezért válasszon automatikus frissítési időközt. Ha bezárt alkalmazásnál is értesítést szeretne kapni, kapcsolja be a bezárt alkalmazásnál történő frissítést is.
+    RSS Feeds Auto Refresh Interval: Milyen gyakran frissíti automatikusan az OpenTubeX az RSS-hírcsatornáidat, amíg az alkalmazás nyitva van.
+    Faster Subscription Refresh: "Először minden csatorna RSS-hírcsatornáját ellenőrzi, és csak az új feltöltéssel rendelkező csatornák videóit, Shorts-videóit és élő közvetítéseit tölti be. Az automatikus frissítések az elmúlt 10 percben betöltött csatornákat is kihagyják. Az új feltöltés nélküli csatornáknál a megtekintések száma, az eltávolított videók és a módosított címek csak néhány óránként frissülnek, és az új feltöltések később jelenhetnek meg, ha az RSS-hírcsatorna lemarad. Az Invidious API-val nem érhető el."
+    Platforms Auto Refresh Interval: Milyen gyakran frissíti automatikusan az OpenTubeX a más platformokon követett csatornáidat, amíg az alkalmazás nyitva van.
+    Twitch Notify When Live: Értesít, amikor valamelyik követett Twitch-csatornád adást indít. Az OpenTubeX néhány percenként ellenőriz, amíg nyitva van, és akkor is, amikor be van zárva, ha ilyenkor frissíti a feliratkozásokat.
+  Theme Settings:
+    Only Show Important Notifications: Elrejti azokat az alkalmazáson belüli értesítéseket, amelyek csak egy műveletet erősítenek meg vagy állapotot jeleznek, beleértve a Visszavonás lehetőséget kínálókat is. A hibák, figyelmeztetések, az Ön által beállított emlékeztetők és a döntést kérő értesítések, például a frissítési felkérések, továbbra is megjelennek. A háttérfolyamatok, például a feliratkozások frissítésének állapota értesítés helyett a globális folyamatjelző sávon jelenik meg. A rendszerértesítéseket nem érinti.
+    Visible Search Suggestions: "Megadja, hány keresési előzményt és javaslatot jelenít meg a keresősáv, mielőtt a listáját görgetni kellene. A lista soha nem nyúlik túl az ablak alsó szélén."
+    Thumbnail Size: "Átméretezi a videók bélyegképeit a rácsokban és listákban. A rögzített oszlopszámú vagy Teljes szélesség nézetű rácsok ehelyett kitöltik az összes sort, így ott csak a listák bélyegképeit és a Shorts videókat módosítja. Telefonméretű ablakokban a rács bélyegképei legfeljebb 100%-osak lehetnek."
+    Playlist Thumbnail Size: "Átméretezi a videók bélyegképeit a lejátszási listák oldalain. A rögzített oszlopszámú vagy Teljes szélesség nézetű rácsok ehelyett kitöltik az összes sort, így ott csak a listák bélyegképeit és a Shorts videókat módosítja. Telefonméretű ablakokban a rács bélyegképei legfeljebb 100%-osak lehetnek."
+    Compact Settings Categories: "Elrejti a leírásokat és csökkenti a beállításkategóriák magasságát."
+    Show Progress as Notification: Állandó értesítés megjelenítése a háttérműveletek, például a feliratkozások frissítése és a kezelt eszközök letöltése valós idejű állapotával a globális folyamatjelző helyett.
+    Always Show Scrollbars: A görgetősávok állandó megjelenítése. Kikapcsolva röviddel az egér mozgatásának befejezése után elhalványulnak, és az egér újbóli megmozdításakor ismét megjelennek.
+    Scroll Speed: Megváltoztatja, hogy az egérgörgő és az érintőpad kézmozdulatai milyen messzire görgessenek.
+    Use Fixed Tab Width: Minden lap azonos szélességű lesz a vízszintes lapsávon, a címükhöz igazodó méretezés helyett.
+    Use Custom Title Bar: A rendszer címsorát a lapsávra cseréli, vagy a felső navigációra, ha a lapok nincsenek felül, így függőleges helyet takarít meg. Az ablakvezérlők a sáv sarkában jelennek meg.
+    Use Grid Player Menu: A videólejátszó beállítási menüjének elrendezése csempékből álló rácsként, sorok listája helyett.
+    Modal Backdrop: "Beállítja, hogyan nézzen ki az alkalmazás a párbeszédablakok és menük mögött. Az elmosás lassú lehet kevésbé erős eszközökön."
+    Click Scrollbar Track to Scroll: "Ha a görgetősávra a csúszkán kívül kattint, a tartalom nagyjából egy oldalnyit görgetődik a kattintás irányába. Amíg ez be van kapcsolva, a látható görgetősáv elfogja az alatta lévő elemeknek szánt kattintásokat. A lapsáv görgetősávja mindig így működik."
+  SponsorBlock Settings:
+    Always Show DeArrow Badge: A DeArrow gomb látható marad azokon a videókon, amelyek címét vagy bélyegképét a DeArrow lecserélte, nem csak egérrel fölé mutatva.
+The playlist is at the beginning. Enable loop to continue playing: A lejátszási lista elején jár. Kapcsolja be az ismétlést a lejátszás folytatásához
+External link opening has been disabled in Settings → Privacy: A külső hivatkozások megnyitása ki van kapcsolva a Beállítások → Adatvédelem menüben
+KeyboardShortcutPrompt:
+  Mark Seen or Watched: "A kijelölt elem megjelölése látottként, vagy a megtekintett állapot átváltása"
+  Toggle Quick Bookmark: Hozzáadás a gyors könyvjelző lejátszási listájához vagy eltávolítás onnan
+  Reopen Closed Window: Az utoljára bezárt ablak újranyitása
+  Edit Hint: Válasszon egy billentyűparancsot, majd nyomjon le egy új billentyűkombinációt. A hozzárendelés törléséhez nyomja meg a Backspace vagy a Delete billentyűt.
+  Change Shortcut: A(z) {action} billentyűparancsának módosítása
+  Press Shortcut: Nyomja le a billentyűparancsot…
+  Unassigned: Nincs hozzárendelve
+  Reset Shortcut: A(z) {action} billentyűparancsának visszaállítása
+  Reset to Defaults: Alapértelmezések visszaállítása
+  Shortcut Already Assigned: A billentyűparancs már hozzá van rendelve
+  Shortcut Conflict: 'A(z) {shortcut} már hozzá van rendelve ehhez: {actions}. Szeretné átrendelni?'
+  Reserved Shortcut Conflict: 'A(z) {shortcut} ehhez van fenntartva: {actions}, ezért nem rendelhető át.'
+  Reassign: Átrendelés
+  Sections:
+    App:
+      Tabs: "Alkalmazás:\_Lapok"
+      Search and Page: "Alkalmazás:\_Keresés és oldal"
+      Window and View: "Alkalmazás:\_Ablak és nézet"
+  New Tab: Új lap létrehozása
+  Close Tab: Aktuális lap bezárása
+  Reload Tab: Aktuális lap újratöltése
+  Reopen Closed Tab: Legutóbb bezárt lap újranyitása
+  Next Tab: Váltás a következő lapra
+  Previous Tab: Váltás az előző lapra
+  Switch to Tab: Váltás az 1–9. lapra
+  Toggle Tab Orientation: Váltás a lapelrendezések között
+  Find in Page: Szöveg keresése az aktuális oldalon
+  Find Next Match: Ugrás a következő találatra
+  Find Previous Match: Ugrás az előző találatra
+  Toggle Normal Playback Speed: Váltás az 1x-es és az előző lejátszási sebesség között
+  Toggle Skip Silence: Csend átugrásának be- vagy kikapcsolása
+  Set A-B Repeat Point A: A-B ismétlés A pontjának beállítása
+  Set A-B Repeat Point B: A-B ismétlés B pontjának beállítása
+  Clear A-B Repeat: A-B ismétlés törlése
+  Video Zoom In: Videó nagyítása
+  Video Zoom Out: Videó kicsinyítése
+  Tab Switcher: Lapváltó
+  Undo Seek: Az utolsó ugrás visszavonása
+  Redo Seek: Egy visszavont ugrás újbóli végrehajtása
+CommandPalette:
+  Title: Parancspaletta
+  Open: Parancspaletta megnyitása
+  Search Label: "Parancsok, beállítások és helyi videók keresése"
+  Search Placeholder: Parancsok, beállítások és helyi videók keresése…
+  Results: "Találatok"
+  No Results: "Nincs megfelelő találat"
+  Result Count: "Találatok: {count} | Találatok: {count}"
+  Move: Mozgatás
+  Run: Futtatás
+  Keys:
+    Up: ↑
+    Down: ↓
+    Escape: Esc
+  Switch to Tab: 'Váltás erre a lapra: {title}'
+  Switch Profile: 'Váltás erre a profilra: {name}'
+  Open Playlist: 'Lejátszási lista megnyitása: {name}'
+  Cancel Download: 'Letöltés megszakítása: {title}'
+  Groups:
+    App: Alkalmazás
+    Navigation: Navigáció
+    Tabs: Lapok
+    Local Videos: Helyi videók
+  Unavailable:
+    Current Page: Már ezen az oldalon van
+    No History: Nincs oldal ebben az irányban
+    Desktop: Csak az asztali alkalmazásban érhető el
+    Build: Ebben az összeállításban nem érhető el
+    One Tab: Előbb nyisson meg egy másik lapot
+    Active Tab: Ez az aktív lap
+    Active Profile: Ez az aktív profil
+    Download Finished: Ez a letöltés már nem fut
+    Video: Előbb nyisson meg egy videót
+Downloads:
+  File Name Template Invalid: 'Használjon a letöltési mappán belüli relatív útvonalat "..", "~", "$", "%" vagy például "thumbnail:" előtag nélkül.'
+  Search Completed: "Befejezett letöltések keresése cím vagy csatorna alapján"
+  Format: "Formátum"
+  All Formats: "Minden formátum"
+  Largest First: "Legnagyobb elöl"
+  Smallest First: "Legkisebb elöl"
+  No Matching Downloads: "Nincs megfelelő befejezett letöltés. Próbáljon más keresést vagy szűrőt."
+  Add Download: Letöltés hozzáadása
+  Preparing: Előkészítés…
+  Export Failed: "A letöltött fájlt nem sikerült menteni. Válasszon írható letöltési mappát, és próbálja újra."
+  Native Code Blocked: "Az Android megakadályozta, hogy a yt-dlp betöltse natív könyvtárait. GrapheneOS-en nyissa meg az alkalmazás adatait, állítsa a(z) “Exploit protection” alatti “Dynamic code loading via storage” beállítást “Allowed” értékre, és próbálja újra."
+  Download Stopped Unexpectedly: "A letöltés váratlanul leállt."
+  Remove File Permanently Warning: "Ez véglegesen törli a következőt: „{title}”."
+  Download: Letöltés
+  Download Video: Videó letöltése
+  Download Playlist: Lejátszási lista letöltése
+  Downloading: Letöltés
+  Queue: Várólista
+  Downloaded: Letöltve
+  Canceled: Megszakítva
+  Open Downloads: Letöltések megnyitása
+  No Downloads: Még nincs letöltés
+  No Downloads Description: Az elindított letöltések itt jelennek meg.
+  Clear Failed Canceled Skipped And Missing: Sikertelen, megszakított, kihagyott és hiányzó elemek törlése
+  Clear From List: Törlés a listáról
+  Show in Folder: Megjelenítés a mappában
+  Play Download: Letöltés lejátszása
+  Retry Download: Letöltés újrapróbálása
+  Pause Download: Letöltés szüneteltetése
+  Resume Download: Letöltés folytatása
+  Move Earlier: Előrébb helyezés
+  Move Later: Hátrébb helyezés
+  Pause All: Összes szüneteltetése
+  Resume All: Összes folytatása
+  Retry All: Minden sikertelen letöltés újrapróbálása
+  Total Size: 'Teljes méret: {size}'
+  Local File: Helyi fájl
+  Available Offline: Offline is elérhető
+  Remove File: Fájl eltávolítása
+  Remove File Confirmation: Eltávolítja a letöltött fájlt?
+  Remove File Warning: Ezzel a(z) „{title}” az eszköz kukájába kerül.
+  File Not Found: A letöltött fájl nem található.
+  Files Missing: A letöltött fájl már nem érhető el a fájlrendszeren. | A letöltött fájlok már nem érhetők el a fájlrendszeren.
+  Files Available: '{total} letöltött fájlból {available} érhető el.'
+  More Files: További 1 fájl | További {count} fájl
+  Template Used: 'Sablon: {name}'
+  Template: Sablon
+  Unsaved: Nincs mentve
+  Media Type: Médiatípus
+  Video: Videó
+  Audio: Hang
+  Maximum Resolution: Legnagyobb felbontás
+  Best Available: Legjobb elérhető
+  Automatic: Automatikus
+  Container: Konténer
+  Video Codec: Videókodek
+  Audio Codec: Hangkodek
+  File Name Template: Fájlnévsablon
+  File Name Template Help: 'Elérhető mezők: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
+  Time Range and Chapters: Időtartomány és fejezetek
+  Start Time: Kezdési idő
+  End Time: Befejezési idő
+  Split by Chapters: Felosztás fejezetenként külön fájlokra
+  Remove Segments: Szegmensek eltávolítása
+  Subtitles and Metadata: Feliratok és metaadatok
+  Include Subtitles: Feliratok hozzáadása
+  Embed Subtitles: Feliratok beágyazása a médiafájlba
+  Subtitle Format: Feliratformátum
+  Subtitle Languages: Feliratok nyelve
+  Subtitle Languages Help: 'Vesszővel elválasztott yt-dlp nyelvválasztók, például: en.*,de.*'
+  Embed Cover Art: Bélyegkép beágyazása borítóképként
+  Embed Metadata: Cím, szerző, leírás és fejezetek beágyazása
+  Additional yt-dlp Arguments: További yt-dlp-argumentumok
+  Template Name: Sablon neve
+  Save Template: Sablon mentése
+  Delete Template: Sablon törlése
+  Template Saved: A(z) „{name}” letöltési sablon mentve
+  Template Name Exists: Már létezik „{name}” nevű letöltési sablon.
+  Choose Folder: Módosítás
+  Select Folder: Mappa kiválasztása
+  Folder Required: A letöltések engedélyezéséhez válasszon letöltési mappát.
+  System Downloads Folder: A rendszer Letöltések mappája
+  Processing: Feldolgozás…
+  Queued: Várólistán
+  Queued Position: Várólistán, {position}. hely
+  Paused: Szüneteltetve
+  Pausing: Az aktuális feladat befejeződik, majd a várólista szünetel
+  Download Complete: A letöltés befejeződött
+  Download Cancelled: A letöltés megszakítva
+  Download Failed: A letöltés sikertelen
+  File Name Shortened: A fájlnevet lerövidítettük, mert a videó címe túl hosszú volt.
+  Some Videos Not Downloaded: A lejátszási lista néhány videóját nem sikerült letölteni.
+  Playlist Video Position: '{index}./{count} videó'
+  Insufficient Disk Space: Nincs elég lemezterület. Körülbelül {required} szükséges, és {available} érhető el.
+  Unknown Download Size: A letöltés mérete ismeretlen. A célfájlrendszeren {available} érhető el.
+  Disk Space Check Unavailable: A letöltés indítása előtt nem sikerült ellenőrizni a rendelkezésre álló lemezterületet.
+  Download Failure Hint: Ellenőrizze a(z) {issuesLink} oldalt, majd próbálja a yt-dlp csatornáját Nightly vagy Master értékre állítani a Beállítások → Speciális → Külső szoftver menüben.
+  yt-dlp YouTube Issues: a yt-dlp YouTube-bal kapcsolatos legutóbbi hibái
+  Automatic Download Started: Az automatikus letöltés elindult
+  Automatic Download Started Body: A(z) „{title}” letöltése a háttérben a(z) {channel} csatornáról.
+  Automatic Download Complete: Az automatikus letöltés befejeződött
+  Automatic Download Failed: Az automatikus letöltés sikertelen
+  Automatic Download Could Not Start: Nem sikerült elindítani a(z) „{title}” automatikus letöltését.
+  Automatic Download Skipped: Az automatikus letöltési szűrők kihagyták
+  Cancel Download: Letöltés megszakítása
+  yt-dlp Not Found: A yt-dlp nem található. Telepítse, vagy állítsa be az elérési útját a Beállítások → Speciális → Külső szoftver menüben.
+  Download Complete Template: A(z) „{title}” letöltése befejeződött
+  Download Failed Template: A(z) „{title}” letöltése sikertelen
+  Templates:
+    Video Best: Videó - Legjobb minőség
+    Video Resolution: Videó - {resolution}
+    Audio Best: Hang - Legjobb minőség
+    Audio Format: Hang - {format}
+    Subtitles Format: Feliratok - {format}
+  Waiting for Unmetered Network: "Várakozás nem forgalomkorlátos hálózatra"
+  Waiting for Charging: "Várakozás töltőre"
+  Remove File Failed: A letöltött fájl nem távolítható el.
+Channels:
+  Load More Channels: "További csatornák betöltése"
+Theme Discovery:
+  Discover Themes: "Témák felfedezése"
+  Refresh: "Frissítés"
+  View on GitHub: "Megtekintés a GitHubon"
+  Load Error: "Nem sikerült betölteni a témákat. Próbálja frissíteni a listát."
+  Loading: "Betöltés…"
+  No Themes: "Nem találhatók telepíthető témák."
+  No Preview: "A képernyőkép nem érhető el"
+  Load More: "Továbbiak betöltése"
+  Applied: "Alkalmazva"
+  Apply Theme: "Téma alkalmazása"
+  Install and Apply: "Telepítés és alkalmazás"
+  Update and Apply: "Frissítés és alkalmazás"
+
+Connection:
+  Offline: Offline
+  Reconnecting: "Megszakadt a kapcsolat. Újracsatlakozás folyamatban…"
+  Back Online: "Újra online"
+
+App Icon:
+  Restart: "Alkalmazás újraindítása"
+  Saved Message: "Ikon mentve. A kezdőképernyő frissítése eltarthat egy ideig."
+  Title: "Alkalmazásikon"
+  Error: "Nem sikerült betölteni vagy módosítani az alkalmazás ikonját"
+
+Tray:
+  Hide All Windows: "Összes ablak elrejtése"
+  Show All Windows: "Összes ablak megjelenítése"
+
+Tray Icon:
+  Title: "Tálcaikon"
+  Follow App Theme: "Alkalmazástéma követése"
+  Monochrome: "Egyszínű"
+
+Form Inputs:
+  Browse: "Tallózás"
+  Use Default Path: "Alapértelmezett használata"
+  Enter Password Hint: "Add meg a jelszavad"
+  Choose Password Hint: "Válassz jelszót"
+  Confirm Password Hint: "Ismételd meg az új jelszavad"
+  Encryption Passphrase Hint: "Add meg a titkosítási jelmondatod"
+  Show Password: "Jelszó megjelenítése"
+  Hide Password: "Jelszó elrejtése"
+  Search Text Hint: "Adjon meg keresési kifejezéseket"
+  Playlist Description Hint: "Írja le ezt a lejátszási listát"
+  Filename Preview: "Fájlnév előnézete"
+  Enter Channels: "Csatornák megadása"
+  Enter Text: "Szöveg megadása"
+  Video URL: Videó vagy lejátszási lista URL-je
+  Paste Link: Illesszen be egy videó- vagy lejátszásilista-hivatkozást
+  Example: pl. {example}
+  No Minimum: Nincs minimum
+  No Maximum: Nincs maximum
+  Any Age: Bármilyen korú
+  Included Terms Example: pl. útmutató, értékelés
+  Excluded Terms Example: pl. előzetes, bemutató
+  Global Arguments Hint: Opcionális argumentumok minden letöltéshez
+  Unlimited Hint: 0 a korlátlanhoz
+  Add Argument: Argumentum hozzáadása
+  Template Name Example: pl. Csak hang
+  Download Arguments Hint: Opcionális argumentumok ehhez a letöltéshez
+  Generated ID Hint: Hagyja üresen egy azonosító létrehozásához
+  Default Value: "Alapértelmezett: {value}"
+
+Search Filters:
+  Possible Age Restriction Hint: "Előfordulhat, hogy a YouTube korhatárt állított be ehhez a keresési lekérdezéshez."
+  Cookie Search Failed: "A keresés a beállított sütikkel sikertelen volt."
+  Showing results for: "Találatok a következőre: {query}"
+  Search instead for: "Keresés helyette erre: {query}"
+  Including results for: "A következő találatait is tartalmazza: {query}"
+  Search only for: "Csak erre keressen: {query}"
+  Did you mean: "Erre gondolt: {query}?"
+
+Storage Startup Error:
+  Title: "Nem sikerült betölteni az alkalmazás adatait"
+  Message: "Szabadítson fel tárhelyet az eszközön, majd próbálja újra. A szinkronizálás az adatok betöltéséig szünetel."
+  Web Message: "Ha az OpenTubeX egy másik lapon is meg van nyitva, zárd be, és próbáld újra."
+  Insecure Web Message: "Az OpenTubeX csak akkor tudja tárolni az adataidat, ha HTTPS-en keresztül vagy localhoston nyitod meg. Nyisd meg inkább ezt a címet https:// előtaggal."
+  Retry: "Újrapróbálkozás"
+Search Bar:
+  Use Suggestion: Javaslat használata
+
+Native Permissions:
+  Local Network Denied: "A közeli eszközök engedélye megtagadva."
+  Local Network: "Eszközök keresése a helyi hálózaton és videók átküldése rájuk, valamint a beállítások és adatok szinkronizálása az eszközök között."
+
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Kezdőlap"
+  subscriptions: "Feliratk."
+  userplaylists: "Listák"
+  history: "Előzmények"
+  subscribedchannels: "Csatornák"
+  trending: "Felkapott"
+  popular: "Népszerű"
+  stats: "Statiszt."
+  more: "Több"
+
+Installer:
+  Create Desktop Shortcut: Asztali parancsikon létrehozása
+Older Version Changes:
+  Title: "Módosítások egy régebbi verzióból"
+  Message: "Az OpenTubeX egy régebbi verziójában végzett módosításaid érvénybe léptek a könyvtáradban."
+  Detail: "Ha egy elem mindkét verzióban módosult, a régebbi verzió módosítása maradt meg. A korábbi könyvtárad biztonsági másolata a profilmappádban található."
+Library Format Changed:
+  Title: "A könyvtár új formátumba került"
+  Message: "A könyvtárad mostantól új tárolási formátumot használ."
+  Detail: "Az OpenTubeX régebbi verziói továbbra is meg tudják nyitni a könyvtáradat, de a frissítés előtti állapotában mutatják. A régebbi verzióban végzett módosítások bekerülnek, amikor visszatérsz ehhez a verzióhoz."
+Invidious Fallback Warning: "Ez a kérés megkerüli a beállított Invidious-példányt, és közvetlenül a YouTube-hoz csatlakozik, felfedve az IP-címedet."
+Automatically unloaded to free memory: "Automatikusan kiürítve memória felszabadításához"
+Home Widgets:
+  Continue Watching: "Megtekintés folytatása"
+  Continue Watching Description: "Folytasd az elkezdett videókat"
+  Continue Watching Empty: "Az elkezdett videók itt jelennek meg"
+  Quick Access: "Gyors elérés"
+  Quick Access Description: "Legfeljebb 4 választott oldal megnyitása"
+  Choose Pages: "Válassz legfeljebb 4 oldalt"
+  Pages: "Oldalak"
+  Search: "Keresés"
+  Subscriptions: "Feliratkozások"
+  Watch Later: "Megnézendő"
+  History: "Előzmények"
+  Playlists: "Listák"
+  Downloads: "Letöltések"
+  Watch Time: "Nézési idő"
+  Watch Time Description: "Nézési időd az elmúlt 7 napban"
+  Today: "Ma"
+  Last 7 Days: "Az elmúlt 7 nap"
+  Recent Downloads: "Legutóbbi letöltések"
+  Recent Downloads Description: "Játszd le a letöltött videókat"
+  Recent Downloads Empty: "A letöltött videók itt jelennek meg"
+Subscription Groups:
+  Groups: Csoportok
+  All: Összes
+  New Group: Új csoport
+  Edit Group: Csoport szerkesztése
+  Group Name: Csoportnév
+  Create: Létrehozás
+  Save: Mentés
+  Delete Group: Csoport törlése
+  Delete Prompt: Törli a(z) „{groupName}” csoportot? A csatornáira való feliratkozások megmaradnak.
+  Empty Group: Ebben a csoportban nincsenek csatornák a jelenlegi profilból.
+  Save Failed: Nem sikerült menteni a csoportot.
+  Delete Failed: Nem sikerült törölni a csoportot.
+  Group Icon: Csoportikon
+  No Icon: Nincs ikon
+Yattee Server:
+  API Error (Click to copy): Yattee-kiszolgáló hiba (Kattintson a másoláshoz)
+  Unsupported page: Ez az oldal nem érhető el a Yattee-kiszolgálóval. Kapcsolja be a(z) „{fallbackSetting}” beállítást, hogy a helyi API-val töltődjön be.
+  Posts unavailable: A Yattee-kiszolgálók nem biztosítanak bejegyzéseket. Kapcsolja be a(z) „{fallbackSetting}” beállítást, hogy a helyi API-val töltődjenek be.
+  Errors:
+    Invalid credentials: A Yattee-kiszolgáló elutasította a felhasználónevet vagy a jelszót. Ellenőrizze őket a Beállítások → Speciális menüben.
+    Rate limited: A Yattee-kiszolgáló túl sok sikertelen próbálkozás miatt blokkolja a bejelentkezéseket. Próbálja újra később.
+    Streams not relayed: A Yattee-kiszolgáló nem továbbította ennek a videónak az adatfolyamait. Amíg a videók a kiszolgálón keresztül érkeznek, az OpenTubeX nem kapcsolódik közvetlenül a YouTube-hoz.
+    Not configured: Adja meg Yattee-kiszolgálója URL-jét a Beállítások → Speciális menüben.
+    HTTPS required: Az Android csak HTTPS-t használó Yattee-kiszolgálókról tud videókat lejátszani.
+    Streams unavailable: A videó streamjeit nem sikerült betölteni a Yattee-kiszolgálóról. Ellenőrizze a kiszolgálót a Beállítások → Speciális menü „Kapcsolat tesztelése” gombjával.
+Yattee Fallback Warning: Ez a kérés megkerüli a beállított Yattee-kiszolgálót, és közvetlenül a YouTube-hoz csatlakozik, felfedve az IP-címét.
+Update With Package Manager: 'Frissítés a(z) {packageManager} segítségével:'
+Update Command Copied: 'Frissítési parancs másolva'
+Digital Wellbeing:
+  Watch time limit almost reached: "Még {duration} van hátra a napi nézési időkorlátjából"
+  Shorts limit almost reached: "Még {duration} van hátra a napi Shorts-korlátjából"
+  Daily watch time limit reached: "Elérte a napi nézési időkorlátot"
+  Daily Shorts limit reached: "Elérte a napi Shorts-korlátot"
+  Watched today: "Ma ennyi ideig nézett videókat: {duration}."
+  Shorts watched today: "Ma ennyi ideig nézett Shorts-videókat: {duration}."
+  15 More Minutes: "Még 15 perc"
+  Ignore for Today: "Figyelmen kívül hagyás mára"
+  Time to take a break: "Ideje szünetet tartani"
+  Watching for: "Már {duration} óta néz videókat."
+  Time for bed: "Ideje lefeküdni"
+  Bedtime started at: "A lefekvési ideje ekkor kezdődött: {time}."
+  Remind Me in 10 Minutes: "Emlékeztetés 10 perc múlva"
+Notification Center:
+  Notifications: "Értesítések"
+  Notifications With Unread: "Értesítések ({count} olvasatlan)"
+  Mark as Read: "Megjelölés olvasottként"
+  Mark All as Read: "Összes megjelölése olvasottként"
+  Clear All: "Összes törlése"
+  Clear: "Törlés"
+  Empty: "Még nincsenek értesítések"
+  Empty Hint: "Itt jelennek meg az élő közvetítések emlékeztetői és a bekapcsolt értesítésű csatornák új feltöltései."
+Platforms:
+  Tracks: Számok
+  Playlists: Lejátszási listák
+  Follower Count: 1 követő | {count} követő
+  Open Website: 'Megnyitás itt: {platform}'
+  Channel Not Found: Ez a csatorna nem található.
+  Playlist Not Found: Ez a lejátszási lista nem található.
+  Load Error: 'Ezt az oldalt nem sikerült betölteni innen: {platform}.'
+  Empty Tab: Itt még nincs semmi.
+YouTube Account:
+  Like: "Tetszik"
+  Dislike: "Nem tetszik"
+  Rating Failed: "Nem sikerült értékelni a YouTube-on: {error}"
+  Subscribe Failed: "Nem sikerült feliratkozni a YouTube-on: {error}"
+  Unsubscribe Failed: "Nem sikerült leiratkozni a YouTube-on: {error}"
+  Add a comment: "Hozzászólás írása"
+  Add a reply: "Válasz írása"
+  Switch Channel: "Csatornaváltás"
+  Comment: "Hozzászólás"
+  Reply: "Válasz"
+  Comment Posted: "Hozzászólás közzétéve"
+  Reply Posted: "Válasz közzétéve"
+  Comment Failed: "Nem sikerült közzétenni a hozzászólást: {error}"
+  Delete Comment: "Hozzászólás törlése"
+  Delete Comment Confirmation: "Törli a hozzászólását a YouTube-ról?"
+  Comment Deleted: "Hozzászólás törölve"
+  Delete Comment Failed: "Nem sikerült törölni a hozzászólást: {error}"
+  Edit Comment: "Hozzászólás szerkesztése"
+  Save: "Mentés"
+  Comment Edited: "Hozzászólás szerkesztve"
+  Edit Comment Failed: "Nem sikerült szerkeszteni a hozzászólást: {error}"
+  Recommendations: "YouTube-ajánlások"
+  Recommendations Failed: "Nem sikerült betölteni a YouTube-ajánlásait."
+  Subscriptions Synced: "Feliratkozások szinkronizálva a YouTube-ról: {added} hozzáadva, {removed} eltávolítva"
+  Playlist Update Failed: "Nem sikerült frissíteni a(z) {playlistName} listát a YouTube-on: {error}"

@@ -1,0 +1,316 @@
+import { historyRepairYtDlpArguments, historyRepairYtDlpError } from '../../historyRepair'
+import { registerPlugin } from '@capacitor/core'
+import { LocalNotifications } from '@capacitor/local-notifications'
+import { normalizeYtDlpPlaybackCacheMaxEntrySize } from '../../ytDlpPlaybackCacheSettings'
+import store from '../store/index'
+import { getDownloadTemplateOptions } from './downloadTemplates'
+import { normalizeAutomaticDownloadRule, parseAutomaticDownloadRules } from './automaticDownloadRules'
+import { buildYtDlpDownloadArguments, playbackSubtitleArguments } from '../../ytDlpArguments'
+import { EXTERNAL_PLAYBACK_FORMAT_SELECTOR, PLAYBACK_INFO_OUTPUT_TEMPLATE, EXTERNAL_PLAYBACK_INFO_OUTPUT_TEMPLATE, parseYtDlpPlaybackInfo, mapPlaybackFormat, mapPlaybackCaptions, getOriginalAudioLanguage, mapExternalPlaybackMetadata, toFiniteNumber, toNonEmptyString } from '../../ytDlpMetadata'
+import { buildYtDlpStoryboardVtt } from '../../main/ytDlpStoryboard'
+import { getTwitchCreatorUrl, resolveYtDlpCreatorAvatarUrl } from '../../main/ytDlpCreatorAvatar'
+import { appFetch } from './rssHub'
+import { isYouTubeSubtitleUrl } from '../../youtubeSubtitle'
+import { buildYtDlpSearchArguments, normalizeYtDlpSearchResults, completeYtDlpSearchPlaylists } from '../../ytDlpSearch'
+import { chooseAndroidDirectory } from './androidStorage'
+import { isLiteBuild } from './ytDlpCapabilities'
+
+const native = process.env.IS_CAPACITOR ? registerPlugin('YtDlp') : null
+
+function configuration() {
+  const rules = {}
+  let templates = []
+  try {
+    const parsed = JSON.parse(store.getters.getYtDlpDownloadTemplates || '[]')
+    if (Array.isArray(parsed)) templates = parsed.filter(template => template && typeof template === 'object')
+  } catch (error) { console.warn('Invalid download templates', error) }
+  for (const [channelId, rawRule] of Object.entries(parseAutomaticDownloadRules(store.getters.getYtDlpAutomaticDownloadRules))) {
+    if (!rawRule || typeof rawRule !== 'object') continue
+    const rule = normalizeAutomaticDownloadRule(rawRule)
+    const options = getDownloadTemplateOptions(rule.template, templates)
+    if (options === null || !/^UC[\w-]{22}$/.test(channelId)) continue
+    const payload = {
+      ...options,
+      ...rule,
+      videoId: '___________',
+      channelId,
+      automatic: true,
+      titleIncludes: rule.titleIncludes.split(',').map(term => term.trim()).filter(Boolean),
+      titleExcludes: rule.titleExcludes.split(',').map(term => term.trim()).filter(Boolean)
+    }
+    try {
+      rules[channelId] = { rule, payload, args: buildYtDlpDownloadArguments(payload, store.getters.getYtDlpDownloadCustomArgs).args }
+    } catch (error) { console.warn('Invalid automatic download options', error) }
+  }
+  return {
+    rules,
+    useCookies: (store.getters.getYtDlpPlaybackAlwaysUseCookies || store.getters.getYtDlpDownloadUseCookies) && store.getters.getYtDlpPlaybackAuthMode === 'file',
+    cookies: store.getters.getYtDlpPlaybackAuthMode === 'file' ? store.getters.getYtDlpPlaybackCookiesPath : '',
+    concurrency: store.getters.getYtDlpMaxConcurrentDownloads,
+    bandwidth: store.getters.getYtDlpDownloadBandwidthLimit,
+    folder: store.getters.getYtDlpDownloadFolderPath,
+    channel: store.getters.getYtDlpChannel,
+    enabled: store.getters.getEnableDownloads,
+    automaticRequireUnmetered: store.getters.getYtDlpAutomaticDownloadsRequireUnmetered,
+    automaticRequireCharging: store.getters.getYtDlpAutomaticDownloadsRequireCharging,
+  }
+}
+
+async function extract(args, useAuthentication = false, externalMedia = false, parse = JSON.parse, detectTimeoutWarnings = false, timeoutMs) {
+  const cookies = useAuthentication && store.getters.getYtDlpPlaybackAuthMode === 'file'
+    ? store.getters.getYtDlpPlaybackCookiesPath
+    : ''
+  if (useAuthentication && !cookies) throw new Error('yt-dlp playback authentication is not configured')
+  const { stdout, stderr, incomplete } = await native.extract({ args, cookies, externalMedia, detectTimeoutWarnings, ...(timeoutMs === undefined ? {} : { timeoutMs }) })
+  const info = detectTimeoutWarnings ? parse(stdout, stderr ?? '') : parse(stdout)
+  if (detectTimeoutWarnings) info.incomplete = incomplete === true
+  return info
+}
+
+function listen(event, callback) {
+  if (!native) return () => {}
+  const handle = native.addListener(event, callback)
+  return () => { handle.then(listener => listener.remove()) }
+}
+
+let removeSettingsProgressListener = null
+
+const capacitor = {
+  isBundledIosRuntime: !!process.env.IS_IOS,
+  ytDlpRegisterTwitchVod: urls => native.registerTwitchVod({ urls }),
+  ytDlpUnregisterTwitchVod: id => native.unregisterTwitchVod({ id }),
+  async ytDlpDownload(payload, retryDownloadId) {
+    try {
+      if (!store.getters.getEnableDownloads) return { error: 'downloads-disabled' }
+      if (!payload.automatic && !process.env.IS_IOS) {
+        const permission = await LocalNotifications.checkPermissions()
+        if (permission.display === 'prompt' || permission.display === 'prompt-with-rationale') await LocalNotifications.requestPermissions()
+      }
+      const { args } = buildYtDlpDownloadArguments(payload, store.getters.getYtDlpDownloadCustomArgs)
+      return await native.download({ payload, args, retryDownloadId, configuration: configuration() })
+    } catch (error) {
+      return { error: error.message }
+    }
+  },
+  ytDlpCancelDownload: id => native.control({ id, action: 'cancel' }).then(result => result.ok),
+  ytDlpControlDownload: (id, action, value) => native.control({ id, action, value }).then(result => result.ok),
+  ytDlpQueueAction: action => native.queue({ action, configuration: configuration() }).then(result => result.ok),
+  async ytDlpListDownloads() {
+    const { downloads } = await native.list()
+    // Downloads saved by the previous AVFoundation implementation only stored
+    // their payload. Rebuild their arguments with the shared parser on resume.
+    if (process.env.IS_IOS) {
+      const resumeArguments = {}
+      const failedResumeArguments = {}
+      for (const download of downloads) {
+        if (!download.args && download.retryPayload && download.status !== 'completed') {
+          try {
+            resumeArguments[download.id] = buildYtDlpDownloadArguments(download.retryPayload, store.getters.getYtDlpDownloadCustomArgs).args
+          } catch (error) {
+            console.warn('Could not restore download arguments', error)
+            if (['queued', 'paused'].includes(download.status)) failedResumeArguments[download.id] = error.message
+          }
+        }
+      }
+      if (Object.keys(resumeArguments).length > 0 || Object.keys(failedResumeArguments).length > 0) {
+        await native.configure({ configuration: configuration(), resumeArguments, failedResumeArguments })
+        return (await native.list()).downloads
+      }
+    }
+    return downloads
+  },
+  ytDlpClearDownloads: ids => native.clear({ ids }).then(result => result.ok),
+  ytDlpOpenDownload: id => native.open({ id }).then(result => result.ok),
+  ytDlpPlayDownload: (id, path) => native.play({ id, path }).then(result => result.ok),
+  ytDlpRemoveDownload: id => native.remove({ id }).then(result => result.ok),
+  handleYtDlpDownloadStatus: callback => listen('downloadStatus', callback),
+  handleYtDlpDownloadsRemoved: callback => listen('downloadsRemoved', result => callback(result.ids)),
+  // Saves the folder like the desktop picker, which writes it in the main process.
+  async ytDlpChooseDownloadFolder() {
+    const path = await chooseAndroidDirectory()
+    if (path) await store.dispatch('updateYtDlpDownloadFolderPath', path)
+    return path
+  },
+  async ytDlpChooseCookies() {
+    const { path } = await native.chooseCookies()
+    if (path) await store.dispatch('updateYtDlpPlaybackCookiesPath', path)
+    return path
+  },
+  ytDlpCreateSession: labels => native.createSession(labels).then(result => result.path),
+  ytDlpGetInfo: () => native.info(),
+  ytDlpCheckBinaryUpdate: binary => native.checkUpdate({ binary, channel: configuration().channel }),
+  ytDlpDownloadBinary: binary => native.update({ binary, channel: configuration().channel }),
+  setYtDlpBinaryDownloadProgressListener(callback) {
+    removeSettingsProgressListener?.()
+    removeSettingsProgressListener = callback ? listen('binaryProgress', callback) : null
+  },
+  handleYtDlpBinaryDownloadProgress: callback => listen('binaryProgress', callback),
+  addYtDlpBinaryDownloadProgressListener: callback => listen('binaryProgress', callback),
+  addYtDlpBinaryUpdatedListener: callback => listen('binaryUpdated', callback),
+  async ytDlpSearch(query, params = '', page = 1) {
+    try {
+      // The native runtime ignores config files and validates each argument;
+      // its allowlist accepts the fixed HTTPS target without a -- separator.
+      const args = buildYtDlpSearchArguments(query, params, page)
+        .filter(arg => arg !== '--ignore-config' && arg !== '--')
+      const response = normalizeYtDlpSearchResults(await extract(args, true), page)
+      const metadataDeadline = Date.now() + 10_000
+      response.results = await completeYtDlpSearchPlaylists(response.results, async (playlistId, signal) => {
+        const playlistArgs = args.slice(0, -1)
+        playlistArgs[playlistArgs.indexOf('--playlist-start') + 1] = '1'
+        playlistArgs[playlistArgs.indexOf('--playlist-end') + 1] = '1'
+        playlistArgs.push(`https://www.youtube.com/playlist?list=${playlistId}`)
+        // Include native queue time and interrupt the process at the remaining
+        // metadata deadline, as well as bounding the renderer's wait.
+        let onAbort
+        const aborted = new Promise((_resolve, reject) => {
+          onAbort = () => reject(signal.reason)
+        })
+        signal.addEventListener('abort', onAbort, { once: true })
+        try {
+          return await Promise.race([extract(playlistArgs, true, false, JSON.parse, false, Math.max(1, metadataDeadline - Date.now())), aborted])
+        } finally {
+          signal.removeEventListener('abort', onAbort)
+        }
+      })
+      return response
+    } catch {
+      return { error: 'Unable to search with configured cookies' }
+    }
+  },
+  async ytDlpGetSubtitle(url) {
+    if (!isYouTubeSubtitleUrl(url) || store.getters.getYtDlpPlaybackAuthMode !== 'file' ||
+      !store.getters.getYtDlpPlaybackCookiesPath) return null
+    try {
+      const result = await native.subtitle({ url, cookies: store.getters.getYtDlpPlaybackCookiesPath })
+      if (typeof result.text !== 'string') throw new Error('Invalid subtitle response')
+      return result.text
+    } catch {
+      return { error: 'Unable to load subtitle with configured cookies' }
+    }
+  },
+  async ytDlpGetHistoryMetadata(videoId) {
+    if (!/^[\w-]{11}$/.test(videoId)) return null
+    try {
+      return await extract([...historyRepairYtDlpArguments(), `https://www.youtube.com/watch?v=${videoId}`], true)
+    } catch (error) {
+      return historyRepairYtDlpError(error.message)
+    }
+  },
+  async ytDlpGetPlaybackInfo(videoId, useDefaultClients = false, useAuthentication = false, includeSubtitles = true, liveFromStart = false) {
+    const isYouTubeVideo = /^[\w-]{11}$/.test(videoId)
+    if (!isYouTubeVideo) {
+      try {
+        const url = new URL(videoId)
+        if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password || videoId.length > 8192) return null
+      } catch { return null }
+    }
+    try {
+      const args = ['--no-playlist', '--no-progress', '--socket-timeout', '15', '--ignore-no-formats-error', '--format', isYouTubeVideo ? 'sb0/sb1/sb2/sb3' : EXTERNAL_PLAYBACK_FORMAT_SELECTOR, '--print', isYouTubeVideo ? PLAYBACK_INFO_OUTPUT_TEMPLATE : EXTERNAL_PLAYBACK_INFO_OUTPUT_TEMPLATE]
+      if (includeSubtitles) args.push(...playbackSubtitleArguments(isYouTubeVideo))
+      if (isYouTubeVideo && liveFromStart) args.push('--live-from-start')
+      if (isYouTubeVideo && !useDefaultClients) args.push('--extractor-args', useAuthentication ? 'youtube:player_client=default,web_safari' : 'youtube:player_client=default,web_embedded,-android_vr')
+      args.push(isYouTubeVideo ? `https://www.youtube.com/watch?v=${videoId}` : videoId)
+      const [info, binaries] = await Promise.all([extract(args, useAuthentication, !isYouTubeVideo, parseYtDlpPlaybackInfo, true), native.info()])
+      const playbackCaptions = mapPlaybackCaptions(info.requested_subtitles, info.subtitles, !isYouTubeVideo, isYouTubeVideo ? getOriginalAudioLanguage(info.formats) : null)
+      let formats = Array.isArray(info.formats) ? info.formats : []
+      if (process.env.IS_IOS) {
+        // WebKit cannot fetch yt-dlp's media URLs through CORS, including
+        // YouTube's googlevideo streams. Use the native scheme for HTTP media.
+        if (!isYouTubeVideo) formats = formats.filter(format => format.protocol === 'https' && format.url)
+        const httpFormats = formats.filter(format => format.protocol === 'https' && format.url)
+        // Register the mapped captions, which can rebuild YouTube translation URLs,
+        // with the headers of the subtitle yt-dlp requested for the same URL
+        const requestedSubtitles = new Map(Object.values(info.requested_subtitles ?? {})
+          .filter(subtitle => subtitle?.url?.startsWith('https://'))
+          .map(subtitle => [new URL(subtitle.url).toString(), subtitle]))
+        const subtitles = [...playbackCaptions.captions, ...playbackCaptions.captionTranslations]
+          .filter(caption => caption.url.startsWith('https://'))
+          .map(caption => requestedSubtitles.get(caption.url) ?? { url: caption.url })
+        const requests = [...httpFormats, ...subtitles]
+        const { urls } = await native.registerMedia({ formats: requests })
+        const registeredUrls = new Map(requests.map((entry, index) => [new URL(entry.url).toString(), urls[index]]))
+        formats = formats.map(format => format.protocol === 'https' && format.url
+          ? { ...format, url: registeredUrls.get(new URL(format.url).toString()) ?? format.url }
+          : format)
+        for (const caption of [...playbackCaptions.captions, ...playbackCaptions.captionTranslations]) {
+          caption.url = registeredUrls.get(caption.url) ?? caption.url
+        }
+        if (!isYouTubeVideo) {
+          // External HLS segments may reject WebKit CORS requests, and this
+          // native proxy only covers registered progressive formats.
+          info.manifest_url = null
+          info.storyboard = null
+        }
+      }
+      // Like on desktop, creators of other sites get their profile link and avatar
+      const creatorAvatarUrl = isYouTubeVideo ? null : await resolveYtDlpCreatorAvatarUrl(info, appFetch)
+      return {
+        version: binaries.ytDlp.version,
+        incomplete: info.incomplete === true,
+        noFormatsReason: toNonEmptyString(info.noFormatsReason),
+        title: toNonEmptyString(info.title),
+        description: toNonEmptyString(info.description),
+        uploader: toNonEmptyString(info.uploader),
+        uploaderUrl: toNonEmptyString(info.uploader_url) ?? getTwitchCreatorUrl(info),
+        uploaderThumbnail: info.channel ? null : creatorAvatarUrl,
+        channel: toNonEmptyString(info.channel),
+        channelUrl: toNonEmptyString(info.channel_url) ?? getTwitchCreatorUrl(info),
+        channelThumbnail: info.channel ? creatorAvatarUrl : null,
+        thumbnail: toNonEmptyString(info.thumbnail),
+        webpageUrl: toNonEmptyString(info.webpage_url),
+        viewCount: toFiniteNumber(info.view_count),
+        uploadDate: toNonEmptyString(info.upload_date),
+        isLive: !!info.is_live,
+        liveStatus: toNonEmptyString(info.live_status),
+        duration: toFiniteNumber(info.duration),
+        externalMetadata: mapExternalPlaybackMetadata(info),
+        hlsManifestUrl: toNonEmptyString(info.manifest_url) ?? formats.find(format => format.protocol === 'm3u8_native' && format.manifest_url)?.manifest_url ?? null,
+        storyboardVtt: buildYtDlpStoryboardVtt([info.storyboard], toFiniteNumber(info.duration)),
+        ...playbackCaptions,
+        formats: formats.filter(format => format.protocol !== 'mhtml').map(mapPlaybackFormat),
+      }
+    } catch (error) {
+      return { error: error.message }
+    }
+  },
+  async ytDlpGetRecommendations(currentVideoId) {
+    try {
+      const info = await extract(['--flat-playlist', '--playlist-end', '30', '--dump-single-json', 'https://www.youtube.com/feed/recommended'], true)
+      return (info.entries ?? []).filter(entry => /^[\w-]{11}$/.test(entry.id) && entry.id !== currentVideoId).map(entry => ({
+        type: 'video',
+        videoId: entry.id,
+        title: entry.title || entry.id,
+        author: entry.channel || entry.uploader || '',
+        authorId: entry.channel_id || null,
+        viewCount: entry.view_count ?? null,
+        lengthSeconds: entry.duration ?? '',
+        liveNow: entry.live_status === 'is_live',
+        isUpcoming: entry.live_status === 'is_upcoming',
+      }))
+    } catch (error) { return { error: error.message } }
+  },
+  ytDlpPlaybackCacheGet: (videoId, cacheKey) => native.cache({ action: 'get', videoId, cacheKey }).then(result => result.entry ?? null),
+  ytDlpPlaybackCacheSet: (videoId, cacheKey, expiryTime, source) => native.cache({ action: 'set', videoId, cacheKey, expiryTime, source, maxEntryBytes: normalizeYtDlpPlaybackCacheMaxEntrySize(store.getters.getYtDlpPlaybackCacheMaxEntrySize) * 1024 * 1024 }),
+  ytDlpPlaybackCacheDelete: videoId => native.cache({ action: 'delete', videoId }),
+  ytDlpPlaybackCacheClear: () => native.cache({ action: 'clear' }),
+}
+
+/**
+ * Loads a Rumble page with the Chrome transport of the Android Rumble HTTP
+ * helper, as Rumble rejects the native HTTP client.
+ * @param {string} url
+ * @returns {Promise<{ status: number, text: string }>}
+ */
+export function fetchAndroidRumblePage(url) {
+  return native.fetchRumblePage({ url })
+}
+
+export function initializeCapacitorYtDlp() {
+  if (!native || isLiteBuild) return () => {}
+  return store.watch(() => JSON.stringify(configuration()), value => {
+    native.configure({ configuration: JSON.parse(value) }).catch(error => console.error('Could not configure mobile downloads', error))
+  }, { immediate: true })
+}
+
+export const ytDlp = process.env.IS_CAPACITOR ? capacitor : window.ftElectron

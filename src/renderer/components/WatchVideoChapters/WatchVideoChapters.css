@@ -1,88 +1,221 @@
-.videoChapters {
-  overflow-y: hidden;
-}
-
-.chaptersSummary {
-  margin-block: 10px 0;
-  cursor: pointer;
-  list-style: none;
-}
-
-.chaptersTitle {
-  margin-block: 0;
-}
-
-.currentChapter {
-  font-size: 15px;
+/* Positions the sync button over the scroll viewport rather than inside it. */
+.chaptersList {
+  display: flex;
+  position: relative;
+  flex: 1;
+  flex-direction: column;
+  min-block-size: 0;
 }
 
 .chaptersWrapper {
-  margin-block-start: 15px;
-  max-block-size: 250px;
-  overflow-y: scroll;
   display: flex;
+  flex: 1;
   flex-direction: column;
-  gap: 8px;
+  min-block-size: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  /* Light handle for the chapter overlay above the video. Watch.scss puts the
+     theme's colour back for the regular sidebar. */
+  --scrollbar-color: rgb(255 255 255 / 45%);
+  --scrollbar-color-hover: rgb(255 255 255 / 65%);
 }
 
-.chaptersWrapper.compact {
-  max-block-size: 200px;
-}
-
-.chaptersChevron {
-  vertical-align: middle;
-}
-
-.chaptersDetails[open] .chaptersChevron {
-  transform: translateX(4px) rotate(90deg);
-}
-
-.chaptersDetails[open]:dir(rtl) .chaptersChevron {
-  transform: translateX(-4px) rotate(90deg);
+.chaptersContent {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
 }
 
 .chapter {
-  display: grid;
-  grid-template:
-    'thumbnail title' 2fr
-    'thumbnail timestamp' 2fr / auto 1fr;
-  column-gap: 10px;
-  cursor: pointer;
-  font-size: 15px;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: stretch;
+  column-gap: 4px;
+  min-block-size: 74px;
+  padding-inline-end: 8px;
+  border-block-end: 1px solid rgb(255 255 255 / 6%);
+  background-color: rgb(20 20 20 / 38%);
+  transition: background-color var(--motion-default-effects);
 }
 
-.chaptersWrapper.compact .chapter {
-  display: flex;
-  flex-direction: row;
+.chapter.current {
+  background-color: rgb(255 255 255 / 14%);
+}
+
+.chapter:hover,
+.chapter:focus-within {
+  background-color: rgb(255 255 255 / 10%);
+}
+
+.chapter.current:hover,
+.chapter.current:focus-within {
+  background-color: rgb(255 255 255 / 18%);
+}
+
+.chapterSeek {
+  display: grid;
+  flex: 1;
+  grid-template-columns: 100px minmax(0, 1fr);
+  gap: 14px;
+  min-inline-size: 0;
+  padding-block: 8px;
+  padding-inline: 14px 8px;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  text-align: start;
+}
+
+.chaptersWrapper.compact .chapterSeek {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .chapterThumbnail {
-  grid-area: thumbnail;
-  inline-size: 130px;
-  margin: 3px;
+  display: block;
+  align-self: center;
+  inline-size: 100px;
+  border-radius: var(--shape-corner-small);
+  background-color: rgb(255 255 255 / 8%);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
-.chapter.current .chapterThumbnail {
-  border: solid 3px var(--accent-color);
-  margin: 0;
+.chapterInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  align-self: center;
+  gap: 8px;
+  min-inline-size: 0;
 }
 
 .chapterTitle {
-  grid-area: title;
-  align-self: center;
-  margin: 0;
+  overflow: hidden;
+  max-inline-size: 100%;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
 }
 
 .chapter.current .chapterTitle {
-  font-weight: bold;
+  font-weight: 700;
 }
 
 .chapterTimestamp {
-  grid-area: timestamp;
-  place-self: flex-start start;
-  padding-block: 3px;
-  padding-inline: 4px;
-  border-radius: 5px;
-  background-color: var(--accent-color);
-  color: var(--text-with-accent-color);
+  padding-block: 4px;
+  padding-inline: 6px;
+  border-radius: var(--shape-corner-extra-small);
+  background-color: rgb(36 76 119 / 88%);
+  color: #55b6ff;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.chapterAction {
+  display: grid;
+  flex: 0 0 40px;
+  place-items: center;
+  align-self: center;
+  block-size: 40px;
+  border: 0;
+  border-radius: var(--shape-corner-full);
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  font-size: 20px;
+  opacity: 0.9;
+  transition: background-color var(--motion-fast-effects);
+}
+
+/* Material 3 state layer: the icon color at low opacity. */
+.chapterAction:hover,
+.chapterAction:focus-visible {
+  background-color: color-mix(in srgb, currentcolor 10%, transparent);
+  opacity: 1;
+}
+
+.chapterAction:active {
+  background-color: color-mix(in srgb, currentcolor 16%, transparent);
+}
+
+/* A selected toggle keeps a tonal fill, like a Material 3 toggle icon button. */
+.loopChapter.active {
+  background-color: color-mix(in srgb, currentcolor 16%, transparent);
+  color: #55b6ff;
+  opacity: 1;
+}
+
+.loopChapter.active:hover,
+.loopChapter.active:focus-visible {
+  background-color: color-mix(in srgb, currentcolor 24%, transparent);
+}
+
+@media only screen and (width <= 680px) {
+  .chapterSeek {
+    grid-template-columns: 82px minmax(0, 1fr);
+    gap: 10px;
+    padding-inline-start: 10px;
+  }
+
+  .chapterThumbnail {
+    inline-size: 82px;
+  }
+}
+
+/* Brings a list scrolled by hand back to the current chapter. */
+.chaptersSync {
+  display: flex;
+  position: absolute;
+  inset-block-end: 12px;
+  inset-inline: 0;
+  align-items: center;
+  gap: 8px;
+  inline-size: fit-content;
+  max-inline-size: calc(100% - 24px);
+  min-block-size: 40px;
+  margin-inline: auto;
+  padding-block: 8px;
+  padding-inline: 16px 20px;
+  border: 0;
+  border-radius: var(--shape-corner-full);
+  background-color: #fff;
+  color: #0f0f0f;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 35%);
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.3;
+  text-align: start;
+  transition: background-color var(--motion-fast-effects);
+}
+
+.chaptersSync:hover,
+.chaptersSync:focus-visible {
+  background-color: color-mix(in srgb, currentcolor 8%, #fff);
+}
+
+.chaptersSync:active {
+  background-color: color-mix(in srgb, currentcolor 12%, #fff);
+}
+
+.chaptersSyncIcon {
+  flex: none;
+  font-size: 18px;
+}
+
+.chaptersSync-enter-active,
+.chaptersSync-leave-active {
+  transition: opacity var(--motion-fast-effects), translate var(--motion-fast-spatial);
+}
+
+.chaptersSync-enter-from,
+.chaptersSync-leave-to {
+  opacity: 0;
+  translate: 0 8px;
 }

@@ -1,0 +1,67 @@
+/* The groups and actions wrap as one row of chips. */
+.subscriptionGroupBar {
+  --material-tab-min-height: 36px;
+  --material-tab-padding-inline: 14px;
+  --material-tab-highlight-transition: opacity var(--motion-default-effects);
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  min-inline-size: 0;
+
+  /* Replaces the tab list's own stacking context for the selection highlight. */
+  isolation: isolate;
+}
+
+.groupTabs {
+  display: contents;
+}
+
+/* Filter chips: outlined at rest, a tonal fill when selected. */
+.groupTabs[role='tablist'] .groupTab[role='tab'] {
+  max-inline-size: min(16rem, 100%);
+  border: 1px solid var(--divider-color);
+  border-radius: var(--shape-corner-small);
+  transition:
+    background-color var(--motion-fast-effects),
+    border-color var(--motion-fast-effects),
+    color var(--motion-fast-effects),
+    border-radius var(--motion-fast-spatial);
+}
+
+.groupTabs[role='tablist'] .groupTab[role='tab']:active:not(:disabled) {
+  border-radius: var(--shape-corner-extra-small);
+}
+
+.groupTabs[role='tablist'] .groupTab[role='tab'][aria-selected='true'] {
+  border-color: transparent;
+  color: var(--primary-text-color);
+}
+
+.groupTabs[role='tablist'] .groupTab[role='tab']::before {
+  background: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
+}
+
+.groupName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.groupActions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.newGroupButton {
+  margin: 0;
+}
+
+@media (any-pointer: coarse) {
+  .groupAction :deep(.iconButton) {
+    min-inline-size: var(--phone-touch-target, 48px);
+    min-block-size: var(--phone-touch-target, 48px);
+  }
+}

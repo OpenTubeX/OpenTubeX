@@ -1,25 +1,22 @@
 name: Feature request
-description: Suggest an idea for FreeTube which you would like to see in a future release
-title: "[Feature Request]: "
+description: Suggest an idea for OpenTubeX which you would like to see in a future release
 type: Feature
 body:
   - type: markdown
     attributes:
       value: |
         **README: Before You Submit Your Issue**
-        - Issues are not a place to go ask support questions or start discussions. Please ask support questions or start discussions on the [discussions page](https://github.com/FreeTubeApp/FreeTube/discussions).
+        - Issues are not a place to go ask support questions or start discussions. Please ask support questions or start discussions on the [discussions page](https://github.com/OpenTubeX/OpenTubeX/discussions).
   - type: checkboxes
     attributes:
       label: Guidelines
       description: Please ensure you've completed all of the following.
       options:
-          - label: I have [searched the issue tracker for open and closed issues](https://github.com/FreeTubeApp/FreeTube/issues?q=is%3Aissue+sort%3Arelevance-desc) that are similar to the feature request I want to file, without success.
+          - label: I have [searched the issue tracker for open and closed issues](https://github.com/OpenTubeX/OpenTubeX/issues?q=is%3Aissue+sort%3Arelevance-desc) that are similar to the feature request I want to file, without success.
             required: true
-          - label: I have searched the [documentation](https://docs.freetubeapp.io/) for information that matches the description of the feature request I want to file, without success.
+          - label: I have searched the [documentation](https://opentubex.org/docs/) for information that matches the description of the feature request I want to file, without success.
             required: true
           - label: This issue contains only one feature request.
-            required: true
-          - label: I have read and agree to follow the [rules](https://docs.freetubeapp.io/community/rules/).
             required: true
   - type: textarea
     attributes:
@@ -57,53 +54,40 @@ body:
       required: true
   - type: input
     attributes:
-      label: FreeTube Version
+      label: OpenTubeX Version
       description: |
         If using releases, enter the version.
-        If using nightly builds, enter commit hash or build number, you can find it via about page in the FreeTube application.
-      placeholder: v0.14.0, 8c4278
+        If using nightly builds, enter commit hash or build number, you can find it via about page in the OpenTubeX application.
+      placeholder: v0.37.0, 8c4278
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Operating System
+      description: Which operating system does this issue concern?
+      multiple: true
+      options:
+        - Windows
+        - macOS
+        - Linux
+        - Android
+        - iOS
+        - iPadOS
+        - Other
     validations:
       required: true
   - type: input
     attributes:
       label: Operating System Version
-      description: What operating system version are you using? On Windows, click Start button > Settings > System > About. On macOS, click the Apple Menu > About This Mac. On Linux, use lsb_release or uname -a.
-      placeholder: "e.g. Windows 10 version 1909, macOS Catalina 10.15.7, or Ubuntu 20.04"
+      description: What operating system version are you using? On Windows, click Start button > Settings > System > About. On macOS, click the Apple Menu > About This Mac. On Linux, use lsb_release or uname -a. On Android, open Settings > About phone > Android version. On iOS or iPadOS, open Settings > General > About.
+      placeholder: "e.g. Windows 11 version 24H2, macOS Sequoia 15.7, Ubuntu 24.04, Android 15, iOS 18.6, or iPadOS 18.6"
     validations:
-      required: true
-  - type: dropdown
-    attributes:
-      label: Installation Method
-      description: If you are using an unofficial installation method, please verify that the requested feature is not already available in one of the official installation methods. If the feature only relates to an unofficial installation, please direct the request to the maintainer of that installation method instead.
-      options:
-        - .AppImage
-        - .deb
-        - .dmg
-        - .exe
-        - Flathub
-        - .pacman
-        - Portable
-        - .rpm
-        - .zip / .7z
-        - .apk (FreeTubeAndroid Unofficial)
-        - .apk (Alpine Linux Package Unofficial)
-        - AUR (Unofficial)
-        - Chocolatey (Unofficial)
-        - Homebrew (Unofficial)
-        - Nix (Unofficial)
-        - PortableApps (Unofficial)
-        - Scoop (Unofficial)
-        - Snapcraft (Unofficial)
-        - WAPT (Unofficial)
-        - winget (Unofficial)
-        - other
-    validations:
-      required: true
-  - type: upload
+      required: false
+  - type: textarea
     id: screenshots
     attributes:
-      label: Upload screenshots or videos
-      description: If applicable, add screenshots or videos to help explain your request.
+      label: Screenshots or videos
+      description: If applicable, drag and drop or paste screenshots or videos here to help explain your request.
     validations:
       required: false
   - type: textarea

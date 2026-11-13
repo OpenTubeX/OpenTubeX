@@ -1,9 +1,12 @@
 import { spawn } from 'node:child_process'
 import { join } from 'node:path'
 import { readFile } from 'node:fs/promises'
+import { BrowserWindow, dialog } from 'electron'
 import { settings } from '../datastores/handlers/base'
-import { isFreeTubeUrl } from './utils'
-import { IpcChannels, UnsupportedPlayerActions } from '../constants'
+import { createMainTranslator } from './mainTranslator'
+import { EXTERNAL_PLAYER_APPROVED_ARGS_SETTING } from './settingWriteGuard'
+import { isOpenTubeXUrl } from './utils'
+import { UnsupportedPlayerActions } from '../constants'
 
 /**
  * @typedef ExternalPlayerPayload
@@ -37,19 +40,28 @@ const ID_REGEX = /^[\w-]+$/
 const externalPlayerCmdArgs = new Map()
 
 /**
- * @param {import('electron').IpcMainEvent} event
+ * @typedef ExternalPlayerResult
+ * @property {string} externalPlayer
+ * @property {import('../constants').UnsupportedPlayerAction[]} unsupportedActions
+ * @property {boolean} isPlaylist
+ * @property {'opened' | 'failed' | 'cancelled'} status
+ */
+
+/**
+ * @param {import('electron').IpcMainInvokeEvent} event
  * @param {ExternalPlayerPayload} payload
+ * @returns {Promise<ExternalPlayerResult | null>} null when nothing was requested
  */
 export async function handleOpenInExternalPlayer(event, payload) {
-  if (!isFreeTubeUrl(event.senderFrame.url) || !event.sender.isFocused()) {
-    return
+  if (!isOpenTubeXUrl(event.senderFrame?.url) || !event.sender.isFocused()) {
+    return null
   }
 
   const hasValidVideoId = typeof payload.videoId === 'string' && payload.videoId.length === 11 && ID_REGEX.test(payload.videoId)
   const hasValidPlaylistId = typeof payload.playlistId === 'string' && payload.playlistId.length > 2 && ID_REGEX.test(payload.playlistId)
 
   if (!hasValidVideoId && !hasValidPlaylistId) {
-    return
+    return null
   }
 
   /** @type {string} */
@@ -57,7 +69,7 @@ export async function handleOpenInExternalPlayer(event, payload) {
 
   // External player setting not set or set to "none"
   if (externalPlayer === '') {
-    return
+    return null
   }
 
   if (externalPlayerCmdArgs.size === 0) {
@@ -67,7 +79,7 @@ export async function handleOpenInExternalPlayer(event, payload) {
   const cmdArgs = externalPlayerCmdArgs.get(externalPlayer)
 
   if (cmdArgs === undefined) {
-    return
+    return null
   }
 
   const args = []
@@ -80,11 +92,14 @@ export async function handleOpenInExternalPlayer(event, payload) {
   /** @type {boolean} */
   const ignoreDefaultArgs = (await settings._findOne('externalPlayerIgnoreDefaultArgs'))?.value || false
 
-  /** @type {string[] | string} */
-  const customArgs = (await settings._findOne('externalPlayerCustomArgs'))?.value || '[]'
+  const customArgs = parseCustomArguments((await settings._findOne('externalPlayerCustomArgs'))?.value)
+  if (customArgs === null) {
+    console.error('Invalid external player arguments')
+    return null
+  }
 
-  if (typeof customArgs === 'string' && customArgs !== '[]') {
-    args.push(...JSON.parse(customArgs))
+  if (customArgs.length > 0) {
+    args.push(...customArgs)
   } else if (!ignoreDefaultArgs && Array.isArray(cmdArgs.defaultCustomArguments)) {
     args.push(...cmdArgs.defaultCustomArguments)
   }
@@ -178,20 +193,90 @@ export async function handleOpenInExternalPlayer(event, payload) {
     }
   }
 
-  event.reply(
-    IpcChannels.OPEN_IN_EXTERNAL_PLAYER_RESULT,
-    externalPlayer,
-    unsupportedActions,
-    hasValidPlaylistId
-  )
-
   /** @type {string} */
   const externalPlayerExecutable = (await settings._findOne('externalPlayerExecutable'))?.value || ''
 
   const executable = externalPlayerExecutable.length > 0 ? externalPlayerExecutable : cmdArgs.defaultExecutable
 
-  const child = spawn(executable, args, { detached: true, stdio: 'ignore' })
-  child.unref()
+  if (!await confirmCustomArguments(event.sender, externalPlayer, executable, customArgs)) {
+    return { externalPlayer, unsupportedActions: [], isPlaylist: hasValidPlaylistId, status: 'cancelled' }
+  }
+
+  let launchFailed = false
+  try {
+    const child = spawn(executable, args, { detached: true, stdio: 'ignore' })
+    // Without an error listener, a missing executable crashes the main process
+    await new Promise((resolve, reject) => {
+      child.once('spawn', resolve)
+      child.once('error', reject)
+    })
+    child.unref()
+  } catch (error) {
+    console.error('Could not start the external player', error)
+    launchFailed = true
+  }
+
+  return { externalPlayer, unsupportedActions, isPlaylist: hasValidPlaylistId, status: launchFailed ? 'failed' : 'opened' }
+}
+
+/**
+ * @param {unknown} value the stored JSON array of arguments
+ * @returns {string[] | null} null when the value is not a list of strings
+ */
+function parseCustomArguments(value) {
+  if (value == null || value === '') return []
+  try {
+    const parsed = typeof value === 'string' ? JSON.parse(value) : value
+    return Array.isArray(parsed) && parsed.every(argument => typeof argument === 'string') ? parsed : null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * The value the user approves: custom arguments can run code or write files
+ * through some players, and the renderer can change them, so a native
+ * dialog in this process asks before they are first used with a player and program.
+ * @param {string} externalPlayer
+ * @param {string} executable
+ * @param {string[]} customArgs
+ */
+function customArgumentsApprovalKey(externalPlayer, executable, customArgs) {
+  return JSON.stringify([externalPlayer, executable, customArgs])
+}
+
+/**
+ * @param {import('electron').WebContents} webContents
+ * @param {string} externalPlayer
+ * @param {string} executable
+ * @param {string[]} customArgs
+ * @returns {Promise<boolean>}
+ */
+async function confirmCustomArguments(webContents, externalPlayer, executable, customArgs) {
+  if (customArgs.length === 0) return true
+
+  const approvalKey = customArgumentsApprovalKey(externalPlayer, executable, customArgs)
+  if ((await settings._findOne(EXTERNAL_PLAYER_APPROVED_ARGS_SETTING))?.value === approvalKey) return true
+
+  const t = await createMainTranslator()
+  const window = webContents.isDestroyed() ? null : BrowserWindow.fromWebContents(webContents)
+  /** @type {import('electron').MessageBoxOptions} */
+  const options = {
+    type: 'warning',
+    title: t('Video.External Player.Confirm Arguments Title'),
+    message: t('Video.External Player.Confirm Arguments Message', { externalPlayer }),
+    // JSON quotes show spaces and empty arguments exactly as they are passed.
+    detail: `${executable}\n${customArgs.map(argument => JSON.stringify(argument)).join('\n')}\n\n${t('Video.External Player.Confirm Arguments Warning')}`,
+    buttons: [t('Cancel'), t('Video.External Player.Run')],
+    defaultId: 0,
+    cancelId: 0,
+    noLink: true
+  }
+  const { response } = window ? await dialog.showMessageBox(window, options) : await dialog.showMessageBox(options)
+  if (response !== 1) return false
+
+  await settings.upsert(EXTERNAL_PLAYER_APPROVED_ARGS_SETTING, approvalKey)
+  return true
 }
 
 async function loadExternalPlayerData() {

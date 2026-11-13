@@ -1,30 +1,41 @@
 <!DOCTYPE html>
-<html>
+<!-- Desktop and web replace the native page scrollbar with a drawn overlay one.
+     Capacitor keeps Android's native page scrollbar. -->
+<html<% if (!process.env.IS_CAPACITOR) { %> data-overlayscrollbars-initialize<% } %>>
 
   <head>
     <meta charset="utf-8" />
+    <!-- Electron's app:// handler sends this policy with frame-ancestors as a header. -->
+    <meta http-equiv="Content-Security-Policy"
+          content="object-src 'none'; base-uri 'self'; form-action 'none'" />
     <meta name="viewport"
-          content="width=device-width, initial-scale=1.0" />
-    <% if (!process.env.IS_ELECTRON) { %>
+          content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <% if (!process.env.IS_ELECTRON && !process.env.IS_CAPACITOR) { %>
     <link rel="manifest" href="static/manifest.json" />
+    <!-- Keeps the server's address from other services, like SponsorBlock -->
+    <meta name="referrer" content="no-referrer" />
     <% } %>
     <title></title>
+    <% if (typeof startupSplash !== 'undefined') { %>
+    <style><%= startupSplash.styles %></style>
+    <!-- Before the injected stylesheet, which a later script would wait for -->
+    <script><%= startupSplash.script %></script>
+    <% } %>
   </head>
 
   <body>
-    <div id="app"></div>
-    <% if (process.env.IS_ELECTRON) { %>
-    <iframe
-      id="sigFrame"
-      src="<%= sigFrameSrc %>"
-      csp="default-src 'none'; script-src '<%= sigFrameCspHash %>' 'unsafe-eval'"
-      sandbox="allow-scripts"
-      height="1"
-      width="1"
-      style="display: none; pointer-events: none"
-      tabindex="-1"
-    ></iframe>
-    <% } else { %>
+    <div id="app"<% if (typeof startupSplash !== 'undefined') { %> inert<% } %>></div>
+    <% if (typeof startupSplash !== 'undefined') { %>
+    <div id="startup-splash" class="startupSplash" role="status" aria-label="OpenTubeX" aria-busy="true">
+      <div class="startupShape" aria-hidden="true"><%= startupSplash.logo %></div>
+      <div class="startupProgress" aria-hidden="true"><div class="startupIndicator"><span><svg class="startupWave" width="120" height="12"><path d="M-6 6Q0 0 6 6T18 6T30 6T42 6T54 6T66 6T78 6T90 6T102 6T114 6T126 6"/></svg></span></div></div>
+    </div>
+    <% } %>
+    <% if (typeof selfHosted !== 'undefined' && selfHosted) { %>
+    <!-- The server's settings, which the app reads when it starts -->
+    <script src="self-hosted.js"></script>
+    <% } %>
+    <% if (!process.env.IS_ELECTRON && !process.env.IS_CAPACITOR) { %>
     <script>
     // This is the service worker with the Advanced caching
 
@@ -32,22 +43,18 @@
 
     // Check compatibility for the browser we're running this in
     if ("serviceWorker" in navigator) {
-      if (navigator.serviceWorker.controller) {
-        console.log("[PWA Builder] active service worker found, no need to register");
-      } else {
-        // Register the service worker
-        navigator.serviceWorker
-          .register("pwabuilder-sw.js", {
-            scope: "./"
-          })
-          .then(function (reg) {
-            console.log("[PWA Builder] Service worker has been registered for scope: " + reg.scope);
-          });
-      }
+      // Each build registers its own worker version, which replaces the previous build's cache
+      navigator.serviceWorker
+        .register("pwabuilder-sw.js?v=<%= compilation.hash %>", {
+          scope: "./"
+        })
+        .then(function (reg) {
+          console.log("[PWA Builder] Service worker has been registered for scope: " + reg.scope);
+        });
     }
     </script>
     <% } %>
-    <!-- webpack builds are automatically injected -->
+    <!-- Rspack builds are automatically injected -->
   </body>
 
 </html>

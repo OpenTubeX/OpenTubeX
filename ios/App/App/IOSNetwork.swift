@@ -1,0 +1,298 @@
+import Capacitor
+import WebKit
+
+// URLSession owns media transfers. Response bytes stream into WebKit's scheme
+// handler instead of being copied through the Capacitor JSON bridge.
+final class IOSNetwork: NSObject, URLSessionDataDelegate {
+    static let shared = IOSNetwork()
+    static func isMediaURL(_ url: URL) -> Bool {
+        guard url.scheme == "https", let host = url.host?.lowercased(), url.user == nil, url.password == nil else { return false }
+        return host == "googlevideo.com" || host.hasSuffix(".googlevideo.com")
+    }
+    private var prepared: [String: URLRequest] = [:]
+    private var external: [String: URLRequest] = [:]
+    private var externalOwners: [String: Set<String>] = [:]
+    private var expiredExternal = Set<String>()
+    private var transfers: [ObjectIdentifier: WKURLSchemeTask] = [:]
+    private var tasks: [ObjectIdentifier: URLSessionDataTask] = [:]
+    private lazy var session: URLSession = {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.timeoutIntervalForRequest = 30
+        configuration.timeoutIntervalForResource = 120
+        return URLSession(configuration: configuration, delegate: self, delegateQueue: .main)
+    }()
+
+    // A media response can remain active for the duration of a long video.
+    // Keep the idle timeout, but use URLSession's default resource lifetime.
+    private lazy var mediaSession: URLSession = {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.timeoutIntervalForRequest = 30
+        return URLSession(configuration: configuration, delegate: self, delegateQueue: .main)
+    }()
+
+    func prepare(_ request: URLRequest) -> String {
+        let id = UUID().uuidString
+        prepared[id] = request
+        DispatchQueue.main.asyncAfter(deadline: .now() + 30) { [weak self] in
+            self?.prepared.removeValue(forKey: id)
+        }
+        return id
+    }
+
+    func prepareExternal(_ request: URLRequest) -> String {
+        let id = UUID().uuidString
+        external[id] = request
+        DispatchQueue.main.asyncAfter(deadline: .now() + 7200) { [weak self] in
+            self?.expireExternal(id)
+        }
+        return id
+    }
+
+    func expireExternal(_ id: String) {
+        guard external[id] != nil else { return }
+        expiredExternal.insert(id)
+        removeExpiredExternal(id)
+    }
+
+    // A displayed source or casting control can outlive the cache's two-hour
+    // expiry. Keep its original URL and headers until all owners release it.
+    func retainMediaRequests(owner: String, urls: [URL]) {
+        let previous = externalOwners[owner] ?? []
+        let ids = Set(urls.compactMap { registeredMediaRequest($0) == nil ? nil : $0.lastPathComponent })
+        if ids.isEmpty { externalOwners.removeValue(forKey: owner) }
+        else { externalOwners[owner] = ids }
+        for id in previous.subtracting(ids) { removeExpiredExternal(id) }
+    }
+
+    private func removeExpiredExternal(_ id: String) {
+        if expiredExternal.contains(id) && !externalOwners.values.contains(where: { $0.contains(id) }) {
+            external.removeValue(forKey: id)
+            expiredExternal.remove(id)
+        }
+    }
+
+    // Accessed on the main queue, like registration and the WebKit scheme handler.
+    func registeredMediaRequest(_ url: URL) -> URLRequest? {
+        let id = url.lastPathComponent
+        guard url.scheme == "capacitor", url.host == "localhost", url.query == nil,
+              url.path == "/_opentubex_media/\(id)" else { return nil }
+        return external[id]
+    }
+
+    func abort(_ id: String) {
+        prepared.removeValue(forKey: id)
+        for task in Array(tasks.values) where task.taskDescription == id {
+            if let target = transfers.removeValue(forKey: ObjectIdentifier(task)) {
+                tasks.removeValue(forKey: ObjectIdentifier(target))
+                target.didFailWithError(URLError(.cancelled))
+            }
+            task.cancel()
+        }
+    }
+
+    func start(_ target: WKURLSchemeTask) {
+        guard let id = target.request.url?.lastPathComponent,
+              var request = prepared.removeValue(forKey: id) ?? external[id] else {
+            target.didFailWithError(URLError(.resourceUnavailable))
+            return
+        }
+        if external[id] != nil, let range = target.request.value(forHTTPHeaderField: "Range") {
+            request.setValue(range, forHTTPHeaderField: "Range")
+        }
+        let task = (external[id] == nil ? session : mediaSession).dataTask(with: request)
+        task.taskDescription = external[id] == nil ? id : "media:\(id)"
+        transfers[ObjectIdentifier(task)] = target
+        tasks[ObjectIdentifier(target)] = task
+        task.resume()
+    }
+
+    func stop(_ target: WKURLSchemeTask) {
+        guard let task = tasks.removeValue(forKey: ObjectIdentifier(target)) else { return }
+        transfers.removeValue(forKey: ObjectIdentifier(task))
+        task.cancel()
+    }
+
+    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask,
+                    didReceive response: URLResponse,
+                    completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
+        guard let target = transfers[ObjectIdentifier(dataTask)], let url = target.request.url,
+              let http = response as? HTTPURLResponse else {
+            completionHandler(.cancel)
+            return
+        }
+        var headers = [String: String]()
+        for (key, value) in http.allHeaderFields { headers[String(describing: key)] = String(describing: value) }
+        // SABR may be decompressed by URLSession. External media requests use
+        // identity encoding so their original byte length and ranges survive.
+        let removed = dataTask.taskDescription?.hasPrefix("media:") == true
+            ? ["content-encoding", "transfer-encoding"]
+            : ["content-encoding", "content-length", "transfer-encoding"]
+        headers = headers.filter { !removed.contains($0.key.lowercased()) }
+        headers["Cache-Control"] = "no-store"
+        headers["X-OpenTubeX-Media-URL"] = response.url?.absoluteString
+        if let result = HTTPURLResponse(url: url, statusCode: http.statusCode, httpVersion: "HTTP/1.1", headerFields: headers) {
+            target.didReceive(result)
+            completionHandler(.allow)
+        } else { completionHandler(.cancel) }
+    }
+
+    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
+        transfers[ObjectIdentifier(dataTask)]?.didReceive(data)
+    }
+
+    func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
+                    newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
+        let externalMedia = task.taskDescription?.hasPrefix("media:") == true
+        let allowed = request.url.map { url in
+            externalMedia
+                ? url.scheme == "https" && url.user == nil && url.password == nil
+                : Self.isMediaURL(url)
+        } == true
+        completionHandler(allowed ? request : nil)
+    }
+
+    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        guard let target = transfers.removeValue(forKey: ObjectIdentifier(task)) else { return }
+        tasks.removeValue(forKey: ObjectIdentifier(target))
+        if let error = error { target.didFailWithError(error) } else { target.didFinish() }
+    }
+}
+
+final class IOSAssetHandler: NSObject, WKURLSchemeHandler {
+    private let assets: WKURLSchemeHandler
+    init(assets: WKURLSchemeHandler) { self.assets = assets }
+    private func isTransfer(_ task: WKURLSchemeTask) -> Bool {
+        task.request.url?.path.hasPrefix("/_opentubex_sabr/") == true ||
+            task.request.url?.path.hasPrefix("/_opentubex_media/") == true
+    }
+    func webView(_ webView: WKWebView, start task: WKURLSchemeTask) {
+        if isTransfer(task) { IOSNetwork.shared.start(task) } else { assets.webView(webView, start: task) }
+    }
+    func webView(_ webView: WKWebView, stop task: WKURLSchemeTask) {
+        if isTransfer(task) { IOSNetwork.shared.stop(task) } else { assets.webView(webView, stop: task) }
+    }
+}
+
+@objc(SabrHttpPlugin)
+public class SabrHttpPlugin: CAPPlugin, CAPBridgedPlugin {
+    public let identifier = "SabrHttpPlugin"
+    public let jsName = "SabrHttp"
+    public let pluginMethods: [CAPPluginMethod] = [CAPPluginMethod(name: "prepare", returnType: CAPPluginReturnPromise),
+                                CAPPluginMethod(name: "abort", returnType: CAPPluginReturnPromise)]
+
+    @objc func prepare(_ call: CAPPluginCall) {
+        let method = call.getString("method") ?? "POST"
+        guard let raw = call.getString("url"), let url = URL(string: raw), IOSNetwork.isMediaURL(url),
+              ["POST", "GET", "HEAD"].contains(method) else {
+            call.reject("Invalid SABR request")
+            return
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = method
+        if method == "POST" {
+            guard let body = call.getString("body"), let data = Data(base64Encoded: body), data.count <= 1024 * 1024 else {
+                call.reject("Invalid SABR request")
+                return
+            }
+            request.httpBody = data
+        }
+        if let headers = call.getObject("headers") as? [String: String] {
+            for (name, value) in headers { request.setValue(value, forHTTPHeaderField: name) }
+        }
+        DispatchQueue.main.async { call.resolve(["requestId": IOSNetwork.shared.prepare(request)]) }
+    }
+
+    @objc func abort(_ call: CAPPluginCall) {
+        DispatchQueue.main.async {
+            if let id = call.getString("requestId") { IOSNetwork.shared.abort(id) }
+            call.resolve()
+        }
+    }
+}
+
+
+// Small API requests need native cancellation too. Keep Capacitor's request and
+// response semantics, but retain each task until it finishes or is cancelled.
+@objc(IOSHttpPlugin)
+public class IOSHttpPlugin: CAPPlugin, CAPBridgedPlugin {
+    public let identifier = "IOSHttpPlugin"
+    public let jsName = "IOSHttp"
+    public let pluginMethods: [CAPPluginMethod] = ["request", "abort"].map {
+        CAPPluginMethod(name: $0, returnType: CAPPluginReturnPromise)
+    }
+    private var tasks: [String: URLSessionDataTask] = [:]
+
+    @objc func request(_ call: CAPPluginCall) {
+        DispatchQueue.main.async {
+            guard let id = call.getString("requestId"), !id.isEmpty, self.tasks[id] == nil,
+                  let raw = call.getString("url"), let url = URL(string: raw),
+                  ["https", "http"].contains(url.scheme), url.host != nil else {
+                call.reject("Invalid API request")
+                return
+            }
+            let request = CapacitorUrlRequest(url, method: call.getString("method") ?? "GET")
+            request.setRequestHeaders(call.getObject("headers") ?? [:])
+            request.setTimeout((call.getDouble("connectTimeout") ?? 30_000) / 1000)
+            do {
+                if let data = call.getString("data") { try request.setRequestBody(data) }
+            } catch {
+                call.reject(error.localizedDescription)
+                return
+            }
+            // Each request owns its session so completion never invalidates
+            // other concurrent API requests. Keep them stateless like desktop:
+            // once YouTube recognizes a visitor it serves preroll ads, which
+            // SABR enforces as long backoffs. Without a cache, every response
+            // also proves to the renderer that the network is reachable.
+            let configuration = URLSessionConfiguration.ephemeral
+            configuration.urlCache = nil
+            configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
+            let session = URLSession(configuration: configuration,
+                                     delegate: call.getBool("disableRedirects") == true ? request : nil,
+                                     delegateQueue: nil)
+            let task = session.dataTask(with: request.getUrlRequest()) { [weak self] data, response, error in
+                session.finishTasksAndInvalidate()
+                DispatchQueue.main.async {
+                    self?.tasks.removeValue(forKey: id)
+                    if let error {
+                        // Prefix connection failures like fetch does, so JavaScript
+                        // waits to reconnect whatever the device language.
+                        let message = error.localizedDescription
+                        call.reject(isConnectionFailure(error) ? "Failed to fetch: \(message)" : message,
+                                    (error as NSError).domain, error)
+                    } else if let response = response as? HTTPURLResponse {
+                        call.resolve(HttpRequestHandler.buildResponse(data, response,
+                            responseType: ResponseType(string: call.getString("responseType"))))
+                    } else {
+                        call.reject("Missing HTTP response")
+                    }
+                }
+            }
+            self.tasks[id] = task
+            task.resume()
+        }
+    }
+
+    @objc func abort(_ call: CAPPluginCall) {
+        DispatchQueue.main.async {
+            if let id = call.getString("requestId") { self.tasks[id]?.cancel() }
+            call.resolve()
+        }
+    }
+
+    deinit {
+        for task in tasks.values { task.cancel() }
+    }
+}
+
+private let connectionFailures: Set<URLError.Code> = [
+    .timedOut, .cannotFindHost, .cannotConnectToHost, .dnsLookupFailed, .networkConnectionLost,
+    .notConnectedToInternet, .internationalRoamingOff, .callIsActive, .dataNotAllowed,
+]
+
+/// Whether a request failed to reach its server, so retrying after reconnecting can succeed.
+/// URLSession localizes its descriptions, so native bridges classify errors by code.
+func isConnectionFailure(_ error: Error) -> Bool {
+    guard let code = (error as? URLError)?.code else { return false }
+    return connectionFailures.contains(code)
+}

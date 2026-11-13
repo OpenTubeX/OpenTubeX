@@ -1,0 +1,147 @@
+/* Layout-specific grids and scrolling remain with the owning view. */
+:where(.materialTabs) {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  user-select: none;
+  isolation: isolate;
+  gap: 6px;
+}
+
+/* Shared in-page tabs. Browser tabs and tab preview cards keep their own layout. */
+.materialTabs[role='tablist'] :deep([role='tab']) {
+  appearance: none;
+  border: 0;
+  padding-block: 8px;
+  padding-inline: var(--material-tab-padding-inline, 16px);
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-block-size: var(--material-tab-min-height, 40px);
+  border-radius: calc(24px * var(--ui-roundness));
+  background: transparent;
+  color: var(--secondary-text-color);
+  font-family: inherit;
+  font-size: var(--material-tab-font-size, inherit);
+  font-weight: 500;
+  line-height: 1.25;
+  text-align: center;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    background-color var(--motion-fast-effects),
+    color var(--motion-fast-effects),
+    border-radius var(--motion-fast-spatial);
+
+  /* Where light-dark() and relative colors are missing (iOS before 17.5), the
+     tint uses the main color and the label the theme's text color, which stays
+     readable on it. */
+  --material-tab-tint-color: var(--primary-color);
+  --material-tab-selected-color: var(--primary-text-color);
+}
+
+/* Tests the same nesting as the colors below, which older WebKit parses only in part */
+@supports (color: light-dark(rgb(from oklch(from red max(l, 0.7) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255)), red)) {
+  .materialTabs[role='tablist'] :deep([role='tab']) {
+    /* light-dark() follows the theme. Selected labels keep the primary hue at a
+       clamped lightness, opposite their tint, to reach 4.5:1 on every theme
+       surface and main color. */
+    color-scheme: var(--native-color-scheme);
+
+    --material-tab-tint-color: light-dark(
+      rgb(from oklch(from var(--primary-color) max(l, 0.7) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255)),
+      rgb(from oklch(from var(--primary-color) min(l, 0.4) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255))
+    );
+    --material-tab-selected-color: light-dark(
+      rgb(from oklch(from var(--primary-color) min(l, 0.4) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255)),
+      rgb(from oklch(from var(--primary-color) max(l, 0.9) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255))
+    );
+  }
+}
+
+.materialTabs[role='tablist'] :deep([role='tab'][aria-selected='true']) {
+  color: var(--material-tab-selected-color);
+}
+
+.materialTabs[role='tablist'] :deep([role='tab']:focus-visible) {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -3px;
+}
+
+.materialTabs[role='tablist'] :deep([role='tab']:disabled) {
+  cursor: default;
+}
+
+.materialTabs[role='tablist'] :deep([role='tab']:hover:not(:disabled)) {
+  background: color-mix(in srgb, var(--primary-text-color) 8%, transparent);
+}
+
+.materialTabs[role='tablist'] :deep([role='tab']:active:not(:disabled)) {
+  border-radius: var(--shape-corner-medium);
+  background: color-mix(in srgb, var(--primary-text-color) 12%, transparent);
+}
+
+.materialTabs[role='tablist'] :deep([role='tab'][aria-selected='true']:hover:not(:disabled)),
+.materialTabs[role='tablist'] :deep([role='tab'][aria-selected='true']:active:not(:disabled)) {
+  background: color-mix(in srgb, var(--material-tab-tint-color) 8%, transparent);
+}
+
+.materialTabs[role='tablist'] :deep([role='tab'] .ft-icon) {
+  flex-shrink: 0;
+  color: var(--primary-color);
+}
+
+.materialTabs[role='tablist'] :deep([role='tab'][aria-selected='true'] .ft-icon) {
+  color: inherit;
+}
+
+/* Compact, mutually exclusive choices share one outline and internal dividers. */
+.materialTabs.segmented {
+  gap: 0;
+  border: 1px solid var(--divider-color);
+  border-radius: calc(24px * var(--ui-roundness));
+  overflow: clip;
+}
+
+.materialTabs.segmented[role='tablist'] :deep([role='tab']),
+.materialTabs.segmented[role='tablist'] :deep([role='tab']:active:not(:disabled)) {
+  border-radius: 0;
+}
+
+.materialTabs.segmented[role='tablist'] :deep([role='tab'] + [role='tab']) {
+  border-inline-start: 1px solid var(--divider-color);
+}
+
+/* Selection fades in place while the pill springs open from its center.
+   Mounting or revealing a page needs no entrance. */
+.materialTabs[role='tablist'] :deep([role='tab']::before) {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: -1;
+  background: color-mix(in srgb, var(--material-tab-tint-color) 20%, transparent);
+  opacity: 0;
+  scale: 0.6 1;
+  transition: var(--material-tab-highlight-transition, opacity var(--motion-default-effects), scale var(--motion-default-spatial));
+}
+
+.materialTabs[role='tablist'] :deep([role='tab'][aria-selected='true']::before) {
+  opacity: 1;
+  scale: none;
+}
+
+/* Segments fill their whole cell, so their highlight only fades. */
+.materialTabs.segmented[role='tablist'] :deep([role='tab']::before) {
+  scale: none;
+}
+
+@media (any-pointer: coarse) {
+  .materialTabs {
+    --material-tab-min-height: var(--phone-touch-target, 48px);
+  }
+}

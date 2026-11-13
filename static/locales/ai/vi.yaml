@@ -1,0 +1,2813 @@
+# Optional AI-generated translations for keys missing from ../vi.yaml.
+Color Picker:
+  Hue: Sắc độ
+  Opacity: Độ mờ
+  Backdrop Blur: Độ nhòe nền
+  Hex Color: Màu hex
+  Apply Color: Áp dụng
+  Reset Color: Đặt lại
+  Copy Color: Sao chép
+  Copy From Another Color: Sao chép từ màu khác
+  Color Copied: Đã sao chép màu
+  Invalid Color: Nhập mã màu hex hợp lệ
+  Clipboard Unavailable: Không dùng được bảng nhớ tạm
+  Saturation and Brightness: Độ bão hòa và độ sáng
+New Tab: Thẻ mới
+Maximize: Phóng to
+Restore: Khôi phục
+Close Tab: Đóng thẻ
+App Menu:
+  About App: Giới thiệu về {appName}
+  Services: Dịch vụ
+  Hide App: Ẩn {appName}
+  Hide Others: Ẩn các ứng dụng khác
+  Show All: Hiện tất cả
+  Quit App: Thoát {appName}
+  Reopen Closed Window: Mở lại cửa sổ đã đóng
+  Paste and Match Style: Dán và khớp kiểu
+  View: Xem
+  Enter Inspect Element Mode: Vào chế độ kiểm tra phần tử
+  GPU Internals: Thông tin nội bộ GPU (chrome://gpu)
+  Navigate: Điều hướng
+  Next Tab: Thẻ tiếp theo
+  Previous Tab: Thẻ trước
+  Help: Trợ giúp
+Close Confirmation:
+  Background Sync Warning: Thoát sẽ dừng làm mới gói đăng ký trong nền.
+  Hide Window: Ẩn cửa sổ
+  Title: Thoát OpenTubeX?
+  Message: Bạn có chắc muốn thoát OpenTubeX không?
+  Quit: Thoát
+  Never Ask Again: Không hỏi lại
+Close Window Confirmation:
+  Title: Đóng cửa sổ?
+  Message: Cửa sổ này có {count} thẻ. Bạn có chắc muốn đóng không?
+  Close Window: Đóng cửa sổ
+Confirmations:
+  Never Ask Again: Không hỏi lại
+  Settings Hint: Bạn có thể bật lại xác nhận này trong Cài đặt → Chung → Xác nhận trước khi…
+Close Multiple Tabs Confirmation:
+  Title: Đóng nhiều thẻ?
+  Message: Thao tác này sẽ đóng {count} thẻ.
+  Close Tabs: Đóng {count} thẻ
+Load Multiple Tabs Confirmation:
+  Title: Tải nhiều thẻ?
+  Message: Thao tác này sẽ tải {count} thẻ.
+  Load Tabs: Tải {count} thẻ
+Unload Multiple Tabs Confirmation:
+  Title: Dỡ nhiều thẻ?
+  Message: Thao tác này sẽ dỡ {count} thẻ.
+  Unload Tabs: Dỡ {count} thẻ
+Tabs Unloaded To Free Memory: Đã dỡ {count} thẻ bạn không dùng gần đây để giải phóng bộ nhớ
+Resize Tab Bar: Đổi kích thước thanh thẻ
+Find in page: Tìm trong trang
+Previous match: Kết quả trước
+Next match: Kết quả sau
+Close find bar: Đóng thanh tìm kiếm
+No matches: Không có kết quả
+Version {versionNumber} is now available.: Đã có phiên bản {versionNumber}.
+See changes and update: Xem thay đổi và cập nhật
+Dismiss: Bỏ qua
+Update to {version}: Cập nhật lên {version}
+Global:
+  Ambient Mode: Chế độ ánh sáng nền
+  Loading More: Đang tải thêm
+  New: Mới
+  Show Blocked Item: Hiện mục bị chặn
+Search Listing:
+  Label:
+    Members Only: Chỉ dành cho hội viên
+    Possibly AI-generated: Có thể do AI tạo
+Stats:
+  Left of daily limit: "Còn {duration} trong giới hạn hằng ngày {limit} của bạn"
+  Daily limit reached: "Đã đạt giới hạn hằng ngày {limit}"
+  Replace old device: "Thay thế thiết bị cũ"
+  Replacement explanation: "Chỉ kết hợp {device} với thiết bị này nếu cả hai mục thuộc cùng một thiết bị vật lý."
+  Overlapping days: "Số ngày có trong cả hai lịch sử: {count}"
+  Overlapping watch time: "Thời gian xem trùng nhau"
+  Keep larger daily total: "Giữ tổng thời gian ngày lớn hơn"
+  Larger total explanation: "Dành cho lịch sử trùng lặp. Có thể bỏ sót thời gian xem thêm trong cùng ngày."
+  Add daily totals: "Cộng tổng thời gian từng ngày"
+  Add totals explanation: "Dành cho lịch sử riêng biệt. Có thể tính hai lần thời gian xem trùng lặp."
+  Replacement preservation: "Các ngày chỉ có trong một lịch sử được giữ lại. Lịch sử gốc vẫn được lưu trong đồng bộ mã hóa."
+  Combined watch time: "Thời gian xem kết hợp"
+  Replacement changed: "Thời gian xem đã thay đổi. Đóng rồi mở lại bản xem trước này để kiểm tra tổng mới."
+  Replacement success: "Đã kết hợp thống kê thiết bị"
+  All devices: Tất cả thiết bị
+  Stats: Thống kê
+  Watch time summary: Tổng hợp thời gian xem
+  Today: Hôm nay
+  This week: Tuần này
+  Total watch time: Tổng thời gian xem
+  Daily average: Trung bình mỗi ngày
+  So far today: Tính đến hiện tại hôm nay
+  Since: Kể từ {day}
+  All recorded time: Toàn bộ thời gian đã ghi
+  Per calendar day: Theo ngày
+  Day by day: Từng ngày
+  Highest: 'Cao nhất: {duration}'
+  Week by week: Từng tuần
+  Last 14 days: 14 ngày qua
+  Last 8 weeks: 8 tuần qua
+  Daily chart aria: Thời gian xem mỗi ngày trong 14 ngày qua
+  Weekly chart aria: Thời gian xem mỗi tuần trong 8 tuần qua
+  No data: Thời gian xem sẽ xuất hiện ở đây khi bạn xem video.
+  Estimate note: Thời gian xem trước bản cập nhật này được ước tính từ tiến độ phát đã lưu.
+  Adjust imported watch time: Điều chỉnh thời gian xem đã nhập
+  Imported watch time: Thời gian xem đã nhập
+  Imported watch time explanation: Chọn tốc độ phát bạn thường dùng. Thời lượng video đã nhập sẽ được chia cho tốc độ này để ước tính thời gian xem thực tế.
+  Playback speed: Tốc độ phát
+  Channel speed note: Tốc độ phát đã lưu cho kênh sẽ được ưu tiên khi có.
+  Apply playback speed: Áp dụng tốc độ phát
+  Imported watch time adjusted: Đã điều chỉnh thời gian xem đã nhập
+  Reset statistics: Đặt lại thống kê
+  Reset: Đặt lại
+  Reset confirmation: Bạn có chắc muốn đặt lại toàn bộ thống kê xem không? Không thể hoàn tác thao tác này.
+  Reset success: Đã đặt lại thống kê xem
+  Less than a minute: < 1 phút
+  Minutes: '{minutes} phút'
+  Hours: '{hours} giờ'
+  Hours and minutes: '{hours} giờ {minutes} phút'
+Home Page:
+  Keep disabled and hide this section: "Giữ trạng thái tắt và ẩn mục này"
+  Familiar description: "Ưu tiên video chưa xem từ các kênh bạn đã yêu thích."
+  Balanced description: "Kết hợp các kênh quen thuộc với kênh mới phù hợp với sở thích của bạn."
+  Explore description: "Dành thêm chỗ cho các kênh mới liên quan đến sở thích của bạn."
+  Turn off recommendations: Tắt đề xuất
+  Recommended for you: "Đề xuất cho bạn"
+  Recommendations description: "Xếp hạng video trên thiết bị của bạn dựa vào lịch sử xem. Mã nhận dạng kênh và các truy vấn tìm kiếm theo chủ đề được gửi đến backend mà bạn đã chọn để tìm video."
+  Enable recommendations: "Bật đề xuất"
+  Recommendations need history: "Xem một vài video khi đã bật lịch sử để nhận đề xuất."
+  No recommendations: "Không tìm thấy đề xuất nào. Hãy thử làm mới sau khi xem thêm video."
+  Recommendations unavailable: "Không thể tải đề xuất. Vui lòng thử lại sau."
+  More like this: "Thêm nội dung tương tự"
+  Not interested: "Không quan tâm"
+  Hide this channel: "Ẩn kênh này"
+  Channel hidden: "Đã ẩn {channel} khỏi đề xuất"
+  Reset recommendations: "Đặt lại đề xuất"
+  Discovery: "Khám phá"
+  Familiar: "Quen thuộc"
+  Balanced: "Cân bằng"
+  Explore: "Khám phá mới"
+  Related to: "Liên quan đến {title}"
+  More from: "Thêm từ {channel}"
+  Matches interest: "Phù hợp với sự quan tâm của bạn về {topic}"
+  Related discovery privacy: "Mã video cũng được gửi để tìm các video liên quan."
+  Home: Trang chủ
+  Description: Tiếp tục từ nơi bạn dừng lại và xem hoạt động gần đây.
+  Customize: Tùy chỉnh Trang chủ
+  Done: Xong
+  Customize description: Chọn các mục sẽ xuất hiện và sắp xếp chúng theo thứ tự bạn muốn.
+  Continue watching: Tiếp tục xem
+  New since last visit: Mới từ lần truy cập trước
+  Watch queue: Hàng đợi xem
+  Recent playlists: Danh sách phát gần đây
+  Recent downloads: Tệp tải xuống gần đây
+  Upcoming reminders: Lời nhắc sắp tới
+  Watch statistics: Thống kê xem
+  View all: Xem tất cả
+  Previous shelf page: Trang trước của {section}
+  Next shelf page: Trang tiếp theo của {section}
+  Shelf page status: '{section}, trang {page} trên {total}.'
+  Move section up: Di chuyển {section} lên
+  Move section down: Di chuyển {section} xuống
+  Section moved: '{section} đã được chuyển đến vị trí {position} trên {total}.'
+  Nothing here yet: Chưa có gì ở đây
+  Empty description: Video bạn bắt đầu xem, danh sách phát bạn dùng, tệp tải xuống và lời nhắc sẽ xuất hiện tại đây.
+  All sections hidden: Tất cả các mục đều bị ẩn
+  All sections hidden description: Tùy chỉnh Trang chủ để hiển thị lại một mục.
+Subscriptions:
+  Channel Errors:
+    Summary: "Không thể làm mới {count} kênh."
+    Toast: "Không thể làm mới một số kênh đã đăng ký. Nhấp để xem."
+    Retry Channel: "Thử lại {channel}"
+    Show All: "Hiển thị tất cả"
+    Show Fewer: "Hiển thị ít hơn"
+  Cache Load Error: Không thể tải các nguồn cấp dữ liệu kênh đăng ký đã lưu của bạn.
+  New video from {channel}: Video mới từ {channel}
+  New short from {channel}: Shorts mới từ {channel}
+  '{channel} is live': "{channel} đang phát trực tiếp"
+  New post from {channel}: Bài đăng mới từ {channel}
+  Mark As Unseen: Đánh dấu là chưa xem
+  Copy Error Details: "Sao chép chi tiết kỹ thuật"
+  Never show {type} from this channel in feeds again: Không bao giờ hiển thị {type} từ kênh này trong bảng tin nữa
+  Refreshing Subscription Videos: Đang làm mới video từ kênh đăng ký
+  Refreshing Subscription Shorts: Đang làm mới video ngắn từ kênh đăng ký
+  Refreshing Subscription Live Streams: Đang làm mới luồng trực tiếp từ kênh đăng ký
+  Refreshing Subscription Posts: Đang làm mới bài đăng từ kênh đăng ký
+  New Content: Nội dung mới
+  New Feed Refresh Warning Title: Làm mới tất cả bảng tin đăng ký?
+  New Feed Refresh Warning: Việc làm mới mọi loại nội dung cho {count} kênh đăng ký có thể mất nhiều thời gian. Bạn có muốn tiếp tục không?
+  New Since Last Refresh: Mới kể từ lần làm mới trước
+  Mark As Seen: Đánh dấu đã xem
+  Mark All as Seen: Đánh dấu tất cả là đã xem
+  No New Content: Không có nội dung mới.
+  New Content Tabs: Thẻ nội dung mới
+  Show Tabbed View: Hiện dạng thẻ
+  Show Combined View: Hiện dạng kết hợp
+  Newest First: Mới nhất trước
+  Oldest First: Cũ nhất trước
+  RSS Feeds:
+    Refreshing: Đang làm mới nguồn cấp RSS
+    Tab: RSS
+    Followed Feeds: Nguồn cấp RSS đang theo dõi
+    Add Feed: Thêm nguồn cấp
+    Feed URL: URL nguồn cấp RSS hoặc Atom
+    Remove Feed: Xóa {feed}
+    Invalid Feed URL: Nhập địa chỉ web bắt đầu bằng http:// hoặc https://.
+    Feed Already Followed: Bạn đã theo dõi nguồn cấp này.
+    Feed Could Not Be Loaded: Không thể tải nguồn cấp. Hãy kiểm tra xem địa chỉ có trỏ đến nguồn cấp RSS hoặc Atom không.
+    Feed Requires Browser Check: Trang này yêu cầu kiểm tra trình duyệt mà OpenTubeX không thể hoàn tất. Hãy thử địa chỉ khác hoặc máy chủ RSSHub khác cho nguồn cấp này.
+    Refresh Errors: Không thể làm mới {count} nguồn cấp.
+    Description: Thêm nguồn cấp RSS hoặc Atom để theo dõi nhà sáng tạo từ các nền tảng khác. Các máy chủ {rssHub} cung cấp nguồn cấp cho nhiều trang web, chẳng hạn như Twitch.
+    Empty Items: Các nguồn cấp của bạn hiện không có mục nào.
+    No Feeds: Bạn chưa theo dõi nguồn cấp RSS nào.
+    RSSHub:
+      Browse: Duyệt RSSHub
+      Title: Thêm nguồn cấp từ RSSHub
+      Description: Chọn một máy chủ RSSHub, một dịch vụ và đối tượng muốn theo dõi. Địa chỉ nguồn cấp sẽ được tạo tự động.
+      Instance: Máy chủ RSSHub
+      Service: Dịch vụ
+      Search Services: Tìm dịch vụ
+      Loading Services: Đang tải dịch vụ…
+      Services Could Not Be Loaded: Máy chủ này không trả về danh sách dịch vụ. Hãy kiểm tra địa chỉ hoặc chọn máy chủ khác.
+      Feed Type: Loại nguồn cấp
+      Requires Configuration: Nguồn cấp này cần thiết lập thêm trên máy chủ nên có thể không hoạt động trên máy chủ công khai.
+      Optional Parameter: '{parameter} (không bắt buộc)'
+      Not Set: Chưa đặt
+    Retry Feed: Thử lại {feed}
+    Reloading Feed: Đang tải lại {feed}
+  Platforms:
+    Tab: Nền tảng
+    Platform: Nền tảng
+    All Platforms: Tất cả nền tảng
+    Followed Channels: Kênh đang theo dõi trên các nền tảng khác
+    Description: Theo dõi các kênh trên Twitch, SoundCloud, PeerTube, Rumble và Odysee để xem nội dung họ tải lên trong thẻ Nền tảng của mục đăng ký. Tìm kênh bằng tính năng tìm kiếm hoặc thêm kênh bằng địa chỉ trang của kênh. Nội dung của các kênh được phát bằng yt-dlp.
+    Add Channel: Thêm kênh
+    Channel URL: Địa chỉ kênh
+    Invalid Channel: Nhập địa chỉ trang của một kênh trên Twitch, SoundCloud, PeerTube, Rumble hoặc Odysee.
+    Channel Not Found: Không có kênh nào ở địa chỉ này.
+    Channel Already Followed: Bạn đã theo dõi kênh này rồi.
+    Channel Could Not Be Loaded: Không thể tải kênh.
+    No Channels: Bạn chưa theo dõi kênh nào trên các nền tảng khác.
+    Unfollow Channel: Bỏ theo dõi {channel}
+    Go To Channel: Đi đến {channel}
+    Follow: Theo dõi
+    Following: Đang theo dõi
+    Clips: Clip
+    Refresh Errors: Không thể làm mới {count} kênh.
+    Content Tabs: Thẻ nội dung nền tảng
+Trending:
+  Music: Âm nhạc
+  Load Error: Không thể tải nội dung thịnh hành.
+  Unsupported Backend: Nội dung thịnh hành cần Local API. Hãy chọn Local API hoặc bật phương án dự phòng cho dịch vụ nền.
+Most Popular Feed Empty: Bảng tin Phổ biến nhất của máy chủ Invidious này đang trống.
+Most Popular Load Error: "Không thể tải bảng tin Phổ biến nhất."
+Feed:
+  Cancel Refresh: Hủy làm mới
+  Next Auto Refresh: 'Lần tự động làm mới tiếp theo: {date}'
+User Playlists:
+  Refresh Saved Playlists: 'Làm mới danh sách phát đã lưu'
+  Saved Playlists Refresh Failed: 'Không thể làm mới một số danh sách phát đã lưu.'
+  Save: "Lưu"
+  Edit: "Chỉnh sửa"
+  Pin to Navigation: "Ghim vào thanh điều hướng"
+  Unpin from Navigation: "Bỏ ghim khỏi thanh điều hướng"
+  Pin to Top: "Ghim lên đầu"
+  Unpin from Top: "Bỏ ghim khỏi đầu"
+  Pinned to Top: "Đã ghim lên đầu"
+  Synced with YouTube: "Đã đồng bộ với YouTube"
+  Delete YouTube Playlist Confirmation: "Xóa danh sách phát này ở đây và trên YouTube? Việc này sẽ không thể được hoàn tác."
+  CreatePlaylistPrompt:
+    Create on YouTube: "Tạo cả trên YouTube"
+  Reorder Hint: Kéo hoặc dùng phím mũi tên để sắp xếp lại
+  Add new videos to the top (custom order): "Thêm video mới lên đầu (thứ tự tùy chỉnh)"
+  Shuffle videos by default: "Phát ngẫu nhiên video theo mặc định"
+  Remove videos once watched: "Xóa video sau khi đã xem"
+  Remove videos once watched Tooltip: "Khi bạn phát danh sách phát này, mỗi video sẽ bị xóa khỏi danh sách ngay khi đạt ngưỡng phần trăm đã xem được đặt trong cài đặt quyền riêng tư."
+  Repair Playlists: Sửa danh sách phát
+  Repair Description: Khôi phục thông tin video bị thiếu sau khi nhập ZIP YouTube Takeout. Thứ tự danh sách phát không thay đổi.
+  Remove Unavailable Videos: "Xóa video không có sẵn"
+  Remove Unavailable Videos Confirmation: "Xóa video không có sẵn? Đã tìm thấy: {count}. Không thể kiểm tra: {uncertain}. Các video không được kiểm tra sẽ được giữ lại."
+  Add Missing Videos: "Thêm video còn thiếu từ danh sách phát nguồn"
+  Source Playlist: "Danh sách phát nguồn"
+  Save Playlist: "Lưu danh sách phát"
+  Remove Saved Playlist: "Xóa danh sách phát đã lưu"
+  Load More Playlists: Tải thêm danh sách phát
+  Save to: Lưu vào…
+  Quick Bookmark Icon: Biểu tượng dấu trang nhanh
+  Custom Emoji: Biểu tượng cảm xúc tùy chỉnh
+  Choose Image: Chọn ảnh
+  Use Bookmark Icon: Dùng biểu tượng dấu trang
+  SinglePlaylistView:
+    Retry: Thử lại
+    This playlist could not be loaded.: Không thể tải danh sách phát này.
+    More videos could not be loaded.: Không thể tải thêm video.
+  Playlist Thumbnail: "Ảnh thu nhỏ của danh sách phát"
+  Restore Default Thumbnail: "Khôi phục ảnh thu nhỏ mặc định"
+  AddVideoPrompt:
+    And N more videos: 'và {count} video khác'
+  Move Up: Lên
+  Move Down: Xuống
+  Remove: Xóa
+  Background Tasks:
+    Loading videos from {playlistName}: 'Đang tải video từ {playlistName}'
+    Adding missing videos to {playlistName}: 'Đang thêm video còn thiếu vào {playlistName}'
+    Checking {playlistName} for unavailable videos: 'Đang kiểm tra video không khả dụng trong {playlistName} ({checked}/{total})'
+History:
+  From Date: 'Từ'
+  To Date: 'Đến'
+  Channel Filter: 'Kênh'
+  All Channels: 'Tất cả kênh'
+  Clear Filters: 'Xóa bộ lọc'
+  Invalid Date Range: 'Ngày bắt đầu phải trước hoặc cùng ngày với ngày kết thúc.'
+  Empty Filter Message: 'Không có video nào trong lịch sử khớp với các bộ lọc này.'
+  Repair Compact: "Sửa chữa"
+  Mark All Watched Compact: "Đánh dấu tất cả đã xem"
+  Repair Use Cookies: "Dùng cookie yt-dlp đã cấu hình"
+  Repair Cookies Hint: "Cần kiểm tra hơn 500 video. Hãy cấu hình cookie trong cài đặt yt-dlp và bật tại đây để giảm nguy cơ bị giới hạn yêu cầu."
+  Repair Description: "Dùng sau khi nhập lịch sử, hoặc khi video thiếu thông tin hay có nhãn LIVE không chính xác."
+  Repair Details: "Bổ sung tiêu đề, kênh và ngày đăng còn thiếu, đồng thời kiểm tra thời lượng và nhãn LIVE. Tiến trình xem và trạng thái đã xem không thay đổi."
+  Repair Notice: "Lịch sử lớn có thể mất thời gian. Yêu cầu thất bại sẽ tự động được thử lại. Video đã xóa hoặc riêng tư có thể vẫn thiếu thông tin."
+  Start Repair: "Bắt đầu sửa"
+  Repair Checking: "Đang kiểm tra thông tin video"
+  Repair Waiting: "Đang chờ YouTube. Quá trình sửa sẽ tự động tiếp tục."
+  Repair Retrying: "Đang thử lại các yêu cầu thất bại"
+  Repair Finished: "Đã sửa xong"
+  Repair Stopped: "Đã dừng sửa"
+  Repair: "Sửa lịch sử"
+  Repair Progress: "Đã kiểm tra {checked}/{total} · Đã sửa {repaired} · Thất bại {failed}"
+  Mark All As Watched: Đánh dấu tất cả là đã xem
+  Mark All As Watched Confirmation: Bạn có chắc muốn đánh dấu mọi video trong lịch sử là đã xem không?
+  All History Marked as Watched: Đã đánh dấu mọi video trong lịch sử là đã xem
+  Select History Age: Chọn thời gian tồn tại tối thiểu của mục trước khi xóa.
+  Delete Entries Older Than: Xóa các mục cũ hơn
+  Number of Days: Số ngày
+  History Cleanup Warning: Thao tác này sẽ xóa vĩnh viễn các mục lịch sử xem phù hợp.
+  1 Day: 1 ngày
+  1 Week: 1 tuần
+  1 Month: 1 tháng
+  3 Months: 3 tháng
+  1 Year: 1 năm
+  All Time: Mọi lúc
+  Custom: Tùy chỉnh
+  History Older Than Days Removed: Đã xóa lịch sử xem cũ hơn {days} ngày
+Settings:
+  Experimental Badge: Thử nghiệm
+  YouTube Account Settings:
+    YouTube Account Settings: "Tài khoản YouTube"
+    Unofficial App Warning: "OpenTubeX không phải là ứng dụng YouTube chính thức. Khi đăng nhập, những gì bạn làm ở đây sẽ được liên kết với tài khoản Google của bạn, và Google có thể hạn chế hoặc cấm các tài khoản dùng ứng dụng không chính thức. Chỉ đăng nhập bằng tài khoản mà bạn chấp nhận bị mất."
+    Sign In Explanation: "OpenTubeX đăng nhập giống như một ứng dụng TV: bạn phê duyệt trên trang web của Google và OpenTubeX không bao giờ thấy mật khẩu của bạn. Thông tin đăng nhập chỉ lưu trên thiết bị này và không được đồng bộ hay sao lưu."
+    Sign In: "Đăng nhập"
+    Sign In Anyway: "Vẫn đăng nhập"
+    Sign Out: "Đăng xuất"
+    Getting Sign-In Code: "Đang lấy mã đăng nhập"
+    Sign In Instructions: "Mở trang đăng nhập và chọn tài khoản Google của bạn. Mã sẽ được điền tự động."
+    Other Device Instructions: "Trên thiết bị khác, truy cập địa chỉ này và nhập mã:"
+    YouTube Channel: "Kênh YouTube"
+    Using Channel: "Đang dùng YouTube với tên {name}"
+    Switch Channel Failed: "Không thể chuyển kênh YouTube: {error}"
+    Open Sign-In Page: "Mở trang đăng nhập"
+    Copy Code: "Sao chép mã"
+    Code Copied: "Đã sao chép mã"
+    Waiting for Approval: "Đang chờ bạn phê duyệt đăng nhập"
+    Sign-In Denied: "Yêu cầu đăng nhập đã bị từ chối."
+    Sign-In Code Expired: "Mã đã hết hạn. Hãy thử lại để nhận mã mới."
+    Sign-In Failed: "Không thể đăng nhập: {error}"
+    Signed In As: "Đã đăng nhập YouTube với tên {name}"
+    Signed Out: "Đã đăng xuất khỏi YouTube"
+    Sign Out Failed: "Không thể đăng xuất: {error}"
+    Revoke Failed: "Đã đăng xuất khỏi YouTube, nhưng Google chưa xác nhận rằng phiên đăng nhập đã kết thúc. Bạn có thể xóa phiên này trong mục kết nối với bên thứ ba của Tài khoản Google."
+    Signed out by YouTube: "YouTube đã kết thúc phiên đăng nhập. Hãy đăng nhập lại trong Cài đặt để tiếp tục dùng tài khoản của bạn."
+    Sync Subscriptions: "Đồng bộ kênh đăng ký với YouTube"
+    Sync Playlists: "Đồng bộ danh sách phát với YouTube"
+    Add to YouTube Watch History: "Thêm video đã xem vào lịch sử YouTube"
+    Sync Now: "Đồng bộ ngay"
+    Synced: "Đã đồng bộ với YouTube"
+    Sync Failed: "Không thể đồng bộ với YouTube: {error}"
+  Diagnostics:
+    Diagnostics: Chẩn đoán
+    Description: Khi nhật ký chẩn đoán đang bật, OpenTubeX giữ các thông báo nhật ký gần đây trong bộ nhớ để bạn có thể đính kèm chúng vào báo cáo lỗi. Ứng dụng không bao giờ tự lưu hay gửi chúng, và tắt nhật ký sẽ xóa chúng. Báo cáo bỏ qua cookie, token, địa chỉ IP và tham số URL, nhưng có thể chứa ID của các video bạn đã phát, vì vậy hãy kiểm tra báo cáo trước khi chia sẻ.
+    Enable Logging: Bật nhật ký chẩn đoán
+    Copy Report: Sao chép báo cáo
+    Save Report: Lưu báo cáo
+    Clear Log: Xóa nhật ký
+    Report Copied: Đã sao chép báo cáo chẩn đoán
+    Report Saved: Đã lưu báo cáo chẩn đoán
+    Report File: Báo cáo chẩn đoán
+    Save Failed: Không thể lưu báo cáo chẩn đoán
+    Log Cleared Message: Đã xóa nhật ký chẩn đoán
+  Tab Unloading:
+    Automatically unload tabs: "Tự động dỡ tải thẻ"
+    Memory threshold: "Ngưỡng bộ nhớ"
+    Tabs to unload: "Tỷ lệ thẻ cần dỡ tải"
+    Automatic unloading help: "Dỡ tải các thẻ nền cũ nhất để giải phóng bộ nhớ. Các thẻ đang hoạt động và đang phát vẫn được tải."
+    Memory threshold help: "Phần trăm giới hạn bộ nhớ của tiến trình kết xuất, không phải tổng RAM của hệ thống."
+  Password Settings:
+    Failed to Save Password: "Không thể lưu mật khẩu."
+    Confirm Password: "Xác nhận mật khẩu"
+    Passwords Do Not Match: "Mật khẩu không khớp."
+  Navigation and Controls: "Điều hướng và điều khiển"
+  Control Bar:
+    Title: "Thanh điều khiển"
+    Customize: "Tùy chỉnh thanh điều khiển"
+    Hidden: "Đã ẩn"
+    Empty: "Không có điều khiển"
+    Move to Control Bar: "Chuyển {control} sang thanh điều khiển"
+    Move to Player Menu: "Chuyển {control} vào menu trình phát"
+    Hide: "Ẩn {control}"
+  Fullscreen Actions:
+    Recommended Videos: "Video được đề xuất"
+    Title: "Thao tác toàn màn hình"
+    Customize: "Tùy chỉnh thao tác toàn màn hình"
+    Add Action: "Thêm thao tác"
+    Empty: "Chưa chọn thao tác toàn màn hình nào"
+    Quick Bookmark: "Dấu trang nhanh"
+    Availability Hint: "Các thao tác chỉ xuất hiện trên những video áp dụng được."
+    Disabled: "(đã tắt)"
+  Quick Settings:
+    Quick Settings: Cài đặt nhanh
+    Customize Quick Settings: Tùy chỉnh cài đặt nhanh
+    Add Setting: Thêm cài đặt
+    Appearance: Giao diện
+    Playback: Phát
+    Content: Nội dung
+    Language and Region: Ngôn ngữ và khu vực
+    All Settings: Tất cả cài đặt
+    Profile Selector Hint: Bạn cũng có thể nhấp chuột phải vào biểu tượng hồ sơ để chuyển hồ sơ
+    Profile Selector Touch Hint: Bạn cũng có thể nhấn giữ biểu tượng hồ sơ để chuyển hồ sơ
+  Categories:
+    General Description: Ngôn ngữ, khởi động, thẻ và bản dịch
+    Appearance: Giao diện
+    Appearance Description: Chủ đề, bố cục, điều hướng và danh sách video
+    Content appearance: Danh sách video và hình thu nhỏ
+    Layout: Bố cục
+    Playback Description: Mặc định của trình phát, phụ đề và cài đặt theo từng kênh
+    Subscriptions Description: Làm mới bảng tin, thông báo video mới và nguồn cấp RSS
+    Downloads Description: Thư mục tải xuống, mẫu và tải xuống tự động
+    Focus: Tập trung
+    Focus Description: Nội dung bị ẩn, giới hạn xem, lời nhắc và kiểm soát của phụ huynh
+    Add-ons: Tiện ích bổ sung
+    Add-ons Description: SponsorBlock, DeArrow, lượt không thích, AiSList và bản dịch lồng tiếng
+    Privacy Description: Lịch sử, gợi ý tìm kiếm, liên kết và mật khẩu ứng dụng
+    Data And Storage Description: Bản sao lưu, nhập và xuất, dung lượng ổ đĩa và dọn dẹp
+    Sync Description: Tài khoản máy chủ đồng bộ, ghép nối thiết bị và dữ liệu được đồng bộ
+    Advanced: Nâng cao
+    Advanced Description: Phần phụ trợ, bộ đệm, công cụ bên ngoài, proxy và chẩn đoán
+    Alternative providers: Nhà cung cấp video và siêu dữ liệu
+  Highlight Changed Settings: Đánh dấu cài đặt khác mặc định
+  Reset Setting to Default: Đặt lại cài đặt này về mặc định
+  Performance Impact:
+    Show Performance Impact: Hiện chỉ báo ảnh hưởng đến hiệu năng
+    Moderate: Ảnh hưởng vừa phải
+    High: Ảnh hưởng cao
+    Description: Cài đặt này có thể làm tăng mức dùng {resources}
+    Resources:
+      CPU: CPU
+      GPU: GPU
+      Memory: bộ nhớ
+      Network: mạng
+      Disk: ổ đĩa
+  General Settings:
+    Built-in Streams:
+      Built-in Streams: "Luồng tích hợp"
+      Automatic: "Tự động"
+      SABR Only: "Chỉ SABR"
+    Link Underlines:
+      Link Underlines: "Gạch chân liên kết"
+      On Hover: "Gạch chân liên kết khi di chuột qua"
+      Never: "Không bao giờ gạch chân liên kết"
+      Always: "Luôn gạch chân liên kết"
+    Title Lines:
+      Title Lines: "Số dòng tiêu đề"
+      Unlimited: "Không giới hạn"
+    Close Window With Last Tab: 'Đóng cửa sổ khi đóng thẻ cuối cùng'
+    Preferred Video Codec: Codec video ưu tiên
+    Always Use Backup Media Server: "Luôn dùng máy chủ phương tiện dự phòng"
+    Automatically switch stream extraction methods: "Tự động chuyển đổi phương thức trích xuất luồng"
+    Enable Tabs: "Bật thẻ"
+    Thumbnail Swipe Gestures:
+      Left: Vuốt sang trái trên hình thu nhỏ
+      Right: Vuốt sang phải trên hình thu nhỏ
+      Description: Vuốt ngang trên hình thu nhỏ của video rồi thả tay để thực hiện thao tác đã chọn.
+    Data Saver Thumbnails: "Ảnh thu nhỏ tiết kiệm dữ liệu"
+    Use tray icon: "Sử dụng biểu tượng khay hệ thống"
+    Close to system tray: "Đóng vào khay hệ thống"
+    Tray required for background refresh: "Biểu tượng khay hệ thống là bắt buộc khi bật làm mới kênh đăng ký trong nền."
+    Show Video Menu Button: Hiện nút trình đơn video
+    Swipe to refresh: Vuốt để làm mới
+    Blur Thumbnails: Làm mờ hình thu nhỏ
+    Navigation:
+      Always Show Navigation Bar: Luôn hiển thị thanh điều hướng khi nó ở phía dưới
+      Compact Tab Labels: Thanh điều hướng thu gọn khi nó ở phía dưới
+      Show Active Subscriptions: Hiển thị các kênh đăng ký đang hoạt động trong thanh bên
+      Navigation: Điều hướng
+      Customize Navigation: Tùy chỉnh điều hướng
+      Add Item: Thêm mục
+    Date Format: Định dạng ngày
+    Time Format: Định dạng thời gian
+    Language Default: Mặc định theo ngôn ngữ
+    Update Relative Timestamps: Luôn cập nhật mốc thời gian tương đối
+    Stream Extraction Method:
+      Stream Extraction Method: Phương thức trích xuất luồng
+      yt-dlp: yt-dlp
+      Built-in: Tích hợp sẵn
+    Confirm Before: Xác nhận trước khi…
+    Confirmation Options:
+      Closing App: Đóng OpenTubeX
+      Closing Window: Đóng cửa sổ có nhiều thẻ
+      Closing Tabs: Đóng nhiều thẻ
+      Loading Tabs: Tải nhiều thẻ
+      Unloading Tabs: Dỡ nhiều thẻ
+      Refreshing All Feeds: Làm mới nhiều kênh đăng ký
+    Remember Tab Navigation History: Ghi nhớ lịch sử điều hướng của thẻ
+    New Tab Position:
+      New Tab Position: Vị trí thẻ mới
+      At the end: Ở cuối
+      After current tab: Sau thẻ hiện tại
+      After current tab in opened order: Sau thẻ hiện tại, theo thứ tự mở
+    Tab Close Focus:
+      Last active tab: "Thẻ hoạt động gần nhất"
+      Next tab in tab order: "Thẻ tiếp theo trong thứ tự thẻ"
+      Previous tab in tab order: "Thẻ trước trong thứ tự thẻ"
+      Tab Close Focus: Sau khi đóng thẻ đang hoạt động
+    Startup Behavior:
+      Startup Behavior: Khi khởi động
+      Load all tabs: Tải tất cả thẻ
+      Load previously loaded tabs: Tải các thẻ đã tải trước đó
+      Load last active tab: Tải thẻ hoạt động gần nhất
+      Start with an empty session: Bắt đầu với phiên trống
+      Load landing page, keep other tabs unloaded: Tải trang khởi đầu, giữ các thẻ khác chưa tải
+    Use AI Translation Completions: Điền các bản dịch còn thiếu bằng những bản dịch do AI tạo
+    Reduced Motion:
+      Reduced Motion: Giảm chuyển động
+      System: Theo hệ thống
+      Force On: Luôn bật
+      Force Off: Luôn tắt
+    Comment Translation:
+      Title: Dịch bình luận
+      Enable: Bật dịch bình luận
+      Never Translate: Không bao giờ dịch bình luận bằng
+      Choose Language: Chọn ngôn ngữ
+      Description: Bình luận bằng ngôn ngữ của ứng dụng đã được loại trừ. Hãy thêm các ngôn ngữ khác mà bạn đọc được.
+      Remove Language: Dịch lại bình luận bằng {language}
+    Avoid translation:
+      Avoid translation: Ưu tiên nội dung video chưa dịch
+      Disabled: Tắt
+      Watch Only: Chỉ giao diện video
+      Entire App: Toàn bộ ứng dụng
+    Playlist View Type:
+      Playlist View Type: Kiểu hiển thị danh sách phát
+    Show Thumbnail Previews: Hiện bản xem trước hình thu nhỏ
+    Extra Thumbnail Action Button:
+      Extra Thumbnail Action Button: Nút thao tác bổ sung trên hình thu nhỏ
+      None: Không có
+      Mark as Watched: Đánh dấu đã xem
+      Copy YouTube Link: Sao chép liên kết YouTube
+      Open in YouTube: Mở trong YouTube
+    Mobile Layout:
+      Mobile Layout: 'Bố cục di động'
+      Automatic: 'Tự động'
+      Phone: 'Điện thoại'
+      Tablet: 'Máy tính bảng'
+    Video View Type:
+      Full Width: Toàn chiều rộng
+    Grid Columns:
+      Grid Columns: Số cột lưới
+      Playlist Grid Columns: Số cột lưới danh sách phát
+      Auto: Tự động
+    Preferred API Backend:
+      Yattee Server: Máy chủ Yattee
+    Yattee Server:
+      Server URL: URL máy chủ Yattee
+      Username: Tên người dùng
+      Password: Mật khẩu
+      Proxy Videos: Proxy video qua máy chủ Yattee
+      Test Connection: Kiểm tra kết nối
+      Testing: Đang kiểm tra kết nối…
+      Connected: Đã kết nối với máy chủ Yattee {version}
+      Errors:
+        Invalid URL: Nhập URL máy chủ, bắt đầu bằng https:// hoặc http://.
+        Unreachable: Không thể kết nối tới máy chủ. Hãy kiểm tra URL và xem máy chủ có đang chạy không.
+        Media not allowed: 'Đã kết nối nhưng máy chủ không cho phép ứng dụng này tải video. Hãy đặt CORS_ORIGINS={origins} trong biến môi trường của máy chủ.'
+        Not a Yattee server: Máy chủ đã phản hồi nhưng đây không phải là máy chủ Yattee.
+        Credentials required: Máy chủ yêu cầu tên người dùng và mật khẩu.
+        Invalid credentials: Máy chủ đã từ chối tên người dùng hoặc mật khẩu.
+        Rate limited: Máy chủ đang chặn đăng nhập do có quá nhiều lần thử không thành công. Vui lòng thử lại sau.
+        Server error: Máy chủ trả về lỗi (HTTP {status}).
+    Notifications:
+      Notifications: Thông báo
+      System and In-App: Hệ thống và trong ứng dụng
+      System Only: Chỉ hệ thống
+      Off: Tắt
+    Auto Load Next Page:
+      Lists Tooltip: Tự động tải thêm các trang của nguồn cấp, kết quả tìm kiếm và các danh sách khác.
+    Auto Load Comments:
+      Label: Tự động tải bình luận
+      Tooltip: Tải bình luận khi mở trang và tải thêm khi bạn cuộn.
+    Haptic Feedback: Phản hồi xúc giác
+    Ignore System Haptics Setting: Bỏ qua cài đặt xúc giác của hệ thống
+  Context Menu Search Settings:
+    Context Menu Search Settings: Tìm kiếm trong menu ngữ cảnh
+    Description: Chọn công cụ tìm kiếm xuất hiện khi bạn nhấp chuột phải vào văn bản đã chọn. Kết quả tìm kiếm sẽ mở trong trình duyệt mặc định.
+    Icon Hint: Khi bật một công cụ, ứng dụng sẽ kết nối đến trang web đó để tải favicon.
+    Engine Name: Tên công cụ
+    Search URL: URL tìm kiếm
+    URL Hint: Dùng %s tại vị trí URL cần chứa văn bản đã chọn và được mã hóa.
+    Add Custom Engine: Thêm công cụ tùy chỉnh
+    Add Engine: Thêm công cụ
+    Remove Engine: Xóa {engine}
+    Invalid Engine: Nhập tên và URL tìm kiếm HTTP hoặc HTTPS hợp lệ có chứa %s.
+    Engine Limit: Bạn có thể thêm tối đa {count} công cụ tìm kiếm tùy chỉnh.
+  Theme Settings:
+    Theme and Colors: "Chủ đề và màu sắc"
+    Font Size: Cỡ chữ
+    Sections:
+      Interface: "Giao diện"
+      Side Bar and Header: "Thanh bên và tiêu đề"
+      Tabs: "Thẻ"
+      Player: "Trình phát"
+      Scrolling: "Cuộn"
+      Notifications: "Thông báo"
+    Only Show Important Notifications: Chỉ hiển thị thông báo quan trọng
+    Visible Search Suggestions: "Số gợi ý tìm kiếm hiển thị"
+    Material Accent Color: "Màu nhấn Material"
+    Tally Accent Color: "Màu nhấn Tally"
+    Material Wallpaper Colors: "Màu hình nền"
+    Material System Accent Color: "Màu nhấn của hệ thống"
+    Tab Loading Indicator:
+      Tab Loading Indicator: Chỉ báo tải thẻ
+      Bar: Thanh
+      Dot: Chấm (cổ điển)
+    Compact Settings Categories: "Danh mục cài đặt nhỏ gọn"
+    Playlist Thumbnail Size: "Kích thước hình thu nhỏ danh sách phát"
+    Compact Mobile Mini Player: "Trình phát mini gọn trên di động"
+    Always Show Mobile Search Bar: "Luôn hiển thị thanh tìm kiếm trên điện thoại"
+    Frosted Glass Player UI: "Giao diện trình phát với hiệu ứng kính mờ"
+    Main Color Theme:
+      Catppuccin Macchiato Rosewater: "Catppuccin Macchiato Rosewater Màu hoa hồng"
+      Catppuccin Macchiato Flamingo: "Catppuccin Macchiato Flamingo Màu hồng hạc"
+      Catppuccin Macchiato Pink: "Catppuccin Macchiato Pink Màu hồng"
+      Catppuccin Macchiato Mauve: "Catppuccin Macchiato Mauve - Màu tím"
+      Catppuccin Macchiato Red: "Catppuccin Macchiato Red Màu đỏ"
+      Catppuccin Macchiato Maroon: "Catppuccin Macchiato Maroon Màu nâu tim"
+      Catppuccin Macchiato Peach: "Catppuccin Macchiato Peach Màu đào"
+      Catppuccin Macchiato Yellow: "Catppuccin Macchiato Yellow Màu vàng"
+      Catppuccin Macchiato Green: "Catppuccin Macchiato Green Màu xanh lục"
+      Catppuccin Macchiato Teal: "Catppuccin Macchiato Teal Màu mòng két"
+      Catppuccin Macchiato Sky: "Catppuccin Macchiato Sky Màu xanh da trời"
+      Catppuccin Macchiato Sapphire: "Catppuccin Macchiato Sapphire màu xanh"
+      Catppuccin Macchiato Blue: "Catppuccin Macchiato Blue Màu xanh"
+      Catppuccin Macchiato Lavender: "Catppuccin Macchiato Lavender Màu tím nhạt"
+    Move Downloads to App Header: Chuyển mục Tải xuống lên đầu ứng dụng
+    Move Settings to App Header: Chuyển mục Cài đặt lên đầu ứng dụng
+    Hide Side Bar on Watch Pages: Ẩn thanh bên trên trang xem
+    UI Roundness: Độ bo tròn giao diện
+    Scrollbar Width: Chiều rộng thanh cuộn
+    Scroll Speed: Tốc độ cuộn
+    Animation Speed: Tốc độ hiệu ứng
+    Thumbnail Size: Kích thước hình thu nhỏ
+    Show Tab Icons: Hiện biểu tượng thẻ
+    Load Missing Tab Icons: Tải biểu tượng thẻ còn thiếu
+    Loading Missing Tab Icons: Đang tải biểu tượng thẻ còn thiếu…
+    No Missing Tab Icons: Tất cả biểu tượng thẻ được hỗ trợ đã được tải
+    Loaded Tab Icons: 'Số biểu tượng thẻ còn thiếu đã tải: {count}'
+    Loaded Tab Icons With Failures: Đã tải {loaded} biểu tượng thẻ; không thể tải {failed} biểu tượng
+    Show Tab Previews: Hiện bản xem trước thẻ
+    Use Fixed Tab Width: Dùng chiều rộng thẻ cố định ở chế độ ngang
+    Use Custom Title Bar: Dùng thanh tiêu đề tùy chỉnh
+    Tab Width: Chiều rộng thẻ
+    Vertical Tab Height: Chiều cao thẻ dọc
+    Tab Layout:
+      Tab Layout: Bố cục thẻ
+      Horizontal Top: Nằm ngang ở trên
+      Horizontal Bottom: Nằm ngang ở dưới
+      Vertical Left: Nằm dọc bên trái
+      Vertical Right: Nằm dọc bên phải
+    Show Toast Timeout Indicator: Hiện thời gian còn lại của thông báo
+    Use Grid Player Menu: Dùng menu trình phát dạng lưới
+    Show Progress as Notification: Hiện tiến trình dưới dạng thông báo
+    Operation in Progress: Đang thực hiện thao tác
+    Toast Position:
+      Test Toast: Thông báo thử
+      Toast Position: Vị trí thông báo
+      Bottom Left: Dưới cùng bên trái
+      Bottom Center: Dưới cùng ở giữa
+      Bottom Right: Dưới cùng bên phải
+      Top Left: Trên cùng bên trái
+      Top Center: Trên cùng ở giữa
+      Top Right: Trên cùng bên phải
+    Icon Pack:
+      Icon Pack: Bộ biểu tượng
+      Material Symbols: Material Symbols
+      Remix Icon: Remix Icon
+    Font:
+      App Font: Phông chữ ứng dụng
+      System Default: Mặc định của hệ thống
+      Unable to Load: Không thể tải các phông chữ hệ thống đã cài đặt
+      Bundled Fonts: Phông chữ đi kèm
+      System Fonts: Phông chữ hệ thống
+    Always Show Scrollbars: Luôn hiện thanh cuộn
+    Base Theme:
+      Material Light: "Material Sáng"
+      Material Dark: "Material Tối"
+      Material Black: "Material Đen"
+      Dynamic colors: Màu động
+      Tokyo Night Night: Tokyo Night Night
+      Tokyo Night Storm: Tokyo Night Storm
+      Tokyo Night Moon: Tokyo Night Moon
+      Tokyo Night Day: Tokyo Night Day
+      Rosé Pine: Rosé Pine
+      Rosé Pine Moon: Rosé Pine Moon
+      Rosé Pine Dawn: Rosé Pine Dawn
+      Kanagawa Wave: Kanagawa Wave
+      Kanagawa Dragon: Kanagawa Dragon
+      Kanagawa Lotus: Kanagawa Lotus
+      Ayu Dark: Ayu Dark
+      Ayu Mirage: Ayu Mirage
+      Ayu Light: Ayu Light
+      One Dark: One Dark
+      Carbonfox: Carbonfox
+      Catppuccin Macchiato: Catppuccin Macchiato
+      Tally Light: "Tally Sáng"
+      Tally Dark: "Tally Tối"
+      Custom: Tùy chỉnh
+      Built-in Themes: Chủ đề tích hợp sẵn
+      Custom Themes: Chủ đề tùy chỉnh
+    Light Theme: Chủ đề sáng
+    Dark Theme: Chủ đề tối
+    Custom Theme:
+      Share Restrictions Prompt: "Mô tả có thể chứa tối đa 500 ký tự, bao gồm Markdown. Chỉ cho phép liên kết và hình ảnh được lưu trữ trên GitHub, kể cả tệp tải trực tiếp lên đây. Bot sẽ xóa liên kết và hình ảnh bên ngoài, rút ngắn mô tả dài và để lại bình luận giải thích các thay đổi."
+      Import from Clipboard: "Nhập từ bảng nhớ tạm"
+      Invalid Clipboard Theme: "Bảng nhớ tạm không chứa giao diện hợp lệ. Sao chép JSON của giao diện rồi thử lại."
+      Create Custom Theme: Tạo chủ đề tùy chỉnh
+      Edit Custom Theme: Sửa chủ đề tùy chỉnh
+      Custom Theme Creator: Trình tạo chủ đề tùy chỉnh
+      Theme Name: Tên chủ đề
+      Based On: Dựa trên
+      Import Theme: Nhập chủ đề
+      Export Theme: Xuất chủ đề
+      Share Theme: Chia sẻ chủ đề
+      Share Description Prompt: Mô tả chủ đề và những điều người khác cần biết trước khi dùng.
+      Share Screenshots Prompt: "Kéo và thả một hoặc nhiều ảnh chụp màn hình vào đây. Để trống phần này để bot thêm ba ảnh xem trước bằng nội dung mẫu, không dùng dữ liệu cá nhân của bạn."
+      Delete Theme: Xóa chủ đề
+      Delete Theme Confirmation: Xóa “{name}”? Không thể hoàn tác thao tác này.
+      Save and Apply: Lưu và áp dụng
+      Discard Changes: Hủy thay đổi
+      Reset Colors: Đặt lại theo chủ đề gốc
+      Theme File: Tệp chủ đề OpenTubeX
+      Theme Saved: Đã lưu và áp dụng chủ đề tùy chỉnh
+      Theme Imported: Đã nhập chủ đề vào trình chỉnh sửa
+      Theme Exported: Đã xuất chủ đề
+      Theme Deleted: Đã xóa chủ đề tùy chỉnh
+      Unable to Load: Không thể tải chủ đề tùy chỉnh
+      Unable to Save: Không thể lưu chủ đề tùy chỉnh
+      Unable to Export: Không thể xuất chủ đề tùy chỉnh
+      Unable to Share: Không thể chia sẻ chủ đề tùy chỉnh
+      Unable to Delete: Không thể xóa chủ đề tùy chỉnh
+      Invalid Theme File: Tệp chủ đề tùy chỉnh không hợp lệ
+      Colors:
+        Watched thumbnail overlay: "Lớp phủ hình thu nhỏ của video đã xem"
+        Thumbnail badge background: "Nền của nhãn trên hình thu nhỏ"
+        Main text: Văn bản chính
+        Secondary text: Văn bản phụ
+        Subtle text: Văn bản mờ
+        Borders and dividers: Viền và đường phân cách
+        Subtle surfaces and indicators: Bề mặt và chỉ báo mờ
+        Title text: Văn bản tiêu đề
+        Selected text background: Nền văn bản được chọn
+        Selected text: Văn bản được chọn
+        Logo icon: Biểu tượng logo
+        Logo text: Chữ trong logo
+        Logo hover: Logo khi di chuột
+        Logo pressed: Logo khi nhấn
+        Page background: Nền trang
+        Card background: Nền thẻ nội dung
+        Secondary card background: Nền thẻ nội dung phụ
+        Favorite icon: Biểu tượng yêu thích
+        Error color: Màu lỗi
+        Scrollbar thumb: Nút kéo thanh cuộn
+        Scrollbar thumb hover: Nút kéo thanh cuộn khi di chuột
+        Scrollbar thumb pressed: Nút kéo thanh cuộn khi nhấn
+        Dropdown item hover text: Chữ của mục thả xuống khi di chuột
+        Dropdown item hover background: Nền của mục thả xuống khi di chuột
+        Navigation and panel background: Nền điều hướng và bảng
+        Neutral item hover and focus background: Nền mục trung tính khi di chuột và lấy nét
+        Neutral item hover and focus text and icons: Chữ và biểu tượng của mục trung tính khi di chuột và lấy nét
+        Neutral item pressed background: Nền mục trung tính khi nhấn
+        Neutral item pressed text and icons: Chữ và biểu tượng của mục trung tính khi nhấn
+        Header button hover and focus background: Nền nút đầu trang khi di chuột và lấy nét
+        Header button hover and focus text and icons: Chữ và biểu tượng nút đầu trang khi di chuột và lấy nét
+        Header button pressed background: Nền nút đầu trang khi nhấn
+        Header button pressed text and icons: Chữ và biểu tượng nút đầu trang khi nhấn
+        Search and dropdown background: Nền tìm kiếm và danh sách thả xuống
+        Settings search background: Nền tìm kiếm cài đặt
+        Instance menu: Menu máy chủ
+        Shadow color: Màu bóng
+        Primary controls and highlights: Điều khiển chính và phần đánh dấu
+        Primary control hover and focus: Điều khiển chính khi di chuột và lấy nét
+        Primary control pressed: Điều khiển chính khi nhấn
+        Text and icons on primary controls: Chữ và biểu tượng trên điều khiển chính
+        Secondary controls and highlights: Điều khiển phụ và phần đánh dấu
+        Secondary control hover and focus: Điều khiển phụ khi di chuột và lấy nét
+        Secondary control pressed: Điều khiển phụ khi nhấn
+        Light secondary color: Màu phụ nhạt
+        Visited accent: Màu nhấn đã truy cập
+        Text and icons on secondary controls: Chữ và biểu tượng trên điều khiển phụ
+        Links: Liên kết
+        Visited links: Liên kết đã truy cập
+        Destructive action: Thao tác xóa
+        Destructive hover and focus: Thao tác xóa khi di chuột và lấy nét
+        Destructive pressed: Thao tác xóa khi nhấn
+        Text and icons on destructive actions: Chữ và biểu tượng trên thao tác xóa
+    Modal Backdrop:
+      Modal Backdrop: "Nền hộp thoại"
+      Dim and Blur: "Làm tối và làm mờ"
+      Dim Only: "Chỉ làm tối"
+    Click Scrollbar Track to Scroll: "Cuộn bằng cách nhấp vào thanh cuộn"
+  Player Settings:
+    Rewind on Resume: "Tua lại khi tiếp tục"
+    Minimum Pause Before Rewinding: "Thời gian tạm dừng tối thiểu trước khi tua lại"
+    Mono Audio: 'Âm thanh đơn kênh'
+    Normalize Loudness: 'Chuẩn hóa âm lượng'
+    Show Mono Audio Toggle: 'Hiển thị nút bật/tắt âm thanh đơn kênh'
+    Pause on Stream Recovery: "Tạm dừng khi khôi phục luồng"
+    Buffering:
+      Buffering: Bộ đệm
+      Description: Chọn lượng video mà trình phát tải trước và giữ lại.
+      Buffer Ahead Hint: Bộ đệm phía trước lớn hơn giúp phát liên tục khi mất kết nối lâu hơn, nhưng sẽ tải cả phần video có thể bạn không xem.
+      Rewind Buffer Hint: Bộ đệm tua lại lớn hơn giúp bạn tua lại mà không phải tải lại, nhưng dùng nhiều bộ nhớ hơn.
+      Buffer Before Playing Hint: Chờ tải thêm video trước khi phát giúp tránh bị dừng liên tục khi kết nối không ổn định, nhưng video sẽ bắt đầu chậm hơn và phát tiếp chậm hơn sau khi tua.
+      Preset: Thiết lập sẵn bộ đệm
+      Presets:
+        Data Saver: Tiết kiệm dữ liệu
+        Default: Mặc định
+        Smooth Playback: Phát mượt mà
+        Custom: Tùy chỉnh
+      Buffer Ahead: Bộ đệm phía trước
+      Buffer Ahead Tooltip: 'Khoảng video được tải trước tính từ vị trí hiện tại. Ở chất lượng cao, giới hạn bộ nhớ có thể hạn chế các giá trị rất cao. Mặc định: {value}'
+      Rewind Buffer: Bộ đệm tua lại
+      Rewind Buffer Tooltip: 'Lượng video đã xem được giữ lại. Mặc định: {value}'
+      Buffer Before Playing: Bộ đệm trước khi phát
+      Buffer Before Playing Tooltip: 'Lượng video cần tải xong trước khi bắt đầu phát hoặc phát tiếp sau khi bị dừng. Mặc định: {value}'
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: "Giới hạn chất lượng trên mạng đo lưu lượng"
+      No Limit: "Không giới hạn"
+      Tooltip: "Trên dữ liệu di động và các mạng đo lưu lượng khác, video bắt đầu ở chất lượng này hoặc thấp hơn. Bạn vẫn có thể chọn chất lượng cao hơn trong trình phát."
+    Show Music Mode Toggle: "Hiển thị nút chuyển chế độ nhạc"
+    Enable DLNA Casting: "Bật truyền phát DLNA"
+    Skip Unavailable Playlist Videos: "Bỏ qua video không khả dụng trong danh sách phát"
+    Lights Off: Tắt đèn
+    Show Lights Off Toggle: Hiển thị nút bật/tắt đèn
+    Show Volume Boost Toggle: "Hiển thị nút bật tăng âm lượng"
+    Swipe Gestures:
+      Fullscreen Brightness: Độ sáng tối đa khi toàn màn hình
+      Left: Vuốt bên trái
+      Right: Vuốt bên phải
+      Disabled: Tắt
+      Brightness: Độ sáng
+      Volume: Âm lượng
+      Hint: Vuốt lên hoặc xuống ở một bên video khi xem toàn màn hình.
+      Unavailable: Không thể điều chỉnh các điều khiển phát lại.
+    yt-dlp Streaming: "Phát trực tuyến bằng yt-dlp"
+    Continue Playback When Screen Is Locked: 'Tiếp tục phát khi màn hình bị khóa'
+    Music Visualizer: Trình trực quan hóa nhạc
+    Automatically Open Chapters: Tự động mở chương
+    Caption Appearance:
+      Caption Appearance: Giao diện phụ đề
+      Captions: Phụ đề
+      Preferred Language: Ngôn ngữ phụ đề ưu tiên
+      Application Language: Ngôn ngữ ứng dụng
+      Enable Translations: Bật dịch phụ đề
+      Text Color: Màu chữ
+      Background Color: Màu nền
+      Background Opacity: Độ mờ nền
+      Font Size: Cỡ chữ
+      Anchor:
+        Anchor: Điểm neo
+        Top Left: Trên bên trái
+        Top Center: Trên ở giữa
+        Top Right: Trên bên phải
+        Bottom Left: Dưới bên trái
+        Bottom Center: Dưới ở giữa
+        Bottom Right: Dưới bên phải
+        Center Left: Giữa bên trái
+        Center: Chính giữa
+        Center Right: Giữa bên phải
+      Edge Style:
+        Edge Style: Kiểu viền
+        None: Không có
+        Outline: Đường viền
+        Drop Shadow: Bóng đổ
+        Raised: Nổi
+        Depressed: Chìm
+      Reset: Đặt lại giao diện phụ đề
+      Default: Mặc định
+      Text Opacity: Độ mờ phông chữ
+      Font Family:
+        Font Family: Họ phông chữ
+        Monospaced Serif: Serif không cân xứng
+        Proportional Serif: Serif cân xứng
+        Monospaced Sans-Serif: Sans-Serif không cân xứng
+        Proportional Sans-Serif: Sans-Serif cân xứng
+      Colors:
+        White: Trắng
+        Yellow: Vàng
+        Green: Xanh lục
+        Cyan: Xanh lơ
+        Blue: Màu lam
+        Magenta: Đỏ tía
+        Red: Đỏ
+        Black: Đen
+    Auto Picture in Picture:
+      Auto Picture in Picture: Tự động chuyển sang Hình trong hình
+      On Tab Change: Khi chuyển thẻ
+      On Window Minimize: Khi thu nhỏ cửa sổ
+      On Window Hide: Khi cửa sổ mất lấy nét hoặc bị chuyển ra sau
+      Wayland Minimize Unsupported: Wayland không thông báo cho ứng dụng khi cửa sổ được thu nhỏ, nên không dùng được điều kiện này. Hãy dùng "Khi cửa sổ mất lấy nét hoặc bị chuyển ra sau", điều kiện này cũng bao gồm việc thu nhỏ.
+      On Tab Change Mini Player: Khi chuyển thẻ, trình phát thu nhỏ sẽ hiện thay thế. Để dùng tùy chọn này, hãy đặt "Khi rời khỏi video" thành "Dừng phát".
+    Scroll Mini Player:
+      Scroll Player Mode: Khi cuộn xuống
+      Scroll Player Mode Tooltip: Trình phát chỉ được ghim khi chiếm tối đa một nửa chiều cao cửa sổ. Nếu không, chẳng hạn trên điện thoại ở chế độ ngang hoặc trong cửa sổ rộng, trình phát mini sẽ hiển thị thay thế.
+      Scroll Player Modes:
+        Mini: Hiện trình phát thu nhỏ
+        Pin: Ghim trình phát ở trên cùng nếu còn chỗ
+        Off: Cuộn cùng trang
+      Leaving Video: Khi rời khỏi video
+      Leaving Video Modes:
+        Keep Playing: Tiếp tục phát trong trình phát thu nhỏ
+        Stop: Dừng phát
+    Multiply Seek Interval by Playback Rate: Nhân khoảng tua với tốc độ phát
+    Show Playback Rate Adjusted Timestamp: Hiện mốc thời gian đã điều chỉnh theo tốc độ phát
+    Use YouTube-style Shorts: Dùng video ngắn kiểu YouTube
+    Loop Shorts: Lặp lại video ngắn
+    Remember Volume: Ghi nhớ âm lượng
+    Skip Silence: Bỏ qua đoạn im lặng
+    Show Skip Silence Toggle: Hiện nút bật/tắt bỏ qua đoạn im lặng
+    Enable Skip Silence by Default: Bật bỏ qua đoạn im lặng theo mặc định
+    Enable Video Zoom: Bật thu phóng video
+    Enable Seek History: Bật lịch sử tua
+    Show Seek Bar Filmstrip: "Hiển thị dải khung hình của thanh tua"
+    Voice-over Translation:
+      Title: Dịch lồng tiếng
+      Attribution: (do Yandex cung cấp)
+      Enable: Bật dịch lồng tiếng
+      Prepare in Background: Chuẩn bị bản dịch lồng tiếng trong nền
+      Background Preparation Tooltip: Gửi ID, thời lượng và ngôn ngữ đã chọn của video hiện tại đến dịch vụ dịch ngay khi tải video được hỗ trợ.
+      Language: Ngôn ngữ dịch lồng tiếng
+      Supported Source Languages: 'Ngôn ngữ nguồn được hỗ trợ: tiếng Nga, Anh, Trung, Hàn, Ả Rập, Pháp, Ý, Tây Ban Nha, Đức và Nhật.'
+      Voice Volume: Âm lượng giọng dịch
+      Original Volume: Âm lượng gốc
+      Russian: Tiếng Nga
+      English: Tiếng Anh
+      Kazakh: Tiếng Kazakh
+    Hold to Speed Up:
+      Hold to Speed Up: Giữ để tăng tốc
+      Off: Tắt
+    Use Quick Playback Speed Bar: Dùng thanh tốc độ phát nhanh
+    Customize Quick Playback Speed Bar: Tùy chỉnh thanh tốc độ phát nhanh
+    Quick Playback Speed Bar Manager: Thanh tốc độ phát nhanh
+    Add Playback Speed: Thêm tốc độ phát
+    Reset Quick Playback Speed Bar: Đặt lại về mặc định
+    Playback Speed Name: Tên
+    Edit Playback Speed Name: Sửa tên tốc độ phát
+    Use Automatic Playback Speed Name: Dùng tên tốc độ phát tự động
+    Reorder Playback Speed: Kéo để sắp xếp lại tốc độ phát
+    Playback Speed: Tốc độ phát
+    Parallel Segment Loading: Tải song song các phân đoạn
+    Rotate Wide Videos to Landscape in Fullscreen: 'Xoay video rộng sang ngang khi ở chế độ toàn màn hình'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'Vuốt lên hoặc xuống để vào hoặc thoát chế độ toàn màn hình'
+    Preload Upcoming Videos: "Tải trước các video tiếp theo"
+    Upcoming Videos to Preload: "Số video cần tải trước"
+    Concurrent Preloads: "Số lượt tải trước đồng thời"
+    Ignore System Rotation Lock for Fullscreen: Bỏ qua khóa xoay của hệ thống cho toàn màn hình
+    Swipe Left or Right to Seek in Fullscreen: Vuốt sang trái hoặc phải để tua khi toàn màn hình
+    Show Swipe to Seek Preview: Hiển thị bản xem trước khi vuốt để tua
+    Enable Google Cast: "Bật Google Cast"
+    Sections:
+      Playback: Phát
+      Autoplay: Tự động phát
+      Playback Speed: Tốc độ phát
+      Player Controls: Điều khiển trình phát
+      Gestures: Cử chỉ
+      Viewing Modes: Chế độ xem
+      Shorts: Shorts
+      Screenshots: Ảnh chụp màn hình
+    Enable FCast: "Bật FCast"
+    Screenshot:
+      Legacy Formats: "Định dạng cũ"
+      Modern Formats: "Định dạng hiện đại"
+    Ask Before Preloading Large Playlists: "Hỏi trước khi tải trước danh sách phát lớn"
+  Channel Settings:
+    Channel Settings: Cài đặt kênh
+    Channel Settings Description: Ghi nhớ riêng các cài đặt bạn chọn khi xem từng kênh để áp dụng lại vào lần sau khi bạn xem video của kênh đó.
+    Enable Channel Playback Settings: Bật cài đặt phát theo kênh
+    Auto Save Playback Speed: Tự động lưu thay đổi tốc độ phát
+    Auto Save Video Quality: Tự động lưu thay đổi chất lượng video
+    Auto Save Subtitles State: Tự động lưu thay đổi trạng thái phụ đề
+    Auto Save Volume: Tự động lưu thay đổi âm lượng
+    Manage Saved Channels: Quản lý kênh đã lưu ({channelCount})
+    Saved Channels: Cài đặt kênh đã lưu
+    Enable Saved Channel Settings Sync: Đồng bộ cài đặt kênh đã lưu
+    Disable Saved Channel Settings Sync: Ngừng đồng bộ cài đặt kênh đã lưu
+    Search Channels: Tìm kênh
+    No Saved Channels: Chưa lưu cài đặt riêng cho kênh nào
+    No Matching Channels: Không có kênh phù hợp với tìm kiếm
+    Forget Channel: Xóa mọi cài đặt cho kênh này
+    Forget Value: Xóa cài đặt này
+    Add Setting: Ghi nhớ thêm một cài đặt cho kênh này
+    Add Subscribed Channel: Thêm kênh đã đăng ký
+    Video Quality: Chất lượng video
+    Subtitles Enabled: Đã bật phụ đề
+    Volume: Âm lượng
+  Download Settings:
+    Download Settings: Tải xuống
+    Enable Downloads: Bật tải xuống
+    Managed Tools Download Started Template: 'Không tìm thấy phần mềm bên ngoài cần thiết: {tools}. Đang tải bản do ứng dụng quản lý…'
+    Managed Tools Download Finished Template: Đã tải xong {tools}
+    Managed Tools Update Started Template: Đã tìm thấy bản cập nhật cho {tools}. Đang tải…
+    Managed Tools Update Finished Template: Đã cập nhật xong {tools}
+    Managed Tools Update Available Template: Có bản cập nhật cho {tools}.
+    Managed Tools Update Source Notice: "OpenTubeX tải bản cập nhật trực tiếp từ GitHub, nên F-Droid và các cửa hàng ứng dụng khác không kiểm tra bản này."
+    Update Managed Tools: Cập nhật
+    Managed Tools Download Error Template: 'Không thể tải các công cụ được quản lý: {errors}'
+    Download Folder: Thư mục tải xuống
+    Global Additional yt-dlp Arguments: Đối số yt-dlp bổ sung
+    Concurrent Downloads: Số lượt tải đồng thời
+    Bandwidth Limit: Giới hạn băng thông (KiB/s)
+    Download Templates: Mẫu tải xuống
+    Manage Download Templates: Quản lý mẫu tải xuống ({templateCount})
+    New Template: Mẫu mới
+    Template Source: Mẫu để sửa hoặc dùng làm cơ sở
+    Built-in Template: '{name} (tích hợp sẵn)'
+    Custom Template Name: '{name} (tùy chỉnh)'
+    Create Template Copy: Tạo bản sao
+    Template Copy Name: 'Bản sao của {name}'
+    Automatic Downloads: Tự động tải xuống
+    Manage Automatic Downloads: Quản lý tự động tải xuống ({channelCount})
+    Automatic Downloads Description: Chọn mẫu tải xuống và bộ lọc cho từng kênh đã đăng ký. Video phù hợp sẽ được tải trong nền khi bảng tin đăng ký được làm mới.
+    Automatic Downloads New Only: Khi bật cho một kênh, ứng dụng sẽ bắt đầu từ video mới tiếp theo. Video hiện có và video cũ của kênh sẽ không được tải.
+    Automatic Downloads No Channels: Hãy đăng ký một kênh trước khi thiết lập tự động tải xuống.
+    No Matching Automatic Download Channels: Không có kênh phù hợp với tìm kiếm.
+    Automatic Downloads Livestreams: Luồng trực tiếp
+    Minimum Duration Seconds: Thời lượng tối thiểu (giây)
+    Maximum Duration Seconds: Thời lượng tối đa (giây)
+    Minimum File Size MB: Kích thước tệp tối thiểu (MB)
+    Maximum File Size MB: Kích thước tệp tối đa (MB)
+    Maximum Age Days: Tuổi tối đa (ngày)
+    Title Includes: Tiêu đề có chứa
+    Title Excludes: Tiêu đề không chứa
+    Title Filter Hint: Phân tách nhiều cụm từ trong tiêu đề bằng dấu phẩy. Video phải khớp ít nhất một cụm từ cần có và không khớp cụm từ loại trừ nào.
+    Automatic Downloads Require Unmetered Network: "Chỉ trên mạng không đo lưu lượng"
+    Automatic Downloads Require Charging: "Chỉ khi đang sạc"
+  External Software Settings:
+    Create YouTube session: "Tạo phiên YouTube"
+    YouTube session hint: "Đăng nhập nếu cần rồi lưu phiên. Chọn trong cài đặt để sử dụng phiên cho tải xuống, phát hoặc phụ đề."
+    Use cookies for downloads: "Sử dụng cookie để tải xuống"
+    YouTube session failed: "Không thể lưu phiên YouTube."
+    Checking FFmpeg and FFprobe: Đang kiểm tra FFmpeg/FFprobe…
+    FFmpeg and FFprobe Managed Not Downloaded: Chưa tải FFmpeg/FFprobe. Nhấp vào nút bên dưới để tải.
+    External Software Settings: Phần mềm bên ngoài
+    yt-dlp Source: Nguồn yt-dlp
+    yt-dlp Channel: Kênh yt-dlp
+    Sources:
+      System: Hệ thống (PATH hoặc đường dẫn tùy chỉnh)
+      Managed: Do OpenTubeX quản lý
+    Detected Version Template: 'Phiên bản yt-dlp đã phát hiện: {version}'
+    Managed Not Downloaded: Chưa tải yt-dlp. Nhấp vào nút bên dưới để tải.
+    System yt-dlp Missing Warning: Không tìm thấy yt-dlp trên hệ thống. Hãy cài đặt, đặt đường dẫn tùy chỉnh bên dưới hoặc chuyển nguồn sang "Do OpenTubeX quản lý".
+    Download yt-dlp: Tải yt-dlp
+    Update yt-dlp: Cập nhật yt-dlp
+    Checking yt-dlp: Đang kiểm tra yt-dlp…
+    Downloading yt-dlp: Đang tải yt-dlp…
+    yt-dlp Downloaded Template: Đã tải yt-dlp {version}
+    yt-dlp Download Error Template: 'Không tải được yt-dlp: {error}'
+    FFmpeg Source: Nguồn FFmpeg
+    Detected FFmpeg Version Template: 'Phiên bản FFmpeg đã phát hiện: {version}'
+    Detected FFmpeg and FFprobe Version Template: 'Phiên bản FFmpeg/FFprobe đã phát hiện: {version}'
+    FFmpeg Managed Not Downloaded: Chưa tải FFmpeg. Nhấp vào nút bên dưới để tải.
+    System FFmpeg Missing Warning: Không tìm thấy FFmpeg trên hệ thống. Công cụ này cần thiết để ghép video với âm thanh và chuyển đổi âm thanh. Hãy cài đặt, đặt đường dẫn tùy chỉnh bên dưới hoặc chuyển nguồn sang "Do OpenTubeX quản lý".
+    Download FFmpeg: Tải FFmpeg
+    Update FFmpeg: Cập nhật FFmpeg
+    Checking FFmpeg: Đang kiểm tra FFmpeg…
+    Downloading FFmpeg: Đang tải FFmpeg…
+    Detected FFprobe Version Template: 'Phiên bản FFprobe đã phát hiện: {version}'
+    FFprobe Managed Not Downloaded: Chưa tải FFprobe. Nhấp vào nút bên dưới để tải cùng FFmpeg.
+    System FFprobe Missing Warning: Không tìm thấy FFprobe trên hệ thống. Công cụ này cần thiết để kiểm tra nội dung đa phương tiện trong quá trình xử lý hậu kỳ. Hãy cài đặt cạnh FFmpeg hoặc chuyển nguồn sang "Do OpenTubeX quản lý".
+    Checking FFprobe: Đang kiểm tra FFprobe…
+    Download FFmpeg and FFprobe: Tải FFmpeg và FFprobe
+    Update FFmpeg and FFprobe: Cập nhật FFmpeg và FFprobe
+    Downloading FFmpeg and FFprobe: Đang tải FFmpeg và FFprobe…
+    FFmpeg and FFprobe Downloaded Template: Đã tải FFmpeg và FFprobe {version}
+    FFmpeg and FFprobe Download Error Template: 'Không tải được FFmpeg và FFprobe: {error}'
+    Managed Tool Already Current Template: '{tool} {version} đã là phiên bản mới nhất'
+    Managed Tool Errors:
+      Removed: 'Tệp đã tải xuống đã bị xóa, rất có thể do phần mềm diệt vi-rút'
+      Unusable: 'Không thể chạy chương trình đã tải xuống. Phần mềm diệt vi-rút có thể đang chặn nó, hoặc nó không hỗ trợ hệ thống này'
+      Release Not Found: 'Không tìm thấy bản phát hành mới nhất'
+      Verification Failed: 'Không thể xác minh bản tải xuống là bản phát hành chính thức'
+      Downgrade: 'Bản phát hành đã tải xuống cũ hơn bản đã cài đặt'
+      Invalid Archive: 'Tệp nén đã tải xuống không hợp lệ'
+      Rollback Failed: 'Cập nhật thất bại và không thể khôi phục hoàn toàn phiên bản trước'
+    Managed Tool Updates: Cập nhật công cụ được quản lý
+    Update Modes:
+      Automatic: Tự động cập nhật
+      Ask: Hỏi trước khi cập nhật
+      Manual: Chỉ cập nhật thủ công
+    yt-dlp Executable Path: Tệp thực thi yt-dlp
+    FFmpeg Executable Path: Tệp thực thi FFmpeg
+    Restricted Playback Authentication: "Cookie yt-dlp"
+    Cookie Source: Nguồn cookie
+    Cookie Sources:
+      None: Không có
+      File: Tệp
+      Browser: Trình duyệt
+    Cookie File: Tệp cookie
+    Browser for Cookies: Trình duyệt lấy cookie
+    Browser Profile: Hồ sơ trình duyệt (không bắt buộc)
+    Browser Profile Placeholder: Tên hoặc đường dẫn hồ sơ
+    Browser Profile Invalid: "Nhập tên hồ sơ hoặc chọn thư mục hồ sơ bằng nút thư mục."
+    Select Browser: Chọn trình duyệt
+    Always Use Cookies: Luôn dùng cookie
+    Restricted Playback Authentication Hint: Theo mặc định, OpenTubeX chỉ chuyển các cookie này cho yt-dlp sau khi bạn chọn "Thử bằng cookie đã thiết lập" trên video giới hạn độ tuổi hoặc chỉ dành cho hội viên.
+    Restricted Playback Authentication Warning: Dùng yt-dlp với tài khoản Google có thể khiến tài khoản bị hạn chế tạm thời hoặc vĩnh viễn.
+    Use cookies for subtitles: "Dùng cookie cho phụ đề"
+  Privacy Settings:
+    Internet Connectivity Checks: "Kiểm tra kết nối internet"
+    Internet Connectivity Checks Tooltip: "Gửi yêu cầu nhỏ đến máy chủ do GrapheneOS lưu trữ để kiểm tra khả năng truy cập internet."
+    Automatic History Retention: Tự động lưu giữ lịch sử (ngày)
+    Automatic History Retention Placeholder: Để trống nếu muốn giữ mãi
+    Automatic History Retention Tooltip: Để trống để giữ lịch sử mãi mãi. Khi lưu một con số, ứng dụng sẽ xóa ngay các mục cũ hơn và tiếp tục tự động xóa khi đang mở.
+    Automatic Search History Retention: Tự động lưu giữ lịch sử tìm kiếm (ngày)
+    Automatic Search History Retention Tooltip: Để trống để giữ lịch sử tìm kiếm mãi mãi. Khi lưu một con số, ứng dụng sẽ xóa ngay các tìm kiếm cũ hơn và tiếp tục tự động xóa khi đang mở.
+    History Retention Saved: Đã lưu thời hạn giữ lịch sử
+    Invalid History Retention Days: Nhập số ngày nguyên lớn hơn 0
+    Enable Watch Statistics: Bật thống kê xem
+    Week Starts On: Ngày đầu tuần
+    Cache Video Metadata: Lịch sử siêu dữ liệu
+    Cache Video Metadata Tooltip: Lưu mọi phiên bản siêu dữ liệu được hỗ trợ của video bạn truy cập, gồm tiêu đề, hình thu nhỏ và mô tả. Đồng thời lưu các tiêu đề hiển thị trong nguồn cấp dữ liệu kênh đăng ký của bạn. Tính năng này mặc định tắt vì việc lưu lịch sử siêu dữ liệu làm tăng dung lượng đĩa sử dụng.
+    Watched Percentage Threshold: Ngưỡng phần trăm đã xem
+    Watched Percentage Threshold Tooltip: Video được đánh dấu đã xem sau khi đạt tỷ lệ đã chọn và còn không quá 2 phút. Ở mức 0%, video được đánh dấu khi bắt đầu phát. Ở mức 100%, video được đánh dấu khi phát xong.
+    Clear Video Metadata Cache: Xóa bộ nhớ đệm siêu dữ liệu video
+    Are you sure you want to clear the video metadata cache?: Bạn có chắc muốn xóa tiêu đề, hình thu nhỏ và mô tả video trong bộ nhớ đệm không?
+    Failed to clear video metadata cache: Không thể xóa bộ nhớ đệm siêu dữ liệu video
+    Video Metadata Cache Size: 'Bộ nhớ đệm siêu dữ liệu video: {size}'
+  Storage Settings:
+    Storage: Bộ nhớ
+    Downloaded Media: Nội dung tải xuống được theo dõi
+    Storage Breakdown: Chi tiết dung lượng
+    Shown Total: Tổng dung lượng hiển thị
+    Calculating: Đang tính…
+    Not Available: Không có kích thước chính xác
+    At Least: Ít nhất {size}
+    Failed To Read Storage: Không thể đọc một số kích thước lưu trữ
+    Downloaded Media Description: Tệp video, âm thanh và phụ đề vẫn được lịch sử tải xuống theo dõi.
+    Selected Download Folders: Thư mục tải xuống do người dùng chọn
+    Download History Records: Bản ghi lịch sử tải xuống
+    Download History Records Description: '{count} bản ghi tải xuống đã hoàn tất. Các bản ghi này theo dõi trạng thái và vị trí tệp nhưng không chứa nội dung đã tải.'
+    Clear Download History Records: Xóa bản ghi lịch sử tải xuống
+    Clear Download History Confirmation: Xóa tất cả bản ghi tải xuống đã hoàn tất?
+    Download Files Stay On Disk: Tệp đã tải sẽ vẫn còn trên ổ đĩa nhưng không còn xuất hiện trên trang Tải xuống.
+    Clear Records: Xóa bản ghi
+    Replaceable Caches: Bộ nhớ đệm có thể tạo lại
+    Application Caches: Bộ nhớ đệm ứng dụng
+    Browser Caches: Bộ nhớ đệm trình duyệt
+    Browser Caches Hint: Bộ nhớ đệm HTTP, GPU, mã, shader, service worker và từ điển của Chromium.
+    Clear Android Cache Confirmation: Xóa bộ nhớ đệm trình duyệt của Android?
+    Stored App Data: Dữ liệu ứng dụng đã lưu
+    Included In App Data: Đã bao gồm trong dữ liệu ứng dụng hiển thị ở trên
+    Browser Runtime Data: Dữ liệu thời gian chạy của trình duyệt
+    Browser Runtime Data Hint: Bộ nhớ phiên và bộ nhớ cục bộ, cookie, trạng thái riêng tư và mạng cùng tệp sự cố của Chromium.
+    Subscription Feed Cache: Bộ nhớ đệm đăng ký và bảng tin
+    Subscription Feed Cache Description: Lưu video, video ngắn, luồng trực tiếp và bài đăng đã tải từ kênh đăng ký. OpenTubeX sẽ tạo lại dữ liệu này trong lần làm mới bảng tin tiếp theo.
+    Clear Subscription Feed Cache: Xóa bộ nhớ đệm đăng ký và bảng tin
+    Clear Subscription Feed Cache Confirmation: Xóa bộ nhớ đệm đăng ký và bảng tin?
+    Subscription Feed Cache Effect: Bảng tin đăng ký có thể trống cho đến khi được làm mới. Các kênh đăng ký và hồ sơ sẽ không thay đổi.
+    Session Search Cache: Bộ nhớ đệm tìm kiếm của phiên
+    In Memory: Trong bộ nhớ
+    Session Search Cache Description: '{count} lượt tìm kiếm được lưu trong bộ nhớ để quay lại nhanh hơn. Bộ nhớ đệm này bị xóa khi đóng OpenTubeX.'
+    Clear Session Search Cache: Xóa bộ nhớ đệm tìm kiếm của phiên
+    Clear Session Search Cache Confirmation: Xóa bộ nhớ đệm tìm kiếm của phiên?
+    Session Search Cache Effect: Các trang kết quả trong bộ nhớ đệm sẽ bị xóa. Lịch sử tìm kiếm đã lưu sẽ không thay đổi.
+    HTTP Cache: Bộ nhớ đệm HTTP
+    HTTP Cache Description: Electron lưu phản hồi mạng trên ổ đĩa để các yêu cầu lặp lại có thể tải mà không phải tải xuống cùng dữ liệu lần nữa. OpenTubeX sẽ tạo lại bộ nhớ đệm này khi cần.
+    Managed By Electron: Do Electron quản lý
+    Clear HTTP Cache: Xóa bộ nhớ đệm HTTP
+    Clear HTTP Cache Confirmation: Xóa bộ nhớ đệm HTTP của Electron?
+    HTTP Cache Effect: Ảnh và các tài nguyên mạng khác có thể tải chậm hơn một lần trong khi bộ nhớ đệm được tạo lại.
+    Tab Image Cache: Hình thu nhỏ của thẻ và ảnh đại diện kênh
+    Tab Image Cache Description: Lưu ảnh xem trước và ảnh đại diện kênh cho các thẻ đang mở và được khôi phục. OpenTubeX sẽ tạo lại chúng khi các thẻ được dùng.
+    Clear Tab Image Cache: Xóa bộ nhớ đệm ảnh thẻ
+    Clear Tab Image Cache Confirmation: Xóa hình thu nhỏ của thẻ và ảnh đại diện kênh?
+    Tab Image Cache Effect: Ảnh thẻ có thể biến mất trong giây lát và sẽ được tạo lại khi dùng thẻ tương ứng.
+    Playback Caches: Bộ nhớ đệm phát
+    Playback Caches Description: Lưu URL luồng yt-dlp giữa các phiên ứng dụng cùng với tệp trình phát YouTube. Bộ nhớ đệm URL chỉ áp dụng cho luồng lấy bằng yt-dlp.
+    Playback URL Cache Entry Size: Giới hạn bộ nhớ đệm URL luồng yt-dlp
+    Playback URL Cache Entry Size Tooltip: Đặt kích thước tối đa cho từng mục luồng yt-dlp trong bộ nhớ đệm. Đặt thành 0 MB để tắt lưu bền vững cho luồng yt-dlp.
+    Clear Playback Caches: Xóa bộ nhớ đệm phát
+    Clear Playback Caches Confirmation: Xóa bộ nhớ đệm yt-dlp và trình phát?
+    Playback Caches Effect: Yêu cầu phát cục bộ tiếp theo có thể mất nhiều thời gian hơn vì dữ liệu luồng và trình phát phải được tải lại.
+    Clear Cache: Xóa bộ nhớ đệm
+    History Data: Lịch sử đã lưu
+    Video Metadata Description: Lưu tiêu đề, hình thu nhỏ và mô tả trước đây của các video được hỗ trợ. Không thể tạo lại các bản cũ sau khi xóa.
+    Video Metadata Effect: Các bản siêu dữ liệu đã lưu sẽ bị xóa vĩnh viễn. Vẫn có thể tải lại thông tin hiện tại của video.
+    Watch History: Lịch sử xem và thống kê
+    Watch History Description: Lịch sử xem ghi lại video đã xem và tiến độ. Thống kê xem lưu tổng thời gian xem mỗi ngày. Thời hạn lưu chỉ áp dụng cho lịch sử xem.
+    Clear Watch Statistics: Xóa thống kê xem
+    Watch History Effect: Bản ghi video đã xem và tiến độ đã lưu sẽ bị xóa. Thống kê xem vẫn được giữ lại.
+    Clear Watch Statistics Confirmation: Xóa toàn bộ thống kê xem?
+    Watch Statistics Effect: Tổng thời gian xem mỗi ngày sẽ bị xóa. Lịch sử xem vẫn được giữ lại.
+    Search History: Lịch sử tìm kiếm
+    Search History Description: Lưu các lượt tìm kiếm bạn chọn ghi nhớ.
+    Delete Search History: Xóa lịch sử tìm kiếm
+    Delete Search History Confirmation: Xóa toàn bộ lịch sử tìm kiếm đã lưu?
+    Search History Effect: Gợi ý tìm kiếm đã lưu từ các lượt tìm kiếm trước sẽ biến mất. Bộ nhớ đệm của phiên hiện tại vẫn được giữ lại.
+    Other User Data: Dữ liệu người dùng khác
+    Other Profile Files: Tệp hồ sơ khác
+    Other Profile Files Hint: Bản sao lưu, tệp tạm và mục hồ sơ mà OpenTubeX chưa nhận dạng.
+    Subscriptions And Profiles: Kênh đăng ký và hồ sơ
+    Subscriptions And Profiles Description: Lưu các kênh đã đăng ký, tên hồ sơ và thành viên trong hồ sơ.
+    Subscriptions And Profiles Effect: Tất cả kênh đăng ký và hồ sơ bổ sung sẽ bị xóa vĩnh viễn. Dữ liệu bộ nhớ đệm bảng tin cũng sẽ bị xóa.
+    Playlists Description: Lưu tên, mô tả và video trong danh sách phát.
+    Playlists Effect: Mọi danh sách phát và danh sách video đã lưu trong đó sẽ bị xóa vĩnh viễn. Các tệp đa phương tiện đã tải vẫn được giữ lại.
+    Settings And Sessions: Cài đặt, phiên thẻ và lời nhắc
+    Settings And Sessions Description: Lưu tùy chọn ứng dụng, các thẻ có thể khôi phục và lời nhắc luồng trực tiếp. Mở thư mục hồ sơ để kiểm tra hoặc sao lưu các tệp này; trang này không xóa chúng.
+    Cleanup Complete: Đã dọn dẹp bộ nhớ
+    Cleanup Failed: Không thể dọn dẹp bộ nhớ
+  Subscription Settings:
+    Fetch Feed on Startup: Tải bảng tin khi khởi động
+    Show New Content Feed: Hiện bảng tin nội dung mới
+    RSS Feeds: Nguồn cấp RSS
+    Enable RSS Feeds: Bật nguồn cấp RSS cho các nền tảng khác
+    Manage RSS Feeds: Quản lý nguồn cấp RSS
+    Show New Content Indicators: Hiện chỉ báo nội dung mới
+    Show Scheduled Live Streams / Premieres First: Hiện luồng trực tiếp / công chiếu đã lên lịch trước
+    Auto Refresh Interval: Khoảng thời gian tự động làm mới
+    Videos Auto Refresh Interval: Khoảng tự động làm mới video
+    Shorts Auto Refresh Interval: Khoảng tự động làm mới video ngắn
+    Live Auto Refresh Interval: Khoảng tự động làm mới luồng trực tiếp
+    Posts Auto Refresh Interval: Khoảng tự động làm mới bài đăng
+    Refresh Subscriptions While App Is Closed: "Làm mới đăng ký khi ứng dụng đã đóng"
+    Notify About New Uploads: Thông báo nội dung mới tải lên
+    RSS Feeds Auto Refresh Interval: Khoảng tự động làm mới nguồn cấp RSS
+    Faster Subscription Refresh: "Làm mới kênh đăng ký nhanh hơn"
+    Platforms:
+      Other Platforms: Nền tảng khác
+      Manage Channels: Quản lý kênh đang theo dõi
+      Notify When Live: Thông báo khi các kênh Twitch đang theo dõi bắt đầu phát trực tiếp
+      Auto Refresh Interval: Khoảng tự động làm mới nền tảng khác
+  Distraction Free Settings:
+    Digital Wellbeing:
+      Count Watch Time From: "Tính thời gian xem từ"
+      Break Reminder Action: "Khi đến lúc nghỉ giải lao"
+      Grayscale: "Thang độ xám"
+      Apply Grayscale To: "Áp dụng thang độ xám cho"
+      Off: "Tắt"
+      Always: "Luôn luôn"
+      During Bedtime: "Trong giờ đi ngủ"
+      After the Daily Limit: "Sau khi đạt giới hạn hằng ngày"
+      Whole App: "Toàn bộ ứng dụng"
+      Videos and Images: "Video và hình ảnh"
+      Daily Watch Time Limit: "Giới hạn thời gian xem hằng ngày"
+      Daily Shorts Limit: "Giới hạn Shorts hằng ngày"
+      When a Limit Is Reached: "Khi đạt giới hạn"
+      Remind Me: "Nhắc tôi"
+      Pause Playback: "Tạm dừng phát"
+      Take a Break Reminder: "Lời nhắc nghỉ giải lao"
+      Every: "Mỗi {duration}"
+      Bedtime Reminder: "Lời nhắc giờ đi ngủ"
+      Bedtime Start: "Bắt đầu giờ đi ngủ"
+      Bedtime End: "Kết thúc giờ đi ngủ"
+      Wait Until the Video Ends: "Chờ đến khi video kết thúc"
+      Silence Upload Notifications at Bedtime: "Tắt tiếng thông báo nội dung mới tải lên trong giờ đi ngủ"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Dừng tự động phát trong giờ đi ngủ và sau khi đạt giới hạn hằng ngày"
+    Hide Popularity Graph: "Ẩn biểu đồ mức độ phổ biến"
+    Enable Block Lists: "Bật danh sách chặn"
+    AI Video Summaries: Bản tóm tắt video bằng AI
+    Hide: Ẩn
+    Collapsed: Thu gọn
+    Expanded: Mở rộng
+    Video Descriptions: Mô tả video
+    Video Description Modes:
+      Hide: Ẩn
+      Collapsed: Thu gọn
+      Expanded: Mở rộng
+    Playing Interface Hide Delay: Độ trễ ẩn giao diện khi phát
+    Hide Startup Splash: Ẩn màn hình khởi động
+    Hide Header Sync Indicator: Ẩn chỉ báo đồng bộ hóa trên thanh đầu ứng dụng
+    Hide Repeat Stats: Ẩn thống kê lặp lại
+    Hide Playlist Stats: Ẩn thống kê danh sách phát
+    Sections:
+      Digital Wellbeing: "Sức khỏe kỹ thuật số"
+      Visible While Paused: Hiện khi tạm dừng ở chế độ toàn cửa sổ / toàn màn hình
+    Hide Channel Avatars: Ẩn ảnh đại diện kênh
+    Shorten View Counts: Rút gọn số lượt xem, bình luận và lượt thích bình luận
+    Hide Home: Ẩn Trang chủ
+    Hide Live Chat Replay: Ẩn bản phát lại trò chuyện trực tiếp
+    Disable A-B Repeat: Tắt lặp A-B
+    Hide End-Screen Annotations: Ẩn chú thích ở màn hình kết thúc
+    Hide End-Screen Recommendations: "Ẩn đề xuất trên màn hình kết thúc"
+    Hide Paid Promotion Badge: Ẩn huy hiệu quảng cáo trả phí
+    Show Player Controls: Hiện điều khiển trình phát
+    Show Video Title: Hiện tiêu đề video
+    Show Bottom Right Actions Dock: Hiện thanh thao tác dưới bên phải
+    Paused Interface Hide Delay: Độ trễ ẩn giao diện khi tạm dừng
+    Hide Channel Shows: Ẩn Tab "Chương trình" của Kênh
+    Blur Blocked Items: Làm mờ các mục bị chặn thay vì ẩn chúng
+    More Items Count: "+{count} mục khác…"
+  Data Settings:
+    Settings could not be imported: "Không thể nhập cài đặt"
+    Some settings could not be imported: "Không thể nhập tất cả cài đặt ({failed}/{total} không thành công)"
+    Scheduled backups: "Sao lưu theo lịch"
+    Scheduled backup description: "Lưu bản sao ZIP đầy đủ khi OpenTubeX đang mở. Các lần sao lưu bị lỡ sẽ chạy khi khởi động. Giới hạn chỉ áp dụng cho bản sao theo lịch trong thư mục này."
+    Choose backup folder: "Chọn thư mục sao lưu"
+    No backup folder selected: "Chưa chọn thư mục sao lưu"
+    Enable scheduled backups: "Bật sao lưu theo lịch"
+    Backup frequency: "Tần suất sao lưu"
+    Backups to keep: "Số bản sao cần giữ"
+    Daily: "Hằng ngày"
+    Weekly: "Hằng tuần"
+    Every 30 days: "Mỗi 30 ngày"
+    Last scheduled backup: "Lần sao lưu theo lịch gần nhất: {date}"
+    No scheduled backup yet: "Chưa có bản sao lưu theo lịch"
+    Scheduled backup failed: "Sao lưu thất bại. Hãy kiểm tra quyền ghi vào thư mục. Sẽ thử lại sau năm phút."
+    Import Preview:
+      Title: Xem trước thay đổi
+      New: "Mới: {count}"
+      Existing: "Hiện có: {count}"
+      Skipped: "Bỏ qua: {count}"
+      Unreadable files: "Tệp không đọc được: {count}"
+      Settings effect: Các cài đặt trùng khớp được thay thế. Cài đặt riêng tư và không xác định được bỏ qua.
+      Details effect: Các đăng ký hoặc video hiện có được giữ lại. Chi tiết hồ sơ hoặc danh sách phát được nhập sẽ thay thế chi tiết hiện tại.
+      Merge effect: Dữ liệu hiện có được giữ lại và hợp nhất với các bản ghi trùng khớp.
+      Subscriptions effect: Các đăng ký hiện có được giữ lại. Chỉ thêm kênh mới.
+      History merge effect: Các video trùng khớp được hợp nhất với lịch sử của bạn, giữ lại chi tiết đã lưu và ngày xem gần nhất. Lịch sử khác được giữ lại.
+    Select export data: "Chọn dữ liệu để xuất"
+    Export selected data: "Xuất dữ liệu đã chọn"
+    Complete backup: "Bản sao lưu đầy đủ"
+    Import backup: "Nhập bản sao lưu"
+    Export backup: "Xuất bản sao lưu"
+    Backup description: "Lưu hồ sơ, danh sách phát, lịch sử, số liệu thống kê và cài đặt có thể chuyển nhượng trong một tệp ZIP. Nhập kết hợp chúng với dữ liệu đã có trên thiết bị này."
+    Select backup data: "Chọn dữ liệu để nhập"
+    Profiles and subscriptions: "Hồ sơ và đăng ký"
+    Backup exported: "Đã xuất bản sao lưu thành công"
+    Backup imported: "Đã nhập bản sao lưu thành công"
+    Import YouTube Takeout ZIP: "Nhập ZIP YouTube Takeout"
+    Select Takeout data: "Chọn dữ liệu cần nhập"
+    Import selected data: "Nhập dữ liệu đã chọn"
+    No supported Takeout data: "Không tìm thấy dữ liệu YouTube được hỗ trợ trong ZIP này."
+    Data And Storage: Dữ liệu và bộ nhớ
+    Profile Directory: Thư mục hồ sơ
+    Open Profile Directory: Mở thư mục hồ sơ
+    Invalid JSON row, skipping item: JSON không hợp lệ ở hàng {row}, bỏ qua mục
+    Setting object has insufficient data, skipping item: Đối tượng cài đặt thiếu dữ liệu, bỏ qua mục
+    Unknown setting key: 'Khóa cài đặt không xác định: {key}'
+    Non-transferable setting key: 'Khóa cài đặt không thể chuyển: {key}'
+    Import subscriptions formats: 'Định dạng được hỗ trợ: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), bản sao lưu LibreTube hoặc bản xuất FreeTube (.json)'
+    Import history formats: 'Định dạng được hỗ trợ: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), bản sao lưu LibreTube (.json)'
+    Import playlists formats: 'Định dạng được hỗ trợ: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import search history formats: 'Định dạng được hỗ trợ: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Channel playback speeds: "Tốc độ phát của kênh"
+    Import channel playback speeds: "Nhập tốc độ phát của kênh"
+    Channel playback speeds file: "Tệp tốc độ phát của kênh"
+    Import channel playback speeds formats: "Định dạng được hỗ trợ: dữ liệu userscript {script} (.json)"
+    Invalid channel playback speeds file: "Không tìm thấy tốc độ phát của kênh nào trong tệp này"
+    Channel playback speeds imported: "Đã nhập tốc độ phát của {count} kênh"
+    Channels not found: "Không tìm thấy {count} kênh"
+    Playlists have been successfully imported: "Đã nhập thành công {count}/{total} danh sách phát"
+  Sync Settings:
+    Signed Out After Restore: 'Đồng bộ đã bị đăng xuất vì dữ liệu ứng dụng này được khôi phục từ bản sao lưu hoặc từ thiết bị khác. Hãy đăng nhập lại để đồng bộ thiết bị này.'
+    Revoke Session Tabs Warning: "Các bộ thẻ đã đồng bộ của thiết bị này cũng sẽ bị xóa."
+    Revoke Session Partial Failure: "Các bộ thẻ đã đồng bộ đã bị xóa, nhưng không thể xác nhận việc thu hồi. Hãy thử thu hồi quyền truy cập lần nữa."
+    Tab Sync Revocation Pending: "Đồng bộ thẻ đang tạm dừng trong khi chờ thu hồi quyền truy cập của lần đăng nhập này. Thử thu hồi lại trong Cài đặt đồng bộ."
+    Show More: "Hiển thị thêm"
+    Watch stats: "Thống kê xem"
+    Syncing statistics: Đang đồng bộ thống kê xem…
+    Sync Automatically: "Tự động đồng bộ"
+    Activity: "Hoạt động tài khoản"
+    No Activity: "Không có hoạt động gần đây"
+    Clear Activity: "Xóa trên thiết bị này"
+    Clear Activity Hint: "Ẩn hoạt động tài khoản hiện có trên thiết bị này. Hoạt động trên máy chủ và các thiết bị khác không thay đổi. Hoạt động mới vẫn sẽ xuất hiện."
+    Setting Changed: "{device} đã đổi {setting} thành {value}"
+    Item Updated: "{device} đã cập nhật {setting}"
+    Item Added: "{device} đã thêm {item} vào {setting}"
+    Item Removed: "{device} đã xóa {item} khỏi {setting}"
+    Item Renamed: "{device} đã đổi tên {item} thành {value}"
+    Saved Playlists: "Danh sách phát đã lưu"
+    No Feed Types: "Không có"
+    Open On Device: "Mở trên thiết bị khác"
+    Video Sent: "Đã gửi video. Thiết bị ngoại tuyến sẽ nhận được khi kết nối lại trong vòng 24 giờ."
+    Video Received: "Video đã nhận: {title}"
+    Previous Auto Sync Notice: "Đồng bộ tự động đang tắt. Phiên bản trước có thể đã tắt tính năng này để tránh mất dữ liệu."
+    Enable Automatic Sync: "Bật đồng bộ tự động"
+    Destructive Sync Blocked: "Đã dừng đồng bộ để tránh mất dữ liệu. Đồng bộ tự động đã tắt. Mở cài đặt đồng bộ để xem lại các mục sẽ bị xóa."
+    Devices: "Thiết bị"
+    Devices Hint: "Xem lại các thiết bị có thể truy cập tài khoản đồng bộ này."
+    Change Password: "Đổi mật khẩu"
+    Refresh Devices: "Làm mới thiết bị"
+    Current Device: "Thiết bị hiện tại"
+    Revoke Session: "Thu hồi quyền truy cập"
+    Session Created: "Đã tạo"
+    Last Active: "Hoạt động gần nhất"
+    Session Expires: "Hết hạn"
+    Unknown Device: "Thiết bị không xác định"
+    Operating System: "Hệ điều hành"
+    Rename Device: "Đổi tên thiết bị"
+    Save Device Name: "Lưu tên"
+    Device Name Invalid: "Tên thiết bị có thể chứa tối đa 80 ký tự và không được chứa ký tự điều khiển."
+    Device Renamed: "Đã đổi tên thiết bị"
+    Revoke Session Confirmation: "Thu hồi phiên này?"
+    Revoke Current Session Warning: "Thu hồi phiên này sẽ ngắt kết nối thiết bị này khỏi tài khoản đồng bộ."
+    Revoke Session Warning: "{device} sẽ mất quyền truy cập vào tài khoản đồng bộ này."
+    Confirm Revoke Session: "Thu hồi phiên"
+    Session Revoked: "Đã thu hồi phiên"
+    Change Password Warning: "Đổi mật khẩu sẽ đăng xuất tất cả thiết bị khác. Thiết bị này vẫn được kết nối."
+    Current Password: "Mật khẩu hiện tại"
+    New Password: "Mật khẩu mới"
+    Confirm New Password: "Xác nhận mật khẩu mới"
+    Save New Password: "Lưu mật khẩu mới"
+    Account Management Failed: "Không thể tải thông tin tài khoản đồng bộ."
+    All Password Fields Required: "Hãy điền tất cả các trường mật khẩu."
+    New Password Too Short: "Mật khẩu mới phải có ít nhất 8 ký tự."
+    New Passwords Do Not Match: "Mật khẩu mới không khớp."
+    Password Changed: "Đã đổi mật khẩu. Các thiết bị khác đã được đăng xuất."
+    Sync Settings: Đồng bộ
+    Enable Sync: Bật đồng bộ
+    Privacy Passphrase: Cụm mật khẩu riêng tư
+    Privacy Passphrase Hint: Dùng cụm mật khẩu khác với mật khẩu tài khoản. Cụm này không bao giờ rời khỏi thiết bị và cần có trên mọi thiết bị; nếu mất, bạn không thể khôi phục dữ liệu đồng bộ đã mã hóa.
+    Privacy Policy: Chính sách riêng tư của máy chủ này
+    Enhanced Privacy Enabled: Đã bật quyền riêng tư nâng cao. Máy chủ chỉ lưu dữ liệu đồng bộ đã mã hóa.
+    Enhanced Privacy Unsupported: Cảnh báo — máy chủ này không hỗ trợ quyền riêng tư nâng cao. Đơn vị vận hành có thể xem dữ liệu đã đồng bộ.
+    Description: 'Đồng bộ gói đăng ký, hồ sơ, danh sách phát, lịch sử xem và các cài đặt được hỗ trợ với máy chủ đồng bộ OpenTubeX hoặc LibreTube. Máy chủ LibreTube có thể không hỗ trợ mọi tính năng đồng bộ.'
+    Server URL: URL máy chủ đồng bộ
+    Checking Server: Đang kiểm tra máy chủ đồng bộ…
+    Server Unavailable: Không thể kết nối với máy chủ đồng bộ này. Hãy kiểm tra URL rồi thử lại.
+    Username: Tên người dùng
+    Log In: Đăng nhập
+    Register: Đăng ký
+    Pair Another Device: Ghép nối thiết bị khác
+    Pair With Existing Device: Ghép nối với thiết bị hiện có
+    Device Name: Tên thiết bị
+    This Device: Thiết bị này
+    Device Name Required: Nhập tên cho thiết bị này.
+    Pairing Device Name Hint: Chọn tên mà bạn sẽ nhận ra trên thiết bị phê duyệt yêu cầu này.
+    Create Pairing Code: Tạo mã ghép nối
+    Creating Pairing Code: Đang tạo mã ghép nối bảo mật…
+    Pairing QR Alt: Mã QR ghép nối cho {device}
+    Scan Pairing Code: Trên thiết bị đã kết nối, mở "Ghép nối thiết bị khác" rồi quét mã này.
+    Pairing Code: Mã ghép nối
+    Use Text Pairing Code: Dùng mã văn bản
+    Show QR Code: Hiện mã QR
+    Text Pairing Code Hint: Sao chép mã này sang thiết bị hiện có. Mã chứa bí mật ghép nối, vì vậy hãy xóa mã khỏi lịch sử bảng nhớ tạm sau khi ghép nối.
+    Pairing QR Warning: Chỉ hiện mã này cho thiết bị tin cậy đã kết nối sẽ phê duyệt yêu cầu. Mã hết hạn sau hai phút.
+    Pairing Expires: Mã ghép nối hết hạn lúc {time}.
+    Verifying Pairing: Đang xác minh khóa riêng tư đã chuyển…
+    Completing Pairing: Đang hoàn tất ghép nối thiết bị…
+    Compare Pairing Codes: So sánh mã ghép nối
+    Pairing Code Match Hint: Chỉ xác nhận nếu mã này khớp với mã trên thiết bị hiện có.
+    Pairing Codes Match: Mã trùng khớp
+    Pairing Approval Code Hint: Giữ cửa sổ này mở và so sánh mã với thiết bị mới. Thiết bị mới không được tiếp tục nếu hai mã khác nhau.
+    Pairing Scan Hint: Quét mã ghép nối hiển thị trên thiết bị bạn đang thêm.
+    Enter Pairing Code: Nhập mã thủ công
+    Pairing Code Entry Hint: Dán mã ghép nối hiển thị trên thiết bị bạn đang thêm.
+    Check Pairing Code: Kiểm tra mã
+    Scan QR Code: Quét mã QR
+    Waiting For Pairing Code: Đang chờ mã ghép nối…
+    Checking Pairing Request: Đang kiểm tra yêu cầu ghép nối…
+    Approving Pairing Request: Đang mã hóa và gửi khóa riêng tư…
+    Pairing Approval Warning: Chỉ phê duyệt nếu bạn thấy yêu cầu này trên thiết bị đang thêm. Ghép nối sẽ cấp quyền truy cập tài khoản và chuyển khóa riêng tư.
+    Approve Pairing: Phê duyệt ghép nối
+    Try Again: Thử lại
+    Scan Again: Quét lại
+    Camera Unavailable: OpenTubeX không thể truy cập camera. Hãy kiểm tra quyền camera hoặc nhập mã ghép nối thủ công.
+    Pairing Unsupported: Máy chủ đồng bộ này không hỗ trợ ghép nối thiết bị an toàn.
+    Pairing Failed: Ghép nối thiết bị không thành công. Hãy thử lại bằng mã mới.
+    Pairing Request Changed: Yêu cầu ghép nối đã thay đổi, hết hạn hoặc đã được dùng. Hãy tạo mã mới.
+    Pairing Server Mismatch: Mã này thuộc về một máy chủ đồng bộ khác.
+    Pairing Verification Unavailable: Không có bộ dữ liệu đồng bộ đã mã hóa để xác minh khóa được chuyển. Hãy đồng bộ thiết bị hiện có rồi thử lại.
+    Pairing Completed: Đã ghép nối thiết bị
+    Pairing Approved: Đã phê duyệt ghép nối thiết bị
+    Use Pairing Invite: Dùng mã từ thiết bị đã kết nối
+    Show Pairing Invite: Hiện mã ghép nối
+    Scan Pairing Invite: Trên thiết bị bạn đang thêm, mở "Ghép nối với thiết bị hiện có", chọn "Dùng mã từ thiết bị đã kết nối" rồi quét mã này.
+    Pairing Invite QR Alt: Mã QR ghép nối cho thiết bị bạn đang thêm
+    Pairing Invite Text Hint: Sao chép mã này sang thiết bị bạn đang thêm. Mã này cho phép một thiết bị yêu cầu truy cập tài khoản của bạn, vì vậy hãy xóa mã khỏi lịch sử bộ nhớ tạm sau khi ghép nối.
+    Pairing Invite Warning: Chỉ hiển thị mã này cho thiết bị bạn đang thêm. Bạn vẫn cần phê duyệt yêu cầu của thiết bị đó trên thiết bị này.
+    Pairing Invite Scan Hint: Quét mã ghép nối hiển thị trên thiết bị đã kết nối của bạn.
+    Pairing Invite Entry Hint: Dán mã ghép nối hiển thị trên thiết bị đã kết nối của bạn.
+    Pairing Invite Code Hint: Chỉ phê duyệt yêu cầu trên thiết bị đã kết nối nếu thiết bị đó hiển thị mã này. Sau đó quá trình ghép nối sẽ tự động hoàn tất.
+    Pairing Invite Approval Hint: Chỉ phê duyệt nếu thiết bị bạn đang thêm hiển thị mã này.
+    Pairing Invite Approved: Đã phê duyệt ghép nối. Thiết bị mới sẽ tự động hoàn tất ghép nối.
+    Disconnect: Ngắt kết nối
+    Delete Account: Xóa tài khoản đồng bộ
+    Delete Account Confirmation: Xóa tài khoản đồng bộ?
+    Delete Account Warning: Thao tác này sẽ xóa vĩnh viễn tài khoản đồng bộ và mọi dữ liệu lưu trên máy chủ này. Dữ liệu OpenTubeX cục bộ sẽ không bị xóa.
+    Confirm Delete Account: Xóa tài khoản
+    Password Required: Cần nhập mật khẩu
+    Account Deleted: Đã xóa tài khoản đồng bộ
+    Connected as: Đã kết nối với tên {username}
+    Profiles: Hồ sơ
+    Open Tabs: Thẻ đang mở và phiên
+    Disable Setting Sync: Ngừng đồng bộ cài đặt này
+    Enable Setting Sync: Đồng bộ cài đặt này
+    Sync Now: Đồng bộ ngay
+    Downloading encrypted data: Đang tải dữ liệu đồng bộ đã mã hóa…
+    Syncing subscriptions: Đang đồng bộ kênh đăng ký…
+    Syncing playlists: Đang đồng bộ danh sách phát…
+    Syncing history: Đang đồng bộ lịch sử xem…
+    Syncing profiles: Đang đồng bộ hồ sơ…
+    Syncing open tabs: Đang đồng bộ thẻ đang mở và phiên…
+    Syncing settings: Đang đồng bộ cài đặt…
+    Uploading encrypted data: Đang tải lên dữ liệu đồng bộ đã mã hóa…
+    Finishing sync: Đang hoàn tất đồng bộ…
+    Sync progress percentage: '{percentage}%'
+    Last synced: 'Lần đồng bộ gần nhất: {date}'
+    History not supported: Phiên bản máy chủ này không hỗ trợ đồng bộ lịch sử xem.
+    Settings not supported: Phiên bản máy chủ này không hỗ trợ đồng bộ cài đặt.
+    Sync completed: Đã đồng bộ
+    Sync failed: 'Đồng bộ thất bại: {error}'
+    Data Loss Confirmation: Xác nhận đồng bộ có xóa dữ liệu?
+    Data Loss Warning: Đồng bộ sẽ xóa {deleted} trong số {previous} mục đã đồng bộ trước đó trong “{collection}” trên tất cả thiết bị. Nếu bạn không xóa chúng, chẳng hạn vì máy chủ đã bị đặt lại, hãy giữ chúng để khôi phục ở mọi nơi.
+    Keep Deleted Items: Giữ các mục
+    Confirm Data Loss: Xóa và tiếp tục
+    Use Shared Tabs: 'Dùng một bộ thẻ chung trên các thiết bị'
+    Shared Tabs Warning: 'Các thẻ đang mở trên thiết bị này sẽ trở thành bộ thẻ dùng chung. Khi đồng bộ hóa, các thiết bị khác sẽ thay thế thẻ đang mở bằng bộ thẻ này; thẻ từ các thiết bị khác nhau không được gộp lại.'
+    Tabs From Other Devices: 'Thẻ từ thiết bị khác'
+    Mobile Device: 'Di động'
+    Desktop Device: 'Máy tính'
+    Open All Tabs: 'Mở tất cả thẻ'
+    Open All Tabs Confirmation: "Mở tất cả thẻ?"
+    Server Update Required: "Cập nhật máy chủ này để hỗ trợ đồng bộ theo thời gian thực được mã hóa."
+    Log In with Provider: 'Đăng nhập bằng {provider}'
+    Log In with Single Sign-On: 'Đăng nhập một lần (SSO)'
+    Continue in Browser: 'Tiếp tục trong trình duyệt. OpenTubeX sẽ tiếp tục khi bạn hoàn tất.'
+    Connected with Single Sign-On: 'Đã kết nối bằng đăng nhập một lần'
+    Delete Single Sign-On Account Hint: 'Trình duyệt sẽ mở để bạn xác nhận việc xóa với nhà cung cấp đăng nhập.'
+  Proxy Settings:
+    IP Block Recovery Script Path: Tập lệnh khôi phục chặn IP
+    Running IP block recovery script: Đang chạy tập lệnh khôi phục khi bị chặn IP
+    IP block recovery script failed: 'Tập lệnh khôi phục khi bị chặn IP đã lỗi (mã thoát: {exitCode})'
+    IP block recovery script finished: Tập lệnh khôi phục khi bị chặn IP đã chạy xong
+    Reloading video after IP block recovery: Đang tải lại video sau khi khôi phục từ lỗi chặn IP
+    Failed to select IP block recovery script: Không thể chọn tập lệnh khôi phục khi bị chặn IP
+  SponsorBlock Settings:
+    Enable SponsorBlock Submission: Bật gửi dữ liệu lên SponsorBlock
+    SponsorBlock Private User ID (optional): ID người dùng riêng tư (tùy chọn)
+    SponsorBlock Private User ID Tooltip: Dán ID người dùng riêng tư SponsorBlock từ tiện ích trình duyệt. Để trống để dùng ID do ứng dụng tạo.
+    Generated SponsorBlock User ID: ID người dùng SponsorBlock đã tạo
+    Generated SponsorBlock User ID Tooltip: Có thể dùng ID người dùng SponsorBlock do ứng dụng tạo này trong tiện ích trình duyệt hoặc khi dùng ứng dụng trên máy tính khác.
+    Reveal Generated User ID: Hiện ID người dùng đã tạo
+    Generated SponsorBlock User ID Copy Button: Sao chép ID người dùng SponsorBlock đã tạo
+    Generated SponsorBlock User ID Copied: Đã sao chép ID người dùng SponsorBlock vào bảng nhớ tạm
+    Skip notification timeout: Thời gian hiện thông báo bỏ qua
+    Custom Color: Màu tùy chỉnh
+    DeArrow Settings: DeArrow
+    Always Show DeArrow Badge: Luôn hiện huy hiệu DeArrow
+  Return YouTube Dislike Settings:
+    Return YouTube Dislike Settings: Return YouTube Dislike
+    Enable Return YouTube Dislike: Bật Return YouTube Dislike
+    Return YouTube Dislike Url: URL API
+  Password Dialog:
+    Incorrect Password: Mật khẩu không đúng
+    Unlock: Mở khóa
+    Unlocking: Đang mở khóa…
+  Search Settings: Tìm trong cài đặt
+  No Settings Found: Không tìm thấy cài đặt
+  Interface Customizer:
+    Customize Interface: "Tùy chỉnh giao diện"
+    Preview: "Xem trước"
+    Player: "Trình phát"
+    Desktop: "Máy tính"
+    Mobile: "Di động"
+    Playing: "Đang phát"
+    Player Menu: "Menu trình phát"
+    Fullscreen: "Toàn màn hình"
+    Paused: "Đã tạm dừng"
+    Controls: "Điều khiển"
+    Example Video Title: "Video mẫu"
+    Resolution: "Độ phân giải"
+    Loop: "Lặp lại"
+    Off: "Tắt"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Ẩn các kênh nội dung rác do AI tạo
+    Hide AI Slop Channels Tooltip: Ẩn các kênh trong danh sách chặn AiSList do cộng đồng duy trì (aisloplist.com) khỏi kết quả tìm kiếm, xu hướng và đề xuất, đồng thời gắn nhãn cho video từ các kênh trong danh sách cảnh báo của nó. Không ảnh hưởng đến các kênh đã đăng ký. Danh sách được tải xuống từ GitHub mỗi ngày một lần và chỉ áp dụng cho kết quả được tải bằng API địa phương.
+    Downloading: Đang tải xuống danh sách…
+    Failed to Download: Không thể tải xuống danh sách
+    Loaded Status: "Kênh bị chặn: {blocked} · Kênh bị gắn cờ: {warned} · Cập nhật: {date}"
+Tutorial:
+  Skip: Bỏ qua
+  Next: Tiếp
+  Finish: Hoàn tất
+  Welcome:
+    Title: Chào mừng đến với OpenTubeX
+    Description: Bắt đầu mới, hoặc chuyển kênh đăng ký, lịch sử và danh sách phát từ ứng dụng khác hoặc từ bản sao lưu.
+    Start Fresh: Bắt đầu mới
+    Import Data: Nhập dữ liệu
+  Preferences:
+    Title: Tùy chỉnh theo ý bạn
+    Description: Chọn chủ đề, trang khởi động và khu vực của bạn. Bạn có thể thay đổi các mục này và nhiều mục khác bất cứ lúc nào trong Cài đặt.
+  Playback:
+    Title: Phát video và quyền riêng tư
+    Description: Chọn cách phát video, OpenTubeX có ghi nhớ nội dung bạn xem hay không và dùng những tiện ích bổ sung nào của cộng đồng.
+  Navigation:
+    Title: Thư viện luôn trong tầm tay
+    Description: Dùng thanh điều hướng để mở kênh đăng ký, danh sách phát, lịch sử và các mục khác.
+  Search:
+    Title: Tìm kiếm hoặc dán liên kết
+    Description: Tìm video và kênh, hoặc dán trực tiếp URL video được hỗ trợ vào ô tìm kiếm.
+  Tabs:
+    Title: Giữ trang mở trong thẻ
+    Description: Mở nhiều trang cùng lúc mà không mất vị trí đang xem.
+  Profile Menu:
+    Title: Cài đặt và hồ sơ
+    Description: Menu hồ sơ chứa cài đặt nhanh, tải xuống và mọi cài đặt khác. Nhấn chuột phải vào menu để chuyển hồ sơ.
+    Touch Description: Menu hồ sơ chứa cài đặt nhanh, tải xuống và mọi cài đặt khác. Nhấn giữ menu để chuyển hồ sơ.
+About:
+  Project: Dự án
+  Community: Cộng đồng
+  Contribute: Đóng góp
+  Documentation: Tài liệu
+  Downloads: Tải xuống
+  Changelog: Nhật ký thay đổi
+  Commit: Bản commit
+  Matrix: Matrix
+  Email: Thư điện tử
+  Show tutorial: Hiện hướng dẫn
+Profile:
+  Customization: Tùy chỉnh
+  Manage Profile Subscriptions: Quản lý đăng ký của hồ sơ
+  Icon Names:
+    Person: Người
+    People: Mọi người
+    Headphones: Tai nghe
+    Gaming: Trò chơi
+    Film: Phim
+    Art: Nghệ thuật
+    Science: Khoa học
+    Globe: Địa cầu
+    Heart: Trái tim
+    Sun: Mặt trời
+    Moon: Mặt trăng
+    Trophy: Cúp
+  Profile Icon: Biểu tượng hồ sơ
+  Choose an Emoji: Chọn biểu tượng cảm xúc
+  Custom Emoji: Biểu tượng cảm xúc tùy chỉnh
+  Choose Image: Chọn ảnh
+  Crop Image: Cắt ảnh
+  Zoom: Thu phóng
+  Apply Crop: Áp dụng phần cắt
+  Transparent: Trong suốt
+  Use Initial: Dùng chữ cái đầu
+  The selected image could not be loaded: Không thể tải ảnh đã chọn
+  Theme Color: Màu chủ đề
+Channel:
+  Hide Watched: Ẩn video đã xem
+  Fewer videos per day: "Ít video hơn mỗi ngày"
+  More videos per day: "Nhiều video hơn mỗi ngày"
+  Verified: Đã xác minh
+  Official Artist Channel: Kênh nghệ sĩ chính thức
+  Subscription settings: Cài đặt đăng ký
+  Failed to save subscription settings: Không thể lưu cài đặt kênh
+  Videos per day: Video mỗi ngày
+  Use global setting: Dùng cài đặt chung
+  Unlimited: Không giới hạn
+  More videos hidden: '+{count} video khác'
+  Show in subscription feed: Hiển thị trong nguồn cấp dữ liệu đăng ký
+  Notify about new uploads: Thông báo nội dung mới tải lên
+  Show members-only videos: Hiển thị video chỉ dành cho hội viên
+  Upload Notifications On: "Bạn sẽ được thông báo về nội dung mới của {channelName} khi danh sách đăng ký được làm mới"
+  Upload Notifications Off: "Bạn sẽ không được thông báo về nội dung mới của {channelName}"
+  Upload Notifications Disabled In Settings: "Thông báo cho {channelName} đang bật, nhưng thông báo nội dung mới đang tắt trong cài đặt của bạn"
+  Turn On Upload Notifications: "Bật"
+  Channel Name Unavailable: Không có tên kênh
+  Search Result Types: Loại kết quả tìm kiếm
+  All Results: Tất cả
+  Posts:
+    Original post unavailable: "Bài đăng gốc không khả dụng"
+    Members-only video hidden by OpenTubeX: "Video chỉ dành cho hội viên đã bị OpenTubeX ẩn"
+    Video hidden by OpenTubeX because of its title: "Video đã bị OpenTubeX ẩn vì tiêu đề chứa văn bản bị ẩn"
+  Shows:
+    Shows: Chương trình
+    This channel does not currently have any shows: Kênh này hiện không có chương trình nào
+Video:
+  Play in Background: "Phát trong nền"
+  Info panel source: 'Nguồn: {source}'
+  External DRM Protected: "Không thể phát video được bảo vệ DRM trong OpenTubeX vì chúng yêu cầu các thành phần nguồn đóng độc quyền."
+  Invalid Media URL: "URL phương tiện không hợp lệ"
+  Mark As Fully Watched: Đánh dấu là đã xem hết
+  AI-generated video summary: "Bản tóm tắt video do AI tạo"
+  Quality and accuracy may vary: "Chất lượng và độ chính xác có thể khác nhau"
+  Includes paid promotion: Có quảng cáo trả phí
+  Age Restricted Badge: Giới hạn độ tuổi
+  Music Video Badge: Video âm nhạc
+  Queue: Hàng đợi
+  Play Next: Phát tiếp theo
+  Add to Queue: Thêm vào hàng đợi
+  Added to Play Next: Video sẽ phát tiếp theo
+  Added to Queue: Đã thêm video vào hàng đợi
+  Clear Queue: Xóa hàng đợi
+  Queue Video Count: '{count} video'
+  Remove from Queue: Xóa {title} khỏi hàng đợi
+  Remove Video from Queue: Xóa khỏi hàng đợi
+  Drag to Reorder Queue: Kéo {title} để sắp xếp lại hàng đợi
+  Reorder Queue Item: Sắp xếp lại {title}
+  Reorder Queue Item Instructions: Dùng phím mũi tên lên và xuống để di chuyển video này trong hàng đợi.
+  Queue Item Moved: Đã chuyển {title} đến vị trí {position} trong tổng số {total}.
+  Queue Item Cannot Move Up: Không thể chuyển {title} lên. Video đã ở vị trí 1 trong tổng số {total}.
+  Queue Item Cannot Move Down: Không thể chuyển {title} xuống. Video đã ở vị trí {total} trong tổng số {total}.
+  Metadata: Thông tin video
+  Close Metadata: Đóng thông tin video
+  Collapse Playlist: Thu gọn danh sách phát
+  Expand Playlist: Mở rộng danh sách phát
+  Metadata Cache:
+    Title History: Lịch sử tiêu đề
+    Thumbnail History: Lịch sử hình thu nhỏ
+    Description History: Lịch sử mô tả
+    Previous Version: Bản trước {number}
+    Empty: (trống)
+  Fetching Streams: Đang lấy luồng bằng yt-dlp…
+  Waiting For Connection: "Không thể kết nối tới máy chủ. Đang tự động thử lại…"
+  Retry Now: "Thử lại ngay"
+  Transcript:
+    Title: Bản chép lời
+    Search: Tìm trong bản chép lời
+    Language: Ngôn ngữ bản chép lời
+    Save: Lưu
+    Show: Hiện bản chép lời
+    Hide: Ẩn bản chép lời
+    Close: Đóng bản chép lời
+    Copied: Đã sao chép bản chép lời vào bảng nhớ tạm
+    Saved: Đã lưu bản chép lời
+    Save Error: Không thể lưu bản chép lời
+    Text File: Tệp văn bản
+    Unavailable: Video này không có bản chép lời.
+    Load Error: Không thể tải bản chép lời.
+    Empty: Bản chép lời này không có văn bản.
+    No Results: Không có đoạn chép lời phù hợp với tìm kiếm.
+  Retry With Built-in Extraction: Thử lại bằng trình trích xuất tích hợp
+  Retry With yt-dlp Extraction: Thử lại bằng yt-dlp
+  Reloading video after streaming URL error: Đang tải lại video sau lỗi URL luồng
+  Configure Restricted Playback Cookies Hint: "Thiết lập cookie trong Cài đặt → Nâng cao → Phần mềm bên ngoài → Cookie yt-dlp."
+  Try With Configured Cookies: Thử bằng cookie đã thiết lập
+  Restricted Playback Authentication Failed Template: 'yt-dlp không thể truy cập video này bằng cookie đã thiết lập: {error}'
+  Unmark As Watched: Bỏ đánh dấu đã xem
+  Video has been unmarked as watched: Đã bỏ đánh dấu video là đã xem
+  Save Channel Playback Speed: Lưu tốc độ phát cho kênh
+  Channel Playback Speed Saved: Đã lưu tốc độ phát cho kênh
+  Save Channel Video Quality: Lưu chất lượng video cho kênh
+  Channel Video Quality Saved: Đã lưu chất lượng video cho kênh
+  Save Channel Subtitles State: Lưu trạng thái phụ đề cho kênh
+  Channel Subtitles State Saved: Đã lưu trạng thái phụ đề cho kênh
+  Save Channel Volume: Lưu âm lượng cho kênh
+  Channel Volume Saved: Đã lưu âm lượng cho kênh
+  Save Channel Setting: Lưu cài đặt kênh…
+  Channel Setting Already Set: '{setting} đã được đặt thành {value}'
+  Video has been saved to {playlistName}: Đã lưu video vào {playlistName}
+  Video has been removed from {playlistName}: Đã xóa video khỏi {playlistName}
+  There was a problem saving the video to {playlistName}: Đã xảy ra lỗi khi lưu video vào {playlistName}
+  There was a problem removing the video from {playlistName}: Đã xảy ra lỗi khi xóa video khỏi {playlistName}
+  Failed to load collaborators: Không thể tải danh sách cộng tác viên
+  Notify me: Thông báo cho tôi
+  Notification on: Đã bật thông báo
+  Notification enabled: Bạn sẽ được thông báo khi video này bắt đầu
+  Notification cancelled: Đã hủy thông báo khi bắt đầu
+  Notification unavailable: Không dùng được thông báo hệ thống
+  Scheduled video starting: Video đã lên lịch sắp bắt đầu
+  Live notification body: '{videoTitle} đang bắt đầu'
+  AI-generated content: Nội dung do AI tạo
+  Collaborators: Cộng tác viên
+  Live Chat Replay: Bản phát lại trò chuyện trực tiếp
+  Show Live Chat: Hiện trò chuyện trực tiếp
+  Show Live Chat Replay: Hiện bản phát lại trò chuyện trực tiếp
+  Close Live Chat: Đóng trò chuyện trực tiếp
+  Close Live Chat Replay: Đóng bản phát lại trò chuyện trực tiếp
+  Live Chat Settings: Cài đặt trò chuyện trực tiếp
+  Show Live Chat Timestamps: Hiện mốc thời gian
+  Chat Filter: Bộ lọc trò chuyện
+  Top Chat: Trò chuyện nổi bật
+  All Messages: Tất cả tin nhắn
+  Live chat replay is enabled. Chat messages will appear here as the video plays.: Đã bật bản phát lại trò chuyện trực tiếp. Tin nhắn trò chuyện sẽ xuất hiện ở đây khi video phát.
+  Premiere started: Đang công chiếu. Bắt đầu {timeAgo}
+  Player:
+    Playing in Picture-in-Picture: Đang phát ở chế độ hình trong hình
+    Stream Recovery:
+      DASH Fallback: "Luồng âm thanh bị lỗi, đang chuyển sang định dạng DASH: {error}"
+      Error Copied: "Đã sao chép lỗi vào bộ nhớ tạm"
+      Legacy Fallback: "Luồng bị lỗi, đang chuyển sang định dạng cũ: {error}"
+    Caption Timing:
+      Adjust Timing: Điều chỉnh thời gian…
+      Caption Timing: Thời gian phụ đề
+      Offset: Độ lệch (giây)
+      Hint: Giá trị âm hiển thị phụ đề sớm hơn; giá trị dương hiển thị muộn hơn. Chỉ áp dụng cho video này.
+      Earlier: Sớm hơn
+      Later: Muộn hơn
+      Reset: Đặt lại
+    Most Replayed: "Được phát lại nhiều nhất"
+    Pull up for precise seeking: "Kéo lên để tua chính xác"
+    Precise seeking, drag down to exit: "Tua chính xác · Kéo xuống để thoát"
+    Cast: "Truyền phát"
+    Music Mode: "Chế độ âm nhạc"
+    Music Mode Description: "Phát video ở tốc độ 1× và bắt đầu video mới từ đầu trong thẻ này. Các thiết lập phát mặc định đã lưu của bạn không thay đổi."
+    DLNA:
+      Cast: "Truyền tới thiết bị DLNA"
+      Stop: "Dừng truyền"
+      No Devices: "Không tìm thấy thiết bị DLNA"
+      No MP4 Source: "Không có luồng MP4 tương thích cho video này"
+      Error: "Không thể truyền video"
+    Repeat Stats:
+      Repeat Stats: Thống kê lặp lại
+      Looping: Đang lặp
+      Repeats: Số lần lặp
+      Time Spent: Thời gian xem
+    Voice-over Translation:
+      Start: Dịch
+      Cancel: Hủy
+      Progress: Đang chuẩn bị bản dịch lồng tiếng…
+      Retry: Thử lại
+      Error: Không thể dịch lồng tiếng. Vui lòng thử lại sau.
+      Duration Error: Chỉ có thể dịch lồng tiếng cho video dài tối đa bốn giờ.
+    Caption Appearance:
+      Options: Tùy chọn
+      Sample: Phụ đề sẽ trông như thế này
+    Auto-translate: Tự động dịch
+    Sleep Timer:
+      Sleep Timer: Hẹn giờ ngủ
+      'Off': 'Tắt'
+      Minutes: '{minutes} phút'
+      End of video: Cuối video
+      End of current chapter: Kết thúc chương hiện tại
+      Remaining: 'Còn {time}'
+      Cancel timer: Hủy hẹn giờ
+      Timer ended: Đã hết giờ ngủ
+    A-B Repeat:
+      A-B Repeat: Lặp A-B
+      Off: Tắt
+      Point A: Điểm A
+      Point B: Điểm B
+      Set Repeat Start: Đặt điểm bắt đầu lặp
+      Set Repeat End: Đặt điểm kết thúc lặp
+      Pause Repeat: Tạm dừng lặp A-B
+      Resume Repeat: Tiếp tục lặp A-B
+      Adjust Point: 'Điều chỉnh điểm {point}, hiện tại là {timestamp}'
+      Clear Range: Xóa phạm vi lặp A-B
+      End Before Start: Điểm B phải nằm sau điểm A.
+      Outside Duration: Dấu thời gian phải nằm trong thời lượng video.
+      Cleared: Đã xóa lặp A-B
+    Seek History:
+      Seek History: Lịch sử tua
+      Positions: '{count} vị trí'
+      Nothing to undo: Không có gì để hoàn tác
+      Nothing to redo: Không có gì để làm lại
+    Zoom:
+      Zoom: Thu phóng
+      'Off': 'Tắt'
+    Volume Boost:
+      Volume Boost: "Tăng âm lượng"
+      'Off': "Tắt"
+    Auto-generated Caption Template: '{language} (tự động tạo)'
+    Up next in {seconds}: Tiếp theo sau {seconds}
+    Resize dock: Đổi kích thước thanh bên
+    Resize dock width: Đổi chiều rộng thanh bên
+    Play now: Phát ngay
+    MusicPlaybackRateOverride: Đã phát hiện video nhạc, phát ở tốc độ 1x
+    Normal: Bình thường
+    Set Default: Đặt làm mặc định
+    Hide Annotations: Ẩn chú thích
+    Show Annotations: Hiện chú thích
+    Hide: Ẩn
+    Show: Hiện
+    Scroll Mini Player:
+      Collapse Controls: "Thu gọn điều khiển"
+      Expand Controls: "Mở rộng điều khiển"
+      Back to Top: Về đầu trang
+      Return to Video Tab: Quay lại thẻ video
+      Hide: Ẩn trình phát thu nhỏ
+      Play: Phát
+      Pause: Tạm dừng
+      Drag Handle: Di chuyển trình phát thu nhỏ
+      Rewind 10 seconds: Tua lại 10 giây
+      Forward 10 seconds: Tua tới 10 giây
+    SponsorBlock:
+      CancelCurrentSegment: Hủy tạo phân đoạn
+      ClearSegments: Xóa phân đoạn
+      ClearSegmentsPrompt: Bạn có chắc muốn xóa tất cả phân đoạn SponsorBlock nháp cho video này không?
+      CompleteSegmentsBeforeSubmitting: Hoàn tất mọi phân đoạn nháp trước khi gửi.
+      CategoryLabel: Danh mục
+      ActionTypeLabel: Loại phân đoạn
+      DuplicateSegments: Không được tạo phân đoạn nháp trùng lặp.
+      EndAction: (Kết thúc)
+      EndActionLabel: Kết thúc
+      EndTimeAfterStart: Thời điểm kết thúc phân đoạn phải sau thời điểm bắt đầu.
+      EndTimeBeforeVideoEnd: Thời điểm kết thúc phân đoạn phải nằm trong thời lượng video.
+      EndTimeLabel: Thời điểm kết thúc phân đoạn
+      Guidelines: Hướng dẫn
+      InspectSegment: Kiểm tra
+      InvalidStartTime: Nhập thời điểm bắt đầu phân đoạn hợp lệ.
+      NoSegmentsToSubmit: Tạo ít nhất một phân đoạn hoàn chỉnh trước khi gửi.
+      NowAction: (Bây giờ)
+      CloseInfoPanel: Đóng thông tin SponsorBlock
+      OpenInfoPanel: Mở thông tin SponsorBlock
+      OpenSubmissionMenu: Mở menu gửi dữ liệu
+      PreviewRequired: Vui lòng xem trước mọi phân đoạn trước khi gửi.
+      PreviewSegment: Xem trước
+      SaveSegment: Lưu
+      SetSegmentEndNow: Kết thúc phân đoạn ngay
+      StartAction: (Bắt đầu)
+      StartSegmentNow: Bắt đầu phân đoạn ngay
+      SubmissionBadRequest: SponsorBlock đã từ chối yêu cầu gửi.
+      SubmissionDuplicate: Nội dung này đã được gửi trước đó.
+      SubmissionFailed: Không thể gửi phân đoạn SponsorBlock.
+      SubmissionForbidden: SponsorBlock đã từ chối nội dung gửi.
+      SubmissionRateLimited: SponsorBlock đã giới hạn tần suất gửi nội dung này.
+      SubmissionSuccess: Đã gửi phân đoạn SponsorBlock.
+      SubmitSegment: Gửi phân đoạn
+      SubmitSegments: Gửi
+      StartTimeLabel: Thời điểm bắt đầu phân đoạn
+      TimeDivider: đến
+      SkipPrompt: Bỏ qua {segmentCategory}?
+      SkipPromptAction: Bỏ qua
+      SkipToHighlight: Chuyển đến đoạn nổi bật?
+      SkippedToHighlight: Đã chuyển đến đoạn nổi bật
+      SkipToastUnskip: Hoàn tác bỏ qua
+      SkipToastReskip: Bỏ qua lại
+      MutedSegment: 'Đã tắt tiếng {segmentCategory}'
+      MuteToastUnmute: Bật tiếng
+      InfoPanelLoading: Vẫn đang tải phân đoạn...
+      InfoPanelHasSegments: Video này có phân đoạn trong cơ sở dữ liệu!
+      InfoPanelNoSegments: Không tìm thấy phân đoạn
+      RefreshInfo: Làm mới thông tin SponsorBlock
+      ContributionStatsTitle: Đóng góp của bạn
+      ContributionStatsLoading: Đang tải thống kê đóng góp...
+      ContributionStatsError: Không có thống kê đóng góp. Hãy thử làm mới.
+      ContributionStatsNoUserId: Gửi một phân đoạn hoặc nhập ID người dùng SponsorBlock để xem thống kê đóng góp.
+      Submissions: Lượt gửi
+      Segments: Phân đoạn
+      TimeSaved: Thời gian tiết kiệm
+      AutoSkipEnabled: Tự động bỏ qua phân đoạn
+      AutoSkipOn: 'Bật'
+      AutoSkipOff: 'Tắt'
+      WhitelistChannel: Thêm kênh vào danh sách cho phép
+      ChannelWhitelisted: Đã cho phép
+      RemoveChannelFromWhitelist: Xóa kênh khỏi danh sách cho phép
+      MuteSegment: Tắt tiếng phân đoạn
+      SkipSegment: Bỏ qua phân đoạn
+      CloseSegmentActions: Đóng thao tác phân đoạn
+      FullVideo: Toàn bộ video
+      FullVideoLabel: '{segmentCategory} · Toàn bộ video'
+      MuteActionType: Tắt tiếng
+      MutePrompt: Tắt tiếng {segmentCategory}?
+      SkipActionType: Bỏ qua
+      LockedSegment: Phân đoạn đã khóa
+      UpvoteSegment: Bình chọn tích cực
+      DownvoteSegment: Bình chọn tiêu cực
+      VoteFailed: Không thể gửi bình chọn SponsorBlock.
+      ChangeCategory: Đổi danh mục
+      CopyAndDownvote: Sao chép và bỏ phiếu phản đối
+      SubmitCategoryVote: Gửi phiếu danh mục
+      CategoryVoteSuccess: Đã gửi phiếu danh mục.
+    Google Cast:
+      Position: "Vị trí phát"
+      Invalid Authentication: "Thiết bị nhận gửi phản hồi xác thực không hợp lệ."
+      Authentication Declined: "Thiết bị nhận từ chối xác thực."
+      Audio Only Receiver: "Thiết bị nhận chỉ hỗ trợ truyền âm thanh."
+      Disconnected: "Thiết bị nhận đã ngắt kết nối."
+      Timeout: "Thiết bị nhận không phản hồi."
+      Busy: "Một cửa sổ khác đang truyền."
+      Not Authorized: "Kích hoạt cửa sổ này và thử lại."
+      Invalid Request: "Yêu cầu truyền không hợp lệ."
+      IPv4 Required: "Cần kết nối IPv4."
+      Launch Failed: "Không thể khởi động thiết bị nhận."
+      Load Failed: "Thiết bị nhận không thể tải video."
+      Cancelled: "Đã hủy truyền."
+      Private Not Authorized: "Quyền truy cập nội dung riêng tư chưa được chấp thuận."
+      Invalid Subtitles: "Phụ đề truyền không hợp lệ."
+      Discovery Failed: "Không thể tìm thiết bị nhận."
+      Preparing Video: "Đang chuẩn bị video để truyền…"
+      Connecting: "Đang kết nối với {device}…"
+      Starting Receiver: "Đang khởi động thiết bị nhận Cast…"
+      Loading Video: "Đang tải video trên thiết bị nhận…"
+      Buffering: "Đang lưu vào bộ đệm trên {device}…"
+      Allow Private Instance: "Cho phép phiên truyền này đọc nội dung đa phương tiện từ máy chủ Invidious riêng tư {instance}?"
+      Cast: "Truyền tới thiết bị Google Cast"
+      Connected: "Đang truyền tới {device}"
+      Rewind: "Lùi 10 giây"
+      Forward: "Tiến 10 giây"
+      Subtitles Off: "Tắt phụ đề"
+      Return: "Quay lại phát trên máy"
+      No Devices: "Không tìm thấy thiết bị Google Cast"
+      No Source: "Không có luồng tương thích với Google Cast"
+      Error: "Không thể truyền video"
+      Error With Details: "Không thể truyền video: {error}"
+      Untrusted Receiver: "Chứng chỉ của thiết bị nhận không đáng tin cậy. Hãy sử dụng thiết bị nhận Google Cast đã được xác thực."
+    FCast:
+      Cast: "Truyền tới thiết bị nhận FCast"
+      No Devices: "Không tìm thấy thiết bị nhận FCast"
+      No Source: "Không có luồng tương thích với FCast"
+    Secondary Captions: Phụ đề phụ
+    Subtitle File:
+      Load: "Tải tệp phụ đề…"
+      Subtitle Files: "Tệp phụ đề"
+      Error: "Không thể tải tệp phụ đề. Vui lòng chọn tệp SRT hoặc WebVTT."
+  Playlist:
+    Unavailable videos are hidden: '{count} video không có sẵn đã bị ẩn'
+  External Media:
+    Dislikes: "Lượt không thích"
+    Reposts: "Lượt đăng lại"
+    Saves: "Lượt lưu"
+    Series: "Chuỗi"
+    Season: "Mùa"
+    Season Number: "Số mùa"
+    Episode: "Tập"
+    Episode Number: "Số tập"
+    Track: "Bài hát"
+    Track Number: "Số thứ tự bài hát"
+    Artists: "Nghệ sĩ"
+    Album: "Album"
+    Genres: "Thể loại"
+    Media Type: "Loại phương tiện"
+    Availability: "Tình trạng truy cập"
+    Age Limit: "Giới hạn độ tuổi"
+    Release Date: "Ngày phát hành"
+    Availability Values:
+      public: "Công khai"
+      private: "Riêng"
+      premium_only: "Chỉ dành cho người dùng Premium"
+      subscriber_only: "Chỉ dành cho người đăng ký"
+      needs_auth: "Yêu cầu đăng nhập"
+      unlisted: "Không liệt kê"
+  How this was made: Nội dung này được tạo ra như thế nào
+  Save Queue to Playlist: "Lưu hàng đợi vào danh sách phát"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Chat trực tiếp hiện không được hỗ trợ với máy chủ Yattee. Cần có kết nối trực tiếp đến YouTube.
+  External Player:
+    LaunchFailedTemplate: Không thể khởi động {externalPlayer}. Hãy kiểm tra xem ứng dụng đã được cài đặt chưa, hoặc đặt đường dẫn tệp thực thi trong cài đặt trình phát bên ngoài.
+    Confirm Arguments Title: "Chạy trình phát ngoài với đối số tùy chỉnh?"
+    Confirm Arguments Message: "{externalPlayer} sẽ khởi động với các đối số tùy chỉnh sau:"
+    Confirm Arguments Warning: "Một số đối số có thể chạy chương trình hoặc ghi đè tệp. Chỉ tiếp tục nếu bạn tự thêm chúng."
+    Run: "Chạy"
+    LaunchCanceledTemplate: "Chưa mở {externalPlayer}"
+Playlist:
+  Playlist Already Preloaded: "Tất cả video trong danh sách phát đã được tải trước"
+  Playlist Preload Progress: "Đang tải trước video: {completed}/{requested}"
+  Close Playlist: Đóng danh sách phát
+  Preload Playlist: "Tải trước tất cả video"
+  Preload Playlist Warning Title: "Tải trước tất cả video?"
+  Preload Playlist Warning: "Tải trước sẽ yêu cầu YouTube cung cấp từng video trong danh sách phát này. Gửi nhiều yêu cầu trong thời gian ngắn có thể khiến YouTube tạm thời chặn địa chỉ IP của bạn. Bạn có muốn tiếp tục không?"
+  Preloading Playlist: "Đang tải trước tất cả video..."
+  Playlist Preload Complete: "Video đã tải trước: {count}."
+  Playlist Preload Partial: "Đã tải trước {preloaded}/{requested} video. Không thể tải trước {failed} video."
+  Playlist Preload Pagination Failed: "Không thể tải toàn bộ danh sách phát nên đã hủy tải trước."
+  Unavailable videos are hidden: Các video không có sẵn đã bị ẩn
+  Add Playlist to Queue: "Thêm danh sách phát vào hàng đợi"
+  Playlist Added to Queue: "Đã thêm danh sách phát vào hàng đợi"
+Change Format:
+  yt-dlp Error Template: "yt-dlp không thể cung cấp các luồng: {error}"
+  Local Video File: Tệp video cục bộ
+  Local Audio File: Tệp âm thanh cục bộ
+  Online Video: Video trực tuyến
+  Stream Source: Nguồn luồng
+  Stream Extraction Method: Phương thức trích xuất luồng
+  Playback Engine: Bộ máy phát
+  Streaming Protocol: Giao thức truyền phát
+  Not Available For This Video: Không dùng được cho video này
+  Protocols:
+    Progressive: Lũy tiến
+  Descriptions:
+    Local File: Phát trực tiếp từ tệp đã tải trên thiết bị này
+    Online Video: Tải các định dạng truyền phát từ nguồn trực tuyến đã thiết lập
+    Dash: Chất lượng thích ứng, nhiều bản âm thanh và độ phân giải cao nhất
+    Legacy: Một tệp kết hợp video và âm thanh, giới hạn ở độ phân giải thấp hơn
+    Audio: Chỉ âm thanh, phù hợp để tiết kiệm băng thông hoặc nghe trong nền
+  yt-dlp Fallback Template: 'yt-dlp không thể cung cấp luồng, chuyển sang dùng bộ máy tích hợp: {error}'
+  yt-dlp Default Clients Fallback: Các máy khách yt-dlp ưu tiên không cung cấp được luồng có thể phát, đang thử máy khách mặc định của yt-dlp
+  Built-in Fallback Template: 'Bộ máy tích hợp không thể phát luồng, đang thử yt-dlp: {error}'
+Share:
+  Shared YouTube Link: "Liên kết YouTube được chia sẻ"
+  Open in Player: "Mở trong trình phát"
+  No YouTube Link: "Văn bản được chia sẻ không chứa liên kết YouTube được hỗ trợ."
+  Loading Video Information: "Đang tải thông tin video…"
+  Video Information Failed: "Không thể tải thông tin video. Hãy thử lại hoặc mở liên kết."
+  Share Link: "Chia sẻ liên kết"
+  Share failed: "Không thể chia sẻ liên kết"
+  Timestamp Link Copied: Đã sao chép liên kết có mốc thời gian vào bảng nhớ tạm
+Context Menu:
+  Opened in a Background Tab: "Đã mở trong thẻ nền"
+  Open in a Background Tab: "Mở trong thẻ nền"
+  Select Tab: Chọn thẻ
+  Close Tabs Before: Đóng các thẻ trước
+  Close Tabs After: Đóng các thẻ sau
+  Close Other Tabs: Đóng các thẻ khác
+  Copy {service} link without playlist: "Sao chép liên kết {service} không kèm danh sách phát"
+  Context Menu: Menu ngữ cảnh
+  Select All: Chọn tất cả
+  Save Image As…: Lưu ảnh thành…
+  Copy Image: Sao chép ảnh
+  Copy Image Address: Sao chép địa chỉ ảnh
+  Cancel Refresh: Hủy làm mới
+  Reload Videos: Tải lại video
+  Reload Shorts: Tải lại video ngắn
+  Reload Live: Tải lại luồng trực tiếp
+  Reload Posts: Tải lại bài đăng
+  Reload All Feeds: Tải lại tất cả bảng tin
+  Reload RSS Feeds: Tải lại nguồn cấp RSS
+  Reload Platforms: Tải lại các nền tảng
+  Close Multiple Tabs: Đóng {count} thẻ
+  Duplicate Tab: Nhân đôi thẻ
+  Duplicate Multiple Tabs: Nhân đôi {count} thẻ
+  Move Tab: Di chuyển thẻ
+  Move Tabs: Di chuyển các thẻ
+  Move Tab to Group: Chuyển thẻ vào nhóm
+  Collapse Group: Thu gọn nhóm
+  Expand Group: Mở rộng nhóm
+  Move Tabs to Group: Chuyển các thẻ vào nhóm
+  Manage Tab Groups…: Quản lý nhóm thẻ…
+  To Beginning: Về đầu
+  To End: Về cuối
+  Close Tabs: Đóng các thẻ
+  To the Top: Lên trên cùng
+  To the Left: Sang trái
+  To the Bottom: Xuống dưới cùng
+  To the Right: Sang phải
+  Other Tabs: Các thẻ khác
+  Copy YouTube Link: Sao chép liên kết YouTube
+  Copy YouTube Links: Sao chép các liên kết YouTube
+  Pin Tab: Ghim thẻ
+  Pin Tabs: Ghim các thẻ
+  Unpin Tab: Bỏ ghim thẻ
+  Unpin Tabs: Bỏ ghim các thẻ
+  Tab Color: Màu thẻ
+  Default: Mặc định
+  Purple: Tím
+  Reopen Closed Tab: Mở lại thẻ đã đóng
+  Reload Tab: Tải lại thẻ
+  Reload Tabs: Tải lại các thẻ
+  Load Tab: Tải thẻ
+  Load Tabs: Tải các thẻ
+  Unload Tab: Dỡ thẻ
+  Unload Tabs: Dỡ các thẻ
+  Unload Tabs Failed: "Không thể giải phóng các thẻ đã chọn khỏi bộ nhớ."
+  Move Tab to Window: Chuyển thẻ sang cửa sổ
+  Move Tabs to Window: Chuyển các thẻ sang cửa sổ
+  Open in a New Tab: Mở trong thẻ mới
+  Open in a New Window: Mở trong cửa sổ mới
+  Copy Link: Sao chép liên kết
+  Copy Invidious Link: Sao chép liên kết Invidious
+  Search Selection in New Tab: Tìm "{selection}" trong thẻ mới
+  Search Selection in New Window: Tìm "{selection}" trong cửa sổ mới
+  Search With: Tìm bằng {engine}
+  Search With Multiple: Tìm bằng...
+  Selection Too Long: Phần đã chọn quá dài để tìm kiếm (> {count} ký tự)
+  Background Tab: Thẻ nền
+Tab Organizer:
+  Tab History: "Lịch sử thẻ"
+  Current Page: "Trang hiện tại"
+  Icon Labels:
+    Podcast: 'Podcast'
+    Clock: 'Đồng hồ'
+    Puzzle Piece: 'Mảnh ghép'
+    People: 'Mọi người'
+    Chart: 'Biểu đồ'
+    Calendar: 'Lịch'
+    Images: 'Hình ảnh'
+    Music: 'Âm nhạc'
+    Folder: Thư mục
+    Bookmark: Dấu trang
+    Favorites: Yêu thích
+    Videos: Video
+    Gaming: Trò chơi
+    Research: Nghiên cứu
+    Art: Nghệ thuật
+    Travel: Du lịch
+  Group Icon: Biểu tượng nhóm
+  Title: Trình sắp xếp thẻ
+  Open Tab Count: '{count} thẻ đang mở'
+  Search Label: Tìm thẻ
+  Selected Count: 'Đã chọn {count} thẻ'
+  Tab Count: '{count} thẻ'
+  Select All: Chọn tất cả
+  Select None: Bỏ chọn tất cả
+  Move To Group: Chuyển các thẻ đã chọn vào nhóm
+  Choose Group: Chọn nhóm
+  Ungrouped: Chưa nhóm
+  Pin: Ghim
+  Unpin: Bỏ ghim
+  Load: Tải
+  Unload: Dỡ
+  Unload All: Dỡ tất cả
+  Close All: Đóng tất cả
+  Ungroup: Bỏ nhóm
+  Group Name: Tên nhóm
+  No Color: Không màu
+  Create Group: Tạo nhóm
+  Expand Group: Mở rộng nhóm
+  Collapse Group: Thu gọn nhóm
+  Expand Group Label: Mở rộng {name}, {count} thẻ
+  Rename Group: Đổi tên {name}
+  Change Group Color: Đổi màu cho {name}
+  Move To Window: Chuyển sang cửa sổ
+  Choose Window: Chọn cửa sổ
+  Select Tab: Chọn {title}
+  Active: Đang hoạt động
+  Pinned: Đã ghim
+  Unloaded: Đã dỡ
+  Playing: Đang phát
+  Close Tab: Đóng {title}
+  No Open Results: Không có thẻ đang mở phù hợp với tìm kiếm.
+  Recently Closed: Đã đóng gần đây
+  Clear: Xóa
+  No Closed Results: Không có thẻ đóng gần đây phù hợp với tìm kiếm.
+  Drag Tab: Kéo để chuyển vào nhóm
+Chapters:
+  Auto-generated: Các chương này được tạo tự động
+  Open Chapters: Mở chương
+  Close Chapters: Đóng chương
+  Copy Timestamp Link: Sao chép liên kết tại {timestamp}
+  Loop Chapter: 'Lặp lại chương: {chapter}'
+  Looping Chapter: 'Đang lặp lại chương: {chapter}'
+  Chapter Loop Stopped: 'Đã dừng lặp lại chương'
+  Sync to Video Time: 'Đồng bộ với thời gian video'
+Comments:
+  Image unavailable: "Hình ảnh không khả dụng"
+  Comment Count: '{count} bình luận'
+  Show Comments: Hiện bình luận
+  Getting comment replies, please wait: Đang tải phản hồi bình luận, vui lòng chờ
+  Reload Comments: Tải lại bình luận
+  Reply Count: '{replyCount} phản hồi'
+  Comments are turned off: Bình luận đã bị tắt
+  YouTube did not provide advertised replies: YouTube cho biết bình luận này có phản hồi nhưng không cung cấp nội dung. Các phản hồi có thể đã bị xóa hoặc ẩn, nên nút phản hồi đã được gỡ bỏ.
+  Pinned by you: Do bạn ghim
+  A reply is pinned: Có một phản hồi được ghim
+  Filter loaded comments: Lọc bình luận đã tải
+  Comment filters: Bộ lọc bình luận
+  From creator: Từ nhà sáng tạo
+  Contains timestamps: Có mốc thời gian
+  Pin comment by author: Ghim bình luận của {author}
+  Unpin comment by author: Bỏ ghim bình luận của {author}
+  Edited: (đã chỉnh sửa)
+  Highlighted comment: Bình luận được đánh dấu
+  Highlighted reply: Phản hồi được đánh dấu
+  Search loaded comments: Tìm trong bình luận đã tải
+  Loaded comment search result count: '{count} trong số {total} bình luận đã tải'
+  No loaded comments match your filters: Không có bình luận đã tải nào phù hợp với bộ lọc
+  YouTube comment link copied to clipboard: Đã sao chép liên kết bình luận YouTube vào bảng nhớ tạm
+  Translate to {language}: Dịch sang {language}
+  Show original: Hiện bản gốc
+  Translating comment, please wait: Đang dịch bình luận, vui lòng chờ
+  Comment translation failed: Không thể dịch bình luận
+Description:
+  Title: Mô tả
+  Copy Description: Sao chép mô tả
+  Description Copied: Đã sao chép mô tả vào bảng nhớ tạm
+  Video Category: 'Danh mục video:'
+  Video Tags: Thẻ video
+  Games: Trò chơi
+  Music: Âm nhạc
+Tooltips:
+  YouTube Account Settings:
+    Sync Subscriptions: "Các kênh bạn đăng ký trên YouTube sẽ được thêm vào Tất cả kênh, còn các kênh bạn hủy đăng ký ở đó sẽ bị xóa khỏi mọi hồ sơ. Đăng ký hoặc hủy đăng ký trong Tất cả kênh tại đây cũng sẽ thực hiện tương tự trên YouTube."
+    Sync Playlists: "Danh sách phát YouTube, Xem sau và Video đã thích của bạn sẽ xuất hiện trong Danh sách phát của bạn, và những thay đổi bạn thực hiện với chúng tại đây cũng được áp dụng trên YouTube. Chúng không được đồng bộ sang các thiết bị khác của bạn và không được bao gồm khi bạn xuất tất cả danh sách phát hoặc sao lưu dữ liệu. Tắt tùy chọn này sẽ xóa chúng khỏi thiết bị này nhưng không xóa khỏi YouTube."
+    Add to YouTube Watch History: "Video bạn phát sẽ được thêm vào lịch sử xem YouTube của bạn để đề xuất của YouTube học hỏi từ đó. Không có gì được thêm khi lịch sử đang bị tạm dừng trên YouTube."
+  General Settings:
+    Built-in Streams: |
+      Tự động phát hầu hết video qua ứng dụng khách visionOS của YouTube, khởi động nhanh hơn và hỗ trợ chất lượng tự động. Các buổi phát trực tiếp và video mà nó không phát được sẽ dùng SABR.
+      Chỉ SABR luôn dùng ứng dụng khách web của YouTube, khởi động chậm hơn và không có chất lượng tự động.
+    Title Lines: "Rút gọn tiêu đề video và danh sách phát trong danh sách và lưới theo số dòng đã chọn kèm dấu chấm lửng, để các thẻ đồng đều hơn. Di chuột lên tiêu đề để xem đầy đủ."
+    Close Window With Last Tab: 'Khi tắt, việc đóng thẻ cuối cùng sẽ mở một thẻ mới thay vào đó, nên cửa sổ vẫn mở cho đến khi bạn đóng nó.'
+    Preferred Video Codec: |
+      Chế độ tự động ưu tiên các codec mà thiết bị của bạn có thể giải mã bằng phần cứng.
+      AV1: chất lượng tốt nhất với ít dữ liệu nhất, nhưng không phải video nào cũng có. Nếu không giải mã bằng phần cứng, nó có thể làm hao pin hoặc rớt khung hình.
+      VP9: cân bằng giữa hiệu quả và khả năng tương thích, thường có đến độ phân giải cao nhất.
+      H.264: dễ giải mã nhất trên hầu hết mọi thiết bị, nhưng tốn nhiều dữ liệu hơn và thường chỉ đến 1080p.
+      Thay đổi áp dụng cho video tiếp theo. Nếu codec ưu tiên không khả dụng, một codec khác sẽ được dùng.
+    Always Use Backup Media Server: "Phát video từ máy chủ dự phòng mà YouTube chỉ định thay vì máy chủ được gán, ví dụ khi bộ nhớ đệm của nhà cung cấp internet của bạn thường chậm. Nếu không, OpenTubeX chỉ chuyển khi máy chủ được gán không phản hồi."
+    Automatically switch stream extraction methods: "Thử yt-dlp nếu trình phát tích hợp bị lỗi, hoặc trình phát tích hợp nếu yt-dlp bị lỗi."
+    Enable Tabs: "Giữ trang hiện tại mở. Các thẻ khác được giữ đến khi khởi động lại ứng dụng; bật lại thẻ để khôi phục chúng."
+    Data Saver Thumbnails: "Sử dụng ảnh thu nhỏ có độ phân giải thấp hơn để giảm mức sử dụng dữ liệu."
+    Use AI Translation Completions: Điền phần còn thiếu trong bản dịch của con người bằng văn bản do AI tạo. Bản dịch của con người luôn được ưu tiên.
+    Update Relative Timestamps: Cập nhật mốc thời gian tương đối trên toàn ứng dụng khi trang vẫn mở. Khi tắt, mốc thời gian chỉ cập nhật sau khi tải lại hoặc mở lại trang.
+    Stream Extraction Method: |
+      Chọn cách OpenTubeX lấy luồng video. yt-dlp phải dùng được khi được chọn.
+      Video có thể mất nhiều thời gian hơn để bắt đầu khi dùng yt-dlp.
+    Avoid translation: |
+      Tắt tính năng tự động dịch tiêu đề, mô tả và chương video của YouTube.
+      "Toàn bộ ứng dụng" cũng hiển thị tên và mô tả kênh bằng ngôn ngữ gốc.
+      Quá nhiều yêu cầu, chẳng hạn lấy tiêu đề video trong nhiều danh sách, có thể tạm thời
+      làm giảm độ ổn định của ứng dụng.
+    Show Thumbnail Previews: Hiện bản xem trước động khi di chuột lên hình thu nhỏ của video.
+    Startup Behavior: |
+      Chọn hành động của OpenTubeX khi khởi động.
+      Tải tất cả thẻ sẽ khôi phục ngay mọi thẻ đã lưu, nhưng các thẻ nền sẽ không tự động phát video.
+      Tải các thẻ đã tải trước đó sẽ tải lại những thẻ đang được tải khi đóng OpenTubeX và giữ các thẻ khác ở trạng thái đã dỡ.
+      Tải thẻ hoạt động gần nhất sẽ khôi phục phiên trước với các thẻ khác được mở nhưng chưa tải; chúng sẽ tải khi bạn nhấp vào.
+      Bắt đầu với phiên trống sẽ bỏ qua các thẻ đã lưu và mở một cửa sổ mới.
+    Remember Tab Navigation History: Lịch sử điều hướng tới và lui của từng thẻ sẽ được lưu và khôi phục khi OpenTubeX khởi động lại.
+    Yattee Server: Máy chủ yattee-server mà OpenTubeX dùng để tải video, kênh, danh sách phát và kết quả tìm kiếm. Tên người dùng và mật khẩu chỉ được lưu trên thiết bị này.
+    Proxy Videos Through Yattee Server: Chuyển tiếp luồng video và âm thanh qua máy chủ. Hãy giữ tùy chọn này bật, trừ khi máy chủ dùng chung kết nối Internet với bạn, vì YouTube chỉ cung cấp luồng cho địa chỉ đã yêu cầu chúng. Ảnh xem trước luôn được tải trực tiếp từ YouTube.
+    Notifications: Chọn cách OpenTubeX thông báo cho bạn về phát trực tiếp, video mới và tải xuống tự động. Với Hệ thống và trong ứng dụng, thông báo xuất hiện trong OpenTubeX khi bạn đang dùng và dưới dạng thông báo hệ thống trong trường hợp khác, và chuông sẽ lưu giữ chúng. Tắt cũng ẩn các tùy chọn thông báo.
+    Ignore System Haptics Setting: Rung khi nhấn giữ và thực hiện cử chỉ ngay cả khi phản hồi chạm bị tắt trong cài đặt Android.
+  Proxy Settings:
+    IP Block Recovery Script Path: Đường dẫn tệp tập lệnh sẽ chạy khi phát hiện bị chặn IP. OpenTubeX chờ tập lệnh chạy xong rồi tải lại video. Nếu bật phương án dự phòng, tập lệnh chỉ chạy khi phương án đó cũng thất bại.
+  Player Settings:
+    Rewind on Resume: "Lùi lại số giây này khi bạn tiếp tục một video đang tạm dừng, để bạn có thể xem lại những khoảnh khắc cuối. Đặt thành 0 để tắt."
+    Minimum Pause Before Rewinding: "Chỉ tua lại khi video đã tạm dừng ít nhất trong khoảng thời gian này. Đặt thành 0 để tua lại sau mỗi lần tạm dừng."
+    Mono Audio: 'Phát kênh âm thanh trái và phải ở cả hai tai. Dùng khi âm thanh của video chỉ phát ra ở một bên tai nghe.'
+    Normalize Loudness: 'Giảm âm lượng của những video to hơn phần lớn video khác để âm lượng không thay đổi đột ngột giữa các video. Video nhỏ tiếng vẫn giữ nguyên âm lượng. Chỉ hoạt động với video được tải bằng API địa phương.'
+    Pause on Stream Recovery: "Khi luồng video bị lỗi và trình phát tải lại hoặc chuyển sang định dạng hay công cụ khác, video sẽ tạm dừng và lỗi được hiển thị ở đầu trình phát cho đến khi bạn đóng nó. Khi tắt, video tiếp tục phát và lỗi xuất hiện ngắn dưới dạng thông báo."
+    Continue Playback When Screen Is Locked: 'Tiếp tục phát âm thanh trong nền và cung cấp các nút điều khiển phương tiện của Android. Tắt tùy chọn này để tạm dừng khi ứng dụng không còn hiển thị.'
+    Enable Caption Translations: Khi bật, nút phụ đề và phím tắt C sẽ ưu tiên bản phụ đề tự động dịch sang ngôn ngữ phụ đề ưu tiên nếu video không có bản gốc phù hợp.
+    Use Quick Playback Speed Bar: Hiện thanh tốc độ phát nhanh trong phần điều khiển bên phải của trình phát. Nếu bật lưu tốc độ phát thủ công theo kênh, thanh này cũng có nút lưu tốc độ cho kênh hiện tại.
+    Multiply Seek Interval by Playback Rate: Khi bật, khoảng tua bằng phím mũi tên và J/L được nhân với tốc độ phát hiện tại. Khi tắt, khoảng tua không đổi bất kể tốc độ phát.
+    Show Playback Rate Adjusted Timestamp: Khi bật và tốc độ phát khác 1x, trình phát hiện mốc thời gian đã điều chỉnh theo tốc độ phát trong ngoặc đơn sau mốc thời gian thông thường.
+    Use YouTube-style Shorts: Hiện video ngắn trong lưới dọc trên trang đăng ký và trang kênh, đồng thời dùng trình phát video ngắn kiểu YouTube.
+    Loop Shorts: Khi bật, video ngắn sẽ tự động phát lại. Khi tắt, video ngắn sẽ dừng ở cuối và hiện nút phát lại.
+    Show Skip Silence Toggle: Hiện nút bật/tắt bỏ qua đoạn im lặng trong menu cài đặt của trình phát.
+    Enable Skip Silence by Default: Bật bỏ qua đoạn im lặng cho thẻ mới. Thay đổi trong một thẻ không ảnh hưởng đến thẻ khác.
+    Enable Video Zoom: Hiện điều khiển Thu phóng trong menu cài đặt của trình phát và bật các phím tắt cùng điều khiển di chuyển khung hình.
+    Enable Seek History: Ghi nhớ vị trí bạn đã tua đi trong mỗi video cho đến khi đóng ứng dụng. Hiển thị danh sách lịch sử tua trong menu cài đặt của trình phát và bật các phím tắt của tính năng này.
+    Show Seek Bar Filmstrip: "Kéo núm của thanh tua sẽ hiển thị một dải khung hình quanh vị trí bạn sẽ đến, và kéo lên trên dải đó để tua chính xác. Khi tắt, việc kéo chỉ hiển thị một hình thu nhỏ, giống như khi di chuột qua."
+    Voice-over Translation: Gửi ID video, thời lượng và ngôn ngữ đã chọn đến dịch vụ dịch lồng tiếng Yandex không chính thức khi bạn yêu cầu dịch. Tính năng này mặc định tắt.
+    Hold to Speed Up: Giữ phím cách hoặc nút chuột trái trên trình phát để tạm thời nhân tốc độ phát hiện tại với giá trị đã chọn.
+    Ambient Mode: Hòa màu của video vào khu vực quanh trình phát.
+    Default Volume: Không dùng được khi bật Ghi nhớ âm lượng. Tắt Ghi nhớ âm lượng để đặt mức âm lượng khởi đầu cố định cho mỗi video.
+    Parallel Segment Loading: |
+      Số phân đoạn video và âm thanh tải đồng thời trước vị trí phát.
+      Giá trị cao hơn có thể hữu ích với kết nối chậm hoặc không ổn định nhưng dùng nhiều băng thông và bộ nhớ hơn.
+      Giá trị cao cũng có thể khiến chế độ Tự động đánh giá thấp tốc độ kết nối và chọn chất lượng thấp hơn.
+      Luồng bị giới hạn ở một yêu cầu mỗi lần sẽ bỏ qua cài đặt này.
+    Preload Upcoming Videos: "Lấy và lưu đệm URL yt-dlp của các video tiếp theo. Hàng đợi được ưu tiên hơn danh sách phát và đề xuất."
+    Upcoming Videos to Preload: "Số video tiếp theo tối đa có URL yt-dlp được lấy trong nền."
+    Concurrent Preloads: "Số tiến trình yt-dlp tối đa được dùng để tải trước nhiều video cùng lúc. Giá trị cao hơn sử dụng nhiều CPU, bộ nhớ và băng thông mạng hơn."
+    Ignore System Rotation Lock for Fullscreen: Xoay thiết bị để vào và thoát toàn màn hình ngay cả khi tính năng tự động xoay của Android đang tắt.
+    Ask Before Preloading Large Playlists: "Yêu cầu xác nhận trước khi tải trước tất cả video của danh sách phát có hơn {count} video."
+  Download Settings:
+    Download Folder: Video được lưu vào thư mục này. Để trống để dùng thư mục Tải xuống của hệ thống.
+    Global Additional yt-dlp Arguments: Đối số dòng lệnh bổ sung được chuyển cho yt-dlp trong mọi lượt tải, ví dụ --cookies-from-browser firefox.
+    Concurrent Downloads: Số tác vụ yt-dlp tối đa có thể chạy cùng lúc.
+    Bandwidth Limit: Giới hạn tổng tốc độ truyền của hàng đợi bằng cách chia giới hạn này cho các tác vụ đồng thời. Nhập 0 để không giới hạn.
+  External Software Settings:
+    yt-dlp Source: OpenTubeX có thể dùng yt-dlp đã cài trên hệ thống hoặc tải và quản lý bản yt-dlp riêng trong thư mục dữ liệu người dùng.
+    yt-dlp Channel: Chọn kênh phát hành yt-dlp mà OpenTubeX sẽ tải và quản lý. Kênh ổn định phù hợp với hầu hết người dùng.
+    FFmpeg Source: OpenTubeX có thể dùng FFmpeg và FFprobe đã cài trên hệ thống hoặc tải và quản lý các bản dựng tĩnh riêng trong thư mục dữ liệu người dùng.
+    Managed Tool Updates: Chọn tự động cập nhật công cụ được quản lý, hỏi trước khi cập nhật hoặc chỉ cập nhật bằng nút thủ công. Công cụ còn thiếu vẫn được tải khi cần.
+    yt-dlp Executable Path: Theo mặc định, OpenTubeX giả định có thể tìm thấy yt-dlp qua biến môi trường PATH. Bạn có thể đặt đường dẫn tùy chỉnh tại đây nếu cần.
+    Cookie Source: Chọn để yt-dlp đọc tệp cookie Netscape hoặc cookie từ trình duyệt đã cài nhằm phát nội dung cần xác thực.
+    Cookie File: Chọn tệp cookie định dạng Netscape để phát nội dung cần xác thực.
+    Browser for Cookies: Khả năng hỗ trợ trình duyệt được đọc từ tệp thực thi yt-dlp đã chọn. OpenTubeX yêu cầu yt-dlp đọc trình duyệt này khi cần phát nội dung xác thực.
+    Browser Profile: Tên hoặc thư mục hồ sơ trình duyệt không bắt buộc. Để trống để dùng hồ sơ được truy cập gần nhất.
+    Always Use Cookies: "Sử dụng cookie đã cấu hình cho tải xuống, phụ đề và mỗi khi yt-dlp trích xuất luồng. Tùy chọn này không chuyển phương thức trích xuất luồng sang yt-dlp. Khi chọn yt-dlp, các định dạng chỉ dành cho tài khoản có thể xuất hiện, gồm tốc độ bit nâng cao của YouTube Premium nếu tài khoản có quyền truy cập."
+    FFmpeg Executable Path: Cần FFmpeg để ghép luồng video và âm thanh riêng biệt cũng như chuyển đổi âm thanh. Theo mặc định, OpenTubeX giả định có thể tìm thấy FFmpeg qua biến môi trường PATH. Bạn có thể đặt đường dẫn tùy chỉnh tại đây nếu cần.
+    Use cookies for subtitles: "Dùng cookie đã cấu hình cho phụ đề và bản dịch tự động. Cũng được bật bởi \"Luôn dùng cookie\"."
+  Distraction Free Settings:
+    Hide Playlist Stats: Ẩn số lượng video, số lượt xem, ngày cập nhật gần nhất và tổng thời lượng trên các trang danh sách phát.
+    Count Watch Time From: "\"Tất cả thiết bị\" tính mọi thiết bị đồng bộ thống kê xem. \"Thiết bị này\" chỉ tính những gì bạn xem tại đây."
+    When a Limit Is Reached: "\"Tạm dừng phát\" cho phép bạn thêm 15 phút hoặc bỏ qua giới hạn trong hôm nay. Khi có mật khẩu cài đặt, bạn chỉ có thể tăng giới hạn trong Cài đặt."
+    Grayscale: "Hiển thị ứng dụng bằng các sắc xám để ít thu hút sự chú ý hơn. \"Trong giờ đi ngủ\" tuân theo lịch của lời nhắc giờ đi ngủ."
+    Apply Grayscale To: "\"Video và hình ảnh\" giữ nguyên màu giao diện và chuyển nội dung như video, hình thu nhỏ và ảnh đại diện sang màu xám."
+    Daily Watch Time Limit: "Tính những gì bạn đã xem hôm nay trên mọi thiết bị đồng bộ thống kê xem, kể cả Shorts."
+    Daily Shorts Limit: "Tính các Shorts bạn đã xem hôm nay trên thiết bị này."
+    Take a Break Reminder: "Tạm dừng video sau khi xem trong khoảng thời gian này. Khoảng nghỉ từ 10 phút trở lên sẽ bắt đầu đếm lại."
+    Bedtime Reminder: "Tạm dừng video và nhắc bạn ngừng xem trong khoảng giữa giờ bắt đầu và giờ kết thúc."
+    Shorten View Counts: Hiện số lượt xem, bình luận và lượt thích bình luận theo dạng rút gọn mà YouTube đã làm tròn, ví dụ 14K thay vì 14.000. Số chính xác luôn được hiện đầy đủ.
+  Subscription Settings:
+    Fetch Feed on Startup: Khi bật, OpenTubeX sẽ tự động tải bảng tin đăng ký lúc khởi động và khi mở cửa sổ mới.
+    Show New Content Feed: Hiện thẻ Mới chứa các mục trong bảng tin đăng ký chưa có ở lần tải trước.
+    Enable RSS Feeds: Hiện thẻ RSS trên trang Đăng ký với các mục từ nguồn cấp RSS hoặc Atom, để bạn có thể theo dõi nhà sáng tạo trên các nền tảng khác. Các mục của thẻ này được mở bằng yt-dlp.
+    Show New Content Indicators: Hiện một chấm nhỏ bên cạnh các mục trong bảng tin đăng ký chưa có ở lần tải trước.
+    Show Scheduled Live Streams / Premieres First: Giữ luồng trực tiếp và buổi công chiếu sắp tới ở đầu bảng tin đăng ký. Khi tắt, chúng vẫn ở vị trí thông báo cho đến khi bắt đầu. Hãy làm mới bảng tin đăng ký một lần sau khi tắt để lấy ngày thông báo cho các mục đã lên lịch hiện có.
+    Auto Refresh Interval: "Tần suất OpenTubeX tự động làm mới bảng tin đăng ký khi ứng dụng đang mở. Trên Android, khoảng thời gian khác 0 cũng làm mới bảng tin khi ứng dụng đã đóng."
+    Refresh Subscriptions While App Is Closed: "Làm mới nguồn cấp theo cài đặt đã chọn. Trên máy tính, OpenTubeX ở trong khay hệ thống cho đến khi bạn thoát. Android quyết định thời điểm làm mới trong nền."
+    Notify About New Uploads: Hiện thông báo hệ thống trên thiết bị này cho các kênh mà bạn đã bật thông báo trong cài đặt đăng ký của kênh. OpenTubeX kiểm tra nội dung mới khi làm mới đăng ký, vì vậy hãy chọn khoảng thời gian tự động làm mới. Để nhận thông báo khi ứng dụng đã đóng, hãy bật thêm tùy chọn làm mới khi ứng dụng đã đóng.
+    RSS Feeds Auto Refresh Interval: Tần suất OpenTubeX tự động làm mới các nguồn cấp RSS của bạn khi ứng dụng đang mở.
+    Faster Subscription Refresh: "Trước tiên kiểm tra nguồn cấp RSS của từng kênh và chỉ tải video, Shorts và sự kiện trực tiếp từ các kênh có nội dung tải lên mới. Làm mới tự động cũng bỏ qua các kênh đã tải trong 10 phút qua. Với các kênh không có nội dung mới, lượt xem, video đã xóa và tiêu đề đã thay đổi chỉ được cập nhật vài giờ một lần, và nội dung mới có thể xuất hiện muộn hơn khi nguồn cấp RSS bị chậm. Không khả dụng với API Invidious."
+    Platforms Auto Refresh Interval: Tần suất OpenTubeX tự động làm mới các kênh bạn theo dõi trên các nền tảng khác khi ứng dụng đang mở.
+    Twitch Notify When Live: Thông báo cho bạn khi một trong các kênh Twitch bạn theo dõi bắt đầu phát. OpenTubeX kiểm tra vài phút một lần khi đang mở, và cả khi đã đóng nếu lúc đó ứng dụng làm mới mục đăng ký.
+  Theme Settings:
+    Only Show Important Notifications: Ẩn các thông báo trong ứng dụng chỉ xác nhận một thao tác hoặc báo cáo trạng thái, kể cả những thông báo có Hoàn tác. Lỗi, cảnh báo, lời nhắc bạn đã thiết lập và các thông báo yêu cầu bạn đưa ra quyết định, chẳng hạn như đề nghị cập nhật, vẫn hiển thị. Tiến trình của các thao tác chạy nền, chẳng hạn như làm mới kênh đăng ký, được hiển thị trên thanh tiến trình chung thay vì trong thông báo. Thông báo hệ thống không bị ảnh hưởng.
+    Visible Search Suggestions: "Đặt số mục lịch sử tìm kiếm và gợi ý mà thanh tìm kiếm hiển thị trước khi danh sách của nó phải cuộn. Danh sách không bao giờ vượt quá cạnh dưới của cửa sổ."
+    Thumbnail Size: "Thay đổi kích thước hình thu nhỏ video trong lưới và danh sách. Lưới có số cột cố định hoặc kiểu xem Toàn chiều rộng sẽ lấp đầy từng hàng, nên ở đó thanh trượt chỉ thay đổi hình thu nhỏ trong danh sách và Shorts. Trong cửa sổ cỡ điện thoại, hình thu nhỏ dạng lưới bị giới hạn ở 100%."
+    Playlist Thumbnail Size: "Thay đổi kích thước hình thu nhỏ video trên trang danh sách phát. Lưới có số cột cố định hoặc kiểu xem Toàn chiều rộng sẽ lấp đầy từng hàng, nên ở đó thanh trượt chỉ thay đổi hình thu nhỏ trong danh sách và Shorts. Trong cửa sổ cỡ điện thoại, hình thu nhỏ dạng lưới bị giới hạn ở 100%."
+    Compact Settings Categories: "Ẩn mô tả và giảm chiều cao của danh mục cài đặt."
+    Show Progress as Notification: Hiện thông báo cố định với tiến trình trực tiếp cho các thao tác nền, chẳng hạn làm mới đăng ký và tải công cụ được quản lý, thay cho thanh tiến trình chung.
+    Always Show Scrollbars: Luôn giữ thanh cuộn hiển thị. Khi tắt, thanh cuộn mờ dần ngay sau khi bạn ngừng di chuyển chuột và xuất hiện lại khi bạn di chuyển chuột.
+    Scroll Speed: Thay đổi khoảng cách cuộn của cử chỉ con lăn chuột và con lăn bàn di chuột.
+    Use Fixed Tab Width: Đặt cùng chiều rộng cho mọi thẻ trên thanh thẻ ngang thay vì điều chỉnh theo tiêu đề.
+    Use Custom Title Bar: Thay thanh tiêu đề của hệ thống bằng thanh thẻ, hoặc bằng thanh điều hướng trên cùng khi các thẻ không ở trên cùng, để tiết kiệm không gian theo chiều dọc. Các nút điều khiển cửa sổ xuất hiện ở góc của thanh đó.
+    Use Grid Player Menu: Sắp xếp menu cài đặt của trình phát video thành lưới ô thay vì danh sách hàng.
+    Modal Backdrop: "Đặt giao diện của ứng dụng phía sau hộp thoại và menu. Hiệu ứng làm mờ có thể chậm trên thiết bị yếu hơn."
+    Click Scrollbar Track to Scroll: "Nhấp vào thanh cuộn bên ngoài tay cầm sẽ cuộn khoảng một trang về phía vị trí nhấp. Khi tùy chọn này bật, thanh cuộn đang hiển thị sẽ nhận các lần nhấp dành cho các mục bên dưới nó. Thanh cuộn của thanh thẻ luôn hoạt động theo cách này."
+  Experimental Settings:
+    Disable Hardware Acceleration: Tắt tăng tốc phần cứng GPU. Có thể khắc phục sự cố đồ họa, nhưng có thể làm giảm hiệu suất.
+  SponsorBlock Settings:
+    Always Show DeArrow Badge: Giữ nút DeArrow luôn hiển thị trên video có tiêu đề hoặc ảnh thu nhỏ đã được DeArrow thay thế, thay vì chỉ khi di chuột qua.
+The playlist is at the beginning. Enable loop to continue playing: Danh sách phát đang ở đầu. Hãy bật lặp lại để tiếp tục phát
+External link opening has been disabled in Settings → Privacy: Tính năng mở liên kết bên ngoài đã bị tắt trong Cài đặt → Quyền riêng tư
+KeyboardShortcutPrompt:
+  Mark Seen or Watched: "Đánh dấu mục đang chọn là đã thấy, hoặc bật/tắt trạng thái đã xem"
+  Toggle Quick Bookmark: Thêm vào hoặc xóa khỏi danh sách phát dấu trang nhanh
+  Reopen Closed Window: Mở lại cửa sổ vừa đóng
+  Edit Hint: Chọn một phím tắt rồi nhấn tổ hợp phím mới. Nhấn Backspace hoặc Delete để bỏ gán.
+  Change Shortcut: Đổi phím tắt cho {action}
+  Press Shortcut: Nhấn phím tắt…
+  Unassigned: Chưa gán
+  Reset Shortcut: Đặt lại phím tắt cho {action}
+  Reset to Defaults: Đặt lại về mặc định
+  Shortcut Already Assigned: Phím tắt đã được gán
+  Shortcut Conflict: '{shortcut} đã được gán cho {actions}. Bạn có muốn gán lại không?'
+  Reserved Shortcut Conflict: '{shortcut} được dành riêng cho {actions} và không thể gán lại.'
+  Reassign: Gán lại
+  Sections:
+    App:
+      Tabs: "Ứng dụng:\_Thẻ"
+      Search and Page: "Ứng dụng:\_Tìm kiếm & Trang"
+      Window and View: "Ứng dụng:\_Cửa sổ & Chế độ xem"
+  New Tab: Tạo thẻ mới
+  Close Tab: Đóng thẻ hiện tại
+  Reload Tab: Tải lại thẻ hiện tại
+  Reopen Closed Tab: Mở lại thẻ đóng gần nhất
+  Next Tab: Chuyển sang thẻ tiếp theo
+  Previous Tab: Chuyển sang thẻ trước
+  Switch to Tab: Chuyển sang thẻ 1–9
+  Toggle Tab Orientation: Chuyển đổi bố cục thẻ
+  Find in Page: Tìm văn bản trên trang hiện tại
+  Find Next Match: Chuyển đến kết quả tiếp theo
+  Find Previous Match: Chuyển đến kết quả trước
+  Toggle Normal Playback Speed: Chuyển đổi giữa tốc độ 1x và tốc độ phát trước đó
+  Toggle Skip Silence: Bật/tắt bỏ qua đoạn im lặng
+  Set A-B Repeat Point A: Đặt điểm A của lặp A-B
+  Set A-B Repeat Point B: Đặt điểm B của lặp A-B
+  Clear A-B Repeat: Xóa lặp A-B
+  Video Zoom In: Phóng to video
+  Video Zoom Out: Thu nhỏ video
+  Tab Switcher: Trình chuyển thẻ
+  Undo Seek: Hoàn tác lần tua gần nhất
+  Redo Seek: Làm lại lần tua đã hoàn tác
+CommandPalette:
+  Title: Bảng lệnh
+  Open: Mở bảng lệnh
+  Search Label: "Tìm lệnh, cài đặt và video cục bộ"
+  Search Placeholder: Tìm lệnh, cài đặt và video cục bộ…
+  Results: "Kết quả"
+  No Results: "Không có kết quả phù hợp"
+  Result Count: "Kết quả: {count}"
+  Move: Di chuyển
+  Run: Chạy
+  Keys:
+    Up: ↑
+    Down: ↓
+    Escape: Esc
+  Switch to Tab: 'Chuyển sang thẻ: {title}'
+  Switch Profile: 'Chuyển hồ sơ: {name}'
+  Open Playlist: 'Mở danh sách phát: {name}'
+  Cancel Download: 'Hủy tải xuống: {title}'
+  Groups:
+    App: Ứng dụng
+    Navigation: Điều hướng
+    Tabs: Thẻ
+    Local Videos: Video cục bộ
+  Unavailable:
+    Current Page: Đã ở trang này
+    No History: Không có trang theo hướng này
+    Desktop: Chỉ dùng được trong ứng dụng máy tính
+    Build: Không dùng được trong bản dựng này
+    One Tab: Hãy mở một thẻ khác trước
+    Active Tab: Đây là thẻ đang hoạt động
+    Active Profile: Đây là hồ sơ đang hoạt động
+    Download Finished: Lượt tải này không còn chạy
+    Video: Hãy mở một video trước
+Downloads:
+  File Name Template Invalid: 'Hãy dùng đường dẫn tương đối bên trong thư mục tải xuống, không có "..", "~", "$", "%" hoặc tiền tố như "thumbnail:".'
+  Search Completed: "Tìm tệp tải xuống đã hoàn tất theo tiêu đề hoặc kênh"
+  Format: "Định dạng"
+  All Formats: "Tất cả định dạng"
+  Largest First: "Lớn nhất trước"
+  Smallest First: "Nhỏ nhất trước"
+  No Matching Downloads: "Không có tệp tải xuống đã hoàn tất nào phù hợp. Hãy thử tìm kiếm hoặc bộ lọc khác."
+  Add Download: Thêm lượt tải xuống
+  Preparing: Đang chuẩn bị…
+  Export Failed: "Không thể lưu tệp đã tải xuống. Hãy chọn thư mục tải xuống có quyền ghi và thử lại."
+  Native Code Blocked: "Android đã chặn yt-dlp tải các thư viện gốc của nó. Trên GrapheneOS, hãy mở thông tin của ứng dụng này, đặt “Dynamic code loading via storage” trong “Exploit protection” thành “Allowed” rồi thử lại."
+  Download Stopped Unexpectedly: "Quá trình tải xuống đã dừng đột ngột."
+  Remove File Permanently Warning: "Thao tác này sẽ xóa vĩnh viễn \"{title}\"."
+  Download: Tải xuống
+  Download Video: Tải video
+  Download Playlist: Tải danh sách phát
+  Downloading: Đang tải
+  Queue: Hàng đợi
+  Downloaded: Đã tải
+  Canceled: Đã hủy
+  Open Downloads: Mở mục Tải xuống
+  No Downloads: Chưa có lượt tải xuống
+  No Downloads Description: Các lượt tải bạn bắt đầu sẽ xuất hiện ở đây.
+  Clear Failed Canceled Skipped And Missing: Xóa mục lỗi, đã hủy, bị bỏ qua và bị thiếu
+  Clear From List: Xóa khỏi danh sách
+  Show in Folder: Hiện trong thư mục
+  Play Download: Phát tệp đã tải
+  Retry Download: Tải lại
+  Pause Download: Tạm dừng tải
+  Resume Download: Tiếp tục tải
+  Move Earlier: Chuyển lên trước
+  Move Later: Chuyển xuống sau
+  Pause All: Tạm dừng tất cả
+  Resume All: Tiếp tục tất cả
+  Retry All: Thử lại tất cả lượt tải bị lỗi
+  Total Size: 'Tổng kích thước: {size}'
+  Local File: Tệp cục bộ
+  Available Offline: Dùng được khi ngoại tuyến
+  Remove File: Xóa tệp
+  Remove File Confirmation: Xóa tệp đã tải?
+  Remove File Warning: Thao tác này sẽ chuyển "{title}" vào thùng rác của thiết bị.
+  File Not Found: Không tìm thấy tệp đã tải.
+  Files Missing: Các tệp đã tải không còn tồn tại trên hệ thống tệp.
+  Files Available: 'Có {available} trong số {total} tệp đã tải.'
+  More Files: 'Thêm {count} tệp'
+  Template Used: 'Mẫu: {name}'
+  Template: Mẫu
+  Unsaved: Chưa lưu
+  Media Type: Loại nội dung
+  Video: Video
+  Audio: Âm thanh
+  Maximum Resolution: Độ phân giải tối đa
+  Best Available: Tốt nhất hiện có
+  Automatic: Tự động
+  Container: Định dạng vùng chứa
+  Video Codec: Codec video
+  Audio Codec: Codec âm thanh
+  File Name Template: Mẫu tên tệp
+  File Name Template Help: 'Trường dùng được: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
+  Time Range and Chapters: Khoảng thời gian và chương
+  Start Time: Thời gian bắt đầu
+  End Time: Thời gian kết thúc
+  Split by Chapters: Tách thành tệp riêng theo chương
+  Remove Segments: Xóa phân đoạn
+  Subtitles and Metadata: Phụ đề và siêu dữ liệu
+  Include Subtitles: Kèm phụ đề
+  Embed Subtitles: Nhúng phụ đề vào tệp đa phương tiện
+  Subtitle Format: Định dạng phụ đề
+  Subtitle Languages: Ngôn ngữ phụ đề
+  Subtitle Languages Help: 'Bộ chọn ngôn ngữ yt-dlp phân tách bằng dấu phẩy, ví dụ: en.*,de.*'
+  Embed Cover Art: Nhúng hình thu nhỏ làm ảnh bìa
+  Embed Metadata: Nhúng tiêu đề, tác giả, mô tả và chương
+  Additional yt-dlp Arguments: Đối số yt-dlp bổ sung
+  Template Name: Tên mẫu
+  Save Template: Lưu mẫu
+  Delete Template: Xóa mẫu
+  Template Saved: Đã lưu mẫu tải xuống "{name}"
+  Template Name Exists: Đã có mẫu tải xuống tên "{name}".
+  Choose Folder: Đổi
+  Select Folder: Chọn thư mục
+  Folder Required: Chọn thư mục tải xuống để bật tính năng tải.
+  System Downloads Folder: Thư mục Tải xuống của hệ thống
+  Processing: Đang xử lý…
+  Queued: Đang chờ
+  Queued Position: Đang chờ, vị trí {position}
+  Paused: Đã tạm dừng
+  Pausing: Tác vụ hiện tại sẽ hoàn tất, sau đó hàng đợi sẽ tạm dừng
+  Download Complete: Đã tải xong
+  Download Cancelled: Đã hủy tải
+  Download Failed: Tải không thành công
+  File Name Shortened: Tên tệp đã được rút gọn vì tiêu đề video quá dài.
+  Some Videos Not Downloaded: Không thể tải xuống một số video trong danh sách phát này.
+  Playlist Video Position: Video {index}/{count}
+  Insufficient Disk Space: Không đủ dung lượng đĩa. Cần khoảng {required}, hiện có {available}.
+  Unknown Download Size: Không rõ kích thước tải xuống. Hệ thống tệp đích còn {available}.
+  Disk Space Check Unavailable: Không thể kiểm tra dung lượng đĩa còn trống trước khi bắt đầu tải.
+  Download Failure Hint: Kiểm tra {issuesLink}, sau đó thử chuyển kênh yt-dlp sang Nightly hoặc Master trong Cài đặt → Nâng cao → Phần mềm bên ngoài.
+  yt-dlp YouTube Issues: sự cố yt-dlp gần đây với YouTube
+  Automatic Download Started: Đã bắt đầu tự động tải
+  Automatic Download Started Body: Đang tải "{title}" từ {channel} trong nền.
+  Automatic Download Complete: Đã tự động tải xong
+  Automatic Download Failed: Tự động tải không thành công
+  Automatic Download Could Not Start: Không thể bắt đầu tự động tải "{title}".
+  Automatic Download Skipped: Đã bị bộ lọc tự động tải bỏ qua
+  Cancel Download: Hủy tải xuống
+  yt-dlp Not Found: Không tìm thấy yt-dlp. Hãy cài đặt hoặc đặt đường dẫn trong Cài đặt → Nâng cao → Phần mềm bên ngoài.
+  Download Complete Template: Đã tải xong "{title}"
+  Download Failed Template: Không tải được "{title}"
+  Templates:
+    Video Best: Video - Chất lượng tốt nhất
+    Video Resolution: Video - {resolution}
+    Audio Best: Âm thanh - Chất lượng tốt nhất
+    Audio Format: Âm thanh - {format}
+    Subtitles Format: Phụ đề - {format}
+  Waiting for Unmetered Network: "Đang chờ mạng không đo lưu lượng"
+  Waiting for Charging: "Đang chờ bộ sạc"
+  Remove File Failed: Không thể xóa tệp đã tải xuống.
+Channels:
+  Load More Channels: "Tải thêm kênh"
+Search Bar:
+  Use Suggestion: Dùng gợi ý
+Theme Discovery:
+  Discover Themes: "Khám phá giao diện"
+  Refresh: "Làm mới"
+  View on GitHub: "Xem trên GitHub"
+  Load Error: "Không thể tải giao diện. Hãy thử làm mới."
+  Loading: "Đang tải…"
+  No Themes: "Không tìm thấy giao diện có thể cài đặt."
+  No Preview: "Ảnh chụp màn hình không khả dụng"
+  Load More: "Tải thêm"
+  Applied: "Đã áp dụng"
+  Apply Theme: "Áp dụng giao diện"
+  Install and Apply: "Cài đặt và áp dụng"
+  Update and Apply: "Cập nhật và áp dụng"
+
+Connection:
+  Offline: Ngoại tuyến
+  Reconnecting: "Mất kết nối. Đang thử kết nối lại…"
+  Back Online: "Đã trực tuyến trở lại"
+
+App Icon:
+  Restart: "Khởi động lại ứng dụng"
+  Saved Message: "Đã lưu biểu tượng. Trình khởi chạy có thể mất một lúc để cập nhật."
+  Title: "Biểu tượng ứng dụng"
+  Error: "Không thể tải hoặc thay đổi biểu tượng ứng dụng"
+
+Tray:
+  Hide All Windows: "Ẩn tất cả cửa sổ"
+  Show All Windows: "Hiển thị tất cả cửa sổ"
+
+Tray Icon:
+  Title: "Biểu tượng khay hệ thống"
+  Follow App Theme: "Theo chủ đề ứng dụng"
+  Monochrome: "Đơn sắc"
+
+Form Inputs:
+  Browse: "Duyệt"
+  Use Default Path: "Dùng mặc định"
+  Enter Password Hint: "Nhập mật khẩu của bạn"
+  Choose Password Hint: "Chọn mật khẩu"
+  Confirm Password Hint: "Nhập lại mật khẩu mới"
+  Encryption Passphrase Hint: "Nhập cụm mật khẩu mã hóa của bạn"
+  Show Password: "Hiện mật khẩu"
+  Hide Password: "Ẩn mật khẩu"
+  Search Text Hint: "Nhập từ khóa tìm kiếm"
+  Playlist Description Hint: "Mô tả danh sách phát này"
+  Filename Preview: "Xem trước tên tệp"
+  Enter Channels: "Nhập kênh"
+  Enter Text: "Nhập văn bản"
+  Video URL: URL video hoặc danh sách phát
+  Paste Link: Dán liên kết video hoặc danh sách phát
+  Example: "ví dụ: {example}"
+  No Minimum: Không có mức tối thiểu
+  No Maximum: Không có mức tối đa
+  Any Age: Mọi độ tuổi
+  Included Terms Example: "ví dụ: hướng dẫn, đánh giá"
+  Excluded Terms Example: "ví dụ: trailer, xem trước"
+  Global Arguments Hint: Đối số tùy chọn cho mọi lượt tải
+  Unlimited Hint: 0 để không giới hạn
+  Add Argument: Thêm đối số
+  Template Name Example: "ví dụ: Chỉ âm thanh"
+  Download Arguments Hint: Đối số tùy chọn cho lượt tải này
+  Generated ID Hint: Để trống để tạo ID
+  Default Value: "Mặc định: {value}"
+
+Search Filters:
+  Possible Age Restriction Hint: "YouTube có thể đã áp dụng giới hạn độ tuổi cho truy vấn tìm kiếm này."
+  Cookie Search Failed: "Tìm kiếm bằng cookie đã cấu hình thất bại."
+  Showing results for: "Đang hiển thị kết quả cho {query}"
+  Search instead for: "Thay vào đó, tìm kiếm {query}"
+  Including results for: "Bao gồm kết quả cho {query}"
+  Search only for: "Chỉ tìm kiếm {query}"
+  Did you mean: "Có phải bạn muốn tìm {query}?"
+
+Storage Startup Error:
+  Title: "Không thể tải dữ liệu ứng dụng"
+  Message: "Giải phóng bộ nhớ thiết bị rồi thử lại. Đồng bộ hóa bị tạm dừng cho đến khi dữ liệu của bạn được tải."
+  Web Message: "Nếu OpenTubeX đang mở trong một thẻ khác, hãy đóng thẻ đó rồi thử lại."
+  Insecure Web Message: "OpenTubeX chỉ có thể lưu dữ liệu của bạn khi được mở qua HTTPS hoặc trên localhost. Thay vào đó, hãy mở địa chỉ này bằng https://."
+  Retry: "Thử lại"
+Native Permissions:
+  Local Network Denied: "Quyền truy cập thiết bị ở gần đã bị từ chối."
+  Local Network: "Tìm thiết bị trên mạng cục bộ và truyền video đến chúng, đồng bộ hóa cài đặt và dữ liệu giữa các thiết bị."
+
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Trang chủ"
+  subscriptions: "Đăng ký"
+  userplaylists: "Danh sách"
+  history: "Lịch sử"
+  subscribedchannels: "Kênh"
+  trending: "Xu hướng"
+  popular: "Phổ biến"
+  stats: "Thống kê"
+  more: "Thêm"
+
+Installer:
+  Create Desktop Shortcut: Tạo lối tắt trên màn hình nền
+Older Version Changes:
+  Title: "Thay đổi từ phiên bản cũ hơn"
+  Message: "Các thay đổi bạn đã thực hiện trong phiên bản cũ hơn của OpenTubeX đã được áp dụng cho thư viện của bạn."
+  Detail: "Nếu một mục đã được thay đổi ở cả hai phiên bản, thay đổi từ phiên bản cũ hơn được giữ lại. Bản sao lưu thư viện trước đó của bạn nằm trong thư mục hồ sơ."
+Library Format Changed:
+  Title: "Thư viện đã được chuyển sang định dạng mới"
+  Message: "Thư viện của bạn hiện dùng định dạng lưu trữ mới."
+  Detail: "Các phiên bản cũ hơn của OpenTubeX vẫn có thể mở thư viện của bạn, nhưng hiển thị nó như trước bản cập nhật này. Các thay đổi bạn thực hiện trong phiên bản cũ hơn sẽ được thêm lại khi bạn quay lại phiên bản này."
+Invidious Fallback Warning: "Yêu cầu này bỏ qua máy chủ Invidious bạn đã cấu hình và kết nối trực tiếp đến YouTube, làm lộ địa chỉ IP của bạn."
+Automatically unloaded to free memory: "Đã tự động dỡ tải để giải phóng bộ nhớ"
+Home Widgets:
+  Continue Watching: "Tiếp tục xem"
+  Continue Watching Description: "Tiếp tục các video bạn đã bắt đầu xem"
+  Continue Watching Empty: "Các video bạn bắt đầu xem sẽ xuất hiện ở đây"
+  Quick Access: "Truy cập nhanh"
+  Quick Access Description: "Mở tối đa 4 trang bạn chọn"
+  Choose Pages: "Chọn tối đa 4 trang"
+  Pages: "Trang"
+  Search: "Tìm kiếm"
+  Subscriptions: "Đăng ký"
+  Watch Later: "Xem sau"
+  History: "Lịch sử"
+  Playlists: "Danh sách"
+  Downloads: "Tải xuống"
+  Watch Time: "Thời gian xem"
+  Watch Time Description: "Thời gian xem của bạn trong 7 ngày qua"
+  Today: "Hôm nay"
+  Last 7 Days: "7 ngày qua"
+  Recent Downloads: "Tải xuống gần đây"
+  Recent Downloads Description: "Phát các video bạn đã tải xuống"
+  Recent Downloads Empty: "Các video bạn tải xuống sẽ xuất hiện ở đây"
+Subscription Groups:
+  Groups: Nhóm
+  All: Tất cả
+  New Group: Nhóm mới
+  Edit Group: Chỉnh sửa nhóm
+  Group Name: Tên nhóm
+  Create: Tạo
+  Save: Lưu
+  Delete Group: Xóa nhóm
+  Delete Prompt: Xóa nhóm "{groupName}"? Bạn vẫn tiếp tục đăng ký các kênh trong nhóm.
+  Empty Group: Nhóm này không có kênh nào trong hồ sơ hiện tại.
+  Save Failed: Không thể lưu nhóm.
+  Delete Failed: Không thể xóa nhóm.
+  Group Icon: Biểu tượng nhóm
+  No Icon: Không có biểu tượng
+Yattee Server:
+  API Error (Click to copy): Lỗi máy chủ Yattee (Nhấn để copy)
+  Unsupported page: Trang này không khả dụng với máy chủ Yattee. Hãy bật “{fallbackSetting}” để tải trang bằng API cục bộ.
+  Posts unavailable: Máy chủ Yattee không cung cấp bài đăng. Hãy bật “{fallbackSetting}” để tải bài đăng bằng API cục bộ.
+  Errors:
+    Invalid credentials: Máy chủ Yattee đã từ chối tên người dùng hoặc mật khẩu. Hãy kiểm tra lại trong Cài đặt → Nâng cao.
+    Rate limited: Máy chủ Yattee đang chặn đăng nhập do có quá nhiều lần thử không thành công. Vui lòng thử lại sau.
+    Streams not relayed: Máy chủ Yattee không chuyển tiếp luồng của video này. Khi video được proxy qua máy chủ, OpenTubeX không kết nối trực tiếp với YouTube.
+    Not configured: Nhập URL máy chủ Yattee của bạn trong Cài đặt → Nâng cao.
+    HTTPS required: Android chỉ có thể phát video từ các máy chủ Yattee sử dụng HTTPS.
+    Streams unavailable: Không thể tải luồng của video này từ máy chủ Yattee. Hãy dùng “Kiểm tra kết nối” trong Cài đặt → Nâng cao để kiểm tra máy chủ.
+Yattee Fallback Warning: Yêu cầu này bỏ qua máy chủ Yattee bạn đã cấu hình và kết nối trực tiếp đến YouTube, làm lộ địa chỉ IP của bạn.
+Update With Package Manager: 'Cập nhật bằng {packageManager}:'
+Update Command Copied: 'Đã sao chép lệnh cập nhật'
+Digital Wellbeing:
+  Watch time limit almost reached: "Còn {duration} là đạt giới hạn thời gian xem hằng ngày của bạn"
+  Shorts limit almost reached: "Còn {duration} là đạt giới hạn Shorts hằng ngày của bạn"
+  Daily watch time limit reached: "Đã đạt giới hạn thời gian xem hằng ngày"
+  Daily Shorts limit reached: "Đã đạt giới hạn Shorts hằng ngày"
+  Watched today: "Hôm nay bạn đã xem {duration}."
+  Shorts watched today: "Hôm nay bạn đã xem Shorts trong {duration}."
+  15 More Minutes: "Thêm 15 phút"
+  Ignore for Today: "Bỏ qua hôm nay"
+  Time to take a break: "Đã đến lúc nghỉ giải lao"
+  Watching for: "Bạn đã xem liên tục {duration}."
+  Time for bed: "Đã đến giờ đi ngủ"
+  Bedtime started at: "Giờ đi ngủ của bạn đã bắt đầu lúc {time}."
+  Remind Me in 10 Minutes: "Nhắc tôi sau 10 phút"
+Notification Center:
+  Notifications: "Thông báo"
+  Notifications With Unread: "Thông báo ({count} chưa đọc)"
+  Mark as Read: "Đánh dấu đã đọc"
+  Mark All as Read: "Đánh dấu tất cả đã đọc"
+  Clear All: "Xóa tất cả"
+  Clear: "Xóa"
+  Empty: "Chưa có thông báo nào"
+  Empty Hint: "Lời nhắc phát trực tiếp và video mới từ các kênh đã bật thông báo sẽ xuất hiện ở đây."
+Platforms:
+  Tracks: Bản nhạc
+  Playlists: Danh sách phát
+  Follower Count: '{count} người theo dõi'
+  Open Website: Mở trên {platform}
+  Channel Not Found: Không tìm thấy kênh này.
+  Playlist Not Found: Không tìm thấy danh sách phát này.
+  Load Error: Không thể tải trang này từ {platform}.
+  Empty Tab: Chưa có gì ở đây.
+YouTube Account:
+  Like: "Thích"
+  Dislike: "Không thích"
+  Rating Failed: "Không thể đánh giá trên YouTube: {error}"
+  Subscribe Failed: "Không thể đăng ký trên YouTube: {error}"
+  Unsubscribe Failed: "Không thể hủy đăng ký trên YouTube: {error}"
+  Subscriptions Synced: "Đã đồng bộ kênh đăng ký từ YouTube: thêm {added}, xóa {removed}"
+  Playlist Update Failed: "Không thể cập nhật {playlistName} trên YouTube: {error}"
+  Add a comment: "Viết bình luận"
+  Add a reply: "Viết phản hồi"
+  Switch Channel: "Chuyển kênh"
+  Comment: "Bình luận"
+  Reply: "Phản hồi"
+  Comment Posted: "Đã đăng bình luận"
+  Reply Posted: "Đã đăng phản hồi"
+  Comment Failed: "Không thể đăng bình luận: {error}"
+  Delete Comment: "Xóa bình luận"
+  Delete Comment Confirmation: "Xóa bình luận của bạn khỏi YouTube?"
+  Comment Deleted: "Đã xóa bình luận"
+  Delete Comment Failed: "Không thể xóa bình luận: {error}"
+  Edit Comment: "Chỉnh sửa bình luận"
+  Save: "Lưu"
+  Comment Edited: "Đã chỉnh sửa bình luận"
+  Edit Comment Failed: "Không thể chỉnh sửa bình luận: {error}"
+  Recommendations: "Đề xuất từ YouTube"
+  Recommendations Failed: "Không thể tải đề xuất YouTube của bạn."

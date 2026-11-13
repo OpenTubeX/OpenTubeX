@@ -1,0 +1,161 @@
+const TABS = { videos: 'EgZ2aWRlb3PyBgQKAjoA', shorts: 'EgZzaG9ydHPyBgUKA5oBAA%3D%3D', live: 'EgdzdHJlYW1z8gYECgJ6AA%3D%3D', posts: 'EgVwb3N0c_IGBAoCSgA%3D' }
+const RESOURCES = { videos: 'videos', shorts: 'shorts', live: 'streams', posts: 'community' }
+const PLAYLIST_PREFIXES = { videos: 'UULF', shorts: 'UUSH', live: 'UULV' }
+const OPTIONAL_TAB_PATHS = { shorts: '/shorts', live: '/streams', posts: '/posts' }
+
+/** The same ordered requests are used by Electron and Android native jobs. */
+export function createBackgroundSubscriptionRequests({ backend = 'local', useRss = true, fallback = false, instanceUrl = '', authorization = null, clientVersion, region = 'US' }) {
+  const instance = instanceUrl.replace(/\/+$/, '')
+  return Object.fromEntries(Object.keys(TABS).map(feed => {
+    const localApi = {
+      format: 'local',
+      url: 'https://www.youtube.com/youtubei/v1/browse?prettyPrint=false',
+      method: 'POST',
+      body: JSON.stringify({ context: { client: { clientName: 'WEB', clientVersion, hl: 'en', gl: region } }, browseId: '%CHANNEL%', params: TABS[feed] })
+    }
+    const localPlaylist = { ...localApi, format: 'localPlaylist', body: JSON.stringify({ ...JSON.parse(localApi.body), browseId: 'VL%PLAYLIST%', params: undefined }) }
+    const invidiousApi = { format: 'invidious', url: `${instance}/api/v1/channels/%CHANNEL%/${RESOURCES[feed]}`, authorization }
+    const localRss = { format: 'rss', url: 'https://www.youtube.com/feeds/videos.xml?playlist_id=%PLAYLIST%' }
+    const invidiousRss = { format: 'rss', url: `${instance}/feed/playlist/%PLAYLIST%`, authorization }
+    // Like foreground refreshes, Shorts always try RSS first: other sources omit dates, so each Short would need a watch page.
+    const rssFirst = useRss || feed === 'shorts'
+    const local = feed === 'posts' ? [localApi] : feed === 'shorts' ? [localRss, localPlaylist, localApi] : [...(rssFirst ? [localRss, localApi] : [localApi, localRss]), ...(feed === 'videos' ? [localPlaylist] : [])]
+    const invidious = feed === 'posts' ? [invidiousApi] : (rssFirst ? [invidiousRss, invidiousApi] : [invidiousApi, invidiousRss])
+    // Yattee servers have neither RSS feeds nor posts
+    const yattee = feed === 'posts' ? [] : [invidiousApi]
+    if (backend === 'yattee') return [feed, [...yattee, ...(fallback ? local : [])]]
+    return [feed, backend === 'invidious' ? [...invidious, ...(fallback ? local : [])] : [...local, ...(fallback ? invidious : [])]]
+  }))
+}
+
+export function resolveBackgroundSubscriptionRequest(plan, feedType, channelId) {
+  if (!/^[A-Za-z0-9_-]+$/.test(channelId)) throw new Error('Invalid subscription channel ID')
+  const replace = value => value.replaceAll('%CHANNEL%', channelId).replaceAll('%PLAYLIST%', channelId.replace(/^UC/, PLAYLIST_PREFIXES[feedType]))
+  return { ...plan, url: replace(plan.url), ...(plan.body ? { body: replace(plan.body) } : {}) }
+}
+
+/** YouTube explains with an error alert why a channel is gone. */
+function hasErrorAlert(data) {
+  return data.alerts?.some(alert => alert.alertRenderer?.type === 'ERROR') === true
+}
+
+function channelUnavailableError() {
+  return Object.assign(new Error('Channel unavailable'), { channelUnavailable: true })
+}
+
+function channelHasNoFeed(data, feedType, channelId) {
+  const path = OPTIONAL_TAB_PATHS[feedType]
+  if (!path || !channelId || data.error || hasErrorAlert(data) ||
+      data.metadata?.channelMetadataRenderer?.externalId !== channelId) return false
+  const tabs = data.contents?.twoColumnBrowseResultsRenderer?.tabs ?? data.contents?.singleColumnBrowseResultsRenderer?.tabs
+  if (!Array.isArray(tabs)) return false
+  const urls = tabs.map(tab => tab.tabRenderer?.endpoint?.commandMetadata?.webCommandMetadata?.url).filter(url => typeof url === 'string')
+  // Channels without any content only have a Home tab showing an empty state.
+  const isEmptyChannel = tabs.some(tab => tab.tabRenderer?.selected === true &&
+    tab.tabRenderer.content?.sectionListRenderer?.contents?.some?.(section => section?.channelOwnerEmptyStateRenderer))
+  return (isEmptyChannel || urls.some(url => /\/(featured|videos|shorts|streams|posts|playlists)$/.test(url))) && !urls.some(url => url.endsWith(path))
+}
+
+function emptyFeed(feedType) {
+  return feedType === 'posts' ? { comments: [] } : { videos: [] }
+}
+
+export function parseBackgroundSubscriptionResponse(format, text, feedType, channelId) {
+  if (format === 'rss') {
+    if (!/<feed[\s>]/.test(text) || !text.includes('</feed>')) throw new Error('Invalid subscription RSS response')
+    return { backgroundFormat: 'rss', text }
+  }
+  const data = JSON.parse(text)
+  if (data.error) {
+    if (feedType === 'posts' && data.error === "This channel hasn't posted yet") return { comments: [] }
+    throw new Error('Subscription API returned an error')
+  }
+  if (format === 'local' || format === 'localPlaylist') {
+    // A request for a missing tab can redirect to the channel's Videos or Home tab.
+    if (format === 'local' && channelHasNoFeed(data, feedType, channelId)) return emptyFeed(feedType)
+    if (format === 'local' && hasErrorAlert(data)) throw channelUnavailableError()
+    const tabs = data.contents?.twoColumnBrowseResultsRenderer?.tabs ?? data.contents?.singleColumnBrowseResultsRenderer?.tabs
+    const selected = Array.isArray(tabs) ? tabs.find(tab => tab.tabRenderer?.selected === true)?.tabRenderer : null
+    const path = format === 'local' && OPTIONAL_TAB_PATHS[feedType]
+    if (!selected?.content || typeof selected.content !== 'object' || Array.isArray(selected.content) ||
+        (path && !selected.endpoint?.commandMetadata?.webCommandMetadata?.url?.endsWith(path)) ||
+        hasErrorAlert(data)) throw new Error('Channel unavailable')
+    if (format === 'local' && feedType === 'videos' && data.metadata?.channelMetadataRenderer?.musicArtistName) {
+      if (!selected?.endpoint?.commandMetadata?.webCommandMetadata?.url?.endsWith('/videos')) {
+        const error = new Error('Topic channel requires its uploads playlist')
+        error.verifiedTopicChannel = data.metadata.channelMetadataRenderer.externalId === channelId
+        throw error
+      }
+    }
+    return { backgroundFormat: format, data }
+  }
+  if (!Array.isArray(data[feedType === 'posts' ? 'comments' : 'videos'])) throw new Error('Invalid subscription API response')
+  return data
+}
+
+export async function fetchBackgroundSubscriptionChannel(configuration, feedType, channelId, signal, fetchText, normalize = payload => payload) {
+  let lastError
+  // A Topic channel without a Videos tab has uploads only if its uploads playlist exists.
+  let topicChannelWithoutVideosTab = false
+  for (const plan of configuration.requests[feedType]) {
+    signal.throwIfAborted()
+    try {
+      const request = resolveBackgroundSubscriptionRequest(plan, feedType, channelId)
+      const text = await fetchText(request, signal)
+      if (plan.format === 'localPlaylist' && topicChannelWithoutVideosTab && JSON.stringify(JSON.parse(text).alerts ?? null).includes('The playlist does not exist.')) {
+        return await normalize(emptyFeed(feedType))
+      }
+      const payload = parseBackgroundSubscriptionResponse(plan.format, text, feedType, channelId)
+      if (payload.backgroundFormat === 'local' && feedType === 'live') {
+        let page = payload.data
+        for (let count = 0; ; count++) {
+          const token = getEmptyLiveContinuation(page)
+          if (!token) break
+          if (count >= 20) throw new Error('Too many empty live feed pages')
+          const body = { ...JSON.parse(request.body), browseId: undefined, params: undefined, continuation: token }
+          page = JSON.parse(await fetchText({ ...request, body: JSON.stringify(body) }, signal))
+          if (page.error) throw new Error('Live feed continuation failed')
+          payload.continuation = page
+        }
+      }
+      signal.throwIfAborted()
+      return await normalize(payload)
+    } catch (error) {
+      // Like foreground refreshes, other sources can't load a channel that YouTube reports as gone
+      if (error.channelUnavailable) throw error
+      lastError = error
+      if (error.verifiedTopicChannel) topicChannelWithoutVideosTab = true
+      if (plan.format === 'local' && OPTIONAL_TAB_PATHS[feedType] && error.message === 'HTTP 404') {
+        try {
+          signal.throwIfAborted()
+          const request = resolveBackgroundSubscriptionRequest(plan, feedType, channelId)
+          const body = JSON.parse(request.body)
+          delete body.params
+          const page = JSON.parse(await fetchText({ ...request, body: JSON.stringify(body) }, signal))
+          signal.throwIfAborted()
+          if (channelHasNoFeed(page, feedType, channelId)) return await normalize(emptyFeed(feedType))
+          if (hasErrorAlert(page)) throw channelUnavailableError()
+        } catch (verificationError) {
+          if (verificationError.channelUnavailable) throw verificationError
+          // An unverified channel is still a failure; keep trying the configured sources.
+        }
+      }
+    }
+  }
+  signal.throwIfAborted()
+  throw lastError ?? new Error('No background subscription backend configured')
+}
+
+/** YouTube sometimes returns only a continuation on the Live tab. */
+export function getEmptyLiveContinuation(data) {
+  let token = null
+  let hasVideos = false
+  function visit(value) {
+    if (!value || typeof value !== 'object') return
+    if (value.videoRenderer || value.gridVideoRenderer || value.lockupViewModel) hasVideos = true
+    if (value.continuationCommand?.token) token = value.continuationCommand.token
+    for (const child of Object.values(value)) visit(child)
+  }
+  visit(data.contents ?? data.onResponseReceivedActions ?? data.onResponseReceivedEndpoints)
+  return hasVideos ? null : token
+}

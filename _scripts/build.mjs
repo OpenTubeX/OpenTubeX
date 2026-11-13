@@ -1,37 +1,52 @@
 import { Arch, build, Platform } from 'electron-builder'
 import config from './ebuilder.config.mjs'
+import { prepareWindowsShare } from './windowsShare.mjs'
+import { prepareMacosNative } from './macosNative.mjs'
+import { prepareWindowsInterposer } from './windowsInterposer.mjs'
+import { withWindowsPortable } from './windowsPortable.mjs'
+import { prepareCastSender } from './castSender.mjs'
 
 const args = process.argv
+const targetArch = args[2] ?? process.arch
+if (targetArch !== 'x64' && targetArch !== 'arm64') {
+  throw new Error(`Unsupported build architecture: ${targetArch}`)
+}
+const arch = Arch[targetArch]
 
-/** @type {Map<import('electron-builder').Platform, Map<import('electron-builder').Arch, Array<string>>>} */
-let targets
+let buildRequests
 const platform = process.platform
+await prepareCastSender('dist', platform, targetArch)
 
 if (platform === 'darwin') {
-  let arch = Arch.x64
-
-  if (args[2] === 'arm64') {
-    arch = Arch.arm64
-  }
-
-  targets = Platform.MAC.createTarget(['DMG', 'zip', '7z'], arch)
+  await prepareMacosNative(targetArch)
+  buildRequests = [{
+    targets: Platform.MAC.createTarget(['DMG', 'zip', '7z'], arch),
+    config
+  }]
 } else if (platform === 'win32') {
-  let arch = Arch.x64
-
-  if (args[2] === 'arm64') {
-    arch = Arch.arm64
+  await prepareWindowsShare(targetArch)
+  if (targetArch === 'x64') {
+    await prepareWindowsInterposer()
   }
-
-  targets = Platform.WINDOWS.createTarget(['nsis', 'zip', '7z', 'portable'], arch)
+  buildRequests = [
+    {
+      targets: Platform.WINDOWS.createTarget(['nsis'], arch),
+      config
+    },
+    {
+      targets: Platform.WINDOWS.createTarget(['zip', '7z'], arch),
+      config: withWindowsPortable(config, targetArch)
+    }
+  ]
 } else if (platform === 'linux') {
-  let arch = Arch.x64
-
-  if (args[2] === 'arm64') {
-    arch = Arch.arm64
-  }
-
-  targets = Platform.LINUX.createTarget(['deb', 'zip', '7z', 'rpm', 'AppImage', 'pacman'], arch)
+  buildRequests = [{
+    targets: Platform.LINUX.createTarget(['deb', 'zip', '7z', 'rpm', 'AppImage', 'pacman'], arch),
+    config
+  }]
 }
 
-const output = await build({ targets, config, publish: 'never' })
-console.log(output)
+const outputs = []
+for (const request of buildRequests) {
+  outputs.push(...await build({ ...request, publish: 'never' }))
+}
+console.log(outputs)

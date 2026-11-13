@@ -4,13 +4,16 @@
   padding-block: 10px 30px;
   padding-inline: 10px;
   cursor: pointer;
-  transition: background 0.2s ease-out;
+  border-radius: var(--shape-corner-small);
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 }
 
 .bubblePadding:hover {
-  background-color: var(--side-nav-hover-color);
-  color: var(--side-nav-hover-text-color);
-  transition: background 0.2s ease-in;
+  background-color: color-mix(in srgb, var(--side-nav-hover-color) 30%, transparent);
+}
+
+.bubblePadding:active {
+  border-radius: var(--shape-corner-extra-small);
 }
 
 .bubble {
@@ -19,18 +22,11 @@
   margin-block: 20px 5px;
   margin-inline: auto;
   border-radius: 50%;
-}
-
-.initial {
   font-size: 35px;
-  line-height: 1em;
-  text-align: center;
-  padding-block: 17.5px;
-  padding-inline: 0;
-  user-select: none;
 }
 
 .profileName {
+  color: var(--primary-text-color);
   font-size: 14px;
   line-height: 1.5em;
   overflow: hidden;

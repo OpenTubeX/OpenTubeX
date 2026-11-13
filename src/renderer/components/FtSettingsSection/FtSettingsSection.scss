@@ -1,7 +1,7 @@
 .settingsSection {
   margin-block: 0;
 
-  @media only screen and (width <= 800px) {
+  @container settings-content (width <= 800px) {
     inline-size: 100%;
   }
 }
@@ -13,8 +13,14 @@
 }
 
 .sectionBody {
-  background-color: var(--card-bg-color);
-  padding-block: 10px;
+  /* Each regular control contributes half of the shared 20px row gap. */
+  --settings-control-margin: calc(var(--settings-row-gap, 20px) / 2);
+  --input-bottom-spacing: 0;
+
+  background-color: var(--settings-section-bg-color, var(--card-bg-color));
+  backdrop-filter: var(--card-bg-blur, none);
+  border-radius: var(--shape-corner-large-increased);
+  padding-block: calc(var(--settings-row-gap, 20px) / 2);
 
   > :deep(div) {
     box-sizing: border-box;
@@ -22,15 +28,15 @@
     padding-inline: 20px;
     inline-size: 100%;
   }
-
-  > :deep(div:not(:last-child, .ft-flex-box)) {
-    @media only screen and (width <= 800px) {
-      margin-block-end: 20px;
-    }
-  }
 }
 
+/* Material 3 Expressive emphasized title: larger and heavier than the
+   setting labels below it. */
 .sectionTitle {
+  font-size: 1.375rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  line-height: 1.75rem;
   user-select: none;
   margin-inline-start: 20px;
   margin-block: 0.5em;
@@ -44,11 +50,11 @@
 %switch-grid {
   align-items: center;
   display: grid;
-  grid-template-columns: auto auto;
+  grid-template-columns: minmax(0, auto) minmax(0, auto);
   justify-content: space-evenly;
 
-  @media only screen and (width <= 680px) {
-    grid-template-columns: auto;
+  @container settings-content (width <= 680px) {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -60,58 +66,148 @@
   @extend %switch-grid;
 
   align-items: start;
+
+  @container settings-content (width <= 680px) {
+    justify-items: center;
+  }
 }
 
 :deep(.switchColumn) {
   display: flex;
   flex-direction: column;
   align-items: start;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+.sectionBody :deep(.sliderGrid) {
+  row-gap: 0;
+}
+
+/* Flex items keep both margins, so a select after another select drops its top margin to keep one row gap. */
+:deep(.switchColumn > .select + .select) {
+  margin-block-start: 0;
+}
+
+:deep(.switchColumn .pure-material-slider) {
+  box-sizing: border-box;
+  inline-size: min(380px, calc(100% - 16px));
 }
 
 :deep(.center) {
   text-align: center;
 }
 
-@media only screen and (width <= 460px) {
+/* Balance the indicator gutter so a standalone field's outline is centered. */
+:deep(.ft-flex-box > .ft-input-component:only-child:has(.inputIndicators > *)),
+:deep(.centeredSettingsInput:has(.inputIndicators > *)) {
+  box-sizing: border-box;
+  margin-inline: 70px;
+  min-inline-size: min(340px, calc(100% - 140px));
+  max-inline-size: calc(100% - 140px);
+}
+
+@container settings-content (width <= 460px) {
+  :deep(.ft-flex-box > .ft-input-component:only-child:has(.inputIndicators > *)) {
+    margin-inline: 32px;
+    min-inline-size: min(340px, calc(100% - 64px));
+    max-inline-size: calc(100% - 64px);
+  }
+
+  :deep(.centeredSettingsInput:has(.inputIndicators > *)) {
+    margin-inline: 0;
+    min-inline-size: min(340px, 100%);
+    max-inline-size: 100%;
+  }
+
+  :deep(.centeredSettingsInput .inputWrapper) {
+    padding-block-end: 32px;
+  }
+
+  :deep(.centeredSettingsInput .inputIndicators) {
+    inset-inline: auto 0;
+    inset-block: auto 0;
+    transform: none;
+  }
+
+  :deep(.centeredSettingsInput .passwordVisibilityToggle) {
+    inset-block-start: calc(var(--password-input-height) / 2);
+  }
+
   :deep(.settingsFlexStart460px) {
     justify-content: flex-start;
   }
 }
 
-@media only screen and (width <= 500px) {
+@container settings-content (width <= 500px) {
   :deep(.settingsFlexStart500px) {
     justify-content: flex-start;
   }
 }
 
-@media only screen and (width <= 680px) {
+@container settings-content (width <= 680px) {
   .settingsSection {
     > :deep(div .text.bottom) {
       inset-inline-start: -85px;
     }
 
-    :deep(.switch-ctn.containsTooltip) {
-      inset-inline-start: -10px;
-      margin-inline-end: 5px;
-      padding-block: 0;
-      padding-inline: 10px;
+    :deep(.switchColumn) {
+      align-items: center;
+      inline-size: 100%;
     }
 
-    :deep(:not(.select-header, .selectLabel, .groupTitle) > .tooltip) {
+    :deep(.switch-label) {
+      min-inline-size: 0;
+      max-inline-size: 100%;
+    }
+
+    :deep(.switch-label-text) {
+      min-inline-size: 0;
+      hyphens: auto;
+      overflow-wrap: break-word;
+    }
+
+    :deep(.switchColumn > .select) {
+      box-sizing: border-box;
+      inline-size: min(100%, 270px);
+      margin-inline-end: 0;
+    }
+
+    :deep(.switchColumn .switch-label-main > .tooltip),
+    :deep(.switchFlowGrid .switch-label-main > .tooltip) {
+      position: static;
+      inset: auto;
+      vertical-align: middle;
+    }
+
+    :deep(.switchColumn .switch-ctn.containsTooltip .switch-label),
+    :deep(.switchFlowGrid .switch-ctn.containsTooltip .switch-label) {
+      align-items: center;
+      display: inline-flex;
+    }
+
+    :deep(:not(.select, .selectLabel, .groupTitle, .selectIndicators, .inputIndicators, .labelMain, .switch-label-main) > .tooltip) {
       display: inline-block;
       position: absolute;
       inset-inline-end: -25px;
       inset-block-start: 12px;
     }
 
-    :deep(.settingsFlexStart460px .tooltip) {
+    :deep(.settingsFlexStart460px :not(.inputIndicators) > .tooltip) {
       inset-inline-end: 0;
       inset-block-start: -2px;
     }
 
     :deep(.switch-ctn) {
-      margin-block: 10px;
+      box-sizing: border-box;
+      min-inline-size: 0;
+      inline-size: calc(100% - 14px);
+      max-inline-size: calc(100% - 14px);
       margin-inline: 7px;
+    }
+
+    :deep(.switch-ctn.compact) {
+      margin-block: 0;
     }
   }
 }

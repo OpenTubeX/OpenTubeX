@@ -1,8 +1,56 @@
-import i18n, { loadLocale } from '../../i18n/index'
-import allLocales from '../../../../static/locales/activeLocales.json'
-import { MAIN_PROFILE_ID, SyncEvents } from '../../../constants'
-import { DBSettingHandlers } from '../../../datastores/handlers/index'
+import { createDefaultSettings, resolveDefaultLandingPage } from '../../../settingsDefaults.js'
+import { getTransferableSettings, NON_TRANSFERABLE_SETTINGS } from '../../../nonTransferableSettings.js'
+import { normalizeMaterialSeedColor } from '../../../materialTheme.js'
+import { normalizeSignalAccentColor } from '../../../signalTheme.js'
+import i18n, { loadLocale, rememberStartupLocale, setAITranslationCompletionsEnabled } from '../../i18n/index'
+import { resolveSystemLocale } from '../../../systemLocale.js'
+import { applyKeyboardShortcutOverrides, resolveLandingPage, sanitizeKeyboardShortcutOverrides, SyncEvents } from '../../../constants'
+import { DBProfileHandlers, DBSettingHandlers } from '../../../datastores/handlers/index'
+import { hashPassword } from '../../helpers/passwords'
+import { ANDROID_PROXY_SETTING_KEYS, configureAndroidProxy, readAndroidProxySettings } from '../../helpers/androidProxy'
+import { ensureAndroidLocalNetworkAccess } from '../../helpers/androidLocalNetwork'
+import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { getSystemLocale, showToast } from '../../helpers/utils'
+import { normalizeTabBarPosition } from '../../constants/tabBarPosition'
+import { setReducedMotionPreference } from '../../helpers/reducedMotion'
+import { applyCapacitorNotificationMode } from '../../helpers/liveReminders'
+import { setAnimationSpeed } from '../../helpers/animationSpeed'
+import { normalizeYouTubeCaptionLanguageCode } from '../../helpers/player/youtubeCaptionLanguages'
+import { clearSeekHistories } from '../../helpers/player/seekHistory'
+import { currentIconPack, isIconPack, setIconPack } from '../../icons/iconPackState'
+import { resolveBaseTheme, resolveSystemTheme } from '../../../appearanceSettings.js'
+import { resolveColor } from '../../helpers/colors.js'
+import { normalizeAppFont } from '../../helpers/appFont.js'
+import {
+  LAST_USED_VERSION_SETTING_ID,
+  TUTORIAL_AUDIENCE_SETTING_ID,
+} from '../../helpers/tutorialState.js'
+import { terminateCommentTranslationLanguageDetector } from '../../helpers/comment-translations'
+import { isSettingSyncableOnPlatform } from '../../helpers/platformSettings.js'
+import { SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY } from '../../helpers/subscription-settings-sync'
+import { PLAYLIST_PREFERENCES_SYNC_KEY } from '../../helpers/playlist-preferences-sync'
+import { CUSTOM_THEMES_SYNC_KEY } from '../../../customTheme.js'
+import { normalizeQuickSettings } from '../../helpers/quickSettings.js'
+import { normalizeFullscreenActions } from '../../helpers/fullscreenActions.js'
+import { normalizeControlBarButtons } from '../../helpers/controlBarButtons.js'
+import { normalizeHiddenPlayerMenuControls, normalizePlayerMenuControls, withoutControlBarButtons } from '../../helpers/playerMenuControls.js'
+import { createOptimisticSettingUpdater, createSavedSettingEditor, createSettingUpdateQueue, createSettingWriteTracker } from '../../helpers/settingUpdateQueue.js'
+import { mergeSubscriptionSeenVideos } from '../../../subscriptionSeenVideos.js'
+import { mergeSubscriptionSeenPosts } from '../../../subscriptionSeenPosts.js'
+import { mergeRssFeedSeenItems } from '../../helpers/rssFeedSeenItems.js'
+import { filterAvailableNavigationItems } from '../../../navigationAvailability.js'
+import { navigationItemsFromLegacySettings, normalizeNavigationItems } from '../../../navigationItems.js'
+import { migrateStoredAiVideoSummarySetting, migrateSyncServerUrl } from '../../helpers/settings-migrations.js'
+import { setDiagnosticLogging } from '../../helpers/diagnostics.js'
+import { setAlwaysUseGoogleVideoBackupServer } from '../../helpers/player/googleVideoFallback.js'
+export { NON_TRANSFERABLE_SETTINGS } from '../../../nonTransferableSettings.js'
+
+const CHANNEL_SETTINGS_SYNC_MIGRATION_SETTING = 'channelSettingsSyncMigration'
+const CONTROL_BAR_BUTTONS_MIGRATION_SETTING = 'controlBarButtonsMigration'
+const TUTORIAL_STATE_SETTING_IDS = new Set([
+  LAST_USED_VERSION_SETTING_ID,
+  TUTORIAL_AUDIENCE_SETTING_ID,
+])
 
 /*
  * Due to the complexity of the settings module in FreeTube, a more
@@ -24,7 +72,7 @@ import { getSystemLocale, showToast } from '../../helpers/utils'
  * The first method benefits from the auto-generation of
  * a getter, a mutation and a few actions related to the setting.
  * This method should be preferred whenever possible:
- * - `state`
+ * - `state`, initialized by `src/settingsDefaults.js`
  *
  * The last one DOES NOT feature any kind of auto-generation and should
  * only be used in scenarios that don't fall under the other 2 options:
@@ -150,223 +198,110 @@ import { getSystemLocale, showToast } from '../../helpers/utils'
 
 // HELPERS
 const capitalize = str => str.charAt(0).toUpperCase() + str.slice(1)
-const defaultGetterId = settingId => 'get' + capitalize(settingId)
-const defaultMutationId = settingId => 'set' + capitalize(settingId)
+export const defaultGetterId = settingId => 'get' + capitalize(settingId)
+export const defaultMutationId = settingId => 'set' + capitalize(settingId)
 export const defaultUpdaterId = settingId => 'update' + capitalize(settingId)
-const defaultSideEffectsTriggerId = settingId =>
+export const defaultSideEffectsTriggerId = settingId =>
   'trigger' + capitalize(settingId) + 'SideEffects'
 /*****/
 
-const state = {
-  autoplayPlaylists: true,
-  autoplayVideos: true,
-  backendFallback: false,
-  backendPreference: !process.env.SUPPORTS_LOCAL_API ? 'invidious' : 'local',
-  barColor: false,
-  checkForUpdates: true,
-  baseTheme: 'system',
-  mainColor: 'Red',
-  secColor: 'Blue',
-  defaultAutoplayInterruptionIntervalHours: 3,
-  defaultCaptionSettings: '{}',
-  defaultInterval: 5,
-  defaultPlayback: 1,
-  defaultProfile: MAIN_PROFILE_ID,
-  defaultQuality: '720',
-  defaultSkipInterval: 5,
-  defaultViewingMode: 'default',
-  defaultVideoFormat: 'dash',
-  disableSmoothScrolling: false,
-  disableChannelLinks: false,
-  displayVideoPlayButton: false,
-  enableSearchSuggestions: true,
-  enableSubtitlesByDefault: false,
-  enterFullscreenOnDisplayRotate: false,
-  externalLinkHandling: '',
-  externalPlayer: '',
-  externalPlayerExecutable: '',
-  externalPlayerIgnoreWarnings: false,
-  externalPlayerIgnoreDefaultArgs: false,
-  externalPlayerCustomArgs: '[]',
-  showAddedExternalPlayerCustomArgs: true,
-  expandSideBar: false,
-  hideActiveSubscriptions: false,
-  hideChannelCommunity: false,
-  hideChannelHome: false,
-  hideChannelPlaylists: false,
-  hideChannelReleases: false,
-  hideChannelPodcasts: false,
-  hideChannelCourses: false,
-  hideChannelShows: false,
-  hideChannelShorts: false,
-  hideChannelSubscriptions: false,
-  hideCommentLikes: false,
-  hideCommentPhotos: false,
-  hideComments: false,
-  hideFeaturedChannels: false,
-  channelsHidden: '[]',
-  forbiddenTitles: '[]',
-  showAddedChannelsHidden: true,
-  showAddedForbiddenTitles: true,
-  hideVideoDescription: false,
-  hideLiveChat: false,
-  hideLiveStreams: false,
-  hideHeaderLogo: false,
-  hidePlaylists: false,
-  hidePopularVideos: false,
-  hideRecommendedVideos: false,
-  hideSearchBar: false,
-  hideSharingActions: false,
-  hideSubscriptionsVideos: false,
-  hideSubscriptionsShorts: false,
-  hideSubscriptionsLive: false,
-  hideSubscriptionsCommunity: false,
-  hideTrendingVideos: false,
-  hideUnsubscribeButton: false,
-  hideUpcomingPremieres: false,
-  hideVideoLikesAndDislikes: false,
-  hideVideoViews: false,
-  hideWatchedSubs: false,
-  hideUploader: false,
-  unsubscriptionPopupStatus: false,
-  hideLabelsSideBar: false,
-  hideChapters: false,
-  showDistractionFreeTitles: false,
-  landingPage: 'subscriptions',
-  listType: 'grid',
-  maxVideoPlaybackRate: 3,
-  onlyShowLatestFromChannel: false,
-  onlyShowLatestFromChannelNumber: 1,
-  openDeepLinksInNewWindow: false,
-  playNextVideo: false,
-  proxyHostname: '127.0.0.1',
-  proxyPort: '9050',
-  proxyUsername: '',
-  proxyPassword: '',
-  proxyProtocol: 'socks5',
-  proxyVideos: !process.env.SUPPORTS_LOCAL_API,
-  region: 'US',
-  rememberHistory: true,
-  rememberSearchHistory: true,
-  // 'auto', 'semi-auto', 'never'
-  watchedProgressSavingMode: 'auto',
-  saveVideoHistoryWithLastViewedPlaylist: true,
-  showFamilyFriendlyOnly: false,
-  sponsorBlockShowSkippedToast: true,
-  sponsorBlockUrl: 'https://sponsor.ajay.app',
-  sponsorBlockSponsor: {
-    color: 'Green',
-    skip: 'autoSkip'
-  },
-  sponsorBlockSelfPromo: {
-    color: 'Yellow',
-    skip: 'showInSeekBar'
-  },
-  sponsorBlockInteraction: {
-    color: 'Pink',
-    skip: 'showInSeekBar'
-  },
-  sponsorBlockIntro: {
-    color: 'Cyan',
-    skip: 'doNothing'
-  },
-  sponsorBlockOutro: {
-    color: 'Blue',
-    skip: 'doNothing'
-  },
-  sponsorBlockRecap: {
-    color: 'Indigo',
-    skip: 'doNothing'
-  },
-  sponsorBlockMusicOffTopic: {
-    color: 'Orange',
-    skip: 'doNothing'
-  },
-  sponsorBlockFiller: {
-    color: 'Purple',
-    skip: 'doNothing'
-  },
-  thumbnailPreference: '',
-  blurThumbnails: false,
-  useProxy: false,
-  userPlaylistSortOrder: 'date_added_descending',
-  useRssFeeds: false,
-  useSponsorBlock: false,
-  videoVolumeMouseScroll: false,
-  videoPlaybackRateMouseScroll: false,
-  videoSkipMouseScroll: false,
-  videoPlaybackRateInterval: 0.25,
-  enableScreenshot: false,
-  screenshotMode: 'prompt_folder',
-  screenshotFormat: 'png',
-  screenshotQuality: 95,
-  screenshotFolderPath: '',
-  screenshotFilenamePattern: '%Y%M%D-%H%N%S',
-  settingsSectionSortEnabled: false,
-  fetchSubscriptionsAutomatically: true,
-  settingsPassword: '',
-  useDeArrowTitles: false,
-  useDeArrowThumbnails: false,
-  deArrowThumbnailGeneratorUrl: 'https://dearrow-thumb.ajay.app',
-  sponsorBlockExcludedChannels: '[]',
-  sponsorBlockShowExcludedChannels: true,
-  // This makes the `favorites` playlist uses as quick bookmark target
-  // If the playlist is removed quick bookmark is disabled
-  quickBookmarkTargetPlaylistId: 'favorites',
-  generalAutoLoadMorePaginatedItemsEnabled: false,
-  hideToTrayOnMinimize: false,
+const state = createDefaultSettings({
+  supportsLocalApi: process.env.SUPPORTS_LOCAL_API,
+  isElectron: process.env.IS_ELECTRON,
+})
 
-  // The settings below have side effects
-  currentLocale: 'system',
-  defaultInvidiousInstance: '',
-  defaultVolume: 1,
-  uiScale: 100,
-  userPlaylistsSortBy: 'latest_played_first',
-  userHistorySortBy: 'latest_played_first',
-}
+// Keep a snapshot separate from Vuex's reactive state so settings can reliably
+// be compared with and restored to their original values.
+export const DEFAULT_SETTINGS = Object.freeze(structuredClone(state))
+
+const runLocaleChange = createSettingUpdateQueue()
 
 const sideEffectHandlers = {
-  currentLocale: async ({ dispatch }, value) => {
+  diagnosticLogging: (_store, value) => {
+    setDiagnosticLogging(value === true)
+  },
+
+  alwaysUseBackupMediaServer: (_store, value) => {
+    setAlwaysUseGoogleVideoBackupServer(value === true)
+  },
+
+  useAiSlopList: ({ dispatch }, value) => {
+    // The list only matches local API results and the web build hides the setting,
+    // so a value synced from another platform must not download anything there
+    if (!process.env.SUPPORTS_LOCAL_API) {
+      return
+    }
+
+    // Not awaited so that downloading the list doesn't delay startup
+    dispatch(value ? 'loadAiSlopList' : 'clearAiSlopList')
+  },
+
+  useAITranslationCompletions: (_store, value) => {
+    return setAITranslationCompletionsEnabled(value)
+  },
+
+  enableCommentTranslations: (_store, value) => {
+    if (!value) {
+      terminateCommentTranslationLanguageDetector()
+    }
+  },
+
+  showVolumeBoostToggle: ({ commit }, value) => {
+    // Turning the toggle back on must not resume an earlier boost
+    if (!value) {
+      commit('clearTabVolumeBoosts')
+    }
+  },
+
+  enableSeekHistory: (_store, value) => {
+    // Turning seek history back on must not bring back earlier positions
+    if (!value) {
+      clearSeekHistories()
+    }
+  },
+
+  showFamilyFriendlyOnly: ({ commit }) => {
+    // Cached search results were requested with the previous restriction
+    commit('setSessionSearchHistory', [])
+  },
+
+  keyboardShortcuts: (_store, value) => {
+    applyKeyboardShortcutOverrides(value)
+  },
+
+  reducedMotion: (store, value) => {
+    setReducedMotionPreference(value)
+  },
+
+  notificationMode: (_store, value) => applyCapacitorNotificationMode(value),
+
+  animationSpeed: (_store, value) => {
+    setAnimationSpeed(value)
+  },
+
+  // Locale changes run in order, and one replaced while its locale loads is
+  // skipped, so the last change wins.
+  currentLocale: ({ dispatch }, value) => runLocaleChange('currentLocale', async isLatest => {
     const fallbackLocale = 'en-US'
 
     let targetLocale = value
     if (value === 'system') {
-      const systemLocaleName = (await getSystemLocale()).replace('_', '-') // ex: en-US
-      const systemLocaleSplit = systemLocaleName.split('-') // ex: en
-      const targetLocaleOptions = allLocales.filter((locale) => {
-        // filter out other languages
-        const localeLang = locale.split('-')[0]
-        return localeLang.includes(systemLocaleSplit[0])
-      }).sort((aLocaleName, bLocaleName) => {
-        const aLocale = aLocaleName.split('-') // ex: [en, US]
-        const bLocale = bLocaleName.split('-')
+      const systemLocale = resolveSystemLocale(await getSystemLocale())
 
-        if (aLocaleName === systemLocaleName) { // country & language match, prefer a
-          return -1
-        } else if (bLocaleName === systemLocaleName) { // country & language match, prefer b
-          return 1
-        } else if (aLocale.length === 1) { // no country code for a, prefer a
-          return -1
-        } else if (bLocale.length === 1) { // no country code for b, prefer b
-          return 1
-        } else { // a & b have different country code from system, sort alphabetically
-          return aLocaleName.localeCompare(bLocaleName)
-        }
-      })
-
-      if (targetLocaleOptions.length > 0) {
-        targetLocale = targetLocaleOptions[0]
+      if (systemLocale !== null) {
+        targetLocale = systemLocale
       } else {
         // Go back to default value if locale is unavailable
         targetLocale = fallbackLocale
         // Translating this string isn't necessary
         // because the user will always see it in the default locale
         // (in this case, English (US))
-        showToast(`Locale not found, defaulting to ${fallbackLocale}`)
+        showToast({ message: `Locale not found, defaulting to ${fallbackLocale}`, icon: ['fas', 'circle-exclamation'] })
       }
     }
 
-    const loadPromises = []
+    // Always finish loading the English fallback before the app is ready.
+    const loadPromises = [loadLocale(fallbackLocale)]
 
     // "es" is used as a fallback for "es-AR" and "es-MX"
     if (targetLocale === 'es-AR' || targetLocale === 'es-MX') {
@@ -382,32 +317,51 @@ const sideEffectHandlers = {
       )
     }
 
-    loadPromises.push(
-      loadLocale(targetLocale)
-    )
+    if (targetLocale !== fallbackLocale) {
+      loadPromises.push(
+        loadLocale(targetLocale)
+      )
+    }
 
     await Promise.allSettled(loadPromises)
 
+    if (!isLatest()) return
     i18n.global.locale.value = targetLocale
+    rememberStartupLocale(targetLocale)
     await dispatch('getRegionData', targetLocale)
-  },
+  }),
 
   defaultInvidiousInstance: ({ commit, rootState }, value) => {
-    if (value !== '' && rootState.invidious.currentInvidiousInstance !== value) {
+    // Servers with their own Invidious server always use it, even with synced settings
+    if (value !== '' && !process.env.SELF_HOSTED_INVIDIOUS && rootState.invidious.currentInvidiousInstance !== value) {
       commit('setCurrentInvidiousInstance', value)
     }
   },
 
-  defaultVolume: (_, value) => {
-    sessionStorage.setItem('volume', value)
-    value === 0 ? sessionStorage.setItem('muted', 'true') : sessionStorage.setItem('muted', 'false')
-    sessionStorage.setItem('defaultVolume', value)
+  enableWatchStats: ({ dispatch }, value) => {
+    if (value) {
+      dispatch('grabWatchStats')
+    }
   },
 
   uiScale: (_, value) => {
     if (process.env.IS_ELECTRON) {
       window.ftElectron.setZoomFactor(value / 100)
     }
+  },
+
+  iconPack: async (_, value) => {
+    const preferredPack = isIconPack(value) ? value : 'material'
+    if (await setIconPack(preferredPack)) {
+      return preferredPack
+    }
+
+    const fallbackPack = preferredPack === 'material' ? 'remix' : 'material'
+    if (await setIconPack(fallbackPack)) {
+      return fallbackPack
+    }
+
+    throw new Error(`Unable to apply icon pack: ${value}`)
   },
 
   maxVideoPlaybackRate: ({ dispatch, state }, value) => {
@@ -423,108 +377,1087 @@ const sideEffectHandlers = {
       dispatch('updateDefaultPlayback', correctedDefaultPlaybackRate)
     }
   },
+
+  showSkipSilenceButton: ({ dispatch }, value) => {
+    if (!value) {
+      dispatch('clearTabSkipSilence')
+    }
+  },
+
+  rememberTabNavigationHistory: (_, value) => {
+    // Sync (or clear) the histories of already-open tabs right away,
+    // so toggling doesn't require a navigation in every tab first.
+    if (process.env.IS_ELECTRON) {
+      getTabNavigationService().publishAllHistories(value === true)
+    }
+  },
 }
 
 const settingsWithSideEffects = Object.keys(sideEffectHandlers)
 
-export const NON_TRANSFERABLE_SETTINGS = new Set([
-  /* Depends on process.env.IS_ELECTRON */
-  // ProxySettings
-  'useProxy',
-  'proxyProtocol',
-  'proxyHostname',
-  'proxyPort',
-  'proxyUsername',
-  'proxyPassword',
-  // ExternalPlayerSettings
-  'externalPlayer',
-  'externalPlayerExecutable',
-  'externalPlayerIgnoreWarnings',
-  'externalPlayerIgnoreDefaultArgs',
-  'externalPlayerCustomArgs',
-  'showAddedExternalPlayerCustomArgs',
-  // Others
-  'disableSmoothScrolling',
-  'hideToTrayOnMinimize',
-  'screenshotAskPath',
-  'screenshotFolderPath',
-
-  /* Depends on process.env.SUPPORTS_LOCAL_API */
-  'backendFallback',
-  'backendPreference',
-  'proxyVideos',
+export const NON_SYNCABLE_SETTINGS = new Set([
+  ...NON_TRANSFERABLE_SETTINGS,
+  // Playlist bookmarks sync with playlists as their own collection.
+  'playlistBookmarks',
+  // Automatic metadata refreshes must not compete with user pin edits.
+  'pinnedChannelMetadata',
+  // Updating is tied to the installed application and operating system.
+  'checkForUpdates',
+  // Window coordinates are only valid for the display they were saved on.
+  'scrollMiniPlayerSavedRect',
+  'crossTabMiniPlayerSavedRect',
+  // These choices describe one physical device, not the user's account.
+  'mobileAutoPictureInPicture',
+  'capacitorLayoutMode',
+  'alwaysShowMobileSearchBar',
+  'continuePlaybackWhenScreenIsLocked',
+  'hapticFeedback',
+  'hapticFeedbackIgnoresSystemSetting',
+  'uiScale',
+  'fontSize',
+  'verticalTabBarWidth',
+  'fullscreenDockWidth',
 ])
+
+export function isSettingSyncable(settingKey) {
+  return settingKey === SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY ||
+    settingKey === PLAYLIST_PREFERENCES_SYNC_KEY ||
+    (Object.prototype.hasOwnProperty.call(state, settingKey) &&
+      !NON_SYNCABLE_SETTINGS.has(settingKey))
+}
+
+export function isSettingSyncEnabled(settings, settingKey) {
+  const excluded = Array.isArray(settings.syncServerSettingsExcluded)
+    ? settings.syncServerSettingsExcluded
+    : []
+  return isSettingSyncable(settingKey) && !excluded.includes(settingKey)
+}
+
+export function getSyncableSettingKeys(settings) {
+  return Object.keys(state).filter(settingKey => (
+    isSettingSyncEnabled(settings, settingKey) &&
+    !(settingKey === 'defaultProfile' && !settings.syncServerSyncProfiles) &&
+    // Pins name playlist IDs that only exist on peers when playlists sync too.
+    !((settingKey === 'pinnedPlaylistIds' || settingKey === 'userPlaylistsPinnedIds') && !settings.syncServerSyncPlaylists) &&
+    isSettingSyncableOnPlatform(settingKey)
+  ))
+}
+
+const SUBSCRIPTION_FEED_CACHE_MUTATIONS = {
+  videos: 'updateVideoCacheByChannel',
+  shorts: 'updateShortsCacheByChannel',
+  liveStreams: 'updateLiveCacheByChannel',
+  communityPosts: 'updatePostsCacheByChannel',
+}
+
+/**
+ * Saves the edit time `update` returns for `settingId`, for sync, or removes it
+ * for `undefined`. Windows can edit different settings at once, so it reads the
+ * saved times inside a lock they share.
+ * @param {Function} commit
+ * @param {string} settingId
+ * @param {(editedAt: number | undefined) => number | undefined} update
+ * @returns {Promise<boolean>} whether the edit time was saved
+ */
+function updateSettingSyncTimestamp(commit, settingId, update) {
+  return runLockedSettingUpdate('syncServerSettingUpdatedAt', async () => {
+    // Read the datastore, as the broadcast of another window's edit may still be on its way.
+    const saved = await DBSettingHandlers.findValue('syncServerSettingUpdatedAt')
+    const updatedAt = { ...(saved !== null && typeof saved === 'object' && !Array.isArray(saved) ? saved : {}) }
+    const editedAt = update(updatedAt[settingId])
+    if (editedAt === updatedAt[settingId]) return
+    if (editedAt === undefined) delete updatedAt[settingId]
+    else updatedAt[settingId] = editedAt
+    await DBSettingHandlers.upsert('syncServerSettingUpdatedAt', updatedAt)
+    commit('setSyncServerSettingUpdatedAt', updatedAt)
+  })
+}
+
+/**
+ * Saves an edit of `settingId` with `save`, and its edit time for sync:
+ * - The edit time is saved first, so no window can pair the new value with the
+ *   previous edit time.
+ * - If either save fails, the edit fails and the previous edit time comes back,
+ *   so sync doesn't count the unchanged value as a newer edit. Edits of a
+ *   setting take turns in all windows, so the previous edit time is always
+ *   that of a saved value.
+ * @template T
+ * @param {Function} commit
+ * @param {string} settingId
+ * @param {() => Promise<T>} save
+ * @param {number} [editedAt]
+ * @returns {Promise<T>}
+ */
+function saveSettingEdit(commit, settingId, save, editedAt = Date.now()) {
+  if (!isSettingSyncable(settingId) && settingId !== CUSTOM_THEMES_SYNC_KEY) return save()
+
+  return runLocked(`opentubex-setting-edit-${settingId}`, async () => {
+    let previous
+    const recorded = await updateSettingSyncTimestamp(commit, settingId, saved => {
+      previous = saved
+      return editedAt
+    })
+    if (!recorded) throw new Error(`Failed to save when ${settingId} was edited`)
+    try {
+      return await save()
+    } catch (error) {
+      // Keep an edit time that something else saved meanwhile.
+      await updateSettingSyncTimestamp(commit, settingId, saved => saved === editedAt ? previous : saved)
+      throw error
+    }
+  })
+}
+
+const settingWrites = createSettingWriteTracker(settingId => DBSettingHandlers.findValue(settingId))
+
+/**
+ * Optimistic edits show their value before their edit time is saved, so sync
+ * waits for this window's setting writes.
+ * @returns {Promise<unknown> | null} settles once the writes in flight finish,
+ * or `null` if there are none
+ */
+export function settingWritesSettled() {
+  return settingWrites.settled()
+}
+
+/**
+ * Runs a write of a synchronized value saved outside this module, such as
+ * custom themes, so sync waits for it too.
+ * @template T
+ * @param {string} settingId
+ * @param {() => Promise<T>} write
+ * @returns {Promise<T>}
+ */
+export function trackSettingWrite(settingId, write) {
+  return settingWrites.track(settingId, write)
+}
 
 const customState = {
 }
 
 const customGetters = {
-  getDefaultPlayback(state) {
-    return Math.round((state['defaultPlayback'] + Number.EPSILON) * 100) / 100
+  getEnableDownloads: (state) => state.enableDownloads,
+  // A synchronized preference must not expose a service absent on this device.
+  getUseVoiceOverTranslation: (state) => !process.env.IS_IOS && state.useVoiceOverTranslation,
+  // The web app loses the local API when its browser extension is removed.
+  // Keep the saved choice for when the extension comes back.
+  getBackendPreference: (state) => !process.env.SUPPORTS_LOCAL_API && state.backendPreference === 'local'
+    ? 'invidious'
+    : state.backendPreference,
+
+  getFullscreenActions: (state) => normalizeFullscreenActions(state.fullscreenActions),
+  getControlBarButtons: (state) => normalizeControlBarButtons(state.controlBarButtons),
+  getPlayerMenuControls: (state) => normalizePlayerMenuControls(state.playerMenuControls),
+  getHiddenPlayerMenuControls: (state) => withoutControlBarButtons(
+    normalizeHiddenPlayerMenuControls(state.hiddenPlayerMenuControls),
+    normalizeControlBarButtons(state.controlBarButtons)
+  ),
+  getQuickSettings: (state) => normalizeQuickSettings(state.quickSettings),
+
+  getNavigationItems: (state) => normalizeNavigationItems(state.navigationItems),
+
+  getLandingPage: (state, getters) => resolveLandingPage(
+    state.landingPage,
+    filterAvailableNavigationItems(normalizeNavigationItems(state.navigationItems), {
+      supportsLocalApi: !!process.env.SUPPORTS_LOCAL_API,
+      backendPreference: getters.getBackendPreference,
+      backendFallback: state.backendFallback,
+      showWatchStats: state.rememberHistory && state.enableWatchStats,
+    })
+  ),
+
+  getPlaylistBookmarks: (state) => {
+    return Array.isArray(state.playlistBookmarks) ? state.playlistBookmarks : []
   },
 
-  getChannelsHiddenIdSet(state) {
-    const channelsHidden = JSON.parse(state.channelsHidden)
+  getPlaylistBookmark: (state) => (playlistId) => {
+    if (!Array.isArray(state.playlistBookmarks)) return undefined
+    return state.playlistBookmarks.find(bookmark => bookmark?.playlist?.id === playlistId)
+  },
 
-    /** @type {Set<string>} */
-    const set = new Set()
+  // These parsed variants are cached by Vuex,
+  // so that list items don't each have to parse the JSON strings themselves
 
-    for (const channel of channelsHidden) {
+  getChannelsHiddenParsed: (state) => {
+    return JSON.parse(state.channelsHidden).map((ch) => {
       // Legacy support
-      if (typeof channel === 'string') {
-        set.add(channel)
-      } else if (typeof channel.name === 'string') {
-        set.add(channel.name)
+      if (typeof ch === 'string') {
+        return { name: ch, preferredName: '', icon: '' }
       }
-    }
+      return ch
+    })
+  },
 
-    return set
+  /** Set of the `name` values in `channelsHidden` for cheap exact-match lookups */
+  getChannelsHiddenNames: (_state, getters) => {
+    return new Set(getters.getChannelsHiddenParsed.map((ch) => ch.name))
+  },
+
+  /** Only showing important notifications moves progress to the progress bar */
+  getEffectiveShowProgressBarToast: (state) => {
+    return state.showProgressBarToast && !state.onlyShowImportantToasts
+  },
+
+  getActiveChannelsHidden: (state, getters) => {
+    return state.enableBlockLists ? getters.getChannelsHiddenParsed : []
+  },
+
+  getActiveChannelsHiddenNames: (state, getters) => {
+    return state.enableBlockLists ? getters.getChannelsHiddenNames : new Set()
+  },
+
+  /** Lowercased for case-insensitive matching */
+  getForbiddenTitlesParsed: (state) => {
+    return JSON.parse(state.forbiddenTitles).map((title) => title.toLowerCase())
+  },
+
+  getActiveForbiddenTitles: (state, getters) => {
+    return state.enableBlockLists ? getters.getForbiddenTitlesParsed : []
+  },
+
+  /** Lists keep block list matches and blur them instead of removing them */
+  getBlurBlockedItemsActive: (state) => {
+    return state.enableBlockLists && state.blurBlockedItems
+  },
+
+  /** Hidden channels that lists remove; autoplay and navigation use `getActiveChannelsHiddenNames` */
+  getChannelsHiddenNamesToRemove: (_state, getters) => {
+    return getters.getBlurBlockedItemsActive ? new Set() : getters.getActiveChannelsHiddenNames
+  },
+
+  /** Forbidden text that lists remove; autoplay and navigation use `getActiveForbiddenTitles` */
+  getForbiddenTitlesToRemove: (_state, getters) => {
+    return getters.getBlurBlockedItemsActive ? [] : getters.getActiveForbiddenTitles
+  },
+
+  getTransferableSettings: (state) => {
+    return getTransferableSettings(state)
+  },
+
+  getDefaultPlayback(state) {
+    return Math.round((state.defaultPlayback + Number.EPSILON) * 100) / 100
+  },
+}
+
+const customMutations = {
+  setPreferredCaptionLocale: (state, value) => {
+    state.preferredCaptionLocale = normalizeYouTubeCaptionLanguageCode(value)
+  },
+  setTabBarPosition: (state, value) => {
+    state.tabBarPosition = normalizeTabBarPosition(value)
   }
 }
 
-const customMutations = {}
+function updateValidatedSetting(commit, settingId, value) {
+  return settingWrites.track(settingId, async () => {
+    await saveSettingEdit(commit, settingId, () => DBSettingHandlers.upsert(settingId, value))
+    commit(defaultMutationId(settingId), value)
+  }).then(() => true, error => {
+    console.error(error)
+    return false
+  })
+}
+
+/** @type {Map<string, Promise<unknown>>} */
+const pendingLocks = new Map()
+
+/**
+ * Runs `run` inside the lock `name`, which all windows share, or a queue where
+ * locks are missing.
+ * @template T
+ * @param {string} name
+ * @param {() => Promise<T>} run
+ * @returns {Promise<T>}
+ */
+function runLocked(name, run) {
+  if (typeof navigator !== 'undefined' && navigator.locks) return navigator.locks.request(name, run)
+  const result = (pendingLocks.get(name) ?? Promise.resolve()).catch(() => {}).then(run)
+  pendingLocks.set(name, result)
+  return result
+}
+
+/**
+ * Runs `persist` inside a lock all windows share for `settingId`, so
+ * read-modify-write updates cannot interleave.
+ * @param {string} settingId
+ * @param {() => Promise<void>} persist
+ * @returns {Promise<boolean>} whether the update was saved
+ */
+function runLockedSettingUpdate(settingId, persist) {
+  return runLocked(`opentubex-setting-${settingId}`, persist).then(() => true, error => {
+    console.error(error)
+    return false
+  })
+}
+
+/**
+ * Applies `update` to the saved bookmarks. Every bookmark write, including
+ * sync's, reads and writes inside one lock shared by all windows, so
+ * concurrent edits build on each other instead of overwriting each other.
+ * @param {Function} commit
+ * @param {(bookmarks: any[]) => any[]} update
+ */
+function updateSavedPlaylistBookmarks(commit, update) {
+  const persist = async () => {
+    // Read the datastore, as the broadcast of another window's edit may still be on its way.
+    const saved = await DBSettingHandlers.findValue('playlistBookmarks')
+    const bookmarks = update(Array.isArray(saved) ? saved : [])
+    await DBSettingHandlers.upsert('playlistBookmarks', bookmarks)
+    commit('setPlaylistBookmarks', bookmarks)
+  }
+  return runLockedSettingUpdate('playlistBookmarks', persist)
+}
+
+const updateOptimisticSetting = createOptimisticSettingUpdater()
+
+function updateOrderedSetting(commit, settings, settingId, value) {
+  return settingWrites.track(settingId, () => updateOptimisticSetting(settingId, value, {
+    read: () => settings[settingId],
+    commit: nextValue => commit(defaultMutationId(settingId), nextValue),
+    persist: nextValue => saveSettingEdit(commit, settingId, () => DBSettingHandlers.upsert(settingId, nextValue)),
+  })).then(() => true).catch(error => {
+    console.error(error)
+    return false
+  })
+}
+
+const editSavedSetting = createSavedSettingEditor()
+
+/**
+ * Applies `update` to a setting that other windows can change at the same
+ * time. A function derives the new value from the current one, so the edit
+ * keeps what other windows saved meanwhile. A value (imports, resets) replaces it.
+ * @template T
+ * @param {Function} commit
+ * @param {Record<string, any>} settings
+ * @param {string} settingId
+ * @param {T | ((value: T) => T)} update
+ * @returns {Promise<boolean>} whether the edit was saved
+ */
+function updateSharedSetting(commit, settings, settingId, update) {
+  const edit = typeof update === 'function' ? update : () => update
+  return settingWrites.track(settingId, () => editSavedSetting(settingId, edit, {
+    read: () => settings[settingId],
+    commit: value => commit(defaultMutationId(settingId), value),
+    readSaved: async () => (await DBSettingHandlers.findValue(settingId)) ?? structuredClone(DEFAULT_SETTINGS[settingId]),
+    write: value => saveSettingEdit(commit, settingId, () => DBSettingHandlers.upsert(settingId, value)),
+    lock: run => runLocked(`opentubex-setting-${settingId}`, run),
+  })).then(() => true, error => {
+    console.error(error)
+    return false
+  })
+}
+
+let androidProxyUpdate = Promise.resolve()
 
 const customActions = {
+  async updateSyncServerActivityClearedThrough({ commit }, value) {
+    const persist = async () => {
+      const cutoffs = { ...await DBSettingHandlers.findValue('syncServerActivityClearedThrough') }
+      for (const [account, cutoff] of Object.entries(value)) {
+        if (!cutoffs[account] || cutoff > cutoffs[account]) cutoffs[account] = cutoff
+      }
+      await DBSettingHandlers.upsert('syncServerActivityClearedThrough', cutoffs)
+      commit('setSyncServerActivityClearedThrough', cutoffs)
+    }
+    // Read and merge inside the shared lock so stale windows cannot undo a
+    // newer dismissal or drop another account's cutoff during concurrent clears.
+    if (typeof navigator !== 'undefined' && navigator.locks) {
+      await navigator.locks.request('opentubex-sync-server-activity-clear', persist)
+    } else await persist()
+  },
+  ...Object.fromEntries(ANDROID_PROXY_SETTING_KEYS.filter(() => process.env.IS_CAPACITOR).map(settingId => [
+    defaultUpdaterId(settingId),
+    ({ commit, state }, value) => {
+      // Serialize across fields so a fast host/port edit cannot restore stale values.
+      androidProxyUpdate = androidProxyUpdate.then(async () => {
+        await configureAndroidProxy({ ...state, [settingId]: value })
+        // Native persistence is authoritative, including when the renderer's
+        // database cannot save its copy of the settings.
+        commit(defaultMutationId(settingId), value)
+        await DBSettingHandlers.upsert(settingId, value)
+        if (state.useProxy) {
+          await ensureAndroidLocalNetworkAccess({ hostname: state.proxyHostname, direct: true })
+        }
+      }).catch(error => {
+        showToast({
+          message: error?.code === 'LOCAL_ACCESS_DENIED'
+            ? error.message
+            : i18n.global.t('Settings.Proxy Settings["Error getting network information. Is your proxy configured properly?"]'),
+          icon: ['fas', 'circle-exclamation'],
+        })
+      })
+      return androidProxyUpdate
+    }
+  ])),
+  waitForAndroidProxySettings: () => androidProxyUpdate,
+  loadAndroidProxySettings: async ({ commit }) => {
+    const settings = await readAndroidProxySettings()
+    if (settings === null) return
+    for (const settingId of ANDROID_PROXY_SETTING_KEYS) {
+      commit(defaultMutationId(settingId), settings[settingId])
+    }
+  },
+  async mergeSubscriptionSeenVideos({ dispatch }, update) {
+    const saved = await DBSettingHandlers.mergeSeenVideos(update)
+    await dispatch('applySubscriptionSeenVideos', saved)
+  },
+  async mergeSubscriptionSeenPosts({ dispatch }, update) {
+    const saved = await DBSettingHandlers.mergeSeenPosts(update)
+    await dispatch('applySubscriptionSeenPosts', saved)
+  },
+  applySubscriptionSeenPosts({ commit, state }, saved) {
+    const value = JSON.stringify(mergeSubscriptionSeenPosts(state.subscriptionSeenPosts, saved))
+    if (value !== state.subscriptionSeenPosts) commit('setSubscriptionSeenPosts', value)
+  },
+  async mergeRssFeedSeenItems({ dispatch }, update) {
+    const saved = await DBSettingHandlers.mergeSeenRssItems(update)
+    await dispatch('applyRssFeedSeenItems', saved)
+  },
+  applyRssFeedSeenItems({ commit, state }, saved) {
+    // Another window's newer update may arrive before this request's reply.
+    const value = JSON.stringify(mergeRssFeedSeenItems(state.rssFeedSeenItems, saved))
+    if (value !== state.rssFeedSeenItems) commit('setRssFeedSeenItems', value)
+  },
+  applySubscriptionSeenVideos({ commit, state, rootGetters }, saved) {
+    // Another window's newer update may arrive before this request's reply.
+    const value = JSON.stringify(mergeSubscriptionSeenVideos(
+      state.subscriptionSeenVideos, saved, rootGetters.getHistoryCacheById
+    ))
+    if (value !== state.subscriptionSeenVideos) commit('setSubscriptionSeenVideos', value)
+  },
+  // Saves an edit of a synced value that is not a setting, such as the custom themes.
+  saveSyncSettingEdit: ({ commit }, { settingId, save }) => saveSettingEdit(commit, settingId, save),
+  updateFullscreenActions: ({ commit, state }, value) => updateOrderedSetting(
+    commit,
+    state,
+    'fullscreenActions',
+    normalizeFullscreenActions(value)
+  ),
+  updateControlBarButtons: ({ commit, state }, value) => updateOrderedSetting(
+    commit,
+    state,
+    'controlBarButtons',
+    normalizeControlBarButtons(value)
+  ),
+  updatePlayerMenuControls: ({ commit, state }, value) => updateOrderedSetting(
+    commit,
+    state,
+    'playerMenuControls',
+    normalizePlayerMenuControls(value)
+  ),
+  updateHiddenPlayerMenuControls: ({ commit, state }, value) => updateOrderedSetting(
+    commit,
+    state,
+    'hiddenPlayerMenuControls',
+    normalizeHiddenPlayerMenuControls(value)
+  ),
+  updateQuickSettings: ({ commit, state }, value) => updateOrderedSetting(
+    commit,
+    state,
+    'quickSettings',
+    normalizeQuickSettings(value)
+  ),
+
+  // Each speed or name edit rewrites the whole list from the current state.
+  updateQuickPlaybackSpeedBarOptions: ({ commit, state }, value) => updateOrderedSetting(
+    commit,
+    state,
+    'quickPlaybackSpeedBarOptions',
+    value
+  ),
+
+  updateNavigationItems: ({ commit, state }, value) => updateOrderedSetting(
+    commit,
+    state,
+    'navigationItems',
+    normalizeNavigationItems(value)
+  ),
+
+  updatePinnedPlaylistIds: ({ commit, state }, update) => updateSharedSetting(commit, state, 'pinnedPlaylistIds', update),
+  updateUserPlaylistsPinnedIds: ({ commit, state }, update) => updateSharedSetting(commit, state, 'userPlaylistsPinnedIds', update),
+  // Takes the new groups (sync, imports) or a function that derives them from
+  // the saved ones. Edits read the saved groups inside a lock all windows
+  // share, so an edit in one window cannot undo another's.
+  updateSubscriptionGroups: ({ commit, state }, update) => settingWrites.track('subscriptionGroups', () => runLockedSettingUpdate('subscriptionGroups', async () => {
+    // Read the datastore, as the broadcast of another window's edit may still be on its way.
+    const saved = await DBSettingHandlers.findValue('subscriptionGroups')
+    const groups = typeof update === 'function' ? update(saved === undefined ? state.subscriptionGroups : saved) : update
+    await saveSettingEdit(commit, 'subscriptionGroups', () => DBSettingHandlers.upsert('subscriptionGroups', groups))
+    commit('setSubscriptionGroups', groups)
+  })),
+  updateSubscribedChannelsCustomOrder: ({ commit, state }, value) => updateOrderedSetting(
+    commit, state, 'subscribedChannelsCustomOrder', value
+  ),
+  updateFollowedRssFeeds: ({ commit, state }, update) => updateSharedSetting(commit, state, 'followedRssFeeds', update),
+  updateFollowedChannels: ({ commit, state }, update) => updateSharedSetting(commit, state, 'followedChannels', update),
+  // The settings saved per channel, as JSON strings
+  updateChannelPlaybackSpeeds: ({ commit, state }, update) => updateSharedSetting(commit, state, 'channelPlaybackSpeeds', update),
+  updateChannelVideoQualities: ({ commit, state }, update) => updateSharedSetting(commit, state, 'channelVideoQualities', update),
+  updateChannelSubtitlesStates: ({ commit, state }, update) => updateSharedSetting(commit, state, 'channelSubtitlesStates', update),
+  updateChannelVolumes: ({ commit, state }, update) => updateSharedSetting(commit, state, 'channelVolumes', update),
+  updatePinnedChannels: async ({ commit, state }, update) => {
+    const previousIds = state.pinnedChannels.map(channel => channel.id)
+    if (!await updateSharedSetting(commit, state, 'pinnedChannels', update)) return false
+    // Only drop unpinned channels, as other windows may have pinned channels this one doesn't show yet.
+    const pinnedIds = new Set(state.pinnedChannels.map(channel => channel.id))
+    const unpinnedIds = previousIds.filter(id => !pinnedIds.has(id) && state.pinnedChannelMetadata[id])
+    if (unpinnedIds.length === 0) return true
+    return updateSharedSetting(commit, state, 'pinnedChannelMetadata', saved => Object.fromEntries(
+      Object.entries(saved).filter(([id]) => !unpinnedIds.includes(id))
+    ))
+  },
+  refreshPinnedChannelMetadata: ({ commit, state }, { id, name, thumbnail }) => {
+    const pin = state.pinnedChannels.find(channel => channel.id === id)
+    if (!pin) return
+    const previous = state.pinnedChannelMetadata[id] ?? pin
+    if ((name || previous.name) === previous.name && (thumbnail || previous.thumbnail) === previous.thumbnail) return
+    // Missing details fall back to the saved ones, which another window may have refreshed.
+    return updateSharedSetting(commit, state, 'pinnedChannelMetadata', saved => {
+      const current = saved[id] ?? pin
+      return { ...saved, [id]: { name: name || current.name, thumbnail: thumbnail || current.thumbnail } }
+    })
+  },
+
+  // Home customization edits build on the previous edit, so commit them before the save finishes.
+  updateHomeSectionLayout: ({ commit, state }, value) => updateOrderedSetting(
+    commit,
+    state,
+    'homeSectionLayout',
+    value
+  ),
+
+  updateYtDlpAutomaticDownloadRules: ({ commit, state }, update) => {
+    // Imports pass a write they authorized when the user started them.
+    const authorizedWrite = update?.authorizedWrite
+    if (authorizedWrite) update = update.value
+    // Capture authorization during the gesture, before earlier saves can delay this one.
+    const persist = process.env.IS_ELECTRON
+      ? authorizedWrite ?? window.ftElectron.prepareAutomaticDownloadRulesWrite()
+      : value => DBSettingHandlers.upsert('ytDlpAutomaticDownloadRules', value)
+    // Apply every mutation to saved rules so later edits preserve intervening cleanups.
+    pendingAutomaticDownloadRuleUpdate = pendingAutomaticDownloadRuleUpdate.then(async () => {
+      if (persist === null) throw new Error('Automatic download rules require a user action')
+      const value = typeof update === 'function' ? update(state.ytDlpAutomaticDownloadRules) : update
+      await saveSettingEdit(commit, 'ytDlpAutomaticDownloadRules', () => persist(value))
+      // Publish successful writes even if a later edit is queued and could fail.
+      commit('setYtDlpAutomaticDownloadRules', value)
+      return true
+    }).catch(error => {
+      console.error(error)
+      return false
+    })
+    return settingWrites.track('ytDlpAutomaticDownloadRules', () => pendingAutomaticDownloadRuleUpdate)
+  },
+
+  savePlaylistBookmark: ({ commit }, bookmark) => updateSavedPlaylistBookmarks(commit, bookmarks => [
+    ...bookmarks.filter(entry => entry?.playlist?.id !== bookmark.playlist.id),
+    bookmark,
+  ]),
+
+  removePlaylistBookmark: async ({ commit, state }, playlistId) => {
+    const removed = await updateSavedPlaylistBookmarks(
+      commit,
+      bookmarks => bookmarks.filter(bookmark => bookmark?.playlist?.id !== playlistId)
+    )
+    if (!removed) return false
+    // Saving the playlist again should not bring back an old pin.
+    if (state.userPlaylistsPinnedIds.includes(playlistId)) {
+      await updateSharedSetting(commit, state, 'userPlaylistsPinnedIds', ids => ids.filter(id => id !== playlistId))
+    }
+    return true
+  },
+
+  // Takes the new list (imports, resets) or a function that derives it from the saved one (sync).
+  updatePlaylistBookmarks: ({ commit }, update) => updateSavedPlaylistBookmarks(
+    commit,
+    typeof update === 'function' ? update : () => update
+  ),
+
+  updatePreferredCaptionLocale: ({ commit }, value) => updateValidatedSetting(
+    commit,
+    'preferredCaptionLocale',
+    normalizeYouTubeCaptionLanguageCode(value)
+  ),
+
+  updateAppFont: ({ commit }, value) => updateValidatedSetting(
+    commit,
+    'appFont',
+    normalizeAppFont(value)
+  ),
+
+  updateMoveDownloadsToAppHeader: ({ commit }, value) => settingWrites.track('moveDownloadsToAppHeader', async () => {
+    await saveSettingEdit(commit, 'moveDownloadsToAppHeader', () => DBSettingHandlers.upsert('moveDownloadsToAppHeader', value))
+    commit('setMoveDownloadsToAppHeader', value)
+    await DBSettingHandlers.delete('moveDownloadsToQuickSettings')
+  }).then(() => true, error => {
+    console.error(error)
+    return false
+  }),
+
+  updateMaterialSeedColor: ({ commit, state }, value) => updateOrderedSetting(
+    commit, state, 'materialSeedColor', normalizeMaterialSeedColor(value)
+  ),
+
+  updateSignalAccentColor: ({ commit, state }, value) => updateOrderedSetting(
+    commit, state, 'signalAccentColor', normalizeSignalAccentColor(value)
+  ),
+
+  updateBaseTheme: ({ commit, rootGetters }, value) => updateValidatedSetting(
+    commit,
+    'baseTheme',
+    resolveBaseTheme(value, 'system', rootGetters.getCustomThemes)
+  ),
+
+  updateSystemLightTheme: ({ commit, rootGetters }, value) => updateValidatedSetting(
+    commit,
+    'systemLightTheme',
+    resolveSystemTheme(value, 'light', rootGetters.getCustomThemes)
+  ),
+
+  updateSystemDarkTheme: ({ commit, rootGetters }, value) => updateValidatedSetting(
+    commit,
+    'systemDarkTheme',
+    resolveSystemTheme(value, 'dark', rootGetters.getCustomThemes)
+  ),
+
+  updateMainColor: ({ commit }, value) => updateValidatedSetting(
+    commit,
+    'mainColor',
+    resolveColor(value, 'Red')
+  ),
+
+  updateSecColor: ({ commit }, value) => updateValidatedSetting(
+    commit,
+    'secColor',
+    resolveColor(value, 'Blue')
+  ),
+
+  updateTabBarPosition: ({ commit }, value) => updateValidatedSetting(
+    commit,
+    'tabBarPosition',
+    normalizeTabBarPosition(value)
+  ),
+
+  updateIconPack: ({ commit }, value) => settingWrites.track('iconPack', async () => {
+    const previousIconPack = currentIconPack.value
+    if (!isIconPack(value) || !await setIconPack(value)) {
+      return false
+    }
+
+    try {
+      await saveSettingEdit(commit, 'iconPack', () => DBSettingHandlers.upsert('iconPack', value))
+      commit('setIconPack', value)
+      return true
+    } catch (error) {
+      if (isIconPack(previousIconPack)) {
+        await setIconPack(previousIconPack)
+      }
+      console.error(error)
+      return false
+    }
+  }),
+
+  resetSettingToDefault: ({ dispatch }, settingKey) => {
+    if (!Object.prototype.hasOwnProperty.call(DEFAULT_SETTINGS, settingKey)) {
+      return
+    }
+
+    return dispatch(defaultUpdaterId(settingKey), structuredClone(DEFAULT_SETTINGS[settingKey]))
+  },
+
+  updateSettingsPassword: async ({ commit }, value) => {
+    try {
+      const hashedPassword = await hashPassword(value)
+
+      await DBSettingHandlers.upsert('settingsPassword', hashedPassword)
+
+      commit('setSettingsPassword', hashedPassword)
+      return true
+    } catch (errMessage) {
+      console.error(errMessage)
+      return false
+    }
+  },
+
   grabUserSettings: async ({ commit, dispatch, state }) => {
     try {
       const userSettings = await DBSettingHandlers.find()
+      let landingPageToInitialize = null
 
       const mutationIds = Object.keys(mutations)
 
       const alreadyTriggeredSideEffects = []
+      const sideEffectPromises = []
+
+      // The icons load alongside the other settings' side effects. A pack that
+      // cannot load is replaced by the other one, which is then saved.
+      let iconPackApplied
+      const applyIconPack = (value) => {
+        iconPackApplied = dispatch(defaultSideEffectsTriggerId('iconPack'), value).then(async (resolvedValue) => {
+          if (resolvedValue !== value) {
+            await DBSettingHandlers.upsert('iconPack', resolvedValue)
+            commit('setIconPack', resolvedValue)
+          }
+        })
+        // A failure is handled where the result is awaited below.
+        iconPackApplied.catch(() => {})
+      }
 
       for (const { _id, value } of userSettings) {
+        let resolvedValue = value
+        if (_id === 'syncServerUrl') {
+          const migratedUrl = migrateSyncServerUrl(value)
+          if (migratedUrl !== value) {
+            try {
+              await DBSettingHandlers.upsert(_id, migratedUrl)
+              resolvedValue = migratedUrl
+            } catch (error) {
+              console.error('Failed to migrate sync server URL', error)
+            }
+          }
+        }
         if (settingsWithSideEffects.includes(_id)) {
-          dispatch(defaultSideEffectsTriggerId(_id), value)
+          if (_id === 'iconPack') {
+            applyIconPack(value)
+          } else {
+            sideEffectPromises.push(
+              dispatch(defaultSideEffectsTriggerId(_id), value)
+            )
+          }
           alreadyTriggeredSideEffects.push(_id)
         }
 
         if (mutationIds.includes(defaultMutationId(_id))) {
-          commit(defaultMutationId(_id), value)
+          commit(defaultMutationId(_id), resolvedValue)
         }
+      }
+
+      const hasNavigationItems = userSettings.some(entry => entry._id === 'navigationItems')
+      if (!hasNavigationItems && userSettings.length > 0) {
+        await dispatch('updateNavigationItems', navigationItemsFromLegacySettings(
+          Object.fromEntries(userSettings.map(({ _id, value }) => [_id, value]))
+        ))
+      }
+
+      const hasPlaylistThumbnailSize = userSettings.some(entry => entry._id === 'playlistThumbnailSize')
+      // Playlists inherited the global size before their preference was split out.
+      // Persist even the default so later global changes stay independent on restart.
+      if (!hasPlaylistThumbnailSize) {
+        await dispatch('updatePlaylistThumbnailSize', state.thumbnailSize)
+      }
+
+      const preferredCaptionLocaleEntry = userSettings.find(
+        entry => entry._id === 'preferredCaptionLocale'
+      )
+      if (
+        preferredCaptionLocaleEntry &&
+        preferredCaptionLocaleEntry.value !== state.preferredCaptionLocale
+      ) {
+        await dispatch('updatePreferredCaptionLocale', preferredCaptionLocaleEntry.value)
+      }
+
+      const hasTabBarPosition = userSettings.some(entry => entry._id === 'tabBarPosition')
+      const legacyVerticalTabBar = userSettings.find(entry => entry._id === 'useVerticalTabBar')
+      if (!hasTabBarPosition && legacyVerticalTabBar?.value === true) {
+        await dispatch('updateTabBarPosition', 'left')
+      }
+
+      if (state.landingPage === 'settings') {
+        await dispatch('updateLandingPage', 'subscriptions')
+      }
+
+      const hasLandingPage = userSettings.some(entry => entry._id === 'landingPage')
+      if (!hasLandingPage) {
+        const profiles = await DBProfileHandlers.find()
+        const isFreshInstallation = userSettings.length === 0 && profiles.length === 0
+        const resolvedLandingPage = resolveDefaultLandingPage(isFreshInstallation)
+        commit('setLandingPage', resolvedLandingPage)
+        landingPageToInitialize = isFreshInstallation
+          ? resolvedLandingPage
+          : null
+      }
+
+      const keyboardShortcutsEntry = userSettings.find(entry => entry._id === 'keyboardShortcuts')
+      if (keyboardShortcutsEntry) {
+        const sanitizedShortcuts = sanitizeKeyboardShortcutOverrides(keyboardShortcutsEntry.value)
+        if (sanitizedShortcuts !== keyboardShortcutsEntry.value) {
+          await dispatch('updateKeyboardShortcuts', sanitizedShortcuts)
+        }
+      }
+
+      const legacyAutoPipModeEntry = userSettings.find(entry => entry._id === 'autoPictureInPictureMode')
+      const legacyAutoPipTabEntry = userSettings.find(entry => entry._id === 'autoPictureInPictureOnTabChange')
+      const legacyDownloadsPlacementEntry = userSettings.find(
+        entry => entry._id === 'moveDownloadsToQuickSettings'
+      )
+      const hasDownloadsHeaderPlacementSetting = userSettings.some(
+        entry => entry._id === 'moveDownloadsToAppHeader'
+      )
+      const hasPipTriggersSetting = userSettings.some(entry => entry._id === 'autoPictureInPictureTriggers')
+      const hasScrollPlayerSetting = userSettings.some(entry => entry._id === 'scrollPlayerMode')
+      const legacyProgressToastEntry = userSettings.find(entry => entry._id === 'showSubscriptionRefreshToast')
+      const hasProgressToastSetting = userSettings.some(entry => entry._id === 'showProgressBarToast')
+      const legacyHideLiveChatEntry = userSettings.find(entry => entry._id === 'hideLiveChat')
+      const hasHideLiveChatReplaySetting = userSettings.some(entry => entry._id === 'hideLiveChatReplay')
+      const legacyHideAiVideoSummariesEntry = userSettings.find(
+        entry => entry._id === 'hideAiVideoSummaries'
+      )
+      const hasAiVideoSummaryModeSetting = userSettings.some(
+        entry => entry._id === 'aiVideoSummaryMode'
+      )
+      const legacyPlaybackSpeedSyncEntry = userSettings.find(
+        entry => entry._id === 'syncServerSyncPlaybackSpeeds'
+      )
+      const hasMigratedChannelSettingsSync = userSettings.some(
+        entry => entry._id === CHANNEL_SETTINGS_SYNC_MIGRATION_SETTING
+      )
+
+      if (legacyDownloadsPlacementEntry && !hasDownloadsHeaderPlacementSetting) {
+        await dispatch(
+          'updateMoveDownloadsToAppHeader',
+          legacyDownloadsPlacementEntry.value !== true
+        )
+      }
+
+      if (!hasMigratedChannelSettingsSync) {
+        try {
+          if (legacyPlaybackSpeedSyncEntry?.value === false) {
+            const excluded = Array.isArray(state.syncServerSettingsExcluded)
+              ? state.syncServerSettingsExcluded
+              : []
+            await dispatch('updateSyncServerSettingsExcluded', Array.from(new Set([
+              ...excluded,
+              'channelPlaybackSpeeds',
+            ])))
+          }
+          await DBSettingHandlers.upsert(CHANNEL_SETTINGS_SYNC_MIGRATION_SETTING, true)
+        } catch (error) {
+          console.error('Failed to migrate saved channel settings sync', error)
+        }
+      }
+
+      if (legacyProgressToastEntry && !hasProgressToastSetting) {
+        await dispatch('updateShowProgressBarToast', legacyProgressToastEntry.value === true)
+      }
+
+      // Hide Live Chat covered both active chats and replays before the replay
+      // preference was split out. Preserve that choice for existing profiles.
+      if (legacyHideLiveChatEntry && !hasHideLiveChatReplaySetting) {
+        await dispatch('updateHideLiveChatReplay', legacyHideLiveChatEntry.value === true)
+      }
+
+      // Auto Load Next Page used to control comments too, so they keep its value.
+      // Saving it settles the choice, so a later change to Auto Load Next Page is
+      // not copied. For sync, the copy keeps the edit time of Auto Load Next Page
+      // instead of counting as a new edit, so a newer choice from another device wins.
+      if (!userSettings.some(entry => entry._id === 'autoLoadComments')) {
+        const autoLoadComments = userSettings.find(
+          entry => entry._id === 'generalAutoLoadMorePaginatedItemsEnabled'
+        )?.value !== false
+        commit('setAutoLoadComments', autoLoadComments)
+        await DBSettingHandlers.upsert('autoLoadComments', autoLoadComments)
+        const editedAt = userSettings.find(entry => entry._id === 'syncServerSettingUpdatedAt')
+          ?.value?.generalAutoLoadMorePaginatedItemsEnabled
+        if (typeof editedAt === 'number') {
+          await updateSettingSyncTimestamp(commit, 'autoLoadComments', () => editedAt)
+        }
+      }
+
+      if (legacyHideAiVideoSummariesEntry) {
+        if (!hasAiVideoSummaryModeSetting) {
+          commit('setAiVideoSummaryMode', legacyHideAiVideoSummariesEntry.value === true ? 'hide' : 'collapsed')
+        }
+        try {
+          await migrateStoredAiVideoSummarySetting({
+            legacyValue: legacyHideAiVideoSummariesEntry.value,
+            hasCurrentSetting: hasAiVideoSummaryModeSetting,
+            saveCurrentSetting: async (value) => {
+              await saveSettingEdit(commit, 'aiVideoSummaryMode', () => DBSettingHandlers.upsert('aiVideoSummaryMode', value))
+              commit('setAiVideoSummaryMode', value)
+            },
+            deleteLegacySetting: () => DBSettingHandlers.delete('hideAiVideoSummaries'),
+          })
+        } catch (error) {
+          console.error('Failed to migrate AI video summary visibility', error)
+        }
+      }
+
+      // Migrate the legacy auto Picture-in-Picture setting to the combinable triggers array.
+      // The old behavior fired on both in-app tab changes and window minimize, so preserve both.
+      if (!hasPipTriggersSetting) {
+        let tabChangeEnabled = null
+
+        if (legacyAutoPipTabEntry) {
+          tabChangeEnabled = legacyAutoPipTabEntry.value === true
+        } else if (legacyAutoPipModeEntry) {
+          tabChangeEnabled = legacyAutoPipModeEntry.value === 'tab' || legacyAutoPipModeEntry.value === 'both'
+        }
+
+        if (tabChangeEnabled !== null) {
+          await dispatch('updateAutoPictureInPictureTriggers', tabChangeEnabled ? ['tab', 'minimize'] : [])
+        }
+      }
+
+      if (legacyAutoPipModeEntry && !hasScrollPlayerSetting) {
+        await dispatch('updateScrollPlayerMode', legacyAutoPipModeEntry.value === 'never' ? 'off' : 'mini')
+      }
+
+      // The chapters and screenshot buttons used to sit on the control bar
+      // before its customizable buttons, so saved control bars from before they
+      // were customizable keep them there.
+      if (!userSettings.some(entry => entry._id === CONTROL_BAR_BUTTONS_MIGRATION_SETTING)) {
+        try {
+          const savedButtons = userSettings.find(entry => entry._id === 'controlBarButtons')?.value
+          if (Array.isArray(savedButtons)) {
+            const added = ['chapters', 'screenshot'].filter(id => !savedButtons.includes(id))
+            // A failed save leaves the marker unset, so the next launch retries.
+            if (added.length > 0 && !await dispatch('updateControlBarButtons', [...added, ...savedButtons])) {
+              throw new Error('The control bar buttons were not saved')
+            }
+          }
+          await DBSettingHandlers.upsert(CONTROL_BAR_BUTTONS_MIGRATION_SETTING, true)
+        } catch (error) {
+          console.error('Failed to migrate the saved control bar buttons', error)
+        }
+      }
+
+      // Existing logged-in sync users keep sync enabled; everyone else starts off
+      // so the default server is not contacted until the user opts in.
+      const hasSyncServerEnabledSetting = userSettings.some(entry => entry._id === 'syncServerEnabled')
+      if (!hasSyncServerEnabledSetting) {
+        const token = typeof state.syncServerToken === 'string' ? state.syncServerToken : ''
+        await dispatch('updateSyncServerEnabled', token !== '')
       }
 
       for (const _id of settingsWithSideEffects) {
         if (!alreadyTriggeredSideEffects.includes(_id)) {
-          dispatch(defaultSideEffectsTriggerId(_id), state[_id])
+          if (_id === 'iconPack') {
+            applyIconPack(state[_id])
+          } else {
+            sideEffectPromises.push(
+              dispatch(defaultSideEffectsTriggerId(_id), state[_id])
+            )
+          }
         }
+      }
+
+      await Promise.allSettled(sideEffectPromises)
+      await iconPackApplied
+      return {
+        hasExistingSettings: userSettings.some(({ _id }) => !TUTORIAL_STATE_SETTING_IDS.has(_id)),
+        landingPageToInitialize,
+        tutorialAudience: userSettings.find(({ _id }) => _id === TUTORIAL_AUDIENCE_SETTING_ID)?.value ?? null,
+        lastUsedVersion: userSettings.find(({ _id }) => _id === LAST_USED_VERSION_SETTING_ID)?.value ?? null,
       }
     } catch (errMessage) {
       console.error(errMessage)
+      // The renderer no longer preloads a default icon bundle before mounting.
+      // Preserve usable fallback icons even when the settings datastore itself
+      // cannot be read during startup.
+      await sideEffectHandlers.iconPack(null, state.iconPack)
+        .then(value => commit('setIconPack', value))
+        .catch(console.error)
+      return {
+        hasExistingSettings: null,
+        landingPageToInitialize: null,
+        tutorialAudience: null,
+        lastUsedVersion: null,
+      }
+    }
+  },
+
+  redirectHomeTabsToLandingPage: async ({ getters }) => {
+    if (!process.env.IS_ELECTRON) { return }
+
+    const landingRoute = { path: `/${getters.getLandingPage}` }
+    const homeTabs = getters.getTabs.filter(tab => tab.route.path === '/home')
+    const navigation = getTabNavigationService()
+    await Promise.all(homeTabs.map(tab => navigation.replace(tab.id, landingRoute)))
+  },
+
+  // Separate, so the subscription cache sees subscriptions made in other
+  // windows while the window starts before it drops unsubscribed channels.
+  setupProfileListenerToSyncWindows: ({ commit }) => {
+    if (process.env.IS_ELECTRON) {
+      window.ftElectron.handleSyncProfiles((event, data) => {
+        switch (event) {
+          case SyncEvents.GENERAL.CREATE:
+            commit('addProfileToList', data)
+            break
+
+          case SyncEvents.GENERAL.UPSERT:
+            commit('upsertProfileToList', data)
+            break
+
+          case SyncEvents.PROFILES.ADD_CHANNEL:
+            commit('addChannelToProfiles', data)
+            break
+
+          case SyncEvents.PROFILES.REMOVE_CHANNEL:
+            commit('removeChannelFromProfiles', data)
+            break
+
+          case SyncEvents.PROFILES.UPDATE_CHANNEL_SETTINGS:
+            commit('updateChannelSettings', data)
+            break
+
+          case SyncEvents.PROFILES.UPDATE_SUBSCRIPTION_DETAILS:
+            commit('updateSubscriptionDetails', data)
+            break
+
+          case SyncEvents.PROFILES.UPDATE_DETAILS:
+            commit('updateProfileDetails', data)
+            break
+
+          case SyncEvents.GENERAL.DELETE:
+            commit('removeProfileFromList', data)
+            break
+
+          default:
+            console.error('profiles: invalid sync event received')
+        }
+      })
     }
   },
 
   // Should be a root action, but we'll tolerate
   setupListenersToSyncWindows: ({ commit, dispatch }) => {
     if (process.env.IS_ELECTRON) {
+      const applySavedSetting = (settingId, value) => {
+        if (settingsWithSideEffects.includes(settingId)) {
+          dispatch(defaultSideEffectsTriggerId(settingId), value)
+        }
+
+        commit(defaultMutationId(settingId), value)
+        if (
+          settingId === 'navigationItems' &&
+          !normalizeNavigationItems(value).includes('home')
+        ) {
+          dispatch('redirectHomeTabsToLandingPage').catch(error => {
+            console.error('Failed to redirect Home tabs after syncing navigation items', error)
+          })
+        }
+        if (settingId === 'syncServerEnabled') {
+          dispatch('applySyncServerEnabled', value, { root: true })
+        } else if (settingId === 'syncServerAutoSync') {
+          dispatch(value ? 'startSyncServerAutoSync' : 'stopSyncServerAutoSync', null, { root: true })
+        } else if (settingId === 'syncServerToken') {
+          dispatch('applySyncServerToken', null, { root: true }).catch(error => {
+            console.error('Failed to refresh sync after a token change in another window', error)
+          })
+        }
+      }
+
       window.ftElectron.handleSyncSettings((event, data) => {
         switch (event) {
           case SyncEvents.GENERAL.UPSERT:
-            if (settingsWithSideEffects.includes(data._id)) {
-              dispatch(defaultSideEffectsTriggerId(data._id), data.value)
-            }
-
-            commit(defaultMutationId(data._id), data.value)
+            // If this window is writing the setting too, either save can end
+            // up last, so this window shows the saved value once its writes finish.
+            settingWrites.savedElsewhere(data._id, saved => {
+              if (saved !== undefined) applySavedSetting(data._id, saved)
+            })
+            applySavedSetting(data._id, data.value)
             break
 
           default:
@@ -558,8 +1491,24 @@ const customActions = {
             commit('updateRecordLastViewedPlaylistIdInHistoryCache', data)
             break
 
+          case SyncEvents.HISTORY.APPLY_SYNC_CHANGES:
+            commit('applyHistorySyncChanges', data)
+            break
+
+          case SyncEvents.HISTORY.UNSET_PLAYLIST_FOR_VIDEOS:
+            commit('unsetRecordsLastViewedPlaylistIdInHistoryCache', data)
+            break
+
+          case SyncEvents.HISTORY.UNSET_PLAYLISTS:
+            commit('unsetRecordsLastViewedPlaylistIdsInHistoryCache', data)
+            break
+
           case SyncEvents.GENERAL.DELETE:
             commit('removeFromHistoryCacheById', data)
+            break
+
+          case SyncEvents.GENERAL.DELETE_MULTIPLE:
+            commit('removeMultipleFromHistoryCache', data)
             break
 
           case SyncEvents.GENERAL.DELETE_ALL:
@@ -570,6 +1519,35 @@ const customActions = {
           default:
             console.error('history: invalid sync event received')
         }
+      })
+
+      window.ftElectron.handleSyncWatchStats((event, data) => {
+        switch (event) {
+          case SyncEvents.GENERAL.OVERWRITE:
+            commit('setWatchStats', data.records)
+            commit('setHasHistoricalWatchTimeEstimate', data.records.some(record => record.historyEstimateApplied === true))
+            commit('setHistoricalWatchTimePlaybackSpeed', data.adjustment?.defaultSpeed ?? null)
+            break
+          case SyncEvents.WATCH_STATS.ADD_WATCH_TIME:
+            commit('addWatchTime', data)
+            break
+
+          case SyncEvents.WATCH_STATS.ADJUST_HISTORICAL_WATCH_TIME:
+            commit('setWatchStats', data.records)
+            commit('setHistoricalWatchTimePlaybackSpeed', data.defaultSpeed)
+            break
+
+          case SyncEvents.GENERAL.DELETE_ALL:
+            commit('resetWatchStats')
+            break
+
+          default:
+            console.error('watch stats: invalid sync event received')
+        }
+      })
+
+      window.ftElectron.handleSyncRecommendations(data => {
+        dispatch('receiveRecommendationUpdate', data).catch(error => console.error('Could not sync recommendation learning', error))
       })
 
       window.ftElectron.handleSyncSearchHistory((event, data) => {
@@ -596,33 +1574,6 @@ const customActions = {
         }
       })
 
-      window.ftElectron.handleSyncProfiles((event, data) => {
-        switch (event) {
-          case SyncEvents.GENERAL.CREATE:
-            commit('addProfileToList', data)
-            break
-
-          case SyncEvents.GENERAL.UPSERT:
-            commit('upsertProfileToList', data)
-            break
-
-          case SyncEvents.PROFILES.ADD_CHANNEL:
-            commit('addChannelToProfiles', data)
-            break
-
-          case SyncEvents.PROFILES.REMOVE_CHANNEL:
-            commit('removeChannelFromProfiles', data)
-            break
-
-          case SyncEvents.GENERAL.DELETE:
-            commit('removeProfileFromList', data)
-            break
-
-          default:
-            console.error('profiles: invalid sync event received')
-        }
-      })
-
       window.ftElectron.handleSyncPlaylists((event, data) => {
         switch (event) {
           case SyncEvents.GENERAL.CREATE:
@@ -633,8 +1584,16 @@ const customActions = {
             commit('removePlaylist', data)
             break
 
+          case SyncEvents.GENERAL.DELETE_ALL:
+            commit('removeAllPlaylists')
+            break
+
           case SyncEvents.GENERAL.UPSERT:
             commit('upsertPlaylistToList', data)
+            break
+
+          case SyncEvents.PLAYLISTS.REPAIR_METADATA:
+            commit('applyPlaylistMetadataRepairs', data)
             break
 
           case SyncEvents.PLAYLISTS.UPSERT_VIDEO:
@@ -660,6 +1619,20 @@ const customActions = {
 
       window.ftElectron.handleSyncSubscriptionCache((event, data) => {
         switch (event) {
+          case SyncEvents.SUBSCRIPTION_CACHE.MARK_ENTRIES_AS_SEEN:
+            commit('markSubscriptionEntriesAsSeenInCache', [data])
+            break
+
+          case SyncEvents.SUBSCRIPTION_CACHE.MARK_ENTRIES_AS_SEEN_MANY:
+            commit('markSubscriptionEntriesAsSeenInCache', data)
+            break
+
+          case SyncEvents.SUBSCRIPTION_CACHE.UPDATE_FEEDS:
+            for (const update of data) {
+              commit(SUBSCRIPTION_FEED_CACHE_MUTATIONS[update.field], update)
+            }
+            break
+
           case SyncEvents.SUBSCRIPTION_CACHE.UPDATE_VIDEOS_BY_CHANNEL:
             commit('updateVideoCacheByChannel', data)
             break
@@ -705,12 +1678,20 @@ const customActions = {
 const getters = {}
 const mutations = {}
 const actions = {}
+const runSettingUpdate = createSettingUpdateQueue()
+let pendingAutomaticDownloadRuleUpdate = Promise.resolve()
 
 // Build default getters, mutations and actions for every setting id
 for (const settingId of Object.keys(state)) {
   const getterId = defaultGetterId(settingId)
   const mutationId = defaultMutationId(settingId)
   const updaterId = defaultUpdaterId(settingId)
+  // Resolves to whether the write was saved; superseded writes count as saved.
+  const handleUpdateError = error => {
+    console.error(error)
+    if (['scheduledBackupEnabled', 'scheduledBackupInterval', 'scheduledBackupKeepCount'].includes(settingId)) throw error
+    return false
+  }
 
   getters[getterId] = (state) => state[settingId]
   mutations[mutationId] = (state, value) => { state[settingId] = value }
@@ -721,27 +1702,26 @@ for (const settingId of Object.keys(state)) {
     // If setting has side effects, generate action to handle them
     actions[triggerId] = sideEffectHandlers[settingId]
 
-    actions[updaterId] = async ({ commit, dispatch }, value) => {
-      try {
-        await DBSettingHandlers.upsert(settingId, value)
+    actions[updaterId] = ({ commit, dispatch }, value) => (
+      settingWrites.track(settingId, () => runSettingUpdate(settingId, async isLatest => {
+        // Once its edit time is saved, the value must be saved too, even if a newer update replaced it.
+        await saveSettingEdit(commit, settingId, () => DBSettingHandlers.upsert(settingId, value))
 
+        if (!isLatest()) return
         dispatch(triggerId, value)
 
         commit(mutationId, value)
-      } catch (errMessage) {
-        console.error(errMessage)
-      }
-    }
+      })).then(() => true, handleUpdateError)
+    )
   } else {
-    actions[updaterId] = async ({ commit }, value) => {
-      try {
-        await DBSettingHandlers.upsert(settingId, value)
+    actions[updaterId] = ({ commit }, value) => (
+      settingWrites.track(settingId, () => runSettingUpdate(settingId, async isLatest => {
+        // Once its edit time is saved, the value must be saved too, even if a newer update replaced it.
+        await saveSettingEdit(commit, settingId, () => DBSettingHandlers.upsert(settingId, value))
 
-        commit(mutationId, value)
-      } catch (errMessage) {
-        console.error(errMessage)
-      }
-    }
+        if (isLatest()) commit(mutationId, value)
+      })).then(() => true, handleUpdateError)
+    )
   }
 }
 

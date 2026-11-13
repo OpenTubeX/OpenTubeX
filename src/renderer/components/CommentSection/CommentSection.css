@@ -1,54 +1,982 @@
 .card {
   padding-block: 0;
   padding-inline: 16px;
+
+  /* Contain floated comment content inside the card. */
+  display: flow-root;
+  container-name: comments;
+  container-type: inline-size;
 }
 
-.getCommentsTitle,
-.commentsTitle,
-.getMoreComments {
+.commentsContentWrapper {
+  /* Contain floated comment avatars inside the comments area. */
+  display: flow-root;
+}
+
+.fullscreenCommentCard {
+  display: flex;
+  flex-direction: column;
+  min-block-size: 0;
+  padding-block: 0;
+  padding-inline: 0;
+  overflow: hidden;
+  color: #fff;
+  background: transparent;
+  backdrop-filter: none;
+  box-shadow: none;
+}
+
+/* The docks drop the card's padding, so the composer lines up with the comments' own. */
+.fullscreenCommentCard .topCommentComposer {
+  padding-inline: 15px;
+}
+
+/* Scroll the content below the fixed header, so it cuts off at the header edge. */
+.fullscreenCommentCard .commentsContentWrapper {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  overflow: hidden auto;
+  overscroll-behavior: contain;
+
+  /* Sits above the video, so the scrollbar needs a light handle rather than the
+     theme's. The overlay scrollbars inherit these from their container. */
+  --scrollbar-color: rgb(255 255 255 / 45%);
+  --scrollbar-color-hover: rgb(255 255 255 / 65%);
+}
+
+/* Matches the chapter overlay header in the video player. */
+.fullscreenCommentHeader {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  box-sizing: border-box;
+  block-size: 52px;
+  flex: 0 0 52px;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: 0;
+  padding-inline: 14px 8px;
+  background-color: rgb(20 20 20 / 52%);
+  border-block-end: 1px solid rgb(255 255 255 / 10%);
+}
+
+.fullscreenCommentHeader h3 {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-inline-size: 0;
   margin: 0;
+  font-size: 18px;
+  letter-spacing: -0.01em;
 }
 
-.getCommentsTitle {
-  padding-block: 8px;
-  text-align: center;
-  text-decoration: underline;
-  cursor: pointer;
-  color: var(--title-color);
+.fullscreenCommentActions {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+  gap: 4px;
 }
 
-.noCommentMsg {
-  padding-block: 1em;
-  text-align: center;
-}
+@container comments (width <= 320px) {
+  .fullscreenCommentHeader {
+    block-size: auto;
+    min-block-size: 52px;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    gap: 2px 8px;
+    padding-block: 6px;
+  }
 
-.commentsTitle {
-  padding-block: 1em;
-  display: inline-block;
-}
+  .fullscreenCommentHeader h3 {
+    flex: 1 1 100%;
+  }
 
-.commentSort {
-  float: inline-end;
-}
-
-@media only screen and (width <= 1000px) {
-  .commentSort {
-    float: none;
-    margin-block: 15px;
+  .fullscreenCommentActions {
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+    justify-content: flex-end;
   }
 }
 
-.hideComments {
-  font-size: 13px;
-  text-decoration: underline;
+.fullscreenCommentAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 36px;
+  block-size: 36px;
+  padding: 0;
+  color: #fff;
+  background-color: transparent;
+  border: 0;
+  border-radius: 50%;
   cursor: pointer;
+  font-size: 18px;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+}
+
+.fullscreenCommentAction:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.fullscreenCommentAction:where(:enabled):hover,
+.fullscreenCommentAction:where(:enabled):focus-visible {
+  background-color: rgb(255 255 255 / 20%);
+}
+
+.fullscreenCommentAction:where(:enabled).active {
+  background-color: rgb(255 255 255 / 34%);
+}
+
+.fullscreenCommentAction:where(:enabled).active:is(:hover, :focus-visible) {
+  background-color: rgb(255 255 255 / 42%);
+}
+
+.fullscreenCommentAction:where(:enabled):active {
+  border-radius: var(--shape-corner-medium);
+}
+
+.commentCreatorFilterAvatar {
+  inline-size: var(--comment-creator-filter-avatar-size, 20px);
+  block-size: var(--comment-creator-filter-avatar-size, 20px);
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.fullscreenCommentAction .commentCreatorFilterAvatar {
+  --comment-creator-filter-avatar-size: 24px;
+}
+
+.commentFilterMenuAnchor {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+}
+
+.commentFilterMenu {
+  position: absolute;
+  z-index: 5;
+  inset-block-start: calc(100% + 8px);
+  inset-inline-end: 0;
+  inline-size: min(240px, calc(100vw - 32px));
+  padding: 6px;
+  color: var(--primary-text-color);
+  background-color: color-mix(in srgb, var(--card-bg-color) 96%, var(--bg-color));
+  border: 1px solid color-mix(in srgb, var(--border-color) 55%, transparent);
+  border-radius: var(--shape-corner-large);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 28%);
+}
+
+.commentFilterOptionsContent {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Short phone layouts scroll the filters below the fixed sheet header. */
+.commentFilterSheet {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  padding-block: 4px 12px;
+}
+
+.commentFilterOptions button {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) 14px;
+  min-block-size: 40px;
+  align-items: center;
+  gap: 10px;
+  padding-block: 8px;
+  padding-inline: 10px;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  background: transparent;
+  border: 0;
+  border-radius: var(--shape-corner-medium);
+  cursor: pointer;
+  transition: background-color var(--motion-fast-effects);
+}
+
+/* Rows match the other phone bottom sheets. */
+.commentFilterSheet button {
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  min-block-size: 56px;
+  gap: 16px;
+  padding-inline: 24px;
+  border-radius: 0;
+  font-size: 1rem;
+}
+
+.commentFilterMenuIcon {
+  display: grid;
+  place-items: center;
+  inline-size: 24px;
+}
+
+.commentFilterSheet .commentFilterMenuIcon {
+  font-size: 20px;
+}
+
+.fullscreenCommentFilterMenu {
+  color: #fff;
+  background-color: rgb(12 12 12 / 82%);
+  border-color: rgb(255 255 255 / 12%);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 40%);
+  backdrop-filter: blur(14px) saturate(1.05);
+}
+
+.fullscreenSortMenu {
+  position: absolute;
+  z-index: 3;
+  inset-block-start: calc(100% + 8px);
+  inset-inline-end: 40px;
+  display: flex;
+  flex-direction: column;
+  inline-size: 260px;
+  max-inline-size: calc(40vw - 48px);
+  padding: 6px;
+  background-color: rgb(12 12 12 / 62%);
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: var(--shape-corner-large);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 35%);
+  backdrop-filter: blur(14px) saturate(1.05);
+}
+
+.fullscreenSortMenu button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  color: inherit;
+  text-align: start;
+  background: transparent;
+  border: 0;
+  border-radius: var(--shape-corner-medium);
+  cursor: pointer;
+  transition: background-color var(--motion-fast-effects);
+}
+
+.fullscreenSortMenu button:hover,
+.fullscreenSortMenu button:focus-visible,
+.fullscreenSortMenu .selected {
+  background-color: var(--side-nav-hover-color);
+}
+
+.commentFilterOptions button:is(:hover, :focus-visible) {
+  color: var(--side-nav-hover-text-color);
+  background-color: var(--side-nav-hover-color);
+}
+
+.commentAutoLoadSentinel {
+  min-block-size: 1px;
+}
+
+.commentAutoLoadSpace {
+  min-block-size: 64px;
+}
+
+.btn:is(.getCommentsTitle, .getMoreComments) {
+  max-inline-size: 100%;
+  inline-size: fit-content;
+  margin-block: 8px;
+  margin-inline: auto;
+  white-space: normal;
+}
+
+.noCommentMsg {
+  flex: 1 1 auto;
+  margin: 0;
+  text-align: center;
+}
+
+.noComments {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-block: 16px;
+}
+
+/* The sort/reload actions normally give the card its height. Without them the
+   lone message would sit in a cramped strip, so pad it out instead. */
+.noCommentsMessageOnly {
+  padding-block: 24px;
+}
+
+.noCommentActions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+  margin-inline-start: auto;
+}
+
+.noCommentActions :deep(.select) {
+  margin-block: 0;
+}
+
+:global(.capacitorPhoneLayout .noComments) {
+  flex-flow: column wrap;
+  align-items: stretch;
+}
+
+:global(.capacitorPhoneLayout .noCommentActions) {
+  order: -1;
+  align-self: flex-end;
+}
+
+.commentsTitle {
+  margin: 0;
+  padding-block: 0;
+  letter-spacing: -0.01em;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  flex: 0 0 auto;
+  max-inline-size: 100%;
+}
+
+.commentHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-block-start: 16px;
+}
+
+.commentHeaderActions {
+  display: flex;
+  min-inline-size: 0;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-inline-start: auto;
+}
+
+.commentHeaderActions :deep(.select) {
+  /* Toolbar controls share a row instead of the spacing between form fields. */
+  margin-block: 0;
+}
+
+
+.commentHeaderIconAction {
+  display: inline-flex;
+  inline-size: 36px;
+  block-size: 36px;
+  flex: 0 0 36px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: var(--title-color);
+  background-color: transparent;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+}
+
+.commentHeaderIconAction:hover,
+.commentHeaderIconAction:focus-visible {
+  color: var(--side-nav-hover-text-color);
+  background-color: var(--side-nav-hover-color);
+}
+
+.commentHeaderIconAction.active {
+  color: var(--on-selected-container-color);
+  background-color: var(--selected-container-color);
+}
+
+.commentHeaderIconAction.active:is(:hover, :focus-visible) {
+  background-color: var(--selected-container-hover-color);
+}
+
+.commentHeaderIconAction:active {
+  border-radius: var(--shape-corner-medium);
+}
+
+.commentTools {
+  --input-bottom-spacing: 0;
+
+  padding-block: 8px;
+}
+
+.commentSearchRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.commentSearchRow :deep(.ft-input-component) {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+
+.commentSearchClose {
+  flex: 0 0 36px;
+}
+
+.card:where(:not(.fullscreenCommentCard, .phoneCommentCard)) > .commentTools {
+  max-inline-size: 480px;
+  padding-block: 16px 0;
+}
+
+.fullscreenCommentCard > .commentTools {
+  flex: 0 0 auto;
+  padding-block: 12px;
+  padding-inline: 14px;
+  background-color: rgb(20 20 20 / 52%);
+  border-block-end: 1px solid rgb(255 255 255 / 10%);
+}
+
+.fullscreenCommentCard > .commentTools :deep(.ft-input) {
+  color: #fff;
+  background-color: rgb(0 0 0 / 35%);
+}
+
+.commentTools :deep(.ft-input) {
+  margin-block-end: 0;
+}
+
+.commentFilterCount,
+.noCommentFilterResults {
+  color: var(--secondary-text-color);
+}
+
+.commentFilterCount {
+  margin-block: 8px 0;
+  font-size: 13px;
+}
+
+.noCommentFilterResults {
+  margin-block: 24px;
+  text-align: center;
+}
+
+.fullscreenCommentCard > .commentTools .commentFilterCount {
+  color: #fff;
+}
+
+@container comments (width <= 520px) {
+  .commentHeaderActions {
+    flex: 1 1 100%;
+    justify-content: flex-start;
+  }
+
+  .commentFilterMenu:not(.fullscreenCommentFilterMenu) {
+    inset-inline: 0 auto;
+  }
+
+  .commentHeaderActions :deep(.select) {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+    inline-size: auto;
+  }
+}
+
+.reloadComments {
   color: var(--title-color);
 }
 
-.getMoreComments {
-  padding-block-end: 1em;
-  text-align: center;
-  text-decoration: underline;
+.reloadComments :deep(.iconButton) {
+  inline-size: 36px;
+  block-size: 36px;
+
+  /* FtIconButton's inline padding scales independently of authored CSS at
+     non-100% Electron zoom factors. Keep this toolbar control a fixed size. */
+  /* stylelint-disable-next-line declaration-no-important */
+  padding: 0 !important;
+}
+
+.comment {
+  padding: 15px;
+}
+
+.comment.highlightedComment {
+  padding-block-start: 0;
+}
+
+.highlightedCommentBadge {
+  display: table;
+  margin-block: 0 8px;
+  padding-block: 2px;
+  padding-inline: 5px;
+  color: var(--primary-text-color);
+  background-color: var(--side-nav-hover-color);
+  border-radius: var(--shape-corner-extra-small);
+  font-size: 11px;
+  font-weight: normal;
+  line-height: 16px;
+}
+
+.commentThread {
+  position: relative;
+
+  --comment-thread-line-color: color-mix(in srgb, var(--border-color) 55%, var(--card-bg-color));
+  --highlighted-comment-offset: 13px;
+}
+
+.commentThreadExpanded::before,
+.commentThreadCollapsed::before {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  inset-block: 75px var(--filtered-comment-thread-line-inset-block-end, 71px);
+  inset-inline-start: 45px;
+  border-inline-start: 1px solid var(--comment-thread-line-color);
+  pointer-events: none;
+}
+
+.commentThreadExpanded.highlightedComment::before,
+.commentThreadCollapsed.highlightedComment::before {
+  inset-block-start: calc(75px + var(--highlighted-comment-offset));
+}
+
+.commentThreadLineToggle {
+  position: absolute;
+  z-index: 1;
+  inset-block: 75px 45px;
+  inset-inline-start: 35px;
+  inline-size: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
   cursor: pointer;
+}
+
+.highlightedComment > .commentThreadLineToggle {
+  inset-block-start: calc(75px + var(--highlighted-comment-offset));
+}
+
+.commentThreadLineToggle:disabled {
+  cursor: default;
+}
+
+.commentThreadLineToggle:focus-visible {
+  outline: 2px solid currentcolor;
+  outline-offset: 2px;
+}
+
+.btn.commentTitleAction {
+  margin: 0;
+}
+
+.commentThumbnail {
+  float: inline-start;
+  inline-size: 60px;
+  block-size: 60px;
+  border-radius: 50%;
+}
+
+.commentThumbnailHidden {
+  float: inline-start;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  inline-size: 60px;
+  block-size: 60px;
+  font-size: 20px;
+  line-height: 1em;
+  color: rgb(0 0 0);
+  background-color: rgb(235 160 172);
+  border-radius: 50%;
+}
+
+.commentAuthorWrapper {
+  font-weight: bold;
+  font-size: 14px;
+  margin-inline-start: 68px;
+  margin-block-start: 0;
+  overflow-wrap: break-word;
+}
+
+.commentOwner {
+  background-color: var(--secondary-card-bg-color);
+  backdrop-filter: var(--secondary-card-bg-blur, none);
+  border: 1px solid var(--tertiary-text-color);
+  border-radius: var(--shape-corner-full);
+  padding-block: 2px;
+  padding-inline: 10px;
+}
+
+
+.commentAuthor {
+  color: inherit;
+  text-decoration: none;
+}
+
+.commentText :deep(img) {
+  display: inline-block;
+}
+
+.commentText {
+  white-space: pre-wrap;
+  font-size: 14px;
+  /* stylelint-disable-next-line liberty/use-logical-spec */
+  margin-left: -10px;
+  margin-inline-start: 70px;
+  overflow-wrap: anywhere;
+}
+
+.commentTranslation {
+  margin-block: 2px;
+  margin-inline-start: 60px;
+}
+
+.commentTranslationButton {
+  display: inline-flex;
+  min-block-size: 32px;
+  max-inline-size: calc(100% - 60px);
+  align-items: center;
+  gap: 6px;
+  padding-block: 4px;
+  padding-inline: 10px;
   color: var(--title-color);
+  background-color: transparent;
+  border: 0;
+
+  /* Half the minimum height rather than full, so the press morph is smooth. */
+  border-radius: calc(16px * var(--ui-roundness));
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: start;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+}
+
+.commentTranslationButton:hover,
+.commentTranslationButton:focus-visible {
+  color: var(--side-nav-hover-text-color);
+  background-color: var(--side-nav-hover-color);
+}
+
+.commentTranslationButton:disabled {
+  cursor: default;
+  opacity: 0.65;
+}
+
+.commentTranslationButton:disabled:hover {
+  color: var(--title-color);
+  background-color: transparent;
+}
+
+.commentTranslationButton:not(:disabled):active {
+  border-radius: var(--shape-corner-medium);
+}
+
+/* stylelint-disable liberty/use-logical-spec */
+:global(body[dir='rtl'] .commentText) {
+  margin-left: initial;
+  margin-right: -10px;
+}
+/* stylelint-enable liberty/use-logical-spec */
+
+.commentPinned {
+  font-weight: normal;
+  font-size: 12px;
+  margin-block: 0 5px;
+  margin-inline-start: 68px;
+}
+
+.commentDate {
+  font-weight: normal;
+  margin-inline-start: 5px;
+  font-size: 12px;
+}
+
+.commentMemberIcon {
+  margin-inline-start: 5px;
+  inline-size: 14px;
+  block-size: 14px;
+}
+
+.commentSubscribedIcon {
+  font-size: 14px;
+  vertical-align: middle;
+  margin-inline: 0.25em;
+}
+
+.commentLikeCount {
+  font-size: 11px;
+  margin-inline-start: 70px;
+  margin-block-start: 0;
+}
+
+/* Lines up with the comment text. */
+.replyComposer,
+.editComposer {
+  margin-inline-start: 60px;
+}
+
+.commentCopyLink,
+.commentPinButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 22px;
+  block-size: 22px;
+  padding: 0;
+  margin-inline-start: 6px;
+  color: var(--title-color);
+  background-color: transparent;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  line-height: 1;
+  vertical-align: middle;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+}
+
+.commentCopyLink:hover,
+.commentCopyLink:focus-visible,
+.commentPinButton:hover,
+.commentPinButton:focus-visible,
+.commentPinButton.active {
+  color: var(--side-nav-hover-text-color);
+  background-color: var(--side-nav-hover-color);
+}
+
+.commentCopyLink:active,
+.commentPinButton:active {
+  border-radius: var(--shape-corner-small);
+}
+
+.commentPersonalPin {
+  display: table;
+  padding-block: 2px;
+  padding-inline: 5px;
+  color: var(--primary-text-color);
+  background-color: color-mix(in srgb, var(--side-nav-hover-color) 45%, transparent);
+  border-radius: var(--shape-corner-extra-small);
+}
+
+.commentAuthor mark,
+.commentText :deep(mark) {
+  padding-inline: 1px;
+  color: var(--text-with-accent-color);
+  background-color: var(--accent-color);
+  border-radius: var(--shape-corner-extra-small);
+}
+
+.commentHeartBadge {
+  display: inline-block;
+  position: relative;
+  isolation: isolate;
+  inline-size: 25px;
+  block-size: 20px;
+  margin-inline-start: 10px;
+  margin-block-end: -7px;
+}
+
+.commentHeartBadgeImg {
+  position: absolute;
+  inset-inline-start: 0;
+  inline-size: 15px;
+  block-size: 15px;
+  border-radius: 50%;
+}
+
+.commentHeartBadgeWhite {
+  position: absolute;
+  inset-inline-start: 9px;
+  inset-block-end: 1px;
+  inline-size: 11px;
+  block-size: 11px;
+  z-index: 1;
+}
+
+.commentHeartBadgeRed {
+  position: absolute;
+  color: var(--red-500);
+  inset-inline-start: 10px;
+  inset-block-end: 2px;
+  inline-size: 9px;
+  block-size: 9px;
+  z-index: 2;
+}
+
+.commentReplies {
+  clear: both;
+  margin-inline-start: 30px;
+}
+
+.commentReplyContinuation {
+  position: relative;
+  padding-block: 8px;
+  padding-inline-start: 30px;
+}
+
+.commentReplyContinuation::before {
+  content: '';
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  inline-size: 15px;
+  block-size: 26px;
+  border-block-end: 1px solid var(--comment-parent-thread-line-color, var(--comment-thread-line-color));
+  border-inline-start: 1px solid var(--comment-parent-thread-line-color, var(--comment-thread-line-color));
+  border-end-start-radius: var(--shape-corner-medium);
+  pointer-events: none;
+}
+
+.commentReplyRootToggle {
+  clear: both;
+  padding-inline-start: 60px;
+}
+
+.commentReplyRootToggle::before {
+  inset-inline-start: 30px;
+}
+
+.commentReplyContinuationButton {
+  display: inline-flex;
+  min-block-size: 40px;
+  align-items: center;
+  gap: 12px;
+  padding-block: 8px;
+  padding-inline: 16px;
+  color: var(--title-color);
+  background-color: transparent;
+  border: 0;
+
+  /* Half the minimum height rather than full, so the press morph is smooth. */
+  border-radius: calc(20px * var(--ui-roundness));
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+}
+
+.commentReplyContinuationButton:hover,
+.commentReplyContinuationButton:focus-visible {
+  color: var(--side-nav-hover-text-color);
+  background-color: var(--side-nav-hover-color);
+}
+
+.commentReplyContinuationButton:disabled {
+  cursor: default;
+}
+
+.commentReplyContinuationButton:disabled:hover {
+  color: var(--title-color);
+  background-color: transparent;
+}
+
+.commentReplyContinuationButton:not(:disabled):active {
+  border-radius: var(--shape-corner-medium);
+}
+
+.commentReplyToggleLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.commentReplyOwnerThumbnail {
+  inline-size: 24px;
+  block-size: 24px;
+  border-radius: 50%;
+}
+
+.commentReplyOwnerSeparator {
+  font-weight: normal;
+}
+
+.commentThread:has(> .commentThreadLineToggle:enabled:is(:hover, :focus-visible))::before,
+.commentThreadLineToggle:enabled:is(:hover, :focus-visible) ~ .commentReplyRootToggle::before,
+/* Match only this thread's connectors, excluding deeper reply threads. */
+/* stylelint-disable-next-line selector-max-compound-selectors */
+.commentThread:has(> .commentReplies > .commentReplyBranchRoot > .commentReplyConnectorToggle:is(:hover, :focus-visible))::before {
+  border-color: currentcolor;
+}
+
+.commentReplies:has(> .commentReplyBranchRoot > .commentReplyConnectorToggle:is(:hover, :focus-visible)),
+.commentThreadLineToggle:enabled:is(:hover, :focus-visible) ~ .commentReplies {
+  --comment-parent-thread-line-color: currentcolor;
+}
+
+.phoneCommentCard {
+  padding-inline: 0;
+  display: flex;
+  flex-direction: column;
+  min-block-size: 0;
+  overflow: hidden;
+}
+
+.phoneCommentCard .commentsContentWrapper {
+  flex: 1;
+  min-block-size: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-inline: 16px;
+  box-sizing: border-box;
+}
+
+/* Line the search up with the comments and keep its floating label clear of the header. */
+.phoneCommentCard > .commentTools {
+  flex: 0 0 auto;
+  padding-block: 16px 8px;
+  padding-inline: 16px;
+}
+
+.phoneCommentHeader {
+  flex: 1;
+  block-size: auto;
+  padding: 0;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-inline-size: 0;
+  background: transparent;
+  color: var(--primary-text-color);
+  border: 0;
+}
+
+.phoneCommentHeader h3 {
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+.phoneCommentHeader .commentHeaderTitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.phoneCommentHeader .fullscreenCommentAction {
+  color: inherit;
+}
+
+.phoneCommentHeader .commentFilterTrigger.active {
+  color: var(--on-selected-container-color);
+  background-color: var(--selected-container-color);
+}
+
+.phoneCommentHeader .commentFilterTrigger.active:is(:hover, :focus-visible) {
+  background-color: var(--selected-container-hover-color);
+}
+
+.phoneCommentHeader .fullscreenCommentActions {
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  min-inline-size: 0;
+  gap: 0;
+  margin-inline-start: auto;
+}
+
+.phoneCommentHeader .commentFilterMenuAnchor {
+  position: static;
+}
+
+.phoneCommentHeader :is(.fullscreenSortMenu, .commentFilterMenu) {
+  inline-size: max-content;
+  max-inline-size: calc(100vw - 40px);
+  inset-inline-end: 0;
 }

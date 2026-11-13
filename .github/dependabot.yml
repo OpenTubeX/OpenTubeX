@@ -9,36 +9,125 @@ updates:
       - "PR: dependencies"
     open-pull-requests-limit: 15
     groups:
-      eslint:
+      # Capacitor releases these packages together, so update them in one PR.
+      "capacitor":
         patterns:
-          - "eslint"
-          - "eslint-*"
-          - "@eslint/*"
-          - "vue-eslint-parser"
-          - "neostandard"
-          - "@intlify/eslint-plugin-vue-i18n"
-          - "@stylistic/eslint-plugin"
-          - "globals"
-      stylelint:
+          - "@capacitor/android"
+          - "@capacitor/cli"
+          - "@capacitor/core"
+          - "@capacitor/ios"
+      # Rspack releases its CLI and core together, so update them in one PR.
+      "rspack":
         patterns:
-          - "stylelint"
-          - "stylelint-*"
-          - "postcss"
-          - "postcss-*"
-          - "@double-great/stylelint-a11y"
-      fortawesome:
-        patterns:
-          - "@fortawesome/*"
-      webpack:
-        patterns:
-          - "cssnano"
-          - "css-loader"
-          - "mini-css-extract-plugin"
-          - "sass"
-          - "sass-loader"
-          - "webpack"
-          - "webpack-*"
-          - "*-webpack-plugin"
+          - "@rspack/cli"
+          - "@rspack/core"
+    allow:
+      - dependency-name: "@capacitor-community/keep-awake"
+      - dependency-name: "@capacitor-community/screen-brightness"
+      - dependency-name: "@capacitor/android"
+      - dependency-name: "@capacitor/app"
+      - dependency-name: "@capacitor/browser"
+      - dependency-name: "@capacitor/cli"
+      - dependency-name: "@capacitor/core"
+      - dependency-name: "@capacitor/device"
+      - dependency-name: "@capacitor/filesystem"
+      - dependency-name: "@capacitor/haptics"
+      - dependency-name: "@capacitor/ios"
+      - dependency-name: "@capacitor/local-notifications"
+      - dependency-name: "@capacitor/share"
+      - dependency-name: "@capawesome/capacitor-app-shortcuts"
+      - dependency-name: "@capawesome/capacitor-clipboard"
+      - dependency-name: "@capawesome/capacitor-screen-orientation"
+      - dependency-name: "@capawesome/capacitor-settings-launcher"
+      - dependency-name: "@capawesome/capacitor-volume"
+      - dependency-name: "@fontsource-variable/figtree"
+      - dependency-name: "@fontsource-variable/geist"
+      - dependency-name: "@fontsource-variable/google-sans"
+      - dependency-name: "@fontsource-variable/ibm-plex-sans"
+      - dependency-name: "@fontsource-variable/inter"
+      - dependency-name: "@fontsource-variable/manrope"
+      - dependency-name: "@fontsource-variable/plus-jakarta-sans"
+      - dependency-name: "@fontsource-variable/source-sans-3"
+      - dependency-name: "@hpke/core"
+      - dependency-name: "@hpke/dhkem-x25519"
+      - dependency-name: "@iconify-json/material-symbols"
+      - dependency-name: "@iconify-json/ri"
+      - dependency-name: "@iconify-json/simple-icons"
+      - dependency-name: "@iconify/utils"
+      - dependency-name: "@iconify/vue"
+      - dependency-name: "@jitl/quickjs-wasmfile-release-sync"
+      - dependency-name: "@jsquash/jxl"
+      - dependency-name: "@lezer/html"
+      - dependency-name: "@lezer/markdown"
+      - dependency-name: "@material/material-color-utilities"
+      - dependency-name: "@playwright/test"
+      - dependency-name: "@rspack/cli"
+      - dependency-name: "@rspack/core"
+      - dependency-name: "@rspack/dev-server"
+      - dependency-name: "@sqlite.org/sqlite-wasm"
+      - dependency-name: "@vot.js/core"
+      - dependency-name: "dbus-native"
+      - dependency-name: "eld"
+      - dependency-name: "entities"
+      - dependency-name: "events"
+      - dependency-name: "fflate"
+      - dependency-name: "font-list"
+      - dependency-name: "hast-util-from-html"
+      - dependency-name: "hast-util-raw"
+      - dependency-name: "mdast-util-from-markdown"
+      - dependency-name: "mdast-util-gfm"
+      - dependency-name: "mdast-util-to-hast"
+      - dependency-name: "mdast-util-to-markdown"
+      - dependency-name: "micromark-extension-gfm"
+      - dependency-name: "node-gyp"
+      - dependency-name: "postcss-loader"
+      - dependency-name: "qr-scanner"
+      - dependency-name: "qrcode"
+      - dependency-name: "quickjs-emscripten-core"
+      - dependency-name: "rspack-vue-loader"
+      - dependency-name: "sax"
+      - dependency-name: "srcset"
+      - dependency-name: "typescript"
+      - dependency-name: "unist-util-visit"
+      - dependency-name: "vfile"
+      - dependency-name: "vue-sonner"
+      - dependency-name: "yaml"
+  - package-ecosystem: "gomod"
+    directory: "/_scripts/cast-sender"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "PR: waiting for review"
+      - "PR: dependencies"
+  - package-ecosystem: "gomod"
+    directory: "/_scripts/yt-dlp-http"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "PR: waiting for review"
+      - "PR: dependencies"
+  - package-ecosystem: "docker"
+    directory: "/docker"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "PR: waiting for review"
+      - "PR: dependencies"
+    ignore:
+      # Stay on the Node.js release line that CI builds with.
+      - dependency-name: "node"
+        update-types: ["version-update:semver-major"]
+  - package-ecosystem: "docker-compose"
+    directory: "/docker"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "PR: waiting for review"
+      - "PR: dependencies"
+    ignore:
+      # Existing databases can't start on a new major version without a manual upgrade.
+      - dependency-name: "postgres"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
@@ -53,3 +142,12 @@ updates:
       "github/codeql-action":
         patterns:
           - "github/codeql-action/*"
+  - package-ecosystem: "gradle"
+    directory: "/android"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "PR: waiting for review"
+      - "PR: dependencies"
+  # Capacitor regenerates the Swift manifest from npm packages after installation.
+  # Its local node_modules dependencies cannot be resolved by Dependabot's Swift job.

@@ -1,0 +1,2819 @@
+import { BrowserWindow, app, shell } from 'electron'
+import { randomUUID } from 'crypto'
+import { normalizeTabGroupIcon } from '../../tabGroupIcons.js'
+import { getTabAvatarPath } from '../../tabAvatarRoute.js'
+import { IpcChannels } from '../../constants.js'
+import { getFixedInternalRouteTitle } from '../../internalRoutes.js'
+import {
+  clearTabSession,
+  saveTabSession
+} from './TabSessionStore.js'
+import { tabPreviewStorage } from './TabPreviewStorage.js'
+import { TabPreviewController } from './TabPreviewController.js'
+import { TabRendererBridge } from './TabRendererBridge.js'
+import {
+  buildReorderedTabMap,
+  getGroupedTabInsertIndex,
+  resetTabPlacementOpeners,
+  restoreTabPlacementOpeners
+} from './tabOrder.js'
+import {
+  isTabPreviewDataUrl,
+  normalizeTabPreviewFileName
+} from './tabPreviewCache.js'
+import { isTabActivatable } from './tabAvailability.js'
+import {
+  DEFAULT_NEW_TAB_POSITION,
+  getNewTabSkipSilence,
+  getStoredCloseWindowWithLastTab,
+  getStoredLandingRoute,
+  getStoredNewTabPosition,
+  getStoredRememberTabNavigationHistory,
+  getTabCloseFocus,
+  normalizeNewTabPosition,
+  refreshStoredSkipSilenceSettings,
+  refreshStoredTabCloseFocus,
+  setEnableSkipSilenceByDefault,
+  setShowSkipSilenceButton,
+  setTabCloseFocus
+} from './tabPreferences.js'
+import {
+  cloneRoute,
+  formatDefaultTabTitle,
+  formatWindowTitle,
+  getRouteFromUrl,
+  getVideoIdFromUrl,
+  normalizeRoute,
+  normalizeRoutePath,
+  resolveTabTitle,
+  sanitizeNavigationHistory,
+  stripOneTimeTimestampFromUrl
+} from './tabRoutes.js'
+import { normalizeLegacyTabTitle } from '../../legacyTabTitle.js'
+import { isExternalBrowserUrl, isOpenTubeXUrl } from '../utils.js'
+import { releaseForegroundLock } from '../backgroundExternalLink.js'
+
+/** @type {Map<number, TabManager>} windowId -> TabManager */
+const tabManagers = new Map()
+
+const VALID_TAB_COLORS = new Set(['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink'])
+const MAX_TAB_GROUP_NAME_LENGTH = 80
+const TAB_TRANSFER_MOUNT_TIMEOUT_MS = 8000
+const STARTUP_TAB_MOUNT_DELAY_MS = 50
+const SESSION_SAVE_DELAY_MS = 250
+const RAPID_TAB_CREATION_BATCH_DELAY_MS = 40
+const RAPID_TAB_CREATION_BATCH_MAX_DELAY_MS = 100
+const transferringTabIds = new Set()
+const TAB_LOADING_SOURCE_MOUNT = 'mount'
+const TAB_LOADING_SOURCE_RENDERER = 'renderer'
+
+/**
+ * @typedef {'unloaded' | 'mounting' | 'loaded' | 'unloading'} TabLoadState
+ */
+
+/**
+ * @typedef {object} TabInfo
+ * @property {string} id
+ * @property {string} url
+ * @property {{name?: string | null, path: string, params: Record<string, string>, query: Record<string, string>, hash: string, fullPath: string}} route
+ * @property {string} title
+ * @property {string | null} avatarDataUrl
+ * @property {string | null} avatarFileName
+ * @property {number} lastActiveAt
+ * @property {boolean} isPlaying
+ * @property {boolean} isPinned
+ * @property {boolean} isLoading
+ * @property {boolean} mountDeferred
+ * @property {Set<string>} loadingSources
+ * @property {string | null} color
+ * @property {string | null} previewDataUrl
+ * @property {number} previewCapturedAt
+ * @property {string | null} previewFileName
+ * @property {ReturnType<typeof setTimeout> | null} previewCaptureTimeoutId
+ * @property {Promise<string | null> | null} previewCapturePromise
+ * @property {boolean} skipSilence
+ * @property {boolean} automaticallyUnloaded
+ * @property {TabLoadState} loadState
+ * @property {boolean} preloadInBackground
+ * @property {number} mountRevision
+ * @property {number} refreshKey
+ * @property {number} syncedNavigationRevision
+ * @property {string | null} placementOpenerTabId
+ * @property {NavigationHistoryEntry[] | null} navigationHistory
+ * @property {number} navigationHistoryIndex
+ * @property {boolean} persistNavigationHistory
+ * @property {string | null} groupId
+ */
+
+/** @typedef {import('./tabRoutes.js').NavigationHistoryEntry} NavigationHistoryEntry */
+
+export class TabManager {
+  // Preference entry points for the main process and the tab IPC handlers.
+  static setTabCloseFocus = setTabCloseFocus
+  static refreshStoredTabCloseFocus = refreshStoredTabCloseFocus
+  static setEnableSkipSilenceByDefault = setEnableSkipSilenceByDefault
+  static setShowSkipSilenceButton = setShowSkipSilenceButton
+  static refreshStoredSkipSilenceSettings = refreshStoredSkipSilenceSettings
+  // Called through the class so tests can replace the stored landing page.
+  static getStoredLandingRoute = getStoredLandingRoute
+
+  /**
+   * @param {unknown} value
+   * @returns {string | null}
+   */
+  static normalizeTabColor(value) {
+    return VALID_TAB_COLORS.has(value) ? value : null
+  }
+
+  /**
+   * @param {unknown} value
+   * @returns {string}
+   */
+  static normalizeTabGroupName(value) {
+    return typeof value === 'string'
+      ? value.trim().slice(0, MAX_TAB_GROUP_NAME_LENGTH)
+      : ''
+  }
+
+  /**
+   * Clears persisted tab thumbnails and channel avatars without leaving live
+   * tabs pointing at files that no longer exist. Enabled caches resume after
+   * cleanup and refill as tabs are used.
+   * @returns {Promise<void>}
+   */
+  static async clearTabPreviewCache() {
+    const states = Array.from(tabManagers.values(), manager => ({
+      manager,
+      previewsEnabled: manager.previews.previewsEnabled,
+      avatarsEnabled: manager.previews.avatarsEnabled
+    }))
+
+    try {
+      await Promise.all(states.map(async ({ manager, previewsEnabled, avatarsEnabled }) => {
+        if (previewsEnabled) await manager.previews.setPreviewsEnabled(false)
+        if (avatarsEnabled) await manager.previews.setAvatarsEnabled(false)
+      }))
+
+      await tabPreviewStorage.prune([])
+    } finally {
+      await Promise.all(states.map(async ({ manager, previewsEnabled, avatarsEnabled }) => {
+        if (previewsEnabled) await manager.previews.setPreviewsEnabled(true)
+        if (avatarsEnabled) await manager.previews.setAvatarsEnabled(true)
+      }))
+    }
+  }
+
+  /**
+   * @param {string} url
+   * @returns {string}
+   */
+  static getOpenTubeXRoute(url) {
+    return getRouteFromUrl(url).fullPath
+  }
+
+  /** @returns {IterableIterator<TabManager>} */
+  static getAll() {
+    return tabManagers.values()
+  }
+
+  /**
+   * @param {number} windowId
+   * @returns {TabManager|undefined}
+   */
+  static getForWindow(windowId) {
+    return tabManagers.get(windowId)
+  }
+
+  /**
+   * Resolve the manager from the BrowserWindow's one shared renderer.
+   * @param {import('electron').WebContents} webContents
+   * @returns {TabManager|undefined}
+   */
+  static getFromWebContents(webContents) {
+    const browserWindow = BrowserWindow.fromWebContents(webContents)
+    return browserWindow ? tabManagers.get(browserWindow.id) : undefined
+  }
+
+  /**
+   * @param {string} tabId
+   * @returns {TabManager|undefined}
+   */
+  static getManagerForTabId(tabId) {
+    for (const manager of tabManagers.values()) {
+      if (manager.tabs.has(tabId)) {
+        return manager
+      }
+    }
+    return undefined
+  }
+
+  /**
+   * @returns {Set<string>} video IDs referenced by tabs in any window
+   */
+  static getOpenVideoIds() {
+    const videoIds = new Set()
+    for (const manager of tabManagers.values()) {
+      for (const tab of manager.tabs.values()) {
+        const videoId = getVideoIdFromUrl(tab.url)
+        if (videoId !== null) {
+          videoIds.add(videoId)
+        }
+      }
+    }
+    return videoIds
+  }
+
+  /**
+   * @param {number} excludeWindowId
+   * @returns {Array<{ windowId: number, label: string }>}
+   */
+  static listMoveTargets(excludeWindowId) {
+    const candidates = Array.from(tabManagers.values())
+      .filter(manager => !manager.browserWindow.isDestroyed() && manager.browserWindow.id !== excludeWindowId)
+      .sort((a, b) => a.browserWindow.id - b.browserWindow.id)
+
+    const baseTitle = (manager) => manager.browserWindow.getTitle().trim() || app.getName()
+    const counts = new Map()
+    for (const manager of candidates) {
+      const title = baseTitle(manager)
+      counts.set(title, (counts.get(title) || 0) + 1)
+    }
+
+    const indexByTitle = new Map()
+    return candidates.map(manager => {
+      const title = baseTitle(manager)
+      let label = title
+      if ((counts.get(title) ?? 1) > 1) {
+        const index = (indexByTitle.get(title) || 0) + 1
+        indexByTitle.set(title, index)
+        label = `${title} (${index})`
+      }
+      return { windowId: manager.browserWindow.id, label }
+    })
+  }
+
+  /**
+   * @param {string} tabId
+   * @param {number} targetWindowId
+   */
+  static async moveTabToWindow(tabId, targetWindowId) {
+    if (transferringTabIds.has(tabId)) {
+      return false
+    }
+
+    const source = TabManager.getManagerForTabId(tabId)
+    const target = TabManager.getForWindow(targetWindowId)
+    if (!source || !target || source.browserWindow.id === targetWindowId) {
+      return false
+    }
+    if (source.browserWindow.isDestroyed() || target.browserWindow.isDestroyed()) {
+      return false
+    }
+
+    transferringTabIds.add(tabId)
+    try {
+      const snapshot = source.createTransferSnapshot(tabId)
+      if (!snapshot) {
+        return false
+      }
+
+      const stagedTab = target.adoptTransferredTab(snapshot)
+      const mounted = await target.waitForTabMount(
+        stagedTab.id,
+        stagedTab.mountRevision,
+        TAB_TRANSFER_MOUNT_TIMEOUT_MS
+      )
+
+      if (
+        !mounted ||
+        source.browserWindow.isDestroyed() ||
+        target.browserWindow.isDestroyed() ||
+        !source.tabs.has(tabId)
+      ) {
+        target.removeStagedTransferredTab(tabId)
+        return false
+      }
+
+      const detached = source.detachTabForTransfer(tabId)
+      if (!detached) {
+        target.removeStagedTransferredTab(tabId)
+        return false
+      }
+
+      // The destination mounted from the snapshot taken before the mount wait.
+      // The source tab may have resolved a real title or refreshed its preview in
+      // the meantime, so reconcile the order-independent metadata from the latest
+      // source state before activating. (url/route stay as mounted; isPinned is
+      // fixed by insertion order and must not change here.)
+      stagedTab.title = detached.title
+      stagedTab.avatarDataUrl = detached.avatarDataUrl
+      stagedTab.avatarFileName = detached.avatarFileName
+      stagedTab.color = detached.color
+      stagedTab.previewDataUrl = detached.previewDataUrl
+      stagedTab.previewCapturedAt = detached.previewCapturedAt
+      stagedTab.previewFileName = detached.previewFileName
+      stagedTab.skipSilence = detached.skipSilence === true
+
+      stagedTab.isTransferStaged = false
+      target.activateTab(tabId)
+      target.browserWindow.focus()
+      if (source.tabs.size === 0) {
+        source.browserWindow.close()
+      }
+      return true
+    } catch (error) {
+      console.error('Failed to move tab to another window:', error)
+      target.removeStagedTransferredTab(tabId)
+      return false
+    } finally {
+      transferringTabIds.delete(tabId)
+    }
+  }
+
+  /**
+   * @param {import('electron').BrowserWindow} browserWindow
+   * @param {string} rootAppUrl
+   * @param {string} _preloadPath
+   * @param {string} [sessionId]
+   * @param {(title: string) => void} [setWindowTitle]
+   */
+  constructor(browserWindow, rootAppUrl, _preloadPath, sessionId, setWindowTitle) {
+    this.browserWindow = browserWindow
+    const setTitle = setWindowTitle ?? (title => browserWindow.setTitle(title))
+    this._setWindowTitle = title => setTitle(formatWindowTitle(title))
+    this.rootAppUrl = rootAppUrl
+    this.sessionId = sessionId || randomUUID()
+    /** @type {Map<string, TabInfo>} */
+    this.tabs = new Map()
+    /** @type {string|null} */
+    this.activeTabId = null
+    /** @type {string|null} */
+    this.presentedTabId = null
+    /** @type {string[]} Most recent activation first; background opens are excluded. */
+    this.activationHistory = []
+    this.selectionRevision = 0
+    /** @type {Array<{ id: string, url: string, title?: string, isPinned?: boolean, color?: string | null, groupId?: string | null, history?: object[] | null, historyIndex?: number, tabIndex: number }>} */
+    this.closedTabs = []
+    this.lastClosedWindowSession = null
+    /** @type {Map<string, {id: string, name: string, color: string | null, icon: string, isCollapsed: boolean}>} */
+    this.tabGroups = new Map()
+    this.tabBarScrollPosition = 0
+    this.contextMenuTabId = null
+    /** @type {string[]} */
+    this.contextMenuSelectedTabIds = []
+    /** @type {string[]} */
+    this.selectedTabIds = []
+    this.lastReorderRequestId = null
+    this.contextMenuSurface = 'content'
+    /** @type {string | null} */
+    this.contextMenuTabGroupId = null
+    this.contextMenuSubscriptionFeedTab = null
+    this.contextMenuSubscriptionNewFeedTab = false
+    this.contextMenuSubscriptionFeedHasNewContent = false
+    this.contextMenuTabBarVertical = false
+    this._sessionSaveTimer = null
+    this._lastSessionSaveContent = null
+    this._lastSyncSessionContent = null
+    this._sessionSavePromise = Promise.resolve()
+    this._sessionPersistenceDisabled = false
+    this.sessionUpdatedAt = 0
+    this._pendingTabMountWaiters = new Map()
+    this._deferredCloseTabIds = new Set()
+    this._deferredUnloadTabIds = new Set()
+    // Keep restored background tabs from competing with the selected video
+    // until it starts playing, is deliberately paused, or fails.
+    this._deferredStartupTabIds = new Set()
+    this._startupPriorityTabId = null
+    this._startupPriorityLoadingObserved = false
+    this._startupMountQueue = new Set()
+    this._startupMountTimer = null
+    this._startupMountRunning = false
+    // While a batch runs, state broadcasts and session writes are collapsed into
+    // a single one that is emitted once the batch finishes (see runBatched).
+    this._batchDepth = 0
+    this._batchedBroadcastPending = false
+    this._batchedSessionSavePending = false
+    this._rapidTabCreationBatch = null
+    this.previews = new TabPreviewController(this, () => tabManagers.values())
+    /** Tabs whose navigation history the renderer has already been sent. */
+    this._historyAnnouncedTabIds = new Set()
+    /** @type {Map<string, string | null>} avatar data URL last sent per tab */
+    this._announcedAvatarUrls = new Map()
+    this.bridge = new TabRendererBridge(browserWindow)
+    this._initialPresentationResolved = false
+    this._initialPresentationPromise = new Promise(resolve => {
+      this._resolveInitialPresentation = resolve
+    })
+
+    tabManagers.set(browserWindow.id, this)
+    this._installNavigationHandlers()
+
+    browserWindow.on('closed', () => {
+      clearTimeout(this._sessionSaveTimer)
+      this._sessionSaveTimer = null
+      clearTimeout(this._startupMountTimer)
+      this._startupMountQueue.clear()
+      if (this._rapidTabCreationBatch) {
+        clearTimeout(this._rapidTabCreationBatch.timeoutId)
+        this._rapidTabCreationBatch.resolve()
+        this._rapidTabCreationBatch = null
+      }
+      tabManagers.delete(browserWindow.id)
+      // Preview refreshes can self-reschedule (see _scheduleTabPreviewRefresh), so
+      // any still-pending capture timer would keep firing and pin this manager
+      // alive after the window is gone. Clear them all before releasing it.
+      for (const tab of this.tabs.values()) {
+        this.previews.clearRefresh(tab)
+      }
+      for (const waiters of this._pendingTabMountWaiters.values()) {
+        for (const waiter of waiters) {
+          clearTimeout(waiter.timeoutId)
+          waiter.resolve(false)
+        }
+      }
+      this._pendingTabMountWaiters.clear()
+    })
+  }
+
+  _installNavigationHandlers() {
+    // The preload API stays attached across navigations, so an external page
+    // must never replace the app document. Links are handled by the renderer.
+    this.browserWindow.webContents.on('will-navigate', (event) => {
+      if (!isOpenTubeXUrl(event.url)) event.preventDefault()
+    })
+
+    this.browserWindow.webContents.setWindowOpenHandler((details) => {
+      const parsedUrl = URL.parse(details.url)
+      const currentUrl = this.browserWindow.webContents.getURL()
+
+      if (parsedUrl !== null && isOpenTubeXUrl(currentUrl)) {
+        if (isOpenTubeXUrl(parsedUrl)) {
+          this.createTabWithPreferenceFromOpener({
+            url: details.url,
+            makeActive: true
+          }, this.presentedTabId ?? this.activeTabId).catch(error => {
+            console.error('Failed to open window.open URL in a new tab:', error)
+          })
+        } else if (isExternalBrowserUrl(parsedUrl)) {
+          releaseForegroundLock()
+          shell.openExternal(details.url)
+        }
+      }
+
+      return { action: 'deny' }
+    })
+  }
+
+  markRendererReady() {
+    this.bridge.markReady()
+    this._broadcastStateUpdate()
+  }
+
+  /**
+   * @param {number} [timeoutMs]
+   * @returns {Promise<boolean>}
+   */
+  async waitForInitialPresentation(timeoutMs = 8000) {
+    if (this._initialPresentationResolved) {
+      return true
+    }
+
+    let timeoutId
+    const timedOut = new Promise(resolve => {
+      timeoutId = setTimeout(() => resolve(false), timeoutMs)
+    })
+    const presented = this._initialPresentationPromise.then(() => true)
+    const result = await Promise.race([presented, timedOut])
+    clearTimeout(timeoutId)
+    return result
+  }
+
+  /**
+   * @param {TabInfo} tab
+   * @param {string} title
+   * @returns {boolean}
+   */
+  applyTabTitle(tab, title) {
+    const nextTitle = resolveTabTitle(tab.title, title)
+    if (nextTitle === tab.title) {
+      return false
+    }
+
+    tab.title = nextTitle
+    if (this.activeTabId === tab.id) {
+      this._setWindowTitle(nextTitle)
+    }
+
+    this._broadcastStateUpdate()
+    this._scheduleSessionSave()
+    return true
+  }
+
+  /**
+   * @param {TabInfo} tab
+   * @param {unknown} avatarBytes
+   * @param {string} routePath
+   * @returns {Promise<boolean>}
+   */
+  applyTabAvatar(tab, avatarBytes, routePath) {
+    return this.previews.applyAvatar(tab, avatarBytes, routePath)
+  }
+
+  /**
+   * @param {boolean} enabled
+   * @returns {Promise<void>}
+   */
+  setTabAvatarsEnabled(enabled) {
+    return this.previews.setAvatarsEnabled(enabled)
+  }
+
+  /**
+   * @param {string | undefined} url
+   * @param {string | undefined} route
+   * @param {object | undefined} query
+   * @returns {{url: string, route: ReturnType<typeof normalizeRoute>}}
+   */
+  _resolveTabLocation(url, route, query) {
+    if (url) {
+      return {
+        url,
+        route: getRouteFromUrl(url)
+      }
+    }
+
+    const normalizedRoute = normalizeRoute({
+      path: normalizeRoutePath(route || '/'),
+      query
+    })
+
+    return {
+      url: this._urlFromRoute(normalizedRoute),
+      route: normalizedRoute
+    }
+  }
+
+  /**
+   * @param {ReturnType<typeof normalizeRoute>} route
+   * @returns {string}
+   */
+  _urlFromRoute(route) {
+    return `${this.rootAppUrl}#${route.fullPath}`
+  }
+
+  /**
+   * @param {string} tabId
+   * @param {TabInfo} tabInfo
+   * @param {number} preferredIndex
+   */
+  _insertTabEntry(tabId, tabInfo, preferredIndex) {
+    if (!tabInfo.isPinned && preferredIndex >= this.tabs.size) {
+      this.tabs.set(tabId, tabInfo)
+      return
+    }
+    const entries = Array.from(this.tabs.entries())
+    const pinnedCount = entries.filter(([, tab]) => tab.isPinned).length
+    let insertIndex = Math.max(0, Math.min(preferredIndex, entries.length))
+
+    if (tabInfo.isPinned) {
+      insertIndex = Math.min(insertIndex, pinnedCount)
+    } else {
+      insertIndex = Math.max(insertIndex, pinnedCount)
+    }
+
+    entries.splice(insertIndex, 0, [tabId, tabInfo])
+    this.tabs = new Map(entries)
+  }
+
+  /**
+   * @param {object} [options]
+   * @returns {TabInfo}
+   */
+  createTab(options = {}) {
+    const {
+      id: requestedId,
+      url,
+      route,
+      query,
+      title,
+      avatarDataUrl = null,
+      avatarFileName = null,
+      isPinned = false,
+      color = null,
+      previewDataUrl = null,
+      previewCapturedAt = 0,
+      previewFileName = null,
+      makeActive = true,
+      openPosition = DEFAULT_NEW_TAB_POSITION,
+      lazyLoad = false,
+      isUnloaded = false,
+      automaticallyUnloaded = false,
+      preloadInBackground = false,
+      history = null,
+      historyIndex = null,
+      persistHistory = history != null,
+      skipSilence = getNewTabSkipSilence(),
+      groupId = null,
+      openerTabId = this.activeTabId,
+      _preferredIndex = null,
+      _deferUpdates = false,
+      _deferMount = false
+    } = options
+
+    // Only trusted callers (session restore, transfers) supply an id; renderer
+    // options are stripped upstream. Validate defensively and never reuse an id
+    // that already exists, which would silently drop a tab from the Map.
+    let id = typeof requestedId === 'string' && requestedId.length > 0 ? requestedId : randomUUID()
+    while (this.tabs.has(id)) {
+      id = randomUUID()
+    }
+
+    const location = this._resolveTabLocation(url, route, query)
+    const startsUnloaded = (Boolean(lazyLoad) || Boolean(isUnloaded)) && !makeActive && !preloadInBackground
+    const shouldMount = !startsUnloaded
+    const restoredPreviewDataUrl = isTabPreviewDataUrl(previewDataUrl)
+      ? previewDataUrl
+      : null
+    const restoredPreviewFileName = normalizeTabPreviewFileName(previewFileName)
+    const restoredAvatarFileName = normalizeTabPreviewFileName(avatarFileName)
+    const restoredPreviewCapturedAt = (restoredPreviewDataUrl != null || restoredPreviewFileName != null) && Number.isFinite(previewCapturedAt)
+      ? previewCapturedAt
+      : 0
+    const restoredNavigationHistory = sanitizeNavigationHistory(history, historyIndex)
+
+    /** @type {TabInfo} */
+    const tabInfo = {
+      id,
+      url: location.url,
+      route: location.route,
+      title: title || formatDefaultTabTitle(location.url),
+      avatarDataUrl: isTabPreviewDataUrl(avatarDataUrl) ? avatarDataUrl : null,
+      avatarFileName: restoredAvatarFileName,
+      lastActiveAt: Date.now(),
+      isPlaying: false,
+      isPinned: Boolean(isPinned),
+      isLoading: shouldMount && getFixedInternalRouteTitle(location.route.path) === null,
+      loadingSources: new Set(shouldMount ? [TAB_LOADING_SOURCE_MOUNT] : []),
+      color: TabManager.normalizeTabColor(color),
+      previewDataUrl: restoredPreviewDataUrl,
+      previewCapturedAt: restoredPreviewCapturedAt,
+      previewFileName: restoredPreviewFileName,
+      previewCaptureTimeoutId: null,
+      previewCapturePromise: null,
+      skipSilence: skipSilence === true,
+      loadState: startsUnloaded ? 'unloaded' : 'mounting',
+      automaticallyUnloaded: startsUnloaded && automaticallyUnloaded === true,
+      mountDeferred: shouldMount && !makeActive && _deferMount,
+      preloadInBackground: Boolean(preloadInBackground),
+      mountRevision: shouldMount ? 1 : 0,
+      refreshKey: 0,
+      syncedNavigationRevision: 0,
+      placementOpenerTabId: this.tabs.has(openerTabId) ? openerTabId : null,
+      navigationHistory: restoredNavigationHistory?.history ?? null,
+      navigationHistoryIndex: restoredNavigationHistory?.historyIndex ?? 0,
+      persistNavigationHistory: Boolean(persistHistory) && restoredNavigationHistory != null,
+      groupId: typeof groupId === 'string' && this.tabGroups.has(groupId) ? groupId : null
+    }
+
+    const hasPreferredIndex = Number.isInteger(_preferredIndex) && _preferredIndex >= 0
+    let preferredIndex = hasPreferredIndex ? _preferredIndex : this.tabs.size
+    if (!hasPreferredIndex) {
+      const normalizedOpenPosition = normalizeNewTabPosition(openPosition)
+      if (normalizedOpenPosition === 'afterCurrent' && this.activeTabId != null) {
+        const activeTabIndex = Array.from(this.tabs.keys()).indexOf(this.activeTabId)
+        if (activeTabIndex !== -1) {
+          preferredIndex = activeTabIndex + 1
+        }
+      } else if (normalizedOpenPosition === 'afterCurrentInOrder' && tabInfo.placementOpenerTabId != null) {
+        preferredIndex = getGroupedTabInsertIndex(
+          this.tabs,
+          tabInfo.placementOpenerTabId,
+          tabInfo.isPinned
+        ) ?? preferredIndex
+      }
+    }
+
+    this._insertTabEntry(id, tabInfo, preferredIndex)
+    if (tabInfo.mountDeferred) this._startupMountQueue.add(id)
+
+    if (makeActive) {
+      // Select immediately; the renderer keeps the outgoing content visible
+      // until this tab mounts. Mount completion must not steal a later selection.
+      this.activateTab(id)
+    } else if (!_deferUpdates) {
+      this._broadcastStateUpdate()
+      this._scheduleSessionSave()
+    }
+
+    return tabInfo
+  }
+
+  /**
+   * @param {object} [options]
+   * @returns {Promise<TabInfo>}
+   */
+  async createTabWithPreference(options = {}) {
+    const openPosition = options.openPosition == null
+      ? await getStoredNewTabPosition()
+      : normalizeNewTabPosition(options.openPosition)
+    const tabOptions = options.url || options.route
+      ? options
+      : { ...options, route: await TabManager.getStoredLandingRoute() }
+
+    const canBatchRapidCreation = this.activeTabId != null && tabOptions.makeActive === false
+    const deferUpdates = canBatchRapidCreation && this._rapidTabCreationBatch != null
+    const tab = this.createTab({ ...tabOptions, openPosition, _deferUpdates: deferUpdates })
+    if (canBatchRapidCreation) {
+      const flush = this._scheduleRapidTabCreationFlush(deferUpdates)
+      if (deferUpdates) await flush
+    }
+    return tab
+  }
+
+  /**
+   * Publish the first background tab in a burst immediately, then coalesce
+   * additional creations into one renderer snapshot and session write. The
+   * maximum delay keeps continuous creation from postponing updates indefinitely.
+   * @param {boolean} updatesDeferred
+   * @returns {Promise<void>}
+   */
+  _scheduleRapidTabCreationFlush(updatesDeferred) {
+    if (!this._rapidTabCreationBatch) {
+      /** @type {(value?: void | PromiseLike<void>) => void} */
+      let resolveBatch
+      const promise = new Promise(resolve => {
+        resolveBatch = resolve
+      })
+      this._rapidTabCreationBatch = {
+        startedAt: Date.now(),
+        hasDeferredUpdates: false,
+        timeoutId: null,
+        promise,
+        resolve: resolveBatch
+      }
+    }
+
+    const batch = this._rapidTabCreationBatch
+    batch.hasDeferredUpdates ||= updatesDeferred
+    clearTimeout(batch.timeoutId)
+    const elapsed = Date.now() - batch.startedAt
+    const delay = Math.max(0, Math.min(
+      RAPID_TAB_CREATION_BATCH_DELAY_MS,
+      RAPID_TAB_CREATION_BATCH_MAX_DELAY_MS - elapsed
+    ))
+    batch.timeoutId = setTimeout(() => {
+      if (this._rapidTabCreationBatch !== batch) return
+
+      this._rapidTabCreationBatch = null
+      if (batch.hasDeferredUpdates) {
+        this._broadcastStateUpdate()
+        this._scheduleSessionSave()
+      }
+      batch.resolve()
+    }, delay)
+
+    return batch.promise
+  }
+
+  /**
+   * @param {object} [options]
+   * @param {string | undefined | null} [openerTabId=this.activeTabId]
+   * @returns {Promise<TabInfo>}
+   */
+  async createTabWithPreferenceFromOpener(options = {}, openerTabId = this.activeTabId) {
+    return this.createTabWithPreference(this._withOpenerTab(options, openerTabId))
+  }
+
+  /**
+   * @param {object} options
+   * @param {string | undefined | null} openerTabId
+   * @returns {object}
+   */
+  _withOpenerTab(options, openerTabId) {
+    if (Object.hasOwn(options, 'color')) {
+      return { ...options, openerTabId }
+    }
+
+    const openerColor = TabManager.normalizeTabColor(this.tabs.get(openerTabId)?.color)
+    return {
+      ...options,
+      openerTabId,
+      ...(openerColor != null && { color: openerColor })
+    }
+  }
+
+  /**
+   * @param {TabInfo | undefined} tab
+   * @returns {boolean}
+   */
+  _isTabActivatable(tab) {
+    return isTabActivatable(
+      tab,
+      this._deferredCloseTabIds,
+      this._deferredUnloadTabIds
+    )
+  }
+
+  /**
+   * @param {string} tabId
+   */
+  activateTab(tabId) {
+    const tab = this.tabs.get(tabId)
+    if (!this._isTabActivatable(tab)) return
+
+    const previousActiveId = this.activeTabId
+    if (
+      previousActiveId === tabId &&
+      tab.loadState !== 'unloaded' &&
+      !tab.mountDeferred
+    ) {
+      return
+    }
+
+    tab.mountDeferred = false
+    this._startupMountQueue.delete(tabId)
+
+    const outgoingTabId = this.presentedTabId ?? previousActiveId
+    if (outgoingTabId && outgoingTabId !== tabId) {
+      this.bridge.send(IpcChannels.TABS_EXIT_FULLSCREEN, outgoingTabId)
+    }
+
+    if (tab.loadState === 'unloaded') {
+      this._deferredStartupTabIds.delete(tabId)
+      tab.automaticallyUnloaded = false
+      tab.loadState = 'mounting'
+      tab.mountRevision += 1
+      this._setTabLoadingSource(tab, TAB_LOADING_SOURCE_MOUNT, true)
+    }
+
+    const shouldResumeDeferredStartupTabs =
+      this._deferredStartupTabIds.size > 0 &&
+      previousActiveId !== tabId &&
+      tab.loadState === 'loaded'
+    if (
+      this._deferredStartupTabIds.size > 0 &&
+      previousActiveId !== tabId &&
+      !shouldResumeDeferredStartupTabs
+    ) {
+      this._startupPriorityTabId = tabId
+      this._startupPriorityLoadingObserved = false
+    }
+
+    tab.preloadInBackground = false
+    this.activationHistory = [tabId, ...this.activationHistory.filter(id => id !== tabId && this.tabs.has(id))]
+    tab.lastActiveAt = Date.now()
+    this.activeTabId = tabId
+    this.selectionRevision += 1
+    this._setWindowTitle(tab.title)
+    this.bridge.send(IpcChannels.TABS_ACTIVE_CHANGED, tabId, this.selectionRevision)
+    if (shouldResumeDeferredStartupTabs) {
+      this._resumeDeferredStartupTabs()
+    }
+    this._broadcastStateUpdate()
+    this._scheduleSessionSave()
+  }
+
+  /**
+   * @param {string} tabId
+   * @param {number} mountRevision
+   * @param {number} [timeoutMs]
+   * @returns {Promise<boolean>}
+   */
+  waitForTabMount(tabId, mountRevision, timeoutMs = TAB_TRANSFER_MOUNT_TIMEOUT_MS) {
+    const tab = this.tabs.get(tabId)
+    if (!tab || tab.mountRevision !== mountRevision) {
+      return Promise.resolve(false)
+    }
+    if (tab.loadState === 'loaded') {
+      return Promise.resolve(true)
+    }
+
+    return new Promise(resolve => {
+      const waiter = {
+        mountRevision,
+        resolve,
+        timeoutId: setTimeout(() => {
+          const waiters = this._pendingTabMountWaiters.get(tabId)
+          waiters?.delete(waiter)
+          if (waiters?.size === 0) {
+            this._pendingTabMountWaiters.delete(tabId)
+          }
+          resolve(false)
+        }, timeoutMs)
+      }
+
+      let waiters = this._pendingTabMountWaiters.get(tabId)
+      if (!waiters) {
+        waiters = new Set()
+        this._pendingTabMountWaiters.set(tabId, waiters)
+      }
+      waiters.add(waiter)
+    })
+  }
+
+  _resolveTabMountWaiters(tabId, mountRevision, succeeded) {
+    const waiters = this._pendingTabMountWaiters.get(tabId)
+    if (!waiters) {
+      return
+    }
+
+    for (const waiter of waiters) {
+      if (waiter.mountRevision <= mountRevision) {
+        waiters.delete(waiter)
+        clearTimeout(waiter.timeoutId)
+        waiter.resolve(succeeded && waiter.mountRevision === mountRevision)
+      }
+    }
+    if (waiters.size === 0) {
+      this._pendingTabMountWaiters.delete(tabId)
+    }
+  }
+
+  /**
+   * @param {string} tabId
+   * @param {number} mountRevision
+   */
+  markTabMounted(tabId, mountRevision) {
+    const tab = this.tabs.get(tabId)
+    if (!tab || mountRevision !== tab.mountRevision) {
+      this._resolveTabMountWaiters(tabId, mountRevision, false)
+      return
+    }
+
+    tab.loadState = 'loaded'
+    tab.preloadInBackground = false
+    this._setTabLoadingSource(tab, TAB_LOADING_SOURCE_MOUNT, false)
+    this._resolveTabMountWaiters(tabId, mountRevision, true)
+
+    this._broadcastStateUpdate()
+  }
+
+  /**
+   * @param {string} tabId
+   * @param {number} mountRevision
+   */
+  markTabMountFailed(tabId, mountRevision) {
+    const tab = this.tabs.get(tabId)
+    if (!tab || mountRevision !== tab.mountRevision) {
+      this._resolveTabMountWaiters(tabId, mountRevision, false)
+      return
+    }
+
+    tab.loadState = 'unloaded'
+    tab.preloadInBackground = false
+    this._setTabLoadingSource(tab, TAB_LOADING_SOURCE_MOUNT, false)
+    this._resolveTabMountWaiters(tabId, mountRevision, false)
+    if (tabId === this._startupPriorityTabId) {
+      this._resumeDeferredStartupTabs()
+    }
+
+    // The failed tab was activated as the replacement for one or more tabs whose
+    // close/unload was deferred until it presented. Since it will never present,
+    // markTabPresented would never run and those tabs would stay stranded in the
+    // bar/store forever. Finalize them now. The deferred tab is still the
+    // presentedTabId, so clear it first to avoid closeTab/unloadTab re-deferring it.
+    if (this.activeTabId === tabId) {
+      if (
+        this.presentedTabId != null &&
+        (this._deferredCloseTabIds.has(this.presentedTabId) ||
+          this._deferredUnloadTabIds.has(this.presentedTabId))
+      ) {
+        this.presentedTabId = null
+      }
+      this._scheduleStartupMount()
+      this._finalizeDeferredDisposals(tabId)
+    }
+
+    this._broadcastStateUpdate()
+    this._scheduleSessionSave()
+  }
+
+  /**
+   * @param {string} tabId
+   * @param {number} selectionRevision
+   */
+  markTabPresented(tabId, selectionRevision) {
+    if (
+      selectionRevision !== this.selectionRevision ||
+      tabId !== this.activeTabId ||
+      !this.tabs.has(tabId)
+    ) {
+      return
+    }
+
+    this.presentedTabId = tabId
+    if (tabId === this._startupPriorityTabId && !this.tabs.get(tabId).route.path.startsWith('/watch/')) {
+      this._resumeDeferredStartupTabs()
+    }
+    if (!this._initialPresentationResolved) {
+      this._initialPresentationResolved = true
+      this._resolveInitialPresentation()
+    }
+
+    this._scheduleStartupMount()
+    this._finalizeDeferredDisposals(tabId)
+
+    const tab = this.tabs.get(tabId)
+    this.previews.scheduleRefresh(tab)
+    this._broadcastStateUpdate()
+  }
+
+  /**
+   * Finalize any tab closes/unloads that were deferred until a new tab was
+   * presented, skipping the tab that should remain.
+   * @param {string} keepTabId
+   */
+  _finalizeDeferredDisposals(keepTabId) {
+    for (const deferredTabId of [...this._deferredCloseTabIds]) {
+      if (deferredTabId !== keepTabId) {
+        this._deferredCloseTabIds.delete(deferredTabId)
+        this.closeTab(deferredTabId)
+      }
+    }
+    for (const deferredTabId of [...this._deferredUnloadTabIds]) {
+      if (deferredTabId !== keepTabId) {
+        this._deferredUnloadTabIds.delete(deferredTabId)
+        this.unloadTab(deferredTabId).catch(error => {
+          console.error('Failed to finish deferred tab unload:', error)
+        })
+      }
+    }
+  }
+
+  /**
+   * @param {string} tabId
+   * @param {boolean} [loadedOnly]
+   * @param {Set<string> | null} [excludedTabIds] tabs that are about to be closed
+   * or unloaded as part of the same bulk operation
+   * @returns {string | null}
+   */
+  _getNeighborTabId(tabId, loadedOnly = false, excludedTabIds = null) {
+    const orderedTabIds = Array.from(this.tabs.keys())
+    const tabIndex = orderedTabIds.indexOf(tabId)
+    if (tabIndex === -1) {
+      return null
+    }
+
+    const previousTabIds = orderedTabIds.slice(0, tabIndex).reverse()
+    const nextTabIds = orderedTabIds.slice(tabIndex + 1)
+    // A tab already queued for deferred close/unload must never be selected as
+    // the replacement, otherwise a rapid second close/unload would leave the
+    // window with no selectable tab.
+    const isSelectable = candidateId =>
+      excludedTabIds?.has(candidateId) !== true &&
+      this.tabs.get(candidateId)?.isTransferStaged !== true &&
+      (!loadedOnly || this.tabs.get(candidateId)?.loadState === 'loaded') &&
+      !this._deferredCloseTabIds.has(candidateId) &&
+      !this._deferredUnloadTabIds.has(candidateId)
+
+    const tabCloseFocus = getTabCloseFocus()
+    if (tabCloseFocus === 'lastActiveTab') {
+      const recentTabId = this.activationHistory.find(id => id !== tabId && this.tabs.has(id) && isSelectable(id))
+      return recentTabId ?? nextTabIds.find(isSelectable) ?? previousTabIds.find(isSelectable) ?? null
+    }
+
+    const [preferredTabIds, fallbackTabIds] = tabCloseFocus === 'nextTab'
+      ? [nextTabIds, previousTabIds]
+      : [previousTabIds, nextTabIds]
+    const preferredTabId = preferredTabIds.find(isSelectable)
+    const fallbackTabId = fallbackTabIds.find(isSelectable)
+
+    // Prefer an already-loaded tab on the other side over mounting an unloaded
+    // tab on the configured side.
+    if (
+      preferredTabId != null &&
+      fallbackTabId != null &&
+      this.tabs.get(preferredTabId)?.loadState !== 'loaded' &&
+      this.tabs.get(fallbackTabId)?.loadState === 'loaded'
+    ) {
+      return fallbackTabId
+    }
+
+    return preferredTabId ?? fallbackTabId ?? null
+  }
+
+  _prepareNeighborActivation(tabId) {
+    const tab = this.tabs.get(tabId)
+    if (!tab || tab.isTransferStaged === true) {
+      return false
+    }
+
+    return true
+  }
+
+  /**
+   * Return the tab's position in the live and recently-closed tabs combined.
+   * Closed positions keep later closes from collapsing into the same index.
+   * @param {string} tabId
+   * @returns {number}
+   */
+  _getClosedTabIndex(tabId) {
+    let tabIndex = Array.from(this.tabs.keys()).indexOf(tabId)
+    if (tabIndex < 0) return tabIndex
+
+    const closedTabIndexes = this.closedTabs
+      .map(tab => tab.tabIndex)
+      .sort((a, b) => a - b)
+    for (const closedTabIndex of closedTabIndexes) {
+      if (closedTabIndex <= tabIndex) tabIndex += 1
+    }
+    return tabIndex
+  }
+
+  /**
+   * Convert a retained logical position back into the current live tab order.
+   * @param {{ tabIndex: number }} closedTab
+   * @returns {number}
+   */
+  _getClosedTabRestoreIndex(closedTab) {
+    const earlierClosedTabCount = this.closedTabs.reduce((count, tab) => {
+      return count + Number(tab.tabIndex < closedTab.tabIndex)
+    }, 0)
+    return closedTab.tabIndex - earlierClosedTabCount
+  }
+
+  /**
+   * @param {string} tabId
+   * @returns {boolean}
+   */
+  closeTab(tabId) {
+    const tab = this.tabs.get(tabId)
+    if (!tab) {
+      return this.tabs.size > 0
+    }
+    if (tab.isTransferStaged === true) {
+      return true
+    }
+
+    // Keep the currently composited subtree alive until its replacement has
+    // mounted and been presented. Removing it immediately would expose the
+    // BrowserWindow background during lazy activation.
+    if (this.presentedTabId === tabId && this.tabs.size > 1) {
+      if (this._deferredCloseTabIds.has(tabId)) {
+        return true
+      }
+
+      const nextTabId = this.activeTabId !== tabId && this.tabs.has(this.activeTabId)
+        ? this.activeTabId
+        : this._getNeighborTabId(tabId)
+      if (nextTabId) {
+        this._deferredCloseTabIds.add(tabId)
+        this.bridge.send(IpcChannels.TABS_EXIT_FULLSCREEN, tabId)
+        if (this.activeTabId === tabId) {
+          this.activeTabId = null
+          if (this._prepareNeighborActivation(nextTabId)) {
+            this.activateTab(nextTabId)
+          }
+        }
+        this._scheduleSessionSave()
+        return true
+      }
+      return true
+    }
+
+    if (this.tabs.size === 1) {
+      this.lastClosedWindowSession = structuredClone(this.getSessionData())
+    }
+
+    if (this.activeTabId === tabId) {
+      if (this.browserWindow.isFullScreen()) {
+        this.browserWindow.setFullScreen(false)
+      }
+      this.bridge.send(IpcChannels.TABS_EXIT_FULLSCREEN, tabId)
+    }
+
+    this.previews.clearRefresh(tab)
+    this.closedTabs.push({
+      id: randomUUID(),
+      url: tab.url,
+      title: tab.title,
+      isPinned: tab.isPinned,
+      color: tab.color,
+      groupId: tab.groupId,
+      history: tab.navigationHistory,
+      historyIndex: tab.navigationHistoryIndex,
+      tabIndex: this._getClosedTabIndex(tabId)
+    })
+    if (this.closedTabs.length > 10) {
+      const removedClosedTab = this.closedTabs.shift()
+      for (const closedTab of this.closedTabs) {
+        if (closedTab.tabIndex > removedClosedTab.tabIndex) closedTab.tabIndex -= 1
+      }
+    }
+
+    const nextTabId = this.activeTabId === tabId
+      ? this._getNeighborTabId(tabId)
+      : null
+
+    this.tabs.delete(tabId)
+    this.selectedTabIds = this.selectedTabIds.filter(selectedTabId => selectedTabId !== tabId)
+    this._deferredCloseTabIds.delete(tabId)
+    this._deferredUnloadTabIds.delete(tabId)
+    this._deferredStartupTabIds.delete(tabId)
+    this._resolveTabMountWaiters(tabId, Number.MAX_SAFE_INTEGER, false)
+    if (this.contextMenuTabId === tabId) {
+      this.contextMenuTabId = null
+    }
+    if (this.presentedTabId === tabId) {
+      this.presentedTabId = null
+    }
+
+    tabPreviewStorage.remove(tab.previewFileName).catch(error => {
+      console.error('Failed to delete closed tab preview:', error)
+    })
+    this.previews.releaseAvatarFile(tab.avatarFileName).catch(error => {
+      console.error('Failed to delete closed tab avatar:', error)
+    })
+
+    if (nextTabId) {
+      this.activeTabId = null
+      if (this._prepareNeighborActivation(nextTabId)) {
+        this.activateTab(nextTabId)
+      }
+    } else if (this.activeTabId === tabId) {
+      this.activeTabId = null
+      this.selectionRevision += 1
+      this._broadcastStateUpdate()
+      this._scheduleSessionSave()
+    } else {
+      this._broadcastStateUpdate()
+      this._scheduleSessionSave()
+    }
+
+    return this.tabs.size > 0
+  }
+
+  /**
+   * @param {number} count how many of the window's tabs are closing
+   * @returns {Promise<boolean>} whether closing them also closes the window
+   */
+  async closingTabsClosesWindow(count) {
+    return count >= this.tabs.size && await getStoredCloseWindowWithLastTab()
+  }
+
+  /**
+   * Close several tabs at once. Activating the surviving replacement up front
+   * keeps the tabs that are on their way out from being mounted just to be torn
+   * down again, and the batching collapses the per-tab renderer updates and
+   * session writes into one.
+   * @param {string[]} tabIds
+   * @returns {Promise<boolean>} whether the window still has tabs
+   */
+  async closeTabs(tabIds) {
+    const closingTabIds = tabIds.filter(tabId => this.tabs.has(tabId))
+    if (closingTabIds.length === 0) {
+      return this.tabs.size > 0
+    }
+    // Tabs that an earlier close left waiting for their replacement to present
+    // are already gone for the user.
+    const closesEveryTab = () => Array.from(this.tabs.keys()).every(tabId => (
+      closingTabIds.includes(tabId) || this._deferredCloseTabIds.has(tabId)
+    ))
+    if (closesEveryTab() && !await getStoredCloseWindowWithLastTab()) {
+      const route = await TabManager.getStoredLandingRoute()
+      // Keep the window open with a new tab in place of the closed ones, unless
+      // a concurrent close already added one while this one waited.
+      if (closesEveryTab()) this.createTab({ route, makeActive: true })
+    }
+    if (closingTabIds.length === 1) {
+      return this.closeTab(closingTabIds[0])
+    }
+
+    const windowSession = closingTabIds.length === this.tabs.size
+      ? structuredClone(this.getSessionData())
+      : null
+    return await this.runBatched(() => {
+      const closingTabIdSet = new Set(closingTabIds)
+      if (this.activeTabId != null && closingTabIdSet.has(this.activeTabId)) {
+        const nextTabId = this._getNeighborTabId(this.activeTabId, false, closingTabIdSet)
+        if (nextTabId != null && this._prepareNeighborActivation(nextTabId)) {
+          this.activateTab(nextTabId)
+        }
+      }
+
+      // Close the presented tab last so its replacement can be shown before the
+      // composited subtree is removed.
+      closingTabIds.sort((a, b) => Number(a === this.presentedTabId) - Number(b === this.presentedTabId))
+      let hasRemainingTabs = this.tabs.size > 0
+      for (const tabId of closingTabIds) {
+        hasRemainingTabs = this.closeTab(tabId)
+      }
+      if (!hasRemainingTabs && windowSession) this.lastClosedWindowSession = windowSession
+      return hasRemainingTabs
+    })
+  }
+
+  /**
+   * Frees renderer memory before it runs out by unloading a percentage of the oldest
+   * loaded background tabs. The selected tab, playing tabs and the tabs the
+   * renderer still needs stay loaded.
+   * @param {number} [percentage]
+   * @param {string[]} [keptTabIds] tabs whose unloading would interrupt the user
+   * @returns {Promise<number>} The number of unloaded tabs
+   */
+  async unloadLeastRecentlyUsedTabs(percentage = 50, keptTabIds = []) {
+    if (!Number.isFinite(percentage) || percentage < 10 || percentage > 100) percentage = 50
+    const kept = new Set(Array.isArray(keptTabIds) ? keptTabIds : [])
+    const candidates = [...this.tabs.values()]
+      .filter(tab => tab.loadState === 'loaded' && !tab.isPlaying && !kept.has(tab.id) &&
+        tab.id !== this.activeTabId && tab.id !== this.presentedTabId)
+      .sort((a, b) => a.lastActiveAt - b.lastActiveAt)
+    const tabIds = candidates.slice(0, Math.ceil(candidates.length * percentage / 100)).map(tab => tab.id)
+    await this.unloadTabs(tabIds, true)
+    return tabIds.filter(tabId => this.tabs.get(tabId)?.loadState === 'unloaded').length
+  }
+
+  /**
+   * A crashed renderer lost every page, so only the selected tab should mount
+   * again when the window reloads. Otherwise an out-of-memory crash would
+   * restore all the pages that filled the memory.
+   * @returns {Promise<void>}
+   */
+  async unloadBackgroundTabs() {
+    // A crash during a tab switch leaves the previous tab presented. Its page
+    // is gone too, so unload it right away instead of deferring it.
+    if (this.presentedTabId !== this.activeTabId) {
+      this.presentedTabId = null
+    }
+    await this.unloadTabs([...this.tabs.values()]
+      .filter(tab => tab.loadState !== 'unloaded' && tab.id !== this.activeTabId)
+      .map(tab => tab.id))
+  }
+
+  /**
+   * Unload several tabs at once, see {@link closeTabs}.
+   * @param {string[]} tabIds
+   * @param {boolean} [automaticallyUnloaded]
+   * @returns {Promise<void>}
+   */
+  async unloadTabs(tabIds, automaticallyUnloaded = false) {
+    const unloadingTabIds = tabIds.filter(tabId => this.tabs.has(tabId))
+    if (unloadingTabIds.length === 0) {
+      return
+    }
+
+    const presentedTabId = this.presentedTabId
+    const batchedTabIds = unloadingTabIds.filter(tabId => tabId !== presentedTabId)
+
+    await this.runBatched(async () => {
+      const unloadingTabIdSet = new Set(unloadingTabIds)
+      if (this.activeTabId != null && unloadingTabIdSet.has(this.activeTabId)) {
+        const nextTabId = this._getNeighborTabId(this.activeTabId, true, unloadingTabIdSet) ??
+          this._getNeighborTabId(this.activeTabId, false, unloadingTabIdSet)
+        if (nextTabId != null && this._prepareNeighborActivation(nextTabId)) {
+          this.activateTab(nextTabId)
+        }
+      }
+
+      for (const tabId of batchedTabIds) {
+        await this.unloadTab(tabId, automaticallyUnloaded).catch(error => {
+          console.error('Failed to unload tab:', error)
+        })
+      }
+    })
+
+    // The presented tab captures a fresh preview before it goes. Run it outside
+    // the manager-wide batch so the capture cannot hold back unrelated updates.
+    if (presentedTabId != null && unloadingTabIds.includes(presentedTabId)) {
+      await this.unloadTab(presentedTabId, automaticallyUnloaded).catch(error => {
+        console.error('Failed to unload tab:', error)
+      })
+    }
+  }
+
+  /**
+   * @param {string} tabId
+   * @returns {TabInfo|null}
+   */
+  duplicateTab(tabId) {
+    const tab = this.tabs.get(tabId)
+    if (!tab) return null
+
+    return this.createTab({
+      url: tab.url,
+      title: tab.title,
+      avatarDataUrl: tab.avatarDataUrl,
+      isPinned: tab.isPinned,
+      color: tab.color,
+      groupId: tab.groupId,
+      makeActive: true
+    })
+  }
+
+  /**
+   * @param {string | null} [closedTabId]
+   * @returns {Promise<TabInfo|null>}
+   */
+  async restoreClosedTab(closedTabId = null) {
+    const index = closedTabId == null
+      ? this.closedTabs.length - 1
+      : this.closedTabs.findIndex(tab => tab.id === closedTabId)
+    if (index < 0) return null
+
+    const [closedTab] = this.closedTabs.splice(index, 1)
+    if (!closedTab) return null
+    const restoreIndex = this._getClosedTabRestoreIndex(closedTab)
+
+    return this.createTab({
+      url: closedTab.url,
+      title: closedTab.title,
+      isPinned: closedTab.isPinned,
+      color: closedTab.color,
+      groupId: closedTab.groupId,
+      history: closedTab.history,
+      historyIndex: closedTab.historyIndex,
+      persistHistory: await getStoredRememberTabNavigationHistory(),
+      _preferredIndex: restoreIndex,
+      makeActive: true
+    })
+  }
+
+  clearClosedTabs() {
+    if (this.closedTabs.length === 0) return false
+    this.closedTabs = []
+    this._broadcastStateUpdate()
+    return true
+  }
+
+  /**
+   * @param {string} tabId
+   * @param {boolean} isPinned
+   * @returns {boolean}
+   */
+  setTabPinned(tabId, isPinned) {
+    const tab = this.tabs.get(tabId)
+    if (!tab) return false
+
+    const nextPinned = Boolean(isPinned)
+    if (tab.isPinned === nextPinned) {
+      return false
+    }
+
+    tab.isPinned = nextPinned
+    const entries = Array.from(this.tabs.entries()).filter(([id]) => id !== tabId)
+    const pinnedCount = entries.filter(([, candidate]) => candidate.isPinned).length
+    entries.splice(pinnedCount, 0, [tabId, tab])
+    this.tabs = new Map(entries)
+    this._broadcastStateUpdate()
+    this._scheduleSessionSave()
+    return true
+  }
+
+  /**
+   * @param {string} tabId
+   * @param {string | null} color
+   * @returns {boolean}
+   */
+  setTabColor(tabId, color) {
+    const tab = this.tabs.get(tabId)
+    if (!tab) return false
+
+    const nextColor = TabManager.normalizeTabColor(color)
+    if (tab.color === nextColor) {
+      return false
+    }
+
+    tab.color = nextColor
+    this._broadcastStateUpdate()
+    this._scheduleSessionSave()
+    return true
+  }
+
+  /**
+   * @param {{name?: unknown, icon?: unknown, color?: unknown}} group
+   * @returns {{id: string, name: string, color: string | null, icon: string, isCollapsed: boolean} | null}
+   */
+  createTabGroup(group = {}) {
+    const name = TabManager.normalizeTabGroupName(group.name)
+    if (name.length === 0) return null
+
+    const tabGroup = {
+      id: randomUUID(),
+      name,
+      color: TabManager.normalizeTabColor(group.color),
+      icon: normalizeTabGroupIcon(group.icon),
+      isCollapsed: false
+    }
+    this.tabGroups.set(tabGroup.id, tabGroup)
+    this._broadcastStateUpdate()
+    this._scheduleSessionSave()
+    return { ...tabGroup }
+  }
+
+  /**
+   * @param {string} groupId
+   * @param {{name?: unknown, icon?: unknown, color?: unknown, isCollapsed?: unknown}} changes
+   * @returns {boolean}
+   */
+  updateTabGroup(groupId, changes = {}) {
+    const group = this.tabGroups.get(groupId)
+    if (!group) return false
+
+    const nextName = Object.hasOwn(changes, 'name')
+      ? TabManager.normalizeTabGroupName(changes.name)
+      : group.name
+    if (nextName.length === 0) return false
+
+    const nextColor = Object.hasOwn(changes, 'color')
+      ? TabManager.normalizeTabColor(changes.color)
+      : group.color
+    const nextIcon = Object.hasOwn(changes, 'icon')
+      ? normalizeTabGroupIcon(changes.icon)
+      : normalizeTabGroupIcon(group.icon)
+    const nextCollapsed = Object.hasOwn(changes, 'isCollapsed')
+      ? changes.isCollapsed === true
+      : group.isCollapsed
+    if (
+      nextName === group.name &&
+      nextColor === group.color &&
+      nextIcon === group.icon &&
+      nextCollapsed === group.isCollapsed
+    ) {
+      return false
+    }
+
+    group.name = nextName
+    group.icon = nextIcon
+    group.color = nextColor
+    group.isCollapsed = nextCollapsed
+    this._broadcastStateUpdate()
+    this._scheduleSessionSave()
+    return true
+  }
+
+  /**
+   * @param {string[]} tabIds
+   * @param {string | null} groupId
+   * @returns {number}
+   */
+  setTabsGroup(tabIds, groupId) {
+    const nextGroupId = typeof groupId === 'string' && this.tabGroups.has(groupId)
+      ? groupId
+      : null
+    if (groupId != null && nextGroupId == null) return 0
+
+    let changed = 0
+    for (const tabId of new Set(tabIds)) {
+      const tab = this.tabs.get(tabId)
+      if (tab && tab.groupId !== nextGroupId) {
+        tab.groupId = nextGroupId
+        changed += 1
+      }
+    }
+    if (changed > 0) {
+      this._broadcastStateUpdate()
+      this._scheduleSessionSave()
+    }
+    return changed
+  }
+
+  /**
+   * @param {string} groupId
+   * @returns {boolean}
+   */
+  deleteTabGroup(groupId) {
+    if (!this.tabGroups.delete(groupId)) return false
+
+    for (const tab of this.tabs.values()) {
+      if (tab.groupId === groupId) tab.groupId = null
+    }
+    for (const tab of this.closedTabs) {
+      if (tab.groupId === groupId) tab.groupId = null
+    }
+    this._broadcastStateUpdate()
+    this._scheduleSessionSave()
+    return true
+  }
+
+  /**
+   * Replace group metadata from a persisted or synced session before its tabs
+   * are created. Invalid and duplicate entries are ignored.
+   * @param {unknown} groups
+   */
+  _restoreTabGroups(groups) {
+    const restored = new Map()
+    if (Array.isArray(groups)) {
+      for (const candidate of groups) {
+        const id = typeof candidate?.id === 'string' ? candidate.id : ''
+        const name = TabManager.normalizeTabGroupName(candidate?.name)
+        if (id.length === 0 || name.length === 0 || restored.has(id)) continue
+
+        restored.set(id, {
+          id,
+          name,
+          color: TabManager.normalizeTabColor(candidate.color),
+          icon: normalizeTabGroupIcon(candidate.icon),
+          isCollapsed: candidate.isCollapsed === true
+        })
+      }
+    }
+    this.tabGroups = restored
+  }
+
+  /**
+   * @param {TabInfo} tab
+   * @returns {Set<string>}
+   */
+  _getTabLoadingSources(tab) {
+    if (!(tab.loadingSources instanceof Set)) {
+      tab.loadingSources = new Set()
+    }
+    return tab.loadingSources
+  }
+
+  /**
+   * @param {TabInfo} tab
+   * @returns {boolean}
+   */
+  _getTabLoadingState(tab) {
+    if (this._deferredStartupTabIds.has(tab.id) || tab.mountDeferred) return true
+    const loadingSources = this._getTabLoadingSources(tab)
+    if (getFixedInternalRouteTitle(tab.route.path) !== null) {
+      return loadingSources.has(TAB_LOADING_SOURCE_RENDERER)
+    }
+    return loadingSources.size > 0 || tab.loadState === 'mounting'
+  }
+
+  /**
+   * @param {TabInfo} tab
+   */
+  _syncTabLoadingState(tab) {
+    const nextLoading = this._getTabLoadingState(tab)
+    if (tab.isLoading === nextLoading) {
+      return
+    }
+
+    tab.isLoading = nextLoading
+    this._broadcastStateUpdate()
+    if (!nextLoading) {
+      this.previews.scheduleRefresh(tab)
+    }
+  }
+
+  /**
+   * @param {TabInfo} tab
+   * @param {string} source
+   * @param {boolean} isLoading
+   */
+  _setTabLoadingSource(tab, source, isLoading) {
+    const loadingSources = this._getTabLoadingSources(tab)
+    if (isLoading) {
+      loadingSources.add(source)
+    } else {
+      loadingSources.delete(source)
+    }
+    this._syncTabLoadingState(tab)
+  }
+
+  /**
+   * @param {string} tabId
+   * @returns {Promise<string | null>}
+   */
+  captureTabPreview(tabId) {
+    return this.previews.capture(tabId)
+  }
+
+  /**
+   * @param {string[]} tabIds
+   * @returns {Promise<Record<string, string | null>>}
+   */
+  getCachedTabPreviews(tabIds) {
+    return this.previews.getCached(tabIds)
+  }
+
+  /**
+   * @param {boolean} paused
+   */
+  setPreviewCapturePaused(paused) {
+    this.previews.setCapturePaused(paused)
+  }
+
+  /**
+   * @param {boolean} enabled
+   * @returns {Promise<void>}
+   */
+  setTabPreviewsEnabled(enabled) {
+    return this.previews.setPreviewsEnabled(enabled)
+  }
+
+  /**
+   * @param {string | null} [tabId]
+   */
+  requestReload(tabId = this.presentedTabId ?? this.activeTabId) {
+    if (!tabId || !this.tabs.has(tabId)) {
+      return
+    }
+    this.bridge.send(IpcChannels.TABS_REQUEST_RELOAD, tabId)
+  }
+
+  /**
+   * Renderer acknowledgement that preparation for a logical reload completed.
+   * @param {string | null} [tabId]
+   */
+  reloadTab(tabId = this.activeTabId) {
+    if (!tabId) return
+
+    const tab = this.tabs.get(tabId)
+    if (!tab) return
+
+    this._deferredStartupTabIds.delete(tabId)
+    tab.mountDeferred = false
+    this._startupMountQueue.delete(tabId)
+    tab.automaticallyUnloaded = false
+    tab.loadState = 'mounting'
+    tab.preloadInBackground = tab.id !== this.activeTabId
+    tab.mountRevision += 1
+    tab.refreshKey += 1
+    this._setTabLoadingSource(tab, TAB_LOADING_SOURCE_MOUNT, true)
+    this._broadcastStateUpdate()
+  }
+
+  /**
+   * @param {string} tabId
+   * @param {boolean} [deferMount]
+   * @returns {boolean}
+   */
+  loadTab(tabId, deferMount = false) {
+    const tab = this.tabs.get(tabId)
+    if (!tab || tab.loadState !== 'unloaded') {
+      return false
+    }
+
+    this._deferredStartupTabIds.delete(tabId)
+    tab.automaticallyUnloaded = false
+    tab.loadState = 'mounting'
+    tab.mountDeferred = deferMount
+    if (deferMount) this._startupMountQueue.add(tabId)
+    tab.preloadInBackground = true
+    tab.mountRevision += 1
+    this._setTabLoadingSource(tab, TAB_LOADING_SOURCE_MOUNT, true)
+    this._broadcastStateUpdate()
+    this._scheduleSessionSave()
+    return true
+  }
+
+  /**
+   * @param {string} tabId
+   * @param {boolean} [automaticallyUnloaded]
+   * @returns {Promise<boolean>}
+   */
+  async unloadTab(tabId, automaticallyUnloaded = false) {
+    const tab = this.tabs.get(tabId)
+    if (tab?.loadState === 'unloaded' && this._deferredStartupTabIds.delete(tabId)) {
+      this._syncTabLoadingState(tab)
+      this._broadcastStateUpdate()
+      this._scheduleSessionSave()
+      return true
+    }
+    if (!tab || tab.loadState === 'unloaded' || tab.loadState === 'unloading') {
+      return false
+    }
+
+    if (tab.id === this.presentedTabId && this.tabs.size > 1) {
+      if (this._deferredUnloadTabIds.has(tabId)) {
+        return true
+      }
+
+      await this.previews.refresh(tab).catch(error => {
+        console.error('Failed to refresh preview before unloading tab:', error)
+      })
+
+      // A bulk unload may have already activated and presented the replacement
+      // while the preview refresh was in flight. Only defer when this tab is
+      // still presented, otherwise no later presentation event would finalize it.
+      if (tab.id === this.presentedTabId) {
+        const nextTabId = this.activeTabId !== tabId && this.tabs.has(this.activeTabId)
+          ? this.activeTabId
+          : this._getNeighborTabId(tabId, true)
+        if (nextTabId) {
+          this._deferredUnloadTabIds.add(tabId)
+          this.bridge.send(IpcChannels.TABS_EXIT_FULLSCREEN, tabId)
+          if (this.activeTabId === tabId) {
+            this.activeTabId = null
+            if (this._prepareNeighborActivation(nextTabId)) {
+              this.activateTab(nextTabId)
+            }
+          }
+          this._scheduleSessionSave()
+          return true
+        }
+        return true
+      }
+    }
+
+    if (tab.id === this.presentedTabId) {
+      await this.previews.refresh(tab).catch(error => {
+        console.error('Failed to refresh preview before unloading tab:', error)
+      })
+    }
+
+    if (tab.id === this.activeTabId) {
+      if (this.tabs.size <= 1) {
+        return false
+      }
+
+      const nextTabId = this._getNeighborTabId(tabId, true)
+      if (!nextTabId) {
+        return false
+      }
+
+      this.activeTabId = null
+      if (this._prepareNeighborActivation(nextTabId)) {
+        this.activateTab(nextTabId)
+      }
+    }
+
+    tab.loadState = 'unloaded'
+    tab.automaticallyUnloaded = automaticallyUnloaded
+    tab.mountDeferred = false
+    this._startupMountQueue.delete(tabId)
+    this._resolveTabMountWaiters(tabId, tab.mountRevision, false)
+    tab.preloadInBackground = false
+    tab.isPlaying = false
+    tab.loadingSources = new Set()
+    tab.isLoading = false
+    tab.refreshKey += 1
+    this._deferredUnloadTabIds.delete(tabId)
+    if (this.presentedTabId === tabId) {
+      this.presentedTabId = null
+    }
+    this._broadcastStateUpdate()
+    this._scheduleSessionSave()
+    return true
+  }
+
+  /**
+   * @param {string} tabId
+   * @param {number} toIndex
+   */
+  moveTab(tabId, toIndex) {
+    const currentTabIds = Array.from(this.tabs.keys())
+    const entries = Array.from(this.tabs.entries())
+    const fromIndex = entries.findIndex(([id]) => id === tabId)
+    if (fromIndex === -1) return
+
+    const [entry] = entries.splice(fromIndex, 1)
+    const [, tab] = entry
+    const pinnedCount = entries.filter(([, candidate]) => candidate.isPinned).length
+    let targetIndex = Math.max(0, Math.min(toIndex, entries.length))
+
+    if (tab.isPinned) {
+      targetIndex = Math.min(targetIndex, pinnedCount)
+    } else {
+      targetIndex = Math.max(targetIndex, pinnedCount)
+    }
+
+    entries.splice(targetIndex, 0, entry)
+    this.tabs = new Map(entries)
+    if (entries.some(([id], index) => id !== currentTabIds[index])) {
+      resetTabPlacementOpeners(this.tabs)
+    }
+    this._broadcastStateUpdate()
+    this._scheduleSessionSave()
+  }
+
+  /**
+   * Apply a complete tab order in one state update.
+   * @param {string[]} tabIds
+   * @param {string | null} requestId
+   */
+  reorderTabs(tabIds, requestId) {
+    this.lastReorderRequestId = requestId
+    const reorderedTabs = buildReorderedTabMap(this.tabs, tabIds)
+    if (reorderedTabs == null || reorderedTabs === this.tabs) {
+      this._broadcastStateUpdate()
+      return
+    }
+
+    this.tabs = reorderedTabs
+    resetTabPlacementOpeners(this.tabs)
+    this._broadcastStateUpdate()
+    this._scheduleSessionSave()
+  }
+
+  /**
+   * Create the main-owned portion of a logical tab for staged recreation in
+   * another renderer process. Runtime history/player state cannot be moved as a
+   * DOM tree, but all persisted metadata and the cached preview stay intact.
+   * @param {string} tabId
+   * @returns {object|null}
+   */
+  createTransferSnapshot(tabId) {
+    const tab = this.tabs.get(tabId)
+    if (!tab) {
+      return null
+    }
+
+    return {
+      id: tab.id,
+      url: tab.url,
+      route: cloneRoute(tab.route),
+      title: tab.title,
+      avatarDataUrl: tab.avatarDataUrl,
+      avatarFileName: tab.avatarFileName,
+      isPinned: tab.isPinned,
+      color: tab.color,
+      groupId: tab.groupId,
+      group: tab.groupId == null ? null : { ...this.tabGroups.get(tab.groupId) },
+      previewDataUrl: tab.previewDataUrl,
+      previewCapturedAt: tab.previewCapturedAt,
+      previewFileName: tab.previewFileName,
+      skipSilence: tab.skipSilence === true,
+      syncedNavigationRevision: tab.syncedNavigationRevision
+    }
+  }
+
+  /**
+   * @param {string} tabId
+   * @returns {TabInfo|null}
+   */
+  detachTabForTransfer(tabId) {
+    const tab = this.tabs.get(tabId)
+    if (!tab) return null
+
+    this.previews.clearRefresh(tab)
+    const nextTabId = this.activeTabId === tabId
+      ? this._getNeighborTabId(tabId)
+      : null
+
+    this.tabs.delete(tabId)
+    this._deferredCloseTabIds.delete(tabId)
+    this._deferredUnloadTabIds.delete(tabId)
+    this._deferredStartupTabIds.delete(tabId)
+    this._resolveTabMountWaiters(tabId, Number.MAX_SAFE_INTEGER, false)
+    if (this.contextMenuTabId === tabId) {
+      this.contextMenuTabId = null
+    }
+    if (this.presentedTabId === tabId) {
+      this.presentedTabId = null
+    }
+
+    if (nextTabId) {
+      this.activeTabId = null
+      if (this._prepareNeighborActivation(nextTabId)) {
+        this.activateTab(nextTabId)
+      }
+    } else if (this.activeTabId === tabId) {
+      this.activeTabId = null
+      this.selectionRevision += 1
+      this._broadcastStateUpdate()
+      this._scheduleSessionSave()
+    } else {
+      this._broadcastStateUpdate()
+      this._scheduleSessionSave()
+    }
+
+    return tab
+  }
+
+  /**
+   * Stage a transferred tab in this window and mount it in the background. The
+   * source remains authoritative until the destination acknowledges the mount.
+   * @param {object} snapshot
+   * @returns {TabInfo}
+   */
+  adoptTransferredTab(snapshot) {
+    if (this.tabs.has(snapshot.id)) {
+      throw new Error(`Cannot adopt duplicate tab ID ${snapshot.id}`)
+    }
+
+    const groupName = TabManager.normalizeTabGroupName(snapshot.group?.name)
+    if (
+      typeof snapshot.groupId === 'string' &&
+      !this.tabGroups.has(snapshot.groupId) &&
+      groupName.length > 0
+    ) {
+      this.tabGroups.set(snapshot.groupId, {
+        id: snapshot.groupId,
+        name: groupName,
+        color: TabManager.normalizeTabColor(snapshot.group.color),
+        icon: normalizeTabGroupIcon(snapshot.group.icon),
+        isCollapsed: snapshot.group.isCollapsed === true
+      })
+    }
+
+    /** @type {TabInfo} */
+    const tabInfo = {
+      id: snapshot.id,
+      url: snapshot.url,
+      route: cloneRoute(snapshot.route),
+      title: snapshot.title,
+      avatarDataUrl: isTabPreviewDataUrl(snapshot.avatarDataUrl) ? snapshot.avatarDataUrl : null,
+      avatarFileName: normalizeTabPreviewFileName(snapshot.avatarFileName),
+      lastActiveAt: Date.now(),
+      isPlaying: false,
+      isPinned: snapshot.isPinned === true,
+      isLoading: getFixedInternalRouteTitle(snapshot.route.path) === null,
+      loadingSources: new Set([TAB_LOADING_SOURCE_MOUNT]),
+      color: TabManager.normalizeTabColor(snapshot.color),
+      previewDataUrl: snapshot.previewDataUrl ?? null,
+      previewCapturedAt: snapshot.previewCapturedAt ?? 0,
+      previewFileName: normalizeTabPreviewFileName(snapshot.previewFileName),
+      previewCaptureTimeoutId: null,
+      previewCapturePromise: null,
+      skipSilence: snapshot.skipSilence === true,
+      loadState: 'mounting',
+      preloadInBackground: true,
+      mountRevision: 1,
+      refreshKey: 0,
+      syncedNavigationRevision: Number.isInteger(snapshot.syncedNavigationRevision)
+        ? snapshot.syncedNavigationRevision
+        : 0,
+      placementOpenerTabId: null,
+      groupId: typeof snapshot.groupId === 'string' && this.tabGroups.has(snapshot.groupId)
+        ? snapshot.groupId
+        : null,
+      isTransferStaged: true
+    }
+
+    const activeTabIndex = Array.from(this.tabs.keys()).indexOf(this.activeTabId)
+    const preferredIndex = activeTabIndex === -1 ? this.tabs.size : activeTabIndex + 1
+    this._insertTabEntry(tabInfo.id, tabInfo, preferredIndex)
+    this._broadcastStateUpdate()
+    return tabInfo
+  }
+
+  /**
+   * Roll back a destination-side transfer without touching the shared preview
+   * file, which is still owned by the source tab.
+   * @param {string} tabId
+   */
+  removeStagedTransferredTab(tabId) {
+    const tab = this.tabs.get(tabId)
+    if (!tab?.isTransferStaged) {
+      return
+    }
+
+    this.previews.clearRefresh(tab)
+    this.tabs.delete(tabId)
+    this._resolveTabMountWaiters(tabId, Number.MAX_SAFE_INTEGER, false)
+    if (this.contextMenuTabId === tabId) {
+      this.contextMenuTabId = null
+    }
+    this._broadcastStateUpdate()
+  }
+
+  /**
+   * @param {string} tabId
+   * @param {object} route
+   * @param {string | undefined} [url]
+   */
+  updateTabRoute(tabId, route, url) {
+    const tab = this.tabs.get(tabId)
+    if (!tab) return
+
+    const nextRoute = normalizeRoute(route)
+    // A channel's content tabs share the same avatar. Retain its decoded image
+    // instead of briefly falling back to the remote thumbnail on each switch.
+    if (getTabAvatarPath(nextRoute.path) !== getTabAvatarPath(tab.route.path) || (
+      nextRoute.path === '/external-media' && nextRoute.fullPath !== tab.route.fullPath
+    )) {
+      const avatarFileName = tab.avatarFileName
+      tab.avatarDataUrl = null
+      tab.avatarFileName = null
+      this.previews.releaseAvatarFile(avatarFileName).catch(error => {
+        console.error('Failed to delete stale tab avatar:', error)
+      })
+    }
+    tab.route = nextRoute
+    if (tabId === this._startupPriorityTabId && !nextRoute.path.startsWith('/watch/')) {
+      this._resumeDeferredStartupTabs()
+    }
+    tab.url = url || this._urlFromRoute(tab.route)
+    this.previews.scheduleRefresh(tab)
+    this._scheduleSessionSave()
+    this._broadcastStateUpdate()
+  }
+
+  /**
+   * Store the renderer-owned back/forward history for persistence with the
+   * tab session. A null history clears it (persistence setting disabled).
+   * @param {string} tabId
+   * @param {object[] | null} history
+   * @param {number | null} historyIndex
+   * @param {boolean} persistHistory
+   */
+  updateTabNavigationHistory(tabId, history, historyIndex, persistHistory) {
+    const tab = this.tabs.get(tabId)
+    if (!tab) return
+
+    const sanitized = sanitizeNavigationHistory(history, historyIndex)
+    tab.navigationHistory = sanitized?.history ?? null
+    tab.navigationHistoryIndex = sanitized?.historyIndex ?? 0
+    if (typeof persistHistory === 'boolean') {
+      tab.persistNavigationHistory = persistHistory && sanitized != null
+    }
+    this._scheduleSessionSave()
+  }
+
+  /**
+   * @param {string} tabId
+   * @param {boolean} isLoading
+   */
+  setTabLoading(tabId, isLoading) {
+    const tab = this.tabs.get(tabId)
+    if (tab) {
+      this._setTabLoadingSource(tab, TAB_LOADING_SOURCE_RENDERER, isLoading)
+      if (tabId === this._startupPriorityTabId) {
+        if (isLoading) {
+          this._startupPriorityLoadingObserved = true
+        } else if (this._startupPriorityLoadingObserved && !tab.route.path.startsWith('/watch/')) {
+          this._resumeDeferredStartupTabs()
+        }
+      }
+    }
+  }
+
+  setTabPlaybackState(tabId, playbackState) {
+    const tab = this.tabs.get(tabId)
+    if (!tab) return
+    tab.isPlaying = playbackState === 'playing'
+    if (tabId === this._startupPriorityTabId && ['playing', 'paused', 'failed'].includes(playbackState)) {
+      this._resumeDeferredStartupTabs()
+    }
+    this._broadcastStateUpdate()
+  }
+
+  _resumeDeferredStartupTabs() {
+    const tabIds = Array.from(this._deferredStartupTabIds)
+    this._deferredStartupTabIds.clear()
+    this._startupPriorityTabId = null
+    this._startupPriorityLoadingObserved = false
+
+    // Resuming can touch dozens of tabs, so publish one renderer snapshot and
+    // one session write rather than waking the shared renderer for every tab.
+    this.runBatched(() => {
+      for (const tabId of tabIds) {
+        this.loadTab(tabId, true)
+      }
+    }).catch(error => {
+      console.error('Failed to resume deferred startup watch tabs:', error)
+    })
+    this._scheduleStartupMount()
+  }
+
+  _scheduleStartupMount() {
+    if (
+      this._startupMountRunning || this._startupMountTimer != null ||
+      this._startupMountQueue.size === 0 || this.browserWindow.isDestroyed()
+    ) return
+
+    // Yield between mounts so input and paint can run on slower CPUs. Waiting
+    // for mount acknowledgement also prevents a slow page from piling up work.
+    this._startupMountTimer = setTimeout(async () => {
+      this._startupMountTimer = null
+      this._startupMountRunning = true
+      try {
+        const active = this.tabs.get(this.activeTabId)
+        if (active?.loadState === 'mounting') {
+          await this.waitForTabMount(active.id, active.mountRevision)
+        }
+        if (this.browserWindow.isDestroyed()) return
+
+        for (const tabId of this._startupMountQueue) {
+          this._startupMountQueue.delete(tabId)
+          const tab = this.tabs.get(tabId)
+          if (!tab?.mountDeferred || tab.loadState !== 'mounting') continue
+
+          tab.mountDeferred = false
+          this._broadcastStateUpdate()
+          await this.waitForTabMount(tabId, tab.mountRevision)
+          break
+        }
+      } catch (error) {
+        console.error('Failed to mount restored background tab:', error)
+      } finally {
+        this._startupMountRunning = false
+        this._scheduleStartupMount()
+      }
+    }, STARTUP_TAB_MOUNT_DELAY_MS)
+  }
+
+  /**
+   * @returns {object}
+   */
+  /**
+   * @param {{ historyForTabIds?: Set<string> | null, announcedAvatarUrls?: Map<string, string | null> | null }} [options]
+   *   Which tabs the navigation history should be included for. Defaults to all
+   *   of them; pass a set to leave it out for the rest. Tabs whose avatar data
+   *   URL matches `announcedAvatarUrls` leave `avatarUrl` undefined so the
+   *   renderer keeps the one it already has.
+   */
+  getState({ historyForTabIds = null, announcedAvatarUrls = null } = {}) {
+    const tabs = Array.from(this.tabs.values()).map(tab => {
+      // The renderer only consumes this when it first learns about a tab
+      // (e.g. session restore); afterwards it owns the live history. Sending it
+      // on every update would serialize each tab's whole history over IPC just
+      // for the renderer to discard it.
+      const includeHistory = historyForTabIds === null || historyForTabIds.has(tab.id)
+      // Avatars are base64 images; resending every tab's on each playing or
+      // loading flip is the bulk of a state update.
+      const avatarUrl = tab.avatarDataUrl ?? null
+      const includeAvatar = announcedAvatarUrls === null ||
+        !announcedAvatarUrls.has(tab.id) ||
+        announcedAvatarUrls.get(tab.id) !== avatarUrl
+
+      return {
+        id: tab.id,
+        history: includeHistory ? tab.navigationHistory : undefined,
+        historyIndex: includeHistory && tab.navigationHistory != null
+          ? tab.navigationHistoryIndex
+          : undefined,
+        url: tab.url,
+        route: cloneRoute(tab.route),
+        title: tab.title,
+        avatarUrl: includeAvatar ? avatarUrl : undefined,
+        isActive: tab.id === this.activeTabId,
+        isActivatable: this._isTabActivatable(tab),
+        automaticallyUnloaded: tab.loadState === 'unloaded' && tab.automaticallyUnloaded === true,
+        isUnloaded: tab.loadState === 'unloaded' && !this._deferredStartupTabIds.has(tab.id),
+        mountDeferred: tab.mountDeferred === true,
+        isLoading: this._getTabLoadingState(tab),
+        isPlaying: tab.isPlaying || false,
+        skipSilence: tab.skipSilence === true,
+        isPinned: tab.isPinned || false,
+        color: TabManager.normalizeTabColor(tab.color),
+        groupId: tab.groupId,
+        loadState: tab.loadState,
+        preloadInBackground: tab.preloadInBackground,
+        mountRevision: tab.mountRevision,
+        refreshKey: tab.refreshKey,
+        syncedNavigationRevision: tab.syncedNavigationRevision
+      }
+    })
+
+    return {
+      tabs,
+      groups: Array.from(this.tabGroups.values(), group => ({ ...group })),
+      closedTabs: this.closedTabs.toReversed().map(tab => ({
+        id: tab.id,
+        url: tab.url,
+        route: cloneRoute(getRouteFromUrl(tab.url)),
+        title: tab.title ?? formatDefaultTabTitle(tab.url),
+        isPinned: tab.isPinned === true,
+        color: TabManager.normalizeTabColor(tab.color),
+        groupId: tab.groupId ?? null
+      })),
+      activeTabId: this.activeTabId,
+      presentedTabId: this.presentedTabId,
+      selectionRevision: this.selectionRevision,
+      reorderRequestId: this.lastReorderRequestId,
+      tabBarScrollPosition: this.tabBarScrollPosition
+    }
+  }
+
+  /**
+   * @returns {import('electron').WebContents|null}
+   */
+  getActiveWebContents() {
+    return this.browserWindow.webContents.isDestroyed() ? null : this.browserWindow.webContents
+  }
+
+  /**
+   * Run a bulk operation with its state broadcasts and session writes collapsed
+   * into a single one, so the renderer re-renders the tab bar and the session
+   * file is written once instead of once per tab. Batching is manager-wide, so
+   * asynchronous callbacks must stay short to avoid suppressing unrelated state
+   * updates until the callback settles.
+   * @template T
+   * @param {() => T | Promise<T>} run
+   * @returns {Promise<T>}
+   */
+  async runBatched(run) {
+    this._batchDepth += 1
+    try {
+      return await run()
+    } finally {
+      this._batchDepth -= 1
+      if (this._batchDepth === 0) {
+        const broadcastPending = this._batchedBroadcastPending
+        const sessionSavePending = this._batchedSessionSavePending
+        this._batchedBroadcastPending = false
+        this._batchedSessionSavePending = false
+        if (broadcastPending) {
+          this._broadcastStateUpdate()
+        }
+        if (sessionSavePending) {
+          this._scheduleSessionSave()
+        }
+      }
+    }
+  }
+
+  _broadcastStateUpdate() {
+    if (this._batchDepth > 0) {
+      this._batchedBroadcastPending = true
+      return
+    }
+
+    // Queued snapshots get coalesced down to the newest one, so while the
+    // renderer is still bootstrapping every snapshot has to carry the history
+    // in full — whichever one survives is the one the tabs get created from.
+    if (!this.bridge.ready) {
+      this._historyAnnouncedTabIds.clear()
+      this._announcedAvatarUrls.clear()
+      this.bridge.send(IpcChannels.TABS_STATE_UPDATED, this.getState())
+      return
+    }
+
+    const historyForTabIds = new Set()
+    for (const tabId of this.tabs.keys()) {
+      if (!this._historyAnnouncedTabIds.has(tabId)) {
+        historyForTabIds.add(tabId)
+      }
+    }
+
+    this.bridge.send(IpcChannels.TABS_STATE_UPDATED, this.getState({
+      historyForTabIds,
+      announcedAvatarUrls: this._announcedAvatarUrls
+    }))
+
+    for (const tabId of historyForTabIds) {
+      this._historyAnnouncedTabIds.add(tabId)
+    }
+    for (const tabId of this._historyAnnouncedTabIds) {
+      if (!this.tabs.has(tabId)) {
+        this._historyAnnouncedTabIds.delete(tabId)
+      }
+    }
+    for (const [tabId, tab] of this.tabs) {
+      this._announcedAvatarUrls.set(tabId, tab.avatarDataUrl ?? null)
+    }
+    for (const tabId of this._announcedAvatarUrls.keys()) {
+      if (!this.tabs.has(tabId)) {
+        this._announcedAvatarUrls.delete(tabId)
+      }
+    }
+  }
+
+  // Local previews and window metadata must not make unchanged synced tabs newer.
+  _updateSessionTimestamp(preserveUpdatedAt = false) {
+    const content = JSON.stringify({ ...this.getSyncSession(), updatedAt: undefined })
+    if (content !== this._lastSyncSessionContent) {
+      if (!preserveUpdatedAt) this.sessionUpdatedAt = Date.now()
+      this._lastSyncSessionContent = content
+    }
+  }
+
+  _scheduleSessionSave() {
+    if (this._sessionPersistenceDisabled) return
+    if (this._batchDepth > 0) {
+      this._batchedSessionSavePending = true
+      return
+    }
+    this._updateSessionTimestamp()
+    // Do not restart the timer: even continuous updates must reach disk.
+    if (this._sessionSaveTimer != null) return
+    this._sessionSaveTimer = setTimeout(() => {
+      this._saveSession().catch(error => {
+        console.error('Failed to persist tab session:', error)
+      })
+    }, SESSION_SAVE_DELAY_MS)
+  }
+
+  async _saveSession() {
+    clearTimeout(this._sessionSaveTimer)
+    this._sessionSaveTimer = null
+    if (this._sessionPersistenceDisabled) return
+
+    this._updateSessionTimestamp()
+    const session = this.getSessionData()
+    const content = JSON.stringify(session)
+    if (content === this._lastSessionSaveContent) return this._sessionSavePromise
+    // Compare with the last queued snapshot, not the last completed write. A
+    // reversion while a write is pending must enqueue the reverted state too.
+    this._lastSessionSaveContent = content
+    this._sessionSavePromise = saveTabSession(this.sessionId, session)
+    if (!await this._sessionSavePromise && this._lastSessionSaveContent === content) {
+      this._lastSessionSaveContent = null
+    }
+  }
+
+  /** Return the state before an operation closed the final tabs, if needed. */
+  getSessionDataForWindowClose() {
+    return {
+      sessionId: this.sessionId,
+      ...(this.tabs.size === 0 && this.lastClosedWindowSession
+        ? this.lastClosedWindowSession
+        : this.getSessionData())
+    }
+  }
+
+  getSessionData() {
+    const tabs = Array.from(this.tabs.values())
+      // A presented tab stays mounted until its replacement is ready, but a
+      // shutdown during that handoff must not resurrect the already-closed tab.
+      .filter(tab => (
+        tab.isTransferStaged !== true &&
+        !this._deferredCloseTabIds.has(tab.id)
+      ))
+      .map(tab => {
+        const tabData = {
+          id: tab.id,
+          url: stripOneTimeTimestampFromUrl(tab.url),
+          title: tab.title,
+          isPinned: tab.isPinned,
+          color: TabManager.normalizeTabColor(tab.color),
+          groupId: tab.groupId,
+          skipSilence: tab.skipSilence === true,
+          // Startup deferral delays mounting without changing the saved load intent.
+          automaticallyUnloaded: tab.loadState === 'unloaded' && tab.automaticallyUnloaded === true,
+          isUnloaded: (tab.loadState === 'unloaded' && !this._deferredStartupTabIds.has(tab.id)) ||
+            this._deferredUnloadTabIds.has(tab.id),
+          ...(tab.placementOpenerTabId != null && {
+            placementOpenerTabId: tab.placementOpenerTabId
+          })
+        }
+
+        const previewFileName = normalizeTabPreviewFileName(tab.previewFileName)
+        if (previewFileName != null && tab.previewCapturedAt > 0) {
+          tabData.previewFileName = previewFileName
+          tabData.previewCapturedAt = tab.previewCapturedAt
+        }
+
+        const avatarFileName = normalizeTabPreviewFileName(tab.avatarFileName)
+        if (avatarFileName != null) {
+          tabData.avatarFileName = avatarFileName
+        }
+
+        if (tab.persistNavigationHistory && tab.navigationHistory != null) {
+          tabData.history = tab.navigationHistory
+          tabData.historyIndex = tab.navigationHistoryIndex
+        }
+
+        return tabData
+      })
+    const activeTabId = tabs.some(tab => tab.id === this.activeTabId)
+      ? this.activeTabId
+      : tabs[0]?.id ?? null
+
+    return {
+      tabs,
+      groups: Array.from(this.tabGroups.values(), group => ({ ...group })),
+      activeTabId,
+      bounds: this._getCurrentBounds(),
+      updatedAt: this.sessionUpdatedAt
+    }
+  }
+
+  /**
+   * Return the portable session state used by encrypted sync.
+   * @returns {object}
+   */
+  getSyncSession() {
+    const tabs = Array.from(this.tabs.values())
+      .filter(tab => !this._deferredCloseTabIds.has(tab.id))
+      .map(tab => ({
+        id: tab.id,
+        url: stripOneTimeTimestampFromUrl(tab.url),
+        title: tab.title,
+        isPinned: tab.isPinned || false,
+        color: TabManager.normalizeTabColor(tab.color),
+        groupId: tab.groupId,
+        automaticallyUnloaded: tab.loadState === 'unloaded' && tab.automaticallyUnloaded === true,
+        isUnloaded: (tab.loadState === 'unloaded' && !this._deferredStartupTabIds.has(tab.id)) ||
+          this._deferredUnloadTabIds.has(tab.id),
+        ...(tab.placementOpenerTabId != null && {
+          placementOpenerTabId: tab.placementOpenerTabId
+        }),
+        ...(tab.persistNavigationHistory && tab.navigationHistory != null && {
+          history: tab.navigationHistory,
+          historyIndex: tab.navigationHistoryIndex
+        })
+      }))
+    const activeTabId = tabs.some(tab => tab.id === this.activeTabId)
+      ? this.activeTabId
+      : tabs[0]?.id ?? null
+
+    return {
+      sessionId: this.sessionId,
+      tabs,
+      groups: Array.from(this.tabGroups.values(), group => ({ ...group })),
+      activeTabId,
+      updatedAt: this.sessionUpdatedAt
+    }
+  }
+
+  /**
+   * Reconcile this window's live tabs with a synced session.
+   * Existing tab objects stay alive so their mounted renderer state is not
+   * discarded when another device only adds, removes, or selects a tab.
+   * @param {object} sessionData
+   * @returns {Promise<boolean>}
+   */
+  async replaceFromSyncData(sessionData) {
+    if (!sessionData || !Array.isArray(sessionData.tabs) || sessionData.tabs.length === 0) {
+      return false
+    }
+    clearTimeout(this._sessionSaveTimer)
+    this._sessionSaveTimer = null
+    this._lastSessionSaveContent = null
+
+    this._sessionPersistenceDisabled = true
+    try {
+      const restoreNavigationHistory = await getStoredRememberTabNavigationHistory()
+      this._restoreTabGroups(sessionData.groups)
+      const previousTabs = this.tabs
+      const syncedTabs = new Map()
+      const removedTabs = new Set(previousTabs.values())
+
+      for (const tabData of sessionData.tabs) {
+        const syncedId = typeof tabData.id === 'string' && tabData.id.length > 0
+          ? tabData.id
+          : undefined
+        let tab = syncedId == null ? null : previousTabs.get(syncedId)
+
+        if (tab) {
+          removedTabs.delete(tab)
+          const nextUrl = stripOneTimeTimestampFromUrl(tabData.url)
+          if (tab.url !== nextUrl) {
+            const previewFileName = tab.previewFileName
+            const avatarFileName = tab.avatarFileName
+            tab.url = nextUrl
+            tab.route = getRouteFromUrl(nextUrl)
+            tab.previewDataUrl = null
+            tab.previewCapturedAt = 0
+            tab.previewFileName = null
+            tab.avatarDataUrl = null
+            tab.avatarFileName = null
+            const navigationHistory = restoreNavigationHistory
+              ? sanitizeNavigationHistory(tabData.history, tabData.historyIndex)
+              : null
+            tab.navigationHistory = navigationHistory?.history ?? null
+            tab.navigationHistoryIndex = navigationHistory?.historyIndex ?? 0
+            tab.persistNavigationHistory = restoreNavigationHistory && navigationHistory != null
+            // The renderer normally ignores main-process route echoes because
+            // it owns live navigation. Mark this remote route as authoritative.
+            tab.syncedNavigationRevision += 1
+            this._historyAnnouncedTabIds.delete(tab.id)
+            tabPreviewStorage.remove(previewFileName).catch(error => {
+              console.error('Failed to delete stale synced tab preview:', error)
+            })
+            this.previews.releaseAvatarFile(avatarFileName).catch(error => {
+              console.error('Failed to delete stale synced tab avatar:', error)
+            })
+          }
+          const syncedTitle = normalizeLegacyTabTitle(tabData.title)
+          if (syncedTitle.trim().length > 0) {
+            tab.title = syncedTitle
+          }
+          tab.isPinned = tabData.isPinned === true
+          tab.color = TabManager.normalizeTabColor(tabData.color)
+          tab.groupId = typeof tabData.groupId === 'string' && this.tabGroups.has(tabData.groupId)
+            ? tabData.groupId
+            : null
+        } else {
+          const savedTitle = normalizeLegacyTabTitle(tabData.title)
+          const hasSavedTitle = savedTitle.trim().length > 0
+          // createTab inserts into previousTabs through this.tabs. The synced
+          // map and restored placement openers below replace that temporary order.
+          tab = this.createTab({
+            id: syncedId,
+            url: stripOneTimeTimestampFromUrl(tabData.url),
+            title: hasSavedTitle ? savedTitle : undefined,
+            isPinned: tabData.isPinned === true,
+            color: tabData.color,
+            groupId: tabData.groupId,
+            history: restoreNavigationHistory ? tabData.history : null,
+            historyIndex: restoreNavigationHistory ? tabData.historyIndex : null,
+            persistHistory: restoreNavigationHistory,
+            makeActive: false,
+            openPosition: 'end',
+            automaticallyUnloaded: tabData.automaticallyUnloaded,
+            lazyLoad: tabData.isUnloaded === true,
+            preloadInBackground: tabData.isUnloaded === false,
+            _deferUpdates: true
+          })
+        }
+
+        syncedTabs.set(tab.id, tab)
+      }
+
+      this.tabs = syncedTabs
+      restoreTabPlacementOpeners(this.tabs, sessionData.tabs)
+
+      for (const tab of removedTabs) {
+        this.previews.clearRefresh(tab)
+        this._resolveTabMountWaiters(tab.id, Number.MAX_SAFE_INTEGER, false)
+        if (this.presentedTabId === tab.id) {
+          this.presentedTabId = null
+        }
+        tabPreviewStorage.remove(tab.previewFileName).catch(error => {
+          console.error('Failed to delete remotely closed tab preview:', error)
+        })
+        this.previews.releaseAvatarFile(tab.avatarFileName).catch(error => {
+          console.error('Failed to delete remotely closed tab avatar:', error)
+        })
+      }
+
+      const retainedTabIds = new Set(this.tabs.keys())
+      this.selectedTabIds = this.selectedTabIds.filter(tabId => retainedTabIds.has(tabId))
+      this.contextMenuSelectedTabIds = this.contextMenuSelectedTabIds.filter(tabId => retainedTabIds.has(tabId))
+      if (!retainedTabIds.has(this.contextMenuTabId)) {
+        this.contextMenuTabId = null
+      }
+      this._deferredCloseTabIds.clear()
+      this._deferredUnloadTabIds.clear()
+      this._deferredStartupTabIds = new Set(
+        [...this._deferredStartupTabIds].filter(tabId => retainedTabIds.has(tabId))
+      )
+      if (!retainedTabIds.has(this._startupPriorityTabId)) {
+        this._startupPriorityTabId = null
+        this._startupPriorityLoadingObserved = false
+      }
+
+      this.sessionId = sessionData.sessionId
+      this.sessionUpdatedAt = Number.isFinite(sessionData.updatedAt)
+        ? sessionData.updatedAt
+        : Date.now()
+
+      const nextActiveTabId = this.tabs.has(sessionData.activeTabId)
+        ? sessionData.activeTabId
+        : this.tabs.keys().next().value
+      if (nextActiveTabId !== this.activeTabId || this.tabs.get(nextActiveTabId)?.loadState === 'unloaded') {
+        this.activateTab(nextActiveTabId)
+      } else {
+        this._setWindowTitle(this.tabs.get(nextActiveTabId).title)
+        this._broadcastStateUpdate()
+      }
+
+      return this.tabs.size > 0
+    } finally {
+      this._updateSessionTimestamp(true)
+      this._sessionPersistenceDisabled = false
+    }
+  }
+
+  _getCurrentBounds() {
+    const win = this.browserWindow
+    if (!win || win.isDestroyed()) return undefined
+
+    try {
+      return {
+        ...win.getNormalBounds(),
+        maximized: win.isMaximized(),
+        fullScreen: win.isFullScreen()
+      }
+    } catch {
+      return undefined
+    }
+  }
+
+  async clearSession({ preservePersistedSession = false } = {}) {
+    clearTimeout(this._sessionSaveTimer)
+    this._sessionSaveTimer = null
+    this._sessionPersistenceDisabled = true
+    const clearedTabs = Array.from(this.tabs.values())
+      .filter(tab => tab.isTransferStaged !== true)
+    await Promise.all([
+      ...clearedTabs.map(tab => tabPreviewStorage.remove(tab.previewFileName)),
+      // These tabs are all going away, so none of them counts as a reference
+      ...clearedTabs.map(tab => this.previews.releaseAvatarFile(
+        tab.avatarFileName,
+        new Set(clearedTabs)
+      ))
+    ])
+    if (!preservePersistedSession) {
+      await clearTabSession(this.sessionId)
+    }
+  }
+
+  /**
+   * @param {{ tabs?: Array<{id?: string, url: string, title?: string, avatarFileName?: string | null, isPinned?: boolean, color?: string | null, skipSilence?: boolean, isUnloaded?: boolean, previewFileName?: string | null, previewCapturedAt?: number, placementOpenerTabId?: string | null, history?: object[], historyIndex?: number}>, activeTabId?: string }} sessionData
+   * @param {{ loadInactiveTabs?: boolean, restoreTabLoadState?: boolean, loadLandingPage?: boolean }} [options]
+   * @returns {Promise<boolean>}
+   */
+  async restoreFromData(sessionData, { loadInactiveTabs = false, restoreTabLoadState = false, loadLandingPage = false } = {}) {
+    if (!sessionData || !Array.isArray(sessionData.tabs) || sessionData.tabs.length === 0) {
+      return false
+    }
+
+    if (Number.isFinite(sessionData.updatedAt)) {
+      this.sessionUpdatedAt = sessionData.updatedAt
+    }
+
+    const preserveUpdatedAt = Number.isFinite(sessionData.updatedAt)
+    const persistenceWasDisabled = this._sessionPersistenceDisabled
+    if (preserveUpdatedAt) this._sessionPersistenceDisabled = true
+
+    try {
+      const restoreNavigationHistory = await getStoredRememberTabNavigationHistory()
+      this._restoreTabGroups(sessionData.groups)
+      const landingRoute = loadLandingPage ? await TabManager.getStoredLandingRoute() : null
+      const activeTabData = loadLandingPage
+        ? sessionData.tabs.find(tab => getRouteFromUrl(tab.url).path === landingRoute)
+        : sessionData.tabs.find(tab => tab.id === sessionData.activeTabId)
+      const prioritizeActiveWatchTab = activeTabData != null &&
+        getRouteFromUrl(activeTabData.url).path.startsWith('/watch/')
+      const deferredStartupTabIds = new Set()
+      const avatars = new Map()
+      for (const tabData of sessionData.tabs) {
+        const fileName = normalizeTabPreviewFileName(tabData.avatarFileName)
+        if (fileName != null && !avatars.has(fileName)) {
+          avatars.set(fileName, tabPreviewStorage.read(fileName))
+        }
+      }
+      await Promise.all([...avatars].map(async ([fileName, data]) => {
+        avatars.set(fileName, await data)
+      }))
+
+      await this.runBatched(() => {
+        for (const tabData of sessionData.tabs) {
+          const makeActive = tabData === activeTabData
+          const savedTitle = normalizeLegacyTabTitle(tabData.title)
+          const hasSavedTitle = savedTitle.trim().length > 0
+          const previewFileName = normalizeTabPreviewFileName(tabData.previewFileName)
+          const avatarFileName = normalizeTabPreviewFileName(tabData.avatarFileName)
+          const avatarDataUrl = avatars.get(avatarFileName) ?? null
+          const loadInBackground = !loadLandingPage && (loadInactiveTabs || (restoreTabLoadState && tabData.isUnloaded === false))
+          const deferForActiveWatchTab = prioritizeActiveWatchTab &&
+            !makeActive &&
+            loadInBackground
+          const restoreAsUnloaded = (loadLandingPage && !makeActive) || deferForActiveWatchTab || (!loadInactiveTabs && !makeActive && (
+            (restoreTabLoadState && tabData.isUnloaded === true) ||
+            (!loadInBackground && hasSavedTitle)
+          ))
+
+          const tab = this.createTab({
+            id: typeof tabData.id === 'string' ? tabData.id : undefined,
+            // Strip here as well to heal sessions persisted before the strip on save existed
+            url: stripOneTimeTimestampFromUrl(tabData.url),
+            title: hasSavedTitle ? savedTitle : undefined,
+            avatarDataUrl,
+            avatarFileName: avatarDataUrl == null ? null : avatarFileName,
+            isPinned: tabData.isPinned === true,
+            color: tabData.color,
+            groupId: tabData.groupId,
+            // Legacy sessions did not persist this field and must retain the old
+            // disabled behavior instead of inheriting the new-tab default.
+            skipSilence: tabData.skipSilence === true,
+            // Preview images are only needed when the switcher asks for them.
+            // Keep the cache reference and let getTabPreview load it on demand
+            // instead of serially reading every restored tab before first paint.
+            previewCapturedAt: previewFileName != null && Number.isFinite(tabData.previewCapturedAt)
+              ? tabData.previewCapturedAt
+              : 0,
+            previewFileName,
+            history: restoreNavigationHistory ? tabData.history : null,
+            historyIndex: restoreNavigationHistory ? tabData.historyIndex : null,
+            persistHistory: restoreNavigationHistory,
+            makeActive,
+            openPosition: 'end',
+            openerTabId: typeof tabData.placementOpenerTabId === 'string'
+              ? tabData.placementOpenerTabId
+              : null,
+            automaticallyUnloaded: tabData.automaticallyUnloaded,
+            lazyLoad: restoreAsUnloaded,
+            _deferMount: !makeActive,
+            preloadInBackground: loadInBackground && !makeActive && !deferForActiveWatchTab
+          })
+          if (deferForActiveWatchTab) {
+            deferredStartupTabIds.add(tab.id)
+          }
+        }
+
+        if (deferredStartupTabIds.size > 0) {
+          this._deferredStartupTabIds = deferredStartupTabIds
+          this._startupPriorityTabId = this.activeTabId
+          this._startupPriorityLoadingObserved = false
+        }
+
+        restoreTabPlacementOpeners(this.tabs, sessionData.tabs)
+
+        if (loadLandingPage && !activeTabData) {
+          this.createTab({ route: landingRoute, makeActive: true, openPosition: 'end' })
+        }
+
+        if (!this.activeTabId) {
+          const firstTabId = this.tabs.keys().next().value
+          if (firstTabId) {
+            this.activateTab(firstTabId)
+          }
+        }
+      })
+
+      return this.tabs.size > 0
+    } finally {
+      if (preserveUpdatedAt) this._updateSessionTimestamp(true)
+      this._sessionPersistenceDisabled = persistenceWasDisabled
+    }
+  }
+
+  /**
+   * @param {string} url
+   */
+  navigateActiveTabTo(url) {
+    if (!this.activeTabId) return
+    this.bridge.send(IpcChannels.OPEN_URL, { tabId: this.activeTabId, url })
+  }
+
+  /**
+   * @param {number} offset
+   */
+  navigateHistory(offset) {
+    const tabId = this.presentedTabId ?? this.activeTabId
+    if (!tabId) return
+    this.bridge.send(IpcChannels.TABS_GO_HISTORY, { tabId, offset })
+  }
+}
+
+export default TabManager

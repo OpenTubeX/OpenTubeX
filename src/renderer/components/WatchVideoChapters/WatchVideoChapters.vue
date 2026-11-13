@@ -1,76 +1,105 @@
 <template>
-  <FtCard class="videoChapters">
-    <details
-      class="chaptersDetails"
-      @toggle="chaptersToggled"
+  <div class="chaptersList">
+    <div
+      ref="chaptersWrapper"
+      v-observe-visibility="observeVisibilityOptions"
+      v-overlay-scrollbars
+      class="chaptersWrapper"
+      :class="{ compact }"
+      role="list"
+      @wheel.passive="stopFollowing"
+      @pointerdown="handlePointerDown"
+      @touchmove.passive="stopFollowing"
+      @keydown="handleKeydown"
+      @keydown.arrow-up.stop.prevent="navigateChapters('up')"
+      @keydown.arrow-down.stop.prevent="navigateChapters('down')"
     >
-      <summary
-        class="chaptersSummary"
-      >
-        <h3 class="chaptersTitle">
-          {{ kind === 'keyMoments' ? $t('Chapters.Key Moments') : $t("Chapters.Chapters") }}
-
-          <span class="currentChapter">
-            • <bdi>{{ currentTitle }}</bdi>
-          </span>
-
-          <FontAwesomeIcon
-            class="chaptersChevron"
-            :icon="['fas', 'chevron-right']"
-          />
-        </h3>
-      </summary>
-
       <div
-        ref="chaptersWrapper"
-        v-observe-visibility="observeVisibilityOptions"
-        class="chaptersWrapper"
-        :class="{ compact }"
-        @keydown.arrow-up.stop.prevent="navigateChapters('up')"
-        @keydown.arrow-down.stop.prevent="navigateChapters('down')"
+        ref="chaptersContent"
+        class="chaptersContent"
+        role="presentation"
       >
         <div
-          v-for="(chapter, index) in chapters"
+          v-for="(chapter, index) in chaptersWithThumbnails"
           :key="index"
           class="chapter"
-          role="button"
-          tabindex="0"
-          :aria-selected="index === currentIndex"
           :class="{ current: index === currentIndex }"
-          @click="changeChapter(index)"
-          @keydown.enter.space.stop.prevent="changeChapter(index)"
+          role="listitem"
         >
-          <!-- Setting the aspect ratio avoids layout shifts when the images load -->
-          <img
-            v-if="!compact"
-            alt=""
-            aria-hidden="true"
-            class="chapterThumbnail"
-            loading="lazy"
-            :src="chapter.thumbnail.url"
-            :style="{ aspectRatio: chapter.thumbnail.width / chapter.thumbnail.height }"
+          <button
+            class="chapterSeek"
+            type="button"
+            :aria-current="index === currentIndex ? 'true' : null"
+            @click="changeChapter(index)"
           >
-          <div class="chapterTimestamp">
-            {{ chapter.timestamp }}
-          </div>
-          <p
-            class="chapterTitle"
-            dir="auto"
+            <span
+              v-if="!compact"
+              aria-hidden="true"
+              class="chapterThumbnail"
+              :style="getThumbnailStyle(chapter.displayThumbnail)"
+            />
+            <span class="chapterInfo">
+              <span
+                class="chapterTitle"
+                dir="auto"
+              >
+                {{ chapter.title }}
+              </span>
+              <span class="chapterTimestamp">
+                {{ chapter.timestamp }}
+              </span>
+            </span>
+          </button>
+          <button
+            v-if="loopedChapterIndex !== null"
+            class="chapterAction loopChapter"
+            :class="{ active: index === loopedChapterIndex }"
+            type="button"
+            :aria-label="$t('Chapters.Loop Chapter', { chapter: chapter.title })"
+            :aria-pressed="index === loopedChapterIndex ? 'true' : 'false'"
+            :title="$t('Chapters.Loop Chapter', { chapter: chapter.title })"
+            @click="emit('loop-chapter', index)"
           >
-            {{ chapter.title }}
-          </p>
+            <FtIcon :icon="['fas', 'retweet']" />
+          </button>
+          <button
+            class="chapterAction copyTimestamp"
+            type="button"
+            :aria-label="$t('Chapters.Copy Timestamp Link', { timestamp: chapter.timestamp })"
+            :title="$t('Chapters.Copy Timestamp Link', { timestamp: chapter.timestamp })"
+            @click="copyTimestamp(index)"
+          >
+            <FtIcon :icon="['fas', 'share-alt']" />
+          </button>
         </div>
       </div>
-    </details>
-  </FtCard>
+    </div>
+    <Transition name="chaptersSync">
+      <button
+        v-if="!followCurrentChapter"
+        class="chaptersSync"
+        type="button"
+        @click="syncToCurrentChapter"
+        @keydown.space.stop
+      >
+        <FtIcon
+          class="chaptersSyncIcon"
+          :icon="['fas', 'clock']"
+          aria-hidden="true"
+        />
+        {{ $t('Chapters.Sync to Video Time') }}
+      </button>
+    </Transition>
+  </div>
 </template>
 
 <script setup>
-import { computed, ref, useTemplateRef, watch } from 'vue'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { FtIcon } from '@opentubex/icons'
 import { ObserveVisibility as vObserveVisibility } from 'vue-observe-visibility'
 
-import FtCard from '../ft-card/ft-card.vue'
+import { getCenteredChapterScrollTop } from './chapterScroll'
+import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 
 const props = defineProps({
   chapters: {
@@ -81,54 +110,171 @@ const props = defineProps({
     type: Number,
     required: true
   },
-  kind: {
+  chapterThumbnails: {
+    type: Array,
+    default: () => []
+  },
+  fallbackThumbnail: {
     type: String,
-    default: 'chapters'
+    default: ''
+  },
+  /** The looped chapter, -1 for none, or null to hide the loop buttons. */
+  loopedChapterIndex: {
+    type: Number,
+    default: null
   }
 })
 
-const emit = defineEmits(['timestamp-event'])
+const emit = defineEmits(['copy-timestamp', 'loop-chapter', 'timestamp-event'])
 
 const chaptersWrapper = useTemplateRef('chaptersWrapper')
+// The scroll container, which the sidebar panel resizes.
+defineExpose({ chaptersWrapper })
 
-let chaptersVisible = false
+const chaptersContent = useTemplateRef('chaptersContent')
+let scrollFrame = null
+// Scrolling the list by hand stops it from following playback until the
+// sync button, a chapter click, or reopening the list brings it back.
+const followCurrentChapter = ref(true)
+const resizeObserver = new ResizeObserver(scheduleScrollClamp)
+
+/** A remaining range up to this size is rounding at fractional UI scales. */
+const SCROLL_RANGE_TOLERANCE = 1
+
+function canScroll() {
+  const container = chaptersWrapper.value
+  return !!container && container.scrollHeight - container.clientHeight > SCROLL_RANGE_TOLERANCE
+}
+
+function stopFollowing() {
+  if (canScroll()) followCurrentChapter.value = false
+}
+
+/** @param {MouseEvent} event */
+function syncToCurrentChapter(event) {
+  const hadFocus = event.currentTarget === document.activeElement
+  followCurrentChapter.value = true
+  scrollToCurrentChapter()
+  // The button goes away, so keep focus in the list rather than losing it to
+  // the page. The smooth scroll above brings the chapter into view.
+  if (hadFocus) {
+    chaptersContent.value?.children[currentIndex.value]
+      ?.querySelector('.chapterSeek')
+      ?.focus({ preventScroll: true })
+  }
+}
+
+/** @param {PointerEvent} event */
+function handlePointerDown(event) {
+  if (event.button === 1 || event.target.closest('.os-scrollbar')) {
+    stopFollowing()
+  }
+}
+
+/** @param {KeyboardEvent} event */
+function handleKeydown(event) {
+  if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End'].includes(event.key)) {
+    stopFollowing()
+  }
+}
+
+function scheduleScrollClamp() {
+  if (scrollFrame !== null) return
+  scrollFrame = requestAnimationFrame(() => {
+    scrollFrame = null
+    // A hidden tab has no layout and so no scroll range to judge; the
+    // observer runs again once the list is shown.
+    if (chaptersWrapper.value?.clientHeight > 0 && chaptersContent.value) {
+      clampOverlayScrollTop(chaptersWrapper.value, chaptersContent.value)
+      // Nothing is left to scroll away from, so there is nothing to sync back to.
+      if (!canScroll()) followCurrentChapter.value = true
+      if (followCurrentChapter.value) scrollToCurrentChapter(0)
+    }
+  })
+}
+
+onMounted(() => {
+  resizeObserver.observe(chaptersWrapper.value)
+  resizeObserver.observe(chaptersContent.value)
+})
+onBeforeUnmount(() => {
+  resizeObserver.disconnect()
+  if (scrollFrame !== null) cancelAnimationFrame(scrollFrame)
+})
 const currentIndex = ref(props.currentChapterIndex)
 
 watch(() => props.currentChapterIndex, (value) => {
   if (currentIndex.value !== value) {
     currentIndex.value = value
+    scrollToCurrentChapter()
   }
 })
 
-const currentChapter = computed(() => {
-  return props.chapters[currentIndex.value]
+const chaptersWithThumbnails = computed(() => {
+  return props.chapters.map((chapter, index) => {
+    let displayThumbnail = chapter.thumbnail?.url ? chapter.thumbnail : props.chapterThumbnails[index]
+
+    if (!displayThumbnail && props.fallbackThumbnail) {
+      displayThumbnail = {
+        url: props.fallbackThumbnail,
+        width: 16,
+        height: 9
+      }
+    }
+
+    return { ...chapter, displayThumbnail }
+  })
 })
 
-/** @type {import('vue').ComputedRef<string>} */
-const currentTitle = computed(() => {
-  return currentChapter.value.title
-})
+watch(chaptersWithThumbnails, scheduleScrollClamp, { flush: 'post' })
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const compact = computed(() => {
-  return !props.chapters[0].thumbnail
+  return !chaptersWithThumbnails.value.some(chapter => chapter.displayThumbnail)
 })
+
+/**
+ * @param {{ url: string, width?: number, height?: number, imageWidth?: number, imageHeight?: number, positionX?: number, positionY?: number, sprite?: boolean } | null} thumbnail
+ * @returns {Record<string, string>}
+ */
+function getThumbnailStyle(thumbnail) {
+  if (!thumbnail) {
+    return {}
+  }
+
+  const width = thumbnail.width || 16
+  const height = thumbnail.height || 9
+  const style = {
+    aspectRatio: `${width} / ${height}`,
+    backgroundImage: `url(${JSON.stringify(thumbnail.url)})`
+  }
+
+  if (thumbnail.sprite && thumbnail.imageWidth && thumbnail.imageHeight) {
+    const horizontalRange = thumbnail.imageWidth - width
+    const verticalRange = thumbnail.imageHeight - height
+    const horizontalPosition = horizontalRange > 0 ? (thumbnail.positionX ?? 0) / horizontalRange * 100 : 0
+    const verticalPosition = verticalRange > 0 ? (thumbnail.positionY ?? 0) / verticalRange * 100 : 0
+
+    style.backgroundPosition = `${horizontalPosition}% ${verticalPosition}%`
+    style.backgroundSize = `${thumbnail.imageWidth / width * 100}% ${thumbnail.imageHeight / height * 100}%`
+  }
+
+  return style
+}
 
 const observeVisibilityOptions = {
   callback: (isVisible, _entry) => {
-    // This is also fired when **hidden**
-    // No point doing anything if not visible
-    if (!isVisible) { return }
-    // Only auto scroll when expanded
-    if (!chaptersVisible) { return }
-
-    scrollToCurrentChapter()
+    if (isVisible) {
+      // Wait for the panel/dock layout to settle; centering with a zero-height
+      // container would scroll by half a row and clip the first chapter.
+      // A list the user scrolled keeps its position, for example after the
+      // page scrolled it out of view; reopening the list mounts it anew.
+      requestAnimationFrame(() => scrollToCurrentChapter())
+    }
   },
   intersection: {
-    // Only when it intersects with N% above bottom
     rootMargin: '0% 0% 0% 0%',
   },
-  // Callback responsible for scolling to current chapter multiple times
   once: false,
 }
 
@@ -136,55 +282,82 @@ const observeVisibilityOptions = {
  * @param {number} index
  */
 function changeChapter(index) {
+  followCurrentChapter.value = true
   currentIndex.value = index
   emit('timestamp-event', props.chapters[index].startSeconds)
-  window.scrollTo(0, 0)
+}
+
+/**
+ * @param {number} index
+ */
+function copyTimestamp(index) {
+  emit('copy-timestamp', props.chapters[index].startSeconds)
 }
 
 /**
  * @param {'up' | 'down'} direction
  */
 function navigateChapters(direction) {
-  const chapterElements = Array.from(chaptersWrapper.value.children)
-  const focusedIndex = chapterElements.indexOf(document.activeElement)
+  const chapterRows = Array.from(chaptersContent.value.children)
+  const focusedRow = document.activeElement?.closest('.chapter')
+  const focusedIndex = chapterRows.indexOf(focusedRow)
+  const offset = direction === 'up' ? -1 : 1
+  let newIndex
 
-  let newIndex = focusedIndex
-  if (direction === 'up') {
-    if (focusedIndex === 0) {
-      newIndex = chapterElements.length - 1
-    } else {
-      newIndex--
-    }
+  if (focusedIndex === -1) {
+    newIndex = direction === 'up' ? chapterRows.length - 1 : 0
   } else {
-    if (focusedIndex === chapterElements.length - 1) {
-      newIndex = 0
-    } else {
-      newIndex++
-    }
+    newIndex = (focusedIndex + offset + chapterRows.length) % chapterRows.length
   }
 
-  chapterElements[newIndex].focus()
+  chapterRows[newIndex].querySelector('.chapterSeek')?.focus()
 }
 
 /**
- * @param {ToggleEvent} event
+ * @param {number} [remainingAttempts]
  */
-function chaptersToggled(event) {
-  chaptersVisible = event.target.open
-
-  if (chaptersVisible) {
-    scrollToCurrentChapter()
-  }
-}
-
-function scrollToCurrentChapter() {
+function scrollToCurrentChapter(remainingAttempts = 5) {
   const container = chaptersWrapper.value
-  const currentItem = container ? Array.from(container.children)[currentIndex.value] : null
+  const currentItem = chaptersContent.value?.children[currentIndex.value]
 
-  if (currentItem != null) {
-    container.scrollTop = currentItem.offsetTop - container.offsetTop
+  // Deferred and retried calls run a frame later; a manual scroll in between wins.
+  if (!followCurrentChapter.value || !container || !currentItem) {
+    return
   }
+
+  clampOverlayScrollTop(container, chaptersContent.value)
+  const containerRect = container.getBoundingClientRect()
+  const currentItemRect = currentItem.getBoundingClientRect()
+
+  if (containerRect.height < currentItemRect.height && remainingAttempts > 0) {
+    requestAnimationFrame(() => scrollToCurrentChapter(remainingAttempts - 1))
+    return
+  }
+
+  const maxScrollTop = container.scrollHeight - container.clientHeight
+  let top = getCenteredChapterScrollTop(
+    container.scrollTop + (currentItemRect.top - containerRect.top),
+    currentItemRect.height,
+    containerRect.height,
+    maxScrollTop
+  )
+
+  if (top == null) {
+    if (remainingAttempts > 0) {
+      requestAnimationFrame(() => scrollToCurrentChapter(remainingAttempts - 1))
+    }
+    return
+  }
+
+  // At fractional UI scales the real end can lie past the rounded maximum.
+  // Stopping short of it lets the next touch swipe latch onto the list
+  // instead of chaining to the page, so let the browser clamp to its end.
+  if (top >= maxScrollTop) top = container.scrollHeight
+  // Writing scrollTop here would stop a composited smooth scroll that's still
+  // running, and with it the new one.
+  container.scrollTo({ top, behavior: 'smooth' })
 }
+
 </script>
 
 <style scoped src="./WatchVideoChapters.css" />

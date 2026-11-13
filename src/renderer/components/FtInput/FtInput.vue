@@ -2,140 +2,243 @@
 <template>
   <div
     class="ft-input-component"
-    :data-settings-search-label="showLabel && label ? label : placeholder"
     :class="{
       search: isSearch,
-      forceTextColor,
       showActionButton,
-      showClearTextButton,
-      clearTextButtonVisible: inputDataPresent || showOptions,
-      inputDataPresent,
-      showOptions
+      showPasswordToggle: inputType === 'password',
+      floatingLabel: showLabel,
+      hasValue: inputDataPresent,
+      hasSupportingText: supportingText !== '',
+      outlined: variant === 'outlined' && !isSearch
     }"
+    @focusout="handleFocusOut"
   >
-    <label
-      v-if="showLabel"
-      :for="id"
-      class="selectLabel"
-      :class="{ disabled }"
-    >
-      {{ label || placeholder }}
-      <FtTooltip
-        v-if="tooltip !== ''"
-        class="selectTooltip"
-        position="bottom"
-        :tooltip="tooltip"
-      />
-    </label>
-    <button
-      v-if="showClearTextButton"
-      class="clearInputTextButton"
-      :class="{
-        visible: inputDataPresent || showOptions
-      }"
-      :aria-label="t('Search Bar.Clear Input')"
-      :title="t('Search Bar.Clear Input')"
-      @click="handleClearTextClick"
-    >
-      <FontAwesomeIcon
-        class="buttonIcon"
-        :icon="['fas', 'times-circle']"
-      />
-    </button>
     <span class="inputWrapper">
-      <input
+      <component
+        :is="multiline ? 'textarea' : 'input'"
+        v-bind="inputAttributes"
         :id="id"
         ref="inputRef"
         :value="inputDataDisplayed"
         class="ft-input"
-        :class="{ disabled }"
+        :class="{ disabled, multiline }"
+        :style="inputTextStyle"
         :maxlength="maxlength"
-        :type="inputType"
+        :min="min"
+        :step="step"
+        :type="inputType === 'password' && passwordVisible ? 'text' : inputType"
         :placeholder="placeholder"
         :disabled="disabled"
+        :readonly="readonly"
         :spellcheck="false"
-        :aria-label="showLabel ? null : placeholder"
+        :aria-describedby="descriptionIds"
+        :aria-invalid="invalid"
+        :aria-label="showLabel ? null : (label || placeholder)"
+        @change="handleChange"
+        @mousedown="selectOnClick && $event.button === 0 && $event.preventDefault()"
+        @click="handleNativeClick"
         @input="handleInput"
         @focus="handleFocus"
         @blur="handleInputBlur"
         @keydown="handleKeyDown"
+      />
+      <fieldset
+        v-if="showLabel"
+        class="inputOutline"
+        role="presentation"
       >
+        <legend class="inputLegend">
+          <label
+            :for="id"
+            class="selectLabel"
+            :class="{ disabled, hasIcon: icon !== null }"
+          >
+            <FtIcon
+              v-if="icon !== null"
+              :icon="icon"
+              class="selectLabelIcon"
+              aria-hidden="true"
+            />
+            <span
+              class="selectLabelText"
+              :title="label || placeholder"
+            >{{ label || placeholder }}</span>
+          </label>
+        </legend>
+      </fieldset>
+      <slot name="extraAction" />
+      <button
+        v-if="inputType === 'password'"
+        type="button"
+        class="inputAction passwordVisibilityToggle"
+        :class="{ enabled: !disabled }"
+        :disabled="disabled"
+        :aria-label="passwordVisibilityLabel"
+        :title="passwordVisibilityLabel"
+        :aria-controls="id"
+        @pointerdown.prevent
+        @click="togglePasswordVisibility"
+      >
+        <FtIcon
+          class="buttonIcon"
+          :icon="['fas', passwordVisible ? 'eye-slash' : 'eye']"
+          aria-hidden="true"
+        />
+      </button>
       <button
         v-if="showActionButton"
         class="inputAction"
         :class="{
-          enabled: inputDataPresent,
+          enabled: !disabled && (inputDataPresent || allowActionButtonWhenEmpty),
           withLabel: showLabel
         }"
+        :disabled="disabled"
         :aria-label="actionButtonLabel"
         :title="actionButtonLabel"
         @click="handleClick"
       >
-        <FontAwesomeIcon
+        <FtIcon
           class="buttonIcon"
           :icon="actionButtonIconName"
+          aria-hidden="true"
         />
       </button>
+      <span
+        v-if="tooltip !== '' || settingKey !== ''"
+        class="inputIndicators"
+      >
+        <FtTooltip
+          v-if="tooltip !== ''"
+          ref="tooltipRef"
+          class="selectTooltip"
+          position="bottom"
+          :tooltip="tooltip"
+        />
+        <FtSyncedSettingIndicator :setting-key="settingKey" />
+      </span>
     </span>
     <div class="options">
       <ul
-        v-if="showOptions"
+        v-if="showOptions && (visibleDataList.length > 0 || $slots.preview)"
+        ref="optionsList"
+        v-overlay-scrollbars
         class="list"
         @mouseenter="searchState.isPointerInList = true"
         @mouseleave="searchState.isPointerInList = false"
       >
         <!-- eslint-disable vuejs-accessibility/click-events-have-key-events -->
+        <!-- Enter already opens what the preview shows, so it needs no key handler. -->
         <li
-          v-for="(entry, index) in visibleDataList"
+          v-if="$slots.preview"
+          class="previewOption"
+          @pointerdown.prevent
+          @click.prevent="handlePreviewClick"
+          @auxclick.middle="handlePreviewAuxClick"
+        >
+          <slot name="preview" />
+        </li>
+        <li
+          v-for="(entry, index) in renderedDataList"
           :key="index"
+          v-first-visible="index === renderedDataList.length - 1 && index < visibleDataList.length - 1 ? renderMoreRows : false"
           :class="{ hover: searchState.selectedOption === index }"
-          @click="handleOptionClick(index)"
           @mouseenter="searchState.selectedOption = index"
           @mouseleave="resetSelectedOption"
         >
-          <div class="optionWrapper">
-            <FontAwesomeIcon
-              v-if="dataListProperties[index]?.iconName"
-              :icon="['fas', dataListProperties[index].iconName]"
+          <component
+            :is="getDataListProperty(index)?.isLink ? 'a' : 'div'"
+            class="optionWrapper"
+            :href="getDataListProperty(index)?.href"
+            :aria-label="getDataListProperty(index)?.ariaLabel"
+            :title="getDataListProperty(index)?.ariaLabel"
+            @click.prevent="handleOptionClick(index, $event)"
+            @auxclick.middle="handleOptionAuxClick(index, $event)"
+          >
+            <FtIcon
+              v-if="getDataListProperty(index)?.iconName"
+              :icon="['fas', getDataListProperty(index).iconName]"
               class="searchResultIcon"
             />
-            <bdi>{{ entry }}</bdi>
-          </div>
+            <bdi>{{ getDataListProperty(index)?.displayText ?? entry }}</bdi>
+          </component>
+          <button
+            v-if="showSuggestionFillButton"
+            type="button"
+            class="acceptSuggestionButton"
+            :aria-label="`${t('Search Bar.Use Suggestion')}: ${getDataListProperty(index)?.displayText ?? entry}`"
+            :title="t('Search Bar.Use Suggestion')"
+            @pointerdown.prevent
+            @click.stop="handleAcceptSuggestion(index)"
+          >
+            <FtIcon
+              :icon="['fas', 'arrow-up-left']"
+              aria-hidden="true"
+            />
+          </button>
           <a
-            v-if="dataListProperties[index]?.isRemoveable"
+            v-if="getDataListProperty(index)?.isRemoveable"
             class="removeButton"
             :class="{ removeButtonSelected: removeButtonSelectedIndex === index }"
             role="button"
             :aria-label="t('Search Bar.Remove')"
+            :title="t('Search Bar.Remove')"
             href="javascript:void(0)"
             @click.prevent.stop="handleRemoveClick(index)"
           >
-            {{ t('Search Bar.Remove') }}
+            <FtIcon :icon="['fas', 'xmark']" />
           </a>
         </li>
         <!-- skipped -->
       </ul>
     </div>
+    <p
+      v-if="supportingText"
+      :id="`${id}-supporting`"
+      class="supportingText"
+    >
+      {{ supportingText }}
+    </p>
   </div>
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, reactive, ref, shallowRef, useId, useTemplateRef, watch } from 'vue'
+import { FtIcon } from '@opentubex/icons'
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, shallowRef, useId, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtTooltip from '../FtTooltip/FtTooltip.vue'
+import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
 
 import store from '../../store/index'
 
+import { vFirstVisible } from '../../helpers/firstVisible'
+import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { isKeyboardEventKeyPrintableChar, isNullOrEmpty } from '../../helpers/strings'
+import { getInputTextAscentOffset } from './inputTextMetrics'
+import { shouldOpenExternalMediaUrl } from '../../helpers/externalMediaUrl'
+import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 
 const { t } = useI18n()
 
 const props = defineProps({
+  invalid: { type: Boolean, default: false },
+  multiline: { type: Boolean, default: false },
+  selectOnClick: { type: Boolean, default: false },
+  changeFilter: { type: Function, default: null },
+  min: { type: [String, Number], default: null },
+  step: { type: [String, Number], default: null },
+  variant: {
+    type: String,
+    default: 'outlined',
+    validator: value => ['filled', 'outlined'].includes(value)
+  },
   inputType: {
     type: String,
     default: 'text'
+  },
+  inputFilter: {
+    type: Function,
+    default: null
   },
   placeholder: {
     type: String,
@@ -143,6 +246,14 @@ const props = defineProps({
   },
   label: {
     type: String,
+    default: null
+  },
+  supportingText: {
+    type: String,
+    default: ''
+  },
+  icon: {
+    type: Array,
     default: null
   },
   maxlength: {
@@ -165,19 +276,27 @@ const props = defineProps({
     type: Array,
     default: null
   },
-  showClearTextButton: {
-    type: Boolean,
-    default: false
-  },
   showLabel: {
     type: Boolean,
-    default: false
+    default: true
   },
   isSearch: {
     type: Boolean,
     default: false
   },
+  showSuggestionFillButton: {
+    type: Boolean,
+    default: false
+  },
+  externalMediaNavigation: {
+    type: Boolean,
+    default: false
+  },
   disabled: {
+    type: Boolean,
+    default: false
+  },
+  readonly: {
     type: Boolean,
     default: false
   },
@@ -200,14 +319,69 @@ const props = defineProps({
   tooltip: {
     type: String,
     default: ''
+  },
+  allowActionButtonWhenEmpty: {
+    type: Boolean,
+    default: false
+  },
+  settingKey: {
+    type: String,
+    default: ''
+  },
+  /** Extra attributes for the native input, such as combobox ARIA state. */
+  inputAttributes: {
+    type: Object,
+    default: null
   }
 })
 
-const emit = defineEmits(['clear', 'click', 'input', 'remove', 'blur'])
+const emit = defineEmits(['blur', 'change', 'clear', 'click', 'focus', 'input', 'keydown', 'remove'])
 
 const id = useId()
 
 const inputRef = useTemplateRef('inputRef')
+const passwordVisible = ref(false)
+const passwordVisibilityLabel = computed(() => passwordVisible.value
+  ? t('Form Inputs.Hide Password')
+  : t('Form Inputs.Show Password'))
+
+watch([() => props.inputType, () => props.disabled], () => {
+  passwordVisible.value = false
+})
+
+async function togglePasswordVisibility() {
+  const input = inputRef.value
+  if (!input || props.disabled) return
+
+  const { selectionStart, selectionEnd, selectionDirection } = input
+  passwordVisible.value = !passwordVisible.value
+  await nextTick()
+  if (selectionStart !== null && selectionEnd !== null) {
+    // Chromium resets the selection of the retyped input at its next layout.
+    // Lay it out first, so that reset cannot discard the restored selection.
+    input.getBoundingClientRect()
+    input.setSelectionRange(selectionStart, selectionEnd, selectionDirection)
+  }
+}
+
+const tooltipRef = useTemplateRef('tooltipRef')
+const descriptionIds = computed(() => [
+  tooltipRef.value?.id,
+  props.supportingText ? `${id}-supporting` : null
+].filter(Boolean).join(' ') || undefined)
+const optionsList = useTemplateRef('optionsList')
+
+watch(optionsList, (list, previousList, onCleanup) => {
+  if (list === null) return
+  // The viewport can keep its height while responsive rows become shorter.
+  const observer = new ResizeObserver(() => {
+    clampOverlayScrollTop(list, list.querySelector(':scope > li:last-of-type'))
+  })
+  observer.observe(list)
+  const firstRow = list.querySelector('li')
+  if (firstRow) observer.observe(firstRow)
+  onCleanup(() => observer.disconnect())
+}, { flush: 'post' })
 
 const inputData = ref(props.value)
 const searchState = reactive({
@@ -217,15 +391,27 @@ const searchState = reactive({
   keyboardSelectedOptionIndex: -1
 })
 const visibleDataList = ref(props.dataList)
+const visibleDataListIndexes = ref(props.dataList.map((_, index) => index))
+
+// Search history can hold thousands of entries. Render them in batches as the
+// list is scrolled to its last rendered row.
+const ROW_BATCH_SIZE = 40
+const renderedRowCount = ref(ROW_BATCH_SIZE)
+const renderedDataList = computed(() => visibleDataList.value.length > renderedRowCount.value
+  ? visibleDataList.value.slice(0, renderedRowCount.value)
+  : visibleDataList.value)
+
+function renderMoreRows() {
+  renderedRowCount.value += ROW_BATCH_SIZE
+}
 const removeButtonSelectedIndex = ref(-1)
 const removalMade = ref(false)
 const actionButtonIconName = shallowRef(props.forceActionButtonIconName ?? ['fas', 'search'])
 
+// The template also requires rows or a preview, as slots are not reactive here.
 const showOptions = computed(() => {
-  return (inputData.value !== '' || props.showDataWhenEmpty) && visibleDataList.value.length > 0 && searchState.showOptions
+  return (inputData.value !== '' || props.showDataWhenEmpty) && searchState.showOptions
 })
-
-const forceTextColor = computed(() => props.isSearch && store.getters.getBarColor)
 
 const searchStateKeyboardSelectedOptionValue = computed(() => {
   return searchState.keyboardSelectedOptionIndex === -1
@@ -246,25 +432,48 @@ const inputDataDisplayed = computed(() => {
 })
 
 const inputDataPresent = computed(() => inputDataDisplayed.value.length > 0)
+const inputTextStyle = computed(() => {
+  if (!props.isSearch) return null
 
-watch(() => props.dataList, updateVisibleDataList, { deep: true })
-watch(inputData, updateVisibleDataList)
-watch(() => props.value, (value) => {
-  inputData.value = value
+  const offset = getInputTextAscentOffset(inputDataDisplayed.value)
+  const paddingStart = props.showLabel ? 20 : (45 - 20) / 2
+  const paddingEnd = props.showLabel ? 5 : (45 - 20) / 2
+
+  return {
+    '--search-input-padding-block-start': `${paddingStart - offset}px`,
+    '--search-input-padding-block-end': `${paddingEnd + offset}px`
+  }
 })
+
+watch(() => props.dataList, () => updateVisibleDataList(removalMade.value), { deep: true })
+watch(inputData, () => updateVisibleDataList())
+watch(() => props.value, (value) => {
+  if (value === inputData.value) { return }
+  setInputText(value)
+})
+
+/**
+ * Replaces the text without user input, e.g. when a parent restores it.
+ * @param {string} text
+ */
+function setInputText(text) {
+  inputData.value = text
+  handleActionIconChange()
+}
 
 updateVisibleDataList()
 
 /**
  * @param {KeyboardEvent | MouseEvent} [event]
+ * @param {number} [dataListIndex]
  */
-function handleClick(event) {
+function handleClick(event, dataListIndex = searchState.keyboardSelectedOptionIndex) {
   const selectedValue = searchStateKeyboardSelectedOptionValue.value
   const query = (selectedValue != null && selectedValue !== '') ? selectedValue : inputData.value
   inputData.value = query
 
   // No action if no input text
-  if (!inputDataPresent.value) {
+  if (!inputDataPresent.value && !props.allowActionButtonWhenEmpty) {
     return
   }
 
@@ -274,15 +483,48 @@ function handleClick(event) {
   removeButtonSelectedIndex.value = -1
 
   emit('input', query)
-  emit('click', query, { event })
+  emit('click', query, { event, dataListIndex })
+}
+
+function handleNativeClick() {
+  if (props.selectOnClick) {
+    inputRef.value?.focus()
+    inputRef.value?.select()
+  }
+}
+
+/**
+ * @param {Event} event
+ */
+function handleChange(event) {
+  const value = props.changeFilter ? String(props.changeFilter(event.target.value)) : event.target.value
+  inputData.value = value
+  event.target.value = value
+  emit('change', value)
 }
 
 /**
  * @param {string | InputEvent} data
  */
 function handleInput(data) {
-  const text = typeof data === 'string' ? data : inputRef.value.value
+  const rawText = typeof data === 'string' ? data : inputRef.value.value
+  const text = props.inputFilter ? props.inputFilter(rawText) : rawText
+  if (text !== rawText && inputRef.value) {
+    const input = inputRef.value
+    const { selectionStart, selectionEnd } = input
+    input.value = text
+    if (selectionStart !== null && selectionEnd !== null) {
+      input.setSelectionRange(
+        props.inputFilter(rawText.slice(0, selectionStart)).length,
+        props.inputFilter(rawText.slice(0, selectionEnd)).length
+      )
+    }
+  }
   inputData.value = text
+  searchState.showOptions = true
+
+  // Native cancel can clear a keyboard preview while inputData is already empty.
+  if (text === '') updateVisibleDataList()
 
   if (
     props.isSearch &&
@@ -296,7 +538,7 @@ function handleInput(data) {
   emit('input', text)
 }
 
-function handleClearTextClick() {
+function clearText() {
   // No action if no input text
   if (!inputDataPresent.value) { return }
 
@@ -313,9 +555,16 @@ function handleClearTextClick() {
   emit('clear')
 }
 
+// URL lookups are async, so only the latest one may update the icon.
+let actionIconRequestId = 0
+
 async function handleActionIconChange() {
   // Only need to update icon if visible
   if (!props.showActionButton) { return }
+
+  const requestId = ++actionIconRequestId
+
+  const inputText = props.isSearch ? inputData.value.trim() : inputData.value
 
   if (!inputDataPresent.value && props.forceActionButtonIconName === null) {
     // Change back to default icon if text is blank
@@ -323,16 +572,21 @@ async function handleActionIconChange() {
     return
   }
 
+  if (props.externalMediaNavigation && supportsYtDlp && shouldOpenExternalMediaUrl(inputText, store.getters.getCurrentInvidiousInstanceUrl)) {
+    if (props.forceActionButtonIconName === null) actionButtonIconName.value = ['fas', 'arrow-right']
+    return
+  }
+
   // Update action button icon according to input
   try {
-    const result = await store.dispatch('getYoutubeUrlInfo', inputData.value)
+    const result = await store.dispatch('getYoutubeUrlInfo', inputText)
+    if (requestId !== actionIconRequestId) { return }
 
     let isYoutubeLink = false
 
     switch (result.urlType) {
       case 'video':
       case 'playlist':
-      case 'show':
       case 'search':
       case 'channel':
       case 'hashtag':
@@ -341,7 +595,6 @@ async function handleActionIconChange() {
       case 'subscriptions':
       case 'history':
       case 'userplaylists':
-      case 'clip':
         isYoutubeLink = true
         break
 
@@ -352,7 +605,8 @@ async function handleActionIconChange() {
     }
 
     if (props.forceActionButtonIconName === null) {
-      if (isYoutubeLink) {
+      if (isYoutubeLink || (props.externalMediaNavigation && supportsYtDlp &&
+        shouldOpenExternalMediaUrl(inputText, store.getters.getCurrentInvidiousInstanceUrl))) {
         // Go to URL (i.e. Video/Playlist/Channel
         actionButtonIconName.value = ['fas', 'arrow-right']
       } else {
@@ -362,7 +616,7 @@ async function handleActionIconChange() {
     }
   } catch (ex) {
     // On exception, consider text as invalid URL
-    if (props.forceActionButtonIconName === null) {
+    if (requestId === actionIconRequestId && props.forceActionButtonIconName === null) {
       actionButtonIconName.value = ['fas', 'search']
     }
 
@@ -373,19 +627,66 @@ async function handleActionIconChange() {
 
 /**
  * @param {number} index
+ * @param {MouseEvent} [event]
  */
-function handleOptionClick(index) {
+function handleOptionClick(index, event) {
   if (removeButtonSelectedIndex.value !== -1) {
     handleRemoveClick(index)
     return
   }
 
+  const selectedValue = visibleDataList.value[index]
+  if (selectedValue == null) {
+    resetSelectedOption()
+    return
+  }
+
   searchState.showOptions = false
   searchState.isPointerInList = false
-  inputData.value = visibleDataList.value[index]
+  inputData.value = selectedValue
   searchState.keyboardSelectedOptionIndex = -1
   emit('input', inputData.value)
-  handleClick()
+  handleClick(event, getDataListIndex(index))
+}
+
+/**
+ * Let web browsers follow the real link themselves. Electron needs to route
+ * middle-clicks through its logical tab service instead.
+ * @param {number} index
+ * @param {MouseEvent} event
+ */
+function handleOptionAuxClick(index, event) {
+  if (!process.env.IS_ELECTRON || !getDataListProperty(index)?.isLink) {
+    return
+  }
+
+  event.preventDefault()
+  inputRef.value.focus()
+  emit('click', visibleDataList.value[index], {
+    event,
+    dataListIndex: getDataListIndex(index)
+  })
+}
+
+/**
+ * The preview shows what the input text opens, so it submits the text itself.
+ * @param {MouseEvent} event
+ */
+function handlePreviewClick(event) {
+  searchState.isPointerInList = false
+  searchState.keyboardSelectedOptionIndex = -1
+  handleClick(event, -1)
+}
+
+/**
+ * @param {MouseEvent} event
+ */
+function handlePreviewAuxClick(event) {
+  if (!process.env.IS_ELECTRON) return
+
+  event.preventDefault()
+  inputRef.value.focus()
+  emit('click', inputData.value, { event, dataListIndex: -1 })
 }
 
 function resetSelectedOption() {
@@ -396,27 +697,63 @@ function resetSelectedOption() {
 /**
  * @param {number} index
  */
+function handleAcceptSuggestion(index) {
+  const selectedValue = visibleDataList.value[index]
+  if (selectedValue == null) return
+
+  resetSelectedOption()
+  searchState.keyboardSelectedOptionIndex = -1
+  handleInput(selectedValue)
+  searchState.isPointerInList = false
+  inputRef.value.focus()
+  inputRef.value.setSelectionRange(selectedValue.length, selectedValue.length)
+  searchState.showOptions = false
+}
+
+/**
+ * @param {number} index
+ */
 function handleRemoveClick(index) {
-  if (!props.dataListProperties[index]?.isRemoveable) { return }
+  if (!getDataListProperty(index)?.isRemoveable) { return }
 
   // keep input in focus even when the to-be-removed "Remove" button was clicked
   inputRef.value.focus()
   removalMade.value = true
-  emit('remove', visibleDataList.value[index])
+  emit('remove', visibleDataList.value[index], { dataListIndex: getDataListIndex(index) })
+}
+
+/**
+ * @param {number} visibleIndex
+ * @returns {number}
+ */
+function getDataListIndex(visibleIndex) {
+  return visibleDataListIndexes.value[visibleIndex]
+}
+
+/**
+ * @param {number} visibleIndex
+ * @returns {object | undefined}
+ */
+function getDataListProperty(visibleIndex) {
+  return props.dataListProperties[getDataListIndex(visibleIndex)]
 }
 
 /**
  * @param {KeyboardEvent} event
  */
 function handleKeyDown(event) {
-// Update Input box value if enter key was pressed and option selected
-  if (event.key === 'Enter' && !event.isComposing) {
+  emit('keydown', event)
+  if (event.defaultPrevented) {
+    return
+  }
+
+  // Update Input box value if enter key was pressed and option selected
+  if (!props.multiline && event.key === 'Enter' && !event.isComposing) {
     if (removeButtonSelectedIndex.value !== -1) {
       handleRemoveClick(removeButtonSelectedIndex.value)
     } else if (searchState.selectedOption !== -1) {
       searchState.showOptions = false
       event.preventDefault()
-      inputData.value = visibleDataList.value[searchState.selectedOption]
       handleOptionClick(searchState.selectedOption)
     } else {
       handleClick(event)
@@ -467,42 +804,91 @@ function updateSelectedOptionIndex(index) {
     searchState.selectedOption = -1
   }
 
+  // Keyboard selection can move past the rendered rows, e.g. wrapping to the last entry.
+  if (searchState.selectedOption >= renderedRowCount.value) {
+    renderedRowCount.value = searchState.selectedOption + 1
+  }
+
   // Update displayed value
   searchState.keyboardSelectedOptionIndex = searchState.selectedOption
 }
 
-function handleInputBlur() {
-  if (!searchState.isPointerInList) {
+function handleOutsideTouch(event) {
+  const input = inputRef.value
+  if (event.pointerType !== 'touch' || document.activeElement !== input || input.closest('.ft-input-component').contains(event.target)) return
+  // iOS can retain focus after dismissing the keyboard, then consume player
+  // taps to reopen it. Clear focus before those taps reach the player.
+  searchState.isPointerInList = false
+  searchState.showOptions = false
+  input.blur()
+}
+
+// Scrollbar setup restores focus while suppressing focus events. Keep this
+// listener for the component lifetime instead of relying on focus/blur pairs.
+onMounted(() => {
+  if (process.env.IS_IOS) document.addEventListener('pointerdown', handleOutsideTouch, true)
+})
+
+onBeforeUnmount(() => {
+  if (process.env.IS_IOS) document.removeEventListener('pointerdown', handleOutsideTouch, true)
+})
+
+function handleFocusOut(event) {
+  if (!searchState.isPointerInList && !event.currentTarget.contains(event.relatedTarget)) {
     searchState.showOptions = false
   }
+}
+
+function handleInputBlur() {
   emit('blur', inputData.value)
 }
 
 function handleFocus() {
+  emit('focus')
   searchState.showOptions = true
 }
 
-function updateVisibleDataList() {
-  // Reset selected option before it's updated
-  // Block resetting if it was just the "Remove" button that was pressed
-  if (!removalMade.value || searchState.selectedOption >= props.dataList.length) {
-    searchState.selectedOption = -1
+async function updateVisibleDataList(preserveSelectionAfterRemoval = false) {
+  // Restoring and clamping the offset force layouts. A list at its start has
+  // no offset to reset, so typing into it skips both.
+  const wasScrolled = optionsList.value != null && optionsList.value.scrollTop !== 0
+  if (wasScrolled) {
+    restoreOverlayScrollTop(optionsList.value, 0)
+  }
+
+  if (inputData.value.trim() === '') {
+    visibleDataList.value = props.dataList
+    visibleDataListIndexes.value = props.dataList.map((_, index) => index)
+  } else {
+    // get list of items that match input
+    const lowerCaseInputData = inputData.value.toLowerCase()
+
+    visibleDataListIndexes.value = props.dataList
+      .map((_, index) => index)
+      .filter(index => props.dataList[index].toLowerCase().includes(lowerCaseInputData))
+    visibleDataList.value = visibleDataListIndexes.value.map(index => props.dataList[index])
+  }
+
+  // Keep the same row selected only while the removal is reflected in the
+  // data list. A text change must clear it, otherwise its index can point past
+  // the newly filtered list and submit an undefined value.
+  if (!preserveSelectionAfterRemoval || searchState.selectedOption >= visibleDataList.value.length) {
+    resetSelectedOption()
     searchState.keyboardSelectedOptionIndex = -1
-    removeButtonSelectedIndex.value = -1
+  }
+
+  if (!preserveSelectionAfterRemoval) {
+    renderedRowCount.value = ROW_BATCH_SIZE
   }
 
   removalMade.value = false
 
-  if (inputData.value.trim() === '') {
-    visibleDataList.value = props.dataList
-    return
-  }
-  // get list of items that match input
-  const lowerCaseInputData = inputData.value.toLowerCase()
+  if (!wasScrolled) return
 
-  visibleDataList.value = props.dataList.filter(x => {
-    return x.toLowerCase().includes(lowerCaseInputData)
-  })
+  await nextTick()
+  const list = optionsList.value
+  const finalOption = list?.querySelector(':scope > li:last-of-type') ?? null
+  if (list !== null) clampOverlayScrollTop(list, finalOption)
 }
 
 defineExpose({
@@ -519,13 +905,9 @@ defineExpose({
   /**
    * @param {string} text
    */
-  setText: (text) => {
-    inputData.value = text
-  },
+  setText: setInputText,
 
-  clear: () => {
-    handleClearTextClick()
-  }
+  clear: clearText
 })
 </script>
 

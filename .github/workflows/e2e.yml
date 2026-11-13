@@ -1,0 +1,327 @@
+name: E2E Tests
+
+on:
+  # Pull requests run quick checks. Each push to development runs the offline
+  # suite, and the nightly run covers everything.
+  pull_request:
+    branches: [ master, development, '**-RC' ]
+  push:
+    branches: [ development ]
+    # Translation-only pushes, like Weblate merges, skip E2E as their PRs do.
+    paths-ignore: [ 'static/locales/**' ]
+  schedule:
+    # Nightly full suite, including network tests against the real YouTube servers
+    - cron: '30 3 * * *'
+  workflow_call:
+    inputs:
+      checkoutRef:
+        description: Git ref to test
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      project:
+        description: 'Playwright project to run'
+        required: false
+        default: 'all'
+        type: choice
+        options: [ all, offline, performance, browser, network ]
+
+permissions: {}
+
+# A newer PR push cancels the older run. Pushes to development finish their
+# run, and only the latest waiting push runs next, so one run can cover several
+# merges.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  prepare-e2e:
+    name: Prepare E2E tests
+    if: ${{ github.event_name != 'pull_request' || github.head_ref != 'weblate-translations' }}
+    runs-on: ubuntu-latest
+
+    outputs:
+      matrix: ${{ steps.shards.outputs.matrix }}
+
+    permissions:
+      contents: read
+
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+        # PR test selection diffs the merge commit against its base parent.
+        fetch-depth: ${{ github.event_name == 'pull_request' && '2' || '1' }}
+        ref: ${{ inputs.checkoutRef }}
+
+    - name: Use Node.js 24.x
+      uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      with:
+        node-version: 24.x
+        package-manager-cache: false
+
+    - name: Set up Go for the Cast sender
+      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      with:
+        go-version-file: _scripts/cast-sender/go.mod
+        cache: false
+
+    - name: Install pnpm
+      uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      with:
+        cache: false
+
+    - name: Get pnpm cache directory
+      id: cache_dir
+      shell: bash
+      run: |
+        {
+          echo 'cache_dir<<EOF'
+          pnpm store path
+          echo EOF
+        } >> "$GITHUB_OUTPUT"
+
+    - name: Cache pnpm store
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        key: ${{ format('node-cache-{0}-{1}-pnpm-{2}', runner.os, runner.arch, hashFiles('pnpm-lock.yaml')) }}
+        path: ${{ steps.cache_dir.outputs.cache_dir }}
+
+    - run: pnpm run ci
+      shell: bash
+
+    - name: Create E2E shard matrix
+      id: shards
+      env:
+        EVENT: ${{ github.event_name }}
+        SELECTED_PROJECT: ${{ github.event_name == 'workflow_dispatch' && inputs.project || 'all' }}
+      run: |
+        set -euo pipefail
+        full_report="$RUNNER_TEMP/e2e-full.json"
+        changed_report="$full_report"
+        pnpm exec playwright test -c e2e/playwright.config.mjs --list --reporter=json > "$full_report"
+        if [ "$EVENT" = pull_request ]; then
+          # HEAD is the PR merge commit and HEAD^1 the base it was merged into.
+          # Playwright diffs against that commit directly, so the moving base
+          # branch tip would also select tests changed by later base pushes.
+          changed_report="$RUNNER_TEMP/e2e-changed.json"
+          pnpm exec playwright test -c e2e/playwright.config.mjs --list --reporter=json \
+            --only-changed=HEAD^1 --pass-with-no-tests > "$changed_report"
+        fi
+        node --input-type=module - "$full_report" "$changed_report" <<'NODE' >> "$GITHUB_OUTPUT"
+        import { appendFileSync, readFileSync } from 'node:fs'
+        import { countRepeatTests, createShardMatrix, REPEAT_EACH, REPEAT_LIMIT } from './e2e/shards.mjs'
+
+        const [full, changed] = process.argv.slice(2).map(file => JSON.parse(readFileSync(file, 'utf8')))
+        const { EVENT: event, SELECTED_PROJECT: selectedProject } = process.env
+        console.log(`matrix=${JSON.stringify(createShardMatrix(full, changed, { event, selectedProject }))}`)
+        const repeatCount = event === 'pull_request' ? countRepeatTests(changed) : 0
+        if (repeatCount > REPEAT_LIMIT) {
+          appendFileSync(process.env.GITHUB_STEP_SUMMARY, `This PR changes ${repeatCount} offline E2E tests, more than the ${REPEAT_LIMIT} that are repeated ${REPEAT_EACH} times to catch flaky tests.\n`)
+        }
+        NODE
+      shell: bash
+
+    - name: Get Electron version
+      id: electron
+      run: printf 'version=%s\n' "$(node -p "require('./node_modules/electron/package.json').version")" >> "$GITHUB_OUTPUT"
+      shell: bash
+
+    - name: Cache Electron binary
+      id: electron_cache
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        key: ${{ format('electron-{0}-{1}-{2}', runner.os, runner.arch, steps.electron.outputs.version) }}
+        path: |
+          node_modules/.pnpm/electron@*/node_modules/electron/dist
+          node_modules/.pnpm/electron@*/node_modules/electron/path.txt
+
+    - name: Install Electron binary
+      if: steps.electron_cache.outputs.cache-hit != 'true'
+      run: pnpm exec install-electron
+      shell: bash
+
+    - run: pnpm run test:e2e:pack
+      shell: bash
+
+    - name: Upload E2E build
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: dist-e2e
+        path: dist-e2e/
+        retention-days: 1
+
+  e2e-shard:
+    name: e2e (${{ matrix.project }} ${{ matrix.shard }}/${{ matrix.shardTotal }})
+    if: ${{ github.event_name != 'pull_request' || github.head_ref != 'weblate-translations' }}
+    needs: prepare-e2e
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.prepare-e2e.outputs.matrix) }}
+    env:
+      OPENTUBEX_SYNC_SERVER_URL: http://127.0.0.1:8080
+
+    permissions:
+      contents: read
+
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        # Playwright diffs the PR merge commit against its base parent to find changed tests.
+        fetch-depth: ${{ github.event_name == 'pull_request' && (matrix.project == 'network' || matrix.project == 'repeat') && '2' || '1' }}
+        persist-credentials: false
+        ref: ${{ inputs.checkoutRef }}
+
+    - name: Use Node.js 24.x
+      uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      with:
+        node-version: 24.x
+        package-manager-cache: false
+
+    - name: Install pnpm
+      uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      with:
+        cache: false
+
+    - name: Get pnpm cache directory
+      id: cache_dir
+      shell: bash
+      run: |
+        {
+          echo 'cache_dir<<EOF'
+          pnpm store path
+          echo EOF
+        } >> "$GITHUB_OUTPUT"
+
+    - name: Restore pnpm cache
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        key: ${{ format('node-cache-{0}-{1}-pnpm-{2}', runner.os, runner.arch, hashFiles('pnpm-lock.yaml')) }}
+        path: ${{ steps.cache_dir.outputs.cache_dir }}
+
+    - run: pnpm run ci
+      shell: bash
+
+    - name: Get Electron version
+      id: electron
+      run: printf 'version=%s\n' "$(node -p "require('./node_modules/electron/package.json').version")" >> "$GITHUB_OUTPUT"
+      shell: bash
+
+    # The global setup imports Electron in every project, which downloads the
+    # binary from GitHub when it is missing.
+    - name: Restore Electron binary
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        key: ${{ format('electron-{0}-{1}-{2}', runner.os, runner.arch, steps.electron.outputs.version) }}
+        path: |
+          node_modules/.pnpm/electron@*/node_modules/electron/dist
+          node_modules/.pnpm/electron@*/node_modules/electron/path.txt
+
+    - name: Download E2E build
+      if: ${{ matrix.project != 'browser' }}
+      uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+      with:
+        name: dist-e2e
+        path: dist-e2e
+
+    - name: Install Chromium for browser integration tests
+      if: ${{ matrix.project == 'browser' }}
+      run: pnpm exec playwright install --with-deps --only-shell chromium
+      shell: bash
+
+    # These browser module checks use node:test and are not discovered by
+    # Playwright or the unit-test glob. Run them explicitly on every PR.
+    - name: Test mobile storage and list performance
+      if: ${{ matrix.project == 'browser' }}
+      run: pnpm run test:mobile-performance
+      shell: bash
+
+    - name: Start sync server
+      if: ${{ matrix.project == 'network' }}
+      run: docker compose -f e2e/sync-server/compose.yml up -d --wait --pull always
+      shell: bash
+
+    # The network project talks to the real YouTube servers on the first
+    # attempt and automatically falls back to recorded fixtures on retry.
+    # PRs run only changed network tests. The repeat shards rerun changed
+    # offline tests without retries, so a new flaky test fails its PR.
+    - name: Run E2E tests
+      env:
+        PROJECTS: ${{ matrix.projects }}
+        E2E_XVFB: '1'
+        E2E_FLAKY_REPORT: ${{ runner.temp }}/e2e-flaky.json
+        # Every test starts from a new profile, whose databases the app syncs to
+        # disk while it starts. A runner's disk can stall those syncs for half a
+        # minute, so keep the profiles in memory.
+        TMPDIR: /dev/shm
+      run: |
+        test_args=()
+        for project in $PROJECTS; do
+          test_args+=("--project=$project")
+        done
+        list_args=("${test_args[@]}")
+        if [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ matrix.project }}" = "network" ]; then
+          list_args+=("--only-changed=HEAD^1")
+          test_args+=("--pass-with-no-tests")
+        fi
+        if [ "${{ matrix.project }}" = "repeat" ]; then
+          list_args+=("--only-changed=HEAD^1")
+          test_args+=("--repeat-each=${{ matrix.repeatEach }}" "--retries=0")
+        fi
+
+        # Deal the tests out to shards in turn instead of using --shard, which
+        # puts neighboring slow files in one shard. See shardTestList.
+        tests_json="$RUNNER_TEMP/e2e-tests.json"
+        test_list="$RUNNER_TEMP/e2e-test-list.txt"
+        pnpm exec playwright test -c e2e/playwright.config.mjs --list --reporter=json --pass-with-no-tests "${list_args[@]}" > "$tests_json"
+        node --input-type=module -e "
+          import { readFileSync } from 'node:fs'
+          import { shardTestList } from './e2e/shards.mjs'
+          const [file, shard, shardTotal] = process.argv.slice(1)
+          console.log(shardTestList(JSON.parse(readFileSync(file, 'utf8')), Number(shard), Number(shardTotal)))
+        " "$tests_json" "${{ matrix.shard }}" "${{ matrix.shardTotal }}" > "$test_list"
+        test_args+=("--test-list=$test_list")
+
+        xvfb-run --auto-servernum --server-args='-screen 0 1920x1080x24' pnpm exec playwright test -c e2e/playwright.config.mjs "${test_args[@]}"
+      shell: bash
+
+    - name: Stop sync server
+      if: ${{ always() && matrix.project == 'network' }}
+      run: docker compose -f e2e/sync-server/compose.yml down -v
+      shell: bash
+
+    # Upload on flaky-but-green runs too, so first-attempt failures
+    # (e.g. YouTube bot checks before the fixture fallback) can be inspected.
+    - name: Upload Playwright report
+      if: ${{ !cancelled() }}
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: playwright-report-${{ matrix.project }}-${{ matrix.shard }}
+        path: |
+          e2e/report/
+          e2e/results/
+        retention-days: 14
+
+    # Read by the Flaky Tests workflow.
+    - name: Upload flaky tests
+      if: ${{ !cancelled() }}
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: e2e-flaky-${{ github.run_attempt }}-${{ matrix.project }}-${{ matrix.shard }}
+        path: ${{ runner.temp }}/e2e-flaky.json
+        if-no-files-found: ignore
+        retention-days: 7
+
+  # Keep a stable required-check name while the test suite runs as a matrix.
+  e2e:
+    if: ${{ always() && (github.event_name != 'pull_request' || github.head_ref != 'weblate-translations') }}
+    needs: e2e-shard
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check E2E shards
+      env:
+        SHARD_RESULT: ${{ needs.e2e-shard.result }}
+      run: test "$SHARD_RESULT" = success

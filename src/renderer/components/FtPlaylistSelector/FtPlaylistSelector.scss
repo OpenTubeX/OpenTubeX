@@ -1,17 +1,42 @@
+.selectedIcon {
+  position: absolute;
+  inset-block-start: calc(50% - 25px);
+  inset-inline-start: calc(50% - 25px);
+  font-size: 50px;
+}
+
 .ft-playlist-selector {
   padding: 6px;
+  border-radius: var(--shape-corner-large);
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 
-  &:hover ,
+  &:hover,
   &.selected {
-    background-color: var(--bg-color);
+    background-color: color-mix(in srgb, var(--primary-color) 16%, var(--secondary-card-bg-color));
 
     .thumbnailImage {
       opacity: 0.3;
     }
   }
 
+  &.selected {
+    color: var(--on-selected-container-color);
+    background-color: var(--selected-container-color);
+  }
+
+  // Disabled tiles get tabindex -1 from the prompt.
+  &:not([tabindex='-1']):active {
+    border-radius: var(--shape-corner-medium);
+  }
+
   .thumbnail {
+    overflow: hidden;
     position: relative;
+    border-radius: var(--shape-corner-medium);
+
+    .thumbnailImage.blur {
+      filter: blur(20px) var(--content-filter,);
+    }
 
     .videoCountContainer {
       position: absolute;
@@ -27,8 +52,8 @@
       }
 
       .background {
-        background-color: var(--bg-color);
-        opacity: 0.9;
+        background-color: var(--thumbnail-badge-bg-color);
+        backdrop-filter: var(--thumbnail-badge-blur);
       }
 
       .inner {
@@ -70,6 +95,7 @@
         inline-size: 100%;
         // Ensure placeholder image displayed at same aspect ratio as most other images
         aspect-ratio: 16/9;
+        object-fit: cover;
       }
     }
 
@@ -77,11 +103,50 @@
       font-size: 22px;
     }
   }
-}
 
-.selectedIcon {
-  position: absolute;
-  inset-block-start: calc(50% - 25px);
-  inset-inline-start: calc(50% - 25px);
-  font-size: 50px;
+  // Compact rows, so several playlists fit on a phone screen at once
+  &.list {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+
+    .thumbnail {
+      flex-shrink: 0;
+      inline-size: 112px;
+
+      .thumbnailImage {
+        display: block;
+        inline-size: 100%;
+        aspect-ratio: 16/9;
+        object-fit: cover;
+      }
+
+      .videoCountContainer {
+        inline-size: 36px;
+        font-size: 13px;
+      }
+    }
+
+    .selectedIcon {
+      inset-block-start: calc(50% - 14px);
+      inset-inline-start: calc(50% - 14px);
+      font-size: 28px;
+    }
+
+    .info {
+      min-inline-size: 0;
+    }
+
+    .title {
+      display: -webkit-box;
+      overflow: hidden;
+      font-size: 16px;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    .videoPresenceCount {
+      font-size: 13px;
+    }
+  }
 }

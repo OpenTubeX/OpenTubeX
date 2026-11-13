@@ -3,11 +3,445 @@
   src: url('assets/font/Roboto-Regular.ttf');
 }
 
+/* Accept control taps without waiting for a double tap, while retaining
+   scrolling and pinch zoom. Gesture-specific rules override this default. */
+:global(:where(
+  a[href],
+  button,
+  input,
+  select,
+  textarea,
+  label,
+  summary,
+  [role='button'],
+  [role='link'],
+  [role='tab'],
+  [role='option'],
+  [role='menuitem'],
+  [role='checkbox'],
+  [role='radio'],
+  [role='switch'],
+  [role='combobox'],
+  .ft-playlist-selector,
+  .ft-input-component .optionWrapper,
+  .toast.actionable,
+  .playlistProgressBar,
+  .mobileLinkActionsBackdrop,
+  .tabOrganizerBackdrop,
+  .capacitorPhoneTabOverlay,
+  .capacitorTabActionsBackdrop,
+  .prompt,
+  .dropdownLayer,
+  .commandPaletteBackdrop,
+  .mobileSheet
+)) {
+  touch-action: manipulation;
+}
+
+:global(.pageTitle) {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-block-size: var(--page-title-line-size);
+  margin: 0;
+  font-size: 1.5em;
+  letter-spacing: -0.01em;
+}
+
+:global(body) {
+  /* Reserve the scrollbar's room even without one, so the gaps around the tabs
+     and the bar's height stay the same. */
+  --horizontal-tab-scrollbar-space: var(--scrollbar-track-width);
+  --top-tab-bar-height: calc(32px + var(--horizontal-tab-scrollbar-space));
+  --bottom-tab-bar-height: calc(34px + var(--horizontal-tab-scrollbar-space));
+  --mobile-nav-content-height: 60px;
+  --progress-bar-height: 10px;
+}
+
 .app {
+  /* Widens with larger Font Size settings so labels keep fitting. */
+  --desktop-nav-rail-width: calc(104px * max(1, var(--font-scale, 1)));
+  --tab-bar-inline-padding: 4px;
+  --app-safe-area-inset-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0));
+  --app-safe-area-inset-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0));
+  --app-safe-area-inset-right: var(--safe-area-inset-right, env(safe-area-inset-right, 0));
+  --top-nav-height: 60px;
+  --mobile-nav-height: calc(var(--mobile-nav-content-height) + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
+  --mobile-nav-reveal-transition: transform var(--motion-default-effects);
+  --mobile-nav-hide-transition: transform var(--motion-fast-effects);
+
+  /* Keep a length so the empty space can be added inside calc(). */
+  /* stylelint-disable-next-line length-zero-no-unit */
+  --mobile-progress-bar-space: 0px;
+  --top-nav-sticky-offset: calc(var(--app-safe-area-inset-top) + var(--top-nav-height));
+
+  /* Main pages share their title position, so it stays in place when switching
+     between them. Controls beside a title center on its line. */
+  --page-title-offset: 8px;
+  --page-title-line-size: 48px;
+
+  box-sizing: border-box;
   display: flex;
   flex-wrap: wrap;
-  font-family: Roboto, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  font-family: var(--app-font-family);
   block-size: 100%;
+  padding-block-start: var(--app-safe-area-inset-top);
+}
+
+.app.capacitorTabs {
+  padding-inline: var(--app-safe-area-inset-left) var(--app-safe-area-inset-right);
+}
+
+@media only screen and (width <= 680px) {
+  .app.capacitorTabs :deep(.topNav),
+  .app.capacitorTabs :deep(.sideNav) {
+    inset-inline: var(--app-safe-area-inset-left) var(--app-safe-area-inset-right);
+    inline-size: auto;
+  }
+}
+
+/* Keep the edge-to-edge status-bar inset opaque. The app itself scrolls, so
+   padding alone would still let route content paint through this area. */
+.app.capacitorTabs::before {
+  content: '';
+  position: fixed;
+  inset-block-start: 0;
+  inset-inline: 0;
+  z-index: 1099;
+  block-size: var(--app-safe-area-inset-top);
+  background-color: var(--card-bg-color);
+  pointer-events: none;
+}
+
+/* Android WebView's default blue flash ignores the active theme. Use the
+   app's semantic pressed-state color instead. */
+:global(.capacitorTabs),
+:global(.capacitorTabs *) {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:global(:root.appPictureInPicture),
+:global(body.androidPictureInPicture) {
+  overflow: hidden !important;
+  scrollbar-width: none !important;
+  background: #000 !important;
+}
+
+:global(body.androidPictureInPicture .app) {
+  background: #000 !important;
+}
+
+:global(body.androidPictureInPicture *) {
+  visibility: hidden !important;
+}
+
+:global([data-bottom-sheet]) {
+  touch-action: none;
+
+  /* Stays on its own layer so the backdrop's layer does not re-raster when the
+     sheet stops sliding, which flickers on Android. See FtPrompt's card. */
+  will-change: transform;
+}
+
+:global([data-bottom-sheet] [data-overlayscrollbars-viewport]) {
+  touch-action: var(--bottom-sheet-scroll-action, pan-down);
+}
+
+:global(.bottomSheetHandle) {
+  display: grid;
+  place-items: center;
+  flex: 0 0 40px;
+  touch-action: none;
+}
+
+:global(.bottomSheetHandle::before) {
+  content: '';
+  inline-size: 32px;
+  block-size: 4px;
+  border-radius: var(--shape-corner-full);
+  background: var(--secondary-text-color);
+}
+
+.mobileLinkActionsBackdrop {
+  position: fixed;
+  z-index: 1200;
+  inset: 0;
+  display: grid;
+  align-items: end;
+  background-color: rgb(0 0 0 / 48%);
+  backdrop-filter: var(--modal-backdrop-blur);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobileLinkActions {
+  min-inline-size: 0;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  max-block-size: calc(var(--phone-viewport-height, 100dvh) - var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) - 24px);
+  gap: 4px;
+  padding-block: 0 max(16px, var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
+  padding-inline: 16px;
+  color: var(--primary-text-color);
+  background-color: var(--card-bg-color);
+  border-start-start-radius: var(--shape-corner-extra-large);
+  border-start-end-radius: var(--shape-corner-extra-large);
+}
+
+.mobileLinkActionsScroll {
+  min-block-size: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.mobileLinkActionsContent {
+  display: grid;
+  gap: 4px;
+}
+
+.mobileLinkActions strong {
+  min-inline-size: 0;
+  padding: 8px;
+  overflow-wrap: anywhere;
+}
+
+.mobileLinkActions button {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  min-block-size: 48px;
+  padding: 12px;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-radius: var(--shape-corner-medium);
+  font: inherit;
+  text-align: start;
+}
+
+.mobileLinkActionImage {
+  block-size: 24px;
+  inline-size: 24px;
+  font-size: 24px;
+  object-fit: contain;
+}
+
+.mobileLinkActionImage.roundImageIcon {
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.mobileLinkActionCheck {
+  color: var(--primary-color);
+}
+
+.mobileLinkActionsHeader {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+.mobileLinkActionsBack {
+  inline-size: 100%;
+}
+
+.mobileLinkActions button:is(:active, :focus-visible) {
+  background-color: var(--side-nav-hover-color);
+}
+
+.mobileLinkQuickActionGroups {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  padding-block: 4px 16px;
+  border-block-end: 1px solid var(--border-color);
+  margin-block-end: 4px;
+}
+
+/* Material 3 connected button groups: tonal buttons with rounded outer ends. */
+.mobileLinkQuickActions {
+  --quick-action-container: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
+  --quick-action-foreground: var(--primary-text-color);
+  --quick-action-outer-radius: calc(28px * var(--ui-roundness));
+  --quick-action-inner-radius: calc(8px * var(--ui-roundness));
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+}
+
+.mobileLinkQuickActionRow {
+  display: flex;
+  gap: 2px;
+}
+
+.mobileLinkActions .mobileLinkQuickActionRow > button {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+
+  /* Touch-sized, but a row of four still fits very narrow sheets at large UI scales. */
+  min-inline-size: min(48px, calc((100% - 6px) / 4));
+  min-block-size: 56px;
+  padding-block: 8px;
+  padding-inline: 4px;
+  color: var(--quick-action-foreground);
+  background-color: var(--quick-action-container);
+  border-radius: var(--quick-action-inner-radius);
+  transition: background-color var(--motion-fast-effects);
+}
+
+.mobileLinkQuickActionRow > button:first-child {
+  border-start-start-radius: var(--quick-action-outer-radius);
+  border-end-start-radius: var(--quick-action-outer-radius);
+}
+
+.mobileLinkQuickActionRow > button:last-child {
+  border-start-end-radius: var(--quick-action-outer-radius);
+  border-end-end-radius: var(--quick-action-outer-radius);
+}
+
+.mobileLinkQuickActionRow > button[aria-checked='true'] {
+  --quick-action-container: var(--selected-container-color);
+  --quick-action-foreground: var(--on-selected-container-color);
+}
+
+/* Touch WebViews emulate hover at a held touch point beneath the opening sheet. */
+@media (hover: hover) {
+  .mobileLinkActions .mobileLinkQuickActionRow > button:not(:disabled):hover {
+    background-color: color-mix(in srgb, var(--quick-action-foreground) 8%, var(--quick-action-container));
+  }
+}
+
+.mobileLinkActions .mobileLinkQuickActionRow > button:not(:disabled):active {
+  background-color: color-mix(in srgb, var(--quick-action-foreground) 12%, var(--quick-action-container));
+}
+
+.mobileLinkQuickActionIcon {
+  flex-shrink: 0;
+  font-size: 20px;
+}
+
+/* Labels stay on one line unless the row is too narrow or the label is long, such as a
+   long quick bookmark playlist name; the width cap keeps it from squeezing its neighbors. */
+.mobileLinkQuickActionLabel {
+  display: -webkit-box;
+  max-inline-size: 12em;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+.mobileLinkActionsSeparator {
+  block-size: 1px;
+  margin-block: 8px;
+  margin-inline: 12px;
+  background-color: var(--border-color);
+}
+
+.mobileLinkSubmenuArrow {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.mobileLinkSubmenuArrow::before {
+  content: '›';
+}
+
+.mobileLinkSubmenuArrow:dir(rtl) {
+  transform: rotate(180deg);
+}
+
+/* Chromium WebView treats an inline-size query container as the containing
+   block for fixed descendants. Use the activity viewport for the PiP player. */
+:global(body.androidPictureInPicture .app > .routerView) {
+  container-type: normal;
+}
+
+:global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target]),
+:global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target] .player),
+:global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target] .musicAudioSurface),
+/* stylelint-disable-next-line selector-max-compound-selectors */
+:global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target] .musicAudioSurface *) {
+  visibility: visible !important;
+}
+
+:global(body.androidPictureInPicture .app.capacitorTabs .ftVideoPlayer.shaka-video-container[data-android-picture-in-picture-target]) {
+  position: fixed !important;
+
+  /* DOM rectangles use physical coordinates in both text directions. */
+  /* stylelint-disable-next-line liberty/use-logical-spec */
+  inset: var(--android-pip-source-top, 0) auto auto var(--android-pip-source-left, 0) !important;
+  inline-size: var(--android-pip-source-width, 100vw) !important;
+  block-size: var(--android-pip-source-height, 0) !important;
+  min-inline-size: 0 !important;
+  max-inline-size: none !important;
+  min-block-size: 0 !important;
+  max-block-size: none !important;
+  margin: 0 !important;
+  transform: none !important;
+  translate: none !important;
+  z-index: 2147483647 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  transition: none !important;
+}
+
+/* Override the phone mini bar's transform and clipping while native PiP owns
+   the video crop. Keep the original object fit and video element dimensions. */
+/* stylelint-disable selector-max-compound-selectors */
+:global(body.androidPictureInPicture .app.capacitorTabs .ftVideoPlayer[data-android-picture-in-picture-target] > .player),
+:global(body.androidPictureInPicture .app.capacitorTabs .ftVideoPlayer[data-android-picture-in-picture-target] > .musicAudioSurface),
+:global(body.androidPictureInPicture .app.capacitorTabs .ftVideoPlayer[data-android-picture-in-picture-target] > .vrCanvas) {
+  position: absolute !important;
+  inset: 0 !important;
+  inline-size: 100% !important;
+  block-size: 100% !important;
+  min-inline-size: 0 !important;
+  max-inline-size: none !important;
+  min-block-size: 0 !important;
+  max-block-size: none !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  object-fit: var(--android-pip-video-fit, contain) !important;
+  transform: none !important;
+  clip-path: none !important;
+  transition: none !important;
+}
+/* stylelint-enable selector-max-compound-selectors */
+
+/* Android already animates the window. Restoring the page must not trigger
+   another player or responsive-layout animation after that transition. */
+:global(body.androidPictureInPictureEntering .ftVideoPlayer[data-android-picture-in-picture-target]),
+:global(body.androidPictureInPictureEntering .ftVideoPlayer[data-android-picture-in-picture-target] *),
+:global(body.androidPictureInPictureRestoring .app),
+:global(body.androidPictureInPictureRestoring .app *) {
+  transition: none !important;
+}
+
+:global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target] .shaka-controls-container),
+:global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target] .scrollMiniPlayerControls) {
+  display: none !important;
+}
+
+:global(:root.appAmbientMode .app) {
+  overflow-inline: clip;
+}
+
+:global(:root.appPhoneLayout),
+:global(:root.appPhoneLayout body) {
+  max-inline-size: 100%;
+  overflow-inline: clip;
+  overscroll-behavior: none;
 }
 
 .routerView {
@@ -16,19 +450,112 @@
   margin-inline: 10px;
 }
 
-.banner {
-  inline-size: 85%;
-  margin-block: 40px 0;
-  margin-inline: auto;
+.app > .routerView {
+  min-inline-size: 0;
+  padding-block-end: var(--connection-status-page-space, 0);
+  container-name: route;
+  container-type: inline-size;
 }
 
-.banner + .banner {
-  margin-block: 20px;
-}
-
-.banner-wrapper {
+/* Phone layouts use the full viewport for page-level cards. Cards stacked
+   inside the watch layout keep its vertical rhythm while remaining full-width. */
+.app.capacitorPhoneLayout > .routerView :deep(.ft-card:not(.watchVideo, .watchVideoSideBar)) {
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: none;
   margin-block: 0;
-  margin-inline: 10px;
+  margin-inline: 0;
+}
+
+@media (width <= 680px) {
+  /* Match the phone layout's removal of the screen and header gaps. Watch
+     cards are separated by gaps, so they keep their configured rounding like
+     inset sidebar cards and wider layouts. */
+  .app.capacitorPhoneLayout > .routerView :deep(.ft-card:not(.watchVideo, .watchVideoSideBar)),
+  .app.capacitorPhoneLayout :deep(.playlistInfoContainer),
+  .app.capacitorPhoneLayout :deep(.channelDetails .bannerContainer),
+  .app.capacitorPhoneLayout :deep(.channelDetails .infoContainer),
+  .app.capacitorPhoneLayout :deep(.subscriptionsHeader),
+  .app.capacitorPhoneLayout :deep(.trendingPage .pageHeader),
+  .app.capacitorPhoneLayout :deep(.popularPage .pageHeader) {
+    border-radius: 0;
+  }
+}
+
+/* The short landscape layout centers Shorts beside their action rail. */
+@media (width <= 680px) and ((orientation: portrait) or (height > 600px)) {
+  .app.capacitorPhoneLayout :deep(.shortsPlayerActive .shortsSwipeViewport),
+  .app.capacitorPhoneLayout :deep(.videoLayout.shortsPlayerActive .videoPlayer),
+  .app.capacitorPhoneLayout :deep(.shortsPlayerActive .ftVideoPlayer),
+  .app.capacitorPhoneLayout :deep(.shortsPlayerActive .shortsNextPreview) {
+    border-radius: 0;
+  }
+}
+
+/* Players and external-media states are centered below a width cap of
+   calc(80vh * 1.78). They reach the phone edges only at this aspect ratio. */
+@media (width <= 680px) and (aspect-ratio <= 178 / 125) {
+  .app.capacitorPhoneLayout :deep(.externalMediaState),
+  .app.capacitorPhoneLayout :deep(.externalMediaPlayer .ftVideoPlayer:not(.scrollMiniPlayer)),
+  .app.capacitorPhoneLayout :deep(.videoLayout:not(.shortsPlayerActive) .videoPlayer),
+  .app.capacitorPhoneLayout :deep(.videoLayout:not(.shortsPlayerActive) .videoPlayerPlaceholder),
+  .app.capacitorPhoneLayout :deep(.videoLayout:not(.shortsPlayerActive) .ftVideoPlayer:not(.scrollMiniPlayer)) {
+    border-radius: 0;
+  }
+}
+
+/* The player owns vertical touch movement on mobile so a short drag can enter
+   or leave fullscreen without fighting page scrolling. The layout class lives
+   on this component while the player is inside a child component. */
+.app.capacitorTabs :deep(.ftVideoPlayer:not(.scrollMiniPlayer)),
+.app.capacitorTabs :deep(.ftVideoPlayer:not(.scrollMiniPlayer) .ft-quick-playback-rate-bar) {
+  touch-action: pan-x;
+}
+
+/* Downward drags still dock the player when fullscreen swipes are disabled.
+   Leave upward gestures to page scrolling unless another player gesture owns them. */
+.app.capacitorTabs :deep(.ftVideoPlayer:not(.scrollMiniPlayer, .mobileFullscreenSwipeEnabled, .videoZoomTouchEnabled)),
+.app.capacitorTabs :deep(.ftVideoPlayer:not(.scrollMiniPlayer, .mobileFullscreenSwipeEnabled, .videoZoomTouchEnabled) .ft-quick-playback-rate-bar) {
+  touch-action: pan-x pan-down;
+}
+
+/* Keep Chromium from cancelling pointer streams for pinch zoom or fullscreen
+   horizontal seeking, even when the other player gestures are disabled. */
+.app.capacitorTabs :deep(.ftVideoPlayer.videoZoomTouchEnabled),
+.app.capacitorTabs :deep(.ftVideoPlayer:is(:fullscreen, .fullWindow)) {
+  touch-action: none;
+}
+
+.app.capacitorTabs :deep(.ftVideoPlayer.mobileFullscreenSwiping > :is(.player, .countdownPoster, .musicAudioSurface)),
+.app.capacitorTabs :deep(.ftVideoPlayer.mobileFullscreenSwipeSettling > :is(.player, .countdownPoster, .musicAudioSurface)) {
+  translate: 0 var(--mobile-fullscreen-swipe-offset, 0);
+  scale: var(--mobile-fullscreen-swipe-scale, 1);
+  will-change: translate, scale;
+}
+
+.app.capacitorTabs :deep(.ftVideoPlayer.mobileFullscreenSwiping > :is(.player, .countdownPoster, .musicAudioSurface)) {
+  transition: none;
+}
+
+/* A cancelled swipe returns on a critically damped spring (stiffness 400), without
+   overshoot. MOBILE_FULLSCREEN_SWIPE_SETTLE_MS matches its duration. */
+.app.capacitorTabs :deep(.ftVideoPlayer.mobileFullscreenSwipeSettling > :is(.player, .countdownPoster, .musicAudioSurface)) {
+  --mobile-fullscreen-swipe-settle: 400ms linear(0, 0.062, 0.191, 0.337, 0.475, 0.594, 0.692, 0.769, 0.829, 0.874, 0.908, 0.934, 0.952, 0.966, 0.976, 0.983, 0.988, 0.991, 0.994, 0.996, 1);
+
+  transition: translate var(--mobile-fullscreen-swipe-settle), scale var(--mobile-fullscreen-swipe-settle);
+}
+
+.crossTabMiniPlayerLayer {
+  position: relative;
+
+  /* Keep the detached player above route content, but below app chrome and
+     utility windows. Its own z-index remains local to this stacking context. */
+  z-index: 4;
+}
+
+.app.capacitorPhoneLayout .crossTabMiniPlayerLayer {
+  /* A dismissing bottom bar slides behind the navigation (z-index: 4). */
+  z-index: 2;
 }
 
 .flexBox {
@@ -36,8 +563,93 @@
   user-select: unset;
 }
 
+.sideNavBackdrop {
+  position: fixed;
+  inset-block: 60px 0;
+  inset-inline: 0;
+  z-index: 2;
+  padding: 0;
+  border: 0;
+  background-color: rgb(0 0 0 / 60%);
+}
+
+.watchSideNavOverlay .routerView {
+  position: relative;
+  z-index: 1;
+}
+
+/* The returning Watch preview already spans the sidebar it will hide. Paint it
+   above the sidebar, so the sidebar fades out with the browsing page instead of
+   covering the preview until the route changes. Phone layouts keep their bottom
+   navigation and lower mini player layer above the route. */
+@media only screen and (width > 680px) {
+  :global(:root.appWatchRestorePreview:not(.appPhoneLayout) .app > .routerView) {
+    position: relative;
+    z-index: 3;
+  }
+}
+
+.app.capacitorTabs > .routerView {
+  position: relative;
+}
+
+@media (width <= 680px) {
+  .app.capacitorPhoneLayout > .routerView {
+    box-sizing: border-box;
+    flex-basis: 100%;
+    inline-size: 100%;
+    margin-block: var(--top-nav-height) 0;
+    margin-inline: 0;
+    overflow-inline: clip;
+  }
+}
+
+.app.capacitorPhoneLayout > .routerView :deep(.routerView) {
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: none;
+  margin: 0;
+  padding-block-end: calc(var(--mobile-nav-height) + var(--mobile-progress-bar-space));
+}
+
+/* Narrow viewports normally reserve a phone-sized top gap. The tablet tab
+   strip already separates app chrome from the main page card. */
+.app.capacitorTabletLayout > .routerView :deep(.routerView) {
+  margin-block-start: 18px;
+}
+
+/* Applies both while entering the overlay (class present) and while leaving it
+   (class already removed), so the sidebar reflow on tab switches doesn't animate. */
+.watchSideNavTransitionDisabled :deep(.sideNav) {
+  transition: none;
+}
+
+@media only screen and (width > 680px) {
+  .watchSideNavOverlay :deep(.sideNav) {
+    position: fixed;
+    inline-size: 200px;
+    transform: translateX(-100%);
+
+    /* Hide the closed side bar once it has slid out, so it leaves the tab order */
+    visibility: hidden;
+    transition-property: transform, visibility;
+  }
+
+  .watchSideNavOverlay.isLocaleRightToLeft :deep(.sideNav) {
+    transform: translateX(100%);
+  }
+
+  .watchSideNavOverlay :deep(.sideNav.opened) {
+    transform: translateX(0);
+    visibility: visible;
+  }
+
+  .watchSideNavOverlay :deep(.sideNav .inner) {
+    inline-size: 200px;
+  }
+}
+
 .changeLogTitle {
-  padding-inline: 16px;
   overflow-wrap: break-word;
   margin-block-end: 16px;
 }
@@ -46,14 +658,238 @@
   overflow-y: scroll;
   block-size: 40vh;
   display: block;
-  padding-inline: 16px;
   margin-block-end: 16px;
   overflow-wrap: break-word;
 }
 
+.changeLogUpdateCommand {
+  margin-block: 0 16px;
+  overflow-wrap: anywhere;
+}
+
+.changeLogUpdateCommand code {
+  display: block;
+  margin-block-start: 8px;
+  padding-block: 8px;
+  padding-inline: 12px;
+  background-color: var(--secondary-card-bg-color);
+  border-radius: calc(6px * var(--ui-roundness));
+  user-select: all;
+}
+
+.changeLogContent {
+  /* Include the first and last Markdown block margins in scroll clamping. */
+  display: flow-root;
+}
+
+.changeLogText :deep(img),
+.changeLogText :deep(.htmlImagePlaceholder) {
+  display: block;
+  max-inline-size: 100%;
+  block-size: auto;
+  margin-block: 8px;
+}
+
+.changeLogText :deep(.htmlImagePlaceholder > img) {
+  block-size: 100%;
+  margin-block: 0;
+}
+
+.changeLogText :deep(details) {
+  margin-block: 1em;
+  padding-block: 0.75em;
+  padding-inline: 1em;
+  background-color: color-mix(in srgb, var(--card-bg-color) 88%, var(--primary-text-color));
+  border: 1px solid var(--border-color);
+  border-radius: var(--shape-corner-small);
+}
+
+.changeLogText :deep(summary) {
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.changeLogText :deep(blockquote[data-alert]) {
+  --change-log-alert-color: #0969da;
+
+  margin-inline: 0;
+  padding-block: 0.75em;
+  padding-inline: 1em;
+  background-color: color-mix(in srgb, var(--change-log-alert-color) 12%, var(--card-bg-color));
+  border-inline-start: 4px solid var(--change-log-alert-color);
+  border-start-end-radius: var(--shape-corner-small);
+  border-end-end-radius: var(--shape-corner-small);
+}
+
+.changeLogText :deep(blockquote[data-alert]::before) {
+  display: block;
+  margin-block-end: 0.5em;
+  color: var(--change-log-alert-color);
+  content: attr(data-alert);
+  font-size: 0.8em;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.changeLogText :deep(blockquote[data-alert='tip']) {
+  --change-log-alert-color: #1a7f37;
+}
+
+.changeLogText :deep(blockquote[data-alert='important']) {
+  --change-log-alert-color: #8250df;
+}
+
+.changeLogText :deep(blockquote[data-alert='warning']) {
+  --change-log-alert-color: #9a6700;
+}
+
+.changeLogText :deep(blockquote[data-alert='caution']) {
+  --change-log-alert-color: #cf222e;
+}
+
+/* A Material 3 search bar floating over the page: a full-pill container
+   that holds the field, the match count, and standard icon buttons. */
+.findbar {
+  position: fixed;
+  inset-block-start: calc(var(--top-nav-sticky-offset) + 10px);
+  inset-inline-end: 18px;
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-sizing: border-box;
+  inline-size: min(440px, calc(100vw - 36px));
+  min-block-size: 48px;
+  padding-block: 4px;
+  padding-inline: 14px 4px;
+  color: var(--primary-text-color);
+  background-color: var(--search-bar-color);
+  border-radius: var(--shape-corner-full);
+  box-shadow:
+    inset 0 0 0 1px var(--input-border-color, transparent),
+    0 2px 6px 2px rgb(0 0 0 / 15%),
+    0 1px 2px rgb(0 0 0 / 30%);
+  transform-origin: top right;
+  animation: findbar-enter var(--motion-default-spatial);
+}
+
+.findbar:dir(rtl) {
+  transform-origin: top left;
+}
+
+/* The field has no outline of its own, so keyboard focus rings the bar.
+   Like the global ring, a contrast line keeps light accents visible. */
+:root:not(.hideOutlines) .findbar:has(.findbarInput:focus-visible) {
+  outline: var(--focus-border-width) solid var(--primary-color);
+  outline-offset: 0;
+  box-shadow:
+    0 0 0 calc(var(--focus-border-width) + 1px) var(--focus-ring-contrast-color),
+    0 2px 6px 2px rgb(0 0 0 / 15%),
+    0 1px 2px rgb(0 0 0 / 30%);
+}
+
+.findbarIcon {
+  flex: 0 0 auto;
+  color: var(--secondary-text-color);
+  font-size: 20px;
+}
+
+.findbarInput {
+  flex: 1 1 auto;
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-inline-size: 0;
+  block-size: 40px;
+  padding-block: 0;
+  padding-inline: 10px 4px;
+  color: var(--primary-text-color);
+  font: inherit;
+  font-size: 16px;
+  background-color: transparent;
+  border: 0;
+  outline: none;
+}
+
+/* The bar draws the focus ring; keep the global one off the field. */
+/* stylelint-disable-next-line a11y/no-outline-none */
+:root:not(.hideOutlines) .findbarInput:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.findbarInput::placeholder {
+  color: var(--secondary-text-color);
+}
+
+/* The count doubles as the divider between the field and its actions. */
+.findbarStatus {
+  flex: 0 0 auto;
+  min-inline-size: 48px;
+  padding-inline-end: 8px;
+  margin-inline-end: 4px;
+  color: var(--secondary-text-color);
+  font-size: 12px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  line-height: 24px;
+  text-align: center;
+  white-space: nowrap;
+  border-inline-end: 1px solid var(--divider-color);
+}
+
+.findbarButton {
+  flex: 0 0 40px;
+  inline-size: 40px;
+  block-size: 40px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: var(--secondary-text-color);
+  font-size: 20px;
+  background-color: transparent;
+  border: 0;
+
+  /* Half of the 40px button, so the press morph starts moving at once. */
+  border-radius: calc(20px * var(--ui-roundness));
+  cursor: pointer;
+  transition:
+    color var(--motion-fast-effects),
+    background-color var(--motion-fast-effects),
+    border-radius var(--motion-fast-spatial);
+}
+
+.findbarButton:hover,
+.findbarButton:focus-visible {
+  color: var(--primary-text-color);
+  background-color: color-mix(in srgb, var(--primary-text-color) 8%, transparent);
+}
+
+.findbarButton:active {
+  background-color: color-mix(in srgb, var(--primary-text-color) 12%, transparent);
+  border-radius: var(--shape-corner-medium);
+}
+
+@keyframes findbar-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+}
+
+::highlight(findbarmatch) {
+  color: #111;
+  background-color: #ffe15a;
+}
+
+::highlight(findbarmatchcurrent) {
+  color: #fff;
+  background-color: #e84100;
+}
+
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.15s;
+  transition: opacity var(--motion-fast-effects);
 }
 
 .fade-enter-from,
@@ -61,15 +897,179 @@
   opacity: 0;
 }
 
+.tabSwitcherOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  pointer-events: auto;
+}
+
+.tabSwitcher {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 220px));
+  justify-content: center;
+  gap: 10px;
+  inline-size: fit-content;
+  max-inline-size: min(88vw, 980px);
+  max-block-size: min(80vh, 720px);
+  overflow: auto;
+  padding: 12px;
+  background-color: color-mix(in srgb, var(--bg-color) 92%, #000);
+  border: 1px solid var(--border-color);
+  border-radius: var(--shape-corner-small);
+  box-shadow: 0 16px 40px rgb(0 0 0 / 38%);
+}
+
+.tabSwitcherItem {
+  display: grid;
+  grid-template-rows: 112px minmax(34px, auto);
+  gap: 8px;
+  min-inline-size: 0;
+  padding: 8px;
+  color: var(--primary-text-color);
+  background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
+  border: 2px solid transparent;
+  border-radius: var(--shape-corner-large);
+  cursor: pointer;
+  text-align: start;
+  transition:
+    border-color var(--motion-fast-effects),
+    background-color var(--motion-fast-effects),
+    transform var(--motion-fast-spatial);
+
+  /* Keep room for the selected lift when scrolling before its transition ends,
+     plus the scroll offset's rounding to device pixels at fractional UI scales.
+     Stay within the grid gap so the previous row stays out of view. */
+  scroll-margin-block-start: 8px;
+}
+
+.tabSwitcher.noPreviews {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 420px));
+}
+
+.tabSwitcher.noPreviews .tabSwitcherItem {
+  grid-template-rows: minmax(34px, auto);
+}
+
+.tabSwitcher.pointerActive .tabSwitcherItem:hover,
+.tabSwitcherItem.selected {
+  border-color: var(--tab-switcher-accent-color, var(--primary-text-color));
+  background-color: color-mix(in srgb, var(--card-bg-color) 82%, var(--primary-text-color));
+}
+
+.tabSwitcherItem.selected {
+  transform: translateY(-2px);
+}
+
+.tabSwitcherPreview {
+  display: grid;
+  place-items: center;
+  inline-size: 100%;
+  block-size: 112px;
+  overflow: hidden;
+  background-color: color-mix(in srgb, var(--bg-color) 84%, #000);
+  border-radius: var(--shape-corner-small);
+}
+
+.tabSwitcherPreview img,
+.tabSwitcherPreview .retryImagePlaceholder {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: contain;
+}
+
+.tabSwitcherPreview .tabSwitcherPreviewAvatar {
+  inline-size: 80px;
+  block-size: 80px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.tabSwitcherPreviewFallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 100%;
+  block-size: 100%;
+  color: var(--tertiary-text-color);
+  opacity: 0.65;
+}
+
+.tabSwitcherFallbackIcon {
+  font-size: 30px;
+}
+
+.tabSwitcherTitle {
+  display: flex;
+  align-items: start;
+  gap: 6px;
+  min-inline-size: 0;
+  overflow: hidden;
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.tabSwitcherTitleAvatar {
+  inline-size: 16px;
+  block-size: 16px;
+  margin-block-start: 1px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.tabSwitcherTitleIcon {
+  inline-size: 14px;
+  margin-block-start: 2px;
+  font-size: 13px;
+  color: var(--secondary-text-color);
+  flex-shrink: 0;
+}
+
+.tabSwitcher.noPreviews .tabSwitcherTitle {
+  align-items: center;
+}
+
+.tabSwitcher.noPreviews .tabSwitcherTitleAvatar,
+.tabSwitcher.noPreviews .tabSwitcherTitleIcon {
+  margin-block-start: 0;
+}
+
+.tabSwitcherTitleText {
+  min-inline-size: 0;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
 @media only screen and (width <= 680px) {
-  .routerView {
-    margin-block: 68px;
-    margin-inline: 8px;
+  :global(:root.appCompactNavigation body) {
+    --mobile-nav-content-height: 48px;
   }
 
-  .banner {
-    inline-size: 90%;
-    margin-block: 60px 0;
+  :global(:root.appProgressBar .app) {
+    --mobile-progress-bar-space: var(--progress-bar-height);
+  }
+
+  .app > :deep(.progressBar) {
+    transform: translateY(0);
+    transition: var(--mobile-nav-reveal-transition);
+  }
+
+  .app > :deep(.sideNav.scrollHidden:not(:has(:focus-visible)) ~ .progressBar) {
+    transform: translateY(var(--mobile-nav-height));
+    transition: var(--mobile-nav-hide-transition);
+  }
+
+  .routerView {
+    margin-block: 68px calc(var(--mobile-nav-content-height) + 8px + var(--mobile-progress-bar-space));
+    margin-inline: 8px;
   }
 
   .flexBox {
@@ -79,4 +1079,230 @@
   .changeLogText {
     block-size: 65vh;
   }
+
+  /* The placeholder names the field, so phones give the icon's room to the query. */
+  .findbar {
+    inset-block-start: 12px;
+    inset-inline: 8px;
+    inline-size: auto;
+    gap: 2px;
+    padding-inline-start: 12px;
+  }
+
+  .findbarIcon {
+    display: none;
+  }
+
+  /* Long translations of "No matches" truncate instead of crowding out the query. */
+  .findbarStatus {
+    flex-shrink: 1;
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .tabSwitcher {
+    grid-template-columns: repeat(auto-fit, minmax(138px, 176px));
+    gap: 8px;
+    max-inline-size: 94vw;
+    padding: 10px;
+  }
+
+  .tabSwitcherItem {
+    grid-template-rows: 86px minmax(34px, auto);
+  }
+
+  .tabSwitcherPreview {
+    block-size: 86px;
+  }
+
+  .tabSwitcherPreview .tabSwitcherPreviewAvatar {
+    inline-size: 62px;
+    block-size: 62px;
+  }
 }
+
+/* The bottom strip includes a 2px compositor-safe inset. */
+.app.topTabs :deep(.sideNav) {
+  block-size: calc(100vh - var(--app-safe-area-inset-top) - var(--top-tab-bar-height) - var(--top-nav-height) - var(--connection-status-space, 0px));
+  inset-block-start: calc(var(--app-safe-area-inset-top) + var(--top-tab-bar-height) + var(--top-nav-height));
+}
+
+.app.bottomTabs :deep(.sideNav) {
+  block-size: calc(100vh - 60px - var(--bottom-tab-bar-height) - var(--connection-status-space, 0px));
+  inset-block-start: 60px;
+}
+
+.app.topTabs .sideNavBackdrop {
+  inset-block-start: calc(var(--app-safe-area-inset-top) + var(--top-tab-bar-height) + var(--top-nav-height));
+}
+
+.app.bottomTabs {
+  box-sizing: border-box;
+  padding-block-end: var(--bottom-tab-bar-height);
+}
+
+.app.bottomTabs .sideNavBackdrop {
+  inset-block: 60px var(--bottom-tab-bar-height);
+}
+
+.app.bottomTabs :deep(.progressBar) {
+  inset-block-end: var(--bottom-tab-bar-height);
+}
+
+.app.topTabs {
+  --top-nav-sticky-offset: calc(var(--app-safe-area-inset-top) + var(--top-tab-bar-height) + var(--top-nav-height));
+}
+
+@media only screen and (width <= 680px) {
+  .app:is(.topTabs, .bottomTabs) :deep(.sideNav) {
+    block-size: var(--mobile-nav-height);
+    inset-block-start: auto;
+  }
+
+  .app.bottomTabs :deep(.sideNav) {
+    inset-block-end: var(--bottom-tab-bar-height);
+  }
+
+  .app.bottomTabs :deep(.progressBar) {
+    inset-block-end: calc(var(--bottom-tab-bar-height) + var(--mobile-nav-height));
+  }
+
+  .app.bottomTabs :deep(.moreOptionContainer) {
+    inset-block-end: calc(var(--bottom-tab-bar-height) + var(--mobile-nav-height) + var(--mobile-progress-bar-space));
+  }
+
+  .sideNavBackdrop {
+    display: none;
+  }
+
+  /* The fixed top nav is taller when a tab bar is present, so restore the gap
+     between it and the page content (the .flexBox rule above shrinks it). */
+  .app.topTabs .routerView {
+    margin-block-start: 68px;
+  }
+}
+
+/* These settings name physical window edges, independent of text direction. */
+/* stylelint-disable liberty/use-logical-spec */
+.app.verticalTabsLeft {
+  box-sizing: border-box;
+  padding-left: var(--vertical-tab-bar-width, 220px);
+}
+
+.app.verticalTabsRight {
+  box-sizing: border-box;
+  padding-right: var(--vertical-tab-bar-width, 220px);
+}
+
+.app.verticalTabsLeft :deep(.progressBar) {
+  left: var(--vertical-tab-bar-width, 220px);
+}
+
+.app.verticalTabsRight :deep(.progressBar) {
+  right: var(--vertical-tab-bar-width, 220px);
+}
+/* stylelint-enable liberty/use-logical-spec */
+
+.app.verticalTabs .sideNavBackdrop {
+  inset-block-start: 60px;
+}
+
+.app.verticalTabsLeft:not(.isLocaleRightToLeft),
+.app.verticalTabsRight.isLocaleRightToLeft {
+  /* Include the adjacent tab padding and its 1px width allowance when
+     balancing the visible navigation gaps. */
+  --side-nav-tab-gap: calc(var(--tab-bar-inline-padding) + 1px);
+}
+
+@media only screen and (width > 680px) {
+  .app.verticalTabs :deep(.sideNav) {
+    block-size: calc(100vh - 60px - var(--connection-status-space, 0px));
+    inset-block-start: 60px;
+  }
+
+  /* The fixed overlay navigation only shifts when it shares the tab bar's
+     physical edge. */
+  /* stylelint-disable liberty/use-logical-spec */
+  .watchSideNavOverlay.verticalTabsLeft:not(.isLocaleRightToLeft) :deep(.sideNav) {
+    left: var(--vertical-tab-bar-width, 220px);
+  }
+
+  .watchSideNavOverlay.verticalTabsRight.isLocaleRightToLeft :deep(.sideNav) {
+    right: var(--vertical-tab-bar-width, 220px);
+  }
+  /* stylelint-enable liberty/use-logical-spec */
+}
+
+/* The mobile bottom nav is fixed, so shift it past the vertical tab column */
+@media only screen and (width <= 680px) {
+  .app.verticalTabs :deep(.sideNav) {
+    inline-size: calc(100% - var(--vertical-tab-bar-width, 220px));
+  }
+
+  /* stylelint-disable liberty/use-logical-spec */
+  .app.verticalTabsLeft :deep(.sideNav) {
+    left: var(--vertical-tab-bar-width, 220px);
+    right: 0;
+  }
+
+  .app.verticalTabsRight :deep(.sideNav) {
+    left: 0;
+    right: var(--vertical-tab-bar-width, 220px);
+  }
+  /* stylelint-enable liberty/use-logical-spec */
+}
+
+.app.capacitorTabs :deep(.ftVideoPlayer[data-inline-mini-drag]) {
+  z-index: 100;
+}
+
+.app.capacitorTabs :deep(.ftVideoPlayer[data-inline-mini-drag] .shaka-controls-container) {
+  opacity: 0;
+  pointer-events: none;
+}
+
+
+/* These touch targets open app menus; Safari's selection/callout competes
+   with the hold gesture, including on descendants of a nonselectable tab. */
+.app.capacitorTabs :deep(a[href], .ft-list-video, .ft-list-playlist, [data-hold-menu], [data-subscription-feed-tab], [data-new-feed-tab], [data-rss-feeds-tab], [data-new-feed-rss-tab], [data-platforms-tab], [data-new-feed-platforms-tab], .capacitorTabletTabTarget),
+.app.capacitorTabs :deep(:is(a[href], .ft-list-video, .ft-list-playlist, [data-hold-menu], [data-subscription-feed-tab], [data-new-feed-tab], [data-rss-feeds-tab], [data-new-feed-rss-tab], [data-platforms-tab], [data-new-feed-platforms-tab], .capacitorTabletTabTarget) *) {
+  -webkit-touch-callout: none;
+
+  /* Safari still requires this prefix for touch selection suppression. */
+  /* stylelint-disable-next-line property-no-vendor-prefix */
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Match the native Android player: the center owns play/pause, while the
+   toolbar retains replay when recommendations cover the center at the end. */
+/* stylelint-disable-next-line selector-max-compound-selectors */
+.app.capacitorTabs :deep(.ftVideoPlayer:not(:has(.endedScreen)) .shaka-controls-button-panel > .shaka-play-button) {
+  display: none !important;
+}
+
+.app.capacitorPhoneLayout > .routerView.organizerSwipePage {
+  z-index: 1101;
+  transform-origin: top left;
+  pointer-events: none;
+  background: var(--bg-color);
+  will-change: transform, clip-path;
+}
+
+.libraryNoticeText {
+  text-align: center;
+}
+
+/* ===== Custom title bar ===== */
+
+/* Space the window controls overlay takes from each physical window edge. The
+   environment variables are missing while the overlay is hidden, such as in
+   fullscreen. */
+/* stylelint-disable length-zero-no-unit -- calc() needs units in the fallbacks */
+.app.customTitleBar {
+  --title-bar-inset-left: env(titlebar-area-x, 0px);
+  --title-bar-inset-right: calc(100vw - env(titlebar-area-x, 0px) - env(titlebar-area-width, 100vw));
+  --title-bar-controls-height: env(titlebar-area-height, 0px);
+}
+/* stylelint-enable length-zero-no-unit */

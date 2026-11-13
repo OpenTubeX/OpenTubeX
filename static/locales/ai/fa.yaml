@@ -1,0 +1,2893 @@
+# Optional AI-generated translations for keys missing from ../fa.yaml.
+Color Picker:
+  Hue: فام
+  Opacity: شفافیت
+  Backdrop Blur: محوشدگی پس‌زمینه
+  Hex Color: رنگ هگز
+  Apply Color: اعمال
+  Reset Color: بازنشانی
+  Copy Color: کپی
+  Copy From Another Color: کپی از رنگی دیگر
+  Color Copied: رنگ کپی شد
+  Invalid Color: یک رنگ هگز معتبر وارد کنید
+  Clipboard Unavailable: کلیپ‌بورد در دسترس نیست
+  Saturation and Brightness: اشباع و روشنایی
+New Tab: زبانه جدید
+Maximize: بیشینه کردن
+Restore: بازگردانی
+Close Tab: بستن زبانه
+App Menu:
+  About App: درباره {appName}
+  Services: خدمات
+  Hide App: پنهان کردن {appName}
+  Hide Others: پنهان کردن بقیه
+  Show All: نمایش همه
+  Quit App: خروج از {appName}
+  Reopen Closed Window: بازکردن دوباره پنجره بسته‌شده
+  Paste and Match Style: چسباندن و تطبیق سبک
+  View: نما
+  Enter Inspect Element Mode: ورود به حالت بازرسی عنصر
+  GPU Internals: اطلاعات داخلی GPU (chrome://gpu)
+  Navigate: پیمایش
+  Next Tab: زبانه بعدی
+  Previous Tab: زبانه قبلی
+  Help: راهنما
+Close Confirmation:
+  Background Sync Warning: با خروج، به‌روزرسانی اشتراک‌ها در پس‌زمینه متوقف می‌شود.
+  Hide Window: پنهان کردن پنجره
+  Title: از OpenTubeX خارج می‌شوید؟
+  Message: مطمئنید می‌خواهید از OpenTubeX خارج شوید؟
+  Quit: خروج
+  Never Ask Again: دیگر نپرس
+Close Window Confirmation:
+  Title: پنجره بسته شود؟
+  Message: این پنجره {count} زبانه دارد. مطمئنید می‌خواهید آن را ببندید؟
+  Close Window: بستن پنجره
+Confirmations:
+  Never Ask Again: دیگر نپرس
+  Settings Hint: می‌توانید این تأیید را از تنظیمات → عمومی → تأیید پیش از… دوباره فعال کنید
+Close Multiple Tabs Confirmation:
+  Title: چند زبانه بسته شوند؟
+  Message: با این کار {count} زبانه بسته می‌شود.
+  Close Tabs: بستن {count} زبانه
+Load Multiple Tabs Confirmation:
+  Title: چند زبانه بارگذاری شوند؟
+  Message: با این کار {count} زبانه بارگذاری می‌شود.
+  Load Tabs: بارگذاری {count} زبانه
+Unload Multiple Tabs Confirmation:
+  Title: چند زبانه از حافظه خارج شوند؟
+  Message: با این کار {count} زبانه از حافظه خارج می‌شود.
+  Unload Tabs: خارج کردن {count} زبانه از حافظه
+Tabs Unloaded To Free Memory: برای آزاد کردن حافظه، {count} زبانه که اخیراً از آن استفاده نکرده‌اید از حافظه خارج شد | برای آزاد کردن حافظه، {count} زبانه که اخیراً از آن‌ها استفاده نکرده‌اید از حافظه خارج شدند
+Compact side navigation: فشرده کردن نوار پیمایش کناری
+Expand side navigation: گسترش نوار پیمایش کناری
+Resize Tab Bar: تغییر اندازه نوار زبانه‌ها
+Find in page: یافتن در صفحه
+Previous match: نتیجه قبلی
+Next match: نتیجه بعدی
+Close find bar: بستن نوار جست‌وجو
+No matches: نتیجه‌ای پیدا نشد
+Version {versionNumber} is now available.: نسخه {versionNumber} اکنون در دسترس است.
+See changes and update: مشاهده تغییرات و به‌روزرسانی
+Dismiss: رد کردن
+Update to {version}: به‌روزرسانی به {version}
+Global:
+  Ambient Mode: حالت محیطی
+  Loading More: در حال بارگذاری بیشتر
+  New: جدید
+  Show Blocked Item: نمایش مورد مسدودشده
+Search Listing:
+  Label:
+    Members Only: فقط اعضا
+    Possibly AI-generated: احتمالاً تولیدشده با هوش مصنوعی
+Search Filters:
+  Possible Age Restriction Hint: "ممکن است YouTube برای این عبارت جستجو محدودیت سنی اعمال کرده باشد."
+  Cookie Search Failed: "جستجو با کوکی‌های تنظیم‌شده ناموفق بود."
+  Showing results for: "نمایش نتایج برای {query}"
+  Search instead for: "به‌جای آن جستجو برای {query}"
+  Including results for: "شامل نتایج برای {query}"
+  Search only for: "فقط جستجو برای {query}"
+  Did you mean: "منظورتان {query} بود؟"
+  Prioritize:
+    Prioritize: اولویت‌بندی
+    Popularity: محبوبیت
+  Duration:
+    < 3 minutes: < 3 دقیقه
+    3 - 20 minutes: 3 تا 20 دقیقه
+    '> 20 minutes': '> 20 دقیقه'
+Stats:
+  Left of daily limit: "{duration} از محدودیت روزانهٔ {limit} شما باقی مانده است"
+  Daily limit reached: "به محدودیت روزانهٔ {limit} رسیدید"
+  Replace old device: "جایگزینی دستگاه قدیمی"
+  Replacement explanation: "فقط زمانی {device} را با این دستگاه ترکیب کنید که هر دو ورودی متعلق به یک دستگاه فیزیکی باشند."
+  Overlapping days: "روزهای موجود در هر دو سابقه: {count}"
+  Overlapping watch time: "زمان تماشای هم‌پوشان"
+  Keep larger daily total: "نگه داشتن مجموع روزانهٔ بزرگ‌تر"
+  Larger total explanation: "برای سابقه‌های تکراری. ممکن است تماشای اضافی در همان روز را نادیده بگیرد."
+  Add daily totals: "جمع کردن مجموع‌های روزانه"
+  Add totals explanation: "برای سابقه‌های جداگانه. ممکن است تماشای تکراری را دو بار بشمارد."
+  Replacement preservation: "روزهایی که فقط در یک سابقه هستند حفظ می‌شوند. سابقه‌های اصلی در همگام‌سازی رمزگذاری‌شده باقی می‌مانند."
+  Combined watch time: "زمان تماشای ترکیبی"
+  Replacement changed: "زمان تماشا تغییر کرد. این پیش‌نمایش را ببندید و دوباره باز کنید تا مجموع‌های جدید را بررسی کنید."
+  Replacement success: "آمار دستگاه‌ها ترکیب شد"
+  All devices: همه دستگاه‌ها
+  Stats: آمار
+  Watch time summary: خلاصه زمان تماشا
+  Today: امروز
+  This week: این هفته
+  Total watch time: کل زمان تماشا
+  Daily average: میانگین روزانه
+  So far today: از ابتدای امروز
+  Since: از {day}
+  All recorded time: کل زمان ثبت‌شده
+  Per calendar day: به‌ازای هر روز تقویمی
+  Day by day: روزبه‌روز
+  Highest: 'بیشترین: {duration}'
+  Week by week: هفته‌به‌هفته
+  Last 14 days: 14 روز گذشته
+  Last 8 weeks: 8 هفته گذشته
+  Daily chart aria: زمان تماشای روزانه در 14 روز گذشته
+  Weekly chart aria: زمان تماشای هفتگی در 8 هفته گذشته
+  No data: با تماشای ویدیوها، زمان تماشا اینجا نمایش داده می‌شود.
+  Estimate note: زمان تماشای پیش از این به‌روزرسانی بر پایه پیشرفت پخش ذخیره‌شده تخمین زده شده است.
+  Adjust imported watch time: تنظیم زمان تماشای واردشده
+  Imported watch time: زمان تماشای واردشده
+  Imported watch time explanation: سرعت پخشی را که معمولاً استفاده می‌کردید انتخاب کنید. برای تخمین زمان واقعی تماشا، مدت ویدیوهای واردشده بر این سرعت تقسیم می‌شود.
+  Playback speed: سرعت پخش
+  Channel speed note: در صورت وجود، به‌جای آن از سرعت‌های پخش ذخیره‌شده کانال‌ها استفاده می‌شود.
+  Apply playback speed: اعمال سرعت پخش
+  Imported watch time adjusted: زمان تماشای واردشده تنظیم شد
+  Reset statistics: بازنشانی آمار
+  Reset: بازنشانی
+  Reset confirmation: مطمئنید می‌خواهید همه آمار تماشا را بازنشانی کنید؟ این کار برگشت‌پذیر نیست.
+  Reset success: آمار تماشا بازنشانی شد
+  Less than a minute: < 1 دقیقه
+  Minutes: '{minutes} دقیقه'
+  Hours: '{hours} ساعت'
+  Hours and minutes: '{hours} ساعت و {minutes} دقیقه'
+Home Page:
+  Keep disabled and hide this section: "غیرفعال بماند و این بخش پنهان شود"
+  Familiar description: "ویدیوهای ندیده از کانال‌هایی را ترجیح دهید که از قبل دوست دارید."
+  Balanced description: "کانال‌های آشنا را با کانال‌های جدید متناسب با علایقتان ترکیب کنید."
+  Explore description: "فضای بیشتری به کانال‌های جدید مرتبط با علایقتان بدهید."
+  Turn off recommendations: خاموش کردن پیشنهادها
+  Recommended for you: "پیشنهادهایی برای شما"
+  Recommendations description: "ویدیوها را روی دستگاه خود بر اساس سابقهٔ تماشایتان رتبه‌بندی کنید. شناسه‌های کانال و جستجوهای موضوعی برای یافتن ویدیو به بک‌اند انتخابی شما ارسال می‌شوند."
+  Enable recommendations: "فعال کردن پیشنهادها"
+  Recommendations need history: "برای دریافت پیشنهاد، چند ویدیو با سابقهٔ تماشای فعال ببینید."
+  No recommendations: "پیشنهادی یافت نشد. پس از تماشای ویدیوهای بیشتر، تازه‌سازی را امتحان کنید."
+  Recommendations unavailable: "بارگیری پیشنهادها ممکن نشد. بعداً دوباره تلاش کنید."
+  More like this: "موارد مشابه بیشتر"
+  Not interested: "علاقه‌ای ندارم"
+  Hide this channel: "پنهان کردن این کانال"
+  Channel hidden: "{channel} از پیشنهادها پنهان شد"
+  Reset recommendations: "بازنشانی پیشنهادها"
+  Discovery: "کشف"
+  Familiar: "آشنا"
+  Balanced: "متعادل"
+  Explore: "کاوش"
+  Related to: "مرتبط با {title}"
+  More from: "بیشتر از {channel}"
+  Matches interest: "متناسب با علاقهٔ شما به {topic}"
+  Related discovery privacy: "شناسه‌های ویدیو نیز برای یافتن ویدیوهای مرتبط ارسال می‌شوند."
+  Home: صفحهٔ اصلی
+  Description: از جایی که متوقف شدید ادامه دهید و فعالیت‌های اخیر را ببینید.
+  Customize: سفارشی‌سازی صفحهٔ اصلی
+  Done: انجام شد
+  Customize description: انتخاب کنید کدام بخش‌ها نمایش داده شوند و آن‌ها را به ترتیب دلخواه بچینید.
+  Continue watching: ادامهٔ تماشا
+  New since last visit: جدید از آخرین بازدید
+  Watch queue: صف تماشا
+  Recent playlists: فهرست‌های پخش اخیر
+  Recent downloads: بارگیری‌های اخیر
+  Upcoming reminders: یادآوری‌های پیش رو
+  Watch statistics: آمار تماشا
+  View all: مشاهدهٔ همه
+  Previous shelf page: صفحهٔ قبلی {section}
+  Next shelf page: صفحهٔ بعدی {section}
+  Shelf page status: '{section}، صفحهٔ {page} از {total}.'
+  Move section up: انتقال {section} به بالا
+  Move section down: انتقال {section} به پایین
+  Section moved: '{section} به جایگاه {position} از {total} منتقل شد.'
+  Nothing here yet: هنوز چیزی اینجا نیست
+  Empty description: ویدیوهایی که شروع می‌کنید، فهرست‌های پخشی که استفاده می‌کنید، بارگیری‌ها و یادآوری‌ها اینجا نمایش داده می‌شوند.
+  All sections hidden: همهٔ بخش‌ها پنهان هستند
+  All sections hidden description: صفحهٔ اصلی را سفارشی کنید تا بخشی دوباره نمایش داده شود.
+Subscriptions:
+  Channel Errors:
+    Summary: "یک کانال تازه‌سازی نشد. | {count} کانال تازه‌سازی نشد."
+    Toast: "برخی از کانال‌های مشترک‌شده تازه‌سازی نشدند. برای دیدن آن‌ها کلیک کنید."
+    Retry Channel: "تلاش دوباره برای {channel}"
+    Show All: "نمایش همه"
+    Show Fewer: "نمایش کمتر"
+  Cache Load Error: فیدهای اشتراک ذخیره‌شده شما بارگیری نشدند.
+  New video from {channel}: ویدئوی جدید از {channel}
+  New short from {channel}: ویدئوی کوتاه جدید از {channel}
+  '{channel} is live': "{channel} در حال پخش زنده است"
+  New post from {channel}: پست جدید از {channel}
+  Mark As Unseen: علامت‌گذاری به‌عنوان دیده‌نشده
+  Copy Error Details: "کپی جزئیات فنی"
+  Never show {type} from this channel in feeds again: دیگر هرگز {type} این کانال را در خوراک‌ها نشان نده
+  Refreshing Subscription Videos: در حال تازه‌سازی ویدیوهای اشتراک‌ها
+  Refreshing Subscription Shorts: در حال تازه‌سازی ویدیوهای کوتاه اشتراک‌ها
+  Refreshing Subscription Live Streams: در حال تازه‌سازی پخش‌های زنده اشتراک‌ها
+  Refreshing Subscription Posts: در حال تازه‌سازی پست‌های اشتراک‌ها
+  New Content: محتوای جدید
+  New Feed Refresh Warning Title: همه خوراک‌های اشتراک تازه‌سازی شوند؟
+  New Feed Refresh Warning: تازه‌سازی همه انواع محتوا برای 1 اشتراک ممکن است زمان زیادی ببرد. می‌خواهید ادامه دهید؟ | تازه‌سازی همه انواع محتوا برای {count} اشتراک ممکن است زمان زیادی ببرد. می‌خواهید ادامه دهید؟
+  New Since Last Refresh: جدید از آخرین تازه‌سازی
+  Mark As Seen: علامت‌گذاری به‌عنوان دیده‌شده
+  Mark All as Seen: علامت‌گذاری همه به‌عنوان دیده‌شده
+  No New Content: محتوای جدیدی نیست.
+  New Content Tabs: زبانه‌های محتوای جدید
+  Show Tabbed View: نمایش زبانه‌ای
+  Show Combined View: نمایش یکپارچه
+  Newest First: جدیدترین ابتدا
+  Oldest First: قدیمی‌ترین ابتدا
+  Posts:
+    RSS Message: 'یوتیوب برای پست‌ها خوراک RSS ارائه نمی‌کند. برای دیدن پست‌ها تنظیم "{rssSetting}" را غیرفعال کنید یا برای پنهان‌کردن این زبانه تنظیم "{hideSetting}" را فعال کنید.'
+  RSS Feeds:
+    Refreshing: در حال تازه‌سازی خوراک‌های RSS
+    Tab: RSS
+    Followed Feeds: خوراک‌های RSS دنبال‌شده
+    Add Feed: افزودن خوراک
+    Feed URL: نشانی خوراک RSS یا Atom
+    Remove Feed: حذف {feed}
+    Invalid Feed URL: یک نشانی وب وارد کنید که با http:// یا https:// شروع شود.
+    Feed Already Followed: شما از قبل این خوراک را دنبال می‌کنید.
+    Feed Could Not Be Loaded: خوراک بارگیری نشد. بررسی کنید که نشانی به یک خوراک RSS یا Atom اشاره کند.
+    Feed Requires Browser Check: این سایت به بررسی مرورگر نیاز دارد که OpenTubeX نمی‌تواند آن را انجام دهد. برای این خوراک نشانی یا نمونهٔ RSSHub دیگری را امتحان کنید.
+    Refresh Errors: 1 خوراک تازه‌سازی نشد. | {count} خوراک تازه‌سازی نشد.
+    Description: برای دنبال کردن سازندگان از پلتفرم‌های دیگر، یک خوراک RSS یا Atom اضافه کنید. نمونه‌های {rssHub} برای بسیاری از سایت‌ها، مانند Twitch، خوراک ارائه می‌کنند.
+    Empty Items: خوراک‌های شما در حال حاضر هیچ موردی ندارند.
+    No Feeds: هنوز هیچ خوراک RSS را دنبال نمی‌کنید.
+    RSSHub:
+      Browse: مرور RSSHub
+      Title: افزودن خوراک از RSSHub
+      Description: یک نمونهٔ RSSHub، یک سرویس و آنچه می‌خواهید دنبال کنید را انتخاب کنید. نشانی خوراک خودکار ساخته می‌شود.
+      Instance: نمونهٔ RSSHub
+      Service: سرویس
+      Search Services: جست‌وجوی سرویس‌ها
+      Loading Services: در حال بارگیری سرویس‌ها…
+      Services Could Not Be Loaded: این نمونه سرویس‌هایش را برنگرداند. نشانی را بررسی کنید یا نمونهٔ دیگری انتخاب کنید.
+      Feed Type: نوع خوراک
+      Requires Configuration: این خوراک به پیکربندی بیشتری روی نمونه نیاز دارد، پس ممکن است روی نمونه‌های عمومی کار نکند.
+      Optional Parameter: '{parameter} (اختیاری)'
+      Not Set: تنظیم نشده
+    Retry Feed: تلاش دوباره برای {feed}
+    Reloading Feed: در حال بارگذاری دوباره {feed}
+  Platforms:
+    Tab: پلتفرم‌ها
+    Platform: پلتفرم
+    All Platforms: همهٔ پلتفرم‌ها
+    Followed Channels: کانال‌های دنبال‌شده در پلتفرم‌های دیگر
+    Description: کانال‌هایی را در Twitch، SoundCloud، PeerTube، Rumble و Odysee دنبال کنید تا محتوای بارگذاری‌شدهٔ آن‌ها را در زبانهٔ پلتفرم‌ها در اشتراک‌هایتان ببینید. کانال‌ها را با جستجو پیدا کنید یا با نشانی صفحه‌شان اضافه کنید. رسانه‌های آن‌ها با yt-dlp پخش می‌شوند.
+    Add Channel: افزودن کانال
+    Channel URL: نشانی کانال
+    Invalid Channel: نشانی صفحهٔ یک کانال در Twitch، SoundCloud، PeerTube، Rumble یا Odysee را وارد کنید.
+    Channel Not Found: در این نشانی کانالی وجود ندارد.
+    Channel Already Followed: شما از قبل این کانال را دنبال می‌کنید.
+    Channel Could Not Be Loaded: بارگیری کانال ممکن نشد.
+    No Channels: هنوز هیچ کانالی را در پلتفرم‌های دیگر دنبال نمی‌کنید.
+    Unfollow Channel: لغو دنبال کردن {channel}
+    Go To Channel: رفتن به {channel}
+    Follow: دنبال کردن
+    Following: دنبال می‌کنید
+    Clips: کلیپ‌ها
+    Refresh Errors: 1 کانال تازه‌سازی نشد. | {count} کانال تازه‌سازی نشد.
+    Content Tabs: زبانه‌های محتوای پلتفرم‌ها
+Trending:
+  Music: موسیقی
+  Load Error: موارد پرطرف‌دار بارگذاری نشدند.
+  Unsupported Backend: نمایش موارد پرطرف‌دار به Local API نیاز دارد. Local API را انتخاب کنید یا بازگشت به بک‌اند را فعال کنید.
+Most Popular Feed Empty: خوراک Most Popular این نمونه Invidious خالی است.
+Most Popular Load Error: "خوراک Most Popular بارگیری نشد."
+Feed:
+  Cancel Refresh: لغو تازه‌سازی
+  Next Auto Refresh: 'تازه‌سازی خودکار بعدی: {date}'
+User Playlists:
+  Refresh Saved Playlists: 'تازه‌سازی فهرست‌های پخش ذخیره‌شده'
+  Saved Playlists Refresh Failed: 'برخی از فهرست‌های پخش ذخیره‌شده تازه‌سازی نشدند.'
+  Save: "ذخیره"
+  Edit: "ویرایش"
+  This playlist is private or does not exist.: "این فهرست پخش خصوصی است یا وجود ندارد."
+  Pin to Navigation: "سنجاق کردن به ناوبری"
+  Unpin from Navigation: "برداشتن سنجاق از ناوبری"
+  Pin to Top: "سنجاق کردن در بالا"
+  Unpin from Top: "برداشتن سنجاق از بالا"
+  Pinned to Top: "سنجاق‌شده در بالا"
+  Reorder Hint: برای تغییر ترتیب، بکشید یا از کلیدهای جهت‌نما استفاده کنید
+  Add new videos to the top (custom order): "افزودن ویدیوهای جدید به ابتدای فهرست (ترتیب سفارشی)"
+  Shuffle videos by default: "پخش تصادفی ویدیوها به‌صورت پیش‌فرض"
+  Remove videos once watched: "حذف ویدیوها پس از تماشا"
+  Remove videos once watched Tooltip: "وقتی این فهرست پخش را پخش می‌کنید، هر ویدیو به‌محض رسیدن به آستانهٔ درصد تماشای تعیین‌شده در تنظیمات حریم خصوصی از آن حذف می‌شود."
+  Repair Playlists: ترمیم فهرست‌های پخش
+  Repair Description: جزئیات گم‌شدهٔ ویدیوها را پس از وارد کردن فایل ZIP از YouTube Takeout بازیابی کنید. ترتیب ویدیوها در فهرست‌های پخش تغییر نمی‌کند.
+  Remove Unavailable Videos: "ویدیوهای غیرقابل دسترس را حذف کنید"
+  Remove Unavailable Videos Confirmation: "ویدیوهای غیرقابل دسترس حذف شوند؟ یافت شد: {count}. بررسی ممکن نبود: {uncertain}. ویدیوهای بررسی‌نشده نگه داشته می‌شوند."
+  Add Missing Videos: "افزودن ویدیوهای موجود در فهرست پخش منبع که در این فهرست نیستند"
+  Source Playlist: "فهرست پخش منبع"
+  Save Playlist: "ذخیره فهرست پخش"
+  Remove Saved Playlist: "حذف فهرست پخش ذخیره‌شده"
+  Load More Playlists: بارگذاری فهرست‌های پخش بیشتر
+  Save to: ذخیره در…
+  Move Video to the Top: انتقال ویدیو به ابتدا
+  Move Video to the Bottom: انتقال ویدیو به انتها
+  Quick Bookmark Icon: نماد نشانک سریع
+  Custom Emoji: ایموجی سفارشی
+  Choose Image: انتخاب تصویر
+  Use Bookmark Icon: استفاده از نماد نشانک
+  SinglePlaylistView:
+    Retry: تلاش دوباره
+    This playlist could not be loaded.: این فهرست پخش بارگذاری نشد.
+    More videos could not be loaded.: ویدیوهای بیشتری بارگذاری نشدند.
+  AddVideoPrompt:
+    Toast:
+      Video(s) added to {playlistCount} playlists: ویدیو به 1 فهرست پخش افزوده شد | ویدیو به {playlistCount} فهرست پخش افزوده شد
+    And N more videos: 'و {count} ویدیوی دیگر | و {count} ویدیوی دیگر'
+  Playlist Thumbnail: "تصویر بندانگشتی فهرست پخش"
+  Restore Default Thumbnail: "بازیابی تصویر بندانگشتی پیش‌فرض"
+  Move Up: بالا
+  Move Down: پایین
+  Remove: پاک کردن
+  Background Tasks:
+    Loading videos from {playlistName}: 'در حال بارگیری ویدیوها از {playlistName}'
+    Adding missing videos to {playlistName}: 'در حال افزودن ویدیوهای جاافتاده به {playlistName}'
+    Checking {playlistName} for unavailable videos: 'در حال بررسی ویدیوهای ناموجود در {playlistName} ({checked}/{total})'
+  Synced with YouTube: "همگام‌سازی‌شده با YouTube"
+  Delete YouTube Playlist Confirmation: "این لیست پخش هم اینجا و هم در YouTube حذف شود؟ این کار قابل واگرد نیست."
+  CreatePlaylistPrompt:
+    Create on YouTube: "در YouTube هم ایجاد شود"
+History:
+  From Date: 'از'
+  To Date: 'تا'
+  Channel Filter: 'کانال'
+  All Channels: 'همهٔ کانال‌ها'
+  Clear Filters: 'پاک کردن فیلترها'
+  Invalid Date Range: 'تاریخ شروع باید قبل از تاریخ پایان یا برابر با آن باشد.'
+  Empty Filter Message: 'هیچ ویدیویی در سابقهٔ شما با این فیلترها مطابقت ندارد.'
+  Repair Compact: "ترمیم"
+  Mark All Watched Compact: "همه تماشا شده"
+  Repair Use Cookies: "استفاده از کوکی‌های پیکربندی‌شدهٔ yt-dlp"
+  Repair Cookies Hint: "بیش از 500 ویدیو باید بررسی شود. کوکی‌ها را در تنظیمات yt-dlp پیکربندی و اینجا فعال کنید تا خطر محدود شدن درخواست‌ها کاهش یابد."
+  Repair Description: "پس از وارد کردن سابقه، یا وقتی جزئیات ویدیوها ناقص است یا برچسب LIVE اشتباه دارند، از این گزینه استفاده کنید."
+  Repair Details: "عنوان‌ها، کانال‌ها و تاریخ‌های انتشار ناقص را تکمیل و مدت ویدیوها و برچسب‌های LIVE را بررسی می‌کند. پیشرفت تماشا و وضعیت دیده‌شدن شما تغییر نمی‌کند."
+  Repair Notice: "سابقه‌های بزرگ ممکن است زمان ببرند. درخواست‌های ناموفق خودکار تکرار می‌شوند. ویدیوهای حذف‌شده یا خصوصی ممکن است ناقص بمانند."
+  Start Repair: "شروع ترمیم"
+  Repair Checking: "در حال بررسی جزئیات ویدیوها"
+  Repair Waiting: "در انتظار YouTube. ترمیم خودکار ادامه می‌یابد."
+  Repair Retrying: "در حال تکرار درخواست‌های ناموفق"
+  Repair Finished: "ترمیم پایان یافت"
+  Repair Stopped: "ترمیم متوقف شد"
+  Repair: "ترمیم تاریخچه"
+  Repair Progress: "بررسی‌شده {checked}/{total} · ترمیم‌شده {repaired} · ناموفق {failed}"
+  Mark All As Watched: علامت‌گذاری همه به‌عنوان تماشاشده
+  Mark All As Watched Confirmation: مطمئنید می‌خواهید همه ویدیوهای تاریخچه را تماشاشده علامت‌گذاری کنید؟
+  All History Marked as Watched: همه ویدیوهای تاریخچه تماشاشده علامت‌گذاری شدند
+  Select History Age: مشخص کنید یک مورد پس از چه مدتی حذف شود.
+  Delete Entries Older Than: حذف موارد قدیمی‌تر از
+  Number of Days: تعداد روزها
+  History Cleanup Warning: با این کار موارد مطابق در تاریخچه تماشا برای همیشه حذف می‌شوند.
+  1 Day: 1 روز
+  1 Week: 1 هفته
+  1 Month: 1 ماه
+  3 Months: 3 ماه
+  1 Year: 1 سال
+  All Time: همه زمان‌ها
+  Custom: سفارشی
+  History Older Than Days Removed: تاریخچه تماشای قدیمی‌تر از 1 روز حذف شد | تاریخچه تماشای قدیمی‌تر از {days} روز حذف شد
+Settings:
+  Experimental Badge: آزمایشی
+  YouTube Account Settings:
+    YouTube Account Settings: "حساب YouTube"
+    Unofficial App Warning: "OpenTubeX برنامهٔ رسمی YouTube نیست. با ورود به حساب، کارهایی که اینجا انجام می‌دهید به حساب Google شما پیوند می‌خورد و Google ممکن است حساب‌هایی را که از برنامه‌های غیررسمی استفاده می‌کنند محدود یا مسدود کند. فقط با حسابی وارد شوید که از دست دادنش برایتان مهم نیست."
+    Sign In Explanation: "OpenTubeX مانند یک برنامهٔ تلویزیون وارد می‌شود: شما ورود را در وب‌سایت Google تأیید می‌کنید و OpenTubeX هرگز گذرواژهٔ شما را نمی‌بیند. این ورود فقط روی همین دستگاه می‌ماند و همگام‌سازی یا پشتیبان‌گیری نمی‌شود."
+    Sign In: "ورود"
+    Sign In Anyway: "در هر حال وارد شوید"
+    Sign Out: "خروج"
+    Getting Sign-In Code: "در حال دریافت کد ورود"
+    Sign In Instructions: "صفحهٔ ورود را باز کنید و حساب Google خود را انتخاب کنید. کد به‌طور خودکار وارد می‌شود."
+    Other Device Instructions: "در دستگاهی دیگر، به این نشانی بروید و کد را وارد کنید:"
+    YouTube Channel: "کانال YouTube"
+    Using Channel: "اکنون با نام {name} از YouTube استفاده می‌کنید"
+    Switch Channel Failed: "تغییر کانال YouTube ممکن نشد: {error}"
+    Open Sign-In Page: "باز کردن صفحهٔ ورود"
+    Copy Code: "کپی کد"
+    Code Copied: "کد کپی شد"
+    Waiting for Approval: "در انتظار تأیید ورود توسط شما"
+    Sign-In Denied: "ورود رد شد."
+    Sign-In Code Expired: "کد منقضی شد. برای دریافت کد جدید دوباره تلاش کنید."
+    Sign-In Failed: "ورود ممکن نشد: {error}"
+    Signed In As: "با نام {name} وارد YouTube شدید"
+    Signed Out: "از YouTube خارج شدید"
+    Sign Out Failed: "خروج ممکن نشد: {error}"
+    Revoke Failed: "از YouTube خارج شدید، اما Google پایان ورود را تأیید نکرد. می‌توانید آن را از بخش اتصال‌های شخص ثالث در حساب Google خود حذف کنید."
+    Signed out by YouTube: "YouTube ورود شما را پایان داد. برای ادامهٔ استفاده از حساب خود، دوباره از تنظیمات وارد شوید."
+    Add to YouTube Watch History: "افزودن ویدیوهای تماشاشده به تاریخچهٔ YouTube"
+    Sync Subscriptions: "همگام‌سازی اشتراک‌ها با YouTube"
+    Sync Playlists: "همگام‌سازی لیست‌های پخش با YouTube"
+    Sync Now: "همگام‌سازی اکنون"
+    Synced: "با YouTube همگام‌سازی شد"
+    Sync Failed: "همگام‌سازی با YouTube ممکن نشد: {error}"
+  Diagnostics:
+    Diagnostics: عیب‌یابی
+    Description: تا زمانی که گزارش رویداد عیب‌یابی روشن است، OpenTubeX پیام‌های اخیر گزارش رویداد را در حافظه نگه می‌دارد تا بتوانید آن‌ها را به گزارش‌های اشکال پیوست کنید. هرگز آن‌ها را خودسرانه ذخیره یا ارسال نمی‌کند و خاموش کردن گزارش رویداد آن‌ها را حذف می‌کند. گزارش‌ها کوکی‌ها، توکن‌ها، نشانی‌های IP و پارامترهای URL را شامل نمی‌شوند، اما ممکن است شناسه ویدیوهایی را که پخش کرده‌اید داشته باشند، پس پیش از هم‌رسانی گزارش آن را بررسی کنید.
+    Enable Logging: فعال کردن گزارش رویداد عیب‌یابی
+    Copy Report: کپی گزارش
+    Save Report: ذخیره گزارش
+    Clear Log: پاک کردن گزارش رویداد
+    Report Copied: گزارش عیب‌یابی کپی شد
+    Report Saved: گزارش عیب‌یابی ذخیره شد
+    Report File: گزارش عیب‌یابی
+    Save Failed: ذخیره گزارش عیب‌یابی ممکن نشد
+    Log Cleared Message: گزارش رویداد عیب‌یابی پاک شد
+  Tab Unloading:
+    Automatically unload tabs: "خارج کردن خودکار زبانه‌ها از حافظه"
+    Memory threshold: "آستانهٔ حافظه"
+    Tabs to unload: "زبانه‌های قابل تخلیه"
+    Automatic unloading help: "قدیمی‌ترین زبانه‌های پس‌زمینه را برای آزاد کردن حافظه تخلیه می‌کند. زبانه‌های فعال و در حال پخش بارگذاری‌شده می‌مانند."
+    Memory threshold help: "درصدی از سقف حافظهٔ فرایند نمایش، نه کل حافظهٔ رم سیستم."
+  Password Settings:
+    Failed to Save Password: "ذخیره گذرواژه ناموفق بود."
+    Confirm Password: "تأیید گذرواژه"
+    Passwords Do Not Match: "گذرواژه‌ها مطابقت ندارند."
+  Navigation and Controls: "پیمایش و کنترل‌ها"
+  Control Bar:
+    Title: "نوار کنترل"
+    Customize: "سفارشی‌سازی نوار کنترل"
+    Hidden: "پنهان"
+    Empty: "کنترلی وجود ندارد"
+    Move to Control Bar: "انتقال {control} به نوار کنترل"
+    Move to Player Menu: "انتقال {control} به منوی پخش‌کننده"
+    Hide: "پنهان کردن {control}"
+  Fullscreen Actions:
+    Recommended Videos: "ویدیوهای پیشنهادی"
+    Title: "اقدامات تمام‌صفحه"
+    Customize: "سفارشی‌سازی اقدامات تمام‌صفحه"
+    Add Action: "افزودن اقدام"
+    Empty: "هیچ اقدام تمام‌صفحه‌ای انتخاب نشده است"
+    Quick Bookmark: "نشانک سریع"
+    Availability Hint: "کنش‌ها فقط در ویدیوهایی نشان داده می‌شوند که برایشان کاربرد دارند."
+    Disabled: "(غیرفعال)"
+  Quick Settings:
+    Quick Settings: تنظیمات سریع
+    Customize Quick Settings: سفارشی‌سازی تنظیمات سریع
+    Add Setting: افزودن تنظیم
+    Appearance: ظاهر
+    Playback: پخش
+    Content: محتوا
+    Language and Region: زبان و منطقه
+    All Settings: همه تنظیمات
+    Profile Selector Hint: برای تعویض نمایه می‌توانید روی نماد نمایه نیز راست‌کلیک کنید
+    Profile Selector Touch Hint: برای تعویض نمایه می‌توانید نماد نمایه را لمس کرده و نگه دارید
+  Categories:
+    General Description: زبان، راه‌اندازی، زبانه‌ها و ترجمه
+    Appearance: ظاهر
+    Appearance Description: پوسته، چیدمان، پیمایش و فهرست‌های ویدیو
+    Content appearance: فهرست ویدیوها و تصاویر بندانگشتی
+    Layout: چیدمان
+    Playback Description: پیش‌فرض‌های پخش‌کننده، زیرنویس‌ها و تنظیمات هر کانال
+    Subscriptions Description: تازه‌سازی خوراک‌ها، اعلان ویدیوهای جدید و خوراک‌های RSS
+    Downloads Description: پوشه بارگیری، الگوها و بارگیری‌های خودکار
+    Focus: تمرکز
+    Focus Description: محتوای پنهان، محدودیت‌های تماشا، یادآورها و کنترل والدین
+    Add-ons: افزونه‌ها
+    Add-ons Description: SponsorBlock، DeArrow، نپسندیدن‌ها، AiSList و ترجمه صوتی
+    Privacy Description: تاریخچه، پیشنهادهای جست‌وجو، پیوندها و گذرواژه برنامه
+    Data And Storage Description: پشتیبان‌ها، درون‌ریزی و برون‌بری، مصرف دیسک و پاک‌سازی
+    Sync Description: حساب سرور همگام‌سازی، جفت‌سازی دستگاه‌ها و داده‌های همگام‌شده
+    Advanced: پیشرفته
+    Advanced Description: پشتیبان‌های سمت سرور، بافر، ابزارهای خارجی، پراکسی و عیب‌یابی
+    Alternative providers: ارائه‌دهندگان ویدیو و فراداده
+  Highlight Changed Settings: برجسته کردن تنظیمات تغییرکرده نسبت به پیش‌فرض‌ها
+  Reset Setting to Default: بازنشانی این تنظیم به مقدار پیش‌فرض
+  Performance Impact:
+    Show Performance Impact: نمایش نشانگرهای اثر بر کارایی
+    Moderate: اثر متوسط
+    High: اثر زیاد
+    Description: این تنظیم ممکن است مصرف {resources} را افزایش دهد
+    Resources:
+      CPU: CPU
+      GPU: GPU
+      Memory: حافظه
+      Network: شبکه
+      Disk: دیسک
+  General Settings:
+    Built-in Streams:
+      Built-in Streams: "جریان‌های داخلی"
+      Automatic: "خودکار"
+      SABR Only: "فقط SABR"
+    Link Underlines:
+      Link Underlines: "زیرخط پیوندها"
+      On Hover: "زیرخط‌دار کردن پیوندها هنگام نگه‌داشتن نشانگر روی آن‌ها"
+      Never: "هرگز پیوندها را زیرخط‌دار نکن"
+      Always: "همیشه پیوندها را زیرخط‌دار کن"
+    Title Lines:
+      Title Lines: "خطوط عنوان"
+      Unlimited: "نامحدود"
+    Close Window With Last Tab: 'بستن پنجره هنگام بستن آخرین زبانه'
+    Preferred Video Codec: کدک ویدیویی ترجیحی
+    Always Use Backup Media Server: "همیشه از سرور رسانهٔ پشتیبان استفاده شود"
+    Automatically switch stream extraction methods: "تغییر خودکار روش‌های استخراج جریان"
+    Enable Tabs: "فعال‌سازی زبانه‌ها"
+    Thumbnail Swipe Gestures:
+      Left: کشیدن به چپ روی تصاویر بندانگشتی
+      Right: کشیدن به راست روی تصاویر بندانگشتی
+      Description: تصویر بندانگشتی ویدیو را افقی بکشید و رها کنید تا عمل انتخاب‌شده انجام شود.
+    Data Saver Thumbnails: "تصاویر بندانگشتی کم‌مصرف"
+    Use tray icon: "استفاده از نماد سینی سیستم"
+    Close to system tray: "بستن به سینی سیستم"
+    Tray required for background refresh: "تا زمانی که به‌روزرسانی اشتراک‌ها در پس‌زمینه فعال است، نماد سینی سیستم لازم است."
+    Show Video Menu Button: نمایش دکمه منوی ویدیو
+    Swipe to refresh: کشیدن برای تازه‌سازی
+    Blur Thumbnails: تار کردن تصاویر بندانگشتی
+    Navigation:
+      Always Show Navigation Bar: همیشه نوار پیمایش را وقتی در پایین است نمایش بده
+      Compact Tab Labels: نوار پیمایش فشرده وقتی در پایین است
+      Show Active Subscriptions: نمایش اشتراک‌های فعال در نوار کناری
+      Navigation: پیمایش
+      Customize Navigation: سفارشی‌سازی پیمایش
+      Add Item: افزودن مورد
+    Date Format: قالب تاریخ
+    Time Format: قالب زمان
+    Language Default: پیش‌فرض زبان
+    Update Relative Timestamps: زمان‌های نسبی را به‌روز نگه دارید
+    Stream Extraction Method:
+      Stream Extraction Method: روش استخراج جریان
+      yt-dlp: yt-dlp
+      Built-in: داخلی
+    Confirm Before: تأیید پیش از…
+    Confirmation Options:
+      Closing App: بستن OpenTubeX
+      Closing Window: بستن پنجره‌ای با چند زبانه
+      Closing Tabs: بستن چند زبانه
+      Loading Tabs: بارگذاری چند زبانه
+      Unloading Tabs: خارج کردن چند زبانه از حافظه
+      Refreshing All Feeds: تازه‌سازی اشتراک‌های زیاد
+    Remember Tab Navigation History: به خاطر سپردن تاریخچه پیمایش زبانه‌ها
+    New Tab Position:
+      New Tab Position: جای زبانه جدید
+      At the end: در انتها
+      After current tab: پس از زبانه فعلی
+      After current tab in opened order: پس از زبانه فعلی، به ترتیب بازشدن
+    Tab Close Focus:
+      Last active tab: "آخرین زبانهٔ فعال"
+      Next tab in tab order: "زبانهٔ بعدی در ترتیب زبانه‌ها"
+      Previous tab in tab order: "زبانهٔ قبلی در ترتیب زبانه‌ها"
+      Tab Close Focus: پس از بستن زبانهٔ فعال
+    Startup Behavior:
+      Startup Behavior: هنگام راه‌اندازی
+      Load all tabs: بارگذاری همه زبانه‌ها
+      Load previously loaded tabs: بارگذاری زبانه‌های قبلاً بارگذاری‌شده
+      Load last active tab: بارگذاری آخرین زبانه فعال
+      Start with an empty session: شروع با نشست خالی
+      Load landing page, keep other tabs unloaded: بارگذاری صفحهٔ آغازین و باز نگه داشتن سایر زبانه‌ها بدون بارگذاری
+    Use AI Translation Completions: ترجمه‌های جاافتاده را با موارد تولیدشده توسط هوش مصنوعی تکمیل کنید
+    Reduced Motion:
+      Reduced Motion: کاهش حرکت
+      System: سیستم
+      Force On: همیشه روشن
+      Force Off: همیشه خاموش
+    Comment Translation:
+      Title: ترجمه دیدگاه‌ها
+      Enable: فعال کردن ترجمه دیدگاه‌ها
+      Never Translate: دیدگاه‌های این زبان‌ها هرگز ترجمه نشوند
+      Choose Language: یک زبان انتخاب کنید
+      Description: دیدگاه‌های هم‌زبان با برنامه از قبل کنار گذاشته شده‌اند. زبان‌های دیگری را که می‌توانید بخوانید اضافه کنید.
+      Remove Language: ترجمه دوباره دیدگاه‌های {language}
+    Avoid translation:
+      Avoid translation: اولویت دادن به متن ترجمه‌نشده ویدیو
+      Disabled: غیرفعال
+      Watch Only: فقط رابط ویدیو
+      Entire App: کل برنامه
+    Playlist View Type:
+      Playlist View Type: نوع نمایش فهرست پخش
+    Show Thumbnail Previews: نمایش پیش‌نمایش تصاویر بندانگشتی
+    Extra Thumbnail Action Button:
+      Extra Thumbnail Action Button: دکمه کنش اضافی روی تصویر بندانگشتی
+      None: هیچ‌کدام
+      Mark as Watched: علامت‌گذاری به‌عنوان تماشاشده
+      Copy YouTube Link: کپی پیوند YouTube
+      Open in YouTube: باز کردن در YouTube
+    Mobile Layout:
+      Mobile Layout: 'چیدمان تلفن همراه'
+      Automatic: 'خودکار'
+      Phone: 'تلفن'
+      Tablet: 'تبلت'
+    Video View Type:
+      Full Width: تمام‌عرض
+    Grid Columns:
+      Grid Columns: ستون‌های شبکه
+      Playlist Grid Columns: ستون‌های شبکهٔ فهرست‌های پخش
+      Auto: خودکار
+    Preferred API Backend:
+      Yattee Server: سرور Yattee
+    Yattee Server:
+      Server URL: نشانی سرور Yattee
+      Username: نام کاربری
+      Password: رمز عبور
+      Proxy Videos: پروکسی ویدیوها از طریق سرور Yattee
+      Test Connection: آزمایش اتصال
+      Testing: در حال آزمایش اتصال…
+      Connected: متصل به سرور Yattee {version}
+      Errors:
+        Invalid URL: نشانی سرور را وارد کنید؛ باید با https:// یا http:// شروع شود.
+        Unreachable: دسترسی به سرور ممکن نشد. نشانی را بررسی کنید و مطمئن شوید سرور در حال اجراست.
+        Media not allowed: 'اتصال برقرار شد، اما سرور به این برنامه اجازهٔ بارگذاری ویدیوها را نمی‌دهد. CORS_ORIGINS={origins} را در متغیرهای محیطی سرور تنظیم کنید.'
+        Not a Yattee server: سرور پاسخ داد، اما سرور Yattee نیست.
+        Credentials required: سرور به نام کاربری و رمز عبور نیاز دارد.
+        Invalid credentials: سرور نام کاربری یا رمز عبور را نپذیرفت.
+        Rate limited: سرور پس از تلاش‌های ناموفق زیاد، ورود را مسدود کرده است. بعداً دوباره تلاش کنید.
+        Server error: سرور خطا برگرداند (HTTP {status}).
+    Notifications:
+      Notifications: اعلان‌ها
+      System and In-App: سیستم و داخل برنامه
+      System Only: فقط سیستم
+      Off: خاموش
+    Auto Load Next Page:
+      Lists Tooltip: صفحه‌های بیشتر فیدها، نتایج جستجو و فهرست‌های دیگر را به‌طور خودکار بارگذاری کن.
+    Auto Load Comments:
+      Label: بارگذاری خودکار نظرات
+      Tooltip: نظرات را هنگام باز شدن صفحه بارگذاری کن و هنگام پیمایش نظرات بیشتری بارگذاری کن.
+    Haptic Feedback: بازخورد لمسی
+    Ignore System Haptics Setting: نادیده گرفتن تنظیم بازخورد لمسی سیستم
+  Context Menu Search Settings:
+    Context Menu Search Settings: جست‌وجوی منوی زمینه
+    Description: موتورهای جست‌وجویی را انتخاب کنید که با کلیک راست روی متن انتخاب‌شده نمایش داده می‌شوند. جست‌وجوها در مرورگر پیش‌فرض شما باز می‌شوند.
+    Icon Hint: با فعال‌کردن هر موتور، برای بارگیری نماد سایت به وب‌سایت آن متصل می‌شوید.
+    Engine Name: نام موتور
+    Search URL: نشانی جست‌وجو
+    URL Hint: در محل قرارگیری متن انتخاب‌شده و کدگذاری‌شده در نشانی، از %s استفاده کنید.
+    Add Custom Engine: افزودن موتور سفارشی
+    Add Engine: افزودن موتور
+    Remove Engine: حذف {engine}
+    Invalid Engine: نام و یک نشانی معتبر جست‌وجوی HTTP یا HTTPS حاوی %s وارد کنید.
+    Engine Limit: می‌توانید حداکثر {count} موتور جست‌وجوی سفارشی بیفزایید.
+  Theme Settings:
+    Theme and Colors: "طرح و رنگ‌ها"
+    Font Size: اندازهٔ قلم
+    Sections:
+      Interface: "رابط کاربری"
+      Side Bar and Header: "نوار کناری و سرصفحه"
+      Tabs: "زبانه‌ها"
+      Player: "پخش‌کننده"
+      Scrolling: "پیمایش"
+      Notifications: "اعلان‌ها"
+    Only Show Important Notifications: فقط اعلان‌های مهم نمایش داده شوند
+    Visible Search Suggestions: "پیشنهادهای جستجوی قابل‌مشاهده"
+    Material Accent Color: "رنگ تأکیدی Material"
+    Tally Accent Color: "رنگ تأکیدی Tally"
+    Material Wallpaper Colors: "رنگ‌های کاغذدیواری"
+    Material System Accent Color: "رنگ تأکیدی سیستم"
+    Tab Loading Indicator:
+      Tab Loading Indicator: نشانگر بارگذاری زبانه
+      Bar: نوار
+      Dot: نقطه (کلاسیک)
+    Compact Settings Categories: "دسته‌های فشردهٔ تنظیمات"
+    Playlist Thumbnail Size: "اندازهٔ تصاویر بندانگشتی فهرست پخش"
+    Compact Mobile Mini Player: "پخش‌کننده کوچک و فشرده موبایل"
+    Always Show Mobile Search Bar: "نوار جستجوی موبایل همیشه نمایش داده شود"
+    Frosted Glass Player UI: "رابط پخش‌کننده با جلوه شیشه مات"
+    Move Downloads to App Header: انتقال بارگیری‌ها به سربرگ برنامه
+    Move Settings to App Header: انتقال تنظیمات به سربرگ برنامه
+    Hide Side Bar on Watch Pages: پنهان‌کردن نوار کناری در صفحه‌های پخش
+    UI Roundness: گردی رابط کاربری
+    Scrollbar Width: پهنای نوار پیمایش
+    Scroll Speed: سرعت پیمایش
+    Animation Speed: سرعت پویانمایی
+    Thumbnail Size: اندازهٔ تصویر بندانگشتی
+    Show Tab Icons: نمایش نماد برگه‌ها
+    Load Missing Tab Icons: بارگیری نمادهای گم‌شدهٔ برگه‌ها
+    Loading Missing Tab Icons: در حال بارگیری نمادهای گم‌شدهٔ برگه‌ها…
+    No Missing Tab Icons: همهٔ نمادهای پشتیبانی‌شدهٔ برگه‌ها بارگیری شده‌اند
+    Loaded Tab Icons: 'نماد گم‌شدهٔ برگه بارگیری شد: {count} | نمادهای گم‌شدهٔ برگه بارگیری شدند: {count}'
+    Loaded Tab Icons With Failures: از نمادهای برگه، {loaded} مورد بارگیری شد و {failed} مورد بارگیری نشد
+    Show Tab Previews: نمایش پیش‌نمایش برگه‌ها
+    Use Fixed Tab Width: استفاده از پهنای ثابت برگه‌ها در حالت افقی
+    Use Custom Title Bar: استفاده از نوار عنوان سفارشی
+    Tab Width: پهنای برگه
+    Vertical Tab Height: ارتفاع برگه‌های عمودی
+    Tab Layout:
+      Tab Layout: چیدمان برگه‌ها
+      Horizontal Top: افقی در بالا
+      Horizontal Bottom: افقی در پایین
+      Vertical Left: عمودی در چپ
+      Vertical Right: عمودی در راست
+    Show Toast Timeout Indicator: نمایش نشانگر زمان اعلان موقت
+    Use Grid Player Menu: استفاده از منوی شبکه‌ای پخش‌کننده
+    Show Progress as Notification: نمایش پیشرفت به‌صورت اعلان
+    Operation in Progress: عملیات در حال انجام است
+    Toast Position:
+      Test Toast: اعلان آزمایشی
+      Toast Position: جایگاه اعلان موقت
+      Bottom Left: پایین چپ
+      Bottom Center: پایین وسط
+      Bottom Right: پایین راست
+      Top Left: بالا چپ
+      Top Center: بالا وسط
+      Top Right: بالا راست
+    Icon Pack:
+      Icon Pack: بستهٔ نماد
+      Material Symbols: Material Symbols
+      Remix Icon: Remix Icon
+    Font:
+      App Font: قلم برنامه
+      System Default: پیش‌فرض سیستم
+      Unable to Load: قلم‌های نصب‌شدهٔ سیستم بارگیری نشدند
+      Bundled Fonts: قلم‌های همراه
+      System Fonts: قلم‌های سیستم
+    Always Show Scrollbars: نمایش همیشگی نوارهای پیمایش
+    Base Theme:
+      Material Light: "Material روشن"
+      Material Dark: "Material تاریک"
+      Material Black: "Material سیاه"
+      Dynamic colors: رنگ‌های پویا
+      Tokyo Night Night: Tokyo Night Night
+      Tokyo Night Storm: Tokyo Night Storm
+      Tokyo Night Moon: Tokyo Night Moon
+      Tokyo Night Day: Tokyo Night Day
+      Rosé Pine: Rosé Pine
+      Rosé Pine Moon: Rosé Pine Moon
+      Rosé Pine Dawn: Rosé Pine Dawn
+      Kanagawa Wave: Kanagawa Wave
+      Kanagawa Dragon: Kanagawa Dragon
+      Kanagawa Lotus: Kanagawa Lotus
+      Ayu Dark: Ayu Dark
+      Ayu Mirage: Ayu Mirage
+      Ayu Light: Ayu Light
+      One Dark: One Dark
+      Carbonfox: Carbonfox
+      Catppuccin Macchiato: Catppuccin Macchiato
+      Tally Light: "Tally روشن"
+      Tally Dark: "Tally تاریک"
+      Custom: سفارشی
+      Catppuccin Latte: Catppuccin Latte
+      Built-in Themes: پوسته‌های داخلی
+      Custom Themes: پوسته‌های سفارشی
+    Light Theme: زمینهٔ روشن
+    Dark Theme: زمینهٔ تیره
+    Custom Theme:
+      Share Restrictions Prompt: "توضیحات می‌توانند حداکثر 500 نویسه، با احتساب Markdown، داشته باشند. فقط پیوندها و تصاویر میزبانی‌شده در GitHub مجاز هستند، از جمله بارگذاری مستقیم در اینجا. ربات پیوندها و تصاویر خارجی را حذف می‌کند، توضیحات طولانی را کوتاه می‌کند و تغییرات را در یک نظر توضیح می‌دهد."
+      Import from Clipboard: "درون‌ریزی از کلیپ‌بورد"
+      Invalid Clipboard Theme: "کلیپ‌بورد حاوی زمینهٔ معتبری نیست. JSON زمینه را کپی کنید و دوباره تلاش کنید."
+      Create Custom Theme: ساخت زمینهٔ سفارشی
+      Edit Custom Theme: ویرایش زمینهٔ سفارشی
+      Custom Theme Creator: سازندهٔ زمینهٔ سفارشی
+      Theme Name: نام زمینه
+      Based On: بر پایهٔ
+      Import Theme: درون‌ریزی زمینه
+      Export Theme: برون‌ریزی زمینه
+      Share Theme: هم‌رسانی زمینه
+      Share Description Prompt: زمینه و هر نکته‌ای را که باید پیش از استفاده از آن دانست، شرح دهید.
+      Share Screenshots Prompt: "یک یا چند نماگرفت را اینجا بکشید و رها کنید. این بخش را خالی بگذارید تا ربات سه پیش‌نمایش با محتوای نمونه و بدون اطلاعات شخصی شما اضافه کند."
+      Delete Theme: حذف زمینه
+      Delete Theme Confirmation: زمینهٔ “{name}” حذف شود؟ این کار برگشت‌پذیر نیست.
+      Save and Apply: ذخیره و اعمال
+      Discard Changes: کنارگذاشتن تغییرات
+      Reset Colors: بازنشانی به زمینهٔ پایه
+      Theme File: پروندهٔ زمینهٔ OpenTubeX
+      Theme Saved: زمینهٔ سفارشی ذخیره و اعمال شد
+      Theme Imported: زمینه به ویرایشگر درون‌ریزی شد
+      Theme Exported: زمینه برون‌ریزی شد
+      Theme Deleted: زمینهٔ سفارشی حذف شد
+      Unable to Load: زمینهٔ سفارشی بارگیری نشد
+      Unable to Save: زمینهٔ سفارشی ذخیره نشد
+      Unable to Export: زمینهٔ سفارشی برون‌ریزی نشد
+      Unable to Share: زمینهٔ سفارشی هم‌رسانی نشد
+      Unable to Delete: زمینهٔ سفارشی حذف نشد
+      Invalid Theme File: پروندهٔ زمینهٔ سفارشی نامعتبر است
+      Colors:
+        Watched thumbnail overlay: "لایهٔ روی تصاویر بندانگشتی ویدیوهای تماشاشده"
+        Thumbnail badge background: "پس‌زمینهٔ نشان‌های روی تصاویر بندانگشتی"
+        Main text: متن اصلی
+        Secondary text: متن فرعی
+        Subtle text: متن کم‌رنگ
+        Borders and dividers: حاشیه‌ها و جداکننده‌ها
+        Subtle surfaces and indicators: سطح‌ها و نشانگرهای کم‌رنگ
+        Title text: متن عنوان
+        Selected text background: پس‌زمینهٔ متن انتخاب‌شده
+        Selected text: متن انتخاب‌شده
+        Logo icon: نماد نشان‌واره
+        Logo text: متن نشان‌واره
+        Logo hover: نشان‌واره هنگام اشاره
+        Logo pressed: نشان‌واره هنگام فشردن
+        Page background: پس‌زمینهٔ صفحه
+        Card background: پس‌زمینهٔ کارت
+        Secondary card background: پس‌زمینهٔ کارت فرعی
+        Favorite icon: نماد برگزیده
+        Error color: رنگ خطا
+        Scrollbar thumb: دستگیرهٔ نوار پیمایش
+        Scrollbar thumb hover: دستگیرهٔ نوار پیمایش هنگام اشاره
+        Scrollbar thumb pressed: دستگیرهٔ نوار پیمایش هنگام فشردن
+        Dropdown item hover text: متن گزینهٔ بازشو هنگام اشاره
+        Dropdown item hover background: پس‌زمینهٔ گزینهٔ بازشو هنگام اشاره
+        Navigation and panel background: پس‌زمینهٔ پیمایش و پنل
+        Neutral item hover and focus background: پس‌زمینهٔ مورد خنثی هنگام اشاره و تمرکز
+        Neutral item hover and focus text and icons: متن و نمادهای مورد خنثی هنگام اشاره و تمرکز
+        Neutral item pressed background: پس‌زمینهٔ مورد خنثی هنگام فشردن
+        Neutral item pressed text and icons: متن و نمادهای مورد خنثی هنگام فشردن
+        Header button hover and focus background: پس‌زمینهٔ دکمهٔ سربرگ هنگام اشاره و تمرکز
+        Header button hover and focus text and icons: متن و نمادهای دکمهٔ سربرگ هنگام اشاره و تمرکز
+        Header button pressed background: پس‌زمینهٔ دکمهٔ سربرگ هنگام فشردن
+        Header button pressed text and icons: متن و نمادهای دکمهٔ سربرگ هنگام فشردن
+        Search and dropdown background: پس‌زمینهٔ جست‌وجو و فهرست بازشو
+        Settings search background: پس‌زمینهٔ جست‌وجوی تنظیمات
+        Instance menu: منوی نمونه
+        Shadow color: رنگ سایه
+        Primary controls and highlights: کنترل‌ها و برجسته‌سازی‌های اصلی
+        Primary control hover and focus: کنترل اصلی هنگام اشاره و تمرکز
+        Primary control pressed: کنترل اصلی هنگام فشردن
+        Text and icons on primary controls: متن و نمادهای روی کنترل‌های اصلی
+        Secondary controls and highlights: کنترل‌ها و برجسته‌سازی‌های فرعی
+        Secondary control hover and focus: کنترل فرعی هنگام اشاره و تمرکز
+        Secondary control pressed: کنترل فرعی هنگام فشردن
+        Light secondary color: رنگ فرعی روشن
+        Visited accent: رنگ تأکیدی موارد بازدیدشده
+        Text and icons on secondary controls: متن و نمادهای روی کنترل‌های فرعی
+        Links: پیوندها
+        Visited links: پیوندهای بازدیدشده
+        Destructive action: کنش مخرب
+        Destructive hover and focus: کنش مخرب هنگام اشاره و تمرکز
+        Destructive pressed: کنش مخرب هنگام فشردن
+        Text and icons on destructive actions: متن و نمادهای روی کنش‌های مخرب
+    Main Color Theme:
+      Catppuccin Macchiato Rosewater: "Catppuccin Macchiato گلاب"
+      Catppuccin Macchiato Flamingo: "Catppuccin Macchiato فلامینگو"
+      Catppuccin Macchiato Pink: "Catppuccin Macchiato صورتی"
+      Catppuccin Macchiato Mauve: "Catppuccin Macchiato ارغوانی سیر"
+      Catppuccin Macchiato Red: "Catppuccin Macchiato قرمز"
+      Catppuccin Macchiato Maroon: "Catppuccin Macchiato خرمایی"
+      Catppuccin Macchiato Peach: "Catppuccin Macchiato هلویی"
+      Catppuccin Macchiato Yellow: "Catppuccin Macchiato زرد"
+      Catppuccin Macchiato Green: "Catppuccin Macchiato سبز"
+      Catppuccin Macchiato Teal: "Catppuccin Macchiato مرغابی"
+      Catppuccin Macchiato Sky: "Catppuccin Macchiato آسمانی"
+      Catppuccin Macchiato Sapphire: "Catppuccin Macchiato یاقونی"
+      Catppuccin Macchiato Blue: "Catppuccin Macchiato آبی"
+      Catppuccin Macchiato Lavender: "Catppuccin Macchiato بنفش کمرنگ"
+      Catppuccin Latte Mauve: Catppuccin Latte Mauve
+      Catppuccin Latte Red: Catppuccin Latte Red
+    Modal Backdrop:
+      Modal Backdrop: "پس‌زمینهٔ کادرهای گفتگو"
+      Dim and Blur: "تیره و مات"
+      Dim Only: "فقط تیره"
+    Click Scrollbar Track to Scroll: "پیمایش با کلیک روی نوار پیمایش"
+  Player Settings:
+    Rewind on Resume: "عقب‌بردن هنگام ادامه"
+    Minimum Pause Before Rewinding: "حداقل توقف پیش از عقب‌بردن"
+    Mono Audio: 'صدای مونو'
+    Normalize Loudness: 'یکسان‌سازی بلندی صدا'
+    Show Mono Audio Toggle: 'نمایش کلید صدای مونو'
+    Default Media Format:
+      Default Media Format: 'فرمت رسانه پیشفرض'
+    Pause on Stream Recovery: "توقف هنگام بازیابی جریان"
+    Buffering:
+      Buffering: بافرینگ
+      Description: انتخاب کنید پخش‌کننده چه مقدار از ویدیو را از پیش بارگیری کند و بارگذاری‌شده نگه دارد.
+      Buffer Ahead Hint: بافر پیش روی بیشتر، پخش را در قطعی‌های طولانی‌تر اتصال هم ادامه می‌دهد، اما ویدیویی را بارگیری می‌کند که شاید تماشا نکنید.
+      Rewind Buffer Hint: بافر عقب‌گرد بزرگ‌تر به شما امکان می‌دهد بدون بارگیری دوباره به عقب بپرید، اما حافظهٔ بیشتری مصرف می‌کند.
+      Buffer Before Playing Hint: انتظار برای بارگیری ویدیوی بیشتر پیش از پخش، از توقف‌های مکرر در اتصال‌های ناپایدار جلوگیری می‌کند، اما شروع ویدیوها و ادامهٔ پخش پس از جابه‌جایی بیشتر طول می‌کشد.
+      Preset: پیش‌تنظیم بافر
+      Presets:
+        Data Saver: صرفه‌جویی در داده
+        Default: پیش‌فرض
+        Smooth Playback: پخش روان
+        Custom: سفارشی
+      Buffer Ahead: بافر پیش رو
+      Buffer Ahead Tooltip: 'تا چه اندازه جلوتر از موقعیت فعلی بارگیری شود. در کیفیت‌های بالا، محدودیت‌های حافظه ممکن است مقادیر خیلی بالا را محدود کنند. پیش‌فرض: {value}'
+      Rewind Buffer: بافر عقب‌گرد
+      Rewind Buffer Tooltip: 'چه مقدار از ویدیویی که قبلاً تماشا کرده‌اید بارگذاری‌شده باقی می‌ماند. پیش‌فرض: {value}'
+      Buffer Before Playing: بافر پیش از پخش
+      Buffer Before Playing Tooltip: 'چه مقدار از ویدیو باید پیش از شروع پخش، یا ادامهٔ آن پس از تمام شدن بافر، بارگیری شود. پیش‌فرض: {value}'
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: "محدودیت کیفیت در شبکه‌های محدود"
+      No Limit: "بدون محدودیت"
+      Tooltip: "در داده تلفن همراه و دیگر شبکه‌های محدود، ویدیوها با این کیفیت یا پایین‌تر شروع می‌شوند. همچنان می‌توانید کیفیت بالاتری را در پخش‌کننده انتخاب کنید."
+    Show Music Mode Toggle: "نمایش کلید حالت موسیقی"
+    Enable DLNA Casting: "فعال کردن پخش DLNA"
+    Skip Unavailable Playlist Videos: "رد کردن ویدیوهای ناموجود در فهرست‌های پخش"
+    Lights Off: خاموش کردن چراغ‌ها
+    Show Lights Off Toggle: نمایش کلید خاموش کردن چراغ‌ها
+    Show Volume Boost Toggle: "نمایش کلید تقویت صدا"
+    Swipe Gestures:
+      Fullscreen Brightness: بیشترین روشنایی در حالت تمام‌صفحه
+      Left: کشیدن در سمت چپ
+      Right: کشیدن در سمت راست
+      Disabled: غیرفعال
+      Brightness: روشنایی
+      Volume: بلندی صدا
+      Hint: در حالت تمام‌صفحه، در یکی از کناره‌های ویدیو به بالا یا پایین بکشید.
+      Unavailable: تنظیم کنترل‌های پخش ممکن نشد.
+    yt-dlp Streaming: "پخش جریانی yt-dlp"
+    Continue Playback When Screen Is Locked: 'ادامه پخش هنگام قفل بودن صفحه'
+    Music Visualizer: تصویرساز موسیقی
+    Automatically Open Chapters: بازکردن خودکار فصل‌ها
+    Caption Appearance:
+      Caption Appearance: ظاهر زیرنویس
+      Captions: زیرنویس‌ها
+      Preferred Language: زبان ترجیحی زیرنویس
+      Application Language: زبان برنامه
+      Enable Translations: فعال‌کردن ترجمهٔ زیرنویس
+      Text Color: رنگ متن
+      Background Color: رنگ پس‌زمینه
+      Background Opacity: میزان کدری پس‌زمینه
+      Font Size: اندازهٔ قلم
+      Anchor:
+        Anchor: لنگر
+        Top Left: بالا چپ
+        Top Center: بالا وسط
+        Top Right: بالا راست
+        Bottom Left: پایین چپ
+        Bottom Center: پایین وسط
+        Bottom Right: پایین راست
+        Center Left: وسط چپ
+        Center: وسط
+        Center Right: وسط راست
+      Edge Style:
+        Edge Style: سبک لبه
+        None: هیچ‌کدام
+        Outline: دورخط
+        Drop Shadow: سایه
+        Raised: برجسته
+        Depressed: فرورفته
+      Reset: بازنشانی ظاهر زیرنویس
+      Default: پیش‌فرض
+      Text Opacity: ماتی قلم
+      Font Family:
+        Font Family: خانواده قلم
+        Monospaced Serif: Serif با عرض ثابت
+        Proportional Serif: Serif نسبی
+        Monospaced Sans-Serif: Sans-Serif با عرض ثابت
+        Proportional Sans-Serif: Sans-Serif نسبی
+      Colors:
+        White: سفید
+        Yellow: زرد
+        Green: سبز
+        Cyan: سبزآبی
+        Blue: آبی
+        Magenta: سرخابی
+        Red: قرمز
+        Black: مشکی
+    Default Viewing Mode:
+      Full Window (Always On): تمام‌پنجره (همیشه فعال)
+      Full Screen (Always On): تمام‌صفحه (همیشه فعال)
+      Tooltip: بیشتر حالت‌های پیش‌فرض نمایش فقط در آغاز هر نوبت تماشا اعمال می‌شوند. تغییرات این حالت‌ها تا پایان همان نوبت باقی می‌مانند. حالت‌های همیشه‌فعال با رفتن به هر ویدیوی جدید اعمال می‌شوند، حتی اگر هنگام تماشای ویدیوی قبلی حالت نمایش را تغییر داده باشید.
+    Auto Picture in Picture:
+      Auto Picture in Picture: ورود خودکار به حالت تصویر در تصویر
+      On Tab Change: هنگام جابه‌جایی میان برگه‌ها
+      On Window Minimize: هنگام کمینه‌کردن پنجره
+      On Window Hide: هنگامی که پنجره تمرکز را از دست می‌دهد یا به پنجره‌ای دیگر می‌روید
+      Wayland Minimize Unsupported: Wayland کمینه‌شدن پنجره را به برنامه‌ها گزارش نمی‌کند، پس این محرک در دسترس نیست. به‌جای آن از "هنگامی که پنجره تمرکز را از دست می‌دهد یا به پنجره‌ای دیگر می‌روید" استفاده کنید که کمینه‌کردن را نیز پوشش می‌دهد.
+      On Tab Change Mini Player: جابه‌جایی میان برگه‌ها به‌جای آن پخش‌کنندهٔ کوچک را نشان می‌دهد. برای استفاده از این گزینه، «هنگام خروج از ویدیو» را روی «توقف پخش» تنظیم کنید.
+    Scroll Mini Player:
+      Scroll Player Mode: هنگام پیمایش به پایین
+      Scroll Player Mode Tooltip: پخش‌کننده فقط تا زمانی سنجاق می‌شود که حداکثر نیمی از ارتفاع پنجره را بگیرد. در غیر این صورت، مثلاً در تلفن‌ها در حالت افقی یا در پنجره‌های عریض، به‌جای آن پخش‌کنندهٔ کوچک نمایش داده می‌شود.
+      Scroll Player Modes:
+        Mini: نمایش پخش‌کنندهٔ کوچک
+        Pin: سنجاق کردن پخش‌کننده در بالا در صورت وجود فضا
+        Off: پیمایش همراه با صفحه
+      Leaving Video: هنگام خروج از ویدیو
+      Leaving Video Modes:
+        Keep Playing: ادامهٔ پخش در پخش‌کنندهٔ کوچک
+        Stop: توقف پخش
+    Multiply Seek Interval by Playback Rate: ضرب فاصلهٔ پرش در سرعت پخش
+    Show Playback Rate Adjusted Timestamp: نمایش زمان هماهنگ‌شده با سرعت پخش
+    Use YouTube-style Shorts: استفاده از ویدیوهای کوتاه به سبک YouTube
+    Loop Shorts: تکرار ویدیوهای کوتاه
+    Remember Volume: به‌خاطر سپردن بلندی صدا
+    Skip Silence: ردکردن سکوت
+    Show Skip Silence Toggle: نمایش کلید ردکردن سکوت
+    Enable Skip Silence by Default: فعال‌کردن پیش‌فرض ردکردن سکوت
+    Enable Video Zoom: فعال‌کردن بزرگ‌نمایی ویدیو
+    Enable Seek History: فعال‌کردن تاریخچهٔ پرش‌ها
+    Show Seek Bar Filmstrip: "نمایش نوار فریم نوار پیشرفت"
+    Voice-over Translation:
+      Title: ترجمهٔ صوتی
+      Attribution: (با پشتیبانی Yandex)
+      Enable: فعال‌کردن ترجمهٔ صوتی
+      Prepare in Background: شروع آماده‌سازی ترجمهٔ صوتی در پس‌زمینه
+      Background Preparation Tooltip: به‌محض بارگیری ویدیوی پشتیبانی‌شده، شناسه، مدت و زبان انتخاب‌شدهٔ ویدیوی فعلی را برای سرویس ترجمه می‌فرستد.
+      Language: زبان ترجمهٔ صوتی
+      Supported Source Languages: 'زبان‌های مبدأ پشتیبانی‌شده: روسی، انگلیسی، چینی، کره‌ای، عربی، فرانسوی، ایتالیایی، اسپانیایی، آلمانی و ژاپنی.'
+      Voice Volume: بلندی صدای ترجمه
+      Original Volume: بلندی صدای اصلی
+      Russian: روسی
+      English: انگلیسی
+      Kazakh: قزاقی
+    Hold to Speed Up:
+      Hold to Speed Up: نگه‌داشتن برای افزایش سرعت
+      Off: خاموش
+    Use Quick Playback Speed Bar: استفاده از نوار سریع سرعت پخش
+    Customize Quick Playback Speed Bar: سفارشی‌سازی نوار سریع سرعت پخش
+    Quick Playback Speed Bar Manager: نوار سریع سرعت پخش
+    Add Playback Speed: افزودن سرعت پخش
+    Reset Quick Playback Speed Bar: بازنشانی به پیش‌فرض‌ها
+    Playback Speed Name: نام
+    Edit Playback Speed Name: ویرایش نام سرعت پخش
+    Use Automatic Playback Speed Name: استفاده از نام خودکار سرعت پخش
+    Reorder Playback Speed: برای تغییر ترتیب سرعت پخش بکشید
+    Playback Speed: سرعت پخش
+    Parallel Segment Loading: بارگیری هم‌زمان بخش‌ها
+    Screenshot:
+      Mode: حالت نماگرفت
+      Modes:
+        Save To Folder: ذخیره در پوشه
+        Clipboard: رونوشت در تخته‌گیره
+      Legacy Formats: "قالب‌های قدیمی"
+      Modern Formats: "قالب‌های جدید"
+    Rotate Wide Videos to Landscape in Fullscreen: 'چرخاندن ویدیوهای عریض به حالت افقی در تمام‌صفحه'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'برای ورود به تمام‌صفحه یا خروج از آن، بالا یا پایین بکشید'
+    Preload Upcoming Videos: "پیش‌بارگیری ویدیوهای بعدی"
+    Upcoming Videos to Preload: "تعداد ویدیوها برای پیش‌بارگیری"
+    Concurrent Preloads: "پیش‌بارگذاری‌های هم‌زمان"
+    Ignore System Rotation Lock for Fullscreen: نادیده گرفتن قفل چرخش سیستم برای تمام‌صفحه
+    Swipe Left or Right to Seek in Fullscreen: برای جلو یا عقب بردن در حالت تمام‌صفحه، به چپ یا راست بکشید
+    Show Swipe to Seek Preview: نمایش پیش‌نمایش هنگام جلو و عقب بردن با کشیدن
+    Enable Google Cast: "فعال کردن Google Cast"
+    Sections:
+      Playback: پخش
+      Autoplay: پخش خودکار
+      Playback Speed: سرعت پخش
+      Player Controls: کنترل‌های پخش‌کننده
+      Gestures: اشاره‌ها
+      Viewing Modes: حالت‌های نمایش
+      Shorts: Shorts
+      Screenshots: نماگرفت‌ها
+    Enable FCast: "فعال کردن FCast"
+    Ask Before Preloading Large Playlists: "پرسیدن پیش از پیش‌بارگیری فهرست‌های پخش بزرگ"
+  Channel Settings:
+    Channel Settings: تنظیمات کانال
+    Channel Settings Description: تنظیمات انتخابی هنگام تماشای هر کانال را جداگانه به‌خاطر بسپار تا دفعهٔ بعد برای ویدیوهای آن دوباره اعمال شوند.
+    Enable Channel Playback Settings: فعال‌سازی تنظیمات پخش کانال
+    Auto Save Playback Speed: ذخیرهٔ خودکار تغییرات سرعت پخش
+    Auto Save Video Quality: ذخیرهٔ خودکار تغییرات کیفیت ویدیو
+    Auto Save Subtitles State: ذخیرهٔ خودکار تغییرات وضعیت زیرنویس
+    Auto Save Volume: ذخیرهٔ خودکار تغییرات بلندی صدا
+    Manage Saved Channels: مدیریت کانال‌های ذخیره‌شده ({channelCount})
+    Saved Channels: تنظیمات ذخیره‌شدهٔ کانال‌ها
+    Enable Saved Channel Settings Sync: همگام‌سازی تنظیمات ذخیره‌شدهٔ کانال‌ها
+    Disable Saved Channel Settings Sync: توقف همگام‌سازی تنظیمات ذخیره‌شدهٔ کانال‌ها
+    Search Channels: جست‌وجوی کانال‌ها
+    No Saved Channels: هنوز تنظیمات ویژه‌ای برای هیچ کانالی ذخیره نشده است
+    No Matching Channels: هیچ کانالی با جست‌وجوی شما مطابقت ندارد
+    Forget Channel: فراموش‌کردن همهٔ تنظیمات این کانال
+    Forget Value: فراموش‌کردن این تنظیم
+    Add Setting: به‌خاطر سپردن تنظیمی دیگر برای این کانال
+    Add Subscribed Channel: افزودن کانال مشترک‌شده
+    Video Quality: کیفیت ویدیو
+    Subtitles Enabled: زیرنویس فعال است
+    Volume: بلندی صدا
+  Download Settings:
+    Download Settings: بارگیری‌ها
+    Enable Downloads: فعال‌کردن بارگیری‌ها
+    Managed Tools Download Started Template: 'نرم‌افزار خارجی موردنیاز پیدا نشد: {tools}. در حال بارگیری نسخه‌های مدیریت‌شده…'
+    Managed Tools Download Finished Template: بارگیری {tools} پایان یافت
+    Managed Tools Update Started Template: به‌روزرسانی {tools} پیدا شد. در حال بارگیری…
+    Managed Tools Update Finished Template: به‌روزرسانی {tools} تمام شد
+    Managed Tools Update Available Template: به‌روزرسانی برای {tools} موجود است.
+    Managed Tools Update Source Notice: "OpenTubeX آن را مستقیماً از GitHub بارگیری می‌کند، بنابراین F-Droid و دیگر فروشگاه‌های برنامه آن را بررسی نمی‌کنند."
+    Update Managed Tools: به‌روزرسانی
+    Managed Tools Download Error Template: 'ابزارهای مدیریت‌شده بارگیری نشدند: {errors}'
+    Download Folder: پوشهٔ بارگیری
+    Global Additional yt-dlp Arguments: آرگومان‌های اضافی yt-dlp
+    Concurrent Downloads: بارگیری‌های هم‌زمان
+    Bandwidth Limit: محدودیت پهنای باند (KiB/s)
+    Download Templates: الگوهای بارگیری
+    Manage Download Templates: مدیریت الگوهای بارگیری ({templateCount})
+    New Template: الگوی جدید
+    Template Source: الگوی قابل ویرایش یا پایه
+    Built-in Template: '{name} (داخلی)'
+    Custom Template Name: '{name} (سفارشی)'
+    Create Template Copy: ساخت رونوشت
+    Template Copy Name: 'رونوشت {name}'
+    Automatic Downloads: بارگیری خودکار
+    Manage Automatic Downloads: مدیریت بارگیری خودکار ({channelCount})
+    Automatic Downloads Description: برای هر کانال مشترک، یک الگوی بارگیری و فیلترها را انتخاب کنید. با تازه‌سازی خوراک اشتراک‌ها، ویدیوهای منطبق در پس‌زمینه بارگیری می‌شوند.
+    Automatic Downloads New Only: با فعال‌کردن کانال، بارگیری از ویدیوی جدید بعدی آن آغاز می‌شود. ویدیوهای موجود و بایگانی کانال بارگیری نمی‌شوند.
+    Automatic Downloads No Channels: پیش از تنظیم بارگیری خودکار، مشترک یک کانال شوید.
+    No Matching Automatic Download Channels: هیچ کانالی با جست‌وجوی شما مطابقت ندارد.
+    Automatic Downloads Livestreams: پخش‌های زنده
+    Minimum Duration Seconds: کمترین مدت (ثانیه)
+    Maximum Duration Seconds: بیشترین مدت (ثانیه)
+    Minimum File Size MB: کمترین حجم فایل (MB)
+    Maximum File Size MB: بیشترین حجم فایل (MB)
+    Maximum Age Days: بیشترین سن (روز)
+    Title Includes: عنوان شامل باشد
+    Title Excludes: عنوان شامل نباشد
+    Title Filter Hint: عبارت‌های عنوان را با ویرگول جدا کنید. ویدیو باید دست‌کم با یکی از عبارت‌های شامل‌شده و با هیچ‌یک از عبارت‌های کنارگذاشته‌شده مطابقت داشته باشد.
+    Automatic Downloads Require Unmetered Network: "فقط در شبکه‌های بدون محدودیت"
+    Automatic Downloads Require Charging: "فقط هنگام شارژ"
+  External Software Settings:
+    Create YouTube session: "ایجاد نشست YouTube"
+    YouTube session hint: "در صورت نیاز وارد شوید و نشست را ذخیره کنید. در تنظیمات انتخاب کنید که برای بارگیری، پخش یا زیرنویس استفاده شود."
+    Use cookies for downloads: "استفاده از کوکی‌ها برای بارگیری"
+    YouTube session failed: "ذخیرهٔ نشست YouTube ممکن نشد."
+    Checking FFmpeg and FFprobe: در حال بررسی FFmpeg/FFprobe…
+    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe هنوز بارگیری نشده است. برای بارگیری، روی دکمهٔ زیر کلیک کنید.
+    External Software Settings: نرم‌افزار خارجی
+    yt-dlp Source: منبع yt-dlp
+    yt-dlp Channel: کانال yt-dlp
+    Sources:
+      System: سیستم (PATH یا مسیر سفارشی)
+      Managed: تحت مدیریت OpenTubeX
+    Detected Version Template: 'نسخهٔ شناسایی‌شدهٔ yt-dlp: {version}'
+    Managed Not Downloaded: yt-dlp هنوز بارگیری نشده است. برای بارگیری، روی دکمهٔ زیر کلیک کنید.
+    System yt-dlp Missing Warning: yt-dlp در سیستم شما پیدا نشد. آن را نصب کنید، در پایین مسیر سفارشی تعیین کنید یا منبع را به «تحت مدیریت OpenTubeX» تغییر دهید.
+    Download yt-dlp: بارگیری yt-dlp
+    Update yt-dlp: به‌روزرسانی yt-dlp
+    Checking yt-dlp: در حال بررسی yt-dlp…
+    Downloading yt-dlp: در حال بارگیری yt-dlp…
+    yt-dlp Downloaded Template: yt-dlp {version} بارگیری شد
+    yt-dlp Download Error Template: 'بارگیری yt-dlp ناموفق بود: {error}'
+    FFmpeg Source: منبع FFmpeg
+    Detected FFmpeg Version Template: 'نسخهٔ شناسایی‌شدهٔ FFmpeg: {version}'
+    Detected FFmpeg and FFprobe Version Template: 'نسخهٔ شناسایی‌شدهٔ FFmpeg/FFprobe: {version}'
+    FFmpeg Managed Not Downloaded: FFmpeg هنوز بارگیری نشده است. برای بارگیری، روی دکمهٔ زیر کلیک کنید.
+    System FFmpeg Missing Warning: FFmpeg در سیستم شما پیدا نشد. برای ادغام ویدیو و صدا و تبدیل صدا لازم است. آن را نصب کنید، در پایین مسیر سفارشی تعیین کنید یا منبع را به «تحت مدیریت OpenTubeX» تغییر دهید.
+    Download FFmpeg: بارگیری FFmpeg
+    Update FFmpeg: به‌روزرسانی FFmpeg
+    Checking FFmpeg: در حال بررسی FFmpeg…
+    Downloading FFmpeg: در حال بارگیری FFmpeg…
+    Detected FFprobe Version Template: 'نسخهٔ شناسایی‌شدهٔ FFprobe: {version}'
+    FFprobe Managed Not Downloaded: FFprobe هنوز بارگیری نشده است. برای بارگیری آن همراه FFmpeg، روی دکمهٔ زیر کلیک کنید.
+    System FFprobe Missing Warning: FFprobe در سیستم شما پیدا نشد. این ابزار برای بررسی رسانه هنگام پس‌پردازش لازم است. آن را کنار FFmpeg نصب کنید یا منبع را به «تحت مدیریت OpenTubeX» تغییر دهید.
+    Checking FFprobe: در حال بررسی FFprobe…
+    Download FFmpeg and FFprobe: بارگیری FFmpeg و FFprobe
+    Update FFmpeg and FFprobe: به‌روزرسانی FFmpeg و FFprobe
+    Downloading FFmpeg and FFprobe: در حال بارگیری FFmpeg و FFprobe…
+    FFmpeg and FFprobe Downloaded Template: FFmpeg و FFprobe {version} بارگیری شدند
+    FFmpeg and FFprobe Download Error Template: 'بارگیری FFmpeg و FFprobe ناموفق بود: {error}'
+    Managed Tool Already Current Template: '{tool} {version} از قبل به‌روز است'
+    Managed Tool Errors:
+      Removed: 'فایل دانلودشده حذف شد، به احتمال زیاد توسط نرم‌افزار ضدویروس'
+      Unusable: 'برنامهٔ دانلودشده اجرا نشد. ممکن است نرم‌افزار ضدویروس آن را مسدود کرده باشد، یا از این سیستم پشتیبانی نکند'
+      Release Not Found: 'آخرین نسخه پیدا نشد'
+      Verification Failed: 'تأیید اینکه دانلود یک نسخهٔ رسمی است ممکن نشد'
+      Downgrade: 'نسخهٔ دانلودشده قدیمی‌تر از نسخهٔ نصب‌شده است'
+      Invalid Archive: 'بایگانی دانلودشده نامعتبر است'
+      Rollback Failed: 'به‌روزرسانی ناموفق بود و نسخهٔ قبلی به‌طور کامل بازیابی نشد'
+    Managed Tool Updates: به‌روزرسانی ابزارهای مدیریت‌شده
+    Update Modes:
+      Automatic: به‌روزرسانی خودکار
+      Ask: پرسش پیش از به‌روزرسانی
+      Manual: فقط به‌روزرسانی دستی
+    yt-dlp Executable Path: فایل اجرایی yt-dlp
+    FFmpeg Executable Path: فایل اجرایی FFmpeg
+    Restricted Playback Authentication: "کوکی‌های yt-dlp"
+    Cookie Source: منبع کوکی
+    Cookie Sources:
+      None: هیچ‌کدام
+      File: فایل
+      Browser: مرورگر
+    Cookie File: فایل کوکی
+    Browser for Cookies: مرورگر کوکی‌ها
+    Browser Profile: نمایهٔ مرورگر (اختیاری)
+    Browser Profile Placeholder: نام یا مسیر نمایه
+    Browser Profile Invalid: "نام نمایه را وارد کنید یا با دکمهٔ پوشه، پوشهٔ نمایه را انتخاب کنید."
+    Select Browser: انتخاب مرورگر
+    Always Use Cookies: همیشه از کوکی‌ها استفاده شود
+    Restricted Playback Authentication Hint: OpenTubeX به‌طور پیش‌فرض تنها پس از انتخاب «تلاش با کوکی‌های تنظیم‌شده» برای ویدیوی دارای محدودیت سنی یا ویژهٔ اعضا، این کوکی‌ها را به yt-dlp می‌فرستد.
+    Restricted Playback Authentication Warning: استفاده از yt-dlp با حساب Google ممکن است حساب را موقت یا دائم محدود کند.
+    Use cookies for subtitles: "استفاده از کوکی‌ها برای زیرنویس"
+  Privacy Settings:
+    Internet Connectivity Checks: "بررسی اتصال اینترنت"
+    Internet Connectivity Checks Tooltip: "برای بررسی دسترسی به اینترنت، درخواست‌های کوچکی به سروری با میزبانی GrapheneOS ارسال می‌کند."
+    Automatic History Retention: نگهداری خودکار تاریخچه (روز)
+    Automatic History Retention Placeholder: برای نگهداری همیشگی خالی بگذارید
+    Automatic History Retention Tooltip: برای نگهداری همیشگی تاریخچه، خالی بگذارید. با ذخیرهٔ یک عدد، موارد قدیمی اکنون و هنگام بازبودن برنامه به‌طور خودکار حذف می‌شوند.
+    Automatic Search History Retention: نگهداری خودکار تاریخچهٔ جستجو (روز)
+    Automatic Search History Retention Tooltip: برای نگهداری همیشگی تاریخچهٔ جستجو، خالی بگذارید. با ذخیرهٔ یک عدد، جستجوهای قدیمی اکنون و هنگام بازبودن برنامه به‌طور خودکار حذف می‌شوند.
+    History Retention Saved: مدت نگهداری تاریخچه ذخیره شد
+    Invalid History Retention Days: تعداد روزها را به‌صورت عدد صحیح بزرگ‌تر از صفر وارد کنید
+    Enable Watch Statistics: فعال‌کردن آمار تماشا
+    Week Starts On: آغاز هفته
+    Cache Video Metadata: تاریخچهٔ فراداده
+    Cache Video Metadata Tooltip: همهٔ نسخه‌های پشتیبانی‌شدهٔ فرادادهٔ ویدیوهای بازدیدشده، از جمله عنوان، تصویر بندانگشتی و توضیحات را نگه می‌دارد. عنوان‌هایی را که در فیدهای اشتراک‌های شما نمایش داده می‌شوند نیز نگه می‌دارد. چون نگهداری تاریخچهٔ فراداده فضای دیسک بیشتری می‌گیرد، به‌طور پیش‌فرض غیرفعال است.
+    Watched Percentage Threshold: آستانهٔ درصد تماشاشده
+    Watched Percentage Threshold Tooltip: ویدیو پس از رسیدن به درصد انتخابی و باقی‌ماندن حداکثر 2 دقیقه، تماشاشده علامت می‌خورد. در 0% با آغاز پخش و در 100% با پایان پخش علامت می‌خورد.
+    Clear Video Metadata Cache: پاک‌کردن حافظهٔ نهان فرادادهٔ ویدیو
+    Are you sure you want to clear the video metadata cache?: مطمئنید می‌خواهید عنوان‌ها، تصاویر بندانگشتی و توضیحات ذخیره‌شده در حافظهٔ نهان را پاک کنید؟
+    Failed to clear video metadata cache: پاک‌کردن حافظهٔ نهان فرادادهٔ ویدیو ناموفق بود
+    Video Metadata Cache Size: 'حافظهٔ نهان فرادادهٔ ویدیو: {size}'
+  Storage Settings:
+    Storage: فضای ذخیره‌سازی
+    Downloaded Media: رسانه‌های بارگیری‌شدهٔ ردیابی‌شده
+    Storage Breakdown: جزئیات فضای ذخیره‌سازی
+    Shown Total: مجموع نمایش‌داده‌شده
+    Calculating: در حال محاسبه…
+    Not Available: اندازهٔ دقیق در دسترس نیست
+    At Least: دست‌کم {size}
+    Failed To Read Storage: اندازهٔ برخی موارد خوانده نشد
+    Downloaded Media Description: فایل‌های ویدیو، صدا و زیرنویسی که هنوز در تاریخچهٔ بارگیری ردیابی می‌شوند.
+    Selected Download Folders: پوشه‌های بارگیری انتخاب‌شده
+    Download History Records: سوابق تاریخچهٔ بارگیری
+    Download History Records Description: '{count} سابقهٔ بارگیری تمام‌شده. این سابقه وضعیت و محل فایل را نگه می‌دارد، اما شامل رسانهٔ بارگیری‌شده نیست. | {count} سابقهٔ بارگیری تمام‌شده. این سوابق وضعیت و محل فایل‌ها را نگه می‌دارند، اما شامل رسانه‌های بارگیری‌شده نیستند.'
+    Clear Download History Records: پاک‌کردن سوابق تاریخچهٔ بارگیری
+    Clear Download History Confirmation: همهٔ سوابق بارگیری تمام‌شده پاک شوند؟
+    Download Files Stay On Disk: فایل‌های بارگیری‌شده روی دیسک می‌مانند، اما دیگر در صفحهٔ بارگیری‌ها نمایش داده نمی‌شوند.
+    Clear Records: پاک‌کردن سوابق
+    Replaceable Caches: حافظه‌های نهان قابل جایگزینی
+    Application Caches: حافظه‌های نهان برنامه
+    Browser Caches: حافظه‌های نهان مرورگر
+    Browser Caches Hint: حافظه‌های نهان HTTP، GPU، کد، سایه‌زن، سرویس‌ورکر و واژه‌نامهٔ Chromium.
+    Clear Android Cache Confirmation: حافظهٔ پنهان مرورگر اندروید پاک شود؟
+    Stored App Data: داده‌های ذخیره‌شدهٔ برنامه
+    Included In App Data: در داده‌های برنامهٔ نمایش‌داده‌شده در بالا گنجانده شده است
+    Browser Runtime Data: داده‌های زمان اجرای مرورگر
+    Browser Runtime Data Hint: نشست و فضای ذخیره‌سازی محلی، کوکی‌ها، وضعیت حریم خصوصی و شبکه و فایل‌های خرابی Chromium.
+    Subscription Feed Cache: حافظهٔ نهان اشتراک‌ها و خوراک
+    Subscription Feed Cache Description: ویدیوها، Shorts، پخش‌های زنده و پست‌های دریافت‌شده از اشتراک‌ها را نگه می‌دارد. OpenTubeX با تازه‌سازی بعدی خوراک آن را دوباره می‌سازد.
+    Clear Subscription Feed Cache: پاک‌کردن حافظهٔ نهان اشتراک‌ها و خوراک
+    Clear Subscription Feed Cache Confirmation: حافظهٔ نهان اشتراک‌ها و خوراک پاک شود؟
+    Subscription Feed Cache Effect: تا زمان تازه‌سازی، خوراک اشتراک‌ها ممکن است خالی باشد. اشتراک‌ها و نمایه‌های شما تغییر نمی‌کنند.
+    Session Search Cache: حافظهٔ نهان جست‌وجوی نشست
+    In Memory: در حافظه
+    Session Search Cache Description: '{count} جست‌وجو برای بازگشت سریع‌تر در حافظهٔ نهان است. با بسته‌شدن OpenTubeX این حافظه پاک می‌شود. | {count} جست‌وجو برای بازگشت سریع‌تر در حافظهٔ نهان هستند. با بسته‌شدن OpenTubeX این حافظه پاک می‌شود.'
+    Clear Session Search Cache: پاک‌کردن حافظهٔ نهان جست‌وجوی نشست
+    Clear Session Search Cache Confirmation: حافظهٔ نهان جست‌وجوی نشست پاک شود؟
+    Session Search Cache Effect: صفحه‌های نتایج ذخیره‌شده در حافظهٔ نهان حذف می‌شوند. تاریخچهٔ جست‌وجوی ذخیره‌شده تغییر نمی‌کند.
+    HTTP Cache: حافظهٔ نهان HTTP
+    HTTP Cache Description: Electron پاسخ‌های شبکه را روی دیسک ذخیره می‌کند تا درخواست‌های تکراری بدون بارگیری دوبارهٔ همان داده باز شوند. OpenTubeX در صورت نیاز این حافظه را دوباره می‌سازد.
+    Managed By Electron: تحت مدیریت Electron
+    Clear HTTP Cache: پاک‌کردن حافظهٔ نهان HTTP
+    Clear HTTP Cache Confirmation: حافظهٔ نهان HTTP در Electron پاک شود؟
+    HTTP Cache Effect: هنگام بازسازی حافظهٔ نهان، تصاویر و دیگر منابع شبکه ممکن است یک بار کندتر بارگیری شوند.
+    Tab Image Cache: تصاویر بندانگشتی زبانه‌ها و آواتار کانال‌ها
+    Tab Image Cache Description: تصاویر پیش‌نمایش و آواتار کانال‌ها را برای زبانه‌های باز و بازیابی‌شده نگه می‌دارد. OpenTubeX هنگام استفاده از زبانه‌ها آن‌ها را دوباره می‌سازد.
+    Clear Tab Image Cache: پاک‌کردن حافظهٔ نهان تصاویر زبانه
+    Clear Tab Image Cache Confirmation: تصاویر بندانگشتی زبانه‌ها و آواتار کانال‌ها پاک شوند؟
+    Tab Image Cache Effect: تصاویر زبانه‌ها ممکن است لحظه‌ای ناپدید شوند و هنگام استفاده از هر زبانه دوباره ساخته می‌شوند.
+    Playback Caches: حافظه‌های نهان پخش
+    Playback Caches Description: نشانی‌های پخش yt-dlp را بین نشست‌های برنامه، همراه فایل‌های پخش‌کنندهٔ YouTube نگه می‌دارد. حافظهٔ نهان نشانی فقط برای پخش‌های دریافت‌شده با yt-dlp است.
+    Playback URL Cache Entry Size: محدودیت حافظهٔ نهان نشانی پخش yt-dlp
+    Playback URL Cache Entry Size Tooltip: بیشترین اندازهٔ هر ورودی ذخیره‌شدهٔ پخش yt-dlp را تعیین می‌کند. برای غیرفعال‌کردن ذخیره‌سازی پایدار پخش‌های yt-dlp، آن را روی 0 MB بگذارید.
+    Clear Playback Caches: پاک‌کردن حافظه‌های نهان پخش
+    Clear Playback Caches Confirmation: حافظه‌های نهان yt-dlp و پخش‌کننده پاک شوند؟
+    Playback Caches Effect: درخواست بعدی پخش محلی ممکن است تا دریافت دوبارهٔ داده‌های پخش و پخش‌کننده بیشتر طول بکشد.
+    Clear Cache: پاک‌کردن حافظهٔ نهان
+    History Data: تاریخچه‌های ذخیره‌شده
+    Video Metadata Description: عنوان‌ها، تصاویر بندانگشتی و توضیحات پیشین ویدیوهای پشتیبانی‌شده را نگه می‌دارد. پس از حذف، نسخه‌های قدیمی دوباره ساخته نمی‌شوند.
+    Video Metadata Effect: نسخه‌های ذخیره‌شدهٔ فراداده برای همیشه حذف می‌شوند. جزئیات کنونی ویدیو همچنان قابل دریافت است.
+    Watch History: تاریخچه و آمار تماشا
+    Watch History Description: تاریخچهٔ تماشا ویدیوهای دیده‌شده و میزان پیشرفت را ثبت می‌کند. آمار تماشا مجموع تماشای روزانه را نگه می‌دارد. مدت نگهداری فقط بر تاریخچهٔ تماشا اثر دارد.
+    Clear Watch Statistics: پاک‌کردن آمار تماشا
+    Watch History Effect: سوابق ویدیوهای دیده‌شده و پیشرفت ذخیره‌شده حذف می‌شوند. آمار تماشا باقی می‌ماند.
+    Clear Watch Statistics Confirmation: همهٔ آمار تماشا حذف شود؟
+    Watch Statistics Effect: مجموع تماشای روزانه حذف می‌شود. تاریخچهٔ تماشا باقی می‌ماند.
+    Search History: تاریخچهٔ جست‌وجو
+    Search History Description: جست‌وجوهایی را که خواسته‌اید به خاطر سپرده شوند نگه می‌دارد.
+    Delete Search History: حذف تاریخچهٔ جست‌وجو
+    Delete Search History Confirmation: همهٔ تاریخچهٔ جست‌وجوی ذخیره‌شده حذف شود؟
+    Search History Effect: پیشنهادهای ذخیره‌شده از جست‌وجوهای پیشین ناپدید می‌شوند. حافظهٔ نهان نشست کنونی باقی می‌ماند.
+    Other User Data: دیگر داده‌های کاربر
+    Other Profile Files: دیگر فایل‌های نمایه
+    Other Profile Files Hint: پشتیبان‌ها، فایل‌های موقت و موارد نمایه که OpenTubeX هنوز نمی‌شناسد.
+    Subscriptions And Profiles: اشتراک‌ها و نمایه‌ها
+    Subscriptions And Profiles Description: کانال‌های مشترک‌شده، نام نمایه‌ها و عضویت در نمایه‌ها را نگه می‌دارد.
+    Subscriptions And Profiles Effect: همهٔ اشتراک‌ها و نمایه‌های اضافی برای همیشه حذف می‌شوند. داده‌های حافظهٔ نهان خوراک نیز پاک می‌شوند.
+    Playlists Description: نام، توضیحات و ویدیوهای ذخیره‌شدهٔ فهرست‌های پخش را نگه می‌دارد.
+    Playlists Effect: همهٔ فهرست‌های پخش و ویدیوهای ذخیره‌شدهٔ آن‌ها برای همیشه حذف می‌شوند. فایل‌های رسانه‌ای بارگیری‌شده باقی می‌مانند.
+    Settings And Sessions: تنظیمات، نشست‌های زبانه و یادآورها
+    Settings And Sessions Description: ترجیحات برنامه، زبانه‌های قابل بازیابی و یادآورهای پخش زنده را نگه می‌دارد. برای بررسی یا پشتیبان‌گیری از این فایل‌ها، پوشهٔ نمایه را باز کنید؛ این صفحه آن‌ها را حذف نمی‌کند.
+    Cleanup Complete: پاک‌سازی فضای ذخیره‌سازی تمام شد
+    Cleanup Failed: پاک‌سازی فضای ذخیره‌سازی ناموفق بود
+  Subscription Settings:
+    Fetch Feed on Startup: دریافت خوراک هنگام راه‌اندازی
+    Show New Content Feed: نمایش خوراک محتوای جدید
+    RSS Feeds: خوراک‌های RSS
+    Enable RSS Feeds: فعال کردن خوراک‌های RSS برای پلتفرم‌های دیگر
+    Manage RSS Feeds: مدیریت خوراک‌های RSS
+    Show New Content Indicators: نمایش نشانگرهای محتوای جدید
+    Show Scheduled Live Streams / Premieres First: نمایش پخش‌های زندهٔ زمان‌بندی‌شده / نخستین نمایش‌ها در ابتدا
+    Auto Refresh Interval: فاصلهٔ تازه‌سازی خودکار
+    Videos Auto Refresh Interval: فاصلهٔ تازه‌سازی خودکار ویدیوها
+    Shorts Auto Refresh Interval: فاصلهٔ تازه‌سازی خودکار Shorts
+    Live Auto Refresh Interval: فاصلهٔ تازه‌سازی خودکار پخش زنده
+    Posts Auto Refresh Interval: فاصلهٔ تازه‌سازی خودکار پست‌ها
+    Refresh Subscriptions While App Is Closed: "تازه‌سازی اشتراک‌ها هنگام بسته بودن برنامه"
+    Notify About New Uploads: اعلان برای بارگذاری‌های جدید
+    RSS Feeds Auto Refresh Interval: فاصلهٔ تازه‌سازی خودکار خوراک‌های RSS
+    Faster Subscription Refresh: "تازه‌سازی سریع‌تر اشتراک‌ها"
+    Platforms:
+      Other Platforms: پلتفرم‌های دیگر
+      Manage Channels: مدیریت کانال‌های دنبال‌شده
+      Notify When Live: اعلان هنگام شروع پخش زندهٔ کانال‌های دنبال‌شدهٔ Twitch
+      Auto Refresh Interval: فاصلهٔ تازه‌سازی خودکار پلتفرم‌های دیگر
+  Distraction Free Settings:
+    Digital Wellbeing:
+      Count Watch Time From: "شمارش زمان تماشا از"
+      Break Reminder Action: "وقتی زمان استراحت است"
+      Grayscale: "حالت خاکستری"
+      Apply Grayscale To: "اعمال حالت خاکستری روی"
+      Off: "خاموش"
+      Always: "همیشه"
+      During Bedtime: "در زمان خواب"
+      After the Daily Limit: "پس از رسیدن به محدودیت روزانه"
+      Whole App: "کل برنامه"
+      Videos and Images: "ویدیوها و تصاویر"
+      Daily Watch Time Limit: "محدودیت روزانهٔ زمان تماشا"
+      Daily Shorts Limit: "محدودیت روزانهٔ Shorts"
+      When a Limit Is Reached: "هنگام رسیدن به محدودیت"
+      Remind Me: "یادآوری شود"
+      Pause Playback: "مکث پخش"
+      Take a Break Reminder: "یادآور استراحت"
+      Every: "هر {duration}"
+      Bedtime Reminder: "یادآور زمان خواب"
+      Bedtime Start: "شروع زمان خواب"
+      Bedtime End: "پایان زمان خواب"
+      Wait Until the Video Ends: "صبر تا پایان ویدیو"
+      Silence Upload Notifications at Bedtime: "بی‌صدا کردن اعلان‌های بارگذاری‌های جدید در زمان خواب"
+      Stop Autoplay at Bedtime and After the Daily Limit: "توقف پخش خودکار در زمان خواب و پس از رسیدن به محدودیت روزانه"
+    Hide Popularity Graph: "پنهان کردن نمودار محبوبیت"
+    Enable Block Lists: "فعال‌سازی فهرست‌های مسدودسازی"
+    AI Video Summaries: خلاصه‌های ویدیویی هوش مصنوعی
+    Hide: پنهان
+    Collapsed: جمع‌شده
+    Expanded: بازشده
+    Video Descriptions: توضیحات ویدیو
+    Video Description Modes:
+      Hide: پنهان
+      Collapsed: جمع‌شده
+      Expanded: بازشده
+    Playing Interface Hide Delay: تأخیر پنهان شدن رابط هنگام پخش
+    Hide Startup Splash: پنهان کردن صفحهٔ آغازین
+    Hide Header Sync Indicator: پنهان کردن نشانگر همگام‌سازی در سربرگ برنامه
+    Hide Repeat Stats: پنهان کردن آمار تکرار
+    Hide Playlist Stats: پنهان کردن آمار فهرست پخش
+    Sections:
+      Digital Wellbeing: "سلامت دیجیتال"
+      Visible While Paused: نمایش هنگام توقف در پنجرهٔ کامل / تمام‌صفحه
+    Hide Channel Avatars: پنهان‌کردن آواتار کانال‌ها
+    Shorten View Counts: کوتاه‌کردن شمار بازدید، دیدگاه‌ها و پسند دیدگاه‌ها
+    Hide Live Chat Replay: پنهان‌کردن بازپخش گفت‌وگوی زنده
+    Hide Home: پنهان‌کردن صفحهٔ اصلی
+    Disable A-B Repeat: غیرفعال‌کردن تکرار A-B
+    Hide End-Screen Annotations: پنهان‌کردن حاشیه‌نویسی‌های صفحهٔ پایانی
+    Hide End-Screen Recommendations: "پنهان کردن پیشنهادهای صفحهٔ پایانی"
+    Hide Paid Promotion Badge: پنهان‌کردن نشان تبلیغ پولی
+    Show Player Controls: نمایش کنترل‌های پخش‌کننده
+    Show Video Title: نمایش عنوان ویدیو
+    Show Bottom Right Actions Dock: نمایش نوار کنش‌های پایین سمت راست
+    Paused Interface Hide Delay: تأخیر پنهان‌شدن رابط هنگام توقف
+    Add: افزودن
+    Remove: حذف
+    Hide Channel Shows: پنهان کردن زبانه "برنامه‌ها" کانال
+    Blur Blocked Items: تار کردن موارد مسدودشده به‌جای پنهان کردن آن‌ها
+    More Items Count: "+{count} مورد دیگر…"
+  Data Settings:
+    Settings could not be imported: "وارد کردن تنظیمات ممکن نشد"
+    Some settings could not be imported: "وارد کردن همه تنظیمات ممکن نشد ({failed} از {total} ناموفق بود)"
+    Scheduled backups: "پشتیبان‌گیری زمان‌بندی‌شده"
+    Scheduled backup description: "هنگام باز بودن OpenTubeX نسخه‌های کامل ZIP ذخیره کنید. پشتیبان‌های انجام‌نشده هنگام راه‌اندازی ساخته می‌شوند. محدودیت فقط برای پشتیبان‌های زمان‌بندی‌شده در این پوشه است."
+    Choose backup folder: "انتخاب پوشهٔ پشتیبان"
+    No backup folder selected: "پوشهٔ پشتیبان انتخاب نشده"
+    Enable scheduled backups: "فعال‌سازی پشتیبان‌گیری زمان‌بندی‌شده"
+    Backup frequency: "بسامد پشتیبان‌گیری"
+    Backups to keep: "تعداد پشتیبان‌های نگهداری‌شده"
+    Daily: "روزانه"
+    Weekly: "هفتگی"
+    Every 30 days: "هر ۳۰ روز"
+    Last scheduled backup: "آخرین پشتیبان زمان‌بندی‌شده: {date}"
+    No scheduled backup yet: "هنوز پشتیبان زمان‌بندی‌شده‌ای وجود ندارد"
+    Scheduled backup failed: "پشتیبان‌گیری ناموفق بود. قابل‌نوشتن بودن پوشه را بررسی کنید. تلاش دوباره تا پنج دقیقهٔ دیگر."
+    Import Preview:
+      Title: پیش‌نمایش تغییرات
+      New: "جدید: {count}"
+      Existing: "موجود: {count}"
+      Skipped: "ردشده: {count}"
+      Unreadable files: "پرونده‌های ناخوانا: {count}"
+      Settings effect: تنظیمات منطبق جایگزین می‌شوند. تنظیمات خصوصی و ناشناخته رد می‌شوند.
+      Details effect: اشتراک‌ها یا ویدیوهای موجود حفظ می‌شوند. جزئیات نمایه یا فهرست پخش واردشده جایگزین جزئیات فعلی می‌شوند.
+      Merge effect: داده‌های موجود حفظ و با رکوردهای منطبق ادغام می‌شوند.
+      Subscriptions effect: اشتراک‌های موجود حفظ می‌شوند. تنها کانال‌های جدید افزوده می‌شوند.
+      History merge effect: ویدیوهای منطبق با سابقه شما ادغام می‌شوند و جزئیات ذخیره‌شده و جدیدترین تاریخ تماشا حفظ می‌شود. سایر سوابق حفظ می‌شوند.
+    Select export data: "داده‌های مورد نظر برای صادر کردن را انتخاب کنید"
+    Export selected data: "صادر کردن داده‌های انتخاب‌شده"
+    Complete backup: "پشتیبان‌گیری کامل"
+    Import backup: "وارد کردن نسخه پشتیبان"
+    Export backup: "پشتیبان گیری را صادر کنید"
+    Backup description: "پروفایل‌ها، لیست‌های پخش، تاریخچه، آمار و تنظیمات قابل انتقال را در یک فایل زیپ ذخیره کنید. وارد کردن آنها، آنها را با داده‌های موجود در این دستگاه ادغام می‌کند."
+    Select backup data: "داده‌ها را برای وارد کردن انتخاب کنید"
+    Profiles and subscriptions: "پروفایل‌ها و اشتراک‌ها"
+    Backup exported: "پشتیبان با موفقیت صادر شد"
+    Backup imported: "پشتیبان با موفقیت وارد شد"
+    Import YouTube Takeout ZIP: "درون‌ریزی فایل ZIP ‏YouTube Takeout"
+    Select Takeout data: "داده‌های مورد نظر برای درون‌ریزی را انتخاب کنید"
+    Import selected data: "درون‌ریزی داده‌های انتخاب‌شده"
+    No supported Takeout data: "هیچ دادهٔ پشتیبانی‌شده‌ای از YouTube در این ZIP پیدا نشد."
+    Data And Storage: داده و فضای ذخیره‌سازی
+    Profile Directory: پوشهٔ نمایه
+    Open Profile Directory: بازکردن پوشهٔ نمایه
+    Search history file: فایل تاریخچهٔ جست‌وجو
+    Settings File: فایل تنظیمات
+    Search history: تاریخچهٔ جست‌وجو
+    Import search history: درون‌ریزی تاریخچهٔ جست‌وجو
+    Export search history: برون‌بری تاریخچهٔ جست‌وجو
+    Import Settings: درون‌ریزی تنظیمات
+    Export Settings: برون‌بری تنظیمات
+    Settings Tooltip: تنظیمات ویژهٔ سیستم‌عامل/کاربر یا آزمایشی قابل درون‌ریزی یا برون‌بری نیستند (مانند پراکسی، پخش‌کنندهٔ خارجی، پوشهٔ نماگرفت...)
+    Invalid JSON row, skipping item: JSON نامعتبر در ردیف {row}؛ مورد نادیده گرفته شد
+    All search history has been successfully imported: همهٔ تاریخچهٔ جست‌وجو با موفقیت درون‌ریزی شد
+    All search history has been successfully exported: همهٔ تاریخچهٔ جست‌وجو با موفقیت برون‌بری شد
+    All settings have been successfully imported: همهٔ تنظیمات با موفقیت درون‌ریزی شد
+    All settings have been successfully exported: همهٔ تنظیمات با موفقیت برون‌بری شد
+    Setting object has insufficient data, skipping item: داده‌های شیء تنظیمات کافی نیست؛ مورد نادیده گرفته شد
+    Unknown setting key: 'کلید تنظیمات ناشناخته: {key}'
+    Non-transferable setting key: 'کلید تنظیمات انتقال‌ناپذیر: {key}'
+    Import subscriptions formats: 'قالب‌های پشتیبانی‌شده: OpenTubeX / FreeTube (.db)، YouTube Takeout (.csv، .json، .opml)، NewPipe (.json)، پشتیبان LibreTube یا خروجی FreeTube (.json)'
+    Import history formats: 'قالب‌های پشتیبانی‌شده: OpenTubeX / FreeTube (.db)، YouTube Takeout (.json)، پشتیبان LibreTube (.json)'
+    Import playlists formats: 'قالب‌های پشتیبانی‌شده: OpenTubeX / FreeTube (.db)، YouTube Takeout (.csv)'
+    Import search history formats: 'قالب‌های پشتیبانی‌شده: OpenTubeX / FreeTube (.db)، YouTube Takeout (.json)'
+    Channel playback speeds: "سرعت‌های پخش کانال‌ها"
+    Import channel playback speeds: "وارد کردن سرعت‌های پخش کانال‌ها"
+    Channel playback speeds file: "فایل سرعت‌های پخش کانال‌ها"
+    Import channel playback speeds formats: "قالب‌های پشتیبانی‌شده: داده‌های ذخیره‌شده اسکریپت کاربری {script} (.json)"
+    Invalid channel playback speeds file: "هیچ سرعت پخش کانالی در این فایل پیدا نشد"
+    Channel playback speeds imported: "سرعت پخش {count} کانال وارد شد | سرعت پخش {count} کانال وارد شد"
+    Channels not found: "{count} کانال پیدا نشد | {count} کانال پیدا نشد"
+    Playlists have been successfully imported: "1/{total} فهرست پخش با موفقیت وارد شد | {count}/{total} فهرست پخش با موفقیت وارد شد"
+  Sync Settings:
+    Signed Out After Restore: 'همگام‌سازی از حساب خارج شد، چون این داده‌های برنامه از یک نسخهٔ پشتیبان یا دستگاهی دیگر بازیابی شده‌اند. برای همگام‌سازی این دستگاه دوباره وارد شوید.'
+    Revoke Session Tabs Warning: "مجموعه‌های برگهٔ همگام‌شدهٔ این دستگاه نیز حذف خواهند شد."
+    Revoke Session Partial Failure: "مجموعه‌های زبانهٔ همگام‌شده حذف شدند، اما لغو دسترسی تأیید نشد. برای لغو دسترسی دوباره تلاش کنید."
+    Tab Sync Revocation Pending: "همگام‌سازی زبانه‌ها تا زمان تکمیل لغو دسترسی این ورود متوقف شده است. لغو دسترسی را در تنظیمات همگام‌سازی دوباره امتحان کنید."
+    Show More: "نمایش بیشتر"
+    Sync Automatically: "همگام‌سازی خودکار"
+    Activity: "فعالیت حساب"
+    No Activity: "فعالیت اخیری وجود ندارد"
+    Clear Activity: "پاک کردن در این دستگاه"
+    Clear Activity Hint: "فعالیت فعلی حساب را در این دستگاه پنهان کنید. فعالیت در سرور و دستگاه‌های دیگر تغییری نمی‌کند. فعالیت جدید همچنان نمایش داده می‌شود."
+    Setting Changed: "{device} مقدار {setting} را به {value} تغییر داد"
+    Item Updated: "{device} گزینهٔ {setting} را به‌روز کرد"
+    Item Added: "{device} مورد {item} را به {setting} افزود"
+    Item Removed: "{device} مورد {item} را از {setting} حذف کرد"
+    Item Renamed: "{device} نام {item} را به {value} تغییر داد"
+    Saved Playlists: "فهرست‌های پخش ذخیره‌شده"
+    No Feed Types: "هیچ‌کدام"
+    Open On Device: "باز کردن در دستگاه دیگر"
+    Video Sent: "ویدیو ارسال شد. دستگاه‌های آفلاین هنگام اتصال دوباره در مدت ۲۴ ساعت آن را دریافت می‌کنند."
+    Video Received: "ویدیوی دریافت‌شده: {title}"
+    Previous Auto Sync Notice: "همگام‌سازی خودکار خاموش است. ممکن است نسخه‌ای پیشین برای جلوگیری از ازدست‌رفتن داده‌ها آن را غیرفعال کرده باشد."
+    Enable Automatic Sync: "فعال‌کردن همگام‌سازی خودکار"
+    Destructive Sync Blocked: "همگام‌سازی برای جلوگیری از ازدست‌رفتن داده‌ها متوقف شد. همگام‌سازی خودکار خاموش است. برای بررسی حذف‌ها، تنظیمات همگام‌سازی را باز کنید."
+    Devices: "دستگاه‌ها"
+    Devices Hint: "دستگاه‌هایی را که می‌توانند به این حساب همگام‌سازی دسترسی داشته باشند بررسی کنید."
+    Change Password: "تغییر گذرواژه"
+    Refresh Devices: "تازه‌سازی دستگاه‌ها"
+    Current Device: "دستگاه کنونی"
+    Revoke Session: "لغو دسترسی"
+    Session Created: "ایجادشده"
+    Last Active: "آخرین فعالیت"
+    Session Expires: "انقضا"
+    Unknown Device: "دستگاه ناشناس"
+    Operating System: "سیستم‌عامل"
+    Rename Device: "تغییر نام دستگاه"
+    Save Device Name: "ذخیره نام"
+    Device Name Invalid: "نام دستگاه می‌تواند حداکثر ۸۰ نویسه داشته باشد و نباید شامل نویسه‌های کنترلی باشد."
+    Device Renamed: "نام دستگاه تغییر کرد"
+    Revoke Session Confirmation: "این نشست لغو شود؟"
+    Revoke Current Session Warning: "لغو این نشست، این دستگاه را از حساب همگام‌سازی جدا می‌کند."
+    Revoke Session Warning: "دسترسی {device} به این حساب همگام‌سازی قطع خواهد شد."
+    Confirm Revoke Session: "لغو نشست"
+    Session Revoked: "نشست لغو شد"
+    Change Password Warning: "تغییر گذرواژه، همهٔ دستگاه‌های دیگر را خارج می‌کند. این دستگاه متصل می‌ماند."
+    Current Password: "گذرواژهٔ کنونی"
+    New Password: "گذرواژهٔ جدید"
+    Confirm New Password: "تأیید گذرواژهٔ جدید"
+    Save New Password: "ذخیرهٔ گذرواژهٔ جدید"
+    Account Management Failed: "جزئیات حساب همگام‌سازی بارگیری نشد."
+    All Password Fields Required: "همهٔ فیلدهای گذرواژه را کامل کنید."
+    New Password Too Short: "گذرواژهٔ جدید باید دست‌کم ۸ نویسه داشته باشد."
+    New Passwords Do Not Match: "گذرواژه‌های جدید یکسان نیستند."
+    Password Changed: "گذرواژه تغییر کرد. دستگاه‌های دیگر خارج شدند."
+    Sync Settings: همگام‌سازی
+    Watch stats: "آمار تماشا"
+    Enable Sync: فعال‌کردن همگام‌سازی
+    Privacy Passphrase: عبارت عبور حریم خصوصی
+    Privacy Passphrase Hint: عبارتی جدا از گذرواژهٔ حساب خود انتخاب کنید. این عبارت هرگز از دستگاه خارج نمی‌شود و در همهٔ دستگاه‌ها لازم است؛ با گم‌کردن آن، داده‌های رمزگذاری‌شدهٔ همگام‌سازی دیگر بازیابی نمی‌شوند.
+    Privacy Policy: سیاست حریم خصوصی این سرور
+    Enhanced Privacy Enabled: حریم خصوصی پیشرفته فعال است. سرور فقط داده‌های رمزگذاری‌شدهٔ همگام‌سازی را نگه می‌دارد.
+    Enhanced Privacy Unsupported: هشدار — این سرور از حریم خصوصی پیشرفته پشتیبانی نمی‌کند. گردانندهٔ سرور می‌تواند داده‌های همگام‌شده را ببیند.
+    Description: 'اشتراک‌ها، نمایه‌ها، فهرست‌های پخش، تاریخچهٔ تماشا و تنظیمات پشتیبانی‌شده را با یک سرور همگام‌سازی OpenTubeX یا LibreTube همگام کنید. ممکن است سرورهای LibreTube از همهٔ قابلیت‌های همگام‌سازی پشتیبانی نکنند.'
+    Server URL: نشانی سرور همگام‌سازی
+    Checking Server: در حال بررسی سرور همگام‌سازی…
+    Server Unavailable: اتصال به این سرور همگام‌سازی ممکن نیست. نشانی را بررسی و دوباره تلاش کنید.
+    Username: نام کاربری
+    Log In: ورود
+    Register: ثبت‌نام
+    Pair Another Device: جفت‌کردن دستگاهی دیگر
+    Pair With Existing Device: جفت‌شدن با دستگاه موجود
+    Device Name: نام دستگاه
+    This Device: این دستگاه
+    Device Name Required: برای این دستگاه نامی وارد کنید.
+    Pairing Device Name Hint: نامی انتخاب کنید که در دستگاه تأییدکنندهٔ این درخواست آن را بشناسید.
+    Create Pairing Code: ساخت کد جفت‌سازی
+    Creating Pairing Code: در حال ساخت کد جفت‌سازی امن…
+    Pairing QR Alt: کد QR جفت‌سازی برای {device}
+    Scan Pairing Code: در دستگاهی که از قبل متصل است، «جفت‌کردن دستگاهی دیگر» را باز و این کد را اسکن کنید.
+    Pairing Code: کد جفت‌سازی
+    Use Text Pairing Code: استفاده از کد متنی
+    Show QR Code: نمایش کد QR
+    Text Pairing Code Hint: این کد را در دستگاه فعلی کپی کنید. کد حاوی رمز جفت‌سازی است؛ پس از جفت‌سازی آن را از تاریخچهٔ کلیپ‌بورد پاک کنید.
+    Pairing QR Warning: این کد را فقط به دستگاه مورداعتماد و ازپیش‌متصل‌شده‌ای نشان دهید که این درخواست را تأیید می‌کند. اعتبار کد پس از دو دقیقه تمام می‌شود.
+    Pairing Expires: کد جفت‌سازی در {time} منقضی می‌شود.
+    Verifying Pairing: در حال تأیید کلید حریم خصوصی منتقل‌شده…
+    Completing Pairing: در حال تکمیل جفت‌سازی دستگاه…
+    Compare Pairing Codes: مقایسهٔ کدهای جفت‌سازی
+    Pairing Code Match Hint: فقط در صورتی تأیید کنید که این کد با کد دستگاه فعلی یکسان باشد.
+    Pairing Codes Match: کدها یکسان‌اند
+    Pairing Approval Code Hint: این پنجره را باز نگه دارید و کد را با دستگاه جدید مقایسه کنید. اگر کدها متفاوت‌اند، دستگاه جدید نباید ادامه دهد.
+    Pairing Scan Hint: کد جفت‌سازی نمایش‌داده‌شده در دستگاهی را که اضافه می‌کنید اسکن کنید.
+    Enter Pairing Code: ورود دستی کد
+    Pairing Code Entry Hint: کد جفت‌سازی نمایش‌داده‌شده در دستگاهی را که اضافه می‌کنید جای‌گذاری کنید.
+    Check Pairing Code: بررسی کد
+    Scan QR Code: اسکن کد QR
+    Waiting For Pairing Code: در انتظار کد جفت‌سازی…
+    Checking Pairing Request: در حال بررسی درخواست جفت‌سازی…
+    Approving Pairing Request: در حال رمزگذاری و ارسال کلید حریم خصوصی…
+    Pairing Approval Warning: فقط وقتی تأیید کنید که این درخواست را در دستگاهی که اضافه می‌کنید می‌بینید. جفت‌سازی امکان دسترسی به حساب را می‌دهد و کلید حریم خصوصی را منتقل می‌کند.
+    Approve Pairing: تأیید جفت‌سازی
+    Try Again: تلاش دوباره
+    Scan Again: اسکن دوباره
+    Camera Unavailable: OpenTubeX نتوانست به دوربین دسترسی پیدا کند. مجوز دوربین را بررسی کنید یا کد جفت‌سازی را دستی وارد کنید.
+    Pairing Unsupported: این سرور همگام‌سازی از جفت‌سازی امن دستگاه پشتیبانی نمی‌کند.
+    Pairing Failed: جفت‌سازی دستگاه ناموفق بود. با کدی جدید دوباره تلاش کنید.
+    Pairing Request Changed: درخواست جفت‌سازی تغییر کرده، منقضی شده یا قبلاً استفاده شده است. کدی جدید بسازید.
+    Pairing Server Mismatch: این کد متعلق به سرور همگام‌سازی دیگری است.
+    Pairing Verification Unavailable: هیچ مجموعهٔ همگام‌سازی رمزگذاری‌شده‌ای برای تأیید کلید منتقل‌شده در دسترس نیست. دستگاه فعلی را همگام و دوباره تلاش کنید.
+    Pairing Completed: جفت‌سازی دستگاه کامل شد
+    Pairing Approved: جفت‌سازی دستگاه تأیید شد
+    Use Pairing Invite: استفاده از کد دستگاه متصل
+    Show Pairing Invite: نمایش کد جفت‌سازی
+    Scan Pairing Invite: در دستگاهی که اضافه می‌کنید، «جفت‌شدن با دستگاه موجود» را باز کنید، «استفاده از کد دستگاه متصل» را انتخاب و این کد را اسکن کنید.
+    Pairing Invite QR Alt: کد QR جفت‌سازی برای دستگاهی که اضافه می‌کنید
+    Pairing Invite Text Hint: این کد را در دستگاهی که اضافه می‌کنید کپی کنید. این کد به یک دستگاه امکان می‌دهد برای دسترسی به حساب شما درخواست بدهد؛ پس از جفت‌سازی آن را از تاریخچهٔ کلیپ‌بورد پاک کنید.
+    Pairing Invite Warning: این کد را فقط به دستگاهی که اضافه می‌کنید نشان دهید. همچنان باید درخواست آن را در این دستگاه تأیید کنید.
+    Pairing Invite Scan Hint: کد جفت‌سازی نمایش‌داده‌شده در دستگاه متصل خود را اسکن کنید.
+    Pairing Invite Entry Hint: کد جفت‌سازی نمایش‌داده‌شده در دستگاه متصل خود را جای‌گذاری کنید.
+    Pairing Invite Code Hint: درخواست را در دستگاه متصل خود فقط در صورتی تأیید کنید که همین کد را نشان دهد. سپس جفت‌سازی خودکار کامل می‌شود.
+    Pairing Invite Approval Hint: فقط در صورتی تأیید کنید که دستگاهی که اضافه می‌کنید همین کد را نشان دهد.
+    Pairing Invite Approved: جفت‌سازی تأیید شد. دستگاه جدید جفت‌سازی را خودکار کامل می‌کند.
+    Disconnect: قطع اتصال
+    Delete Account: حذف حساب همگام‌سازی
+    Delete Account Confirmation: حساب همگام‌سازی حذف شود؟
+    Delete Account Warning: با این کار، حساب همگام‌سازی شما و همهٔ داده‌های ذخیره‌شده در این سرور برای همیشه حذف می‌شوند. داده‌های محلی OpenTubeX حذف نخواهند شد.
+    Confirm Delete Account: حذف حساب
+    Password Required: گذرواژه لازم است
+    Account Deleted: حساب همگام‌سازی حذف شد
+    Connected as: متصل با نام {username}
+    Profiles: نمایه‌ها
+    Open Tabs: زبانه‌های باز و نشست
+    Disable Setting Sync: توقف همگام‌سازی این تنظیم
+    Enable Setting Sync: همگام‌سازی این تنظیم
+    Sync Now: همگام‌سازی اکنون
+    Downloading encrypted data: در حال دریافت داده‌های رمزگذاری‌شدهٔ همگام‌سازی…
+    Syncing subscriptions: در حال همگام‌سازی اشتراک‌ها…
+    Syncing playlists: در حال همگام‌سازی فهرست‌های پخش…
+    Syncing history: در حال همگام‌سازی سابقهٔ تماشا…
+    Syncing statistics: در حال همگام‌سازی آمار تماشا…
+    Syncing profiles: در حال همگام‌سازی نمایه‌ها…
+    Syncing open tabs: در حال همگام‌سازی زبانه‌های باز و نشست…
+    Syncing settings: در حال همگام‌سازی تنظیمات…
+    Uploading encrypted data: در حال بارگذاری داده‌های رمزگذاری‌شدهٔ همگام‌سازی…
+    Finishing sync: در حال پایان همگام‌سازی…
+    Sync progress percentage: '{percentage}%'
+    Last synced: 'آخرین همگام‌سازی: {date}'
+    History not supported: این نسخهٔ سرور از همگام‌سازی سابقهٔ تماشا پشتیبانی نمی‌کند.
+    Settings not supported: این نسخهٔ سرور از همگام‌سازی تنظیمات پشتیبانی نمی‌کند.
+    Sync completed: همگام‌سازی کامل شد
+    Sync failed: 'همگام‌سازی ناموفق بود: {error}'
+    Data Loss Confirmation: همگام‌سازی مخرب تأیید شود؟
+    Data Loss Warning: همگام‌سازی {deleted} مورد از {previous} مورد قبلاً همگام‌شده در «{collection}» را در همهٔ دستگاه‌ها حذف می‌کند. اگر خودتان آن‌ها را حذف نکرده‌اید، مثلاً چون سرور بازنشانی شده است، آن‌ها را نگه دارید تا همه‌جا بازیابی شوند.
+    Keep Deleted Items: نگه داشتن موارد
+    Confirm Data Loss: حذف و ادامه
+    Use Shared Tabs: 'استفاده از یک مجموعه زبانهٔ مشترک در همهٔ دستگاه‌ها'
+    Shared Tabs Warning: 'زبانه‌های باز این دستگاه به مجموعهٔ مشترک تبدیل می‌شوند. دستگاه‌های دیگر هنگام همگام‌سازی زبانه‌های باز خود را با این مجموعه جایگزین می‌کنند؛ زبانه‌های دستگاه‌های مختلف با هم ادغام نمی‌شوند.'
+    Tabs From Other Devices: 'زبانه‌های دستگاه‌های دیگر'
+    Mobile Device: 'تلفن همراه'
+    Desktop Device: 'رایانه'
+    Open All Tabs: 'باز کردن همهٔ زبانه‌ها'
+    Open All Tabs Confirmation: "همهٔ زبانه‌ها باز شوند؟"
+    Server Update Required: "این سرور را برای پشتیبانی از همگام‌سازی زندهٔ رمزگذاری‌شده به‌روز کنید."
+    Log In with Provider: 'ورود با {provider}'
+    Log In with Single Sign-On: 'ورود با ورود یکپارچه'
+    Continue in Browser: 'در مرورگر خود ادامه دهید. OpenTubeX پس از پایان کار شما ادامه می‌دهد.'
+    Connected with Single Sign-On: 'متصل با ورود یکپارچه'
+    Delete Single Sign-On Account Hint: 'مرورگر شما باز می‌شود تا حذف را نزد ارائه‌دهندهٔ ورود خود تأیید کنید.'
+  Proxy Settings:
+    IP Block Recovery Script Path: اسکریپت بازیابی مسدودیت IP
+    Running IP block recovery script: در حال اجرای اسکریپت بازیابی مسدودشدن IP
+    IP block recovery script failed: 'اسکریپت بازیابی مسدودشدن IP ناموفق بود (کد خروج: {exitCode})'
+    IP block recovery script finished: اجرای اسکریپت بازیابی مسدودشدن IP پایان یافت
+    Reloading video after IP block recovery: در حال بارگیری دوبارهٔ ویدیو پس از بازیابی مسدودشدن IP
+    Failed to select IP block recovery script: انتخاب اسکریپت بازیابی مسدودشدن IP ناموفق بود
+  SponsorBlock Settings:
+    Excluded Channels:
+      Excluded Channels: "کانال‌های مستثنا"
+      Tooltip: "شناسهٔ کانالی را وارد کنید تا بخش‌های SponsorBlock در ویدیوهای آن رد نشوند. شناسه باید دقیقاً یکسان باشد و به بزرگی و کوچکی حروف حساس است."
+    Enable SponsorBlock Submission: فعال‌کردن ارسال به SponsorBlock
+    SponsorBlock Private User ID (optional): شناسهٔ خصوصی کاربر (اختیاری)
+    SponsorBlock Private User ID Tooltip: شناسهٔ خصوصی کاربر SponsorBlock را از افزونهٔ مرورگر جای‌گذاری کنید. برای استفاده از شناسهٔ ساخته‌شده توسط برنامه، این قسمت را خالی بگذارید.
+    Generated SponsorBlock User ID: شناسهٔ کاربر SponsorBlock ساخته‌شده
+    Generated SponsorBlock User ID Tooltip: این شناسهٔ کاربر SponsorBlock که برنامه ساخته است، در افزونهٔ مرورگر یا هنگام استفاده از برنامه در رایانه‌ای دیگر کاربرد دارد.
+    Reveal Generated User ID: نمایش شناسهٔ کاربر ساخته‌شده
+    Generated SponsorBlock User ID Copy Button: کپی شناسهٔ کاربر SponsorBlock ساخته‌شده
+    Generated SponsorBlock User ID Copied: شناسهٔ کاربر SponsorBlock ساخته‌شده در کلیپ‌بورد کپی شد
+    Skip notification timeout: مهلت اعلان پرش
+    Custom Color: رنگ سفارشی
+    DeArrow Settings: DeArrow
+    Always Show DeArrow Badge: همیشه نمایش نشان DeArrow
+  Return YouTube Dislike Settings:
+    Return YouTube Dislike Settings: Return YouTube Dislike
+    Enable Return YouTube Dislike: فعال‌کردن Return YouTube Dislike
+    Return YouTube Dislike Url: نشانی API
+  Parental Control Settings:
+    Disable Channel Links: غیرفعال‌کردن پیوندهای کانال
+  Password Dialog:
+    Incorrect Password: گذرواژه نادرست است
+    Unlock: بازکردن قفل
+    Unlocking: در حال بازکردن قفل…
+  Search Settings: جست‌وجوی تنظیمات
+  No Settings Found: تنظیمی پیدا نشد
+  Experimental Settings:
+    Disable Hardware Acceleration: غیرفعال کردن شتاب‌دهی سخت‌افزاری
+  Interface Customizer:
+    Customize Interface: "سفارشی‌سازی رابط"
+    Preview: "پیش‌نمایش"
+    Player: "پخش‌کننده"
+    Desktop: "رایانه"
+    Mobile: "موبایل"
+    Playing: "در حال پخش"
+    Player Menu: "منوی پخش‌کننده"
+    Fullscreen: "تمام‌صفحه"
+    Paused: "مکث‌شده"
+    Controls: "کنترل‌ها"
+    Example Video Title: "ویدیوی نمونه"
+    Resolution: "وضوح"
+    Loop: "تکرار"
+    Off: "خاموش"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: پنهان کردن کانال‌های محتوای بی‌کیفیت هوش مصنوعی
+    Hide AI Slop Channels Tooltip: کانال‌های موجود در فهرست مسدودسازی AiSList که توسط جامعه نگهداری می‌شود (aisloplist.com) را از نتایج جست و جو، پربازدیدها و پیشنهادها پنهان می‌کند و ویدیوهای کانال‌های موجود در فهرست هشدار آن را برچسب‌گذاری می‌کند. دنبال کرده ها تحت تأثیر قرار نمی‌گیرند. فهرست‌ها روزی یک بار از GitHub دانلود می‌شوند و فقط برای نتایجی اعمال می‌شوند که با ای پی ای داخلی بارگذاری شده‌اند.
+    Downloading: در حال دانلود فهرست‌ها…
+    Failed to Download: دانلود فهرست‌ها ممکن نشد
+    Loaded Status: "کانال‌های مسدودشده: {blocked} · کانال‌های علامت‌گذاری‌شده: {warned} · به‌روزرسانی: {date}"
+Tutorial:
+  Skip: ردکردن
+  Next: بعدی
+  Finish: پایان
+  Welcome:
+    Title: به OpenTubeX خوش آمدید
+    Description: از نو شروع کنید یا اشتراک‌ها، سابقه و فهرست‌های پخش خود را از برنامهٔ دیگری یا یک نسخهٔ پشتیبان بیاورید.
+    Start Fresh: شروع از نو
+    Import Data: ورود داده‌ها
+  Preferences:
+    Title: مطابق سلیقهٔ شما
+    Description: پوسته، صفحهٔ آغازین و منطقهٔ خود را انتخاب کنید. می‌توانید این موارد و موارد دیگر را هر زمان در تنظیمات تغییر دهید.
+  Playback:
+    Title: پخش و حریم خصوصی
+    Description: انتخاب کنید ویدیوها چگونه پخش شوند، آیا OpenTubeX آنچه را تماشا می‌کنید به خاطر بسپارد، و از کدام افزونه‌های جامعه استفاده کند.
+  Navigation:
+    Title: کتابخانه‌تان همیشه در دسترس است
+    Description: از پیمایش برای دسترسی به اشتراک‌ها، فهرست‌های پخش، سابقه و بخش‌های دیگر استفاده کنید.
+  Search:
+    Title: جست‌وجو یا جای‌گذاری پیوند
+    Description: ویدیوها و کانال‌ها را پیدا کنید یا نشانی یک ویدیوی پشتیبانی‌شده را مستقیماً در کادر جست‌وجو جای‌گذاری کنید.
+  Tabs:
+    Title: صفحه‌ها را در زبانه‌ها باز نگه دارید
+    Description: چند صفحه را هم‌زمان باز کنید، بی‌آنکه جای خود را گم کنید.
+  Profile Menu:
+    Title: تنظیمات و نمایه‌ها
+    Description: منوی نمایهٔ شما شامل تنظیمات سریع، دانلودها و همهٔ تنظیمات دیگر است. برای تغییر نمایه، روی آن راست‌کلیک کنید.
+    Touch Description: منوی نمایهٔ شما شامل تنظیمات سریع، دانلودها و همهٔ تنظیمات دیگر است. برای تغییر نمایه، آن را لمس کرده و نگه دارید.
+About:
+  Project: پروژه
+  Community: جامعه
+  Contribute: مشارکت
+  Documentation: مستندات
+  Downloads: دانلودها
+  Changelog: تغییرات
+  Commit: کامیت
+  Licensed under the {licenseLink}: دارای مجوز {licenseLink}
+  Matrix: Matrix
+  Email: ایمیل
+  Please read the {roomRulesLink}: لطفاً {roomRulesLink} را بخوانید
+  OpenTubeX is made possible by {creditsPageLink}: ساخت OpenTubeX با کمک {creditsPageLink} ممکن شده است
+  Show tutorial: نمایش آموزش
+Profile:
+  Customization: شخصی‌سازی
+  Manage Profile Subscriptions: مدیریت اشتراک‌های نمایه
+  Icon Names:
+    Person: شخص
+    People: افراد
+    Headphones: هدفون
+    Gaming: بازی
+    Film: فیلم
+    Art: هنر
+    Science: علم
+    Globe: کرهٔ زمین
+    Heart: قلب
+    Sun: خورشید
+    Moon: ماه
+    Trophy: جام
+  Profile Icon: نماد نمایه
+  Choose an Emoji: انتخاب ایموجی
+  Custom Emoji: ایموجی سفارشی
+  Choose Image: انتخاب تصویر
+  Crop Image: برش تصویر
+  Zoom: بزرگ‌نمایی
+  Apply Crop: اعمال برش
+  Transparent: شفاف
+  Use Initial: استفاده از حرف اول
+  The selected image could not be loaded: تصویر انتخاب‌شده بارگیری نشد
+  Theme Color: رنگ پوسته
+  Go To Profile Manager: رفتن به مدیر نمایه‌ها
+Channel:
+  Hide Watched: پنهان کردن تماشاشده‌ها
+  Fewer videos per day: "ویدیوی کمتر در روز"
+  More videos per day: "ویدیوی بیشتر در روز"
+  Verified: تأییدشده
+  Official Artist Channel: کانال رسمی هنرمند
+  About:
+    Links: پیوندها
+  Subscription settings: تنظیمات اشتراک
+  Failed to save subscription settings: تنظیمات کانال ذخیره نشد
+  Videos per day: ویدیو در روز
+  Use global setting: استفاده از تنظیم سراسری
+  Unlimited: نامحدود
+  More videos hidden: '+{count} ویدیوی دیگر | +{count} ویدیوی دیگر'
+  Show in subscription feed: نمایش در خوراک اشتراک‌ها
+  Notify about new uploads: اعلان برای بارگذاری‌های جدید
+  Show members-only videos: نمایش ویدیوهای مخصوص اعضا
+  Upload Notifications On: "هنگام به‌روزرسانی اشتراک‌ها، درباره بارگذاری‌های جدید {channelName} به شما اطلاع داده می‌شود"
+  Upload Notifications Off: "درباره بارگذاری‌های جدید {channelName} به شما اطلاع داده نمی‌شود"
+  Upload Notifications Disabled In Settings: "اعلان‌های {channelName} روشن است، اما اعلان بارگذاری‌های جدید در تنظیمات شما خاموش است"
+  Turn On Upload Notifications: "روشن کردن"
+  Channel Name Unavailable: نام کانال در دسترس نیست
+  Search Result Types: انواع نتایج جست‌وجو
+  All Results: همه
+  View All: مشاهدهٔ همه
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "این کانال ویدیو دارد، اما هیچ‌کدام نمایش داده نشد. دریافت ویدیوهای بیشتر را امتحان کنید"
+  Posts:
+    Original post unavailable: "پست اصلی در دسترس نیست"
+    Members-only video hidden by OpenTubeX: "ویدیوی مخصوص اعضا توسط OpenTubeX پنهان شد"
+    Video hidden by OpenTubeX because of its title: "ویدیو توسط OpenTubeX پنهان شد، زیرا عنوان آن شامل متن پنهان‌شده است"
+  Shows:
+    Shows: برنامه‌ها
+    This channel does not currently have any shows: این کانال در حال حاضر هیچ برنامه‌ای ندارد
+Video:
+  Play in Background: "پخش در پس‌زمینه"
+  Info panel source: 'منبع: {source}'
+  External DRM Protected: "ویدیوهای محافظت شده DRM را نمی توان در OpenTubeX پخش کرد، زیرا به اجزای اختصاصی و منبع بسته نیاز دارند."
+  Invalid Media URL: "نشانی رسانه نامعتبر است"
+  Mark As Fully Watched: علامت‌گذاری به‌عنوان کاملاً دیده‌شده
+  AI-generated video summary: "خلاصهٔ تولیدشده با هوش مصنوعی از ویدیو"
+  Quality and accuracy may vary: "کیفیت و دقت ممکن است متفاوت باشد"
+  Includes paid promotion: دارای تبلیغ پولی
+  Age Restricted Badge: دارای محدودیت سنی
+  Music Video Badge: ویدیوی موسیقی
+  Queue: صف
+  Play Next: پخش بعدی
+  Add to Queue: افزودن به صف
+  Added to Play Next: ویدیو بعدی پخش می‌شود
+  Added to Queue: ویدیو به صف افزوده شد
+  Clear Queue: پاک‌کردن صف
+  Queue Video Count: '{count} ویدیو | {count} ویدیو'
+  Remove from Queue: حذف {title} از صف
+  Remove Video from Queue: حذف از صف
+  Drag to Reorder Queue: برای تغییر ترتیب صف، {title} را بکشید
+  Reorder Queue Item: تغییر ترتیب {title}
+  Reorder Queue Item Instructions: برای جابه‌جایی این ویدیو در صف، از کلیدهای جهت بالا و پایین استفاده کنید.
+  Queue Item Moved: ‏{title} به جایگاه {position} از {total} منتقل شد.
+  Queue Item Cannot Move Up: ‏{title} را نمی‌توان بالاتر برد. این ویدیو هم‌اکنون در جایگاه ۱ از {total} است.
+  Queue Item Cannot Move Down: ‏{title} را نمی‌توان پایین‌تر برد. این ویدیو هم‌اکنون در جایگاه {total} از {total} است.
+  Metadata: اطلاعات ویدیو
+  Close Metadata: بستن اطلاعات ویدیو
+  Metadata Cache:
+    Title History: سابقهٔ عنوان
+    Thumbnail History: سابقهٔ تصویر بندانگشتی
+    Description History: سابقهٔ توضیحات
+    Previous Version: نسخهٔ قبلی {number}
+    Empty: (خالی)
+  Fetching Streams: در حال دریافت جریان‌ها با yt-dlp…
+  Waiting For Connection: "دسترسی به سرور ممکن نشد. تلاش دوباره به‌صورت خودکار…"
+  Retry Now: "اکنون دوباره تلاش کنید"
+  Transcript:
+    Title: رونوشت
+    Search: جست‌وجوی رونوشت
+    Language: زبان رونوشت
+    Save: ذخیره
+    Show: نمایش رونوشت
+    Hide: پنهان‌کردن رونوشت
+    Close: بستن رونوشت
+    Copied: رونوشت در کلیپ‌بورد کپی شد
+    Saved: رونوشت ذخیره شد
+    Save Error: رونوشت ذخیره نشد
+    Text File: فایل متنی
+    Unavailable: رونوشت این ویدیو در دسترس نیست.
+    Load Error: رونوشت بارگیری نشد.
+    Empty: این رونوشت متنی ندارد.
+    No Results: هیچ بخشی از رونوشت با جست‌وجوی شما مطابقت ندارد.
+  Retry With Built-in Extraction: تلاش دوباره با استخراج داخلی
+  Retry With yt-dlp Extraction: تلاش دوباره با استخراج yt-dlp
+  Reloading video after streaming URL error: در حال بارگیری دوبارهٔ ویدیو پس از خطای نشانی پخش
+  Configure Restricted Playback Cookies Hint: "کوکی‌ها را در تنظیمات ← پیشرفته ← نرم‌افزار خارجی ← کوکی‌های yt-dlp پیکربندی کنید."
+  Try With Configured Cookies: تلاش با کوکی‌های پیکربندی‌شده
+  Restricted Playback Authentication Failed Template: 'yt-dlp با کوکی‌های پیکربندی‌شده نتوانست به این ویدیو دسترسی پیدا کند: {error}'
+  Private: ویدیوهای خصوصی در OpenTubeX قابل تماشا نیستند، زیرا به ورود به Google و مالکیت ویدیو نیاز دارند.
+  Collapse Playlist: جمع‌کردن فهرست پخش
+  Expand Playlist: بازکردن فهرست پخش
+  Unmark As Watched: برداشتن علامت تماشاشده
+  Video has been unmarked as watched: علامت تماشاشده از ویدیو برداشته شد
+  Save Channel Playback Speed: ذخیرهٔ سرعت پخش کانال
+  Channel Playback Speed Saved: سرعت پخش کانال ذخیره شد
+  Save Channel Video Quality: ذخیرهٔ کیفیت ویدیوی کانال
+  Channel Video Quality Saved: کیفیت ویدیوی کانال ذخیره شد
+  Save Channel Subtitles State: ذخیرهٔ وضعیت زیرنویس کانال
+  Channel Subtitles State Saved: وضعیت زیرنویس کانال ذخیره شد
+  Save Channel Volume: ذخیرهٔ صدای کانال
+  Channel Volume Saved: صدای کانال ذخیره شد
+  Save Channel Setting: در حال ذخیرهٔ تنظیم کانال…
+  Channel Setting Already Set: '{setting} از قبل روی {value} تنظیم شده است'
+  Video has been saved to {playlistName}: ویدیو در {playlistName} ذخیره شد
+  Video has been removed from {playlistName}: ویدیو از {playlistName} حذف شد
+  There was a problem saving the video to {playlistName}: ذخیرهٔ ویدیو در {playlistName} با مشکل روبه‌رو شد
+  There was a problem removing the video from {playlistName}: حذف ویدیو از {playlistName} با مشکل روبه‌رو شد
+  Failed to load collaborators: همکاران بارگیری نشدند
+  Notify me: به من اطلاع بده
+  Notification on: اعلان روشن است
+  Notification enabled: هنگام شروع این ویدیو به شما اطلاع داده می‌شود
+  Notification cancelled: اعلان شروع لغو شد
+  Notification unavailable: اعلان‌های سیستم در دسترس نیستند
+  Scheduled video starting: ویدیوی زمان‌بندی‌شده در حال شروع است
+  Live notification body: '{videoTitle} اکنون شروع می‌شود'
+  Premiere: نمایش نخست
+  AI: هوش مصنوعی
+  AI-generated content: محتوای ساخته‌شده با هوش مصنوعی
+  Collaborators: همکاران
+  Live Chat Replay: بازپخش گفت‌وگوی زنده
+  Show Live Chat: نمایش گفت‌وگوی زنده
+  Show Live Chat Replay: نمایش بازپخش گفت‌وگوی زنده
+  Close Live Chat: بستن گفت‌وگوی زنده
+  Close Live Chat Replay: بستن بازپخش گفت‌وگوی زنده
+  Live Chat Settings: تنظیمات گفت‌وگوی زنده
+  Show Live Chat Timestamps: نمایش زمان پیام‌ها
+  Chat Filter: فیلتر گفت‌وگو
+  Top Chat: گفت‌وگوی برتر
+  All Messages: همهٔ پیام‌ها
+  Popout Live Chat: بازکردن گفت‌وگو در پنجرهٔ جدا
+  Live chat replay is enabled. Chat messages will appear here as the video plays.: بازپخش گفت‌وگوی زنده فعال است.  هم‌زمان با پخش ویدیو، پیام‌ها اینجا نمایش داده می‌شوند.
+  Premiere started: نمایش نخست در حال پخش است. {timeAgo} شروع شد
+  Sponsor Block category:
+    hook: جلب توجه/خوشامدگویی
+  Sponsor Block category short:
+    intro: میان‌برنامه
+    interaction: یادآوری تعامل
+    filler: حاشیه‌روی
+  Player:
+    Playing in Picture-in-Picture: در حال پخش در حالت تصویر در تصویر
+    Stream Recovery:
+      DASH Fallback: "پخش جریانی صدا ناموفق بود، در حال تغییر به قالب‌های DASH: {error}"
+      Error Copied: "خطا در کلیپ‌بورد کپی شد"
+      Legacy Fallback: "پخش جریانی ناموفق بود، در حال تغییر به قالب‌های قدیمی: {error}"
+    Caption Timing:
+      Adjust Timing: تنظیم زمان‌بندی…
+      Caption Timing: زمان‌بندی زیرنویس
+      Offset: جابه‌جایی (ثانیه)
+      Hint: مقادیر منفی زیرنویس‌ها را زودتر و مقادیر مثبت دیرتر نمایش می‌دهند. فقط برای این ویدیو اعمال می‌شود.
+      Earlier: زودتر
+      Later: دیرتر
+      Reset: بازنشانی
+    Most Replayed: "بیشترین بازپخش"
+    Pull up for precise seeking: "برای جابه‌جایی دقیق به بالا بکشید"
+    Precise seeking, drag down to exit: "جابه‌جایی دقیق · برای خروج به پایین بکشید"
+    Cast: "پخش"
+    Music Mode: "حالت موسیقی"
+    Music Mode Description: "ویدیوها را با سرعت 1× پخش کنید و ویدیوهای جدید را در این زبانه از ابتدا شروع کنید. تنظیمات پیش‌فرض پخش ذخیره‌شده شما بدون تغییر می‌مانند."
+    DLNA:
+      Cast: "پخش در دستگاه DLNA"
+      Stop: "توقف پخش"
+      No Devices: "هیچ دستگاه DLNA پیدا نشد"
+      No MP4 Source: "جریان MP4 سازگاری برای این ویدیو وجود ندارد"
+      Error: "پخش ویدیو در دستگاه ممکن نشد"
+    Repeat Stats:
+      Repeat Stats: آمار تکرار
+      Looping: تکرار فعال است
+      Repeats: تکرار | تکرارها
+      Time Spent: زمان تماشا
+    Voice-over Translation:
+      Start: ترجمه
+      Cancel: لغو
+      Progress: در حال آماده‌سازی ترجمهٔ صوتی…
+      Retry: تلاش دوباره
+      Error: ترجمهٔ صوتی ناموفق بود. لطفاً بعداً دوباره تلاش کنید.
+      Duration Error: ترجمهٔ صوتی فقط برای ویدیوهای حداکثر چهارساعته در دسترس است.
+    Caption Appearance:
+      Options: گزینه‌ها
+      Sample: زیرنویس‌ها این‌گونه نمایش داده می‌شوند
+    Auto-translate: ترجمهٔ خودکار
+    Sleep Timer:
+      Sleep Timer: زمان‌سنج خواب
+      'Off': 'خاموش'
+      Minutes: '{minutes} دقیقه'
+      End of video: پایان ویدیو
+      End of current chapter: پایان فصل فعلی
+      Remaining: '{time} باقی‌مانده'
+      Cancel timer: لغو تایمر
+      Timer ended: تایمر خواب پایان یافت
+    A-B Repeat:
+      A-B Repeat: تکرار A-B
+      'Off': خاموش
+      Point A: نقطهٔ A
+      Point B: نقطهٔ B
+      Set Repeat Start: تنظیم آغاز تکرار
+      Set Repeat End: تنظیم پایان تکرار
+      Pause Repeat: مکث تکرار A-B
+      Resume Repeat: ادامهٔ تکرار A-B
+      Adjust Point: 'تنظیم نقطهٔ {point}، اکنون {timestamp}'
+      Clear Range: پاک‌کردن محدودهٔ تکرار A-B
+      End Before Start: نقطهٔ B باید پس از نقطهٔ A باشد.
+      Outside Duration: برچسب زمانی باید در محدودهٔ ویدیو باشد.
+      Cleared: تکرار A-B پاک شد
+    Seek History:
+      Seek History: تاریخچهٔ پرش‌ها
+      Positions: '{count} موقعیت | {count} موقعیت'
+      Nothing to undo: چیزی برای واگرد وجود ندارد
+      Nothing to redo: چیزی برای ازنو وجود ندارد
+    Zoom:
+      Zoom: بزرگ‌نمایی
+      'Off': 'خاموش'
+    Volume Boost:
+      Volume Boost: "تقویت صدا"
+      'Off': "خاموش"
+    Auto-generated Caption Template: '{language} (تولیدشده به‌صورت خودکار)'
+    Up next in {seconds}: مورد بعدی تا {seconds} ثانیه
+    Resize dock: تغییر اندازهٔ داک
+    Resize dock width: تغییر پهنای داک
+    Play now: اکنون پخش شود
+    MusicPlaybackRateOverride: ویدیوی موسیقی تشخیص داده شد، پخش با سرعت 1x
+    Normal: عادی
+    Set Default: تنظیم به‌عنوان پیش‌فرض
+    Hide Annotations: پنهان کردن یادداشت‌ها
+    Show Annotations: نمایش یادداشت‌ها
+    Hide: پنهان کردن
+    Show: نمایش
+    Scroll Mini Player:
+      Collapse Controls: "جمع کردن کنترل‌ها"
+      Expand Controls: "باز کردن کنترل‌ها"
+      Back to Top: بازگشت به بالا
+      Return to Video Tab: بازگشت به زبانهٔ ویدیو
+      Hide: پنهان‌کردن پخش‌کنندهٔ کوچک
+      Play: پخش
+      Pause: مکث
+      Drag Handle: جابه‌جایی پخش‌کنندهٔ کوچک
+      Rewind 10 seconds: ۱۰ ثانیه به عقب
+      Forward 10 seconds: ۱۰ ثانیه به جلو
+    SponsorBlock:
+      CancelCurrentSegment: لغو ساخت بخش
+      ClearSegments: پاک کردن بخش‌ها
+      ClearSegmentsPrompt: همهٔ پیش‌نویس‌های بخش‌های SponsorBlock برای این ویدیو پاک شوند؟
+      CompleteSegmentsBeforeSubmitting: پیش از ارسال، همهٔ پیش‌نویس‌های بخش‌ها را کامل کنید.
+      CategoryLabel: دسته
+      ActionTypeLabel: نوع بخش
+      DuplicateSegments: پیش‌نویس بخش تکراری مجاز نیست.
+      EndAction: (پایان)
+      EndActionLabel: پایان
+      EndTimeAfterStart: زمان پایان بخش باید پس از زمان شروع باشد.
+      EndTimeBeforeVideoEnd: زمان پایان بخش باید در محدودهٔ مدت ویدیو باشد.
+      EndTimeLabel: زمان پایان بخش
+      Guidelines: دستورالعمل‌ها
+      InspectSegment: بررسی
+      InvalidStartTime: زمان شروع معتبری برای بخش وارد کنید.
+      NoSegmentsToSubmit: پیش از ارسال، دست‌کم یک بخش کامل بسازید.
+      NowAction: (اکنون)
+      CloseInfoPanel: بستن اطلاعات SponsorBlock
+      OpenInfoPanel: باز کردن اطلاعات SponsorBlock
+      OpenSubmissionMenu: باز کردن منوی ارسال
+      PreviewRequired: پیش از ارسال، همهٔ بخش‌ها را پیش‌نمایش کنید.
+      PreviewSegment: پیش‌نمایش
+      SaveSegment: ذخیره
+      SetSegmentEndNow: پایان بخش در همین لحظه
+      StartAction: (شروع)
+      StartSegmentNow: شروع بخش در همین لحظه
+      SubmissionBadRequest: SponsorBlock درخواست ارسال را رد کرد.
+      SubmissionDuplicate: این مورد قبلاً ارسال شده است.
+      SubmissionFailed: ارسال بخش‌های SponsorBlock ناموفق بود.
+      SubmissionForbidden: SponsorBlock ارسال را رد کرد.
+      SubmissionRateLimited: SponsorBlock نرخ ارسال این مورد را محدود کرد.
+      SubmissionSuccess: بخش‌های SponsorBlock ارسال شدند.
+      SubmitSegment: ارسال بخش
+      SubmitSegments: ارسال
+      StartTimeLabel: زمان شروع بخش
+      TimeDivider: تا
+      SkipPrompt: از {segmentCategory} رد شود؟
+      SkipPromptAction: رد کردن
+      SkipToHighlight: رفتن به بخش برجسته؟
+      SkippedToHighlight: به بخش برجسته رفت
+      SkipToastUnskip: برگرداندن
+      SkipToastReskip: رد کردن دوباره
+      MutedSegment: '{segmentCategory} بی‌صدا شد'
+      MuteToastUnmute: وصل کردن صدا
+      InfoPanelLoading: بخش‌ها هنوز در حال بارگیری‌اند...
+      InfoPanelHasSegments: این ویدیو در پایگاه داده بخش دارد!
+      InfoPanelNoSegments: بخشی پیدا نشد
+      RefreshInfo: تازه‌سازی اطلاعات SponsorBlock
+      ContributionStatsTitle: مشارکت‌های شما
+      ContributionStatsLoading: آمار مشارکت در حال بارگیری است...
+      ContributionStatsError: آمار مشارکت در دسترس نیست. دوباره تازه‌سازی کنید.
+      ContributionStatsNoUserId: برای دیدن آمار مشارکت، بخشی ارسال کنید یا شناسهٔ کاربری SponsorBlock خود را وارد کنید.
+      Submissions: ارسال‌ها
+      Segments: بخش‌ها
+      TimeSaved: زمان ذخیره‌شده
+      AutoSkipEnabled: ردکردن خودکار بخش‌ها
+      AutoSkipOn: 'روشن'
+      AutoSkipOff: 'خاموش'
+      WhitelistChannel: افزودن کانال به فهرست مجاز
+      ChannelWhitelisted: در فهرست مجاز
+      RemoveChannelFromWhitelist: حذف کانال از فهرست مجاز
+      MuteSegment: بی‌صدا کردن بخش
+      SkipSegment: رد کردن بخش
+      CloseSegmentActions: بستن کنش‌های بخش
+      FullVideo: کل ویدیو
+      FullVideoLabel: '{segmentCategory} · کل ویدیو'
+      MuteActionType: بی‌صدا کردن
+      MutePrompt: صدای {segmentCategory} قطع شود؟
+      SkipActionType: رد کردن
+      LockedSegment: بخش قفل‌شده
+      UpvoteSegment: رأی مثبت
+      DownvoteSegment: رأی منفی
+      VoteFailed: ارسال رأی SponsorBlock ناموفق بود.
+      ChangeCategory: تغییر دسته‌بندی
+      CopyAndDownvote: کپی و رأی منفی
+      SubmitCategoryVote: ارسال رأی دسته‌بندی
+      CategoryVoteSuccess: رأی دسته‌بندی ارسال شد.
+    Google Cast:
+      Position: "موقعیت پخش"
+      Invalid Authentication: "گیرنده پاسخ احراز هویت نامعتبری فرستاد."
+      Authentication Declined: "گیرنده احراز هویت را رد کرد."
+      Audio Only Receiver: "گیرنده فقط از پخش صدا پشتیبانی می‌کند."
+      Disconnected: "اتصال گیرنده قطع شد."
+      Timeout: "گیرنده پاسخ نداد."
+      Busy: "پنجرهٔ دیگری در حال پخش است."
+      Not Authorized: "این پنجره را فعال کنید و دوباره تلاش کنید."
+      Invalid Request: "درخواست پخش نامعتبر است."
+      IPv4 Required: "اتصال IPv4 لازم است."
+      Launch Failed: "گیرنده راه‌اندازی نشد."
+      Load Failed: "گیرنده نتوانست ویدیو را بارگیری کند."
+      Cancelled: "پخش لغو شد."
+      Private Not Authorized: "دسترسی به رسانهٔ خصوصی تأیید نشد."
+      Invalid Subtitles: "زیرنویس‌های پخش نامعتبرند."
+      Discovery Failed: "جست‌وجوی گیرنده‌ها ممکن نشد."
+      Preparing Video: "در حال آماده‌سازی ویدیو برای پخش…"
+      Connecting: "در حال اتصال به {device}…"
+      Starting Receiver: "در حال راه‌اندازی گیرندهٔ Cast…"
+      Loading Video: "در حال بارگذاری ویدیو روی گیرنده…"
+      Buffering: "در حال بافر کردن روی {device}…"
+      Allow Private Instance: "به این پخش اجازه داده شود رسانه را از نمونهٔ خصوصی Invidious در {instance} بخواند؟"
+      Cast: "پخش روی دستگاه Google Cast"
+      Connected: "در حال پخش روی {device}"
+      Rewind: "۱۰ ثانیه عقب"
+      Forward: "۱۰ ثانیه جلو"
+      Subtitles Off: "خاموش کردن زیرنویس"
+      Return: "بازگشت به پخش محلی"
+      No Devices: "هیچ دستگاه Google Cast پیدا نشد"
+      No Source: "جریان سازگاری برای Google Cast وجود ندارد"
+      Error: "پخش ویدیو در دستگاه ممکن نشد"
+      Error With Details: "پخش ویدیو در دستگاه ممکن نشد: {error}"
+      Untrusted Receiver: "گواهی گیرنده قابل اعتماد نیست. از یک گیرندهٔ Google Cast احراز هویت‌شده استفاده کنید."
+    FCast:
+      Cast: "پخش روی گیرنده FCast"
+      No Devices: "هیچ گیرنده FCast پیدا نشد"
+      No Source: "جریان سازگاری برای FCast وجود ندارد"
+    Secondary Captions: زیرنویس دوم
+    Subtitle File:
+      Load: "بارگذاری فایل زیرنویس…"
+      Subtitle Files: "فایل‌های زیرنویس"
+      Error: "بارگذاری فایل زیرنویس ممکن نشد. یک فایل SRT یا WebVTT انتخاب کنید."
+  Watch:
+    'Remaining preroll-ad time: {remindingTimeSeconds}s': 'زمان باقی‌ماندهٔ تبلیغ پیش از پخش: {remindingTimeSeconds}s'
+    'Remaining SABR backoff time: {remindingTimeSeconds}s': 'زمان باقی‌ماندهٔ وقفهٔ SABR: {remindingTimeSeconds}s'
+  Station: ایستگاه
+  Playlist:
+    Unavailable videos are hidden: ۱ ویدیوی در دسترس‌نبوده پنهان است | {count} ویدیوی در دسترس‌نبوده پنهان هستند
+  External Media:
+    Dislikes: "دیسلایک | دیسلایک‌ها"
+    Reposts: "بازنشر | بازنشرها"
+    Saves: "ذخیره | ذخیره‌ها"
+    Series: "سری"
+    Season: "فصل"
+    Season Number: "شماره فصل"
+    Episode: "قسمت"
+    Episode Number: "شماره قسمت"
+    Track: "آهنگ موسیقی"
+    Track Number: "شماره آهنگ"
+    Artists: "هنرمندان"
+    Album: "آلبوم"
+    Genres: "ژانرها"
+    Media Type: "نوع رسانه"
+    Availability: "در دسترس بودن"
+    Age Limit: "محدودیت سنی"
+    Release Date: "تاریخ انتشار"
+    Availability Values:
+      public: "عمومی"
+      private: "خصوصی"
+      premium_only: "فقط کاربران پریمیوم"
+      subscriber_only: "فقط مشترکین"
+      needs_auth: "ورود به سیستم الزامی است"
+      unlisted: "بدون لیست"
+  How this was made: این چگونه ساخته شده است
+  Save Queue to Playlist: "ذخیرهٔ صف در فهرست پخش"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: گفتگوی زنده در حال حاضر با سرور Yattee پشتیبانی نمی‌شود. اتصال مستقیم به YouTube مورد نیاز است.
+  External Player:
+    LaunchFailedTemplate: اجرای {externalPlayer} ممکن نشد. مطمئن شوید نصب شده است، یا مسیر فایل اجرایی آن را در تنظیمات پخش‌کنندهٔ خارجی تعیین کنید.
+    Confirm Arguments Title: "پخش‌کنندهٔ خارجی با آرگومان‌های سفارشی اجرا شود؟"
+    Confirm Arguments Message: "{externalPlayer} با این آرگومان‌های سفارشی اجرا می‌شود:"
+    Confirm Arguments Warning: "برخی آرگومان‌ها می‌توانند برنامه اجرا کنند یا فایل‌ها را بازنویسی کنند. فقط اگر خودتان آن‌ها را افزوده‌اید ادامه دهید."
+    Run: "اجرا"
+    LaunchCanceledTemplate: "{externalPlayer} باز نشد"
+Playlist:
+  Playlist Already Preloaded: "همه ویدیوهای فهرست پخش از قبل پیش‌بارگذاری شده‌اند"
+  Playlist Preload Progress: "در حال پیش‌بارگذاری ویدیوها: {completed} از {requested}"
+  Close Playlist: بستن فهرست پخش
+  Preload Playlist: "پیش‌بارگیری همهٔ ویدیوها"
+  Preload Playlist Warning Title: "همهٔ ویدیوها پیش‌بارگیری شوند؟"
+  Preload Playlist Warning: "پیش‌بارگیری هر ویدیوی این فهرست پخش را از YouTube درخواست می‌کند. ارسال درخواست‌های زیاد در زمان کوتاه ممکن است باعث شود YouTube نشانی IP شما را موقتاً مسدود کند. می‌خواهید ادامه دهید؟"
+  Preloading Playlist: "در حال پیش‌بارگیری همهٔ ویدیوها..."
+  Playlist Preload Complete: "ویدیوهای پیش‌بارگیری‌شده: {count}."
+  Playlist Preload Partial: "از {requested} ویدیو، {preloaded} مورد پیش‌بارگیری شد. پیش‌بارگیری {failed} مورد ناموفق بود."
+  Playlist Preload Pagination Failed: "فهرست پخش کامل بارگیری نشد، بنابراین پیش‌بارگیری لغو شد."
+  Unavailable videos are hidden: ویدیوهای در دسترس‌نبوده پنهان هستند
+  Add Playlist to Queue: "افزودن فهرست پخش به صف"
+  Playlist Added to Queue: "فهرست پخش به صف افزوده شد"
+Change Format:
+  yt-dlp Error Template: "yt-dlp نتوانست جریان‌ها را فراهم کند: {error}"
+  Local Video File: فایل ویدیویی محلی
+  Local Audio File: فایل صوتی محلی
+  Online Video: ویدیوی آنلاین
+  Stream Source: منبع پخش جریانی
+  Stream Extraction Method: روش استخراج جریان
+  Playback Engine: موتور پخش
+  Streaming Protocol: پروتکل پخش جریانی
+  Not Available For This Video: برای این ویدیو در دسترس نیست
+  Protocols:
+    Progressive: پیش‌رونده
+  Descriptions:
+    Local File: پخش مستقیم از فایل بارگیری‌شده روی این دستگاه
+    Online Video: بارگیری قالب‌های پخش جریانی از منبع آنلاین تنظیم‌شده
+    Dash: کیفیت تطبیقی، چند قطعهٔ صوتی و بالاترین وضوح‌ها
+    Legacy: یک فایل ترکیبی ویدیو و صدا، محدود به وضوح‌های پایین‌تر
+    Audio: فقط صدا، مناسب برای کاهش مصرف پهنای باند یا گوش‌دادن در پس‌زمینه
+  yt-dlp Fallback Template: 'yt-dlp نتوانست جریان‌ها را فراهم کند، به‌جای آن از موتور داخلی استفاده می‌شود: {error}'
+  yt-dlp Default Clients Fallback: کارخواه‌های ترجیحی yt-dlp نتوانستند جریان قابل پخش فراهم کنند، کارخواه‌های پیش‌فرض yt-dlp امتحان می‌شوند
+  Built-in Fallback Template: 'موتور داخلی نتوانست جریان را پخش کند، به‌جای آن yt-dlp امتحان می‌شود: {error}'
+Share:
+  Shared YouTube Link: "پیوند اشتراک‌گذاری‌شدهٔ YouTube"
+  Open in Player: "باز کردن در پخش‌کننده"
+  No YouTube Link: "متن اشتراک‌گذاری‌شده دارای پیوند پشتیبانی‌شدهٔ YouTube نیست."
+  Loading Video Information: "در حال بارگذاری اطلاعات ویدیو…"
+  Video Information Failed: "اطلاعات ویدیو بارگذاری نشد. دوباره تلاش کنید یا پیوند را باز کنید."
+  Share Link: "اشتراک‌گذاری پیوند"
+  Share failed: "اشتراک‌گذاری پیوند ممکن نشد"
+  Share Post: هم‌رسانی پست
+  Timestamp Link Copied: پیوند زمان‌دار در بریده‌دان کپی شد
+Context Menu:
+  Opened in a Background Tab: "در یک زبانه در پس‌زمینه باز شد"
+  Open in a Background Tab: "باز کردن در زبانه‌ای در پس‌زمینه"
+  Select Tab: انتخاب زبانه
+  Close Tabs Before: بستن زبانه‌های قبلی
+  Close Tabs After: بستن زبانه‌های بعدی
+  Close Other Tabs: بستن سایر زبانه‌ها
+  Copy {service} link without playlist: "کپی پیوند {service} بدون فهرست پخش"
+  Context Menu: منوی زمینه
+  Select All: انتخاب همه
+  Save Image As…: ذخیرهٔ تصویر به‌عنوان…
+  Copy Image: کپی تصویر
+  Copy Image Address: کپی نشانی تصویر
+  Cancel Refresh: لغو تازه‌سازی
+  Reload Videos: بارگیری دوبارهٔ ویدیوها
+  Reload Shorts: بارگیری دوبارهٔ ویدیوهای کوتاه
+  Reload Live: بارگیری دوبارهٔ پخش‌های زنده
+  Reload Posts: بارگیری دوبارهٔ پست‌ها
+  Reload All Feeds: بارگیری دوبارهٔ همهٔ خوراک‌ها
+  Reload RSS Feeds: بارگذاری دوبارهٔ خوراک‌های RSS
+  Reload Platforms: بارگیری دوبارهٔ پلتفرم‌ها
+  Close Multiple Tabs: بستن {count} زبانه
+  Duplicate Tab: تکثیر زبانه
+  Duplicate Multiple Tabs: تکثیر {count} زبانه
+  Move Tab: جابه‌جایی زبانه
+  Move Tabs: جابه‌جایی زبانه‌ها
+  Move Tab to Group: انتقال زبانه به گروه
+  Collapse Group: جمع کردن گروه
+  Expand Group: باز کردن گروه
+  Move Tabs to Group: انتقال زبانه‌ها به گروه
+  Manage Tab Groups…: مدیریت گروه‌های زبانه…
+  To Beginning: به ابتدا
+  To End: به انتها
+  Close Tabs: بستن زبانه‌ها
+  To the Top: به بالا
+  To the Left: به چپ
+  To the Bottom: به پایین
+  To the Right: به راست
+  Other Tabs: زبانه‌های دیگر
+  Copy YouTube Link: کپی پیوند YouTube
+  Copy YouTube Links: کپی پیوندهای YouTube
+  Pin Tab: سنجاق کردن زبانه
+  Pin Tabs: سنجاق کردن زبانه‌ها
+  Unpin Tab: برداشتن سنجاق زبانه
+  Unpin Tabs: برداشتن سنجاق زبانه‌ها
+  Tab Color: رنگ زبانه
+  Default: پیش‌فرض
+  Purple: بنفش
+  Reopen Closed Tab: باز کردن دوبارهٔ زبانهٔ بسته‌شده
+  Reload Tab: بارگیری دوبارهٔ زبانه
+  Reload Tabs: بارگیری دوبارهٔ زبانه‌ها
+  Load Tab: بارگیری زبانه
+  Load Tabs: بارگیری زبانه‌ها
+  Unload Tab: خارج کردن زبانه از حافظه
+  Unload Tabs: خارج کردن زبانه‌ها از حافظه
+  Unload Tabs Failed: "بارگذاری‌زدایی زبانه‌های انتخاب‌شده ممکن نشد."
+  Move Tab to Window: انتقال زبانه به پنجره
+  Move Tabs to Window: انتقال زبانه‌ها به پنجره
+  Open in a New Tab: باز کردن در زبانهٔ جدید
+  Open in a New Window: باز کردن در پنجرهٔ جدید
+  Copy Link: کپی پیوند
+  Copy Invidious Link: کپی پیوند Invidious
+  Search Selection in New Tab: جست‌وجوی «{selection}» در زبانهٔ جدید
+  Search Selection in New Window: جست‌وجوی «{selection}» در پنجرهٔ جدید
+  Search With: جست‌وجو با {engine}
+  Search With Multiple: جست‌وجو با...
+  Selection Too Long: متن انتخاب‌شده برای جست‌وجو بیش از حد بلند است (> {count} نویسه)
+  Background Tab: زبانه پس‌زمینه
+Tab Organizer:
+  Tab History: "تاریخچهٔ زبانه"
+  Current Page: "صفحهٔ کنونی"
+  Icon Labels:
+    Podcast: 'پادکست'
+    Clock: 'ساعت'
+    Puzzle Piece: 'قطعه پازل'
+    People: 'افراد'
+    Chart: 'نمودار'
+    Calendar: 'تقویم'
+    Images: 'تصاویر'
+    Music: 'موسیقی'
+    Folder: پوشه
+    Bookmark: نشانک
+    Favorites: علاقه‌مندی‌ها
+    Videos: ویدیوها
+    Gaming: بازی
+    Research: پژوهش
+    Art: هنر
+    Travel: سفر
+  Group Icon: نماد گروه
+  Title: سامان‌دهندهٔ زبانه‌ها
+  Open Tab Count: '{count} زبانهٔ باز | {count} زبانهٔ باز'
+  Search Label: جست‌وجوی زبانه‌ها
+  Selected Count: '{count} زبانه انتخاب شده | {count} زبانه انتخاب شده'
+  Tab Count: '{count} زبانه | {count} زبانه'
+  Select All: انتخاب همه
+  Select None: لغو همهٔ انتخاب‌ها
+  Move To Group: انتقال زبانه‌های انتخاب‌شده به گروه
+  Choose Group: انتخاب گروه
+  Ungrouped: بدون گروه
+  Pin: سنجاق کردن
+  Unpin: برداشتن سنجاق
+  Load: بارگیری
+  Unload: خارج کردن از حافظه
+  Unload All: خارج کردن همه از حافظه
+  Close All: بستن همه
+  Ungroup: خارج کردن از گروه
+  Group Name: نام گروه
+  No Color: بدون رنگ
+  Create Group: ساخت گروه
+  Expand Group: باز کردن گروه
+  Collapse Group: جمع کردن گروه
+  Expand Group Label: باز کردن {name}، {count} زبانه | باز کردن {name}، {count} زبانه
+  Rename Group: تغییر نام {name}
+  Change Group Color: تغییر رنگ {name}
+  Move To Window: انتقال به پنجره
+  Choose Window: انتخاب پنجره
+  Select Tab: انتخاب {title}
+  Active: فعال
+  Pinned: سنجاق‌شده
+  Unloaded: خارج‌شده از حافظه
+  Playing: در حال پخش
+  Close Tab: بستن {title}
+  No Open Results: هیچ زبانهٔ بازی با این جست‌وجو مطابقت ندارد.
+  Recently Closed: اخیراً بسته‌شده
+  Clear: پاک کردن
+  No Closed Results: هیچ زبانهٔ اخیراً بسته‌شده‌ای با این جست‌وجو مطابقت ندارد.
+  Drag Tab: برای انتقال به گروه بکشید
+Chapters:
+  Auto-generated: این فصل‌ها به‌طور خودکار ایجاد شده‌اند
+  Open Chapters: باز کردن فصل‌ها
+  Close Chapters: بستن فصل‌ها
+  Copy Timestamp Link: کپی پیوند در {timestamp}
+  Loop Chapter: 'تکرار فصل: {chapter}'
+  Looping Chapter: 'در حال تکرار فصل: {chapter}'
+  Chapter Loop Stopped: 'تکرار فصل متوقف شد'
+  Sync to Video Time: 'همگام‌سازی با زمان ویدیو'
+Comments:
+  Image unavailable: "تصویر در دسترس نیست"
+  Comment Count: 1 دیدگاه | {count} دیدگاه
+  Show Comments: نمایش دیدگاه‌ها
+  Getting comment replies, please wait: پاسخ‌های دیدگاه در حال دریافت‌اند، لطفاً صبر کنید
+  Reload Comments: بارگیری دوبارهٔ دیدگاه‌ها
+  Reply Count: 1 پاسخ | {replyCount} پاسخ
+  Hide {replyCount} replies: پنهان کردن 1 پاسخ | پنهان کردن {replyCount} پاسخ
+  View 1 reply from {channelName}: نمایش 1 پاسخ از {channelName}
+  View {replyCount} replies from {channelName} and others: نمایش {replyCount} پاسخ از {channelName} و دیگران
+  Comments are turned off: دیدگاه‌ها غیرفعال‌اند
+  YouTube did not provide advertised replies: YouTube نشان داد که این دیدگاه پاسخ دارد، اما پاسخ‌ها را ارائه نکرد. ممکن است حذف یا پنهان شده باشند؛ بنابراین دکمهٔ پاسخ برداشته شد.
+  Pinned by you: سنجاق‌شده به‌دست شما
+  A reply is pinned: یک پاسخ سنجاق شده است
+  Filter loaded comments: پالایش دیدگاه‌های بارگیری‌شده
+  Comment filters: پالایه‌های دیدگاه
+  From creator: از سازنده
+  Contains timestamps: دارای زمان‌نما
+  Pin comment by author: سنجاق کردن دیدگاه {author}
+  Unpin comment by author: برداشتن سنجاق دیدگاه {author}
+  Edited: (ویرایش‌شده)
+  Highlighted comment: دیدگاه برجسته
+  Highlighted reply: پاسخ برجسته
+  Search loaded comments: جست‌وجوی دیدگاه‌های بارگیری‌شده
+  Loaded comment search result count: 1 از {total} دیدگاه بارگیری‌شده | {count} از {total} دیدگاه بارگیری‌شده
+  No loaded comments match your filters: هیچ دیدگاه بارگیری‌شده‌ای با پالایه‌ها مطابقت ندارد
+  YouTube comment link copied to clipboard: پیوند دیدگاه YouTube در بریده‌دان کپی شد
+  Translate to {language}: ترجمه به {language}
+  Show original: نمایش متن اصلی
+  Translating comment, please wait: دیدگاه در حال ترجمه است، لطفاً صبر کنید
+  Comment translation failed: ترجمهٔ دیدگاه ناموفق بود
+Description:
+  Title: توضیحات
+  Copy Description: کپی توضیحات
+  Description Copied: توضیحات در بریده‌دان کپی شد
+  Video Category: 'دسته‌بندی ویدیو:'
+  Video Tags: برچسب‌های ویدیو
+  Games: بازی‌ها
+  Music: موسیقی
+Tooltips:
+  YouTube Account Settings:
+    Add to YouTube Watch History: "ویدیوهایی که پخش می‌کنید به تاریخچهٔ تماشای YouTube شما افزوده می‌شوند تا پیشنهادهای YouTube از آن‌ها یاد بگیرند. تا زمانی که تاریخچه در YouTube متوقف باشد، چیزی افزوده نمی‌شود."
+    Sync Subscriptions: "کانال‌هایی که در YouTube مشترکشان می‌شوید به «همه کانال ها» افزوده می‌شوند، و کانال‌هایی که در آنجا اشتراکشان را لغو می‌کنید از همهٔ پروفایل‌ها حذف می‌شوند. اشتراک یا لغو اشتراک در «همه کانال ها» در اینجا، همین کار را در YouTube نیز انجام می‌دهد."
+    Sync Playlists: "لیست‌های پخش YouTube شما، «تماشا در فرصتی دیگر» و «ویدیوهای پسندیده‌شده» در «لیست های پخش شما» نمایش داده می‌شوند، و تغییراتی که اینجا در آن‌ها می‌دهید در YouTube نیز اعمال می‌شود. این موارد با دستگاه‌های دیگر شما همگام‌سازی نمی‌شوند و هنگام استخراج همهٔ لیست‌های پخش یا پشتیبان‌گیری از داده‌هایتان گنجانده نمی‌شوند. خاموش کردن این گزینه آن‌ها را از این دستگاه حذف می‌کند، اما نه از YouTube."
+  General Settings:
+    Built-in Streams: |
+      حالت خودکار بیشتر ویدیوها را با کلاینت visionOS یوتیوب پخش می‌کند که سریع‌تر شروع می‌شود و از کیفیت خودکار پشتیبانی می‌کند. پخش‌های زنده و ویدیوهایی که نمی‌تواند پخش کند از SABR استفاده می‌کنند.
+      حالت فقط SABR همیشه از کلاینت وب یوتیوب استفاده می‌کند که کندتر شروع می‌شود و کیفیت خودکار ندارد.
+    Title Lines: "عنوان ویدیوها و فهرست‌های پخش را در فهرست‌ها و شبکه‌ها با سه‌نقطه به تعداد خط انتخاب‌شده کوتاه می‌کند تا کارت‌ها یکدست‌تر باشند. برای دیدن عنوان کامل، نشانگر را روی آن نگه دارید."
+    Close Window With Last Tab: 'وقتی خاموش باشد، بستن آخرین زبانه به‌جای آن یک زبانهٔ جدید باز می‌کند تا پنجره تا زمانی که آن را ببندید باز بماند.'
+    Preferred Video Codec: |
+      حالت خودکار کدک‌هایی را ترجیح می‌دهد که دستگاه شما می‌تواند به‌صورت سخت‌افزاری رمزگشایی کند.
+      AV1: بهترین کیفیت با کمترین مصرف داده، اما همهٔ ویدیوها آن را ندارند. بدون رمزگشایی سخت‌افزاری ممکن است باتری را زود خالی کند یا فریم‌ها را از دست بدهد.
+      VP9: تعادلی میان کارایی و سازگاری، که معمولاً تا بالاترین وضوح در دسترس است.
+      H.264: آسان‌ترین برای رمزگشایی تقریباً روی هر دستگاهی، اما داده بیشتری مصرف می‌کند و معمولاً تا 1080p است.
+      تغییرات از ویدیوی بعدی اعمال می‌شوند. اگر کدک ترجیحی در دسترس نباشد، از کدک دیگری استفاده می‌شود.
+    Always Use Backup Media Server: "ویدیوها را به‌جای سرور تعیین‌شده از سرور پشتیبانی که YouTube معرفی می‌کند پخش می‌کند، برای نمونه وقتی حافظهٔ نهان ارائه‌دهندهٔ اینترنت شما اغلب کند است. در غیر این صورت OpenTubeX فقط وقتی سرور تعیین‌شده پاسخ ندهد سرور را عوض می‌کند."
+    Automatically switch stream extraction methods: "اگر پخش داخلی ناموفق بود، yt-dlp را امتحان کنید و اگر yt-dlp ناموفق بود، پخش داخلی را امتحان کنید."
+    Enable Tabs: "صفحهٔ فعلی باز می‌ماند. زبانه‌های دیگر تا راه‌اندازی مجدد برنامه نگه داشته می‌شوند؛ برای بازیابی آن‌ها، زبانه‌ها را دوباره فعال کنید."
+    Data Saver Thumbnails: "برای کاهش مصرف داده از تصاویر بندانگشتی با وضوح پایین‌تر استفاده کنید."
+    Use AI Translation Completions: جاهای خالی ترجمه‌های انسانی را با متن تولیدشده با هوش مصنوعی پر می‌کند. ترجمه‌های انسانی همیشه اولویت دارند.
+    Update Relative Timestamps: تا زمانی که صفحه باز است، زمان‌های نسبی را در سراسر برنامه به‌روز می‌کند. در صورت غیرفعال بودن، فقط پس از بارگیری دوباره یا بازدید مجدد از صفحه به‌روز می‌شوند.
+    Stream Extraction Method: |
+      روش دریافت جریان‌های ویدیو توسط OpenTubeX را انتخاب کنید. در صورت انتخاب yt-dlp، باید در دسترس باشد.
+      با استفاده از yt-dlp ممکن است پخش ویدیوها دیرتر آغاز شود.
+    Avoid translation: |
+      ترجمه خودکار عنوان، توضیحات و فصل‌های ویدیو توسط YouTube را غیرفعال می‌کند.
+      گزینهٔ «کل برنامه» نام و توضیحات کانال‌ها را نیز به زبان اصلی‌شان نشان می‌دهد.
+      درخواست‌های بیش‌ازحد، مانند دریافت عنوان ویدیوهای فهرست‌ها، ممکن است موقتاً
+      بر پایداری برنامه اثر بگذارد.
+    Show Thumbnail Previews: با نگه‌داشتن نشانگر روی تصاویر بندانگشتی ویدیو، پیش‌نمایش متحرک نشان می‌دهد.
+    Startup Behavior: |
+      عملکرد OpenTubeX هنگام راه‌اندازی را انتخاب کنید.
+      «بارگیری همه زبانه‌ها» فوراً همه زبانه‌های ذخیره‌شده را بازیابی می‌کند، اما ویدیوهای زبانه‌های پس‌زمینه خودکار پخش نمی‌شوند.
+      «بارگیری زبانه‌های بارگیری‌شده قبلی» زبانه‌هایی را که هنگام بسته‌شدن OpenTubeX بارگیری شده بودند دوباره بارگیری می‌کند و بقیه را بارگیری‌نشده نگه می‌دارد.
+      «بارگیری آخرین زبانه فعال» نشست قبلی را با زبانه‌های دیگر به‌صورت باز اما بارگیری‌نشده بازیابی می‌کند؛ با کلیک روی آن‌ها بارگیری می‌شوند.
+      «شروع با نشست خالی» زبانه‌های ذخیره‌شده را نادیده می‌گیرد و پنجره‌ای تازه باز می‌کند.
+    Remember Tab Navigation History: سابقه پیمایش عقب و جلوی هر زبانه ذخیره می‌شود و با راه‌اندازی دوباره OpenTubeX بازیابی می‌شود.
+    Yattee Server: نمونهٔ yattee-server که OpenTubeX ویدیوها، کانال‌ها، لیست‌های پخش و نتایج جستجو را از آن بارگذاری می‌کند. نام کاربری و رمز عبور فقط روی همین دستگاه ذخیره می‌شوند.
+    Proxy Videos Through Yattee Server: جریان‌های ویدیو و صدا را از طریق سرور منتقل می‌کند. این گزینه را روشن نگه دارید، مگر اینکه سرور از همان اتصال اینترنت شما استفاده کند؛ زیرا YouTube جریان‌ها را فقط به نشانی‌ای می‌فرستد که آن‌ها را درخواست کرده است. تصاویر بندانگشتی همیشه مستقیماً از YouTube بارگذاری می‌شوند.
+    Notifications: انتخاب کنید OpenTubeX چگونه شما را از پخش‌های زنده، ویدیوهای جدید و بارگیری‌های خودکار باخبر کند. با گزینهٔ سیستم و داخل برنامه، اعلان‌ها هنگام استفاده از OpenTubeX داخل آن و در غیر این صورت به‌صورت اعلان سیستم نمایش داده می‌شوند و زنگوله آن‌ها را نگه می‌دارد. گزینهٔ خاموش گزینه‌های اعلان را هم پنهان می‌کند.
+    Ignore System Haptics Setting: هنگام فشار طولانی و حرکات اشاره‌ای لرزش ایجاد شود، حتی اگر بازخورد لمسی در تنظیمات Android خاموش باشد.
+  Proxy Settings:
+    IP Block Recovery Script Path: مسیر فایل اسکریپتی که هنگام شناسایی مسدودشدن IP اجرا می‌شود. OpenTubeX تا پایان آن منتظر می‌ماند و سپس ویدیو را دوباره بارگیری می‌کند. اگر روش جایگزین فعال باشد، اسکریپت فقط در صورت شکست آن نیز اجرا می‌شود.
+  Player Settings:
+    Rewind on Resume: "هنگام ادامهٔ ویدیوی متوقف‌شده، این تعداد ثانیه به عقب برمی‌گردد تا لحظه‌های آخر را دوباره ببینید. برای خاموش کردن، روی ۰ تنظیم کنید."
+    Minimum Pause Before Rewinding: "فقط وقتی به عقب برمی‌گردد که ویدیو دست‌کم این مدت متوقف بوده باشد. برای عقب‌بردن پس از هر توقف، روی ۰ تنظیم کنید."
+    Mono Audio: 'کانال‌های صوتی چپ و راست را در هر دو گوش پخش می‌کند. وقتی صدای ویدیو فقط از یک طرف هدفون شنیده می‌شود از آن استفاده کنید.'
+    Normalize Loudness: 'صدای ویدیوهایی را که از بیشتر ویدیوها بلندترند کم می‌کند تا بلندی صدا بین ویدیوها ناگهان تغییر نکند. ویدیوهای کم‌صدا بلندی صدای خود را حفظ می‌کنند. فقط برای ویدیوهایی کار می‌کند که با ای پی ای داخلی بارگیری شده‌اند.'
+    Pause on Stream Recovery: "وقتی جریان ویدیو ناموفق باشد و پخش‌کننده آن را دوباره بارگیری کند یا به قالب یا موتور دیگری تغییر دهد، پخش متوقف می‌شود و خطا تا زمانی که آن را ببندید بالای پخش‌کننده باقی می‌ماند. در صورت غیرفعال بودن، پخش ادامه می‌یابد و خطا برای مدت کوتاهی به‌صورت اعلان نمایش داده می‌شود."
+    Continue Playback When Screen Is Locked: 'صدا را در پس‌زمینه پخش نگه می‌دارد و کنترل‌های رسانه‌ای اندروید را فراهم می‌کند. برای توقف پخش هنگامی که برنامه دیگر دیده نمی‌شود، این گزینه را خاموش کنید.'
+    Enable Caption Translations: در صورت فعال بودن، اگر ویدیو زیرنویس اصلی منطبق نداشته باشد، دکمه زیرنویس و میان‌بر C نسخه ترجمه‌شده خودکار به زبان زیرنویس ترجیحی را انتخاب می‌کنند.
+    Use Quick Playback Speed Bar: نوار سریع سرعت پخش را در سمت راست کنترل‌های پخش‌کننده نشان می‌دهد. اگر ذخیره دستی سرعت پخش برای هر کانال فعال باشد، دکمه ذخیره سرعت برای کانال فعلی نیز در این نوار قرار می‌گیرد.
+    Multiply Seek Interval by Playback Rate: در صورت فعال بودن، بازه‌های جابه‌جایی (کلیدهای جهت‌نما و J/L) در سرعت پخش فعلی ضرب می‌شوند. در صورت غیرفعال بودن، این بازه‌ها مستقل از سرعت پخش ثابت می‌مانند.
+    Show Playback Rate Adjusted Timestamp: در صورت فعال بودن و تفاوت سرعت پخش با 1x، پخش‌کننده زمان تنظیم‌شده بر اساس سرعت پخش را پس از زمان عادی و داخل پرانتز نشان می‌دهد.
+    Use YouTube-style Shorts: ویدیوهای کوتاه را در صفحه‌های اشتراک و کانال به‌صورت شبکه‌ای عمودی نشان می‌دهد و از پخش‌کننده ویدیوهای کوتاه به سبک YouTube استفاده می‌کند.
+    Loop Shorts: در صورت فعال بودن، ویدیوهای کوتاه خودکار از ابتدا پخش می‌شوند. در صورت غیرفعال بودن، در پایان متوقف می‌شوند و دکمه پخش دوباره نمایش داده می‌شود.
+    Show Skip Silence Toggle: کلید روشن/خاموشِ ردکردن سکوت را در منوی تنظیمات پخش‌کننده نشان می‌دهد.
+    Enable Skip Silence by Default: ردکردن سکوت را برای زبانه‌های جدید فعال می‌کند. تغییر آن در یک زبانه بر زبانه‌های دیگر اثری ندارد.
+    Enable Video Zoom: کنترل بزرگ‌نمایی را در منوی تنظیمات پخش‌کننده نشان می‌دهد و میان‌برهای صفحه‌کلید و کنترل‌های جابه‌جایی آن را فعال می‌کند.
+    Enable Seek History: تا زمان بسته شدن برنامه، به خاطر می‌سپارد در هر ویدیو از کجا پرش کرده‌اید. فهرست تاریخچهٔ پرش‌ها را در منوی تنظیمات پخش‌کننده نشان می‌دهد و میان‌برهای صفحه‌کلید آن را فعال می‌کند.
+    Show Seek Bar Filmstrip: "کشیدن دستگیرهٔ نوار پیشرفت نواری از فریم‌ها را در اطراف جایی که به آن می‌رسید نشان می‌دهد و کشیدن به بالا روی آن جابه‌جایی دقیق را ممکن می‌کند. در صورت غیرفعال بودن، کشیدن فقط یک تصویر بندانگشتی نشان می‌دهد، مانند هنگام نگه داشتن نشانگر روی آن."
+    Voice-over Translation: هنگام درخواست ترجمه، شناسه ویدیو، مدت‌زمان و زبان انتخابی را به سرویس غیررسمی ترجمه صوتی Yandex می‌فرستد. به‌طور پیش‌فرض غیرفعال است.
+    Hold to Speed Up: برای ضرب موقت سرعت پخش فعلی در مقدار انتخاب‌شده، کلید فاصله یا دکمه چپ ماوس را روی پخش‌کننده نگه دارید.
+    Ambient Mode: رنگ‌های ویدیو را در فضای اطراف پخش‌کننده پخش می‌کند.
+    Default Volume: هنگام فعال بودن «به‌خاطرسپردن بلندی صدا» غیرفعال است. برای تعیین بلندی صدای ثابت هنگام شروع هر ویدیو، «به‌خاطرسپردن بلندی صدا» را خاموش کنید.
+    Parallel Segment Loading: |
+      تعداد قطعه‌های ویدیو و صدا که پیش از پخش هم‌زمان بارگیری می‌شوند.
+      مقادیر بالاتر ممکن است به اتصال‌های کند یا ناپایدار کمک کنند، اما پهنای باند و حافظه بیشتری مصرف می‌کنند.
+      همچنین ممکن است باعث شوند «خودکار» سرعت اتصال را کمتر برآورد کند و کیفیت پایین‌تری برگزیند.
+      جریان‌هایی که هر بار به یک درخواست محدودند، این تنظیم را نادیده می‌گیرند.
+    Preload Upcoming Videos: "نشانی‌های پخش yt-dlp ویدیوهای بعدی را دریافت و ذخیره می‌کند. صف بر فهرست‌های پخش و پیشنهادها اولویت دارد."
+    Upcoming Videos to Preload: "بیشترین تعداد ویدیوهای بعدی که نشانی yt-dlp آن‌ها در پس‌زمینه دریافت می‌شود."
+    Concurrent Preloads: "بیشترین تعداد فرایندهای yt-dlp که برای پیش‌بارگذاری هم‌زمان ویدیوها استفاده می‌شوند. مقادیر بالاتر از پردازنده، حافظه و پهنای باند شبکه بیشتری استفاده می‌کنند."
+    Ignore System Rotation Lock for Fullscreen: با چرخاندن فیزیکی دستگاه وارد حالت تمام‌صفحه شوید یا از آن خارج شوید، حتی وقتی چرخش خودکار اندروید خاموش است.
+    Ask Before Preloading Large Playlists: "پیش از پیش‌بارگیری همهٔ ویدیوهای فهرست پخشی با بیش از {count} ویدیو، تأیید می‌خواهد."
+  Download Settings:
+    Download Folder: ویدیوها در این پوشه ذخیره می‌شوند. برای استفاده از پوشه «بارگیری‌ها»ی سیستم، خالی بگذارید.
+    Global Additional yt-dlp Arguments: آرگومان‌های اضافی خط فرمان که برای هر بارگیری به yt-dlp فرستاده می‌شوند؛ برای مثال --cookies-from-browser firefox.
+    Concurrent Downloads: بیشترین تعداد کارهای yt-dlp که می‌توانند هم‌زمان اجرا شوند.
+    Bandwidth Limit: با تقسیم این حد میان کارهای هم‌زمان، نرخ انتقال مجموع صف را محدود می‌کند. برای نامحدودبودن، 0 وارد کنید.
+  External Software Settings:
+    yt-dlp Source: OpenTubeX می‌تواند از yt-dlp نصب‌شده روی سیستم استفاده کند یا نسخه خودش را بارگیری و مدیریت کند که در پوشه داده‌های کاربر نگهداری می‌شود.
+    yt-dlp Channel: کانال انتشار yt-dlp را که OpenTubeX بارگیری و مدیریت می‌کند انتخاب کنید. کانال Stable برای بیشتر کاربران پیشنهاد می‌شود.
+    FFmpeg Source: OpenTubeX می‌تواند از FFmpeg و FFprobe نصب‌شده روی سیستم استفاده کند یا نسخه‌های ایستای خودش را بارگیری و مدیریت کند که در پوشه داده‌های کاربر نگهداری می‌شوند.
+    Managed Tool Updates: انتخاب کنید ابزارهای مدیریت‌شده خودکار به‌روز شوند، پیش از به‌روزرسانی اجازه بگیرند یا فقط با دکمه‌های دستی به‌روز شوند. ابزارهایی که موجود نیستند همچنان هنگام نیاز بارگیری می‌شوند.
+    yt-dlp Executable Path: OpenTubeX به‌طور پیش‌فرض فرض می‌کند yt-dlp از طریق متغیر محیطی PATH پیدا می‌شود. در صورت نیاز می‌توانید اینجا مسیری سفارشی تعیین کنید.
+    Cookie Source: انتخاب کنید yt-dlp برای پخش با احراز هویت، فایل کوکی Netscape را بخواند یا کوکی‌های مرورگری نصب‌شده را.
+    Cookie File: یک فایل کوکی با قالب Netscape برای پخش با احراز هویت انتخاب کنید.
+    Browser for Cookies: پشتیبانی از مرورگر از فایل اجرایی yt-dlp انتخاب‌شده خوانده می‌شود. هنگام درخواست پخش با احراز هویت، OpenTubeX از yt-dlp می‌خواهد کوکی‌های این مرورگر را بخواند.
+    Browser Profile: نام یا پوشه نمایه مرورگر، اختیاری است. برای استفاده از آخرین نمایه‌ای که به آن دسترسی داشته‌اید، خالی بگذارید.
+    Always Use Cookies: "از کوکی‌های پیکربندی‌شده برای بارگیری‌ها، زیرنویس‌ها و هر بار که yt-dlp جریان‌ها را استخراج می‌کند استفاده کنید. این گزینه روش استخراج جریان را به yt-dlp تغییر نمی‌دهد. با انتخاب yt-dlp، ممکن است قالب‌های ویژه حساب در دسترس قرار گیرند؛ از جمله نرخ بیت بهتر YouTube Premium، اگر حساب به آن دسترسی داشته باشد."
+    FFmpeg Executable Path: برای ادغام جریان‌های جداگانه ویدیو و صدا و نیز تبدیل صدا، FFmpeg لازم است. OpenTubeX به‌طور پیش‌فرض فرض می‌کند FFmpeg از طریق متغیر محیطی PATH پیدا می‌شود. در صورت نیاز می‌توانید اینجا مسیری سفارشی تعیین کنید.
+    Use cookies for subtitles: "از کوکی‌های پیکربندی‌شده برای زیرنویس‌ها و ترجمه‌های خودکار استفاده شود. گزینهٔ «همیشه از کوکی‌ها استفاده شود» نیز این قابلیت را فعال می‌کند."
+  Distraction Free Settings:
+    Hide Playlist Stats: تعداد ویدیوها، تعداد بازدیدها، تاریخ آخرین به‌روزرسانی و مدت کل را در صفحه‌های فهرست پخش پنهان می‌کند.
+    Count Watch Time From: "«همه دستگاه‌ها» هر دستگاهی را که آمار تماشا را همگام‌سازی می‌کند می‌شمارد. «این دستگاه» فقط آنچه را اینجا تماشا می‌کنید می‌شمارد."
+    When a Limit Is Reached: "«مکث پخش» به شما امکان می‌دهد ۱۵ دقیقه اضافه کنید یا محدودیت را برای امروز نادیده بگیرید. با رمز عبور تنظیمات، فقط در تنظیمات می‌توانید محدودیت را افزایش دهید."
+    Grayscale: "برنامه را با سایه‌های خاکستری نمایش می‌دهد تا کمتر جلب توجه کند. «در زمان خواب» از زمان‌بندی یادآور زمان خواب پیروی می‌کند."
+    Apply Grayscale To: "«ویدیوها و تصاویر» رابط کاربری را رنگی نگه می‌دارد و محتوایی مانند ویدیوها، تصاویر بندانگشتی و آواتارها را خاکستری می‌کند."
+    Daily Watch Time Limit: "آنچه را امروز در همهٔ دستگاه‌هایی که آمار تماشا را همگام‌سازی می‌کنند تماشا کرده‌اید، از جمله Shorts، می‌شمارد."
+    Daily Shorts Limit: "Shortsهایی را که امروز در این دستگاه تماشا کرده‌اید می‌شمارد."
+    Take a Break Reminder: "پس از این مدت تماشا، ویدیو را متوقف می‌کند. مکث ۱۰ دقیقه‌ای یا بیشتر، شمارش را از نو آغاز می‌کند."
+    Bedtime Reminder: "ویدیو را متوقف می‌کند و بین زمان شروع و پایان به شما یادآوری می‌کند که تماشا را متوقف کنید."
+    Shorten View Counts: تعداد بازدید، دیدگاه‌ها و پسندهای نظرها را که YouTube از قبل گرد کرده، به‌شکل کوتاه نشان می‌دهد؛ مثلاً 14K به‌جای 14,000. تعداد دقیق همیشه کامل نمایش داده می‌شود.
+  Subscription Settings:
+    Fetch Feed on Startup: در صورت فعال بودن، OpenTubeX هنگام راه‌اندازی و بازشدن پنجره‌ای جدید، خوراک اشتراک‌های شما را خودکار دریافت می‌کند.
+    Show New Content Feed: زبانه «جدید» را نشان می‌دهد که حاوی مواردی از خوراک اشتراک‌هاست که هنگام دریافت قبلی وجود نداشتند.
+    Enable RSS Feeds: یک زبانه RSS با موارد خوراک‌های RSS یا Atom در صفحه اشتراک‌ها نشان می‌دهد تا بتوانید سازندگان در پلتفرم‌های دیگر را دنبال کنید. موارد آن با yt-dlp باز می‌شوند.
+    Show New Content Indicators: کنار مواردی از خوراک اشتراک‌ها که هنگام دریافت قبلی وجود نداشتند، نقطه‌ای کوچک نشان می‌دهد.
+    Show Scheduled Live Streams / Premieres First: پخش‌های زنده و نمایش‌های نخست آینده را بالای خوراک اشتراک‌ها نگه می‌دارد. در صورت غیرفعال بودن، تا زمان شروع در جایگاه اعلام اولیه خود می‌مانند. پس از غیرفعال‌کردن، خوراک اشتراک‌ها را یک‌بار تازه‌سازی کنید تا تاریخ اعلام موارد زمان‌بندی‌شده موجود دریافت شود.
+    Auto Refresh Interval: "فاصله زمانی تازه‌سازی خودکار خوراک اشتراک‌ها توسط OpenTubeX در حالی که برنامه باز است. در اندروید، فاصلهٔ زمانی غیرصفر خوراک را هنگام بسته بودن برنامه نیز تازه می‌کند."
+    Refresh Subscriptions While App Is Closed: "خوراک‌ها را با تنظیمات انتخابی شما تازه می‌کند. در رایانه، OpenTubeX تا زمان خروج در سینی سیستم می‌ماند. Android زمان اجرای تازه‌سازی‌های پس‌زمینه را تعیین می‌کند."
+    Notify About New Uploads: اعلان‌های سیستمی را در این دستگاه برای کانال‌هایی نمایش می‌دهد که اعلان‌هایشان را در تنظیمات اشتراک آن‌ها روشن کرده‌اید. OpenTubeX هنگام تازه‌سازی اشتراک‌ها محتوای جدید را بررسی می‌کند، پس یک فاصلهٔ تازه‌سازی خودکار انتخاب کنید. برای دریافت اعلان هنگام بسته بودن برنامه، تازه‌سازی هنگام بسته بودن برنامه را نیز فعال کنید.
+    RSS Feeds Auto Refresh Interval: هر چند وقت یک بار OpenTubeX خوراک‌های RSS شما را هنگام باز بودن برنامه به‌طور خودکار تازه‌سازی می‌کند.
+    Faster Subscription Refresh: "ابتدا خوراک RSS هر کانال را بررسی می‌کند و ویدیوها، Shorts و پخش‌های زنده را فقط از کانال‌هایی که بارگذاری جدید دارند بار می‌کند. تازه‌سازی‌های خودکار همچنین از کانال‌هایی که در ۱۰ دقیقهٔ گذشته بار شده‌اند صرف‌نظر می‌کنند. برای کانال‌هایی که بارگذاری جدید ندارند، تعداد بازدیدها، ویدیوهای حذف‌شده و عنوان‌های تغییرکرده فقط هر چند ساعت یک‌بار به‌روز می‌شوند و بارگذاری‌های جدید ممکن است وقتی خوراک RSS عقب است دیرتر نمایش داده شوند. با API اینویدیوس در دسترس نیست."
+    Platforms Auto Refresh Interval: هر چند وقت یک بار OpenTubeX کانال‌هایی را که در پلتفرم‌های دیگر دنبال می‌کنید هنگام باز بودن برنامه به‌طور خودکار تازه‌سازی می‌کند.
+    Twitch Notify When Live: وقتی یکی از کانال‌های Twitch دنبال‌شدهٔ شما پخش را آغاز کند، به شما اعلان می‌دهد. OpenTubeX تا زمانی که باز است هر چند دقیقه یک بار بررسی می‌کند، و هنگامی که بسته است نیز اگر در آن زمان اشتراک‌ها را تازه کند.
+  Theme Settings:
+    Only Show Important Notifications: اعلان‌های درون‌برنامه‌ای را که فقط یک کار را تأیید می‌کنند یا وضعیتی را گزارش می‌دهند، از جمله آن‌هایی که بازگردانی را ارائه می‌دهند، پنهان می‌کند. خطاها، هشدارها، یادآورهایی که تنظیم کرده‌اید و اعلان‌هایی که از شما تصمیمی می‌خواهند، مانند درخواست‌های به‌روزرسانی، همچنان نمایش داده می‌شوند. پیشرفت کارهای پس‌زمینه، مانند تازه‌سازی اشتراک‌ها، به‌جای اعلان در نوار پیشرفت سراسری نمایش داده می‌شود. اعلان‌های سیستم تحت تأثیر قرار نمی‌گیرند.
+    Visible Search Suggestions: "تعیین می‌کند نوار جستجو پیش از پیمایش فهرستش چند مورد از تاریخچهٔ جستجو و پیشنهادها را نشان دهد. فهرست هرگز از پایین پنجره فراتر نمی‌رود."
+    Thumbnail Size: "اندازهٔ تصاویر کوچک ویدیوها را در شبکه‌ها و فهرست‌ها تغییر می‌دهد. شبکه‌هایی با تعداد ستون ثابت یا نوع نمای «تمام‌عرض» در عوض هر ردیف را پر می‌کنند، پس در آنجا فقط تصاویر کوچک فهرست‌ها و Shorts را تغییر می‌دهد. در پنجره‌هایی به اندازهٔ تلفن، تصاویر کوچک شبکه به ۱۰۰٪ محدود می‌شوند."
+    Playlist Thumbnail Size: "اندازهٔ تصاویر کوچک ویدیوها را در صفحه‌های فهرست پخش تغییر می‌دهد. شبکه‌هایی با تعداد ستون ثابت یا نوع نمای «تمام‌عرض» در عوض هر ردیف را پر می‌کنند، پس در آنجا فقط تصاویر کوچک فهرست‌ها و Shorts را تغییر می‌دهد. در پنجره‌هایی به اندازهٔ تلفن، تصاویر کوچک شبکه به ۱۰۰٪ محدود می‌شوند."
+    Compact Settings Categories: "توضیحات را پنهان می‌کند و ارتفاع دسته‌های تنظیمات را کاهش می‌دهد."
+    Show Progress as Notification: به‌جای نوار پیشرفت سراسری، اعلان پایداری با پیشرفت زنده عملیات پس‌زمینه مانند تازه‌سازی اشتراک‌ها و بارگیری ابزارهای مدیریت‌شده نشان می‌دهد.
+    Always Show Scrollbars: نوارهای پیمایش را همیشه نمایان نگه می‌دارد. در صورت غیرفعال بودن، کمی پس از توقف حرکت ماوس محو می‌شوند و با حرکت دوباره آن فوراً ظاهر می‌شوند.
+    Scroll Speed: فاصلهٔ پیمایش با حرکت چرخ ماوس و صفحهٔ لمسی را تغییر می‌دهد.
+    Use Fixed Tab Width: به‌جای تنظیم اندازه زبانه‌ها بر اساس عنوانشان، به همه زبانه‌های نوار افقی عرضی یکسان می‌دهد.
+    Use Custom Title Bar: برای صرفه‌جویی در فضای عمودی، نوار عنوان سیستم را با نوار زبانه‌ها، یا وقتی زبانه‌ها در بالا نیستند با ناوبری بالا، جایگزین می‌کند. دکمه‌های کنترل پنجره در گوشه همان نوار نمایش داده می‌شوند.
+    Use Grid Player Menu: منوی تنظیمات پخش‌کننده ویدیو را به‌جای فهرستی از ردیف‌ها، به‌صورت شبکه‌ای از کاشی‌ها می‌چیند.
+    Modal Backdrop: "تعیین می‌کند برنامه پشت کادرهای گفتگو و منوها چگونه دیده شود. مات‌کردن ممکن است در دستگاه‌های ضعیف‌تر کند باشد."
+    Click Scrollbar Track to Scroll: "کلیک روی نوار پیمایش در بیرون از دستگیره‌ی آن، حدود یک صفحه به سمت محل کلیک پیمایش می‌کند. تا زمانی که این گزینه روشن است، نوار پیمایشِ قابل‌مشاهده کلیک‌هایی را که برای موارد زیر آن است دریافت می‌کند. نوار پیمایش نوار زبانه‌ها همیشه همین‌طور کار می‌کند."
+  Experimental Settings:
+    Disable Hardware Acceleration: شتاب‌دهی سخت‌افزاری پردازندهٔ گرافیکی را غیرفعال می‌کند. ممکن است مشکلات گرافیکی را برطرف کند، اما احتمالاً کارایی را کاهش می‌دهد.
+  SponsorBlock Settings:
+    Always Show DeArrow Badge: دکمه DeArrow را در ویدیوهایی که DeArrow عنوان یا تصویر بندانگشتی آن‌ها را جایگزین کرده است همیشه نشان بده، نه فقط هنگام قرار گرفتن نشانگر روی آن.
+The playlist is at the beginning. Enable loop to continue playing: فهرست پخش در ابتداست. برای ادامه پخش، تکرار را فعال کنید
+External link opening has been disabled in Settings → Privacy: بازکردن پیوندهای خارجی در تنظیمات → حریم خصوصی غیرفعال شده است
+Screenshot Clipboard Success: نماگرفت در بریده‌دان ذخیره شد
+Screenshot Clipboard Error: کپی نماگرفت در بریده‌دان ناموفق بود
+KeyboardShortcutPrompt:
+  Mark Seen or Watched: "علامت‌گذاری مورد انتخاب‌شده به‌عنوان دیده‌شده، یا تغییر وضعیت تماشای آن"
+  Toggle Quick Bookmark: افزودن به فهرست پخش نشانک سریع یا حذف از آن
+  Reopen Closed Window: باز کردن دوبارهٔ آخرین پنجرهٔ بسته‌شده
+  Edit Hint: یک میان‌بر را انتخاب کنید، سپس ترکیب کلید جدید را فشار دهید. برای حذف انتساب، Backspace یا Delete را فشار دهید.
+  Change Shortcut: تغییر میان‌بر برای {action}
+  Press Shortcut: میان‌بر را فشار دهید…
+  Unassigned: بدون انتساب
+  Reset Shortcut: بازنشانی میان‌بر برای {action}
+  Reset to Defaults: بازنشانی به پیش‌فرض‌ها
+  Shortcut Already Assigned: میان‌بر از قبل اختصاص یافته است
+  Shortcut Conflict: '{shortcut} از قبل به {actions} اختصاص یافته است. می‌خواهید آن را دوباره اختصاص دهید؟'
+  Reserved Shortcut Conflict: '{shortcut} برای {actions} رزرو شده و نمی‌توان آن را دوباره اختصاص داد.'
+  Reassign: اختصاص دوباره
+  Sections:
+    App:
+      Tabs: "برنامه:\_زبانه‌ها"
+      Search and Page: "برنامه:\_جست‌وجو و صفحه"
+      Window and View: "برنامه:\_پنجره و نما"
+  New Tab: ایجاد زبانه جدید
+  Close Tab: بستن زبانه فعلی
+  Reload Tab: بارگیری دوباره زبانه فعلی
+  Reopen Closed Tab: بازکردن دوباره آخرین زبانه بسته‌شده
+  Next Tab: رفتن به زبانه بعدی
+  Previous Tab: رفتن به زبانه قبلی
+  Switch to Tab: رفتن به زبانه 1–9
+  Toggle Tab Orientation: جابه‌جایی میان چیدمان‌های زبانه
+  Find in Page: یافتن متن در صفحه فعلی
+  Find Next Match: رفتن به تطابق بعدی
+  Find Previous Match: رفتن به تطابق قبلی
+  Toggle Normal Playback Speed: جابه‌جایی میان سرعت 1x و سرعت پخش قبلی
+  Toggle Skip Silence: روشن یا خاموش‌کردن ردکردن سکوت
+  Set A-B Repeat Point A: تنظیم نقطهٔ A تکرار A-B
+  Set A-B Repeat Point B: تنظیم نقطهٔ B تکرار A-B
+  Clear A-B Repeat: پاک‌کردن تکرار A-B
+  Video Zoom In: بزرگ‌نمایی ویدیو
+  Video Zoom Out: کوچک‌نمایی ویدیو
+  Tab Switcher: تعویض‌کننده زبانه
+  Undo Seek: واگرد آخرین پرش
+  Redo Seek: ازنو انجام دادن پرش واگردشده
+CommandPalette:
+  Title: پالت فرمان
+  Open: بازکردن پالت فرمان
+  Search Label: "جستجوی فرمان‌ها، تنظیمات و ویدیوهای محلی"
+  Search Placeholder: جستجوی فرمان‌ها، تنظیمات و ویدیوهای محلی…
+  Results: "نتایج"
+  No Results: "نتیجهٔ منطبقی نیست"
+  Result Count: "نتایج: {count} | نتایج: {count}"
+  Move: جابه‌جایی
+  Run: اجرا
+  Keys:
+    Up: ↑
+    Down: ↓
+    Escape: Esc
+  Switch to Tab: 'رفتن به زبانه: {title}'
+  Switch Profile: 'تعویض نمایه: {name}'
+  Open Playlist: 'بازکردن فهرست پخش: {name}'
+  Cancel Download: 'لغو بارگیری: {title}'
+  Groups:
+    App: برنامه
+    Navigation: پیمایش
+    Tabs: زبانه‌ها
+    Local Videos: ویدیوهای محلی
+  Unavailable:
+    Current Page: از قبل در این صفحه هستید
+    No History: در این جهت صفحه‌ای نیست
+    Desktop: فقط در برنامه دسکتاپ در دسترس است
+    Build: در این نسخه در دسترس نیست
+    One Tab: ابتدا زبانه دیگری باز کنید
+    Active Tab: این زبانه فعال است
+    Active Profile: این نمایه فعال است
+    Download Finished: این بارگیری دیگر در حال اجرا نیست
+    Video: ابتدا ویدیویی باز کنید
+Downloads:
+  File Name Template Invalid: 'از یک مسیر نسبی درون پوشهٔ بارگیری بدون ".."، "~"، "$"، "%" یا پیشوندی مانند "thumbnail:" استفاده کنید.'
+  Search Completed: "جستجوی دانلودهای تکمیل‌شده بر اساس عنوان یا کانال"
+  Format: "قالب"
+  All Formats: "همهٔ قالب‌ها"
+  Largest First: "بزرگ‌ترین‌ها اول"
+  Smallest First: "کوچک‌ترین‌ها اول"
+  No Matching Downloads: "دانلود تکمیل‌شدهٔ مطابقی یافت نشد. جستجو یا پالایهٔ دیگری را امتحان کنید."
+  Add Download: افزودن دانلود
+  Preparing: در حال آماده‌سازی…
+  Export Failed: "ذخیرهٔ فایل دانلودشده ممکن نشد. پوشه‌ای با اجازهٔ نوشتن برای دانلودها انتخاب کنید و دوباره تلاش کنید."
+  Native Code Blocked: "Android از بارگذاری کتابخانه‌های بومی yt-dlp جلوگیری کرد. در GrapheneOS اطلاعات این برنامه را باز کنید، “Dynamic code loading via storage” را در بخش “Exploit protection” روی “Allowed” بگذارید و دوباره تلاش کنید."
+  Download Stopped Unexpectedly: "دانلود به‌طور غیرمنتظره متوقف شد."
+  Remove File Permanently Warning: "این کار «{title}» را برای همیشه حذف می‌کند."
+  Download: بارگیری
+  Download Video: بارگیری ویدیو
+  Download Playlist: بارگیری فهرست پخش
+  Downloading: در حال بارگیری
+  Queue: صف
+  Downloaded: بارگیری‌شده
+  Canceled: لغوشده
+  Open Downloads: بازکردن بارگیری‌ها
+  No Downloads: هنوز بارگیری‌ای نیست
+  No Downloads Description: بارگیری‌هایی که آغاز کنید اینجا نمایش داده می‌شوند.
+  Clear Failed Canceled Skipped And Missing: پاک‌کردن موارد ناموفق، لغوشده، ردشده و ناموجود
+  Clear From List: حذف از فهرست
+  Show in Folder: نمایش در پوشه
+  Play Download: پخش فایل بارگیری‌شده
+  Retry Download: تلاش دوباره برای بارگیری
+  Pause Download: مکث بارگیری
+  Resume Download: ادامه بارگیری
+  Move Earlier: انتقال به بالا
+  Move Later: انتقال به پایین
+  Pause All: مکث همه
+  Resume All: ادامه همه
+  Retry All: تلاش دوباره برای همه بارگیری‌های ناموفق
+  Total Size: 'حجم کل: {size}'
+  Local File: فایل محلی
+  Available Offline: به‌صورت آفلاین در دسترس است
+  Remove File: حذف فایل
+  Remove File Confirmation: فایل بارگیری‌شده حذف شود؟
+  Remove File Warning: این کار "{title}" را به زباله‌دان دستگاه منتقل می‌کند.
+  File Not Found: فایل بارگیری‌شده پیدا نشد.
+  Files Missing: فایل بارگیری‌شده دیگر در فایل‌سیستم موجود نیست. | فایل‌های بارگیری‌شده دیگر در فایل‌سیستم موجود نیستند.
+  Files Available: '{available} از {total} فایل بارگیری‌شده در دسترس است.'
+  More Files: 1 فایل دیگر | {count} فایل دیگر
+  Template Used: 'الگو: {name}'
+  Template: الگو
+  Unsaved: ذخیره‌نشده
+  Media Type: نوع رسانه
+  Video: ویدیو
+  Audio: صدا
+  Maximum Resolution: حداکثر وضوح
+  Best Available: بهترین گزینه موجود
+  Automatic: خودکار
+  Container: کانتینر
+  Video Codec: کدک ویدیو
+  Audio Codec: کدک صدا
+  File Name Template: الگوی نام فایل
+  File Name Template Help: 'فیلدهای موجود: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
+  Time Range and Chapters: بازه زمانی و فصل‌ها
+  Start Time: زمان شروع
+  End Time: زمان پایان
+  Split by Chapters: جداسازی هر فصل در فایلی جداگانه
+  Remove Segments: حذف بخش‌ها
+  Subtitles and Metadata: زیرنویس و فراداده
+  Include Subtitles: افزودن زیرنویس‌ها
+  Embed Subtitles: جاسازی زیرنویس‌ها در فایل رسانه
+  Subtitle Format: قالب زیرنویس
+  Subtitle Languages: زبان‌های زیرنویس
+  Subtitle Languages Help: 'انتخابگرهای زبان yt-dlp با جداکننده ویرگول، برای مثال: en.*,de.*'
+  Embed Cover Art: جاسازی تصویر بندانگشتی به‌عنوان تصویر جلد
+  Embed Metadata: جاسازی عنوان، سازنده، توضیحات و فصل‌ها
+  Additional yt-dlp Arguments: آرگومان‌های اضافی yt-dlp
+  Template Name: نام الگو
+  Save Template: ذخیره الگو
+  Delete Template: حذف الگو
+  Template Saved: الگوی بارگیری "{name}" ذخیره شد
+  Template Name Exists: الگوی بارگیری‌ای با نام "{name}" از قبل وجود دارد.
+  Choose Folder: تغییر
+  Select Folder: انتخاب پوشه
+  Folder Required: برای فعال‌کردن بارگیری‌ها، پوشه‌ای برای بارگیری انتخاب کنید.
+  System Downloads Folder: پوشه بارگیری‌های سیستم
+  Processing: در حال پردازش…
+  Queued: در صف
+  Queued Position: در صف، جایگاه {position}
+  Paused: در حالت مکث
+  Pausing: پس از پایان کار فعلی، صف به حالت مکث درمی‌آید
+  Download Complete: بارگیری کامل شد
+  Download Cancelled: بارگیری لغو شد
+  Download Failed: بارگیری ناموفق بود
+  File Name Shortened: چون عنوان ویدیو بیش‌ازحد طولانی بود، نام فایل کوتاه شد.
+  Some Videos Not Downloaded: برخی از ویدیوهای این فهرست پخش بارگیری نشدند.
+  Playlist Video Position: ویدیوی {index} از {count}
+  Insufficient Disk Space: فضای دیسک کافی نیست. حدود {required} لازم است و {available} در دسترس است.
+  Unknown Download Size: حجم بارگیری نامشخص است. {available} در فایل‌سیستم مقصد در دسترس است.
+  Disk Space Check Unavailable: فضای خالی دیسک پیش از آغاز این بارگیری قابل بررسی نبود.
+  Download Failure Hint: '{issuesLink} را بررسی کنید، سپس کانال yt-dlp را در تنظیمات → پیشرفته → نرم‌افزار خارجی به Nightly یا Master تغییر دهید.'
+  yt-dlp YouTube Issues: مشکلات اخیر yt-dlp برای YouTube
+  Automatic Download Started: بارگیری خودکار آغاز شد
+  Automatic Download Started Body: '"{title}" از {channel} در پس‌زمینه در حال بارگیری است.'
+  Automatic Download Complete: بارگیری خودکار کامل شد
+  Automatic Download Failed: بارگیری خودکار ناموفق بود
+  Automatic Download Could Not Start: 'بارگیری خودکار "{title}" آغاز نشد.'
+  Automatic Download Skipped: فیلترهای بارگیری خودکار این مورد را رد کردند
+  Cancel Download: لغو بارگیری
+  yt-dlp Not Found: yt-dlp پیدا نشد. آن را نصب کنید یا مسیرش را در تنظیمات → پیشرفته → نرم‌افزار خارجی تعیین کنید.
+  Download Complete Template: بارگیری "{title}" پایان یافت
+  Download Failed Template: بارگیری "{title}" ناموفق بود
+  Templates:
+    Video Best: ویدیو - بهترین کیفیت
+    Video Resolution: ویدیو - {resolution}
+    Audio Best: صدا - بهترین کیفیت
+    Audio Format: صدا - {format}
+    Subtitles Format: زیرنویس - {format}
+  Waiting for Unmetered Network: "در انتظار شبکهٔ بدون محدودیت"
+  Waiting for Charging: "در انتظار شارژر"
+  Remove File Failed: حذف فایل بارگیری‌شده ممکن نشد.
+Channels:
+  Load More Channels: "بارگیری کانال‌های بیشتر"
+Search Bar:
+  Use Suggestion: استفاده از پیشنهاد
+  Open Search Container: باز کردن کادر جستجو
+  Search: جستجو
+Theme Discovery:
+  Discover Themes: "کشف پوسته‌ها"
+  Refresh: "تازه‌سازی"
+  View on GitHub: "مشاهده در GitHub"
+  Load Error: "بارگیری پوسته‌ها ممکن نشد. دوباره تازه‌سازی کنید."
+  Loading: "در حال بارگیری…"
+  No Themes: "پوسته‌ای برای نصب یافت نشد."
+  No Preview: "تصویر صفحه در دسترس نیست"
+  Load More: "بارگیری بیشتر"
+  Applied: "اعمال‌شده"
+  Apply Theme: "اعمال پوسته"
+  Install and Apply: "نصب و اعمال"
+  Update and Apply: "به‌روزرسانی و اعمال"
+
+Connection:
+  Offline: آفلاین
+  Reconnecting: "اتصال قطع شد. در حال تلاش برای اتصال مجدد…"
+  Back Online: "دوباره آنلاین هستید"
+
+App Icon:
+  Restart: "راه‌اندازی مجدد برنامه"
+  Saved Message: "نماد ذخیره شد. ممکن است به‌روزرسانی راه‌انداز کمی طول بکشد."
+  Title: "نماد برنامه"
+  Error: "بارگیری یا تغییر نماد برنامه ممکن نشد"
+
+Tray:
+  Hide All Windows: "پنهان کردن همهٔ پنجره‌ها"
+  Show All Windows: "نمایش همهٔ پنجره‌ها"
+
+Tray Icon:
+  Title: "نماد سینی سیستم"
+  Follow App Theme: "پیروی از زمینهٔ برنامه"
+  Monochrome: "تک‌رنگ"
+
+Form Inputs:
+  Browse: "مرور"
+  Use Default Path: "استفاده از پیش‌فرض"
+  Enter Password Hint: "گذرواژهٔ خود را وارد کنید"
+  Choose Password Hint: "یک گذرواژه انتخاب کنید"
+  Confirm Password Hint: "گذرواژهٔ جدید خود را تکرار کنید"
+  Encryption Passphrase Hint: "عبارت عبور رمزگذاری خود را وارد کنید"
+  Show Password: "نمایش گذرواژه"
+  Hide Password: "پنهان کردن گذرواژه"
+  Search Text Hint: "عبارت‌های جستجو را وارد کنید"
+  Playlist Description Hint: "این فهرست پخش را توصیف کنید"
+  Filename Preview: "پیش‌نمایش نام فایل"
+  Enter Channels: "کانال‌ها را وارد کنید"
+  Enter Text: "متن را وارد کنید"
+  Video URL: نشانی ویدیو یا فهرست پخش
+  Paste Link: پیوند ویدیو یا فهرست پخش را جای‌گذاری کنید
+  Example: مثلاً {example}
+  No Minimum: بدون حداقل
+  No Maximum: بدون حداکثر
+  Any Age: هر قدمتی
+  Included Terms Example: مثلاً آموزش, بررسی
+  Excluded Terms Example: مثلاً تریلر, پیش‌نمایش
+  Global Arguments Hint: آرگومان‌های اختیاری برای هر بارگیری
+  Unlimited Hint: 0 برای نامحدود
+  Add Argument: افزودن آرگومان
+  Template Name Example: مثلاً فقط صدا
+  Download Arguments Hint: آرگومان‌های اختیاری برای این بارگیری
+  Generated ID Hint: برای ایجاد شناسه خالی بگذارید
+  Default Value: "پیش‌فرض: {value}"
+
+Storage Startup Error:
+  Title: "داده‌های برنامه بارگیری نشد"
+  Message: "فضای ذخیره‌سازی دستگاه را آزاد کنید و دوباره تلاش کنید. همگام‌سازی تا بارگیری داده‌های شما متوقف است."
+  Web Message: "اگر OpenTubeX در زبانهٔ دیگری باز است، آن را ببندید و دوباره تلاش کنید."
+  Insecure Web Message: "OpenTubeX فقط زمانی می‌تواند داده‌های شما را ذخیره کند که از طریق HTTPS یا روی localhost باز شده باشد. به‌جای آن، این نشانی را با https:// باز کنید."
+  Retry: "تلاش دوباره"
+Native Permissions:
+  Local Network Denied: "مجوز دستگاه‌های اطراف رد شد."
+  Local Network: "دستگاه‌های شبکهٔ محلی را پیدا کنید و ویدیوها را به آن‌ها بفرستید و تنظیمات و داده‌ها را بین دستگاه‌ها همگام‌سازی کنید."
+
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "خانه"
+  subscriptions: "اشتراک‌ها"
+  userplaylists: "فهرست‌ها"
+  history: "تاریخچه"
+  subscribedchannels: "کانال‌ها"
+  trending: "داغ"
+  popular: "محبوب"
+  stats: "آمار"
+  more: "بیشتر"
+
+Installer:
+  Create Desktop Shortcut: ایجاد میان‌بر روی دسکتاپ
+Older Version Changes:
+  Title: "تغییرات از نسخهٔ قدیمی‌تر"
+  Message: "تغییراتی که در نسخهٔ قدیمی‌تر OpenTubeX انجام داده بودید روی کتابخانهٔ شما اعمال شد."
+  Detail: "اگر موردی در هر دو نسخه تغییر کرده بود، تغییر نسخهٔ قدیمی‌تر حفظ شد. یک نسخهٔ پشتیبان از کتابخانهٔ قبلی شما در پوشهٔ نمایه‌تان است."
+Library Format Changed:
+  Title: "کتابخانه به قالب جدیدی منتقل شد"
+  Message: "کتابخانهٔ شما اکنون از قالب ذخیره‌سازی جدیدی استفاده می‌کند."
+  Detail: "نسخه‌های قدیمی‌تر OpenTubeX همچنان می‌توانند کتابخانهٔ شما را باز کنند، اما آن را همان‌طور که پیش از این به‌روزرسانی بود نشان می‌دهند. تغییراتی که در نسخهٔ قدیمی‌تر انجام می‌دهید هنگام بازگشت به این نسخه افزوده می‌شوند."
+Invidious Fallback Warning: "این درخواست نمونهٔ Invidious پیکربندی‌شدهٔ شما را دور می‌زند و مستقیماً به YouTube وصل می‌شود و نشانی IP شما را آشکار می‌کند."
+Automatically unloaded to free memory: "برای آزاد کردن حافظه به‌طور خودکار تخلیه شد"
+Home Widgets:
+  Continue Watching: "ادامهٔ تماشا"
+  Continue Watching Description: "ادامهٔ ویدیوهایی که تماشایشان را شروع کرده‌اید"
+  Continue Watching Empty: "ویدیوهایی که تماشایشان را شروع می‌کنید اینجا نمایش داده می‌شوند"
+  Quick Access: "دسترسی سریع"
+  Quick Access Description: "باز کردن حداکثر 4 صفحه به انتخاب شما"
+  Choose Pages: "حداکثر 4 صفحه انتخاب کنید"
+  Pages: "صفحه‌ها"
+  Search: "جستجو"
+  Subscriptions: "دنبال کرده ها"
+  Watch Later: "تماشا در آینده"
+  History: "تاریخچه"
+  Playlists: "فهرست‌ها"
+  Downloads: "بارگیری‌ها"
+  Watch Time: "زمان تماشا"
+  Watch Time Description: "زمان تماشای شما در 7 روز گذشته"
+  Today: "امروز"
+  Last 7 Days: "7 روز گذشته"
+  Recent Downloads: "بارگیری‌های اخیر"
+  Recent Downloads Description: "پخش ویدیوهایی که بارگیری کرده‌اید"
+  Recent Downloads Empty: "ویدیوهایی که بارگیری می‌کنید اینجا نمایش داده می‌شوند"
+Subscription Groups:
+  Groups: گروه‌ها
+  All: همه
+  New Group: گروه جدید
+  Edit Group: ویرایش گروه
+  Group Name: نام گروه
+  Create: ایجاد
+  Save: ذخیره
+  Delete Group: حذف گروه
+  Delete Prompt: گروه «{groupName}» حذف شود؟ اشتراک شما در کانال‌های آن حفظ می‌شود.
+  Empty Group: این گروه هیچ کانالی از نمایهٔ فعلی ندارد.
+  Save Failed: گروه ذخیره نشد.
+  Delete Failed: گروه حذف نشد.
+  Group Icon: نماد گروه
+  No Icon: بدون نماد
+Yattee Server:
+  API Error (Click to copy): خطای سرور Yattee (برای کپی کلیک کنید)
+  Unsupported page: این صفحه با سرور Yattee در دسترس نیست. برای بارگذاری آن با API محلی، «{fallbackSetting}» را روشن کنید.
+  Posts unavailable: سرورهای Yattee پست‌ها را ارائه نمی‌دهند. برای بارگذاری آن‌ها با API محلی، «{fallbackSetting}» را روشن کنید.
+  Errors:
+    Invalid credentials: سرور Yattee نام کاربری یا رمز عبور را نپذیرفت. آن‌ها را در تنظیمات → پیشرفته بررسی کنید.
+    Rate limited: سرور Yattee پس از تلاش‌های ناموفق زیاد، ورود را مسدود کرده است. بعداً دوباره تلاش کنید.
+    Streams not relayed: سرور Yattee جریان‌های این ویدیو را منتقل نکرد. تا وقتی ویدیوها از طریق سرور پروکسی می‌شوند، OpenTubeX مستقیماً به YouTube وصل نمی‌شود.
+    Not configured: نشانی سرور Yattee خود را در تنظیمات → پیشرفته وارد کنید.
+    HTTPS required: Android فقط می‌تواند ویدیوها را از سرورهای Yattee که از HTTPS استفاده می‌کنند پخش کند.
+    Streams unavailable: بارگیری جریان‌های این ویدیو از سرور Yattee ممکن نشد. برای بررسی سرور از «آزمایش اتصال» در تنظیمات → پیشرفته استفاده کنید.
+Yattee Fallback Warning: این درخواست سرور Yattee پیکربندی‌شدهٔ شما را دور می‌زند و مستقیماً به YouTube وصل می‌شود و نشانی IP شما را آشکار می‌کند.
+Update With Package Manager: 'به‌روزرسانی با {packageManager}:'
+Update Command Copied: 'فرمان به‌روزرسانی کپی شد'
+Digital Wellbeing:
+  Watch time limit almost reached: "{duration} تا محدودیت روزانهٔ زمان تماشای شما باقی مانده است"
+  Shorts limit almost reached: "{duration} تا محدودیت روزانهٔ Shorts شما باقی مانده است"
+  Daily watch time limit reached: "به محدودیت روزانهٔ زمان تماشا رسیدید"
+  Daily Shorts limit reached: "به محدودیت روزانهٔ Shorts رسیدید"
+  Watched today: "امروز {duration} تماشا کرده‌اید."
+  Shorts watched today: "امروز {duration} Shorts تماشا کرده‌اید."
+  15 More Minutes: "۱۵ دقیقهٔ دیگر"
+  Ignore for Today: "نادیده گرفتن برای امروز"
+  Time to take a break: "وقت استراحت است"
+  Watching for: "{duration} است که در حال تماشا هستید."
+  Time for bed: "وقت خواب است"
+  Bedtime started at: "زمان خواب شما ساعت {time} شروع شد."
+  Remind Me in 10 Minutes: "۱۰ دقیقهٔ دیگر یادآوری شود"
+Notification Center:
+  Notifications: "اعلان‌ها"
+  Notifications With Unread: "اعلان‌ها ({count} خوانده‌نشده)"
+  Mark as Read: "علامت‌گذاری به‌عنوان خوانده‌شده"
+  Mark All as Read: "علامت‌گذاری همه به‌عنوان خوانده‌شده"
+  Clear All: "پاک کردن همه"
+  Clear: "پاک کردن"
+  Empty: "هنوز اعلانی وجود ندارد"
+  Empty Hint: "یادآوری‌های پخش زنده و ویدیوهای جدید کانال‌هایی که اعلانشان روشن است اینجا نمایش داده می‌شوند."
+Platforms:
+  Tracks: قطعه‌ها
+  Playlists: فهرست‌های پخش
+  Follower Count: 1 دنبال‌کننده | {count} دنبال‌کننده
+  Open Website: باز کردن در {platform}
+  Channel Not Found: این کانال پیدا نشد.
+  Playlist Not Found: این فهرست پخش پیدا نشد.
+  Load Error: بارگیری این صفحه از {platform} ممکن نشد.
+  Empty Tab: هنوز چیزی اینجا نیست.
+YouTube Account:
+  Like: "پسندیدن"
+  Dislike: "نپسندیدن"
+  Rating Failed: "امتیازدهی در YouTube ممکن نشد: {error}"
+  Subscribe Failed: "اشتراک در YouTube ممکن نشد: {error}"
+  Unsubscribe Failed: "لغو اشتراک در YouTube ممکن نشد: {error}"
+  Add a comment: "افزودن نظر"
+  Add a reply: "افزودن پاسخ"
+  Switch Channel: "تغییر کانال"
+  Comment: "ارسال نظر"
+  Reply: "پاسخ"
+  Comment Posted: "نظر ارسال شد"
+  Reply Posted: "پاسخ ارسال شد"
+  Comment Failed: "ارسال نظر ممکن نشد: {error}"
+  Delete Comment: "حذف نظر"
+  Delete Comment Confirmation: "نظر شما از YouTube حذف شود؟"
+  Comment Deleted: "نظر حذف شد"
+  Delete Comment Failed: "حذف نظر ممکن نشد: {error}"
+  Edit Comment: "ویرایش نظر"
+  Save: "ذخیره"
+  Comment Edited: "نظر ویرایش شد"
+  Edit Comment Failed: "ویرایش نظر ممکن نشد: {error}"
+  Recommendations: "پیشنهادهای YouTube"
+  Recommendations Failed: "بارگیری پیشنهادهای YouTube شما ممکن نشد."
+  Subscriptions Synced: "اشتراک‌ها از YouTube همگام‌سازی شدند: {added} مورد افزوده شد، {removed} مورد حذف شد"
+  Playlist Update Failed: "به‌روزرسانی {playlistName} در YouTube ممکن نشد: {error}"

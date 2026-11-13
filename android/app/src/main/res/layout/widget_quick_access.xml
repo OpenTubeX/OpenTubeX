@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The provider fills these slots with the chosen pages and hides unused ones. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:orientation="horizontal"
+    android:padding="6dp">
+
+    <LinearLayout
+        android:id="@+id/widget_action_0"
+        style="@style/HomeWidgetAction">
+
+        <ImageView
+            android:id="@+id/widget_action_icon_0"
+            style="@style/HomeWidgetActionIcon"
+            android:src="@drawable/ic_widget_search" />
+
+        <TextView
+            android:id="@+id/widget_action_label_0"
+            style="@style/HomeWidgetActionLabel"
+            android:text="@string/widget_search" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/widget_action_1"
+        style="@style/HomeWidgetAction">
+
+        <ImageView
+            android:id="@+id/widget_action_icon_1"
+            style="@style/HomeWidgetActionIcon"
+            android:src="@drawable/ic_widget_subscriptions" />
+
+        <TextView
+            android:id="@+id/widget_action_label_1"
+            style="@style/HomeWidgetActionLabel"
+            android:text="@string/widget_subscriptions" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/widget_action_2"
+        style="@style/HomeWidgetAction">
+
+        <ImageView
+            android:id="@+id/widget_action_icon_2"
+            style="@style/HomeWidgetActionIcon"
+            android:src="@drawable/ic_widget_watch_later" />
+
+        <TextView
+            android:id="@+id/widget_action_label_2"
+            style="@style/HomeWidgetActionLabel"
+            android:text="@string/widget_watch_later" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/widget_action_3"
+        style="@style/HomeWidgetAction"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/widget_action_icon_3"
+            style="@style/HomeWidgetActionIcon"
+            android:src="@drawable/ic_widget_history" />
+
+        <TextView
+            android:id="@+id/widget_action_label_3"
+            style="@style/HomeWidgetActionLabel"
+            android:text="@string/widget_history" />
+    </LinearLayout>
+</LinearLayout>

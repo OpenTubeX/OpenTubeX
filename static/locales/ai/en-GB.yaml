@@ -1,0 +1,2789 @@
+Color Picker:
+  Hue: Hue
+  Opacity: Opacity
+  Backdrop Blur: Backdrop blur
+  Hex Color: Hex colour
+  Apply Color: Apply
+  Reset Color: Reset
+  Copy Color: Copy
+  Copy From Another Color: Copy from another colour
+  Color Copied: Colour copied
+  Invalid Color: Enter a valid hex colour
+  Clipboard Unavailable: Clipboard unavailable
+  Saturation and Brightness: Saturation and brightness
+New Tab: New Tab
+Maximize: Maximise
+Restore: Restore
+Close Tab: Close Tab
+App Menu:
+  About App: About {appName}
+  Services: Services
+  Hide App: Hide {appName}
+  Hide Others: Hide Others
+  Show All: Show All
+  Quit App: Quit {appName}
+  Reopen Closed Window: Reopen Closed Window
+  Paste and Match Style: Paste and Match Style
+  View: View
+  Enter Inspect Element Mode: Enter Inspect Element Mode
+  GPU Internals: GPU Internals (chrome://gpu)
+  Navigate: Navigate
+  Next Tab: Next Tab
+  Previous Tab: Previous Tab
+  Help: Help
+Close Confirmation:
+  Background Sync Warning: Quitting will stop background subscription refreshes.
+  Hide Window: Hide Window
+  Title: Quit OpenTubeX?
+  Message: Are you sure you want to quit OpenTubeX?
+  Quit: Quit
+  Never Ask Again: Never ask again
+Close Window Confirmation:
+  Title: Close window?
+  Message: This window contains {count} tabs. Are you sure you want to close it?
+  Close Window: Close Window
+Confirmations:
+  Never Ask Again: Never ask again
+  Settings Hint: You can re-enable this confirmation in Settings → General → Confirm before…
+Close Multiple Tabs Confirmation:
+  Title: Close multiple tabs?
+  Message: This will close {count} tabs.
+  Close Tabs: Close {count} Tabs
+Load Multiple Tabs Confirmation:
+  Title: Load multiple tabs?
+  Message: This will load {count} tabs.
+  Load Tabs: Load {count} Tabs
+Unload Multiple Tabs Confirmation:
+  Title: Unload multiple tabs?
+  Message: This will unload {count} tabs.
+  Unload Tabs: Unload {count} Tabs
+Tabs Unloaded To Free Memory: 'Unloaded {count} tab you haven''t used recently to free memory | Unloaded {count} tabs you haven''t used recently to free memory'
+Resize Tab Bar: Resize Tab Bar
+Find in page: Find in page
+Previous match: Previous match
+Next match: Next match
+Close find bar: Close find bar
+No matches: No matches
+Version {versionNumber} is now available.: Version {versionNumber} is now available.
+See changes and update: See changes and update
+Dismiss: Dismiss
+Update to {version}: Update to {version}
+Global:
+  Ambient Mode: Ambient Mode
+  Loading More: Loading more
+  New: New
+  Show Blocked Item: Show blocked item
+Search Listing:
+  Label:
+    Members Only: Members only
+    Possibly AI-generated: Possibly AI-generated
+Stats:
+  Left of daily limit: "{duration} left of your {limit} daily limit"
+  Daily limit reached: "Daily limit of {limit} reached"
+  Replace old device: "Replace old device"
+  Replacement explanation: "Combine {device} with this device only if both entries belong to the same physical device."
+  Overlapping days: "Days in both histories: {count}"
+  Overlapping watch time: "Overlapping watch time"
+  Keep larger daily total: "Keep larger daily total"
+  Larger total explanation: "Best for duplicate histories. May miss extra viewing on the same day."
+  Add daily totals: "Add daily totals"
+  Add totals explanation: "Best for separate histories. May count duplicate viewing twice."
+  Replacement preservation: "Days found in only one history are kept. Original histories stay saved in encrypted sync."
+  Combined watch time: "Combined watch time"
+  Replacement changed: "Watch time changed. Close this preview and reopen it to review the new totals."
+  Replacement success: "Device statistics combined"
+  All devices: All devices
+  Stats: Stats
+  Watch time summary: Watch time summary
+  Today: Today
+  This week: This week
+  Total watch time: Total watch time
+  Daily average: Daily average
+  So far today: So far today
+  Since: Since {day}
+  All recorded time: All recorded time
+  Per calendar day: Per calendar day
+  Day by day: Day by day
+  Highest: 'Highest: {duration}'
+  Week by week: Week by week
+  Last 14 days: Last 14 days
+  Last 8 weeks: Last 8 weeks
+  Daily chart aria: Daily watch time for the last 14 days
+  Weekly chart aria: Weekly watch time for the last 8 weeks
+  No data: Watch time will appear here as you watch videos.
+  Estimate note: Watch time from before this update is estimated from your saved playback progress.
+  Adjust imported watch time: Adjust imported watch time
+  Imported watch time: Imported watch time
+  Imported watch time explanation: Choose the playback speed you usually used. The imported video durations will be divided by this speed to estimate the actual time you spent watching.
+  Playback speed: Playback speed
+  Channel speed note: Saved channel playback speeds are used instead when available.
+  Apply playback speed: Apply playback speed
+  Imported watch time adjusted: Imported watch time has been adjusted
+  Reset statistics: Reset statistics
+  Reset: Reset
+  Reset confirmation: Are you sure you want to reset all watch statistics? This cannot be undone.
+  Reset success: Watch statistics have been reset
+  Less than a minute: "< 1 min"
+  Minutes: "{minutes} min"
+  Hours: "{hours} hr"
+  Hours and minutes: "{hours} hr {minutes} min"
+Home Page:
+  Keep disabled and hide this section: "Keep disabled and hide this section"
+  Familiar description: "Favour unwatched videos from channels you already enjoy."
+  Balanced description: "Mix familiar channels with new ones that match your interests."
+  Explore description: "Give more space to new channels related to your interests."
+  Turn off recommendations: Turn off recommendations
+  Recommended for you: "Recommended for you"
+  Recommendations description: "Rank videos on your device using your watch history. Channel IDs and topic searches are sent to your selected backend to find videos."
+  Enable recommendations: "Enable recommendations"
+  Recommendations need history: "Watch some videos with history enabled to get recommendations."
+  No recommendations: "No recommendations found. Try refreshing after watching more videos."
+  Recommendations unavailable: "Could not load recommendations. Try again later."
+  More like this: "More like this"
+  Not interested: "Not interested"
+  Hide this channel: "Hide this channel"
+  Channel hidden: "{channel} hidden from recommendations"
+  Reset recommendations: "Reset recommendations"
+  Discovery: "Discovery"
+  Familiar: "Familiar"
+  Balanced: "Balanced"
+  Explore: "Explore"
+  Related to: "Related to {title}"
+  More from: "More from {channel}"
+  Matches interest: "Matches your interest in {topic}"
+  Related discovery privacy: "Video IDs are also sent to find related videos."
+  Home: Home
+  Description: Pick up where you left off and see recent activity.
+  Customize: Customise Home
+  Done: Done
+  Customize description: Choose which sections appear and arrange them in the order you want.
+  Continue watching: Continue watching
+  New since last visit: New since last visit
+  Watch queue: Watch queue
+  Recent playlists: Recent playlists
+  Recent downloads: Recent downloads
+  Upcoming reminders: Upcoming reminders
+  Watch statistics: Watch statistics
+  View all: View all
+  Previous shelf page: Previous {section} page
+  Next shelf page: Next {section} page
+  Shelf page status: '{section}, page {page} of {total}.'
+  Move section up: Move {section} up
+  Move section down: Move {section} down
+  Section moved: '{section} moved to position {position} of {total}.'
+  Nothing here yet: Nothing here yet
+  Empty description: Videos you start, playlists you use, downloads, and reminders will appear here.
+  All sections hidden: All sections are hidden
+  All sections hidden description: Customise Home to show a section again.
+Subscriptions:
+  Channel Errors:
+    Summary: "1 channel could not be refreshed. | {count} channels could not be refreshed."
+    Toast: "Some subscribed channels could not be refreshed. Click to view them."
+    Retry Channel: "Retry {channel}"
+    Show All: "Show all"
+    Show Fewer: "Show fewer"
+  Cache Load Error: Your saved subscription feeds could not be loaded.
+  New video from {channel}: New video from {channel}
+  New short from {channel}: New short from {channel}
+  '{channel} is live': "{channel} is live"
+  New post from {channel}: New post from {channel}
+  Mark As Unseen: Mark As Unseen
+  Copy Error Details: "Copy technical details"
+  Never show {type} from this channel in feeds again: Never show {type} from this channel in feeds again
+  Refreshing Subscription Videos: Refreshing subscription videos
+  Refreshing Subscription Shorts: Refreshing subscription shorts
+  Refreshing Subscription Live Streams: Refreshing subscription live streams
+  Refreshing Subscription Posts: Refreshing subscription posts
+  New Content: New content
+  New Feed Refresh Warning Title: Refresh all subscription feeds?
+  New Feed Refresh Warning: Refreshing all content types for 1 subscription can take a long time. Do you want to continue? | Refreshing all content types for {count} subscriptions can take a long time. Do you want to continue?
+  New Since Last Refresh: New since last refresh
+  Mark As Seen: Mark As Seen
+  Mark All as Seen: Mark all as seen
+  No New Content: There is no new content.
+  New Content Tabs: New content tabs
+  Show Tabbed View: Show tabbed view
+  Show Combined View: Show combined view
+  Newest First: Newest first
+  Oldest First: Oldest first
+  RSS Feeds:
+    Refreshing: Refreshing RSS feeds
+    Tab: RSS
+    Followed Feeds: Followed RSS feeds
+    Add Feed: Add feed
+    Feed URL: RSS or Atom feed URL
+    Remove Feed: Remove {feed}
+    Invalid Feed URL: Enter a web address that starts with http:// or https://.
+    Feed Already Followed: You already follow this feed.
+    Feed Could Not Be Loaded: The feed could not be loaded. Check that the address points to an RSS or Atom feed.
+    Feed Requires Browser Check: This site requires a browser check, which OpenTubeX can't complete. Try another address or RSSHub instance for this feed.
+    Refresh Errors: 1 feed could not be refreshed. | {count} feeds could not be refreshed.
+    Description: Add an RSS or Atom feed to follow creators from other platforms. {rssHub} instances provide feeds for many sites, such as Twitch.
+    Empty Items: Your feeds currently do not have any items.
+    No Feeds: You don't follow any RSS feeds yet.
+    RSSHub:
+      Browse: Browse RSSHub
+      Title: Add a feed from RSSHub
+      Description: Pick an RSSHub instance, a service and what to follow. The feed address is built for you.
+      Instance: RSSHub instance
+      Service: Service
+      Search Services: Search services
+      Loading Services: Loading services…
+      Services Could Not Be Loaded: This instance did not return its services. Check the address or choose another instance.
+      Feed Type: Feed type
+      Requires Configuration: This feed needs extra setup on the instance, so it might not work on public instances.
+      Optional Parameter: '{parameter} (optional)'
+      Not Set: Not set
+    Retry Feed: Retry {feed}
+    Reloading Feed: Reloading {feed}
+  Platforms:
+    Tab: Platforms
+    Platform: Platform
+    All Platforms: All platforms
+    Followed Channels: Followed channels on other platforms
+    Description: Follow channels on Twitch, SoundCloud, PeerTube, Rumble and Odysee to see their uploads in the Platforms tab of your subscriptions. Find channels with the search, or add them by the address of their page. Their media plays with yt-dlp.
+    Add Channel: Add channel
+    Channel URL: Channel address
+    Invalid Channel: Enter the address of a channel page on Twitch, SoundCloud, PeerTube, Rumble or Odysee.
+    Channel Not Found: There is no channel at this address.
+    Channel Already Followed: You already follow this channel.
+    Channel Could Not Be Loaded: The channel could not be loaded.
+    No Channels: You don't follow any channels on other platforms yet.
+    Unfollow Channel: Unfollow {channel}
+    Go To Channel: Go to {channel}
+    Follow: Follow
+    Following: Following
+    Clips: Clips
+    Refresh Errors: 1 channel could not be refreshed. | {count} channels could not be refreshed.
+    Content Tabs: Platform content tabs
+Trending:
+  Music: Music
+  Load Error: Trending could not be loaded.
+  Unsupported Backend: Trending requires the Local API. Select the Local API or enable backend fallback.
+Most Popular Feed Empty: This Invidious instance's Most Popular feed is empty.
+Most Popular Load Error: "The Most Popular feed could not be loaded."
+Feed:
+  Cancel Refresh: Cancel refresh
+  Next Auto Refresh: 'Next auto refresh: {date}'
+User Playlists:
+  Refresh Saved Playlists: 'Refresh saved playlists'
+  Saved Playlists Refresh Failed: 'Some saved playlists could not be refreshed.'
+  Save: "Save"
+  Edit: "Edit"
+  Pin to Navigation: "Pin to Navigation"
+  Unpin from Navigation: "Unpin from Navigation"
+  Pin to Top: "Pin to Top"
+  Unpin from Top: "Unpin from Top"
+  Pinned to Top: "Pinned to Top"
+  Reorder Hint: Drag or use the arrow keys to reorder
+  Add new videos to the top (custom order): "Add new videos to the top (custom order)"
+  Shuffle videos by default: "Shuffle videos by default"
+  Remove videos once watched: "Remove videos once watched"
+  Remove videos once watched Tooltip: "When you play this playlist, each video is removed from it once it reaches the watched percentage threshold set in the Privacy settings."
+  Repair Playlists: Repair Playlists
+  Repair Description: Restore missing video details after importing a YouTube Takeout ZIP. Playlist order stays unchanged.
+  Remove Unavailable Videos: "Remove unavailable videos"
+  Remove Unavailable Videos Confirmation: "Remove unavailable videos? Found: {count}. Could not check: {uncertain}. Videos that could not be checked will be kept."
+  Add Missing Videos: "Add missing videos from source playlist"
+  Source Playlist: "Source playlist"
+  Save Playlist: "Save Playlist"
+  Remove Saved Playlist: "Remove Saved Playlist"
+  Load More Playlists: Load More Playlists
+  Save to: Save to…
+  Quick Bookmark Icon: Quick bookmark icon
+  Custom Emoji: Custom emoji
+  Choose Image: Choose image
+  Use Bookmark Icon: Use bookmark icon
+  SinglePlaylistView:
+    Retry: Retry
+    This playlist could not be loaded.: This playlist could not be loaded.
+    More videos could not be loaded.: More videos could not be loaded.
+  Playlist Thumbnail: "Playlist thumbnail"
+  Restore Default Thumbnail: "Restore default thumbnail"
+  AddVideoPrompt:
+    And N more videos: 'and {count} more video | and {count} more videos'
+  Move Up: Move up
+  Move Down: Move down
+  Remove: Remove
+  Background Tasks:
+    Loading videos from {playlistName}: 'Loading videos from {playlistName}'
+    Adding missing videos to {playlistName}: 'Adding missing videos to {playlistName}'
+    Checking {playlistName} for unavailable videos: 'Checking {playlistName} for unavailable videos ({checked}/{total})'
+  Synced with YouTube: "Synced with YouTube"
+  Delete YouTube Playlist Confirmation: "Delete this playlist here and on YouTube? This cannot be undone."
+  CreatePlaylistPrompt:
+    Create on YouTube: "Also create on YouTube"
+History:
+  From Date: 'From'
+  To Date: 'To'
+  Channel Filter: 'Channel'
+  All Channels: 'All channels'
+  Clear Filters: 'Clear filters'
+  Invalid Date Range: 'The From date must be on or before the To date.'
+  Empty Filter Message: 'No videos in your history match these filters.'
+  Repair Compact: "Repair"
+  Mark All Watched Compact: "Mark all watched"
+  Repair Use Cookies: "Use configured yt-dlp cookies"
+  Repair Cookies Hint: "More than 500 videos need checking. Configure cookies in yt-dlp settings and enable them here to reduce the risk of rate limiting."
+  Repair Description: "Use this after importing history, or when videos have missing details or an incorrect LIVE label."
+  Repair Details: "Fills in missing titles, channels and publish dates, and checks durations and LIVE labels. Your watch progress and watched status stay unchanged."
+  Repair Notice: "Large histories can take a while. Failed requests are retried automatically. Deleted or private videos may stay incomplete."
+  Start Repair: "Start repair"
+  Repair Checking: "Checking video details"
+  Repair Waiting: "Waiting for YouTube. Repair will resume automatically."
+  Repair Retrying: "Retrying failed requests"
+  Repair Finished: "Repair finished"
+  Repair Stopped: "Repair stopped"
+  Repair: "Repair History"
+  Repair Progress: "Checked {checked}/{total} · Repaired {repaired} · Failed {failed}"
+  Mark All As Watched: Mark All As Watched
+  Mark All As Watched Confirmation: Are you sure you want to mark all videos in your history as watched?
+  All History Marked as Watched: All videos in your history have been marked as watched
+  Select History Age: Select how old an entry must be before it is deleted.
+  Delete Entries Older Than: Delete entries older than
+  Number of Days: Number of days
+  History Cleanup Warning: This permanently deletes matching watch history entries.
+  1 Day: 1 day
+  1 Week: 1 week
+  1 Month: 1 month
+  3 Months: 3 months
+  1 Year: 1 year
+  All Time: All time
+  Custom: Custom
+  History Older Than Days Removed: Watch history older than 1 day has been removed | Watch history older than {days} days has been removed
+Settings:
+  Experimental Badge: Experimental
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube Account"
+    Unofficial App Warning: "OpenTubeX is not an official YouTube app. Signing in links what you do here to your Google account, and Google can restrict or ban accounts that use unofficial apps. Only sign in with an account you can afford to lose."
+    Sign In Explanation: "OpenTubeX signs in like a TV app: you approve it on Google's website, and OpenTubeX never sees your password. The sign-in stays on this device and is not synced or backed up."
+    Sign In: "Sign in"
+    Sign In Anyway: "Sign in anyway"
+    Sign Out: "Sign out"
+    Getting Sign-In Code: "Getting a sign-in code"
+    Sign In Instructions: "Open the sign-in page and choose your Google account. The code is filled in for you."
+    Other Device Instructions: "On another device, go to this address and enter the code:"
+    YouTube Channel: "YouTube channel"
+    Using Channel: "Now using YouTube as {name}"
+    Switch Channel Failed: "Could not switch the YouTube channel: {error}"
+    Open Sign-In Page: "Open sign-in page"
+    Copy Code: "Copy code"
+    Code Copied: "Code copied"
+    Waiting for Approval: "Waiting for you to approve the sign-in"
+    Sign-In Denied: "The sign-in was denied."
+    Sign-In Code Expired: "The code expired. Try again to get a new one."
+    Sign-In Failed: "Could not sign in: {error}"
+    Signed In As: "Signed in to YouTube as {name}"
+    Signed Out: "Signed out of YouTube"
+    Sign Out Failed: "Could not sign out: {error}"
+    Revoke Failed: "Signed out of YouTube, but Google did not confirm that the sign-in ended. You can remove it under third-party connections in your Google account."
+    Signed out by YouTube: "YouTube ended the sign-in. Sign in again in Settings to keep using your account."
+    Sync Subscriptions: "Sync subscriptions with YouTube"
+    Sync Playlists: "Sync playlists with YouTube"
+    Add to YouTube Watch History: "Add watched videos to YouTube history"
+    Sync Now: "Sync now"
+    Synced: "Synced with YouTube"
+    Sync Failed: "Could not sync with YouTube: {error}"
+  Diagnostics:
+    Diagnostics: Diagnostics
+    Description: While diagnostic logging is on, OpenTubeX keeps recent log messages in memory so you can attach them to bug reports. It never saves or sends them on its own, and turning logging off deletes them. Reports leave out cookies, tokens, IP addresses and URL parameters, but they can include IDs of videos you played, so check a report before you share it.
+    Enable Logging: Enable diagnostic logging
+    Copy Report: Copy report
+    Save Report: Save report
+    Clear Log: Clear log
+    Report Copied: Diagnostic report copied
+    Report Saved: Diagnostic report saved
+    Report File: Diagnostic report
+    Save Failed: Unable to save the diagnostic report
+    Log Cleared Message: Diagnostic log cleared
+  Tab Unloading:
+    Automatically unload tabs: "Automatically unload tabs"
+    Memory threshold: "Memory threshold"
+    Tabs to unload: "Tabs to unload"
+    Automatic unloading help: "Unload the oldest background tabs to free memory. Active and playing tabs stay loaded."
+    Memory threshold help: "Percentage of the renderer's memory limit, not total system RAM."
+  Password Settings:
+    Failed to Save Password: "Failed to save password."
+    Confirm Password: "Confirm password"
+    Passwords Do Not Match: "Passwords do not match."
+  Navigation and Controls: "Navigation & controls"
+  Control Bar:
+    Title: "Control bar"
+    Customize: "Customise control bar"
+    Hidden: "Hidden"
+    Empty: "No controls"
+    Move to Control Bar: "Move {control} to the control bar"
+    Move to Player Menu: "Move {control} to the player menu"
+    Hide: "Hide {control}"
+  Fullscreen Actions:
+    Recommended Videos: "Recommended videos"
+    Title: "Fullscreen actions"
+    Customize: "Customise fullscreen actions"
+    Add Action: "Add action"
+    Empty: "No fullscreen actions selected"
+    Quick Bookmark: "Quick bookmark"
+    Availability Hint: "Actions only appear on videos they apply to."
+    Disabled: "(disabled)"
+  Quick Settings:
+    Quick Settings: Quick settings
+    Customize Quick Settings: Customise quick settings
+    Add Setting: Add setting
+    Appearance: Appearance
+    Playback: Playback
+    Content: Content
+    Language and Region: Language and region
+    All Settings: All settings
+    Profile Selector Hint: You can also right-click the profile icon to switch profiles
+    Profile Selector Touch Hint: You can also tap and hold the profile icon to switch profiles
+  Categories:
+    General Description: Language, startup, tabs, and translation
+    Appearance: Appearance
+    Appearance Description: Theme, layout, navigation, and video lists
+    Content appearance: Video lists and thumbnails
+    Layout: Layout
+    Playback Description: Player defaults, captions, and per-channel settings
+    Subscriptions Description: Feed refresh, upload notifications, and RSS feeds
+    Downloads Description: Download folder, templates, and automatic downloads
+    Focus: Focus
+    Focus Description: Hidden content, watch limits, reminders, and parental controls
+    Add-ons: Add-ons
+    Add-ons Description: SponsorBlock, DeArrow, dislikes, AiSList, and voice-over translation
+    Privacy Description: History, search suggestions, links, and app password
+    Data And Storage Description: Backups, import and export, disk usage, and cleanup
+    Sync Description: Sync server account, device pairing, and synced data
+    Advanced: Advanced
+    Advanced Description: Backends, buffering, external tools, proxy, and diagnostics
+    Alternative providers: Video and metadata providers
+  Performance Impact:
+    Show Performance Impact: Show performance impact indicators
+    Moderate: Moderate impact
+    High: High impact
+    Description: This setting can increase {resources} usage
+    Resources:
+      CPU: CPU
+      GPU: GPU
+      Memory: memory
+      Network: network
+      Disk: disk
+  General Settings:
+    Built-in Streams:
+      Built-in Streams: "Built-in streams"
+      Automatic: "Automatic"
+      SABR Only: "SABR only"
+    Link Underlines:
+      Link Underlines: "Link Underlines"
+      On Hover: "Underline links on hover"
+      Never: "Never underline links"
+      Always: "Always underline links"
+    Title Lines:
+      Title Lines: "Title Lines"
+      Unlimited: "Unlimited"
+    Close Window With Last Tab: 'Close window when closing the last tab'
+    Preferred Video Codec: Preferred video codec
+    Always Use Backup Media Server: "Always use backup media server"
+    Automatically switch stream extraction methods: "Automatically switch stream extraction methods"
+    Enable Tabs: "Enable Tabs"
+    Thumbnail Swipe Gestures:
+      Left: Swipe left on thumbnails
+      Right: Swipe right on thumbnails
+      Description: Swipe a video thumbnail horizontally and release to perform the selected action.
+    Data Saver Thumbnails: "Data saver thumbnails"
+    Use tray icon: "Use tray icon"
+    Close to system tray: "Close to system tray"
+    Tray required for background refresh: "The tray icon is required while background subscription refresh is enabled."
+    Show Video Menu Button: Show video menu button
+    Swipe to refresh: Swipe to refresh
+    Blur Thumbnails: Blur thumbnails
+    Navigation:
+      Always Show Navigation Bar: Always show navigation bar when it's at the bottom
+      Compact Tab Labels: Compact navigation bar when it's at the bottom
+      Show Active Subscriptions: Show active subscriptions in sidebar
+      Navigation: Navigation
+      Customize Navigation: Customise navigation
+      Add Item: Add item
+    Date Format: Date format
+    Time Format: Time format
+    Language Default: Language default
+    Use AI Translation Completions: Fill missing translations with AI-generated ones
+    Update Relative Timestamps: Keep relative timestamps updated
+    Stream Extraction Method:
+      Stream Extraction Method: Stream extraction method
+      yt-dlp: yt-dlp
+      Built-in: Built-in
+    Confirm Before: Confirm before…
+    Confirmation Options:
+      Closing App: Closing OpenTubeX
+      Closing Window: Closing a window with multiple tabs
+      Closing Tabs: Closing multiple tabs
+      Loading Tabs: Loading multiple tabs
+      Unloading Tabs: Unloading multiple tabs
+      Refreshing All Feeds: Refreshing many subscriptions
+    Remember Tab Navigation History: Remember Tab Navigation History
+    New Tab Position:
+      New Tab Position: New Tab Position
+      At the end: At the end
+      After current tab: After current tab
+      After current tab in opened order: After current tab, in opened order
+    Tab Close Focus:
+      Last active tab: "Last active tab"
+      Next tab in tab order: "Next tab in tab order"
+      Previous tab in tab order: "Previous tab in tab order"
+      Tab Close Focus: After Closing the Active Tab
+    Startup Behavior:
+      Startup Behavior: On Startup
+      Load all tabs: Load all tabs
+      Load previously loaded tabs: Load previously loaded tabs
+      Load last active tab: Load last active tab
+      Start with an empty session: Start with an empty session
+      Load landing page, keep other tabs unloaded: Load landing page, keep other tabs unloaded
+    Comment Translation:
+      Title: Comment translations
+      Enable: Enable comment translations
+      Never Translate: Never translate comments in
+      Choose Language: Choose a language
+      Description: Comments in the app language are already excluded. Add any other languages you can read.
+      Remove Language: Translate {language} comments again
+    Avoid translation:
+      Avoid translation: Prefer untranslated video text
+      Disabled: Disabled
+      Watch Only: Video UI Only
+      Entire App: Entire App
+    Playlist View Type:
+      Playlist View Type: Playlist View Type
+    Show Thumbnail Previews: Show thumbnail previews
+    Mobile Layout:
+      Mobile Layout: 'Mobile layout'
+      Automatic: 'Automatic'
+      Phone: 'Phone'
+      Tablet: 'Tablet'
+    Video View Type:
+      Full Width: Full Width
+    Grid Columns:
+      Grid Columns: Grid Columns
+      Playlist Grid Columns: Playlist Grid Columns
+      Auto: Auto
+    Preferred API Backend:
+      Yattee Server: Yattee Server
+    Yattee Server:
+      Server URL: Yattee server URL
+      Username: Username
+      Password: Password
+      Proxy Videos: Proxy videos through the Yattee server
+      Test Connection: Test Connection
+      Testing: Testing the connection…
+      Connected: Connected to Yattee Server {version}
+      Errors:
+        Invalid URL: Enter the server URL, starting with https:// or http://.
+        Unreachable: Could not reach the server. Check the URL and whether the server is running.
+        Media not allowed: 'Connected, but the server does not allow this app to load videos. Set CORS_ORIGINS={origins} in the server''s environment.'
+        Not a Yattee server: The server responded, but it is not a Yattee server.
+        Credentials required: The server requires a username and password.
+        Invalid credentials: The server rejected the username or password.
+        Rate limited: The server is blocking sign-ins after too many failed attempts. Try again later.
+        Server error: The server returned an error (HTTP {status}).
+    Notifications:
+      Notifications: Notifications
+      System and In-App: System and in-app
+      System Only: System only
+      Off: Off
+    Auto Load Next Page:
+      Lists Tooltip: Load additional pages of feeds, search results and other lists automatically.
+    Auto Load Comments:
+      Label: Auto load comments
+      Tooltip: Load comments when the page opens and load more comments as you scroll.
+    Haptic Feedback: Haptic feedback
+    Ignore System Haptics Setting: Ignore system haptics setting
+  Context Menu Search Settings:
+    Context Menu Search Settings: Context Menu Search
+    Description: Choose which search engines appear when you right-click selected text. Searches open in your default browser.
+    Icon Hint: Enabling an engine contacts its website to load the favicon.
+    Engine Name: Engine name
+    Search URL: Search URL
+    URL Hint: Use %s where the URL should contain the encoded selected text.
+    Add Custom Engine: Add a custom engine
+    Add Engine: Add engine
+    Remove Engine: Remove {engine}
+    Invalid Engine: Enter a name and a valid HTTP or HTTPS search URL containing %s.
+    Engine Limit: You can add up to {count} custom search engines.
+  Theme Settings:
+    Theme and Colors: "Theme and colours"
+    Font Size: Font Size
+    Sections:
+      Interface: "Interface"
+      Side Bar and Header: "Side Bar & Header"
+      Tabs: "Tabs"
+      Player: "Player"
+      Scrolling: "Scrolling"
+      Notifications: "Notifications"
+    Only Show Important Notifications: Only show important notifications
+    Visible Search Suggestions: "Visible Search Suggestions"
+    Material Accent Color: "Material accent colour"
+    Tally Accent Color: "Tally accent colour"
+    Material Wallpaper Colors: "Wallpaper colours"
+    Material System Accent Color: "System accent colour"
+    Tab Loading Indicator:
+      Tab Loading Indicator: Tab Loading Style
+      Bar: Bar
+      Dot: Dot (classic)
+    Compact Settings Categories: "Compact Settings Categories"
+    Playlist Thumbnail Size: "Playlist Thumbnail Size"
+    Compact Mobile Mini Player: "Compact mobile mini player"
+    Always Show Mobile Search Bar: "Always show mobile search bar"
+    Frosted Glass Player UI: "Frosted glass player UI"
+    Main Color Theme:
+      Catppuccin Macchiato Rosewater: "Catppuccin Macchiato Rosewater"
+      Catppuccin Macchiato Flamingo: "Catppuccin Macchiato Flamingo"
+      Catppuccin Macchiato Pink: "Catppuccin Macchiato Pink"
+      Catppuccin Macchiato Mauve: "Catppuccin Macchiato Mauve"
+      Catppuccin Macchiato Red: "Catppuccin Macchiato Red"
+      Catppuccin Macchiato Maroon: "Catppuccin Macchiato Maroon"
+      Catppuccin Macchiato Peach: "Catppuccin Macchiato Peach"
+      Catppuccin Macchiato Yellow: "Catppuccin Macchiato Yellow"
+      Catppuccin Macchiato Green: "Catppuccin Macchiato Green"
+      Catppuccin Macchiato Teal: "Catppuccin Macchiato Teal"
+      Catppuccin Macchiato Sky: "Catppuccin Macchiato Sky"
+      Catppuccin Macchiato Sapphire: "Catppuccin Macchiato Sapphire"
+      Catppuccin Macchiato Blue: "Catppuccin Macchiato Blue"
+      Catppuccin Macchiato Lavender: "Catppuccin Macchiato Lavender"
+    Move Downloads to App Header: Move Downloads to App Header
+    Move Settings to App Header: Move Settings to App Header
+    Hide Side Bar on Watch Pages: Hide Side Bar on Watch Pages
+    Scrollbar Width: Scrollbar Width
+    Scroll Speed: Scroll Speed
+    Animation Speed: Animation Speed
+    Thumbnail Size: Thumbnail Size
+    Show Tab Icons: Show Tab Icons
+    Load Missing Tab Icons: Load Missing Tab Icons
+    Loading Missing Tab Icons: Loading Missing Tab Icons…
+    No Missing Tab Icons: All supported tab icons are already loaded
+    Loaded Tab Icons: 'Missing tab icon loaded: {count} | Missing tab icons loaded: {count}'
+    Loaded Tab Icons With Failures: Loaded {loaded} tab icons; {failed} could not be loaded
+    Show Tab Previews: Show Tab Previews
+    Use Fixed Tab Width: Use Fixed Tab Width in Horizontal Mode
+    Use Custom Title Bar: Use Custom Title Bar
+    Tab Width: Tab Width
+    Vertical Tab Height: Vertical Tab Height
+    Tab Layout:
+      Tab Layout: Tab Layout
+      Horizontal Top: Horizontal at top
+      Horizontal Bottom: Horizontal at bottom
+      Vertical Left: Vertical on left
+      Vertical Right: Vertical on right
+    Show Toast Timeout Indicator: Show toast timeout indicator
+    Use Grid Player Menu: Use Grid Player Menu
+    Show Progress as Notification: Show progress as notification
+    Operation in Progress: Operation in progress
+    Toast Position:
+      Test Toast: Test toast
+      Toast Position: Toast Position
+      Bottom Left: Bottom left
+      Bottom Center: Bottom centre
+      Bottom Right: Bottom right
+      Top Left: Top left
+      Top Center: Top centre
+      Top Right: Top right
+    Icon Pack:
+      Icon Pack: Icon Pack
+      Material Symbols: Material Symbols
+      Remix Icon: Remix Icon
+    Font:
+      App Font: App font
+      System Default: System default
+      Unable to Load: Unable to load installed system fonts
+      Bundled Fonts: Bundled fonts
+      System Fonts: System fonts
+    Always Show Scrollbars: Always Show Scrollbars
+    Base Theme:
+      Material Light: "Material Light"
+      Material Dark: "Material Dark"
+      Material Black: "Material Black"
+      Dynamic colors: Dynamic colours
+      Tokyo Night Night: Tokyo Night Night
+      Tokyo Night Storm: Tokyo Night Storm
+      Tokyo Night Moon: Tokyo Night Moon
+      Tokyo Night Day: Tokyo Night Day
+      Rosé Pine: Rosé Pine
+      Rosé Pine Moon: Rosé Pine Moon
+      Rosé Pine Dawn: Rosé Pine Dawn
+      Kanagawa Wave: Kanagawa Wave
+      Kanagawa Dragon: Kanagawa Dragon
+      Kanagawa Lotus: Kanagawa Lotus
+      Ayu Dark: Ayu Dark
+      Ayu Mirage: Ayu Mirage
+      Ayu Light: Ayu Light
+      One Dark: One Dark
+      Carbonfox: Carbonfox
+      Catppuccin Macchiato: Catppuccin Macchiato
+      Tally Light: "Tally Light"
+      Tally Dark: "Tally Dark"
+      Custom: Custom
+      Built-in Themes: Built-in themes
+      Custom Themes: Custom themes
+    Light Theme: Light theme
+    Dark Theme: Dark theme
+    Custom Theme:
+      Share Restrictions Prompt: "Descriptions may contain up to 500 characters, including Markdown. Only GitHub-hosted links and images are allowed, including direct uploads here. The bot removes external links and images, shortens long descriptions, and leaves a comment explaining any changes."
+      Import from Clipboard: "Import from clipboard"
+      Invalid Clipboard Theme: "Clipboard does not contain a valid theme. Copy the theme JSON and try again."
+      Create Custom Theme: Create custom theme
+      Edit Custom Theme: Edit custom theme
+      Custom Theme Creator: Custom theme creator
+      Theme Name: Theme name
+      Based On: Based on
+      Import Theme: Import theme
+      Export Theme: Export theme
+      Share Theme: Share theme
+      Share Description Prompt: Describe the theme and anything people should know before using it.
+      Share Screenshots Prompt: "Drag and drop one or more screenshots here. Leave this section empty for the bot to add three previews using sample content, without your personal data."
+      Delete Theme: Delete theme
+      Delete Theme Confirmation: Delete “{name}”? This cannot be undone.
+      Save and Apply: Save and apply
+      Discard Changes: Discard changes
+      Reset Colors: Reset to base theme
+      Theme File: OpenTubeX theme file
+      Theme Saved: Custom theme saved and applied
+      Theme Imported: Theme imported into the editor
+      Theme Exported: Theme exported
+      Theme Deleted: Custom theme deleted
+      Unable to Load: Unable to load the custom theme
+      Unable to Save: Unable to save the custom theme
+      Unable to Export: Unable to export the custom theme
+      Unable to Share: Unable to share the custom theme
+      Unable to Delete: Unable to delete the custom theme
+      Invalid Theme File: Invalid custom theme file
+      Colors:
+        Watched thumbnail overlay: "Watched thumbnail overlay"
+        Thumbnail badge background: "Thumbnail badge background"
+        Main text: Main text
+        Secondary text: Secondary text
+        Subtle text: Subtle text
+        Borders and dividers: Borders and dividers
+        Subtle surfaces and indicators: Subtle surfaces and indicators
+        Title text: Title text
+        Selected text background: Selected text background
+        Selected text: Selected text
+        Logo icon: Logo icon
+        Logo text: Logo text
+        Logo hover: Logo hover
+        Logo pressed: Logo pressed
+        Page background: Page background
+        Card background: Card background
+        Secondary card background: Secondary card background
+        Favorite icon: Favourite icon
+        Error color: Error colour
+        Scrollbar thumb: Scrollbar thumb
+        Scrollbar thumb hover: Scrollbar thumb hover
+        Scrollbar thumb pressed: Scrollbar thumb pressed
+        Dropdown item hover text: Dropdown item hover text
+        Dropdown item hover background: Dropdown item hover background
+        Navigation and panel background: Navigation and panel background
+        Neutral item hover and focus background: Neutral item hover and focus background
+        Neutral item hover and focus text and icons: Neutral item hover and focus text and icons
+        Neutral item pressed background: Neutral item pressed background
+        Neutral item pressed text and icons: Neutral item pressed text and icons
+        Header button hover and focus background: Header button hover and focus background
+        Header button hover and focus text and icons: Header button hover and focus text and icons
+        Header button pressed background: Header button pressed background
+        Header button pressed text and icons: Header button pressed text and icons
+        Search and dropdown background: Search and dropdown background
+        Settings search background: Settings search background
+        Instance menu: Instance menu
+        Shadow color: Shadow colour
+        Primary controls and highlights: Primary controls and highlights
+        Primary control hover and focus: Primary control hover and focus
+        Primary control pressed: Primary control pressed
+        Text and icons on primary controls: Text and icons on primary controls
+        Secondary controls and highlights: Secondary controls and highlights
+        Secondary control hover and focus: Secondary control hover and focus
+        Secondary control pressed: Secondary control pressed
+        Light secondary color: Light secondary colour
+        Visited accent: Visited accent
+        Text and icons on secondary controls: Text and icons on secondary controls
+        Links: Links
+        Visited links: Visited links
+        Destructive action: Destructive action
+        Destructive hover and focus: Destructive hover and focus
+        Destructive pressed: Destructive pressed
+        Text and icons on destructive actions: Text and icons on destructive actions
+    Modal Backdrop:
+      Modal Backdrop: "Dialogue Background"
+      Dim and Blur: "Dim and blur"
+      Dim Only: "Dim only"
+    Click Scrollbar Track to Scroll: "Click Scrollbar Track to Scroll"
+  Player Settings:
+    Rewind on Resume: "Rewind on resume"
+    Minimum Pause Before Rewinding: "Minimum pause before rewinding"
+    Mono Audio: 'Mono Audio'
+    Normalize Loudness: 'Normalise Loudness'
+    Show Mono Audio Toggle: 'Show Mono Audio Toggle'
+    Pause on Stream Recovery: "Pause on Stream Recovery"
+    Buffering:
+      Buffering: Buffering
+      Description: Choose how much video the player loads in advance and keeps loaded.
+      Buffer Ahead Hint: More buffer ahead keeps playback going through longer connection drops, but downloads video you might not watch.
+      Rewind Buffer Hint: A larger rewind buffer lets you jump back without downloading again, but uses more memory.
+      Buffer Before Playing Hint: Waiting for more video before playing prevents repeated stalls on unstable connections, but videos take longer to start and to resume after seeking.
+      Preset: Buffering Preset
+      Presets:
+        Data Saver: Data Saver
+        Default: Default
+        Smooth Playback: Smooth Playback
+        Custom: Custom
+      Buffer Ahead: Buffer Ahead
+      Buffer Ahead Tooltip: 'How far past the current position to load. At high qualities, memory limits may cap very high values. Default: {value}'
+      Rewind Buffer: Rewind Buffer
+      Rewind Buffer Tooltip: 'How much of the video you already watched stays loaded. Default: {value}'
+      Buffer Before Playing: Buffer Before Playing
+      Buffer Before Playing Tooltip: 'How much video has to load before playback starts, or resumes after stalling. Default: {value}'
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: "Quality limit on metered networks"
+      No Limit: "No limit"
+      Tooltip: "On mobile data and other metered networks, videos start at this quality or lower. You can still choose a higher quality in the player."
+    Show Music Mode Toggle: "Show Music Mode Toggle"
+    Enable DLNA Casting: "Enable DLNA casting"
+    Skip Unavailable Playlist Videos: "Skip Unavailable Playlist Videos"
+    Lights Off: Lights Off
+    Show Lights Off Toggle: Show Lights Off Toggle
+    Show Volume Boost Toggle: "Show Volume Boost Toggle"
+    Swipe Gestures:
+      Fullscreen Brightness: Full brightness in fullscreen
+      Left: Left-side swipe
+      Right: Right-side swipe
+      Disabled: Disabled
+      Brightness: Brightness
+      Volume: Volume
+      Hint: Swipe up or down on either side of the video in fullscreen.
+      Unavailable: Could not adjust playback controls.
+    yt-dlp Streaming: "yt-dlp Streaming"
+    Continue Playback When Screen Is Locked: 'Continue playback when the screen is locked'
+    Music Visualizer: Music visualiser
+    Automatically Open Chapters: Automatically Open Chapters
+    Caption Appearance:
+      Caption Appearance: Caption Appearance
+      Captions: Captions
+      Preferred Language: Preferred Caption Language
+      Application Language: Application Language
+      Enable Translations: Enable Caption Translations
+      Text Color: Text Colour
+      Background Color: Background Colour
+      Background Opacity: Background Opacity
+      Font Size: Font Size
+      Anchor:
+        Anchor: Position
+        Top Left: Top Left
+        Top Center: Top Centre
+        Top Right: Top Right
+        Bottom Left: Bottom Left
+        Bottom Center: Bottom Centre
+        Bottom Right: Bottom Right
+        Center Left: Centre Left
+        Center: Centre
+        Center Right: Centre Right
+      Edge Style:
+        Edge Style: Edge Style
+        None: None
+        Outline: Outline
+        Drop Shadow: Drop Shadow
+        Raised: Raised
+        Depressed: Depressed
+      Reset: Reset Caption Appearance
+      Default: Default
+      Text Opacity: Text Opacity
+      Font Family:
+        Font Family: Font Family
+        Monospaced Serif: Monospaced Serif
+        Proportional Serif: Proportional Serif
+        Monospaced Sans-Serif: Monospaced Sans-Serif
+        Proportional Sans-Serif: Proportional Sans-Serif
+      Colors:
+        White: White
+        Yellow: Yellow
+        Green: Green
+        Cyan: Cyan
+        Blue: Blue
+        Magenta: Magenta
+        Red: Red
+        Black: Black
+    Auto Picture in Picture:
+      Auto Picture in Picture: Automatically enter Picture-in-Picture
+      On Tab Change: When switching tabs
+      On Window Minimize: When minimising the window
+      On Window Hide: When the window loses focus or is switched away
+      Wayland Minimize Unsupported: Wayland does not report window minimise to apps, so this trigger is unavailable. Use "When the window loses focus or is switched away" instead, which also covers minimising.
+      On Tab Change Mini Player: Switching tabs shows the mini player instead. To use this, set "When leaving a video" to "Stop playing".
+    Scroll Mini Player:
+      Scroll Player Mode: When scrolling down
+      Scroll Player Mode Tooltip: "The player is only pinned while it takes up at most half of the window's height. Otherwise, such as on phones in landscape or in wide windows, the mini player shows instead."
+      Scroll Player Modes:
+        Mini: Show a mini player
+        Pin: "Pin the player at the top if there's room"
+        Off: Scroll with the page
+      Leaving Video: When leaving a video
+      Leaving Video Modes:
+        Keep Playing: Keep playing in a mini player
+        Stop: Stop playing
+    Multiply Seek Interval by Playback Rate: Multiply Seek Interval by Playback Rate
+    Show Playback Rate Adjusted Timestamp: Show Playback Rate Adjusted Timestamp
+    Use YouTube-style Shorts: Use YouTube-style Shorts
+    Loop Shorts: Loop Shorts
+    Remember Volume: Remember Volume
+    Skip Silence: Skip Silence
+    Show Skip Silence Toggle: Show Skip Silence Toggle
+    Enable Skip Silence by Default: Enable Skip Silence by Default
+    Enable Video Zoom: Enable Video Zoom
+    Enable Seek History: Enable Seek History
+    Show Seek Bar Filmstrip: "Show seek bar filmstrip"
+    Voice-over Translation:
+      Title: Voice-over translation
+      Attribution: "(powered by Yandex)"
+      Enable: Enable voice-over translation
+      Prepare in Background: Start preparing voice-over translations in the background
+      Background Preparation Tooltip: Sends the current video's ID, duration, and selected language to the translation service as soon as a supported video loads.
+      Language: Voice-over translation language
+      Supported Source Languages: 'Supported source languages: Russian, English, Chinese, Korean, Arabic, French, Italian, Spanish, German, and Japanese.'
+      Voice Volume: Translated voice volume
+      Original Volume: Original audio volume
+      Russian: Russian
+      English: English
+      Kazakh: Kazakh
+    Hold to Speed Up:
+      Hold to Speed Up: Hold to Speed Up
+      Off: 'Off'
+    Use Quick Playback Speed Bar: Use Quick Playback Speed Bar
+    Customize Quick Playback Speed Bar: Customise Quick Playback Speed Bar
+    Quick Playback Speed Bar Manager: Quick Playback Speed Bar
+    Add Playback Speed: Add Playback Speed
+    Reset Quick Playback Speed Bar: Reset to Defaults
+    Playback Speed Name: Name
+    Edit Playback Speed Name: Edit playback speed name
+    Use Automatic Playback Speed Name: Use automatic playback speed name
+    Reorder Playback Speed: Drag to reorder playback speed
+    Playback Speed: Playback Speed
+    Parallel Segment Loading: Parallel Segment Loading
+    Rotate Wide Videos to Landscape in Fullscreen: 'Rotate wide videos to landscape in fullscreen'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'Swipe up or down to enter or exit fullscreen'
+    Preload Upcoming Videos: "Preload Upcoming Videos"
+    Upcoming Videos to Preload: "Upcoming Videos to Preload"
+    Concurrent Preloads: "Concurrent Preloads"
+    Ignore System Rotation Lock for Fullscreen: Ignore system rotation lock for fullscreen
+    Swipe Left or Right to Seek in Fullscreen: Swipe left or right to seek in fullscreen
+    Show Swipe to Seek Preview: Show swipe-to-seek preview
+    Enable Google Cast: "Enable Google Cast"
+    Sections:
+      Playback: Playback
+      Autoplay: Autoplay
+      Playback Speed: Playback Speed
+      Player Controls: Player Controls
+      Gestures: Gestures
+      Viewing Modes: Viewing Modes
+      Shorts: Shorts
+      Screenshots: Screenshots
+    Enable FCast: "Enable FCast"
+    Screenshot:
+      Legacy Formats: "Legacy formats"
+      Modern Formats: "Modern formats"
+    Ask Before Preloading Large Playlists: "Ask Before Preloading Large Playlists"
+  Channel Settings:
+    Channel Settings: Channel Settings
+    Channel Settings Description: Remember the settings you pick while watching for each channel individually, so they are applied again the next time you watch one of its videos.
+    Enable Channel Playback Settings: Enable channel playback settings
+    Auto Save Playback Speed: Automatically save playback speed changes
+    Auto Save Video Quality: Automatically save video quality changes
+    Auto Save Subtitles State: Automatically save subtitle state changes
+    Auto Save Volume: Automatically save volume changes
+    Manage Saved Channels: Manage Saved Channels ({channelCount})
+    Saved Channels: Saved Channel Settings
+    Enable Saved Channel Settings Sync: Sync saved channel settings
+    Disable Saved Channel Settings Sync: Stop syncing saved channel settings
+    Search Channels: Search channels
+    No Saved Channels: No channel specific settings have been saved yet
+    No Matching Channels: No channels match your search
+    Forget Channel: Forget all settings for this channel
+    Forget Value: Forget this setting
+    Add Setting: Remember another setting for this channel
+    Add Subscribed Channel: Add subscribed channel
+    Video Quality: Video Quality
+    Subtitles Enabled: Subtitles Enabled
+    Volume: Volume
+  Download Settings:
+    Download Settings: Downloads
+    Enable Downloads: Enable Downloads
+    Managed Tools Download Started Template: 'Required external software was not found: {tools}. Downloading managed copies…'
+    Managed Tools Download Finished Template: Finished downloading {tools}
+    Managed Tools Update Started Template: An update was found for {tools}. Downloading…
+    Managed Tools Update Finished Template: Finished updating {tools}
+    Managed Tools Update Available Template: An update is available for {tools}.
+    Managed Tools Update Source Notice: "OpenTubeX downloads it directly from GitHub, so F-Droid and other app stores do not check it."
+    Update Managed Tools: Update
+    Managed Tools Download Error Template: 'Could not download the managed tools: {errors}'
+    Download Folder: Download Folder
+    Global Additional yt-dlp Arguments: Additional yt-dlp arguments
+    Concurrent Downloads: Concurrent downloads
+    Bandwidth Limit: Bandwidth limit (KiB/s)
+    Download Templates: Download Templates
+    Manage Download Templates: Manage Download Templates ({templateCount})
+    New Template: New Template
+    Template Source: Template to Edit or Use as a Base
+    Built-in Template: "{name} (Built-in)"
+    Custom Template Name: "{name} (Custom)"
+    Create Template Copy: Create Copy
+    Template Copy Name: "{name} Copy"
+    Automatic Downloads: Automatic Downloads
+    Manage Automatic Downloads: Manage Automatic Downloads ({channelCount})
+    Automatic Downloads Description: Select a download template and filters for each subscribed channel. Matching videos download in the background when subscription feeds refresh.
+    Automatic Downloads New Only: Enabling a channel starts with its next new upload. Existing videos and the channel backlog are not downloaded.
+    Automatic Downloads No Channels: Subscribe to a channel before configuring automatic downloads.
+    No Matching Automatic Download Channels: No channels match your search.
+    Automatic Downloads Livestreams: Livestreams
+    Minimum Duration Seconds: Minimum duration (seconds)
+    Maximum Duration Seconds: Maximum duration (seconds)
+    Minimum File Size MB: Minimum file size (MB)
+    Maximum File Size MB: Maximum file size (MB)
+    Maximum Age Days: Maximum age (days)
+    Title Includes: Title includes
+    Title Excludes: Title excludes
+    Title Filter Hint: Separate multiple title terms with commas. A video must match at least one included term and no excluded terms.
+    Automatic Downloads Require Unmetered Network: "Only on unmetered networks"
+    Automatic Downloads Require Charging: "Only while charging"
+  External Software Settings:
+    Create YouTube session: "Create YouTube session"
+    YouTube session hint: "Sign in if needed, then save. Choose in settings whether to use this session for downloads, playback or subtitles."
+    Use cookies for downloads: "Use cookies for downloads"
+    YouTube session failed: "Unable to save the YouTube session."
+    Checking FFmpeg and FFprobe: Checking FFmpeg/FFprobe…
+    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe have not been downloaded yet. Click the button below to download them.
+    External Software Settings: External Software
+    yt-dlp Source: yt-dlp Source
+    yt-dlp Channel: yt-dlp Channel
+    Sources:
+      System: System (PATH or custom path)
+      Managed: Managed by OpenTubeX
+    Detected Version Template: 'Detected yt-dlp version: {version}'
+    Managed Not Downloaded: yt-dlp has not been downloaded yet. Click the button below to download it.
+    System yt-dlp Missing Warning: yt-dlp was not found on your system. Install it, set a custom path below, or switch the source to "Managed by OpenTubeX".
+    Download yt-dlp: Download yt-dlp
+    Update yt-dlp: Update yt-dlp
+    Checking yt-dlp: Checking yt-dlp…
+    Downloading yt-dlp: Downloading yt-dlp…
+    yt-dlp Downloaded Template: yt-dlp {version} has been downloaded
+    yt-dlp Download Error Template: 'Downloading yt-dlp failed: {error}'
+    FFmpeg Source: FFmpeg Source
+    Detected FFmpeg Version Template: 'Detected FFmpeg version: {version}'
+    Detected FFmpeg and FFprobe Version Template: 'Detected FFmpeg/FFprobe version: {version}'
+    FFmpeg Managed Not Downloaded: FFmpeg has not been downloaded yet. Click the button below to download it.
+    System FFmpeg Missing Warning: FFmpeg was not found on your system. It is required for merging video and audio and for audio conversion. Install it, set a custom path below, or switch the source to "Managed by OpenTubeX".
+    Download FFmpeg: Download FFmpeg
+    Update FFmpeg: Update FFmpeg
+    Checking FFmpeg: Checking FFmpeg…
+    Downloading FFmpeg: Downloading FFmpeg…
+    Detected FFprobe Version Template: 'Detected FFprobe version: {version}'
+    FFprobe Managed Not Downloaded: FFprobe has not been downloaded yet. Click the button below to download it with FFmpeg.
+    System FFprobe Missing Warning: FFprobe was not found on your system. It is required for inspecting media during post-processing. Install it next to FFmpeg, or switch the source to "Managed by OpenTubeX".
+    Checking FFprobe: Checking FFprobe…
+    Download FFmpeg and FFprobe: Download FFmpeg and FFprobe
+    Update FFmpeg and FFprobe: Update FFmpeg and FFprobe
+    Downloading FFmpeg and FFprobe: Downloading FFmpeg and FFprobe…
+    FFmpeg and FFprobe Downloaded Template: FFmpeg and FFprobe {version} have been downloaded
+    FFmpeg and FFprobe Download Error Template: 'Downloading FFmpeg and FFprobe failed: {error}'
+    Managed Tool Already Current Template: "{tool} {version} is already up to date"
+    Managed Tool Errors:
+      Removed: 'The downloaded file was removed, most likely by antivirus software'
+      Unusable: 'The downloaded program could not be run. Antivirus software may be blocking it, or it does not support this system'
+      Release Not Found: 'Could not find the latest release'
+      Verification Failed: 'The download could not be verified as an official release'
+      Downgrade: 'The downloaded release is older than the installed one'
+      Invalid Archive: 'The downloaded archive is invalid'
+      Rollback Failed: 'The update failed and the previous version could not be fully restored'
+    Managed Tool Updates: Managed Tool Updates
+    Update Modes:
+      Automatic: Update automatically
+      Ask: Ask before updating
+      Manual: Only update manually
+    yt-dlp Executable Path: yt-dlp executable
+    FFmpeg Executable Path: FFmpeg executable
+    Restricted Playback Authentication: "yt-dlp Cookies"
+    Cookie Source: Cookie Source
+    Cookie Sources:
+      None: None
+      File: File
+      Browser: Browser
+    Cookie File: Cookie File
+    Browser for Cookies: Browser for Cookies
+    Browser Profile: Browser Profile (Optional)
+    Browser Profile Placeholder: Profile name or path
+    Browser Profile Invalid: "Enter a profile name, or choose a profile folder with the folder button."
+    Select Browser: Select a browser
+    Always Use Cookies: Always Use Cookies
+    Restricted Playback Authentication Hint: By default, OpenTubeX only passes these cookies to yt-dlp after you choose "Try with configured cookies" on an age-restricted or members-only video.
+    Restricted Playback Authentication Warning: Using yt-dlp with a Google account can lead to temporary or permanent account restrictions.
+    Use cookies for subtitles: "Use cookies for subtitles"
+  Privacy Settings:
+    Internet Connectivity Checks: "Internet connectivity checks"
+    Internet Connectivity Checks Tooltip: "Sends small requests to a server hosted by GrapheneOS to check internet access."
+    Automatic History Retention: Automatic History Retention (Days)
+    Automatic History Retention Placeholder: Leave blank to keep forever
+    Automatic History Retention Tooltip: Leave blank to keep history forever. Saving a number removes older entries now and automatically while the app is open.
+    Automatic Search History Retention: Automatic Search History Retention (Days)
+    Automatic Search History Retention Tooltip: Leave blank to keep search history forever. Saving a number removes older searches now and automatically while the app is open.
+    History Retention Saved: History retention has been saved
+    Invalid History Retention Days: Enter a whole number of days greater than zero
+    Enable Watch Statistics: Enable Watch Statistics
+    Week Starts On: Week Starts On
+    Cache Video Metadata: Metadata history
+    Cache Video Metadata Tooltip: Keeps every version of supported video metadata for videos you visit, including titles, thumbnails, and descriptions. Also keeps the titles shown in your subscription feeds. Disabled by default because storing metadata history increases disk usage.
+    Watched Percentage Threshold: Watched Percentage Threshold
+    Watched Percentage Threshold Tooltip: Videos are marked as watched after reaching the selected percentage and having no more than 2 minutes remaining. At 0%, they are marked when playback begins. At 100%, they are marked when playback ends.
+    Clear Video Metadata Cache: Clear Video Metadata Cache
+    Are you sure you want to clear the video metadata cache?: Are you sure you want to clear the cached video titles, thumbnails, and descriptions?
+    Failed to clear video metadata cache: Failed to clear video metadata cache
+    Video Metadata Cache Size: 'Video metadata cache: {size}'
+  Storage Settings:
+    Storage: Storage
+    Downloaded Media: Tracked downloaded media
+    Storage Breakdown: Storage breakdown
+    Shown Total: Shown total
+    Calculating: Calculating…
+    Not Available: Exact size unavailable
+    At Least: At least {size}
+    Failed To Read Storage: Some storage sizes could not be read
+    Downloaded Media Description: Video, audio, and subtitle files that download history still tracks.
+    Selected Download Folders: User-selected download folders
+    Download History Records: Download history records
+    Download History Records Description: "{count} finished download record. This record tracks status and file locations but does not contain the downloaded media. | {count} finished download records. These records track status and file locations but do not contain the downloaded media."
+    Clear Download History Records: Clear download history records
+    Clear Download History Confirmation: Clear all finished download records?
+    Download Files Stay On Disk: Downloaded files will stay on disk, but they will no longer appear on the Downloads page.
+    Clear Records: Clear records
+    Replaceable Caches: Replaceable caches
+    Application Caches: Application caches
+    Browser Caches: Browser caches
+    Browser Caches Hint: Chromium’s HTTP, GPU, code, shader, service-worker, and dictionary caches.
+    Clear Android Cache Confirmation: Clear Android's browser cache?
+    Stored App Data: Stored app data
+    Included In App Data: Included in app data above
+    Browser Runtime Data: Browser runtime data
+    Browser Runtime Data Hint: Chromium’s session and local storage, cookies, privacy and network state, and crash files.
+    Subscription Feed Cache: Subscription and feed cache
+    Subscription Feed Cache Description: Stores fetched subscription videos, Shorts, live streams, and posts. OpenTubeX recreates it on the next feed refresh.
+    Clear Subscription Feed Cache: Clear subscription and feed cache
+    Clear Subscription Feed Cache Confirmation: Clear the subscription and feed cache?
+    Subscription Feed Cache Effect: Subscription feeds may appear empty until they refresh. Your subscriptions and profiles will not be changed.
+    Session Search Cache: Session search cache
+    In Memory: In memory
+    Session Search Cache Description: "{count} search is cached in memory for faster back navigation. This cache is discarded when OpenTubeX closes. | {count} searches are cached in memory for faster back navigation. This cache is discarded when OpenTubeX closes."
+    Clear Session Search Cache: Clear session search cache
+    Clear Session Search Cache Confirmation: Clear the session search cache?
+    Session Search Cache Effect: Cached result pages will be discarded. Saved search history will not be changed.
+    HTTP Cache: HTTP cache
+    HTTP Cache Description: Electron stores network responses on disk so repeated requests can load without downloading the same data again. OpenTubeX recreates this cache as needed.
+    Managed By Electron: Managed by Electron
+    Clear HTTP Cache: Clear HTTP cache
+    Clear HTTP Cache Confirmation: Clear Electron's HTTP cache?
+    HTTP Cache Effect: Images and other network resources may load more slowly once while the cache is rebuilt.
+    Tab Image Cache: Tab thumbnails and channel avatars
+    Tab Image Cache Description: Stores preview images and channel avatars for open and restored tabs. OpenTubeX recreates them while tabs are used.
+    Clear Tab Image Cache: Clear tab image cache
+    Clear Tab Image Cache Confirmation: Clear tab thumbnails and channel avatars?
+    Tab Image Cache Effect: Tab images may disappear briefly and will be recreated as their tabs are used.
+    Playback Caches: Playback caches
+    Playback Caches Description: Stores yt-dlp stream URLs between app sessions, plus YouTube player files. The URL cache applies only to streams fetched with yt-dlp.
+    Playback URL Cache Entry Size: yt-dlp stream URL cache limit
+    Playback URL Cache Entry Size Tooltip: Sets the maximum size of each cached yt-dlp stream entry. Set it to 0 MB to disable persistent caching for yt-dlp streams.
+    Clear Playback Caches: Clear playback caches
+    Clear Playback Caches Confirmation: Clear the yt-dlp and player caches?
+    Playback Caches Effect: The next local playback request may take longer while stream and player data is fetched again.
+    Clear Cache: Clear cache
+    History Data: Stored histories
+    Video Metadata Description: Stores past titles, thumbnails, and descriptions for supported videos. Old revisions cannot be recreated after deletion.
+    Video Metadata Effect: Saved metadata revisions will be deleted permanently. Current video details can still be fetched again.
+    Watch History: Watch history and statistics
+    Watch History Description: Watch history records viewed videos and progress. Watch statistics store daily viewing totals. Retention only applies to watch history.
+    Clear Watch Statistics: Clear watch statistics
+    Watch History Effect: Viewed-video records and saved progress will be deleted. Watch statistics will remain.
+    Clear Watch Statistics Confirmation: Delete all watch statistics?
+    Watch Statistics Effect: Daily viewing totals will be deleted. Watch history will remain.
+    Search History: Search history
+    Search History Description: Stores searches you chose to remember.
+    Delete Search History: Delete search history
+    Delete Search History Confirmation: Delete all saved search history?
+    Search History Effect: Saved search suggestions from your previous searches will disappear. The current session cache will remain.
+    Other User Data: Other user data
+    Other Profile Files: Other profile files
+    Other Profile Files Hint: Backups, temporary files, and profile entries OpenTubeX does not recognise yet.
+    Subscriptions And Profiles: Subscriptions and profiles
+    Subscriptions And Profiles Description: Stores subscribed channels, profile names, and profile membership.
+    Subscriptions And Profiles Effect: All subscriptions and extra profiles will be deleted permanently. Feed cache data will also be cleared.
+    Playlists Description: Stores playlist names, descriptions, and saved videos.
+    Playlists Effect: Every playlist and its saved-video list will be deleted permanently. Downloaded media files will remain.
+    Settings And Sessions: Settings, tab sessions, and reminders
+    Settings And Sessions Description: Stores app preferences, restorable tabs, and live-stream reminders. Open the profile directory to inspect or back up these files; this page does not delete them.
+    Cleanup Complete: Storage cleanup finished
+    Cleanup Failed: Storage cleanup failed
+  Subscription Settings:
+    Show New Content Feed: Show New Content Feed
+    RSS Feeds: RSS feeds
+    Enable RSS Feeds: Enable RSS feeds for other platforms
+    Manage RSS Feeds: Manage RSS feeds
+    Show New Content Indicators: Show New Content Indicators
+    Show Scheduled Live Streams / Premieres First: Show Scheduled Live Streams / Premieres First
+    Auto Refresh Interval: Auto Refresh Interval
+    Videos Auto Refresh Interval: Videos Auto Refresh Interval
+    Shorts Auto Refresh Interval: Shorts Auto Refresh Interval
+    Live Auto Refresh Interval: Live Auto Refresh Interval
+    Posts Auto Refresh Interval: Posts Auto Refresh Interval
+    Refresh Subscriptions While App Is Closed: "Refresh Subscriptions While App Is Closed"
+    Notify About New Uploads: Notify About New Uploads
+    RSS Feeds Auto Refresh Interval: RSS Feeds Auto Refresh Interval
+    Faster Subscription Refresh: "Faster Subscription Refresh"
+    Platforms:
+      Other Platforms: Other platforms
+      Manage Channels: Manage followed channels
+      Notify When Live: Notify when followed Twitch channels go live
+      Auto Refresh Interval: Other platforms auto refresh interval
+  Distraction Free Settings:
+    Digital Wellbeing:
+      Count Watch Time From: "Count Watch Time From"
+      Break Reminder Action: "When It's Time for a Break"
+      Grayscale: "Greyscale"
+      Apply Grayscale To: "Apply Greyscale To"
+      Off: "Off"
+      Always: "Always"
+      During Bedtime: "During Bedtime"
+      After the Daily Limit: "After the Daily Limit"
+      Whole App: "Whole App"
+      Videos and Images: "Videos and Images"
+      Daily Watch Time Limit: "Daily Watch Time Limit"
+      Daily Shorts Limit: "Daily Shorts Limit"
+      When a Limit Is Reached: "When a Limit Is Reached"
+      Remind Me: "Remind Me"
+      Pause Playback: "Pause Playback"
+      Take a Break Reminder: "Take a Break Reminder"
+      Every: "Every {duration}"
+      Bedtime Reminder: "Bedtime Reminder"
+      Bedtime Start: "Bedtime Start"
+      Bedtime End: "Bedtime End"
+      Wait Until the Video Ends: "Wait Until the Video Ends"
+      Silence Upload Notifications at Bedtime: "Silence Upload Notifications at Bedtime"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Stop Autoplay at Bedtime and After the Daily Limit"
+    Sections:
+      Digital Wellbeing: "Digital Wellbeing"
+    Hide Popularity Graph: "Hide Popularity Graph"
+    Enable Block Lists: "Enable block lists"
+    AI Video Summaries: AI video summaries
+    Hide: Hide
+    Collapsed: Collapsed
+    Expanded: Expanded
+    Video Descriptions: Video descriptions
+    Video Description Modes:
+      Hide: Hide
+      Collapsed: Collapsed
+      Expanded: Expanded
+    Playing Interface Hide Delay: Playing Interface Hide Delay
+    Hide Startup Splash: Hide Startup Splash
+    Hide Header Sync Indicator: Hide Header Sync Indicator
+    Hide Repeat Stats: Hide Repeat Stats
+    Hide Playlist Stats: Hide Playlist Stats
+    Hide Channel Avatars: Hide Channel Avatars
+    Shorten View Counts: Shorten View, Comment and Comment Like Counts
+    Hide Home: Hide Home
+    Hide Live Chat Replay: Hide Live Chat Replay
+    Disable A-B Repeat: Disable A-B Repeat
+    Hide End-Screen Annotations: Hide End-Screen Annotations
+    Hide End-Screen Recommendations: "Hide End-Screen Recommendations"
+    Hide Paid Promotion Badge: Hide Paid Promotion Badge
+    Add: Add
+    Remove: Remove
+    Hide Channel Shows: Hide Channel "Shows" Tab
+    Blur Blocked Items: Blur blocked items instead of hiding them
+    More Items Count: "+{count} more…"
+  Data Settings:
+    Settings could not be imported: "Settings could not be imported"
+    Some settings could not be imported: "{failed} of {total} settings could not be imported"
+    Scheduled backups: "Scheduled backups"
+    Scheduled backup description: "Save complete ZIP backups while OpenTubeX is open. Missed backups run on startup. The limit applies only to scheduled backups in this folder."
+    Choose backup folder: "Choose backup folder"
+    No backup folder selected: "No backup folder selected"
+    Enable scheduled backups: "Enable scheduled backups"
+    Backup frequency: "Backup frequency"
+    Backups to keep: "Backups to keep"
+    Daily: "Daily"
+    Weekly: "Weekly"
+    Every 30 days: "Every 30 days"
+    Last scheduled backup: "Last scheduled backup: {date}"
+    No scheduled backup yet: "No scheduled backup yet"
+    Scheduled backup failed: "Backup failed. Check that the folder is writable. Retrying in five minutes."
+    Import Preview:
+      Title: Preview changes
+      New: "New: {count}"
+      Existing: "Existing: {count}"
+      Skipped: "Skipped: {count}"
+      Unreadable files: "Unreadable files: {count}"
+      Settings effect: Matching settings are replaced. Private and unknown settings are skipped.
+      Details effect: Existing subscriptions or videos are kept. Imported profile or playlist details replace current details.
+      Merge effect: Existing data is kept and merged with matching records.
+      Subscriptions effect: Existing subscriptions are kept. Only new channels are added.
+      History merge effect: Matching videos are merged with your history, keeping saved details and the latest watch date. Other history is kept.
+    Select export data: "Select the data to export"
+    Export selected data: "Export selected data"
+    Complete backup: "Complete backup"
+    Import backup: "Import backup"
+    Export backup: "Export backup"
+    Backup description: "Save profiles, playlists, history, statistics, and transferable settings in one ZIP file. Importing merges them with data already on this device."
+    Select backup data: "Select the data to import"
+    Profiles and subscriptions: "Profiles and subscriptions"
+    Backup exported: "Backup exported successfully"
+    Backup imported: "Backup imported successfully"
+    Import YouTube Takeout ZIP: "Import YouTube Takeout ZIP"
+    Select Takeout data: "Select the data to import"
+    Import selected data: "Import selected data"
+    No supported Takeout data: "No supported YouTube data was found in this ZIP."
+    Data And Storage: Data & Storage
+    Profile Directory: Profile directory
+    Open Profile Directory: Open profile directory
+    Import subscriptions formats: 'Supported formats: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube backup or FreeTube export (.json)'
+    Import history formats: 'Supported formats: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube backup (.json)'
+    Import playlists formats: 'Supported formats: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import search history formats: 'Supported formats: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Channel playback speeds: "Channel playback speeds"
+    Import channel playback speeds: "Import channel playback speeds"
+    Channel playback speeds file: "Channel playback speeds file"
+    Import channel playback speeds formats: "Supported formats: {script} userscript storage (.json)"
+    Invalid channel playback speeds file: "No channel playback speeds were found in this file"
+    Channel playback speeds imported: "Imported the playback speed of {count} channel | Imported the playback speeds of {count} channels"
+    Channels not found: "{count} channel could not be found | {count} channels could not be found"
+    Playlists have been successfully imported: "1/{total} playlist has been successfully imported | {count}/{total} playlists have been successfully imported"
+  Sync Settings:
+    Signed Out After Restore: 'Sync was signed out because this app data was restored from a backup or another device. Sign in again to sync this device.'
+    Revoke Session Tabs Warning: "This device's synced tab sets will also be deleted."
+    Revoke Session Partial Failure: "Synced tab sets were deleted, but revocation could not be confirmed. Retry to revoke access."
+    Tab Sync Revocation Pending: "Tab syncing is paused while revocation of this login is pending. Retry revocation in Sync Settings."
+    Show More: "Show more"
+    Sync Automatically: "Sync automatically"
+    Activity: "Account activity"
+    No Activity: "No recent activity"
+    Clear Activity: "Clear on this device"
+    Clear Activity Hint: "Hide existing account activity on this device. Activity on the server and other devices stays unchanged. New activity will still appear."
+    Setting Changed: "{device} changed {setting} to {value}"
+    Item Updated: "{device} updated {setting}"
+    Item Added: "{device} added {item} to {setting}"
+    Item Removed: "{device} removed {item} from {setting}"
+    Item Renamed: "{device} renamed {item} to {value}"
+    Saved Playlists: "Saved playlists"
+    No Feed Types: "None"
+    Open On Device: "Open on another device"
+    Video Sent: "Video sent. Offline devices receive it when they reconnect, for up to 24 hours."
+    Video Received: "Received video: {title}"
+    Previous Auto Sync Notice: "Automatic sync is off. An earlier version may have disabled it to prevent data loss."
+    Enable Automatic Sync: "Enable automatic sync"
+    Destructive Sync Blocked: "Sync stopped to prevent data loss. Automatic sync is off. Open Sync settings to review the deletions."
+    Devices: "Devices"
+    Devices Hint: "Review the devices that can access this sync account."
+    Change Password: "Change password"
+    Refresh Devices: "Refresh devices"
+    Current Device: "Current device"
+    Revoke Session: "Revoke access"
+    Session Created: "Created"
+    Last Active: "Last active"
+    Session Expires: "Expires"
+    Unknown Device: "Unknown device"
+    Operating System: "Operating system"
+    Rename Device: "Rename device"
+    Save Device Name: "Save name"
+    Device Name Invalid: "Device names can contain up to 80 characters and no control characters."
+    Device Renamed: "Device renamed"
+    Revoke Session Confirmation: "Revoke this session?"
+    Revoke Current Session Warning: "Revoking this session will disconnect this device from the sync account."
+    Revoke Session Warning: "{device} will lose access to this sync account."
+    Confirm Revoke Session: "Revoke session"
+    Session Revoked: "Session revoked"
+    Change Password Warning: "Changing your password will sign out every other device. This device will stay connected."
+    Current Password: "Current password"
+    New Password: "New password"
+    Confirm New Password: "Confirm new password"
+    Save New Password: "Save new password"
+    Account Management Failed: "Sync account details could not be loaded."
+    All Password Fields Required: "Complete all password fields."
+    New Password Too Short: "The new password must be at least 8 characters."
+    New Passwords Do Not Match: "The new passwords do not match."
+    Password Changed: "Password changed. Other devices have been signed out."
+    Sync Settings: Sync
+    Watch stats: "Watch stats"
+    Enable Sync: Enable Sync
+    Privacy Passphrase: Privacy passphrase
+    Privacy Passphrase Hint: Use a separate passphrase from your account password. It never leaves this device and is required on every device; losing it makes encrypted sync data unrecoverable.
+    Privacy Policy: Privacy policy for this server
+    Enhanced Privacy Enabled: Enhanced privacy is enabled. The server stores only encrypted sync data.
+    Enhanced Privacy Unsupported: Warning — this server does not support enhanced privacy. Synced data is visible to its operator.
+    Description: 'Synchronise subscriptions, profiles, playlists, watch history, and supported settings with an OpenTubeX or LibreTube sync server. LibreTube servers may not support every sync feature.'
+    Server URL: Sync server URL
+    Checking Server: Checking sync server…
+    Server Unavailable: Unable to connect to this sync server. Check the URL and try again.
+    Username: Username
+    Log In: Log in
+    Register: Register
+    Pair Another Device: Pair another device
+    Pair With Existing Device: Pair with an existing device
+    Device Name: Device name
+    This Device: This device
+    Device Name Required: Enter a name for this device.
+    Pairing Device Name Hint: Choose a name that you will recognise on the device approving this request.
+    Create Pairing Code: Create pairing code
+    Creating Pairing Code: Creating a secure pairing code…
+    Pairing QR Alt: Pairing QR code for {device}
+    Scan Pairing Code: On an already connected device, open "Pair another device" and scan this code.
+    Pairing Code: Pairing code
+    Use Text Pairing Code: Use text code instead
+    Show QR Code: Show QR code
+    Text Pairing Code Hint: Copy this code to the existing device. It contains the pairing secret, so clear it from clipboard history after pairing.
+    Pairing QR Warning: Show this code only to the trusted, already connected device that will approve this request. It expires after two minutes.
+    Pairing Expires: Pairing code expires at {time}.
+    Verifying Pairing: Verifying the transferred privacy key…
+    Completing Pairing: Completing device pairing…
+    Compare Pairing Codes: Compare pairing codes
+    Pairing Code Match Hint: Confirm only if this code matches the code on your existing device.
+    Pairing Codes Match: Codes match
+    Pairing Approval Code Hint: Keep this window open and compare this code with the new device. The new device must not continue if the codes differ.
+    Pairing Scan Hint: Scan the pairing code shown on the device you are adding.
+    Enter Pairing Code: Enter code manually
+    Pairing Code Entry Hint: Paste the pairing code shown on the device you are adding.
+    Check Pairing Code: Check code
+    Scan QR Code: Scan QR code
+    Waiting For Pairing Code: Waiting for a pairing code…
+    Checking Pairing Request: Checking the pairing request…
+    Approving Pairing Request: Encrypting and sending the privacy key…
+    Pairing Approval Warning: Approve only if you can see this request on the device you are adding. Pairing grants account access and transfers the privacy key.
+    Approve Pairing: Approve pairing
+    Try Again: Try again
+    Scan Again: Scan again
+    Camera Unavailable: OpenTubeX could not access a camera. Check the camera permission or enter the pairing code manually.
+    Pairing Unsupported: This sync server does not support secure device pairing.
+    Pairing Failed: Device pairing failed. Try again with a new code.
+    Pairing Request Changed: The pairing request changed, expired, or was already used. Create a new code.
+    Pairing Server Mismatch: This code belongs to a different sync server.
+    Pairing Verification Unavailable: No encrypted sync collection is available to verify the transferred key. Sync the existing device, then try again.
+    Pairing Completed: Device pairing completed
+    Pairing Approved: Device pairing approved
+    Use Pairing Invite: Use code from connected device
+    Show Pairing Invite: Show pairing code
+    Scan Pairing Invite: 'On the device you are adding, open "Pair with an existing device", choose "Use code from connected device", and scan this code.'
+    Pairing Invite QR Alt: Pairing QR code for the device you are adding
+    Pairing Invite Text Hint: Copy this code to the device you are adding. It lets a device request access to your account, so clear it from clipboard history after pairing.
+    Pairing Invite Warning: Show this code only to the device you are adding. You still need to approve its request on this device.
+    Pairing Invite Scan Hint: Scan the pairing code shown on your connected device.
+    Pairing Invite Entry Hint: Paste the pairing code shown on your connected device.
+    Pairing Invite Code Hint: Approve the request on your connected device only if it shows this code. Pairing then finishes automatically.
+    Pairing Invite Approval Hint: Approve only if the device you are adding shows this code.
+    Pairing Invite Approved: Pairing approved. The new device finishes pairing automatically.
+    Disconnect: Disconnect
+    Delete Account: Delete sync account
+    Delete Account Confirmation: Delete sync account?
+    Delete Account Warning: This permanently deletes your sync account and all data stored on this server. Your local OpenTubeX data will not be deleted.
+    Confirm Delete Account: Delete account
+    Password Required: Password is required
+    Account Deleted: Sync account deleted
+    Connected as: Connected as {username}
+    Profiles: Profiles
+    Open Tabs: Open tabs and session
+    Disable Setting Sync: Stop syncing this setting
+    Enable Setting Sync: Sync this setting
+    Sync Now: Sync now
+    Downloading encrypted data: Downloading encrypted sync data…
+    Syncing subscriptions: Syncing subscriptions…
+    Syncing playlists: Syncing playlists…
+    Syncing history: Syncing watch history…
+    Syncing statistics: Syncing watch statistics…
+    Syncing profiles: Syncing profiles…
+    Syncing open tabs: Syncing open tabs and session…
+    Syncing settings: Syncing settings…
+    Uploading encrypted data: Uploading encrypted sync data…
+    Finishing sync: Finishing sync…
+    Sync progress percentage: "{percentage}%"
+    Last synced: 'Last synced: {date}'
+    History not supported: This server version does not support watch history syncing.
+    Settings not supported: This server version does not support settings syncing.
+    Sync completed: Sync completed
+    Sync failed: 'Sync failed: {error}'
+    Data Loss Confirmation: Confirm destructive sync?
+    Data Loss Warning: Sync would delete {deleted} of {previous} previously synced items in {collection} on all devices. If you did not delete them, for example because the server was reset, keep them to restore them everywhere.
+    Keep Deleted Items: Keep items
+    Confirm Data Loss: Delete and continue
+    Use Shared Tabs: 'Use one shared tab set across devices'
+    Shared Tabs Warning: 'The open tabs on this device become the shared set. Other devices replace their open tabs with this set when they sync; tabs from different devices are not combined.'
+    Tabs From Other Devices: 'Tabs from other devices'
+    Mobile Device: 'Mobile'
+    Desktop Device: 'Desktop'
+    Open All Tabs: 'Open all tabs'
+    Open All Tabs Confirmation: "Open all tabs?"
+    Server Update Required: "Update this server to support encrypted live sync."
+    Log In with Provider: 'Log in with {provider}'
+    Log In with Single Sign-On: 'Log in with single sign-on'
+    Continue in Browser: 'Continue in your browser. OpenTubeX resumes when you are done.'
+    Connected with Single Sign-On: 'Connected with single sign-on'
+    Delete Single Sign-On Account Hint: 'Your browser opens so that you can confirm the deletion with your sign-in provider.'
+  Proxy Settings:
+    IP Block Recovery Script Path: IP block recovery script
+    Running IP block recovery script: Running IP block recovery script
+    IP block recovery script failed: 'IP block recovery script failed (exit code: {exitCode})'
+    IP block recovery script finished: IP block recovery script finished
+    Reloading video after IP block recovery: Reloading video after IP block recovery
+    Failed to select IP block recovery script: Failed to select IP block recovery script
+  SponsorBlock Settings:
+    Excluded Channels:
+      Excluded Channels: "Excluded channels"
+      Tooltip: "Enter a channel ID to stop SponsorBlock skipping segments in its videos. IDs must match exactly and are case-sensitive."
+    Enable SponsorBlock Submission: Enable SponsorBlock Submission
+    SponsorBlock Private User ID (optional): Private user ID (optional)
+    SponsorBlock Private User ID Tooltip: Paste the private SponsorBlock user ID from the browser extension. Leave this empty to use an app-generated ID.
+    Generated SponsorBlock User ID: Generated SponsorBlock User ID
+    Generated SponsorBlock User ID Tooltip: This app-generated SponsorBlock user ID can be used in the browser extension or if you use the app on another computer.
+    Reveal Generated User ID: Reveal Generated User ID
+    Generated SponsorBlock User ID Copy Button: Copy generated SponsorBlock user ID
+    Generated SponsorBlock User ID Copied: Generated SponsorBlock user ID copied to clipboard
+    Custom Color: Custom colour
+    DeArrow Settings: DeArrow
+    Always Show DeArrow Badge: Always show DeArrow badge
+  Return YouTube Dislike Settings:
+    Return YouTube Dislike Settings: Return YouTube Dislike
+    Enable Return YouTube Dislike: Enable Return YouTube Dislike
+    Return YouTube Dislike Url: API URL
+  Password Dialog:
+    Incorrect Password: Incorrect password
+    Unlock: Unlock
+    Unlocking: Unlocking…
+  No Settings Found: No settings found
+  Experimental Settings:
+    Disable Hardware Acceleration: Disable Hardware Acceleration
+  Interface Customizer:
+    Customize Interface: "Customise interface"
+    Preview: "Preview"
+    Player: "Player"
+    Desktop: "Desktop"
+    Mobile: "Mobile"
+    Playing: "Playing"
+    Player Menu: "Player menu"
+    Fullscreen: "Full screen"
+    Paused: "Paused"
+    Controls: "Controls"
+    Example Video Title: "Example video"
+    Resolution: "Resolution"
+    Loop: "Loop"
+    Off: "Off"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Hide AI slop channels
+    Hide AI Slop Channels Tooltip: Hides channels on the community-maintained AiSList blocklist (aisloplist.com) from search results, trending and recommendations, and labels videos from channels on its warnlist. Subscriptions aren't affected. The lists are downloaded from GitHub once a day and only apply to results loaded with the Local API.
+    Downloading: Downloading the lists…
+    Failed to Download: Couldn't download the lists
+    Loaded Status: "Blocked channels: {blocked} · Flagged channels: {warned} · Updated: {date}"
+Tutorial:
+  Skip: Skip
+  Next: Next
+  Finish: Finish
+  Welcome:
+    Title: Welcome to OpenTubeX
+    Description: Start fresh, or bring your subscriptions, history, and playlists from another app or a backup.
+    Start Fresh: Start fresh
+    Import Data: Import data
+  Preferences:
+    Title: Make it yours
+    Description: Choose your theme, start page, and region. You can change these and more in Settings at any time.
+  Playback:
+    Title: Playback and privacy
+    Description: Choose how videos play, whether OpenTubeX remembers what you watch, and which community add-ons it uses.
+  Navigation:
+    Title: Your library is always nearby
+    Description: Use the navigation to reach subscriptions, playlists, history, and more.
+  Search:
+    Title: Search or paste a link
+    Description: Find videos and channels, or paste a supported video URL directly into the search field.
+  Tabs:
+    Title: Keep pages open in tabs
+    Description: Open several pages at once without losing your place.
+  Profile Menu:
+    Title: Settings and profiles
+    Description: Your profile menu holds quick settings, downloads, and all other settings. Right-click it to switch profiles.
+    Touch Description: Your profile menu holds quick settings, downloads, and all other settings. Tap and hold it to switch profiles.
+About:
+  Project: Project
+  Community: Community
+  Contribute: Contribute
+  Documentation: Documentation
+  Downloads: Downloads
+  Changelog: Changelog
+  Commit: Commit
+  Matrix: Matrix
+  Email: Email
+  Show tutorial: Show tutorial
+Profile:
+  Customization: Customisation
+  Manage Profile Subscriptions: Manage profile subscriptions
+  Icon Names:
+    Person: Person
+    People: People
+    Headphones: Headphones
+    Gaming: Gaming
+    Film: Film
+    Art: Art
+    Science: Science
+    Globe: Globe
+    Heart: Heart
+    Sun: Sun
+    Moon: Moon
+    Trophy: Trophy
+  Profile Icon: Profile Icon
+  Choose an Emoji: Choose an Emoji
+  Custom Emoji: Custom Emoji
+  Choose Image: Choose Image
+  Crop Image: Crop Image
+  Zoom: Zoom
+  Apply Crop: Apply Crop
+  Transparent: Transparent
+  Use Initial: Use Initial
+  The selected image could not be loaded: The selected image could not be loaded
+  Theme Color: Theme Colour
+  Go To Profile Manager: Go to Profile Manager
+Channel:
+  Hide Watched: Hide Watched
+  Fewer videos per day: "Fewer videos per day"
+  More videos per day: "More videos per day"
+  Verified: Verified
+  Official Artist Channel: Official Artist Channel
+  About:
+    Links: Links
+  Subscription settings: Subscription settings
+  Failed to save subscription settings: Failed to save channel settings
+  Videos per day: Videos per day
+  Use global setting: Use global setting
+  Unlimited: Unlimited
+  More videos hidden: '+{count} more | +{count} more'
+  Show in subscription feed: Show in subscription feed
+  Notify about new uploads: Notify about new uploads
+  Show members-only videos: Show members-only videos
+  Upload Notifications On: "You'll be notified about new uploads from {channelName} when your subscriptions refresh"
+  Upload Notifications Off: "You won't be notified about new uploads from {channelName}"
+  Upload Notifications Disabled In Settings: "Notifications for {channelName} are on, but upload notifications are turned off in your settings"
+  Turn On Upload Notifications: "Turn On"
+  Channel Name Unavailable: Channel name unavailable
+  Search Result Types: Search result types
+  All Results: All
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "This channel has videos but none could be displayed, try fetching more"
+  Posts:
+    Original post unavailable: "Original post unavailable"
+    Members-only video hidden by OpenTubeX: "Members-only video hidden by OpenTubeX"
+    Video hidden by OpenTubeX because of its title: "Video hidden by OpenTubeX because its title contains hidden text"
+  Shows:
+    Shows: Shows
+    This channel does not currently have any shows: This channel does not currently have any shows
+Video:
+  Play in Background: "Play in Background"
+  Info panel source: 'Source: {source}'
+  External DRM Protected: "DRM protected videos cannot be played in OpenTubeX, as they require proprietary, closed source components."
+  Invalid Media URL: "Invalid media URL"
+  Mark As Fully Watched: Mark As Fully Watched
+  AI-generated video summary: "AI-generated video summary"
+  Quality and accuracy may vary: "Quality and accuracy may vary"
+  Includes paid promotion: Includes paid promotion
+  Age Restricted Badge: Age restricted
+  Music Video Badge: Music video
+  Queue: Queue
+  Play Next: Play Next
+  Add to Queue: Add to Queue
+  Added to Play Next: Video will play next
+  Added to Queue: Video added to queue
+  Clear Queue: Clear Queue
+  Queue Video Count: "{count} video | {count} videos"
+  Remove from Queue: Remove {title} from queue
+  Remove Video from Queue: Remove from Queue
+  Drag to Reorder Queue: Drag {title} to reorder queue
+  Reorder Queue Item: Reorder {title}
+  Reorder Queue Item Instructions: Use the Up and Down Arrow keys to move this video in the queue.
+  Queue Item Moved: Moved {title} to position {position} of {total}.
+  Queue Item Cannot Move Up: Cannot move {title} up. It is already at position 1 of {total}.
+  Queue Item Cannot Move Down: Cannot move {title} down. It is already at position {total} of {total}.
+  Metadata: Video information
+  Close Metadata: Close video information
+  Collapse Playlist: Collapse Playlist
+  Expand Playlist: Expand Playlist
+  Metadata Cache:
+    Title History: Title history
+    Thumbnail History: Thumbnail history
+    Description History: Description history
+    Previous Version: Previous {number}
+    Empty: "(empty)"
+  Fetching Streams: Fetching streams with yt-dlp…
+  Waiting For Connection: "Couldn't reach the server. Trying again automatically…"
+  Retry Now: "Retry now"
+  Transcript:
+    Title: Transcript
+    Search: Search transcript
+    Language: Transcript language
+    Save: Save
+    Show: Show transcript
+    Hide: Hide transcript
+    Close: Close transcript
+    Copied: Transcript copied to clipboard
+    Saved: Transcript saved
+    Save Error: Unable to save transcript
+    Text File: Text file
+    Unavailable: A transcript is not available for this video.
+    Load Error: The transcript could not be loaded.
+    Empty: This transcript does not contain any text.
+    No Results: No transcript segments match your search.
+  Retry With Built-in Extraction: Retry with built-in extraction
+  Retry With yt-dlp Extraction: Retry with yt-dlp extraction
+  Reloading video after streaming URL error: Reloading video after streaming URL error
+  Configure Restricted Playback Cookies Hint: "Configure cookies in Settings → Advanced → External Software → yt-dlp Cookies."
+  Try With Configured Cookies: Try with configured cookies
+  Restricted Playback Authentication Failed Template: 'yt-dlp could not access this video with the configured cookies: {error}'
+  Save Channel Playback Speed: Save Channel Playback Speed
+  Channel Playback Speed Saved: Channel Playback Speed Saved
+  Save Channel Video Quality: Save Channel Video Quality
+  Channel Video Quality Saved: Channel Video Quality Saved
+  Save Channel Subtitles State: Save Channel Subtitles State
+  Channel Subtitles State Saved: Channel Subtitles State Saved
+  Save Channel Volume: Save Channel Volume
+  Channel Volume Saved: Channel Volume Saved
+  Save Channel Setting: Save channel setting…
+  Channel Setting Already Set: "{setting} already set to {value}"
+  Video has been saved to {playlistName}: Video has been saved to {playlistName}
+  Video has been removed from {playlistName}: Video has been removed from {playlistName}
+  There was a problem saving the video to {playlistName}: There was a problem saving the video to {playlistName}
+  There was a problem removing the video from {playlistName}: There was a problem removing the video from {playlistName}
+  Failed to load collaborators: Failed to load collaborators
+  Premiere: Premiere
+  AI: AI
+  AI-generated content: AI-generated content
+  Collaborators: Collaborators
+  Live Chat Replay: Live Chat Replay
+  Show Live Chat: Show Live Chat
+  Show Live Chat Replay: Show Live Chat Replay
+  Close Live Chat: Close Live Chat
+  Close Live Chat Replay: Close Live Chat Replay
+  Live Chat Settings: Live chat settings
+  Show Live Chat Timestamps: Show timestamps
+  Chat Filter: Chat filter
+  Top Chat: Top chat
+  All Messages: All messages
+  Live chat replay is enabled. Chat messages will appear here as the video plays.: Live chat replay is enabled.  Chat messages will appear here as the video plays.
+  Premiere started: Premiere in progress. Started {timeAgo}
+  Player:
+    Playing in Picture-in-Picture: Playing in Picture-in-Picture
+    Stream Recovery:
+      DASH Fallback: "The audio stream failed, switching to DASH formats: {error}"
+      Error Copied: "Error copied to clipboard"
+      Legacy Fallback: "The stream failed, switching to legacy formats: {error}"
+    Caption Timing:
+      Adjust Timing: Adjust timing…
+      Caption Timing: Caption timing
+      Offset: Offset (seconds)
+      Hint: Negative values show captions earlier; positive values show them later. Applies to this video only.
+      Earlier: Earlier
+      Later: Later
+      Reset: Reset
+    Most Replayed: "Most replayed"
+    Pull up for precise seeking: "Pull up for precise seeking"
+    Precise seeking, drag down to exit: "Precise seeking · Drag down to exit"
+    Cast: "Cast"
+    Music Mode: "Music Mode"
+    Music Mode Description: "Play videos at 1× and start new videos from the beginning in this tab. Your saved playback defaults stay unchanged."
+    DLNA:
+      Cast: "Cast to a DLNA device"
+      Stop: "Stop casting"
+      No Devices: "No DLNA devices found"
+      No MP4 Source: "No compatible MP4 stream for this video"
+      Error: "Could not cast the video"
+    Repeat Stats:
+      Repeat Stats: Repeat stats
+      Looping: Looping
+      Repeats: Repeat | Repeats
+      Time Spent: Time spent
+    Voice-over Translation:
+      Start: Translate
+      Cancel: Cancel
+      Progress: Preparing voice-over translation…
+      Retry: Retry
+      Error: Voice-over translation failed. Please try again later.
+      Duration Error: Voice-over translation is only available for videos up to four hours long.
+    Caption Appearance:
+      Options: Options
+      Sample: Captions look like this
+    Auto-translate: Auto-translate
+    Sleep Timer:
+      Sleep Timer: Sleep timer
+      'Off': 'Off'
+      Minutes: "{minutes} minutes"
+      End of video: End of video
+      End of current chapter: End of current chapter
+      Remaining: "{time} remaining"
+      Cancel timer: Cancel timer
+      Timer ended: Sleep timer ended
+    A-B Repeat:
+      A-B Repeat: A-B repeat
+      Off: 'Off'
+      Point A: Point A
+      Point B: Point B
+      Set Repeat Start: Set repeat start
+      Set Repeat End: Set repeat end
+      Pause Repeat: Pause A-B repeat
+      Resume Repeat: Resume A-B repeat
+      Adjust Point: 'Adjust point {point}, currently {timestamp}'
+      Clear Range: Clear A-B repeat range
+      End Before Start: Point B must be after point A.
+      Outside Duration: The timestamp must be within the video.
+      Cleared: A-B repeat cleared
+    Seek History:
+      Seek History: Seek history
+      Positions: '{count} position | {count} positions'
+      Nothing to undo: Nothing to undo
+      Nothing to redo: Nothing to redo
+    Zoom:
+      Zoom: Zoom
+      'Off': 'Off'
+    Volume Boost:
+      Volume Boost: "Volume Boost"
+      'Off': "Off"
+    Auto-generated Caption Template: "{language} (auto-generated)"
+    Up next in {seconds}: Up next in {seconds}
+    Resize dock: Resize dock
+    Resize dock width: Resize dock width
+    Play now: Play now
+    MusicPlaybackRateOverride: Detected music video, playing back at 1x
+    Normal: Normal
+    Set Default: Set Default
+    Hide Annotations: Hide annotations
+    Show Annotations: Show annotations
+    Hide: Hide
+    Show: Show
+    Scroll Mini Player:
+      Collapse Controls: "Collapse controls"
+      Expand Controls: "Expand controls"
+      Back to Top: Back to top
+      Return to Video Tab: Return to video tab
+      Hide: Hide mini player
+      Play: Play
+      Pause: Pause
+      Drag Handle: Move mini player
+      Rewind 10 seconds: Rewind 10 seconds
+      Forward 10 seconds: Forward 10 seconds
+    SponsorBlock:
+      CancelCurrentSegment: Cancel Creating Segment
+      ClearSegments: Clear Segments
+      ClearSegmentsPrompt: Are you sure you want to clear all drafted SponsorBlock segments for this video?
+      CompleteSegmentsBeforeSubmitting: Complete every drafted segment before submitting.
+      CategoryLabel: Category
+      ActionTypeLabel: Segment type
+      DuplicateSegments: Duplicate drafted segments are not allowed.
+      EndAction: "(End)"
+      EndActionLabel: End
+      EndTimeAfterStart: The segment end time must be after the start time.
+      EndTimeBeforeVideoEnd: The segment end time must be within the video duration.
+      EndTimeLabel: Segment end time
+      Guidelines: Guidelines
+      InspectSegment: Inspect
+      InvalidStartTime: Enter a valid segment start time.
+      NoSegmentsToSubmit: Create at least one complete segment before submitting.
+      NowAction: "(Now)"
+      CloseInfoPanel: Close SponsorBlock info
+      OpenInfoPanel: Open SponsorBlock info
+      OpenSubmissionMenu: Open Submission Menu
+      PreviewRequired: Please preview every segment before submitting.
+      PreviewSegment: Preview
+      SaveSegment: Save
+      SetSegmentEndNow: End Segment Now
+      StartAction: "(Start)"
+      StartSegmentNow: Start Segment Now
+      SubmissionBadRequest: SponsorBlock rejected the submission request.
+      SubmissionDuplicate: This has already been submitted before.
+      SubmissionFailed: Failed to submit SponsorBlock segments.
+      SubmissionForbidden: SponsorBlock rejected the submission.
+      SubmissionRateLimited: SponsorBlock rate limited this submission.
+      SubmissionSuccess: SponsorBlock segments submitted.
+      SubmitSegment: Submit Segment
+      SubmitSegments: Submit
+      StartTimeLabel: Segment start time
+      TimeDivider: to
+      SkipPrompt: Skip {segmentCategory}?
+      SkipPromptAction: Skip
+      SkipToHighlight: Skip to Highlight?
+      SkippedToHighlight: Skipped to Highlight
+      SkipToastUnskip: Unskip
+      SkipToastReskip: Reskip
+      MutedSegment: "{segmentCategory} Muted"
+      MuteToastUnmute: Unmute
+      InfoPanelLoading: Segments still loading...
+      InfoPanelHasSegments: This video has segments in the database!
+      InfoPanelNoSegments: No segments found
+      RefreshInfo: Refresh SponsorBlock information
+      ContributionStatsTitle: Your contributions
+      ContributionStatsLoading: Loading contribution stats...
+      ContributionStatsError: Contribution stats are unavailable. Try refreshing.
+      ContributionStatsNoUserId: Submit a segment or import your SponsorBlock user ID to see contribution stats.
+      Submissions: Submissions
+      Segments: Segments
+      TimeSaved: Time saved
+      AutoSkipEnabled: Automatically skip segments
+      AutoSkipOn: 'On'
+      AutoSkipOff: 'Off'
+      WhitelistChannel: Whitelist channel
+      ChannelWhitelisted: Whitelisted
+      RemoveChannelFromWhitelist: Remove channel from whitelist
+      MuteSegment: Mute segment
+      SkipSegment: Skip segment
+      CloseSegmentActions: Close segment actions
+      FullVideo: Full Video
+      FullVideoLabel: "{segmentCategory} · Full Video"
+      MuteActionType: Mute
+      MutePrompt: Mute {segmentCategory}?
+      SkipActionType: Skip
+      LockedSegment: Locked segment
+      UpvoteSegment: Upvote
+      DownvoteSegment: Downvote
+      VoteFailed: Failed to submit SponsorBlock vote.
+      ChangeCategory: Change category
+      CopyAndDownvote: Copy & downvote
+      SubmitCategoryVote: Submit category vote
+      CategoryVoteSuccess: Category vote submitted.
+    Google Cast:
+      Position: "Playback position"
+      Invalid Authentication: "The receiver sent an invalid authentication response."
+      Authentication Declined: "The receiver declined authentication."
+      Audio Only Receiver: "The receiver only supports audio casting."
+      Disconnected: "Receiver disconnected."
+      Timeout: "Receiver did not respond."
+      Busy: "Another window is already casting."
+      Not Authorized: "Activate this window and try again."
+      Invalid Request: "Invalid casting request."
+      IPv4 Required: "An IPv4 connection is required."
+      Launch Failed: "Could not start the receiver."
+      Load Failed: "Receiver could not load the video."
+      Cancelled: "Casting was cancelled."
+      Private Not Authorized: "Private media access was not approved."
+      Invalid Subtitles: "Invalid casting subtitles."
+      Discovery Failed: "Could not discover receivers."
+      Preparing Video: "Preparing video for casting…"
+      Connecting: "Connecting to {device}…"
+      Starting Receiver: "Starting the Cast receiver…"
+      Loading Video: "Loading video on the receiver…"
+      Buffering: "Buffering on {device}…"
+      Allow Private Instance: "Allow this cast to read media from the private Invidious instance {instance}?"
+      Cast: "Cast to a Google Cast device"
+      Connected: "Casting to {device}"
+      Rewind: "Rewind 10 seconds"
+      Forward: "Forward 10 seconds"
+      Subtitles Off: "Subtitles off"
+      Return: "Return to local playback"
+      No Devices: "No Google Cast devices found"
+      No Source: "No compatible stream for Google Cast"
+      Error: "Could not cast the video"
+      Error With Details: "Could not cast the video: {error}"
+      Untrusted Receiver: "The receiver's certificate is not trusted. Use an authenticated Google Cast receiver."
+    FCast:
+      Cast: "Cast to an FCast receiver"
+      No Devices: "No FCast receivers found"
+      No Source: "No compatible stream for FCast"
+    Secondary Captions: Secondary Captions
+    Subtitle File:
+      Load: "Load subtitle file…"
+      Subtitle Files: "Subtitle files"
+      Error: "Could not load the subtitle file. Choose an SRT or WebVTT file."
+  Station: Station
+  Playlist:
+    Unavailable videos are hidden: 1 unavailable video is hidden | {count} unavailable videos are hidden
+  External Media:
+    Dislikes: "dislike | dislikes"
+    Reposts: "repost | reposts"
+    Saves: "save | saves"
+    Series: Series
+    Season: Season
+    Season Number: Season number
+    Episode: Episode
+    Episode Number: Episode number
+    Track: Track
+    Track Number: Track number
+    Artists: Artists
+    Album: Album
+    Genres: Genres
+    Media Type: Media type
+    Availability: Availability
+    Age Limit: Age limit
+    Release Date: Release date
+    Availability Values:
+      public: Public
+      private: Private
+      premium_only: Premium only
+      subscriber_only: Subscribers only
+      needs_auth: Sign-in required
+      unlisted: Unlisted
+  How this was made: How this was made
+  Save Queue to Playlist: "Save queue to playlist"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.
+  External Player:
+    LaunchFailedTemplate: Could not start {externalPlayer}. Make sure it is installed, or set its executable path in the external player settings.
+    Confirm Arguments Title: "Run the external player with custom arguments?"
+    Confirm Arguments Message: "{externalPlayer} will start with these custom arguments:"
+    Confirm Arguments Warning: "Some arguments can run programs or overwrite files. Only continue if you added them yourself."
+    Run: "Run"
+    LaunchCanceledTemplate: "Did not open {externalPlayer}"
+Playlist:
+  Playlist Already Preloaded: "All playlist videos are already preloaded"
+  Playlist Preload Progress: "Preloading videos: {completed} of {requested}"
+  Close Playlist: Close Playlist
+  Preload Playlist: "Preload all videos"
+  Preload Playlist Warning Title: "Preload all videos?"
+  Preload Playlist Warning: "Preloading requests every video in this playlist from YouTube. Sending many requests in a short time can get your IP address temporarily blocked by YouTube. Do you want to continue?"
+  Preloading Playlist: "Preloading all videos..."
+  Playlist Preload Complete: "Preloaded videos: {count}."
+  Playlist Preload Partial: "Preloaded {preloaded} of {requested} videos. {failed} could not be preloaded."
+  Playlist Preload Pagination Failed: "The full playlist could not be loaded, so preloading was cancelled."
+  Unavailable videos are hidden: Unavailable videos are hidden
+  Add Playlist to Queue: "Add playlist to queue"
+  Playlist Added to Queue: "Playlist added to queue"
+Change Format:
+  yt-dlp Error Template: "yt-dlp could not provide the streams: {error}"
+  Local Video File: Local video file
+  Local Audio File: Local audio file
+  Online Video: Online video
+  Stream Source: Stream source
+  Stream Extraction Method: Stream extraction method
+  Playback Engine: Playback engine
+  Streaming Protocol: Streaming protocol
+  Not Available For This Video: Not available for this video
+  Protocols:
+    Progressive: Progressive
+  Descriptions:
+    Local File: Played directly from the downloaded file on this device
+    Online Video: Load streaming formats from the configured online source
+    Dash: Adaptive quality, multiple audio tracks and the highest resolutions
+    Legacy: A single file with video and audio combined, limited to lower resolutions
+    Audio: Audio only, useful for saving bandwidth or listening in the background
+  yt-dlp Fallback Template: 'yt-dlp could not provide the streams, using the built-in engine instead: {error}'
+  yt-dlp Default Clients Fallback: The preferred yt-dlp clients could not provide playable streams, trying yt-dlp's default clients instead
+  Built-in Fallback Template: 'The built-in engine could not play the stream, trying yt-dlp instead: {error}'
+Share:
+  Shared YouTube Link: "Shared YouTube link"
+  Open in Player: "Open in player"
+  No YouTube Link: "The shared text does not contain a supported YouTube link."
+  Loading Video Information: "Loading video information…"
+  Video Information Failed: "Could not load video information. Try again or open the link."
+  Share Link: "Share Link"
+  Share failed: "Could not share the link"
+  Timestamp Link Copied: Timestamp link copied to clipboard
+Context Menu:
+  Opened in a Background Tab: "Opened in a background tab"
+  Open in a Background Tab: "Open in a Background Tab"
+  Select Tab: Select Tab
+  Close Tabs Before: Close Tabs Before
+  Close Tabs After: Close Tabs After
+  Close Other Tabs: Close Other Tabs
+  Copy {service} link without playlist: "Copy {service} link without playlist"
+  Context Menu: Context menu
+  Select All: Select All
+  Save Image As…: Save Image As…
+  Copy Image: Copy Image
+  Copy Image Address: Copy Image Address
+  Cancel Refresh: Cancel Refresh
+  Reload Videos: Reload Videos
+  Reload Shorts: Reload Shorts
+  Reload Live: Reload Live
+  Reload Posts: Reload Posts
+  Reload All Feeds: Reload All Feeds
+  Reload RSS Feeds: Reload RSS Feeds
+  Reload Platforms: Reload Platforms
+  Close Multiple Tabs: Close {count} Tabs
+  Duplicate Tab: Duplicate Tab
+  Duplicate Multiple Tabs: Duplicate {count} Tabs
+  Move Tab: Move Tab
+  Move Tabs: Move Tabs
+  Move Tab to Group: Move Tab to Group
+  Collapse Group: Collapse Group
+  Expand Group: Expand Group
+  Move Tabs to Group: Move Tabs to Group
+  Manage Tab Groups…: Manage Tab Groups…
+  To Beginning: To Beginning
+  To End: To End
+  Close Tabs: Close Tabs
+  To the Top: To the Top
+  To the Left: To the Left
+  To the Bottom: To the Bottom
+  To the Right: To the Right
+  Other Tabs: Other Tabs
+  Copy YouTube Link: Copy YouTube Link
+  Copy YouTube Links: Copy YouTube Links
+  Pin Tab: Pin Tab
+  Pin Tabs: Pin Tabs
+  Unpin Tab: Unpin Tab
+  Unpin Tabs: Unpin Tabs
+  Tab Color: Tab Colour
+  Default: Default
+  Purple: Purple
+  Reopen Closed Tab: Reopen Closed Tab
+  Reload Tab: Reload Tab
+  Reload Tabs: Reload Tabs
+  Load Tab: Load Tab
+  Load Tabs: Load Tabs
+  Unload Tab: Unload Tab
+  Unload Tabs: Unload Tabs
+  Unload Tabs Failed: "Could not unload the selected tabs."
+  Move Tab to Window: Move Tab to Window
+  Move Tabs to Window: Move Tabs to Window
+  Open in a New Tab: Open in a New Tab
+  Open in a New Window: Open in a New Window
+  Copy Link: Copy Link
+  Copy Invidious Link: Copy Invidious Link
+  Search Selection in New Tab: Search "{selection}" in a New Tab
+  Search Selection in New Window: Search "{selection}" in a New Window
+  Search With: Search with {engine}
+  Search With Multiple: Search with...
+  Selection Too Long: Selection is too long for search (> {count} characters)
+  Background Tab: Background tab
+Tab Organizer:
+  Tab History: "Tab history"
+  Current Page: "Current page"
+  Icon Labels:
+    Podcast: 'Podcast'
+    Clock: 'Clock'
+    Puzzle Piece: 'Puzzle Piece'
+    People: 'People'
+    Chart: 'Chart'
+    Calendar: 'Calendar'
+    Images: 'Images'
+    Music: 'Music'
+    Folder: Folder
+    Bookmark: Bookmark
+    Favorites: Favourites
+    Videos: Videos
+    Gaming: Gaming
+    Research: Research
+    Art: Art
+    Travel: Travel
+  Group Icon: Group icon
+  Title: Tab Organiser
+  Open Tab Count: "{count} open tab | {count} open tabs"
+  Search Label: Search tabs
+  Selected Count: "{count} tab selected | {count} tabs selected"
+  Tab Count: "{count} tab | {count} tabs"
+  Select All: Select All
+  Select None: Select None
+  Move To Group: Move selected tabs to group
+  Choose Group: Choose a group
+  Ungrouped: Ungrouped
+  Pin: Pin
+  Unpin: Unpin
+  Load: Load
+  Unload: Unload
+  Unload All: Unload All
+  Close All: Close All
+  Ungroup: Ungroup
+  Group Name: Group name
+  No Color: No colour
+  Create Group: Create Group
+  Expand Group: Expand group
+  Collapse Group: Collapse group
+  Expand Group Label: Expand {name}, {count} tab | Expand {name}, {count} tabs
+  Rename Group: Rename {name}
+  Change Group Color: Change colour for {name}
+  Move To Window: Move to Window
+  Choose Window: Choose a window
+  Select Tab: Select {title}
+  Active: Active
+  Pinned: Pinned
+  Unloaded: Unloaded
+  Playing: Playing
+  Close Tab: Close {title}
+  No Open Results: No open tabs match this search.
+  Recently Closed: Recently Closed
+  Clear: Clear
+  No Closed Results: No recently closed tabs match this search.
+  Drag Tab: Drag to move to a group
+Chapters:
+  Auto-generated: These chapters are auto-generated
+  Open Chapters: Open Chapters
+  Close Chapters: Close Chapters
+  Copy Timestamp Link: Copy link at {timestamp}
+  Loop Chapter: 'Loop chapter: {chapter}'
+  Looping Chapter: 'Looping chapter: {chapter}'
+  Chapter Loop Stopped: 'Stopped looping chapter'
+  Sync to Video Time: 'Sync to video time'
+Comments:
+  Image unavailable: "Image unavailable"
+  Comment Count: 1 Comment | {count} Comments
+  Show Comments: Show Comments
+  Getting comment replies, please wait: Getting comment replies, please wait
+  Reload Comments: Reload Comments
+  Reply Count: 1 reply | {replyCount} replies
+  Comments are turned off: Comments are turned off
+  YouTube did not provide advertised replies: YouTube showed that this comment has replies, but did not provide them. They may have been deleted or hidden, so the reply button was removed.
+  Pinned by you: Pinned by you
+  A reply is pinned: A reply is pinned
+  Filter loaded comments: Filter loaded comments
+  Comment filters: Comment filters
+  From creator: From creator
+  Contains timestamps: Contains timestamps
+  Pin comment by author: Pin comment by {author}
+  Unpin comment by author: Unpin comment by {author}
+  Edited: "(edited)"
+  Highlighted comment: Highlighted comment
+  Highlighted reply: Highlighted reply
+  Search loaded comments: Search loaded comments
+  Loaded comment search result count: 1 of {total} loaded comments | {count} of {total} loaded comments
+  No loaded comments match your filters: No loaded comments match your filters
+  YouTube comment link copied to clipboard: YouTube comment link copied to clipboard
+  Translate to {language}: Translate to {language}
+  Show original: Show original
+  Translating comment, please wait: Translating comment, please wait
+  Comment translation failed: Comment translation failed
+Description:
+  Title: Description
+  Copy Description: Copy Description
+  Description Copied: Description copied to clipboard
+  Video Category: 'Video Category:'
+  Video Tags: Video Tags
+  Games: Games
+  Music: Music
+Tooltips:
+  YouTube Account Settings:
+    Sync Subscriptions: "Channels you subscribe to on YouTube are added to All Channels, and channels you unsubscribe from there are removed from every profile. Subscribing or unsubscribing in All Channels here does the same on YouTube."
+    Sync Playlists: "Your YouTube playlists, Watch later and Liked videos appear in Your playlists, and changes you make to them here are made on YouTube too. They are not synced to your other devices or included when you export all playlists or back up your data. Turning this off removes them from this device but not from YouTube."
+    Add to YouTube Watch History: "Videos you play are added to your YouTube watch history, so YouTube's recommendations learn from them. Nothing is added while the history is paused on YouTube."
+  General Settings:
+    Built-in Streams: |
+      Automatic plays most videos through YouTube's visionOS client, which starts faster and supports automatic quality. Live streams and videos it can't play use SABR.
+      SABR only always uses YouTube's web client, which starts slower and has no automatic quality.
+    Title Lines: "Shortens video and playlist titles in lists and grids to the chosen number of lines with an ellipsis, for more uniform cards. Hover over a title to see it in full."
+    Close Window With Last Tab: 'When off, closing the last tab opens a new tab instead, so the window stays open until you close it.'
+    Preferred Video Codec: |
+      Auto prefers codecs that your device can decode in hardware.
+      AV1: the best quality for the least data, but not every video has it. Without hardware decoding, it can drain the battery or drop frames.
+      VP9: a balance of efficiency and compatibility, usually available up to the highest resolution.
+      H.264: the easiest to decode on almost any device, but it uses more data and usually stops at 1080p.
+      Changes apply to the next video. If the preferred codec is unavailable, another one is used.
+    Always Use Backup Media Server: "Streams videos from the backup server YouTube names instead of the assigned one, for example when your internet provider's cache is often slow. Otherwise OpenTubeX switches only when the assigned server doesn't respond."
+    Automatically switch stream extraction methods: "Try yt-dlp if built-in playback fails, or built-in playback if yt-dlp fails."
+    Enable Tabs: "Keeps the current page open. Other tabs are kept until the app restarts; enable tabs again to restore them."
+    Data Saver Thumbnails: "Use lower-resolution thumbnails to reduce data usage."
+    Use AI Translation Completions: Fill gaps in human translations with AI-generated text. Human translations always take priority.
+    Update Relative Timestamps: Updates relative timestamps throughout the app while a page remains open. When disabled, they update only after reloading or revisiting the page.
+    Stream Extraction Method: |
+      Choose how OpenTubeX obtains video streams. yt-dlp must be available when selected.
+      Videos may take longer to start when using yt-dlp.
+    Avoid translation: |
+      Disable YouTube's autotranslation of video titles, descriptions and chapters.
+      Entire App also shows channel names and descriptions in their original language.
+      Too many requests, such as fetching video titles across lists, may temporarily
+      impact app reliability.
+    Show Thumbnail Previews: Show animated previews when hovering over video thumbnails.
+    Startup Behavior: |
+      Choose what OpenTubeX does when it starts.
+      Load all tabs restores every saved tab immediately, but background tabs will not autoplay videos.
+      Load previously loaded tabs reloads the tabs that were loaded when OpenTubeX closed and keeps the others unloaded.
+      Load last active tab restores the previous session with the other tabs opened but unloaded; they load when you click them.
+      Start with an empty session skips the saved tabs and opens a fresh window.
+    Remember Tab Navigation History: Each tab's back and forward navigation history is saved and restored when OpenTubeX restarts.
+    Yattee Server: The yattee-server instance that OpenTubeX loads videos, channels, playlists and search results from. The username and password are only stored on this device.
+    Proxy Videos Through Yattee Server: Relays video and audio streams through the server. Leave this on unless the server shares your internet connection, because YouTube only serves streams to the address that requested them. Thumbnails always load directly from YouTube.
+    Notifications: Choose how OpenTubeX notifies you about live streams, new uploads, and automatic downloads. With System and in-app, notifications appear inside OpenTubeX while you use it and as system notifications otherwise, and the bell keeps them. Off also hides the notification options.
+    Ignore System Haptics Setting: Vibrate on long presses and gestures even when touch feedback is turned off in Android's settings.
+  Proxy Settings:
+    IP Block Recovery Script Path: Script file path to run when an IP block is detected. OpenTubeX waits for it to finish, then reloads the video. If fallback is enabled, it runs only when fallback also fails.
+  Player Settings:
+    Rewind on Resume: "Jumps back this many seconds when you resume a paused video, so you can catch the last moments again. Set to 0 to turn it off."
+    Minimum Pause Before Rewinding: "Only rewinds when the video was paused for at least this long. Set to 0 to rewind after every pause."
+    Mono Audio: 'Plays the left and right audio channels in both ears. Use it when a video''s sound only comes out of one side of your headphones.'
+    Normalize Loudness: 'Turns down videos that are louder than most, so the volume doesn''t jump between videos. Quiet videos keep their volume. Only works for videos loaded with the Local API.'
+    Pause on Stream Recovery: "When the video stream fails and the player reloads it or switches to another format or engine, pause playback and keep the error at the top of the player until you dismiss it. When disabled, playback continues and the error appears briefly as a notification."
+    Continue Playback When Screen Is Locked: 'Keeps audio playing in the background and provides Android media controls. Turn this off to pause when the app is no longer visible.'
+    Enable Caption Translations: When enabled, the captions button and C shortcut prefer an automatically translated track in the preferred caption language when the video does not provide a matching original track.
+    Use Quick Playback Speed Bar: Shows a quick playback speed bar in the player controls on the right side. If manual per-channel playback speed saving is enabled, the bar also includes the button to save the speed for the current channel.
+    Multiply Seek Interval by Playback Rate: When enabled, seek intervals (arrow keys and J/L) are multiplied by the current playback rate. When disabled, seek intervals remain constant regardless of playback rate.
+    Show Playback Rate Adjusted Timestamp: When enabled and playback speed differs from 1x, the player shows playback-rate-adjusted timestamps in parentheses after the normal timestamp display.
+    Use YouTube-style Shorts: Displays Shorts in a portrait grid on subscription and channel pages and uses the YouTube-style Shorts player.
+    Loop Shorts: When enabled, Shorts restart automatically. When disabled, Shorts stop at the end and show a replay button.
+    Show Skip Silence Toggle: Shows an on/off toggle for skipping silence in the player's settings menu.
+    Enable Skip Silence by Default: Enables silence skipping for new tabs. Changing it in one tab does not affect other tabs.
+    Enable Video Zoom: Shows the Zoom control in the player's settings menu and enables its keyboard shortcuts and panning controls.
+    Enable Seek History: Remembers where you jumped from in each video until the app closes. Shows the Seek history list in the player's settings menu and enables its keyboard shortcuts.
+    Show Seek Bar Filmstrip: "Dragging the seek bar knob shows a strip of frames around where you'll land, and pulling up onto it seeks precisely. When disabled, dragging shows a single thumbnail, as when hovering."
+    Voice-over Translation: Sends the video ID, duration, and selected language to the unofficial Yandex voice-over translation service when you request a translation. Disabled by default.
+    Hold to Speed Up: Hold the Spacebar or left mouse button over the player to temporarily multiply the current playback speed by the selected amount.
+    Ambient Mode: Blends the video's colours into the area around the player.
+    Default Volume: Disabled while Remember Volume is enabled. Turn off Remember Volume to set a fixed startup volume for each video.
+    Parallel Segment Loading: |
+      How many video and audio segments to load at once ahead of playback.
+      Higher values may help on slow or unstable connections, but use more bandwidth and memory.
+      They may also make Auto underestimate the connection speed and select a lower quality.
+      Streams limited to one request at a time ignore this setting.
+    Preload Upcoming Videos: "Fetches and caches yt-dlp stream URLs for the videos that can play next. The queue takes priority over playlists and recommendations."
+    Upcoming Videos to Preload: "The maximum number of upcoming videos whose yt-dlp stream URLs are fetched in the background."
+    Concurrent Preloads: "The maximum number of yt-dlp processes used to preload videos at once. Higher values use more CPU, memory, and network bandwidth."
+    Ignore System Rotation Lock for Fullscreen: Use physical device rotation to enter and exit fullscreen even when Android's auto-rotate is off.
+    Ask Before Preloading Large Playlists: "Asks for confirmation before preloading all videos of a playlist with more than {count} videos."
+  Download Settings:
+    Download Folder: Videos are saved to this folder. Leave blank to use your system's Downloads folder.
+    Global Additional yt-dlp Arguments: Additional command line arguments passed to yt-dlp for every download, for example --cookies-from-browser firefox.
+    Concurrent Downloads: The maximum number of yt-dlp jobs that may run at once.
+    Bandwidth Limit: Caps the queue's combined transfer rate by dividing this limit between concurrent jobs. Enter 0 for no limit.
+  External Software Settings:
+    yt-dlp Source: OpenTubeX can either use the yt-dlp installed on your system or download and manage its own copy of yt-dlp, which is stored in the user data directory.
+    yt-dlp Channel: Select which yt-dlp release channel OpenTubeX downloads and manages. Stable is recommended for most users.
+    FFmpeg Source: OpenTubeX can either use FFmpeg and FFprobe installed on your system or download and manage its own static builds, which are stored in the user data directory.
+    Managed Tool Updates: Choose whether managed tools update automatically, ask before updating, or only update through the manual buttons. Missing tools are still downloaded when required.
+    yt-dlp Executable Path: By default, OpenTubeX will assume that yt-dlp can be found via the PATH environment variable. If needed, a custom path can be set here.
+    Cookie Source: Choose whether yt-dlp should read a Netscape cookie file or cookies from an installed browser for authenticated playback.
+    Cookie File: Select a Netscape-formatted cookie file for authenticated playback.
+    Browser for Cookies: Browser support is read from the selected yt-dlp executable. OpenTubeX asks yt-dlp to read this browser when authenticated playback is requested.
+    Browser Profile: Optional browser profile name or folder. Leave blank to use the most recently accessed profile.
+    Always Use Cookies: "Use the configured cookies for downloads, subtitles and whenever yt-dlp extracts streams. This does not switch the stream extraction method to yt-dlp. With yt-dlp selected, account-only formats may become available, including YouTube Premium's enhanced bitrate when the account has access."
+    FFmpeg Executable Path: FFmpeg is required for merging separate video and audio streams and for audio conversion. By default, OpenTubeX will assume that FFmpeg can be found via the PATH environment variable. If needed, a custom path can be set here.
+    Use cookies for subtitles: "Use the configured cookies for subtitles and automatic translations. Also enabled by \"Always Use Cookies\"."
+  Distraction Free Settings:
+    Hide Playlist Stats: Hides the video count, view count, last updated date and total duration on playlist pages.
+    Count Watch Time From: "All devices counts every device that syncs watch statistics. This device counts only what you watch here."
+    When a Limit Is Reached: "Pause Playback lets you add 15 minutes or ignore the limit for today. With a settings password, you can only raise a limit in Settings."
+    Grayscale: "Shows the app in shades of grey, so it draws less attention. During Bedtime follows the bedtime reminder's schedule."
+    Apply Grayscale To: "Videos and Images keeps the interface in colour and turns content such as videos, thumbnails, and avatars grey."
+    Daily Watch Time Limit: "Counts what you watched today on all devices that sync watch statistics, including Shorts."
+    Daily Shorts Limit: "Counts the Shorts you watched on this device today."
+    Take a Break Reminder: "Pauses the video after this much watching. A pause of 10 minutes or more starts the count again."
+    Bedtime Reminder: "Pauses the video and reminds you to stop watching between the start and end time."
+    Shorten View Counts: Shows view, comment and comment like counts that YouTube has already rounded in a shortened form, e.g. 14K instead of 14,000. Exact counts are always shown in full.
+  Subscription Settings:
+    Show New Content Feed: Shows a New tab containing subscription feed items that were not present during the previous fetch.
+    Enable RSS Feeds: Shows an RSS tab on the Subscriptions page with the items of RSS or Atom feeds, so you can follow creators on other platforms. Its items open with yt-dlp.
+    Show New Content Indicators: Shows a small dot beside subscription feed items that were not present during the previous fetch.
+    Show Scheduled Live Streams / Premieres First: Keeps upcoming live streams and premieres at the top of the subscription feed. When disabled, they remain at their announcement position until they start. Refresh the subscription feed once after disabling to retrieve announcement dates for existing scheduled entries.
+    Auto Refresh Interval: "How often OpenTubeX automatically refreshes your subscription feed while the app is open. On Android, a nonzero interval also refreshes it while the app is closed."
+    Refresh Subscriptions While App Is Closed: "Refreshes feeds using your selected settings. On desktop, OpenTubeX stays in the system tray until you quit. Android controls when background refreshes run."
+    Notify About New Uploads: Shows system notifications on this device for channels whose notifications you turned on in their subscription settings. OpenTubeX checks for new content when subscriptions refresh, so choose an auto refresh interval. To be notified while the app is closed, also enable refreshing while the app is closed.
+    RSS Feeds Auto Refresh Interval: How often OpenTubeX automatically refreshes your RSS feeds while the app is open.
+    Faster Subscription Refresh: "Checks each channel's RSS feed first and only loads the videos, Shorts and live streams of channels with new uploads. Automatic refreshes also skip channels loaded in the last 10 minutes. For channels without new uploads, view counts, removed videos and changed titles only update every few hours, and new uploads may appear later when the RSS feed lags behind. Not available with the Invidious API."
+    Platforms Auto Refresh Interval: How often OpenTubeX automatically refreshes the channels you follow on other platforms while the app is open.
+    Twitch Notify When Live: Notifies you when one of your followed Twitch channels starts streaming. OpenTubeX checks every few minutes while it is open, and also while it is closed if it refreshes subscriptions then.
+  Theme Settings:
+    Only Show Important Notifications: Hides in-app notifications that only confirm an action or report a status, including ones that offer Undo. Errors, warnings, reminders you set up, and notifications that ask for a decision, such as update prompts, still appear. Background progress, such as subscription refreshes, shows in the global progress bar instead of a notification. System notifications are not affected.
+    Visible Search Suggestions: "Sets how many search history entries and suggestions the search bar shows before its list scrolls. The list never extends past the bottom of the window."
+    Thumbnail Size: "Scales video thumbnails in grids and lists. Grids with a fixed column count or the Full Width view type fill each row instead, so there it only changes list thumbnails and Shorts. Phone-sized windows limit grid thumbnails to 100%."
+    Playlist Thumbnail Size: "Scales video thumbnails on playlist pages. Grids with a fixed column count or the Full Width view type fill each row instead, so there it only changes list thumbnails and Shorts. Phone-sized windows limit grid thumbnails to 100%."
+    Compact Settings Categories: "Hides descriptions and reduces the height of settings categories."
+    Show Progress as Notification: Shows a persistent notification with live progress for background operations, such as subscription refreshes and managed tool downloads, instead of using the global progress bar.
+    Always Show Scrollbars: Keeps the scrollbars visible at all times. When disabled, they fade out shortly after you stop moving the mouse and reappear as soon as you move it again.
+    Scroll Speed: Changes how far mouse-wheel and touchpad wheel gestures scroll.
+    Use Fixed Tab Width: Gives every tab in the horizontal tab bar the same width instead of sizing them to their title.
+    Use Custom Title Bar: Replaces the system title bar with the tab bar, or with the top navigation when tabs are not at the top, to save vertical space. The window controls appear in the corner of that bar.
+    Use Grid Player Menu: Arranges the video player's settings menu as a grid of tiles instead of a list of rows.
+    Modal Backdrop: "Sets how the app looks behind dialogues and menus. Blurring it can be slow on less powerful devices."
+    Click Scrollbar Track to Scroll: "Clicking a scrollbar outside its handle scrolls about one page towards the click. While this is on, a visible scrollbar catches clicks meant for items under it. The tab bar's scrollbar always works this way."
+  Experimental Settings:
+    Disable Hardware Acceleration: Disables GPU hardware acceleration. May fix graphical issues, but will probably perform worse.
+  SponsorBlock Settings:
+    Always Show DeArrow Badge: Keep the DeArrow button visible on videos whose title or thumbnail DeArrow replaced, instead of only on hover.
+The playlist is at the beginning. Enable loop to continue playing: The playlist is at the beginning. Enable loop to continue playing
+External link opening has been disabled in Settings → Privacy: External link opening has been disabled in Settings → Privacy
+KeyboardShortcutPrompt:
+  Mark Seen or Watched: "Mark the focused item as seen, or toggle whether it is watched"
+  Toggle Quick Bookmark: Add to or remove from the quick bookmark playlist
+  Reopen Closed Window: Reopen the last closed window
+  Edit Hint: Select a shortcut, then press a new key combination. Press Backspace or Delete to unassign it.
+  Change Shortcut: Change shortcut for {action}
+  Press Shortcut: Press shortcut…
+  Unassigned: Unassigned
+  Reset Shortcut: Reset shortcut for {action}
+  Reset to Defaults: Reset to defaults
+  Shortcut Already Assigned: Shortcut already assigned
+  Shortcut Conflict: "{shortcut} is already assigned to {actions}. Do you want to reassign it?"
+  Reserved Shortcut Conflict: "{shortcut} is reserved for {actions} and cannot be reassigned."
+  Reassign: Reassign
+  Sections:
+    App:
+      Tabs: App: Tabs
+      Search and Page: App: Search & Page
+      Window and View: App: Window & View
+  New Tab: Create a new tab
+  Close Tab: Close the current tab
+  Reload Tab: Reload the current tab
+  Reopen Closed Tab: Reopen the last closed tab
+  Next Tab: Switch to the next tab
+  Previous Tab: Switch to the previous tab
+  Switch to Tab: Switch to tab 1–9
+  Toggle Tab Orientation: Switch between tab layouts
+  Find in Page: Find text on the current page
+  Find Next Match: Jump to the next match
+  Find Previous Match: Jump to the previous match
+  Toggle Normal Playback Speed: Toggle between 1x speed and the previous playback speed
+  Toggle Skip Silence: Toggle skip silence
+  Set A-B Repeat Point A: Set A-B repeat point A
+  Set A-B Repeat Point B: Set A-B repeat point B
+  Clear A-B Repeat: Clear A-B repeat
+  Video Zoom In: Zoom into the video
+  Video Zoom Out: Zoom out of the video
+  Tab Switcher: Tab switcher
+  Undo Seek: Undo the last seek
+  Redo Seek: Redo an undone seek
+CommandPalette:
+  Title: Command palette
+  Open: Open command palette
+  Search Label: "Search commands, settings, and local videos"
+  Search Placeholder: Search commands, settings, and local videos…
+  Results: "Results"
+  No Results: "No matching results"
+  Result Count: "{count} result found | {count} results found"
+  Move: Move
+  Run: Run
+  Keys:
+    Up: "↑"
+    Down: "↓"
+    Escape: Esc
+  Switch to Tab: 'Switch to tab: {title}'
+  Switch Profile: 'Switch profile: {name}'
+  Open Playlist: 'Open playlist: {name}'
+  Cancel Download: 'Cancel download: {title}'
+  Groups:
+    App: App
+    Navigation: Navigation
+    Tabs: Tabs
+    Local Videos: Local videos
+  Unavailable:
+    Current Page: Already on this page
+    No History: No page in this direction
+    Desktop: Only available in the desktop app
+    Build: Not available in this build
+    One Tab: Open another tab first
+    Active Tab: This is the active tab
+    Active Profile: This is the active profile
+    Download Finished: This download is no longer running
+    Video: Open a video first
+Downloads:
+  File Name Template Invalid: 'Use a relative path inside the download folder without "..", "~", "$", "%", or a prefix such as "thumbnail:".'
+  Search Completed: "Search completed downloads by title or channel"
+  Format: "Format"
+  All Formats: "All formats"
+  Largest First: "Largest first"
+  Smallest First: "Smallest first"
+  No Matching Downloads: "No completed downloads match. Try a different search or filter."
+  Add Download: Add download
+  Preparing: Preparing…
+  Export Failed: "Could not save the downloaded file. Choose a writable download folder and retry."
+  Native Code Blocked: "Android blocked yt-dlp from loading its native libraries. On GrapheneOS, open this app’s App info, set “Dynamic code loading via storage” under “Exploit protection” to “Allowed”, and retry."
+  Download Stopped Unexpectedly: "The download stopped unexpectedly."
+  Remove File Permanently Warning: "This will permanently delete \"{title}\"."
+  Download: Download
+  Download Video: Download Video
+  Download Playlist: Download Playlist
+  Downloading: Downloading
+  Queue: Queue
+  Downloaded: Downloaded
+  Canceled: Cancelled
+  Open Downloads: Open Downloads
+  No Downloads: No downloads yet
+  No Downloads Description: Downloads you start will appear here.
+  Clear Failed Canceled Skipped And Missing: Clear failed, cancelled, skipped, and missing
+  Clear From List: Clear From List
+  Show in Folder: Show in Folder
+  Play Download: Play download
+  Retry Download: Retry download
+  Pause Download: Pause download
+  Resume Download: Resume download
+  Move Earlier: Move earlier
+  Move Later: Move later
+  Pause All: Pause all
+  Resume All: Resume all
+  Retry All: Retry all failed downloads
+  Total Size: 'Total size: {size}'
+  Local File: Local file
+  Available Offline: Available offline
+  Remove File: Remove File
+  Remove File Confirmation: Remove downloaded file?
+  Remove File Warning: This will move "{title}" to your device's bin.
+  File Not Found: The downloaded file could not be found.
+  Files Missing: The downloaded file is no longer available on the filesystem. | The downloaded files are no longer available on the filesystem.
+  Files Available: "{available} of {total} downloaded files are available."
+  More Files: 1 more file | {count} more files
+  Template Used: 'Template: {name}'
+  Template: Template
+  Unsaved: Unsaved
+  Media Type: Media Type
+  Video: Video
+  Audio: Audio
+  Maximum Resolution: Maximum Resolution
+  Best Available: Best Available
+  Automatic: Automatic
+  Container: Container
+  Video Codec: Video Codec
+  Audio Codec: Audio Codec
+  File Name Template: File Name Template
+  File Name Template Help: 'Available fields: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
+  Time Range and Chapters: Time Range and Chapters
+  Start Time: Start time
+  End Time: End time
+  Split by Chapters: Split into separate files by chapter
+  Remove Segments: Remove segments
+  Subtitles and Metadata: Subtitles and Metadata
+  Include Subtitles: Include subtitles
+  Embed Subtitles: Embed subtitles in the media file
+  Subtitle Format: Subtitle Format
+  Subtitle Languages: Subtitle Languages
+  Subtitle Languages Help: 'Comma-separated yt-dlp language selectors, for example: en.*,de.*'
+  Embed Cover Art: Embed thumbnail as cover art
+  Embed Metadata: Embed title, author, description, and chapters
+  Additional yt-dlp Arguments: Additional yt-dlp Arguments
+  Template Name: Template Name
+  Save Template: Save Template
+  Delete Template: Delete Template
+  Template Saved: Saved download template "{name}"
+  Template Name Exists: A download template named "{name}" already exists.
+  Choose Folder: Change
+  Select Folder: Choose Folder
+  Folder Required: Choose a download folder to enable downloads.
+  System Downloads Folder: System Downloads Folder
+  Processing: Processing…
+  Queued: Queued
+  Queued Position: Queued, position {position}
+  Paused: Paused
+  Pausing: The current job will finish, then the queue will pause
+  Download Complete: Download complete
+  Download Cancelled: Download cancelled
+  Download Failed: Download failed
+  File Name Shortened: The file name was shortened because the video title was too long.
+  Some Videos Not Downloaded: Some videos in this playlist could not be downloaded.
+  Playlist Video Position: Video {index} of {count}
+  Insufficient Disk Space: Not enough disk space. About {required} is needed and {available} is available.
+  Unknown Download Size: Download size is unknown. {available} is available on the destination filesystem.
+  Disk Space Check Unavailable: Available disk space could not be checked before starting this download.
+  Download Failure Hint: Check {issuesLink}, then try switching the yt-dlp channel to Nightly or Master in Settings → Advanced → External Software.
+  yt-dlp YouTube Issues: recent yt-dlp issues for YouTube
+  Automatic Download Started: Automatic download started
+  Automatic Download Started Body: Downloading "{title}" from {channel} in the background.
+  Automatic Download Complete: Automatic download complete
+  Automatic Download Failed: Automatic download failed
+  Automatic Download Could Not Start: Could not start the automatic download of "{title}".
+  Automatic Download Skipped: Skipped by automatic download filters
+  Cancel Download: Cancel Download
+  yt-dlp Not Found: yt-dlp was not found. Install it or set its path in Settings → Advanced → External Software.
+  Download Complete Template: Download of "{title}" has finished
+  Download Failed Template: Download of "{title}" has failed
+  Templates:
+    Video Best: Video - Best Quality
+    Video Resolution: Video - {resolution}
+    Audio Best: Audio - Best Quality
+    Audio Format: Audio - {format}
+    Subtitles Format: Subtitles - {format}
+  Waiting for Unmetered Network: "Waiting for an unmetered network"
+  Waiting for Charging: "Waiting for a charger"
+  Remove File Failed: Could not remove the downloaded file.
+Search Bar:
+  Use Suggestion: Use suggestion
+Theme Discovery:
+  Discover Themes: "Discover themes"
+  Refresh: "Refresh"
+  View on GitHub: "View on GitHub"
+  Load Error: "Could not load themes. Try refreshing."
+  Loading: "Loading…"
+  No Themes: "No installable themes found."
+  No Preview: "Screenshot unavailable"
+  Load More: "Load more"
+  Applied: "Applied"
+  Apply Theme: "Apply theme"
+  Install and Apply: "Install and apply"
+  Update and Apply: "Update and apply"
+
+Connection:
+  Offline: Offline
+  Reconnecting: "Connection lost. Trying to reconnect…"
+  Back Online: "Back online"
+
+App Icon:
+  Restart: "Restart app"
+  Saved Message: "Icon saved. Your launcher may take a moment to update."
+  Title: "App icon"
+  Error: "Unable to load or change the app icon"
+
+Tray:
+  Hide All Windows: "Hide All Windows"
+  Show All Windows: "Show All Windows"
+
+Tray Icon:
+  Title: "Tray icon"
+  Follow App Theme: "Follow app theme"
+  Monochrome: "Monochrome"
+
+Form Inputs:
+  Browse: "Browse"
+  Use Default Path: "Use default"
+  Enter Password Hint: "Enter your password"
+  Choose Password Hint: "Choose a password"
+  Confirm Password Hint: "Repeat your new password"
+  Encryption Passphrase Hint: "Enter your encryption passphrase"
+  Show Password: "Show password"
+  Hide Password: "Hide password"
+  Search Text Hint: "Enter search terms"
+  Playlist Description Hint: "Describe this playlist"
+  Filename Preview: "Filename preview"
+  Enter Channels: "Enter channels"
+  Enter Text: "Enter text"
+  Video URL: Video or playlist URL
+  Paste Link: Paste a video or playlist link
+  Example: e.g. {example}
+  No Minimum: No minimum
+  No Maximum: No maximum
+  Any Age: Any age
+  Included Terms Example: e.g. tutorial, review
+  Excluded Terms Example: e.g. trailer, preview
+  Global Arguments Hint: Optional arguments for every download
+  Unlimited Hint: 0 for unlimited
+  Add Argument: Add an argument
+  Template Name Example: e.g. Audio only
+  Download Arguments Hint: Optional arguments for this download
+  Generated ID Hint: Leave blank to generate an ID
+  Default Value: "Default: {value}"
+
+Search Filters:
+  Possible Age Restriction Hint: "YouTube may have age-restricted this search query."
+  Cookie Search Failed: "Search failed with the configured cookies."
+  Showing results for: "Showing results for {query}"
+  Search instead for: "Search instead for {query}"
+  Including results for: "Including results for {query}"
+  Search only for: "Search only for {query}"
+  Did you mean: "Did you mean {query}?"
+
+Storage Startup Error:
+  Title: "Could not load app data"
+  Message: "Free up device storage and try again. Sync is paused until your data is loaded."
+  Web Message: "If OpenTubeX is open in another tab, close it and try again."
+  Insecure Web Message: "OpenTubeX can only store your data when it is opened over HTTPS or on localhost. Open this address with https:// instead."
+  Retry: "Retry"
+Native Permissions:
+  Local Network Denied: "Nearby devices permission was denied."
+  Local Network: "Discover and cast videos to devices on your local network, and sync settings and data across devices."
+
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Home"
+  subscriptions: "Subs"
+  userplaylists: "Playlists"
+  history: "History"
+  subscribedchannels: "Channels"
+  trending: "Trending"
+  popular: "Popular"
+  stats: "Stats"
+  more: "More"
+
+Installer:
+  Create Desktop Shortcut: Create a desktop shortcut
+Older Version Changes:
+  Title: "Changes from an older version"
+  Message: "Changes you made in an older version of OpenTubeX were applied to your library."
+  Detail: "If an item was changed in both versions, the change from the older version was kept. A backup of your library from before is in your profile folder."
+Library Format Changed:
+  Title: "Library moved to a new format"
+  Message: "Your library now uses a new storage format."
+  Detail: "Older versions of OpenTubeX can still open your library, but they show it as it was before this update. Changes you make in an older version are added back when you return to this version."
+Invidious Fallback Warning: "This request bypasses your configured Invidious instance and connects directly to YouTube, exposing your IP address."
+Automatically unloaded to free memory: "Automatically unloaded to free memory"
+Home Widgets:
+  Continue Watching: "Continue watching"
+  Continue Watching Description: "Resume videos you started watching"
+  Continue Watching Empty: "Videos you start watching appear here"
+  Quick Access: "Quick access"
+  Quick Access Description: "Open up to 4 pages you choose"
+  Choose Pages: "Choose up to 4 pages"
+  Pages: "Pages"
+  Search: "Search"
+  Subscriptions: "Subscriptions"
+  Watch Later: "Watch Later"
+  History: "History"
+  Playlists: "Playlists"
+  Downloads: "Downloads"
+  Watch Time: "Watch time"
+  Watch Time Description: "Your watch time over the last 7 days"
+  Today: "Today"
+  Last 7 Days: "Last 7 days"
+  Recent Downloads: "Recent downloads"
+  Recent Downloads Description: "Play videos you downloaded"
+  Recent Downloads Empty: "Videos you download appear here"
+Subscription Groups:
+  Groups: Groups
+  All: All
+  New Group: New Group
+  Edit Group: Edit Group
+  Group Name: Group name
+  Create: Create
+  Save: Save
+  Delete Group: Delete Group
+  Delete Prompt: Delete the group ‘{groupName}’? Its channels stay subscribed.
+  Empty Group: This group has no channels in the current profile.
+  Save Failed: The group could not be saved.
+  Delete Failed: The group could not be deleted.
+  Group Icon: Group icon
+  No Icon: No icon
+Yattee Server:
+  API Error (Click to copy): Yattee Server Error (Click to copy)
+  Unsupported page: This page is not available with the Yattee server. Turn on ‘{fallbackSetting}’ to load it with the local API.
+  Posts unavailable: Yattee servers do not provide posts. Turn on ‘{fallbackSetting}’ to load them with the local API.
+  Errors:
+    Invalid credentials: The Yattee server rejected the username or password. Check them in Settings → Advanced.
+    Rate limited: The Yattee server is blocking sign-ins after too many failed attempts. Try again later.
+    Streams not relayed: The Yattee server did not relay the streams of this video. While videos are proxied through the server, OpenTubeX does not connect to YouTube directly.
+    Not configured: Enter the URL of your Yattee server in Settings → Advanced.
+    HTTPS required: Android can only play videos from Yattee servers that use HTTPS.
+    Streams unavailable: Could not load the streams of this video from the Yattee server. Use Test Connection in Settings → Advanced to check the server.
+Yattee Fallback Warning: This request bypasses your configured Yattee server and connects directly to YouTube, exposing your IP address.
+Update With Package Manager: 'Update with {packageManager}:'
+Update Command Copied: 'Update command copied'
+Digital Wellbeing:
+  Watch time limit almost reached: "{duration} left of your daily watch time limit"
+  Shorts limit almost reached: "{duration} left of your daily Shorts limit"
+  Daily watch time limit reached: "Daily watch time limit reached"
+  Daily Shorts limit reached: "Daily Shorts limit reached"
+  Watched today: "You've watched {duration} today."
+  Shorts watched today: "You've watched {duration} of Shorts today."
+  15 More Minutes: "15 More Minutes"
+  Ignore for Today: "Ignore for Today"
+  Time to take a break: "Time to take a break"
+  Watching for: "You've been watching for {duration}."
+  Time for bed: "It's time for bed"
+  Bedtime started at: "Your bedtime started at {time}."
+  Remind Me in 10 Minutes: "Remind Me in 10 Minutes"
+Notification Center:
+  Notifications: "Notifications"
+  Notifications With Unread: "Notifications ({count} unread)"
+  Mark as Read: "Mark as read"
+  Mark All as Read: "Mark all as read"
+  Clear All: "Clear all"
+  Clear: "Clear"
+  Empty: "No notifications yet"
+  Empty Hint: "Live stream reminders and new uploads from channels with notifications turned on will show up here."
+Platforms:
+  Tracks: Tracks
+  Playlists: Playlists
+  Follower Count: 1 follower | {count} followers
+  Open Website: Open on {platform}
+  Channel Not Found: This channel could not be found.
+  Playlist Not Found: This playlist could not be found.
+  Load Error: This page could not be loaded from {platform}.
+  Empty Tab: There is nothing here yet.
+YouTube Account:
+  Like: "Like"
+  Dislike: "Dislike"
+  Rating Failed: "Could not rate on YouTube: {error}"
+  Subscribe Failed: "Could not subscribe on YouTube: {error}"
+  Unsubscribe Failed: "Could not unsubscribe on YouTube: {error}"
+  Subscriptions Synced: "Subscriptions synced from YouTube: {added} added, {removed} removed"
+  Playlist Update Failed: "Could not update {playlistName} on YouTube: {error}"
+  Add a comment: "Add a comment"
+  Add a reply: "Add a reply"
+  Switch Channel: "Switch channel"
+  Comment: "Comment"
+  Reply: "Reply"
+  Comment Posted: "Comment posted"
+  Reply Posted: "Reply posted"
+  Comment Failed: "Could not post the comment: {error}"
+  Delete Comment: "Delete comment"
+  Delete Comment Confirmation: "Delete your comment from YouTube?"
+  Comment Deleted: "Comment deleted"
+  Delete Comment Failed: "Could not delete the comment: {error}"
+  Edit Comment: "Edit comment"
+  Save: "Save"
+  Comment Edited: "Comment edited"
+  Edit Comment Failed: "Could not edit the comment: {error}"
+  Recommendations: "YouTube recommendations"
+  Recommendations Failed: "Could not load your YouTube recommendations."

@@ -1,10 +1,18 @@
+import path from 'node:path'
+
 import packageDetails from '../package.json' with { type: 'json' }
+import { removeLinuxGroupOtherWrite } from './linuxFileModes.mjs'
+import { patchLinuxMprisName } from './patchLinuxMprisName.mjs'
+import { prepareWindowsInstallerTranslations } from './windowsInstallerTranslations.mjs'
+
+// Release builds write the deb and rpm changelogs here with storeReleaseNotes.mjs.
+const packageChangelogs = process.env.PACKAGE_CHANGELOG_DIR
 
 /** @type {import('electron-builder').Configuration} */
 export default {
-  appId: `io.freetubeapp.${packageDetails.name}`,
+  appId: `io.opentubex.${packageDetails.name}`,
   copyright: 'Copyleft © 2020-2026',
-  // asar: false,
+  asarUnpack: ['dist/windows_share.node', 'dist/macos_native.node', 'dist/opentubex-cast', 'dist/opentubex-cast.exe'],
   // compression: 'store',
   productName: packageDetails.productName,
   directories: {
@@ -12,9 +20,9 @@ export default {
   },
   protocols: [
     {
-      name: 'FreeTube',
+      name: 'OpenTubeX',
       schemes: [
-        'freetube'
+        'opentubex'
       ]
     }
   ],
@@ -26,10 +34,15 @@ export default {
     '!node_modules/**/*',
   ],
 
-  // As we bundle all dependecies with webpack, the `node_modules` folder is excluded from packaging in the `files` array.
+  // As we bundle all dependencies with Rspack, the `node_modules` folder is excluded from packaging in the `files` array.
   // electron-builder will however still spend time scanning the `node_modules` folder and building up a list of dependencies,
   // returning `false` from the `beforeBuild` hook skips that.
   beforeBuild: () => Promise.resolve(false),
+  afterPack: async context => {
+    await removeLinuxGroupOtherWrite(context)
+    await patchLinuxMprisName(context)
+    await prepareWindowsInstallerTranslations(context)
+  },
   dmg: {
     contents: [
       {
@@ -51,6 +64,7 @@ export default {
   },
   linux: {
     category: 'AudioVideo;Video;Player;Feed;Network',
+    synopsis: packageDetails.description,
     icon: '_icons/icon.svg',
     target: ['deb', 'zip', '7z', 'rpm', 'AppImage', 'pacman'], // 'flatpak'],
   },
@@ -58,9 +72,24 @@ export default {
   // https://github.com/jordansissel/fpm/issues/1503
   // https://github.com/jgraph/drawio-desktop/issues/259
   rpm: {
-    fpm: ['--rpm-rpmbuild-define=_build_id_links none']
+    depends: [
+      'gtk3',
+      'libnotify',
+      'nss',
+      '(libXtst or libXtst6)',
+      'xdg-utils',
+      'at-spi2-core',
+      '(libuuid or libuuid1)'
+    ],
+    fpm: [
+      '--rpm-rpmbuild-define=_build_id_links none',
+      // rpm 6 writes v6 packages by default, which EL9 and EL10 cannot unpack
+      '--rpm-rpmbuild-define=_rpmformat 4',
+      ...(packageChangelogs ? ['--rpm-changelog', path.join(packageChangelogs, 'rpm')] : []),
+    ]
   },
   deb: {
+    packageCategory: 'video',
     depends: [
       'libgtk-3-0',
       'libnotify4',
@@ -70,8 +99,12 @@ export default {
       'xdg-utils',
       'libatspi2.0-0',
       'libuuid1',
-      'libsecret-1-0'
-    ]
+      'libsecret-1-0',
+      // Electron links these directly, and minimal installs and containers lack them
+      'libgbm1',
+      'libasound2'
+    ],
+    ...(packageChangelogs && { fpm: ['--deb-changelog', path.join(packageChangelogs, 'debian')] }),
   },
   toolsets: {
     appimage: '1.0.3'
@@ -93,7 +126,7 @@ export default {
       '--socket=pulseaudio',
       '--share=network',
       '--own-name=org.mpris.MediaPlayer2.chromium.*',
-      '--own-name=org.mpris.MediaPlayer2.freetube',
+      '--own-name=org.mpris.MediaPlayer2.opentubex',
       '--talk-name=org.freedesktop.PowerManagement',
       '--talk-name=org.freedesktop.ScreenSaver',
       '--talk-name=org.gnome.SessionManager',
@@ -109,11 +142,13 @@ export default {
     target: ['dmg', 'zip', '7z'],
     type: 'distribution',
     extendInfo: {
+      NSLocalNetworkUsageDescription: 'OpenTubeX discovers and controls Cast devices on your local network.',
+      NSBonjourServices: ['_googlecast._tcp', '_fcast._tcp'],
       CFBundleURLTypes: [
-        'freetube'
+        'opentubex'
       ],
       CFBundleURLSchemes: [
-        'freetube'
+        'opentubex'
       ],
 
       // Clear the default usage descriptions in the Info.plist file set by Electron that we don't need
@@ -137,5 +172,7 @@ export default {
   nsis: {
     allowToChangeInstallationDirectory: true,
     oneClick: false,
+    createDesktopShortcut: false,
+    include: '_scripts/windowsInstaller.nsh',
   },
 }

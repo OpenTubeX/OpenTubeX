@@ -1,6 +1,7 @@
 .card {
   position: relative;
-  inline-size: 85%;
+  inline-size: 100%;
+  max-inline-size: 92dvw;
   margin-block: 0 20px;
   margin-inline: auto;
   box-sizing: border-box;
@@ -8,16 +9,126 @@
 
 .channelDetails {
   padding: 0;
-  max-inline-size: 92vw;
+  margin-block-end: 0;
+}
+
+.channelContent,
+.channelError {
+  margin-block-start: 10px;
+  padding-block: 16px;
+}
+
+.channelError > p {
+  margin-block: 0;
 }
 
 .select-container {
+  --channel-sort-label-space: 7px;
+
   display: flex;
-  flex-direction: row;
+  flex-flow: row wrap;
   justify-content: flex-end;
-  align-items: baseline;
+  align-items: center;
   gap: 10px;
   margin-block-end: 10px;
+}
+
+.select-container:empty {
+  display: none;
+}
+
+.select-container > :deep(.btn) {
+  margin-block: 0 9px;
+  margin-inline-end: auto;
+}
+
+.select-container > :deep(.select) {
+  /* Reserve only the half-height of the floating label above its outline. */
+  margin-block-start: var(--channel-sort-label-space);
+}
+
+.select-container:has(> .select) > :deep(.btn) {
+  /* Match the select's margins so their visible controls share a center. */
+  margin-block: var(--channel-sort-label-space) 0;
+}
+
+.select-container > .hideWatchedSwitch {
+  /* Size to the label instead of taking the row like a settings switch. */
+  inline-size: auto;
+}
+
+.select-container:has(> .select) > .hideWatchedSwitch {
+  margin-block-start: var(--channel-sort-label-space);
+}
+
+@media (any-pointer: coarse), (width <= 680px) {
+  .select-container {
+    --channel-sort-label-space: 8px;
+  }
+}
+
+@media (width <= 800px) {
+  .channelContent {
+    margin-block-start: 0;
+    padding-block-start: 0;
+  }
+
+  .channelContent:has(.elementList .message) {
+    padding-block-start: 16px;
+  }
+
+  .select-container > :deep(.select) {
+    flex: 1 1 200px;
+    min-inline-size: 0;
+  }
+}
+
+.select-container > :deep(.channel-view-all) {
+  --button-foreground: var(--accent-color);
+  --button-border: var(--accent-color);
+
+  flex-shrink: 0;
+  max-inline-size: calc(100% - 10px);
+  white-space: normal;
+}
+
+.channelSearchFilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-block-end: 16px;
+}
+
+/* Material 3 filter chips */
+.channelSearchFilter {
+  color: var(--primary-text-color);
+  background-color: var(--search-bar-color);
+  backdrop-filter: var(--search-bar-blur, none);
+  border: 1px solid var(--border-color);
+  border-radius: var(--shape-corner-small);
+  padding-block: 7px;
+  padding-inline: 14px;
+  cursor: pointer;
+  transition:
+    background-color var(--motion-fast-effects),
+    border-color var(--motion-fast-effects),
+    color var(--motion-fast-effects),
+    border-radius var(--motion-fast-spatial);
+}
+
+.channelSearchFilter:hover,
+.channelSearchFilter:focus {
+  border-color: var(--primary-color);
+}
+
+.channelSearchFilter:active {
+  border-radius: var(--shape-corner-extra-small);
+}
+
+.channelSearchFilter.selected {
+  color: var(--on-selected-container-color);
+  background-color: var(--selected-container-color);
+  border-color: var(--selected-container-color);
 }
 
 .elementListLoading {
@@ -28,20 +139,31 @@
   color: var(--tertiary-text-color);
 }
 
+.elementList .message {
+  margin-block: 0;
+}
+
+/* The radius is half the height rather than full, so the press morph is
+   smooth. */
 .getNextPage {
   background-color: var(--search-bar-color);
+  backdrop-filter: var(--search-bar-blur, none);
+  border-radius: calc(22.5px * var(--ui-roundness));
   inline-size: 100%;
   block-size: 45px;
   line-height: 45px;
   text-align: center;
   cursor: pointer;
   margin-block-start: 16px;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 }
 
-@media only screen and (width <= 800px) {
-  .communityPanel {
-    margin-block-start: 1rem;
-  }
+.getNextPage:hover {
+  background-color: color-mix(in srgb, var(--primary-text-color) 8%, var(--search-bar-color));
+}
+
+.getNextPage:active {
+  border-radius: var(--shape-corner-medium);
 }
 
 @media only screen and (width <= 680px) {
@@ -49,10 +171,8 @@
     max-inline-size: none;
     inline-size: 100%;
   }
-}
 
-@media only screen and (width <= 260px) {
-  .channelDetails {
-    max-inline-size: none;
+  .elementList :deep(.autoGrid.grid) {
+    justify-content: center;
   }
 }

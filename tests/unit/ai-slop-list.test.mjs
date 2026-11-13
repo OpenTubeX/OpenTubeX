@@ -1,0 +1,244 @@
+import assert from 'node:assert/strict'
+import { readFile } from 'node:fs/promises'
+import test from 'node:test'
+import { compileFunction, createContext, runInContext } from 'node:vm'
+import { createStore } from 'vuex'
+import { Parser, YTNodes } from 'youtubei.js'
+
+import {
+  isOnAiSlopList,
+  loadCachedAiSlopList,
+  parseAiSlopList,
+  saveCachedAiSlopList
+} from '../../src/renderer/helpers/aiSlopList.js'
+import { createLocalFeedParsers, getChannelHandleFromEndpoint } from '../../src/renderer/helpers/api/local-feed-parsers.js'
+import { parseLocalCollaboratorItems } from '../../src/renderer/helpers/video-collaborators.js'
+
+const CHANNEL_ID = 'UCabcdefghijklmnopqrstuv'
+
+const subscriptionsSource = await readFile(new URL('../../src/renderer/helpers/subscriptions.js', import.meta.url), 'utf8')
+const visibilityStart = subscriptionsSource.indexOf('export function isVideoHiddenByPreferences(')
+const visibilitySource = subscriptionsSource.slice(visibilityStart, subscriptionsSource.indexOf('\n}\n', visibilityStart) + 2)
+const isVideoHiddenByPreferences = compileFunction(`${visibilitySource.replace('export ', '')}\nreturn isVideoHiddenByPreferences`,
+  ['isUpcomingPremiere', 'isOnAiSlopList'])(() => false, isOnAiSlopList)
+
+const localSource = await readFile(new URL('../../src/renderer/helpers/api/local.js', import.meta.url), 'utf8')
+const watchNextStart = localSource.indexOf('export function parseLocalWatchNextVideo(')
+const watchNextContext = createContext({
+  YTNodes,
+  parseLocalCollaboratorItems,
+  getChannelHandleFromEndpoint,
+  getThumbnailPreviewUrl: () => undefined,
+  getAuthorVerification: () => ({}),
+  calculatePublishedDate: () => undefined,
+  extractNumberFromString: () => null
+})
+runInContext(`${localSource.slice(watchNextStart, localSource.indexOf('/**', watchNextStart)).replace('export ', '')}
+globalThis.parseLocalWatchNextVideo = parseLocalWatchNextVideo`, watchNextContext)
+const { parseLocalWatchNextVideo } = watchNextContext
+
+function useLocalStorage(entries = {}) {
+  const values = new Map(Object.entries(entries))
+  globalThis.localStorage = {
+    getItem: key => values.get(key) ?? null,
+    setItem: (key, value) => values.set(key, value),
+    removeItem: key => values.delete(key)
+  }
+  return values
+}
+
+test('parses handles and channel IDs and skips comments and invalid lines', () => {
+  const text = [
+    '! Title: AISList - Blocklist',
+    '! Total Channels: 4',
+    '',
+    '@SlopChannel',
+    '  @Caf%C3%A9-x1y  ',
+    '@CAFÉ',
+    CHANNEL_ID,
+    'UCtooShort',
+    'not a channel',
+  ].join('\r\n')
+
+  assert.deepEqual(parseAiSlopList(text), ['@slopchannel', '@café-x1y', '@café', CHANNEL_ID])
+})
+
+test('matches videos by case-insensitive handle or exact channel ID', () => {
+  const entries = new Set(parseAiSlopList(`@SlopChannel\n@Caf%C3%A9-x1y\n${CHANNEL_ID}`))
+
+  assert.equal(isOnAiSlopList(entries, { authorHandle: '@slopCHANNEL' }), true)
+  assert.equal(isOnAiSlopList(entries, { authorHandle: '@Café-x1y' }), true)
+  assert.equal(isOnAiSlopList(entries, { authorHandle: '@Caf%C3%A9-X1Y' }), true)
+  assert.equal(isOnAiSlopList(entries, { authorId: CHANNEL_ID }), true)
+  assert.equal(isOnAiSlopList(entries, { authorId: CHANNEL_ID.toLowerCase() }), false)
+  assert.equal(isOnAiSlopList(entries, { authorId: 'UCother', authorHandle: '@other' }), false)
+  assert.equal(isOnAiSlopList(entries, {}), false)
+  assert.equal(isOnAiSlopList(new Set(), { authorHandle: '@SlopChannel' }), false)
+})
+
+test('hides videos from blocklisted channels only when the blocklist is passed', () => {
+  const aiSlopChannels = new Set(parseAiSlopList('@SlopChannel'))
+  const video = { videoId: 'abcdefghijk', title: 'Title', author: 'Slop Channel', authorId: CHANNEL_ID, authorHandle: '@SlopChannel' }
+
+  assert.equal(isVideoHiddenByPreferences(video, { aiSlopChannels }), true)
+  assert.equal(isVideoHiddenByPreferences({ ...video, authorHandle: '@Other' }, { aiSlopChannels }), false)
+  assert.equal(isVideoHiddenByPreferences(video), false)
+})
+
+test('hides collaboration videos when any collaborator is on the blocklist', () => {
+  const aiSlopChannels = new Set(parseAiSlopList(`@GuestSlop\n${CHANNEL_ID}`))
+  const collaboration = {
+    title: 'Title',
+    author: 'Main and Guest',
+    authorId: null,
+    collaborators: [{ id: 'UCmain', name: 'Main', handle: '@Main' }, { id: 'UCguest', name: 'Guest', handle: '@guestSLOP' }]
+  }
+
+  assert.equal(isVideoHiddenByPreferences(collaboration, { aiSlopChannels }), true)
+  assert.equal(isOnAiSlopList(aiSlopChannels, {
+    collaborators: [{ id: 'UCmain', name: 'Main' }, { id: CHANNEL_ID, name: 'Guest' }]
+  }), true)
+  assert.equal(isOnAiSlopList(aiSlopChannels, {
+    collaborators: [{ id: 'UCmain', name: 'Main', handle: '@Main' }, { id: 'UCguest', name: 'Guest' }]
+  }), false)
+})
+
+test('hides collaboration videos when any collaborator is hidden and regular videos by author ID', () => {
+  const hiddenChannelNames = new Set([CHANNEL_ID])
+  const collaboration = {
+    title: 'Title',
+    author: 'Main and Guest',
+    authorId: null,
+    collaborators: [{ id: CHANNEL_ID, name: 'Main' }, { id: 'UCguest', name: 'Guest' }]
+  }
+
+  assert.equal(isVideoHiddenByPreferences(collaboration, { hiddenChannelNames }), true)
+  assert.equal(isVideoHiddenByPreferences({ title: 'Title', author: 'Main', authorId: CHANNEL_ID }, { hiddenChannelNames }), true)
+  assert.equal(isVideoHiddenByPreferences({ ...collaboration, collaborators: collaboration.collaborators.toReversed() }, { hiddenChannelNames }), true)
+  assert.equal(isVideoHiddenByPreferences({ ...collaboration, collaborators: [{ id: 'UCmain', name: 'Main' }, { id: 'UCguest', name: 'Guest' }] }, { hiddenChannelNames }), false)
+})
+
+test('keeps collaborators on compact watch-next videos', () => {
+  const video = Parser.parseItem({
+    compactVideoRenderer: {
+      videoId: 'abcdefghijk',
+      title: { simpleText: 'Title' },
+      longBylineText: {
+        runs: [{
+          text: 'Main and Guest',
+          navigationEndpoint: {
+            showDialogCommand: {
+              panelLoadingStrategy: {
+                inlineContent: {
+                  dialogViewModel: {
+                    customContent: {
+                      listViewModel: {
+                        listItems: [{
+                          listItemViewModel: {
+                            title: { content: 'Guest' },
+                            subtitle: { content: '\u200e\u2068@GuestSlop\u2069 • \u206810 subscribers\u2069' },
+                            rendererContext: {
+                              commandContext: {
+                                onTap: {
+                                  innertubeCommand: {
+                                    commandMetadata: { webCommandMetadata: { url: '/@GuestSlop', webPageType: 'WEB_PAGE_TYPE_CHANNEL' } },
+                                    browseEndpoint: { browseId: CHANNEL_ID }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }]
+      }
+    }
+  }, YTNodes.CompactVideo)
+
+  const parsed = parseLocalWatchNextVideo(video)
+
+  assert.deepEqual(parsed.collaborators.map(({ id, handle }) => ({ id, handle })), [{ id: CHANNEL_ID, handle: '@GuestSlop' }])
+  assert.equal(isOnAiSlopList(new Set(parseAiSlopList('@guestslop')), parsed), true)
+})
+
+test('restores cached lists and ignores malformed caches', () => {
+  useLocalStorage()
+  saveCachedAiSlopList({ fetchedAt: 123, blocked: ['@a', CHANNEL_ID], warned: [] })
+  assert.deepEqual(loadCachedAiSlopList(), { fetchedAt: 123, blocked: ['@a', CHANNEL_ID], warned: [] })
+
+  useLocalStorage({ aiSlopList: '{broken' })
+  assert.equal(loadCachedAiSlopList(), null)
+
+  useLocalStorage({ aiSlopList: JSON.stringify({ fetchedAt: 'yesterday', blocked: '', warned: '' }) })
+  assert.equal(loadCachedAiSlopList(), null)
+
+  useLocalStorage()
+  assert.equal(loadCachedAiSlopList(), null)
+})
+
+test('keeps the channel handle on parsed search result videos', () => {
+  const { parseLocalListVideo } = createLocalFeedParsers(() => false)
+  const video = Parser.parseItem({
+    videoRenderer: {
+      videoId: 'abcdefghijk',
+      title: { runs: [{ text: 'Title' }] },
+      ownerText: {
+        runs: [{
+          text: 'Slop Channel',
+          navigationEndpoint: { browseEndpoint: { browseId: CHANNEL_ID, canonicalBaseUrl: '/@SlopChannel' } }
+        }]
+      },
+    }
+  }, YTNodes.Video)
+
+  const parsed = parseLocalListVideo(video)
+
+  assert.equal(parsed.authorId, CHANNEL_ID)
+  assert.equal(parsed.authorHandle, '@SlopChannel')
+})
+
+test('coming back online during a failing download retries once it settles', async () => {
+  const listeners = {}
+  const eventTarget = { addEventListener: (type, listener) => { listeners[type] = listener } }
+  let failFirstDownload
+  const firstDownload = new Promise((resolve, reject) => { failFirstDownload = reject })
+  firstDownload.catch(() => {})
+  let fetches = 0
+  const storeSource = (await readFile(new URL('../../src/renderer/store/modules/ai-slop-list.js', import.meta.url), 'utf8'))
+    .replace(/^import[\s\S]*?from '[^']+'\n/gm, '')
+    .replace('export default', 'globalThis.aiSlopListModule =')
+  const context = createContext({
+    markRaw: value => value,
+    AI_SLOP_LIST_MAX_AGE_MS: 86_400_000,
+    AI_SLOP_LIST_URLS: { blocked: 'blocked.txt', warned: 'warned.txt' },
+    loadCachedAiSlopList: () => null,
+    parseAiSlopList,
+    removeCachedAiSlopList() {},
+    saveCachedAiSlopList() {},
+    fetchWithTimeout: () => ++fetches <= 2 ? firstDownload : Promise.resolve({ ok: true, text: async () => CHANNEL_ID }),
+    window: eventTarget,
+    document: { ...eventTarget, visibilityState: 'visible' },
+    console: { error() {} },
+  })
+  runInContext(storeSource, context)
+  const module = context.aiSlopListModule
+  module.getters.getUseAiSlopList = () => true
+  const store = createStore(module)
+
+  const download = store.dispatch('loadAiSlopList')
+  listeners.online()
+  failFirstDownload(new Error('offline'))
+  await download
+  assert.equal(fetches, 4)
+  // The retry is the pending download now
+  await store.dispatch('loadAiSlopList')
+
+  assert.equal(store.getters.getAiSlopListLoadFailed, false)
+  assert.equal(store.state.aiSlopBlockedChannels.has(CHANNEL_ID), true)
+})

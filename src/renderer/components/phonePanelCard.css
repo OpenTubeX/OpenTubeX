@@ -1,0 +1,32 @@
+/* Phone watch page cards (Comments, Description, AI summary, queue and playlist)
+   share one surface and pressed state. A long press opens the card instead of
+   selecting its preview text; expanded summaries keep their text selectable. */
+.phonePanelCard {
+  border-radius: var(--shape-corner-large);
+  background: var(--card-bg-color);
+  color: var(--primary-text-color);
+  transition:
+    background-color var(--motion-fast-effects),
+    color var(--motion-fast-effects),
+    border-radius var(--motion-fast-spatial);
+}
+
+.phonePanelCard:not(:has(> summary)),
+.phonePanelCard > summary {
+  -webkit-touch-callout: none;
+
+  /* Safari still requires this prefix for touch selection suppression. */
+  /* stylelint-disable-next-line property-no-vendor-prefix */
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.phonePanelCard:is(:active, :has(> summary:active)) {
+  /* Themes such as Hot Pink press to a surface their text colors would vanish on. */
+  --primary-text-color: var(--side-nav-hover-text-color);
+  --secondary-text-color: color-mix(in srgb, var(--side-nav-hover-text-color) 70%, var(--side-nav-hover-color));
+
+  border-radius: var(--shape-corner-medium);
+  background: var(--side-nav-hover-color);
+  color: var(--side-nav-hover-text-color);
+}

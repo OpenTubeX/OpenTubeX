@@ -1,0 +1,28 @@
+@use '../thumbnailSwipe';
+@use '../../scss-partials/ft-list-item';
+
+@include ft-list-item.video-card;
+
+.thumbnailImage {
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+.thumbnailPlaceholder {
+  align-items: center;
+  background-color: var(--secondary-card-bg-color);
+  color: var(--tertiary-text-color);
+  display: flex;
+  font-size: 32px;
+  justify-content: center;
+}
+
+.blur {
+  filter: blur(20px) var(--content-filter,);
+}
+
+.platformIcon {
+  color: var(--tertiary-text-color);
+  flex: none;
+  font-size: 0.85em;
+}

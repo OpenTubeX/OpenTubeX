@@ -1,9 +1,18 @@
 .bannerContainer {
-  background: center / cover no-repeat var(--banner-url, transparent);
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--shape-corner-large) var(--shape-corner-large) 0 0;
   block-size: 13vw;
   min-block-size: 110px;
   max-block-size: 32vh;
   inline-size: 100%;
+}
+
+.bannerImage {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
 }
 
 .bannerContainer.default {
@@ -14,10 +23,20 @@
 }
 
 .infoContainer {
+  --channel-header-gap: 20px;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--channel-header-gap);
   position: relative;
   background-color: var(--card-bg-color);
-  margin-block-start: 10px;
-  padding-block: 0;
+  background-image: var(--card-bg-image);
+
+  /* FtFixedBackground paints the background fixed to the viewport. */
+  background-clip: var(--fixed-background-host-clip, border-box);
+  backdrop-filter: var(--card-bg-blur, none);
+  border-radius: 0 0 var(--shape-corner-large) var(--shape-corner-large);
+  padding-block: var(--channel-header-gap);
   padding-inline: 16px;
 }
 
@@ -26,49 +45,83 @@
   flex-flow: row wrap;
   inline-size: 100%;
   justify-content: space-between;
-}
-
-.infoHasError {
-  padding-block-end: 10px;
+  gap: var(--channel-header-gap);
 }
 
 .thumbnail {
   inline-size: 100px;
   block-size: 100px;
-  border-radius: 200px;
+  border-radius: 50%;
   object-fit: cover;
 }
 
-.name {
-  font-weight: bold;
-  inline-size: 100%;
-  font-size: 25px;
+.ft-icon.thumbnail {
+  font-size: 100px;
 }
 
-.subCount {
+.thumbnail :deep(.ft-icon__glyph) {
+  block-size: 100%;
+  inline-size: 100%;
+  scale: 1;
+}
+
+.name {
+  font-weight: 700;
+  inline-size: 100%;
+  font-size: 28px;
+  letter-spacing: -0.01em;
+}
+
+.metadata {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 0.5em;
   color: var(--tertiary-text-color);
-  inset-block-start: 50px;
-  inset-inline-start: 120px;
+}
+
+.handle {
+  overflow-wrap: anywhere;
+}
+
+.handle + .subCount::before {
+  content: '•' / '';
+  margin-inline-end: 0.5em;
 }
 
 .infoActionsContainer {
   display: flex;
-  gap: 30px;
+  gap: 10px;
   justify-content: space-between;
   align-items: center;
+  align-self: center;
+}
+
+.infoActionsContainer:empty {
+  display: none;
 }
 
 .shareIcon {
   align-self: center;
 }
 
+.infoActionsContainer :deep(.buttonList) {
+  margin-block: 0;
+}
+
 .channelSearch {
-  margin-block-start: 10px;
   max-inline-size: 250px;
   inline-size: 220px;
   margin-inline-start: auto;
   align-self: flex-end;
   flex: 1 1 0%;
+}
+
+.channelSearch :deep(.inputWrapper) {
+  margin-block-end: 0;
+}
+
+.channelSearchToggle {
+  display: none;
 }
 
 .infoTabs {
@@ -77,38 +130,112 @@
   block-size: auto;
   justify-content: unset;
   gap: 32px;
-  padding-block: 0.3em;
+  padding-block: 0;
   padding-inline: 0;
   flex-wrap: nowrap;
 }
 
 .tabs {
+  position: relative;
   display: flex;
-  flex: 0 1 66%;
-  flex-wrap: wrap;
+  flex: 1 1 66%;
+  min-inline-size: 0;
+
+  /* Tabs that do not fit move to the More menu, so the row never scrolls. */
+  overflow: clip;
+}
+
+.tabsContent {
+  --material-tab-font-size: 15px;
+  --material-tab-padding-inline: 15px;
+
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: nowrap;
+  min-inline-size: 0;
+}
+
+/* Out of the row and the accessibility tree, but still measured. */
+.tabsContent > .tab.overflowedTab {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .tab {
-  padding: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-sizing: border-box;
+  flex: none;
+  gap: 6px;
+  padding-block: 15px;
+  padding-inline: 15px;
   font-size: 15px;
   cursor: pointer;
   align-self: flex-end;
   text-align: center;
+  white-space: nowrap;
   color: var(--tertiary-text-color);
   border-block-end: 3px solid transparent;
 }
 
-.tab:focus-visible,
-.tab:hover:not(.selectedTab) {
+.channelTabIcon {
+  flex: none;
+  font-size: 16px;
+}
+
+.hideTabIcons .channelTabIcon {
+  display: none;
+}
+
+.tabLabel,
+.moreTabLabel,
+.moreTabSelected {
+  display: inline-grid;
+  white-space: nowrap;
+}
+
+.tabLabel::after,
+.moreTabSelected::after {
+  content: attr(data-label);
+  grid-area: 1 / 1;
   font-weight: bold;
-  border-block-end: 3px solid var(--tertiary-text-color);
+  visibility: hidden;
+}
+
+.tabLabel > span,
+.moreTabSelected > span {
+  grid-area: 1 / 1;
+}
+
+/* Each label keeps its own width, which the layout measures. */
+.moreTabLabel > span {
+  grid-area: 1 / 1;
+  justify-self: center;
+}
+
+.moreTabTextHidden {
+  visibility: hidden;
+}
+
+.moreTabIcon {
+  flex: none;
+  font-size: 12px;
+}
+
+/* Outrank the primary color of tab icons; this one belongs to the label. */
+.tabsContent > .tab.moreTab > .moreTabIcon {
+  color: inherit;
 }
 
 .selectedTab {
   color: var(--primary-text-color);
-  border-block-end: 3px solid var(--primary-color);
   font-weight: bold;
-  box-sizing: border-box;
 }
 
 .thumbnailContainer {
@@ -123,61 +250,91 @@
 }
 
 .name,
-.subCount {
+.metadata {
   margin: 0;
 }
 
 @media only screen and (width <=800px) {
   .infoTabs {
     block-size: auto;
-    flex-flow: column-reverse;
-    gap: 0;
+    flex-flow: row wrap;
+    gap: var(--channel-header-gap);
   }
 
   .channelSearch {
+    flex-basis: 100%;
+    order: -1;
     inline-size: 100%;
     max-inline-size: none;
   }
 
-  .tabs {
-    flex: 1 1 0;
+  .channelSearch:not(.expanded) {
+    display: none;
+  }
+
+  .channelSearchToggle {
+    display: block;
+  }
+
+  .tabsContent {
+    --material-tab-font-size: 0.9em;
+    --material-tab-padding-inline: 12px;
+    --material-tab-min-height: 48px;
   }
 
   .tab {
-    flex: 1 1 0%;
+    min-block-size: 48px;
+    padding-block: 4px;
+    padding-inline: 12px;
+    font-size: 0.9em;
   }
 }
 
 @media only screen and (width <=680px) {
   .info {
     flex-direction: column;
-    margin-block: 20px 10px;
   }
 
   .infoActionsContainer {
-    flex-direction: row-reverse;
-    justify-content: left;
-    gap: 10px;
-    margin-block-start: 5px;
+    justify-content: flex-start;
+    align-self: stretch;
+    gap: 8px;
+  }
+
+  /* Lead with Subscribe; Search wraps last when the row is too narrow. */
+  .pinButton {
+    order: 1;
+  }
+
+  .shareIcon {
+    order: 2;
+  }
+
+  .channelSearchToggle {
+    order: 3;
   }
 }
 
 @media only screen and (width <=400px) {
   .info {
     justify-content: center;
-    gap: 10px;
   }
 
   .infoActionsContainer {
     justify-content: center;
   }
 
-  .clineContainer {
+  .lineContainer {
     padding-inline-start: 0;
+  }
+
+  .metadata {
+    justify-content: center;
   }
 
   .thumbnailContainer {
     flex-direction: column;
+    gap: 10px;
   }
 
   .thumbnailContainer,
@@ -185,6 +342,5 @@
     flex-wrap: wrap;
     align-items: center;
     text-align: center;
-    gap: 10px;
   }
 }

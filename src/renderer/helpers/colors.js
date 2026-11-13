@@ -1,7 +1,7 @@
 import { randomArrayItem } from './utils'
+import { CATPPUCCIN_MACCHIATO_COLORS } from '../../constants'
+import { cssColorToHex } from '../../customTheme.js'
 
-// When adding new colors here,
-// remember to update the name translations in `src/renderer/composables/colors.js`
 export const colors = [
   { name: 'Red', value: '#d50000' },
   { name: 'Pink', value: '#C51162' },
@@ -35,6 +35,7 @@ export const colors = [
   { name: 'CatppuccinFrappeLavender', value: '#babbf1' },
   { name: 'CatppuccinLatteMauve', value: '#8839ef' },
   { name: 'CatppuccinLatteRed', value: '#d20f39' },
+  ...CATPPUCCIN_MACCHIATO_COLORS,
   { name: 'CatppuccinMochaRosewater', value: '#F5E0DC' },
   { name: 'CatppuccinMochaFlamingo', value: '#F2CDCD' },
   { name: 'CatppuccinMochaPink', value: '#F5C2E7' },
@@ -89,6 +90,51 @@ export const colors = [
   { name: 'SolarizedCyan', value: '#2aa198' },
   { name: 'SolarizedGreen', value: '#859900' },
 ]
+
+const COLOR_VALUES = new Set(colors.map(({ name }) => name))
+const OPAQUE_HEX_COLOR_PATTERN = /^#[\da-f]{6}$/i
+
+export function isHexColor(value) {
+  return typeof value === 'string' && OPAQUE_HEX_COLOR_PATTERN.test(value)
+}
+
+export function resolveColorValue(value, fallback) {
+  if (isHexColor(value)) return value
+  return colors.find(color => color.name === value)?.value ?? fallback
+}
+
+export function resolveColor(value, fallback) {
+  return COLOR_VALUES.has(value) ? value : fallback
+}
+
+/**
+ * Resolves the currently selected theme color to a concrete value,
+ * for the places that can't use `THEME_BG_COLOR` directly.
+ * @returns {string}
+ */
+export function resolveThemeColor() {
+  return resolveColorProperty(document.body, '--primary-color') ?? '#000000'
+}
+
+/**
+ * Resolve a color custom property to hex. Custom properties keep their declared
+ * text, so relative colors, such as the Tally themes' accents, resolve through `color`.
+ * Hex declarations are returned as written.
+ * @param {Element} element
+ * @param {string} property
+ * @returns {string | null}
+ */
+export function resolveColorProperty(element, property) {
+  const value = getComputedStyle(element).getPropertyValue(property).trim()
+  if (/^#[\da-f]{3,8}$/i.test(value)) return value
+  const probe = document.createElement('span')
+  probe.hidden = true
+  probe.style.color = `var(${property})`
+  element.append(probe)
+  const color = getComputedStyle(probe).color
+  probe.remove()
+  return cssColorToHex(color)
+}
 
 export function getRandomColorClass() {
   return 'main' + getRandomColor().name

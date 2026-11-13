@@ -12,6 +12,11 @@ export const SORT_BY_VALUES = {
   Custom: 'custom'
 }
 
+/** Values written by a newer version are not sort orders this one knows. */
+export function isPlaylistSortOrder(value) {
+  return Object.values(SORT_BY_VALUES).includes(value)
+}
+
 export function getSortedPlaylistItems(playlistItems, sortOrder, locale, reversed = false) {
   if (sortOrder === SORT_BY_VALUES.Custom) {
     return reversed ? playlistItems.toReversed() : playlistItems
@@ -37,6 +42,143 @@ export function getSortedPlaylistItems(playlistItems, sortOrder, locale, reverse
   })
 }
 
+export const USER_PLAYLISTS_SORT_BY_OPTIONS = {
+  NameAscending: 'name_ascending',
+  NameDescending: 'name_descending',
+
+  LatestCreatedFirst: 'latest_created_first',
+  EarliestCreatedFirst: 'earliest_created_first',
+
+  LatestUpdatedFirst: 'latest_updated_first',
+  EarliestUpdatedFirst: 'earliest_updated_first',
+
+  LatestPlayedFirst: 'latest_played_first',
+  EarliestPlayedFirst: 'earliest_played_first',
+
+  Custom: 'custom',
+}
+
+/** @param {{ _id?: string, playlistId?: string }} playlist */
+export function playlistKey(playlist) {
+  return playlist._id ?? playlist.playlistId
+}
+
+/**
+ * Sorts playlists the way the Playlists page shows them.
+ * @param {any[]} playlists
+ * @param {string} sortBy a USER_PLAYLISTS_SORT_BY_OPTIONS value
+ * @param {string[]} customOrder playlist keys in the custom order
+ * @param {Intl.Collator} collator
+ * @param {string[]} [pinnedIds] playlist keys shown above the others, each group in the chosen order
+ */
+export function sortUserPlaylists(playlists, sortBy, customOrder, collator, pinnedIds = []) {
+  if (pinnedIds.length > 0) {
+    const pinned = new Set(pinnedIds)
+    const sorted = sortUserPlaylists(playlists, sortBy, customOrder, collator)
+    return [
+      ...sorted.filter(playlist => pinned.has(playlistKey(playlist))),
+      ...sorted.filter(playlist => !pinned.has(playlistKey(playlist))),
+    ]
+  }
+
+  if (!Object.values(USER_PLAYLISTS_SORT_BY_OPTIONS).includes(sortBy)) {
+    console.error(`Unknown sortBy: ${sortBy}`)
+    return playlists
+  }
+
+  if (sortBy === USER_PLAYLISTS_SORT_BY_OPTIONS.Custom) {
+    const positions = new Map(customOrder.map((id, index) => [id, index]))
+    // Playlists missing from the saved order, such as new ones, come first.
+    return playlists.toSorted((a, b) => {
+      return (positions.get(playlistKey(a)) ?? -1) - (positions.get(playlistKey(b)) ?? -1) || b.createdAt - a.createdAt
+    })
+  }
+
+  return playlists.toSorted((a, b) => {
+    switch (sortBy) {
+      case USER_PLAYLISTS_SORT_BY_OPTIONS.NameAscending:
+        return collator.compare(a.playlistName, b.playlistName)
+      case USER_PLAYLISTS_SORT_BY_OPTIONS.NameDescending:
+        return collator.compare(b.playlistName, a.playlistName)
+      case USER_PLAYLISTS_SORT_BY_OPTIONS.LatestCreatedFirst:
+        if (a.createdAt > b.createdAt) { return -1 }
+        if (a.createdAt < b.createdAt) { return 1 }
+
+        return collator.compare(a.playlistName, b.playlistName)
+      case USER_PLAYLISTS_SORT_BY_OPTIONS.EarliestCreatedFirst:
+        if (a.createdAt < b.createdAt) { return -1 }
+        if (a.createdAt > b.createdAt) { return 1 }
+
+        return collator.compare(a.playlistName, b.playlistName)
+      case USER_PLAYLISTS_SORT_BY_OPTIONS.LatestUpdatedFirst:
+        if (a.lastUpdatedAt > b.lastUpdatedAt) { return -1 }
+        if (a.lastUpdatedAt < b.lastUpdatedAt) { return 1 }
+
+        return collator.compare(a.playlistName, b.playlistName)
+      case USER_PLAYLISTS_SORT_BY_OPTIONS.EarliestUpdatedFirst:
+        if (a.lastUpdatedAt < b.lastUpdatedAt) { return -1 }
+        if (a.lastUpdatedAt > b.lastUpdatedAt) { return 1 }
+
+        return collator.compare(a.playlistName, b.playlistName)
+      case USER_PLAYLISTS_SORT_BY_OPTIONS.LatestPlayedFirst:
+        if (a.lastPlayedAt == null && b.lastPlayedAt == null) {
+          return collator.compare(a.playlistName, b.playlistName)
+        }
+
+        // Never played playlist = move to last
+        if (a.lastPlayedAt == null) { return 1 }
+        if (b.lastPlayedAt == null) { return -1 }
+        if (a.lastPlayedAt > b.lastPlayedAt) { return -1 }
+        if (a.lastPlayedAt < b.lastPlayedAt) { return 1 }
+
+        return collator.compare(a.playlistName, b.playlistName)
+      case USER_PLAYLISTS_SORT_BY_OPTIONS.EarliestPlayedFirst:
+        // Never played playlist = first
+        if (a.lastPlayedAt == null && b.lastPlayedAt == null) {
+          return collator.compare(a.playlistName, b.playlistName)
+        }
+
+        // Never played playlist = move to first
+        if (a.lastPlayedAt == null) { return -1 }
+        if (b.lastPlayedAt == null) { return 1 }
+        if (a.lastPlayedAt < b.lastPlayedAt) { return -1 }
+        if (a.lastPlayedAt > b.lastPlayedAt) { return 1 }
+
+        return collator.compare(a.playlistName, b.playlistName)
+      default:
+        // should never happen as we detect this before calling toSorted
+        return 0
+    }
+  })
+}
+
+/**
+ * Whether the playlist has a video to skip to from the current position,
+ * so that the player only offers the skip buttons that actually do something.
+ * @param {object} options
+ * @param {number} options.itemCount amount of videos in the order the playlist is played back in
+ * @param {number} options.currentIndex index of the current video, -1 when it isn't part of the playlist
+ * @param {boolean} options.loopEnabled loop makes both directions wrap around
+ * @param {number} [options.previousVideoSourceIndex] index the previous video is looked up from,
+ * which differs from the current index when the current video was deleted from the playlist
+ * @returns {{ canPlayNext: boolean, canPlayPrevious: boolean }}
+ */
+export function getPlaylistSkipAvailability({ itemCount, currentIndex, loopEnabled, previousVideoSourceIndex = currentIndex }) {
+  if (itemCount === 0) {
+    return { canPlayNext: false, canPlayPrevious: false }
+  }
+
+  // A video that isn't part of the playlist plays the first video next and the last one previously
+  if (loopEnabled || currentIndex === -1) {
+    return { canPlayNext: true, canPlayPrevious: true }
+  }
+
+  return {
+    canPlayNext: currentIndex < itemCount - 1,
+    canPlayPrevious: previousVideoSourceIndex > 0
+  }
+}
+
 export function videoDurationPresent(video) {
   if (typeof video.lengthSeconds !== 'number') { return false }
 
@@ -48,6 +190,34 @@ export function videoDurationWithFallback(video) {
 
   // Fallback
   return 0
+}
+
+/**
+ * Returns the playlist items with missing durations filled from matching
+ * history entries. Only the items that need a duration are copied; the rest
+ * keep their identity.
+ * @param {object[]} playlistItems
+ * @param {Record<string, object>} historyCacheById
+ * @returns {{ items: object[], anyVideoMissingDuration: boolean }}
+ */
+export function fillMissingPlaylistVideoDurations(playlistItems, historyCacheById) {
+  let anyVideoMissingDuration = false
+
+  const items = playlistItems.map((video) => {
+    if (videoDurationPresent(video)) { return video }
+
+    const videoHistory = historyCacheById[video.videoId]
+    const fetchedLengthSeconds = videoHistory == null
+      ? 0
+      : videoDurationWithFallback(videoHistory)
+
+    if (fetchedLengthSeconds === 0) {
+      anyVideoMissingDuration = true
+    }
+    return { ...video, lengthSeconds: fetchedLengthSeconds }
+  })
+
+  return { items, anyVideoMissingDuration }
 }
 
 function publishedWithFallback(video) {

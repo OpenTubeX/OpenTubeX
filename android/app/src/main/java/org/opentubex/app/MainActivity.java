@@ -1,0 +1,254 @@
+package org.opentubex.app;
+
+import android.app.PictureInPictureUiState;
+import android.content.Intent;
+import android.content.res.Configuration;
+import android.hardware.input.InputManager;
+import android.os.Bundle;
+import android.os.Build;
+
+import com.getcapacitor.BridgeActivity;
+import com.getcapacitor.PluginHandle;
+import com.capacitorjs.plugins.share.SharePlugin;
+
+import java.net.CookieHandler;
+
+public class MainActivity extends BridgeActivity {
+    /** AndroidProxyRelay.clock when the app was last hidden, kept if Android recreates the activity. */
+    private static Long hiddenAt;
+    private InputManager inputManager;
+    private int lastOrientation;
+    private WebViewRotationFrame rotationFrame;
+    private final InputManager.InputDeviceListener inputDeviceListener =
+        new InputManager.InputDeviceListener() {
+            @Override
+            public void onInputDeviceAdded(int deviceId) {
+                notifyHardwareKeyboardState();
+            }
+
+            @Override
+            public void onInputDeviceRemoved(int deviceId) {
+                notifyHardwareKeyboardState();
+            }
+
+            @Override
+            public void onInputDeviceChanged(int deviceId) {
+                notifyHardwareKeyboardState();
+            }
+        };
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (bridge != null) {
+            PluginHandle handle = bridge.getPlugin("Share");
+            if (handle != null && handle.getInstance() instanceof SharePlugin share &&
+                share.dispatchActivityResult(requestCode, resultCode, data)) return;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void onStart() {
+        // Android can freeze or firewall a hidden app, so a server may have closed
+        // a kept-alive connection unseen. Close those tunnels before the page
+        // learns it is visible and reuses them, which would wait for a reply that
+        // never comes. Tunnels that kept streaming, such as background playback, stay.
+        if (hiddenAt != null) AndroidProxy.closeStaleTunnels(hiddenAt);
+        super.onStart();
+        AppVisibility.setVisible(true);
+        SubscriptionRefreshWorker.onAppVisibilityChanged(this);
+        BackgroundSync.onAppVisibilityChanged(this);
+    }
+
+    @Override
+    public void onStop() {
+        hiddenAt = AndroidProxyRelay.clock.getAsLong();
+        AppVisibility.setVisible(false);
+        SubscriptionRefreshWorker.onAppVisibilityChanged(this);
+        BackgroundSync.onAppVisibilityChanged(this);
+        super.onStop();
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        registerPlugin(AndroidProxyPlugin.class);
+        registerPlugin(AndroidLocalNetworkPlugin.class);
+        registerPlugin(DlnaPlugin.class);
+        registerPlugin(ChromecastPlugin.class);
+        registerPlugin(PoTokenPlugin.class);
+        // Lite builds omit the runtime; the renderer then hides yt-dlp features.
+        if (BuildConfig.BUNDLES_YT_DLP) registerPlugin(YtDlpPlugin.class);
+        registerPlugin(AndroidUiPlugin.class);
+        registerPlugin(AndroidBackPlugin.class);
+        registerPlugin(AndroidDynamicColorsPlugin.class);
+        registerPlugin(AppIconPlugin.class);
+        registerPlugin(ScreenshotPlugin.class);
+        registerPlugin(PullToRefreshPlugin.class);
+        registerPlugin(AndroidStoragePlugin.class);
+        registerPlugin(LibraryDatabasePlugin.class);
+        registerPlugin(AndroidMediaSessionPlugin.class);
+        registerPlugin(SubscriptionRefreshPlugin.class);
+        registerPlugin(BackgroundSyncPlugin.class);
+        registerPlugin(SabrHttpPlugin.class);
+        registerPlugin(AndroidHttpPlugin.class);
+        registerPlugin(VoiceOverHttpPlugin.class);
+        registerPlugin(AndroidSharePlugin.class);
+        registerPlugin(HomeWidgetsPlugin.class);
+        // Android recreates an activity with the intent that first opened it, and
+        // Capacitor passes that intent to onNewIntent on every create. Handle a
+        // share or notification when it arrives, not again when the app comes
+        // back from Recents or is restored after the system stopped it.
+        if (savedInstanceState != null ||
+            (getIntent().getFlags() & Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) != 0) {
+            setIntent(new Intent(Intent.ACTION_MAIN));
+        }
+        super.onCreate(savedInstanceState);
+        // Capacitor's cookie plugin makes HttpURLConnection share the WebView
+        // cookie store, including the YouTube sign-in created for yt-dlp. Keep
+        // native requests stateless like desktop: once YouTube recognizes a
+        // visitor it serves preroll ads, which SABR enforces as long backoffs.
+        CookieHandler.setDefault(null);
+        lastOrientation = getResources().getConfiguration().orientation;
+        // Capacitor must select its no-title theme before the decor is created.
+        StartupBackground.apply(getWindow(), StartupBackground.getColor(this));
+        // Keep swiped bars visible so a second swipe can open notifications.
+        // The player hides the status bar again with its controls.
+        androidx.core.view.WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView())
+            .setSystemBarsBehavior(androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_DEFAULT);
+        try {
+            AppIconPlugin.updateTaskIcon(this);
+        } catch (android.content.pm.PackageManager.NameNotFoundException | RuntimeException error) {
+            android.util.Log.e("AppIcon", "Unable to restore recent apps icon", error);
+        }
+        // Honor viewport widths larger than the device for UI scales below 100%.
+        getBridge().getWebView().getSettings().setUseWideViewPort(true);
+        // UI scale owns the page viewport; the custom player handles video pinch zoom.
+        getBridge().getWebView().getSettings().setSupportZoom(false);
+        // Render small text at its CSS size like Electron and iOS instead of
+        // WebView's default 8px minimum, which distorts scaled-down previews.
+        getBridge().getWebView().getSettings().setMinimumFontSize(1);
+        // Capacitor falls back to addJavascriptInterface when the modern,
+        // top-frame-only bridge is unavailable. Fail closed instead of
+        // exposing native plugins to untrusted subframes.
+        getBridge().getWebView().removeJavascriptInterface("androidBridge");
+        getBridge().setWebViewClient(new OpenTubeXWebViewClient(getBridge()));
+        OpenTubeXNotificationChannels.createAll(this);
+        inputManager = (InputManager) getSystemService(INPUT_SERVICE);
+        inputManager.registerInputDeviceListener(inputDeviceListener, null);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        // Opening an upload notification marks its entry read.
+        UploadNotifications.recordDismissed(this, intent);
+        super.onNewIntent(intent);
+    }
+
+    @Override
+    public void onDestroy() {
+        if (rotationFrame != null) rotationFrame.run();
+        inputManager.unregisterInputDeviceListener(inputDeviceListener);
+        if (isFinishing() && bridge != null) {
+            PluginHandle handle = bridge.getPlugin("SubscriptionRefresh");
+            if (handle != null && handle.getInstance() instanceof SubscriptionRefreshPlugin refresh &&
+                refresh.retainRenderer()) {
+                // Dismiss playback with the task, but let subscription requests and
+                // their database writes finish before destroying the Capacitor bridge.
+                bridge.triggerWindowJSEvent("opentubex:android-task-removed");
+                ((AndroidMediaSessionPlugin) bridge.getPlugin("AndroidMediaSession").getInstance()).handleOnDestroy();
+                bridge = null;
+            }
+        }
+        super.onDestroy();
+    }
+
+    @Override
+    public void onUserLeaveHint() {
+        super.onUserLeaveHint();
+
+        PluginHandle handle = getBridge().getPlugin("AndroidUi");
+        if (handle != null && handle.getInstance() instanceof AndroidUiPlugin) {
+            ((AndroidUiPlugin) handle.getInstance()).enterAutomaticPictureInPictureIfEnabled();
+        }
+    }
+
+    @Override
+    public void onPictureInPictureUiStateChanged(PictureInPictureUiState state) {
+        super.onPictureInPictureUiStateChanged(state);
+        if (Build.VERSION.SDK_INT >= 35 && state.isTransitioningToPip()) {
+            AndroidUiPlugin plugin = (AndroidUiPlugin) getBridge().getPlugin("AndroidUi").getInstance();
+            plugin.notifyPictureInPictureEntering();
+            plugin.preparePictureInPictureSurface();
+        }
+    }
+
+    @Override
+    public void onPictureInPictureModeChanged(
+        boolean isInPictureInPictureMode,
+        Configuration newConfig
+    ) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
+        notifyPictureInPictureState(isInPictureInPictureMode, newConfig);
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus && bridge != null) {
+            // System gestures can reveal the bars without changing player controls.
+            bridge.triggerWindowJSEvent("opentubex:android-window-focus");
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // A PiP exit can happen while Chromium is suspended behind the lock
+        // screen. Reconcile both layers with the Activity's current state.
+        notifyPictureInPictureState(isInPictureInPictureMode(), getResources().getConfiguration());
+        LauncherActivity.finishReturn();
+    }
+
+    private void notifyPictureInPictureState(boolean active, Configuration config) {
+        // The callback's configuration describes the destination on PiP exit,
+        // while WebView's outerWidth still describes the small PiP window.
+        ((AndroidUiPlugin) getBridge().getPlugin("AndroidUi").getInstance()).onPictureInPictureModeChanged(active, () -> {
+            getBridge().triggerWindowJSEvent("opentubex:android-pip",
+                "{\"active\":" + active + ",\"windowWidth\":" + config.screenWidthDp +
+                    ",\"windowHeight\":" + config.screenHeightDp + "}"
+            );
+        });
+    }
+
+    void prepareFullscreenRotation() {
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE
+            || isInPictureInPictureMode()) return;
+        if (rotationFrame != null) rotationFrame.run();
+        rotationFrame = new WebViewRotationFrame(getBridge().getWebView(), true);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        if (newConfig.orientation != lastOrientation) {
+            lastOrientation = newConfig.orientation;
+            if (rotationFrame != null) rotationFrame.run();
+            // PiP has its own viewport/surface synchronization.
+            rotationFrame = isInPictureInPictureMode() ? null : new WebViewRotationFrame(getBridge().getWebView());
+        }
+
+        notifyHardwareKeyboardState();
+    }
+
+    private void notifyHardwareKeyboardState() {
+        PluginHandle handle = getBridge().getPlugin("AndroidUi");
+        if (handle != null && handle.getInstance() instanceof AndroidUiPlugin) {
+            boolean attached = ((AndroidUiPlugin) handle.getInstance()).hasHardwareKeyboard();
+            getBridge().triggerWindowJSEvent(
+                "opentubex:hardware-keyboard",
+                "{\"attached\":" + attached + "}"
+            );
+        }
+    }
+}

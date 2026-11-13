@@ -1,12 +1,23 @@
-/* TODO: Revert when auto is fixed */
-:deep(.shaka-enable-abr-button) {
+/*
+  Auto quality's runtime switches are broken with SABR (FreeTube#8906),
+  so it is only offered for stream sources that don't use it.
+*/
+.ftVideoPlayer.autoQualityUnavailable :deep(.shaka-enable-abr-button) {
   display: none !important;
 }
 
 /* stylelint-disable liberty/use-logical-spec */
 .ftVideoPlayer {
+  /* Width reserved for a docked side panel (chapters / fullscreen comments). */
+  --side-panel-width: min(clamp(260px, 40%, 440px), 100%);
+
+  /* The mini player's morph blends between these corners. */
+  --inline-player-radius: calc(12px * var(--ui-roundness));
+  --scroll-mini-player-radius: calc(10px * var(--ui-roundness));
+
   display: flex;
   position: relative;
+  font-family: var(--app-font-family);
 
   /*
     For vertical videos and full window mode the background is visible,
@@ -18,12 +29,163 @@
     Fixes the seek bar thumbnails causing a horizontal scroll bar
     to appear after exiting full screen and full window.
     But also vertically in case context menu overflows.
+    Clip rather than hide so focus, find-in-page and scrollIntoView cannot
+    scroll the player sideways towards a dock that is still sliding in.
   */
-  overflow: hidden;
+  overflow: clip;
+}
+
+/* Override browser form fonts and Shaka's badge fonts without changing their sizing. */
+.ftVideoPlayer :deep(:is(button, input, select, textarea, .shaka-overflow-playback-rate-mark, .shaka-overflow-quality-mark)) {
+  font-family: var(--app-font-family);
+}
+
+/*
+  The watch layout caps the player width at 80vh * 16:9. Videos taller than
+  16:9 also need a height cap to fit the window; above it they keep the full
+  width with black bars at the sides. Capacitor builds set their own cap.
+*/
+.ftVideoPlayer:where(:not(:fullscreen, .fullWindow, .scrollMiniPlayer, .shortsPlayer)) {
+  max-block-size: 80vh;
+}
+
+.ftVideoPlayer:not(:fullscreen, .fullWindow) {
+  border-radius: var(--inline-player-radius);
+}
+
+/* Shaka sizes its center buttons as a percentage of the player width, which
+   becomes enormous in a wide desktop or fullscreen player. The outer columns
+   keep play/pause centered when only one adjacent video is available. Track
+   percentages resolve against the player width. */
+.ftVideoPlayer :deep(.shaka-big-buttons-container) {
+  --center-play-button-size: clamp(48px, 12.5%, 80px);
+  --center-skip-button-size: clamp(40px, 10%, 64px);
+
+  display: grid;
+  grid-template-columns:
+    1fr var(--center-skip-button-size) var(--center-play-button-size)
+    var(--center-skip-button-size) 1fr;
+  column-gap: clamp(8px, 3%, 32px);
+  place-content: center stretch;
+  align-items: center;
+}
+
+.ftVideoPlayer :deep(.shaka-big-buttons-container > button) {
+  inline-size: 100%;
+
+  /* Without Shaka's dark circle, the video stays visible around the icons. */
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.ftVideoPlayer :deep(.shaka-big-buttons-container > button:not([disabled]):hover) {
+  background-color: transparent;
+}
+
+/* The center icons explain themselves, and a tooltip over the video looks out of place. */
+.ftVideoPlayer :deep(.shaka-big-buttons-container > :is(.shaka-tooltip, .shaka-tooltip-status)::after) {
+  display: none;
+}
+
+/* Keeps the icons legible over bright video. */
+.ftVideoPlayer :deep(.shaka-big-buttons-container .shaka-ui-icon) {
+  filter: drop-shadow(0 0 6px rgb(0 0 0 / 60%));
+}
+
+.ftVideoPlayer :deep(.shaka-big-buttons-container > .skip-previous-button) {
+  grid-column: 2;
+}
+
+.ftVideoPlayer :deep(.shaka-big-buttons-container > .shaka-play-button) {
+  grid-column: 3;
+}
+
+.ftVideoPlayer :deep(.shaka-big-buttons-container > .skip-next-button) {
+  grid-column: 4;
+}
+
+:global(.capacitorTabs .ftVideoPlayer .shaka-big-buttons-container) {
+  --center-play-button-size: 64px;
+  --center-skip-button-size: 48px;
+
+  column-gap: 8px;
+}
+
+/* Transparent center buttons must let surface taps and speed holds through. */
+/* stylelint-disable-next-line selector-max-compound-selectors */
+:global(.capacitorTabs .shaka-controls-container:not([shown='true'], [casting='true']) .shaka-big-buttons-container > button) {
+  pointer-events: none;
 }
 
 .player {
   width: 100%;
+
+  /* Follows the inline player's height cap, and none in other modes. */
+  max-block-size: inherit;
+
+  /* Animates dock pushes and user-selected video zoom levels. */
+  /* stylelint-disable plugin/no-low-performance-animation-properties -- docks push the player, and scaling it instead would stretch the video */
+  transition:
+    inline-size 250ms ease,
+    transform 200ms ease-out;
+  /* stylelint-enable plugin/no-low-performance-animation-properties */
+}
+
+/*
+  Holding shift over a zoomed video turns the pointer into a handle for moving
+  the visible part of the frame. shaka-player's controls cover the video, so
+  they have to show the same cursor.
+*/
+.ftVideoPlayer.videoZoomPannable,
+.ftVideoPlayer.videoZoomPannable :deep(.shaka-controls-container) {
+  cursor: grab;
+}
+
+.ftVideoPlayer.videoZoomPanning,
+.ftVideoPlayer.videoZoomPanning :deep(.shaka-controls-container) {
+  cursor: grabbing;
+}
+
+.ftVideoPlayer.vrMode :deep(.shaka-controls-container) {
+  cursor: grab;
+}
+
+.ftVideoPlayer.vrMode :deep(.shaka-controls-container:active) {
+  cursor: grabbing;
+}
+
+.paidPromotionOverlay {
+  position: absolute;
+  z-index: 4;
+  inset-block-start: 12px;
+  inset-inline-start: 8px;
+  opacity: 0.82;
+  /* stylelint-disable plugin/no-low-performance-animation-properties -- the small badge moves clear of the fullscreen title */
+  transition: opacity 150ms ease,
+    inset-block-start 150ms ease 450ms;
+  /* stylelint-enable plugin/no-low-performance-animation-properties */
+}
+
+.paidPromotionOverlay:hover,
+.paidPromotionOverlay:focus-visible {
+  opacity: 1;
+}
+
+.ftVideoPlayer.presentationModeChanging > .paidPromotionOverlay {
+  transition: opacity 150ms ease;
+}
+
+.ftVideoPlayer:is(:fullscreen, .fullWindow):has(
+  :deep(.shaka-controls-container[shown='true'])
+):not(.playerPaused.hideVideoTitleWhenPaused:not(.pausedInterfaceRevealed)) > .paidPromotionOverlay {
+  /* Keep the badge clear of the single-line fullscreen title overlay. */
+  inset-block-start: 65px;
+  transition-delay: 0s, 0s;
+}
+
+.ftVideoPlayer :deep(.videoAnnotations) {
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- docks push the player, and scaling it instead would stretch the video */
+  transition: inset-inline-end 250ms ease;
 }
 
 .vrCanvas {
@@ -54,7 +216,7 @@
   left: 5px;
   top: 5px;
   padding: 10px;
-  border-radius: 5px;
+  border-radius: calc(5px * var(--ui-roundness));
   line-height: 1.4em;
   background-color: rgb(0 0 0 / 70%);
   color: #fff;
@@ -70,15 +232,17 @@
 
 .valueChangePopup {
   position: absolute;
-  top: 70px;
+  top: clamp(16px, 5%, 32px);
   left: 50%;
   transform: translateX(-50%);
   padding: 10px;
-  border-radius: 5px;
+  border-radius: calc(5px * var(--ui-roundness));
   font-size: 1.1em;
   background-color: rgb(0 0 0 / 60%);
   color: #fff;
-  width: 85px;
+  width: max-content;
+  max-width: calc(100% - 32px);
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -86,6 +250,7 @@
   z-index: 2;
   pointer-events: none;
 }
+
 
 .valueChangePopup.invert-content-order {
   flex-direction: row-reverse;
@@ -113,7 +278,7 @@
   background-color: #000;
   color: #fff;
   padding: 10px;
-  border-radius: 10px;
+  border-radius: calc(10px * var(--ui-roundness));
 }
 
 .offlineIcon {
@@ -130,21 +295,51 @@
 
 .skippedSegmentsWrapper {
   position: absolute;
-  right: 2%;
-  bottom: max(15%, calc(46px + 2.5% + 3%)); /* 46px + 2.5% is the height of the controls */
+  inset-inline-end: 2%;
+
+  --sponsorblock-notice-bottom: max(15%, calc(46px + 2.5% + 3%)); /* 46px + 2.5% is the height of the controls */
+
+  bottom: var(--sponsorblock-notice-bottom);
   display: flex;
   flex-direction: column;
   gap: 10px;
-  align-items: center;
+  align-items: flex-end;
   pointer-events: none;
+  z-index: 3;
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- docks push the player, and scaling it instead would stretch the video */
+  transition: inset-inline-end 250ms ease;
 }
 
 .skippedSegment {
+  --skipped-segment-background: rgb(33 37 43 / 96%);
+
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
   margin-block: 0;
-  padding: 10px;
-  border-radius: 20px;
-  background-color: rgb(0 0 0 / 80%);
+  min-width: min(320px, calc(100vw - 32px));
+  padding: 10px 12px;
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: calc(10px * var(--ui-roundness));
+  background-color: var(--skipped-segment-background);
+  box-shadow: 0 10px 28px rgb(0 0 0 / 35%);
   color: #fff;
+  pointer-events: auto;
+  cursor: default;
+}
+
+.sponsorBlockSubmissionWrapper {
+  position: absolute;
+  inset-inline-end: 2%;
+  bottom: max(16%, calc(50px + 2.5% + 3%));
+  z-index: 4;
+  width: max-content;
+  min-width: min(420px, calc(100% - 16px));
+  max-width: calc(100% - 16px);
+  pointer-events: auto;
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- docks push the player, and scaling it instead would stretch the video */
+  transition: inset-inline-end 250ms ease;
 }
 
 :deep(.markerContainer) {
@@ -154,44 +349,79 @@
   padding: 0;
   width: 100%;
   height: 100%;
+  pointer-events: none;
 }
 
 :deep(.sponsorBlockMarker) {
+  --marker-played-end: clamp(0%, calc((var(--sponsorblock-played, 0) - var(--marker-start)) / var(--marker-width) * 100%), 100%);
+  --marker-buffered-start: max(var(--marker-played-end), clamp(0%, calc((var(--sponsorblock-buffered-start, 0) - var(--marker-start)) / var(--marker-width) * 100%), 100%));
+  --marker-buffered-end: max(var(--marker-buffered-start), clamp(0%, calc((var(--sponsorblock-buffered-end, 0) - var(--marker-start)) / var(--marker-width) * 100%), 100%));
+
+  position: absolute;
+  z-index: 1;
+  height: 100%;
   background-color: var(--primary-color);
-  mix-blend-mode: screen;
+
+  /* Neutral shading preserves category hues regardless of the track's accent. */
+  background-image: linear-gradient(
+    to right,
+    rgb(0 0 0 / 35%) var(--marker-played-end),
+    rgb(0 0 0 / 15%) var(--marker-played-end),
+    rgb(0 0 0 / 15%) var(--marker-buffered-start),
+    transparent var(--marker-buffered-start),
+    transparent var(--marker-buffered-end),
+    rgb(0 0 0 / 15%) var(--marker-buffered-end)
+  );
 }
 
-:deep(.chapterMarker) {
+:deep(.sponsorBlockPointMarker) {
   width: 2px;
-  background-color: #000;
 }
 
-:deep(.sponsorBlockMarker),
 :deep(.chapterMarker) {
   position: absolute;
-  opacity: 0.6;
+  z-index: 1;
+  width: 2px;
   height: 100%;
+  background-color: #000;
+  opacity: 0.6;
 }
 
 :deep(.playerFullscreenTitleOverlay) {
   display: none;
   opacity: 0;
   position: absolute;
+  z-index: 4;
   margin: 0;
-  top: 5px;
+  top: calc(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) + 5px);
   left: 5px;
+  box-sizing: border-box;
+  inline-size: fit-content;
+  block-size: auto;
   max-width: calc(100% - 10px);
-  font-size: xx-large;
-  color: #fff;
-  font-weight: normal;
-  background-color: rgb(0 0 0 / 50%);
-  border-radius: 5px;
+  font-size: 28px;
+  line-height: 1.3;
+  color: #fff !important;
+  font-weight: 600;
+  font-family: inherit;
+  text-align: start;
+  text-shadow: 0 1px 2px #000, 0 2px 8px rgb(0 0 0 / 85%);
+  background-color: transparent;
+  border: 0;
+  border-radius: calc(12px * var(--ui-roundness));
+  padding: 8px 12px;
+  cursor: pointer !important;
+  pointer-events: auto !important;
   text-overflow: ellipsis;
   text-wrap: nowrap;
   overflow: hidden;
 
   /* copied from .shaka-scrim-container */
-  transition: opacity cubic-bezier(0.4, 0, 0.6, 1) 0.6s;
+  /* stylelint-disable plugin/no-low-performance-animation-properties -- the title follows changes of the safe area, which are rare */
+  transition: opacity cubic-bezier(0.4, 0, 0.6, 1) 0.6s,
+    background-color 150ms ease,
+    top 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  /* stylelint-enable plugin/no-low-performance-animation-properties */
 }
 
 :deep(.playerFullscreenTitleOverlay:dir(rtl)) {
@@ -199,9 +429,20 @@
   right: 5px;
 }
 
-.ftVideoPlayer:fullscreen :deep(.playerFullscreenTitleOverlay) {
+.ftVideoPlayer:fullscreen :deep(.playerFullscreenTitleOverlay),
+.ftVideoPlayer.fullWindow :deep(.playerFullscreenTitleOverlay) {
   display: block;
 }
+
+/* Clears the window controls a custom title bar shows over the player on
+   Windows and macOS. */
+/* stylelint-disable length-zero-no-unit -- calc() needs units in the fallbacks */
+.ftVideoPlayer.fullWindow :deep(.playerFullscreenTitleOverlay) {
+  margin-left: env(titlebar-area-x, 0px);
+  margin-right: calc(100vw - env(titlebar-area-x, 0px) - env(titlebar-area-width, 100vw));
+  max-width: calc(env(titlebar-area-width, 100%) - 10px);
+}
+/* stylelint-enable length-zero-no-unit */
 
 :deep(.shaka-controls-container[shown='true'] > .playerFullscreenTitleOverlay) {
   opacity: 1;
@@ -213,15 +454,20 @@
 
 .ftVideoPlayer:fullscreen :deep(.theatre-button),
 .ftVideoPlayer:fullscreen :deep(.full-window-button),
-.fullWindow :deep(.theatre-button) {
+.fullWindow :deep(.theatre-button),
+.theatreUnavailable :deep(.theatre-button) {
   display: none;
 }
 
 .fullWindow {
-  position: absolute !important;
+  position: fixed !important;
   max-width: initial !important;
   inset: 0;
   z-index: 1000;
+}
+
+.fullWindow:not(:fullscreen) {
+  inset-block-end: var(--connection-status-space, 0);
 }
 
 .fullWindow > .player {
@@ -229,17 +475,70 @@
   height: 100%;
 }
 
-/* added to the body element */
+:global(body.playerFullWindow .app > .routerView) {
+  position: relative;
+  z-index: 1000;
+}
+
+/* Chapter title while hovering the seek bar; bottom/left and the seek bar's width limit from JS */
+:deep(.ft-chapter-preview) {
+  position: absolute;
+  transform: translateX(-50%);
+  box-sizing: border-box;
+  width: max-content;
+  max-width: min(320px, var(--ft-chapter-preview-max-width, 100%));
+  padding: 6px 12px;
+
+  /* Clip at the content box, or the top of a clamped fourth line shows in the bottom padding */
+  overflow: clip;
+  overflow-clip-margin: content-box;
+  background-color: rgb(27 27 27 / 67%);
+
+  /* Half of a single line's height: a pill for one line, rounded corners once it wraps */
+  border-radius: calc(15px * var(--ui-roundness));
+  color: #fff;
+  font-size: 13px;
+  line-height: 17px;
+  font-weight: bold;
+  font-family: var(--app-font-family);
+  text-align: center;
+  text-wrap: pretty;
+  overflow-wrap: anywhere;
+  box-shadow: none;
+  text-shadow: none;
+  pointer-events: none;
+  z-index: 11;
+
+  /* Three lines at most, fewer when the player is too short; set from JS */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: var(--ft-chapter-preview-lines, 3);
+  line-clamp: var(--ft-chapter-preview-lines, 3);
+}
+
+/* added to the body element, and appPlayerFullWindow to <html> */
+:global(:root.appPlayerFullWindow) {
+  overflow: hidden;
+}
+
 :global(.playerFullWindow) {
   overflow: hidden;
   margin: 0;
   padding: 0;
 }
 
+:global(body.playerFullWindow > .os-scrollbar) {
+  display: none;
+}
+
 @media only screen and (width <=400px) {
-  :deep(.shaka-text-container) {
-    /* make subtitles take up slightly less space when a mobile phone is in portrait orientation */
-    font-size: 16px !important;
+  /*
+    Captions don't need a rule here: --caption-font-size already scales them
+    with the small player that a narrow window results in.
+  */
+  .sponsorBlockSubmissionWrapper {
+    inset-inline: 8px;
+    width: auto;
   }
 }
 
@@ -255,12 +554,14 @@
   }
 }
 
-@media (prefers-reduced-transparency) {
-  :deep(.playerFullscreenTitleOverlay),
-  .skippedSegment,
-  .stats {
-    background-color: rgb(0 0 0 / 90%);
-  }
+:root[data-reduced-transparency] .ftVideoPlayer :deep(.ft-chapter-preview),
+:root[data-reduced-transparency] .ftVideoPlayer :deep(.playerFullscreenTitleOverlay),
+:root[data-reduced-transparency] .stats {
+  background-color: rgb(0 0 0 / 90%);
+}
+
+:root[data-reduced-transparency] .skippedSegment:not(.editing) {
+  --skipped-segment-background: rgb(0 0 0);
 }
 
 /* stylelint-enable liberty/use-logical-spec */

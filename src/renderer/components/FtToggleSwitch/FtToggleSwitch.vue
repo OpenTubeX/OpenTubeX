@@ -1,9 +1,10 @@
 <template>
   <div
     class="switch-ctn"
-    :data-settings-search-label="label"
+    :data-setting-key="settingKey || undefined"
     :class="{
       compact,
+      trailing,
       disabled: disabled,
       containsTooltip: tooltip.length > 0
     }"
@@ -15,6 +16,8 @@
       name="set-name"
       class="switch-input"
       :checked="currentValue"
+      :indeterminate="indeterminate"
+      :aria-checked="indeterminate ? 'mixed' : undefined"
       :disabled="disabled"
       @change="change"
     >
@@ -22,23 +25,51 @@
       :for="id"
       class="switch-label"
     >
-      <span class="switch-label-text">
-        {{ label }}
+      <span class="switch-label-main">
+        <span class="switch-label-text">
+          {{ label }}
+          <span
+            class="switch-thumb"
+            aria-hidden="true"
+          >
+            <FtIcon :icon="['fas', currentValue && !indeterminate ? 'check' : 'minus']" />
+          </span>
+        </span>
+        <FtTooltip
+          v-if="tooltip !== ''"
+          class="selectTooltip"
+          :position="tooltipPosition"
+          :tooltip="tooltip"
+          :allow-newlines="tooltipAllowNewlines"
+        />
+        <FtSyncedSettingIndicator
+          :setting-key="settingKey"
+          :setting-keys="syncSettingKeys"
+        />
       </span>
-      <FtTooltip
-        v-if="tooltip !== ''"
-        class="selectTooltip"
-        :position="tooltipPosition"
-        :tooltip="tooltip"
-      />
+      <span
+        v-if="experimental"
+        class="experimentalBadge"
+      >
+        <FtIcon
+          :icon="['fas', 'flask']"
+          aria-hidden="true"
+        />
+        {{ t('Settings.Experimental Badge') }}
+      </span>
+      <FtPerformanceImpact :setting-key="performanceImpactKey || settingKey" />
     </label>
   </div>
 </template>
 
 <script setup>
 import { ref, useId, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { FtIcon } from '@opentubex/icons'
 
 import FtTooltip from '../FtTooltip/FtTooltip.vue'
+import FtPerformanceImpact from '../FtPerformanceImpact/FtPerformanceImpact.vue'
+import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
 
 const props = defineProps({
   label: {
@@ -49,7 +80,19 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  controlled: {
+    type: Boolean,
+    default: false
+  },
+  indeterminate: {
+    type: Boolean,
+    default: false
+  },
   compact: {
+    type: Boolean,
+    default: false
+  },
+  trailing: {
     type: Boolean,
     default: false
   },
@@ -65,9 +108,34 @@ const props = defineProps({
     type: String,
     default: 'bottom-left'
   },
+  tooltipAllowNewlines: {
+    type: Boolean,
+    default: false,
+  },
+  // Marks a setting that works but hasn't been tested much yet
+  experimental: {
+    type: Boolean,
+    default: false
+  },
+  settingKey: {
+    type: String,
+    default: ''
+  },
+  // Synced setting keys for a switch outside the settings, which has no `settingKey`
+  syncSettingKeys: {
+    type: Array,
+    default: () => []
+  },
+  // Performance impact key for a switch that is not backed by a setting, which has no `settingKey`
+  performanceImpactKey: {
+    type: String,
+    default: ''
+  },
 })
 
 const emit = defineEmits(['change'])
+
+const { t } = useI18n()
 
 const id = useId()
 
@@ -78,7 +146,9 @@ watch(() => props.defaultValue, (value) => {
 })
 
 function change() {
-  emit('change', currentValue.value)
+  const value = currentValue.value
+  if (props.controlled) currentValue.value = props.defaultValue
+  emit('change', value)
 }
 </script>
 

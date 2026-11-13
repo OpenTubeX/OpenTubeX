@@ -18,9 +18,9 @@
 
 @mixin fixed-top-bar {
   position: fixed;
-  inset-block-start: 60px;
+  inset-block-start: var(--top-nav-sticky-offset);
   inset-inline-end: 0;
-  inline-size: calc(100% - 80px);
+  inline-size: calc(100% - var(--desktop-nav-rail-width));
   margin-inline: 0;
   z-index: 3;
 

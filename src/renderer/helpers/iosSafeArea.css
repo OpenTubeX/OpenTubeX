@@ -1,0 +1,30 @@
+/* WebKit reports physical-point insets even when the layout viewport is scaled. */
+:root {
+  --safe-area-inset-top: calc(env(safe-area-inset-top, 0px) / var(--capacitor-ui-scale, 1));
+  --safe-area-inset-bottom: calc(env(safe-area-inset-bottom, 0px) / var(--capacitor-ui-scale, 1));
+  --safe-area-inset-left: calc(env(safe-area-inset-left, 0px) / var(--capacitor-ui-scale, 1));
+  --safe-area-inset-right: calc(env(safe-area-inset-right, 0px) / var(--capacitor-ui-scale, 1));
+}
+
+/* Leave a touch-scroll area below the inline iOS player and app navigation. */
+.capacitorTabs .ftVideoPlayer:not(:fullscreen, .fullWindow, .scrollMiniPlayer, .shortsPlayer) {
+  --inline-player-max-height: max(180px, calc(100svh - var(--top-nav-sticky-offset) - var(--mobile-progress-bar-space) - 160px));
+
+  /* Definite width prevents the startup aspect ratio from narrowing the box. */
+  inline-size: 100%;
+
+  /* Limit both axes together so the height cap does not leave side bars. */
+  max-inline-size: calc(var(--inline-player-max-height) * var(--inline-player-aspect-ratio, 16 / 9));
+  max-block-size: var(--inline-player-max-height);
+  margin-inline: auto;
+}
+
+.capacitorTabs .ftVideoPlayer:not(:fullscreen, .fullWindow, .scrollMiniPlayer, .shortsPlayer) > .player {
+  max-block-size: inherit;
+  object-fit: contain;
+}
+
+/* Match neutral button text on other platforms instead of iOS link blue. */
+.btn {
+  color: ButtonText;
+}

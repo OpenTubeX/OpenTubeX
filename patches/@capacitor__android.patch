@@ -1,0 +1,155 @@
+diff --git a/capacitor/src/main/java/com/getcapacitor/Bridge.java b/capacitor/src/main/java/com/getcapacitor/Bridge.java
+index 9a3c6e0739682c9ff3b1254324ef59bb4fb2f4bd..64d6c7777412652d7a46ed043caae400fc749aea 100644
+--- a/capacitor/src/main/java/com/getcapacitor/Bridge.java
++++ b/capacitor/src/main/java/com/getcapacitor/Bridge.java
+@@ -884,12 +884,15 @@ public class Bridge {
+         logToJs(message, "log");
+     }
+ 
++    // An event sent before the page loads the Capacitor runtime, such as one
++    // from the first onResume of a cold start, has no listener yet. Skip it
++    // instead of throwing an uncaught TypeError in the page.
+     public void triggerJSEvent(final String eventName, final String target) {
+-        eval("window.Capacitor.triggerEvent(\"" + eventName + "\", \"" + target + "\")", (s) -> {});
++        eval("window.Capacitor?.triggerEvent(\"" + eventName + "\", \"" + target + "\")", (s) -> {});
+     }
+ 
+     public void triggerJSEvent(final String eventName, final String target, final String data) {
+-        eval("window.Capacitor.triggerEvent(\"" + eventName + "\", \"" + target + "\", " + data + ")", (s) -> {});
++        eval("window.Capacitor?.triggerEvent(\"" + eventName + "\", \"" + target + "\", " + data + ")", (s) -> {});
+     }
+ 
+     public void triggerWindowJSEvent(final String eventName) {
+@@ -939,7 +942,8 @@ public class Bridge {
+         return this.savedCalls.get(callbackId);
+     }
+ 
+-    PluginCall getPluginCallForLastActivity() {
++    /** Consume the restored call from a plugin with custom activity-result handling. */
++    public PluginCall getPluginCallForLastActivity() {
+         PluginCall pluginCallForLastActivity = this.pluginCallForLastActivity;
+         this.pluginCallForLastActivity = null;
+         return pluginCallForLastActivity;
+diff --git a/capacitor/src/main/java/com/getcapacitor/plugin/SystemBars.java b/capacitor/src/main/java/com/getcapacitor/plugin/SystemBars.java
+index 8b9de88493bd3269247cffbe9d290fc381fc088f..878cb509bd4046e920d6db1b8c1721ea13a7199f 100644
+--- a/capacitor/src/main/java/com/getcapacitor/plugin/SystemBars.java
++++ b/capacitor/src/main/java/com/getcapacitor/plugin/SystemBars.java
+@@ -211,9 +211,14 @@ public class SystemBars extends Plugin {
+                             getBottomInset(systemBarsInsets, keyboardVisible)
+                         )
+                     )
++                    // The padding above already resizes the WebView for the IME. Passing the IME
++                    // insets on makes the WebView shrink its visual viewport by the keyboard height
++                    // a second time while the keyboard opens, and Chrome scrolls the focused field
++                    // into that too-small viewport, behind fixed headers.
++                    .setInsets(WindowInsetsCompat.Type.ime(), Insets.NONE)
+                     .build();
+ 
+-                injectSafeAreaCSS(newInsets);
++                injectSafeAreaCSS(newInsets, keyboardVisible);
+ 
+                 return newInsets;
+             }
+@@ -233,19 +238,18 @@ public class SystemBars extends Plugin {
+                 .setInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout(), Insets.of(0, 0, 0, 0))
+                 .build();
+ 
+-            injectSafeAreaCSS(newInsets);
++            injectSafeAreaCSS(newInsets, keyboardVisible);
+ 
+             return newInsets;
+         });
+     }
+ 
+-    private void injectSafeAreaCSS(WindowInsetsCompat insets) {
++    private void injectSafeAreaCSS(WindowInsetsCompat insets, boolean keyboardVisible) {
+         if (!INSETS_HANDLING_CSS.equals(insetsHandling)) {
+             return;
+         }
+ 
+         Insets systemBarsInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
+-        boolean keyboardVisible = insets.isVisible(WindowInsetsCompat.Type.ime());
+ 
+         // Convert pixels to density-independent pixels
+         float density = getActivity().getResources().getDisplayMetrics().density;
+diff --git a/capacitor/src/main/java/com/getcapacitor/plugin/util/HttpRequestHandler.java b/capacitor/src/main/java/com/getcapacitor/plugin/util/HttpRequestHandler.java
+index d92eb9bb44dc0b064312ca43f97a78206a67be21..90ae7a9c3b6160e9c800ef3c29645ddb0c193c68 100644
+--- a/capacitor/src/main/java/com/getcapacitor/plugin/util/HttpRequestHandler.java
++++ b/capacitor/src/main/java/com/getcapacitor/plugin/util/HttpRequestHandler.java
+@@ -16,6 +16,8 @@ import java.io.UnsupportedEncodingException;
+ import java.lang.reflect.Method;
+ import java.net.HttpURLConnection;
+ import java.net.MalformedURLException;
++import java.net.Proxy;
++import java.net.ProxySelector;
+ import java.net.URI;
+ import java.net.URISyntaxException;
+ import java.net.URL;
+@@ -103,8 +105,24 @@ public class HttpRequestHandler {
+             return this;
+         }
+ 
++        /**
++         * HttpURLConnection tries a direct connection once every proxy from
++         * ProxySelector has failed, which would bypass the app's proxy. An
++         * explicit proxy has no such fallback.
++         */
++        private static Proxy selectedProxy(URL url) throws IOException {
++            ProxySelector selector = ProxySelector.getDefault();
++            if (selector == null) return Proxy.NO_PROXY;
++            try {
++                List<Proxy> proxies = selector.select(url.toURI());
++                return proxies == null || proxies.isEmpty() ? Proxy.NO_PROXY : proxies.get(0);
++            } catch (URISyntaxException error) {
++                throw new MalformedURLException(error.getMessage());
++            }
++        }
++
+         public HttpURLConnectionBuilder openConnection() throws IOException {
+-            connection = new CapacitorHttpUrlConnection((HttpURLConnection) url.openConnection());
++            connection = new CapacitorHttpUrlConnection((HttpURLConnection) url.openConnection(selectedProxy(url)));
+ 
+             connection.setAllowUserInteraction(false);
+             connection.setRequestMethod(method);
+@@ -219,7 +237,9 @@ public class HttpRequestHandler {
+         output.put("status", statusCode);
+         output.put("headers", buildResponseHeaders(connection));
+         output.put("url", connection.getURL());
+-        output.put("data", readData(connection, responseType));
++        // HEAD and empty HTTP errors have no error stream. Reading the normal
++        // stream would throw and discard the HTTP status (e.g. a YouTube 404).
++        output.put("data", statusCode >= 400 && connection.getErrorStream() == null ? "" : readData(connection, responseType));
+ 
+         InputStream errorStream = connection.getErrorStream();
+         if (errorStream != null) {
+@@ -241,6 +261,12 @@ public class HttpRequestHandler {
+         InputStream errorStream = connection.getErrorStream();
+         String contentType = connection.getHeaderField("Content-Type");
+ 
++        // Text callers parse JSON themselves. Parsing it here as well rebuilds
++        // the whole object graph on the WebView's UI thread for every response.
++        if (responseType == ResponseType.TEXT) {
++            return readStreamAsString(errorStream != null ? errorStream : connection.getInputStream());
++        }
++
+         if (errorStream != null) {
+             if (isOneOf(contentType, MimeType.APPLICATION_JSON, MimeType.APPLICATION_VND_API_JSON)) {
+                 return parseJSON(readStreamAsString(errorStream));
+@@ -423,6 +449,9 @@ public class HttpRequestHandler {
+             .openConnection();
+ 
+         CapacitorHttpUrlConnection connection = connectionBuilder.build();
++        // Publish the connection before writing a request body opens it, so
++        // callers can disconnect a request stuck in its TLS handshake.
++        call.getData().put("activeCapacitorHttpUrlConnection", connection);
+ 
+         if (null != bridge && !isDomainExcludedFromSSL(bridge, url)) {
+             connection.setSSLSocketFactory(bridge);
+@@ -437,7 +466,6 @@ public class HttpRequestHandler {
+             }
+         }
+ 
+-        call.getData().put("activeCapacitorHttpUrlConnection", connection);
+         connection.connect();
+ 
+         JSObject response = buildResponse(connection, responseType);

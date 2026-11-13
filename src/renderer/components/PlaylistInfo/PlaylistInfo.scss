@@ -2,12 +2,18 @@
   inline-size: 100%;
 }
 
-.playlistThumbnail img {
+.playlistThumbnail {
+  border-radius: var(--shape-corner-small);
+  overflow: hidden;
+}
+
+.playlistThumbnail img,
+.playlistThumbnail .retryImagePlaceholder {
+  aspect-ratio: 16 / 9;
+  border-radius: var(--shape-corner-small);
+  display: block;
   inline-size: 100%;
-  // Ensure placeholder image displayed at same aspect ratio as most other images
-  aspect-ratio: 16/9;
-  // Set the object-fit so it doesn't get stretched to 16:9
-  object-fit: contain;
+  object-fit: cover;
 
   @media only screen and (width <= 800px) {
     display: none;
@@ -15,7 +21,7 @@
 }
 
 .blur {
-  filter: blur(20px);
+  filter: blur(20px) var(--content-filter,);
 }
 
 .playlistStats {
@@ -29,6 +35,8 @@
 
 .playlistTitle {
   margin-block-end: 0.1em;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 
   /* Prevents overflow for long values */
   overflow-wrap: anywhere;
@@ -49,18 +57,60 @@
   white-space: break-spaces;
   margin-inline: auto;
   overflow-wrap: break-word;
-  max-inline-size: 24vw;
-
-  @media only screen and (width <= 850px) {
-    max-inline-size: 75vw;
-  }
-
-  @media only screen and (width <= 680px) {
-    max-inline-size: unset;
-  }
 
   @media only screen and (width <= 500px) {
     max-block-size: 10vh;
+  }
+}
+
+// The fields share a row with the pickers while they fit
+.editForm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 16px 32px;
+  padding-block-start: var(--playlist-label-outset, 7px);
+}
+
+// The pickers wrap together so they stay side by side below the fields
+.editPickers {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 16px 32px;
+  max-inline-size: 100%;
+}
+
+.editFields {
+  display: flex;
+  flex: 1 1 420px;
+  flex-direction: column;
+  gap: 12px;
+  min-inline-size: 0;
+
+  .inputElement {
+    --input-bottom-spacing: 0;
+
+    inline-size: 100%;
+  }
+}
+
+.editError {
+  color: var(--secondary-text-color);
+  margin: 0;
+}
+
+.editToggles {
+  --settings-control-margin: 0;
+
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 16px;
+
+  .switch-ctn {
+    margin-inline: 0;
   }
 }
 
@@ -74,9 +124,10 @@
 }
 
 .channelThumbnail {
-  border-radius: 200px;
+  border-radius: 50%;
   float: inline-start;
   inline-size: 40px;
+  block-size: 40px;
 }
 
 .channelName {
@@ -85,25 +136,55 @@
   word-break: break-all;
 }
 
-.channelShareWrapper {
-  column-gap: 8px;
-  display: grid;
-  grid-template-columns: auto minmax(min-content, 1fr);
-}
-
-.channelShareWrapper > :only-child {
-  grid-column: 1 / -1;
-}
-
-.playlistOptions {
-  display: grid;
-  grid-auto-flow: column;
-  column-gap: 8px;
+// FtButtonGroup root; the extra class outranks its centered default.
+.playlistInfo .playlistOptions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
   justify-content: flex-end;
+  margin-block: 0;
+
+  .actionButton {
+    margin: 0;
+  }
 }
 
 .searchInputsRow {
   margin-block-start: 8px;
+}
+
+.base {
+  // The actions share the channel's line while they fit, otherwise they wrap
+  // below it and center across the full width like playlists without a channel
+  .channelShareWrapper {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .playlistOptionsWrapper {
+    flex: auto;
+  }
+
+  .inputElement {
+    margin-inline: auto;
+  }
+
+  .playlistInfoSeparator {
+    margin-block: 16px;
+  }
+
+  .playlistOptions {
+    justify-content: center;
+  }
+
+  .searchInputsRow {
+    --input-bottom-spacing: 6px;
+
+    margin-block-start: calc(16px + var(--playlist-label-outset));
+  }
 }
 
 .top-bar {
@@ -123,6 +204,12 @@
     margin-block-start: 0.2em;
   }
 
+  .channelName {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .playlistTitle,
   .playlistDescription {
     overflow-x: hidden;
@@ -133,15 +220,26 @@
     margin-block: 8px;
   }
 
-  .descriptionInput {
-    margin-block-start: 8px;
+  .playlistDescription {
+    max-block-size: 10vh;
   }
 
-  .playlistOptionsAndSearch {
+  .playlistOptionsWrapper {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
+    grid-column: 2;
+
+    &:only-child {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .channelShareWrapper {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    margin-block-start: 16px;
   }
 
   .channelShareWrapper,
@@ -153,6 +251,12 @@
 
   .inputElement {
     inline-size: 100%;
+  }
+
+  .searchInputsRow {
+    --input-bottom-spacing: 6px;
+
+    margin-block-start: calc(16px + var(--playlist-label-outset));
   }
 }
 

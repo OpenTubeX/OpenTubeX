@@ -1,54 +1,76 @@
 <template>
-  <div>
-    <ft-loader
-      v-if="isLoading"
-      :fullscreen="true"
-    />
+  <div
+    class="popularPage"
+  >
     <ft-card
-      v-else
       class="card"
     >
-      <h2>
-        <FontAwesomeIcon
-          :icon="['fas', 'users']"
-          class="headingIcon"
-        />
-        {{ $t("Most Popular") }}
-      </h2>
+      <div class="pageHeader">
+        <div class="titleRow">
+          <h2 class="pageTitle">
+            <FtIcon
+              :icon="['fas', 'users']"
+              class="headingIcon"
+            />
+            {{ $t("Most Popular") }}
+          </h2>
+          <ft-refresh-widget
+            embedded
+            class="headerRefreshWidget"
+            :disable-refresh="isLoading"
+            :last-refresh-timestamp="lastPopularRefreshTimestamp"
+            :title="$t('Most Popular')"
+            @click="fetchPopularInfo"
+          />
+        </div>
+        <FtFixedBackground />
+      </div>
+      <ft-loader
+        v-if="isLoading"
+      />
       <ft-element-list
+        v-else-if="shownResults.length > 0"
         :data="shownResults"
       />
+      <p
+        v-else-if="hasLoaded"
+        class="emptyMessage"
+        role="status"
+      >
+        {{ $t("Most Popular Feed Empty") }}
+      </p>
+      <p
+        v-else-if="loadFailed"
+        class="emptyMessage"
+        role="status"
+      >
+        {{ $t("Most Popular Load Error") }}
+      </p>
     </ft-card>
-    <ft-refresh-widget
-      :disable-refresh="isLoading"
-      :last-refresh-timestamp="lastPopularRefreshTimestamp"
-      :title="$t('Most Popular')"
-      @click="fetchPopularInfo"
-    />
   </div>
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
+import { FtIcon } from '@opentubex/icons'
+import { computed, onMounted, ref, shallowRef } from 'vue'
 
 import FtLoader from '../../components/FtLoader/FtLoader.vue'
 import FtCard from '../../components/ft-card/ft-card.vue'
+import FtFixedBackground from '../../components/FtFixedBackground/FtFixedBackground.vue'
 import FtElementList from '../../components/FtElementList/FtElementList.vue'
 import FtRefreshWidget from '../../components/FtRefreshWidget/FtRefreshWidget.vue'
 import store from '../../store/index'
 
 import { getInvidiousPopularFeed } from '../../helpers/api/invidious'
-import { copyToClipboard, getRelativeTimeFromDate, showToast } from '../../helpers/utils'
-import { useI18n } from 'vue-i18n'
-import { KeyboardShortcuts } from '../../../constants'
-
-const { t } = useI18n()
+import { getInvidiousApiErrorMessage, getRelativeTimeFromDate, showApiErrorToast } from '../../helpers/utils'
+import { useFeedRefreshShortcut } from '../../composables/useFeedRefreshShortcut'
+import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 
 const isLoading = ref(false)
+const relativeTimeNow = useRelativeTimeClock()
 
 const lastPopularRefreshTimestamp = computed(() => {
-  return getRelativeTimeFromDate(store.getters.getLastPopularRefreshTimestamp, true)
+  return getRelativeTimeFromDate(store.getters.getLastPopularRefreshTimestamp, true, true, relativeTimeNow.value)
 })
 
 /** @type {import('vue').ComputedRef<Array | null>} */
@@ -57,58 +79,37 @@ const popularCache = computed(() => {
 })
 
 const shownResults = shallowRef(popularCache.value || [])
+const hasLoaded = ref(popularCache.value !== null)
+const loadFailed = ref(false)
 
 onMounted(() => {
-  document.addEventListener('keydown', keyboardShortcutHandler)
-
   if (shownResults.value.length === 0) {
     fetchPopularInfo()
   }
 })
 
-onBeforeUnmount(() => {
-  document.removeEventListener('keydown', keyboardShortcutHandler)
-})
-
 async function fetchPopularInfo() {
   isLoading.value = true
+  hasLoaded.value = false
+  loadFailed.value = false
 
   try {
     const items = await getInvidiousPopularFeed()
 
     store.commit('setLastPopularRefreshTimestamp', new Date())
     shownResults.value = items
+    hasLoaded.value = true
     isLoading.value = false
     store.commit('setPopularCache', items)
   } catch (err) {
     isLoading.value = false
-    const errorMessage = t('Invidious API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    loadFailed.value = true
+    const errorMessage = getInvidiousApiErrorMessage(store.getters.getBackendPreference)
+    showApiErrorToast(errorMessage, err)
   }
 }
 
-/**
- * @param {KeyboardEvent} event the keyboard event
- */
-function keyboardShortcutHandler(event) {
-  if (document.activeElement.classList.contains('ft-input')) {
-    return
-  }
-  // Avoid handling events due to user holding a key (not released)
-  // https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/repeat
-  if (event.repeat) { return }
-
-  switch (event.key.toLowerCase()) {
-    case 'f5':
-    case KeyboardShortcuts.APP.SITUATIONAL.REFRESH:
-      if (!isLoading.value) {
-        fetchPopularInfo()
-      }
-      break
-  }
-}
+useFeedRefreshShortcut(() => !isLoading.value, fetchPopularInfo)
 
 </script>
 <style scoped src="./Popular.css" />

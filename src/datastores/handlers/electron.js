@@ -1,219 +1,506 @@
 import { DBActions } from '../../constants'
+import { newestUniqueHistoryRecords } from '../../history'
+import { runBackgroundJob } from '../../renderer/helpers/background-jobs.js'
+
+/**
+ * Payloads can contain Vue reactivity proxies (e.g. objects taken from Vuex
+ * state), which Electron IPC cannot structured-clone ("An object could not be
+ * cloned"). Datastore payloads are plain JSON documents, so strip reactivity
+ * once here at the process boundary instead of in every caller.
+ * @template T
+ * @param {T} data
+ * @returns {T}
+ */
+function toPlain(data) {
+  return data === undefined ? undefined : JSON.parse(JSON.stringify(data))
+}
+
+// Copying more videos than this across the context bridge blocks the window
+// noticeably, so they are serialized in a worker first.
+const LARGE_PLAYLIST_VIDEO_COUNT = 1000
+
+/**
+ * Sends requests in call order, even while an earlier large payload is still
+ * being serialized in a worker, so it cannot overwrite a later write.
+ * @param {(action: string, data: unknown) => Promise<unknown>} send
+ */
+function createOrderedSender(send) {
+  let previous = Promise.resolve()
+  const sender = (action, data, { inWorker = false, beforeSend } = {}) => {
+    const payload = inWorker ? runBackgroundJob('stringify', { value: data }) : toPlain(data)
+    const sent = Promise.all([previous, payload]).then(([, value]) => {
+      beforeSend?.()
+      return { response: send(action, value) }
+    })
+    previous = sent.then(() => {}, () => {})
+    return sent.then(({ response }) => response)
+  }
+  /** Resolves once every request made so far has been sent. */
+  sender.sent = () => previous
+  return sender
+}
+
+const dbSettings = (action, data) => window.ftElectron.dbSettings(action, toPlain(data))
+const dbHistory = createOrderedSender((action, data) => window.ftElectron.dbHistory(action, data))
+const dbWatchStats = (action, data) => window.ftElectron.dbWatchStats(action, toPlain(data))
+const dbRecommendations = (action, data) => window.ftElectron.dbRecommendations(action, toPlain(data))
+
+export const recommendations = {
+  find: () => dbRecommendations(DBActions.GENERAL.FIND),
+  record: event => dbRecommendations(DBActions.GENERAL.UPSERT, event),
+  remove: ids => dbRecommendations(DBActions.GENERAL.DELETE_MULTIPLE, ids),
+  reset: () => dbRecommendations(DBActions.GENERAL.DELETE_ALL),
+}
+const dbProfiles = (action, data) => window.ftElectron.dbProfiles(action, toPlain(data))
+const dbPlaylists = createOrderedSender((action, data) => window.ftElectron.dbPlaylists(action, data))
+const dbSearchHistory = (action, data) => window.ftElectron.dbSearchHistory(action, toPlain(data))
+const dbSubscriptionCache = (action, data) => window.ftElectron.dbSubscriptionCache(action, toPlain(data))
 
 class Settings {
+  static mergeSeenPosts(update) {
+    return dbSettings(DBActions.SETTINGS.MERGE_SEEN_POSTS, update)
+  }
+
+  static mergeSeenVideos(update) {
+    return dbSettings(DBActions.SETTINGS.MERGE_SEEN_VIDEOS, update)
+  }
+
+  static mergeSeenRssItems(update) {
+    return dbSettings(DBActions.SETTINGS.MERGE_SEEN_RSS_ITEMS, update)
+  }
+
   static find() {
-    return window.ftElectron.dbSettings(DBActions.GENERAL.FIND)
+    return dbSettings(DBActions.GENERAL.FIND)
+  }
+
+  /** Reads one setting's value without transferring the whole settings store */
+  static findValue(_id) {
+    return dbSettings(DBActions.SETTINGS.FIND_ONE, _id)
   }
 
   static upsert(_id, value) {
-    return window.ftElectron.dbSettings(DBActions.GENERAL.UPSERT, { _id, value })
+    return dbSettings(DBActions.GENERAL.UPSERT, { _id, value })
+  }
+
+  static delete(_id) {
+    return dbSettings(DBActions.GENERAL.DELETE, _id)
   }
 }
 
 class History {
-  static find() {
-    return window.ftElectron.dbHistory(DBActions.GENERAL.FIND)
+  static sent() {
+    return dbHistory.sent()
+  }
+
+  static updateSubscriptionState(update) {
+    return dbHistory(DBActions.HISTORY.UPDATE_SUBSCRIPTION_STATE, update)
+  }
+
+  static async find() {
+    // The main process sends each record's stored JSON text. Strings cross IPC
+    // and the context bridge far faster than the records' object graph.
+    const stored = await dbHistory(DBActions.GENERAL.FIND)
+    const { records, duplicateIds } = newestUniqueHistoryRecords(stored.map(record => JSON.parse(record)))
+    // The main process selects and removes duplicates in one queued step. Its
+    // records replace these, which a write in between could have outdated.
+    if (duplicateIds.length > 0) return dbHistory(DBActions.HISTORY.REMOVE_DUPLICATES)
+    return records
   }
 
   static upsert(record) {
-    return window.ftElectron.dbHistory(DBActions.GENERAL.UPSERT, record)
+    return dbHistory(DBActions.GENERAL.UPSERT, record)
   }
 
   static overwrite(records) {
-    return window.ftElectron.dbHistory(DBActions.GENERAL.OVERWRITE, records)
+    // Imports replace the whole history, which would block this window for
+    // seconds while crossing the context bridge.
+    return dbHistory(DBActions.GENERAL.OVERWRITE, records, { inWorker: true })
+  }
+
+  static async mergeBackup(records) {
+    return JSON.parse(await dbHistory(DBActions.HISTORY.MERGE_BACKUP, records, { inWorker: true }))
+  }
+
+  static async importRecords(records, rule) {
+    return JSON.parse(await dbHistory(DBActions.HISTORY.IMPORT, { records, rule }, { inWorker: true }))
+  }
+
+  static applySyncChanges(changes, assertActive) {
+    // Large object graphs also block while crossing Electron's context bridge.
+    return dbHistory(DBActions.HISTORY.APPLY_SYNC_CHANGES, changes, { inWorker: true, beforeSend: assertActive })
   }
 
   static updateWatchProgress(videoId, watchProgress) {
-    return window.ftElectron.dbHistory(
+    return dbHistory(
       DBActions.HISTORY.UPDATE_WATCH_PROGRESS,
       { videoId, watchProgress }
     )
   }
 
   static updateLastViewedPlaylist(videoId, lastViewedPlaylistId, lastViewedPlaylistType, lastViewedPlaylistItemId) {
-    return window.ftElectron.dbHistory(
+    return dbHistory(
       DBActions.HISTORY.UPDATE_PLAYLIST,
       { videoId, lastViewedPlaylistId, lastViewedPlaylistType, lastViewedPlaylistItemId }
     )
   }
 
   static unsetLastViewedPlaylistForVideos(videoIds, lastViewedPlaylistId) {
-    return window.ftElectron.dbHistory(DBActions.HISTORY.UNSET_PLAYLIST_FOR_VIDEOS, { videoIds, lastViewedPlaylistId })
+    return dbHistory(DBActions.HISTORY.UNSET_PLAYLIST_FOR_VIDEOS, { videoIds, lastViewedPlaylistId })
   }
 
   static unsetLastViewedPlaylists(lastViewedPlaylistIds) {
-    return window.ftElectron.dbHistory(DBActions.HISTORY.UNSET_PLAYLISTS, lastViewedPlaylistIds)
+    return dbHistory(DBActions.HISTORY.UNSET_PLAYLISTS, lastViewedPlaylistIds)
   }
 
   static delete(videoId) {
-    return window.ftElectron.dbHistory(DBActions.GENERAL.DELETE, videoId)
+    return dbHistory(DBActions.GENERAL.DELETE, videoId)
+  }
+
+  static deleteOlderThan(cutoff) {
+    return dbHistory(DBActions.HISTORY.DELETE_OLDER_THAN, cutoff)
   }
 
   static deleteAll() {
-    return window.ftElectron.dbHistory(DBActions.GENERAL.DELETE_ALL)
+    return dbHistory(DBActions.GENERAL.DELETE_ALL)
+  }
+}
+
+class WatchStats {
+  static find() {
+    return dbWatchStats(DBActions.GENERAL.FIND)
+  }
+
+  static mergeBackup(backup) {
+    return dbWatchStats(DBActions.WATCH_STATS.MERGE_BACKUP, backup)
+  }
+
+  static addWatchTime(date, seconds) {
+    return dbWatchStats(
+      DBActions.WATCH_STATS.ADD_WATCH_TIME,
+      { date, seconds }
+    )
+  }
+
+  static migrateHistory() {
+    return dbWatchStats(DBActions.WATCH_STATS.MIGRATE_HISTORY)
+  }
+
+  static getHistoricalAdjustment() {
+    return dbWatchStats(DBActions.WATCH_STATS.GET_HISTORICAL_ADJUSTMENT)
+  }
+
+  static adjustHistoricalWatchTime(defaultSpeed, channelPlaybackSpeeds) {
+    return dbWatchStats(
+      DBActions.WATCH_STATS.ADJUST_HISTORICAL_WATCH_TIME,
+      { defaultSpeed, channelPlaybackSpeeds }
+    )
+  }
+
+  static deleteAll() {
+    return dbWatchStats(DBActions.GENERAL.DELETE_ALL)
   }
 }
 
 class Profiles {
   static create(profile) {
-    return window.ftElectron.dbProfiles(DBActions.GENERAL.CREATE, profile)
+    return dbProfiles(DBActions.GENERAL.CREATE, profile)
   }
 
   static find() {
-    return window.ftElectron.dbProfiles(DBActions.GENERAL.FIND)
+    return dbProfiles(DBActions.GENERAL.FIND)
   }
 
   static upsert(profile) {
-    return window.ftElectron.dbProfiles(DBActions.GENERAL.UPSERT, profile)
+    return dbProfiles(DBActions.GENERAL.UPSERT, profile)
   }
 
   static addChannelToProfiles(channel, profileIds) {
-    return window.ftElectron.dbProfiles(DBActions.PROFILES.ADD_CHANNEL, { channel, profileIds })
+    return dbProfiles(DBActions.PROFILES.ADD_CHANNEL, { channel, profileIds })
   }
 
-  static removeChannelFromProfiles(channelId, profileIds) {
-    return window.ftElectron.dbProfiles(DBActions.PROFILES.REMOVE_CHANNEL, { channelId, profileIds })
+  static removeChannelFromProfiles(channelIds, profileIds) {
+    return dbProfiles(DBActions.PROFILES.REMOVE_CHANNEL, { channelIds, profileIds })
+  }
+
+  static updateDetails(profileId, details) {
+    return dbProfiles(DBActions.PROFILES.UPDATE_DETAILS, { profileId, details })
+  }
+
+  static updateChannelSettings(channel, profileIds) {
+    return dbProfiles(DBActions.PROFILES.UPDATE_CHANNEL_SETTINGS, { channel, profileIds })
+  }
+
+  static batchUpdateChannelSettings(updates, profileIds) {
+    // Preserve explicit undefined overrides through IPC; JSON would drop resets.
+    const plainUpdates = updates.map(({ channelId, settings, updatedAt }) => ({
+      channelId,
+      updatedAt,
+      settings: Object.fromEntries(Object.entries(settings).map(([key, value]) => [
+        key, Array.isArray(value) ? [...value] : value
+      ]))
+    }))
+    return window.ftElectron.dbProfiles(DBActions.PROFILES.BATCH_UPDATE_CHANNEL_SETTINGS, {
+      updates: plainUpdates, profileIds: [...profileIds]
+    })
+  }
+
+  static updateSubscriptionDetails(channels) {
+    return dbProfiles(DBActions.PROFILES.UPDATE_SUBSCRIPTION_DETAILS, channels)
+  }
+
+  static saveFromSyncIfUnchanged(profile, previous) {
+    return dbProfiles(DBActions.PROFILES.SAVE_FROM_SYNC_IF_UNCHANGED, { profile, previous })
+  }
+
+  static updateSubscriptionsIfUnchanged(profileId, subscriptions, previous) {
+    return dbProfiles(DBActions.PROFILES.UPDATE_SUBSCRIPTIONS_IF_UNCHANGED, { profileId, subscriptions, previous })
+  }
+
+  static mergeBackup(profile) {
+    return dbProfiles(DBActions.PROFILES.MERGE_BACKUP, profile)
+  }
+
+  static mergeImported(profile) {
+    return dbProfiles(DBActions.PROFILES.MERGE_IMPORTED, profile)
   }
 
   static delete(id) {
-    return window.ftElectron.dbProfiles(DBActions.GENERAL.DELETE, id)
+    return dbProfiles(DBActions.GENERAL.DELETE, id)
   }
 }
 
 class Playlists {
-  static create(playlists) {
-    return window.ftElectron.dbPlaylists(DBActions.GENERAL.CREATE, playlists)
+  static upsertIfUnchanged(playlist, previous) {
+    return dbPlaylists(DBActions.PLAYLISTS.UPSERT_IF_UNCHANGED, { playlist, previous })
   }
 
-  static find() {
-    return window.ftElectron.dbPlaylists(DBActions.GENERAL.FIND)
+  static updateSortOrder(_id, sortOrder) {
+    return dbPlaylists(DBActions.PLAYLISTS.UPDATE_SORT_ORDER, { _id, sortOrder })
+  }
+
+  static repairMetadata(payload) {
+    return dbPlaylists(DBActions.PLAYLISTS.REPAIR_METADATA, payload)
+  }
+
+  static create(playlists) {
+    return dbPlaylists(DBActions.GENERAL.CREATE, playlists)
+  }
+
+  static async find() {
+    // The main process sends each playlist as JSON text, see History.find.
+    return (await dbPlaylists(DBActions.GENERAL.FIND)).map(playlist => JSON.parse(playlist))
+  }
+
+  static sent() {
+    return dbPlaylists.sent()
   }
 
   static upsert(playlist) {
-    return window.ftElectron.dbPlaylists(DBActions.GENERAL.UPSERT, playlist)
+    return dbPlaylists(DBActions.GENERAL.UPSERT, playlist, {
+      inWorker: playlist.videos?.length > LARGE_PLAYLIST_VIDEO_COUNT
+    })
+  }
+
+  static update(playlist) {
+    return dbPlaylists(DBActions.PLAYLISTS.UPDATE, playlist, {
+      inWorker: playlist.videos?.length > LARGE_PLAYLIST_VIDEO_COUNT
+    })
+  }
+
+  static reorderVideos(_id, lastUpdatedAt, playlistItemIds) {
+    return dbPlaylists(DBActions.PLAYLISTS.REORDER_VIDEOS, { _id, lastUpdatedAt, playlistItemIds })
+  }
+
+  static async mergeBackup(playlist) {
+    return JSON.parse(await dbPlaylists(DBActions.PLAYLISTS.MERGE_BACKUP, playlist, {
+      inWorker: playlist.videos.length > LARGE_PLAYLIST_VIDEO_COUNT
+    }))
   }
 
   static upsertVideoByPlaylistId(_id, lastUpdatedAt, videoData) {
-    return window.ftElectron.dbPlaylists(
+    return dbPlaylists(
       DBActions.PLAYLISTS.UPSERT_VIDEO,
       { _id, lastUpdatedAt, videoData }
     )
   }
 
-  static upsertVideosByPlaylistId(_id, lastUpdatedAt, videos) {
-    return window.ftElectron.dbPlaylists(
+  static upsertVideosByPlaylistId(_id, lastUpdatedAt, videos, deduplicate = false) {
+    return dbPlaylists(
       DBActions.PLAYLISTS.UPSERT_VIDEOS,
-      { _id, lastUpdatedAt, videos }
+      { _id, lastUpdatedAt, videos, deduplicate }
     )
   }
 
   static delete(_id) {
-    return window.ftElectron.dbPlaylists(DBActions.GENERAL.DELETE, _id)
+    return dbPlaylists(DBActions.GENERAL.DELETE, _id)
   }
 
   static deleteVideoIdByPlaylistId(_id, lastUpdatedAt, videoId, playlistItemId) {
-    return window.ftElectron.dbPlaylists(
+    return dbPlaylists(
       DBActions.PLAYLISTS.DELETE_VIDEO_ID,
       { _id, lastUpdatedAt, videoId, playlistItemId }
     )
   }
 
   static deleteVideoIdsByPlaylistId(_id, lastUpdatedAt, playlistItemIds) {
-    return window.ftElectron.dbPlaylists(
+    return dbPlaylists(
       DBActions.PLAYLISTS.DELETE_VIDEO_IDS,
       { _id, lastUpdatedAt, playlistItemIds }
     )
   }
 
   static deleteAllVideosByPlaylistId(_id) {
-    return window.ftElectron.dbPlaylists(DBActions.PLAYLISTS.DELETE_ALL_VIDEOS, _id)
+    return dbPlaylists(DBActions.PLAYLISTS.DELETE_ALL_VIDEOS, _id)
   }
 
   static deleteMultiple(ids) {
-    return window.ftElectron.dbPlaylists(DBActions.GENERAL.DELETE_MULTIPLE, ids)
+    return dbPlaylists(DBActions.GENERAL.DELETE_MULTIPLE, ids)
   }
 
   static deleteAll() {
-    return window.ftElectron.dbPlaylists(DBActions.GENERAL.DELETE_ALL)
+    return dbPlaylists(DBActions.GENERAL.DELETE_ALL)
   }
 }
 
 class SearchHistory {
   static find() {
-    return window.ftElectron.dbSearchHistory(DBActions.GENERAL.FIND)
+    return dbSearchHistory(DBActions.GENERAL.FIND)
   }
 
   static upsert(searchHistoryEntry) {
-    return window.ftElectron.dbSearchHistory(DBActions.GENERAL.UPSERT, searchHistoryEntry)
+    return dbSearchHistory(DBActions.GENERAL.UPSERT, searchHistoryEntry)
   }
 
-  static overwrite(records) {
-    return window.ftElectron.dbSearchHistory(DBActions.GENERAL.OVERWRITE, records)
+  static mergeImported(entries) {
+    return dbSearchHistory(DBActions.SEARCH_HISTORY.MERGE_IMPORTED, entries)
   }
 
   static delete(_id) {
-    return window.ftElectron.dbSearchHistory(DBActions.GENERAL.DELETE, _id)
+    return dbSearchHistory(DBActions.GENERAL.DELETE, _id)
+  }
+
+  static deleteOlderThan(cutoff) {
+    return dbSearchHistory(DBActions.SEARCH_HISTORY.DELETE_OLDER_THAN, cutoff)
   }
 
   static deleteAll() {
-    return window.ftElectron.dbSearchHistory(DBActions.GENERAL.DELETE_ALL)
+    return dbSearchHistory(DBActions.GENERAL.DELETE_ALL)
   }
 }
 
+// Subscription cache requests reach the main process in the order they were
+// made, so a deletion cannot be undone by a write made before it.
+let subscriptionCacheRequests = Promise.resolve()
+/** @type {{ update: object, resolve: (applied: boolean) => void, reject: (error: Error) => void }[] | null} */
+let openSubscriptionFeedBatch = null
+
+/** @param {() => Promise<any>} send */
+function enqueueSubscriptionCacheRequest(send) {
+  const request = subscriptionCacheRequests.then(send)
+  subscriptionCacheRequests = request.catch(() => {})
+  return request
+}
+
+/**
+ * A refresh writes one feed per channel. Writes made while an earlier request
+ * is on its way to the main process go together in the next request, which
+ * stores them in one transaction.
+ * @param {{ channelId: string, field: string, entries: object[], timestamp: Date }} update
+ * @returns {Promise<boolean>} false when a newer feed was already stored
+ */
+function queueSubscriptionFeedUpdate(update) {
+  return new Promise((resolve, reject) => {
+    if (!openSubscriptionFeedBatch) {
+      const batch = []
+      openSubscriptionFeedBatch = batch
+      enqueueSubscriptionCacheRequest(async () => {
+        if (openSubscriptionFeedBatch === batch) openSubscriptionFeedBatch = null
+        try {
+          const applied = await dbSubscriptionCache(DBActions.SUBSCRIPTION_CACHE.UPDATE_FEEDS, batch.map(({ update }) => update))
+          batch.forEach(({ resolve }, index) => resolve(applied[index]))
+        } catch (error) {
+          for (const { reject } of batch) reject(error)
+        }
+      })
+    }
+    openSubscriptionFeedBatch.push({ update, resolve, reject })
+  })
+}
+
+/** Sends any other cache request in order. Later writes start a new batch. */
+function subscriptionCacheRequest(action, data) {
+  openSubscriptionFeedBatch = null
+  return enqueueSubscriptionCacheRequest(() => dbSubscriptionCache(action, data))
+}
+
+/**
+ * Parses a document's stored JSON text. Documents saved with dates keep them
+ * in NeDB's `{ "$$date": … }` form, which its reviver turns back into dates.
+ * @param {string} text
+ */
+function parseStoredDocument(text) {
+  return text.includes('"$$date"')
+    ? JSON.parse(text, (key, value) => key === '$$date' ? new Date(value) : (value?.$$date ?? value))
+    : JSON.parse(text)
+}
+
 class SubscriptionCache {
-  static find() {
-    return window.ftElectron.dbSubscriptionCache(DBActions.GENERAL.FIND)
+  static markEntriesAsSeen(channelId, tab, entries) {
+    return subscriptionCacheRequest(DBActions.SUBSCRIPTION_CACHE.MARK_ENTRIES_AS_SEEN, { channelId, tab, entries })
+  }
+
+  static markEntriesAsSeenMany(marks) {
+    return subscriptionCacheRequest(DBActions.SUBSCRIPTION_CACHE.MARK_ENTRIES_AS_SEEN_MANY, marks)
+  }
+
+  static async find() {
+    // The main process sends each channel's stored JSON text, see History.find.
+    return (await subscriptionCacheRequest(DBActions.GENERAL.FIND)).map(parseStoredDocument)
   }
 
   static updateVideosByChannelId(channelId, entries, timestamp) {
-    return window.ftElectron.dbSubscriptionCache(
-      DBActions.SUBSCRIPTION_CACHE.UPDATE_VIDEOS_BY_CHANNEL,
-      { channelId, entries, timestamp }
-    )
+    return queueSubscriptionFeedUpdate({ channelId, field: 'videos', entries, timestamp })
   }
 
   static updateLiveStreamsByChannelId(channelId, entries, timestamp) {
-    return window.ftElectron.dbSubscriptionCache(
-      DBActions.SUBSCRIPTION_CACHE.UPDATE_LIVE_STREAMS_BY_CHANNEL,
-      { channelId, entries, timestamp }
-    )
+    return queueSubscriptionFeedUpdate({ channelId, field: 'liveStreams', entries, timestamp })
   }
 
   static updateShortsByChannelId(channelId, entries, timestamp) {
-    return window.ftElectron.dbSubscriptionCache(
-      DBActions.SUBSCRIPTION_CACHE.UPDATE_SHORTS_BY_CHANNEL,
-      { channelId, entries, timestamp }
-    )
+    return queueSubscriptionFeedUpdate({ channelId, field: 'shorts', entries, timestamp })
   }
 
   static updateShortsWithChannelPageShortsByChannelId(channelId, entries) {
-    return window.ftElectron.dbSubscriptionCache(
+    return subscriptionCacheRequest(
       DBActions.SUBSCRIPTION_CACHE.UPDATE_SHORTS_WITH_CHANNEL_PAGE_SHORTS_BY_CHANNEL,
       { channelId, entries }
     )
   }
 
   static updateCommunityPostsByChannelId(channelId, entries, timestamp) {
-    return window.ftElectron.dbSubscriptionCache(
-      DBActions.SUBSCRIPTION_CACHE.UPDATE_COMMUNITY_POSTS_BY_CHANNEL,
-      { channelId, entries, timestamp }
-    )
+    return queueSubscriptionFeedUpdate({ channelId, field: 'communityPosts', entries, timestamp })
   }
 
   static deleteMultipleChannels(channelIds) {
-    return window.ftElectron.dbSubscriptionCache(DBActions.GENERAL.DELETE_MULTIPLE, channelIds)
+    return subscriptionCacheRequest(DBActions.GENERAL.DELETE_MULTIPLE, channelIds)
   }
 
   static deleteAll() {
-    return window.ftElectron.dbSubscriptionCache(DBActions.GENERAL.DELETE_ALL)
+    return subscriptionCacheRequest(DBActions.GENERAL.DELETE_ALL)
   }
+}
+
+function compactAllDatastores() {
+  return window.ftElectron.storage.compactDatabases()
 }
 
 export {
   Settings as settings,
   History as history,
+  WatchStats as watchStats,
   Profiles as profiles,
   Playlists as playlists,
   SearchHistory as searchHistory,
   SubscriptionCache as subscriptionCache,
+  compactAllDatastores,
 }

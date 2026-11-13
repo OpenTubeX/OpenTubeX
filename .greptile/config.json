@@ -1,0 +1,13 @@
+{
+  "autoReview": ["open"],
+  "effort": "base",
+  "autoApprove": {
+    "enabled": true,
+    "riskCeiling": "low"
+  },
+  "ignoreKeywords": "Translations update from Weblate\nchore: sync development from FreeTubeApp/FreeTube",
+  "excludeAuthors": ["dependabot[bot]"],
+  "disabledLabels": ["translations"],
+  "ignorePatterns": "tests/**\ne2e/tests/**\nstatic/locales/**",
+  "fixWithAI": false
+}

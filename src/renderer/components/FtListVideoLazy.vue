@@ -1,44 +1,49 @@
 <template>
   <div
-    v-observe-visibility="visible ? false : {
-      callback: onVisibilityChanged
-    }"
+    v-first-visible="visible ? false : onFirstVisible"
     :style="{ display }"
   >
-    <FtListVideo
+    <FtBlockedItem
       v-if="visible"
-      :data="data"
-      :playlist-id="playlistId"
-      :playlist-type="playlistType"
-      :playlist-index="playlistIndex"
-      :playlist-reverse="playlistReverse"
-      :playlist-shuffle="playlistShuffle"
-      :playlist-loop="playlistLoop"
-      :playlist-item-id="playlistItemId"
-      :force-list-type="forceListType"
-      :appearance="appearance"
-      :always-show-add-to-playlist-button="alwaysShowAddToPlaylistButton"
-      :quick-bookmark-button-enabled="quickBookmarkButtonEnabled"
-      :can-move-video-up="canMoveVideoUp"
-      :can-move-video-down="canMoveVideoDown"
-      :can-remove-from-playlist="canRemoveFromPlaylist"
-      @move-video-to-the-top="moveVideoToTheTop"
-      @move-video-to-the-bottom="moveVideoToTheBottom"
-      @pause-player="pausePlayer"
-      @move-video-up="moveVideoUp"
-      @move-video-down="moveVideoDown"
-      @remove-from-playlist="removeFromPlaylist"
-    />
+      :blocked="blocked"
+      :reveal-key="data.videoId"
+    >
+      <FtListVideo
+        :data="data"
+        :playlist-id="playlistId"
+        :playlist-type="playlistType"
+        :playlist-index="playlistIndex"
+        :playlist-reverse="playlistReverse"
+        :playlist-shuffle="playlistShuffle"
+        :playlist-loop="playlistLoop"
+        :playlist-item-id="playlistItemId"
+        :force-list-type="forceListType"
+        :appearance="appearance"
+        :always-show-add-to-playlist-button="alwaysShowAddToPlaylistButton"
+        :quick-bookmark-button-enabled="quickBookmarkButtonEnabled"
+        :can-move-video-up="canMoveVideoUp"
+        :can-move-video-down="canMoveVideoDown"
+        :can-remove-from-playlist="canRemoveFromPlaylist"
+        @move-video-to-the-top="moveVideoToTheTop"
+        @move-video-to-the-bottom="moveVideoToTheBottom"
+        @pause-player="pausePlayer"
+        @move-video-up="moveVideoUp"
+        @move-video-down="moveVideoDown"
+        @remove-from-playlist="removeFromPlaylist"
+      />
+    </FtBlockedItem>
   </div>
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
-import { ObserveVisibility as vObserveVisibility } from 'vue-observe-visibility'
+import { computed, ref, watch } from 'vue'
+import { vFirstVisible } from '../helpers/firstVisible'
 
+import FtBlockedItem from './FtBlockedItem/FtBlockedItem.vue'
 import FtListVideo from './FtListVideo/FtListVideo.vue'
 
 import store from '../store/index'
+import { isVideoHiddenByPreferences } from '../helpers/subscriptions'
 
 const props = defineProps({
   data: {
@@ -115,44 +120,73 @@ const props = defineProps({
   }
 })
 
-const visible = ref(props.initialVisibleState)
-const display = ref('block')
+const EMPTY_SET = new Set()
 
 /** @type {import('vue').ComputedRef<Set<string>>} */
-const channelsHiddenIdSet = computed(() => {
+const channelsHiddenNames = computed(() => {
   // Some component users like channel view will have this disabled
-  if (!props.useChannelsHiddenPreference) { return new Set() }
+  if (!props.useChannelsHiddenPreference) { return EMPTY_SET }
 
-  return store.getters.getChannelsHiddenIdSet
+  return store.getters.getActiveChannelsHiddenNames
 })
 
+/** @type {import('vue').ComputedRef<Set<string>>} */
+const aiSlopChannels = computed(() => {
+  if (!props.useChannelsHiddenPreference) { return EMPTY_SET }
+
+  return store.getters.getAiSlopBlockedChannels
+})
+
+/** @type {import('vue').ComputedRef<string[]>} */
 const forbiddenTitles = computed(() => {
   if (!props.hideForbiddenTitles) { return [] }
-  return JSON.parse(store.getters.getForbiddenTitles.toLowerCase())
+  return store.getters.getActiveForbiddenTitles
 })
 
-const hideChannelsBasedOnText = computed(() => {
-  return store.getters.getHideChannelsBasedOnText
-})
+/** Lists keep block list matches and blur them instead of removing them */
+const blurBlockedItems = computed(() => store.getters.getBlurBlockedItemsActive)
 
 const shouldBeVisible = computed(() => {
-  const lowerCaseTitle = props.data.title?.toLowerCase()
-  const lowerCaseAuthor = props.data.author?.toLowerCase()
-
-  return !(channelsHiddenIdSet.value.has(props.data.authorId) ||
-    (props.data.collaborators?.length > 0 && channelsHiddenIdSet.value.has(props.data.collaborators[0].id)) ||
-    channelsHiddenIdSet.value.has(props.data.author) ||
-    (lowerCaseTitle && forbiddenTitles.value.some((text) => lowerCaseTitle.includes(text))) ||
-    (hideChannelsBasedOnText.value && lowerCaseAuthor && forbiddenTitles.value.some((text) => lowerCaseAuthor.includes(text))))
+  return !isVideoHiddenByPreferences(props.data, {
+    hiddenChannelNames: blurBlockedItems.value ? EMPTY_SET : channelsHiddenNames.value,
+    aiSlopChannels: aiSlopChannels.value,
+    forbiddenTitles: blurBlockedItems.value ? [] : forbiddenTitles.value,
+    hideChannelsBasedOnText: false,
+    membersOnlyChannelIds: store.getters.getMembersOnlyChannelIdSet,
+  })
 })
 
-/**
- * @param {boolean} isVisible
- */
-function onVisibilityChanged(isVisible) {
-  if (isVisible && shouldBeVisible.value) {
-    visible.value = isVisible
-  } else if (isVisible) {
+const blocked = computed(() => {
+  return blurBlockedItems.value && isVideoHiddenByPreferences(props.data, {
+    hiddenChannelNames: channelsHiddenNames.value,
+    forbiddenTitles: forbiddenTitles.value,
+    hideChannelsBasedOnText: false,
+  })
+})
+
+const visible = ref(props.initialVisibleState && shouldBeVisible.value)
+const display = ref(shouldBeVisible.value ? 'block' : 'none')
+const loadedByVisibilityObserver = ref(false)
+
+watch(
+  [() => props.initialVisibleState, shouldBeVisible],
+  ([initialVisibleState, isAllowed]) => {
+    if (!isAllowed) {
+      visible.value = false
+      display.value = 'none'
+      return
+    }
+
+    display.value = 'block'
+    visible.value = initialVisibleState || loadedByVisibilityObserver.value
+  }
+)
+
+function onFirstVisible() {
+  if (shouldBeVisible.value) {
+    loadedByVisibilityObserver.value = true
+    visible.value = true
+  } else {
     display.value = 'none'
   }
 }

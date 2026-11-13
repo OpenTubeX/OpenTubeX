@@ -1,150 +1,263 @@
+import { supportsYtDlp } from '../helpers/ytDlpCapabilities'
+import { defineAsyncComponent, h, markRaw, shallowRef } from 'vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
-import Subscriptions from '../views/Subscriptions/Subscriptions.vue'
-import SubscribedChannels from '../views/SubscribedChannels/SubscribedChannels.vue'
-import ProfileSettings from '../views/ProfileSettings/ProfileSettings.vue'
-import Trending from '../views/Trending/Trending.vue'
-import Popular from '../views/Popular/Popular.vue'
-import UserPlaylists from '../views/UserPlaylists/UserPlaylists.vue'
-import History from '../views/History/History.vue'
-import Settings from '../views/Settings/Settings.vue'
-import About from '../views/About/About.vue'
-import SearchPage from '../views/SearchPage/SearchPage.vue'
-import Playlist from '../views/Playlist/Playlist.vue'
-import Channel from '../views/Channel/Channel.vue'
-import Watch from '../views/Watch/Watch.vue'
-import Hashtag from '../views/Hashtag/Hashtag.vue'
-import Post from '../views/Post.vue'
+import { getFixedInternalRouteTitle } from '../../internalRoutes'
+
+// Loaded lazily to keep the startup bundle small, most notably the Watch view
+// pulls in shaka-player and googlevideo.
+// The tab system renders route components directly via `resolveRouteComponent`
+// instead of `RouterView` resolving them during navigation, so they must be
+// wrapped in `defineAsyncComponent` rather than passing the raw import function
+// to `component`.
+const AsyncRouteLoadingIndicator = {
+  render: () => h('span', {
+    hidden: true,
+    'data-tab-loading-indicator': ''
+  })
+}
+const routePreloaders = new WeakMap()
+
+function createAsyncRoute(loader) {
+  // Preloads and mounts share one request. A failed one is not kept, so the
+  // next attempt loads again.
+  let request = null
+  const load = () => {
+    request ??= loader().catch((error) => {
+      request = null
+      throw error
+    })
+    return request
+  }
+  const component = defineAsyncComponent({
+    loader: load,
+    loadingComponent: AsyncRouteLoadingIndicator,
+    delay: 0
+  })
+  // Resolving the wrapper itself lets later mounts render the view in the same
+  // frame instead of a placeholder first, which a view transition would
+  // capture. Vue keeps a rejected request of its own, so it only runs after a
+  // successful load.
+  routePreloaders.set(component, () => load()
+    .then(() => component.__asyncLoader?.())
+    .then(() => undefined))
+  return component
+}
+
+const Subscriptions = createAsyncRoute(() => import('../views/Subscriptions/Subscriptions.vue'))
+const Home = createAsyncRoute(() => import('../views/Home/Home.vue'))
+const SubscribedChannels = createAsyncRoute(() => import('../views/SubscribedChannels/SubscribedChannels.vue'))
+const Trending = createAsyncRoute(() => import('../views/Trending/Trending.vue'))
+const Popular = createAsyncRoute(() => import('../views/Popular/Popular.vue'))
+const UserPlaylists = createAsyncRoute(() => import('../views/UserPlaylists/UserPlaylists.vue'))
+const History = createAsyncRoute(() => import('../views/History/History.vue'))
+const SearchPage = createAsyncRoute(() => import('../views/SearchPage/SearchPage.vue'))
+const Playlist = createAsyncRoute(() => import('../views/Playlist/Playlist.vue'))
+const Channel = createAsyncRoute(() => import('../views/Channel/Channel.vue'))
+const Watch = createAsyncRoute(() => import('../views/Watch/Watch.vue'))
+const ExternalMedia = createAsyncRoute(() => import('../views/ExternalMedia/ExternalMedia.vue'))
+const ExternalChannel = createAsyncRoute(() => import('../views/ExternalChannel/ExternalChannel.vue'))
+const ExternalPlaylist = createAsyncRoute(() => import('../views/ExternalPlaylist/ExternalPlaylist.vue'))
+const Hashtag = createAsyncRoute(() => import('../views/Hashtag/Hashtag.vue'))
+const Post = createAsyncRoute(() => import('../views/Post.vue'))
+
+function createPreloadedRoute(name, loader) {
+  const loadedComponent = shallowRef(defineAsyncComponent(loader))
+  const preload = () => loader().then(({ default: component }) => {
+    loadedComponent.value = markRaw(component)
+  }).catch((error) => {
+    console.error(`Failed to preload ${name}`, error)
+  })
+  const component = {
+    name,
+    setup: () => () => h(loadedComponent.value)
+  }
+  routePreloaders.set(component, preload)
+
+  return {
+    component,
+    preload,
+  }
+}
+
+const settingsWindowRoute = createPreloadedRoute('SettingsWindowRoute', () => import('../views/Settings/Settings.vue'))
+const Stats = createAsyncRoute(() => import('../views/Stats/Stats.vue'))
+
+// Keep Settings in its own chunk so its styles retain their established load
+// order. The app schedules this utility chunk once the first usable frame has
+// rendered, avoiding startup contention without leaving the first navigation
+// to pay its full parse cost.
+export function preloadUtilityRoutes() {
+  return settingsWindowRoute.preload()
+}
+
+export const routes = [
+  {
+    path: '/home',
+    name: 'home',
+    meta: {
+      title: getFixedInternalRouteTitle('/home'),
+      hasResizableThumbnails: true
+    },
+    component: Home
+  },
+  {
+    path: '/',
+    name: 'default',
+    meta: {
+      title: 'Subscriptions',
+      hasResizableThumbnails: true
+    },
+    component: Subscriptions
+  },
+  {
+    path: '/subscriptions',
+    name: 'subscriptions',
+    meta: {
+      title: getFixedInternalRouteTitle('/subscriptions'),
+      hasResizableThumbnails: true
+    },
+    component: Subscriptions
+  },
+  {
+    path: '/subscribedchannels',
+    name: 'subscribedChannels',
+    meta: {
+      title: getFixedInternalRouteTitle('/subscribedchannels')
+    },
+    component: SubscribedChannels
+  },
+  ...(process.env.SUPPORTS_LOCAL_API
+    ? [{
+        path: '/trending',
+        name: 'trending',
+        meta: {
+          title: getFixedInternalRouteTitle('/trending'),
+          hasResizableThumbnails: true
+        },
+        component: Trending
+      }]
+    : []),
+  {
+    path: '/popular',
+    name: 'popular',
+    meta: {
+      title: getFixedInternalRouteTitle('/popular'),
+      hasResizableThumbnails: true
+    },
+    component: Popular
+  },
+  {
+    path: '/userplaylists',
+    name: 'userPlaylists',
+    meta: {
+      title: getFixedInternalRouteTitle('/userplaylists'),
+      hasResizableThumbnails: true
+    },
+    component: UserPlaylists
+  },
+  {
+    path: '/history',
+    name: 'history',
+    meta: {
+      title: getFixedInternalRouteTitle('/history'),
+      hasResizableThumbnails: true
+    },
+    component: History
+  },
+  {
+    path: '/stats',
+    name: 'stats',
+    meta: {
+      title: getFixedInternalRouteTitle('/stats')
+    },
+    component: Stats
+  },
+  // Settings, Downloads, About and the Profile Manager open in the settings
+  // window. Released builds also had routes for them, so restored and synced
+  // tabs can still hold these paths.
+  ...['/settings', '/settings/profile', '/downloads', '/about'].map(path => ({ path, redirect: '/' })),
+  {
+    path: '/search/:query',
+    meta: {
+      hasResizableThumbnails: true
+    },
+    component: SearchPage
+  },
+  {
+    path: '/playlist/:id',
+    meta: {
+      hasResizableThumbnails: true
+    },
+    component: Playlist
+  },
+  {
+    path: '/channel/:id/:currentTab?',
+    meta: {
+      hasResizableThumbnails: true
+    },
+    component: Channel
+  },
+  {
+    path: '/watch/:id',
+    component: Watch
+  },
+  ...(supportsYtDlp
+    ? [{
+        path: '/external-media',
+        component: ExternalMedia
+      }, {
+        // Channels and playlists of other platforms, whose items play through yt-dlp
+        path: '/external-channel',
+        meta: {
+          hasResizableThumbnails: true
+        },
+        component: ExternalChannel
+      }, {
+        path: '/external-playlist',
+        meta: {
+          hasResizableThumbnails: true
+        },
+        component: ExternalPlaylist
+      }]
+    : [
+        { path: '/external-media', redirect: '/' },
+        { path: '/external-channel', redirect: '/' },
+        { path: '/external-playlist', redirect: '/' }
+      ]),
+  {
+    path: '/hashtag/:hashtag',
+    meta: {
+      hasResizableThumbnails: true
+    },
+    component: Hashtag
+  },
+  {
+    path: '/post/:id',
+    component: Post
+  }
+]
 
 const router = createRouter({
   history: createWebHashHistory(),
-  routes: [
-    {
-      path: '/',
-      name: 'default',
-      meta: {
-        title: 'Subscriptions'
-      },
-      component: Subscriptions
-    },
-    {
-      path: '/subscriptions',
-      name: 'subscriptions',
-      meta: {
-        title: 'Subscriptions'
-      },
-      component: Subscriptions
-    },
-    {
-      path: '/subscribedchannels',
-      name: 'subscribedChannels',
-      meta: {
-        title: 'Channels'
-      },
-      component: SubscribedChannels
-    },
-    ...(process.env.SUPPORTS_LOCAL_API
-      ? [{
-          path: '/trending',
-          name: 'trending',
-          meta: {
-            title: 'Trending'
-          },
-          component: Trending
-        }]
-      : []),
-    {
-      path: '/popular',
-      name: 'popular',
-      meta: {
-        title: 'Most Popular'
-      },
-      component: Popular
-    },
-    {
-      path: '/userplaylists',
-      name: 'userPlaylists',
-      meta: {
-        title: 'Your Playlists'
-      },
-      component: UserPlaylists
-    },
-    {
-      path: '/history',
-      name: 'history',
-      meta: {
-        title: 'History'
-      },
-      component: History
-    },
-    {
-      path: '/settings',
-      name: 'settings',
-      meta: {
-        title: 'Settings'
-      },
-      component: Settings
-    },
-    {
-      path: '/about',
-      name: 'about',
-      meta: {
-        title: 'About'
-      },
-      component: About
-    },
-    {
-      path: '/settings/profile',
-      name: 'profileSettings',
-      meta: {
-        title: 'Profile Settings'
-      },
-      component: ProfileSettings
-    },
-    {
-      path: '/search/:query',
-      meta: {
-        title: 'Search Results'
-      },
-      component: SearchPage
-    },
-    {
-      path: '/playlist/:id',
-      meta: {
-        title: 'Playlist'
-      },
-      component: Playlist
-    },
-    {
-      path: '/channel/:id/:currentTab?',
-      meta: {
-        title: 'Channel'
-      },
-      component: Channel
-    },
-    {
-      path: '/watch/:id',
-      meta: {
-        title: 'Watch'
-      },
-      component: Watch
-    },
-    {
-      path: '/hashtag/:hashtag',
-      meta: {
-        title: 'Hashtag'
-      },
-      component: Hashtag
-    },
-    {
-      path: '/post/:id',
-      meta: {
-        title: 'Post',
-      },
-      component: Post
-    }
-  ],
+  routes,
   scrollBehavior(to, from, savedPosition) {
-    return new Promise((resolve, reject) => {
+    // Logical tabs restore their own viewport after presenting the target.
+    // A delayed router reset would move a restored floating player back inline.
+    if (process.env.IS_ELECTRON || process.env.IS_CAPACITOR) {
+      return false
+    }
+
+    const preserveScroll = window.history.state?.preserveScroll === true
+    if (preserveScroll) {
+      const state = { ...window.history.state }
+      delete state.preserveScroll
+      window.history.replaceState(state, '')
+    }
+    if (savedPosition === null && preserveScroll) {
+      return false
+    }
+
+    return new Promise((resolve) => {
       setTimeout(() => {
         if (savedPosition !== null) {
           resolve(savedPosition)
@@ -155,5 +268,14 @@ const router = createRouter({
     })
   }
 })
+
+export function resolveRouteComponent(resolvedRoute) {
+  return resolvedRoute.matched.at(-1)?.components?.default ?? null
+}
+
+export function preloadResolvedRoute(resolvedRoute) {
+  const component = resolveRouteComponent(resolvedRoute)
+  return routePreloaders.get(component)?.() ?? Promise.resolve()
+}
 
 export default router

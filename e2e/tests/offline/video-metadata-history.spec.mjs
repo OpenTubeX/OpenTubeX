@@ -1,0 +1,336 @@
+import { once } from 'node:events'
+import { existsSync } from 'node:fs'
+import { mkdtemp, rm, symlink, writeFile } from 'node:fs/promises'
+import { createServer } from 'node:http'
+import { tmpdir } from 'node:os'
+import path from 'node:path'
+
+import { DBActions } from '../../../src/constants.js'
+import { activeTab, openMockedVideo } from '../../helpers/player.mjs'
+import { expect, goToSettingsSection, test, readDatastore, createUserDataDir, launchApp } from '../../helpers/app.mjs'
+import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
+
+const WATCH_PAGE_SEED = {
+  videoPlaybackEngine: 'built-in',
+  ytDlpPlaybackEngineDefaultMigration: true,
+  enableVideoMetadataCache: true
+}
+const THUMBNAILS = [
+  Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64'),
+  Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64')
+]
+
+test.use({ seed: { settings: WATCH_PAGE_SEED } })
+
+test('shows metadata history after loading a video with a previously recorded title', async ({ app, page }) => {
+  await page.evaluate(() => window.ftElectron.videoMetadataCache.update({
+    videoId: 'jNQXAC9IVRw',
+    title: 'Previously recorded title',
+    description: '',
+    thumbnailUrl: ''
+  }))
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+
+  const historyButton = page.locator(`${activeTab} .infoArea`)
+    .getByRole('button', { name: 'Metadata history' })
+  await expect(historyButton).toBeVisible({ timeout: 25_000 })
+  await historyButton.click()
+  await expect(page.getByRole('dialog', { name: 'Metadata history' }))
+    .toContainText('Previously recorded title')
+})
+
+async function storeFeedTitle(page, videoId, title, timestamp, channelId = 'UCfeedtitlechannel00000') {
+  await page.evaluate(({ action, channelId, videoId, title, timestamp }) => window.ftElectron.dbSubscriptionCache(action, [{
+    channelId,
+    field: 'videos',
+    entries: [{ type: 'video', videoId, title }],
+    timestamp: new Date(timestamp)
+  }]), { action: DBActions.SUBSCRIPTION_CACHE.UPDATE_FEEDS, channelId, videoId, title, timestamp })
+}
+
+test('shows a title that only the subscription feed delivered before the visit', async ({ app, page }) => {
+  const now = Date.now()
+  await storeFeedTitle(page, 'jNQXAC9IVRw', 'Title variant from the feed', now - 60_000)
+  await storeFeedTitle(page, 'jNQXAC9IVRw', 'Title the feed shows now', now - 30_000)
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+
+  const historyButton = page.locator(`${activeTab} .infoArea`)
+    .getByRole('button', { name: 'Metadata history' })
+  await expect(historyButton).toBeVisible({ timeout: 25_000 })
+  await historyButton.click()
+  const dialog = page.getByRole('dialog', { name: 'Metadata history' })
+  await expect(dialog).toContainText('Title variant from the feed')
+  await expect(dialog).not.toContainText('Title the feed shows now')
+})
+
+test('compares feed titles only with each other', async ({ page }) => {
+  const now = Date.now()
+  const update = () => page.evaluate(() => window.ftElectron.videoMetadataCache.update({
+    videoId: 'feedtitle01',
+    title: 'Original title',
+    description: '',
+    thumbnailUrl: ''
+  }))
+
+  await storeFeedTitle(page, 'feedtitle01', 'Translated title', now - 60_000)
+  await storeFeedTitle(page, 'feedtitle01', 'Renamed translated title', now - 40_000)
+  await storeFeedTitle(page, 'feedtitle01', 'Translated title', now - 35_000)
+  await storeFeedTitle(page, 'feedtitle01', 'Renamed translated title', now - 30_000)
+  await storeFeedTitle(page, 'feedtitle01', 'Renamed translated title', now - 20_000)
+  // Another channel's feed that was fetched earlier but stored later, as with
+  // a collaboration, must not record its older title as the latest, even when
+  // it is newer than the latest title change.
+  await storeFeedTitle(page, 'feedtitle01', 'Stale title', now - 25_000, 'UCfeedtitlechannel00001')
+  // The feed may translate titles, so the title it shows now is not a previous
+  // title, even though it differs from the watch page.
+  await expect.poll(async () => (await update())?.feedTitles.map(({ title }) => title))
+    .toEqual(['Translated title', 'Translated title'])
+})
+
+test('skips feed titles fetched before the cache was cleared', async ({ page }) => {
+  const fetchedBeforeClear = Date.now() - 1000
+  await page.evaluate(() => window.ftElectron.videoMetadataCache.clear())
+  await storeFeedTitle(page, 'feedtitle03', 'Title fetched before the clear', fetchedBeforeClear)
+  const fetchedAfterClear = Date.now()
+  await storeFeedTitle(page, 'feedtitle03', 'Title fetched after the clear', fetchedAfterClear, 'UCfeedtitlechannel00001')
+  await storeFeedTitle(page, 'feedtitle03', 'Later title', fetchedAfterClear + 1, 'UCfeedtitlechannel00002')
+
+  await expect.poll(async () => (await page.evaluate(() => window.ftElectron.videoMetadataCache.update({
+    videoId: 'feedtitle03',
+    title: 'Original title',
+    description: '',
+    thumbnailUrl: ''
+  })))?.feedTitles.map(({ title }) => title)).toEqual(['Title fetched after the clear'])
+})
+
+test('stores and presents every previous metadata version', async ({ app, page }) => {
+  // It stores six revisions, then checks the dialog's layout and clearing,
+  // which takes about 45 seconds when several workers load the machine.
+  test.slow()
+  const thumbnailServer = createServer((request, response) => {
+    const requestUrl = new URL(request.url, 'http://localhost')
+    if (requestUrl.pathname === '/redirect.png') {
+      const { port } = thumbnailServer.address()
+      response.writeHead(302, { location: `http://localhost:${port}/thumbnail.png?revision=0` })
+      response.end()
+      return
+    }
+
+    const index = Number(requestUrl.searchParams.get('revision'))
+    const thumbnail = THUMBNAILS[index % THUMBNAILS.length]
+    response.writeHead(200, {
+      'content-length': thumbnail.length,
+      'content-type': 'image/png'
+    })
+    response.end(thumbnail)
+  })
+  thumbnailServer.listen(0, '127.0.0.1')
+  await once(thumbnailServer, 'listening')
+
+  try {
+    const { port } = thumbnailServer.address()
+    await mockPlayableWatchPage(app, page)
+    const video = await openMockedVideo(page)
+    await video.evaluate(element => element.pause())
+
+    const thumbnailBaseUrl = `http://127.0.0.1:${port}`
+    await page.evaluate(async ({ action, url }) => {
+      await window.ftElectron.dbSettings(action, {
+        _id: 'defaultInvidiousInstance',
+        value: url
+      })
+    }, { action: DBActions.GENERAL.UPSERT, url: thumbnailBaseUrl })
+
+    const watchView = await watchViewHandle(page)
+    const cacheChecks = await watchView.evaluate(async (view, thumbnailBaseUrl) => {
+      await window.ftElectron.videoMetadataCache.clear()
+
+      const redirectedMetadata = {
+        videoId: 'redirect001',
+        title: 'Redirect test',
+        description: 'Redirect test',
+        thumbnailUrl: `${thumbnailBaseUrl}/redirect.png`
+      }
+      await window.ftElectron.videoMetadataCache.update(redirectedMetadata)
+      const redirectedHistory = await window.ftElectron.videoMetadataCache.update({
+        ...redirectedMetadata,
+        title: 'Redirect test changed'
+      })
+      const privateRedirectRejected = redirectedHistory.revisions.every(revision => revision.thumbnail === null)
+      await window.ftElectron.videoMetadataCache.clear()
+
+      const observedAt = Date.now() - 10_000
+      let history = null
+      for (let index = 0; index < 6; index += 1) {
+        const isCurrent = index === 5
+        const label = isCurrent ? 'Current' : `Previous ${index + 1}`
+        history = await window.ftElectron.videoMetadataCache.update({
+          videoId: view.videoId,
+          title: `${label} title`,
+          description: Array.from(
+            { length: 30 },
+            (_, line) => `${label} description line ${line + 1} with enough text to wrap when the metadata history is narrow`
+          ).join('\n'),
+          thumbnailUrl: `${thumbnailBaseUrl}/thumbnail.png?revision=${index}`,
+          observedAt: observedAt + index
+        })
+      }
+
+      view.resetVideoState({ preserveTitle: true })
+      view.isLoading = false
+      await view.updateVideoMetadataCache()
+      const preservedTitleWasRejected = !view.hasResolvedVideoTitle
+
+      view.videoTitle = 'Current title'
+      view.videoDescription = 'Current description'
+      view.thumbnail = `${thumbnailBaseUrl}?revision=5`
+      view.videoMetadataHistory = history
+      view.hasResolvedVideoTitle = true
+      await view.$nextTick()
+      return { preservedTitleWasRejected, privateRedirectRejected }
+    }, thumbnailBaseUrl)
+    await watchView.dispose()
+    expect(cacheChecks).toEqual({
+      preservedTitleWasRejected: true,
+      privateRedirectRejected: true
+    })
+
+    const cacheDocuments = readDatastore(app.userDataDir, 'video-metadata-cache').trim().split('\n')
+      .map(line => JSON.parse(line))
+      .filter(document => document._id && !document.$$deleted)
+    expect(cacheDocuments).toHaveLength(6)
+    expect(cacheDocuments.every(document => document.thumbnail?.startsWith('data:image/png;base64,')))
+      .toBe(true)
+
+    const historyButton = page.locator(`${activeTab} .infoArea`)
+      .getByRole('button', { name: 'Metadata history' })
+    await expect(historyButton).toBeVisible()
+    await historyButton.click()
+
+    const dialog = page.getByRole('dialog', { name: 'Metadata history' })
+    await expect(dialog).toBeVisible()
+    // Geometry captured during the prompt's scale/translate entrance animation
+    // can differ by fractional pixels even though the fixed header never moves.
+    await dialog.evaluate(element => Promise.all(
+      element.getAnimations({ subtree: false }).map(animation => animation.finished)
+    ))
+    await expect(dialog.getByRole('heading', { name: 'Title history' })).toBeVisible()
+    await expect(dialog.getByRole('heading', { name: 'Thumbnail history' })).toBeVisible()
+    await expect(dialog.getByRole('heading', { name: 'Description history' })).toBeVisible()
+    await expect(dialog.locator('.historySection')).toHaveCount(3)
+    await expect(dialog.locator('.historySection').first().locator('.historyEntry')).toHaveCount(5)
+    await expect(dialog).not.toContainText('Current title')
+
+    const sectionPositions = await dialog.locator('.historySection').evaluateAll(sections => (
+      sections.map(section => {
+        const { x, y } = section.getBoundingClientRect()
+        return { x, y }
+      })
+    ))
+    expect(new Set(sectionPositions.map(position => Math.round(position.x))).size).toBe(3)
+    expect(Math.max(...sectionPositions.map(position => position.y)) -
+      Math.min(...sectionPositions.map(position => position.y))).toBeLessThanOrEqual(1)
+
+    const thumbnailFrames = dialog.locator('.thumbnailFrame')
+    await expect(thumbnailFrames).toHaveCount(5)
+    expect(Math.max(...await thumbnailFrames.evaluateAll(frames => (
+      frames.map(frame => frame.getBoundingClientRect().width)
+    )))).toBeLessThanOrEqual(280)
+
+    const descriptions = dialog.locator('.metadataDescription')
+    await expect(descriptions).toHaveCount(5)
+    for (const description of await descriptions.all()) {
+      await expect(description).toHaveAttribute('data-overlayscrollbars-viewport')
+      await expect(description.locator(':scope > .os-scrollbar-vertical')).toHaveCount(1)
+    }
+
+    const scroller = dialog.locator('.promptContentScroller')
+    await expect(scroller).toHaveAttribute('data-overlayscrollbars-viewport')
+    const heading = dialog.getByRole('heading', { name: 'Metadata history' })
+    const closeButton = dialog.getByRole('button', { name: 'Close' })
+    const fixedPositionsBeforeScroll = await Promise.all([heading.boundingBox(), closeButton.boundingBox()])
+    await scroller.evaluate(element => element.scrollTo(0, element.scrollHeight))
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    const fixedPositionsAfterScroll = await Promise.all([heading.boundingBox(), closeButton.boundingBox()])
+    for (const [index, before] of fixedPositionsBeforeScroll.entries()) {
+      const after = fixedPositionsAfterScroll[index]
+      for (const property of ['x', 'y', 'width', 'height']) {
+        expect(Math.abs(after[property] - before[property])).toBeLessThanOrEqual(1)
+      }
+    }
+
+    await page.setViewportSize({ width: 480, height: 500 })
+    const firstDescription = descriptions.first()
+    await scroller.evaluate(element => element.scrollTo(0, element.scrollHeight))
+    await firstDescription.evaluate(element => element.scrollTo(0, element.scrollHeight))
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    await expect.poll(() => firstDescription.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+    await page.setViewportSize({ width: 1920, height: 1080 })
+    await expect.poll(() => scroller.evaluate(element => {
+      const content = element.firstElementChild
+      const maximum = Math.max(0, content.offsetTop + content.offsetHeight +
+        Number.parseFloat(getComputedStyle(content).marginBlockEnd) +
+        Number.parseFloat(getComputedStyle(element).paddingBottom) - element.clientHeight)
+      return element.scrollTop <= maximum + 1
+    })).toBe(true)
+    await expect.poll(() => firstDescription.evaluate(element => {
+      const content = element.firstElementChild
+      const maximum = Math.max(0, content.offsetTop + content.offsetHeight +
+        Number.parseFloat(getComputedStyle(content).marginBlockEnd) +
+        Number.parseFloat(getComputedStyle(element).paddingBottom) - element.clientHeight)
+      return element.scrollTop <= maximum + 1
+    })).toBe(true)
+
+    await closeButton.click()
+    await expect(dialog).toHaveCount(0)
+
+    const storageSettings = await goToSettingsSection(page, 'storage')
+    const metadata = storageSettings.locator('.storageItem').filter({ hasText: 'Metadata history' })
+    await expect(metadata.getByRole('checkbox', { name: 'Metadata history' })).toBeChecked()
+    await expect(metadata.locator('.storageSize')).not.toHaveText('0 B')
+    await metadata.getByRole('button', { name: 'Clear Video Metadata Cache' }).click()
+    await page.getByRole('dialog', {
+      name: 'Are you sure you want to clear the cached video titles, thumbnails, and descriptions?'
+    }).getByRole('button', { name: 'Delete' }).click()
+
+    await expect(metadata.locator('.storageSize')).toHaveText('0 B')
+    await expect(historyButton).toHaveCount(0)
+  } finally {
+    thumbnailServer.close()
+    // Chromium can keep a connection open that never sent a request, which
+    // close() leaves alone, so the close event would never fire.
+    thumbnailServer.closeAllConnections()
+    await once(thumbnailServer, 'close')
+  }
+})
+
+test('measures a linked cache after clearing and refilling it', async () => {
+  const external = await mkdtemp(path.join(tmpdir(), 'opentubex-linked-cache-'))
+  const userDataDir = await createUserDataDir({ settings: WATCH_PAGE_SEED })
+  let electronApp
+  try {
+    await writeFile(path.join(external, 'video-metadata-cache.db'), '')
+    await symlink(path.join(external, 'video-metadata-cache.db'), path.join(userDataDir, 'video-metadata-cache.db'))
+    const launched = await launchApp(userDataDir)
+    electronApp = launched.electronApp
+    const size = await launched.page.evaluate(async () => {
+      const cache = window.ftElectron.videoMetadataCache
+      const metadata = { videoId: 'linked00001', title: 'Linked', description: 'Linked cache', thumbnailUrl: '', observedAt: Date.now() }
+      await cache.update(metadata)
+      // Clearing removes the link's target; the refilled cache stays beside it.
+      await cache.clear()
+      await cache.update(metadata)
+      return cache.getSize()
+    })
+    expect(existsSync(path.join(external, 'video-metadata-cache.sqlite'))).toBe(true)
+    expect(existsSync(path.join(userDataDir, 'video-metadata-cache.sqlite'))).toBe(false)
+    expect(size).toBeGreaterThan(0)
+  } finally {
+    await electronApp?.close()
+    await rm(userDataDir, { recursive: true, force: true })
+    await rm(external, { recursive: true, force: true })
+  }
+})

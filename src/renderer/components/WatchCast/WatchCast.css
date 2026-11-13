@@ -1,0 +1,242 @@
+/* Outranks FtIconButton's scoped centered, small and secondary dropdown text. */
+:global(.ftIconButton .iconDropdown.castMenu) {
+  inline-size: min(300px, calc(100vw - 16px));
+}
+
+.castHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-block-size: 40px;
+  padding-block: 4px;
+  padding-inline: 12px 4px;
+}
+
+.castHeaderTitle {
+  flex: 1;
+  min-inline-size: 0;
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.castHeaderText {
+  display: grid;
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.castHeaderCaption,
+.castDeviceCaption,
+.castTimes {
+  color: var(--secondary-text-color);
+  font-size: 12px;
+}
+
+.castHeaderIcon,
+.castDeviceIcon {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  inline-size: 36px;
+  block-size: 36px;
+  border-radius: var(--shape-corner-medium);
+  background-color: var(--side-nav-hover-color);
+  color: var(--secondary-text-color);
+}
+
+.castHeaderIcon {
+  background-color: color-mix(in srgb, var(--primary-color) 18%, transparent);
+  color: var(--primary-color);
+}
+
+.castHeaderButton,
+.castTransportButton,
+.castVolumeButton {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  inline-size: 36px;
+  block-size: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.castHeaderButton:not(:disabled, [aria-disabled='true']):is(:hover, :focus-visible),
+.castTransportButton:not(:disabled, [aria-disabled='true']):is(:hover, :focus-visible),
+.castVolumeButton:not(:disabled, [aria-disabled='true']):is(:hover, :focus-visible) {
+  background-color: var(--side-nav-hover-color);
+}
+
+.castDevices {
+  margin: 0;
+  padding-block: 0 4px;
+  padding-inline: 0;
+  list-style: none;
+}
+
+.castDevice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  inline-size: 100%;
+  padding-block: 6px;
+  padding-inline: 12px;
+  border: 0;
+  border-radius: var(--shape-corner-small);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition: background-color var(--motion-fast-effects);
+}
+
+.castDevice:disabled {
+  cursor: default;
+}
+
+.castDevice:disabled:not(.castStatus) {
+  opacity: 0.5;
+}
+
+.castDevice:not(:disabled):is(:hover, :focus-visible) {
+  background-color: var(--side-nav-hover-color);
+  color: var(--side-nav-hover-text-color);
+}
+
+.castStatus {
+  color: var(--secondary-text-color);
+}
+
+.castStatus .castDeviceIcon {
+  background: transparent;
+}
+
+.castDeviceText {
+  display: grid;
+  min-inline-size: 0;
+}
+
+.castDeviceName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.castRemote {
+  display: grid;
+  gap: 8px;
+  padding-block: 4px 8px;
+  padding-inline: 12px;
+}
+
+.castSlider {
+  inline-size: 100%;
+  margin: 0;
+  accent-color: var(--primary-color);
+  cursor: pointer;
+}
+
+.castTimes {
+  display: flex;
+  justify-content: space-between;
+  margin-block-start: -4px;
+}
+
+.castTransport {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.castPlay {
+  inline-size: 48px;
+  block-size: 48px;
+  background-color: var(--primary-text-color);
+  color: var(--card-bg-color);
+  font-size: 20px;
+}
+
+.castPlay:not(:disabled, [aria-disabled='true']):is(:hover, :focus-visible) {
+  background-color: var(--secondary-text-color);
+}
+
+.castVolume {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.castCaptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.castCaption,
+.castStop {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-block-size: 32px;
+  padding-block: 4px;
+  padding-inline: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--shape-corner-full);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.castCaption[aria-pressed='true'] {
+  border-color: transparent;
+  background-color: color-mix(in srgb, var(--primary-color) 18%, transparent);
+}
+
+.castStop {
+  inline-size: 100%;
+  min-block-size: 36px;
+  border-radius: var(--shape-corner-full);
+  font-weight: 500;
+}
+
+.castCaption:not(:disabled, [aria-disabled='true']):is(:hover, :focus-visible),
+.castStop:not(:disabled, [aria-disabled='true']):is(:hover, :focus-visible) {
+  background-color: var(--side-nav-hover-color);
+}
+
+/* Busy controls stay focusable so that the menu, which closes when focus leaves it, stays open. */
+:is(.castHeaderButton, .castTransportButton, .castVolumeButton, .castCaption, .castStop, .castSlider):is(:disabled, [aria-disabled='true']) {
+  cursor: default;
+  opacity: 0.5;
+}
+
+@media (pointer: coarse), (width <= 680px) {
+  .castDevice,
+  .castCaption,
+  .castSlider,
+  .castHeaderButton,
+  .castTransportButton,
+  .castVolumeButton,
+  .castStop {
+    box-sizing: border-box;
+    min-block-size: var(--phone-touch-target, 48px);
+  }
+
+  .castHeaderButton,
+  .castTransportButton,
+  .castVolumeButton {
+    min-inline-size: var(--phone-touch-target, 48px);
+  }
+}

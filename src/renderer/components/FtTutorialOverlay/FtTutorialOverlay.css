@@ -1,0 +1,237 @@
+.tutorialOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1001;
+}
+
+.tutorialOverlay.centered {
+  background-color: rgb(0 0 0 / 72%);
+  display: grid;
+  place-items: center;
+}
+
+.tutorialHighlight {
+  position: fixed;
+  border-radius: var(--shape-corner-medium);
+  box-shadow:
+    inset 0 0 0 2px var(--primary-color),
+    0 0 0 9999px rgb(0 0 0 / 72%);
+  box-sizing: border-box;
+  pointer-events: none;
+
+  /* Physical target coordinates must not mirror in RTL layouts. */
+  /* stylelint-disable liberty/use-logical-spec, plugin/no-low-performance-animation-properties -- the tutorial highlight follows its target */
+  transition:
+    inset-block-start var(--motion-default-spatial),
+    left var(--motion-default-spatial),
+    inline-size var(--motion-default-spatial),
+    block-size var(--motion-default-spatial);
+  /* stylelint-enable liberty/use-logical-spec, plugin/no-low-performance-animation-properties */
+}
+
+.tutorialCard {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  inline-size: min(380px, calc(100vw - 24px));
+  max-block-size: calc(100dvh - 24px);
+  overflow: hidden;
+  margin: 0;
+  padding: 24px;
+  color: var(--primary-text-color);
+  box-shadow: 0 18px 55px rgb(0 0 0 / 55%);
+  text-align: center;
+}
+
+.centered .tutorialCard {
+  position: relative;
+}
+
+/* Gives the theme preview names one line and the selects their usual width side by side */
+.tutorialWideCard {
+  inline-size: min(580px, calc(100vw - 24px));
+}
+
+.tutorialSkip {
+  position: absolute;
+  inset-block-start: 12px;
+  inset-inline-end: 12px;
+}
+
+.tutorialProgress {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-block-end: 20px;
+}
+
+.tutorialProgress span {
+  inline-size: 7px;
+  block-size: 7px;
+  border-radius: 50%;
+  background-color: var(--subtle-surface-color);
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- the tutorial highlight follows its target */
+  transition: inline-size var(--motion-fast-spatial), background-color var(--motion-fast-effects);
+}
+
+.tutorialProgress .active {
+  inline-size: 22px;
+  border-radius: var(--shape-corner-full);
+  background-color: var(--primary-color);
+}
+
+.tutorialIcon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  inline-size: 48px;
+  block-size: 48px;
+  margin-inline: auto;
+  color: var(--text-with-main-color);
+  font-size: 22px;
+  isolation: isolate;
+}
+
+.tutorialIcon::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--primary-color);
+  clip-path: var(--shape-cookie-9);
+  content: '';
+}
+
+.tutorialProgress,
+.tutorialIcon,
+.tutorialCard h2 {
+  flex-shrink: 0;
+}
+
+.tutorialCard h2 {
+  margin-block: 16px 8px;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.tutorialCard p {
+  margin-block: 0 20px;
+  color: var(--secondary-text-color);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+.tutorialScroll {
+  min-block-size: 0;
+  overflow-y: auto;
+}
+
+.tutorialPreferences {
+  display: grid;
+  gap: 16px;
+  justify-items: center;
+  margin-block-end: 20px;
+  text-align: start;
+}
+
+.tutorialPreferences > .themeModes {
+  justify-self: stretch;
+
+  /* Room for the selection and focus outlines, which the scroll viewport would clip */
+  padding: 7px;
+  font-size: 0.875rem;
+}
+
+.tutorialControls {
+  display: grid;
+  gap: 20px;
+  justify-items: center;
+  margin-block-end: 20px;
+}
+
+/* Selects keep room for their reset and sync indicators at their end; the same
+   room at their start centers the visible field, also when it spans the card. */
+.tutorialControls > :deep(.select) {
+  max-inline-size: calc(100% - var(--select-indicator-space));
+  margin-block: 0;
+  margin-inline-start: var(--select-indicator-space);
+  text-align: start;
+}
+
+.tutorialSwitches {
+  display: grid;
+  gap: 4px;
+  justify-self: stretch;
+  text-align: start;
+}
+
+.tutorialSwitches > :deep(.switch-ctn) {
+  margin: 0;
+}
+
+.tutorialSelectRow {
+  display: flex;
+  gap: 12px;
+  justify-self: stretch;
+  margin-block-start: 12px;
+}
+
+.tutorialSelectRow > :deep(.select) {
+  flex: 1 1 0;
+  inline-size: auto;
+  min-inline-size: 0;
+  margin-block: 0;
+}
+
+.tutorialSelectRow > :deep(.select:first-child) {
+  margin-inline-start: var(--select-indicator-space);
+}
+
+/* Side by side, narrower selects would cut off their labels and values. */
+@media only screen and (width <= 620px) {
+  .tutorialSelectRow {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .tutorialSelectRow > :deep(.select) {
+    margin-inline-start: var(--select-indicator-space);
+  }
+}
+
+.tutorialPreferences > .tutorialMoreThemes {
+  margin: 0;
+}
+
+.tutorialActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.tutorialActions :deep(.btn) {
+  margin: 0;
+}
+
+.tutorialChoices {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+@media only screen and (width <= 500px) {
+  .tutorialCard {
+    padding: 20px;
+  }
+
+  .tutorialSkip {
+    inset-block-start: 8px;
+    inset-inline-end: 8px;
+  }
+}
+
+:root[data-reduced-motion='reduce'] .tutorialHighlight,
+:root[data-reduced-motion='reduce'] .tutorialProgress span {
+  transition: none;
+}

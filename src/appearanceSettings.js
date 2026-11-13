@@ -1,0 +1,47 @@
+import { BUILTIN_BASE_THEME_VALUES, DARK_BASE_THEMES, DEFAULT_SYSTEM_THEMES, FIXED_COLOR_BASE_THEMES, LIGHT_BASE_THEMES } from './constants.js'
+import { isCustomThemeValue } from './customTheme.js'
+
+const BUILTIN_BASE_THEMES = new Set(BUILTIN_BASE_THEME_VALUES)
+
+function hasFixedThemeColors(theme) {
+  return FIXED_COLOR_BASE_THEMES.includes(theme) || isCustomThemeValue(theme)
+}
+
+function getThemeClassification(value, customThemes = []) {
+  if (LIGHT_BASE_THEMES.includes(value)) return 'light'
+  if (DARK_BASE_THEMES.includes(value)) return 'dark'
+
+  const customTheme = customThemes.find(({ id }) => value === `custom:${id}`)
+  if (customTheme) return customTheme.isDark ? 'dark' : 'light'
+
+  return null
+}
+
+function resolveBaseTheme(value, fallback, customThemes = [], allowSystem = true) {
+  if (!allowSystem && value === 'system') return fallback
+  if (BUILTIN_BASE_THEMES.has(value) || customThemes.some(({ id }) => value === `custom:${id}`)) {
+    return value
+  }
+  return fallback
+}
+
+function resolveSystemTheme(value, classification, customThemes = []) {
+  return getThemeClassification(value, customThemes) === classification
+    ? value
+    : DEFAULT_SYSTEM_THEMES[classification]
+}
+
+function resolveSystemThemeSettings(settings, customThemes = []) {
+  return {
+    systemLightTheme: resolveSystemTheme(settings.systemLightTheme, 'light', customThemes),
+    systemDarkTheme: resolveSystemTheme(settings.systemDarkTheme, 'dark', customThemes),
+  }
+}
+
+export {
+  hasFixedThemeColors,
+  getThemeClassification,
+  resolveBaseTheme,
+  resolveSystemTheme,
+  resolveSystemThemeSettings,
+}

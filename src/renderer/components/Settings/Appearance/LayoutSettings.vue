@@ -1,0 +1,897 @@
+<template>
+  <FtSettingsSection :title="t('Settings.Categories.Layout')">
+    <h4 class="groupTitle">
+      {{ t('Settings.Theme Settings.Sections.Interface') }}
+    </h4>
+    <FtFlexBox class="themeSelectRow">
+      <FtSelect
+        v-if="IS_CAPACITOR"
+        size-to-content
+        :placeholder="t('Settings.General Settings.Mobile Layout.Mobile Layout')"
+        :value="capacitorLayoutMode"
+        setting-key="capacitorLayoutMode"
+        :select-names="capacitorLayoutModeNames"
+        :select-values="CAPACITOR_LAYOUT_MODE_VALUES"
+        :icon="['fas', 'display']"
+        @change="store.dispatch('updateCapacitorLayoutMode', $event)"
+      />
+      <FtSelect
+        size-to-content
+        :placeholder="t('Settings.Theme Settings.Modal Backdrop.Modal Backdrop')"
+        :value="modalBackdrop"
+        setting-key="modalBackdrop"
+        :select-names="modalBackdropNames"
+        :select-values="MODAL_BACKDROP_VALUES"
+        :tooltip="t('Tooltips.Theme Settings.Modal Backdrop')"
+        :icon="['fas', 'opacity']"
+        @change="store.dispatch('updateModalBackdrop', $event)"
+      />
+    </FtFlexBox>
+    <div class="appearanceSwitchGrid switchFlowGrid">
+      <FtToggleSwitch
+        :label="$t('Settings.Theme Settings.Compact Settings Categories')"
+        :tooltip="$t('Tooltips.Theme Settings.Compact Settings Categories')"
+        compact
+        controlled
+        :disabled="savingSettingsCategoryDescriptions"
+        :default-value="hideSettingsCategoryDescriptions"
+        setting-key="hideSettingsCategoryDescriptions"
+        @change="updateHideSettingsCategoryDescriptions"
+      />
+      <FtToggleSwitch
+        v-if="usingElectron"
+        :label="$t('Settings.Theme Settings.Use Custom Title Bar')"
+        :tooltip="$t('Tooltips.Theme Settings.Use Custom Title Bar')"
+        compact
+        :default-value="restartSettingValues.customTitleBar"
+        setting-key="customTitleBar"
+        @change="requestRestart('customTitleBar', $event)"
+      />
+    </div>
+    <FtSliderGrid>
+      <FtSlider
+        v-if="usingElectron || IS_CAPACITOR"
+        :label="$t('Settings.Theme Settings.UI Scale')"
+        :default-value="uiScale"
+        :min-value="IS_CAPACITOR ? CAPACITOR_UI_SCALE_MIN : 50"
+        :max-value="IS_CAPACITOR ? CAPACITOR_UI_SCALE_MAX : 300"
+        :step="5"
+        value-extension="%"
+        @change="updateUiScale"
+      />
+      <FtSlider
+        :label="t('Settings.Theme Settings.Font Size')"
+        :default-value="fontSize"
+        setting-key="fontSize"
+        :min-value="MIN_FONT_SIZE"
+        :max-value="MAX_FONT_SIZE"
+        :step="5"
+        value-extension="%"
+        @change="store.dispatch('updateFontSize', $event)"
+      />
+      <FtSlider
+        :label="t('Settings.Theme Settings.UI Roundness')"
+        :default-value="uiRoundness"
+        setting-key="uiRoundness"
+        :min-value="0"
+        :max-value="200"
+        :step="5"
+        value-extension="%"
+        @input="previewUiRoundness"
+        @change="updateUiRoundness"
+      />
+      <FtSlider
+        :label="t('Settings.Theme Settings.Animation Speed')"
+        :default-value="animationSpeed"
+        setting-key="animationSpeed"
+        :min-value="25"
+        :max-value="200"
+        :step="5"
+        :disabled="reducedMotionEnabled"
+        value-extension="%"
+        @input="previewAnimationSpeed"
+        @change="updateAnimationSpeed"
+      />
+    </FtSliderGrid>
+    <h4 class="groupTitle">
+      {{ t('Settings.Theme Settings.Sections.Side Bar and Header') }}
+    </h4>
+    <div class="appearanceSwitchGrid switchFlowGrid">
+      <FtToggleSwitch
+        :label="$t('Settings.Theme Settings.Expand Side Bar by Default')"
+        compact
+        :default-value="expandSideBar"
+        setting-key="expandSideBar"
+        @change="handleExpandSideBar"
+      />
+      <FtToggleSwitch
+        :label="$t('Settings.Theme Settings.Hide Side Bar Labels')"
+        compact
+        :default-value="hideLabelsSideBar"
+        setting-key="hideLabelsSideBar"
+        @change="updateHideLabelsSideBar"
+      />
+      <FtToggleSwitch
+        :label="$t('Settings.Theme Settings.Hide Side Bar on Watch Pages')"
+        compact
+        :default-value="hideSideBarOnWatchPages"
+        setting-key="hideSideBarOnWatchPages"
+        @change="updateHideSideBarOnWatchPages"
+      />
+      <FtToggleSwitch
+        :label="$t('Settings.Theme Settings.Hide OpenTubeX Header Logo')"
+        compact
+        :default-value="hideHeaderLogo"
+        setting-key="hideHeaderLogo"
+        @change="updateHideHeaderLogo"
+      />
+      <FtToggleSwitch
+        v-if="usingElectron || IS_CAPACITOR"
+        :label="$t('Settings.Theme Settings.Move Downloads to App Header')"
+        compact
+        :default-value="moveDownloadsToAppHeader"
+        setting-key="moveDownloadsToAppHeader"
+        @change="updateMoveDownloadsToAppHeader"
+      />
+      <FtToggleSwitch
+        v-if="usingElectron || IS_CAPACITOR"
+        :label="$t('Settings.Theme Settings.Move Settings to App Header')"
+        compact
+        :default-value="moveSettingsToAppHeader"
+        setting-key="moveSettingsToAppHeader"
+        @change="updateMoveSettingsToAppHeader"
+      />
+      <FtToggleSwitch
+        v-if="IS_CAPACITOR"
+        :label="$t('Settings.Theme Settings.Always Show Mobile Search Bar')"
+        compact
+        :default-value="alwaysShowMobileSearchBar"
+        setting-key="alwaysShowMobileSearchBar"
+        @change="store.dispatch('updateAlwaysShowMobileSearchBar', $event)"
+      />
+    </div>
+    <FtSliderGrid>
+      <FtSlider
+        :label="t('Settings.Theme Settings.Visible Search Suggestions')"
+        :tooltip="t('Tooltips.Theme Settings.Visible Search Suggestions')"
+        :default-value="visibleSearchSuggestions"
+        setting-key="visibleSearchSuggestions"
+        :min-value="5"
+        :max-value="50"
+        :step="1"
+        @change="store.dispatch('updateVisibleSearchSuggestions', $event)"
+      />
+    </FtSliderGrid>
+    <template v-if="usingElectron || IS_CAPACITOR">
+      <h4 class="groupTitle">
+        {{ t('Settings.Theme Settings.Sections.Tabs') }}
+      </h4>
+      <div class="appearanceSwitchGrid switchFlowGrid">
+        <FtToggleSwitch
+          :label="$t('Settings.Theme Settings.Show Tab Icons')"
+          compact
+          :default-value="showTabIcons"
+          setting-key="showTabIcons"
+          :disabled="!store.getters.getTabsEnabled"
+          @change="updateShowTabIcons"
+        />
+        <FtToggleSwitch
+          :label="$t('Settings.Theme Settings.Show Tab Previews')"
+          compact
+          :default-value="showTabPreviews"
+          setting-key="showTabPreviews"
+          :disabled="!store.getters.getTabsEnabled"
+          @change="updateShowTabPreviews"
+        />
+        <FtToggleSwitch
+          :label="$t('Settings.Theme Settings.Use Fixed Tab Width')"
+          :tooltip="$t('Tooltips.Theme Settings.Use Fixed Tab Width')"
+          compact
+          :default-value="useFixedTabWidth"
+          setting-key="useFixedTabWidth"
+          :disabled="!store.getters.getTabsEnabled"
+          @change="updateUseFixedTabWidth"
+        />
+      </div>
+      <FtFlexBox
+        v-if="usingElectron"
+        class="themeSelectRow"
+      >
+        <FtSelect
+          size-to-content
+          :placeholder="t('Settings.Theme Settings.Tab Layout.Tab Layout')"
+          :value="tabBarPosition"
+          setting-key="tabBarPosition"
+          :select-names="tabBarPositionNames"
+          :select-values="TAB_BAR_POSITIONS"
+          :icon="['fac', 'horizontal-tabs']"
+          @change="updateTabBarPosition"
+        />
+        <FtSelect
+          size-to-content
+          :placeholder="t('Settings.Theme Settings.Tab Loading Indicator.Tab Loading Indicator')"
+          :value="store.getters.getTabLoadingIndicator"
+          setting-key="tabLoadingIndicator"
+          :select-names="[
+            t('Settings.Theme Settings.Tab Loading Indicator.Bar'),
+            t('Settings.Theme Settings.Tab Loading Indicator.Dot')
+          ]"
+          :select-values="['bar', 'dot']"
+          :icon="['fas', 'gauge']"
+          @change="store.dispatch('updateTabLoadingIndicator', $event)"
+        />
+      </FtFlexBox>
+      <FtSliderGrid>
+        <FtSlider
+          :label="$t('Settings.Theme Settings.Tab Width')"
+          :default-value="fixedTabWidth"
+          setting-key="fixedTabWidth"
+          :min-value="MIN_FIXED_TAB_WIDTH"
+          :max-value="MAX_FIXED_TAB_WIDTH"
+          :step="FIXED_TAB_WIDTH_STEP"
+          :disabled="!useFixedTabWidth || !store.getters.getTabsEnabled"
+          value-extension="px"
+          @input="previewFixedTabWidth"
+          @change="updateFixedTabWidth"
+        />
+        <FtSlider
+          v-if="usingElectron"
+          :label="$t('Settings.Theme Settings.Vertical Tab Height')"
+          :default-value="verticalTabHeight"
+          setting-key="verticalTabHeight"
+          :min-value="MIN_VERTICAL_TAB_HEIGHT"
+          :max-value="MAX_VERTICAL_TAB_HEIGHT"
+          :step="VERTICAL_TAB_HEIGHT_STEP"
+          :disabled="!isVerticalTabBarPosition(tabBarPosition)"
+          value-extension="px"
+          @input="previewVerticalTabHeight"
+          @change="updateVerticalTabHeight"
+        />
+      </FtSliderGrid>
+      <FtFlexBox v-if="usingElectron && showTabIcons">
+        <FtButton
+          :label="loadingTabIcons
+            ? $t('Settings.Theme Settings.Loading Missing Tab Icons')
+            : $t('Settings.Theme Settings.Load Missing Tab Icons')"
+          :icon="['fas', 'download']"
+          :disabled="loadingTabIcons || !hasMissingTabIcons"
+          @click="loadTabIcons"
+        />
+      </FtFlexBox>
+    </template>
+    <h4 class="groupTitle">
+      {{ t('Settings.Theme Settings.Sections.Player') }}
+    </h4>
+    <div class="appearanceSwitchGrid switchFlowGrid">
+      <FtToggleSwitch
+        :label="$t('Settings.Theme Settings.Use Grid Player Menu')"
+        :tooltip="$t('Tooltips.Theme Settings.Use Grid Player Menu')"
+        compact
+        :default-value="usePlayerMenuGrid"
+        setting-key="usePlayerMenuGrid"
+        @change="updateUsePlayerMenuGrid"
+      />
+      <FtToggleSwitch
+        :label="$t('Settings.Theme Settings.Frosted Glass Player UI')"
+        compact
+        :default-value="useFrostedGlassPlayerUi"
+        setting-key="useFrostedGlassPlayerUi"
+        @change="store.dispatch('updateUseFrostedGlassPlayerUi', $event)"
+      />
+      <FtToggleSwitch
+        v-if="IS_CAPACITOR"
+        :label="t('Settings.Theme Settings.Compact Mobile Mini Player')"
+        compact
+        :default-value="compactMobileMiniPlayer"
+        setting-key="compactMobileMiniPlayer"
+        @change="store.dispatch('updateCompactMobileMiniPlayer', $event)"
+      />
+    </div>
+    <h4 class="groupTitle">
+      {{ t('Settings.Theme Settings.Sections.Scrolling') }}
+    </h4>
+    <div class="appearanceSwitchGrid switchFlowGrid">
+      <FtToggleSwitch
+        v-if="usingElectron"
+        :label="$t('Settings.Theme Settings.Disable Smooth Scrolling')"
+        compact
+        :default-value="restartSettingValues.disableSmoothScrolling"
+        @change="requestRestart('disableSmoothScrolling', $event)"
+      />
+      <FtToggleSwitch
+        :label="$t('Settings.Theme Settings.Always Show Scrollbars')"
+        :tooltip="$t('Tooltips.Theme Settings.Always Show Scrollbars')"
+        compact
+        :default-value="alwaysShowScrollbars"
+        setting-key="alwaysShowScrollbars"
+        @change="updateAlwaysShowScrollbars"
+      />
+      <FtToggleSwitch
+        v-if="!IS_CAPACITOR"
+        :label="t('Settings.Theme Settings.Click Scrollbar Track to Scroll')"
+        :tooltip="t('Tooltips.Theme Settings.Click Scrollbar Track to Scroll')"
+        compact
+        :default-value="scrollbarTrackClicks"
+        setting-key="scrollbarTrackClicks"
+        @change="store.dispatch('updateScrollbarTrackClicks', $event)"
+      />
+    </div>
+    <FtSliderGrid>
+      <FtSlider
+        :label="t('Settings.Theme Settings.Scrollbar Width')"
+        :default-value="scrollbarThumbWidth"
+        setting-key="scrollbarThumbWidth"
+        :min-value="MIN_SCROLLBAR_THUMB_WIDTH"
+        :max-value="MAX_SCROLLBAR_THUMB_WIDTH"
+        :step="SCROLLBAR_THUMB_WIDTH_STEP"
+        value-extension="px"
+        @input="previewScrollbarThumbWidth"
+        @change="updateScrollbarThumbWidth"
+      />
+      <FtSlider
+        :label="t('Settings.Theme Settings.Scroll Speed')"
+        :tooltip="t('Tooltips.Theme Settings.Scroll Speed')"
+        :default-value="scrollSpeed"
+        setting-key="scrollSpeed"
+        :min-value="MIN_SCROLL_SPEED"
+        :max-value="MAX_SCROLL_SPEED"
+        :step="SCROLL_SPEED_STEP"
+        value-extension="%"
+        @change="updateScrollSpeed"
+      />
+    </FtSliderGrid>
+    <h4 class="groupTitle">
+      {{ t('Settings.Theme Settings.Sections.Notifications') }}
+    </h4>
+    <FtFlexBox class="themeSelectRow">
+      <FtSelect
+        size-to-content
+        :placeholder="$t('Settings.Theme Settings.Toast Position.Toast Position')"
+        :value="toastPosition"
+        setting-key="toastPosition"
+        :select-names="toastPositionNames"
+        :select-values="TOAST_POSITION_VALUES"
+        :icon="['fas', 'message']"
+        @change="updateToastPosition"
+      />
+      <div class="testToastAction">
+        <FtButton
+          class="testToastButton"
+          :label="t('Settings.Theme Settings.Toast Position.Test Toast')"
+          :icon="['fas', 'message']"
+          @click="showTestToast"
+        />
+      </div>
+    </FtFlexBox>
+    <div class="appearanceSwitchGrid switchFlowGrid">
+      <FtToggleSwitch
+        :label="$t('Settings.Theme Settings.Show Toast Timeout Indicator')"
+        compact
+        :default-value="showToastTimeoutIndicator"
+        setting-key="showToastTimeoutIndicator"
+        @change="updateShowToastTimeoutIndicator"
+      />
+      <FtToggleSwitch
+        :label="$t('Settings.Theme Settings.Only Show Important Notifications')"
+        :tooltip="$t('Tooltips.Theme Settings.Only Show Important Notifications')"
+        compact
+        :default-value="onlyShowImportantToasts"
+        setting-key="onlyShowImportantToasts"
+        @change="store.dispatch('updateOnlyShowImportantToasts', $event)"
+      />
+      <FtToggleSwitch
+        v-if="!IS_CAPACITOR"
+        :label="$t('Settings.Theme Settings.Show Progress as Notification')"
+        :tooltip="$t('Tooltips.Theme Settings.Show Progress as Notification')"
+        compact
+        :default-value="store.getters.getEffectiveShowProgressBarToast"
+        setting-key="showProgressBarToast"
+        :disabled="onlyShowImportantToasts"
+        @change="updateShowProgressBarToast"
+      />
+    </div>
+    <FtPrompt
+      v-if="restartPromptSetting !== null"
+      autosize
+      :label="$t('Settings[\'The app needs to restart for changes to take effect. Restart and apply change?\']')"
+      :option-names="restartPromptNames"
+      :option-values="RESTART_PROMPT_VALUES"
+      :option-icons="[['fas', 'sync'], ['fas', 'xmark']]"
+      @click="handleRestartPrompt"
+    />
+  </FtSettingsSection>
+</template>
+
+<script setup>
+import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
+import FtSelect from '../../FtSelect/FtSelect.vue'
+import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
+import FtSlider from '../../FtSlider/FtSlider.vue'
+import FtSliderGrid from '../../FtSliderGrid/FtSliderGrid.vue'
+import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
+import FtButton from '../../FtButton/FtButton.vue'
+import FtPrompt from '../../FtPrompt/FtPrompt.vue'
+
+import store from '../../../store/index'
+import {
+  FIXED_TAB_WIDTH_STEP,
+  MAX_FIXED_TAB_WIDTH,
+  MIN_FIXED_TAB_WIDTH
+} from '../../../constants/tabWidth'
+import {
+  MAX_VERTICAL_TAB_HEIGHT,
+  MIN_VERTICAL_TAB_HEIGHT,
+  VERTICAL_TAB_HEIGHT_STEP
+} from '../../../constants/tabHeight'
+import {
+  isVerticalTabBarPosition,
+  normalizeTabBarPosition,
+  TAB_BAR_POSITIONS
+} from '../../../constants/tabBarPosition'
+import {
+  MAX_SCROLLBAR_THUMB_WIDTH,
+  MIN_SCROLLBAR_THUMB_WIDTH,
+  normalizeScrollbarThumbWidth,
+  SCROLLBAR_THUMB_WIDTH_STEP
+} from '../../../constants/scrollbar'
+import { normalizeToastPosition, TOAST_POSITION_VALUES } from '../../../constants/toastPosition'
+import { setAnimationSpeed } from '../../../helpers/animationSpeed'
+import {
+  MAX_SCROLL_SPEED,
+  MIN_SCROLL_SPEED,
+  normalizeScrollSpeed,
+  SCROLL_SPEED_STEP
+} from '../../../helpers/scrollSpeed'
+import { getMissingTabAvatarTabs, loadMissingTabAvatars } from '../../../helpers/loadTabAvatars'
+import { showToast } from '../../../helpers/utils'
+import { CAPACITOR_UI_SCALE_MIN, CAPACITOR_UI_SCALE_MAX } from '../../../helpers/capacitorUiScale'
+import { MAX_FONT_SIZE, MIN_FONT_SIZE } from '../../../helpers/appFont'
+
+const { t } = useI18n()
+
+const IS_CAPACITOR = !!process.env.IS_CAPACITOR
+/** @type {boolean} */
+const usingElectron = process.env.IS_ELECTRON
+const CAPACITOR_LAYOUT_MODE_VALUES = ['auto', 'phone', 'tablet']
+const compactMobileMiniPlayer = computed(() => store.getters.getCompactMobileMiniPlayer)
+const capacitorLayoutMode = computed(() => store.getters.getCapacitorLayoutMode)
+const useFrostedGlassPlayerUi = computed(() => store.getters.getUseFrostedGlassPlayerUi)
+const capacitorLayoutModeNames = computed(() => [
+  t('Settings.General Settings.Mobile Layout.Automatic'),
+  t('Settings.General Settings.Mobile Layout.Phone'),
+  t('Settings.General Settings.Mobile Layout.Tablet')
+])
+
+const MODAL_BACKDROP_VALUES = ['blur', 'dim']
+const modalBackdropNames = computed(() => [
+  t('Settings.Theme Settings.Modal Backdrop.Dim and Blur'),
+  t('Settings.Theme Settings.Modal Backdrop.Dim Only')
+])
+/** @type {import('vue').ComputedRef<'blur' | 'dim'>} */
+const modalBackdrop = computed(() => store.getters.getModalBackdrop)
+
+const toastPositionNames = computed(() => [
+  t('Settings.Theme Settings.Toast Position.Bottom Left'),
+  t('Settings.Theme Settings.Toast Position.Bottom Center'),
+  t('Settings.Theme Settings.Toast Position.Bottom Right'),
+  t('Settings.Theme Settings.Toast Position.Top Left'),
+  t('Settings.Theme Settings.Toast Position.Top Center'),
+  t('Settings.Theme Settings.Toast Position.Top Right')
+])
+
+/** @type {import('vue').ComputedRef<'bottom-left' | 'bottom-center' | 'bottom-right' | 'top-left' | 'top-center' | 'top-right'>} */
+const toastPosition = computed(() => normalizeToastPosition(store.getters.getToastPosition))
+let toastPositionUpdatePromise = Promise.resolve()
+
+/**
+ * @param {'bottom-left' | 'bottom-center' | 'bottom-right' | 'top-left' | 'top-center' | 'top-right'} value
+ */
+function updateToastPosition(value) {
+  toastPositionUpdatePromise = store.dispatch('updateToastPosition', value)
+}
+
+async function showTestToast() {
+  await toastPositionUpdatePromise
+  showToast({
+    message: t('Settings.Theme Settings.Toast Position.Test Toast'),
+    icon: ['fas', 'message'],
+    important: true
+  })
+}
+
+const tabBarPositionNames = computed(() => [
+  t('Settings.Theme Settings.Tab Layout.Horizontal Top'),
+  t('Settings.Theme Settings.Tab Layout.Horizontal Bottom'),
+  t('Settings.Theme Settings.Tab Layout.Vertical Left'),
+  t('Settings.Theme Settings.Tab Layout.Vertical Right')
+])
+
+const tabBarPosition = computed(() => normalizeTabBarPosition(store.getters.getTabBarPosition))
+
+/**
+ * @param {'top' | 'bottom' | 'left' | 'right'} value
+ */
+function updateTabBarPosition(value) {
+  store.dispatch('updateTabBarPosition', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const expandSideBar = computed(() => {
+  return store.getters.getExpandSideBar
+})
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const isSideNavOpen = computed(() => {
+  return store.getters.getIsSideNavOpen
+})
+
+/**
+ * @param {boolean} value
+ */
+function handleExpandSideBar(value) {
+  if (isSideNavOpen.value !== value) {
+    store.commit('toggleSideNav')
+  }
+
+  store.dispatch('updateExpandSideBar', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const hideSideBarOnWatchPages = computed(() => store.getters.getHideSideBarOnWatchPages)
+
+/**
+ * @param {boolean} value
+ */
+function updateHideSideBarOnWatchPages(value) {
+  store.dispatch('updateHideSideBarOnWatchPages', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const hideSettingsCategoryDescriptions = computed(() => store.getters.getHideSettingsCategoryDescriptions)
+
+const savingSettingsCategoryDescriptions = ref(false)
+
+/**
+ * @param {boolean} value
+ */
+async function updateHideSettingsCategoryDescriptions(value) {
+  if (savingSettingsCategoryDescriptions.value) return
+  savingSettingsCategoryDescriptions.value = true
+  try {
+    await store.dispatch('updateHideSettingsCategoryDescriptions', value)
+  } finally {
+    savingSettingsCategoryDescriptions.value = false
+  }
+}
+
+const hideLabelsSideBar = computed(() => {
+  return store.getters.getHideLabelsSideBar
+})
+
+/**
+ * @param {boolean} value
+ */
+function updateHideLabelsSideBar(value) {
+  store.dispatch('updateHideLabelsSideBar', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const alwaysShowScrollbars = computed(() => {
+  return store.getters.getAlwaysShowScrollbars
+})
+
+/**
+ * @param {boolean} value
+ */
+function updateAlwaysShowScrollbars(value) {
+  store.dispatch('updateAlwaysShowScrollbars', value)
+}
+
+const scrollbarTrackClicks = computed(() => store.getters.getScrollbarTrackClicks)
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const hideHeaderLogo = computed(() => {
+  return store.getters.getHideHeaderLogo
+})
+
+const moveDownloadsToAppHeader = computed(() => store.getters.getMoveDownloadsToAppHeader)
+const alwaysShowMobileSearchBar = computed(() => store.getters.getAlwaysShowMobileSearchBar)
+const moveSettingsToAppHeader = computed(() => store.getters.getMoveSettingsToAppHeader)
+
+function updateMoveDownloadsToAppHeader(value) {
+  store.dispatch('updateMoveDownloadsToAppHeader', value)
+}
+
+function updateMoveSettingsToAppHeader(value) {
+  store.dispatch('updateMoveSettingsToAppHeader', value)
+}
+
+/**
+ * @param {boolean} value
+ */
+function updateHideHeaderLogo(value) {
+  store.dispatch('updateHideHeaderLogo', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const showToastTimeoutIndicator = computed(() => store.getters.getShowToastTimeoutIndicator)
+
+/**
+ * @param {boolean} value
+ */
+function updateShowToastTimeoutIndicator(value) {
+  store.dispatch('updateShowToastTimeoutIndicator', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const usePlayerMenuGrid = computed(() => store.getters.getUsePlayerMenuGrid)
+
+/**
+ * @param {boolean} value
+ */
+function updateUsePlayerMenuGrid(value) {
+  store.dispatch('updateUsePlayerMenuGrid', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const onlyShowImportantToasts = computed(() => store.getters.getOnlyShowImportantToasts)
+
+/**
+ * @param {boolean} value
+ */
+function updateShowProgressBarToast(value) {
+  store.dispatch('updateShowProgressBarToast', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const showTabIcons = computed(() => store.getters.getShowTabIcons)
+const hasMissingTabIcons = computed(() => getMissingTabAvatarTabs(store.getters.getTabs).length > 0)
+const loadingTabIcons = ref(false)
+
+async function loadTabIcons() {
+  if (loadingTabIcons.value) return
+  loadingTabIcons.value = true
+  try {
+    const { loaded, failed } = await loadMissingTabAvatars(store.getters.getTabs)
+    if (loaded === 0 && failed === 0) {
+      showToast({
+        message: t('Settings.Theme Settings.No Missing Tab Icons'),
+        icon: ['fas', 'circle-info'],
+      })
+    } else if (failed > 0) {
+      showToast({
+        message: t('Settings.Theme Settings.Loaded Tab Icons With Failures', { loaded, failed }),
+        icon: ['fas', 'circle-exclamation'],
+      })
+    } else {
+      showToast({
+        message: t('Settings.Theme Settings.Loaded Tab Icons', { count: loaded }, loaded),
+        icon: ['fas', 'check'],
+      })
+    }
+  } finally {
+    loadingTabIcons.value = false
+  }
+}
+
+/**
+ * @param {boolean} value
+ */
+function updateShowTabIcons(value) {
+  store.dispatch('updateShowTabIcons', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const showTabPreviews = computed(() => store.getters.getShowTabPreviews)
+
+/**
+ * @param {boolean} value
+ */
+function updateShowTabPreviews(value) {
+  store.dispatch('updateShowTabPreviews', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const useFixedTabWidth = computed(() => store.getters.getUseFixedTabWidth)
+
+/** @type {import('vue').ComputedRef<number>} */
+const fixedTabWidth = computed(() => store.getters.getFixedTabWidth)
+
+/**
+ * @param {boolean} value
+ */
+function updateUseFixedTabWidth(value) {
+  store.dispatch('updateUseFixedTabWidth', value)
+}
+
+/**
+ * @param {number} value
+ */
+function previewFixedTabWidth(value) {
+  store.commit('setFixedTabWidth', value)
+}
+
+/**
+ * @param {number} value
+ */
+function updateFixedTabWidth(value) {
+  store.dispatch('updateFixedTabWidth', value)
+}
+
+/** @type {import('vue').ComputedRef<number>} */
+const verticalTabHeight = computed(() => store.getters.getVerticalTabHeight)
+
+/**
+ * @param {number} value
+ */
+function previewVerticalTabHeight(value) {
+  store.commit('setVerticalTabHeight', value)
+}
+
+/**
+ * @param {number} value
+ */
+function updateVerticalTabHeight(value) {
+  store.dispatch('updateVerticalTabHeight', value)
+}
+
+/** @type {import('vue').ComputedRef<number>} */
+const uiScale = computed(() => store.getters.getUiScale)
+
+/** @type {import('vue').ComputedRef<number>} */
+const fontSize = computed(() => store.getters.getFontSize)
+
+/**
+ * @param {number} value
+ */
+function updateUiScale(value) {
+  store.dispatch('updateUiScale', value)
+}
+
+const uiRoundness = computed(() => store.getters.getUiRoundness)
+const scrollbarThumbWidth = computed(
+  () => normalizeScrollbarThumbWidth(store.getters.getScrollbarThumbWidth)
+)
+const scrollSpeed = computed(() => normalizeScrollSpeed(store.getters.getScrollSpeed))
+const visibleSearchSuggestions = computed(() => store.getters.getVisibleSearchSuggestions)
+const animationSpeed = computed(() => store.getters.getAnimationSpeed)
+
+const systemReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
+const systemReducedMotionEnabled = ref(systemReducedMotion.matches)
+const reducedMotion = computed(() => store.getters.getReducedMotion)
+const reducedMotionEnabled = computed(() => reducedMotion.value === 'on' ||
+  (reducedMotion.value === 'system' && systemReducedMotionEnabled.value))
+
+function updateSystemReducedMotion(event) {
+  systemReducedMotionEnabled.value = event.matches
+}
+
+onMounted(() => {
+  systemReducedMotion.addEventListener('change', updateSystemReducedMotion)
+})
+onUnmounted(() => {
+  systemReducedMotion.removeEventListener('change', updateSystemReducedMotion)
+})
+
+/**
+ * @param {number} value
+ */
+function previewUiRoundness(value) {
+  store.commit('setUiRoundness', value)
+}
+
+/**
+ * @param {number} value
+ */
+function updateUiRoundness(value) {
+  store.dispatch('updateUiRoundness', value)
+}
+
+/**
+ * @param {number} value
+ */
+function previewScrollbarThumbWidth(value) {
+  store.commit('setScrollbarThumbWidth', value)
+}
+
+/**
+ * @param {number} value
+ */
+function updateScrollbarThumbWidth(value) {
+  store.dispatch('updateScrollbarThumbWidth', value)
+}
+
+/**
+ * @param {number} value
+ */
+function updateScrollSpeed(value) {
+  store.dispatch('updateScrollSpeed', value)
+}
+
+/**
+ * @param {number} value
+ */
+function previewAnimationSpeed(value) {
+  setAnimationSpeed(value)
+}
+
+/**
+ * @param {number} value
+ */
+function updateAnimationSpeed(value) {
+  store.dispatch('updateAnimationSpeed', value)
+}
+
+const RESTART_PROMPT_VALUES = [
+  'restart',
+  'cancel'
+]
+
+const restartPromptNames = computed(() => [
+  t('Yes, Restart'),
+  t('Cancel')
+])
+
+/** Settings that only take effect after the app restarts. */
+const restartSettingValues = reactive({
+  disableSmoothScrolling: store.getters.getDisableSmoothScrolling,
+  customTitleBar: store.getters.getCustomTitleBar
+})
+/** @type {import('vue').Ref<'disableSmoothScrolling' | 'customTitleBar' | null>} */
+const restartPromptSetting = ref(null)
+
+/**
+ * @param {'disableSmoothScrolling' | 'customTitleBar'} setting
+ * @param {boolean} value
+ */
+function requestRestart(setting, value) {
+  restartSettingValues[setting] = value
+  restartPromptSetting.value = setting
+}
+
+/**
+ * @param {'restart' | 'cancel' | null} value
+ */
+function handleRestartPrompt(value) {
+  const setting = restartPromptSetting.value
+  restartPromptSetting.value = null
+
+  if (value === null || value === 'cancel') {
+    restartSettingValues[setting] = !restartSettingValues[setting]
+    return
+  }
+
+  if (process.env.IS_ELECTRON) {
+    const action = `update${setting[0].toUpperCase()}${setting.slice(1)}`
+    store.dispatch(action, restartSettingValues[setting]).then(() => {
+      window.ftElectron.relaunch()
+    })
+  }
+}
+</script>
+
+<style scoped src="./themeSelectRow.css" />
+<style scoped src="./appearanceSwitchGrid.css" />
+<style scoped>
+.groupTitle:not(:first-child) {
+  margin-block-start: 1.5em;
+}
+
+.testToastAction {
+  display: flex;
+  justify-content: center;
+}
+
+.testToastButton {
+  margin-block: var(--settings-control-margin);
+}
+
+@container settings-content (width <= 580px) {
+  .testToastAction {
+    inline-size: 100%;
+  }
+}
+</style>

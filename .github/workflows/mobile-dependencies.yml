@@ -1,0 +1,185 @@
+name: Update mobile dependencies
+
+# Dependabot cannot track the yt-dlp and libwebp releases that android/app/build.gradle bundles,
+# the Python runtime and PyPI pins that _scripts/setupIosYtDlp.sh installs, or the
+# FFmpegKit binaries that ios/App/FFmpegKit/Package.swift links, so this opens a PR
+# when any of them has a new stable release.
+# A PR opened with GITHUB_TOKEN would not run CI, so the PR step uses UPSTREAM_SYNC_TOKEN.
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mobile-dependencies
+  cancel-in-progress: false
+
+jobs:
+  update:
+    if: github.repository == 'OpenTubeX/OpenTubeX'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: development
+          persist-credentials: false
+
+      - name: Update pinned versions
+        id: update
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          latest=$(gh api repos/yt-dlp/yt-dlp/releases/latest --jq .tag_name)
+          if [[ ! "$latest" =~ ^[0-9]+(\.[0-9]+)+$ ]]; then
+            echo "::error::Unexpected yt-dlp release tag: ${latest:-nothing}."
+            exit 1
+          fi
+          url="https://github.com/yt-dlp/yt-dlp/releases/tag/$latest"
+
+          newer() {
+            [[ "$(printf '%s\n' "$1" "$2" | sort -V | tail -n 1)" != "$1" ]]
+          }
+
+          file=android/app/build.gradle
+          current=$(grep -oP "^def ytDlpVersion = '\K[0-9.]+(?='$)" "$file")
+          if newer "$current" "$latest"; then
+            hash=$(gh api "repos/yt-dlp/yt-dlp/releases/tags/$latest" \
+              --jq '.assets[] | select(.name == "yt-dlp") | .digest // empty | ltrimstr("sha256:")')
+            if [[ ! "$hash" =~ ^[0-9a-f]{64}$ ]] || ! grep -qE "^def ytDlpSha256 = '[0-9a-f]{64}'$" "$file"; then
+              echo "::error::Cannot update Android yt-dlp from $current to $latest."
+              exit 1
+            fi
+            sed -i -E \
+              -e "s/^def ytDlpVersion = '[0-9.]+'$/def ytDlpVersion = '$latest'/" \
+              -e "s/^def ytDlpSha256 = '[0-9a-f]{64}'$/def ytDlpSha256 = '$hash'/" "$file"
+            echo "- Android: [yt-dlp $latest]($url) (from $current)" >> "$RUNNER_TEMP/changes.md"
+          fi
+
+          current=$(grep -oP "^def libwebpVersion = '\K[0-9.]+(?='$)" "$file")
+          version=$(gh api --paginate repos/webmproject/libwebp/tags --jq '.[].name' |
+            grep -oP '^v\K[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1)
+          if [[ -z "$current" || -z "$version" ]]; then
+            echo "::error::Cannot update Android libwebp from ${current:-nothing} to ${version:-nothing}."
+            exit 1
+          fi
+          if newer "$current" "$version"; then
+            hash=$(curl -fsSL "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-$version.tar.gz" |
+              sha256sum | cut -d ' ' -f 1)
+            sed -i -E \
+              -e "s/^def libwebpVersion = '[0-9.]+'$/def libwebpVersion = '$version'/" \
+              -e "s/^def libwebpSha256 = '[0-9a-f]{64}'$/def libwebpSha256 = '$hash'/" "$file"
+            echo "- Android: [libwebp $version](https://chromium.googlesource.com/webm/libwebp/+/refs/tags/v$version/NEWS) (from $current)" >> "$RUNNER_TEMP/changes.md"
+          fi
+
+          # PyPI normalizes the release tag by dropping leading zeros (2026.08.19 -> 2026.8.19).
+          file=_scripts/setupIosYtDlp.sh
+          version=$(sed -E 's/(^|\.)0+([0-9])/\1\2/g' <<< "$latest")
+          current=$(grep -oP "'yt-dlp==\K[0-9.]+(?=')" "$file")
+          if newer "$current" "$version"; then
+            current_ejs=$(grep -oP "'yt-dlp-ejs==\K[0-9.]+(?=')" "$file" || true)
+            # yt-dlp supports only the yt-dlp-ejs release its "default" extra pins.
+            ejs=$(curl -fsSL "https://pypi.org/pypi/yt-dlp/$version/json" |
+              jq -r '.info.requires_dist[]' | grep -oP '^yt-dlp-ejs==\K[0-9.]+(?=; extra == "default"$)' || true)
+            if [[ -z "$ejs" || -z "$current_ejs" ]]; then
+              echo "::error::Cannot update iOS yt-dlp from $current to $version."
+              exit 1
+            fi
+            sed -i -E \
+              -e "s/'yt-dlp==[0-9.]+'/'yt-dlp==$version'/" \
+              -e "s/'yt-dlp-ejs==[0-9.]+'/'yt-dlp-ejs==$ejs'/" "$file"
+            echo "- iOS and iPadOS: [yt-dlp $version]($url) (from $current)" >> "$RUNNER_TEMP/changes.md"
+            if [[ "$ejs" != "$current_ejs" ]]; then
+              echo "- iOS and iPadOS: [yt-dlp-ejs $ejs](https://github.com/yt-dlp/ejs/releases/tag/$ejs) (from $current_ejs)" >> "$RUNNER_TEMP/changes.md"
+            fi
+          fi
+
+          for package in yt-dlp-apple-webkit-jsi certifi mutagen; do
+            current=$(grep -oP "'${package}==\K[0-9.]+(?=')" "$file")
+            version=$(curl -fsSL "https://pypi.org/pypi/$package/json" | jq -r .info.version)
+            if [[ ! "$version" =~ ^[0-9]+(\.[0-9]+)+$ ]]; then
+              echo "::error::Cannot update iOS $package from ${current:-nothing} to ${version:-nothing}."
+              exit 1
+            fi
+            if newer "$current" "$version"; then
+              sed -i -E "s/'${package}==[0-9.]+'/'${package}==$version'/" "$file"
+              echo "- iOS and iPadOS: [$package $version](https://pypi.org/project/$package/$version/) (from $current)" >> "$RUNNER_TEMP/changes.md"
+            fi
+          done
+
+          # Stay on the bundled Python version; a new minor version needs a manual update.
+          current=$(grep -oP "^release_tag=\K[0-9.]+-b[0-9]+$" "$file")
+          python=${current%-b*}
+          build=$(gh api --paginate repos/beeware/Python-Apple-support/releases \
+            --jq '.[] | select(.draft == false and .prerelease == false) | .tag_name' |
+            grep -oP "^${python//./\\.}-b\K[0-9]+$" | sort -n | tail -n 1)
+          if [[ -z "$build" ]]; then
+            echo "::error::Cannot find a Python-Apple-support release for Python $python."
+            exit 1
+          fi
+          if (( build > ${current#*-b} )); then
+            sed -i -E "s/^release_tag=.*/release_tag=$python-b$build/" "$file"
+            echo "- iOS and iPadOS: [Python-Apple-support $python-b$build](https://github.com/beeware/Python-Apple-support/releases/tag/$python-b$build) (from $current)" >> "$RUNNER_TEMP/changes.md"
+          fi
+
+          file=ios/App/FFmpegKit/Package.swift
+          repository=sk3llo/ffmpeg_kit_flutter
+          current=$(grep -oP "/releases/download/\K[0-9.]+(?=-full-gpl\"$)" "$file")
+          version=$(gh api --paginate "repos/$repository/releases" \
+            --jq '.[] | select(.draft == false and .prerelease == false) | .tag_name' |
+            grep -oP '^[0-9.]+(?=-full-gpl$)' | sort -V | tail -n 1)
+          if [[ -z "$current" || -z "$version" ]]; then
+            echo "::error::Cannot update FFmpegKit from ${current:-nothing} to ${version:-nothing}."
+            exit 1
+          fi
+          if newer "$current" "$version"; then
+            # SwiftPM checksums are the SHA-256 digests GitHub records for the release assets.
+            digests=$(gh api "repos/$repository/releases/tags/$version-full-gpl" \
+              --jq '.assets[] | "\(.name) \(.digest // "" | ltrimstr("sha256:"))"')
+            for framework in $(grep -oP '^    \("\K[a-z]+(?=", "[0-9a-f]{64}"\),$)' "$file"); do
+              digest=$(awk -v name="$framework.xcframework.zip" '$1 == name { print $2 }' <<< "$digests")
+              if [[ ! "$digest" =~ ^[0-9a-f]{64}$ ]]; then
+                echo "::error::FFmpegKit $version has no $framework.xcframework.zip digest."
+                exit 1
+              fi
+              sed -i -E "s/^(    \(\"$framework\", \")[0-9a-f]{64}(\"\),)$/\1$digest\2/" "$file"
+            done
+            sed -i -E "s|/releases/download/[0-9.]+-full-gpl\"$|/releases/download/$version-full-gpl\"|" "$file"
+            echo "- iOS and iPadOS: [FFmpegKit $version](https://github.com/$repository/releases/tag/$version-full-gpl) (from $current)" >> "$RUNNER_TEMP/changes.md"
+          fi
+
+          if [[ -f "$RUNNER_TEMP/changes.md" ]]; then
+            {
+              echo 'changes<<EOF'
+              cat "$RUNNER_TEMP/changes.md"
+              echo EOF
+            } >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create or update pull request
+        if: steps.update.outputs.changes
+        uses: peter-evans/create-pull-request@3ffccacd46053766916f087ce41d627c0b8cf2d1 # v8.1.3
+        with:
+          token: ${{ secrets.UPSTREAM_SYNC_TOKEN }}
+          base: development
+          branch: mobile-dependencies
+          delete-branch: true
+          commit-message: "build(mobile): update bundled dependencies"
+          title: "build(mobile): update bundled dependencies"
+          body: |
+            Updates the dependencies that the mobile apps bundle in `android/app/build.gradle`, `_scripts/setupIosYtDlp.sh` and `ios/App/FFmpegKit/Package.swift`:
+
+            ${{ steps.update.outputs.changes }}
+
+            The Android yt-dlp and iOS FFmpegKit checksums come from the digests GitHub records for the release assets. The libwebp checksum is the SHA-256 of the release tarball this workflow downloaded. Gradle, the libwebp build script and SwiftPM verify the downloads against them. The iOS `yt-dlp-ejs` pin follows the version yt-dlp requires.
+
+            ## Release note
+            - [x] No release note needed

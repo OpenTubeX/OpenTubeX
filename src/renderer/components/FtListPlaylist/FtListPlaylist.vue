@@ -4,9 +4,27 @@
     :class="{
       [appearance]: true,
       list: listType === 'list',
-      grid: listType === 'grid'
+      grid: listType !== 'list'
     }"
+    @contextmenu="openPlaylistContextMenu"
+    @keydown="handleContextMenuKeydown"
+    @pointerdown="startMenuHold"
+    @pointermove="moveMenuHold"
+    @pointerup="cancelMenuHold"
+    @pointercancel="cancelMenuHold"
+    @dragstart="handleMenuHoldDragStart"
   >
+    <div
+      v-if="showGrabBar"
+      class="grabBar"
+      role="button"
+      tabindex="0"
+      :aria-label="t('User Playlists.Reorder Hint')"
+      :title="t('User Playlists.Reorder Hint')"
+      aria-keyshortcuts="ArrowUp ArrowDown Home End"
+    >
+      <FtIcon :icon="['fas', 'bars']" />
+    </div>
     <div
       class="videoThumbnail"
     >
@@ -16,22 +34,22 @@
         tabindex="-1"
         aria-hidden="true"
       >
-        <img
+        <FtRetryImage
           alt=""
           :src="thumbnailForDisplay"
           class="thumbnailImage"
           :class="{ blur: blurThumbnails }"
-        >
+        />
       </RouterLink>
       <div
         class="videoCountContainer"
+        :class="{ hasCountText: playlistMetadata.itemCountText }"
       >
         <div class="background" />
         <div class="inner">
-          <div>{{ videoCount }}</div>
-          <div>
-            <FontAwesomeIcon :icon="['fas', playlistTypeIcon]" />
-          </div>
+          <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -- Infinity is a language-independent count indicator. -->
+          <div>{{ playlistMetadata.itemCountText ?? (playlistMetadata.videoCount < 0 ? '∞' : playlistMetadata.videoCount) }}</div>
+          <div><FtIcon :icon="['fas', playlistTypeIcon]" /></div>
         </div>
       </div>
     </div>
@@ -39,68 +57,110 @@
       <RouterLink
         class="title"
         :to="playlistPageLinkTo"
+        :title="store.getters.getTitleLineLimit > 0 ? playlistMetadata.title : null"
       >
         <h3
           class="h3Title"
           dir="auto"
         >
-          {{ titleForDisplay }}
+          <!-- No whitespace before the title, so its text content stays unchanged. -->
+          <FtIcon
+            v-if="isPinnedToTop"
+            class="pinnedIcon"
+            :icon="['fas', 'thumbtack']"
+            role="img"
+            :aria-label="t('User Playlists.Pinned to Top')"
+            :title="t('User Playlists.Pinned to Top')"
+          /><FtIcon
+            v-if="data.youTube"
+            class="youTubeIcon"
+            :icon="['fab', 'youtube']"
+            role="img"
+            :aria-label="t('User Playlists.Synced with YouTube')"
+            :title="t('User Playlists.Synced with YouTube')"
+          />{{ titleForDisplay }}
         </h3>
       </RouterLink>
-      <div class="infoLine">
+      <div
+        v-if="!isUserPlaylist"
+        class="infoLine"
+      >
         <RouterLink
-          v-if="channelId && enableChannelLinks"
+          v-if="playlistMetadata.channelId && enableChannelLinks"
           class="channelName"
           dir="auto"
-          :to="`/channel/${channelId}`"
+          :to="`/channel/${playlistMetadata.channelId}`"
         >
-          {{ channelName }}
+          <FtChannelAvatar
+            v-if="showChannelAvatar"
+            :thumbnail="channelThumbnail"
+          />
+          <span class="channelNameText"><FtVerifiedBadge
+            :name="playlistMetadata.channelName"
+            :verified="data.authorVerified"
+            :artist="data.authorVerifiedArtist"
+          /></span>
         </RouterLink>
         <bdi
           v-else
           class="channelName"
         >
-          {{ channelName }}
+          <FtChannelAvatar
+            v-if="showChannelAvatar"
+            :thumbnail="channelThumbnail"
+          />
+          <span class="channelNameText"><FtVerifiedBadge
+            :name="playlistMetadata.channelName"
+            :verified="data.authorVerified"
+            :artist="data.authorVerifiedArtist"
+          /></span>
         </bdi>
       </div>
-      <FtIconButton
-        v-if="externalPlayer !== '' && !isUserPlaylist"
-        :title="t('Video.External Player.OpenInTemplate', { externalPlayer })"
-        :icon="['fas', 'external-link-alt']"
-        class="externalPlayerButton"
-        theme="base-no-default"
-        :size="16"
-        :use-shadow="false"
-        @click="handleExternalPlayer"
-      />
-      <span
-        v-if="isUserPlaylist"
-        class="playlistIcons"
-      >
+      <div class="buttonStack playlistButtonStack">
         <FtIconButton
-          :title="markedAsQuickBookmarkTarget ? t('User Playlists.Quick Bookmark Enabled') : t('User Playlists.Enable Quick Bookmark With This Playlist')"
-          :icon="markedAsQuickBookmarkTarget ? ['fas', 'bookmark'] : ['far', 'bookmark']"
-          :disabled="markedAsQuickBookmarkTarget"
-          :theme="markedAsQuickBookmarkTarget ? 'secondary' : 'base-no-default'"
+          v-if="store.getters.getShowVideoMenuButton"
+          ref="menuButton"
+          class="optionsButton"
+          :title="t('Video.More Options')"
+          :icon="['fas', 'ellipsis-v']"
+          theme="base-no-default"
           :size="16"
-          @disabled-click="handleQuickBookmarkEnabledDisabledClick"
-          @click="enableQuickBookmarkForThisPlaylist"
+          @click="openPlaylistOptionsMenu"
         />
-      </span>
+      </div>
     </div>
+    <WatchVideoDownloadPrompt
+      v-if="enableDownloads && showDownloadPrompt"
+      :playlist-id="isUserPlaylist ? '' : playlistMetadata.playlistId"
+      :playlist-key="playlistMetadata.playlistId"
+      :video-ids="isUserPlaylist ? data.videos.map(video => video.videoId) : []"
+      :is-playlist="true"
+      :title="playlistMetadata.title"
+      :thumbnail="isUserPlaylist && thumbnailPreference !== 'hidden' ? playlistMetadata.defaultThumbnailUrl : thumbnailForDisplay"
+      @close="showDownloadPrompt = false"
+    />
   </div>
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed } from 'vue'
+import { useContextMenuHold } from '../../composables/useContextMenuHold'
+import { lightHaptic } from '../../helpers/mobileHaptics'
+import FtRetryImage from '../FtRetryImage.vue'
+import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
+import { FtIcon } from '@opentubex/icons'
+import { computed, inject, onBeforeUnmount, ref, toRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import FtChannelAvatar from '../FtChannelAvatar/FtChannelAvatar.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
+import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
+import FtVerifiedBadge from '../FtVerifiedBadge/FtVerifiedBadge.vue'
 
 import store from '../../store/index'
 
-import { showToast } from '../../helpers/utils'
+import { useResultChannelAvatar } from '../../composables/useResultChannelAvatar'
+import { copyToClipboard, openInExternalPlayer, openInternalPath, showToast } from '../../helpers/utils'
+import { openButtonMenu } from '../../helpers/buttonMenu'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 
 const props = defineProps({
@@ -116,34 +176,130 @@ const props = defineProps({
     type: String,
     default: ''
   },
+  showGrabBar: {
+    type: Boolean,
+    default: false
+  },
 })
 
 const { t } = useI18n()
+const menuButton = useTemplateRef('menuButton')
+const openMobileContextActions = inject('openMobileContextActions')
+// Only the Playlists page sorts pinned playlists first.
+const canPinPlaylistsToTop = inject('canPinPlaylistsToTop', false)
+const isPinnedToTop = computed(() => canPinPlaylistsToTop && store.getters.getUserPlaylistsPinnedIds.includes(playlistMetadata.value.playlistId))
+function togglePinnedToTop() {
+  const id = playlistMetadata.value.playlistId
+  const pin = !isPinnedToTop.value
+  store.dispatch('updateUserPlaylistsPinnedIds', pinnedIds => [...pinnedIds.filter(pinnedId => pinnedId !== id), ...pin ? [id] : []])
+}
+const playlistMenuItems = computed(() => {
+  const items = store.getters.getTabsEnabled
+    ? [{
+        label: t('Context Menu.Open in a New Tab'),
+        shortLabel: t('New Tab'),
+        icon: ['fas', 'arrow-up-right-from-square'],
+        quickAction: true,
+        run: () => openInternalPath({ ...playlistPageLinkTo.value, title: titleForDisplay.value, doCreateNewTab: true, makeActive: true })
+      }]
+    : []
+  if (process.env.IS_ELECTRON) {
+    items.push({
+      label: t('Context Menu.Open in a New Window'),
+      shortLabel: t('New Window'),
+      icon: ['fas', 'external-link-alt'],
+      quickAction: true,
+      run: () => openInternalPath({ ...playlistPageLinkTo.value, title: titleForDisplay.value, doCreateNewWindow: true, makeActive: true })
+    })
+  }
+  if (items.length > 0) items.push({ type: 'separator' })
+  if (externalPlayer.value !== '' && !isUserPlaylist.value) {
+    items.push({
+      label: t('Video.External Player.OpenInTemplate', { externalPlayer: externalPlayer.value }),
+      icon: ['fas', 'external-link-alt'],
+      run: handleExternalPlayer,
+    })
+  }
+  if (supportsYtDlp && enableDownloads.value && playlistMetadata.value.videoCount > 0) {
+    items.push({
+      label: t('Downloads.Download Playlist'),
+      icon: ['fas', 'download'],
+      run: () => { showDownloadPrompt.value = true },
+    })
+  }
+  if (canPinPlaylistsToTop) {
+    items.push({
+      label: isPinnedToTop.value ? t('User Playlists.Unpin from Top') : t('User Playlists.Pin to Top'),
+      icon: ['fas', isPinnedToTop.value ? 'thumbtack-slash' : 'thumbtack'],
+      run: togglePinnedToTop,
+    })
+  }
+  if (isUserPlaylist.value) {
+    items.push({
+      label: markedAsQuickBookmarkTarget.value ? t('User Playlists.Quick Bookmark Enabled') : t('User Playlists.Enable Quick Bookmark With This Playlist'),
+      icon: markedAsQuickBookmarkTarget.value ? quickBookmarkIcon.value : ['far', 'bookmark'],
+      enabled: !markedAsQuickBookmarkTarget.value,
+      run: enableQuickBookmarkForThisPlaylist,
+    })
+  }
+  if (isPlaylistBookmark.value) {
+    items.push({
+      label: t('User Playlists.Remove Saved Playlist'), icon: ['fas', 'bookmark'], run: removePlaylistBookmark,
+    })
+  }
+  if (!isUserPlaylist.value) {
+    items.push({
+      label: t('Context Menu.Copy YouTube Link'),
+      icon: ['fab', 'youtube'],
+      run: () => copyToClipboard(`https://www.youtube.com/playlist?list=${encodeURIComponent(playlistMetadata.value.playlistId)}`)
+    })
+  }
+  return items.map(item => ({ enabled: true, ...item }))
+})
 
-let playlistId = ''
-let title = ''
-/** @type {string} */
-let thumbnail = thumbnailPlaceholder
-/** @type {string | null} */
-let channelId = null
-let channelName = ''
-let videoCount = 0
-/** @type {'fa-list' | 'fa-music' | 'fa-podcast' | 'fa-graduation-cap' | 'fa-tv'} */
-let playlistTypeIcon = 'fa-list'
+const { startMenuHold, moveMenuHold, cancelMenuHold, handleMenuHoldDragStart, suppressMenuHoldClick } = useContextMenuHold(openPlaylistContextMenu)
+
+function openPlaylistOptionsMenu() {
+  cancelMenuHold()
+  openButtonMenu(menuButton.value.$el.querySelector('button'), playlistMenuItems, titleForDisplay.value)
+}
+function openPlaylistContextMenu(event) {
+  if (event.target.closest('.channelName, [role="dialog"], [role="menu"], .iconDropdown')) return
+  if (event.pointerType !== 'touch' && !process.env.IS_ELECTRON) {
+    const selection = window.getSelection()
+    if (event.target.closest('img, video') || (selection && !selection.isCollapsed && selection.containsNode(event.target, true))) return
+  }
+  event.preventDefault()
+  event.stopPropagation()
+  cancelMenuHold()
+  if (event.pointerType === 'touch') {
+    suppressMenuHoldClick()
+    openMobileContextActions({ title: titleForDisplay.value, actions: playlistMenuItems })
+    lightHaptic()
+    return
+  }
+  const bounds = event.target.getBoundingClientRect()
+  const keyboard = event.type === 'keydown' || (event.clientX === 0 && event.clientY === 0)
+  window.dispatchEvent(new CustomEvent('opentubex:context-menu', {
+    detail: { x: keyboard ? bounds.left : event.clientX, y: keyboard ? bounds.bottom : event.clientY, items: playlistMenuItems, contextEvent: event }
+  }))
+}
+function handleContextMenuKeydown(event) {
+  if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) openPlaylistContextMenu(event)
+}
+onBeforeUnmount(() => {
+  window.dispatchEvent(new CustomEvent('opentubex:close-context-menu', { detail: playlistMenuItems }))
+})
+
+const showDownloadPrompt = ref(false)
+const enableDownloads = computed(() => store.getters.getEnableDownloads)
+
+watch(enableDownloads, (enabled) => {
+  if (!enabled) showDownloadPrompt.value = false
+})
 
 /** @type {import('vue').ComputedRef<'grid' | 'list'>} */
 const listType = computed(() => store.getters.getListType)
-
-const titleForDisplay = computed(() => {
-  if (typeof title !== 'string') {
-    return ''
-  }
-  if (title.length <= 255) {
-    return title
-  }
-
-  return `${title.slice(0, 255)}...`
-})
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const blurThumbnails = computed(() => store.getters.getBlurThumbnails)
@@ -151,137 +307,176 @@ const blurThumbnails = computed(() => store.getters.getBlurThumbnails)
 /** @type {import('vue').ComputedRef<'' | 'start' | 'middle' | 'end' | 'hidden' | 'blur'>} */
 const thumbnailPreference = computed(() => store.getters.getThumbnailPreference)
 
-/** @type {import('vue').ComputedRef<string>} */
-const thumbnailForDisplay = computed(() => {
-  return thumbnailPreference.value !== 'hidden' ? thumbnail : thumbnailPlaceholder
-})
-
-const isUserPlaylist = computed(() => props.data._id != null)
-
-// For `router-link` attribute `to`
-const playlistPageLinkTo = computed(() => ({
-  path: `/playlist/${playlistId}`,
-  query: {
-    playlistType: isUserPlaylist.value ? 'user' : '',
-    searchQueryText: props.searchQueryText,
-  },
-}))
-
 /** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
 const backendPreference = computed(() => store.getters.getBackendPreference)
 
 /** @type {import('vue').ComputedRef<string>} */
 const currentInvidiousInstanceUrl = computed(() => store.getters.getCurrentInvidiousInstanceUrl)
 
-if (isUserPlaylist.value) {
-  parseUserData()
-} else if (props.data.dataSource === 'local') {
-  parseLocalData()
-} else {
-  parseInvidiousData()
-}
+const isUserPlaylist = computed(() => props.data._id != null)
+const isPlaylistBookmark = computed(() => props.data.isPlaylistBookmark === true)
+const playlistTypeIcon = computed(() => {
+  if (!isUserPlaylist.value) {
+    if (props.data.isPodcast === true) return 'podcast'
+    if (props.data.isAlbum === true) return 'music'
+    if (props.data.isCourse === true) return 'graduation-cap'
+    if (props.data.isShow === true) return 'tv'
+  }
+  return 'list'
+})
+const playlistMetadata = computed(() => {
+  if (isUserPlaylist.value) {
+    let thumbnailUrl = thumbnailPlaceholder
+    if (props.data.videos.length > 0) {
+      const origin = backendPreference.value === 'invidious'
+        ? currentInvidiousInstanceUrl.value
+        : 'https://i.ytimg.com'
+      thumbnailUrl = `${origin}/vi/${props.data.videos[0].videoId}/maxresdefault.jpg`
+    }
 
-function parseInvidiousData() {
-  title = props.data.title
-
-  thumbnail = props.data.playlistThumbnail
-    .replace('https://i.ytimg.com', currentInvidiousInstanceUrl.value)
-    .replace('hqdefault', 'mqdefault')
-
-  channelName = props.data.author
-  channelId = props.data.authorId
-  playlistId = props.data.playlistId
-  videoCount = props.data.videoCount
-
-  if (props.data.isPodcast === true) {
-    playlistTypeIcon = 'fa-podcast'
-  } else if (props.data.isAlbum === true) {
-    playlistTypeIcon = 'fa-music'
-  } else if (props.data.isCourse === true) {
-    playlistTypeIcon = 'fa-graduation-cap'
-  } else if (props.data.isShow === true) {
-    playlistTypeIcon = 'fa-tv'
+    return {
+      playlistId: props.data._id,
+      title: props.data.playlistName,
+      thumbnailUrl: props.data.customThumbnail || thumbnailUrl,
+      defaultThumbnailUrl: thumbnailUrl,
+      channelName: '',
+      channelId: '',
+      videoCount: props.data.videos.length,
+    }
   }
 
+  if (props.data.dataSource === 'local') {
+    return {
+      playlistId: props.data.playlistId,
+      title: props.data.title,
+      thumbnailUrl: props.data.thumbnail,
+      channelName: props.data.channelName,
+      channelId: props.data.channelId,
+      videoCount: props.data.videoCount,
+      itemCountText: props.data.itemCountText,
+    }
+  }
+
+  let thumbnailUrl = thumbnailPlaceholder
   if (props.data.proxyThumbnail === false) {
-    thumbnail = props.data.playlistThumbnail
-  }
-}
-
-function parseLocalData() {
-  title = props.data.title
-
-  thumbnail = props.data.thumbnail
-
-  channelName = props.data.channelName
-  channelId = props.data.channelId
-  playlistId = props.data.playlistId
-  videoCount = props.data.videoCount
-  if (props.data.isPodcast === true) {
-    playlistTypeIcon = 'fa-podcast'
-  } else if (props.data.isAlbum === true) {
-    playlistTypeIcon = 'fa-music'
-  } else if (props.data.isCourse === true) {
-    playlistTypeIcon = 'fa-graduation-cap'
-  } else if (props.data.isShow === true) {
-    playlistTypeIcon = 'fa-tv'
-  }
-}
-
-function parseUserData() {
-  title = props.data.playlistName
-
-  if (props.data.videos.length > 0) {
-    const origin = backendPreference.value === 'invidious'
-      ? currentInvidiousInstanceUrl.value
-      : 'https://i.ytimg.com'
-
-    thumbnail = `${origin}/vi/${props.data.videos[0].videoId}/mqdefault.jpg`
+    thumbnailUrl = props.data.playlistThumbnail
+  } else if (typeof props.data.playlistThumbnail === 'string' && props.data.playlistThumbnail !== '') {
+    thumbnailUrl = props.data.playlistThumbnail.replace(/(?:mq|hq|sd)default\.(jpg|webp)(?=[?#]|$)/, 'maxresdefault.$1')
+    // Yattee servers don't proxy images
+    if (backendPreference.value !== 'yattee' && (!isPlaylistBookmark.value || backendPreference.value === 'invidious')) {
+      thumbnailUrl = thumbnailUrl.replace('https://i.ytimg.com', currentInvidiousInstanceUrl.value)
+    }
   }
 
-  channelName = ''
-  channelId = ''
-  playlistId = props.data._id
-  videoCount = props.data.videos.length
-}
+  return {
+    playlistId: props.data.playlistId,
+    title: props.data.title,
+    thumbnailUrl,
+    channelName: props.data.author,
+    channelId: props.data.authorId,
+    videoCount: props.data.videoCount,
+  }
+})
+
+const titleForDisplay = computed(() => {
+  const { title } = playlistMetadata.value
+  if (typeof title !== 'string') return ''
+  if (title.length <= 255) return title
+  return `${title.slice(0, 255)}...`
+})
+
+/** @type {import('vue').ComputedRef<string>} */
+const thumbnailForDisplay = computed(() => {
+  return thumbnailPreference.value !== 'hidden'
+    ? playlistMetadata.value.thumbnailUrl
+    : thumbnailPlaceholder
+})
+
+// For `router-link` attribute `to`
+const playlistPageLinkTo = computed(() => {
+  const query = {
+    playlistType: isUserPlaylist.value ? 'user' : '',
+    searchQueryText: props.searchQueryText,
+  }
+  const playlistThumbnail = props.data.dataSource === 'local'
+    ? props.data.thumbnail
+    : props.data.playlistThumbnail
+  if (!isUserPlaylist.value && typeof playlistThumbnail === 'string' && playlistThumbnail !== '') {
+    query.playlistThumbnail = playlistThumbnail
+  }
+
+  return {
+    path: `/playlist/${playlistMetadata.value.playlistId}`,
+    query,
+  }
+})
+
+const channelId = computed(() => playlistMetadata.value.channelId)
+
+const showChannelAvatar = computed(() => (
+  !store.getters.getHideChannelAvatars &&
+  (props.appearance === 'result' || props.appearance === 'youtubeShort') &&
+  typeof playlistMetadata.value.channelName === 'string' &&
+  playlistMetadata.value.channelName !== '' &&
+  typeof playlistMetadata.value.channelId === 'string' &&
+  playlistMetadata.value.channelId !== ''
+))
+
+const { channelThumbnail } = useResultChannelAvatar(
+  toRef(props, 'data'),
+  channelId,
+  showChannelAvatar
+)
 
 /** @type {import('vue').ComputedRef<string | null>} */
 const quickBookmarkPlaylistId = computed(() => store.getters.getQuickBookmarkTargetPlaylistId)
+const quickBookmarkIcon = computed(() => store.getters.getQuickBookmarkIcon)
 
 const markedAsQuickBookmarkTarget = computed(() => {
   // Only user playlists can be target
-  return playlistId != null &&
+  return playlistMetadata.value.playlistId != null &&
     quickBookmarkPlaylistId.value != null &&
-    quickBookmarkPlaylistId.value === playlistId
+    quickBookmarkPlaylistId.value === playlistMetadata.value.playlistId
 })
-
-function handleQuickBookmarkEnabledDisabledClick() {
-  showToast(t('User Playlists.SinglePlaylistView.Toast["This playlist is already being used for quick bookmark."]'))
-}
 
 async function enableQuickBookmarkForThisPlaylist() {
   const currentQuickBookmarkTargetPlaylist = store.getters.getQuickBookmarkPlaylist
 
-  store.dispatch('updateQuickBookmarkTargetPlaylistId', playlistId)
+  store.dispatch('updateQuickBookmarkTargetPlaylistId', playlistMetadata.value.playlistId)
 
   if (currentQuickBookmarkTargetPlaylist != null) {
-    showToast(
-      t('User Playlists.SinglePlaylistView.Toast["This playlist is now used for quick bookmark instead of {oldPlaylistName}. Click here to undo"]', {
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast["This playlist is now used for quick bookmark instead of {oldPlaylistName}. Click here to undo"]', {
         oldPlaylistName: currentQuickBookmarkTargetPlaylist.playlistName,
       }),
-      5000,
-      () => {
+      time: 5000,
+      action: () => {
         store.dispatch('updateQuickBookmarkTargetPlaylistId', currentQuickBookmarkTargetPlaylist._id)
-        showToast(
-          t('User Playlists.SinglePlaylistView.Toast["Reverted to use {oldPlaylistName} for quick bookmark"]', {
+        showToast({
+          message: t('User Playlists.SinglePlaylistView.Toast["Reverted to use {oldPlaylistName} for quick bookmark"]', {
             oldPlaylistName: currentQuickBookmarkTargetPlaylist.playlistName,
           }),
-          5000,
-        )
+          time: 5000,
+          icon: ['fas', 'undo'],
+        })
       },
-    )
+      icon: ['fas', 'bookmark'],
+    })
   } else {
-    showToast(t('User Playlists.SinglePlaylistView.Toast.This playlist is now used for quick bookmark'))
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast.This playlist is now used for quick bookmark'),
+      icon: ['fas', 'bookmark'],
+    })
+  }
+}
+
+async function removePlaylistBookmark() {
+  const removed = await store.dispatch('removePlaylistBookmark', playlistMetadata.value.playlistId)
+  if (!removed) {
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
+      icon: ['fas', 'circle-exclamation'],
+    })
   }
 }
 
@@ -295,8 +490,8 @@ const enableChannelLinks = computed(() => !store.getters.getDisableChannelLinks)
 
 function handleExternalPlayer() {
   if (process.env.IS_ELECTRON) {
-    window.ftElectron.openInExternalPlayer({
-      playlistId: playlistId,
+    openInExternalPlayer({
+      playlistId: playlistMetadata.value.playlistId,
       playbackRate: defaultPlayback.value,
     })
   }

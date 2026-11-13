@@ -1,0 +1,614 @@
+package org.opentubex.app;
+
+import static java.util.Arrays.asList;
+
+import android.content.Context;
+import android.net.Uri;
+import android.util.AtomicFile;
+import android.util.Log;
+import androidx.documentfile.provider.DocumentFile;
+import androidx.work.ExistingWorkPolicy;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
+import java.util.regex.Pattern;
+
+/** Native queue ownership keeps downloads independent of WebView and activity lifetime. */
+final class YtDlpDownloads {
+    interface Conditions {
+        boolean unmetered();
+        boolean charging();
+        /** Wakes the queue once every requested state is reached. */
+        void wakeWhen(boolean unmetered, boolean charging);
+    }
+
+    private static YtDlpDownloads instance;
+    private static final List<String> ACTIVE = asList("queued", "preparing", "downloading", "processing", "paused", "pausing");
+    private static final Pattern PROGRESS = Pattern.compile("^\\[download]\\s+(\\d+(?:\\.\\d+)?)%(?:.*?\\bat\\s+(\\S+))?(?:.*?\\bETA\\s+(\\S+))?");
+    private final Context context;
+    private final AtomicFile file;
+    private final File staging;
+    private final Runnable schedule;
+    private final Map<Long, JSONObject> records = new LinkedHashMap<>();
+    private final Set<Long> running = new HashSet<>();
+    private final Map<Long, Thread> threads = new HashMap<>();
+    private final List<Consumer<JSONObject>> listeners = new CopyOnWriteArrayList<>();
+    private long counter;
+    private boolean paused;
+    private int concurrency = 2;
+    private int bandwidth;
+    private JSONObject configuration = new JSONObject();
+    Conditions conditions;
+    private String scheduledConditions;
+
+    static synchronized YtDlpDownloads get(Context context) {
+        Context application = context.getApplicationContext();
+        if (instance == null) instance = new YtDlpDownloads(application, application.getNoBackupFilesDir(), () ->
+            WorkManager.getInstance(application).enqueueUniqueWork("yt-dlp-downloads", ExistingWorkPolicy.APPEND_OR_REPLACE,
+                new OneTimeWorkRequest.Builder(YtDlpDownloadWorker.class).build()));
+        return instance;
+    }
+
+    YtDlpDownloads(Context context, File directory, Runnable schedule) {
+        this.context = context;
+        this.schedule = schedule;
+        conditions = YtDlpDownloadConditionsWorker.conditions(context);
+        staging = new File(directory, "yt-dlp-downloads");
+        file = new AtomicFile(new File(directory, "yt-dlp-downloads.json"));
+        if (!file.getBaseFile().exists()) return;
+        try (InputStream input = file.openRead()) {
+            byte[] bytes = YtDlpFiles.read(input, 32 * 1024 * 1024);
+            if (bytes.length == 0) return;
+            JSONObject saved = new JSONObject(new String(bytes, StandardCharsets.UTF_8));
+            configuration = saved.optJSONObject("configuration");
+            if (configuration == null) configuration = new JSONObject();
+            counter = saved.optLong("counter");
+            paused = saved.optBoolean("paused");
+            concurrency = saved.optInt("concurrency", 2);
+            bandwidth = saved.optInt("bandwidth");
+            JSONArray list = saved.optJSONArray("records");
+            if (list != null) for (int i = 0; i < list.length(); i++) {
+                JSONObject record = list.getJSONObject(i);
+                String status = record.optString("status");
+                if (asList("preparing", "downloading", "processing", "pausing").contains(status)) {
+                    record.put("status", paused || status.equals("pausing") ? "paused" : "queued");
+                }
+                records.put(record.getLong("id"), record);
+            }
+        } catch (Exception error) {
+            // Preserve corrupt history rather than silently replacing it with an empty queue.
+            throw new IllegalStateException("Unable to read Android download history", error);
+        }
+    }
+
+    synchronized void configure(JSONObject config) {
+        configuration = config;
+        concurrency = Math.max(1, Math.min(10, config.optInt("concurrency", 2)));
+        bandwidth = Math.max(0, Math.min(10_000_000, config.optInt("bandwidth")));
+        save();
+        // Disabled requirements release waiting automatic downloads.
+        if (hasQueued()) wake();
+    }
+
+    static JSONObject parseCompletedFile(String line) throws Exception {
+        String[] fields = line.substring("__OPENTUBEX_FILE__:".length()).split("\t", 8);
+        if (fields.length != 8) return null;
+        JSONObject item = new JSONObject().put("videoId", fields[0]).put("path", fields[7]);
+        String[] keys = {"duration", "width", "height"};
+        for (int i = 0; i < keys.length; i++) {
+            try { item.put(keys[i], Double.parseDouble(fields[i + 1])); } catch (Exception ignored) { }
+        }
+        String[] textKeys = {"author", "authorId", "title"};
+        for (int i = 0; i < textKeys.length; i++) {
+            Object value = new org.json.JSONTokener(fields[i + 4]).nextValue();
+            if (value instanceof String) item.put(textKeys[i], value);
+        }
+        return item;
+    }
+
+    synchronized void discover(String channelId, String feedType, JSONObject response) throws Exception {
+        if (!configuration.optBoolean("enabled")) return;
+        JSONObject rules = configuration.optJSONObject("rules");
+        JSONObject entry = rules == null ? null : rules.optJSONObject(channelId);
+        if (entry == null) return;
+        JSONObject rule = entry.getJSONObject("rule");
+        JSONArray videos = SubscriptionRefreshDownloadMetadata.forDownloads(response, System.currentTimeMillis()).optJSONArray("videos");
+        if (videos == null) return;
+        for (int i = 0; i < videos.length(); i++) {
+            JSONObject video = videos.optJSONObject(i);
+            if (video == null || !YtDlpAutomaticDownloads.matches(video, feedType, rule, System.currentTimeMillis())) continue;
+            JSONObject payload = new JSONObject(entry.getJSONObject("payload").toString());
+            String videoId = video.getString("videoId");
+            payload.put("videoId", videoId).put("title", video.optString("title", videoId));
+            JSONArray thumbnails = video.optJSONArray("videoThumbnails");
+            if (thumbnails != null && thumbnails.length() > 0) payload.put("thumbnail", thumbnails.getJSONObject(thumbnails.length() - 1).optString("url"));
+            JSONArray args = new JSONArray();
+            JSONArray template = entry.getJSONArray("args");
+            for (int n = 0; n < template.length(); n++) {
+                String arg = template.getString(n);
+                args.put(arg.equals("https://www.youtube.com/watch?v=___________") ? "https://www.youtube.com/watch?v=" + videoId : arg);
+            }
+            add(payload, args, configuration, -1);
+        }
+    }
+
+    void observe(Consumer<JSONObject> listener) { listeners.add(listener); }
+    void unobserve(Consumer<JSONObject> listener) { listeners.remove(listener); }
+
+    synchronized JSONObject add(JSONObject payload, JSONArray args, JSONObject config, long retryId) throws Exception {
+        if (!config.optBoolean("enabled")) return new JSONObject().put("error", "downloads-disabled");
+        String folder = config.optString("folder");
+        if (!folder.startsWith("content://")) return new JSONObject().put("error", "download-folder-required");
+        DocumentFile target = DocumentFile.fromTreeUri(context, Uri.parse(folder));
+        if (target == null || !target.canWrite()) return new JSONObject().put("error", "download-folder-unavailable");
+        YtDlpArguments.validate(args);
+        if (payload.optBoolean("automatic")) {
+            for (JSONObject record : records.values()) {
+                if (record.optString("videoId").equals(payload.optString("videoId")) &&
+                    !asList("failed", "cancelled").contains(record.optString("status"))) {
+                    return new JSONObject().put("skipped", "already-downloaded");
+                }
+            }
+        }
+        configure(config);
+        JSONObject previous = records.get(retryId);
+        if (previous != null && (running.contains(retryId) || ACTIVE.contains(previous.optString("status")))) return new JSONObject().put("error", "download-active");
+        long position = ++counter;
+        long id = previous == null ? position : retryId;
+        JSONObject record = previous == null ? new JSONObject() : previous;
+        for (String key : asList("videoId", "playlistId", "playlistKey", "title", "thumbnail", "mode", "template")) record.put(key, payload.optString(key));
+        record.put("id", id).put("retryPayload", new JSONObject(payload.toString())).put("automatic", payload.optBoolean("automatic"));
+        record.put("args", args).put("folder", folder).put("status", paused ? "paused" : "queued");
+        // Validate at execution so missing sessions also leave a visible failed automatic download.
+        boolean useCookies = !payload.has("externalUrl") && config.optBoolean("useCookies");
+        record.put("useCookies", useCookies)
+            .put("cookies", useCookies ? config.optString("cookies") : "");
+        record.put("queuePosition", position).put("percent", 0).put("speed", JSONObject.NULL).put("eta", JSONObject.NULL);
+        record.put("errorMessage", JSONObject.NULL).put("started", false);
+        clearCurrentVideo(record);
+        if (!record.has("destinations")) record.put("destinations", new JSONArray()).put("files", new JSONArray());
+        records.put(id, record);
+        publish(record);
+        save();
+        wake();
+        return new JSONObject().put("id", id);
+    }
+
+    void wake() {
+        schedule.run();
+    }
+
+    private File cookieFile(String path) throws IOException {
+        File cookies = new File(context.getNoBackupFilesDir(), "yt-dlp-cookies.txt");
+        if (!cookies.getAbsolutePath().equals(path) || !cookies.isFile()) throw new IOException("Cookie file is unavailable");
+        return cookies;
+    }
+
+    synchronized void conditionsMet() {
+        scheduledConditions = null;
+        wake();
+    }
+
+    /** Marks queued automatic downloads whose requirements are unmet and returns whether any queued download can start. */
+    private synchronized boolean refreshWaiting() throws Exception {
+        boolean requireUnmetered = configuration.optBoolean("automaticRequireUnmetered");
+        boolean requireCharging = configuration.optBoolean("automaticRequireCharging");
+        boolean unmetered = !requireUnmetered || conditions.unmetered();
+        boolean charging = !requireCharging || conditions.charging();
+        boolean startable = false;
+        String waiting = null;
+        boolean changed = false;
+        for (JSONObject record : records.values()) {
+            if (!record.optString("status").equals("queued")) continue;
+            String waitingFor = YtDlpAutomaticDownloads.waitingFor(record, configuration, unmetered, charging);
+            if (!Objects.equals(waitingFor, record.has("waitingFor") ? record.optString("waitingFor") : null)) {
+                if (waitingFor == null) record.remove("waitingFor");
+                else record.put("waitingFor", waitingFor);
+                publish(record);
+                changed = true;
+            }
+            if (waitingFor == null) startable = true;
+            else waiting = waitingFor;
+        }
+        if (changed) save();
+        // Wake for the reason shown so the next unmet requirement replaces it.
+        if (waiting != null && !waiting.equals(scheduledConditions)) {
+            scheduledConditions = waiting;
+            conditions.wakeWhen(waiting.equals("unmetered"), waiting.equals("charging"));
+        }
+        return startable;
+    }
+
+    synchronized List<Long> claim() throws Exception {
+        refreshWaiting();
+        List<JSONObject> pending = records.values().stream()
+            .filter(record -> record.optString("status").equals("queued") && !record.has("waitingFor") && !running.contains(record.optLong("id")))
+            .sorted(Comparator.comparingLong(record -> record.optLong("queuePosition")))
+            .collect(java.util.stream.Collectors.toList());
+        List<Long> ids = new ArrayList<>();
+        for (JSONObject record : pending) {
+            if (running.size() >= concurrency) break;
+            long id = record.getLong("id");
+            running.add(id);
+            record.put("status", "preparing").put("started", true);
+            ids.add(id);
+            publish(record);
+        }
+        save();
+        return ids;
+    }
+
+    synchronized boolean hasRunning() { return !running.isEmpty(); }
+    synchronized boolean hasQueued() {
+        try { return refreshWaiting(); }
+        catch (Exception error) { throw new IllegalStateException(error); }
+    }
+
+    void run(long id) {
+        JSONObject record;
+        synchronized (this) {
+            record = records.get(id);
+            threads.put(id, Thread.currentThread());
+        }
+        File root = new File(staging, Long.toString(id));
+        try {
+            if (!isExecuting(id)) return;
+            root.mkdirs();
+            List<String> args = YtDlpArguments.validate(record.getJSONArray("args"));
+            args.addAll(asList("--paths", root.getAbsolutePath(), "--paths", "temp:" + new File(root, "temp").getAbsolutePath(),
+                "--newline", "--progress", "--no-simulate", "--print", "after_move:__OPENTUBEX_FILE__:%(id)s\t%(duration)s\t%(width)s\t%(height)s\t%(channel,uploader|null)j\t%(channel_id|null)j\t%(title)j\t%(filepath)s"));
+            synchronized (this) {
+                if (record.optBoolean("useCookies")) {
+                    File cookies = cookieFile(record.optString("cookies"));
+                    args.addAll(asList("--cookies", cookies.getAbsolutePath()));
+                }
+                if (bandwidth > 0) args.addAll(asList("--limit-rate", Math.max(1, bandwidth / concurrency) + "K"));
+                long estimate = record.getJSONObject("retryPayload").optLong("estimatedSizeBytes");
+                record.put("availableSpaceBytes", root.getUsableSpace());
+                if (estimate > 0 && root.getUsableSpace() < estimate) throw new IOException("INSUFFICIENT_SPACE");
+            }
+            StringBuilder completedOutput = new StringBuilder();
+            // The runtime's error only keeps the end of the output, where progress
+            // lines can hide a playlist's earlier per-video errors.
+            ArrayDeque<String> errorLines = new ArrayDeque<>();
+            Exception downloadError = null;
+            try {
+                YtDlpRuntime.execute(context, args, "download-" + id, line -> {
+                    if (line.startsWith("__OPENTUBEX_FILE__:")) completedOutput.append(line).append('\n');
+                    if (line.startsWith("ERROR:")) synchronized (errorLines) {
+                        errorLines.add(line);
+                        if (errorLines.size() > 5) errorLines.removeFirst();
+                    }
+                    progress(id, line);
+                });
+            } catch (Exception error) {
+                downloadError = error;
+            }
+            if (!isExecuting(id) || Thread.currentThread().isInterrupted()) return;
+            updateStatus(id, "processing", null);
+            Map<String, JSONObject> metadata = new HashMap<>();
+            for (String line : completedOutput.toString().split("\n")) {
+                if (!line.startsWith("__OPENTUBEX_FILE__:")) continue;
+                JSONObject item = parseCompletedFile(line);
+                if (item != null) metadata.put(item.getString("path"), item);
+            }
+            for (File completed : YtDlpFiles.completedFiles(root)) {
+                if (!isExecuting(id)) return;
+                String source = completed.getAbsolutePath();
+                // A playlist can fail after other entries finish. Export those entries,
+                // but leave unfinished format fragments and sidecars for the retry.
+                if (downloadError != null && !metadata.containsKey(source)) continue;
+                JSONObject exports;
+                JSONObject exported;
+                synchronized (this) {
+                    exports = record.optJSONObject("exports");
+                    if (exports == null) { exports = new JSONObject(); record.put("exports", exports); }
+                    exported = exports.optJSONObject(source);
+                    if (exported == null) { exported = new JSONObject(); exports.put(source, exported); }
+                }
+                if (exported.optBoolean("completed") && YtDlpFiles.exists(context, exported.optString("uri"))) continue;
+                synchronized (this) {
+                    if (exported.optBoolean("completed")) {
+                        String missing = exported.getString("uri");
+                        JSONArray destinations = record.getJSONArray("destinations");
+                        JSONArray files = record.getJSONArray("files");
+                        for (int i = destinations.length() - 1; i >= 0; i--) {
+                            if (missing.equals(destinations.getString(i))) destinations.remove(i);
+                        }
+                        for (int i = files.length() - 1; i >= 0; i--) {
+                            if (missing.equals(files.getJSONObject(i).optString("path"))) files.remove(i);
+                        }
+                        record.put("sizeBytes", record.optLong("sizeBytes") - exported.getLong("sizeBytes"));
+                        if (missing.equals(record.optString("destination"))) {
+                            record.put("destination", destinations.length() == 0 ? JSONObject.NULL : destinations.getString(destinations.length() - 1));
+                        }
+                        exported.put("completed", false);
+                        save();
+                    }
+                }
+                JSONObject destinationRecord = exported;
+                Uri destination = YtDlpFiles.export(context, root, completed, record.getString("folder"), exported.optString("uri"), uri -> {
+                    synchronized (this) {
+                        try { destinationRecord.put("uri", uri.toString()); save(); }
+                        catch (Exception error) { throw new IllegalStateException(error); }
+                    }
+                });
+                synchronized (this) {
+                    exported.put("completed", true).put("sizeBytes", completed.length());
+                    record.getJSONArray("destinations").put(destination.toString());
+                    record.put("destination", destination.toString());
+                    record.put("sizeBytes", record.optLong("sizeBytes") + completed.length());
+                    JSONObject item = metadata.get(completed.getAbsolutePath());
+                    if (item != null) record.getJSONArray("files").put(item.put("path", destination.toString()).put("extension", completed.getName().substring(completed.getName().lastIndexOf('.') + 1)).put("available", true));
+                    save();
+                }
+            }
+            boolean finished;
+            synchronized (this) {
+                if (!isExecuting(id)) return;
+                String error = downloadError == null ? null
+                    : downloadError.getMessage() == null ? downloadError.getClass().getSimpleName()
+                    : downloadError.getMessage().isEmpty() ? "DOWNLOAD_STOPPED_UNEXPECTEDLY" : downloadError.getMessage();
+                // yt-dlp skips playlist entries it cannot download, such as members-only
+                // videos, but still exits with an error after downloading the others.
+                boolean skippedPlaylistVideos = downloadError != null &&
+                    record.getJSONObject("retryPayload").optBoolean("isPlaylist") && record.getJSONArray("destinations").length() > 0;
+                finished = downloadError == null || skippedPlaylistVideos;
+                if (finished) {
+                    record.put("percent", 100);
+                    if (record.getJSONArray("destinations").length() > 0) record.put("completedAt", System.currentTimeMillis());
+                    updateStatus(id, record.getJSONArray("destinations").length() > 0 ? "completed" : "skipped",
+                        skippedPlaylistVideos ? (errorLines.isEmpty() ? error : String.join("\n", errorLines)) : null);
+                } else {
+                    updateStatus(id, "failed", error);
+                }
+            }
+            if (finished) YtDlpFiles.deleteTree(root);
+        } catch (Exception error) {
+            synchronized (this) {
+                if (isExecuting(id)) updateStatus(id, "failed", error.getMessage() == null ? error.getClass().getSimpleName() : error.getMessage());
+            }
+        } finally {
+            synchronized (this) {
+                threads.remove(id);
+                running.remove(id);
+                notifyAll();
+            }
+        }
+    }
+
+    private synchronized boolean isExecuting(long id) {
+        JSONObject record = records.get(id);
+        return record != null && asList("preparing", "downloading", "processing").contains(record.optString("status"));
+    }
+
+    private synchronized void progress(long id, String lines) {
+        JSONObject record = records.get(id);
+        if (!isExecuting(id)) return;
+        try {
+            String previousStatus = record.optString("status");
+            for (String line : lines.split("\n")) updateProgress(record, line);
+            long now = System.currentTimeMillis();
+            if (!previousStatus.equals(record.optString("status")) || now - record.optLong("lastProgress") >= 500) {
+                record.put("lastProgress", now);
+                publish(record);
+            }
+        } catch (Exception error) { Log.w("OpenTubeXYtDlp", "Invalid download progress", error); }
+    }
+
+    static void updateProgress(JSONObject record, String line) throws org.json.JSONException {
+        if (line.startsWith("__OPENTUBEX_PREPARING__:")) {
+            String[] fields = line.substring("__OPENTUBEX_PREPARING__:".length()).split("\t", 4);
+            Object title = null;
+            try { title = fields.length > 3 ? new org.json.JSONTokener(fields[3]).nextValue() : null; } catch (org.json.JSONException ignored) { }
+            record.put("currentVideoId", fields[0].matches("[\\w-]{11}") ? fields[0] : "")
+                .put("currentTitle", title instanceof String ? ((String) title).substring(0, Math.min(255, ((String) title).length())) : "")
+                .put("playlistIndex", positiveInteger(fields, 1)).put("playlistCount", positiveInteger(fields, 2));
+        }
+        if (line.startsWith("__OPENTUBEX_PREPARING__:") || line.equals("__OPENTUBEX_PROCESSING__") || line.startsWith("__OPENTUBEX_DOWNLOAD__:finished")) {
+            record.put("status", line.startsWith("__OPENTUBEX_PREPARING__:") ? "preparing" : "processing")
+                .put("percent", 0).put("speed", JSONObject.NULL).put("eta", JSONObject.NULL);
+            return;
+        }
+        if (line.startsWith("__OPENTUBEX_DOWNLOAD__:downloading\t")) {
+            String[] fields = line.split("\t", -1);
+            double percent = 0;
+            try { percent = Double.parseDouble(fields[1].trim().replace("%", "")); } catch (NumberFormatException ignored) { }
+            record.put("status", "downloading").put("percent", percent)
+                .put("speed", fields[2].trim().matches("Unknown.*|NA") ? JSONObject.NULL : fields[2].trim())
+                .put("eta", fields[3].trim().matches("Unknown.*|NA") ? JSONObject.NULL : fields[3].trim());
+            return;
+        }
+        var match = PROGRESS.matcher(line);
+        if (match.find()) {
+            record.put("percent", Double.parseDouble(match.group(1))).put("speed", match.group(2)).put("eta", match.group(3));
+            record.put("status", Double.parseDouble(match.group(1)) == 100 && line.contains(" in ") ? "processing" : "downloading");
+        } else if (line.startsWith("[Merger]") || line.startsWith("[ExtractAudio]")) record.put("status", "processing");
+    }
+
+    // A requeued record must not show the video its previous run stopped at.
+    private static void clearCurrentVideo(JSONObject record) {
+        for (String key : asList("currentVideoId", "currentTitle", "playlistIndex", "playlistCount")) record.remove(key);
+    }
+
+    private static Object positiveInteger(String[] fields, int index) {
+        try {
+            int value = fields.length > index ? Integer.parseInt(fields[index]) : 0;
+            return value > 0 ? value : JSONObject.NULL;
+        } catch (NumberFormatException ignored) { return JSONObject.NULL; }
+    }
+
+    private synchronized void updateStatus(long id, String status, String error) {
+        try {
+            JSONObject record = records.get(id);
+            record.put("status", status).put("errorMessage", error == null ? JSONObject.NULL : error);
+            publish(record);
+            save();
+        } catch (Exception exception) { throw new IllegalStateException(exception); }
+    }
+
+    synchronized boolean control(long id, String action, int direction) throws Exception {
+        JSONObject record = records.get(id);
+        if (record == null) return false;
+        String status = record.optString("status");
+        if ((action.equals("pause") || action.equals("cancel")) && ACTIVE.contains(status)) {
+            updateStatus(id, action.equals("pause") ? "paused" : "cancelled", null);
+            YtDlpRuntime.cancel(id);
+            Thread thread = threads.get(id);
+            if (thread != null) thread.interrupt();
+        } else if (action.equals("resume") && status.equals("paused")) {
+            updateStatus(id, "queued", null);
+        } else if (action.equals("move") && asList("queued", "paused").contains(status) && Math.abs(direction) == 1) {
+            List<JSONObject> peers = records.values().stream().filter(r -> asList("queued", "paused").contains(r.optString("status")))
+                .sorted(Comparator.comparingLong(r -> r.optLong("queuePosition"))).collect(java.util.stream.Collectors.toList());
+            int index = peers.indexOf(record) + direction;
+            if (index < 0 || index >= peers.size()) return false;
+            JSONObject other = peers.get(index);
+            long position = record.optLong("queuePosition");
+            record.put("queuePosition", other.optLong("queuePosition"));
+            other.put("queuePosition", position);
+            publish(other);
+            publish(record);
+        } else return false;
+        save();
+        if (action.equals("resume")) wake();
+        return true;
+    }
+
+    synchronized boolean queue(String action, JSONObject config) throws Exception {
+        configure(config);
+        if (action.equals("pause-all")) {
+            paused = true;
+            for (long id : records.keySet()) if (ACTIVE.contains(records.get(id).optString("status"))) control(id, "pause", 0);
+        } else if (action.equals("resume-all")) {
+            paused = false;
+            for (JSONObject record : records.values()) if (record.optString("status").equals("paused")) updateStatus(record.getLong("id"), "queued", null);
+        } else if (action.equals("retry-all")) {
+            for (JSONObject record : records.values()) {
+                if (!record.optString("status").equals("failed")) continue;
+                clearCurrentVideo(record);
+                updateStatus(record.getLong("id"), paused ? "paused" : "queued", null);
+            }
+        } else if (!action.equals("refresh")) return false;
+        save();
+        if (hasQueued()) wake();
+        return true;
+    }
+
+    synchronized void cancelAll() throws Exception {
+        for (long id : new ArrayList<>(records.keySet())) control(id, "cancel", 0);
+    }
+
+    synchronized void stopRunning() {
+        for (long id : new ArrayList<>(running)) {
+            if (isExecuting(id)) updateStatus(id, "queued", null);
+            YtDlpRuntime.cancel(id);
+            Thread thread = threads.get(id);
+            if (thread != null) thread.interrupt();
+            else running.remove(id);
+        }
+    }
+
+    JSONArray list() throws Exception {
+        return list(path -> YtDlpFiles.exists(context, path));
+    }
+
+    JSONArray list(java.util.function.Predicate<String> exists) throws Exception {
+        // Provider calls can block on removable or remote storage. They must not
+        // hold the queue monitor needed by progress, pause and cancellation.
+        Map<String, Boolean> availability = YtDlpDownloadAvailability.inspect(snapshots(), exists);
+        JSONArray result = snapshots();
+        // Controls/progress may have changed records while inspection was running.
+        YtDlpDownloadAvailability.annotate(result, availability);
+        for (int i = 0; i < result.length(); i++) {
+            JSONObject record = result.getJSONObject(i);
+            if (!"completed".equals(record.optString("status")) || record.has("completedAt")) continue;
+            JSONArray destinations = record.optJSONArray("destinations");
+            long completedAt = 0;
+            for (int j = 0; destinations != null && j < destinations.length(); j++) {
+                DocumentFile document = DocumentFile.fromSingleUri(context, Uri.parse(destinations.getString(j)));
+                if (document != null) completedAt = Math.max(completedAt, document.lastModified());
+            }
+            if (completedAt > 0) record.put("completedAt", completedAt);
+        }
+        return result;
+    }
+
+    private synchronized JSONArray snapshots() throws Exception {
+        JSONArray result = new JSONArray();
+        for (JSONObject record : records.values()) result.put(snapshot(record));
+        return result;
+    }
+
+    synchronized JSONArray clear(JSONArray ids) throws Exception {
+        JSONArray removed = new JSONArray();
+        for (int i = 0; i < ids.length(); i++) {
+            long id = ids.getLong(i);
+            JSONObject record = records.get(id);
+            if (record == null || ACTIVE.contains(record.optString("status")) || running.contains(id)) continue;
+            records.remove(id);
+            YtDlpFiles.deleteTree(new File(staging, Long.toString(id)));
+            removed.put(id);
+        }
+        save();
+        return removed;
+    }
+
+    Uri firstFile(long id) {
+        Set<String> paths = new LinkedHashSet<>();
+        synchronized (this) {
+            JSONObject record = records.get(id);
+            if (record == null) return null;
+            JSONArray media = record.optJSONArray("files");
+            for (int i = 0; media != null && i < media.length(); i++) {
+                paths.add(media.optJSONObject(i).optString("path"));
+            }
+            JSONArray destinations = record.optJSONArray("destinations");
+            for (int i = 0; destinations != null && i < destinations.length(); i++) paths.add(destinations.optString(i));
+        }
+        for (String path : paths) if (YtDlpFiles.exists(context, path)) return Uri.parse(path);
+        return null;
+    }
+
+    synchronized boolean remove(long id) throws Exception {
+        JSONObject record = records.get(id);
+        if (record == null || ACTIVE.contains(record.optString("status")) || running.contains(id)) return false;
+        JSONArray paths = record.getJSONArray("destinations");
+        for (int i = 0; i < paths.length(); i++) {
+            DocumentFile document = DocumentFile.fromSingleUri(context, Uri.parse(paths.getString(i)));
+            if (document != null && document.exists() && !document.delete()) return false;
+        }
+        clear(new JSONArray().put(id));
+        return true;
+    }
+
+    private JSONObject snapshot(JSONObject record) throws Exception {
+        JSONObject copy = new JSONObject(record.toString());
+        for (String key : asList("args", "folder", "lastProgress", "exports")) copy.remove(key);
+        return copy;
+    }
+
+    private void publish(JSONObject record) throws Exception {
+        for (Consumer<JSONObject> listener : listeners) listener.accept(snapshot(record));
+    }
+
+    private synchronized void save() {
+        FileOutputStream output = null;
+        try {
+            JSONObject saved = new JSONObject().put("counter", counter).put("paused", paused)
+                .put("configuration", configuration).put("concurrency", concurrency).put("bandwidth", bandwidth).put("records", new JSONArray(records.values()));
+            output = file.startWrite();
+            output.write(saved.toString().getBytes(StandardCharsets.UTF_8));
+            file.finishWrite(output);
+        } catch (Exception error) {
+            if (output != null) file.failWrite(output);
+            throw new IllegalStateException("Unable to save Android download history", error);
+        }
+    }
+}

@@ -1,0 +1,3253 @@
+# Optional AI-generated translations for keys missing from ../ko.yaml.
+Color Picker:
+  Hue: 색조
+  Opacity: 불투명도
+  Backdrop Blur: 배경 흐림
+  Hex Color: 16진수 색상
+  Apply Color: 적용
+  Reset Color: 초기화
+  Copy Color: 복사
+  Copy From Another Color: 다른 색상에서 복사
+  Color Copied: 색상을 복사했습니다
+  Invalid Color: 올바른 16진수 색상을 입력하세요
+  Clipboard Unavailable: 클립보드를 사용할 수 없습니다
+  Saturation and Brightness: 채도 및 밝기
+New Tab: 새 탭
+Maximize: 최대화
+Restore: 복원
+Close Tab: 탭 닫기
+App Menu:
+  About App: '{appName} 정보'
+  Services: 서비스
+  Hide App: '{appName} 가리기'
+  Hide Others: 기타 가리기
+  Show All: 모두 보기
+  Quit App: '{appName} 종료'
+  Reopen Closed Window: 닫은 창 다시 열기
+  Paste and Match Style: 붙여넣기 및 스타일 일치
+  View: 보기
+  Enter Inspect Element Mode: 요소 검사 모드 시작
+  GPU Internals: GPU 내부 정보 (chrome://gpu)
+  Navigate: 이동
+  Next Tab: 다음 탭
+  Previous Tab: 이전 탭
+  Help: 도움말
+Close Confirmation:
+  Background Sync Warning: 종료하면 백그라운드 구독 새로고침이 중지됩니다.
+  Hide Window: 창 숨기기
+  Title: OpenTubeX를 종료하시겠습니까?
+  Message: OpenTubeX를 종료하시겠습니까?
+  Quit: 종료
+  Never Ask Again: 다시 묻지 않기
+Close Window Confirmation:
+  Title: 창을 닫으시겠습니까?
+  Message: 이 창에 탭이 {count}개 있습니다. 창을 닫으시겠습니까?
+  Close Window: 창 닫기
+Confirmations:
+  Never Ask Again: 다시 묻지 않기
+  Settings Hint: 설정 → 일반 → 실행 전 확인…에서 이 확인을 다시 활성화할 수 있습니다
+Close Multiple Tabs Confirmation:
+  Title: 여러 탭을 닫으시겠습니까?
+  Message: 탭 {count}개를 닫습니다.
+  Close Tabs: 탭 {count}개 닫기
+Load Multiple Tabs Confirmation:
+  Title: 여러 탭을 불러오시겠습니까?
+  Message: 탭 {count}개를 불러옵니다.
+  Load Tabs: 탭 {count}개 불러오기
+Unload Multiple Tabs Confirmation:
+  Title: 여러 탭을 언로드하시겠습니까?
+  Message: 탭 {count}개를 언로드합니다.
+  Unload Tabs: 탭 {count}개 언로드
+Tabs Unloaded To Free Memory: 메모리를 확보하기 위해 최근에 사용하지 않은 탭 {count}개를 언로드했습니다
+Compact side navigation: 측면 탐색 메뉴 축소
+Expand side navigation: 측면 탐색 메뉴 펼치기
+Resize Tab Bar: 탭 표시줄 크기 조절
+Find in page: 페이지에서 찾기
+Previous match: 이전 일치 항목
+Next match: 다음 일치 항목
+Close find bar: 찾기 표시줄 닫기
+No matches: 일치하는 항목 없음
+Version {versionNumber} is now available.: 버전 {versionNumber}을(를) 사용할 수 있습니다.
+See changes and update: 변경 사항 확인 및 업데이트
+Dismiss: 닫기
+Update to {version}: '{version}(으)로 업데이트'
+Global:
+  Ambient Mode: 앰비언트 모드
+  Loading More: 더 불러오는 중
+  New: 신규
+  Show Blocked Item: 차단된 항목 표시
+Search Listing:
+  Label:
+    Members Only: 회원 전용
+    Possibly AI-generated: AI 생성 콘텐츠일 수 있음
+Search Filters:
+  Possible Age Restriction Hint: "YouTube에서 이 검색어에 연령 제한을 적용했을 수 있습니다."
+  Cookie Search Failed: "설정된 쿠키를 사용한 검색에 실패했습니다."
+  Showing results for: "{query}에 대한 결과 표시 중"
+  Search instead for: "대신 {query} 검색"
+  Including results for: "{query}에 대한 결과 포함"
+  Search only for: "{query}만 검색"
+  Did you mean: "{query}을(를) 찾으셨나요?"
+  Prioritize:
+    Prioritize: 우선순위
+    Popularity: 인기순
+  Clear Filters: 필터 지우기
+Stats:
+  Left of daily limit: "일일 한도 {limit} 중 {duration} 남음"
+  Daily limit reached: "일일 한도 {limit}에 도달함"
+  Replace old device: "이전 기기 교체"
+  Replacement explanation: "두 항목이 동일한 실제 기기에 속하는 경우에만 {device}을(를) 이 기기와 합치세요."
+  Overlapping days: "두 기록에 모두 있는 날짜 수: {count}"
+  Overlapping watch time: "겹치는 시청 시간"
+  Keep larger daily total: "더 큰 일일 합계 유지"
+  Larger total explanation: "중복된 기록에 적합합니다. 같은 날의 추가 시청이 누락될 수 있습니다."
+  Add daily totals: "일일 합계 더하기"
+  Add totals explanation: "별도의 기록에 적합합니다. 중복된 시청을 두 번 셀 수 있습니다."
+  Replacement preservation: "한 기록에만 있는 날짜는 유지됩니다. 원본 기록은 암호화된 동기화에 저장된 상태로 유지됩니다."
+  Combined watch time: "합쳐진 시청 시간"
+  Replacement changed: "시청 시간이 변경되었습니다. 이 미리보기를 닫고 다시 열어 새 합계를 확인하세요."
+  Replacement success: "기기 통계를 합쳤습니다"
+  All devices: 모든 기기
+  Stats: 통계
+  Watch time summary: 시청 시간 요약
+  Today: 오늘
+  This week: 이번 주
+  Total watch time: 총 시청 시간
+  Daily average: 일일 평균
+  So far today: 오늘 현재까지
+  Since: '{day} 이후'
+  All recorded time: 기록된 전체 기간
+  Per calendar day: 달력 날짜 기준
+  Day by day: 일별
+  Highest: '최고: {duration}'
+  Week by week: 주별
+  Last 14 days: 최근 14일
+  Last 8 weeks: 최근 8주
+  Daily chart aria: 최근 14일의 일별 시청 시간
+  Weekly chart aria: 최근 8주의 주별 시청 시간
+  No data: 동영상을 시청하면 여기에 시청 시간이 표시됩니다.
+  Estimate note: 이번 업데이트 이전의 시청 시간은 저장된 재생 진행률을 바탕으로 추정됩니다.
+  Adjust imported watch time: 가져온 시청 시간 조정
+  Imported watch time: 가져온 시청 시간
+  Imported watch time explanation: 평소 사용한 재생 속도를 선택하세요. 가져온 동영상의 재생 시간을 이 속도로 나누어 실제 시청 시간을 추정합니다.
+  Playback speed: 재생 속도
+  Channel speed note: 저장된 채널별 재생 속도가 있으면 해당 속도를 대신 사용합니다.
+  Apply playback speed: 재생 속도 적용
+  Imported watch time adjusted: 가져온 시청 시간을 조정했습니다
+  Reset statistics: 통계 초기화
+  Reset: 초기화
+  Reset confirmation: 모든 시청 통계를 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.
+  Reset success: 시청 통계를 초기화했습니다
+  Less than a minute: 1분 미만
+  Minutes: '{minutes}분'
+  Hours: '{hours}시간'
+  Hours and minutes: '{hours}시간 {minutes}분'
+Home Page:
+  Keep disabled and hide this section: "비활성화 상태를 유지하고 이 섹션 숨기기"
+  Familiar description: "이미 좋아하는 채널의 아직 보지 않은 동영상을 우선합니다."
+  Balanced description: "익숙한 채널과 관심사에 맞는 새로운 채널을 섞어 추천합니다."
+  Explore description: "관심사와 관련된 새로운 채널을 더 많이 추천합니다."
+  Turn off recommendations: 추천 끄기
+  Recommended for you: "맞춤 추천"
+  Recommendations description: "시청 기록을 바탕으로 기기에서 동영상의 순위를 매깁니다. 동영상을 찾기 위해 채널 ID와 주제 검색어가 선택한 백엔드로 전송됩니다."
+  Enable recommendations: "추천 활성화"
+  Recommendations need history: "추천을 받으려면 기록을 활성화한 상태에서 동영상을 몇 개 시청하세요."
+  No recommendations: "추천 동영상을 찾을 수 없습니다. 동영상을 더 시청한 후 새로고침해 보세요."
+  Recommendations unavailable: "추천을 불러오지 못했습니다. 나중에 다시 시도하세요."
+  More like this: "비슷한 동영상 더 보기"
+  Not interested: "관심 없음"
+  Hide this channel: "이 채널 숨기기"
+  Channel hidden: "{channel} 채널을 추천에서 숨겼습니다"
+  Reset recommendations: "추천 초기화"
+  Discovery: "새로운 발견"
+  Familiar: "익숙한 콘텐츠"
+  Balanced: "균형"
+  Explore: "탐색"
+  Related to: "{title} 관련"
+  More from: "{channel}의 다른 동영상"
+  Matches interest: "{topic}에 대한 관심과 일치"
+  Related discovery privacy: "관련 동영상을 찾기 위해 동영상 ID도 전송됩니다."
+  Home: 홈
+  Description: 중단한 부분부터 이어서 보고 최근 활동을 확인하세요.
+  Customize: 홈 맞춤 설정
+  Done: 완료
+  Customize description: 표시할 섹션을 선택하고 원하는 순서로 정렬하세요.
+  Continue watching: 이어서 시청하기
+  New since last visit: 마지막 방문 이후 새로운 항목
+  Watch queue: 시청 대기열
+  Recent playlists: 최근 재생목록
+  Recent downloads: 최근 다운로드
+  Upcoming reminders: 예정된 알림
+  Watch statistics: 시청 통계
+  View all: 모두 보기
+  Previous shelf page: "{section} 이전 페이지"
+  Next shelf page: "{section} 다음 페이지"
+  Shelf page status: "{section}, {total}페이지 중 {page}페이지."
+  Move section up: "{section} 위로 이동"
+  Move section down: "{section} 아래로 이동"
+  Section moved: "{section}: {total}개 중 {position}번째 위치로 이동했습니다."
+  Nothing here yet: 아직 아무것도 없습니다
+  Empty description: 시청을 시작한 동영상, 사용한 재생목록, 다운로드 및 알림이 여기에 표시됩니다.
+  All sections hidden: 모든 섹션이 숨겨져 있습니다
+  All sections hidden description: 홈을 맞춤 설정하여 섹션을 다시 표시하세요.
+Subscriptions:
+  Channel Errors:
+    Summary: "채널 {count}개를 새로고침할 수 없습니다."
+    Toast: "일부 구독 채널을 새로고침할 수 없습니다. 클릭하여 확인하세요."
+    Retry Channel: "{channel} 다시 시도"
+    Show All: "모두 보기"
+    Show Fewer: "간략히 보기"
+  Cache Load Error: 저장된 구독 피드를 불러올 수 없습니다.
+  New video from {channel}: "{channel}의 새 동영상"
+  New short from {channel}: "{channel}의 새 쇼츠"
+  '{channel} is live': "{channel}에서 라이브 방송 중"
+  New post from {channel}: "{channel}의 새 게시물"
+  Mark As Unseen: 보지 않음으로 표시
+  Copy Error Details: "기술 세부 정보 복사"
+  Never show {type} from this channel in feeds again: 이 채널의 {type} 콘텐츠를 피드에 다시 표시하지 않기
+  Refreshing Subscription Videos: 구독 동영상 새로 고치는 중
+  Refreshing Subscription Shorts: 구독 Shorts 새로 고치는 중
+  Refreshing Subscription Live Streams: 구독 실시간 스트림 새로 고치는 중
+  Refreshing Subscription Posts: 구독 게시물 새로 고치는 중
+  New Content: 새 콘텐츠
+  New Feed Refresh Warning Title: 모든 구독 피드를 새로 고치시겠습니까?
+  New Feed Refresh Warning: 구독 {count}개의 모든 콘텐츠 유형을 새로 고치면 시간이 오래 걸릴 수 있습니다. 계속하시겠습니까?
+  New Since Last Refresh: 마지막 새로 고침 이후 신규 항목
+  Mark As Seen: 확인함으로 표시
+  Mark All as Seen: 모두 확인함으로 표시
+  No New Content: 새 콘텐츠가 없습니다.
+  New Content Tabs: 새 콘텐츠 탭
+  Show Tabbed View: 탭 보기 표시
+  Show Combined View: 통합 보기 표시
+  Newest First: 최신순
+  Oldest First: 오래된순
+  Posts:
+    RSS Message: YouTube는 게시물용 RSS 피드를 제공하지 않습니다. 게시물을 보려면 "{rssSetting}" 설정을 끄거나 이 탭을 숨기려면 "{hideSetting}" 설정을 켜세요.
+  RSS Feeds:
+    Refreshing: RSS 피드 새로고침 중
+    Tab: RSS
+    Followed Feeds: 팔로우 중인 RSS 피드
+    Add Feed: 피드 추가
+    Feed URL: RSS 또는 Atom 피드 URL
+    Remove Feed: '{feed} 삭제'
+    Invalid Feed URL: http:// 또는 https://로 시작하는 웹 주소를 입력하세요.
+    Feed Already Followed: 이미 이 피드를 팔로우하고 있습니다.
+    Feed Could Not Be Loaded: 피드를 불러올 수 없습니다. 주소가 RSS 또는 Atom 피드를 가리키는지 확인하세요.
+    Feed Requires Browser Check: 이 사이트는 OpenTubeX가 완료할 수 없는 브라우저 확인을 요구합니다. 이 피드에는 다른 주소나 다른 RSSHub 인스턴스를 사용해 보세요.
+    Refresh Errors: 피드 {count}개를 새로 고치지 못했습니다.
+    Description: RSS 또는 Atom 피드를 추가하여 다른 플랫폼의 크리에이터를 팔로우하세요. {rssHub} 인스턴스는 Twitch 등 많은 사이트의 피드를 제공합니다.
+    Empty Items: 현재 피드에 항목이 없습니다.
+    No Feeds: 아직 팔로우 중인 RSS 피드가 없습니다.
+    RSSHub:
+      Browse: RSSHub 둘러보기
+      Title: RSSHub에서 피드 추가
+      Description: RSSHub 인스턴스, 서비스, 팔로우할 대상을 선택하세요. 피드 주소는 자동으로 만들어집니다.
+      Instance: RSSHub 인스턴스
+      Service: 서비스
+      Search Services: 서비스 검색
+      Loading Services: 서비스를 불러오는 중…
+      Services Could Not Be Loaded: 이 인스턴스에서 서비스 목록을 받지 못했습니다. 주소를 확인하거나 다른 인스턴스를 선택하세요.
+      Feed Type: 피드 유형
+      Requires Configuration: 이 피드는 인스턴스에서 추가 설정이 필요하므로 공개 인스턴스에서는 작동하지 않을 수 있습니다.
+      Optional Parameter: '{parameter}(선택 사항)'
+      Not Set: 설정 안 함
+    Retry Feed: '{feed} 다시 시도'
+    Reloading Feed: '{feed} 다시 불러오는 중'
+  Platforms:
+    Tab: 플랫폼
+    Platform: 플랫폼
+    All Platforms: 모든 플랫폼
+    Followed Channels: 다른 플랫폼에서 팔로우한 채널
+    Description: Twitch, SoundCloud, PeerTube, Rumble, Odysee의 채널을 팔로우하면 구독의 플랫폼 탭에서 업로드를 볼 수 있습니다. 검색으로 채널을 찾거나 채널 페이지 주소로 추가하세요. 미디어는 yt-dlp로 재생됩니다.
+    Add Channel: 채널 추가
+    Channel URL: 채널 주소
+    Invalid Channel: Twitch, SoundCloud, PeerTube, Rumble 또는 Odysee의 채널 페이지 주소를 입력하세요.
+    Channel Not Found: 이 주소에 채널이 없습니다.
+    Channel Already Followed: 이미 이 채널을 팔로우하고 있습니다.
+    Channel Could Not Be Loaded: 채널을 불러올 수 없습니다.
+    No Channels: 아직 다른 플랫폼에서 팔로우한 채널이 없습니다.
+    Unfollow Channel: '{channel} 팔로우 취소'
+    Go To Channel: '{channel} 채널로 이동'
+    Follow: 팔로우
+    Following: 팔로잉
+    Clips: 클립
+    Refresh Errors: 채널 {count}개를 새로 고치지 못했습니다.
+    Content Tabs: 플랫폼 콘텐츠 탭
+Trending:
+  Music: 음악
+  Load Error: 인기 급상승 콘텐츠를 불러올 수 없습니다.
+  Unsupported Backend: 인기 급상승 콘텐츠에는 로컬 API가 필요합니다. 로컬 API를 선택하거나 백엔드 대체 사용을 활성화하세요.
+Most Popular Feed Empty: 이 Invidious 인스턴스의 인기 콘텐츠 피드가 비어 있습니다.
+Most Popular Load Error: "인기 콘텐츠 피드를 불러올 수 없습니다."
+Feed:
+  Cancel Refresh: 새로 고침 취소
+  Next Auto Refresh: '다음 자동 새로 고침: {date}'
+User Playlists:
+  Refresh Saved Playlists: '저장한 재생목록 새로 고침'
+  Saved Playlists Refresh Failed: '일부 저장한 재생목록을 새로 고치지 못했습니다.'
+  Save: "저장"
+  Edit: "편집"
+  This playlist is private or does not exist.: "이 재생목록은 비공개이거나 존재하지 않습니다."
+  Pin to Navigation: "탐색 메뉴에 고정"
+  Unpin from Navigation: "탐색 메뉴에서 고정 해제"
+  Pin to Top: "맨 위에 고정"
+  Unpin from Top: "맨 위 고정 해제"
+  Pinned to Top: "맨 위에 고정됨"
+  Reorder Hint: 드래그하거나 화살표 키를 사용해 순서 변경
+  Add new videos to the top (custom order): "새 동영상을 맨 위에 추가 (사용자 지정 순서)"
+  Shuffle videos by default: "기본적으로 동영상 셔플 재생"
+  Remove videos once watched: "시청한 동영상 삭제"
+  Remove videos once watched Tooltip: "이 재생목록을 재생하면 각 동영상이 개인정보 보호 설정에서 지정한 시청 비율 기준에 도달하는 즉시 재생목록에서 삭제됩니다."
+  Repair Playlists: 재생목록 복구
+  Repair Description: YouTube Takeout ZIP을 가져온 후 누락된 동영상 정보를 복원합니다. 재생목록 순서는 변경되지 않습니다.
+  Remove Unavailable Videos: "사용할 수 없는 동영상 삭제"
+  Remove Unavailable Videos Confirmation: "사용할 수 없는 동영상을 삭제하시겠습니까? 발견: {count}. 확인할 수 없음: {uncertain}. 확인하지 않은 동영상은 보관됩니다."
+  Add Missing Videos: "원본 재생목록에서 누락된 동영상 추가"
+  Source Playlist: "원본 재생목록"
+  Save Playlist: "재생목록 저장"
+  Remove Saved Playlist: "저장한 재생목록 삭제"
+  Load More Playlists: 재생목록 더 불러오기
+  Save to: 저장 위치…
+  Add to Favorites: '{playlistName}에 추가'
+  Remove from Favorites: '{playlistName}에서 제거'
+  Move Video Up: 동영상 위로 이동
+  Move Video Down: 동영상 아래로 이동
+  Move Video to the Top: 동영상을 맨 위로 이동
+  Move Video to the Bottom: 동영상을 맨 아래로 이동
+  Remove from Playlist: 재생목록에서 제거
+  Playlist Name: 재생목록 이름
+  Playlist Description: 재생목록 설명
+  Quick Bookmark Icon: 빠른 북마크 아이콘
+  Custom Emoji: 사용자 지정 이모지
+  Choose Image: 이미지 선택
+  Use Bookmark Icon: 북마크 아이콘 사용
+  Save Changes: 변경 사항 저장
+  Cancel: 취소
+  Edit Playlist Info: 재생목록 정보 편집
+  Copy Playlist: 재생목록 복사
+  Remove Duplicate Videos: 중복 동영상 제거
+  Remove Watched Videos: 시청한 동영상 제거
+  Enable Quick Bookmark With This Playlist: 이 재생목록을 빠른 북마크로 사용
+  Quick Bookmark Enabled: 빠른 북마크 활성화됨
+  Export Playlist: 이 재생목록 내보내기
+  Export list of URLs: URL 목록 내보내기
+  The playlist has been successfully exported: 재생목록을 내보냈습니다
+  Are you sure you want to remove {playlistItemCount} duplicate videos from this playlist? This cannot be undone: 이 재생목록에서 중복 동영상 {playlistItemCount}개를 제거하시겠습니까? 이 작업은 되돌릴 수 없습니다.
+  Are you sure you want to remove {playlistItemCount} watched videos from this playlist? This cannot be undone: 이 재생목록에서 시청한 동영상 {playlistItemCount}개를 제거하시겠습니까? 이 작업은 되돌릴 수 없습니다.
+  Delete Playlist: 재생목록 삭제
+  Cannot delete the quick bookmark target playlist.: 빠른 북마크 대상으로 지정된 재생목록은 삭제할 수 없습니다.
+  Are you sure you want to delete this playlist? This cannot be undone: 이 재생목록을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
+  TotalTimePlaylist: '총 시간: {duration}'
+  Sort By:
+    NameAscending: A-Z
+    NameDescending: Z-A
+    LatestCreatedFirst: 만든 날짜 (최신순)
+    EarliestCreatedFirst: 만든 날짜 (오래된순)
+    LatestUpdatedFirst: 수정한 날짜 (최신순)
+    EarliestUpdatedFirst: 수정한 날짜 (오래된순)
+    LatestPlayedFirst: 재생한 날짜 (최신순)
+    EarliestPlayedFirst: 재생한 날짜 (오래된순)
+  SinglePlaylistView:
+    Search for Videos: 동영상 검색
+    Retry: 다시 시도
+    This playlist could not be loaded.: 이 재생목록을 불러올 수 없습니다.
+    More videos could not be loaded.: 동영상을 더 불러올 수 없습니다.
+    Toast:
+      This video cannot be moved up.: 이 동영상은 위로 이동할 수 없습니다.
+      This video cannot be moved down.: 이 동영상은 아래로 이동할 수 없습니다.
+      Video has been removed: 동영상을 제거했습니다
+      Video has been removed. Click here to undo.: 동영상을 제거했습니다. 여기를 클릭하면 실행 취소합니다.
+      There was a problem with removing this video: 동영상을 제거하는 중 문제가 발생했습니다
+      This playlist is already being used for quick bookmark.: 이 재생목록은 이미 빠른 북마크로 사용 중입니다.
+      This playlist is now used for quick bookmark: 이제 이 재생목록을 빠른 북마크로 사용합니다
+      This playlist is now used for quick bookmark instead of {oldPlaylistName}. Click here to undo: 이제 {oldPlaylistName} 대신 이 재생목록을 빠른 북마크로 사용합니다. 여기를 클릭하면 실행 취소합니다
+      Reverted to use {oldPlaylistName} for quick bookmark: 빠른 북마크에 {oldPlaylistName}을(를) 사용하도록 되돌렸습니다
+      Some videos in the playlist are not loaded yet. Click here to copy anyway.: 재생목록의 일부 동영상을 아직 불러오지 않았습니다. 그래도 복사하려면 여기를 클릭하세요.
+      Playlist name cannot be empty. Please input a name.: 재생목록 이름을 입력하세요.
+      Playlist has been updated.: 재생목록을 업데이트했습니다.
+      There was an issue with updating this playlist.: 재생목록을 업데이트하는 중 문제가 발생했습니다.
+      '{videoCount} video(s) have been removed': '동영상 {videoCount}개를 제거했습니다'
+      There were no videos to remove.: 제거할 동영상이 없습니다.
+      This playlist is protected and cannot be removed.: 보호된 재생목록은 제거할 수 없습니다.
+      Playlist {playlistName} has been deleted.: '{playlistName} 재생목록을 삭제했습니다.'
+      This playlist does not exist: 이 재생목록은 존재하지 않습니다
+      This playlist has a video with a duration error: 이 재생목록에 재생 시간이 없는 동영상이 하나 이상 있습니다. 정렬할 때 해당 동영상의 재생 시간을 0으로 처리합니다.
+  AddVideoPrompt:
+    Select a playlist to add your N videos to: 동영상 {videoCount}개를 추가할 재생목록을 선택하세요
+    N playlists selected: '{playlistCount}개 선택됨'
+    Search in Playlists: 재생목록에서 검색
+    Allow Adding Duplicate Video(s): 중복 동영상 추가 허용
+    Save: 저장
+    Added {count} Times: '{count}번 추가됨'
+    '{videoCount}/{totalVideoCount} Videos Will Be Added': '동영상 {totalVideoCount}개 중 {videoCount}개가 추가됩니다'
+    '{videoCount}/{totalVideoCount} Videos Already Added': '동영상 {totalVideoCount}개 중 {videoCount}개가 이미 추가되었습니다'
+    Toast:
+      You haven't selected any playlist yet.: 아직 재생목록을 선택하지 않았습니다.
+      Video(s) added to {playlistCount} playlists: 재생목록 {playlistCount}개에 동영상을 추가했습니다
+    And N more videos: '외 동영상 {count}개'
+  CreatePlaylistPrompt:
+    New Playlist Name: 새 재생목록 이름
+    Create: 만들기
+    Toast:
+      There is already a playlist with this name. Please pick a different name.: 같은 이름의 재생목록이 이미 있습니다. 다른 이름을 선택하세요.
+      Playlist {playlistName} has been successfully created.: '{playlistName} 재생목록을 만들었습니다.'
+      There was an issue with creating the playlist.: 재생목록을 만드는 중 문제가 발생했습니다.
+    Create on YouTube: "YouTube에도 만들기"
+  Playlist Thumbnail: "재생목록 썸네일"
+  Restore Default Thumbnail: "기본 썸네일 복원"
+  Move Up: 위로
+  Move Down: 아래로
+  Remove: 제거
+  Background Tasks:
+    Loading videos from {playlistName}: '{playlistName}에서 동영상을 불러오는 중'
+    Adding missing videos to {playlistName}: '{playlistName}에 누락된 동영상을 추가하는 중'
+    Checking {playlistName} for unavailable videos: '{playlistName}에서 사용할 수 없는 동영상을 확인하는 중 ({checked}/{total})'
+  Synced with YouTube: "YouTube와 동기화됨"
+  Delete YouTube Playlist Confirmation: "이 재생 목록을 여기와 YouTube에서 모두 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다."
+History:
+  From Date: '시작일'
+  To Date: '종료일'
+  Channel Filter: '채널'
+  All Channels: '모든 채널'
+  Clear Filters: '필터 초기화'
+  Invalid Date Range: '시작일은 종료일보다 이전이거나 같아야 합니다.'
+  Empty Filter Message: '기록에 이 필터와 일치하는 동영상이 없습니다.'
+  Repair Compact: "복구"
+  Mark All Watched Compact: "모두 시청 완료로"
+  Repair Use Cookies: "설정된 yt-dlp 쿠키 사용"
+  Repair Cookies Hint: "500개가 넘는 동영상을 확인해야 합니다. 요청 제한 위험을 줄이려면 yt-dlp 설정에서 쿠키를 구성하고 여기서 활성화하세요."
+  Repair Description: "기록을 가져온 후 또는 동영상 정보가 누락되거나 LIVE 표시가 잘못된 경우 사용하세요."
+  Repair Details: "누락된 제목, 채널, 게시 날짜를 채우고 재생 시간과 LIVE 표시를 확인합니다. 시청 진행 상황과 시청 완료 상태는 변경되지 않습니다."
+  Repair Notice: "기록이 많으면 시간이 걸릴 수 있습니다. 실패한 요청은 자동으로 다시 시도합니다. 삭제되거나 비공개인 동영상 정보는 불완전할 수 있습니다."
+  Start Repair: "복구 시작"
+  Repair Checking: "동영상 정보 확인 중"
+  Repair Waiting: "YouTube를 기다리는 중입니다. 복구가 자동으로 재개됩니다."
+  Repair Retrying: "실패한 요청 재시도 중"
+  Repair Finished: "복구 완료"
+  Repair Stopped: "복구 중지됨"
+  Repair: "기록 복구"
+  Repair Progress: "확인 {checked}/{total} · 복구 {repaired} · 실패 {failed}"
+  Case Sensitive Search: 대소문자 구분 검색
+  Mark All As Watched: 모두 시청함으로 표시
+  Mark All As Watched Confirmation: 시청 기록의 모든 동영상을 시청함으로 표시하시겠습니까?
+  All History Marked as Watched: 시청 기록의 모든 동영상을 시청함으로 표시했습니다
+  DateOldestHistory: 시청 날짜 (오래된순)
+  DateNewestHistory: 시청 날짜 (최신순)
+  Select History Age: 삭제할 기록의 최소 경과 기간을 선택하세요.
+  Delete Entries Older Than: 다음보다 오래된 기록 삭제
+  Number of Days: 일수
+  History Cleanup Warning: 조건에 맞는 시청 기록을 영구적으로 삭제합니다.
+  1 Day: 1일
+  1 Week: 1주
+  1 Month: 1개월
+  3 Months: 3개월
+  1 Year: 1년
+  All Time: 전체 기간
+  Custom: 사용자 지정
+  History Older Than Days Removed: '{days}일보다 오래된 시청 기록을 제거했습니다'
+Settings:
+  Experimental Badge: 실험적
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube 계정"
+    Unofficial App Warning: "OpenTubeX는 YouTube 공식 앱이 아닙니다. 로그인하면 여기서 하는 활동이 Google 계정에 연결되며, Google은 비공식 앱을 사용하는 계정을 제한하거나 정지할 수 있습니다. 잃어도 괜찮은 계정으로만 로그인하세요."
+    Sign In Explanation: "OpenTubeX는 TV 앱처럼 로그인합니다. Google 웹사이트에서 로그인을 승인하므로 OpenTubeX는 비밀번호를 볼 수 없습니다. 로그인 정보는 이 기기에만 저장되며 동기화되거나 백업되지 않습니다."
+    Sign In: "로그인"
+    Sign In Anyway: "그래도 로그인"
+    Sign Out: "로그아웃"
+    Getting Sign-In Code: "로그인 코드를 가져오는 중"
+    Sign In Instructions: "로그인 페이지를 열고 Google 계정을 선택하세요. 코드는 자동으로 입력됩니다."
+    Other Device Instructions: "다른 기기에서 이 주소로 이동하여 코드를 입력하세요:"
+    YouTube Channel: "YouTube 채널"
+    Using Channel: "이제 {name}(으)로 YouTube를 사용합니다"
+    Switch Channel Failed: "YouTube 채널을 전환할 수 없습니다: {error}"
+    Open Sign-In Page: "로그인 페이지 열기"
+    Copy Code: "코드 복사"
+    Code Copied: "코드를 복사했습니다"
+    Waiting for Approval: "로그인 승인을 기다리는 중"
+    Sign-In Denied: "로그인이 거부되었습니다."
+    Sign-In Code Expired: "코드가 만료되었습니다. 다시 시도하여 새 코드를 받으세요."
+    Sign-In Failed: "로그인할 수 없습니다: {error}"
+    Signed In As: "{name}(으)로 YouTube에 로그인했습니다"
+    Signed Out: "YouTube에서 로그아웃했습니다"
+    Sign Out Failed: "로그아웃할 수 없습니다: {error}"
+    Revoke Failed: "YouTube에서 로그아웃했지만 Google에서 로그인 종료를 확인하지 않았습니다. Google 계정의 서드 파티 연결에서 삭제할 수 있습니다."
+    Signed out by YouTube: "YouTube에서 로그인을 종료했습니다. 계정을 계속 사용하려면 설정에서 다시 로그인하세요."
+    Add to YouTube Watch History: "시청한 동영상을 YouTube 기록에 추가"
+    Sync Subscriptions: "YouTube와 구독 동기화"
+    Sync Playlists: "YouTube와 재생 목록 동기화"
+    Sync Now: "지금 동기화"
+    Synced: "YouTube와 동기화했습니다"
+    Sync Failed: "YouTube와 동기화할 수 없습니다: {error}"
+  Diagnostics:
+    Diagnostics: 진단
+    Description: 진단 로그가 켜져 있는 동안 OpenTubeX는 최근 로그 메시지를 메모리에 보관하여 버그 보고서에 첨부할 수 있게 합니다. 스스로 저장하거나 전송하지 않으며, 로그를 끄면 삭제됩니다. 보고서에는 쿠키, 토큰, IP 주소, URL 매개변수가 포함되지 않지만 재생한 동영상의 ID가 포함될 수 있으므로 공유하기 전에 보고서를 확인하세요.
+    Enable Logging: 진단 로그 사용
+    Copy Report: 보고서 복사
+    Save Report: 보고서 저장
+    Clear Log: 로그 지우기
+    Report Copied: 진단 보고서를 복사했습니다
+    Report Saved: 진단 보고서를 저장했습니다
+    Report File: 진단 보고서
+    Save Failed: 진단 보고서를 저장할 수 없습니다
+    Log Cleared Message: 진단 로그를 지웠습니다
+  Tab Unloading:
+    Automatically unload tabs: "자동으로 탭 언로드"
+    Memory threshold: "메모리 임계값"
+    Tabs to unload: "언로드할 탭 비율"
+    Automatic unloading help: "가장 오래된 백그라운드 탭을 언로드하여 메모리를 확보합니다. 활성 탭과 재생 중인 탭은 로드된 상태로 유지됩니다."
+    Memory threshold help: "시스템 전체 RAM이 아닌 렌더러 메모리 한도에 대한 비율입니다."
+  Password Settings:
+    Failed to Save Password: "비밀번호를 저장하지 못했습니다."
+    Confirm Password: "비밀번호 확인"
+    Passwords Do Not Match: "비밀번호가 일치하지 않습니다."
+  Navigation and Controls: "탐색 및 컨트롤"
+  Control Bar:
+    Title: "컨트롤 바"
+    Customize: "컨트롤 바 사용자 지정"
+    Hidden: "숨김"
+    Empty: "컨트롤 없음"
+    Move to Control Bar: "{control}을(를) 컨트롤 바로 이동"
+    Move to Player Menu: "{control}을(를) 플레이어 메뉴로 이동"
+    Hide: "{control} 숨기기"
+  Fullscreen Actions:
+    Recommended Videos: "추천 동영상"
+    Title: "전체 화면 작업"
+    Customize: "전체 화면 작업 사용자 지정"
+    Add Action: "작업 추가"
+    Empty: "선택된 전체 화면 작업 없음"
+    Quick Bookmark: "빠른 북마크"
+    Availability Hint: "작업은 해당하는 동영상에서만 표시됩니다."
+    Disabled: "(사용 안 함)"
+  Quick Settings:
+    Quick Settings: 빠른 설정
+    Customize Quick Settings: 빠른 설정 맞춤설정
+    Add Setting: 설정 추가
+    Appearance: 모양
+    Playback: 재생
+    Content: 콘텐츠
+    Language and Region: 언어 및 지역
+    All Settings: 모든 설정
+    Profile Selector Hint: 프로필 아이콘을 마우스 오른쪽 버튼으로 클릭해도 프로필을 전환할 수 있습니다
+    Profile Selector Touch Hint: 프로필 아이콘을 길게 눌러도 프로필을 전환할 수 있습니다
+  Categories:
+    General Description: 언어, 시작, 탭 및 번역
+    Appearance: 모양
+    Appearance Description: 테마, 레이아웃, 탐색 및 동영상 목록
+    Content appearance: 동영상 목록 및 썸네일
+    Layout: 레이아웃
+    Playback Description: 플레이어 기본값, 자막 및 채널별 설정
+    Subscriptions Description: 피드 새로 고침, 새 동영상 알림 및 RSS 피드
+    Downloads Description: 다운로드 폴더, 템플릿 및 자동 다운로드
+    Focus: 집중
+    Focus Description: 숨긴 콘텐츠, 시청 제한, 알림 및 자녀 보호
+    Add-ons: 부가 기능
+    Add-ons Description: SponsorBlock, DeArrow, 싫어요, AiSList 및 음성 번역
+    Privacy Description: 기록, 검색 제안, 링크 및 앱 비밀번호
+    Data And Storage Description: 백업, 가져오기 및 내보내기, 디스크 사용량 및 정리
+    Sync Description: 동기화 서버 계정, 기기 페어링 및 동기화된 데이터
+    Advanced: 고급
+    Advanced Description: 백엔드, 버퍼링, 외부 도구, 프록시 및 진단
+    Alternative providers: 동영상 및 메타데이터 제공자
+  Highlight Changed Settings: 기본값에서 변경된 설정 강조
+  Reset Setting to Default: 이 설정을 기본값으로 초기화
+  Performance Impact:
+    Show Performance Impact: 성능 영향 표시
+    Moderate: 보통 수준의 영향
+    High: 큰 영향
+    Description: 이 설정은 {resources} 사용량을 늘릴 수 있습니다
+    Resources:
+      CPU: CPU
+      GPU: GPU
+      Memory: 메모리
+      Network: 네트워크
+      Disk: 디스크
+  Return to Settings Menu: 설정 메뉴로 돌아가기
+  General Settings:
+    Built-in Streams:
+      Built-in Streams: "내장 스트림"
+      Automatic: "자동"
+      SABR Only: "SABR만"
+    Link Underlines:
+      Link Underlines: "링크 밑줄"
+      On Hover: "마우스를 올리면 링크에 밑줄 표시"
+      Never: "링크에 밑줄 표시 안 함"
+      Always: "항상 링크에 밑줄 표시"
+    Title Lines:
+      Title Lines: "제목 줄 수"
+      Unlimited: "무제한"
+    Close Window With Last Tab: '마지막 탭을 닫으면 창 닫기'
+    Preferred Video Codec: 선호하는 동영상 코덱
+    Always Use Backup Media Server: "항상 백업 미디어 서버 사용"
+    Automatically switch stream extraction methods: "스트림 추출 방식 자동 전환"
+    Enable Tabs: "탭 활성화"
+    Thumbnail Swipe Gestures:
+      Left: 썸네일에서 왼쪽으로 스와이프
+      Right: 썸네일에서 오른쪽으로 스와이프
+      Description: 동영상 썸네일을 가로로 스와이프한 후 손을 떼면 선택한 작업이 실행됩니다.
+    Data Saver Thumbnails: "데이터 절약 썸네일"
+    Use tray icon: "트레이 아이콘 사용"
+    Close to system tray: "닫을 때 시스템 트레이로 보내기"
+    Tray required for background refresh: "백그라운드 구독 새로고침이 활성화된 동안에는 트레이 아이콘이 필요합니다."
+    Show Video Menu Button: 동영상 메뉴 버튼 표시
+    Swipe to refresh: 스와이프하여 새로고침
+    Blur Thumbnails: 썸네일 흐리게 표시
+    Navigation:
+      Always Show Navigation Bar: 탐색 막대가 하단에 있을 때 항상 표시
+      Compact Tab Labels: 탐색 막대가 하단에 있을 때 간소화
+      Show Active Subscriptions: 사이드바에 활성 구독 표시
+      Navigation: 탐색
+      Customize Navigation: 탐색 맞춤 설정
+      Add Item: 항목 추가
+    Date Format: 날짜 형식
+    Time Format: 시간 형식
+    Language Default: 언어 기본값
+    Update Relative Timestamps: 상대 시간 표시 계속 업데이트
+    Stream Extraction Method:
+      Stream Extraction Method: 스트림 추출 방법
+      yt-dlp: yt-dlp
+      Built-in: 내장
+    Confirm Before: 실행 전 확인…
+    Confirmation Options:
+      Closing App: OpenTubeX 종료
+      Closing Window: 탭이 여러 개인 창 닫기
+      Closing Tabs: 여러 탭 닫기
+      Loading Tabs: 여러 탭 불러오기
+      Unloading Tabs: 여러 탭 언로드
+      Refreshing All Feeds: 많은 구독 새로 고침
+    Open Deep Links In New Window: OpenTubeX로 전달된 URL을 새 창에서 열기
+    Minimize to system tray: 시스템 트레이로 최소화
+    Remember Tab Navigation History: 탭 탐색 기록 저장
+    Auto Load Next Page:
+      Label: 다음 페이지 자동 불러오기
+      Lists Tooltip: 피드, 검색 결과 및 기타 목록의 추가 페이지를 자동으로 불러옵니다.
+    New Tab Position:
+      New Tab Position: 새 탭 위치
+      At the end: 끝
+      After current tab: 현재 탭 뒤
+      After current tab in opened order: 현재 탭 뒤, 연 순서대로
+    Tab Close Focus:
+      Last active tab: "마지막 활성 탭"
+      Next tab in tab order: "탭 순서상 다음 탭"
+      Previous tab in tab order: "탭 순서상 이전 탭"
+      Tab Close Focus: 활성 탭을 닫은 후
+    Startup Behavior:
+      Startup Behavior: 시작할 때
+      Load all tabs: 모든 탭 불러오기
+      Load previously loaded tabs: 이전에 불러온 탭 불러오기
+      Load last active tab: 마지막 활성 탭 불러오기
+      Start with an empty session: 빈 세션으로 시작
+      Load landing page, keep other tabs unloaded: 시작 페이지를 로드하고 다른 탭은 로드하지 않은 상태로 유지
+    Use AI Translation Completions: 누락된 번역을 AI 생성 번역으로 채우기
+    Reduced Motion:
+      Reduced Motion: 모션 줄이기
+      System: 시스템 설정
+      Force On: 강제로 켜기
+      Force Off: 강제로 끄기
+    Comment Translation:
+      Title: 댓글 번역
+      Enable: 댓글 번역 활성화
+      Never Translate: 다음 언어의 댓글은 번역하지 않기
+      Choose Language: 언어 선택
+      Description: 앱 언어로 작성된 댓글은 이미 제외됩니다. 읽을 수 있는 다른 언어를 추가하세요.
+      Remove Language: '{language} 댓글 다시 번역'
+    Avoid translation:
+      Avoid translation: 번역되지 않은 동영상 텍스트 우선 사용
+      Disabled: 사용 안 함
+      Watch Only: 동영상 UI만
+      Entire App: 앱 전체
+    Playlist View Type:
+      Playlist View Type: 재생목록 보기 형식
+    Thumbnail Preference:
+      Hidden: 숨김
+      Blur: 흐리게
+    Show Thumbnail Previews: 썸네일 미리보기 표시
+    Extra Thumbnail Action Button:
+      Extra Thumbnail Action Button: 추가 썸네일 작업 버튼
+      None: 없음
+      Mark as Watched: 시청함으로 표시
+      Copy YouTube Link: YouTube 링크 복사
+      Open in YouTube: YouTube에서 열기
+    Mobile Layout:
+      Mobile Layout: '모바일 레이아웃'
+      Automatic: '자동'
+      Phone: '휴대전화'
+      Tablet: '태블릿'
+    Video View Type:
+      Full Width: 전체 너비
+    Grid Columns:
+      Grid Columns: 그리드 열 수
+      Playlist Grid Columns: 재생목록 그리드 열 수
+      Auto: 자동
+    Preferred API Backend:
+      Yattee Server: Yattee 서버
+    Yattee Server:
+      Server URL: Yattee 서버 URL
+      Username: 사용자 이름
+      Password: 비밀번호
+      Proxy Videos: Yattee 서버를 통해 동영상 프록시
+      Test Connection: 연결 테스트
+      Testing: 연결 테스트 중…
+      Connected: Yattee Server {version}에 연결됨
+      Errors:
+        Invalid URL: https:// 또는 http://로 시작하는 서버 URL을 입력하세요.
+        Unreachable: 서버에 연결할 수 없습니다. URL이 올바른지, 서버가 실행 중인지 확인하세요.
+        Media not allowed: '연결되었지만 서버가 이 앱의 동영상 로드를 허용하지 않습니다. 서버 환경 변수에서 CORS_ORIGINS={origins} 값을 설정하세요.'
+        Not a Yattee server: 서버가 응답했지만 Yattee 서버가 아닙니다.
+        Credentials required: 이 서버는 사용자 이름과 비밀번호가 필요합니다.
+        Invalid credentials: 서버가 사용자 이름 또는 비밀번호를 거부했습니다.
+        Rate limited: 로그인 실패 횟수가 너무 많아 서버가 로그인을 차단하고 있습니다. 나중에 다시 시도하세요.
+        Server error: 서버에서 오류를 반환했습니다(HTTP {status}).
+    Notifications:
+      Notifications: 알림
+      System and In-App: 시스템 및 앱 내
+      System Only: 시스템만
+      Off: 끔
+    Auto Load Comments:
+      Label: 댓글 자동 불러오기
+      Tooltip: 페이지를 열 때 댓글을 불러오고 스크롤하면 더 많은 댓글을 불러옵니다.
+    Haptic Feedback: 햅틱 피드백
+    Ignore System Haptics Setting: 시스템 햅틱 설정 무시
+  Context Menu Search Settings:
+    Context Menu Search Settings: 상황에 맞는 메뉴 검색
+    Description: 선택한 텍스트를 마우스 오른쪽 버튼으로 클릭할 때 표시할 검색 엔진을 선택하세요. 검색 결과는 기본 브라우저에서 열립니다.
+    Icon Hint: 검색 엔진을 활성화하면 파비콘을 불러오기 위해 해당 웹사이트에 연결합니다.
+    Engine Name: 검색 엔진 이름
+    Search URL: 검색 URL
+    URL Hint: URL에서 인코딩된 선택 텍스트가 들어갈 위치에 %s을(를) 사용하세요.
+    Add Custom Engine: 사용자 지정 검색 엔진 추가
+    Add Engine: 검색 엔진 추가
+    Remove Engine: '{engine} 제거'
+    Invalid Engine: 이름과 %s을(를) 포함하는 올바른 HTTP 또는 HTTPS 검색 URL을 입력하세요.
+    Engine Limit: 사용자 지정 검색 엔진은 최대 {count}개까지 추가할 수 있습니다.
+  Theme Settings:
+    Theme and Colors: "테마 및 색상"
+    Font Size: 글꼴 크기
+    Sections:
+      Interface: "인터페이스"
+      Side Bar and Header: "사이드바 및 헤더"
+      Tabs: "탭"
+      Player: "플레이어"
+      Scrolling: "스크롤"
+      Notifications: "알림"
+    Only Show Important Notifications: 중요한 알림만 표시
+    Visible Search Suggestions: "표시할 검색 추천 수"
+    Material Accent Color: "Material 강조 색상"
+    Tally Accent Color: "Tally 강조 색상"
+    Material Wallpaper Colors: "배경화면 색상"
+    Material System Accent Color: "시스템 강조 색상"
+    Tab Loading Indicator:
+      Tab Loading Indicator: 탭 로딩 표시
+      Bar: 막대
+      Dot: 점 (클래식)
+    Compact Settings Categories: "설정 카테고리 간결하게 표시"
+    Playlist Thumbnail Size: "재생목록 썸네일 크기"
+    Compact Mobile Mini Player: "간결한 모바일 미니 플레이어"
+    Always Show Mobile Search Bar: "모바일 검색창 항상 표시"
+    Frosted Glass Player UI: "반투명 유리 효과 플레이어 UI"
+    Move Downloads to App Header: 다운로드를 앱 헤더로 이동
+    Move Settings to App Header: 설정을 앱 헤더로 이동
+    Hide Side Bar on Watch Pages: 시청 페이지에서 사이드바 숨기기
+    UI Roundness: UI 둥근 정도
+    Scrollbar Width: 스크롤바 너비
+    Scroll Speed: 스크롤 속도
+    Animation Speed: 애니메이션 속도
+    Thumbnail Size: 썸네일 크기
+    Show Tab Icons: 탭 아이콘 표시
+    Load Missing Tab Icons: 누락된 탭 아이콘 불러오기
+    Loading Missing Tab Icons: 누락된 탭 아이콘 불러오는 중…
+    No Missing Tab Icons: 지원되는 모든 탭 아이콘을 이미 불러왔습니다
+    Loaded Tab Icons: '불러온 누락 탭 아이콘: {count}개'
+    Loaded Tab Icons With Failures: 탭 아이콘 {loaded}개를 불러왔으며 {failed}개는 불러오지 못했습니다
+    Show Tab Previews: 탭 미리보기 표시
+    Use Fixed Tab Width: 가로 모드에서 고정 탭 너비 사용
+    Use Custom Title Bar: 사용자 지정 제목 표시줄 사용
+    Tab Width: 탭 너비
+    Vertical Tab Height: 세로 탭 높이
+    Tab Layout:
+      Tab Layout: 탭 레이아웃
+      Horizontal Top: 위쪽에 가로로
+      Horizontal Bottom: 아래쪽에 가로로
+      Vertical Left: 왼쪽에 세로로
+      Vertical Right: 오른쪽에 세로로
+    Show Toast Timeout Indicator: 알림 메시지 표시 시간 표시
+    Use Grid Player Menu: 격자형 플레이어 메뉴 사용
+    Show Progress as Notification: 진행률을 알림으로 표시
+    Operation in Progress: 작업 진행 중
+    Toast Position:
+      Test Toast: 테스트 알림
+      Toast Position: 알림 메시지 위치
+      Bottom Left: 왼쪽 아래
+      Bottom Center: 가운데 아래
+      Bottom Right: 오른쪽 아래
+      Top Left: 왼쪽 위
+      Top Center: 가운데 위
+      Top Right: 오른쪽 위
+    Icon Pack:
+      Icon Pack: 아이콘 팩
+      Material Symbols: Material Symbols
+      Remix Icon: Remix Icon
+    Font:
+      App Font: 앱 글꼴
+      System Default: 시스템 기본값
+      Unable to Load: 설치된 시스템 글꼴을 불러올 수 없습니다
+      Bundled Fonts: 내장 글꼴
+      System Fonts: 시스템 글꼴
+    Always Show Scrollbars: 스크롤바 항상 표시
+    Base Theme:
+      Material Light: "Material 밝은 테마"
+      Material Dark: "Material 어두운 테마"
+      Material Black: "Material 검정"
+      Dynamic colors: 동적 색상
+      Tokyo Night Night: Tokyo Night Night
+      Tokyo Night Storm: Tokyo Night Storm
+      Tokyo Night Moon: Tokyo Night Moon
+      Tokyo Night Day: Tokyo Night Day
+      Rosé Pine: Rosé Pine
+      Rosé Pine Moon: Rosé Pine Moon
+      Rosé Pine Dawn: Rosé Pine Dawn
+      Kanagawa Wave: Kanagawa Wave
+      Kanagawa Dragon: Kanagawa Dragon
+      Kanagawa Lotus: Kanagawa Lotus
+      Ayu Dark: Ayu Dark
+      Ayu Mirage: Ayu Mirage
+      Ayu Light: Ayu Light
+      One Dark: One Dark
+      Carbonfox: Carbonfox
+      Catppuccin Macchiato: Catppuccin Macchiato
+      Tally Light: "Tally 밝은 테마"
+      Tally Dark: "Tally 어두운 테마"
+      Custom: 사용자 지정
+      Catppuccin Frappe: Catppuccin Frappe
+      Catppuccin Latte: Catppuccin Latte
+      Pastel Pink: 파스텔 핑크
+      Hot Pink: 핫 핑크
+      Nordic: Nordic
+      Gruvbox Dark: Gruvbox Dark
+      Gruvbox Light: Gruvbox Light
+      Solarized Dark: Solarized Dark
+      Solarized Light: Solarized Light
+      Everforest Dark Hard: Everforest Dark Hard
+      Everforest Dark Medium: Everforest Dark Medium
+      Everforest Dark Low: Everforest Dark Low
+      Everforest Light Hard: Everforest Light Hard
+      Everforest Light Medium: Everforest Light Medium
+      Everforest Light Low: Everforest Light Low
+      Built-in Themes: 기본 제공 테마
+      Custom Themes: 사용자 지정 테마
+    Light Theme: 밝은 테마
+    Dark Theme: 어두운 테마
+    Custom Theme:
+      Share Restrictions Prompt: "설명은 Markdown을 포함하여 최대 500자까지 입력할 수 있습니다. GitHub에서 호스팅되는 링크와 이미지만 허용되며, 여기에 직접 업로드할 수도 있습니다. 봇은 외부 링크와 이미지를 제거하고 긴 설명을 줄인 뒤 변경 사항을 설명하는 댓글을 남깁니다."
+      Import from Clipboard: "클립보드에서 가져오기"
+      Invalid Clipboard Theme: "클립보드에 유효한 테마가 없습니다. 테마 JSON을 복사한 후 다시 시도하세요."
+      Create Custom Theme: 사용자 지정 테마 만들기
+      Edit Custom Theme: 사용자 지정 테마 편집
+      Custom Theme Creator: 사용자 지정 테마 만들기
+      Theme Name: 테마 이름
+      Based On: 기반 테마
+      Import Theme: 테마 가져오기
+      Export Theme: 테마 내보내기
+      Share Theme: 테마 공유
+      Share Description Prompt: 테마와 사용 전에 알아야 할 내용을 설명하세요.
+      Share Screenshots Prompt: "여기에 스크린샷을 하나 이상 끌어다 놓으세요. 이 섹션을 비워 두면 봇이 개인 데이터 없이 샘플 콘텐츠로 미리보기 세 장을 추가합니다."
+      Delete Theme: 테마 삭제
+      Delete Theme Confirmation: '"{name}"을(를) 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.'
+      Save and Apply: 저장 및 적용
+      Discard Changes: 변경 사항 취소
+      Reset Colors: 기반 테마로 초기화
+      Theme File: OpenTubeX 테마 파일
+      Theme Saved: 사용자 지정 테마를 저장하고 적용했습니다
+      Theme Imported: 편집기로 테마를 가져왔습니다
+      Theme Exported: 테마를 내보냈습니다
+      Theme Deleted: 사용자 지정 테마를 삭제했습니다
+      Unable to Load: 사용자 지정 테마를 불러올 수 없습니다
+      Unable to Save: 사용자 지정 테마를 저장할 수 없습니다
+      Unable to Export: 사용자 지정 테마를 내보낼 수 없습니다
+      Unable to Share: 사용자 지정 테마를 공유할 수 없습니다
+      Unable to Delete: 사용자 지정 테마를 삭제할 수 없습니다
+      Invalid Theme File: 올바르지 않은 사용자 지정 테마 파일
+      Colors:
+        Watched thumbnail overlay: "시청한 동영상 썸네일 오버레이"
+        Thumbnail badge background: "썸네일 배지 배경"
+        Main text: 기본 텍스트
+        Secondary text: 보조 텍스트
+        Subtle text: 흐린 텍스트
+        Borders and dividers: 테두리 및 구분선
+        Subtle surfaces and indicators: 흐린 표면 및 표시기
+        Title text: 제목 텍스트
+        Selected text background: 선택한 텍스트 배경
+        Selected text: 선택한 텍스트
+        Logo icon: 로고 아이콘
+        Logo text: 로고 텍스트
+        Logo hover: 로고 마우스 올림
+        Logo pressed: 로고 누름
+        Page background: 페이지 배경
+        Card background: 카드 배경
+        Secondary card background: 보조 카드 배경
+        Favorite icon: 즐겨찾기 아이콘
+        Error color: 오류 색상
+        Scrollbar thumb: 스크롤바 손잡이
+        Scrollbar thumb hover: 스크롤바 손잡이 마우스 올림
+        Scrollbar thumb pressed: 스크롤바 손잡이 누름
+        Dropdown item hover text: 드롭다운 항목 마우스 올림 텍스트
+        Dropdown item hover background: 드롭다운 항목 마우스 올림 배경
+        Navigation and panel background: 탐색 메뉴 및 패널 배경
+        Neutral item hover and focus background: 일반 항목 마우스 올림 및 포커스 배경
+        Neutral item hover and focus text and icons: 일반 항목 마우스 올림 및 포커스 텍스트와 아이콘
+        Neutral item pressed background: 일반 항목 누름 배경
+        Neutral item pressed text and icons: 일반 항목 누름 텍스트와 아이콘
+        Header button hover and focus background: 헤더 버튼 마우스 올림 및 포커스 배경
+        Header button hover and focus text and icons: 헤더 버튼 마우스 올림 및 포커스 텍스트와 아이콘
+        Header button pressed background: 헤더 버튼 누름 배경
+        Header button pressed text and icons: 헤더 버튼 누름 텍스트와 아이콘
+        Search and dropdown background: 검색 및 드롭다운 배경
+        Settings search background: 설정 검색 배경
+        Instance menu: 인스턴스 메뉴
+        Shadow color: 그림자 색상
+        Primary controls and highlights: 기본 컨트롤 및 강조
+        Primary control hover and focus: 기본 컨트롤 마우스 올림 및 포커스
+        Primary control pressed: 기본 컨트롤 누름
+        Text and icons on primary controls: 기본 컨트롤의 텍스트와 아이콘
+        Secondary controls and highlights: 보조 컨트롤 및 강조
+        Secondary control hover and focus: 보조 컨트롤 마우스 올림 및 포커스
+        Secondary control pressed: 보조 컨트롤 누름
+        Light secondary color: 밝은 보조 색상
+        Visited accent: 방문한 항목 강조
+        Text and icons on secondary controls: 보조 컨트롤의 텍스트와 아이콘
+        Links: 링크
+        Visited links: 방문한 링크
+        Destructive action: 삭제 작업
+        Destructive hover and focus: 삭제 작업 마우스 올림 및 포커스
+        Destructive pressed: 삭제 작업 누름
+        Text and icons on destructive actions: 삭제 작업의 텍스트와 아이콘
+    Main Color Theme:
+      Catppuccin Macchiato Rosewater: "Catppuccin Macchiato 로즈워터"
+      Catppuccin Macchiato Flamingo: "Catppuccin Macchiato 플라밍고"
+      Catppuccin Macchiato Pink: "Catppuccin Macchiato 핑크"
+      Catppuccin Macchiato Mauve: "Catppuccin Macchiato 자주빛"
+      Catppuccin Macchiato Red: "Catppuccin Macchiato 빨강"
+      Catppuccin Macchiato Maroon: "Catppuccin Macchiato 적갈색"
+      Catppuccin Macchiato Peach: "Catppuccin Macchiato 복숭아"
+      Catppuccin Macchiato Yellow: "Catppuccin Macchiato 노랑"
+      Catppuccin Macchiato Green: "Catppuccin Macchiato 녹색"
+      Catppuccin Macchiato Teal: "Catppuccin Macchiato 청록색"
+      Catppuccin Macchiato Sky: "Catppuccin Macchiato 하늘색"
+      Catppuccin Macchiato Sapphire: "Catppuccin Macchiato 사파이어"
+      Catppuccin Macchiato Blue: "Catppuccin Macchiato 파랑"
+      Catppuccin Macchiato Lavender: "Catppuccin Macchiato 라벤더"
+      Catppuccin Frappe Rosewater: Catppuccin Frappe Rosewater
+      Catppuccin Frappe Flamingo: Catppuccin Frappe Flamingo
+      Catppuccin Frappe Pink: Catppuccin Frappe Pink
+      Catppuccin Frappe Mauve: Catppuccin Frappe Mauve
+      Catppuccin Frappe Red: Catppuccin Frappe Red
+      Catppuccin Frappe Maroon: Catppuccin Frappe Maroon
+      Catppuccin Frappe Peach: Catppuccin Frappe Peach
+      Catppuccin Frappe Yellow: Catppuccin Frappe Yellow
+      Catppuccin Frappe Green: Catppuccin Frappe Green
+      Catppuccin Frappe Teal: Catppuccin Frappe Teal
+      Catppuccin Frappe Sky: Catppuccin Frappe Sky
+      Catppuccin Frappe Sapphire: Catppuccin Frappe Sapphire
+      Catppuccin Frappe Blue: Catppuccin Frappe Blue
+      Catppuccin Frappe Lavender: Catppuccin Frappe Lavender
+      Catppuccin Latte Mauve: Catppuccin Latte Mauve
+      Catppuccin Latte Red: Catppuccin Latte Red
+      Gruvbox Dark Green: Gruvbox Dark Green
+      Gruvbox Dark Yellow: Gruvbox Dark Yellow
+      Gruvbox Dark Blue: Gruvbox Dark Blue
+      Gruvbox Dark Purple: Gruvbox Dark Purple
+      Gruvbox Dark Aqua: Gruvbox Dark Aqua
+      Gruvbox Dark Orange: Gruvbox Dark Orange
+      Gruvbox Light Red: Gruvbox Light Red
+      Gruvbox Light Blue: Gruvbox Light Blue
+      Gruvbox Light Purple: Gruvbox Light Purple
+      Gruvbox Light Orange: Gruvbox Light Orange
+      Solarized Yellow: Solarized Yellow
+      Solarized Orange: Solarized Orange
+      Solarized Red: Solarized Red
+      Solarized Magenta: Solarized Magenta
+      Solarized Violet: Solarized Violet
+      Solarized Blue: Solarized Blue
+      Solarized Cyan: Solarized Cyan
+      Solarized Green: Solarized Green
+      Everforest Dark Red: Everforest Dark Red
+      Everforest Dark Orange: Everforest Dark Orange
+      Everforest Dark Yellow: Everforest Dark Yellow
+      Everforest Dark Green: Everforest Dark Green
+      Everforest Dark Aqua: Everforest Dark Aqua
+      Everforest Dark Blue: Everforest Dark Blue
+      Everforest Dark Purple: Everforest Dark Purple
+      Everforest Light Red: Everforest Light Red
+      Everforest Light Orange: Everforest Light Orange
+      Everforest Light Yellow: Everforest Light Yellow
+      Everforest Light Green: Everforest Light Green
+      Everforest Light Aqua: Everforest Light Aqua
+      Everforest Light Blue: Everforest Light Blue
+      Everforest Light Purple: Everforest Light Purple
+    Modal Backdrop:
+      Modal Backdrop: "대화 상자 배경"
+      Dim and Blur: "어둡게 하고 흐리게"
+      Dim Only: "어둡게만"
+    Click Scrollbar Track to Scroll: "스크롤바를 클릭하여 스크롤"
+  Player Settings:
+    Rewind on Resume: "재개 시 되감기"
+    Minimum Pause Before Rewinding: "되감기 전 최소 일시 정지 시간"
+    Mono Audio: '모노 오디오'
+    Normalize Loudness: '음량 평준화'
+    Show Mono Audio Toggle: '모노 오디오 토글 표시'
+    Default Media Format:
+      Default Media Format: '기본 미디어 포맷'
+    Pause on Stream Recovery: "스트림 복구 시 일시 정지"
+    Buffering:
+      Buffering: 버퍼링
+      Description: 플레이어가 동영상을 얼마나 미리 불러오고 유지할지 선택하세요.
+      Buffer Ahead Hint: 미리 불러오기 버퍼를 늘리면 연결이 더 오래 끊겨도 계속 재생되지만, 시청하지 않을 수도 있는 부분까지 다운로드합니다.
+      Rewind Buffer Hint: 되감기 버퍼를 늘리면 다시 다운로드하지 않고 뒤로 이동할 수 있지만, 메모리를 더 많이 사용합니다.
+      Buffer Before Playing Hint: 재생 전에 현재 동영상의 더 많은 부분을 불러오면 불안정한 연결에서 반복적으로 멈추는 것을 막을 수 있지만, 재생 시작과 탐색 후 재개에 시간이 더 걸립니다.
+      Preset: 버퍼링 프리셋
+      Presets:
+        Data Saver: 데이터 절약
+        Default: 기본
+        Smooth Playback: 부드러운 재생
+        Custom: 사용자 지정
+      Buffer Ahead: 미리 불러오기 버퍼
+      Buffer Ahead Tooltip: '현재 위치보다 얼마나 앞까지 불러올지 정합니다. 고화질에서는 메모리 제한으로 인해 매우 높은 값이 제한될 수 있습니다. 기본값: {value}'
+      Rewind Buffer: 되감기 버퍼
+      Rewind Buffer Tooltip: '이미 시청한 부분을 얼마나 불러온 상태로 유지할지 정합니다. 기본값: {value}'
+      Buffer Before Playing: 재생 전 버퍼
+      Buffer Before Playing Tooltip: '재생을 시작하거나 멈춘 후 다시 이어가기 전에 불러와야 하는 동영상의 양입니다. 기본값: {value}'
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: "종량제 네트워크 화질 제한"
+      No Limit: "제한 없음"
+      Tooltip: "모바일 데이터 및 기타 종량제 네트워크에서는 동영상이 이 화질 이하로 시작됩니다. 플레이어에서 더 높은 화질을 선택할 수도 있습니다."
+    Show Music Mode Toggle: "음악 모드 전환 표시"
+    Enable DLNA Casting: "DLNA 전송 활성화"
+    Skip Unavailable Playlist Videos: "재생목록에서 볼 수 없는 동영상 건너뛰기"
+    Lights Off: 조명 끄기
+    Show Lights Off Toggle: 조명 끄기 토글 표시
+    Show Volume Boost Toggle: "볼륨 증폭 토글 표시"
+    Swipe Gestures:
+      Fullscreen Brightness: 전체 화면에서 최대 밝기 사용
+      Left: 왼쪽 스와이프
+      Right: 오른쪽 스와이프
+      Disabled: 사용 안 함
+      Brightness: 밝기
+      Volume: 음량
+      Hint: 전체 화면에서 동영상의 양쪽 가장자리를 위아래로 스와이프하세요.
+      Unavailable: 재생 컨트롤을 조정할 수 없습니다.
+    yt-dlp Streaming: "yt-dlp 스트리밍"
+    Continue Playback When Screen Is Locked: '화면이 잠겨 있을 때도 재생 계속'
+    Music Visualizer: 음악 시각화
+    Automatically Open Chapters: 챕터 자동 열기
+    Caption Appearance:
+      Caption Appearance: 자막 모양
+      Captions: 자막
+      Preferred Language: 선호 자막 언어
+      Application Language: 앱 언어
+      Enable Translations: 자막 번역 활성화
+      Text Color: 텍스트 색상
+      Background Color: 배경 색상
+      Background Opacity: 배경 불투명도
+      Font Size: 글꼴 크기
+      Anchor:
+        Anchor: 기준 위치
+        Top Left: 왼쪽 위
+        Top Center: 가운데 위
+        Top Right: 오른쪽 위
+        Bottom Left: 왼쪽 아래
+        Bottom Center: 가운데 아래
+        Bottom Right: 오른쪽 아래
+        Center Left: 중앙 왼쪽
+        Center: 중앙
+        Center Right: 중앙 오른쪽
+      Edge Style:
+        Edge Style: 테두리 스타일
+        None: 없음
+        Outline: 윤곽선
+        Drop Shadow: 그림자
+        Raised: 높임
+        Depressed: 낮춤
+      Reset: 자막 모양 초기화
+      Default: 기본값
+      Text Opacity: 글꼴 불투명도
+      Font Family:
+        Font Family: 글꼴 모음
+        Monospaced Serif: 고정 너비 Serif
+        Proportional Serif: 비례 너비 Serif
+        Monospaced Sans-Serif: 고정 너비 Sans-Serif
+        Proportional Sans-Serif: 비례 너비 Sans-Serif
+      Colors:
+        White: 흰색
+        Yellow: 노란색
+        Green: 녹색
+        Cyan: 청록색
+        Blue: 파란색
+        Magenta: 자홍색
+        Red: 빨간색
+        Black: 검은색
+    Default Viewing Mode:
+      Theater: 영화관 모드
+      Default Viewing Mode: 기본 보기 모드
+      Full Screen: 전체 화면
+      Picture in Picture: 화면 속 화면
+      External Player: '외부 플레이어 ({externalPlayerName})'
+      Full Window (Always On): 전체 창 (항상 적용)
+      Full Screen (Always On): 전체 화면 (항상 적용)
+      Tooltip: 대부분의 기본 보기 모드는 각 시청 세션을 시작할 때만 적용됩니다. 세션 중 변경한 모드는 세션이 끝날 때까지 유지됩니다. 항상 적용되는 보기 모드는 이전 동영상에서 변경한 보기 모드와 관계없이 새 동영상으로 전환할 때마다 적용됩니다.
+    Auto Picture in Picture:
+      Auto Picture in Picture: 자동으로 화면 속 화면 시작
+      On Tab Change: 탭을 전환할 때
+      On Window Minimize: 창을 최소화할 때
+      On Window Hide: 창이 포커스를 잃거나 다른 창으로 전환할 때
+      Wayland Minimize Unsupported: Wayland는 앱에 창 최소화 상태를 알리지 않으므로 이 조건을 사용할 수 없습니다. 최소화도 감지하는 "창이 포커스를 잃거나 다른 창으로 전환할 때"를 대신 사용하세요.
+      On Tab Change Mini Player: 탭을 전환하면 대신 미니 플레이어가 표시됩니다. 이 기능을 사용하려면 "동영상을 벗어날 때"를 "재생 중지"로 설정하세요.
+    Scroll Mini Player:
+      Scroll Player Mode: 아래로 스크롤할 때
+      Scroll Player Mode Tooltip: 플레이어는 창 높이의 절반 이하를 차지할 때만 고정됩니다. 그렇지 않으면, 예를 들어 가로 모드의 휴대폰이나 넓은 창에서는 대신 미니 플레이어가 표시됩니다.
+      Scroll Player Modes:
+        Mini: 미니 플레이어 표시
+        Pin: 공간이 있으면 플레이어를 상단에 고정
+        Off: 페이지와 함께 스크롤
+      Leaving Video: 동영상을 벗어날 때
+      Leaving Video Modes:
+        Keep Playing: 미니 플레이어에서 계속 재생
+        Stop: 재생 중지
+    Multiply Seek Interval by Playback Rate: 탐색 간격에 재생 속도 곱하기
+    Show Playback Rate Adjusted Timestamp: 재생 속도가 반영된 시간 표시
+    Use YouTube-style Shorts: YouTube 스타일 Shorts 사용
+    Loop Shorts: Shorts 반복 재생
+    Autoplay Interruption Timer: 자동 재생 중단 타이머
+    Remember Volume: 음량 기억
+    Skip Silence: 무음 구간 건너뛰기
+    Show Skip Silence Toggle: 무음 구간 건너뛰기 전환 버튼 표시
+    Enable Skip Silence by Default: 무음 구간 건너뛰기를 기본으로 활성화
+    Enable Video Zoom: 동영상 확대/축소 활성화
+    Enable Seek History: 탐색 기록 활성화
+    Show Seek Bar Filmstrip: "탐색 바 필름 스트립 표시"
+    Voice-over Translation:
+      Title: 음성 번역
+      Attribution: Yandex 제공
+      Enable: 음성 번역 활성화
+      Prepare in Background: 백그라운드에서 음성 번역 준비 시작
+      Background Preparation Tooltip: 지원되는 동영상을 불러오면 즉시 현재 동영상의 ID, 재생 시간 및 선택한 언어를 번역 서비스로 전송합니다.
+      Language: 음성 번역 언어
+      Supported Source Languages: '지원되는 원본 언어: 러시아어, 영어, 중국어, 한국어, 아랍어, 프랑스어, 이탈리아어, 스페인어, 독일어 및 일본어.'
+      Voice Volume: 번역 음성 음량
+      Original Volume: 원본 오디오 음량
+      Russian: 러시아어
+      English: 영어
+      Kazakh: 카자흐어
+    Hold to Speed Up:
+      Hold to Speed Up: 길게 눌러 빠르게 재생
+      Off: 끄기
+    Use Quick Playback Speed Bar: 빠른 재생 속도 표시줄 사용
+    Customize Quick Playback Speed Bar: 빠른 재생 속도 표시줄 사용자 지정
+    Quick Playback Speed Bar Manager: 빠른 재생 속도 표시줄
+    Add Playback Speed: 재생 속도 추가
+    Reset Quick Playback Speed Bar: 기본값으로 초기화
+    Playback Speed Name: 이름
+    Edit Playback Speed Name: 재생 속도 이름 편집
+    Use Automatic Playback Speed Name: 자동 재생 속도 이름 사용
+    Reorder Playback Speed: 끌어서 재생 속도 순서 변경
+    Playback Speed: 재생 속도
+    Parallel Segment Loading: 세그먼트 병렬 불러오기
+    Screenshot:
+      Mode: 스크린샷 모드
+      Modes:
+        Save To Folder: 폴더에 저장
+        Clipboard: 클립보드에 복사
+      Legacy Formats: "기존 형식"
+      Modern Formats: "최신 형식"
+    Rotate Wide Videos to Landscape in Fullscreen: '전체 화면에서 가로형 동영상을 가로 방향으로 회전'
+    Swipe Up or Down to Enter or Exit Fullscreen: '위아래로 밀어 전체 화면 시작 또는 종료'
+    Preload Upcoming Videos: "다음 동영상 미리 불러오기"
+    Upcoming Videos to Preload: "미리 불러올 동영상 수"
+    Concurrent Preloads: "동시 미리 로드 수"
+    Ignore System Rotation Lock for Fullscreen: 전체 화면에서 시스템 회전 잠금 무시
+    Swipe Left or Right to Seek in Fullscreen: 전체 화면에서 좌우로 스와이프하여 탐색
+    Show Swipe to Seek Preview: 스와이프로 탐색할 때 미리보기 표시
+    Enable Google Cast: "Google Cast 활성화"
+    Sections:
+      Playback: 재생
+      Autoplay: 자동 재생
+      Playback Speed: 재생 속도
+      Player Controls: 플레이어 컨트롤
+      Gestures: 제스처
+      Viewing Modes: 보기 모드
+      Shorts: Shorts
+      Screenshots: 스크린샷
+    Enable FCast: "FCast 활성화"
+    Ask Before Preloading Large Playlists: "큰 재생목록을 미리 불러오기 전에 묻기"
+  Channel Settings:
+    Channel Settings: 채널 설정
+    Channel Settings Description: 채널마다 시청 중 선택한 설정을 기억하고, 다음에 해당 채널의 동영상을 시청할 때 다시 적용합니다.
+    Enable Channel Playback Settings: 채널별 재생 설정 사용
+    Auto Save Playback Speed: 재생 속도 변경 사항 자동 저장
+    Auto Save Video Quality: 동영상 화질 변경 사항 자동 저장
+    Auto Save Subtitles State: 자막 상태 변경 사항 자동 저장
+    Auto Save Volume: 음량 변경 사항 자동 저장
+    Manage Saved Channels: '저장된 채널 관리 ({channelCount})'
+    Saved Channels: 저장된 채널 설정
+    Enable Saved Channel Settings Sync: 저장된 채널 설정 동기화
+    Disable Saved Channel Settings Sync: 저장된 채널 설정 동기화 중지
+    Search Channels: 채널 검색
+    No Saved Channels: 아직 저장된 채널별 설정이 없습니다
+    No Matching Channels: 검색과 일치하는 채널이 없습니다
+    Forget Channel: 이 채널의 모든 설정 삭제
+    Forget Value: 이 설정 삭제
+    Add Setting: 이 채널에 다른 설정 저장
+    Add Subscribed Channel: 구독 채널 추가
+    Video Quality: 동영상 화질
+    Subtitles Enabled: 자막 활성화됨
+    Volume: 음량
+  External Player Settings:
+    Ignore Default Arguments: 기본 인수 무시
+  Download Settings:
+    Download Settings: 다운로드
+    Enable Downloads: 다운로드 활성화
+    Managed Tools Download Started Template: '필수 외부 소프트웨어를 찾을 수 없습니다: {tools}. 관리되는 사본을 다운로드하는 중…'
+    Managed Tools Download Finished Template: '{tools} 다운로드 완료'
+    Managed Tools Update Started Template: '{tools} 업데이트를 찾았습니다. 다운로드하는 중…'
+    Managed Tools Update Finished Template: '{tools} 업데이트 완료'
+    Managed Tools Update Available Template: '{tools} 업데이트를 사용할 수 있습니다.'
+    Managed Tools Update Source Notice: "OpenTubeX가 GitHub에서 직접 다운로드하므로 F-Droid 및 다른 앱 스토어에서 검사하지 않습니다."
+    Update Managed Tools: 업데이트
+    Managed Tools Download Error Template: '관리되는 도구를 다운로드할 수 없습니다: {errors}'
+    Download Folder: 다운로드 폴더
+    Global Additional yt-dlp Arguments: 추가 yt-dlp 인수
+    Concurrent Downloads: 동시 다운로드 수
+    Bandwidth Limit: 대역폭 제한 (KiB/s)
+    Download Templates: 다운로드 템플릿
+    Manage Download Templates: '다운로드 템플릿 관리 ({templateCount})'
+    New Template: 새 템플릿
+    Template Source: 편집하거나 기반으로 사용할 템플릿
+    Built-in Template: '{name} (내장)'
+    Custom Template Name: '{name} (사용자 지정)'
+    Create Template Copy: 사본 만들기
+    Template Copy Name: '{name} 사본'
+    Automatic Downloads: 자동 다운로드
+    Manage Automatic Downloads: '자동 다운로드 관리 ({channelCount})'
+    Automatic Downloads Description: 구독 채널마다 다운로드 템플릿과 필터를 선택하세요. 구독 피드를 새로 고칠 때 조건에 맞는 동영상을 백그라운드에서 다운로드합니다.
+    Automatic Downloads New Only: 채널을 활성화하면 다음 신규 업로드부터 다운로드합니다. 기존 동영상과 이전 업로드는 다운로드하지 않습니다.
+    Automatic Downloads No Channels: 자동 다운로드를 설정하려면 먼저 채널을 구독하세요.
+    No Matching Automatic Download Channels: 검색과 일치하는 채널이 없습니다.
+    Automatic Downloads Livestreams: 실시간 스트림
+    Minimum Duration Seconds: 최소 재생 시간 (초)
+    Maximum Duration Seconds: 최대 재생 시간 (초)
+    Minimum File Size MB: 최소 파일 크기 (MB)
+    Maximum File Size MB: 최대 파일 크기 (MB)
+    Maximum Age Days: 최대 경과 기간 (일)
+    Title Includes: 제목에 포함
+    Title Excludes: 제목에서 제외
+    Title Filter Hint: 제목 검색어가 여러 개이면 쉼표로 구분하세요. 동영상은 포함 검색어 중 하나 이상과 일치하고 제외 검색어와는 모두 일치하지 않아야 합니다.
+    Automatic Downloads Require Unmetered Network: "종량제가 아닌 네트워크에서만"
+    Automatic Downloads Require Charging: "충전 중일 때만"
+  External Software Settings:
+    Create YouTube session: "YouTube 세션 만들기"
+    YouTube session hint: "필요한 경우 로그인한 다음 세션을 저장하세요. 설정에서 다운로드, 재생 또는 자막에 사용할지 선택하세요."
+    Use cookies for downloads: "다운로드에 쿠키 사용"
+    YouTube session failed: "YouTube 세션을 저장할 수 없습니다."
+    Checking FFmpeg and FFprobe: FFmpeg/FFprobe 확인 중…
+    FFmpeg and FFprobe Managed Not Downloaded: 아직 FFmpeg/FFprobe를 다운로드하지 않았습니다. 아래 버튼을 클릭하여 다운로드하세요.
+    External Software Settings: 외부 소프트웨어
+    yt-dlp Source: yt-dlp 소스
+    yt-dlp Channel: yt-dlp 채널
+    Sources:
+      System: 시스템 (PATH 또는 사용자 지정 경로)
+      Managed: OpenTubeX에서 관리
+    Detected Version Template: '감지된 yt-dlp 버전: {version}'
+    Managed Not Downloaded: 아직 yt-dlp를 다운로드하지 않았습니다. 아래 버튼을 클릭하여 다운로드하세요.
+    System yt-dlp Missing Warning: 시스템에서 yt-dlp를 찾을 수 없습니다. 설치하거나 아래에서 사용자 지정 경로를 설정하거나 소스를 "OpenTubeX에서 관리"로 변경하세요.
+    Download yt-dlp: yt-dlp 다운로드
+    Update yt-dlp: yt-dlp 업데이트
+    Checking yt-dlp: yt-dlp 확인 중…
+    Downloading yt-dlp: yt-dlp 다운로드 중…
+    yt-dlp Downloaded Template: 'yt-dlp {version}을(를) 다운로드했습니다'
+    yt-dlp Download Error Template: 'yt-dlp 다운로드 실패: {error}'
+    FFmpeg Source: FFmpeg 소스
+    Detected FFmpeg Version Template: '감지된 FFmpeg 버전: {version}'
+    Detected FFmpeg and FFprobe Version Template: '감지된 FFmpeg/FFprobe 버전: {version}'
+    FFmpeg Managed Not Downloaded: 아직 FFmpeg를 다운로드하지 않았습니다. 아래 버튼을 클릭하여 다운로드하세요.
+    System FFmpeg Missing Warning: 시스템에서 FFmpeg를 찾을 수 없습니다. 동영상과 오디오 병합 및 오디오 변환에 필요합니다. 설치하거나 아래에서 사용자 지정 경로를 설정하거나 소스를 "OpenTubeX에서 관리"로 변경하세요.
+    Download FFmpeg: FFmpeg 다운로드
+    Update FFmpeg: FFmpeg 업데이트
+    Checking FFmpeg: FFmpeg 확인 중…
+    Downloading FFmpeg: FFmpeg 다운로드 중…
+    Detected FFprobe Version Template: '감지된 FFprobe 버전: {version}'
+    FFprobe Managed Not Downloaded: 아직 FFprobe를 다운로드하지 않았습니다. 아래 버튼을 클릭하여 FFmpeg와 함께 다운로드하세요.
+    System FFprobe Missing Warning: 시스템에서 FFprobe를 찾을 수 없습니다. 후처리 중 미디어를 검사하는 데 필요합니다. FFmpeg 옆에 설치하거나 소스를 "OpenTubeX에서 관리"로 변경하세요.
+    Checking FFprobe: FFprobe 확인 중…
+    Download FFmpeg and FFprobe: FFmpeg 및 FFprobe 다운로드
+    Update FFmpeg and FFprobe: FFmpeg 및 FFprobe 업데이트
+    Downloading FFmpeg and FFprobe: FFmpeg 및 FFprobe 다운로드 중…
+    FFmpeg and FFprobe Downloaded Template: 'FFmpeg 및 FFprobe {version}을(를) 다운로드했습니다'
+    FFmpeg and FFprobe Download Error Template: 'FFmpeg 및 FFprobe 다운로드 실패: {error}'
+    Managed Tool Already Current Template: '{tool} {version}은(는) 이미 최신 버전입니다'
+    Managed Tool Errors:
+      Removed: '다운로드한 파일이 삭제되었습니다. 바이러스 백신 소프트웨어가 삭제했을 가능성이 높습니다'
+      Unusable: '다운로드한 프로그램을 실행할 수 없습니다. 바이러스 백신 소프트웨어가 차단하고 있거나 이 시스템을 지원하지 않을 수 있습니다'
+      Release Not Found: '최신 릴리스를 찾을 수 없습니다'
+      Verification Failed: '다운로드가 공식 릴리스인지 확인할 수 없습니다'
+      Downgrade: '다운로드한 릴리스가 설치된 릴리스보다 오래되었습니다'
+      Invalid Archive: '다운로드한 압축 파일이 올바르지 않습니다'
+      Rollback Failed: '업데이트에 실패했으며 이전 버전을 완전히 복원할 수 없습니다'
+    Managed Tool Updates: 관리되는 도구 업데이트
+    Update Modes:
+      Automatic: 자동 업데이트
+      Ask: 업데이트 전 확인
+      Manual: 수동으로만 업데이트
+    yt-dlp Executable Path: yt-dlp 실행 파일
+    FFmpeg Executable Path: FFmpeg 실행 파일
+    Restricted Playback Authentication: "yt-dlp 쿠키"
+    Cookie Source: 쿠키 소스
+    Cookie Sources:
+      None: 없음
+      File: 파일
+      Browser: 브라우저
+    Cookie File: 쿠키 파일
+    Browser for Cookies: 쿠키를 가져올 브라우저
+    Browser Profile: 브라우저 프로필 (선택 사항)
+    Browser Profile Placeholder: 프로필 이름 또는 경로
+    Browser Profile Invalid: "프로필 이름을 입력하거나 폴더 버튼으로 프로필 폴더를 선택하세요."
+    Select Browser: 브라우저 선택
+    Always Use Cookies: 항상 쿠키 사용
+    Restricted Playback Authentication Hint: 기본적으로 OpenTubeX는 연령 제한 또는 회원 전용 동영상에서 "설정된 쿠키로 시도"를 선택한 경우에만 이 쿠키를 yt-dlp에 전달합니다.
+    Restricted Playback Authentication Warning: Google 계정과 함께 yt-dlp를 사용하면 계정이 일시적 또는 영구적으로 제한될 수 있습니다.
+    Use cookies for subtitles: "자막에 쿠키 사용"
+  Privacy Settings:
+    Internet Connectivity Checks: "인터넷 연결 확인"
+    Internet Connectivity Checks Tooltip: "GrapheneOS가 호스팅하는 서버에 작은 요청을 보내 인터넷 연결을 확인합니다."
+    Automatic History Retention: 시청 기록 자동 보관 기간 (일)
+    Automatic History Retention Placeholder: 영구 보관하려면 비워 두세요
+    Automatic History Retention Tooltip: 시청 기록을 영구 보관하려면 비워 두세요. 숫자를 저장하면 오래된 기록을 즉시 제거하고 앱이 열려 있는 동안에도 자동으로 제거합니다.
+    Automatic Search History Retention: 검색 기록 자동 보관 기간 (일)
+    Automatic Search History Retention Tooltip: 검색 기록을 영구 보관하려면 비워 두세요. 숫자를 저장하면 오래된 검색어를 즉시 제거하고 앱이 열려 있는 동안에도 자동으로 제거합니다.
+    History Retention Saved: 기록 보관 기간을 저장했습니다
+    Invalid History Retention Days: 0보다 큰 정수 일수를 입력하세요
+    Enable Watch Statistics: 시청 통계 활성화
+    Week Starts On: 한 주의 시작 요일
+    Remember Search History: 검색 기록 저장
+    Cache Video Metadata: 메타데이터 기록
+    Cache Video Metadata Tooltip: 방문한 동영상에서 지원되는 메타데이터의 모든 버전을 제목, 썸네일, 설명과 함께 보관합니다. 구독 피드에 표시된 제목도 보관합니다. 메타데이터 기록을 저장하면 디스크 사용량이 늘어나므로 기본적으로 비활성화되어 있습니다.
+    Watched Percentage Threshold: 시청함 처리 기준 비율
+    Watched Percentage Threshold Tooltip: 선택한 비율에 도달하고 남은 시간이 2분 이하이면 동영상을 시청함으로 표시합니다. 0%에서는 재생을 시작할 때, 100%에서는 재생이 끝날 때 표시합니다.
+    Watched Progress Saving Mode:
+      Modes:
+        Auto: 자동
+        Semi-auto: 반자동
+        Never: 저장 안 함
+      Tooltip: 자동 = 동영상 재생 중 2초마다, 동영상 페이지를 나갈 때마다, 동영상을 일시 정지하거나 재생이 끝났을 때, 오류가 발생했을 때 저장합니다. 예를 들어 요청 한도 초과나 시청 세션 만료가 해당됩니다. 반자동 = 자동과 같지만 2초마다 또는 동영상 페이지를 나갈 때 저장하지 않습니다. 동영상 플레이어 아래의 시청 진행률 저장 버튼으로 진행률을 직접 저장할 수도 있습니다.
+    Save Watched Videos With Last Viewed Playlist: 시청한 동영상에 마지막으로 본 재생목록 저장
+    Clear Search History and Cache: 검색 기록 및 캐시 지우기
+    Clear Video Metadata Cache: 동영상 메타데이터 캐시 지우기
+    Are you sure you want to clear the video metadata cache?: 캐시된 동영상 제목, 썸네일 및 설명을 지우시겠습니까?
+    Failed to clear video metadata cache: 동영상 메타데이터 캐시를 지우지 못했습니다
+    Video Metadata Cache Size: '동영상 메타데이터 캐시: {size}'
+    Are you sure you want to clear out your search history and cache?: 검색 기록과 캐시를 지우시겠습니까?
+    Search history and cache have been cleared: 검색 기록과 캐시를 지웠습니다
+    Remove All Playlists: 모든 재생목록 제거
+    All playlists have been removed: 모든 재생목록을 제거했습니다
+    Are you sure you want to remove all your playlists?: 모든 재생목록을 제거하시겠습니까?
+  Storage Settings:
+    Storage: 저장 공간
+    Downloaded Media: 추적 중인 다운로드 미디어
+    Storage Breakdown: 저장 공간 세부 내역
+    Shown Total: 표시된 합계
+    Calculating: 계산 중…
+    Not Available: 정확한 크기를 알 수 없음
+    At Least: '최소 {size}'
+    Failed To Read Storage: 일부 저장 공간 크기를 읽을 수 없습니다
+    Downloaded Media Description: 다운로드 기록에서 계속 추적하는 동영상, 오디오 및 자막 파일입니다.
+    Selected Download Folders: 사용자가 선택한 다운로드 폴더
+    Download History Records: 다운로드 기록
+    Download History Records Description: '완료된 다운로드 기록 {count}개입니다. 이 기록에는 상태와 파일 위치만 있으며 다운로드한 미디어는 포함되지 않습니다.'
+    Clear Download History Records: 다운로드 기록 지우기
+    Clear Download History Confirmation: 완료된 다운로드 기록을 모두 지우시겠습니까?
+    Download Files Stay On Disk: 다운로드한 파일은 디스크에 남지만 다운로드 페이지에는 더 이상 표시되지 않습니다.
+    Clear Records: 기록 지우기
+    Replaceable Caches: 다시 만들 수 있는 캐시
+    Application Caches: 앱 캐시
+    Browser Caches: 브라우저 캐시
+    Browser Caches Hint: Chromium의 HTTP, GPU, 코드, 셰이더, 서비스 워커 및 사전 캐시입니다.
+    Clear Android Cache Confirmation: Android 브라우저 캐시를 지울까요?
+    Stored App Data: 저장된 앱 데이터
+    Included In App Data: 위에 표시된 앱 데이터에 포함됨
+    Browser Runtime Data: 브라우저 런타임 데이터
+    Browser Runtime Data Hint: Chromium의 세션 및 로컬 저장소, 쿠키, 개인 정보 및 네트워크 상태, 충돌 파일입니다.
+    Subscription Feed Cache: 구독 및 피드 캐시
+    Subscription Feed Cache Description: 불러온 구독 동영상, Shorts, 실시간 스트림 및 게시물을 저장합니다. 다음 피드 새로 고침 때 OpenTubeX가 다시 만듭니다.
+    Clear Subscription Feed Cache: 구독 및 피드 캐시 지우기
+    Clear Subscription Feed Cache Confirmation: 구독 및 피드 캐시를 지우시겠습니까?
+    Subscription Feed Cache Effect: 새로 고칠 때까지 구독 피드가 비어 보일 수 있습니다. 구독과 프로필은 변경되지 않습니다.
+    Session Search Cache: 세션 검색 캐시
+    In Memory: 메모리 내
+    Session Search Cache Description: '뒤로 이동할 때 더 빠르게 표시하도록 검색 {count}개를 메모리에 캐시했습니다. OpenTubeX를 닫으면 이 캐시는 삭제됩니다.'
+    Clear Session Search Cache: 세션 검색 캐시 지우기
+    Clear Session Search Cache Confirmation: 세션 검색 캐시를 지우시겠습니까?
+    Session Search Cache Effect: 캐시된 결과 페이지를 삭제합니다. 저장된 검색 기록은 변경되지 않습니다.
+    HTTP Cache: HTTP 캐시
+    HTTP Cache Description: Electron은 같은 데이터를 다시 다운로드하지 않고 반복 요청을 불러올 수 있도록 네트워크 응답을 디스크에 저장합니다. OpenTubeX는 필요할 때 이 캐시를 다시 만듭니다.
+    Managed By Electron: Electron에서 관리
+    Clear HTTP Cache: HTTP 캐시 지우기
+    Clear HTTP Cache Confirmation: Electron의 HTTP 캐시를 지우시겠습니까?
+    HTTP Cache Effect: 캐시를 다시 만드는 동안 이미지와 기타 네트워크 리소스를 한 번 느리게 불러올 수 있습니다.
+    Tab Image Cache: 탭 썸네일 및 채널 아바타
+    Tab Image Cache Description: 열려 있거나 복원된 탭의 미리보기 이미지와 채널 아바타를 저장합니다. 탭을 사용하면 OpenTubeX가 다시 만듭니다.
+    Clear Tab Image Cache: 탭 이미지 캐시 지우기
+    Clear Tab Image Cache Confirmation: 탭 썸네일과 채널 아바타를 지우시겠습니까?
+    Tab Image Cache Effect: 탭 이미지가 잠시 사라질 수 있으며 해당 탭을 사용하면 다시 생성됩니다.
+    Playback Caches: 재생 캐시
+    Playback Caches Description: 앱 세션 사이에 yt-dlp 스트림 URL과 YouTube 플레이어 파일을 저장합니다. URL 캐시는 yt-dlp로 가져온 스트림에만 적용됩니다.
+    Playback URL Cache Entry Size: yt-dlp 스트림 URL 캐시 제한
+    Playback URL Cache Entry Size Tooltip: 캐시된 각 yt-dlp 스트림 항목의 최대 크기를 설정합니다. yt-dlp 스트림의 영구 캐시를 비활성화하려면 0 MB로 설정하세요.
+    Clear Playback Caches: 재생 캐시 지우기
+    Clear Playback Caches Confirmation: yt-dlp 및 플레이어 캐시를 지우시겠습니까?
+    Playback Caches Effect: 스트림과 플레이어 데이터를 다시 가져오는 동안 다음 로컬 재생 요청이 더 오래 걸릴 수 있습니다.
+    Clear Cache: 캐시 지우기
+    History Data: 저장된 기록
+    Video Metadata Description: 지원되는 동영상의 이전 제목, 썸네일 및 설명을 저장합니다. 삭제한 이전 버전은 다시 만들 수 없습니다.
+    Video Metadata Effect: 저장된 메타데이터 버전이 영구적으로 삭제됩니다. 현재 동영상 정보는 다시 가져올 수 있습니다.
+    Watch History: 시청 기록 및 통계
+    Watch History Description: 시청 기록에는 본 동영상과 진행률이 기록됩니다. 시청 통계에는 일별 시청 합계가 저장됩니다. 보관 기간은 시청 기록에만 적용됩니다.
+    Clear Watch Statistics: 시청 통계 지우기
+    Watch History Effect: 본 동영상 기록과 저장된 진행률이 삭제됩니다. 시청 통계는 유지됩니다.
+    Clear Watch Statistics Confirmation: 모든 시청 통계를 삭제하시겠습니까?
+    Watch Statistics Effect: 일별 시청 합계가 삭제됩니다. 시청 기록은 유지됩니다.
+    Search History: 검색 기록
+    Search History Description: 저장하도록 선택한 검색어를 보관합니다.
+    Delete Search History: 검색 기록 삭제
+    Delete Search History Confirmation: 저장된 검색 기록을 모두 삭제하시겠습니까?
+    Search History Effect: 이전 검색에서 저장된 검색 제안이 사라집니다. 현재 세션 캐시는 유지됩니다.
+    Other User Data: 기타 사용자 데이터
+    Other Profile Files: 기타 프로필 파일
+    Other Profile Files Hint: OpenTubeX에서 아직 인식하지 못하는 백업, 임시 파일 및 프로필 항목입니다.
+    Subscriptions And Profiles: 구독 및 프로필
+    Subscriptions And Profiles Description: 구독 채널, 프로필 이름 및 프로필 구성원을 저장합니다.
+    Subscriptions And Profiles Effect: 모든 구독과 추가 프로필이 영구적으로 삭제됩니다. 피드 캐시 데이터도 지워집니다.
+    Playlists Description: 재생목록 이름, 설명 및 저장된 동영상을 보관합니다.
+    Playlists Effect: 모든 재생목록과 저장된 동영상 목록이 영구적으로 삭제됩니다. 다운로드한 미디어 파일은 유지됩니다.
+    Settings And Sessions: 설정, 탭 세션 및 알림
+    Settings And Sessions Description: 앱 설정, 복원 가능한 탭 및 실시간 스트림 알림을 저장합니다. 파일을 확인하거나 백업하려면 프로필 디렉터리를 여세요. 이 페이지에서는 삭제할 수 없습니다.
+    Cleanup Complete: 저장 공간 정리를 마쳤습니다
+    Cleanup Failed: 저장 공간 정리에 실패했습니다
+  Subscription Settings:
+    Fetch Feed on Startup: 시작할 때 피드 가져오기
+    Show New Content Feed: 새 콘텐츠 피드 표시
+    RSS Feeds: RSS 피드
+    Enable RSS Feeds: 다른 플랫폼용 RSS 피드 사용
+    Manage RSS Feeds: RSS 피드 관리
+    Show New Content Indicators: 새 콘텐츠 표시기 표시
+    Show Scheduled Live Streams / Premieres First: 예정된 실시간 스트림 / 최초 공개 먼저 표시
+    Auto Refresh Interval: 자동 새로 고침 간격
+    Videos Auto Refresh Interval: 동영상 자동 새로 고침 간격
+    Shorts Auto Refresh Interval: Shorts 자동 새로 고침 간격
+    Live Auto Refresh Interval: 실시간 스트림 자동 새로 고침 간격
+    Posts Auto Refresh Interval: 게시물 자동 새로 고침 간격
+    Refresh Subscriptions While App Is Closed: "앱이 닫혀 있을 때 구독 새로 고침"
+    Notify About New Uploads: 새 업로드 알림
+    Limit the number of videos displayed for each channel: 채널별 표시 동영상 수 제한
+    To: 다음으로
+    Confirm Before Unsubscribing: 구독 취소 전 확인
+    RSS Feeds Auto Refresh Interval: RSS 피드 자동 새로 고침 간격
+    Faster Subscription Refresh: "더 빠른 구독 새로 고침"
+    Platforms:
+      Other Platforms: 다른 플랫폼
+      Manage Channels: 팔로우한 채널 관리
+      Notify When Live: 팔로우한 Twitch 채널이 방송을 시작하면 알림
+      Auto Refresh Interval: 다른 플랫폼 자동 새로 고침 간격
+  Distraction Free Settings:
+    Digital Wellbeing:
+      Count Watch Time From: "시청 시간 계산 기준"
+      Break Reminder Action: "휴식할 시간이 되면"
+      Grayscale: "회색조"
+      Apply Grayscale To: "회색조 적용 대상"
+      Off: "끄기"
+      Always: "항상"
+      During Bedtime: "취침 시간 중"
+      After the Daily Limit: "일일 한도 도달 후"
+      Whole App: "앱 전체"
+      Videos and Images: "동영상 및 이미지"
+      Daily Watch Time Limit: "일일 시청 시간 한도"
+      Daily Shorts Limit: "일일 Shorts 한도"
+      When a Limit Is Reached: "한도에 도달하면"
+      Remind Me: "알림"
+      Pause Playback: "재생 일시 정지"
+      Take a Break Reminder: "휴식 알림"
+      Every: "{duration}마다"
+      Bedtime Reminder: "취침 시간 알림"
+      Bedtime Start: "취침 시작 시간"
+      Bedtime End: "취침 종료 시간"
+      Wait Until the Video Ends: "동영상이 끝날 때까지 기다리기"
+      Silence Upload Notifications at Bedtime: "취침 시간에 새 업로드 알림 무음"
+      Stop Autoplay at Bedtime and After the Daily Limit: "취침 시간 및 일일 한도 도달 후 자동 재생 중지"
+    Hide Popularity Graph: "인기도 그래프 숨기기"
+    Enable Block Lists: "차단 목록 활성화"
+    AI Video Summaries: AI 동영상 요약
+    Hide: 숨기기
+    Collapsed: 접힘
+    Expanded: 펼침
+    Video Descriptions: 동영상 설명
+    Video Description Modes:
+      Hide: 숨기기
+      Collapsed: 접힘
+      Expanded: 펼침
+    Playing Interface Hide Delay: 재생 중 인터페이스 숨김 지연
+    Hide Startup Splash: 시작 화면 숨기기
+    Hide Header Sync Indicator: 앱 헤더의 동기화 표시기 숨기기
+    Hide Repeat Stats: 반복 통계 숨기기
+    Hide Playlist Stats: 재생목록 통계 숨기기
+    Sections:
+      Digital Wellbeing: "디지털 웰빙"
+      Side Bar: 사이드바
+      Subscriptions Page: 구독 페이지
+      Channel Page: 채널 페이지
+      Watch Page: 시청 페이지
+      General: 일반
+      Visible While Paused: 전체 창 / 전체 화면에서 일시 정지 중 표시
+    Hide Channel Avatars: 채널 아바타 숨기기
+    Shorten View Counts: 조회수, 댓글 수 및 댓글 좋아요 수 줄여 표시
+    Hide Home: 홈 숨기기
+    Hide Live Chat Replay: 실시간 채팅 다시보기 숨기기
+    Hide Profile Pictures in Comments: 댓글의 프로필 사진 숨기기
+    Disable A-B Repeat: A-B 반복 사용 안 함
+    Hide End-Screen Annotations: 최종 화면 특수효과 숨기기
+    Hide End-Screen Recommendations: "종료 화면 추천 동영상 숨기기"
+    Hide Paid Promotion Badge: 유료 프로모션 배지 숨기기
+    Hide Channels Disabled Message: 일부 채널이 ID로 차단되어 처리되지 않았습니다. 해당 ID를 업데이트하는 동안 이 기능을 사용할 수 없습니다
+    Hide Channels Invalid: 입력한 채널 ID가 올바르지 않습니다
+    Hide Channels API Error: 입력한 ID로 사용자를 가져오는 중 오류가 발생했습니다. ID가 올바른지 다시 확인하세요.
+    Hide Channels Already Exists: 채널 ID가 이미 있습니다
+    Hide Featured Channels: 추천 채널 숨기기
+    Hide Channel Playlists: 채널의 "재생목록" 탭 숨기기
+    Hide Channel Posts: 채널의 "게시물" 탭 숨기기
+    Hide Channel Home: 채널의 "홈" 탭 숨기기
+    Hide Channel Shorts: 채널의 "Shorts" 탭 숨기기
+    Hide Channel Podcasts: 채널의 "팟캐스트" 탭 숨기기
+    Hide Channel Releases: 채널의 "출시작" 탭 숨기기
+    Hide Channel Courses: 채널의 "강의" 탭 숨기기
+    Hide Channel Shows: 채널의 "프로그램" 탭 숨기기
+    Hide Videos, Playlists and Channels Containing Text: 지정한 텍스트가 포함된 동영상, 재생목록 및 채널 숨기기
+    Hide Videos, Playlists and Channels Containing Text Placeholder: 단어, 단어 일부 또는 구문
+    Hide Subscriptions Videos: 구독 동영상 숨기기
+    Hide Subscriptions Shorts: 구독 Shorts 숨기기
+    Hide Subscriptions Live: 구독 실시간 스트림 숨기기
+    Hide Subscriptions Posts: 구독 게시물 숨기기
+    Show Added Items: 추가된 항목 표시
+    Show Player Controls: 플레이어 컨트롤 표시
+    Show Video Title: 동영상 제목 표시
+    Show Bottom Right Actions Dock: 오른쪽 아래 작업 독 표시
+    Paused Interface Hide Delay: 일시 정지된 인터페이스 숨김 지연 시간
+    Add: 추가
+    Remove: 제거
+    Blur Blocked Items: 차단된 항목을 숨기지 않고 흐리게 표시
+    More Items Count: "+{count}개 더…"
+  Data Settings:
+    Settings could not be imported: "설정을 가져올 수 없습니다"
+    Some settings could not be imported: "일부 설정을 가져올 수 없습니다({total}개 중 {failed}개 실패)"
+    Scheduled backups: "예약 백업"
+    Scheduled backup description: "OpenTubeX가 열려 있는 동안 전체 ZIP 백업을 저장합니다. 놓친 백업은 시작 시 실행됩니다. 보관 한도는 이 폴더의 예약 백업에만 적용됩니다."
+    Choose backup folder: "백업 폴더 선택"
+    No backup folder selected: "백업 폴더를 선택하지 않았습니다"
+    Enable scheduled backups: "예약 백업 사용"
+    Backup frequency: "백업 주기"
+    Backups to keep: "보관할 백업 수"
+    Daily: "매일"
+    Weekly: "매주"
+    Every 30 days: "30일마다"
+    Last scheduled backup: "마지막 예약 백업: {date}"
+    No scheduled backup yet: "아직 예약 백업이 없습니다"
+    Scheduled backup failed: "백업에 실패했습니다. 폴더에 쓸 수 있는지 확인하세요. 5분 후에 다시 시도합니다."
+    Import Preview:
+      Title: 변경 사항 미리 보기
+      New: "신규: {count}"
+      Existing: "기존: {count}"
+      Skipped: "건너뜀: {count}"
+      Unreadable files: "읽을 수 없는 파일: {count}"
+      Settings effect: 일치하는 설정은 대체됩니다. 비공개 설정과 알 수 없는 설정은 건너뜁니다.
+      Details effect: 기존 구독 또는 동영상은 유지됩니다. 가져온 프로필 또는 재생목록 세부 정보가 현재 정보를 대체합니다.
+      Merge effect: 기존 데이터는 유지되며 일치하는 기록과 병합됩니다.
+      Subscriptions effect: 기존 구독은 유지됩니다. 새 채널만 추가됩니다.
+      History merge effect: 일치하는 동영상은 기록과 병합되며 저장된 세부 정보와 최신 시청 날짜가 유지됩니다. 다른 기록은 유지됩니다.
+    Select export data: "내보낼 데이터를 선택하세요"
+    Export selected data: "선택한 데이터 내보내기"
+    Complete backup: "전체 백업"
+    Import backup: "백업 가져오기"
+    Export backup: "백업 내보내기"
+    Backup description: "프로필, 재생 목록, 기록, 통계 및 전송 가능한 설정을 하나의 ZIP 파일에 저장합니다. 가져오기를 하면 이미 이 장치에 있는 데이터와 병합됩니다."
+    Select backup data: "가져올 데이터 선택"
+    Profiles and subscriptions: "프로필 및 구독"
+    Backup exported: "백업을 성공적으로 내보냈습니다"
+    Backup imported: "백업을 성공적으로 가져왔습니다"
+    Import YouTube Takeout ZIP: "YouTube Takeout ZIP 가져오기"
+    Select Takeout data: "가져올 데이터 선택"
+    Import selected data: "선택한 데이터 가져오기"
+    No supported Takeout data: "이 ZIP에서 지원되는 YouTube 데이터를 찾지 못했습니다."
+    Data And Storage: 데이터 및 저장 공간
+    Profile Directory: 프로필 디렉터리
+    Open Profile Directory: 프로필 디렉터리 열기
+    Search history file: 검색 기록 파일
+    Settings File: 설정 파일
+    Search history: 검색 기록
+    Import search history: 검색 기록 가져오기
+    Export search history: 검색 기록 내보내기
+    Import Settings: 설정 가져오기
+    Export Settings: 설정 내보내기
+    Settings Tooltip: 운영 체제나 사용자별 설정 및 실험적 설정은 내보내거나 가져올 수 없습니다. 예를 들어 프록시, 외부 플레이어, 스크린샷 폴더가 해당됩니다.
+    Invalid JSON row, skipping item: '{row}행의 JSON이 올바르지 않아 항목을 건너뜁니다'
+    All search history has been successfully imported: 모든 검색 기록을 가져왔습니다
+    All search history has been successfully exported: 모든 검색 기록을 내보냈습니다
+    All settings have been successfully imported: 모든 설정을 가져왔습니다
+    All settings have been successfully exported: 모든 설정을 내보냈습니다
+    Setting object has insufficient data, skipping item: 설정 객체에 데이터가 부족하여 항목을 건너뜁니다
+    Unknown setting key: '알 수 없는 설정 키: {key}'
+    Non-transferable setting key: '전송할 수 없는 설정 키: {key}'
+    Import subscriptions formats: '지원 형식: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube 백업 또는 FreeTube 내보내기 (.json)'
+    Import history formats: '지원 형식: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube 백업 (.json)'
+    Import playlists formats: '지원 형식: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import search history formats: '지원 형식: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Channel playback speeds: "채널별 재생 속도"
+    Import channel playback speeds: "채널별 재생 속도 가져오기"
+    Channel playback speeds file: "채널별 재생 속도 파일"
+    Import channel playback speeds formats: "지원 형식: {script} 사용자 스크립트 저장소 (.json)"
+    Invalid channel playback speeds file: "이 파일에서 채널별 재생 속도를 찾을 수 없습니다"
+    Channel playback speeds imported: "채널 {count}개의 재생 속도를 가져왔습니다"
+    Channels not found: "채널 {count}개를 찾을 수 없습니다"
+    Playlists have been successfully imported: "재생 목록 {count}/{total}개를 가져왔습니다"
+  Sync Settings:
+    Signed Out After Restore: '이 앱 데이터가 백업이나 다른 기기에서 복원되어 동기화에서 로그아웃되었습니다. 이 기기를 동기화하려면 다시 로그인하세요.'
+    Revoke Session Tabs Warning: "이 기기의 동기화된 탭 모음도 삭제됩니다."
+    Revoke Session Partial Failure: "동기화된 탭 모음이 삭제되었지만 접근 권한 취소를 확인할 수 없습니다. 접근 권한 취소를 다시 시도하세요."
+    Tab Sync Revocation Pending: "이 로그인의 액세스 취소가 완료될 때까지 탭 동기화가 일시 중지됩니다. 동기화 설정에서 취소를 다시 시도하세요."
+    Show More: "더 보기"
+    Sync Automatically: "자동으로 동기화"
+    Activity: "계정 활동"
+    No Activity: "최근 활동 없음"
+    Clear Activity: "이 기기에서 지우기"
+    Clear Activity Hint: "이 기기에서 기존 계정 활동을 숨깁니다. 서버와 다른 기기의 활동은 변경되지 않습니다. 새로운 활동은 계속 표시됩니다."
+    Setting Changed: "{device}에서 {setting}을(를) {value}(으)로 변경했습니다"
+    Item Updated: "{device}에서 {setting}을(를) 업데이트했습니다"
+    Item Added: "{device}에서 {item}을(를) {setting}에 추가했습니다"
+    Item Removed: "{device}가 {item}을(를) {setting}에서 삭제했습니다"
+    Item Renamed: "{device}에서 {item}의 이름을 {value}(으)로 변경했습니다"
+    Saved Playlists: "저장한 재생목록"
+    No Feed Types: "없음"
+    Open On Device: "다른 기기에서 열기"
+    Video Sent: "동영상을 보냈습니다. 오프라인 기기는 24시간 이내에 다시 연결하면 받을 수 있습니다."
+    Video Received: "받은 동영상: {title}"
+    Previous Auto Sync Notice: "자동 동기화가 꺼져 있습니다. 이전 버전에서 데이터 손실을 방지하기 위해 비활성화했을 수 있습니다."
+    Enable Automatic Sync: "자동 동기화 활성화"
+    Destructive Sync Blocked: "데이터 손실을 방지하기 위해 동기화를 중지했습니다. 자동 동기화가 꺼져 있습니다. 동기화 설정을 열어 삭제할 항목을 확인하세요."
+    Devices: "기기"
+    Devices Hint: "이 동기화 계정에 접근할 수 있는 기기를 확인합니다."
+    Change Password: "비밀번호 변경"
+    Refresh Devices: "기기 새로 고침"
+    Current Device: "현재 기기"
+    Revoke Session: "접근 권한 해지"
+    Session Created: "생성됨"
+    Last Active: "마지막 활동"
+    Session Expires: "만료일"
+    Unknown Device: "알 수 없는 기기"
+    Operating System: "운영 체제"
+    Rename Device: "기기 이름 변경"
+    Save Device Name: "이름 저장"
+    Device Name Invalid: "기기 이름은 최대 80자까지 입력할 수 있으며 제어 문자를 포함할 수 없습니다."
+    Device Renamed: "기기 이름이 변경되었습니다"
+    Revoke Session Confirmation: "이 세션을 해지할까요?"
+    Revoke Current Session Warning: "이 세션을 해지하면 이 기기와 동기화 계정의 연결이 끊어집니다."
+    Revoke Session Warning: "{device}에서 이 동기화 계정에 접근할 수 없게 됩니다."
+    Confirm Revoke Session: "세션 해지"
+    Session Revoked: "세션이 해지되었습니다"
+    Change Password Warning: "비밀번호를 변경하면 다른 모든 기기에서 로그아웃됩니다. 이 기기는 연결된 상태로 유지됩니다."
+    Current Password: "현재 비밀번호"
+    New Password: "새 비밀번호"
+    Confirm New Password: "새 비밀번호 확인"
+    Save New Password: "새 비밀번호 저장"
+    Account Management Failed: "동기화 계정 정보를 불러올 수 없습니다."
+    All Password Fields Required: "모든 비밀번호 입력란을 작성하세요."
+    New Password Too Short: "새 비밀번호는 8자 이상이어야 합니다."
+    New Passwords Do Not Match: "새 비밀번호가 일치하지 않습니다."
+    Password Changed: "비밀번호를 변경했습니다. 다른 기기에서 로그아웃했습니다."
+    Sync Settings: 동기화
+    Watch stats: "시청 통계"
+    Enable Sync: 동기화 활성화
+    Privacy Passphrase: 개인 정보 암호문
+    Privacy Passphrase Hint: 계정 비밀번호와 다른 암호문을 사용하세요. 암호문은 이 기기를 벗어나지 않으며 모든 기기에 필요합니다. 잃어버리면 암호화된 동기화 데이터를 복구할 수 없습니다.
+    Privacy Policy: 이 서버의 개인 정보 처리 방침
+    Enhanced Privacy Enabled: 강화된 개인 정보 보호가 활성화되었습니다. 서버에는 암호화된 동기화 데이터만 저장됩니다.
+    Enhanced Privacy Unsupported: 경고. 이 서버는 강화된 개인 정보 보호를 지원하지 않습니다. 동기화된 데이터를 서버 운영자가 볼 수 있습니다.
+    Description: 'OpenTubeX 또는 LibreTube 동기화 서버와 구독, 프로필, 재생목록, 시청 기록 및 지원되는 설정을 동기화합니다. LibreTube 서버는 일부 동기화 기능을 지원하지 않을 수 있습니다.'
+    Server URL: 동기화 서버 URL
+    Checking Server: 동기화 서버 확인 중…
+    Server Unavailable: 이 동기화 서버에 연결할 수 없습니다. URL을 확인하고 다시 시도하세요.
+    Username: 사용자 이름
+    Log In: 로그인
+    Register: 가입
+    Pair Another Device: 다른 기기 페어링
+    Pair With Existing Device: 기존 기기와 페어링
+    Device Name: 기기 이름
+    This Device: 이 기기
+    Device Name Required: 이 기기의 이름을 입력하세요.
+    Pairing Device Name Hint: 요청을 승인하는 기기에서 알아볼 수 있는 이름을 선택하세요.
+    Create Pairing Code: 페어링 코드 만들기
+    Creating Pairing Code: 보안 페어링 코드 만드는 중…
+    Pairing QR Alt: '{device}용 페어링 QR 코드'
+    Scan Pairing Code: 이미 연결된 기기에서 "다른 기기 페어링"을 열고 이 코드를 스캔하세요.
+    Pairing Code: 페어링 코드
+    Use Text Pairing Code: 텍스트 코드 사용
+    Show QR Code: QR 코드 표시
+    Text Pairing Code Hint: 이 코드를 기존 기기에 복사하세요. 페어링 비밀 정보가 포함되어 있으므로 페어링 후 클립보드 기록에서 지우세요.
+    Pairing QR Warning: 이 요청을 승인할 신뢰할 수 있는 연결된 기기에만 이 코드를 보여 주세요. 코드는 2분 후 만료됩니다.
+    Pairing Expires: 페어링 코드는 {time}에 만료됩니다.
+    Verifying Pairing: 전송된 개인 정보 키 확인 중…
+    Completing Pairing: 기기 페어링 완료 중…
+    Compare Pairing Codes: 페어링 코드 비교
+    Pairing Code Match Hint: 이 코드가 기존 기기의 코드와 일치하는 경우에만 확인하세요.
+    Pairing Codes Match: 코드 일치
+    Pairing Approval Code Hint: 이 창을 열어 둔 채 새 기기의 코드와 비교하세요. 코드가 다르면 새 기기에서 계속 진행하지 마세요.
+    Pairing Scan Hint: 추가할 기기에 표시된 페어링 코드를 스캔하세요.
+    Enter Pairing Code: 코드 직접 입력
+    Pairing Code Entry Hint: 추가할 기기에 표시된 페어링 코드를 붙여 넣으세요.
+    Check Pairing Code: 코드 확인
+    Scan QR Code: QR 코드 스캔
+    Waiting For Pairing Code: 페어링 코드 기다리는 중…
+    Checking Pairing Request: 페어링 요청 확인 중…
+    Approving Pairing Request: 개인 정보 키를 암호화하여 전송하는 중…
+    Pairing Approval Warning: 추가할 기기에서 이 요청을 확인할 수 있는 경우에만 승인하세요. 페어링하면 계정 접근 권한을 부여하고 개인 정보 키를 전송합니다.
+    Approve Pairing: 페어링 승인
+    Try Again: 다시 시도
+    Scan Again: 다시 스캔
+    Camera Unavailable: OpenTubeX에서 카메라에 접근할 수 없습니다. 카메라 권한을 확인하거나 페어링 코드를 직접 입력하세요.
+    Pairing Unsupported: 이 동기화 서버는 보안 기기 페어링을 지원하지 않습니다.
+    Pairing Failed: 기기 페어링에 실패했습니다. 새 코드로 다시 시도하세요.
+    Pairing Request Changed: 페어링 요청이 변경 또는 만료되었거나 이미 사용되었습니다. 새 코드를 만드세요.
+    Pairing Server Mismatch: 이 코드는 다른 동기화 서버의 코드입니다.
+    Pairing Verification Unavailable: 전송된 키를 확인할 암호화된 동기화 컬렉션이 없습니다. 기존 기기를 동기화한 후 다시 시도하세요.
+    Pairing Completed: 기기 페어링을 완료했습니다
+    Pairing Approved: 기기 페어링을 승인했습니다
+    Use Pairing Invite: 연결된 기기의 코드 사용
+    Show Pairing Invite: 페어링 코드 표시
+    Scan Pairing Invite: '추가할 기기에서 "기존 기기와 페어링"을 열고 "연결된 기기의 코드 사용"을 선택한 다음 이 코드를 스캔하세요.'
+    Pairing Invite QR Alt: 추가할 기기용 페어링 QR 코드
+    Pairing Invite Text Hint: 이 코드를 추가할 기기에 복사하세요. 이 코드로 기기가 계정 접근을 요청할 수 있으므로 페어링 후 클립보드 기록에서 지우세요.
+    Pairing Invite Warning: 이 코드는 추가할 기기에만 보여 주세요. 해당 기기의 요청은 여전히 이 기기에서 승인해야 합니다.
+    Pairing Invite Scan Hint: 연결된 기기에 표시된 페어링 코드를 스캔하세요.
+    Pairing Invite Entry Hint: 연결된 기기에 표시된 페어링 코드를 붙여 넣으세요.
+    Pairing Invite Code Hint: 연결된 기기에 이 코드가 표시되는 경우에만 요청을 승인하세요. 그러면 페어링이 자동으로 완료됩니다.
+    Pairing Invite Approval Hint: 추가할 기기에 이 코드가 표시되는 경우에만 승인하세요.
+    Pairing Invite Approved: 페어링을 승인했습니다. 새 기기에서 페어링이 자동으로 완료됩니다.
+    Disconnect: 연결 해제
+    Delete Account: 동기화 계정 삭제
+    Delete Account Confirmation: 동기화 계정을 삭제하시겠습니까?
+    Delete Account Warning: 동기화 계정과 이 서버에 저장된 모든 데이터를 영구적으로 삭제합니다. 로컬 OpenTubeX 데이터는 삭제되지 않습니다.
+    Confirm Delete Account: 계정 삭제
+    Password Required: 비밀번호가 필요합니다
+    Account Deleted: 동기화 계정을 삭제했습니다
+    Connected as: '{username}(으)로 연결됨'
+    Profiles: 프로필
+    Open Tabs: 열린 탭 및 세션
+    Disable Setting Sync: 이 설정 동기화 중지
+    Enable Setting Sync: 이 설정 동기화
+    Sync Now: 지금 동기화
+    Downloading encrypted data: 암호화된 동기화 데이터 다운로드 중…
+    Syncing subscriptions: 구독 동기화 중…
+    Syncing playlists: 재생목록 동기화 중…
+    Syncing history: 시청 기록 동기화 중…
+    Syncing statistics: 시청 통계 동기화 중…
+    Syncing profiles: 프로필 동기화 중…
+    Syncing open tabs: 열린 탭 및 세션 동기화 중…
+    Syncing settings: 설정 동기화 중…
+    Uploading encrypted data: 암호화된 동기화 데이터 업로드 중…
+    Finishing sync: 동기화 마무리 중…
+    Sync progress percentage: '{percentage}%'
+    Last synced: '마지막 동기화: {date}'
+    History not supported: 이 서버 버전은 시청 기록 동기화를 지원하지 않습니다.
+    Settings not supported: 이 서버 버전은 설정 동기화를 지원하지 않습니다.
+    Sync completed: 동기화를 완료했습니다
+    Sync failed: "동기화 실패: {error}"
+    Data Loss Confirmation: 데이터가 삭제되는 동기화를 확인하시겠습니까?
+    Data Loss Warning: 동기화하면 모든 기기에서 이전에 동기화된 ‘{collection}’ 항목 {previous}개 중 {deleted}개가 삭제됩니다. 서버가 초기화된 경우처럼 직접 삭제하지 않았다면 항목을 유지하여 모든 곳에 복원하세요.
+    Keep Deleted Items: 항목 유지
+    Confirm Data Loss: 삭제하고 계속
+    Use Shared Tabs: '기기 간에 하나의 탭 모음 공유'
+    Shared Tabs Warning: '이 기기에 열려 있는 탭이 공유 탭 모음이 됩니다. 다른 기기는 동기화할 때 열려 있는 탭을 이 모음으로 대체하며, 서로 다른 기기의 탭은 합쳐지지 않습니다.'
+    Tabs From Other Devices: '다른 기기의 탭'
+    Mobile Device: '모바일'
+    Desktop Device: '데스크톱'
+    Open All Tabs: '모든 탭 열기'
+    Open All Tabs Confirmation: "모든 탭을 여시겠습니까?"
+    Server Update Required: "암호화된 실시간 동기화를 지원하도록 이 서버를 업데이트하세요."
+    Log In with Provider: '{provider}(으)로 로그인'
+    Log In with Single Sign-On: '통합 인증으로 로그인'
+    Continue in Browser: '브라우저에서 계속하세요. 완료되면 OpenTubeX가 이어서 진행합니다.'
+    Connected with Single Sign-On: '통합 인증으로 연결됨'
+    Delete Single Sign-On Account Hint: '브라우저가 열리면 로그인 제공자에서 삭제를 확인할 수 있습니다.'
+  Proxy Settings:
+    Proxy Warning: OpenTubeX에는 내장 프록시가 없지만 기기에서 실행 중인 Tor나 일부 VPN에서 제공하는 SOCKS5 프록시 같은 외부 프록시에 연결할 수 있습니다. 활성화한 경우 프록시 또는 Tor를 올바르게 설정해야 합니다. 그렇지 않으면 OpenTubeX에서 데이터를 가져올 수 없습니다.
+    Proxy Username: 프록시 사용자 이름
+    Proxy Password: 프록시 비밀번호
+    IP Block Recovery Script Path: IP 차단 복구 스크립트
+    Running IP block recovery script: IP 차단 복구 스크립트 실행 중
+    IP block recovery script failed: 'IP 차단 복구 스크립트 실패 (종료 코드: {exitCode})'
+    IP block recovery script finished: IP 차단 복구 스크립트 완료
+    Reloading video after IP block recovery: IP 차단 복구 후 동영상 다시 불러오는 중
+    Failed to select IP block recovery script: IP 차단 복구 스크립트를 선택하지 못했습니다
+  SponsorBlock Settings:
+    Excluded Channels:
+      Excluded Channels: "제외된 채널"
+      Tooltip: "해당 채널의 동영상에서 SponsorBlock 구간을 건너뛰지 않으려면 채널 ID를 입력하세요. ID는 대소문자를 구분하여 정확히 일치해야 합니다."
+    Enable SponsorBlock Submission: SponsorBlock 제출 활성화
+    SponsorBlock Private User ID (optional): 비공개 사용자 ID (선택 사항)
+    SponsorBlock Private User ID Tooltip: 브라우저 확장 프로그램의 비공개 SponsorBlock 사용자 ID를 붙여 넣으세요. 앱에서 생성한 ID를 사용하려면 비워 두세요.
+    Generated SponsorBlock User ID: 생성된 SponsorBlock 사용자 ID
+    Generated SponsorBlock User ID Tooltip: 앱에서 생성한 SponsorBlock 사용자 ID를 브라우저 확장 프로그램이나 다른 컴퓨터의 앱에서 사용할 수 있습니다.
+    Reveal Generated User ID: 생성된 사용자 ID 표시
+    Generated SponsorBlock User ID Copy Button: 생성된 SponsorBlock 사용자 ID 복사
+    Generated SponsorBlock User ID Copied: 생성된 SponsorBlock 사용자 ID를 클립보드에 복사했습니다
+    Skip notification timeout: 건너뛰기 알림 표시 시간
+    UseDeArrowTitles: DeArrow 동영상 제목 사용
+    UseDeArrowThumbnails: 썸네일에 DeArrow 사용
+    DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app): DeArrow 썸네일 API URL
+    Custom Color: 사용자 지정 색상
+    DeArrow Settings: DeArrow
+    Always Show DeArrow Badge: DeArrow 배지 항상 표시
+  Return YouTube Dislike Settings:
+    Return YouTube Dislike Settings: Return YouTube Dislike
+    Enable Return YouTube Dislike: Return YouTube Dislike 활성화
+    Return YouTube Dislike Url: API URL
+  Parental Control Settings:
+    Hide Uploader on Watch page: 시청 페이지에서 업로더 숨기기
+    Disable Channel Links: 채널 링크 비활성화
+  Password Dialog:
+    Incorrect Password: 비밀번호가 올바르지 않습니다
+    Unlock: 잠금 해제
+    Unlocking: 잠금 해제 중…
+  Search Settings: 설정 검색
+  No Settings Found: 설정을 찾을 수 없습니다
+  Experimental Settings:
+    Disable Hardware Acceleration: 하드웨어 가속 비활성화
+  Interface Customizer:
+    Customize Interface: "인터페이스 사용자 지정"
+    Preview: "미리 보기"
+    Player: "플레이어"
+    Desktop: "데스크톱"
+    Mobile: "모바일"
+    Playing: "재생 중"
+    Player Menu: "플레이어 메뉴"
+    Fullscreen: "전체 화면"
+    Paused: "일시 중지됨"
+    Controls: "컨트롤"
+    Example Video Title: "예시 동영상"
+    Resolution: "해상도"
+    Loop: "반복"
+    Off: "끄기"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: AI 저품질 콘텐츠 채널 숨기기
+    Hide AI Slop Channels Tooltip: 커뮤니티에서 관리하는 AiSList 차단 목록(aisloplist.com)에 있는 채널을 검색 결과, 트렌딩, 추천에서 숨기고, 경고 목록에 있는 채널의 동영상에 라벨을 표시합니다. 구독에는 영향을 주지 않습니다. 목록은 하루에 한 번 GitHub에서 다운로드되며 로컬 API로 불러온 결과에만 적용됩니다.
+    Downloading: 목록 다운로드 중…
+    Failed to Download: 목록을 다운로드할 수 없습니다
+    Loaded Status: "차단된 채널: {blocked} · 표시된 채널: {warned} · 업데이트: {date}"
+Tutorial:
+  Skip: 건너뛰기
+  Next: 다음
+  Finish: 완료
+  Welcome:
+    Title: OpenTubeX에 오신 것을 환영합니다
+    Description: 새로 시작하거나 다른 앱 또는 백업에서 구독, 시청 기록, 재생목록을 가져오세요.
+    Start Fresh: 새로 시작
+    Import Data: 데이터 가져오기
+  Preferences:
+    Title: 나에게 맞게 설정
+    Description: 테마, 시작 페이지, 지역을 선택하세요. 이 항목과 그 밖의 설정은 언제든지 설정에서 변경할 수 있습니다.
+  Playback:
+    Title: 재생 및 개인정보 보호
+    Description: 동영상 재생 방식, OpenTubeX의 시청 기록 저장 여부, 사용할 커뮤니티 부가 기능을 선택하세요.
+  Navigation:
+    Title: 언제든지 라이브러리 이용
+    Description: 탐색 메뉴에서 구독, 재생목록, 시청 기록 등을 이용하세요.
+  Search:
+    Title: 검색 또는 링크 붙여넣기
+    Description: 동영상과 채널을 찾거나 지원되는 동영상 URL을 검색란에 바로 붙여 넣으세요.
+  Tabs:
+    Title: 페이지를 탭에 열어 두기
+    Description: 보던 위치를 잃지 않고 여러 페이지를 동시에 열 수 있습니다.
+  Profile Menu:
+    Title: 설정 및 프로필
+    Description: 프로필 메뉴에는 빠른 설정, 다운로드 및 기타 모든 설정이 있습니다. 마우스 오른쪽 버튼으로 클릭하면 프로필을 전환할 수 있습니다.
+    Touch Description: 프로필 메뉴에는 빠른 설정, 다운로드 및 기타 모든 설정이 있습니다. 길게 누르면 프로필을 전환할 수 있습니다.
+About:
+  Project: 프로젝트
+  Community: 커뮤니티
+  Contribute: 기여하기
+  Documentation: 문서
+  Downloads: 다운로드
+  Changelog: 변경 로그
+  Commit: 커밋
+  Licensed under the {licenseLink}: '{licenseLink} 라이선스로 배포'
+  AGPLv3: AGPLv3
+  Discussions: 토론
+  Matrix: Matrix
+  Email: 이메일
+  Please read the {roomRulesLink}: '{roomRulesLink}을(를) 읽어 주세요'
+  OpenTubeX is made possible by {creditsPageLink}: '{creditsPageLink}의 도움으로 OpenTubeX를 만들 수 있었습니다'
+  Show tutorial: 튜토리얼 보기
+Profile:
+  Customization: 맞춤 설정
+  Manage Profile Subscriptions: 프로필 구독 관리
+  Icon Names:
+    Person: 사람
+    People: 사람들
+    Headphones: 헤드폰
+    Gaming: 게임
+    Film: 영화
+    Art: 예술
+    Science: 과학
+    Globe: 지구본
+    Heart: 하트
+    Sun: 태양
+    Moon: 달
+    Trophy: 트로피
+  Toggle Profile List: 프로필 목록 전환
+  Edit Profile Name: 프로필 이름 편집
+  Create Profile Name: 프로필 이름 만들기
+  Profile Name: 프로필 이름
+  Profile Icon: 프로필 아이콘
+  Choose an Emoji: 이모지 선택
+  Custom Emoji: 사용자 지정 이모지
+  Choose Image: 이미지 선택
+  Crop Image: 이미지 자르기
+  Zoom: 확대/축소
+  Apply Crop: 자르기 적용
+  Transparent: 투명
+  Use Initial: 이니셜 사용
+  The selected image could not be loaded: 선택한 이미지를 불러올 수 없습니다
+  Theme Color: 테마 색상
+  Close Profile Dropdown: 프로필 드롭다운 닫기
+  Open Profile Dropdown: 프로필 드롭다운 열기
+  Go To Profile Manager: 프로필 관리자로 이동
+Channel:
+  Hide Watched: 시청한 동영상 숨기기
+  Fewer videos per day: "일일 동영상 수 줄이기"
+  More videos per day: "일일 동영상 수 늘리기"
+  Verified: 인증됨
+  Official Artist Channel: 공식 아티스트 채널
+  Subscription settings: 구독 설정
+  Failed to save subscription settings: 채널 설정을 저장하지 못했습니다
+  Videos per day: 일일 동영상 수
+  Use global setting: 전역 설정 사용
+  Unlimited: 무제한
+  More videos hidden: '+{count}개 더'
+  Show in subscription feed: 구독 피드에 표시
+  Notify about new uploads: 새 업로드 알림
+  Show members-only videos: 회원 전용 동영상 표시
+  Upload Notifications On: "구독이 새로 고쳐질 때 {channelName}의 새 업로드를 알려드립니다"
+  Upload Notifications Off: "{channelName}의 새 업로드 알림을 받지 않습니다"
+  Upload Notifications Disabled In Settings: "{channelName}의 알림은 켜져 있지만 설정에서 새 업로드 알림이 꺼져 있습니다"
+  Turn On Upload Notifications: "켜기"
+  Channel Name Unavailable: 채널 이름을 확인할 수 없습니다
+  Search Result Types: 검색 결과 유형
+  All Results: 전체
+  This channel does not exist: 이 채널은 존재하지 않습니다
+  This channel does not allow searching: 이 채널에서는 검색할 수 없습니다
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: 이 채널은 연령 제한이 있어 현재 OpenTubeX에서 볼 수 없습니다.
+  Channel Tabs: 채널 탭
+  View All: 모두 보기
+  Shorts:
+    This channel does not currently have any shorts: 이 채널에는 현재 Shorts가 없습니다
+  Live:
+    Live: 실시간
+    This channel does not currently have any live streams: 이 채널에는 현재 실시간 스트림이 없습니다
+  Home:
+    Home: 홈
+    View Playlist: 재생목록 보기
+  Podcasts:
+    This channel does not currently have any podcasts: 이 채널에는 현재 팟캐스트가 없습니다
+  Releases:
+    Releases: 출시작
+    This channel does not currently have any releases: 이 채널에는 현재 출시작이 없습니다
+  Courses:
+    Courses: 강의
+    This channel does not currently have any courses: 이 채널에는 현재 강의가 없습니다
+  About:
+    Links: 링크
+    Tags:
+      Tags: 채널 태그
+      Search for: '"{tag}" 검색'
+    Details: 세부 정보
+    Joined: 가입일
+    Location: 위치
+  Posts:
+    This channel currently does not have any posts: 이 채널에는 현재 게시물이 없습니다
+    votes: '{votes}표'
+    View Full Post: 전체 게시물 보기
+    Reveal Answers: 답변 표시
+    Hide Answers: 답변 숨기기
+    Original post unavailable: "원본 게시물을 사용할 수 없음"
+    Members-only video hidden by OpenTubeX: "OpenTubeX에서 숨긴 회원 전용 동영상"
+    Video hidden by OpenTubeX because of its title: "제목에 숨긴 텍스트가 포함되어 OpenTubeX에서 숨긴 동영상"
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "이 채널에는 동영상이 있지만 표시할 수 없습니다. 더 불러오기를 시도하세요"
+  Shows:
+    Shows: 프로그램
+    This channel does not currently have any shows: 이 채널에는 현재 프로그램이 없습니다
+Video:
+  Play in Background: "백그라운드에서 재생"
+  Info panel source: '출처: {source}'
+  External DRM Protected: "DRM 보호 동영상에는 독점 비공개 소스 구성 요소가 필요하므로 OpenTubeX에서 재생할 수 없습니다."
+  Invalid Media URL: "유효하지 않은 미디어 URL"
+  Mark As Fully Watched: 끝까지 시청한 것으로 표시
+  AI-generated video summary: "AI 생성 동영상 요약"
+  Quality and accuracy may vary: "품질과 정확도는 다를 수 있습니다"
+  Includes paid promotion: 유료 프로모션 포함
+  Age Restricted Badge: 연령 제한
+  Music Video Badge: 뮤직비디오
+  Queue: 대기열
+  Play Next: 다음에 재생
+  Add to Queue: 대기열에 추가
+  Added to Play Next: 이 동영상을 다음에 재생합니다
+  Added to Queue: 동영상을 대기열에 추가했습니다
+  Clear Queue: 대기열 지우기
+  Queue Video Count: '동영상 {count}개'
+  Remove from Queue: 대기열에서 {title} 제거
+  Remove Video from Queue: 대기열에서 제거
+  Drag to Reorder Queue: 끌어서 대기열의 {title} 순서 변경
+  Reorder Queue Item: '{title} 순서 변경'
+  Reorder Queue Item Instructions: 위쪽 및 아래쪽 화살표 키로 이 동영상을 대기열에서 이동하세요.
+  Queue Item Moved: '{title}을(를) {total}개 중 {position}번째로 이동했습니다.'
+  Queue Item Cannot Move Up: '{title}을(를) 위로 이동할 수 없습니다. 이미 {total}개 중 첫 번째입니다.'
+  Queue Item Cannot Move Down: '{title}을(를) 아래로 이동할 수 없습니다. 이미 {total}개 중 {total}번째입니다.'
+  Metadata: 동영상 정보
+  Close Metadata: 동영상 정보 닫기
+  Metadata Cache:
+    Title History: 제목 기록
+    Thumbnail History: 썸네일 기록
+    Description History: 설명 기록
+    Previous Version: '이전 버전 {number}'
+    Empty: (비어 있음)
+  Fetching Streams: yt-dlp로 스트림 가져오는 중…
+  Waiting For Connection: "서버에 연결할 수 없습니다. 자동으로 다시 시도하는 중…"
+  Retry Now: "지금 다시 시도"
+  Transcript:
+    Title: 스크립트
+    Search: 스크립트 검색
+    Language: 스크립트 언어
+    Save: 저장
+    Show: 스크립트 표시
+    Hide: 스크립트 숨기기
+    Close: 스크립트 닫기
+    Copied: 스크립트를 클립보드에 복사했습니다
+    Saved: 스크립트를 저장했습니다
+    Save Error: 스크립트를 저장할 수 없습니다
+    Text File: 텍스트 파일
+    Unavailable: 이 동영상에는 스크립트가 없습니다.
+    Load Error: 스크립트를 불러올 수 없습니다.
+    Empty: 이 스크립트에는 텍스트가 없습니다.
+    No Results: 검색과 일치하는 스크립트 구간이 없습니다.
+  IP block: YouTube에서 이 IP 주소의 동영상 시청을 차단했거나, 이 동영상에 YouTube가 로그인하지 않은 사용자의 접근을 제한하는 미성년자 관련 콘텐츠가 포함되어 있을 수 있습니다. IP 차단이라면 다른 VPN이나 프록시로 전환해 보세요.
+  Retry With Built-in Extraction: 내장 추출로 다시 시도
+  Retry With yt-dlp Extraction: yt-dlp 추출로 다시 시도
+  Reloading video after streaming URL error: 스트리밍 URL 오류 후 동영상 다시 불러오는 중
+  MembersOnly: 이 회원 전용 동영상을 보려면 이 채널의 멤버십이 활성화된 Google 계정이 필요합니다.
+  AgeRestricted: 이 연령 제한 동영상을 보려면 연령 인증된 Google 계정이 필요합니다.
+  Configure Restricted Playback Cookies Hint: "설정 → 고급 → 외부 소프트웨어 → yt-dlp 쿠키에서 쿠키를 설정하세요."
+  Try With Configured Cookies: 설정된 쿠키로 시도
+  Restricted Playback Authentication Failed Template: 'yt-dlp에서 설정된 쿠키로 이 동영상에 접근할 수 없습니다: {error}'
+  DRMProtected: DRM 보호 동영상에는 독점 비공개 소스 구성 요소가 필요하므로 OpenTubeX에서 재생할 수 없습니다. 이 동영상을 보려면 DRM을 지원하는 웹 브라우저에서 공식 YouTube 웹사이트를 이용하세요.
+  Private: 비공개 동영상은 Google 로그인과 동영상 소유권이 필요하므로 OpenTubeX에서 볼 수 없습니다.
+  Collapse Playlist: 재생목록 접기
+  Expand Playlist: 재생목록 펼치기
+  More Options: 옵션 더 보기
+  Unmark As Watched: 시청함 표시 해제
+  Video has been unmarked as watched: 동영상의 시청함 표시를 해제했습니다
+  Save Watched Progress: 시청 진행률 저장
+  Watched Progress Saved: 시청 진행률을 저장했습니다
+  Save Channel Playback Speed: 채널 재생 속도 저장
+  Channel Playback Speed Saved: 채널 재생 속도를 저장했습니다
+  Save Channel Video Quality: 채널 동영상 화질 저장
+  Channel Video Quality Saved: 채널 동영상 화질을 저장했습니다
+  Save Channel Subtitles State: 채널 자막 상태 저장
+  Channel Subtitles State Saved: 채널 자막 상태를 저장했습니다
+  Save Channel Volume: 채널 음량 저장
+  Channel Volume Saved: 채널 음량을 저장했습니다
+  Save Channel Setting: 채널 설정 저장…
+  Channel Setting Already Set: '{setting}은(는) 이미 {value}(으)로 설정되어 있습니다'
+  Video has been saved to {playlistName}: 동영상을 {playlistName}에 저장했습니다
+  Video has been removed from {playlistName}: '{playlistName}에서 동영상을 제거했습니다'
+  There was a problem saving the video to {playlistName}: 동영상을 {playlistName}에 저장하는 중 문제가 발생했습니다
+  There was a problem removing the video from {playlistName}: '{playlistName}에서 동영상을 제거하는 중 문제가 발생했습니다'
+  Failed to load collaborators: 공동 작업자를 불러오지 못했습니다
+  Hide Channel: 채널 숨기기
+  Unhide Channel: 채널 표시
+  Notify me: 알림 받기
+  Notification on: 알림 켜짐
+  Notification enabled: 이 동영상이 시작되면 알려드립니다
+  Notification cancelled: 시작 알림을 취소했습니다
+  Notification unavailable: 시스템 알림을 사용할 수 없습니다
+  Scheduled video starting: 예정된 동영상 시작
+  Live notification body: '{videoTitle}이(가) 지금 시작됩니다'
+  Premiere: 최초 공개
+  Unlisted: 일부 공개
+  AI: AI
+  AI-generated content: AI 생성 콘텐츠
+  Collaborators: 공동 작업자
+  Live Chat Replay: 실시간 채팅 다시보기
+  Show Live Chat: 실시간 채팅 표시
+  Show Live Chat Replay: 실시간 채팅 다시보기 표시
+  Close Live Chat: 실시간 채팅 닫기
+  Close Live Chat Replay: 실시간 채팅 다시보기 닫기
+  Live Chat Settings: 실시간 채팅 설정
+  Show Live Chat Timestamps: 시간 표시
+  Chat Filter: 채팅 필터
+  Top Chat: 주요 채팅
+  All Messages: 모든 메시지
+  Popout Live Chat: 채팅 팝아웃
+  Live chat replay is enabled. Chat messages will appear here as the video plays.: 실시간 채팅 다시보기가 활성화되었습니다. 동영상이 재생되면 여기에 채팅 메시지가 표시됩니다.
+  Live Chat is unavailable for this stream. It may have been disabled by the uploader.: 이 스트림에서는 실시간 채팅을 사용할 수 없습니다. 업로더가 비활성화했을 수 있습니다.
+  Premiere started: 최초 공개 진행 중. {timeAgo}에 시작
+  DeArrow:
+    Show Original Details: 원본 정보 표시
+    Show Modified Details: 수정된 정보 표시
+  Player:
+    Playing in Picture-in-Picture: 화면 속 화면 모드에서 재생 중
+    Stream Recovery:
+      DASH Fallback: "오디오 스트림에 실패하여 DASH 형식으로 전환합니다: {error}"
+      Error Copied: "오류를 클립보드에 복사했습니다"
+      Legacy Fallback: "스트림에 실패하여 레거시 형식으로 전환합니다: {error}"
+    Caption Timing:
+      Adjust Timing: 타이밍 조정…
+      Caption Timing: 자막 타이밍
+      Offset: 오프셋(초)
+      Hint: 음수는 자막을 더 일찍, 양수는 더 늦게 표시합니다. 이 동영상에만 적용됩니다.
+      Earlier: 더 일찍
+      Later: 더 늦게
+      Reset: 초기화
+    Most Replayed: "가장 많이 다시 본 부분"
+    Pull up for precise seeking: "위로 끌어서 정밀 탐색"
+    Precise seeking, drag down to exit: "정밀 탐색 · 아래로 끌어서 종료"
+    Cast: "전송"
+    Music Mode: "음악 모드"
+    Music Mode Description: "이 탭에서 동영상을 1배속으로 재생하고 새 동영상을 처음부터 시작합니다. 저장된 기본 재생 설정은 변경되지 않습니다."
+    DLNA:
+      Cast: "DLNA 기기로 전송"
+      Stop: "전송 중지"
+      No Devices: "DLNA 기기를 찾을 수 없습니다"
+      No MP4 Source: "이 동영상에 호환되는 MP4 스트림이 없습니다"
+      Error: "동영상을 전송할 수 없습니다"
+    Repeat Stats:
+      Repeat Stats: 반복 통계
+      Looping: 반복 중
+      Repeats: 반복 횟수
+      Time Spent: 시청 시간
+    Voice-over Translation:
+      Start: 번역
+      Cancel: 취소
+      Progress: 음성 번역 준비 중…
+      Retry: 다시 시도
+      Error: 음성 번역에 실패했습니다. 나중에 다시 시도하세요.
+      Duration Error: 음성 번역은 재생 시간이 최대 4시간인 동영상에서만 사용할 수 있습니다.
+    Caption Appearance:
+      Options: 옵션
+      Sample: 자막은 이렇게 표시됩니다
+    Auto-translate: 자동 번역
+    Sleep Timer:
+      Sleep Timer: 취침 타이머
+      'Off': 끄기
+      Minutes: '{minutes}분'
+      End of video: 동영상 끝
+      End of current chapter: 현재 챕터 끝
+      Remaining: '{time} 남음'
+      Cancel timer: 타이머 취소
+      Timer ended: 취침 타이머가 끝났습니다
+    A-B Repeat:
+      A-B Repeat: A-B 반복
+      Off: 끄기
+      Point A: 지점 A
+      Point B: 지점 B
+      Set Repeat Start: 반복 시작 설정
+      Set Repeat End: 반복 종료 설정
+      Pause Repeat: A-B 반복 일시중지
+      Resume Repeat: A-B 반복 재개
+      Adjust Point: "{point} 지점 조정, 현재 {timestamp}"
+      Clear Range: A-B 반복 범위 지우기
+      End Before Start: B 지점은 A 지점 뒤에 있어야 합니다.
+      Outside Duration: 타임스탬프는 동영상 재생 시간 내에 있어야 합니다.
+      Cleared: A-B 반복을 지웠습니다
+    Seek History:
+      Seek History: 탐색 기록
+      Positions: 위치 {count}개
+      Nothing to undo: 실행 취소할 항목이 없습니다
+      Nothing to redo: 다시 실행할 항목이 없습니다
+    Zoom:
+      Zoom: 확대/축소
+      'Off': 끄기
+    Volume Boost:
+      Volume Boost: "볼륨 증폭"
+      'Off': "끄기"
+    TranslatedCaptionTemplate: '{language} ("{originalLanguage}"에서 번역됨)'
+    Auto-generated Caption Template: '{language} (자동 생성됨)'
+    Audio Tracks: 오디오 트랙
+    Autoplay is off: 자동 재생 꺼짐
+    Autoplay is on: 자동 재생 켜짐
+    Up next in {seconds}: '{seconds} 후 다음 동영상'
+    Resize dock: 독 크기 조절
+    Resize dock width: 독 너비 조절
+    Play now: 지금 재생
+    MusicPlaybackRateOverride: 뮤직비디오가 감지되어 1배속으로 재생합니다
+    Normal: 보통
+    Set Default: 기본값으로 설정
+    Theatre Mode: 영화관 모드
+    Exit Theatre Mode: 영화관 모드 종료
+    Full Window: 전체 창
+    Exit Full Window: 전체 창 종료
+    Take Screenshot: 스크린샷 찍기
+    Show Stats: 통계 표시
+    Hide Stats: 통계 숨기기
+    Hide Annotations: 특수효과 숨기기
+    Show Annotations: 특수효과 표시
+    Hide: 숨기기
+    Show: 표시
+    Stats:
+      Stats: 통계
+      Video ID: '동영상 ID: {videoId}'
+      Media Formats: '미디어 형식: {formats}'
+      Resolution: '해상도: {width}x{height}{''@''}{frameRate}'
+      Player Dimensions: '플레이어 크기: {width}x{height}'
+      Bitrate: '비트 전송률: {bitrate}kbps'
+      Volume: '음량: {volumePercentage}%'
+      Bandwidth: '대역폭: {bandwidth}kbps'
+      Buffered: '버퍼링됨: {bufferedPercentage}%'
+      Dropped Frames / Total Frames: '손실 프레임: {droppedFrames} / 전체 프레임: {totalFrames}'
+      CodecAudio: '코덱: {audioCodec} ({audioItag})'
+      CodecsVideoAudio: '코덱: {videoCodec} ({videoItag}) / {audioCodec} ({audioItag})'
+      CodecsVideoAudioNoItags: '코덱: {videoCodec} / {audioCodec}'
+    You appear to be offline: 오프라인 상태인 것 같습니다.
+    Playback will resume automatically when your connection comes back: 연결이 복구되면 자동으로 재생을 계속합니다.
+    Scroll Mini Player:
+      Collapse Controls: "컨트롤 접기"
+      Expand Controls: "컨트롤 펼치기"
+      Back to Top: 맨 위로
+      Return to Video Tab: 동영상 탭으로 돌아가기
+      Hide: 미니 플레이어 숨기기
+      Play: 재생
+      Pause: 일시 정지
+      Drag Handle: 미니 플레이어 이동
+      Rewind 10 seconds: 10초 뒤로
+      Forward 10 seconds: 10초 앞으로
+    Skipped segment: '{segmentCategory} 건너뜀'
+    SponsorBlock:
+      CancelCurrentSegment: 구간 만들기 취소
+      ClearSegments: 구간 지우기
+      ClearSegmentsPrompt: 이 동영상에 작성한 모든 SponsorBlock 구간을 지우시겠습니까?
+      CompleteSegmentsBeforeSubmitting: 제출하기 전에 작성한 모든 구간을 완성하세요.
+      CategoryLabel: 카테고리
+      ActionTypeLabel: 구간 유형
+      DuplicateSegments: 작성 중인 구간은 중복될 수 없습니다.
+      EndAction: (끝)
+      EndActionLabel: 끝
+      EndTimeAfterStart: 구간 종료 시간은 시작 시간보다 뒤여야 합니다.
+      EndTimeBeforeVideoEnd: 구간 종료 시간은 동영상 재생 시간 안에 있어야 합니다.
+      EndTimeLabel: 구간 종료 시간
+      Guidelines: 가이드라인
+      InspectSegment: 검사
+      InvalidStartTime: 올바른 구간 시작 시간을 입력하세요.
+      NoSegmentsToSubmit: 제출하기 전에 완성된 구간을 하나 이상 만드세요.
+      NowAction: (지금)
+      CloseInfoPanel: SponsorBlock 정보 닫기
+      OpenInfoPanel: SponsorBlock 정보 열기
+      OpenSubmissionMenu: 제출 메뉴 열기
+      PreviewRequired: 제출하기 전에 모든 구간을 미리 보세요.
+      PreviewSegment: 미리보기
+      SaveSegment: 저장
+      SetSegmentEndNow: 지금 구간 끝내기
+      StartAction: (시작)
+      StartSegmentNow: 지금 구간 시작
+      SubmissionBadRequest: SponsorBlock에서 제출 요청을 거부했습니다.
+      SubmissionDuplicate: 이미 제출된 구간입니다.
+      SubmissionFailed: SponsorBlock 구간을 제출하지 못했습니다.
+      SubmissionForbidden: SponsorBlock에서 제출을 거부했습니다.
+      SubmissionRateLimited: SponsorBlock에서 이 제출의 요청 횟수를 제한했습니다.
+      SubmissionSuccess: SponsorBlock 구간을 제출했습니다.
+      SubmitSegment: 구간 제출
+      SubmitSegments: 제출
+      StartTimeLabel: 구간 시작 시간
+      TimeDivider: '~'
+      SkipPrompt: '{segmentCategory}을(를) 건너뛰시겠습니까?'
+      SkipPromptAction: 건너뛰기
+      SkipToHighlight: 하이라이트로 건너뛰시겠습니까?
+      SkippedToHighlight: 하이라이트로 건너뛰었습니다
+      SkipToastUnskip: 건너뛰기 취소
+      SkipToastReskip: 다시 건너뛰기
+      MutedSegment: '{segmentCategory} 음소거됨'
+      MuteToastUnmute: 음소거 해제
+      InfoPanelLoading: 구간 불러오는 중...
+      InfoPanelHasSegments: 데이터베이스에 이 동영상의 구간이 있습니다!
+      InfoPanelNoSegments: 구간을 찾을 수 없습니다
+      RefreshInfo: SponsorBlock 정보 새로 고침
+      ContributionStatsTitle: 내 기여
+      ContributionStatsLoading: 기여 통계 불러오는 중...
+      ContributionStatsError: 기여 통계를 사용할 수 없습니다. 새로 고쳐 보세요.
+      ContributionStatsNoUserId: 기여 통계를 보려면 구간을 제출하거나 SponsorBlock 사용자 ID를 가져오세요.
+      Submissions: 제출 수
+      Segments: 구간 수
+      TimeSaved: 절약한 시간
+      AutoSkipEnabled: 구간 자동 건너뛰기
+      AutoSkipOn: 켜기
+      AutoSkipOff: 끄기
+      WhitelistChannel: 채널 허용 목록에 추가
+      ChannelWhitelisted: 허용 목록에 추가됨
+      RemoveChannelFromWhitelist: 채널을 허용 목록에서 제거
+      MuteSegment: 구간 음소거
+      SkipSegment: 구간 건너뛰기
+      CloseSegmentActions: 구간 작업 닫기
+      FullVideo: 전체 동영상
+      FullVideoLabel: '{segmentCategory} · 전체 동영상'
+      MuteActionType: 음소거
+      MutePrompt: '{segmentCategory}을(를) 음소거하시겠습니까?'
+      SkipActionType: 건너뛰기
+      LockedSegment: 잠긴 구간
+      UpvoteSegment: 추천
+      DownvoteSegment: 비추천
+      VoteFailed: SponsorBlock 투표를 제출하지 못했습니다.
+      ChangeCategory: 카테고리 변경
+      CopyAndDownvote: 복사 및 반대 투표
+      SubmitCategoryVote: 카테고리 투표 제출
+      CategoryVoteSuccess: 카테고리 투표가 제출되었습니다.
+    Google Cast:
+      Position: "재생 위치"
+      Invalid Authentication: "수신기가 잘못된 인증 응답을 보냈습니다."
+      Authentication Declined: "수신기가 인증을 거부했습니다."
+      Audio Only Receiver: "수신기는 오디오 전송만 지원합니다."
+      Disconnected: "수신기 연결이 끊어졌습니다."
+      Timeout: "수신기가 응답하지 않았습니다."
+      Busy: "다른 창에서 이미 전송 중입니다."
+      Not Authorized: "이 창을 활성화하고 다시 시도하세요."
+      Invalid Request: "잘못된 전송 요청입니다."
+      IPv4 Required: "IPv4 연결이 필요합니다."
+      Launch Failed: "수신기를 시작할 수 없습니다."
+      Load Failed: "수신기가 동영상을 불러올 수 없습니다."
+      Cancelled: "전송이 취소되었습니다."
+      Private Not Authorized: "비공개 미디어 접근이 승인되지 않았습니다."
+      Invalid Subtitles: "전송 자막이 올바르지 않습니다."
+      Discovery Failed: "수신기를 검색할 수 없습니다."
+      Preparing Video: "전송할 동영상을 준비하는 중…"
+      Connecting: "{device}에 연결하는 중…"
+      Starting Receiver: "Cast 수신기를 시작하는 중…"
+      Loading Video: "수신기에서 동영상을 로드하는 중…"
+      Buffering: "{device}에서 버퍼링하는 중…"
+      Allow Private Instance: "이 전송이 비공개 Invidious 인스턴스 {instance}에서 미디어를 읽도록 허용할까요?"
+      Cast: "Google Cast 기기로 전송"
+      Connected: "{device}(으)로 전송 중"
+      Rewind: "10초 뒤로"
+      Forward: "10초 앞으로"
+      Subtitles Off: "자막 끄기"
+      Return: "로컬 재생으로 돌아가기"
+      No Devices: "Google Cast 기기를 찾을 수 없습니다"
+      No Source: "Google Cast와 호환되는 스트림이 없습니다"
+      Error: "동영상을 전송할 수 없습니다"
+      Error With Details: "동영상을 전송할 수 없습니다: {error}"
+      Untrusted Receiver: "수신기의 인증서를 신뢰할 수 없습니다. 인증된 Google Cast 수신기를 사용하세요."
+    FCast:
+      Cast: "FCast 수신기로 전송"
+      No Devices: "FCast 수신기를 찾을 수 없습니다"
+      No Source: "FCast와 호환되는 스트림이 없습니다"
+    Secondary Captions: 보조 자막
+    Subtitle File:
+      Load: "자막 파일 불러오기…"
+      Subtitle Files: "자막 파일"
+      Error: "자막 파일을 불러올 수 없습니다. SRT 또는 WebVTT 파일을 선택하세요."
+  Watch:
+    'Remaining preroll-ad time: {remindingTimeSeconds}s': '프리롤 광고 남은 시간: {remindingTimeSeconds}초'
+    'Remaining SABR backoff time: {remindingTimeSeconds}s': 'SABR 대기 남은 시간: {remindingTimeSeconds}초'
+  Station: 스테이션
+  Playlist:
+    Unavailable videos are hidden: 사용할 수 없는 동영상 {count}개가 숨겨졌습니다
+  External Media:
+    Dislikes: "싫어요"
+    Reposts: "리포스팅"
+    Saves: "저장"
+    Series: "시리즈"
+    Season: "시즌"
+    Season Number: "시즌 번호"
+    Episode: "에피소드"
+    Episode Number: "에피소드 번호"
+    Track: "음악 트랙"
+    Track Number: "트랙 번호"
+    Artists: "아티스트"
+    Album: "앨범"
+    Genres: "장르"
+    Media Type: "미디어 유형"
+    Availability: "공개 상태"
+    Age Limit: "나이 제한"
+    Release Date: "출시일"
+    Availability Values:
+      public: "공개"
+      private: "비공개"
+      premium_only: "프리미엄 전용"
+      subscriber_only: "구독자만"
+      needs_auth: "로그인 필요"
+      unlisted: "일부 공개"
+  How this was made: 제작 방식
+  Save Queue to Playlist: "대기열을 재생목록에 저장"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: 라이브 채팅은 현재 Yattee 서버에서 지원되지 않습니다. YouTube에 직접 연결해야 합니다.
+  External Player:
+    LaunchFailedTemplate: "{externalPlayer}을(를) 시작할 수 없습니다. 설치되어 있는지 확인하거나 외부 플레이어 설정에서 실행 파일 경로를 지정하세요."
+    Confirm Arguments Title: "사용자 지정 인수로 외부 플레이어를 실행할까요?"
+    Confirm Arguments Message: "{externalPlayer}이(가) 다음 사용자 지정 인수로 시작됩니다:"
+    Confirm Arguments Warning: "일부 인수는 프로그램을 실행하거나 파일을 덮어쓸 수 있습니다. 직접 추가한 경우에만 계속하세요."
+    Run: "실행"
+    LaunchCanceledTemplate: "{externalPlayer}을(를) 열지 않았습니다"
+Playlist:
+  Playlist Already Preloaded: "재생목록의 모든 동영상을 이미 미리 불러왔습니다"
+  Playlist Preload Progress: "동영상 미리 불러오는 중: {requested}개 중 {completed}개"
+  Close Playlist: 재생목록 닫기
+  Sort By:
+    DateAddedNewest: 추가한 날짜 (최신순)
+    DateAddedOldest: 추가한 날짜 (오래된순)
+    PublishedNewest: 게시 날짜 (최신순)
+    PublishedOldest: 게시 날짜 (오래된순)
+    AuthorAscending: 작성자 (가나다순)
+    AuthorDescending: 작성자 (가나다 역순)
+    VideoTitleAscending: 제목 (가나다순)
+    VideoTitleDescending: 제목 (가나다 역순)
+    VideoDurationAscending: 재생 시간 (짧은순)
+    VideoDurationDescending: 재생 시간 (긴순)
+    Custom: 사용자 지정
+  Preload Playlist: "모든 동영상 미리 불러오기"
+  Preload Playlist Warning Title: "모든 동영상을 미리 불러올까요?"
+  Preload Playlist Warning: "미리 불러오기는 이 재생목록의 모든 동영상을 YouTube에 요청합니다. 짧은 시간에 많은 요청을 보내면 YouTube가 IP 주소를 일시적으로 차단할 수 있습니다. 계속하시겠습니까?"
+  Preloading Playlist: "모든 동영상을 미리 불러오는 중..."
+  Playlist Preload Complete: "미리 불러온 동영상: {count}개."
+  Playlist Preload Partial: "동영상 {requested}개 중 {preloaded}개를 미리 불러왔습니다. {failed}개는 실패했습니다."
+  Playlist Preload Pagination Failed: "재생목록 전체를 불러오지 못해 미리 불러오기를 취소했습니다."
+  Unavailable videos are hidden: 사용할 수 없는 동영상은 숨겨집니다
+  Add Playlist to Queue: "재생목록을 대기열에 추가"
+  Playlist Added to Queue: "재생목록을 대기열에 추가했습니다"
+Change Format:
+  yt-dlp Error Template: "yt-dlp에서 스트림을 가져오지 못했습니다: {error}"
+  Local Video File: 로컬 동영상 파일
+  Local Audio File: 로컬 오디오 파일
+  Online Video: 온라인 동영상
+  Legacy formats are not available for this video: 이 동영상에는 레거시 형식을 사용할 수 없습니다
+  Stream Source: 스트림 소스
+  Stream Extraction Method: 스트림 추출 방법
+  Playback Engine: 재생 엔진
+  Streaming Protocol: 스트리밍 프로토콜
+  Not Available For This Video: 이 동영상에는 사용할 수 없음
+  Protocols:
+    Progressive: 프로그레시브
+  Descriptions:
+    Local File: 이 기기에 다운로드한 파일에서 직접 재생
+    Online Video: 설정된 온라인 소스에서 스트리밍 형식 불러오기
+    Dash: 적응형 화질, 여러 오디오 트랙 및 최고 해상도
+    Legacy: 동영상과 오디오가 결합된 단일 파일이며 낮은 해상도로 제한됨
+    Audio: 오디오 전용으로, 대역폭을 절약하거나 백그라운드에서 들을 때 유용함
+  yt-dlp Fallback Template: 'yt-dlp에서 스트림을 제공하지 못해 내장 엔진을 대신 사용합니다: {error}'
+  yt-dlp Default Clients Fallback: 선호하는 yt-dlp 클라이언트에서 재생 가능한 스트림을 제공하지 못해 yt-dlp 기본 클라이언트로 시도합니다
+  Built-in Fallback Template: '내장 엔진에서 스트림을 재생하지 못해 yt-dlp로 시도합니다: {error}'
+Share:
+  Shared YouTube Link: "공유된 YouTube 링크"
+  Open in Player: "플레이어에서 열기"
+  No YouTube Link: "공유된 텍스트에 지원되는 YouTube 링크가 없습니다."
+  Loading Video Information: "동영상 정보 불러오는 중…"
+  Video Information Failed: "동영상 정보를 불러올 수 없습니다. 다시 시도하거나 링크를 여세요."
+  Share Link: "링크 공유"
+  Share failed: "링크를 공유할 수 없습니다"
+  Share Post: 게시물 공유
+  Timestamp Link Copied: 타임스탬프 링크를 클립보드에 복사했습니다
+Context Menu:
+  Opened in a Background Tab: "백그라운드 탭에서 열었습니다"
+  Open in a Background Tab: "백그라운드 탭에서 열기"
+  Select Tab: 탭 선택
+  Close Tabs Before: 이전 탭 닫기
+  Close Tabs After: 이후 탭 닫기
+  Close Other Tabs: 다른 탭 닫기
+  Copy {service} link without playlist: "재생목록 없이 {service} 링크 복사"
+  Context Menu: 상황에 맞는 메뉴
+  Select All: 모두 선택
+  Save Image As…: 다른 이름으로 이미지 저장…
+  Copy Image: 이미지 복사
+  Copy Image Address: 이미지 주소 복사
+  Cancel Refresh: 새로 고침 취소
+  Reload Videos: 동영상 다시 불러오기
+  Reload Shorts: Shorts 다시 불러오기
+  Reload Live: 실시간 스트림 다시 불러오기
+  Reload Posts: 게시물 다시 불러오기
+  Reload All Feeds: 모든 피드 다시 불러오기
+  Reload RSS Feeds: RSS 피드 새로고침
+  Reload Platforms: 플랫폼 다시 불러오기
+  Close Multiple Tabs: 탭 {count}개 닫기
+  Duplicate Tab: 탭 복제
+  Duplicate Multiple Tabs: 탭 {count}개 복제
+  Move Tab: 탭 이동
+  Move Tabs: 탭 이동
+  Move Tab to Group: 탭을 그룹으로 이동
+  Collapse Group: 그룹 접기
+  Expand Group: 그룹 펼치기
+  Move Tabs to Group: 탭을 그룹으로 이동
+  Manage Tab Groups…: 탭 그룹 관리…
+  To Beginning: 시작으로
+  To End: 끝으로
+  Close Tabs: 탭 닫기
+  To the Top: 맨 위로
+  To the Left: 왼쪽으로
+  To the Bottom: 맨 아래로
+  To the Right: 오른쪽으로
+  Other Tabs: 다른 탭
+  Copy YouTube Link: YouTube 링크 복사
+  Copy YouTube Links: YouTube 링크 복사
+  Pin Tab: 탭 고정
+  Pin Tabs: 탭 고정
+  Unpin Tab: 탭 고정 해제
+  Unpin Tabs: 탭 고정 해제
+  Tab Color: 탭 색상
+  Default: 기본값
+  Purple: 보라색
+  Reopen Closed Tab: 닫은 탭 다시 열기
+  Reload Tab: 탭 다시 불러오기
+  Reload Tabs: 탭 다시 불러오기
+  Load Tab: 탭 불러오기
+  Load Tabs: 탭 불러오기
+  Unload Tab: 탭 언로드
+  Unload Tabs: 탭 언로드
+  Unload Tabs Failed: "선택한 탭을 언로드하지 못했습니다."
+  Move Tab to Window: 탭을 창으로 이동
+  Move Tabs to Window: 탭을 창으로 이동
+  Open in a New Tab: 새 탭에서 열기
+  Open in a New Window: 새 창에서 열기
+  Copy Link: 링크 복사
+  Copy Invidious Link: Invidious 링크 복사
+  Search Selection in New Tab: 새 탭에서 "{selection}" 검색
+  Search Selection in New Window: 새 창에서 "{selection}" 검색
+  Search With: '{engine}(으)로 검색'
+  Search With Multiple: 검색 엔진 선택...
+  Selection Too Long: 선택한 텍스트가 너무 길어 검색할 수 없습니다. {count}자 이하여야 합니다
+  Background Tab: 백그라운드 탭
+Tab Organizer:
+  Tab History: "탭 기록"
+  Current Page: "현재 페이지"
+  Icon Labels:
+    Podcast: '팟캐스트'
+    Clock: '시계'
+    Puzzle Piece: '퍼즐 조각'
+    People: '사람'
+    Chart: '차트'
+    Calendar: '달력'
+    Images: '이미지'
+    Music: '음악'
+    Folder: 폴더
+    Bookmark: 북마크
+    Favorites: 즐겨찾기
+    Videos: 동영상
+    Gaming: 게임
+    Research: 연구
+    Art: 예술
+    Travel: 여행
+  Group Icon: 그룹 아이콘
+  Title: 탭 정리
+  Open Tab Count: '열린 탭 {count}개'
+  Search Label: 탭 검색
+  Selected Count: '탭 {count}개 선택됨'
+  Tab Count: '탭 {count}개'
+  Select All: 모두 선택
+  Select None: 선택 해제
+  Move To Group: 선택한 탭을 그룹으로 이동
+  Choose Group: 그룹 선택
+  Ungrouped: 그룹 없음
+  Pin: 고정
+  Unpin: 고정 해제
+  Load: 불러오기
+  Unload: 언로드
+  Unload All: 모두 언로드
+  Close All: 모두 닫기
+  Ungroup: 그룹 해제
+  Group Name: 그룹 이름
+  No Color: 색상 없음
+  Create Group: 그룹 만들기
+  Expand Group: 그룹 펼치기
+  Collapse Group: 그룹 접기
+  Expand Group Label: '{name} 펼치기, 탭 {count}개'
+  Rename Group: '{name} 이름 바꾸기'
+  Change Group Color: '{name} 색상 변경'
+  Move To Window: 창으로 이동
+  Choose Window: 창 선택
+  Select Tab: '{title} 선택'
+  Active: 활성
+  Pinned: 고정됨
+  Unloaded: 언로드됨
+  Playing: 재생 중
+  Close Tab: '{title} 닫기'
+  No Open Results: 검색과 일치하는 열린 탭이 없습니다.
+  Recently Closed: 최근에 닫은 탭
+  Clear: 지우기
+  No Closed Results: 검색과 일치하는 최근에 닫은 탭이 없습니다.
+  Drag Tab: 끌어서 그룹으로 이동
+Chapters:
+  Auto-generated: 이 챕터는 자동으로 생성되었습니다
+  Key Moments: 주요 장면
+  Open Chapters: 챕터 열기
+  Close Chapters: 챕터 닫기
+  Copy Timestamp Link: '{timestamp} 위치의 링크 복사'
+  Loop Chapter: '챕터 반복: {chapter}'
+  Looping Chapter: '챕터 반복 중: {chapter}'
+  Chapter Loop Stopped: '챕터 반복을 중지했습니다'
+  Sync to Video Time: '동영상 시간에 동기화'
+Comments:
+  Image unavailable: "이미지를 사용할 수 없습니다"
+  Comment Count: '댓글 {count}개'
+  Show Comments: 댓글 표시
+  Getting comment replies, please wait: 댓글의 답글을 가져오는 중입니다. 잠시 기다려 주세요
+  Reload Comments: 댓글 다시 불러오기
+  Reply Count: '답글 {replyCount}개'
+  Hide {replyCount} replies: 답글 {replyCount}개 숨기기
+  View 1 reply from {channelName}: '{channelName}의 답글 1개 보기'
+  View {replyCount} replies from {channelName} and others: '{channelName} 외 답글 {replyCount}개 보기'
+  There are no comments available for this post: 이 게시물에는 댓글이 없습니다
+  Comments are turned off: 댓글이 사용 중지되었습니다
+  YouTube did not provide advertised replies: YouTube에는 이 댓글에 답글이 있다고 표시되었지만 답글을 제공하지 않았습니다. 삭제되었거나 숨겨졌을 수 있어 답글 버튼을 제거했습니다.
+  Pinned by you: 내가 고정함
+  A reply is pinned: 고정된 답글이 있습니다
+  Filter loaded comments: 불러온 댓글 필터링
+  Comment filters: 댓글 필터
+  From creator: 크리에이터 작성
+  Contains timestamps: 타임스탬프 포함
+  Pin comment by author: '{author}의 댓글 고정'
+  Unpin comment by author: '{author}의 댓글 고정 해제'
+  Subscribed: 구독 중
+  Edited: (수정됨)
+  Highlighted comment: 강조된 댓글
+  Highlighted reply: 강조된 답글
+  Search loaded comments: 불러온 댓글 검색
+  Loaded comment search result count: '불러온 댓글 {total}개 중 {count}개'
+  No loaded comments match your filters: 필터와 일치하는 불러온 댓글이 없습니다
+  YouTube comment link copied to clipboard: YouTube 댓글 링크를 클립보드에 복사했습니다
+  Translate to {language}: '{language}(으)로 번역'
+  Show original: 원문 표시
+  Translating comment, please wait: 댓글 번역 중입니다. 잠시 기다려 주세요
+  Comment translation failed: 댓글 번역에 실패했습니다
+Description:
+  Title: 설명
+  Expand Description: 더보기
+  Collapse Description: 간략히
+  Copy Description: 설명 복사
+  Description Copied: 설명을 클립보드에 복사했습니다
+  Video Category: '동영상 카테고리:'
+  Video Tags: 동영상 태그
+  Games: 게임
+  Music: 음악
+Tooltips:
+  YouTube Account Settings:
+    Add to YouTube Watch History: "재생한 동영상이 YouTube 시청 기록에 추가되어 YouTube 추천에 반영됩니다. YouTube에서 기록이 일시중지된 동안에는 아무것도 추가되지 않습니다."
+    Sync Subscriptions: "YouTube에서 구독한 채널은 “모든 채널”에 추가되고, YouTube에서 구독 취소한 채널은 모든 프로필에서 삭제됩니다. 여기서 “모든 채널”의 채널을 구독하거나 구독 취소하면 YouTube에서도 똑같이 적용됩니다."
+    Sync Playlists: "YouTube 재생 목록, “나중에 볼 동영상”, “좋아요 표시한 동영상”이 “나의 재생 목록”에 표시되며, 여기서 변경한 내용은 YouTube에도 반영됩니다. 다른 기기와 동기화되지 않으며 모든 재생 목록을 내보내거나 데이터를 백업할 때도 포함되지 않습니다. 이 옵션을 끄면 이 기기에서는 삭제되지만 YouTube에서는 삭제되지 않습니다."
+  General Settings:
+    Built-in Streams: |
+      자동은 대부분의 동영상을 YouTube의 visionOS 클라이언트로 재생하며, 더 빨리 시작되고 자동 화질을 지원합니다. 실시간 스트림과 재생할 수 없는 동영상은 SABR을 사용합니다.
+      SABR만은 항상 YouTube의 웹 클라이언트를 사용하며, 더 느리게 시작되고 자동 화질이 없습니다.
+    Title Lines: "목록과 그리드의 동영상 및 재생목록 제목을 말줄임표와 함께 선택한 줄 수로 줄여 카드를 더 균일하게 보이게 합니다. 제목 위에 마우스를 올리면 전체 제목을 볼 수 있습니다."
+    Close Window With Last Tab: '끄면 마지막 탭을 닫을 때 대신 새 탭이 열리므로 창을 직접 닫을 때까지 창이 열려 있습니다.'
+    Preferred Video Codec: |
+      자동 모드는 기기에서 하드웨어로 디코딩할 수 있는 코덱을 우선합니다.
+      AV1: 가장 적은 데이터로 최고의 화질을 제공하지만 모든 동영상에 있지는 않습니다. 하드웨어 디코딩이 없으면 배터리를 많이 소모하거나 프레임이 끊길 수 있습니다.
+      VP9: 효율과 호환성의 균형을 갖추었으며, 보통 최고 해상도까지 제공됩니다.
+      H.264: 거의 모든 기기에서 가장 가볍게 디코딩되지만 데이터를 더 많이 사용하며 보통 1080p까지만 제공됩니다.
+      변경 사항은 다음 동영상에 적용됩니다. 선호 코덱을 사용할 수 없으면 다른 코덱을 사용합니다.
+    Always Use Backup Media Server: "할당된 서버 대신 YouTube가 지정한 백업 서버에서 동영상을 스트리밍합니다. 인터넷 제공업체의 캐시가 자주 느릴 때 유용합니다. 그렇지 않으면 OpenTubeX는 할당된 서버가 응답하지 않을 때만 전환합니다."
+    Automatically switch stream extraction methods: "내장 엔진의 재생이 실패하면 yt-dlp를 시도하고, yt-dlp가 실패하면 내장 엔진의 재생을 시도합니다."
+    Enable Tabs: "현재 페이지는 열린 상태로 유지됩니다. 다른 탭은 앱을 다시 시작할 때까지 보관되며, 탭을 다시 활성화하면 복원됩니다."
+    Data Saver Thumbnails: "낮은 해상도의 썸네일을 사용하여 데이터 사용량을 줄입니다."
+    Use AI Translation Completions: 사람이 번역하지 않은 부분을 AI 생성 텍스트로 채웁니다. 사람의 번역을 항상 우선합니다.
+    Update Relative Timestamps: 페이지가 열려 있는 동안 앱 전체의 상대 시간 표시를 업데이트합니다. 비활성화하면 페이지를 다시 불러오거나 다시 방문할 때만 업데이트합니다.
+    Stream Extraction Method: |
+      OpenTubeX에서 동영상 스트림을 가져오는 방법을 선택하세요. yt-dlp를 선택하면 yt-dlp를 사용할 수 있어야 합니다.
+      yt-dlp를 사용하면 동영상 재생을 시작하는 데 시간이 더 걸릴 수 있습니다.
+    Avoid translation: |
+      YouTube의 동영상 제목, 설명 및 챕터 자동 번역을 비활성화합니다.
+      '앱 전체'를 선택하면 채널 이름과 설명도 원래 언어로 표시합니다.
+      목록의 동영상 제목을 가져오는 등 요청이 너무 많으면 일시적으로
+      앱의 안정성에 영향을 줄 수 있습니다.
+    Show Thumbnail Previews: 동영상 썸네일에 마우스를 올리면 움직이는 미리보기를 표시합니다.
+    Startup Behavior: |
+      OpenTubeX를 시작할 때 수행할 작업을 선택하세요.
+      모든 탭 불러오기는 저장된 탭을 즉시 모두 복원하지만 백그라운드 탭의 동영상은 자동 재생하지 않습니다.
+      이전에 불러온 탭 불러오기는 OpenTubeX를 닫을 때 불러온 탭을 다시 불러오고 나머지는 언로드된 상태로 유지합니다.
+      마지막 활성 탭 불러오기는 다른 탭을 열려 있지만 언로드된 상태로 두고 이전 세션을 복원합니다. 탭을 클릭하면 불러옵니다.
+      빈 세션으로 시작은 저장된 탭을 건너뛰고 새 창을 엽니다.
+    Open Deep Links In New Window: 리디렉션 브라우저 확장 프로그램이나 명령줄 인수 등을 통해 OpenTubeX에 전달된 URL을 새 창에서 엽니다.
+    Remember Tab Navigation History: 각 탭의 뒤로 및 앞으로 탐색 기록을 저장하고 OpenTubeX를 다시 시작할 때 복원합니다.
+    Yattee Server: OpenTubeX가 동영상, 채널, 재생 목록, 검색 결과를 불러오는 yattee-server 인스턴스입니다. 사용자 이름과 비밀번호는 이 기기에만 저장됩니다.
+    Proxy Videos Through Yattee Server: 동영상 및 오디오 스트림을 서버를 통해 중계합니다. YouTube는 스트림을 요청한 주소에만 제공하므로, 서버가 사용자의 인터넷 연결을 공유하는 경우가 아니면 켜 두세요. 썸네일은 항상 YouTube에서 직접 불러옵니다.
+    Notifications: OpenTubeX가 실시간 스트리밍, 새 업로드, 자동 다운로드를 알리는 방식을 선택합니다. 시스템 및 앱 내를 선택하면 OpenTubeX를 사용하는 동안에는 앱 안에, 그 외에는 시스템 알림으로 표시되고 벨에 보관됩니다. 끔을 선택하면 알림 옵션도 숨겨집니다.
+    Ignore System Haptics Setting: Android 설정에서 터치 피드백이 꺼져 있어도 길게 누르기와 제스처에 진동합니다.
+  Proxy Settings:
+    IP Block Recovery Script Path: IP 차단이 감지될 때 실행할 스크립트 파일 경로입니다. OpenTubeX는 실행이 끝날 때까지 기다린 후 동영상을 다시 불러옵니다. 대체 사용이 활성화된 경우 대체 방식도 실패했을 때만 실행합니다.
+  Player Settings:
+    Rewind on Resume: "일시 정지한 동영상을 다시 재생할 때 이 시간(초)만큼 뒤로 이동해 마지막 장면을 다시 볼 수 있습니다. 끄려면 0으로 설정하세요."
+    Minimum Pause Before Rewinding: "동영상이 이 시간 이상 일시 정지된 경우에만 되감습니다. 매번 되감으려면 0으로 설정하세요."
+    Mono Audio: '왼쪽과 오른쪽 오디오 채널을 양쪽 귀에서 재생합니다. 동영상 소리가 헤드폰 한쪽에서만 들릴 때 사용하세요.'
+    Normalize Loudness: '대부분의 동영상보다 소리가 큰 동영상의 음량을 낮춰 동영상 간에 음량이 갑자기 바뀌지 않도록 합니다. 소리가 작은 동영상은 음량이 그대로 유지됩니다. 로컬 API로 불러온 동영상에서만 작동합니다.'
+    Pause on Stream Recovery: "동영상 스트림이 실패하여 플레이어가 다시 불러오거나 다른 형식 또는 엔진으로 전환하면 재생을 일시 정지하고, 닫을 때까지 플레이어 상단에 오류를 표시합니다. 끄면 재생이 계속되고 오류는 알림으로 잠시 표시됩니다."
+    Continue Playback When Screen Is Locked: '백그라운드에서 오디오를 계속 재생하고 Android 미디어 컨트롤을 제공합니다. 앱이 더 이상 보이지 않을 때 일시중지하려면 이 옵션을 끄세요.'
+    Enable Caption Translations: 활성화하면 동영상에 선호 자막 언어와 일치하는 원본 트랙이 없을 때 자막 버튼과 C 단축키가 자동 번역된 트랙을 우선 사용합니다.
+    Use Quick Playback Speed Bar: 오른쪽 플레이어 컨트롤에 빠른 재생 속도 표시줄을 표시합니다. 채널별 재생 속도 수동 저장이 활성화된 경우 현재 채널의 속도를 저장하는 버튼도 표시됩니다.
+    Multiply Seek Interval by Playback Rate: 활성화하면 탐색 간격에 현재 재생 속도를 곱합니다. 화살표 키와 J/L에 적용됩니다. 비활성화하면 재생 속도와 관계없이 탐색 간격이 일정합니다.
+    Show Playback Rate Adjusted Timestamp: 활성화하고 재생 속도가 1배속이 아니면 일반 시간 표시 뒤의 괄호 안에 재생 속도가 반영된 시간을 표시합니다.
+    Use YouTube-style Shorts: 구독 및 채널 페이지에서 Shorts를 세로형 격자로 표시하고 YouTube 스타일 Shorts 플레이어를 사용합니다.
+    Loop Shorts: 활성화하면 Shorts를 자동으로 다시 시작합니다. 비활성화하면 끝에서 멈추고 다시 재생 버튼을 표시합니다.
+    Show Skip Silence Toggle: 플레이어 설정 메뉴에 무음 구간 건너뛰기 켜기/끄기 전환 버튼을 표시합니다.
+    Enable Skip Silence by Default: 새 탭에서 무음 구간 건너뛰기를 활성화합니다. 한 탭에서 변경해도 다른 탭에는 영향을 주지 않습니다.
+    Enable Video Zoom: 플레이어 설정 메뉴에 확대/축소 컨트롤을 표시하고 키보드 단축키와 화면 이동 컨트롤을 활성화합니다.
+    Enable Seek History: 앱을 닫을 때까지 각 동영상에서 이동하기 전의 위치를 기억합니다. 플레이어 설정 메뉴에 탐색 기록 목록을 표시하고 관련 키보드 단축키를 활성화합니다.
+    Show Seek Bar Filmstrip: "탐색 바 손잡이를 끌면 이동할 위치 주변의 프레임 띠가 표시되고, 그 위로 끌어올리면 정밀하게 탐색할 수 있습니다. 비활성화하면 마우스를 올렸을 때처럼 끄는 동안 썸네일 하나만 표시됩니다."
+    Voice-over Translation: 번역을 요청하면 동영상 ID, 재생 시간 및 선택한 언어를 비공식 Yandex 음성 번역 서비스로 전송합니다. 기본적으로 비활성화되어 있습니다.
+    Hold to Speed Up: 플레이어 위에서 스페이스바 또는 마우스 왼쪽 버튼을 길게 누르면 현재 재생 속도에 선택한 배수가 일시적으로 곱해집니다.
+    Ambient Mode: 동영상 색상을 플레이어 주변 영역에 혼합합니다.
+    Default Volume: 음량 기억이 활성화된 동안에는 사용할 수 없습니다. 각 동영상의 시작 음량을 고정하려면 음량 기억을 끄세요.
+    Parallel Segment Loading: |
+      재생할 동영상 및 오디오 구간을 한 번에 미리 불러올 개수입니다.
+      값이 높으면 느리거나 불안정한 연결에서 도움이 될 수 있지만 대역폭과 메모리를 더 많이 사용합니다.
+      또한 자동 설정이 연결 속도를 실제보다 낮게 판단하여 더 낮은 화질을 선택할 수 있습니다.
+      한 번에 하나의 요청으로 제한된 스트림에는 이 설정이 적용되지 않습니다.
+    Preload Upcoming Videos: "다음에 재생할 동영상의 yt-dlp URL을 가져와 캐시합니다. 대기열이 재생목록과 추천보다 우선합니다."
+    Upcoming Videos to Preload: "백그라운드에서 yt-dlp URL을 가져올 다음 동영상의 최대 개수입니다."
+    Concurrent Preloads: "동시에 동영상을 미리 로드하는 데 사용할 yt-dlp 프로세스의 최대 개수입니다. 값이 높을수록 CPU, 메모리 및 네트워크 대역폭을 더 많이 사용합니다."
+    Ignore System Rotation Lock for Fullscreen: Android 자동 회전이 꺼져 있어도 기기를 직접 회전하여 전체 화면으로 전환하거나 종료합니다.
+    Ask Before Preloading Large Playlists: "동영상이 {count}개를 넘는 재생목록의 모든 동영상을 미리 불러오기 전에 확인을 요청합니다."
+  External Player Settings:
+    Ignore Default Arguments: 동영상 URL 외의 기본 인수를 외부 플레이어에 보내지 않습니다. 예를 들어 재생 속도와 재생목록 URL이 해당됩니다. 사용자 지정 인수는 계속 전달됩니다.
+  Download Settings:
+    Download Folder: 동영상을 이 폴더에 저장합니다. 시스템의 다운로드 폴더를 사용하려면 비워 두세요.
+    Global Additional yt-dlp Arguments: 모든 다운로드에서 yt-dlp에 전달할 추가 명령줄 인수입니다. 예를 들면 --cookies-from-browser firefox입니다.
+    Concurrent Downloads: 동시에 실행할 수 있는 yt-dlp 작업의 최대 개수입니다.
+    Bandwidth Limit: 이 제한을 동시 작업 간에 나누어 대기열의 총 전송 속도를 제한합니다. 제한하지 않으려면 0을 입력하세요.
+  External Software Settings:
+    yt-dlp Source: OpenTubeX는 시스템에 설치된 yt-dlp를 사용하거나 자체 yt-dlp 사본을 다운로드하여 관리할 수 있습니다. 자체 사본은 사용자 데이터 디렉터리에 저장됩니다.
+    yt-dlp Channel: OpenTubeX에서 다운로드하고 관리할 yt-dlp 릴리스 채널을 선택하세요. 대부분의 사용자에게 안정 버전을 권장합니다.
+    FFmpeg Source: OpenTubeX는 시스템에 설치된 FFmpeg 및 FFprobe를 사용하거나 자체 정적 빌드를 다운로드하여 관리할 수 있습니다. 자체 빌드는 사용자 데이터 디렉터리에 저장됩니다.
+    Managed Tool Updates: 관리되는 도구를 자동으로 업데이트할지, 업데이트 전에 확인할지, 수동 버튼으로만 업데이트할지 선택하세요. 누락된 도구는 필요할 때 계속 다운로드합니다.
+    yt-dlp Executable Path: 기본적으로 OpenTubeX는 PATH 환경 변수에서 yt-dlp를 찾습니다. 필요하면 여기서 사용자 지정 경로를 설정할 수 있습니다.
+    Cookie Source: 인증된 재생을 위해 yt-dlp에서 Netscape 쿠키 파일을 읽을지 설치된 브라우저의 쿠키를 읽을지 선택하세요.
+    Cookie File: 인증된 재생에 사용할 Netscape 형식 쿠키 파일을 선택하세요.
+    Browser for Cookies: 선택한 yt-dlp 실행 파일에서 지원하는 브라우저를 확인합니다. 인증된 재생을 요청하면 OpenTubeX가 yt-dlp에 이 브라우저의 쿠키를 읽도록 요청합니다.
+    Browser Profile: 선택 사항인 브라우저 프로필 이름 또는 폴더입니다. 가장 최근에 사용한 프로필을 사용하려면 비워 두세요.
+    Always Use Cookies: "다운로드, 자막 및 yt-dlp가 스트림을 추출할 때 설정된 쿠키를 사용합니다. 스트림 추출 방법이 yt-dlp로 전환되지는 않습니다. yt-dlp를 선택하면 계정에 접근 권한이 있을 때 YouTube Premium의 향상된 비트 전송률을 포함한 계정 전용 형식을 사용할 수 있습니다."
+    FFmpeg Executable Path: 별도의 동영상 및 오디오 스트림을 병합하고 오디오를 변환하려면 FFmpeg가 필요합니다. 기본적으로 OpenTubeX는 PATH 환경 변수에서 FFmpeg를 찾습니다. 필요하면 여기서 사용자 지정 경로를 설정할 수 있습니다.
+    Use cookies for subtitles: "설정된 쿠키를 자막과 자동 번역에 사용합니다. \"항상 쿠키 사용\"으로도 활성화됩니다."
+  Distraction Free Settings:
+    Hide Playlist Stats: 재생목록 페이지에서 동영상 수, 조회수, 마지막 업데이트 날짜, 총 재생 시간을 숨깁니다.
+    Count Watch Time From: "“모든 기기”는 시청 통계를 동기화하는 모든 기기를 계산합니다. “이 기기”는 여기에서 시청한 시간만 계산합니다."
+    When a Limit Is Reached: "“재생 일시 정지”를 사용하면 15분을 추가하거나 오늘은 한도를 무시할 수 있습니다. 설정 비밀번호가 있으면 한도는 설정에서만 늘릴 수 있습니다."
+    Grayscale: "앱을 회색조로 표시하여 주의를 덜 끌게 합니다. “취침 시간 중”은 취침 시간 알림 일정을 따릅니다."
+    Apply Grayscale To: "“동영상 및 이미지”는 인터페이스 색상을 유지하고 동영상, 썸네일, 아바타 같은 콘텐츠를 회색으로 표시합니다."
+    Daily Watch Time Limit: "시청 통계를 동기화하는 모든 기기에서 오늘 시청한 시간을 Shorts를 포함하여 계산합니다."
+    Daily Shorts Limit: "이 기기에서 오늘 시청한 Shorts를 계산합니다."
+    Take a Break Reminder: "이 시간만큼 시청하면 동영상을 일시 정지합니다. 10분 이상 쉬면 처음부터 다시 계산합니다."
+    Bedtime Reminder: "시작 시간과 종료 시간 사이에 동영상을 일시 정지하고 시청을 그만하도록 알려 줍니다."
+    Shorten View Counts: YouTube에서 이미 반올림해 줄여 표시한 조회수, 댓글 수와 댓글 좋아요 수를 표시합니다. 예를 들어 14,000 대신 14K로 표시합니다. 정확한 수치는 항상 전체 자릿수로 표시합니다.
+    Hide Subscriptions Live: 이 설정은 "{settingsSection}"의 "{subsection}" 섹션에 있는 앱 전체 "{appWideSetting}" 설정으로 재정의됩니다
+    Hide Videos, Playlists and Channels Containing Text: 단어, 단어 일부 또는 구문을 입력하면 원본 제목에 해당 텍스트가 포함된 모든 동영상, 재생목록 및 채널을 OpenTubeX 전체에서 숨깁니다. 대소문자를 구분하지 않습니다. 시청 기록, 내 재생목록 및 재생목록 안의 동영상은 제외됩니다.
+    Hide Videos on Watch: 구독 및 채널 페이지의 동영상, Shorts 및 실시간 탭에서 시청한 동영상을 숨깁니다. 채널 페이지의 홈 탭에는 영향을 주지 않습니다
+  Subscription Settings:
+    Fetch Feed on Startup: 활성화하면 OpenTubeX를 시작하거나 새 창을 열 때 구독 피드를 자동으로 가져옵니다.
+    Show New Content Feed: 이전에 가져올 때 없었던 구독 피드 항목이 포함된 신규 탭을 표시합니다.
+    Enable RSS Feeds: 구독 페이지에 RSS 또는 Atom 피드의 항목을 보여 주는 RSS 탭을 표시하여 다른 플랫폼의 크리에이터를 팔로우할 수 있게 합니다. 항목은 yt-dlp로 열립니다.
+    Show New Content Indicators: 이전에 가져올 때 없었던 구독 피드 항목 옆에 작은 점을 표시합니다.
+    Show Scheduled Live Streams / Premieres First: 예정된 실시간 스트림과 최초 공개를 구독 피드 맨 위에 유지합니다. 비활성화하면 시작될 때까지 공지된 위치에 유지됩니다. 비활성화한 후 구독 피드를 한 번 새로 고쳐 기존 예정 항목의 공지 날짜를 가져오세요.
+    Auto Refresh Interval: "앱이 열려 있는 동안 OpenTubeX에서 구독 피드를 자동으로 새로 고칠 간격입니다. Android에서는 0이 아닌 간격을 선택하면 앱이 닫혀 있을 때도 피드를 새로 고칩니다."
+    Refresh Subscriptions While App Is Closed: "선택한 설정으로 피드를 새로고침합니다. 데스크톱에서는 종료할 때까지 OpenTubeX가 시스템 트레이에 남습니다. Android는 백그라운드 새로고침 시간을 결정합니다."
+    Notify About New Uploads: 구독 설정에서 알림을 켠 채널에 대해 이 기기에 시스템 알림을 표시합니다. OpenTubeX는 구독을 새로 고칠 때 새 콘텐츠를 확인하므로 자동 새로 고침 간격을 선택하세요. 앱이 닫혀 있을 때도 알림을 받으려면 앱이 닫혀 있을 때 새로 고침도 사용하도록 설정하세요.
+    RSS Feeds Auto Refresh Interval: 앱이 열려 있는 동안 OpenTubeX가 RSS 피드를 자동으로 새로 고치는 빈도입니다.
+    Faster Subscription Refresh: "먼저 각 채널의 RSS 피드를 확인하고 새 업로드가 있는 채널의 동영상, Shorts, 라이브 스트림만 불러옵니다. 자동 새로 고침은 지난 10분 이내에 불러온 채널도 건너뜁니다. 새 업로드가 없는 채널은 조회수, 삭제된 동영상, 변경된 제목이 몇 시간마다만 업데이트되며, RSS 피드가 늦어지면 새 업로드가 늦게 표시될 수 있습니다. Invidious API에서는 사용할 수 없습니다."
+    Platforms Auto Refresh Interval: 앱이 열려 있는 동안 OpenTubeX가 다른 플랫폼에서 팔로우한 채널을 자동으로 새로 고치는 빈도입니다.
+    Twitch Notify When Live: 팔로우한 Twitch 채널 중 하나가 방송을 시작하면 알려 줍니다. OpenTubeX는 열려 있는 동안 몇 분마다 확인하며, 닫혀 있는 동안에도 그때 구독을 새로 고치면 확인합니다.
+  Theme Settings:
+    Only Show Important Notifications: 작업을 확인하거나 상태만 알려 주는 앱 내 알림을 숨기며, 실행취소를 제공하는 알림도 여기에 포함됩니다. 오류, 경고, 직접 설정한 알림, 그리고 업데이트 안내처럼 결정을 요청하는 알림은 계속 표시됩니다. 구독 새로 고침과 같은 백그라운드 작업의 진행 상황은 알림 대신 전역 진행 표시줄에 표시됩니다. 시스템 알림에는 영향을 주지 않습니다.
+    Visible Search Suggestions: "검색창 목록이 스크롤되기 전에 표시할 검색 기록 항목과 추천 검색어의 수를 설정합니다. 목록은 창 아래쪽 가장자리를 넘어가지 않습니다."
+    Thumbnail Size: "그리드와 목록에서 동영상 썸네일 크기를 조정합니다. 열 수가 고정된 그리드나 전체 너비 보기 유형은 대신 각 행을 채우므로, 여기서는 목록 썸네일과 Shorts만 변경됩니다. 휴대전화 크기의 창에서는 그리드 썸네일이 100%로 제한됩니다."
+    Playlist Thumbnail Size: "재생목록 페이지에서 동영상 썸네일 크기를 조정합니다. 열 수가 고정된 그리드나 전체 너비 보기 유형은 대신 각 행을 채우므로, 여기서는 목록 썸네일과 Shorts만 변경됩니다. 휴대전화 크기의 창에서는 그리드 썸네일이 100%로 제한됩니다."
+    Compact Settings Categories: "설명을 숨기고 설정 카테고리의 높이를 줄입니다."
+    Show Progress as Notification: 전체 진행률 표시줄 대신 구독 새로 고침 및 관리되는 도구 다운로드 같은 백그라운드 작업의 실시간 진행률을 지속 알림으로 표시합니다.
+    Always Show Scrollbars: 스크롤바를 항상 표시합니다. 비활성화하면 마우스 움직임을 멈춘 직후 서서히 사라지고 다시 움직이면 즉시 나타납니다.
+    Scroll Speed: 마우스 휠 및 터치패드 휠 동작의 스크롤 거리를 변경합니다.
+    Use Fixed Tab Width: 가로 탭 표시줄의 각 탭 너비를 제목에 맞추는 대신 모두 같은 너비로 설정합니다.
+    Use Custom Title Bar: 세로 공간을 절약하기 위해 시스템 제목 표시줄을 탭 표시줄로 바꾸거나, 탭이 위쪽에 있지 않을 때는 상단 탐색 영역으로 바꿉니다. 창 제어 버튼은 해당 표시줄의 모서리에 표시됩니다.
+    Use Grid Player Menu: 동영상 플레이어의 설정 메뉴를 행 목록 대신 타일 격자로 배치합니다.
+    Modal Backdrop: "대화 상자와 메뉴 뒤에서 앱이 보이는 방식을 설정합니다. 흐림 효과는 성능이 낮은 기기에서 느릴 수 있습니다."
+    Click Scrollbar Track to Scroll: "스크롤바의 핸들 바깥쪽을 클릭하면 클릭한 방향으로 약 한 페이지씩 스크롤합니다. 이 설정이 켜져 있으면 보이는 스크롤바가 그 아래 항목을 향한 클릭을 가로챕니다. 탭 바의 스크롤바는 항상 이렇게 동작합니다."
+  Experimental Settings:
+    Replace HTTP Cache: Electron의 디스크 기반 HTTP 캐시를 비활성화하고 사용자 지정 메모리 내 이미지 캐시를 활성화합니다. RAM 사용량이 늘어납니다.
+    Disable Hardware Acceleration: GPU 하드웨어 가속을 비활성화합니다. 그래픽 문제를 해결할 수 있지만 성능이 저하될 수 있습니다.
+  SponsorBlock Settings:
+    UseDeArrowTitles: 동영상 제목을 DeArrow에서 사용자가 제출한 제목으로 바꿉니다.
+    UseDeArrowThumbnails: 동영상 썸네일을 DeArrow의 썸네일로 바꿉니다.
+    Always Show DeArrow Badge: DeArrow가 제목 또는 썸네일을 바꾼 동영상에서 마우스를 올렸을 때만이 아니라 항상 DeArrow 버튼을 표시합니다.
+Autoplay Interruption Timer: '{autoplayInterruptionIntervalHours}시간 동안 활동이 없어 자동 재생을 취소했습니다'
+The playlist is at the beginning. Enable loop to continue playing: 재생목록의 시작입니다. 계속 재생하려면 반복을 활성화하세요
+Age Restricted:
+  This channel is age restricted: 이 채널에는 연령 제한이 있습니다
+  This video is age restricted: 이 동영상에는 연령 제한이 있습니다
+External link opening has been disabled in Settings → Privacy: 설정 → 개인 정보에서 외부 링크 열기가 비활성화되었습니다
+Screenshot Clipboard Success: 스크린샷을 클립보드에 저장했습니다
+Screenshot Clipboard Error: 스크린샷을 클립보드에 복사하지 못했습니다
+Channel Hidden: '{channel}을(를) 채널 필터에 추가했습니다'
+Channel Unhidden: '{channel}을(를) 채널 필터에서 제거했습니다'
+Trimmed input must be at least N characters long: 공백을 제거한 입력은 {length}자 이상이어야 합니다
+Tag already exists: '"{tagName}" 태그가 이미 있습니다'
+Hashtag:
+  Hashtag: 해시태그
+  This hashtag does not currently have any videos: 이 해시태그에는 현재 동영상이 없습니다
+Moments Ago: 방금 전
+Ok: 확인
+Yes, Delete: 예, 삭제
+Yes, Restart: 예, 다시 시작
+Yes, Open Link: 예, 링크 열기
+Cancel: 취소
+checkmark: ✓
+Display Label: '{label}: {value}'
+KeyboardShortcutTemplate: '{label} ({shortcut})'
+shortcutJoinOperator: +
+shortcutLabelSeparator: ｜
+Keys:
+  alt: Alt
+  ctrl: Ctrl
+  shift: Shift
+  enter: Enter
+  plus: 더하기
+  arrowdown: 아래쪽 화살표
+  arrowleft: 왼쪽 화살표
+  arrowright: 오른쪽 화살표
+  arrowup: 위쪽 화살표
+KeyboardShortcutPrompt:
+  Mark Seen or Watched: "선택한 항목을 확인함으로 표시하거나 시청함 상태를 전환"
+  Toggle Quick Bookmark: 빠른 북마크 재생목록에 추가하거나 제거
+  Reopen Closed Window: 마지막으로 닫은 창 다시 열기
+  Keyboard Shortcuts: 키보드 단축키
+  Edit Hint: 단축키를 선택한 다음 새 키 조합을 누르세요. 할당을 해제하려면 Backspace 또는 Delete를 누르세요.
+  Change Shortcut: '{action} 단축키 변경'
+  Press Shortcut: 단축키 누르기…
+  Unassigned: 할당되지 않음
+  Reset Shortcut: '{action} 단축키 초기화'
+  Reset to Defaults: 기본값으로 초기화
+  Shortcut Already Assigned: 이미 할당된 단축키
+  Shortcut Conflict: '{shortcut}은(는) 이미 {actions}에 할당되어 있습니다. 다시 할당하시겠습니까?'
+  Reserved Shortcut Conflict: '{shortcut}은(는) {actions}용으로 예약되어 있어 다시 할당할 수 없습니다.'
+  Reassign: 다시 할당
+  Sections:
+    Video:
+      Playback: "동영상:\_재생"
+      General: "동영상:\_일반"
+    App:
+      General: "앱:\_일반"
+      Tabs: "앱:\_탭"
+      Search and Page: "앱:\_검색 및 페이지"
+      Window and View: "앱:\_창 및 보기"
+  Show Keyboard Shortcuts: 키보드 단축키 표시
+  History Backward: 한 페이지 뒤로 이동
+  History Forward: 한 페이지 앞으로 이동
+  New Window: 새 창 만들기
+  New Tab: 새 탭 만들기
+  Close Tab: 현재 탭 닫기
+  Reload Tab: 현재 탭 다시 불러오기
+  Reopen Closed Tab: 마지막으로 닫은 탭 다시 열기
+  Next Tab: 다음 탭으로 전환
+  Previous Tab: 이전 탭으로 전환
+  Switch to Tab: 1~9번 탭으로 전환
+  Toggle Tab Orientation: 탭 레이아웃 전환
+  Navigate to Settings: 설정 페이지로 이동
+  Navigate to History: 시청 기록 페이지로 이동
+  Refresh: 최신 콘텐츠로 피드 새로 고침
+  Find in Page: 현재 페이지에서 텍스트 찾기
+  Find Next Match: 다음 일치 항목으로 이동
+  Find Previous Match: 이전 일치 항목으로 이동
+  Captions: 자막 켜기/끄기
+  Stats: 동영상 통계 표시
+  Picture in Picture: 화면 속 화면 모드 전환
+  Large Rewind: 10초 되감기 / 현재 동영상 재생 속도에 따라 되감기
+  Play: 재생/일시 정지 전환
+  Large Fast Forward: 10초 빨리 감기 / 현재 동영상 재생 속도에 따라 빨리 감기
+  Mute: 음소거 전환
+  Decrease Video Speed: 동영상 재생 속도 간격만큼 재생 속도 낮추기
+  Increase Video Speed: 동영상 재생 속도 간격만큼 재생 속도 높이기
+  Toggle Normal Playback Speed: 1배속과 이전 재생 속도 간 전환
+  Toggle Skip Silence: 무음 구간 건너뛰기 전환
+  Set A-B Repeat Point A: A-B 반복 지점 A 설정
+  Set A-B Repeat Point B: A-B 반복 지점 B 설정
+  Clear A-B Repeat: A-B 반복 지우기
+  Full Window: 전체 창 전환
+  Theatre Mode: 영화관 모드 전환
+  Take Screenshot: 스크린샷 찍기
+  Video Zoom In: 동영상 확대
+  Video Zoom Out: 동영상 축소
+  Minimize Window: 창 최소화
+  Close Window: 창 닫기
+  Tab Switcher: 탭 전환기
+  Last Chapter: 이전 챕터
+  Next Chapter: 다음 챕터
+  Skip by Tenths: 비율로 동영상 건너뛰기 (3번 누르면 재생 시간의 30%로 이동)
+  Home: 동영상 시작으로 이동
+  End: 동영상 끝으로 이동
+  Skip to Next Video: 재생목록의 다음 동영상 또는 다음 추천 동영상으로 건너뛰기
+  Skip to Previous Video: 재생목록의 이전 동영상으로 건너뛰기
+  Undo Seek: 마지막 탐색 실행 취소
+  Redo Seek: 실행 취소한 탐색 다시 실행
+CommandPalette:
+  Title: 명령 팔레트
+  Open: 명령 팔레트 열기
+  Search Label: "명령, 설정 및 로컬 동영상 검색"
+  Search Placeholder: 명령, 설정 및 로컬 동영상 검색…
+  Results: "검색 결과"
+  No Results: "일치하는 검색 결과 없음"
+  Result Count: "검색 결과: {count}"
+  Move: 이동
+  Run: 실행
+  Keys:
+    Up: ↑
+    Down: ↓
+    Escape: Esc
+  Switch to Tab: '탭으로 전환: {title}'
+  Switch Profile: '프로필 전환: {name}'
+  Open Playlist: '재생목록 열기: {name}'
+  Cancel Download: '다운로드 취소: {title}'
+  Groups:
+    App: 앱
+    Navigation: 탐색
+    Tabs: 탭
+    Local Videos: 로컬 동영상
+  Unavailable:
+    Current Page: 이미 이 페이지에 있습니다
+    No History: 이 방향에 이동할 페이지가 없습니다
+    Desktop: 데스크톱 앱에서만 사용할 수 있습니다
+    Build: 이 빌드에서는 사용할 수 없습니다
+    One Tab: 먼저 다른 탭을 여세요
+    Active Tab: 현재 활성 탭입니다
+    Active Profile: 현재 활성 프로필입니다
+    Download Finished: 이 다운로드는 더 이상 실행 중이 아닙니다
+    Video: 먼저 동영상을 여세요
+Downloads:
+  File Name Template Invalid: '다운로드 폴더 안의 상대 경로를 사용하세요. "..", "~", "$", "%" 또는 "thumbnail:" 같은 접두사는 사용할 수 없습니다.'
+  Search Completed: "제목 또는 채널로 완료된 다운로드 검색"
+  Format: "형식"
+  All Formats: "모든 형식"
+  Largest First: "큰 파일 순"
+  Smallest First: "작은 파일 순"
+  No Matching Downloads: "일치하는 완료된 다운로드가 없습니다. 다른 검색어나 필터를 사용해 보세요."
+  Add Download: 다운로드 추가
+  Preparing: 준비 중…
+  Export Failed: "다운로드한 파일을 저장할 수 없습니다. 쓰기 가능한 다운로드 폴더를 선택하고 다시 시도하세요."
+  Native Code Blocked: "Android에서 yt-dlp의 네이티브 라이브러리 로드를 차단했습니다. GrapheneOS에서 이 앱의 앱 정보를 열고 “Exploit protection”의 “Dynamic code loading via storage”을(를) “Allowed”(으)로 설정한 후 다시 시도하세요."
+  Download Stopped Unexpectedly: "다운로드가 예기치 않게 중지되었습니다."
+  Remove File Permanently Warning: "\"{title}\"을(를) 영구적으로 삭제합니다."
+  Download: 다운로드
+  Download Video: 동영상 다운로드
+  Download Playlist: 재생목록 다운로드
+  Downloading: 다운로드 중
+  Queue: 대기열
+  Downloaded: 다운로드됨
+  Canceled: 취소됨
+  Open Downloads: 다운로드 열기
+  No Downloads: 아직 다운로드가 없습니다
+  No Downloads Description: 시작한 다운로드가 여기에 표시됩니다.
+  Clear Failed Canceled Skipped And Missing: 실패, 취소, 건너뜀 및 누락 항목 지우기
+  Clear From List: 목록에서 지우기
+  Show in Folder: 폴더에 표시
+  Play Download: 다운로드 재생
+  Retry Download: 다운로드 다시 시도
+  Pause Download: 다운로드 일시 정지
+  Resume Download: 다운로드 계속
+  Move Earlier: 앞으로 이동
+  Move Later: 뒤로 이동
+  Pause All: 모두 일시 정지
+  Resume All: 모두 계속
+  Retry All: 실패한 다운로드 모두 다시 시도
+  Total Size: '전체 크기: {size}'
+  Local File: 로컬 파일
+  Available Offline: 오프라인에서 사용 가능
+  Remove File: 파일 제거
+  Remove File Confirmation: 다운로드한 파일을 제거하시겠습니까?
+  Remove File Warning: '"{title}"을(를) 기기의 휴지통으로 이동합니다.'
+  File Not Found: 다운로드한 파일을 찾을 수 없습니다.
+  Files Missing: 다운로드한 파일을 파일 시스템에서 더 이상 사용할 수 없습니다.
+  Files Available: '다운로드한 파일 {total}개 중 {available}개를 사용할 수 있습니다.'
+  More Files: '파일 {count}개 더 있음'
+  Template Used: '템플릿: {name}'
+  Template: 템플릿
+  Unsaved: 저장되지 않음
+  Media Type: 미디어 유형
+  Video: 동영상
+  Audio: 오디오
+  Maximum Resolution: 최대 해상도
+  Best Available: 사용 가능한 최고 품질
+  Automatic: 자동
+  Container: 컨테이너
+  Video Codec: 동영상 코덱
+  Audio Codec: 오디오 코덱
+  File Name Template: 파일 이름 템플릿
+  File Name Template Help: '사용 가능한 필드: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
+  Time Range and Chapters: 시간 범위 및 챕터
+  Start Time: 시작 시간
+  End Time: 종료 시간
+  Split by Chapters: 챕터별로 별도 파일로 분할
+  Remove Segments: 구간 제거
+  Subtitles and Metadata: 자막 및 메타데이터
+  Include Subtitles: 자막 포함
+  Embed Subtitles: 미디어 파일에 자막 삽입
+  Subtitle Format: 자막 형식
+  Subtitle Languages: 자막 언어
+  Subtitle Languages Help: '쉼표로 구분한 yt-dlp 언어 선택자. 예: en.*,de.*'
+  Embed Cover Art: 썸네일을 표지 이미지로 삽입
+  Embed Metadata: 제목, 작성자, 설명 및 챕터 삽입
+  Additional yt-dlp Arguments: 추가 yt-dlp 인수
+  Template Name: 템플릿 이름
+  Save Template: 템플릿 저장
+  Delete Template: 템플릿 삭제
+  Template Saved: '다운로드 템플릿 "{name}"을(를) 저장했습니다'
+  Template Name Exists: '"{name}"이라는 다운로드 템플릿이 이미 있습니다.'
+  Choose Folder: 변경
+  Select Folder: 폴더 선택
+  Folder Required: 다운로드를 활성화하려면 다운로드 폴더를 선택하세요.
+  System Downloads Folder: 시스템 다운로드 폴더
+  Processing: 처리 중…
+  Queued: 대기 중
+  Queued Position: '대기 중, {position}번째'
+  Paused: 일시 정지됨
+  Pausing: 현재 작업이 끝나면 대기열을 일시 정지합니다
+  Download Complete: 다운로드 완료
+  Download Cancelled: 다운로드 취소됨
+  Download Failed: 다운로드 실패
+  File Name Shortened: 동영상 제목이 너무 길어 파일 이름을 줄였습니다.
+  Some Videos Not Downloaded: 이 재생목록의 일부 동영상을 다운로드하지 못했습니다.
+  Playlist Video Position: 동영상 {index}/{count}
+  Insufficient Disk Space: 디스크 공간이 부족합니다. 약 {required}이(가) 필요하며 {available}을(를) 사용할 수 있습니다.
+  Unknown Download Size: 다운로드 크기를 알 수 없습니다. 대상 파일 시스템에서 {available}을(를) 사용할 수 있습니다.
+  Disk Space Check Unavailable: 다운로드를 시작하기 전에 사용 가능한 디스크 공간을 확인할 수 없습니다.
+  Download Failure Hint: '{issuesLink}을(를) 확인한 다음 설정 → 고급 → 외부 소프트웨어에서 yt-dlp 채널을 Nightly 또는 Master로 전환해 보세요.'
+  yt-dlp YouTube Issues: 최근 yt-dlp YouTube 문제
+  Automatic Download Started: 자동 다운로드를 시작했습니다
+  Automatic Download Started Body: '{channel}의 "{title}"을(를) 백그라운드에서 다운로드하는 중입니다.'
+  Automatic Download Complete: 자동 다운로드 완료
+  Automatic Download Failed: 자동 다운로드 실패
+  Automatic Download Could Not Start: '"{title}" 자동 다운로드를 시작할 수 없습니다.'
+  Automatic Download Skipped: 자동 다운로드 필터에 따라 건너뜀
+  Cancel Download: 다운로드 취소
+  yt-dlp Not Found: yt-dlp를 찾을 수 없습니다. 설치하거나 설정 → 고급 → 외부 소프트웨어에서 경로를 지정하세요.
+  Download Complete Template: '"{title}" 다운로드가 완료되었습니다'
+  Download Failed Template: '"{title}" 다운로드에 실패했습니다'
+  Templates:
+    Video Best: 동영상 - 최고 품질
+    Video Resolution: 동영상 - {resolution}
+    Audio Best: 오디오 - 최고 품질
+    Audio Format: 오디오 - {format}
+    Subtitles Format: 자막 - {format}
+  Waiting for Unmetered Network: "종량제가 아닌 네트워크를 기다리는 중"
+  Waiting for Charging: "충전기를 기다리는 중"
+  Remove File Failed: 다운로드한 파일을 제거할 수 없습니다.
+Channels:
+  Load More Channels: "채널 더 불러오기"
+Search Bar:
+  Use Suggestion: 추천 검색어 사용
+  Open Search Container: 검색창 열기
+  Search: 검색
+Theme Discovery:
+  Discover Themes: "테마 둘러보기"
+  Refresh: "새로고침"
+  View on GitHub: "GitHub에서 보기"
+  Load Error: "테마를 불러올 수 없습니다. 새로고침해 보세요."
+  Loading: "불러오는 중…"
+  No Themes: "설치 가능한 테마를 찾지 못했습니다."
+  No Preview: "스크린샷을 표시할 수 없습니다"
+  Load More: "더 불러오기"
+  Applied: "적용됨"
+  Apply Theme: "테마 적용"
+  Install and Apply: "설치 및 적용"
+  Update and Apply: "업데이트 및 적용"
+
+Connection:
+  Offline: 오프라인
+  Reconnecting: "연결이 끊어졌습니다. 다시 연결하는 중…"
+  Back Online: "다시 온라인 상태입니다"
+
+App Icon:
+  Restart: "앱 다시 시작"
+  Saved Message: "아이콘이 저장되었습니다. 런처가 업데이트되는 데 잠시 걸릴 수 있습니다."
+  Title: "앱 아이콘"
+  Error: "앱 아이콘을 불러오거나 변경할 수 없습니다"
+
+Tray:
+  Hide All Windows: "모든 창 숨기기"
+  Show All Windows: "모든 창 표시"
+
+Tray Icon:
+  Title: "트레이 아이콘"
+  Follow App Theme: "앱 테마 따르기"
+  Monochrome: "단색"
+
+Form Inputs:
+  Browse: "찾아보기"
+  Use Default Path: "기본값 사용"
+  Enter Password Hint: "비밀번호를 입력하세요"
+  Choose Password Hint: "비밀번호를 설정하세요"
+  Confirm Password Hint: "새 비밀번호를 다시 입력하세요"
+  Encryption Passphrase Hint: "암호화 암호문을 입력하세요"
+  Show Password: "비밀번호 표시"
+  Hide Password: "비밀번호 숨기기"
+  Search Text Hint: "검색어 입력"
+  Playlist Description Hint: "이 재생목록을 설명하세요"
+  Filename Preview: "파일 이름 미리보기"
+  Enter Channels: "채널 입력"
+  Enter Text: "텍스트 입력"
+  Video URL: 동영상 또는 재생목록 URL
+  Paste Link: 동영상 또는 재생목록 링크 붙여넣기
+  Example: "예: {example}"
+  No Minimum: 최솟값 없음
+  No Maximum: 최댓값 없음
+  Any Age: 게시 시기 무관
+  Included Terms Example: "예: 튜토리얼, 리뷰"
+  Excluded Terms Example: "예: 예고편, 미리보기"
+  Global Arguments Hint: 모든 다운로드에 사용할 선택적 인수
+  Unlimited Hint: 0은 무제한
+  Add Argument: 인수 추가
+  Template Name Example: "예: 오디오만"
+  Download Arguments Hint: 이 다운로드에 사용할 선택적 인수
+  Generated ID Hint: 비워 두면 ID 생성
+  Default Value: "기본값: {value}"
+
+Storage Startup Error:
+  Title: "앱 데이터를 불러올 수 없습니다"
+  Message: "기기의 저장 공간을 확보한 후 다시 시도하세요. 데이터를 불러올 때까지 동기화가 일시 중지됩니다."
+  Web Message: "다른 탭에서 OpenTubeX가 열려 있다면 해당 탭을 닫고 다시 시도하세요."
+  Insecure Web Message: "OpenTubeX는 HTTPS 또는 localhost에서 열었을 때만 데이터를 저장할 수 있습니다. 대신 https://로 이 주소를 여세요."
+  Retry: "다시 시도"
+Native Permissions:
+  Local Network Denied: "근처 기기 권한이 거부되었습니다."
+  Local Network: "로컬 네트워크에서 기기를 검색하고 동영상을 전송하며, 기기 간 설정과 데이터를 동기화합니다."
+
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "홈"
+  subscriptions: "구독"
+  userplaylists: "목록"
+  history: "기록"
+  subscribedchannels: "채널"
+  trending: "급상승"
+  popular: "인기"
+  stats: "통계"
+  more: "더 보기"
+
+Installer:
+  Create Desktop Shortcut: 바탕 화면 바로 가기 만들기
+Older Version Changes:
+  Title: "이전 버전의 변경 사항"
+  Message: "이전 버전의 OpenTubeX에서 변경한 내용이 라이브러리에 적용되었습니다."
+  Detail: "두 버전 모두에서 변경된 항목은 이전 버전의 변경 사항이 유지되었습니다. 이전 라이브러리의 백업은 프로필 폴더에 있습니다."
+Library Format Changed:
+  Title: "라이브러리를 새 형식으로 옮겼습니다"
+  Message: "라이브러리가 이제 새 저장 형식을 사용합니다."
+  Detail: "이전 버전의 OpenTubeX에서도 라이브러리를 열 수 있지만 이 업데이트 이전 상태로 표시됩니다. 이전 버전에서 변경한 내용은 이 버전으로 돌아오면 추가됩니다."
+Invidious Fallback Warning: "이 요청은 설정한 Invidious 인스턴스를 우회하여 YouTube에 직접 연결하므로 IP 주소가 노출됩니다."
+Automatically unloaded to free memory: "메모리 확보를 위해 자동으로 언로드됨"
+Home Widgets:
+  Continue Watching: "이어서 시청하기"
+  Continue Watching Description: "시청하던 동영상을 이어서 재생합니다"
+  Continue Watching Empty: "시청을 시작한 동영상이 여기에 표시됩니다"
+  Quick Access: "빠른 실행"
+  Quick Access Description: "선택한 페이지를 최대 4개까지 엽니다"
+  Choose Pages: "페이지를 최대 4개까지 선택하세요"
+  Pages: "페이지"
+  Search: "검색"
+  Subscriptions: "구독"
+  Watch Later: "나중에 볼 동영상"
+  History: "기록"
+  Playlists: "재생 목록"
+  Downloads: "다운로드"
+  Watch Time: "시청 시간"
+  Watch Time Description: "최근 7일간의 시청 시간"
+  Today: "오늘"
+  Last 7 Days: "최근 7일"
+  Recent Downloads: "최근 다운로드"
+  Recent Downloads Description: "다운로드한 동영상을 재생합니다"
+  Recent Downloads Empty: "다운로드한 동영상이 여기에 표시됩니다"
+Subscription Groups:
+  Groups: 그룹
+  All: 전체
+  New Group: 새 그룹
+  Edit Group: 그룹 편집
+  Group Name: 그룹 이름
+  Create: 만들기
+  Save: 저장
+  Delete Group: 그룹 삭제
+  Delete Prompt: '"{groupName}" 그룹을 삭제하시겠습니까? 그룹에 속한 채널의 구독은 유지됩니다.'
+  Empty Group: 이 그룹에는 현재 프로필의 채널이 없습니다.
+  Save Failed: 그룹을 저장하지 못했습니다.
+  Delete Failed: 그룹을 삭제하지 못했습니다.
+  Group Icon: 그룹 아이콘
+  No Icon: 아이콘 없음
+Yattee Server:
+  API Error (Click to copy): Yattee 서버 오류(복사하려면 클릭)
+  Unsupported page: 이 페이지는 Yattee 서버에서 사용할 수 없습니다. 로컬 API로 불러오려면 “{fallbackSetting}”을(를) 켜세요.
+  Posts unavailable: Yattee 서버는 게시물을 제공하지 않습니다. 로컬 API로 불러오려면 “{fallbackSetting}”을(를) 켜세요.
+  Errors:
+    Invalid credentials: Yattee 서버가 사용자 이름 또는 비밀번호를 거부했습니다. 설정 → 고급에서 확인하세요.
+    Rate limited: 로그인 실패 횟수가 너무 많아 Yattee 서버가 로그인을 차단하고 있습니다. 나중에 다시 시도하세요.
+    Streams not relayed: Yattee 서버가 이 동영상의 스트림을 중계하지 않았습니다. 동영상을 서버를 통해 프록시하는 동안에는 OpenTubeX가 YouTube에 직접 연결하지 않습니다.
+    Not configured: 설정 → 고급에서 Yattee 서버의 URL을 입력하세요.
+    HTTPS required: Android에서는 HTTPS를 사용하는 Yattee 서버의 동영상만 재생할 수 있습니다.
+    Streams unavailable: Yattee 서버에서 이 동영상의 스트림을 불러올 수 없습니다. 설정 → 고급의 “연결 테스트”로 서버를 확인하세요.
+Yattee Fallback Warning: 이 요청은 설정한 Yattee 서버를 우회하여 YouTube에 직접 연결하므로 IP 주소가 노출됩니다.
+Update With Package Manager: '{packageManager}(으)로 업데이트:'
+Update Command Copied: '업데이트 명령을 복사했습니다'
+Digital Wellbeing:
+  Watch time limit almost reached: "일일 시청 시간 한도까지 {duration} 남음"
+  Shorts limit almost reached: "일일 Shorts 한도까지 {duration} 남음"
+  Daily watch time limit reached: "일일 시청 시간 한도에 도달함"
+  Daily Shorts limit reached: "일일 Shorts 한도에 도달함"
+  Watched today: "오늘 {duration} 동안 시청했습니다."
+  Shorts watched today: "오늘 Shorts를 {duration} 동안 시청했습니다."
+  15 More Minutes: "15분 더"
+  Ignore for Today: "오늘은 무시"
+  Time to take a break: "휴식할 시간입니다"
+  Watching for: "{duration} 동안 시청하고 있습니다."
+  Time for bed: "잠자리에 들 시간입니다"
+  Bedtime started at: "취침 시간이 {time}에 시작되었습니다."
+  Remind Me in 10 Minutes: "10분 후에 다시 알림"
+Notification Center:
+  Notifications: "알림"
+  Notifications With Unread: "알림(읽지 않음 {count}개)"
+  Mark as Read: "읽음으로 표시"
+  Mark All as Read: "모두 읽음으로 표시"
+  Clear All: "모두 지우기"
+  Clear: "지우기"
+  Empty: "아직 알림이 없습니다"
+  Empty Hint: "실시간 스트리밍 알림과 알림을 켠 채널의 새 업로드가 여기에 표시됩니다."
+Platforms:
+  Tracks: 트랙
+  Playlists: 재생 목록
+  Follower Count: 팔로워 {count}명
+  Open Website: '{platform}에서 열기'
+  Channel Not Found: 이 채널을 찾을 수 없습니다.
+  Playlist Not Found: 이 재생 목록을 찾을 수 없습니다.
+  Load Error: '{platform}에서 이 페이지를 불러올 수 없습니다.'
+  Empty Tab: 아직 아무것도 없습니다.
+YouTube Account:
+  Like: "좋아요"
+  Dislike: "싫어요"
+  Rating Failed: "YouTube에서 평가할 수 없습니다: {error}"
+  Subscribe Failed: "YouTube에서 구독할 수 없습니다: {error}"
+  Unsubscribe Failed: "YouTube에서 구독을 취소할 수 없습니다: {error}"
+  Add a comment: "댓글 추가"
+  Add a reply: "답글 추가"
+  Switch Channel: "채널 전환"
+  Comment: "댓글"
+  Reply: "답글"
+  Comment Posted: "댓글을 게시했습니다"
+  Reply Posted: "답글을 게시했습니다"
+  Comment Failed: "댓글을 게시할 수 없습니다: {error}"
+  Delete Comment: "댓글 삭제"
+  Delete Comment Confirmation: "YouTube에서 댓글을 삭제하시겠습니까?"
+  Comment Deleted: "댓글을 삭제했습니다"
+  Delete Comment Failed: "댓글을 삭제할 수 없습니다: {error}"
+  Edit Comment: "댓글 수정"
+  Save: "저장"
+  Comment Edited: "댓글을 수정했습니다"
+  Edit Comment Failed: "댓글을 수정할 수 없습니다: {error}"
+  Recommendations: "YouTube 추천"
+  Recommendations Failed: "YouTube 추천을 불러올 수 없습니다."
+  Subscriptions Synced: "YouTube에서 구독을 동기화했습니다: {added}개 추가, {removed}개 삭제"
+  Playlist Update Failed: "YouTube에서 {playlistName}을(를) 업데이트할 수 없습니다: {error}"

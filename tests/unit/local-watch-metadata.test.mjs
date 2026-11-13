@@ -1,0 +1,504 @@
+import assert from 'node:assert/strict'
+import { readFile } from 'node:fs/promises'
+import test from 'node:test'
+import { compileFunction } from 'node:vm'
+import { YTNodes } from 'youtubei.js'
+import { createLocalFeedParsers, getAuthorVerification } from '../../src/renderer/helpers/api/local-feed-parsers.js'
+import { parseLocalVideoSummary } from '../../src/renderer/helpers/video-summary.js'
+import { parseLocalVideoGames } from '../../src/renderer/helpers/video-games.js'
+import { parseLocalVideoMusicTracks } from '../../src/renderer/helpers/video-music.js'
+import { parseLocalVideoCollaborators } from '../../src/renderer/helpers/video-collaborators.js'
+import { getVideoPopularity } from '../../src/renderer/helpers/player/videoPopularity.js'
+import { getAudioFormatLoudness } from '../../src/renderer/helpers/player/loudnessNormalization.js'
+
+const { parseLocalSubscriberCount, parseLocalTextRuns } = createLocalFeedParsers(() => false)
+
+const source = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
+const start = source.indexOf('    getVideoInformationLocal:')
+const end = source.indexOf('\n    },', start)
+const chapterStart = source.indexOf('    extractChaptersFromDescription:')
+const chapterEnd = source.indexOf('\n    },', chapterStart)
+const extractChaptersFromDescription = compileFunction(`return ({${source.slice(chapterStart, chapterEnd)}\n} }).extractChaptersFromDescription`)()
+
+async function loadMetadata(info, avoidTranslation = 'disabled', options = {}) {
+  info.streaming_data = { formats: [], adaptive_formats: [{ url: 'https://example.com/video' }], hls_manifest_url: 'manifest' }
+  const errors = []
+  const dependencies = {
+    initializeNetworkRecovery: () => ({ ready: Promise.resolve() }),
+    getConnectionState: () => 'online',
+    getLocalVideoInfo: async () => ({
+      info,
+      paidPromotionDurationMs: options.paidPromotionDurationMs ?? null,
+      paidPromotionPromise: options.paidPromotionPromise,
+      contentDisclosures: options.contentDisclosures,
+    }),
+    getOembedTitle: options.getOembedTitle ?? (async () => null),
+    areLocalCommentsDisabled: () => true,
+    parseLocalEndscreen: () => [],
+    parseLocalVideoGames,
+    parseLocalVideoMusicTracks,
+    parseLocalVideoSummary,
+    getVideoPopularity,
+    getAudioFormatLoudness,
+    YTNodes,
+    parseLocalTextRuns,
+    MANIFEST_TYPE_DASH: 'dash',
+    MANIFEST_TYPE_HLS: 'hls',
+    parseLocalVideoCollaborators,
+    parseLocalSubscriberCount,
+    getAuthorVerification,
+    window: { innerWidth: options.windowWidth ?? 1000 },
+    formatNumber: String,
+    formatSubscriberCount: String,
+    showApiErrorToast() {},
+    console: { error: error => errors.push(String(error)) },
+  }
+  const load = compileFunction(`return ({${source.slice(start, end)}\n} }).getVideoInformationLocal`, Object.keys(dependencies))(...Object.values(dependencies))
+  let completed = false
+  const watch = Object.assign(options.watch ?? {}, {
+    restrictedPlaybackError: null,
+    createLocalDashManifest: options.createLocalDashManifest ?? (async () => 'manifest'),
+    createLocalStoryboardUrls: storyboard => {
+      assert.ok(storyboard, 'Thumbnail previews must not be generated without a storyboard')
+      return `storyboard:${storyboard.thumbnail_height}`
+    },
+    applyDownloadedPlaybackSource: () => false,
+    alignActiveFormatWithAvailableSources() {},
+    applyYtDlpPlaybackSource() {},
+    firstLoad: true,
+    videoLoadGeneration: 0,
+    videoId: 'testVideo01',
+    tabRoute: { params: { id: 'testVideo01' } },
+    isCurrentVideoLoad: () => true,
+    $store: { getters: { getAvoidTranslation: avoidTranslation }, commit() {} },
+    setTabAvatar() {},
+    updateSubscriptionDetails() {},
+    initializePlaybackRate() {},
+    initializeVideoQuality() {},
+    extractChaptersFromDescription,
+    finalizeChapters() {},
+    getSponsorBlockCommunityChapters: options.getSponsorBlockCommunityChapters ?? (async () => []),
+    updateShortsPlayerState() {},
+    updateShortThumbnail() {},
+    updateTitle() { completed = true },
+    runIpBlockRecoveryScriptAndReload: async () => false,
+    finishDownloadedPlaybackWithoutMetadata: () => false,
+    scheduleDownloadedPlaybackFallback() {},
+    settleDownloadedPlaybackFallback: () => false,
+    finishMetadataLoad() { this.isLoading = false; this.downloadedPlaybackWithoutMetadata = false },
+    getUnavailableVideoThumbnail: () => '',
+    hideVideoLikesAndDislikes: options.hideVideoLikesAndDislikes ?? true,
+    backendPreference: 'local',
+    backendFallback: options.backendFallback ?? false,
+    getVideoInformationInvidious: options.getVideoInformationInvidious,
+    t: value => value,
+    showTabToast() {},
+  })
+  await load.call(watch)
+  assert.deepEqual(errors, options.expectedErrors ?? [])
+  assert.equal(watch.errorMessage, options.expectedErrorMessage)
+  assert.equal(watch.isLoading, false)
+  assert.equal(completed, true)
+  assert.equal(watch.manifestSrc, options.expectedErrorMessage ? undefined : 'manifest')
+  return watch
+}
+
+for (const [windowWidth, boards] of [[1000, []], [375, [{ thumbnail_height: 180 }]]]) {
+  test(`loads video streams when no usable storyboard remains at ${windowWidth}px`, async () => {
+    const watch = await loadMetadata({
+      playability_status: { status: 'OK' },
+      basic_info: { title: 'Ready video', duration: 42 },
+      page: [],
+      storyboards: { type: 'PlayerStoryboardSpec', boards },
+    }, 'disabled', { windowWidth })
+    assert.equal(watch.videoTitle, 'Ready video')
+    assert.equal(watch.manifestSrc, 'manifest')
+    assert.equal(watch.videoStoryboardSrc, undefined)
+  })
+}
+
+for (const [status, subreason] of [['UNPLAYABLE', null], ['LOGIN_REQUIRED', { text: 'More details' }]]) {
+  test(`formats ${status} errors with subreason ${JSON.stringify(subreason)}`, async () => {
+    await loadMetadata({
+      playability_status: { status, reason: 'Video unavailable', error_screen: { subreason } },
+      basic_info: { title: 'Unavailable video', duration: 42 },
+      page: [],
+    }, 'disabled', {
+      watch: { isYtDlpPlaybackRequested: () => false },
+      expectedErrorMessage: `[${status}] Video unavailable${subreason?.text ? ': More details' : ''}`,
+    })
+  })
+}
+
+test('removes the skeleton before community chapters finish loading', async () => {
+  const watch = {}
+  let finishChapters
+  const chapters = new Promise(resolve => { finishChapters = resolve })
+  const loading = loadMetadata({
+    playability_status: { status: 'OK' },
+    basic_info: { title: 'Ready video', duration: 42 },
+    page: [],
+  }, 'disabled', { watch, getSponsorBlockCommunityChapters: () => chapters })
+  await new Promise(resolve => setImmediate(resolve))
+  try {
+    assert.equal(watch.isLoading, false, 'Optional chapters must not keep the video skeleton visible')
+    assert.equal(watch.manifestSrc, 'manifest')
+  } finally {
+    finishChapters([])
+    await loading
+  }
+})
+
+for (const live of [false]) {
+  test(`loads popularity independently of hidden chapters for ${live ? 'live streams' : 'videos'}`, async () => {
+    const heatmap = new YTNodes.MacroMarkersListEntity({
+      markersList: {
+        markerType: 'MARKER_TYPE_HEATMAP',
+        markers: [{
+          startMillis: '1000', durationMillis: '1000', intensityScoreNormalized: 1
+        }]
+      }
+    }).toHeatmap()
+    const watch = await loadMetadata({
+      playability_status: { status: 'OK' },
+      basic_info: { title: 'Ready video', duration: 42, is_live: live, is_live_content: live },
+      page: [],
+      heat_map: heatmap
+    }, 'disabled', { watch: { hideChapters: true } })
+    assert.deepEqual(watch.videoPopularity, live ? [] : [{ startSeconds: 1, endSeconds: 2, intensity: 1 }])
+  })
+}
+
+for (const change of ['none', 'navigation', 'reload', 'hide chapters']) {
+  test(`handles late community chapters after ${change}`, async () => {
+    let finishChapters
+    const chapters = new Promise(resolve => { finishChapters = resolve })
+    const watch = await loadMetadata({
+      playability_status: { status: 'OK' },
+      basic_info: { title: 'Ready video', duration: 42 },
+      page: [],
+    }, 'disabled', { getSponsorBlockCommunityChapters: () => chapters })
+    const generation = watch.videoLoadGeneration
+    watch.isCurrentVideoLoad = candidate => candidate === watch.videoLoadGeneration
+    if (change === 'navigation') watch.isCurrentVideoLoad = () => false
+    if (change === 'reload') watch.videoLoadGeneration++
+    if (change === 'hide chapters') watch.hideChapters = true
+    const result = [{ title: 'Community chapter', startSeconds: 0, endSeconds: 42 }]
+    finishChapters(result)
+    await chapters
+    assert.deepEqual(watch.videoChapters, change === 'none' ? result : [])
+    assert.equal(watch.isLoading, false)
+    assert.equal(watch.videoLoadGeneration, generation + (change === 'reload' ? 1 : 0))
+  })
+}
+
+for (const change of ['none', 'navigation', 'reload']) {
+  test(`handles late promotion details after ${change}`, async () => {
+    let finishPromotion
+    const paidPromotionPromise = new Promise(resolve => { finishPromotion = resolve })
+    const watch = await loadMetadata({
+      playability_status: { status: 'OK' },
+      basic_info: { title: 'Ready video', duration: 42 },
+      page: [],
+    }, 'disabled', { paidPromotionPromise })
+    assert.equal(watch.hasPaidPromotion, false)
+    const generation = watch.videoLoadGeneration
+    watch.isCurrentVideoLoad = candidate => candidate === generation && watch.videoLoadGeneration === generation
+    if (change === 'navigation') watch.isCurrentVideoLoad = () => false
+    if (change === 'reload') watch.videoLoadGeneration++
+    finishPromotion(60000)
+    await paidPromotionPromise
+    assert.equal(watch.hasPaidPromotion, change === 'none')
+    assert.equal(watch.paidPromotionDurationMs, change === 'none' ? 60000 : 10000)
+  })
+}
+
+for (const response of [[], [{ title: 'Stale community chapter', startSeconds: 0, endSeconds: 42 }]]) {
+  test(`preserves fallback chapters after a failed local manifest and ${response.length ? 'nonempty' : 'empty'} late community response`, async () => {
+    let finishChapters
+    const chapters = new Promise(resolve => { finishChapters = resolve })
+    const fallbackChapters = [{ title: 'Fallback chapter', startSeconds: 0, endSeconds: 42 }]
+    const watch = await loadMetadata({
+      playability_status: { status: 'OK' }, basic_info: { title: 'Ready video', duration: 42 }, page: [],
+    }, 'disabled', {
+      backendFallback: true,
+      expectedErrors: ['Error: Manifest failed'],
+      getSponsorBlockCommunityChapters: () => chapters,
+      createLocalDashManifest: async () => { throw new Error('Manifest failed') },
+      getVideoInformationInvidious(generation) {
+        assert.equal(generation, this.videoLoadGeneration, 'Backend fallback shares the video generation')
+        this.videoChapters = fallbackChapters
+        this.manifestSrc = 'manifest'
+        this.isLoading = false
+        this.updateTitle()
+      },
+    })
+    finishChapters(response)
+    await chapters
+    assert.deepEqual(watch.videoChapters, fallbackChapters)
+  })
+}
+
+for (const views of [undefined]) {
+  test(`loads player metadata without watch-page panels, view count ${views}`, async () => {
+    const watch = await loadMetadata({
+      playability_status: { status: 'OK' },
+      basic_info: { title: ' Video title ', view_count: views, channel_id: 'channel', author: 'Author', duration: 42 },
+      page: [],
+    })
+    assert.equal(watch.videoTitle, 'Video title')
+    assert.equal(watch.hasResolvedVideoTitle, true)
+    assert.equal(watch.videoViewCount, views ?? null)
+    assert.equal(watch.channelId, 'channel')
+    assert.equal(watch.channelName, 'Author')
+    assert.equal(watch.channelThumbnail, '')
+    assert.equal(watch.channelSubscriptionCountText, '')
+    assert.equal(watch.license, undefined)
+    assert.equal(watch.videoLengthSeconds, 42)
+  })
+}
+
+for (const secondary of [{}, { owner: {} }, { owner: { author: {} } }]) {
+  test(`loads partial watch-page panels ${JSON.stringify(secondary)}`, async () => {
+    const watch = await loadMetadata({
+      playability_status: { status: 'OK' },
+      basic_info: {},
+      page: [],
+      primary_info: { title: { text: 'Localized title' }, view_count: { text: '1,234 views' } },
+      secondary_info: secondary,
+    })
+    assert.equal(watch.videoTitle, 'Localized title')
+    assert.equal(watch.videoViewCount, 1234)
+    assert.equal(watch.channelId, '')
+    assert.equal(watch.channelName, '')
+    assert.equal(watch.channelSubscriptionCountText, '')
+  })
+}
+
+test('preserves complete watch-page metadata and a zero player view count', async () => {
+  const watch = await loadMetadata({
+    playability_status: { status: 'OK' },
+    basic_info: { title: 'Original', view_count: 0 },
+    page: [],
+    primary_info: { title: { text: 'Localized' }, view_count: { text: '123 views' }, badges: [{ label: 'AI' }] },
+    secondary_info: {
+      metadata: { rows: [{ title: { text: 'License' }, contents: [{ text: 'Creative Commons' }] }] },
+      description: { text: 'Description' },
+      owner: {
+        author: { id: 'channel', name: 'Author', best_thumbnail: { url: 'avatar' } },
+        subscriber_count: { isEmpty: () => false, text: '42' },
+      },
+    },
+  })
+  assert.equal(watch.videoTitle, 'Localized')
+  assert.equal(watch.videoViewCount, 0)
+  assert.equal(watch.license, 'Creative Commons')
+  assert.equal(watch.channelId, 'channel')
+  assert.equal(watch.channelName, 'Author')
+  assert.equal(watch.channelThumbnail, 'avatar')
+  assert.equal(watch.channelSubscriptionCountText, '42')
+  assert.equal(watch.hasAiGeneratedContent, true)
+})
+
+// Synthetic metadata for a response with a description panel but no main watch panels.
+function descriptionPanel() {
+  return new YTNodes.StructuredDescriptionContent({
+    items: [
+      {
+        videoDescriptionHeaderRenderer: {
+          title: { simpleText: 'Description-panel title' },
+          channel: { simpleText: 'Example Channel' },
+          views: { simpleText: '42 views' },
+          publishDate: { simpleText: 'Jan 2, 2025' },
+          channelNavigationEndpoint: { browseEndpoint: { browseId: 'UC_TEST_CHANNEL' } },
+          channelThumbnail: { thumbnails: [{ url: 'avatar', width: 88, height: 88 }] },
+        }
+      },
+      {
+        videoDescriptionInfocardsSectionRenderer: {
+          sectionTitle: { simpleText: 'Example Channel' },
+          sectionSubtitle: { simpleText: '123 subscribers' },
+        }
+      },
+      {
+        expandableVideoDescriptionBodyRenderer: {
+          attributedDescriptionBodyText: { content: 'Localized description' },
+        }
+      },
+    ]
+  })
+}
+
+test('recovers metadata from the structured description when watch panels are absent', async () => {
+  const content = descriptionPanel()
+  const watch = await loadMetadata({
+    playability_status: { status: 'OK' },
+    basic_info: {},
+    page: [{}, { engagement_panels: [{ panel_identifier: 'engagement-panel-structured-description', content }] }],
+  })
+  assert.equal(watch.videoTitle, 'Description-panel title')
+  assert.equal(watch.videoViewCount, 42)
+  assert.equal(watch.channelName, 'Example Channel')
+  assert.equal(watch.channelId, 'UC_TEST_CHANNEL')
+  assert.equal(watch.channelThumbnail, 'avatar')
+  assert.equal(watch.channelSubscriptionCountText, '123')
+  assert.equal(watch.videoDescription, 'Localized description')
+  assert.equal(watch.videoPublished, Date.parse('Jan 2, 2025'))
+})
+
+test('keeps player metadata when the description panel has no title or description', async () => {
+  const content = descriptionPanel()
+  content.items[0].title = { text: undefined }
+  content.items[2].attributed_description_body_text = undefined
+  const watch = await loadMetadata({
+    playability_status: { status: 'OK' },
+    basic_info: { title: 'Player title', short_description: '', view_count: 42 },
+    page: [{}, { engagement_panels: [{ panel_identifier: 'engagement-panel-structured-description', content }] }],
+  })
+  assert.equal(watch.videoTitle, 'Player title')
+  assert.equal(watch.videoDescription, '')
+  assert.equal(watch.channelThumbnail, 'avatar')
+  assert.equal(watch.channelSubscriptionCountText, '123')
+})
+
+test('honors the original-language preference with description-panel metadata', async () => {
+  const content = descriptionPanel()
+  const watch = await loadMetadata({
+    playability_status: { status: 'OK' },
+    basic_info: { title: 'Original title', short_description: 'Original description', view_count: 0 },
+    page: [{}, { engagement_panels: [{ panel_identifier: 'engagement-panel-structured-description', content }] }],
+  }, 'enabled')
+  assert.equal(watch.videoTitle, 'Original title')
+  assert.equal(watch.videoDescription, 'Original description')
+  assert.equal(watch.videoViewCount, 0)
+  assert.equal(watch.channelSubscriptionCountText, '123')
+})
+
+test('retrieves a missing title from oEmbed', async () => {
+  let calls = 0
+  const watch = await loadMetadata({ playability_status: { status: 'OK' }, basic_info: {}, page: [] }, 'disabled', {
+    getOembedTitle: async id => { assert.equal(id, 'testVideo01'); calls++; return 'Recovered title' },
+  })
+  assert.equal(calls, 1)
+  assert.equal(watch.videoTitle, 'Recovered title')
+  assert.equal(watch.hasResolvedVideoTitle, true)
+})
+
+for (const state of ['cached', 'in flight']) {
+  test(`reuses the ${state} original-language title request`, async () => {
+    const utils = await readFile(new URL('../../src/renderer/helpers/utils.js', import.meta.url), 'utf8')
+    const oembed = utils.slice(utils.indexOf('const OEMBED_TITLE_CACHE_LIMIT')).replace(/^export /gm, '')
+    let requests = 0
+    let respond
+    const response = new Promise(resolve => { respond = resolve })
+    const getOembedTitle = compileFunction(`${oembed}\nreturn getOembedTitle`, ['fetch'])(() => {
+      requests++
+      return response
+    })
+    // The video list starts this lookup for the original-language preference.
+    const listTitle = getOembedTitle('testVideo01')
+    const finish = () => respond({ json: async () => ({ title: 'Original title' }) })
+    if (state === 'cached') { finish(); await listTitle }
+    const watch = await loadMetadata({ playability_status: { status: 'OK' }, basic_info: {}, page: [] }, 'entire_app', { getOembedTitle })
+    assert.equal(watch.isLoading, false)
+    if (state === 'in flight') finish()
+    await listTitle
+    await new Promise(resolve => setImmediate(resolve))
+    assert.equal(requests, 1)
+    assert.equal(watch.videoTitle, 'Original title')
+  })
+}
+
+for (const change of ['navigation', 'another title source']) {
+  test(`ignores a late oEmbed title after ${change}`, async () => {
+    let respond
+    const title = new Promise(resolve => { respond = resolve })
+    const watch = await loadMetadata({ playability_status: { status: 'OK' }, basic_info: {}, page: [] }, 'disabled', {
+      getOembedTitle: () => title,
+    })
+    if (change === 'navigation') watch.isCurrentVideoLoad = () => false
+    else { watch.videoTitle = 'Other title'; watch.hasResolvedVideoTitle = true }
+    respond('Late title')
+    await title
+    assert.equal(watch.videoTitle, change === 'navigation' ? '' : 'Other title')
+  })
+}
+
+test('uses description-panel text when parsed main-panel text is empty', async () => {
+  const content = descriptionPanel()
+  const watch = await loadMetadata({
+    playability_status: { status: 'OK' },
+    basic_info: {},
+    secondary_info: new YTNodes.VideoSecondaryInfo({ owner: { videoOwnerRenderer: {} } }),
+    primary_info: new YTNodes.VideoPrimaryInfo({}),
+    page: [{}, { engagement_panels: [{ panel_identifier: 'engagement-panel-structured-description', content }] }],
+  })
+  assert.equal(watch.videoDescription, 'Localized description')
+  assert.equal(watch.channelName, 'Example Channel')
+  assert.equal(watch.channelId, 'UC_TEST_CHANNEL')
+  assert.equal(watch.channelSubscriptionCountText, '123')
+  assert.equal(watch.videoPublished, Date.parse('Jan 2, 2025'))
+})
+
+for (const [text, expected] of [['No views', 0], ['1.2K views', 1200], ['Views unavailable', null]]) {
+  test(`parses description-panel view count ${text}`, async () => {
+    const content = descriptionPanel()
+    content.items[0].views.text = text
+    const watch = await loadMetadata({
+      playability_status: { status: 'OK' },
+      basic_info: {},
+      page: [{}, { engagement_panels: [{ panel_identifier: 'engagement-panel-structured-description', content }] }],
+    })
+    assert.equal(watch.videoViewCount, expected)
+  })
+}
+
+test('uses a parsed title header before requesting oEmbed', async () => {
+  const content = descriptionPanel()
+  content.items[0].title = { text: undefined }
+  // The parser-panel fix retains this existing node class in structured descriptions.
+  content.items.unshift(new YTNodes.VideoTitleHeaderView({ videoTitle: { content: 'Header title' } }))
+  const watch = await loadMetadata({
+    playability_status: { status: 'OK' },
+    basic_info: {},
+    page: [{}, { engagement_panels: [{ panel_identifier: 'engagement-panel-structured-description', content }] }],
+  }, 'disabled', { getOembedTitle: () => assert.fail('Title already available') })
+  assert.equal(watch.videoTitle, 'Header title')
+})
+
+test('tolerates a loading placeholder in the description panel', async () => {
+  const watch = await loadMetadata({
+    playability_status: { status: 'OK' },
+    basic_info: { title: 'Player title' },
+    page: [{}, { engagement_panels: [{ panel_identifier: 'engagement-panel-structured-description', content: { type: 'ContentLoading', use_spinner: true } }] }],
+  })
+  assert.equal(watch.videoTitle, 'Player title')
+})
+
+test('tolerates omitted raw description-header fields after parsing', async () => {
+  const content = new YTNodes.StructuredDescriptionContent({ items: [{ videoDescriptionHeaderRenderer: {} }] })
+  const watch = await loadMetadata({
+    playability_status: { status: 'OK' },
+    basic_info: { title: 'Player title' },
+    page: [{}, { engagement_panels: [{ panel_identifier: 'engagement-panel-structured-description', content }] }],
+  }, 'disabled', { hideVideoLikesAndDislikes: false })
+  assert.equal(watch.videoTitle, 'Player title')
+  assert.equal(watch.videoViewCount, null)
+  assert.equal(watch.channelThumbnail, '')
+  assert.equal(watch.videoPublished, 0)
+})
+
+for (const original of [false]) {
+  test(`extracts plain-text chapters with the original-language preference ${original}`, async () => {
+    const content = descriptionPanel()
+    content.items[2] = new YTNodes.ExpandableVideoDescriptionBody({
+      attributedDescriptionBodyText: { content: '0:00 Intro & setup\n0:10 Main topic' },
+    })
+    const watch = await loadMetadata({
+      playability_status: { status: 'OK' },
+      basic_info: { short_description: original ? '0:00 Original chapter' : '' },
+      page: [{}, { engagement_panels: [{ panel_identifier: 'engagement-panel-structured-description', content }] }],
+    }, original ? 'entire_app' : 'disabled')
+    assert.deepEqual(watch.videoChapters.map(chapter => chapter.title), original ? ['Original chapter'] : ['Intro & setup', 'Main topic'])
+  })
+}

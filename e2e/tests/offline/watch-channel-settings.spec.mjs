@@ -1,0 +1,183 @@
+import { test, expect } from '../../helpers/app.mjs'
+import { activeTab, openMockedVideo } from '../../helpers/player.mjs'
+import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
+
+test.use({
+  seed: {
+    settings: {
+      videoPlaybackEngine: 'built-in',
+      ytDlpPlaybackEngineDefaultMigration: true,
+      autoUpdateChannelPlaybackSpeeds: false,
+      autoUpdateChannelVideoQualities: false,
+      autoUpdateChannelSubtitlesStates: false,
+      autoUpdateChannelVolumes: false,
+      baseTheme: 'system',
+      systemDarkTheme: 'dark',
+      systemLightTheme: 'light',
+      mainColor: 'Red',
+      secColor: 'Blue',
+      currentLocale: 'en-US'
+    }
+  }
+})
+
+async function savedValues(page) {
+  return page.evaluate(() => {
+    const store = window.$store
+    return ['ChannelPlaybackSpeeds', 'ChannelVideoQualities', 'ChannelSubtitlesStates', 'ChannelVolumes']
+      .map(key => JSON.parse(store.getters[`get${key}`]))
+  })
+}
+
+test('removes each saved channel override from the watch popover without changing playback', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  const view = await watchViewHandle(page)
+  await view.evaluate(async view => {
+    const overrides = [
+      ['ChannelPlaybackSpeeds', 1],
+      ['ChannelVideoQualities', '360'],
+      ['ChannelSubtitlesStates', false],
+      ['ChannelVolumes', 0]
+    ]
+    for (const [key, value] of overrides) {
+      await view.$store.dispatch(`update${key}`, JSON.stringify({ [view.channelId]: value, other: value }))
+    }
+  })
+  const video = page.locator(`${activeTab} .ftVideoPlayer video`)
+  await video.evaluate(video => video.pause())
+  const before = await video.evaluate(video => ({ speed: video.playbackRate, volume: video.volume }))
+  await page.locator(`${activeTab} .watchVideoInfo`).getByRole('button', { name: 'Save channel setting…', exact: true }).click()
+  const rows = page.locator('.channelSettingRow')
+  await expect(rows).toHaveCount(4)
+  await expect.poll(() => rows.first().locator('.channelSettingSave > span').last().evaluate(label => (
+    label.getBoundingClientRect().height / Number.parseFloat(getComputedStyle(label).fontSize)
+  ))).toBeLessThan(2)
+  const trash = rows.first().getByRole('button', { name: 'Forget this setting' })
+  await expect(trash).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+  await expect(trash).toHaveCSS('box-shadow', 'none')
+  await expect(trash).toHaveCSS('font-size', '14px')
+  const saveVolume = rows.nth(3).locator('.channelSettingSave')
+  await saveVolume.hover()
+  await expect(saveVolume).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+  for (let index = 0; index < 4; index++) {
+    await rows.nth(index).getByRole('button', { name: 'Forget this setting' }).click()
+    await expect(rows).toHaveCount(0)
+    await page.locator(`${activeTab} .watchVideoInfo`).getByRole('button', { name: 'Save channel setting…', exact: true }).click()
+    await expect(rows.nth(index).getByRole('button', { name: 'Forget this setting' })).toBeDisabled()
+    await expect.poll(async () => Object.keys((await savedValues(page))[index])).toEqual(['other'])
+  }
+  expect(await video.evaluate(video => ({ speed: video.playbackRate, volume: video.volume }))).toEqual(before)
+  await page.keyboard.press('Escape')
+  await view.evaluate(async view => {
+    for (const setting of ['VideoQualities', 'SubtitlesStates', 'Volumes']) {
+      await view.$store.dispatch(`updateAutoUpdateChannel${setting}`, true)
+    }
+  })
+  await page.locator(`${activeTab} .watchVideoInfo`).getByRole('button', { name: 'Save channel setting…', exact: true }).click()
+  await expect(rows).toHaveCount(1)
+  // Space activates the button rather than the player's play shortcut.
+  await rows.first().locator('.channelSettingSave').press('Space')
+  await expect.poll(async () => Object.keys((await savedValues(page))[0]).length).toBe(2)
+  await expect(rows).toHaveCount(0)
+  expect(await video.evaluate(video => video.paused)).toBe(true)
+  // The confirmation slides in over the toolbar and stays while the pointer rests on it.
+  const savedToast = page.locator('[data-sonner-toast]', { hasText: 'Channel Playback Speed Saved: 1×' })
+  await savedToast.press('Escape')
+  await expect(savedToast).toHaveCount(0)
+  await page.locator(`${activeTab} .watchVideoInfo`).getByRole('button', { name: 'Save channel setting…', exact: true }).click()
+  await expect(rows.first().getByRole('button', { name: 'Forget this setting' })).toBeVisible()
+  await rows.first().getByRole('button', { name: 'Forget this setting' }).press('Enter')
+  await expect.poll(async () => Object.keys((await savedValues(page))[0])).toEqual(['other'])
+})
+
+test('phones save and forget channel settings from the context menu sheet', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  await page.setViewportSize({ width: 400, height: 800 })
+  const view = await watchViewHandle(page)
+  await view.evaluate(view => view.$store.dispatch('updateChannelVideoQualities', JSON.stringify({ [view.channelId]: '360', other: '360' })))
+  const openSheet = () => page.locator(`${activeTab} .watchVideoInfo`).getByRole('button', { name: 'Save channel setting…', exact: true }).click()
+  const sheet = page.locator('.mobileLinkActions')
+
+  await openSheet()
+  await expect(sheet).toBeVisible()
+  await expect(page.locator('.iconDropdown')).toHaveCount(0)
+  await expect(sheet.locator('.mobileLinkActionsHeader')).toHaveText('Save channel setting…')
+  await sheet.getByRole('menuitem', { name: 'Forget this setting: Video Quality', exact: true }).click()
+  await expect(sheet).toHaveCount(0)
+  await expect.poll(async () => Object.keys((await savedValues(page))[1])).toEqual(['other'])
+
+  await openSheet()
+  await expect(sheet.getByRole('menuitem', { name: /^Forget this setting/ })).toHaveCount(0)
+  await sheet.getByRole('menuitem', { name: 'Save Channel Volume', exact: true }).click()
+  await expect(sheet).toHaveCount(0)
+  await expect.poll(async () => Object.keys((await savedValues(page))[3]).length).toBe(1)
+})
+
+test('quick speed action saves, replaces and removes the channel speed through its button', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  const view = await watchViewHandle(page)
+  await view.evaluate(async view => {
+    await view.$store.dispatch('updateUseQuickPlaybackSpeedBar', true)
+    await view.$store.dispatch('updateChannelPlaybackSpeeds', JSON.stringify({ other: 1.25 }))
+  })
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  const video = player.locator('video')
+  await video.evaluate(video => video.pause())
+  await player.hover()
+  const action = player.locator('.ft-quick-playback-rate-save')
+  await expect(action).toHaveText('Set Default')
+  await action.click()
+  await expect(action).toHaveText('Delete')
+  await expect.poll(async () => Object.keys((await savedValues(page))[0]).length).toBe(2)
+  await video.evaluate(video => { video.playbackRate = 1.5 })
+  await expect(action).toHaveText('Set Default')
+  await action.click()
+  await expect(action).toHaveText('Delete')
+  await action.click()
+  await expect(action).toHaveText('Set Default')
+  await expect.poll(async () => (await savedValues(page))[0]).toEqual({ other: 1.25 })
+  expect(await video.evaluate(video => video.playbackRate)).toBe(1.5)
+  await page.locator(`${activeTab} .watchVideoInfo`).getByRole('button', { name: 'Save channel setting…', exact: true }).click()
+  await expect(page.locator('.channelSettingRow').first()).toContainText('Playback Speed')
+})
+
+test('ignores saved channel settings while channel playback settings are off', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  // The channels of the two mocked videos opened below
+  const channelIds = ['UC-test-channel-id', 'UC4QobU6STFB0P71PMvOGN5A']
+  const forChannels = value => JSON.stringify(Object.fromEntries(channelIds.map(id => [id, value])))
+  await page.evaluate(async (values) => {
+    const store = window.$store
+    await store.dispatch('updateEnableChannelSettings', false)
+    await store.dispatch('updateAutoUpdateChannelPlaybackSpeeds', true)
+    for (const [key, value] of Object.entries(values)) {
+      await store.dispatch(`update${key}`, value)
+    }
+  }, {
+    ChannelPlaybackSpeeds: forChannels(1.5),
+    ChannelVolumes: forChannels(0.2),
+    ChannelVideoQualities: forChannels('360'),
+    ChannelSubtitlesStates: forChannels(true)
+  })
+  const video = await openMockedVideo(page)
+  expect(await video.evaluate(video => ({ speed: video.playbackRate, volume: video.volume })))
+    .toEqual({ speed: 1, volume: 1 })
+  const saveButton = page.locator(`${activeTab} .watchVideoInfo`).getByRole('button', { name: 'Save channel setting…', exact: true })
+  await expect(saveButton).toHaveCount(0)
+
+  const view = await watchViewHandle(page)
+  await expect.poll(() => view.evaluate(view => view.currentSubtitlesState)).toBe(false)
+  expect(await view.evaluate(view => view.currentVideoQuality === view.getDefaultVideoQuality())).toBe(true)
+  await view.evaluate(view => view.handlePlaybackRateUserSet(2))
+  expect((await savedValues(page))[0]).toEqual(JSON.parse(forChannels(1.5)))
+
+  await page.evaluate(() => window.$store.dispatch('updateEnableChannelSettings', true))
+  await expect(saveButton).toBeVisible()
+  // Saved values apply again once the switch is back on
+  const nextVideo = await openMockedVideo(page, 'aqz-KE-bpKQ')
+  await expect.poll(() => nextVideo.evaluate(video => ({ speed: video.playbackRate, volume: video.volume })))
+    .toEqual({ speed: 1.5, volume: 0.2 })
+})

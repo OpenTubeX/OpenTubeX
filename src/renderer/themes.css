@@ -1,13 +1,100 @@
+/* Resolves the Font Size scaling to a plain length for code that reads it. */
+@property --form-control-height {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 45px;
+}
+
 body {
   margin: 0;
   min-block-size: 100vh;
+  font-family: var(--app-font-family);
+  font-size: 16px;
   color: var(--primary-text-color);
   background-color: var(--bg-color);
+
+  --app-font-family: 'Geist Variable', system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --ui-roundness: 1;
+  --font-scale: 1;
+
+  /* Material 3 corner scale, scaled by the UI Roundness setting. */
+  --shape-corner-extra-small: calc(4px * var(--ui-roundness));
+  --shape-corner-small: calc(8px * var(--ui-roundness));
+  --shape-corner-medium: calc(12px * var(--ui-roundness));
+  --shape-corner-large: calc(16px * var(--ui-roundness));
+  --shape-corner-large-increased: calc(20px * var(--ui-roundness));
+  --shape-corner-extra-large: calc(28px * var(--ui-roundness));
+  --shape-corner-full: calc(999px * var(--ui-roundness));
+
+  /* Expressive shapes for decorative clip-path layers. */
+  --shape-cookie-9: polygon(50% 0%, 54.3% 1.4%, 58% 4.7%, 61.2% 8.3%, 64.4% 10.5%, 68.2% 10.9%, 73% 10.2%, 78% 10%, 82.1% 11.7%, 84.5% 15.5%, 85.2% 20.4%, 85.4% 25.2%, 86.4% 29%, 89.1% 31.8%, 93.2% 34.3%, 97.2% 37.4%, 99.2% 41.3%, 98.6% 45.7%, 96% 50%, 93% 53.8%, 91.4% 57.3%, 91.7% 61.2%, 93.2% 65.7%, 94.3% 70.6%, 93.3% 75%, 90% 78%, 85.2% 79.6%, 80.5% 80.5%, 77% 82.2%, 74.8% 85.4%, 73% 89.8%, 70.6% 94.3%, 67.1% 97%, 62.6% 97.2%, 58% 95.3%, 53.8% 93%, 50% 92%, 46.2% 93%, 42% 95.3%, 37.4% 97.2%, 32.9% 97%, 29.4% 94.3%, 27% 89.8%, 25.2% 85.4%, 23% 82.2%, 19.5% 80.5%, 14.8% 79.6%, 10% 78%, 6.7% 75%, 5.7% 70.6%, 6.8% 65.7%, 8.3% 61.2%, 8.6% 57.3%, 7% 53.8%, 4% 50%, 1.4% 45.7%, 0.8% 41.3%, 2.8% 37.4%, 6.8% 34.3%, 10.9% 31.8%, 13.6% 29%, 14.6% 25.2%, 14.8% 20.4%, 15.5% 15.5%, 17.9% 11.7%, 22% 10%, 27% 10.2%, 31.8% 10.9%, 35.6% 10.5%, 38.8% 8.3%, 42% 4.7%, 45.7% 1.4%);
+
+  /* Material 3 Expressive springs (damping, stiffness) sampled into
+     duration + easing pairs: `transition: transform var(--motion-fast-spatial)`.
+     Spatial springs overshoot and suit position, size and shape; effects
+     springs do not and suit color and opacity. */
+  --motion-fast-spatial: 350ms linear(0, 0.075, 0.248, 0.456, 0.657, 0.825, 0.95, 1.033, 1.078, 1.094, 1.091, 1.076, 1.057, 1.038, 1.021, 1.008, 0.999, 0.994, 0.991, 0.991, 0.992, 0.994, 0.996, 0.998, 1);
+  --motion-default-spatial: 450ms linear(0, 0.052, 0.17, 0.316, 0.463, 0.597, 0.712, 0.804, 0.875, 0.927, 0.963, 0.987, 1.002, 1.011, 1.014, 1.015, 1.014, 1.012, 1.01, 1.008, 1.006, 1.004, 1.003, 1.002, 1);
+  --motion-slow-spatial: 650ms linear(0, 0.06, 0.194, 0.354, 0.511, 0.649, 0.761, 0.848, 0.912, 0.956, 0.985, 1.002, 1.011, 1.015, 1.015, 1.014, 1.011, 1.009, 1.007, 1.005, 1.003, 1.002, 1.001, 1.001, 1);
+  --motion-fast-effects: 150ms linear(0, 0.058, 0.181, 0.321, 0.456, 0.574, 0.672, 0.751, 0.813, 0.861, 0.897, 0.924, 0.945, 0.96, 0.971, 0.979, 0.985, 0.989, 0.992, 0.994, 0.996, 0.997, 0.998, 0.999, 1);
+  --motion-default-effects: 250ms linear(0, 0.057, 0.18, 0.32, 0.454, 0.572, 0.67, 0.749, 0.812, 0.86, 0.896, 0.924, 0.944, 0.959, 0.971, 0.979, 0.985, 0.989, 0.992, 0.994, 0.996, 0.997, 0.998, 0.999, 1);
+  --motion-slow-effects: 350ms linear(0, 0.065, 0.2, 0.351, 0.491, 0.611, 0.708, 0.783, 0.841, 0.885, 0.917, 0.941, 0.958, 0.97, 0.979, 0.985, 0.99, 0.993, 0.995, 0.997, 0.998, 0.998, 0.999, 0.999, 1);
+  --modal-backdrop-blur: blur(2px);
+  --focus-border-width: 2px;
+
+  /* Form controls grow with the Font Size setting so their text keeps fitting. */
+  --form-control-height: calc(45px * var(--font-scale));
+  --form-control-value-padding: calc(18px * var(--font-scale)) 4px;
+  --form-control-label-top: calc(4px * var(--font-scale));
+  --switch-track-width: 40px;
+  --switch-track-height: 24px;
+  --switch-thumb-inset: 3px;
+  --switch-unchecked-thumb-size: calc(var(--switch-track-height) - 2 * var(--switch-thumb-inset));
+  --switch-touch-height: 36px;
+  --scrollbar-thumb-width: 6px;
+  --scrollbar-track-width: calc(var(--scrollbar-thumb-width) + 4px);
+}
+
+/* Color defaults that themes override or derive from. Theme previews
+   (.themeScope) declare them again so derived colors follow the previewed
+   theme instead of resolving once on the body; :where() keeps every theme
+   class and inline theme property ahead of them. */
+body,
+:where(.themeScope) {
+  --native-color-scheme: light;
+
+  /* Optional decorative layers, separate from colors used by contrast checks
+     and native windows. Fixed backgrounds keep the field aligned on scroll;
+     themes that set them also set --fixed-background-display, see
+     FtFixedBackground. */
+  --bg-image: none;
+  --card-bg-image: none;
+  --border-color: var(--tertiary-text-color);
+  --divider-color: color-mix(in srgb, var(--border-color) 45%, transparent);
+  --subtle-surface-color: var(--tertiary-text-color);
+
+  /* Themes whose page background matches the tab strip set a visible fill. */
+  --inactive-tab-color: var(--bg-color);
+  --watched-thumbnail-overlay-color: rgb(from var(--bg-color) r g b / 70%);
+  --thumbnail-badge-bg-color: color-mix(in srgb, var(--card-bg-color) 85%, transparent);
+  --thumbnail-badge-blur: var(--card-bg-blur, none);
+  --dropdown-item-hover-color: var(--scrollbar-color-hover);
+  --dropdown-item-hover-text-color: var(--scrollbar-text-color-hover);
+  --selection-background-color: var(--primary-color);
+  --selection-text-color: var(--text-with-main-color);
+  --focus-ring-contrast-color: #000;
 
   /*
     This works because CSS variables are just a find and replace and
     are replaced before the expressions are evaluated
   */
+
+  /* Match calculateColorLuminance's perceived-brightness threshold: white on
+     medium/dark fills, black on light fills. The channel names resolve inside
+     each relative rgb(), so nested palettes use their own fill. Older WebViews
+     lack round(); a steep clamp produces black or white for 8-bit colors,
+     with a transition of one millionth of a brightness unit. */
+  --fill-text-channel: calc(255 * clamp(0, (127.5 - r * 0.299 - g * 0.587 - b * 0.114) * 1000000, 1));
   --accent-color: rgb(var(--accent-color-rgb));
   --accent-color-opacity1: rgb(var(--accent-color-rgb) / 4%);
   --accent-color-opacity2: rgb(var(--accent-color-rgb) / 12%);
@@ -16,37 +103,177 @@ body {
 
   /* divider */
 
-  --primary-input-color: rgb(0 0 0 / 50%);
   --link-color: var(--accent-color);
   --link-visited-color: var(--accent-color-visited);
   --instance-menu-color: var(--search-bar-color);
+  --settings-search-bar-color: var(--search-bar-color);
   --red-500: #f44336;
-  --top-bar-push-down-adjustment-default: -35px;
-
-  /* Value of 0 without 'px' does not work inside calc() */
-  /* stylelint-disable length-zero-no-unit */
-  --top-bar-push-down-adjustment-no-description: 0px;
-  --top-bar-push-down-adjustment-edit-mode: 0px;
-  --top-bar-push-down-adjustment-one-or-fewer: 0px;
-  /* stylelint-enable length-zero-no-unit */
-
   --destructive-color: #f44336;
-  --destructive-text-color: #000;
-  --destructive-hover-color: #e53935;
+  --destructive-text-color: rgb(from var(--destructive-color) var(--fill-text-channel) var(--fill-text-channel) var(--fill-text-channel));
+  --destructive-hover-color: #d32f2f;
   --destructive-active-color: #c62828;
+
+  /* Error text keeps most of the text color's lightness, so it stays readable
+     on every surface, and takes a red hue (the default destructive red's).
+     Mixed from two relative colors, because Chromium 119 can crash on a
+     relative color whose origin is a color-mix(); the result is the same. */
+  --error-text-color: color-mix(in oklch, oklch(from var(--destructive-color) l 0.14 29deg) 20%, oklch(from var(--primary-text-color) l 0.14 29deg));
+  --members-only-color: #1b7331;
+  --favorite-icon-filter: grayscale(1) sepia(1) saturate(2.2) hue-rotate(68deg) brightness(0.9);
 
   /* For the 'About' page, show the logo with the primary text color by default */
   --logo-primary-color: var(--primary-text-color);
   --logo-secondary-color: var(--primary-text-color);
   --logo-tertiary-color: var(--primary-text-color);
+  --logo-pressed-color: var(--logo-tertiary-color);
+
+  /* Headers use the base theme's interaction colors. */
+  --header-button-hover-color: var(--side-nav-hover-color);
+  --header-button-hover-text-color: var(--side-nav-hover-text-color);
+  --header-button-pressed-color: var(--side-nav-active-color);
+  --header-button-pressed-text-color: var(--side-nav-active-text-color);
+
+  /* Tints keep a color's hue and chroma at a fixed lightness, so bright and
+     dark main colors shift the card's lightness, and the text contrast, alike. */
+  --tint-lightness: 0.6;
+
+  /* Enabled toggles are tonal, tinted more than tonal buttons. Hover softens
+     the tint instead of adding a text-colored layer that costs contrast. */
+  --selected-container-color: color-mix(in srgb, oklch(from var(--primary-color) var(--tint-lightness) c h) 24%, var(--card-bg-color));
+  --selected-container-hover-color: color-mix(in srgb, oklch(from var(--primary-color) var(--tint-lightness) c h) 20%, var(--card-bg-color));
+  --on-selected-container-color: var(--primary-text-color);
+}
+
+/* Chromium truncates zoomed border widths to whole device pixels, so a 2px
+   focus border renders as thin as the 1px rest state below 100% UI scale. */
+@media (resolution < 1dppx) {
+  body {
+    --focus-border-width: 3px;
+  }
+}
+
+@media (resolution < 0.67dppx) {
+  body {
+    --focus-border-width: 4px;
+  }
+}
+
+/* Inherit native touch sizing into dialogs and other teleported controls too. */
+:where(:root.appCapacitorTabs) body {
+  --form-control-height: max(calc(56px * var(--font-scale)), var(--phone-touch-target, 48px));
+  --form-control-value-padding: calc(24px * var(--font-scale)) 8px;
+  --form-control-label-top: calc(8px * var(--font-scale));
+  --switch-track-width: 52px;
+  --switch-track-height: 32px;
+  --switch-thumb-inset: 4px;
+  --switch-unchecked-thumb-size: 24px;
+  --switch-touch-height: var(--phone-touch-target, 48px);
+}
+
+::selection {
+  color: var(--selection-text-color);
+  background-color: var(--selection-background-color);
+}
+
+/* Digital wellbeing. A filter on the root element keeps fixed positioning intact.
+   Top-layer elements render outside the root element, so they need their own filter. */
+:root.grayscale,
+:root.grayscale :is(:fullscreen, :modal, :popover-open) {
+  filter: grayscale(1);
+}
+
+/* Content-only grayscale keeps the interface colors. Images the user picked, such as profile
+   pictures and custom icons, belong to the interface. These rules have no specificity, so rules that
+   already filter content, such as blurred thumbnails, win and add var(--content-filter,) themselves. */
+:root.grayscaleContent {
+  --content-filter: grayscale(1);
+}
+
+:where(:root.grayscaleContent) :where(img, video, canvas, .chapterThumbnail, .ft-seek-filmstrip-frame > *) {
+  filter: var(--content-filter);
+}
+
+:where(:root.grayscaleContent) :where(.ft-custom-icon, .appIconPreset) :where(img),
+:where(:root.grayscaleContent) :where(.profileIconImage, .cropCanvas) {
+  filter: none;
+}
+
+/* Use fallback corners only when the control does not define its own shape. */
+:where(:root:not(.hideOutlines) :focus-visible:not(:disabled)) {
+  border-radius: calc(4px * var(--ui-roundness));
+}
+
+:where(:root:not(.hideOutlines)) :focus-visible:not(:disabled) {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -3px;
+  box-shadow: inset 0 0 0 1px var(--focus-ring-contrast-color);
+}
+
+input[type='number']::-webkit-inner-spin-button {
+  /* Keep Chromium's stepping behavior and hit area; replace only its paint. */
+  /* stylelint-disable-next-line property-no-vendor-prefix */
+  -webkit-appearance: none;
+  appearance: none;
+  inline-size: 24px;
+  block-size: 28px;
+  align-self: center;
+  margin-inline: 8px -8px;
+  background-color: var(--secondary-text-color);
+  background-image: linear-gradient(to bottom, var(--number-step-up-color, var(--secondary-text-color)) 50%, var(--number-step-down-color, var(--secondary-text-color)) 50%);
+  mask-image:
+    conic-gradient(from 135deg at 50% 0, #000 90deg, transparent 0),
+    conic-gradient(from -45deg at 50% 100%, #000 90deg, transparent 0);
+  mask-position: center 5px, center calc(100% - 5px);
+  mask-size: 10px 6px;
+  mask-repeat: no-repeat;
+  opacity: 1;
+  cursor: pointer;
+}
+
+input[type='number']:disabled::-webkit-inner-spin-button,
+input[type='number']:read-only::-webkit-inner-spin-button {
+  background-image: none;
+  opacity: 0.4;
+  cursor: default;
+}
+
+input[type='search']::-webkit-search-cancel-button {
+  /* Chromium only exposes this native control through its prefixed appearance. */
+  /* stylelint-disable-next-line property-no-vendor-prefix */
+  -webkit-appearance: none;
+  appearance: none;
+  block-size: 24px;
+  inline-size: 24px;
+  margin-inline-start: 8px;
+  border-radius: 50%;
+  background-color: var(--secondary-text-color);
+  cursor: pointer;
+  mask-image:
+    linear-gradient(45deg, transparent 44%, #000 44% 56%, transparent 56%),
+    linear-gradient(-45deg, transparent 44%, #000 44% 56%, transparent 56%);
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: 12px 12px;
+  opacity: 0.7;
+  transition:
+    background-color 0.15s ease-in-out,
+    opacity 0.15s ease-in-out;
+}
+
+input[type='search']::-webkit-search-cancel-button:hover {
+  background-color: var(--primary-color);
+  opacity: 1;
+}
+
+input[type='search']::-webkit-search-cancel-button:active {
+  background-color: var(--primary-color-active);
 }
 
 /*************** RULE TWEAKS ***************/
 
-/* Default sidenav hover text color and primary input color not needed to be changed for most themes */
+/* Default sidenav hover text color not needed to be changed for most themes */
 /* stylelint-disable-next-line selector-no-qualifying-type */
 body:not(.hotPink) {
-  --primary-input-color: rgb(0 0 0 / 50%);
   --side-nav-hover-text-color: var(--primary-text-color);
 }
 
@@ -57,43 +284,31 @@ body:not(.hotPink, .pastelPink) {
   --scrollbar-text-color-hover: var(--primary-text-color);
 }
 
-/* Themes that use the main FreeTube logo */
-.system[data-system-theme*='light'],
-.light,
-.system[data-system-theme*='dark'],
-.dark,
-.black {
-  --logo-icon: url('../../_icons/iconColorSmall.svg');
-  --logo-text: url('../../_icons/textColorSmall.svg');
-  --logo-primary-color: #f33;
-  --logo-secondary-color: #29abe1;
-  --logo-tertiary-color: #000;
-}
-
-/* Text "app" should be visible but retain FreeTube color logo */
-.system[data-system-theme*='dark'],
-.dark,
-.black {
-  --logo-tertiary-color: #fff;
-}
+/* The default themes use the monochrome OpenTubeX logo, adapting to the
+   foreground colour: a dark mark on light themes, a light mark on dark ones.
+   These --logo-icon/--logo-text values live in the main theme definitions
+   below. FtLogoFull (the About page) inherits --logo-*-color from the body
+   defaults (--primary-text-color), so it stays monochrome and theme-aware
+   across every theme. */
 
 /* Given that the Hot Pink theme does not need link underlining due to meeting
 WCAG 2 Level AA (https://webaim.org/resources/linkcontrastchecker/?fcolor=FFFFFF&bcolor=DE1C85&lcolor=000000),
-it can be safely elided. This looks quite pleasant on this theme. */
-.hotPink a:not(:hover, :focus),
+it can be safely elided. This looks quite pleasant on this theme. Links follow
+the link underline setting instead, which underlines them on hover by default. */
 .hotPink .navOption:hover,
 .hotPink .navOption:focus,
-.hotPink *:not(:hover, :focus) {
+.hotPink :not(a, :hover, :focus) {
   text-decoration: none;
-}
-
-.hotPink a:hover,
-.hotPink a:focus {
-  text-decoration: underline;
 }
 
 .hotPink .shaka-range-container {
   --primary-color: #fff;
+}
+
+/* Pressed phone cards turn white with black text (phonePanelCard.css), so
+   their chips need a light surface instead of the translucent black one. */
+.hotPink .phonePanelCard:is(:active, :has(> summary:active)) {
+  --secondary-card-bg-color: rgb(0 0 0 / 12%);
 }
 
 
@@ -104,6 +319,9 @@ it can be safely elided. This looks quite pleasant on this theme. */
 /* Dark theme Youtube and Invidious logo styling (in FtShareButton) */
 .system[data-system-theme*='dark'],
 .dark,
+.openTubeXDark,
+.black,
+.custom[data-custom-theme='dark'],
 .dracula,
 .catppuccinMocha,
 .hotPink,
@@ -113,8 +331,23 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .catppuccinFrappe,
 .everforestDarkHard,
 .everforestDarkMedium,
-.everforestDarkLow {
+.everforestDarkLow,
+.tokyoNightNight,
+.tokyoNightStorm,
+.tokyoNightMoon,
+.rosePine,
+.rosePineMoon,
+.kanagawaWave,
+.kanagawaDragon,
+.ayuDark,
+.ayuMirage,
+.oneDark,
+.carbonfox,
+.catppuccinMacchiato {
+  --focus-ring-contrast-color: #fff;
+  --native-color-scheme: dark;
   --primary-shadow-color: rgb(0 0 0 / 75%);
+  --members-only-color: #55c86b;
 
   .invidiousLogo {
     background-image: url('./assets/img/invidious-logo-dark.svg');
@@ -172,9 +405,10 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --secondary-text-color: #424242;
   --tertiary-text-color: #757575;
   --primary-shadow-color: rgb(200 200 200 / 75%);
-  --title-color: #3f7ac6;
+  --title-color: #185eb4;
+  --link-color: var(--title-color);
   --bg-color: #f1f1f1;
-  --favorite-icon-color: #0c0;
+  --favorite-icon-color: #6eaa73;
   --card-bg-color: #fff;
   --secondary-card-bg-color: #eee;
   --scrollbar-color: #ccc;
@@ -183,6 +417,8 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --side-nav-hover-color: #e0e0e0;
   --side-nav-active-color: #757575;
   --search-bar-color: #f5f5f5;
+  --logo-icon: url('../../_icons/iconBlackSmall.svg');
+  --logo-text: url('../../_icons/textBlackSmall.svg');
 }
 
 .system[data-system-theme*='dark'],
@@ -191,16 +427,20 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --secondary-text-color: #ddd;
   --tertiary-text-color: #999;
   --title-color: #eee;
-  --bg-color: #212121;
-  --favorite-icon-color: #0f0;
-  --card-bg-color: #303030;
-  --secondary-card-bg-color: rgb(0 0 0 / 75%);
-  --scrollbar-color: #414141;
-  --scrollbar-color-hover: #757575;
-  --side-nav-color: #262626;
-  --side-nav-hover-color: #212121;
-  --side-nav-active-color: #303030;
-  --search-bar-color: #262626;
+  --bg-color: #0f0f0f;
+  --favorite-icon-color: #6eaa73;
+  --card-bg-color: #1f1f1f;
+  --secondary-card-bg-color: #181818;
+  --scrollbar-color: #3f3f3f;
+  --scrollbar-color-hover: #606060;
+  --side-nav-color: #121212;
+  --side-nav-hover-color: #272727;
+  --side-nav-active-color: #3a3a3a;
+  --inactive-tab-color: #272727;
+  --search-bar-color: #181818;
+  --settings-search-bar-color: var(--card-bg-color);
+  --logo-icon: url('../../_icons/iconWhiteSmall.svg');
+  --logo-text: url('../../_icons/textWhiteSmall.svg');
 }
 
 .black {
@@ -209,15 +449,66 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --tertiary-text-color: #eee;
   --title-color: #eee;
   --bg-color: #000;
-  --favorite-icon-color: #0f0;
-  --card-bg-color: #000;
-  --secondary-card-bg-color: rgb(0 0 0 / 75%);
+  --favorite-icon-color: #6eaa73;
+  --card-bg-color: #050505;
+  --secondary-card-bg-color: #1c1c1c;
   --scrollbar-color: #515151;
   --scrollbar-color-hover: #424242;
   --side-nav-color: #000;
   --side-nav-hover-color: #212121;
   --side-nav-active-color: #303030;
+  --inactive-tab-color: #1a1a1a;
   --search-bar-color: #262626;
+  --logo-icon: url('../../_icons/iconWhiteSmall.svg');
+  --logo-text: url('../../_icons/textWhiteSmall.svg');
+}
+
+.custom[data-custom-theme='dark'] {
+  --logo-icon: url('../../_icons/iconWhiteSmall.svg');
+  --logo-text: url('../../_icons/textWhiteSmall.svg');
+}
+
+.custom[data-custom-theme='light'] {
+  --logo-icon: url('../../_icons/iconBlackSmall.svg');
+  --logo-text: url('../../_icons/textBlackSmall.svg');
+}
+
+/* Custom themes show errors in the destructive color they chose. */
+.custom {
+  --error-text-color: var(--destructive-color);
+}
+
+/* Custom, Tally, and dynamic themes tint the header logo instead of displaying the fixed-color
+   theme assets. Keeping the assets as masks preserves their sharp edges. */
+:is(.custom, .openTubeXLight, .openTubeXDark, .dynamicColors) .topNav .logoIcon,
+:is(.custom, .openTubeXLight, .openTubeXDark, .dynamicColors) .topNav .logoText {
+  /* The component's fixed SVG has intentionally high scoped specificity. */
+  /* stylelint-disable-next-line declaration-no-important */
+  background-image: none !important;
+  background-repeat: no-repeat;
+  background-position: center;
+  mask-repeat: no-repeat;
+  mask-position: center;
+}
+
+:is(.custom, .openTubeXLight, .openTubeXDark, .dynamicColors) .topNav .logoIcon {
+  background-color: var(--logo-primary-color);
+  mask-image: var(--logo-icon);
+  mask-size: 25px;
+}
+
+:is(.custom, .openTubeXLight, .openTubeXDark, .dynamicColors) .topNav .logoText {
+  background-color: var(--logo-secondary-color);
+  mask-image: var(--logo-text);
+  mask-size: 100px;
+}
+
+:is(.custom, .openTubeXLight, .openTubeXDark, .dynamicColors) .logo:hover :is(.logoIcon, .logoText) {
+  background-color: var(--logo-tertiary-color);
+}
+
+:is(.custom, .openTubeXLight, .openTubeXDark, .dynamicColors) .logo:active :is(.logoIcon, .logoText) {
+  background-color: var(--logo-pressed-color);
 }
 
 .nordic {
@@ -226,7 +517,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --tertiary-text-color: #eee;
   --title-color: #eee;
   --bg-color: #2b2f3a;
-  --favorite-icon-color: #0f0;
+  --favorite-icon-color: #6eaa73;
   --card-bg-color: #2e3440;
   --secondary-card-bg-color: rgb(59 66 82 / 75%);
   --scrollbar-color: #4b566a;
@@ -240,22 +531,35 @@ it can be safely elided. This looks quite pleasant on this theme. */
 }
 
 .hotPink {
+  /* Its black main color darkens tints, keeping the white text readable. */
+  --tint-lightness: 0;
+
+  /* No red stands out on its pink cards, so destructive icons and error text
+     use the text color. */
+  --destructive-icon-color: currentcolor;
+  --error-text-color: var(--primary-text-color);
+  --toggle-track-color: #ddd;
+  --toggle-thumb-color: #fff;
+  --toggle-checked-thumb-color: #fff;
+  --toggle-thumb-outline-color: #000;
+  --slider-track-color: #fff;
   --primary-text-color: #ffff;
   --secondary-text-color: #ffff;
   --tertiary-text-color: #ffff;
   --title-color: #000;
-  --bg-color: #ff008a;
-  --favorite-icon-color: #0f0;
+  --bg-color: #dd197f;
+  --favorite-icon-color: #6eaa73;
   --card-bg-color: #de1c85;
   --secondary-card-bg-color: rgb(0 0 0 / 75%);
   --scrollbar-color: #fff;
   --scrollbar-color-hover: #c0f6ff;
   --scrollbar-text-color-hover: #000;
-  --side-nav-color: #ee1e90;
+  --side-nav-color: #dd197f;
   --side-nav-hover-color: #fff;
   --side-nav-hover-text-color: #000;
   --side-nav-active-color: #959595;
   --side-nav-active-text-color: #000;
+  --inactive-tab-color: #bc156c;
   --search-bar-color: #9c2d5d;
   --logo-icon: url('../../_icons/iconWhiteSmall.svg');
   --logo-text: url('../../_icons/textWhiteSmall.svg');
@@ -270,8 +574,8 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --text-with-main-color: #fff !important;
   --text-with-accent-color: #fff !important;
   --accent-color: #000 !important;
-  --accent-color-hover: #808080 !important;
-  --accent-color-active: #6a739a !important;
+  --accent-color-hover: #000 !important;
+  --accent-color-active: #000 !important;
   --accent-color-light: #000 !important;
   --accent-color-visited: #000 !important;
   --accent-color-opacity1: rgb(0 0 0 / 4%) !important;
@@ -286,7 +590,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --tertiary-text-color: #5a285a;
   --title-color: #185eb4;
   --bg-color: #ffeadd;
-  --favorite-icon-color: #760278;
+  --favorite-icon-color: #6eaa73;
   --card-bg-color: #ffd1dc;
   --secondary-card-bg-color: #fff;
   --scrollbar-color: #f5c8d3;
@@ -307,7 +611,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --tertiary-text-color: #a6adc8;
   --title-color: #cdd6f4;
   --bg-color: #1e1e2e;
-  --favorite-icon-color: #0f0;
+  --favorite-icon-color: #6eaa73;
   --card-bg-color: #181825;
   --secondary-card-bg-color: #1e1e2e;
   --scrollbar-color: #313244;
@@ -326,7 +630,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --tertiary-text-color: #e5e8f3;
   --title-color: #bd93f9;
   --bg-color: #282a36;
-  --favorite-icon-color: #0f0;
+  --favorite-icon-color: #6eaa73;
   --card-bg-color: #33353f;
   --secondary-card-bg-color: #282a36;
   --scrollbar-color: #44475a;
@@ -345,13 +649,13 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --tertiary-text-color: #ddd6c3;
   --title-color: #fdf6e3;
   --bg-color: #002b36;
-  --favorite-icon-color: #0f0;
+  --favorite-icon-color: #6eaa73;
   --card-bg-color: #204b56;
   --secondary-card-bg-color: #102b36;
   --scrollbar-color: #608b96;
   --scrollbar-color-hover: #406b76;
   --side-nav-color: #204b56;
-  --side-nav-hover-color: #608b96;
+  --side-nav-hover-color: #4c7782;
   --side-nav-active-color: #406b76;
   --search-bar-color: #073642;
   --logo-icon: url('../../_icons/iconSolarizedLightSmall.svg');
@@ -364,7 +668,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --tertiary-text-color: #204b56;
   --title-color: #002b36;
   --bg-color: #fdf6e3;
-  --favorite-icon-color: #0f0;
+  --favorite-icon-color: #6eaa73;
   --card-bg-color: #eee8d5;
   --secondary-card-bg-color: #fdf6e3;
   --scrollbar-color: #a9a895;
@@ -383,7 +687,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --tertiary-text-color: #d5c4a1;
   --title-color: #ebdbb2;
   --bg-color: #282828;
-  --favorite-icon-color: #0f0;
+  --favorite-icon-color: #6eaa73;
   --card-bg-color: #504945;
   --secondary-card-bg-color: #3c3836;
   --scrollbar-color: #665c54;
@@ -402,7 +706,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --tertiary-text-color: #282828;
   --title-color: #3c3836;
   --bg-color: #fbf1c7;
-  --favorite-icon-color: #0f0;
+  --favorite-icon-color: #6eaa73;
   --card-bg-color: #ebdbb2;
   --secondary-card-bg-color: #d5c4a1;
   --scrollbar-color: #bdae93;
@@ -421,7 +725,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --tertiary-text-color: #a5adce;
   --title-color: #c6d0f5;
   --bg-color: #303446;
-  --favorite-icon-color: #0f0;
+  --favorite-icon-color: #6eaa73;
   --card-bg-color: #292c3c;
   --secondary-card-bg-color: #303446;
   --scrollbar-color: #414559;
@@ -440,7 +744,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --tertiary-text-color: #d3c6aa;
   --title-color: #d3c6aa;
   --bg-color: #272e33;
-  --favorite-icon-color: #0f0;
+  --favorite-icon-color: #6eaa73;
   --card-bg-color: #1e2326;
   --secondary-card-bg-color: #272e33;
   --scrollbar-color: #394146;
@@ -459,7 +763,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --tertiary-text-color: #d3c6aa;
   --title-color: #d3c6aa;
   --bg-color: #2d353b;
-  --favorite-icon-color: #0f0;
+  --favorite-icon-color: #6eaa73;
   --card-bg-color: #232a2e;
   --secondary-card-bg-color: #2d353b;
   --scrollbar-color: #3f484e;
@@ -478,7 +782,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --tertiary-text-color: #d3c6aa;
   --title-color: #d3c6aa;
   --bg-color: #333c43;
-  --favorite-icon-color: #0f0;
+  --favorite-icon-color: #6eaa73;
   --card-bg-color: #293136;
   --secondary-card-bg-color: #333c43;
   --scrollbar-color: #454f56;
@@ -497,7 +801,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --tertiary-text-color: #3c4a52;
   --title-color: #3c4a52;
   --bg-color: #fffbef;
-  --favorite-icon-color: #0f0;
+  --favorite-icon-color: #6eaa73;
   --card-bg-color: #f2efdf;
   --secondary-card-bg-color: #fffbef;
   --scrollbar-color: #d8d5c5;
@@ -516,7 +820,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --tertiary-text-color: #3c4a52;
   --title-color: #3c4a52;
   --bg-color: #fdf6e3;
-  --favorite-icon-color: #0f0;
+  --favorite-icon-color: #6eaa73;
   --card-bg-color: #efe8d4;
   --secondary-card-bg-color: #fdf6e3;
   --scrollbar-color: #d0ccb7;
@@ -535,7 +839,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --tertiary-text-color: #3c4a52;
   --title-color: #3c4a52;
   --bg-color: #f3ead3;
-  --favorite-icon-color: #0f0;
+  --favorite-icon-color: #6eaa73;
   --card-bg-color: #eee8ce;
   --secondary-card-bg-color: #f3ead3;
   --scrollbar-color: #c8c3aa;
@@ -543,6 +847,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --side-nav-color: #eee8ce;
   --side-nav-hover-color: #d5cfb5;
   --side-nav-active-color: #d5cfb5;
+  --inactive-tab-color: #e5dfc5;
   --search-bar-color: #eae4ca;
   --logo-icon: url('../../_icons/iconEverforestDarkLowSmall.svg');
   --logo-text: url('../../_icons/textEverforestDarkLowSmall.svg');
@@ -554,7 +859,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --tertiary-text-color: #6c6f85;
   --title-color: #4c4f69;
   --bg-color: #eff1f5;
-  --favorite-icon-color: #0f0;
+  --favorite-icon-color: #6eaa73;
   --card-bg-color: #e6e9ef;
   --secondary-card-bg-color: #eff1f5;
   --scrollbar-color: #ccd0da;
@@ -569,31 +874,24 @@ it can be safely elided. This looks quite pleasant on this theme. */
 
 /*************** PRIMARY THEME COLOR DEFINTIONS ***************/
 
-.mainRed,
-.mainPink,
+/* Foregrounds follow the fill brightness, including nested palettes such as Super Chats. */
 .mainPurple,
 .mainDeepPurple,
 .mainIndigo,
+.mainRed,
+.mainPink,
 .mainBlue,
 .mainLightBlue,
 .mainCyan,
 .mainTeal,
-.mainGreen {
-  --text-with-main-color: #fff;
-  --logo-icon-bar-color: url('../../_icons/iconWhiteSmall.svg');
-  --logo-text-bar-color: url('../../_icons/textWhiteSmall.svg');
-}
-
-/* light primary theme colors */
+.mainGreen,
 .mainLightGreen,
 .mainLime,
 .mainYellow,
 .mainAmber,
 .mainOrange,
 .mainDeepOrange {
-  --text-with-main-color: #000;
-  --logo-icon-bar-color: url('../../_icons/iconBlackSmall.svg');
-  --logo-text-bar-color: url('../../_icons/textBlackSmall.svg');
+  --text-with-main-color: rgb(from var(--primary-color) var(--fill-text-channel) var(--fill-text-channel) var(--fill-text-channel));
 }
 
 .mainRed {
@@ -629,13 +927,13 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .mainBlue {
   --primary-color: #2196f3;
   --primary-color-hover: #1e88e5;
-  --primary-color-active: #1565c0;
+  --primary-color-active: #1976d2;
 }
 
 .mainLightBlue {
   --primary-color: #03a9f4;
   --primary-color-hover: #039be5;
-  --primary-color-active: #0277bd;
+  --primary-color-active: #0288d1;
 }
 
 .mainCyan {
@@ -653,7 +951,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .mainGreen {
   --primary-color: #4caf50;
   --primary-color-hover: #43a047;
-  --primary-color-active: #2e7d32;
+  --primary-color-active: #388e3c;
 }
 
 .mainLightGreen {
@@ -695,6 +993,124 @@ it can be safely elided. This looks quite pleasant on this theme. */
 
 /* PRIMARY THEME COLORS CORRESPONDING TO BASE THEMES */
 
+.mainCatppuccinMacchiatoRosewater,
+.mainCatppuccinMacchiatoFlamingo,
+.mainCatppuccinMacchiatoPink,
+.mainCatppuccinMacchiatoMauve,
+.mainCatppuccinMacchiatoRed,
+.mainCatppuccinMacchiatoMaroon,
+.mainCatppuccinMacchiatoPeach,
+.mainCatppuccinMacchiatoYellow,
+.mainCatppuccinMacchiatoGreen,
+.mainCatppuccinMacchiatoTeal,
+.mainCatppuccinMacchiatoSky,
+.mainCatppuccinMacchiatoSapphire,
+.mainCatppuccinMacchiatoBlue,
+.mainCatppuccinMacchiatoLavender {
+  --primary-color: var(--macchiato-color);
+  --primary-color-hover: var(--macchiato-color-hover);
+  --primary-color-active: var(--macchiato-color-active);
+  --text-with-main-color: rgb(from var(--primary-color) var(--fill-text-channel) var(--fill-text-channel) var(--fill-text-channel));
+}
+
+:is(.mainCatppuccinMacchiatoRosewater, .secCatppuccinMacchiatoRosewater) {
+  --macchiato-color: #f4dbd6;
+  --macchiato-color-rgb: 244 219 214;
+  --macchiato-color-hover: #f5dfda;
+  --macchiato-color-active: #f6e2de;
+}
+
+:is(.mainCatppuccinMacchiatoFlamingo, .secCatppuccinMacchiatoFlamingo) {
+  --macchiato-color: #f0c6c6;
+  --macchiato-color-rgb: 240 198 198;
+  --macchiato-color-hover: #f2cccc;
+  --macchiato-color-active: #f3d1d1;
+}
+
+:is(.mainCatppuccinMacchiatoPink, .secCatppuccinMacchiatoPink) {
+  --macchiato-color: #f5bde6;
+  --macchiato-color-rgb: 245 189 230;
+  --macchiato-color-hover: #f6c4e8;
+  --macchiato-color-active: #f7caeb;
+}
+
+:is(.mainCatppuccinMacchiatoMauve, .secCatppuccinMacchiatoMauve) {
+  --macchiato-color: #c6a0f6;
+  --macchiato-color-rgb: 198 160 246;
+  --macchiato-color-hover: #ccaaf7;
+  --macchiato-color-active: #d1b3f8;
+}
+
+:is(.mainCatppuccinMacchiatoRed, .secCatppuccinMacchiatoRed) {
+  --macchiato-color: #ed8796;
+  --macchiato-color-rgb: 237 135 150;
+  --macchiato-color-hover: #ef93a0;
+  --macchiato-color-active: #f19fab;
+}
+
+:is(.mainCatppuccinMacchiatoMaroon, .secCatppuccinMacchiatoMaroon) {
+  --macchiato-color: #ee99a0;
+  --macchiato-color-rgb: 238 153 160;
+  --macchiato-color-hover: #f0a3aa;
+  --macchiato-color-active: #f1adb3;
+}
+
+:is(.mainCatppuccinMacchiatoPeach, .secCatppuccinMacchiatoPeach) {
+  --macchiato-color: #f5a97f;
+  --macchiato-color-rgb: 245 169 127;
+  --macchiato-color-hover: #f6b28c;
+  --macchiato-color-active: #f7ba99;
+}
+
+:is(.mainCatppuccinMacchiatoYellow, .secCatppuccinMacchiatoYellow) {
+  --macchiato-color: #eed49f;
+  --macchiato-color-rgb: 238 212 159;
+  --macchiato-color-hover: #f0d8a9;
+  --macchiato-color-active: #f1ddb2;
+}
+
+:is(.mainCatppuccinMacchiatoGreen, .secCatppuccinMacchiatoGreen) {
+  --macchiato-color: #a6da95;
+  --macchiato-color-rgb: 166 218 149;
+  --macchiato-color-hover: #afdea0;
+  --macchiato-color-active: #b8e1aa;
+}
+
+:is(.mainCatppuccinMacchiatoTeal, .secCatppuccinMacchiatoTeal) {
+  --macchiato-color: #8bd5ca;
+  --macchiato-color-rgb: 139 213 202;
+  --macchiato-color-hover: #97d9cf;
+  --macchiato-color-active: #a2ddd5;
+}
+
+:is(.mainCatppuccinMacchiatoSky, .secCatppuccinMacchiatoSky) {
+  --macchiato-color: #91d7e3;
+  --macchiato-color-rgb: 145 215 227;
+  --macchiato-color-hover: #9cdbe6;
+  --macchiato-color-active: #a7dfe9;
+}
+
+:is(.mainCatppuccinMacchiatoSapphire, .secCatppuccinMacchiatoSapphire) {
+  --macchiato-color: #7dc4e4;
+  --macchiato-color-rgb: 125 196 228;
+  --macchiato-color-hover: #8acae7;
+  --macchiato-color-active: #97d0e9;
+}
+
+:is(.mainCatppuccinMacchiatoBlue, .secCatppuccinMacchiatoBlue) {
+  --macchiato-color: #8aadf4;
+  --macchiato-color-rgb: 138 173 244;
+  --macchiato-color-hover: #96b5f5;
+  --macchiato-color-active: #a1bdf6;
+}
+
+:is(.mainCatppuccinMacchiatoLavender, .secCatppuccinMacchiatoLavender) {
+  --macchiato-color: #b7bdf8;
+  --macchiato-color-rgb: 183 189 248;
+  --macchiato-color-hover: #bec4f9;
+  --macchiato-color-active: #c5caf9;
+}
+
 .mainCatppuccinMochaRosewater,
 .mainCatppuccinMochaFlamingo,
 .mainCatppuccinMochaPink,
@@ -709,9 +1125,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .mainCatppuccinMochaSapphire,
 .mainCatppuccinMochaBlue,
 .mainCatppuccinMochaLavender {
-  --text-with-main-color: #1e1e2e;
-  --logo-icon-bar-color: url('../../_icons/iconCatppuccinMochaDarkSmall.svg');
-  --logo-text-bar-color: url('../../_icons/textCatppuccinMochaDarkSmall.svg');
+  --text-with-main-color: rgb(from var(--primary-color) var(--fill-text-channel) var(--fill-text-channel) var(--fill-text-channel));
 }
 
 .mainCatppuccinMochaRosewater {
@@ -801,18 +1215,11 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .mainDraculaCyan,
 .mainDraculaGreen,
 .mainDraculaOrange,
+.mainDraculaPink,
+.mainDraculaPurple,
 .mainDraculaRed,
 .mainDraculaYellow {
-  --text-with-main-color: #282a36;
-  --logo-icon-bar-color: url('../../_icons/iconDraculaDarkSmall.svg');
-  --logo-text-bar-color: url('../../_icons/textDraculaDarkSmall.svg');
-}
-
-.mainDraculaPink,
-.mainDraculaPurple {
-  --text-with-main-color: #f8f8f2;
-  --logo-icon-bar-color: url('../../_icons/iconDraculaLightSmall.svg');
-  --logo-text-bar-color: url('../../_icons/textDraculaLightSmall.svg');
+  --text-with-main-color: rgb(from var(--primary-color) var(--fill-text-channel) var(--fill-text-channel) var(--fill-text-channel));
 }
 
 .mainDraculaCyan {
@@ -848,7 +1255,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .mainDraculaRed {
   --primary-color: #f55;
   --primary-color-hover: #f66;
-  --primary-color-active: #e64d4d;
+  --primary-color-active: #f77;
 }
 
 .mainDraculaYellow {
@@ -862,17 +1269,10 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .mainSolarizedRed,
 .mainSolarizedMagenta,
 .mainSolarizedViolet,
-.mainSolarizedGreen {
-  --text-with-main-color: #fdf6e3;
-  --logo-icon-bar-color: url('../../_icons/iconDraculaLightSmall.svg');
-  --logo-text-bar-color: url('../../_icons/textDraculaLightSmall.svg');
-}
-
 .mainSolarizedBlue,
-.mainSolarizedCyan {
-  --text-with-main-color: #000;
-  --logo-icon-bar-color: url('../../_icons/iconDraculaDarkSmall.svg');
-  --logo-text-bar-color: url('../../_icons/textDraculaDarkSmall.svg');
+.mainSolarizedCyan,
+.mainSolarizedGreen {
+  --text-with-main-color: rgb(from var(--primary-color) var(--fill-text-channel) var(--fill-text-channel) var(--fill-text-channel));
 }
 
 .mainSolarizedYellow {
@@ -883,38 +1283,38 @@ it can be safely elided. This looks quite pleasant on this theme. */
 
 .mainSolarizedOrange {
   --primary-color: #cb4b16;
-  --primary-color-hover: #eb6b36;
-  --primary-color-active: #fc8b56;
+  --primary-color-hover: color-mix(in srgb, var(--primary-color) 90%, #000);
+  --primary-color-active: color-mix(in srgb, var(--primary-color) 80%, #000);
 }
 
 .mainSolarizedRed {
   --primary-color: #dc322f;
-  --primary-color-hover: #fc524f;
-  --primary-color-active: #fe726f;
+  --primary-color-hover: color-mix(in srgb, var(--primary-color) 90%, #000);
+  --primary-color-active: color-mix(in srgb, var(--primary-color) 80%, #000);
 }
 
 .mainSolarizedMagenta {
   --primary-color: #d33682;
-  --primary-color-hover: #f356a2;
-  --primary-color-active: #f558c2;
+  --primary-color-hover: color-mix(in srgb, var(--primary-color) 90%, #000);
+  --primary-color-active: color-mix(in srgb, var(--primary-color) 80%, #000);
 }
 
 .mainSolarizedViolet {
   --primary-color: #6c71c4;
-  --primary-color-hover: #8c91e4;
-  --primary-color-active: #acb1f4;
+  --primary-color-hover: color-mix(in srgb, var(--primary-color) 90%, #000);
+  --primary-color-active: color-mix(in srgb, var(--primary-color) 80%, #000);
 }
 
 .mainSolarizedBlue {
   --primary-color: #268bd2;
-  --primary-color-hover: #46abf2;
-  --primary-color-active: #66cbf4;
+  --primary-color-hover: color-mix(in srgb, var(--primary-color) 90%, #000);
+  --primary-color-active: color-mix(in srgb, var(--primary-color) 80%, #000);
 }
 
 .mainSolarizedCyan {
   --primary-color: #2aa198;
-  --primary-color-hover: #4ac1b8;
-  --primary-color-active: #6ae1d8;
+  --primary-color-hover: color-mix(in srgb, var(--primary-color) 90%, #000);
+  --primary-color-active: color-mix(in srgb, var(--primary-color) 80%, #000);
 }
 
 .mainSolarizedGreen {
@@ -962,7 +1362,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .mainGruvboxLightRed {
   --primary-color: #9d0006;
   --primary-color-hover: #bd2026;
-  --primary-color-active: #dd4046;
+  --primary-color-active: #cc2e39;
 }
 
 .mainGruvboxLightBlue {
@@ -973,23 +1373,21 @@ it can be safely elided. This looks quite pleasant on this theme. */
 
 .mainGruvboxLightPurple {
   --primary-color: #8f3f71;
-  --primary-color-hover: #af5f91;
-  --primary-color-active: #cf7fb1;
+  --primary-color-hover: #7f3063;
+  --primary-color-active: #6f2255;
 }
 
 .mainGruvboxLightOrange {
   --primary-color: #af3a03;
-  --primary-color-hover: #cf5a23;
-  --primary-color-active: #ef7a43;
+  --primary-color-hover: #993100;
+  --primary-color-active: #822901;
 }
 
 .mainGruvboxLightOrange,
 .mainGruvboxLightRed,
 .mainGruvboxLightBlue,
 .mainGruvboxLightPurple {
-  --text-with-main-color: #fbf1c7;
-  --logo-icon-bar-color: url('../../_icons/iconGruvboxLightSmall.svg');
-  --logo-text-bar-color: url('../../_icons/textGruvboxLightSmall.svg');
+  --text-with-main-color: rgb(from var(--primary-color) var(--fill-text-channel) var(--fill-text-channel) var(--fill-text-channel));
 }
 
 
@@ -997,16 +1395,12 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .mainGruvboxDarkYellow,
 .mainGruvboxDarkAqua,
 .mainGruvboxDarkOrange {
-  --text-with-main-color: #3c3836;
-  --logo-icon-bar-color: url('../../_icons/iconGruvboxDarkSmall.svg');
-  --logo-text-bar-color: url('../../_icons/textGruvboxDarkSmall.svg');
+  --text-with-main-color: rgb(from var(--primary-color) var(--fill-text-channel) var(--fill-text-channel) var(--fill-text-channel));
 }
 
 .mainGruvboxDarkBlue,
 .mainGruvboxDarkPurple {
-  --text-with-main-color: #1d2021;
-  --logo-icon-bar-color: url('../../_icons/iconGruvboxDarkSmall.svg');
-  --logo-text-bar-color: url('../../_icons/textGruvboxDarkSmall.svg');
+  --text-with-main-color: rgb(from var(--primary-color) var(--fill-text-channel) var(--fill-text-channel) var(--fill-text-channel));
 }
 
 .mainCatppuccinFrappeRosewater,
@@ -1023,9 +1417,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .mainCatppuccinFrappeSapphire,
 .mainCatppuccinFrappeBlue,
 .mainCatppuccinFrappeLavender {
-  --text-with-main-color: #24273a;
-  --logo-icon-bar-color: url('../../_icons/iconCatppuccinFrappeDarkSmall.svg');
-  --logo-text-bar-color: url('../../_icons/textCatppuccinFrappeDarkSmall.svg');
+  --text-with-main-color: rgb(from var(--primary-color) var(--fill-text-channel) var(--fill-text-channel) var(--fill-text-channel));
 }
 
 .mainCatppuccinFrappeRosewater {
@@ -1055,7 +1447,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .mainCatppuccinFrappeRed {
   --primary-color: #e78284;
   --primary-color-hover: #e99a9c;
-  --primary-color-active: #d46b6d;
+  --primary-color-active: #da7172;
 }
 
 .mainCatppuccinFrappeMaroon {
@@ -1103,7 +1495,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .mainCatppuccinFrappeBlue {
   --primary-color: #8caaee;
   --primary-color-hover: #9eb7f0;
-  --primary-color-active: #6c8dbf;
+  --primary-color-active: #7092c4;
 }
 
 .mainCatppuccinFrappeLavender {
@@ -1118,29 +1510,29 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .mainEverforestDarkGreen,
 .mainEverforestDarkAqua,
 .mainEverforestDarkBlue,
-.mainEverforestDarkPurple,
-.mainEverforestLightRed,
+.mainEverforestDarkPurple {
+  --text-with-main-color: rgb(from var(--primary-color) var(--fill-text-channel) var(--fill-text-channel) var(--fill-text-channel));
+}
+
 .mainEverforestLightOrange,
 .mainEverforestLightYellow,
 .mainEverforestLightGreen,
 .mainEverforestLightAqua,
 .mainEverforestLightBlue,
 .mainEverforestLightPurple {
-  --text-with-main-color: #1e2326;
-  --logo-icon-bar-color: url('../../_icons/iconEverforestDarkHardSmall.svg');
-  --logo-text-bar-color: url('../../_icons/textEverforestDarkHardSmall.svg');
+  --text-with-main-color: rgb(from var(--primary-color) var(--fill-text-channel) var(--fill-text-channel) var(--fill-text-channel));
 }
 
 .mainEverforestDarkRed {
   --primary-color: #e67e80;
   --primary-color-hover: #e89e9f;
-  --primary-color-active: #d65f61;
+  --primary-color-active: #dc6566;
 }
 
 .mainEverforestDarkOrange {
   --primary-color: #e69875;
   --primary-color-hover: #e8b095;
-  --primary-color-active: #b96e4f;
+  --primary-color-active: #c37757;
 }
 
 .mainEverforestDarkYellow {
@@ -1175,89 +1567,85 @@ it can be safely elided. This looks quite pleasant on this theme. */
 
 .mainEverforestLightRed {
   --primary-color: #d83532;
-  --primary-color-hover: #e84e3f;
+  --primary-color-hover: #c8332f;
   --primary-color-active: #b83232;
+  --text-with-main-color: rgb(from var(--primary-color) var(--fill-text-channel) var(--fill-text-channel) var(--fill-text-channel));
 }
 
 .mainEverforestLightOrange {
   --primary-color: #d55d0f;
   --primary-color-hover: #e66f10;
-  --primary-color-active: #b64f00;
+  --primary-color-active: #bf5813;
 }
 
 .mainEverforestLightYellow {
   --primary-color: #a96e00;
-  --primary-color-hover: #c88b00;
-  --primary-color-active: #8b6e00;
+  --primary-color-hover: color-mix(in srgb, var(--primary-color) 90%, #000);
+  --primary-color-active: color-mix(in srgb, var(--primary-color) 80%, #000);
 }
 
 .mainEverforestLightGreen {
   --primary-color: #6d8100;
-  --primary-color-hover: #8da101;
-  --primary-color-active: #4f5f00;
+  --primary-color-hover: color-mix(in srgb, var(--primary-color) 90%, #000);
+  --primary-color-active: color-mix(in srgb, var(--primary-color) 80%, #000);
 }
 
 .mainEverforestLightAqua {
   --primary-color: #25976c;
-  --primary-color-hover: #46b38a;
-  --primary-color-active: #0d7e51;
+  --primary-color-hover: color-mix(in srgb, var(--primary-color) 90%, #000);
+  --primary-color-active: color-mix(in srgb, var(--primary-color) 80%, #000);
 }
 
 .mainEverforestLightBlue {
   --primary-color: #2a84b5;
-  --primary-color-hover: #4aa2d3;
-  --primary-color-active: #0a7ea5;
+  --primary-color-hover: color-mix(in srgb, var(--primary-color) 90%, #000);
+  --primary-color-active: color-mix(in srgb, var(--primary-color) 80%, #000);
 }
 
 .mainEverforestLightPurple {
   --primary-color: #cf59aa;
   --primary-color-hover: #e77dc9;
-  --primary-color-active: #a63f9a;
+  --primary-color-active: #b64ea9;
 }
 
 .mainCatppuccinLatteMauve,
 .mainCatppuccinLatteRed {
-  --text-with-main-color: #fff;
-  --logo-icon-bar-color: url('../../_icons/iconCatppuccinLatteLightSmall.svg');
-  --logo-text-bar-color: url('../../_icons/textCatppuccinLatteLightSmall.svg');
+  --text-with-main-color: rgb(from var(--primary-color) var(--fill-text-channel) var(--fill-text-channel) var(--fill-text-channel));
 }
 
 .mainCatppuccinLatteMauve {
   --primary-color: #8839ef;
-  --primary-color-hover: #9f5cf1;
+  --primary-color-hover: #9450e5;
   --primary-color-active: #6c28ce;
 }
 
 .mainCatppuccinLatteRed {
   --primary-color: #d20f39;
-  --primary-color-hover: #dd385c;
+  --primary-color-hover: #d83358;
   --primary-color-active: #a60c2d;
 }
 
 /*************** SECONDARY THEME COLOR DEFINTIONS ***************/
 
-/* dark secondary theme colors */
-.secRed,
-.secPink,
+/* Secondary fills use the same foreground rule as primary fills. */
 .secPurple,
 .secDeepPurple,
 .secIndigo,
+.secRed,
+.secPink,
 .secBlue,
 .secLightBlue,
 .secCyan,
 .secTeal,
-.secGreen {
-  --text-with-accent-color: #fff;
-}
-
-/* light secondary theme colors */
+.secGreen,
 .secLightGreen,
 .secLime,
 .secYellow,
 .secAmber,
 .secOrange,
 .secDeepOrange {
-  --text-with-accent-color: #000;
+  --accent-color: rgb(var(--accent-color-rgb));
+  --text-with-accent-color: rgb(from var(--accent-color) var(--fill-text-channel) var(--fill-text-channel) var(--fill-text-channel));
 }
 
 .secRed {
@@ -1303,7 +1691,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .secBlue {
   --accent-color-rgb: 33 150 243;
   --accent-color-hover: #1e88e5;
-  --accent-color-active: #1565c0;
+  --accent-color-active: #1976d2;
   --accent-color-light: #90caf9;
   --accent-color-visited: #0d47a1;
 }
@@ -1311,7 +1699,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .secLightBlue {
   --accent-color-rgb: 3 169 244;
   --accent-color-hover: #039be5;
-  --accent-color-active: #0277bd;
+  --accent-color-active: #0288d1;
   --accent-color-light: #81d4fa;
   --accent-color-visited: #01579b;
 }
@@ -1335,7 +1723,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .secGreen {
   --accent-color-rgb: 76 175 80;
   --accent-color-hover: #43a047;
-  --accent-color-active: #2e7d32;
+  --accent-color-active: #388e3c;
   --accent-color-light: #a5d6a7;
   --accent-color-visited: #1b5e20;
 }
@@ -1391,6 +1779,28 @@ it can be safely elided. This looks quite pleasant on this theme. */
 
 /* SECONDARY THEME COLORS CORRESPONDING TO BASE THEMES */
 
+.secCatppuccinMacchiatoRosewater,
+.secCatppuccinMacchiatoFlamingo,
+.secCatppuccinMacchiatoPink,
+.secCatppuccinMacchiatoMauve,
+.secCatppuccinMacchiatoRed,
+.secCatppuccinMacchiatoMaroon,
+.secCatppuccinMacchiatoPeach,
+.secCatppuccinMacchiatoYellow,
+.secCatppuccinMacchiatoGreen,
+.secCatppuccinMacchiatoTeal,
+.secCatppuccinMacchiatoSky,
+.secCatppuccinMacchiatoSapphire,
+.secCatppuccinMacchiatoBlue,
+.secCatppuccinMacchiatoLavender {
+  --accent-color-rgb: var(--macchiato-color-rgb);
+  --accent-color-hover: var(--macchiato-color-hover);
+  --accent-color-active: var(--macchiato-color-active);
+  --accent-color-visited: var(--macchiato-color);
+  --accent-color: rgb(var(--accent-color-rgb));
+  --text-with-accent-color: rgb(from var(--accent-color) var(--fill-text-channel) var(--fill-text-channel) var(--fill-text-channel));
+}
+
 .secCatppuccinMochaRosewater,
 .secCatppuccinMochaFlamingo,
 .secCatppuccinMochaPink,
@@ -1405,7 +1815,8 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .secCatppuccinMochaSapphire,
 .secCatppuccinMochaBlue,
 .secCatppuccinMochaLavender {
-  --text-with-accent-color: #1e1e2e;
+  --accent-color: rgb(var(--accent-color-rgb));
+  --text-with-accent-color: rgb(from var(--accent-color) var(--fill-text-channel) var(--fill-text-channel) var(--fill-text-channel));
 }
 
 .secCatppuccinMochaRosewater {
@@ -1523,14 +1934,12 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .secDraculaCyan,
 .secDraculaGreen,
 .secDraculaOrange,
+.secDraculaPink,
+.secDraculaPurple,
 .secDraculaRed,
 .secDraculaYellow {
-  --text-with-accent-color: #212121;
-}
-
-.secDraculaPink,
-.secDraculaPurple {
-  --text-with-accent-color: #f8f8f2;
+  --accent-color: rgb(var(--accent-color-rgb));
+  --text-with-accent-color: rgb(from var(--accent-color) var(--fill-text-channel) var(--fill-text-channel) var(--fill-text-channel));
 }
 
 .secDraculaCyan {
@@ -1577,7 +1986,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .secDraculaRed {
   --accent-color-rgb: 255 85 85;
   --accent-color-hover: #f66;
-  --accent-color-active: #e64d4d;
+  --accent-color-active: #f77;
   --accent-color-light: #f77;
   --accent-color-visited: #c44;
 }
@@ -1590,23 +1999,24 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --accent-color-visited: #c1c870;
 }
 
-.secSolarizedYellow,
 .secSolarizedOrange,
 .secSolarizedRed,
 .secSolarizedMagenta,
 .secSolarizedViolet,
 .secSolarizedGreen {
-  --text-with-accent-color: #fdf6e3;
+  --accent-color: rgb(var(--accent-color-rgb));
+  --text-with-accent-color: rgb(from var(--accent-color) var(--fill-text-channel) var(--fill-text-channel) var(--fill-text-channel));
 }
 
+.secSolarizedYellow,
 .secSolarizedBlue,
 .secSolarizedCyan {
-  --text-with-accent-color: #000;
+  --accent-color: rgb(var(--accent-color-rgb));
+  --text-with-accent-color: rgb(from var(--accent-color) var(--fill-text-channel) var(--fill-text-channel) var(--fill-text-channel));
 }
 
 .secSolarizedYellow {
   --accent-color-rgb: 165 165 0;
-  --primary-color-hover: #a9a130;
   --accent-color-hover: #bb9f40;
   --accent-color-active: #897710;
   --accent-color-light: #dbc050;
@@ -1615,17 +2025,15 @@ it can be safely elided. This looks quite pleasant on this theme. */
 
 .secSolarizedOrange {
   --accent-color-rgb: 169 47 20;
-  --primary-color-hover: #c94d34;
-  --accent-color-hover: #db8140;
-  --accent-color-active: #b35936;
+  --accent-color-hover: #ae5808;
+  --accent-color-active: #b05633;
   --accent-color-light: #eb8156;
   --accent-color-visited: #c94d34;
 }
 
 .secSolarizedRed {
   --accent-color-rgb: 186 16 29;
-  --primary-color-hover: #d8302d;
-  --accent-color-hover: #da504d;
+  --accent-color-hover: #c73e3e;
   --accent-color-active: #b8282b;
   --accent-color-light: #fa726f;
   --accent-color-visited: #d8302d;
@@ -1633,8 +2041,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
 
 .secSolarizedMagenta {
   --accent-color-rgb: 176 20 96;
-  --primary-color-hover: #d23480;
-  --accent-color-hover: #dc5280;
+  --accent-color-hover: #c43c6c;
   --accent-color-active: #b814a0;
   --accent-color-light: #fc5280;
   --accent-color-visited: #d23480;
@@ -1642,36 +2049,32 @@ it can be safely elided. This looks quite pleasant on this theme. */
 
 .secSolarizedViolet {
   --accent-color-rgb: 78 83 164;
-  --primary-color-hover: #6e83c4;
-  --accent-color-hover: #8e77c4;
-  --accent-color-active: #5e63e4;
+  --accent-color-hover: #7a63ae;
+  --accent-color-active: #5c60e1;
   --accent-color-light: #ae95f4;
   --accent-color-visited: #6e83c4;
 }
 
 .secSolarizedBlue {
   --accent-color-rgb: 4 131 178;
-  --primary-color-hover: #4899d2;
-  --accent-color-hover: #469fd2;
-  --accent-color-active: #2483d4;
+  --accent-color-hover: color-mix(in srgb, var(--accent-color) 90%, #000);
+  --accent-color-active: color-mix(in srgb, var(--accent-color) 80%, #000);
   --accent-color-light: #66b1f4;
   --accent-color-visited: #4899d2;
 }
 
 .secSolarizedCyan {
   --accent-color-rgb: 8 135 118;
-  --primary-color-hover: #2ca998;
-  --accent-color-hover: #4cb9b8;
-  --accent-color-active: #1c9788;
+  --accent-color-hover: color-mix(in srgb, var(--accent-color) 90%, #000);
+  --accent-color-active: color-mix(in srgb, var(--accent-color) 80%, #000);
   --accent-color-light: #6ce1d8;
   --accent-color-visited: #2ca998;
 }
 
 .secSolarizedGreen {
   --accent-color-rgb: 101 119 0;
-  --primary-color-hover: #857720;
-  --accent-color-hover: #a59640;
-  --accent-color-active: #837720;
+  --accent-color-hover: #5a6b02;
+  --accent-color-active: #505f00;
   --accent-color-light: #c5d940;
   --accent-color-visited: #857720;
 }
@@ -1685,6 +2088,8 @@ it can be safely elided. This looks quite pleasant on this theme. */
 }
 
 .secGruvboxDarkYellow {
+  --accent-color: rgb(var(--accent-color-rgb));
+  --text-with-accent-color: rgb(from var(--accent-color) var(--fill-text-channel) var(--fill-text-channel) var(--fill-text-channel));
   --accent-color-rgb: 215 153 33;
   --accent-color-hover: #f0b839;
   --accent-color-active: #f0b839;
@@ -1702,8 +2107,8 @@ it can be safely elided. This looks quite pleasant on this theme. */
 
 .secGruvboxDarkPurple {
   --accent-color-rgb: 177 98 134;
-  --accent-color-hover: #d3869b;
-  --accent-color-active: #d3869b;
+  --accent-color-hover: color-mix(in srgb, var(--accent-color) 90%, #000);
+  --accent-color-active: color-mix(in srgb, var(--accent-color) 80%, #000);
   --accent-color-light: #d3869b;
   --accent-color-visited: #b16286;
 }
@@ -1718,16 +2123,17 @@ it can be safely elided. This looks quite pleasant on this theme. */
 
 .secGruvboxDarkOrange {
   --accent-color-rgb: 214 93 14;
-  --accent-color-hover: #f2804f;
-  --accent-color-active: #f2804f;
+  --accent-color-hover: color-mix(in srgb, var(--accent-color) 90%, #000);
+  --accent-color-active: color-mix(in srgb, var(--accent-color) 80%, #000);
   --accent-color-light: #fe8019;
   --accent-color-visited: #d65d0e;
 }
 
 .secGruvboxLightRed {
-  --text-with-accent-color: #fbf1c7;
+  --accent-color: rgb(var(--accent-color-rgb));
+  --text-with-accent-color: rgb(from var(--accent-color) var(--fill-text-channel) var(--fill-text-channel) var(--fill-text-channel));
   --accent-color-rgb: 204 36 29;
-  --accent-color-hover: #d23c2a;
+  --accent-color-hover: #bc2313;
   --accent-color-active: #a61f1f;
   --accent-color-light: #fb4934;
   --accent-color-visited: #a61f1f;
@@ -1743,37 +2149,35 @@ it can be safely elided. This looks quite pleasant on this theme. */
 
 .secGruvboxLightPurple {
   --accent-color-rgb: 177 98 134;
-  --accent-color-hover: #d3869b;
-  --accent-color-active: #d3869b;
+  --accent-color-hover: color-mix(in srgb, var(--accent-color) 90%, #000);
+  --accent-color-active: color-mix(in srgb, var(--accent-color) 80%, #000);
   --accent-color-light: #d3869b;
   --accent-color-visited: #b16286;
 }
 
 .secGruvboxLightOrange {
   --accent-color-rgb: 214 93 14;
-  --accent-color-hover: #f2804f;
-  --accent-color-active: #f2804f;
+  --accent-color-hover: color-mix(in srgb, var(--accent-color) 90%, #000);
+  --accent-color-active: color-mix(in srgb, var(--accent-color) 80%, #000);
   --accent-color-light: #fe8019;
   --accent-color-visited: #d65d0e;
 }
 
+.secGruvboxDarkGreen,
+.secGruvboxDarkAqua {
+  --accent-color: rgb(var(--accent-color-rgb));
+  --text-with-accent-color: rgb(from var(--accent-color) var(--fill-text-channel) var(--fill-text-channel) var(--fill-text-channel));
+}
+
+/* These accents are too dark for #1d2021 and too light for #fbf1c7. */
+.secGruvboxDarkOrange,
+.secGruvboxDarkBlue,
+.secGruvboxDarkPurple,
 .secGruvboxLightOrange,
-.secGruvboxLightRed,
 .secGruvboxLightBlue,
 .secGruvboxLightPurple {
-  --text-with-accent-color: #fbf1c7;
-}
-
-.secGruvboxDarkGreen,
-.secGruvboxDarkYellow,
-.secGruvboxDarkAqua,
-.secGruvboxDarkOrange {
-  --text-with-accent-color: #3c3836;
-}
-
-.secGruvboxDarkBlue,
-.secGruvboxDarkPurple {
-  --text-with-accent-color: #1d2021;
+  --accent-color: rgb(var(--accent-color-rgb));
+  --text-with-accent-color: rgb(from var(--accent-color) var(--fill-text-channel) var(--fill-text-channel) var(--fill-text-channel));
 }
 
 .secCatppuccinFrappeRosewater,
@@ -1790,7 +2194,8 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .secCatppuccinFrappeSapphire,
 .secCatppuccinFrappeBlue,
 .secCatppuccinFrappeLavender {
-  --text-with-accent-color: #24273a;
+  --accent-color: rgb(var(--accent-color-rgb));
+  --text-with-accent-color: rgb(from var(--accent-color) var(--fill-text-channel) var(--fill-text-channel) var(--fill-text-channel));
 }
 
 .secCatppuccinFrappeRosewater {
@@ -1919,7 +2324,8 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .secEverforestLightAqua,
 .secEverforestLightBlue,
 .secEverforestLightPurple {
-  --text-with-accent-color: #1e2326;
+  --accent-color: rgb(var(--accent-color-rgb));
+  --text-with-accent-color: rgb(from var(--accent-color) var(--fill-text-channel) var(--fill-text-channel) var(--fill-text-channel));
 }
 
 .secEverforestDarkRed {
@@ -1981,7 +2387,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .secEverforestLightRed {
   --accent-color-rgb: 248 85 82;
   --accent-color-hover: #f96360;
-  --accent-color-active: #e64441;
+  --accent-color-active: #fa716e;
   --accent-color-light: #f97673;
   --accent-color-visited: #e64441;
 }
@@ -2005,7 +2411,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .secEverforestLightGreen {
   --accent-color-rgb: 141 161 1;
   --accent-color-hover: #9dbf0f;
-  --accent-color-active: #7b8f00;
+  --accent-color-active: #7f940e;
   --accent-color-light: #a5d000;
   --accent-color-visited: #7b8f00;
 }
@@ -2020,8 +2426,8 @@ it can be safely elided. This looks quite pleasant on this theme. */
 
 .secEverforestLightBlue {
   --accent-color-rgb: 58 148 197;
-  --accent-color-hover: #4aa2d3;
-  --accent-color-active: #2881b2;
+  --accent-color-hover: color-mix(in srgb, var(--accent-color) 90%, #000);
+  --accent-color-active: color-mix(in srgb, var(--accent-color) 80%, #000);
   --accent-color-light: #5ab0e0;
   --accent-color-visited: #2881b2;
 }
@@ -2029,19 +2435,20 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .secEverforestLightPurple {
   --accent-color-rgb: 223 105 186;
   --accent-color-hover: #e77dc9;
-  --accent-color-active: #c84f9a;
+  --accent-color-active: #d85ea9;
   --accent-color-light: #f09ed0;
   --accent-color-visited: #c84f9a;
 }
 
 .secCatppuccinLatteMauve,
 .secCatppuccinLatteRed {
-  --text-with-accent-color: #fff;
+  --accent-color: rgb(var(--accent-color-rgb));
+  --text-with-accent-color: rgb(from var(--accent-color) var(--fill-text-channel) var(--fill-text-channel) var(--fill-text-channel));
 }
 
 .secCatppuccinLatteMauve {
   --accent-color-rgb: 136 57 239;
-  --accent-color-hover: #9f5cf1;
+  --accent-color-hover: #9450e5;
   --accent-color-active: #7129d2;
   --accent-color-light: #b076f8;
   --accent-color-visited: #6021a9;
@@ -2049,38 +2456,11 @@ it can be safely elided. This looks quite pleasant on this theme. */
 
 .secCatppuccinLatteRed {
   --accent-color-rgb: 210 15 57;
-  --accent-color-hover: #dd385c;
+  --accent-color-hover: #d83358;
   --accent-color-active: #ad0c2e;
   --accent-color-light: #e64e71;
   --accent-color-visited: #810922;
 }
-
-/*************** DESTRUCTIVE THEME COLOR OVERRIDES ***************/
-
-/* stylelint-disable no-descending-specificity */
-
-/* destructive color in case of conflict with red color themes (sets new destructive color to purple)
-  NOTE: RED COLORS MUST CONTAIN 'Red' IN CLASSNAME.
-*/
-body[class*='Red'] * {
-  --destructive-color: #9c27b0;
-  --destructive-text-color: #fff;
-  --destructive-hover-color: #8e24aa;
-  --destructive-active-color: #6a1b9a;
-}
-
-/* destructive color in case of conflict with red and purple color themes (sets new destructive color to yellow)
-  NOTE: PURPLE COLORS MUST CONTAIN 'Purple' IN CLASSNAME.
-*/
-body[class*='Red'][class*='Purple'] * {
-  --destructive-color: #ff9800;
-  --destructive-text-color: #fff;
-  --destructive-hover-color: #fb8c00;
-  --destructive-active-color: #ef6c00;
-}
-
-/* stylelint-enable no-descending-specificity */
-
 
 /*************** LEFT-TO-RIGHT AND RIGHT-TO-LEFT RULES ***************/
 
@@ -2107,6 +2487,17 @@ html[lang='ur'] [data-prefix='fas'][data-icon='circle-question'] {
 
 /*************** MAIN APP STYLING RULES ***************/
 
+/* The window's field, in a fixed layer like FtFixedBackground. */
+body::before {
+  content: '';
+  display: var(--fixed-background-display, none);
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: var(--bg-image);
+}
+
 .app {
   color: var(--primary-text-color);
   background-color: var(--bg-color);
@@ -2128,39 +2519,859 @@ a:visited {
   color: var(--link-visited-color);
 }
 
+/* The link underline setting replaces only the browser's default underline;
+   zero specificity keeps decorations that components set themselves. */
+:where(
+  :root[data-link-underline='hover'] a:not(:hover, :focus-visible),
+  :root[data-link-underline='never'] a
+) {
+  text-decoration: none;
+}
+
 /* stylelint-enable no-descending-specificity */
 
-@media (prefers-reduced-motion) {
-  * {
-    transition: none !important;
-    animation: none !important;
+/* Set from the system Reduce Transparency setting by helpers/reducedTransparency.js
+   and from the Modal Backdrop setting by App.vue */
+:root:is([data-reduced-transparency], [data-modal-backdrop='dim']) body {
+  --modal-backdrop-blur: none;
+}
+
+/* Follows the app's Reduced Motion setting, which already resolves the system
+   preference, so choosing Off still animates on a reduced-motion system. */
+:root[data-reduced-motion='reduce'] body {
+  --motion-fast-spatial: 0s;
+  --motion-default-spatial: 0s;
+  --motion-slow-spatial: 0s;
+  --motion-fast-effects: 0s;
+  --motion-default-effects: 0s;
+  --motion-slow-effects: 0s;
+}
+
+/* stylelint-disable no-descending-specificity */
+:root[data-reduced-motion='reduce'],
+:root[data-reduced-motion='reduce']::before,
+:root[data-reduced-motion='reduce']::after,
+:root[data-reduced-motion='reduce'] *,
+:root[data-reduced-motion='reduce'] *::before,
+:root[data-reduced-motion='reduce'] *::after {
+  transition: none !important;
+  animation: none !important;
+}
+
+:root[data-reduced-motion='reduce']::view-transition-group(*),
+:root[data-reduced-motion='reduce']::view-transition-old(*),
+:root[data-reduced-motion='reduce']::view-transition-new(*) {
+  animation: none !important;
+}
+/* stylelint-enable no-descending-specificity */
+
+/* thumbnail-to-player morph (only runs for navigations
+   wrapped by helpers/viewTransitions.js).
+
+   The player is only named while a morph is running: view-transition-name
+   forces a stacking context, which would otherwise trap the player's
+   full-window mode below the info/sidebar areas. */
+:root.viewTransitionMorphActive:not(.viewTransitionShortMorphActive) .videoPlayer,
+:root.viewTransitionShortMorphActive .videoLayout.shortsPlayerActive .videoPlayer {
+  view-transition-name: video-morph;
+}
+
+::view-transition-group(video-morph) {
+  animation-duration: 300ms;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Animate only a thumbnail copy; creating a background tab must not wait for
+   document snapshots or freeze the subscriptions feed while it loads. */
+.newTabThumbnailMorph {
+  position: fixed;
+  z-index: 20000;
+  margin: 0;
+  object-fit: cover;
+  pointer-events: none;
+  transform-origin: top left;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 200ms;
+}
+
+/* shared shimmer for skeleton loading placeholders */
+.htmlImagePlaceholder {
+  overflow: hidden;
+  inline-size: var(--html-image-width, auto);
+  block-size: var(--html-image-height, auto);
+  aspect-ratio: 320 / 180;
+}
+
+.htmlImagePlaceholder > img {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.ft-shimmer {
+  position: relative;
+  overflow: hidden;
+  background: var(--card-bg-color);
+}
+
+.ft-shimmer::before {
+  content: '';
+  position: absolute;
+
+  /* stylelint-disable-next-line liberty/use-logical-spec -- Preserve the sweep's physical direction in RTL layouts. */
+  inset: 0 auto 0 0;
+  inline-size: 400%;
+  pointer-events: none;
+
+  /* Keep the gradient anchored on the left in both text directions. Moving
+     this four-wide layer avoids repainting background-position every frame. */
+  background: linear-gradient(
+    90deg,
+    var(--card-bg-color) 25%,
+    var(--secondary-card-bg-color) 37%,
+    var(--card-bg-color) 63%
+  );
+  animation: ft-shimmer 1.4s ease infinite;
+}
+
+.ft-shimmer:not([data-shimmer-visible])::before,
+:root[data-shimmer-hidden] .ft-shimmer::before {
+  animation-play-state: paused;
+}
+
+@keyframes ft-shimmer {
+  from {
+    transform: translateX(-75%);
+  }
+
+  to {
+    transform: translateX(0);
   }
 }
 
-::-webkit-scrollbar {
-  inline-size: auto;
-  block-size: auto;
+:root[data-reduced-motion='reduce'] .ft-shimmer::before,
+:root[data-reduced-motion='reduce'] .shortsSkeleton::before {
+  animation: none !important;
 }
 
-::-webkit-scrollbar-thumb {
-  background: var(--scrollbar-color);
-  border-radius: 6px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
+
+/* Signal palette from opentubex.github.io/src/styles/signal.css.
+   Keep these after the selectable color palettes: the brand themes supply
+   their own primary and secondary colors. Every accent shade derives from
+   --signal-accent, which the renderer sets from the Tally accent setting.
+   Lightness is clamped so any accent keeps its contrast, and each derived
+   color resolves to in-gamut sRGB for code that reads computed colors. */
+.openTubeXLight,
+.openTubeXDark {
+  --signal-accent-color: var(--signal-accent, #f34132);
+
+  /* Filled controls carry white text in the light theme. */
+  --signal-accent-fill: rgb(from oklch(from var(--signal-accent-color) min(l, 0.5) min(c, 0.2) h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255));
+
+  /* The seekbar sits on video, so dark accents are lifted to stay apart from its track. */
+  --seekbar-played-color: color-mix(in srgb, rgb(from oklch(from var(--signal-accent-color) max(l, 0.62) min(c, 0.2) h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255)) 65%, #e4e1df);
+  --bg-glows:
+    radial-gradient(ellipse 80% 50% at 15% 10%, var(--bg-glow-accent), transparent 55%),
+    radial-gradient(ellipse 60% 45% at 90% 20%, var(--bg-glow-ink), transparent 50%),
+    radial-gradient(ellipse 70% 40% at 50% 100%, var(--bg-glow-accent-soft), transparent 55%);
+  --bg-image:
+    var(--bg-glows),
+    linear-gradient(165deg, var(--bg-gradient-start), var(--bg-color) 40%, var(--bg-gradient-end));
+  --card-bg-image:
+    var(--bg-glows),
+    linear-gradient(165deg, var(--card-bg-color), var(--card-bg-color) 40%, var(--bg-gradient-end));
+  --bg-glow-accent: rgb(from var(--signal-accent-color) r g b / 10%);
+  --bg-glow-accent-soft: rgb(from var(--signal-accent-color) r g b / 7%);
+
+  /* Composite the layered fields instead of repainting them on every scroll
+     frame, at the cost of subpixel text over them on low-DPI screens. */
+  --fixed-background-display: block;
+  --fixed-background-host-clip: border-area;
+
+  /* Settings sections share the window's field instead of repeating it. */
+  --settings-section-bg-color: transparent;
+  --settings-changed-color: var(--accent-color);
+
+  /* Keep thumbs distinct from their tracks and the surrounding gradient. */
+  --toggle-checked-thumb-color: var(--toggle-thumb-color);
+  --slider-track-color: var(--tertiary-text-color);
+  --input-border-color: var(--tertiary-text-color);
+  --primary-color: var(--signal-accent-fill);
+  --primary-color-hover: rgb(from oklch(from var(--signal-accent-fill) calc(l - 0.06) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255));
+  --primary-color-active: rgb(from oklch(from var(--signal-accent-fill) calc(l - 0.1) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255));
+  --text-with-main-color: #fff;
+  --accent-color-opacity1: rgb(from var(--accent-color) r g b / 4%);
+  --accent-color-opacity2: rgb(from var(--accent-color) r g b / 12%);
+  --accent-color-opacity3: rgb(from var(--accent-color) r g b / 16%);
+  --accent-color-opacity4: rgb(from var(--accent-color) r g b / 24%);
+  --accent-color-visited: var(--secondary-text-color);
+  --accent-color-light: var(--accent-color-hover);
+  --selection-background-color: var(--signal-accent-fill);
+  --selection-text-color: #fff;
+  --favorite-icon-color: var(--accent-color);
+  --title-color: var(--primary-text-color);
+  --divider-color: var(--border-color);
+  --subtle-surface-color: var(--secondary-card-bg-color);
+  --dropdown-item-hover-color: var(--side-nav-hover-color);
+  --dropdown-item-hover-text-color: var(--primary-text-color);
+  --settings-search-bar-color: var(--search-bar-color);
+  --scrollbar-color-hover: var(--accent-color);
+  --logo-primary-color: var(--accent-color);
+  --logo-secondary-color: var(--primary-text-color);
+  --logo-tertiary-color: var(--accent-color-hover);
+  --logo-pressed-color: var(--accent-color-active);
+  --logo-icon: url('../../_icons/iconWhiteSmall.svg');
+  --logo-text: url('../../_icons/textWhiteSmall.svg');
 }
 
-::-webkit-scrollbar-thumb:hover {
-  border: 0;
+/* Let the window's fixed field show through. */
+:is(.openTubeXLight, .openTubeXDark) .app {
+  background-color: transparent;
 }
 
-::-webkit-scrollbar-thumb:hover,
-::-webkit-scrollbar-thumb:focus {
-  background: var(--scrollbar-color-hover);
+/* Resolve the color on the thread so fullscreen docks can supply their palette. */
+:is(.openTubeXLight, .openTubeXDark) .comment.commentThread {
+  --comment-thread-line-color: var(--tertiary-text-color);
 }
 
-/***** REMOVE MAIN SCROLLBAR WHEN PROMPT IS OPEN ******/
+.openTubeXLight {
+  --toggle-track-color: #b5b0ad;
+  --toggle-checked-thumb-color: #fff;
+  --toggle-thumb-color: #3a3a3a;
+  --bg-glow-ink: rgb(26 26 26 / 5%);
+  --bg-gradient-start: color-mix(in srgb, var(--signal-accent-color) 2%, #faf9f8);
+  --bg-gradient-end: color-mix(in srgb, var(--signal-accent-color) 3%, #edebea);
+  --primary-text-color: #1a1a1a;
+  --secondary-text-color: #4f4f4f;
+  --tertiary-text-color: #5e5e5e;
+  --bg-color: #f6f5f4;
+  --card-bg-color: #fff;
+  --secondary-card-bg-color: #faf9f8;
+  --side-nav-color: #faf9f8;
+  --side-nav-hover-color: #ebe8e6;
+  --side-nav-active-color: color-mix(in srgb, var(--signal-accent-fill) 14%, #ebe8e6);
+  --search-bar-color: #ebe8e6;
+  --inactive-tab-color: #ebe8e6;
+  --border-color: rgb(26 26 26 / 12%);
+  --primary-shadow-color: rgb(26 26 26 / 12%);
+  --accent-color: var(--signal-accent-fill);
+  --accent-color-hover: var(--primary-color-hover);
+  --accent-color-active: var(--primary-color-active);
+  --text-with-accent-color: #fff;
+  --scrollbar-color: color-mix(in srgb, var(--signal-accent-fill) 42%, #737373);
+  --scrollbar-color-active: #1a1a1a;
+}
 
-/* stylelint-disable-next-line selector-no-qualifying-type */
-body:has(.prompt) {
-  overflow: hidden;
+.openTubeXDark {
+  --toggle-track-color: #6b6b6b;
+  --toggle-checked-track-color: rgb(from oklch(from var(--signal-accent-color) 60% min(c, 0.16) h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255));
+  --toggle-thumb-color: #f2f2f2;
+  --bg-glow-ink: rgb(from var(--signal-accent-color) r g b / 5%);
+  --bg-gradient-start: color-mix(in srgb, var(--signal-accent-color) 4%, #151515);
+  --bg-gradient-end: #0c0c0c;
+  --primary-text-color: #f2f2f2;
+  --secondary-text-color: #a3a3a3;
+  --tertiary-text-color: #a3a3a3;
+  --bg-color: #111;
+  --card-bg-color: #1a1a1a;
+  --secondary-card-bg-color: #171717;
+  --side-nav-color: #141414;
+  --side-nav-hover-color: #262626;
+  --side-nav-active-color: color-mix(in srgb, var(--accent-color) 18%, #1c1c1c);
+  --search-bar-color: #1e1e1e;
+  --inactive-tab-color: #262626;
+  --border-color: rgb(255 255 255 / 12%);
+  --primary-shadow-color: rgb(0 0 0 / 24%);
+
+  /* Accents stay light enough to read on the dark surfaces and their own
+     20% tints, and capped chroma keeps them in gamut. The primary color
+     also colors selected labels, so filled controls use dark text. */
+  --accent-color: rgb(from oklch(from var(--signal-accent-color) max(l, 0.74) min(c, 0.2) h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255));
+  --primary-color: var(--accent-color);
+  --primary-color-hover: var(--accent-color-hover);
+  --primary-color-active: var(--accent-color-active);
+  --text-with-main-color: #111;
+  --selection-background-color: var(--accent-color);
+  --selection-text-color: #111;
+  --accent-color-hover: rgb(from oklch(from var(--accent-color) min(calc(l + 0.06), 0.92) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255));
+  --accent-color-active: rgb(from oklch(from var(--accent-color) calc(l - 0.05) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255));
+  --text-with-accent-color: #111;
+  --scrollbar-color: color-mix(in srgb, var(--accent-color) 42%, #7a7a7a);
+  --scrollbar-color-active: var(--accent-color-hover);
+}
+
+
+/* Adapted palettes: https://github.com/folke/tokyonight.nvim,
+   https://github.com/rose-pine/neovim, https://github.com/rebelot/kanagawa.nvim,
+   https://github.com/ayu-theme/ayu-colors, https://github.com/joshdick/onedark.vim,
+   https://github.com/EdenEast/nightfox.nvim and https://github.com/catppuccin/palette.
+   Keep after selectable accents. Each preset owns its complete palette, with
+   text and interaction colors adjusted for contrast on every neutral surface. */
+:is(
+  .tokyoNightNight,
+  .tokyoNightStorm,
+  .tokyoNightMoon,
+  .tokyoNightDay,
+  .rosePine,
+  .rosePineMoon,
+  .rosePineDawn,
+  .kanagawaWave,
+  .kanagawaDragon,
+  .kanagawaLotus,
+  .ayuDark,
+  .ayuMirage,
+  .ayuLight,
+  .oneDark,
+  .carbonfox,
+  .catppuccinMacchiato
+) {
+  --title-color: var(--primary-text-color);
+  --tertiary-text-color: var(--secondary-text-color);
+  --border-color: var(--secondary-text-color);
+  --subtle-surface-color: var(--side-nav-active-color);
+  --secondary-card-bg-color: var(--card-bg-color);
+  --side-nav-color: var(--card-bg-color);
+  --search-bar-color: var(--bg-color);
+  --dropdown-item-hover-color: var(--side-nav-hover-color);
+  --dropdown-item-hover-text-color: var(--primary-text-color);
+  --header-button-pressed-color: var(--side-nav-active-color);
+  --scrollbar-color: var(--secondary-text-color);
+  --scrollbar-color-hover: var(--primary-color);
+  --scrollbar-color-active: var(--primary-color-active);
+  --scrollbar-text-color-hover: var(--text-with-main-color);
+  --settings-changed-color: var(--accent-color);
+  --slider-track-color: var(--secondary-text-color);
+  --input-border-color: var(--secondary-text-color);
+  --accent-color: rgb(var(--accent-color-rgb));
+  --accent-color-light: var(--accent-color-hover);
+  --link-color: var(--accent-color);
+  --link-visited-color: var(--accent-color-visited);
+  --favorite-icon-color: var(--accent-color);
+  --destructive-color: var(--red-500);
+  --destructive-hover-color: color-mix(in srgb, var(--red-500) 88%, var(--primary-text-color));
+  --destructive-active-color: color-mix(in srgb, var(--red-500) 76%, var(--primary-text-color));
+  --destructive-text-color: var(--text-with-main-color);
+  --selection-background-color: var(--primary-color);
+  --selection-text-color: var(--text-with-main-color);
+  --header-button-hover-color: var(--side-nav-hover-color);
+  --header-button-hover-text-color: var(--primary-text-color);
+  --header-button-pressed-text-color: var(--primary-text-color);
+  --logo-icon: url('../../_icons/iconWhiteSmall.svg');
+  --logo-text: url('../../_icons/textWhiteSmall.svg');
+
+  /* Tint the existing logo for the header. */
+  .topNav .logoIcon,
+  .topNav .logoText {
+    /* stylelint-disable-next-line declaration-no-important */
+    background-image: none !important;
+    background-color: var(--primary-text-color);
+    mask-repeat: no-repeat;
+    mask-position: center;
+  }
+
+  .topNav .logoIcon {
+    mask-image: var(--logo-icon);
+    mask-size: 25px;
+  }
+
+  .topNav .logoText {
+    mask-image: var(--logo-text);
+    mask-size: 100px;
+  }
+
+  .ft-input-component .ft-input::placeholder {
+    color: var(--tertiary-text-color);
+    opacity: 1;
+  }
+
+  .btn:focus-visible {
+    outline-color: currentcolor;
+  }}
+
+.tokyoNightNight {
+  --primary-text-color: #c0caf5;
+  --secondary-text-color: #a9b1d6;
+  --bg-color: #1a1b26;
+  --card-bg-color: #16161e;
+  --side-nav-hover-color: #20212b;
+  --side-nav-active-color: #272834;
+  --primary-color: #7aa2f7;
+  --primary-color-hover: #87abf8;
+  --primary-color-active: #95b5f9;
+  --text-with-main-color: #111;
+  --accent-color-rgb: 125 207 255;
+  --accent-color-hover: #8ad4ff;
+  --accent-color-active: #97d9ff;
+  --accent-color-visited: #bb9af7;
+  --text-with-accent-color: #111;
+  --red-500: #f07178;
+  --primary-shadow-color: rgb(0 0 0 / 35%);
+  --focus-ring-contrast-color: #fff;
+}
+
+.tokyoNightStorm {
+  --primary-text-color: #c0caf5;
+  --secondary-text-color: #a9b1d6;
+  --bg-color: #24283b;
+  --card-bg-color: #1f2335;
+  --side-nav-hover-color: #292d41;
+  --side-nav-active-color: #2f3448;
+  --primary-color: #7aa2f7;
+  --primary-color-hover: #87abf8;
+  --primary-color-active: #95b5f9;
+  --text-with-main-color: #111;
+  --accent-color-rgb: 125 207 255;
+  --accent-color-hover: #8ad4ff;
+  --accent-color-active: #97d9ff;
+  --accent-color-visited: #bb9af7;
+  --text-with-accent-color: #111;
+  --red-500: #f28187;
+  --primary-shadow-color: rgb(0 0 0 / 35%);
+  --focus-ring-contrast-color: #fff;
+}
+
+.tokyoNightMoon {
+  --primary-text-color: #c8d3f5;
+  --secondary-text-color: #969ec3;
+  --bg-color: #222436;
+  --card-bg-color: #1e2030;
+  --side-nav-hover-color: #282b3c;
+  --side-nav-active-color: #2f3244;
+  --primary-color: #82aaff;
+  --primary-color-hover: #8eb2ff;
+  --primary-color-active: #9bbbff;
+  --text-with-main-color: #111;
+  --accent-color-rgb: 134 225 252;
+  --accent-color-hover: #92e4fc;
+  --accent-color-active: #9ee7fd;
+  --accent-color-visited: #c099ff;
+  --text-with-accent-color: #111;
+  --red-500: #f17e84;
+  --primary-shadow-color: rgb(0 0 0 / 35%);
+  --focus-ring-contrast-color: #fff;
+}
+
+.tokyoNightDay {
+  --primary-text-color: #2b4b96;
+  --secondary-text-color: #4e5b8d;
+  --bg-color: #e1e2e7;
+  --card-bg-color: #ebecf0;
+  --side-nav-hover-color: #e0e4ed;
+  --side-nav-active-color: #d9deeb;
+  --primary-color: #225cac;
+  --primary-color-hover: #1f539b;
+  --primary-color-active: #1b4a8a;
+  --text-with-main-color: #fff;
+  --accent-color-rgb: 0 101 134;
+  --accent-color-hover: #005b79;
+  --accent-color-active: #00516b;
+  --accent-color-visited: #7541ba;
+  --text-with-accent-color: #fff;
+  --red-500: #a63639;
+  --primary-shadow-color: rgb(0 0 0 / 12%);
+  --focus-ring-contrast-color: #000;
+}
+
+.rosePine {
+  --primary-text-color: #e0def4;
+  --secondary-text-color: #a09cb6;
+  --bg-color: #191724;
+  --card-bg-color: #1f1d2e;
+  --side-nav-hover-color: #2b293a;
+  --side-nav-active-color: #323042;
+  --primary-color: #ebbcba;
+  --primary-color-hover: #edc3c1;
+  --primary-color-active: #efc9c8;
+  --text-with-main-color: #111;
+  --accent-color-rgb: 156 207 216;
+  --accent-color-hover: #a6d4dc;
+  --accent-color-active: #b0d9e0;
+  --accent-color-visited: #c4a7e7;
+  --text-with-accent-color: #111;
+  --red-500: #f17b81;
+  --primary-shadow-color: rgb(0 0 0 / 35%);
+  --focus-ring-contrast-color: #fff;
+}
+
+.rosePineMoon {
+  --primary-text-color: #e0def4;
+  --secondary-text-color: #aca9bf;
+  --bg-color: #232136;
+  --card-bg-color: #2a273f;
+  --side-nav-hover-color: #35324a;
+  --side-nav-active-color: #3c3951;
+  --primary-color: #ea9a97;
+  --primary-color-hover: #eca4a1;
+  --primary-color-active: #eeaeac;
+  --text-with-main-color: #111;
+  --accent-color-rgb: 156 207 216;
+  --accent-color-hover: #a6d4dc;
+  --accent-color-active: #b0d9e0;
+  --accent-color-visited: #c4a7e7;
+  --text-with-accent-color: #111;
+  --red-500: #f38f94;
+  --primary-shadow-color: rgb(0 0 0 / 35%);
+  --focus-ring-contrast-color: #fff;
+}
+
+.rosePineDawn {
+  --primary-text-color: #464261;
+  --secondary-text-color: #64617a;
+  --bg-color: #faf4ed;
+  --card-bg-color: #fffaf3;
+  --side-nav-hover-color: #f4efea;
+  --side-nav-active-color: #ece8e4;
+  --primary-color: #925063;
+  --primary-color-hover: #834859;
+  --primary-color-active: #75404f;
+  --text-with-main-color: #fff;
+  --accent-color-rgb: 40 105 131;
+  --accent-color-hover: #245e76;
+  --accent-color-active: #205469;
+  --accent-color-visited: #6d5d80;
+  --text-with-accent-color: #fff;
+  --red-500: #b13a3d;
+  --primary-shadow-color: rgb(0 0 0 / 12%);
+  --focus-ring-contrast-color: #000;
+}
+
+.kanagawaWave {
+  --primary-text-color: #dcd7ba;
+  --secondary-text-color: #c8c093;
+  --bg-color: #1f1f28;
+  --card-bg-color: #181820;
+  --side-nav-hover-color: #242329;
+  --side-nav-active-color: #2c2b2f;
+  --primary-color: #7e9cd8;
+  --primary-color-hover: #8ba6dc;
+  --primary-color-active: #98b0e0;
+  --text-with-main-color: #111;
+  --accent-color-rgb: 122 168 159;
+  --accent-color-hover: #87b1a9;
+  --accent-color-active: #95b9b2;
+  --accent-color-visited: #a28ec1;
+  --text-with-accent-color: #111;
+  --red-500: #f07178;
+  --primary-shadow-color: rgb(0 0 0 / 35%);
+  --focus-ring-contrast-color: #fff;
+}
+
+.kanagawaDragon {
+  --primary-text-color: #c5c9c5;
+  --secondary-text-color: #a6a69c;
+  --bg-color: #181616;
+  --card-bg-color: #12120f;
+  --side-nav-hover-color: #1d1d1a;
+  --side-nav-active-color: #242421;
+  --inactive-tab-color: #1d1d1a;
+  --primary-color: #8a9a7b;
+  --primary-color-hover: #96a488;
+  --primary-color-active: #a1ae95;
+  --text-with-main-color: #111;
+  --accent-color-rgb: 127 180 202;
+  --accent-color-hover: #8cbccf;
+  --accent-color-active: #99c3d5;
+  --accent-color-visited: #a292a3;
+  --text-with-accent-color: #111;
+  --red-500: #f07178;
+  --primary-shadow-color: rgb(0 0 0 / 35%);
+  --focus-ring-contrast-color: #fff;
+}
+
+.kanagawaLotus {
+  --primary-text-color: #545464;
+  --secondary-text-color: #656256;
+  --bg-color: #f2ecbc;
+  --card-bg-color: #faf5d5;
+  --side-nav-hover-color: #f0ebce;
+  --side-nav-active-color: #e9e5ca;
+  --primary-color: #486290;
+  --primary-color-hover: #415882;
+  --primary-color-active: #3a4e73;
+  --text-with-main-color: #fff;
+  --accent-color-rgb: 75 103 98;
+  --accent-color-hover: #445d58;
+  --accent-color-active: #3c524e;
+  --accent-color-visited: #624c83;
+  --text-with-accent-color: #fff;
+  --red-500: #ac383b;
+  --primary-shadow-color: rgb(0 0 0 / 12%);
+  --focus-ring-contrast-color: #000;
+}
+
+.ayuDark {
+  --primary-text-color: #bfbdb6;
+  --secondary-text-color: #8a909f;
+  --bg-color: #0d1017;
+  --card-bg-color: #10141c;
+  --side-nav-hover-color: #1a1e25;
+  --side-nav-active-color: #22252b;
+  --inactive-tab-color: #1a1e25;
+  --primary-color: #e6b450;
+  --primary-color-hover: #e8bc62;
+  --primary-color-active: #ebc373;
+  --text-with-main-color: #111;
+  --accent-color-rgb: 89 194 255;
+  --accent-color-hover: #6ac8ff;
+  --accent-color-active: #7aceff;
+  --accent-color-visited: #d2a6ff;
+  --text-with-accent-color: #111;
+  --red-500: #f07178;
+  --primary-shadow-color: rgb(0 0 0 / 35%);
+  --focus-ring-contrast-color: #fff;
+}
+
+.ayuMirage {
+  --primary-text-color: #cccac2;
+  --secondary-text-color: #a2a9b4;
+  --bg-color: #1f2430;
+  --card-bg-color: #242936;
+  --side-nav-hover-color: #2e333e;
+  --side-nav-active-color: #353944;
+  --primary-color: #fc6;
+  --primary-color-hover: #ffd175;
+  --primary-color-active: #ffd685;
+  --text-with-main-color: #111;
+  --accent-color-rgb: 115 208 255;
+  --accent-color-hover: #81d5ff;
+  --accent-color-active: #8fd9ff;
+  --accent-color-visited: #dfbfff;
+  --text-with-accent-color: #111;
+  --red-500: #f3898f;
+  --primary-shadow-color: rgb(0 0 0 / 35%);
+  --focus-ring-contrast-color: #fff;
+}
+
+.ayuLight {
+  --primary-text-color: #53575c;
+  --secondary-text-color: #5e6672;
+  --bg-color: #f8f9fa;
+  --card-bg-color: #fcfcfc;
+  --side-nav-hover-color: #f2f3f3;
+  --side-nav-active-color: #ececed;
+  --inactive-tab-color: #f2f3f3;
+  --primary-color: #8f590e;
+  --primary-color-hover: #81500d;
+  --primary-color-active: #72470b;
+  --text-with-main-color: #fff;
+  --accent-color-rgb: 22 108 152;
+  --accent-color-hover: #146189;
+  --accent-color-active: #12567a;
+  --accent-color-visited: #775995;
+  --text-with-accent-color: #fff;
+  --red-500: #b53c3e;
+  --primary-shadow-color: rgb(0 0 0 / 12%);
+  --focus-ring-contrast-color: #000;
+}
+
+.oneDark {
+  --primary-text-color: #b5bdca;
+  --secondary-text-color: #9ca0a8;
+  --bg-color: #282c34;
+  --card-bg-color: #21252b;
+  --side-nav-hover-color: #292d34;
+  --side-nav-active-color: #2f333a;
+  --primary-color: #61afef;
+  --primary-color-hover: #71b7f1;
+  --primary-color-active: #81bff2;
+  --text-with-main-color: #111;
+  --accent-color-rgb: 86 182 194;
+  --accent-color-hover: #67bdc8;
+  --accent-color-active: #78c5ce;
+  --accent-color-visited: #cc86e0;
+  --text-with-accent-color: #111;
+  --red-500: #f17c83;
+  --primary-shadow-color: rgb(0 0 0 / 35%);
+  --focus-ring-contrast-color: #fff;
+}
+
+.carbonfox {
+  --primary-text-color: #f2f4f8;
+  --secondary-text-color: #a3a3a3;
+  --bg-color: #161616;
+  --card-bg-color: #202020;
+  --side-nav-hover-color: #2d2d2d;
+  --side-nav-active-color: #353536;
+  --primary-color: #78a9ff;
+  --primary-color-hover: #86b2ff;
+  --primary-color-active: #93baff;
+  --text-with-main-color: #111;
+  --accent-color-rgb: 61 219 217;
+  --accent-color-hover: #50dfdd;
+  --accent-color-active: #64e2e1;
+  --accent-color-visited: #be95ff;
+  --text-with-accent-color: #111;
+  --red-500: #f28187;
+  --primary-shadow-color: rgb(0 0 0 / 35%);
+  --focus-ring-contrast-color: #fff;
+}
+
+.catppuccinMacchiato {
+  --primary-text-color: #cad3f5;
+  --secondary-text-color: #a5adcb;
+  --bg-color: #24273a;
+  --card-bg-color: #1e2030;
+  --side-nav-hover-color: #282b3c;
+  --side-nav-active-color: #2f3244;
+  --destructive-text-color: #111;
+  --red-500: #f17e84;
+  --primary-shadow-color: rgb(0 0 0 / 35%);
+  --focus-ring-contrast-color: #fff;
+}
+
+/* Material tonal palettes supply colors; these roles keep controls visible
+   against both their fill and the surrounding card. */
+.dynamicColors:is(.light, .dark, .black) {
+  --input-border-color: var(--md-sys-color-outline);
+  --input-container-color: var(--md-sys-color-surface-container-highest);
+  --slider-track-color: var(--md-sys-color-outline);
+  --toggle-track-color: var(--md-sys-color-surface-container-highest);
+  --toggle-checked-track-color: var(--md-sys-color-primary);
+  --toggle-thumb-color: var(--md-sys-color-outline);
+  --toggle-checked-thumb-color: var(--md-sys-color-on-primary);
+  --toggle-thumb-icon-color: var(--md-sys-color-surface-container-highest);
+  --settings-changed-color: var(--md-sys-color-primary);
+  --settings-section-bg-color: var(--md-sys-color-surface-container-low);
+  --inactive-tab-color: var(--md-sys-color-surface-container-high);
+
+  .settingsWindow {
+    background-color: var(--bg-color);
+    border-radius: calc(28px * var(--ui-roundness));
+  }
+
+  .settingsWindow.maximized {
+    border-radius: 0;
+  }
+
+  .settingsMenu {
+    background-color: var(--bg-color);
+  }
+
+  .settingsMenu .title {
+    border-radius: calc(28px * var(--ui-roundness));
+    padding-inline: 16px;
+  }
+
+  .settingsSection .sectionBody {
+    border-radius: calc(24px * var(--ui-roundness));
+    padding-inline: 20px;
+    padding-block: 16px;
+  }
+
+  .settingsSection + .settingsSection {
+    margin-block-start: 16px;
+  }
+
+  .btn.variant-tonal:not(.destructive, .selected),
+  .btn.variant-filled[aria-pressed='false']:not(.destructive, .selected) {
+    --button-container: var(--md-sys-color-secondary-container);
+    --button-foreground: var(--md-sys-color-on-secondary-container);
+  }
+
+  /* The bell and options segments share the tonal subscribe button's colors. */
+  .buttonList.subscribed {
+    --subscribe-container: var(--md-sys-color-secondary-container);
+    --subscribe-on-container: var(--md-sys-color-on-secondary-container);
+  }
+
+  .btn.variant-elevated:not(.selected) {
+    --button-container: var(--md-sys-color-surface-container-low);
+    --button-foreground: var(--md-sys-color-primary);
+  }
+
+  .mobileLinkQuickActions {
+    --quick-action-container: var(--md-sys-color-secondary-container);
+    --quick-action-foreground: var(--md-sys-color-on-secondary-container);
+  }
+
+
+
+  /* Off switches are identified by their outline; the track stays tonal. */
+  .switch-label-text::before {
+    border-color: var(--md-sys-color-outline);
+  }
+
+  .ft-input-component .ft-input::placeholder,
+  .colorPickerPopover input::placeholder {
+    color: var(--tertiary-text-color);
+    opacity: 1;
+  }
+
+  .ft-input-component .list {
+    --scrollbar-color: var(--secondary-text-color);
+  }
+
+  /* Separate the thumb from the track, including during focus and dragging.
+     The thumb is scaled sixfold by the slider component. */
+  .pure-material-slider .input:not(:disabled)::-webkit-slider-thumb {
+    outline: 0.25px solid var(--bg-color);
+    outline-offset: 0;
+  }
+
+  .pure-material-slider .input:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+  }
+
+  .btn:focus-visible {
+    outline-color: currentcolor;
+  }
+
+  .btn:is(.variant-outlined, .variant-text):not(.destructive, .selected) {
+    --button-foreground: var(--md-sys-color-primary);
+  }
+}
+
+.textInputLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-inline-size: 0;
+}
+
+.textInputLabelText {
+  color: var(--secondary-text-color);
+  font-size: 12px;
+  font-weight: normal;
+  line-height: 16px;
+}
+
+/* A drag region swallows clicks even where another element is painted above
+   it, so everything that can float over the title bar opts out explicitly. */
+:is(
+  .prompt,
+  .mobileSheet,
+  .dropdownLayer,
+  .iconDropdown,
+  .selectDropdown,
+  .profileDropdown,
+  .colorPickerPopover,
+  .contextMenu,
+  .submenu,
+  .commandPaletteBackdrop,
+  .tabOrganizerBackdrop,
+  .tutorialOverlay,
+  .tutorialHighlight,
+  .tutorialCard,
+  .moreOptionBackdrop,
+  .sideNavBackdrop,
+  .findbar,
+  .settingsWindow,
+  .toast-holder,
+  .progress-toast-holder,
+  .connection-status-holder,
+  .fullWindow,
+  .lightsOffOverlay
+) {
+  -webkit-app-region: no-drag;
+}
+
+/* Keep the exact threshold for fractional color channels where supported. */
+@supports (color: rgb(from red round(up, r, 1) g b)) {
+  body {
+    --fill-text-channel: calc(255 * round(up, clamp(0, 127.5 - r * 0.299 - g * 0.587 - b * 0.114, 1), 1));
+  }
 }

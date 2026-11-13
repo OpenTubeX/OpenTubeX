@@ -1,0 +1,80 @@
+import assert from 'node:assert/strict'
+import { readFile, readdir } from 'node:fs/promises'
+import path from 'node:path'
+import test from 'node:test'
+import { fileURLToPath } from 'node:url'
+
+import {
+  resolveMappedIcon,
+} from '../../src/renderer/icons/iconMappingResolver.js'
+
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
+const rendererRoot = path.join(repoRoot, 'src/renderer')
+const iconRoot = path.join(rendererRoot, 'icons')
+const packs = ['material', 'remix']
+const aliases = await readJson('faAliasToCanon.json')
+const mapping = await readJson('faIconMap.json')
+
+function resolveIconifyId(icon, pack) {
+  return resolveMappedIcon(icon, pack, aliases, mapping)
+}
+
+async function readJson(file) {
+  return JSON.parse(await readFile(path.join(iconRoot, file), 'utf8'))
+}
+
+test('every mapped glyph is present in its generated pack bundle', async () => {
+  for (const pack of packs) {
+    const bundle = await readJson(`iconifyBundles/${pack}.json`)
+    for (const [name, entry] of Object.entries(mapping)) {
+      const iconifyId = resolveIconifyId(['fas', name], pack)
+      assert.ok(bundle[iconifyId], `${pack} bundle is missing ${iconifyId}`)
+
+      if (entry.simple) {
+        assert.ok(
+          bundle[`simple-icons:${entry.simple}`],
+          `${pack} bundle is missing simple-icons:${entry.simple}`
+        )
+      }
+    }
+  }
+})
+
+test('every semantic icon the renderer asks for has a mapping', async () => {
+  // `fac` icons are the project's own glyphs and resolve to the otx: collection
+  // without a mapping entry, so they are not part of this.
+  const iconPattern = /\[\s*['"](fas|far|fab)['"]\s*,\s*['"]([a-z0-9-]+)['"]\s*\]/g
+  const unmapped = new Map()
+
+  for (const file of await readRendererSources()) {
+    const source = await readFile(file, 'utf8')
+    for (const [, prefix, name] of source.matchAll(iconPattern)) {
+      if (resolveIconifyId([prefix, name], 'material') == null) {
+        unmapped.set(`${prefix}:${name}`, path.relative(repoRoot, file))
+      }
+    }
+  }
+
+  assert.deepEqual(
+    Object.fromEntries(unmapped),
+    {},
+    'these icons are missing from the supported icon packs'
+  )
+})
+
+async function readRendererSources() {
+  const files = []
+  const walk = async (directory) => {
+    for (const entry of await readdir(directory, { withFileTypes: true })) {
+      const entryPath = path.join(directory, entry.name)
+      // The icon data itself lists names that are not icon usages
+      if (entry.isDirectory() && entryPath !== iconRoot) {
+        await walk(entryPath)
+      } else if (entry.isFile() && /\.(?:vue|js)$/.test(entry.name)) {
+        files.push(entryPath)
+      }
+    }
+  }
+  await walk(rendererRoot)
+  return files
+}

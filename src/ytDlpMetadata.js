@@ -1,0 +1,368 @@
+/** @typedef {import('./main/ytDlp').YtDlpPlaybackFormat} YtDlpPlaybackFormat */
+/** @typedef {import('./main/ytDlp').YtDlpPlaybackCaption} YtDlpPlaybackCaption */
+
+import { isDubbedCaptionLanguage, isSameBaseLanguage } from './captionLanguages.js'
+
+const PLAYBACK_FORMAT_OUTPUT_FIELDS = [
+  'format_id',
+  'url',
+  'manifest_url',
+  'http_headers',
+  'protocol',
+  'ext',
+  'container',
+  'vcodec',
+  'acodec',
+  'width',
+  'height',
+  'fps',
+  'tbr',
+  'asr',
+  'audio_channels',
+  'language',
+  'format_note',
+  'dynamic_range',
+  'available_at',
+  'target_duration',
+  // Every Post-Live-DVR fragment carries the total count, so one is enough.
+  'fragments.0.fragment_count'
+].join(',')
+const EXTERNAL_INFO_FIELDS = [
+  ',"timestamp":%(timestamp|null)j',
+  ',"release_date":%(release_date|null)j',
+  ',"release_timestamp":%(release_timestamp|null)j',
+  ',"concurrent_view_count":%(concurrent_view_count|null)j',
+  ',"like_count":%(like_count|null)j',
+  ',"dislike_count":%(dislike_count|null)j',
+  ',"comment_count":%(comment_count|null)j',
+  ',"repost_count":%(repost_count|null)j',
+  ',"save_count":%(save_count|null)j',
+  ',"series":%(series|null)j',
+  ',"season":%(season|null)j',
+  ',"season_number":%(season_number|null)j',
+  ',"episode":%(episode|null)j',
+  ',"episode_number":%(episode_number|null)j',
+  ',"track":%(track|null)j',
+  ',"track_number":%(track_number|null)j',
+  ',"artists":%(artists|null)j',
+  ',"artist":%(artist|null)j',
+  ',"album":%(album|null)j',
+  ',"genres":%(genres|null)j',
+  ',"license":%(license|null)j',
+  ',"categories":%(categories|null)j',
+  ',"tags":%(tags|null)j',
+  ',"age_limit":%(age_limit|null)j',
+  ',"availability":%(availability|null)j',
+  ',"media_type":%(media_type|null)j',
+  ',"chapters":%(chapters.:.{start_time,end_time,title})j',
+  ',"subtitles":%(subtitles|null)j'
+].join('')
+
+function playbackInfoOutputTemplate(formatFields, external = false, storyboardFields = 'protocol,width,height,fps,rows,columns,fragments,http_headers') {
+  return [
+    '{"title":%(title|null)j',
+    ',"description":%(description|null)j',
+    ',"uploader":%(uploader|null)j',
+    ',"uploader_id":%(uploader_id|null)j',
+    ',"uploader_url":%(uploader_url|null)j',
+    ',"uploader_thumbnail":%(uploader_thumbnail|null)j',
+    ',"uploader_avatar":%(uploader_avatar|null)j',
+    ',"channel":%(channel|null)j',
+    ',"channel_url":%(channel_url|null)j',
+    ',"channel_thumbnail":%(channel_thumbnail|null)j',
+    ',"channel_avatar":%(channel_avatar|null)j',
+    ',"thumbnail":%(thumbnail|null)j',
+    ',"webpage_url":%(webpage_url|null)j',
+    ',"view_count":%(view_count|null)j',
+    ',"upload_date":%(upload_date|null)j',
+    ',"is_live":%(is_live|null)j',
+    ',"live_status":%(live_status|null)j',
+    ',"duration":%(duration|null)j',
+    ',"manifest_url":%(manifest_url|null)j',
+    ',"requested_subtitles":%(requested_subtitles|null)j',
+    ...(external ? [EXTERNAL_INFO_FIELDS] : []),
+  `,"formats":%(formats.:.{${formatFields}})j`,
+  // Project the selected storyboard only, avoiding the much larger media
+  // fragment arrays that can occur in the full formats list.
+  `,"storyboard":%(.{${storyboardFields}})j}`
+  ].join('')
+}
+
+export const PLAYBACK_INFO_OUTPUT_TEMPLATE = playbackInfoOutputTemplate(PLAYBACK_FORMAT_OUTPUT_FIELDS)
+export const EXTERNAL_PLAYBACK_FORMAT_SELECTOR = 'bestvideo*+bestaudio/best,mhtml'
+export const EXTERNAL_PLAYBACK_INFO_OUTPUT_TEMPLATE = playbackInfoOutputTemplate(PLAYBACK_FORMAT_OUTPUT_FIELDS, true)
+// Desktop keeps these scoped cookies in the main process; Android uses its
+// native cookie jar and must not return them to the WebView.
+export const PLAYBACK_INFO_WITH_COOKIES_OUTPUT_TEMPLATE = playbackInfoOutputTemplate(
+  `${PLAYBACK_FORMAT_OUTPUT_FIELDS},cookies`,
+  true,
+  'protocol,width,height,fps,rows,columns,fragments,http_headers,cookies'
+)
+
+/** yt-dlp prints one JSON line for the media and another when an image grid exists. */
+export function parseYtDlpPlaybackInfo(stdout, stderr = '') {
+  const [media, ...additional] = stdout.trim().split('\n').map(line => JSON.parse(line))
+  if (!media || typeof media !== 'object') throw new Error('yt-dlp returned invalid playback metadata')
+  // A final client timeout can leave formats from other clients in the output.
+  // Retry warnings are historical when yt-dlp subsequently exits successfully.
+  const timeoutWarnings = stderr.match(/^WARNING:.*(?:timed?\s*out|time-?out).*$/gmi) ?? []
+  if (timeoutWarnings.some(warning => !/\bRetrying \(\d+\/\d+\)/i.test(warning))) {
+    media.incomplete = true
+  }
+  const noFormatsReason = getNoFormatsReason(stderr)
+  if (noFormatsReason) media.noFormatsReason = noFormatsReason
+  const storyboard = [media, ...additional]
+    .find(info => info?.storyboard?.protocol === 'mhtml')?.storyboard
+  if (storyboard) media.storyboard = storyboard
+  return media
+}
+
+/**
+ * --ignore-no-formats-error turns an extractor's explanation for missing
+ * formats, such as "There is no video in this post", into a warning. yt-dlp
+ * follows it with its own unprefixed warning; extractor warnings carry their name.
+ * @param {string} stderr
+ */
+function getNoFormatsReason(stderr) {
+  const lines = stderr.split(/\r?\n/).map(line => line.trim())
+  const end = lines.findIndex(line => /^WARNING: (?:No video formats found!|This video is DRM protected)$/.test(line))
+  if (end === -1) return null
+  if (lines[end].endsWith('DRM protected')) return lines[end].slice('WARNING: '.length)
+  return lines.slice(0, end).findLast(line => /^WARNING: \[[^\]]+\] /.test(line))?.slice('WARNING: '.length) ?? null
+}
+
+/**
+ * @param {unknown} value
+ * @returns {number | null}
+ */
+export function toFiniteNumber(value) {
+  const number = typeof value === 'string' ? parseFloat(value) : value
+  return typeof number === 'number' && Number.isFinite(number) ? number : null
+}
+
+/**
+ * @param {unknown} value
+ * @returns {string | null}
+ */
+export function toNonEmptyString(value) {
+  return typeof value === 'string' && value.length > 0 ? value : null
+}
+
+/** @param {unknown} value */
+function stringList(value) {
+  return Array.isArray(value) ? value.filter(item => typeof item === 'string' && item.length > 0).slice(0, 100) : []
+}
+
+/** @param {Record<string, unknown>} info */
+export function mapExternalPlaybackMetadata(info) {
+  const duration = toFiniteNumber(info.duration)
+  const chapters = Array.isArray(info.chapters) ? info.chapters : []
+  const artists = stringList(info.artists)
+  const artist = toNonEmptyString(info.artist)
+  return {
+    timestamp: toFiniteNumber(info.timestamp),
+    releaseDate: toNonEmptyString(info.release_date),
+    releaseTimestamp: toFiniteNumber(info.release_timestamp),
+    concurrentViewCount: toFiniteNumber(info.concurrent_view_count),
+    likeCount: toFiniteNumber(info.like_count),
+    dislikeCount: toFiniteNumber(info.dislike_count),
+    commentCount: toFiniteNumber(info.comment_count),
+    repostCount: toFiniteNumber(info.repost_count),
+    saveCount: toFiniteNumber(info.save_count),
+    series: toNonEmptyString(info.series),
+    season: toNonEmptyString(info.season),
+    seasonNumber: toFiniteNumber(info.season_number),
+    episode: toNonEmptyString(info.episode),
+    episodeNumber: toFiniteNumber(info.episode_number),
+    track: toNonEmptyString(info.track),
+    trackNumber: toFiniteNumber(info.track_number),
+    artists: artists.length > 0 ? artists : artist ? [artist] : [],
+    album: toNonEmptyString(info.album),
+    genres: stringList(info.genres),
+    license: toNonEmptyString(info.license),
+    categories: stringList(info.categories),
+    tags: stringList(info.tags),
+    ageLimit: toFiniteNumber(info.age_limit),
+    availability: toNonEmptyString(info.availability),
+    mediaType: toNonEmptyString(info.media_type),
+    chapters: chapters.flatMap((chapter, index) => {
+      if (chapter === null || typeof chapter !== 'object') return []
+      const startSeconds = toFiniteNumber(chapter.start_time)
+      const next = chapters[index + 1]
+      const nextStartSeconds = next && typeof next === 'object' ? toFiniteNumber(next.start_time) : null
+      const endSeconds = toFiniteNumber(chapter.end_time) ??
+        (startSeconds !== null && nextStartSeconds !== null && nextStartSeconds > startSeconds ? nextStartSeconds : null) ?? duration
+      if (startSeconds === null || startSeconds < 0 || (endSeconds !== null && endSeconds <= startSeconds)) return []
+      return [{ startSeconds, endSeconds, title: toNonEmptyString(chapter.title) ?? String(index + 1) }]
+    })
+  }
+}
+
+/**
+ * @param {Record<string, unknown>} format
+ * @returns {YtDlpPlaybackFormat}
+ */
+export function mapPlaybackFormat(format) {
+  const bitrate = toFiniteNumber(format.tbr)
+
+  return {
+    formatId: String(format.format_id),
+    url: toNonEmptyString(format.url),
+    manifestUrl: toNonEmptyString(format.manifest_url),
+    protocol: typeof format.protocol === 'string' ? format.protocol : '',
+    ext: typeof format.ext === 'string' ? format.ext : '',
+    container: toNonEmptyString(format.container),
+    vcodec: toNonEmptyString(format.vcodec),
+    acodec: toNonEmptyString(format.acodec),
+    width: toFiniteNumber(format.width),
+    height: toFiniteNumber(format.height),
+    fps: toFiniteNumber(format.fps),
+    // yt-dlp reports bitrates in kbit/s
+    bitrate: bitrate === null ? null : Math.round(bitrate * 1000),
+    audioSampleRate: toFiniteNumber(format.asr),
+    audioChannels: toFiniteNumber(format.audio_channels),
+    language: toNonEmptyString(format.language),
+    formatNote: toNonEmptyString(format.format_note),
+    dynamicRange: toNonEmptyString(format.dynamic_range),
+    availableAt: toFiniteNumber(format.available_at),
+    targetDuration: toFiniteNumber(format.target_duration),
+    fragmentCount: toFiniteNumber(format['fragments.0.fragment_count']) ??
+      (Array.isArray(format.fragments) ? format.fragments.length : null)
+  }
+}
+
+/**
+ * Finds the language of the original audio track of a YouTube video with multiple audio tracks, e.g. AI dubs.
+ * yt-dlp's top-level language follows the selected formats, which are storyboards during playback.
+ * @param {unknown} formats
+ * @returns {string | null}
+ */
+export function getOriginalAudioLanguage(formats) {
+  if (!Array.isArray(formats)) return null
+
+  for (const format of formats) {
+    const url = toNonEmptyString(format?.url)
+    if (url === null) continue
+
+    let xtags
+    try {
+      // googlevideo puts the audio track details into the URL
+      xtags = (new URL(url).searchParams.get('xtags') ?? '').split(':')
+    } catch {
+      continue
+    }
+    if (xtags.includes('acont=original')) {
+      return xtags.find(tag => tag.startsWith('lang='))?.slice('lang='.length) || toNonEmptyString(format.language)
+    }
+  }
+
+  return null
+}
+
+/**
+ * Maps yt-dlp's selected WebVTT subtitles and keeps translated tracks separate,
+ * so the player can load translations only when the user selects one.
+ * @param {unknown} requestedSubtitles
+ * @param {unknown} [manualSubtitles]
+ * @param {boolean} [allowHttp]
+ * @param {unknown} [originalLanguage] the language of the original YouTube audio track, as this relies on YouTube's caption URLs
+ * @returns {{ captions: YtDlpPlaybackCaption[], captionTranslations: YtDlpPlaybackCaption[] }}
+ */
+export function mapPlaybackCaptions(requestedSubtitles, manualSubtitles = null, allowHttp = false, originalLanguage = null) {
+  if (requestedSubtitles === null || typeof requestedSubtitles !== 'object') {
+    return { captions: [], captionTranslations: [] }
+  }
+
+  const captions = new Map()
+  const captionTranslations = new Map()
+
+  for (const [requestedLanguage, subtitle] of Object.entries(requestedSubtitles)) {
+    if (subtitle === null || typeof subtitle !== 'object') continue
+    const mimeType = {
+      vtt: 'text/vtt',
+      srt: 'text/srt',
+      ttml: 'application/ttml+xml',
+      dfxp: 'application/ttml+xml'
+    }[subtitle.ext]
+    if (typeof mimeType !== 'string') continue
+
+    const subtitleUrl = toNonEmptyString(subtitle.url)
+    if (subtitleUrl === null) continue
+
+    let url
+    try {
+      url = new URL(subtitleUrl)
+    } catch {
+      continue
+    }
+    if (url.protocol !== 'https:' && !(allowHttp && url.protocol === 'http:') &&
+      !(allowHttp && url.protocol === 'capacitor:' && url.hostname === 'localhost' &&
+        url.pathname.startsWith('/_opentubex_media/'))) continue
+
+    const sourceLanguage = toNonEmptyString(url.searchParams.get('lang'))
+    const rawTargetLanguage = toNonEmptyString(url.searchParams.get('tlang'))
+    const sourceSuffix = sourceLanguage === null ? '' : `-${sourceLanguage}`
+    const targetLanguage = rawTargetLanguage?.endsWith(sourceSuffix) && sourceSuffix !== ''
+      ? rawTargetLanguage.slice(0, -sourceSuffix.length)
+      : rawTargetLanguage
+    const isTranslation = targetLanguage !== null && targetLanguage !== sourceLanguage
+    const language = isTranslation
+      ? targetLanguage
+      : sourceLanguage ?? requestedLanguage.replace(/-orig$/, '')
+    const subtitleName = toNonEmptyString(subtitle.name)
+    const label = subtitleName ?? language
+    const manualTracks = manualSubtitles && typeof manualSubtitles === 'object'
+      ? manualSubtitles[requestedLanguage]
+      : null
+    const isManual = Array.isArray(manualTracks) && manualTracks.some(track =>
+      track && typeof track === 'object' && track.ext === subtitle.ext && track.url === subtitleUrl
+    )
+    const caption = {
+      url: url.toString(),
+      language,
+      label,
+      mimeType,
+      ...(isTranslation
+        ? {
+            id: `yt-dlp:${requestedLanguage}`,
+            translationName: label,
+            ...(sourceLanguage === null ? {} : { originalLanguage: sourceLanguage })
+          }
+        : { isAutoGenerated: !isManual })
+    }
+    const destination = isTranslation ? captionTranslations : captions
+    const existing = destination.get(language)
+    const priority = Number(requestedLanguage === language) + Number(subtitleName !== null)
+
+    if (existing === undefined || priority > existing.priority) {
+      destination.set(language, { caption, priority })
+    }
+  }
+
+  const mappedCaptions = [...captions.values()].map(({ caption }) => caption)
+  const mappedTranslations = [...captionTranslations.values()].map(({ caption }) => caption)
+  const language = toNonEmptyString(originalLanguage)
+  const autoGeneratedCaptions = mappedCaptions.filter(caption => new URL(caption.url).searchParams.get('kind') === 'asr')
+  const captionLanguages = mappedCaptions.map(caption => caption.language)
+
+  for (const caption of language ? mappedCaptions : []) {
+    caption.isDubbed = autoGeneratedCaptions.includes(caption) &&
+      isDubbedCaptionLanguage(caption.language, language, captionLanguages)
+    caption.isOriginalLanguage = !!language && isSameBaseLanguage(caption.language, language)
+  }
+
+  // yt-dlp translates from the first auto-generated track, which may transcribe a dub
+  const originalCaption = language && mappedCaptions.find(caption => isSameBaseLanguage(caption.language, language))
+  if (originalCaption) {
+    for (const translation of mappedTranslations) {
+      if (translation.originalLanguage === undefined || isSameBaseLanguage(translation.originalLanguage, language)) continue
+
+      const url = new URL(originalCaption.url)
+      url.searchParams.set('tlang', translation.language)
+      translation.url = url.toString()
+      translation.originalLanguage = originalCaption.language
+    }
+  }
+
+  return { captions: mappedCaptions, captionTranslations: mappedTranslations }
+}

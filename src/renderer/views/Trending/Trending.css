@@ -1,43 +1,96 @@
 .card {
-  inline-size: 85%;
+  --trending-top-bar-block-size: var(--top-nav-sticky-offset);
+
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: 92dvw;
   margin-block: 0 60px;
   margin-inline: auto;
+  overflow: visible;
+}
+
+.pageHeader {
+  container: trending-header / inline-size;
+  position: sticky;
+  inset-block-start: var(--trending-top-bar-block-size);
+  z-index: 3;
+
+  /* Room for the focus ring of the first row, which the header would cover. */
+  margin-block-end: 6px;
+  margin-inline: -16px;
+  padding-block: var(--page-title-offset) 12px;
+  padding-inline: 16px;
+  border-start-start-radius: var(--shape-corner-medium);
+  border-start-end-radius: var(--shape-corner-medium);
+  background-color: var(--card-bg-color);
+  background-image: var(--card-bg-image);
+
+  /* FtFixedBackground paints the background fixed to the viewport. */
+  background-clip: var(--fixed-background-host-clip, border-box);
+  backdrop-filter: var(--card-bg-blur, none);
+  box-shadow: 0 1px 0 var(--primary-shadow-color);
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  flex-wrap: wrap;
+}
+
+.pageTitle .trendingIcon {
+  color: var(--primary-color);
+}
+
+.headerRefreshWidget {
+  min-inline-size: min(100%, 360px);
 }
 
 .trendingInfoTabs {
+  --material-tab-font-size: 1.1em;
+
   inline-size: 100%;
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  margin-block: -3px 10px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px 10px;
+  margin-block: 10px 0;
   color: var(--tertiary-text-color);
 }
 
-.selectedTab {
-  border-block-end: 3px solid var(--primary-color);
-  color: var(--primary-text-color);
-  font-weight: bold;
-  box-sizing: border-box;
-  margin-block-end: -3px;
+@container trending-header (width < 640px) {
+  .trendingInfoTabs {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
-.tab {
+.statusMessage {
+  margin-block: 48px;
   text-align: center;
-  padding: 15px;
-  font-size: 1.1em;
-  cursor: pointer;
-  align-self: flex-end;
-}
-
-.tab:hover {
-  font-weight: bold;
-}
-
-.trendingIcon {
-  color: var(--primary-color);
 }
 
 @media only screen and (width <= 680px) {
   .card {
-    inline-size: 90%;
+    inline-size: 100%;
+  }
+
+  .pageHeader {
+    padding-block-end: 10px;
+  }
+
+  .titleRow {
+    align-items: flex-start;
+  }
+
+  .pageTitle {
+    inline-size: 100%;
+  }
+
+  .headerRefreshWidget {
+    min-inline-size: 100%;
+  }
+
+  .trendingInfoTabs {
+    gap: 4px;
   }
 }

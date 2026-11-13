@@ -1,0 +1,489 @@
+<template>
+  <div
+    :id="`comment${threadIndex}-${node.index}`"
+    class="commentReplyBranch"
+    :class="{
+      commentReplyBranchRoot: rootLevel,
+      highlightedCommentBranch: reply.id === highlightedCommentId
+    }"
+  >
+    <component
+      :is="canToggleParent ? 'button' : 'span'"
+      class="commentReplyConnector"
+      :class="{ commentReplyConnectorToggle: canToggleParent }"
+      :type="canToggleParent ? 'button' : undefined"
+      :aria-hidden="canToggleParent ? undefined : true"
+      :aria-label="canToggleParent ? parentToggleLabel : undefined"
+      :tabindex="canToggleParent ? -1 : undefined"
+      @click="canToggleParent && emit('toggle-parent')"
+      @keydown.space.stop
+      @keyup.space.stop
+    />
+    <button
+      v-if="hasReplyChildren && !filtering"
+      type="button"
+      class="commentThreadLineToggle commentReplyLineToggle"
+      :aria-label="replyToggleLabel"
+      :aria-expanded="showReplyChildren"
+      @click="toggleReplyChildren"
+      @keydown.space.stop
+      @keyup.space.stop
+    />
+    <div
+      class="comment commentReplyContent"
+      :class="{ highlightedComment: reply.id === highlightedCommentId }"
+    >
+      <p
+        v-if="reply.id === highlightedCommentId"
+        class="highlightedCommentBadge"
+      >
+        {{ $t('Comments.Highlighted reply') }}
+      </p>
+      <span
+        v-if="hasReplyChildren"
+        class="commentReplyChildStem"
+        aria-hidden="true"
+      />
+      <component
+        :is="enableChannelLinks ? 'router-link' : 'div'"
+        :to="`/channel/${reply.authorLink}`"
+        :aria-label="enableChannelLinks ? reply.author : null"
+        tabindex="-1"
+      >
+        <div
+          v-if="!reply.authorThumb || (hideCommentPhotos && !reply.isOwner)"
+          class="commentThumbnailHidden"
+          dir="auto"
+        >
+          {{ reply.author.substring(1, 2) }}
+        </div>
+        <FtRetryImage
+          v-else
+          :fallback-icon="['fas', 'circle-user']"
+          :src="reply.authorThumb"
+          class="commentThumbnail"
+        />
+      </component>
+      <p
+        v-if="isPersonallyPinned"
+        class="commentPinned commentPersonalPin"
+      >
+        <FtIcon
+          :icon="['fas', 'thumbtack']"
+          aria-hidden="true"
+        />
+        {{ $t('Comments.Pinned by you') }}
+      </p>
+      <p class="commentAuthorWrapper">
+        <component
+          :is="enableChannelLinks ? 'router-link' : 'span'"
+          class="commentAuthor"
+          dir="auto"
+          :class="{ commentOwner: reply.isOwner }"
+          :to="`/channel/${reply.authorLink}`"
+        >
+          <template
+            v-for="(segment, segmentIndex) in authorSearchSegments"
+            :key="segmentIndex"
+          >
+            <mark v-if="segment.highlighted">{{ segment.text }}</mark>
+            <template v-else>
+              {{ segment.text }}
+            </template>
+          </template>
+        </component>
+        <FtVerifiedBadge
+          :verified="reply.authorVerified"
+          :artist="reply.authorVerifiedArtist"
+        />
+        <FtRetryImage
+          v-if="reply.isMember && typeof reply.memberIconUrl === 'string'"
+          :fallback-icon="['fas', 'user-check']"
+          :src="reply.memberIconUrl"
+          class="commentMemberIcon"
+          alt=""
+        />
+        <FtIcon
+          v-if="subscribedChannelIds.has(reply.authorId)"
+          :icon="['fas', 'user-check']"
+          class="commentSubscribedIcon"
+          role="img"
+          :title="$t('Comments.Subscribed')"
+          :aria-label="$t('Comments.Subscribed')"
+        />
+        <span class="commentDate">
+          {{ formatCommentTime(reply) }}
+          <template v-if="reply.isEdited">
+            {{ $t("Comments.Edited") }}
+          </template>
+        </span>
+        <button
+          type="button"
+          class="commentPinButton"
+          :class="{ active: isPersonallyPinned }"
+          :title="personalPinActionLabel"
+          :aria-label="personalPinActionLabel"
+          :aria-pressed="isPersonallyPinned"
+          @click="emit('toggle-personal-pin', reply.id)"
+        >
+          <FtIcon
+            :icon="['fas', isPersonallyPinned ? 'thumbtack-slash' : 'thumbtack']"
+          />
+        </button>
+        <button
+          type="button"
+          class="commentCopyLink"
+          :title="$t('Video.Copy YouTube Link')"
+          :aria-label="$t('Video.Copy YouTube Link')"
+          @click="emit('copy-youtube-link', reply.id)"
+        >
+          <FtIcon :icon="['fas', 'link']" />
+        </button>
+      </p>
+      <CommentComposer
+        v-if="youTubeComments?.enabled.value && youTubeComments.editing.value === reply.id"
+        class="editComposer"
+        :edit-comment="reply"
+        @done="youTubeComments.closeEdit(reply.id)"
+      />
+      <FtTimestampCatcher
+        v-else
+        class="commentText"
+        :input-html="reply.showTranslated && reply.translatedLanguage === translationLanguage
+          ? reply.translatedText
+          : reply.text"
+        :highlight="highlight"
+        @timestamp-event="emit('timestamp-event', $event)"
+      />
+      <CommentTranslationButton
+        v-if="translationEnabled && reply.translationText"
+        :comment="reply"
+        :loading="loadingTranslationIds.has(reply.id)"
+        :target-language="translationLanguage"
+        :target-language-name="translationLanguageName"
+        :ignored-languages="commentTranslationIgnoredLanguages"
+        @translate-comment="emit('translate-comment', $event)"
+        @translation-unavailable="emit('translation-unavailable', $event)"
+      />
+      <CommentImageAttachment
+        v-if="reply.imageAttachment"
+        :attachment="reply.imageAttachment"
+      />
+      <p class="commentLikeCount">
+        <CommentAccountActions
+          v-if="youTubeComments?.enabled.value"
+          :comment="reply"
+          :hide-count="hideCommentLikes"
+          :shorten-view-counts="shortenViewCounts"
+        />
+        <template v-else-if="!hideCommentLikes">
+          <FtIcon :icon="['fas', 'thumbs-up']" />
+          {{ formatViewCount(reply.likes, shortenViewCounts) }}
+        </template>
+        <span
+          v-if="reply.isHearted"
+          class="commentHeartBadge"
+        >
+          <FtRetryImage
+            :fallback-icon="['fas', 'circle-user']"
+            :src="channelThumbnail"
+            :title="$t('Comments.Hearted')"
+            :aria-label="$t('Comments.Hearted')"
+            class="commentHeartBadgeImg"
+            alt=""
+          />
+          <FtIcon
+            :icon="['fas', 'heart-filled']"
+            class="commentHeartBadgeWhite"
+          />
+          <FtIcon
+            :icon="['fas', 'heart-filled']"
+            class="commentHeartBadgeRed"
+          />
+        </span>
+      </p>
+      <!-- Replies to replies go to the thread, mentioning the author, as on YouTube. -->
+      <CommentComposer
+        v-if="youTubeComments?.enabled.value && youTubeComments.replyingTo.value === reply.id"
+        class="replyComposer"
+        :parent-id="getRootCommentId(reply.id)"
+        :initial-text="reply.author.startsWith('@') ? `${reply.author} ` : ''"
+        @done="youTubeComments.closeReply(reply.id)"
+      />
+    </div>
+    <div
+      v-if="hasReplyChildren"
+      class="commentReplyChildren"
+    >
+      <template v-if="showReplyChildren">
+        <CommentReply
+          v-for="child in node.children"
+          :key="child.reply.id"
+          :node="child"
+          :thread-index="threadIndex"
+          :enable-channel-links="enableChannelLinks"
+          :hide-comment-likes="hideCommentLikes"
+          :hide-comment-photos="hideCommentPhotos"
+          :subscribed-channel-ids="subscribedChannelIds"
+          :channel-thumbnail="channelThumbnail"
+          :loading-reply-ids="loadingReplyIds"
+          :loading-translation-ids="loadingTranslationIds"
+          :translation-enabled="translationEnabled"
+          :translation-language="translationLanguage"
+          :translation-language-name="translationLanguageName"
+          :comment-translation-ignored-languages="commentTranslationIgnoredLanguages"
+          :highlighted-comment-id="highlightedCommentId"
+          :highlight="highlight"
+          :personal-pinned-comment-ids="personalPinnedCommentIds"
+          :filtering="filtering"
+          :shorten-view-counts="shortenViewCounts"
+          :parent-toggle-label="replyToggleLabel"
+          :can-toggle-parent="!filtering"
+          @toggle-parent="toggleReplyChildren"
+          @replies-toggled="emit('replies-toggled')"
+          @copy-youtube-link="emit('copy-youtube-link', $event)"
+          @get-more-replies="emit('get-more-replies', $event)"
+          @toggle-personal-pin="emit('toggle-personal-pin', $event)"
+          @timestamp-event="emit('timestamp-event', $event)"
+          @translate-comment="emit('translate-comment', $event)"
+          @translation-unavailable="emit('translation-unavailable', $event)"
+        />
+        <div
+          v-if="!filtering && (loadingReplyIds.has(reply.id) || (reply.dataType === 'local' && reply.hasReplyToken))"
+          class="commentReplyContinuation"
+        >
+          <button
+            type="button"
+            class="commentReplyContinuationButton"
+            :disabled="loadingReplyIds.has(reply.id)"
+            @click="emit('get-more-replies', reply.id)"
+          >
+            <FtLoader
+              v-if="loadingReplyIds.has(reply.id)"
+              inline
+              size="18px"
+              :label="$t('Comments.Getting comment replies, please wait')"
+              :tab-loading-indicator="false"
+            />
+            <template v-else>
+              <span>{{ $t("Comments.Show More Replies") }}</span>
+              <FtIcon
+                :icon="['fas', 'angle-down']"
+                aria-hidden="true"
+              />
+            </template>
+          </button>
+        </div>
+      </template>
+      <div
+        v-if="!filtering && !showReplyChildren"
+        class="commentReplyContinuation"
+      >
+        <button
+          type="button"
+          class="commentReplyContinuationButton"
+          :aria-expanded="showReplyChildren"
+          @click="toggleReplyChildren"
+          @keydown.space.stop
+          @keyup.space.stop
+        >
+          <span>{{ replyToggleLabel }}</span>
+          <FtIcon
+            :icon="['fas', 'angle-down']"
+            aria-hidden="true"
+          />
+        </button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { FtIcon } from '@opentubex/icons'
+import { computed, inject, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+import FtTimestampCatcher from '../FtTimestampCatcher.vue'
+import CommentTranslationButton from './CommentTranslationButton.vue'
+import CommentImageAttachment from './CommentImageAttachment.vue'
+import FtRetryImage from '../FtRetryImage.vue'
+import FtVerifiedBadge from '../FtVerifiedBadge/FtVerifiedBadge.vue'
+import FtLoader from '../FtLoader/FtLoader.vue'
+import CommentAccountActions from './CommentAccountActions.vue'
+import CommentComposer from './CommentComposer.vue'
+import { getRootCommentId, youTubeCommentsKey } from './youTubeComments'
+import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
+import { formatViewCount, getRelativeTimeFromDate } from '../../helpers/utils'
+import { getCommentReplyCount } from '../../helpers/comment-replies'
+
+const { t } = useI18n()
+const youTubeComments = inject(youTubeCommentsKey, null)
+
+const props = defineProps({
+  node: {
+    type: Object,
+    required: true
+  },
+  threadIndex: {
+    type: Number,
+    required: true
+  },
+  rootLevel: {
+    type: Boolean,
+    default: false
+  },
+  parentToggleLabel: {
+    type: String,
+    required: true
+  },
+  canToggleParent: {
+    type: Boolean,
+    required: true
+  },
+  enableChannelLinks: {
+    type: Boolean,
+    required: true
+  },
+  hideCommentLikes: {
+    type: Boolean,
+    required: true
+  },
+  hideCommentPhotos: {
+    type: Boolean,
+    required: true
+  },
+  subscribedChannelIds: {
+    type: Set,
+    required: true
+  },
+  channelThumbnail: {
+    type: String,
+    required: true
+  },
+  loadingReplyIds: {
+    type: Set,
+    required: true
+  },
+  loadingTranslationIds: {
+    type: Set,
+    required: true
+  },
+  translationEnabled: {
+    type: Boolean,
+    required: true
+  },
+  translationLanguage: {
+    type: String,
+    required: true
+  },
+  translationLanguageName: {
+    type: String,
+    required: true
+  },
+  commentTranslationIgnoredLanguages: {
+    type: Array,
+    required: true
+  },
+  highlightedCommentId: {
+    type: String,
+    default: null
+  },
+  highlight: {
+    type: String,
+    default: ''
+  },
+  personalPinnedCommentIds: {
+    type: Set,
+    required: true
+  },
+  filtering: {
+    type: Boolean,
+    required: true
+  },
+  shortenViewCounts: {
+    type: Boolean,
+    required: true
+  }
+})
+
+const relativeTimeNow = useRelativeTimeClock()
+
+function formatCommentTime(comment) {
+  return comment.published
+    // A comment posted since the clock last ticked would read "in a few seconds".
+    ? getRelativeTimeFromDate(comment.published, false, true, Math.max(relativeTimeNow.value, comment.published))
+    : comment.time
+}
+
+// The reply list keys by ID, so a saved edit can hand this component a new reply object.
+const reply = computed(() => props.node.reply)
+const childrenCollapsed = ref(false)
+const hasReplyChildren = computed(() => {
+  return props.node.children.length > 0 ||
+    (!props.filtering && (
+      (reply.value.dataType === 'local' && reply.value.hasReplyToken) ||
+      props.loadingReplyIds.has(reply.value.id)
+    ))
+})
+const showReplyChildren = computed(() => hasReplyChildren.value && (!childrenCollapsed.value || props.filtering))
+const replyToggleLabel = computed(() => {
+  const replyCount = getCommentReplyCount(reply.value)
+  return showReplyChildren.value
+    ? t('Comments.Hide {replyCount} replies', { replyCount }, replyCount)
+    : t('Comments.Reply Count', { replyCount }, replyCount)
+})
+
+function toggleReplyChildren() {
+  childrenCollapsed.value = !childrenCollapsed.value
+  emit('replies-toggled')
+}
+const isPersonallyPinned = computed(() => props.personalPinnedCommentIds.has(reply.value.id))
+const personalPinActionLabel = computed(() => {
+  return isPersonallyPinned.value
+    ? t('Comments.Unpin comment by author', { author: reply.value.author })
+    : t('Comments.Pin comment by author', { author: reply.value.author })
+})
+const authorSearchSegments = computed(() => {
+  const query = props.highlight
+  if (query === '') {
+    return [{ text: reply.value.author, highlighted: false }]
+  }
+
+  const normalizedAuthor = reply.value.author.toLocaleLowerCase()
+  const segments = []
+  let start = 0
+  let matchIndex = normalizedAuthor.indexOf(query)
+
+  while (matchIndex !== -1) {
+    if (matchIndex > start) {
+      segments.push({ text: reply.value.author.slice(start, matchIndex), highlighted: false })
+    }
+    segments.push({
+      text: reply.value.author.slice(matchIndex, matchIndex + query.length),
+      highlighted: true
+    })
+    start = matchIndex + query.length
+    matchIndex = normalizedAuthor.indexOf(query, start)
+  }
+
+  if (start < reply.value.author.length) {
+    segments.push({ text: reply.value.author.slice(start), highlighted: false })
+  }
+
+  return segments
+})
+
+const emit = defineEmits([
+  'toggle-parent',
+  'replies-toggled',
+  'copy-youtube-link',
+  'get-more-replies',
+  'timestamp-event',
+  'toggle-personal-pin',
+  'translate-comment',
+  'translation-unavailable'
+])
+</script>
+
+<style scoped src="./CommentSection.css" />
+<style scoped src="./CommentReply.css" />

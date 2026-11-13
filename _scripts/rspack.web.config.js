@@ -1,0 +1,298 @@
+const path = require('path')
+const fs = require('fs')
+const { rspack } = require('@rspack/core')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const { VueLoaderPlugin } = require('rspack-vue-loader')
+const getStartupSplash = require('./startupSplash')
+const postcssFontScale = require('./postcssFontScale')
+const getBuildCommit = require('./buildCommit')
+const RelativeImportMetaUrlPlugin = require('./RelativeImportMetaUrlPlugin')
+const getMinimizers = require('./minimizers')
+const ProcessLocalesPlugin = require('./ProcessLocalesPlugin')
+const {
+  SHAKA_LOCALE_MAPPINGS,
+  SHAKA_LOCALES_PREBUNDLED,
+  SHAKA_LOCALES_TO_BE_BUNDLED
+} = require('./getShakaLocales')
+
+const isDevMode = process.env.NODE_ENV === 'development'
+const isCapacitor = process.env.IS_CAPACITOR === 'true'
+const isIos = isCapacitor && process.env.CAPACITOR_PLATFORM === 'ios'
+const isSelfHosted = !isCapacitor && process.env.OPENTUBEX_SELF_HOSTED === 'true'
+const outputPath = path.join(__dirname, isCapacitor ? '../dist/capacitor' : '../dist/web')
+
+const postcssLoader = {
+  loader: 'postcss-loader',
+  options: {
+    postcssOptions: {
+      // The CSS minimizer adds the vendor prefixes the targets need
+      plugins: [postcssFontScale]
+    }
+  }
+}
+
+const { version: swiperVersion } = JSON.parse(fs.readFileSync(path.join(__dirname, '../node_modules/swiper/package.json')))
+
+/** @type {import('@rspack/core').Configuration} */
+const config = {
+  name: 'web',
+  mode: process.env.NODE_ENV,
+  devtool: isDevMode ? 'eval-cheap-module-source-map' : false,
+  entry: {
+    web: path.join(__dirname, '../src/renderer/main.js'),
+  },
+  output: {
+    path: outputPath,
+    // Hashed names let the browser build's service worker cache assets
+    // cache-first without mixing files from different builds.
+    filename: isDevMode || isCapacitor ? '[name].js' : '[name].[contenthash].js',
+  },
+  module: {
+    rules: [
+      {
+        // Only the OPFS pool VFS is used. Do not bundle the library's
+        // optional worker API, which it starts with `new Worker()`.
+        test: /node_modules[\\/]@sqlite\.org[\\/]sqlite-wasm[\\/]/,
+        parser: { worker: false },
+      },
+      {
+        test: /\.vue$/,
+        loader: 'rspack-vue-loader',
+        options: {
+          compilerOptions: {
+            isCustomElement: (tag) => tag === 'swiper-container' || tag === 'swiper-slide',
+          }
+        }
+      },
+      {
+        test: /\.scss$/,
+        use: [
+          {
+            loader: rspack.CssExtractRspackPlugin.loader,
+          },
+          {
+            loader: 'css-loader',
+            options: {
+              esModule: false
+            }
+          },
+          postcssLoader,
+          {
+            loader: 'sass-loader',
+            options: {
+              implementation: require('sass')
+            }
+          },
+        ],
+      },
+      {
+        test: /\.css$/,
+        use: [
+          {
+            loader: rspack.CssExtractRspackPlugin.loader
+          },
+          {
+            loader: 'css-loader',
+            options: {
+              esModule: false
+            }
+          },
+          postcssLoader
+        ],
+        rules: [
+          {
+            resource: require.resolve('shaka-player/dist/controls.css'),
+            use: path.join(__dirname, 'patch-shaka-player-loader.js')
+          }
+        ],
+      },
+      {
+        test: /\.html$/,
+        use: 'vue-html-loader',
+      },
+      {
+        test: /\.(png|jpe?g|gif|tif?f|bmp|webp|svg)(\?.*)?$/,
+        oneOf: [
+          {
+            resourceQuery: /inline/,
+            type: 'asset/inline'
+          },
+          {
+            type: 'asset/resource',
+            generator: {
+              filename: 'imgs/[name][ext]'
+            }
+          }
+        ]
+      },
+      {
+        test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
+        type: 'asset/resource',
+        generator: {
+          filename: 'fonts/[name][ext]'
+        }
+      },
+    ],
+    generator: {
+      json: {
+        JSONParse: false
+      }
+    }
+  },
+  // Rspack only minimizes production builds, so having this here is fine
+  optimization: {
+    minimizer: getMinimizers({
+      cssTargets: isIos ? getMinimizers.IOS_TARGETS : getMinimizers.WEB_TARGETS,
+      json: true
+    })
+  },
+  node: {
+    __dirname: false,
+    __filename: false
+  },
+  plugins: [
+    new RelativeImportMetaUrlPlugin(),
+    new rspack.DefinePlugin({
+      'process.platform': 'undefined',
+      'process.env.IS_ELECTRON': false,
+      'process.env.IS_ELECTRON_MAIN': false,
+      'process.env.IS_CAPACITOR': isCapacitor,
+      'process.env.IS_IOS': isIos,
+      // Matches the scheme _scripts/prepareIos.mjs registers.
+      'process.env.APP_URL_SCHEME': JSON.stringify(
+        isIos && /-nightly-\d+$/.test(require('../package.json').version)
+          ? 'opentubex-nightly'
+          : 'opentubex'
+      ),
+      // The web app can only reach YouTube while the OpenTubeX Local API browser
+      // extension (browser-extension/) rewrites the CORS headers for it.
+      'process.env.SUPPORTS_LOCAL_API': isCapacitor || '(globalThis.opentubexExtension?.protocol === 1)',
+      // The Docker image serves the web build, by default in front of its own
+      // Invidious server. Its Caddyfile serves self-hosted.js, which says whether
+      // the server runs one.
+      'process.env.IS_SELF_HOSTED': isSelfHosted,
+      'process.env.SELF_HOSTED_INVIDIOUS': isSelfHosted && '(globalThis.opentubexSelfHosted?.invidious !== false)',
+      'process.env.BUILD_COMMIT': JSON.stringify(getBuildCommit()),
+      __VUE_OPTIONS_API__: 'true',
+      __VUE_PROD_DEVTOOLS__: 'false',
+      __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: 'false',
+      __VUE_I18N_LEGACY_API__: 'false',
+      __VUE_I18N_FULL_INSTALL__: 'false',
+      __INTLIFY_PROD_DEVTOOLS__: 'false',
+      'process.env.SWIPER_VERSION': `'${swiperVersion}'`
+    }),
+    new rspack.ProvidePlugin({
+      process: 'process/browser.js'
+    }),
+    new HtmlWebpackPlugin({
+      excludeChunks: ['processTaskWorker'],
+      filename: 'index.html',
+      template: path.resolve(__dirname, '../src/index.ejs'),
+      templateParameters: isCapacitor
+        ? { startupSplash: getStartupSplash({ stillSplash: process.env.CAPACITOR_PLATFORM !== 'ios' }) }
+        : { selfHosted: isSelfHosted }
+    }),
+    new VueLoaderPlugin(),
+    new rspack.CssExtractRspackPlugin({
+      filename: isDevMode ? '[name].css' : '[name].[contenthash].css',
+      chunkFilename: isDevMode ? '[id].css' : '[id].[contenthash].css',
+      // Route-level chunks can discover scoped Vue styles in different orders.
+      // Their selectors cannot affect one another, so no global order is needed.
+      ignoreOrder: true,
+    }),
+    new rspack.CopyRspackPlugin({
+      patterns: [
+        {
+          from: '*/LICENSE',
+          context: path.join(__dirname, '../node_modules/@fontsource-variable'),
+          to: 'fonts/licenses/[path][name][ext]'
+        },
+        {
+          from: path.join(__dirname, '../node_modules/swiper/modules/a11y-element.css').replaceAll('\\', '/'),
+          to: `swiper-${swiperVersion}.css`,
+          context: path.join(__dirname, '../node_modules/swiper/modules')
+        }
+      ]
+    })
+  ],
+  resolve: {
+    fallback: {
+      // Feed parsing uses sax.parser, not its optional Node stream wrapper.
+      stream: false,
+      // @hpke/core prefers Web Crypto in supported browsers. Its old-Node
+      // fallback is unreachable in modern web builds and must not be bundled.
+      crypto: false
+    },
+    alias: {
+      '@root': path.resolve(__dirname, '..'),
+      DB_HANDLERS_ELECTRON_RENDERER_OR_WEB$: path.resolve(__dirname, '../src/datastores/handlers/web.js'),
+
+      // change to "shaka-player.ui-es2021.debug.js" to get debug logs (update jsconfig to get updated types)
+      'shaka-player$': 'shaka-player/dist/shaka-player.ui-es2021.js',
+
+      '@opentubex/icons$': path.resolve(__dirname, '../src/renderer/icons/iconComponents.js')
+    },
+    extensions: ['.js', '.vue']
+  },
+  target: 'web',
+}
+
+const processLocalesPlugin = new ProcessLocalesPlugin({
+  compress: false,
+  hotReload: isDevMode,
+  inputDir: path.join(__dirname, '../static/locales'),
+  outputDir: 'static/locales',
+})
+
+const processAILocalesPlugin = new ProcessLocalesPlugin({
+  activeLocales: processLocalesPlugin.activeLocales,
+  allowMissing: true,
+  collectMetadata: false,
+  compress: false,
+  hotReload: isDevMode,
+  inputDir: path.join(__dirname, '../static/locales/ai'),
+  localeSource: 'ai',
+  outputDir: 'static/locales/ai',
+})
+
+config.plugins.push(
+  processLocalesPlugin,
+  processAILocalesPlugin,
+  new rspack.DefinePlugin({
+    'process.env.LOCALE_NAMES': JSON.stringify(processLocalesPlugin.localeNames),
+    'process.env.LOCALE_TRANSLATION_PERCENTAGES': JSON.stringify(processLocalesPlugin.localeTranslationPercentages),
+    'process.env.AI_LOCALES': JSON.stringify([...processAILocalesPlugin.locales.keys()]),
+    'process.env.GEOLOCATION_NAMES': JSON.stringify(fs.readdirSync(path.join(__dirname, '..', 'static', 'geolocations')).map(filename => filename.replace('.json', ''))),
+    'process.env.SHAKA_LOCALE_MAPPINGS': JSON.stringify(SHAKA_LOCALE_MAPPINGS),
+    'process.env.SHAKA_LOCALES_PREBUNDLED': JSON.stringify(SHAKA_LOCALES_PREBUNDLED)
+  }),
+  new rspack.CopyRspackPlugin({
+    patterns: [
+      ...(isCapacitor
+        ? []
+        : [{
+            from: path.join(__dirname, '../static/pwabuilder-sw.js'),
+            to: path.join(outputPath, 'pwabuilder-sw.js'),
+          }]),
+      ...(isDevMode
+        ? []
+        : [
+            {
+              from: path.join(__dirname, '../static'),
+              to: path.join(outputPath, 'static'),
+              globOptions: {
+                dot: true,
+                ignore: ['**/.*', '**/locales/**', '**/pwabuilder-sw.js', '**/dashFiles/**', '**/storyboards/**'],
+              },
+            },
+            {
+              from: path.join(__dirname, '../node_modules/shaka-player/ui/locales', `{${SHAKA_LOCALES_TO_BE_BUNDLED.join(',')}}.json`).replaceAll('\\', '/'),
+              to: path.join(outputPath, 'static/shaka-player-locales'),
+              context: path.join(__dirname, '../node_modules/shaka-player/ui/locales')
+            }
+          ])
+    ]
+  })
+)
+
+module.exports = config

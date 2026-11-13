@@ -1,0 +1,475 @@
+import { getThemeClassification } from '../../appearanceSettings.js'
+import { usesInvidiousInstance } from '../../apiBackends.js'
+
+import {
+  SETTINGS_SEARCH_EXCLUDED_MESSAGE_PATHS,
+  SETTINGS_SEARCH_SELECT_GROUP_LABELS,
+  SETTINGS_SEARCH_SOURCES,
+} from './settings-search-config.js'
+import { isLiteBuild } from './ytDlpCapabilities.js'
+import { isSignedInToYouTube } from './youtube-account-state.js'
+
+export const settingsSearchNavigationKey = Symbol('settingsSearchNavigation')
+
+const NON_SETTING_MESSAGE_KEY_PATTERN = /(?:^Are you sure\b|^Failed to\b|^Invalid\b|^No\b|^How\b|^Checking\b|^Downloading\b|^Loading\b|^Loaded\b|^Current .+\b(?:has|is|will)\b|\b(?:has|have) been (?:cleared|removed|saved|updated)\b|^Operation in Progress$|(?:Description|Hint|Tooltip|Placeholder|Template|Warning|Error|Status|Message|Not Downloaded|Unavailable|Connected|Connecting|Success|Failed|Failure|Invalid|Saved|Copied|Already Exists)$)/i
+
+/**
+ * Builds the localized setting labels used by both Settings search and the
+ * command palette. Visibility follows the controls currently rendered by the
+ * active settings state.
+ * @param {object} options
+ * @returns {Map<string, Array<{label: string, tab?: string, subpage?: string, subpageTab?: string}>>}
+ */
+export function createSettingsSearchIndex(options) {
+  const {
+    sections,
+    tm,
+  } = options
+  const extraValues = {
+    // Resolve this label individually so partially translated Channel groups
+    // still use the same fallback as the subscription settings button.
+    subscriptions: flattenSettingsSearchMessageValues(tm('Channel.Subscription settings')),
+    privacy: flattenSettingsSearchMessageValues(
+      tm('Settings.Password Settings'),
+      {},
+      [],
+      (path, value) => isSearchableSettingsMessage('password', path, value, options)
+    )
+  }
+
+  return new Map(sections.map((section) => {
+    const sources = SETTINGS_SEARCH_SOURCES[section.type] ?? []
+    const matches = [
+      { label: section.title },
+      { label: section.description },
+      ...sources.flatMap(source => getSettingsSearchSourceValues(source, options).map(label => ({
+        label,
+        ...(source.tab === undefined ? {} : { tab: source.tab }),
+        ...(source.subpage === undefined ? {} : { subpage: source.subpage }),
+        ...(source.subpageTab === undefined ? {} : { subpageTab: source.subpageTab })
+      }))),
+      ...(extraValues[section.type] ?? []).map(label => ({ label }))
+    ]
+    return [section.type, matches.filter((match, index) => (
+      matches.findIndex(candidate => candidate.label === match.label) === index
+    ))]
+  }))
+}
+
+export function findSettingsSearchTab(match) {
+  return match.tab
+}
+
+function getSettingsSearchSourceValues(source, options) {
+  if (options.isIos && ['external-software', 'proxy', 'tab-unloading'].includes(source.type)) return []
+  if (isLiteBuild && ['external-software', 'download', 'yt-dlp-streaming'].includes(source.type)) return []
+  if (source.subpage === 'quick-playback-speed' && !options.store.getters.getUseQuickPlaybackSpeedBar) return []
+  if (source.electronOnly && !options.usingElectron && !(options.isCapacitor && (source.capacitorSupported || ['external-software', 'download', 'yt-dlp-streaming'].includes(source.type)))) return []
+  return flattenSettingsSearchMessageValues(
+    options.tm(source.key),
+    SETTINGS_SEARCH_SELECT_GROUP_LABELS[source.type],
+    [],
+    (path, value) => (
+      (source.include === undefined || source.include.has(path[0])) &&
+      (source.exclude === undefined || !source.exclude.has(path[0])) &&
+      isSearchableSettingsMessage(source.type, path, value, options)
+    )
+  )
+}
+
+function isSearchableSettingsMessage(sectionType, path, value, options) {
+  if (/\{[^{}]+\}/.test(value)) return false
+  const messagePath = path.join('.')
+  const messageKey = path.at(-1) ?? ''
+  return !SETTINGS_SEARCH_EXCLUDED_MESSAGE_PATHS[sectionType]?.has(messagePath) &&
+    !NON_SETTING_MESSAGE_KEY_PATTERN.test(messageKey) &&
+    isSettingsSearchMessageVisible(sectionType, path, options)
+}
+
+function isSettingsSearchMessageVisible(sectionType, path, options) {
+  const {
+    store,
+    usingElectron,
+    isCapacitor = false,
+    phoneLayout = false,
+    isIos = false,
+    supportsLocalApi,
+    isLinuxWayland,
+    supportsAutoPictureInPictureMinimize = !isLinuxWayland,
+  } = options
+  const [group, item] = path
+
+  if (isIos && (
+    (sectionType === 'general' && ['Stream Extraction Method', 'Swipe to refresh', 'Ignore System Haptics Setting'].includes(group)) ||
+    (sectionType === 'player' && group === 'Voice-over Translation')
+  )) return false
+
+  // The account settings only show once signed in, and Sign in only before.
+  if (sectionType === 'youtube-account' && group !== 'YouTube Account Settings') {
+    return (group === 'Sign In') !== isSignedInToYouTube(store.getters)
+  }
+
+  // These need the desktop main process or the Android background worker.
+  if (sectionType === 'subscription' && [
+    'Refresh Subscriptions While App Is Closed',
+    'Notify About New Uploads'
+  ].includes(group)) {
+    return usingElectron || (isCapacitor && !isIos)
+  }
+
+  // Uses the local API's channel feeds
+  if (sectionType === 'subscription' && group === 'Faster Subscription Refresh') {
+    return supportsLocalApi
+  }
+
+  // Items from other platforms open through yt-dlp
+  if (sectionType === 'subscription' && group === 'Platforms') {
+    return (usingElectron || isCapacitor) && !isLiteBuild
+  }
+
+  // RSS feed items open through yt-dlp, and the manager needs the feature enabled
+  if (sectionType === 'subscription' && ['RSS Feeds', 'Enable RSS Feeds', 'Manage RSS Feeds'].includes(group)) {
+    return (usingElectron || isCapacitor) && !isLiteBuild &&
+      (group !== 'Manage RSS Feeds' || store.getters.getEnableRssFeeds === true)
+  }
+
+  if (sectionType === 'player' && group === 'Screenshot') {
+    if (item === 'Enable') return true
+    if (!store.getters.getEnableScreenshot) return false
+    if (item === 'Mode') return true
+    if (['Format Label', 'Quality Label', 'File Name Label'].includes(item)) {
+      return store.getters.getScreenshotMode !== 'clipboard'
+    }
+    if (['Folder Label', 'Folder Button'].includes(item)) {
+      return (usingElectron || isCapacitor) && store.getters.getScreenshotMode === 'default_folder'
+    }
+    return false
+  }
+
+  if (sectionType === 'general' && [
+    'Current Invidious Instance',
+    'View all Invidious instance information',
+    'Set Current Instance as Default',
+    'Clear Default Instance'
+  ].includes(group)) {
+    return usesInvidiousInstance(store.getters.getBackendPreference, store.getters.getBackendFallback)
+  }
+
+  if (sectionType === 'general' && group === 'Yattee Server') {
+    return store.getters.getBackendPreference === 'yattee'
+  }
+
+  if (sectionType === 'general') {
+    if (group === 'Grid Columns') {
+      return store.getters[item === 'Playlist Grid Columns' ? 'getPlaylistViewType' : 'getListType'] === 'grid'
+    }
+    if (group === 'Thumbnail Swipe Gestures') return isCapacitor || phoneLayout
+    if (group === 'Extra Thumbnail Action Button') return !isCapacitor && !phoneLayout
+    if (['Stream Extraction Method', 'Automatically switch stream extraction methods'].includes(group)) return usingElectron || isCapacitor
+    if (['Enable Tabs', 'Mobile Layout', 'Swipe to refresh', 'Haptic Feedback', 'Ignore System Haptics Setting'].includes(group)) {
+      return isCapacitor
+    }
+    if (['Use tray icon', 'Close to system tray'].includes(group)) return usingElectron
+    if (group === 'Minimize to system tray') {
+      return usingElectron && supportsAutoPictureInPictureMinimize
+    }
+    if (['New Tab Position', 'Tab Close Focus', 'Startup Behavior', 'Remember Tab Navigation History'].includes(group)) {
+      return usingElectron || isCapacitor
+    }
+    // Matches the options that the Confirm before list shows
+    if (group === 'Confirmation Options') {
+      if (item === 'Refreshing All Feeds') return true
+      if (item === 'Closing App') return usingElectron || isCapacitor
+      return usingElectron
+    }
+    if ([
+      'Open Deep Links In New Window',
+      'Close Window With Last Tab',
+      'Stream Extraction Method'
+    ].includes(group)) {
+      return usingElectron
+    }
+    if (['Fallback to Non-Preferred Backend on Failure', 'Always Use Backup Media Server', 'Built-in Streams'].includes(group)) {
+      return supportsLocalApi
+    }
+    if (group === 'Comment Translation') {
+      return supportsLocalApi
+    }
+    if (group === 'Avoid translation') {
+      return supportsLocalApi && (
+        store.getters.getBackendPreference === 'local' || store.getters.getBackendFallback
+      )
+    }
+  }
+
+  if (sectionType === 'sync') {
+    if (['Sync Settings', 'Enable Sync'].includes(group)) return true
+    if (!store.getters.getSyncServerEnabled) return false
+    const connected = store.getters.getSyncServerToken !== ''
+    if (['Password', 'Privacy Passphrase', 'Log In', 'Register'].includes(group)) {
+      return !connected
+    }
+    if ([
+      'Sync Automatically',
+      'Profiles',
+      'Settings',
+      'Sync Now',
+      'Disconnect',
+      'Delete Account'
+    ].includes(group)) {
+      return connected
+    }
+    if (group === 'Open Tabs') {
+      return connected && (usingElectron || isCapacitor) &&
+        store.getters.getSyncServerPrivacyMode === 'enhanced'
+    }
+    return true
+  }
+
+  if (sectionType === 'external-player' && [
+    'Custom External Player Executable',
+    'Custom External Player Arguments'
+  ].includes(group)) {
+    return store.getters.getExternalPlayer !== ''
+  }
+
+  if (sectionType === 'sponsor-block') {
+    const useSponsorBlock = store.getters.getUseSponsorBlock
+    const useDeArrowTitles = store.getters.getUseDeArrowTitles
+    const useDeArrowThumbnails = store.getters.getUseDeArrowThumbnails
+    if (group === 'SponsorBlock API Url (Default is https://sponsor.ajay.app)') {
+      return useSponsorBlock || useDeArrowTitles || useDeArrowThumbnails
+    }
+    if ([
+      'Enable SponsorBlock Submission',
+      'Excluded Channels',
+      'Notify when sponsor segment is skipped',
+      'Skip notification timeout',
+      'Skip Options',
+      'Category Color'
+    ].includes(group)) {
+      return useSponsorBlock
+    }
+    if (group === 'SponsorBlock Private User ID (optional)') {
+      return useSponsorBlock && store.getters.getSponsorBlockEnableSubmission
+    }
+    if (group === 'Generated SponsorBlock User ID') return false
+    if (group === 'Reveal Generated User ID') {
+      return useSponsorBlock && store.getters.getSponsorBlockEnableSubmission &&
+        store.getters.getSponsorBlockGeneratedUserId !== ''
+    }
+  }
+
+  if (sectionType === 'ai-slop-list') {
+    return supportsLocalApi
+  }
+
+  if (sectionType === 'return-youtube-dislike' && group === 'Return YouTube Dislike Url') {
+    return store.getters.getUseReturnYouTubeDislikes
+  }
+
+  if (sectionType === 'proxy') {
+    if (group === 'IP Block Recovery Script Path') return usingElectron
+    if ([
+      'Proxy Settings',
+      'Enable Tor / Proxy',
+      'IP Block Recovery Script Path'
+    ].includes(group)) {
+      return true
+    }
+    if (['Proxy Username', 'Proxy Password'].includes(group)) {
+      return store.getters.getUseProxy &&
+        (['http', 'https'].includes(store.getters.getProxyProtocol) ||
+          (isCapacitor && store.getters.getProxyProtocol === 'socks5'))
+    }
+    return store.getters.getUseProxy && [
+      'Proxy Protocol',
+      'Proxy Host',
+      'Proxy Port Number',
+      'Test Proxy'
+    ].includes(group)
+  }
+
+  if (sectionType === 'download') {
+    return ['Download Settings', 'Enable Downloads'].includes(group) ||
+      store.getters.getEnableDownloads
+  }
+
+  if (sectionType === 'storage') {
+    if (group === 'Playback URL Cache Entry Size') return usingElectron || isCapacitor
+  }
+
+  if (sectionType === 'external-software') {
+    if (isCapacitor) {
+      if (['yt-dlp Source', 'yt-dlp Executable Path', 'FFmpeg Source', 'FFmpeg Executable Path', 'Download FFmpeg and FFprobe', 'Update FFmpeg and FFprobe', 'Browser for Cookies', 'Browser Profile'].includes(group)) return false
+      if (['yt-dlp Channel', 'Managed Tool Updates'].includes(group)) return true
+    }
+    if (group === 'yt-dlp Channel') return store.getters.getYtDlpSource === 'managed'
+    if (group === 'Managed Tool Updates') {
+      return store.getters.getYtDlpSource === 'managed' ||
+        store.getters.getYtDlpFfmpegSource === 'managed'
+    }
+    if (group === 'yt-dlp Executable Path') return store.getters.getYtDlpSource === 'system'
+    if (group === 'FFmpeg Executable Path') return store.getters.getYtDlpFfmpegSource === 'system'
+    if (group === 'Cookie File') return store.getters.getYtDlpPlaybackAuthMode === 'file'
+    if (group === 'Browser for Cookies' || group === 'Browser Profile') {
+      return store.getters.getYtDlpPlaybackAuthMode === 'browser'
+    }
+  }
+
+  if (sectionType === 'channel') {
+    if (isCapacitor && group === 'Auto Save Volume') {
+      return false
+    }
+    if (['Channel Settings', 'Enable Channel Playback Settings'].includes(group)) {
+      return true
+    }
+    return store.getters.getEnableChannelSettings && [
+      'Auto Save Playback Speed',
+      'Auto Save Video Quality',
+      'Auto Save Subtitles State',
+      'Auto Save Volume'
+    ].includes(group)
+  }
+
+  if (sectionType === 'digital-wellbeing' && group === 'Silence Upload Notifications at Bedtime') {
+    return usingElectron || (isCapacitor && !isIos)
+  }
+
+  if (sectionType === 'distraction') {
+    if (group === 'Hide Startup Splash') return usingElectron
+    if (group === 'Show Added Items') {
+      return store.getters.getChannelsHiddenParsed.length > 0 ||
+        store.getters.getForbiddenTitlesParsed.length > 0
+    }
+    if (group === 'Hide Trending Videos') return supportsLocalApi
+  }
+
+  if (sectionType === 'theme') {
+    if (group === 'Always Show Mobile Search Bar') return isCapacitor
+    if (isCapacitor && group === 'Show Progress as Notification') {
+      return false
+    }
+    // Each custom theme in the theme gallery has an edit button.
+    if (group === 'Custom Theme' && item === 'Edit Custom Theme') {
+      return store.getters.getCustomThemes.length > 0
+    }
+    if (group === 'Light Theme' || group === 'Dark Theme') {
+      // The theme gallery lists light and dark themes for its current mode.
+      const baseTheme = store.getters.getBaseTheme
+      const classification = getThemeClassification(baseTheme, store.getters.getCustomThemes)
+      return classification === null || classification === (group === 'Light Theme' ? 'light' : 'dark')
+    }
+    if (['Move Downloads to App Header', 'Move Settings to App Header', 'UI Scale'].includes(group)) {
+      return usingElectron || isCapacitor
+    }
+    if (['Use Fixed Tab Width', 'Show Tab Icons', 'Tab Width'].includes(group)) {
+      return usingElectron || isCapacitor
+    }
+    if ([
+      'Disable Smooth Scrolling',
+      'Show Tab Previews',
+      'Tab Layout',
+      'Tab Loading Indicator',
+      'Vertical Tab Height',
+      'Load Missing Tab Icons'
+    ].includes(group)) {
+      return usingElectron && (
+        group !== 'Load Missing Tab Icons' || store.getters.getShowTabIcons
+      )
+    }
+  }
+
+  if (sectionType === 'player' && isCapacitor && [
+    'Default Volume',
+    'Display Play Button In Video Player',
+    'Remember Volume',
+    'Scroll Volume Over Video Player',
+  ].includes(group)) {
+    return false
+  }
+
+  if (sectionType === 'player' && [
+    'Ignore System Rotation Lock for Fullscreen',
+    'Quality Limit on Metered Networks',
+  ].includes(group)) {
+    return isCapacitor && !isIos
+  }
+
+  if (sectionType === 'player' && !isCapacitor && [
+    'Rotate Wide Videos to Landscape in Fullscreen',
+    'Swipe Up or Down to Enter or Exit Fullscreen',
+    'Swipe Gestures',
+  ].includes(group)) {
+    return false
+  }
+
+  if (sectionType === 'password') {
+    const hasStoredPassword = store.getters.getSettingsPassword !== ''
+    if (group === 'Remove Password') return hasStoredPassword
+    if (['Set Password To Prevent Access', 'Set Password'].includes(group)) {
+      return !hasStoredPassword
+    }
+  }
+
+  return true
+}
+
+export function flattenSettingsSearchMessageValues(
+  value,
+  selectGroups = {},
+  path = [],
+  include = () => true
+) {
+  if (typeof value === 'string') return include(path, value) ? [value] : []
+  if (Array.isArray(value)) {
+    return value.flatMap((item, index) => flattenSettingsSearchMessageValues(
+      item,
+      selectGroups,
+      [...path, index.toString()],
+      include
+    ))
+  }
+  if (value !== null && typeof value === 'object') {
+    const retainedKeys = selectGroups[path.join('.')]
+    return Object.entries(value)
+      .filter(([key]) => retainedKeys === undefined || retainedKeys.includes(key))
+      .flatMap(([key, childValue]) => flattenSettingsSearchMessageValues(
+        childValue,
+        selectGroups,
+        [...path, key],
+        include
+      ))
+  }
+  return []
+}
+
+export function removeRedundantSettingsSearchMatches(values, locale) {
+  const keptMatches = []
+  const normalizedMatches = []
+  for (const match of values.toSorted((a, b) => a.label.length - b.label.length)) {
+    const normalizedValue = normalizeSettingsSearchText(match.label, locale)
+    if (normalizedMatches.some(shorterValue => normalizedValue.includes(shorterValue))) continue
+    keptMatches.push(match)
+    normalizedMatches.push(normalizedValue)
+  }
+  return keptMatches
+}
+
+export function normalizeSettingsSearchText(value, locale) {
+  return value.toLocaleLowerCase(locale).normalize('NFKD').replaceAll(/\s+/g, ' ').trim()
+}
+
+// Use the descriptive parent label for navigation; settingKey identifies the exact control.
+export function findSettingsSearchTarget(index, labels, settingKey) {
+  for (const label of labels) {
+    const targets = [...index].flatMap(([section, matches]) =>
+      matches.filter(match => match.label === label).map(match => ({ section, match }))
+    )
+    if (targets.length === 1) {
+      const { section, match } = targets[0]
+      return { section, match: settingKey ? { ...match, settingKey } : match }
+    }
+  }
+  return null
+}

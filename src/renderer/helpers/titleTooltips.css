@@ -1,0 +1,54 @@
+/* Material 3 plain tooltip: a short label on the inverse surface. */
+.ftTitleTooltip {
+  position: fixed;
+  inset: auto;
+  box-sizing: border-box;
+  min-block-size: 24px;
+  max-inline-size: min(320px, calc(100vw - 16px));
+  margin: 0;
+  padding-block: 4px;
+  padding-inline: 8px;
+  border: 0;
+  border-radius: var(--shape-corner-extra-small);
+  background-color: var(--primary-text-color);
+  color: var(--card-bg-color);
+  font-family: var(--app-font-family);
+  font-size: 12px;
+  letter-spacing: 0.4px;
+  line-height: 16px;
+  overflow-wrap: anywhere;
+  pointer-events: none;
+  white-space: pre-line;
+  transform-origin: top center;
+
+  /* Only opacity and transform animate, so the compositor runs the animation
+     at full frame rate even while the main thread is busy. */
+  opacity: 0;
+  transform: scale(0.8);
+  transition:
+    opacity var(--motion-fast-effects),
+    transform var(--motion-fast-effects),
+    display var(--motion-fast-effects) allow-discrete,
+    overlay var(--motion-fast-effects) allow-discrete;
+}
+
+.ftTitleTooltip:popover-open {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--motion-fast-effects),
+    transform var(--motion-fast-spatial),
+    display var(--motion-fast-effects) allow-discrete,
+    overlay var(--motion-fast-effects) allow-discrete;
+}
+
+.ftTitleTooltip[data-placement='above'] {
+  transform-origin: bottom center;
+}
+
+@starting-style {
+  .ftTitleTooltip:popover-open {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}

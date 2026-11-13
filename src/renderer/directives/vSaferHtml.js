@@ -1,20 +1,75 @@
 import DOMPurify from 'dompurify'
+import { addHtmlImagePlaceholders } from '../helpers/htmlImagePlaceholder'
 
 const USE_NATIVE_SANITIZER = process.env.IS_ELECTRON || ('Sanitizer' in window && typeof HTMLElement.prototype.setHTML === 'function')
 
+const LENIENT_ELEMENTS = [
+  'br', 'code', 'del', 'em',
+  'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'kbd',
+  'p', 'pre', 's', 'strong', 'summary',
+  'table', 'tbody', 'td', 'th', 'thead', 'tr',
+  'ul',
+  {
+    name: 'a',
+    attributes: ['href', 'title']
+  },
+  {
+    name: 'blockquote',
+    attributes: ['data-alert']
+  },
+  {
+    name: 'details',
+    attributes: ['open']
+  },
+  {
+    name: 'img',
+    attributes: ['alt', 'height', 'loading', 'src', 'title', 'width']
+  },
+  {
+    name: 'li',
+    attributes: ['value']
+  },
+  {
+    name: 'ol',
+    attributes: ['start']
+  }
+]
+
 let sanitizer
+let lenientSanitizer
 /** @type {import('dompurify').Config | undefined} */
 let domPurifyStrictConfig
+/** @type {import('dompurify').Config | undefined} */
+let domPurifyLenientConfig
 
 /** @type {import('vue').FunctionDirective<HTMLElement, string, 'lenient'>} */
 export const vSaferHtml = (element, { value, oldValue, modifiers }) => {
   if (oldValue === null || value !== oldValue) {
     if (modifiers.lenient) {
-      // Use the default browser sanitizer configuration e.g. for the changelog
       if (USE_NATIVE_SANITIZER) {
-        element.setHTML(value)
+        if (lenientSanitizer === undefined) {
+          lenientSanitizer = new Sanitizer({ comments: false, elements: LENIENT_ELEMENTS })
+        }
+
+        element.setHTML(value, { sanitizer: lenientSanitizer })
+
+        // Chromium doesn't set up the internal disclosure widget for details elements
+        // that setHTML creates, so their summary stays invisible and they can't be
+        // expanded. Recreating the elements makes them behave as expected.
+        for (const details of element.querySelectorAll('details')) {
+          const replacement = document.createElement('details')
+          replacement.toggleAttribute('open', details.hasAttribute('open'))
+          replacement.append(...details.childNodes)
+          details.replaceWith(replacement)
+        }
       } else {
-        element.innerHTML = DOMPurify.sanitize(value, { RETURN_TRUSTED_TYPE: false })
+        // Match the native allowlist, DOMPurify's default one keeps forms and styles.
+        domPurifyLenientConfig ??= {
+          ALLOWED_TAGS: LENIENT_ELEMENTS.map(entry => entry.name ?? entry),
+          ALLOWED_ATTR: LENIENT_ELEMENTS.flatMap(entry => entry.attributes ?? []),
+          RETURN_TRUSTED_TYPE: false
+        }
+        element.innerHTML = DOMPurify.sanitize(value, domPurifyLenientConfig)
       }
     } else if (USE_NATIVE_SANITIZER) {
       // Use a much stricter sanitzer configuration, should be used in most places
@@ -25,6 +80,7 @@ export const vSaferHtml = (element, { value, oldValue, modifiers }) => {
             'br',
             'b',
             'i',
+            'mark',
             's',
             {
               name: 'a',
@@ -43,12 +99,22 @@ export const vSaferHtml = (element, { value, oldValue, modifiers }) => {
     } else {
       if (domPurifyStrictConfig === undefined) {
         domPurifyStrictConfig = {
-          ALLOWED_TAGS: ['br', 'b', 'i', 's', 'a', 'img'],
+          ALLOWED_TAGS: ['br', 'b', 'i', 'mark', 's', 'a', 'img'],
           ALLOWED_ATTR: ['alt', 'data-time', 'dir', 'height', 'href', 'lang', 'loading', 'src', 'style', 'tabindex', 'title', 'width']
         }
       }
 
       element.innerHTML = DOMPurify.sanitize(value, domPurifyStrictConfig)
     }
+    if (!modifiers.lenient) {
+      // Remote styles could lay content over app controls, so keep only the
+      // alignment of live chat emojis. DOMPurify allows styles on every element.
+      for (const styled of element.querySelectorAll('[style]')) {
+        const alignMiddle = styled.tagName === 'IMG' && styled.style.verticalAlign === 'middle'
+        styled.removeAttribute('style')
+        if (alignMiddle) styled.style.verticalAlign = 'middle'
+      }
+    }
+    addHtmlImagePlaceholders(element)
   }
 }

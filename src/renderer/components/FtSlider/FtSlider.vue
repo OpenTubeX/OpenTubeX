@@ -2,27 +2,79 @@
   <label
     class="pure-material-slider"
     :for="id"
-    :data-settings-search-label="label"
   >
-    <input
-      :id="id"
-      v-model.number="currentValue"
-      class="input"
-      :disabled="disabled"
-      type="range"
-      :min="minValue"
-      :max="maxValue"
-      :step="step"
-      @change="change"
+    <span class="labelRow">
+      <span class="labelMain">
+        <span class="labelContent">
+          <I18nT
+            keypath="Display Label"
+            tag="span"
+            class="label"
+            scope="global"
+          >
+            <template #label>{{ label }}</template>
+            <template #value>
+              <span
+                class="value"
+                :data-width-value="widestValue"
+              >
+                <span class="valueText">
+                  <span class="valueNumber">{{ displayValue }}</span>{{ valueExtension }}
+                </span>
+              </span>
+            </template>
+          </I18nT>
+        </span>
+        <FtTooltip
+          v-if="tooltip !== ''"
+          class="selectTooltip"
+          :tooltip="tooltip"
+        />
+        <FtSyncedSettingIndicator
+          :setting-key="settingKey"
+          :is-changed="isChanged"
+          @reset="emit('reset')"
+        />
+      </span>
+      <FtPerformanceImpact :setting-key="settingKey" />
+    </span>
+    <span
+      class="sliderControl"
+      :style="{ '--slider-progress': `${progress}%`, '--slider-fraction': progress / 100 }"
     >
-    <span class="label">
-      {{ $t('Display Label', {label: label, value: displayLabel}) }}
+      <span
+        class="sliderTrack activeTrack"
+        aria-hidden="true"
+      />
+      <span
+        class="sliderTrack inactiveTrack"
+        aria-hidden="true"
+      />
+      <input
+        :id="id"
+        v-model.number="currentValue"
+        v-touch-range
+        class="input"
+        :disabled="disabled"
+        type="range"
+        :min="minValue"
+        :max="maxValue"
+        :step="step"
+        @input="input"
+        @change="change"
+      >
     </span>
   </label>
 </template>
 
 <script setup>
+import { vTouchRange } from '../../helpers/touchRange'
 import { computed, ref, useId, watch } from 'vue'
+import { Translation as I18nT } from 'vue-i18n'
+
+import FtTooltip from '../FtTooltip/FtTooltip.vue'
+import FtPerformanceImpact from '../FtPerformanceImpact/FtPerformanceImpact.vue'
+import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
 
 const props = defineProps({
   label: {
@@ -52,30 +104,61 @@ const props = defineProps({
   disabled: {
     type: Boolean,
     default: false
+  },
+  tooltip: {
+    type: String,
+    default: ''
+  },
+  settingKey: {
+    type: String,
+    default: ''
+  },
+  isChanged: {
+    type: Boolean,
+    default: null
   }
 })
 
-const emit = defineEmits(['change'])
+const emit = defineEmits(['change', 'input', 'reset'])
 
 const id = useId()
 const currentValue = ref(props.defaultValue)
 
+const progress = computed(() => {
+  const range = props.maxValue - props.minValue
+  return range > 0 ? Math.max(0, Math.min(100, (currentValue.value - props.minValue) / range * 100)) : 0
+})
+
+// Apply new bounds before the value, or a range input clamps it to the old max.
 watch(() => props.defaultValue, (value) => {
   if (currentValue.value !== value) {
     currentValue.value = value
   }
+}, { flush: 'post' })
+
+const valuePrecision = computed(() => {
+  const [coefficient, exponent = '0'] = String(props.step).split('e')
+  return Math.max(0, (coefficient.split('.')[1]?.length ?? 0) - Number(exponent))
 })
 
-const displayLabel = computed(() => {
-  if (props.valueExtension === null) {
-    return currentValue.value
-  } else {
-    return `${currentValue.value}${props.valueExtension}`
-  }
+const displayValue = computed(() => currentValue.value.toFixed(valuePrecision.value))
+
+// Reserve room for the complete value and unit, without spacing them apart.
+const widestValue = computed(() => {
+  const min = props.minValue.toFixed(valuePrecision.value)
+  const max = props.maxValue.toFixed(valuePrecision.value)
+  return `${min.length > max.length ? min : max}${props.valueExtension ?? ''}`
 })
 
 function change() {
   emit('change', currentValue.value)
+}
+
+/**
+ * @param {Event} event
+ */
+function input(event) {
+  emit('input', event.target.valueAsNumber)
 }
 
 </script>

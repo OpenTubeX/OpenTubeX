@@ -1,7 +1,15 @@
 <template>
   <div
     class="ft-input-tags-component"
+    role="group"
+    :aria-labelledby="`${id}-heading`"
   >
+    <h3
+      :id="`${id}-heading`"
+      class="tagInputHeading"
+    >
+      {{ label }}
+    </h3>
     <div
       v-if="disabled"
       class="disabledMsg"
@@ -12,7 +20,9 @@
       ref="tagNameInput"
       :disabled="disabled || isUpdating"
       :placeholder="tagNamePlaceholder"
-      :label="label"
+      :icon="areChannelTags ? ['fas', 'users'] : ['fas', 'hashtag']"
+      :label="entryLabel || (areChannelTags ? t('Form Inputs.Enter Channels') : t('Form Inputs.Enter Text'))"
+      :setting-key="settingKey"
       :min-input-length="minInputLength"
       :show-label="true"
       :tooltip="tooltip"
@@ -22,20 +32,13 @@
       :force-action-button-icon-name="['fas', 'arrow-right']"
       @click="updateTags"
     />
-    <div
+    <FtCheckboxList
       v-if="tagList.length >= 1"
-      class="checkbox-container"
-    >
-      <input
-        :id="id"
-        type="checkbox"
-        :checked="showTags"
-        @change="toggleShowTags"
-      >
-      <label :for="id">
-        {{ t('Settings.Distraction Free Settings.Show Added Items') }}
-      </label>
-    </div>
+      :labels="[t('Settings.Distraction Free Settings.Show Added Items')]"
+      :values="['show']"
+      :model-value="showTags ? ['show'] : []"
+      @update:model-value="toggleShowTags"
+    />
     <div
       v-if="showTags"
       class="ft-tag-box"
@@ -51,14 +54,15 @@
               :to="tag.iconHref ?? ''"
               class="tag-icon-link"
             >
-              <img
+              <FtRetryImage
+                :fallback-icon="['fas', 'circle-user']"
                 :src="tag.icon"
                 alt=""
                 class="tag-icon"
                 height="24"
                 width="24"
                 loading="lazy"
-              >
+              />
             </RouterLink>
             <bdi
               class="name"
@@ -79,8 +83,8 @@
             :aria-label="t('Settings.Distraction Free Settings.Remove')"
             @click="removeTag(tag)"
           >
-            <FontAwesomeIcon
-              :icon="['fas', 'fa-times']"
+            <FtIcon
+              :icon="['fas', 'times']"
             />
           </button>
         </li>
@@ -99,7 +103,9 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import FtCheckboxList from '../FtCheckboxList/FtCheckboxList.vue'
+import FtRetryImage from '../FtRetryImage.vue'
+import { FtIcon } from '@opentubex/icons'
 import { useId, useTemplateRef, ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -128,6 +134,10 @@ const props = defineProps({
     type: String,
     required: true
   },
+  entryLabel: {
+    type: String,
+    default: ''
+  },
   minInputLength: {
     type: Number,
     default: 1
@@ -151,6 +161,10 @@ const props = defineProps({
   findTagInfo: {
     type: Function,
     default: (_) => ({ preferredName: '', icon: '' }),
+  },
+  settingKey: {
+    type: String,
+    default: ''
   }
 })
 
@@ -191,12 +205,15 @@ async function updateTags(text) {
     const trimmedText = text.trim()
 
     if (props.minInputLength > trimmedText.length) {
-      showToast(t('Trimmed input must be at least N characters long', { length: props.minInputLength }, props.minInputLength))
+      showToast({
+        message: t('Trimmed input must be at least N characters long', { length: props.minInputLength }, props.minInputLength),
+        icon: ['fas', 'circle-exclamation'],
+      })
       return
     }
 
     if (props.tagList.includes(trimmedText)) {
-      showToast(t('Tag already exists', { tagName: trimmedText }))
+      showToast({ message: t('Tag already exists', { tagName: trimmedText }), icon: ['fas', 'circle-exclamation'] })
       return
     }
 
