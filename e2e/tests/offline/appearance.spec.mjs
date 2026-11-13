@@ -34,6 +34,9 @@ function backgroundRgb(locator) {
 
 // Long font lists render rows a page at a time. Scroll until the last page is in.
 async function scrollToLoadedEnd(list) {
+  // A list with a search field shows loading installed fonts only in that
+  // field, and the fonts append rows below the current end when they arrive.
+  await expect(list).not.toHaveAttribute('aria-busy')
   await expect.poll(() => list.evaluate(menu => {
     menu.scrollTop = menu.scrollHeight
     return Array.from(menu.children).findLast(child => child.tagName === 'LI')?.classList.contains('selectOption')
