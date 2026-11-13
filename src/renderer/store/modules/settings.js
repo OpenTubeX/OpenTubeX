@@ -1584,6 +1584,10 @@ const customActions = {
             commit('removePlaylist', data)
             break
 
+          case SyncEvents.GENERAL.DELETE_MULTIPLE:
+            commit('removePlaylists', data)
+            break
+
           case SyncEvents.GENERAL.DELETE_ALL:
             commit('removeAllPlaylists')
             break
@@ -1610,6 +1614,10 @@ const customActions = {
 
           case SyncEvents.PLAYLISTS.DELETE_VIDEOS:
             commit('removeVideos', data)
+            break
+
+          case SyncEvents.PLAYLISTS.DELETE_ALL_VIDEOS:
+            commit('removeAllVideos', data)
             break
 
           default:
