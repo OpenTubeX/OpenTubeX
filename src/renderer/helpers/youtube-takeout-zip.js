@@ -256,6 +256,7 @@ function findPlaylistMetadataColumns(headers, rows, fileNames) {
   if (title !== -1 && headers.includes('Playlist ID')) {
     return {
       title,
+      id: headers.indexOf('Playlist ID'),
       description: headers.indexOf('Playlist Description (Original)'),
       createdAt: headers.indexOf('Playlist Create Timestamp'),
       lastUpdatedAt: headers.indexOf('Playlist Update Timestamp'),
@@ -282,7 +283,8 @@ function findPlaylistMetadataColumns(headers, rows, fileNames) {
   }
   if (best.index === -1 || tied) { return null }
   const [createdAt, lastUpdatedAt] = timestamps.length === 2 ? timestamps : [-1, -1]
-  return { title: best.index, description: -1, createdAt, lastUpdatedAt }
+  // Only a single ID column is surely the playlist's.
+  return { title: best.index, id: ids.length === 1 ? ids[0] : -1, description: -1, createdAt, lastUpdatedAt }
 }
 
 /**
@@ -302,6 +304,9 @@ export function parseTakeoutPlaylistMetadataCsv(content, fileNames = []) {
     if (!row[columns.title].trim()) { return null }
     const playlist = { playlistName: row[columns.title] }
     if (columns.description !== -1) { playlist.description = row[columns.description] }
+    // Watch later and liked videos (LL, or LL and the channel) are private, so they cannot be read as sources.
+    const id = columns.id === -1 ? '' : row[columns.id].trim()
+    if (PLAYLIST_ID_PATTERN.test(id) && !/^(?:WL|LL|LM)/.test(id)) { playlist.sourcePlaylistId = id }
     for (const property of ['createdAt', 'lastUpdatedAt']) {
       const value = row[columns[property]]
       if (value) {
