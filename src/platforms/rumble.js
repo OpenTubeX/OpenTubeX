@@ -350,7 +350,12 @@ function parseListedVideo(video, channel, now) {
   }
 }
 
-/** Rumble's notice for a channel without videos, in each language its pages come in */
+/**
+ * Rumble's notice for a channel without videos, in each language its pages
+ * come in. Other languages get the English one. If Rumble changes the notice,
+ * empty channels fail until this is updated, which keeps their items, rather
+ * than a changed page emptying channels that have videos.
+ */
 const EMPTY_CHANNEL_NOTICES = new Set([
   'No videos found',
   'Keine Videos gefunden',

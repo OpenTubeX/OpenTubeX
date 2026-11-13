@@ -163,7 +163,7 @@ test.describe('Channels on other platforms', () => {
     await expect(panel.locator('[data-platform-section="clips"] .h3Title')).toHaveText('Streamer clip')
 
     // Videos can come back to the New feed, but clips aren't new content
-    await videos.locator('.ft-list-item').first().click({ button: 'right' })
+    await videos.locator('.ft-list-item', { hasText: 'Streamer newest VOD' }).click({ button: 'right' })
     const menu = page.getByRole('menu')
     await expect(menu.getByRole('menuitem', { name: 'Mark As Watched' })).toBeVisible()
     await expect(menu.getByRole('menuitem', { name: 'Mark As Unseen' })).toBeVisible()

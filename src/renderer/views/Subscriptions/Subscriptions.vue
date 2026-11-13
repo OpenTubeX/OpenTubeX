@@ -1395,9 +1395,6 @@ const newPanel = useTemplateRef('newPanel')
 const feedsPanel = useTemplateRef('feedsPanel')
 const platformsPanel = useTemplateRef('platformsPanel')
 
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts' | 'feeds' | 'platforms'} tab
- */
 /** @param {'videos' | 'shorts' | 'live' | 'posts' | 'feeds' | 'platforms'} tab */
 function newFeedTabRefreshing(tab) {
   if (tab === 'platforms') return platformFeedRefreshing.value
