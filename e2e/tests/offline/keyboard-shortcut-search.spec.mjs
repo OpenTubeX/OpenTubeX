@@ -27,7 +27,8 @@ test('searches shortcut actions, sections and bindings while preserving editing'
   await expect(binding).toBeVisible()
   await search.fill('no-such-shortcut')
   await expect(rows).toHaveCount(0)
-  await expect(page.getByRole('status')).toHaveText('No matching results')
+  // The page below the settings has live regions of its own
+  await expect(page.locator('.keyboardShortcutPrompt').getByRole('status')).toHaveText('No matching results')
   const reset = page.getByRole('button', { name: 'Reset to defaults', exact: true })
   await expect(reset).toBeEnabled()
   await reset.click()
@@ -37,7 +38,7 @@ test('searches shortcut actions, sections and bindings while preserving editing'
   await expect(page.locator('.shortcutSection h3')).toHaveText([/Video:\s*Playback/])
   await search.fill('')
   await expect(rows).toHaveCount(total)
-  await expect(page.getByRole('status')).toHaveCount(0)
+  await expect(page.locator('.keyboardShortcutPrompt').getByRole('status')).toHaveCount(0)
 
   await page.locator('.settingsBackButton').click()
   await expect(page.getByRole('button', { name: 'Show Keyboard Shortcuts' })).toBeVisible()
