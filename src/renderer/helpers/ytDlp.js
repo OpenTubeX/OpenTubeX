@@ -297,12 +297,12 @@ const capacitor = {
 }
 
 /**
- * Loads a Rumble page with the Chrome transport of the Android Rumble HTTP
- * helper, as Rumble rejects the native HTTP client.
+ * Loads a Rumble page natively, with its own cookies. Android uses the Chrome
+ * transport of its Rumble HTTP helper, as Rumble rejects its HTTP client.
  * @param {string} url
  * @returns {Promise<{ status: number, text: string }>}
  */
-export function fetchAndroidRumblePage(url) {
+export function fetchMobileRumblePage(url) {
   return native.fetchRumblePage({ url })
 }
 
