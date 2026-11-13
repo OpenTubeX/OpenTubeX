@@ -26,6 +26,17 @@ test('Back returns to the page instance the tab left, and the page Back leaves i
   assert.deepEqual(pages.show(0), ['4:/channel/a'], 'mount pages that were not kept')
 })
 
+test('at the history limit a push still keeps the page the tab left', () => {
+  const pages = tab('/subscriptions', '/history', '/trending')
+  pages.show(1)
+  pages.show(2)
+  // The navigation service drops the oldest entry, so the index stays the same.
+  pages.history.shift()
+  pages.history.push(route('/userplaylists'))
+  assert.deepEqual(pages.show(2), ['2:/trending', '3:/userplaylists'])
+  assert.deepEqual(pages.show(1), ['2:/trending'], 'Back reuses the kept instance')
+})
+
 test('replacing the shown entry keeps its instance', () => {
   const pages = tab('/subscriptions', '/channel/a')
   pages.show(0)

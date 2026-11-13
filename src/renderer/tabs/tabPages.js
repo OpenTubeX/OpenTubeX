@@ -19,6 +19,13 @@
  * @returns {TabPage[]}
  */
 export function showTabPage(pages, target, getEntryPath, createKey, limit) {
+  // At the history limit, a push drops the oldest entry and keeps the index,
+  // so the shown page moved down one entry instead of being replaced.
+  const shown = pages.at(-1)
+  if (shown && getEntryPath(shown.index) !== shown.route.fullPath &&
+    getEntryPath(shown.index - 1) === shown.route.fullPath) {
+    pages = pages.map(page => ({ ...page, index: page.index - 1 }))
+  }
   const current = pages.at(-1)
   if (current?.index === target.index) {
     if (current.route.fullPath === target.route.fullPath) return pages
