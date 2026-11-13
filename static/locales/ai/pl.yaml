@@ -165,6 +165,7 @@ User Playlists:
     This playlist could not be loaded.: Nie udało się wczytać tej playlisty.
     More videos could not be loaded.: Nie udało się wczytać kolejnych filmów.
   Playlist Thumbnail: "Miniatura playlisty"
+  YouTube Invalid Characters: "YouTube nie zezwala na {characters} w nazwach i opisach playlist."
   Restore Default Thumbnail: "Przywróć domyślną miniaturę"
   AddVideoPrompt:
     And N more videos: 'i {count} inny film | i {count} inne filmy | i {count} innych filmów'

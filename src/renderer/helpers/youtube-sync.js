@@ -4,12 +4,13 @@ import store from '../store/index'
 import i18n from '../i18n/index'
 import { MAIN_PROFILE_ID } from '../../constants'
 import { deepCopy, ERROR_TOAST_ICON, showToast } from './utils'
-import { generateRandomUniqueId } from './playlists'
+import { generateRandomUniqueId, SORT_BY_VALUES } from './playlists'
 import { getYouTubeChannelKey, getYouTubeSyncKey } from './youtube-account-state'
 import { setYouTubePlaylistChangeListener } from './youtube-playlist-changes'
 import {
   completeYouTubePlaylistVideos,
   diffYouTubeSubscriptions,
+  mergeYouTubePlaylistDescription,
   mergeYouTubePlaylistVideos,
   planYouTubePlaylistMoves,
   resolveYouTubeSetVideoIds
@@ -36,6 +37,14 @@ import {
 const LOCK_NAME = 'opentubex-youtube-sync'
 const LIKED_VIDEOS = 'LL'
 const WATCH_LATER = 'WL'
+/** The sort orders YouTube also has, as its `playlistVideoOrder` values. */
+const YOUTUBE_PLAYLIST_ORDERS = Object.freeze({
+  [SORT_BY_VALUES.Custom]: 0,
+  [SORT_BY_VALUES.DateAddedNewest]: 1,
+  [SORT_BY_VALUES.DateAddedOldest]: 2,
+  [SORT_BY_VALUES.PublishedNewest]: 4,
+  [SORT_BY_VALUES.PublishedOldest]: 5
+})
 const STARTUP_SYNC_INTERVAL_MS = 5 * 60_000
 // Feed refreshes, settings changes, and every window ask for a sync.
 const MIN_SYNC_INTERVAL_MS = 60_000
@@ -57,6 +66,7 @@ const EDIT_BATCH_SIZE = 50
  * @property {string} playlistId
  * @property {string} accountKey the sign-in and channel it was synced from
  * @property {string} title the name on YouTube at the last sync
+ * @property {string} [description] the description on YouTube at the last sync
  * @property {string | null} signature from the playlist list at the last sync
  */
 
@@ -253,9 +263,9 @@ async function pushSubscriptions(channelIds, subscribed, account) {
  * @param {YouTubeAccount} account
  * @param {YouTubePlaylistSummary} summary
  * @param {boolean} force reads the playlist even when its count and first video are unchanged
- * @param {boolean} [restoreName] takes YouTube's name, after YouTube refused a rename
+ * @param {boolean} [restoreDetails] takes YouTube's name and description, after YouTube refused an edit
  */
-async function pullPlaylist(account, summary, force, restoreName = false) {
+async function pullPlaylist(account, summary, force, restoreDetails = false) {
   const key = getYouTubeSyncKey(account)
   const saved = getLinkedPlaylists(key).find(playlist => playlist.youTube.playlistId === summary.playlistId)
   const renamed = saved !== undefined && saved.youTube.title !== summary.title
@@ -266,7 +276,7 @@ async function pullPlaylist(account, summary, force, restoreName = false) {
   // Liked videos only gains videos at its start, so the start and the count
   // show every change. Other playlists can change anywhere.
   const readAll = summary.playlistId !== LIKED_VIDEOS
-  const { title, videos } = await getYouTubePlaylistVideos(summary.playlistId, account,
+  const { title, description, videos } = await getYouTubePlaylistVideos(summary.playlistId, account,
     readAll ? undefined : read => completeYouTubePlaylistVideos(read, savedVideos, summary.videoCount))
   throwIfAccountChanged(account)
   if (!store.getters.getYouTubeAccountSyncPlaylists) return
@@ -279,6 +289,13 @@ async function pullPlaylist(account, summary, force, restoreName = false) {
   const name = summary.title || title || summary.playlistId
   /** @type {YouTubePlaylistLink} */
   const youTube = { playlistId: summary.playlistId, accountKey: key, title: summary.title, signature: summary.signature }
+  // YouTube names Watch later and Liked videos itself and gives them no description,
+  // so the ones here stay here.
+  const hasOwnDescription = summary.playlistId !== LIKED_VIDEOS && summary.playlistId !== WATCH_LATER
+  // A page without a description leaves the saved one alone.
+  const remoteDescription = hasOwnDescription ? description : null
+  if (remoteDescription !== null) youTube.description = remoteDescription
+  else if (previous?.youTube.description !== undefined) youTube.description = previous.youTube.description
 
   if (!previous) {
     await store.dispatch('importPlaylist', {
@@ -287,7 +304,7 @@ async function pullPlaylist(account, summary, force, restoreName = false) {
       _id: `ft-playlist--${generateRandomUniqueId()}`,
       playlistName: name,
       protected: false,
-      description: '',
+      description: remoteDescription ?? '',
       videos: merged,
       // YouTube adds new likes at the start.
       ...(summary.playlistId === LIKED_VIDEOS ? { addVideosToTop: true } : {}),
@@ -298,7 +315,13 @@ async function pullPlaylist(account, summary, force, restoreName = false) {
 
   // A name changed here stays until the playlist is renamed on YouTube.
   await store.dispatch('updatePlaylistFromSync', {
-    playlist: { ...previous, playlistName: renamed || restoreName ? name : previous.playlistName, videos: merged, youTube },
+    playlist: {
+      ...previous,
+      playlistName: renamed || restoreDetails ? name : previous.playlistName,
+      description: mergeYouTubePlaylistDescription(previous.description, previous.youTube.description, remoteDescription, restoreDetails),
+      videos: merged,
+      youTube
+    },
     previous
   })
 }
@@ -418,25 +441,25 @@ export function syncYouTubeSubscriptionsBeforeRefresh(automatic) {
 
 /**
  * Playlists waiting to be read again, so opening one twice reads it once.
- * @type {Map<string, { restoreName: boolean }>}
+ * @type {Map<string, { restoreDetails: boolean }>}
  */
 const pendingPlaylistRefreshes = new Map()
 
 /**
  * Reads an opened synced playlist again, which also finds videos moved on YouTube.
  * @param {string} localId
- * @param {boolean} [restoreName] takes YouTube's name, after YouTube refused a rename
+ * @param {boolean} [restoreDetails] takes YouTube's name and description, after YouTube refused an edit
  */
-export function refreshYouTubePlaylist(localId, restoreName = false) {
+export function refreshYouTubePlaylist(localId, restoreDetails = false) {
   const playlist = store.getters.getPlaylist(localId)
   const playlistId = playlist?.youTube?.playlistId
   if (!playlistId || !store.getters.getYouTubeAccountSyncPlaylists) return
   const pending = pendingPlaylistRefreshes.get(localId)
   if (pending) {
-    pending.restoreName ||= restoreName
+    pending.restoreDetails ||= restoreDetails
     return
   }
-  const refresh = { restoreName }
+  const refresh = { restoreDetails }
   pendingPlaylistRefreshes.set(localId, refresh)
 
   withSyncLock(async () => {
@@ -445,7 +468,7 @@ export function refreshYouTubePlaylist(localId, restoreName = false) {
     const summary = (await getSyncedPlaylistSummaries(account)).find(entry => entry.playlistId === playlistId)
     throwIfAccountChanged(account)
     // Deleted on YouTube, which the next sync handles.
-    if (summary) await pullPlaylist(account, summary, true, refresh.restoreName)
+    if (summary) await pullPlaylist(account, summary, true, refresh.restoreDetails)
   }).catch(error => {
     if (!(error instanceof AccountChangedError)) console.error(error)
   }).finally(() => pendingPlaylistRefreshes.delete(localId))
@@ -513,11 +536,12 @@ async function pushReorder(change, account) {
  * @param {string} playlistId the playlist on YouTube
  * @param {string} localId
  * @param {YouTubeAccount} account the sign-in and channel the playlist belongs to
+ * @returns {Promise<boolean>} whether YouTube now lists the videos in another order
  */
 async function pushPlaylistChange(change, playlistId, localId, account) {
   throwIfAccountChanged(account)
   // Turned off while the edit waited for other sync work
-  if (!store.getters.getYouTubeAccountSyncPlaylists) return
+  if (!store.getters.getYouTubeAccountSyncPlaylists) return false
   const isLikedVideos = playlistId === LIKED_VIDEOS
 
   switch (change.type) {
@@ -554,10 +578,18 @@ async function pushPlaylistChange(change, playlistId, localId, account) {
       await editYouTubePlaylist(playlistId, actions, account)
       break
     }
+    case 'order': {
+      // YouTube sorts Liked videos itself.
+      const order = YOUTUBE_PLAYLIST_ORDERS[change.sortOrder]
+      if (isLikedVideos || order === undefined) break
+      await editYouTubePlaylist(playlistId, [{ action: 'ACTION_SET_PLAYLIST_VIDEO_ORDER', playlistVideoOrder: order }], account)
+      return true
+    }
     case 'delete':
       await deleteYouTubePlaylist(playlistId, account)
       break
   }
+  return false
 }
 
 /** @param {YouTubePlaylistChange} change */
@@ -569,7 +601,10 @@ function handlePlaylistChange(change) {
     playlist.youTube.accountKey !== getYouTubeSyncKey(account)) return
   const { _id: localId, playlistName, youTube: { playlistId } } = playlist
 
-  withSyncLock(() => pushPlaylistChange(change, playlistId, localId, account)).catch(error => {
+  withSyncLock(() => pushPlaylistChange(change, playlistId, localId, account)).then(reordered => {
+    // Reads YouTube's new order, which the Custom sort shows.
+    if (reordered) refreshYouTubePlaylist(localId)
+  }, error => {
     if (error instanceof AccountChangedError) return
     console.error(error)
     showToast({
@@ -583,6 +618,17 @@ function handlePlaylistChange(change) {
       refreshYouTubePlaylist(localId, change.type === 'details')
     }
   })
+}
+
+/** The characters YouTube refuses in playlist names and descriptions, for messages. */
+export const YOUTUBE_REJECTED_PLAYLIST_CHARACTERS = '< >'
+
+/**
+ * Whether YouTube refuses this playlist name or description.
+ * @param {string} text
+ */
+export function isRejectedByYouTube(text) {
+  return /[<>]/.test(text)
 }
 
 /** Whether new playlists can be created on YouTube too. */
@@ -601,12 +647,14 @@ export async function createYouTubePlaylistWithVideos(playlist) {
   const result = await withSyncLock(async () => {
     const playlistId = await createYouTubePlaylist(playlist.playlistName, playlist.videos.map(video => video.videoId), account)
     try {
-      if (playlist.description) {
-        await editYouTubePlaylist(playlistId, [{ action: 'ACTION_SET_PLAYLIST_DESCRIPTION', playlistDescription: playlist.description }], account)
+      // A description YouTube refuses, as one copied from another playlist can be, stays here only.
+      const description = playlist.description && !isRejectedByYouTube(playlist.description) ? playlist.description : ''
+      if (description) {
+        await editYouTubePlaylist(playlistId, [{ action: 'ACTION_SET_PLAYLIST_DESCRIPTION', playlistDescription: description }], account)
       }
       throwIfAccountChanged(account)
       /** @type {YouTubePlaylistLink} */
-      const youTube = { playlistId, accountKey: getYouTubeSyncKey(account), title: playlist.playlistName, signature: null }
+      const youTube = { playlistId, accountKey: getYouTubeSyncKey(account), title: playlist.playlistName, description, signature: null }
       if (!await store.dispatch('addPlaylist', { ...playlist, youTube })) throw new Error('Could not save the playlist')
       return true
     } catch (error) {

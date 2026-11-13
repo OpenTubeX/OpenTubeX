@@ -247,11 +247,15 @@ const playlistMenuItems = computed(() => {
       label: t('User Playlists.Remove Saved Playlist'), icon: ['fas', 'bookmark'], run: removePlaylistBookmark,
     })
   }
-  if (!isUserPlaylist.value) {
+  // Playlists here link to YouTube when synced from or copied from a playlist there.
+  const youTubePlaylistId = isUserPlaylist.value
+    ? props.data.youTube?.playlistId ?? props.data.sourcePlaylistId
+    : playlistMetadata.value.playlistId
+  if (youTubePlaylistId) {
     items.push({
       label: t('Context Menu.Copy YouTube Link'),
       icon: ['fab', 'youtube'],
-      run: () => copyToClipboard(`https://www.youtube.com/playlist?list=${encodeURIComponent(playlistMetadata.value.playlistId)}`)
+      run: () => copyToClipboard(`https://www.youtube.com/playlist?list=${encodeURIComponent(youTubePlaylistId)}`)
     })
   }
   return items.map(item => ({ enabled: true, ...item }))

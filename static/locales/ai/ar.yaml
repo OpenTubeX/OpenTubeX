@@ -305,6 +305,7 @@ User Playlists:
     This playlist could not be loaded.: لا يمكن تحميل قائمة التشغيل هذه.
     More videos could not be loaded.: لا يمكن تحميل المزيد من مقاطع الفيديو.
   Playlist Thumbnail: "الصورة المصغرة لقائمة التشغيل"
+  YouTube Invalid Characters: "لا يسمح YouTube باستخدام {characters} في أسماء قوائم التشغيل وأوصافها."
   Restore Default Thumbnail: "استعادة الصورة المصغرة الافتراضية"
   AddVideoPrompt:
     And N more videos: 'و{count} فيديو آخر | و{count} فيديو آخر | و{count} فيديو آخر | و{count} فيديوهات أخرى | و{count} فيديو آخر | و{count} فيديو آخر'

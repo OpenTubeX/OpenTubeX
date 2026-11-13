@@ -301,6 +301,7 @@ User Playlists:
     This playlist could not be loaded.: Nid oedd modd llwytho'r rhestr chwarae hon.
     More videos could not be loaded.: Nid oedd modd llwytho rhagor o fideos.
   Playlist Thumbnail: "Mân-lun y rhestr chwarae"
+  YouTube Invalid Characters: "Nid yw YouTube yn caniatáu {characters} mewn enwau a disgrifiadau rhestrau chwarae."
   Restore Default Thumbnail: "Adfer y mân-lun diofyn"
   AddVideoPrompt:
     And N more videos: 'a {count} fideo arall | a {count} fideo arall | a {count} fideo arall | a {count} fideo arall | a {count} fideo arall | a {count} fideo arall'

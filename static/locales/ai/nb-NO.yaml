@@ -300,6 +300,7 @@ User Playlists:
     This playlist could not be loaded.: Denne spillelisten kunne ikke lastes inn.
     More videos could not be loaded.: Flere videoer kunne ikke lastes inn.
   Playlist Thumbnail: "Spillelistens miniatyrbilde"
+  YouTube Invalid Characters: "YouTube tillater ikke {characters} i spillelistenavn og -beskrivelser."
   Restore Default Thumbnail: "Gjenopprett standard miniatyrbilde"
   AddVideoPrompt:
     And N more videos: 'og {count} video til | og {count} videoer til'

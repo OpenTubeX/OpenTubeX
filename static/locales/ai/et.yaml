@@ -300,6 +300,7 @@ User Playlists:
     This playlist could not be loaded.: Seda esitusloendit ei saanud laadida.
     More videos could not be loaded.: Rohkem videoid ei saanud laadida.
   Playlist Thumbnail: "Esitusloendi pisipilt"
+  YouTube Invalid Characters: "YouTube ei luba {characters} esitusloendite nimedes ja kirjeldustes."
   Restore Default Thumbnail: "Taasta vaikimisi pisipilt"
   AddVideoPrompt:
     And N more videos: 'ja veel {count} video | ja veel {count} videot'

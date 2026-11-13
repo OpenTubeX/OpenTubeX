@@ -304,6 +304,7 @@ User Playlists:
     This playlist could not be loaded.: Không thể tải danh sách phát này.
     More videos could not be loaded.: Không thể tải thêm video.
   Playlist Thumbnail: "Ảnh thu nhỏ của danh sách phát"
+  YouTube Invalid Characters: "YouTube không cho phép {characters} trong tên và nội dung mô tả danh sách phát."
   Restore Default Thumbnail: "Khôi phục ảnh thu nhỏ mặc định"
   AddVideoPrompt:
     And N more videos: 'và {count} video khác'

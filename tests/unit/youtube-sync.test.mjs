@@ -4,6 +4,7 @@ import test from 'node:test'
 import {
   completeYouTubePlaylistVideos,
   diffYouTubeSubscriptions,
+  mergeYouTubePlaylistDescription,
   mergeYouTubePlaylistVideos,
   planYouTubePlaylistMoves,
   resolveYouTubeSetVideoIds
@@ -73,6 +74,19 @@ test('playlist sync keeps saved entries and confirms the ones added here', () =>
     ['addedHere', 'item-addedHere', 'SET3', 1000],
     ['kept', 'item-kept', 'SET1', 1000]
   ])
+})
+
+test('playlist sync takes descriptions changed on YouTube and keeps the ones changed here', () => {
+  // Read for the first time
+  assert.equal(mergeYouTubePlaylistDescription('', undefined, 'From YouTube', false), 'From YouTube')
+  // Changed on YouTube since the last sync
+  assert.equal(mergeYouTubePlaylistDescription('Old', 'Old', 'New on YouTube', false), 'New on YouTube')
+  // Changed here and not yet on YouTube
+  assert.equal(mergeYouTubePlaylistDescription('Edited here', 'Old', 'Old', false), 'Edited here')
+  // A page that does not show the description changes nothing.
+  assert.equal(mergeYouTubePlaylistDescription('Edited here', 'Old', null, true), 'Edited here')
+  // YouTube refused the edit made here.
+  assert.equal(mergeYouTubePlaylistDescription('Edited here', 'Old', 'Old', true), 'Old')
 })
 
 test('a playlist read stops early only where the saved entries continue unchanged', () => {

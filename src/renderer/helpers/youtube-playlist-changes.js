@@ -8,6 +8,7 @@
  *   | { type: 'remove', playlist: SyncedPlaylist, videos: SyncedPlaylist['videos'] }
  *   | { type: 'reorder', playlist: SyncedPlaylist, previous: SyncedPlaylist['videos'] }
  *   | { type: 'details', playlist: SyncedPlaylist, playlistName: string | null, description: string | null }
+ *   | { type: 'order', playlist: SyncedPlaylist, sortOrder: string }
  *   | { type: 'delete', playlist: SyncedPlaylist }} YouTubePlaylistChange
  */
 

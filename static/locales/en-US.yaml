@@ -594,6 +594,7 @@ User Playlists:
       Playlist {playlistName} has been successfully created.: Playlist {playlistName} has been successfully created.
       There was an issue with creating the playlist.: There was an issue with creating the playlist.
   Playlist Thumbnail: "Playlist thumbnail"
+  YouTube Invalid Characters: "YouTube does not allow {characters} in playlist names and descriptions."
   Restore Default Thumbnail: "Restore default thumbnail"
 History:
   From Date: 'From'

@@ -304,6 +304,7 @@ User Playlists:
     This playlist could not be loaded.: Tento zoznam videí sa nepodarilo načítať.
     More videos could not be loaded.: Ďalšie videá sa nepodarilo načítať.
   Playlist Thumbnail: "Miniatúra playlistu"
+  YouTube Invalid Characters: "YouTube nepovoľuje {characters} v názvoch a popisoch playlistov."
   Restore Default Thumbnail: "Obnoviť predvolenú miniatúru"
   AddVideoPrompt:
     And N more videos: 'a {count} ďalšie video | a {count} ďalšie videá | a {count} ďalších videí'

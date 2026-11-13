@@ -357,6 +357,7 @@ User Playlists:
   AddVideoPrompt:
     And N more videos: اور {count} مزید ویڈیو | اور {count} مزید ویڈیوز
   Playlist Thumbnail: پلے لسٹ تھمب نیل
+  YouTube Invalid Characters: "YouTube پلے لسٹ کے ناموں اور تفصیلات میں {characters} کی اجازت نہیں دیتا۔"
   Restore Default Thumbnail: ڈیفالٹ تھمب نیل بحال کریں
   Move Up: اوپر
   Move Down: نیچے

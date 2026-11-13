@@ -316,6 +316,7 @@ User Playlists:
       Video(s) added to {playlistCount} playlists: Видео-снимци су додати на {playlistCount} листу за репродукцију | Видео-снимци су додати на {playlistCount} листе за репродукцију | Видео-снимци су додати на {playlistCount} листа за репродукцију
     And N more videos: 'и још {count} видео-снимак | и још {count} видео-снимка | и још {count} видео-снимака'
   Playlist Thumbnail: "Сличица плејлисте"
+  YouTube Invalid Characters: "YouTube не дозвољава {characters} у називима и описима плејлиста."
   Restore Default Thumbnail: "Врати подразумевану сличицу"
   Move Up: Нагоре
   Move Down: Надоле

@@ -304,6 +304,7 @@ User Playlists:
     This playlist could not be loaded.: Spellistan kunde inte läsas in.
     More videos could not be loaded.: Fler videor kunde inte läsas in.
   Playlist Thumbnail: "Spellistans miniatyrbild"
+  YouTube Invalid Characters: "YouTube tillåter inte {characters} i spellistnamn och -beskrivningar."
   Restore Default Thumbnail: "Återställ standardminiatyrbild"
   AddVideoPrompt:
     And N more videos: 'och {count} video till | och {count} videor till'

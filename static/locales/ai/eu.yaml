@@ -300,6 +300,7 @@ User Playlists:
     This playlist could not be loaded.: Ezin izan da erreprodukzio-zerrenda hau kargatu.
     More videos could not be loaded.: Ezin izan dira bideo gehiago kargatu.
   Playlist Thumbnail: "Erreprodukzio-zerrendaren miniatura"
+  YouTube Invalid Characters: "YouTube-k ez du {characters} onartzen erreprodukzio-zerrenden izen eta deskribapenetan."
   Restore Default Thumbnail: "Leheneratu miniatura lehenetsia"
   AddVideoPrompt:
     And N more videos: 'eta beste bideo {count} | eta beste {count} bideo'

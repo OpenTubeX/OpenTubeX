@@ -313,6 +313,7 @@ User Playlists:
       There was an issue with creating the playlist.: Det oppstod eit problem då spelelista skulle opprettast.
     Create on YouTube: "Opprett òg på YouTube"
   Playlist Thumbnail: "Miniatyrbilete for spelelista"
+  YouTube Invalid Characters: "YouTube tillèt ikkje {characters} i namn og skildringar av spelelister."
   Restore Default Thumbnail: "Gjenopprett standard miniatyrbilete"
   Move Up: Flytt opp
   Move Down: Flytt ned

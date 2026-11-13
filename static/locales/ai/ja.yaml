@@ -300,6 +300,7 @@ User Playlists:
     This playlist could not be loaded.: このプレイリストを読み込めませんでした。
     More videos could not be loaded.: 動画をさらに読み込めませんでした。
   Playlist Thumbnail: "再生リストのサムネイル"
+  YouTube Invalid Characters: "YouTube では、再生リストの名前と説明に {characters} を使用できません。"
   Restore Default Thumbnail: "既定のサムネイルに戻す"
   AddVideoPrompt:
     And N more videos: 'ほか {count} 本の動画'

@@ -619,20 +619,20 @@ export async function getYouTubeAccountPlaylists(account) {
  * @param {YouTubeAccount} account the sign-in and channel that started the sync
  * @param {(videos: import('./youtube-account-parsers.js').YouTubePlaylistVideo[]) => import('./youtube-account-parsers.js').YouTubePlaylistVideo[] | null} [isComplete]
  *   returns all videos once the ones read so far complete them, otherwise null
- * @returns {Promise<{ title: string | null, videos: import('./youtube-account-parsers.js').YouTubePlaylistVideo[] }>}
+ * @returns {Promise<{ title: string | null, description: string | null, videos: import('./youtube-account-parsers.js').YouTubePlaylistVideo[] }>}
  */
 export async function getYouTubePlaylistVideos(playlistId, account, isComplete = () => null) {
   return await withAccount(async innertube => {
     let page = parsePlaylistPage((await innertube.actions.execute('/browse', { browseId: `VL${playlistId}` })).data)
-    const title = page.title
+    const { title, description } = page
     const videos = [...page.videos]
     while (page.continuation) {
       const completed = isComplete(videos)
-      if (completed) return { title, videos: completed }
+      if (completed) return { title, description, videos: completed }
       page = parsePlaylistPage((await innertube.actions.execute('/browse', { continuation: page.continuation })).data)
       videos.push(...page.videos)
     }
-    return { title, videos }
+    return { title, description, videos }
   }, { account })
 }
 

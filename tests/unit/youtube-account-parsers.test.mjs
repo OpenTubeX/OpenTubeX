@@ -263,6 +263,8 @@ test('reads playlist entries with the IDs that edits need from TV playlist pages
     }
   })
   assert.equal(firstPage.title, 'Example')
+  // Neither a description nor an empty one, so the saved one stays.
+  assert.equal(firstPage.description, null)
   assert.equal(firstPage.continuation, 'more')
   assert.deepEqual(firstPage.videos, [{
     videoId: 'video000001',
@@ -278,6 +280,38 @@ test('reads playlist entries with the IDs that edits need from TV playlist pages
   const nextPage = parsePlaylistPage({ continuationContents: { playlistVideoListContinuation: { contents: [entry('video000002', 'SET2')] } } })
   assert.deepEqual(nextPage.videos.map(video => video.setVideoId), ['SET2'])
   assert.equal(nextPage.title, null)
+  assert.equal(nextPage.description, null)
+
+  const page = leftColumn => ({ contents: { tvBrowseRenderer: { content: { tvSurfaceContentRenderer: { content: { twoColumnRenderer: { leftColumn } } } } } } })
+  const informationButton = text => ({
+    buttonRenderer: {
+      icon: { iconType: 'INFO_OUTLINE' },
+      command: {
+        openPopupAction: {
+          popup: {
+            overlaySectionRenderer: {
+              overlay: {
+                overlayTwoPanelRenderer: {
+                  actionPanel: {
+                    overlayPanelRenderer: {
+                      header: { overlayPanelHeaderRenderer: { title: { simpleText: 'Example' } } },
+                      content: { scrollPaneRenderer: { content: { scrollPaneItemListRenderer: { items: [{ overlayMessageRenderer: { subtitle: { simpleText: text } } }] } } } }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  })
+  const described = parsePlaylistPage(page({
+    entityMetadataRenderer: { title: { simpleText: 'Example' }, buttons: [informationButton('First line\nSecond line'), { buttonRenderer: { text: { simpleText: 'Repeat' } } }] }
+  }))
+  assert.equal(described.description, 'First line\nSecond line')
+  const undescribed = parsePlaylistPage(page({ entityMetadataRenderer: { title: { simpleText: 'Example' }, description: {}, buttons: [] } }))
+  assert.equal(undescribed.description, '')
 
   // An empty playlist has no list at all, which is different from an unreadable page.
   const empty = parsePlaylistPage({ contents: { tvBrowseRenderer: { content: { tvSurfaceContentRenderer: { content: { twoColumnRenderer: { leftColumn: {} } } } } } } })

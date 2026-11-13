@@ -419,6 +419,7 @@ User Playlists:
       There was an issue with creating the playlist.: Kuriant grojaraštį kilo klaida.
     Create on YouTube: "Sukurti ir YouTube"
   Playlist Thumbnail: "Grojaraščio miniatiūra"
+  YouTube Invalid Characters: "YouTube neleidžia naudoti {characters} grojaraščių pavadinimuose ir aprašymuose."
   Restore Default Thumbnail: "Atkurti numatytąją miniatiūrą"
   Move Up: Aukštyn
   Move Down: Žemyn

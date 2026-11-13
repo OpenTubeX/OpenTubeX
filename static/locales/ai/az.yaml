@@ -302,6 +302,7 @@ User Playlists:
     This playlist could not be loaded.: Bu pleylisti yükləmək mümkün olmadı.
     More videos could not be loaded.: Daha çox video yükləmək mümkün olmadı.
   Playlist Thumbnail: "Pleylist miniatürü"
+  YouTube Invalid Characters: "YouTube pleylist adlarında və təsvirlərində {characters} simvollarına icazə vermir."
   Restore Default Thumbnail: "Standart miniatürü bərpa et"
   AddVideoPrompt:
     And N more videos: 'və daha {count} video | və daha {count} video'

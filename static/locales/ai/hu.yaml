@@ -300,6 +300,7 @@ User Playlists:
     This playlist could not be loaded.: A lejátszási lista nem tölthető be.
     More videos could not be loaded.: Nem tölthető be több videó.
   Playlist Thumbnail: "Lejátszási lista bélyegképe"
+  YouTube Invalid Characters: "A YouTube nem engedélyezi a(z) {characters} karaktereket a lejátszási listák nevében és leírásában."
   Restore Default Thumbnail: "Alapértelmezett bélyegkép visszaállítása"
   AddVideoPrompt:
     And N more videos: 'és még {count} videó | és még {count} videó'

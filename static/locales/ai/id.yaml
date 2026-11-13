@@ -301,6 +301,7 @@ User Playlists:
     This playlist could not be loaded.: Daftar putar ini tidak dapat dimuat.
     More videos could not be loaded.: Video lainnya tidak dapat dimuat.
   Playlist Thumbnail: "Gambar mini playlist"
+  YouTube Invalid Characters: "YouTube tidak mengizinkan {characters} dalam nama dan deskripsi playlist."
   Restore Default Thumbnail: "Pulihkan gambar mini bawaan"
   AddVideoPrompt:
     And N more videos: 'dan {count} video lainnya'

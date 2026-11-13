@@ -339,6 +339,7 @@ User Playlists:
   AddVideoPrompt:
     And N more videos: kaj {count} plia videaĵo | kaj {count} pliaj videaĵoj
   Playlist Thumbnail: Bildeto de ludlisto
+  YouTube Invalid Characters: "YouTube ne permesas {characters} en nomoj kaj priskriboj de ludlistoj."
   Restore Default Thumbnail: Restarigi defaŭltan bildeton
   Move Up: Supren
   Move Down: Malsupren
