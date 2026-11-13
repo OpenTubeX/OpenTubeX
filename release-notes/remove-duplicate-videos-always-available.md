@@ -2,7 +2,7 @@
 category: improvement
 ---
 
-Remove Duplicate Videos now always appears in a playlist's More menu, even when the playlist has no duplicates yet.
+Remove Duplicate Videos now always appears in the More menu of your playlists that have videos, even when they have no duplicates yet.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/da784dcc-7675-48f5-9af1-9ed15bd84d2e">
