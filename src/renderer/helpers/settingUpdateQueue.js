@@ -98,7 +98,8 @@ export function createSavedSettingEditor() {
         await write(value)
         if (isLast()) commit(value)
       } catch (error) {
-        if (isLast()) commit(await readSaved())
+        const saved = await readSaved()
+        if (isLast()) commit(saved)
         throw error
       }
     }).finally(() => {

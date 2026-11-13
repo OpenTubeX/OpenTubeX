@@ -927,9 +927,12 @@ const customActions = {
     const pin = state.pinnedChannels.find(channel => channel.id === id)
     if (!pin) return
     const previous = state.pinnedChannelMetadata[id] ?? pin
-    const details = { name: name || previous.name, thumbnail: thumbnail || previous.thumbnail }
-    if (details.name === previous.name && details.thumbnail === previous.thumbnail) return
-    return updateSharedSetting(commit, state, 'pinnedChannelMetadata', saved => ({ ...saved, [id]: details }))
+    if ((name || previous.name) === previous.name && (thumbnail || previous.thumbnail) === previous.thumbnail) return
+    // Missing details fall back to the saved ones, which another window may have refreshed.
+    return updateSharedSetting(commit, state, 'pinnedChannelMetadata', saved => {
+      const current = saved[id] ?? pin
+      return { ...saved, [id]: { name: name || current.name, thumbnail: thumbnail || current.thumbnail } }
+    })
   },
 
   // Home customization edits build on the previous edit, so commit them before the save finishes.
