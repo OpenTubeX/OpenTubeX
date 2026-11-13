@@ -303,6 +303,7 @@ User Playlists:
     This playlist could not be loaded.: Този плейлист не можа да бъде зареден.
     More videos could not be loaded.: Не можаха да бъдат заредени още видеоклипове.
   Playlist Thumbnail: "Миниатюра на плейлиста"
+  YouTube Invalid Characters: "YouTube не позволява {characters} в имената и описанията на плейлисти."
   Restore Default Thumbnail: "Възстановяване на стандартната миниатюра"
   AddVideoPrompt:
     And N more videos: 'и още {count} видеоклип | и още {count} видеоклипа'

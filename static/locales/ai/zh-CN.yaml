@@ -304,6 +304,7 @@ User Playlists:
     This playlist could not be loaded.: 无法加载此播放列表。
     More videos could not be loaded.: 无法加载更多视频。
   Playlist Thumbnail: "播放列表缩略图"
+  YouTube Invalid Characters: "YouTube 不允许在播放列表名称和说明中使用 {characters}。"
   Restore Default Thumbnail: "恢复默认缩略图"
   AddVideoPrompt:
     And N more videos: '以及另外 {count} 个视频'

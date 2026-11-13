@@ -323,6 +323,7 @@ User Playlists:
       Video(s) added to {playlistCount} playlists: Відэа дададзена ў {playlistCount} спіс прайгравання | Відэа дададзена ў {playlistCount} спісы прайгравання | Відэа дададзена ў {playlistCount} спісаў прайгравання
     And N more videos: 'і яшчэ {count} відэа | і яшчэ {count} відэа | і яшчэ {count} відэа'
   Playlist Thumbnail: "Мініяцюра плэйліста"
+  YouTube Invalid Characters: "YouTube не дазваляе {characters} у назвах і апісаннях плэй-лістоў."
   Restore Default Thumbnail: "Аднавіць стандартную мініяцюру"
   Move Up: Уверх
   Move Down: Уніз

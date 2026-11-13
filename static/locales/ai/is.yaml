@@ -300,6 +300,7 @@ User Playlists:
     This playlist could not be loaded.: Ekki tókst að hlaða þessum spilunarlista.
     More videos could not be loaded.: Ekki tókst að hlaða fleiri myndböndum.
   Playlist Thumbnail: "Smámynd spilunarlista"
+  YouTube Invalid Characters: "YouTube leyfir ekki {characters} í heitum og lýsingum spilunarlista."
   Restore Default Thumbnail: "Endurheimta sjálfgefna smámynd"
   AddVideoPrompt:
     And N more videos: 'og {count} myndskeið til viðbótar | og {count} myndskeið til viðbótar'

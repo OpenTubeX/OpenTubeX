@@ -4,9 +4,11 @@ import test from 'node:test'
 import {
   completeYouTubePlaylistVideos,
   diffYouTubeSubscriptions,
+  mergeYouTubePlaylistDescription,
   mergeYouTubePlaylistVideos,
   planYouTubePlaylistMoves,
-  resolveYouTubeSetVideoIds
+  resolveYouTubeSetVideoIds,
+  restoreAfterRefusedEdit
 } from '../../src/renderer/helpers/youtube-sync-merge.js'
 
 const channel = id => ({ id, name: `Channel ${id}`, thumbnail: null })
@@ -73,6 +75,28 @@ test('playlist sync keeps saved entries and confirms the ones added here', () =>
     ['addedHere', 'item-addedHere', 'SET3', 1000],
     ['kept', 'item-kept', 'SET1', 1000]
   ])
+})
+
+test('playlist sync takes descriptions changed on YouTube and keeps the ones changed here', () => {
+  // Read for the first time
+  assert.equal(mergeYouTubePlaylistDescription('', undefined, 'From YouTube', false), 'From YouTube')
+  // Changed on YouTube since the last sync
+  assert.equal(mergeYouTubePlaylistDescription('Old', 'Old', 'New on YouTube', false), 'New on YouTube')
+  // Changed here and not yet on YouTube
+  assert.equal(mergeYouTubePlaylistDescription('Edited here', 'Old', 'Old', false), 'Edited here')
+  // A page that does not show the description changes nothing, except that a refused edit goes back to YouTube's last one.
+  assert.equal(mergeYouTubePlaylistDescription('Edited here', 'Old', null, false), 'Edited here')
+  assert.equal(mergeYouTubePlaylistDescription('Edited here', 'Old', null, true), 'Old')
+  // YouTube refused the edit made here.
+  assert.equal(mergeYouTubePlaylistDescription('Edited here', 'Old', 'Old', true), 'Old')
+})
+
+test('a refused playlist edit takes back only what it changed', () => {
+  const playlist = { _id: 'local', playlistName: 'Name', videos: [] }
+  // A refused rename keeps a description that is only here.
+  assert.deepEqual(restoreAfterRefusedEdit({ type: 'details', playlist, playlistName: 'New', description: null }), { name: true, description: false })
+  assert.deepEqual(restoreAfterRefusedEdit({ type: 'details', playlist, playlistName: null, description: 'New' }), { name: false, description: true })
+  assert.deepEqual(restoreAfterRefusedEdit({ type: 'reorder', playlist, previous: [] }), { name: false, description: false })
 })
 
 test('a playlist read stops early only where the saved entries continue unchanged', () => {

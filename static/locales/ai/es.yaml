@@ -244,6 +244,7 @@ User Playlists:
     This playlist could not be loaded.: No se pudo cargar esta lista de reproducción.
     More videos could not be loaded.: No se pudieron cargar más vídeos.
   Playlist Thumbnail: "Miniatura de la lista de reproducción"
+  YouTube Invalid Characters: "YouTube no permite {characters} en los nombres ni en las descripciones de las listas de reproducción."
   Restore Default Thumbnail: "Restaurar miniatura predeterminada"
   AddVideoPrompt:
     And N more videos: 'y {count} vídeo más | y {count} de vídeos más | y {count} vídeos más'

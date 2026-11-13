@@ -73,6 +73,12 @@
           @input="(input) => newDescription = input"
           @keydown.enter="savePlaylistInfo"
         />
+        <p
+          v-if="inputRejectedByYouTube"
+          class="editError"
+        >
+          {{ $t('User Playlists.YouTube Invalid Characters', { characters: YOUTUBE_REJECTED_PLAYLIST_CHARACTERS }) }}
+        </p>
         <div class="editToggles">
           <FtToggleSwitch
             :label="$t('User Playlists.Add new videos to the top (custom order)')"
@@ -403,6 +409,7 @@ import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/WatchVideoDown
 import store from '../../store/index'
 
 import {
+  copyToClipboard,
   ctrlFHandler,
   debounce,
   formatDurationAsTimestamp,
@@ -418,6 +425,7 @@ import { isHistoryEntryWatched } from '../../helpers/history'
 import { getQuickBookmarkIconValue } from '../../helpers/quickBookmarkIcons'
 import { PLAYLIST_PREFERENCES_SYNC_KEY } from '../../helpers/playlist-preferences-sync'
 import { openButtonMenu } from '../../helpers/buttonMenu'
+import { isRejectedByYouTube, YOUTUBE_REJECTED_PLAYLIST_CHARACTERS } from '../../helpers/youtube-sync'
 import { useFittedButtonLabels } from '../../composables/useFittedButtonLabels'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 
@@ -784,6 +792,15 @@ const ownMenuItems = computed(() => {
   if (hasVideos && showPlaylists.value) {
     items.push({ label: t('User Playlists.Copy Playlist'), icon: ['fas', 'copy'], run: copyPlaylist })
   }
+  // Others have the Share button. Playlists here link to YouTube when synced from or copied from a playlist there.
+  const linkedYouTubePlaylistId = selectedUserPlaylist.value?.youTube?.playlistId ?? selectedUserPlaylist.value?.sourcePlaylistId
+  if (isUserPlaylist.value && linkedYouTubePlaylistId) {
+    items.push({
+      label: t('Context Menu.Copy YouTube Link'),
+      icon: ['fab', 'youtube'],
+      run: () => copyToClipboard(`https://www.youtube.com/playlist?list=${encodeURIComponent(linkedYouTubePlaylistId)}`),
+    })
+  }
   if (isUserPlaylist.value && selectedUserPlaylist.value?.sourcePlaylistId) {
     items.push({ label: t('User Playlists.Add Missing Videos'), icon: ['fas', 'playlist-merge'], enabled: !addingMissingVideosPending.value, run: () => addMissingPlaylistVideos(props.id) })
   }
@@ -879,8 +896,18 @@ const inputPlaylistWithNameExists = computed(() => {
     })
 })
 
+// Only changes go to YouTube, and Watch later and Liked videos keep their names and descriptions here.
+const inputRejectedByYouTube = computed(() => {
+  const playlist = selectedUserPlaylist.value
+  const youTubePlaylistId = playlist?.youTube?.playlistId
+  if (youTubePlaylistId == null || youTubePlaylistId === 'WL' || youTubePlaylistId === 'LL') return false
+  const description = newDescription.value ?? ''
+  return (newTitle.value !== playlist.playlistName && isRejectedByYouTube(newTitle.value)) ||
+    (description !== (playlist.description ?? '') && isRejectedByYouTube(description))
+})
+
 const playlistPersistenceDisabled = computed(() => {
-  return inputPlaylistNameBlank.value || inputPlaylistWithNameExists.value || thumbnailLoading.value
+  return inputPlaylistNameBlank.value || inputPlaylistWithNameExists.value || inputRejectedByYouTube.value || thumbnailLoading.value
 })
 
 watch(showDeletePlaylistPrompt, handlePromptToggle)

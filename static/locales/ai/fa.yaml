@@ -326,6 +326,7 @@ User Playlists:
       Video(s) added to {playlistCount} playlists: ویدیو به 1 فهرست پخش افزوده شد | ویدیو به {playlistCount} فهرست پخش افزوده شد
     And N more videos: 'و {count} ویدیوی دیگر | و {count} ویدیوی دیگر'
   Playlist Thumbnail: "تصویر بندانگشتی فهرست پخش"
+  YouTube Invalid Characters: "YouTube اجازهٔ استفاده از {characters} را در نام و توضیحات فهرست‌های پخش نمی‌دهد."
   Restore Default Thumbnail: "بازیابی تصویر بندانگشتی پیش‌فرض"
   Move Up: بالا
   Move Down: پایین

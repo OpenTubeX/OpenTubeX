@@ -222,15 +222,15 @@ test('a playlist removed immediately before Save uses a generic error without ex
   await page.screenshot({ path: test.info().outputPath('missing-playlist-error.png'), animations: 'disabled' })
 })
 
-test('playlist import restores the saved insertion preference for existing and new playlists', async ({ page }) => {
+test('playlist import restores the saved insertion preference and source playlist for existing and new playlists', async ({ page }) => {
   await openPlaylist(page)
   await page.evaluate(async id => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-    await store.dispatch('updatePlaylist', { _id: id, addVideosToTop: true })
+    await store.dispatch('updatePlaylist', { _id: id, addVideosToTop: true, sourcePlaylistId: 'source-order' })
     const playlist = store.getters.getPlaylist(id)
     const contents = JSON.stringify(playlist) + '\n' + JSON.stringify({ ...playlist, _id: 'imported-insertion-order', playlistName: 'Imported order' })
     window.showOpenFilePicker = async () => [{ getFile: async () => new File([contents], 'playlists.db', { type: 'application/x-freetube-db' }) }]
-    await store.dispatch('updatePlaylist', { _id: id, addVideosToTop: false })
+    await store.dispatch('updatePlaylist', { _id: id, addVideosToTop: false, sourcePlaylistId: undefined })
   }, playlistId)
   const section = await goToSettingsSection(page, 'data')
   await section.getByRole('button', { name: /^Import playlists$/i }).click()
@@ -243,5 +243,9 @@ test('playlist import restores the saved insertion preference for existing and n
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
     return [id, 'imported-insertion-order'].map(id => Number.isSafeInteger(store.getters.getPlaylist(id)?.preferencesUpdatedAt))
   }, playlistId)).toEqual([true, true])
-  await expect(page.getByText(/^Unknown data key: (addVideosToTop|preferencesUpdatedAt)$/)).toHaveCount(0)
+  expect(await page.evaluate(id => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    return [id, 'imported-insertion-order'].map(id => store.getters.getPlaylist(id)?.sourcePlaylistId)
+  }, playlistId)).toEqual(['source-order', 'source-order'])
+  await expect(page.getByText(/^Unknown data key: (addVideosToTop|preferencesUpdatedAt|sourcePlaylistId)$/)).toHaveCount(0)
 })

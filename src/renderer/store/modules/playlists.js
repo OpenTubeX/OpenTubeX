@@ -340,12 +340,14 @@ const actions = {
     }
   },
 
-  async updatePlaylistSortOrder({ commit }, { _id, sortOrder }) {
+  async updatePlaylistSortOrder({ commit, state }, { _id, sortOrder }) {
     // Sorting is a view preference, so it leaves `lastUpdatedAt` alone
     try {
       // Another window may have deleted the playlist, which must stay deleted
       if (await DBPlaylistHandlers.updateSortOrder(_id, sortOrder)) {
         commit('upsertPlaylistToList', { _id, sortOrder })
+        const snapshot = youTubeSnapshot(state.playlists.find(playlist => playlist._id === _id))
+        if (snapshot) reportYouTubePlaylistChange({ type: 'order', playlist: snapshot, sortOrder })
       }
     } catch (errMessage) {
       console.error(errMessage)

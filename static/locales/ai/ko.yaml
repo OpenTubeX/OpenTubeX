@@ -394,6 +394,7 @@ User Playlists:
       There was an issue with creating the playlist.: 재생목록을 만드는 중 문제가 발생했습니다.
     Create on YouTube: "YouTube에도 만들기"
   Playlist Thumbnail: "재생목록 썸네일"
+  YouTube Invalid Characters: "YouTube에서는 재생목록 이름과 설명에 {characters}을(를) 사용할 수 없습니다."
   Restore Default Thumbnail: "기본 썸네일 복원"
   Move Up: 위로
   Move Down: 아래로

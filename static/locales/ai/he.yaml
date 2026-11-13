@@ -305,6 +305,7 @@ User Playlists:
     This playlist could not be loaded.: לא ניתן לטעון את רשימת ההשמעה הזאת.
     More videos could not be loaded.: לא ניתן לטעון סרטונים נוספים.
   Playlist Thumbnail: "תמונה ממוזערת של רשימת ההשמעה"
+  YouTube Invalid Characters: "YouTube לא מאפשר {characters} בשמות ובתיאורים של פלייליסטים."
   Restore Default Thumbnail: "החזרת התמונה הממוזערת לברירת המחדל"
   AddVideoPrompt:
     And N more videos: 'ועוד {count} סרטון | ועוד {count} סרטונים | ועוד {count} סרטונים'

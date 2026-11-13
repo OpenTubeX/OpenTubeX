@@ -437,6 +437,7 @@ User Playlists:
       Playlist {playlistName} has been successfully created.: S'ha creat correctament la llista de reproducció {playlistName}.
       There was an issue with creating the playlist.: Hi ha hagut un problema en crear la llista de reproducció.
   Playlist Thumbnail: "Miniatura de la llista de reproducció"
+  YouTube Invalid Characters: "YouTube no permet {characters} als noms ni a les descripcions de les llistes de reproducció."
   Restore Default Thumbnail: "Restaura la miniatura predeterminada"
   Move Up: Amunt
   Move Down: Avall

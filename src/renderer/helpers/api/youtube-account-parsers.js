@@ -393,10 +393,28 @@ function parsePlaylistTile(tile) {
 }
 
 /**
- * A page of a playlist's videos. The first page also has the title, and an
- * empty playlist has no video list at all.
+ * The TV app shows a description in a popup behind the playlist's Information
+ * button, and has an empty `description` without one.
+ * @param {any} metadata the playlist page's `entityMetadataRenderer`
+ * @returns {string | null} null when the page shows neither
+ */
+function parsePlaylistDescription(metadata) {
+  const messages = (metadata?.buttons ?? [])
+    .flatMap(button => button?.buttonRenderer?.command?.openPopupAction?.popup?.overlaySectionRenderer?.overlay
+      ?.overlayTwoPanelRenderer?.actionPanel?.overlayPanelRenderer?.content?.scrollPaneRenderer?.content
+      ?.scrollPaneItemListRenderer?.items ?? [])
+    .map(item => item?.overlayMessageRenderer?.subtitle)
+    .filter(Boolean)
+  if (messages.length > 0) return messages.map(readText).join('\n').trim()
+  if (metadata && Object.hasOwn(metadata, 'description')) return readText(metadata.description).trim()
+  return null
+}
+
+/**
+ * A page of a playlist's videos. The first page also has the title and
+ * description, and an empty playlist has no video list at all.
  * @param {any} data TV `browse` response for `VL` and the playlist ID, or one of its continuations
- * @returns {{ title: string | null, videos: YouTubePlaylistVideo[], continuation: string | null }}
+ * @returns {{ title: string | null, description: string | null, videos: YouTubePlaylistVideo[], continuation: string | null }}
  */
 export function parsePlaylistPage(data) {
   const continuationList = data?.continuationContents?.playlistVideoListContinuation
@@ -405,7 +423,8 @@ export function parsePlaylistPage(data) {
   if (!continuationList && !columns) throw new Error('YouTube returned no playlist page')
 
   const list = continuationList ?? columns.rightColumn?.playlistVideoListRenderer
-  const titleText = columns ? readText(columns.leftColumn?.entityMetadataRenderer?.title).trim() : ''
+  const metadata = columns?.leftColumn?.entityMetadataRenderer
+  const titleText = readText(metadata?.title).trim()
   const videos = (list?.contents ?? [])
     .map(item => parsePlaylistTile(item?.tileRenderer))
     .filter(Boolean)
@@ -415,6 +434,7 @@ export function parsePlaylistPage(data) {
 
   return {
     title: titleText === '' ? null : titleText,
+    description: parsePlaylistDescription(metadata),
     videos,
     continuation
   }

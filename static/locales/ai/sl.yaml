@@ -431,6 +431,7 @@ User Playlists:
       Playlist {playlistName} has been successfully created.: Seznam predvajanja {playlistName} je uspešno ustvarjen.
       There was an issue with creating the playlist.: Pri ustvarjanju seznama predvajanja je prišlo do težave.
   Playlist Thumbnail: "Sličica seznama predvajanja"
+  YouTube Invalid Characters: "YouTube ne dovoli {characters} v imenih in opisih seznamov predvajanja."
   Restore Default Thumbnail: "Obnovi privzeto sličico"
   Move Up: Navzgor
   Move Down: Navzdol

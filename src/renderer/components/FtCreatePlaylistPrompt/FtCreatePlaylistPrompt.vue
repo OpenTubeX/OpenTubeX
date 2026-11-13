@@ -29,6 +29,11 @@
         {{ $t('User Playlists.CreatePlaylistPrompt.Toast["There is already a playlist with this name. Please pick a different name."]') }}
       </p>
     </FtFlexBox>
+    <FtFlexBox v-if="playlistNameRejectedByYouTube">
+      <p>
+        {{ $t('User Playlists.YouTube Invalid Characters', { characters: YOUTUBE_REJECTED_PLAYLIST_CHARACTERS }) }}
+      </p>
+    </FtFlexBox>
     <FtFlexBox v-if="youTubeAvailable">
       <FtToggleSwitch
         :label="$t('User Playlists.CreatePlaylistPrompt.Create on YouTube')"
@@ -71,7 +76,12 @@ import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 import store from '../../store/index'
 
 import { showToast } from '../../helpers/utils'
-import { canCreateYouTubePlaylists, createYouTubePlaylistWithVideos } from '../../helpers/youtube-sync'
+import {
+  canCreateYouTubePlaylists,
+  createYouTubePlaylistWithVideos,
+  isRejectedByYouTube,
+  YOUTUBE_REJECTED_PLAYLIST_CHARACTERS
+} from '../../helpers/youtube-sync'
 
 const { t } = useI18n()
 
@@ -98,7 +108,7 @@ const playlistWithNameExists = computed(() => {
 })
 
 const playlistPersistenceDisabled = computed(() => {
-  return playlistName.value === '' || playlistNameBlank.value || playlistWithNameExists.value
+  return playlistName.value === '' || playlistNameBlank.value || playlistWithNameExists.value || playlistNameRejectedByYouTube.value
 })
 
 const playlistNameInput = useTemplateRef('playlistNameInput')
@@ -106,6 +116,7 @@ const playlistNameInput = useTemplateRef('playlistNameInput')
 // With playlist sync on, new playlists go to YouTube unless turned off here.
 const youTubeAvailable = canCreateYouTubePlaylists()
 const createOnYouTube = ref(youTubeAvailable)
+const playlistNameRejectedByYouTube = computed(() => youTubeAvailable && createOnYouTube.value && isRejectedByYouTube(playlistName.value))
 const creating = ref(false)
 
 onMounted(() => {

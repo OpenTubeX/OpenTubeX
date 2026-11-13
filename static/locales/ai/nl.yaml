@@ -305,6 +305,7 @@ User Playlists:
     This playlist could not be loaded.: Deze afspeellijst kan niet worden geladen.
     More videos could not be loaded.: Er kunnen geen video's meer worden geladen.
   Playlist Thumbnail: "Afspeellijstminiatuur"
+  YouTube Invalid Characters: "YouTube staat {characters} niet toe in namen en beschrijvingen van afspeellijsten."
   Restore Default Thumbnail: "Standaardminiatuur herstellen"
   AddVideoPrompt:
     And N more videos: 'en nog {count} video | en nog {count} video’s'

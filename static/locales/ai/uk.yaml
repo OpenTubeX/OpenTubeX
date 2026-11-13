@@ -309,6 +309,7 @@ User Playlists:
     This playlist could not be loaded.: Не вдалося завантажити цей список відтворення.
     More videos could not be loaded.: Не вдалося завантажити інші відео.
   Playlist Thumbnail: "Мініатюра списку відтворення"
+  YouTube Invalid Characters: "YouTube не дозволяє {characters} у назвах і описах плейлистів."
   Restore Default Thumbnail: "Відновити типову мініатюру"
   AddVideoPrompt:
     And N more videos: 'і ще {count} відео | і ще {count} відео | і ще {count} відео'

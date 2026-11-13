@@ -300,6 +300,7 @@ User Playlists:
     This playlist could not be loaded.: Tätä soittolistaa ei voitu ladata.
     More videos could not be loaded.: Lisää videoita ei voitu ladata.
   Playlist Thumbnail: "Soittolistan pikkukuva"
+  YouTube Invalid Characters: "YouTube ei salli merkkejä {characters} soittolistojen nimissä ja kuvauksissa."
   Restore Default Thumbnail: "Palauta oletuspikkukuva"
   AddVideoPrompt:
     And N more videos: 'ja {count} muu video | ja {count} muuta videota'

@@ -456,6 +456,7 @@ User Playlists:
       Playlist {playlistName} has been successfully created.: Afspeellys {playlistName} is suksesvol geskep.
       There was an issue with creating the playlist.: Daar was ’n probleem met die skep van die afspeellys.
   Playlist Thumbnail: Afspeellysduimnael
+  YouTube Invalid Characters: "YouTube laat nie {characters} in afspeellysname en -beskrywings toe nie."
   Restore Default Thumbnail: Herstel versteksduimnael
   Move Up: Skuif op
   Move Down: Skuif af

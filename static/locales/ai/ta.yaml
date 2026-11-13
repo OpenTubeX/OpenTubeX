@@ -317,6 +317,7 @@ User Playlists:
     This playlist could not be loaded.: இந்தப் பிளேலிஸ்ட்டை ஏற்ற முடியவில்லை.
     More videos could not be loaded.: மேலும் காணொளிகளை ஏற்ற முடியவில்லை.
   Playlist Thumbnail: "பிளேலிஸ்ட் சிறுபடம்"
+  YouTube Invalid Characters: "பிளேலிஸ்ட் பெயர்களிலும் விளக்கங்களிலும் {characters} ஐ YouTube அனுமதிக்காது."
   Restore Default Thumbnail: "இயல்புநிலை சிறுபடத்தை மீட்டமை"
   AddVideoPrompt:
     And N more videos: 'மேலும் {count} காணொளி | மேலும் {count} காணொளிகள்'

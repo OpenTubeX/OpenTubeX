@@ -76,6 +76,32 @@ export function mergeYouTubePlaylistVideos(saved, remote, { now, newestFirst, cr
 }
 
 /**
+ * What to take back from YouTube after it refused an edit: only what the edit
+ * changed, so a refused rename keeps a description that is only here.
+ * @param {import('./youtube-playlist-changes.js').YouTubePlaylistChange} change
+ * @returns {{ name: boolean, description: boolean }}
+ */
+export function restoreAfterRefusedEdit(change) {
+  return change.type === 'details'
+    ? { name: change.playlistName !== null, description: change.description !== null }
+    : { name: false, description: false }
+}
+
+/**
+ * The description to save after reading a playlist. One changed here stays
+ * until it changes on YouTube.
+ * @param {string | undefined} saved the description here
+ * @param {string | undefined} lastSynced YouTube's at the last sync, if known
+ * @param {string | null} remote YouTube's now, or null when the page did not show it
+ * @param {boolean} restore takes YouTube's, after YouTube refused an edit
+ * @returns {string | undefined}
+ */
+export function mergeYouTubePlaylistDescription(saved, lastSynced, remote, restore) {
+  if (remote === null) return restore && lastSynced !== undefined ? lastSynced : saved
+  return restore || remote !== lastSynced ? remote : saved
+}
+
+/**
  * Fills in the YouTube entries of videos added here since the last sync,
  * from the playlist as YouTube has it.
  * @template {SavedPlaylistVideo} T

@@ -304,6 +304,7 @@ User Playlists:
     This playlist could not be loaded.: Acest playlist nu a putut fi încărcat.
     More videos could not be loaded.: Nu au putut fi încărcate mai multe videoclipuri.
   Playlist Thumbnail: "Miniatura listei de redare"
+  YouTube Invalid Characters: "YouTube nu permite {characters} în numele și descrierile playlisturilor."
   Restore Default Thumbnail: "Restabilește miniatura implicită"
   AddVideoPrompt:
     And N more videos: 'și încă {count} videoclip | și încă {count} videoclipuri | și încă {count} de videoclipuri'

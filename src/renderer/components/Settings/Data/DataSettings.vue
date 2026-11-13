@@ -1802,6 +1802,7 @@ async function importPlaylistDatabase(data) {
     'shuffleByDefault',
     'removeWatchedVideos',
     'sortOrder',
+    'sourcePlaylistId',
   ]
 
   const BOOLEAN_PLAYLIST_KEYS = ['addVideosToTop', 'shuffleByDefault', 'removeWatchedVideos']
@@ -1892,6 +1893,10 @@ async function importPlaylistDatabase(data) {
       } else if (key === 'sortOrder') {
         if (isPlaylistSortOrder(playlistData.sortOrder)) {
           playlistObject.sortOrder = playlistData.sortOrder
+        }
+      } else if (key === 'sourcePlaylistId') {
+        if (typeof playlistData.sourcePlaylistId === 'string' && playlistData.sourcePlaylistId !== '') {
+          playlistObject.sourcePlaylistId = playlistData.sourcePlaylistId
         }
       } else if (!ignoredKeys.includes(key)) {
         // Do nothing for keys to be ignored
@@ -1996,6 +2001,7 @@ async function importPlaylistDatabase(data) {
       ...(Object.hasOwn(playlistObject, 'shuffleByDefault') ? { shuffleByDefault: playlistObject.shuffleByDefault } : {}),
       ...(Object.hasOwn(playlistObject, 'removeWatchedVideos') ? { removeWatchedVideos: playlistObject.removeWatchedVideos } : {}),
       ...(Object.hasOwn(playlistObject, 'sortOrder') ? { sortOrder: playlistObject.sortOrder } : {}),
+      ...(Object.hasOwn(playlistObject, 'sourcePlaylistId') ? { sourcePlaylistId: playlistObject.sourcePlaylistId } : {}),
       videos: orderedVideos
     })
   })

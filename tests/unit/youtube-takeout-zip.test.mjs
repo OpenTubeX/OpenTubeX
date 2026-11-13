@@ -120,7 +120,7 @@ test('imports localized playlist metadata by matching titles to file names', asy
   const { metadata, errors } = await readTakeoutPlaylistMetadata(file)
   assert.deepEqual(errors, [])
   assert.deepEqual(metadata.get(`${root}/Musique_Rock-vidéos.csv`), {
-    playlistName: 'Musique/Rock', createdAt: Date.parse('2024-01-01T00:00:00Z'), lastUpdatedAt: Date.parse('2025-01-01T00:00:00Z'),
+    playlistName: 'Musique/Rock', sourcePlaylistId: playlistId, createdAt: Date.parse('2024-01-01T00:00:00Z'), lastUpdatedAt: Date.parse('2025-01-01T00:00:00Z'),
   })
   assert.equal(metadata.get(`${root}/Vide-vidéos.csv`).playlistName, 'Vide')
   const playlists = []
@@ -146,8 +146,11 @@ test('reports a damaged playlist file instead of importing its metadata as an em
 test('rejects localized playlist metadata whose title column cannot be identified', () => {
   const content = `Playlist-ID,Titel,Sichtbarkeit\n${playlistId},Liste,Privat\n`
   assert.equal(parseTakeoutPlaylistMetadataCsv(content, []), null)
-  assert.deepEqual(parseTakeoutPlaylistMetadataCsv(content, ['Liste-Videos']), [{ playlistName: 'Liste' }])
-  assert.deepEqual(parseTakeoutPlaylistMetadataCsv(`${content}FL${channelId.slice(2)},Favoriten,Privat\n`, ['Liste-Videos', 'Favoriten-Videos']), [{ playlistName: 'Liste' }, { playlistName: 'Favoriten' }])
+  assert.deepEqual(parseTakeoutPlaylistMetadataCsv(content, ['Liste-Videos']), [{ playlistName: 'Liste', sourcePlaylistId: playlistId }])
+  assert.deepEqual(parseTakeoutPlaylistMetadataCsv(`${content}FL${channelId.slice(2)},Favoriten,Privat\n`, ['Liste-Videos', 'Favoriten-Videos']), [
+    { playlistName: 'Liste', sourcePlaylistId: playlistId },
+    { playlistName: 'Favoriten', sourcePlaylistId: `FL${channelId.slice(2)}` },
+  ])
   assert.equal(parseTakeoutPlaylistMetadataCsv(content, ['Liste-Videos', 'Privat-Videos']), null)
 })
 
@@ -312,6 +315,12 @@ test('parses reordered metadata columns, BOM, CRLF and quoted multiline descript
     lastUpdatedAt: Date.parse('2025-02-01T00:00:00Z'),
   }])
   assert.deepEqual(parseTakeoutPlaylistMetadataCsv('Playlist ID,Playlist Title (Original)\nPLempty,Empty'), [{ playlistName: 'Empty' }])
+  // Watch later and liked videos cannot be read as sources.
+  assert.deepEqual(parseTakeoutPlaylistMetadataCsv(`Playlist ID,Playlist Title (Original)\n${playlistId},List\nWL,Watch later\nLL${channelId.slice(2)},Liked videos`), [
+    { playlistName: 'List', sourcePlaylistId: playlistId },
+    { playlistName: 'Watch later' },
+    { playlistName: 'Liked videos' },
+  ])
 })
 
 test('rejects malformed playlist metadata rather than attaching it to the wrong playlist', () => {
