@@ -11,6 +11,7 @@ import {
 } from '../searchEngines'
 import { releaseForegroundLock } from './backgroundExternalLink'
 import { fetchFaviconDataUrl, resolveFaviconUrl } from './favicon'
+import { handleTrusted } from './ipc'
 import {
   isSubscriptionAutoRefreshInProgress,
   requestSubscriptionAutoRefreshCancellation
@@ -832,7 +833,7 @@ export function setupContextMenu(contextMenuOptions, { createWindow, confirmClos
   /** @type {Map<number, number>} */
   const latestContextMenuRequests = new Map()
 
-  ipcMain.handle(IpcChannels.CONTEXT_MENU_OPEN, async (event, rawParameters = {}) => {
+  handleTrusted(IpcChannels.CONTEXT_MENU_OPEN, async (event, rawParameters = {}) => {
     const webContents = event.sender
     const sessionId = ++contextMenuSessionId
     latestContextMenuRequests.set(webContents.id, sessionId)
@@ -878,7 +879,7 @@ export function setupContextMenu(contextMenuOptions, { createWindow, confirmClos
     return { sessionId, items: serializedItems }
   })
 
-  ipcMain.handle(IpcChannels.CONTEXT_MENU_EXECUTE, async (event, payload) => {
+  handleTrusted(IpcChannels.CONTEXT_MENU_EXECUTE, async (event, payload) => {
     const session = contextMenuSessions.get(event.sender.id)
     if (!session || payload?.sessionId !== session.sessionId) return
 
