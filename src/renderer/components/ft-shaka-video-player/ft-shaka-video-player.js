@@ -10660,8 +10660,10 @@ export default defineComponent({
 
         const video_ = video.value
         const switchStartTime = twitchLiveRewind.takeSwitchStartTime()
-        if (pendingFormatSwitchState !== null && switchStartTime !== undefined) {
-          pendingFormatSwitchState.playbackPosition = switchStartTime
+        if (switchStartTime !== undefined) {
+          // Seeks queued before the switch use the previous source's timeline
+          pendingMetadataSeek = null
+          if (pendingFormatSwitchState !== null) pendingFormatSwitchState.playbackPosition = switchStartTime
         }
         if (pendingFormatSwitchState === null) {
           const activeVariant = oldFormat === 'legacy'

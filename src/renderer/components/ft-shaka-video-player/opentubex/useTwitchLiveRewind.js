@@ -71,6 +71,13 @@ export function useTwitchLiveRewind({ getPlayer, getControls, props, video }) {
         if (!requestSwitch(time)) currentTime.set.call(this, time)
       }
     })
+    // WebKit's Media Session seeks use fastSeek
+    if (typeof videoElement.fastSeek === 'function') {
+      const fastSeek = videoElement.fastSeek
+      videoElement.fastSeek = (time) => {
+        if (!requestSwitch(time)) fastSeek.call(videoElement, time)
+      }
+    }
   }
 
   function handleLoaded() {

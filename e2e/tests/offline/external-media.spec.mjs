@@ -1483,13 +1483,13 @@ ${Array.from({ length: 35 }, (_, index) => `#EXTINF:2.000,\n${index}.mp4`).join(
   await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
 
   const liveTime = player.locator('.shaka-current-time:not(.ft-playback-adjusted-time)')
-  // Shaka only updates the time while the controls are shown
+  // Shaka only enables the time once playback is behind live, and only updates it while the controls are shown
   let hoverX = 10
   await expect.poll(async () => {
     hoverX = 30 - hoverX
     await player.hover({ position: { x: hoverX, y: 10 } })
-    return await liveTime.textContent()
-  }).toMatch(/^- [01]:\d\d$/)
+    return await liveTime.isEnabled()
+  }).toBe(true)
   await liveTime.click()
   // The recording is an EVENT playlist, which Shaka does not consider live
   await expect.poll(isLive).toBe(true)
