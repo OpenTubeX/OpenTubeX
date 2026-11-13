@@ -22,21 +22,7 @@ export function getSubscriptionFeedTypeOptions(t) {
   ]
 }
 
-/**
- * @param {(key: string) => string} t
- */
 export const MAX_SUBSCRIPTION_DAILY_VIDEO_LIMIT = 30
-
-export function getSubscriptionDailyVideoLimitOptions(t) {
-  return [
-    { value: 'global', label: t('Channel.Use global setting') },
-    { value: 'unlimited', label: t('Channel.Unlimited') },
-    ...Array.from({ length: MAX_SUBSCRIPTION_DAILY_VIDEO_LIMIT }, (_, index) => ({
-      value: String(index + 1),
-      label: String(index + 1)
-    }))
-  ]
-}
 
 /**
  * @param {{ feedTypes?: unknown, notificationFeedTypes?: unknown, dailyVideoLimit?: unknown, showMembersOnly?: unknown }} [channel]

@@ -284,7 +284,7 @@ export async function createPairingRecipient(deviceName, savedDeviceId, invite =
     sessionId: invite?.sessionId ?? randomBase64Url(SESSION_ID_BYTES),
     recipientDeviceId: isCanonicalBase64Url(savedDeviceId, DEVICE_ID_BYTES)
       ? savedDeviceId
-      : randomBase64Url(DEVICE_ID_BYTES),
+      : randomPairingDeviceId(),
     recipientDeviceName: validateSyncServerDeviceName(deviceName),
     recipientPublicKey: bytesToBase64Url(new Uint8Array(recipientPublicKey)),
     pairingSecret: invite?.pairingSecret ?? randomBase64Url(PAIRING_SECRET_BYTES),

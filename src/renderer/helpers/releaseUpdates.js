@@ -117,17 +117,6 @@ export function findUpdateReleases(releases, installedVersion) {
     .map(({ release }) => release)
 }
 
-/**
- * Finds the newest update available to the installed build.
- *
- * @param {Array<{ draft?: boolean, prerelease?: boolean, tag_name?: string }>} releases
- * @param {string} installedVersion
- * @returns {object | null}
- */
-export function findUpdateRelease(releases, installedVersion) {
-  return findUpdateReleases(releases, installedVersion)[0] ?? null
-}
-
 const UPDATE_CHECK_POLL_INTERVAL = 15 * 60 * 1000
 
 /**

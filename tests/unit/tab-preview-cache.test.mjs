@@ -9,8 +9,7 @@ import {
   isTabPreviewTempFileName,
   normalizeTabPreviewFileName,
   selectOrphanedTabPreviews,
-  tabPreviewBufferToDataUrl,
-  tabPreviewDataUrlToBuffer
+  tabPreviewBufferToDataUrl
 } from '../../src/main/tabs/tabPreviewCache.js'
 
 const JPEG = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10])
@@ -28,7 +27,6 @@ test('accepts both preview data URL types and nothing else', () => {
   assert.equal(isTabPreviewDataUrl('data:image/svg+xml;base64,PHN2Zy8+'), false)
   assert.equal(isTabPreviewDataUrl('https://i.ytimg.com/vi/x/mqdefault.jpg'), false)
   assert.equal(isTabPreviewDataUrl(null), false)
-  assert.equal(tabPreviewDataUrlToBuffer('data:image/svg+xml;base64,PHN2Zy8+'), null)
 })
 
 test('deletes only previews no tab refers to', () => {

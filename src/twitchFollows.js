@@ -238,21 +238,6 @@ export async function requestTwitch(fetcher, query, variables, signal) {
 }
 
 /**
- * Looks up a channel to follow.
- * @param {Fetcher} fetcher
- * @param {string} login
- * @param {AbortSignal} [signal]
- * @returns {Promise<{ channel: TwitchChannel, feed: TwitchFeed } | null>} null for unknown channels
- */
-export async function findTwitchChannel(fetcher, login, signal) {
-  if (!LOGIN_PATTERN.test(login)) return null
-  const data = await requestTwitch(fetcher,
-    `query($login: String!) { user(login: $login) { ${CHANNEL_FIELDS} ${STREAM_FIELDS} ${VIDEO_FIELDS} ${CLIP_FIELDS} } }`,
-    { login }, signal)
-  return parseTwitchUser(data.user)
-}
-
-/**
  * Loads the channels in batches. Channels that Twitch doesn't know anymore,
  * for example because they were deleted, have no result.
  * @param {Fetcher} fetcher

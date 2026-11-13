@@ -82,19 +82,6 @@ export function isTabPreviewDataUrl(value) {
 }
 
 /**
- * @param {unknown} dataUrl
- * @returns {Buffer | null}
- */
-export function tabPreviewDataUrlToBuffer(dataUrl) {
-  if (typeof dataUrl !== 'string') {
-    return null
-  }
-
-  const match = dataUrl.match(TAB_PREVIEW_DATA_URL_PATTERN)
-  return match ? Buffer.from(match[1], 'base64') : null
-}
-
-/**
  * @param {Buffer} buffer
  * @returns {string}
  */

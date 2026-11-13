@@ -3,9 +3,10 @@ import test from 'node:test'
 
 import {
   DEFAULT_HOME_SECTION_LAYOUT,
-  getContinueWatchingEntries,
+  getContinueWatchingCandidates,
   normalizeHomeSectionLayout,
 } from '../../src/renderer/helpers/homeSections.js'
+import { canMarkHistoryEntryAsWatched } from '../../src/history.js'
 import { getHomeShelfLayout } from '../../src/renderer/helpers/homeShelfPagination.js'
 
 test('normalizes a complete current Home layout', () => {
@@ -44,7 +45,8 @@ test('continue watching includes only started, unfinished videos', () => {
   ]
 
   assert.deepEqual(
-    getContinueWatchingEntries(entries).map(entry => entry.videoId),
+    // As the Continue Watching getter filters them
+    getContinueWatchingCandidates(entries).filter(canMarkHistoryEntryAsWatched).map(entry => entry.videoId),
     ['unfinished', 'started-premiere']
   )
 })

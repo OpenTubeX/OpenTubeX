@@ -5,7 +5,6 @@ import {
   applySubscriptionVideoLimit,
   filterMembersOnlySubscriptionVideos,
   formatSubscriptionDailyVideoLimit,
-  getSubscriptionDailyVideoLimitOptions,
   getSubscriptionFeedTypeOptions,
   getSubscriptionsForFeed,
   getUpdatedSubscriptionFeedTypes,
@@ -59,10 +58,6 @@ test('shares normalized channel-setting values between settings interfaces', () 
   assert.deepEqual(
     getSubscriptionFeedTypeOptions(translate).map(option => option.id),
     ['videos', 'shorts', 'live', 'posts']
-  )
-  assert.deepEqual(
-    getSubscriptionDailyVideoLimitOptions(translate).map(option => option.value),
-    ['global', 'unlimited', ...Array.from({ length: 30 }, (_, index) => String(index + 1))]
   )
 })
 
