@@ -958,7 +958,9 @@ function withLocalCommentChanges(comments) {
     .filter(comment => !deletedCommentIds.has(comment.id))
     .map(comment => {
       const text = editedCommentTexts.get(comment.id)
-      return text === undefined ? comment : { ...comment, ...getEditedCommentFields(comment, text) }
+      const changed = text === undefined ? comment : { ...comment, ...getEditedCommentFields(comment, text) }
+      // A thread can come with its replies, as when it is the highlighted one.
+      return comment.replies?.length > 0 ? { ...changed, replies: withLocalCommentChanges(comment.replies) } : changed
     })
 }
 
