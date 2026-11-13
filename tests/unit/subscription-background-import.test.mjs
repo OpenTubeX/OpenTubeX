@@ -135,10 +135,11 @@ test('background playlist imports restore missing authors and keep explicit byli
   hooks.notifySubscriptionChannelRefreshed = tab => published.push(tab)
   hooks.clearSubscriptionChannelErrors = (...args) => clearedErrors.push(args)
   hooks.enrichSubscriptionShortDates = async entries => entries.map(entry => ({ ...entry, published: 123456 }))
+  const fetchedAt = Date.now()
   await importChannelResult(t, {
     channelId: 'UCchannel',
     feedType: 'shorts',
-    timestamp: Date.now(),
+    timestamp: fetchedAt,
     payload: {
       backgroundFormat: 'entries',
       entries: [
@@ -158,7 +159,7 @@ test('background playlist imports restore missing authors and keep explicit byli
   assert.ok(saved.every(video => video.isShort))
   assert.ok(saved.every(video => video.published === 123456))
   assert.deepEqual(published, ['shorts'], 'publish imported videos while the native refresh is still active')
-  assert.deepEqual(clearedErrors, [['UCchannel', ['shorts']]], 'a successful import clears the feed error shown above the feeds')
+  assert.deepEqual(clearedErrors, [['UCchannel', ['shorts'], fetchedAt]], 'a successful import clears the feed error shown above the feeds')
 })
 
 test('channels that failed in a background refresh are listed above the feed', async t => {
@@ -186,7 +187,7 @@ test('channels that failed in a background refresh are listed above the feed', a
     reasons: ['HTTP 404'],
     trace: 'Subscribed creator (UCgone): request=subscription videos; backend=Subscription backend; lifecycle=background; failure=http; message=HTTP 404',
     unavailable: true
-  }]])
+  }, 1000]])
   assert.deepEqual(notifications, [[{ feed: 'videos', channelId: 'UCgone' }]])
 })
 

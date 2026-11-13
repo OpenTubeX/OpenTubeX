@@ -1015,7 +1015,7 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
       reasons: [result.diagnostic.message],
       trace: `${channelLabel}: ${formatRequestDiagnostic(result.diagnostic)}`,
       unavailable: result.unavailable === true
-    })
+    }, Number(result.timestamp))
   }
 
   async function reconcileAndroidSubscriptionRefreshChannelResult(result) {
@@ -1091,7 +1091,7 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
     if (!(committedTimestamp instanceof Date) || committedTimestamp.getTime() < timestamp.getTime()) {
       throw new Error(`The ${feedType} cache write did not complete`)
     }
-    clearSubscriptionChannelErrors(result.channelId, [feedType])
+    clearSubscriptionChannelErrors(result.channelId, [feedType], timestamp.getTime())
     notifySubscriptionChannelRefreshed(feedType)
   }
 

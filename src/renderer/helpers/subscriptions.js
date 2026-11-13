@@ -38,7 +38,7 @@ import {
   showToast,
   showToastOnAllTabs,
 } from './utils'
-import { getSubscriptionsForFeed } from './subscription-channels'
+import { getSubscriptionsForFeed, isSubscriptionFeedTypeEnabled } from './subscription-channels'
 import {
   applyRssPremiereVerdict,
   collectResolvedNonPremiereVideoIds,
@@ -395,13 +395,15 @@ export function notifyNewSubscriptionChannelErrors(errors, t) {
   // The box only lists the active profile's channels. Upload notifications,
   // automatic downloads, and background refreshes also fetch other profiles'
   // channels, and the user can switch profiles while a refresh runs.
-  const profileChannelIds = new Set(store.getters.getActiveProfile.subscriptions.map(channel => channel.id))
-  // A later refresh in the same import can load the channel again
-  const hiddenErrors = errors.filter(({ feed, channelId }) => (
-    profileChannelIds.has(channelId) &&
-    subscriptionChannelErrors.get(channelId)?.[feed] !== undefined &&
-    !isSubscriptionChannelErrorShown(feed, channelId)
-  ))
+  const profileChannels = new Map(store.getters.getActiveProfile.subscriptions.map(channel => [channel.id, channel]))
+  const hiddenErrors = errors.filter(({ feed, channelId }) => {
+    const channel = profileChannels.get(channelId)
+    // The box leaves out feeds the user turned off for the channel while it was fetched
+    return channel !== undefined && isSubscriptionFeedTypeEnabled(channel, feed) &&
+      // A later refresh in the same import can load the channel again
+      subscriptionChannelErrors.get(channelId)?.[feed] !== undefined &&
+      !isSubscriptionChannelErrorShown(feed, channelId)
+  })
   if (hiddenErrors.length === 0) return
 
   showToast({
@@ -1525,9 +1527,10 @@ export async function retrySubscriptionChannel(channelId, feeds, t) {
     live: refreshSubscriptionLiveFromRemote,
     posts: refreshSubscriptionPostsFromRemote
   }
+  const cancelCountAtStart = cancelCount
   for (const feed of feeds) {
-    // Cancelled, or another refresh is running
-    if (await refreshers[feed]({ t, channelIds: [channelId] }) === null) return
+    // Cancelled, also between two feeds, or another refresh is running
+    if (cancelCount !== cancelCountAtStart || await refreshers[feed]({ t, channelIds: [channelId] }) === null) return
   }
 }
 

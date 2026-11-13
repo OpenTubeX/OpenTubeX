@@ -34,9 +34,18 @@ export function resolveBackgroundSubscriptionRequest(plan, feedType, channelId) 
   return { ...plan, url: replace(plan.url), ...(plan.body ? { body: replace(plan.body) } : {}) }
 }
 
+/** YouTube explains with an error alert why a channel is gone. */
+function hasErrorAlert(data) {
+  return data.alerts?.some(alert => alert.alertRenderer?.type === 'ERROR') === true
+}
+
+function channelUnavailableError() {
+  return Object.assign(new Error('Channel unavailable'), { channelUnavailable: true })
+}
+
 function channelHasNoFeed(data, feedType, channelId) {
   const path = OPTIONAL_TAB_PATHS[feedType]
-  if (!path || !channelId || data.error || data.alerts?.some(alert => alert.alertRenderer?.type === 'ERROR') ||
+  if (!path || !channelId || data.error || hasErrorAlert(data) ||
       data.metadata?.channelMetadataRenderer?.externalId !== channelId) return false
   const tabs = data.contents?.twoColumnBrowseResultsRenderer?.tabs ?? data.contents?.singleColumnBrowseResultsRenderer?.tabs
   if (!Array.isArray(tabs)) return false
@@ -64,16 +73,13 @@ export function parseBackgroundSubscriptionResponse(format, text, feedType, chan
   if (format === 'local' || format === 'localPlaylist') {
     // A request for a missing tab can redirect to the channel's Videos or Home tab.
     if (format === 'local' && channelHasNoFeed(data, feedType, channelId)) return emptyFeed(feedType)
-    // YouTube explains with an error alert why a channel is gone
-    if (format === 'local' && data.alerts?.some(alert => alert.alertRenderer?.type === 'ERROR')) {
-      throw Object.assign(new Error('Channel unavailable'), { channelUnavailable: true })
-    }
+    if (format === 'local' && hasErrorAlert(data)) throw channelUnavailableError()
     const tabs = data.contents?.twoColumnBrowseResultsRenderer?.tabs ?? data.contents?.singleColumnBrowseResultsRenderer?.tabs
     const selected = Array.isArray(tabs) ? tabs.find(tab => tab.tabRenderer?.selected === true)?.tabRenderer : null
     const path = format === 'local' && OPTIONAL_TAB_PATHS[feedType]
     if (!selected?.content || typeof selected.content !== 'object' || Array.isArray(selected.content) ||
         (path && !selected.endpoint?.commandMetadata?.webCommandMetadata?.url?.endsWith(path)) ||
-        data.alerts?.some(alert => alert.alertRenderer?.type === 'ERROR')) throw new Error('Channel unavailable')
+        hasErrorAlert(data)) throw new Error('Channel unavailable')
     if (format === 'local' && feedType === 'videos' && data.metadata?.channelMetadataRenderer?.musicArtistName) {
       if (!selected?.endpoint?.commandMetadata?.webCommandMetadata?.url?.endsWith('/videos')) {
         const error = new Error('Topic channel requires its uploads playlist')
@@ -89,7 +95,6 @@ export function parseBackgroundSubscriptionResponse(format, text, feedType, chan
 
 export async function fetchBackgroundSubscriptionChannel(configuration, feedType, channelId, signal, fetchText, normalize = payload => payload) {
   let lastError
-  let channelUnavailable = false
   // A Topic channel without a Videos tab has uploads only if its uploads playlist exists.
   let topicChannelWithoutVideosTab = false
   for (const plan of configuration.requests[feedType]) {
@@ -116,8 +121,9 @@ export async function fetchBackgroundSubscriptionChannel(configuration, feedType
       signal.throwIfAborted()
       return await normalize(payload)
     } catch (error) {
+      // Like foreground refreshes, other sources can't load a channel that YouTube reports as gone
+      if (error.channelUnavailable) throw error
       lastError = error
-      channelUnavailable ||= error.channelUnavailable === true
       if (error.verifiedTopicChannel) topicChannelWithoutVideosTab = true
       if (plan.format === 'local' && OPTIONAL_TAB_PATHS[feedType] && error.message === 'HTTP 404') {
         try {
@@ -128,15 +134,16 @@ export async function fetchBackgroundSubscriptionChannel(configuration, feedType
           const page = JSON.parse(await fetchText({ ...request, body: JSON.stringify(body) }, signal))
           signal.throwIfAborted()
           if (channelHasNoFeed(page, feedType, channelId)) return await normalize(emptyFeed(feedType))
-        } catch {
+          if (hasErrorAlert(page)) throw channelUnavailableError()
+        } catch (verificationError) {
+          if (verificationError.channelUnavailable) throw verificationError
           // An unverified channel is still a failure; keep trying the configured sources.
         }
       }
     }
   }
   signal.throwIfAborted()
-  // Later sources fail for a channel that is gone too, with less telling errors
-  throw Object.assign(lastError ?? new Error('No background subscription backend configured'), { channelUnavailable })
+  throw lastError ?? new Error('No background subscription backend configured')
 }
 
 /** YouTube sometimes returns only a continuation on the Live tab. */

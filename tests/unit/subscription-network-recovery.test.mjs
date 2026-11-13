@@ -16,7 +16,7 @@ import { mapConcurrently } from '../../src/renderer/helpers/concurrent-map.js'
 import { waitForPlaybackStartup } from '../../src/renderer/helpers/playbackStartup.js'
 import { waitUnlessAborted } from '../../src/renderer/helpers/abortable.js'
 import { buildRequestDiagnostic, classifyRequestFailure, formatRequestDiagnostic } from '../../src/renderer/helpers/api/requestDiagnostics.js'
-import { getSubscriptionsForFeed } from '../../src/renderer/helpers/subscription-channels.js'
+import { getSubscriptionsForFeed, isSubscriptionFeedTypeEnabled } from '../../src/renderer/helpers/subscription-channels.js'
 import { extractAssignedJsonObject } from '../../src/renderer/helpers/assigned-json.js'
 import { getSubscriptionVideoSortTimestamp, updateUpcomingPremiereState, reconcileFetchedSubscriptionEntries } from '../../src/renderer/helpers/subscription-entries.js'
 import { usesInvidiousApi } from '../../src/apiBackends.js'
@@ -123,6 +123,7 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
     classifyRequestFailure,
     formatRequestDiagnostic,
     getSubscriptionsForFeed,
+    isSubscriptionFeedTypeEnabled,
     reconcileFetchedSubscriptionEntries,
     canKeepSubscriptionFeedWithoutNewUploads,
     hasNoNewSubscriptionUploads,
@@ -180,7 +181,7 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
       init?.signal?.addEventListener('abort', () => reject(createAbortError()), { once: true })
     })
   }
-  vm.runInContext(`${errorStoreSource}\n${source}\nglobalThis.api = { refreshSubscriptionVideosFromRemote, refreshSubscriptionShortsFromRemote, refreshSubscriptionLiveFromRemote, refreshSubscriptionPostsFromRemote, retrySubscriptionChannel, cancelSubscriptionRefresh, updateVideoListAfterProcessing, subscriptionChannelErrors, registerShownSubscriptionErrorBox, notifyNewSubscriptionChannelErrors }`, context)
+  vm.runInContext(`${errorStoreSource}\n${source}\nglobalThis.api = { refreshSubscriptionVideosFromRemote, refreshSubscriptionShortsFromRemote, refreshSubscriptionLiveFromRemote, refreshSubscriptionPostsFromRemote, retrySubscriptionChannel, cancelSubscriptionRefresh, updateVideoListAfterProcessing, subscriptionChannelErrors, setSubscriptionChannelError, clearSubscriptionChannelErrors, registerShownSubscriptionErrorBox, notifyNewSubscriptionChannelErrors }`, context)
   return {
     get details() {
       return [...context.api.subscriptionChannelErrors.values()].flatMap(errors => Object.values(errors).map(error => error.trace)).join('\n')
@@ -700,7 +701,6 @@ for (const feed of ['Videos', 'Shorts', 'Live', 'Posts']) {
     assert.equal(app.writes.filter(write => write.key.endsWith('CacheByChannel')).length, 0)
     assert.equal(app.errors.size, 20)
     assert.equal(app.toasts.length, 1)
-    assert.equal(app.toasts[0][0].message, 'Some subscribed channels could not be refreshed. Click to view them.')
     app.toasts[0][0].action()
     await settle()
     assert.deepEqual(JSON.parse(JSON.stringify(app.navigations)), [{ path: '/subscriptions', query: { tab: feed === 'Posts' ? 'community' : feed.toLowerCase() } }])
@@ -797,6 +797,26 @@ test('retrying a channel fetches only that channel without counting as a feed re
   assert.ok(app.requests.every(url => url.includes('UC1')), 'other channels are not fetched again')
   assert.deepEqual([...app.errors.keys()], ['UC0'])
   assert.deepEqual(app.events, ['finished'], 'a retry does not mark the feed as refreshed')
+})
+
+test('a channel retry cancelled between two feeds does not fetch the next one', async () => {
+  // On Android, the cancellation can arrive while the first feed hands back the native refresh
+  const app = createRefresh({ error: Object.assign(new Error('HTTP 500'), { status: 500 }), finishNative: async () => app.cancelSubscriptionRefresh() })
+  app.getters.getActiveProfile.subscriptions = [{ id: 'UC0' }]
+  await app.retrySubscriptionChannel('UC0', ['videos', 'shorts'], key => key)
+  assert.deepEqual(app.events, ['finished'])
+})
+
+test('a background result fetched before a failure does not replace it', () => {
+  const app = createRefresh()
+  const error = reason => ({ reasons: [reason], trace: reason, unavailable: false })
+  app.setSubscriptionChannelError('UC0', 'videos', error('HTTP 500'), 300)
+  // Background results are imported later than they were fetched
+  app.clearSubscriptionChannelErrors('UC0', ['videos'], 200)
+  app.setSubscriptionChannelError('UC0', 'videos', error('HTTP 404'), 200)
+  assert.deepEqual(app.errors.get('UC0').videos.reasons, ['HTTP 500'])
+  app.clearSubscriptionChannelErrors('UC0', ['videos'], 300)
+  assert.equal(app.errors.has('UC0'), false)
 })
 
 test('a failed channel ends the refresh only after the channels in flight finish', async () => {

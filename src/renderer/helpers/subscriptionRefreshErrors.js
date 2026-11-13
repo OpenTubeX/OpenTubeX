@@ -7,6 +7,7 @@ import { shallowReactive } from 'vue'
  * @property {string[]} reasons readable failure reasons
  * @property {string} trace technical details for bug reports
  * @property {boolean} unavailable the channel does not exist anymore or was terminated
+ * @property {number} [timestamp] when the fetch failed
  */
 
 /**
@@ -17,26 +18,32 @@ import { shallowReactive } from 'vue'
 export const subscriptionChannelErrors = shallowReactive(new Map())
 
 /**
+ * Background refreshes are imported later, so their results can be older
+ * than a foreground refresh's.
  * @param {string} channelId
  * @param {SubscriptionFeed} feed
  * @param {SubscriptionFeedError} error
+ * @param {number} [timestamp] when the fetch failed
  * @returns {boolean} whether the channel had no error before
  */
-export function setSubscriptionChannelError(channelId, feed, error) {
+export function setSubscriptionChannelError(channelId, feed, error, timestamp = Date.now()) {
   const errors = subscriptionChannelErrors.get(channelId)
-  subscriptionChannelErrors.set(channelId, { ...errors, [feed]: error })
+  if (errors?.[feed]?.timestamp > timestamp) return false
+  subscriptionChannelErrors.set(channelId, { ...errors, [feed]: { ...error, timestamp } })
   return errors === undefined
 }
 
 /**
  * @param {string} channelId
  * @param {SubscriptionFeed[]} feeds
+ * @param {number} [fetchedAt] when the feeds loaded, to keep errors of later fetches
  */
-export function clearSubscriptionChannelErrors(channelId, feeds) {
+export function clearSubscriptionChannelErrors(channelId, feeds, fetchedAt = Infinity) {
   const errors = subscriptionChannelErrors.get(channelId)
-  if (!errors || !feeds.some(feed => feed in errors)) return
+  const cleared = feeds.filter(feed => !(errors?.[feed]?.timestamp > fetchedAt))
+  if (!errors || !cleared.some(feed => feed in errors)) return
 
-  const remaining = Object.fromEntries(Object.entries(errors).filter(([feed]) => !feeds.includes(feed)))
+  const remaining = Object.fromEntries(Object.entries(errors).filter(([feed]) => !cleared.includes(feed)))
   if (Object.keys(remaining).length === 0) {
     subscriptionChannelErrors.delete(channelId)
   } else {

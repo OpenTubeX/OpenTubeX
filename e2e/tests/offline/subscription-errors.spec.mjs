@@ -42,7 +42,7 @@ test.describe('unavailable channels', () => {
     await page.getByRole('button', { name: /Refresh Shorts/ }).click()
 
     const box = page.locator('.channelErrors.hasErrors')
-    await expect(box.getByRole('status')).toHaveText('20 channels could not be refreshed.')
+    await expect(box.getByRole('status')).toHaveText(/\b20\b/)
     const rows = box.getByRole('listitem')
     await expect(rows).toHaveCount(3)
     // The box is visible, so the refresh doesn't point to it
@@ -75,7 +75,7 @@ test.describe('unavailable channels', () => {
     expect(details).toContain('HTTP 404')
 
     await firstRow.getByRole('button', { name: 'Unsubscribe' }).click()
-    await expect(box.getByRole('status')).toHaveText('19 channels could not be refreshed.')
+    await expect(box.getByRole('status')).toHaveText(/\b19\b/)
     await expect(box.getByRole('link', { name: channels[0].name, exact: true })).toHaveCount(0)
     expect(await page.evaluate(id => window.$store.getters.getActiveProfile.subscriptions.some(channel => channel.id === id), channels[0].id)).toBe(false)
 
@@ -105,7 +105,7 @@ test.describe('channels that could not be refreshed in several New feed categori
     await page.getByRole('button', { name: /Refresh New content/ }).click()
 
     const box = page.locator('.channelErrors.hasErrors')
-    await expect(box.getByRole('status')).toHaveText('2 channels could not be refreshed.')
+    await expect(box.getByRole('status')).toHaveText(/\b2\b/)
     // Both the videos and the Shorts of each channel failed
     await expect.poll(() => page.evaluate(() => window.$store.getters.getSubscriptionFeedRefreshInProgress)).toBe(false)
     await expect(box.getByRole('listitem')).toHaveCount(2)

@@ -213,26 +213,26 @@ public class SubscriptionRefreshBackendTest {
     }
 
     @Test
-    public void aChannelThatYouTubeReportsAsGoneFailsAsUnavailable() throws Exception {
+    public void aChannelThatYouTubeReportsAsGoneFailsWithoutAskingOtherSources() throws Exception {
         JSONArray requests = new JSONArray()
-            .put(new JSONObject().put("format", "local"))
+            .put(new JSONObject().put("format", "local").put("body", new JSONObject().put("params", "tab").toString()))
             .put(new JSONObject().put("format", "rss"));
-        JSONObject gone = channelPage("UCtest", "videos").put("alerts", new JSONArray().put(new JSONObject()
+        JSONObject gone = new JSONObject().put("alerts", new JSONArray().put(new JSONObject()
             .put("alertRenderer", new JSONObject().put("type", "ERROR"))));
-        SubscriptionRefreshHttpClient.RequestsFailedException failure = assertThrows(
-            SubscriptionRefreshHttpClient.RequestsFailedException.class,
-            () -> SubscriptionRefreshHttpClient.fetch(feed(requests), "UCtest", (request, type, id) -> {
-                if (request.getString("format").equals("rss")) throw new IOException("HTTP 404");
-                return gone.toString();
-            })
-        );
-        assertTrue("a later source does not hide that the channel is gone", failure.channelUnavailable);
-        assertFalse(assertThrows(
-            SubscriptionRefreshHttpClient.RequestsFailedException.class,
-            () -> SubscriptionRefreshHttpClient.fetch(feed(requests), "UCtest", (request, type, id) -> {
-                throw new IOException("HTTP 404");
-            })
-        ).channelUnavailable);
+        // A failed Live tab request is checked with the channel's page, which tells why
+        for (String type : List.of("videos", "live")) {
+            List<String> formats = new ArrayList<>();
+            assertThrows(
+                SubscriptionRefreshHttpClient.ChannelUnavailableException.class,
+                () -> SubscriptionRefreshHttpClient.fetch(feed(type, requests), "UCtest", (request, feedType, id) -> {
+                    formats.add(request.getString("format"));
+                    if (!request.getString("format").equals("local")) throw new IOException("HTTP 404");
+                    if (type.equals("live") && new JSONObject(request.getString("body")).has("params")) throw new IOException("HTTP 404");
+                    return gone.toString();
+                })
+            );
+            assertEquals(type.equals("live") ? List.of("local", "local") : List.of("local"), formats);
+        }
     }
 
     @Test

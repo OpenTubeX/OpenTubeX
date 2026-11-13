@@ -436,8 +436,7 @@ public final class SubscriptionRefreshWorker extends Worker {
         SubscriptionRefreshRequestDiagnostic diagnostic =
             SubscriptionRefreshRequestDiagnostic.create(feedType, backend, error);
         Log.w(LOG_TAG, diagnostic.toString());
-        boolean unavailable = error instanceof SubscriptionRefreshHttpClient.RequestsFailedException failure &&
-            failure.channelUnavailable;
+        boolean unavailable = error instanceof SubscriptionRefreshHttpClient.ChannelUnavailableException;
         long timestamp = System.currentTimeMillis();
         for (String profileId : profileIds) {
             try {

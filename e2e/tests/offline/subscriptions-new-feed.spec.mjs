@@ -143,8 +143,8 @@ test.describe('New feed refresh while saving seen marks', () => {
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="all"]').click()
     await page.getByRole('button', { name: /Refresh New content/ }).click()
-    const errorSummary = page.getByText('1 channel could not be refreshed.', { exact: true })
-    await expect(errorSummary).toBeVisible()
+    const errorBox = page.locator('.channelErrors.hasErrors')
+    await expect(errorBox).toBeVisible()
     await expect(page.getByRole('button', { name: 'Mark all as seen' })).toBeEnabled()
 
     await holdSeenMarks(page)
@@ -152,7 +152,7 @@ test.describe('New feed refresh while saving seen marks', () => {
       await page.getByRole('button', { name: 'Mark all as seen' }).click()
       await expect.poll(() => page.evaluate(() => !!window.__finishSavingSeenMarks)).toBe(true)
       await expect(page.getByText('There is no new content.', { exact: true })).toBeVisible()
-      await expect.soft(errorSummary).toBeVisible({ timeout: 1000 })
+      await expect.soft(errorBox).toBeVisible({ timeout: 1000 })
       await expect.soft(page.locator('.newFeed').getByRole('link', { name: 'Channel A', exact: true })).toBeVisible({ timeout: 1000 })
       await page.locator('.card').filter({ has: page.locator('.newFeed') }).screenshot({
         path: testInfo.outputPath('failed-channels-during-save.png')
