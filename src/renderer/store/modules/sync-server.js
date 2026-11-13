@@ -3,7 +3,7 @@ import { SyncLiveConnectionState, SyncCollectionCache, createSyncActivity, valid
 import i18n from '../../i18n/index'
 import { openExternalLink, showToastOnAllTabs } from '../../helpers/utils'
 import { isAppHidden } from '../../helpers/appVisibility.js'
-import { onPeriodicBackgroundSync } from '../../helpers/androidBackgroundSync.js'
+import { onAndroidWindowBlur, onPeriodicBackgroundSync } from '../../helpers/androidBackgroundSync.js'
 import { connectionEvents, getConnectionState } from '../../helpers/networkRecovery.js'
 import {
   SyncServerClient,
@@ -1860,6 +1860,9 @@ const actions = {
             !isSyncReasonEnabled(settings, 'automatic')) return
         return dispatch('syncWithSyncServer', { skipIfRecent: true, automatic: true, remoteOnly: true })
       })
+      // Swiping the app away stops syncing until it opens again, so pending
+      // edits sync as soon as the user may be leaving it.
+      onAndroidWindowBlur(() => dispatch('flushPendingSyncServerEdits'))
       document.addEventListener('visibilitychange', () => {
         if (process.env.IS_CAPACITOR && isAppHidden()) dispatch('stopSyncServerLive')
         if (!isAppHidden()) {
@@ -2003,6 +2006,10 @@ const actions = {
 
   scheduleSyncServer(context, reason) {
     getScheduler(context).schedule(reason)
+  },
+
+  flushPendingSyncServerEdits(context) {
+    getScheduler(context).flush()
   },
 
   resumeHiddenEventSyncs(context) {

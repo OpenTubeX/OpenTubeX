@@ -301,6 +301,7 @@ async function schedulingFixture(t, platform = {}) {
     start: () => scheduler.start(),
     schedule: reason => scheduler.schedule(reason),
     resume: () => scheduler.resumeHidden(),
+    flush: () => scheduler.flush(),
     sync: options => scheduler.sync(options),
     stop: () => scheduler.stop(),
     block: () => { blockSync = true },
@@ -493,6 +494,19 @@ test('event syncs run while the Android app is hidden and hold it until they fin
   f.release()
   await f.tick(0)
   assert.equal(f.holds.size, 0)
+})
+
+test('flushing syncs pending edits at once in one sync', async t => {
+  const f = await schedulingFixture(t, { IS_CAPACITOR: 'true' })
+  f.schedule('history')
+  f.schedule('sessions')
+  f.setHidden(true)
+  f.flush()
+  await f.tick(0)
+  assert.equal(f.calls.length, 1)
+  assert.equal(f.holds.size, 0)
+  await f.tick(60000)
+  assert.equal(f.calls.length, 1)
 })
 
 test('a full sync queued behind a remote-only check keeps the Android app held', async t => {

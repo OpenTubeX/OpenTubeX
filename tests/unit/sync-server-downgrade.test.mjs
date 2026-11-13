@@ -156,6 +156,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     holdAndroidBackgroundWork: () => () => {},
     setPeriodicBackgroundSync: () => {},
     onPeriodicBackgroundSync: () => {},
+    onAndroidWindowBlur: () => {},
     structuredClone,
     TextEncoder,
     TextDecoder,
