@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.view.PixelCopy;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.webkit.WebView;
@@ -237,55 +238,68 @@ public class WebViewScreenshotTest {
                 """);
             AtomicReference<Exception> error = new AtomicReference<>();
             AtomicReference<Integer> pixel = new AtomicReference<>();
-            // The black baseline only sets up the delayed capture below. A starved
-            // emulator can miss the two-second frame deadline here, so try again.
-            for (int attempt = 0; attempt < 3; attempt++) {
-                CountDownLatch baseline = new CountDownLatch(1);
-                error.set(null);
-                scenario.onActivity(activity -> WebViewScreenshot.capture(activity, webView, 0.1, 0.3, 320, 180,
-                    bitmap -> {
-                        pixel.set(bitmap.getPixel(160, 90));
-                        bitmap.recycle();
-                        baseline.countDown();
-                    }, failure -> { error.set(failure); baseline.countDown(); }));
-                assertTrue(baseline.await(10, TimeUnit.SECONDS));
-                if (error.get() == null) break;
-            }
-            assertEquals(null, error.get());
-            assertEquals(Color.BLACK, (int) pixel.get());
-
-            AtomicBoolean drawingAllowed = new AtomicBoolean(false);
-            ViewTreeObserver.OnPreDrawListener delayDraw = drawingAllowed::get;
-            CountDownLatch captured = new CountDownLatch(1);
+            boolean capturedBeforeDraw = false;
             try {
-                scenario.onActivity(activity -> {
-                    webView.getViewTreeObserver().addOnPreDrawListener(delayDraw);
-                    webView.evaluateJavascript("window.__delayedPreview.style.background = 'lime'", ignored ->
-                        WebViewScreenshot.capture(activity, webView, 0.1, 0.3, 320, 180,
+                // A starved emulator can miss the capture's two-second frame deadline,
+                // and HWUI abandons a readback after waiting 500 ms for the GPU. Neither
+                // shows which frame a capture copies, so repeat the whole check.
+                for (int check = 0; check < 3; check++) {
+                    evaluate(webView, "window.__delayedPreview.style.background = 'black'");
+                    // The black baseline only sets up the delayed capture below.
+                    for (int attempt = 0; attempt < 3; attempt++) {
+                        CountDownLatch baseline = new CountDownLatch(1);
+                        error.set(null);
+                        scenario.onActivity(activity -> WebViewScreenshot.capture(activity, webView, 0.1, 0.3, 320, 180,
                             bitmap -> {
                                 pixel.set(bitmap.getPixel(160, 90));
                                 bitmap.recycle();
-                                captured.countDown();
-                            }, failure -> { error.set(failure); captured.countDown(); }));
-                });
-                // Animation callbacks still run while pre-draw cancels submission.
-                boolean capturedBeforeDraw = captured.await(500, TimeUnit.MILLISECONDS);
-                webView.post(() -> {
-                    drawingAllowed.set(true);
-                    webView.invalidate();
-                });
-                assertTrue(captured.await(10, TimeUnit.SECONDS));
+                                baseline.countDown();
+                            }, failure -> { error.set(failure); baseline.countDown(); }));
+                        assertTrue(baseline.await(10, TimeUnit.SECONDS));
+                        if (error.get() == null) break;
+                    }
+                    assertEquals(null, error.get());
+                    assertEquals(Color.BLACK, (int) pixel.get());
+
+                    AtomicBoolean drawingAllowed = new AtomicBoolean(false);
+                    ViewTreeObserver.OnPreDrawListener delayDraw = drawingAllowed::get;
+                    CountDownLatch captured = new CountDownLatch(1);
+                    try {
+                        scenario.onActivity(activity -> {
+                            webView.getViewTreeObserver().addOnPreDrawListener(delayDraw);
+                            webView.evaluateJavascript("window.__delayedPreview.style.background = 'lime'", ignored ->
+                                WebViewScreenshot.capture(activity, webView, 0.1, 0.3, 320, 180,
+                                    bitmap -> {
+                                        pixel.set(bitmap.getPixel(160, 90));
+                                        bitmap.recycle();
+                                        captured.countDown();
+                                    }, failure -> { error.set(failure); captured.countDown(); }));
+                        });
+                        // Animation callbacks still run while pre-draw cancels submission.
+                        capturedBeforeDraw = captured.await(500, TimeUnit.MILLISECONDS);
+                        webView.post(() -> {
+                            drawingAllowed.set(true);
+                            webView.invalidate();
+                        });
+                        assertTrue(captured.await(10, TimeUnit.SECONDS));
+                    } finally {
+                        webView.post(() -> drawingAllowed.set(true));
+                        scenario.onActivity(activity -> webView.getViewTreeObserver().removeOnPreDrawListener(delayDraw));
+                    }
+                    if (!isCaptureTimeout(error.get())) break;
+                }
                 assertEquals(null, error.get());
                 assertTrue("Capture must wait until the new frame can be submitted", !capturedBeforeDraw);
                 assertTrue("Capture shows the newly committed green frame", Color.green(pixel.get()) > 220);
             } finally {
-                webView.post(() -> drawingAllowed.set(true));
-                scenario.onActivity(activity -> {
-                    webView.getViewTreeObserver().removeOnPreDrawListener(delayDraw);
-                    webView.evaluateJavascript("window.__delayedPreview.remove()", null);
-                });
+                scenario.onActivity(activity -> webView.evaluateJavascript("window.__delayedPreview.remove()", null));
             }
         }
+    }
+
+    private static boolean isCaptureTimeout(Exception error) {
+        return error != null && ("Timed out waiting for a rendered frame".equals(error.getMessage())
+            || ("PixelCopy failed: " + PixelCopy.ERROR_TIMEOUT).equals(error.getMessage()));
     }
 
     @Test
