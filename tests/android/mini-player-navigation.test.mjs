@@ -46,6 +46,8 @@ async function withMobileVideo(run, { fromChannel = false } = {}) {
         BackendFallback: false,
         RotateFullscreenToLandscape: false,
         EnterFullscreenOnDisplayRotate: false,
+        // The fullscreen comment test opens comments from this action
+        FullscreenActions: ['comments'],
       }
       const saved = Object.fromEntries(Object.keys(values).map(key => [key, structuredClone(store.getters['get' + key])]))
       for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
