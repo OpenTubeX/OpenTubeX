@@ -74,22 +74,28 @@ test.describe('subscriptions header layout', () => {
     await expect(page.locator('.headerSortSelect')).toBeVisible()
 
     const markAllSeen = page.locator('.markAllSeenButton')
+    // Phones put Mark all as seen beside the title while both fit onto its
+    // line, and on its own row below the refresh button otherwise
+    const placements = { 375: /headerActions/, 640: /titleActions/, 1600: /tabsRow/ }
     for (const width of [375, 1600, 640, 1600]) {
       await markAllSeen.focus()
       await setWindowWidth(app, page, width)
-      const compact = width <= 680
-      await expect(markAllSeen.locator('xpath=..')).toHaveClass(compact ? /headerActions/ : /tabsRow/)
+      await expect(markAllSeen.locator('xpath=..')).toHaveClass(placements[width])
       await expect(markAllSeen).toBeFocused()
       const controls = [
         '.headerViewToggle .iconButton',
         '.headerSortSelect .select-text',
         '.refreshButton .iconButton'
       ]
-      if (width <= 600) {
-        // Phones put Mark all as seen on its own row below the refresh button
+      if (width === 375) {
         controls.push('.markAllSeenButton')
-      } else if (compact) {
-        controls.splice(2, 0, '.markAllSeenButton')
+      } else if (width === 640) {
+        // Before the feed tabs, which follow it on the line below
+        await page.keyboard.press('Tab')
+        await expect(page.locator('[data-subscription-feed-tab="all"]')).toBeFocused()
+        const markEnd = await markAllSeen.evaluate(element => element.getBoundingClientRect().right)
+        const headerEnd = await page.locator('.subscriptionsHeader').evaluate(element => element.getBoundingClientRect().right)
+        expect(markEnd).toBeLessThanOrEqual(headerEnd)
       } else {
         controls.unshift('.markAllSeenButton')
       }

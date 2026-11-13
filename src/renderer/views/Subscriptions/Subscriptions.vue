@@ -14,6 +14,7 @@
         :class="{
           singleRow: headerFitsOneRow,
           compactTabs,
+          markAllSeenBesideTitle,
           scrollHidden: headerScrollHidden,
           tabbedNewFeed: (currentTab === 'new' && newFeedView === 'tabbed') || (currentTab === 'platforms' && platformFeedView === 'tabbed'),
           groupsBesideNewFeedTabs
@@ -31,6 +32,11 @@
             />
             {{ $t("Subscriptions.Subscriptions") }}
           </h2>
+          <div
+            v-show="markAllSeenBesideTitle"
+            ref="titleActionsRef"
+            class="titleActions"
+          />
           <div
             ref="feedTabsControlsRowRef"
             class="feedTabsControlsRow"
@@ -353,8 +359,8 @@
               </div>
               <Teleport
                 v-if="currentTabHasNewContent"
-                :to="tabsRowRef"
-                :disabled="!headerFitsOneRow"
+                :to="headerFitsOneRow ? tabsRowRef : titleActionsRef"
+                :disabled="!headerFitsOneRow && !markAllSeenBesideTitle"
               >
                 <FtButton
                   class="markAllSeenButton"
@@ -1760,8 +1766,15 @@ async function handleFeedReloadRequest(payload) {
 const headerRowRef = useTemplateRef('headerRowRef')
 const feedTabsControlsRowRef = useTemplateRef('feedTabsControlsRowRef')
 const tabsRowRef = useTemplateRef('tabsRowRef')
+const titleActionsRef = useTemplateRef('titleActionsRef')
 /** @type {import('vue').Ref<boolean>} */
 const headerFitsOneRow = ref(false)
+/**
+ * Whether Mark all as seen sits beside the page title on phones, rather than
+ * taking a row of its own below the controls.
+ * @type {import('vue').Ref<boolean>}
+ */
+const markAllSeenBesideTitle = ref(false)
 /**
  * Whether the tabs take the compact layout of phones below the title, as they
  * would wrap onto a second line at their full size.
@@ -1782,7 +1795,7 @@ let headerResizeObserver = null
  */
 function singleLineWidth(container, childWidth = child => child.getBoundingClientRect().width) {
   const children = Array.from(container.children)
-    .filter(child => getComputedStyle(child).position !== 'absolute')
+    .filter(child => child.getClientRects().length > 0 && getComputedStyle(child).position !== 'absolute')
   const columnGap = Number.parseFloat(getComputedStyle(container).columnGap) || 0
 
   return children.reduce((total, child) => total + childWidth(child), 0) +
@@ -1846,6 +1859,34 @@ function updateHeaderFitsOneRow() {
   // layout's tabs are compact already.
   compactTabs.value = window.matchMedia(WIDE_HEADER_QUERY).matches && !headerFitsOneRow.value &&
     tabsRowWidth > contentBoxWidth(feedTabsControlsRow)
+
+  updateMarkAllSeenBesideTitle(row)
+}
+
+/**
+ * The title fills its line on phones, so its content is measured instead of
+ * its box, which also keeps the measurement the same while it shares the line.
+ * @param {HTMLElement} row
+ */
+function updateMarkAllSeenBesideTitle(row) {
+  const title = row.querySelector('.pageTitle')
+  const button = row.querySelector('.markAllSeenButton')
+
+  if (headerFitsOneRow.value || window.matchMedia(WIDE_HEADER_QUERY).matches || title === null || button === null) {
+    markAllSeenBesideTitle.value = false
+    return
+  }
+
+  const titleContent = document.createRange()
+  titleContent.selectNodeContents(title)
+  // A title that wraps on a line of its own measures its widest line, which
+  // would no longer fit once it stops wrapping beside the button
+  const titleBoxes = Array.from(titleContent.getClientRects()).filter(box => box.width > 0 && box.height > 0)
+  const titleWraps = titleBoxes.some(box => titleBoxes.some(other => other.top >= box.bottom))
+  const columnGap = Number.parseFloat(getComputedStyle(row).columnGap) || 0
+
+  markAllSeenBesideTitle.value = !titleWraps && titleContent.getBoundingClientRect().width + columnGap +
+    button.getBoundingClientRect().width <= contentBoxWidth(row)
 }
 
 const newFeedTabsRef = useTemplateRef('newFeedTabsRef')
@@ -1927,6 +1968,12 @@ function observeHeaderRow() {
     headerResizeObserver.observe(child)
   }
 
+  // Its label, like the title, changes with the locale without resizing the row
+  const markAllSeenButton = row.querySelector('.markAllSeenButton')
+  if (markAllSeenButton instanceof HTMLElement) {
+    headerResizeObserver.observe(markAllSeenButton)
+  }
+
   // The header for the space beside the New feed's tabs
   if (headerRef.value instanceof HTMLElement) {
     headerResizeObserver.observe(headerRef.value)
@@ -1951,6 +1998,7 @@ watch([
   currentTabPanel,
   currentTabHasNewContent,
   headerFitsOneRow,
+  markAllSeenBesideTitle,
   newFeedView,
   visibleNewFeedTabs,
   currentNewFeedRssTab,
