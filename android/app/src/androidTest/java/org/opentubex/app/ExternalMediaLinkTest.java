@@ -104,6 +104,7 @@ public class ExternalMediaLinkTest {
         "https://www.youtube.com/account",
         "https://www.youtube.com/premium",
         "https://www.youtube.com/watchlater",
+        "https://www.youtube.com/shorts/",
         "https://www.youtube.com/feed/storefront",
         "https://youtu.be/",
         "https://music.youtube.com/watch?v=aaaaaaaaaaa",

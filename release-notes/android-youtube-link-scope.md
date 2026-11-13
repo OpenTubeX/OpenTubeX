@@ -3,4 +3,4 @@ category: improvement
 platforms: [android]
 ---
 
-OpenTubeX now opens only the YouTube links it can show, such as videos, playlists, channels, and searches. Other YouTube pages, such as the home page and account settings, stay in your browser.
+YouTube links to pages OpenTubeX can't show, such as the home page and account settings, now stay in your browser instead of opening the app.
