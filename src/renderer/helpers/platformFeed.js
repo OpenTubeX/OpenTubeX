@@ -732,7 +732,10 @@ async function checkLiveStreams(configuration) {
     const fresh = takeNewTwitchStreams(known, channelIds, feed.live)
     localStorage.setItem(KNOWN_STREAMS_STORAGE_KEY, JSON.stringify(known))
     for (const stream of fresh) {
-      await announceStream(configuration, stream).catch(error => console.error('Failed to announce a Twitch stream', error))
+      // Nothing is announced once notifications are off, nor for channels unfollowed meanwhile
+      const current = getLiveConfiguration()
+      if (!current.enabled) return
+      await announceStream(current, stream).catch(error => console.error('Failed to announce a Twitch stream', error))
     }
   } catch (error) {
     console.error('Failed to check the live Twitch channels', error)
