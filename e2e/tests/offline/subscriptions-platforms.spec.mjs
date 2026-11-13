@@ -108,7 +108,10 @@ test.describe('Channels on other platforms', () => {
   test('follows a Twitch channel from its media page and lists its streams, videos and clips', async ({ app, page }) => {
     test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
     const liveStream = { id: 'stream-1', title: 'Live right now', createdAt: new Date(now - 600000).toISOString(), viewersCount: 42, previewImageURL: 'https://twitch.example.test/live.jpg', archiveVideo: { id: '10013' } }
-    const requests = await mockTwitch(page, { [CHANNEL.id]: twitchUser(CHANNEL, { stream: liveStream }) })
+    const user = twitchUser(CHANNEL, { stream: liveStream })
+    // The video recording the running stream, which is left out while it runs
+    user.videos.edges.unshift({ node: { id: '10013', title: 'Recording of the live stream', publishedAt: new Date(now - 600000).toISOString(), lengthSeconds: 600, previewThumbnailURL: 'https://twitch.example.test/vod.jpg' } })
+    const requests = await mockTwitch(page, { [CHANNEL.id]: user })
     const mediaUrl = 'https://www.twitch.tv/videos/123456789'
     await prepareTwitchYtDlp(app, page, mediaUrl)
     // Without followed channels, there is no Platforms tab
