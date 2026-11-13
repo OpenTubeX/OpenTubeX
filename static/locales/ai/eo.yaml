@@ -488,6 +488,8 @@ Settings:
     Privacy Description: Historio, serĉaj sugestoj, ligiloj kaj pasvorto de la aplikaĵo
     Data And Storage Description: Savkopioj, enporto kaj elporto, diskuzo kaj purigado
     Sync Description: Konto ĉe la sinkroniga servilo, parigo de aparatoj kaj sinkronigitaj datumoj
+    Accounts and Sync: "Kontoj kaj sinkronigo"
+    Accounts and Sync Description: "YouTube-konto, konto de sinkroniga servilo kaj parigo de aparatoj"
     Advanced: Altnivela
     Advanced Description: Internaj API-oj, bufrado, eksteraj iloj, prokurilo kaj diagnozo
     Alternative providers: Provizantoj de videaĵoj kaj metadatumoj

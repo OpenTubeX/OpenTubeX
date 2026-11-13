@@ -453,6 +453,8 @@ Settings:
     Privacy Description: Riwayat, saran pencarian, tautan, dan kata sandi aplikasi
     Data And Storage Description: Cadangan, impor dan ekspor, penggunaan disk, dan pembersihan
     Sync Description: Akun server sinkronisasi, pemasangan perangkat, dan data yang disinkronkan
+    Accounts and Sync: "Akun & Sinkronisasi"
+    Accounts and Sync Description: "Akun YouTube, akun server sinkronisasi, dan penyandingan perangkat"
     Advanced: Lanjutan
     Advanced Description: Backend, buffering, alat eksternal, proksi, dan diagnostik
     Alternative providers: Penyedia video dan metadata

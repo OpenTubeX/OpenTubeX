@@ -452,6 +452,8 @@ Settings:
     Privacy Description: Historia, hakuehdotukset, linkit ja sovelluksen salasana
     Data And Storage Description: Varmuuskopiot, tuonti ja vienti, levyn käyttö ja siivous
     Sync Description: Synkronointipalvelimen tili, laitteiden yhdistäminen ja synkronoidut tiedot
+    Accounts and Sync: "Tilit ja synkronointi"
+    Accounts and Sync Description: "YouTube-tili, synkronointipalvelimen tili ja laitteiden yhdistäminen"
     Advanced: Lisäasetukset
     Advanced Description: Taustapalvelut, puskurointi, ulkoiset työkalut, välityspalvelin ja vianmääritys
     Alternative providers: Video- ja metatietojen palveluntarjoajat

@@ -584,6 +584,8 @@ Settings:
     Privacy Description: Historial, suggeriments de cerca, enllaços i contrasenya de l'aplicació
     Data And Storage Description: Còpies de seguretat, importació i exportació, ús del disc i neteja
     Sync Description: Compte del servidor de sincronització, vinculació de dispositius i dades sincronitzades
+    Accounts and Sync: "Comptes i sincronització"
+    Accounts and Sync Description: "Compte de YouTube, compte del servidor de sincronització i vinculació de dispositius"
     Advanced: Avançat
     Advanced Description: Backends, memòria intermèdia, eines externes, servidor intermediari i diagnòstic
     Alternative providers: Proveïdors de vídeo i metadades

@@ -535,6 +535,8 @@ Settings:
     Privacy Description: Verlauf, Suchvorschläge, Links und App-Passwort
     Data And Storage Description: Sicherungen, Import und Export, Speicherbelegung und Bereinigung
     Sync Description: Synchronisierungskonto, Gerätekopplung und synchronisierte Daten
+    Accounts and Sync: Konten & Synchronisierung
+    Accounts and Sync Description: YouTube-Konto, Synchronisierungskonto und Gerätekopplung
     Advanced: Erweitert
     Advanced Description: Backends, Pufferung, externe Tools, Proxy und Diagnose
     Alternative providers: Video- und Metadatenanbieter

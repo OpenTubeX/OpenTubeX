@@ -452,6 +452,8 @@ Settings:
     Privacy Description: Historik, sökförslag, länkar och appens lösenord
     Data And Storage Description: Säkerhetskopior, import och export, diskanvändning och rensning
     Sync Description: Konto på synkroniseringsservern, parkoppling av enheter och synkroniserade data
+    Accounts and Sync: "Konton och synkronisering"
+    Accounts and Sync Description: "YouTube-konto, konto på synkroniseringsservern och parkoppling av enheter"
     Advanced: Avancerat
     Advanced Description: Serverdelar, buffring, externa verktyg, proxy och diagnostik
     Alternative providers: Leverantörer av video och metadata

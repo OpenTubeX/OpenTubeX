@@ -463,6 +463,8 @@ Settings:
     Privacy Description: Historik, søgeforslag, links og appadgangskode
     Data And Storage Description: Sikkerhedskopier, import og eksport, diskforbrug og oprydning
     Sync Description: Synkroniseringsserverkonto, parring af enheder og synkroniserede data
+    Accounts and Sync: "Konti og synkronisering"
+    Accounts and Sync Description: "YouTube-konto, synkroniseringsserverkonto og parring af enheder"
     Advanced: Avanceret
     Advanced Description: Backends, buffering, eksterne værktøjer, proxy og diagnosticering
     Alternative providers: Udbydere af video og metadata

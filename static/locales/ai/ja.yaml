@@ -452,6 +452,8 @@ Settings:
     Privacy Description: 履歴、検索候補、リンク、アプリのパスワード
     Data And Storage Description: バックアップ、インポートとエクスポート、ディスク使用量、クリーンアップ
     Sync Description: 同期サーバーのアカウント、デバイスのペアリング、同期されたデータ
+    Accounts and Sync: "アカウントと同期"
+    Accounts and Sync Description: "YouTube アカウント、同期サーバーのアカウント、デバイスのペアリング"
     Advanced: 詳細設定
     Advanced Description: バックエンド、バッファリング、外部ツール、プロキシ、診断
     Alternative providers: 動画とメタデータのプロバイダー

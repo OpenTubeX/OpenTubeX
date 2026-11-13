@@ -462,6 +462,8 @@ Settings:
     Privacy Description: Историја, предлози претраге, везе и лозинка апликације
     Data And Storage Description: Резервне копије, увоз и извоз, заузеће диска и чишћење
     Sync Description: Налог сервера за синхронизацију, упаривање уређаја и синхронизовани подаци
+    Accounts and Sync: "Налози и синхронизација"
+    Accounts and Sync Description: "YouTube налог, налог сервера за синхронизацију и упаривање уређаја"
     Advanced: Напредно
     Advanced Description: Позадински сервиси, баферовање, спољни алати, прокси и дијагностика
     Alternative providers: Добављачи видео-снимака и метаподатака

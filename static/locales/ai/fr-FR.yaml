@@ -452,6 +452,8 @@ Settings:
     Privacy Description: Historique, suggestions de recherche, liens et mot de passe de l’application
     Data And Storage Description: Sauvegardes, importation et exportation, utilisation du disque et nettoyage
     Sync Description: Compte du serveur de synchronisation, association d’appareils et données synchronisées
+    Accounts and Sync: "Comptes et synchronisation"
+    Accounts and Sync Description: "Compte YouTube, compte du serveur de synchronisation et association d’appareils"
     Advanced: Avancé
     Advanced Description: Back-ends, mise en mémoire tampon, outils externes, proxy et diagnostics
     Alternative providers: Fournisseurs de vidéos et de métadonnées
