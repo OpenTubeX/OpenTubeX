@@ -525,7 +525,11 @@ watch(() => isTabPresented?.value, presented => {
   if (presented) hasBeenPresented = true
   // Phone sheets open outside this page, so like on the watch page, hiding
   // the page, such as while it plays in the mini player, closes them.
-  else mobilePanel.value = null
+  else {
+    mobilePanel.value = null
+    // The chapters sheet follows the chapters panel. Desktop keeps it open.
+    if (phonePanelsEnabled.value) showChapters.value = false
+  }
 })
 const showChapters = ref(false)
 const showDownloadPrompt = ref(false)
@@ -588,8 +592,8 @@ const chatAvailable = computed(() => twitchChatTarget.value && !(twitchChatTarge
   ? store.getters.getHideLiveChatReplay
   : store.getters.getHideLiveChat))
 const chaptersPanelOpen = computed(() => Boolean(source.value && chapters.value.length && showChapters.value))
-// The chapters sheet follows the panel, so a hidden page, such as one playing
-// in the mini player, must not show it over the presented page.
+// A hidden page keeps its sidebar chapters open, so its sheet must not show
+// over the presented page when the window becomes narrow.
 const chaptersSheetOpen = computed(() => chaptersPanelOpen.value && isTabPresented?.value !== false)
 // The transcript reads WebVTT and SRT, while other sites may only offer TTML.
 const transcriptCaptions = computed(() => source.value?.captions.filter(caption => caption.mimeType !== 'application/ttml+xml') ?? [])
