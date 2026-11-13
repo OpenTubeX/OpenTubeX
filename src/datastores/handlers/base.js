@@ -845,14 +845,16 @@ class Profiles {
   }
 
   static addChannelToProfiles(channel, profileIds) {
+    // Another window can subscribe to the same channel first
+    const notSubscribed = { $not: { subscriptions: { $elemMatch: { id: channel.id } } } }
     if (profileIds.length === 1) {
       return db.profiles.updateAsync(
-        { _id: profileIds[0] },
+        { _id: profileIds[0], ...notSubscribed },
         { $push: { subscriptions: channel } }
       )
     } else {
       return db.profiles.updateAsync(
-        { _id: { $in: profileIds } },
+        { _id: { $in: profileIds }, ...notSubscribed },
         { $push: { subscriptions: channel } },
         { multi: true }
       )
