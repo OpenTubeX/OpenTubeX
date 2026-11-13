@@ -503,6 +503,8 @@ async function pushReorder(change, account) {
  */
 async function pushPlaylistChange(change, playlistId, localId, account) {
   throwIfAccountChanged(account)
+  // Turned off while the edit waited for other sync work
+  if (!store.getters.getYouTubeAccountSyncPlaylists) return
   const isLikedVideos = playlistId === LIKED_VIDEOS
 
   switch (change.type) {
