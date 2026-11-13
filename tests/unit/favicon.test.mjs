@@ -84,4 +84,7 @@ test('public engines cannot point the icon request at the local network', async 
   assert.equal(await resolveFaviconUrl('https://search.example.com/?q=%s', page('https://cdn.example.net/icon.png'), resolve), 'https://cdn.example.net/icon.png')
   // A self-hosted engine on the local network keeps its icons there
   assert.equal(await resolveFaviconUrl('http://searx.lan/search?q=%s', page('http://192.168.1.1/icon.png'), resolve), 'http://192.168.1.1/icon.png')
+  // but a public engine whose homepage redirects there does not
+  const redirected = async () => Object.defineProperty(await page('/icon.png')(), 'url', { value: 'http://searx.lan/' })
+  assert.equal(await resolveFaviconUrl('https://search.example.com/?q=%s', redirected, resolve), 'https://search.example.com/favicon.ico')
 })

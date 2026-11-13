@@ -145,9 +145,9 @@ export async function resolveFaviconUrl(searchUrl, fetchPage, resolveAddresses) 
     if (!contentType.includes('text/html')) return fallback
 
     const { data } = await readAtMost(response, MAX_HTML_BYTES)
-    const pageUrl = response.url || homepage
-    const iconUrl = extractFaviconUrl(new TextDecoder().decode(data), pageUrl)
-    return iconUrl && await isAllowedIconUrl(iconUrl, pageUrl, resolveAddresses) ? iconUrl : fallback
+    const iconUrl = extractFaviconUrl(new TextDecoder().decode(data), response.url || homepage)
+    // The configured engine decides, not a page it redirects to
+    return iconUrl && await isAllowedIconUrl(iconUrl, homepage, resolveAddresses) ? iconUrl : fallback
   } catch {
     return fallback
   }
