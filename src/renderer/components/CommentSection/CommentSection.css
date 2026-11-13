@@ -26,6 +26,11 @@
   box-shadow: none;
 }
 
+/* The docks drop the card's padding, so the composer lines up with the comments' own. */
+.fullscreenCommentCard .topCommentComposer {
+  padding-inline: 15px;
+}
+
 /* Scroll the content below the fixed header, so it cuts off at the header edge. */
 .fullscreenCommentCard .commentsContentWrapper {
   flex: 1 1 auto;

@@ -2,6 +2,13 @@
   <div
     class="ft-list-video ft-list-item"
     :class="{ list: layout === 'list', grid: layout !== 'list' }"
+    @contextmenu="openContextMenu"
+    @keydown="handleMenuKeydown"
+    @pointerdown="startMenuHold"
+    @pointermove="moveMenuHold"
+    @pointerup="cancelMenuHold"
+    @pointercancel="cancelMenuHold"
+    @dragstart="handleMenuHoldDragStart"
   >
     <div class="videoThumbnail">
       <RouterLink
@@ -63,17 +70,33 @@
           :title="platform.name"
         />
       </div>
+      <div class="buttonStack playlistButtonStack">
+        <FtIconButton
+          v-if="store.getters.getShowVideoMenuButton"
+          ref="menuButton"
+          class="optionsButton"
+          :title="t('Video.More Options')"
+          :icon="['fas', 'ellipsis-v']"
+          theme="base-no-default"
+          :size="16"
+          @click="openOptionsMenu(menuButton.$el.querySelector('button'))"
+        />
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, useTemplateRef } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { FtIcon } from '@opentubex/icons'
 
+import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtRetryImage from '../FtRetryImage.vue'
 
 import store from '../../store/index'
+import { useCardContextMenu } from '../../composables/useCardContextMenu'
+import { copyToClipboard, openExternalLink, openInternalPath, shareLink } from '../../helpers/utils'
 import { getPlatform, getPlatformChannelRoute, getPlatformPlaylistRoute, PLATFORM_ICONS } from '../../../platforms/index'
 
 const props = defineProps({
@@ -96,6 +119,50 @@ const route = computed(() => getPlatformPlaylistRoute(props.playlist.platform, p
 const channelRoute = computed(() => props.playlist.channelId
   ? getPlatformChannelRoute(props.playlist.platform, props.playlist.channelId)
   : null)
+
+const { t } = useI18n()
+
+const menuItems = computed(() => {
+  const items = []
+  if (store.getters.getTabsEnabled) {
+    items.push({
+      label: t('Context Menu.Open in a New Tab'),
+      shortLabel: t('New Tab'),
+      icon: ['fas', 'arrow-up-right-from-square'],
+      quickAction: true,
+      run: () => openInternalPath({ ...route.value, title: props.playlist.title, doCreateNewTab: true })
+    })
+  }
+  if (process.env.IS_ELECTRON) {
+    items.push({
+      label: t('Context Menu.Open in a New Window'),
+      shortLabel: t('New Window'),
+      icon: ['fas', 'external-link-alt'],
+      quickAction: true,
+      run: () => openInternalPath({ ...route.value, title: props.playlist.title, doCreateNewWindow: true })
+    })
+  }
+  if (items.length > 0) items.push({ type: 'separator' })
+  items.push({
+    label: t('Share.Copy Link'),
+    icon: ['fas', 'link'],
+    run: () => copyToClipboard(props.playlist.url)
+  }, {
+    label: t('Platforms.Open Website', { platform: platform.value?.name ?? props.playlist.platform }),
+    icon: PLATFORM_ICONS[props.playlist.platform] ?? ['fas', 'external-link-alt'],
+    run: () => openExternalLink(props.playlist.url)
+  })
+  if (process.env.IS_CAPACITOR) {
+    items.push({ label: t('Share.Share Link'), icon: ['fas', 'share-alt'], run: () => shareLink(props.playlist.url) })
+  }
+  return items.map(item => item.type === 'separator' ? item : { enabled: true, ...item })
+})
+
+const menuButton = useTemplateRef('menuButton')
+const {
+  startMenuHold, moveMenuHold, cancelMenuHold, handleMenuHoldDragStart,
+  openContextMenu, openOptionsMenu, handleMenuKeydown,
+} = useCardContextMenu({ items: menuItems, title: () => props.playlist.title })
 </script>
 
 <style scoped lang="scss" src="../FtListPlaylist/FtListPlaylist.scss" />

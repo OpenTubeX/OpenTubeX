@@ -15,6 +15,7 @@ import {
 import { encryptSyncDocument, decryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
 import { SYNC_KEY, SYNC_SALT, mockSyncServer, syncWithSyncServer } from '../../helpers/sync-history.mjs'
 import { activeTab } from '../../helpers/player.mjs'
+import { swipeAction } from '../../helpers/thumbnail-swipe.mjs'
 
 const THUMBNAIL_PATH = fileURLToPath(new URL('../../fixtures/images/opentubex-playlist.jpg', import.meta.url))
 
@@ -756,6 +757,30 @@ test.describe('with followed feeds', () => {
     await openMenu(older)
     await menu.getByRole('menuitem', { name: 'Copy Link' }).click()
     await expect.poll(() => app.electronApp.evaluate(({ clipboard }) => clipboard.readText())).toBe(olderUrl)
+
+    // The swipe gestures from the settings work on them too
+    await page.evaluate(() => window.$store.commit('setThumbnailLeftSwipeAction', 'history'))
+    const session = await page.context().newCDPSession(page)
+    try {
+      await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
+      await swipeAction(page, session, newest.locator('.title'), null)
+      await expect(newest).toHaveClass(/watched/)
+      // A hold that opened the menu doesn't also swipe
+      const rect = await newest.locator('.title').boundingBox()
+      const point = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 }
+      await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point] })
+      await expect(page.getByRole('menuitem', { name: 'Unmark As Watched' })).toBeVisible()
+      await session.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ ...point, x: point.x - 40 }] })
+      await session.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ ...point, x: point.x - 120 }] })
+      await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+      await expect(page.locator('.thumbnailSwipeFeedback')).toHaveCount(0)
+      await page.keyboard.press('Escape')
+      await expect(page.getByRole('menuitem', { name: 'Unmark As Watched' })).toHaveCount(0)
+      await session.send('Emulation.setTouchEmulationEnabled', { enabled: false })
+    } finally { await session.detach() }
+    await expect(newest).toHaveClass(/watched/)
+    expect(await position(newestUrl)).toEqual({ seconds: 0, watched: true, updatedAt: expect.any(Number) })
+    await expect(page).toHaveURL(/#\/subscriptions/)
 
     // The options button opens the same menu
     await page.evaluate(() => window.$store.dispatch('updateShowVideoMenuButton', true))

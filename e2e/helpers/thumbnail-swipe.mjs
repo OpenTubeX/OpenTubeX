@@ -297,7 +297,7 @@ export async function swipeAction(page, session, target, label, screenshot = asy
   await session.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ ...point, x: point.x - 40 }] })
   await session.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ ...point, x: point.x - 110 }] })
   const feedback = page.locator('.thumbnailSwipeFeedback')
-  await expect(feedback).toHaveAttribute('title', label)
+  if (label) await expect(feedback).toHaveAttribute('title', label)
   await expect(feedback).toHaveClass(/thumbnailSwipeReady/)
   await screenshot(`reverse swipe ${label}`)
   await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
