@@ -72,20 +72,15 @@ test('quick speed action switches between saving and removal as current and save
   assert.equal(bar.saveButton_.dataset.remove, 'false')
 })
 
-test('removal does not overwrite malformed collections or collections without the channel', async () => {
+test('removal leaves malformed collections and collections without the channel as saved', async () => {
   for (const saved of ['{invalid', 'null', '[]', '{}', '{"other":1.5}']) {
-    const calls = []
-    const store = {
-      getters: { getChannelPlaybackSpeeds: saved },
-      dispatch: (...args) => calls.push(args)
-    }
-    await preferenceApi.removeChannelPreference(store, 'current', 'playbackSpeed')
-    assert.deepEqual(calls, [], saved)
+    const store = { dispatch: async (action, edit) => edit(saved) === saved }
+    assert.equal(await preferenceApi.removeChannelPreference(store, 'current', 'playbackSpeed'), true, saved)
   }
 })
 
-test('edits apply to the saved collection, keeping what other windows saved', async () => {
-  let saved = '{"first":1,"second":1.5,"elsewhere":2}'
+test('edits apply to the saved collection, including entries this window does not show yet', async () => {
+  let saved = '{"first":1,"second":1.5,"elsewhere":2,"unseen":3}'
   const store = {
     getters: { getChannelPlaybackSpeeds: '{"first":1,"second":1.5}' },
     async dispatch(action, edit) {
@@ -96,5 +91,6 @@ test('edits apply to the saved collection, keeping what other windows saved', as
   assert.equal(await preferenceApi.removeChannelPreference(store, 'first', 'playbackSpeed'), true)
   assert.equal(await preferenceApi.saveChannelPreference(store, 'third', 'playbackSpeed', 1.25), true)
   assert.equal(await preferenceApi.removeChannelPreference(store, 'second', 'playbackSpeed', speed => speed === 2), true)
+  assert.equal(await preferenceApi.removeChannelPreference(store, 'unseen', 'playbackSpeed'), true)
   assert.deepEqual(JSON.parse(saved), { second: 1.5, elsewhere: 2, third: 1.25 })
 })

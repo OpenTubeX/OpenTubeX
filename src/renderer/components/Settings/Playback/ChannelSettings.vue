@@ -843,7 +843,8 @@ async function addSubscribedChannel(channelId) {
     )))
 
     if (saved.some(value => !value)) {
-      const rolledBack = await Promise.all(preferencesToAdd.map(({ type, initialValue }) => (
+      // Failed writes saved nothing, so only the saved values need removing
+      const rolledBack = await Promise.all(preferencesToAdd.filter((_, index) => saved[index]).map(({ type, initialValue }) => (
         rollbackPreference(channelId, type, initialValue, initializationToken)
           .catch(error => {
             console.error(error)

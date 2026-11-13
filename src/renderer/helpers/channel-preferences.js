@@ -127,8 +127,9 @@ export async function saveChannelPreferenceWithToast(store, channelId, type, val
 
 /**
  * Edits the saved values of one setting for any number of channels. The store
- * applies the edit again to the saved values, so it keeps the changes that
- * other tabs and windows save meanwhile. `change` can therefore run more than once.
+ * shows the edit right away and applies it again to the saved values, so it
+ * keeps the changes that other tabs and windows save meanwhile, even ones this
+ * window doesn't show yet. `change` can therefore run more than once.
  * @param {import('vuex').Store} store
  * @param {string} type
  * @param {(values: Record<string, unknown>) => boolean} change edits the values, returns whether they changed
@@ -140,8 +141,6 @@ export async function updateChannelPreferences(store, type, change) {
 
   const { valuesKey } = preference
   const suffix = valuesKey[0].toUpperCase() + valuesKey.slice(1)
-  if (!change(parseChannelPreferences(store.getters[`get${suffix}`], valuesKey))) return true
-
   return store.dispatch(`update${suffix}`, (saved) => {
     const values = parseChannelPreferences(saved, valuesKey)
     return change(values) ? JSON.stringify(values) : saved
