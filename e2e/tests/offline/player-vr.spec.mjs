@@ -360,15 +360,24 @@ test('uses panoramic HLS for a YouTube mesh video', async ({ app, page }) => {
 for (const mode of ['yt-dlp', 'built-in', 'proxy', 'failed-child']) {
   test(`uses panoramic HLS for an Invidious mesh video (${mode})`, async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
-    await page.route('https://vr.example.test/master.m3u8', route => route.fulfill({
-      contentType: 'application/x-mpegURL', body: '#EXTM3U\n'
-    }))
+    let releaseManifest
+    let panoramaRequests = 0
+    await page.route('https://vr.example.test/master.m3u8', route => {
+      // yt-dlp probes the manifest before the player loads it. The empty
+      // manifest would fail the player and switch to the built-in engine, which
+      // drops the panorama, so keep the player's request pending.
+      if (++panoramaRequests > 1) {
+        return new Promise(resolve => {
+          releaseManifest = () => resolve(route.fulfill({ contentType: 'application/x-mpegURL', body: '#EXTM3U\n' }))
+        })
+      }
+      return route.fulfill({ contentType: 'application/x-mpegURL', body: '#EXTM3U\n' })
+    })
     const hlsRequests = []
     let childRequests = 0
     const manifestBody = mode === 'failed-child'
       ? '#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=500000,RESOLUTION=640x360,CODECS="avc1.42E01E,mp4a.40.2"\nhttps://invidious.test/api/manifest/hls/child.m3u8\n'
       : '#EXTM3U\n'
-    let releaseManifest
     await page.route('https://invidious.test/api/manifest/hls/**', route => {
       if (route.request().url().endsWith('/child.m3u8')) {
         childRequests++
