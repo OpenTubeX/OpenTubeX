@@ -52,15 +52,19 @@ export function addScrollSpeedHandler(element, getScrollSpeed) {
     }
 
     const position = wheel.axis === 'x' ? element.scrollLeft : element.scrollTop
-    const maximum = wheel.axis === 'x'
+    const range = wheel.axis === 'x'
       ? element.scrollWidth - element.clientWidth
       : element.scrollHeight - element.clientHeight
+    // Right-to-left elements start at 0 and scroll to negative offsets.
+    const isRtl = wheel.axis === 'x' && getComputedStyle(element).direction === 'rtl'
+    const minimum = isRtl ? -range : 0
+    const maximum = isRtl ? 0 : range
     const target = Math.min(
-      Math.max(smoothTargets[wheel.axis] ?? position, 0),
+      Math.max(smoothTargets[wheel.axis] ?? position, minimum),
       maximum
     )
 
-    if (!canMoveScrollTarget(target, maximum, wheel.delta)) {
+    if (!canMoveScrollTarget(target, minimum, maximum, wheel.delta)) {
       if (hasContainedOverscroll(element, wheel.axis)) {
         // The default scroll is canceled at a contained boundary. Parent
         // handlers see defaultPrevented and leave the page in place.
@@ -73,7 +77,7 @@ export function addScrollSpeedHandler(element, getScrollSpeed) {
     const distance = wheelDeltaInPixels(event, element, wheel.axis, wheel.delta) *
       speed / DEFAULT_SCROLL_SPEED
     smoothTargets[wheel.axis] = Math.min(
-      Math.max(target + distance, 0),
+      Math.max(target + distance, minimum),
       maximum
     )
     element.scrollTo({
@@ -123,11 +127,12 @@ function hasContainedOverscroll(element, axis) {
 
 /**
  * @param {number} target
+ * @param {number} minimum
  * @param {number} maximum
  * @param {number} delta
  */
-function canMoveScrollTarget(target, maximum, delta) {
-  return maximum > 0 && (delta < 0 ? target > 0 : target < maximum)
+function canMoveScrollTarget(target, minimum, maximum, delta) {
+  return maximum > minimum && (delta < 0 ? target > minimum : target < maximum)
 }
 
 /**
