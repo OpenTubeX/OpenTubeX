@@ -1049,6 +1049,8 @@ function markAsWatchedIfFinished(seconds, isFinished = false) {
   if (!hasBeenPresented || !store.getters.getRememberHistory || source.value?.isLive ||
     isHistoryEntryWatched(historyEntry.value) || watchedMarkPending) return
   if (!isFinished && player.value?.isPaused()) return
+  // Until both tracks' lengths are known, the threshold would use the shorter video.
+  if (!isFinished && source.value?.separateAudioUrl && !hasCompanionMetadata()) return
   if (!isFinished && !hasReachedWatchedThreshold(seconds, getMediaDuration(), store.getters.getWatchedPercentageThreshold)) return
   const watchProgress = store.getters.getWatchedProgressSavingMode === 'never' ? (historyEntry.value?.watchProgress ?? 0) : seconds
   watchedMarkPending = true
@@ -1168,6 +1170,10 @@ function savePosition() {
   // Choosing another format can change which track sets the length.
   if (historyEntry.value && !(duration > 0 && Math.abs(duration - historyEntry.value.lengthSeconds) > 1)) {
     store.dispatch('updateWatchProgress', { videoId: historyId.value, watchProgress: seconds })
+  } else if (watchedMarkPending) {
+    // The pending watched mark saves the length and position. A full record
+    // from the cache would still say unwatched and replace it.
+    return
   } else {
     addToHistory(seconds)
   }
