@@ -14,6 +14,7 @@ import {
 } from '../../helpers/app.mjs'
 import { encryptSyncDocument, decryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
 import { SYNC_KEY, SYNC_SALT, mockSyncServer, syncWithSyncServer } from '../../helpers/sync-history.mjs'
+import { activeTab } from '../../helpers/player.mjs'
 
 const THUMBNAIL_PATH = fileURLToPath(new URL('../../fixtures/images/opentubex-playlist.jpg', import.meta.url))
 
@@ -1225,7 +1226,8 @@ test.describe('with new items', () => {
 
   test('opens items in a new tab or window from the context menu and marks them as seen', async ({ app, page }) => {
     await loadNewItems(page)
-    const panel = page.locator('#subscriptionsPanel')
+    // The new tab's external media page keeps a Subscriptions page mounted below its player
+    const panel = page.locator(`${activeTab} #subscriptionsPanel`)
     const menu = page.locator('.contextMenu')
     const item = title => panel.locator('.ft-list-item', { hasText: title })
     const tabState = () => page.evaluate(() => window.ftElectron.tabs.getState())
