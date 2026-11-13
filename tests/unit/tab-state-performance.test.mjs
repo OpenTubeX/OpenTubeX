@@ -4,6 +4,7 @@ import vm from 'node:vm'
 import test from 'node:test'
 import { createStore } from 'vuex'
 import { reconcilePendingTabOrder } from '../../src/renderer/tabs/pendingTabOrder.js'
+import { cloneRoute, normalizeRoute } from '../../src/renderer/tabs/routes.js'
 
 const source = readFileSync(new URL('../../src/renderer/store/modules/tabs.js', import.meta.url), 'utf8')
   .replace(/^import .*\n/gm, '')
@@ -14,6 +15,8 @@ function createTabStore() {
   const module = vm.runInNewContext(`${source}; module`, {
     URL,
     URLSearchParams,
+    cloneRoute,
+    normalizeRoute,
     DEFAULT_VIDEO_ZOOM: 1,
     reconcilePendingTabOrder,
   })

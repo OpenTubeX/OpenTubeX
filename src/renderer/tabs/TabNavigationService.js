@@ -8,7 +8,7 @@ import {
   runPendingViewTransition,
   takePendingViewTransition
 } from '../helpers/viewTransitions'
-import { cloneRoute, normalizeRoute } from '../store/modules/tabs'
+import { cloneRoute, normalizeRoute } from './routes'
 import { tabLifecycleService } from './TabLifecycleService'
 import { tabMediaCoordinator } from './TabMediaCoordinator'
 import { tabRuntimeRegistry } from './TabRuntimeRegistry'
