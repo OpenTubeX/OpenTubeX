@@ -7,7 +7,7 @@ import { activeTab, openMockedVideo, waitForPlayback, openPlayerOptions } from '
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { DEMO_MEDIA_PATH, DEMO_MEDIA_URL, routeDemoMedia } from '../../helpers/media.mjs'
 import { expectImagesLoaded, fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
-import { IpcChannels } from '../../../src/constants.js'
+import { DBActions, IpcChannels } from '../../../src/constants.js'
 import {
   externalHistoryEntry as savedExternalEntry,
   externalResumePosition as savedExternalPosition,
@@ -218,6 +218,17 @@ test('external media joins the watch history, where its menu marks it as watched
   await goTo(page, 'history')
   const item = page.locator(`${activeTab} .ft-list-item`, { hasText: 'A Twitch broadcast' })
   await expect(item.locator('.watchedProgressBar')).toBeVisible()
+  // The Hidden thumbnail preference shows the placeholder instead of the media's image.
+  await page.evaluate(videoId => {
+    const entry = window.$store.getters.getHistoryCacheById[videoId]
+    return window.$store.dispatch('updateHistory', { ...entry, thumbnail: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' })
+  }, new URL(mediaUrl).href)
+  const thumbnail = item.locator('.thumbnailImage:not(.thumbnailPlaceholder)')
+  await expect(thumbnail).toHaveCount(1)
+  await page.evaluate(() => window.$store.dispatch('updateThumbnailPreference', 'hidden'))
+  await expect(thumbnail).toHaveCount(0)
+  await expect(item.locator('.thumbnailPlaceholder')).toBeVisible()
+  await page.evaluate(() => window.$store.dispatch('updateThumbnailPreference', ''))
   await item.locator('.title').click()
   await expect(page).toHaveURL(/#\/external-media\?url=/)
   await waitForPlayback(page)
@@ -488,6 +499,48 @@ for (const { label, settings, live, timestamp } of [
     expect(await savedExternalPosition(page, mediaUrl)).toBe(12)
   })
 }
+
+test('external media keeps a watched mark that is still saving when the length changes', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+  const storedEntry = () => page.evaluate(async ({ action, videoId }) => {
+    // The main process sends each stored record as JSON text.
+    const records = (await window.ftElectron.dbHistory(action)).map(record => JSON.parse(record))
+    return records.find(record => record.videoId === videoId) ?? null
+  }, { action: DBActions.GENERAL.FIND, videoId: new URL(mediaUrl).href })
+  await prepareTwitchYtDlp(app, page, mediaUrl, false)
+  // Hold the reply to the watched write once it is stored, so the page still shows the media as unwatched.
+  await app.electronApp.evaluate(({ ipcMain }, action) => {
+    const original = ipcMain._invokeHandlers.get('db-history')
+    ipcMain.removeHandler('db-history')
+    ipcMain.handle('db-history', async (event, request) => {
+      const reply = await original(event, request)
+      if (request.action === action && request.data?.records?.[0]?.isWatched === true && !globalThis.releaseWatchedMark) {
+        await new Promise(resolve => { globalThis.releaseWatchedMark = resolve })
+      }
+      return reply
+    })
+  }, DBActions.HISTORY.UPDATE_SUBSCRIPTION_STATE)
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  const video = await waitForPlayback(page)
+  await video.evaluate(element => { element.currentTime = element.duration - 0.1; return element.play() })
+  await expect.poll(() => app.electronApp.evaluate(() => typeof globalThis.releaseWatchedMark)).toBe('function')
+  expect((await savedExternalEntry(page, mediaUrl))?.isWatched).toBe(false)
+  // Another format changes the length, so the next save writes the whole record.
+  await page.evaluate(videoId => {
+    const entry = window.$store.getters.getHistoryCacheById[videoId]
+    window.$store.commit('upsertToHistoryCache', { ...entry, lengthSeconds: 1 })
+  }, new URL(mediaUrl).href)
+  await video.evaluate(element => { element.currentTime = 5; element.dispatchEvent(new Event('pause')) })
+  await app.electronApp.evaluate(() => globalThis.releaseWatchedMark())
+  await expect.poll(async () => (await savedExternalEntry(page, mediaUrl))?.isWatched).toBe(true)
+  expect((await storedEntry())?.isWatched).toBe(true)
+  // Saves after the mark is stored keep it and save the position.
+  await video.evaluate(element => { element.currentTime = 8; element.dispatchEvent(new Event('pause')) })
+  await expect.poll(async () => (await storedEntry())?.watchProgress).toBeCloseTo(8, 0)
+  expect((await storedEntry())?.isWatched).toBe(true)
+})
 
 test('external media saves on pause in semi-auto mode without periodically saving', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')

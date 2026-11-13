@@ -20,8 +20,8 @@
         @auxclick.middle="markAsSeen"
       >
         <FtRetryImage
-          v-if="data.thumbnail"
-          :src="data.thumbnail"
+          v-if="thumbnail"
+          :src="thumbnail"
           class="thumbnailImage"
           :class="{ blur: blurThumbnails }"
           alt=""
@@ -134,7 +134,7 @@
       v-if="canDownload && showDownloadPrompt"
       :external-url="data.url"
       :title="data.title"
-      :thumbnail="data.thumbnail"
+      :thumbnail="thumbnail"
       @close="showDownloadPrompt = false"
     />
   </div>
@@ -225,6 +225,8 @@ const { t, locale } = useI18n()
 
 const now = useRelativeTimeClock()
 const blurThumbnails = computed(() => store.getters.getBlurThumbnails)
+// The Hidden thumbnail preference shows the placeholder instead, so the image is never fetched.
+const thumbnail = computed(() => store.getters.getThumbnailPreference === 'hidden' ? '' : props.data.thumbnail)
 const hideChannelAvatars = computed(() => store.getters.getHideChannelAvatars)
 const thumbnailProgressRadius = computed(() => 8 * store.getters.getUiRoundness / 100)
 // The external media page adds everything it plays to the history. Live
@@ -324,7 +326,7 @@ function setWatched(watched, fully = false) {
   }
   showToast({
     message: watched ? t('Video.Video has been marked as watched') : t('Video.Video has been unmarked as watched'),
-    image: props.data.thumbnail || null,
+    image: thumbnail.value || null,
     icon: ['fas', watched ? 'eye' : 'eye-slash']
   })
 }
@@ -338,7 +340,7 @@ function removeFromHistory() {
   store.dispatch('removeFromHistory', historyId.value)
   showToast({
     message: t('Video.Video has been removed from your history'),
-    image: props.data.thumbnail || null,
+    image: thumbnail.value || null,
     icon: ['fas', 'trash']
   })
 }
