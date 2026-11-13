@@ -81,9 +81,9 @@ jobs:
       shell: bash
     - run: pnpm run typecheck
       shell: bash
-    # let's verify that webpack is able to package the project
+    # let's verify that Rspack is able to package the project
     - run: pnpm run pack
       shell: bash
-    # verify that webpack is able to package the project using the web config
+    # verify that Rspack is able to package the project using the web config
     - run: pnpm run pack:web
       shell: bash

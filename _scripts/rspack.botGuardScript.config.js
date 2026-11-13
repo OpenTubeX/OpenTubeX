@@ -1,6 +1,6 @@
 const path = require('path')
 
-/** @type {import('webpack').Configuration} */
+/** @type {import('@rspack/core').Configuration} */
 module.exports = {
   name: 'botGuardScript',
   // Always use production mode, as we use the output as a function body and the debug output doesn't work for that

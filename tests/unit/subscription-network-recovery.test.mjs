@@ -35,7 +35,7 @@ const source = (await readFile(new URL('../../src/renderer/helpers/subscriptions
   .replace(/^export /gm, '')
 
 // Exercise the real refresh, fallback, cache, and notification paths with fake
-// platform APIs. Webpack-only imports are supplied in the isolated context.
+// platform APIs. Bundler-only imports are supplied in the isolated context.
 function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('Failed to fetch'), webCors = false, backend = 'local', fallbackWorks = false, rssStatus = 200, channelInfo = { has_shorts: true, getShorts: async () => ({ videos: [] }) }, playlistError = null, playlistItems = [], stallChannelProbe = false, channelStatus = rssStatus, scraperError = null, shortPublishDate = '2026-09-06T12:00:00Z', beforeShortMetadata = async () => {}, beforeWrite = async () => {}, finishNative = async () => {}, useRssFeeds = true, channelFeeds = {} } = {}) {
   const window = new EventTarget()
   const navigator = { onLine: online }

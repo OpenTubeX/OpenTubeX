@@ -495,8 +495,8 @@ async function initializeSwiper() {
       modules: [A11y, Navigation, Pagination],
 
       injectStylesUrls: [
-        // This file is created with the copy webpack plugin in the web and renderer webpack configs.
-        // If you add more modules, please remember to add their CSS files to the list in webpack config files.
+        // This file is created with the copy plugin in the web and renderer Rspack configs.
+        // If you add more modules, please remember to add their CSS files to the list in the Rspack config files.
         createWebURL(`/swiper-${process.env.SWIPER_VERSION}.css`)
       ],
 

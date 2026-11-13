@@ -1,13 +1,12 @@
 const path = require('path')
 const fs = require('fs/promises')
-const webpack = require('webpack')
-const CopyWebpackPlugin = require('copy-webpack-plugin')
-const MinimizerPlugin = require('minimizer-webpack-plugin')
+const { rspack } = require('@rspack/core')
+const getMinimizers = require('./minimizers')
 const ProcessBoundaryPlugin = require('./ProcessBoundaryPlugin')
 
 const isDevMode = process.env.NODE_ENV === 'development'
 
-/** @type {import('webpack').Configuration} */
+/** @type {import('@rspack/core').Configuration} */
 const config = {
   name: 'main',
   mode: process.env.NODE_ENV,
@@ -31,7 +30,7 @@ const config = {
       },
       {
         // Native addon paths are resolved at runtime. Dependencies such as
-        // font-list still need webpack to follow their static createRequire calls.
+        // font-list still need Rspack to follow their static createRequire calls.
         include: [
           path.join(__dirname, '../src/main/desktopShare.js'),
           path.join(__dirname, '../src/main/pictureInPictureBounds.js')
@@ -39,6 +38,10 @@ const config = {
         parser: { createRequire: false },
       },
     ],
+    parser: {
+      // Rspack leaves createRequire calls to the runtime by default, see the rule above
+      javascript: { createRequire: true }
+    },
     generator: {
       json: {
         JSONParse: false
@@ -56,27 +59,9 @@ const config = {
       'mime-db$': path.join(__dirname, 'image-extensions-only-mime-db.json')
     }
   },
-  // webpack defaults to only optimising the production builds, so having this here is fine
+  // Rspack only minimizes production builds, so having this here is fine
   optimization: {
-    minimizer: [
-      new MinimizerPlugin({
-        test: /\.js(?:on)?(\?.*)?$/i,
-        minify: [
-          {
-            implementation: MinimizerPlugin.jsonMinify
-          },
-          {
-            implementation: MinimizerPlugin.terserMinify,
-            options: {
-              compress: {
-                // webpack sets passes to 2 in its default minimizer config too
-                passes: 2
-              }
-            }
-          }
-        ]
-      })
-    ]
+    minimizer: getMinimizers({ json: true })
   },
   node: {
     __dirname: isDevMode,
@@ -109,7 +94,7 @@ const config = {
         compiler.hooks.watchRun.tapPromise('CastSender', prepare)
       }
     },
-    new webpack.DefinePlugin({
+    new rspack.DefinePlugin({
       // Do not bake process.platform here. Cross-compiling (e.g. macOS
       // builds on Linux) would otherwise hardcode the build host OS and
       // download the wrong managed yt-dlp/ffmpeg binaries at runtime.
@@ -119,7 +104,7 @@ const config = {
   ],
   output: {
     filename: '[name].js',
-    libraryTarget: 'commonjs2',
+    library: { type: 'commonjs2' },
     path: path.join(__dirname, '../dist'),
   },
   target: 'electron-main',
@@ -143,7 +128,7 @@ if (!isDevMode) {
     callback(null, request === 'youtubei.js' ? 'commonjs ./youtubei.js' : undefined)
   }]
   config.plugins.push(
-    new CopyWebpackPlugin({
+    new rspack.CopyRspackPlugin({
       patterns: [
         {
           from: path.join(__dirname, '../static'),

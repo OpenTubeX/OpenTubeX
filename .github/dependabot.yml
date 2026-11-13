@@ -16,6 +16,11 @@ updates:
           - "@capacitor/cli"
           - "@capacitor/core"
           - "@capacitor/ios"
+      # Rspack releases its CLI and core together, so update them in one PR.
+      "rspack":
+        patterns:
+          - "@rspack/cli"
+          - "@rspack/core"
     allow:
       - dependency-name: "@capacitor-community/keep-awake"
       - dependency-name: "@capacitor-community/screen-brightness"
@@ -56,13 +61,15 @@ updates:
       - dependency-name: "@lezer/markdown"
       - dependency-name: "@material/material-color-utilities"
       - dependency-name: "@playwright/test"
+      - dependency-name: "@rspack/cli"
+      - dependency-name: "@rspack/core"
+      - dependency-name: "@rspack/dev-server"
       - dependency-name: "@sqlite.org/sqlite-wasm"
       - dependency-name: "@vot.js/core"
-      - dependency-name: "autoprefixer"
-      - dependency-name: "copy-webpack-plugin"
       - dependency-name: "dbus-native"
       - dependency-name: "eld"
       - dependency-name: "entities"
+      - dependency-name: "events"
       - dependency-name: "fflate"
       - dependency-name: "font-list"
       - dependency-name: "hast-util-from-html"
@@ -77,6 +84,7 @@ updates:
       - dependency-name: "qr-scanner"
       - dependency-name: "qrcode"
       - dependency-name: "quickjs-emscripten-core"
+      - dependency-name: "rspack-vue-loader"
       - dependency-name: "sax"
       - dependency-name: "srcset"
       - dependency-name: "typescript"

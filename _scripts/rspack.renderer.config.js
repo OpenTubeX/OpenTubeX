@@ -1,12 +1,10 @@
 const path = require('path')
 const { readFileSync, readdirSync } = require('fs')
-const webpack = require('webpack')
+const { rspack } = require('@rspack/core')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const { VueLoaderPlugin } = require('vue-loader')
-const MiniCssExtractPlugin = require('mini-css-extract-plugin')
-const MinimizerPlugin = require('minimizer-webpack-plugin')
+const { VueLoaderPlugin } = require('rspack-vue-loader')
 const ProcessLocalesPlugin = require('./ProcessLocalesPlugin')
-const CopyWebpackPlugin = require('copy-webpack-plugin')
+const getMinimizers = require('./minimizers')
 const getStartupSplash = require('./startupSplash')
 const postcssFontScale = require('./postcssFontScale')
 const getBuildCommit = require('./buildCommit')
@@ -57,7 +55,7 @@ const processAILocalesPlugin = new ProcessLocalesPlugin({
   outputDir: 'static/locales/ai',
 })
 
-/** @type {import('webpack').Configuration} */
+/** @type {import('@rspack/core').Configuration} */
 const config = {
   name: 'renderer',
   mode: process.env.NODE_ENV,
@@ -76,7 +74,7 @@ const config = {
     path: path.join(__dirname, '../dist'),
     filename: '[name].js',
   },
-  // The renderer is loaded from the local Electron package, so Webpack's
+  // The renderer is loaded from the local Electron package, so Rspack's
   // 250 kB web-delivery budget is not representative. Keep a realistic limit
   // so unexpected bundle growth still produces a warning.
   performance: {
@@ -87,7 +85,7 @@ const config = {
     rules: [
       {
         test: /\.vue$/,
-        loader: 'vue-loader',
+        loader: 'rspack-vue-loader',
         options: {
           compilerOptions: {
             isCustomElement: (tag) => tag === 'swiper-container' || tag === 'swiper-slide'
@@ -98,7 +96,7 @@ const config = {
         test: /\.scss$/,
         use: [
           {
-            loader: MiniCssExtractPlugin.loader,
+            loader: rspack.CssExtractRspackPlugin.loader,
           },
           {
             loader: 'css-loader',
@@ -119,7 +117,7 @@ const config = {
         test: /\.css$/,
         use: [
           {
-            loader: MiniCssExtractPlugin.loader
+            loader: rspack.CssExtractRspackPlugin.loader
           },
           {
             loader: 'css-loader',
@@ -165,27 +163,9 @@ const config = {
       }
     }
   },
-  // webpack defaults to only optimising the production builds, so having this here is fine
+  // Rspack only minimizes production builds, so having this here is fine
   optimization: {
-    minimizer: [
-      new MinimizerPlugin({
-        test: /\.(?:cs|j)s(\?.*)?$/i,
-        minify: [
-          {
-            implementation: MinimizerPlugin.cssnanoMinify
-          },
-          {
-            implementation: MinimizerPlugin.terserMinify,
-            options: {
-              compress: {
-                // webpack sets passes to 2 in its default minimizer config too
-                passes: 2
-              }
-            }
-          }
-        ]
-      })
-    ]
+    minimizer: getMinimizers({ cssTargets: getMinimizers.ELECTRON_TARGETS })
   },
   node: {
     __dirname: false,
@@ -194,7 +174,7 @@ const config = {
   plugins: [
     processLocalesPlugin,
     processAILocalesPlugin,
-    new webpack.DefinePlugin({
+    new rspack.DefinePlugin({
       // build.mjs packages for the host OS, so reject mismatched target hints
       // above instead of compiling renderer behavior for a different platform.
       'process.platform': JSON.stringify(rendererPlatform),
@@ -229,14 +209,14 @@ const config = {
       }
     }),
     new VueLoaderPlugin(),
-    new MiniCssExtractPlugin({
+    new rspack.CssExtractRspackPlugin({
       filename: isDevMode ? '[name].css' : '[name].[contenthash].css',
       chunkFilename: isDevMode ? '[id].css' : '[id].[contenthash].css',
       // Route-level chunks can discover scoped Vue styles in different orders.
       // Their selectors cannot affect one another, so no global order is needed.
       ignoreOrder: true,
     }),
-    new CopyWebpackPlugin({
+    new rspack.CopyRspackPlugin({
       patterns: [
         {
           from: '*/LICENSE',
@@ -246,13 +226,10 @@ const config = {
         {
           from: path.join(__dirname, '../node_modules/swiper/modules/a11y-element.css').replaceAll('\\', '/'),
           to: `swiper-${swiperVersion}.css`,
-          context: path.join(__dirname, '../node_modules/swiper/modules'),
-          transformAll: (assets) => {
-            return Buffer.concat(assets.map(asset => asset.data))
-          }
+          context: path.join(__dirname, '../node_modules/swiper/modules')
         },
         // Don't need to copy them in dev mode,
-        // as we configure WebpackDevServer to serve them
+        // as we configure the dev server to serve them
         ...(isDevMode
           ? []
           : [

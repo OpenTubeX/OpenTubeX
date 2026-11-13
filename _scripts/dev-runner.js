@@ -1,8 +1,8 @@
 process.env.NODE_ENV = 'development'
 
 const electron = require('electron')
-const webpack = require('webpack')
-const WebpackDevServer = require('webpack-dev-server')
+const { rspack } = require('@rspack/core')
+const { RspackDevServer } = require('@rspack/dev-server')
 const kill = require('@magda/tree-kill')
 
 const path = require('path')
@@ -56,45 +56,14 @@ function configureWorktree() {
   console.log(`Using worktree profile ${profilePath}`)
 }
 
-/** @param {WebpackDevServer} devServer */
-function getListeningPort(devServer) {
-  return new Promise((resolve, reject) => {
-    const server = devServer.server
-    if (!server) {
-      reject(new Error('Development server was not created'))
-      return
-    }
-
-    const onError = error => {
-      server.off('listening', onListening)
-      reject(error)
-    }
-    const onListening = () => {
-      server.off('error', onError)
-      const address = server.address()
-      if (typeof address === 'object' && address !== null) {
-        resolve(address.port)
-      } else {
-        reject(new Error('Unable to determine the development server port'))
-      }
-    }
-
-    if (server.listening) onListening()
-    else {
-      server.once('error', onError)
-      server.once('listening', onListening)
-    }
-  })
-}
-
-function loadWebpackConfigs() {
+function loadConfigs() {
   if (!web) {
-    mainConfig = require('./webpack.main.config')
-    rendererConfig = require('./webpack.renderer.config')
-    preloadConfig = require('./webpack.preload.config.js')
-    botGuardScriptConfig = require('./webpack.botGuardScript.config')
+    mainConfig = require('./rspack.main.config')
+    rendererConfig = require('./rspack.renderer.config')
+    preloadConfig = require('./rspack.preload.config.js')
+    botGuardScriptConfig = require('./rspack.botGuardScript.config')
   } else {
-    webConfig = require('./webpack.web.config')
+    webConfig = require('./rspack.web.config')
   }
 }
 
@@ -171,8 +140,8 @@ function scheduleElectronRestart() {
 }
 
 /**
- * @param {import('webpack').Compiler} compiler
- * @param {WebpackDevServer} devServer
+ * @param {import('@rspack/core').Compiler} compiler
+ * @param {RspackDevServer} devServer
  */
 function setupNotifyLocaleUpdate(compiler, devServer) {
   const notifyLocaleChange = (update) => {
@@ -187,7 +156,7 @@ function setupNotifyLocaleUpdate(compiler, devServer) {
 }
 
 function startBotGuardScript() {
-  webpack(botGuardScriptConfig, (err) => {
+  rspack(botGuardScriptConfig, (err) => {
     if (err) console.error(err)
 
     console.log(`\nCompiled ${botGuardScriptConfig.name} script!`)
@@ -195,7 +164,7 @@ function startBotGuardScript() {
 }
 
 function startMain() {
-  const compiler = webpack(mainConfig)
+  const compiler = rspack(mainConfig)
   const { name } = compiler
 
   compiler.hooks.afterEmit.tap('afterEmit', async () => {
@@ -215,7 +184,7 @@ function startMain() {
 }
 
 function startPreload() {
-  const compiler = webpack(preloadConfig)
+  const compiler = rspack(preloadConfig)
   const { name } = compiler
 
   let firstTime = true
@@ -240,11 +209,26 @@ function startPreload() {
   })
 }
 
-function startRenderer(callback) {
-  const compiler = webpack(rendererConfig)
+/**
+ * Logs each compilation of a dev server compiler.
+ * @param {import('@rspack/core').Compiler} compiler
+ * @returns {Promise<void>} resolves after the first compilation
+ */
+function logCompilations(compiler) {
   const { name } = compiler
+  return new Promise(resolve => {
+    compiler.hooks.done.tap('DevRunner', stats => {
+      console.log('\n' + stats.toString({ colors: true }))
+      console.log(`\nCompiled ${name} script!\n\nWatching file changes for ${name} script...`)
+      resolve()
+    })
+  })
+}
 
-  const server = new WebpackDevServer({
+function startRenderer(callback) {
+  const compiler = rspack({ ...rendererConfig, watchOptions: { aggregateTimeout: 250 } })
+
+  const server = new RspackDevServer({
     client: {
       overlay: {
         runtimeErrors: false
@@ -270,40 +254,24 @@ function startRenderer(callback) {
       }
     ],
     port
-  })
-
-  server.apply(compiler)
+  }, compiler)
 
   setupNotifyLocaleUpdate(compiler, server)
 
-  let firstTime = true
-
-  const watching = compiler.watch({ aggregateTimeout: 250 }, (err, result) => {
-    if (err) console.error(err)
-
-    if (result) {
-      console.log('\n' + result.toString({ colors: true }))
-    }
-
-    console.log(`\nCompiled ${name} script!\n\nWatching file changes for ${name} script...`)
-
-    if (firstTime) {
-      firstTime = false
-      getListeningPort(server).then(callback).catch(error => {
-        console.error(error)
-        watching.close(() => {
-          process.exitCode = 1
-        })
-      })
-    }
-  })
+  // The dev server watches the files, so wait for its first compilation
+  Promise.all([server.start(), logCompilations(compiler)])
+    .then(() => callback(server.server.address().port))
+    .catch(error => {
+      console.error(error)
+      process.exitCode = 1
+      return server.stop()
+    })
 }
 
 function startWeb () {
-  const compiler = webpack(webConfig)
-  const { name } = compiler
+  const compiler = rspack({ ...webConfig, watchOptions: { aggregateTimeout: 250 } })
 
-  const server = new WebpackDevServer({
+  const server = new RspackDevServer({
     open: true,
     static: [
       {
@@ -323,25 +291,20 @@ function startWeb () {
       }
     ],
     port
-  })
-
-  server.apply(compiler)
+  }, compiler)
 
   setupNotifyLocaleUpdate(compiler, server)
+  logCompilations(compiler)
 
-  compiler.watch({ aggregateTimeout: 250 }, (err, result) => {
-    if (err) console.error(err)
-
-    if (result) {
-      console.log('\n' + result.toString({ colors: true }))
-    }
-
-    console.log(`\nCompiled ${name} script!\n\nWatching file changes for ${name} script...`)
+  server.start().catch(error => {
+    console.error(error)
+    process.exitCode = 1
   })
 }
+
 async function start() {
   if (worktree) configureWorktree()
-  loadWebpackConfigs()
+  loadConfigs()
 
   if (!web) {
     if (process.platform === 'win32') {
