@@ -37,13 +37,14 @@ function fixture () {
   const handlers = evaluate(sources[0], { db, createRecommendationStore, createIdQuery, ...historyHelpers, ...seenHelpers }, 'return { history: History, recommendations }')
   const history = evaluate(sources[1], { DBHistoryHandlers: handlers.history, toRaw, ...historyHelpers, ...externalMediaHistory })
   const recommendations = evaluate(sources[2], { DBRecommendationHandlers: handlers.recommendations })
-  const otherModules = Object.fromEntries([...sources[3].matchAll(/^import (\w+) from '\.\/modules\//gm)].map(([, name]) => [name, {}]))
+  const otherModules = Object.fromEntries([...sources[3].matchAll(/^import (\w+)(?:, \{[^}]*\})? from '\.\/modules\//gm)].map(([, name]) => [name, {}]))
   const store = evaluate(sources[3], {
     ...otherModules,
     history,
     recommendations,
     watchQueue,
     persistWatchQueue: store => persistWatchQueue(store, { getItem: () => null, setItem() {} }),
+    shareWellbeingAcrossWindows: () => {},
     createStore,
     getProfileSyncSignature,
     settings: {

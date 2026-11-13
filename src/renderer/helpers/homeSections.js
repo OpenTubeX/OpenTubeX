@@ -1,5 +1,3 @@
-import { canMarkHistoryEntryAsWatched } from '../../history.js'
-
 export const HOME_SECTION_IDS = Object.freeze([
   'continueWatching',
   'recommendations',
@@ -58,15 +56,6 @@ export function getRecentDownloads(downloads) {
   return entries
     .filter(download => RECENT_DOWNLOAD_STATUSES.has(download.status))
     .toSorted((a, b) => b.id - a.id)
-}
-
-/**
- * @param {object[]} history
- * @param {number} [limit]
- * @returns {object[]}
- */
-export function getContinueWatchingEntries(history, limit = Number.POSITIVE_INFINITY) {
-  return getContinueWatchingCandidates(history).filter(canMarkHistoryEntryAsWatched).slice(0, limit)
 }
 
 /**

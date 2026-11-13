@@ -1,4 +1,5 @@
 import { normalizeLegacyTabTitle } from '../../legacyTabTitle.js'
+import { cloneRoute, normalizeRoute } from './routes.js'
 
 const MAX_CLOSED_CAPACITOR_TABS = 10
 
@@ -366,59 +367,6 @@ function updateCapacitorTabRuntime(session, tabId, update) {
   const tabs = [...session.tabs]
   tabs[tabIndex] = updatedTab
   return { ...session, tabs }
-}
-
-function normalizeRoute(route) {
-  const path = typeof route?.path === 'string' && route.path.length > 0
-    ? route.path
-    : '/'
-  const query = normalizeQuery(route?.query)
-  const hash = typeof route?.hash === 'string' ? route.hash : ''
-  const fullPath = typeof route?.fullPath === 'string' && route.fullPath.length > 0
-    ? route.fullPath
-    : buildFullPath(path, query, hash)
-
-  return {
-    name: typeof route?.name === 'string' ? route.name : null,
-    path: path.startsWith('/') ? path : `/${path}`,
-    params: normalizeQuery(route?.params),
-    query,
-    hash,
-    fullPath
-  }
-}
-
-function cloneRoute(route) {
-  const normalized = normalizeRoute(route)
-  return {
-    ...normalized,
-    params: { ...normalized.params },
-    query: Object.fromEntries(Object.entries(normalized.query).map(([key, value]) => [
-      key,
-      Array.isArray(value) ? [...value] : value
-    ]))
-  }
-}
-
-function normalizeQuery(query) {
-  if (!query || typeof query !== 'object') return {}
-
-  return Object.fromEntries(
-    Object.entries(query)
-      .filter(([, value]) => value != null)
-      .map(([key, value]) => [key, Array.isArray(value) ? value.map(String) : String(value)])
-  )
-}
-
-function buildFullPath(path, query, hash) {
-  const search = new URLSearchParams()
-  for (const [key, value] of Object.entries(query)) {
-    for (const item of Array.isArray(value) ? value : [value]) {
-      search.append(key, item)
-    }
-  }
-  const queryString = search.toString()
-  return `${path.startsWith('/') ? path : `/${path}`}${queryString ? `?${queryString}` : ''}${hash}`
 }
 
 function withoutLegacyTitle(tab) {

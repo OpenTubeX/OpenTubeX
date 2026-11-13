@@ -1,7 +1,7 @@
 // @ts-check
 import { BrowserWindow, ipcMain } from 'electron'
 
-import { isOpenTubeXUrl } from './utils'
+import { isOpenTubeXUrl } from './utils.js'
 
 /**
  * Whether an IPC message comes from an OpenTubeX page. A frame that has

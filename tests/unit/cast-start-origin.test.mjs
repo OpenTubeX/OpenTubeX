@@ -41,6 +41,7 @@ async function fixture(defaultInstance = 'http://192.168.1.2:3000', settings = {
     process: { argv: [], env: {}, versions: {} },
     console,
     isOpenTubeXUrl: url => url === 'app://opentubex/index.html',
+    isTrustedSender: event => event.senderFrame?.url === 'app://opentubex/index.html',
     baseHandlers: { settings: { _findOne: async id => ({ value: id in settings ? settings[id] : defaultInstance }) } },
     normalizeYatteeServerUrl,
     invidiousAuthorizations: new Map(),

@@ -9,6 +9,7 @@ import { app, BrowserWindow, net } from 'electron'
 import { settings } from '../datastores/handlers/base'
 import { createSerialQueue } from './serialQueue'
 import { buildProxyUrl, isOpenTubeXUrl } from './utils'
+import { isTrustedSender } from './ipc'
 import { IpcChannels } from '../constants'
 import { getMatchingDownloadValidators, getYtDlpAssetName } from './ytDlpAsset'
 import { verifySha256Checksum, verifyYtDlpReleaseAsset } from './ytDlpSignature'
@@ -1091,7 +1092,7 @@ function getInfoProbeKey(options) {
  * @returns {Promise<{ ytDlp: YtDlpInfo, ffmpeg: YtDlpBinaryInfo, ffprobe: YtDlpBinaryInfo } | null>}
  */
 export async function handleYtDlpGetInfo(event, options) {
-  if (!isOpenTubeXUrl(event.senderFrame?.url)) {
+  if (!isTrustedSender(event)) {
     return null
   }
 
@@ -1159,7 +1160,7 @@ export async function handleYtDlpGetInfo(event, options) {
  * @returns {Promise<{ available: boolean } | { error: string } | null>}
  */
 export async function handleYtDlpCheckBinaryUpdate(event, binary) {
-  if (!isOpenTubeXUrl(event.senderFrame?.url) || (binary !== 'yt-dlp' && binary !== 'ffmpeg')) {
+  if (!isTrustedSender(event) || (binary !== 'yt-dlp' && binary !== 'ffmpeg')) {
     return null
   }
 
@@ -1176,7 +1177,7 @@ export async function handleYtDlpCheckBinaryUpdate(event, binary) {
  * @returns {Promise<{ version: string, updated: boolean } | { error: string, errorCode?: string } | null>}
  */
 export async function handleYtDlpDownloadBinary(event, binary) {
-  if (!isOpenTubeXUrl(event.senderFrame?.url)) {
+  if (!isTrustedSender(event)) {
     return null
   }
 

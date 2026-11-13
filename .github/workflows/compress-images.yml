@@ -58,7 +58,7 @@ jobs:
 
       - name: Generate File Diff Content
         id: file_diff
-        uses: PikachuEXE/file-size-diff@c623d1e49f0b19ecb006caf05522f9756561052b
+        uses: PikachuEXE/file-size-diff@c623d1e49f0b19ecb006caf05522f9756561052b # main
         with:
           target_branch: ${{ github.event.repository.default_branch }}
           dir_glob: "**/*.png,**/*.svg"

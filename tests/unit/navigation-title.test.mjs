@@ -6,6 +6,7 @@ import { computed, effectScope, nextTick, reactive, watch } from 'vue'
 import { createMemoryHistory, createRouter, START_LOCATION } from 'vue-router'
 import { createStore } from 'vuex'
 import { reconcilePendingTabOrder } from '../../src/renderer/tabs/pendingTabOrder.js'
+import { cloneRoute, normalizeRoute } from '../../src/renderer/tabs/routes.js'
 import { tabLifecycleService } from '../../src/renderer/tabs/TabLifecycleService.js'
 
 const storeSource = readFileSync(new URL('../../src/renderer/store/modules/tabs.js', import.meta.url), 'utf8')
@@ -41,9 +42,11 @@ function mountBrowsingTitle(t, store, navigation, fullPath = '/channel/UC-test')
 }
 
 function setup() {
-  const { module, cloneRoute, normalizeRoute } = vm.runInNewContext(`${storeSource}; ({ module, cloneRoute, normalizeRoute })`, {
+  const module = vm.runInNewContext(`${storeSource}; module`, {
     URL,
     URLSearchParams,
+    cloneRoute,
+    normalizeRoute,
     DEFAULT_VIDEO_ZOOM: 1,
     reconcilePendingTabOrder,
   })

@@ -1,6 +1,7 @@
 // @ts-check
 import { createWatchQueueState, watchQueueMutations, PERSISTED_MUTATIONS } from '../watchQueue.js'
-import { readFile } from 'node:fs/promises'
+import { constants } from 'node:fs'
+import { copyFile, readFile } from 'node:fs/promises'
 import { createSerialQueue } from './serialQueue.js'
 import { writeFileAtomic } from './writeFileAtomic.js'
 
@@ -52,6 +53,16 @@ export function createFileWatchQueue(filename) {
         return JSON.parse(await readFile(filename, 'utf8'))
       } catch (error) {
         if (error.code === 'ENOENT') return []
+        // Without this, every request would retry the read and the queue
+        // would stay unusable until the file is deleted by hand.
+        if (error instanceof SyntaxError) {
+          console.error('The saved watch queue is corrupt, starting with an empty queue', error)
+          // Keep it for recovery, as the next change saves over it. A copy
+          // never replaces an earlier one, and if it fails, the error keeps
+          // the queue from saving over the file.
+          await copyFile(filename, `${filename}.corrupt-${Date.now()}`, constants.COPYFILE_EXCL)
+          return []
+        }
         throw error
       }
     },

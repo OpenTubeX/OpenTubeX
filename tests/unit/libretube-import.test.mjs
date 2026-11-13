@@ -20,7 +20,7 @@ test('LibreTube watch positions are read as milliseconds', () => {
       { videoId: 'aaaaaaaaaaa', position: 3600 },
       { videoId: 'bbbbbbbbbbb', position: 590_000 },
     ],
-  }, [])
+  })
   const [early, finished] = [...historyItems.values()]
   assert.equal(early.watchProgress, 3.6)
   assert.equal(early.isWatched, false)

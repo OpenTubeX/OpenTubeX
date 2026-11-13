@@ -33,6 +33,8 @@ const hooks = registerHooks({
 })
 const { TabManager } = await import('../../src/main/tabs/TabManager.js')
 const { tabSession } = await import('../../src/datastores/handlers/base.js')
+// Tab IPC only answers OpenTubeX pages
+const APP_FRAME = { url: 'app://bundle/index.html' }
 const { setupTabsIPC } = await import('../../src/main/tabs/tabIpc.js')
 const { getRouteFromUrl } = await import('../../src/main/tabs/tabRoutes.js')
 const { BrowserWindow, ipcMain, nativeImage } = await import('electron')
@@ -562,20 +564,24 @@ test('extracted IPC handlers keep tab commands scoped to the sender window', asy
   const firstTab = first.createTab({ route: '/history' })
   const secondTab = second.createTab({ route: '/home' })
   const handlers = await setupIpc(t, [first, second])
-  const sender = { sender: first.browserWindow.webContents }
+  const sender = { senderFrame: APP_FRAME, sender: first.browserWindow.webContents }
   handlers.get(IpcChannels.TABS_UPDATE_TITLE)(sender, 'First title', firstTab.id)
   assert.equal(firstTab.title, 'First title')
   const originalTitle = secondTab.title
   handlers.get(IpcChannels.TABS_UPDATE_TITLE)(sender, 'Foreign title', secondTab.id)
   assert.equal(secondTab.title, originalTitle)
-  assert.equal(handlers.get(IpcChannels.TABS_GET_STATE)({ sender: {} }), null)
+  assert.equal(handlers.get(IpcChannels.TABS_GET_STATE)({ senderFrame: APP_FRAME, sender: {} }), null)
   const created = await handlers.get(IpcChannels.TABS_CREATE)(sender, { route: '/stats', id: secondTab.id })
   assert.notEqual(created.id, secondTab.id)
   assert.equal(created.route.path, '/stats')
   assert.equal(first.tabs.has(created.id), true)
   assert.equal(second.tabs.has(created.id), false)
   assert.equal(handlers.get(IpcChannels.TABS_GET_SYNC_SESSIONS)(sender).length, 2)
-  assert.deepEqual(handlers.get(IpcChannels.TABS_GET_SYNC_SESSIONS)({ sender: {} }), [])
+  assert.deepEqual(handlers.get(IpcChannels.TABS_GET_SYNC_SESSIONS)({ senderFrame: APP_FRAME, sender: {} }), [])
+  // A frame of the window that shows another page reads no tab URLs
+  const foreign = { senderFrame: { url: 'https://example.com/' }, sender: first.browserWindow.webContents }
+  assert.deepEqual(handlers.get(IpcChannels.TABS_GET_SYNC_SESSIONS)(foreign), [])
+  assert.equal(handlers.get(IpcChannels.TABS_GET_STATE)(foreign), null)
 })
 
 test('a change reverted during an in-flight write still persists the latest state', async t => {
@@ -623,7 +629,7 @@ for (const count of [2]) {
       confirmCloseWindow: () => { confirmations++; return allowClose }
     })
     const close = handlers.get(IpcChannels.TABS_CLOSE_MULTIPLE)
-    const event = { sender: manager.browserWindow.webContents }
+    const event = { senderFrame: APP_FRAME, sender: manager.browserWindow.webContents }
     const ids = [...tabs.flatMap(tab => [tab.id, tab.id]), 'missing', null, 123]
     const cancelled = await close(event, ids)
     assert.equal(confirmations, 1)
@@ -645,7 +651,7 @@ test('route IPC rejects malformed URL values and permits omitted URLs', async t 
   const tab = manager.createTab({ route: '/history' })
   const handlers = await setupIpc(t, [manager])
   const update = handlers.get(IpcChannels.TABS_UPDATE_ROUTE)
-  const event = { sender: manager.browserWindow.webContents }
+  const event = { senderFrame: APP_FRAME, sender: manager.browserWindow.webContents }
   const originalUrl = tab.url
   for (const url of [{ path: '/home' }, [], true, 42]) {
     update(event, { tabId: tab.id, route: { path: '/home' }, url })
@@ -672,7 +678,7 @@ for (const outcome of ['playing', 'paused', 'failed']) {
     await manager.restoreFromData(saved, { restoreTabLoadState: true })
     const handlers = await setupIpc(t, [manager])
     const playback = state => handlers.get(IpcChannels.TABS_SET_PLAYBACK_STATE)(
-      { sender: manager.browserWindow.webContents }, state, 'tab-3')
+      { senderFrame: APP_FRAME, sender: manager.browserWindow.webContents }, state, 'tab-3')
     presentActive(manager)
     manager.setTabLoading('tab-3', true)
     manager.setTabLoading('tab-3', false)

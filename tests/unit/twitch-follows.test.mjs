@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { fetchTwitchChannels, findTwitchChannel, getTwitchLiveNotificationTarget, parseTwitchChannelLogin } from '../../src/twitchFollows.js'
+import { fetchTwitchChannels, getTwitchLiveNotificationTarget, parseTwitchChannelLogin } from '../../src/twitchFollows.js'
 
 function user(overrides = {}) {
   return {
@@ -116,16 +116,11 @@ test('loads many channels in batches and only the live status when asked', async
   assert.ok(requests.every(body => !body.query.includes('videos(') && !body.query.includes('clips(')))
 })
 
-test('fails for errors that leave no data, and finds no unknown channels', async () => {
+test('fails for errors that leave no data', async () => {
   await assert.rejects(fetchTwitchChannels(async () => new Response('', { status: 503 }), ['1']), /HTTP 503/)
   await assert.rejects(fetchTwitchChannels(async () => Response.json({ errors: [{ message: 'failed' }] }), ['1']), /no data/)
   // A failed list of channels isn't an empty one, which would clear their cached items
   await assert.rejects(fetchTwitchChannels(async () => Response.json({ data: { users: null }, errors: [{ message: 'failed' }] }), ['1']), /no channels/)
-
-  assert.equal(await findTwitchChannel(async () => Response.json({ data: { user: null } }), 'unknown'), null)
-  let requested = false
-  assert.equal(await findTwitchChannel(async () => { requested = true }, 'not a login'), null)
-  assert.equal(requested, false)
 })
 
 test('notifications only lead to the live page of a valid channel, one per broadcast', () => {

@@ -32,7 +32,7 @@ const [{ handleOpenInExternalPlayer }] = await importWithStubs(
     [sourceUrl('src/main/mainTranslator.js')]: {
       createMainTranslator: async () => (key, parameters) => parameters ? `${key} ${JSON.stringify(parameters)}` : key,
     },
-    [sourceUrl('src/main/utils.js')]: { isOpenTubeXUrl: () => true },
+    [sourceUrl('src/main/ipc.js')]: { isTrustedSender: () => true },
   }
 )
 

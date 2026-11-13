@@ -365,7 +365,7 @@ import {
 import { parseLineDelimitedJson } from '../../../helpers/line-delimited-json'
 import { parseOpmlFeeds } from '../../../helpers/opml'
 import { updateChannelPreferences } from '../../../helpers/channel-preferences'
-import { resolveChannelId } from '../../../helpers/channels'
+import { checkYoutubeChannelId, resolveChannelId } from '../../../helpers/channels'
 import { parseSpeedByChannelValues, resolveSpeedByChannelValues } from '../../../helpers/speed-by-channel-import'
 import { previewBackupImport, previewTakeoutImport, parseTakeoutSubscriptions, parseTakeoutWatchHistory, parseTakeoutSearchHistory } from '../../../helpers/import-preview'
 import FtImportPreview from '../../FtImportPreview/FtImportPreview.vue'
@@ -794,7 +794,7 @@ async function importSubscriptions() {
 
   try {
     if (filename.endsWith('.csv')) {
-      await importCsvYouTubeSubscriptions(content)
+      await importYouTubeSubscriptions(filename, content)
     } else if (filename.endsWith('.db')) {
       const records = parseImportedLineDelimitedJson(content)
       if (records !== null) {
@@ -821,7 +821,7 @@ async function importSubscriptions() {
           await importNewPipeSubscriptions(jsonContent)
           break
         case 'youtube':
-          await importYouTubeSubscriptions(jsonContent)
+          await importYouTubeSubscriptions(filename, content)
           break
         default:
           showToast({
@@ -1016,71 +1016,21 @@ async function importFreeTubeSubscriptions(profileRecords) {
 }
 
 /**
- * @param {string} textDecode
+ * Imports a YouTube subscriptions CSV or JSON export, which Takeout archives also contain.
+ * @param {string} filename
+ * @param {string} content
  */
-function importCsvYouTubeSubscriptions(textDecode) { // first row = header, last row = empty
-  return runWithDataImportProgress(async () => {
-    const youtubeSubscriptions = textDecode.split('\n').filter(sub => {
-      return sub !== ''
-    })
-    const subscriptions = []
+function importYouTubeSubscriptions(filename, content) {
+  let subscriptions
+  try {
+    subscriptions = parseTakeoutSubscriptions({ path: filename, content })
+  } catch (error) {
+    console.error(error)
+    showToast({ message: t('Settings.Data Settings.Invalid subscriptions file'), icon: ['fas', 'circle-exclamation'] })
+    return
+  }
 
-    const splitCSVRegex = /(?:,|\n|^)("(?:(?:"")|[^"])*"|[^\n",]*|(?:\n|$))/g
-
-    const ytsubs = youtubeSubscriptions.slice(1).map(yt => {
-      return [...yt.matchAll(splitCSVRegex)].map(s => {
-        let newVal = s[1]
-        if (newVal.startsWith('"')) {
-          newVal = newVal.substring(1, newVal.length - 1).replaceAll('""', '"')
-        }
-        return newVal
-      })
-    }).filter(channel => {
-      return channel.length > 0
-    })
-
-    ytsubs.forEach((yt) => {
-      subscriptions.push({
-        id: yt[0],
-        name: yt[2],
-        thumbnail: null
-      })
-    })
-
-    await addSubscriptionsToPrimaryProfile(subscriptions)
-  })
-}
-
-/**
- * @param {object} textDecode
- */
-function importYouTubeSubscriptions(textDecode) {
-  return runWithDataImportProgress(async progressOperation => {
-    const subscriptions = []
-    let count = 0
-
-    textDecode.forEach((channel) => {
-      const snippet = channel.snippet
-      if (typeof snippet === 'undefined') {
-        const message = t('Settings.Data Settings.Invalid subscriptions file')
-        showToast({ message: message, icon: ['fas', 'circle-exclamation'] })
-        throw new Error('Unable to find channel data')
-      }
-
-      subscriptions.push({
-        id: snippet.resourceId.channelId,
-        name: snippet.title,
-        thumbnail: snippet.thumbnails.default.url
-      })
-
-      count++
-
-      const progressPercentage = (count / (textDecode.length - 1)) * 100
-      progressOperation.update({ percentage: progressPercentage })
-    })
-
-    await addSubscriptionsToPrimaryProfile(subscriptions)
-  })
+  return runWithDataImportProgress(() => addSubscriptionsToPrimaryProfile(subscriptions))
 }
 
 /**
@@ -1145,8 +1095,9 @@ function importLibreTubeSubscriptions(libreTubeSubscriptions) {
  * @param {{ id: string | null | undefined, name: string, thumbnail: string | null }[]} subscriptions
  */
 async function addSubscriptionsToPrimaryProfile(subscriptions) {
-  // Merged with the saved subscriptions, which another window may change meanwhile
-  const profile = { _id: MAIN_PROFILE_ID, subscriptions: subscriptions.filter(channel => channel.id != null) }
+  // Merged with the saved subscriptions, which another window may change meanwhile.
+  // Every caller imports YouTube channels, so anything else is a malformed entry.
+  const profile = { _id: MAIN_PROFILE_ID, subscriptions: subscriptions.filter(channel => typeof channel.id === 'string' && checkYoutubeChannelId(channel.id)) }
   if (await store.dispatch('mergeImportedProfile', profile) !== true) {
     throw new Error('Could not import subscriptions')
   }
@@ -1542,10 +1493,7 @@ async function importLibreTubeWatchHistory(backupData) {
     historyItems: convertedHistoryItems,
     importedCount,
     skippedCount,
-  } = convertLibreTubeWatchHistoryToOpenTubeX(
-    backupData,
-    []
-  )
+  } = convertLibreTubeWatchHistoryToOpenTubeX(backupData)
 
   if (importedCount === 0) {
     showToast({ message: t('Settings.Data Settings.Invalid history file'), icon: ['fas', 'circle-exclamation'] })
@@ -1559,7 +1507,7 @@ async function importLibreTubeWatchHistory(backupData) {
     })
   }
 
-  if (await store.dispatch('importHistory', { records: [...convertedHistoryItems.values()], rule: 'replace' }) !== true) {
+  if (await store.dispatch('importHistory', { records: [...convertedHistoryItems.values()], rule: 'libretube' }) !== true) {
     throw new Error('Could not import history')
   }
 

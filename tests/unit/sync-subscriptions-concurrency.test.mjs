@@ -155,7 +155,7 @@ test('a subscription sync retry keeps a resubscribe made after the first attempt
     }
   }
 
-  const synced = await sync.syncSubscriptions(client, store, ['A', 'C'])
+  const synced = await sync.syncSubscriptions(client, store, ['A', 'C', 'D'])
 
   assert.deepEqual([...synced].sort(), ['A', 'B', 'C'])
   assert.deepEqual([...remote.keys()].sort(), ['A', 'B', 'C'])
@@ -176,7 +176,7 @@ test('a subscription sync retry keeps a resubscribe to a channel both sides had 
     return subscriptions
   }
 
-  const synced = await sync.syncSubscriptions(client, store, ['A', 'C'])
+  const synced = await sync.syncSubscriptions(client, store, ['A', 'C', 'D'])
 
   assert.deepEqual([...synced].sort(), ['A', 'B', 'C'])
   assert.deepEqual([...remote.keys()].sort(), ['A', 'B', 'C'])
@@ -184,7 +184,8 @@ test('a subscription sync retry keeps a resubscribe to a channel both sides had 
 })
 
 test('a subscription sync retry keeps a resubscribe made after the main profile saved the merge', async () => {
-  const { store, client, remote, mainIds } = await fixture([channel('A'), channel('C')], [channel('C')])
+  // The sync removes C and D, and D from the second profile after the main one
+  const { store, client, remote, mainIds } = await fixture([channel('A'), channel('C'), channel('D')], [channel('D')])
   for (const id of ['A', 'B']) remote.set(id, remoteChannel(id))
   const dispatch = store.dispatch
   let resubscribed = false
@@ -196,7 +197,7 @@ test('a subscription sync retry keeps a resubscribe made after the main profile 
     return dispatch(type, payload)
   }
 
-  const synced = await sync.syncSubscriptions(client, store, ['A', 'C'])
+  const synced = await sync.syncSubscriptions(client, store, ['A', 'C', 'D'])
 
   assert.deepEqual([...synced].sort(), ['A', 'B', 'C'])
   assert.deepEqual([...remote.keys()].sort(), ['A', 'B', 'C'])
@@ -242,5 +243,21 @@ test('adding a channel without a thumbnail to a profile saves it', async () => {
 
   await store.dispatch('addChannelToProfiles', { channel: { ...channel('A'), thumbnail: null }, profileIds: ['second'] })
 
+  assert.deepEqual((await db.profiles.findOneAsync({ _id: 'second' })).subscriptions.map(channel => channel.id), ['A'])
+})
+
+test('subscribing to a channel another window already saved does not store it twice', async () => {
+  const { db, ids } = await fixture([], [channel('A')])
+  const handlers = vm.runInNewContext(
+    handlersSource.slice(handlersSource.indexOf('class Profiles {'), handlersSource.indexOf('class Playlists {')) + '\nProfiles',
+    { MAIN_PROFILE_ID, db, loadProfilesDatastore: async () => {} }
+  )
+
+  // Both windows' stores lacked the channel, so both save it
+  await handlers.addChannelToProfiles(channel('A'), [MAIN_PROFILE_ID])
+  await handlers.addChannelToProfiles(channel('A'), [MAIN_PROFILE_ID])
+  await handlers.addChannelToProfiles(channel('A'), [MAIN_PROFILE_ID, 'second'])
+
+  assert.deepEqual(await ids(), ['A'])
   assert.deepEqual((await db.profiles.findOneAsync({ _id: 'second' })).subscriptions.map(channel => channel.id), ['A'])
 })

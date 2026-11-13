@@ -16,7 +16,7 @@ import utils from './modules/utils'
 import player from './modules/player'
 import tabs from './modules/tabs'
 import watchStats from './modules/watch-stats'
-import wellbeing from './modules/wellbeing'
+import wellbeing, { shareWellbeingAcrossWindows } from './modules/wellbeing'
 import watchQueue, { persistWatchQueue } from './modules/watch-queue'
 import syncServer from './modules/sync-server'
 import { getProfileSyncSignature } from '../helpers/profile-sync'
@@ -140,7 +140,7 @@ export default createStore({
   // but we have to turn it off despite its usefulness as we have so much data in the store
   // that it causes a noticable slow-down :(
   strict: false,
-  plugins: [syncOnLocalChanges, trackHistoryChanges, confirmLocalSyncDeletions, reloadRecommendationEvidenceAfterHistoryRemoval, persistWatchQueue]
+  plugins: [syncOnLocalChanges, trackHistoryChanges, confirmLocalSyncDeletions, reloadRecommendationEvidenceAfterHistoryRemoval, persistWatchQueue, shareWellbeingAcrossWindows]
 
   // TODO: Enable when deploy
   // plugins: [createPersistedState()]

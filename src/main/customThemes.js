@@ -14,7 +14,9 @@ import {
 } from '../customTheme'
 import { resolveSystemTheme, resolveSystemThemeSettings } from '../appearanceSettings'
 import * as baseHandlers from '../datastores/handlers/base'
+import { createSerialQueue } from './serialQueue'
 import { isOpenTubeXUrl } from './utils'
+import { isTrustedSender } from './ipc'
 import { writeFileAtomic } from './writeFileAtomic'
 
 /**
@@ -26,6 +28,8 @@ import { writeFileAtomic } from './writeFileAtomic'
  */
 export function setupCustomThemes({ updateSettingFromMain, updateThemeSource }) {
   const CUSTOM_THEMES_PATH = path.join(app.getPath('userData'), CUSTOM_THEMES_DIRECTORY)
+  // A replacement deletes the files it does not list, so it must not interleave with saves.
+  const runThemeChange = createSerialQueue()
 
   function getCustomThemePath(id) {
     if (!/^[\w-]{1,80}$/.test(id)) throw new TypeError('Invalid custom theme ID')
@@ -68,8 +72,19 @@ export function setupCustomThemes({ updateSettingFromMain, updateThemeSource }) 
     return await loadCustomThemes()
   }
 
-  async function replaceCustomThemes(themes) {
+  /** Sorted by ID, so lists compare equal regardless of their order */
+  function themesById(themes) {
+    return JSON.stringify(normalizeCustomThemes(themes).toSorted((left, right) => left.id.localeCompare(right.id)))
+  }
+
+  /**
+   * @param {unknown} themes
+   * @param {unknown} [expected] the themes the caller merged against. If they changed
+   *   meanwhile, nothing is replaced and the result is `null`.
+   */
+  async function replaceCustomThemes(themes, expected) {
     const normalizedThemes = normalizeCustomThemes(themes)
+    if (expected !== undefined && themesById(await loadCustomThemes()) !== themesById(expected)) return null
     const themeIds = new Set()
     for (const theme of normalizedThemes) {
       if (themeIds.has(theme.id)) throw new TypeError(`Duplicate custom theme ID: ${theme.id}`)
@@ -127,64 +142,71 @@ export function setupCustomThemes({ updateSettingFromMain, updateThemeSource }) 
   }
 
   ipcMain.handle(IpcChannels.CUSTOM_THEME_LOAD, async (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame?.url)) return
+    if (!isTrustedSender(event)) return
     return await loadCustomThemes()
   })
 
   ipcMain.handle(IpcChannels.CUSTOM_THEME_SAVE, async (event, theme) => {
-    if (!isOpenTubeXUrl(event.senderFrame?.url)) return
+    if (!isTrustedSender(event)) return
 
-    const themes = await saveCustomTheme(theme)
-    await repairSystemThemeSettingsFromMain(themes)
-    await publishCustomThemes(themes)
-    return themes
+    return runThemeChange(async () => {
+      const themes = await saveCustomTheme(theme)
+      await repairSystemThemeSettingsFromMain(themes)
+      await publishCustomThemes(themes)
+      return themes
+    })
   })
 
-  ipcMain.handle(IpcChannels.CUSTOM_THEME_REPLACE, async (event, themes) => {
-    if (!isOpenTubeXUrl(event.senderFrame?.url)) return
+  ipcMain.handle(IpcChannels.CUSTOM_THEME_REPLACE, async (event, themes, expected) => {
+    if (!isTrustedSender(event)) return
 
-    const normalizedThemes = await replaceCustomThemes(themes)
-    await repairSystemThemeSettingsFromMain(normalizedThemes)
-    await publishCustomThemes(normalizedThemes)
-    return normalizedThemes
+    return runThemeChange(async () => {
+      const normalizedThemes = await replaceCustomThemes(themes, expected)
+      if (normalizedThemes === null) return null
+      await repairSystemThemeSettingsFromMain(normalizedThemes)
+      await publishCustomThemes(normalizedThemes)
+      return normalizedThemes
+    })
   })
 
   ipcMain.handle(IpcChannels.CUSTOM_THEME_DELETE, async (event, themeId) => {
-    if (!isOpenTubeXUrl(event.senderFrame?.url)) return
+    if (!isTrustedSender(event)) return
 
-    const deletedTheme = (await loadCustomThemes()).find(({ id }) => id === themeId)
-    const themes = await deleteCustomTheme(themeId)
-    if (deletedTheme) {
-      const deletedThemeValue = customThemeValue(themeId)
-      const [baseTheme, systemLightTheme, systemDarkTheme] = await Promise.all([
-        baseHandlers.settings._findOne('baseTheme'),
-        baseHandlers.settings._findOne('systemLightTheme'),
-        baseHandlers.settings._findOne('systemDarkTheme')
-      ])
-      if (systemLightTheme?.value === deletedThemeValue) {
-        await updateSettingFromMain(
-          'systemLightTheme',
-          resolveSystemTheme(deletedTheme.basedOn, 'light'),
-          deletedThemeValue
-        )
+    return runThemeChange(async () => {
+      const deletedTheme = (await loadCustomThemes()).find(({ id }) => id === themeId)
+      const themes = await deleteCustomTheme(themeId)
+      if (deletedTheme) {
+        const deletedThemeValue = customThemeValue(themeId)
+        const [baseTheme, systemLightTheme, systemDarkTheme] = await Promise.all([
+          baseHandlers.settings._findOne('baseTheme'),
+          baseHandlers.settings._findOne('systemLightTheme'),
+          baseHandlers.settings._findOne('systemDarkTheme')
+        ])
+        if (systemLightTheme?.value === deletedThemeValue) {
+          await updateSettingFromMain(
+            'systemLightTheme',
+            resolveSystemTheme(deletedTheme.basedOn, 'light'),
+            deletedThemeValue
+          )
+        }
+        if (systemDarkTheme?.value === deletedThemeValue) {
+          await updateSettingFromMain(
+            'systemDarkTheme',
+            resolveSystemTheme(deletedTheme.basedOn, 'dark'),
+            deletedThemeValue
+          )
+        }
+        if (baseTheme?.value === deletedThemeValue) {
+          await updateSettingFromMain('mainColor', deletedTheme.mainColor)
+          await updateSettingFromMain('secColor', deletedTheme.secondaryColor)
+          await updateSettingFromMain('baseTheme', deletedTheme.basedOn)
+          updateThemeSource(deletedTheme.basedOn)
+        }
       }
-      if (systemDarkTheme?.value === deletedThemeValue) {
-        await updateSettingFromMain(
-          'systemDarkTheme',
-          resolveSystemTheme(deletedTheme.basedOn, 'dark'),
-          deletedThemeValue
-        )
-      }
-      if (baseTheme?.value === deletedThemeValue) {
-        await updateSettingFromMain('mainColor', deletedTheme.mainColor)
-        await updateSettingFromMain('secColor', deletedTheme.secondaryColor)
-        await updateSettingFromMain('baseTheme', deletedTheme.basedOn)
-        updateThemeSource(deletedTheme.basedOn)
-      }
-    }
-    await repairSystemThemeSettingsFromMain(themes)
-    await publishCustomThemes(themes)
-    return themes
+      await repairSystemThemeSettingsFromMain(themes)
+      await publishCustomThemes(themes)
+      return themes
+    })
   })
 
   return { loadCustomThemes, getSelectedCustomTheme }

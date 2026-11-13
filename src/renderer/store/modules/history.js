@@ -167,8 +167,8 @@ const actions = {
 
   /**
    * @param {any} param0
-   * @param {{ records: object[], rule: 'replace' | 'takeout' }} payload imported records, which
-   *   replace the saved ones or, from Takeout, only fill what they lack
+   * @param {{ records: object[], rule: 'replace' | 'takeout' | 'libretube' }} payload imported records, which
+   *   replace the saved ones or, from Takeout and LibreTube, only fill what they lack
    */
   async importHistory({ commit }, { records, rule }) {
     try {

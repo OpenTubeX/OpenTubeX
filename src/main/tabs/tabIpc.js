@@ -1,6 +1,7 @@
 // @ts-check
 import { ipcMain } from 'electron'
 import { IpcChannels } from '../../constants.js'
+import { isTrustedSender } from '../ipc.js'
 import { TabManager } from './TabManager.js'
 import { replaceAllTabSessions } from './TabSessionStore.js'
 
@@ -25,7 +26,8 @@ export async function setupTabsIPC(options = {}) {
     TabManager.refreshStoredSkipSilenceSettings()
   ])
 
-  const getManager = event => TabManager.getFromWebContents(event.sender)
+  // Only OpenTubeX pages may control tabs, not a frame or document that navigated elsewhere
+  const getManager = event => isTrustedSender(event) ? TabManager.getFromWebContents(event.sender) : undefined
 
   ipcMain.on(IpcChannels.TABS_RENDERER_READY, (event) => {
     getManager(event)?.markRendererReady()

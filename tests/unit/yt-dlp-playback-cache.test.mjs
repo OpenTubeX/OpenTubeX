@@ -210,7 +210,7 @@ async function loadPersistentCache (directory, stringified) {
     DEFAULT_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB,
     normalizeYtDlpPlaybackCacheMaxEntrySize,
     TabManager: { getOpenVideoIds: () => new Set() },
-    isOpenTubeXUrl: () => true,
+    isTrustedSender: () => true,
     // Counts serialized entries; the whole-file write passes an array.
     JSON: { parse: JSON.parse, stringify: value => { if (!Array.isArray(value)) stringified.push(value.videoId); return JSON.stringify(value) } },
   }

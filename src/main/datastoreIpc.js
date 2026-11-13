@@ -136,6 +136,7 @@ export function setupDatastoreIpc({ datastoreRequests, onSettingUpserted, onSett
           return null
 
         case DBActions.GENERAL.DELETE:
+          if (typeof data !== 'string') return null
           await baseHandlers.settings.delete(data)
           onSettingDeleted(data)
           return null
@@ -652,14 +653,20 @@ export function setupDatastoreIpc({ datastoreRequests, onSettingUpserted, onSett
 
         case DBActions.PLAYLISTS.DELETE_ALL_VIDEOS:
           await baseHandlers.playlists.deleteAllVideosByPlaylistId(data)
-          // TODO: Syncing (implement only when it starts being used)
-          // syncOtherWindows(IpcChannels.SYNC_PLAYLISTS, event, { event: '_', data })
+          syncOtherWindows(
+            IpcChannels.SYNC_PLAYLISTS,
+            event,
+            { event: SyncEvents.PLAYLISTS.DELETE_ALL_VIDEOS, data }
+          )
           return null
 
         case DBActions.GENERAL.DELETE_MULTIPLE:
           await baseHandlers.playlists.deleteMultiple(data)
-          // TODO: Syncing (implement only when it starts being used)
-          // syncOtherWindows(IpcChannels.SYNC_PLAYLISTS, event, { event: '_', data })
+          syncOtherWindows(
+            IpcChannels.SYNC_PLAYLISTS,
+            event,
+            { event: SyncEvents.GENERAL.DELETE_MULTIPLE, data }
+          )
           return null
 
         case DBActions.GENERAL.DELETE_ALL:

@@ -8,7 +8,7 @@ import {
   DIAGNOSTIC_ENTRY_MAX_LENGTH,
   DIAGNOSTIC_LOG_LEVELS,
 } from '../diagnosticLog'
-import { isOpenTubeXUrl } from './utils'
+import { isTrustedSender } from './ipc'
 
 // One log for the main process and every tab, so a report from any tab
 // includes the yt-dlp and PO token failures that only the main process sees.
@@ -40,7 +40,7 @@ export function setupDiagnosticLogIpc() {
   ipcMain.on(IpcChannels.DIAGNOSTIC_LOG_ADD, (event, entry) => {
     if (
       restoreConsole === null ||
-      !isOpenTubeXUrl(event.senderFrame?.url) ||
+      !isTrustedSender(event) ||
       !DIAGNOSTIC_LOG_LEVELS.includes(entry?.level) ||
       typeof entry.message !== 'string'
     ) return
@@ -54,10 +54,10 @@ export function setupDiagnosticLogIpc() {
   })
 
   ipcMain.handle(IpcChannels.DIAGNOSTIC_LOG_GET, (event) => {
-    return isOpenTubeXUrl(event.senderFrame?.url) ? diagnosticLog.entries() : []
+    return isTrustedSender(event) ? diagnosticLog.entries() : []
   })
 
   ipcMain.handle(IpcChannels.DIAGNOSTIC_LOG_CLEAR, (event) => {
-    if (isOpenTubeXUrl(event.senderFrame?.url)) diagnosticLog.clear()
+    if (isTrustedSender(event)) diagnosticLog.clear()
   })
 }

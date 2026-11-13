@@ -1,20 +1,20 @@
 import { net } from 'electron'
-import { isOpenTubeXUrl } from './utils'
+import { isTrustedSender } from './ipc'
 import { createTwitchChatReplayRequest, readTwitchReplayResponse, TWITCH_CHAT_CLIENT_ID } from '../twitchChatReplayRequest'
 import { fetchTwitchLiveVod, fetchTwitchSubOnlyVod } from '../twitchSubOnlyVod'
 
 export async function handleTwitchSubOnlyVod(event, videoId) {
-  if (!isOpenTubeXUrl(event.senderFrame?.url) || typeof videoId !== 'string' || !/^\d{1,20}$/.test(videoId)) return null
+  if (!isTrustedSender(event) || typeof videoId !== 'string' || !/^\d{1,20}$/.test(videoId)) return null
   return fetchTwitchSubOnlyVod(videoId, (url, options) => net.fetch(url, options))
 }
 
 export async function handleTwitchLiveVod(event, login) {
-  if (!isOpenTubeXUrl(event.senderFrame?.url) || typeof login !== 'string') return null
+  if (!isTrustedSender(event) || typeof login !== 'string') return null
   return fetchTwitchLiveVod(login, (url, options) => net.fetch(url, options))
 }
 
 export async function handleTwitchChatReplayPage(event, videoId, position) {
-  if (!isOpenTubeXUrl(event.senderFrame?.url) || typeof videoId !== 'string' || !/^\d{1,20}$/.test(videoId)) return null
+  if (!isTrustedSender(event) || typeof videoId !== 'string' || !/^\d{1,20}$/.test(videoId)) return null
   const isCursor = typeof position === 'string' && position.length < 2048
   if (!isCursor && !(Number.isInteger(position) && position >= 0 && position <= 864000)) return null
 

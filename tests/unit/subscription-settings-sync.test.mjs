@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
 
+import { DEFAULT_CUSTOM_THEME } from '../../src/customTheme.js'
 import { DEFAULT_PROFILE_ICON } from '../../src/renderer/helpers/profileIcons.js'
 import { copySubscriptionChannelSettings, getChannelWithUpdatedSettings, getNextSubscriptionSettingsTimestamp, isValidSubscriptionSettingsTimestamp } from '../../src/renderer/helpers/subscription-channels.js'
 import * as subscriptionSync from '../../src/renderer/helpers/subscription-settings-sync.js'
@@ -474,4 +475,63 @@ test('a newer local edit back to the synced value beats an older remote edit', (
     now: 40,
   })
   assert.deepEqual(merged.value.item, { value: { shuffleByDefault: false }, updatedAt: 30 })
+})
+
+test('a setting edited while sync saves an earlier one keeps the edit', async (t) => {
+  const getSyncableSettingKeys = context.getSyncableSettingKeys
+  context.getSyncableSettingKeys = () => ['first', 'second']
+  t.after(() => { context.getSyncableSettingKeys = getSyncableSettingKeys })
+  const previous = { first: { key: 'first', value: 'local', updatedAt: 1 }, second: { key: 'second', value: false, updatedAt: 1 } }
+  const client = {
+    entries: [{ key: 'first', value: 'remote', updatedAt: 5 }, previous.second],
+    async getSettings() { return structuredClone(this.entries) },
+    async putSettings(value) { this.entries = structuredClone(value) },
+  }
+  const settings = { first: 'local', second: false, syncServerSettingsExcluded: [] }
+  const updates = []
+  const store = {
+    state: { profiles: { profileList: [{ subscriptions: [] }] }, settings, utils: { customThemes: [] } },
+    dispatch: async (action, value) => {
+      updates.push([action, value])
+      if (action === 'updateFirst') settings.second = true
+      settings[action.charAt(6).toLowerCase() + action.slice(7)] = value
+    },
+  }
+
+  await context.syncSettings(client, store, previous)
+
+  assert.deepEqual(updates, [['updateFirst', 'remote']])
+  assert.equal(settings.second, true)
+})
+
+test('a theme selection waits with its theme when another window changed the themes meanwhile', async (t) => {
+  const getSyncableSettingKeys = context.getSyncableSettingKeys
+  context.getSyncableSettingKeys = () => ['baseTheme']
+  // Another window saved a theme after this sync read them
+  context.replaceCustomThemes = async () => null
+  t.after(() => {
+    context.getSyncableSettingKeys = getSyncableSettingKeys
+    delete context.replaceCustomThemes
+  })
+  const theme = id => ({ ...structuredClone(DEFAULT_CUSTOM_THEME), id, name: id })
+  const remoteSelection = { key: 'baseTheme', value: 'custom:remote', updatedAt: 5 }
+  const client = {
+    entries: [{ key: 'customThemes', value: [theme('remote')], updatedAt: 5 }, remoteSelection],
+    async getSettings() { return structuredClone(this.entries) },
+    async putSettings(value) { this.entries = structuredClone(value) },
+  }
+  const updates = []
+  const store = {
+    state: {
+      profiles: { profileList: [{ subscriptions: [] }] },
+      settings: { baseTheme: 'custom:local', syncServerSettingsExcluded: [] },
+      utils: { customThemes: [theme('local')] },
+    },
+    dispatch: async (action, value) => { updates.push([action, value]) },
+  }
+
+  await context.syncSettings(client, store)
+
+  assert.deepEqual(updates, [])
+  assert.deepEqual(client.entries.find(entry => entry.key === 'baseTheme'), remoteSelection)
 })

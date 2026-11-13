@@ -192,11 +192,10 @@ export function detectSubscriptionJsonFormat(data) {
 
 /**
  * @param {object} backupData
- * @param {Map<string, any>} existingHistoryItems
  * @returns {{ historyItems: Map<string, any>, importedCount: number, skippedCount: number }}
  */
-export function convertLibreTubeWatchHistoryToOpenTubeX(backupData, existingHistoryItems) {
-  const historyItems = new Map(existingHistoryItems)
+export function convertLibreTubeWatchHistoryToOpenTubeX(backupData) {
+  const historyItems = new Map()
   const watchPositionsByVideoId = new Map()
 
   if (Array.isArray(backupData.watchPositions)) {

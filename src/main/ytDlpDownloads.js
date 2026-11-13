@@ -10,7 +10,7 @@ import { isAbsolute, join, relative, resolve, sep } from 'node:path'
 import { promisify } from 'node:util'
 import { app, powerMonitor, shell } from 'electron'
 import { settings } from '../datastores/handlers/base'
-import { isOpenTubeXUrl } from './utils'
+import { isTrustedSender } from './ipc'
 import { IpcChannels } from '../constants'
 import { createSerialQueue } from './serialQueue'
 import { writeFileAtomic } from './writeFileAtomic'
@@ -453,7 +453,7 @@ async function startYtDlpDownload(
   onQueued,
   previouslyAccepted = false
 ) {
-  if ((!previouslyAccepted && !isOpenTubeXUrl(event?.senderFrame?.url)) ||
+  if ((!previouslyAccepted && !(event && isTrustedSender(event))) ||
     typeof incomingPayload !== 'object' || incomingPayload === null) {
     return null
   }
@@ -1145,7 +1145,7 @@ export async function handleYtDlpDownload(event, payload, retryDownloadId, autom
     return queueYtDlpDownload(event, payload, automaticDownloadAuthorized)
   }
 
-  if (!isOpenTubeXUrl(event.senderFrame?.url) || !event.sender.isFocused() ||
+  if (!isTrustedSender(event) || !event.sender.isFocused() ||
     !Number.isInteger(retryDownloadId)) {
     return null
   }
@@ -1180,7 +1180,7 @@ export async function handleYtDlpDownload(event, payload, retryDownloadId, autom
  * @param {number} id
  */
 export function handleYtDlpCancelDownload(event, id) {
-  if (!isOpenTubeXUrl(event.senderFrame?.url)) {
+  if (!isTrustedSender(event)) {
     return
   }
 
@@ -1220,7 +1220,7 @@ function clearQueuePauseAfterLastIndividualResume() {
  * @param {number} [value]
  */
 export async function handleYtDlpControlDownload(event, id, action, value) {
-  if (!isOpenTubeXUrl(event.senderFrame?.url) || !event.sender.isFocused() || !Number.isInteger(id)) return false
+  if (!isTrustedSender(event) || !event.sender.isFocused() || !Number.isInteger(id)) return false
   await loadDownloadRecords()
   const record = downloadRecords.get(id)
   if (!record) return false
@@ -1295,7 +1295,7 @@ export async function handleYtDlpControlDownload(event, id, action, value) {
  * @param {'pause-all' | 'resume-all' | 'retry-all' | 'refresh'} action
  */
 export async function handleYtDlpQueueAction(event, action) {
-  if (!isOpenTubeXUrl(event.senderFrame?.url) || !event.sender.isFocused()) return false
+  if (!isTrustedSender(event) || !event.sender.isFocused()) return false
   await loadDownloadRecords()
   if (action === 'refresh') {
     await requestDownloadQueueDrain()
@@ -1380,7 +1380,7 @@ async function moveToTrash(destination) {
  * @param {number} id
  */
 export async function handleYtDlpOpenDownload(event, id) {
-  if (!isOpenTubeXUrl(event.senderFrame?.url) || !event.sender.isFocused() || !Number.isInteger(id)) {
+  if (!isTrustedSender(event) || !event.sender.isFocused() || !Number.isInteger(id)) {
     return false
   }
 
@@ -1404,7 +1404,7 @@ export async function handleYtDlpOpenDownload(event, id) {
  * @param {number} id
  */
 export async function handleYtDlpRemoveDownload(event, id) {
-  if (!isOpenTubeXUrl(event.senderFrame?.url) || !event.sender.isFocused() || !Number.isInteger(id)) {
+  if (!isTrustedSender(event) || !event.sender.isFocused() || !Number.isInteger(id)) {
     return false
   }
 
@@ -1438,7 +1438,7 @@ export async function handleYtDlpRemoveDownload(event, id) {
  * @param {import('electron').IpcMainInvokeEvent} event
  */
 export async function handleYtDlpListDownloads(event) {
-  if (!isOpenTubeXUrl(event.senderFrame?.url)) return []
+  if (!isTrustedSender(event)) return []
   await loadDownloadRecords()
   await restorePersistedDownloadQueue(event)
   return Promise.all([...downloadRecords.values()].map(async record => {
@@ -1520,7 +1520,7 @@ export async function getYtDlpDownloadFile(id, videoId, filePath = null) {
  * @param {number[]} ids
  */
 export async function handleYtDlpClearDownloads(event, ids) {
-  if (!isOpenTubeXUrl(event.senderFrame?.url) || !event.sender.isFocused() ||
+  if (!isTrustedSender(event) || !event.sender.isFocused() ||
     !Array.isArray(ids) || ids.some(id => !Number.isInteger(id))) {
     return false
   }

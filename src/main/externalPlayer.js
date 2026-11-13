@@ -5,7 +5,7 @@ import { BrowserWindow, dialog } from 'electron'
 import { settings } from '../datastores/handlers/base'
 import { createMainTranslator } from './mainTranslator'
 import { EXTERNAL_PLAYER_APPROVED_ARGS_SETTING } from './settingWriteGuard'
-import { isOpenTubeXUrl } from './utils'
+import { isTrustedSender } from './ipc'
 import { UnsupportedPlayerActions } from '../constants'
 
 /**
@@ -53,7 +53,7 @@ const externalPlayerCmdArgs = new Map()
  * @returns {Promise<ExternalPlayerResult | null>} null when nothing was requested
  */
 export async function handleOpenInExternalPlayer(event, payload) {
-  if (!isOpenTubeXUrl(event.senderFrame?.url) || !event.sender.isFocused()) {
+  if (!isTrustedSender(event) || !event.sender.isFocused()) {
     return null
   }
 

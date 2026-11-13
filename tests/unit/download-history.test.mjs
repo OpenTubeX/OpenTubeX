@@ -42,6 +42,7 @@ const [downloads] = await importWithStubs([sourceUrl('src/main/ytDlpDownloads.js
   },
   [sourceUrl('src/datastores/handlers/base.js')]: { settings: { _findOne: async () => null } },
   [sourceUrl('src/main/utils.js')]: { isOpenTubeXUrl: () => true },
+  [sourceUrl('src/main/ipc.js')]: { isTrustedSender: () => true },
   [sourceUrl('src/main/trashPlatform.js')]: { shouldUseGioTrash: () => false },
   [sourceUrl('src/main/ytDlpBinaries.js')]: { broadcastToRenderers: (...args) => broadcasts.push(args) },
   [sourceUrl('src/main/ytDlpPlayback.js')]: {},

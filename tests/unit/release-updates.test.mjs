@@ -3,10 +3,12 @@ import test from 'node:test'
 
 import {
   fetchReleasePages,
-  findUpdateRelease,
   findUpdateReleases,
   scheduleUpdateChecks
 } from '../../src/renderer/helpers/releaseUpdates.js'
+
+// The newest update, which the update banner shows
+const findUpdateRelease = (releases, installedVersion) => findUpdateReleases(releases, installedVersion)[0] ?? null
 
 const stableRelease = {
   name: 'OpenTubeX 0.30.0',

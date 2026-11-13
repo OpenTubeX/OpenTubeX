@@ -1,31 +1,36 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { buildRecommendationProfile, rankRecommendations, scoreRecommendationCandidates } from '../../src/renderer/helpers/recommendations.js'
+import { buildRecommendationProfile, buildRecommendationProfileAsync, rankRecommendationCandidatesAsync, scoreRecommendationCandidates } from '../../src/renderer/helpers/recommendations.js'
 const DAY = 86400000
 const now = Date.UTC(2026, 8, 6)
 const watched = (videoId, extra = {}) => ({ videoId, title: 'Linux desktop customization', authorId: 'linux', author: 'Linux channel', lengthSeconds: 600, watchProgress: 500, timeWatched: now, type: 'video', ...extra })
 const video = (videoId, extra = {}) => ({ videoId, title: 'Linux desktop shortcuts', authorId: 'new-channel', type: 'video', ...extra })
 const options = { now }
 const profile = (history, extra = {}) => buildRecommendationProfile(history, { ...options, ...extra })
-const rank = (candidates, history, extra = {}) => rankRecommendations(candidates, history, { ...options, ...extra })
+// Ranks the way Home does
+const rank = async (candidates, history, extra = {}) => {
+  const rankOptions = { ...options, ...extra }
+  const ranked = await rankRecommendationCandidatesAsync(candidates, await buildRecommendationProfileAsync(history, rankOptions), rankOptions)
+  return ranked.map(item => item.video)
+}
 const ids = list => list.map(video => video.videoId)
 
-test('empty or malformed history does not invent interests', () => {
+test('empty or malformed history does not invent interests', async () => {
   for (const history of [null, [], [null, {}, false], 'invalid']) {
     assert.deepEqual(profile(history).channels, [])
-    assert.deepEqual(rank([video('candidate')], history), [])
+    assert.deepEqual(await rank([video('candidate')], history), [])
   }
 })
-test('uses at most 1000 recent history videos but excludes every history ID', () => {
+test('uses at most 1000 recent history videos but excludes every history ID', async () => {
   const history = [watched('old', { authorId: 'old', timeWatched: now - DAY }), ...Array.from({ length: 1000 }, (_, i) => watched(`recent${i}`))]
   assert.deepEqual(profile(history).channels, ['linux'])
-  assert.deepEqual(rank([video('old'), video('unseen')], history).map(v => v.videoId), ['unseen'])
+  assert.deepEqual((await rank([video('old'), video('unseen')], history)).map(v => v.videoId), ['unseen'])
 })
-test('saved videos remain eligible to watch, while every history entry is excluded', () => {
-  assert.equal(rank([video('saved')], [], { saved: [watched('saved')] }).length, 1)
-  assert.deepEqual(rank([video('partial'), video('complete'), video('new')], [watched('partial', { watchProgress: 1 }), watched('complete', { isWatched: true })]).map(v => v.videoId), ['new'])
+test('saved videos remain eligible to watch, while every history entry is excluded', async () => {
+  assert.equal((await rank([video('saved')], [], { saved: [watched('saved')] })).length, 1)
+  assert.deepEqual((await rank([video('partial'), video('complete'), video('new')], [watched('partial', { watchProgress: 1 }), watched('complete', { isWatched: true })])).map(v => v.videoId), ['new'])
 })
-test('dismissal excludes the video and penalizes similar topics without blocking unrelated interests', () => {
+test('dismissal excludes the video and penalizes similar topics without blocking unrelated interests', async () => {
   const history = [watched('linux'), watched('food', { title: 'Sourdough bread baking', authorId: 'food' })]
   const linux = video('linux-new')
   const food = video('food-new', { title: 'Sourdough bread starter', authorId: 'baker' })
@@ -33,20 +38,20 @@ test('dismissal excludes the video and penalizes similar topics without blocking
   const before = scoreRecommendationCandidates([linux], profile(history), options)[0].score
   const after = scoreRecommendationCandidates([linux], profile(history, { records }), options)[0].score
   assert.ok(after < before / 2)
-  assert.equal(rank([linux, food, video('dismissed')], history, { records })[0].videoId, 'food-new')
+  assert.equal((await rank([linux, food, video('dismissed')], history, { records }))[0].videoId, 'food-new')
 })
-test('more-like-this feedback creates a persistent interest and a related seed', () => {
+test('more-like-this feedback creates a persistent interest and a related seed', async () => {
   const records = [{ ...video('liked', { title: 'Sourdough bread baking' }), feedback: 'positive', feedbackAt: now }]
   const p = profile([], { records })
   assert.ok(p.hasInterests)
   assert.equal(p.seeds[0].videoId, 'liked')
-  assert.equal(rank([video('bread', { title: 'Sourdough starter maintenance' })], [], { records }).length, 1)
+  assert.equal((await rank([video('bread', { title: 'Sourdough starter maintenance' })], [], { records })).length, 1)
 })
-test('hide-channel feedback excludes all of that channel, including related candidates', () => {
+test('hide-channel feedback excludes all of that channel, including related candidates', async () => {
   const records = [{ ...video('blocked'), feedback: 'blockChannel', feedbackAt: now }]
-  assert.deepEqual(rank([video('other', { recommendationSources: [{ type: 'related', id: 'seed' }] })], [watched('seed')], { records }), [])
+  assert.deepEqual(await rank([video('other', { recommendationSources: [{ type: 'related', id: 'seed' }] })], [watched('seed')], { records }), [])
 })
-test('appended recommendations count the shown feed toward channel caps and duplicate titles', () => {
+test('appended recommendations count the shown feed toward channel caps and duplicate titles', async () => {
   const history = [watched('seed'), watched('second-seed', { authorId: 'second' })]
   const kept = [...Array.from({ length: 3 }, (_, i) => video(`shown${i}`, { title: '', authorId: 'linux' })), video('shown-title'), video('shown-short', { title: 'Linux', authorId: 'third' })]
   const candidates = [
@@ -55,18 +60,18 @@ test('appended recommendations count the shown feed toward channel caps and dupl
     ...Array.from({ length: 2 }, (_, i) => video(`second${i}`, { title: '', authorId: 'second' })),
     video('duplicate', { authorId: 'second' }),
   ]
-  assert.deepEqual(ids(rank(candidates, history, { kept, limit: 24 })).sort(), ['second0', 'second1'])
-  assert.equal(rank(candidates, history, { kept, limit: kept.length + 1 }).length, 1)
+  assert.deepEqual(ids(await rank(candidates, history, { kept, limit: 24 })).sort(), ['second0', 'second1'])
+  assert.equal((await rank(candidates, history, { kept, limit: kept.length + 1 })).length, 1)
 })
-test('subscriptions provide a cold-start feed without inventing unrelated interests', () => {
-  assert.deepEqual(ids(rank([video('sub', { authorId: 'subscribed' }), video('other')], [], { subscriptions: [{ id: 'subscribed' }] })), ['sub'])
+test('subscriptions provide a cold-start feed without inventing unrelated interests', async () => {
+  assert.deepEqual(ids(await rank([video('sub', { authorId: 'subscribed' }), video('other')], [], { subscriptions: [{ id: 'subscribed' }] })), ['sub'])
 })
-test('invalid candidates and future dates cannot poison ranking; inputs are not mutated', () => {
+test('invalid candidates and future dates cannot poison ranking; inputs are not mutated', async () => {
   const history = [watched('seed')]
   const candidate = video('result')
   const before = structuredClone({ history, candidate })
-  assert.equal(rank([null, {}, { videoId: 7 }, { ...candidate, type: 'playlist' }, candidate], history)[0], candidate)
-  assert.deepEqual(rank([candidate], history, { limit: 0 }), [])
+  assert.equal((await rank([null, {}, { videoId: 7 }, { ...candidate, type: 'playlist' }, candidate], history))[0], candidate)
+  assert.deepEqual(await rank([candidate], history, { limit: 0 }), [])
   assert.deepEqual({ history, candidate }, before)
   assert.deepEqual(profile([watched('seed', { timeWatched: now + DAY })]).channelWeights, profile(history).channelWeights)
 })

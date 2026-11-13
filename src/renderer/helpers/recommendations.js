@@ -409,17 +409,7 @@ export function scoreRecommendationCandidates(candidates, profile, options) {
   return runSynchronously(scoreRecommendationCandidateSteps(candidates, profile, options))
 }
 
-export function diversifyRecommendations(scored, options) {
-  return runSynchronously(diversifyRecommendationSteps(scored, options))
-}
-
 export async function rankRecommendationCandidatesAsync(candidates, profile, options, isCancelled) {
   const scored = await runCooperatively(scoreRecommendationCandidateSteps(candidates, profile, options), isCancelled)
   return scored && runCooperatively(diversifyRecommendationSteps(scored, { ...options, kept: keptRecommendationItems(options?.kept, profile) }), isCancelled)
-}
-
-export function rankRecommendations(candidates, history, options = {}) {
-  const profile = buildRecommendationProfile(history, options)
-  return diversifyRecommendations(scoreRecommendationCandidates(candidates, profile, options), { ...options, kept: keptRecommendationItems(options.kept, profile) })
-    .map(item => item.video)
 }

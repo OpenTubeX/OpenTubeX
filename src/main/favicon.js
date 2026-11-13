@@ -1,6 +1,9 @@
+import { isIP } from 'node:net'
+import { Readable } from 'node:stream'
 import { decodeHTMLAttribute } from 'entities'
 
 import { getFaviconUrl } from '../searchEngines.js'
+import { isNonPublicNetworkAddress } from './utils.js'
 
 const MAX_ICON_BYTES = 262_144
 // Icons are declared in <head>, so the start of a page is enough to find them.
@@ -95,11 +98,104 @@ async function readAtMost(response, limit) {
 }
 
 /**
+ * @param {string} hostname
+ * @param {(hostname: string) => Promise<string[]>} resolveAddresses
+ * @returns {Promise<boolean | null>} null for hosts that cannot be resolved
+ */
+async function isNonPublicHost(hostname, resolveAddresses) {
+  const host = hostname.replaceAll(/^\[|\]$/g, '')
+  try {
+    const addresses = isIP(host) ? [host] : await resolveAddresses(host)
+    return addresses.length === 0 ? null : addresses.some(isNonPublicNetworkAddress)
+  } catch {
+    return null
+  }
+}
+
+/**
+ * A public engine's page must not make the app request addresses on the local
+ * network. Self-hosted engines, such as SearXNG, keep icons on their network.
+ * @param {string} iconUrl
+ * @param {string} pageUrl
+ * @param {(hostname: string) => Promise<string[]>} resolveAddresses
+ */
+export async function isAllowedIconUrl(iconUrl, pageUrl, resolveAddresses) {
+  const iconHost = new URL(iconUrl).hostname
+  const pageHost = new URL(pageUrl).hostname
+  if (iconHost === pageHost) return true
+  // A failed lookup must not grant the exception
+  return await isNonPublicHost(iconHost, resolveAddresses) === false || await isNonPublicHost(pageHost, resolveAddresses) === true
+}
+
+const MAX_ICON_REDIRECTS = 5
+// Marks icon requests that redirect to the local network or too often
+const REFUSED_ICON = 'OPENTUBEX_REFUSED_ICON'
+
+/**
+ * Requests `url` once without following a redirect.
+ * @param {(options: object) => import('electron').ClientRequest} request Electron's `net.request`
+ * @param {string} url
+ * @param {{ headers?: Record<string, string>, signal?: AbortSignal }} init
+ * @returns {Promise<{ response: Response } | { redirectUrl: string }>}
+ */
+function requestOnce(request, url, { headers = {}, signal }) {
+  return new Promise((resolve, reject) => {
+    const clientRequest = request({ url, redirect: 'manual' })
+    for (const [name, value] of Object.entries(headers)) clientRequest.setHeader(name, value)
+    const abort = () => {
+      clientRequest.abort()
+      reject(signal?.reason)
+    }
+    if (signal?.aborted) return abort()
+    signal?.addEventListener('abort', abort, { once: true })
+    clientRequest.on('redirect', (_statusCode, _method, redirectUrl) => {
+      clientRequest.abort()
+      resolve({ redirectUrl })
+    })
+    clientRequest.on('response', message => {
+      const responseHeaders = new Headers()
+      for (const [name, value] of Object.entries(message.headers)) {
+        for (const item of [value].flat()) responseHeaders.append(name, item)
+      }
+      const body = [204, 205, 304].includes(message.statusCode) ? null : Readable.toWeb(message)
+      resolve({ response: new Response(body, { status: message.statusCode, headers: responseHeaders }) })
+    })
+    clientRequest.on('error', reject)
+    clientRequest.end()
+  })
+}
+
+/**
+ * Fetches with Electron's `net.request`, which unlike `net.fetch` reports a
+ * redirect without following it, so each target is checked before it is requested.
+ * @param {(options: object) => import('electron').ClientRequest} request Electron's `net.request`
+ * @param {string} url
+ * @param {{ headers?: Record<string, string>, signal?: AbortSignal }} init
+ * @param {(url: string) => Promise<boolean>} isAllowed
+ * @returns {Promise<Response>}
+ */
+export async function fetchWithCheckedRedirects(request, url, init, isAllowed) {
+  for (let redirects = 0; redirects <= MAX_ICON_REDIRECTS; redirects++) {
+    const result = await requestOnce(request, url, init)
+    if ('response' in result) return result.response
+    if (!await isAllowed(result.redirectUrl)) throw refusedIconError('Refused an icon redirect to the local network')
+    url = result.redirectUrl
+  }
+  throw refusedIconError('Too many icon redirects')
+}
+
+/** @param {string} message */
+function refusedIconError(message) {
+  return Object.assign(new Error(message), { code: REFUSED_ICON })
+}
+
+/**
  * @param {string} searchUrl
  * @param {(input: string, init: RequestInit) => Promise<Response>} fetchPage
+ * @param {(hostname: string) => Promise<string[]>} resolveAddresses resolves a host name to its IP addresses
  * @returns {Promise<string>}
  */
-export async function resolveFaviconUrl(searchUrl, fetchPage) {
+export async function resolveFaviconUrl(searchUrl, fetchPage, resolveAddresses) {
   const fallback = getFaviconUrl(searchUrl)
   if (!fallback) return ''
 
@@ -113,7 +209,9 @@ export async function resolveFaviconUrl(searchUrl, fetchPage) {
     if (!contentType.includes('text/html')) return fallback
 
     const { data } = await readAtMost(response, MAX_HTML_BYTES)
-    return extractFaviconUrl(new TextDecoder().decode(data), response.url || homepage) ?? fallback
+    const iconUrl = extractFaviconUrl(new TextDecoder().decode(data), response.url || homepage)
+    // The configured engine decides, not a page it redirects to
+    return iconUrl && await isAllowedIconUrl(iconUrl, homepage, resolveAddresses) ? iconUrl : fallback
   } catch {
     return fallback
   }
@@ -125,9 +223,11 @@ export async function resolveFaviconUrl(searchUrl, fetchPage) {
  *
  * @param {string} iconUrl
  * @param {(input: string, init: RequestInit) => Promise<Response>} fetchIcon
+ * @param {string} [refusedUrl] what to show when the icon request is refused,
+ *   as the renderer would follow the refused redirect
  * @returns {Promise<string>}
  */
-export async function fetchFaviconDataUrl(iconUrl, fetchIcon) {
+export async function fetchFaviconDataUrl(iconUrl, fetchIcon, refusedUrl = '') {
   try {
     const response = await fetchIcon(iconUrl, {
       headers: { Accept: 'image/*' },
@@ -140,7 +240,7 @@ export async function fetchFaviconDataUrl(iconUrl, fetchIcon) {
     if (data.length === 0 || !complete) return iconUrl
 
     return `data:${contentType};base64,${data.toString('base64')}`
-  } catch {
-    return iconUrl
+  } catch (error) {
+    return error?.code === REFUSED_ICON ? refusedUrl : iconUrl
   }
 }

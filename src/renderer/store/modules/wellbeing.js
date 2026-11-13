@@ -82,6 +82,84 @@ function persist(state) {
   }
 }
 
+/**
+ * Counts played time toward the day's limits.
+ * @param {typeof state} state
+ * @param {{ date: string, seconds: number, isShort: boolean, recorded: boolean }} playback
+ */
+function addDayPlayback(state, { date, seconds, isShort, recorded }) {
+  // Time flushed after midnight can still belong to the previous day.
+  if (date > state.day.date) state.day = createDay(date)
+  if (date !== state.day.date) return
+  if (!recorded) state.day.unrecordedSeconds += seconds
+  if (isShort) state.day.shortsSeconds += seconds
+  if (isShort && !recorded) state.day.unrecordedShortsSeconds += seconds
+}
+
+/**
+ * Adopts the day of an open window. Its reply cannot include the time this
+ * window played since asking, as messages from one window arrive in order.
+ * @param {typeof state} state
+ * @param {{ day: ReturnType<typeof createDay>, own: ReturnType<typeof createDay> }} days the open
+ *   window's day, and the time this window played since asking
+ */
+function joinWellbeingDay(state, { day, own }) {
+  if (day.date > state.day.date) state.day = createDay(day.date)
+  if (day.date !== state.day.date) return
+  const ownDay = own.date === day.date ? own : createDay(day.date)
+  state.day.unrecordedSeconds = Math.max(state.day.unrecordedSeconds, day.unrecordedSeconds + ownDay.unrecordedSeconds)
+  // Saving subtracts the unrecorded Shorts time, so both counts come from the same window
+  const shortsSeconds = day.shortsSeconds + ownDay.shortsSeconds
+  if (shortsSeconds >= state.day.shortsSeconds) {
+    state.day.shortsSeconds = shortsSeconds
+    state.day.unrecordedShortsSeconds = day.unrecordedShortsSeconds + ownDay.unrecordedShortsSeconds
+  }
+  for (const kind of ['watch', 'shorts']) {
+    state.day.extraSeconds[kind] = Math.max(state.day.extraSeconds[kind], day.extraSeconds[kind])
+    state.day.ignored[kind] ||= day.ignored[kind]
+  }
+}
+
+// The limits count playback in every window, so windows share these changes.
+// The break reminder counts each window's own session.
+const SHARED_MUTATIONS = new Set(['addWellbeingPlayback', 'extendWellbeingLimit', 'setWellbeingBedtimeDismissed'])
+
+/**
+ * Store plugin that shares the limits' day and the bedtime dismissal with the
+ * other windows. Time that watch statistics do not record stays in memory, so
+ * the windows tell each other instead of saving it, and a new window asks the
+ * open ones for their day.
+ * @param {import('vuex').Store<any>} store
+ * @param {BroadcastChannel | null} [channel]
+ */
+export function shareWellbeingAcrossWindows(store, channel = typeof BroadcastChannel === 'undefined' ? null : new BroadcastChannel('opentubex-digital-wellbeing')) {
+  if (!channel) return
+  const id = crypto.randomUUID()
+  // The time this window played since asking for the open windows' day
+  const own = { day: createDay(store.state.wellbeing.day.date) }
+  store.subscribe(({ type, payload }, rootState) => {
+    if (type === 'addWellbeingPlayback') addDayPlayback(own, payload)
+    if (SHARED_MUTATIONS.has(type)) channel.postMessage({ type, payload, date: rootState.wellbeing.day.date })
+  })
+  channel.addEventListener('message', ({ data }) => {
+    if (data?.type === 'requestWellbeingDay') {
+      // The state is reactive, which messages cannot clone
+      channel.postMessage({ type: 'wellbeingDay', to: data.id, payload: JSON.parse(JSON.stringify(store.state.wellbeing.day)) })
+      return
+    }
+    if (data?.type === 'wellbeingDay') {
+      // Open windows already counted what the reply holds
+      if (data.to !== id) return
+      store.commit('applySharedWellbeingChange', { type: data.type, payload: { day: data.payload, own: own.day } })
+    } else {
+      store.commit('applySharedWellbeingChange', data)
+    }
+    // Another window may have saved its total before it counted this change
+    persist(store.state.wellbeing)
+  })
+  channel.postMessage({ type: 'requestWellbeingDay', id })
+}
+
 function recordsWatchStats(rootGetters) {
   return rootGetters.getRememberHistory && rootGetters.getEnableWatchStats
 }
@@ -166,13 +244,26 @@ const mutations = {
     if (now - state.lastPlaybackAt > BREAK_RESET_GAP_MS) state.sessionSeconds = 0
     state.sessionSeconds += seconds
     state.lastPlaybackAt = now
+    addDayPlayback(state, { date, seconds, isShort, recorded })
+  },
 
-    // Time flushed after midnight can still belong to the previous day.
-    if (date > state.day.date) state.day = createDay(date)
-    if (date !== state.day.date) return
-    if (!recorded) state.day.unrecordedSeconds += seconds
-    if (isShort) state.day.shortsSeconds += seconds
-    if (isShort && !recorded) state.day.unrecordedShortsSeconds += seconds
+  /**
+   * Applies a change another window made. The window that made it saved it.
+   * @param {typeof state} state
+   * @param {{ type: string, payload: any, date: string }} change
+   */
+  applySharedWellbeingChange(state, { type, payload, date }) {
+    if (type === 'wellbeingDay') joinWellbeingDay(state, payload)
+    else if (type === 'addWellbeingPlayback') addDayPlayback(state, payload)
+    else if (type === 'extendWellbeingLimit' && date === state.day.date) {
+      // Allowances only grow during a day, so a late message cannot take one back
+      state.day.extraSeconds[payload.kind] = Math.max(state.day.extraSeconds[payload.kind], payload.extraSeconds ?? 0)
+      state.day.ignored[payload.kind] ||= payload.ignore === true
+    } else if (type === 'setWellbeingBedtimeDismissed' && !(payload <= state.bedtimeDismissedNight)) {
+      mutations.setWellbeingBedtimeDismissed(state, payload)
+      // The reminder was dismissed in another window
+      if (state.prompt === 'bedtime') state.prompt = null
+    }
   },
 
   replaceWellbeingDay(state, day) {
