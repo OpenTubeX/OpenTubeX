@@ -127,8 +127,9 @@ test.describe('Channels on other platforms', () => {
     await expect(page.locator('.externalMediaCreator').getByRole('button', { name: 'Following' })).toBeVisible()
     expect(await page.evaluate(() => window.$store.getters.getFollowedChannels)).toEqual([followed(CHANNEL)])
 
-    // The creator opens the channel page in the app, not the website
-    await page.locator('.externalMediaCreatorProfile').click()
+    // The creator is a real link that opens the channel page in the app, not the website
+    await page.locator('.externalMediaCreatorProfile').focus()
+    await page.keyboard.press('Enter')
     await expect.poll(() => page.evaluate(() => {
       const { path, query } = window.$router.currentRoute.value
       return { path, query }

@@ -248,10 +248,7 @@
                 :is="creatorChannel ? 'router-link' : creatorUrl ? 'a' : 'span'"
                 v-if="creatorName"
                 class="externalMediaCreatorProfile"
-                :to="creatorChannel ? getPlatformChannelRoute(creatorChannel.platform, creatorChannel.id) : undefined"
-                :href="!creatorChannel && creatorUrl ? creatorUrl : undefined"
-                :target="!creatorChannel && creatorUrl ? '_blank' : undefined"
-                :rel="!creatorChannel && creatorUrl ? 'noopener noreferrer' : undefined"
+                v-bind="creatorLinkAttributes"
               >
                 <FtRetryImage
                   v-if="creatorAvatarUrl"
@@ -774,6 +771,11 @@ const creatorUrl = computed(() => safeWebUrl(info.value?.channel ? info.value.ch
 const creatorAvatarUrl = computed(() => safeWebUrl(info.value?.channel ? info.value.channelThumbnail : info.value?.uploaderThumbnail))
 // Only the creator's profile names the channel; the media URL can be a clip or VOD
 const creatorChannel = computed(() => findPlatformChannel(creatorUrl.value))
+// A fallthrough href, even an undefined one, would replace the router link's own
+const creatorLinkAttributes = computed(() => {
+  if (creatorChannel.value) return { to: getPlatformChannelRoute(creatorChannel.value.platform, creatorChannel.value.id) }
+  return creatorUrl.value ? { href: creatorUrl.value, target: '_blank', rel: 'noopener noreferrer' } : {}
+})
 const hideSharingActions = computed(() => store.getters.getHideSharingActions)
 const formattedViewCount = computed(() => {
   const count = info.value?.viewCount
