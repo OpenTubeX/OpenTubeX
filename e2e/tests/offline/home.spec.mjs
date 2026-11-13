@@ -232,6 +232,18 @@ test('shows local activity and keeps Home customization after relaunch', async (
   await expect(page.locator('[data-home-section="playlists"]')).toHaveCount(0)
   await expect(page.locator('[data-home-section]').first()).toHaveAttribute('data-home-section', 'watchStats')
 
+  const customizerRows = customizer.locator('.customizerItem')
+  const dragHandle = customizer.locator('[data-home-section-id="continueWatching"] .dragHandle')
+  await dragHandle.scrollIntoViewIfNeeded()
+  const source = await dragHandle.boundingBox()
+  const target = await customizerRows.first().boundingBox()
+  await page.mouse.move(source.x + source.width / 2, source.y + source.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(source.x + source.width / 2, target.y + target.height / 2, { steps: 10 })
+  await page.mouse.up()
+  await expect(customizerRows.first()).toHaveAttribute('data-home-section-id', 'continueWatching')
+  await expect(page.locator('[data-home-section]').nth(1)).toHaveAttribute('data-home-section', 'watchStats')
+
   // The UI updates optimistically; wait for the complete layout to reach storage.
   const expectedLayout = await page.evaluate(() => window.$store.getters.getHomeSectionLayout)
   await expect.poll(() => page.evaluate(async findAction => {
@@ -244,7 +256,8 @@ test('shows local activity and keeps Home customization after relaunch', async (
   await goTo(page, 'home')
 
   await expect(page.locator('[data-home-section="playlists"]')).toHaveCount(0)
-  await expect(page.locator('[data-home-section]').first()).toHaveAttribute('data-home-section', 'watchStats')
+  await expect(page.locator('[data-home-section]').first()).toHaveAttribute('data-home-section', 'continueWatching')
+  await expect(page.locator('[data-home-section]').nth(1)).toHaveAttribute('data-home-section', 'watchStats')
 })
 
 test('opens the subscriptions New feed from its Home summary', async ({ page }) => {
