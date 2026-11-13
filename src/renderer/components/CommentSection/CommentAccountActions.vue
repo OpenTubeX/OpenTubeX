@@ -210,9 +210,6 @@ async function handleDeletePrompt(value) {
 
 .commentAccountAction:focus-visible {
   background-color: var(--side-nav-hover-color);
-}
-
-.commentAccountAction:focus-visible {
   outline: 2px solid var(--primary-color);
   outline-offset: 2px;
 }
