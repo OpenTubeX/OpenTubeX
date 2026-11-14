@@ -7,6 +7,7 @@ import {
   holdPlaybackRateMultiplierFromSwitch,
   migrateSettingIds,
   scrollPlayerModeFromMiniPlayerSwitch,
+  thumbnailDataSaverModeFromSwitch,
   titleLineLimitFromSwitch,
 } from '../../datastores/settingsMigrations.js'
 
@@ -133,6 +134,13 @@ export function migrateLegacySettings(settings) {
       migratedSettings.holdPlaybackRateMultiplier = holdPlaybackRateMultiplierFromSwitch(migratedSettings.holdToDoublePlaybackSpeed)
     }
     delete migratedSettings.holdToDoublePlaybackSpeed
+  }
+
+  if (Object.hasOwn(migratedSettings, 'thumbnailDataSaver')) {
+    if (!Object.hasOwn(migratedSettings, 'thumbnailDataSaverMode')) {
+      migratedSettings.thumbnailDataSaverMode = thumbnailDataSaverModeFromSwitch(migratedSettings.thumbnailDataSaver)
+    }
+    delete migratedSettings.thumbnailDataSaver
   }
 
   if (Object.hasOwn(migratedSettings, 'moveDownloadsToQuickSettings')) {

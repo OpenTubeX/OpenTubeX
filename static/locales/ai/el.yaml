@@ -474,6 +474,10 @@ Settings:
       Network: δικτύου
       Disk: δίσκου
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Ανενεργό"
+      On Metered Networks: "Σε δίκτυα με χρέωση δεδομένων"
+      Always: "Πάντα"
     Built-in Streams:
       Built-in Streams: "Ενσωματωμένες ροές"
       Automatic: "Αυτόματα"

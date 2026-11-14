@@ -487,6 +487,10 @@ Settings:
       Network: பிணையம்
       Disk: வட்டு
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "முடக்கு"
+      On Metered Networks: "அளவிடப்பட்ட நெட்வொர்க்குகளில்"
+      Always: "எப்போதும்"
     Built-in Streams:
       Built-in Streams: "உள்ளமைந்த ஸ்ட்ரீம்கள்"
       Automatic: "தானியங்கு"

@@ -475,6 +475,10 @@ Settings:
       Network: rhwydwaith
       Disk: disg
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "I ffwrdd"
+      On Metered Networks: "Ar rwydweithiau â mesurydd"
+      Always: "Bob amser"
     Built-in Streams:
       Built-in Streams: "Ffrydiau adeiledig"
       Automatic: "Awtomatig"

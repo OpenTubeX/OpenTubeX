@@ -474,6 +474,10 @@ Settings:
       Network: rețea
       Disk: disc
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Dezactivat"
+      On Metered Networks: "În rețelele contorizate"
+      Always: "Întotdeauna"
     Built-in Streams:
       Built-in Streams: "Fluxuri integrate"
       Automatic: "Automat"

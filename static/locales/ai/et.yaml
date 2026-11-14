@@ -474,6 +474,10 @@ Settings:
       Network: võrgu
       Disk: ketta
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Väljas"
+      On Metered Networks: "Mahupiiranguga võrkudes"
+      Always: "Alati"
     Built-in Streams:
       Built-in Streams: "Sisseehitatud vood"
       Automatic: "Automaatne"

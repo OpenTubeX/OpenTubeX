@@ -524,6 +524,10 @@ Settings:
       Network: نیٹ ورک
       Disk: ڈسک
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "بند"
+      On Metered Networks: "میٹرڈ نیٹ ورکس پر"
+      Always: "ہمیشہ"
     Built-in Streams:
       Built-in Streams: "بلٹ اِن اسٹریمز"
       Automatic: "خودکار"

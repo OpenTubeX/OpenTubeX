@@ -498,6 +498,10 @@ Settings:
       Network: شبکه
       Disk: دیسک
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "خاموش"
+      On Metered Networks: "در شبکه‌های محدود"
+      Always: "همیشه"
     Built-in Streams:
       Built-in Streams: "جریان‌های داخلی"
       Automatic: "خودکار"

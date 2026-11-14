@@ -474,6 +474,10 @@ Settings:
       Network: ağ
       Disk: disk
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Kapalı"
+      On Metered Networks: "Sınırlı ağlarda"
+      Always: "Her zaman"
     Built-in Streams:
       Built-in Streams: "Yerleşik akışlar"
       Automatic: "Otomatik"

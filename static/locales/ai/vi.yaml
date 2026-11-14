@@ -474,6 +474,10 @@ Settings:
       Network: mạng
       Disk: ổ đĩa
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Tắt"
+      On Metered Networks: "Trên mạng đo lưu lượng"
+      Always: "Luôn luôn"
     Built-in Streams:
       Built-in Streams: "Luồng tích hợp"
       Automatic: "Tự động"

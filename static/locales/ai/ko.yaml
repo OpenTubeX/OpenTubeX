@@ -568,6 +568,10 @@ Settings:
       Disk: 디스크
   Return to Settings Menu: 설정 메뉴로 돌아가기
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "끄기"
+      On Metered Networks: "종량제 네트워크에서"
+      Always: "항상"
     Built-in Streams:
       Built-in Streams: "내장 스트림"
       Automatic: "자동"

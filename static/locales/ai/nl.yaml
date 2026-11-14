@@ -479,6 +479,10 @@ Settings:
       Network: netwerk
       Disk: schijf
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Uit"
+      On Metered Networks: "Op netwerken met datalimiet"
+      Always: "Altijd"
     Built-in Streams:
       Built-in Streams: "Ingebouwde streams"
       Automatic: "Automatisch"

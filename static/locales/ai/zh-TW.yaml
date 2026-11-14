@@ -474,6 +474,10 @@ Settings:
       Network: 網路
       Disk: 磁碟
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "關閉"
+      On Metered Networks: "計量付費網路"
+      Always: "一律"
     Built-in Streams:
       Built-in Streams: "內建串流"
       Automatic: "自動"

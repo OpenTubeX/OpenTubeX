@@ -479,6 +479,10 @@ Settings:
       Network: rede
       Disk: disco
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Desactivado"
+      On Metered Networks: "En redes con límite de datos"
+      Always: "Sempre"
     Built-in Streams:
       Built-in Streams: "Fluxos integrados"
       Automatic: "Automático"

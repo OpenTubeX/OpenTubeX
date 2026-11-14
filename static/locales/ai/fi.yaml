@@ -474,6 +474,10 @@ Settings:
       Network: verkko
       Disk: levytila
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Pois"
+      On Metered Networks: "Rajoitetuissa verkoissa"
+      Always: "Aina"
     Built-in Streams:
       Built-in Streams: "Sisäänrakennetut striimit"
       Automatic: "Automaattinen"

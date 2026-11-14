@@ -589,6 +589,10 @@ Settings:
       Disk: disko
   Return to Settings Menu: Grįžti į nustatymų meniu
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Išjungta"
+      On Metered Networks: "Matuojamuose tinkluose"
+      Always: "Visada"
     Built-in Streams:
       Built-in Streams: "Integruoti srautai"
       Automatic: "Automatiškai"

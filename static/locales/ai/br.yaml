@@ -474,6 +474,10 @@ Settings:
       Network: "ar rouedad"
       Disk: "ar bladenn"
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Lazhet"
+      On Metered Networks: "War ar rouedadoù muzuliet"
+      Always: "Atav"
     Built-in Streams:
       Built-in Streams: "Froudoù enframmet"
       Automatic: "Emgefreek"

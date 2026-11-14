@@ -474,6 +474,10 @@ Settings:
       Network: nettverk
       Disk: disk
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Av"
+      On Metered Networks: "På nettverk med datamåling"
+      Always: "Alltid"
     Built-in Streams:
       Built-in Streams: "Innebygde strømmer"
       Automatic: "Automatisk"
