@@ -14,7 +14,7 @@ globalThis.localStorage = {
 }
 const { default: wellbeing, shareWellbeingAcrossWindows } = await import('../../src/renderer/store/modules/wellbeing.js')
 const savedShortsSeconds = () => Object.values(JSON.parse(storage.get('OpenTubeX/digitalWellbeing')).windows)
-  .reduce((sum, time) => sum + time.shortsSeconds, 0)
+  .reduce((sum, seconds) => sum + seconds, 0)
 // Each window loads the module, and with it its own window ID
 const windowState = () => ({ ...structuredClone(wellbeing.state), windowId: crypto.randomUUID() })
 
@@ -211,9 +211,9 @@ test('time that a reply and a later message both hold counts once, and clearing 
       target.dispatchEvent(new MessageEvent('message', { data }))
     }
   }
-  const open = () => {
+  const open = (state = windowState) => {
     const store = createStore({
-      modules: { wellbeing: { ...wellbeing, state: windowState } },
+      modules: { wellbeing: { ...wellbeing, state } },
       getters: { getRememberHistory: () => true, getEnableWatchStats: () => false },
     })
     const channel = connect()
@@ -244,4 +244,18 @@ test('time that a reply and a later message both hold counts once, and clearing 
   second.store.dispatch('clearWellbeingTime')
   deliver()
   assert.deepEqual([first, second, third].map(({ store }) => store.state.wellbeing.day.unrecordedSeconds), [0, 0, 0])
+  // Saved time of a closed window that a reply from before the clear still holds
+  channels.length = 0
+  const withClosedWindow = () => {
+    const state = windowState()
+    state.day.windows.closed = { seq: 0, unrecordedSeconds: 0, shortsSeconds: 60, unrecordedShortsSeconds: 0 }
+    return state
+  }
+  const [open1, open2] = [open(withClosedWindow), open(withClosedWindow)]
+  deliver()
+  const opening = open()
+  deliver({ from: opening.channel })
+  for (const { store } of [open1, open2, opening]) store.dispatch('clearWellbeingTime')
+  deliver()
+  assert.deepEqual([open1, open2, opening].map(({ store }) => store.state.wellbeing.day.shortsSeconds), [0, 0, 0])
 })

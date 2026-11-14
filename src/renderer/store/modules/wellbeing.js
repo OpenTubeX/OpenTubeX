@@ -35,9 +35,10 @@ function createWindowTime(seq, shortsSeconds = 0) {
 function loadSavedWindows(saved) {
   // Versions before 0.38 saved one total
   if (Number.isFinite(saved.shortsSeconds)) return { earlier: createWindowTime(0, saved.shortsSeconds) }
+  // Saved time lacks the unrecorded time, so any count from an open window replaces it
   return Object.fromEntries(Object.entries(saved.windows ?? {})
-    .filter(([, time]) => Number.isFinite(time?.seq) && Number.isFinite(time.shortsSeconds))
-    .map(([id, time]) => [id, createWindowTime(time.seq, time.shortsSeconds)]))
+    .filter(([, seconds]) => Number.isFinite(seconds))
+    .map(([id, seconds]) => [id, createWindowTime(0, seconds)]))
 }
 
 /**
@@ -118,8 +119,8 @@ function persist(state) {
       // Saved by window, so a window that opens later does not count an open window's time twice.
       // Shorts watched without statistics stay private.
       windows: Object.fromEntries(Object.entries(windows)
-        .map(([id, time]) => [id, { seq: time.seq, shortsSeconds: time.shortsSeconds - time.unrecordedShortsSeconds }])
-        .filter(([, time]) => time.shortsSeconds > 0)),
+        .map(([id, time]) => [id, time.shortsSeconds - time.unrecordedShortsSeconds])
+        .filter(([, seconds]) => seconds > 0)),
       extraSeconds,
       ignored,
       bedtimeDismissedNight: state.bedtimeDismissedNight,
@@ -157,7 +158,7 @@ function joinWellbeingDay(state, day) {
   if (day.date !== state.day.date) return
   for (const [id, time] of Object.entries(day.windows)) {
     // This window's own time is always current
-    if (id !== state.windowId && !(time.seq < state.day.windows[id]?.seq)) state.day.windows[id] = { ...time }
+    if (id !== state.windowId && !(time.seq <= state.day.windows[id]?.seq)) state.day.windows[id] = { ...time }
   }
   sumWindows(state.day)
   for (const kind of day.extraSeconds ? ['watch', 'shorts'] : []) {
@@ -183,9 +184,12 @@ const TIME_MUTATIONS = new Set(['addWellbeingPlayback', 'clearWellbeingTime'])
 export function shareWellbeingAcrossWindows(store, channel = typeof BroadcastChannel === 'undefined' ? null : new BroadcastChannel('opentubex-digital-wellbeing')) {
   if (!channel) return
   const { windowId } = store.state.wellbeing
+  // Replies to a request from before the time was cleared would bring it back
+  let requestId = windowId
   // The state is reactive, which messages cannot clone
   const clone = value => JSON.parse(JSON.stringify(value))
   store.subscribe(({ type, payload }, { wellbeing: { day } }) => {
+    if (type === 'clearWellbeingTime') requestId = crypto.randomUUID()
     if (TIME_MUTATIONS.has(type) && day.windows[windowId]) {
       channel.postMessage({ type: 'wellbeingDay', payload: { date: day.date, windows: { [windowId]: clone(day.windows[windowId]) } } })
     }
@@ -197,12 +201,12 @@ export function shareWellbeingAcrossWindows(store, channel = typeof BroadcastCha
       return
     }
     // Replies go to the window that asked
-    if (data?.to != null && data.to !== windowId) return
+    if (data?.to != null && data.to !== requestId) return
     store.commit('applySharedWellbeingChange', data)
     // Another window may have saved its time before it counted this change
     persist(store.state.wellbeing)
   })
-  channel.postMessage({ type: 'requestWellbeingDay', id: windowId })
+  channel.postMessage({ type: 'requestWellbeingDay', id: requestId })
 }
 
 function recordsWatchStats(rootGetters) {
@@ -316,8 +320,8 @@ const mutations = {
 
   /**
    * Every window clears the time when the watch statistics are cleared. The other
-   * windows' time keeps its sequence, so a message they sent before clearing cannot
-   * outlast the cleared time they share next.
+   * windows' time keeps its sequence, so an older copy cannot replace it, and an open
+   * window's message from before it cleared cannot outlast the cleared time it shares next.
    * @param {typeof state} state
    */
   clearWellbeingTime(state) {
