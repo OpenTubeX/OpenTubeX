@@ -718,15 +718,30 @@ function parseImportedJson(content, invalidMessage) {
 function parseImportedLineDelimitedJson(content) {
   const { records, errors } = parseLineDelimitedJson(content)
 
-  errors.forEach((error) => {
-    console.error('Unable to parse imported JSON row', error)
+  errors.forEach(error => console.error('Unable to parse imported JSON row', error))
+  // Only the first row is named, so a file that is not JSON at all cannot raise a toast per line
+  if (errors.length > 0) {
     showToast({
-      message: t('Settings.Data Settings.Invalid JSON row, skipping item', { row: error.rowNumber }),
+      message: t('Settings.Data Settings.Invalid JSON row, skipping item', { row: errors[0].rowNumber }),
       icon: ['fas', 'circle-exclamation'],
     })
-  })
+  }
 
   return records.length === 0 ? null : records
+}
+
+/**
+ * Shows each warning of one import once. A file of the wrong kind can have
+ * thousands of rows, and a toast for each of them freezes the app.
+ */
+function createImportWarnings() {
+  const shown = new Set()
+  /** @param {string} message */
+  return (message) => {
+    if (shown.has(message)) return
+    shown.add(message)
+    showToast({ message, icon: ['fas', 'circle-exclamation'] })
+  }
 }
 
 /**
@@ -891,11 +906,16 @@ function convertOldFreeTubeFormatToNew(oldData) {
 }
 
 /**
- * Keeps the first entry for each channel ID.
- * @template {{ id: string }} T
- * @param {T[]} subscriptions
- * @returns {T[]}
+ * FreeTube's subscription-cache.db sits next to profiles.db and only holds
+ * the cached feeds of each channel, not the subscriptions themselves.
+ * @param {unknown[]} records
  */
+function isSubscriptionCacheFile(records) {
+  const feedKeys = ['videosTimestamp', 'liveStreamsTimestamp', 'shortsTimestamp', 'communityPostsTimestamp']
+  return records.some(record => isJsonObject(record) && feedKeys.some(key => Object.hasOwn(record, key))) &&
+    !records.some(record => isJsonObject(record) && Object.hasOwn(record, 'subscriptions'))
+}
+
 /**
  * The channels of an imported profile, or null when it has none to read
  * @param {unknown} subscriptions
@@ -909,6 +929,16 @@ function importedProfileChannels(subscriptions) {
  * @param {unknown[]} profileRecords
  */
 async function importFreeTubeSubscriptions(profileRecords) {
+  if (isSubscriptionCacheFile(profileRecords)) {
+    showToast({
+      message: t('Settings.Data Settings.Subscription cache file'),
+      icon: ['fas', 'circle-exclamation'],
+      time: 15000,
+    })
+    return
+  }
+
+  const warn = createImportWarnings()
   const firstEntry = profileRecords[0]
   if (
     isJsonObject(firstEntry) &&
@@ -946,16 +976,14 @@ async function importFreeTubeSubscriptions(profileRecords) {
     // to the app, so we'll only grab the data we need here.
 
     if (!isJsonObject(profileData)) {
-      const message = t('Settings.Data Settings.Profile object has insufficient data, skipping item')
-      showToast({ message: message, icon: ['fas', 'circle-exclamation'] })
+      warn(t('Settings.Data Settings.Profile object has insufficient data, skipping item'))
       return
     }
 
     const profileObject = {}
     Object.keys(profileData).forEach((key) => {
       if (!knownKeys.includes(key)) {
-        const message = t('Settings.Data Settings.Unknown data key')
-        showToast({ message: `${message}: ${key}`, icon: ['fas', 'circle-exclamation'] })
+        warn(`${t('Settings.Data Settings.Unknown data key')}: ${key}`)
       } else {
         profileObject[key] = profileData[key]
       }
@@ -964,8 +992,7 @@ async function importFreeTubeSubscriptions(profileRecords) {
     const hasAllRequiredKeys = requiredKeys.every(key => Object.hasOwn(profileObject, key))
     const channels = hasAllRequiredKeys ? importedProfileChannels(profileObject.subscriptions) : null
     if (channels === null || typeof profileObject._id !== 'string' || typeof profileObject.name !== 'string') {
-      const message = t('Settings.Data Settings.Profile object has insufficient data, skipping item')
-      showToast({ message: message, icon: ['fas', 'circle-exclamation'] })
+      warn(t('Settings.Data Settings.Profile object has insufficient data, skipping item'))
     } else {
       profileObject.subscriptions = channels
       const icon = Object.hasOwn(profileObject, 'icon') ? { icon: profileObject.icon } : {}
@@ -1423,6 +1450,7 @@ async function importFreeTubeWatchHistory(historyRecords) {
   // saved history, which another window may change meanwhile.
   const historyItems = new Map()
   let importedCount = 0
+  const warn = createImportWarnings()
 
   historyRecords.forEach((historyData) => {
     // We would technically already be done by the time the data is parsed,
@@ -1430,10 +1458,7 @@ async function importFreeTubeWatchHistory(historyRecords) {
     // to the app, so we'll only grab the data we need here.
 
     if (!isJsonObject(historyData)) {
-      showToast({
-        message: t('Settings.Data Settings.History object has insufficient data, skipping item'),
-        icon: ['fas', 'circle-exclamation'],
-      })
+      warn(t('Settings.Data Settings.History object has insufficient data, skipping item'))
       console.error('Invalid history record:', historyData)
       return
     }
@@ -1444,7 +1469,7 @@ async function importFreeTubeWatchHistory(historyRecords) {
       if (requiredKeys.includes(key) || optionalKeys.includes(key)) {
         historyObject[key] = historyData[key]
       } else if (!ignoredKeys.includes(key)) {
-        showToast({ message: `${t('Settings.Data Settings.Unknown data key')}: ${key}`, icon: ['fas', 'circle-exclamation'] })
+        warn(`${t('Settings.Data Settings.Unknown data key')}: ${key}`)
       }
       // Else do not import the key
     })
@@ -1452,10 +1477,7 @@ async function importFreeTubeWatchHistory(historyRecords) {
     const historyObjectKeysSet = new Set(Object.keys(historyObject))
     const missingKeys = requiredKeys.filter(x => !historyObjectKeysSet.has(x))
     if (missingKeys.length > 0) {
-      showToast({
-        message: t('Settings.Data Settings.History object has insufficient data, skipping item'),
-        icon: ['fas', 'circle-exclamation'],
-      })
+      warn(t('Settings.Data Settings.History object has insufficient data, skipping item'))
       console.error('Missing Keys: ', missingKeys, historyData)
     } else {
       // FreeTube history export does not have this data if the video was marked as watched manually, setting default value
@@ -1793,6 +1815,7 @@ async function importPlaylistDatabase(data) {
   /** @type {Map<string, object>} */
   const updates = new Map()
   let importedCount = 0
+  const warn = createImportWarnings()
 
   for (const playlistData of playlists) {
     await normalizeImportedPlaylistThumbnail(playlistData)
@@ -1804,8 +1827,7 @@ async function importPlaylistDatabase(data) {
     // to the app, so we'll only grab the data we need here.
 
     if (!isJsonObject(playlistData) || !Array.isArray(playlistData.videos)) {
-      const message = t('Settings.Data Settings.Playlist insufficient data', { playlist: '' })
-      showToast({ message: message, icon: ['fas', 'circle-exclamation'] })
+      warn(t('Settings.Data Settings.Playlist insufficient data', { playlist: '' }))
       return
     }
 
@@ -1815,8 +1837,7 @@ async function importPlaylistDatabase(data) {
 
     Object.keys(playlistData).forEach((key) => {
       if (!knownKeys.includes(key)) {
-        const message = `${t('Settings.Data Settings.Unknown data key')}: ${key}`
-        showToast({ message: message, icon: ['fas', 'circle-exclamation'] })
+        warn(`${t('Settings.Data Settings.Unknown data key')}: ${key}`)
       } else if (key === 'videos') {
         const videoArray = []
         playlistData.videos.forEach((video) => {
@@ -1858,8 +1879,7 @@ async function importPlaylistDatabase(data) {
 
     const allVideosSkipped = playlistData.videos.length > 0 && playlistObject.videos.length === 0
     if (countRequiredKeysPresent !== requiredKeys.length || allVideosSkipped) {
-      const message = t('Settings.Data Settings.Playlist insufficient data', { playlist: playlistData.playlistName })
-      showToast({ message: message, icon: ['fas', 'circle-exclamation'] })
+      warn(t('Settings.Data Settings.Playlist insufficient data', { playlist: playlistData.playlistName }))
       return
     }
 
@@ -2039,13 +2059,11 @@ async function importSearchHistory() {
  */
 async function importFreeTubeSearchHistory(searchHistoryRecords) {
   const importedEntries = []
+  const warn = createImportWarnings()
 
   searchHistoryRecords.forEach((entry) => {
     if (!isJsonObject(entry) || typeof entry._id !== 'string' || typeof entry.lastUpdatedAt !== 'number') {
-      showToast({
-        message: t('Settings.Data Settings.History object has insufficient data, skipping item'),
-        icon: ['fas', 'circle-exclamation'],
-      })
+      warn(t('Settings.Data Settings.History object has insufficient data, skipping item'))
       console.error('Missing keys:', entry)
     } else {
       importedEntries.push(normalizeSearchHistoryEntry({
@@ -2287,14 +2305,12 @@ async function importSettings() {
     rows = [importedSettings]
   }
   if (rows) {
+    const warn = createImportWarnings()
     importedSettings = Object.fromEntries(rows.filter((entry) => {
       if (isJsonObject(entry) && typeof entry._id === 'string' && Object.hasOwn(entry, 'value')) {
         return true
       }
-      showToast({
-        message: t('Settings.Data Settings.Setting object has insufficient data, skipping item'),
-        icon: ['fas', 'circle-exclamation'],
-      })
+      warn(t('Settings.Data Settings.Setting object has insufficient data, skipping item'))
       return false
     }).map(entry => [entry._id, entry.value]))
   }

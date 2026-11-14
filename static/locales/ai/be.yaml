@@ -1357,6 +1357,7 @@ Settings:
     Hide Channel Shows: Схаваць укладку «Шоу» канала
     Blur Blocked Items: Размываць заблакіраваныя элементы замест таго, каб хаваць іх
   Data Settings:
+    Subscription cache file: "Гэты файл толькі кэшуе відэа з вашых падпісак, а не самі каналы. Выберыце замест яго profiles.db або экспарт падпісак."
     Settings could not be imported: "Не ўдалося імпартаваць налады"
     Some settings could not be imported: "Не ўсе налады ўдалося імпартаваць (не ўдалося: {failed} з {total})"
     Scheduled backups: "Запланаваныя рэзервовыя копіі"

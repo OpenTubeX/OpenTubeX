@@ -1321,6 +1321,7 @@ Settings:
     Paused Interface Hide Delay: Töf áður en viðmót er falið í hléi
     Blur Blocked Items: Þoka útilokuð atriði í stað þess að fela þau
   Data Settings:
+    Subscription cache file: "Þessi skrá geymir aðeins myndskeið úr áskriftunum þínum í skyndiminni, ekki rásirnar. Veldu frekar profiles.db eða útflutning áskrifta."
     Settings could not be imported: "Ekki tókst að flytja inn stillingarnar"
     Some settings could not be imported: "Ekki tókst að flytja inn allar stillingar ({failed} af {total} mistókust)"
     Scheduled backups: "Áætluð öryggisafrit"

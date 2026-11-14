@@ -1319,6 +1319,7 @@ Settings:
     Paused Interface Hide Delay: Duraklatılmış Arayüzü Gizleme Gecikmesi
     Blur Blocked Items: Engellenen öğeleri gizlemek yerine bulanıklaştır
   Data Settings:
+    Subscription cache file: "Bu dosya yalnızca aboneliklerinizdeki videoları önbelleğe alır, kanalları değil. Bunun yerine profiles.db dosyasını veya bir abonelik dışa aktarımını seçin."
     Settings could not be imported: "Ayarlar içe aktarılamadı"
     Some settings could not be imported: "Ayarların tümü içe aktarılamadı ({total} ayardan {failed} tanesi başarısız oldu)"
     Scheduled backups: "Zamanlanmış yedeklemeler"

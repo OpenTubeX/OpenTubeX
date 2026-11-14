@@ -1324,6 +1324,7 @@ Settings:
     Hide Channel Shows: Ascunde fila „Emisiuni” a canalului
     Blur Blocked Items: Estompează elementele blocate în loc să le ascunzi
   Data Settings:
+    Subscription cache file: "Acest fișier stochează în cache doar videoclipurile din abonamentele tale, nu și canalele. Alege în schimb profiles.db sau un export al abonamentelor."
     Settings could not be imported: "Setările nu au putut fi importate"
     Some settings could not be imported: "Nu toate setările au putut fi importate (eșuate: {failed} din {total})"
     Scheduled backups: "Copii de siguranță programate"

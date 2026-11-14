@@ -1333,6 +1333,7 @@ Settings:
     Hide Channel Shows: إخفاء علامة التبويب "العروض" في القناة
     Blur Blocked Items: تمويه العناصر المحظورة بدلًا من إخفائها
   Data Settings:
+    Subscription cache file: "يخزّن هذا الملف مقاطع الفيديو من اشتراكاتك مؤقتًا فقط، وليس القنوات. اختر profiles.db أو ملف تصدير للاشتراكات بدلًا منه."
     Settings could not be imported: "تعذّر استيراد الإعدادات"
     Some settings could not be imported: "تعذّر استيراد بعض الإعدادات (فشل {failed} من {total})"
     Scheduled backups: "النسخ الاحتياطية المجدولة"

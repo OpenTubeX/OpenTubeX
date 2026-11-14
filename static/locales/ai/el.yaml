@@ -1320,6 +1320,7 @@ Settings:
     Hide Channel Shows: Απόκρυψη της καρτέλας «Εκπομπές» του καναλιού
     Blur Blocked Items: Θόλωση αποκλεισμένων στοιχείων αντί για απόκρυψή τους
   Data Settings:
+    Subscription cache file: "Αυτό το αρχείο αποθηκεύει προσωρινά μόνο τα βίντεο από τις συνδρομές σας, όχι τα κανάλια. Επιλέξτε profiles.db ή μια εξαγωγή συνδρομών."
     Settings could not be imported: "Δεν ήταν δυνατή η εισαγωγή των ρυθμίσεων"
     Some settings could not be imported: "Δεν ήταν δυνατή η εισαγωγή όλων των ρυθμίσεων (απέτυχαν {failed} από {total})"
     Scheduled backups: "Προγραμματισμένα αντίγραφα ασφαλείας"

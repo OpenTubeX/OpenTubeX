@@ -1320,6 +1320,7 @@ Settings:
     Hide Channel Shows: Piilota kanavan Ohjelmat-välilehti
     Blur Blocked Items: Sumenna estetyt kohteet niiden piilottamisen sijaan
   Data Settings:
+    Subscription cache file: "Tämä tiedosto tallentaa välimuistiin vain tilaustesi videot, ei kanavia. Valitse sen sijaan profiles.db tai tilausten vienti."
     Settings could not be imported: "Asetuksia ei voitu tuoda"
     Some settings could not be imported: "Kaikkia asetuksia ei voitu tuoda ({failed}/{total} epäonnistui)"
     Scheduled backups: "Ajastetut varmuuskopiot"

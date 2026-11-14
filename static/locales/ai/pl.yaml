@@ -840,6 +840,7 @@ Settings:
     Paused Interface Hide Delay: Opóźnienie ukrywania interfejsu po wstrzymaniu
     Blur Blocked Items: Rozmywaj zablokowane elementy zamiast je ukrywać
   Data Settings:
+    Subscription cache file: "Ten plik przechowuje w pamięci podręcznej tylko filmy z Twoich subskrypcji, a nie kanały. Zamiast niego wybierz profiles.db lub eksport subskrypcji."
     Settings could not be imported: "Nie udało się zaimportować ustawień"
     Some settings could not be imported: "Nie udało się zaimportować wszystkich ustawień (niepowodzenia: {failed} z {total})"
     Channel playback speeds: "Prędkości odtwarzania kanałów"

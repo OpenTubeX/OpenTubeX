@@ -1327,6 +1327,7 @@ Settings:
     Hide Channel Shows: Скриване на раздел "Предавания"
     Blur Blocked Items: Замъгляване на блокираните елементи вместо скриването им
   Data Settings:
+    Subscription cache file: "Този файл само кешира видеоклиповете от абонаментите ви, не каналите. Изберете profiles.db или експорт на абонаменти."
     Settings could not be imported: "Настройките не можаха да бъдат импортирани"
     Some settings could not be imported: "Не всички настройки можаха да бъдат импортирани (неуспешни: {failed} от {total})"
     Scheduled backups: "Планирани резервни копия"

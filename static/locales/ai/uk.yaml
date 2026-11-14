@@ -1333,6 +1333,7 @@ Settings:
     Hide Channel Shows: Приховати вкладку «Шоу» каналу
     Blur Blocked Items: Розмивати заблоковані елементи замість приховування
   Data Settings:
+    Subscription cache file: "Цей файл лише кешує відео з ваших підписок, а не самі канали. Натомість виберіть profiles.db або експорт підписок."
     Settings could not be imported: "Не вдалося імпортувати налаштування"
     Some settings could not be imported: "Не всі налаштування вдалося імпортувати (не вдалося: {failed} з {total})"
     Scheduled backups: "Заплановані резервні копії"

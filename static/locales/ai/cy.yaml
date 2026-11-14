@@ -1323,6 +1323,7 @@ Settings:
     Hide Channel Shows: Cuddio Tab "Sioeau" Sianel
     Blur Blocked Items: Niwlio eitemau wedi'u blocio yn lle eu cuddio
   Data Settings:
+    Subscription cache file: "Mae'r ffeil hon ond yn storio fideos o'ch tanysgrifiadau, nid y sianeli. Dewiswch profiles.db neu allforiad tanysgrifiadau yn lle."
     Settings could not be imported: "Methu mewnforio'r gosodiadau"
     Some settings could not be imported: "Methu mewnforio pob gosodiad ({failed} o {total} wedi methu)"
     Scheduled backups: "Copïau wrth gefn wedi’u hamserlennu"

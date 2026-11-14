@@ -1464,6 +1464,7 @@ Settings:
     Remove: Fjern
     Blur Blocked Items: Gjer blokkerte element uskarpe i staden for å gøyma dei
   Data Settings:
+    Subscription cache file: "Denne fila mellomlagrar berre videoane frå abonnementa dine, ikkje kanalane. Vel profiles.db eller ein eksport av abonnement i staden."
     Settings could not be imported: "Innstillingane kunne ikkje importerast"
     Some settings could not be imported: "Ikkje alle innstillingane kunne importerast ({failed} av {total} mislukkast)"
     Scheduled backups: "Planlagde tryggleikskopiar"

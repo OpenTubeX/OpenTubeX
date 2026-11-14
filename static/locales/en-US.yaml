@@ -1989,6 +1989,7 @@ Settings:
     All subscriptions have been successfully imported: All subscriptions have been
       successfully imported
     Invalid subscriptions file: Invalid subscriptions file
+    Subscription cache file: This file only caches the videos from your subscriptions, not the channels. Choose profiles.db or a subscriptions export instead.
     Invalid history file: Invalid history file
     Invalid JSON row, skipping item: 'Invalid JSON at row {row}, skipping item'
     Subscriptions have been successfully exported: Subscriptions have been successfully

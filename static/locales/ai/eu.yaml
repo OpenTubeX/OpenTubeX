@@ -1319,6 +1319,7 @@ Settings:
     Paused Interface Hide Delay: Pausatutako interfazea ezkutatzeko atzerapena
     Blur Blocked Items: Lausotu blokeatutako elementuak ezkutatu beharrean
   Data Settings:
+    Subscription cache file: "Fitxategi honek zure harpidetzetako bideoak soilik gordetzen ditu cachean, ez kanalak. Aukeratu profiles.db edo harpidetzen esportazio bat."
     Settings could not be imported: "Ezin izan dira ezarpenak inportatu"
     Some settings could not be imported: "Ezin izan dira ezarpen guztiak inportatu ({total}etik {failed} huts egin dute)"
     Scheduled backups: "Programatutako babeskopiak"

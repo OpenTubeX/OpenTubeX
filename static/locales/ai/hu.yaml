@@ -1319,6 +1319,7 @@ Settings:
     Paused Interface Hide Delay: Szüneteltetett kezelőfelület elrejtési késleltetése
     Blur Blocked Items: Letiltott elemek elhomályosítása elrejtés helyett
   Data Settings:
+    Subscription cache file: "Ez a fájl csak a feliratkozásaid videóit tárolja gyorsítótárban, a csatornákat nem. Válaszd helyette a profiles.db fájlt vagy egy feliratkozás-exportot."
     Settings could not be imported: "A beállításokat nem sikerült importálni"
     Some settings could not be imported: "Nem minden beállítást sikerült importálni ({total} beállításból {failed} sikertelen)"
     Scheduled backups: "Ütemezett biztonsági mentések"

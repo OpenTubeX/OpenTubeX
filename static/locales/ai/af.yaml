@@ -1508,6 +1508,7 @@ Settings:
     Remove: Verwyder
     Blur Blocked Items: Vervaag geblokkeerde items in plaas daarvan om hulle te versteek
   Data Settings:
+    Subscription cache file: "Hierdie lêer kas net die video's van jou intekeninge, nie die kanale nie. Kies eerder profiles.db of 'n uitvoer van intekeninge."
     Settings could not be imported: "Instellings kon nie ingevoer word nie"
     Some settings could not be imported: "Nie alle instellings kon ingevoer word nie ({failed} van {total} het misluk)"
     Scheduled backups: Geskeduleerde rugsteune

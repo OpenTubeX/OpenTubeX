@@ -1301,6 +1301,7 @@ Settings:
     Hide Channel Shows: Hide Channel "Shows" Tab
     Blur Blocked Items: Blur blocked items instead of hiding them
   Data Settings:
+    Subscription cache file: "This file only caches the videos from your subscriptions, not the channels. Choose profiles.db or a subscriptions export instead."
     Settings could not be imported: "Settings could not be imported"
     Some settings could not be imported: "{failed} of {total} settings could not be imported"
     Scheduled backups: "Scheduled backups"

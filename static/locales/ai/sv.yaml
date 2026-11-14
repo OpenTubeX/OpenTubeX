@@ -1319,6 +1319,7 @@ Settings:
     Paused Interface Hide Delay: Fördröjning innan pausgränssnittet döljs
     Blur Blocked Items: Gör blockerade objekt suddiga i stället för att dölja dem
   Data Settings:
+    Subscription cache file: "Den här filen cachar bara videorna från dina prenumerationer, inte kanalerna. Välj profiles.db eller en export av prenumerationer i stället."
     Settings could not be imported: "Inställningarna kunde inte importeras"
     Some settings could not be imported: "Alla inställningar kunde inte importeras ({failed} av {total} misslyckades)"
     Scheduled backups: "Schemalagda säkerhetskopior"

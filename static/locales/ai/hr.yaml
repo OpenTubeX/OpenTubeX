@@ -1327,6 +1327,7 @@ Settings:
     Hide Channel Shows: Sakrij karticu "Emisije" kanala
     Blur Blocked Items: Zamuti blokirane stavke umjesto skrivanja
   Data Settings:
+    Subscription cache file: "Ova datoteka samo sprema u predmemoriju videozapise iz tvojih pretplata, ne kanale. Umjesto nje odaberi profiles.db ili izvoz pretplata."
     Settings could not be imported: "Postavke nije bilo moguće uvesti"
     Some settings could not be imported: "Nije bilo moguće uvesti sve postavke (neuspjelo: {failed} od {total})"
     Scheduled backups: "Zakazane sigurnosne kopije"

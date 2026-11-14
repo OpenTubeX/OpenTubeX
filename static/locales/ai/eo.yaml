@@ -1355,6 +1355,7 @@ Settings:
     Paused Interface Hide Delay: Prokrasto de kaŝo de la interfaco dum paŭzo
     Blur Blocked Items: Nebuligi blokitajn erojn anstataŭ kaŝi ilin
   Data Settings:
+    Subscription cache file: "Ĉi tiu dosiero nur kaŝmemoras la videojn de viaj abonoj, ne la kanalojn. Elektu anstataŭe profiles.db aŭ eksporton de abonoj."
     Settings could not be imported: "Ne eblis importi la agordojn"
     Some settings could not be imported: "Ne eblis importi ĉiujn agordojn ({failed} el {total} malsukcesis)"
     Scheduled backups: Planitaj savkopioj

@@ -282,3 +282,35 @@ test('invalid-only line-delimited imports do not report success', async ({ page 
 
   expect(pageErrors).toEqual([])
 })
+
+test('importing the FreeTube subscription cache as subscriptions points to the right file', async ({ page }) => {
+  const dataSection = await goToSettingsSection(page, 'data')
+  const subscriptionsBefore = await page.evaluate(() => window.$store.getters.getProfileList[0].subscriptions.length)
+  const videos = [watchRecord('cache000001', 1)]
+  await mockImportFile(page, 'subscription-cache.db', Array.from({ length: 500 }, (_, index) => JSON.stringify({
+    _id: `UC${String(index).padStart(22, '0')}`,
+    videos,
+    videosTimestamp: 1,
+    shorts: videos,
+    shortsTimestamp: 1,
+    liveStreams: [],
+    liveStreamsTimestamp: 1,
+    communityPosts: [],
+    communityPostsTimestamp: 1
+  })).join('\n'))
+  await dataSection.getByRole('button', { name: 'Import subscriptions', exact: true }).click()
+
+  await expect(page.locator('.toast')).toHaveText(/Choose profiles\.db or a subscriptions export instead/)
+  expect(await page.evaluate(() => window.$store.getters.getProfileList[0].subscriptions.length)).toBe(subscriptionsBefore)
+})
+
+test('a large file of the wrong kind warns once per problem instead of freezing', async ({ page }) => {
+  const dataSection = await goToSettingsSection(page, 'data')
+  await mockImportFile(page, 'history.db', Array.from({ length: 5000 }, (_, index) => (
+    JSON.stringify(watchRecord(`wrong${index}`, index))
+  )).join('\n'))
+  await dataSection.getByRole('button', { name: 'Import subscriptions', exact: true }).click()
+
+  await expect(page.locator('.toast', { hasText: 'Profile object has insufficient data, skipping item' })).toHaveCount(1)
+  await expect(page.locator('.toast', { hasText: 'Unknown data key: videoId' })).toHaveCount(1)
+})
