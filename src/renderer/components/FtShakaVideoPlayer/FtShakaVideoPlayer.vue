@@ -3378,6 +3378,15 @@ let miniPlayerHandoffHeight = props.miniPlayerStartHeight
 // while its Watch page is hidden.
 const presentedOutsideTab = computed(() => isCrossTabMiniPlayerPresented.value ||
   pictureInPictureActive.value || miniPlayerStartPending.value || pictureInPictureStartPending.value)
+const playerVisible = computed(() => playerIsPresented.value || presentedOutsideTab.value)
+// Shown Shaka controls refresh several times a second and measure their
+// layout each time, and a paused player never hides them. Disable them in
+// hidden tabs, where every open watch tab would otherwise keep doing that.
+watch(playerVisible, visible => {
+  ui?.setEnabled(visible)
+  // Disabled controls ignore buffering changes, so refresh their spinner.
+  if (visible) player?.dispatchEvent(new shaka.util.FakeEvent('buffering', { buffering: player.isBuffering() }))
+})
 
 const {
   getAutoPictureInPictureState,
@@ -4381,7 +4390,7 @@ const progressivePlayback = ref(false)
 
 // A paused video in a hidden tab, such as one opened in the background,
 // only buffers its start, so it doesn't slow down the video the user watches.
-const bufferingHidden = computed(() => !playerIsPresented.value && !presentedOutsideTab.value && playerPaused.value)
+const bufferingHidden = computed(() => !playerVisible.value && playerPaused.value)
 
 /** @type {import('vue').ComputedRef<ReturnType<typeof getBufferingConfig>>} */
 const bufferingConfig = computed(() => getBufferingConfig({
@@ -11757,6 +11766,7 @@ onMounted(async () => {
     return
   }
 
+  if (!playerVisible.value) ui.setEnabled(false)
   const controls = ui.getControls()
   captionCueLayoutCleanup = setupCaptionCueLayout(container.value)
   if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
