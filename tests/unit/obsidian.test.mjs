@@ -18,6 +18,7 @@ test('only builds an Obsidian URI that appends to a note by name', () => {
     { vault: 'v', name: 'n', content: 1 },
     { vault: 'v', name: '../n', content: 'c' },
     { vault: 'v', name: 'folder\\n', content: 'c' },
+    { vault: 'v', name: 'n', content: '\uD800' },
   ]) {
     assert.equal(getObsidianAppendUri(note), null)
   }

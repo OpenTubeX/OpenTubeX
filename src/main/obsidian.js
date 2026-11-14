@@ -10,7 +10,8 @@
 export function getObsidianAppendUri(note) {
   if (note === null || typeof note !== 'object') return null
   const { vault, name, content } = /** @type {Record<string, unknown>} */ (note)
-  if (![vault, name, content].every(value => typeof value === 'string' && value.trim() !== '')) return null
+  // encodeURIComponent throws for lone surrogates
+  if (![vault, name, content].every(value => typeof value === 'string' && value.trim() !== '' && value.isWellFormed())) return null
   // A name is not a path into other folders
   if (/[/\\]/.test(/** @type {string} */ (name))) return null
 

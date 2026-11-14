@@ -2,6 +2,7 @@
   <FtPrompt
     autosize
     fixed-layout
+    :busy="busy"
     :label="t('Video.Player.Timestamp Notes.Note at {time}', { time: timestamp })"
     @click="close"
   >
@@ -10,6 +11,7 @@
         ref="noteInput"
         class="noteInput"
         :label="t('Video.Player.Timestamp Notes.Note')"
+        placeholder=""
         :icon="['fas', 'note-sticky']"
         :value="note"
         :maxlength="5000"
@@ -119,12 +121,11 @@ function handleKeydown(event) {
 async function copy() {
   if (busy.value) return
   busy.value = true
-  try {
-    await copyToClipboard(markdown.value, { messageOnSuccess: t('Video.Player.Timestamp Notes.Copied') })
-  } finally {
-    busy.value = false
-  }
-  close()
+  // Failures are reported with a toast instead of thrown
+  const copied = await copyToClipboard(markdown.value, { messageOnSuccess: t('Video.Player.Timestamp Notes.Copied') })
+  busy.value = false
+  // Keep the note open to try again, since an error toast explains the failure
+  if (copied) close()
 }
 
 async function addToObsidian() {
