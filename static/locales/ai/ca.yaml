@@ -1248,8 +1248,11 @@ Settings:
       Viewing Modes: Modes de visualització
       Shorts: Shorts
       Screenshots: Captures de pantalla
+      Timestamp Notes: Notes amb marca de temps
     Enable FCast: "Activa FCast"
     Ask Before Preloading Large Playlists: "Pregunta abans de precarregar llistes de reproducció grans"
+    Timestamp Notes:
+      Obsidian Vault: Magatzem d'Obsidian
   Channel Settings:
     Channel Settings: Configuració dels canals
     Channel Settings Description: Recorda per separat la configuració que trieu mentre mireu cada canal, per tornar-la a aplicar la propera vegada que mireu un dels seus vídeos.
@@ -1699,6 +1702,7 @@ Settings:
     Channel playback speeds imported: "S'ha importat la velocitat de reproducció de {count} canal | S'han importat les velocitats de reproducció de {count} canals | S'han importat les velocitats de reproducció de {count} canals"
     Channels not found: "No s'ha pogut trobar {count} canal | No s'han pogut trobar {count} canals | No s'han pogut trobar {count} canals"
     Playlists have been successfully imported: "S'ha importat correctament 1/{total} llista de reproducció | S'han importat correctament {count}/{total} llistes de reproducció | S'han importat correctament {count}/{total} llistes de reproducció"
+    Import subscription groups hint: Per classificar els canals en grups, afegeix els noms dels grups separats per punts i comes després del títol del canal en un fitxer .csv, o importa un fitxer .opml amb carpetes. Es creen els grups que falten.
   Sync Settings:
     Signed Out After Restore: 'S''ha tancat la sessió de la sincronització perquè aquestes dades de l''aplicació s''han restaurat d''una còpia de seguretat o d''un altre dispositiu. Torna a iniciar la sessió per sincronitzar aquest dispositiu.'
     Revoke Session Tabs Warning: "També se suprimiran els conjunts de pestanyes sincronitzats d’aquest dispositiu."
@@ -2496,6 +2500,14 @@ Video:
       Load: "Carrega un fitxer de subtítols…"
       Subtitle Files: "Fitxers de subtítols"
       Error: "No s'ha pogut carregar el fitxer de subtítols. Trieu un fitxer SRT o WebVTT."
+    Timestamp Notes:
+      Take Note: Pren una nota amb marca de temps
+      Note at {time}: Nota a {time}
+      Note: Nota
+      Add to Obsidian: Afegeix a Obsidian
+      Copy as Markdown: Copia com a Markdown
+      Copied: S'ha copiat la nota com a Markdown
+      Obsidian Failed: No s'ha pogut obrir Obsidian
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Temps restant de l''anunci previ: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Temps d''espera de SABR restant: {remindingTimeSeconds}s'
@@ -2882,6 +2894,7 @@ Tooltips:
     Concurrent Preloads: "El nombre màxim de processos yt-dlp que s'utilitzen per precàrregar vídeos alhora. Els valors més alts utilitzen més CPU, memòria i amplada de banda de xarxa."
     Ignore System Rotation Lock for Fullscreen: Gira físicament el dispositiu per entrar i sortir de la pantalla completa encara que la rotació automàtica d'Android estigui desactivada.
     Ask Before Preloading Large Playlists: "Demana confirmació abans de precarregar tots els vídeos d’una llista de reproducció amb més de {count} vídeos."
+    Obsidian Vault: Nom del magatzem d'Obsidian per a les notes amb marca de temps. Si s'estableix, les notes es poden afegir a Obsidian. Les notes de cada vídeo es recullen en una nota amb el nom del vídeo, a la carpeta del magatzem per a notes noves.
   External Player Settings:
     External Player: En triar un reproductor extern, es mostrarà a la miniatura una icona per obrir-hi el vídeo o, si s'admet, la llista de reproducció. La configuració d'Invidious no afecta els reproductors externs.
     Custom External Player Executable: De manera predeterminada, l'OpenTubeX suposa que el reproductor extern triat es pot trobar mitjançant la variable d'entorn PATH. Si cal, podeu definir aquí un camí personalitzat.

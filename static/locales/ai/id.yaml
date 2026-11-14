@@ -1001,11 +1001,14 @@ Settings:
       Viewing Modes: Mode tampilan
       Shorts: Shorts
       Screenshots: Tangkapan layar
+      Timestamp Notes: Catatan Stempel Waktu
     Enable FCast: "Aktifkan FCast"
     Screenshot:
       Legacy Formats: "Format lama"
       Modern Formats: "Format modern"
     Ask Before Preloading Large Playlists: "Tanyakan sebelum pramuat daftar putar besar"
+    Timestamp Notes:
+      Obsidian Vault: Brankas Obsidian
   Channel Settings:
     Channel Settings: Pengaturan Saluran
     Channel Settings Description: Ingat pengaturan yang Anda pilih saat menonton untuk setiap saluran, lalu terapkan lagi saat Anda menonton video saluran tersebut berikutnya.
@@ -1380,6 +1383,7 @@ Settings:
     Channel playback speeds imported: "Kecepatan pemutaran {count} kanal telah diimpor"
     Channels not found: "{count} kanal tidak dapat ditemukan"
     Playlists have been successfully imported: "{count}/{total} daftar putar berhasil diimpor"
+    Import subscription groups hint: Untuk mengelompokkan saluran, tambahkan nama grup yang dipisahkan titik koma setelah judul saluran dalam file .csv, atau impor file .opml dengan folder. Grup yang belum ada akan dibuat.
   Sync Settings:
     Signed Out After Restore: 'Sinkronisasi dikeluarkan karena data aplikasi ini dipulihkan dari cadangan atau perangkat lain. Masuk lagi untuk menyinkronkan perangkat ini.'
     Revoke Session Tabs Warning: "Kumpulan tab tersinkronisasi perangkat ini juga akan dihapus."
@@ -2025,6 +2029,14 @@ Video:
       Load: "Muat file subtitel…"
       Subtitle Files: "File subtitel"
       Error: "Tidak dapat memuat file subtitel. Pilih file SRT atau WebVTT."
+    Timestamp Notes:
+      Take Note: Buat Catatan Stempel Waktu
+      Note at {time}: Catatan pada {time}
+      Note: Catatan
+      Add to Obsidian: Tambahkan ke Obsidian
+      Copy as Markdown: Salin sebagai Markdown
+      Copied: Catatan disalin sebagai Markdown
+      Obsidian Failed: Tidak dapat membuka Obsidian
   Station: Stasiun
   Playlist:
     Unavailable videos are hidden: '{count} video yang tidak tersedia disembunyikan'
@@ -2356,6 +2368,7 @@ Tooltips:
     Concurrent Preloads: "Jumlah maksimum proses yt-dlp yang digunakan untuk pramuat video secara bersamaan. Nilai yang lebih tinggi menggunakan lebih banyak CPU, memori, dan bandwidth jaringan."
     Ignore System Rotation Lock for Fullscreen: Putar perangkat secara fisik untuk masuk dan keluar layar penuh meskipun rotasi otomatis Android dimatikan.
     Ask Before Preloading Large Playlists: "Meminta konfirmasi sebelum pramuat semua video dari daftar putar yang berisi lebih dari {count} video."
+    Obsidian Vault: Nama brankas Obsidian untuk catatan stempel waktu. Jika diatur, catatan dapat ditambahkan ke Obsidian. Catatan setiap video dikumpulkan dalam catatan yang dinamai sesuai video, di folder brankas untuk catatan baru.
   Download Settings:
     Download Folder: Video disimpan ke folder ini. Biarkan kosong untuk menggunakan folder Unduhan sistem.
     Global Additional yt-dlp Arguments: Argumen baris perintah tambahan yang diteruskan ke yt-dlp untuk setiap unduhan, misalnya --cookies-from-browser firefox.

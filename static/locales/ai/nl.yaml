@@ -1016,8 +1016,11 @@ Settings:
       Viewing Modes: Weergavemodi
       Shorts: Shorts
       Screenshots: Schermafbeeldingen
+      Timestamp Notes: Notities met tijdstempel
     Enable FCast: "FCast inschakelen"
     Ask Before Preloading Large Playlists: "Vragen voordat grote afspeellijsten vooraf worden geladen"
+    Timestamp Notes:
+      Obsidian Vault: Obsidian-kluis
   Channel Settings:
     Channel Settings: Kanaalinstellingen
     Channel Settings Description: Onthoud de instellingen die je tijdens het kijken kiest afzonderlijk voor elk kanaal, zodat ze weer worden toegepast wanneer je een andere video van dat kanaal bekijkt.
@@ -1403,6 +1406,7 @@ Settings:
     Channel playback speeds imported: "Afspeelsnelheid van {count} kanaal geïmporteerd | Afspeelsnelheden van {count} kanalen geïmporteerd"
     Channels not found: "{count} kanaal kon niet worden gevonden | {count} kanalen konden niet worden gevonden"
     Playlists have been successfully imported: "1/{total} afspeellijst is geïmporteerd | {count}/{total} afspeellijsten zijn geïmporteerd"
+    Import subscription groups hint: Om kanalen in groepen in te delen, voeg je in een .csv-bestand na de kanaaltitel groepsnamen toe, gescheiden door puntkomma's, of importeer je een .opml-bestand met mappen. Ontbrekende groepen worden aangemaakt.
   Sync Settings:
     Signed Out After Restore: 'Synchronisatie is afgemeld omdat deze app-gegevens zijn hersteld vanuit een back-up of vanaf een ander apparaat. Meld je opnieuw aan om dit apparaat te synchroniseren.'
     Revoke Session Tabs Warning: "De gesynchroniseerde tabbladsets van dit apparaat worden ook verwijderd."
@@ -2061,6 +2065,14 @@ Video:
       Load: "Ondertitelbestand laden…"
       Subtitle Files: "Ondertitelbestanden"
       Error: "Het ondertitelbestand kan niet worden geladen. Kies een SRT- of WebVTT-bestand."
+    Timestamp Notes:
+      Take Note: Notitie met tijdstempel maken
+      Note at {time}: Notitie bij {time}
+      Note: Notitie
+      Add to Obsidian: Toevoegen aan Obsidian
+      Copy as Markdown: Kopiëren als Markdown
+      Copied: Notitie gekopieerd als Markdown
+      Obsidian Failed: Kan Obsidian niet openen
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Resterende tijd van preroll-advertentie: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Resterende SABR-wachttijd: {remindingTimeSeconds}s'
@@ -2397,6 +2409,7 @@ Tooltips:
     Concurrent Preloads: "Het maximale aantal yt-dlp-processen dat wordt gebruikt om video's tegelijk vooraf te laden. Hogere waarden gebruiken meer CPU, geheugen en netwerkbandbreedte."
     Ignore System Rotation Lock for Fullscreen: Draai het apparaat om volledig scherm te openen en te sluiten, ook als automatisch draaien in Android uitstaat.
     Ask Before Preloading Large Playlists: "Vraagt om bevestiging voordat alle video’s van een afspeellijst met meer dan {count} video’s vooraf worden geladen."
+    Obsidian Vault: Naam van de Obsidian-kluis voor notities met tijdstempel. Als deze is ingesteld, kunnen notities aan Obsidian worden toegevoegd. De notities van elke video worden verzameld in een notitie met de naam van de video, in de map van de kluis voor nieuwe notities.
   Download Settings:
     Download Folder: Video's worden in deze map opgeslagen. Laat dit leeg om de downloadmap van je systeem te gebruiken.
     Global Additional yt-dlp Arguments: Aanvullende opdrachtregelargumenten die bij elke download aan yt-dlp worden doorgegeven, bijvoorbeeld --cookies-from-browser firefox.

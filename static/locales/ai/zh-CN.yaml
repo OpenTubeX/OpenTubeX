@@ -998,11 +998,14 @@ Settings:
       Viewing Modes: 观看模式
       Shorts: Shorts
       Screenshots: 截图
+      Timestamp Notes: 时间戳笔记
     Enable FCast: "启用 FCast"
     Screenshot:
       Legacy Formats: "传统格式"
       Modern Formats: "现代格式"
     Ask Before Preloading Large Playlists: "预加载大型播放列表前询问"
+    Timestamp Notes:
+      Obsidian Vault: Obsidian 仓库
   Channel Settings:
     Channel Settings: 频道设置
     Channel Settings Description: 分别记住观看各频道时选择的设置，以便下次观看该频道的视频时再次应用。
@@ -1375,6 +1378,7 @@ Settings:
     Invalid channel playback speeds file: "此文件中未找到频道播放速度"
     Channel playback speeds imported: "已导入 {count} 个频道的播放速度"
     Channels not found: "未能找到 {count} 个频道"
+    Import subscription groups hint: 要将频道归入分组，请在 .csv 文件中的频道标题后添加以分号分隔的分组名称，或导入包含文件夹的 .opml 文件。缺失的分组会自动创建。
   Sync Settings:
     Signed Out After Restore: '由于此应用数据是从备份或其他设备恢复的，同步已退出登录。请重新登录以同步此设备。'
     Revoke Session Tabs Warning: "此设备已同步的标签页集合也将被删除。"
@@ -2002,6 +2006,14 @@ Video:
       Load: "加载字幕文件…"
       Subtitle Files: "字幕文件"
       Error: "无法加载字幕文件。请选择 SRT 或 WebVTT 文件。"
+    Timestamp Notes:
+      Take Note: 记录时间戳笔记
+      Note at {time}: '{time} 的笔记'
+      Note: 笔记
+      Add to Obsidian: 添加到 Obsidian
+      Copy as Markdown: 复制为 Markdown
+      Copied: 已将笔记复制为 Markdown
+      Obsidian Failed: 无法打开 Obsidian
   External Media:
     Dislikes: "点踩"
     Reposts: "转发"
@@ -2329,6 +2341,7 @@ Tooltips:
     Concurrent Preloads: "同时用于预加载视频的 yt-dlp 进程数上限。数值越高，使用的 CPU、内存和网络带宽越多。"
     Ignore System Rotation Lock for Fullscreen: 通过转动设备进入和退出全屏，即使 Android 的自动旋转已关闭。
     Ask Before Preloading Large Playlists: "预加载超过 {count} 个视频的播放列表中的所有视频前请求确认。"
+    Obsidian Vault: 用于时间戳笔记的 Obsidian 仓库名称。设置后，可将笔记添加到 Obsidian。每个视频的笔记会汇总到一篇以该视频命名的笔记中，位于仓库的新笔记文件夹内。
   Download Settings:
     Download Folder: 视频将保存到此文件夹。留空则使用系统的“下载”文件夹。
     Global Additional yt-dlp Arguments: 每次下载时传递给 yt-dlp 的额外命令行参数，例如 --cookies-from-browser firefox。

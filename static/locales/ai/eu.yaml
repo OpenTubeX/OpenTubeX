@@ -998,11 +998,14 @@ Settings:
       Viewing Modes: Ikuspegi moduak
       Shorts: Shorts
       Screenshots: Pantaila-argazkiak
+      Timestamp Notes: Denbora-zigiludun oharrak
     Enable FCast: "Gaitu FCast"
     Screenshot:
       Legacy Formats: "Formatu zaharrak"
       Modern Formats: "Formatu modernoak"
     Ask Before Preloading Large Playlists: "Galdetu erreprodukzio-zerrenda handiak aurrekargatu aurretik"
+    Timestamp Notes:
+      Obsidian Vault: Obsidian biltegia
   Channel Settings:
     Channel Settings: Kanalen ezarpenak
     Channel Settings Description: Gogoratu kanal bakoitzerako bideoak ikustean aukeratutako ezarpenak, kanal horretako beste bideo bat ikusten duzunean berriro aplikatzeko.
@@ -1376,6 +1379,7 @@ Settings:
     Channel playback speeds imported: "{count} kanalaren erreprodukzio-abiadura inportatu da | {count} kanalen erreprodukzio-abiadurak inportatu dira"
     Channels not found: "Ezin izan da {count} kanal aurkitu | Ezin izan dira {count} kanal aurkitu"
     Playlists have been successfully imported: "1/{total} erreprodukzio-zerrenda behar bezala inportatu da | {count}/{total} erreprodukzio-zerrenda behar bezala inportatu dira"
+    Import subscription groups hint: Kanalak taldeetan sailkatzeko, gehitu talde-izenak puntu eta komaz bereizita kanalaren izenburuaren ondoren .csv fitxategi batean, edo inportatu karpetak dituen .opml fitxategi bat. Falta diren taldeak sortu egiten dira.
   Sync Settings:
     Signed Out After Restore: 'Sinkronizazioaren saioa itxi da, aplikazioaren datu hauek babeskopia batetik edo beste gailu batetik leheneratu direlako. Hasi saioa berriro gailu hau sinkronizatzeko.'
     Revoke Session Tabs Warning: "Gailu honen sinkronizatutako fitxa multzoak ere ezabatuko dira."
@@ -2013,6 +2017,14 @@ Video:
       Load: "Kargatu azpititulu-fitxategia…"
       Subtitle Files: "Azpititulu-fitxategiak"
       Error: "Ezin izan da azpititulu-fitxategia kargatu. Aukeratu SRT edo WebVTT fitxategi bat."
+    Timestamp Notes:
+      Take Note: Hartu denbora-zigiludun oharra
+      Note at {time}: Oharra {time} unean
+      Note: Oharra
+      Add to Obsidian: Gehitu Obsidian-era
+      Copy as Markdown: Kopiatu Markdown gisa
+      Copied: Oharra Markdown gisa kopiatu da
+      Obsidian Failed: Ezin izan da Obsidian ireki
   External Media:
     Dislikes: "Desatsegitea | Desatsegiteak"
     Reposts: "Berriro argitaratzea | Berriro argitaratzeak"
@@ -2340,6 +2352,7 @@ Tooltips:
     Concurrent Preloads: "Bideoak aldi berean aurrekargatzeko erabilitako yt-dlp prozesuen gehieneko kopurua. Balio handiagoek PUZ, memoria eta sareko banda-zabalera gehiago erabiltzen dute."
     Ignore System Rotation Lock for Fullscreen: Biratu gailua fisikoki pantaila osoan sartzeko eta irteteko, Androiden biraketa automatikoa desaktibatuta badago ere.
     Ask Before Preloading Large Playlists: "Berrespena eskatzen du {count} bideo baino gehiagoko erreprodukzio-zerrenda baten bideo guztiak aurrekargatu aurretik."
+    Obsidian Vault: Denbora-zigiludun oharretarako Obsidian biltegiaren izena. Ezartzen bada, oharrak Obsidian-era gehi daitezke. Bideo bakoitzaren oharrak bideoaren izena duen ohar batean biltzen dira, biltegiaren ohar berrien karpetan.
   Download Settings:
     Download Folder: Bideoak karpeta honetan gordetzen dira. Utzi hutsik sistemako Deskargak karpeta erabiltzeko.
     Global Additional yt-dlp Arguments: Deskarga bakoitzean yt-dlp-ri emandako komando-lerroko argumentu gehigarriak; adibidez, --cookies-from-browser firefox.

@@ -1009,6 +1009,7 @@ Settings:
       Viewing Modes: Kykmodusse
       Shorts: Kortvideo’s
       Screenshots: Skermkiekies
+      Timestamp Notes: Tydstempelnotas
     Lights Off: Ligte af
     Show Lights Off Toggle: Wys Ligte af-wisselaar
     Show Volume Boost Toggle: Wys volumeversterking-wisselaar
@@ -1180,6 +1181,8 @@ Settings:
     Enable Google Cast: Aktiveer Google Cast
     Enable FCast: Aktiveer FCast
     Ask Before Preloading Large Playlists: "Vra voordat groot snitlyste vooraf gelaai word"
+    Timestamp Notes:
+      Obsidian Vault: Obsidian-kluis
   Channel Settings:
     Channel Settings: Kanaalinstellings
     Channel Settings Description: Onthou die instellings wat u tydens kyk kies vir elke kanaal afsonderlik, sodat hulle weer toegepas word die volgende keer dat u een van sy video’s kyk.
@@ -1580,6 +1583,7 @@ Settings:
     Channel playback speeds imported: Die afspeelspoed van {count} kanaal is ingevoer | Die afspeelspoed van {count} kanale is ingevoer
     Channels not found: '{count} kanaal kon nie gevind word nie | {count} kanale kon nie gevind word nie'
     Playlists have been successfully imported: "1/{total} snitlys is suksesvol ingevoer | {count}/{total} snitlyste is suksesvol ingevoer"
+    Import subscription groups hint: Om kanale in groepe te sorteer, voeg groepname, geskei deur kommapunte, ná die kanaaltitel in 'n .csv-lêer by, of voer 'n .opml-lêer met vouers in. Groepe wat ontbreek, word geskep.
   Sync Settings:
     Signed Out After Restore: 'Sinkronisering is afgemeld omdat hierdie toepassingsdata vanaf ''n rugsteun of ''n ander toestel herstel is. Meld weer aan om hierdie toestel te sinkroniseer.'
     Revoke Session Tabs Warning: Hierdie toestel se gesinkroniseerde oortjiestelle sal ook geskrap word.
@@ -2277,6 +2281,14 @@ Video:
       Cast: Saai uit na ’n FCast-ontvanger
       No Devices: Geen FCast-ontvangers gevind nie
       No Source: Geen versoenbare stroom vir FCast nie
+    Timestamp Notes:
+      Take Note: Maak tydstempelnota
+      Note at {time}: Nota by {time}
+      Note: Nota
+      Add to Obsidian: Voeg by Obsidian
+      Copy as Markdown: Kopieer as Markdown
+      Copied: Nota as Markdown gekopieer
+      Obsidian Failed: Kon nie Obsidian oopmaak nie
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Oorblywende tyd van voorafadvertensie: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Oorblywende SABR-wagtyd: {remindingTimeSeconds}s'
@@ -2585,6 +2597,7 @@ Tooltips:
     Concurrent Preloads: Die maksimum aantal yt-dlp-prosesse wat gelyktydig gebruik word om video’s vooraf te laai. Hoër waardes gebruik meer SVE, geheue en netwerkbandwydte.
     Ignore System Rotation Lock for Fullscreen: Gebruik fisiese toesteldraaiing om volskerm te betree en te verlaat, selfs wanneer Android se outodraai af is.
     Ask Before Preloading Large Playlists: "Vra vir bevestiging voordat alle video’s van ’n snitlys met meer as {count} video’s vooraf gelaai word."
+    Obsidian Vault: Naam van die Obsidian-kluis vir tydstempelnotas. Wanneer dit gestel is, kan notas by Obsidian gevoeg word. Die notas van elke video word versamel in 'n nota wat na die video vernoem is, in die kluis se vouer vir nuwe notas.
   Download Settings:
     Download Folder: Video’s word in hierdie vouer gestoor. Laat leeg om u stelsel se Aflaaie-vouer te gebruik.
     Global Additional yt-dlp Arguments: Bykomende opdragreëlargumente wat vir elke aflaai aan yt-dlp deurgegee word, byvoorbeeld --cookies-from-browser firefox.

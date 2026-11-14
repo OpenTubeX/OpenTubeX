@@ -43,6 +43,7 @@ const PLAYBACK_COMMANDS = [
   ['playback.previous', 'PLAYBACK', 'SKIP_TO_PREV', 'KeyboardShortcutPrompt.Skip to Previous Video', ['fas', 'step-backward'], ['previous video']],
   ['playback.next', 'PLAYBACK', 'SKIP_TO_NEXT', 'KeyboardShortcutPrompt.Skip to Next Video', ['fas', 'step-forward'], ['next video']],
   ['playback.screenshot', 'GENERAL', 'TAKE_SCREENSHOT', 'KeyboardShortcutPrompt.Take Screenshot', ['fas', 'file-image'], ['capture']],
+  ['playback.timestamp-note', 'GENERAL', 'TAKE_TIMESTAMP_NOTE', 'Video.Player.Timestamp Notes.Take Note', ['fas', 'note-sticky'], ['markdown', 'obsidian', 'bookmark']],
   ['playback.quick-bookmark', 'GENERAL', 'TOGGLE_QUICK_BOOKMARK', 'KeyboardShortcutPrompt.Toggle Quick Bookmark', ['far', 'bookmark'], ['bookmarked', 'favorite']],
   ['playback.add-to-playlist', 'GENERAL', 'OPEN_ADD_TO_PLAYLIST', 'User Playlists.Add to Playlist', ['fac', 'playlist-add'], ['save']],
 ]

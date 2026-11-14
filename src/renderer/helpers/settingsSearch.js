@@ -133,6 +133,11 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
       (group !== 'Manage RSS Feeds' || store.getters.getEnableRssFeeds === true)
   }
 
+  // Obsidian opens through the desktop main process
+  if (sectionType === 'player' && group === 'Timestamp Notes') {
+    return usingElectron
+  }
+
   if (sectionType === 'player' && group === 'Screenshot') {
     if (item === 'Enable') return true
     if (!store.getters.getEnableScreenshot) return false

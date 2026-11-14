@@ -1003,11 +1003,14 @@ Settings:
       Viewing Modes: Режими на гледане
       Shorts: Shorts
       Screenshots: Екранни снимки
+      Timestamp Notes: Бележки с времеви отметки
     Enable FCast: "Активиране на FCast"
     Screenshot:
       Legacy Formats: "Остарели формати"
       Modern Formats: "Модерни формати"
     Ask Before Preloading Large Playlists: "Питане преди предварително зареждане на големи плейлисти"
+    Timestamp Notes:
+      Obsidian Vault: Хранилище на Obsidian
   Channel Settings:
     Channel Settings: Настройки за каналите
     Channel Settings Description: Запомняне на избраните при гледане настройки поотделно за всеки канал, за да бъдат приложени отново следващия път, когато гледате негов видеоклип.
@@ -1384,6 +1387,7 @@ Settings:
     Channel playback speeds imported: "Внесена е скоростта на възпроизвеждане на {count} канал | Внесени са скоростите на възпроизвеждане на {count} канала"
     Channels not found: "{count} канал не може да бъде намерен | {count} канала не могат да бъдат намерени"
     Playlists have been successfully imported: "1/{total} плейлист е импортиран успешно | {count}/{total} плейлиста са импортирани успешно"
+    Import subscription groups hint: За да разпределите каналите в групи, добавете имена на групи, разделени с точка и запетая, след заглавието на канала във файл .csv или импортирайте файл .opml с папки. Липсващите групи се създават.
   Sync Settings:
     Signed Out After Restore: 'Синхронизирането беше излязло от профила, защото тези данни на приложението бяха възстановени от резервно копие или от друго устройство. Влезте отново, за да синхронизирате това устройство.'
     Revoke Session Tabs Warning: "Синхронизираните набори от раздели на това устройство също ще бъдат изтрити."
@@ -2030,6 +2034,14 @@ Video:
       Load: "Зареждане на файл със субтитри…"
       Subtitle Files: "Файлове със субтитри"
       Error: "Файлът със субтитри не можа да бъде зареден. Изберете файл SRT или WebVTT."
+    Timestamp Notes:
+      Take Note: Добавяне на бележка с времева отметка
+      Note at {time}: Бележка при {time}
+      Note: Бележка
+      Add to Obsidian: Добавяне в Obsidian
+      Copy as Markdown: Копиране като Markdown
+      Copied: Бележката е копирана като Markdown
+      Obsidian Failed: Obsidian не можа да се отвори
   Station: Станция
   Playlist:
     Unavailable videos are hidden: 1 недостъпен видеоклип е скрит | {count} недостъпни видеоклипа са скрити
@@ -2363,6 +2375,7 @@ Tooltips:
     Concurrent Preloads: "Максималният брой процеси на yt-dlp, използвани за предварително зареждане на видеоклипове едновременно. По-високите стойности използват повече процесор, памет и мрежова пропускателна способност."
     Ignore System Rotation Lock for Fullscreen: Завъртайте физически устройството за влизане и излизане от цял екран, дори когато автоматичното завъртане в Android е изключено.
     Ask Before Preloading Large Playlists: "Изисква потвърждение преди предварително зареждане на всички видеа от плейлист с повече от {count} видеа."
+    Obsidian Vault: Име на хранилището на Obsidian за бележки с времеви отметки. Когато е зададено, бележките могат да се добавят в Obsidian. Бележките за всяко видео се събират в бележка, наречена на видеото, в папката на хранилището за нови бележки.
   Download Settings:
     Download Folder: Видеоклиповете се запазват в тази папка. Оставете празно, за да използвате системната папка за изтегляния.
     Global Additional yt-dlp Arguments: Допълнителни аргументи от командния ред, подавани на yt-dlp при всяко изтегляне, например --cookies-from-browser firefox.

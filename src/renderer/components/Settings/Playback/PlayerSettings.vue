@@ -724,6 +724,24 @@
         />
       </FtFlexBox>
     </div>
+    <template v-if="USING_ELECTRON">
+      <h4 class="groupTitle">
+        {{ t('Settings.Player Settings.Sections.Timestamp Notes') }}
+      </h4>
+      <FtFlexBox>
+        <FtInput
+          class="obsidianVaultInput"
+          :label="t('Settings.Player Settings.Timestamp Notes.Obsidian Vault')"
+          :tooltip="t('Tooltips.Player Settings.Obsidian Vault')"
+          setting-key="obsidianVault"
+          :icon="['fas', 'file-export']"
+          :value="obsidianVault"
+          :maxlength="255"
+          :show-action-button="false"
+          @change="store.dispatch('updateObsidianVault', $event.trim())"
+        />
+      </FtFlexBox>
+    </template>
     <FtSettingsSubpage
       :open="showQuickPlaybackSpeedBarManager"
       :title="t('Settings.Player Settings.Quick Playback Speed Bar Manager')"
@@ -2065,6 +2083,7 @@ async function chooseScreenshotFolder() {
 
 /** @type {import('vue').ComputedRef<string>} */
 const screenshotFilenamePattern = computed(() => store.getters.getScreenshotFilenamePattern)
+const obsidianVault = computed(() => store.getters.getObsidianVault)
 
 onMounted(() => {
   getScreenshotFilenameExample(screenshotFilenamePattern.value)

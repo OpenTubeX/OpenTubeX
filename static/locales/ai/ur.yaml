@@ -892,6 +892,7 @@ Settings:
       Viewing Modes: دیکھنے کے موڈز
       Shorts: شارٹس
       Screenshots: اسکرین شاٹس
+      Timestamp Notes: ٹائم اسٹیمپ نوٹس
     Lights Off: لائٹس بند
     Show Lights Off Toggle: لائٹس بند کا ٹوگل دکھائیں
     Show Volume Boost Toggle: والیوم بوسٹ کا ٹوگل دکھائیں
@@ -1063,6 +1064,8 @@ Settings:
     Enable Google Cast: Google Cast فعال کریں
     Enable FCast: FCast فعال کریں
     Ask Before Preloading Large Playlists: "بڑی پلے لسٹس پہلے سے لوڈ کرنے سے پہلے پوچھیں"
+    Timestamp Notes:
+      Obsidian Vault: Obsidian والٹ
   Channel Settings:
     Channel Settings: چینل سیٹنگز
     Channel Settings Description: دیکھتے وقت منتخب کردہ سیٹنگز کو ہر چینل کے لیے الگ الگ یاد رکھیں، تاکہ اگلی بار اس کی کوئی ویڈیو دیکھنے پر وہ دوبارہ لاگو ہو جائیں۔
@@ -1448,6 +1451,7 @@ Settings:
     Channel playback speeds imported: '{count} چینل کی پلے بیک اسپیڈ امپورٹ کی گئی | {count} چینلز کی پلے بیک اسپیڈز امپورٹ کی گئیں'
     Channels not found: '{count} چینل نہیں مل سکا | {count} چینلز نہیں مل سکے'
     Playlists have been successfully imported: "1/{total} پلے لسٹ کامیابی سے درآمد ہو گئی | {count}/{total} پلے لسٹس کامیابی سے درآمد ہو گئیں"
+    Import subscription groups hint: چینلز کو گروپس میں ترتیب دینے کے لیے، .csv فائل میں چینل کے عنوان کے بعد سیمی کولن سے الگ کیے گئے گروپ کے نام شامل کریں، یا فولڈرز والی .opml فائل درآمد کریں۔ غیر موجود گروپس بنا دیے جاتے ہیں۔
   Sync Settings:
     Signed Out After Restore: 'مطابقت سے سائن آؤٹ کر دیا گیا کیونکہ اس ایپ کا ڈیٹا بیک اپ یا کسی دوسرے آلے سے بحال کیا گیا تھا۔ اس آلے کو مطابقت پذیر کرنے کے لیے دوبارہ سائن ان کریں۔'
     Revoke Session Tabs Warning: اس ڈیوائس کے سنک شدہ ٹیب سیٹس بھی حذف ہو جائیں گے۔
@@ -2138,6 +2142,14 @@ Video:
       Cast: FCast ریسیور پر کاسٹ کریں
       No Devices: کوئی FCast ریسیور نہیں ملا
       No Source: FCast کے لیے کوئی مطابقت رکھنے والی اسٹریم نہیں
+    Timestamp Notes:
+      Take Note: ٹائم اسٹیمپ نوٹ لیں
+      Note at {time}: '{time} پر نوٹ'
+      Note: نوٹ
+      Add to Obsidian: Obsidian میں شامل کریں
+      Copy as Markdown: Markdown کے طور پر کاپی کریں
+      Copied: نوٹ Markdown کے طور پر کاپی ہو گیا
+      Obsidian Failed: Obsidian نہیں کھل سکا
   Playlist:
     Unavailable videos are hidden: 1 غیر دستیاب ویڈیو پوشیدہ ہے | {count} غیر دستیاب ویڈیوز پوشیدہ ہیں
   How this was made: یہ کیسے بنایا گیا
@@ -2444,6 +2456,7 @@ Tooltips:
     Concurrent Preloads: ایک ساتھ ویڈیوز پہلے سے لوڈ کرنے کے لیے استعمال ہونے والے yt-dlp پروسیسز کی زیادہ سے زیادہ تعداد۔ زیادہ قدریں زیادہ CPU، میموری اور نیٹ ورک بینڈوڈتھ استعمال کرتی ہیں۔
     Ignore System Rotation Lock for Fullscreen: Android کی خودکار گردش بند ہونے پر بھی فل اسکرین میں جانے اور نکلنے کے لیے ڈیوائس کی جسمانی گردش استعمال کریں۔
     Ask Before Preloading Large Playlists: "{count} سے زیادہ ویڈیوز والی پلے لسٹ کی تمام ویڈیوز پہلے سے لوڈ کرنے سے پہلے تصدیق مانگتا ہے۔"
+    Obsidian Vault: ٹائم اسٹیمپ نوٹس کے لیے Obsidian والٹ کا نام۔ سیٹ ہونے پر نوٹس Obsidian میں شامل کیے جا سکتے ہیں۔ ہر ویڈیو کے نوٹس والٹ میں نئے نوٹس کے فولڈر کے اندر ویڈیو کے نام والے ایک نوٹ میں جمع کیے جاتے ہیں۔
   Download Settings:
     Download Folder: ویڈیوز اس فولڈر میں محفوظ ہوتی ہیں۔ اپنے سسٹم کا ڈاؤن لوڈز فولڈر استعمال کرنے کے لیے خالی چھوڑیں۔
     Global Additional yt-dlp Arguments: ہر ڈاؤن لوڈ کے لیے yt-dlp کو دیے جانے والے اضافی کمانڈ لائن آرگیومینٹس، مثلاً --cookies-from-browser firefox۔

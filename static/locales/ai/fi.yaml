@@ -1001,8 +1001,11 @@ Settings:
       Viewing Modes: Katselutilat
       Shorts: Shorts
       Screenshots: Kuvakaappaukset
+      Timestamp Notes: Aikaleimamuistiinpanot
     Enable FCast: "Ota FCast käyttöön"
     Ask Before Preloading Large Playlists: "Kysy ennen suurten soittolistojen esilatausta"
+    Timestamp Notes:
+      Obsidian Vault: Obsidian-holvi
   Channel Settings:
     Channel Settings: Kanava-asetukset
     Channel Settings Description: Muista katselun aikana valitsemasi asetukset kanavakohtaisesti, jotta niitä käytetään uudelleen, kun katsot seuraavan kerran saman kanavan videota.
@@ -1377,6 +1380,7 @@ Settings:
     Channel playback speeds imported: "Tuotiin {count} kanavan toistonopeus | Tuotiin {count} kanavan toistonopeudet"
     Channels not found: "{count} kanavaa ei löytynyt | {count} kanavaa ei löytynyt"
     Playlists have been successfully imported: "1/{total} soittolista tuotiin onnistuneesti | {count}/{total} soittolistaa tuotiin onnistuneesti"
+    Import subscription groups hint: Jos haluat lajitella kanavat ryhmiin, lisää .csv-tiedostossa kanavan nimen perään ryhmien nimet puolipisteillä erotettuina tai tuo .opml-tiedosto, jossa on kansioita. Puuttuvat ryhmät luodaan.
   Sync Settings:
     Signed Out After Restore: 'Synkronoinnista kirjauduttiin ulos, koska nämä sovelluksen tiedot palautettiin varmuuskopiosta tai toisesta laitteesta. Kirjaudu uudelleen sisään synkronoidaksesi tämän laitteen.'
     Revoke Session Tabs Warning: "Myös tämän laitteen synkronoidut välilehtijoukot poistetaan."
@@ -2010,6 +2014,14 @@ Video:
       Load: "Lataa tekstitystiedosto…"
       Subtitle Files: "Tekstitystiedostot"
       Error: "Tekstitystiedostoa ei voitu ladata. Valitse SRT- tai WebVTT-tiedosto."
+    Timestamp Notes:
+      Take Note: Tee aikaleimamuistiinpano
+      Note at {time}: Muistiinpano kohdassa {time}
+      Note: Muistiinpano
+      Add to Obsidian: Lisää Obsidianiin
+      Copy as Markdown: Kopioi Markdownina
+      Copied: Muistiinpano kopioitiin Markdownina
+      Obsidian Failed: Obsidianin avaaminen epäonnistui
   Station: Asema
   External Media:
     Dislikes: "Ei-tykkäys | Ei-tykkäystä"
@@ -2338,6 +2350,7 @@ Tooltips:
     Concurrent Preloads: "Videoiden samanaikaiseen esilataukseen käytettävien yt-dlp-prosessien enimmäismäärä. Suuremmat arvot käyttävät enemmän suoritinta, muistia ja verkon kaistanleveyttä."
     Ignore System Rotation Lock for Fullscreen: Käännä laitetta siirtyäksesi koko näyttöön ja poistuaksesi siitä, vaikka Androidin automaattinen kierto olisi pois käytöstä.
     Ask Before Preloading Large Playlists: "Pyytää vahvistusta ennen kuin kaikki videot esiladataan soittolistalta, jossa on yli {count} videota."
+    Obsidian Vault: Aikaleimamuistiinpanoihin käytettävän Obsidian-holvin nimi. Kun se on asetettu, muistiinpanoja voi lisätä Obsidianiin. Kunkin videon muistiinpanot kootaan videon mukaan nimettyyn muistiinpanoon holvin uusien muistiinpanojen kansiossa.
   Download Settings:
     Download Folder: Videot tallennetaan tähän kansioon. Jos kenttä jätetään tyhjäksi, käytetään järjestelmän Lataukset-kansiota.
     Global Additional yt-dlp Arguments: Kaikissa latauksissa yt-dlp:lle välitettävät komentorivin lisäargumentit, esimerkiksi --cookies-from-browser firefox.

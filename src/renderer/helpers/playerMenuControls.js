@@ -22,6 +22,7 @@ export const PLAYER_MENU_CONTROL_DEFINITIONS = Object.freeze([
   { id: 'loop', labelKey: 'Settings.Interface Customizer.Loop', icon: ['fas', 'retweet'] },
   { id: 'abRepeat', labelKey: 'Video.Player.A-B Repeat.A-B Repeat', icon: ['fas', 'exchange-alt'], settingKey: 'disableAbRepeat', inverted: true },
   { id: 'screenshot', labelKey: 'Video.Player.Take Screenshot', icon: ['fas', 'camera'], settingKey: 'enableScreenshot' },
+  { id: 'timestampNote', labelKey: 'Video.Player.Timestamp Notes.Take Note', icon: ['fas', 'note-sticky'] },
   { id: 'pictureInPicture', labelKey: 'Settings.Player Settings.Default Viewing Mode.Picture in Picture', icon: ['fas', 'picture-in-picture'] },
   { id: 'theatreMode', labelKey: 'Video.Player.Theatre Mode', icon: ['fas', 'theatre-mode'], desktopOnly: true },
   { id: 'fullWindow', labelKey: 'Video.Player.Full Window', icon: ['fas', 'full-window'], desktopOnly: true },

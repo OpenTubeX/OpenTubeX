@@ -1122,8 +1122,11 @@ Settings:
       Viewing Modes: Modos de visualización
       Shorts: Shorts
       Screenshots: Capturas de pantalla
+      Timestamp Notes: Notas con marca de tiempo
     Enable FCast: "Activar FCast"
     Ask Before Preloading Large Playlists: "Preguntar antes de precargar listas de reproducción grandes"
+    Timestamp Notes:
+      Obsidian Vault: Bóveda de Obsidian
   Channel Settings:
     Channel Settings: Ajustes de canales
     Channel Settings Description: Recuerda por separado los ajustes que elijas al ver cada canal para volver a aplicarlos la próxima vez que veas uno de sus videos.
@@ -1553,6 +1556,7 @@ Settings:
     Channel playback speeds imported: "Se importó la velocidad de reproducción de {count} canal | Se importaron las velocidades de reproducción de {count} canales | Se importaron las velocidades de reproducción de {count} canales"
     Channels not found: "No se pudo encontrar {count} canal | No se pudieron encontrar {count} canales | No se pudieron encontrar {count} canales"
     Playlists have been successfully imported: "Se importó correctamente 1/{total} lista de reproducción | Se importaron correctamente {count}/{total} listas de reproducción | Se importaron correctamente {count}/{total} listas de reproducción"
+    Import subscription groups hint: Para ordenar los canales en grupos, agrega los nombres de los grupos separados por punto y coma después del título del canal en un archivo .csv, o importa un archivo .opml con carpetas. Los grupos que falten se crean.
   Sync Settings:
     Signed Out After Restore: 'Se cerró la sesión de sincronización porque estos datos de la aplicación se restauraron desde una copia de seguridad o desde otro dispositivo. Vuelve a iniciar sesión para sincronizar este dispositivo.'
     Revoke Session Tabs Warning: "También se eliminarán los conjuntos de pestañas sincronizados de este dispositivo."
@@ -2324,6 +2328,14 @@ Video:
       Load: "Cargar archivo de subtítulos…"
       Subtitle Files: "Archivos de subtítulos"
       Error: "No se pudo cargar el archivo de subtítulos. Elige un archivo SRT o WebVTT."
+    Timestamp Notes:
+      Take Note: Tomar nota con marca de tiempo
+      Note at {time}: Nota en {time}
+      Note: Nota
+      Add to Obsidian: Agregar a Obsidian
+      Copy as Markdown: Copiar como Markdown
+      Copied: Nota copiada como Markdown
+      Obsidian Failed: No se pudo abrir Obsidian
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Tiempo restante previo al anuncio: {remindingTimeSeconds} s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Tiempo restante de retroceso de SABR: {remindingTimeSeconds} s'
@@ -2691,6 +2703,7 @@ Tooltips:
     Concurrent Preloads: "La cantidad máxima de procesos de yt-dlp usados para precargar videos al mismo tiempo. Los valores más altos usan más CPU, memoria y ancho de banda de red."
     Ignore System Rotation Lock for Fullscreen: Gira físicamente el dispositivo para entrar y salir de pantalla completa aunque la rotación automática de Android esté desactivada.
     Ask Before Preloading Large Playlists: "Pide confirmación antes de precargar todos los videos de una lista de reproducción con más de {count} videos."
+    Obsidian Vault: Nombre de la bóveda de Obsidian para las notas con marca de tiempo. Si se establece, las notas se pueden agregar a Obsidian. Las notas de cada video se reúnen en una nota con el nombre del video, en la carpeta de la bóveda para notas nuevas.
   External Player Settings:
     Ignore Default Arguments: No envíe ningún argumento predeterminado al reproductor externo aparte de la URL del video (por ejemplo, velocidad de reproducción, URL de la lista de reproducción, etc.). Los argumentos personalizados se seguirán transmitiendo.
   Download Settings:

@@ -998,11 +998,14 @@ Settings:
       Viewing Modes: Režimy zobrazenia
       Shorts: Shorts
       Screenshots: Snímky obrazovky
+      Timestamp Notes: Poznámky s časovými pečiatkami
     Enable FCast: "Povoliť FCast"
     Screenshot:
       Legacy Formats: "Staršie formáty"
       Modern Formats: "Moderné formáty"
     Ask Before Preloading Large Playlists: "Pýtať sa pred prednačítaním veľkých playlistov"
+    Timestamp Notes:
+      Obsidian Vault: Trezor Obsidian
   Channel Settings:
     Channel Settings: Nastavenia kanálov
     Channel Settings Description: Nastavenia, ktoré vyberiete pri sledovaní, sa zapamätajú pre každý kanál samostatne a znova sa použijú pri ďalšom sledovaní jeho videa.
@@ -1377,6 +1380,7 @@ Settings:
     Channel playback speeds imported: "Importovala sa rýchlosť prehrávania {count} kanála | Importovali sa rýchlosti prehrávania {count} kanálov | Importovali sa rýchlosti prehrávania {count} kanálov"
     Channels not found: "{count} kanál sa nepodarilo nájsť | {count} kanály sa nepodarilo nájsť | {count} kanálov sa nepodarilo nájsť"
     Playlists have been successfully imported: "Úspešne importovaný 1/{total} playlist | Úspešne importované {count}/{total} playlisty | Úspešne importovaných {count}/{total} playlistov"
+    Import subscription groups hint: Ak chcete kanály roztriediť do skupín, pridajte v súbore .csv za názov kanála názvy skupín oddelené bodkočiarkami alebo importujte súbor .opml s priečinkami. Chýbajúce skupiny sa vytvoria.
   Sync Settings:
     Signed Out After Restore: 'Synchronizácia bola odhlásená, pretože tieto údaje aplikácie boli obnovené zo zálohy alebo z iného zariadenia. Prihláste sa znova, aby ste toto zariadenie synchronizovali.'
     Revoke Session Tabs Warning: "Synchronizované sady kariet tohto zariadenia budú tiež odstránené."
@@ -2010,6 +2014,14 @@ Video:
       Load: "Načítať súbor s titulkami…"
       Subtitle Files: "Súbory s titulkami"
       Error: "Súbor s titulkami sa nepodarilo načítať. Vyberte súbor SRT alebo WebVTT."
+    Timestamp Notes:
+      Take Note: Vytvoriť poznámku s časovou pečiatkou
+      Note at {time}: Poznámka v čase {time}
+      Note: Poznámka
+      Add to Obsidian: Pridať do Obsidianu
+      Copy as Markdown: Kopírovať ako Markdown
+      Copied: Poznámka bola skopírovaná ako Markdown
+      Obsidian Failed: Obsidian sa nepodarilo otvoriť
   External Media:
     Dislikes: "Negatívne hodnotenie | Negatívne hodnotenia | Negatívnych hodnotení"
     Reposts: "Opätovné zdieľanie | Opätovné zdieľania | Opätovných zdieľaní"
@@ -2337,6 +2349,7 @@ Tooltips:
     Concurrent Preloads: "Maximálny počet procesov yt-dlp použitých na súbežné prednačítanie videí. Vyššie hodnoty využívajú viac procesora, pamäte a šírky pásma siete."
     Ignore System Rotation Lock for Fullscreen: Fyzickým otočením zariadenia zapnete a vypnete celú obrazovku, aj keď je automatické otáčanie v Androide vypnuté.
     Ask Before Preloading Large Playlists: "Pred prednačítaním všetkých videí playlistu s viac ako {count} videami požiada o potvrdenie."
+    Obsidian Vault: Názov trezoru Obsidian pre poznámky s časovými pečiatkami. Ak je nastavený, poznámky možno pridávať do Obsidianu. Poznámky ku každému videu sa zhromažďujú v poznámke pomenovanej podľa videa, v priečinku trezoru pre nové poznámky.
   Download Settings:
     Download Folder: Videá sa ukladajú do tohto priečinka. Ak chcete použiť systémový priečinok Stiahnuté súbory, ponechajte pole prázdne.
     Global Additional yt-dlp Arguments: Dodatočné argumenty príkazového riadka odovzdané nástroju yt-dlp pri každom sťahovaní, napríklad --cookies-from-browser firefox.
