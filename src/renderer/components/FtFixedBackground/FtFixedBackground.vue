@@ -28,6 +28,15 @@
   background-clip: border-area;
 }
 
+/* The parent can't hide its own background without border-area, and Firefox's
+   clip-path doesn't clip the fixed field to the corners, so the parent paints
+   it with a fixed attachment, see --fixed-background-host-attachment. */
+@supports not (background-clip: border-area) {
+  .fixedBackgroundLayer {
+    display: none;
+  }
+}
+
 .fixedBackgroundLayer::before {
   content: '';
   position: fixed;

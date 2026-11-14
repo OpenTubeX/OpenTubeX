@@ -12,9 +12,11 @@
   position: relative;
   border-radius: var(--shape-corner-medium);
   background-color: var(--card-bg-color);
+  background-image: var(--card-bg-image);
 
   /* FtFixedBackground paints the background fixed to the viewport. */
   background-clip: var(--fixed-background-host-clip, border-box);
+  background-attachment: var(--fixed-background-host-attachment, scroll);
   backdrop-filter: var(--card-bg-blur, none);
   box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
   color: var(--primary-text-color);

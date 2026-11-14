@@ -2727,6 +2727,16 @@ a:visited {
   --logo-text: url('../../_icons/textWhiteSmall.svg');
 }
 
+/* Without background-clip: border-area (Firefox), a card can't hide its own
+   background behind FtFixedBackground, which hides itself there. Cards paint
+   the field with a fixed attachment instead, which Firefox composites. */
+@supports not (background-clip: border-area) {
+  .openTubeXLight,
+  .openTubeXDark {
+    --fixed-background-host-attachment: fixed;
+  }
+}
+
 /* Let the window's fixed field show through. */
 :is(.openTubeXLight, .openTubeXDark) .app {
   background-color: transparent;
