@@ -8505,7 +8505,12 @@ async function takeScreenshot() {
     canvas.remove()
 
     if (pauseForScreenshot && wasPlaying) {
-      video_.play()
+      // A note opened meanwhile resumes playback once it closes
+      if (timestampNote.value !== null) {
+        resumeAfterTimestampNote = true
+      } else {
+        video_.play()
+      }
     }
   }
 }
