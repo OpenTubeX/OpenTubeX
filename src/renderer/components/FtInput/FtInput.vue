@@ -459,6 +459,8 @@ function handleStepTap(direction) {
   stopStepping()
 }
 
+// stepUp() and stepDown() ignore disabled and readonly, so a hold must end when either turns on.
+watch(() => props.disabled || props.readonly, (locked) => { if (locked) stopStepping() })
 onBeforeUnmount(stopStepping)
 
 const tooltipRef = useTemplateRef('tooltipRef')
