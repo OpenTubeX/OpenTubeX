@@ -209,8 +209,9 @@ async function checkThreads() {
     }
     const { added, seen } = result ? findNewReplies(thread, result.replies) : { added: [], seen: thread.seen }
     // Announced before they count as seen, so closing the app in between
-    // repeats a reply rather than losing it. Replies left when notifications
-    // turn off count as seen too.
+    // repeats a reply rather than losing it. Replies whose announcement fails
+    // count as seen too, as retrying could add them to the history twice, and
+    // so do the ones left when notifications turn off.
     let disabled = false
     for (const reply of added) {
       disabled = !isEnabled()

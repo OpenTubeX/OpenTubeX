@@ -48,7 +48,7 @@ public class CommentReplyNotificationsTest {
             .put("onResponseReceivedEndpoints", new JSONArray().put(new JSONObject().put("appendContinuationItemsAction",
                 new JSONObject().put("continuationItems", new JSONArray()
                     .put(replyViewModel("thread1.a"))
-                    .put(replyViewModel("thread1.b"))
+                    .put(new JSONObject().put("commentThreadRenderer", viewModel("thread1.b")))
                     .put(new JSONObject().put("continuationItemRenderer", new JSONObject().put("button", new JSONObject()
                         .put("buttonRenderer", new JSONObject().put("command", new JSONObject()
                             .put("continuationCommand", new JSONObject().put("token", "next%3D")))))))))))

@@ -93,9 +93,6 @@ final class CommentReplyNotifications {
         stateFile(context).delete();
     }
 
-    private static synchronized boolean isCurrent(int started) {
-        return generation == started;
-    }
 
     static boolean closedAppAllowed(Context context) throws JSONException {
         return configuration(context).optBoolean("closedApp");
@@ -138,8 +135,12 @@ final class CommentReplyNotifications {
             JSONObject found = findNewReplies(checked, result.getJSONArray("replies"));
             JSONArray added = found.getJSONArray("added");
             // Replies left when notifications turn off count as seen too.
-            for (int index = 0; index < added.length() && configuration(context).optBoolean("enabled") && isCurrent(started); index++) {
-                announce(context, configuration, videoId, added.getJSONObject(index));
+            for (int index = 0; index < added.length() && configuration(context).optBoolean("enabled"); index++) {
+                // Held while delivering, so a sign-out cannot slip in between.
+                synchronized (CommentReplyNotifications.class) {
+                    if (generation != started) return;
+                    announce(context, configuration, videoId, added.getJSONObject(index));
+                }
             }
             seen = found.getJSONArray("seen");
         }
@@ -226,8 +227,10 @@ final class CommentReplyNotifications {
             for (int index = 0; index < items.length(); index++) {
                 JSONObject entry = items.optJSONObject(index);
                 if (entry == null) continue;
-                // Replies hold the view model directly, threads wrap it once more.
-                JSONObject viewModel = entry.optJSONObject("commentViewModel");
+                // YouTube serves replies flat, holding the view model directly, or
+                // nested, wrapping it in a thread like top-level comments.
+                JSONObject thread = entry.optJSONObject("commentThreadRenderer");
+                JSONObject viewModel = (thread != null ? thread : entry).optJSONObject("commentViewModel");
                 if (viewModel != null && viewModel.has("commentViewModel")) viewModel = viewModel.optJSONObject("commentViewModel");
                 if (viewModel != null) {
                     JSONObject entity = entities.optJSONObject(viewModel.optString("commentId"));
