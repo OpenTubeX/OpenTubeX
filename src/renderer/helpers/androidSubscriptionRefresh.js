@@ -136,15 +136,26 @@ export async function configureAndroidCommentReplies(configuration) {
 }
 
 /**
- * Has Android watch the thread of a comment the account posted.
- * @param {{ videoId: string, threadId: string, commentId: string, channelId: string, handle: string | null, token: string }} comment
+ * Has Android watch a comment for replies.
+ * @param {Parameters<typeof import('../../commentReplyTracking.js').trackComment>[1] & { token: string }} comment
  */
 export async function trackAndroidCommentReplies(comment) {
   if (SubscriptionRefresh) await SubscriptionRefresh.trackCommentReplies({ comment })
 }
 
-export async function clearAndroidCommentReplies() {
-  if (SubscriptionRefresh) await SubscriptionRefresh.clearCommentReplies()
+/** @returns {Promise<unknown[]>} the threads Android watches, newest first */
+export async function listAndroidCommentReplies() {
+  if (!SubscriptionRefresh) return []
+  const { threads } = await SubscriptionRefresh.listCommentReplies()
+  return threads
+}
+
+/**
+ * Has Android stop watching a comment, with its author's other comments in the thread.
+ * @param {{ videoId: string, threadId: string, channelId: string }} comment
+ */
+export async function untrackAndroidCommentReplies(comment) {
+  if (SubscriptionRefresh) await SubscriptionRefresh.untrackCommentReplies({ comment })
 }
 
 export async function isAndroidSubscriptionRefreshActive() {

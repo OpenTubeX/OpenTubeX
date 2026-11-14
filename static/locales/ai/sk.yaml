@@ -356,6 +356,7 @@ History:
 Settings:
   Experimental Badge: Experimentálne
   YouTube Account Settings:
+    Watch Posted Comments: "Sledovať odpovede na moje komentáre"
     YouTube Account Settings: "Účet YouTube"
     Unofficial App Warning: "OpenTubeX nie je oficiálna aplikácia YouTube. Prihlásením sa to, čo tu robíte, prepojí s vaším účtom Google a Google môže účty, ktoré používajú neoficiálne aplikácie, obmedziť alebo zablokovať. Prihlasujte sa iba účtom, o ktorý si môžete dovoliť prísť."
     Sign In Explanation: "OpenTubeX sa prihlasuje ako aplikácia pre televízory: prihlásenie schválite na webe Google a OpenTubeX nikdy neuvidí vaše heslo. Prihlásenie zostáva v tomto zariadení a nesynchronizuje sa ani nezálohuje."
@@ -387,7 +388,6 @@ Settings:
     Sync Now: "Synchronizovať teraz"
     Synced: "Synchronizované s YouTube"
     Sync Failed: "Synchronizácia s YouTube zlyhala: {error}"
-    Reply Notifications: "Upozorňovať ma na odpovede na moje komentáre"
   Diagnostics:
     Diagnostics: Diagnostika
     Description: Kým je diagnostický denník zapnutý, OpenTubeX uchováva nedávne správy denníka v pamäti, aby ste ich mohli priložiť k hláseniam chýb. Nikdy ich sám neukladá ani neodosiela a vypnutím denníka sa vymažú. Hlásenia vynechávajú súbory cookie, tokeny, IP adresy a parametre URL, môžu však obsahovať ID prehratých videí, preto hlásenie pred zdieľaním skontrolujte.
@@ -474,6 +474,11 @@ Settings:
       Network: sieť
       Disk: disk
   General Settings:
+    Stop Watching: "Prestať sledovať"
+    No Watched Comments: "Nesledujú sa žiadne komentáre. Komentár môžete sledovať pomocou tlačidla so zvončekom vedľa neho."
+    Your Comment: "Váš komentár"
+    Watched Comments: "Sledované komentáre"
+    Reply Notifications: "Zapnúť upozornenia na odpovede"
     Built-in Streams:
       Built-in Streams: "Vstavané streamy"
       Automatic: "Automaticky"
@@ -550,7 +555,6 @@ Settings:
       Force On: Vždy zapnuté
       Force Off: Vždy vypnuté
     Comment Translation:
-      Title: Preklady komentárov
       Enable: Zapnúť preklady komentárov
       Never Translate: Nikdy neprekladať komentáre v jazyku
       Choose Language: Vyberte jazyk
@@ -2236,6 +2240,9 @@ Chapters:
   Chapter Loop Stopped: 'Opakovanie kapitoly zastavené'
   Sync to Video Time: 'Synchronizovať s časom videa'
 Comments:
+  Watch Failed: "Odpovede na komentár sa nepodarilo sledovať"
+  Stop Watching for Replies: "Prestať sledovať odpovede"
+  Watch for Replies: "Sledovať odpovede"
   Image unavailable: "Obrázok nie je dostupný"
   Comment Count: 1 komentár | {count} komentáre | {count} komentárov
   Show Comments: Zobraziť komentáre
@@ -2273,12 +2280,13 @@ Description:
   Music: Hudba
 Tooltips:
   YouTube Account Settings:
+    Watch Posted Comments: "Komentáre, ktoré tu uverejníte, sa automaticky sledujú kvôli odpovediam, pokiaľ máte v nastaveniach komentárov zapnuté upozornenia na odpovede."
     Sync Subscriptions: "Kanály, ktoré začnete odoberať na YouTube, sa pridajú do profilu Všetky kanály a kanály, ktorých odber tam zrušíte, sa odstránia zo všetkých profilov. Začatie alebo zrušenie odberu tu v profile Všetky kanály urobí to isté na YouTube."
     Sync Playlists: "Vaše playlisty z YouTube, Pozrieť neskôr a Videá, ktoré sa mi páčia, sa zobrazia v sekcii Vaše playlisty a zmeny, ktoré v nich tu urobíte, sa urobia aj na YouTube. Nesynchronizujú sa s vašimi ďalšími zariadeniami a nie sú zahrnuté, keď exportujete všetky playlisty alebo zálohujete svoje údaje. Vypnutím tejto možnosti sa odstránia z tohto zariadenia, ale nie z YouTube."
     Add to YouTube Watch History: "Prehrávané videá sa pridávajú do vašej histórie pozerania na YouTube, aby sa z nich učili odporúčania YouTube. Keď je história na YouTube pozastavená, nič sa nepridáva."
     Rate Videos: "Zobrazuje pri videách tlačidlá Páči sa mi a Nepáči sa mi. Aby sa zobrazilo vaše hodnotenie, každé otvorené video sa vyhľadá na YouTube s vaším účtom, takže YouTube zistí, ktoré videá otvárate, aj keď sa nepridajú do histórie pozerania."
-    Reply Notifications: "OpenTubeX kontroluje nové odpovede na komentáre, ktoré ste tu uverejnili za posledných 30 dní. Komentáre uverejnené inde, napríklad na webe YouTube, nie sú zahrnuté."
   General Settings:
+    Reply Notifications: "OpenTubeX počas 30 dní kontroluje, či na komentáre, ktoré sledujete, pribudli nové odpovede. Ľubovoľný komentár môžete sledovať pomocou tlačidla so zvončekom vedľa neho."
     Built-in Streams: |
       Automatický režim prehráva väčšinu videí cez klienta visionOS od YouTube, ktorý sa spúšťa rýchlejšie a podporuje automatickú kvalitu. Živé prenosy a videá, ktoré nedokáže prehrať, používajú SABR.
       Iba SABR vždy používa webového klienta YouTube, ktorý sa spúšťa pomalšie a nemá automatickú kvalitu.
@@ -2797,6 +2805,7 @@ Platforms:
   Load Error: Túto stránku sa nepodarilo načítať z platformy {platform}.
   Empty Tab: Zatiaľ tu nič nie je.
 YouTube Account:
+  "{author} replied to {commentAuthor}": "{author} odpovedal(a) používateľovi {commentAuthor}"
   Like: "Páči sa mi to"
   Dislike: "Nepáči sa mi to"
   Rating Failed: "Hodnotenie na YouTube sa nepodarilo: {error}"

@@ -356,6 +356,7 @@ History:
 Settings:
   Experimental Badge: Deneysel
   YouTube Account Settings:
+    Watch Posted Comments: "Paylaştığım yorumlara gelen yanıtları izle"
     YouTube Account Settings: "YouTube Hesabı"
     Unofficial App Warning: "OpenTubeX resmi bir YouTube uygulaması değildir. Oturum açtığınızda burada yaptıklarınız Google hesabınızla ilişkilendirilir ve Google resmi olmayan uygulamalar kullanan hesapları kısıtlayabilir veya yasaklayabilir. Yalnızca kaybetmeyi göze alabileceğiniz bir hesapla oturum açın."
     Sign In Explanation: "OpenTubeX bir TV uygulaması gibi oturum açar: oturum açmayı Google'ın web sitesinde onaylarsınız ve OpenTubeX şifrenizi hiçbir zaman görmez. Oturum bu cihazda kalır; eşitlenmez ve yedeklenmez."
@@ -387,7 +388,6 @@ Settings:
     Sync Now: "Şimdi eşitle"
     Synced: "YouTube ile eşitlendi"
     Sync Failed: "YouTube ile eşitlenemedi: {error}"
-    Reply Notifications: "Yorumlarıma gelen yanıtlardan beni haberdar et"
   Diagnostics:
     Diagnostics: Tanılama
     Description: Tanılama günlüğü açıkken OpenTubeX, hata raporlarına ekleyebilmeniz için son günlük iletilerini bellekte tutar. Bunları hiçbir zaman kendiliğinden kaydetmez veya göndermez ve günlüğü kapatmak bunları siler. Raporlar çerezleri, belirteçleri, IP adreslerini ve URL parametrelerini içermez, ancak oynattığınız videoların kimliklerini içerebilir; bu yüzden paylaşmadan önce raporu kontrol edin.
@@ -474,6 +474,11 @@ Settings:
       Network: ağ
       Disk: disk
   General Settings:
+    Stop Watching: "İzlemeyi bırak"
+    No Watched Comments: "İzlenen yorum yok. Bir yorumu yanındaki zil düğmesiyle izleyin."
+    Your Comment: "Yorumunuz"
+    Watched Comments: "İzlenen yorumlar"
+    Reply Notifications: "Yanıt bildirimlerini etkinleştir"
     Built-in Streams:
       Built-in Streams: "Yerleşik akışlar"
       Automatic: "Otomatik"
@@ -550,7 +555,6 @@ Settings:
       Force On: Her zaman açık
       Force Off: Her zaman kapalı
     Comment Translation:
-      Title: Yorum çevirileri
       Enable: Yorum çevirilerini etkinleştir
       Never Translate: Şu dildeki yorumları asla çevirme
       Choose Language: Bir dil seçin
@@ -2229,6 +2233,9 @@ Chapters:
   Chapter Loop Stopped: 'Bölüm tekrarı durduruldu'
   Sync to Video Time: 'Video zamanıyla eşitle'
 Comments:
+  Watch Failed: "Yorumun yanıtları izlenemedi"
+  Stop Watching for Replies: "Yanıtları izlemeyi bırak"
+  Watch for Replies: "Yanıtları izle"
   Image unavailable: "Görüntü kullanılamıyor"
   Comment Count: 1 Yorum | {count} Yorum
   Show Comments: Yorumları Göster
@@ -2267,12 +2274,13 @@ Description:
   Music: Müzik
 Tooltips:
   YouTube Account Settings:
+    Watch Posted Comments: "Yorum ayarlarında yanıt bildirimleri açık olduğu sürece, burada paylaştığınız yorumlar yanıtlar için otomatik olarak izlenir."
     Sync Subscriptions: "YouTube'da abone olduğunuz kanallar Tüm Kanallar'a eklenir, orada abonelikten çıktığınız kanallar ise tüm profillerden kaldırılır. Burada Tüm Kanallar'da abone olmak veya abonelikten çıkmak YouTube'da da aynısını yapar."
     Sync Playlists: "YouTube oynatma listeleriniz, Daha sonra izle ve Beğenilen videolar, Oynatma Listelerin bölümünde görünür ve burada bunlarda yaptığınız değişiklikler YouTube'da da yapılır. Diğer cihazlarınızla eşitlenmez ve tüm oynatma listelerini dışa aktardığınızda veya verilerinizi yedeklediğinizde dahil edilmez. Bunu kapatmak onları bu cihazdan kaldırır ancak YouTube'dan kaldırmaz."
     Add to YouTube Watch History: "Oynattığınız videolar YouTube izleme geçmişinize eklenir, böylece YouTube önerileri bunlardan öğrenir. Geçmiş YouTube'da duraklatılmışken hiçbir şey eklenmez."
     Rate Videos: "Videolarda beğen ve beğenme düğmelerini gösterir. Puanınızı göstermek için açtığınız her video hesabınızla YouTube'da sorgulanır; bu nedenle YouTube, izleme geçmişinize eklenmeseler bile hangi videoları açtığınızı öğrenir."
-    Reply Notifications: "OpenTubeX, son 30 gün içinde burada paylaştığınız yorumlara yeni yanıt gelip gelmediğini denetler. YouTube web sitesi gibi başka yerlerde paylaştığınız yorumlar dahil değildir."
   General Settings:
+    Reply Notifications: "OpenTubeX, izlediğiniz yorumlara gelen yeni yanıtları 30 gün boyunca denetler. Herhangi bir yorumu yanındaki zil düğmesiyle izleyin."
     Built-in Streams: |
       Otomatik, çoğu videoyu YouTube'un visionOS istemcisiyle oynatır; bu istemci daha hızlı başlar ve otomatik kaliteyi destekler. Canlı yayınlar ve oynatamadığı videolar SABR kullanır.
       Yalnızca SABR her zaman YouTube'un web istemcisini kullanır; bu istemci daha yavaş başlar ve otomatik kalite sunmaz.
@@ -2791,6 +2799,7 @@ Platforms:
   Load Error: Bu sayfa {platform} üzerinden yüklenemedi.
   Empty Tab: Burada henüz bir şey yok.
 YouTube Account:
+  "{author} replied to {commentAuthor}": "{author}, {commentAuthor} adlı kullanıcıyı yanıtladı"
   Like: "Beğen"
   Dislike: "Beğenme"
   Rating Failed: "YouTube'da oy verilemedi: {error}"

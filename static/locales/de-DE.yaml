@@ -449,6 +449,7 @@ Most Popular Feed Empty: Der Feed „Am beliebtesten“ dieser Invidious-Instanz
 Most Popular Load Error: Der Feed „Am beliebtesten“ konnte nicht geladen werden.
 Settings:
   YouTube Account Settings:
+    Watch Posted Comments: "Meine Kommentare auf Antworten beobachten"
     YouTube Account Settings: "YouTube-Konto"
     Unofficial App Warning: "OpenTubeX ist keine offizielle YouTube-App. Wenn du dich anmeldest, wird dein Handeln hier mit deinem Google-Konto verknüpft, und Google kann Konten, die inoffizielle Apps nutzen, einschränken oder sperren. Melde dich nur mit einem Konto an, auf das du verzichten kannst."
     Sign In Explanation: "OpenTubeX meldet sich wie eine TV-App an: Du bestätigst die Anmeldung auf der Website von Google, und OpenTubeX sieht dein Passwort nie. Die Anmeldung bleibt auf diesem Gerät und wird weder synchronisiert noch gesichert."
@@ -477,7 +478,6 @@ Settings:
     Sync Playlists: "Playlists mit YouTube synchronisieren"
     Add to YouTube Watch History: "Angesehene Videos zum YouTube-Verlauf hinzufügen"
     Rate Videos: "Videos mit „Mag ich“ oder „Mag ich nicht“ bewerten"
-    Reply Notifications: "Bei Antworten auf meine Kommentare benachrichtigen"
     Sync Now: "Jetzt synchronisieren"
     Synced: "Mit YouTube synchronisiert"
     Sync Failed: "Synchronisierung mit YouTube fehlgeschlagen: {error}"
@@ -544,6 +544,11 @@ Settings:
     Advanced Description: Backends, Pufferung, externe Tools, Proxy und Diagnose
     Alternative providers: Video- und Metadatenanbieter
   General Settings:
+    Stop Watching: "Nicht mehr beobachten"
+    No Watched Comments: "Es werden keine Kommentare beobachtet. Beobachte einen Kommentar mit der Glocke daneben."
+    Your Comment: "Dein Kommentar"
+    Watched Comments: "Beobachtete Kommentare"
+    Reply Notifications: "Benachrichtigungen bei Antworten aktivieren"
     Preferred Video Codec: Bevorzugter Videocodec
     Enable Tabs: "Tabs aktivieren"
     Thumbnail Swipe Gestures:
@@ -649,7 +654,6 @@ Settings:
         Server error: "Der Server hat einen Fehler gemeldet (HTTP {status})."
     System Default: Systemvorgabe
     Comment Translation:
-      Title: Kommentarübersetzungen
       Enable: Kommentarübersetzungen aktivieren
       Never Translate: Kommentare in diesen Sprachen nie übersetzen
       Choose Language: Sprache auswählen
@@ -2865,6 +2869,9 @@ Share:
   Timestamp Link Copied: Link mit Zeitstempel in die Zwischenablage kopiert
 Mini Player: Mini-Video-Player
 Comments:
+  Watch Failed: "Der Kommentar konnte nicht beobachtet werden"
+  Stop Watching for Replies: "Antworten nicht mehr beobachten"
+  Watch for Replies: "Antworten beobachten"
   Image unavailable: "Bild nicht verfügbar"
   Comments: Kommentare
   Click to View Comments: Kommentare anzeigen
@@ -3023,12 +3030,13 @@ See changes and update: Änderungen ansehen und aktualisieren
 Dismiss: Ausblenden
 Tooltips:
   YouTube Account Settings:
+    Watch Posted Comments: "Kommentare, die du hier schreibst, werden automatisch auf Antworten beobachtet, solange Benachrichtigungen über Antworten in den Kommentareinstellungen aktiviert sind."
     Sync Subscriptions: "Kanäle, die du auf YouTube abonnierst, kommen zu „Alle Kanäle“ hinzu, und Kanäle, deren Abo du dort beendest, werden aus jedem Profil entfernt. Wenn du hier in „Alle Kanäle“ abonnierst oder ein Abo beendest, passiert das auch auf YouTube."
     Sync Playlists: "Deine YouTube-Playlists, „Später ansehen“ und „Videos mit ‚Mag ich‘-Bewertung“ erscheinen unter „Deine Playlists“, und deine Änderungen daran werden auch auf YouTube übernommen. Sie werden nicht mit deinen anderen Geräten synchronisiert und nicht einbezogen, wenn du alle Playlists exportierst oder deine Daten sicherst. Wenn du das ausschaltest, werden sie von diesem Gerät entfernt, aber nicht von YouTube."
     Add to YouTube Watch History: "Videos, die du abspielst, werden zu deinem YouTube-Verlauf hinzugefügt, damit die Empfehlungen von YouTube daraus lernen. Solange der Verlauf auf YouTube pausiert ist, wird nichts hinzugefügt."
     Rate Videos: "Zeigt bei Videos die Schaltflächen „Mag ich“ und „Mag ich nicht“. Um deine Bewertung anzuzeigen, wird jedes Video, das du öffnest, mit deinem Konto bei YouTube abgefragt. So erfährt YouTube, welche Videos du öffnest, auch wenn sie nicht zu deinem Verlauf hinzugefügt werden."
-    Reply Notifications: "OpenTubeX sucht nach neuen Antworten auf Kommentare, die du in den letzten 30 Tagen hier geschrieben hast. Kommentare, die du woanders geschrieben hast, etwa auf der YouTube-Website, sind nicht enthalten."
   General Settings:
+    Reply Notifications: "OpenTubeX prüft beobachtete Kommentare 30 Tage lang auf neue Antworten. Beobachte einen Kommentar mit der Glocke daneben."
     Preferred Video Codec: |
       Auto bevorzugt Codecs, die dein Gerät per Hardware decodieren kann.
       AV1: die beste Qualität bei geringstem Datenverbrauch, aber nicht jedes Video bietet ihn an. Ohne Hardware-Decodierung kann er den Akku belasten oder Bilder auslassen.
@@ -3993,6 +4001,7 @@ Platforms:
   Load Error: Diese Seite konnte nicht von {platform} geladen werden.
   Empty Tab: Hier gibt es noch nichts.
 YouTube Account:
+  "{author} replied to {commentAuthor}": "{author} hat {commentAuthor} geantwortet"
   Like: "Mag ich"
   Dislike: "Mag ich nicht"
   Rating Failed: "Bewertung auf YouTube fehlgeschlagen: {error}"

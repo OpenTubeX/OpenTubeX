@@ -9,6 +9,8 @@ import { getSelectedYouTubeProfile } from '../../helpers/youtube-account-state.j
  * @type {import('vue').InjectionKey<{
  *   enabled: import('vue').ComputedRef<boolean>,
  *   videoId: import('vue').ComputedRef<string>,
+ *   videoTitle: import('vue').ComputedRef<string>,
+ *   watchable: import('vue').ComputedRef<boolean>,
  *   channelId: import('vue').ComputedRef<string | null>,
  *   replyingTo: import('vue').Ref<string | null>,
  *   editing: import('vue').Ref<string | null>,

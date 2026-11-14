@@ -370,6 +370,20 @@
               />
             </button>
             <button
+              v-if="canWatchComments"
+              type="button"
+              class="commentWatchButton"
+              :class="{ active: isCommentWatched(comment) }"
+              :title="watchLabel(comment)"
+              :aria-label="watchLabel(comment)"
+              :aria-pressed="isCommentWatched(comment)"
+              @click="toggleCommentWatch(comment)"
+            >
+              <FtIcon
+                :icon="['fas', isCommentWatched(comment) ? 'bell' : 'bell-outline']"
+              />
+            </button>
+            <button
               type="button"
               class="commentCopyLink"
               :title="$t('Video.Copy YouTube Link')"
@@ -693,6 +707,8 @@ import store from '../../store/index'
 import { usesInvidiousApi } from '../../../apiBackends'
 import { getYouTubeChannelKey, isSignedInToYouTube } from '../../helpers/youtube-account-state'
 import { createPostedComment, getEditedCommentFields, getRootCommentId, youTubeCommentsKey } from './youTubeComments'
+import { useCommentWatching } from './commentWatching'
+import { getWatchedComments } from '../../helpers/commentReplyNotifications'
 
 import { debounce, getInvidiousApiErrorMessage, showInvidiousFallbackToast, copyToClipboard, formatViewCount, getRelativeTimeFromDate, showApiErrorToast, showToast } from '../../helpers/utils'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
@@ -792,6 +808,11 @@ const props = defineProps({
   highlightedCommentId: {
     type: String,
     default: null,
+  },
+  // Shown with the account's comments in the list of watched comments.
+  videoTitle: {
+    type: String,
+    default: '',
   }
 })
 
@@ -818,6 +839,9 @@ const youTubeComments = {
   enabled: computed(() => !props.isPostComments && !props.offline && !props.commentsDisabled &&
     !areCommentsDisabled.value && isSignedInToYouTube(store.getters)),
   videoId: computed(() => props.id),
+  videoTitle: computed(() => props.videoTitle),
+  // Comments on posts and saved comments cannot be watched for replies.
+  watchable: computed(() => !props.isPostComments && !props.offline),
   channelId: computed(() => store.getters.getYouTubeAccount?.channelId ?? null),
   replyingTo: ref(null),
   // The comment open for editing, one at a time like replies.
@@ -892,6 +916,12 @@ const youTubeComments = {
   }
 }
 provide(youTubeCommentsKey, youTubeComments)
+
+const { canWatchComments, isCommentWatched, watchLabel, toggleCommentWatch } = useCommentWatching(youTubeComments)
+// Loads which comments are watched, also when they changed in another window.
+watch(canWatchComments, enabled => {
+  if (enabled) getWatchedComments().catch(error => console.error('Failed to load the watched comments', error))
+}, { immediate: true })
 // Closing a comment box shortens the list too.
 watch([youTubeComments.replyingTo, youTubeComments.editing], () => clampCommentsScrollAfterRender())
 const canUseYouTubeComments = youTubeComments.enabled

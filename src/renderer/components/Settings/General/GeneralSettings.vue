@@ -64,14 +64,6 @@
         @change="updateGeneralAutoLoadMorePaginatedItemsEnabled"
       />
       <FtToggleSwitch
-        :label="t('Settings.General Settings.Auto Load Comments.Label')"
-        :default-value="store.getters.getAutoLoadComments"
-        setting-key="autoLoadComments"
-        :compact="true"
-        :tooltip="t('Settings.General Settings.Auto Load Comments.Tooltip')"
-        @change="store.dispatch('updateAutoLoadComments', $event)"
-      />
-      <FtToggleSwitch
         v-if="USING_ELECTRON"
         :label="t('Settings.General Settings.Use tray icon')"
         :default-value="trayEnabled"

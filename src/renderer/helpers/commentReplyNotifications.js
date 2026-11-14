@@ -1,21 +1,32 @@
 import { LocalNotifications } from '@capacitor/local-notifications'
+import { ref } from 'vue'
 import { Constants } from 'youtubei.js'
 
 import store from '../store/index'
 import i18n from '../i18n/index'
 import { getLocalComments } from './api/local'
 import { createLinkedCommentsContinuation } from './api/youtube-account-parsers'
-import { clearAndroidCommentReplies, configureAndroidCommentReplies, trackAndroidCommentReplies } from './androidSubscriptionRefresh'
+import {
+  configureAndroidCommentReplies,
+  listAndroidCommentReplies,
+  trackAndroidCommentReplies,
+  untrackAndroidCommentReplies
+} from './androidSubscriptionRefresh'
 import { isAppHidden } from './appVisibility'
 import { capacitorNotificationHistory } from './capacitorNotificationHistory'
 import { getCommentReplyLocalNotificationId } from './capacitorSystemNotifications'
 import { getNotificationThumbnailUrl, openNotificationEntry, showInAppNotification, withThumbnail } from './notificationHistory'
+import { requestCapacitorNotificationPermission } from './platformFeed'
 import { getSelectedYouTubeProfile, isSignedInToYouTube } from './youtube-account-state'
 import {
+  COMMENT_TEXT_LIMIT,
   findNewReplies,
   getCommentReplyTarget,
+  isOwnWatchedComment,
+  isSameWatchedComment,
   normalizeTrackedCommentThreads,
-  trackPostedComment
+  trackComment,
+  untrackComment
 } from '../../commentReplyTracking.js'
 
 const STORAGE_KEY = 'commentReplyThreads'
@@ -27,7 +38,15 @@ const CHANNEL_ID = 'comment-replies'
 // Android checks natively, also while the app is closed.
 const isAndroid = !!process.env.IS_CAPACITOR && !process.env.IS_IOS
 
-/** @returns {import('../../commentReplyTracking.js').TrackedCommentThread[]} */
+/** @typedef {import('../../commentReplyTracking.js').TrackedCommentThread} TrackedCommentThread */
+
+/**
+ * The watched comments as last loaded, for the watch buttons on comments.
+ * @type {import('vue').Ref<TrackedCommentThread[]>}
+ */
+export const watchedComments = ref([])
+
+/** @returns {TrackedCommentThread[]} */
 function loadThreads() {
   try {
     return normalizeTrackedCommentThreads(JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]'))
@@ -36,16 +55,16 @@ function loadThreads() {
   }
 }
 
-/** @param {import('../../commentReplyTracking.js').TrackedCommentThread[]} threads */
+/** @param {TrackedCommentThread[]} threads */
 function saveThreads(threads) {
   if (threads.length > 0) localStorage.setItem(STORAGE_KEY, JSON.stringify(threads))
   else localStorage.removeItem(STORAGE_KEY)
+  watchedComments.value = threads
 }
 
-function isEnabled() {
-  return isSignedInToYouTube(store.getters) &&
-    store.getters.getYouTubeAccountReplyNotifications &&
-    store.getters.getNotificationMode !== 'off'
+/** Whether comments can be watched for replies, which the settings turn on. */
+export function isCommentWatchingEnabled() {
+  return store.getters.getCommentReplyNotifications && store.getters.getNotificationMode !== 'off'
 }
 
 /**
@@ -54,23 +73,105 @@ function isEnabled() {
  * @param {string} threadId the top-level comment
  * @param {string} commentId the posted comment, the same as `threadId` unless it is a reply
  * @param {import('./api/youtube-account').YouTubeAccount | null} account the channel that posted it
+ * @param {string} text the posted text, shown in the list of watched comments
+ * @param {string} videoTitle
  */
-export function trackCommentReplies(videoId, threadId, commentId, account) {
+export function trackCommentReplies(videoId, threadId, commentId, account, text, videoTitle) {
   // Without its channel, the account's own replies would be announced too.
-  if (!isEnabled() || !account?.channelId) return
-  const handle = getSelectedYouTubeProfile(account)?.handle ?? null
-  if (isAndroid) {
-    const token = createLinkedCommentsContinuation(videoId, threadId)
-    trackAndroidCommentReplies({ videoId, threadId, commentId, channelId: account.channelId, handle, token })
-      .catch(error => console.error('Failed to watch a comment for replies', error))
-    return
+  if (!isCommentWatchingEnabled() || !store.getters.getYouTubeAccountReplyNotifications || !account?.channelId) return
+  const comment = {
+    videoId,
+    threadId,
+    commentId,
+    channelId: account.channelId,
+    handle: getSelectedYouTubeProfile(account)?.handle ?? null,
+    accountId: account.channelId,
+    text: text.slice(0, COMMENT_TEXT_LIMIT),
+    videoTitle
   }
   // The comment is posted, so failing to watch it must not fail the post.
-  try {
-    saveThreads(trackPostedComment(loadThreads(), { videoId, threadId, commentId, channelId: account.channelId, handle }))
-  } catch (error) {
-    console.error('Failed to watch a comment for replies', error)
+  saveComment(comment).catch(error => console.error('Failed to watch a comment for replies', error))
+}
+
+/**
+ * Watches a loaded comment for replies, from the replies it has now.
+ * @param {string} videoId
+ * @param {string} videoTitle
+ * @param {{ id: string, authorId: string, author: string, text: string }} comment `text` is HTML
+ * @returns {Promise<boolean>} false when the comment is gone
+ */
+export async function watchComment(videoId, videoTitle, { id, authorId, author, text }) {
+  const account = isSignedInToYouTube(store.getters) ? store.getters.getYouTubeAccount : null
+  const threadId = id.split('.')[0]
+  const watched = {
+    videoId,
+    threadId,
+    commentId: id,
+    channelId: authorId,
+    handle: author || null,
+    accountId: account?.channelId ?? '',
+    text: (new DOMParser().parseFromString(text, 'text/html').body.textContent ?? '').slice(0, COMMENT_TEXT_LIMIT),
+    videoTitle
   }
+  // The replies so far count as seen, so only new ones are announced.
+  const result = await fetchThread({ ...watched, postedAt: 0, replyCount: -1, seen: [] })
+  if (!result) return false
+  await saveComment({ ...watched, replyCount: result.replyCount, seen: result.replies.map(reply => reply.id) })
+  return true
+}
+
+/** @param {Parameters<typeof trackComment>[1]} comment */
+async function saveComment(comment) {
+  // Watching is on unless turned off, so the first watched comment asks for the permission.
+  if (process.env.IS_CAPACITOR) requestCapacitorNotificationPermission()
+  if (isAndroid) {
+    const token = createLinkedCommentsContinuation(comment.videoId, comment.threadId)
+    await trackAndroidCommentReplies({ ...comment, token })
+    await getWatchedComments()
+  } else {
+    saveThreads(trackComment(loadThreads(), comment))
+  }
+}
+
+/**
+ * Stops watching a comment, with its author's other comments in the thread.
+ * @param {Pick<TrackedCommentThread, 'videoId' | 'threadId' | 'channelId'>} comment
+ */
+export async function unwatchComment({ videoId, threadId, channelId }) {
+  if (isAndroid) {
+    await untrackAndroidCommentReplies({ videoId, threadId, channelId })
+    await getWatchedComments()
+  } else {
+    saveThreads(untrackComment(loadThreads(), { videoId, threadId, channelId }))
+  }
+}
+
+/**
+ * The watched comment that covers a loaded comment, if any.
+ * @param {string} videoId
+ * @param {{ id: string, authorId: string }} comment
+ */
+export function findWatchedComment(videoId, { id, authorId }) {
+  const key = { videoId, threadId: id.split('.')[0], channelId: authorId }
+  return watchedComments.value.find(thread => isSameWatchedComment(thread, key)) ?? null
+}
+
+/** @returns {Promise<TrackedCommentThread[]>} the watched comments, newest first */
+export async function getWatchedComments() {
+  const threads = isAndroid ? normalizeTrackedCommentThreads(await listAndroidCommentReplies()) : loadThreads()
+  watchedComments.value = threads
+  return threads
+}
+
+/**
+ * The title of a notification about a reply.
+ * @param {TrackedCommentThread} thread
+ * @param {string} author
+ */
+function getReplyTitle(thread, author) {
+  return isOwnWatchedComment(thread)
+    ? i18n.global.t('YouTube Account.{author} replied to your comment', { author })
+    : i18n.global.t('YouTube Account.{author} replied to {commentAuthor}', { author, commentAuthor: thread.handle || '?' })
 }
 
 /**
@@ -78,14 +179,15 @@ export function trackCommentReplies(videoId, threadId, commentId, account) {
  * @returns {() => void} stops updating the configuration
  */
 function startAndroidCommentReplyNotifications() {
-  const stopConfiguring = store.watch(() => {
+  return store.watch(() => {
     // An 11-character placeholder, as the thumbnail settings expect a video ID.
     const thumbnail = getNotificationThumbnailUrl('VIDEOIDXXXX')?.replace('VIDEOIDXXXX', '%VIDEO%') ?? ''
     return JSON.stringify({
-      enabled: isEnabled(),
+      enabled: isCommentWatchingEnabled(),
       mode: store.getters.getNotificationMode,
       closedApp: store.getters.getEnableClosedAppSubscriptionRefresh,
       title: i18n.global.t('YouTube Account.{author} replied to your comment', { author: '{author}' }),
+      otherTitle: i18n.global.t('YouTube Account.{author} replied to {commentAuthor}', { author: '{author}', commentAuthor: '{commentAuthor}' }),
       thumbnail,
       request: {
         url: 'https://www.youtube.com/youtubei/v1/next?prettyPrint=false',
@@ -99,14 +201,6 @@ function startAndroidCommentReplyNotifications() {
     configureAndroidCommentReplies(JSON.parse(value))
       .catch(error => console.error('Failed to configure the comment reply checks', error))
   }, { immediate: true })
-  // Signing out, also when YouTube ends the sign-in, forgets the watched comments.
-  const stopWatchingAccount = store.watch(() => isSignedInToYouTube(store.getters), signedIn => {
-    if (!signedIn) clearAndroidCommentReplies().catch(error => console.error('Failed to forget the watched comments', error))
-  }, { immediate: true })
-  return () => {
-    stopConfiguring()
-    stopWatchingAccount()
-  }
 }
 
 /**
@@ -151,13 +245,14 @@ async function fetchThread(thread) {
 }
 
 /**
- * @param {string} videoId
+ * @param {TrackedCommentThread} thread
  * @param {import('../../commentReplyTracking.js').CommentReply} reply
  */
-async function announceReply(videoId, reply) {
+async function announceReply(thread, reply) {
+  const videoId = thread.videoId
   const target = getCommentReplyTarget(videoId, reply.id)
   if (!target) return
-  const title = i18n.global.t('YouTube Account.{author} replied to your comment', { author: reply.author || '?' })
+  const title = getReplyTitle(thread, reply.author || '?')
   const body = reply.text
   const thumbnail = withThumbnail(videoId).thumbnail
 
@@ -170,7 +265,7 @@ async function announceReply(videoId, reply) {
   // so the app may be visible again once it returns
   const granted = (await LocalNotifications.checkPermissions()).display === 'granted'
   // Notifications may have been turned off meanwhile.
-  if (!isEnabled()) return
+  if (!isCommentWatchingEnabled()) return
   if (store.getters.getNotificationMode === 'both') {
     const [entry] = capacitorNotificationHistory.add([{ title, body, ...(thumbnail ? { thumbnail } : {}), ...target }])
     // Read on another device already
@@ -195,10 +290,12 @@ async function announceReply(videoId, reply) {
 }
 
 async function checkThreads() {
-  for (const { videoId, threadId } of loadThreads()) {
-    if (!isEnabled()) return
-    // Reloaded for each thread, as comments posted meanwhile change the list.
-    const thread = loadThreads().find(item => item.videoId === videoId && item.threadId === threadId)
+  // Comments of several authors in a thread can be watched, and a reply can answer more than one.
+  const announced = new Set()
+  for (const key of loadThreads()) {
+    if (!isCommentWatchingEnabled()) return
+    // Reloaded for each thread, as comments watched meanwhile change the list.
+    const thread = loadThreads().find(item => isSameWatchedComment(item, key))
     if (!thread) continue
     let result
     try {
@@ -207,19 +304,24 @@ async function checkThreads() {
       console.warn('Could not check a comment for replies', error)
       continue
     }
-    const { added, seen } = result ? findNewReplies(thread, result.replies) : { added: [], seen: thread.seen }
+    // Stopped watching while it loaded
+    const current = loadThreads().find(item => isSameWatchedComment(item, key))
+    if (!current) continue
+    const { added, seen } = result ? findNewReplies(current, result.replies) : { added: [], seen: current.seen }
     // Announced before they count as seen, so closing the app in between
     // repeats a reply rather than losing it. Replies whose announcement fails
     // count as seen too, as retrying could add them to the history twice, and
     // so do the ones left when notifications turn off.
     let disabled = false
     for (const reply of added) {
-      disabled = !isEnabled()
+      disabled = !isCommentWatchingEnabled()
       if (disabled) break
-      await announceReply(videoId, reply).catch(error => console.error('Failed to announce a comment reply', error))
+      if (announced.has(`${thread.videoId}/${reply.id}`)) continue
+      announced.add(`${thread.videoId}/${reply.id}`)
+      await announceReply(thread, reply).catch(error => console.error('Failed to announce a comment reply', error))
     }
     const threads = loadThreads()
-    const index = threads.findIndex(item => item.videoId === videoId && item.threadId === threadId)
+    const index = threads.findIndex(item => isSameWatchedComment(item, key))
     if (index !== -1) {
       if (result) threads[index] = { ...threads[index], replyCount: result.replyCount, seen }
       else threads.splice(index, 1)
@@ -230,7 +332,7 @@ async function checkThreads() {
 }
 
 /**
- * Checks the comments the account posted for replies while the app runs. On
+ * Checks the watched comments for replies while the app runs. On
  * iOS, the checks pause while the app is hidden; Android checks natively.
  * @returns {() => void} stops the checks
  */
@@ -244,7 +346,7 @@ export function startCommentReplyNotifications() {
     clearTimeout(timer)
     timer = null
     if (stopped) return
-    if (isEnabled() && !(process.env.IS_CAPACITOR && isAppHidden())) {
+    if (isCommentWatchingEnabled() && !(process.env.IS_CAPACITOR && isAppHidden())) {
       lastCheck = Date.now()
       // Windows of the desktop app share the watched comments, so one checks them.
       await navigator.locks.request(LOCK_NAME, { ifAvailable: true }, async lock => {
@@ -254,11 +356,6 @@ export function startCommentReplyNotifications() {
     if (!stopped) timer = setTimeout(check, CHECK_INTERVAL_MS)
   }
   check()
-
-  // Signing out, also when YouTube ends the sign-in, forgets the watched comments.
-  const stopWatchingAccount = store.watch(() => isSignedInToYouTube(store.getters), signedIn => {
-    if (!signedIn) localStorage.removeItem(STORAGE_KEY)
-  }, { immediate: true })
 
   const checkWhenVisible = () => {
     if (!isAppHidden() && timer !== null && Date.now() - lastCheck >= CHECK_INTERVAL_MS) check()
@@ -282,7 +379,6 @@ export function startCommentReplyNotifications() {
   return () => {
     stopped = true
     clearTimeout(timer)
-    stopWatchingAccount()
     removeTapListener?.()
     document.removeEventListener('visibilitychange', checkWhenVisible)
   }

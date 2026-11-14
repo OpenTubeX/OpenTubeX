@@ -77,7 +77,7 @@ public class CommentReplyNotificationsTest {
     public void announcesRepliesLikeTheOtherPlatforms() throws Exception {
         JSONObject comment = new JSONObject().put("videoId", "video1").put("threadId", "thread1").put("commentId", "thread1")
             .put("channelId", "UCme").put("handle", "@Me").put("token", "token%3D");
-        JSONObject own = CommentReplyNotifications.trackPostedComment(new JSONArray(), comment, 1000).getJSONObject(0);
+        JSONObject own = CommentReplyNotifications.trackComment(new JSONArray(), comment, 1000).getJSONObject(0);
         JSONObject first = CommentReplyNotifications.findNewReplies(own, new JSONArray()
             .put(reply("a", "UCother", "Nice")).put(reply("b", "UCme", "Mine")));
         assertEquals("[\"thread1.a\"]", ids(first.getJSONArray("added")).toString());
@@ -86,7 +86,7 @@ public class CommentReplyNotificationsTest {
             .getJSONArray("added")).toString());
 
         JSONObject replyComment = new JSONObject(comment.toString()).put("commentId", "thread1.mine");
-        JSONObject other = CommentReplyNotifications.trackPostedComment(new JSONArray(), replyComment, 1000).getJSONObject(0);
+        JSONObject other = CommentReplyNotifications.trackComment(new JSONArray(), replyComment, 1000).getJSONObject(0);
         JSONArray replies = new JSONArray()
             .put(reply("before", "UCother", "@Me earlier"))
             .put(reply("mine", "UCme", "My reply"))
@@ -101,15 +101,45 @@ public class CommentReplyNotificationsTest {
     @Test
     public void watchesRecentThreadsOnceEach() throws Exception {
         JSONObject comment = new JSONObject().put("videoId", "video1").put("threadId", "thread1").put("commentId", "thread1")
-            .put("channelId", "UCme").put("handle", JSONObject.NULL).put("token", "token%3D");
-        JSONArray threads = CommentReplyNotifications.trackPostedComment(new JSONArray(), comment, 1000);
+            .put("channelId", "UCme").put("handle", JSONObject.NULL).put("token", "token%3D")
+            .put("text", "First").put("videoTitle", "Title");
+        JSONArray threads = CommentReplyNotifications.trackComment(new JSONArray(), comment, 1000);
         threads.getJSONObject(0).put("seen", new JSONArray().put("thread1.a"));
-        threads = CommentReplyNotifications.trackPostedComment(threads,
-            new JSONObject(comment.toString()).put("commentId", "thread1.later"), 5000);
+        threads = CommentReplyNotifications.trackComment(threads,
+            new JSONObject(comment.toString()).put("commentId", "thread1.later").put("text", "Later").put("videoTitle", "Renamed"), 5000);
         assertEquals(1, threads.length());
         assertEquals("thread1", threads.getJSONObject(0).getString("commentId"));
         assertEquals(5000, threads.getJSONObject(0).getLong("postedAt"));
         assertEquals("[\"thread1.a\"]", threads.getJSONObject(0).getJSONArray("seen").toString());
+        assertEquals("First", threads.getJSONObject(0).getString("text"));
+        assertEquals("Renamed", threads.getJSONObject(0).getString("videoTitle"));
         assertEquals(0, CommentReplyNotifications.normalize(threads, 5000 + CommentReplyNotifications.TRACKING_MILLIS).size());
+    }
+
+    @Test
+    public void watchesOthersCommentsFromNowOnAndApartFromOwnOnes() throws Exception {
+        JSONObject theirs = new JSONObject().put("videoId", "video1").put("threadId", "thread1").put("commentId", "thread1")
+            .put("channelId", "UCthem").put("handle", "@Them").put("accountId", "UCme").put("token", "token%3D")
+            .put("replyCount", 1).put("seen", new JSONArray().put("thread1.old"));
+        JSONArray threads = CommentReplyNotifications.trackComment(new JSONArray(), theirs, 1000);
+        JSONObject watched = threads.getJSONObject(0);
+        assertEquals(false, CommentReplyNotifications.isOwnComment(watched));
+        // Replies it had already are not announced, nor the account's, but its author's are.
+        JSONArray replies = new JSONArray().put(reply("old", "UCx", "Old")).put(reply("author", "UCthem", "Update"))
+            .put(reply("mine", "UCme", "Mine")).put(reply("new", "UCx", "New"));
+        assertEquals("[\"thread1.author\",\"thread1.new\"]",
+            ids(CommentReplyNotifications.findNewReplies(watched, replies).getJSONArray("added")).toString());
+
+        // The account's own comment in that thread is watched apart from it.
+        JSONObject mine = new JSONObject().put("videoId", "video1").put("threadId", "thread1").put("commentId", "thread1.mine")
+            .put("channelId", "UCme").put("handle", "@Me").put("accountId", "UCme").put("token", "token%3D");
+        threads = CommentReplyNotifications.trackComment(threads, mine, 2000);
+        assertEquals(2, threads.length());
+        threads = CommentReplyNotifications.untrackComment(threads, theirs);
+        assertEquals(1, threads.length());
+        assertEquals("UCme", threads.getJSONObject(0).getString("channelId"));
+        // Comments watched before others' could be are the account's own.
+        threads.getJSONObject(0).remove("accountId");
+        assertEquals(true, CommentReplyNotifications.isOwnComment(threads.getJSONObject(0)));
     }
 }

@@ -368,6 +368,7 @@ History:
 Settings:
   Experimental Badge: Eksperimentell
   YouTube Account Settings:
+    Watch Posted Comments: "Overvak kommentarar eg legg ut, for svar"
     YouTube Account Settings: "YouTube-konto"
     Unofficial App Warning: "OpenTubeX er ikkje ein offisiell YouTube-app. Når du loggar inn, blir det du gjer her, knytt til Google-kontoen din, og Google kan avgrense eller utestengje kontoar som brukar uoffisielle appar. Logg berre inn med ein konto du har råd til å miste."
     Sign In Explanation: "OpenTubeX loggar inn som ein TV-app: du godkjenner innlogginga på nettstaden til Google, og OpenTubeX ser aldri passordet ditt. Innlogginga blir verande på denne eininga og blir korkje synkronisert eller sikkerheitskopiert."
@@ -399,7 +400,6 @@ Settings:
     Sync Now: "Synkroniser no"
     Synced: "Synkronisert med YouTube"
     Sync Failed: "Klarte ikkje å synkronisere med YouTube: {error}"
-    Reply Notifications: "Varsle meg om svar på kommentarane mine"
   Diagnostics:
     Diagnostics: Diagnostikk
     Description: Medan diagnoseloggen er på, held OpenTubeX nylege loggmeldingar i minnet slik at du kan leggje dei ved feilrapportar. Det lagrar eller sender dei aldri av seg sjølv, og når du slår av loggen, vert dei sletta. Rapportar utelèt informasjonskapslar, token, IP-adresser og URL-parametrar, men dei kan innehalde ID-ar for videoar du har spelt av, så sjekk ein rapport før du deler han.
@@ -487,6 +487,11 @@ Settings:
       Disk: disk
   Return to Settings Menu: Tilbake til innstillingsmenyen
   General Settings:
+    Stop Watching: "Slutt å overvake"
+    No Watched Comments: "Ingen kommentarar vert overvaka. Overvak ein kommentar med bjølleknappen ved sida av."
+    Your Comment: "Kommentaren din"
+    Watched Comments: "Overvaka kommentarar"
+    Reply Notifications: "Slå på varsel om svar"
     Built-in Streams:
       Built-in Streams: "Innebygde straumar"
       Automatic: "Automatisk"
@@ -568,7 +573,6 @@ Settings:
       Force On: Tving på
       Force Off: Tving av
     Comment Translation:
-      Title: Omsetjing av kommentarar
       Enable: Slå på omsetjing av kommentarar
       Never Translate: Omset aldri kommentarar på
       Choose Language: Vel eit språk
@@ -2532,6 +2536,9 @@ Chapters:
   Chapter Loop Stopped: 'Slutta å gjenta kapittel'
   Sync to Video Time: 'Synkroniser med videotida'
 Comments:
+  Watch Failed: "Kunne ikkje overvake kommentaren for svar"
+  Stop Watching for Replies: "Slutt å overvake svar"
+  Watch for Replies: "Overvak svar"
   Image unavailable: "Biletet er ikkje tilgjengeleg"
   Comment Count: 1 kommentar | {count} kommentarar
   Show Comments: Vis kommentarar
@@ -2577,12 +2584,13 @@ Description:
   Music: Musikk
 Tooltips:
   YouTube Account Settings:
+    Watch Posted Comments: "Kommentarar du legg ut her, vert automatisk overvaka for svar så lenge svarvarsel er slått på i kommentarinnstillingane."
     Add to YouTube Watch History: "Videoar du spelar av, blir lagde til i visingshistorikken din på YouTube, slik at tilrådingane til YouTube lærer av dei. Ingenting blir lagt til medan historikken er sett på pause på YouTube."
     Rate Videos: "Viser knappar for å like og mislike videoar. For å vise vurderinga di blir kvar video du opnar, slått opp på YouTube med kontoen din, så YouTube får vite kva videoar du opnar, også når dei ikkje blir lagde til i sjåarloggen din."
     Sync Subscriptions: "Når du abonnerer på ein kanal på YouTube, blir han lagd til i «Alle kanalar», og når du avsluttar abonnementet der, blir han fjerna frå alle profilar. Å abonnere eller avslutte abonnementet her i «Alle kanalar» gjer det same på YouTube."
     Sync Playlists: "YouTube-spelelistene dine, «Sjå seinare» og «Lika videoar» blir viste i «Dine spelelistar», og endringar du gjer i dei her, blir òg gjorde på YouTube. Dei blir ikkje synkroniserte til dei andre einingane dine og blir ikkje tekne med når du eksporterer alle spelelistene eller tek sikkerheitskopi av dataa dine. Om du slår av dette, blir dei fjerna frå denne eininga, men ikkje frå YouTube."
-    Reply Notifications: "OpenTubeX sjekkar kommentarane du har skrive her dei siste 30 dagane, for nye svar. Kommentarar du har skrive andre stader, til dømes på YouTube-nettstaden, er ikkje med."
   General Settings:
+    Reply Notifications: "OpenTubeX sjekkar kommentarane du overvakar for nye svar i 30 dagar. Overvak kva kommentar som helst med bjølleknappen ved sida av."
     Built-in Streams: |
       Automatisk spelar dei fleste videoane via visionOS-klienten til YouTube, som startar raskare og støttar automatisk kvalitet. Direktesendingar og videoar han ikkje kan spela av, brukar SABR.
       Berre SABR brukar alltid nettklienten til YouTube, som startar seinare og ikkje har automatisk kvalitet.
@@ -3186,6 +3194,7 @@ Platforms:
   Load Error: Kunne ikkje lasta inn denne sida frå {platform}.
   Empty Tab: Det er ingenting her enno.
 YouTube Account:
+  "{author} replied to {commentAuthor}": "{author} svarte {commentAuthor}"
   Like: "Lik"
   Dislike: "Mislik"
   Rating Failed: "Klarte ikkje å vurdere på YouTube: {error}"

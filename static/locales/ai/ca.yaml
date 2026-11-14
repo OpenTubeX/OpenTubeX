@@ -492,6 +492,7 @@ History:
 Settings:
   Experimental Badge: Experimental
   YouTube Account Settings:
+    Watch Posted Comments: "Segueix les respostes als comentaris que publico"
     YouTube Account Settings: "Compte de YouTube"
     Unofficial App Warning: "OpenTubeX no és una aplicació oficial de YouTube. En iniciar la sessió, el que facis aquí queda vinculat al teu compte de Google, i Google pot restringir o bloquejar els comptes que fan servir aplicacions no oficials. Inicia la sessió només amb un compte que et puguis permetre perdre."
     Sign In Explanation: "OpenTubeX inicia la sessió com una aplicació de televisor: l'aproves al lloc web de Google i OpenTubeX no veu mai la teva contrasenya. La sessió es queda en aquest dispositiu i no se sincronitza ni s'inclou a les còpies de seguretat."
@@ -523,7 +524,6 @@ Settings:
     Sync Now: "Sincronitza ara"
     Synced: "S'ha sincronitzat amb YouTube"
     Sync Failed: "No s'ha pogut sincronitzar amb YouTube: {error}"
-    Reply Notifications: "Avisa'm de les respostes als meus comentaris"
   Diagnostics:
     Diagnostics: Diagnòstic
     Description: Mentre el registre de diagnòstic està activat, OpenTubeX conserva els missatges de registre recents a la memòria perquè els pugueu adjuntar als informes d'errors. Mai no els desa ni els envia pel seu compte, i desactivar el registre els elimina. Els informes ometen galetes, testimonis, adreces IP i paràmetres d'URL, però poden incloure identificadors dels vídeos que heu reproduït, així que reviseu l'informe abans de compartir-lo.
@@ -607,6 +607,11 @@ Settings:
       Disk: disc
   Return to Settings Menu: Torna al menú de configuració
   General Settings:
+    Stop Watching: "Deixa de seguir"
+    No Watched Comments: "No se segueix cap comentari. Segueix un comentari amb el botó de la campana que hi ha al costat."
+    Your Comment: "El teu comentari"
+    Watched Comments: "Comentaris seguits"
+    Reply Notifications: "Activa les notificacions de respostes"
     Built-in Streams:
       Built-in Streams: "Fluxos integrats"
       Automatic: "Automàtic"
@@ -688,7 +693,6 @@ Settings:
       Force On: Força l'activació
       Force Off: Força la desactivació
     Comment Translation:
-      Title: Traducció dels comentaris
       Enable: Activa la traducció dels comentaris
       Never Translate: No tradueixis mai els comentaris en
       Choose Language: Trieu una llengua
@@ -2746,6 +2750,9 @@ Chapters:
   Sync to Video Time: 'Sincronitza amb el temps del vídeo'
 Mini Player: Minireproductor
 Comments:
+  Watch Failed: "No s'han pogut seguir les respostes del comentari"
+  Stop Watching for Replies: "Deixa de seguir les respostes"
+  Watch for Replies: "Segueix les respostes"
   Image unavailable: "Imatge no disponible"
   Comments: Comentaris
   Comment Count: 1 comentari | {count} comentaris | {count} comentaris
@@ -2805,12 +2812,13 @@ Description:
   Music: Música
 Tooltips:
   YouTube Account Settings:
+    Watch Posted Comments: "Els comentaris que publiquis aquí se segueixen automàticament per si reben respostes, sempre que els avisos de respostes estiguin activats a la configuració dels comentaris."
     Sync Subscriptions: "Els canals als quals et subscrius a YouTube s'afegeixen a «Tots els canals», i els canals dels quals et dones de baixa allà se suprimeixen de tots els perfils. Subscriure't o donar-te de baixa a «Tots els canals» aquí fa el mateix a YouTube."
     Sync Playlists: "Les teves llistes de reproducció de YouTube, «Mira més tard» i «Vídeos que m'agraden» apareixen a «Les teves llistes de reproducció», i els canvis que hi facis aquí també es fan a YouTube. No se sincronitzen amb els teus altres dispositius ni s'inclouen quan exportes totes les llistes de reproducció o fas una còpia de seguretat de les teves dades. Si desactives aquesta opció, se suprimeixen d'aquest dispositiu, però no de YouTube."
     Add to YouTube Watch History: "Els vídeos que reprodueixes s'afegeixen al teu historial de visualitzacions de YouTube, perquè les recomanacions de YouTube n'aprenguin. No s'hi afegeix res mentre l'historial està en pausa a YouTube."
     Rate Videos: "Mostra els botons de m'agrada i no m'agrada als vídeos. Per mostrar la teva valoració, cada vídeo que obres es consulta a YouTube amb el teu compte, de manera que YouTube sap quins vídeos obres, encara que no s'afegeixin a l'historial de visualitzacions."
-    Reply Notifications: "OpenTubeX comprova si hi ha respostes noves als comentaris que heu publicat aquí en els últims 30 dies. No s'hi inclouen els comentaris que heu publicat en altres llocs, com ara al lloc web de YouTube."
   General Settings:
+    Reply Notifications: "OpenTubeX comprova durant 30 dies si els comentaris que segueixes tenen respostes noves. Segueix qualsevol comentari amb el botó de la campana que hi ha al costat."
     Built-in Streams: |
       Automàtic reprodueix la majoria de vídeos amb el client visionOS de YouTube, que comença més ràpid i admet la qualitat automàtica. Les emissions en directe i els vídeos que no pot reproduir fan servir SABR.
       Només SABR sempre fa servir el client web de YouTube, que comença més lentament i no té qualitat automàtica.
@@ -3437,6 +3445,7 @@ Platforms:
   Load Error: No s'ha pogut carregar aquesta pàgina des de {platform}.
   Empty Tab: Encara no hi ha res aquí.
 YouTube Account:
+  "{author} replied to {commentAuthor}": "{author} ha respost a {commentAuthor}"
   Like: "M'agrada"
   Dislike: "No m'agrada"
   Rating Failed: "No s'ha pogut valorar a YouTube: {error}"
