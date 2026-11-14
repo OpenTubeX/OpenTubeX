@@ -26,6 +26,7 @@
 
   /* FtFixedBackground paints the background fixed to the viewport. */
   background-clip: var(--fixed-background-host-clip, border-box);
+  background-attachment: var(--fixed-background-host-attachment, scroll);
   backdrop-filter: var(--card-bg-blur, none);
   box-shadow: 0 1px 0 var(--primary-shadow-color);
 }
