@@ -1,7 +1,25 @@
 diff --git a/dist/shaka-player.ui-es2021.js b/dist/shaka-player.ui-es2021.js
-index 89c2ede0d9d60737b776a900fc97d3f4c446df90..ce91014e3bab94a6f72442326eac279c693de5f2 100644
+index 89c2ede0d9d60737b776a900fc97d3f4c446df90..988b39110d2f72f4c4d648e3aea2037022098250 100644
 --- a/dist/shaka-player.ui-es2021.js
 +++ b/dist/shaka-player.ui-es2021.js
+@@ -531,7 +531,7 @@ function Po(a,b,c){if(b.type===N)return!1;var d=b.yb;if(!d)return!1;var e=c.init
+ async function Qo(a,b,c,d,e){var f=b.stream,g=b.Ba;b.Sa=!0;try{if(d.kc()==2)throw new L(1,1,1011);await So(a,b,d,e);Fg(a.m);if(!a.G){var h=f.mimeType=="video/mp4"||f.mimeType=="audio/mp4",k=window.ReadableStream,l={sd:null};if(a.l.lowLatencyMode&&a.j.isLowLatency&&k&&h&&(a.j.type!="HLS"||d.o)){let n=new Uint8Array(0),p=!1,r=!1,q,u=await To(a,b,d,async t=>{if(!p&&(r=!0,Fg(a.m),!a.G))try{n=Hb(n,t);let w=!1,v=0;(new Wg).box("mdat",z=>{v=z.size+z.start;w=!0}).parse(n,!1,!0);if(w){let z=n.subarray(0,v);
+ n=n.subarray(v);let x=await Uo(a,b,c,f,d,z,!0,e);l.sd==null&&(l=x);b.ua&&b.Ba&&On(b.ua,d.startTime,!0)}}catch(w){q=w}});if(q)throw q;if(!r){p=!0;Fg(a.m);if(a.G)return;if(b.Qb){b.Sa=!1;no(a,b,0);return}l=await Uo(a,b,c,f,d,u,!1,e)}b.ua&&b.Ba&&On(b.ua,d.startTime,!0)}else{let n=await To(a,b,d);Fg(a.m);if(a.G)return;Fg(a.m);if(b.Qb){b.Sa=!1;no(a,b,0);return}if(Vn(a.C,d.startTime,d.endTime)){b.Sa=!1;b.jb||no(a,b,0);return}l=await Uo(a,b,c,f,d,n,!1,e)}Fg(a.m);if(!a.G){b.Xa=d;g.next();b.Sa=!1;b.Nh=!1;var m=
+ a.h.ha.Uc()[b.type];pa(JSON.stringify(m));b.Qb||(g=null,b.type==="video"?g=a.i.get("audio"):b.type==="audio"&&(g=a.i.get("video")),g&&g.type=="audio"?a.h.Vd(d,b.stream,g.stream.isAudioMuxedInVideo,!1,l.sd):a.h.Vd(d,b.stream,b.stream.codecs.includes(","),!1,l.sd));io(b);no(a,b,0)}}}catch(n){Fg(a.m,n),a.G||(b.Sa=!1,n.code!=7001&&n.category!=1||!b.ua||(Nn(b.ua,d),d.initSegmentReference&&Nn(b.ua,d.initSegmentReference)),n.code==7001?(b.Sa=!1,io(b),no(a,b,0)):b.type==N&&a.l.ignoreTextStreamFailures?a.i.delete(N):
+-n.code==3017?await Vo(a,b,n):(b.Ld=!0,n.severity=2,await Lo(a,b,n)))}}
++n.code==3017?await Vo(a,b,n,d):(b.Ld=!0,n.severity=2,await Lo(a,b,n)))}}
+ async function Ro(a,b,c,d){var e=b.stream,f=e.segmentIndex;for(c=(f=f&&f.Gb(c))&&f.next().value;c&&a.P.includes(c.startTime);)c=f&&f.next().value;if(c){if((f=c.initSegmentReference)&&!Sj(f,b.yb)){b.yb=f;try{let k=await To(a,b,f);if(!a.h)return;var g=a.h.ha;g.H&&jc(g.H,k,0,e);a.P=[]}catch(k){throw b.yb=null,k;}}if(!b.Xa||b.Xa!=c){b.Xa=c;try{let k=await To(a,b,c);if(!a.h)return;var h=a.h.ha;h.H&&jc(h.H,k,0,e);a.P.push(c.startTime)}catch(k){throw b.Xa=null,k;}a.h&&(b.Qb||(e=null,b.type==="video"?e=a.i.get("audio"):
+ b.type==="audio"&&(e=a.i.get("video")),e&&e.type=="audio"?a.h.Vd(c,b.stream,e.stream.isAudioMuxedInVideo,!0,null):a.h.Vd(c,b.stream,b.stream.codecs.includes(","),!0,null)),e=Math.max(0,...a.P),a.h.fc()+d>e&&await Ro(a,b,c.startTime,d))}}}
+ async function So(a,b,c,d){var e=b.Xa==null,f=[],g=Math.max(0,Math.max(c.appendWindowStart,a.ea)-.1),h=Math.min(c.appendWindowEnd,a.ba)+.1;if(a.l.clampAppendWindowToDuration){var k=a.j.presentationTimeline.getDuration();k<Infinity&&(h=Math.min(h,k))}k=se(c.codecs||b.stream.codecs);var l=te(c.mimeType||b.stream.mimeType),m=c.timestampOffset;m==b.Gf&&g==b.Fc&&h==b.Ec&&k==b.rh&&l==b.sh||await Wo(a,b,m,g,h,c,k,l);if(!Sj(c.initSegmentReference,b.yb)&&(b.yb=c.initSegmentReference,c.l&&c.initSegmentReference)){let n=
+@@ -540,7 +540,7 @@ new Wg;t.Ca(["moov","trak","mdia"],Og).X("mdhd",x=>{r=vi(x.reader,x.version).tim
+ u);q.has(b.type)?c.initSegmentReference.timescale=q.get(b.type):r!=null&&(c.initSegmentReference.timescale=r);let w=b.stream.segmentIndex,v;w instanceof un&&(v=tn(w,c.startTime));let z=b.stream.closedCaptions&&b.stream.closedCaptions.size>0;await a.h.Gi(b.type,p);await nm(a.h.ha,b.type,p,null,b.stream,z,b.ud,d,!1,!1,v)}catch(p){throw b.yb=null,p;}})())}c.discontinuitySequence!=(b.Xa?b.Xa.discontinuitySequence:-1)&&f.push(Jm(a.h.ha,b.type,c.startTime));await Promise.all(f)}
+ async function To(a,b,c,d){var e=c.hc();if(e)return e;e=null;if(b.ua){{e=b.ua;let f=e.h;c instanceof Tj&&(f=e.l);f.has(c)?(e=f.get(c),d&&(e.gi=d),e=e.De):e=null}}e||=go(c,b.stream,d||null,a.l.retryParameters,a.h.Hc);a=0;b.Ba&&(a=b.Ba.i);b.operation=e;d=await e.promise;b.operation=null;b=d.data;c.aesKey&&(b=await nl(b,c.aesKey,a));return b}
+ async function Uo(a,b,c,d,e,f,g=!1,h=!1){var k=d.closedCaptions&&d.closedCaptions.size>0;if(a.l.shouldFixTimestampOffset){let l=d.mimeType=="video/mp4"||d.mimeType=="audio/mp4",m=null;e.initSegmentReference&&(m=e.initSegmentReference.timescale);l&&m&&d.type==="video"&&a.j.type=="DASH"&&(new Wg).Ca(Yg,Og).X("tfdt",async n=>{if(n=ui(n.reader,n.version).Ta)n=-n/m,(Number(b.Gf)||0)<n&&await Wo(a,b,n,b.Fc,b.Ec,e)}).parse(f,!1,g)}await Yo(a,b,c);Fg(a.m);c=b.ud;b.ud=!1;await a.h.Gi(b.type,f);d=await nm(a.h.ha,
+-b.type,f,e,d,k,c,h,g);Fg(a.m);return d}async function Vo(a,b,c){var d=!1;for(let e of a.i.values())if(e!=b&&e.Nh){d=!0;break}if(!d){if(a.l.avoidEvictionOnQuotaExceededError){if(a.h.disableStream(b.stream,No(a,c)))return;no(a,b,4);return}d=Math.round(100*a.D);if(d>20)a.D-=.2;else if(d>4)a.D-=.04;else{a.h.disableStream(b.stream,No(a,c))?(a.D=1,c=a.h.fc(),await Yo(a,b,c)):(b.Ld=!0,a.G=!0,a.h.onError(c));return}b.Nh=!0;c=a.h.fc();await Yo(a,b,c)}no(a,b,4)}
++b.type,f,e,d,k,c,h,g);Fg(a.m);return d}async function Vo(a,b,c,x){var d=!1;for(let e of a.i.values())if(e!=b&&e.Nh){d=!0;break}if(!d){if(a.l.avoidEvictionOnQuotaExceededError){if(a.h.disableStream(b.stream,No(a,c)))return;no(a,b,4);return}d=a.h.La();if(d>=0){let t=a.h.fc(),r=x.endTime-x.startTime,f=im(a.h.ha,b.type,t)-r;if(f>0){a.D=Math.min(a.D,f/Math.max(a.l.rebufferingGoal,a.l.bufferingGoal));b.Nh=!0;await Yo(a,b,t);no(a,b,r/Math.max(1,d));return}}d=Math.round(100*a.D);if(d>20)a.D-=.2;else if(d>4)a.D-=.04;else{a.h.disableStream(b.stream,No(a,c))?(a.D=1,c=a.h.fc(),await Yo(a,b,c)):(b.Ld=!0,a.G=!0,a.h.onError(c));return}b.Nh=!0;c=a.h.fc();await Yo(a,b,c)}no(a,b,4)}
+ function No(a,b){return a.l.maxDisabledTime===0&&b.code==1011?1:b.code==3014||b.code==3015?Infinity:a.l.maxDisabledTime}
+ async function Yo(a,b,c){a.I==b&&(a.I=null);var d=b.stream.segmentIndex;if(d instanceof un){d.eb(a.j.presentationTimeline.Ib());var e=[];sn(d,n=>{e.push(n.A())})}d=Math.max(a.l.bufferBehind*a.D,a.j.presentationTimeline.i);var f=fm(a.h.ha,b.type);if(f!=null){var g=c-f,h=a.l.evictionGoal,k=a.j.presentationTimeline.Pb(),l=a.j.presentationTimeline.Hb()-k,m=g-d;l>h&&(m=Math.max(g-d,k-h-f));m<=h||(await a.h.ha.remove(b.type,f,f+m,e),Fg(a.m),a.I&&(await Yo(a,a.I,c),Fg(a.m)))}}
+ async function Wo(a,b,c,d,e,f,g,h){var k=so(a);try{b.Fc=d;b.Ec=e;g&&(b.rh=g);h&&(b.sh=h);b.Gf=c;let l=a.j.sequenceMode||a.j.type=="HLS",m=null;b.type==="video"?m=a.i.get("audio"):b.type==="audio"&&(m=a.i.get("video"));m&&m.stream&&m.stream.isAudioMuxedInVideo&&await Im(a.h.ha,m.type,c,d,e,l,m.stream.mimeType,m.stream.codecs,k);await Im(a.h.ha,b.type,c,d,e,l,f.mimeType||b.stream.mimeType,f.codecs||b.stream.codecs,k,()=>Zo(a,m))}catch(l){throw b.Fc=null,b.Ec=null,b.rh=null,b.sh=null,b.Gf=null,l;}}
 @@ -1694,7 +1694,7 @@ TOGGLE_STEREOSCOPIC:"M830-720H128C102-720 80-697 80-669v378c0 28 22 51 48 51h194
  CHAPTER:"m400-200-182 91q-20 10-39-2T160-145v-495q0-33 24-56T240-720h320q33 0 56 24T640-640v495q0 23-19 34t-39 2l-182-91Zm360-40q-17 0-28-12T720-280v-520H320q-17 0-28-12T280-840q0-17 12-28T320-880h400q33 0 56 24T800-800v520q0 17-12 28T760-240Z",VIDEO_TYPE:"m460-380 280-180-280-180v360ZM320-240q-33 0-56-24T240-320v-480q0-33 24-56T320-880h480q33 0 56 24T880-800v480q0 33-24 56T800-240H320Zm0-80h480v-480H320v480ZM160-80q-33 0-56-24T80-160v-560h80v560h560v80H160Zm160-720v480-480Z",COPY:"M360-240q-33 0-56-24T280-320v-480q0-33 24-56T360-880h360q33 0 56 24T800-800v480q0 33-24 56T720-240H360Zm0-80h360v-480H360v480ZM200-80q-33 0-56-24T120-160v-560h80v560h440v80H200Zm160-240v-480 480Z",
  QUEUE:"M120-320v-80h320v80H120Zm0-160v-80h480v80H120Zm0-160v-80h480v80H120Zm520 520v-320l240 160-240 160Z"};y("shaka.ui.Enums.MaterialDesignSVGIcons",MN);function NN(a,b,c){a.h.style.setProperty("background-color","transparent");a.h.style.setProperty("mask-image","");a.h.setAttribute("viewBox",c||"0 -960 960 960");if(Array.isArray(b))for(let d=0,e=b.length;d<e;d++)ON(a,b[d]);else b&&ON(a,b)}function ON(a,b){var c=Dl("path");c.setAttribute("d",b);a.h.appendChild(c)}
@@ -83,6 +101,100 @@ index 89c2ede0d9d60737b776a900fc97d3f4c446df90..ce91014e3bab94a6f72442326eac279c
  a.button.setAttribute("shaka-status",a.currentSelection.textContent);a.menu.appendChild(c);RN(a.menu);a.controls.dispatchEvent(new D("resolutionselectionupdated"));a.updateLocalizedStrings();Y(a.button,b>0&&!a.isSubMenuOpened)}
  function yS(a){var b=a.player.getConfiguration().abr.enabled;if(a.player.mc()){a.j.textContent="";a.j.style.display="none";a.h&&(a.h.textContent="",a.h.style.display="none");var c=a.player.Vb()||[],d=c.find(e=>e.active);d&&(b?(a.i.textContent=d.bandwidth?zS(a,d,c):"Unknown",a.i.style.display=""):a.i.style.display="none")}else c=a.player.getVideoTracks()||[],(d=c.find(e=>e.active))?(b?(a.i.textContent=d.height&&d.width?AS(a,d,c):d.bandwidth?BS(d.bandwidth):"Unknown",a.i.style.display=""):a.i.style.display=
  "none",b=CS(a,d.width,d.height),a.j.textContent=b,a.j.style.display=b!==""?"":"none",a.h&&(a.h.textContent=b,a.h.style.display=b!==""?"":"none")):a.h&&(b=a.player.getStats(),b=CS(a,b.width,b.height),a.h.textContent=b,a.h.style.display=b!==""?"":"none")}function zS(a,b,c){var d=BS(b.bandwidth);if(a.controls.h.showAudioCodec){let e=f=>{var g="";f&&(g=qe(f).toUpperCase());return g?" "+g:g};c.some(f=>e(f.codecs)!=e(b.codecs))&&(d+=e(b.codecs))}return d}
+diff --git a/lib/media/streaming_engine.js b/lib/media/streaming_engine.js
+index 15a4addd2bda62fdad887fcdc71412639355bedc..05ddd9837fea87dc0595c3e7cd2f8e3d1869f796 100644
+--- a/lib/media/streaming_engine.js
++++ b/lib/media/streaming_engine.js
+@@ -2501,7 +2501,7 @@ shaka.media.StreamingEngine = class {
+         }
+         this.mediaStates_.delete(ContentType.TEXT);
+       } else if (error.code == shaka.util.Error.Code.QUOTA_EXCEEDED_ERROR) {
+-        await this.handleQuotaExceeded_(mediaState, error);
++        await this.handleQuotaExceeded_(mediaState, error, reference);
+       } else {
+         shaka.log.error(logPrefix, 'failed fetch and append: code=' +
+             error.code);
+@@ -2650,10 +2650,12 @@ shaka.media.StreamingEngine = class {
+    *
+    * @param {shaka.media.StreamingEngine.MediaState_} mediaState
+    * @param {!shaka.util.Error} error
++   * @param {!shaka.media.SegmentReference} reference The segment that did not
++   *   fit.
+    * @return {!Promise}
+    * @private
+    */
+-  async handleQuotaExceeded_(mediaState, error) {
++  async handleQuotaExceeded_(mediaState, error, reference) {
+     const logPrefix = shaka.media.StreamingEngine.logPrefix_(mediaState);
+ 
+     // The segment cannot fit into the SourceBuffer. Ideally, MediaSource would
+@@ -2695,6 +2697,15 @@ shaka.media.StreamingEngine = class {
+         this.scheduleUpdate_(mediaState, 4);
+         return;
+       }
++      // This must not await before marking the stream as recovering, or
++      // another stream could pass the check above and reduce the goal too.
++      const retryDelay = this.reduceBufferingGoalToFit_(mediaState, reference);
++      if (retryDelay != null) {
++        const presentationTime = this.playerInterface_.getPresentationTime();
++        await this.evict_(mediaState, presentationTime);
++        this.scheduleUpdate_(mediaState, retryDelay);
++        return;
++      }
+       // Reduction schedule: 80%, 60%, 40%, 20%, 16%, 12%, 8%, 4%, fail.
+       // Note: percentages are used for comparisons to avoid rounding errors.
+       const percentBefore = Math.round(100 * this.bufferingScale_);
+@@ -2747,6 +2758,50 @@ shaka.media.StreamingEngine = class {
+     this.scheduleUpdate_(mediaState, 4);
+   }
+ 
++  /**
++   * Lowers the buffering goal to what was buffered ahead of the playhead when
++   * the segment was rejected, minus that segment, so that the next append
++   * brings the buffer back to an amount that is known to fit.
++   *
++   * @param {shaka.media.StreamingEngine.MediaState_} mediaState
++   * @param {!shaka.media.SegmentReference} reference The segment that did not
++   *   fit.
++   * @return {?number} The number of seconds after which to retry the segment,
++   *   or null if the goal cannot be derived this way, because not even one
++   *   segment fits next to the playhead or playback is backwards.  The caller
++   *   should then fall back to the reduction schedule.
++   * @private
++   */
++  reduceBufferingGoalToFit_(mediaState, reference) {
++    const playbackRate = this.playerInterface_.getPlaybackRate();
++    if (playbackRate < 0) {
++      return null;
++    }
++    const presentationTime = this.playerInterface_.getPresentationTime();
++    const bufferedAhead = this.playerInterface_.mediaSourceEngine
++        .bufferedAheadOf(mediaState.type, presentationTime);
++    const segmentDuration = reference.endTime - reference.startTime;
++    const fittingGoal = bufferedAhead - segmentDuration;
++    if (fittingGoal <= 0) {
++      return null;
++    }
++
++    const unscaledBufferingGoal = Math.max(
++        this.config_.rebufferingGoal, this.config_.bufferingGoal);
++    // Only ever lower the scale: a later, larger segment lowers it again.
++    this.bufferingScale_ = Math.min(
++        this.bufferingScale_, fittingGoal / unscaledBufferingGoal);
++    shaka.log.warning(
++        shaka.media.StreamingEngine.logPrefix_(mediaState),
++        'MediaSource threw QuotaExceededError:',
++        'reducing buffering goal to ' + fittingGoal.toFixed(1) + ' seconds');
++    mediaState.recovering = true;
++
++    // There is room for the segment once the playhead has played the buffer
++    // down to the new goal, which takes about one segment.
++    return segmentDuration / Math.max(1, playbackRate);
++  }
++
+ 
+   /**
+    * Sets the given MediaState's associated SourceBuffer's timestamp offset,
 diff --git a/ui/controls.js b/ui/controls.js
 index e5ba02a18cbe4bca7b2edcc44c8ed768bdefa6ac..7a8cfe8d1cfe94a1d4af5caed1d7212b2867b154 100644
 --- a/ui/controls.js
