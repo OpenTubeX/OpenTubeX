@@ -91,7 +91,7 @@ test('portrait Shorts actions open phone sheets instead of side panels', async (
       const { top, height } = await sheet.evaluate(el => el.getBoundingClientRect())
       return height / (top + height)
     }).toBeLessThan(0.72)
-    await expect(sheet.locator('.mobileSheetHeader')).toContainText(title)
+    await expect(sheet.locator('.mobileSheetHeader').getByRole('heading', { name: title })).toBeVisible()
     await expect(page.locator('.shortsAuxPanelOpen, .shortsCommentsPanelOpen')).toHaveCount(0)
     await sheet.locator('.mobileSheetHeader').getByRole('button', { name: 'Close' }).click()
     await expect(sheet).toHaveCount(0)
