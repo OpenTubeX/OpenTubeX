@@ -226,9 +226,6 @@ export async function deArrowThumbnail(videoId, timestamp) {
     }
 
     if (response.ok) {
-      // The image element loads the thumbnail itself, so only the final URL
-      // is needed. Stop downloading it a second time.
-      response.body?.cancel().catch(() => {})
       return response.url
     }
 
