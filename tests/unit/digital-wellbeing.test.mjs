@@ -238,10 +238,17 @@ test('time that a reply and a later message both hold counts once, and clearing 
 
   // Each window clears the time when the statistics are cleared, one after another
   second.store.dispatch('recordPlaybackTime', { date, seconds: 5, isShort: false })
-  first.store.dispatch('clearWellbeingTime')
-  third.store.dispatch('clearWellbeingTime')
+  first.store.dispatch('clearWellbeingTime', 1)
+  third.store.dispatch('clearWellbeingTime', 1)
   deliver({ from: second.channel })
-  second.store.dispatch('clearWellbeingTime')
+  second.store.dispatch('clearWellbeingTime', 1)
+  deliver()
+  assert.deepEqual([first, second, third].map(({ store }) => store.state.wellbeing.day.unrecordedSeconds), [0, 0, 0])
+  // A window that reports its time and closes before the clear reaches it, or that
+  // missed the clear, takes it from the windows that cleared
+  second.store.dispatch('recordPlaybackTime', { date, seconds: 5, isShort: false })
+  first.store.dispatch('clearWellbeingTime', 2)
+  third.store.dispatch('clearWellbeingTime', 2)
   deliver()
   assert.deepEqual([first, second, third].map(({ store }) => store.state.wellbeing.day.unrecordedSeconds), [0, 0, 0])
   // Saved time of a closed window that a reply from before the clear still holds
@@ -255,7 +262,7 @@ test('time that a reply and a later message both hold counts once, and clearing 
   deliver()
   const opening = open()
   deliver({ from: opening.channel })
-  for (const { store } of [open1, open2, opening]) store.dispatch('clearWellbeingTime')
+  for (const { store } of [open1, open2, opening]) store.dispatch('clearWellbeingTime', 3)
   deliver()
   assert.deepEqual([open1, open2, opening].map(({ store }) => store.state.wellbeing.day.shortsSeconds), [0, 0, 0])
 })

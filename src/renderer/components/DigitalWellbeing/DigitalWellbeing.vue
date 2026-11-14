@@ -51,7 +51,10 @@ const wellbeing = computed(() => store.getters.getWellbeing)
 const prompt = computed(() => wellbeing.value.prompt)
 const today = computed(() => localDateKey(now.value))
 watch(today, date => store.dispatch('startWellbeingDay', date), { immediate: true })
-watch(() => store.getters.getWatchStatsResetVersion, () => store.dispatch('clearWellbeingTime'))
+// The statistics save the reset marker before they clear, here and in the other windows
+watch(() => store.getters.getWatchStatsResetVersion, () => {
+  store.dispatch('clearWellbeingTime', store.getters.getSyncServerWatchStatsReset.at)
+})
 
 const isPlaying = computed(() => {
   return now.value - Math.max(wellbeing.value.lastPlaybackAt, wellbeing.value.lastPlayAt) < PLAYBACK_ACTIVE_MS
