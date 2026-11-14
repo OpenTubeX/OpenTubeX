@@ -267,15 +267,12 @@ public class SubscriptionRefreshPlugin extends Plugin {
 
     @PluginMethod
     public void listCommentReplies(PluginCall call) {
-        Context context = getContext();
-        // After the tracking writes queued before it, which the list would miss.
-        UPLOADS.execute(() -> {
-            try {
-                call.resolve(new JSObject().put("threads", CommentReplyNotifications.list(context)));
-            } catch (Exception error) {
-                call.reject("Unable to list the watched comments", error);
-            }
-        });
+        // Reads under the lock the writes take, so it need not wait for upload checks.
+        try {
+            call.resolve(new JSObject().put("threads", CommentReplyNotifications.list(getContext())));
+        } catch (Exception error) {
+            call.reject("Unable to list the watched comments", error);
+        }
     }
 
     @PluginMethod

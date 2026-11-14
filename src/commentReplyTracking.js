@@ -124,8 +124,11 @@ export function trackComment(threads, comment, now = Date.now()) {
   const tracked = existing
     ? {
         ...existing,
-        // The text stays the watched comment's.
-        ...(commentId === threadId ? { commentId, text } : {}),
+        // The text stays the watched comment's. A top-level comment watches the
+        // whole thread, starting from the replies it had when watched.
+        ...(commentId === threadId && existing.commentId !== threadId
+          ? { commentId, text, seen: [...new Set([...existing.seen, ...(comment.seen ?? [])])].slice(-SEEN_REPLY_LIMIT) }
+          : {}),
         ...(accountId && !existing.accountId ? { accountId } : {}),
         videoTitle: videoTitle || existing.videoTitle,
         postedAt: now

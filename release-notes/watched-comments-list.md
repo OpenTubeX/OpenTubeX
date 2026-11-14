@@ -2,7 +2,7 @@
 category: feature
 ---
 
-Any comment can now be watched for replies with the bell button next to it, also without a YouTube account, and comments you post are watched automatically. The comment settings list the watched comments, and selecting one opens it highlighted.
+Any video comment can now be watched for replies with the bell button next to it, also without a YouTube account, and comments you post are watched automatically. The comment settings list the watched comments, and selecting one opens it highlighted.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/5872509f-d167-4b83-8190-9515c525b018">

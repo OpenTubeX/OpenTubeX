@@ -370,7 +370,7 @@
               />
             </button>
             <button
-              v-if="canWatchComments"
+              v-if="canWatchComments && comment.authorId"
               type="button"
               class="commentWatchButton"
               :class="{ active: isCommentWatched(comment) }"
@@ -918,7 +918,7 @@ const youTubeComments = {
 provide(youTubeCommentsKey, youTubeComments)
 
 const { canWatchComments, isCommentWatched, watchLabel, toggleCommentWatch } = useCommentWatching(youTubeComments)
-// Loads which comments are watched, also when they changed in another window.
+// Loads which comments are watched, for the bells.
 watch(canWatchComments, enabled => {
   if (enabled) getWatchedComments().catch(error => console.error('Failed to load the watched comments', error))
 }, { immediate: true })

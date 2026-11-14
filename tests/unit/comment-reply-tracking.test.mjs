@@ -99,6 +99,12 @@ test('watches others\' comments from now on and apart from own ones', () => {
   const signedOut = { ...threads[0], accountId: '' }
   assert.deepEqual(findNewReplies(signedOut, [reply('mine', 'UCme'), reply('new', 'UCx')], 'UCme').added.map(item => item.id), ['thread1.new'])
 
+  // Their top-level comment covers the thread from the replies it had when watched.
+  const [replyWatch] = trackComment([], { ...theirs, commentId: 'thread1.theirs', seen: ['thread1.old'] }, 1000)
+  const [upgraded] = trackComment([replyWatch], { ...theirs, seen: ['thread1.old', 'thread1.since'] }, 2000)
+  assert.equal(upgraded.commentId, 'thread1')
+  assert.deepEqual(upgraded.seen, ['thread1.old', 'thread1.since'])
+
   // The account's own comment in that thread is watched apart from it.
   threads = trackComment(threads, { ...own, threadId: 'thread1', commentId: 'thread1.mine', accountId: 'UCme' }, 2000)
   assert.equal(threads.length, 2)

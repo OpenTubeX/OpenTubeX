@@ -424,8 +424,17 @@ final class CommentReplyNotifications {
                 .put("seen", keptSeen)
                 .put("text", comment.optString("text"));
         } else {
-            // The text stays the watched comment's.
-            if (commentId.equals(threadId)) tracked.put("commentId", commentId).put("text", comment.optString("text"));
+            // The text stays the watched comment's. A top-level comment watches the
+            // whole thread, starting from the replies it had when watched.
+            if (commentId.equals(threadId) && !threadId.equals(tracked.optString("commentId"))) {
+                Set<String> seen = new LinkedHashSet<>();
+                for (JSONArray ids : new JSONArray[] { tracked.optJSONArray("seen"), comment.optJSONArray("seen") }) {
+                    if (ids != null) for (int index = 0; index < ids.length(); index++) seen.add(ids.optString(index));
+                }
+                List<String> all = new ArrayList<>(seen);
+                tracked.put("commentId", commentId).put("text", comment.optString("text"))
+                    .put("seen", new JSONArray(all.subList(Math.max(0, all.size() - SEEN_REPLY_LIMIT), all.size())));
+            }
             String accountId = comment.optString("accountId");
             if (!accountId.isEmpty() && tracked.optString("accountId").isEmpty()) tracked.put("accountId", accountId);
         }

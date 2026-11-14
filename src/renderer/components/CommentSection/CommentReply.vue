@@ -131,7 +131,7 @@
           />
         </button>
         <button
-          v-if="canWatchComments"
+          v-if="canWatchComments && reply.authorId"
           type="button"
           class="commentWatchButton"
           :class="{ active: isCommentWatched(reply) }"

@@ -134,6 +134,14 @@ public class CommentReplyNotificationsTest {
         assertEquals("[\"thread1.author\",\"thread1.new\"]",
             ids(CommentReplyNotifications.findNewReplies(signedOut, replies, "UCme").getJSONArray("added")).toString());
 
+        // Their top-level comment covers the thread from the replies it had when watched.
+        JSONArray replyWatch = CommentReplyNotifications.trackComment(new JSONArray(),
+            new JSONObject(theirs.toString()).put("commentId", "thread1.theirs"), 1000);
+        JSONObject upgraded = CommentReplyNotifications.trackComment(replyWatch,
+            new JSONObject(theirs.toString()).put("seen", new JSONArray().put("thread1.old").put("thread1.since")), 2000).getJSONObject(0);
+        assertEquals("thread1", upgraded.getString("commentId"));
+        assertEquals("[\"thread1.old\",\"thread1.since\"]", upgraded.getJSONArray("seen").toString());
+
         // The account's own comment in that thread is watched apart from it.
         JSONObject mine = new JSONObject().put("videoId", "video1").put("threadId", "thread1").put("commentId", "thread1.mine")
             .put("channelId", "UCme").put("handle", "@Me").put("accountId", "UCme").put("token", "token%3D");
