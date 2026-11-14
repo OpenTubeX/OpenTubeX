@@ -765,6 +765,8 @@ test.describe('manual comment loading', () => {
     await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
 
     let thread = page.locator('.commentThread').first()
+    // Offscreen threads are not rendered (content-visibility), so innerText needs it in view.
+    await thread.scrollIntoViewIfNeeded()
     const parentAuthor = await thread.locator(':scope > .commentAuthorWrapper .commentAuthor').innerText()
     await thread.locator('.commentReplyRootToggle button').click()
     let firstReply = thread.locator('.commentReplyContent').first()
@@ -1130,6 +1132,8 @@ test.describe('manual comment loading', () => {
     expect(await replyToggleRow.evaluate(element => (
       getComputedStyle(element, '::before').borderInlineStartWidth
     ))).toBe('1px')
+    // Offscreen threads are not laid out (content-visibility), so measure it where it is seen.
+    await comment.scrollIntoViewIfNeeded()
     expect(await comment.evaluate((element) => {
       const toggle = element.querySelector('.commentReplyRootToggle')
       const stemStyle = getComputedStyle(element, '::before')
