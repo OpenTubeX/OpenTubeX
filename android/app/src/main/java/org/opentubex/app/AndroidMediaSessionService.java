@@ -69,8 +69,9 @@ public class AndroidMediaSessionService extends Service {
             @Override
             public boolean onMediaButtonEvent(Intent mediaButtonIntent) {
                 // Bluetooth devices and wired headsets send media key events.
-                // The notification and system media controls call the
-                // transport methods below directly, so they keep working.
+                // System media controls call the transport methods below, and
+                // notification buttons use this service's PendingIntents, so
+                // neither passes through here.
                 if (AndroidMediaSessionPlugin.ignoresMediaButtons()) return true;
                 return super.onMediaButtonEvent(mediaButtonIntent);
             }
