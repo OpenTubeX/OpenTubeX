@@ -200,10 +200,6 @@ export function normalizeRoutePath(route) {
 }
 
 /**
- * @param {object | undefined | null} query
- * @returns {Record<string, string>}
- */
-/**
  * Convert URLSearchParams into a plain query object, preserving repeated keys as
  * arrays while keeping single occurrences as scalars.
  * @param {URLSearchParams} searchParams
@@ -224,6 +220,10 @@ function searchParamsToQuery(searchParams) {
   return query
 }
 
+/**
+ * @param {object | undefined | null} query
+ * @returns {Record<string, string | string[]>}
+ */
 function normalizeQuery(query) {
   if (!query || typeof query !== 'object') {
     return {}
@@ -232,7 +232,11 @@ function normalizeQuery(query) {
   return Object.fromEntries(
     Object.entries(query)
       .filter(([, value]) => value != null)
-      .map(([key, value]) => [key, Array.isArray(value) ? value.map(String) : String(value)])
+      .map(([key, value]) => [
+        key,
+        // Vue Router parses a bare key such as `a` in `?a&a=1` as a null item
+        Array.isArray(value) ? value.filter(item => item != null).map(String) : String(value)
+      ])
   )
 }
 
