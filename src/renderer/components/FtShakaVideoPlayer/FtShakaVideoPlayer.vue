@@ -5038,7 +5038,7 @@ const uiConfig = computed(() => {
   }
 
   // A live stream has no stable time to link to
-  if (props.isLive) {
+  if (isLive.value) {
     removeFromArrayIfExists(uiConfig.controlPanelElements, 'ft_timestamp_note')
     removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_timestamp_note')
   }
@@ -8520,7 +8520,7 @@ let resumeAfterTimestampNote = false
 
 function takeTimestampNote() {
   const video_ = video.value
-  if (!video_ || timestampNote.value !== null || props.isLive) return
+  if (!video_ || timestampNote.value !== null || isLive.value) return
 
   const seconds = Number.isFinite(video_.currentTime) ? Math.max(0, Math.floor(video_.currentTime)) : 0
   resumeAfterTimestampNote = !video_.paused
@@ -8530,7 +8530,7 @@ function takeTimestampNote() {
   }
   timestampNote.value = {
     seconds,
-    url: props.externalUrl || appendTimestamp(getYoutubeVideoShareUrl(props.videoId), seconds)
+    url: appendTimestamp(props.externalUrl || getYoutubeVideoShareUrl(props.videoId), seconds)
   }
 }
 
@@ -11111,7 +11111,7 @@ async function keyboardShortcutHandler(event) {
       event.preventDefault()
       if (!event.repeat) toggleQuickBookmark()
       break
-    case !props.isLive && !store.getters.isAnyPromptOpen &&
+    case !isLive.value && !store.getters.isAnyPromptOpen &&
       matches(KeyboardShortcuts.VIDEO_PLAYER.GENERAL.TAKE_TIMESTAMP_NOTE):
       event.preventDefault()
       if (!event.repeat) takeTimestampNote()
