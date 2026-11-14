@@ -207,6 +207,7 @@ function kwinWindow({ pid = 42, keepAbove = false, desktopFileName = '', normalW
   const window = {
     pid,
     keepAbove,
+    onAllDesktops: false,
     desktopFileName,
     normalWindow,
     maxSize,
@@ -235,7 +236,7 @@ function kwinWindow({ pid = 42, keepAbove = false, desktopFileName = '', normalW
   return window
 }
 
-test('the KWin script moves, then resizes, only the Picture-in-Picture window', () => {
+test('the KWin script moves, resizes, and keeps above others only the Picture-in-Picture window', () => {
   const pip = kwinWindow()
   const main = kwinWindow({ desktopFileName: 'opentubex', maxSize: unboundedMaxSize, listed: true })
   // A window rule can keep the app's window above others
@@ -247,7 +248,13 @@ test('the KWin script moves, then resizes, only the Picture-in-Picture window', 
   const { add } = runKwinScript({ x: 40, y: 50, width: 640, height: 360 }, [main])
   for (const window of [ruled, menu, other, devTools, pip]) add(window)
 
-  for (const window of [main, ruled, menu, other, devTools]) assert.deepEqual(window.assignments, [])
+  for (const window of [main, ruled, menu, other, devTools]) {
+    assert.deepEqual(window.assignments, [])
+    assert.equal(window.onAllDesktops, false)
+  }
+  for (const window of [main, menu, other, devTools]) assert.equal(window.keepAbove, false)
+  assert.equal(pip.keepAbove, true)
+  assert.equal(pip.onAllDesktops, true)
   assert.deepEqual(pip.assignments, [
     { x: 40, y: 50, width: 888, height: 500 },
     { x: 40, y: 50, width: 640, height: 360 }

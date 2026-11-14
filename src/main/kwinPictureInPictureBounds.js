@@ -11,9 +11,10 @@ const REPORT_PATH = '/io/github/OpenTubeX/KWinPictureInPicture'
 const REPORT_INTERFACE = 'io.github.OpenTubeX.KWinPictureInPicture'
 
 /**
- * Builds the KWin script that restores and reports the bounds of the
- * owner's Picture-in-Picture windows. KWin creates a new window each time
- * one shows, so the script also keeps the bounds for the rest of the session.
+ * Builds the KWin script that keeps the owner's Picture-in-Picture windows
+ * above others on all desktops, and restores and reports their bounds. KWin
+ * creates a new window each time one shows, so the script also keeps the
+ * bounds for the rest of the session.
  *
  * @param {{
  *   owner: import('./kwinScripts.js').KwinWindowOwner,
@@ -69,10 +70,15 @@ const restore = window => {
 // Chromium's Picture-in-Picture window has no desktop file name, and Chromium
 // keeps it smaller than the screen. Electron's detached DevTools window has no
 // desktop file name either, but no maximum size. The caption is translated,
-// and on Wayland the window is only kept above others by a window rule.
+// and without an app ID users can't match the window with a window rule.
 const fitsOnScreen = size => workspace.screens.some(output => size.width <= output.geometry.width && size.height <= output.geometry.height)
 const track = window => {
-  if (window.desktopFileName === '' && window.normalWindow && fitsOnScreen(window.maxSize) && isOwn(window)) restore(window)
+  if (window.desktopFileName === '' && window.normalWindow && fitsOnScreen(window.maxSize) && isOwn(window)) {
+    // Chromium asks for this on other platforms, but Wayland ignores it
+    window.keepAbove = true
+    window.onAllDesktops = true
+    restore(window)
+  }
 }
 workspace.windowList().forEach(track)
 workspace.windowAdded.connect(track)
@@ -80,8 +86,8 @@ workspace.windowAdded.connect(track)
 }
 
 /**
- * Restores Picture-in-Picture bounds through KWin, which can place windows on
- * Wayland, where Chromium cannot.
+ * Restores Picture-in-Picture bounds and keeps the window above others through
+ * KWin, which can place windows on Wayland, where Chromium cannot.
  *
  * @param {{
  *   store: ReturnType<typeof import('./pictureInPictureBounds.js').createPictureInPictureBoundsStore>,
