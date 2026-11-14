@@ -9,6 +9,7 @@ import { DEFAULT_PROFILE_ICON } from '../../src/renderer/helpers/profileIcons.js
 import { copySubscriptionChannelSettings, getChannelWithUpdatedSettings, getNextSubscriptionSettingsTimestamp, isValidSubscriptionSettingsTimestamp } from '../../src/renderer/helpers/subscription-channels.js'
 import { getSubscriptionSettingsForSync } from '../../src/renderer/helpers/subscription-settings-sync.js'
 import { mergeSettingItemsEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
+import { toRaw } from 'vue'
 
 const profileSource = await readFile(new URL('../../src/renderer/store/modules/profiles.js', import.meta.url), 'utf8')
 const handlersSource = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
@@ -61,6 +62,7 @@ async function profileStore(subscriptions = [{ id: 'channel', name: 'Old name', 
       DEFAULT_PROFILE_ICON,
       DBProfileHandlers: handlers,
       getProfileWithUpdatedSubscriptionDetails,
+      toRaw,
       copySubscriptionChannelSettings,
       getChannelWithUpdatedSettings,
       getNextSubscriptionSettingsTimestamp,

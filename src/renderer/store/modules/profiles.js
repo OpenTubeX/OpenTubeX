@@ -1,3 +1,5 @@
+import { toRaw } from 'vue'
+
 import { MAIN_PROFILE_ID, THEME_BG_COLOR, THEME_TEXT_COLOR } from '../../../constants'
 import { DBProfileHandlers } from '../../../datastores/handlers/index'
 import { getProfileWithUpdatedSubscriptionDetails } from '../../helpers/subscription-profile-details'
@@ -139,7 +141,7 @@ const actions = {
     if (channels.length === 0) { return true }
     // Skip the main-process round trip when no synced profile would change.
     // Before profiles load, only the datastore knows the subscriptions.
-    if (state.profilesLoaded && state.profileList.every(profile => getProfileWithUpdatedSubscriptionDetails(profile, channels) === null)) {
+    if (state.profilesLoaded && toRaw(state.profileList).every(profile => getProfileWithUpdatedSubscriptionDetails(toRaw(profile), channels) === null)) {
       return true
     }
 
@@ -432,7 +434,8 @@ const mutations = {
       const profile = state.profileList.find(profile => profile._id === id)
       if (!profile) continue
 
-      const updatedProfile = getProfileWithUpdatedSubscriptionDetails(profile, channels)
+      // Raw records keep reactive proxies out of the copied subscription list.
+      const updatedProfile = getProfileWithUpdatedSubscriptionDetails(toRaw(profile), channels)
       if (updatedProfile !== null) profile.subscriptions = updatedProfile.subscriptions
     }
   },
