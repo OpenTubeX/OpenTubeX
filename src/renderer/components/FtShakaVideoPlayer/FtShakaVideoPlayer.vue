@@ -8525,7 +8525,8 @@ let resumeAfterTimestampNote = false
 
 function takeTimestampNote() {
   const video_ = video.value
-  if (!video_ || timestampNote.value !== null || isLive.value) return
+  // A format switch unloads the source and resumes playback when it finishes
+  if (!video_ || timestampNote.value !== null || isLive.value || pendingFormatSwitchState !== null) return
 
   const seconds = Number.isFinite(video_.currentTime) ? Math.max(0, Math.floor(video_.currentTime)) : 0
   resumeAfterTimestampNote = !video_.paused
