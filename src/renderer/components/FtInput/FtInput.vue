@@ -417,15 +417,18 @@ function startStepping(direction, event) {
     }, delay)
   }
   repeat(STEP_REPEAT_DELAY)
-  // A button disabled at the minimum no longer receives its own pointerup.
+  // A button disabled at the minimum no longer receives its own pointerup,
+  // and a release in another window reaches neither.
   window.addEventListener('pointerup', stopStepping)
   window.addEventListener('pointercancel', stopStepping)
+  window.addEventListener('blur', stopStepping)
 }
 
 function stopStepping() {
   window.clearTimeout(stepTimer)
   window.removeEventListener('pointerup', stopStepping)
   window.removeEventListener('pointercancel', stopStepping)
+  window.removeEventListener('blur', stopStepping)
   if (!stepChanged) return
   stepChanged = false
   inputRef.value?.dispatchEvent(new Event('change', { bubbles: true }))
