@@ -1301,7 +1301,8 @@ const mobileContextLinkCanOpenInTab = computed(() => {
   if (!store.getters.getTabsEnabled) return false
   const href = mobileContextLink.value?.href ?? ''
   return href.startsWith(`${window.location.href.split('#')[0]}#`) ||
-    /^https?:\/\/(?:www\.|m\.)?(?:youtube\.com|youtu\.be)\//.test(href)
+    /^https?:\/\/(?:www\.|m\.)?(?:youtube\.com|youtu\.be)\//.test(href) ||
+    getLinkedPlatformChannel(href) !== null
 })
 const mobileContextLinkCopyUrl = computed(() => {
   const href = mobileContextLink.value?.href
@@ -4299,8 +4300,9 @@ function handleLinkClick(event, link) {
     ? ((process.platform !== 'darwin' && event.ctrlKey) || (process.platform === 'darwin' && event.metaKey))
     : (event.ctrlKey || event.metaKey)
   const isMiddleClick = event.type === 'auxclick' && event.button === 1
-  const doCreateNewTab = ctrlOrCmdPressed || isMiddleClick
+  // Shift opens a window, also with Ctrl/Cmd or the middle button, as for internal links
   const doCreateNewWindow = event.shiftKey
+  const doCreateNewTab = (ctrlOrCmdPressed || isMiddleClick) && !doCreateNewWindow
 
   const platformChannel = getLinkedPlatformChannel(href)
   if (isYoutubeLink) {
