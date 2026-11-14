@@ -1001,11 +1001,14 @@ Settings:
       Viewing Modes: Moddau gwylio
       Shorts: Shorts
       Screenshots: Sgrinluniau
+      Timestamp Notes: Nodiadau Stamp Amser
     Enable FCast: "Galluogi FCast"
     Screenshot:
       Legacy Formats: "Fformatau hŷn"
       Modern Formats: "Fformatau modern"
     Ask Before Preloading Large Playlists: "Gofyn cyn rhaglwytho rhestrau chwarae mawr"
+    Timestamp Notes:
+      Obsidian Vault: Claddgell Obsidian
   Channel Settings:
     Channel Settings: Gosodiadau sianeli
     Channel Settings Description: Cofiwch y gosodiadau a ddewiswch wrth wylio ar gyfer pob sianel ar wahân, fel eu bod yn cael eu gosod eto y tro nesaf y byddwch yn gwylio un o'i fideos.
@@ -1380,6 +1383,7 @@ Settings:
     Channel playback speeds imported: "Wedi mewnforio cyflymderau chwarae {count} o sianeli | Wedi mewnforio cyflymder chwarae {count} sianel | Wedi mewnforio cyflymderau chwarae {count} sianel | Wedi mewnforio cyflymderau chwarae {count} sianel | Wedi mewnforio cyflymderau chwarae {count} sianel | Wedi mewnforio cyflymderau chwarae {count} o sianeli"
     Channels not found: "Methwyd dod o hyd i {count} o sianeli | Methwyd dod o hyd i {count} sianel | Methwyd dod o hyd i {count} sianel | Methwyd dod o hyd i {count} sianel | Methwyd dod o hyd i {count} sianel | Methwyd dod o hyd i {count} o sianeli"
     Playlists have been successfully imported: "Mewnforiwyd {count}/{total} rhestr chwarae yn llwyddiannus | Mewnforiwyd 1/{total} rhestr chwarae yn llwyddiannus | Mewnforiwyd {count}/{total} rhestr chwarae yn llwyddiannus | Mewnforiwyd {count}/{total} rhestr chwarae yn llwyddiannus | Mewnforiwyd {count}/{total} rhestr chwarae yn llwyddiannus | Mewnforiwyd {count}/{total} rhestr chwarae yn llwyddiannus"
+    Import subscription groups hint: I drefnu sianeli yn grwpiau, ychwanegwch enwau grwpiau wedi'u gwahanu gan hanner colonau ar ôl teitl y sianel mewn ffeil .csv, neu mewnforiwch ffeil .opml gyda ffolderi. Caiff grwpiau coll eu creu.
   Sync Settings:
     Signed Out After Restore: 'Cafodd cysoni ei allgofnodi oherwydd i ddata''r ap hwn gael ei adfer o gopi wrth gefn neu o ddyfais arall. Mewngofnodwch eto i gysoni''r ddyfais hon.'
     Revoke Session Tabs Warning: "Bydd setiau tabiau wedi’u cysoni’r ddyfais hon hefyd yn cael eu dileu."
@@ -2034,6 +2038,14 @@ Video:
       Load: "Llwytho ffeil isdeitlau…"
       Subtitle Files: "Ffeiliau isdeitlau"
       Error: "Methu llwytho'r ffeil isdeitlau. Dewiswch ffeil SRT neu WebVTT."
+    Timestamp Notes:
+      Take Note: Cymryd Nodyn Stamp Amser
+      Note at {time}: Nodyn am {time}
+      Note: Nodyn
+      Add to Obsidian: Ychwanegu at Obsidian
+      Copy as Markdown: Copïo fel Markdown
+      Copied: Copïwyd y nodyn fel Markdown
+      Obsidian Failed: Methu agor Obsidian
   Station: Gorsaf
   Playlist:
     Unavailable videos are hidden: Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae 1 fideo nad yw ar gael wedi'i guddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio
@@ -2367,6 +2379,7 @@ Tooltips:
     Concurrent Preloads: "Uchafswm nifer y prosesau yt-dlp a ddefnyddir i raglwytho fideos ar yr un pryd. Mae gwerthoedd uwch yn defnyddio mwy o CPU, cof a lled band rhwydwaith."
     Ignore System Rotation Lock for Fullscreen: Cylchdrowch y ddyfais yn gorfforol i agor a chau sgrin lawn hyd yn oed pan fydd cylchdroi awtomatig Android wedi’i ddiffodd.
     Ask Before Preloading Large Playlists: "Yn gofyn am gadarnhad cyn rhaglwytho pob fideo mewn rhestr chwarae gyda mwy na {count} fideo."
+    Obsidian Vault: Enw'r gladdgell Obsidian ar gyfer nodiadau stamp amser. Pan gaiff ei gosod, gellir ychwanegu nodiadau at Obsidian. Caiff nodiadau pob fideo eu casglu mewn nodyn wedi'i enwi ar ôl y fideo, yn ffolder y gladdgell ar gyfer nodiadau newydd.
   Download Settings:
     Download Folder: Caiff fideos eu cadw yn y ffolder hon. Gadewch yn wag i ddefnyddio ffolder Lawrlwythiadau eich system.
     Global Additional yt-dlp Arguments: Ymresymiadau llinell orchymyn ychwanegol a drosglwyddir i yt-dlp ar gyfer pob lawrlwythiad, er enghraifft --cookies-from-browser firefox.

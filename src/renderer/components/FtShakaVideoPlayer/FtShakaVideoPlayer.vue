@@ -2002,6 +2002,14 @@
         </div>
       </dl>
     </section>
+    <FtTimestampNotePrompt
+      v-if="timestampNote !== null"
+      :seconds="timestampNote.seconds"
+      :url="timestampNote.url"
+      :title="title"
+      :video-id="videoId"
+      @close="closeTimestampNote"
+    />
   </div>
 </template>
 
@@ -2075,6 +2083,7 @@ import { MusicVisualizerButton } from './player-components/MusicVisualizerButton
 import { QuickPlaybackRateBar, setQuickPlaybackRateBarContext } from './player-components/QuickPlaybackRateBar'
 import './player-components/SeekPreviewBar'
 import { ScreenshotButton } from './player-components/ScreenshotButton'
+import { TimestampNoteButton } from './player-components/TimestampNoteButton'
 import { SkipSilenceButton } from './player-components/SkipSilenceButton'
 import { LevelSelection } from './player-components/LevelSelection'
 import { VoiceOverTranslationButton } from './player-components/VoiceOverTranslationButton'
@@ -2216,6 +2225,7 @@ import { useVideoZoom } from './opentubex/useVideoZoom'
 import { useVoiceOverTranslation } from './opentubex/useVoiceOverTranslation'
 import FtVideoAnnotations from '../FtVideoAnnotations/FtVideoAnnotations.vue'
 import FtShareButton from '../FtShareButton/FtShareButton.vue'
+import FtTimestampNotePrompt from '../FtTimestampNotePrompt/FtTimestampNotePrompt.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtAddToPlaylistDropdown from '../FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue'
 import WatchVideoChapters from '../WatchVideoChapters/WatchVideoChapters.vue'
@@ -3124,8 +3134,8 @@ let initialAutoplayCanceled = false
 // When the viewer paused playback, consumed by the next play.
 /** @type {number|null} */
 let rewindOnResumePausedAt = null
-// Pausing to save a screenshot resumes where it paused.
-let screenshotPausePending = false
+// Pausing to save a screenshot or write a note resumes where it paused.
+let actionPausePending = false
 const videoLayoutReady = ref(false)
 const annotationCurrentTime = ref(0)
 const annotationVideoAspectRatio = ref(null)
@@ -4935,6 +4945,7 @@ const uiConfig = computed(() => {
     playbackRate: 'playback_rate',
     loop: 'ft_loop',
     screenshot: 'ft_screenshot',
+    timestampNote: 'ft_timestamp_note',
     autoplay: 'ft_autoplay_toggle',
     captions: 'ft_caption_toggle',
     menu: 'overflow_menu',
@@ -5024,6 +5035,12 @@ const uiConfig = computed(() => {
   if (!enableScreenshot.value || props.format === 'audio') {
     removeFromArrayIfExists(uiConfig.controlPanelElements, 'ft_screenshot')
     removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_screenshot')
+  }
+
+  // A live stream has no stable time to link to
+  if (props.isLive) {
+    removeFromArrayIfExists(uiConfig.controlPanelElements, 'ft_timestamp_note')
+    removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_timestamp_note')
   }
 
   if (props.externalUrl) {
@@ -6897,12 +6914,12 @@ function handlePause() {
   const temporaryPlaybackRatePause = consumeTemporaryPlaybackRatePause()
   if (!temporaryPlaybackRatePause) setShowUiOnPaused(true)
   // Only a pause during playback rewinds on resume. Ending, scrubbing,
-  // format switches, screenshots and releasing a hold that started paused don't.
+  // format switches, screenshots, notes and releasing a hold that started paused don't.
   const video_ = video.value
   const rewindOnResumeApplies = !!video_ && video_.played.length > 0 && !video_.ended &&
     !ui?.getControls().isSeeking() && pendingFormatSwitchState === null && !temporaryPlaybackRatePause &&
-    !screenshotPausePending
-  screenshotPausePending = false
+    !actionPausePending
+  actionPausePending = false
   // Keep the earlier time when a play in a background tab is paused again.
   rewindOnResumePausedAt = rewindOnResumeApplies ? (rewindOnResumePausedAt ?? performance.now()) : null
   playerPaused.value = true
@@ -8412,7 +8429,7 @@ async function takeScreenshot() {
     (process.env.IS_CAPACITOR && screenshotMode.value === 'default_folder' && !store.getters.getScreenshotFolderPath)
   const pauseForScreenshot = needsFilePicker || (!process.env.IS_ELECTRON && !process.env.IS_CAPACITOR)
   if (pauseForScreenshot && wasPlaying) {
-    screenshotPausePending = true
+    actionPausePending = true
     video_.pause()
   }
 
@@ -8494,6 +8511,36 @@ async function takeScreenshot() {
 }
 
 // #endregion screenshots
+
+// #region timestamp notes
+
+/** The time and link of the note being written */
+const timestampNote = ref(/** @type {{ seconds: number, url: string } | null} */ (null))
+let resumeAfterTimestampNote = false
+
+function takeTimestampNote() {
+  const video_ = video.value
+  if (!video_ || timestampNote.value !== null || props.isLive) return
+
+  const seconds = Number.isFinite(video_.currentTime) ? Math.max(0, Math.floor(video_.currentTime)) : 0
+  resumeAfterTimestampNote = !video_.paused
+  if (resumeAfterTimestampNote) {
+    actionPausePending = true
+    video_.pause()
+  }
+  timestampNote.value = {
+    seconds,
+    url: props.externalUrl || appendTimestamp(getYoutubeVideoShareUrl(props.videoId), seconds)
+  }
+}
+
+function closeTimestampNote() {
+  timestampNote.value = null
+  if (resumeAfterTimestampNote) video.value?.play()
+  resumeAfterTimestampNote = false
+}
+
+// #endregion timestamp notes
 
 // #region custom player controls
 
@@ -10101,6 +10148,24 @@ function registerScreenshotButton() {
   registerOwnElement(shakaOverflowMenu, 'ft_screenshot', new ScreenshotButtonFactory())
 }
 
+function registerTimestampNoteButton() {
+  events.addEventListener('takeTimestampNote', () => {
+    takeTimestampNote()
+  })
+
+  /**
+   * @implements {shaka.extern.IUIElement.Factory}
+   */
+  class TimestampNoteButtonFactory {
+    create(rootElement, controls) {
+      return new TimestampNoteButton(events, rootElement, controls)
+    }
+  }
+
+  registerOwnElement(shakaControls, 'ft_timestamp_note', new TimestampNoteButtonFactory())
+  registerOwnElement(shakaOverflowMenu, 'ft_timestamp_note', new TimestampNoteButtonFactory())
+}
+
 function registerSponsorBlockSubmissionButtons() {
   events.addEventListener('startSponsorBlockSegment', () => {
     startSponsorBlockDraft()
@@ -10584,6 +10649,7 @@ const buttonWithTooltipClasses = [
   'full-window-button',
   'theatre-button',
   'screenshot-button',
+  'timestamp-note-button',
 ]
 function blurTooltipButtons() {
   const element = document.activeElement
@@ -11044,6 +11110,11 @@ async function keyboardShortcutHandler(event) {
       matches(KeyboardShortcuts.VIDEO_PLAYER.GENERAL.TOGGLE_QUICK_BOOKMARK):
       event.preventDefault()
       if (!event.repeat) toggleQuickBookmark()
+      break
+    case !props.isLive && !store.getters.isAnyPromptOpen &&
+      matches(KeyboardShortcuts.VIDEO_PLAYER.GENERAL.TAKE_TIMESTAMP_NOTE):
+      event.preventDefault()
+      if (!event.repeat) takeTimestampNote()
       break
     case props.playlistVideoData != null && !store.getters.isAnyPromptOpen &&
       matches(KeyboardShortcuts.VIDEO_PLAYER.GENERAL.OPEN_ADD_TO_PLAYLIST):
@@ -11785,6 +11856,7 @@ onMounted(async () => {
   videoResizeObserver.observe(videoElement)
 
   registerScreenshotButton()
+  registerTimestampNoteButton()
   registerAudioTrackSelection()
   registerQualitySelection()
   registerCaptionSelection()

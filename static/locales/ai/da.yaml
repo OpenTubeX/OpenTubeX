@@ -1026,8 +1026,11 @@ Settings:
       Viewing Modes: Visningstilstande
       Shorts: Shorts
       Screenshots: Skærmbilleder
+      Timestamp Notes: Tidsstempelnoter
     Enable FCast: "Aktivér FCast"
     Ask Before Preloading Large Playlists: "Spørg før forudindlæsning af store playlister"
+    Timestamp Notes:
+      Obsidian Vault: Obsidian-boks
   Channel Settings:
     Channel Settings: Kanalindstillinger
     Channel Settings Description: Husk de indstillinger, du vælger under afspilning, for hver kanal, så de anvendes igen, næste gang du ser en af kanalens videoer.
@@ -1420,6 +1423,7 @@ Settings:
     Channel playback speeds imported: "Importerede afspilningshastigheden for {count} kanal | Importerede afspilningshastighederne for {count} kanaler"
     Channels not found: "{count} kanal kunne ikke findes | {count} kanaler kunne ikke findes"
     Playlists have been successfully imported: "1/{total} playliste blev importeret | {count}/{total} playlister blev importeret"
+    Import subscription groups hint: For at sortere kanaler i grupper skal du tilføje gruppenavne adskilt af semikoloner efter kanaltitlen i en .csv-fil eller importere en .opml-fil med mapper. Manglende grupper oprettes.
   Sync Settings:
     Signed Out After Restore: 'Synkroniseringen blev logget ud, fordi disse appdata blev gendannet fra en sikkerhedskopi eller en anden enhed. Log ind igen for at synkronisere denne enhed.'
     Revoke Session Tabs Warning: "Denne enheds synkroniserede fanesæt vil også blive slettet."
@@ -2079,6 +2083,14 @@ Video:
       Load: "Indlæs undertekstfil…"
       Subtitle Files: "Undertekstfiler"
       Error: "Undertekstfilen kunne ikke indlæses. Vælg en SRT- eller WebVTT-fil."
+    Timestamp Notes:
+      Take Note: Tag tidsstempelnote
+      Note at {time}: Note ved {time}
+      Note: Note
+      Add to Obsidian: Føj til Obsidian
+      Copy as Markdown: Kopiér som Markdown
+      Copied: Note kopieret som Markdown
+      Obsidian Failed: Kunne ikke åbne Obsidian
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Resterende tid for preroll-annonce: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Resterende SABR-ventetid: {remindingTimeSeconds}s'
@@ -2419,6 +2431,7 @@ Tooltips:
     Concurrent Preloads: "Det højeste antal yt-dlp-processer, der bruges til at forudindlæse videoer samtidig. Højere værdier bruger mere CPU, hukommelse og netværksbåndbredde."
     Ignore System Rotation Lock for Fullscreen: Drej enheden fysisk for at åbne og afslutte fuld skærm, selv når automatisk rotation er slået fra i Android.
     Ask Before Preloading Large Playlists: "Beder om bekræftelse, før alle videoer i en playliste med mere end {count} videoer forudindlæses."
+    Obsidian Vault: Navnet på Obsidian-boksen til tidsstempelnoter. Når den er angivet, kan noter føjes til Obsidian. Noterne for hver video samles i en note opkaldt efter videoen i boksens mappe til nye noter.
   Download Settings:
     Download Folder: Videoer gemmes i denne mappe. Lad feltet stå tomt for at bruge systemets Downloads-mappe.
     Global Additional yt-dlp Arguments: Yderligere kommandolinjeargumenter, der sendes til yt-dlp ved hver download, f.eks. --cookies-from-browser firefox.

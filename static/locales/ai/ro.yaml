@@ -1000,11 +1000,14 @@ Settings:
       Viewing Modes: Moduri de vizualizare
       Shorts: Shorts
       Screenshots: Capturi de ecran
+      Timestamp Notes: Note cu marcaj temporal
     Enable FCast: "Activează FCast"
     Screenshot:
       Legacy Formats: "Formate mai vechi"
       Modern Formats: "Formate moderne"
     Ask Before Preloading Large Playlists: "Întreabă înainte de preîncărcarea listelor de redare mari"
+    Timestamp Notes:
+      Obsidian Vault: Seif Obsidian
   Channel Settings:
     Channel Settings: Setări pentru canale
     Channel Settings Description: Rețineți separat pentru fiecare canal setările alese în timpul vizionării, pentru a fi aplicate din nou când vizionați alt videoclip al canalului.
@@ -1388,6 +1391,7 @@ Settings:
     Channel playback speeds imported: "A fost importată viteza de redare pentru {count} canal | Au fost importate vitezele de redare pentru {count} canale | Au fost importate vitezele de redare pentru {count} de canale"
     Channels not found: "{count} canal nu a putut fi găsit | {count} canale nu au putut fi găsite | {count} de canale nu au putut fi găsite"
     Playlists have been successfully imported: "1/{total} playlist importat cu succes | {count}/{total} playlisturi importate cu succes | {count}/{total} de playlisturi importate cu succes"
+    Import subscription groups hint: Pentru a sorta canalele în grupuri, adaugă numele grupurilor separate prin punct și virgulă după titlul canalului într-un fișier .csv sau importă un fișier .opml cu dosare. Grupurile lipsă sunt create.
   Sync Settings:
     Signed Out After Restore: 'Sincronizarea a fost deconectată deoarece aceste date ale aplicației au fost restaurate dintr-o copie de rezervă sau de pe alt dispozitiv. Conectează-te din nou pentru a sincroniza acest dispozitiv.'
     Revoke Session Tabs Warning: "Seturile de file sincronizate ale acestui dispozitiv vor fi și ele șterse."
@@ -2044,6 +2048,14 @@ Video:
       Load: "Încarcă fișierul de subtitrare…"
       Subtitle Files: "Fișiere de subtitrare"
       Error: "Fișierul de subtitrare nu a putut fi încărcat. Alegeți un fișier SRT sau WebVTT."
+    Timestamp Notes:
+      Take Note: Adaugă o notă cu marcaj temporal
+      Note at {time}: Notă la {time}
+      Note: Notă
+      Add to Obsidian: Adaugă în Obsidian
+      Copy as Markdown: Copiază ca Markdown
+      Copied: Nota a fost copiată ca Markdown
+      Obsidian Failed: Obsidian nu a putut fi deschis
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Timp rămas din reclama de început: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Timp rămas din așteptarea SABR: {remindingTimeSeconds}s'
@@ -2384,6 +2396,7 @@ Tooltips:
     Concurrent Preloads: "Numărul maxim de procese yt-dlp utilizate pentru a preîncărca videoclipuri simultan. Valorile mai mari folosesc mai mult procesor, memorie și lățime de bandă a rețelei."
     Ignore System Rotation Lock for Fullscreen: Rotește fizic dispozitivul pentru a intra și ieși din ecranul complet, chiar dacă rotirea automată din Android este dezactivată.
     Ask Before Preloading Large Playlists: "Cere confirmarea înainte de preîncărcarea tuturor videoclipurilor dintr-o listă de redare cu peste {count} videoclipuri."
+    Obsidian Vault: Numele seifului Obsidian pentru notele cu marcaj temporal. Când este setat, notele pot fi adăugate în Obsidian. Notele fiecărui videoclip sunt adunate într-o notă denumită după videoclip, în dosarul seifului pentru note noi.
   Download Settings:
     Download Folder: Videoclipurile sunt salvate în acest folder. Lăsați necompletat pentru a folosi folderul Descărcări al sistemului.
     Global Additional yt-dlp Arguments: Argumente suplimentare de linie de comandă transmise către yt-dlp pentru fiecare descărcare, de exemplu --cookies-from-browser firefox.

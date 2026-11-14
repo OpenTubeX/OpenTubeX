@@ -463,6 +463,10 @@
     "ri": "node-tree",
     "material": "hub-outline"
   },
+  "note-sticky": {
+    "ri": "sticky-note-add-line",
+    "material": "edit-note-rounded"
+  },
   "palette": {
     "ri": "palette-line",
     "material": "palette-outline"

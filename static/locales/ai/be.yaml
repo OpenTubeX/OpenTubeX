@@ -1036,8 +1036,11 @@ Settings:
       Viewing Modes: Рэжымы прагляду
       Shorts: Shorts
       Screenshots: Здымкі экрана
+      Timestamp Notes: Нататкі з адзнакамі часу
     Enable FCast: "Уключыць FCast"
     Ask Before Preloading Large Playlists: "Пытацца перад папярэдняй загрузкай вялікіх плэйлістоў"
+    Timestamp Notes:
+      Obsidian Vault: Сховішча Obsidian
   Channel Settings:
     Channel Settings: Налады каналаў
     Channel Settings Description: Запамінаць асобныя налады, абраныя падчас прагляду кожнага канала, і ўжываць іх пры наступным праглядзе відэа з гэтага канала.
@@ -1429,6 +1432,7 @@ Settings:
     Channel playback speeds imported: "Імпартавана хуткасць прайгравання для {count} канала | Імпартаваны хуткасці прайгравання для {count} каналаў | Імпартаваны хуткасці прайгравання для {count} каналаў"
     Channels not found: "Не ўдалося знайсці {count} канал | Не ўдалося знайсці {count} каналы | Не ўдалося знайсці {count} каналаў"
     Playlists have been successfully imported: "Паспяхова імпартаваны {count}/{total} плэйліст | Паспяхова імпартаваны {count}/{total} плэйлісты | Паспяхова імпартавана {count}/{total} плэйлістоў"
+    Import subscription groups hint: Каб размеркаваць каналы па групах, дадайце назвы груп праз кропку з коскай пасля назвы канала ў файле .csv або імпартуйце файл .opml з папкамі. Адсутныя групы будуць створаны.
   Sync Settings:
     Signed Out After Restore: 'Сінхранізацыя выйшла з уліковага запісу, бо гэтыя даныя праграмы адноўлены з рэзервовай копіі або з іншай прылады. Увайдзіце зноў, каб сінхранізаваць гэту прыладу.'
     Revoke Session Tabs Warning: "Сінхранізаваныя наборы ўкладак гэтай прылады таксама будуць выдалены."
@@ -2093,6 +2097,14 @@ Video:
       Load: "Загрузіць файл субтытраў…"
       Subtitle Files: "Файлы субтытраў"
       Error: "Не ўдалося загрузіць файл субтытраў. Выберыце файл SRT або WebVTT."
+    Timestamp Notes:
+      Take Note: Зрабіць нататку з адзнакай часу
+      Note at {time}: Нататка на {time}
+      Note: Нататка
+      Add to Obsidian: Дадаць у Obsidian
+      Copy as Markdown: Скапіяваць як Markdown
+      Copied: Нататка скапіявана як Markdown
+      Obsidian Failed: Не ўдалося адкрыць Obsidian
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Да канца рэкламы перад відэа: {remindingTimeSeconds} с'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Да паўторнай спробы SABR: {remindingTimeSeconds} с'
@@ -2433,6 +2445,7 @@ Tooltips:
     Concurrent Preloads: "Найбольшая колькасць працэсаў yt-dlp, якія адначасова папярэдне загружаюць відэа. Большыя значэнні выкарыстоўваюць больш рэсурсаў працэсара, памяці і прапускной здольнасці сеткі."
     Ignore System Rotation Lock for Fullscreen: Паварочвайце прыладу, каб уваходзіць у поўнаэкранны рэжым і выходзіць з яго, нават калі аўтапаварот у Android выключаны.
     Ask Before Preloading Large Playlists: "Запытвае пацвярджэнне перад папярэдняй загрузкай усіх відэа плэйліста, у якім больш за {count} відэа."
+    Obsidian Vault: Назва сховішча Obsidian для нататак з адзнакамі часу. Калі яна зададзена, нататкі можна дадаваць у Obsidian. Нататкі кожнага відэа збіраюцца ў нататцы з назвай відэа ў папцы сховішча для новых нататак.
   Download Settings:
     Download Folder: Відэа захоўваюцца ў гэтай папцы. Пакіньце поле пустым, каб выкарыстоўваць сістэмную папку «Спампоўванні».
     Global Additional yt-dlp Arguments: Дадатковыя аргументы каманднага радка, якія перадаюцца yt-dlp пры кожным спампоўванні, напрыклад --cookies-from-browser firefox.

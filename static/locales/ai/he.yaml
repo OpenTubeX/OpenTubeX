@@ -1016,8 +1016,11 @@ Settings:
       Viewing Modes: מצבי צפייה
       Shorts: Shorts
       Screenshots: צילומי מסך
+      Timestamp Notes: הערות עם חותמת זמן
     Enable FCast: "הפעלת FCast"
     Ask Before Preloading Large Playlists: "לשאול לפני טעינה מראש של פלייליסטים גדולים"
+    Timestamp Notes:
+      Obsidian Vault: כספת Obsidian
   Channel Settings:
     Channel Settings: הגדרות ערוץ
     Channel Settings Description: שמירת ההגדרות שנבחרו בזמן צפייה לכל ערוץ בנפרד, כדי שיוחלו שוב בצפייה הבאה באחד מסרטוניו.
@@ -1403,6 +1406,7 @@ Settings:
     Channel playback speeds imported: "יובאה מהירות ההפעלה של {count} ערוץ | יובאו מהירויות ההפעלה של {count} ערוצים | יובאו מהירויות ההפעלה של {count} ערוצים"
     Channels not found: "{count} ערוץ לא נמצא | {count} ערוצים לא נמצאו | {count} ערוצים לא נמצאו"
     Playlists have been successfully imported: "יובאה בהצלחה 1/{total} רשימת נגינה | יובאו בהצלחה {count}/{total} רשימות נגינה | יובאו בהצלחה {count}/{total} רשימות נגינה"
+    Import subscription groups hint: כדי למיין ערוצים לקבוצות, יש להוסיף שמות קבוצות מופרדים בנקודה-פסיק אחרי שם הערוץ בקובץ .csv, או לייבא קובץ .opml עם תיקיות. קבוצות חסרות נוצרות.
   Sync Settings:
     Signed Out After Restore: 'הסנכרון נותק כי נתוני האפליקציה האלה שוחזרו מגיבוי או ממכשיר אחר. יש להתחבר שוב כדי לסנכרן את המכשיר הזה.'
     Revoke Session Tabs Warning: "גם קבוצות הכרטיסיות המסונכרנות של המכשיר הזה יימחקו."
@@ -2055,6 +2059,14 @@ Video:
       Load: "טעינת קובץ כתוביות…"
       Subtitle Files: "קובצי כתוביות"
       Error: "לא ניתן לטעון את קובץ הכתוביות. יש לבחור קובץ SRT או WebVTT."
+    Timestamp Notes:
+      Take Note: רישום הערה עם חותמת זמן
+      Note at {time}: הערה ב־{time}
+      Note: הערה
+      Add to Obsidian: הוספה ל־Obsidian
+      Copy as Markdown: העתקה כ־Markdown
+      Copied: ההערה הועתקה כ־Markdown
+      Obsidian Failed: לא ניתן לפתוח את Obsidian
   Station: תחנה
   Playlist:
     Unavailable videos are hidden: סרטון אחד שאינו זמין מוסתר | {count} סרטונים לא זמינים מוסתרים | {count} סרטונים לא זמינים מוסתרים
@@ -2388,6 +2400,7 @@ Tooltips:
     Concurrent Preloads: "המספר המרבי של תהליכי yt-dlp המשמשים לטעינה מראש של סרטונים בו־זמנית. ערכים גבוהים יותר משתמשים ביותר מעבד, זיכרון ורוחב פס רשת."
     Ignore System Rotation Lock for Fullscreen: סובבו את המכשיר כדי להיכנס למסך מלא ולצאת ממנו, גם כשהסיבוב האוטומטי של Android כבוי.
     Ask Before Preloading Large Playlists: "מבקש אישור לפני טעינה מראש של כל הסרטונים בפלייליסט עם יותר מ־{count} סרטונים."
+    Obsidian Vault: שם כספת Obsidian עבור הערות עם חותמת זמן. כשהוא מוגדר, ניתן להוסיף הערות ל־Obsidian. ההערות של כל סרטון נאספות בהערה הנקראת על שם הסרטון, בתיקיית ההערות החדשות של הכספת.
   Download Settings:
     Download Folder: הסרטונים נשמרים בתיקייה זו. השאירו ריק כדי להשתמש בתיקיית ההורדות של המערכת.
     Global Additional yt-dlp Arguments: ארגומנטים נוספים לשורת הפקודה שיועברו אל yt-dlp בכל הורדה, לדוגמה --cookies-from-browser firefox.

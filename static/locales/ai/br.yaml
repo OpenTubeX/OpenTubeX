@@ -998,11 +998,14 @@ Settings:
       Viewing Modes: Modoù gwelout
       Shorts: Shorts
       Screenshots: Tapadennoù skramm
+      Timestamp Notes: Notennoù gant merk-amzer
     Enable FCast: "Gweredekaat FCast"
     Screenshot:
       Legacy Formats: "Furmadoù kozh"
       Modern Formats: "Furmadoù modern"
     Ask Before Preloading Large Playlists: "Goulenn a-raok rakgargañ rolloù-lenn bras"
+    Timestamp Notes:
+      Obsidian Vault: Kell Obsidian
   Channel Settings:
     Channel Settings: "Arventennoù ar chadennoù"
     Channel Settings Description: "Derc'hel soñj, evit pep chadenn, eus an arventennoù a zibabit pa sellit. Arloet e vint en-dro ar wech da-heul ma sellot ouzh unan eus he videoioù."
@@ -1376,6 +1379,7 @@ Settings:
     Channel playback speeds imported: "Enporzhiet eo bet tizh lenn {count} chadenn | Enporzhiet eo bet tizhoù lenn {count} chadenn | Enporzhiet eo bet tizhoù lenn {count} chadenn | Enporzhiet eo bet tizhoù lenn {count} chadenn | Enporzhiet eo bet tizhoù lenn {count} chadenn"
     Channels not found: "N'eus ket bet gallet kavout {count} chadenn | N'eus ket bet gallet kavout {count} chadenn | N'eus ket bet gallet kavout {count} chadenn | N'eus ket bet gallet kavout {count} chadenn | N'eus ket bet gallet kavout {count} chadenn"
     Playlists have been successfully imported: "{count}/{total} roll-lenn enporzhiet gant berzh | {count}/{total} roll-lenn enporzhiet gant berzh | {count}/{total} roll-lenn enporzhiet gant berzh | {count}/{total} roll-lenn enporzhiet gant berzh | {count}/{total} roll-lenn enporzhiet gant berzh"
+    Import subscription groups hint: Evit rummañ ar chadennoù e strolladoù, ouzhpennit anvioù strolladoù disrannet gant pikoù-skej goude titl ar chadenn en ur restr .csv, pe enporzhiit ur restr .opml gant teuliadoù. Krouet e vez ar strolladoù a vank.
   Sync Settings:
     Signed Out After Restore: 'Digennasket eo bet ar goubredañ peogwir eo bet assavet roadennoù an arload-mañ eus un enrolladenn gwarez pe eus ur benveg all. Kevreit en-dro evit goubredañ ar benveg-mañ.'
     Revoke Session Tabs Warning: "Holladoù ivinelloù sinkronizet an trevnad-mañ a vo diverket ivez."
@@ -2013,6 +2017,14 @@ Video:
       Load: "Kargañ ur restr istitloù…"
       Subtitle Files: "Restroù istitloù"
       Error: "N'eus ket bet gallet kargañ ar restr istitloù. Dibabit ur restr SRT pe WebVTT."
+    Timestamp Notes:
+      Take Note: Kemer un notenn gant merk-amzer
+      Note at {time}: Notenn da {time}
+      Note: Notenn
+      Add to Obsidian: Ouzhpennañ da Obsidian
+      Copy as Markdown: Eilañ evel Markdown
+      Copied: Eilet eo bet an notenn evel Markdown
+      Obsidian Failed: N'eus ket bet gallet digeriñ Obsidian
   External Media:
     Dislikes: "Displijadenn | Displijadennoù | Displijadennoù | Displijadennoù | Displijadennoù"
     Reposts: "Adkasadenn | Adkasadennoù | Adkasadennoù | Adkasadennoù | Adkasadennoù"
@@ -2340,6 +2352,7 @@ Tooltips:
     Concurrent Preloads: "Niver brasañ a argerzhioù yt-dlp a vez implijet evit rakgargañ videoioù war un dro. An talvoudoù uheloc'h a implij muioc'h a c'halloud ar c'hewerier, a vemor hag a ledander rouedad."
     Ignore System Rotation Lock for Fullscreen: Troit an trevnad evit mont e skramm leun hag er-maez anezhañ, zoken pa vez diweredekaet an troadur emgefreek en Android.
     Ask Before Preloading Large Playlists: "Goulenn a ra ur gadarnaat a-raok rakgargañ holl videoioù ur roll-lenn gant muioc’h eget {count} video."
+    Obsidian Vault: Anv kell Obsidian evit an notennoù gant merk-amzer. Pa vez termenet, e c'haller ouzhpennañ notennoù da Obsidian. Dastumet e vez notennoù pep video en un notenn anvet diwar ar video, e teuliad ar gell evit an notennoù nevez.
   Download Settings:
     Download Folder: "Enrollet e vez ar videoioù en teuliad-mañ. Laoskit goullo evit implijout teuliad Pellgargadennoù ho reizhiad."
     Global Additional yt-dlp Arguments: "Arventennoù arc'had ouzhpenn tremenet da yt-dlp evit pep pellgargadenn, da skouer --cookies-from-browser firefox."

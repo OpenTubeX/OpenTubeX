@@ -1038,8 +1038,11 @@ Settings:
       Viewing Modes: حالت‌های نمایش
       Shorts: Shorts
       Screenshots: نماگرفت‌ها
+      Timestamp Notes: یادداشت‌های مهر زمانی
     Enable FCast: "فعال کردن FCast"
     Ask Before Preloading Large Playlists: "پرسیدن پیش از پیش‌بارگیری فهرست‌های پخش بزرگ"
+    Timestamp Notes:
+      Obsidian Vault: گاوصندوق Obsidian
   Channel Settings:
     Channel Settings: تنظیمات کانال
     Channel Settings Description: تنظیمات انتخابی هنگام تماشای هر کانال را جداگانه به‌خاطر بسپار تا دفعهٔ بعد برای ویدیوهای آن دوباره اعمال شوند.
@@ -1431,6 +1434,7 @@ Settings:
     Channel playback speeds imported: "سرعت پخش {count} کانال وارد شد | سرعت پخش {count} کانال وارد شد"
     Channels not found: "{count} کانال پیدا نشد | {count} کانال پیدا نشد"
     Playlists have been successfully imported: "1/{total} فهرست پخش با موفقیت وارد شد | {count}/{total} فهرست پخش با موفقیت وارد شد"
+    Import subscription groups hint: برای مرتب کردن کانال‌ها در گروه‌ها، در فایل .csv نام گروه‌ها را با نقطه‌ویرگول از هم جدا کرده و پس از عنوان کانال اضافه کنید، یا یک فایل .opml دارای پوشه درون‌ریزی کنید. گروه‌هایی که وجود ندارند ساخته می‌شوند.
   Sync Settings:
     Signed Out After Restore: 'همگام‌سازی از حساب خارج شد، چون این داده‌های برنامه از یک نسخهٔ پشتیبان یا دستگاهی دیگر بازیابی شده‌اند. برای همگام‌سازی این دستگاه دوباره وارد شوید.'
     Revoke Session Tabs Warning: "مجموعه‌های برگهٔ همگام‌شدهٔ این دستگاه نیز حذف خواهند شد."
@@ -2091,6 +2095,14 @@ Video:
       Load: "بارگذاری فایل زیرنویس…"
       Subtitle Files: "فایل‌های زیرنویس"
       Error: "بارگذاری فایل زیرنویس ممکن نشد. یک فایل SRT یا WebVTT انتخاب کنید."
+    Timestamp Notes:
+      Take Note: ثبت یادداشت با مهر زمانی
+      Note at {time}: یادداشت در {time}
+      Note: یادداشت
+      Add to Obsidian: افزودن به Obsidian
+      Copy as Markdown: کپی به‌صورت Markdown
+      Copied: یادداشت به‌صورت Markdown کپی شد
+      Obsidian Failed: باز کردن Obsidian ممکن نشد
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'زمان باقی‌ماندهٔ تبلیغ پیش از پخش: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'زمان باقی‌ماندهٔ وقفهٔ SABR: {remindingTimeSeconds}s'
@@ -2431,6 +2443,7 @@ Tooltips:
     Concurrent Preloads: "بیشترین تعداد فرایندهای yt-dlp که برای پیش‌بارگذاری هم‌زمان ویدیوها استفاده می‌شوند. مقادیر بالاتر از پردازنده، حافظه و پهنای باند شبکه بیشتری استفاده می‌کنند."
     Ignore System Rotation Lock for Fullscreen: با چرخاندن فیزیکی دستگاه وارد حالت تمام‌صفحه شوید یا از آن خارج شوید، حتی وقتی چرخش خودکار اندروید خاموش است.
     Ask Before Preloading Large Playlists: "پیش از پیش‌بارگیری همهٔ ویدیوهای فهرست پخشی با بیش از {count} ویدیو، تأیید می‌خواهد."
+    Obsidian Vault: نام گاوصندوق Obsidian برای یادداشت‌های مهر زمانی. در صورت تنظیم، می‌توان یادداشت‌ها را به Obsidian افزود. یادداشت‌های هر ویدیو در یادداشتی به نام همان ویدیو، در پوشهٔ یادداشت‌های جدید گاوصندوق جمع‌آوری می‌شوند.
   Download Settings:
     Download Folder: ویدیوها در این پوشه ذخیره می‌شوند. برای استفاده از پوشه «بارگیری‌ها»ی سیستم، خالی بگذارید.
     Global Additional yt-dlp Arguments: آرگومان‌های اضافی خط فرمان که برای هر بارگیری به yt-dlp فرستاده می‌شوند؛ برای مثال --cookies-from-browser firefox.

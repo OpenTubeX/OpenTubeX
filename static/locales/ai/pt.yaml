@@ -998,11 +998,14 @@ Settings:
       Viewing Modes: Modos de visualização
       Shorts: Shorts
       Screenshots: Capturas de ecrã
+      Timestamp Notes: Notas com marca temporal
     Enable FCast: "Ativar FCast"
     Screenshot:
       Legacy Formats: "Formatos antigos"
       Modern Formats: "Formatos modernos"
     Ask Before Preloading Large Playlists: "Perguntar antes de pré-carregar listas de reprodução grandes"
+    Timestamp Notes:
+      Obsidian Vault: Cofre do Obsidian
   Channel Settings:
     Channel Settings: Definições dos canais
     Channel Settings Description: Memorizar individualmente para cada canal as definições escolhidas durante a visualização, para que sejam aplicadas quando voltar a ver um dos seus vídeos.
@@ -1376,6 +1379,7 @@ Settings:
     Channel playback speeds imported: "Importada a velocidade de reprodução de {count} canal | Importadas as velocidades de reprodução de {count} de canais | Importadas as velocidades de reprodução de {count} canais"
     Channels not found: "{count} canal não foi encontrado | {count} de canais não foram encontrados | {count} canais não foram encontrados"
     Playlists have been successfully imported: "1/{total} playlist importada com sucesso | {count}/{total} playlists importadas com sucesso | {count}/{total} playlists importadas com sucesso"
+    Import subscription groups hint: Para organizar os canais em grupos, adicione os nomes dos grupos separados por ponto e vírgula após o título do canal num ficheiro .csv, ou importe um ficheiro .opml com pastas. Os grupos em falta são criados.
   Sync Settings:
     Signed Out After Restore: 'A sincronização terminou a sessão porque estes dados da aplicação foram restaurados de uma cópia de segurança ou de outro dispositivo. Inicie sessão novamente para sincronizar este dispositivo.'
     Revoke Session Tabs Warning: "Os conjuntos de separadores sincronizados deste dispositivo também serão eliminados."
@@ -2004,6 +2008,14 @@ Video:
       Load: "Carregar ficheiro de legendas…"
       Subtitle Files: "Ficheiros de legendas"
       Error: "Não foi possível carregar o ficheiro de legendas. Escolha um ficheiro SRT ou WebVTT."
+    Timestamp Notes:
+      Take Note: Criar nota com marca temporal
+      Note at {time}: Nota em {time}
+      Note: Nota
+      Add to Obsidian: Adicionar ao Obsidian
+      Copy as Markdown: Copiar como Markdown
+      Copied: Nota copiada como Markdown
+      Obsidian Failed: Não foi possível abrir o Obsidian
   External Media:
     Dislikes: "Voto negativo | Votos negativos | Votos negativos"
     Reposts: "Republicação | Republicações | Republicações"
@@ -2331,6 +2343,7 @@ Tooltips:
     Concurrent Preloads: "O número máximo de processos do yt-dlp utilizados para pré-carregar vídeos ao mesmo tempo. Valores mais elevados utilizam mais CPU, memória e largura de banda da rede."
     Ignore System Rotation Lock for Fullscreen: Rode fisicamente o dispositivo para entrar e sair do ecrã inteiro, mesmo quando a rotação automática do Android está desligada.
     Ask Before Preloading Large Playlists: "Pede confirmação antes de pré-carregar todos os vídeos de uma lista de reprodução com mais de {count} vídeos."
+    Obsidian Vault: Nome do cofre do Obsidian para as notas com marca temporal. Quando definido, as notas podem ser adicionadas ao Obsidian. As notas de cada vídeo são reunidas numa nota com o nome do vídeo, na pasta do cofre para novas notas.
   Download Settings:
     Download Folder: Os vídeos são guardados nesta pasta. Deixe em branco para utilizar a pasta Transferências do sistema.
     Global Additional yt-dlp Arguments: Argumentos adicionais da linha de comandos passados ao yt-dlp em cada descarga, por exemplo --cookies-from-browser firefox.

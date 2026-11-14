@@ -878,6 +878,7 @@ Settings:
       Viewing Modes: Spektoreĝimoj
       Shorts: Videaĵetoj
       Screenshots: Ekrankopioj
+      Timestamp Notes: Tempomarkaj notoj
     Lights Off: Lumoj estingitaj
     Show Lights Off Toggle: Montri baskulon de estingitaj lumoj
     Show Volume Boost Toggle: Montri baskulon de laŭteca plifortigo
@@ -1039,6 +1040,8 @@ Settings:
     Enable Google Cast: Ŝalti Google Cast
     Enable FCast: Ŝalti FCast
     Ask Before Preloading Large Playlists: "Demandi antaŭ antaŭŝargi grandajn ludlistojn"
+    Timestamp Notes:
+      Obsidian Vault: Obsidian-trezorejo
   Channel Settings:
     Channel Settings: Kanalaj agordoj
     Channel Settings Description: Memori la agordojn, kiujn vi elektas dum spektado, aparte por ĉiu kanalo, por ke ili estu reaplikitaj la venontan fojon, kiam vi spektos unu el ĝiaj videaĵoj.
@@ -1412,6 +1415,7 @@ Settings:
     Channel playback speeds imported: Enportis la ludrapidon de {count} kanalo | Enportis la ludrapidojn de {count} kanaloj
     Channels not found: '{count} kanalo ne troviĝis | {count} kanaloj ne troviĝis'
     Playlists have been successfully imported: "1/{total} ludlisto sukcese importita | {count}/{total} ludlistoj sukcese importitaj"
+    Import subscription groups hint: Por ordigi kanalojn en grupojn, aldonu grupnomojn apartigitajn per punktokomoj post la kanaltitolo en .csv-dosiero, aŭ importu .opml-dosieron kun dosierujoj. Mankantaj grupoj estas kreataj.
   Sync Settings:
     Signed Out After Restore: 'Sinkronigo estis elsalutita ĉar ĉi tiuj aplikaĵaj datumoj estis restaŭritaj el sekurkopio aŭ el alia aparato. Ensalutu denove por sinkronigi ĉi tiun aparaton.'
     Revoke Session Tabs Warning: La sinkronigitaj langetaroj de ĉi tiu aparato ankaŭ estos forigitaj.
@@ -2077,6 +2081,14 @@ Video:
       Cast: Elsendi al FCast-ricevilo
       No Devices: Neniu FCast-ricevilo trovita
       No Source: Neniu kongrua fluo por FCast
+    Timestamp Notes:
+      Take Note: Fari tempomarkan noton
+      Note at {time}: Noto je {time}
+      Note: Noto
+      Add to Obsidian: Aldoni al Obsidian
+      Copy as Markdown: Kopii kiel Markdown
+      Copied: Noto kopiita kiel Markdown
+      Obsidian Failed: Ne eblis malfermi Obsidian
   Info panel source: 'Fonto: {source}'
   External Player:
     LaunchFailedTemplate: Ne eblis lanĉi {externalPlayer}. Kontrolu, ke ĝi estas instalita, aŭ agordu la vojon al ĝia plenumebla dosiero en la agordoj de ekstera ludilo.
@@ -2378,6 +2390,7 @@ Tooltips:
     Concurrent Preloads: La maksimuma nombro de yt-dlp-procezoj uzataj por samtempe antaŭŝargi videaĵojn. Pli altaj valoroj uzas pli da CPU, memoro kaj reta kapacito.
     Ignore System Rotation Lock for Fullscreen: Uzi fizikan rotacion de la aparato por eniri kaj eliri el plenekrana reĝimo eĉ kiam la aŭtomata rotacio de Android estas malŝaltita.
     Ask Before Preloading Large Playlists: "Petas konfirmon antaŭ antaŭŝargi ĉiujn videaĵojn de ludlisto kun pli ol {count} videaĵoj."
+    Obsidian Vault: Nomo de la Obsidian-trezorejo por tempomarkaj notoj. Se ĝi estas agordita, notoj aldoneblas al Obsidian. La notoj de ĉiu video estas kolektataj en noto nomita laŭ la video, en la dosierujo de la trezorejo por novaj notoj.
   Download Settings:
     Download Folder: Videaĵoj estas konservataj en ĉi tiu dosierujo. Lasu malplena por uzi la elŝutan dosierujon de via sistemo.
     Global Additional yt-dlp Arguments: Aldonaj komandliniaj argumentoj donataj al yt-dlp por ĉiu elŝuto, ekzemple --cookies-from-browser firefox.

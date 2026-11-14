@@ -591,6 +591,7 @@ Settings:
       Viewing Modes: Tryby wyświetlania
       Shorts: Shorts
       Screenshots: Zrzuty ekranu
+      Timestamp Notes: Notatki ze znacznikami czasu
     Enable FCast: "Włącz FCast"
     Caption Appearance:
       Default: Domyślnie
@@ -621,6 +622,8 @@ Settings:
       Legacy Formats: "Starsze formaty"
       Modern Formats: "Nowoczesne formaty"
     Ask Before Preloading Large Playlists: "Pytaj przed wstępnym wczytaniem dużych playlist"
+    Timestamp Notes:
+      Obsidian Vault: Sejf Obsidiana
   Channel Settings:
     Enable Channel Playback Settings: Włącz ustawienia odtwarzania dla kanałów
     Auto Save Playback Speed: Automatycznie zapisuj zmiany prędkości odtwarzania
@@ -893,6 +896,7 @@ Settings:
     Open Profile Directory: Otwórz katalog profilu
     Invalid JSON row, skipping item: Nieprawidłowy JSON w wierszu {row}. Element zostanie pominięty
     Playlists have been successfully imported: "Pomyślnie zaimportowano 1/{total} playlistę | Pomyślnie zaimportowano {count}/{total} playlisty | Pomyślnie zaimportowano {count}/{total} playlist"
+    Import subscription groups hint: Aby przydzielić kanały do grup, dodaj w pliku .csv po tytule kanału nazwy grup oddzielone średnikami albo zaimportuj plik .opml z folderami. Brakujące grupy zostaną utworzone.
   Sync Settings:
     Signed Out After Restore: 'Synchronizacja została wylogowana, ponieważ te dane aplikacji przywrócono z kopii zapasowej lub z innego urządzenia. Zaloguj się ponownie, aby synchronizować to urządzenie.'
     Revoke Session Tabs Warning: "Zsynchronizowane zestawy kart tego urządzenia również zostaną usunięte."
@@ -1337,6 +1341,14 @@ Video:
       Load: "Wczytaj plik napisów…"
       Subtitle Files: "Pliki napisów"
       Error: "Nie udało się wczytać pliku napisów. Wybierz plik SRT lub WebVTT."
+    Timestamp Notes:
+      Take Note: Zrób notatkę ze znacznikiem czasu
+      Note at {time}: Notatka przy {time}
+      Note: Notatka
+      Add to Obsidian: Dodaj do Obsidiana
+      Copy as Markdown: Kopiuj jako Markdown
+      Copied: Skopiowano notatkę jako Markdown
+      Obsidian Failed: Nie można otworzyć Obsidiana
   External Media:
     Dislikes: "Niepolubienie | Niepolubienia | Niepolubień"
     Reposts: "Repost | Reposty | Repostów"
@@ -1559,6 +1571,7 @@ Tooltips:
     Concurrent Preloads: "Maksymalna liczba procesów yt-dlp używanych do jednoczesnego wstępnego ładowania filmów. Wyższe wartości zużywają więcej procesora, pamięci i przepustowości sieci."
     Ignore System Rotation Lock for Fullscreen: Obróć fizycznie urządzenie, aby włączyć lub wyłączyć pełny ekran, nawet gdy automatyczne obracanie w Androidzie jest wyłączone.
     Ask Before Preloading Large Playlists: "Prosi o potwierdzenie przed wstępnym wczytaniem wszystkich filmów z playlisty zawierającej więcej niż {count} filmów."
+    Obsidian Vault: Nazwa sejfu Obsidiana dla notatek ze znacznikami czasu. Po jej ustawieniu notatki można dodawać do Obsidiana. Notatki z każdego filmu są zbierane w notatce nazwanej tak jak film, w folderze sejfu na nowe notatki.
   Download Settings:
     Global Additional yt-dlp Arguments: Dodatkowe argumenty wiersza poleceń przekazywane do yt-dlp przy każdym pobieraniu, na przykład --cookies-from-browser firefox.
     Concurrent Downloads: Maksymalna liczba zadań yt-dlp wykonywanych jednocześnie.

@@ -998,11 +998,14 @@ Settings:
       Viewing Modes: Visningslägen
       Shorts: Shorts
       Screenshots: Skärmbilder
+      Timestamp Notes: Tidsstämpelanteckningar
     Enable FCast: "Aktivera FCast"
     Screenshot:
       Legacy Formats: "Äldre format"
       Modern Formats: "Moderna format"
     Ask Before Preloading Large Playlists: "Fråga innan stora spellistor förinläses"
+    Timestamp Notes:
+      Obsidian Vault: Obsidian-valv
   Channel Settings:
     Channel Settings: Kanalinställningar
     Channel Settings Description: Kom ihåg inställningarna du väljer när du tittar för varje enskild kanal och använd dem nästa gång du tittar på en av kanalens videor.
@@ -1376,6 +1379,7 @@ Settings:
     Channel playback speeds imported: "Importerade uppspelningshastigheten för {count} kanal | Importerade uppspelningshastigheterna för {count} kanaler"
     Channels not found: "{count} kanal kunde inte hittas | {count} kanaler kunde inte hittas"
     Playlists have been successfully imported: "1/{total} spellista har importerats | {count}/{total} spellistor har importerats"
+    Import subscription groups hint: Om du vill sortera kanaler i grupper lägger du till gruppnamn avgränsade med semikolon efter kanaltiteln i en .csv-fil, eller importerar en .opml-fil med mappar. Grupper som saknas skapas.
   Sync Settings:
     Signed Out After Restore: 'Synkroniseringen loggades ut eftersom dessa appdata återställdes från en säkerhetskopia eller en annan enhet. Logga in igen för att synkronisera den här enheten.'
     Revoke Session Tabs Warning: "Den här enhetens synkroniserade flikuppsättningar kommer också att raderas."
@@ -2004,6 +2008,14 @@ Video:
       Load: "Läs in undertextfil…"
       Subtitle Files: "Undertextfiler"
       Error: "Det gick inte att läsa in undertextfilen. Välj en SRT- eller WebVTT-fil."
+    Timestamp Notes:
+      Take Note: Gör en tidsstämpelanteckning
+      Note at {time}: Anteckning vid {time}
+      Note: Anteckning
+      Add to Obsidian: Lägg till i Obsidian
+      Copy as Markdown: Kopiera som Markdown
+      Copied: Anteckningen kopierades som Markdown
+      Obsidian Failed: Det gick inte att öppna Obsidian
   External Media:
     Dislikes: "Ogillamarkering | Ogillamarkeringar"
     Reposts: "Återinlägg | Återinlägg"
@@ -2331,6 +2343,7 @@ Tooltips:
     Concurrent Preloads: "Det högsta antalet yt-dlp-processer som används för att förinläsa videor samtidigt. Högre värden använder mer processor, minne och nätverksbandbredd."
     Ignore System Rotation Lock for Fullscreen: Rotera enheten fysiskt för att öppna och avsluta helskärm, även när automatisk rotation är avstängd i Android.
     Ask Before Preloading Large Playlists: "Ber om bekräftelse innan alla videor i en spellista med fler än {count} videor förinläses."
+    Obsidian Vault: Namnet på Obsidian-valvet för tidsstämpelanteckningar. När det är angivet kan anteckningar läggas till i Obsidian. Anteckningarna för varje video samlas i en anteckning med videons namn, i valvets mapp för nya anteckningar.
   Download Settings:
     Download Folder: Videor sparas i den här mappen. Lämna tomt för att använda systemets nedladdningsmapp.
     Global Additional yt-dlp Arguments: Extra kommandoradsargument som skickas till yt-dlp vid varje nedladdning, exempelvis --cookies-from-browser firefox.

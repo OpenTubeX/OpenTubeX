@@ -998,11 +998,14 @@ Settings:
       Viewing Modes: 表示モード
       Shorts: ショート
       Screenshots: スクリーンショット
+      Timestamp Notes: タイムスタンプメモ
     Enable FCast: "FCastを有効にする"
     Screenshot:
       Legacy Formats: "従来の形式"
       Modern Formats: "新しい形式"
     Ask Before Preloading Large Playlists: "大きな再生リストを先読みする前に確認"
+    Timestamp Notes:
+      Obsidian Vault: Obsidian の保管庫
   Channel Settings:
     Channel Settings: チャンネル設定
     Channel Settings Description: 視聴中に選んだ設定をチャンネルごとに記憶し、次回そのチャンネルの動画を見るときに再度適用します。
@@ -1375,6 +1378,7 @@ Settings:
     Invalid channel playback speeds file: "このファイルにチャンネル別の再生速度が見つかりませんでした"
     Channel playback speeds imported: "{count} チャンネルの再生速度をインポートしました"
     Channels not found: "{count} チャンネルが見つかりませんでした"
+    Import subscription groups hint: チャンネルをグループに分けるには、.csv ファイルでチャンネル名の後にセミコロン区切りでグループ名を追加するか、フォルダーを含む .opml ファイルをインポートしてください。存在しないグループは作成されます。
   Sync Settings:
     Signed Out After Restore: 'このアプリのデータがバックアップまたは別のデバイスから復元されたため、同期からサインアウトしました。このデバイスを同期するには、もう一度サインインしてください。'
     Revoke Session Tabs Warning: "このデバイスの同期されたタブセットも削除されます。"
@@ -2002,6 +2006,14 @@ Video:
       Load: "字幕ファイルを読み込む…"
       Subtitle Files: "字幕ファイル"
       Error: "字幕ファイルを読み込めませんでした。SRT または WebVTT ファイルを選択してください。"
+    Timestamp Notes:
+      Take Note: タイムスタンプメモを取る
+      Note at {time}: '{time} のメモ'
+      Note: メモ
+      Add to Obsidian: Obsidian に追加
+      Copy as Markdown: Markdown としてコピー
+      Copied: メモを Markdown としてコピーしました
+      Obsidian Failed: Obsidian を開けませんでした
   External Media:
     Dislikes: "低評価"
     Reposts: "再投稿"
@@ -2329,6 +2341,7 @@ Tooltips:
     Concurrent Preloads: "動画の先読みに同時使用する yt-dlp プロセスの最大数です。値を大きくすると、CPU、メモリ、ネットワーク帯域をより多く使用します。"
     Ignore System Rotation Lock for Fullscreen: Androidの自動回転がオフでも、端末を実際に回転させることで全画面表示の開始と終了を切り替えます。
     Ask Before Preloading Large Playlists: "{count} 本を超える動画を含む再生リストのすべての動画を先読みする前に確認します。"
+    Obsidian Vault: タイムスタンプメモに使用する Obsidian の保管庫の名前。設定すると、メモを Obsidian に追加できます。各動画のメモは、保管庫の新規ノート用フォルダー内にある、動画名を付けたノートにまとめられます。
   Download Settings:
     Download Folder: 動画をこのフォルダーに保存します。空欄にすると、システムのダウンロードフォルダーを使用します。
     Global Additional yt-dlp Arguments: 'すべてのダウンロードでyt-dlpに渡す追加のコマンドライン引数です。例: --cookies-from-browser firefox'

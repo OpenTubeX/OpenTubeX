@@ -998,11 +998,14 @@ Settings:
       Viewing Modes: Visningsmoduser
       Shorts: Shorts
       Screenshots: Skjermbilder
+      Timestamp Notes: Tidsstempelnotater
     Enable FCast: "Aktiver FCast"
     Screenshot:
       Legacy Formats: "Eldre formater"
       Modern Formats: "Moderne formater"
     Ask Before Preloading Large Playlists: "Spør før forhåndslasting av store spillelister"
+    Timestamp Notes:
+      Obsidian Vault: Obsidian-hvelv
   Channel Settings:
     Channel Settings: Kanalinnstillinger
     Channel Settings Description: Husk innstillingene du velger mens du ser på hver kanal, slik at de brukes igjen neste gang du ser en av videoene fra kanalen.
@@ -1376,6 +1379,7 @@ Settings:
     Channel playback speeds imported: "Importerte avspillingshastigheten for {count} kanal | Importerte avspillingshastighetene for {count} kanaler"
     Channels not found: "{count} kanal ble ikke funnet | {count} kanaler ble ikke funnet"
     Playlists have been successfully imported: "1/{total} spilleliste ble importert | {count}/{total} spillelister ble importert"
+    Import subscription groups hint: For å sortere kanaler i grupper legger du til gruppenavn atskilt med semikolon etter kanaltittelen i en .csv-fil, eller importerer en .opml-fil med mapper. Manglende grupper opprettes.
   Sync Settings:
     Signed Out After Restore: 'Synkroniseringen ble logget ut fordi disse appdataene ble gjenopprettet fra en sikkerhetskopi eller en annen enhet. Logg på igjen for å synkronisere denne enheten.'
     Revoke Session Tabs Warning: "Denne enhetens synkroniserte fanesett vil også bli slettet."
@@ -2008,6 +2012,14 @@ Video:
       Load: "Last inn undertekstfil…"
       Subtitle Files: "Undertekstfiler"
       Error: "Kunne ikke laste inn undertekstfilen. Velg en SRT- eller WebVTT-fil."
+    Timestamp Notes:
+      Take Note: Ta tidsstempelnotat
+      Note at {time}: Notat ved {time}
+      Note: Notat
+      Add to Obsidian: Legg til i Obsidian
+      Copy as Markdown: Kopier som Markdown
+      Copied: Notatet ble kopiert som Markdown
+      Obsidian Failed: Kunne ikke åpne Obsidian
   External Media:
     Dislikes: "Misliking | Mislikinger"
     Reposts: "Videredeling | Videredelinger"
@@ -2335,6 +2347,7 @@ Tooltips:
     Concurrent Preloads: "Det høyeste antallet yt-dlp-prosesser som brukes til å forhåndslaste videoer samtidig. Høyere verdier bruker mer prosessorkraft, minne og nettverksbåndbredde."
     Ignore System Rotation Lock for Fullscreen: Roter enheten fysisk for å åpne og avslutte fullskjerm, selv når automatisk rotasjon er slått av i Android.
     Ask Before Preloading Large Playlists: "Ber om bekreftelse før alle videoene i en spilleliste med mer enn {count} videoer forhåndslastes."
+    Obsidian Vault: Navnet på Obsidian-hvelvet for tidsstempelnotater. Når det er angitt, kan notater legges til i Obsidian. Notatene for hver video samles i et notat oppkalt etter videoen, i hvelvets mappe for nye notater.
   Download Settings:
     Download Folder: Videoer lagres i denne mappen. La feltet stå tomt for å bruke systemets nedlastingsmappe.
     Global Additional yt-dlp Arguments: Ekstra kommandolinjeargumenter som sendes til yt-dlp for hver nedlasting, for eksempel --cookies-from-browser firefox.

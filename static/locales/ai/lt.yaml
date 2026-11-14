@@ -1201,8 +1201,11 @@ Settings:
       Viewing Modes: Peržiūros režimai
       Shorts: Shorts
       Screenshots: Ekrano kopijos
+      Timestamp Notes: Laiko žymų pastabos
     Enable FCast: "Įjungti FCast"
     Ask Before Preloading Large Playlists: "Klausti prieš iš anksto įkeliant didelius grojaraščius"
+    Timestamp Notes:
+      Obsidian Vault: Obsidian saugykla
   Channel Settings:
     Channel Settings: Kanalo nustatymai
     Channel Settings Description: Atskirai įsiminti kiekvienam kanalui žiūrint pasirinktus nustatymus, kad jie vėl būtų pritaikyti kitą kartą žiūrint vieną iš jo vaizdo įrašų.
@@ -1630,6 +1633,7 @@ Settings:
     Channel playback speeds imported: "Importuotas {count} kanalo atkūrimo greitis | Importuoti {count} kanalų atkūrimo greičiai | Importuoti {count} kanalų atkūrimo greičiai"
     Channels not found: "{count} kanalas nerastas | {count} kanalai nerasti | {count} kanalų nerasta"
     Playlists have been successfully imported: "Sėkmingai importuotas {count}/{total} grojaraštis | Sėkmingai importuoti {count}/{total} grojaraščiai | Sėkmingai importuota {count}/{total} grojaraščių"
+    Import subscription groups hint: Norėdami suskirstyti kanalus į grupes, .csv faile po kanalo pavadinimo pridėkite grupių pavadinimus, atskirtus kabliataškiais, arba importuokite .opml failą su aplankais. Trūkstamos grupės sukuriamos.
   Sync Settings:
     Signed Out After Restore: 'Sinchronizavimas atjungtas, nes šios programėlės duomenys buvo atkurti iš atsarginės kopijos arba kito įrenginio. Prisijunkite iš naujo, kad sinchronizuotumėte šį įrenginį.'
     Revoke Session Tabs Warning: "Taip pat bus ištrinti šio įrenginio sinchronizuoti skirtukų rinkiniai."
@@ -2393,6 +2397,14 @@ Video:
       Load: "Įkelti subtitrų failą…"
       Subtitle Files: "Subtitrų failai"
       Error: "Nepavyko įkelti subtitrų failo. Pasirinkite SRT arba WebVTT failą."
+    Timestamp Notes:
+      Take Note: Užrašyti pastabą su laiko žyma
+      Note at {time}: Pastaba ties {time}
+      Note: Pastaba
+      Add to Obsidian: Pridėti į Obsidian
+      Copy as Markdown: Kopijuoti kaip Markdown
+      Copied: Pastaba nukopijuota kaip Markdown
+      Obsidian Failed: Nepavyko atidaryti Obsidian
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Reklamos prieš vaizdo įrašą likęs laikas: {remindingTimeSeconds} s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Likęs SABR delsos laikas: {remindingTimeSeconds} s'
@@ -2755,6 +2767,7 @@ Tooltips:
     Concurrent Preloads: "Didžiausias yt-dlp procesų, vienu metu naudojamų vaizdo įrašams iš anksto įkelti, skaičius. Didesnės reikšmės naudoja daugiau procesoriaus, atminties ir tinklo pralaidumo."
     Ignore System Rotation Lock for Fullscreen: Fiziškai pasukite įrenginį, kad įjungtumėte arba išjungtumėte visą ekraną, net kai automatinis sukimas sistemoje „Android“ išjungtas.
     Ask Before Preloading Large Playlists: "Prašo patvirtinimo prieš iš anksto įkeliant visus grojaraščio, kuriame yra daugiau nei {count} vaizdo įrašų, vaizdo įrašus."
+    Obsidian Vault: Obsidian saugyklos, skirtos laiko žymų pastaboms, pavadinimas. Jį nustačius, pastabas galima pridėti į Obsidian. Kiekvieno vaizdo įrašo pastabos renkamos pagal vaizdo įrašą pavadintoje pastaboje, saugyklos naujų pastabų aplanke.
   External Player Settings:
     Ignore Default Arguments: Išoriniam leistuvui nesiųsti jokių numatytųjų argumentų, išskyrus vaizdo įrašo URL (pvz., atkūrimo greitį, grojaraščio URL ir kt.). Pasirinktiniai argumentai vis tiek bus perduoti.
   Download Settings:

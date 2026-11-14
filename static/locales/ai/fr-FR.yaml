@@ -998,11 +998,14 @@ Settings:
       Viewing Modes: Modes d’affichage
       Shorts: Shorts
       Screenshots: Captures d’écran
+      Timestamp Notes: Notes horodatées
     Enable FCast: "Activer FCast"
     Screenshot:
       Legacy Formats: "Formats classiques"
       Modern Formats: "Formats modernes"
     Ask Before Preloading Large Playlists: "Demander avant de précharger les grandes playlists"
+    Timestamp Notes:
+      Obsidian Vault: Coffre Obsidian
   Channel Settings:
     Channel Settings: Paramètres des chaînes
     Channel Settings Description: Mémorisez séparément pour chaque chaîne les paramètres choisis pendant le visionnage afin de les appliquer de nouveau à la prochaine vidéo de cette chaîne.
@@ -1376,6 +1379,7 @@ Settings:
     Channel playback speeds imported: "Vitesse de lecture de {count} chaîne importée | Vitesses de lecture de {count} de chaînes importées | Vitesses de lecture de {count} chaînes importées"
     Channels not found: "{count} chaîne est introuvable | {count} de chaînes sont introuvables | {count} chaînes sont introuvables"
     Playlists have been successfully imported: "1/{total} liste de lecture a été importée avec succès | {count}/{total} listes de lecture ont été importées avec succès | {count}/{total} listes de lecture ont été importées avec succès"
+    Import subscription groups hint: Pour classer les chaînes dans des groupes, ajoutez après le titre de la chaîne des noms de groupes séparés par des points-virgules dans un fichier .csv, ou importez un fichier .opml avec des dossiers. Les groupes manquants sont créés.
   Sync Settings:
     Signed Out After Restore: 'La synchronisation a été déconnectée, car les données de cette application ont été restaurées depuis une sauvegarde ou un autre appareil. Reconnectez-vous pour synchroniser cet appareil.'
     Revoke Session Tabs Warning: "Les ensembles d’onglets synchronisés de cet appareil seront également supprimés."
@@ -2002,6 +2006,14 @@ Video:
       Load: "Charger un fichier de sous-titres…"
       Subtitle Files: "Fichiers de sous-titres"
       Error: "Impossible de charger le fichier de sous-titres. Choisissez un fichier SRT ou WebVTT."
+    Timestamp Notes:
+      Take Note: Prendre une note horodatée
+      Note at {time}: Note à {time}
+      Note: Note
+      Add to Obsidian: Ajouter à Obsidian
+      Copy as Markdown: Copier en Markdown
+      Copied: Note copiée en Markdown
+      Obsidian Failed: Impossible d’ouvrir Obsidian
   External Media:
     Dislikes: "Vote négatif | Votes négatifs | Votes négatifs"
     Reposts: "Republication | Republications | Republications"
@@ -2329,6 +2341,7 @@ Tooltips:
     Concurrent Preloads: "Nombre maximal de processus yt-dlp utilisés pour précharger des vidéos simultanément. Les valeurs élevées utilisent davantage de processeur, de mémoire et de bande passante réseau."
     Ignore System Rotation Lock for Fullscreen: Tournez physiquement l’appareil pour entrer et sortir du plein écran, même lorsque la rotation automatique d’Android est désactivée.
     Ask Before Preloading Large Playlists: "Demande une confirmation avant de précharger toutes les vidéos d’une playlist de plus de {count} vidéos."
+    Obsidian Vault: Nom du coffre Obsidian pour les notes horodatées. S’il est défini, les notes peuvent être ajoutées à Obsidian. Les notes de chaque vidéo sont regroupées dans une note portant le nom de la vidéo, dans le dossier du coffre destiné aux nouvelles notes.
   Download Settings:
     Download Folder: Les vidéos sont enregistrées dans ce dossier. Laissez ce champ vide pour utiliser le dossier Téléchargements de votre système.
     Global Additional yt-dlp Arguments: Arguments de ligne de commande supplémentaires transmis à yt-dlp pour chaque téléchargement, par exemple --cookies-from-browser firefox.

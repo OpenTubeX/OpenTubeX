@@ -1058,6 +1058,7 @@ Settings:
       Viewing Modes: Ansichtsmodi
       Shorts: Shorts
       Screenshots: Screenshots
+      Timestamp Notes: Zeitstempel-Notizen
     Lights Off: Licht aus
     Show Lights Off Toggle: Schalter für „Licht aus“ anzeigen
     Show Volume Boost Toggle: Schalter für Lautstärkeverstärkung anzeigen
@@ -1195,6 +1196,8 @@ Settings:
     Hold to Speed Up:
       Hold to Speed Up: Zum Beschleunigen gedrückt halten
       Off: Aus
+    Timestamp Notes:
+      Obsidian Vault: Obsidian-Vault
     Screenshot:
       Enable: Screenshots aktivieren
       Format Label: Format von Screenshots
@@ -1550,6 +1553,7 @@ Settings:
     Unknown setting key: 'Unbekannter Einstellungsschlüssel: {key}'
     Non-transferable setting key: 'Nicht übertragbarer Einstellungsschlüssel: {key}'
     Import subscriptions formats: 'Unterstützte Formate: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube backup oder FreeTube export (.json)'
+    Import subscription groups hint: 'Um Kanäle in Gruppen einzusortieren, füge in einer .csv-Datei nach dem Kanaltitel Gruppennamen hinzu, getrennt durch Semikolons, oder importiere eine .opml-Datei mit Ordnern. Fehlende Gruppen werden erstellt.'
     Import history formats: 'Unterstützte Formate: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube backup (.json)'
     Import playlists formats: 'Unterstützte Formate: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
     Import search history formats: 'Unterstützte Formate: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
@@ -2487,6 +2491,14 @@ Video:
     Exit Theatre Mode: Kinomodus beenden
     Full Window: Vollständiges Fenster
     Take Screenshot: Screenshot aufnehmen
+    Timestamp Notes:
+      Take Note: Zeitstempel-Notiz erstellen
+      Note at {time}: Notiz bei {time}
+      Note: Notiz
+      Add to Obsidian: Zu Obsidian hinzufügen
+      Copy as Markdown: Als Markdown kopieren
+      Copied: Notiz als Markdown kopiert
+      Obsidian Failed: Obsidian konnte nicht geöffnet werden
     Show Stats: Statistiken anzeigen
     Hide Annotations: Anmerkungen ausblenden
     Show Annotations: Anmerkungen anzeigen
@@ -3079,6 +3091,7 @@ Tooltips:
     Notify About New Uploads: "Zeigt auf diesem Gerät Systembenachrichtigungen für Kanäle, deren Benachrichtigungen du in ihren Abo-Einstellungen aktiviert hast. OpenTubeX sucht beim Aktualisieren der Abos nach neuen Inhalten, wähle daher ein automatisches Aktualisierungsintervall. Um auch bei geschlossener App benachrichtigt zu werden, aktiviere zusätzlich die Aktualisierung bei geschlossener App."
     Faster Subscription Refresh: Prüft zuerst den RSS-Feed jedes Kanals und lädt Videos, Shorts und Livestreams nur von Kanälen mit neuen Uploads. Automatische Aktualisierungen überspringen außerdem Kanäle, die in den letzten 10 Minuten geladen wurden. Bei Kanälen ohne neue Uploads werden Aufrufzahlen, entfernte Videos und geänderte Titel nur alle paar Stunden aktualisiert, und neue Uploads können später erscheinen, wenn der RSS-Feed hinterherhinkt. Mit der Invidious-API nicht verfügbar.
   Player Settings:
+    Obsidian Vault: Name des Obsidian-Vaults für Zeitstempel-Notizen. Ist er gesetzt, können Notizen zu Obsidian hinzugefügt werden. Die Notizen eines Videos werden in einer nach dem Video benannten Notiz im Ordner für neue Notizen des Vaults gesammelt.
     Enable Caption Translations: Wenn aktiviert, bevorzugen die Untertitel-Schaltfläche und das Tastenkürzel C eine automatisch übersetzte Spur in der bevorzugten Untertitelsprache, wenn das Video keine passende Originalspur bereitstellt.
     Default Media Format: Lege die Formate fest, die bei der Wiedergabe eines Videos verwendet werden. DASH-Formate können höhere Auflösungen wiedergeben. Altformate sind auf maximal 360p beschränkt, verbrauchen aber weniger Bandbreite. Audioformate sind reine Audiostreams.
     Proxy Videos Through Invidious: Stellt eine Verbindung mit Invidious her, um Videos bereitzustellen, anstatt eine direkte Verbindung mit YouTube herzustellen.
