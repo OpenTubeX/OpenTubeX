@@ -242,10 +242,10 @@ Subscriptions:
     Platform: Platforma
     All Platforms: Všetky platformy
     Followed Channels: Sledované kanály na iných platformách
-    Description: Sledujte kanály na platformách Twitch, SoundCloud, PeerTube, Rumble a Odysee a ich novo nahraný obsah uvidíte na karte Platformy vo svojich odberoch. Kanály nájdete pomocou vyhľadávania alebo ich pridajte podľa adresy ich stránky. Ich médiá sa prehrávajú pomocou yt-dlp.
+    Description: Sledujte kanály na platformách Twitch, SoundCloud, PeerTube, Rumble, Odysee a media.ccc.de a ich novo nahraný obsah uvidíte na karte Platformy vo svojich odberoch. Kanály nájdete pomocou vyhľadávania alebo ich pridajte podľa adresy ich stránky. Ich médiá sa prehrávajú pomocou yt-dlp.
     Add Channel: Pridať kanál
     Channel URL: Adresa kanála
-    Invalid Channel: Zadajte adresu stránky kanála na platforme Twitch, SoundCloud, PeerTube, Rumble alebo Odysee.
+    Invalid Channel: Zadajte adresu stránky kanála na platforme Twitch, SoundCloud, PeerTube, Rumble, Odysee alebo media.ccc.de.
     Channel Not Found: Na tejto adrese nie je žiadny kanál.
     Channel Already Followed: Tento kanál už sledujete.
     Channel Could Not Be Loaded: Kanál sa nepodarilo načítať.

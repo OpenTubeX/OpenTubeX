@@ -242,10 +242,10 @@ Subscriptions:
     Platform: Vettvangur
     All Platforms: Allir vettvangar
     Followed Channels: Rásir sem þú fylgir á öðrum vettvöngum
-    Description: Fylgdu rásum á Twitch, SoundCloud, PeerTube, Rumble og Odysee til að sjá það sem þær hlaða upp í flipanum Vettvangar í áskriftunum þínum. Finndu rásir með leitinni eða bættu þeim við með slóð síðunnar þeirra. Efni þeirra er spilað með yt-dlp.
+    Description: Fylgdu rásum á Twitch, SoundCloud, PeerTube, Rumble, Odysee og media.ccc.de til að sjá það sem þær hlaða upp í flipanum Vettvangar í áskriftunum þínum. Finndu rásir með leitinni eða bættu þeim við með slóð síðunnar þeirra. Efni þeirra er spilað með yt-dlp.
     Add Channel: Bæta við rás
     Channel URL: Slóð rásar
-    Invalid Channel: Sláðu inn slóð á rásarsíðu á Twitch, SoundCloud, PeerTube, Rumble eða Odysee.
+    Invalid Channel: Sláðu inn slóð á rásarsíðu á Twitch, SoundCloud, PeerTube, Rumble, Odysee eða media.ccc.de.
     Channel Not Found: Engin rás er á þessari slóð.
     Channel Already Followed: Þú fylgir þessari rás nú þegar.
     Channel Could Not Be Loaded: Ekki tókst að hlaða rásinni.

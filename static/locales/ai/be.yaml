@@ -257,10 +257,10 @@ Subscriptions:
     Platform: Платформа
     All Platforms: Усе платформы
     Followed Channels: Адсочваныя каналы на іншых платформах
-    Description: Адсочвайце каналы на Twitch, SoundCloud, PeerTube, Rumble і Odysee, каб бачыць іх новыя публікацыі на ўкладцы «Платформы» ў вашых падпісках. Знаходзьце каналы праз пошук або дадавайце іх па адрасе іх старонкі. Іх медыя прайграюцца праз yt-dlp.
+    Description: Адсочвайце каналы на Twitch, SoundCloud, PeerTube, Rumble, Odysee і media.ccc.de, каб бачыць іх новыя публікацыі на ўкладцы «Платформы» ў вашых падпісках. Знаходзьце каналы праз пошук або дадавайце іх па адрасе іх старонкі. Іх медыя прайграюцца праз yt-dlp.
     Add Channel: Дадаць канал
     Channel URL: Адрас канала
-    Invalid Channel: Увядзіце адрас старонкі канала на Twitch, SoundCloud, PeerTube, Rumble або Odysee.
+    Invalid Channel: Увядзіце адрас старонкі канала на Twitch, SoundCloud, PeerTube, Rumble, Odysee або media.ccc.de.
     Channel Not Found: Па гэтым адрасе няма канала.
     Channel Already Followed: Вы ўжо адсочваеце гэты канал.
     Channel Could Not Be Loaded: Не ўдалося загрузіць канал.

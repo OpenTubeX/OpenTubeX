@@ -258,10 +258,10 @@ Subscriptions:
     Platform: 플랫폼
     All Platforms: 모든 플랫폼
     Followed Channels: 다른 플랫폼에서 팔로우한 채널
-    Description: Twitch, SoundCloud, PeerTube, Rumble, Odysee의 채널을 팔로우하면 구독의 플랫폼 탭에서 업로드를 볼 수 있습니다. 검색으로 채널을 찾거나 채널 페이지 주소로 추가하세요. 미디어는 yt-dlp로 재생됩니다.
+    Description: Twitch, SoundCloud, PeerTube, Rumble, Odysee, media.ccc.de의 채널을 팔로우하면 구독의 플랫폼 탭에서 업로드를 볼 수 있습니다. 검색으로 채널을 찾거나 채널 페이지 주소로 추가하세요. 미디어는 yt-dlp로 재생됩니다.
     Add Channel: 채널 추가
     Channel URL: 채널 주소
-    Invalid Channel: Twitch, SoundCloud, PeerTube, Rumble 또는 Odysee의 채널 페이지 주소를 입력하세요.
+    Invalid Channel: Twitch, SoundCloud, PeerTube, Rumble, Odysee 또는 media.ccc.de의 채널 페이지 주소를 입력하세요.
     Channel Not Found: 이 주소에 채널이 없습니다.
     Channel Already Followed: 이미 이 채널을 팔로우하고 있습니다.
     Channel Could Not Be Loaded: 채널을 불러올 수 없습니다.

@@ -242,10 +242,10 @@ Subscriptions:
     Platform: Nền tảng
     All Platforms: Tất cả nền tảng
     Followed Channels: Kênh đang theo dõi trên các nền tảng khác
-    Description: Theo dõi các kênh trên Twitch, SoundCloud, PeerTube, Rumble và Odysee để xem nội dung họ tải lên trong thẻ Nền tảng của mục đăng ký. Tìm kênh bằng tính năng tìm kiếm hoặc thêm kênh bằng địa chỉ trang của kênh. Nội dung của các kênh được phát bằng yt-dlp.
+    Description: Theo dõi các kênh trên Twitch, SoundCloud, PeerTube, Rumble, Odysee và media.ccc.de để xem nội dung họ tải lên trong thẻ Nền tảng của mục đăng ký. Tìm kênh bằng tính năng tìm kiếm hoặc thêm kênh bằng địa chỉ trang của kênh. Nội dung của các kênh được phát bằng yt-dlp.
     Add Channel: Thêm kênh
     Channel URL: Địa chỉ kênh
-    Invalid Channel: Nhập địa chỉ trang của một kênh trên Twitch, SoundCloud, PeerTube, Rumble hoặc Odysee.
+    Invalid Channel: Nhập địa chỉ trang của một kênh trên Twitch, SoundCloud, PeerTube, Rumble, Odysee hoặc media.ccc.de.
     Channel Not Found: Không có kênh nào ở địa chỉ này.
     Channel Already Followed: Bạn đã theo dõi kênh này rồi.
     Channel Could Not Be Loaded: Không thể tải kênh.
