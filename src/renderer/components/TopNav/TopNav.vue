@@ -319,7 +319,7 @@ import { getLocalSearchSuggestions } from '../../helpers/api/local'
 import { getInvidiousSearchSuggestions, youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { isPlayerRoutePath } from '../../tabs/playerDockDestination'
-import { shouldOpenExternalMediaUrl } from '../../helpers/externalMediaUrl'
+import { getExternalUrlRoute, shouldOpenExternalMediaUrl } from '../../helpers/externalMediaUrl'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { usesCapacitorTabletLayout } from '../../helpers/capacitorLayout'
@@ -880,11 +880,7 @@ async function getSearchDestination(rawQueryText, selectedSearchSettings = null)
   if (isPlainSearchText(queryText)) return getTextSearchDestination(queryText, selectedSearchSettings)
 
   if (supportsYtDlp && shouldOpenExternalMediaUrl(queryText, store.getters.getCurrentInvidiousInstanceUrl)) {
-    return {
-      path: '/external-media',
-      query: { url: queryText },
-      searchQueryText: queryText
-    }
+    return { ...getExternalUrlRoute(queryText), searchQueryText: queryText }
   }
 
   const result = await store.dispatch('getYoutubeUrlInfo', queryText)
@@ -945,11 +941,7 @@ async function getSearchDestination(rawQueryText, selectedSearchSettings = null)
     case 'invalid_url':
     default: {
       if (supportsYtDlp && shouldOpenExternalMediaUrl(queryText, store.getters.getCurrentInvidiousInstanceUrl)) {
-        return {
-          path: '/external-media',
-          query: { url: queryText },
-          searchQueryText: queryText
-        }
+        return { ...getExternalUrlRoute(queryText), searchQueryText: queryText }
       }
       return getTextSearchDestination(queryText, selectedSearchSettings)
     }

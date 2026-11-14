@@ -37,11 +37,14 @@ export function getPlatform(id) {
 /**
  * The platform and ID of the channel a web page belongs to.
  * @param {unknown} url
+ * @param {{ anyHost?: boolean }} [options] `anyHost: false` skips PeerTube,
+ * whose channel paths also appear on other sites, such as Lemmy communities
  * @returns {{ platform: string, id: string } | null}
  */
-export function findPlatformChannel(url) {
+export function findPlatformChannel(url, { anyHost = true } = {}) {
   if (typeof url !== 'string') return null
   for (const platform of PLATFORMS) {
+    if (!anyHost && platform === peertube) continue
     const id = platform.parseChannelUrl(url)
     if (id) return { platform: platform.id, id }
   }
