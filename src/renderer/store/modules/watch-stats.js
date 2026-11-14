@@ -66,8 +66,10 @@ const actions = {
 
   async clearWatchStats({ commit, dispatch, rootState, state }) {
     try {
-      const reset = createWatchStatsReset(state.syncedWatchStats, rootState.settings.syncServerDeviceId, Date.now())
       const previous = rootState.settings.syncServerWatchStatsReset
+      // Windows order clears by this time, so it grows even when the clock moved back
+      const at = Math.max(Date.now(), (previous?.at ?? 0) + 1)
+      const reset = createWatchStatsReset(state.syncedWatchStats, rootState.settings.syncServerDeviceId, at)
       await dispatch('updateSyncServerWatchStatsReset', reset)
       // Confirm this marker persisted, not just that the write did not fail: a newer
       // write can supersede it. A failed save must not lose local history.
