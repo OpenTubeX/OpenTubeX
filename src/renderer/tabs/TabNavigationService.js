@@ -17,6 +17,8 @@ const TAB_ROUTE_LOADING_MIN_MS = 450
 const TAB_ROUTE_LOADING_SOURCE = 'route'
 const TAB_VIEW_TRANSITION_MAX_AGE_MS = 10_000
 const MAX_LOGICAL_HISTORY_ENTRIES = 100
+// Long enough for a frame from a busy renderer to paint the new page first.
+const NAVIGATION_FRAME_TIMEOUT_MS = 1000
 
 let service = null
 
@@ -816,6 +818,7 @@ function nextAnimationFrame() {
   return new Promise(resolve => {
     const finish = () => {
       window.cancelAnimationFrame(frame)
+      window.clearTimeout(timeout)
       document.removeEventListener('visibilitychange', onVisibilityChange)
       resolve()
     }
@@ -824,6 +827,10 @@ function nextAnimationFrame() {
     }
     document.addEventListener('visibilitychange', onVisibilityChange)
     const frame = window.requestAnimationFrame(finish)
+    // Electron keeps the document visible while background throttling is
+    // disabled, so a minimized window whose compositor stops producing frames
+    // (for example while the screen is locked) never reports itself hidden.
+    const timeout = window.setTimeout(finish, NAVIGATION_FRAME_TIMEOUT_MS)
   })
 }
 
