@@ -404,7 +404,7 @@ import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 import FtPlaylistThumbnailPicker from '../FtPlaylistThumbnailPicker.vue'
 import FtQuickBookmarkIconPicker from '../FtQuickBookmarkIconPicker/FtQuickBookmarkIconPicker.vue'
 import FtShareButton from '../FtShareButton/FtShareButton.vue'
-import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
+import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/lazyWatchVideoDownloadPrompt'
 
 import store from '../../store/index'
 

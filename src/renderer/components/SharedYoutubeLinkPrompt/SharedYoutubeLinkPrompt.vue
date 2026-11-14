@@ -84,10 +84,10 @@
 
 <script setup>
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/lazyWatchVideoDownloadPrompt'
 import { useI18n } from 'vue-i18n'
 import FtButton from '../FtButton/FtButton.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
-import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
 import store from '../../store'
 import { loadVideoMetadata } from '../../helpers/videoMetadata'
 import { showToast } from '../../helpers/utils'
