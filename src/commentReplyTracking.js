@@ -161,9 +161,10 @@ export function untrackComment(threads, comment) {
  * mention its author's handle, which is how YouTube addresses replies to replies.
  * @param {TrackedCommentThread} thread
  * @param {CommentReply[]} replies the thread's replies in order, oldest first
+ * @param {string} [signedInId] the channel signed in now, which may differ from the one it was watched with
  * @returns {{ added: CommentReply[], seen: string[] }} the new replies, and the replies seen so far
  */
-export function findNewReplies(thread, replies) {
+export function findNewReplies(thread, replies, signedInId = '') {
   const wholeThread = thread.commentId === thread.threadId
   // Loaded replies are `threadId.replyId`, which a posted reply may lack.
   // Without the watched reply, as when it was deleted or not loaded, no
@@ -181,6 +182,7 @@ export function findNewReplies(thread, replies) {
   const added = replies.filter((reply, index) => index >= start &&
     !seen.has(reply.id) &&
     (accountId === '' || reply.authorId !== accountId) &&
+    (signedInId === '' || reply.authorId !== signedInId) &&
     (wholeThread || mention?.test(reply.text)))
   return {
     added,

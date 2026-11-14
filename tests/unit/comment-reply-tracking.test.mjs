@@ -95,6 +95,9 @@ test('watches others\' comments from now on and apart from own ones', () => {
   // Replies it had already are not announced, nor the account's, but its author's are.
   const { added } = findNewReplies(threads[0], [reply('old', 'UCx'), reply('author', 'UCthem'), reply('mine', 'UCme'), reply('new', 'UCx')])
   assert.deepEqual(added.map(item => item.id), ['thread1.author', 'thread1.new'])
+  // Watched while signed out, but answered after signing in
+  const signedOut = { ...threads[0], accountId: '' }
+  assert.deepEqual(findNewReplies(signedOut, [reply('mine', 'UCme'), reply('new', 'UCx')], 'UCme').added.map(item => item.id), ['thread1.new'])
 
   // The account's own comment in that thread is watched apart from it.
   threads = trackComment(threads, { ...own, threadId: 'thread1', commentId: 'thread1.mine', accountId: 'UCme' }, 2000)

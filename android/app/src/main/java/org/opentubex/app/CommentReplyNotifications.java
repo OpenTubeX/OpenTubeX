@@ -146,7 +146,7 @@ final class CommentReplyNotifications {
         String videoId = checked.getString("videoId");
         JSONArray seen = checked.optJSONArray("seen");
         if (result != null && result.has("replies")) {
-            JSONObject found = findNewReplies(checked, result.getJSONArray("replies"));
+            JSONObject found = findNewReplies(checked, result.getJSONArray("replies"), configuration.optString("accountId"));
             JSONArray added = found.getJSONArray("added");
             // Replies left when notifications turn off count as seen too.
             for (int index = 0; index < added.length() && configuration(context).optBoolean("enabled"); index++) {
@@ -454,6 +454,11 @@ final class CommentReplyNotifications {
      * @return the new replies under `added`, and the replies seen so far under `seen`
      */
     static JSONObject findNewReplies(JSONObject thread, JSONArray replies) throws JSONException {
+        return findNewReplies(thread, replies, "");
+    }
+
+    /** @param signedInId the channel signed in now, which may differ from the one it was watched with */
+    static JSONObject findNewReplies(JSONObject thread, JSONArray replies, String signedInId) throws JSONException {
         String threadId = thread.getString("threadId");
         String commentId = thread.getString("commentId");
         boolean wholeThread = commentId.equals(threadId);
@@ -485,7 +490,9 @@ final class CommentReplyNotifications {
             JSONObject reply = replies.getJSONObject(index);
             String id = reply.optString("id");
             seen.add(id);
-            if (index < start || alreadySeen.contains(id) || (!accountId.isEmpty() && accountId.equals(reply.optString("authorId")))) continue;
+            String authorId = reply.optString("authorId");
+            if (index < start || alreadySeen.contains(id) || (!accountId.isEmpty() && accountId.equals(authorId)) ||
+                (!signedInId.isEmpty() && signedInId.equals(authorId))) continue;
             Matcher matcher = mention == null ? null : mention.matcher(reply.optString("text"));
             if (wholeThread || (matcher != null && matcher.find())) added.put(reply);
         }

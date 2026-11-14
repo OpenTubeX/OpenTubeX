@@ -174,6 +174,11 @@ function getReplyTitle(thread, author) {
     : i18n.global.t('YouTube Account.{author} replied to {commentAuthor}', { author, commentAuthor: thread.handle || '?' })
 }
 
+/** The channel signed in now, whose replies are never announced. */
+function getSignedInChannelId() {
+  return isSignedInToYouTube(store.getters) ? store.getters.getYouTubeAccount?.channelId ?? '' : ''
+}
+
 /**
  * Hands the checks to Android, which announces replies like uploads.
  * @returns {() => void} stops updating the configuration
@@ -184,6 +189,7 @@ function startAndroidCommentReplyNotifications() {
     const thumbnail = getNotificationThumbnailUrl('VIDEOIDXXXX')?.replace('VIDEOIDXXXX', '%VIDEO%') ?? ''
     return JSON.stringify({
       enabled: isCommentWatchingEnabled(),
+      accountId: getSignedInChannelId(),
       mode: store.getters.getNotificationMode,
       closedApp: store.getters.getEnableClosedAppSubscriptionRefresh,
       title: i18n.global.t('YouTube Account.{author} replied to your comment', { author: '{author}' }),
@@ -292,6 +298,7 @@ async function announceReply(thread, reply) {
 async function checkThreads() {
   // Comments of several authors in a thread can be watched, and a reply can answer more than one.
   const announced = new Set()
+  const signedInId = getSignedInChannelId()
   for (const key of loadThreads()) {
     if (!isCommentWatchingEnabled()) return
     // Reloaded for each thread, as comments watched meanwhile change the list.
@@ -307,7 +314,7 @@ async function checkThreads() {
     // Stopped watching while it loaded
     const current = loadThreads().find(item => isSameWatchedComment(item, key))
     if (!current) continue
-    const { added, seen } = result ? findNewReplies(current, result.replies) : { added: [], seen: current.seen }
+    const { added, seen } = result ? findNewReplies(current, result.replies, signedInId) : { added: [], seen: current.seen }
     // Announced before they count as seen, so closing the app in between
     // repeats a reply rather than losing it. Replies whose announcement fails
     // count as seen too, as retrying could add them to the history twice, and
@@ -357,6 +364,12 @@ export function startCommentReplyNotifications() {
   }
   check()
 
+  // Windows of the desktop app share the watched comments, so their bells follow each other.
+  const reloadWatchedComments = (/** @type {StorageEvent} */ event) => {
+    if (event.key === STORAGE_KEY) watchedComments.value = loadThreads()
+  }
+  window.addEventListener('storage', reloadWatchedComments)
+
   const checkWhenVisible = () => {
     if (!isAppHidden() && timer !== null && Date.now() - lastCheck >= CHECK_INTERVAL_MS) check()
   }
@@ -379,6 +392,7 @@ export function startCommentReplyNotifications() {
   return () => {
     stopped = true
     clearTimeout(timer)
+    window.removeEventListener('storage', reloadWatchedComments)
     removeTapListener?.()
     document.removeEventListener('visibilitychange', checkWhenVisible)
   }

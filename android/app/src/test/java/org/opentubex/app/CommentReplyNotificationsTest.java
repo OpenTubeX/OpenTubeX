@@ -129,6 +129,10 @@ public class CommentReplyNotificationsTest {
             .put(reply("mine", "UCme", "Mine")).put(reply("new", "UCx", "New"));
         assertEquals("[\"thread1.author\",\"thread1.new\"]",
             ids(CommentReplyNotifications.findNewReplies(watched, replies).getJSONArray("added")).toString());
+        // Watched while signed out, but answered after signing in
+        JSONObject signedOut = new JSONObject(watched.toString()).put("accountId", "");
+        assertEquals("[\"thread1.author\",\"thread1.new\"]",
+            ids(CommentReplyNotifications.findNewReplies(signedOut, replies, "UCme").getJSONArray("added")).toString());
 
         // The account's own comment in that thread is watched apart from it.
         JSONObject mine = new JSONObject().put("videoId", "video1").put("threadId", "thread1").put("commentId", "thread1.mine")
