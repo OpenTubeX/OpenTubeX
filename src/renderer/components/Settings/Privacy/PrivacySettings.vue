@@ -54,38 +54,55 @@
         />
       </div>
     </div>
-    <FtFlexBox class="privacyRetention">
-      <FtInput
-        :placeholder="$t('Settings.Privacy Settings.Automatic History Retention Placeholder')"
-        :icon="['fas', 'clock']"
-        :label="$t('Settings.Privacy Settings.Automatic History Retention')"
-        input-type="number"
-        :value="historyRetentionDaysInput"
-        setting-key="historyRetentionDays"
-        :show-label="true"
-        :allow-action-button-when-empty="true"
-        :force-action-button-icon-name="['fas', 'check']"
-        :tooltip="$t('Settings.Privacy Settings.Automatic History Retention Tooltip')"
-        :disabled="!rememberHistory"
-        @input="historyRetentionDaysInput = $event"
-        @click="saveRetention('watch')"
-      />
-      <FtInput
-        :placeholder="$t('Settings.Privacy Settings.Automatic History Retention Placeholder')"
-        :icon="['fas', 'clock']"
-        :label="$t('Settings.Privacy Settings.Automatic Search History Retention')"
-        input-type="number"
-        :value="searchHistoryRetentionDaysInput"
-        setting-key="searchHistoryRetentionDays"
-        :show-label="true"
-        :allow-action-button-when-empty="true"
-        :force-action-button-icon-name="['fas', 'check']"
-        :tooltip="$t('Settings.Privacy Settings.Automatic Search History Retention Tooltip')"
-        :disabled="!rememberSearchHistory"
-        @input="searchHistoryRetentionDaysInput = $event"
-        @click="saveRetention('search')"
-      />
-    </FtFlexBox>
+    <div
+      class="privacyRetention"
+      role="group"
+      :aria-labelledby="retentionTitleId"
+    >
+      <h4
+        :id="retentionTitleId"
+        class="groupTitle"
+      >
+        {{ $t('Settings.Privacy Settings.Automatic History Deletion') }}
+        <FtTooltip
+          class="selectTooltip"
+          position="top"
+          :tooltip="$t('Settings.Privacy Settings.Automatic History Retention Tooltip')"
+        />
+      </h4>
+      <FtFlexBox>
+        <FtInput
+          :placeholder="$t('Settings.Privacy Settings.Keep Forever Placeholder')"
+          :icon="['fas', 'clock-rotate-left']"
+          :label="$t('Settings.Privacy Settings.Watch History Retention')"
+          input-type="number"
+          min="1"
+          :value="historyRetentionDaysInput"
+          setting-key="historyRetentionDays"
+          :show-label="true"
+          :allow-action-button-when-empty="true"
+          :force-action-button-icon-name="['fas', 'check']"
+          :disabled="!rememberHistory"
+          @input="historyRetentionDaysInput = $event"
+          @click="saveRetention('watch')"
+        />
+        <FtInput
+          :placeholder="$t('Settings.Privacy Settings.Keep Forever Placeholder')"
+          :icon="['fas', 'magnifying-glass']"
+          :label="$t('Settings.Privacy Settings.Search History Retention')"
+          input-type="number"
+          min="1"
+          :value="searchHistoryRetentionDaysInput"
+          setting-key="searchHistoryRetentionDays"
+          :show-label="true"
+          :allow-action-button-when-empty="true"
+          :force-action-button-icon-name="['fas', 'check']"
+          :disabled="!rememberSearchHistory"
+          @input="searchHistoryRetentionDaysInput = $event"
+          @click="saveRetention('search')"
+        />
+      </FtFlexBox>
+    </div>
     <div class="privacyExternalLinkHandling">
       <FtSelect
         class="privacyExternalLinkSelect"
@@ -131,7 +148,7 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
@@ -140,6 +157,7 @@ import FtSelect from '../../FtSelect/FtSelect.vue'
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
 import FtSlider from '../../FtSlider/FtSlider.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
+import FtTooltip from '../../FtTooltip/FtTooltip.vue'
 
 import { compactAllDatastores } from '../../../../datastores/handlers/index'
 import { showToast } from '../../../helpers/utils'
@@ -151,6 +169,8 @@ function updateInternetConnectivityChecks(value) {
 }
 
 const { t } = useI18n()
+
+const retentionTitleId = useId()
 const USING_ELECTRON = process.env.IS_ELECTRON
 const IS_CAPACITOR = process.env.IS_CAPACITOR
 
@@ -313,9 +333,8 @@ function updateWatchedPercentageThreshold(value) {
 </script>
 
 <style scoped>
-/* Matches the gap between the selects below */
 .privacyRetention {
-  margin-block-start: 6px;
+  margin-block-start: 1.5em;
 }
 
 .privacyWatchedProgressSelect.select.outlined :deep(.selectOutline) {

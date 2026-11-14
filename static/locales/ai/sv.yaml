@@ -1140,11 +1140,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: "Kontroll av internetanslutning"
     Internet Connectivity Checks Tooltip: "Skickar små förfrågningar till en server som drivs av GrapheneOS för att kontrollera internetåtkomst."
-    Automatic History Retention: Automatisk lagringstid för historik (dagar)
-    Automatic History Retention Placeholder: Lämna tomt för att spara för alltid
+    Automatic History Deletion: Radera historik automatiskt efter (dagar)
+    Watch History Retention: Visningshistorik
+    Search History Retention: Sökhistorik
+    Keep Forever Placeholder: Spara för alltid
     Automatic History Retention Tooltip: Lämna tomt för att spara historiken för alltid. När du sparar ett antal tas äldre poster bort direkt och därefter automatiskt medan appen är öppen.
-    Automatic Search History Retention: Automatisk lagringstid för sökhistorik (dagar)
-    Automatic Search History Retention Tooltip: Lämna tomt för att spara sökhistoriken för alltid. När du sparar ett antal tas äldre sökningar bort direkt och därefter automatiskt medan appen är öppen.
     History Retention Saved: Historikens lagringstid har sparats
     Invalid History Retention Days: Ange ett helt antal dagar som är större än noll
     Enable Watch Statistics: Aktivera visningsstatistik

@@ -1140,11 +1140,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: "Internet-yhteyden tarkistukset"
     Internet Connectivity Checks Tooltip: "Lähettää pieniä pyyntöjä GrapheneOS:n ylläpitämälle palvelimelle internet-yhteyden tarkistamiseksi."
-    Automatic History Retention: Historian automaattinen säilytysaika (päivää)
-    Automatic History Retention Placeholder: Jätä tyhjäksi säilyttääksesi historian pysyvästi
+    Automatic History Deletion: Poista historia automaattisesti (päivän) jälkeen
+    Watch History Retention: Katseluhistoria
+    Search History Retention: Hakuhistoria
+    Keep Forever Placeholder: Säilytä pysyvästi
     Automatic History Retention Tooltip: Jätä tyhjäksi, jos haluat säilyttää historian pysyvästi. Kun tallennat luvun, sitä vanhemmat merkinnät poistetaan heti ja jatkossa automaattisesti sovelluksen ollessa avoinna.
-    Automatic Search History Retention: Hakuhistorian automaattinen säilytysaika (päivää)
-    Automatic Search History Retention Tooltip: Jätä tyhjäksi, jos haluat säilyttää hakuhistorian pysyvästi. Kun tallennat luvun, sitä vanhemmat haut poistetaan heti ja jatkossa automaattisesti sovelluksen ollessa avoinna.
     History Retention Saved: Historian säilytysaika tallennettiin
     Invalid History Retention Days: Anna päivien määräksi nollaa suurempi kokonaisluku
     Enable Watch Statistics: Ota katselutilastot käyttöön

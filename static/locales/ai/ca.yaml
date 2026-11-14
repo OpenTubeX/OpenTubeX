@@ -1392,11 +1392,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: "Comprovacions de connexió a Internet"
     Internet Connectivity Checks Tooltip: "Envia petites sol·licituds a un servidor allotjat per GrapheneOS per comprovar l’accés a Internet."
-    Automatic History Retention: Conservació automàtica de l'historial (dies)
-    Automatic History Retention Placeholder: Deixeu-ho en blanc per conservar-lo per sempre
+    Automatic History Deletion: Suprimeix automàticament l'historial després de (dies)
+    Watch History Retention: Historial de reproducció
+    Search History Retention: Historial de cerca
+    Keep Forever Placeholder: Conserva per sempre
     Automatic History Retention Tooltip: Deixeu-ho en blanc per conservar l'historial per sempre. En desar un nombre, se suprimeixen ara les entrades més antigues i també automàticament mentre l'aplicació estigui oberta.
-    Automatic Search History Retention: Conservació automàtica de l'historial de cerca (dies)
-    Automatic Search History Retention Tooltip: Deixeu-ho en blanc per conservar l'historial de cerca per sempre. En desar un nombre, se suprimeixen ara les cerques més antigues i també automàticament mentre l'aplicació estigui oberta.
     History Retention Saved: S'ha desat la conservació de l'historial
     Invalid History Retention Days: Introduïu un nombre enter de dies superior a zero
     Enable Watch Statistics: Activa les estadístiques de reproducció

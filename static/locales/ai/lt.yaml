@@ -1342,11 +1342,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: "Interneto ryšio tikrinimas"
     Internet Connectivity Checks Tooltip: "Siunčia mažas užklausas į GrapheneOS talpinamą serverį, kad patikrintų interneto prieigą."
-    Automatic History Retention: Automatinis istorijos saugojimas (dienomis)
-    Automatic History Retention Placeholder: Palikite tuščią, kad būtų saugoma neribotai
+    Automatic History Deletion: Automatiškai ištrinti istoriją po (dienų)
+    Watch History Retention: Žiūrėjimo istorija
+    Search History Retention: Paieškos istorija
+    Keep Forever Placeholder: Saugoti neribotai
     Automatic History Retention Tooltip: Palikite tuščią, kad istorija būtų saugoma neribotai. Išsaugojus skaičių, senesni įrašai pašalinami dabar ir automatiškai, kol programa atidaryta.
-    Automatic Search History Retention: Automatinis paieškos istorijos saugojimas (dienomis)
-    Automatic Search History Retention Tooltip: Palikite tuščią, kad paieškos istorija būtų saugoma neribotai. Išsaugojus skaičių, senesnės paieškos pašalinamos dabar ir automatiškai, kol programa atidaryta.
     History Retention Saved: Istorijos saugojimo nuostata išsaugota
     Invalid History Retention Days: Įveskite už nulį didesnį sveikąjį dienų skaičių
     Enable Watch Statistics: Įjungti žiūrėjimo statistiką

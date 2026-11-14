@@ -1140,11 +1140,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: "Interneteko konexioaren egiaztapenak"
     Internet Connectivity Checks Tooltip: "Eskaera txikiak bidaltzen dizkio GrapheneOSek ostatatutako zerbitzari bati Interneterako sarbidea egiaztatzeko."
-    Automatic History Retention: Historiaren atxikipen automatikoa (egunak)
-    Automatic History Retention Placeholder: Utzi hutsik betiko gordetzeko
+    Automatic History Deletion: Ezabatu historia automatikoki (egun) igaro ondoren
+    Watch History Retention: Ikusitakoen historia
+    Search History Retention: Bilaketa-historia
+    Keep Forever Placeholder: Betiko gorde
     Automatic History Retention Tooltip: Utzi hutsik historia betiko gordetzeko. Zenbaki bat gordetzean, sarrera zaharragoak orain eta automatikoki kenduko dira aplikazioa irekita dagoen bitartean.
-    Automatic Search History Retention: Bilaketa-historiaren atxikipen automatikoa (egunak)
-    Automatic Search History Retention Tooltip: Utzi hutsik bilaketa-historia betiko gordetzeko. Zenbaki bat gordetzean, bilaketa zaharragoak orain eta automatikoki kenduko dira aplikazioa irekita dagoen bitartean.
     History Retention Saved: Historiaren atxikipena gorde da
     Invalid History Retention Days: Idatzi zero baino handiagoa den egun kopuru oso bat
     Enable Watch Statistics: Gaitu ikustaldien estatistikak

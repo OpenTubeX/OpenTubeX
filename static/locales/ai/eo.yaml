@@ -1176,11 +1176,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: Kontroloj de interreta konekteco
     Internet Connectivity Checks Tooltip: Sendas malgrandajn petojn al servilo gastigita de GrapheneOS por kontroli interretan aliron.
-    Automatic History Retention: Aŭtomata konservado de historio (tagoj)
-    Automatic History Retention Placeholder: Lasu malplena por konservi por ĉiam
+    Automatic History Deletion: Aŭtomate forigi historion post (tagoj)
+    Watch History Retention: Spekta historio
+    Search History Retention: Serĉa historio
+    Keep Forever Placeholder: Konservi por ĉiam
     Automatic History Retention Tooltip: Lasu malplena por konservi la historion por ĉiam. Konservi nombron forigas pli malnovajn erojn nun kaj aŭtomate dum la aplikaĵo estas malfermita.
-    Automatic Search History Retention: Aŭtomata konservado de serĉhistorio (tagoj)
-    Automatic Search History Retention Tooltip: Lasu malplena por konservi la serĉhistorion por ĉiam. Konservi nombron forigas pli malnovajn serĉojn nun kaj aŭtomate dum la aplikaĵo estas malfermita.
     History Retention Saved: La konservado de historio estis konservita
     Invalid History Retention Days: Enigu entjeran nombron de tagoj pli grandan ol nulo
     Enable Watch Statistics: Ŝalti spektajn statistikojn

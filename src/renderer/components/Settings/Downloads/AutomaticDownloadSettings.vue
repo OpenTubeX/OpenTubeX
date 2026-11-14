@@ -129,6 +129,7 @@
               <div class="filterGrid">
                 <FtInput
                   input-type="number"
+                  min="1"
                   :icon="['fas', 'clock']"
                   :label="t('Settings.Download Settings.Minimum Duration Seconds')"
                   :placeholder="t('Form Inputs.No Minimum')"
@@ -140,6 +141,7 @@
                 />
                 <FtInput
                   input-type="number"
+                  min="1"
                   :icon="['fas', 'clock']"
                   :label="t('Settings.Download Settings.Maximum Duration Seconds')"
                   :placeholder="t('Form Inputs.No Maximum')"
@@ -151,6 +153,7 @@
                 />
                 <FtInput
                   input-type="number"
+                  min="1"
                   :icon="['fas', 'file-lines']"
                   :label="t('Settings.Download Settings.Minimum File Size MB')"
                   :placeholder="t('Form Inputs.No Minimum')"
@@ -162,6 +165,7 @@
                 />
                 <FtInput
                   input-type="number"
+                  min="1"
                   :icon="['fas', 'file-lines']"
                   :label="t('Settings.Download Settings.Maximum File Size MB')"
                   :placeholder="t('Form Inputs.No Maximum')"
@@ -173,6 +177,7 @@
                 />
                 <FtInput
                   input-type="number"
+                  min="1"
                   :icon="['fas', 'clock']"
                   :label="t('Settings.Download Settings.Maximum Age Days')"
                   :placeholder="t('Form Inputs.Any Age')"

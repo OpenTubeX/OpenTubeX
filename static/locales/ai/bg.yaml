@@ -1145,11 +1145,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: "Проверки на интернет връзката"
     Internet Connectivity Checks Tooltip: "Изпраща малки заявки до сървър, хостван от GrapheneOS, за проверка на достъпа до интернет."
-    Automatic History Retention: Автоматично съхраняване на историята (дни)
-    Automatic History Retention Placeholder: Оставете празно за безсрочно съхраняване
+    Automatic History Deletion: Автоматично изтриване на историята след (дни)
+    Watch History Retention: История на гледане
+    Search History Retention: История на търсенето
+    Keep Forever Placeholder: Безсрочно
     Automatic History Retention Tooltip: Оставете полето празно, за да пазите историята безсрочно. Ако въведете число, по-старите записи ще бъдат премахнати веднага, а занапред ще се премахват автоматично, докато приложението е отворено.
-    Automatic Search History Retention: Автоматично съхраняване на историята на търсенията (дни)
-    Automatic Search History Retention Tooltip: Оставете полето празно, за да пазите историята на търсенията безсрочно. Ако въведете число, по-старите търсения ще бъдат премахнати веднага, а занапред ще се премахват автоматично, докато приложението е отворено.
     History Retention Saved: Срокът за съхраняване на историята е запазен
     Invalid History Retention Days: Въведете цяло число дни, по-голямо от нула
     Enable Watch Statistics: Включване на статистиката за гледане

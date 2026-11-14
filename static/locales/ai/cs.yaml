@@ -1140,11 +1140,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: "Kontroly připojení k internetu"
     Internet Connectivity Checks Tooltip: "Odesílá malé požadavky na server hostovaný GrapheneOS pro ověření přístupu k internetu."
-    Automatic History Retention: Automatické uchovávání historie (dny)
-    Automatic History Retention Placeholder: Chcete-li historii zachovat navždy, ponechte prázdné
+    Automatic History Deletion: Automaticky mazat historii po (dnech)
+    Watch History Retention: Historie sledování
+    Search History Retention: Historie vyhledávání
+    Keep Forever Placeholder: Uchovávat navždy
     Automatic History Retention Tooltip: Chcete-li historii zachovat navždy, ponechte pole prázdné. Uložením čísla odstraníte starší záznamy ihned a poté automaticky, když je aplikace otevřená.
-    Automatic Search History Retention: Automatické uchovávání historie vyhledávání (dny)
-    Automatic Search History Retention Tooltip: Chcete-li historii vyhledávání zachovat navždy, ponechte pole prázdné. Uložením čísla odstraníte starší vyhledávání ihned a poté automaticky, když je aplikace otevřená.
     History Retention Saved: Doba uchovávání historie byla uložena
     Invalid History Retention Days: Zadejte celé číslo větší než nula
     Enable Watch Statistics: Povolit statistiky sledování

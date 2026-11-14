@@ -1317,11 +1317,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: Internetverbindingskontroles
     Internet Connectivity Checks Tooltip: Stuur klein versoeke na ’n bediener wat deur GrapheneOS gehuisves word om internettoegang na te gaan.
-    Automatic History Retention: Outomatiese behoud van geskiedenis (dae)
-    Automatic History Retention Placeholder: Laat leeg om vir altyd te hou
+    Automatic History Deletion: Vee geskiedenis outomaties uit ná (dae)
+    Watch History Retention: Kykgeskiedenis
+    Search History Retention: Soekgeskiedenis
+    Keep Forever Placeholder: Hou vir altyd
     Automatic History Retention Tooltip: Laat leeg om geskiedenis vir altyd te hou. As u ’n getal stoor, word ouer inskrywings nou en outomaties verwyder terwyl die toep oop is.
-    Automatic Search History Retention: Outomatiese behoud van soekgeskiedenis (dae)
-    Automatic Search History Retention Tooltip: Laat leeg om soekgeskiedenis vir altyd te hou. As u ’n getal stoor, word ouer soektogte nou en outomaties verwyder terwyl die toep oop is.
     History Retention Saved: Behoud van geskiedenis is gestoor
     Invalid History Retention Days: Voer ’n heelgetal dae groter as nul in
     Enable Watch Statistics: Aktiveer kykstatistieke

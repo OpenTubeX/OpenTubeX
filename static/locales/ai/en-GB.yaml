@@ -1125,11 +1125,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: "Internet connectivity checks"
     Internet Connectivity Checks Tooltip: "Sends small requests to a server hosted by GrapheneOS to check internet access."
-    Automatic History Retention: Automatic History Retention (Days)
-    Automatic History Retention Placeholder: Leave blank to keep forever
+    Automatic History Deletion: Automatically Delete History After (Days)
+    Watch History Retention: Watch History
+    Search History Retention: Search History
+    Keep Forever Placeholder: Keep forever
     Automatic History Retention Tooltip: Leave blank to keep history forever. Saving a number removes older entries now and automatically while the app is open.
-    Automatic Search History Retention: Automatic Search History Retention (Days)
-    Automatic Search History Retention Tooltip: Leave blank to keep search history forever. Saving a number removes older searches now and automatically while the app is open.
     History Retention Saved: History retention has been saved
     Invalid History Retention Days: Enter a whole number of days greater than zero
     Enable Watch Statistics: Enable Watch Statistics

@@ -62,6 +62,7 @@
       />
       <FtInput
         input-type="number"
+        min="0"
         :icon="['fas', 'gauge-high']"
         :label="t('Settings.Download Settings.Bandwidth Limit')"
         :placeholder="t('Form Inputs.Unlimited Hint')"
