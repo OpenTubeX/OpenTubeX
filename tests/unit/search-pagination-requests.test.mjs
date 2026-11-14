@@ -113,7 +113,8 @@ function createSearch (backend, { searchResults = [], missingPublicationDates = 
     usesInvidiousApi,
     t: text => text,
     console: { error: error => errors.push(error) },
-    process: { env: { SUPPORTS_LOCAL_API: true } }
+    process: { env: { SUPPORTS_LOCAL_API: true } },
+    AbortController
   })
   const select = (query, spellCorrection) => checkSearchCache({ query, searchSettings, options: {}, spellCorrection })
   const result = id => backend === 'local'

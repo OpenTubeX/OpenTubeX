@@ -34,6 +34,7 @@ function channelView({ routeTab, tabs = ['videos', 'shorts', 'live', 'playlists'
     elementListRequestIds: {},
     channelLoaded: false,
     channelInstance: null,
+    abortChannelRequests() {},
     channelRouteGeneration: 0,
     isLoading: ref(true),
     id: ref('UCchannel'),
