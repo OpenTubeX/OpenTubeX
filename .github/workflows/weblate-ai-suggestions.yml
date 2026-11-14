@@ -1,0 +1,69 @@
+name: Weblate AI suggestions
+
+# Offers AI translations as Weblate suggestions. The schedule retries strings
+# that Weblate had not pulled from the repository yet during the push run.
+on:
+  push:
+    branches: [ development ]
+    paths: [ 'static/locales/**' ]
+  schedule:
+    - cron: '41 */3 * * *'
+  workflow_dispatch:
+
+cache-mode: none
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+env:
+  LEDGER_BRANCH: weblate-ai-ledger
+
+jobs:
+  suggest:
+    if: github.repository == 'OpenTubeX/OpenTubeX'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      # Pushes the ledger branch.
+      contents: write
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+    - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      with:
+        node-version: 24.x
+        package-manager-cache: false
+
+    - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      with:
+        cache: false
+
+    - run: pnpm install --frozen-lockfile --ignore-scripts
+
+    # The ledger branch holds one commit that every run replaces. A missing
+    # branch fails the job instead of resubmitting rejected suggestions.
+    - name: Check out ledger
+      run: |
+        git fetch --depth=1 origin "refs/heads/$LEDGER_BRANCH"
+        git worktree add --detach "$RUNNER_TEMP/ledger" FETCH_HEAD
+
+    - name: Submit suggestions
+      env:
+        WEBLATE_TOKEN: ${{ secrets.WEBLATE_TOKEN }}
+      run: node _scripts/weblateAiSuggestions.mjs --apply --ledger "$RUNNER_TEMP/ledger/submitted.txt"
+
+    # Also saves the progress of a run that failed partway.
+    - name: Save ledger
+      if: always()
+      run: |
+        cd "$RUNNER_TEMP/ledger" 2>/dev/null || exit 0
+        if git diff --quiet; then
+          exit 0
+        fi
+        previous=$(git rev-parse HEAD)
+        git config user.name 'github-actions[bot]'
+        git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+        git commit --amend --quiet --all --message 'Weblate AI suggestion ledger'
+        git push --force-with-lease="refs/heads/$LEDGER_BRANCH:$previous" origin "HEAD:refs/heads/$LEDGER_BRANCH"
