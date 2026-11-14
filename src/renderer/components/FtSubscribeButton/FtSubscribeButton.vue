@@ -312,8 +312,8 @@ const activeProfile = computed(() => {
 const profileDisplayList = computed(() => [
   profileList.value[0],
   ...(activeProfile.value._id !== MAIN_PROFILE_ID ? [activeProfile.value] : []),
-  ...profileList.value.filter((profile, i) => i !== 0 && !isActiveProfile(profile) && !isProfileSubscribed(profile)),
-  ...profileList.value.filter((profile, i) => i !== 0 && !isActiveProfile(profile) && isProfileSubscribed(profile))
+  ...profileList.value.filter((profile, i) => i !== 0 && !isActiveProfile(profile) && isProfileSubscribed(profile)),
+  ...profileList.value.filter((profile, i) => i !== 0 && !isActiveProfile(profile) && !isProfileSubscribed(profile))
 ])
 
 const profileInitials = computed(() => {
