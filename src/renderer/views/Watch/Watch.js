@@ -1310,12 +1310,16 @@ export default defineComponent({
       // only offer the recommended video while autoplay would play it anyway.
       if (this.nextQueuedVideo) return true
       if (this.watchingPlaylist) return this.playlistSkipAvailability.canPlayNext
-      return this.autoplayEnabled && !this.hideRecommendedVideos && !!this.nextRecommendedVideo
+      return this.autoplaysRecommendedVideos && !this.hideRecommendedVideos && !!this.nextRecommendedVideo
     },
     canSkipToPreviousVideo: function () {
       // see `handleSkipToPrev`
       if (this.watchingPlaylist) return this.playlistSkipAvailability.canPlayPrevious
-      return this.autoplayEnabled && this.previousTabVideoRoute != null
+      return this.autoplaysRecommendedVideos && this.previousTabVideoRoute != null
+    },
+    // A queued video turns `autoplayEnabled` on even when recommended videos do not autoplay
+    autoplaysRecommendedVideos: function () {
+      return !this.isStandaloneShort && this.autoplayNextRecommendedVideo
     },
     /**
      * The video this tab showed before the current one, if it came straight from one.
