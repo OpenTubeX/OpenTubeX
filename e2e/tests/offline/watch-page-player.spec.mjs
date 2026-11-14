@@ -1280,6 +1280,10 @@ test('skip controls follow recommended videos outside a playlist while autoplay 
 
   await page.evaluate(() => window.mediaActions.previoustrack({ action: 'previoustrack' }))
   await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw$/)
+  // The URL changes before the returned video's player replaces the previous one.
+  await expect.poll(() => view.evaluate(component =>
+    component.videoId === 'jNQXAC9IVRw' && !component.isLoading && !!component.$refs.player
+  )).toBe(true)
 
   // Behind a browsing page, the entry before it is the video that keeps playing.
   await view.evaluate(async component => {
