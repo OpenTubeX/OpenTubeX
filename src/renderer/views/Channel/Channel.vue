@@ -745,6 +745,8 @@ function loadChannelRoute() {
   isLoading.value = true
 
   if (route.query.url) {
+    abortChannelRequests()
+    channelInstance = null
     resolveChannelUrl(route.query.url, route.params.currentTab)
     return
   }
