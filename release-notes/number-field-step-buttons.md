@@ -2,7 +2,7 @@
 category: improvement
 ---
 
-Number fields have − and + buttons that work the same in every browser, and Firefox no longer treats letters typed into them as an empty value.
+Number fields have − and + buttons that work the same in every browser when you use a mouse. Firefox no longer treats letters typed into number fields as an empty value.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/ff50e90a-55aa-4fc8-aa4d-524a4ecbb37c">
