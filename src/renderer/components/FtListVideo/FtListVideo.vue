@@ -1067,6 +1067,27 @@ const extraThumbnailActionButton = computed(() => {
             icon: ['fas', 'flag-checkered']
           }
         : null
+    case 'playNext':
+    case 'addToQueue': {
+      const action = queueSwipeAction(extraThumbnailAction.value, [{ ...props.data, videoId: id.value }], store.getters.getWatchQueue, {
+        t, commit: store.commit, add: addToWatchQueue,
+      })
+      return { title: action.label, icon: action.icon, run: action.run }
+    }
+    case 'openBackgroundTab':
+      return process.env.IS_ELECTRON && store.getters.getTabsEnabled
+        ? {
+            title: t('Context Menu.Open in a Background Tab'),
+            icon: ['fas', 'clone']
+          }
+        : null
+    case 'markAsSeen':
+      if (showMarkAsSeen.value) {
+        return { title: t('Subscriptions.Mark As Seen'), icon: ['fas', 'check'] }
+      }
+      return inSubscriptions.value && props.data.isNewInSubscriptionFeed === false
+        ? { title: t('Subscriptions.Mark As Unseen'), icon: ['fas', 'eye-slash'], run: () => handleOptionsClick('markAsUnseen') }
+        : null
     case 'copyYoutube':
       return {
         title: t('Video.Copy YouTube Link'),
@@ -2447,7 +2468,11 @@ async function openChannelByline(event) {
 }
 
 function handleExtraThumbnailAction() {
-  handleOptionsClick(extraThumbnailAction.value)
+  if (extraThumbnailActionButton.value?.run) {
+    extraThumbnailActionButton.value.run()
+  } else {
+    handleOptionsClick(extraThumbnailAction.value)
+  }
 }
 
 function updateUploadedTime() {
