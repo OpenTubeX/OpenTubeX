@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="activeAnnotations.length > 0"
+    v-if="annotations.length > 0"
     ref="annotationRoot"
     class="videoAnnotations"
   >
@@ -21,7 +21,7 @@
       :style="annotationSurfaceStyle"
     >
       <template
-        v-for="annotation in annotationsHidden ? [] : activeAnnotations"
+        v-for="annotation in annotationsHidden ? [] : annotations"
         :key="annotation.id"
       >
         <div
@@ -111,13 +111,10 @@ import FtSubscribeButton from '../FtSubscribeButton/FtSubscribeButton.vue'
 import { getVideoRect } from './annotationSurface'
 
 const props = defineProps({
+  /** The annotations active at the current playback time. */
   annotations: {
     type: Array,
     default: () => []
-  },
-  currentTime: {
-    type: Number,
-    default: 0
   },
   active: {
     type: Boolean,
@@ -188,10 +185,6 @@ watch(() => props.active, (active) => {
 }, { flush: 'post' })
 
 onBeforeUnmount(() => resizeObserver.disconnect())
-
-const activeAnnotations = computed(() => props.annotations.filter((annotation) => {
-  return props.currentTime >= annotation.startTime && props.currentTime <= annotation.endTime
-}))
 
 const toggleLabel = computed(() => {
   return annotationsHidden.value
