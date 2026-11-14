@@ -141,6 +141,13 @@ test('public engines cannot make the app request the local network', async () =>
     'https://search.example.com/favicon.ico 93.184.216.34'
   ])
 
+  // A lookup after the first cannot rebind the engine to the local network
+  const rebinding = engineNetwork({ 'https://search.example.com': page('http://127.0.0.1/icon.png') })
+  let lookups = 0
+  rebinding.resolveAddresses = async () => lookups++ === 0 ? ['93.184.216.34'] : ['127.0.0.1']
+  assert.equal(await resolveSearchEngineIcon('https://search.example.com/?q=%s', rebinding), '')
+  assert.deepEqual(rebinding.requests, [])
+
   // An engine whose address cannot be looked up gets no exception
   const unknown = engineNetwork({ 'https://unknown.example': page('http://192.168.1.1/icon.png') })
   assert.equal(await resolveSearchEngineIcon('https://unknown.example/?q=%s', unknown), '')
