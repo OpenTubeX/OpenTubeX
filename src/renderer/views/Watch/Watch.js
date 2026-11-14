@@ -817,8 +817,8 @@ export default defineComponent({
     wellbeingPauseRequest: function () {
       return this.$store.getters.getWellbeingPauseRequest
     },
-    watchStatsResetVersion: function () {
-      return this.$store.getters.getWatchStatsResetVersion
+    watchStatsResetAt: function () {
+      return this.$store.getters.getWatchStatsResetAt
     },
     watchedProgressSavingEnabled: function () {
       return this.$store.getters.getWatchedProgressSavingMode !== 'never'
@@ -1638,7 +1638,7 @@ export default defineComponent({
         this.videoMetadataHistory = null
       }
     },
-    watchStatsResetVersion() {
+    watchStatsResetAt() {
       this.watchTimeTracker.clear()
     },
     // Buffered time follows the recording policy it was watched under, so

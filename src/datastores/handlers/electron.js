@@ -196,8 +196,9 @@ class WatchStats {
     )
   }
 
-  static deleteAll() {
-    return dbWatchStats(DBActions.GENERAL.DELETE_ALL)
+  /** @param {number} resetAt when the statistics were cleared, for the other windows */
+  static deleteAll(resetAt) {
+    return dbWatchStats(DBActions.GENERAL.DELETE_ALL, resetAt)
   }
 }
 

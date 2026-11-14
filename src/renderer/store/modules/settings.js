@@ -1538,7 +1538,7 @@ const customActions = {
             break
 
           case SyncEvents.GENERAL.DELETE_ALL:
-            commit('resetWatchStats')
+            commit('resetWatchStats', data)
             break
 
           default:

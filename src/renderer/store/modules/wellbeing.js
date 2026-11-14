@@ -85,6 +85,9 @@ const saved = loadSaved()
 const state = {
   // Identifies this window's time to the other windows
   windowId: crypto.randomUUID(),
+  // When the watch statistics were last cleared, from the reset marker that every window
+  // shares, so windows can tell time from before a clear without comparing their clocks
+  resetAt: Number.isFinite(saved.resetAt) ? saved.resetAt : 0,
   day: createDay(localDateKey(Date.now()), saved),
   bedtimeDismissedNight: typeof saved.bedtimeDismissedNight === 'string' ? saved.bedtimeDismissedNight : null,
   bedtimeSnoozedUntil: 0,
@@ -113,6 +116,8 @@ const state = {
  */
 function persist(state) {
   const { date, windows, extraSeconds, ignored } = state.day
+  // A window that has not applied a clear yet, such as one that is closing, would bring back its time
+  if (loadSaved().resetAt > state.resetAt) return
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       date,
@@ -123,6 +128,7 @@ function persist(state) {
         .filter(([, seconds]) => seconds > 0)),
       extraSeconds,
       ignored,
+      resetAt: state.resetAt,
       bedtimeDismissedNight: state.bedtimeDismissedNight,
     }))
   } catch (error) {
@@ -148,15 +154,29 @@ function addDayPlayback(state, { date, seconds, isShort, recorded }) {
 }
 
 /**
+ * Drops the day's time for a watch statistics clear.
+ * @param {typeof state} state
+ * @param {number} resetAt
+ */
+function clearDayTime(state, resetAt) {
+  state.resetAt = resetAt
+  state.day.windows = {}
+  sumWindows(state.day)
+}
+
+/**
  * Takes the newer time of each window that another window shares, so time
  * that a reply and a later message both hold counts once.
  * @param {typeof state} state
- * @param {Pick<ReturnType<typeof createDay>, 'date' | 'windows'> & Partial<ReturnType<typeof createDay>>} day
+ * @param {Pick<ReturnType<typeof createDay>, 'date' | 'windows'> & Partial<ReturnType<typeof createDay>> & { resetAt: number }} day
  */
 function joinWellbeingDay(state, day) {
   if (day.date > state.day.date) state.day = createDay(day.date)
   if (day.date !== state.day.date) return
-  for (const [id, time] of Object.entries(day.windows)) {
+  // A window that missed a clear, or has not seen it yet, applies it now. Time from
+  // before this window's clear, such as a closing window's last report, no longer counts.
+  if (day.resetAt > state.resetAt) clearDayTime(state, day.resetAt)
+  for (const [id, time] of day.resetAt === state.resetAt ? Object.entries(day.windows) : []) {
     // This window's own time is always current
     if (id !== state.windowId && !(time.seq <= state.day.windows[id]?.seq)) state.day.windows[id] = { ...time }
   }
@@ -184,29 +204,28 @@ const TIME_MUTATIONS = new Set(['addWellbeingPlayback', 'clearWellbeingTime'])
 export function shareWellbeingAcrossWindows(store, channel = typeof BroadcastChannel === 'undefined' ? null : new BroadcastChannel('opentubex-digital-wellbeing')) {
   if (!channel) return
   const { windowId } = store.state.wellbeing
-  // Replies to a request from before the time was cleared would bring it back
-  let requestId = windowId
   // The state is reactive, which messages cannot clone
   const clone = value => JSON.parse(JSON.stringify(value))
-  store.subscribe(({ type, payload }, { wellbeing: { day } }) => {
-    if (type === 'clearWellbeingTime') requestId = crypto.randomUUID()
-    if (TIME_MUTATIONS.has(type) && day.windows[windowId]) {
-      channel.postMessage({ type: 'wellbeingDay', payload: { date: day.date, windows: { [windowId]: clone(day.windows[windowId]) } } })
+  store.subscribe(({ type, payload }, { wellbeing: { day, resetAt } }) => {
+    if (TIME_MUTATIONS.has(type)) {
+      const time = day.windows[windowId]
+      channel.postMessage({ type: 'wellbeingDay', payload: { date: day.date, resetAt, windows: time ? { [windowId]: clone(time) } : {} } })
     }
     if (SHARED_MUTATIONS.has(type)) channel.postMessage({ type, payload, date: day.date })
   })
   channel.addEventListener('message', ({ data }) => {
     if (data?.type === 'requestWellbeingDay') {
-      channel.postMessage({ type: 'wellbeingDay', to: data.id, payload: clone(store.state.wellbeing.day) })
+      const { day, resetAt } = store.state.wellbeing
+      channel.postMessage({ type: 'wellbeingDay', to: data.id, payload: { ...clone(day), resetAt } })
       return
     }
     // Replies go to the window that asked
-    if (data?.to != null && data.to !== requestId) return
+    if (data?.to != null && data.to !== windowId) return
     store.commit('applySharedWellbeingChange', data)
     // Another window may have saved its time before it counted this change
     persist(store.state.wellbeing)
   })
-  channel.postMessage({ type: 'requestWellbeingDay', id: requestId })
+  channel.postMessage({ type: 'requestWellbeingDay', id: windowId })
 }
 
 function recordsWatchStats(rootGetters) {
@@ -281,8 +300,9 @@ const actions = {
     persist(state)
   },
 
-  clearWellbeingTime({ commit, state }) {
-    commit('clearWellbeingTime')
+  /** @param {number} resetAt when the watch statistics were cleared */
+  clearWellbeingTime({ commit, state }, resetAt) {
+    commit('clearWellbeingTime', resetAt)
     commit('resetWellbeingSession')
     persist(state)
   },
@@ -319,16 +339,13 @@ const mutations = {
   },
 
   /**
-   * Every window clears the time when the watch statistics are cleared. The other
-   * windows' time keeps its sequence, so an older copy cannot replace it, and an open
-   * window's message from before it cleared cannot outlast the cleared time it shares next.
+   * Every window clears the time when the watch statistics are cleared, unless
+   * another window's message already brought this clear.
    * @param {typeof state} state
+   * @param {number} resetAt
    */
-  clearWellbeingTime(state) {
-    for (const [id, { seq }] of Object.entries(state.day.windows)) {
-      state.day.windows[id] = createWindowTime(id === state.windowId ? seq + 1 : seq)
-    }
-    sumWindows(state.day)
+  clearWellbeingTime(state, resetAt) {
+    if (resetAt > state.resetAt) clearDayTime(state, resetAt)
   },
 
   extendWellbeingLimit(state, { kind, extraSeconds = 0, ignore = false }) {
