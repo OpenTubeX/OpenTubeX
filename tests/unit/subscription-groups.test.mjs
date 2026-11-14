@@ -2,12 +2,14 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import {
+  addChannelsToNamedGroups,
   filterSubscriptionsByGroup,
   normalizeSubscriptionGroups,
   sortSubscribedChannels,
   SUBSCRIBED_CHANNELS_SORT_BY_OPTIONS
 } from '../../src/renderer/helpers/subscription-groups.js'
 import { moveItemByVisibleOffset } from '../../src/orderedItems.js'
+import { parseTakeoutSubscriptions } from '../../src/renderer/helpers/import-preview.js'
 
 const collator = new Intl.Collator('en', { sensitivity: 'base', numeric: true })
 
@@ -87,4 +89,26 @@ test('group edits apply to the saved groups, so edits from other windows and dev
   const edited = { id, name: 'Songs', channelIds: ['UCa'] }
   await actions.saveSubscriptionGroup(store, edited)
   assert.deepEqual(structuredClone(saved), [news, edited])
+})
+
+test('imported CSV group columns add channels to existing groups and create missing ones', () => {
+  const content = [
+    'Channel Id,Channel Url,Channel Title,Groups',
+    'UCa,https://www.youtube.com/channel/UCa,"Channel, A","tech; Web Design ;"',
+    'UCb,https://www.youtube.com/channel/UCb,Channel B,',
+    'UCc,https://www.youtube.com/channel/UCc,Channel C,Tech',
+  ].join('\r\n')
+  const channels = parseTakeoutSubscriptions({ path: 'subscriptions.csv', content })
+  assert.deepEqual(channels.map(({ name, groups }) => [name, groups]), [
+    ['Channel, A', ['tech', 'Web Design']],
+    ['Channel B', []],
+    ['Channel C', ['Tech']],
+  ])
+
+  let nextId = 0
+  const groups = addChannelsToNamedGroups([{ id: 'tech', name: 'Tech', channelIds: ['UCc', 'UCz'], icon: 'code' }], channels, () => `new-${nextId++}`)
+  assert.deepEqual(groups, [
+    { id: 'tech', name: 'Tech', channelIds: ['UCc', 'UCz', 'UCa'], icon: 'code' },
+    { id: 'new-0', name: 'Web Design', channelIds: ['UCa'] },
+  ])
 })

@@ -276,6 +276,12 @@ export default {
   shareLink: url => ipcRenderer.invoke(IpcChannels.SHARE_LINK, url),
   /** @param {string} url */
   openExternalLinkInBackground: url => ipcRenderer.invoke(IpcChannels.OPEN_EXTERNAL_LINK_IN_BACKGROUND, url),
+  /**
+   * Appends text to a note in Obsidian, creating the note when it is missing
+   * @param {{ vault: string, name: string, content: string }} note
+   * @returns {Promise<boolean>} whether Obsidian could be opened
+   */
+  openObsidianNote: note => ipcRenderer.invoke(IpcChannels.OPEN_OBSIDIAN_NOTE, note),
   startupSplashReady: () => ipcRenderer.send(IpcChannels.STARTUP_SPLASH_READY),
   startStartupReads,
   startupAppearance: {

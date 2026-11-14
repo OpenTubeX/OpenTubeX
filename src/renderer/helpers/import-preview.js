@@ -1,6 +1,7 @@
 import { getSearchHistoryEntryKeyFromEntry, DEFAULT_SEARCH_SETTINGS, normalizeSearchSettings } from '../../search-history.js'
 import { migrateLegacySettings } from './settings-migrations.js'
 import { parseOpmlFeeds } from './opml.js'
+import { parseImportedGroupNames } from './subscription-groups.js'
 import { forEachTakeoutImportEntry, parseCsvRecords } from './youtube-takeout-zip.js'
 
 function countRecords(imported, current, key) {
@@ -149,8 +150,9 @@ export function parseTakeoutSubscriptions(entry) {
     const rows = parseCsvRecords(entry.content)
     if (!rows) throw new Error('Invalid subscriptions CSV')
     return rows.slice(1).filter(row => row.some(value => value.trim() !== '')).map(fields => {
-      if (fields.length !== 3 || !fields[0].trim()) throw new Error('Invalid subscription record')
-      return { id: fields[0], name: fields[2], thumbnail: null }
+      if (fields.length < 3 || !fields[0].trim()) throw new Error('Invalid subscription record')
+      // Columns after the channel title can name groups for the channel
+      return { id: fields[0], name: fields[2], thumbnail: null, groups: parseImportedGroupNames(fields.slice(3)) }
     })
   }
   if (entry.path.toLowerCase().endsWith('.opml')) {
@@ -160,7 +162,7 @@ export function parseTakeoutSubscriptions(entry) {
       const url = new URL(feed.xmlUrl)
       const id = url.searchParams.get('channel_id') ?? (url.pathname.includes('/feed/channel/') ? url.pathname.split('/').filter(Boolean).at(-1) : null)
       if (!id) throw new Error('Invalid subscription feed')
-      return { id, name: feed.title, thumbnail: null }
+      return { id, name: feed.title, thumbnail: null, groups: feed.folders }
     })
   }
   return JSON.parse(entry.content).map(channel => {
