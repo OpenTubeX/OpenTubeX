@@ -26,8 +26,25 @@ import {
 
 const CHANNEL_THUMBNAIL_CACHE_LIMIT = 200
 const VIDEO_AVATAR_CACHE_LIMIT = 200
+// Every video shown with DeArrow enabled adds an entry, so long sessions need a
+// bound. It is far above the number of cards any page keeps mounted.
+const DEARROW_CACHE_LIMIT = 2000
 
 let settingsWindowMorph = Promise.resolve()
+
+/**
+ * Inserts or refreshes an entry as the newest one and evicts the oldest past the limit.
+ * @param {Record<string, object>} cache
+ * @param {{ videoId: string }} payload
+ */
+function addToDeArrowCache(cache, payload) {
+  delete cache[payload.videoId]
+  cache[payload.videoId] = payload
+  const keys = Object.keys(cache)
+  for (let i = 0; i < keys.length - DEARROW_CACHE_LIMIT; i++) {
+    delete cache[keys[i]]
+  }
+}
 
 /**
  * Throws if the videos lack the details the add to playlist prompt needs.
@@ -919,12 +936,12 @@ const mutations = {
     const sameVideo = state.deArrowCache[payload.videoId]
 
     if (!sameVideo) {
-      state.deArrowCache[payload.videoId] = payload
+      addToDeArrowCache(state.deArrowCache, payload)
     }
   },
 
   addThumbnailToDeArrowCache (state, payload) {
-    state.deArrowCache[payload.videoId] = payload
+    addToDeArrowCache(state.deArrowCache, payload)
   },
 
   setChannelThumbnail (state, { channelId, thumbnail }) {
