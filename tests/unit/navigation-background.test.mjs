@@ -12,12 +12,17 @@ function frameWait(hidden = false) {
   const events = new EventTarget()
   const listeners = new Set()
   let frame
+  let timeout
   let cancellations = 0
+  let clearedTimeouts = 0
   const wait = runInNewContext(source.slice(start, end) + '\nnextAnimationFrame', {
     isAppHidden: () => hidden,
+    NAVIGATION_FRAME_TIMEOUT_MS: 1000,
     window: {
       requestAnimationFrame(callback) { frame = callback; return 1 },
       cancelAnimationFrame() { cancellations++ },
+      setTimeout(callback) { timeout = callback; return 1 },
+      clearTimeout() { clearedTimeouts++ },
     },
     document: {
       addEventListener(type, listener) { listeners.add(listener); events.addEventListener(type, listener) },
@@ -28,8 +33,10 @@ function frameWait(hidden = false) {
     wait,
     hide() { hidden = true; events.dispatchEvent(new Event('visibilitychange')) },
     render() { frame?.() },
+    expire() { timeout?.() },
     get listeners() { return listeners.size },
     get cancellations() { return cancellations },
+    get clearedTimeouts() { return clearedTimeouts },
   }
 }
 
@@ -55,4 +62,16 @@ test('visible navigation still waits for a rendered frame and cleans up its list
   await pending
   assert.equal(complete, true)
   assert.equal(frames.listeners, 0)
+  assert.equal(frames.clearedTimeouts, 1, 'the fallback timeout is cleared')
+})
+
+// Electron keeps a minimized window's document visible, so a stopped
+// compositor must not hold later queue navigations forever.
+test('visible navigation completes when no frame arrives', async () => {
+  const frames = frameWait()
+  const pending = frames.wait()
+  frames.expire()
+  assert.equal(await Promise.race([pending.then(() => true), setTimeout(20, false)]), true)
+  assert.equal(frames.listeners, 0)
+  assert.equal(frames.cancellations, 1, 'the outstanding frame is cancelled')
 })
