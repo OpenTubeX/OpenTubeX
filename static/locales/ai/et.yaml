@@ -242,10 +242,10 @@ Subscriptions:
     Platform: Platvorm
     All Platforms: Kõik platvormid
     Followed Channels: Jälgitavad kanalid teistel platvormidel
-    Description: Jälgi kanaleid platvormidel Twitch, SoundCloud, PeerTube, Rumble ja Odysee, et näha nende üleslaadimisi oma tellimuste vahekaardil Platvormid. Leia kanaleid otsingu abil või lisa need nende lehe aadressi järgi. Nende meediat esitatakse yt-dlp abil.
+    Description: Jälgi kanaleid platvormidel Twitch, SoundCloud, PeerTube, Rumble, Odysee ja media.ccc.de, et näha nende üleslaadimisi oma tellimuste vahekaardil Platvormid. Leia kanaleid otsingu abil või lisa need nende lehe aadressi järgi. Nende meediat esitatakse yt-dlp abil.
     Add Channel: Lisa kanal
     Channel URL: Kanali aadress
-    Invalid Channel: Sisesta kanalilehe aadress platvormil Twitch, SoundCloud, PeerTube, Rumble või Odysee.
+    Invalid Channel: Sisesta kanalilehe aadress platvormil Twitch, SoundCloud, PeerTube, Rumble, Odysee või media.ccc.de.
     Channel Not Found: Sellel aadressil pole kanalit.
     Channel Already Followed: Sa juba jälgid seda kanalit.
     Channel Could Not Be Loaded: Kanalit ei õnnestunud laadida.

@@ -242,10 +242,10 @@ Subscriptions:
     Platform: Savenn
     All Platforms: An holl savennoù
     Followed Channels: Chadennoù heuliet war savennoù all
-    Description: Heuliit chadennoù war Twitch, SoundCloud, PeerTube, Rumble hag Odysee evit gwelet ar pezh a embannont en ivinell Savennoù ho koumanantoù. Kavit chadennoù gant an enklask, pe ouzhpennit anezho gant chomlec'h o fajenn. Lennet e vez o mediaoù gant yt-dlp.
+    Description: Heuliit chadennoù war Twitch, SoundCloud, PeerTube, Rumble, Odysee ha media.ccc.de evit gwelet ar pezh a embannont en ivinell Savennoù ho koumanantoù. Kavit chadennoù gant an enklask, pe ouzhpennit anezho gant chomlec'h o fajenn. Lennet e vez o mediaoù gant yt-dlp.
     Add Channel: Ouzhpennañ ur chadenn
     Channel URL: Chomlec'h ar chadenn
-    Invalid Channel: Skrivit chomlec'h pajenn ur chadenn war Twitch, SoundCloud, PeerTube, Rumble pe Odysee.
+    Invalid Channel: Skrivit chomlec'h pajenn ur chadenn war Twitch, SoundCloud, PeerTube, Rumble, Odysee pe media.ccc.de.
     Channel Not Found: N'eus chadenn ebet er chomlec'h-mañ.
     Channel Already Followed: Heuliañ a rit ar chadenn-mañ dija.
     Channel Could Not Be Loaded: N'eus ket bet gallet kargañ ar chadenn.

@@ -242,10 +242,10 @@ Subscriptions:
     Platform: Alusta
     All Platforms: Kaikki alustat
     Followed Channels: Seuratut kanavat muilla alustoilla
-    Description: Seuraa kanavia palveluissa Twitch, SoundCloud, PeerTube, Rumble ja Odysee, niin näet niiden lataukset tilaustesi Alustat-välilehdellä. Etsi kanavia haulla tai lisää ne niiden sivun osoitteella. Niiden media toistetaan yt-dlp:llä.
+    Description: Seuraa kanavia palveluissa Twitch, SoundCloud, PeerTube, Rumble, Odysee ja media.ccc.de, niin näet niiden lataukset tilaustesi Alustat-välilehdellä. Etsi kanavia haulla tai lisää ne niiden sivun osoitteella. Niiden media toistetaan yt-dlp:llä.
     Add Channel: Lisää kanava
     Channel URL: Kanavan osoite
-    Invalid Channel: Kirjoita kanavasivun osoite palvelusta Twitch, SoundCloud, PeerTube, Rumble tai Odysee.
+    Invalid Channel: Kirjoita kanavasivun osoite palvelusta Twitch, SoundCloud, PeerTube, Rumble, Odysee tai media.ccc.de.
     Channel Not Found: Tässä osoitteessa ei ole kanavaa.
     Channel Already Followed: Seuraat jo tätä kanavaa.
     Channel Could Not Be Loaded: Kanavaa ei voitu ladata.

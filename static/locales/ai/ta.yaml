@@ -254,10 +254,10 @@ Subscriptions:
     Platform: தளம்
     All Platforms: அனைத்து தளங்களும்
     Followed Channels: பிற தளங்களில் பின்தொடரும் சேனல்கள்
-    Description: Twitch, SoundCloud, PeerTube, Rumble, Odysee ஆகியவற்றில் உள்ள சேனல்களைப் பின்தொடர்ந்து, அவற்றின் பதிவேற்றங்களை உங்கள் சந்தாக்களின் தளங்கள் தாவலில் பார்க்கவும். தேடல் மூலம் சேனல்களைக் கண்டறியவும், அல்லது அவற்றின் பக்க முகவரியைக் கொண்டு சேர்க்கவும். அவற்றின் ஊடகம் yt-dlp மூலம் இயக்கப்படும்.
+    Description: Twitch, SoundCloud, PeerTube, Rumble, Odysee, media.ccc.de ஆகியவற்றில் உள்ள சேனல்களைப் பின்தொடர்ந்து, அவற்றின் பதிவேற்றங்களை உங்கள் சந்தாக்களின் தளங்கள் தாவலில் பார்க்கவும். தேடல் மூலம் சேனல்களைக் கண்டறியவும், அல்லது அவற்றின் பக்க முகவரியைக் கொண்டு சேர்க்கவும். அவற்றின் ஊடகம் yt-dlp மூலம் இயக்கப்படும்.
     Add Channel: சேனலைச் சேர்
     Channel URL: சேனல் முகவரி
-    Invalid Channel: Twitch, SoundCloud, PeerTube, Rumble அல்லது Odysee இல் உள்ள ஒரு சேனல் பக்கத்தின் முகவரியை உள்ளிடுக.
+    Invalid Channel: Twitch, SoundCloud, PeerTube, Rumble, Odysee அல்லது media.ccc.de இல் உள்ள ஒரு சேனல் பக்கத்தின் முகவரியை உள்ளிடுக.
     Channel Not Found: இந்த முகவரியில் சேனல் இல்லை.
     Channel Already Followed: இந்தச் சேனலை ஏற்கனவே பின்தொடர்கிறீர்கள்.
     Channel Could Not Be Loaded: சேனலை ஏற்ற முடியவில்லை.

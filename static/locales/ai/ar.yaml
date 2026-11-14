@@ -244,10 +244,10 @@ Subscriptions:
     Platform: المنصة
     All Platforms: كل المنصات
     Followed Channels: القنوات المتابَعة على منصات أخرى
-    Description: تابع قنوات على Twitch وSoundCloud وPeerTube وRumble وOdysee لترى ما تنشره في علامة تبويب المنصات ضمن اشتراكاتك. ابحث عن القنوات باستخدام البحث، أو أضفها بعنوان صفحتها. يتم تشغيل وسائطها باستخدام yt-dlp.
+    Description: تابع قنوات على Twitch وSoundCloud وPeerTube وRumble وOdysee وmedia.ccc.de لترى ما تنشره في علامة تبويب المنصات ضمن اشتراكاتك. ابحث عن القنوات باستخدام البحث، أو أضفها بعنوان صفحتها. يتم تشغيل وسائطها باستخدام yt-dlp.
     Add Channel: إضافة قناة
     Channel URL: عنوان القناة
-    Invalid Channel: أدخل عنوان صفحة قناة على Twitch أو SoundCloud أو PeerTube أو Rumble أو Odysee.
+    Invalid Channel: أدخل عنوان صفحة قناة على Twitch أو SoundCloud أو PeerTube أو Rumble أو Odysee أو media.ccc.de.
     Channel Not Found: لا توجد قناة على هذا العنوان.
     Channel Already Followed: أنت تتابع هذه القناة بالفعل.
     Channel Could Not Be Loaded: تعذّر تحميل القناة.
