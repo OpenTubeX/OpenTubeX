@@ -43,6 +43,7 @@ import { navigationItemsFromLegacySettings, normalizeNavigationItems } from '../
 import { migrateStoredAiVideoSummarySetting, migrateSyncServerUrl } from '../../helpers/settings-migrations.js'
 import { setDiagnosticLogging } from '../../helpers/diagnostics.js'
 import { setAlwaysUseGoogleVideoBackupServer } from '../../helpers/player/googleVideoFallback.js'
+import { networkMetered } from '../../helpers/player/meteredNetworkQuality.js'
 export { NON_TRANSFERABLE_SETTINGS } from '../../../nonTransferableSettings.js'
 
 const CHANNEL_SETTINGS_SYNC_MIGRATION_SETTING = 'channelSettingsSyncMigration'
@@ -544,6 +545,10 @@ const customGetters = {
   getBackendPreference: (state) => !process.env.SUPPORTS_LOCAL_API && state.backendPreference === 'local'
     ? 'invidious'
     : state.backendPreference,
+
+  // Only Android reports metered networks, so `metered` stays off elsewhere.
+  getUseDataSaverThumbnails: (state) => state.thumbnailDataSaverMode === 'always' ||
+    (state.thumbnailDataSaverMode === 'metered' && networkMetered.value),
 
   getFullscreenActions: (state) => normalizeFullscreenActions(state.fullscreenActions),
   getControlBarButtons: (state) => normalizeControlBarButtons(state.controlBarButtons),

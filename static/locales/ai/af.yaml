@@ -635,6 +635,10 @@ Settings:
   Return to Settings Menu: Keer terug na instellingskieslys
   The app needs to restart for changes to take effect. Restart and apply change?: Die toep moet herbegin vir die veranderinge om in werking te tree. Herbegin en pas die verandering toe?
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Af"
+      On Metered Networks: "Op gemeterde netwerke"
+      Always: "Altyd"
     Built-in Streams:
       Built-in Streams: "Ingeboude strome"
       Automatic: "Outomaties"

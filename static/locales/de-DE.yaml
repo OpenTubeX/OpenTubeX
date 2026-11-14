@@ -551,6 +551,10 @@ Settings:
       Right: Auf Vorschaubildern nach rechts wischen
       Description: Wische horizontal über ein Video-Vorschaubild und lasse los, um die ausgewählte Aktion auszuführen.
     Data Saver Thumbnails: "Datensparende Vorschaubilder"
+    Data Saver Thumbnail Modes:
+      Off: Aus
+      On Metered Networks: In getakteten Netzwerken
+      Always: Immer
     Title Lines:
       Title Lines: Titelzeilen
       Unlimited: Unbegrenzt

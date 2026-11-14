@@ -474,6 +474,10 @@ Settings:
       Network: sítě
       Disk: disku
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Vypnuto"
+      On Metered Networks: "V měřených sítích"
+      Always: "Vždy"
     Built-in Streams:
       Built-in Streams: "Vestavěné streamy"
       Automatic: "Automaticky"

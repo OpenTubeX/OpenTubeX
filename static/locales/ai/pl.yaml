@@ -277,6 +277,10 @@ Settings:
     Advanced Description: Backendy, buforowanie, narzędzia zewnętrzne, proxy i diagnostyka
     Alternative providers: Dostawcy filmów i metadanych
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Wyłączone"
+      On Metered Networks: "W sieciach z pomiarem użycia danych"
+      Always: "Zawsze"
     Confirmation Options:
       Refreshing All Feeds: Odświeżaniem wielu subskrypcji
     Built-in Streams:

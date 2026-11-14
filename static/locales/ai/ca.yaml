@@ -607,6 +607,10 @@ Settings:
       Disk: disc
   Return to Settings Menu: Torna al menú de configuració
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Desactivat"
+      On Metered Networks: "En xarxes amb límit de dades"
+      Always: "Sempre"
     Built-in Streams:
       Built-in Streams: "Fluxos integrats"
       Automatic: "Automàtic"

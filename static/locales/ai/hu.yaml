@@ -474,6 +474,10 @@ Settings:
       Network: hálózat
       Disk: lemez
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Ki"
+      On Metered Networks: "Forgalomkorlátos hálózatokon"
+      Always: "Mindig"
     Built-in Streams:
       Built-in Streams: "Beépített streamek"
       Automatic: "Automatikus"

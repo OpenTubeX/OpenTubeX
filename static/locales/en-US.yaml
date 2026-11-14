@@ -775,6 +775,10 @@ Settings:
       Right: Swipe right on thumbnails
       Description: Swipe a video thumbnail horizontally and release to perform the selected action.
     Data Saver Thumbnails: "Data saver thumbnails"
+    Data Saver Thumbnail Modes:
+      Off: Off
+      On Metered Networks: On metered networks
+      Always: Always
     Title Lines:
       Title Lines: Title Lines
       Unlimited: Unlimited

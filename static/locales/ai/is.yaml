@@ -474,6 +474,10 @@ Settings:
       Network: nets
       Disk: disks
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Slökkt"
+      On Metered Networks: "Á mældum netum"
+      Always: "Alltaf"
     Built-in Streams:
       Built-in Streams: "Innbyggðir straumar"
       Automatic: "Sjálfvirkt"

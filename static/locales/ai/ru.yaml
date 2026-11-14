@@ -433,6 +433,10 @@ Settings:
       Network: сеть
       Disk: диск
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Выкл."
+      On Metered Networks: "В лимитных сетях"
+      Always: "Всегда"
     Built-in Streams:
       Built-in Streams: "Встроенные потоки"
       Automatic: "Автоматически"

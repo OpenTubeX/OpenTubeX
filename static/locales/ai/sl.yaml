@@ -599,6 +599,10 @@ Settings:
       Disk: disk
   Return to Settings Menu: Nazaj v meni z nastavitvami
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Izklopljeno"
+      On Metered Networks: "V omrežjih z omejitvijo prenosa"
+      Always: "Vedno"
     Built-in Streams:
       Built-in Streams: "Vgrajeni tokovi"
       Automatic: "Samodejno"

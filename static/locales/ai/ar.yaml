@@ -479,6 +479,10 @@ Settings:
       Network: شبكة
       Disk: القرص
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "إيقاف"
+      On Metered Networks: "على الشبكات المحدودة"
+      Always: "دائمًا"
     Built-in Streams:
       Built-in Streams: "البث المدمج"
       Automatic: "تلقائي"

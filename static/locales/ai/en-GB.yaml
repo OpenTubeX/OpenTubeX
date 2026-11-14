@@ -471,6 +471,10 @@ Settings:
       Network: network
       Disk: disk
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Off"
+      On Metered Networks: "On metered networks"
+      Always: "Always"
     Built-in Streams:
       Built-in Streams: "Built-in streams"
       Automatic: "Automatic"

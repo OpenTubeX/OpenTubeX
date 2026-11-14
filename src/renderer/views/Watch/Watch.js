@@ -1040,7 +1040,7 @@ export default defineComponent({
         this.backendPreference,
         this.currentInvidiousInstanceUrl,
         this.thumbnailPreference,
-        this.$store.getters.getThumbnailDataSaver
+        this.$store.getters.getUseDataSaverThumbnails
       ) ?? ''
     },
     shortsCommentsPanelOpen: function () {
@@ -1490,7 +1490,7 @@ export default defineComponent({
       this.showDownloadPrompt = false
       this.shortsNavigation.resetSwipe()
     },
-    '$store.getters.getThumbnailDataSaver'() {
+    '$store.getters.getUseDataSaverThumbnails'() {
       const short = this.currentSubscriptionShort
       if (short?.thumbnailUrl && short.lowResolutionThumbnailUrl) {
         this.updateShortThumbnail()
@@ -1666,7 +1666,7 @@ export default defineComponent({
         this.backendPreference,
         this.currentInvidiousInstanceUrl,
         this.thumbnailPreference,
-        this.$store.getters.getThumbnailDataSaver
+        this.$store.getters.getUseDataSaverThumbnails
       ) ?? '',
       getViewport: () => this.$refs.shortsSwipeViewport,
       openShort: this.openSubscriptionShort,
@@ -3115,7 +3115,7 @@ export default defineComponent({
         this.backendPreference,
         this.currentInvidiousInstanceUrl,
         this.thumbnailPreference,
-        this.$store.getters.getThumbnailDataSaver
+        this.$store.getters.getUseDataSaverThumbnails
       ) ?? this.thumbnail
     },
 

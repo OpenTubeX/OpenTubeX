@@ -475,6 +475,10 @@ Settings:
       Network: jaringan
       Disk: disk
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Mati"
+      On Metered Networks: "Di jaringan terukur"
+      Always: "Selalu"
     Built-in Streams:
       Built-in Streams: "Streaming bawaan"
       Automatic: "Otomatis"

@@ -283,6 +283,14 @@ test('devices read the Hold to Speed Up multiplier from the switch of older vers
   assert.equal(migrateLegacySyncedSettings({ holdToDoublePlaybackSpeed: legacy, holdPlaybackRateMultiplier: current }).holdPlaybackRateMultiplier, current)
 })
 
+test('devices read the Data Saver Thumbnails mode from the switch of older versions', () => {
+  const legacy = { key: 'thumbnailDataSaver', value: true, updatedAt: 10 }
+  assert.deepEqual(migrateLegacySyncedSettings({ thumbnailDataSaver: legacy }).thumbnailDataSaverMode,
+    { key: 'thumbnailDataSaverMode', value: 'always', updatedAt: 10 })
+  const current = { key: 'thumbnailDataSaverMode', value: 'metered', updatedAt: 5 }
+  assert.equal(migrateLegacySyncedSettings({ thumbnailDataSaver: legacy, thumbnailDataSaverMode: current }).thumbnailDataSaverMode, current)
+})
+
 test('devices read the scroll player select from the mini player switch of older versions', () => {
   const legacy = { key: 'scrollMiniPlayerEnabled', value: false, updatedAt: 10 }
   assert.deepEqual(migrateLegacySyncedSettings({ scrollMiniPlayerEnabled: legacy }).scrollPlayerMode,

@@ -19,12 +19,13 @@
         @change="updateShowThumbnailPreviews"
       />
       <FtToggleSwitch
+        v-if="!SUPPORTS_METERED_NETWORK_DETECTION"
         :label="t('Settings.General Settings.Data Saver Thumbnails')"
-        :default-value="thumbnailDataSaver"
-        setting-key="thumbnailDataSaver"
+        :default-value="thumbnailDataSaverMode === 'always'"
+        setting-key="thumbnailDataSaverMode"
         compact
         :tooltip="t('Tooltips.General Settings.Data Saver Thumbnails')"
-        @change="store.dispatch('updateThumbnailDataSaver', $event)"
+        @change="store.dispatch('updateThumbnailDataSaverMode', $event ? 'always' : 'off')"
       />
     </div>
     <div class="switchGrid generalSelectGrid">
@@ -93,6 +94,18 @@
         :icon="['fas', 'images']"
         @change="handleThumbnailPreferenceChange"
         @reset="resetThumbnailPreference"
+      />
+      <FtSelect
+        v-if="SUPPORTS_METERED_NETWORK_DETECTION"
+        size-to-content
+        :placeholder="t('Settings.General Settings.Data Saver Thumbnails')"
+        :value="thumbnailDataSaverMode"
+        setting-key="thumbnailDataSaverMode"
+        :select-names="thumbnailDataSaverModeNames"
+        :select-values="THUMBNAIL_DATA_SAVER_MODE_VALUES"
+        :tooltip="t('Tooltips.General Settings.Data Saver Thumbnails')"
+        :icon="['fas', 'images']"
+        @change="store.dispatch('updateThumbnailDataSaverMode', $event)"
       />
       <FtSelect
         size-to-content
@@ -238,7 +251,17 @@ const showVideoMenuButton = computed(() => store.getters.getShowVideoMenuButton)
 /** @type {import('vue').ComputedRef<boolean>} */
 const showThumbnailPreviews = computed(() => store.getters.getShowThumbnailPreviews)
 
-const thumbnailDataSaver = computed(() => store.getters.getThumbnailDataSaver)
+// Only Android reports metered networks, elsewhere the switch toggles Always.
+const SUPPORTS_METERED_NETWORK_DETECTION = process.env.IS_CAPACITOR && !process.env.IS_IOS
+const THUMBNAIL_DATA_SAVER_MODE_VALUES = ['off', 'metered', 'always']
+const thumbnailDataSaverModeNames = computed(() => [
+  t('Settings.General Settings.Data Saver Thumbnail Modes.Off'),
+  t('Settings.General Settings.Data Saver Thumbnail Modes.On Metered Networks'),
+  t('Settings.General Settings.Data Saver Thumbnail Modes.Always'),
+])
+
+/** @type {import('vue').ComputedRef<'off' | 'metered' | 'always'>} */
+const thumbnailDataSaverMode = computed(() => store.getters.getThumbnailDataSaverMode)
 
 // 0 shows titles in full.
 const TITLE_LINE_LIMIT_VALUES = [1, 2, 3, 0]

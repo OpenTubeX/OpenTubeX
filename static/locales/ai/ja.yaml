@@ -474,6 +474,10 @@ Settings:
       Network: ネットワーク
       Disk: ディスク
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "オフ"
+      On Metered Networks: "従量制ネットワークのみ"
+      Always: "常に"
     Built-in Streams:
       Built-in Streams: "組み込みストリーム"
       Automatic: "自動"

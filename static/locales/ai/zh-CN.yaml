@@ -474,6 +474,10 @@ Settings:
       Network: 网络
       Disk: 磁盘
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "关闭"
+      On Metered Networks: "按流量计费的网络"
+      Always: "始终"
     Built-in Streams:
       Built-in Streams: "内置流"
       Automatic: "自动"

@@ -6,6 +6,7 @@ import {
   holdPlaybackRateMultiplierFromSwitch,
   migrateSettingIds,
   scrollPlayerModeFromMiniPlayerSwitch,
+  thumbnailDataSaverModeFromSwitch,
   titleLineLimitFromSwitch,
 } from '../../datastores/settingsMigrations.js'
 
@@ -62,6 +63,12 @@ export function migrateLegacySyncedSettings(remote) {
   if (holdToDouble && !remote.holdPlaybackRateMultiplier) {
     migrated.holdPlaybackRateMultiplier = {
       ...holdToDouble, key: 'holdPlaybackRateMultiplier', value: holdPlaybackRateMultiplierFromSwitch(holdToDouble.value),
+    }
+  }
+  const thumbnailDataSaver = remote.thumbnailDataSaver
+  if (thumbnailDataSaver && !remote.thumbnailDataSaverMode) {
+    migrated.thumbnailDataSaverMode = {
+      ...thumbnailDataSaver, key: 'thumbnailDataSaverMode', value: thumbnailDataSaverModeFromSwitch(thumbnailDataSaver.value),
     }
   }
   // Auto Load Next Page used to control comments too.

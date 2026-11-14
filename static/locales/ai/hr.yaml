@@ -477,6 +477,10 @@ Settings:
       Network: mreže
       Disk: diska
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Isključeno"
+      On Metered Networks: "Na mrežama s ograničenjem podataka"
+      Always: "Uvijek"
     Built-in Streams:
       Built-in Streams: "Ugrađeni streamovi"
       Automatic: "Automatski"

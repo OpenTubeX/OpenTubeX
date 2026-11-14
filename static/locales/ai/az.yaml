@@ -476,6 +476,10 @@ Settings:
       Network: şəbəkə
       Disk: disk
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Söndürülüb"
+      On Metered Networks: "Limitli şəbəkələrdə"
+      Always: "Həmişə"
     Built-in Streams:
       Built-in Streams: "Daxili yayımlar"
       Automatic: "Avtomatik"

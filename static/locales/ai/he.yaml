@@ -479,6 +479,10 @@ Settings:
       Network: רשת
       Disk: כונן
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "כבוי"
+      On Metered Networks: "ברשתות עם הגבלת נתונים"
+      Always: "תמיד"
     Built-in Streams:
       Built-in Streams: "זרמים מובנים"
       Automatic: "אוטומטי"

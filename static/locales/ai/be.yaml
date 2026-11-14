@@ -497,6 +497,10 @@ Settings:
       Network: сетка
       Disk: дыск
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Выкл."
+      On Metered Networks: "У лімітных сетках"
+      Always: "Заўсёды"
     Built-in Streams:
       Built-in Streams: "Убудаваныя патокі"
       Automatic: "Аўтаматычна"

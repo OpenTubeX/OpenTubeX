@@ -510,6 +510,10 @@ Settings:
       Network: reto
       Disk: disko
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Malŝaltita"
+      On Metered Networks: "Ĉe mezurataj retoj"
+      Always: "Ĉiam"
     Built-in Streams:
       Built-in Streams: "Enkonstruitaj fluoj"
       Automatic: "Aŭtomata"

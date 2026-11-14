@@ -24,7 +24,7 @@ async function mountAvatar(t, nativeResult, componentPath = 'FtChannelAvatar/FtC
   const loads = []
   const timers = new Map()
   const observers = []
-  const settings = Vue.reactive({ getThumbnailDataSaver: false })
+  const settings = Vue.reactive({ getUseDataSaverThumbnails: false })
   const RetryImage = await compileComponent('FtRetryImage.vue', {
     process: { env: { IS_CAPACITOR: isCapacitor } },
     store: { getters: settings },
@@ -171,15 +171,15 @@ test('data saver changes loaded thumbnail sources and resets resolution fallback
   const f = await mountAvatar(t, null, 'FtRetryImage.vue')
   f.thumbnail.value = 'https://invidious.test/vi/video/maxresdefault.jpg?cache=1'
   await Vue.nextTick()
-  f.settings.getThumbnailDataSaver = true
+  f.settings.getUseDataSaverThumbnails = true
   await Vue.nextTick()
   assert.equal(f.find('img').props.src, 'https://invidious.test/vi/video/mqdefault.jpg?cache=1')
-  f.settings.getThumbnailDataSaver = false
+  f.settings.getUseDataSaverThumbnails = false
   await Vue.nextTick()
   assert.equal(f.find('img').props.src, f.thumbnail.value)
   await fail(f.find('img'))
   assert.equal(f.find('img').props.src, 'https://invidious.test/vi/video/sddefault.jpg?cache=1')
-  f.settings.getThumbnailDataSaver = true
+  f.settings.getUseDataSaverThumbnails = true
   await Vue.nextTick()
   assert.equal(f.find('img').props.src, 'https://invidious.test/vi/video/mqdefault.jpg?cache=1')
   assert.equal(f.timers.size, 1)

@@ -484,6 +484,10 @@ Settings:
       Network: мрежа
       Disk: диск
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Искључено"
+      On Metered Networks: "На мрежама са ограничењем података"
+      Always: "Увек"
     Built-in Streams:
       Built-in Streams: "Уграђени токови"
       Automatic: "Аутоматски"
