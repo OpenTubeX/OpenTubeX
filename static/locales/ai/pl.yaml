@@ -1506,7 +1506,7 @@ Tooltips:
     Sync Playlists: "Twoje playlisty z YouTube oraz „Do obejrzenia” i „Filmy, które mi się podobają” pojawiają się w sekcji „Twoje playlisty”, a zmiany, które w nich tutaj wprowadzasz, są wprowadzane także na YouTube. Nie są synchronizowane z innymi twoimi urządzeniami ani uwzględniane, gdy eksportujesz wszystkie playlisty lub tworzysz kopię zapasową danych. Wyłączenie tej opcji usuwa je z tego urządzenia, ale nie z YouTube."
     Add to YouTube Watch History: "Odtwarzane filmy są dodawane do twojej historii oglądania na YouTube, więc rekomendacje YouTube uczą się na ich podstawie. Gdy historia jest wstrzymana na YouTube, nic nie jest dodawane."
     Rate Videos: "Pokazuje przy filmach przyciski Podoba mi się i Nie podoba mi się. Aby pokazać Twoją ocenę, każdy otwarty film jest sprawdzany w YouTube przy użyciu Twojego konta, więc YouTube wie, które filmy otwierasz, nawet jeśli nie są dodawane do historii oglądania."
-    Reply Notifications: "Gdy OpenTubeX działa, sprawdza, czy pod komentarzami opublikowanymi tutaj w ciągu ostatnich 30 dni pojawiły się nowe odpowiedzi. Komentarze opublikowane gdzie indziej, na przykład w witrynie YouTube, nie są uwzględniane."
+    Reply Notifications: "OpenTubeX sprawdza, czy pod komentarzami opublikowanymi tutaj w ciągu ostatnich 30 dni pojawiły się nowe odpowiedzi. Komentarze opublikowane gdzie indziej, na przykład w witrynie YouTube, nie są uwzględniane."
   General Settings:
     Built-in Streams: |
       Tryb automatyczny odtwarza większość filmów przez klienta visionOS YouTube, który uruchamia się szybciej i obsługuje automatyczną jakość. Transmisje na żywo i filmy, których nie może odtworzyć, używają SABR.

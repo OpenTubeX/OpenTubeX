@@ -2261,7 +2261,7 @@ Tooltips:
     Rate Videos: "Viser knapper for å like og mislike videoer. For å vise vurderingen din blir hver video du åpner, slått opp på YouTube med kontoen din, så YouTube får vite hvilke videoer du åpner, også når de ikke legges til i seerloggen din."
     Sync Subscriptions: "Når du abonnerer på en kanal på YouTube, legges den til i «Alle kanaler», og når du avslutter abonnementet der, fjernes den fra alle profiler. Å abonnere eller avslutte abonnementet her i «Alle kanaler» gjør det samme på YouTube."
     Sync Playlists: "YouTube-spillelistene dine, «Se senere» og «Likte videoer» vises i «Dine spillelister», og endringer du gjør i dem her, gjøres også på YouTube. De synkroniseres ikke til de andre enhetene dine og tas ikke med når du eksporterer alle spillelister eller sikkerhetskopierer dataene dine. Hvis du slår av dette, fjernes de fra denne enheten, men ikke fra YouTube."
-    Reply Notifications: "Mens OpenTubeX kjører, sjekker den kommentarene du har skrevet her de siste 30 dagene, for nye svar. Kommentarer du har skrevet andre steder, for eksempel på YouTube-nettstedet, er ikke med."
+    Reply Notifications: "OpenTubeX sjekker kommentarene du har skrevet her de siste 30 dagene, for nye svar. Kommentarer du har skrevet andre steder, for eksempel på YouTube-nettstedet, er ikke med."
   General Settings:
     Built-in Streams: |
       Automatisk spiller de fleste videoer via YouTubes visionOS-klient, som starter raskere og støtter automatisk kvalitet. Direktesendinger og videoer den ikke kan spille av, bruker SABR.

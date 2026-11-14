@@ -2259,7 +2259,7 @@ Tooltips:
     Sync Playlists: "您的 YouTube 播放清單、「稍後觀看」和「喜歡的影片」會顯示在「您的播放清單」中，您在這裡對它們所做的變更也會套用到 YouTube。它們不會同步到您的其他裝置，在您匯出所有播放清單或備份資料時也不會包含在內。關閉此選項會將它們從這部裝置中移除，但不會從 YouTube 移除。"
     Add to YouTube Watch History: "您播放的影片會加入您的 YouTube 觀看紀錄，讓 YouTube 的推薦內容從中學習。在 YouTube 上暫停觀看紀錄時，不會加入任何內容。"
     Rate Videos: "在影片上顯示喜歡和不喜歡按鈕。為了顯示你的評價，你開啟的每部影片都會用你的帳戶在 YouTube 上查詢，因此即使影片沒有加入觀看記錄，YouTube 也會知道你開啟了哪些影片。"
-    Reply Notifications: "OpenTubeX 執行期間，會檢查你過去 30 天內在此發布的留言是否有新回覆。在其他地方（例如 YouTube 網站）發布的留言不包含在內。"
+    Reply Notifications: "OpenTubeX 會檢查你過去 30 天內在此發布的留言是否有新回覆。在其他地方（例如 YouTube 網站）發布的留言不包含在內。"
   General Settings:
     Built-in Streams: |
       自動模式透過 YouTube 的 visionOS 用戶端播放大多數影片，啟動更快並支援自動畫質。直播和它無法播放的影片會使用 SABR。

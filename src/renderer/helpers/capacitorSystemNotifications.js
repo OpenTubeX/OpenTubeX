@@ -63,13 +63,15 @@ export async function closeCapacitorSystemNotifications(entries) {
   /** @type {Map<string, number>} */
   const reminders = new Map()
   const uploads = []
-  /** @type {number[]} replies, and Twitch broadcasts that iOS announced itself */
+  /** @type {number[]} replies and Twitch broadcasts that iOS announced itself */
   const localIds = []
   for (const { kind, path, query, createdAt } of entries) {
     const id = path.split('/').at(-1)
     const twitchLogin = path === '/external-media' ? parseTwitchChannelLogin(query?.url) : null
     if (kind === 'live-reminder') reminders.set(id, createdAt)
-    else if (kind === 'comment-reply' && query?.commentId) localIds.push(getCommentReplyLocalNotificationId(query.commentId))
+    else if (kind === 'comment-reply' && query?.commentId && process.env.IS_IOS) localIds.push(getCommentReplyLocalNotificationId(query.commentId))
+    // Android announces replies like uploads
+    else if (kind === 'comment-reply' && query?.commentId) uploads.push({ feedType: 'comment-reply', id: `${id}/${query.commentId}` })
     else if (twitchLogin && query?.stream && process.env.IS_IOS) localIds.push(getTwitchLocalNotificationId(query.stream))
     else if (twitchLogin && query?.stream) uploads.push({ feedType: 'twitch', id: getTwitchNotificationId(twitchLogin, query.stream) })
     else if (kind in UPLOAD_FEED_TYPES) uploads.push({ feedType: UPLOAD_FEED_TYPES[kind], id })

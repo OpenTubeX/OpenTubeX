@@ -2268,7 +2268,7 @@ Tooltips:
     Sync Playlists: "YouTube pleylistləriniz, “Sonra baxın” və “Bəyənilən videolar” “Pleylistləriniz” bölməsində görünür və burada onlara etdiyiniz dəyişikliklər YouTube-da da edilir. Onlar digər cihazlarınızla sinxronlaşdırılmır və bütün pleylistləri ixrac etdikdə və ya məlumatlarınızın ehtiyat nüsxəsini çıxardıqda daxil edilmir. Bunu söndürmək onları bu cihazdan silir, lakin YouTube-dan silmir."
     Add to YouTube Watch History: "Oxutduğunuz videolar YouTube baxış tarixçənizə əlavə olunur, beləliklə YouTube tövsiyələri onlardan öyrənir. YouTube-da tarixçə dayandırılıbsa, heç nə əlavə olunmur."
     Rate Videos: "Videolarda bəyən və bəyənmə düymələrini göstərir. Qiymətləndirmənizi göstərmək üçün açdığınız hər video hesabınızla YouTube-da yoxlanılır, buna görə YouTube hansı videoları açdığınızı öyrənir, hətta onlar baxış tarixçənizə əlavə edilməsə belə."
-    Reply Notifications: "OpenTubeX işlədikcə son 30 gündə burada yazdığınız şərhlərə yeni cavabların olub-olmadığını yoxlayır. Başqa yerdə, məsələn, YouTube saytında yazdığınız şərhlər daxil deyil."
+    Reply Notifications: "OpenTubeX son 30 gündə burada yazdığınız şərhlərə yeni cavabların olub-olmadığını yoxlayır. Başqa yerdə, məsələn, YouTube saytında yazdığınız şərhlər daxil deyil."
   General Settings:
     Built-in Streams: |
       Avtomatik rejim əksər videoları YouTube-un visionOS müştərisi ilə oynadır; o, daha tez başlayır və avtomatik keyfiyyəti dəstəkləyir. Canlı yayımlar və onun oynada bilmədiyi videolar SABR istifadə edir.

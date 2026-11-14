@@ -2256,7 +2256,7 @@ Tooltips:
     Rate Videos: "Mostra i pulsanti Mi piace e Non mi piace sui video. Per mostrare la tua valutazione, ogni video che apri viene cercato su YouTube con il tuo account, quindi YouTube sa quali video apri, anche quando non vengono aggiunti alla cronologia visualizzazioni."
     Sync Subscriptions: "I canali a cui ti iscrivi su YouTube vengono aggiunti a «Tutti i canali», e quelli da cui annulli l'iscrizione lì vengono rimossi da tutti i profili. Iscriversi o annullare l'iscrizione qui in «Tutti i canali» fa lo stesso su YouTube."
     Sync Playlists: "Le tue playlist di YouTube, «Guarda più tardi» e «Video piaciuti» compaiono in «Le tue playlist», e le modifiche che vi apporti qui vengono applicate anche su YouTube. Non vengono sincronizzate con gli altri tuoi dispositivi né incluse quando esporti tutte le playlist o esegui il backup dei tuoi dati. Disattivando questa opzione vengono rimosse da questo dispositivo, ma non da YouTube."
-    Reply Notifications: "Mentre OpenTubeX è in esecuzione, controlla se ci sono nuove risposte ai commenti che hai pubblicato qui negli ultimi 30 giorni. I commenti pubblicati altrove, ad esempio sul sito web di YouTube, non sono inclusi."
+    Reply Notifications: "OpenTubeX controlla se ci sono nuove risposte ai commenti che hai pubblicato qui negli ultimi 30 giorni. I commenti pubblicati altrove, ad esempio sul sito web di YouTube, non sono inclusi."
   General Settings:
     Built-in Streams: |
       Automatico riproduce la maggior parte dei video tramite il client visionOS di YouTube, che si avvia più rapidamente e supporta la qualità automatica. Le dirette e i video che non può riprodurre usano SABR.

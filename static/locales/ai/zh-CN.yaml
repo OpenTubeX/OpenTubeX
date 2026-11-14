@@ -2255,7 +2255,7 @@ Tooltips:
     Sync Playlists: "你的 YouTube 播放列表、“稍后观看”和“赞过的视频”会显示在“您的播放列表”中，你在此处对它们所做的更改也会在 YouTube 上生效。它们不会同步到你的其他设备，在你导出所有播放列表或备份数据时也不会包含在内。关闭此选项会将它们从此设备中移除，但不会从 YouTube 中移除。"
     Add to YouTube Watch History: "你播放的视频会添加到你的 YouTube 观看历史记录中，让 YouTube 的推荐据此学习。在 YouTube 上暂停历史记录时，不会添加任何内容。"
     Rate Videos: "在视频上显示顶和踩按钮。为了显示你的评价，你打开的每个视频都会用你的账号在 YouTube 上查询，因此即使视频没有添加到观看记录中，YouTube 也会知道你打开了哪些视频。"
-    Reply Notifications: "OpenTubeX 运行时，会检查你在过去 30 天内在此发布的评论是否有新回复。在其他地方（例如 YouTube 网站）发布的评论不包括在内。"
+    Reply Notifications: "OpenTubeX 会检查你在过去 30 天内在此发布的评论是否有新回复。在其他地方（例如 YouTube 网站）发布的评论不包括在内。"
   General Settings:
     Built-in Streams: |
       自动模式通过 YouTube 的 visionOS 客户端播放大多数视频，启动更快并支持自动画质。直播和它无法播放的视频使用 SABR。

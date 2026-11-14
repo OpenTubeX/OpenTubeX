@@ -84,7 +84,7 @@ final class OpenTubeXNotificationChannels {
                 NotificationManager.IMPORTANCE_DEFAULT,
                 true
             ),
-            // Capacitor LocalNotifications owns replies to the account's comments.
+            // CommentReplyNotifications owns replies to the account's comments.
             new ChannelSpec(
                 COMMENT_REPLIES_ID,
                 R.string.notification_channel_comment_replies_name,

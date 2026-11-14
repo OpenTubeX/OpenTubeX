@@ -2615,7 +2615,7 @@ Tooltips:
     Sync Playlists: "Tus listas de reproducción de YouTube, “Ver más tarde” y “Videos que me gustan” aparecen en “Tus Listas de Reproducción”, y los cambios que les hagas aquí también se hacen en YouTube. No se sincronizan con tus otros dispositivos ni se incluyen cuando exportas todas las listas de reproducción o haces una copia de seguridad de tus datos. Si desactivas esta opción, se quitan de este dispositivo, pero no de YouTube."
     Add to YouTube Watch History: "Los videos que reproduces se agregan a tu historial de reproducciones de YouTube, para que las recomendaciones de YouTube aprendan de ellos. No se agrega nada mientras el historial esté en pausa en YouTube."
     Rate Videos: "Muestra los botones de me gusta y no me gusta en los videos. Para mostrar tu calificación, cada video que abres se consulta en YouTube con tu cuenta, así que YouTube sabe qué videos abres, aunque no se agreguen a tu historial de reproducciones."
-    Reply Notifications: "Mientras OpenTubeX está en ejecución, revisa si hay respuestas nuevas a los comentarios que publicaste aquí en los últimos 30 días. No se incluyen los comentarios que publicaste en otros lugares, como en el sitio web de YouTube."
+    Reply Notifications: "OpenTubeX revisa si hay respuestas nuevas a los comentarios que publicaste aquí en los últimos 30 días. No se incluyen los comentarios que publicaste en otros lugares, como en el sitio web de YouTube."
   General Settings:
     Built-in Streams: |
       Automático reproduce la mayoría de los videos con el cliente visionOS de YouTube, que inicia más rápido y admite la calidad automática. Las transmisiones en vivo y los videos que no puede reproducir usan SABR.

@@ -2257,7 +2257,7 @@ Tooltips:
     Rate Videos: "Megjeleníti a videóknál a Tetszik és Nem tetszik gombokat. Az értékelésed megjelenítéséhez minden megnyitott videót lekérdez a YouTube-on a fiókoddal, így a YouTube megtudja, mely videókat nyitod meg, akkor is, ha nem kerülnek be a megtekintési előzményeidbe."
     Sync Subscriptions: "Azok a csatornák, amelyekre a YouTube-on feliratkozik, bekerülnek az „Összes csatorna” profilba, azok pedig, amelyekről ott leiratkozik, minden profilból törlődnek. Ha itt az „Összes csatorna” profilban feliratkozik vagy leiratkozik, az a YouTube-on is megtörténik."
     Sync Playlists: "A YouTube-lejátszási listái, a „Megnézendő” és a „Kedvelt videók” megjelennek a „Saját lejátszási listák” között, és az itt rajtuk végzett módosítások a YouTube-on is megtörténnek. Nem szinkronizálódnak a többi eszközére, és nem kerülnek bele, amikor az összes lejátszási listát exportálja, vagy biztonsági mentést készít az adatairól. Ha ezt kikapcsolja, eltűnnek erről az eszközről, de a YouTube-ról nem."
-    Reply Notifications: "Amíg az OpenTubeX fut, ellenőrzi, hogy érkezett-e új válasz az itt az elmúlt 30 napban közzétett hozzászólásaidra. A máshol, például a YouTube webhelyén közzétett hozzászólások nem számítanak bele."
+    Reply Notifications: "Az OpenTubeX ellenőrzi, hogy érkezett-e új válasz az itt az elmúlt 30 napban közzétett hozzászólásaidra. A máshol, például a YouTube webhelyén közzétett hozzászólások nem számítanak bele."
   General Settings:
     Built-in Streams: |
       Az automatikus mód a legtöbb videót a YouTube visionOS-kliensével játssza le, amely gyorsabban indul és támogatja az automatikus minőséget. Az élő közvetítések és az általa nem lejátszható videók SABR-t használnak.

@@ -2345,7 +2345,7 @@ Tooltips:
     Sync Playlists: "Dine YouTube-playlister, “Se senere” og “Videoer, jeg synes godt om” vises i “Dine playlister”, og ændringer, du foretager i dem her, foretages også på YouTube. De synkroniseres ikke til dine andre enheder og medtages ikke, når du eksporterer alle playlister eller sikkerhedskopierer dine data. Hvis du slår dette fra, fjernes de fra denne enhed, men ikke fra YouTube."
     Add to YouTube Watch History: "Videoer, du afspiller, føjes til din YouTube-visningshistorik, så YouTubes anbefalinger lærer af dem. Der føjes intet til, mens historikken er sat på pause på YouTube."
     Rate Videos: "Viser knapperne Synes godt om og Synes ikke om på videoer. For at vise din bedømmelse slås hver video, du åbner, op på YouTube med din konto, så YouTube får at vide, hvilke videoer du åbner, også når de ikke føjes til din visningshistorik."
-    Reply Notifications: "Mens OpenTubeX kører, tjekker den de kommentarer, du har skrevet her inden for de sidste 30 dage, for nye svar. Kommentarer, du har skrevet andre steder, f.eks. på YouTubes websted, er ikke medtaget."
+    Reply Notifications: "OpenTubeX tjekker de kommentarer, du har skrevet her inden for de sidste 30 dage, for nye svar. Kommentarer, du har skrevet andre steder, f.eks. på YouTubes websted, er ikke medtaget."
   General Settings:
     Built-in Streams: |
       Automatisk afspiller de fleste videoer via YouTubes visionOS-klient, som starter hurtigere og understøtter automatisk kvalitet. Livestreams og videoer, den ikke kan afspille, bruger SABR.

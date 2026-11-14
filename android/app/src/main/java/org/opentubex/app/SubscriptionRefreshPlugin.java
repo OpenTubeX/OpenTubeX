@@ -237,6 +237,41 @@ public class SubscriptionRefreshPlugin extends Plugin {
     }
 
     @PluginMethod
+    public void configureCommentReplies(PluginCall call) {
+        JSObject configuration = call.getObject("configuration");
+        if (configuration == null) {
+            call.reject("A comment reply configuration is required");
+            return;
+        }
+        CommentReplyNotifications.configure(getContext(), configuration);
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void trackCommentReplies(PluginCall call) {
+        JSObject comment = call.getObject("comment");
+        if (comment == null) {
+            call.reject("A comment is required");
+            return;
+        }
+        Context context = getContext();
+        UPLOADS.execute(() -> {
+            try {
+                CommentReplyNotifications.track(context, comment);
+                call.resolve();
+            } catch (Exception error) {
+                call.reject("Unable to watch the comment for replies", error);
+            }
+        });
+    }
+
+    @PluginMethod
+    public void clearCommentReplies(PluginCall call) {
+        CommentReplyNotifications.clear(getContext());
+        call.resolve();
+    }
+
+    @PluginMethod
     public void observeTwitchLive(PluginCall call) {
         JSArray streams = call.getArray("streams");
         JSArray channelIds = call.getArray("channelIds");

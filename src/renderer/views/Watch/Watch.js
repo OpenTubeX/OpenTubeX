@@ -659,7 +659,9 @@ export default defineComponent({
     },
     phoneLinkedCommentId() {
       // Loading a video closes the panels.
-      return this.phonePanelsEnabled && !this.isLoading ? this.tabRoute.query.commentId ?? null : null
+      return (this.phonePanelsEnabled || this.shortsPhonePanelsEnabled) && !this.isLoading
+        ? this.tabRoute.query.commentId ?? null
+        : null
     },
     isMusicVideo: function () {
       // Lists pass on YouTube's music badge, which also covers music videos outside the Music category
@@ -1457,7 +1459,8 @@ export default defineComponent({
       handler(commentId) {
         if (!commentId || commentId === this.openedLinkedCommentId) return
         this.openedLinkedCommentId = commentId
-        this.openPhonePanel('comments')
+        if (this.shortsPhonePanelsEnabled) this.openShortsPhonePanel('comments')
+        else this.openPhonePanel('comments')
       },
       immediate: true
     },

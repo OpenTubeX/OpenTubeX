@@ -1,12 +1,15 @@
 import { LocalNotifications } from '@capacitor/local-notifications'
+import { Constants } from 'youtubei.js'
 
 import store from '../store/index'
 import i18n from '../i18n/index'
 import { getLocalComments } from './api/local'
+import { createLinkedCommentsContinuation } from './api/youtube-account-parsers'
+import { clearAndroidCommentReplies, configureAndroidCommentReplies, trackAndroidCommentReplies } from './androidSubscriptionRefresh'
 import { isAppHidden } from './appVisibility'
 import { capacitorNotificationHistory } from './capacitorNotificationHistory'
 import { getCommentReplyLocalNotificationId } from './capacitorSystemNotifications'
-import { openNotificationEntry, showInAppNotification, withThumbnail } from './notificationHistory'
+import { getNotificationThumbnailUrl, openNotificationEntry, showInAppNotification, withThumbnail } from './notificationHistory'
 import { getSelectedYouTubeProfile, isSignedInToYouTube } from './youtube-account-state'
 import {
   findNewReplies,
@@ -21,6 +24,8 @@ const CHECK_INTERVAL_MS = 15 * 60 * 1000
 // Reply pages hold 10 replies each.
 const MAX_REPLY_PAGES = 10
 const CHANNEL_ID = 'comment-replies'
+// Android checks natively, also while the app is closed.
+const isAndroid = !!process.env.IS_CAPACITOR && !process.env.IS_IOS
 
 /** @returns {import('../../commentReplyTracking.js').TrackedCommentThread[]} */
 function loadThreads() {
@@ -54,7 +59,54 @@ export function trackCommentReplies(videoId, threadId, commentId, account) {
   // Without its channel, the account's own replies would be announced too.
   if (!isEnabled() || !account?.channelId) return
   const handle = getSelectedYouTubeProfile(account)?.handle ?? null
-  saveThreads(trackPostedComment(loadThreads(), { videoId, threadId, commentId, channelId: account.channelId, handle }))
+  if (isAndroid) {
+    const token = createLinkedCommentsContinuation(videoId, threadId)
+    trackAndroidCommentReplies({ videoId, threadId, commentId, channelId: account.channelId, handle, token })
+      .catch(error => console.error('Failed to watch a comment for replies', error))
+    return
+  }
+  // The comment is posted, so failing to watch it must not fail the post.
+  try {
+    saveThreads(trackPostedComment(loadThreads(), { videoId, threadId, commentId, channelId: account.channelId, handle }))
+  } catch (error) {
+    console.error('Failed to watch a comment for replies', error)
+  }
+}
+
+/**
+ * Hands the checks to Android, which announces replies like uploads.
+ * @returns {() => void} stops updating the configuration
+ */
+function startAndroidCommentReplyNotifications() {
+  const stopConfiguring = store.watch(() => {
+    // An 11-character placeholder, as the thumbnail settings expect a video ID.
+    const thumbnail = getNotificationThumbnailUrl('VIDEOIDXXXX')?.replace('VIDEOIDXXXX', '%VIDEO%') ?? ''
+    return JSON.stringify({
+      enabled: isEnabled(),
+      mode: store.getters.getNotificationMode,
+      closedApp: store.getters.getEnableClosedAppSubscriptionRefresh,
+      title: i18n.global.t('YouTube Account.{author} replied to your comment', { author: '{author}' }),
+      thumbnail,
+      request: {
+        url: 'https://www.youtube.com/youtubei/v1/next?prettyPrint=false',
+        body: JSON.stringify({
+          context: { client: { clientName: 'WEB', clientVersion: Constants.CLIENTS.WEB.VERSION, hl: 'en', gl: store.getters.getRegion || 'US' } },
+          continuation: '%CONTINUATION%'
+        })
+      }
+    })
+  }, value => {
+    configureAndroidCommentReplies(JSON.parse(value))
+      .catch(error => console.error('Failed to configure the comment reply checks', error))
+  }, { immediate: true })
+  // Signing out, also when YouTube ends the sign-in, forgets the watched comments.
+  const stopWatchingAccount = store.watch(() => isSignedInToYouTube(store.getters), signedIn => {
+    if (!signedIn) clearAndroidCommentReplies().catch(error => console.error('Failed to forget the watched comments', error))
+  }, { immediate: true })
+  return () => {
+    stopConfiguring()
+    stopWatchingAccount()
+  }
 }
 
 /**
@@ -82,8 +134,8 @@ async function fetchThread(thread) {
         id: comment.comment_id,
         authorId: comment.author?.id ?? '',
         author: comment.author?.name ?? '',
-        // Mentions come with extra spaces and bidirectional isolates around them.
-        text: (comment.content?.toString() ?? '').replaceAll(/[\u2066-\u2069]/g, '').replaceAll(/\s+/g, ' ').trim()
+        // Mentions come with extra spaces, zero-width spaces, and bidirectional isolates around them.
+        text: (comment.content?.toString() ?? '').replaceAll(/[\u200B-\u200D\u2066-\u2069]/g, '').replaceAll(/\s+/g, ' ').trim()
       })
     }
   }
@@ -155,26 +207,32 @@ async function checkThreads() {
     }
     const { added, seen } = result ? findNewReplies(thread, result.replies) : { added: [], seen: thread.seen }
     // Announced before they count as seen, so closing the app in between
-    // repeats a reply rather than losing it.
+    // repeats a reply rather than losing it. Replies left when notifications
+    // turn off count as seen too.
+    let disabled = false
     for (const reply of added) {
-      if (!isEnabled()) return
+      disabled = !isEnabled()
+      if (disabled) break
       await announceReply(videoId, reply).catch(error => console.error('Failed to announce a comment reply', error))
     }
     const threads = loadThreads()
     const index = threads.findIndex(item => item.videoId === videoId && item.threadId === threadId)
-    if (index === -1) continue
-    if (result) threads[index] = { ...threads[index], replyCount: result.replyCount, seen }
-    else threads.splice(index, 1)
-    saveThreads(threads)
+    if (index !== -1) {
+      if (result) threads[index] = { ...threads[index], replyCount: result.replyCount, seen }
+      else threads.splice(index, 1)
+      saveThreads(threads)
+    }
+    if (disabled) return
   }
 }
 
 /**
  * Checks the comments the account posted for replies while the app runs. On
- * mobile, the checks pause while the app is hidden.
+ * iOS, the checks pause while the app is hidden; Android checks natively.
  * @returns {() => void} stops the checks
  */
 export function startCommentReplyNotifications() {
+  if (isAndroid) return startAndroidCommentReplyNotifications()
   let stopped = false
   let timer = null
   let lastCheck = 0

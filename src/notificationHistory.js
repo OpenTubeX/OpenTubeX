@@ -1,4 +1,5 @@
 // @ts-check
+import { getCommentReplyTarget } from './commentReplyTracking.js'
 import { parseTwitchNotificationId } from './twitchFollows.js'
 
 /** Older entries are dropped once the history holds this many. */
@@ -140,6 +141,11 @@ export function getLiveReminderTarget(videoId) {
 export function getUploadTarget(feedType, id, live = false) {
   // Android announces Twitch streams like uploads
   if (feedType === 'twitch') return parseTwitchNotificationId(id)
+  // and replies to the account's comments, whose ID is `videoId/replyId`
+  if (feedType === 'comment-reply') {
+    const [videoId, replyId, ...rest] = typeof id === 'string' ? id.split('/') : []
+    return rest.length === 0 ? getCommentReplyTarget(videoId, replyId) : null
+  }
   if (typeof id !== 'string' || !ID_PATTERN.test(id)) return null
   if (feedType === 'posts') return { kind: 'post', path: `/post/${id}` }
   if (feedType === 'shorts') return { kind: 'short', path: `/watch/${id}`, query: { short: 'true' } }

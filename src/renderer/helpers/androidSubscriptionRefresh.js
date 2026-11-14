@@ -126,6 +126,27 @@ export async function observeAndroidTwitchLive(channelIds, streams) {
   if (SubscriptionRefresh) await SubscriptionRefresh.observeTwitchLive({ channelIds, streams })
 }
 
+/**
+ * How Android checks the comments the account posted for replies, while the
+ * app is visible and, if it may refresh subscriptions then, while it is closed.
+ * @param {{ enabled: boolean, mode: string, closedApp: boolean, title: string, thumbnail: string, request: { url: string, body: string } }} configuration
+ */
+export async function configureAndroidCommentReplies(configuration) {
+  if (SubscriptionRefresh) await SubscriptionRefresh.configureCommentReplies({ configuration })
+}
+
+/**
+ * Has Android watch the thread of a comment the account posted.
+ * @param {{ videoId: string, threadId: string, commentId: string, channelId: string, handle: string | null, token: string }} comment
+ */
+export async function trackAndroidCommentReplies(comment) {
+  if (SubscriptionRefresh) await SubscriptionRefresh.trackCommentReplies({ comment })
+}
+
+export async function clearAndroidCommentReplies() {
+  if (SubscriptionRefresh) await SubscriptionRefresh.clearCommentReplies()
+}
+
 export async function isAndroidSubscriptionRefreshActive() {
   if (!SubscriptionRefresh) return false
   const { active } = await SubscriptionRefresh.isActive()

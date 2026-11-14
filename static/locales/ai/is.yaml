@@ -2271,7 +2271,7 @@ Tooltips:
     Rate Videos: "Sýnir hnappa til að líka við og líka ekki við myndskeið. Til að sýna einkunnina þína er hvert myndskeið sem þú opnar flett upp á YouTube með reikningnum þínum, svo YouTube veit hvaða myndskeið þú opnar, jafnvel þegar þeim er ekki bætt við áhorfsferilinn þinn."
     Sync Subscriptions: "Rásum sem þú gerist áskrifandi að á YouTube er bætt við „Allar rásir“, og rásir sem þú segir upp áskrift að þar eru fjarlægðar úr öllum notkunarsniðum. Að gerast áskrifandi eða segja upp áskrift hér í „Allar rásir“ gerir það sama á YouTube."
     Sync Playlists: "YouTube-spilunarlistarnir þínir, „Horfa síðar“ og „Myndskeið sem mér líkar“ birtast í „Spilunarlistarnir þínir“, og breytingar sem þú gerir á þeim hér eru einnig gerðar á YouTube. Þeir eru ekki samstilltir við önnur tæki þín og eru ekki teknir með þegar þú flytur út alla spilunarlista eða tekur afrit af gögnunum þínum. Ef slökkt er á þessu eru þeir fjarlægðir úr þessu tæki en ekki af YouTube."
-    Reply Notifications: "Á meðan OpenTubeX er í gangi athugar það hvort ný svör hafi borist við athugasemdum sem þú birtir hér síðustu 30 daga. Athugasemdir sem þú birtir annars staðar, t.d. á vefsvæði YouTube, eru ekki teknar með."
+    Reply Notifications: "OpenTubeX athugar hvort ný svör hafi borist við athugasemdum sem þú birtir hér síðustu 30 daga. Athugasemdir sem þú birtir annars staðar, t.d. á vefsvæði YouTube, eru ekki teknar með."
   General Settings:
     Built-in Streams: |
       Sjálfvirkt spilar flest myndskeið í gegnum visionOS-biðlara YouTube, sem byrjar hraðar og styður sjálfvirk gæði. Beinar útsendingar og myndskeið sem hann getur ekki spilað nota SABR.

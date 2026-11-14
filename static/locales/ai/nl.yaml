@@ -2323,7 +2323,7 @@ Tooltips:
     Rate Videos: "Toont knoppen om video's leuk of niet leuk te vinden. Om je beoordeling te tonen, wordt elke video die je opent met je account op YouTube opgezocht, zodat YouTube weet welke video's je opent, ook als ze niet aan je kijkgeschiedenis worden toegevoegd."
     Sync Subscriptions: "Kanalen waarop u zich op YouTube abonneert, worden toegevoegd aan ‘Alle kanalen’, en kanalen waarvan u daar het abonnement opzegt, worden uit elk profiel verwijderd. Abonneren of deabonneren hier in ‘Alle kanalen’ doet hetzelfde op YouTube."
     Sync Playlists: "Uw YouTube-afspeellijsten, ‘Later bekijken’ en ‘Video's die ik leuk vind’ verschijnen in ‘Jouw afspeellijsten’, en wijzigingen die u er hier in aanbrengt, worden ook op YouTube doorgevoerd. Ze worden niet gesynchroniseerd met uw andere apparaten en niet meegenomen wanneer u alle afspeellijsten exporteert of een back-up van uw gegevens maakt. Als u dit uitschakelt, worden ze van dit apparaat verwijderd, maar niet van YouTube."
-    Reply Notifications: "Zolang OpenTubeX actief is, controleert het de reacties die je hier in de afgelopen 30 dagen hebt geplaatst op nieuwe antwoorden. Reacties die je ergens anders hebt geplaatst, zoals op de website van YouTube, worden niet meegenomen."
+    Reply Notifications: "OpenTubeX controleert de reacties die je hier in de afgelopen 30 dagen hebt geplaatst op nieuwe antwoorden. Reacties die je ergens anders hebt geplaatst, zoals op de website van YouTube, worden niet meegenomen."
   General Settings:
     Built-in Streams: |
       Automatisch speelt de meeste video's af via de visionOS-client van YouTube, die sneller start en automatische kwaliteit ondersteunt. Livestreams en video's die hij niet kan afspelen, gebruiken SABR.

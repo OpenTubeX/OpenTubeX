@@ -2258,7 +2258,7 @@ Tooltips:
     Sync Playlists: "Sinu YouTube'i esitusloendid, „Vaata hiljem“ ja „Meeldivad videod“ kuvatakse jaotises „Sinu esitusloendid“ ning neis siin tehtud muudatused tehakse ka YouTube'is. Neid ei sünkroonita sinu teistesse seadmetesse ega kaasata, kui ekspordid kõik esitusloendid või varundad oma andmed. Selle väljalülitamine eemaldab need sellest seadmest, kuid mitte YouTube'ist."
     Add to YouTube Watch History: "Sinu esitatud videod lisatakse sinu YouTube'i vaatamiste ajalukku, nii et YouTube'i soovitused õpivad neist. Kui ajalugu on YouTube'is peatatud, ei lisata midagi."
     Rate Videos: "Näitab videotel meeldimise ja mittemeeldimise nuppe. Sinu hinnangu näitamiseks otsitakse iga avatud video sinu kontoga YouTube'ist üles, nii et YouTube saab teada, milliseid videoid sa avad, isegi kui neid sinu vaatamisajalukku ei lisata."
-    Reply Notifications: "Kui OpenTubeX töötab, kontrollib see uusi vastuseid kommentaaridele, mille oled siin viimase 30 päeva jooksul postitanud. Mujal, näiteks YouTube'i veebisaidil postitatud kommentaare ei arvestata."
+    Reply Notifications: "OpenTubeX kontrollib uusi vastuseid kommentaaridele, mille oled siin viimase 30 päeva jooksul postitanud. Mujal, näiteks YouTube'i veebisaidil postitatud kommentaare ei arvestata."
   General Settings:
     Built-in Streams: |
       Automaatne esitab enamikku videoid YouTube'i visionOS-i kliendi kaudu, mis käivitub kiiremini ja toetab automaatset kvaliteeti. Otseülekanded ja videod, mida see esitada ei saa, kasutavad SABR-i.

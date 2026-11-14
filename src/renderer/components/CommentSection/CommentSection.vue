@@ -1071,6 +1071,47 @@ function resetCommentsScroll() {
   }
 }
 
+// A highlighted comment that loaded and still needs to be scrolled to. Only the
+// comments' own panel scrolls to it, as in the phone sheet or the fullscreen
+// dock; the page itself stays at the player.
+let pendingHighlightedCommentScroll = false
+
+function scrollToHighlightedComment() {
+  const wrapper = commentsContentWrapper.value
+  if (!pendingHighlightedCommentScroll || wrapper == null || wrapper.clientHeight === 0 ||
+    !(props.fullscreenOverlay || phonePanelHeader?.value)) return
+  const target = wrapper.querySelector('.highlightedComment')
+  if (target == null) return
+  pendingHighlightedCommentScroll = false
+  // Leaves a small gap above the highlighted comment's badge.
+  const top = wrapper.scrollTop + target.getBoundingClientRect().top - wrapper.getBoundingClientRect().top - 8
+  restoreOverlayScrollTop(wrapper, top)
+  if (props.fullscreenOverlay) fullscreenScrollTop = wrapper.scrollTop
+}
+
+/**
+ * Scrolls to the highlighted comment of a list that just loaded, now or once
+ * its panel opens.
+ * @param {number} generation the list that loaded
+ */
+async function armHighlightedCommentScroll(generation) {
+  if (generation !== commentListGeneration || !props.highlightedCommentId) return
+  pendingHighlightedCommentScroll = true
+  await nextTick()
+  scrollToHighlightedComment()
+}
+
+// The phone sheet and the fullscreen dock may open after the comments loaded.
+let highlightedCommentResizeObserver = null
+watch(commentsContentWrapper, (wrapper) => {
+  highlightedCommentResizeObserver?.disconnect()
+  highlightedCommentResizeObserver = null
+  if (wrapper == null) return
+  highlightedCommentResizeObserver = new ResizeObserver(scrollToHighlightedComment)
+  highlightedCommentResizeObserver.observe(wrapper)
+}, { immediate: true })
+onBeforeUnmount(() => highlightedCommentResizeObserver?.disconnect())
+
 const COMMENT_TIMESTAMP_PATTERN = /(?:(?:\d+):)?\d+:\d+/
 
 // Filtering re-parses every loaded comment on each keystroke; keep the plain
@@ -2277,6 +2318,7 @@ async function getCommentDataLocal(more = false) {
 
     if (!more) {
       await loadHighlightedReply()
+      await armHighlightedCommentScroll(generation)
     }
   } catch (err) {
     if (generation !== commentListGeneration) {
@@ -2466,6 +2508,7 @@ async function getCommentDataInvidious() {
     nextPageToken.value = response.continuation
     isLoading.value = false
     showComments.value = true
+    if (!more) await armHighlightedCommentScroll(generation)
   } catch (err) {
     if (generation !== commentListGeneration) {
       return

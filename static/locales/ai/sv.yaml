@@ -2257,7 +2257,7 @@ Tooltips:
     Sync Playlists: "Dina YouTube-spellistor, Titta senare och Gillade videor visas i Dina spellistor, och ändringar som du gör i dem här görs även på YouTube. De synkroniseras inte till dina andra enheter och tas inte med när du exporterar alla spellistor eller säkerhetskopierar dina data. Om du stänger av detta tas de bort från den här enheten men inte från YouTube."
     Add to YouTube Watch History: "Videor du spelar upp läggs till i din visningshistorik på YouTube, så att rekommendationerna på YouTube lär sig av dem. Inget läggs till medan historiken är pausad på YouTube."
     Rate Videos: "Visar knappar för att gilla och ogilla videor. För att visa ditt betyg slås varje video du öppnar upp på YouTube med ditt konto, så YouTube får veta vilka videor du öppnar, även när de inte läggs till i din visningshistorik."
-    Reply Notifications: "Medan OpenTubeX körs kontrollerar den om kommentarer du har skrivit här under de senaste 30 dagarna har fått nya svar. Kommentarer du har skrivit på andra ställen, till exempel på YouTubes webbplats, ingår inte."
+    Reply Notifications: "OpenTubeX kontrollerar om kommentarer du har skrivit här under de senaste 30 dagarna har fått nya svar. Kommentarer du har skrivit på andra ställen, till exempel på YouTubes webbplats, ingår inte."
   General Settings:
     Built-in Streams: |
       Automatiskt spelar de flesta videor via YouTubes visionOS-klient, som startar snabbare och stöder automatisk kvalitet. Direktsändningar och videor som den inte kan spela upp använder SABR.

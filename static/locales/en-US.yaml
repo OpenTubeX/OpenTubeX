@@ -3330,7 +3330,7 @@ Tooltips:
     Sync Playlists: "Your YouTube playlists, Watch later, and Liked videos appear in Your Playlists, and changes you make to them here are made on YouTube too. They are not synced to your other devices or included when you export all playlists or back up your data. Turning this off removes them from this device but not from YouTube."
     Add to YouTube Watch History: "Videos you play are added to your YouTube watch history, so YouTube's recommendations learn from them. Nothing is added while the history is paused on YouTube."
     Rate Videos: "Shows like and dislike buttons on videos. To show your rating, each video you open is looked up on YouTube with your account, so YouTube learns which videos you open, even when they are not added to your watch history."
-    Reply Notifications: "While OpenTubeX runs, it checks the comments you posted here in the last 30 days for new replies. Comments you posted elsewhere, such as on the YouTube website, are not included."
+    Reply Notifications: "OpenTubeX checks the comments you posted here in the last 30 days for new replies. Comments you posted elsewhere, such as on the YouTube website, are not included."
   General Settings:
     Preferred Video Codec: |
       Auto prefers codecs that your device can decode in hardware.
