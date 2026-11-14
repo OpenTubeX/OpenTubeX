@@ -633,7 +633,7 @@ const watchTimeTracker = createWatchTimeTracker(
   () => !loading.value && player.value?.isPaused() === false,
   (date, seconds, retry) => store.dispatch('recordPlaybackTime', { date, seconds, isShort: false, retry })
 )
-watch(() => store.getters.getWatchStatsResetVersion, () => watchTimeTracker.clear())
+watch(() => store.getters.getWatchStatsResetAt, () => watchTimeTracker.clear())
 // Buffered time follows the recording policy it was watched under.
 watch(() => [store.getters.getRememberHistory, store.getters.getEnableWatchStats], () => watchTimeTracker.clear())
 watch(() => store.getters.getWellbeingPauseRequest, request => {

@@ -249,6 +249,9 @@ test('time that a reply and a later message both hold counts once, and clearing 
   second.store.dispatch('recordPlaybackTime', { date, seconds: 5, isShort: false })
   first.store.dispatch('clearWellbeingTime', 2)
   third.store.dispatch('clearWellbeingTime', 2)
+  // Its saved time would come back in a window that opens later
+  second.store.dispatch('recordPlaybackTime', { date, seconds: 5, isShort: true })
+  assert.equal(JSON.parse(storage.get('OpenTubeX/digitalWellbeing')).resetAt, 2)
   deliver()
   assert.deepEqual([first, second, third].map(({ store }) => store.state.wellbeing.day.unrecordedSeconds), [0, 0, 0])
   // Saved time of a closed window that a reply from before the clear still holds

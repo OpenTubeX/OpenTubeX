@@ -116,6 +116,8 @@ const state = {
  */
 function persist(state) {
   const { date, windows, extraSeconds, ignored } = state.day
+  // A window that has not applied a clear yet, such as one that is closing, would bring back its time
+  if (loadSaved().resetAt > state.resetAt) return
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       date,
@@ -343,7 +345,7 @@ const mutations = {
    * @param {number} resetAt
    */
   clearWellbeingTime(state, resetAt) {
-    if (resetAt !== state.resetAt) clearDayTime(state, resetAt)
+    if (resetAt > state.resetAt) clearDayTime(state, resetAt)
   },
 
   extendWellbeingLimit(state, { kind, extraSeconds = 0, ignore = false }) {
