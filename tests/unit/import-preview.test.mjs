@@ -250,7 +250,7 @@ test('re-importing older watch history keeps the saved duration, resume position
 test('subscription CSVs with Windows line endings import only the listed channels', () => {
   const id = 'UC' + 'a'.repeat(22)
   const content = `Channel Id,Channel Url,Channel Title\r\n${id},https://www.youtube.com/channel/${id},Plain\r\n\r\n`
-  assert.deepEqual(parseTakeoutSubscriptions({ path: 'subscriptions.csv', content }), [{ id, name: 'Plain', thumbnail: null }])
+  assert.deepEqual(parseTakeoutSubscriptions({ path: 'subscriptions.csv', content }), [{ id, name: 'Plain', thumbnail: null, groups: [] }])
 })
 
 test('watch history parsing excludes malformed records from preview counts and preserves usable entries', () => {

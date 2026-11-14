@@ -99,3 +99,40 @@ export function sortSubscribedChannels(channels, sortBy, customOrder, collator) 
 
   return channels.toSorted(compareNames)
 }
+
+/**
+ * The group names of an imported subscription. A cell can list several
+ * groups, separated by semicolons.
+ * @param {string[]} cells
+ * @returns {string[]}
+ */
+export function parseImportedGroupNames(cells) {
+  return [...new Set(cells.flatMap(cell => cell.split(';')).map(name => name.trim()).filter(name => name !== ''))]
+}
+
+/**
+ * Adds imported channels to the groups they name. Names match existing groups
+ * regardless of case, and missing groups are created.
+ * @param {SubscriptionGroup[]} groups
+ * @param {{ id: string, groups?: string[] }[]} channels
+ * @param {() => string} createId
+ * @returns {SubscriptionGroup[]}
+ */
+export function addChannelsToNamedGroups(groups, channels, createId = () => crypto.randomUUID()) {
+  const result = groups.map(group => ({ ...group, channelIds: [...group.channelIds] }))
+  const byName = new Map(result.map(group => [group.name.toLowerCase(), group]))
+  for (const channel of channels) {
+    for (const name of channel.groups ?? []) {
+      // The group editor limits names to 255 characters
+      const groupName = name.slice(0, 255)
+      let group = byName.get(groupName.toLowerCase())
+      if (group === undefined) {
+        group = { id: createId(), name: groupName, channelIds: [] }
+        result.push(group)
+        byName.set(groupName.toLowerCase(), group)
+      }
+      if (!group.channelIds.includes(channel.id)) group.channelIds.push(channel.id)
+    }
+  }
+  return result
+}

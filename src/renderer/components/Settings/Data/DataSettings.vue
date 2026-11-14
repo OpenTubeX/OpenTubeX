@@ -57,6 +57,9 @@
     <p class="importFormatsHint">
       {{ t('Settings.Data Settings.Import subscriptions formats') }}
     </p>
+    <p class="importFormatsHint">
+      {{ t('Settings.Data Settings.Import subscription groups hint') }}
+    </p>
     <FtFlexBox>
       <p>
         <a
@@ -364,6 +367,7 @@ import {
 } from '../../../helpers/libretube'
 import { parseLineDelimitedJson } from '../../../helpers/line-delimited-json'
 import { parseOpmlFeeds } from '../../../helpers/opml'
+import { addChannelsToNamedGroups, normalizeSubscriptionGroups } from '../../../helpers/subscription-groups'
 import { updateChannelPreferences } from '../../../helpers/channel-preferences'
 import { checkYoutubeChannelId, resolveChannelId } from '../../../helpers/channels'
 import { parseSpeedByChannelValues, resolveSpeedByChannelValues } from '../../../helpers/speed-by-channel-import'
@@ -1076,7 +1080,7 @@ function importOpmlYouTubeSubscriptions(data) {
 
     let count = 0
 
-    feedData.forEach(({ xmlUrl, title: channelName }) => {
+    feedData.forEach(({ xmlUrl, title: channelName, folders }) => {
       let channelId
       if (xmlUrl.includes('https://www.youtube.com/feeds/videos.xml?channel_id=')) {
         channelId = new URL(xmlUrl).searchParams.get('channel_id')
@@ -1090,7 +1094,8 @@ function importOpmlYouTubeSubscriptions(data) {
       subscriptions.push({
         id: channelId,
         name: channelName,
-        thumbnail: null
+        thumbnail: null,
+        groups: folders,
       })
 
       count++
@@ -1118,15 +1123,24 @@ function importLibreTubeSubscriptions(libreTubeSubscriptions) {
 }
 
 /**
- * Adds the channels that are not subscribed yet to the primary profile.
- * @param {{ id: string | null | undefined, name: string, thumbnail: string | null }[]} subscriptions
+ * Adds the channels that are not subscribed yet to the primary profile, and
+ * to the groups they name.
+ * @param {{ id: string | null | undefined, name: string, thumbnail: string | null, groups?: string[] }[]} subscriptions
  */
 async function addSubscriptionsToPrimaryProfile(subscriptions) {
-  // Merged with the saved subscriptions, which another window may change meanwhile.
-  // Every caller imports YouTube channels, so anything else is a malformed entry.
-  const profile = { _id: MAIN_PROFILE_ID, subscriptions: subscriptions.filter(channel => typeof channel.id === 'string' && checkYoutubeChannelId(channel.id)) }
+  // Every caller imports YouTube channels, so anything else is a malformed entry
+  const channels = subscriptions.filter(channel => typeof channel.id === 'string' && checkYoutubeChannelId(channel.id))
+  // Merged with the saved subscriptions, which another window may change meanwhile
+  const profile = {
+    _id: MAIN_PROFILE_ID,
+    subscriptions: channels.map(({ id, name, thumbnail }) => ({ id, name, thumbnail })),
+  }
   if (await store.dispatch('mergeImportedProfile', profile) !== true) {
     throw new Error('Could not import subscriptions')
+  }
+  if (channels.some(channel => channel.groups?.length > 0) &&
+    !await store.dispatch('updateSubscriptionGroups', groups => addChannelsToNamedGroups(normalizeSubscriptionGroups(groups), channels))) {
+    throw new Error('Could not import subscription groups')
   }
   showToast({
     message: t('Settings.Data Settings.All subscriptions have been successfully imported'),

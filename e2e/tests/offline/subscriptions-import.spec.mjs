@@ -26,3 +26,33 @@ test('imports subscriptions from an OPML file, including one that is not well-fo
     return [a, b].map(id => subscriptions.find(channel => channel.id === id)?.name)
   }, [channelA, channelB])).toEqual(['Rock & Roll', 'Fish & Chips'])
 })
+
+test.describe('importing subscription groups', () => {
+  test.use({ seed: { settings: { subscriptionGroups: [{ id: 'music', name: 'Music', channelIds: [channelB], icon: 'headphones' }] } } })
+
+  test('adds CSV channels to the groups named after their title', async ({ page }) => {
+    const dataSection = await goToSettingsSection(page, 'data')
+    await page.evaluate(([a, b]) => {
+      Object.defineProperty(window, 'showOpenFilePicker', {
+        configurable: true,
+        value: async () => [{
+          getFile: async () => new File([
+            'Channel Id,Channel Url,Channel Title,Groups\r\n' +
+            `${a},https://www.youtube.com/channel/${a},"Rock, Roll","music; Live "\r\n` +
+            `${b},https://www.youtube.com/channel/${b},Fish,\r\n`,
+          ], 'subscriptions.csv', { type: 'text/csv' }),
+        }],
+      })
+    }, [channelA, channelB])
+
+    await dataSection.getByRole('button', { name: 'Import Subscriptions' }).click()
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getSubscriptionGroupList
+      .map(({ name, channelIds, icon }) => ({ name, channelIds, icon }))))
+      .toEqual([
+        { name: 'Live', channelIds: [channelA], icon: undefined },
+        { name: 'Music', channelIds: [channelB, channelA], icon: 'headphones' },
+      ])
+    expect(await page.evaluate(() => window.$store.getters.getProfileList[0].subscriptions.map(channel => channel.name)))
+      .toEqual(expect.arrayContaining(['Rock, Roll', 'Fish']))
+  })
+})
