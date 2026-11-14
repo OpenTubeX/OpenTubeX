@@ -931,7 +931,6 @@
   flex: 1;
   block-size: auto;
   padding: 0;
-  flex-wrap: wrap;
   gap: 8px;
   min-inline-size: 0;
   background: transparent;
@@ -942,6 +941,10 @@
 .phoneCommentHeader h3 {
   flex: 1 1 auto;
   overflow: hidden;
+}
+
+.phoneCommentHeader h3 > :first-child {
+  flex: none;
 }
 
 .phoneCommentHeader .commentHeaderTitle {
@@ -964,9 +967,6 @@
 }
 
 .phoneCommentHeader .fullscreenCommentActions {
-  flex: 0 1 auto;
-  flex-wrap: wrap;
-  min-inline-size: 0;
   gap: 0;
   margin-inline-start: auto;
 }

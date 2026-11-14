@@ -12,7 +12,7 @@ async function resizeViewport(app, page, width, uiScale) {
 test.describe('comment header spacing', { tag: '@scale' }, () => {
   test.use({ seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true } } })
 
-  test('keeps Close clickable when phone header actions need to wrap', async ({ app, page, uiScale }) => {
+  test('keeps phone header actions on one row and moves extras into More when narrow', async ({ app, page, uiScale }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
     await app.electronApp.evaluate(({ BrowserWindow }, uiScale) => {
@@ -25,16 +25,39 @@ test.describe('comment header spacing', { tag: '@scale' }, () => {
     const sheet = page.locator('.mobileSheet[open]')
     const header = sheet.locator('.mobileSheetHeader')
     await expect(sheet.locator('.comment').first()).toBeVisible()
-    await expect.poll(() => header.locator('.commentHeaderTitle').evaluate(title => title.scrollWidth - title.clientWidth)).toBeLessThanOrEqual(1)
-    await expect.poll(() => header.evaluate(header => {
+
+    const expectOneRow = () => expect.poll(() => header.evaluate(header => {
       const bounds = header.getBoundingClientRect()
+      const title = header.querySelector('.commentHeaderTitle')
       const minimumSize = parseFloat(getComputedStyle(header).getPropertyValue('--phone-touch-target'))
-      const buttons = [...header.querySelectorAll('button')].map(button => button.getBoundingClientRect())
-      return buttons.every((button, index) => button.width >= minimumSize - 1 && button.height >= minimumSize - 1 &&
-        button.left >= bounds.left && button.right <= bounds.right &&
-        buttons.slice(index + 1).every(other => button.right <= other.left + 1 || other.right <= button.left + 1 ||
-          button.bottom <= other.top + 1 || other.bottom <= button.top + 1))
-    })).toBe(true)
+      const buttons = [...header.querySelectorAll('button')]
+        .filter(button => button.checkVisibility())
+        .map(button => button.getBoundingClientRect())
+      const titleBounds = title.getBoundingClientRect()
+      const center = titleBounds.top + titleBounds.height / 2
+      return {
+        titleFits: title.scrollWidth - title.clientWidth <= 1,
+        buttonsFit: buttons.every(button => button.width >= minimumSize - 1 && button.height >= minimumSize - 1 &&
+          button.left >= bounds.left && button.right <= bounds.right &&
+          Math.abs(button.top + button.height / 2 - center) <= 1)
+      }
+    })).toEqual({ titleFits: true, buttonsFit: true })
+
+    await expectOneRow()
+    await expect(header.getByRole('button', { name: 'Reload Comments' })).toBeHidden()
+    await header.getByRole('button', { name: 'More', exact: true }).click()
+    await expect(page.getByRole('menuitem', { name: 'Reload Comments' })).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('menuitem', { name: 'Reload Comments' })).toHaveCount(0)
+
+    await app.electronApp.evaluate(({ BrowserWindow }, uiScale) => {
+      BrowserWindow.getAllWindows()[0].setContentSize(Math.round(440 * uiScale / 100), Math.round(900 * uiScale / 100))
+    }, uiScale)
+    await expect.poll(() => page.evaluate(() => innerWidth)).toBeGreaterThanOrEqual(430)
+    await expect(header.getByRole('button', { name: 'Reload Comments' })).toBeVisible()
+    await expect(header.getByRole('button', { name: 'More', exact: true })).toBeHidden()
+    await expectOneRow()
+
     await header.getByRole('button', { name: 'Close', exact: true }).click()
     await expect(sheet).toHaveCount(0)
   })
