@@ -62,7 +62,7 @@ test('reads conference acronyms from conference pages only', () => {
 
 test('loads a conference with its talks newest first, and finds no unknown ones', async () => {
   const { fetch, requests } = fakeFetch(url => url.pathname.endsWith('/exc24')
-    ? Response.json({ ...conference(), events: [event(1), event(3), { guid: 'no-link' }, event(2, { thumb_url: null, length: 0, duration: 95 })] })
+    ? Response.json({ ...conference(), events: [event(1), event(3), { guid: 'no-link' }, event(4, { frontend_link: 'https://example.test/v/talk' }), event(2, { thumb_url: null, length: 0, duration: 95 })] })
     : new Response(null, { status: 404 }))
 
   const channel = await mediaccc.getChannel(fetch, 'exc24')

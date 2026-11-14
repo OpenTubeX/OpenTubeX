@@ -48,6 +48,17 @@ function httpsUrl(value) {
 }
 
 /**
+ * yt-dlp plays this page, so only talk pages on the site qualify.
+ * @param {unknown} value
+ */
+function talkUrl(value) {
+  const url = httpsUrl(value)
+  if (!url) return ''
+  const { hostname, port, pathname } = new URL(url)
+  return WEB_HOSTS.includes(hostname) && !port && pathname.startsWith('/v/') ? url : ''
+}
+
+/**
  * @param {unknown} value
  * @returns {number | null}
  */
@@ -122,7 +133,7 @@ function parseConference(data) {
  */
 function parseEvent(event, conference) {
   if (!event || typeof event !== 'object' || typeof event.guid !== 'string' || !event.guid) return null
-  const url = httpsUrl(event.frontend_link)
+  const url = talkUrl(event.frontend_link)
   if (!url) return null
   const author = conference?.name || text(event.conference_title)
   /** @type {PlatformItem} */
