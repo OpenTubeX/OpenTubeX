@@ -169,6 +169,8 @@ async function announceReply(videoId, reply) {
   // Checked first, as the system suspends hidden apps, also during the check,
   // so the app may be visible again once it returns
   const granted = (await LocalNotifications.checkPermissions()).display === 'granted'
+  // Notifications may have been turned off meanwhile.
+  if (!isEnabled()) return
   if (store.getters.getNotificationMode === 'both') {
     const [entry] = capacitorNotificationHistory.add([{ title, body, ...(thumbnail ? { thumbnail } : {}), ...target }])
     // Read on another device already

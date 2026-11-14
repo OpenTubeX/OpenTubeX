@@ -705,7 +705,8 @@ function runApp() {
   handleTrusted(IpcChannels.NOTIFICATION_COMMENT_REPLY, (_event, reply) => {
     const target = getCommentReplyTarget(reply?.videoId, reply?.replyId)
     if (!target || typeof reply.title !== 'string' || typeof reply.body !== 'string') return
-    showUrlNotification({
+    // Settles once the history entry is saved, so the renderer marks the reply seen after it.
+    return showUrlNotification({
       title: reply.title.slice(0, 200),
       body: reply.body.slice(0, 500),
       thumbnail: typeof reply.thumbnail === 'string' ? reply.thumbnail : undefined,

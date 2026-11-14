@@ -267,8 +267,12 @@ public class SubscriptionRefreshPlugin extends Plugin {
 
     @PluginMethod
     public void clearCommentReplies(PluginCall call) {
-        CommentReplyNotifications.clear(getContext());
-        call.resolve();
+        Context context = getContext();
+        // After the tracking writes queued before it, which would bring the comments back.
+        UPLOADS.execute(() -> {
+            CommentReplyNotifications.clear(context);
+            call.resolve();
+        });
     }
 
     @PluginMethod

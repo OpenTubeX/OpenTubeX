@@ -56,6 +56,9 @@ final class CommentReplyNotifications {
     private static final Pattern TOKEN = Pattern.compile("[\\w%.+/=-]+");
     private static final String HANDLE_CHARACTERS = "\\p{L}\\p{M}\\p{N}_\\-·";
 
+    // Bumped by clear, so checks that started before a sign-out announce nothing.
+    private static int generation;
+
     private CommentReplyNotifications() {}
 
     /**
@@ -86,7 +89,12 @@ final class CommentReplyNotifications {
 
     /** Forgets the watched comments, after signing out. */
     static synchronized void clear(Context context) {
+        generation++;
         stateFile(context).delete();
+    }
+
+    private static synchronized boolean isCurrent(int started) {
+        return generation == started;
     }
 
     static boolean closedAppAllowed(Context context) throws JSONException {
@@ -100,13 +108,15 @@ final class CommentReplyNotifications {
         JSONObject request = configuration.optJSONObject("request");
         if (request == null) return;
         List<JSONObject> threads;
+        int started;
         synchronized (CommentReplyNotifications.class) {
             threads = normalize(threads(readState(stateFile(context))), System.currentTimeMillis());
+            started = generation;
         }
         for (JSONObject thread : threads) {
             if (!configuration(context).optBoolean("enabled")) return;
             try {
-                observe(context, thread, fetchThread(request, thread));
+                observe(context, thread, fetchThread(request, thread), started);
             } catch (Exception error) {
                 // One thread must not stop the checks of the others.
                 android.util.Log.w("OpenTubeXReplies", "Unable to check a comment for replies", error);
@@ -119,7 +129,7 @@ final class CommentReplyNotifications {
      * seen, so a check that stops in between repeats a reply rather than losing it.
      * @param result null when the thread is gone
      */
-    private static void observe(Context context, JSONObject checked, JSONObject result) throws Exception {
+    private static void observe(Context context, JSONObject checked, JSONObject result, int started) throws Exception {
         JSONObject configuration = configuration(context);
         String videoId = checked.getString("videoId");
         String threadId = checked.getString("threadId");
@@ -128,12 +138,13 @@ final class CommentReplyNotifications {
             JSONObject found = findNewReplies(checked, result.getJSONArray("replies"));
             JSONArray added = found.getJSONArray("added");
             // Replies left when notifications turn off count as seen too.
-            for (int index = 0; index < added.length() && configuration(context).optBoolean("enabled"); index++) {
+            for (int index = 0; index < added.length() && configuration(context).optBoolean("enabled") && isCurrent(started); index++) {
                 announce(context, configuration, videoId, added.getJSONObject(index));
             }
             seen = found.getJSONArray("seen");
         }
         synchronized (CommentReplyNotifications.class) {
+            if (generation != started) return;
             File file = stateFile(context);
             JSONObject state = readState(file);
             JSONArray threads = threads(state);
