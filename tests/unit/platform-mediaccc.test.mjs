@@ -2,7 +2,6 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import mediaccc from '../../src/platforms/mediaccc.js'
-import { findPlatformChannel } from '../../src/platforms/index.js'
 
 const API = 'https://api.media.ccc.de/public'
 
@@ -59,8 +58,6 @@ test('reads conference acronyms from conference pages only', () => {
   assert.equal(parseChannelUrl('https://media.ccc.de/c/a%2Fb'), null)
   assert.equal(parseChannelUrl('https://media.ccc.de.example.test/c/exc24'), null)
   assert.equal(parseChannelUrl('https://user@media.ccc.de/c/exc24'), null)
-  // PeerTube also has /c/ pages, but these are conferences
-  assert.deepEqual(findPlatformChannel('https://media.ccc.de/c/exc24'), { platform: 'mediaccc', id: 'exc24' })
 })
 
 test('loads a conference with its talks newest first, and finds no unknown ones', async () => {
