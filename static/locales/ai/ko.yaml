@@ -1620,7 +1620,7 @@ Settings:
     Channel playback speeds imported: "채널 {count}개의 재생 속도를 가져왔습니다"
     Channels not found: "채널 {count}개를 찾을 수 없습니다"
     Playlists have been successfully imported: "재생 목록 {count}/{total}개를 가져왔습니다"
-    Import subscription groups hint: 채널을 그룹으로 분류하려면 .csv 파일에서 채널 제목 뒤에 세미콜론으로 구분한 그룹 이름을 추가하거나, 폴더가 있는 .opml 파일을 가져오세요. 없는 그룹은 새로 만들어집니다.
+    Import subscription groups hint: 채널을 그룹으로 분류하려면 .csv 파일에서 채널 제목 뒤에 세미콜론으로 구분한 그룹 이름이 담긴 열을 추가하거나, 폴더가 있는 .opml 파일을 가져오세요. 없는 그룹은 새로 만들어집니다.
   Sync Settings:
     Signed Out After Restore: '이 앱 데이터가 백업이나 다른 기기에서 복원되어 동기화에서 로그아웃되었습니다. 이 기기를 동기화하려면 다시 로그인하세요.'
     Revoke Session Tabs Warning: "이 기기의 동기화된 탭 모음도 삭제됩니다."

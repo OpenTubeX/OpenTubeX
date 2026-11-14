@@ -1379,7 +1379,7 @@ Settings:
     Channel playback speeds imported: "Enporzhiet eo bet tizh lenn {count} chadenn | Enporzhiet eo bet tizhoù lenn {count} chadenn | Enporzhiet eo bet tizhoù lenn {count} chadenn | Enporzhiet eo bet tizhoù lenn {count} chadenn | Enporzhiet eo bet tizhoù lenn {count} chadenn"
     Channels not found: "N'eus ket bet gallet kavout {count} chadenn | N'eus ket bet gallet kavout {count} chadenn | N'eus ket bet gallet kavout {count} chadenn | N'eus ket bet gallet kavout {count} chadenn | N'eus ket bet gallet kavout {count} chadenn"
     Playlists have been successfully imported: "{count}/{total} roll-lenn enporzhiet gant berzh | {count}/{total} roll-lenn enporzhiet gant berzh | {count}/{total} roll-lenn enporzhiet gant berzh | {count}/{total} roll-lenn enporzhiet gant berzh | {count}/{total} roll-lenn enporzhiet gant berzh"
-    Import subscription groups hint: Evit rummañ ar chadennoù e strolladoù, ouzhpennit anvioù strolladoù disrannet gant pikoù-skej goude titl ar chadenn en ur restr .csv, pe enporzhiit ur restr .opml gant teuliadoù. Krouet e vez ar strolladoù a vank.
+    Import subscription groups hint: Evit rummañ ar chadennoù e strolladoù, ouzhpennit ur bann goude titl ar chadenn en ur restr .csv gant anvioù strolladoù disrannet gant pikoù-skej, pe enporzhiit ur restr .opml gant teuliadoù. Krouet e vez ar strolladoù a vank.
   Sync Settings:
     Signed Out After Restore: 'Digennasket eo bet ar goubredañ peogwir eo bet assavet roadennoù an arload-mañ eus un enrolladenn gwarez pe eus ur benveg all. Kevreit en-dro evit goubredañ ar benveg-mañ.'
     Revoke Session Tabs Warning: "Holladoù ivinelloù sinkronizet an trevnad-mañ a vo diverket ivez."

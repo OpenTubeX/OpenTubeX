@@ -1383,7 +1383,7 @@ Settings:
     Channel playback speeds imported: "Kecepatan pemutaran {count} kanal telah diimpor"
     Channels not found: "{count} kanal tidak dapat ditemukan"
     Playlists have been successfully imported: "{count}/{total} daftar putar berhasil diimpor"
-    Import subscription groups hint: Untuk mengelompokkan saluran, tambahkan nama grup yang dipisahkan titik koma setelah judul saluran dalam file .csv, atau impor file .opml dengan folder. Grup yang belum ada akan dibuat.
+    Import subscription groups hint: Untuk mengelompokkan saluran, tambahkan kolom setelah judul saluran dalam file .csv yang berisi nama grup yang dipisahkan titik koma, atau impor file .opml dengan folder. Grup yang belum ada akan dibuat.
   Sync Settings:
     Signed Out After Restore: 'Sinkronisasi dikeluarkan karena data aplikasi ini dipulihkan dari cadangan atau perangkat lain. Masuk lagi untuk menyinkronkan perangkat ini.'
     Revoke Session Tabs Warning: "Kumpulan tab tersinkronisasi perangkat ini juga akan dihapus."

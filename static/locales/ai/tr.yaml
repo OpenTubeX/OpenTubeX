@@ -1379,7 +1379,7 @@ Settings:
     Channel playback speeds imported: "{count} kanalın oynatma hızı içe aktarıldı | {count} kanalın oynatma hızları içe aktarıldı"
     Channels not found: "{count} kanal bulunamadı | {count} kanal bulunamadı"
     Playlists have been successfully imported: "1/{total} oynatma listesi başarıyla içe aktarıldı | {count}/{total} oynatma listesi başarıyla içe aktarıldı"
-    Import subscription groups hint: Kanalları gruplara ayırmak için bir .csv dosyasında kanal başlığından sonra noktalı virgülle ayrılmış grup adları ekleyin veya klasörler içeren bir .opml dosyasını içe aktarın. Eksik gruplar oluşturulur.
+    Import subscription groups hint: Kanalları gruplara ayırmak için bir .csv dosyasında kanal başlığından sonra noktalı virgülle ayrılmış grup adlarını içeren bir sütun ekleyin veya klasörler içeren bir .opml dosyasını içe aktarın. Eksik gruplar oluşturulur.
   Sync Settings:
     Signed Out After Restore: 'Bu uygulama verileri bir yedekten veya başka bir cihazdan geri yüklendiği için eşitleme oturumu kapatıldı. Bu cihazı eşitlemek için yeniden oturum açın.'
     Revoke Session Tabs Warning: "Bu cihazın eşitlenmiş sekme kümeleri de silinecek."

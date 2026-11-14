@@ -53,4 +53,10 @@ test('reads nested folders, except one wrapping every feed', () => {
     ['Music'],
     [],
   ])
+
+  // A folder inside the wrapper is a group, even when it holds every feed
+  const shared = `<opml><body><outline text="YouTube Subscriptions"><outline text="Tech">
+    <outline xmlUrl="${feed('UCa')}" /><outline xmlUrl="${feed('UCb')}" />
+  </outline></outline></body></opml>`
+  assert.deepEqual(parseOpmlFeeds(shared).map(({ folders }) => folders), [['Tech'], ['Tech']])
 })

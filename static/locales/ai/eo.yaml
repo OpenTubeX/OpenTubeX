@@ -1415,7 +1415,7 @@ Settings:
     Channel playback speeds imported: Enportis la ludrapidon de {count} kanalo | Enportis la ludrapidojn de {count} kanaloj
     Channels not found: '{count} kanalo ne troviĝis | {count} kanaloj ne troviĝis'
     Playlists have been successfully imported: "1/{total} ludlisto sukcese importita | {count}/{total} ludlistoj sukcese importitaj"
-    Import subscription groups hint: Por ordigi kanalojn en grupojn, aldonu grupnomojn apartigitajn per punktokomoj post la kanaltitolo en .csv-dosiero, aŭ importu .opml-dosieron kun dosierujoj. Mankantaj grupoj estas kreataj.
+    Import subscription groups hint: Por ordigi kanalojn en grupojn, aldonu kolumnon post la kanaltitolo en .csv-dosiero kun grupnomoj apartigitaj per punktokomoj, aŭ importu .opml-dosieron kun dosierujoj. Mankantaj grupoj estas kreataj.
   Sync Settings:
     Signed Out After Restore: 'Sinkronigo estis elsalutita ĉar ĉi tiuj aplikaĵaj datumoj estis restaŭritaj el sekurkopio aŭ el alia aparato. Ensalutu denove por sinkronigi ĉi tiun aparaton.'
     Revoke Session Tabs Warning: La sinkronigitaj langetaroj de ĉi tiu aparato ankaŭ estos forigitaj.

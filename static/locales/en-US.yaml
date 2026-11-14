@@ -2025,7 +2025,7 @@ Settings:
     Non-transferable setting key: 'Non-transferable setting key: {key}'
     How do I import my subscriptions?: How do I import my subscriptions?
     Import subscriptions formats: 'Supported formats: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube backup or FreeTube export (.json)'
-    Import subscription groups hint: 'To sort channels into groups, add group names separated by semicolons after the channel title in a .csv file, or import an .opml file with folders. Missing groups are created.'
+    Import subscription groups hint: 'To sort channels into groups, add a column after the channel title in a .csv file with group names separated by semicolons, or import an .opml file with folders. Missing groups are created.'
     Import history formats: 'Supported formats: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube backup (.json)'
     Import playlists formats: 'Supported formats: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
     Import search history formats: 'Supported formats: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'

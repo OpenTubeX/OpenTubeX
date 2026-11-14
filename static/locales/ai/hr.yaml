@@ -1387,7 +1387,7 @@ Settings:
     Channel playback speeds imported: "Uvezena je brzina reprodukcije za {count} kanal | Uvezene su brzine reprodukcije za {count} kanala | Uvezene su brzine reprodukcije za {count} kanala"
     Channels not found: "{count} kanal nije pronađen | {count} kanala nisu pronađena | {count} kanala nije pronađeno"
     Playlists have been successfully imported: "Uspješno uvezena {count}/{total} zbirka | Uspješno uvezene {count}/{total} zbirke | Uspješno uvezeno {count}/{total} zbirki"
-    Import subscription groups hint: Za razvrstavanje kanala u grupe dodaj nazive grupa odvojene točkom sa zarezom nakon naslova kanala u .csv datoteci ili uvezi .opml datoteku s mapama. Nedostajuće grupe se stvaraju.
+    Import subscription groups hint: Za razvrstavanje kanala u grupe dodaj stupac nakon naslova kanala u .csv datoteci s nazivima grupa odvojenima točkom sa zarezom ili uvezi .opml datoteku s mapama. Nedostajuće grupe se stvaraju.
   Sync Settings:
     Signed Out After Restore: 'Sinkronizacija je odjavljena jer su ovi podaci aplikacije vraćeni iz sigurnosne kopije ili s drugog uređaja. Ponovno se prijavite kako biste sinkronizirali ovaj uređaj.'
     Revoke Session Tabs Warning: "Sinkronizirani skupovi kartica ovog uređaja također će biti izbrisani."

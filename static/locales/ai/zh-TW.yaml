@@ -1379,7 +1379,7 @@ Settings:
     Channel playback speeds imported: "已匯入 {count} 個頻道的播放速度"
     Channels not found: "找不到 {count} 個頻道"
     Playlists have been successfully imported: "已成功匯入 {count}/{total} 個播放清單"
-    Import subscription groups hint: 若要將頻道分入群組，請在 .csv 檔案中的頻道標題後加上以分號分隔的群組名稱，或匯入含有資料夾的 .opml 檔案。不存在的群組會自動建立。
+    Import subscription groups hint: 若要將頻道分入群組，請在 .csv 檔案中的頻道標題後新增一欄，填入以分號分隔的群組名稱，或匯入含有資料夾的 .opml 檔案。不存在的群組會自動建立。
   Sync Settings:
     Signed Out After Restore: '由於此應用程式資料是從備份或其他裝置還原的，同步已登出。請重新登入以同步此裝置。'
     Revoke Session Tabs Warning: "此裝置已同步的分頁集合也將被刪除。"

@@ -1379,7 +1379,7 @@ Settings:
     Channel playback speeds imported: "{count} csatorna lejátszási sebessége importálva | {count} csatorna lejátszási sebessége importálva"
     Channels not found: "{count} csatorna nem található | {count} csatorna nem található"
     Playlists have been successfully imported: "1/{total} lejátszási lista sikeresen importálva | {count}/{total} lejátszási lista sikeresen importálva"
-    Import subscription groups hint: A csatornák csoportokba rendezéséhez egy .csv-fájlban a csatorna címe után adja meg pontosvesszővel elválasztva a csoportneveket, vagy importáljon mappákat tartalmazó .opml-fájlt. A hiányzó csoportok létrejönnek.
+    Import subscription groups hint: A csatornák csoportokba rendezéséhez egy .csv-fájlban a csatorna címe után adjon hozzá egy oszlopot a pontosvesszővel elválasztott csoportnevekkel, vagy importáljon mappákat tartalmazó .opml-fájlt. A hiányzó csoportok létrejönnek.
   Sync Settings:
     Signed Out After Restore: 'A szinkronizálás kijelentkezett, mert ezeket az alkalmazásadatokat biztonsági mentésből vagy másik eszközről állították vissza. Jelentkezz be újra az eszköz szinkronizálásához.'
     Revoke Session Tabs Warning: "Az eszköz szinkronizált lapkészletei is törlődnek."

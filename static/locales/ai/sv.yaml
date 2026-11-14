@@ -1379,7 +1379,7 @@ Settings:
     Channel playback speeds imported: "Importerade uppspelningshastigheten för {count} kanal | Importerade uppspelningshastigheterna för {count} kanaler"
     Channels not found: "{count} kanal kunde inte hittas | {count} kanaler kunde inte hittas"
     Playlists have been successfully imported: "1/{total} spellista har importerats | {count}/{total} spellistor har importerats"
-    Import subscription groups hint: Om du vill sortera kanaler i grupper lägger du till gruppnamn avgränsade med semikolon efter kanaltiteln i en .csv-fil, eller importerar en .opml-fil med mappar. Grupper som saknas skapas.
+    Import subscription groups hint: Om du vill sortera kanaler i grupper lägger du till en kolumn efter kanaltiteln i en .csv-fil med gruppnamn avgränsade med semikolon, eller importerar en .opml-fil med mappar. Grupper som saknas skapas.
   Sync Settings:
     Signed Out After Restore: 'Synkroniseringen loggades ut eftersom dessa appdata återställdes från en säkerhetskopia eller en annan enhet. Logga in igen för att synkronisera den här enheten.'
     Revoke Session Tabs Warning: "Den här enhetens synkroniserade flikuppsättningar kommer också att raderas."

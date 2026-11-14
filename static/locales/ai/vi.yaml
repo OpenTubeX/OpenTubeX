@@ -1383,7 +1383,7 @@ Settings:
     Channel playback speeds imported: "Đã nhập tốc độ phát của {count} kênh"
     Channels not found: "Không tìm thấy {count} kênh"
     Playlists have been successfully imported: "Đã nhập thành công {count}/{total} danh sách phát"
-    Import subscription groups hint: Để sắp xếp kênh vào các nhóm, hãy thêm tên nhóm phân tách bằng dấu chấm phẩy sau tiêu đề kênh trong tệp .csv, hoặc nhập tệp .opml có thư mục. Các nhóm chưa có sẽ được tạo.
+    Import subscription groups hint: Để sắp xếp kênh vào các nhóm, hãy thêm một cột sau tiêu đề kênh trong tệp .csv chứa tên nhóm phân tách bằng dấu chấm phẩy, hoặc nhập tệp .opml có thư mục. Các nhóm chưa có sẽ được tạo.
   Sync Settings:
     Signed Out After Restore: 'Đồng bộ đã bị đăng xuất vì dữ liệu ứng dụng này được khôi phục từ bản sao lưu hoặc từ thiết bị khác. Hãy đăng nhập lại để đồng bộ thiết bị này.'
     Revoke Session Tabs Warning: "Các bộ thẻ đã đồng bộ của thiết bị này cũng sẽ bị xóa."

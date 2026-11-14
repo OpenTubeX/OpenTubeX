@@ -1381,7 +1381,7 @@ Settings:
     Invalid channel playback speeds file: "Bu faylda kanal oynatma sürəti tapılmadı"
     Channel playback speeds imported: "{count} kanalın oynatma sürəti idxal edildi | {count} kanalın oynatma sürətləri idxal edildi"
     Channels not found: "{count} kanal tapılmadı | {count} kanal tapılmadı"
-    Import subscription groups hint: Kanalları qruplara ayırmaq üçün .csv faylında kanal adından sonra nöqtəli vergüllə ayrılmış qrup adlarını əlavə edin və ya qovluqları olan .opml faylını idxal edin. Mövcud olmayan qruplar yaradılır.
+    Import subscription groups hint: Kanalları qruplara ayırmaq üçün .csv faylında kanal adından sonra nöqtəli vergüllə ayrılmış qrup adları olan bir sütun əlavə edin və ya qovluqları olan .opml faylını idxal edin. Mövcud olmayan qruplar yaradılır.
   Sync Settings:
     Signed Out After Restore: 'Sinxronizasiyadan çıxış edildi, çünki bu tətbiq məlumatları ehtiyat nüsxədən və ya başqa cihazdan bərpa olunub. Bu cihazı sinxronlaşdırmaq üçün yenidən daxil olun.'
     Revoke Session Tabs Warning: "Bu cihazın sinxronlaşdırılmış vərəq dəstləri də silinəcək."

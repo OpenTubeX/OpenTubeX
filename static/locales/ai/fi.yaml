@@ -1380,7 +1380,7 @@ Settings:
     Channel playback speeds imported: "Tuotiin {count} kanavan toistonopeus | Tuotiin {count} kanavan toistonopeudet"
     Channels not found: "{count} kanavaa ei löytynyt | {count} kanavaa ei löytynyt"
     Playlists have been successfully imported: "1/{total} soittolista tuotiin onnistuneesti | {count}/{total} soittolistaa tuotiin onnistuneesti"
-    Import subscription groups hint: Jos haluat lajitella kanavat ryhmiin, lisää .csv-tiedostossa kanavan nimen perään ryhmien nimet puolipisteillä erotettuina tai tuo .opml-tiedosto, jossa on kansioita. Puuttuvat ryhmät luodaan.
+    Import subscription groups hint: Jos haluat lajitella kanavat ryhmiin, lisää .csv-tiedostoon kanavan nimen perään sarake, jossa on ryhmien nimet puolipisteillä erotettuina, tai tuo .opml-tiedosto, jossa on kansioita. Puuttuvat ryhmät luodaan.
   Sync Settings:
     Signed Out After Restore: 'Synkronoinnista kirjauduttiin ulos, koska nämä sovelluksen tiedot palautettiin varmuuskopiosta tai toisesta laitteesta. Kirjaudu uudelleen sisään synkronoidaksesi tämän laitteen.'
     Revoke Session Tabs Warning: "Myös tämän laitteen synkronoidut välilehtijoukot poistetaan."

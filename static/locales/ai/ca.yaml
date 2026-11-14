@@ -1702,7 +1702,7 @@ Settings:
     Channel playback speeds imported: "S'ha importat la velocitat de reproducció de {count} canal | S'han importat les velocitats de reproducció de {count} canals | S'han importat les velocitats de reproducció de {count} canals"
     Channels not found: "No s'ha pogut trobar {count} canal | No s'han pogut trobar {count} canals | No s'han pogut trobar {count} canals"
     Playlists have been successfully imported: "S'ha importat correctament 1/{total} llista de reproducció | S'han importat correctament {count}/{total} llistes de reproducció | S'han importat correctament {count}/{total} llistes de reproducció"
-    Import subscription groups hint: Per classificar els canals en grups, afegeix els noms dels grups separats per punts i comes després del títol del canal en un fitxer .csv, o importa un fitxer .opml amb carpetes. Es creen els grups que falten.
+    Import subscription groups hint: Per classificar els canals en grups, afegeix una columna després del títol del canal en un fitxer .csv amb els noms dels grups separats per punts i comes, o importa un fitxer .opml amb carpetes. Es creen els grups que falten.
   Sync Settings:
     Signed Out After Restore: 'S''ha tancat la sessió de la sincronització perquè aquestes dades de l''aplicació s''han restaurat d''una còpia de seguretat o d''un altre dispositiu. Torna a iniciar la sessió per sincronitzar aquest dispositiu.'
     Revoke Session Tabs Warning: "També se suprimiran els conjunts de pestanyes sincronitzats d’aquest dispositiu."

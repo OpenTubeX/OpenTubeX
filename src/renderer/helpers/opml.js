@@ -19,8 +19,8 @@ function decodeXmlEntities(value) {
  * attribute names.
  * @param {string} content
  * @returns {{ xmlUrl: string, title: string | null, folders: string[] }[]} `folders`
- * names the outlines that contain the feed, outermost first, except those
- * containing every feed
+ * names the outlines that contain the feed, outermost first, except an
+ * outermost one containing every feed
  */
 export function parseOpmlFeeds(content) {
   // Commented-out outlines are not subscriptions
@@ -54,10 +54,12 @@ export function parseOpmlFeeds(content) {
     }
   }
   // Exports wrap all feeds in one outline, such as "YouTube Subscriptions",
-  // which does not group them.
-  const wrappers = new Set(feeds[0]?.folders.filter(name => feeds.every(feed => feed.folders.includes(name))))
-  for (const feed of feeds) {
-    feed.folders = feed.folders.filter(name => !wrappers.has(name))
+  // which does not group them. Folders inside it are kept even when they hold every feed.
+  const wrapper = feeds[0]?.folders[0]
+  if (wrapper !== undefined && feeds.every(feed => feed.folders[0] === wrapper)) {
+    for (const feed of feeds) {
+      feed.folders.shift()
+    }
   }
   return feeds
 }
