@@ -60,20 +60,43 @@ test('the next video is requested while the previous one is still saving its pro
   await reloading
 })
 
-test('a hidden tab requests its video once it is its turn', async () => {
+// Only its player waits for other hidden tabs, so its details load in parallel
+test('a hidden tab requests its video without waiting for other tabs', async () => {
   const requests = []
   const { watch, finish } = watchFor(load(requests))
-  let grantTurn
   watch.isPlaybackPresented = () => false
-  watch.waitForBackgroundPlaybackTurn = () => new Promise(resolve => { grantTurn = resolve })
+  watch.waitForBackgroundPlaybackTurn = () => new Promise(() => {})
   const reloading = watch.reloadView()
   await new Promise(resolve => setImmediate(resolve))
-  assert.deepEqual(requests, [])
-  grantTurn()
-  await new Promise(resolve => setImmediate(resolve))
   assert.deepEqual(requests, ['nextVideo01'])
+  assert.equal(watch.loadingInBackground, true)
   finish()
   await reloading
+})
+
+test('Play in Background starts its video in the mini player without waiting for hidden tabs', async () => {
+  const { watch } = watchFor(load([]))
+  let turnRequested = false
+  Object.assign(watch, {
+    // The docked Watch page of a browsing tab isn't presented and has no player yet
+    isCurrentlyPresented: () => false,
+    isPlaybackPresented: () => false,
+    miniPlayerStartHeight: 0,
+    waitForBackgroundPlaybackTurn: () => { turnRequested = true },
+    handleRouteChange: async () => {},
+    $refs: {},
+    $store: { commit() {}, getters: {} },
+    getPendingVideoTitle: () => '',
+    resetVideoState() {},
+    applyBackgroundStart() { this.hasBeenPresented = true; return true },
+    checkIfTimestamp() {},
+    checkIfPlaylist() {},
+    setViewingModeOnRouteChange() {},
+    getVideoInformationLocal: async () => {},
+  })
+  await watch.reloadView()
+  assert.equal(watch.loadingInBackground, false)
+  assert.equal(turnRequested, false)
 })
 
 for (const sameVideo of [true, false]) {
