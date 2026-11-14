@@ -1507,6 +1507,7 @@ Settings:
     Invalid history file: Ungültige Verlaufsdatei
     Invalid JSON row, skipping item: Ungültiges JSON in Zeile {row}, Eintrag wird übersprungen
     Invalid subscriptions file: Ungültige Abo-Datei
+    Subscription cache file: Diese Datei speichert nur die Videos deiner Abos zwischen, nicht die Kanäle. Wähle stattdessen profiles.db oder einen Abo-Export.
     All subscriptions and profiles have been successfully imported: Alle Abos und Profile wurden erfolgreich importiert
     All subscriptions have been successfully imported: Alle Abos wurden erfolgreich importiert
     Profile object has insufficient data, skipping item: Profilobjekt hat unzureichende Daten, Element wird übersprungen

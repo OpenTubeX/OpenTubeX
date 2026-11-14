@@ -1319,6 +1319,7 @@ Settings:
     Paused Interface Hide Delay: 暂停界面隐藏延迟
     Blur Blocked Items: 模糊显示已屏蔽的项目，而不是隐藏
   Data Settings:
+    Subscription cache file: "此文件只缓存了你订阅中的视频，不包含频道本身。请改为选择 profiles.db 或订阅导出文件。"
     Settings could not be imported: "无法导入设置"
     Some settings could not be imported: "部分设置无法导入（{total} 项中有 {failed} 项失败）"
     Scheduled backups: "定时备份"

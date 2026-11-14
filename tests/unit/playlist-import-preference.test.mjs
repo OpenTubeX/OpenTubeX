@@ -25,6 +25,7 @@ for (const [preference, existing] of [[undefined, true], [false, true], [true, f
       processToBeAddedPlaylistVideo: () => {},
       store: { dispatch: (action, payload) => writes.push({ action, payload }) },
       showToast: value => toasts.push(value),
+      createImportWarnings: () => message => toasts.push({ message }),
       t: value => value,
       console,
     })
@@ -85,6 +86,7 @@ test('playlist import applies each picked database file to the previous file\'s 
       },
     },
     showToast: () => {},
+    createImportWarnings: () => () => {},
     t: value => value,
     console,
   })
@@ -108,6 +110,7 @@ test('playlist import reports a malformed database file and continues with the n
     isJsonObject: value => value !== null && typeof value === 'object' && !Array.isArray(value),
     store: { dispatch: async (action, payload) => writes.push({ action, payload }) },
     showToast: value => toasts.push(value.message),
+    createImportWarnings: () => message => toasts.push(message),
     t: value => value,
     console: { error: () => {} },
   })

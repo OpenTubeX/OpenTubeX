@@ -1319,6 +1319,7 @@ Settings:
     Paused Interface Hide Delay: Liidese peitmise viivitus pausi ajal
     Blur Blocked Items: Hägusta blokeeritud üksused nende peitmise asemel
   Data Settings:
+    Subscription cache file: "See fail puhverdab ainult sinu tellimuste videoid, mitte kanaleid. Vali selle asemel profiles.db või tellimuste eksport."
     Settings could not be imported: "Seadeid ei õnnestunud importida"
     Some settings could not be imported: "Kõiki seadeid ei õnnestunud importida ({total}-st nurjus {failed})"
     Scheduled backups: "Ajastatud varukoopiad"

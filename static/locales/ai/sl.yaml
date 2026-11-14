@@ -1584,6 +1584,7 @@ Settings:
     Remove: Odstrani
     Blur Blocked Items: Zamegli blokirane elemente, namesto da bi jih skril
   Data Settings:
+    Subscription cache file: "Ta datoteka hrani v predpomnilniku samo videoposnetke iz vaših naročnin, ne kanalov. Namesto nje izberite profiles.db ali izvoz naročnin."
     Settings could not be imported: "Nastavitev ni bilo mogoče uvoziti"
     Some settings could not be imported: "Vseh nastavitev ni bilo mogoče uvoziti (neuspešno: {failed} od {total})"
     Scheduled backups: "Načrtovane varnostne kopije"

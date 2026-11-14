@@ -1558,6 +1558,7 @@ Settings:
     Remove: Pašalinti
     Blur Blocked Items: Sulieti užblokuotus elementus, užuot juos slėpus
   Data Settings:
+    Subscription cache file: "Šiame faile talpinami tik jūsų prenumeratų vaizdo įrašai, o ne kanalai. Vietoj jo pasirinkite profiles.db arba prenumeratų eksportą."
     Settings could not be imported: "Nepavyko importuoti nustatymų"
     Some settings could not be imported: "Nepavyko importuoti visų nustatymų (nepavyko: {failed} iš {total})"
     Scheduled backups: "Suplanuotos atsarginės kopijos"

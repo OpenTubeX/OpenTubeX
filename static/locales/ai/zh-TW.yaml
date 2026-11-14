@@ -1319,6 +1319,7 @@ Settings:
     Paused Interface Hide Delay: 暫停介面的隱藏延遲
     Blur Blocked Items: 模糊顯示已封鎖的項目，而非隱藏
   Data Settings:
+    Subscription cache file: "此檔案只快取了你訂閱中的影片，不包含頻道本身。請改為選擇 profiles.db 或訂閱匯出檔案。"
     Settings could not be imported: "無法匯入設定"
     Some settings could not be imported: "部分設定無法匯入（{total} 項中有 {failed} 項失敗）"
     Scheduled backups: "排程備份"

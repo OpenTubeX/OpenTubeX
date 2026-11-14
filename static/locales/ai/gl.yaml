@@ -1333,6 +1333,7 @@ Settings:
     Hide Channel Shows: Agochar a lapela "Programas" da canle
     Blur Blocked Items: Desenfocar os elementos bloqueados en lugar de agochalos
   Data Settings:
+    Subscription cache file: "Este ficheiro só garda na caché os vídeos das túas subscricións, non as canles. Escolle profiles.db ou unha exportación de subscricións."
     Settings could not be imported: "Non foi posible importar a configuración"
     Some settings could not be imported: "Non foi posible importar toda a configuración (fallaron {failed} de {total})"
     Scheduled backups: "Copias de seguridade programadas"

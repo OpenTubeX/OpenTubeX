@@ -1337,6 +1337,7 @@ Settings:
     Hide Channel Shows: Kanaal­tabblad ‘Programma's’ verbergen
     Blur Blocked Items: Geblokkeerde items vervagen in plaats van verbergen
   Data Settings:
+    Subscription cache file: "Dit bestand bevat alleen een cache van de video's van je abonnementen, niet de kanalen. Kies in plaats daarvan profiles.db of een export van abonnementen."
     Settings could not be imported: "De instellingen konden niet worden geïmporteerd"
     Some settings could not be imported: "Niet alle instellingen konden worden geïmporteerd ({failed} van {total} mislukt)"
     Scheduled backups: "Geplande back-ups"

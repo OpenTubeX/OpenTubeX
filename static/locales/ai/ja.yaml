@@ -1319,6 +1319,7 @@ Settings:
     Paused Interface Hide Delay: 一時停止中のインターフェースを隠すまでの時間
     Blur Blocked Items: ブロックした項目を非表示にせずぼかす
   Data Settings:
+    Subscription cache file: "このファイルには登録チャンネルの動画のキャッシュだけが含まれ、チャンネル自体は含まれません。代わりに profiles.db または登録チャンネルのエクスポートを選択してください。"
     Settings could not be imported: "設定をインポートできませんでした"
     Some settings could not be imported: "一部の設定をインポートできませんでした（{total} 件中 {failed} 件が失敗）"
     Scheduled backups: "定期バックアップ"

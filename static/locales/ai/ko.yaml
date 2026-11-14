@@ -1545,6 +1545,7 @@ Settings:
     Remove: 제거
     Blur Blocked Items: 차단된 항목을 숨기지 않고 흐리게 표시
   Data Settings:
+    Subscription cache file: "이 파일에는 구독한 채널의 동영상 캐시만 있고 채널 자체는 없습니다. 대신 profiles.db 또는 구독 내보내기 파일을 선택하세요."
     Settings could not be imported: "설정을 가져올 수 없습니다"
     Some settings could not be imported: "일부 설정을 가져올 수 없습니다({total}개 중 {failed}개 실패)"
     Scheduled backups: "예약 백업"

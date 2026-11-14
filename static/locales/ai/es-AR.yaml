@@ -1411,6 +1411,7 @@ Settings:
     Hide Channel Shows: Ocultar la pestaña de 'Programas' del canal
     Blur Blocked Items: Desenfocar los elementos bloqueados en lugar de ocultarlos
   Data Settings:
+    Subscription cache file: "Este archivo solo guarda en caché los videos de tus suscripciones, no los canales. Elegí profiles.db o una exportación de suscripciones."
     Settings could not be imported: "No se pudo importar la configuración"
     Some settings could not be imported: "No se pudo importar toda la configuración (fallaron {failed} de {total})"
     Scheduled backups: "Copias de seguridad programadas"

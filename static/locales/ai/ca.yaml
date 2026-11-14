@@ -1624,6 +1624,7 @@ Settings:
     Remove: Elimina
     Blur Blocked Items: Difumina els elements bloquejats en lloc d'amagar-los
   Data Settings:
+    Subscription cache file: "Aquest fitxer només desa a la memòria cau els vídeos de les teves subscripcions, no els canals. Tria profiles.db o una exportació de subscripcions."
     Settings could not be imported: "No s'ha pogut importar la configuració"
     Some settings could not be imported: "No s'ha pogut importar tota la configuració (han fallat {failed} de {total})"
     Scheduled backups: "Còpies de seguretat programades"

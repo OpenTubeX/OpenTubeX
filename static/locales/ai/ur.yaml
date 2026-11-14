@@ -1382,6 +1382,7 @@ Settings:
     Hide Channel Shows: چینل کا ”شوز“ ٹیب چھپائیں
     Blur Blocked Items: بلاک شدہ آئٹمز کو چھپانے کے بجائے دھندلا کریں
   Data Settings:
+    Subscription cache file: "یہ فائل صرف آپ کی سبسکرپشنز کی ویڈیوز کو کیش کرتی ہے، چینلز کو نہیں۔ اس کے بجائے profiles.db یا سبسکرپشنز کی ایکسپورٹ منتخب کریں۔"
     Settings could not be imported: "ترتیبات درآمد نہیں کی جا سکیں"
     Some settings could not be imported: "تمام ترتیبات درآمد نہیں کی جا سکیں ({total} میں سے {failed} ناکام)"
     Scheduled backups: شیڈول شدہ بیک اپس

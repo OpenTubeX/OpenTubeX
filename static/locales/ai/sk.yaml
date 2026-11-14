@@ -1320,6 +1320,7 @@ Settings:
     Hide Channel Shows: Skryť kartu kanálov "Relácie"
     Blur Blocked Items: Rozmazať blokované položky namiesto ich skrytia
   Data Settings:
+    Subscription cache file: "Tento súbor obsahuje iba vyrovnávaciu pamäť videí z vašich odberov, nie samotné kanály. Namiesto neho vyberte profiles.db alebo export odberov."
     Settings could not be imported: "Nastavenia sa nepodarilo importovať"
     Some settings could not be imported: "Niektoré nastavenia sa nepodarilo importovať (zlyhalo {failed} z {total})"
     Scheduled backups: "Plánované zálohy"

@@ -1345,6 +1345,7 @@ Settings:
     Hide Channel Shows: Сакриј картицу „Емисије“ на каналу
     Blur Blocked Items: Замагли блокиране ставке уместо да их сакријеш
   Data Settings:
+    Subscription cache file: "Ова датотека само кешира видео снимке из ваших претплата, не и канале. Уместо ње изаберите profiles.db или извоз претплата."
     Settings could not be imported: "Подешавања није могуће увести"
     Some settings could not be imported: "Није могуће увести сва подешавања (неуспешно: {failed} од {total})"
     Scheduled backups: "Заказане резервне копије"

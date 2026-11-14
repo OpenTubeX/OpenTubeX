@@ -1359,6 +1359,7 @@ Settings:
     Hide Channel Shows: پنهان کردن زبانه "برنامه‌ها" کانال
     Blur Blocked Items: تار کردن موارد مسدودشده به‌جای پنهان کردن آن‌ها
   Data Settings:
+    Subscription cache file: "این فایل فقط ویدیوهای اشتراک‌های شما را در حافظهٔ پنهان نگه می‌دارد، نه خود کانال‌ها را. به‌جای آن profiles.db یا یک خروجی اشتراک‌ها را انتخاب کنید."
     Settings could not be imported: "وارد کردن تنظیمات ممکن نشد"
     Some settings could not be imported: "وارد کردن همه تنظیمات ممکن نشد ({failed} از {total} ناموفق بود)"
     Scheduled backups: "پشتیبان‌گیری زمان‌بندی‌شده"

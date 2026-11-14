@@ -1319,6 +1319,7 @@ Settings:
     Paused Interface Hide Delay: Atraso até ocultar a interface durante a pausa
     Blur Blocked Items: Desfocar itens bloqueados em vez de os ocultar
   Data Settings:
+    Subscription cache file: "Este ficheiro só guarda em cache os vídeos das suas subscrições, não os canais. Escolha antes profiles.db ou uma exportação de subscrições."
     Settings could not be imported: "Não foi possível importar as definições"
     Some settings could not be imported: "Não foi possível importar todas as definições (falharam {failed} de {total})"
     Scheduled backups: "Cópias de segurança agendadas"
