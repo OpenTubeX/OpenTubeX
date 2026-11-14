@@ -3150,7 +3150,7 @@ function updateActiveAnnotations() {
   activeAnnotations.value = next.length === 0 ? NO_ANNOTATIONS : next
 }
 
-watch(() => props.annotations, updateActiveAnnotations)
+watch(() => props.annotations, updateActiveAnnotations, { immediate: true })
 const annotationVideoAspectRatio = ref(null)
 
 const hasMultipleAudioTracks = ref(false)
@@ -7263,6 +7263,8 @@ function handleTimeupdate() {
     checkAbRepeatBoundary()
     const currentTime = video.value.currentTime
     updateMobileMiniBarProgress()
+    // A live seek range moves on without changing the progress, so refresh its time text.
+    renderMobileMiniBarProgress()
     sponsorBlockCurrentTime.value = currentTime
     annotationCurrentTime = currentTime
     updateActiveAnnotations()

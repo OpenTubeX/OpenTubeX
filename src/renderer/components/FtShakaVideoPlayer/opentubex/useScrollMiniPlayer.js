@@ -1712,7 +1712,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
 
   watch(scrollMiniVolumePercent, updateScrollMiniVolumeBarFill)
   watch([scrollMiniPlayPauseVisible, scrollMiniPlayerStashed], ([visible, stashed]) => {
-    if (visible && !stashed) nextTick(() => updateScrollMiniDragHandleContrast(true))
+    if (visible && !stashed) nextTick(() => updateScrollMiniDragHandleContrast())
   })
 
   watch(() => props.videoId, () => {
