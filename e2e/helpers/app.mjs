@@ -1010,9 +1010,12 @@ export async function goTo(page, route) {
     await expect(page.locator('.sideNav')).not.toHaveClass(/scrollHidden/)
   }
   const visibleLink = () => page.locator(sel.sideNavLink(route)).first()
-  if (await visibleLink().count() === 0) {
-    // Entry lives in the "More" flyout in the collapsed side nav.
-    await page.locator('.sideNav .moreOptionNav').click()
+  const moreButton = page.locator('.sideNav .moreOptionNav')
+  // Entry lives in the "More" flyout in the collapsed mobile side nav. A desktop
+  // nav that was just expanded renders its links a moment later, so wait for
+  // the link instead of clicking its hidden More button.
+  if (await visibleLink().count() === 0 && await moreButton.isVisible()) {
+    await moreButton.click()
   }
   await visibleLink().click()
   await expect(page).toHaveURL(new RegExp(`#/${route}`))
