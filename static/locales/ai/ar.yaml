@@ -1009,11 +1009,14 @@ Settings:
       Viewing Modes: أوضاع العرض
       Shorts: Shorts
       Screenshots: لقطات الشاشة
+      Timestamp Notes: ملاحظات الطوابع الزمنية
     Enable FCast: "تفعيل FCast"
     Screenshot:
       Legacy Formats: "صيغ قديمة"
       Modern Formats: "صيغ حديثة"
     Ask Before Preloading Large Playlists: "السؤال قبل التحميل المسبق لقوائم التشغيل الكبيرة"
+    Timestamp Notes:
+      Obsidian Vault: خزنة Obsidian
   Channel Settings:
     Channel Settings: إعدادات القناة
     Channel Settings Description: تذكر الإعدادات التي تختارها أثناء المشاهدة لكل قناة على حدة، بحيث يتم تطبيقها مرة أخرى في المرة التالية التي تشاهد فيها أحد مقاطع الفيديو الخاصة بها.
@@ -1399,6 +1402,7 @@ Settings:
     Channel playback speeds imported: "لم يتم استيراد سرعة التشغيل لأي قناة ({count}) | تم استيراد سرعة التشغيل لقناة واحدة ({count}) | تم استيراد سرعات التشغيل لقناتين ({count}) | تم استيراد سرعات التشغيل لـ {count} قنوات | تم استيراد سرعات التشغيل لـ {count} قناة | تم استيراد سرعات التشغيل لـ {count} قناة"
     Channels not found: "تعذّر العثور على {count} قناة | تعذّر العثور على قناة واحدة ({count}) | تعذّر العثور على قناتين ({count}) | تعذّر العثور على {count} قنوات | تعذّر العثور على {count} قناة | تعذّر العثور على {count} قناة"
     Playlists have been successfully imported: "تم استيراد {count}/{total} قائمة تشغيل بنجاح | تم استيراد 1/{total} قائمة تشغيل بنجاح | تم استيراد {count}/{total} قائمتي تشغيل بنجاح | تم استيراد {count}/{total} قوائم تشغيل بنجاح | تم استيراد {count}/{total} قائمة تشغيل بنجاح | تم استيراد {count}/{total} قائمة تشغيل بنجاح"
+    Import subscription groups hint: لفرز القنوات في مجموعات، أضف أسماء المجموعات مفصولة بفواصل منقوطة بعد عنوان القناة في ملف .csv، أو استورد ملف .opml يحتوي على مجلدات. تُنشأ المجموعات غير الموجودة.
   Sync Settings:
     Signed Out After Restore: 'تم تسجيل الخروج من المزامنة لأن بيانات التطبيق هذه استُعيدت من نسخة احتياطية أو من جهاز آخر. سجّل الدخول مجددًا لمزامنة هذا الجهاز.'
     Revoke Session Tabs Warning: "ستُحذف أيضًا مجموعات علامات التبويب المتزامنة لهذا الجهاز."
@@ -2049,6 +2053,14 @@ Video:
       Load: "تحميل ملف ترجمة…"
       Subtitle Files: "ملفات الترجمة"
       Error: "تعذّر تحميل ملف الترجمة. اختر ملف SRT أو WebVTT."
+    Timestamp Notes:
+      Take Note: تدوين ملاحظة بالطابع الزمني
+      Note at {time}: ملاحظة عند {time}
+      Note: ملاحظة
+      Add to Obsidian: إضافة إلى Obsidian
+      Copy as Markdown: نسخ بصيغة Markdown
+      Copied: نُسخت الملاحظة بصيغة Markdown
+      Obsidian Failed: تعذّر فتح Obsidian
   Station: محطة
   Playlist:
     Unavailable videos are hidden: تم إخفاء {count} من مقاطع الفيديو غير المتاحة | تم إخفاء فيديو واحد غير متاح | تم إخفاء {count} من مقاطع الفيديو غير المتاحة | تم إخفاء {count} من مقاطع الفيديو غير المتاحة | تم إخفاء {count} من مقاطع الفيديو غير المتاحة | تم إخفاء {count} من مقاطع الفيديو غير المتاحة
@@ -2367,6 +2379,7 @@ Tooltips:
     Concurrent Preloads: "الحد الأقصى لعدد عمليات yt-dlp المستخدمة لتحميل مقاطع الفيديو مسبقًا في الوقت نفسه. تستخدم القيم الأعلى مزيدًا من وحدة المعالجة المركزية والذاكرة وعرض النطاق الترددي للشبكة."
     Ignore System Rotation Lock for Fullscreen: استخدم دوران الجهاز الفعلي للدخول إلى ملء الشاشة والخروج منه حتى عند إيقاف التدوير التلقائي في أندرويد.
     Ask Before Preloading Large Playlists: "يطلب التأكيد قبل التحميل المسبق لكل فيديوهات قائمة تشغيل تحتوي على أكثر من {count} فيديو."
+    Obsidian Vault: اسم خزنة Obsidian لملاحظات الطوابع الزمنية. عند تعيينه، يمكن إضافة الملاحظات إلى Obsidian. تُجمع ملاحظات كل فيديو في ملاحظة تحمل اسم الفيديو، داخل مجلد الملاحظات الجديدة في الخزنة.
   Download Settings:
     Download Folder: يتم حفظ مقاطع الفيديو في هذا المجلد. اتركه فارغًا لاستخدام مجلد التنزيلات الخاص بنظامك.
     Global Additional yt-dlp Arguments: يتم تمرير وسيطات سطر الأوامر الإضافية إلى yt-dlp لكل عملية تنزيل، على سبيل المثال --cookies-from-browser Firefox.

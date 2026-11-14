@@ -1099,8 +1099,11 @@ Settings:
       Viewing Modes: Visingsmodusar
       Shorts: Shorts
       Screenshots: Skjermbilete
+      Timestamp Notes: Tidsstempelnotat
     Enable FCast: "Aktiver FCast"
     Ask Before Preloading Large Playlists: "Spør før førehandslasting av store spelelister"
+    Timestamp Notes:
+      Obsidian Vault: Obsidian-kvelv
   Channel Settings:
     Channel Settings: Kanalinnstillingar
     Channel Settings Description: Hugs innstillingane du vel medan du ser på kvar einskild kanal, slik at dei blir brukte att neste gong du ser ein av videoane til kanalen.
@@ -1536,6 +1539,7 @@ Settings:
     Channel playback speeds imported: "Importerte avspelingsfarten til {count} kanal | Importerte avspelingsfarten til {count} kanalar"
     Channels not found: "{count} kanal vart ikkje funnen | {count} kanalar vart ikkje funne"
     Playlists have been successfully imported: "1/{total} speleliste vart importert | {count}/{total} spelelister vart importerte"
+    Import subscription groups hint: For å sortere kanalar i grupper legg du til gruppenamn skilde med semikolon etter kanaltittelen i ei .csv-fil, eller importerer ei .opml-fil med mapper. Manglande grupper vert oppretta.
   Sync Settings:
     Signed Out After Restore: 'Synkroniseringa vart logga ut fordi desse appdataa vart gjenoppretta frå ein tryggleikskopi eller ei anna eining. Logg på igjen for å synkronisere denne eininga.'
     Revoke Session Tabs Warning: "Dei synkroniserte fanesetta til denne eininga vert òg sletta."
@@ -2283,6 +2287,14 @@ Video:
       Load: "Last inn undertekstfil…"
       Subtitle Files: "Undertekstfiler"
       Error: "Klarte ikkje å laste inn undertekstfila. Vel ei SRT- eller WebVTT-fil."
+    Timestamp Notes:
+      Take Note: Ta tidsstempelnotat
+      Note at {time}: Notat ved {time}
+      Note: Notat
+      Add to Obsidian: Legg til i Obsidian
+      Copy as Markdown: Kopier som Markdown
+      Copied: Notatet vart kopiert som Markdown
+      Obsidian Failed: Kunne ikkje opne Obsidian
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Attverande tid for førehandsannonsen: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Attverande ventetid for SABR: {remindingTimeSeconds}s'
@@ -2642,6 +2654,7 @@ Tooltips:
     Concurrent Preloads: "Det høgaste talet på yt-dlp-prosessar som blir brukte til å førehandslaste videoar samstundes. Høgare verdiar bruker meir prosessorkraft, minne og nettverksbandbreidd."
     Ignore System Rotation Lock for Fullscreen: Roter eininga fysisk for å opne og avslutte fullskjerm, sjølv når automatisk rotasjon er slått av i Android.
     Ask Before Preloading Large Playlists: "Ber om stadfesting før alle videoane i ei speleliste med meir enn {count} videoar vert førehandslasta."
+    Obsidian Vault: Namnet på Obsidian-kvelven for tidsstempelnotat. Når det er sett, kan notat leggjast til i Obsidian. Notata for kvar video vert samla i eit notat kalla opp etter videoen, i mappa til kvelven for nye notat.
   External Player Settings:
     Ignore Default Arguments: Ikkje send andre standardargument enn URL-en til videoen til den eksterne spelaren, til dømes avspelingsfart eller URL til spelelista. Eigne argument vert framleis sende vidare.
   Download Settings:

@@ -998,11 +998,14 @@ Settings:
       Viewing Modes: Megtekintési módok
       Shorts: Shorts
       Screenshots: Képernyőképek
+      Timestamp Notes: Időbélyeges jegyzetek
     Enable FCast: "FCast engedélyezése"
     Screenshot:
       Legacy Formats: "Régebbi formátumok"
       Modern Formats: "Modern formátumok"
     Ask Before Preloading Large Playlists: "Kérdezzen nagy lejátszási listák előtöltése előtt"
+    Timestamp Notes:
+      Obsidian Vault: Obsidian-széf
   Channel Settings:
     Channel Settings: Csatornabeállítások
     Channel Settings Description: Csatornánként megjegyzi a videónézés közben kiválasztott beállításokat, és a csatorna következő videójánál újra alkalmazza őket.
@@ -1376,6 +1379,7 @@ Settings:
     Channel playback speeds imported: "{count} csatorna lejátszási sebessége importálva | {count} csatorna lejátszási sebessége importálva"
     Channels not found: "{count} csatorna nem található | {count} csatorna nem található"
     Playlists have been successfully imported: "1/{total} lejátszási lista sikeresen importálva | {count}/{total} lejátszási lista sikeresen importálva"
+    Import subscription groups hint: A csatornák csoportokba rendezéséhez egy .csv-fájlban a csatorna címe után adja meg pontosvesszővel elválasztva a csoportneveket, vagy importáljon mappákat tartalmazó .opml-fájlt. A hiányzó csoportok létrejönnek.
   Sync Settings:
     Signed Out After Restore: 'A szinkronizálás kijelentkezett, mert ezeket az alkalmazásadatokat biztonsági mentésből vagy másik eszközről állították vissza. Jelentkezz be újra az eszköz szinkronizálásához.'
     Revoke Session Tabs Warning: "Az eszköz szinkronizált lapkészletei is törlődnek."
@@ -2003,6 +2007,14 @@ Video:
       Load: "Feliratfájl betöltése…"
       Subtitle Files: "Feliratfájlok"
       Error: "Nem sikerült betölteni a feliratfájlt. Válasszon SRT vagy WebVTT fájlt."
+    Timestamp Notes:
+      Take Note: Időbélyeges jegyzet készítése
+      Note at {time}: 'Jegyzet itt: {time}'
+      Note: Jegyzet
+      Add to Obsidian: Hozzáadás az Obsidianhoz
+      Copy as Markdown: Másolás Markdownként
+      Copied: Jegyzet Markdownként másolva
+      Obsidian Failed: Nem sikerült megnyitni az Obsidiant
   External Media:
     Dislikes: "Nemtetszés | Nemtetszés"
     Reposts: "Újbóli bejegyzés | Újbóli bejegyzés"
@@ -2331,6 +2343,7 @@ Tooltips:
     Concurrent Preloads: "A videók egyidejű előtöltésére használt yt-dlp-folyamatok legnagyobb száma. A magasabb értékek több processzort, memóriát és hálózati sávszélességet használnak."
     Ignore System Rotation Lock for Fullscreen: A készülék fizikai elforgatásával léphet teljes képernyőre és ki onnan akkor is, ha az Android automatikus forgatása ki van kapcsolva.
     Ask Before Preloading Large Playlists: "Megerősítést kér, mielőtt egy {count} videónál többet tartalmazó lejátszási lista összes videóját előtöltené."
+    Obsidian Vault: Az időbélyeges jegyzetekhez használt Obsidian-széf neve. Ha meg van adva, a jegyzetek hozzáadhatók az Obsidianhoz. Az egyes videók jegyzetei egy, a videóról elnevezett jegyzetben gyűlnek össze, a széf új jegyzeteknek szánt mappájában.
   Download Settings:
     Download Folder: A videók ebbe a mappába kerülnek. Hagyja üresen a rendszer Letöltések mappájának használatához.
     Global Additional yt-dlp Arguments: Minden letöltésnél a yt-dlp számára átadott további parancssori argumentumok, például --cookies-from-browser firefox.

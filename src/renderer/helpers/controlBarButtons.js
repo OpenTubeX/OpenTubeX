@@ -8,6 +8,7 @@ export const CONTROL_BAR_BUTTON_DEFINITIONS = Object.freeze([
   { id: 'playbackRate', labelKey: 'Settings.Player Settings.Playback Speed', icon: ['fas', 'gauge'], desktopOnly: true },
   { id: 'loop', labelKey: 'Settings.Interface Customizer.Loop', icon: ['fas', 'retweet'], desktopOnly: true },
   { id: 'screenshot', labelKey: 'Video.Player.Take Screenshot', icon: ['fas', 'camera'], desktopOnly: true },
+  { id: 'timestampNote', labelKey: 'Video.Player.Timestamp Notes.Take Note', icon: ['fas', 'note-sticky'], desktopOnly: true },
   { id: 'autoplay', labelKey: 'Video.Autoplay', icon: ['fas', 'autoplay'], desktopOnly: true },
   { id: 'captions', labelKey: 'Settings.Player Settings.Caption Appearance.Captions', icon: ['fas', 'closed-captioning'] },
   { id: 'menu', labelKey: 'Settings.Interface Customizer.Player Menu', icon: ['fas', 'gear'], required: true },

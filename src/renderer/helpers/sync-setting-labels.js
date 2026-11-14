@@ -263,6 +263,7 @@ export const SYNC_SETTING_LABELS = {
   rememberVolume: 'Settings.Player Settings.Remember Volume',
   monoAudio: 'Settings.Player Settings.Mono Audio',
   normalizeLoudness: 'Settings.Player Settings.Normalize Loudness',
+  obsidianVault: 'Settings.Player Settings.Timestamp Notes.Obsidian Vault',
   rewindOnResume: 'Settings.Player Settings.Rewind on Resume',
   rewindOnResumeMinimumPause: 'Settings.Player Settings.Minimum Pause Before Rewinding',
   returnYouTubeDislikesUrl: 'Settings.Return YouTube Dislike Settings.Return YouTube Dislike Url',

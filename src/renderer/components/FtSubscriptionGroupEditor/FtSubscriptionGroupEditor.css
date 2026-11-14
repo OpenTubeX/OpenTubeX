@@ -8,8 +8,17 @@
   inline-size: 100%;
 }
 
+.selectionRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px 12px;
+  margin-block-end: 8px;
+}
+
 .selectedCount {
-  margin-block: 0 8px;
+  margin: 0;
 }
 
 .message {

@@ -998,11 +998,14 @@ Settings:
       Viewing Modes: Vaaterežiimid
       Shorts: Shorts
       Screenshots: Ekraanipildid
+      Timestamp Notes: Ajatempliga märkmed
     Enable FCast: "Luba FCast"
     Screenshot:
       Legacy Formats: "Vanemad vormingud"
       Modern Formats: "Kaasaegsed vormingud"
     Ask Before Preloading Large Playlists: "Küsi enne suurte esitusloendite eellaadimist"
+    Timestamp Notes:
+      Obsidian Vault: Obsidiani hoidla
   Channel Settings:
     Channel Settings: Kanali seaded
     Channel Settings Description: Jäta iga kanali jaoks eraldi meelde vaatamise ajal valitud seaded, et need rakenduksid uuesti, kui vaatad järgmisel korral selle kanali videot.
@@ -1375,6 +1378,7 @@ Settings:
     Invalid channel playback speeds file: "Sellest failist ei leitud ühegi kanali esituskiirust"
     Channel playback speeds imported: "Imporditi {count} kanali esituskiirus | Imporditi {count} kanali esituskiirused"
     Channels not found: "{count} kanalit ei leitud | {count} kanalit ei leitud"
+    Import subscription groups hint: Kanalite rühmadesse jaotamiseks lisa .csv-failis kanali pealkirja järele semikoolonitega eraldatud rühmade nimed või impordi kaustadega .opml-fail. Puuduvad rühmad luuakse.
   Sync Settings:
     Signed Out After Restore: 'Sünkroonimisest logiti välja, sest need rakenduse andmed taastati varukoopiast või teisest seadmest. Selle seadme sünkroonimiseks logi uuesti sisse.'
     Revoke Session Tabs Warning: "Samuti kustutatakse selle seadme sünkroonitud vahelehtede komplektid."
@@ -2004,6 +2008,14 @@ Video:
       Load: "Laadi subtiitrifail…"
       Subtitle Files: "Subtiitrifailid"
       Error: "Subtiitrifaili ei õnnestunud laadida. Vali SRT- või WebVTT-fail."
+    Timestamp Notes:
+      Take Note: Tee ajatempliga märge
+      Note at {time}: Märge ajal {time}
+      Note: Märge
+      Add to Obsidian: Lisa Obsidiani
+      Copy as Markdown: Kopeeri Markdownina
+      Copied: Märge kopeeriti Markdownina
+      Obsidian Failed: Obsidiani avamine ebaõnnestus
   External Media:
     Dislikes: "Ei meeldi | Ei meeldi"
     Reposts: "Taaspostitus | Taaspostitused"
@@ -2332,6 +2344,7 @@ Tooltips:
     Concurrent Preloads: "Suurim arv yt-dlp protsesse, mida kasutatakse videote samaaegseks eellaadimiseks. Suuremad väärtused kasutavad rohkem protsessorit, mälu ja võrgu läbilaskevõimet."
     Ignore System Rotation Lock for Fullscreen: Pööra seadet füüsiliselt täisekraani avamiseks ja sulgemiseks ka siis, kui Androidi automaatne pööramine on välja lülitatud.
     Ask Before Preloading Large Playlists: "Küsib kinnitust enne, kui eellaaditakse kõik videod esitusloendist, milles on üle {count} video."
+    Obsidian Vault: Ajatempliga märkmete jaoks kasutatava Obsidiani hoidla nimi. Kui see on määratud, saab märkmeid Obsidiani lisada. Iga video märkmed kogutakse video järgi nimetatud märkmesse hoidla uute märkmete kaustas.
   Download Settings:
     Download Folder: Videod salvestatakse sellesse kausta. Süsteemi allalaadimiste kausta kasutamiseks jäta väli tühjaks.
     Global Additional yt-dlp Arguments: Täiendavad käsureaargumendid, mis edastatakse iga allalaadimise puhul yt-dlp-le, näiteks --cookies-from-browser firefox.

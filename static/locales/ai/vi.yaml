@@ -998,11 +998,14 @@ Settings:
       Viewing Modes: Chế độ xem
       Shorts: Shorts
       Screenshots: Ảnh chụp màn hình
+      Timestamp Notes: Ghi chú theo mốc thời gian
     Enable FCast: "Bật FCast"
     Screenshot:
       Legacy Formats: "Định dạng cũ"
       Modern Formats: "Định dạng hiện đại"
     Ask Before Preloading Large Playlists: "Hỏi trước khi tải trước danh sách phát lớn"
+    Timestamp Notes:
+      Obsidian Vault: Kho Obsidian
   Channel Settings:
     Channel Settings: Cài đặt kênh
     Channel Settings Description: Ghi nhớ riêng các cài đặt bạn chọn khi xem từng kênh để áp dụng lại vào lần sau khi bạn xem video của kênh đó.
@@ -1380,6 +1383,7 @@ Settings:
     Channel playback speeds imported: "Đã nhập tốc độ phát của {count} kênh"
     Channels not found: "Không tìm thấy {count} kênh"
     Playlists have been successfully imported: "Đã nhập thành công {count}/{total} danh sách phát"
+    Import subscription groups hint: Để sắp xếp kênh vào các nhóm, hãy thêm tên nhóm phân tách bằng dấu chấm phẩy sau tiêu đề kênh trong tệp .csv, hoặc nhập tệp .opml có thư mục. Các nhóm chưa có sẽ được tạo.
   Sync Settings:
     Signed Out After Restore: 'Đồng bộ đã bị đăng xuất vì dữ liệu ứng dụng này được khôi phục từ bản sao lưu hoặc từ thiết bị khác. Hãy đăng nhập lại để đồng bộ thiết bị này.'
     Revoke Session Tabs Warning: "Các bộ thẻ đã đồng bộ của thiết bị này cũng sẽ bị xóa."
@@ -2014,6 +2018,14 @@ Video:
       Load: "Tải tệp phụ đề…"
       Subtitle Files: "Tệp phụ đề"
       Error: "Không thể tải tệp phụ đề. Vui lòng chọn tệp SRT hoặc WebVTT."
+    Timestamp Notes:
+      Take Note: Tạo ghi chú theo mốc thời gian
+      Note at {time}: Ghi chú tại {time}
+      Note: Ghi chú
+      Add to Obsidian: Thêm vào Obsidian
+      Copy as Markdown: Sao chép dạng Markdown
+      Copied: Đã sao chép ghi chú dạng Markdown
+      Obsidian Failed: Không thể mở Obsidian
   Playlist:
     Unavailable videos are hidden: '{count} video không có sẵn đã bị ẩn'
   External Media:
@@ -2346,6 +2358,7 @@ Tooltips:
     Concurrent Preloads: "Số tiến trình yt-dlp tối đa được dùng để tải trước nhiều video cùng lúc. Giá trị cao hơn sử dụng nhiều CPU, bộ nhớ và băng thông mạng hơn."
     Ignore System Rotation Lock for Fullscreen: Xoay thiết bị để vào và thoát toàn màn hình ngay cả khi tính năng tự động xoay của Android đang tắt.
     Ask Before Preloading Large Playlists: "Yêu cầu xác nhận trước khi tải trước tất cả video của danh sách phát có hơn {count} video."
+    Obsidian Vault: Tên kho Obsidian dùng cho ghi chú theo mốc thời gian. Khi được đặt, ghi chú có thể được thêm vào Obsidian. Ghi chú của mỗi video được gom vào một ghi chú mang tên video, trong thư mục ghi chú mới của kho.
   Download Settings:
     Download Folder: Video được lưu vào thư mục này. Để trống để dùng thư mục Tải xuống của hệ thống.
     Global Additional yt-dlp Arguments: Đối số dòng lệnh bổ sung được chuyển cho yt-dlp trong mọi lượt tải, ví dụ --cookies-from-browser firefox.

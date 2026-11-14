@@ -1000,11 +1000,14 @@ Settings:
       Viewing Modes: Skoðunarhamir
       Shorts: Shorts
       Screenshots: Skjámyndir
+      Timestamp Notes: Tímamerktar glósur
     Enable FCast: "Virkja FCast"
     Screenshot:
       Legacy Formats: "Eldri snið"
       Modern Formats: "Nútímaleg snið"
     Ask Before Preloading Large Playlists: "Spyrja áður en stórir spilunarlistar eru forhlaðnir"
+    Timestamp Notes:
+      Obsidian Vault: Obsidian-hvelfing
   Channel Settings:
     Channel Settings: Rásarstillingar
     Channel Settings Description: Muna stillingarnar sem þú velur við áhorf fyrir hverja rás, svo þær verði notaðar aftur næst þegar þú horfir á myndband frá henni.
@@ -1379,6 +1382,7 @@ Settings:
     Channel playback speeds imported: "Flutti inn spilunarhraða {count} rásar | Flutti inn spilunarhraða {count} rása"
     Channels not found: "{count} rás fannst ekki | {count} rásir fundust ekki"
     Playlists have been successfully imported: "{count}/{total} spilunarlisti fluttur inn | {count}/{total} spilunarlistar fluttir inn"
+    Import subscription groups hint: Til að raða rásum í hópa skaltu bæta við hópaheitum aðskildum með semíkommum á eftir titli rásarinnar í .csv-skrá, eða flytja inn .opml-skrá með möppum. Hópar sem vantar eru búnir til.
   Sync Settings:
     Signed Out After Restore: 'Samstillingu var skráð út vegna þess að þessi forritsgögn voru endurheimt úr öryggisafriti eða af öðru tæki. Skráðu þig inn aftur til að samstilla þetta tæki.'
     Revoke Session Tabs Warning: "Samstilltum flipasöfnum þessa tækis verður einnig eytt."
@@ -2018,6 +2022,14 @@ Video:
       Load: "Hlaða inn skjátextaskrá…"
       Subtitle Files: "Skjátextaskrár"
       Error: "Ekki tókst að hlaða inn skjátextaskránni. Veldu SRT- eða WebVTT-skrá."
+    Timestamp Notes:
+      Take Note: Skrifa tímamerkta glósu
+      Note at {time}: Glósa við {time}
+      Note: Glósa
+      Add to Obsidian: Bæta við Obsidian
+      Copy as Markdown: Afrita sem Markdown
+      Copied: Glósa afrituð sem Markdown
+      Obsidian Failed: Ekki tókst að opna Obsidian
   External Media:
     Dislikes: "Neikvætt atkvæði | Neikvæð atkvæði"
     Reposts: "Endurbirting | Endurbirtingar"
@@ -2345,6 +2357,7 @@ Tooltips:
     Concurrent Preloads: "Hámarksfjöldi yt-dlp-ferla sem eru notaðir til að forhlaða myndskeiðum samtímis. Hærri gildi nota meira örgjörvaafl, minni og netbandvídd."
     Ignore System Rotation Lock for Fullscreen: Snúðu tækinu til að opna og loka öllum skjánum, jafnvel þótt slökkt sé á sjálfvirkum snúningi í Android.
     Ask Before Preloading Large Playlists: "Biður um staðfestingu áður en öll myndskeið spilunarlista með fleiri en {count} myndskeið eru forhlaðin."
+    Obsidian Vault: Heiti Obsidian-hvelfingarinnar fyrir tímamerktar glósur. Þegar það er stillt er hægt að bæta glósum við Obsidian. Glósur hvers myndskeiðs eru teknar saman í glósu sem nefnd er eftir myndskeiðinu, í möppu hvelfingarinnar fyrir nýjar glósur.
   Download Settings:
     Download Folder: Myndbönd vistast í þessa möppu. Skildu reitinn eftir auðan til að nota niðurhalsmöppu kerfisins.
     Global Additional yt-dlp Arguments: Viðbótarviðföng skipanalínu sem eru send til yt-dlp við hvert niðurhal, til dæmis --cookies-from-browser firefox.

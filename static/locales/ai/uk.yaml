@@ -1009,11 +1009,14 @@ Settings:
       Viewing Modes: Режими перегляду
       Shorts: Shorts
       Screenshots: Знімки екрана
+      Timestamp Notes: Нотатки з позначками часу
     Enable FCast: "Увімкнути FCast"
     Screenshot:
       Legacy Formats: "Застарілі формати"
       Modern Formats: "Сучасні формати"
     Ask Before Preloading Large Playlists: "Запитувати перед попереднім завантаженням великих плейлистів"
+    Timestamp Notes:
+      Obsidian Vault: Сховище Obsidian
   Channel Settings:
     Channel Settings: Налаштування каналів
     Channel Settings Description: Запам’ятовувати вибрані під час перегляду налаштування окремо для кожного каналу й застосовувати їх під час наступного перегляду його відео.
@@ -1399,6 +1402,7 @@ Settings:
     Channel playback speeds imported: "Імпортовано швидкість відтворення {count} каналу | Імпортовано швидкості відтворення {count} каналів | Імпортовано швидкості відтворення {count} каналів"
     Channels not found: "Не вдалося знайти {count} канал | Не вдалося знайти {count} канали | Не вдалося знайти {count} каналів"
     Playlists have been successfully imported: "Успішно імпортовано {count}/{total} плейлист | Успішно імпортовано {count}/{total} плейлисти | Успішно імпортовано {count}/{total} плейлистів"
+    Import subscription groups hint: Щоб розподілити канали за групами, додайте у файлі .csv після назви каналу назви груп через крапку з комою або імпортуйте файл .opml з теками. Відсутні групи буде створено.
   Sync Settings:
     Signed Out After Restore: 'Виконано вихід із синхронізації, бо ці дані застосунку відновлено з резервної копії або з іншого пристрою. Увійдіть знову, щоб синхронізувати цей пристрій.'
     Revoke Session Tabs Warning: "Синхронізовані набори вкладок цього пристрою також буде видалено."
@@ -2049,6 +2053,14 @@ Video:
       Load: "Завантажити файл субтитрів…"
       Subtitle Files: "Файли субтитрів"
       Error: "Не вдалося завантажити файл субтитрів. Виберіть файл SRT або WebVTT."
+    Timestamp Notes:
+      Take Note: Зробити нотатку з позначкою часу
+      Note at {time}: Нотатка на {time}
+      Note: Нотатка
+      Add to Obsidian: Додати в Obsidian
+      Copy as Markdown: Копіювати як Markdown
+      Copied: Нотатку скопійовано як Markdown
+      Obsidian Failed: Не вдалося відкрити Obsidian
   Station: Станція
   Playlist:
     Unavailable videos are hidden: '{count} недоступне відео приховано | {count} недоступні відео приховано | {count} недоступних відео приховано'
@@ -2382,6 +2394,7 @@ Tooltips:
     Concurrent Preloads: "Найбільша кількість процесів yt-dlp, які одночасно попередньо завантажують відео. Вищі значення використовують більше ресурсів процесора, пам'яті та пропускної здатності мережі."
     Ignore System Rotation Lock for Fullscreen: Повертайте пристрій, щоб входити в повноекранний режим і виходити з нього, навіть коли автоповорот в Android вимкнено.
     Ask Before Preloading Large Playlists: "Запитує підтвердження перед попереднім завантаженням усіх відео плейлиста, у якому понад {count} відео."
+    Obsidian Vault: Назва сховища Obsidian для нотаток із позначками часу. Якщо її задано, нотатки можна додавати в Obsidian. Нотатки до кожного відео збираються в нотатці з назвою відео, у теці сховища для нових нотаток.
   Download Settings:
     Download Folder: Відео зберігаються в цій папці. Залиште поле порожнім, щоб використовувати системну папку «Завантаження».
     Global Additional yt-dlp Arguments: Додаткові аргументи командного рядка, що передаються yt-dlp під час кожного завантаження, наприклад --cookies-from-browser firefox.

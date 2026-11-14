@@ -42,10 +42,12 @@ export function sniffTakeoutEntry(path, head, complete) {
   }
   const records = parseCsvRecords(lines, !complete)
   const record = records?.slice(1).find(values => values.some(value => value.trim() !== ''))
-  if (record === undefined || record.length !== records[0].length) { return null }
-  if (record.length === 3 && CHANNEL_ID_PATTERN.test(record[0]) && record[1].includes(record[0])) {
+  if (record === undefined) { return null }
+  // Columns after the channel title name groups, which users may add without a header
+  if (records[0].length >= 3 && record.length >= 3 && CHANNEL_ID_PATTERN.test(record[0]) && record[1].includes(record[0])) {
     return 'subscriptions'
   }
+  if (record.length !== records[0].length) { return null }
   if (record.length >= 2 && (records[0].includes('Playlist ID') || record.some(value => PLAYLIST_ID_PATTERN.test(value)))) {
     return 'playlistMetadata'
   }
@@ -513,7 +515,7 @@ export function isSupportedTakeoutEntry(entry) {
     return parseTakeoutPlaylistCsv(entry.content, path.split('/').at(-1)) !== null
   }
   if (entry.type === 'subscriptions' && path.endsWith('.csv')) {
-    return parseCsvRecords(entry.content)?.[0]?.length === 3
+    return parseCsvRecords(entry.content)?.[0]?.length >= 3
   }
   if (entry.type === 'subscriptions' && path.endsWith('.opml')) {
     return entry.content.includes('<opml')

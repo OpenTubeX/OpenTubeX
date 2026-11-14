@@ -79,6 +79,8 @@ test('detects Takeout entries by content under any localized path', () => {
     }
   }
   assert.equal(sniffTakeoutEntry('Takeout/YouTube/abonnements.opml', `<opml><body><outline xmlUrl="https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}" /></body></opml>`, true), 'subscriptions')
+  // Group columns added to the rows without extending the header
+  assert.equal(sniffTakeoutEntry('Takeout/YouTube/subscriptions.csv', `Channel Id,Channel Url,Channel Title\n${channelId},http://www.youtube.com/channel/${channelId},Kanal,Tech;News\n`, true), 'subscriptions')
 })
 
 test('ignores unrelated or unrecognizable Takeout data', () => {

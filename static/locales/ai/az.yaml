@@ -1000,11 +1000,14 @@ Settings:
       Viewing Modes: Baxış rejimləri
       Shorts: Shorts
       Screenshots: Ekran görüntüləri
+      Timestamp Notes: Zaman nişanlı qeydlər
     Enable FCast: "FCast aktivləşdir"
     Screenshot:
       Legacy Formats: "Köhnə formatlar"
       Modern Formats: "Müasir formatlar"
     Ask Before Preloading Large Playlists: "Böyük pleylistləri əvvəlcədən yükləməzdən əvvəl soruş"
+    Timestamp Notes:
+      Obsidian Vault: Obsidian anbarı
   Channel Settings:
     Channel Settings: Kanal tənzimləmələri
     Channel Settings Description: Baxış zamanı seçdiyiniz tənzimləmələri hər kanal üçün ayrıca yadda saxlayın ki, həmin kanalın növbəti videosuna baxanda yenidən tətbiq edilsin.
@@ -1378,6 +1381,7 @@ Settings:
     Invalid channel playback speeds file: "Bu faylda kanal oynatma sürəti tapılmadı"
     Channel playback speeds imported: "{count} kanalın oynatma sürəti idxal edildi | {count} kanalın oynatma sürətləri idxal edildi"
     Channels not found: "{count} kanal tapılmadı | {count} kanal tapılmadı"
+    Import subscription groups hint: Kanalları qruplara ayırmaq üçün .csv faylında kanal adından sonra nöqtəli vergüllə ayrılmış qrup adlarını əlavə edin və ya qovluqları olan .opml faylını idxal edin. Mövcud olmayan qruplar yaradılır.
   Sync Settings:
     Signed Out After Restore: 'Sinxronizasiyadan çıxış edildi, çünki bu tətbiq məlumatları ehtiyat nüsxədən və ya başqa cihazdan bərpa olunub. Bu cihazı sinxronlaşdırmaq üçün yenidən daxil olun.'
     Revoke Session Tabs Warning: "Bu cihazın sinxronlaşdırılmış vərəq dəstləri də silinəcək."
@@ -2014,6 +2018,14 @@ Video:
       Load: "Altyazı faylını yüklə…"
       Subtitle Files: "Altyazı faylları"
       Error: "Altyazı faylı yüklənmədi. SRT və ya WebVTT faylı seçin."
+    Timestamp Notes:
+      Take Note: Zaman nişanlı qeyd yaz
+      Note at {time}: '{time} anında qeyd'
+      Note: Qeyd
+      Add to Obsidian: Obsidian-a əlavə et
+      Copy as Markdown: Markdown kimi kopyala
+      Copied: Qeyd Markdown kimi kopyalandı
+      Obsidian Failed: Obsidian açıla bilmədi
   External Media:
     Dislikes: "Bəyənməmə | Bəyənməmə"
     Reposts: "Repost | Repostlar"
@@ -2342,6 +2354,7 @@ Tooltips:
     Concurrent Preloads: Videoları eyni anda öncədən yükləmək üçün istifadə olunan yt-dlp proseslərinin maksimum sayı. Yüksək dəyərlər daha çox prosessor, yaddaş və şəbəkə resursu istifadə edir.
     Ignore System Rotation Lock for Fullscreen: Android-də avtomatik fırlanma söndürülsə belə, cihazı fiziki olaraq döndərərək tam ekrana keçin və çıxın.
     Ask Before Preloading Large Playlists: "{count} videodan çox olan pleylistin bütün videolarını əvvəlcədən yükləməzdən əvvəl təsdiq istəyir."
+    Obsidian Vault: Zaman nişanlı qeydlər üçün Obsidian anbarının adı. Təyin edildikdə qeydləri Obsidian-a əlavə etmək olar. Hər videonun qeydləri anbarın yeni qeydlər qovluğunda videonun adını daşıyan bir qeyddə toplanır.
   Download Settings:
     Download Folder: Videolar bu qovluqda saxlanır. Sistemin Yükləmələr qovluğunu istifadə etmək üçün boş buraxın.
     Global Additional yt-dlp Arguments: Hər endirmədə yt-dlp-yə ötürülən əlavə əmr sətri arqumentləri, məsələn --cookies-from-browser firefox.

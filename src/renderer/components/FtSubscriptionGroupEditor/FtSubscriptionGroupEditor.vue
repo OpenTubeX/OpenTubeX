@@ -38,9 +38,29 @@
         :maxlength="255"
         @input="query = $event"
       />
-      <p class="selectedCount">
-        {{ t('Profile.{number} selected', { number: selectedSubscribedCount }) }}
-      </p>
+      <div class="selectionRow">
+        <p class="selectedCount">
+          {{ t('Profile.{number} selected', { number: selectedSubscribedCount }) }}
+        </p>
+        <!-- With a search, these change only the matching channels -->
+        <FtButtonGroup
+          v-if="displayedChannels.length > 1"
+          class="selectionActions"
+        >
+          <FtButton
+            :label="t('Profile.Select All')"
+            :icon="['fas', 'check']"
+            :disabled="displayedChannels.every(channel => selected.has(channel.id))"
+            @click="setDisplayedChannelsSelected(true)"
+          />
+          <FtButton
+            :label="t('Profile.Select None')"
+            :icon="['fas', 'xmark']"
+            :disabled="!displayedChannels.some(channel => selected.has(channel.id))"
+            @click="setDisplayedChannelsSelected(false)"
+          />
+        </FtButtonGroup>
+      </div>
     </template>
     <div
       class="iconPicker"
@@ -248,6 +268,17 @@ function toggleChannel(channelId) {
     selected.delete(channelId)
   } else {
     selected.add(channelId)
+  }
+}
+
+/** @param {boolean} included */
+function setDisplayedChannelsSelected(included) {
+  for (const channel of displayedChannels.value) {
+    if (included) {
+      selected.add(channel.id)
+    } else {
+      selected.delete(channel.id)
+    }
   }
 }
 

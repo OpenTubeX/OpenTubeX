@@ -983,11 +983,14 @@ Settings:
       Viewing Modes: Viewing Modes
       Shorts: Shorts
       Screenshots: Screenshots
+      Timestamp Notes: Timestamp Notes
     Enable FCast: "Enable FCast"
     Screenshot:
       Legacy Formats: "Legacy formats"
       Modern Formats: "Modern formats"
     Ask Before Preloading Large Playlists: "Ask Before Preloading Large Playlists"
+    Timestamp Notes:
+      Obsidian Vault: Obsidian Vault
   Channel Settings:
     Channel Settings: Channel Settings
     Channel Settings Description: Remember the settings you pick while watching for each channel individually, so they are applied again the next time you watch one of its videos.
@@ -1357,6 +1360,7 @@ Settings:
     Channel playback speeds imported: "Imported the playback speed of {count} channel | Imported the playback speeds of {count} channels"
     Channels not found: "{count} channel could not be found | {count} channels could not be found"
     Playlists have been successfully imported: "1/{total} playlist has been successfully imported | {count}/{total} playlists have been successfully imported"
+    Import subscription groups hint: To sort channels into groups, add group names separated by semicolons after the channel title in a .csv file, or import an .opml file with folders. Missing groups are created.
   Sync Settings:
     Signed Out After Restore: 'Sync was signed out because this app data was restored from a backup or another device. Sign in again to sync this device.'
     Revoke Session Tabs Warning: "This device's synced tab sets will also be deleted."
@@ -1992,6 +1996,14 @@ Video:
       Load: "Load subtitle file…"
       Subtitle Files: "Subtitle files"
       Error: "Could not load the subtitle file. Choose an SRT or WebVTT file."
+    Timestamp Notes:
+      Take Note: Take Timestamp Note
+      Note at {time}: Note at {time}
+      Note: Note
+      Add to Obsidian: Add to Obsidian
+      Copy as Markdown: Copy as Markdown
+      Copied: Note copied as Markdown
+      Obsidian Failed: Could not open Obsidian
   Station: Station
   Playlist:
     Unavailable videos are hidden: 1 unavailable video is hidden | {count} unavailable videos are hidden
@@ -2325,6 +2337,7 @@ Tooltips:
     Concurrent Preloads: "The maximum number of yt-dlp processes used to preload videos at once. Higher values use more CPU, memory, and network bandwidth."
     Ignore System Rotation Lock for Fullscreen: Use physical device rotation to enter and exit fullscreen even when Android's auto-rotate is off.
     Ask Before Preloading Large Playlists: "Asks for confirmation before preloading all videos of a playlist with more than {count} videos."
+    Obsidian Vault: Name of the Obsidian vault for timestamp notes. When set, notes can be added to Obsidian. The notes of each video are collected in a note named after the video, in the vault's folder for new notes.
   Download Settings:
     Download Folder: Videos are saved to this folder. Leave blank to use your system's Downloads folder.
     Global Additional yt-dlp Arguments: Additional command line arguments passed to yt-dlp for every download, for example --cookies-from-browser firefox.

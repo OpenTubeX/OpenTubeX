@@ -1216,8 +1216,11 @@ Settings:
       Viewing Modes: Načini ogleda
       Shorts: Shorts
       Screenshots: Posnetki zaslona
+      Timestamp Notes: Opombe s časovnimi oznakami
     Enable FCast: "Omogoči FCast"
     Ask Before Preloading Large Playlists: "Vprašaj pred prednalaganjem velikih seznamov predvajanja"
+    Timestamp Notes:
+      Obsidian Vault: Trezor Obsidian
   Channel Settings:
     Channel Settings: Nastavitve kanalov
     Channel Settings Description: Zapomni si nastavitve, ki jih med gledanjem izberete za vsak kanal posebej, in jih znova uporabi ob naslednjem ogledu enega od njegovih videoposnetkov.
@@ -1663,6 +1666,7 @@ Settings:
     Channel playback speeds imported: "Uvožena je hitrost predvajanja za {count} kanal | Uvoženi sta hitrosti predvajanja za {count} kanala | Uvožene so hitrosti predvajanja za {count} kanale | Uvožene so hitrosti predvajanja za {count} kanalov"
     Channels not found: "{count} kanal ni bil najden | {count} kanala nista bila najdena | {count} kanali niso bili najdeni | {count} kanalov ni bilo najdenih"
     Playlists have been successfully imported: "Uspešno uvožen {count}/{total} seznam predvajanja | Uspešno uvožena {count}/{total} seznama predvajanja | Uspešno uvoženi {count}/{total} seznami predvajanja | Uspešno uvoženih {count}/{total} seznamov predvajanja"
+    Import subscription groups hint: Če želite kanale razvrstiti v skupine, v datoteki .csv za naslovom kanala dodajte imena skupin, ločena s podpičji, ali uvozite datoteko .opml z mapami. Manjkajoče skupine bodo ustvarjene.
   Sync Settings:
     Signed Out After Restore: 'Sinhronizacija je bila odjavljena, ker so bili ti podatki aplikacije obnovljeni iz varnostne kopije ali z druge naprave. Znova se prijavite, da sinhronizirate to napravo.'
     Revoke Session Tabs Warning: "Izbrisani bodo tudi sinhronizirani nabori zavihkov te naprave."
@@ -2474,6 +2478,14 @@ Video:
       Load: "Naloži datoteko s podnapisi…"
       Subtitle Files: "Datoteke s podnapisi"
       Error: "Datoteke s podnapisi ni bilo mogoče naložiti. Izberite datoteko SRT ali WebVTT."
+    Timestamp Notes:
+      Take Note: Ustvari opombo s časovno oznako
+      Note at {time}: Opomba ob {time}
+      Note: Opomba
+      Add to Obsidian: Dodaj v Obsidian
+      Copy as Markdown: Kopiraj kot Markdown
+      Copied: Opomba je kopirana kot Markdown
+      Obsidian Failed: Obsidiana ni bilo mogoče odpreti
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Preostali čas oglasa pred videoposnetkom: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Preostali čas zakasnitve SABR: {remindingTimeSeconds}s'
@@ -2842,6 +2854,7 @@ Tooltips:
     Concurrent Preloads: "Največje število procesov yt-dlp, ki se uporabljajo za sočasno prednalaganje videov. Višje vrednosti porabijo več procesorske moči, pomnilnika in omrežne pasovne širine."
     Ignore System Rotation Lock for Fullscreen: Fizično obrnite napravo za vstop in izstop iz celotnega zaslona, tudi ko je samodejno vrtenje v Androidu izklopljeno.
     Ask Before Preloading Large Playlists: "Pred prednalaganjem vseh videoposnetkov s seznama predvajanja z več kot {count} videoposnetki zahteva potrditev."
+    Obsidian Vault: Ime trezorja Obsidian za opombe s časovnimi oznakami. Ko je nastavljeno, lahko opombe dodajate v Obsidian. Opombe posameznega videoposnetka se zbirajo v opombi, poimenovani po videoposnetku, v mapi trezorja za nove opombe.
   External Player Settings:
     External Player: Če izberete zunanji predvajalnik, se na sličici prikaže ikona za odpiranje videoposnetka oziroma seznama predvajanja, če je podprt, v zunanjem predvajalniku. Nastavitve Invidious ne vplivajo na zunanje predvajalnike.
     Custom External Player Executable: OpenTubeX privzeto predvideva, da je izbrani zunanji predvajalnik mogoče najti prek okoljske spremenljivke PATH. Po potrebi lahko tukaj nastavite pot po meri.

@@ -1180,8 +1180,11 @@ Settings:
       Viewing Modes: 보기 모드
       Shorts: Shorts
       Screenshots: 스크린샷
+      Timestamp Notes: 타임스탬프 메모
     Enable FCast: "FCast 활성화"
     Ask Before Preloading Large Playlists: "큰 재생목록을 미리 불러오기 전에 묻기"
+    Timestamp Notes:
+      Obsidian Vault: Obsidian 보관함
   Channel Settings:
     Channel Settings: 채널 설정
     Channel Settings Description: 채널마다 시청 중 선택한 설정을 기억하고, 다음에 해당 채널의 동영상을 시청할 때 다시 적용합니다.
@@ -1617,6 +1620,7 @@ Settings:
     Channel playback speeds imported: "채널 {count}개의 재생 속도를 가져왔습니다"
     Channels not found: "채널 {count}개를 찾을 수 없습니다"
     Playlists have been successfully imported: "재생 목록 {count}/{total}개를 가져왔습니다"
+    Import subscription groups hint: 채널을 그룹으로 분류하려면 .csv 파일에서 채널 제목 뒤에 세미콜론으로 구분한 그룹 이름을 추가하거나, 폴더가 있는 .opml 파일을 가져오세요. 없는 그룹은 새로 만들어집니다.
   Sync Settings:
     Signed Out After Restore: '이 앱 데이터가 백업이나 다른 기기에서 복원되어 동기화에서 로그아웃되었습니다. 이 기기를 동기화하려면 다시 로그인하세요.'
     Revoke Session Tabs Warning: "이 기기의 동기화된 탭 모음도 삭제됩니다."
@@ -2359,6 +2363,14 @@ Video:
       Load: "자막 파일 불러오기…"
       Subtitle Files: "자막 파일"
       Error: "자막 파일을 불러올 수 없습니다. SRT 또는 WebVTT 파일을 선택하세요."
+    Timestamp Notes:
+      Take Note: 타임스탬프 메모 작성
+      Note at {time}: '{time} 메모'
+      Note: 메모
+      Add to Obsidian: Obsidian에 추가
+      Copy as Markdown: Markdown으로 복사
+      Copied: 메모를 Markdown으로 복사했습니다
+      Obsidian Failed: Obsidian을 열 수 없습니다
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': '프리롤 광고 남은 시간: {remindingTimeSeconds}초'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'SABR 대기 남은 시간: {remindingTimeSeconds}초'
@@ -2718,6 +2730,7 @@ Tooltips:
     Concurrent Preloads: "동시에 동영상을 미리 로드하는 데 사용할 yt-dlp 프로세스의 최대 개수입니다. 값이 높을수록 CPU, 메모리 및 네트워크 대역폭을 더 많이 사용합니다."
     Ignore System Rotation Lock for Fullscreen: Android 자동 회전이 꺼져 있어도 기기를 직접 회전하여 전체 화면으로 전환하거나 종료합니다.
     Ask Before Preloading Large Playlists: "동영상이 {count}개를 넘는 재생목록의 모든 동영상을 미리 불러오기 전에 확인을 요청합니다."
+    Obsidian Vault: 타임스탬프 메모에 사용할 Obsidian 보관함 이름입니다. 설정하면 메모를 Obsidian에 추가할 수 있습니다. 각 동영상의 메모는 보관함의 새 노트 폴더에 있는, 동영상 이름으로 된 노트에 모입니다.
   External Player Settings:
     Ignore Default Arguments: 동영상 URL 외의 기본 인수를 외부 플레이어에 보내지 않습니다. 예를 들어 재생 속도와 재생목록 URL이 해당됩니다. 사용자 지정 인수는 계속 전달됩니다.
   Download Settings:
