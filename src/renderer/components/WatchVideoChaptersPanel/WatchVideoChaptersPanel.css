@@ -78,7 +78,9 @@
 
 .watchVideoChaptersPanel :deep(.chapter:hover),
 .watchVideoChaptersPanel :deep(.chapter:focus-within) {
-  background-color: var(--side-nav-hover-color);
+  /* A state layer on top of the resting tint. --side-nav-hover-color is about
+     as light as that tint in many themes, so the hover barely showed. */
+  background-color: color-mix(in srgb, var(--primary-text-color) 14%, transparent);
 }
 
 /* The current chapter takes a tonal tint, like the playlist panel's current video. */
