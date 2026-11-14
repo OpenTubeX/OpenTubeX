@@ -306,6 +306,8 @@ export default defineComponent({
       /** @type {import('../../components/FtShakaVideoPlayer/opentubex/dockedPanels').DockedPanel[]} */
       startNextVideoWithDockedPanels: [],
       isLoading: true,
+      // Whether the current video started loading while nobody could see it
+      loadingInBackground: false,
       waitingForBackgroundPlaybackTurn: false,
       firstLoad: true,
       // Whether this tab has been presented while showing the current video. A
@@ -1408,7 +1410,7 @@ export default defineComponent({
       return (this.playerStreamsPending || this.preparingVideoLoadGeneration !== null) &&
         !this.waitingForBackgroundPlaybackTurn
     },
-    playerReady() {
+    playerStreamsReady() {
       if (this.playerStreamsPending) {
         return false
       }
@@ -1416,6 +1418,9 @@ export default defineComponent({
       return this.activeFormat === 'legacy'
         ? this.legacyFormats.length > 0
         : this.manifestSrc !== null
+    },
+    playerReady() {
+      return this.playerStreamsReady && !this.waitingForBackgroundPlaybackTurn
     },
 
     canSaveWatchProgress() {
@@ -1444,6 +1449,10 @@ export default defineComponent({
     }
   },
   watch: {
+    // Waiting for the player's turn starts once the streams are known
+    playerStreamsReady(ready) {
+      if (ready && this.loadingInBackground) this.waitForBackgroundPlaybackTurn()
+    },
     holdsPlaybackStartup: {
       // The player holds subscription refreshes itself once it mounts
       handler(pending) {
@@ -1563,6 +1572,7 @@ export default defineComponent({
       handler() {
         if (this.isCurrentlyPresented()) {
           this.hasBeenPresented = true
+          this.loadingInBackground = false
           this.backgroundPlaybackTurnController?.abort()
         } else {
           this.mobilePanel = null
@@ -1723,7 +1733,8 @@ export default defineComponent({
     if (isOverlayScrollTopOutOfBounds(rail, contentEnd)) clampOverlayScrollTop(rail, contentEnd)
   },
   beforeUnmount: function () {
-    // A load still waiting for its turn must not start after the tab closes
+    // A load still in progress must not go on after the tab closes, and a
+    // player still waiting for its turn must leave the queue
     this.videoLoadGeneration++
     this.backgroundPlaybackTurnController?.abort()
     this.releasePlaybackStartup?.()
@@ -2444,8 +2455,10 @@ export default defineComponent({
     },
 
     /**
-     * Lets a hidden tab start its video only after other hidden tabs have
-     * started theirs, so a tab the user switches to doesn't compete with all of them.
+     * Lets a hidden tab mount its player only after other hidden tabs have
+     * started their videos, so a tab the user switches to doesn't compete with
+     * all of them. Their video details still load right away, so many tabs
+     * opened at once don't wait for each other's players.
      * Showing the tab, a newer load or closing the tab stops the wait.
      */
     async waitForBackgroundPlaybackTurn() {
@@ -2541,13 +2554,9 @@ export default defineComponent({
       this.loadingTheatreMode = this.useTheatreMode
       preserveTitle ||= this.preserveTitleOnNextReload
       this.preserveTitleOnNextReload = false
-      if (!this.isPlaybackPresented()) {
-        await this.waitForBackgroundPlaybackTurn()
-        if (!this.isCurrentVideoLoad(loadGeneration, requestedVideoId)) {
-          if (this.preparingVideoLoadGeneration === loadGeneration) this.preparingVideoLoadGeneration = null
-          return
-        }
-      }
+      // A player still queued for the previous video must not take a turn now
+      this.backgroundPlaybackTurnController?.abort()
+      this.loadingInBackground = !this.isPlaybackPresented()
       const videoInfoPrefetch = this.prefetchLocalVideoInfo(loadGeneration, requestedVideoId, reloadPlaybackContext)
 
       try {
@@ -3012,19 +3021,13 @@ export default defineComponent({
       this.setViewingModeOnFirstLoad()
 
       const loadGeneration = ++this.videoLoadGeneration
-      const loadVideo = () => {
-        if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(this.backendPreference)) {
-          this.getVideoInformationInvidious(loadGeneration)
-        } else {
-          this.getVideoInformationLocal(loadGeneration)
-        }
-      }
-      if (this.isPlaybackPresented()) {
-        loadVideo()
+      // A player still queued for the previous video must not take a turn now
+      this.backgroundPlaybackTurnController?.abort()
+      this.loadingInBackground = !this.isPlaybackPresented()
+      if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(this.backendPreference)) {
+        this.getVideoInformationInvidious(loadGeneration)
       } else {
-        this.waitForBackgroundPlaybackTurn().then(() => {
-          if (loadGeneration === this.videoLoadGeneration) loadVideo()
-        })
+        this.getVideoInformationLocal(loadGeneration)
       }
 
       window.addEventListener('beforeunload', this.handleWatchProgressAutoSave)

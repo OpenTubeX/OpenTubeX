@@ -60,18 +60,16 @@ test('the next video is requested while the previous one is still saving its pro
   await reloading
 })
 
-test('a hidden tab requests its video once it is its turn', async () => {
+// Only its player waits for other hidden tabs, so its details load in parallel
+test('a hidden tab requests its video without waiting for other tabs', async () => {
   const requests = []
   const { watch, finish } = watchFor(load(requests))
-  let grantTurn
   watch.isPlaybackPresented = () => false
-  watch.waitForBackgroundPlaybackTurn = () => new Promise(resolve => { grantTurn = resolve })
+  watch.waitForBackgroundPlaybackTurn = () => new Promise(() => {})
   const reloading = watch.reloadView()
   await new Promise(resolve => setImmediate(resolve))
-  assert.deepEqual(requests, [])
-  grantTurn()
-  await new Promise(resolve => setImmediate(resolve))
   assert.deepEqual(requests, ['nextVideo01'])
+  assert.equal(watch.loadingInBackground, true)
   finish()
   await reloading
 })
