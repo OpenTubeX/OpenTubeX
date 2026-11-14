@@ -2633,6 +2633,8 @@ export default defineComponent({
       // player that moves on to the next video keeps showing it, though.
       this.hasBeenPresented = this.isCurrentlyPresented() || this.miniPlayerStartHeight > 0
       this.applyBackgroundStart()
+      // A mini player or Play in Background shows the video without a player yet
+      if (this.hasBeenPresented) this.loadingInBackground = false
 
       this.checkIfTimestamp()
       this.checkIfPlaylist()
@@ -3023,7 +3025,8 @@ export default defineComponent({
       const loadGeneration = ++this.videoLoadGeneration
       // A player still queued for the previous video must not take a turn now
       this.backgroundPlaybackTurnController?.abort()
-      this.loadingInBackground = !this.isPlaybackPresented()
+      // Play in Background shows the video in the mini player before it has a player
+      this.loadingInBackground = !this.hasBeenPresented && !this.isPlaybackPresented()
       if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(this.backendPreference)) {
         this.getVideoInformationInvidious(loadGeneration)
       } else {

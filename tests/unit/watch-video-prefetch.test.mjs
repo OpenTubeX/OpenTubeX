@@ -74,6 +74,31 @@ test('a hidden tab requests its video without waiting for other tabs', async () 
   await reloading
 })
 
+test('Play in Background starts its video in the mini player without waiting for hidden tabs', async () => {
+  const { watch } = watchFor(load([]))
+  let turnRequested = false
+  Object.assign(watch, {
+    // The docked Watch page of a browsing tab isn't presented and has no player yet
+    isCurrentlyPresented: () => false,
+    isPlaybackPresented: () => false,
+    miniPlayerStartHeight: 0,
+    waitForBackgroundPlaybackTurn: () => { turnRequested = true },
+    handleRouteChange: async () => {},
+    $refs: {},
+    $store: { commit() {}, getters: {} },
+    getPendingVideoTitle: () => '',
+    resetVideoState() {},
+    applyBackgroundStart() { this.hasBeenPresented = true; return true },
+    checkIfTimestamp() {},
+    checkIfPlaylist() {},
+    setViewingModeOnRouteChange() {},
+    getVideoInformationLocal: async () => {},
+  })
+  await watch.reloadView()
+  assert.equal(watch.loadingInBackground, false)
+  assert.equal(turnRequested, false)
+})
+
 for (const sameVideo of [true, false]) {
   test(`SABR reload context ${sameVideo ? 'reaches the prefetch once' : 'does not follow navigation to another video'}`, async () => {
     const requests = []
