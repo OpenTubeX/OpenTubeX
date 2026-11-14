@@ -9,6 +9,15 @@
     :style="tabSizeStyle"
   >
     <div class="tabsViewport">
+      <!-- With a custom title bar, the layer inherits the bar's drag region,
+        which ignores pointer-events. Chromium applies the regions in document
+        order, so the layer must come before the tabs, whose no-drag regions
+        would otherwise be covered and their clicks taken by the window. -->
+      <div
+        ref="tabGhostLayer"
+        class="tabGhostLayer"
+        aria-hidden="true"
+      />
       <div
         ref="dropZoneRef"
         v-overlay-scrollbars
@@ -99,11 +108,6 @@
           </div>
         </TransitionGroup>
       </div>
-      <div
-        ref="tabGhostLayer"
-        class="tabGhostLayer"
-        aria-hidden="true"
-      />
     </div>
     <div class="tabBarActions">
       <button
