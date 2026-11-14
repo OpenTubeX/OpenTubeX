@@ -175,7 +175,7 @@ const chunks = computed(() => [
         },
       ],
       [
-        { icon: ['fas', 'language'], label: t('About.Translate'), href: 'https://weblate.opentubex.org/engage/opentubex/' },
+        { icon: ['fas', 'language'], label: t('About.Translate'), href: 'https://hosted.weblate.org/engage/opentubex/' },
         { icon: ['fas', 'heart'], label: t('About.Donate'), href: 'https://opentubex.org/donate/' },
       ],
     ],
