@@ -1,9 +1,9 @@
-name: Update mobile dependencies
+name: Update vendored dependencies
 
 # Dependabot cannot track the yt-dlp and libwebp releases that android/app/build.gradle bundles,
-# the Python runtime and PyPI pins that _scripts/setupIosYtDlp.sh installs, or the
-# FFmpegKit binaries that ios/App/FFmpegKit/Package.swift links, so this opens a PR
-# when any of them has a new stable release.
+# the Python runtime and PyPI pins that _scripts/setupIosYtDlp.sh installs, the
+# FFmpegKit binaries that ios/App/FFmpegKit/Package.swift links, or the Libron font in
+# src/renderer/assets/font/libron, so this opens a PR when any of them has a new stable release.
 # A PR opened with GITHUB_TOKEN would not run CI, so the PR step uses UPSTREAM_SYNC_TOKEN.
 on:
   schedule:
@@ -14,7 +14,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: mobile-dependencies
+  group: vendored-dependencies
   cancel-in-progress: false
 
 jobs:
@@ -156,6 +156,34 @@ jobs:
             echo "- iOS and iPadOS: [FFmpegKit $version](https://github.com/$repository/releases/tag/$version-full-gpl) (from $current)" >> "$RUNNER_TEMP/changes.md"
           fi
 
+          # Libron is not on npm, so its web font release is vendored with the
+          # VERSION it came from. App.css loads these four files by name.
+          dir=src/renderer/assets/font/libron
+          repository=nicoverbruggen/libron
+          current=$(cat "$dir/VERSION")
+          tag=$(gh api "repos/$repository/releases/latest" --jq .tag_name)
+          version=${tag#v}
+          if [[ ! "$version" =~ ^[0-9]+(\.[0-9]+)+$ ]]; then
+            echo "::error::Unexpected Libron release tag: ${tag:-nothing}."
+            exit 1
+          fi
+          if newer "$current" "$version"; then
+            digest=$(gh api "repos/$repository/releases/tags/$tag" \
+              --jq '.assets[] | select(.name == "Libron_Web.zip") | .digest // empty | ltrimstr("sha256:")')
+            gh release download "$tag" --repo "$repository" --pattern Libron_Web.zip --dir "$RUNNER_TEMP"
+            expected=$'Libron-Bold.woff2\nLibron-BoldItalic.woff2\nLibron-Italic.woff2\nLibron-Regular.woff2'
+            if [[ ! "$digest" =~ ^[0-9a-f]{64}$ ]] ||
+              ! sha256sum -c <<< "$digest  $RUNNER_TEMP/Libron_Web.zip" ||
+              [[ "$(zipinfo -1 "$RUNNER_TEMP/Libron_Web.zip" | LC_ALL=C sort)" != "$expected" ]]; then
+              echo "::error::Cannot update Libron from $current to $version."
+              exit 1
+            fi
+            unzip -o -q "$RUNNER_TEMP/Libron_Web.zip" -d "$dir"
+            gh api "repos/$repository/contents/LICENSE?ref=$tag" --jq .content | base64 -d > "$dir/LICENSE"
+            echo "$version" > "$dir/VERSION"
+            echo "- App: [Libron $version](https://github.com/$repository/releases/tag/$tag) (from $current)" >> "$RUNNER_TEMP/changes.md"
+          fi
+
           if [[ -f "$RUNNER_TEMP/changes.md" ]]; then
             {
               echo 'changes<<EOF'
@@ -170,16 +198,16 @@ jobs:
         with:
           token: ${{ secrets.UPSTREAM_SYNC_TOKEN }}
           base: development
-          branch: mobile-dependencies
+          branch: vendored-dependencies
           delete-branch: true
-          commit-message: "build(mobile): update bundled dependencies"
-          title: "build(mobile): update bundled dependencies"
+          commit-message: "build: update vendored dependencies"
+          title: "build: update vendored dependencies"
           body: |
-            Updates the dependencies that the mobile apps bundle in `android/app/build.gradle`, `_scripts/setupIosYtDlp.sh` and `ios/App/FFmpegKit/Package.swift`:
+            Updates the dependencies that the app bundles in `android/app/build.gradle`, `_scripts/setupIosYtDlp.sh`, `ios/App/FFmpegKit/Package.swift` and `src/renderer/assets/font/libron`:
 
             ${{ steps.update.outputs.changes }}
 
-            The Android yt-dlp and iOS FFmpegKit checksums come from the digests GitHub records for the release assets. The libwebp checksum is the SHA-256 of the release tarball this workflow downloaded. Gradle, the libwebp build script and SwiftPM verify the downloads against them. The iOS `yt-dlp-ejs` pin follows the version yt-dlp requires.
+            The Android yt-dlp and iOS FFmpegKit checksums come from the digests GitHub records for the release assets, which this workflow also checked the Libron download against. The libwebp checksum is the SHA-256 of the release tarball this workflow downloaded. Gradle, the libwebp build script and SwiftPM verify the downloads against them. The iOS `yt-dlp-ejs` pin follows the version yt-dlp requires.
 
             ## Release note
             - [x] No release note needed
