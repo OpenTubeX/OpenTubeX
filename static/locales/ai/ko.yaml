@@ -1325,7 +1325,7 @@ Settings:
     Watch History Retention: 시청 기록
     Search History Retention: 검색 기록
     Keep Forever Placeholder: 영구 보관
-    Automatic History Retention Tooltip: 시청 기록을 영구 보관하려면 비워 두세요. 숫자를 저장하면 오래된 기록을 즉시 제거하고 앱이 열려 있는 동안에도 자동으로 제거합니다.
+    Automatic History Retention Tooltip: 기록을 영구 보관하려면 비워 두세요. 숫자를 저장하면 오래된 기록을 즉시 제거하고 앱이 열려 있는 동안에도 자동으로 제거합니다.
     History Retention Saved: 기록 보관 기간을 저장했습니다
     Invalid History Retention Days: 0보다 큰 정수 일수를 입력하세요
     Enable Watch Statistics: 시청 통계 활성화
