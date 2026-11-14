@@ -735,7 +735,7 @@ import { fetchReleasePages, findUpdateReleases, formatReleaseChangelog, schedule
 import { copyToClipboard, isUnloadedBackgroundTabClick, openExternalLink, openInExternalPlayer, openInternalPath, shareLink, showToast } from './helpers/utils'
 import { getChannelLinkDetails, getChannelLinkMenuItems } from './helpers/channel-context-menu'
 import { initializeCapacitorLiveReminderActions } from './helpers/liveReminders'
-import { showInAppNotification } from './helpers/notificationHistory'
+import { showInAppNotification, supportsNotificationHistory } from './helpers/notificationHistory'
 import {
   addAndroidMediaSessionActionListener,
   shouldPauseAndroidPlaybackOnAppStateChange,
@@ -745,6 +745,7 @@ import { useSubscriptionAutoRefresh } from './composables/useSubscriptionAutoRef
 import { useRssFeedAutoRefresh } from './composables/useRssFeedAutoRefresh'
 import { usePlatformFeedAutoRefresh } from './composables/usePlatformFeedAutoRefresh'
 import { startTwitchLiveNotifications } from './helpers/platformFeed'
+import { startCommentReplyNotifications } from './helpers/commentReplyNotifications'
 import { translateWindowTitle } from './helpers/strings'
 import { normalizeScrollbarThumbWidth } from './constants/scrollbar'
 import { getAppFontFamily } from './helpers/appFont'
@@ -2100,6 +2101,7 @@ onBeforeUnmount(() => {
   rssFeedAutoRefresh.stop()
   platformFeedAutoRefresh.stop()
   stopTwitchLiveNotifications?.()
+  stopCommentReplyNotifications?.()
   clearInterval(historyCleanupTimer)
   clearInterval(searchHistoryCleanupTimer)
   stopUpdateChecks?.()
@@ -2240,8 +2242,12 @@ const rssFeedAutoRefresh = useRssFeedAutoRefresh(dataReady)
 const platformFeedAutoRefresh = usePlatformFeedAutoRefresh(dataReady)
 // Starts once the followed channels and the notification settings have loaded
 let stopTwitchLiveNotifications = null
+let stopCommentReplyNotifications = null
 watch(dataReady, (ready) => {
   if (ready && stopTwitchLiveNotifications === null) stopTwitchLiveNotifications = startTwitchLiveNotifications()
+  if (ready && supportsNotificationHistory && stopCommentReplyNotifications === null) {
+    stopCommentReplyNotifications = startCommentReplyNotifications()
+  }
 }, { immediate: true })
 
 /** @type {import('vue').ComputedRef<string>} */

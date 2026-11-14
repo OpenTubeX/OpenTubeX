@@ -50,6 +50,7 @@ function createComments() {
     replyTokens: new Map(),
     closeCommentMenus: () => {},
     resetCommentsScroll: () => {},
+    armHighlightedCommentScroll: async () => {},
     setCommentCount: () => {},
     prioritizeHighlightedComment: comments => comments,
     withLocalCommentChanges: comments => comments,

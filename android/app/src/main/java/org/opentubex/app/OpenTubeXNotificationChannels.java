@@ -16,6 +16,7 @@ final class OpenTubeXNotificationChannels {
     static final String DOWNLOADS_ID = "yt-dlp-downloads";
     static final String LIVE_REMINDERS_ID = "live-reminders";
     static final String NEW_UPLOADS_ID = "new-uploads";
+    static final String COMMENT_REPLIES_ID = "comment-replies";
     private static final String OBSOLETE_LOCAL_NOTIFICATIONS_DEFAULT_ID = "default";
 
     static final class ChannelSpec {
@@ -80,6 +81,14 @@ final class OpenTubeXNotificationChannels {
                 NEW_UPLOADS_ID,
                 R.string.notification_channel_new_uploads_name,
                 R.string.notification_channel_new_uploads_description,
+                NotificationManager.IMPORTANCE_DEFAULT,
+                true
+            ),
+            // CommentReplyNotifications owns replies to the account's comments.
+            new ChannelSpec(
+                COMMENT_REPLIES_ID,
+                R.string.notification_channel_comment_replies_name,
+                R.string.notification_channel_comment_replies_description,
                 NotificationManager.IMPORTANCE_DEFAULT,
                 true
             ),

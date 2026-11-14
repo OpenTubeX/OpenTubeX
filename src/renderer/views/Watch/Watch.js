@@ -657,6 +657,12 @@ export default defineComponent({
     shortsPhonePanelsEnabled() {
       return this.phoneLayout && this.portraitLayout && this.customShortsPlayerActive
     },
+    phoneLinkedCommentId() {
+      // Loading a video closes the panels.
+      return (this.phonePanelsEnabled || this.shortsPhonePanelsEnabled) && !this.isLoading
+        ? this.tabRoute.query.commentId ?? null
+        : null
+    },
     isMusicVideo: function () {
       // Lists pass on YouTube's music badge, which also covers music videos outside the Music category
       return this.videoGenreIsMusic || this.tabRoute.query.musicVideo === 'true'
@@ -1443,6 +1449,18 @@ export default defineComponent({
       handler(pending) {
         this.releasePlaybackStartup?.()
         this.releasePlaybackStartup = pending ? holdForPlaybackStartup(this.tabId ?? null) : null
+      },
+      immediate: true
+    },
+    // On phones, comments are behind their preview card, so a link to one, such
+    // as a reply notification, opens them. Once per comment, so rotating keeps
+    // them closed after the user closes them.
+    phoneLinkedCommentId: {
+      handler(commentId) {
+        if (!commentId || commentId === this.openedLinkedCommentId) return
+        this.openedLinkedCommentId = commentId
+        if (this.shortsPhonePanelsEnabled) this.openShortsPhonePanel('comments')
+        else this.openPhonePanel('comments')
       },
       immediate: true
     },
@@ -2642,6 +2660,7 @@ export default defineComponent({
       const previousVideoTitle = this.videoTitle
 
       this.mobilePanel = null
+      this.openedLinkedCommentId = null
 
       // A preserved title belongs to the previous successful request. Keep it
       // visible during a reload, but require the current request to resolve its

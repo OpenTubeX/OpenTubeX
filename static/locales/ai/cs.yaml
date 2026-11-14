@@ -387,6 +387,7 @@ Settings:
     Sync Now: "Synchronizovat nyní"
     Synced: "Synchronizováno s YouTube"
     Sync Failed: "Synchronizace s YouTube se nezdařila: {error}"
+    Reply Notifications: "Upozorňovat mě na odpovědi na mé komentáře"
   Diagnostics:
     Diagnostics: Diagnostika
     Description: Když je diagnostický protokol zapnutý, OpenTubeX uchovává nedávné zprávy protokolu v paměti, abyste je mohli přiložit k hlášení chyb. Nikdy je sám neukládá ani neodesílá a vypnutím protokolu se smažou. Hlášení neobsahují soubory cookie, tokeny, IP adresy ani parametry URL, mohou však obsahovat ID přehraných videí, proto hlášení před sdílením zkontrolujte.
@@ -2256,6 +2257,7 @@ Tooltips:
     Sync Playlists: "Vaše playlisty z YouTube, „Na později“ a „Video s označením Líbí se mi“ se zobrazí v sekci „Vaše playlisty“ a změny, které v nich zde provedete, se provedou i na YouTube. Nesynchronizují se do vašich dalších zařízení a nejsou zahrnuty, když exportujete všechny playlisty nebo zálohujete svá data. Vypnutím této volby je odeberete z tohoto zařízení, ale ne z YouTube."
     Add to YouTube Watch History: "Videa, která přehrajete, se přidají do vaší historie sledování na YouTube, takže se z nich učí doporučení YouTube. Když je historie na YouTube pozastavená, nic se nepřidá."
     Rate Videos: "Zobrazuje u videí tlačítka Líbí se a Nelíbí se. Aby se zobrazilo vaše hodnocení, každé otevřené video se vyhledá na YouTube s vaším účtem, takže YouTube zjistí, která videa otevíráte, i když se nepřidají do historie sledování."
+    Reply Notifications: "OpenTubeX kontroluje nové odpovědi na komentáře, které jste zde zveřejnili za posledních 30 dní. Komentáře zveřejněné jinde, například na webu YouTube, nejsou zahrnuty."
   General Settings:
     Built-in Streams: |
       Automatický režim přehrává většinu videí přes klienta visionOS od YouTube, který začíná rychleji a podporuje automatickou kvalitu. Živé přenosy a videa, která nedokáže přehrát, používají SABR.
@@ -2799,3 +2801,4 @@ YouTube Account:
   Edit Comment Failed: "Komentář se nepodařilo upravit: {error}"
   Recommendations: "Doporučení YouTube"
   Recommendations Failed: "Vaše doporučení YouTube se nepodařilo načíst."
+  "{author} replied to your comment": "{author} odpověděl(a) na váš komentář"

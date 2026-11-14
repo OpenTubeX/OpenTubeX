@@ -80,6 +80,16 @@ function encodeParams(fields) {
   return encodeURIComponent(btoa(String.fromCharCode(...encodeProto(fields))))
 }
 
+/**
+ * The continuation that loads a video's comments with this thread first, like
+ * youtubei.js builds it for a linked comment.
+ * @param {string} videoId
+ * @param {string} threadId
+ */
+export function createLinkedCommentsContinuation(videoId, threadId) {
+  return encodeParams([[2, [[2, videoId]]], [3, 6], [6, [[4, [[4, videoId], [15, 2], [16, threadId]]], [8, 'comments-section']]]])
+}
+
 /** @param {string} videoId */
 export function createCommentParams(videoId) {
   return encodeParams([[2, videoId], [5, []], [10, 7]])

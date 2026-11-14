@@ -87,6 +87,7 @@ import { createNotificationHistory, createNotifier, createSystemNotificationLink
 import { loadNotificationImage, setNotificationImagesAllowed } from './notificationImage'
 import { setAutomaticDownloadNotifier } from './ytDlpAutomaticDownloads'
 import { getLiveReminderTarget } from '../notificationHistory'
+import { getCommentReplyTarget } from '../commentReplyTracking'
 import { supportsNativeNotifications } from './nativeNotifications'
 import { getTrayMenuIcon } from './trayMenuIcons'
 import { createScheduledBackups } from './scheduledBackups'
@@ -701,6 +702,18 @@ function runApp() {
   handleTrusted(IpcChannels.NOTIFICATION_HISTORY_CLEAR, () => notificationHistory.clear())
   handleTrusted(IpcChannels.NOTIFICATION_DISMISSALS_GET, () => notificationHistory.getDismissals())
   handleTrusted(IpcChannels.NOTIFICATION_DISMISSALS_MERGE, (_event, dismissals) => notificationHistory.mergeDismissals(dismissals))
+  handleTrusted(IpcChannels.NOTIFICATION_COMMENT_REPLY, (_event, reply) => {
+    const target = getCommentReplyTarget(reply?.videoId, reply?.replyId)
+    if (!target || typeof reply.title !== 'string' || typeof reply.body !== 'string') return
+    // Settles once the history entry is saved, so the renderer marks the reply seen after it.
+    return showUrlNotification({
+      title: reply.title.slice(0, 200),
+      body: reply.body.slice(0, 500),
+      thumbnail: typeof reply.thumbnail === 'string' ? reply.thumbnail : undefined,
+      url: `https://www.youtube.com/watch?v=${reply.videoId}&lc=${reply.replyId}`,
+      target
+    })
+  })
   // Runs without windows too, for example while the app refreshes subscriptions from the tray.
   const twitchLiveNotifier = createTwitchLiveNotifier({
     file: path.join(userDataPath, 'twitch-live-notifications.json'),

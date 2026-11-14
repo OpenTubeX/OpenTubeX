@@ -155,7 +155,9 @@ final class UploadNotifications {
     /**
      * Shows a notification, or leaves it to the visible app. With a history, it
      * is queued until the app adds it to its notification history. Also used for
-     * Twitch streams, whose `feedType` is `twitch` and whose ID is `login/streamId`.
+     * Twitch streams, whose `feedType` is `twitch` and whose ID is `login/streamId`,
+     * and for comment replies, whose `feedType` is `comment-reply` and whose ID is
+     * `videoId/replyId`.
      */
     static synchronized void deliver(Context context, String feedType, String id, boolean live, String title,
         String body, String thumbnail, boolean history, boolean silent) {
@@ -529,6 +531,12 @@ final class UploadNotifications {
     static String url(String feedType, String id) {
         // Twitch notifications lead to the live stream of the channel
         if (feedType.equals("twitch")) return "https://www.twitch.tv/" + Uri.encode(id.substring(0, Math.max(0, id.indexOf('/'))));
+        // Replies lead to their video with the reply highlighted, and their ID is `videoId/replyId`.
+        if (feedType.equals(CommentReplyNotifications.FEED_TYPE)) {
+            int separator = Math.max(0, id.indexOf('/'));
+            return "https://www.youtube.com/watch?v=" + Uri.encode(id.substring(0, separator)) +
+                "&lc=" + Uri.encode(id.substring(Math.min(id.length(), separator + 1)));
+        }
         String encoded = Uri.encode(id);
         if (feedType.equals("posts")) return "https://www.youtube.com/post/" + encoded;
         if (feedType.equals("shorts")) return "https://www.youtube.com/shorts/" + encoded;
@@ -542,7 +550,9 @@ final class UploadNotifications {
         int notificationId = notificationId(feedType, id);
         OpenTubeXNotificationChannels.createAll(context);
         Notification.Builder builder = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
-            ? new Notification.Builder(context, OpenTubeXNotificationChannels.NEW_UPLOADS_ID)
+            ? new Notification.Builder(context, feedType.equals(CommentReplyNotifications.FEED_TYPE)
+                ? OpenTubeXNotificationChannels.COMMENT_REPLIES_ID
+                : OpenTubeXNotificationChannels.NEW_UPLOADS_ID)
             : new Notification.Builder(context);
         // MainActivity forwards YouTube links to the renderer, including on cold start.
         Intent open = new Intent(Intent.ACTION_VIEW, Uri.parse(url), context, MainActivity.class);

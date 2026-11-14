@@ -295,7 +295,7 @@ export const SETTINGS_SEARCH_SOURCES = {
   }, {
     type: 'youtube-account',
     key: 'Settings.YouTube Account Settings',
-    include: new Set(['YouTube Account Settings', 'Sign In', 'Sign Out', 'Sync Subscriptions', 'Sync Playlists', 'Add to YouTube Watch History', 'Rate Videos']),
+    include: new Set(['YouTube Account Settings', 'Sign In', 'Sign Out', 'Sync Subscriptions', 'Sync Playlists', 'Add to YouTube Watch History', 'Rate Videos', 'Reply Notifications']),
     electronOnly: true,
     capacitorSupported: true,
     tab: 'youtube-account'

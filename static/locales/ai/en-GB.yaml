@@ -386,6 +386,7 @@ Settings:
     Sync Now: "Sync now"
     Synced: "Synced with YouTube"
     Sync Failed: "Could not sync with YouTube: {error}"
+    Reply Notifications: "Notify me about replies to my comments"
   Diagnostics:
     Diagnostics: Diagnostics
     Description: While diagnostic logging is on, OpenTubeX keeps recent log messages in memory so you can attach them to bug reports. It never saves or sends them on its own, and turning logging off deletes them. Reports leave out cookies, tokens, IP addresses and URL parameters, but they can include IDs of videos you played, so check a report before you share it.
@@ -2250,6 +2251,7 @@ Tooltips:
     Sync Playlists: "Your YouTube playlists, Watch later and Liked videos appear in Your playlists, and changes you make to them here are made on YouTube too. They are not synced to your other devices or included when you export all playlists or back up your data. Turning this off removes them from this device but not from YouTube."
     Add to YouTube Watch History: "Videos you play are added to your YouTube watch history, so YouTube's recommendations learn from them. Nothing is added while the history is paused on YouTube."
     Rate Videos: "Shows like and dislike buttons on videos. To show your rating, each video you open is looked up on YouTube with your account, so YouTube learns which videos you open, even when they are not added to your watch history."
+    Reply Notifications: "OpenTubeX checks the comments you posted here in the last 30 days for new replies. Comments you posted elsewhere, such as on the YouTube website, are not included."
   General Settings:
     Built-in Streams: |
       Automatic plays most videos through YouTube's visionOS client, which starts faster and supports automatic quality. Live streams and videos it can't play use SABR.
@@ -2791,3 +2793,4 @@ YouTube Account:
   Edit Comment Failed: "Could not edit the comment: {error}"
   Recommendations: "YouTube recommendations"
   Recommendations Failed: "Could not load your YouTube recommendations."
+  "{author} replied to your comment": "{author} replied to your comment"

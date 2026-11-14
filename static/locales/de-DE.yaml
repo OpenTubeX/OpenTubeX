@@ -477,6 +477,7 @@ Settings:
     Sync Playlists: "Playlists mit YouTube synchronisieren"
     Add to YouTube Watch History: "Angesehene Videos zum YouTube-Verlauf hinzufügen"
     Rate Videos: "Videos mit „Mag ich“ oder „Mag ich nicht“ bewerten"
+    Reply Notifications: "Bei Antworten auf meine Kommentare benachrichtigen"
     Sync Now: "Jetzt synchronisieren"
     Synced: "Mit YouTube synchronisiert"
     Sync Failed: "Synchronisierung mit YouTube fehlgeschlagen: {error}"
@@ -3012,6 +3013,7 @@ Tooltips:
     Sync Playlists: "Deine YouTube-Playlists, „Später ansehen“ und „Videos mit ‚Mag ich‘-Bewertung“ erscheinen unter „Deine Playlists“, und deine Änderungen daran werden auch auf YouTube übernommen. Sie werden nicht mit deinen anderen Geräten synchronisiert und nicht einbezogen, wenn du alle Playlists exportierst oder deine Daten sicherst. Wenn du das ausschaltest, werden sie von diesem Gerät entfernt, aber nicht von YouTube."
     Add to YouTube Watch History: "Videos, die du abspielst, werden zu deinem YouTube-Verlauf hinzugefügt, damit die Empfehlungen von YouTube daraus lernen. Solange der Verlauf auf YouTube pausiert ist, wird nichts hinzugefügt."
     Rate Videos: "Zeigt bei Videos die Schaltflächen „Mag ich“ und „Mag ich nicht“. Um deine Bewertung anzuzeigen, wird jedes Video, das du öffnest, mit deinem Konto bei YouTube abgefragt. So erfährt YouTube, welche Videos du öffnest, auch wenn sie nicht zu deinem Verlauf hinzugefügt werden."
+    Reply Notifications: "OpenTubeX sucht nach neuen Antworten auf Kommentare, die du in den letzten 30 Tagen hier geschrieben hast. Kommentare, die du woanders geschrieben hast, etwa auf der YouTube-Website, sind nicht enthalten."
   General Settings:
     Preferred Video Codec: |
       Auto bevorzugt Codecs, die dein Gerät per Hardware decodieren kann.
@@ -3990,6 +3992,7 @@ YouTube Account:
   Reply: "Antworten"
   Comment Posted: "Kommentar veröffentlicht"
   Reply Posted: "Antwort veröffentlicht"
+  "{author} replied to your comment": "{author} hat auf deinen Kommentar geantwortet"
   Comment Failed: "Kommentar konnte nicht veröffentlicht werden: {error}"
   Delete Comment: "Kommentar löschen"
   Delete Comment Confirmation: "Deinen Kommentar auf YouTube löschen?"

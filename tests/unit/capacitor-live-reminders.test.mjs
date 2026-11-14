@@ -5,7 +5,7 @@ import vm from 'node:vm'
 import { importWithStubs, sourceUrl } from '../helpers/module-stubs.mjs'
 
 const systemNotifications = { calls: [], all: [] }
-const [{ closeCapacitorSystemNotifications, getTwitchLocalNotificationId }] = await importWithStubs([sourceUrl('src/renderer/helpers/capacitorSystemNotifications.js')], {
+const [{ closeCapacitorSystemNotifications, getCommentReplyLocalNotificationId, getTwitchLocalNotificationId }] = await importWithStubs([sourceUrl('src/renderer/helpers/capacitorSystemNotifications.js')], {
   '@capacitor/local-notifications': {
     LocalNotifications: {
       getAll: async () => ({ notifications: systemNotifications.all }),
@@ -45,19 +45,20 @@ test('closing reminder entries removes their notifications and overdue alarms by
   assert.deepEqual(systemNotifications.calls.find(([name]) => name === 'removeDelivered'), ['removeDelivered', [7, 8, 11]])
 })
 
-test('closing Twitch live entries on iOS removes the notifications the app showed', async () => {
+test('closing Twitch live entries on iOS and comment reply entries removes the notifications the app showed', async () => {
   process.env.IS_CAPACITOR = 'true'
   process.env.IS_IOS = 'true'
   systemNotifications.calls = []
   try {
     await closeCapacitorSystemNotifications([
-      { kind: 'live', path: '/external-media', query: { url: 'https://www.twitch.tv/streamer', stream: '12345' }, createdAt: Date.now() }
+      { kind: 'live', path: '/external-media', query: { url: 'https://www.twitch.tv/streamer', stream: '12345' }, createdAt: Date.now() },
+      { kind: 'comment-reply', path: '/watch/video1', query: { commentId: 'thread1.reply1' }, createdAt: Date.now() }
     ])
   } finally {
     delete process.env.IS_CAPACITOR
     delete process.env.IS_IOS
   }
-  assert.deepEqual(systemNotifications.calls, [['removeDelivered', [getTwitchLocalNotificationId('12345')]]])
+  assert.deepEqual(systemNotifications.calls, [['removeDelivered', [getTwitchLocalNotificationId('12345'), getCommentReplyLocalNotificationId('thread1.reply1')]]])
 })
 
 async function loadCapacitorReminder(notifications, context = {}) {

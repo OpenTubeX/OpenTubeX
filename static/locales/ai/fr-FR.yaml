@@ -387,6 +387,7 @@ Settings:
     Sync Now: "Synchroniser maintenant"
     Synced: "Synchronisé avec YouTube"
     Sync Failed: "Impossible de synchroniser avec YouTube : {error}"
+    Reply Notifications: "M’avertir des réponses à mes commentaires"
   Diagnostics:
     Diagnostics: Diagnostic
     Description: Tant que le journal de diagnostic est activé, OpenTubeX conserve les messages de journal récents en mémoire pour que vous puissiez les joindre à vos rapports de bogue. Il ne les enregistre ni ne les envoie jamais de lui-même, et désactiver le journal les supprime. Les rapports excluent les cookies, les jetons, les adresses IP et les paramètres d'URL, mais ils peuvent contenir les identifiants des vidéos que vous avez lues ; vérifiez donc un rapport avant de le partager.
@@ -2254,6 +2255,7 @@ Tooltips:
     Rate Videos: "Affiche les boutons J’aime et Je n’aime pas sur les vidéos. Pour afficher votre note, chaque vidéo que vous ouvrez est consultée sur YouTube avec votre compte : YouTube sait donc quelles vidéos vous ouvrez, même lorsqu’elles ne sont pas ajoutées à votre historique de visionnage."
     Sync Subscriptions: "Les chaînes auxquelles vous vous abonnez sur YouTube sont ajoutées à « Toutes les chaînes », et celles dont vous vous désabonnez là-bas sont retirées de tous les profils. S’abonner ou se désabonner ici dans « Toutes les chaînes » fait de même sur YouTube."
     Sync Playlists: "Vos playlists YouTube, « À regarder plus tard » et « Vidéos J’aime » apparaissent dans « Vos playlists », et les modifications que vous y apportez ici sont aussi effectuées sur YouTube. Elles ne sont pas synchronisées avec vos autres appareils, ni incluses lorsque vous exportez toutes les playlists ou sauvegardez vos données. Désactiver cette option les retire de cet appareil, mais pas de YouTube."
+    Reply Notifications: "OpenTubeX vérifie si les commentaires que vous avez publiés ici au cours des 30 derniers jours ont reçu de nouvelles réponses. Les commentaires publiés ailleurs, par exemple sur le site web de YouTube, ne sont pas inclus."
   General Settings:
     Built-in Streams: |
       Automatique lit la plupart des vidéos via le client visionOS de YouTube, qui démarre plus vite et prend en charge la qualité automatique. Les diffusions en direct et les vidéos qu’il ne peut pas lire utilisent SABR.
@@ -2797,3 +2799,4 @@ YouTube Account:
   Recommendations Failed: "Impossible de charger vos recommandations YouTube."
   Subscriptions Synced: "Abonnements synchronisés depuis YouTube : {added} ajoutés, {removed} retirés"
   Playlist Update Failed: "Impossible de mettre à jour {playlistName} sur YouTube : {error}"
+  "{author} replied to your comment": "{author} a répondu à votre commentaire"

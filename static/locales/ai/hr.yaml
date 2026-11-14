@@ -390,6 +390,7 @@ Settings:
     Sync Now: "Sinkroniziraj sada"
     Synced: "Sinkronizirano s YouTubeom"
     Sync Failed: "Sinkronizacija s YouTubeom nije uspjela: {error}"
+    Reply Notifications: "Obavijesti me o odgovorima na moje komentare"
   Diagnostics:
     Diagnostics: Dijagnostika
     Description: Dok je dijagnostički zapisnik uključen, OpenTubeX čuva nedavne poruke zapisnika u memoriji kako biste ih mogli priložiti izvješćima o greškama. Nikad ih ne sprema niti šalje sam, a isključivanje zapisnika ih briše. Izvješća izostavljaju kolačiće, tokene, IP adrese i URL parametre, ali mogu sadržavati ID-ove videozapisa koje ste reproducirali, stoga provjerite izvješće prije dijeljenja.
@@ -2292,6 +2293,7 @@ Tooltips:
     Rate Videos: "Prikazuje gumbe Sviđa mi se i Ne sviđa mi se na videozapisima. Kako bi se prikazala tvoja ocjena, svaki videozapis koji otvoriš provjerava se na YouTubeu s tvojim računom, pa YouTube saznaje koje videozapise otvaraš, čak i kad se ne dodaju u povijest gledanja."
     Sync Subscriptions: "Kanali na koje se pretplatiš na YouTubeu dodaju se u „Svi kanali”, a kanali s kojih tamo otkažeš pretplatu uklanjaju se iz svih profila. Pretplata ili otkazivanje pretplate ovdje u „Svi kanali” čini isto na YouTubeu."
     Sync Playlists: "Tvoje YouTube zbirke, „Pogledaj kasnije” i „Videozapisi koji mi se sviđaju” prikazuju se u „Tvoje zbirke”, a promjene koje u njima ovdje napraviš primjenjuju se i na YouTubeu. Ne sinkroniziraju se s tvojim drugim uređajima i nisu uključene kada izvoziš sve zbirke ili izrađuješ sigurnosnu kopiju svojih podataka. Isključivanjem ovoga uklanjaju se s ovog uređaja, ali ne i s YouTubea."
+    Reply Notifications: "OpenTubeX provjerava ima li novih odgovora na komentare koje si ovdje objavio u posljednjih 30 dana. Komentari objavljeni negdje drugdje, primjerice na web-stranici YouTubea, nisu uključeni."
   General Settings:
     Built-in Streams: |
       Automatski način reproducira većinu videozapisa putem YouTubeova visionOS klijenta, koji se pokreće brže i podržava automatsku kvalitetu. Prijenosi uživo i videozapisi koje ne može reproducirati koriste SABR.
@@ -2838,3 +2840,4 @@ YouTube Account:
   Recommendations Failed: "Nije moguće učitati tvoje YouTube preporuke."
   Subscriptions Synced: "Pretplate sinkronizirane s YouTubea: dodano {added}, uklonjeno {removed}"
   Playlist Update Failed: "Ažuriranje zbirke {playlistName} na YouTubeu nije uspjelo: {error}"
+  "{author} replied to your comment": "{author} je odgovorio na tvoj komentar"

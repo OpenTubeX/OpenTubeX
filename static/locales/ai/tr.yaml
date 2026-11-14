@@ -387,6 +387,7 @@ Settings:
     Sync Now: "Şimdi eşitle"
     Synced: "YouTube ile eşitlendi"
     Sync Failed: "YouTube ile eşitlenemedi: {error}"
+    Reply Notifications: "Yorumlarıma gelen yanıtlardan beni haberdar et"
   Diagnostics:
     Diagnostics: Tanılama
     Description: Tanılama günlüğü açıkken OpenTubeX, hata raporlarına ekleyebilmeniz için son günlük iletilerini bellekte tutar. Bunları hiçbir zaman kendiliğinden kaydetmez veya göndermez ve günlüğü kapatmak bunları siler. Raporlar çerezleri, belirteçleri, IP adreslerini ve URL parametrelerini içermez, ancak oynattığınız videoların kimliklerini içerebilir; bu yüzden paylaşmadan önce raporu kontrol edin.
@@ -2256,6 +2257,7 @@ Tooltips:
     Sync Playlists: "YouTube oynatma listeleriniz, Daha sonra izle ve Beğenilen videolar, Oynatma Listelerin bölümünde görünür ve burada bunlarda yaptığınız değişiklikler YouTube'da da yapılır. Diğer cihazlarınızla eşitlenmez ve tüm oynatma listelerini dışa aktardığınızda veya verilerinizi yedeklediğinizde dahil edilmez. Bunu kapatmak onları bu cihazdan kaldırır ancak YouTube'dan kaldırmaz."
     Add to YouTube Watch History: "Oynattığınız videolar YouTube izleme geçmişinize eklenir, böylece YouTube önerileri bunlardan öğrenir. Geçmiş YouTube'da duraklatılmışken hiçbir şey eklenmez."
     Rate Videos: "Videolarda beğen ve beğenme düğmelerini gösterir. Puanınızı göstermek için açtığınız her video hesabınızla YouTube'da sorgulanır; bu nedenle YouTube, izleme geçmişinize eklenmeseler bile hangi videoları açtığınızı öğrenir."
+    Reply Notifications: "OpenTubeX, son 30 gün içinde burada paylaştığınız yorumlara yeni yanıt gelip gelmediğini denetler. YouTube web sitesi gibi başka yerlerde paylaştığınız yorumlar dahil değildir."
   General Settings:
     Built-in Streams: |
       Otomatik, çoğu videoyu YouTube'un visionOS istemcisiyle oynatır; bu istemci daha hızlı başlar ve otomatik kaliteyi destekler. Canlı yayınlar ve oynatamadığı videolar SABR kullanır.
@@ -2799,3 +2801,4 @@ YouTube Account:
   Edit Comment Failed: "Yorum düzenlenemedi: {error}"
   Recommendations: "YouTube önerileri"
   Recommendations Failed: "YouTube önerileriniz yüklenemedi."
+  "{author} replied to your comment": "{author} yorumunuzu yanıtladı"

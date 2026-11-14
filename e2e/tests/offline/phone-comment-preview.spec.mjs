@@ -1,4 +1,4 @@
-import { test, expect, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, sel, setWindowSize } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, recordWatchViewChanges, watchViewHandle } from '../../helpers/watch.mjs'
 import { fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
@@ -221,4 +221,24 @@ test('phone comment preview respects reduced motion and resets when comments rel
   await expect(button.locator('.phoneCommentPreview')).toHaveCount(0)
   await expect(button.getByRole('button', { name: 'Comments', exact: true })).toBeVisible()
   await expect(button.getByRole('button', { name: 'Comments', exact: true })).toHaveAccessibleDescription('')
+})
+
+test('a link to a comment opens the comments sheet on phones once', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  // Reply notifications and shared comment links lead here.
+  await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw&lc=UgxExampleThreadId4AaABAg.ExampleReply')
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(page.locator('.watchVideoInfo')).toBeVisible({ timeout: 30_000 })
+  await setWindowSize(app, page, { width: 450, height: 850 })
+
+  const sheet = page.getByRole('dialog', { name: 'Comments', exact: true })
+  await expect(sheet).toBeVisible({ timeout: 30_000 })
+  await sheet.getByRole('button', { name: 'Close', exact: true }).click()
+  await expect(sheet).toHaveCount(0)
+
+  // Leaving and returning to the phone layout keeps it closed.
+  await setWindowSize(app, page, { width: 1200, height: 800 })
+  await setWindowSize(app, page, { width: 450, height: 850 })
+  await expect(page.locator('.phoneCommentsButton')).toBeVisible()
+  await expect(sheet).toHaveCount(0)
 })

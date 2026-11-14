@@ -387,6 +387,7 @@ Settings:
     Sync Now: "Goubredañ bremañ"
     Synced: "Goubredet gant YouTube"
     Sync Failed: "N'haller ket goubredañ gant YouTube: {error}"
+    Reply Notifications: "Kemenn din pa vez respontet d'am evezhiadennoù"
   Diagnostics:
     Diagnostics: Diagnoz
     Description: E-pad ma vez gweredekaet an deizlevr diagnoz, OpenTubeX a vir ar c'hemennadennoù deizlevr nevez er memor evit ma c'hallfec'h o stagañ ouzh danevelloù fazioù. Biskoazh ne enrollo na ne gaso anezho e-unan, ha diweredekaat an deizlevr a ziverk anezho. An danevelloù n'int ket enno toupinoù, jedouerioù, chomlec'hioù IP na arventennoù URL, met gallout a reont kaout IDoù ar videoioù ho peus lennet, setu gwiriit an danevell a-raok he rannañ.
@@ -2265,6 +2266,7 @@ Tooltips:
     Sync Playlists: "Ho rolloù-videoioù YouTube, « Da sellet diwezhatoc'h » ha « Videoioù a blij din » a zeu war wel en « Ho rolloù videoioù », hag ar c'hemmoù a rit dezho amañ a vez graet war YouTube ivez. N'int ket goubredet gant ho penvegoù all, ha n'int ket lakaet e-barzh pa ezporzhiit an holl rolloù-videoioù pe pa warezit ho roadennoù. Diweredekaat an dibarzh-mañ a lam anezho eus ar benveg-mañ, met n'eo ket eus YouTube."
     Add to YouTube Watch History: "Ar videoioù a lennit a vez ouzhpennet ouzh ho roll istor YouTube, evel-se e c'hall erbedadennoù YouTube deskiñ diouto. Netra ne vez ouzhpennet keit ha ma vez ehanet ar roll istor war YouTube."
     Rate Videos: "Diskouez a ra an nozelennoù plijout ha displijout war ar videoioù. Evit diskouez ho priziadenn e vez klasket pep video a zigorit war YouTube gant ho kont, neuze e oar YouTube peseurt videoioù a zigorit, ha pa ne vezont ket ouzhpennet d'ho roll-istor sellet zoken."
+    Reply Notifications: "OpenTubeX a wir hag-eñ ez eus respontoù nevez d'an evezhiadennoù embannet ganeoc'h amañ e-pad an 30 devezh diwezhañ. N'eo ket lakaet an evezhiadennoù embannet en un tu bennak all, evel war lec'hienn YouTube."
   General Settings:
     Built-in Streams: |
       Emgefreek a lenn al lodenn vrasañ eus ar videoioù dre arval visionOS YouTube, a grog buanoc'h hag a skor ar perzhded emgefreek. Ar froudoù war-eeun hag ar videoioù n'hall ket lenn a implij SABR.
@@ -2808,3 +2810,4 @@ YouTube Account:
   Edit Comment Failed: "N'eus ket bet gallet kemmañ an evezhiadenn: {error}"
   Recommendations: "Erbedadennoù YouTube"
   Recommendations Failed: "N'eus ket bet gallet kargañ hoc'h erbedadennoù YouTube."
+  "{author} replied to your comment": "{author} en deus respontet d'hoc'h evezhiadenn"

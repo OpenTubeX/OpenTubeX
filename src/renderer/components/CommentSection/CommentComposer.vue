@@ -84,6 +84,7 @@ import { useYouTubeProfileSwitch } from '../../composables/useYouTubeProfileSwit
 
 import { ERROR_TOAST_ICON, showToast } from '../../helpers/utils'
 import { editYouTubeComment, postYouTubeComment } from '../../helpers/api/youtube-account'
+import { trackCommentReplies } from '../../helpers/commentReplyNotifications'
 import { getCommentEditText, youTubeCommentsKey } from './youTubeComments'
 
 const props = defineProps({
@@ -157,6 +158,7 @@ async function submit() {
   try {
     const posted = await postYouTubeComment(comments.videoId.value, commentText, props.parentId ?? undefined, account)
     comments.addComment(posted, commentText, props.parentId, account)
+    trackCommentReplies(comments.videoId.value, props.parentId ?? posted.id, posted.id, account)
     text.value = ''
     if (!props.parentId) expanded.value = false
     showToast({

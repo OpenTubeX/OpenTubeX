@@ -505,6 +505,7 @@ Settings:
     Sync Now: "Sinchronizuoti dabar"
     Synced: "Sinchronizuota su YouTube"
     Sync Failed: "Nepavyko sinchronizuoti su YouTube: {error}"
+    Reply Notifications: "Pranešti man apie atsakymus į mano komentarus"
   Diagnostics:
     Diagnostics: Diagnostika
     Description: Kol diagnostikos žurnalas įjungtas, OpenTubeX laiko naujausius žurnalo pranešimus atmintyje, kad galėtumėte juos pridėti prie pranešimų apie klaidas. Jis niekada jų neišsaugo ir nesiunčia pats, o išjungus žurnalą jie ištrinami. Ataskaitose nėra slapukų, prieigos raktų, IP adresų ir URL parametrų, tačiau jose gali būti jūsų paleistų vaizdo įrašų ID, todėl prieš dalindamiesi ataskaita ją peržiūrėkite.
@@ -2678,6 +2679,7 @@ Tooltips:
     Rate Videos: "Rodo vaizdo įrašuose mygtukus „Patinka“ ir „Nepatinka“. Kad būtų parodytas jūsų įvertinimas, kiekvienas atidarytas vaizdo įrašas patikrinamas „YouTube“ naudojant jūsų paskyrą, todėl „YouTube“ sužino, kokius vaizdo įrašus atidarote, net jei jie nepridedami prie žiūrėjimo istorijos."
     Sync Subscriptions: "Kanalai, kuriuos užsiprenumeruojate YouTube, įtraukiami į „Visi kanalai“, o kanalai, kurių prenumeratą ten atšaukiate, pašalinami iš visų profilių. Užsiprenumeravus ar atšaukus prenumeratą čia, „Visi kanalai“, tas pats atliekama ir YouTube."
     Sync Playlists: "Jūsų YouTube grojaraščiai, „Žiūrėti vėliau“ ir „Patikę vaizdo įrašai“ rodomi skiltyje „Tavo grojaraščiai“, o čia juose atlikti pakeitimai atliekami ir YouTube. Jie nesinchronizuojami su kitais jūsų įrenginiais ir neįtraukiami, kai eksportuojate visus grojaraščius ar kuriate atsarginę duomenų kopiją. Tai išjungus, jie pašalinami iš šio įrenginio, bet ne iš YouTube."
+    Reply Notifications: "OpenTubeX tikrina, ar į komentarus, kuriuos čia paskelbėte per pastarąsias 30 dienų, yra naujų atsakymų. Komentarai, paskelbti kitur, pavyzdžiui, YouTube svetainėje, neįtraukiami."
   General Settings:
     Built-in Streams: |
       Automatinis režimas daugumą vaizdo įrašų leidžia per YouTube visionOS klientą, kuris paleidžia greičiau ir palaiko automatinę kokybę. Tiesioginės transliacijos ir vaizdo įrašai, kurių jis negali paleisti, naudoja SABR.
@@ -3301,3 +3303,4 @@ YouTube Account:
   Recommendations Failed: "Nepavyko įkelti jūsų YouTube rekomendacijų."
   Subscriptions Synced: "Prenumeratos sinchronizuotos iš YouTube: pridėta {added}, pašalinta {removed}"
   Playlist Update Failed: "Nepavyko atnaujinti {playlistName} YouTube: {error}"
+  "{author} replied to your comment": "{author} atsakė į jūsų komentarą"

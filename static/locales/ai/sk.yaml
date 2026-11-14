@@ -387,6 +387,7 @@ Settings:
     Sync Now: "Synchronizovať teraz"
     Synced: "Synchronizované s YouTube"
     Sync Failed: "Synchronizácia s YouTube zlyhala: {error}"
+    Reply Notifications: "Upozorňovať ma na odpovede na moje komentáre"
   Diagnostics:
     Diagnostics: Diagnostika
     Description: Kým je diagnostický denník zapnutý, OpenTubeX uchováva nedávne správy denníka v pamäti, aby ste ich mohli priložiť k hláseniam chýb. Nikdy ich sám neukladá ani neodosiela a vypnutím denníka sa vymažú. Hlásenia vynechávajú súbory cookie, tokeny, IP adresy a parametre URL, môžu však obsahovať ID prehratých videí, preto hlásenie pred zdieľaním skontrolujte.
@@ -2262,6 +2263,7 @@ Tooltips:
     Sync Playlists: "Vaše playlisty z YouTube, Pozrieť neskôr a Videá, ktoré sa mi páčia, sa zobrazia v sekcii Vaše playlisty a zmeny, ktoré v nich tu urobíte, sa urobia aj na YouTube. Nesynchronizujú sa s vašimi ďalšími zariadeniami a nie sú zahrnuté, keď exportujete všetky playlisty alebo zálohujete svoje údaje. Vypnutím tejto možnosti sa odstránia z tohto zariadenia, ale nie z YouTube."
     Add to YouTube Watch History: "Prehrávané videá sa pridávajú do vašej histórie pozerania na YouTube, aby sa z nich učili odporúčania YouTube. Keď je história na YouTube pozastavená, nič sa nepridáva."
     Rate Videos: "Zobrazuje pri videách tlačidlá Páči sa mi a Nepáči sa mi. Aby sa zobrazilo vaše hodnotenie, každé otvorené video sa vyhľadá na YouTube s vaším účtom, takže YouTube zistí, ktoré videá otvárate, aj keď sa nepridajú do histórie pozerania."
+    Reply Notifications: "OpenTubeX kontroluje nové odpovede na komentáre, ktoré ste tu uverejnili za posledných 30 dní. Komentáre uverejnené inde, napríklad na webe YouTube, nie sú zahrnuté."
   General Settings:
     Built-in Streams: |
       Automatický režim prehráva väčšinu videí cez klienta visionOS od YouTube, ktorý sa spúšťa rýchlejšie a podporuje automatickú kvalitu. Živé prenosy a videá, ktoré nedokáže prehrať, používajú SABR.
@@ -2805,3 +2807,4 @@ YouTube Account:
   Edit Comment Failed: "Komentár sa nepodarilo upraviť: {error}"
   Recommendations: "Odporúčania YouTube"
   Recommendations Failed: "Vaše odporúčania YouTube sa nepodarilo načítať."
+  "{author} replied to your comment": "{author} odpovedal(a) na váš komentár"

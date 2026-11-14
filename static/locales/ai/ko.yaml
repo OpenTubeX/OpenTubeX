@@ -480,6 +480,7 @@ Settings:
     Sync Now: "지금 동기화"
     Synced: "YouTube와 동기화했습니다"
     Sync Failed: "YouTube와 동기화할 수 없습니다: {error}"
+    Reply Notifications: "내 댓글에 달린 답글 알림 받기"
   Diagnostics:
     Diagnostics: 진단
     Description: 진단 로그가 켜져 있는 동안 OpenTubeX는 최근 로그 메시지를 메모리에 보관하여 버그 보고서에 첨부할 수 있게 합니다. 스스로 저장하거나 전송하지 않으며, 로그를 끄면 삭제됩니다. 보고서에는 쿠키, 토큰, IP 주소, URL 매개변수가 포함되지 않지만 재생한 동영상의 ID가 포함될 수 있으므로 공유하기 전에 보고서를 확인하세요.
@@ -2642,6 +2643,7 @@ Tooltips:
     Rate Videos: "동영상에 좋아요 및 싫어요 버튼을 표시합니다. 평가를 표시하려면 여는 모든 동영상을 계정으로 YouTube에서 조회하므로, 시청 기록에 추가되지 않더라도 YouTube는 어떤 동영상을 열었는지 알게 됩니다."
     Sync Subscriptions: "YouTube에서 구독한 채널은 “모든 채널”에 추가되고, YouTube에서 구독 취소한 채널은 모든 프로필에서 삭제됩니다. 여기서 “모든 채널”의 채널을 구독하거나 구독 취소하면 YouTube에서도 똑같이 적용됩니다."
     Sync Playlists: "YouTube 재생 목록, “나중에 볼 동영상”, “좋아요 표시한 동영상”이 “나의 재생 목록”에 표시되며, 여기서 변경한 내용은 YouTube에도 반영됩니다. 다른 기기와 동기화되지 않으며 모든 재생 목록을 내보내거나 데이터를 백업할 때도 포함되지 않습니다. 이 옵션을 끄면 이 기기에서는 삭제되지만 YouTube에서는 삭제되지 않습니다."
+    Reply Notifications: "OpenTubeX는 최근 30일 동안 여기에서 작성한 댓글에 새 답글이 있는지 확인합니다. YouTube 웹사이트 등 다른 곳에서 작성한 댓글은 포함되지 않습니다."
   General Settings:
     Built-in Streams: |
       자동은 대부분의 동영상을 YouTube의 visionOS 클라이언트로 재생하며, 더 빨리 시작되고 자동 화질을 지원합니다. 실시간 스트림과 재생할 수 없는 동영상은 SABR을 사용합니다.
@@ -3255,3 +3257,4 @@ YouTube Account:
   Recommendations Failed: "YouTube 추천을 불러올 수 없습니다."
   Subscriptions Synced: "YouTube에서 구독을 동기화했습니다: {added}개 추가, {removed}개 삭제"
   Playlist Update Failed: "YouTube에서 {playlistName}을(를) 업데이트할 수 없습니다: {error}"
+  "{author} replied to your comment": "{author}님이 회원님의 댓글에 답글을 남겼습니다"
