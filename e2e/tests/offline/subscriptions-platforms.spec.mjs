@@ -228,7 +228,7 @@ test.describe('Channels on other platforms', () => {
 
       const input = manager.getByRole('textbox', { name: 'Add Channel' })
       // Videos aren't channels, and names alone don't say which platform they are on
-      const invalid = page.getByText('Enter the address of a channel page on Twitch, SoundCloud, PeerTube, Rumble or Odysee.')
+      const invalid = page.getByText('Enter the address of a channel page on Twitch, SoundCloud, PeerTube, Rumble, Odysee or media.ccc.de.')
       for (const [index, text] of ['https://www.twitch.tv/videos/123', 'Other'].entries()) {
         await input.fill(text)
         await input.press('Enter')
