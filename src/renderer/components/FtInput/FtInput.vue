@@ -6,6 +6,7 @@
       search: isSearch,
       showActionButton,
       showPasswordToggle: inputType === 'password',
+      numberInput: inputType === 'number',
       floatingLabel: showLabel,
       hasValue: inputDataPresent,
       hasSupportingText: supportingText !== '',
@@ -19,6 +20,7 @@
         v-bind="inputAttributes"
         :id="id"
         ref="inputRef"
+        :data-setting-key="settingKey || undefined"
         :value="inputDataDisplayed"
         class="ft-input"
         :class="{ disabled, multiline }"
@@ -67,6 +69,29 @@
         </legend>
       </fieldset>
       <slot name="extraAction" />
+      <!-- The input is a spinbutton for the keyboard and assistive technology. -->
+      <span
+        v-if="inputType === 'number'"
+        class="numberStepper"
+        aria-hidden="true"
+      >
+        <button
+          v-for="direction in [-1, 1]"
+          :key="direction"
+          type="button"
+          tabindex="-1"
+          class="numberStep"
+          :disabled="disabled || readonly || (direction < 0 && !canStepDown)"
+          @pointerdown="startStepping(direction, $event)"
+          @mousedown.prevent
+          @click="handleStepTap(direction)"
+        >
+          <FtIcon
+            class="buttonIcon"
+            :icon="['fas', direction < 0 ? 'minus' : 'plus']"
+          />
+        </button>
+      </span>
       <button
         v-if="inputType === 'password'"
         type="button"
@@ -363,6 +388,75 @@ async function togglePasswordVisibility() {
     input.setSelectionRange(selectionStart, selectionEnd, selectionDirection)
   }
 }
+
+const canStepDown = computed(() => props.min === null ||
+  (inputData.value !== '' && Number(inputData.value) > Number(props.min)))
+
+const STEP_REPEAT_DELAY = 400
+const STEP_REPEAT_INTERVAL = 60
+let stepTimer = 0
+let stepChanged = false
+let stepPointerType = ''
+
+/**
+ * Steps like a native spin button, which Firefox and Chromium draw differently.
+ * Holding the button repeats the step.
+ * @param {-1 | 1} direction
+ * @param {PointerEvent} event
+ */
+function startStepping(direction, event) {
+  stepPointerType = event.pointerType
+  // A touch can start a scroll, so touch steps once it becomes a tap.
+  if (event.button !== 0 || event.pointerType === 'touch') return
+  stopStepping()
+  stepValue(direction)
+  const repeat = (delay) => {
+    stepTimer = window.setTimeout(() => {
+      stepValue(direction)
+      repeat(STEP_REPEAT_INTERVAL)
+    }, delay)
+  }
+  repeat(STEP_REPEAT_DELAY)
+  // A button disabled at the minimum no longer receives its own pointerup.
+  window.addEventListener('pointerup', stopStepping)
+  window.addEventListener('pointercancel', stopStepping)
+}
+
+function stopStepping() {
+  window.clearTimeout(stepTimer)
+  window.removeEventListener('pointerup', stopStepping)
+  window.removeEventListener('pointercancel', stopStepping)
+  if (!stepChanged) return
+  stepChanged = false
+  inputRef.value?.dispatchEvent(new Event('change', { bubbles: true }))
+}
+
+/**
+ * @param {-1 | 1} direction
+ */
+function stepValue(direction) {
+  const input = inputRef.value
+  const previousValue = input.value
+  if (direction < 0) {
+    input.stepDown()
+  } else {
+    input.stepUp()
+  }
+  if (input.value === previousValue) return
+  stepChanged = true
+  input.dispatchEvent(new Event('input', { bubbles: true }))
+}
+
+/**
+ * @param {-1 | 1} direction
+ */
+function handleStepTap(direction) {
+  if (stepPointerType !== 'touch') return
+  stepValue(direction)
+  stopStepping()
+}
+
+onBeforeUnmount(stopStepping)
 
 const tooltipRef = useTemplateRef('tooltipRef')
 const descriptionIds = computed(() => [

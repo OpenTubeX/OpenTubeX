@@ -1140,11 +1140,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: "インターネット接続の確認"
     Internet Connectivity Checks Tooltip: "GrapheneOS がホストするサーバーに小さなリクエストを送り、インターネット接続を確認します。"
-    Automatic History Retention: 履歴の自動保持期間（日）
-    Automatic History Retention Placeholder: 無期限に保持する場合は空欄
+    Automatic History Deletion: 履歴を自動で削除するまでの日数
+    Watch History Retention: 再生履歴
+    Search History Retention: 検索履歴
+    Keep Forever Placeholder: 無期限に保持
     Automatic History Retention Tooltip: 履歴を無期限に保持する場合は空欄にしてください。日数を保存すると、それより古い履歴を今すぐ削除し、アプリの起動中も自動的に削除します。
-    Automatic Search History Retention: 検索履歴の自動保持期間（日）
-    Automatic Search History Retention Tooltip: 検索履歴を無期限に保持する場合は空欄にしてください。日数を保存すると、それより古い検索を今すぐ削除し、アプリの起動中も自動的に削除します。
     History Retention Saved: 履歴の保持期間を保存しました
     Invalid History Retention Days: 0より大きい整数の日数を入力してください
     Enable Watch Statistics: 視聴統計を有効化

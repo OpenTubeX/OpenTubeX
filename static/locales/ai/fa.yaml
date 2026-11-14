@@ -1177,11 +1177,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: "بررسی اتصال اینترنت"
     Internet Connectivity Checks Tooltip: "برای بررسی دسترسی به اینترنت، درخواست‌های کوچکی به سروری با میزبانی GrapheneOS ارسال می‌کند."
-    Automatic History Retention: نگهداری خودکار تاریخچه (روز)
-    Automatic History Retention Placeholder: برای نگهداری همیشگی خالی بگذارید
+    Automatic History Deletion: حذف خودکار تاریخچه پس از (روز)
+    Watch History Retention: تاریخچه تماشا
+    Search History Retention: تاریخچه جستجو
+    Keep Forever Placeholder: نگهداری همیشگی
     Automatic History Retention Tooltip: برای نگهداری همیشگی تاریخچه، خالی بگذارید. با ذخیرهٔ یک عدد، موارد قدیمی اکنون و هنگام بازبودن برنامه به‌طور خودکار حذف می‌شوند.
-    Automatic Search History Retention: نگهداری خودکار تاریخچهٔ جستجو (روز)
-    Automatic Search History Retention Tooltip: برای نگهداری همیشگی تاریخچهٔ جستجو، خالی بگذارید. با ذخیرهٔ یک عدد، جستجوهای قدیمی اکنون و هنگام بازبودن برنامه به‌طور خودکار حذف می‌شوند.
     History Retention Saved: مدت نگهداری تاریخچه ذخیره شد
     Invalid History Retention Days: تعداد روزها را به‌صورت عدد صحیح بزرگ‌تر از صفر وارد کنید
     Enable Watch Statistics: فعال‌کردن آمار تماشا

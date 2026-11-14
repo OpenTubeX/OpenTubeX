@@ -1140,11 +1140,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: "İnternet bağlantısı kontrolleri"
     Internet Connectivity Checks Tooltip: "İnternet erişimini kontrol etmek için GrapheneOS tarafından barındırılan bir sunucuya küçük istekler gönderir."
-    Automatic History Retention: Otomatik Geçmiş Saklama Süresi (Gün)
-    Automatic History Retention Placeholder: Süresiz saklamak için boş bırakın
+    Automatic History Deletion: Geçmişin otomatik silinme süresi (gün)
+    Watch History Retention: İzleme geçmişi
+    Search History Retention: Arama geçmişi
+    Keep Forever Placeholder: Süresiz sakla
     Automatic History Retention Tooltip: Geçmişi süresiz saklamak için boş bırakın. Bir sayı kaydettiğinizde eski kayıtlar hemen ve uygulama açıkken otomatik olarak kaldırılır.
-    Automatic Search History Retention: Otomatik Arama Geçmişi Saklama Süresi (Gün)
-    Automatic Search History Retention Tooltip: Arama geçmişini süresiz saklamak için boş bırakın. Bir sayı kaydettiğinizde eski aramalar hemen ve uygulama açıkken otomatik olarak kaldırılır.
     History Retention Saved: Geçmiş saklama süresi kaydedildi
     Invalid History Retention Days: Sıfırdan büyük bir tam gün sayısı girin
     Enable Watch Statistics: İzleme İstatistiklerini Etkinleştir

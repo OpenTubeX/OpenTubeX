@@ -1143,11 +1143,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: "Gwiriadau cysylltiad rhyngrwyd"
     Internet Connectivity Checks Tooltip: "Yn anfon ceisiadau bach at weinydd a gynhelir gan GrapheneOS i wirio mynediad i’r rhyngrwyd."
-    Automatic History Retention: Cadw hanes yn awtomatig (diwrnodau)
-    Automatic History Retention Placeholder: Gadewch yn wag i'w gadw am byth
+    Automatic History Deletion: Dileu'r hanes yn awtomatig ar ôl (diwrnodau)
+    Watch History Retention: Hanes gwylio
+    Search History Retention: Hanes chwilio
+    Keep Forever Placeholder: Cadw am byth
     Automatic History Retention Tooltip: Gadewch yn wag i gadw'r hanes am byth. Bydd cadw rhif yn dileu cofnodion hŷn nawr ac yn awtomatig tra bo'r ap ar agor.
-    Automatic Search History Retention: Cadw hanes chwilio yn awtomatig (diwrnodau)
-    Automatic Search History Retention Tooltip: Gadewch yn wag i gadw'r hanes chwilio am byth. Bydd cadw rhif yn dileu chwiliadau hŷn nawr ac yn awtomatig tra bo'r ap ar agor.
     History Retention Saved: Mae'r cyfnod cadw hanes wedi'i gadw
     Invalid History Retention Days: Rhowch nifer cyfan o ddiwrnodau sy'n fwy na sero
     Enable Watch Statistics: Galluogi ystadegau gwylio

@@ -1155,11 +1155,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: "בדיקות חיבור לאינטרנט"
     Internet Connectivity Checks Tooltip: "שולח בקשות קטנות לשרת המתארח אצל GrapheneOS כדי לבדוק גישה לאינטרנט."
-    Automatic History Retention: תקופת שמירה אוטומטית של ההיסטוריה (ימים)
-    Automatic History Retention Placeholder: השאירו ריק כדי לשמור לתמיד
+    Automatic History Deletion: מחיקה אוטומטית של ההיסטוריה אחרי (ימים)
+    Watch History Retention: היסטוריית צפייה
+    Search History Retention: היסטוריית חיפוש
+    Keep Forever Placeholder: שמירה לתמיד
     Automatic History Retention Tooltip: השאירו ריק כדי לשמור את ההיסטוריה לתמיד. הזנת מספר מוחקת כעת רשומות ישנות יותר וממשיכה למחוק אותן אוטומטית כל עוד היישום פתוח.
-    Automatic Search History Retention: תקופת שמירה אוטומטית של היסטוריית החיפוש (ימים)
-    Automatic Search History Retention Tooltip: השאירו ריק כדי לשמור את היסטוריית החיפוש לתמיד. שמירת מספר מוחקת כעת חיפושים ישנים יותר וממשיכה למחוק אותם אוטומטית כל עוד היישום פתוח.
     History Retention Saved: תקופת שמירת ההיסטוריה נשמרה
     Invalid History Retention Days: הזינו מספר ימים שלם וגדול מאפס
     Enable Watch Statistics: הפעלת סטטיסטיקות צפייה
