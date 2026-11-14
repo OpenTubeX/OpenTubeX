@@ -876,6 +876,7 @@ Settings:
       Unavailable: Toiston säätimiä ei voitu säätää.
     yt-dlp Streaming: "yt-dlp-suoratoisto"
     Continue Playback When Screen Is Locked: 'Jatka toistoa näytön ollessa lukittuna'
+    Ignore Headphone Controls: 'Ohita kuulokkeiden ohjaimet'
     Music Visualizer: Musiikkivisualisointi
     Automatically Open Chapters: Avaa luvut automaattisesti
     Caption Appearance:
@@ -2326,6 +2327,7 @@ Tooltips:
     Normalize Loudness: 'Hiljentää videoita, jotka ovat useimpia kovempia, jotta äänenvoimakkuus ei hyppää videoiden välillä. Hiljaiset videot säilyttävät äänenvoimakkuutensa. Toimii vain paikallisella API:lla ladatuissa videoissa.'
     Pause on Stream Recovery: "Kun videostriimi epäonnistuu ja soitin lataa sen uudelleen tai vaihtaa toiseen formaattiin tai moottoriin, toisto keskeytetään ja virhe näkyy soittimen yläosassa, kunnes suljet sen. Kun asetus on pois päältä, toisto jatkuu ja virhe näkyy hetken ilmoituksena."
     Continue Playback When Screen Is Locked: 'Jatkaa äänen toistamista taustalla ja tarjoaa Androidin mediasäätimet. Poista tämä käytöstä, jos haluat keskeyttää toiston, kun sovellus ei enää ole näkyvissä.'
+    Ignore Headphone Controls: 'Ohittaa Bluetooth-laitteiden ja langallisten kuulokkeiden toisto-, tauko- ja ohituskomennot, kuten vahingossa tehdyt napautukset nappikuulokkeisiin. Sovelluksen ja mediailmoituksen ohjaimet toimivat edelleen.'
     Enable Caption Translations: Kun asetus on käytössä, tekstityspainike ja C-pikanäppäin suosivat automaattisesti käännettyä tekstitysraitaa ensisijaisella tekstityskielellä, jos videossa ei ole vastaavaa alkuperäistä raitaa.
     Use Quick Playback Speed Bar: Näyttää toistonopeuden pikapalkin soittimen säätimien oikeassa reunassa. Jos kanavakohtaisen toistonopeuden manuaalinen tallennus on käytössä, palkissa on myös painike nykyisen kanavan nopeuden tallentamiseen.
     Multiply Seek Interval by Playback Rate: Kun asetus on käytössä, siirtymäväli kerrotaan nykyisellä toistonopeudella käytettäessä nuolinäppäimiä tai J/L-näppäimiä. Kun asetus on poistettu käytöstä, siirtymäväli pysyy samana toistonopeudesta riippumatta.

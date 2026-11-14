@@ -1096,6 +1096,7 @@ Settings:
       Unavailable: No s’han pogut ajustar els controls de reproducció.
     yt-dlp Streaming: "Reproducció en continu amb yt-dlp"
     Continue Playback When Screen Is Locked: 'Continua la reproducció amb la pantalla bloquejada'
+    Ignore Headphone Controls: 'Ignora els controls dels auriculars'
     Music Visualizer: Visualitzador de música
     Automatically Open Chapters: Obre els capítols automàticament
     Caption Appearance:
@@ -2866,6 +2867,7 @@ Tooltips:
     Normalize Loudness: 'Abaixa el volum dels vídeos que sonen més fort que la majoria perquè el volum no faci salts entre vídeos. Els vídeos fluixos mantenen el seu volum. Només funciona amb els vídeos carregats amb l''API local.'
     Pause on Stream Recovery: "Quan el flux de vídeo falla i el reproductor el torna a carregar o canvia a un altre format o motor, la reproducció es posa en pausa i l'error es manté a la part superior del reproductor fins que el descartis. Si està desactivat, la reproducció continua i l'error apareix breument com a notificació."
     Continue Playback When Screen Is Locked: 'Manté l’àudio reproduint-se en segon pla i proporciona controls multimèdia d’Android. Desactiveu-ho per posar en pausa quan l’aplicació deixi de ser visible.'
+    Ignore Headphone Controls: 'Ignora les ordres de reproduir, posar en pausa i saltar dels dispositius Bluetooth i dels auriculars amb cable, com ara els tocs accidentals als auriculars. Els controls de l’aplicació i de la notificació multimèdia continuen funcionant.'
     Enable Caption Translations: Si s'activa i el vídeo no proporciona cap pista original coincident, el botó de subtítols i la drecera C prefereixen una pista traduïda automàticament a la llengua de subtítols preferida.
     Proxy Videos Through Invidious: Es connecta a Invidious per servir els vídeos en lloc de connectar-se directament a YouTube.
     Default Media Format: Defineix els formats utilitzats en reproduir un vídeo. Els formats DASH poden reproduir qualitats més altes. Els formats antics estan limitats a 360p com a màxim, però utilitzen menys amplada de banda. Els formats d'àudio només contenen fluxos d'àudio.

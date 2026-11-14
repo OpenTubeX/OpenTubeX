@@ -75,6 +75,14 @@ export function updateAndroidMediaSession(state) {
   })
 }
 
+/** @param {boolean} ignored */
+export function setAndroidMediaButtonsIgnored(ignored) {
+  if (!AndroidMediaSession || process.env.IS_IOS) return
+  AndroidMediaSession.setIgnoreMediaButtons({ ignored }).catch(error => {
+    console.error('Failed to update Android media button handling', error)
+  })
+}
+
 export async function addAndroidMediaSessionActionListener(listener) {
   if (!AndroidMediaSession) return () => {}
   const handle = await AndroidMediaSession.addListener('action', listener)

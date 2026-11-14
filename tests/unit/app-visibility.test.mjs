@@ -156,6 +156,7 @@ for (const eventFirst of [false, true]) {
       initializeCapacitorLiveReminderActions: async () => () => {},
       showInAppNotification: () => {},
       addAndroidMediaSessionActionListener: async () => () => {},
+      setAndroidMediaButtonsIgnored: () => {},
       AppShortcuts: { addListener: async () => ({ remove() {} }) },
       syncHomeWidgets: () => () => {},
       watch: () => () => {},

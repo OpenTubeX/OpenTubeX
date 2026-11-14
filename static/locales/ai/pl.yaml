@@ -558,6 +558,7 @@ Settings:
       Unavailable: Nie udało się dostosować sterowania odtwarzaniem.
     yt-dlp Streaming: "Strumieniowanie yt-dlp"
     Continue Playback When Screen Is Locked: 'Kontynuuj odtwarzanie przy zablokowanym ekranie'
+    Ignore Headphone Controls: 'Ignoruj sterowanie ze słuchawek'
     Music Visualizer: Wizualizator muzyki
     Scroll Mini Player:
       Scroll Player Mode: Podczas przewijania w dół
@@ -1555,6 +1556,7 @@ Tooltips:
     Normalize Loudness: 'Ścisza filmy, które są głośniejsze niż większość, aby głośność nie skakała między filmami. Ciche filmy zachowują swoją głośność. Działa tylko w przypadku filmów wczytanych przez lokalne API.'
     Pause on Stream Recovery: "Gdy strumień wideo zawiedzie, a odtwarzacz załaduje go ponownie lub przełączy się na inny format lub silnik, odtwarzanie zostanie wstrzymane, a błąd pozostanie u góry odtwarzacza, dopóki go nie zamkniesz. Po wyłączeniu odtwarzanie jest kontynuowane, a błąd pojawia się na chwilę jako powiadomienie."
     Continue Playback When Screen Is Locked: 'Utrzymuje odtwarzanie dźwięku w tle i udostępnia elementy sterowania multimediami Androida. Wyłącz, aby wstrzymywać odtwarzanie, gdy aplikacja nie jest już widoczna.'
+    Ignore Headphone Controls: 'Ignoruje polecenia odtwarzania, wstrzymania i pomijania z urządzeń Bluetooth i słuchawek przewodowych, takie jak przypadkowe dotknięcia słuchawek dousznych. Elementy sterujące w aplikacji i w powiadomieniu multimedialnym nadal działają.'
     Use YouTube-style Shorts: Wyświetla Shorts w pionowej siatce na stronach subskrypcji i kanałów oraz używa odtwarzacza Shorts w stylu YouTube.
     Loop Shorts: Po włączeniu Shorts są automatycznie odtwarzane od początku. Po wyłączeniu zatrzymują się na końcu i wyświetlają przycisk ponownego odtwarzania.
     Enable Skip Silence by Default: Włącza pomijanie ciszy na nowych kartach. Zmiana na jednej karcie nie wpływa na pozostałe.

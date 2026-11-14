@@ -876,6 +876,7 @@ Settings:
       Unavailable: Impossibile regolare i controlli di riproduzione.
     yt-dlp Streaming: "Streaming yt-dlp"
     Continue Playback When Screen Is Locked: 'Continua la riproduzione quando lo schermo è bloccato'
+    Ignore Headphone Controls: 'Ignora i controlli delle cuffie'
     Music Visualizer: Visualizzatore musicale
     Automatically Open Chapters: Apri automaticamente i capitoli
     Caption Appearance:
@@ -2318,6 +2319,7 @@ Tooltips:
     Normalize Loudness: 'Abbassa il volume dei video più forti della maggior parte, così il volume non cambia bruscamente tra un video e l''altro. I video più bassi mantengono il loro volume. Funziona solo con i video caricati tramite le API locali.'
     Pause on Stream Recovery: "Quando lo stream video non riesce e il lettore lo ricarica o passa a un altro formato o motore, la riproduzione viene messa in pausa e l'errore rimane nella parte superiore del lettore finché non lo chiudi. Se disattivato, la riproduzione continua e l'errore appare brevemente come notifica."
     Continue Playback When Screen Is Locked: 'Mantiene l’audio in riproduzione in background e fornisce i controlli multimediali di Android. Disattiva questa opzione per mettere in pausa quando l’app non è più visibile.'
+    Ignore Headphone Controls: 'Ignora i comandi di riproduzione, pausa e salto provenienti da dispositivi Bluetooth e cuffie con cavo, come i tocchi accidentali sugli auricolari. I controlli nell’app e nella notifica multimediale continuano a funzionare.'
     Enable Caption Translations: Se abilitato, il pulsante dei sottotitoli e la scorciatoia C preferiscono una traccia tradotta automaticamente nella lingua scelta quando il video non offre una traccia originale corrispondente.
     Use Quick Playback Speed Bar: Mostra una barra rapida della velocità di riproduzione tra i controlli a destra del lettore. Se è abilitato il salvataggio manuale della velocità per canale, la barra include anche il pulsante per salvare la velocità del canale corrente.
     Multiply Seek Interval by Playback Rate: Se abilitato, gli intervalli di spostamento nella riproduzione, con i tasti freccia e J/L, vengono moltiplicati per la velocità corrente. Se disabilitato, restano costanti indipendentemente dalla velocità.

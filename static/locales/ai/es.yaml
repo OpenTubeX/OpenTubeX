@@ -822,6 +822,7 @@ Settings:
       Unavailable: No se pudieron ajustar los controles de reproducción.
     yt-dlp Streaming: "Streaming con yt-dlp"
     Continue Playback When Screen Is Locked: 'Continuar la reproducción con la pantalla bloqueada'
+    Ignore Headphone Controls: 'Ignorar los controles de los auriculares'
     Music Visualizer: Visualizador de música
     Automatically Open Chapters: Abrir capítulos automáticamente
     Caption Appearance:
@@ -2278,6 +2279,7 @@ Tooltips:
     Normalize Loudness: 'Baja el volumen de los vídeos que suenan más fuerte que la mayoría para que el volumen no salte entre vídeos. Los vídeos silenciosos mantienen su volumen. Solo funciona con vídeos cargados con la API local.'
     Pause on Stream Recovery: "Cuando la transmisión de vídeo falla y el reproductor la recarga o cambia a otro formato o motor, la reproducción se pausa y el error permanece en la parte superior del reproductor hasta que lo descartes. Si está desactivado, la reproducción continúa y el error aparece brevemente como notificación."
     Continue Playback When Screen Is Locked: 'Mantiene el audio reproduciéndose en segundo plano y proporciona controles multimedia de Android. Desactívalo para pausar cuando la aplicación deje de estar visible.'
+    Ignore Headphone Controls: 'Ignora las órdenes de reproducir, pausar y saltar de los dispositivos Bluetooth y de los auriculares con cable, como los toques accidentales en los auriculares. Los controles de la aplicación y de la notificación multimedia siguen funcionando.'
     Enable Caption Translations: Al activarlo, el botón de subtítulos y el atajo C prefieren una pista traducida automáticamente al idioma de subtítulos elegido cuando el vídeo no ofrece una pista original coincidente.
     Use Quick Playback Speed Bar: Muestra una barra rápida de velocidad de reproducción en los controles situados a la derecha del reproductor. Si está activado el guardado manual de la velocidad por canal, la barra también incluye un botón para guardar la velocidad del canal actual.
     Multiply Seek Interval by Playback Rate: Al activarlo, los intervalos de avance (teclas de flecha y J/L) se multiplican por la velocidad de reproducción actual. Si se desactiva, los intervalos permanecen constantes independientemente de la velocidad.

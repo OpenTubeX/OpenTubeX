@@ -876,6 +876,7 @@ Settings:
       Unavailable: Nem sikerült módosítani a lejátszás vezérlőit.
     yt-dlp Streaming: "yt-dlp streamelés"
     Continue Playback When Screen Is Locked: 'Lejátszás folytatása zárolt képernyőnél'
+    Ignore Headphone Controls: 'Fejhallgató-vezérlők figyelmen kívül hagyása'
     Music Visualizer: Zenevizualizáció
     Automatically Open Chapters: Fejezetek automatikus megnyitása
     Caption Appearance:
@@ -2319,6 +2320,7 @@ Tooltips:
     Normalize Loudness: 'Lehalkítja a legtöbbnél hangosabb videókat, hogy a hangerő ne ugráljon a videók között. A halk videók megtartják a hangerejüket. Csak a helyi API-val betöltött videóknál működik.'
     Pause on Stream Recovery: "Ha a videostream meghiúsul, és a lejátszó újratölti, vagy másik formátumra vagy motorra vált, a lejátszás szünetel, és a hiba a lejátszó tetején marad, amíg el nem veted. Kikapcsolva a lejátszás folytatódik, és a hiba röviden értesítésként jelenik meg."
     Continue Playback When Screen Is Locked: 'A háttérben folytatja a hang lejátszását, és Android-médiavezérlőket biztosít. Kapcsold ki, ha az alkalmazás elrejtésekor szüneteltetni szeretnéd a lejátszást.'
+    Ignore Headphone Controls: 'Figyelmen kívül hagyja a Bluetooth-eszközök és vezetékes fejhallgatók lejátszás, szüneteltetés és ugrás parancsait, például a fülhallgatók véletlen megérintését. Az alkalmazás és a médiaértesítés vezérlői továbbra is működnek.'
     Enable Caption Translations: Bekapcsolva a feliratok gomb és a C billentyűparancs az előnyben részesített feliratnyelvre automatikusan lefordított sávot választja, ha a videóhoz nincs ezen a nyelven eredeti sáv.
     Use Quick Playback Speed Bar: Gyors lejátszásisebesség-sáv megjelenítése a lejátszó jobb oldali vezérlői között. Ha engedélyezett a lejátszási sebesség csatornánkénti kézi mentése, a sávon az aktuális csatorna sebességének mentésére szolgáló gomb is megjelenik.
     Multiply Seek Interval by Playback Rate: Bekapcsolva a tekerési időközök (nyílbillentyűk és J/L) az aktuális lejátszási sebességgel szorzódnak. Kikapcsolva az időközök a lejátszási sebességtől függetlenül változatlanok maradnak.

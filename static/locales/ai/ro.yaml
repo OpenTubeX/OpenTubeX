@@ -876,6 +876,7 @@ Settings:
       Unavailable: Nu s-au putut ajusta comenzile de redare.
     yt-dlp Streaming: "Streaming yt-dlp"
     Continue Playback When Screen Is Locked: 'Continuă redarea când ecranul este blocat'
+    Ignore Headphone Controls: 'Ignoră comenzile căștilor'
     Music Visualizer: Vizualizator muzical
     Automatically Open Chapters: Deschide automat capitolele
     Caption Appearance:
@@ -2372,6 +2373,7 @@ Tooltips:
     Normalize Loudness: 'Reduce volumul videoclipurilor mai puternice decât majoritatea, astfel încât volumul să nu sară între videoclipuri. Videoclipurile cu volum redus își păstrează volumul. Funcționează doar pentru videoclipurile încărcate prin API-ul local.'
     Pause on Stream Recovery: "Când fluxul video eșuează și playerul îl reîncarcă sau trece la alt format sau motor, redarea este pusă pe pauză, iar eroarea rămâne în partea de sus a playerului până când o închizi. Când este dezactivat, redarea continuă, iar eroarea apare pentru scurt timp ca notificare."
     Continue Playback When Screen Is Locked: 'Menține redarea audio în fundal și oferă comenzi media Android. Dezactivează pentru a întrerupe redarea când aplicația nu mai este vizibilă.'
+    Ignore Headphone Controls: 'Ignoră comenzile de redare, pauză și omitere de la dispozitivele Bluetooth și căștile cu fir, cum ar fi atingerile accidentale ale căștilor. Comenzile din aplicație și din notificarea media funcționează în continuare.'
     Enable Caption Translations: Când opțiunea este activată, butonul de subtitrări și comanda rapidă C preferă o pistă tradusă automat în limba preferată dacă videoclipul nu oferă o pistă originală corespunzătoare.
     Use Quick Playback Speed Bar: Afișează o bară rapidă pentru viteza de redare în partea dreaptă a comenzilor playerului. Dacă este activată salvarea manuală a vitezei de redare pentru fiecare canal, bara include și butonul pentru salvarea vitezei canalului curent.
     Multiply Seek Interval by Playback Rate: Când opțiunea este activată, intervalele de salt (tastele săgeată și J/L) sunt înmulțite cu viteza de redare curentă. Când este dezactivată, intervalele rămân constante indiferent de viteza de redare.
