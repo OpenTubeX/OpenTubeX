@@ -674,7 +674,7 @@ import SharedYoutubeLinkPrompt from './components/SharedYoutubeLinkPrompt/Shared
 import { initializeAndroidIncomingShare } from './helpers/androidIncomingShare'
 import { handleRestoredAndroidAppData } from './helpers/androidStorage'
 import { extractSharedMediaLink, extractSharedYoutubeLink } from './helpers/sharedYoutubeLink'
-import { shouldOpenExternalMediaUrl } from './helpers/externalMediaUrl'
+import { getExternalUrlRoute, shouldOpenExternalMediaUrl } from './helpers/externalMediaUrl'
 import { isExternalMediaHistoryId } from './helpers/externalMediaHistory'
 import DigitalWellbeing from './components/DigitalWellbeing/DigitalWellbeing.vue'
 import FtButton from './components/FtButton/FtButton.vue'
@@ -745,6 +745,7 @@ import { useSubscriptionAutoRefresh } from './composables/useSubscriptionAutoRef
 import { useRssFeedAutoRefresh } from './composables/useRssFeedAutoRefresh'
 import { usePlatformFeedAutoRefresh } from './composables/usePlatformFeedAutoRefresh'
 import { startTwitchLiveNotifications } from './helpers/platformFeed'
+import { findPlatformChannel, getPlatformChannelRoute } from '../platforms/index'
 import { startCommentReplyNotifications } from './helpers/commentReplyNotifications'
 import { translateWindowTitle } from './helpers/strings'
 import { normalizeScrollbarThumbWidth } from './constants/scrollbar'
@@ -1300,7 +1301,8 @@ const mobileContextLinkCanOpenInTab = computed(() => {
   if (!store.getters.getTabsEnabled) return false
   const href = mobileContextLink.value?.href ?? ''
   return href.startsWith(`${window.location.href.split('#')[0]}#`) ||
-    /^https?:\/\/(?:www\.|m\.)?(?:youtube\.com|youtu\.be)\//.test(href)
+    /^https?:\/\/(?:www\.|m\.)?(?:youtube\.com|youtu\.be)\//.test(href) ||
+    getLinkedPlatformChannel(href) !== null
 })
 const mobileContextLinkCopyUrl = computed(() => {
   const href = mobileContextLink.value?.href
@@ -4207,6 +4209,16 @@ async function openMobileContextLink(newTab) {
     return
   }
 
+  const platformChannel = getLinkedPlatformChannel(href)
+  if (platformChannel) {
+    await openInternalPath({
+      ...getPlatformChannelRoute(platformChannel.platform, platformChannel.id),
+      doCreateNewTab: newTab,
+      makeActive: true
+    })
+    return
+  }
+
   handleExternalLink(href)
 }
 
@@ -4288,9 +4300,11 @@ function handleLinkClick(event, link) {
     ? ((process.platform !== 'darwin' && event.ctrlKey) || (process.platform === 'darwin' && event.metaKey))
     : (event.ctrlKey || event.metaKey)
   const isMiddleClick = event.type === 'auxclick' && event.button === 1
-  const doCreateNewTab = ctrlOrCmdPressed || isMiddleClick
+  // Shift opens a window, also with Ctrl/Cmd or the middle button, as for internal links
   const doCreateNewWindow = event.shiftKey
+  const doCreateNewTab = (ctrlOrCmdPressed || isMiddleClick) && !doCreateNewWindow
 
+  const platformChannel = getLinkedPlatformChannel(href)
   if (isYoutubeLink) {
     handleYoutubeLink(href, {
       doCreateNewWindow,
@@ -4298,9 +4312,27 @@ function handleLinkClick(event, link) {
       isMiddleClick,
       lazyLoad: isUnloadedBackgroundTabClick(event)
     })
+  } else if (platformChannel) {
+    openInternalPath({
+      ...getPlatformChannelRoute(platformChannel.platform, platformChannel.id),
+      doCreateNewWindow,
+      doCreateNewTab,
+      makeActive: !isMiddleClick,
+      lazyLoad: isUnloadedBackgroundTabClick(event)
+    })
   } else {
     handleExternalLink(href, { background: isMiddleClick })
   }
+}
+
+/**
+ * Links to channels of supported platforms, e.g. in a channel's About tab,
+ * open their channel page like YouTube links do. PeerTube channel paths are
+ * left to the browser, as other sites use them too.
+ * @param {string} href
+ */
+function getLinkedPlatformChannel(href) {
+  return supportsYtDlp ? findPlatformChannel(href, { anyHost: false }) : null
 }
 
 async function handleYoutubeLink(href, {
@@ -4446,7 +4478,7 @@ function enableOpenUrl() {
     if (!url) return
     // other sites must not reach the YouTube parser, which reads e.g. facebook.com/watch?v= as a video
     if (supportsYtDlp && shouldOpenExternalMediaUrl(url, store.getters.getCurrentInvidiousInstanceUrl)) {
-      const route = { path: '/external-media', query: { url } }
+      const route = getExternalUrlRoute(url)
       if (tabId) navigation.push(tabId, route)
       else openInternalPath(route)
       return
@@ -4463,7 +4495,7 @@ function enableOpenUrl() {
 }
 
 function openExternalMedia(url) {
-  return openInternalPath({ path: '/external-media', query: { url } })
+  return openInternalPath(getExternalUrlRoute(url))
 }
 
 async function handleAndroidSharedText(text) {

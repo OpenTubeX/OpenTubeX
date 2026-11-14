@@ -1,3 +1,4 @@
+import { findPlatformChannel, getPlatformChannelRoute } from '../../platforms/index.js'
 import { isYtDlpMediaUrl } from '../../ytDlpArguments.js'
 
 /**
@@ -42,4 +43,15 @@ export function shouldOpenExternalMediaUrl(value, invidiousInstanceUrl = '') {
   } catch { /* No configured instance. */ }
 
   return true
+}
+
+/**
+ * The in-app page of a URL from another site: the channel page for channels of
+ * supported platforms, which yt-dlp would play as their live stream or first
+ * upload, and yt-dlp playback for everything else.
+ * @param {string} url
+ */
+export function getExternalUrlRoute(url) {
+  const channel = findPlatformChannel(url)
+  return channel ? getPlatformChannelRoute(channel.platform, channel.id) : { path: '/external-media', query: { url } }
 }

@@ -3,7 +3,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { choosePickerPaths, expect, goTo, sel, test } from '../../helpers/app.mjs'
-import { waitForPlayback } from '../../helpers/player.mjs'
+import { activeTab, waitForPlayback } from '../../helpers/player.mjs'
 import { DEMO_MEDIA_URL, routeDemoMedia } from '../../helpers/media.mjs'
 import { SYNC_KEY, SYNC_SALT, mockSyncServer, syncWithSyncServer } from '../../helpers/sync-history.mjs'
 import { encryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
@@ -76,11 +76,13 @@ async function mockTwitch(page, users) {
  * @param {import('../../helpers/app.mjs').App} app
  * @param {import('@playwright/test').Page} page
  * @param {string} mediaUrl
+ * @param {{ description?: string }} [options]
  */
-async function prepareTwitchYtDlp(app, page, mediaUrl) {
+async function prepareTwitchYtDlp(app, page, mediaUrl, { description } = {}) {
   const executable = path.join(app.userDataDir, 'twitch-yt-dlp.sh')
   const response = JSON.stringify({
     title: 'A Twitch broadcast',
+    description,
     webpage_url: mediaUrl,
     uploader: 'Streamer',
     uploader_id: 'streamer',
@@ -112,9 +114,9 @@ test.describe('Channels on other platforms', () => {
     const user = twitchUser(CHANNEL, { stream: liveStream })
     // The video recording the running stream, which is left out while it runs
     user.videos.edges.unshift({ node: { id: '10013', title: 'Recording of the live stream', publishedAt: new Date(now - 600000).toISOString(), lengthSeconds: 600, previewThumbnailURL: 'https://twitch.example.test/vod.jpg' } })
-    const requests = await mockTwitch(page, { [CHANNEL.id]: user })
+    const requests = await mockTwitch(page, { [CHANNEL.id]: user, [OTHER_CHANNEL.id]: twitchUser(OTHER_CHANNEL) })
     const mediaUrl = 'https://www.twitch.tv/videos/123456789'
-    await prepareTwitchYtDlp(app, page, mediaUrl)
+    await prepareTwitchYtDlp(app, page, mediaUrl, { description: 'Also streaming at https://www.twitch.tv/other' })
     // Without followed channels, there is no Platforms tab
     await goTo(page, 'subscriptions')
     await expect(page.locator('[data-subscription-feed-tab="videos"]')).toBeVisible()
@@ -189,6 +191,13 @@ test.describe('Channels on other platforms', () => {
       const { path, query } = window.$router.currentRoute.value
       return { path, query }
     })).toEqual({ path: '/external-media', query: { url: 'https://www.twitch.tv/videos/10012' } })
+
+    // Links to channels open the channel page in the app, not the website
+    await page.locator(`${activeTab} .externalMediaDescription a`, { hasText: 'twitch.tv/other' }).click()
+    await expect.poll(() => page.evaluate(() => window.$router.currentRoute.value.fullPath))
+      .toBe('/external-channel?platform=twitch&id=other')
+    await expect(page.locator('.channelHeader .channelName')).toHaveText('Other')
+    await page.locator(sel.backButton).click()
 
     // Unfollowing the last channel removes the tab
     await page.locator('.externalMediaCreator').getByRole('button', { name: 'Following' }).click()
@@ -502,6 +511,13 @@ test.describe('Channels on other platforms', () => {
     await page.locator(sel.searchInput).fill('other')
     await page.locator(sel.searchInput).press('Enter')
     await expect(page.getByRole('combobox', { name: 'Platform' })).toContainText('Twitch')
+
+    // Channel addresses open the channel page instead of playing the live stream
+    await page.locator(sel.searchInput).fill('https://www.twitch.tv/other')
+    await page.locator(sel.searchInput).press('Enter')
+    await expect.poll(() => page.evaluate(() => window.$router.currentRoute.value.fullPath))
+      .toBe('/external-channel?platform=twitch&id=other')
+    await expect(page.locator('.channelHeader .channelName')).toHaveText('Other')
   })
 
   test.describe('with a followed channel and every YouTube feed hidden', () => {
