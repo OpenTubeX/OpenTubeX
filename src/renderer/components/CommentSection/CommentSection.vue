@@ -176,12 +176,12 @@
           type="button"
           class="commentSearchClose"
           :class="fullscreenOverlay ? 'fullscreenCommentAction' : 'commentHeaderIconAction'"
-          :aria-label="$t('Close')"
-          :title="$t('Close')"
+          :aria-label="$t('Comments.Close search')"
+          :title="$t('Comments.Close search')"
           @click="closeCommentSearch"
         >
           <FtIcon
-            :icon="['fas', 'xmark']"
+            :icon="['fas', 'angle-up']"
             aria-hidden="true"
           />
         </button>

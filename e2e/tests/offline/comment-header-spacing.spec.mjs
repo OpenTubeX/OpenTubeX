@@ -86,7 +86,7 @@ test.describe('comment header spacing', { tag: '@scale' }, () => {
 
     await search.fill('honored')
     await expect(page.locator('.commentFilterCount')).toBeVisible()
-    await page.locator('.commentTools').getByRole('button', { name: 'Close', exact: true }).click()
+    await page.locator('.commentTools').getByRole('button', { name: 'Close search', exact: true }).click()
     await expect(search).toHaveCount(0)
     await expect(page.getByRole('button', { name: 'Filter loaded comments' })).toBeFocused()
   })
