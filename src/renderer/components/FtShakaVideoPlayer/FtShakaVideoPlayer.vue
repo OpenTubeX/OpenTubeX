@@ -3382,7 +3382,11 @@ const playerVisible = computed(() => playerIsPresented.value || presentedOutside
 // Shown Shaka controls refresh several times a second and measure their
 // layout each time, and a paused player never hides them. Disable them in
 // hidden tabs, where every open watch tab would otherwise keep doing that.
-watch(playerVisible, visible => ui?.setEnabled(visible))
+watch(playerVisible, visible => {
+  ui?.setEnabled(visible)
+  // Disabled controls ignore buffering changes, so refresh their spinner.
+  if (visible) player?.dispatchEvent(new shaka.util.FakeEvent('buffering', { buffering: player.isBuffering() }))
+})
 
 const {
   getAutoPictureInPictureState,
