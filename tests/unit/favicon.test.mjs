@@ -146,7 +146,7 @@ test('public engines cannot make the app request the local network', async () =>
   let lookups = 0
   rebinding.resolveAddresses = async () => lookups++ === 0 ? ['93.184.216.34'] : ['127.0.0.1']
   assert.equal(await resolveSearchEngineIcon('https://search.example.com/?q=%s', rebinding), '')
-  assert.deepEqual(rebinding.requests, [])
+  assert.deepEqual(rebinding.requests, ['https://search.example.com 93.184.216.34'])
 
   // An engine whose address cannot be looked up gets no exception
   const unknown = engineNetwork({ 'https://unknown.example': page('http://192.168.1.1/icon.png') })
@@ -170,6 +170,13 @@ test('proxied engine requests keep the local network check', async () => {
   // The proxy resolves the engine's host, which may have no local lookup
   assert.equal(await resolveSearchEngineIcon('https://search.example.com/?q=%s', network), ICON)
   assert.deepEqual(network.requests, ['https://search.example.com proxy', 'https://search.example.com/favicon.ico proxy'])
+
+  // nor does the local resolver learn it
+  const ownIcon = engineNetwork({ 'https://search.example.com': page('/icon.png'), 'https://search.example.com/icon.png': 'icon' }, 'PROXY proxy.example:8080')
+  const lookups = []
+  ownIcon.resolveAddresses = async hostname => lookups.push(hostname) && []
+  assert.equal(await resolveSearchEngineIcon('https://search.example.com/?q=%s', ownIcon), ICON)
+  assert.deepEqual(lookups, [])
 })
 
 test('proxied requests report redirects instead of following them', async () => {

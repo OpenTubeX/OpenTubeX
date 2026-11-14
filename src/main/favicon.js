@@ -123,9 +123,19 @@ async function lookupHost(hostname, resolveAddresses) {
 /**
  * @typedef {object} Engine
  * @property {string} host
- * @property {Promise<boolean>} isLocal whether the engine is on the local network,
+ * @property {Promise<boolean>} [isLocal] whether the engine is on the local network,
  *   from one lookup, so a later lookup cannot rebind it there
  */
+
+/**
+ * @param {Engine} engine
+ * @param {EngineNetwork} network
+ */
+function isLocalEngine(engine, network) {
+  // A failed lookup must not grant the exception
+  engine.isLocal ??= lookupHost(engine.host, network.resolveAddresses).then(addresses => addresses.some(isNonPublicNetworkAddress))
+  return engine.isLocal
+}
 
 /**
  * Requests `url` once for `engine`, or returns null when the request would reach
@@ -146,7 +156,9 @@ async function fetchEngineHop(url, init, engine, network) {
   // the checked addresses, and the engine's own host needs no lookup through it.
   if (proxied && hostname === engine.host) return network.fetchProxied(url, init)
   const addresses = await lookupHost(hostname, network.resolveAddresses)
-  if (addresses.length === 0 || (addresses.some(isNonPublicNetworkAddress) && !await engine.isLocal)) return null
+  // The first direct request, for the engine's homepage, decides without another lookup
+  if (hostname === engine.host) engine.isLocal ??= Promise.resolve(addresses.some(isNonPublicNetworkAddress))
+  if (addresses.length === 0 || (addresses.some(isNonPublicNetworkAddress) && !await isLocalEngine(engine, network))) return null
   // Connect only to the checked addresses, as a second lookup could rebind to the local network
   return proxied ? network.fetchProxied(url, init) : network.fetchPinned(url, init, addresses)
 }
@@ -273,9 +285,8 @@ export async function resolveSearchEngineIcon(searchUrl, network) {
   const fallback = getFaviconUrl(searchUrl)
   if (!fallback) return ''
 
-  const host = new URL(fallback).hostname
-  // A failed lookup must not grant the exception
-  const engine = { host, isLocal: lookupHost(host, network.resolveAddresses).then(addresses => addresses.some(isNonPublicNetworkAddress)) }
+  /** @type {Engine} */
+  const engine = { host: new URL(fallback).hostname }
   const fetchIcon = (url, init) => fetchFromEngine(url, init, engine, network)
   for (const iconUrl of new Set([await resolveFaviconUrl(searchUrl, fetchIcon), fallback])) {
     const icon = await fetchFaviconDataUrl(iconUrl, fetchIcon)
