@@ -154,6 +154,7 @@ import { useI18n } from 'vue-i18n'
 import { useTabAvatar, useTabContext, useTabTitle, watchNavigationKey } from '../../tabs/TabContext'
 import { SCROLL_MINI_MIN_INLINE_LAYOUT_HEIGHT } from '../../helpers/scrollMiniPlayer'
 import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
+import { isPlayerRoutePath } from '../../tabs/playerDockDestination'
 import { keepTabLoaded } from '../../tabs/TabResidency'
 import { useTabToast } from '../../composables/useTabToast'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
@@ -1305,12 +1306,33 @@ export default defineComponent({
     },
     canSkipToNextVideo: function () {
       // The watch queue takes precedence over the playlist and works without one,
-      // see `handleSkipToNext`
-      return !!this.nextQueuedVideo || (this.watchingPlaylist && this.playlistSkipAvailability.canPlayNext)
+      // see `handleSkipToNext`. Outside a playlist, the buttons and media controls
+      // only offer the recommended video while autoplay would play it anyway.
+      if (this.nextQueuedVideo) return true
+      if (this.watchingPlaylist) return this.playlistSkipAvailability.canPlayNext
+      return this.autoplaysRecommendedVideos && !this.hideRecommendedVideos && !!this.nextRecommendedVideo
     },
     canSkipToPreviousVideo: function () {
-      // Only a playlist has a previous video, see `handleSkipToPrev`
-      return this.watchingPlaylist && this.playlistSkipAvailability.canPlayPrevious
+      // see `handleSkipToPrev`
+      if (this.watchingPlaylist) return this.playlistSkipAvailability.canPlayPrevious
+      return this.autoplaysRecommendedVideos && this.previousTabVideoRoute != null
+    },
+    // A queued video turns `autoplayEnabled` on even when recommended videos do not autoplay
+    autoplaysRecommendedVideos: function () {
+      return !this.isStandaloneShort && this.autoplayNextRecommendedVideo
+    },
+    /**
+     * The video this tab showed before the current one, if it came straight from one.
+     * Not while the player keeps playing behind a browsing page, whose previous
+     * entry is usually the playing video itself.
+     */
+    previousTabVideoRoute: function () {
+      const tab = this.$store.getters.getTabById(this.tabId)
+      const current = tab?.history[tab.historyIndex]?.route
+      const previous = tab?.history[tab.historyIndex - 1]?.route
+      return current && previous && isPlayerRoutePath(current.path) && isPlayerRoutePath(previous.path)
+        ? previous
+        : null
     },
     autoplayPossible: function () {
       return !this.isStandaloneShort && (
@@ -6090,8 +6112,13 @@ export default defineComponent({
     },
 
     // Skip to the previous video in a playlist
+    // else go back to the video this tab showed before
     handleSkipToPrev: function () {
-      this.$refs.watchVideoPlaylist?.playPreviousVideo()
+      if (this.watchingPlaylist) {
+        this.$refs.watchVideoPlaylist?.playPreviousVideo()
+      } else if (this.previousTabVideoRoute) {
+        this.tabRouter.back()
+      }
     },
 
     abortAutoplayCountdown: function (hideToast = false) {

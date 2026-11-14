@@ -1244,6 +1244,59 @@ test('mobile skip buttons switch videos when tapped', async ({ app, page }) => {
   await session.detach()
 })
 
+test('skip controls follow recommended videos outside a playlist while autoplay is on', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await page.evaluate(() => {
+    window.mediaActions = {}
+    const register = navigator.mediaSession.setActionHandler.bind(navigator.mediaSession)
+    navigator.mediaSession.setActionHandler = (name, handler) => {
+      window.mediaActions[name] = handler
+      register(name, handler)
+    }
+  })
+  await openMockedVideo(page)
+  const view = await watchViewHandle(page)
+  await view.evaluate(component => {
+    component.recommendedVideos = [{ videoId: '9bZkp7q19f0', title: 'Recommended', type: 'video' }]
+  })
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  const skipButtons = player.locator('.shaka-controls-button-panel > .ft-shaka-skip-button')
+  const mediaActions = () => page.evaluate(() => ({
+    next: typeof window.mediaActions.nexttrack === 'function',
+    previous: typeof window.mediaActions.previoustrack === 'function'
+  }))
+
+  // Autoplay is off by default, so neither the player nor the media controls offer a skip.
+  await expect.poll(mediaActions).toEqual({ next: false, previous: false })
+  await expect(skipButtons).toHaveCount(0)
+
+  await view.evaluate(component => component.toggleAutoplay())
+  await expect.poll(mediaActions).toEqual({ next: true, previous: false })
+  await expect(skipButtons).toHaveCount(1)
+
+  await page.evaluate(() => window.mediaActions.nexttrack({ action: 'nexttrack' }))
+  await expect(page).toHaveURL(/#\/watch\/9bZkp7q19f0$/)
+  await expect.poll(mediaActions).toEqual({ next: true, previous: true })
+
+  await page.evaluate(() => window.mediaActions.previoustrack({ action: 'previoustrack' }))
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw$/)
+  // The URL changes before the returned video's player replaces the previous one.
+  await expect.poll(() => view.evaluate(component =>
+    component.videoId === 'jNQXAC9IVRw' && !component.isLoading && !!component.$refs.player
+  )).toBe(true)
+
+  // Behind a browsing page, the entry before it is the video that keeps playing.
+  await view.evaluate(async component => {
+    await component.$store.dispatch('updateKeepPlayingOnNavigation', true)
+    await component.$refs.player.play()
+    await component.tabRouter.push('/subscriptions')
+  })
+  await expect(page).toHaveURL(/#\/subscriptions$/)
+  await expect.poll(mediaActions).toEqual({ next: true, previous: false })
+
+  await view.dispose()
+})
+
 test('desktop skip buttons flank the centered play button without a backdrop', { tag: '@scale' }, async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await page.evaluate(() => window.$store.dispatch('updateDisplayVideoPlayButton', true))
