@@ -13,6 +13,10 @@ globalThis.localStorage = {
   setItem: (key, value) => storage.set(key, String(value)),
 }
 const { default: wellbeing, shareWellbeingAcrossWindows } = await import('../../src/renderer/store/modules/wellbeing.js')
+const savedShortsSeconds = () => Object.values(JSON.parse(storage.get('OpenTubeX/digitalWellbeing')).windows)
+  .reduce((sum, seconds) => sum + seconds, 0)
+// Each window loads the module, and with it its own window ID
+const windowState = () => ({ ...structuredClone(wellbeing.state), windowId: crypto.randomUUID() })
 
 test('daily windows can cross midnight and equal times describe none', () => {
   const start = 22 * 60
@@ -74,7 +78,7 @@ test('only Shorts watched with statistics are saved, whatever the current settin
   const rootGetters = { getRememberHistory: true, getEnableWatchStats: true }
   const { state, context } = createContext(rootGetters)
   const date = state.day.date
-  const saved = () => JSON.parse(storage.get('OpenTubeX/digitalWellbeing')).shortsSeconds
+  const saved = savedShortsSeconds
   wellbeing.actions.recordPlaybackTime(context, { date, seconds: 30, isShort: true })
   assert.equal(saved(), 30)
 
@@ -118,7 +122,7 @@ test('windows share the time and choices that limits count, but not the break se
   })
   const [first, second] = channels.map(channel => {
     const store = createStore({
-      modules: { wellbeing: { ...wellbeing, state: () => structuredClone(wellbeing.state) } },
+      modules: { wellbeing: { ...wellbeing, state: windowState } },
       // Without watch statistics, played time is only counted in memory
       getters: { getRememberHistory: () => true, getEnableWatchStats: () => false },
     })
@@ -159,7 +163,7 @@ test('a window opened later starts from the open windows\' day, and saved Shorts
   }
   const open = () => {
     const store = createStore({
-      modules: { wellbeing: { ...wellbeing, state: () => structuredClone(wellbeing.state) } },
+      modules: { wellbeing: { ...wellbeing, state: windowState } },
       getters: { getRememberHistory: () => true, getEnableWatchStats: () => true },
       actions: { recordWatchTime() {} },
     })
@@ -176,11 +180,82 @@ test('a window opened later starts from the open windows\' day, and saved Shorts
   await first.dispatch('recordPlaybackTime', { date, seconds: 10, isShort: true })
   await second.dispatch('recordPlaybackTime', { date, seconds: 10, isShort: true })
   await settle()
-  assert.equal(JSON.parse(localStorage.getItem('OpenTubeX/digitalWellbeing')).shortsSeconds, 20)
+  assert.equal(savedShortsSeconds(), 20)
 
   // It plays before the open windows' day arrives
   const third = open()
   await third.dispatch('recordPlaybackTime', { date, seconds: 5, isShort: true })
   await settle()
   assert.deepEqual([first, second, third].map(store => store.state.wellbeing.day.shortsSeconds), [25, 25, 25])
+})
+
+test('time that a reply and a later message both hold counts once, and clearing it races no message', () => {
+  const queue = []
+  const channels = []
+  const connect = () => {
+    const channel = new EventTarget()
+    channel.postMessage = data => channels.filter(other => other !== channel)
+      .forEach(target => queue.push({ from: channel, target, data: structuredClone(data) }))
+    channels.push(channel)
+    return channel
+  }
+  // Delivers the queued messages between two windows, and the replies they cause
+  const deliver = ({ from, to } = {}) => {
+    for (let index = 0; index < queue.length;) {
+      const { from: sender, target, data } = queue[index]
+      if ((from && sender !== from) || (to && target !== to)) {
+        index++
+        continue
+      }
+      queue.splice(index, 1)
+      target.dispatchEvent(new MessageEvent('message', { data }))
+    }
+  }
+  const open = (state = windowState) => {
+    const store = createStore({
+      modules: { wellbeing: { ...wellbeing, state } },
+      getters: { getRememberHistory: () => true, getEnableWatchStats: () => false },
+    })
+    const channel = connect()
+    shareWellbeingAcrossWindows(store, channel)
+    return { store, channel }
+  }
+  const [first, second] = [open(), open()]
+  deliver()
+  const date = first.store.state.wellbeing.day.date
+
+  const third = open()
+  second.store.dispatch('recordPlaybackTime', { date, seconds: 10, isShort: true })
+  // The first window replies with the second window's time before its message reaches the third
+  deliver({ from: second.channel, to: first.channel })
+  deliver({ from: third.channel })
+  deliver({ from: first.channel, to: third.channel })
+  deliver()
+  assert.deepEqual(
+    [first, second, third].map(({ store }) => [store.state.wellbeing.day.shortsSeconds, store.state.wellbeing.day.unrecordedSeconds]),
+    [[10, 10], [10, 10], [10, 10]]
+  )
+
+  // Each window clears the time when the statistics are cleared, one after another
+  second.store.dispatch('recordPlaybackTime', { date, seconds: 5, isShort: false })
+  first.store.dispatch('clearWellbeingTime')
+  third.store.dispatch('clearWellbeingTime')
+  deliver({ from: second.channel })
+  second.store.dispatch('clearWellbeingTime')
+  deliver()
+  assert.deepEqual([first, second, third].map(({ store }) => store.state.wellbeing.day.unrecordedSeconds), [0, 0, 0])
+  // Saved time of a closed window that a reply from before the clear still holds
+  channels.length = 0
+  const withClosedWindow = () => {
+    const state = windowState()
+    state.day.windows.closed = { seq: 0, unrecordedSeconds: 0, shortsSeconds: 60, unrecordedShortsSeconds: 0 }
+    return state
+  }
+  const [open1, open2] = [open(withClosedWindow), open(withClosedWindow)]
+  deliver()
+  const opening = open()
+  deliver({ from: opening.channel })
+  for (const { store } of [open1, open2, opening]) store.dispatch('clearWellbeingTime')
+  deliver()
+  assert.deepEqual([open1, open2, opening].map(({ store }) => store.state.wellbeing.day.shortsSeconds), [0, 0, 0])
 })
