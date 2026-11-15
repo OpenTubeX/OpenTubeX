@@ -129,18 +129,20 @@ test('the desktop notifier persists state and shows localized notifications', as
   }
 })
 
-test('saved state without known feeds is kept as a backup and replaced', async t => {
+test('saved state without known upload IDs per feed is kept as a backup and replaced', async t => {
   t.mock.method(console, 'error', () => {})
   const directory = await mkdtemp(path.join(tmpdir(), 'upload-notifications-'))
   try {
-    const file = path.join(directory, 'state.json')
-    const saved = JSON.stringify({ known: true, notified: [] })
-    await writeFile(file, saved)
-    const notifier = createUploadNotifier({ file, show: () => {} })
-    await notifier.configure({ enabled: true, titles: {}, channels: { UC1: { name: 'One', feedTypes: ['videos'], membersOnly: false } } })
-    await notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('a')] })
-    const [backup] = (await readdir(directory)).filter(name => name.startsWith('state.json.corrupt-'))
-    assert.equal(await readFile(path.join(directory, backup), 'utf8'), saved)
+    for (const [index, known] of [true, { 'UC1:videos': 42 }].entries()) {
+      const file = path.join(directory, `state-${index}.json`)
+      const saved = JSON.stringify({ known, notified: [] })
+      await writeFile(file, saved)
+      const notifier = createUploadNotifier({ file, show: () => {} })
+      await notifier.configure({ enabled: true, titles: {}, channels: { UC1: { name: 'One', feedTypes: ['videos'], membersOnly: false } } })
+      await notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('a')] })
+      const [backup] = (await readdir(directory)).filter(name => name.startsWith(`state-${index}.json.corrupt-`))
+      assert.equal(await readFile(path.join(directory, backup), 'utf8'), saved)
+    }
   } finally {
     await rm(directory, { recursive: true, force: true })
   }

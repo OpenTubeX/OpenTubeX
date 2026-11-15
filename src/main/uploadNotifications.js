@@ -8,12 +8,13 @@ import { writeFileAtomic } from './writeFileAtomic.js'
 const ORIGINAL_TITLE_TIMEOUT_MS = 5000
 
 /**
- * Whether saved state lists the known uploads per feed and the notified ones.
+ * Whether saved state lists the known upload IDs per feed and the notified ones.
  * @param {unknown} value
  */
 function isUploadNotificationState(value) {
   const { known, notified } = /** @type {{ known?: unknown, notified?: unknown } | null | undefined} */ (value) ?? {}
-  return typeof known === 'object' && known !== null && !Array.isArray(known) && Array.isArray(notified)
+  return typeof known === 'object' && known !== null && !Array.isArray(known) &&
+    Object.values(known).every(Array.isArray) && Array.isArray(notified)
 }
 
 /**
