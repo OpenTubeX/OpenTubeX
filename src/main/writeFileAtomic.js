@@ -7,13 +7,15 @@ import { open, rename, unlink } from 'node:fs/promises'
  * not overlap.
  * @param {string} file
  * @param {string | Uint8Array} data
- * @param {{ mode?: number, temporaryFile?: string }} [options] `mode` applies
- * only to new files
+ * @param {{ mode?: number, temporaryFile?: string }} [options] `mode` sets the
+ * permissions of the written file, which does not keep the replaced file's
  */
 export async function writeFileAtomic(file, data, { mode, temporaryFile = `${file}.tmp` } = {}) {
   try {
     const handle = await open(temporaryFile, 'w', mode)
     try {
+      // A temporary file left by a crash keeps its permissions otherwise.
+      if (mode !== undefined) await handle.chmod(mode)
       await handle.writeFile(data)
       // Otherwise the rename can reach the disk before the data, leaving an
       // empty or partial file after a power loss.
