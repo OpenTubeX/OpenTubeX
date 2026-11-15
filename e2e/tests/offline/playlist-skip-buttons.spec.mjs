@@ -245,6 +245,11 @@ test('seeks and skips from the desktop mini player', async ({ app, page, attachS
   await expect.poll(() => video.evaluate(element => element.paused)).toBe(true)
   await expect(player).toHaveClass(/scrollMiniPlayer/)
   await expect(page).toHaveURL(/#\/watch\/skipvideo1\?/)
+  // The focused seek bar keeps arrow keys but leaves player shortcuts working.
+  await expect(seek).toBeFocused()
+  await page.keyboard.press('k')
+  await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
+  await video.evaluate(element => element.pause())
   await attachScreenshot('desktop mini player controls')
 
   await expect(player.getByRole('button', { name: 'Previous', exact: true })).toBeVisible()

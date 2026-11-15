@@ -2007,7 +2007,7 @@
             @pointercancel="mobileMiniBarSeeking = false"
             @lostpointercapture="mobileMiniBarSeeking = false"
             @blur="mobileMiniBarSeeking = false"
-            @keydown.stop
+            @keydown.left.right.up.down.home.end.page-up.page-down.stop
             @click.stop
           >
         </div>
