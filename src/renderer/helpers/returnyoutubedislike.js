@@ -1,4 +1,5 @@
 import store from '../store/index'
+import { capacitorHttpFetch } from './api/capacitor-http'
 
 /**
  * Hard-coded list of well-known Return YouTube Dislike API instances.
@@ -33,7 +34,12 @@ export async function getVideoDislikes(videoId) {
     requestUrl = `${url}/votes/${encodeURIComponent(videoId)}`
   }
 
-  const response = await fetch(requestUrl).then(res => res.json())
+  // Some instances, including the default proxy, send no CORS headers,
+  // so the mobile WebView has to use the native HTTP client.
+  const response = await (process.env.IS_CAPACITOR
+    ? capacitorHttpFetch(requestUrl, { allowHttp: true })
+    : fetch(requestUrl))
+    .then(res => res.json())
 
   return response.dislikes
 }
