@@ -1190,6 +1190,7 @@ Settings:
     Enable FCast: "FCast 활성화"
     Ask Before Preloading Large Playlists: "큰 재생목록을 미리 불러오기 전에 묻기"
     Timestamp Notes:
+      Enable: "타임스탬프 메모 사용"
       Obsidian Vault: Obsidian 보관함
   Channel Settings:
     Channel Settings: 채널 설정
@@ -2742,6 +2743,7 @@ Tooltips:
     Concurrent Preloads: "동시에 동영상을 미리 로드하는 데 사용할 yt-dlp 프로세스의 최대 개수입니다. 값이 높을수록 CPU, 메모리 및 네트워크 대역폭을 더 많이 사용합니다."
     Ignore System Rotation Lock for Fullscreen: Android 자동 회전이 꺼져 있어도 기기를 직접 회전하여 전체 화면으로 전환하거나 종료합니다.
     Ask Before Preloading Large Playlists: "동영상이 {count}개를 넘는 재생목록의 모든 동영상을 미리 불러오기 전에 확인을 요청합니다."
+    Enable Timestamp Notes: "동영상을 일시 정지하고 현재 시점으로 연결되는 메모를 여는 플레이어 버튼과 N 단축키를 추가합니다. 메모는 Markdown으로 복사하거나 데스크톱에서 Obsidian에 추가할 수 있습니다."
     Obsidian Vault: 타임스탬프 메모에 사용할 Obsidian 보관함 이름입니다. 설정하면 메모를 Obsidian에 추가할 수 있습니다. 각 동영상의 메모는 보관함의 새 노트 폴더에 있는, 동영상 이름으로 된 노트에 모입니다.
   External Player Settings:
     Ignore Default Arguments: 동영상 URL 외의 기본 인수를 외부 플레이어에 보내지 않습니다. 예를 들어 재생 속도와 재생목록 URL이 해당됩니다. 사용자 지정 인수는 계속 전달됩니다.

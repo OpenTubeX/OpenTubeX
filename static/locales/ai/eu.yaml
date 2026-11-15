@@ -1011,6 +1011,7 @@ Settings:
       Modern Formats: "Formatu modernoak"
     Ask Before Preloading Large Playlists: "Galdetu erreprodukzio-zerrenda handiak aurrekargatu aurretik"
     Timestamp Notes:
+      Enable: "Gaitu denbora-zigiludun oharrak"
       Obsidian Vault: Obsidian biltegia
   Channel Settings:
     Channel Settings: Kanalen ezarpenak
@@ -2364,6 +2365,7 @@ Tooltips:
     Concurrent Preloads: "Bideoak aldi berean aurrekargatzeko erabilitako yt-dlp prozesuen gehieneko kopurua. Balio handiagoek PUZ, memoria eta sareko banda-zabalera gehiago erabiltzen dute."
     Ignore System Rotation Lock for Fullscreen: Biratu gailua fisikoki pantaila osoan sartzeko eta irteteko, Androiden biraketa automatikoa desaktibatuta badago ere.
     Ask Before Preloading Large Playlists: "Berrespena eskatzen du {count} bideo baino gehiagoko erreprodukzio-zerrenda baten bideo guztiak aurrekargatu aurretik."
+    Enable Timestamp Notes: "Erreproduzigailuari botoi bat eta N lasterbidea gehitzen dizkio, bideoa pausatu eta uneko momentura estekatzen duen ohar bat irekitzen dutenak. Oharrak Markdown gisa kopia daitezke edo, mahaigainean, Obsidian-era gehitu."
     Obsidian Vault: Denbora-zigiludun oharretarako Obsidian biltegiaren izena. Ezartzen bada, oharrak Obsidian-era gehi daitezke. Bideo bakoitzaren oharrak bideoaren izena duen ohar batean biltzen dira, biltegiaren ohar berrien karpetan.
   Download Settings:
     Download Folder: Bideoak karpeta honetan gordetzen dira. Utzi hutsik sistemako Deskargak karpeta erabiltzeko.

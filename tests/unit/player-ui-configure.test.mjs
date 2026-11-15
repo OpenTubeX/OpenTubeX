@@ -70,6 +70,7 @@ function setupPlayer({ theatrePossible = true, useSponsorBlock = true } = {}) {
     useVrMode: ref(false),
     useQuickPlaybackSpeedBar: ref(false),
     enableScreenshot: ref(false),
+    enableTimestampNotes: ref(false),
     useSponsorBlock: ref(useSponsorBlock),
     audioPlayerMode: ref(false),
     videoZoomPossible: ref(false),

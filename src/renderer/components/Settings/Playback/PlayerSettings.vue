@@ -733,10 +733,19 @@
         />
       </FtFlexBox>
     </div>
-    <template v-if="USING_ELECTRON">
-      <h4 class="groupTitle">
-        {{ t('Settings.Player Settings.Sections.Timestamp Notes') }}
-      </h4>
+    <h4 class="groupTitle">
+      {{ t('Settings.Player Settings.Sections.Timestamp Notes') }}
+    </h4>
+    <FtFlexBox>
+      <FtToggleSwitch
+        :label="t('Settings.Player Settings.Timestamp Notes.Enable')"
+        :default-value="enableTimestampNotes"
+        setting-key="enableTimestampNotes"
+        :tooltip="t('Tooltips.Player Settings.Enable Timestamp Notes')"
+        @change="store.dispatch('updateEnableTimestampNotes', $event)"
+      />
+    </FtFlexBox>
+    <template v-if="USING_ELECTRON && enableTimestampNotes">
       <FtFlexBox>
         <FtInput
           class="obsidianVaultInput"
@@ -2092,6 +2101,7 @@ async function chooseScreenshotFolder() {
 
 /** @type {import('vue').ComputedRef<string>} */
 const screenshotFilenamePattern = computed(() => store.getters.getScreenshotFilenamePattern)
+const enableTimestampNotes = computed(() => store.getters.getEnableTimestampNotes)
 const obsidianVault = computed(() => store.getters.getObsidianVault)
 
 onMounted(() => {

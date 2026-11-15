@@ -1011,6 +1011,7 @@ Settings:
       Modern Formats: "现代格式"
     Ask Before Preloading Large Playlists: "预加载大型播放列表前询问"
     Timestamp Notes:
+      Enable: "启用时间戳笔记"
       Obsidian Vault: Obsidian 仓库
   Channel Settings:
     Channel Settings: 频道设置
@@ -2353,6 +2354,7 @@ Tooltips:
     Concurrent Preloads: "同时用于预加载视频的 yt-dlp 进程数上限。数值越高，使用的 CPU、内存和网络带宽越多。"
     Ignore System Rotation Lock for Fullscreen: 通过转动设备进入和退出全屏，即使 Android 的自动旋转已关闭。
     Ask Before Preloading Large Playlists: "预加载超过 {count} 个视频的播放列表中的所有视频前请求确认。"
+    Enable Timestamp Notes: "添加一个播放器按钮和 N 快捷键，用于暂停视频并打开一条链接到当前时刻的笔记。笔记可以复制为 Markdown，或在桌面版中添加到 Obsidian。"
     Obsidian Vault: 用于时间戳笔记的 Obsidian 仓库名称。设置后，可将笔记添加到 Obsidian。每个视频的笔记会汇总到一篇以该视频命名的笔记中，位于仓库的新笔记文件夹内。
   Download Settings:
     Download Folder: 视频将保存到此文件夹。留空则使用系统的“下载”文件夹。

@@ -1014,6 +1014,7 @@ Settings:
       Modern Formats: "Fformatau modern"
     Ask Before Preloading Large Playlists: "Gofyn cyn rhaglwytho rhestrau chwarae mawr"
     Timestamp Notes:
+      Enable: "Galluogi Nodiadau Stamp Amser"
       Obsidian Vault: Claddgell Obsidian
   Channel Settings:
     Channel Settings: Gosodiadau sianeli
@@ -2391,6 +2392,7 @@ Tooltips:
     Concurrent Preloads: "Uchafswm nifer y prosesau yt-dlp a ddefnyddir i raglwytho fideos ar yr un pryd. Mae gwerthoedd uwch yn defnyddio mwy o CPU, cof a lled band rhwydwaith."
     Ignore System Rotation Lock for Fullscreen: Cylchdrowch y ddyfais yn gorfforol i agor a chau sgrin lawn hyd yn oed pan fydd cylchdroi awtomatig Android wedi’i ddiffodd.
     Ask Before Preloading Large Playlists: "Yn gofyn am gadarnhad cyn rhaglwytho pob fideo mewn rhestr chwarae gyda mwy na {count} fideo."
+    Enable Timestamp Notes: "Yn ychwanegu botwm chwaraewr a'r llwybr byr N sy'n oedi'r fideo ac yn agor nodyn sy'n cysylltu â'r eiliad bresennol. Gellir copïo nodiadau fel Markdown neu, ar y bwrdd gwaith, eu hychwanegu at Obsidian."
     Obsidian Vault: Enw'r gladdgell Obsidian ar gyfer nodiadau stamp amser. Pan gaiff ei gosod, gellir ychwanegu nodiadau at Obsidian. Caiff nodiadau pob fideo eu casglu mewn nodyn wedi'i enwi ar ôl y fideo, yn ffolder y gladdgell ar gyfer nodiadau newydd.
   Download Settings:
     Download Folder: Caiff fideos eu cadw yn y ffolder hon. Gadewch yn wag i ddefnyddio ffolder Lawrlwythiadau eich system.

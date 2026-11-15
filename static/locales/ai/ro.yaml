@@ -1013,6 +1013,7 @@ Settings:
       Modern Formats: "Formate moderne"
     Ask Before Preloading Large Playlists: "Întreabă înainte de preîncărcarea listelor de redare mari"
     Timestamp Notes:
+      Enable: "Activează notele cu marcaj temporal"
       Obsidian Vault: Seif Obsidian
   Channel Settings:
     Channel Settings: Setări pentru canale
@@ -2408,6 +2409,7 @@ Tooltips:
     Concurrent Preloads: "Numărul maxim de procese yt-dlp utilizate pentru a preîncărca videoclipuri simultan. Valorile mai mari folosesc mai mult procesor, memorie și lățime de bandă a rețelei."
     Ignore System Rotation Lock for Fullscreen: Rotește fizic dispozitivul pentru a intra și ieși din ecranul complet, chiar dacă rotirea automată din Android este dezactivată.
     Ask Before Preloading Large Playlists: "Cere confirmarea înainte de preîncărcarea tuturor videoclipurilor dintr-o listă de redare cu peste {count} videoclipuri."
+    Enable Timestamp Notes: "Adaugă un buton în player și scurtătura N, care pun videoclipul pe pauză și deschid o notă cu link către momentul curent. Notele pot fi copiate ca Markdown sau, pe desktop, adăugate în Obsidian."
     Obsidian Vault: Numele seifului Obsidian pentru notele cu marcaj temporal. Când este setat, notele pot fi adăugate în Obsidian. Notele fiecărui videoclip sunt adunate într-o notă denumită după videoclip, în dosarul seifului pentru note noi.
   Download Settings:
     Download Folder: Videoclipurile sunt salvate în acest folder. Lăsați necompletat pentru a folosi folderul Descărcări al sistemului.

@@ -490,6 +490,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     screenshotQuality: 95,
     screenshotFolderPath: '',
     screenshotFilenamePattern: '%Y%M%D-%H%N%S',
+    enableTimestampNotes: false,
     obsidianVault: '',
     highlightChangedSettings: true,
     showPerformanceImpactIndicators: false,

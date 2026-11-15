@@ -1098,6 +1098,7 @@ Settings:
     Enable FCast: "Activar FCast"
     Ask Before Preloading Large Playlists: "Preguntar antes de precargar listas de reproducción grandes"
     Timestamp Notes:
+      Enable: "Activar notas con marca de tiempo"
       Obsidian Vault: Bóveda de Obsidian
   Channel Settings:
     Channel Settings: Ajustes de canales
@@ -2817,6 +2818,7 @@ Tooltips:
     Concurrent Preloads: "La cantidad máxima de procesos de yt-dlp usados para precargar videos al mismo tiempo. Los valores más altos usan más CPU, memoria y ancho de banda de red."
     Ignore System Rotation Lock for Fullscreen: Girá físicamente el dispositivo para entrar y salir de pantalla completa aunque la rotación automática de Android esté desactivada.
     Ask Before Preloading Large Playlists: "Pide confirmación antes de precargar todos los videos de una lista de reproducción con más de {count} videos."
+    Enable Timestamp Notes: "Agrega un botón al reproductor y el atajo N, que pausan el video y abren una nota que enlaza al momento actual. Las notas se pueden copiar como Markdown o, en la computadora, agregar a Obsidian."
     Obsidian Vault: Nombre de la bóveda de Obsidian para las notas con marca de tiempo. Si se define, las notas se pueden agregar a Obsidian. Las notas de cada video se juntan en una nota con el nombre del video, en la carpeta de la bóveda para notas nuevas.
   External Player Settings:
     External Player: La elección de un reproductor externo mostrará un icono, para abrir el video (lista de reproducción si es compatible) en el reproductor externo, en la miniatura. Atención, los ajustes de Invidious no afectan a los reproductores externos.

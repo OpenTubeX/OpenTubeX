@@ -1011,6 +1011,7 @@ Settings:
     Enable FCast: "Ota FCast käyttöön"
     Ask Before Preloading Large Playlists: "Kysy ennen suurten soittolistojen esilatausta"
     Timestamp Notes:
+      Enable: "Ota aikaleimamuistiinpanot käyttöön"
       Obsidian Vault: Obsidian-holvi
   Channel Settings:
     Channel Settings: Kanava-asetukset
@@ -2362,6 +2363,7 @@ Tooltips:
     Concurrent Preloads: "Videoiden samanaikaiseen esilataukseen käytettävien yt-dlp-prosessien enimmäismäärä. Suuremmat arvot käyttävät enemmän suoritinta, muistia ja verkon kaistanleveyttä."
     Ignore System Rotation Lock for Fullscreen: Käännä laitetta siirtyäksesi koko näyttöön ja poistuaksesi siitä, vaikka Androidin automaattinen kierto olisi pois käytöstä.
     Ask Before Preloading Large Playlists: "Pyytää vahvistusta ennen kuin kaikki videot esiladataan soittolistalta, jossa on yli {count} videota."
+    Enable Timestamp Notes: "Lisää soittimeen painikkeen ja pikanäppäimen N, jotka keskeyttävät videon ja avaavat muistiinpanon, joka linkittää nykyiseen kohtaan. Muistiinpanot voi kopioida Markdownina tai työpöydällä lisätä Obsidianiin."
     Obsidian Vault: Aikaleimamuistiinpanoihin käytettävän Obsidian-holvin nimi. Kun se on asetettu, muistiinpanoja voi lisätä Obsidianiin. Kunkin videon muistiinpanot kootaan videon mukaan nimettyyn muistiinpanoon holvin uusien muistiinpanojen kansiossa.
   Download Settings:
     Download Folder: Videot tallennetaan tähän kansioon. Jos kenttä jätetään tyhjäksi, käytetään järjestelmän Lataukset-kansiota.

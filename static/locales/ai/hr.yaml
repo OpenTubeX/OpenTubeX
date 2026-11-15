@@ -1016,6 +1016,7 @@ Settings:
       Modern Formats: "Moderni formati"
     Ask Before Preloading Large Playlists: "Pitaj prije predučitavanja velikih popisa za reprodukciju"
     Timestamp Notes:
+      Enable: "Omogući bilješke s vremenskim oznakama"
       Obsidian Vault: Obsidian trezor
   Channel Settings:
     Channel Settings: Postavke kanala
@@ -2391,6 +2392,7 @@ Tooltips:
     Concurrent Preloads: "Najveći broj yt-dlp procesa koji se koriste za istodobno predučitavanje videozapisa. Veće vrijednosti koriste više procesora, memorije i mrežne propusnosti."
     Ignore System Rotation Lock for Fullscreen: Fizički okrenite uređaj za ulazak i izlazak iz cijelog zaslona, čak i kada je automatska rotacija u Androidu isključena.
     Ask Before Preloading Large Playlists: "Traži potvrdu prije predučitavanja svih videozapisa s popisa za reprodukciju s više od {count} videozapisa."
+    Enable Timestamp Notes: "Dodaje gumb u player i prečac N koji pauziraju videozapis i otvaraju bilješku s poveznicom na trenutačni trenutak. Bilješke se mogu kopirati kao Markdown ili ih na računalu dodati u Obsidian."
     Obsidian Vault: Naziv Obsidian trezora za bilješke s vremenskim oznakama. Kada je postavljen, bilješke se mogu dodati u Obsidian. Bilješke svakog videa skupljaju se u bilješci nazvanoj po videu, u mapi trezora za nove bilješke.
   Download Settings:
     Download Folder: Videozapisi se spremaju u ovu mapu. Ostavite prazno za upotrebu sustavske mape Preuzimanja.

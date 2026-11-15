@@ -1047,6 +1047,7 @@ Settings:
     Enable FCast: Ŝalti FCast
     Ask Before Preloading Large Playlists: "Demandi antaŭ antaŭŝargi grandajn ludlistojn"
     Timestamp Notes:
+      Enable: "Ŝalti tempomarkajn notojn"
       Obsidian Vault: Obsidian-trezorejo
   Channel Settings:
     Channel Settings: Kanalaj agordoj
@@ -2402,6 +2403,7 @@ Tooltips:
     Concurrent Preloads: La maksimuma nombro de yt-dlp-procezoj uzataj por samtempe antaŭŝargi videaĵojn. Pli altaj valoroj uzas pli da CPU, memoro kaj reta kapacito.
     Ignore System Rotation Lock for Fullscreen: Uzi fizikan rotacion de la aparato por eniri kaj eliri el plenekrana reĝimo eĉ kiam la aŭtomata rotacio de Android estas malŝaltita.
     Ask Before Preloading Large Playlists: "Petas konfirmon antaŭ antaŭŝargi ĉiujn videaĵojn de ludlisto kun pli ol {count} videaĵoj."
+    Enable Timestamp Notes: "Aldonas ludilan butonon kaj la klavkombinon N, kiuj paŭzigas la videon kaj malfermas noton, kiu ligas al la nuna momento. Notojn eblas kopii kiel Markdown aŭ, ĉe labortablo, aldoni al Obsidian."
     Obsidian Vault: Nomo de la Obsidian-trezorejo por tempomarkaj notoj. Se ĝi estas agordita, notoj aldoneblas al Obsidian. La notoj de ĉiu video estas kolektataj en noto nomita laŭ la video, en la dosierujo de la trezorejo por novaj notoj.
   Download Settings:
     Download Folder: Videaĵoj estas konservataj en ĉi tiu dosierujo. Lasu malplena por uzi la elŝutan dosierujon de via sistemo.

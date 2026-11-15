@@ -1211,6 +1211,7 @@ Settings:
     Enable FCast: "Įjungti FCast"
     Ask Before Preloading Large Playlists: "Klausti prieš iš anksto įkeliant didelius grojaraščius"
     Timestamp Notes:
+      Enable: "Įjungti laiko žymų pastabas"
       Obsidian Vault: Obsidian saugykla
   Channel Settings:
     Channel Settings: Kanalo nustatymai
@@ -2779,6 +2780,7 @@ Tooltips:
     Concurrent Preloads: "Didžiausias yt-dlp procesų, vienu metu naudojamų vaizdo įrašams iš anksto įkelti, skaičius. Didesnės reikšmės naudoja daugiau procesoriaus, atminties ir tinklo pralaidumo."
     Ignore System Rotation Lock for Fullscreen: Fiziškai pasukite įrenginį, kad įjungtumėte arba išjungtumėte visą ekraną, net kai automatinis sukimas sistemoje „Android“ išjungtas.
     Ask Before Preloading Large Playlists: "Prašo patvirtinimo prieš iš anksto įkeliant visus grojaraščio, kuriame yra daugiau nei {count} vaizdo įrašų, vaizdo įrašus."
+    Enable Timestamp Notes: "Prideda grotuvo mygtuką ir spartųjį klavišą N, kurie pristabdo vaizdo įrašą ir atveria pastabą su nuoroda į dabartinę akimirką. Pastabas galima nukopijuoti kaip Markdown arba kompiuteryje pridėti prie Obsidian."
     Obsidian Vault: Obsidian saugyklos, skirtos laiko žymų pastaboms, pavadinimas. Jį nustačius, pastabas galima pridėti į Obsidian. Kiekvieno vaizdo įrašo pastabos renkamos pagal vaizdo įrašą pavadintoje pastaboje, saugyklos naujų pastabų aplanke.
   External Player Settings:
     Ignore Default Arguments: Išoriniam leistuvui nesiųsti jokių numatytųjų argumentų, išskyrus vaizdo įrašo URL (pvz., atkūrimo greitį, grojaraščio URL ir kt.). Pasirinktiniai argumentai vis tiek bus perduoti.

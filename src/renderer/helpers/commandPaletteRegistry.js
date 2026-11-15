@@ -231,6 +231,7 @@ export function createCommandPaletteRegistry(context) {
     videoShortcuts,
     runShortcut,
     quickBookmarkAvailable: store.getters.getQuickBookmarkPlaylist != null,
+    timestampNotesEnabled: store.getters.getEnableTimestampNotes === true,
   })
 
   return commands
@@ -467,7 +468,7 @@ function addDownloadCommands(commands, { t, groups, downloads, isElectron }) {
 }
 
 function addPlaybackCommands(commands, context) {
-  const { t, groups, routePath, videoShortcuts, runShortcut, isCapacitor, quickBookmarkAvailable } = context
+  const { t, groups, routePath, videoShortcuts, runShortcut, isCapacitor, quickBookmarkAvailable, timestampNotesEnabled } = context
   const onVideo = isPlayerRoutePath(routePath)
   const onExternalMedia = routePath === '/external-media'
 
@@ -475,6 +476,7 @@ function addPlaybackCommands(commands, context) {
     if (isCapacitor && code === 'FULLWINDOW') continue
     if (onExternalMedia && YOUTUBE_PLAYBACK_COMMANDS.has(code)) continue
     if (!quickBookmarkAvailable && code === 'TOGGLE_QUICK_BOOKMARK') continue
+    if (!timestampNotesEnabled && code === 'TAKE_TIMESTAMP_NOTE') continue
     const configuredShortcut = videoShortcuts[section][code]
     const executionShortcut = configuredShortcut || DefaultKeyboardShortcuts.VIDEO_PLAYER[section][code]
     // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys

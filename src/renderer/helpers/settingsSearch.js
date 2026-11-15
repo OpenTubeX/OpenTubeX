@@ -135,7 +135,8 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
 
   // Obsidian opens through the desktop main process
   if (sectionType === 'player' && group === 'Timestamp Notes') {
-    return usingElectron
+    if (item === 'Enable') return true
+    return usingElectron && store.getters.getEnableTimestampNotes === true
   }
 
   if (sectionType === 'player' && group === 'Screenshot') {

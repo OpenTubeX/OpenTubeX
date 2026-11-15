@@ -3880,6 +3880,9 @@ const enableScreenshot = computed(() => {
   return store.getters.getEnableScreenshot
 })
 
+/** @type {import('vue').ComputedRef<boolean>} */
+const enableTimestampNotes = computed(() => store.getters.getEnableTimestampNotes)
+
 const usePlayerMenuGrid = computed(() => {
   return store.getters.getUsePlayerMenuGrid
 })
@@ -5061,7 +5064,7 @@ const uiConfig = computed(() => {
   }
 
   // A live stream has no stable time to link to
-  if (isLive.value) {
+  if (!enableTimestampNotes.value || isLive.value) {
     removeFromArrayIfExists(uiConfig.controlPanelElements, 'ft_timestamp_note')
     removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_timestamp_note')
   }
@@ -11175,7 +11178,7 @@ async function keyboardShortcutHandler(event) {
       event.preventDefault()
       if (!event.repeat) toggleQuickBookmark()
       break
-    case !isLive.value && !store.getters.isAnyPromptOpen &&
+    case enableTimestampNotes.value && !isLive.value && !store.getters.isAnyPromptOpen &&
       matches(KeyboardShortcuts.VIDEO_PLAYER.GENERAL.TAKE_TIMESTAMP_NOTE):
       event.preventDefault()
       if (!event.repeat) takeTimestampNote()

@@ -1011,6 +1011,7 @@ Settings:
       Modern Formats: "現代格式"
     Ask Before Preloading Large Playlists: "預先載入大型播放清單前詢問"
     Timestamp Notes:
+      Enable: "啟用時間戳記筆記"
       Obsidian Vault: Obsidian 儲存庫
   Channel Settings:
     Channel Settings: 頻道設定
@@ -2357,6 +2358,7 @@ Tooltips:
     Concurrent Preloads: "同時用於預先載入影片的 yt-dlp 處理程序數量上限。數值越高，使用的 CPU、記憶體和網路頻寬越多。"
     Ignore System Rotation Lock for Fullscreen: 透過轉動裝置進入和退出全螢幕，即使 Android 的自動旋轉已關閉。
     Ask Before Preloading Large Playlists: "預先載入超過 {count} 部影片的播放清單中的所有影片前要求確認。"
+    Enable Timestamp Notes: "新增播放器按鈕與 N 快速鍵，可暫停影片並開啟一則連結至目前時間點的筆記。筆記可複製為 Markdown，或在桌面版中新增至 Obsidian。"
     Obsidian Vault: 用於時間戳記筆記的 Obsidian 儲存庫名稱。設定後即可將筆記新增至 Obsidian。每部影片的筆記會彙整在以該影片命名的筆記中，位於儲存庫的新筆記資料夾內。
   Download Settings:
     Download Folder: 影片會儲存至此資料夾。留白可使用系統的「下載」資料夾。
