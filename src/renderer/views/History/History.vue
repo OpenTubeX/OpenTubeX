@@ -393,6 +393,7 @@
             :icon="['fas', 'calendar-days']"
             placeholder="30"
             input-type="number"
+            min="1"
             :value="customHistoryCleanupDays"
             :show-action-button="false"
             @input="customHistoryCleanupDays = $event"

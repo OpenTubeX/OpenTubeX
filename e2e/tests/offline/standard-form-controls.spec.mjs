@@ -22,6 +22,16 @@ test.describe('standard form controls', () => {
     await speed.fill('1.25')
     await speed.press('Tab')
 
+    // The step buttons replace the native spin buttons, which differ between browsers.
+    const [stepDown, stepUp] = await row.locator('.numberStep').all()
+    const savedSpeed = () => page.evaluate(() => JSON.parse(window.$store.getters.getQuickPlaybackSpeedBarOptions)[0].speed)
+    await stepUp.click()
+    await expect(speed).toHaveValue('1.26')
+    await expect.poll(savedSpeed).toBe(1.26)
+    await stepDown.click()
+    await expect(speed).toHaveValue('1.25')
+    await expect.poll(savedSpeed).toBe(1.25)
+
     await row.getByRole('button', { name: 'Edit Playback Speed Name' }).click()
     const name = row.getByRole('textbox', { name: 'Name', exact: true })
     await name.fill('Comfortable')

@@ -81,7 +81,9 @@
 }
 
 :deep(.ft-input-component:has(.inputIndicators > *)) {
-  margin-inline-end: 0;
+  /* The indicators sit in the field's own grid instead of beside it. */
+  /* stylelint-disable-next-line length-zero-no-unit -- used inside calc() */
+  --input-indicator-space: 0px;
 }
 
 :deep(.ft-input-component .inputWrapper) {
