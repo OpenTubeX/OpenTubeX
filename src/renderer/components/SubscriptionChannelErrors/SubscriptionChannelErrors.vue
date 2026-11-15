@@ -23,6 +23,7 @@
         <FtButton
           v-if="retryableRows.length > 1"
           class="channelErrorsRetryAll"
+          :title="t('Subscriptions.Channel Errors.Retry All')"
           :icon="['fas', 'sync']"
           :disabled="refreshInProgress"
           variant="text"
