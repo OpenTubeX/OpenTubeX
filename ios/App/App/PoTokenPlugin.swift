@@ -34,6 +34,18 @@ public class PoTokenPlugin: CAPPlugin, CAPBridgedPlugin {
         return isAttested(token) && expiresAt > now ? expiresAt : nil
     }
 
+    /// Turns the bundled BotGuard module into a script that calls its default export.
+    /// Rspack emits the export inline or as `export{name as default};`.
+    static func botGuardCall(_ source: String, arguments: String) throws -> String {
+        let pattern = try NSRegularExpression(pattern: "export\\{(\\w+) as default\\};")
+        if let match = pattern.firstMatch(in: source, range: NSRange(source.startIndex..., in: source)),
+           let whole = Range(match.range, in: source), let name = Range(match.range(at: 1), in: source) {
+            return source.replacingCharacters(in: whole, with: ";\(source[name])(\(arguments))")
+        }
+        guard let inline = source.range(of: "export default ") else { throw URLError(.cannotDecodeContentData) }
+        return source.replacingCharacters(in: inline, with: "const ftBotGuardScript=") + ";ftBotGuardScript(\(arguments))"
+    }
+
     @objc func generate(_ call: CAPPluginCall) {
         guard let videoId = call.getString("videoId"),
               let context = call.getString("sessionContext"),
@@ -199,11 +211,7 @@ private final class BotGuardView: NSObject, WKScriptMessageHandler, URLSessionTa
             try JSONSerialization.jsonObject(with: Data(attestationData.utf8)),
             try JSONSerialization.jsonObject(with: Data(config.utf8))]
         let encoded = String(decoding: try JSONSerialization.data(withJSONObject: arguments), as: UTF8.self)
-        let source = try String(contentsOf: path, encoding: .utf8)
-        let pattern = try NSRegularExpression(pattern: "export\\{(\\w+) as default\\};")
-        guard let match = pattern.firstMatch(in: source, range: NSRange(source.startIndex..., in: source)),
-              let range = Range(match.range(at: 1), in: source) else { throw URLError(.cannotDecodeContentData) }
-        let script = pattern.stringByReplacingMatches(in: source, range: NSRange(source.startIndex..., in: source), withTemplate: "")
+        let script = try PoTokenPlugin.botGuardCall(try String(contentsOf: path, encoding: .utf8), arguments: "...\(encoded)")
         let configuration = WKWebViewConfiguration()
         configuration.websiteDataStore = .nonPersistent()
         configuration.userContentController.add(self, name: "token")
@@ -220,7 +228,7 @@ private final class BotGuardView: NSObject, WKScriptMessageHandler, URLSessionTa
             window.webkit.messageHandlers.request.postMessage({ id, url: String(url), method: options.method || 'GET', headers: { 'User-Agent': navigator.userAgent, ...options.headers }, body: options.body || '' });
         });
         """
-        let execution = prelude + script + ";\(source[range])(...\(encoded)).then(token => window.webkit.messageHandlers.token.postMessage({token, validForSecs: window.ftPoTokenValidForSecs || 0})).catch(error => window.webkit.messageHandlers.token.postMessage({error:String(error)}));"
+        let execution = prelude + script + ".then(token => window.webkit.messageHandlers.token.postMessage({token, validForSecs: window.ftPoTokenValidForSecs || 0})).catch(error => window.webkit.messageHandlers.token.postMessage({error:String(error)}));"
         configuration.userContentController.addUserScript(WKUserScript(source: execution, injectionTime: .atDocumentEnd, forMainFrameOnly: true))
         let view = WKWebView(frame: .zero, configuration: configuration)
         view.navigationDelegate = navigationGuard
