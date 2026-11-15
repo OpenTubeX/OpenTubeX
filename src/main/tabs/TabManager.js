@@ -456,7 +456,9 @@ export class TabManager {
           })
         } else if (isExternalBrowserUrl(parsedUrl)) {
           releaseForegroundLock()
-          shell.openExternal(details.url)
+          shell.openExternal(details.url).catch(error => {
+            console.error('Failed to open window.open URL externally:', error)
+          })
         }
       }
 
