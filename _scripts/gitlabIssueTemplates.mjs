@@ -45,6 +45,8 @@ function renderField({ type, attributes, validations }) {
         attributes.placeholder && `Example:\n${attributes.placeholder.trim().replace(/^e\.g\. /, '')}`,
         required
       ]))
+      // Prefilled text, such as an empty code block for a pasted report.
+      if (attributes.value?.trim()) lines.push(attributes.value.trimEnd())
       break
     default:
       throw new Error(`Unsupported issue form field type: ${type}`)

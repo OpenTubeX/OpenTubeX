@@ -155,6 +155,9 @@ v0.37.0
 Open Settings > Advanced > Diagnostics, turn on "Enable diagnostic logging", reproduce the bug, then save or copy the report.
 Paste the report between the backticks, or replace them with the attached file if the report is too long. Check it for anything you do not want to share before posting.
 -->
+```text
+
+```
 
 ### Additional Information
 <!--
