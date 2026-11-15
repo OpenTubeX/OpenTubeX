@@ -193,4 +193,10 @@ test('restored playlist options become a new local edit so sync keeps them', () 
   assert.equal(mergeBackupPlaylist(current, { ...backup, shuffleByDefault: true }).preferencesUpdatedAt, 20)
   assert.ok(mergeBackupPlaylist(undefined, backup).preferencesUpdatedAt > 10)
   assert.equal(Object.hasOwn(mergeBackupPlaylist(undefined, { _id: 'old', videos: [] }), 'preferencesUpdatedAt'), false)
+
+  // The removal threshold has its own edit time.
+  const restored = mergeBackupPlaylist({ ...current, removeWatchedVideosThreshold: null, watchedThresholdUpdatedAt: 30 },
+    { ...backup, shuffleByDefault: true, removeWatchedVideosThreshold: 100, watchedThresholdUpdatedAt: 5 })
+  assert.equal(restored.preferencesUpdatedAt, 20)
+  assert.ok(restored.watchedThresholdUpdatedAt > 30)
 })
