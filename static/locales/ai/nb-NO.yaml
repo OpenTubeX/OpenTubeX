@@ -1393,7 +1393,6 @@ Settings:
     Invalid channel playback speeds file: "Fant ingen avspillingshastigheter for kanaler i denne filen"
     Channel playback speeds imported: "Importerte avspillingshastigheten for {count} kanal | Importerte avspillingshastighetene for {count} kanaler"
     Channels not found: "{count} kanal ble ikke funnet | {count} kanaler ble ikke funnet"
-    Playlists have been successfully imported: "1/{total} spilleliste ble importert | {count}/{total} spillelister ble importert"
     Import subscription groups hint: For å sortere kanaler i grupper legger du til en kolonne etter kanaltittelen i en .csv-fil med gruppenavn atskilt med semikolon, eller importerer en .opml-fil med mapper. Manglende grupper opprettes.
   Sync Settings:
     Signed Out After Restore: 'Synkroniseringen ble logget ut fordi disse appdataene ble gjenopprettet fra en sikkerhetskopi eller en annen enhet. Logg på igjen for å synkronisere denne enheten.'
