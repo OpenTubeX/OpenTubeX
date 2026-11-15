@@ -22,7 +22,7 @@ reviews:
     - "!ios/App/OpenTubeXWidgets/*.lproj/Localizable.strings"
   auto_review:
     ignore_title_keywords:
-      - "Translations update from Weblate"
+      - "Translations update from Hosted Weblate"
       - "chore: sync development from FreeTubeApp/FreeTube"
     ignore_usernames:
       - "dependabot[bot]"

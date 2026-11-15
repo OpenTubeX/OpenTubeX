@@ -39,7 +39,7 @@ concurrency:
 jobs:
   prepare-e2e:
     name: Prepare E2E tests
-    if: ${{ github.event_name != 'pull_request' || github.head_ref != 'weblate-translations' }}
+    if: ${{ github.event_name != 'pull_request' || github.head_ref != 'weblate-opentubex-application' }}
     runs-on: ubuntu-latest
 
     outputs:
@@ -155,7 +155,7 @@ jobs:
 
   e2e-shard:
     name: e2e (${{ matrix.project }} ${{ matrix.shard }}/${{ matrix.shardTotal }})
-    if: ${{ github.event_name != 'pull_request' || github.head_ref != 'weblate-translations' }}
+    if: ${{ github.event_name != 'pull_request' || github.head_ref != 'weblate-opentubex-application' }}
     needs: prepare-e2e
     runs-on: ubuntu-latest
     strategy:
@@ -317,7 +317,7 @@ jobs:
 
   # Keep a stable required-check name while the test suite runs as a matrix.
   e2e:
-    if: ${{ always() && (github.event_name != 'pull_request' || github.head_ref != 'weblate-translations') }}
+    if: ${{ always() && (github.event_name != 'pull_request' || github.head_ref != 'weblate-opentubex-application') }}
     needs: e2e-shard
     runs-on: ubuntu-latest
     steps:

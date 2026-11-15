@@ -12,9 +12,9 @@ reviews:
       - "static/locales/**"
     head_branches:
       - "upstream-sync"
-      - "weblate-translations"
+      - "weblate-opentubex-application"
       - "dependabot/**"
     pr_labels:
       - "translations"
     pr_titles:
-      - "*Translations update from Weblate*"
+      - "*Translations update from Hosted Weblate*"

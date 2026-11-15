@@ -1,6 +1,6 @@
 name: Weblate AI translation cleanup
 
-# Weblate force-pushes weblate-translations from development, dropping earlier
+# Weblate force-pushes weblate-opentubex-application from development, dropping earlier
 # cleanup commits, so this reapplies the cleanup after every Weblate push.
 on:
   pull_request:
@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   cleanup:
-    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'weblate-translations'
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'weblate-opentubex-application'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:

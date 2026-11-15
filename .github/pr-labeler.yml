@@ -3,7 +3,7 @@
   - any-glob-to-any-file: '**'
 
 translations:
-- head-branch: ['^weblate-translations$']
+- head-branch: ['^weblate-opentubex-application$']
 
 'PR: dependencies':
 - any:
