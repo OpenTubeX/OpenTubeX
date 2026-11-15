@@ -262,6 +262,26 @@ test('a Short opened in a background tab never starts playback', async ({ app, p
   }))).toEqual({ paused: true, currentTime: 0 })
 })
 
+test('a video loaded in a background tab plays from its controls once shown', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  const backgroundTab = await page.evaluate(() => window.ftElectron.tabs.create({
+    route: '/watch/background-video',
+    title: 'Background video',
+    makeActive: false,
+    preloadInBackground: true
+  }))
+  const player = page.locator(`.tabContent[data-tab-id="${backgroundTab.id}"] .ftVideoPlayer`)
+  const video = player.locator('video')
+  await expect(video).toHaveCount(1, { timeout: 30_000 })
+  await expect.poll(() => video.evaluate(element => element.readyState)).toBeGreaterThanOrEqual(2)
+  // Disabled controls skip Shaka's refresh, which every hidden tab would repeat.
+  await expect.poll(() => player.evaluate(element => element.ui.getControls().isOpaque())).toBe(false)
+
+  await page.evaluate(id => window.ftElectron.tabs.activate(id), backgroundTab.id)
+  await player.getByRole('button', { name: 'Play (k)' }).click()
+  await waitForPlayback(page)
+})
+
 test('hides configured paused interface elements until pointer activity', async ({ app, page }) => {
   const video = await openDemoVideo({ app, page })
   const watchComponent = await page.evaluateHandle(findWatchComponent)

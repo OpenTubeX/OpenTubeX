@@ -1,18 +1,24 @@
 /* stylelint-disable no-descending-specificity */
 .ft-input-component {
+  /* Keep zero values as lengths so they can be added inside calc(). */
+  /* stylelint-disable length-zero-no-unit */
+  --input-tooltip-space: 0px;
+  --input-sync-space: 0px;
+  --input-reset-space: 0px;
+  /* stylelint-enable length-zero-no-unit */
   --input-label-scale: 1;
   --input-label-reserved-space: 32px;
   --input-container-color: color-mix(in srgb, var(--primary-text-color) 4%, var(--search-bar-color));
 
   position: relative;
   margin-block: var(--settings-control-margin, 0);
-  max-inline-size: 100%;
+  max-inline-size: calc(100% - var(--input-indicator-space, 0px));
   min-inline-size: 0;
 }
 
 .floatingLabel {
   inline-size: fit-content;
-  min-inline-size: min(340px, 100%);
+  min-inline-size: min(340px, 100% - var(--input-indicator-space, 0px));
 }
 
 .hasSupportingText .inputWrapper {
@@ -188,8 +194,24 @@
   gap: 6px;
 }
 
+/* The indicators sit beside the field, so it leaves room for the ones it shows,
+   like FtSelect does. */
 .ft-input-component:has(.inputIndicators > *) {
-  margin-inline-end: 70px;
+  --input-indicator-space: calc(8px + var(--input-tooltip-space) + var(--input-sync-space) + var(--input-reset-space));
+
+  margin-inline-end: var(--input-indicator-space);
+}
+
+.ft-input-component:has(.inputIndicators > .selectTooltip) {
+  --input-tooltip-space: 32px;
+}
+
+.ft-input-component:has(.inputIndicators > .syncedSettingIndicator) {
+  --input-sync-space: 22px;
+}
+
+.ft-input-component:has(.inputIndicators > :is(.changedSettingIndicator, .changedSettingIndicatorPlaceholder)) {
+  --input-reset-space: 22px;
 }
 
 .inputIndicators :deep(.button) {
@@ -276,7 +298,9 @@
 .outlined .inputLegend {
   display: block;
   min-block-size: calc(14px * var(--font-scale, 1));
-  max-inline-size: calc(100% - var(--input-label-reserved-space));
+
+  /* The label sits on the border above the buttons, so it only keeps clear of the corners. */
+  max-inline-size: calc(100% - 24px);
   margin-inline-start: 12px;
   padding: 0;
 }
@@ -432,6 +456,98 @@
   the text might get under the arrow with normal padding
    */
   padding-inline-end: calc(36px + 6px);
+}
+
+.numberInput {
+  --number-step-size: 32px;
+  --number-stepper-size: calc(2 * var(--number-step-size));
+}
+
+/* An outlined label sits on the border, above the step buttons. */
+.numberInput:not(.outlined) {
+  --input-label-reserved-space: calc(var(--number-stepper-size) + 24px);
+}
+
+.numberInput.showActionButton:not(.outlined) {
+  --input-label-reserved-space: calc(var(--number-stepper-size) + 66px);
+}
+
+.numberInput .ft-input {
+  padding-inline-end: calc(var(--number-stepper-size) + 8px);
+
+  /* Long placeholders such as "Leave blank to …" meet the buttons on phones. */
+  text-overflow: ellipsis;
+}
+
+.numberInput.showActionButton .ft-input {
+  padding-inline-end: calc(var(--number-stepper-size) + 48px);
+}
+
+.numberStepper {
+  display: flex;
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-end: 4px;
+  transform: translateY(-50%);
+}
+
+.showActionButton .numberStepper {
+  inset-inline-end: 42px;
+}
+
+.numberStep {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--number-step-size);
+  block-size: var(--number-step-size);
+  padding: 0;
+  border: 0;
+  border-radius: 100%;
+  background-color: transparent;
+  color: var(--secondary-text-color);
+  font-size: 16px;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+}
+
+.numberStep:disabled {
+  opacity: 0.38;
+  cursor: default;
+}
+
+.numberStep:not(:disabled):hover {
+  background-color: var(--side-nav-hover-color);
+  color: var(--side-nav-hover-text-color);
+}
+
+.numberStep:not(:disabled):active {
+  border-radius: var(--shape-corner-medium);
+  background-color: var(--side-nav-active-color);
+  color: var(--side-nav-active-text-color);
+}
+
+@media (any-pointer: coarse) {
+  .numberInput {
+    --number-step-size: 40px;
+  }
+
+  .numberStep {
+    font-size: 20px;
+  }
+}
+
+/* Touch screens show a number keypad, so the buttons would only take space. */
+@media (pointer: coarse) {
+  .numberInput {
+    /* stylelint-disable-next-line length-zero-no-unit -- added inside calc() */
+    --number-stepper-size: 0px;
+  }
+
+  .numberStepper {
+    display: none;
+  }
 }
 
 .showPasswordToggle {

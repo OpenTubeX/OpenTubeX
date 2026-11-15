@@ -257,10 +257,10 @@ Subscriptions:
     Platform: Платформа
     All Platforms: Усе платформы
     Followed Channels: Адсочваныя каналы на іншых платформах
-    Description: Адсочвайце каналы на Twitch, SoundCloud, PeerTube, Rumble і Odysee, каб бачыць іх новыя публікацыі на ўкладцы «Платформы» ў вашых падпісках. Знаходзьце каналы праз пошук або дадавайце іх па адрасе іх старонкі. Іх медыя прайграюцца праз yt-dlp.
+    Description: Адсочвайце каналы на Twitch, SoundCloud, PeerTube, Rumble, Odysee і media.ccc.de, каб бачыць іх новыя публікацыі на ўкладцы «Платформы» ў вашых падпісках. Знаходзьце каналы праз пошук або дадавайце іх па адрасе іх старонкі. Іх медыя прайграюцца праз yt-dlp.
     Add Channel: Дадаць канал
     Channel URL: Адрас канала
-    Invalid Channel: Увядзіце адрас старонкі канала на Twitch, SoundCloud, PeerTube, Rumble або Odysee.
+    Invalid Channel: Увядзіце адрас старонкі канала на Twitch, SoundCloud, PeerTube, Rumble, Odysee або media.ccc.de.
     Channel Not Found: Па гэтым адрасе няма канала.
     Channel Already Followed: Вы ўжо адсочваеце гэты канал.
     Channel Could Not Be Loaded: Не ўдалося загрузіць канал.
@@ -1040,8 +1040,11 @@ Settings:
       Viewing Modes: Рэжымы прагляду
       Shorts: Shorts
       Screenshots: Здымкі экрана
+      Timestamp Notes: Нататкі з адзнакамі часу
     Enable FCast: "Уключыць FCast"
     Ask Before Preloading Large Playlists: "Пытацца перад папярэдняй загрузкай вялікіх плэйлістоў"
+    Timestamp Notes:
+      Obsidian Vault: Сховішча Obsidian
   Channel Settings:
     Channel Settings: Налады каналаў
     Channel Settings Description: Запамінаць асобныя налады, абраныя падчас прагляду кожнага канала, і ўжываць іх пры наступным праглядзе відэа з гэтага канала.
@@ -1179,11 +1182,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: "Праверка інтэрнэт-злучэння"
     Internet Connectivity Checks Tooltip: "Адпраўляе невялікія запыты да сервера, размешчанага арганізацыяй GrapheneOS, для праверкі доступу да інтэрнэту."
-    Automatic History Retention: Аўтаматычны тэрмін захоўвання гісторыі (у днях)
-    Automatic History Retention Placeholder: Пакіньце пустым, каб захоўваць заўсёды
+    Automatic History Deletion: Аўтаматычна выдаляць гісторыю праз (дні)
+    Watch History Retention: Гісторыя прагляду
+    Search History Retention: Гісторыя пошуку
+    Keep Forever Placeholder: Захоўваць заўсёды
     Automatic History Retention Tooltip: Пакіньце пустым, каб захоўваць гісторыю заўсёды. Калі захаваць лік, старыя запісы будуць выдалены цяпер і надалей будуць выдаляцца аўтаматычна, пакуль праграма адкрыта.
-    Automatic Search History Retention: Аўтаматычны тэрмін захоўвання гісторыі пошуку (у днях)
-    Automatic Search History Retention Tooltip: Пакіньце пустым, каб захоўваць гісторыю пошуку заўсёды. Калі захаваць лік, старыя пошукавыя запыты будуць выдалены цяпер і надалей будуць выдаляцца аўтаматычна, пакуль праграма адкрыта.
     History Retention Saved: Тэрмін захоўвання гісторыі захаваны
     Invalid History Retention Days: Увядзіце цэлы лік дзён, большы за нуль
     Enable Watch Statistics: Уключыць статыстыку праглядаў
@@ -1433,6 +1436,7 @@ Settings:
     Channel playback speeds imported: "Імпартавана хуткасць прайгравання для {count} канала | Імпартаваны хуткасці прайгравання для {count} каналаў | Імпартаваны хуткасці прайгравання для {count} каналаў"
     Channels not found: "Не ўдалося знайсці {count} канал | Не ўдалося знайсці {count} каналы | Не ўдалося знайсці {count} каналаў"
     Playlists have been successfully imported: "Паспяхова імпартаваны {count}/{total} плэйліст | Паспяхова імпартаваны {count}/{total} плэйлісты | Паспяхова імпартавана {count}/{total} плэйлістоў"
+    Import subscription groups hint: Каб размеркаваць каналы па групах, дадайце ў файле .csv пасля назвы канала слупок з назвамі груп праз кропку з коскай або імпартуйце файл .opml з папкамі. Адсутныя групы будуць створаны.
   Sync Settings:
     Signed Out After Restore: 'Сінхранізацыя выйшла з уліковага запісу, бо гэтыя даныя праграмы адноўлены з рэзервовай копіі або з іншай прылады. Увайдзіце зноў, каб сінхранізаваць гэту прыладу.'
     Revoke Session Tabs Warning: "Сінхранізаваныя наборы ўкладак гэтай прылады таксама будуць выдалены."
@@ -2097,6 +2101,14 @@ Video:
       Load: "Загрузіць файл субтытраў…"
       Subtitle Files: "Файлы субтытраў"
       Error: "Не ўдалося загрузіць файл субтытраў. Выберыце файл SRT або WebVTT."
+    Timestamp Notes:
+      Take Note: Зрабіць нататку з адзнакай часу
+      Note at {time}: Нататка на {time}
+      Note: Нататка
+      Add to Obsidian: Дадаць у Obsidian
+      Copy as Markdown: Скапіяваць як Markdown
+      Copied: Нататка скапіявана як Markdown
+      Obsidian Failed: Не ўдалося адкрыць Obsidian
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Да канца рэкламы перад відэа: {remindingTimeSeconds} с'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Да паўторнай спробы SABR: {remindingTimeSeconds} с'
@@ -2343,6 +2355,7 @@ Comments:
   Highlighted comment: Вылучаны каментарый
   Highlighted reply: Вылучаны адказ
   Search loaded comments: Шукаць у загружаных каментарах
+  Close search: Закрыць пошук
   Loaded comment search result count: '{count} з {total} загружаных каментароў | {count} з {total} загружаных каментароў | {count} з {total} загружаных каментароў'
   No loaded comments match your filters: Ніводзін загружаны каментарый не адпавядае вашым фільтрам
   YouTube comment link copied to clipboard: Спасылка на каментарый YouTube скапіяваная ў буфер абмену
@@ -2437,6 +2450,7 @@ Tooltips:
     Concurrent Preloads: "Найбольшая колькасць працэсаў yt-dlp, якія адначасова папярэдне загружаюць відэа. Большыя значэнні выкарыстоўваюць больш рэсурсаў працэсара, памяці і прапускной здольнасці сеткі."
     Ignore System Rotation Lock for Fullscreen: Паварочвайце прыладу, каб уваходзіць у поўнаэкранны рэжым і выходзіць з яго, нават калі аўтапаварот у Android выключаны.
     Ask Before Preloading Large Playlists: "Запытвае пацвярджэнне перад папярэдняй загрузкай усіх відэа плэйліста, у якім больш за {count} відэа."
+    Obsidian Vault: Назва сховішча Obsidian для нататак з адзнакамі часу. Калі яна зададзена, нататкі можна дадаваць у Obsidian. Нататкі кожнага відэа збіраюцца ў нататцы з назвай відэа ў папцы сховішча для новых нататак.
   Download Settings:
     Download Folder: Відэа захоўваюцца ў гэтай папцы. Пакіньце поле пустым, каб выкарыстоўваць сістэмную папку «Спампоўванні».
     Global Additional yt-dlp Arguments: Дадатковыя аргументы каманднага радка, якія перадаюцца yt-dlp пры кожным спампоўванні, напрыклад --cookies-from-browser firefox.

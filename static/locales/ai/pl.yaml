@@ -111,10 +111,10 @@ Subscriptions:
     Platform: Platforma
     All Platforms: Wszystkie platformy
     Followed Channels: Obserwowane kanały na innych platformach
-    Description: Obserwuj kanały na platformach Twitch, SoundCloud, PeerTube, Rumble i Odysee, aby widzieć ich nowe materiały na karcie Platformy w swoich subskrypcjach. Znajduj kanały za pomocą wyszukiwania lub dodawaj je po adresie ich strony. Ich multimedia są odtwarzane za pomocą yt-dlp.
+    Description: Obserwuj kanały na platformach Twitch, SoundCloud, PeerTube, Rumble, Odysee i media.ccc.de, aby widzieć ich nowe materiały na karcie Platformy w swoich subskrypcjach. Znajduj kanały za pomocą wyszukiwania lub dodawaj je po adresie ich strony. Ich multimedia są odtwarzane za pomocą yt-dlp.
     Add Channel: Dodaj kanał
     Channel URL: Adres kanału
-    Invalid Channel: Wpisz adres strony kanału na platformie Twitch, SoundCloud, PeerTube, Rumble lub Odysee.
+    Invalid Channel: Wpisz adres strony kanału na platformie Twitch, SoundCloud, PeerTube, Rumble, Odysee lub media.ccc.de.
     Channel Not Found: Pod tym adresem nie ma kanału.
     Channel Already Followed: Już obserwujesz ten kanał.
     Channel Could Not Be Loaded: Nie udało się wczytać kanału.
@@ -595,6 +595,7 @@ Settings:
       Viewing Modes: Tryby wyświetlania
       Shorts: Shorts
       Screenshots: Zrzuty ekranu
+      Timestamp Notes: Notatki ze znacznikami czasu
     Enable FCast: "Włącz FCast"
     Caption Appearance:
       Default: Domyślnie
@@ -625,6 +626,8 @@ Settings:
       Legacy Formats: "Starsze formaty"
       Modern Formats: "Nowoczesne formaty"
     Ask Before Preloading Large Playlists: "Pytaj przed wstępnym wczytaniem dużych playlist"
+    Timestamp Notes:
+      Obsidian Vault: Sejf Obsidiana
   Channel Settings:
     Enable Channel Playback Settings: Włącz ustawienia odtwarzania dla kanałów
     Auto Save Playback Speed: Automatycznie zapisuj zmiany prędkości odtwarzania
@@ -681,8 +684,10 @@ Settings:
       Invalid Archive: 'Pobrane archiwum jest nieprawidłowe'
       Rollback Failed: 'Aktualizacja nie powiodła się, a poprzedniej wersji nie udało się w pełni przywrócić'
   Privacy Settings:
-    Automatic Search History Retention: Przechowywanie historii wyszukiwania (dni)
-    Automatic Search History Retention Tooltip: Pozostaw puste, aby historia wyszukiwania była zachowana na zawsze. Zapisanie liczby usuwa starsze wyszukiwania od razu i automatycznie, gdy aplikacja jest otwarta.
+    Automatic History Deletion: Automatycznie usuwaj historię po (dniach)
+    Watch History Retention: Historia oglądania
+    Search History Retention: Historia wyszukiwania
+    Keep Forever Placeholder: Przechowuj bezterminowo
     Internet Connectivity Checks: "Sprawdzanie połączenia z internetem"
     Internet Connectivity Checks Tooltip: "Wysyła niewielkie żądania do serwera hostowanego przez GrapheneOS w celu sprawdzenia dostępu do internetu."
     Cache Video Metadata: Historia metadanych
@@ -897,6 +902,7 @@ Settings:
     Open Profile Directory: Otwórz katalog profilu
     Invalid JSON row, skipping item: Nieprawidłowy JSON w wierszu {row}. Element zostanie pominięty
     Playlists have been successfully imported: "Pomyślnie zaimportowano 1/{total} playlistę | Pomyślnie zaimportowano {count}/{total} playlisty | Pomyślnie zaimportowano {count}/{total} playlist"
+    Import subscription groups hint: Aby przydzielić kanały do grup, dodaj w pliku .csv po tytule kanału kolumnę z nazwami grup oddzielonymi średnikami albo zaimportuj plik .opml z folderami. Brakujące grupy zostaną utworzone.
   Sync Settings:
     Signed Out After Restore: 'Synchronizacja została wylogowana, ponieważ te dane aplikacji przywrócono z kopii zapasowej lub z innego urządzenia. Zaloguj się ponownie, aby synchronizować to urządzenie.'
     Revoke Session Tabs Warning: "Zsynchronizowane zestawy kart tego urządzenia również zostaną usunięte."
@@ -1341,6 +1347,14 @@ Video:
       Load: "Wczytaj plik napisów…"
       Subtitle Files: "Pliki napisów"
       Error: "Nie udało się wczytać pliku napisów. Wybierz plik SRT lub WebVTT."
+    Timestamp Notes:
+      Take Note: Zrób notatkę ze znacznikiem czasu
+      Note at {time}: Notatka przy {time}
+      Note: Notatka
+      Add to Obsidian: Dodaj do Obsidiana
+      Copy as Markdown: Kopiuj jako Markdown
+      Copied: Skopiowano notatkę jako Markdown
+      Obsidian Failed: Nie można otworzyć Obsidiana
   External Media:
     Dislikes: "Niepolubienie | Niepolubienia | Niepolubień"
     Reposts: "Repost | Reposty | Repostów"
@@ -1492,6 +1506,7 @@ Comments:
   Highlighted comment: Wyróżniony komentarz
   Highlighted reply: Wyróżniona odpowiedź
   Search loaded comments: Przeszukaj wczytane komentarze
+  Close search: Zamknij wyszukiwanie
   Loaded comment search result count: '1 z {total} wczytanych komentarzy | {count} z {total} wczytanych komentarzy | {count} z {total} wczytanych komentarzy'
   No loaded comments match your filters: Żaden wczytany komentarz nie pasuje do filtrów
   Translate to {language}: Przetłumacz na język {language}
@@ -1563,6 +1578,7 @@ Tooltips:
     Concurrent Preloads: "Maksymalna liczba procesów yt-dlp używanych do jednoczesnego wstępnego ładowania filmów. Wyższe wartości zużywają więcej procesora, pamięci i przepustowości sieci."
     Ignore System Rotation Lock for Fullscreen: Obróć fizycznie urządzenie, aby włączyć lub wyłączyć pełny ekran, nawet gdy automatyczne obracanie w Androidzie jest wyłączone.
     Ask Before Preloading Large Playlists: "Prosi o potwierdzenie przed wstępnym wczytaniem wszystkich filmów z playlisty zawierającej więcej niż {count} filmów."
+    Obsidian Vault: Nazwa sejfu Obsidiana dla notatek ze znacznikami czasu. Po jej ustawieniu notatki można dodawać do Obsidiana. Notatki z każdego filmu są zbierane w notatce nazwanej tak jak film, w folderze sejfu na nowe notatki.
   Download Settings:
     Global Additional yt-dlp Arguments: Dodatkowe argumenty wiersza poleceń przekazywane do yt-dlp przy każdym pobieraniu, na przykład --cookies-from-browser firefox.
     Concurrent Downloads: Maksymalna liczba zadań yt-dlp wykonywanych jednocześnie.

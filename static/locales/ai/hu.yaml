@@ -242,10 +242,10 @@ Subscriptions:
     Platform: Platform
     All Platforms: Összes platform
     Followed Channels: Követett csatornák más platformokon
-    Description: Kövessen csatornákat a Twitch, SoundCloud, PeerTube, Rumble és Odysee platformon, hogy feltöltéseiket a feliratkozásai Platformok lapján lássa. Keressen csatornákat a keresővel, vagy adja hozzá őket az oldaluk címével. Médiatartalmaik a yt-dlp segítségével játszhatók le.
+    Description: Kövessen csatornákat a Twitch, SoundCloud, PeerTube, Rumble, Odysee és media.ccc.de platformon, hogy feltöltéseiket a feliratkozásai Platformok lapján lássa. Keressen csatornákat a keresővel, vagy adja hozzá őket az oldaluk címével. Médiatartalmaik a yt-dlp segítségével játszhatók le.
     Add Channel: Csatorna hozzáadása
     Channel URL: Csatorna címe
-    Invalid Channel: Adja meg egy Twitch-, SoundCloud-, PeerTube-, Rumble- vagy Odysee-csatornaoldal címét.
+    Invalid Channel: Adja meg egy Twitch-, SoundCloud-, PeerTube-, Rumble-, Odysee- vagy media.ccc.de-csatornaoldal címét.
     Channel Not Found: Ezen a címen nincs csatorna.
     Channel Already Followed: Már követi ezt a csatornát.
     Channel Could Not Be Loaded: A csatornát nem sikerült betölteni.
@@ -1002,11 +1002,14 @@ Settings:
       Viewing Modes: Megtekintési módok
       Shorts: Shorts
       Screenshots: Képernyőképek
+      Timestamp Notes: Időbélyeges jegyzetek
     Enable FCast: "FCast engedélyezése"
     Screenshot:
       Legacy Formats: "Régebbi formátumok"
       Modern Formats: "Modern formátumok"
     Ask Before Preloading Large Playlists: "Kérdezzen nagy lejátszási listák előtöltése előtt"
+    Timestamp Notes:
+      Obsidian Vault: Obsidian-széf
   Channel Settings:
     Channel Settings: Csatornabeállítások
     Channel Settings Description: Csatornánként megjegyzi a videónézés közben kiválasztott beállításokat, és a csatorna következő videójánál újra alkalmazza őket.
@@ -1144,11 +1147,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: "Internetkapcsolat ellenőrzése"
     Internet Connectivity Checks Tooltip: "Kis kéréseket küld egy GrapheneOS által üzemeltetett kiszolgálónak az internetelérés ellenőrzéséhez."
-    Automatic History Retention: Előzmények automatikus megőrzése (nap)
-    Automatic History Retention Placeholder: Hagyja üresen a korlátlan megőrzéshez
+    Automatic History Deletion: Előzmények automatikus törlése (napok után)
+    Watch History Retention: Megtekintési előzmények
+    Search History Retention: Keresési előzmények
+    Keep Forever Placeholder: Korlátlan megőrzés
     Automatic History Retention Tooltip: Hagyja üresen az előzmények korlátlan megőrzéséhez. Egy szám mentése azonnal törli a régebbi bejegyzéseket, és ezt az alkalmazás futása közben automatikusan megismétli.
-    Automatic Search History Retention: Keresési előzmények automatikus megőrzése (nap)
-    Automatic Search History Retention Tooltip: Hagyja üresen a keresési előzmények korlátlan megőrzéséhez. Egy szám mentése azonnal törli a régebbi kereséseket, és ezt az alkalmazás futása közben automatikusan megismétli.
     History Retention Saved: Előzménymegőrzés mentve
     Invalid History Retention Days: Adjon meg nullánál nagyobb egész számú napot
     Enable Watch Statistics: Megtekintési statisztikák engedélyezése
@@ -1380,6 +1383,7 @@ Settings:
     Channel playback speeds imported: "{count} csatorna lejátszási sebessége importálva | {count} csatorna lejátszási sebessége importálva"
     Channels not found: "{count} csatorna nem található | {count} csatorna nem található"
     Playlists have been successfully imported: "1/{total} lejátszási lista sikeresen importálva | {count}/{total} lejátszási lista sikeresen importálva"
+    Import subscription groups hint: A csatornák csoportokba rendezéséhez egy .csv-fájlban a csatorna címe után adjon hozzá egy oszlopot a pontosvesszővel elválasztott csoportnevekkel, vagy importáljon mappákat tartalmazó .opml-fájlt. A hiányzó csoportok létrejönnek.
   Sync Settings:
     Signed Out After Restore: 'A szinkronizálás kijelentkezett, mert ezeket az alkalmazásadatokat biztonsági mentésből vagy másik eszközről állították vissza. Jelentkezz be újra az eszköz szinkronizálásához.'
     Revoke Session Tabs Warning: "Az eszköz szinkronizált lapkészletei is törlődnek."
@@ -2007,6 +2011,14 @@ Video:
       Load: "Feliratfájl betöltése…"
       Subtitle Files: "Feliratfájlok"
       Error: "Nem sikerült betölteni a feliratfájlt. Válasszon SRT vagy WebVTT fájlt."
+    Timestamp Notes:
+      Take Note: Időbélyeges jegyzet készítése
+      Note at {time}: 'Jegyzet itt: {time}'
+      Note: Jegyzet
+      Add to Obsidian: Hozzáadás az Obsidianhoz
+      Copy as Markdown: Másolás Markdownként
+      Copied: Jegyzet Markdownként másolva
+      Obsidian Failed: Nem sikerült megnyitni az Obsidiant
   External Media:
     Dislikes: "Nemtetszés | Nemtetszés"
     Reposts: "Újbóli bejegyzés | Újbóli bejegyzés"
@@ -2241,6 +2253,7 @@ Comments:
   Highlighted comment: Kiemelt hozzászólás
   Highlighted reply: Kiemelt válasz
   Search loaded comments: Keresés a betöltött hozzászólásokban
+  Close search: Keresés bezárása
   Loaded comment search result count: 1 / {total} betöltött hozzászólás | {count} / {total} betöltött hozzászólás
   No loaded comments match your filters: Egy betöltött hozzászólás sem felel meg a szűrőknek
   YouTube comment link copied to clipboard: A YouTube-hozzászólás hivatkozása a vágólapra másolva
@@ -2335,6 +2348,7 @@ Tooltips:
     Concurrent Preloads: "A videók egyidejű előtöltésére használt yt-dlp-folyamatok legnagyobb száma. A magasabb értékek több processzort, memóriát és hálózati sávszélességet használnak."
     Ignore System Rotation Lock for Fullscreen: A készülék fizikai elforgatásával léphet teljes képernyőre és ki onnan akkor is, ha az Android automatikus forgatása ki van kapcsolva.
     Ask Before Preloading Large Playlists: "Megerősítést kér, mielőtt egy {count} videónál többet tartalmazó lejátszási lista összes videóját előtöltené."
+    Obsidian Vault: Az időbélyeges jegyzetekhez használt Obsidian-széf neve. Ha meg van adva, a jegyzetek hozzáadhatók az Obsidianhoz. Az egyes videók jegyzetei egy, a videóról elnevezett jegyzetben gyűlnek össze, a széf új jegyzeteknek szánt mappájában.
   Download Settings:
     Download Folder: A videók ebbe a mappába kerülnek. Hagyja üresen a rendszer Letöltések mappájának használatához.
     Global Additional yt-dlp Arguments: Minden letöltésnél a yt-dlp számára átadott további parancssori argumentumok, például --cookies-from-browser firefox.

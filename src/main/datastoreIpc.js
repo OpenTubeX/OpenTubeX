@@ -368,7 +368,7 @@ export function setupDatastoreIpc({ datastoreRequests, onSettingUpserted, onSett
           syncOtherWindows(
             IpcChannels.SYNC_WATCH_STATS,
             event,
-            { event: SyncEvents.GENERAL.DELETE_ALL }
+            { event: SyncEvents.GENERAL.DELETE_ALL, data }
           )
           return null
 

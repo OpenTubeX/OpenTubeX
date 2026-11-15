@@ -23,3 +23,31 @@ export function getVideoThumbnailFallbackUrl(src) {
 
   return src.replace(match[0], match[0].replace(match[1], fallbacks[match[1]]))
 }
+
+// Windowed lists remount their cards while scrolling. Remember resolutions a
+// video does not have, so each remount skips the requests that failed before.
+const MISSING_THUMBNAIL_LIMIT = 5000
+/** @type {Map<string, string>} */
+const missingThumbnails = new Map()
+
+/**
+ * @param {string} src a thumbnail that failed to load
+ * @param {string} fallback the smaller version used instead
+ */
+export function rememberMissingThumbnail(src, fallback) {
+  missingThumbnails.delete(src)
+  missingThumbnails.set(src, fallback)
+  if (missingThumbnails.size > MISSING_THUMBNAIL_LIMIT) {
+    missingThumbnails.delete(missingThumbnails.keys().next().value)
+  }
+}
+
+/**
+ * @param {string} src
+ * @returns {string} the largest version not known to be missing
+ */
+export function skipMissingThumbnails(src) {
+  let source = src
+  while (missingThumbnails.has(source)) source = missingThumbnails.get(source)
+  return source
+}

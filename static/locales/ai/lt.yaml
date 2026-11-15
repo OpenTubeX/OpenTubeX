@@ -276,10 +276,10 @@ Subscriptions:
     Platform: Platforma
     All Platforms: Visos platformos
     Followed Channels: Sekami kanalai kitose platformose
-    Description: Sekite kanalus Twitch, SoundCloud, PeerTube, Rumble ir Odysee platformose, kad jų įkeltą turinį matytumėte savo prenumeratų skirtuke „Platformos“. Raskite kanalus paieška arba pridėkite juos pagal jų puslapio adresą. Jų medija atkuriama naudojant yt-dlp.
+    Description: Sekite kanalus Twitch, SoundCloud, PeerTube, Rumble, Odysee ir media.ccc.de platformose, kad jų įkeltą turinį matytumėte savo prenumeratų skirtuke „Platformos“. Raskite kanalus paieška arba pridėkite juos pagal jų puslapio adresą. Jų medija atkuriama naudojant yt-dlp.
     Add Channel: Pridėti kanalą
     Channel URL: Kanalo adresas
-    Invalid Channel: Įveskite kanalo puslapio adresą Twitch, SoundCloud, PeerTube, Rumble arba Odysee platformoje.
+    Invalid Channel: Įveskite kanalo puslapio adresą Twitch, SoundCloud, PeerTube, Rumble, Odysee arba media.ccc.de platformoje.
     Channel Not Found: Šiuo adresu kanalo nėra.
     Channel Already Followed: Jūs jau sekate šį kanalą.
     Channel Could Not Be Loaded: Nepavyko įkelti kanalo.
@@ -1205,8 +1205,11 @@ Settings:
       Viewing Modes: Peržiūros režimai
       Shorts: Shorts
       Screenshots: Ekrano kopijos
+      Timestamp Notes: Laiko žymų pastabos
     Enable FCast: "Įjungti FCast"
     Ask Before Preloading Large Playlists: "Klausti prieš iš anksto įkeliant didelius grojaraščius"
+    Timestamp Notes:
+      Obsidian Vault: Obsidian saugykla
   Channel Settings:
     Channel Settings: Kanalo nustatymai
     Channel Settings Description: Atskirai įsiminti kiekvienam kanalui žiūrint pasirinktus nustatymus, kad jie vėl būtų pritaikyti kitą kartą žiūrint vieną iš jo vaizdo įrašų.
@@ -1346,11 +1349,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: "Interneto ryšio tikrinimas"
     Internet Connectivity Checks Tooltip: "Siunčia mažas užklausas į GrapheneOS talpinamą serverį, kad patikrintų interneto prieigą."
-    Automatic History Retention: Automatinis istorijos saugojimas (dienomis)
-    Automatic History Retention Placeholder: Palikite tuščią, kad būtų saugoma neribotai
+    Automatic History Deletion: Automatiškai ištrinti istoriją po (dienų)
+    Watch History Retention: Žiūrėjimo istorija
+    Search History Retention: Paieškos istorija
+    Keep Forever Placeholder: Saugoti neribotai
     Automatic History Retention Tooltip: Palikite tuščią, kad istorija būtų saugoma neribotai. Išsaugojus skaičių, senesni įrašai pašalinami dabar ir automatiškai, kol programa atidaryta.
-    Automatic Search History Retention: Automatinis paieškos istorijos saugojimas (dienomis)
-    Automatic Search History Retention Tooltip: Palikite tuščią, kad paieškos istorija būtų saugoma neribotai. Išsaugojus skaičių, senesnės paieškos pašalinamos dabar ir automatiškai, kol programa atidaryta.
     History Retention Saved: Istorijos saugojimo nuostata išsaugota
     Invalid History Retention Days: Įveskite už nulį didesnį sveikąjį dienų skaičių
     Enable Watch Statistics: Įjungti žiūrėjimo statistiką
@@ -1634,6 +1637,7 @@ Settings:
     Channel playback speeds imported: "Importuotas {count} kanalo atkūrimo greitis | Importuoti {count} kanalų atkūrimo greičiai | Importuoti {count} kanalų atkūrimo greičiai"
     Channels not found: "{count} kanalas nerastas | {count} kanalai nerasti | {count} kanalų nerasta"
     Playlists have been successfully imported: "Sėkmingai importuotas {count}/{total} grojaraštis | Sėkmingai importuoti {count}/{total} grojaraščiai | Sėkmingai importuota {count}/{total} grojaraščių"
+    Import subscription groups hint: Norėdami suskirstyti kanalus į grupes, .csv faile po kanalo pavadinimo pridėkite stulpelį su grupių pavadinimais, atskirtais kabliataškiais, arba importuokite .opml failą su aplankais. Trūkstamos grupės sukuriamos.
   Sync Settings:
     Signed Out After Restore: 'Sinchronizavimas atjungtas, nes šios programėlės duomenys buvo atkurti iš atsarginės kopijos arba kito įrenginio. Prisijunkite iš naujo, kad sinchronizuotumėte šį įrenginį.'
     Revoke Session Tabs Warning: "Taip pat bus ištrinti šio įrenginio sinchronizuoti skirtukų rinkiniai."
@@ -2397,6 +2401,14 @@ Video:
       Load: "Įkelti subtitrų failą…"
       Subtitle Files: "Subtitrų failai"
       Error: "Nepavyko įkelti subtitrų failo. Pasirinkite SRT arba WebVTT failą."
+    Timestamp Notes:
+      Take Note: Užrašyti pastabą su laiko žyma
+      Note at {time}: Pastaba ties {time}
+      Note: Pastaba
+      Add to Obsidian: Pridėti į Obsidian
+      Copy as Markdown: Kopijuoti kaip Markdown
+      Copied: Pastaba nukopijuota kaip Markdown
+      Obsidian Failed: Nepavyko atidaryti Obsidian
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Reklamos prieš vaizdo įrašą likęs laikas: {remindingTimeSeconds} s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Likęs SABR delsos laikas: {remindingTimeSeconds} s'
@@ -2661,6 +2673,7 @@ Comments:
   Highlighted comment: Paryškintas komentaras
   Highlighted reply: Paryškintas atsakymas
   Search loaded comments: Ieškoti įkeltuose komentaruose
+  Close search: Uždaryti paiešką
   Loaded comment search result count: '{count} iš {total} įkeltų komentarų | {count} iš {total} įkeltų komentarų | {count} iš {total} įkeltų komentarų'
   No loaded comments match your filters: Nė vienas įkeltas komentaras neatitinka filtrų
   YouTube comment link copied to clipboard: YouTube komentaro nuoroda nukopijuota į iškarpinę
@@ -2759,6 +2772,7 @@ Tooltips:
     Concurrent Preloads: "Didžiausias yt-dlp procesų, vienu metu naudojamų vaizdo įrašams iš anksto įkelti, skaičius. Didesnės reikšmės naudoja daugiau procesoriaus, atminties ir tinklo pralaidumo."
     Ignore System Rotation Lock for Fullscreen: Fiziškai pasukite įrenginį, kad įjungtumėte arba išjungtumėte visą ekraną, net kai automatinis sukimas sistemoje „Android“ išjungtas.
     Ask Before Preloading Large Playlists: "Prašo patvirtinimo prieš iš anksto įkeliant visus grojaraščio, kuriame yra daugiau nei {count} vaizdo įrašų, vaizdo įrašus."
+    Obsidian Vault: Obsidian saugyklos, skirtos laiko žymų pastaboms, pavadinimas. Jį nustačius, pastabas galima pridėti į Obsidian. Kiekvieno vaizdo įrašo pastabos renkamos pagal vaizdo įrašą pavadintoje pastaboje, saugyklos naujų pastabų aplanke.
   External Player Settings:
     Ignore Default Arguments: Išoriniam leistuvui nesiųsti jokių numatytųjų argumentų, išskyrus vaizdo įrašo URL (pvz., atkūrimo greitį, grojaraščio URL ir kt.). Pasirinktiniai argumentai vis tiek bus perduoti.
   Download Settings:

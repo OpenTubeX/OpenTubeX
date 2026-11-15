@@ -242,10 +242,10 @@ Subscriptions:
     Platform: Platvorm
     All Platforms: Kõik platvormid
     Followed Channels: Jälgitavad kanalid teistel platvormidel
-    Description: Jälgi kanaleid platvormidel Twitch, SoundCloud, PeerTube, Rumble ja Odysee, et näha nende üleslaadimisi oma tellimuste vahekaardil Platvormid. Leia kanaleid otsingu abil või lisa need nende lehe aadressi järgi. Nende meediat esitatakse yt-dlp abil.
+    Description: Jälgi kanaleid platvormidel Twitch, SoundCloud, PeerTube, Rumble, Odysee ja media.ccc.de, et näha nende üleslaadimisi oma tellimuste vahekaardil Platvormid. Leia kanaleid otsingu abil või lisa need nende lehe aadressi järgi. Nende meediat esitatakse yt-dlp abil.
     Add Channel: Lisa kanal
     Channel URL: Kanali aadress
-    Invalid Channel: Sisesta kanalilehe aadress platvormil Twitch, SoundCloud, PeerTube, Rumble või Odysee.
+    Invalid Channel: Sisesta kanalilehe aadress platvormil Twitch, SoundCloud, PeerTube, Rumble, Odysee või media.ccc.de.
     Channel Not Found: Sellel aadressil pole kanalit.
     Channel Already Followed: Sa juba jälgid seda kanalit.
     Channel Could Not Be Loaded: Kanalit ei õnnestunud laadida.
@@ -1002,11 +1002,14 @@ Settings:
       Viewing Modes: Vaaterežiimid
       Shorts: Shorts
       Screenshots: Ekraanipildid
+      Timestamp Notes: Ajatempliga märkmed
     Enable FCast: "Luba FCast"
     Screenshot:
       Legacy Formats: "Vanemad vormingud"
       Modern Formats: "Kaasaegsed vormingud"
     Ask Before Preloading Large Playlists: "Küsi enne suurte esitusloendite eellaadimist"
+    Timestamp Notes:
+      Obsidian Vault: Obsidiani hoidla
   Channel Settings:
     Channel Settings: Kanali seaded
     Channel Settings Description: Jäta iga kanali jaoks eraldi meelde vaatamise ajal valitud seaded, et need rakenduksid uuesti, kui vaatad järgmisel korral selle kanali videot.
@@ -1144,11 +1147,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: "Internetiühenduse kontrollid"
     Internet Connectivity Checks Tooltip: "Saadab väikeseid päringuid GrapheneOS-i majutatud serverisse internetiühenduse kontrollimiseks."
-    Automatic History Retention: Ajaloo automaatne säilitusaeg (päevades)
-    Automatic History Retention Placeholder: Tähtajatult säilitamiseks jäta tühjaks
+    Automatic History Deletion: Kustuta ajalugu automaatselt pärast (päeva)
+    Watch History Retention: Vaatamisajalugu
+    Search History Retention: Otsinguajalugu
+    Keep Forever Placeholder: Säilita tähtajatult
     Automatic History Retention Tooltip: Ajaloo tähtajatult säilitamiseks jäta väli tühjaks. Arvu salvestamisel eemaldatakse vanemad kirjed kohe ja edaspidi automaatselt, kuni rakendus on avatud.
-    Automatic Search History Retention: Otsinguajaloo automaatne säilitusaeg (päevades)
-    Automatic Search History Retention Tooltip: Otsinguajaloo tähtajatult säilitamiseks jäta väli tühjaks. Arvu salvestamisel eemaldatakse vanemad otsingud kohe ja edaspidi automaatselt, kuni rakendus on avatud.
     History Retention Saved: Ajaloo säilitusaeg on salvestatud
     Invalid History Retention Days: Sisesta päevade arvuks nullist suurem täisarv
     Enable Watch Statistics: Luba vaatamisstatistika
@@ -1379,6 +1382,7 @@ Settings:
     Invalid channel playback speeds file: "Sellest failist ei leitud ühegi kanali esituskiirust"
     Channel playback speeds imported: "Imporditi {count} kanali esituskiirus | Imporditi {count} kanali esituskiirused"
     Channels not found: "{count} kanalit ei leitud | {count} kanalit ei leitud"
+    Import subscription groups hint: Kanalite rühmadesse jaotamiseks lisa .csv-failis kanali pealkirja järele veerg semikoolonitega eraldatud rühmade nimedega või impordi kaustadega .opml-fail. Puuduvad rühmad luuakse.
   Sync Settings:
     Signed Out After Restore: 'Sünkroonimisest logiti välja, sest need rakenduse andmed taastati varukoopiast või teisest seadmest. Selle seadme sünkroonimiseks logi uuesti sisse.'
     Revoke Session Tabs Warning: "Samuti kustutatakse selle seadme sünkroonitud vahelehtede komplektid."
@@ -2008,6 +2012,14 @@ Video:
       Load: "Laadi subtiitrifail…"
       Subtitle Files: "Subtiitrifailid"
       Error: "Subtiitrifaili ei õnnestunud laadida. Vali SRT- või WebVTT-fail."
+    Timestamp Notes:
+      Take Note: Tee ajatempliga märge
+      Note at {time}: Märge ajal {time}
+      Note: Märge
+      Add to Obsidian: Lisa Obsidiani
+      Copy as Markdown: Kopeeri Markdownina
+      Copied: Märge kopeeriti Markdownina
+      Obsidian Failed: Obsidiani avamine ebaõnnestus
   External Media:
     Dislikes: "Ei meeldi | Ei meeldi"
     Reposts: "Taaspostitus | Taaspostitused"
@@ -2242,6 +2254,7 @@ Comments:
   Highlighted comment: Esiletõstetud kommentaar
   Highlighted reply: Esiletõstetud vastus
   Search loaded comments: Otsi laaditud kommentaaridest
+  Close search: Sulge otsing
   Loaded comment search result count: 1 tulemus {total} laaditud kommentaari hulgast | {count} tulemust {total} laaditud kommentaari hulgast
   No loaded comments match your filters: Ükski laaditud kommentaar ei vasta filtritele
   YouTube comment link copied to clipboard: YouTube'i kommentaari link kopeeriti lõikelauale
@@ -2336,6 +2349,7 @@ Tooltips:
     Concurrent Preloads: "Suurim arv yt-dlp protsesse, mida kasutatakse videote samaaegseks eellaadimiseks. Suuremad väärtused kasutavad rohkem protsessorit, mälu ja võrgu läbilaskevõimet."
     Ignore System Rotation Lock for Fullscreen: Pööra seadet füüsiliselt täisekraani avamiseks ja sulgemiseks ka siis, kui Androidi automaatne pööramine on välja lülitatud.
     Ask Before Preloading Large Playlists: "Küsib kinnitust enne, kui eellaaditakse kõik videod esitusloendist, milles on üle {count} video."
+    Obsidian Vault: Ajatempliga märkmete jaoks kasutatava Obsidiani hoidla nimi. Kui see on määratud, saab märkmeid Obsidiani lisada. Iga video märkmed kogutakse video järgi nimetatud märkmesse hoidla uute märkmete kaustas.
   Download Settings:
     Download Folder: Videod salvestatakse sellesse kausta. Süsteemi allalaadimiste kausta kasutamiseks jäta väli tühjaks.
     Global Additional yt-dlp Arguments: Täiendavad käsureaargumendid, mis edastatakse iga allalaadimise puhul yt-dlp-le, näiteks --cookies-from-browser firefox.

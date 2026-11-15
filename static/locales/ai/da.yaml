@@ -246,10 +246,10 @@ Subscriptions:
     Platform: Platform
     All Platforms: Alle platforme
     Followed Channels: Fulgte kanaler på andre platforme
-    Description: Følg kanaler på Twitch, SoundCloud, PeerTube, Rumble og Odysee for at se deres uploads under fanen Platforme i dine abonnementer. Find kanaler med søgningen, eller tilføj dem med adressen på deres side. Deres medier afspilles med yt-dlp.
+    Description: Følg kanaler på Twitch, SoundCloud, PeerTube, Rumble, Odysee og media.ccc.de for at se deres uploads under fanen Platforme i dine abonnementer. Find kanaler med søgningen, eller tilføj dem med adressen på deres side. Deres medier afspilles med yt-dlp.
     Add Channel: Tilføj kanal
     Channel URL: Kanaladresse
-    Invalid Channel: Indtast adressen på en kanalside på Twitch, SoundCloud, PeerTube, Rumble eller Odysee.
+    Invalid Channel: Indtast adressen på en kanalside på Twitch, SoundCloud, PeerTube, Rumble, Odysee eller media.ccc.de.
     Channel Not Found: Der er ingen kanal på denne adresse.
     Channel Already Followed: Du følger allerede denne kanal.
     Channel Could Not Be Loaded: Kanalen kunne ikke indlæses.
@@ -1030,8 +1030,11 @@ Settings:
       Viewing Modes: Visningstilstande
       Shorts: Shorts
       Screenshots: Skærmbilleder
+      Timestamp Notes: Tidsstempelnoter
     Enable FCast: "Aktivér FCast"
     Ask Before Preloading Large Playlists: "Spørg før forudindlæsning af store playlister"
+    Timestamp Notes:
+      Obsidian Vault: Obsidian-boks
   Channel Settings:
     Channel Settings: Kanalindstillinger
     Channel Settings Description: Husk de indstillinger, du vælger under afspilning, for hver kanal, så de anvendes igen, næste gang du ser en af kanalens videoer.
@@ -1169,11 +1172,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: "Kontrol af internetforbindelse"
     Internet Connectivity Checks Tooltip: "Sender små forespørgsler til en server hostet af GrapheneOS for at kontrollere internetadgang."
-    Automatic History Retention: Automatisk opbevaring af historik (dage)
-    Automatic History Retention Placeholder: Lad feltet stå tomt for at gemme for altid
+    Automatic History Deletion: Slet automatisk historik efter (dage)
+    Watch History Retention: Afspilningshistorik
+    Search History Retention: Søgehistorik
+    Keep Forever Placeholder: Gem for altid
     Automatic History Retention Tooltip: Lad feltet stå tomt for at gemme historikken for altid. Når du gemmer et tal, fjernes ældre poster nu og automatisk, mens appen er åben.
-    Automatic Search History Retention: Automatisk opbevaring af søgehistorik (dage)
-    Automatic Search History Retention Tooltip: Lad feltet stå tomt for at gemme søgehistorikken for altid. Når du gemmer et tal, fjernes ældre søgninger nu og automatisk, mens appen er åben.
     History Retention Saved: Opbevaringsperioden for historikken er gemt
     Invalid History Retention Days: Angiv et helt antal dage, der er større end nul
     Enable Watch Statistics: Slå visningsstatistik til
@@ -1424,6 +1427,7 @@ Settings:
     Channel playback speeds imported: "Importerede afspilningshastigheden for {count} kanal | Importerede afspilningshastighederne for {count} kanaler"
     Channels not found: "{count} kanal kunne ikke findes | {count} kanaler kunne ikke findes"
     Playlists have been successfully imported: "1/{total} playliste blev importeret | {count}/{total} playlister blev importeret"
+    Import subscription groups hint: For at sortere kanaler i grupper skal du tilføje en kolonne efter kanaltitlen i en .csv-fil med gruppenavne adskilt af semikoloner eller importere en .opml-fil med mapper. Manglende grupper oprettes.
   Sync Settings:
     Signed Out After Restore: 'Synkroniseringen blev logget ud, fordi disse appdata blev gendannet fra en sikkerhedskopi eller en anden enhed. Log ind igen for at synkronisere denne enhed.'
     Revoke Session Tabs Warning: "Denne enheds synkroniserede fanesæt vil også blive slettet."
@@ -2083,6 +2087,14 @@ Video:
       Load: "Indlæs undertekstfil…"
       Subtitle Files: "Undertekstfiler"
       Error: "Undertekstfilen kunne ikke indlæses. Vælg en SRT- eller WebVTT-fil."
+    Timestamp Notes:
+      Take Note: Tag tidsstempelnote
+      Note at {time}: Note ved {time}
+      Note: Note
+      Add to Obsidian: Føj til Obsidian
+      Copy as Markdown: Kopiér som Markdown
+      Copied: Note kopieret som Markdown
+      Obsidian Failed: Kunne ikke åbne Obsidian
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Resterende tid for preroll-annonce: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Resterende SABR-ventetid: {remindingTimeSeconds}s'
@@ -2329,6 +2341,7 @@ Comments:
   Highlighted comment: Fremhævet kommentar
   Highlighted reply: Fremhævet svar
   Search loaded comments: Søg i indlæste kommentarer
+  Close search: Luk søgning
   Loaded comment search result count: 1 af {total} indlæste kommentarer | {count} af {total} indlæste kommentarer
   No loaded comments match your filters: Ingen indlæste kommentarer matcher dine filtre
   YouTube comment link copied to clipboard: Linket til YouTube-kommentaren er kopieret til udklipsholderen
@@ -2423,6 +2436,7 @@ Tooltips:
     Concurrent Preloads: "Det højeste antal yt-dlp-processer, der bruges til at forudindlæse videoer samtidig. Højere værdier bruger mere CPU, hukommelse og netværksbåndbredde."
     Ignore System Rotation Lock for Fullscreen: Drej enheden fysisk for at åbne og afslutte fuld skærm, selv når automatisk rotation er slået fra i Android.
     Ask Before Preloading Large Playlists: "Beder om bekræftelse, før alle videoer i en playliste med mere end {count} videoer forudindlæses."
+    Obsidian Vault: Navnet på Obsidian-boksen til tidsstempelnoter. Når den er angivet, kan noter føjes til Obsidian. Noterne for hver video samles i en note opkaldt efter videoen i boksens mappe til nye noter.
   Download Settings:
     Download Folder: Videoer gemmes i denne mappe. Lad feltet stå tomt for at bruge systemets Downloads-mappe.
     Global Additional yt-dlp Arguments: Yderligere kommandolinjeargumenter, der sendes til yt-dlp ved hver download, f.eks. --cookies-from-browser firefox.

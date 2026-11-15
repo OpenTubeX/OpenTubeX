@@ -463,6 +463,10 @@
     "ri": "node-tree",
     "material": "hub-outline"
   },
+  "note-sticky": {
+    "ri": "sticky-note-add-line",
+    "material": "edit-note-rounded"
+  },
   "palette": {
     "ri": "palette-line",
     "material": "palette-outline"
@@ -838,6 +842,7 @@
   "odysee": { "ri": "video-line", "material": "movie-outline", "simple": "odysee" },
   "peertube": { "ri": "video-line", "material": "movie-outline", "simple": "peertube" },
   "rumble": { "ri": "video-line", "material": "movie-outline", "simple": "rumble" },
+  "ccc": { "ri": "video-line", "material": "movie-outline", "simple": "ccc" },
   "internetarchive": { "ri": "video-line", "material": "movie-outline", "simple": "internetarchive" },
   "mixcloud": { "ri": "video-line", "material": "movie-outline", "simple": "mixcloud" },
   "kick": { "ri": "video-line", "material": "movie-outline", "simple": "kick" },

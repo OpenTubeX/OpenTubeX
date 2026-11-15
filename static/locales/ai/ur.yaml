@@ -273,10 +273,10 @@ Subscriptions:
     Platform: پلیٹ فارم
     All Platforms: تمام پلیٹ فارمز
     Followed Channels: دیگر پلیٹ فارمز پر فالو کیے گئے چینلز
-    Description: Twitch، SoundCloud، PeerTube، Rumble اور Odysee پر چینلز کو فالو کریں تاکہ ان کے اپ لوڈز اپنی سبسکرپشنز کے پلیٹ فارمز ٹیب میں دیکھ سکیں۔ تلاش کے ذریعے چینلز ڈھونڈیں، یا ان کے صفحے کے پتے سے انہیں شامل کریں۔ ان کا میڈیا yt-dlp کے ساتھ چلتا ہے۔
+    Description: Twitch، SoundCloud، PeerTube، Rumble، Odysee اور media.ccc.de پر چینلز کو فالو کریں تاکہ ان کے اپ لوڈز اپنی سبسکرپشنز کے پلیٹ فارمز ٹیب میں دیکھ سکیں۔ تلاش کے ذریعے چینلز ڈھونڈیں، یا ان کے صفحے کے پتے سے انہیں شامل کریں۔ ان کا میڈیا yt-dlp کے ساتھ چلتا ہے۔
     Add Channel: چینل شامل کریں
     Channel URL: چینل کا پتا
-    Invalid Channel: Twitch، SoundCloud، PeerTube، Rumble یا Odysee پر کسی چینل صفحے کا پتا درج کریں۔
+    Invalid Channel: Twitch، SoundCloud، PeerTube، Rumble، Odysee یا media.ccc.de پر کسی چینل صفحے کا پتا درج کریں۔
     Channel Not Found: اس پتے پر کوئی چینل نہیں ہے۔
     Channel Already Followed: آپ پہلے ہی اس چینل کو فالو کر رہے ہیں۔
     Channel Could Not Be Loaded: چینل لوڈ نہیں ہو سکا۔
@@ -896,6 +896,7 @@ Settings:
       Viewing Modes: دیکھنے کے موڈز
       Shorts: شارٹس
       Screenshots: اسکرین شاٹس
+      Timestamp Notes: ٹائم اسٹیمپ نوٹس
     Lights Off: لائٹس بند
     Show Lights Off Toggle: لائٹس بند کا ٹوگل دکھائیں
     Show Volume Boost Toggle: والیوم بوسٹ کا ٹوگل دکھائیں
@@ -1067,6 +1068,8 @@ Settings:
     Enable Google Cast: Google Cast فعال کریں
     Enable FCast: FCast فعال کریں
     Ask Before Preloading Large Playlists: "بڑی پلے لسٹس پہلے سے لوڈ کرنے سے پہلے پوچھیں"
+    Timestamp Notes:
+      Obsidian Vault: Obsidian والٹ
   Channel Settings:
     Channel Settings: چینل سیٹنگز
     Channel Settings Description: دیکھتے وقت منتخب کردہ سیٹنگز کو ہر چینل کے لیے الگ الگ یاد رکھیں، تاکہ اگلی بار اس کی کوئی ویڈیو دیکھنے پر وہ دوبارہ لاگو ہو جائیں۔
@@ -1204,11 +1207,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: انٹرنیٹ کنیکٹیویٹی چیکس
     Internet Connectivity Checks Tooltip: انٹرنیٹ تک رسائی چیک کرنے کے لیے GrapheneOS کے ہوسٹ کردہ سرور کو چھوٹی درخواستیں بھیجتا ہے۔
-    Automatic History Retention: خودکار ہسٹری برقرار رکھنا (دن)
-    Automatic History Retention Placeholder: ہمیشہ کے لیے رکھنے کے لیے خالی چھوڑیں
+    Automatic History Deletion: تاریخچہ خودکار طور پر حذف کریں بعد از (دن)
+    Watch History Retention: دیکھنے کی تاریخچہ
+    Search History Retention: تلاش کی تاریخچہ
+    Keep Forever Placeholder: ہمیشہ کے لیے رکھیں
     Automatic History Retention Tooltip: ہسٹری ہمیشہ کے لیے رکھنے کے لیے خالی چھوڑیں۔ کوئی عدد محفوظ کرنے سے پرانے اندراجات ابھی اور ایپ کھلی رہنے کے دوران خود بخود ہٹ جاتے ہیں۔
-    Automatic Search History Retention: خودکار تلاش کی ہسٹری برقرار رکھنا (دن)
-    Automatic Search History Retention Tooltip: تلاش کی ہسٹری ہمیشہ کے لیے رکھنے کے لیے خالی چھوڑیں۔ کوئی عدد محفوظ کرنے سے پرانی تلاشیں ابھی اور ایپ کھلی رہنے کے دوران خود بخود ہٹ جاتی ہیں۔
     History Retention Saved: ہسٹری برقرار رکھنے کی مدت محفوظ ہو گئی ہے
     Invalid History Retention Days: صفر سے زیادہ دنوں کا پورا عدد درج کریں
     Enable Watch Statistics: دیکھنے کے اعداد و شمار فعال کریں
@@ -1452,6 +1455,7 @@ Settings:
     Channel playback speeds imported: '{count} چینل کی پلے بیک اسپیڈ امپورٹ کی گئی | {count} چینلز کی پلے بیک اسپیڈز امپورٹ کی گئیں'
     Channels not found: '{count} چینل نہیں مل سکا | {count} چینلز نہیں مل سکے'
     Playlists have been successfully imported: "1/{total} پلے لسٹ کامیابی سے درآمد ہو گئی | {count}/{total} پلے لسٹس کامیابی سے درآمد ہو گئیں"
+    Import subscription groups hint: چینلز کو گروپس میں ترتیب دینے کے لیے، .csv فائل میں چینل کے عنوان کے بعد ایک کالم شامل کریں جس میں سیمی کولن سے الگ کیے گئے گروپ کے نام ہوں، یا فولڈرز والی .opml فائل درآمد کریں۔ غیر موجود گروپس بنا دیے جاتے ہیں۔
   Sync Settings:
     Signed Out After Restore: 'مطابقت سے سائن آؤٹ کر دیا گیا کیونکہ اس ایپ کا ڈیٹا بیک اپ یا کسی دوسرے آلے سے بحال کیا گیا تھا۔ اس آلے کو مطابقت پذیر کرنے کے لیے دوبارہ سائن ان کریں۔'
     Revoke Session Tabs Warning: اس ڈیوائس کے سنک شدہ ٹیب سیٹس بھی حذف ہو جائیں گے۔
@@ -2142,6 +2146,14 @@ Video:
       Cast: FCast ریسیور پر کاسٹ کریں
       No Devices: کوئی FCast ریسیور نہیں ملا
       No Source: FCast کے لیے کوئی مطابقت رکھنے والی اسٹریم نہیں
+    Timestamp Notes:
+      Take Note: ٹائم اسٹیمپ نوٹ لیں
+      Note at {time}: '{time} پر نوٹ'
+      Note: نوٹ
+      Add to Obsidian: Obsidian میں شامل کریں
+      Copy as Markdown: Markdown کے طور پر کاپی کریں
+      Copied: نوٹ Markdown کے طور پر کاپی ہو گیا
+      Obsidian Failed: Obsidian نہیں کھل سکا
   Playlist:
     Unavailable videos are hidden: 1 غیر دستیاب ویڈیو پوشیدہ ہے | {count} غیر دستیاب ویڈیوز پوشیدہ ہیں
   How this was made: یہ کیسے بنایا گیا
@@ -2354,6 +2366,7 @@ Comments:
   Highlighted comment: نمایاں کمنٹ
   Highlighted reply: نمایاں جواب
   Search loaded comments: لوڈ شدہ کمنٹس میں تلاش کریں
+  Close search: تلاش بند کریں
   Loaded comment search result count: '{total} لوڈ شدہ کمنٹس میں سے 1 | {total} لوڈ شدہ کمنٹس میں سے {count}'
   No loaded comments match your filters: کوئی لوڈ شدہ کمنٹ آپ کے فلٹرز سے مماثل نہیں
   YouTube comment link copied to clipboard: YouTube کمنٹ کا لنک کلپ بورڈ پر کاپی ہو گیا
@@ -2448,6 +2461,7 @@ Tooltips:
     Concurrent Preloads: ایک ساتھ ویڈیوز پہلے سے لوڈ کرنے کے لیے استعمال ہونے والے yt-dlp پروسیسز کی زیادہ سے زیادہ تعداد۔ زیادہ قدریں زیادہ CPU، میموری اور نیٹ ورک بینڈوڈتھ استعمال کرتی ہیں۔
     Ignore System Rotation Lock for Fullscreen: Android کی خودکار گردش بند ہونے پر بھی فل اسکرین میں جانے اور نکلنے کے لیے ڈیوائس کی جسمانی گردش استعمال کریں۔
     Ask Before Preloading Large Playlists: "{count} سے زیادہ ویڈیوز والی پلے لسٹ کی تمام ویڈیوز پہلے سے لوڈ کرنے سے پہلے تصدیق مانگتا ہے۔"
+    Obsidian Vault: ٹائم اسٹیمپ نوٹس کے لیے Obsidian والٹ کا نام۔ سیٹ ہونے پر نوٹس Obsidian میں شامل کیے جا سکتے ہیں۔ ہر ویڈیو کے نوٹس والٹ میں نئے نوٹس کے فولڈر کے اندر ویڈیو کے نام والے ایک نوٹ میں جمع کیے جاتے ہیں۔
   Download Settings:
     Download Folder: ویڈیوز اس فولڈر میں محفوظ ہوتی ہیں۔ اپنے سسٹم کا ڈاؤن لوڈز فولڈر استعمال کرنے کے لیے خالی چھوڑیں۔
     Global Additional yt-dlp Arguments: ہر ڈاؤن لوڈ کے لیے yt-dlp کو دیے جانے والے اضافی کمانڈ لائن آرگیومینٹس، مثلاً --cookies-from-browser firefox۔

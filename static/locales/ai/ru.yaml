@@ -201,10 +201,10 @@ Subscriptions:
     Platform: Платформа
     All Platforms: Все платформы
     Followed Channels: Отслеживаемые каналы на других платформах
-    Description: Отслеживайте каналы на Twitch, SoundCloud, PeerTube, Rumble и Odysee, чтобы видеть их новые публикации на вкладке «Платформы» в ваших подписках. Находите каналы через поиск или добавляйте их по адресу их страницы. Их медиа воспроизводятся через yt-dlp.
+    Description: Отслеживайте каналы на Twitch, SoundCloud, PeerTube, Rumble, Odysee и media.ccc.de, чтобы видеть их новые публикации на вкладке «Платформы» в ваших подписках. Находите каналы через поиск или добавляйте их по адресу их страницы. Их медиа воспроизводятся через yt-dlp.
     Add Channel: Добавить канал
     Channel URL: Адрес канала
-    Invalid Channel: Введите адрес страницы канала на Twitch, SoundCloud, PeerTube, Rumble или Odysee.
+    Invalid Channel: Введите адрес страницы канала на Twitch, SoundCloud, PeerTube, Rumble, Odysee или media.ccc.de.
     Channel Not Found: По этому адресу нет канала.
     Channel Already Followed: Вы уже отслеживаете этот канал.
     Channel Could Not Be Loaded: Не удалось загрузить канал.
@@ -961,11 +961,14 @@ Settings:
       Viewing Modes: Режимы просмотра
       Shorts: Shorts
       Screenshots: Снимки экрана
+      Timestamp Notes: Заметки с отметками времени
     Enable FCast: "Включить FCast"
     Screenshot:
       Legacy Formats: "Устаревшие форматы"
       Modern Formats: "Современные форматы"
     Ask Before Preloading Large Playlists: "Спрашивать перед предзагрузкой больших плейлистов"
+    Timestamp Notes:
+      Obsidian Vault: Хранилище Obsidian
   Channel Settings:
     Channel Settings: Настройки каналов
     Channel Settings Description: Запоминать выбранные при просмотре настройки отдельно для каждого канала и применять их снова при следующем просмотре видео с этого канала.
@@ -1103,11 +1106,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: "Проверка подключения к интернету"
     Internet Connectivity Checks Tooltip: "Отправляет небольшие запросы на сервер, размещённый GrapheneOS, для проверки доступа к интернету."
-    Automatic History Retention: Автоматическое хранение истории (дней)
-    Automatic History Retention Placeholder: Оставьте пустым для бессрочного хранения
+    Automatic History Deletion: Автоматически удалять историю через (дней)
+    Watch History Retention: История просмотра
+    Search History Retention: История поиска
+    Keep Forever Placeholder: Хранить бессрочно
     Automatic History Retention Tooltip: Оставьте поле пустым, чтобы хранить историю бессрочно. Если сохранить число, старые записи будут удалены сразу, а затем будут удаляться автоматически, пока приложение открыто.
-    Automatic Search History Retention: Автоматическое хранение истории поиска (дней)
-    Automatic Search History Retention Tooltip: Оставьте поле пустым, чтобы хранить историю поиска бессрочно. Если сохранить число, старые запросы будут удалены сразу, а затем будут удаляться автоматически, пока приложение открыто.
     History Retention Saved: Срок хранения истории сохранён
     Invalid History Retention Days: Введите целое число дней больше нуля
     Enable Watch Statistics: Включить статистику просмотров
@@ -1340,6 +1343,7 @@ Settings:
     Channel playback speeds imported: "Импортирована скорость воспроизведения {count} канала | Импортированы скорости воспроизведения {count} каналов | Импортированы скорости воспроизведения {count} каналов"
     Channels not found: "Не удалось найти {count} канал | Не удалось найти {count} канала | Не удалось найти {count} каналов"
     Playlists have been successfully imported: "Успешно импортирован {count}/{total} плейлист | Успешно импортировано {count}/{total} плейлиста | Успешно импортировано {count}/{total} плейлистов"
+    Import subscription groups hint: Чтобы распределить каналы по группам, добавьте в файле .csv после названия канала столбец с названиями групп через точку с запятой или импортируйте файл .opml с папками. Недостающие группы будут созданы.
   Sync Settings:
     Signed Out After Restore: 'Выполнен выход из синхронизации, так как эти данные приложения восстановлены из резервной копии или с другого устройства. Войдите снова, чтобы синхронизировать это устройство.'
     Revoke Session Tabs Warning: "Синхронизированные наборы вкладок этого устройства также будут удалены."
@@ -1974,6 +1978,14 @@ Video:
       Load: "Загрузить файл субтитров…"
       Subtitle Files: "Файлы субтитров"
       Error: "Не удалось загрузить файл субтитров. Выберите файл SRT или WebVTT."
+    Timestamp Notes:
+      Take Note: Сделать заметку с отметкой времени
+      Note at {time}: Заметка на {time}
+      Note: Заметка
+      Add to Obsidian: Добавить в Obsidian
+      Copy as Markdown: Копировать как Markdown
+      Copied: Заметка скопирована как Markdown
+      Obsidian Failed: Не удалось открыть Obsidian
   External Media:
     Dislikes: "Дизлайк | Дизлайки | Дизлайков"
     Reposts: "Репост | Репосты | Репостов"
@@ -2207,6 +2219,7 @@ Comments:
   Highlighted comment: Выделенный комментарий
   Highlighted reply: Выделенный ответ
   Search loaded comments: Поиск по загруженным комментариям
+  Close search: Закрыть поиск
   Loaded comment search result count: '{count} из {total} загруженных комментариев | {count} из {total} загруженных комментариев | {count} из {total} загруженных комментариев'
   No loaded comments match your filters: Нет загруженных комментариев, соответствующих фильтрам
   YouTube comment link copied to clipboard: Ссылка на комментарий YouTube скопирована в буфер обмена
@@ -2301,6 +2314,7 @@ Tooltips:
     Concurrent Preloads: "Максимальное количество процессов yt-dlp, используемых для одновременной предзагрузки видео. Более высокие значения требуют больше ресурсов процессора, памяти и пропускной способности сети."
     Ignore System Rotation Lock for Fullscreen: Поворачивайте устройство, чтобы входить в полноэкранный режим и выходить из него, даже если автоповорот в Android отключён.
     Ask Before Preloading Large Playlists: "Запрашивает подтверждение перед предзагрузкой всех видео плейлиста, в котором больше {count} видео."
+    Obsidian Vault: Название хранилища Obsidian для заметок с отметками времени. Если оно задано, заметки можно добавлять в Obsidian. Заметки к каждому видео собираются в заметке с названием видео в папке хранилища для новых заметок.
   Download Settings:
     Download Folder: Видео сохраняются в эту папку. Оставьте поле пустым, чтобы использовать системную папку «Загрузки».
     Global Additional yt-dlp Arguments: Дополнительные аргументы командной строки, передаваемые yt-dlp при каждой загрузке, например --cookies-from-browser firefox.

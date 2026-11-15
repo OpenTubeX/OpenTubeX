@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises'
 import vm from 'node:vm'
 import { SyncLiveConnectionState } from '../../src/renderer/helpers/sync-server-live.js'
 import { createStore } from 'vuex'
+import { toRaw } from 'vue'
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { importWithStubs, sourceUrl } from '../helpers/module-stubs.mjs'
@@ -106,6 +107,7 @@ async function profileChangeFixture() {
     THEME_BG_COLOR: 'theme',
     THEME_TEXT_COLOR: 'theme',
     getProfileWithUpdatedSubscriptionDetails,
+    toRaw,
     copySubscriptionChannelSettings,
     deepCopy: value => JSON.parse(JSON.stringify(value)),
     DBProfileHandlers: {

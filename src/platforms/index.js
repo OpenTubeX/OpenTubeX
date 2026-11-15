@@ -1,4 +1,5 @@
 // @ts-check
+import mediaccc from './mediaccc.js'
 import odysee from './odysee.js'
 import peertube from './peertube.js'
 import rumble from './rumble.js'
@@ -15,7 +16,7 @@ import twitch from './twitch.js'
  * PeerTube comes last, as it recognizes channel paths on any host.
  * @type {Platform[]}
  */
-export const PLATFORMS = [twitch, soundcloud, odysee, rumble, peertube]
+export const PLATFORMS = [twitch, soundcloud, odysee, rumble, mediaccc, peertube]
 
 /** @type {Record<string, string[]>} */
 export const PLATFORM_ICONS = {
@@ -23,6 +24,7 @@ export const PLATFORM_ICONS = {
   soundcloud: ['fab', 'soundcloud'],
   odysee: ['fab', 'odysee'],
   rumble: ['fab', 'rumble'],
+  mediaccc: ['fab', 'ccc'],
   peertube: ['fab', 'peertube']
 }
 
@@ -37,11 +39,14 @@ export function getPlatform(id) {
 /**
  * The platform and ID of the channel a web page belongs to.
  * @param {unknown} url
+ * @param {{ anyHost?: boolean }} [options] `anyHost: false` skips PeerTube,
+ * whose channel paths also appear on other sites, such as Lemmy communities
  * @returns {{ platform: string, id: string } | null}
  */
-export function findPlatformChannel(url) {
+export function findPlatformChannel(url, { anyHost = true } = {}) {
   if (typeof url !== 'string') return null
   for (const platform of PLATFORMS) {
+    if (!anyHost && platform === peertube) continue
     const id = platform.parseChannelUrl(url)
     if (id) return { platform: platform.id, id }
   }

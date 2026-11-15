@@ -242,10 +242,10 @@ Subscriptions:
     Platform: Llwyfan
     All Platforms: Pob llwyfan
     Followed Channels: Sianeli rydych chi'n eu dilyn ar lwyfannau eraill
-    Description: Dilynwch sianeli ar Twitch, SoundCloud, PeerTube, Rumble ac Odysee i weld eu huwchlwythiadau yn y tab Llwyfannau yn eich tanysgrifiadau. Dewch o hyd i sianeli gyda'r chwiliad, neu ychwanegwch nhw drwy gyfeiriad eu tudalen. Mae eu cyfryngau'n chwarae gyda yt-dlp.
+    Description: Dilynwch sianeli ar Twitch, SoundCloud, PeerTube, Rumble, Odysee a media.ccc.de i weld eu huwchlwythiadau yn y tab Llwyfannau yn eich tanysgrifiadau. Dewch o hyd i sianeli gyda'r chwiliad, neu ychwanegwch nhw drwy gyfeiriad eu tudalen. Mae eu cyfryngau'n chwarae gyda yt-dlp.
     Add Channel: Ychwanegu Sianel
     Channel URL: Cyfeiriad y sianel
-    Invalid Channel: Rhowch gyfeiriad tudalen sianel ar Twitch, SoundCloud, PeerTube, Rumble neu Odysee.
+    Invalid Channel: Rhowch gyfeiriad tudalen sianel ar Twitch, SoundCloud, PeerTube, Rumble, Odysee neu media.ccc.de.
     Channel Not Found: Does dim sianel yn y cyfeiriad hwn.
     Channel Already Followed: Rydych eisoes yn dilyn y sianel hon.
     Channel Could Not Be Loaded: Doedd dim modd llwytho'r sianel.
@@ -1005,11 +1005,14 @@ Settings:
       Viewing Modes: Moddau gwylio
       Shorts: Shorts
       Screenshots: Sgrinluniau
+      Timestamp Notes: Nodiadau Stamp Amser
     Enable FCast: "Galluogi FCast"
     Screenshot:
       Legacy Formats: "Fformatau hŷn"
       Modern Formats: "Fformatau modern"
     Ask Before Preloading Large Playlists: "Gofyn cyn rhaglwytho rhestrau chwarae mawr"
+    Timestamp Notes:
+      Obsidian Vault: Claddgell Obsidian
   Channel Settings:
     Channel Settings: Gosodiadau sianeli
     Channel Settings Description: Cofiwch y gosodiadau a ddewiswch wrth wylio ar gyfer pob sianel ar wahân, fel eu bod yn cael eu gosod eto y tro nesaf y byddwch yn gwylio un o'i fideos.
@@ -1147,11 +1150,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: "Gwiriadau cysylltiad rhyngrwyd"
     Internet Connectivity Checks Tooltip: "Yn anfon ceisiadau bach at weinydd a gynhelir gan GrapheneOS i wirio mynediad i’r rhyngrwyd."
-    Automatic History Retention: Cadw hanes yn awtomatig (diwrnodau)
-    Automatic History Retention Placeholder: Gadewch yn wag i'w gadw am byth
+    Automatic History Deletion: Dileu'r hanes yn awtomatig ar ôl (diwrnodau)
+    Watch History Retention: Hanes gwylio
+    Search History Retention: Hanes chwilio
+    Keep Forever Placeholder: Cadw am byth
     Automatic History Retention Tooltip: Gadewch yn wag i gadw'r hanes am byth. Bydd cadw rhif yn dileu cofnodion hŷn nawr ac yn awtomatig tra bo'r ap ar agor.
-    Automatic Search History Retention: Cadw hanes chwilio yn awtomatig (diwrnodau)
-    Automatic Search History Retention Tooltip: Gadewch yn wag i gadw'r hanes chwilio am byth. Bydd cadw rhif yn dileu chwiliadau hŷn nawr ac yn awtomatig tra bo'r ap ar agor.
     History Retention Saved: Mae'r cyfnod cadw hanes wedi'i gadw
     Invalid History Retention Days: Rhowch nifer cyfan o ddiwrnodau sy'n fwy na sero
     Enable Watch Statistics: Galluogi ystadegau gwylio
@@ -1384,6 +1387,7 @@ Settings:
     Channel playback speeds imported: "Wedi mewnforio cyflymderau chwarae {count} o sianeli | Wedi mewnforio cyflymder chwarae {count} sianel | Wedi mewnforio cyflymderau chwarae {count} sianel | Wedi mewnforio cyflymderau chwarae {count} sianel | Wedi mewnforio cyflymderau chwarae {count} sianel | Wedi mewnforio cyflymderau chwarae {count} o sianeli"
     Channels not found: "Methwyd dod o hyd i {count} o sianeli | Methwyd dod o hyd i {count} sianel | Methwyd dod o hyd i {count} sianel | Methwyd dod o hyd i {count} sianel | Methwyd dod o hyd i {count} sianel | Methwyd dod o hyd i {count} o sianeli"
     Playlists have been successfully imported: "Mewnforiwyd {count}/{total} rhestr chwarae yn llwyddiannus | Mewnforiwyd 1/{total} rhestr chwarae yn llwyddiannus | Mewnforiwyd {count}/{total} rhestr chwarae yn llwyddiannus | Mewnforiwyd {count}/{total} rhestr chwarae yn llwyddiannus | Mewnforiwyd {count}/{total} rhestr chwarae yn llwyddiannus | Mewnforiwyd {count}/{total} rhestr chwarae yn llwyddiannus"
+    Import subscription groups hint: I drefnu sianeli yn grwpiau, ychwanegwch golofn ar ôl teitl y sianel mewn ffeil .csv gydag enwau grwpiau wedi'u gwahanu gan hanner colonau, neu mewnforiwch ffeil .opml gyda ffolderi. Caiff grwpiau coll eu creu.
   Sync Settings:
     Signed Out After Restore: 'Cafodd cysoni ei allgofnodi oherwydd i ddata''r ap hwn gael ei adfer o gopi wrth gefn neu o ddyfais arall. Mewngofnodwch eto i gysoni''r ddyfais hon.'
     Revoke Session Tabs Warning: "Bydd setiau tabiau wedi’u cysoni’r ddyfais hon hefyd yn cael eu dileu."
@@ -2038,6 +2042,14 @@ Video:
       Load: "Llwytho ffeil isdeitlau…"
       Subtitle Files: "Ffeiliau isdeitlau"
       Error: "Methu llwytho'r ffeil isdeitlau. Dewiswch ffeil SRT neu WebVTT."
+    Timestamp Notes:
+      Take Note: Cymryd Nodyn Stamp Amser
+      Note at {time}: Nodyn am {time}
+      Note: Nodyn
+      Add to Obsidian: Ychwanegu at Obsidian
+      Copy as Markdown: Copïo fel Markdown
+      Copied: Copïwyd y nodyn fel Markdown
+      Obsidian Failed: Methu agor Obsidian
   Station: Gorsaf
   Playlist:
     Unavailable videos are hidden: Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae 1 fideo nad yw ar gael wedi'i guddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio
@@ -2277,6 +2289,7 @@ Comments:
   Highlighted comment: Sylw wedi'i amlygu
   Highlighted reply: Ymateb wedi'i amlygu
   Search loaded comments: Chwilio sylwadau wedi'u llwytho
+  Close search: "Cau'r chwiliad"
   Loaded comment search result count: '{count} o {total} o sylwadau wedi''u llwytho | 1 o {total} o sylwadau wedi''u llwytho | {count} o {total} o sylwadau wedi''u llwytho | {count} o {total} o sylwadau wedi''u llwytho | {count} o {total} o sylwadau wedi''u llwytho | {count} o {total} o sylwadau wedi''u llwytho'
   No loaded comments match your filters: Nid oes unrhyw sylwadau wedi'u llwytho yn cyfateb i'ch hidlyddion
   YouTube comment link copied to clipboard: Wedi copïo dolen sylw YouTube i'r clipfwrdd
@@ -2371,6 +2384,7 @@ Tooltips:
     Concurrent Preloads: "Uchafswm nifer y prosesau yt-dlp a ddefnyddir i raglwytho fideos ar yr un pryd. Mae gwerthoedd uwch yn defnyddio mwy o CPU, cof a lled band rhwydwaith."
     Ignore System Rotation Lock for Fullscreen: Cylchdrowch y ddyfais yn gorfforol i agor a chau sgrin lawn hyd yn oed pan fydd cylchdroi awtomatig Android wedi’i ddiffodd.
     Ask Before Preloading Large Playlists: "Yn gofyn am gadarnhad cyn rhaglwytho pob fideo mewn rhestr chwarae gyda mwy na {count} fideo."
+    Obsidian Vault: Enw'r gladdgell Obsidian ar gyfer nodiadau stamp amser. Pan gaiff ei gosod, gellir ychwanegu nodiadau at Obsidian. Caiff nodiadau pob fideo eu casglu mewn nodyn wedi'i enwi ar ôl y fideo, yn ffolder y gladdgell ar gyfer nodiadau newydd.
   Download Settings:
     Download Folder: Caiff fideos eu cadw yn y ffolder hon. Gadewch yn wag i ddefnyddio ffolder Lawrlwythiadau eich system.
     Global Additional yt-dlp Arguments: Ymresymiadau llinell orchymyn ychwanegol a drosglwyddir i yt-dlp ar gyfer pob lawrlwythiad, er enghraifft --cookies-from-browser firefox.

@@ -57,9 +57,10 @@ html[data-overlayscrollbars-initialize]::-webkit-scrollbar,
 
   /* Tracks stick out of this box to follow the scroll offset. Layout
      containment draws and hit-tests them there without letting them extend
-     the container's scroll range. */
-  contain: size layout style;
-  container-type: size;
+     the container's scroll range. Size containment would make the bar a
+     reflow root in Firefox, whose reflows inside it, such as a hovered handle
+     growing, drop the track's sticky offset until the container scrolls. */
+  contain: layout style;
   overflow-anchor: none;
   pointer-events: none;
   opacity: 0;
@@ -126,22 +127,23 @@ body > .os-scrollbar-vertical {
 }
 
 /* A sticky track can only move within its containing block, so this one
-   reaches as far as the container scrolls. */
+   reaches as far as the container scrolls. The track inherits the travel
+   and subtracts it again to match the bar. */
 .os-scrollbar-track-host {
-  inline-size: calc(100cqi + var(--os-track-travel-inline, 0px));
-  block-size: calc(100cqb + var(--os-track-travel-block, 0px));
+  inline-size: calc(100% + var(--os-track-travel-inline, 0px));
+  block-size: calc(100% + var(--os-track-travel-block, 0px));
 }
 
 /* Sticky offsets follow the content's scroll offset in the same frame, also
-   when the compositor draws the content late. See updateStickyOffsets. */
+   when the compositor draws the content late. See applyStickyGeometry. */
 .os-scrollbar-track {
   position: sticky;
   inset-block-start: var(--os-track-sticky-block, auto);
   inset-inline-start: var(--os-track-sticky-inline, auto);
   box-sizing: border-box;
   container-type: size;
-  inline-size: 100cqi;
-  block-size: 100cqb;
+  inline-size: calc(100% - var(--os-track-travel-inline, 0px));
+  block-size: calc(100% - var(--os-track-travel-block, 0px));
   pointer-events: none;
 }
 

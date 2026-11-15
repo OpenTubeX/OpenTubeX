@@ -180,7 +180,7 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, onMounted, ref, shallowRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { Translation as I18nT, useI18n } from 'vue-i18n'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 
@@ -282,6 +282,13 @@ const cookieSearchFailed = ref(false)
 const supportsCookieSearch = supportsYtDlp && !process.env.IS_IOS
 const cookiesConfigured = computed(() => hasConfiguredRestrictedPlaybackAuthentication(store.getters, supportsCookieSearch))
 let searchRequestId = 0
+
+// A search finishing after the page closed must not fill caches or start
+// publication date requests for results nobody sees.
+onBeforeUnmount(() => {
+  searchRequestId++
+  abortSearchRequest()
+})
 
 const query = ref('')
 const processedQuery = computed(() => query.value.trim())
@@ -419,6 +426,7 @@ function updateSearchHistoryEntry(searchSettings) {
 
 function checkSearchCache(payload) {
   searchRequestId++
+  abortSearchRequest()
   // Other platforms search on their own
   if (searchPlatform.value !== 'youtube') {
     isLoading.value = false
@@ -479,16 +487,25 @@ function checkSearchCache(payload) {
   }
 }
 
+// Cancels the local search that a newer one or leaving the page replaced.
+let searchAbortController = null
+
+function abortSearchRequest() {
+  searchAbortController?.abort()
+  searchAbortController = null
+}
+
 async function performSearchLocal(payload) {
   isLoading.value = true
   const requestId = searchRequestId
+  searchAbortController = new AbortController()
 
   try {
     const response = await getLocalSearchResults(
       payload.query,
       payload.searchSettings,
       showFamilyFriendlyOnly.value,
-      undefined,
+      searchAbortController.signal,
       spellCorrection.value
     )
     if (requestId !== searchRequestId) return

@@ -262,10 +262,10 @@ Subscriptions:
     Platform: Platformo
     All Platforms: Ĉiuj platformoj
     Followed Channels: Sekvataj kanaloj en aliaj platformoj
-    Description: Sekvu kanalojn en Twitch, SoundCloud, PeerTube, Rumble kaj Odysee por vidi iliajn alŝutaĵojn en la langeto Platformoj de viaj abonoj. Trovu kanalojn per la serĉo, aŭ aldonu ilin per la adreso de ilia paĝo. Iliaj aŭdvidaĵoj ludiĝas per yt-dlp.
+    Description: Sekvu kanalojn en Twitch, SoundCloud, PeerTube, Rumble, Odysee kaj media.ccc.de por vidi iliajn alŝutaĵojn en la langeto Platformoj de viaj abonoj. Trovu kanalojn per la serĉo, aŭ aldonu ilin per la adreso de ilia paĝo. Iliaj aŭdvidaĵoj ludiĝas per yt-dlp.
     Add Channel: Aldoni kanalon
     Channel URL: Adreso de kanalo
-    Invalid Channel: Enigu la adreson de kanala paĝo en Twitch, SoundCloud, PeerTube, Rumble aŭ Odysee.
+    Invalid Channel: Enigu la adreson de kanala paĝo en Twitch, SoundCloud, PeerTube, Rumble, Odysee aŭ media.ccc.de.
     Channel Not Found: Ne estas kanalo ĉe ĉi tiu adreso.
     Channel Already Followed: Vi jam sekvas ĉi tiun kanalon.
     Channel Could Not Be Loaded: Ne eblis ŝargi la kanalon.
@@ -882,6 +882,7 @@ Settings:
       Viewing Modes: Spektoreĝimoj
       Shorts: Videaĵetoj
       Screenshots: Ekrankopioj
+      Timestamp Notes: Tempomarkaj notoj
     Lights Off: Lumoj estingitaj
     Show Lights Off Toggle: Montri baskulon de estingitaj lumoj
     Show Volume Boost Toggle: Montri baskulon de laŭteca plifortigo
@@ -1043,6 +1044,8 @@ Settings:
     Enable Google Cast: Ŝalti Google Cast
     Enable FCast: Ŝalti FCast
     Ask Before Preloading Large Playlists: "Demandi antaŭ antaŭŝargi grandajn ludlistojn"
+    Timestamp Notes:
+      Obsidian Vault: Obsidian-trezorejo
   Channel Settings:
     Channel Settings: Kanalaj agordoj
     Channel Settings Description: Memori la agordojn, kiujn vi elektas dum spektado, aparte por ĉiu kanalo, por ke ili estu reaplikitaj la venontan fojon, kiam vi spektos unu el ĝiaj videaĵoj.
@@ -1180,11 +1183,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: Kontroloj de interreta konekteco
     Internet Connectivity Checks Tooltip: Sendas malgrandajn petojn al servilo gastigita de GrapheneOS por kontroli interretan aliron.
-    Automatic History Retention: Aŭtomata konservado de historio (tagoj)
-    Automatic History Retention Placeholder: Lasu malplena por konservi por ĉiam
+    Automatic History Deletion: Aŭtomate forigi historion post (tagoj)
+    Watch History Retention: Spekta historio
+    Search History Retention: Serĉa historio
+    Keep Forever Placeholder: Konservi por ĉiam
     Automatic History Retention Tooltip: Lasu malplena por konservi la historion por ĉiam. Konservi nombron forigas pli malnovajn erojn nun kaj aŭtomate dum la aplikaĵo estas malfermita.
-    Automatic Search History Retention: Aŭtomata konservado de serĉhistorio (tagoj)
-    Automatic Search History Retention Tooltip: Lasu malplena por konservi la serĉhistorion por ĉiam. Konservi nombron forigas pli malnovajn serĉojn nun kaj aŭtomate dum la aplikaĵo estas malfermita.
     History Retention Saved: La konservado de historio estis konservita
     Invalid History Retention Days: Enigu entjeran nombron de tagoj pli grandan ol nulo
     Enable Watch Statistics: Ŝalti spektajn statistikojn
@@ -1416,6 +1419,7 @@ Settings:
     Channel playback speeds imported: Enportis la ludrapidon de {count} kanalo | Enportis la ludrapidojn de {count} kanaloj
     Channels not found: '{count} kanalo ne troviĝis | {count} kanaloj ne troviĝis'
     Playlists have been successfully imported: "1/{total} ludlisto sukcese importita | {count}/{total} ludlistoj sukcese importitaj"
+    Import subscription groups hint: Por ordigi kanalojn en grupojn, aldonu kolumnon post la kanaltitolo en .csv-dosiero kun grupnomoj apartigitaj per punktokomoj, aŭ importu .opml-dosieron kun dosierujoj. Mankantaj grupoj estas kreataj.
   Sync Settings:
     Signed Out After Restore: 'Sinkronigo estis elsalutita ĉar ĉi tiuj aplikaĵaj datumoj estis restaŭritaj el sekurkopio aŭ el alia aparato. Ensalutu denove por sinkronigi ĉi tiun aparaton.'
     Revoke Session Tabs Warning: La sinkronigitaj langetaroj de ĉi tiu aparato ankaŭ estos forigitaj.
@@ -2081,6 +2085,14 @@ Video:
       Cast: Elsendi al FCast-ricevilo
       No Devices: Neniu FCast-ricevilo trovita
       No Source: Neniu kongrua fluo por FCast
+    Timestamp Notes:
+      Take Note: Fari tempomarkan noton
+      Note at {time}: Noto je {time}
+      Note: Noto
+      Add to Obsidian: Aldoni al Obsidian
+      Copy as Markdown: Kopii kiel Markdown
+      Copied: Noto kopiita kiel Markdown
+      Obsidian Failed: Ne eblis malfermi Obsidian
   Info panel source: 'Fonto: {source}'
   External Player:
     LaunchFailedTemplate: Ne eblis lanĉi {externalPlayer}. Kontrolu, ke ĝi estas instalita, aŭ agordu la vojon al ĝia plenumebla dosiero en la agordoj de ekstera ludilo.
@@ -2288,6 +2300,7 @@ Comments:
   Highlighted comment: Emfazita komento
   Highlighted reply: Emfazita respondo
   Search loaded comments: Serĉi en ŝargitaj komentoj
+  Close search: Fermi serĉon
   Loaded comment search result count: 1 el {total} ŝargitaj komentoj | {count} el {total} ŝargitaj komentoj
   No loaded comments match your filters: Neniu ŝargita komento kongruas kun viaj filtriloj
   YouTube comment link copied to clipboard: Ligilo al komento de YouTube kopiita al la tondujo
@@ -2382,6 +2395,7 @@ Tooltips:
     Concurrent Preloads: La maksimuma nombro de yt-dlp-procezoj uzataj por samtempe antaŭŝargi videaĵojn. Pli altaj valoroj uzas pli da CPU, memoro kaj reta kapacito.
     Ignore System Rotation Lock for Fullscreen: Uzi fizikan rotacion de la aparato por eniri kaj eliri el plenekrana reĝimo eĉ kiam la aŭtomata rotacio de Android estas malŝaltita.
     Ask Before Preloading Large Playlists: "Petas konfirmon antaŭ antaŭŝargi ĉiujn videaĵojn de ludlisto kun pli ol {count} videaĵoj."
+    Obsidian Vault: Nomo de la Obsidian-trezorejo por tempomarkaj notoj. Se ĝi estas agordita, notoj aldoneblas al Obsidian. La notoj de ĉiu video estas kolektataj en noto nomita laŭ la video, en la dosierujo de la trezorejo por novaj notoj.
   Download Settings:
     Download Folder: Videaĵoj estas konservataj en ĉi tiu dosierujo. Lasu malplena por uzi la elŝutan dosierujon de via sistemo.
     Global Additional yt-dlp Arguments: Aldonaj komandliniaj argumentoj donataj al yt-dlp por ĉiu elŝuto, ekzemple --cookies-from-browser firefox.

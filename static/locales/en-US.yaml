@@ -390,10 +390,10 @@ Subscriptions:
     Platform: Platform
     All Platforms: All platforms
     Followed Channels: Followed channels on other platforms
-    Description: Follow channels on Twitch, SoundCloud, PeerTube, Rumble and Odysee to see their uploads in the Platforms tab of your subscriptions. Find channels with the search, or add them by the address of their page. Their media plays with yt-dlp.
+    Description: Follow channels on Twitch, SoundCloud, PeerTube, Rumble, Odysee and media.ccc.de to see their uploads in the Platforms tab of your subscriptions. Find channels with the search, or add them by the address of their page. Their media plays with yt-dlp.
     Add Channel: Add Channel
     Channel URL: Channel address
-    Invalid Channel: Enter the address of a channel page on Twitch, SoundCloud, PeerTube, Rumble or Odysee.
+    Invalid Channel: Enter the address of a channel page on Twitch, SoundCloud, PeerTube, Rumble, Odysee or media.ccc.de.
     Channel Not Found: There is no channel at this address.
     Channel Already Followed: You already follow this channel.
     Channel Could Not Be Loaded: The channel could not be loaded.
@@ -1293,6 +1293,7 @@ Settings:
       Viewing Modes: Viewing Modes
       Shorts: Shorts
       Screenshots: Screenshots
+      Timestamp Notes: Timestamp Notes
     Lights Off: Lights Off
     Show Lights Off Toggle: Show Lights Off Toggle
     Show Volume Boost Toggle: Show Volume Boost Toggle
@@ -1492,6 +1493,8 @@ Settings:
       Rewind Buffer Tooltip: 'How much of the video you already watched stays loaded. Default: {value}'
       Buffer Before Playing: Buffer Before Playing
       Buffer Before Playing Tooltip: 'How much video has to load before playback starts, or resumes after stalling. Default: {value}'
+    Timestamp Notes:
+      Obsidian Vault: Obsidian Vault
     Screenshot:
       Enable: Enable Screenshot
       Mode: Screenshot Mode
@@ -1666,11 +1669,11 @@ Settings:
     Internet Connectivity Checks Tooltip: "Sends small requests to a server hosted by GrapheneOS to check internet access."
     Privacy Settings: Privacy
     Remember History: Remember Watch History
-    Automatic History Retention: Automatic History Retention (Days)
-    Automatic History Retention Placeholder: Leave blank to keep forever
+    Automatic History Deletion: Automatically Delete History After (Days)
+    Watch History Retention: Watch History
+    Search History Retention: Search History
+    Keep Forever Placeholder: Keep forever
     Automatic History Retention Tooltip: Leave blank to keep history forever. Saving a number removes older entries now and automatically while the app is open.
-    Automatic Search History Retention: Automatic Search History Retention (Days)
-    Automatic Search History Retention Tooltip: Leave blank to keep search history forever. Saving a number removes older searches now and automatically while the app is open.
     History Retention Saved: History retention has been saved
     Invalid History Retention Days: Enter a whole number of days greater than zero
     Enable Watch Statistics: Enable Watch Statistics
@@ -2026,6 +2029,7 @@ Settings:
     Non-transferable setting key: 'Non-transferable setting key: {key}'
     How do I import my subscriptions?: How do I import my subscriptions?
     Import subscriptions formats: 'Supported formats: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube backup or FreeTube export (.json)'
+    Import subscription groups hint: 'To sort channels into groups, add a column after the channel title in a .csv file with group names separated by semicolons, or import an .opml file with folders. Missing groups are created.'
     Import history formats: 'Supported formats: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube backup (.json)'
     Import playlists formats: 'Supported formats: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
     Import search history formats: 'Supported formats: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
@@ -2871,6 +2875,14 @@ Video:
     Full Window: Full Window
     Exit Full Window: Exit Full Window
     Take Screenshot: Take Screenshot
+    Timestamp Notes:
+      Take Note: Take Timestamp Note
+      Note at {time}: Note at {time}
+      Note: Note
+      Add to Obsidian: Add to Obsidian
+      Copy as Markdown: Copy as Markdown
+      Copied: Note copied as Markdown
+      Obsidian Failed: Could not open Obsidian
     Show Stats: Show Stats
     Hide Stats: Hide Stats
     Hide Annotations: Hide annotations
@@ -3308,6 +3320,7 @@ Comments:
   Highlighted comment: Highlighted comment
   Highlighted reply: Highlighted reply
   Search loaded comments: Search loaded comments
+  Close search: Close search
   Loaded comment search result count: 1 of {total} loaded comments | {count} of {total} loaded comments
   No loaded comments match your filters: No loaded comments match your filters
   YouTube comment link copied to clipboard: YouTube comment link copied to clipboard
@@ -3400,6 +3413,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Script file path to run when an IP block is detected. OpenTubeX waits for it to finish, then reloads the video. If fallback is enabled, it runs only when fallback also fails.
   Player Settings:
+    Obsidian Vault: Name of the Obsidian vault for timestamp notes. When set, notes can be added to Obsidian. The notes of each video are collected in a note named after the video, in the vault's folder for new notes.
     Enable Caption Translations: When enabled, the captions button and C shortcut prefer an automatically translated track in the preferred caption language when the video does not provide a matching original track.
     Proxy Videos Through Invidious: Will connect to Invidious to serve videos instead
       of making a direct connection to YouTube.

@@ -94,7 +94,7 @@ test('phone panel buttons open their sheets with Space instead of toggling playb
   for (const [button, title] of [['.phoneCommentsOpen', 'Comments'], ['.phoneQueueButton', 'Queue']]) {
     const paused = await video.evaluate(element => element.paused)
     await page.locator(button).press('Space')
-    await expect(sheet.locator('.mobileSheetHeader')).toContainText(title)
+    await expect(sheet.locator('.mobileSheetHeader').getByRole('heading', { name: title })).toBeVisible()
     expect(await video.evaluate(element => element.paused), button).toBe(paused)
     await sheet.getByRole('button', { name: 'Close', exact: true }).click()
     await expect(sheet).toHaveCount(0)

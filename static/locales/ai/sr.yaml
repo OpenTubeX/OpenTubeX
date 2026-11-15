@@ -246,10 +246,10 @@ Subscriptions:
     Platform: Платформа
     All Platforms: Све платформе
     Followed Channels: Праћени канали на другим платформама
-    Description: Пратите канале на платформама Twitch, SoundCloud, PeerTube, Rumble и Odysee да бисте видели њихове објаве на картици Платформе у својим претплатама. Пронађите канале претрагом или их додајте помоћу адресе њихове странице. Њихови медији се репродукују помоћу yt-dlp.
+    Description: Пратите канале на платформама Twitch, SoundCloud, PeerTube, Rumble, Odysee и media.ccc.de да бисте видели њихове објаве на картици Платформе у својим претплатама. Пронађите канале претрагом или их додајте помоћу адресе њихове странице. Њихови медији се репродукују помоћу yt-dlp.
     Add Channel: Додај канал
     Channel URL: Адреса канала
-    Invalid Channel: Унесите адресу странице канала на платформи Twitch, SoundCloud, PeerTube, Rumble или Odysee.
+    Invalid Channel: Унесите адресу странице канала на платформи Twitch, SoundCloud, PeerTube, Rumble, Odysee или media.ccc.de.
     Channel Not Found: На овој адреси нема канала.
     Channel Already Followed: Већ пратите овај канал.
     Channel Could Not Be Loaded: Канал није могао да се учита.
@@ -1028,8 +1028,11 @@ Settings:
       Viewing Modes: Режими приказа
       Shorts: Shorts
       Screenshots: Снимци екрана
+      Timestamp Notes: Белешке са временским ознакама
     Enable FCast: "Омогући FCast"
     Ask Before Preloading Large Playlists: "Питај пре учитавања великих плејлиста унапред"
+    Timestamp Notes:
+      Obsidian Vault: Obsidian трезор
   Channel Settings:
     Channel Settings: Подешавања канала
     Channel Settings Description: За сваки канал засебно запамти подешавања која изабереш током гледања, како би поново била примењена када следећи пут гледаш неки његов видео-снимак.
@@ -1167,11 +1170,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: "Провере интернет везе"
     Internet Connectivity Checks Tooltip: "Шаље мале захтеве серверу чији је домаћин GrapheneOS ради провере приступа интернету."
-    Automatic History Retention: Аутоматско чување историје (у данима)
-    Automatic History Retention Placeholder: Оставите празно да би се чувала заувек
+    Automatic History Deletion: Аутоматски брисати историју након (дана)
+    Watch History Retention: Историја гледања
+    Search History Retention: Историја претраге
+    Keep Forever Placeholder: Чувај заувек
     Automatic History Retention Tooltip: Оставите празно да би се историја чувала заувек. Чувањем броја старији уноси се уклањају одмах, а затим и аутоматски док је апликација отворена.
-    Automatic Search History Retention: Аутоматско чување историје претраге (у данима)
-    Automatic Search History Retention Tooltip: Оставите празно да би се историја претраге чувала заувек. Чувањем броја старије претраге се уклањају одмах, а затим и аутоматски док је апликација отворена.
     History Retention Saved: Период чувања историје је сачуван
     Invalid History Retention Days: Унесите цео број дана већи од нуле
     Enable Watch Statistics: Омогући статистику гледања
@@ -1421,6 +1424,7 @@ Settings:
     Channel playback speeds imported: "Увезена је брзина репродукције за {count} канал | Увезене су брзине репродукције за {count} канала | Увезене су брзине репродукције за {count} канала"
     Channels not found: "{count} канал није пронађен | {count} канала нису пронађена | {count} канала није пронађено"
     Playlists have been successfully imported: "Успешно увезена {count}/{total} плејлиста | Успешно увезене {count}/{total} плејлисте | Успешно увезено {count}/{total} плејлиста"
+    Import subscription groups hint: За разврставање канала у групе додај колону после наслова канала у .csv датотеци са називима група одвојеним тачком и зарезом или увези .opml датотеку са фасциклама. Недостајуће групе се праве.
   Sync Settings:
     Signed Out After Restore: 'Синхронизација је одјављена јер су ови подаци апликације враћени из резервне копије или са другог уређаја. Пријавите се поново да бисте синхронизовали овај уређај.'
     Revoke Session Tabs Warning: "Синхронизовани скупови картица овог уређаја такође ће бити избрисани."
@@ -2077,6 +2081,14 @@ Video:
       Load: "Учитај датотеку титлова…"
       Subtitle Files: "Датотеке титлова"
       Error: "Није могуће учитати датотеку титлова. Изаберите SRT или WebVTT датотеку."
+    Timestamp Notes:
+      Take Note: Направи белешку са временском ознаком
+      Note at {time}: Белешка у {time}
+      Note: Белешка
+      Add to Obsidian: Додај у Obsidian
+      Copy as Markdown: Копирај као Markdown
+      Copied: Белешка је копирана као Markdown
+      Obsidian Failed: Није могуће отворити Obsidian
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Преостало време уводног огласа: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Преостало време до поновног покушаја SABR-а: {remindingTimeSeconds}s'
@@ -2323,6 +2335,7 @@ Comments:
   Highlighted comment: Истакнути коментар
   Highlighted reply: Истакнути одговор
   Search loaded comments: Претражи учитане коментаре
+  Close search: Затвори претрагу
   Loaded comment search result count: '{count} од {total} учитаних коментара | {count} од {total} учитаних коментара | {count} од {total} учитаних коментара'
   No loaded comments match your filters: Ниједан учитани коментар не одговара вашим филтерима
   YouTube comment link copied to clipboard: Веза YouTube коментара је копирана у привремену меморију
@@ -2417,6 +2430,7 @@ Tooltips:
     Concurrent Preloads: "Највећи број yt-dlp процеса који се користе за истовремено предучитавање видео-снимака. Веће вредности користе више процесора, меморије и мрежног протока."
     Ignore System Rotation Lock for Fullscreen: Физички окрените уређај за улазак и излазак из целог екрана, чак и када је аутоматска ротација у Андроиду искључена.
     Ask Before Preloading Large Playlists: "Тражи потврду пре учитавања унапред свих снимака са плејлисте која има више од {count} снимака."
+    Obsidian Vault: Назив Obsidian трезора за белешке са временским ознакама. Када је подешен, белешке се могу додати у Obsidian. Белешке сваког видео снимка прикупљају се у белешци названој по видео снимку, у фасцикли трезора за нове белешке.
   Download Settings:
     Download Folder: Видео-снимци се чувају у овој фасцикли. Оставите празно да бисте користили системску фасциклу за преузимања.
     Global Additional yt-dlp Arguments: Додатни аргументи командне линије који се прослеђују програму yt-dlp при сваком преузимању, на пример --cookies-from-browser firefox.

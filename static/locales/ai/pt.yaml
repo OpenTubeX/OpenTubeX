@@ -242,10 +242,10 @@ Subscriptions:
     Platform: Plataforma
     All Platforms: Todas as plataformas
     Followed Channels: Canais seguidos noutras plataformas
-    Description: Siga canais da Twitch, SoundCloud, PeerTube, Rumble e Odysee para ver as respetivas publicações no separador Plataformas das suas subscrições. Encontre canais através da pesquisa ou adicione-os pelo endereço da respetiva página. O conteúdo multimédia é reproduzido com o yt-dlp.
+    Description: Siga canais da Twitch, SoundCloud, PeerTube, Rumble, Odysee e media.ccc.de para ver as respetivas publicações no separador Plataformas das suas subscrições. Encontre canais através da pesquisa ou adicione-os pelo endereço da respetiva página. O conteúdo multimédia é reproduzido com o yt-dlp.
     Add Channel: Adicionar canal
     Channel URL: Endereço do canal
-    Invalid Channel: Introduza o endereço da página de um canal da Twitch, SoundCloud, PeerTube, Rumble ou Odysee.
+    Invalid Channel: Introduza o endereço da página de um canal da Twitch, SoundCloud, PeerTube, Rumble, Odysee ou media.ccc.de.
     Channel Not Found: Não existe nenhum canal neste endereço.
     Channel Already Followed: Já segue este canal.
     Channel Could Not Be Loaded: Não foi possível carregar o canal.
@@ -1002,11 +1002,14 @@ Settings:
       Viewing Modes: Modos de visualização
       Shorts: Shorts
       Screenshots: Capturas de ecrã
+      Timestamp Notes: Notas com marca temporal
     Enable FCast: "Ativar FCast"
     Screenshot:
       Legacy Formats: "Formatos antigos"
       Modern Formats: "Formatos modernos"
     Ask Before Preloading Large Playlists: "Perguntar antes de pré-carregar listas de reprodução grandes"
+    Timestamp Notes:
+      Obsidian Vault: Cofre do Obsidian
   Channel Settings:
     Channel Settings: Definições dos canais
     Channel Settings Description: Memorizar individualmente para cada canal as definições escolhidas durante a visualização, para que sejam aplicadas quando voltar a ver um dos seus vídeos.
@@ -1144,11 +1147,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: "Verificações da ligação à Internet"
     Internet Connectivity Checks Tooltip: "Envia pequenos pedidos a um servidor alojado pelo GrapheneOS para verificar o acesso à Internet."
-    Automatic History Retention: Retenção automática do histórico (dias)
-    Automatic History Retention Placeholder: Deixar em branco para manter para sempre
+    Automatic History Deletion: Eliminar automaticamente o histórico após (dias)
+    Watch History Retention: Histórico de visualização
+    Search History Retention: Histórico de pesquisa
+    Keep Forever Placeholder: Manter para sempre
     Automatic History Retention Tooltip: Deixe em branco para manter o histórico para sempre. Guardar um número remove agora as entradas mais antigas e passa a removê-las automaticamente enquanto a aplicação estiver aberta.
-    Automatic Search History Retention: Retenção automática do histórico de pesquisa (dias)
-    Automatic Search History Retention Tooltip: Deixe em branco para manter o histórico de pesquisa para sempre. Guardar um número remove agora as pesquisas mais antigas e passa a removê-las automaticamente enquanto a aplicação estiver aberta.
     History Retention Saved: Retenção do histórico guardada
     Invalid History Retention Days: Introduza um número inteiro de dias superior a zero
     Enable Watch Statistics: Ativar estatísticas de visualização
@@ -1380,6 +1383,7 @@ Settings:
     Channel playback speeds imported: "Importada a velocidade de reprodução de {count} canal | Importadas as velocidades de reprodução de {count} de canais | Importadas as velocidades de reprodução de {count} canais"
     Channels not found: "{count} canal não foi encontrado | {count} de canais não foram encontrados | {count} canais não foram encontrados"
     Playlists have been successfully imported: "1/{total} playlist importada com sucesso | {count}/{total} playlists importadas com sucesso | {count}/{total} playlists importadas com sucesso"
+    Import subscription groups hint: Para organizar os canais em grupos, adicione uma coluna após o título do canal num ficheiro .csv com os nomes dos grupos separados por ponto e vírgula, ou importe um ficheiro .opml com pastas. Os grupos em falta são criados.
   Sync Settings:
     Signed Out After Restore: 'A sincronização terminou a sessão porque estes dados da aplicação foram restaurados de uma cópia de segurança ou de outro dispositivo. Inicie sessão novamente para sincronizar este dispositivo.'
     Revoke Session Tabs Warning: "Os conjuntos de separadores sincronizados deste dispositivo também serão eliminados."
@@ -2008,6 +2012,14 @@ Video:
       Load: "Carregar ficheiro de legendas…"
       Subtitle Files: "Ficheiros de legendas"
       Error: "Não foi possível carregar o ficheiro de legendas. Escolha um ficheiro SRT ou WebVTT."
+    Timestamp Notes:
+      Take Note: Criar nota com marca temporal
+      Note at {time}: Nota em {time}
+      Note: Nota
+      Add to Obsidian: Adicionar ao Obsidian
+      Copy as Markdown: Copiar como Markdown
+      Copied: Nota copiada como Markdown
+      Obsidian Failed: Não foi possível abrir o Obsidian
   External Media:
     Dislikes: "Voto negativo | Votos negativos | Votos negativos"
     Reposts: "Republicação | Republicações | Republicações"
@@ -2241,6 +2253,7 @@ Comments:
   Highlighted comment: Comentário destacado
   Highlighted reply: Resposta destacada
   Search loaded comments: Pesquisar nos comentários carregados
+  Close search: Fechar pesquisa
   Loaded comment search result count: 1 de {total} comentários carregados | {count} de {total} comentários carregados | {count} de {total} comentários carregados
   No loaded comments match your filters: Nenhum comentário carregado corresponde aos seus filtros
   YouTube comment link copied to clipboard: Hiperligação do comentário do YouTube copiada para a área de transferência
@@ -2335,6 +2348,7 @@ Tooltips:
     Concurrent Preloads: "O número máximo de processos do yt-dlp utilizados para pré-carregar vídeos ao mesmo tempo. Valores mais elevados utilizam mais CPU, memória e largura de banda da rede."
     Ignore System Rotation Lock for Fullscreen: Rode fisicamente o dispositivo para entrar e sair do ecrã inteiro, mesmo quando a rotação automática do Android está desligada.
     Ask Before Preloading Large Playlists: "Pede confirmação antes de pré-carregar todos os vídeos de uma lista de reprodução com mais de {count} vídeos."
+    Obsidian Vault: Nome do cofre do Obsidian para as notas com marca temporal. Quando definido, as notas podem ser adicionadas ao Obsidian. As notas de cada vídeo são reunidas numa nota com o nome do vídeo, na pasta do cofre para novas notas.
   Download Settings:
     Download Folder: Os vídeos são guardados nesta pasta. Deixe em branco para utilizar a pasta Transferências do sistema.
     Global Additional yt-dlp Arguments: Argumentos adicionais da linha de comandos passados ao yt-dlp em cada descarga, por exemplo --cookies-from-browser firefox.

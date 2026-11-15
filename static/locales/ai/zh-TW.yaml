@@ -242,10 +242,10 @@ Subscriptions:
     Platform: 平台
     All Platforms: 所有平台
     Followed Channels: 在其他平台上追隨的頻道
-    Description: 追隨 Twitch、SoundCloud、PeerTube、Rumble 和 Odysee 上的頻道，即可在訂閱內容的「平台」分頁中查看其上傳內容。您可以透過搜尋尋找頻道，或以頻道頁面的網址新增。其媒體會使用 yt-dlp 播放。
+    Description: 追隨 Twitch、SoundCloud、PeerTube、Rumble、Odysee 和 media.ccc.de 上的頻道，即可在訂閱內容的「平台」分頁中查看其上傳內容。您可以透過搜尋尋找頻道，或以頻道頁面的網址新增。其媒體會使用 yt-dlp 播放。
     Add Channel: 新增頻道
     Channel URL: 頻道網址
-    Invalid Channel: 請輸入 Twitch、SoundCloud、PeerTube、Rumble 或 Odysee 上頻道頁面的網址。
+    Invalid Channel: 請輸入 Twitch、SoundCloud、PeerTube、Rumble、Odysee 或 media.ccc.de 上頻道頁面的網址。
     Channel Not Found: 這個網址沒有頻道。
     Channel Already Followed: 您已追隨這個頻道。
     Channel Could Not Be Loaded: 無法載入頻道。
@@ -1002,11 +1002,14 @@ Settings:
       Viewing Modes: 觀看模式
       Shorts: Shorts
       Screenshots: 螢幕截圖
+      Timestamp Notes: 時間戳記筆記
     Enable FCast: "啟用 FCast"
     Screenshot:
       Legacy Formats: "傳統格式"
       Modern Formats: "現代格式"
     Ask Before Preloading Large Playlists: "預先載入大型播放清單前詢問"
+    Timestamp Notes:
+      Obsidian Vault: Obsidian 儲存庫
   Channel Settings:
     Channel Settings: 頻道設定
     Channel Settings Description: 為各頻道分別記住觀看時選擇的設定，下次觀看該頻道的影片時便會再次套用。
@@ -1144,11 +1147,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: "網際網路連線檢查"
     Internet Connectivity Checks Tooltip: "向 GrapheneOS 託管的伺服器傳送小型請求以檢查網際網路連線。"
-    Automatic History Retention: 自動保留觀看記錄（天）
-    Automatic History Retention Placeholder: 留空則永久保留
+    Automatic History Deletion: 自動刪除紀錄的天數
+    Watch History Retention: 觀看紀錄
+    Search History Retention: 搜尋紀錄
+    Keep Forever Placeholder: 永久保留
     Automatic History Retention Tooltip: 留空會永久保留記錄。儲存天數後，系統會立即移除較舊的項目，並在應用程式開啟期間自動清除。
-    Automatic Search History Retention: 自動保留搜尋記錄（天）
-    Automatic Search History Retention Tooltip: 留空會永久保留搜尋記錄。儲存天數後，系統會立即移除較舊的搜尋，並在應用程式開啟期間自動清除。
     History Retention Saved: 已儲存記錄保留設定
     Invalid History Retention Days: 請輸入大於零的整數天數
     Enable Watch Statistics: 啟用觀看統計
@@ -1380,6 +1383,7 @@ Settings:
     Channel playback speeds imported: "已匯入 {count} 個頻道的播放速度"
     Channels not found: "找不到 {count} 個頻道"
     Playlists have been successfully imported: "已成功匯入 {count}/{total} 個播放清單"
+    Import subscription groups hint: 若要將頻道分入群組，請在 .csv 檔案中的頻道標題後新增一欄，填入以分號分隔的群組名稱，或匯入含有資料夾的 .opml 檔案。不存在的群組會自動建立。
   Sync Settings:
     Signed Out After Restore: '由於此應用程式資料是從備份或其他裝置還原的，同步已登出。請重新登入以同步此裝置。'
     Revoke Session Tabs Warning: "此裝置已同步的分頁集合也將被刪除。"
@@ -2010,6 +2014,14 @@ Video:
       Load: "載入字幕檔案…"
       Subtitle Files: "字幕檔案"
       Error: "無法載入字幕檔案。請選擇 SRT 或 WebVTT 檔案。"
+    Timestamp Notes:
+      Take Note: 記錄時間戳記筆記
+      Note at {time}: '{time} 的筆記'
+      Note: 筆記
+      Add to Obsidian: 新增至 Obsidian
+      Copy as Markdown: 複製為 Markdown
+      Copied: 已將筆記複製為 Markdown
+      Obsidian Failed: 無法開啟 Obsidian
   External Media:
     Dislikes: "倒讚"
     Reposts: "轉發"
@@ -2243,6 +2255,7 @@ Comments:
   Highlighted comment: 精選留言
   Highlighted reply: 精選回覆
   Search loaded comments: 搜尋已載入的留言
+  Close search: 關閉搜尋
   Loaded comment search result count: '已載入的留言中有 {count}/{total} 則符合搜尋'
   No loaded comments match your filters: 已載入的留言中沒有符合篩選條件的內容
   YouTube comment link copied to clipboard: 已將 YouTube 留言連結複製到剪貼簿
@@ -2337,6 +2350,7 @@ Tooltips:
     Concurrent Preloads: "同時用於預先載入影片的 yt-dlp 處理程序數量上限。數值越高，使用的 CPU、記憶體和網路頻寬越多。"
     Ignore System Rotation Lock for Fullscreen: 透過轉動裝置進入和退出全螢幕，即使 Android 的自動旋轉已關閉。
     Ask Before Preloading Large Playlists: "預先載入超過 {count} 部影片的播放清單中的所有影片前要求確認。"
+    Obsidian Vault: 用於時間戳記筆記的 Obsidian 儲存庫名稱。設定後即可將筆記新增至 Obsidian。每部影片的筆記會彙整在以該影片命名的筆記中，位於儲存庫的新筆記資料夾內。
   Download Settings:
     Download Folder: 影片會儲存至此資料夾。留白可使用系統的「下載」資料夾。
     Global Additional yt-dlp Arguments: 每次下載時傳遞給 yt-dlp 的額外命令列引數，例如 --cookies-from-browser firefox。

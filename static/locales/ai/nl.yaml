@@ -244,10 +244,10 @@ Subscriptions:
     Platform: Platform
     All Platforms: Alle platforms
     Followed Channels: Gevolgde kanalen op andere platforms
-    Description: Volg kanalen op Twitch, SoundCloud, PeerTube, Rumble en Odysee om hun uploads te zien op het tabblad Platforms van je abonnementen. Zoek kanalen met de zoekfunctie, of voeg ze toe via het adres van hun pagina. Hun media worden afgespeeld met yt-dlp.
+    Description: Volg kanalen op Twitch, SoundCloud, PeerTube, Rumble, Odysee en media.ccc.de om hun uploads te zien op het tabblad Platforms van je abonnementen. Zoek kanalen met de zoekfunctie, of voeg ze toe via het adres van hun pagina. Hun media worden afgespeeld met yt-dlp.
     Add Channel: Kanaal toevoegen
     Channel URL: Kanaaladres
-    Invalid Channel: Voer het adres in van een kanaalpagina op Twitch, SoundCloud, PeerTube, Rumble of Odysee.
+    Invalid Channel: Voer het adres in van een kanaalpagina op Twitch, SoundCloud, PeerTube, Rumble, Odysee of media.ccc.de.
     Channel Not Found: Er is geen kanaal op dit adres.
     Channel Already Followed: Je volgt dit kanaal al.
     Channel Could Not Be Loaded: Het kanaal kon niet worden geladen.
@@ -1020,8 +1020,11 @@ Settings:
       Viewing Modes: Weergavemodi
       Shorts: Shorts
       Screenshots: Schermafbeeldingen
+      Timestamp Notes: Notities met tijdstempel
     Enable FCast: "FCast inschakelen"
     Ask Before Preloading Large Playlists: "Vragen voordat grote afspeellijsten vooraf worden geladen"
+    Timestamp Notes:
+      Obsidian Vault: Obsidian-kluis
   Channel Settings:
     Channel Settings: Kanaalinstellingen
     Channel Settings Description: Onthoud de instellingen die je tijdens het kijken kiest afzonderlijk voor elk kanaal, zodat ze weer worden toegepast wanneer je een andere video van dat kanaal bekijkt.
@@ -1159,11 +1162,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: "Internetverbinding controleren"
     Internet Connectivity Checks Tooltip: "Stuurt kleine verzoeken naar een server gehost door GrapheneOS om internettoegang te controleren."
-    Automatic History Retention: Geschiedenis automatisch bewaren (dagen)
-    Automatic History Retention Placeholder: Leeg laten om onbeperkt te bewaren
+    Automatic History Deletion: Geschiedenis automatisch verwijderen na (dagen)
+    Watch History Retention: Kijkgeschiedenis
+    Search History Retention: Zoekgeschiedenis
+    Keep Forever Placeholder: Onbeperkt bewaren
     Automatic History Retention Tooltip: Laat dit leeg om de geschiedenis onbeperkt te bewaren. Als je een getal opslaat, worden oudere items nu en automatisch verwijderd zolang de app geopend is.
-    Automatic Search History Retention: Zoekgeschiedenis automatisch bewaren (dagen)
-    Automatic Search History Retention Tooltip: Laat dit leeg om de zoekgeschiedenis onbeperkt te bewaren. Als je een getal opslaat, worden oudere zoekopdrachten nu en automatisch verwijderd zolang de app geopend is.
     History Retention Saved: Bewaartermijn voor geschiedenis is opgeslagen
     Invalid History Retention Days: Voer een geheel aantal dagen groter dan nul in
     Enable Watch Statistics: Kijkstatistieken inschakelen
@@ -1407,6 +1410,7 @@ Settings:
     Channel playback speeds imported: "Afspeelsnelheid van {count} kanaal geïmporteerd | Afspeelsnelheden van {count} kanalen geïmporteerd"
     Channels not found: "{count} kanaal kon niet worden gevonden | {count} kanalen konden niet worden gevonden"
     Playlists have been successfully imported: "1/{total} afspeellijst is geïmporteerd | {count}/{total} afspeellijsten zijn geïmporteerd"
+    Import subscription groups hint: Om kanalen in groepen in te delen, voeg je in een .csv-bestand na de kanaaltitel een kolom toe met groepsnamen, gescheiden door puntkomma's, of importeer je een .opml-bestand met mappen. Ontbrekende groepen worden aangemaakt.
   Sync Settings:
     Signed Out After Restore: 'Synchronisatie is afgemeld omdat deze app-gegevens zijn hersteld vanuit een back-up of vanaf een ander apparaat. Meld je opnieuw aan om dit apparaat te synchroniseren.'
     Revoke Session Tabs Warning: "De gesynchroniseerde tabbladsets van dit apparaat worden ook verwijderd."
@@ -2065,6 +2069,14 @@ Video:
       Load: "Ondertitelbestand laden…"
       Subtitle Files: "Ondertitelbestanden"
       Error: "Het ondertitelbestand kan niet worden geladen. Kies een SRT- of WebVTT-bestand."
+    Timestamp Notes:
+      Take Note: Notitie met tijdstempel maken
+      Note at {time}: Notitie bij {time}
+      Note: Notitie
+      Add to Obsidian: Toevoegen aan Obsidian
+      Copy as Markdown: Kopiëren als Markdown
+      Copied: Notitie gekopieerd als Markdown
+      Obsidian Failed: Kan Obsidian niet openen
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Resterende tijd van preroll-advertentie: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Resterende SABR-wachttijd: {remindingTimeSeconds}s'
@@ -2307,6 +2319,7 @@ Comments:
   Highlighted comment: Uitgelichte reactie
   Highlighted reply: Uitgelicht antwoord
   Search loaded comments: Geladen reacties doorzoeken
+  Close search: Zoeken sluiten
   Loaded comment search result count: 1 van {total} geladen reacties | {count} van {total} geladen reacties
   No loaded comments match your filters: Geen geladen reacties voldoen aan je filters
   YouTube comment link copied to clipboard: Link naar YouTube-reactie naar klembord gekopieerd
@@ -2401,6 +2414,7 @@ Tooltips:
     Concurrent Preloads: "Het maximale aantal yt-dlp-processen dat wordt gebruikt om video's tegelijk vooraf te laden. Hogere waarden gebruiken meer CPU, geheugen en netwerkbandbreedte."
     Ignore System Rotation Lock for Fullscreen: Draai het apparaat om volledig scherm te openen en te sluiten, ook als automatisch draaien in Android uitstaat.
     Ask Before Preloading Large Playlists: "Vraagt om bevestiging voordat alle video’s van een afspeellijst met meer dan {count} video’s vooraf worden geladen."
+    Obsidian Vault: Naam van de Obsidian-kluis voor notities met tijdstempel. Als deze is ingesteld, kunnen notities aan Obsidian worden toegevoegd. De notities van elke video worden verzameld in een notitie met de naam van de video, in de map van de kluis voor nieuwe notities.
   Download Settings:
     Download Folder: Video's worden in deze map opgeslagen. Laat dit leeg om de downloadmap van je systeem te gebruiken.
     Global Additional yt-dlp Arguments: Aanvullende opdrachtregelargumenten die bij elke download aan yt-dlp worden doorgegeven, bijvoorbeeld --cookies-from-browser firefox.

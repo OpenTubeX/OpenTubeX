@@ -744,8 +744,7 @@
       <FtVideoAnnotations
         v-if="!hideAnnotations && !showEndedScreen"
         :active="isActiveTab"
-        :annotations="annotations"
-        :current-time="annotationCurrentTime"
+        :annotations="activeAnnotations"
         :video-aspect-ratio="annotationVideoAspectRatio"
         :video-fit="annotationVideoFit"
       />
@@ -1704,22 +1703,22 @@
           <div
             class="mobileMiniBarProgress"
           >
+            <!-- renderMobileMiniBarProgress writes the progress, so playback does not re-render the player -->
             <div
+              ref="mobileMiniBarProgressFill"
               aria-hidden="true"
-              :style="{ transform: `scaleX(${mobileMiniBarProgress})` }"
             />
             <input
               v-if="scrollMiniPlayerActive"
+              ref="mobileMiniBarSeekInput"
               class="mobileMiniBarSeek"
               :class="{ mobileMiniBarSeeking }"
               type="range"
               min="0"
               max="100"
               step="0.1"
-              :value="mobileMiniBarProgress * 100"
               :disabled="mobileMiniBarSeekDisabled"
               :aria-label="mobileMiniBarSeekLabel"
-              :aria-valuetext="mobileMiniBarSeekValueText"
               @input="handleMobileMiniBarSeekInput"
               @pointerdown.stop="startMobileMiniBarSeek"
               @pointerup="mobileMiniBarSeeking = false"
@@ -1997,11 +1996,19 @@
         <div>
           <dt>{{ $t('Video.Player.Repeat Stats.Time Spent') }}</dt>
           <dd class="repeatStatsTime">
-            {{ repeatStatsTime }}
+            <RepeatStatsTime />
           </dd>
         </div>
       </dl>
     </section>
+    <FtTimestampNotePrompt
+      v-if="timestampNote !== null"
+      :seconds="timestampNote.seconds"
+      :url="timestampNote.url"
+      :title="title"
+      :video-id="videoId"
+      @close="closeTimestampNote"
+    />
   </div>
 </template>
 
@@ -2075,6 +2082,7 @@ import { MusicVisualizerButton } from './player-components/MusicVisualizerButton
 import { QuickPlaybackRateBar, setQuickPlaybackRateBarContext } from './player-components/QuickPlaybackRateBar'
 import './player-components/SeekPreviewBar'
 import { ScreenshotButton } from './player-components/ScreenshotButton'
+import { TimestampNoteButton } from './player-components/TimestampNoteButton'
 import { SkipSilenceButton } from './player-components/SkipSilenceButton'
 import { LevelSelection } from './player-components/LevelSelection'
 import { VoiceOverTranslationButton } from './player-components/VoiceOverTranslationButton'
@@ -2216,6 +2224,7 @@ import { useVideoZoom } from './opentubex/useVideoZoom'
 import { useVoiceOverTranslation } from './opentubex/useVoiceOverTranslation'
 import FtVideoAnnotations from '../FtVideoAnnotations/FtVideoAnnotations.vue'
 import FtShareButton from '../FtShareButton/FtShareButton.vue'
+import FtTimestampNotePrompt from '../FtTimestampNotePrompt/FtTimestampNotePrompt.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtAddToPlaylistDropdown from '../FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue'
 import WatchVideoChapters from '../WatchVideoChapters/WatchVideoChapters.vue'
@@ -3124,10 +3133,24 @@ let initialAutoplayCanceled = false
 // When the viewer paused playback, consumed by the next play.
 /** @type {number|null} */
 let rewindOnResumePausedAt = null
-// Pausing to save a screenshot resumes where it paused.
-let screenshotPausePending = false
+// Pausing to save a screenshot or write a note resumes where it paused.
+let actionPausePending = false
 const videoLayoutReady = ref(false)
-const annotationCurrentTime = ref(0)
+// Only the active annotations reach the template, so timeupdate re-renders the
+// player only when an annotation appears or disappears.
+const NO_ANNOTATIONS = Object.freeze([])
+let annotationCurrentTime = 0
+const activeAnnotations = shallowRef(NO_ANNOTATIONS)
+
+function updateActiveAnnotations() {
+  const time = annotationCurrentTime
+  const next = props.annotations.filter(annotation => time >= annotation.startTime && time <= annotation.endTime)
+  const current = activeAnnotations.value
+  if (next.length === current.length && next.every((annotation, index) => annotation === current[index])) return
+  activeAnnotations.value = next.length === 0 ? NO_ANNOTATIONS : next
+}
+
+watch(() => props.annotations, updateActiveAnnotations, { immediate: true })
 const annotationVideoAspectRatio = ref(null)
 
 const hasMultipleAudioTracks = ref(false)
@@ -3368,6 +3391,15 @@ let miniPlayerHandoffHeight = props.miniPlayerStartHeight
 // while its Watch page is hidden.
 const presentedOutsideTab = computed(() => isCrossTabMiniPlayerPresented.value ||
   pictureInPictureActive.value || miniPlayerStartPending.value || pictureInPictureStartPending.value)
+const playerVisible = computed(() => playerIsPresented.value || presentedOutsideTab.value)
+// Shown Shaka controls refresh several times a second and measure their
+// layout each time, and a paused player never hides them. Disable them in
+// hidden tabs, where every open watch tab would otherwise keep doing that.
+watch(playerVisible, visible => {
+  ui?.setEnabled(visible)
+  // Disabled controls ignore buffering changes, so refresh their spinner.
+  if (visible) player?.dispatchEvent(new shaka.util.FakeEvent('buffering', { buffering: player.isBuffering() }))
+})
 
 const {
   getAutoPictureInPictureState,
@@ -4371,7 +4403,7 @@ const progressivePlayback = ref(false)
 
 // A paused video in a hidden tab, such as one opened in the background,
 // only buffers its start, so it doesn't slow down the video the user watches.
-const bufferingHidden = computed(() => !playerIsPresented.value && !presentedOutsideTab.value && playerPaused.value)
+const bufferingHidden = computed(() => !playerVisible.value && playerPaused.value)
 
 /** @type {import('vue').ComputedRef<ReturnType<typeof getBufferingConfig>>} */
 const bufferingConfig = computed(() => getBufferingConfig({
@@ -4670,7 +4702,8 @@ const {
 })
 const repeatStats = reactive({ active: false, repeats: 0, seconds: 0 })
 const hideRepeatStats = computed(() => store.getters.getHideRepeatStats)
-const repeatStatsTime = computed(() => formatDurationAsTimestamp(repeatStats.seconds))
+// Renders the time on its own, so its once-per-second update does not re-render the player.
+const RepeatStatsTime = { render: () => formatDurationAsTimestamp(repeatStats.seconds) }
 const repeatStatsRange = computed(() => abRepeatEnabled.value
   ? `${formatAbRepeatTimestamp(abRepeatStart.value)} – ${formatAbRepeatTimestamp(abRepeatEnd.value)}`
   : '')
@@ -4935,6 +4968,7 @@ const uiConfig = computed(() => {
     playbackRate: 'playback_rate',
     loop: 'ft_loop',
     screenshot: 'ft_screenshot',
+    timestampNote: 'ft_timestamp_note',
     autoplay: 'ft_autoplay_toggle',
     captions: 'ft_caption_toggle',
     menu: 'overflow_menu',
@@ -5024,6 +5058,12 @@ const uiConfig = computed(() => {
   if (!enableScreenshot.value || props.format === 'audio') {
     removeFromArrayIfExists(uiConfig.controlPanelElements, 'ft_screenshot')
     removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_screenshot')
+  }
+
+  // A live stream has no stable time to link to
+  if (isLive.value) {
+    removeFromArrayIfExists(uiConfig.controlPanelElements, 'ft_timestamp_note')
+    removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_timestamp_note')
   }
 
   if (props.externalUrl) {
@@ -6897,12 +6937,12 @@ function handlePause() {
   const temporaryPlaybackRatePause = consumeTemporaryPlaybackRatePause()
   if (!temporaryPlaybackRatePause) setShowUiOnPaused(true)
   // Only a pause during playback rewinds on resume. Ending, scrubbing,
-  // format switches, screenshots and releasing a hold that started paused don't.
+  // format switches, screenshots, notes and releasing a hold that started paused don't.
   const video_ = video.value
   const rewindOnResumeApplies = !!video_ && video_.played.length > 0 && !video_.ended &&
     !ui?.getControls().isSeeking() && pendingFormatSwitchState === null && !temporaryPlaybackRatePause &&
-    !screenshotPausePending
-  screenshotPausePending = false
+    !actionPausePending
+  actionPausePending = false
   // Keep the earlier time when a play in a background tab is paused again.
   rewindOnResumePausedAt = rewindOnResumeApplies ? (rewindOnResumePausedAt ?? performance.now()) : null
   playerPaused.value = true
@@ -7223,8 +7263,11 @@ function handleTimeupdate() {
     checkAbRepeatBoundary()
     const currentTime = video.value.currentTime
     updateMobileMiniBarProgress()
+    // A live seek range moves on without changing the progress, so refresh its time text.
+    renderMobileMiniBarProgress()
     sponsorBlockCurrentTime.value = currentTime
-    annotationCurrentTime.value = currentTime
+    annotationCurrentTime = currentTime
+    updateActiveAnnotations()
     updateHiddenShortsSeekBar(currentTime)
     updateSecondaryCaptionText()
 
@@ -7462,12 +7505,28 @@ const mobileMiniBarSeeking = ref(false)
 watch([mobileMiniBarSeekDisabled, scrollMiniPlayerActive], ([disabled, active]) => {
   if (disabled || !active) mobileMiniBarSeeking.value = false
 })
-const mobileMiniBarSeekValueText = computed(() => {
-  const range = player?.seekRange()
-  return formatDurationAsTimestamp(range
-    ? range.start + (range.end - range.start) * mobileMiniBarProgress.value
-    : 0)
-})
+const mobileMiniBarProgressFill = useTemplateRef('mobileMiniBarProgressFill')
+const mobileMiniBarSeekInput = useTemplateRef('mobileMiniBarSeekInput')
+
+// Progress changes on every timeupdate. Writing it here instead of binding it
+// in the template keeps the player's render function out of playback.
+function renderMobileMiniBarProgress() {
+  const progress = mobileMiniBarProgress.value
+  if (mobileMiniBarProgressFill.value) {
+    mobileMiniBarProgressFill.value.style.transform = `scaleX(${progress})`
+  }
+  const input = mobileMiniBarSeekInput.value
+  if (input) {
+    const value = String(progress * 100)
+    if (input.value !== value) input.value = value
+    const range = player?.seekRange()
+    input.setAttribute('aria-valuetext', formatDurationAsTimestamp(range
+      ? range.start + (range.end - range.start) * progress
+      : 0))
+  }
+}
+
+watch([mobileMiniBarProgress, mobileMiniBarProgressFill, mobileMiniBarSeekInput], renderMobileMiniBarProgress, { flush: 'post' })
 
 /** @param {Event} event */
 function handleMobileMiniBarSeekInput(event) {
@@ -8412,7 +8471,7 @@ async function takeScreenshot() {
     (process.env.IS_CAPACITOR && screenshotMode.value === 'default_folder' && !store.getters.getScreenshotFolderPath)
   const pauseForScreenshot = needsFilePicker || (!process.env.IS_ELECTRON && !process.env.IS_CAPACITOR)
   if (pauseForScreenshot && wasPlaying) {
-    screenshotPausePending = true
+    actionPausePending = true
     video_.pause()
   }
 
@@ -8488,12 +8547,48 @@ async function takeScreenshot() {
     canvas.remove()
 
     if (pauseForScreenshot && wasPlaying) {
-      video_.play()
+      // A note opened meanwhile resumes playback once it closes
+      if (timestampNote.value !== null) {
+        resumeAfterTimestampNote = true
+      } else {
+        video_.play()
+      }
     }
   }
 }
 
 // #endregion screenshots
+
+// #region timestamp notes
+
+/** The time and link of the note being written */
+const timestampNote = ref(/** @type {{ seconds: number, url: string } | null} */ (null))
+let resumeAfterTimestampNote = false
+
+function takeTimestampNote() {
+  const video_ = video.value
+  // Until a source has loaded, such as during a format switch, the time is not the viewer's position
+  if (!video_ || !hasLoaded.value || pendingFormatSwitchState !== null || timestampNote.value !== null || isLive.value) return
+
+  const seconds = Number.isFinite(video_.currentTime) ? Math.max(0, Math.floor(video_.currentTime)) : 0
+  resumeAfterTimestampNote = !video_.paused
+  if (resumeAfterTimestampNote) {
+    actionPausePending = true
+    video_.pause()
+  }
+  timestampNote.value = {
+    seconds,
+    url: appendTimestamp(props.externalUrl || getYoutubeVideoShareUrl(props.videoId), seconds)
+  }
+}
+
+function closeTimestampNote() {
+  timestampNote.value = null
+  if (resumeAfterTimestampNote) video.value?.play()
+  resumeAfterTimestampNote = false
+}
+
+// #endregion timestamp notes
 
 // #region custom player controls
 
@@ -10101,6 +10196,24 @@ function registerScreenshotButton() {
   registerOwnElement(shakaOverflowMenu, 'ft_screenshot', new ScreenshotButtonFactory())
 }
 
+function registerTimestampNoteButton() {
+  events.addEventListener('takeTimestampNote', () => {
+    takeTimestampNote()
+  })
+
+  /**
+   * @implements {shaka.extern.IUIElement.Factory}
+   */
+  class TimestampNoteButtonFactory {
+    create(rootElement, controls) {
+      return new TimestampNoteButton(events, rootElement, controls)
+    }
+  }
+
+  registerOwnElement(shakaControls, 'ft_timestamp_note', new TimestampNoteButtonFactory())
+  registerOwnElement(shakaOverflowMenu, 'ft_timestamp_note', new TimestampNoteButtonFactory())
+}
+
 function registerSponsorBlockSubmissionButtons() {
   events.addEventListener('startSponsorBlockSegment', () => {
     startSponsorBlockDraft()
@@ -10584,6 +10697,7 @@ const buttonWithTooltipClasses = [
   'full-window-button',
   'theatre-button',
   'screenshot-button',
+  'timestamp-note-button',
 ]
 function blurTooltipButtons() {
   const element = document.activeElement
@@ -11044,6 +11158,11 @@ async function keyboardShortcutHandler(event) {
       matches(KeyboardShortcuts.VIDEO_PLAYER.GENERAL.TOGGLE_QUICK_BOOKMARK):
       event.preventDefault()
       if (!event.repeat) toggleQuickBookmark()
+      break
+    case !isLive.value && !store.getters.isAnyPromptOpen &&
+      matches(KeyboardShortcuts.VIDEO_PLAYER.GENERAL.TAKE_TIMESTAMP_NOTE):
+      event.preventDefault()
+      if (!event.repeat) takeTimestampNote()
       break
     case props.playlistVideoData != null && !store.getters.isAnyPromptOpen &&
       matches(KeyboardShortcuts.VIDEO_PLAYER.GENERAL.OPEN_ADD_TO_PLAYLIST):
@@ -11680,6 +11799,7 @@ onMounted(async () => {
     return
   }
 
+  if (!playerVisible.value) ui.setEnabled(false)
   const controls = ui.getControls()
   captionCueLayoutCleanup = setupCaptionCueLayout(container.value)
   if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
@@ -11785,6 +11905,7 @@ onMounted(async () => {
   videoResizeObserver.observe(videoElement)
 
   registerScreenshotButton()
+  registerTimestampNoteButton()
   registerAudioTrackSelection()
   registerQualitySelection()
   registerCaptionSelection()

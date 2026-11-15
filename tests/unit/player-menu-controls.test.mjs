@@ -9,7 +9,7 @@ import {
 
 test('keeps a custom order and adds missing controls after their default neighbor', () => {
   const order = normalizePlayerMenuControls(['loop', 'unknown', 'loop', 'audioTracks', 1], false)
-  assert.deepEqual(order.slice(0, 7), ['loop', 'abRepeat', 'screenshot', 'pictureInPicture', 'theatreMode', 'fullWindow', 'audioTracks'])
+  assert.deepEqual(order.slice(0, 8), ['loop', 'abRepeat', 'screenshot', 'timestampNote', 'pictureInPicture', 'theatreMode', 'fullWindow', 'audioTracks'])
   assert.equal(order.at(-1), 'monoAudio')
   assert.deepEqual([...order].sort(), getDefaultPlayerMenuControls(false).sort())
 })

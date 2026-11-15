@@ -345,6 +345,7 @@ export async function readClipboard() {
  * @param {object} [options] - Optional settings for the copy operation.
  * @param {null|string} options.messageOnSuccess the message to be displayed as a toast when the copy succeeds (optional)
  * @param {null|string} options.messageOnError the message to be displayed as a toast when the copy fails (optional)
+ * @returns {Promise<boolean>} whether the content was copied
  */
 export async function copyToClipboard(content, { messageOnSuccess = null, messageOnError = null } = {}) {
   const useCapacitorClipboard = process.env.IS_CAPACITOR
@@ -370,6 +371,7 @@ export async function copyToClipboard(content, { messageOnSuccess = null, messag
       if (messageOnSuccess !== null) {
         showToast({ message: messageOnSuccess, icon: ['fas', 'copy'] })
       }
+      return true
     } catch (error) {
       if (content instanceof Blob) {
         console.error('Failed to copy clipboard data of type', content.type, error)
@@ -391,6 +393,7 @@ export async function copyToClipboard(content, { messageOnSuccess = null, messag
       icon: ERROR_TOAST_ICON,
     })
   }
+  return false
 }
 
 // API requests often fail together. Show at most one error toast every 10 seconds.

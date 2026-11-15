@@ -31,11 +31,38 @@ function getControlsGeometry(page, selector) {
   }, selector)
 }
 
+/**
+ * Resolves the window's drag region at a point like Chromium does: playwright
+ * clicks skip the window's hit test, which takes clicks in drag regions. Every
+ * box with a drag or no-drag region applies it in document order, regardless
+ * of pointer-events and stacking, so the last box at the point decides.
+ * @param {import('@playwright/test').Page} page
+ * @param {{ x: number, y: number }} point
+ */
+function getAppRegionAt(page, point) {
+  return page.evaluate(({ x, y }) => {
+    let region = 'none'
+    for (const element of document.body.querySelectorAll('*')) {
+      const style = getComputedStyle(element)
+      const value = style.getPropertyValue('-webkit-app-region')
+      if (value === 'none' || style.visibility !== 'visible') continue
+      const rect = element.getBoundingClientRect()
+      if (rect.left <= x && x < rect.right && rect.top <= y && y < rect.bottom) {
+        region = value
+      }
+    }
+    return region
+  }, point)
+}
+
 test.describe('with a custom title bar', () => {
   test.use({ seed: { settings: { customTitleBar: true } } })
 
   test('places the window controls beside the top tabs @scale', async ({ app, page }) => {
     await setWindowSize(app, page, { width: 1200, height: 700 })
+    // The empty strip beside the tabs moves the window.
+    const strip = await page.locator('.tabBar .tabsViewport').boundingBox()
+    expect(await getAppRegionAt(page, { x: strip.x + strip.width * 0.95, y: strip.y + strip.height / 2 })).toBe('drag')
     await page.evaluate(async () => {
       for (let index = 0; index < 30; index++) {
         await window.ftElectron.tabs.create({ route: '/history', title: `History ${index + 1}`, makeActive: false, lazyLoad: true })
@@ -60,6 +87,19 @@ test.describe('with a custom title bar', () => {
 
     const tabRegion = await page.locator('.tabBar .tab').first().evaluate(element => getComputedStyle(element).getPropertyValue('-webkit-app-region'))
     expect(tabRegion).toBe('no-drag')
+    // The window takes clicks in drag regions before the page sees them, so
+    // every tab the strip shows must resolve to no-drag.
+    const visibleTabPoints = await page.evaluate(() => {
+      const strip = document.querySelector('.tabBar .tabsViewport').getBoundingClientRect()
+      return [...document.querySelectorAll('.tabBar .tab')]
+        .map(tab => tab.getBoundingClientRect())
+        .filter(rect => rect.left >= strip.left && rect.right <= strip.right)
+        .map(rect => ({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }))
+    })
+    expect(visibleTabPoints.length).toBeGreaterThan(1)
+    for (const point of visibleTabPoints) {
+      expect(await getAppRegionAt(page, point)).toBe('no-drag')
+    }
     const buttonRegion = await page.locator('.newTabButton').evaluate(element => getComputedStyle(element).getPropertyValue('-webkit-app-region'))
     expect(buttonRegion).toBe('no-drag')
   })

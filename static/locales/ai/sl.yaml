@@ -285,10 +285,10 @@ Subscriptions:
     Platform: Platforma
     All Platforms: Vse platforme
     Followed Channels: Spremljani kanali na drugih platformah
-    Description: Spremljajte kanale na platformah Twitch, SoundCloud, PeerTube, Rumble in Odysee, da boste njihove objave videli na zavihku Platforme med svojimi naročninami. Kanale poiščite z iskanjem ali jih dodajte z naslovom njihove strani. Njihove vsebine se predvajajo z yt-dlp.
+    Description: Spremljajte kanale na platformah Twitch, SoundCloud, PeerTube, Rumble, Odysee in media.ccc.de, da boste njihove objave videli na zavihku Platforme med svojimi naročninami. Kanale poiščite z iskanjem ali jih dodajte z naslovom njihove strani. Njihove vsebine se predvajajo z yt-dlp.
     Add Channel: Dodaj kanal
     Channel URL: Naslov kanala
-    Invalid Channel: Vnesite naslov strani kanala na platformi Twitch, SoundCloud, PeerTube, Rumble ali Odysee.
+    Invalid Channel: Vnesite naslov strani kanala na platformi Twitch, SoundCloud, PeerTube, Rumble, Odysee ali media.ccc.de.
     Channel Not Found: Na tem naslovu ni kanala.
     Channel Already Followed: Ta kanal že spremljate.
     Channel Could Not Be Loaded: Kanala ni bilo mogoče naložiti.
@@ -1220,8 +1220,11 @@ Settings:
       Viewing Modes: Načini ogleda
       Shorts: Shorts
       Screenshots: Posnetki zaslona
+      Timestamp Notes: Opombe s časovnimi oznakami
     Enable FCast: "Omogoči FCast"
     Ask Before Preloading Large Playlists: "Vprašaj pred prednalaganjem velikih seznamov predvajanja"
+    Timestamp Notes:
+      Obsidian Vault: Trezor Obsidian
   Channel Settings:
     Channel Settings: Nastavitve kanalov
     Channel Settings Description: Zapomni si nastavitve, ki jih med gledanjem izberete za vsak kanal posebej, in jih znova uporabi ob naslednjem ogledu enega od njegovih videoposnetkov.
@@ -1363,11 +1366,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: "Preverjanje internetne povezave"
     Internet Connectivity Checks Tooltip: "Pošilja majhne zahteve strežniku, ki ga gosti GrapheneOS, za preverjanje dostopa do interneta."
-    Automatic History Retention: Samodejna hramba zgodovine (dnevi)
-    Automatic History Retention Placeholder: Pustite prazno za trajno hrambo
+    Automatic History Deletion: Samodejno izbriši zgodovino po (dneh)
+    Watch History Retention: Zgodovina ogledov
+    Search History Retention: Zgodovina iskanja
+    Keep Forever Placeholder: Trajna hramba
     Automatic History Retention Tooltip: Za trajno hrambo zgodovine pustite prazno. Če shranite število, se starejši vnosi odstranijo takoj in nato samodejno, dokler je aplikacija odprta.
-    Automatic Search History Retention: Samodejna hramba zgodovine iskanja (dnevi)
-    Automatic Search History Retention Tooltip: Za trajno hrambo zgodovine iskanja pustite prazno. Če shranite število, se starejša iskanja odstranijo takoj in nato samodejno, dokler je aplikacija odprta.
     History Retention Saved: Hramba zgodovine je shranjena
     Invalid History Retention Days: Vnesite celo število dni, večje od nič
     Enable Watch Statistics: Omogoči statistiko gledanja
@@ -1667,6 +1670,7 @@ Settings:
     Channel playback speeds imported: "Uvožena je hitrost predvajanja za {count} kanal | Uvoženi sta hitrosti predvajanja za {count} kanala | Uvožene so hitrosti predvajanja za {count} kanale | Uvožene so hitrosti predvajanja za {count} kanalov"
     Channels not found: "{count} kanal ni bil najden | {count} kanala nista bila najdena | {count} kanali niso bili najdeni | {count} kanalov ni bilo najdenih"
     Playlists have been successfully imported: "Uspešno uvožen {count}/{total} seznam predvajanja | Uspešno uvožena {count}/{total} seznama predvajanja | Uspešno uvoženi {count}/{total} seznami predvajanja | Uspešno uvoženih {count}/{total} seznamov predvajanja"
+    Import subscription groups hint: Če želite kanale razvrstiti v skupine, v datoteki .csv za naslovom kanala dodajte stolpec z imeni skupin, ločenimi s podpičji, ali uvozite datoteko .opml z mapami. Manjkajoče skupine bodo ustvarjene.
   Sync Settings:
     Signed Out After Restore: 'Sinhronizacija je bila odjavljena, ker so bili ti podatki aplikacije obnovljeni iz varnostne kopije ali z druge naprave. Znova se prijavite, da sinhronizirate to napravo.'
     Revoke Session Tabs Warning: "Izbrisani bodo tudi sinhronizirani nabori zavihkov te naprave."
@@ -2478,6 +2482,14 @@ Video:
       Load: "Naloži datoteko s podnapisi…"
       Subtitle Files: "Datoteke s podnapisi"
       Error: "Datoteke s podnapisi ni bilo mogoče naložiti. Izberite datoteko SRT ali WebVTT."
+    Timestamp Notes:
+      Take Note: Ustvari opombo s časovno oznako
+      Note at {time}: Opomba ob {time}
+      Note: Opomba
+      Add to Obsidian: Dodaj v Obsidian
+      Copy as Markdown: Kopiraj kot Markdown
+      Copied: Opomba je kopirana kot Markdown
+      Obsidian Failed: Obsidiana ni bilo mogoče odpreti
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Preostali čas oglasa pred videoposnetkom: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Preostali čas zakasnitve SABR: {remindingTimeSeconds}s'
@@ -2739,6 +2751,7 @@ Comments:
   Highlighted comment: Poudarjen komentar
   Highlighted reply: Poudarjen odgovor
   Search loaded comments: Išči po naloženih komentarjih
+  Close search: Zapri iskanje
   Loaded comment search result count: '{count} od {total} naloženih komentarjev | {count} od {total} naloženih komentarjev | {count} od {total} naloženih komentarjev | {count} od {total} naloženih komentarjev'
   No loaded comments match your filters: Noben naložen komentar ne ustreza vašim filtrom
   YouTube comment link copied to clipboard: Povezava do komentarja v YouTubu je kopirana v odložišče
@@ -2846,6 +2859,7 @@ Tooltips:
     Concurrent Preloads: "Največje število procesov yt-dlp, ki se uporabljajo za sočasno prednalaganje videov. Višje vrednosti porabijo več procesorske moči, pomnilnika in omrežne pasovne širine."
     Ignore System Rotation Lock for Fullscreen: Fizično obrnite napravo za vstop in izstop iz celotnega zaslona, tudi ko je samodejno vrtenje v Androidu izklopljeno.
     Ask Before Preloading Large Playlists: "Pred prednalaganjem vseh videoposnetkov s seznama predvajanja z več kot {count} videoposnetki zahteva potrditev."
+    Obsidian Vault: Ime trezorja Obsidian za opombe s časovnimi oznakami. Ko je nastavljeno, lahko opombe dodajate v Obsidian. Opombe posameznega videoposnetka se zbirajo v opombi, poimenovani po videoposnetku, v mapi trezorja za nove opombe.
   External Player Settings:
     External Player: Če izberete zunanji predvajalnik, se na sličici prikaže ikona za odpiranje videoposnetka oziroma seznama predvajanja, če je podprt, v zunanjem predvajalniku. Nastavitve Invidious ne vplivajo na zunanje predvajalnike.
     Custom External Player Executable: OpenTubeX privzeto predvideva, da je izbrani zunanji predvajalnik mogoče najti prek okoljske spremenljivke PATH. Po potrebi lahko tukaj nastavite pot po meri.

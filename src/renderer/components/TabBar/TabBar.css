@@ -55,11 +55,12 @@
 }
 
 /* Closing tabs leave the strip at once and finish closing in this layer, so
-   they neither hold the strip's scroll range nor take events. */
+   they neither hold the strip's scroll range nor take events. It stacks above
+   the tab row (z-index 1) although it comes first in the markup. */
 .tabGhostLayer {
   position: absolute;
   inset: 0;
-  z-index: 1;
+  z-index: 2;
   overflow: clip;
   pointer-events: none;
 }

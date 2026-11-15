@@ -49,6 +49,7 @@
             :max-value="control.slider.max * 100"
             :step="control.slider.step * 100"
             value-extension="%"
+            @input="previewSliderSetting(control, $event / 100)"
             @change="updateCaptionSetting(control.setting, $event / 100)"
             @reset="resetCaptionSetting(control.setting)"
           />
@@ -301,6 +302,7 @@ const preferredCaptionSelectValue = computed(() => {
 async function updateCaptionSetting(setting, value) {
   const saving = { setting, value }
   savingPreview.value = saving
+  if (preview.value?.setting === setting) preview.value = null
   try {
     await store.dispatch('updateDefaultCaptionSettings', JSON.stringify({
       ...captionSettings.value,
@@ -317,6 +319,16 @@ async function updateCaptionSetting(setting, value) {
  */
 function previewCaptionSetting(setting, value) {
   preview.value = value === undefined ? null : { setting, value }
+}
+
+/**
+ * Shows the value on the sample while the slider is dragged, until it is released.
+ * A slider dragged back to its saved value doesn't change, so it stops showing then.
+ * @param {{ setting: keyof typeof DEFAULT_CAPTION_SETTINGS, slider: { value: number } }} control
+ * @param {number} value
+ */
+function previewSliderSetting(control, value) {
+  preview.value = value === control.slider.value ? null : { setting: control.setting, value }
 }
 
 /**

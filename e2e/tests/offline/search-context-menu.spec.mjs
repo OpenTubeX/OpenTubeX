@@ -155,12 +155,8 @@ test.describe('with all built-in external search engines enabled', () => {
       'Qwant',
       'Brave Search'
     ])
-    expect(searchWith.submenu.map(item => item.icon)).toEqual([
-      'https://duckduckgo.com/favicon.ico',
-      'https://www.startpage.com/favicon.ico',
-      'https://www.qwant.com/favicon.ico',
-      'https://search.brave.com/favicon.ico'
-    ])
+    // The renderer must not request engines itself; the main process resolves their icons
+    expect(searchWith.submenu.every(item => item.icon === undefined)).toBe(true)
     expect(searchWith.submenu.map(item => item.faviconSource)).toEqual([
       'https://duckduckgo.com/?q=%s',
       'https://www.startpage.com/sp/search?query=%s',
@@ -259,7 +255,7 @@ test('adds a custom search engine from settings', async ({ page }) => {
     labelParameters: { engine: 'Example Search' }
   })
   expect(searchWith.submenu).toBeUndefined()
-  expect(searchWith.icon).toBe('https://example.com/favicon.ico')
+  expect(searchWith.icon).toBeUndefined()
 })
 
 test.describe('with one external search engine enabled', () => {
@@ -314,7 +310,7 @@ test.describe('with one external search engine enabled', () => {
       labelKey: 'Context Menu.Search With',
       labelParameters: { engine: 'DuckDuckGo' }
     })
-    expect(searchWith.icon).toBe('https://duckduckgo.com/favicon.ico')
+    expect(searchWith.icon).toBeUndefined()
     expect(searchWith.faviconSource).toBe('https://duckduckgo.com/?q=%s')
     await page.evaluate(({ sessionId, actionId }) => {
       return window.ftElectron.contextMenu.execute(sessionId, actionId)

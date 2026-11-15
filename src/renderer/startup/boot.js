@@ -3,6 +3,10 @@
 // the splash would wait for that stylesheet, and Chromium can paint the splash
 // in its default colors before running it.
 (() => {
+  // Electron's main process reads the settings and the library while the
+  // deferred bundles load, compile and run. Starting here, rather than in the
+  // renderer entry, keeps those reads from waiting for youtubei.js.
+  window.ftElectron?.startStartupReads?.()
   let appearance = window.ftElectron?.startupAppearance
   let cached
   try {

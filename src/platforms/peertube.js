@@ -37,7 +37,7 @@ const HOST_PATTERN = /^(?:[a-z\d](?:[a-z\d-]{0,61}[a-z\d])?\.)+(?=[a-z\d-]*[a-z]
 /** Names that only resolve in the local network */
 const LOCAL_SUFFIXES = ['localhost', 'local', 'internal', 'home.arpa']
 /** Sites that aren't PeerTube but also have `/c/` pages */
-const OTHER_PLATFORM_HOSTS = new Set(['youtube.com', 'youtu.be', 'twitch.tv', 'rumble.com', 'odysee.com', 'soundcloud.com'])
+const OTHER_PLATFORM_HOSTS = new Set(['youtube.com', 'youtu.be', 'twitch.tv', 'rumble.com', 'odysee.com', 'soundcloud.com', 'media.ccc.de'])
 
 /** @type {Partial<Record<PlatformSearchType, string>>} */
 const SEARCH_ENDPOINTS = { videos: 'videos', channels: 'video-channels', playlists: 'video-playlists' }

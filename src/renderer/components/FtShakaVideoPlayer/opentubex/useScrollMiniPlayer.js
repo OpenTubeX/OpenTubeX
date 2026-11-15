@@ -930,6 +930,9 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     // Reading pixels from a hardware-decoded video can synchronously stall the
     // renderer. Keep it out of the first frame and the rest of the transition.
     if (!scrollMiniPlayerActive.value || scrollMiniPlayerAnimating.value || inlineDrag) return
+    // The handles fade out with the play/pause button. Their contrast only
+    // matters once they reappear, which forces a fresh sample.
+    if (!scrollMiniPlayPauseVisible.value || scrollMiniPlayerStashed.value) return
 
     const now = performance.now()
     if (!force && now - scrollMiniDragHandleContrastLastUpdate < SCROLL_MINI_DRAG_HANDLE_CONTRAST_MS) {
@@ -1708,6 +1711,9 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   })
 
   watch(scrollMiniVolumePercent, updateScrollMiniVolumeBarFill)
+  watch([scrollMiniPlayPauseVisible, scrollMiniPlayerStashed], ([visible, stashed]) => {
+    if (visible && !stashed) nextTick(() => updateScrollMiniDragHandleContrast())
+  })
 
   watch(() => props.videoId, () => {
     lastKnownInlinePlayerHeight = 0

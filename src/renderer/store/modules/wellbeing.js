@@ -14,17 +14,58 @@ function loadSaved() {
 }
 
 /**
+ * The time one window played today. `seq` grows with each change, so a window
+ * keeps the newest counts it hears of, whatever order messages arrive in.
+ * @typedef {{ seq: number, unrecordedSeconds: number, shortsSeconds: number, unrecordedShortsSeconds: number }} WindowTime
+ */
+
+/**
+ * @param {number} seq
+ * @param {number} [shortsSeconds]
+ * @returns {WindowTime}
+ */
+function createWindowTime(seq, shortsSeconds = 0) {
+  return { seq, unrecordedSeconds: 0, shortsSeconds, unrecordedShortsSeconds: 0 }
+}
+
+/**
+ * @param {Record<string, any>} saved
+ * @returns {Record<string, WindowTime>}
+ */
+function loadSavedWindows(saved) {
+  // Versions before 0.38 saved one total
+  if (Number.isFinite(saved.shortsSeconds)) return { earlier: createWindowTime(0, saved.shortsSeconds) }
+  // Saved time lacks the unrecorded time, so any count from an open window replaces it
+  return Object.fromEntries(Object.entries(saved.windows ?? {})
+    .filter(([, seconds]) => Number.isFinite(seconds))
+    .map(([id, seconds]) => [id, createWindowTime(0, seconds)]))
+}
+
+/**
+ * The day's totals over its windows.
+ * @param {ReturnType<typeof createDay>} day
+ */
+function sumWindows(day) {
+  const times = Object.values(day.windows)
+  // Time that watch statistics did not record, kept only in memory.
+  day.unrecordedSeconds = times.reduce((sum, time) => sum + time.unrecordedSeconds, 0)
+  day.shortsSeconds = times.reduce((sum, time) => sum + time.shortsSeconds, 0)
+  // Never saved, so Shorts watched without statistics stay private.
+  day.unrecordedShortsSeconds = times.reduce((sum, time) => sum + time.unrecordedShortsSeconds, 0)
+}
+
+/**
  * @param {string} date
  * @param {Record<string, any>} saved
  */
 function createDay(date, saved = {}) {
   const sameDay = saved.date === date
-  return {
+  const day = {
     date,
-    // Time that watch statistics did not record, kept only in memory.
+    /** @type {Record<string, WindowTime>} the time each window played, by window ID */
+    windows: sameDay ? loadSavedWindows(saved) : {},
     unrecordedSeconds: 0,
-    shortsSeconds: sameDay && Number.isFinite(saved.shortsSeconds) ? saved.shortsSeconds : 0,
-    // Never saved, so Shorts watched without statistics stay private.
+    shortsSeconds: 0,
     unrecordedShortsSeconds: 0,
     extraSeconds: {
       watch: sameDay ? saved.extraSeconds?.watch ?? 0 : 0,
@@ -35,11 +76,18 @@ function createDay(date, saved = {}) {
       shorts: sameDay && saved.ignored?.shorts === true,
     },
   }
+  sumWindows(day)
+  return day
 }
 
 const saved = loadSaved()
 
 const state = {
+  // Identifies this window's time to the other windows
+  windowId: crypto.randomUUID(),
+  // When the watch statistics were last cleared, from the reset marker that every window
+  // shares, so windows can tell time from before a clear without comparing their clocks
+  resetAt: Number.isFinite(saved.resetAt) ? saved.resetAt : 0,
   day: createDay(localDateKey(Date.now()), saved),
   bedtimeDismissedNight: typeof saved.bedtimeDismissedNight === 'string' ? saved.bedtimeDismissedNight : null,
   bedtimeSnoozedUntil: 0,
@@ -67,14 +115,20 @@ const state = {
  * @param {typeof state} state
  */
 function persist(state) {
-  const { date, shortsSeconds, unrecordedShortsSeconds, extraSeconds, ignored } = state.day
+  const { date, windows, extraSeconds, ignored } = state.day
+  // A window that has not applied a clear yet, such as one that is closing, would bring back its time
+  if (loadSaved().resetAt > state.resetAt) return
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       date,
+      // Saved by window, so a window that opens later does not count an open window's time twice.
       // Shorts watched without statistics stay private.
-      shortsSeconds: shortsSeconds - unrecordedShortsSeconds,
+      windows: Object.fromEntries(Object.entries(windows)
+        .map(([id, time]) => [id, time.shortsSeconds - time.unrecordedShortsSeconds])
+        .filter(([, seconds]) => seconds > 0)),
       extraSeconds,
       ignored,
+      resetAt: state.resetAt,
       bedtimeDismissedNight: state.bedtimeDismissedNight,
     }))
   } catch (error) {
@@ -83,7 +137,7 @@ function persist(state) {
 }
 
 /**
- * Counts played time toward the day's limits.
+ * Counts time this window played toward the day's limits.
  * @param {typeof state} state
  * @param {{ date: string, seconds: number, isShort: boolean, recorded: boolean }} playback
  */
@@ -91,30 +145,43 @@ function addDayPlayback(state, { date, seconds, isShort, recorded }) {
   // Time flushed after midnight can still belong to the previous day.
   if (date > state.day.date) state.day = createDay(date)
   if (date !== state.day.date) return
-  if (!recorded) state.day.unrecordedSeconds += seconds
-  if (isShort) state.day.shortsSeconds += seconds
-  if (isShort && !recorded) state.day.unrecordedShortsSeconds += seconds
+  const time = state.day.windows[state.windowId] ??= createWindowTime(0)
+  time.seq++
+  if (!recorded) time.unrecordedSeconds += seconds
+  if (isShort) time.shortsSeconds += seconds
+  if (isShort && !recorded) time.unrecordedShortsSeconds += seconds
+  sumWindows(state.day)
 }
 
 /**
- * Adopts the day of an open window. Its reply cannot include the time this
- * window played since asking, as messages from one window arrive in order.
+ * Drops the day's time for a watch statistics clear.
  * @param {typeof state} state
- * @param {{ day: ReturnType<typeof createDay>, own: ReturnType<typeof createDay> }} days the open
- *   window's day, and the time this window played since asking
+ * @param {number} resetAt
  */
-function joinWellbeingDay(state, { day, own }) {
+function clearDayTime(state, resetAt) {
+  state.resetAt = resetAt
+  state.day.windows = {}
+  sumWindows(state.day)
+}
+
+/**
+ * Takes the newer time of each window that another window shares, so time
+ * that a reply and a later message both hold counts once.
+ * @param {typeof state} state
+ * @param {Pick<ReturnType<typeof createDay>, 'date' | 'windows'> & Partial<ReturnType<typeof createDay>> & { resetAt: number }} day
+ */
+function joinWellbeingDay(state, day) {
   if (day.date > state.day.date) state.day = createDay(day.date)
   if (day.date !== state.day.date) return
-  const ownDay = own.date === day.date ? own : createDay(day.date)
-  state.day.unrecordedSeconds = Math.max(state.day.unrecordedSeconds, day.unrecordedSeconds + ownDay.unrecordedSeconds)
-  // Saving subtracts the unrecorded Shorts time, so both counts come from the same window
-  const shortsSeconds = day.shortsSeconds + ownDay.shortsSeconds
-  if (shortsSeconds >= state.day.shortsSeconds) {
-    state.day.shortsSeconds = shortsSeconds
-    state.day.unrecordedShortsSeconds = day.unrecordedShortsSeconds + ownDay.unrecordedShortsSeconds
+  // A window that missed a clear, or has not seen it yet, applies it now. Time from
+  // before this window's clear, such as a closing window's last report, no longer counts.
+  if (day.resetAt > state.resetAt) clearDayTime(state, day.resetAt)
+  for (const [id, time] of day.resetAt === state.resetAt ? Object.entries(day.windows) : []) {
+    // This window's own time is always current
+    if (id !== state.windowId && !(time.seq <= state.day.windows[id]?.seq)) state.day.windows[id] = { ...time }
   }
-  for (const kind of ['watch', 'shorts']) {
+  sumWindows(state.day)
+  for (const kind of day.extraSeconds ? ['watch', 'shorts'] : []) {
     state.day.extraSeconds[kind] = Math.max(state.day.extraSeconds[kind], day.extraSeconds[kind])
     state.day.ignored[kind] ||= day.ignored[kind]
   }
@@ -122,7 +189,9 @@ function joinWellbeingDay(state, { day, own }) {
 
 // The limits count playback in every window, so windows share these changes.
 // The break reminder counts each window's own session.
-const SHARED_MUTATIONS = new Set(['addWellbeingPlayback', 'extendWellbeingLimit', 'setWellbeingBedtimeDismissed'])
+const SHARED_MUTATIONS = new Set(['extendWellbeingLimit', 'setWellbeingBedtimeDismissed'])
+// Changes to this window's time, which it shares as its current counts
+const TIME_MUTATIONS = new Set(['addWellbeingPlayback', 'clearWellbeingTime'])
 
 /**
  * Store plugin that shares the limits' day and the bedtime dismissal with the
@@ -134,30 +203,29 @@ const SHARED_MUTATIONS = new Set(['addWellbeingPlayback', 'extendWellbeingLimit'
  */
 export function shareWellbeingAcrossWindows(store, channel = typeof BroadcastChannel === 'undefined' ? null : new BroadcastChannel('opentubex-digital-wellbeing')) {
   if (!channel) return
-  const id = crypto.randomUUID()
-  // The time this window played since asking for the open windows' day
-  const own = { day: createDay(store.state.wellbeing.day.date) }
-  store.subscribe(({ type, payload }, rootState) => {
-    if (type === 'addWellbeingPlayback') addDayPlayback(own, payload)
-    if (SHARED_MUTATIONS.has(type)) channel.postMessage({ type, payload, date: rootState.wellbeing.day.date })
+  const { windowId } = store.state.wellbeing
+  // The state is reactive, which messages cannot clone
+  const clone = value => JSON.parse(JSON.stringify(value))
+  store.subscribe(({ type, payload }, { wellbeing: { day, resetAt } }) => {
+    if (TIME_MUTATIONS.has(type)) {
+      const time = day.windows[windowId]
+      channel.postMessage({ type: 'wellbeingDay', payload: { date: day.date, resetAt, windows: time ? { [windowId]: clone(time) } : {} } })
+    }
+    if (SHARED_MUTATIONS.has(type)) channel.postMessage({ type, payload, date: day.date })
   })
   channel.addEventListener('message', ({ data }) => {
     if (data?.type === 'requestWellbeingDay') {
-      // The state is reactive, which messages cannot clone
-      channel.postMessage({ type: 'wellbeingDay', to: data.id, payload: JSON.parse(JSON.stringify(store.state.wellbeing.day)) })
+      const { day, resetAt } = store.state.wellbeing
+      channel.postMessage({ type: 'wellbeingDay', to: data.id, payload: { ...clone(day), resetAt } })
       return
     }
-    if (data?.type === 'wellbeingDay') {
-      // Open windows already counted what the reply holds
-      if (data.to !== id) return
-      store.commit('applySharedWellbeingChange', { type: data.type, payload: { day: data.payload, own: own.day } })
-    } else {
-      store.commit('applySharedWellbeingChange', data)
-    }
-    // Another window may have saved its total before it counted this change
+    // Replies go to the window that asked
+    if (data?.to != null && data.to !== windowId) return
+    store.commit('applySharedWellbeingChange', data)
+    // Another window may have saved its time before it counted this change
     persist(store.state.wellbeing)
   })
-  channel.postMessage({ type: 'requestWellbeingDay', id })
+  channel.postMessage({ type: 'requestWellbeingDay', id: windowId })
 }
 
 function recordsWatchStats(rootGetters) {
@@ -232,8 +300,9 @@ const actions = {
     persist(state)
   },
 
-  clearWellbeingTime({ commit, state }) {
-    commit('replaceWellbeingDay', { ...state.day, unrecordedSeconds: 0, shortsSeconds: 0, unrecordedShortsSeconds: 0 })
+  /** @param {number} resetAt when the watch statistics were cleared */
+  clearWellbeingTime({ commit, state }, resetAt) {
+    commit('clearWellbeingTime', resetAt)
     commit('resetWellbeingSession')
     persist(state)
   },
@@ -254,7 +323,6 @@ const mutations = {
    */
   applySharedWellbeingChange(state, { type, payload, date }) {
     if (type === 'wellbeingDay') joinWellbeingDay(state, payload)
-    else if (type === 'addWellbeingPlayback') addDayPlayback(state, payload)
     else if (type === 'extendWellbeingLimit' && date === state.day.date) {
       // Allowances only grow during a day, so a late message cannot take one back
       state.day.extraSeconds[payload.kind] = Math.max(state.day.extraSeconds[payload.kind], payload.extraSeconds ?? 0)
@@ -268,6 +336,16 @@ const mutations = {
 
   replaceWellbeingDay(state, day) {
     state.day = day
+  },
+
+  /**
+   * Every window clears the time when the watch statistics are cleared, unless
+   * another window's message already brought this clear.
+   * @param {typeof state} state
+   * @param {number} resetAt
+   */
+  clearWellbeingTime(state, resetAt) {
+    if (resetAt > state.resetAt) clearDayTime(state, resetAt)
   },
 
   extendWellbeingLimit(state, { kind, extraSeconds = 0, ignore = false }) {

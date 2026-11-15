@@ -242,10 +242,10 @@ Subscriptions:
     Platform: Plataforma
     All Platforms: Plataforma guztiak
     Followed Channels: Beste plataformetan jarraitutako kanalak
-    Description: Jarraitu Twitch, SoundCloud, PeerTube, Rumble eta Odysee plataformetako kanalei, haien igoerak zure harpidetzetako Plataformak fitxan ikusteko. Bilatu kanalak bilaketarekin, edo gehitu haien orriaren helbidearekin. Haien multimedia yt-dlp bidez erreproduzitzen da.
+    Description: Jarraitu Twitch, SoundCloud, PeerTube, Rumble, Odysee eta media.ccc.de plataformetako kanalei, haien igoerak zure harpidetzetako Plataformak fitxan ikusteko. Bilatu kanalak bilaketarekin, edo gehitu haien orriaren helbidearekin. Haien multimedia yt-dlp bidez erreproduzitzen da.
     Add Channel: Gehitu kanala
     Channel URL: Kanalaren helbidea
-    Invalid Channel: Idatzi Twitch, SoundCloud, PeerTube, Rumble edo Odysee plataformako kanal-orri baten helbidea.
+    Invalid Channel: Idatzi Twitch, SoundCloud, PeerTube, Rumble, Odysee edo media.ccc.de plataformako kanal-orri baten helbidea.
     Channel Not Found: Ez dago kanalik helbide honetan.
     Channel Already Followed: Dagoeneko jarraitzen diozu kanal honi.
     Channel Could Not Be Loaded: Ezin izan da kanala kargatu.
@@ -1002,11 +1002,14 @@ Settings:
       Viewing Modes: Ikuspegi moduak
       Shorts: Shorts
       Screenshots: Pantaila-argazkiak
+      Timestamp Notes: Denbora-zigiludun oharrak
     Enable FCast: "Gaitu FCast"
     Screenshot:
       Legacy Formats: "Formatu zaharrak"
       Modern Formats: "Formatu modernoak"
     Ask Before Preloading Large Playlists: "Galdetu erreprodukzio-zerrenda handiak aurrekargatu aurretik"
+    Timestamp Notes:
+      Obsidian Vault: Obsidian biltegia
   Channel Settings:
     Channel Settings: Kanalen ezarpenak
     Channel Settings Description: Gogoratu kanal bakoitzerako bideoak ikustean aukeratutako ezarpenak, kanal horretako beste bideo bat ikusten duzunean berriro aplikatzeko.
@@ -1144,11 +1147,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: "Interneteko konexioaren egiaztapenak"
     Internet Connectivity Checks Tooltip: "Eskaera txikiak bidaltzen dizkio GrapheneOSek ostatatutako zerbitzari bati Interneterako sarbidea egiaztatzeko."
-    Automatic History Retention: Historiaren atxikipen automatikoa (egunak)
-    Automatic History Retention Placeholder: Utzi hutsik betiko gordetzeko
+    Automatic History Deletion: Ezabatu historia automatikoki (egun) igaro ondoren
+    Watch History Retention: Ikusitakoen historia
+    Search History Retention: Bilaketa-historia
+    Keep Forever Placeholder: Betiko gorde
     Automatic History Retention Tooltip: Utzi hutsik historia betiko gordetzeko. Zenbaki bat gordetzean, sarrera zaharragoak orain eta automatikoki kenduko dira aplikazioa irekita dagoen bitartean.
-    Automatic Search History Retention: Bilaketa-historiaren atxikipen automatikoa (egunak)
-    Automatic Search History Retention Tooltip: Utzi hutsik bilaketa-historia betiko gordetzeko. Zenbaki bat gordetzean, bilaketa zaharragoak orain eta automatikoki kenduko dira aplikazioa irekita dagoen bitartean.
     History Retention Saved: Historiaren atxikipena gorde da
     Invalid History Retention Days: Idatzi zero baino handiagoa den egun kopuru oso bat
     Enable Watch Statistics: Gaitu ikustaldien estatistikak
@@ -1380,6 +1383,7 @@ Settings:
     Channel playback speeds imported: "{count} kanalaren erreprodukzio-abiadura inportatu da | {count} kanalen erreprodukzio-abiadurak inportatu dira"
     Channels not found: "Ezin izan da {count} kanal aurkitu | Ezin izan dira {count} kanal aurkitu"
     Playlists have been successfully imported: "1/{total} erreprodukzio-zerrenda behar bezala inportatu da | {count}/{total} erreprodukzio-zerrenda behar bezala inportatu dira"
+    Import subscription groups hint: Kanalak taldeetan sailkatzeko, gehitu .csv fitxategi batean kanalaren izenburuaren ondoren puntu eta komaz bereizitako talde-izenak dituen zutabe bat, edo inportatu karpetak dituen .opml fitxategi bat. Falta diren taldeak sortu egiten dira.
   Sync Settings:
     Signed Out After Restore: 'Sinkronizazioaren saioa itxi da, aplikazioaren datu hauek babeskopia batetik edo beste gailu batetik leheneratu direlako. Hasi saioa berriro gailu hau sinkronizatzeko.'
     Revoke Session Tabs Warning: "Gailu honen sinkronizatutako fitxa multzoak ere ezabatuko dira."
@@ -2017,6 +2021,14 @@ Video:
       Load: "Kargatu azpititulu-fitxategia…"
       Subtitle Files: "Azpititulu-fitxategiak"
       Error: "Ezin izan da azpititulu-fitxategia kargatu. Aukeratu SRT edo WebVTT fitxategi bat."
+    Timestamp Notes:
+      Take Note: Hartu denbora-zigiludun oharra
+      Note at {time}: Oharra {time} unean
+      Note: Oharra
+      Add to Obsidian: Gehitu Obsidian-era
+      Copy as Markdown: Kopiatu Markdown gisa
+      Copied: Oharra Markdown gisa kopiatu da
+      Obsidian Failed: Ezin izan da Obsidian ireki
   External Media:
     Dislikes: "Desatsegitea | Desatsegiteak"
     Reposts: "Berriro argitaratzea | Berriro argitaratzeak"
@@ -2250,6 +2262,7 @@ Comments:
   Highlighted comment: Nabarmendutako iruzkina
   Highlighted reply: Nabarmendutako erantzuna
   Search loaded comments: Bilatu kargatutako iruzkinetan
+  Close search: Itxi bilaketa
   Loaded comment search result count: Kargatutako {total} iruzkinetatik 1 | Kargatutako {total} iruzkinetatik {count}
   No loaded comments match your filters: Kargatutako iruzkinik ez dator bat iragazkiekin
   YouTube comment link copied to clipboard: YouTube iruzkinaren esteka arbelean kopiatu da
@@ -2344,6 +2357,7 @@ Tooltips:
     Concurrent Preloads: "Bideoak aldi berean aurrekargatzeko erabilitako yt-dlp prozesuen gehieneko kopurua. Balio handiagoek PUZ, memoria eta sareko banda-zabalera gehiago erabiltzen dute."
     Ignore System Rotation Lock for Fullscreen: Biratu gailua fisikoki pantaila osoan sartzeko eta irteteko, Androiden biraketa automatikoa desaktibatuta badago ere.
     Ask Before Preloading Large Playlists: "Berrespena eskatzen du {count} bideo baino gehiagoko erreprodukzio-zerrenda baten bideo guztiak aurrekargatu aurretik."
+    Obsidian Vault: Denbora-zigiludun oharretarako Obsidian biltegiaren izena. Ezartzen bada, oharrak Obsidian-era gehi daitezke. Bideo bakoitzaren oharrak bideoaren izena duen ohar batean biltzen dira, biltegiaren ohar berrien karpetan.
   Download Settings:
     Download Folder: Bideoak karpeta honetan gordetzen dira. Utzi hutsik sistemako Deskargak karpeta erabiltzeko.
     Global Additional yt-dlp Arguments: Deskarga bakoitzean yt-dlp-ri emandako komando-lerroko argumentu gehigarriak; adibidez, --cookies-from-browser firefox.

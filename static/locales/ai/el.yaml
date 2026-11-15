@@ -242,10 +242,10 @@ Subscriptions:
     Platform: Πλατφόρμα
     All Platforms: Όλες οι πλατφόρμες
     Followed Channels: Κανάλια που ακολουθείτε σε άλλες πλατφόρμες
-    Description: Ακολουθήστε κανάλια στα Twitch, SoundCloud, PeerTube, Rumble και Odysee για να βλέπετε τις νέες τους αναρτήσεις στην καρτέλα «Πλατφόρμες» των συνδρομών σας. Βρείτε κανάλια με την αναζήτηση ή προσθέστε τα με τη διεύθυνση της σελίδας τους. Το περιεχόμενό τους αναπαράγεται με το yt-dlp.
+    Description: Ακολουθήστε κανάλια στα Twitch, SoundCloud, PeerTube, Rumble, Odysee και media.ccc.de για να βλέπετε τις νέες τους αναρτήσεις στην καρτέλα «Πλατφόρμες» των συνδρομών σας. Βρείτε κανάλια με την αναζήτηση ή προσθέστε τα με τη διεύθυνση της σελίδας τους. Το περιεχόμενό τους αναπαράγεται με το yt-dlp.
     Add Channel: Προσθήκη καναλιού
     Channel URL: Διεύθυνση καναλιού
-    Invalid Channel: Εισαγάγετε τη διεύθυνση της σελίδας ενός καναλιού στα Twitch, SoundCloud, PeerTube, Rumble ή Odysee.
+    Invalid Channel: Εισαγάγετε τη διεύθυνση της σελίδας ενός καναλιού στα Twitch, SoundCloud, PeerTube, Rumble, Odysee ή media.ccc.de.
     Channel Not Found: Δεν υπάρχει κανάλι σε αυτή τη διεύθυνση.
     Channel Already Followed: Ακολουθείτε ήδη αυτό το κανάλι.
     Channel Could Not Be Loaded: Δεν ήταν δυνατή η φόρτωση του καναλιού.
@@ -1002,11 +1002,14 @@ Settings:
       Viewing Modes: Λειτουργίες προβολής
       Shorts: Shorts
       Screenshots: Στιγμιότυπα οθόνης
+      Timestamp Notes: Σημειώσεις χρονικής σήμανσης
     Enable FCast: "Ενεργοποίηση FCast"
     Screenshot:
       Legacy Formats: "Παλαιότερες μορφές"
       Modern Formats: "Σύγχρονες μορφές"
     Ask Before Preloading Large Playlists: "Ερώτηση πριν από την προφόρτωση μεγάλων λιστών αναπαραγωγής"
+    Timestamp Notes:
+      Obsidian Vault: Θησαυροφυλάκιο Obsidian
   Channel Settings:
     Channel Settings: Ρυθμίσεις καναλιών
     Channel Settings Description: Απομνημόνευση των ρυθμίσεων που επιλέγετε κατά την παρακολούθηση, ξεχωριστά για κάθε κανάλι, ώστε να εφαρμόζονται ξανά την επόμενη φορά που θα παρακολουθήσετε κάποιο βίντεό του.
@@ -1144,11 +1147,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: "Έλεγχοι σύνδεσης στο διαδίκτυο"
     Internet Connectivity Checks Tooltip: "Στέλνει μικρά αιτήματα σε έναν διακομιστή που φιλοξενείται από το GrapheneOS για έλεγχο της πρόσβασης στο διαδίκτυο."
-    Automatic History Retention: Αυτόματη διατήρηση ιστορικού (ημέρες)
-    Automatic History Retention Placeholder: Αφήστε το κενό για μόνιμη διατήρηση
+    Automatic History Deletion: Αυτόματη διαγραφή ιστορικού μετά από (ημέρες)
+    Watch History Retention: Ιστορικό προβολής
+    Search History Retention: Ιστορικό αναζήτησης
+    Keep Forever Placeholder: Μόνιμη διατήρηση
     Automatic History Retention Tooltip: Αφήστε το κενό για να διατηρείται το ιστορικό για πάντα. Αν αποθηκεύσετε έναν αριθμό, οι παλαιότερες καταχωρίσεις αφαιρούνται τώρα και αυτόματα όσο η εφαρμογή είναι ανοιχτή.
-    Automatic Search History Retention: Αυτόματη διατήρηση ιστορικού αναζητήσεων (ημέρες)
-    Automatic Search History Retention Tooltip: Αφήστε το κενό για να διατηρείται το ιστορικό αναζητήσεων για πάντα. Αν αποθηκεύσετε έναν αριθμό, οι παλαιότερες αναζητήσεις αφαιρούνται τώρα και αυτόματα όσο η εφαρμογή είναι ανοιχτή.
     History Retention Saved: Η ρύθμιση διατήρησης ιστορικού αποθηκεύτηκε
     Invalid History Retention Days: Εισαγάγετε ακέραιο αριθμό ημερών μεγαλύτερο από το μηδέν
     Enable Watch Statistics: Ενεργοποίηση στατιστικών παρακολούθησης
@@ -1381,6 +1384,7 @@ Settings:
     Channel playback speeds imported: "Έγινε εισαγωγή της ταχύτητας αναπαραγωγής {count} καναλιού | Έγινε εισαγωγή των ταχυτήτων αναπαραγωγής {count} καναλιών"
     Channels not found: "Δεν ήταν δυνατή η εύρεση {count} καναλιού | Δεν ήταν δυνατή η εύρεση {count} καναλιών"
     Playlists have been successfully imported: "Εισήχθη επιτυχώς 1/{total} λίστα αναπαραγωγής | Εισήχθησαν επιτυχώς {count}/{total} λίστες αναπαραγωγής"
+    Import subscription groups hint: Για να ταξινομήσετε τα κανάλια σε ομάδες, προσθέστε σε ένα αρχείο .csv μια στήλη μετά τον τίτλο του καναλιού με ονόματα ομάδων χωρισμένα με «;» ή εισαγάγετε ένα αρχείο .opml με φακέλους. Οι ομάδες που λείπουν δημιουργούνται.
   Sync Settings:
     Signed Out After Restore: 'Ο συγχρονισμός αποσυνδέθηκε επειδή αυτά τα δεδομένα εφαρμογής επαναφέρθηκαν από αντίγραφο ασφαλείας ή από άλλη συσκευή. Συνδεθείτε ξανά για να συγχρονίσετε αυτήν τη συσκευή.'
     Revoke Session Tabs Warning: "Τα συγχρονισμένα σύνολα καρτελών αυτής της συσκευής θα διαγραφούν επίσης."
@@ -2022,6 +2026,14 @@ Video:
       Load: "Φόρτωση αρχείου υποτίτλων…"
       Subtitle Files: "Αρχεία υποτίτλων"
       Error: "Δεν ήταν δυνατή η φόρτωση του αρχείου υποτίτλων. Επιλέξτε ένα αρχείο SRT ή WebVTT."
+    Timestamp Notes:
+      Take Note: Δημιουργία σημείωσης με χρονική σήμανση
+      Note at {time}: Σημείωση στο {time}
+      Note: Σημείωση
+      Add to Obsidian: Προσθήκη στο Obsidian
+      Copy as Markdown: Αντιγραφή ως Markdown
+      Copied: Η σημείωση αντιγράφηκε ως Markdown
+      Obsidian Failed: Δεν ήταν δυνατό το άνοιγμα του Obsidian
   External Media:
     Dislikes: "Αρνητική ψήφος | Αρνητικές ψήφοι"
     Reposts: "Αναδημοσίευση | Αναδημοσιεύσεις"
@@ -2255,6 +2267,7 @@ Comments:
   Highlighted comment: Επισημασμένο σχόλιο
   Highlighted reply: Επισημασμένη απάντηση
   Search loaded comments: Αναζήτηση στα φορτωμένα σχόλια
+  Close search: Κλείσιμο αναζήτησης
   Loaded comment search result count: 1 από {total} φορτωμένα σχόλια | {count} από {total} φορτωμένα σχόλια
   No loaded comments match your filters: Κανένα φορτωμένο σχόλιο δεν αντιστοιχεί στα φίλτρα σας
   YouTube comment link copied to clipboard: Ο σύνδεσμος σχολίου YouTube αντιγράφηκε στο πρόχειρο
@@ -2349,6 +2362,7 @@ Tooltips:
     Concurrent Preloads: "Ο μέγιστος αριθμός διεργασιών yt-dlp που χρησιμοποιούνται για την ταυτόχρονη προφόρτωση βίντεο. Οι υψηλότερες τιμές χρησιμοποιούν περισσότερη CPU, μνήμη και εύρος ζώνης δικτύου."
     Ignore System Rotation Lock for Fullscreen: Περιστρέψτε τη συσκευή για είσοδο και έξοδο από την πλήρη οθόνη, ακόμη και όταν η αυτόματη περιστροφή του Android είναι απενεργοποιημένη.
     Ask Before Preloading Large Playlists: "Ζητά επιβεβαίωση πριν από την προφόρτωση όλων των βίντεο μιας λίστας αναπαραγωγής με περισσότερα από {count} βίντεο."
+    Obsidian Vault: Όνομα του θησαυροφυλακίου Obsidian για τις σημειώσεις χρονικής σήμανσης. Όταν οριστεί, οι σημειώσεις μπορούν να προστεθούν στο Obsidian. Οι σημειώσεις κάθε βίντεο συγκεντρώνονται σε μια σημείωση με το όνομα του βίντεο, στον φάκελο του θησαυροφυλακίου για νέες σημειώσεις.
   Download Settings:
     Download Folder: Τα βίντεο αποθηκεύονται σε αυτόν τον φάκελο. Αφήστε το κενό για να χρησιμοποιηθεί ο φάκελος Λήψεις του συστήματός σας.
     Global Additional yt-dlp Arguments: Πρόσθετα ορίσματα γραμμής εντολών που διαβιβάζονται στο yt-dlp για κάθε λήψη, για παράδειγμα --cookies-from-browser firefox.

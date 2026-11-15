@@ -572,6 +572,7 @@ import { queueSwipeAction, findSwipeDownload, downloadSwipeAction } from '../../
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { FtIcon } from '@opentubex/icons'
 import { computed, inject, onBeforeUnmount, onMounted, ref, toRef, useTemplateRef, watch } from 'vue'
+import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/lazyWatchVideoDownloadPrompt'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 
@@ -582,7 +583,6 @@ import FtEmbeddedProgress from '../FtEmbeddedProgress/FtEmbeddedProgress.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtNewContentDot from '../FtNewContentDot/FtNewContentDot.vue'
 import FtVerifiedBadge from '../FtVerifiedBadge/FtVerifiedBadge.vue'
-import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
 import { vSaferHtml } from '../../directives/vSaferHtml.js'
 
 import store from '../../store/index'

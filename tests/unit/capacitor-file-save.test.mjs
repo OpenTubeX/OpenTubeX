@@ -103,6 +103,7 @@ function loadScreenshot({ directory = 'content://documents/tree/screenshots', ch
   const takeScreenshot = vm.runInNewContext(`${screenshotSource}\ntakeScreenshot`, {
     process: { env: { IS_CAPACITOR: true } },
     video: { value: video },
+    timestampNote: { value: null },
     capturePlayerFrame: async source => source,
     screenshotMode: { value: mode },
     screenshotFormat: { value: 'png' },

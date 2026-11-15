@@ -661,7 +661,7 @@ test.describe('manual comment loading', () => {
     await thread.locator('.commentReplyRootToggle button').click()
     const firstReply = thread.locator('.commentReplyContent').first()
     await expect(firstReply).toBeVisible({ timeout: 30_000 })
-    const replyAuthor = await firstReply.locator('.commentAuthor').innerText()
+    const replyAuthor = (await firstReply.locator('.commentAuthor').textContent()).trim()
 
     await page.getByRole('button', { name: 'Filter loaded comments' }).click()
     await page.getByRole('checkbox', { name: 'Search loaded comments' }).click()
@@ -765,11 +765,12 @@ test.describe('manual comment loading', () => {
     await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
 
     let thread = page.locator('.commentThread').first()
-    const parentAuthor = await thread.locator(':scope > .commentAuthorWrapper .commentAuthor').innerText()
+    // innerText is empty while content-visibility skips the offscreen thread.
+    const parentAuthor = (await thread.locator(':scope > .commentAuthorWrapper .commentAuthor').textContent()).trim()
     await thread.locator('.commentReplyRootToggle button').click()
     let firstReply = thread.locator('.commentReplyContent').first()
     await expect(firstReply).toBeVisible({ timeout: 30_000 })
-    const replyAuthor = await firstReply.locator('.commentAuthor').innerText()
+    const replyAuthor = (await firstReply.locator('.commentAuthor').textContent()).trim()
     await firstReply.getByRole('button', { name: `Pin comment by ${replyAuthor}` }).click()
     await expect(firstReply).toContainText('Pinned by you')
     await expect(thread.locator(':scope > .commentPersonalPin')).toContainText('A reply is pinned')
@@ -1130,6 +1131,8 @@ test.describe('manual comment loading', () => {
     expect(await replyToggleRow.evaluate(element => (
       getComputedStyle(element, '::before').borderInlineStartWidth
     ))).toBe('1px')
+    // Offscreen threads are not laid out (content-visibility), so measure it where it is seen.
+    await comment.scrollIntoViewIfNeeded()
     expect(await comment.evaluate((element) => {
       const toggle = element.querySelector('.commentReplyRootToggle')
       const stemStyle = getComputedStyle(element, '::before')

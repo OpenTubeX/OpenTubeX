@@ -1,4 +1,3 @@
-import './startupReads'
 import './i18n/startupLocales'
 import { ytDlp } from './helpers/ytDlp'
 import { supportsYtDlp } from './helpers/ytDlpCapabilities'

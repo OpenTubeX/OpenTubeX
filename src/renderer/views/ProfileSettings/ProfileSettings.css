@@ -138,6 +138,7 @@ h2 {
   /* These cards scroll inside the window, which can't clip a fixed layer. */
   --fixed-background-display: none;
   --fixed-background-host-clip: border-box;
+  --fixed-background-host-attachment: scroll;
 
   display: flow-root;
 }

@@ -241,10 +241,10 @@ Subscriptions:
     Platform: Platform
     All Platforms: All platforms
     Followed Channels: Followed channels on other platforms
-    Description: Follow channels on Twitch, SoundCloud, PeerTube, Rumble and Odysee to see their uploads in the Platforms tab of your subscriptions. Find channels with the search, or add them by the address of their page. Their media plays with yt-dlp.
+    Description: Follow channels on Twitch, SoundCloud, PeerTube, Rumble, Odysee and media.ccc.de to see their uploads in the Platforms tab of your subscriptions. Find channels with the search, or add them by the address of their page. Their media plays with yt-dlp.
     Add Channel: Add channel
     Channel URL: Channel address
-    Invalid Channel: Enter the address of a channel page on Twitch, SoundCloud, PeerTube, Rumble or Odysee.
+    Invalid Channel: Enter the address of a channel page on Twitch, SoundCloud, PeerTube, Rumble, Odysee or media.ccc.de.
     Channel Not Found: There is no channel at this address.
     Channel Already Followed: You already follow this channel.
     Channel Could Not Be Loaded: The channel could not be loaded.
@@ -987,11 +987,14 @@ Settings:
       Viewing Modes: Viewing Modes
       Shorts: Shorts
       Screenshots: Screenshots
+      Timestamp Notes: Timestamp Notes
     Enable FCast: "Enable FCast"
     Screenshot:
       Legacy Formats: "Legacy formats"
       Modern Formats: "Modern formats"
     Ask Before Preloading Large Playlists: "Ask Before Preloading Large Playlists"
+    Timestamp Notes:
+      Obsidian Vault: Obsidian Vault
   Channel Settings:
     Channel Settings: Channel Settings
     Channel Settings Description: Remember the settings you pick while watching for each channel individually, so they are applied again the next time you watch one of its videos.
@@ -1129,11 +1132,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: "Internet connectivity checks"
     Internet Connectivity Checks Tooltip: "Sends small requests to a server hosted by GrapheneOS to check internet access."
-    Automatic History Retention: Automatic History Retention (Days)
-    Automatic History Retention Placeholder: Leave blank to keep forever
+    Automatic History Deletion: Automatically Delete History After (Days)
+    Watch History Retention: Watch History
+    Search History Retention: Search History
+    Keep Forever Placeholder: Keep forever
     Automatic History Retention Tooltip: Leave blank to keep history forever. Saving a number removes older entries now and automatically while the app is open.
-    Automatic Search History Retention: Automatic Search History Retention (Days)
-    Automatic Search History Retention Tooltip: Leave blank to keep search history forever. Saving a number removes older searches now and automatically while the app is open.
     History Retention Saved: History retention has been saved
     Invalid History Retention Days: Enter a whole number of days greater than zero
     Enable Watch Statistics: Enable Watch Statistics
@@ -1361,6 +1364,7 @@ Settings:
     Channel playback speeds imported: "Imported the playback speed of {count} channel | Imported the playback speeds of {count} channels"
     Channels not found: "{count} channel could not be found | {count} channels could not be found"
     Playlists have been successfully imported: "1/{total} playlist has been successfully imported | {count}/{total} playlists have been successfully imported"
+    Import subscription groups hint: To sort channels into groups, add a column after the channel title in a .csv file with group names separated by semicolons, or import an .opml file with folders. Missing groups are created.
   Sync Settings:
     Signed Out After Restore: 'Sync was signed out because this app data was restored from a backup or another device. Sign in again to sync this device.'
     Revoke Session Tabs Warning: "This device's synced tab sets will also be deleted."
@@ -1996,6 +2000,14 @@ Video:
       Load: "Load subtitle file…"
       Subtitle Files: "Subtitle files"
       Error: "Could not load the subtitle file. Choose an SRT or WebVTT file."
+    Timestamp Notes:
+      Take Note: Take Timestamp Note
+      Note at {time}: Note at {time}
+      Note: Note
+      Add to Obsidian: Add to Obsidian
+      Copy as Markdown: Copy as Markdown
+      Copied: Note copied as Markdown
+      Obsidian Failed: Could not open Obsidian
   Station: Station
   Playlist:
     Unavailable videos are hidden: 1 unavailable video is hidden | {count} unavailable videos are hidden
@@ -2235,6 +2247,7 @@ Comments:
   Highlighted comment: Highlighted comment
   Highlighted reply: Highlighted reply
   Search loaded comments: Search loaded comments
+  Close search: Close search
   Loaded comment search result count: 1 of {total} loaded comments | {count} of {total} loaded comments
   No loaded comments match your filters: No loaded comments match your filters
   YouTube comment link copied to clipboard: YouTube comment link copied to clipboard
@@ -2329,6 +2342,7 @@ Tooltips:
     Concurrent Preloads: "The maximum number of yt-dlp processes used to preload videos at once. Higher values use more CPU, memory, and network bandwidth."
     Ignore System Rotation Lock for Fullscreen: Use physical device rotation to enter and exit fullscreen even when Android's auto-rotate is off.
     Ask Before Preloading Large Playlists: "Asks for confirmation before preloading all videos of a playlist with more than {count} videos."
+    Obsidian Vault: Name of the Obsidian vault for timestamp notes. When set, notes can be added to Obsidian. The notes of each video are collected in a note named after the video, in the vault's folder for new notes.
   Download Settings:
     Download Folder: Videos are saved to this folder. Leave blank to use your system's Downloads folder.
     Global Additional yt-dlp Arguments: Additional command line arguments passed to yt-dlp for every download, for example --cookies-from-browser firefox.

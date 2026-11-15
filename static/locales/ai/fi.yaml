@@ -242,10 +242,10 @@ Subscriptions:
     Platform: Alusta
     All Platforms: Kaikki alustat
     Followed Channels: Seuratut kanavat muilla alustoilla
-    Description: Seuraa kanavia palveluissa Twitch, SoundCloud, PeerTube, Rumble ja Odysee, niin näet niiden lataukset tilaustesi Alustat-välilehdellä. Etsi kanavia haulla tai lisää ne niiden sivun osoitteella. Niiden media toistetaan yt-dlp:llä.
+    Description: Seuraa kanavia palveluissa Twitch, SoundCloud, PeerTube, Rumble, Odysee ja media.ccc.de, niin näet niiden lataukset tilaustesi Alustat-välilehdellä. Etsi kanavia haulla tai lisää ne niiden sivun osoitteella. Niiden media toistetaan yt-dlp:llä.
     Add Channel: Lisää kanava
     Channel URL: Kanavan osoite
-    Invalid Channel: Kirjoita kanavasivun osoite palvelusta Twitch, SoundCloud, PeerTube, Rumble tai Odysee.
+    Invalid Channel: Kirjoita kanavasivun osoite palvelusta Twitch, SoundCloud, PeerTube, Rumble, Odysee tai media.ccc.de.
     Channel Not Found: Tässä osoitteessa ei ole kanavaa.
     Channel Already Followed: Seuraat jo tätä kanavaa.
     Channel Could Not Be Loaded: Kanavaa ei voitu ladata.
@@ -1005,8 +1005,11 @@ Settings:
       Viewing Modes: Katselutilat
       Shorts: Shorts
       Screenshots: Kuvakaappaukset
+      Timestamp Notes: Aikaleimamuistiinpanot
     Enable FCast: "Ota FCast käyttöön"
     Ask Before Preloading Large Playlists: "Kysy ennen suurten soittolistojen esilatausta"
+    Timestamp Notes:
+      Obsidian Vault: Obsidian-holvi
   Channel Settings:
     Channel Settings: Kanava-asetukset
     Channel Settings Description: Muista katselun aikana valitsemasi asetukset kanavakohtaisesti, jotta niitä käytetään uudelleen, kun katsot seuraavan kerran saman kanavan videota.
@@ -1144,11 +1147,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: "Internet-yhteyden tarkistukset"
     Internet Connectivity Checks Tooltip: "Lähettää pieniä pyyntöjä GrapheneOS:n ylläpitämälle palvelimelle internet-yhteyden tarkistamiseksi."
-    Automatic History Retention: Historian automaattinen säilytysaika (päivää)
-    Automatic History Retention Placeholder: Jätä tyhjäksi säilyttääksesi historian pysyvästi
+    Automatic History Deletion: Poista historia automaattisesti (päivän) jälkeen
+    Watch History Retention: Katseluhistoria
+    Search History Retention: Hakuhistoria
+    Keep Forever Placeholder: Säilytä pysyvästi
     Automatic History Retention Tooltip: Jätä tyhjäksi, jos haluat säilyttää historian pysyvästi. Kun tallennat luvun, sitä vanhemmat merkinnät poistetaan heti ja jatkossa automaattisesti sovelluksen ollessa avoinna.
-    Automatic Search History Retention: Hakuhistorian automaattinen säilytysaika (päivää)
-    Automatic Search History Retention Tooltip: Jätä tyhjäksi, jos haluat säilyttää hakuhistorian pysyvästi. Kun tallennat luvun, sitä vanhemmat haut poistetaan heti ja jatkossa automaattisesti sovelluksen ollessa avoinna.
     History Retention Saved: Historian säilytysaika tallennettiin
     Invalid History Retention Days: Anna päivien määräksi nollaa suurempi kokonaisluku
     Enable Watch Statistics: Ota katselutilastot käyttöön
@@ -1381,6 +1384,7 @@ Settings:
     Channel playback speeds imported: "Tuotiin {count} kanavan toistonopeus | Tuotiin {count} kanavan toistonopeudet"
     Channels not found: "{count} kanavaa ei löytynyt | {count} kanavaa ei löytynyt"
     Playlists have been successfully imported: "1/{total} soittolista tuotiin onnistuneesti | {count}/{total} soittolistaa tuotiin onnistuneesti"
+    Import subscription groups hint: Jos haluat lajitella kanavat ryhmiin, lisää .csv-tiedostoon kanavan nimen perään sarake, jossa on ryhmien nimet puolipisteillä erotettuina, tai tuo .opml-tiedosto, jossa on kansioita. Puuttuvat ryhmät luodaan.
   Sync Settings:
     Signed Out After Restore: 'Synkronoinnista kirjauduttiin ulos, koska nämä sovelluksen tiedot palautettiin varmuuskopiosta tai toisesta laitteesta. Kirjaudu uudelleen sisään synkronoidaksesi tämän laitteen.'
     Revoke Session Tabs Warning: "Myös tämän laitteen synkronoidut välilehtijoukot poistetaan."
@@ -2014,6 +2018,14 @@ Video:
       Load: "Lataa tekstitystiedosto…"
       Subtitle Files: "Tekstitystiedostot"
       Error: "Tekstitystiedostoa ei voitu ladata. Valitse SRT- tai WebVTT-tiedosto."
+    Timestamp Notes:
+      Take Note: Tee aikaleimamuistiinpano
+      Note at {time}: Muistiinpano kohdassa {time}
+      Note: Muistiinpano
+      Add to Obsidian: Lisää Obsidianiin
+      Copy as Markdown: Kopioi Markdownina
+      Copied: Muistiinpano kopioitiin Markdownina
+      Obsidian Failed: Obsidianin avaaminen epäonnistui
   Station: Asema
   External Media:
     Dislikes: "Ei-tykkäys | Ei-tykkäystä"
@@ -2248,6 +2260,7 @@ Comments:
   Highlighted comment: Korostettu kommentti
   Highlighted reply: Korostettu vastaus
   Search loaded comments: Hae ladatuista kommenteista
+  Close search: Sulje haku
   Loaded comment search result count: 1/{total} ladatusta kommentista | {count}/{total} ladatusta kommentista
   No loaded comments match your filters: Yksikään ladattu kommentti ei vastaa suodattimia
   YouTube comment link copied to clipboard: YouTube-kommentin linkki kopioitiin leikepöydälle
@@ -2342,6 +2355,7 @@ Tooltips:
     Concurrent Preloads: "Videoiden samanaikaiseen esilataukseen käytettävien yt-dlp-prosessien enimmäismäärä. Suuremmat arvot käyttävät enemmän suoritinta, muistia ja verkon kaistanleveyttä."
     Ignore System Rotation Lock for Fullscreen: Käännä laitetta siirtyäksesi koko näyttöön ja poistuaksesi siitä, vaikka Androidin automaattinen kierto olisi pois käytöstä.
     Ask Before Preloading Large Playlists: "Pyytää vahvistusta ennen kuin kaikki videot esiladataan soittolistalta, jossa on yli {count} videota."
+    Obsidian Vault: Aikaleimamuistiinpanoihin käytettävän Obsidian-holvin nimi. Kun se on asetettu, muistiinpanoja voi lisätä Obsidianiin. Kunkin videon muistiinpanot kootaan videon mukaan nimettyyn muistiinpanoon holvin uusien muistiinpanojen kansiossa.
   Download Settings:
     Download Folder: Videot tallennetaan tähän kansioon. Jos kenttä jätetään tyhjäksi, käytetään järjestelmän Lataukset-kansiota.
     Global Additional yt-dlp Arguments: Kaikissa latauksissa yt-dlp:lle välitettävät komentorivin lisäargumentit, esimerkiksi --cookies-from-browser firefox.

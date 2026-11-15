@@ -24,6 +24,7 @@ const EXTERNAL_MEDIA_PLATFORMS = [
   ['bilibili.com', 'bilibili'],
   ['odysee.com', 'odysee'],
   ['rumble.com', 'rumble'],
+  ['media.ccc.de', 'ccc'],
   ['archive.org', 'internetarchive'],
   ['mixcloud.com', 'mixcloud'],
   ['kick.com', 'kick'],

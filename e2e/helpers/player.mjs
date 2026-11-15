@@ -225,7 +225,11 @@ export async function waitForPlaybackOrSkip(test, page) {
     }, { timeout: 60_000, message: 'waiting for playback to start or an IP-block error' })
     .toBe('done')
 
-  test.skip(state === 'blocked', `YouTube refused playback from this IP: ${await blocked.textContent().catch(() => '')}`)
+  if (state === 'blocked') {
+    // Read the message only when it exists: textContent() waits for a match,
+    // which would stall a playing test until short videos have ended.
+    test.skip(true, `YouTube refused playback from this IP: ${await blocked.textContent().catch(() => '')}`)
+  }
   return video
 }
 

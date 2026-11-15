@@ -674,7 +674,7 @@ import SharedYoutubeLinkPrompt from './components/SharedYoutubeLinkPrompt/Shared
 import { initializeAndroidIncomingShare } from './helpers/androidIncomingShare'
 import { handleRestoredAndroidAppData } from './helpers/androidStorage'
 import { extractSharedMediaLink, extractSharedYoutubeLink } from './helpers/sharedYoutubeLink'
-import { shouldOpenExternalMediaUrl } from './helpers/externalMediaUrl'
+import { getExternalUrlRoute, shouldOpenExternalMediaUrl } from './helpers/externalMediaUrl'
 import { isExternalMediaHistoryId } from './helpers/externalMediaHistory'
 import DigitalWellbeing from './components/DigitalWellbeing/DigitalWellbeing.vue'
 import FtButton from './components/FtButton/FtButton.vue'
@@ -745,6 +745,7 @@ import { useSubscriptionAutoRefresh } from './composables/useSubscriptionAutoRef
 import { useRssFeedAutoRefresh } from './composables/useRssFeedAutoRefresh'
 import { usePlatformFeedAutoRefresh } from './composables/usePlatformFeedAutoRefresh'
 import { startTwitchLiveNotifications } from './helpers/platformFeed'
+import { findPlatformChannel, getPlatformChannelRoute } from '../platforms/index'
 import { startCommentReplyNotifications } from './helpers/commentReplyNotifications'
 import { translateWindowTitle } from './helpers/strings'
 import { normalizeScrollbarThumbWidth } from './constants/scrollbar'
@@ -1300,7 +1301,8 @@ const mobileContextLinkCanOpenInTab = computed(() => {
   if (!store.getters.getTabsEnabled) return false
   const href = mobileContextLink.value?.href ?? ''
   return href.startsWith(`${window.location.href.split('#')[0]}#`) ||
-    /^https?:\/\/(?:www\.|m\.)?(?:youtube\.com|youtu\.be)\//.test(href)
+    /^https?:\/\/(?:www\.|m\.)?(?:youtube\.com|youtu\.be)\//.test(href) ||
+    getLinkedPlatformChannel(href) !== null
 })
 const mobileContextLinkCopyUrl = computed(() => {
   const href = mobileContextLink.value?.href
@@ -2056,10 +2058,7 @@ onMounted(async () => {
   }
   document.addEventListener('keyup', handleKeyboardShortcutKeyup)
   document.addEventListener('mousedown', handleMouseDown)
-  document.addEventListener('pointermove', handleNumberInputPointer, { passive: true })
-  document.addEventListener('pointerdown', handleNumberInputPointer, { capture: true, passive: true })
-  document.addEventListener('pointerup', handleNumberInputPointer, { capture: true, passive: true })
-  document.addEventListener('pointerout', handleNumberInputPointer, { passive: true })
+  document.addEventListener('beforeinput', rejectNonNumericInput)
   document.addEventListener('dragstart', handleDragStart)
   window.addEventListener('blur', cancelTabSwitcher)
   if (process.env.IS_ELECTRON) {
@@ -2117,10 +2116,7 @@ onBeforeUnmount(() => {
   document.removeEventListener('contextmenu', handleMobileLinkContextMenu, true)
   document.removeEventListener('keyup', handleKeyboardShortcutKeyup)
   document.removeEventListener('mousedown', handleMouseDown)
-  document.removeEventListener('pointermove', handleNumberInputPointer)
-  document.removeEventListener('pointerdown', handleNumberInputPointer, true)
-  document.removeEventListener('pointerup', handleNumberInputPointer, true)
-  document.removeEventListener('pointerout', handleNumberInputPointer)
+  document.removeEventListener('beforeinput', rejectNonNumericInput)
   document.removeEventListener('dragstart', handleDragStart)
   document.removeEventListener('click', handleClick)
   document.removeEventListener('auxclick', handleAuxClick)
@@ -3938,39 +3934,15 @@ function handleMouseDown() {
   store.dispatch('hideOutlines')
 }
 
-/** @param {PointerEvent} event */
-function handleNumberInputPointer(event) {
+/**
+ * Firefox lets number inputs take any text and then reports an empty value,
+ * which reads as a cleared field. Reject the characters Chromium rejects.
+ * @param {InputEvent} event
+ */
+function rejectNonNumericInput(event) {
   const input = event.target
-  if (!(input instanceof HTMLInputElement) || input.type !== 'number') return
-  if (event.type === 'pointerout') {
-    if (event.relatedTarget !== input) {
-      input.style.removeProperty('--number-step-up-color')
-      input.style.removeProperty('--number-step-down-color')
-    }
-    return
-  }
-  if (input.disabled || input.readOnly) return
-
-  // Chromium exposes both native step arrows as one pseudo-element. Split its
-  // paint at the content's center while keeping native stepping and key repeat.
-  const bounds = input.getBoundingClientRect()
-  const style = getComputedStyle(input)
-  const rtl = style.direction === 'rtl'
-  const edge = rtl ? bounds.left + parseFloat(style.paddingLeft) + 4 : bounds.right - parseFloat(style.paddingRight) - 4
-  const middle = bounds.top + (bounds.height + parseFloat(style.paddingTop) - parseFloat(style.paddingBottom)) / 2
-  let hoveredStep = ''
-  if (Math.abs(event.clientX - edge) <= 12 && Math.abs(event.clientY - middle) <= 14) {
-    hoveredStep = event.clientY < middle ? 'up' : 'down'
-  }
-  // Custom themes may use a translucent pressed color, which would fade the arrow out.
-  const highlight = event.buttons & 1 ? 'rgb(from var(--primary-color-active) r g b / 100%)' : 'var(--primary-color)'
-  for (const step of ['up', 'down']) {
-    const property = `--number-step-${step}-color`
-    const color = hoveredStep === step ? highlight : ''
-    if (input.style.getPropertyValue(property) !== color) {
-      if (color) input.style.setProperty(property, color)
-      else input.style.removeProperty(property)
-    }
+  if (input instanceof HTMLInputElement && input.type === 'number' && event.data !== null && /[^\d.,eE+-]/.test(event.data)) {
+    event.preventDefault()
   }
 }
 
@@ -4207,6 +4179,16 @@ async function openMobileContextLink(newTab) {
     return
   }
 
+  const platformChannel = getLinkedPlatformChannel(href)
+  if (platformChannel) {
+    await openInternalPath({
+      ...getPlatformChannelRoute(platformChannel.platform, platformChannel.id),
+      doCreateNewTab: newTab,
+      makeActive: true
+    })
+    return
+  }
+
   handleExternalLink(href)
 }
 
@@ -4288,9 +4270,11 @@ function handleLinkClick(event, link) {
     ? ((process.platform !== 'darwin' && event.ctrlKey) || (process.platform === 'darwin' && event.metaKey))
     : (event.ctrlKey || event.metaKey)
   const isMiddleClick = event.type === 'auxclick' && event.button === 1
-  const doCreateNewTab = ctrlOrCmdPressed || isMiddleClick
+  // Shift opens a window, also with Ctrl/Cmd or the middle button, as for internal links
   const doCreateNewWindow = event.shiftKey
+  const doCreateNewTab = (ctrlOrCmdPressed || isMiddleClick) && !doCreateNewWindow
 
+  const platformChannel = getLinkedPlatformChannel(href)
   if (isYoutubeLink) {
     handleYoutubeLink(href, {
       doCreateNewWindow,
@@ -4298,9 +4282,27 @@ function handleLinkClick(event, link) {
       isMiddleClick,
       lazyLoad: isUnloadedBackgroundTabClick(event)
     })
+  } else if (platformChannel) {
+    openInternalPath({
+      ...getPlatformChannelRoute(platformChannel.platform, platformChannel.id),
+      doCreateNewWindow,
+      doCreateNewTab,
+      makeActive: !isMiddleClick,
+      lazyLoad: isUnloadedBackgroundTabClick(event)
+    })
   } else {
     handleExternalLink(href, { background: isMiddleClick })
   }
+}
+
+/**
+ * Links to channels of supported platforms, e.g. in a channel's About tab,
+ * open their channel page like YouTube links do. PeerTube channel paths are
+ * left to the browser, as other sites use them too.
+ * @param {string} href
+ */
+function getLinkedPlatformChannel(href) {
+  return supportsYtDlp ? findPlatformChannel(href, { anyHost: false }) : null
 }
 
 async function handleYoutubeLink(href, {
@@ -4446,7 +4448,7 @@ function enableOpenUrl() {
     if (!url) return
     // other sites must not reach the YouTube parser, which reads e.g. facebook.com/watch?v= as a video
     if (supportsYtDlp && shouldOpenExternalMediaUrl(url, store.getters.getCurrentInvidiousInstanceUrl)) {
-      const route = { path: '/external-media', query: { url } }
+      const route = getExternalUrlRoute(url)
       if (tabId) navigation.push(tabId, route)
       else openInternalPath(route)
       return
@@ -4463,7 +4465,7 @@ function enableOpenUrl() {
 }
 
 function openExternalMedia(url) {
-  return openInternalPath({ path: '/external-media', query: { url } })
+  return openInternalPath(getExternalUrlRoute(url))
 }
 
 async function handleAndroidSharedText(text) {

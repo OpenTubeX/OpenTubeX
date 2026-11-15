@@ -344,6 +344,8 @@ function getItemIcon(item, parentLabel = '') {
   if (item.icon != null && typeof item.icon === 'object') return item.icon
   // Shown when an image icon fails to load.
   if (item.fallbackIcon) return item.fallbackIcon
+  // Search engines until the main process resolves their icon
+  if (item.faviconSource) return ['fas', 'search']
   if (colorLabels.has(item.label)) return ['fas', 'circle']
   if (item.label === 'To Beginning') return ['fas', verticalTabLayout.value ? 'arrow-up' : 'arrow-left']
   if (item.label === 'To End') return ['fas', verticalTabLayout.value ? 'arrow-down' : 'arrow-right']

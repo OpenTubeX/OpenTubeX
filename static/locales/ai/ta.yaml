@@ -254,10 +254,10 @@ Subscriptions:
     Platform: தளம்
     All Platforms: அனைத்து தளங்களும்
     Followed Channels: பிற தளங்களில் பின்தொடரும் சேனல்கள்
-    Description: Twitch, SoundCloud, PeerTube, Rumble, Odysee ஆகியவற்றில் உள்ள சேனல்களைப் பின்தொடர்ந்து, அவற்றின் பதிவேற்றங்களை உங்கள் சந்தாக்களின் தளங்கள் தாவலில் பார்க்கவும். தேடல் மூலம் சேனல்களைக் கண்டறியவும், அல்லது அவற்றின் பக்க முகவரியைக் கொண்டு சேர்க்கவும். அவற்றின் ஊடகம் yt-dlp மூலம் இயக்கப்படும்.
+    Description: Twitch, SoundCloud, PeerTube, Rumble, Odysee, media.ccc.de ஆகியவற்றில் உள்ள சேனல்களைப் பின்தொடர்ந்து, அவற்றின் பதிவேற்றங்களை உங்கள் சந்தாக்களின் தளங்கள் தாவலில் பார்க்கவும். தேடல் மூலம் சேனல்களைக் கண்டறியவும், அல்லது அவற்றின் பக்க முகவரியைக் கொண்டு சேர்க்கவும். அவற்றின் ஊடகம் yt-dlp மூலம் இயக்கப்படும்.
     Add Channel: சேனலைச் சேர்
     Channel URL: சேனல் முகவரி
-    Invalid Channel: Twitch, SoundCloud, PeerTube, Rumble அல்லது Odysee இல் உள்ள ஒரு சேனல் பக்கத்தின் முகவரியை உள்ளிடுக.
+    Invalid Channel: Twitch, SoundCloud, PeerTube, Rumble, Odysee அல்லது media.ccc.de இல் உள்ள ஒரு சேனல் பக்கத்தின் முகவரியை உள்ளிடுக.
     Channel Not Found: இந்த முகவரியில் சேனல் இல்லை.
     Channel Already Followed: இந்தச் சேனலை ஏற்கனவே பின்தொடர்கிறீர்கள்.
     Channel Could Not Be Loaded: சேனலை ஏற்ற முடியவில்லை.
@@ -1026,8 +1026,11 @@ Settings:
       Viewing Modes: பார்வை முறைகள்
       Shorts: Shorts
       Screenshots: திரைப்பிடிப்புகள்
+      Timestamp Notes: நேர முத்திரைக் குறிப்புகள்
     Enable FCast: "FCast-ஐ இயக்கு"
     Ask Before Preloading Large Playlists: "பெரிய பிளேலிஸ்ட்களை முன்பே ஏற்றும் முன் கேள்"
+    Timestamp Notes:
+      Obsidian Vault: Obsidian பெட்டகம்
   Channel Settings:
     Channel Settings: சேனல் அமைப்புகள்
     Channel Settings Description: ஒவ்வொரு சேனலையும் பார்க்கும்போது தேர்ந்தெடுக்கும் அமைப்புகளைத் தனித்தனியாக நினைவில் கொண்டு, அதன் காணொளியை அடுத்த முறை பார்க்கும்போது மீண்டும் பயன்படுத்தும்.
@@ -1165,11 +1168,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: "இணைய இணைப்புச் சோதனைகள்"
     Internet Connectivity Checks Tooltip: "இணைய அணுகலைச் சரிபார்க்க GrapheneOS வழங்கும் சேவையகத்திற்கு சிறிய கோரிக்கைகளை அனுப்புகிறது."
-    Automatic History Retention: தானியக்க வரலாற்றுத் தக்கவைப்பு (நாட்கள்)
-    Automatic History Retention Placeholder: நிரந்தரமாக வைத்திருக்கக் காலியாக விடவும்
+    Automatic History Deletion: வரலாற்றைத் தானாக நீக்கும் காலம் (நாட்கள்)
+    Watch History Retention: பார்வை வரலாறு
+    Search History Retention: தேடல் வரலாறு
+    Keep Forever Placeholder: நிரந்தரமாக வைத்திரு
     Automatic History Retention Tooltip: வரலாற்றை நிரந்தரமாக வைத்திருக்கக் காலியாக விடவும். ஓர் எண்ணைச் சேமித்தால், பழைய உள்ளீடுகள் இப்போதும் செயலி திறந்திருக்கும் போதும் தானாக நீக்கப்படும்.
-    Automatic Search History Retention: தானியக்கத் தேடல் வரலாற்றுத் தக்கவைப்பு (நாட்கள்)
-    Automatic Search History Retention Tooltip: தேடல் வரலாற்றை நிரந்தரமாக வைத்திருக்கக் காலியாக விடவும். ஓர் எண்ணைச் சேமித்தால், பழைய தேடல்கள் இப்போதும் செயலி திறந்திருக்கும் போதும் தானாக நீக்கப்படும்.
     History Retention Saved: வரலாற்றுத் தக்கவைப்பு சேமிக்கப்பட்டது
     Invalid History Retention Days: பூஜ்ஜியத்தைவிடப் பெரிய முழு நாள் எண்ணை உள்ளிடவும்
     Enable Watch Statistics: பார்வைப் புள்ளிவிவரங்களை இயக்கு
@@ -1413,6 +1416,7 @@ Settings:
     Channel playback speeds imported: "{count} சேனலின் இயக்க வேகம் இறக்குமதி செய்யப்பட்டது | {count} சேனல்களின் இயக்க வேகங்கள் இறக்குமதி செய்யப்பட்டன"
     Channels not found: "{count} சேனலைக் கண்டறிய முடியவில்லை | {count} சேனல்களைக் கண்டறிய முடியவில்லை"
     Playlists have been successfully imported: "1/{total} பிளேலிஸ்ட் வெற்றிகரமாக இறக்குமதி செய்யப்பட்டது | {count}/{total} பிளேலிஸ்ட்கள் வெற்றிகரமாக இறக்குமதி செய்யப்பட்டன"
+    Import subscription groups hint: சேனல்களைக் குழுக்களாகப் பிரிக்க, .csv கோப்பில் சேனல் தலைப்புக்குப் பின் அரைப்புள்ளிகளால் பிரிக்கப்பட்ட குழுப் பெயர்களைக் கொண்ட ஒரு நெடுவரிசையைச் சேர்க்கவும், அல்லது கோப்புறைகள் கொண்ட .opml கோப்பை இறக்குமதி செய்யவும். இல்லாத குழுக்கள் உருவாக்கப்படும்.
   Sync Settings:
     Signed Out After Restore: 'இந்தப் பயன்பாட்டுத் தரவு காப்புப்பிரதியிலிருந்து அல்லது வேறொரு சாதனத்திலிருந்து மீட்டமைக்கப்பட்டதால் ஒத்திசைவிலிருந்து வெளியேற்றப்பட்டது. இந்தச் சாதனத்தை ஒத்திசைக்க மீண்டும் உள்நுழையவும்.'
     Revoke Session Tabs Warning: "இந்தச் சாதனத்தின் ஒத்திசைக்கப்பட்ட தாவல் தொகுப்புகளும் நீக்கப்படும்."
@@ -2067,6 +2071,14 @@ Video:
       Load: "வசனக் கோப்பை ஏற்று…"
       Subtitle Files: "வசனக் கோப்புகள்"
       Error: "வசனக் கோப்பை ஏற்ற முடியவில்லை. SRT அல்லது WebVTT கோப்பைத் தேர்ந்தெடுக்கவும்."
+    Timestamp Notes:
+      Take Note: நேர முத்திரைக் குறிப்பு எடு
+      Note at {time}: '{time} இல் குறிப்பு'
+      Note: குறிப்பு
+      Add to Obsidian: Obsidian-இல் சேர்
+      Copy as Markdown: Markdown ஆக நகலெடு
+      Copied: குறிப்பு Markdown ஆக நகலெடுக்கப்பட்டது
+      Obsidian Failed: Obsidian-ஐத் திறக்க முடியவில்லை
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'தொடக்க விளம்பரத்தில் மீதமுள்ள நேரம்: {remindingTimeSeconds}வி.'
   Station: நிலையம்
@@ -2308,6 +2320,7 @@ Comments:
   Highlighted comment: தனிப்படுத்திய கருத்து
   Highlighted reply: தனிப்படுத்திய பதில்
   Search loaded comments: ஏற்றிய கருத்துகளில் தேடு
+  Close search: தேடலை மூடு
   Loaded comment search result count: ஏற்றிய {total} கருத்துகளில் 1 | ஏற்றிய {total} கருத்துகளில் {count}
   No loaded comments match your filters: ஏற்றிய கருத்துகளில் உங்கள் வடிப்பான்களுக்குப் பொருந்துபவை இல்லை
   YouTube comment link copied to clipboard: YouTube கருத்து இணைப்பு இடைநிலைப் பலகைக்கு நகலெடுக்கப்பட்டது
@@ -2402,6 +2415,7 @@ Tooltips:
     Concurrent Preloads: "ஒரே நேரத்தில் காணொளிகளை முன் ஏற்றப் பயன்படுத்தப்படும் yt-dlp செயல்முறைகளின் அதிகபட்ச எண்ணிக்கை. அதிக மதிப்புகள் கூடுதல் CPU, நினைவகம் மற்றும் பிணைய அலைவரிசையைப் பயன்படுத்தும்."
     Ignore System Rotation Lock for Fullscreen: Android தானியங்கிச் சுழற்சி முடக்கப்பட்டிருந்தாலும், சாதனத்தைச் சுழற்றி முழுத்திரைக்குச் செல்லவும் அதிலிருந்து வெளியேறவும் முடியும்.
     Ask Before Preloading Large Playlists: "{count} காணொளிகளுக்கு மேல் உள்ள பிளேலிஸ்டின் அனைத்து காணொளிகளையும் முன்பே ஏற்றும் முன் உறுதிப்படுத்தல் கேட்கும்."
+    Obsidian Vault: நேர முத்திரைக் குறிப்புகளுக்கான Obsidian பெட்டகத்தின் பெயர். அமைக்கப்பட்டால், குறிப்புகளை Obsidian-இல் சேர்க்கலாம். ஒவ்வொரு வீடியோவின் குறிப்புகளும், பெட்டகத்தின் புதிய குறிப்புகளுக்கான கோப்புறையில், அந்த வீடியோவின் பெயரிலான ஒரு குறிப்பில் சேகரிக்கப்படும்.
   Download Settings:
     Download Folder: காணொளிகள் இந்தக் கோப்புறையில் சேமிக்கப்படும். உங்கள் கணினியின் பதிவிறக்கங்கள் கோப்புறையைப் பயன்படுத்தக் காலியாக விடவும்.
     Global Additional yt-dlp Arguments: ஒவ்வொரு பதிவிறக்கத்திற்கும் yt-dlp-க்குக் கொடுக்கப்படும் கூடுதல் கட்டளைவரி அளவுருக்கள். எடுத்துக்காட்டு, --cookies-from-browser firefox.

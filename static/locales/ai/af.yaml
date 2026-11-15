@@ -284,10 +284,10 @@ Subscriptions:
     Platform: Platform
     All Platforms: Alle platforms
     Followed Channels: Gevolgde kanale op ander platforms
-    Description: Volg kanale op Twitch, SoundCloud, PeerTube, Rumble en Odysee om hul oplaaie in die Platforms-oortjie van u intekeninge te sien. Vind kanale met die soekfunksie, of voeg hulle by met die adres van hul bladsy. Hul media speel met yt-dlp.
+    Description: Volg kanale op Twitch, SoundCloud, PeerTube, Rumble, Odysee en media.ccc.de om hul oplaaie in die Platforms-oortjie van u intekeninge te sien. Vind kanale met die soekfunksie, of voeg hulle by met die adres van hul bladsy. Hul media speel met yt-dlp.
     Add Channel: Voeg kanaal by
     Channel URL: Kanaaladres
-    Invalid Channel: Voer die adres van ’n kanaalbladsy op Twitch, SoundCloud, PeerTube, Rumble of Odysee in.
+    Invalid Channel: Voer die adres van ’n kanaalbladsy op Twitch, SoundCloud, PeerTube, Rumble, Odysee of media.ccc.de in.
     Channel Not Found: Daar is geen kanaal by hierdie adres nie.
     Channel Already Followed: U volg reeds hierdie kanaal.
     Channel Could Not Be Loaded: Die kanaal kon nie gelaai word nie.
@@ -1013,6 +1013,7 @@ Settings:
       Viewing Modes: Kykmodusse
       Shorts: Kortvideo’s
       Screenshots: Skermkiekies
+      Timestamp Notes: Tydstempelnotas
     Lights Off: Ligte af
     Show Lights Off Toggle: Wys Ligte af-wisselaar
     Show Volume Boost Toggle: Wys volumeversterking-wisselaar
@@ -1184,6 +1185,8 @@ Settings:
     Enable Google Cast: Aktiveer Google Cast
     Enable FCast: Aktiveer FCast
     Ask Before Preloading Large Playlists: "Vra voordat groot snitlyste vooraf gelaai word"
+    Timestamp Notes:
+      Obsidian Vault: Obsidian-kluis
   Channel Settings:
     Channel Settings: Kanaalinstellings
     Channel Settings Description: Onthou die instellings wat u tydens kyk kies vir elke kanaal afsonderlik, sodat hulle weer toegepas word die volgende keer dat u een van sy video’s kyk.
@@ -1321,11 +1324,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: Internetverbindingskontroles
     Internet Connectivity Checks Tooltip: Stuur klein versoeke na ’n bediener wat deur GrapheneOS gehuisves word om internettoegang na te gaan.
-    Automatic History Retention: Outomatiese behoud van geskiedenis (dae)
-    Automatic History Retention Placeholder: Laat leeg om vir altyd te hou
+    Automatic History Deletion: Vee geskiedenis outomaties uit ná (dae)
+    Watch History Retention: Kykgeskiedenis
+    Search History Retention: Soekgeskiedenis
+    Keep Forever Placeholder: Hou vir altyd
     Automatic History Retention Tooltip: Laat leeg om geskiedenis vir altyd te hou. As u ’n getal stoor, word ouer inskrywings nou en outomaties verwyder terwyl die toep oop is.
-    Automatic Search History Retention: Outomatiese behoud van soekgeskiedenis (dae)
-    Automatic Search History Retention Tooltip: Laat leeg om soekgeskiedenis vir altyd te hou. As u ’n getal stoor, word ouer soektogte nou en outomaties verwyder terwyl die toep oop is.
     History Retention Saved: Behoud van geskiedenis is gestoor
     Invalid History Retention Days: Voer ’n heelgetal dae groter as nul in
     Enable Watch Statistics: Aktiveer kykstatistieke
@@ -1584,6 +1587,7 @@ Settings:
     Channel playback speeds imported: Die afspeelspoed van {count} kanaal is ingevoer | Die afspeelspoed van {count} kanale is ingevoer
     Channels not found: '{count} kanaal kon nie gevind word nie | {count} kanale kon nie gevind word nie'
     Playlists have been successfully imported: "1/{total} snitlys is suksesvol ingevoer | {count}/{total} snitlyste is suksesvol ingevoer"
+    Import subscription groups hint: Om kanale in groepe te sorteer, voeg 'n kolom ná die kanaaltitel in 'n .csv-lêer by met groepname wat deur kommapunte geskei word, of voer 'n .opml-lêer met vouers in. Groepe wat ontbreek, word geskep.
   Sync Settings:
     Signed Out After Restore: 'Sinkronisering is afgemeld omdat hierdie toepassingsdata vanaf ''n rugsteun of ''n ander toestel herstel is. Meld weer aan om hierdie toestel te sinkroniseer.'
     Revoke Session Tabs Warning: Hierdie toestel se gesinkroniseerde oortjiestelle sal ook geskrap word.
@@ -2281,6 +2285,14 @@ Video:
       Cast: Saai uit na ’n FCast-ontvanger
       No Devices: Geen FCast-ontvangers gevind nie
       No Source: Geen versoenbare stroom vir FCast nie
+    Timestamp Notes:
+      Take Note: Maak tydstempelnota
+      Note at {time}: Nota by {time}
+      Note: Nota
+      Add to Obsidian: Voeg by Obsidian
+      Copy as Markdown: Kopieer as Markdown
+      Copied: Nota as Markdown gekopieer
+      Obsidian Failed: Kon nie Obsidian oopmaak nie
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Oorblywende tyd van voorafadvertensie: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Oorblywende SABR-wagtyd: {remindingTimeSeconds}s'
@@ -2495,6 +2507,7 @@ Comments:
   Highlighted comment: Uitgeligte opmerking
   Highlighted reply: Uitgeligte antwoord
   Search loaded comments: Soek in gelaaide kommentaar
+  Close search: Sluit soektog
   Loaded comment search result count: 1 van {total} gelaaide opmerkings | {count} van {total} gelaaide opmerkings
   No loaded comments match your filters: Geen gelaaide kommentaar pas by u filters nie
   YouTube comment link copied to clipboard: YouTube-kommentaarskakel na knipbord gekopieer
@@ -2589,6 +2602,7 @@ Tooltips:
     Concurrent Preloads: Die maksimum aantal yt-dlp-prosesse wat gelyktydig gebruik word om video’s vooraf te laai. Hoër waardes gebruik meer SVE, geheue en netwerkbandwydte.
     Ignore System Rotation Lock for Fullscreen: Gebruik fisiese toesteldraaiing om volskerm te betree en te verlaat, selfs wanneer Android se outodraai af is.
     Ask Before Preloading Large Playlists: "Vra vir bevestiging voordat alle video’s van ’n snitlys met meer as {count} video’s vooraf gelaai word."
+    Obsidian Vault: Naam van die Obsidian-kluis vir tydstempelnotas. Wanneer dit gestel is, kan notas by Obsidian gevoeg word. Die notas van elke video word versamel in 'n nota wat na die video vernoem is, in die kluis se vouer vir nuwe notas.
   Download Settings:
     Download Folder: Video’s word in hierdie vouer gestoor. Laat leeg om u stelsel se Aflaaie-vouer te gebruik.
     Global Additional yt-dlp Arguments: Bykomende opdragreëlargumente wat vir elke aflaai aan yt-dlp deurgegee word, byvoorbeeld --cookies-from-browser firefox.

@@ -417,6 +417,14 @@ let channelRouteGeneration = 0
 let autoRefreshOnSortByChangeEnabled = false
 /** @type {import('youtubei.js').YT.Channel|null} */
 let channelInstance = null
+// Tab loads reuse the instance, so its requests are cancelled only once the
+// page drops the instance: on another channel, a backend switch, or unmount.
+let channelAbortController = null
+
+function abortChannelRequests() {
+  channelAbortController?.abort()
+  channelAbortController = null
+}
 /** @type {'local' | 'invidious' | ''} */
 let apiUsed = ''
 /**
@@ -737,6 +745,8 @@ function loadChannelRoute() {
   isLoading.value = true
 
   if (route.query.url) {
+    abortChannelRequests()
+    channelInstance = null
     resolveChannelUrl(route.query.url, route.params.currentTab)
     return
   }
@@ -763,6 +773,7 @@ function loadChannelRoute() {
   latestCommunityPosts.value = []
   searchResults.value = []
   apiUsed = ''
+  abortChannelRequests()
   channelInstance = null
   mayContainContentFromOtherChannels = false
   loadedTabs.clear()
@@ -844,6 +855,7 @@ onBeforeUnmount(() => {
   // Leaving for another view stops the route watcher, so invalidate pending
   // loads here as well; a late URL resolution must not navigate back.
   channelRouteGeneration += 1
+  abortChannelRequests()
 })
 
 /**
@@ -888,7 +900,8 @@ async function ensureChannelInstance() {
 
   const expectedId = id.value
   const expectedRouteGeneration = channelRouteGeneration
-  const instance = await getLocalChannel(expectedId)
+  channelAbortController ??= new AbortController()
+  const instance = await getLocalChannel(expectedId, channelAbortController.signal)
 
   // The route watcher clears the instance when the channel changes. A slow
   // response for the previous channel must not become the current one.
@@ -1264,6 +1277,7 @@ async function getChannelInfoInvidious() {
   loadedTabs.clear()
   pendingTabs.clear()
   channelLoaded = false
+  abortChannelRequests()
   channelInstance = null
 
   const expectedId = id.value

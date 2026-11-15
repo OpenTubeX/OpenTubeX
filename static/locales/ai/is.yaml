@@ -242,10 +242,10 @@ Subscriptions:
     Platform: Vettvangur
     All Platforms: Allir vettvangar
     Followed Channels: Rásir sem þú fylgir á öðrum vettvöngum
-    Description: Fylgdu rásum á Twitch, SoundCloud, PeerTube, Rumble og Odysee til að sjá það sem þær hlaða upp í flipanum Vettvangar í áskriftunum þínum. Finndu rásir með leitinni eða bættu þeim við með slóð síðunnar þeirra. Efni þeirra er spilað með yt-dlp.
+    Description: Fylgdu rásum á Twitch, SoundCloud, PeerTube, Rumble, Odysee og media.ccc.de til að sjá það sem þær hlaða upp í flipanum Vettvangar í áskriftunum þínum. Finndu rásir með leitinni eða bættu þeim við með slóð síðunnar þeirra. Efni þeirra er spilað með yt-dlp.
     Add Channel: Bæta við rás
     Channel URL: Slóð rásar
-    Invalid Channel: Sláðu inn slóð á rásarsíðu á Twitch, SoundCloud, PeerTube, Rumble eða Odysee.
+    Invalid Channel: Sláðu inn slóð á rásarsíðu á Twitch, SoundCloud, PeerTube, Rumble, Odysee eða media.ccc.de.
     Channel Not Found: Engin rás er á þessari slóð.
     Channel Already Followed: Þú fylgir þessari rás nú þegar.
     Channel Could Not Be Loaded: Ekki tókst að hlaða rásinni.
@@ -1004,11 +1004,14 @@ Settings:
       Viewing Modes: Skoðunarhamir
       Shorts: Shorts
       Screenshots: Skjámyndir
+      Timestamp Notes: Tímamerktar glósur
     Enable FCast: "Virkja FCast"
     Screenshot:
       Legacy Formats: "Eldri snið"
       Modern Formats: "Nútímaleg snið"
     Ask Before Preloading Large Playlists: "Spyrja áður en stórir spilunarlistar eru forhlaðnir"
+    Timestamp Notes:
+      Obsidian Vault: Obsidian-hvelfing
   Channel Settings:
     Channel Settings: Rásarstillingar
     Channel Settings Description: Muna stillingarnar sem þú velur við áhorf fyrir hverja rás, svo þær verði notaðar aftur næst þegar þú horfir á myndband frá henni.
@@ -1146,11 +1149,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: "Athuganir á nettengingu"
     Internet Connectivity Checks Tooltip: "Sendir litlar beiðnir til netþjóns sem GrapheneOS hýsir til að athuga netaðgang."
-    Automatic History Retention: Sjálfvirk varðveisla ferils (dagar)
-    Automatic History Retention Placeholder: Skildu eftir autt til að geyma að eilífu
+    Automatic History Deletion: Eyða ferli sjálfkrafa eftir (daga)
+    Watch History Retention: Áhorfsferill
+    Search History Retention: Leitarferill
+    Keep Forever Placeholder: Geyma að eilífu
     Automatic History Retention Tooltip: Skildu eftir autt til að geyma ferilinn að eilífu. Þegar tala er vistuð eru eldri færslur fjarlægðar strax og síðan sjálfkrafa meðan forritið er opið.
-    Automatic Search History Retention: Sjálfvirk varðveisla leitarferils (dagar)
-    Automatic Search History Retention Tooltip: Skildu eftir autt til að geyma leitarferilinn að eilífu. Þegar tala er vistuð eru eldri leitir fjarlægðar strax og síðan sjálfkrafa meðan forritið er opið.
     History Retention Saved: Varðveisla ferils hefur verið vistuð
     Invalid History Retention Days: Sláðu inn heilan dagafjölda sem er meiri en núll
     Enable Watch Statistics: Virkja áhorfstölfræði
@@ -1383,6 +1386,7 @@ Settings:
     Channel playback speeds imported: "Flutti inn spilunarhraða {count} rásar | Flutti inn spilunarhraða {count} rása"
     Channels not found: "{count} rás fannst ekki | {count} rásir fundust ekki"
     Playlists have been successfully imported: "{count}/{total} spilunarlisti fluttur inn | {count}/{total} spilunarlistar fluttir inn"
+    Import subscription groups hint: Til að raða rásum í hópa skaltu bæta við dálki á eftir titli rásarinnar í .csv-skrá með hópaheitum aðskildum með semíkommum, eða flytja inn .opml-skrá með möppum. Hópar sem vantar eru búnir til.
   Sync Settings:
     Signed Out After Restore: 'Samstillingu var skráð út vegna þess að þessi forritsgögn voru endurheimt úr öryggisafriti eða af öðru tæki. Skráðu þig inn aftur til að samstilla þetta tæki.'
     Revoke Session Tabs Warning: "Samstilltum flipasöfnum þessa tækis verður einnig eytt."
@@ -2022,6 +2026,14 @@ Video:
       Load: "Hlaða inn skjátextaskrá…"
       Subtitle Files: "Skjátextaskrár"
       Error: "Ekki tókst að hlaða inn skjátextaskránni. Veldu SRT- eða WebVTT-skrá."
+    Timestamp Notes:
+      Take Note: Skrifa tímamerkta glósu
+      Note at {time}: Glósa við {time}
+      Note: Glósa
+      Add to Obsidian: Bæta við Obsidian
+      Copy as Markdown: Afrita sem Markdown
+      Copied: Glósa afrituð sem Markdown
+      Obsidian Failed: Ekki tókst að opna Obsidian
   External Media:
     Dislikes: "Neikvætt atkvæði | Neikvæð atkvæði"
     Reposts: "Endurbirting | Endurbirtingar"
@@ -2255,6 +2267,7 @@ Comments:
   Highlighted comment: Auðkennd athugasemd
   Highlighted reply: Auðkennt svar
   Search loaded comments: Leita í sóttum athugasemdum
+  Close search: Loka leit
   Loaded comment search result count: '{count} af {total} sóttum athugasemdum | {count} af {total} sóttum athugasemdum'
   No loaded comments match your filters: Engar sóttar athugasemdir passa við síurnar
   YouTube comment link copied to clipboard: Tengill á YouTube-athugasemd afritaður á klippispjaldið
@@ -2349,6 +2362,7 @@ Tooltips:
     Concurrent Preloads: "Hámarksfjöldi yt-dlp-ferla sem eru notaðir til að forhlaða myndskeiðum samtímis. Hærri gildi nota meira örgjörvaafl, minni og netbandvídd."
     Ignore System Rotation Lock for Fullscreen: Snúðu tækinu til að opna og loka öllum skjánum, jafnvel þótt slökkt sé á sjálfvirkum snúningi í Android.
     Ask Before Preloading Large Playlists: "Biður um staðfestingu áður en öll myndskeið spilunarlista með fleiri en {count} myndskeið eru forhlaðin."
+    Obsidian Vault: Heiti Obsidian-hvelfingarinnar fyrir tímamerktar glósur. Þegar það er stillt er hægt að bæta glósum við Obsidian. Glósur hvers myndskeiðs eru teknar saman í glósu sem nefnd er eftir myndskeiðinu, í möppu hvelfingarinnar fyrir nýjar glósur.
   Download Settings:
     Download Folder: Myndbönd vistast í þessa möppu. Skildu reitinn eftir auðan til að nota niðurhalsmöppu kerfisins.
     Global Additional yt-dlp Arguments: Viðbótarviðföng skipanalínu sem eru send til yt-dlp við hvert niðurhal, til dæmis --cookies-from-browser firefox.

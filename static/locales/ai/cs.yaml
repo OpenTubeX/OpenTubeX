@@ -242,10 +242,10 @@ Subscriptions:
     Platform: Platforma
     All Platforms: Všechny platformy
     Followed Channels: Sledované kanály na jiných platformách
-    Description: Sledujte kanály na platformách Twitch, SoundCloud, PeerTube, Rumble a Odysee a jejich nově nahraný obsah uvidíte na kartě Platformy ve svých odběrech. Kanály najdete pomocí vyhledávání, nebo je přidejte podle adresy jejich stránky. Jejich média se přehrávají pomocí yt-dlp.
+    Description: Sledujte kanály na platformách Twitch, SoundCloud, PeerTube, Rumble, Odysee a media.ccc.de a jejich nově nahraný obsah uvidíte na kartě Platformy ve svých odběrech. Kanály najdete pomocí vyhledávání, nebo je přidejte podle adresy jejich stránky. Jejich média se přehrávají pomocí yt-dlp.
     Add Channel: Přidat kanál
     Channel URL: Adresa kanálu
-    Invalid Channel: Zadejte adresu stránky kanálu na platformě Twitch, SoundCloud, PeerTube, Rumble nebo Odysee.
+    Invalid Channel: Zadejte adresu stránky kanálu na platformě Twitch, SoundCloud, PeerTube, Rumble, Odysee nebo media.ccc.de.
     Channel Not Found: Na této adrese není žádný kanál.
     Channel Already Followed: Tento kanál již sledujete.
     Channel Could Not Be Loaded: Kanál se nepodařilo načíst.
@@ -1002,11 +1002,14 @@ Settings:
       Viewing Modes: Režimy zobrazení
       Shorts: Shorts
       Screenshots: Snímky obrazovky
+      Timestamp Notes: Poznámky s časovými značkami
     Enable FCast: "Povolit FCast"
     Screenshot:
       Legacy Formats: "Starší formáty"
       Modern Formats: "Moderní formáty"
     Ask Before Preloading Large Playlists: "Ptát se před přednačtením velkých playlistů"
+    Timestamp Notes:
+      Obsidian Vault: Trezor Obsidian
   Channel Settings:
     Channel Settings: Nastavení kanálů
     Channel Settings Description: Zapamatuje nastavení zvolená při sledování pro každý kanál zvlášť a znovu je použije při příštím sledování některého z jeho videí.
@@ -1144,11 +1147,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: "Kontroly připojení k internetu"
     Internet Connectivity Checks Tooltip: "Odesílá malé požadavky na server hostovaný GrapheneOS pro ověření přístupu k internetu."
-    Automatic History Retention: Automatické uchovávání historie (dny)
-    Automatic History Retention Placeholder: Chcete-li historii zachovat navždy, ponechte prázdné
+    Automatic History Deletion: Automaticky mazat historii po (dnech)
+    Watch History Retention: Historie sledování
+    Search History Retention: Historie vyhledávání
+    Keep Forever Placeholder: Uchovávat navždy
     Automatic History Retention Tooltip: Chcete-li historii zachovat navždy, ponechte pole prázdné. Uložením čísla odstraníte starší záznamy ihned a poté automaticky, když je aplikace otevřená.
-    Automatic Search History Retention: Automatické uchovávání historie vyhledávání (dny)
-    Automatic Search History Retention Tooltip: Chcete-li historii vyhledávání zachovat navždy, ponechte pole prázdné. Uložením čísla odstraníte starší vyhledávání ihned a poté automaticky, když je aplikace otevřená.
     History Retention Saved: Doba uchovávání historie byla uložena
     Invalid History Retention Days: Zadejte celé číslo větší než nula
     Enable Watch Statistics: Povolit statistiky sledování
@@ -1380,6 +1383,7 @@ Settings:
     Channel playback speeds imported: "Importována rychlost přehrávání {count} kanálu | Importovány rychlosti přehrávání {count} kanálů | Importovány rychlosti přehrávání {count} kanálů"
     Channels not found: "{count} kanál nebyl nalezen | {count} kanály nebyly nalezeny | {count} kanálů nebylo nalezeno"
     Playlists have been successfully imported: "Úspěšně importován 1/{total} playlist | Úspěšně importovány {count}/{total} playlisty | Úspěšně importováno {count}/{total} playlistů"
+    Import subscription groups hint: Chcete-li kanály roztřídit do skupin, přidejte v souboru .csv za název kanálu sloupec s názvy skupin oddělenými středníky, nebo importujte soubor .opml se složkami. Chybějící skupiny se vytvoří.
   Sync Settings:
     Signed Out After Restore: 'Synchronizace byla odhlášena, protože tato data aplikace byla obnovena ze zálohy nebo z jiného zařízení. Přihlaste se znovu, abyste toto zařízení synchronizovali.'
     Revoke Session Tabs Warning: "Synchronizované sady karet tohoto zařízení budou také odstraněny."
@@ -2008,6 +2012,14 @@ Video:
       Load: "Načíst soubor s titulky…"
       Subtitle Files: "Soubory s titulky"
       Error: "Soubor s titulky se nepodařilo načíst. Vyberte soubor SRT nebo WebVTT."
+    Timestamp Notes:
+      Take Note: Vytvořit poznámku s časovou značkou
+      Note at {time}: Poznámka v čase {time}
+      Note: Poznámka
+      Add to Obsidian: Přidat do Obsidianu
+      Copy as Markdown: Kopírovat jako Markdown
+      Copied: Poznámka zkopírována jako Markdown
+      Obsidian Failed: Obsidian se nepodařilo otevřít
   External Media:
     Dislikes: "Dislajk | Dislajky | Dislajků"
     Reposts: "Repost | Reposty | Repostů"
@@ -2241,6 +2253,7 @@ Comments:
   Highlighted comment: Zvýrazněný komentář
   Highlighted reply: Zvýrazněná odpověď
   Search loaded comments: Hledat v načtených komentářích
+  Close search: Zavřít vyhledávání
   Loaded comment search result count: 1 z {total} načtených komentářů | {count} z {total} načtených komentářů | {count} z {total} načtených komentářů
   No loaded comments match your filters: Filtrům neodpovídají žádné načtené komentáře
   YouTube comment link copied to clipboard: Odkaz na komentář na YouTube byl zkopírován do schránky
@@ -2335,6 +2348,7 @@ Tooltips:
     Concurrent Preloads: "Maximální počet procesů yt-dlp použitých k současnému přednačítání videí. Vyšší hodnoty využívají více výkonu procesoru, paměti a šířky pásma sítě."
     Ignore System Rotation Lock for Fullscreen: Fyzickým otočením zařízení zapnete a vypnete celou obrazovku, i když je automatické otáčení v Androidu vypnuté.
     Ask Before Preloading Large Playlists: "Před přednačtením všech videí playlistu s více než {count} videi požádá o potvrzení."
+    Obsidian Vault: Název trezoru Obsidian pro poznámky s časovými značkami. Pokud je nastaven, lze poznámky přidávat do Obsidianu. Poznámky ke každému videu se shromažďují v poznámce pojmenované podle videa, ve složce trezoru pro nové poznámky.
   Download Settings:
     Download Folder: Videa se ukládají do této složky. Chcete-li použít systémovou složku Stažené, ponechte pole prázdné.
     Global Additional yt-dlp Arguments: Další argumenty příkazového řádku předávané nástroji yt-dlp při každém stahování, například --cookies-from-browser firefox.

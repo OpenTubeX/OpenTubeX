@@ -32,7 +32,7 @@ for (const mode of ['desktop', 'phone']) {
     await search.fill('honored')
     await expect(section.locator('.commentThread')).toHaveCount(1)
     const close = section.locator('.commentSearchClose')
-    await expect(close).toHaveAccessibleName('Close')
+    await expect(close).toHaveAccessibleName('Close search')
     await expect.poll(() => close.evaluate(button => {
       const input = button.parentElement.querySelector('input').getBoundingClientRect()
       const bounds = button.getBoundingClientRect()

@@ -17,12 +17,12 @@ test('mobile only offers the buttons of its compact control bar', () => {
 
 test('the player menu offers the buttons that are not on the full control bar', () => {
   const menuControls = ['quality', 'audioTracks', 'playbackRate', 'loop']
-  assert.deepEqual(getRemovedControlBarButtons(getDefaultControlBarButtons(false), false), menuControls)
-  assert.deepEqual(getRemovedControlBarButtons(['captions', 'menu', 'fullscreen'], false), ['chapters', ...menuControls, 'screenshot', 'autoplay', 'pictureInPicture', 'theatreMode', 'fullWindow'])
-  assert.deepEqual(getRemovedControlBarButtons(['quality', 'loop', ...getDefaultControlBarButtons(false)], false), ['audioTracks', 'playbackRate'])
+  assert.deepEqual(getRemovedControlBarButtons(getDefaultControlBarButtons(false), false), [...menuControls, 'timestampNote'])
+  assert.deepEqual(getRemovedControlBarButtons(['captions', 'menu', 'fullscreen'], false), ['chapters', ...menuControls, 'screenshot', 'timestampNote', 'autoplay', 'pictureInPicture', 'theatreMode', 'fullWindow'])
+  assert.deepEqual(getRemovedControlBarButtons(['quality', 'loop', ...getDefaultControlBarButtons(false)], false), ['audioTracks', 'playbackRate', 'timestampNote'])
   // Capacitor tablets and TVs use the full control bar with the compact buttons,
   // and have no full-window mode
-  assert.deepEqual(getRemovedControlBarButtons(getDefaultControlBarButtons(true), true), [...menuControls, 'screenshot', 'autoplay', 'theatreMode'])
+  assert.deepEqual(getRemovedControlBarButtons(getDefaultControlBarButtons(true), true), [...menuControls, 'screenshot', 'timestampNote', 'autoplay', 'theatreMode'])
 })
 
 test('keeps a custom order, discards invalid entries and always keeps the menu', () => {

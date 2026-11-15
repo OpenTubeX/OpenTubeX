@@ -1,3 +1,6 @@
+import * as http from 'node:http'
+import * as https from 'node:https'
+import { isIP } from 'node:net'
 import { BrowserWindow, clipboard, ipcMain, net, session, shell } from 'electron'
 
 import { IpcChannels } from '../constants'
@@ -10,7 +13,8 @@ import {
   parseSearchEngines
 } from '../searchEngines'
 import { releaseForegroundLock } from './backgroundExternalLink'
-import { fetchFaviconDataUrl, fetchWithCheckedRedirects, isAllowedIconUrl, resolveFaviconUrl } from './favicon'
+import { fetchCastMedia } from './castMediaServer'
+import { requestWithoutRedirects, resolveSearchEngineIcon } from './favicon'
 import { handleTrusted, isTrustedSender } from './ipc'
 import {
   isSubscriptionAutoRefreshInProgress,
@@ -254,9 +258,24 @@ export function setupContextMenu(contextMenuOptions, { createWindow, confirmClos
     return configuredSearchEngines
   }
 
+  /** @type {import('./favicon').EngineNetwork} */
+  const faviconNetwork = {
+    resolveAddresses: async hostname => (await session.defaultSession.resolveHost(hostname, { cacheUsage: 'disallowed' }))
+      .endpoints.map(({ address }) => address),
+    resolveProxy: url => session.defaultSession.resolveProxy(url),
+    // Node's client sends no cookies and has no HTTP cache.
+    fetchPinned: (url, { headers, signal }, addresses) => fetchCastMedia(new URL(url).protocol === 'https:' ? https : http, url, {
+      method: 'GET',
+      headers: new Headers({ ...headers, 'User-Agent': session.defaultSession.getUserAgent() }),
+      signal,
+      addresses: addresses.map(address => ({ address, family: isIP(address) }))
+    }),
+    fetchProxied: (url, init) => requestWithoutRedirects(options => net.request(options), url, init)
+  }
+
   /**
    * @param {string} searchUrl
-   * @returns {Promise<string>}
+   * @returns {Promise<string>} a data URL, or an empty string without a usable icon
    */
   function resolveSearchEngineFavicon(searchUrl) {
     const fallback = getFaviconUrl(searchUrl)
@@ -264,16 +283,9 @@ export function setupContextMenu(contextMenuOptions, { createWindow, confirmClos
 
     const origin = new URL(fallback).origin
     if (!faviconPromises.has(origin)) {
-      const resolveAddresses = async hostname => (await session.defaultSession.resolveHost(hostname)).endpoints.map(({ address }) => address)
       const promise = process.env.OPENTUBEX_E2E_USER_DATA_DIR
         ? Promise.resolve(fallback)
-        : resolveFaviconUrl(searchUrl, (url, options) => net.fetch(url, options), resolveAddresses)
-            .then(icon => fetchFaviconDataUrl(icon, (url, options) => fetchWithCheckedRedirects(
-              requestOptions => net.request(requestOptions),
-              url,
-              options,
-              target => isAllowedIconUrl(target, origin, resolveAddresses)
-            ), icon === fallback ? '' : fallback))
+        : resolveSearchEngineIcon(searchUrl, faviconNetwork)
       faviconPromises.set(origin, promise)
     }
 
@@ -803,7 +815,6 @@ export function setupContextMenu(contextMenuOptions, { createWindow, confirmClos
       .filter(engine => engine.enabled)
     const externalSearchItems = activeSearchEngines.map(engine => ({
       label: engine.name,
-      icon: getFaviconUrl(engine.url),
       faviconSource: engine.url,
       click: async () => {
         try {
@@ -821,7 +832,6 @@ export function setupContextMenu(contextMenuOptions, { createWindow, confirmClos
             { engine: activeSearchEngines[0].name },
             `Search with ${activeSearchEngines[0].name}`
           ),
-          icon: getFaviconUrl(activeSearchEngines[0].url),
           faviconSource: activeSearchEngines[0].url,
           visible: selectionText.length > 0,
           click: externalSearchItems[0].click

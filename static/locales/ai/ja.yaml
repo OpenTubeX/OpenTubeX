@@ -242,10 +242,10 @@ Subscriptions:
     Platform: プラットフォーム
     All Platforms: すべてのプラットフォーム
     Followed Channels: 他のプラットフォームでフォロー中のチャンネル
-    Description: Twitch、SoundCloud、PeerTube、Rumble、Odysee のチャンネルをフォローすると、その投稿が登録チャンネルの「プラットフォーム」タブに表示されます。チャンネルは検索で見つけるか、ページのアドレスで追加できます。メディアは yt-dlp で再生されます。
+    Description: Twitch、SoundCloud、PeerTube、Rumble、Odysee、media.ccc.de のチャンネルをフォローすると、その投稿が登録チャンネルの「プラットフォーム」タブに表示されます。チャンネルは検索で見つけるか、ページのアドレスで追加できます。メディアは yt-dlp で再生されます。
     Add Channel: チャンネルを追加
     Channel URL: チャンネルのアドレス
-    Invalid Channel: Twitch、SoundCloud、PeerTube、Rumble、Odysee のチャンネルページのアドレスを入力してください。
+    Invalid Channel: Twitch、SoundCloud、PeerTube、Rumble、Odysee、media.ccc.de のチャンネルページのアドレスを入力してください。
     Channel Not Found: このアドレスにチャンネルはありません。
     Channel Already Followed: このチャンネルは既にフォローしています。
     Channel Could Not Be Loaded: チャンネルを読み込めませんでした。
@@ -1002,11 +1002,14 @@ Settings:
       Viewing Modes: 表示モード
       Shorts: ショート
       Screenshots: スクリーンショット
+      Timestamp Notes: タイムスタンプメモ
     Enable FCast: "FCastを有効にする"
     Screenshot:
       Legacy Formats: "従来の形式"
       Modern Formats: "新しい形式"
     Ask Before Preloading Large Playlists: "大きな再生リストを先読みする前に確認"
+    Timestamp Notes:
+      Obsidian Vault: Obsidian の保管庫
   Channel Settings:
     Channel Settings: チャンネル設定
     Channel Settings Description: 視聴中に選んだ設定をチャンネルごとに記憶し、次回そのチャンネルの動画を見るときに再度適用します。
@@ -1144,11 +1147,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: "インターネット接続の確認"
     Internet Connectivity Checks Tooltip: "GrapheneOS がホストするサーバーに小さなリクエストを送り、インターネット接続を確認します。"
-    Automatic History Retention: 履歴の自動保持期間（日）
-    Automatic History Retention Placeholder: 無期限に保持する場合は空欄
+    Automatic History Deletion: 履歴を自動で削除するまでの日数
+    Watch History Retention: 再生履歴
+    Search History Retention: 検索履歴
+    Keep Forever Placeholder: 無期限に保持
     Automatic History Retention Tooltip: 履歴を無期限に保持する場合は空欄にしてください。日数を保存すると、それより古い履歴を今すぐ削除し、アプリの起動中も自動的に削除します。
-    Automatic Search History Retention: 検索履歴の自動保持期間（日）
-    Automatic Search History Retention Tooltip: 検索履歴を無期限に保持する場合は空欄にしてください。日数を保存すると、それより古い検索を今すぐ削除し、アプリの起動中も自動的に削除します。
     History Retention Saved: 履歴の保持期間を保存しました
     Invalid History Retention Days: 0より大きい整数の日数を入力してください
     Enable Watch Statistics: 視聴統計を有効化
@@ -1379,6 +1382,7 @@ Settings:
     Invalid channel playback speeds file: "このファイルにチャンネル別の再生速度が見つかりませんでした"
     Channel playback speeds imported: "{count} チャンネルの再生速度をインポートしました"
     Channels not found: "{count} チャンネルが見つかりませんでした"
+    Import subscription groups hint: チャンネルをグループに分けるには、.csv ファイルでチャンネル名の後にセミコロン区切りのグループ名を記入した列を追加するか、フォルダーを含む .opml ファイルをインポートしてください。存在しないグループは作成されます。
   Sync Settings:
     Signed Out After Restore: 'このアプリのデータがバックアップまたは別のデバイスから復元されたため、同期からサインアウトしました。このデバイスを同期するには、もう一度サインインしてください。'
     Revoke Session Tabs Warning: "このデバイスの同期されたタブセットも削除されます。"
@@ -2006,6 +2010,14 @@ Video:
       Load: "字幕ファイルを読み込む…"
       Subtitle Files: "字幕ファイル"
       Error: "字幕ファイルを読み込めませんでした。SRT または WebVTT ファイルを選択してください。"
+    Timestamp Notes:
+      Take Note: タイムスタンプメモを取る
+      Note at {time}: '{time} のメモ'
+      Note: メモ
+      Add to Obsidian: Obsidian に追加
+      Copy as Markdown: Markdown としてコピー
+      Copied: メモを Markdown としてコピーしました
+      Obsidian Failed: Obsidian を開けませんでした
   External Media:
     Dislikes: "低評価"
     Reposts: "再投稿"
@@ -2239,6 +2251,7 @@ Comments:
   Highlighted comment: 強調表示されたコメント
   Highlighted reply: 強調表示された返信
   Search loaded comments: 読み込み済みのコメントを検索
+  Close search: 検索を閉じる
   Loaded comment search result count: '読み込み済みコメント{total}件中{count}件'
   No loaded comments match your filters: フィルターに一致する読み込み済みコメントはありません
   YouTube comment link copied to clipboard: YouTubeコメントのリンクをクリップボードにコピーしました
@@ -2333,6 +2346,7 @@ Tooltips:
     Concurrent Preloads: "動画の先読みに同時使用する yt-dlp プロセスの最大数です。値を大きくすると、CPU、メモリ、ネットワーク帯域をより多く使用します。"
     Ignore System Rotation Lock for Fullscreen: Androidの自動回転がオフでも、端末を実際に回転させることで全画面表示の開始と終了を切り替えます。
     Ask Before Preloading Large Playlists: "{count} 本を超える動画を含む再生リストのすべての動画を先読みする前に確認します。"
+    Obsidian Vault: タイムスタンプメモに使用する Obsidian の保管庫の名前。設定すると、メモを Obsidian に追加できます。各動画のメモは、保管庫の新規ノート用フォルダー内にある、動画名を付けたノートにまとめられます。
   Download Settings:
     Download Folder: 動画をこのフォルダーに保存します。空欄にすると、システムのダウンロードフォルダーを使用します。
     Global Additional yt-dlp Arguments: 'すべてのダウンロードでyt-dlpに渡す追加のコマンドライン引数です。例: --cookies-from-browser firefox'

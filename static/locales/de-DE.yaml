@@ -242,10 +242,10 @@ Subscriptions:
     Platform: Plattform
     All Platforms: Alle Plattformen
     Followed Channels: Gefolgte Kanäle auf anderen Plattformen
-    Description: Folge Kanälen auf Twitch, SoundCloud, PeerTube, Rumble und Odysee, um ihre Uploads im Plattformen-Tab deiner Abos zu sehen. Finde Kanäle über die Suche oder füge sie über die Adresse ihrer Seite hinzu. Ihre Medien werden mit yt-dlp abgespielt.
+    Description: Folge Kanälen auf Twitch, SoundCloud, PeerTube, Rumble, Odysee und media.ccc.de, um ihre Uploads im Plattformen-Tab deiner Abos zu sehen. Finde Kanäle über die Suche oder füge sie über die Adresse ihrer Seite hinzu. Ihre Medien werden mit yt-dlp abgespielt.
     Add Channel: Kanal hinzufügen
     Channel URL: Kanaladresse
-    Invalid Channel: Gib die Adresse einer Kanalseite auf Twitch, SoundCloud, PeerTube, Rumble oder Odysee ein.
+    Invalid Channel: Gib die Adresse einer Kanalseite auf Twitch, SoundCloud, PeerTube, Rumble, Odysee oder media.ccc.de ein.
     Channel Not Found: Unter dieser Adresse gibt es keinen Kanal.
     Channel Already Followed: Du folgst diesem Kanal bereits.
     Channel Could Not Be Loaded: Der Kanal konnte nicht geladen werden.
@@ -1062,6 +1062,7 @@ Settings:
       Viewing Modes: Ansichtsmodi
       Shorts: Shorts
       Screenshots: Screenshots
+      Timestamp Notes: Zeitstempel-Notizen
     Lights Off: Licht aus
     Show Lights Off Toggle: Schalter für „Licht aus“ anzeigen
     Show Volume Boost Toggle: Schalter für Lautstärkeverstärkung anzeigen
@@ -1199,6 +1200,8 @@ Settings:
     Hold to Speed Up:
       Hold to Speed Up: Zum Beschleunigen gedrückt halten
       Off: Aus
+    Timestamp Notes:
+      Obsidian Vault: Obsidian-Vault
     Screenshot:
       Enable: Screenshots aktivieren
       Format Label: Format von Screenshots
@@ -1339,11 +1342,11 @@ Settings:
     Save Watched Progress: Videofortschritt merken
     Remember History: Wiedergabeverlauf merken
     Privacy Settings: Datenschutz
-    Automatic History Retention: Automatisches Löschen des Wiedergabeverlaufs (Tage)
-    Automatic History Retention Placeholder: Leer lassen, um nie automatisch zu löschen
+    Automatic History Deletion: Verlauf automatisch löschen nach (Tagen)
+    Watch History Retention: Wiedergabeverlauf
+    Search History Retention: Suchverlauf
+    Keep Forever Placeholder: Nie löschen
     Automatic History Retention Tooltip: Leer lassen, um den Verlauf unbegrenzt aufzubewahren. Beim Speichern einer Zahl werden ältere Einträge sofort und automatisch gelöscht, solange die Anwendung geöffnet ist.
-    Automatic Search History Retention: Automatisches Löschen des Suchverlaufs (Tage)
-    Automatic Search History Retention Tooltip: Leer lassen, um den Suchverlauf unbegrenzt aufzubewahren. Beim Speichern einer Zahl werden ältere Suchanfragen sofort und automatisch gelöscht, solange die Anwendung geöffnet ist.
     History Retention Saved: Aufbewahrungsdauer des Verlaufs wurde gespeichert
     Invalid History Retention Days: Gib eine ganze Anzahl von Tagen größer als null ein
     Are you sure you want to remove all subscriptions and profiles?  This cannot be undone.: Bist du sicher, dass du alle Abos und Profile löschen möchtest?  Diese Aktion kann nicht rückgängig gemacht werden.
@@ -1554,6 +1557,7 @@ Settings:
     Unknown setting key: 'Unbekannter Einstellungsschlüssel: {key}'
     Non-transferable setting key: 'Nicht übertragbarer Einstellungsschlüssel: {key}'
     Import subscriptions formats: 'Unterstützte Formate: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube backup oder FreeTube export (.json)'
+    Import subscription groups hint: 'Um Kanäle in Gruppen einzusortieren, füge in einer .csv-Datei nach dem Kanaltitel eine Spalte mit durch Semikolons getrennten Gruppennamen hinzu, oder importiere eine .opml-Datei mit Ordnern. Fehlende Gruppen werden erstellt.'
     Import history formats: 'Unterstützte Formate: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube backup (.json)'
     Import playlists formats: 'Unterstützte Formate: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
     Import search history formats: 'Unterstützte Formate: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
@@ -2491,6 +2495,14 @@ Video:
     Exit Theatre Mode: Kinomodus beenden
     Full Window: Vollständiges Fenster
     Take Screenshot: Screenshot aufnehmen
+    Timestamp Notes:
+      Take Note: Zeitstempel-Notiz erstellen
+      Note at {time}: Notiz bei {time}
+      Note: Notiz
+      Add to Obsidian: Zu Obsidian hinzufügen
+      Copy as Markdown: Als Markdown kopieren
+      Copied: Notiz als Markdown kopiert
+      Obsidian Failed: Obsidian konnte nicht geöffnet werden
     Show Stats: Statistiken anzeigen
     Hide Annotations: Anmerkungen ausblenden
     Show Annotations: Anmerkungen anzeigen
@@ -2899,6 +2911,7 @@ Comments:
   Highlighted comment: Hervorgehobener Kommentar
   Highlighted reply: Hervorgehobene Antwort
   Search loaded comments: Geladene Kommentare durchsuchen
+  Close search: Suche schließen
   Loaded comment search result count: 1 von {total} geladenen Kommentaren | {count} von {total} geladenen Kommentaren
   No loaded comments match your filters: Keine geladenen Kommentare entsprechen deinen Filtern
   Translate to {language}: Auf {language} übersetzen
@@ -3083,6 +3096,7 @@ Tooltips:
     Notify About New Uploads: "Zeigt auf diesem Gerät Systembenachrichtigungen für Kanäle, deren Benachrichtigungen du in ihren Abo-Einstellungen aktiviert hast. OpenTubeX sucht beim Aktualisieren der Abos nach neuen Inhalten, wähle daher ein automatisches Aktualisierungsintervall. Um auch bei geschlossener App benachrichtigt zu werden, aktiviere zusätzlich die Aktualisierung bei geschlossener App."
     Faster Subscription Refresh: Prüft zuerst den RSS-Feed jedes Kanals und lädt Videos, Shorts und Livestreams nur von Kanälen mit neuen Uploads. Automatische Aktualisierungen überspringen außerdem Kanäle, die in den letzten 10 Minuten geladen wurden. Bei Kanälen ohne neue Uploads werden Aufrufzahlen, entfernte Videos und geänderte Titel nur alle paar Stunden aktualisiert, und neue Uploads können später erscheinen, wenn der RSS-Feed hinterherhinkt. Mit der Invidious-API nicht verfügbar.
   Player Settings:
+    Obsidian Vault: Name des Obsidian-Vaults für Zeitstempel-Notizen. Ist er gesetzt, können Notizen zu Obsidian hinzugefügt werden. Die Notizen eines Videos werden in einer nach dem Video benannten Notiz im Ordner für neue Notizen des Vaults gesammelt.
     Enable Caption Translations: Wenn aktiviert, bevorzugen die Untertitel-Schaltfläche und das Tastenkürzel C eine automatisch übersetzte Spur in der bevorzugten Untertitelsprache, wenn das Video keine passende Originalspur bereitstellt.
     Default Media Format: Lege die Formate fest, die bei der Wiedergabe eines Videos verwendet werden. DASH-Formate können höhere Auflösungen wiedergeben. Altformate sind auf maximal 360p beschränkt, verbrauchen aber weniger Bandbreite. Audioformate sind reine Audiostreams.
     Proxy Videos Through Invidious: Stellt eine Verbindung mit Invidious her, um Videos bereitzustellen, anstatt eine direkte Verbindung mit YouTube herzustellen.

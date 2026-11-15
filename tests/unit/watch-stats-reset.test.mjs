@@ -10,7 +10,8 @@ const loadStore = compileFunction(source.replace(/^import .*\n/gm, '').replace('
 function fixture({ saveFails = false, deleteFails = false } = {}) {
   let deleted = false
   const writes = []
-  const previous = { id: 'previous' }
+  const previous = { id: 'previous', at: 100 }
+  const resetTimes = []
   const settings = { syncServerDeviceId: 'pixel', syncServerWatchStatsReset: previous }
   const reset = { id: 'next' }
   const store = loadStore({
@@ -19,7 +20,10 @@ function fixture({ saveFails = false, deleteFails = false } = {}) {
       if (deleteFails) throw new Error('Delete failed')
       deleted = true
     }
-  }, () => reset, { error: () => {} })
+  }, (_devices, _deviceId, at) => {
+    resetTimes.push(at)
+    return reset
+  }, { error: () => {} })
   const context = {
     state: store.state,
     rootState: { settings },
@@ -32,7 +36,7 @@ function fixture({ saveFails = false, deleteFails = false } = {}) {
     },
     commit: name => writes.push(name)
   }
-  return { run: () => store.actions.clearWatchStats(context), deleted: () => deleted, settings, writes, previous, reset }
+  return { run: () => store.actions.clearWatchStats(context), deleted: () => deleted, settings, writes, previous, reset, resetTimes }
 }
 
 test('failed reset persistence leaves local records and the previous marker untouched', async () => {
@@ -48,6 +52,14 @@ test('reset saves its marker before deleting local records and updating the view
   assert.equal(await f.run(), true)
   assert.equal(f.deleted(), true)
   assert.deepEqual(f.writes, [f.reset, 'delete', 'resetWatchStats'])
+})
+
+test('a reset orders after the previous one when the clock moved back', async (t) => {
+  const f = fixture()
+  // Windows tell time from before a clear by this order
+  t.mock.method(Date, 'now', () => 90)
+  await f.run()
+  assert.ok(f.resetTimes[0] > f.previous.at)
 })
 
 test('a failed deletion restores the previous reset marker', async () => {

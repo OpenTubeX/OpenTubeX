@@ -51,6 +51,7 @@ import { createTwitchLiveNotifier } from './twitchLiveNotifications'
 import { isYtDlpStoryboardUrl, getYtDlpExternalStreamCookieHeader, getYtDlpExternalStreamHeaders, refreshYtDlpDownloadQueue, restoreYtDlpDownloadQueue, shutdownYtDlpDownloads } from './ytDlp'
 import { applyYtDlpPlaybackCacheSettings } from './ytDlpPlaybackCache'
 import { generatePoToken, mintPoTokenFromAttestation } from './poTokenGenerator'
+import { getObsidianAppendUri } from './obsidian'
 import { buildProxyUrl, DEFAULT_PROXY_SETTINGS, isConfiguredProxyChallenge, isExternalBrowserUrl, isOpenTubeXUrl } from './utils'
 import { createBackgroundExternalLinkOpener } from './backgroundExternalLink'
 import { isInvidiousInstanceUrl } from './invidiousAuthorization'
@@ -2439,6 +2440,18 @@ function runApp() {
       await openExternalInBackground(url)
     } catch (error) {
       console.error('Failed to open external link in the background:', error)
+    }
+  })
+
+  handleTrusted(IpcChannels.OPEN_OBSIDIAN_NOTE, async (event, note) => {
+    const uri = getObsidianAppendUri(note)
+    if (event.senderFrame !== event.sender.mainFrame || uri === null) return false
+    try {
+      await shell.openExternal(uri, { activate: false })
+      return true
+    } catch (error) {
+      console.error('Failed to open Obsidian:', error)
+      return false
     }
   })
 

@@ -24,7 +24,7 @@ import { Utils, YTNodes } from 'youtubei.js'
 import FtShakaVideoPlayer from '../../components/FtShakaVideoPlayer/FtShakaVideoPlayer.vue'
 import WatchCast from '../../components/WatchCast/WatchCast.vue'
 import { selectCastSource } from '../../helpers/player/castSource'
-import WatchVideoDownloadPrompt from '../../components/WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
+import WatchVideoDownloadPrompt from '../../components/WatchVideoDownloadPrompt/lazyWatchVideoDownloadPrompt'
 import { retainIosMediaSources } from '../../helpers/player/dlnaCast'
 import { supportsCasting } from '../../helpers/player/chromecast'
 import WatchVideoInfo from '../../components/WatchVideoInfo/WatchVideoInfo.vue'
@@ -154,6 +154,7 @@ import { useI18n } from 'vue-i18n'
 import { useTabAvatar, useTabContext, useTabTitle, watchNavigationKey } from '../../tabs/TabContext'
 import { SCROLL_MINI_MIN_INLINE_LAYOUT_HEIGHT } from '../../helpers/scrollMiniPlayer'
 import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
+import { isPlayerRoutePath } from '../../tabs/playerDockDestination'
 import { keepTabLoaded } from '../../tabs/TabResidency'
 import { useTabToast } from '../../composables/useTabToast'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
@@ -306,6 +307,8 @@ export default defineComponent({
       /** @type {import('../../components/FtShakaVideoPlayer/opentubex/dockedPanels').DockedPanel[]} */
       startNextVideoWithDockedPanels: [],
       isLoading: true,
+      // Whether the current video started loading while nobody could see it
+      loadingInBackground: false,
       waitingForBackgroundPlaybackTurn: false,
       firstLoad: true,
       // Whether this tab has been presented while showing the current video. A
@@ -814,8 +817,8 @@ export default defineComponent({
     wellbeingPauseRequest: function () {
       return this.$store.getters.getWellbeingPauseRequest
     },
-    watchStatsResetVersion: function () {
-      return this.$store.getters.getWatchStatsResetVersion
+    watchStatsResetAt: function () {
+      return this.$store.getters.getWatchStatsResetAt
     },
     watchedProgressSavingEnabled: function () {
       return this.$store.getters.getWatchedProgressSavingMode !== 'never'
@@ -1305,12 +1308,33 @@ export default defineComponent({
     },
     canSkipToNextVideo: function () {
       // The watch queue takes precedence over the playlist and works without one,
-      // see `handleSkipToNext`
-      return !!this.nextQueuedVideo || (this.watchingPlaylist && this.playlistSkipAvailability.canPlayNext)
+      // see `handleSkipToNext`. Outside a playlist, the buttons and media controls
+      // only offer the recommended video while autoplay would play it anyway.
+      if (this.nextQueuedVideo) return true
+      if (this.watchingPlaylist) return this.playlistSkipAvailability.canPlayNext
+      return this.autoplaysRecommendedVideos && !this.hideRecommendedVideos && !!this.nextRecommendedVideo
     },
     canSkipToPreviousVideo: function () {
-      // Only a playlist has a previous video, see `handleSkipToPrev`
-      return this.watchingPlaylist && this.playlistSkipAvailability.canPlayPrevious
+      // see `handleSkipToPrev`
+      if (this.watchingPlaylist) return this.playlistSkipAvailability.canPlayPrevious
+      return this.autoplaysRecommendedVideos && this.previousTabVideoRoute != null
+    },
+    // A queued video turns `autoplayEnabled` on even when recommended videos do not autoplay
+    autoplaysRecommendedVideos: function () {
+      return !this.isStandaloneShort && this.autoplayNextRecommendedVideo
+    },
+    /**
+     * The video this tab showed before the current one, if it came straight from one.
+     * Not while the player keeps playing behind a browsing page, whose previous
+     * entry is usually the playing video itself.
+     */
+    previousTabVideoRoute: function () {
+      const tab = this.$store.getters.getTabById(this.tabId)
+      const current = tab?.history[tab.historyIndex]?.route
+      const previous = tab?.history[tab.historyIndex - 1]?.route
+      return current && previous && isPlayerRoutePath(current.path) && isPlayerRoutePath(previous.path)
+        ? previous
+        : null
     },
     autoplayPossible: function () {
       return !this.isStandaloneShort && (
@@ -1408,7 +1432,7 @@ export default defineComponent({
       return (this.playerStreamsPending || this.preparingVideoLoadGeneration !== null) &&
         !this.waitingForBackgroundPlaybackTurn
     },
-    playerReady() {
+    playerStreamsReady() {
       if (this.playerStreamsPending) {
         return false
       }
@@ -1416,6 +1440,9 @@ export default defineComponent({
       return this.activeFormat === 'legacy'
         ? this.legacyFormats.length > 0
         : this.manifestSrc !== null
+    },
+    playerReady() {
+      return this.playerStreamsReady && !this.waitingForBackgroundPlaybackTurn
     },
 
     canSaveWatchProgress() {
@@ -1444,6 +1471,10 @@ export default defineComponent({
     }
   },
   watch: {
+    // Waiting for the player's turn starts once the streams are known
+    playerStreamsReady(ready) {
+      if (ready && this.loadingInBackground) this.waitForBackgroundPlaybackTurn()
+    },
     holdsPlaybackStartup: {
       // The player holds subscription refreshes itself once it mounts
       handler(pending) {
@@ -1563,6 +1594,7 @@ export default defineComponent({
       handler() {
         if (this.isCurrentlyPresented()) {
           this.hasBeenPresented = true
+          this.loadingInBackground = false
           this.backgroundPlaybackTurnController?.abort()
         } else {
           this.mobilePanel = null
@@ -1606,7 +1638,7 @@ export default defineComponent({
         this.videoMetadataHistory = null
       }
     },
-    watchStatsResetVersion() {
+    watchStatsResetAt() {
       this.watchTimeTracker.clear()
     },
     // Buffered time follows the recording policy it was watched under, so
@@ -1723,7 +1755,8 @@ export default defineComponent({
     if (isOverlayScrollTopOutOfBounds(rail, contentEnd)) clampOverlayScrollTop(rail, contentEnd)
   },
   beforeUnmount: function () {
-    // A load still waiting for its turn must not start after the tab closes
+    // A load still in progress must not go on after the tab closes, and a
+    // player still waiting for its turn must leave the queue
     this.videoLoadGeneration++
     this.backgroundPlaybackTurnController?.abort()
     this.releasePlaybackStartup?.()
@@ -2444,8 +2477,10 @@ export default defineComponent({
     },
 
     /**
-     * Lets a hidden tab start its video only after other hidden tabs have
-     * started theirs, so a tab the user switches to doesn't compete with all of them.
+     * Lets a hidden tab mount its player only after other hidden tabs have
+     * started their videos, so a tab the user switches to doesn't compete with
+     * all of them. Their video details still load right away, so many tabs
+     * opened at once don't wait for each other's players.
      * Showing the tab, a newer load or closing the tab stops the wait.
      */
     async waitForBackgroundPlaybackTurn() {
@@ -2541,13 +2576,9 @@ export default defineComponent({
       this.loadingTheatreMode = this.useTheatreMode
       preserveTitle ||= this.preserveTitleOnNextReload
       this.preserveTitleOnNextReload = false
-      if (!this.isPlaybackPresented()) {
-        await this.waitForBackgroundPlaybackTurn()
-        if (!this.isCurrentVideoLoad(loadGeneration, requestedVideoId)) {
-          if (this.preparingVideoLoadGeneration === loadGeneration) this.preparingVideoLoadGeneration = null
-          return
-        }
-      }
+      // A player still queued for the previous video must not take a turn now
+      this.backgroundPlaybackTurnController?.abort()
+      this.loadingInBackground = !this.isPlaybackPresented()
       const videoInfoPrefetch = this.prefetchLocalVideoInfo(loadGeneration, requestedVideoId, reloadPlaybackContext)
 
       try {
@@ -2624,6 +2655,8 @@ export default defineComponent({
       // player that moves on to the next video keeps showing it, though.
       this.hasBeenPresented = this.isCurrentlyPresented() || this.miniPlayerStartHeight > 0
       this.applyBackgroundStart()
+      // A mini player or Play in Background shows the video without a player yet
+      if (this.hasBeenPresented) this.loadingInBackground = false
 
       this.checkIfTimestamp()
       this.checkIfPlaylist()
@@ -3012,19 +3045,14 @@ export default defineComponent({
       this.setViewingModeOnFirstLoad()
 
       const loadGeneration = ++this.videoLoadGeneration
-      const loadVideo = () => {
-        if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(this.backendPreference)) {
-          this.getVideoInformationInvidious(loadGeneration)
-        } else {
-          this.getVideoInformationLocal(loadGeneration)
-        }
-      }
-      if (this.isPlaybackPresented()) {
-        loadVideo()
+      // A player still queued for the previous video must not take a turn now
+      this.backgroundPlaybackTurnController?.abort()
+      // Play in Background shows the video in the mini player before it has a player
+      this.loadingInBackground = !this.hasBeenPresented && !this.isPlaybackPresented()
+      if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(this.backendPreference)) {
+        this.getVideoInformationInvidious(loadGeneration)
       } else {
-        this.waitForBackgroundPlaybackTurn().then(() => {
-          if (loadGeneration === this.videoLoadGeneration) loadVideo()
-        })
+        this.getVideoInformationLocal(loadGeneration)
       }
 
       window.addEventListener('beforeunload', this.handleWatchProgressAutoSave)
@@ -6090,8 +6118,13 @@ export default defineComponent({
     },
 
     // Skip to the previous video in a playlist
+    // else go back to the video this tab showed before
     handleSkipToPrev: function () {
-      this.$refs.watchVideoPlaylist?.playPreviousVideo()
+      if (this.watchingPlaylist) {
+        this.$refs.watchVideoPlaylist?.playPreviousVideo()
+      } else if (this.previousTabVideoRoute) {
+        this.tabRouter.back()
+      }
     },
 
     abortAutoplayCountdown: function (hideToast = false) {

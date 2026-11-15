@@ -242,10 +242,10 @@ Subscriptions:
     Platform: Platformă
     All Platforms: Toate platformele
     Followed Channels: Canale urmărite pe alte platforme
-    Description: Urmărește canale de pe Twitch, SoundCloud, PeerTube, Rumble și Odysee pentru a vedea ce încarcă în fila Platforme a abonamentelor tale. Găsește canale prin căutare sau adaugă-le după adresa paginii lor. Conținutul lor este redat cu yt-dlp.
+    Description: Urmărește canale de pe Twitch, SoundCloud, PeerTube, Rumble, Odysee și media.ccc.de pentru a vedea ce încarcă în fila Platforme a abonamentelor tale. Găsește canale prin căutare sau adaugă-le după adresa paginii lor. Conținutul lor este redat cu yt-dlp.
     Add Channel: Adaugă canal
     Channel URL: Adresa canalului
-    Invalid Channel: Introdu adresa paginii unui canal de pe Twitch, SoundCloud, PeerTube, Rumble sau Odysee.
+    Invalid Channel: Introdu adresa paginii unui canal de pe Twitch, SoundCloud, PeerTube, Rumble, Odysee sau media.ccc.de.
     Channel Not Found: Nu există niciun canal la această adresă.
     Channel Already Followed: Urmărești deja acest canal.
     Channel Could Not Be Loaded: Canalul nu a putut fi încărcat.
@@ -1004,11 +1004,14 @@ Settings:
       Viewing Modes: Moduri de vizualizare
       Shorts: Shorts
       Screenshots: Capturi de ecran
+      Timestamp Notes: Note cu marcaj temporal
     Enable FCast: "Activează FCast"
     Screenshot:
       Legacy Formats: "Formate mai vechi"
       Modern Formats: "Formate moderne"
     Ask Before Preloading Large Playlists: "Întreabă înainte de preîncărcarea listelor de redare mari"
+    Timestamp Notes:
+      Obsidian Vault: Seif Obsidian
   Channel Settings:
     Channel Settings: Setări pentru canale
     Channel Settings Description: Rețineți separat pentru fiecare canal setările alese în timpul vizionării, pentru a fi aplicate din nou când vizionați alt videoclip al canalului.
@@ -1146,11 +1149,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: "Verificări ale conexiunii la internet"
     Internet Connectivity Checks Tooltip: "Trimite cereri mici către un server găzduit de GrapheneOS pentru a verifica accesul la internet."
-    Automatic History Retention: Păstrarea automată a istoricului (zile)
-    Automatic History Retention Placeholder: Lăsați necompletat pentru păstrare permanentă
+    Automatic History Deletion: Șterge automat istoricul după (zile)
+    Watch History Retention: Istoric vizionări
+    Search History Retention: Istoric căutări
+    Keep Forever Placeholder: Păstrare permanentă
     Automatic History Retention Tooltip: Lăsați necompletat pentru a păstra istoricul permanent. Salvarea unui număr elimină înregistrările mai vechi acum și automat cât timp aplicația este deschisă.
-    Automatic Search History Retention: Păstrarea automată a istoricului căutărilor (zile)
-    Automatic Search History Retention Tooltip: Lăsați necompletat pentru a păstra istoricul căutărilor permanent. Salvarea unui număr elimină căutările mai vechi acum și automat cât timp aplicația este deschisă.
     History Retention Saved: Perioada de păstrare a istoricului a fost salvată
     Invalid History Retention Days: Introduceți un număr întreg de zile mai mare decât zero
     Enable Watch Statistics: Activează statisticile de vizionare
@@ -1392,6 +1395,7 @@ Settings:
     Channel playback speeds imported: "A fost importată viteza de redare pentru {count} canal | Au fost importate vitezele de redare pentru {count} canale | Au fost importate vitezele de redare pentru {count} de canale"
     Channels not found: "{count} canal nu a putut fi găsit | {count} canale nu au putut fi găsite | {count} de canale nu au putut fi găsite"
     Playlists have been successfully imported: "1/{total} playlist importat cu succes | {count}/{total} playlisturi importate cu succes | {count}/{total} de playlisturi importate cu succes"
+    Import subscription groups hint: Pentru a sorta canalele în grupuri, adaugă o coloană după titlul canalului într-un fișier .csv cu numele grupurilor separate prin punct și virgulă sau importă un fișier .opml cu dosare. Grupurile lipsă sunt create.
   Sync Settings:
     Signed Out After Restore: 'Sincronizarea a fost deconectată deoarece aceste date ale aplicației au fost restaurate dintr-o copie de rezervă sau de pe alt dispozitiv. Conectează-te din nou pentru a sincroniza acest dispozitiv.'
     Revoke Session Tabs Warning: "Seturile de file sincronizate ale acestui dispozitiv vor fi și ele șterse."
@@ -2048,6 +2052,14 @@ Video:
       Load: "Încarcă fișierul de subtitrare…"
       Subtitle Files: "Fișiere de subtitrare"
       Error: "Fișierul de subtitrare nu a putut fi încărcat. Alegeți un fișier SRT sau WebVTT."
+    Timestamp Notes:
+      Take Note: Adaugă o notă cu marcaj temporal
+      Note at {time}: Notă la {time}
+      Note: Notă
+      Add to Obsidian: Adaugă în Obsidian
+      Copy as Markdown: Copiază ca Markdown
+      Copied: Nota a fost copiată ca Markdown
+      Obsidian Failed: Obsidian nu a putut fi deschis
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Timp rămas din reclama de început: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Timp rămas din așteptarea SABR: {remindingTimeSeconds}s'
@@ -2294,6 +2306,7 @@ Comments:
   Highlighted comment: Comentariu evidențiat
   Highlighted reply: Răspuns evidențiat
   Search loaded comments: Caută în comentariile încărcate
+  Close search: Închide căutarea
   Loaded comment search result count: 1 din {total} comentarii încărcate | {count} din {total} comentarii încărcate | {count} din {total} de comentarii încărcate
   No loaded comments match your filters: Niciun comentariu încărcat nu corespunde filtrelor
   YouTube comment link copied to clipboard: Linkul comentariului YouTube a fost copiat în clipboard
@@ -2388,6 +2401,7 @@ Tooltips:
     Concurrent Preloads: "Numărul maxim de procese yt-dlp utilizate pentru a preîncărca videoclipuri simultan. Valorile mai mari folosesc mai mult procesor, memorie și lățime de bandă a rețelei."
     Ignore System Rotation Lock for Fullscreen: Rotește fizic dispozitivul pentru a intra și ieși din ecranul complet, chiar dacă rotirea automată din Android este dezactivată.
     Ask Before Preloading Large Playlists: "Cere confirmarea înainte de preîncărcarea tuturor videoclipurilor dintr-o listă de redare cu peste {count} videoclipuri."
+    Obsidian Vault: Numele seifului Obsidian pentru notele cu marcaj temporal. Când este setat, notele pot fi adăugate în Obsidian. Notele fiecărui videoclip sunt adunate într-o notă denumită după videoclip, în dosarul seifului pentru note noi.
   Download Settings:
     Download Folder: Videoclipurile sunt salvate în acest folder. Lăsați necompletat pentru a folosi folderul Descărcări al sistemului.
     Global Additional yt-dlp Arguments: Argumente suplimentare de linie de comandă transmise către yt-dlp pentru fiecare descărcare, de exemplu --cookies-from-browser firefox.

@@ -393,6 +393,7 @@
             :icon="['fas', 'calendar-days']"
             placeholder="30"
             input-type="number"
+            min="1"
             :value="customHistoryCleanupDays"
             :show-action-button="false"
             @input="customHistoryCleanupDays = $event"
@@ -485,7 +486,14 @@ const showRepairPrompt = ref(false)
 const repairOptions = ref([])
 
 const repairUseCookies = computed(() => repairCookiesConfigured.value && repairOptions.value.includes('cookies'))
-const showRepairCookieHint = computed(() => (process.env.IS_ELECTRON || process.env.IS_CAPACITOR) && !repairUseCookies.value && store.getters.getHistoryCacheSorted.filter(needsHistoryRepair).length > 500)
+const showRepairCookieHint = computed(() => {
+  if (!(process.env.IS_ELECTRON || process.env.IS_CAPACITOR) || repairUseCookies.value) return false
+  let count = 0
+  for (const record of rawHistory.value.records) {
+    if (needsHistoryRepair(record) && ++count > 500) return true
+  }
+  return false
+})
 watch(showRepairPrompt, open => {
   if (open) repairOptions.value = []
 })
@@ -602,14 +610,15 @@ function updateUserHistorySortBy(value) {
   store.dispatch('updateUserHistorySortBy', value)
 }
 
+// Always a new array per entries revision: the store replaces records in
+// place for metadata updates, so downstream filters must not see the same
+// array and keep stale records.
 const historyCacheSorted = computed(() => {
-  const historySorted = store.getters.getHistoryCacheSorted
+  const { records } = rawHistory.value
 
-  if (sortBy.value === HISTORY_SORT_BY_VALUES.DateAddedOldest) {
-    return historySorted.toReversed()
-  } else {
-    return historySorted
-  }
+  return sortBy.value === HISTORY_SORT_BY_VALUES.DateAddedOldest
+    ? records.toReversed()
+    : records.slice()
 })
 
 // Large histories can contain thousands of channels. Collect them once the
@@ -736,11 +745,17 @@ function increaseLimit() {
 
 let searchGeneration = 0
 let completedSearchInputs = null
+// Loading more results only raises the limit, so reuse the completed matches
+// while the inputs and the searched records are unchanged.
+let completedSearchSource = null
+let completedSearchResults = null
 async function filterHistory() {
   filterHistoryAsync.cancel()
   const generation = ++searchGeneration
   if (query.value.trim().length === 0) {
     completedSearchInputs = null
+    completedSearchSource = null
+    completedSearchResults = null
     isSearching.value = false
     activeData.value = fullData.value
     showLoadMoreButton.value = activeData.value.length < browseData.value.length
@@ -752,13 +767,19 @@ async function filterHistory() {
   // Pagination and background history changes (e.g. sync merges) repeat the
   // same search. Keep its existing results visible so a temporary spinner
   // cannot shorten the page and reset its scroll position.
-  isSearching.value = !completedSearchInputs || searchInputs.some((value, index) => value !== completedSearchInputs[index])
-  const filteredQuery = await filterVideosWithQueryAsync(
-    browseData.value, query.value, doCaseSensitiveSearch.value, locale.value,
-    () => generation !== searchGeneration,
-  )
+  const sameInputs = !!completedSearchInputs && searchInputs.every((value, index) => value === completedSearchInputs[index])
+  isSearching.value = !sameInputs
+  const source = browseData.value
+  const filteredQuery = sameInputs && source === completedSearchSource
+    ? completedSearchResults
+    : await filterVideosWithQueryAsync(
+        source, query.value, doCaseSensitiveSearch.value, locale.value,
+        () => generation !== searchGeneration,
+      )
   if (!filteredQuery || generation !== searchGeneration) return
   completedSearchInputs = searchInputs
+  completedSearchSource = source
+  completedSearchResults = filteredQuery
   isSearching.value = false
 
   const filteredResultCount = filteredQuery.length

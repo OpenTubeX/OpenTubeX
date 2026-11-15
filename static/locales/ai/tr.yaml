@@ -242,10 +242,10 @@ Subscriptions:
     Platform: Platform
     All Platforms: Tüm platformlar
     Followed Channels: Diğer platformlarda takip edilen kanallar
-    Description: Aboneliklerinizin Platformlar sekmesinde yüklemelerini görmek için Twitch, SoundCloud, PeerTube, Rumble ve Odysee'deki kanalları takip edin. Kanalları aramayla bulun veya sayfalarının adresiyle ekleyin. Medyaları yt-dlp ile oynatılır.
+    Description: Aboneliklerinizin Platformlar sekmesinde yüklemelerini görmek için Twitch, SoundCloud, PeerTube, Rumble, Odysee ve media.ccc.de'deki kanalları takip edin. Kanalları aramayla bulun veya sayfalarının adresiyle ekleyin. Medyaları yt-dlp ile oynatılır.
     Add Channel: Kanal Ekle
     Channel URL: Kanal adresi
-    Invalid Channel: Twitch, SoundCloud, PeerTube, Rumble veya Odysee'deki bir kanal sayfasının adresini girin.
+    Invalid Channel: Twitch, SoundCloud, PeerTube, Rumble, Odysee veya media.ccc.de'deki bir kanal sayfasının adresini girin.
     Channel Not Found: Bu adreste kanal yok.
     Channel Already Followed: Bu kanalı zaten takip ediyorsunuz.
     Channel Could Not Be Loaded: Kanal yüklenemedi.
@@ -1002,11 +1002,14 @@ Settings:
       Viewing Modes: Görüntüleme modları
       Shorts: Shorts
       Screenshots: Ekran görüntüleri
+      Timestamp Notes: Zaman Damgalı Notlar
     Enable FCast: "FCast özelliğini etkinleştir"
     Screenshot:
       Legacy Formats: "Eski biçimler"
       Modern Formats: "Modern biçimler"
     Ask Before Preloading Large Playlists: "Büyük oynatma listelerini önceden yüklemeden önce sor"
+    Timestamp Notes:
+      Obsidian Vault: Obsidian Kasası
   Channel Settings:
     Channel Settings: Kanal Ayarları
     Channel Settings Description: İzlerken seçtiğiniz ayarları her kanal için ayrı ayrı hatırlayarak kanalın bir sonraki videosunda yeniden uygular.
@@ -1144,11 +1147,11 @@ Settings:
   Privacy Settings:
     Internet Connectivity Checks: "İnternet bağlantısı kontrolleri"
     Internet Connectivity Checks Tooltip: "İnternet erişimini kontrol etmek için GrapheneOS tarafından barındırılan bir sunucuya küçük istekler gönderir."
-    Automatic History Retention: Otomatik Geçmiş Saklama Süresi (Gün)
-    Automatic History Retention Placeholder: Süresiz saklamak için boş bırakın
+    Automatic History Deletion: Geçmişin otomatik silinme süresi (gün)
+    Watch History Retention: İzleme geçmişi
+    Search History Retention: Arama geçmişi
+    Keep Forever Placeholder: Süresiz sakla
     Automatic History Retention Tooltip: Geçmişi süresiz saklamak için boş bırakın. Bir sayı kaydettiğinizde eski kayıtlar hemen ve uygulama açıkken otomatik olarak kaldırılır.
-    Automatic Search History Retention: Otomatik Arama Geçmişi Saklama Süresi (Gün)
-    Automatic Search History Retention Tooltip: Arama geçmişini süresiz saklamak için boş bırakın. Bir sayı kaydettiğinizde eski aramalar hemen ve uygulama açıkken otomatik olarak kaldırılır.
     History Retention Saved: Geçmiş saklama süresi kaydedildi
     Invalid History Retention Days: Sıfırdan büyük bir tam gün sayısı girin
     Enable Watch Statistics: İzleme İstatistiklerini Etkinleştir
@@ -1380,6 +1383,7 @@ Settings:
     Channel playback speeds imported: "{count} kanalın oynatma hızı içe aktarıldı | {count} kanalın oynatma hızları içe aktarıldı"
     Channels not found: "{count} kanal bulunamadı | {count} kanal bulunamadı"
     Playlists have been successfully imported: "1/{total} oynatma listesi başarıyla içe aktarıldı | {count}/{total} oynatma listesi başarıyla içe aktarıldı"
+    Import subscription groups hint: Kanalları gruplara ayırmak için bir .csv dosyasında kanal başlığından sonra noktalı virgülle ayrılmış grup adlarını içeren bir sütun ekleyin veya klasörler içeren bir .opml dosyasını içe aktarın. Eksik gruplar oluşturulur.
   Sync Settings:
     Signed Out After Restore: 'Bu uygulama verileri bir yedekten veya başka bir cihazdan geri yüklendiği için eşitleme oturumu kapatıldı. Bu cihazı eşitlemek için yeniden oturum açın.'
     Revoke Session Tabs Warning: "Bu cihazın eşitlenmiş sekme kümeleri de silinecek."
@@ -2007,6 +2011,14 @@ Video:
       Load: "Altyazı dosyası yükle…"
       Subtitle Files: "Altyazı dosyaları"
       Error: "Altyazı dosyası yüklenemedi. Bir SRT veya WebVTT dosyası seçin."
+    Timestamp Notes:
+      Take Note: Zaman Damgalı Not Al
+      Note at {time}: '{time} anındaki not'
+      Note: Not
+      Add to Obsidian: Obsidian'a Ekle
+      Copy as Markdown: Markdown Olarak Kopyala
+      Copied: Not Markdown olarak kopyalandı
+      Obsidian Failed: Obsidian açılamadı
   External Media:
     Dislikes: "Beğenmeme | Beğenmeme"
     Reposts: "Repost | Repost"
@@ -2241,6 +2253,7 @@ Comments:
   Highlighted comment: Vurgulanan yorum
   Highlighted reply: Vurgulanan yanıt
   Search loaded comments: Yüklenen yorumlarda ara
+  Close search: Aramayı kapat
   Loaded comment search result count: 'Yüklenen {total} yorumdan 1 tanesi | Yüklenen {total} yorumdan {count} tanesi'
   No loaded comments match your filters: Süzgeçlerinizle eşleşen yüklü yorum yok
   YouTube comment link copied to clipboard: YouTube yorum bağlantısı panoya kopyalandı
@@ -2335,6 +2348,7 @@ Tooltips:
     Concurrent Preloads: "Videoları aynı anda önceden yüklemek için kullanılan en fazla yt-dlp işlemi sayısı. Daha yüksek değerler daha fazla CPU, bellek ve ağ bant genişliği kullanır."
     Ignore System Rotation Lock for Fullscreen: Android otomatik döndürmesi kapalı olsa bile tam ekrana girmek ve çıkmak için cihazı fiziksel olarak döndürün.
     Ask Before Preloading Large Playlists: "{count} videodan fazla içeren bir oynatma listesinin tüm videolarını önceden yüklemeden önce onay ister."
+    Obsidian Vault: Zaman damgalı notlar için Obsidian kasasının adı. Ayarlandığında notlar Obsidian'a eklenebilir. Her videonun notları, kasanın yeni notlar klasöründe videonun adını taşıyan bir notta toplanır.
   Download Settings:
     Download Folder: Videolar bu klasöre kaydedilir. Sisteminizin İndirilenler klasörünü kullanmak için boş bırakın.
     Global Additional yt-dlp Arguments: Her indirmede yt-dlp'ye iletilen ek komut satırı argümanları, örneğin --cookies-from-browser firefox.

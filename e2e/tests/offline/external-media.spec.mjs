@@ -59,6 +59,15 @@ async function mockTwitchLiveVod(app, recording) {
   }, recording)
 }
 
+/**
+ * Opens a channel's live stream, which the search bar opens as the channel page.
+ * @param {import('@playwright/test').Page} page
+ * @param {string} url
+ */
+async function openLiveStream(page, url) {
+  await page.evaluate(url => window.ftElectron.tabs.create({ route: '/external-media', query: { url }, makeActive: true }), url)
+}
+
 test('unloaded Twitch tabs resolve their title when selected, reloaded, and reopened', async ({ app, page }, testInfo) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
   const mediaUrl = 'https://www.twitch.tv/videos/123456789'
@@ -491,7 +500,9 @@ for (const { label, settings, live, timestamp } of [
         await store.dispatch(`update${key[0].toUpperCase()}${key.slice(1)}`, value)
       }
     }, settings)
-    if (timestamp === undefined) {
+    if (live) {
+      await openLiveStream(page, mediaUrl)
+    } else if (timestamp === undefined) {
       await page.locator(sel.searchInput).fill(mediaUrl)
       await page.locator(sel.searchInput).press('Enter')
     } else {
@@ -1378,8 +1389,7 @@ test('Twitch livestream omits playback speed from player options', async ({ app,
     await store.dispatch('updateUseQuickPlaybackSpeedBar', true)
     await store.dispatch('updateDefaultPlayback', 1.5)
   })
-  await page.locator(sel.searchInput).fill(mediaUrl)
-  await page.locator(sel.searchInput).press('Enter')
+  await openLiveStream(page, mediaUrl)
 
   const player = page.locator(`${activeTab} .videoPlayer`)
   await expect(player.locator('.shaka-overflow-menu-button')).toBeVisible()
@@ -1458,8 +1468,7 @@ ${Array.from({ length: 35 }, (_, index) => `#EXTINF:2.000,\n${index}.mp4`).join(
     })
   })
 
-  await page.locator(sel.searchInput).fill('https://www.twitch.tv/testchannel')
-  await page.locator(sel.searchInput).press('Enter')
+  await openLiveStream(page, 'https://www.twitch.tv/testchannel')
   const player = page.locator(`${activeTab} .ftVideoPlayer`)
   const video = player.locator('video')
   const isLive = () => player.evaluate(element => element.ui?.getControls().getPlayer().isLive() ?? false)
@@ -1740,8 +1749,7 @@ test('Twitch live chat scrolls like the YouTube chat panel', async ({ app, page,
     window.WebSocket = MockTwitchSocket
   })
 
-  await page.locator(sel.searchInput).fill(mediaUrl)
-  await page.locator(sel.searchInput).press('Enter')
+  await openLiveStream(page, mediaUrl)
   const chat = page.locator(`${activeTab} .twitchChat`)
   await expect(chat).toBeVisible()
   await page.evaluate(() => {

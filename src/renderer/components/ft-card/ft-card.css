@@ -14,4 +14,5 @@
 .ft-card:where(.fixedBackground) {
   position: relative;
   background-clip: var(--fixed-background-host-clip, border-box);
+  background-attachment: var(--fixed-background-host-attachment, scroll);
 }

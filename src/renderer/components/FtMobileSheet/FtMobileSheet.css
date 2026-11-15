@@ -31,6 +31,7 @@
      fixedBackground="false". */
   --fixed-background-display: none;
   --fixed-background-host-clip: border-box;
+  --fixed-background-host-attachment: scroll;
 }
 
 .mobileSheet[open].compactSheet {

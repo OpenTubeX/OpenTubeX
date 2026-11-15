@@ -75,30 +75,29 @@ const loadingSystemFonts = ref(false)
 let systemFontsPromise = null
 
 const appFont = computed(() => normalizeAppFont(store.getters.getAppFont))
-const bundledFontNames = ['Figtree', 'Source Sans 3', 'IBM Plex Sans', 'Inter', 'Manrope', 'Plus Jakarta Sans', 'Google Sans']
-const bundledFontValues = bundledFontNames.map(name => `${name} Variable`)
-const fontValues = computed(() => [
-  DEFAULT_APP_FONT,
-  'Roboto',
-  ...bundledFontValues,
-  SYSTEM_APP_FONT,
-  ...[...new Set([
-    ...IS_CAPACITOR ? [] : [appFont.value],
-    ...systemFonts.value
-  ])]
-    .filter(font => font !== DEFAULT_APP_FONT && font !== 'Roboto' && font !== SYSTEM_APP_FONT && !bundledFontValues.includes(font))
-    .toSorted(new Intl.Collator([locale.value, 'en'], { sensitivity: 'base' }).compare)
-])
+const bundledFonts = [
+  { name: 'Geist', value: DEFAULT_APP_FONT },
+  { name: 'Roboto', value: 'Roboto' },
+  ...['Figtree', 'Source Sans 3', 'IBM Plex Sans', 'Inter', 'Manrope', 'Plus Jakarta Sans', 'Google Sans']
+    .map(name => ({ name, value: `${name} Variable` })),
+  { name: 'Libron', value: 'Libron' }
+]
+const bundledFontValues = bundledFonts.map(({ value }) => value)
+const otherFonts = computed(() => [...new Set([
+  ...IS_CAPACITOR ? [] : [appFont.value],
+  ...systemFonts.value
+])]
+  .filter(font => font !== SYSTEM_APP_FONT && !bundledFontValues.includes(font))
+  .toSorted(new Intl.Collator([locale.value, 'en'], { sensitivity: 'base' }).compare))
+const fontValues = computed(() => [...bundledFontValues, SYSTEM_APP_FONT, ...otherFonts.value])
 const fontNames = computed(() => [
-  'Geist',
-  'Roboto',
-  ...bundledFontNames,
+  ...bundledFonts.map(({ name }) => name),
   t('Settings.Theme Settings.Font.System Default'),
-  ...fontValues.value.slice(3 + bundledFontValues.length)
+  ...otherFonts.value
 ])
 
 const fontGroups = computed(() => fontValues.value.map((font, index) =>
-  index < 2 + bundledFontValues.length ? 'bundled' : 'system'))
+  index < bundledFonts.length ? 'bundled' : 'system'))
 
 function updateAppFont(value) {
   store.dispatch('updateAppFont', value)

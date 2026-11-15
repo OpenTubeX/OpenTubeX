@@ -34,6 +34,7 @@
 
   /* FtFixedBackground paints the background fixed to the viewport. */
   background-clip: var(--fixed-background-host-clip, border-box);
+  background-attachment: var(--fixed-background-host-attachment, scroll);
   backdrop-filter: var(--card-bg-blur, none);
   border-radius: 0 0 var(--shape-corner-large) var(--shape-corner-large);
   padding-block: var(--channel-header-gap);

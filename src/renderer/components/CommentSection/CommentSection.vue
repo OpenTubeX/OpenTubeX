@@ -9,19 +9,20 @@
     >
       <header
         v-if="fullscreenOverlay || phonePanelHeader"
+        ref="commentHeader"
         class="fullscreenCommentHeader"
         :class="{ phoneCommentHeader: phonePanelHeader }"
       >
-        <h3>
+        <!-- Phones show only the count, so the actions fit beside it. -->
+        <h3 :aria-label="phonePanelHeader ? commentsTitle : null">
           <FtIcon
-            v-if="!phonePanelHeader"
             :icon="['fas', 'comment']"
             aria-hidden="true"
           />
           <span
             class="commentHeaderTitle"
             :title="commentsTitle"
-          >{{ commentsTitle }}</span>
+          >{{ phonePanelHeader ? (formattedCommentCount || $t('Comments.Comments')) : commentsTitle }}</span>
         </h3>
         <div
           class="fullscreenCommentActions"
@@ -43,7 +44,7 @@
             @toggle-timestamps="toggleTimestampCommentsFilter"
           />
           <button
-            v-if="canSortComments && !commentsDisabled"
+            v-if="canSortComments && !commentsDisabled && phoneHeaderOverflow < 2"
             type="button"
             class="fullscreenCommentAction"
             :class="{ active: sortMenuOpen }"
@@ -56,7 +57,7 @@
             <FtIcon :icon="['fas', 'arrow-down-short-wide']" />
           </button>
           <button
-            v-if="!commentsDisabled"
+            v-if="!commentsDisabled && !phoneHeaderOverflow"
             type="button"
             class="fullscreenCommentAction"
             :aria-label="$t('Comments.Reload Comments')"
@@ -67,13 +68,27 @@
             <FtIcon :icon="['fas', 'sync']" />
           </button>
           <button
-            v-if="!phonePanelHeader || !commentsDisabled"
+            v-if="!phonePanelHeader || (!commentsDisabled && !phoneHeaderOverflow)"
             type="button"
             class="fullscreenCommentAction"
             :aria-label="phonePanelHeader && !showComments ? $t('Comments.Click to View Comments') : $t('Comments.Hide Comments')"
             @click="phonePanelHeader ? toggleCommentVisibility() : emit('close-comments')"
           >
             <FtIcon :icon="['fas', phonePanelHeader ? (showComments ? 'eye-slash' : 'eye') : 'xmark']" />
+          </button>
+          <button
+            v-if="phonePanelHeader && !commentsDisabled && phoneHeaderOverflow"
+            type="button"
+            class="fullscreenCommentAction"
+            :aria-label="$t('More')"
+            :title="$t('More')"
+            aria-haspopup="menu"
+            @click="openPhoneHeaderOverflowMenu($event.currentTarget)"
+          >
+            <FtIcon
+              :icon="['fas', 'ellipsis-v']"
+              aria-hidden="true"
+            />
           </button>
           <div
             v-if="sortMenuOpen"
@@ -176,12 +191,12 @@
           type="button"
           class="commentSearchClose"
           :class="fullscreenOverlay ? 'fullscreenCommentAction' : 'commentHeaderIconAction'"
-          :aria-label="$t('Close')"
-          :title="$t('Close')"
+          :aria-label="$t('Comments.Close search')"
+          :title="$t('Comments.Close search')"
           @click="closeCommentSearch"
         >
           <FtIcon
-            :icon="['fas', 'xmark']"
+            :icon="['fas', 'angle-up']"
             aria-hidden="true"
           />
         </button>
@@ -1862,6 +1877,29 @@ function toggleSortMenu(button) {
   }
 }
 
+const phoneHeaderOverflowActions = computed(() => [
+  ...phoneHeaderOverflow.value < 2 || !canSortComments.value
+    ? []
+    : [{ label: t('Global.Sort By'), icon: ['fas', 'arrow-down-short-wide'], enabled: !props.offline, submenu: sortSheetActions.value }],
+  {
+    label: t('Comments.Reload Comments'),
+    icon: ['fas', 'sync'],
+    enabled: !props.offline,
+    run: reloadCommentData
+  },
+  {
+    label: showComments.value ? t('Comments.Hide Comments') : t('Comments.Click to View Comments'),
+    icon: ['fas', showComments.value ? 'eye-slash' : 'eye'],
+    run: toggleCommentVisibility
+  }
+])
+
+/** @param {HTMLElement} button */
+function openPhoneHeaderOverflowMenu(button) {
+  closeCommentMenus()
+  openMobileContextMenu({ title: t('More'), actions: phoneHeaderOverflowActions, trigger: button })
+}
+
 function handleSortChange(value) {
   if (props.offline) return
   const newest = value === 'newest'
@@ -1973,6 +2011,41 @@ const commentsTitle = computed(() => {
 
   return t('Comments.Comment Count', { count: formattedCommentCount.value }, commentCount.value)
 })
+
+// Phone headers keep one row. When the count and every action do not fit,
+// Reload and Hide move into a More menu (level 1), then Sort too (level 2).
+const commentHeader = useTemplateRef('commentHeader')
+const phoneHeaderOverflowLevel = ref(0)
+const phoneHeaderOverflow = computed(() => phonePanelHeader?.value ? phoneHeaderOverflowLevel.value : 0)
+const phoneHeaderSortable = computed(() => canSortComments.value && !props.commentsDisabled)
+const phoneHeaderActionCount = computed(() => {
+  return Number(canUseCommentTools.value) + Number(phoneHeaderSortable.value) + (props.commentsDisabled ? 0 : 2)
+})
+
+function updatePhoneHeaderOverflow() {
+  const header = commentHeader.value
+  if (!header || !phonePanelHeader?.value) return
+  const heading = header.querySelector('h3')
+  const titleWidth = heading.firstElementChild.getBoundingClientRect().width +
+    parseFloat(getComputedStyle(heading).columnGap) + heading.querySelector('.commentHeaderTitle').scrollWidth
+  const actionWidth = parseFloat(getComputedStyle(header).getPropertyValue('--phone-touch-target')) || 48
+  const actionSpace = header.clientWidth + 0.5 - titleWidth - parseFloat(getComputedStyle(header).columnGap)
+  const actionCount = phoneHeaderActionCount.value
+  if (props.commentsDisabled || actionCount * actionWidth <= actionSpace) phoneHeaderOverflowLevel.value = 0
+  else if (!phoneHeaderSortable.value || (actionCount - 1) * actionWidth <= actionSpace) phoneHeaderOverflowLevel.value = 1
+  else phoneHeaderOverflowLevel.value = 2
+}
+
+const phoneHeaderResizeObserver = new ResizeObserver(updatePhoneHeaderOverflow)
+// The icon is observed too because icon packs can render it after the header.
+watch(commentHeader, (header) => {
+  phoneHeaderResizeObserver.disconnect()
+  if (!header) return
+  phoneHeaderResizeObserver.observe(header)
+  phoneHeaderResizeObserver.observe(header.querySelector('h3').firstElementChild)
+})
+watch([() => phonePanelHeader?.value, formattedCommentCount, phoneHeaderActionCount, locale], updatePhoneHeaderOverflow, { flush: 'post' })
+onBeforeUnmount(() => phoneHeaderResizeObserver.disconnect())
 
 watch(() => props.initialCommentCount, (value) => {
   if (value == null) {
