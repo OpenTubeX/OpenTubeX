@@ -3,6 +3,38 @@
   src: url('assets/font/Roboto-Regular.ttf');
 }
 
+@font-face {
+  font-family: Libron;
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('assets/font/libron/Libron-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: Libron;
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('assets/font/libron/Libron-Italic.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: Libron;
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('assets/font/libron/Libron-Bold.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: Libron;
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url('assets/font/libron/Libron-BoldItalic.woff2') format('woff2');
+}
+
 /* Accept control taps without waiting for a double tap, while retaining
    scrolling and pinch zoom. Gesture-specific rules override this default. */
 :global(:where(

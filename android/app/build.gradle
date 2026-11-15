@@ -92,7 +92,7 @@ if (!liteBuild) tasks.named('preBuild').configure { dependsOn(generateRumbleHttp
 
 // Replaces youtubedl-android's 4 KB-aligned libwebp, which cannot load on 16 KB
 // page devices and would stop FFmpeg from starting.
-// .github/workflows/mobile-dependencies.yml opens a PR for each new release.
+// .github/workflows/vendored-dependencies.yml opens a PR for each new release.
 def libwebpVersion = '1.6.0'
 def libwebpSha256 = 'e4ab7009bf0629fd11982d4c2aa83964cf244cffba7347ecd39019a9e38c4564'
 def libwebpOutput = layout.buildDirectory.dir('generated/libwebp')
@@ -114,7 +114,7 @@ if (!liteBuild) tasks.named('preBuild').configure { dependsOn(generateLibwebp) }
 
 // Replaces the older yt-dlp that youtubedl-android bundles, so fresh installs can
 // play videos before the first managed update.
-// .github/workflows/mobile-dependencies.yml opens a PR for each new release.
+// .github/workflows/vendored-dependencies.yml opens a PR for each new release.
 def ytDlpVersion = '2026.10.26'
 def ytDlpSha256 = 'e51e69e89489f199530f13d32a4342da3ddb2cf34842f364603a066db05afbf3'
 def ytDlpOutput = layout.buildDirectory.dir('generated/yt-dlp')
