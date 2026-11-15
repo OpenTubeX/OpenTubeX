@@ -266,7 +266,9 @@ function moveTileFocus(event) {
   const index = tiles.findIndex(tile => tile.contains(event.target))
   if (index === -1) return
 
-  const rects = tiles.map(tile => tile.getBoundingClientRect())
+  // Left and right follow the tile order, so only up and down need geometry.
+  const horizontal = direction === 'previous' || direction === 'next'
+  const rects = tiles.map(tile => horizontal ? null : tile.getBoundingClientRect())
   const adjacentIndex = findAdjacentTileIndex(rects, index, direction)
   // Without a tile in that direction, the key keeps scrolling the page.
   if (adjacentIndex === -1) return

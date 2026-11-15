@@ -149,11 +149,11 @@ import FtRetryImage from '../FtRetryImage.vue'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { FtIcon } from '@opentubex/icons'
 import { computed, inject, onBeforeUnmount, ref, toRef, useTemplateRef, watch } from 'vue'
+import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/lazyWatchVideoDownloadPrompt'
 import { useI18n } from 'vue-i18n'
 
 import FtChannelAvatar from '../FtChannelAvatar/FtChannelAvatar.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
-import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
 import FtVerifiedBadge from '../FtVerifiedBadge/FtVerifiedBadge.vue'
 
 import store from '../../store/index'

@@ -194,8 +194,14 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
     })
   })
 
+  // Both configurations are rebuilt from every subscription whenever a profile
+  // changes, such as after each feed refresh. Only send ones that differ.
+  let configuredBackground = null
   watch(androidSubscriptionRefreshConfiguration, async configuration => {
     if (configuration === null) return
+    const fingerprint = JSON.stringify([configuration, enableClosedAppSubscriptionRefresh.value])
+    if (fingerprint === configuredBackground) return
+    configuredBackground = fingerprint
     try {
       if (isElectron) {
         await window.ftElectron.subscriptionAutoRefresh.configureBackground({
@@ -209,9 +215,10 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
         if (denied) showAndroidSubscriptionRefreshNotificationWarning()
       }
     } catch (error) {
+      configuredBackground = null
       console.error('Failed to configure closed-app subscription refreshes', error)
     }
-  }, { deep: true })
+  })
 
   const uploadNotificationConfiguration = computed(() => {
     if (process.env.IS_IOS || (!isCapacitor && !isElectron) || !dataReady.value) return null
@@ -236,17 +243,22 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
     })
   })
 
+  let configuredUploadNotifications = null
   watch(uploadNotificationConfiguration, async configuration => {
     if (configuration === null) return
+    const fingerprint = JSON.stringify(configuration)
+    if (fingerprint === configuredUploadNotifications) return
+    configuredUploadNotifications = fingerprint
     try {
       await configureUploadNotifications(configuration)
       if (configuration.enabled && isCapacitor && await requestAndroidSubscriptionRefreshNotificationPermission()) {
         showAndroidSubscriptionRefreshNotificationWarning()
       }
     } catch (error) {
+      configuredUploadNotifications = null
       console.error('Failed to configure upload notifications', error)
     }
-  }, { deep: true })
+  })
 
   watch([dataReady, subscriptionCacheReady], ([ready, cacheReady]) => {
     if ((isCapacitor || isElectron) && ready && cacheReady) {

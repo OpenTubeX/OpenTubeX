@@ -503,7 +503,7 @@ import FtShakaVideoPlayer from '../../components/FtShakaVideoPlayer/FtShakaVideo
 import WatchVideoDescription from '../../components/WatchVideoDescription/WatchVideoDescription.vue'
 import PhoneDescriptionButton from '../../components/PhoneDescriptionButton/PhoneDescriptionButton.vue'
 import WatchVideoChaptersPanel from '../../components/WatchVideoChaptersPanel/WatchVideoChaptersPanel.vue'
-import WatchVideoDownloadPrompt from '../../components/WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
+import WatchVideoDownloadPrompt from '../../components/WatchVideoDownloadPrompt/lazyWatchVideoDownloadPrompt'
 import WatchVideoLikes from '../../components/WatchVideoLikes/WatchVideoLikes.vue'
 import WatchVideoTranscript from '../../components/WatchVideoTranscript/WatchVideoTranscript.vue'
 import WatchSidebarPanel from '../../components/WatchSidebarPanel/WatchSidebarPanel.vue'

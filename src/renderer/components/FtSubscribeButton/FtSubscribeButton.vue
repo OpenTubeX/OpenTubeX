@@ -487,7 +487,7 @@ const restrictedPlaybackConfigured = computed(() => (
 const feedTypes = computed(() => getSubscriptionFeedTypeOptions(t))
 
 const storedChannelSettings = computed(() => {
-  const subscription = profileList.value[0].subscriptions.find(channel => channel.id === props.channelId)
+  const subscription = store.getters.getSubscribedChannelsById.get(props.channelId)
   return normalizeSubscriptionChannelSettings(subscription)
 })
 

@@ -173,6 +173,7 @@
 
 <script setup>
 import { computed, inject, ref, useTemplateRef, watch } from 'vue'
+import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/lazyWatchVideoDownloadPrompt'
 import { useI18n } from 'vue-i18n'
 import { FtIcon } from '@opentubex/icons'
 
@@ -182,7 +183,6 @@ import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtInlineMetadata from '../FtInlineMetadata/FtInlineMetadata.vue'
 import FtNewContentDot from '../FtNewContentDot/FtNewContentDot.vue'
 import FtRetryImage from '../FtRetryImage.vue'
-import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
 
 import store from '../../store/index'
 import { useCardContextMenu } from '../../composables/useCardContextMenu'

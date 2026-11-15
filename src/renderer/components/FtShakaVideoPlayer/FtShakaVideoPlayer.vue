@@ -744,8 +744,7 @@
       <FtVideoAnnotations
         v-if="!hideAnnotations && !showEndedScreen"
         :active="isActiveTab"
-        :annotations="annotations"
-        :current-time="annotationCurrentTime"
+        :annotations="activeAnnotations"
         :video-aspect-ratio="annotationVideoAspectRatio"
         :video-fit="annotationVideoFit"
       />
@@ -1704,22 +1703,22 @@
           <div
             class="mobileMiniBarProgress"
           >
+            <!-- renderMobileMiniBarProgress writes the progress, so playback does not re-render the player -->
             <div
+              ref="mobileMiniBarProgressFill"
               aria-hidden="true"
-              :style="{ transform: `scaleX(${mobileMiniBarProgress})` }"
             />
             <input
               v-if="scrollMiniPlayerActive"
+              ref="mobileMiniBarSeekInput"
               class="mobileMiniBarSeek"
               :class="{ mobileMiniBarSeeking }"
               type="range"
               min="0"
               max="100"
               step="0.1"
-              :value="mobileMiniBarProgress * 100"
               :disabled="mobileMiniBarSeekDisabled"
               :aria-label="mobileMiniBarSeekLabel"
-              :aria-valuetext="mobileMiniBarSeekValueText"
               @input="handleMobileMiniBarSeekInput"
               @pointerdown.stop="startMobileMiniBarSeek"
               @pointerup="mobileMiniBarSeeking = false"
@@ -1997,7 +1996,7 @@
         <div>
           <dt>{{ $t('Video.Player.Repeat Stats.Time Spent') }}</dt>
           <dd class="repeatStatsTime">
-            {{ repeatStatsTime }}
+            <RepeatStatsTime />
           </dd>
         </div>
       </dl>
@@ -3137,7 +3136,21 @@ let rewindOnResumePausedAt = null
 // Pausing to save a screenshot or write a note resumes where it paused.
 let actionPausePending = false
 const videoLayoutReady = ref(false)
-const annotationCurrentTime = ref(0)
+// Only the active annotations reach the template, so timeupdate re-renders the
+// player only when an annotation appears or disappears.
+const NO_ANNOTATIONS = Object.freeze([])
+let annotationCurrentTime = 0
+const activeAnnotations = shallowRef(NO_ANNOTATIONS)
+
+function updateActiveAnnotations() {
+  const time = annotationCurrentTime
+  const next = props.annotations.filter(annotation => time >= annotation.startTime && time <= annotation.endTime)
+  const current = activeAnnotations.value
+  if (next.length === current.length && next.every((annotation, index) => annotation === current[index])) return
+  activeAnnotations.value = next.length === 0 ? NO_ANNOTATIONS : next
+}
+
+watch(() => props.annotations, updateActiveAnnotations, { immediate: true })
 const annotationVideoAspectRatio = ref(null)
 
 const hasMultipleAudioTracks = ref(false)
@@ -4689,7 +4702,8 @@ const {
 })
 const repeatStats = reactive({ active: false, repeats: 0, seconds: 0 })
 const hideRepeatStats = computed(() => store.getters.getHideRepeatStats)
-const repeatStatsTime = computed(() => formatDurationAsTimestamp(repeatStats.seconds))
+// Renders the time on its own, so its once-per-second update does not re-render the player.
+const RepeatStatsTime = { render: () => formatDurationAsTimestamp(repeatStats.seconds) }
 const repeatStatsRange = computed(() => abRepeatEnabled.value
   ? `${formatAbRepeatTimestamp(abRepeatStart.value)} – ${formatAbRepeatTimestamp(abRepeatEnd.value)}`
   : '')
@@ -7249,8 +7263,11 @@ function handleTimeupdate() {
     checkAbRepeatBoundary()
     const currentTime = video.value.currentTime
     updateMobileMiniBarProgress()
+    // A live seek range moves on without changing the progress, so refresh its time text.
+    renderMobileMiniBarProgress()
     sponsorBlockCurrentTime.value = currentTime
-    annotationCurrentTime.value = currentTime
+    annotationCurrentTime = currentTime
+    updateActiveAnnotations()
     updateHiddenShortsSeekBar(currentTime)
     updateSecondaryCaptionText()
 
@@ -7488,12 +7505,28 @@ const mobileMiniBarSeeking = ref(false)
 watch([mobileMiniBarSeekDisabled, scrollMiniPlayerActive], ([disabled, active]) => {
   if (disabled || !active) mobileMiniBarSeeking.value = false
 })
-const mobileMiniBarSeekValueText = computed(() => {
-  const range = player?.seekRange()
-  return formatDurationAsTimestamp(range
-    ? range.start + (range.end - range.start) * mobileMiniBarProgress.value
-    : 0)
-})
+const mobileMiniBarProgressFill = useTemplateRef('mobileMiniBarProgressFill')
+const mobileMiniBarSeekInput = useTemplateRef('mobileMiniBarSeekInput')
+
+// Progress changes on every timeupdate. Writing it here instead of binding it
+// in the template keeps the player's render function out of playback.
+function renderMobileMiniBarProgress() {
+  const progress = mobileMiniBarProgress.value
+  if (mobileMiniBarProgressFill.value) {
+    mobileMiniBarProgressFill.value.style.transform = `scaleX(${progress})`
+  }
+  const input = mobileMiniBarSeekInput.value
+  if (input) {
+    const value = String(progress * 100)
+    if (input.value !== value) input.value = value
+    const range = player?.seekRange()
+    input.setAttribute('aria-valuetext', formatDurationAsTimestamp(range
+      ? range.start + (range.end - range.start) * progress
+      : 0))
+  }
+}
+
+watch([mobileMiniBarProgress, mobileMiniBarProgressFill, mobileMiniBarSeekInput], renderMobileMiniBarProgress, { flush: 'post' })
 
 /** @param {Event} event */
 function handleMobileMiniBarSeekInput(event) {

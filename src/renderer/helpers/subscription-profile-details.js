@@ -6,7 +6,8 @@ import { normalizeChannelHandle } from './feed-metadata.js'
  *
  * @param {object} profile
  * @param {{ channelId: string, channelName?: string, channelThumbnailUrl?: string, channelHandle?: string | null }[]} channels
- * @returns {object | null} a copied profile when details changed
+ * @returns {object | null} a shallow copy of the profile when details changed,
+ * sharing every unchanged subscription with the original
  */
 export function getProfileWithUpdatedSubscriptionDetails(profile, channels) {
   const updatesByChannelId = new Map()
@@ -43,18 +44,24 @@ export function getProfileWithUpdatedSubscriptionDetails(profile, channels) {
         continue
       }
 
+      // Copy on write: unchanged channels keep their identity, so large
+      // subscription lists are neither cloned nor re-rendered for one rename.
       if (updatedProfile === null) {
-        updatedProfile = JSON.parse(JSON.stringify(profile))
+        updatedProfile = { ...profile, subscriptions: profile.subscriptions.slice() }
+      }
+      if (updatedProfile.subscriptions[index] === profile.subscriptions[index]) {
+        updatedProfile.subscriptions[index] = { ...channel }
       }
 
+      const updatedChannel = updatedProfile.subscriptions[index]
       if (nameChanged) {
-        updatedProfile.subscriptions[index].name = channelName
+        updatedChannel.name = channelName
       }
       if (thumbnailChanged) {
-        updatedProfile.subscriptions[index].thumbnail = thumbnail
+        updatedChannel.thumbnail = thumbnail
       }
       if (handleChanged) {
-        updatedProfile.subscriptions[index].handle = handle
+        updatedChannel.handle = handle
       }
     }
   }

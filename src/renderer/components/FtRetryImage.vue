@@ -48,7 +48,7 @@
 import { computed, getCurrentInstance, onBeforeUnmount, ref, watch } from 'vue'
 import { FtIcon } from '@opentubex/icons'
 import store from '../store/index'
-import { getVideoThumbnailSource, getVideoThumbnailFallbackUrl } from '../helpers/videoThumbnail.js'
+import { getVideoThumbnailSource, getVideoThumbnailFallbackUrl, rememberMissingThumbnail, skipMissingThumbnails } from '../helpers/videoThumbnail.js'
 import thumbnailPlaceholder from '../assets/img/thumbnail_placeholder.svg'
 
 defineOptions({ inheritAttrs: false })
@@ -76,7 +76,7 @@ const emit = defineEmits(['error', 'load'])
 
 const preferredSource = computed(() => {
   const src = typeof props.src === 'string' ? props.src.trim() : ''
-  return getVideoThumbnailSource(src.startsWith('//') ? 'https:' + src : src, store.getters.getThumbnailDataSaver)
+  return skipMissingThumbnails(getVideoThumbnailSource(src.startsWith('//') ? 'https:' + src : src, store.getters.getThumbnailDataSaver))
 })
 const imageUrl = ref(preferredSource.value)
 const hasLoaded = ref(false)
@@ -181,10 +181,13 @@ function startLoadingTimeout() {
   }, SKELETON_TIMEOUT_MS)
 }
 
-function useSmallerThumbnail() {
+/** @param {boolean} [missing] the server reported that this resolution does not exist */
+function useSmallerThumbnail(missing = false) {
   const fallback = getVideoThumbnailFallbackUrl(currentSource)
   if (!fallback) return false
 
+  // Network errors can be temporary, so only a reported placeholder is remembered.
+  if (missing) rememberMissingThumbnail(currentSource, fallback)
   resetSource(fallback, true)
   return true
 }
@@ -194,7 +197,7 @@ function handleImageLoad(event) {
   // YouTube can return a decodable 120x90 placeholder for missing resolutions.
   const image = event.target
   if (image.naturalWidth === 120 && image.naturalHeight === 90) {
-    if (useSmallerThumbnail()) return
+    if (useSmallerThumbnail(true)) return
   }
   clearTimeout(skeletonTimeoutId)
   cancelNativeRecovery()

@@ -520,6 +520,15 @@
   --highlighted-comment-offset: 13px;
 }
 
+/* Long comment sections keep every loaded thread. Skip style, layout and paint
+   of offscreen threads, which made each loaded page slower than the last. Only
+   where the page scrolls: their estimated heights would make the nested
+   fullscreen and phone scrollers clamp to an inexact end. */
+.card:not(.fullscreenCommentCard, .phoneCommentCard) .commentThread {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 160px;
+}
+
 .commentThreadExpanded::before,
 .commentThreadCollapsed::before {
   content: '';

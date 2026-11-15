@@ -2,7 +2,8 @@
 import Datastore from '@seald-io/nedb'
 
 const options = {
-  history: { indexes: ['videoId'] },
+  // lastViewedPlaylistId keeps deleting a playlist from parsing the whole history
+  history: { indexes: ['videoId', 'lastViewedPlaylistId'] },
   playlists: { childField: 'videos' },
   'watch-stats': { indexes: ['date'] },
   'video-metadata-cache': { indexes: ['videoId'] },

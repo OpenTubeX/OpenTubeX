@@ -14,7 +14,7 @@ async function compileComponent(path, bindings = {}) {
     .replace(/^import .* from .*\n/gm, '')
     .replace("import('../helpers/api/capacitor-http')", 'loadNativeHttp()')
     .replace('export default', 'const component =')
-  return runInNewContext(`${source}; component`, { Vue, process: { env: { IS_CAPACITOR: true } }, URL, Date, Event, getVideoThumbnailSource, getVideoThumbnailFallbackUrl, ...bindings })
+  return runInNewContext(`${source}; component`, { Vue, process: { env: { IS_CAPACITOR: true } }, URL, Date, Event, getVideoThumbnailSource, getVideoThumbnailFallbackUrl, rememberMissingThumbnail: () => {}, skipMissingThumbnails: src => src, ...bindings })
 }
 
 async function mountAvatar(t, nativeResult, componentPath = 'FtChannelAvatar/FtChannelAvatar.vue', cachedSources = new Map(), attrs = {}, { isCapacitor = true } = {}) {
