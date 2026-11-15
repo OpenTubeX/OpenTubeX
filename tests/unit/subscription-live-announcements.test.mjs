@@ -15,6 +15,7 @@ function sliceFunction(signature) {
 }
 
 const harnessSource = [
+  sliceFunction('async function fetchYouTubeFeed('),
   sliceFunction('async function enrichScrapedUpcomingPublicationDates('),
   sliceFunction('async function getChannelLiveLocal(')
 ].join('\n')
@@ -28,6 +29,8 @@ function fetchLiveTab(showScheduledLiveStreamsFirst, activeRefresh = null) {
   const getChannelLiveLocal = vm.runInNewContext(`${harnessSource}; getChannelLiveLocal`, {
     AbortSignal,
     RSS_ENRICHMENT_TIMEOUT_MS: 1000,
+    youTubeFeedsPausedUntil: 0,
+    consecutiveYouTubeFeedFailures: 0,
     activeRefresh,
     store: { getters: { getShowScheduledLiveStreamsFirst: showScheduledLiveStreamsFirst } },
     mergeUpcomingSubscriptionFeedPublished,

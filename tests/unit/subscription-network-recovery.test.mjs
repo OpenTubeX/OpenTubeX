@@ -69,7 +69,7 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
     requests.push(url)
     if (fail) throw typeof error === 'function' ? error(url) : error
     const channelFeed = channelFeeds[new URL(url, 'https://www.youtube.com/').searchParams.get('channel_id')]
-    if (channelFeed) return { status: 200, text: async () => channelFeed }
+    if (channelFeed) return { ok: true, status: 200, text: async () => channelFeed }
     if (url.includes('/watch?v=')) {
       await beforeShortMetadata()
       const videoId = new URL(url).searchParams.get('v')
@@ -82,11 +82,12 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
       })};`
       }
     }
-    return { videos: [], posts: [], status: url.includes('/feed/channel/') ? channelStatus : rssStatus, text: async () => '<feed><author><name>Channel</name></author></feed>' }
+    const status = url.includes('/feed/channel/') ? channelStatus : rssStatus
+    return { videos: [], posts: [], ok: status >= 200 && status < 300, status, text: async () => '<feed><author><name>Channel</name></author></feed>' }
   }
   const fetchFallback = async url => {
     fallbackRequests.push(url)
-    return { videos: [], posts: [], status: 200, text: async () => '<feed><author><name>Channel</name></author></feed>' }
+    return { videos: [], posts: [], ok: true, status: 200, text: async () => '<feed><author><name>Channel</name></author></feed>' }
   }
   const fetchLocal = fallbackWorks && backend === 'invidious' ? fetchFallback : fetchChannel
   const fetchInvidious = fallbackWorks && backend === 'local' ? fetchFallback : fetchChannel
@@ -650,10 +651,12 @@ for (const feed of ['Videos', 'Shorts', 'Live']) {
 }
 
 for (const feed of ['Videos', 'Shorts', 'Live']) {
-  for (const backend of ['local', 'invidious']) {
+  // Local Shorts load through the API instead, see the next test
+  for (const backend of feed === 'Shorts' ? ['invidious'] : ['local', 'invidious']) {
     const status = 500
     test(`${backend} ${feed} RSS HTTP ${status} produces one error toast without a connection banner`, async () => {
       const app = createRefresh({ feed, backend, rssStatus: status, scraperError: Object.assign(new Error(`HTTP ${status}`), { status }) })
+      if (feed === 'Shorts') app.getters.getBackendFallback = false
       app.reconnect()
       await app.refresh({ t: key => key })
       assert.equal(app.toasts.length, 1)
@@ -662,6 +665,20 @@ for (const feed of ['Videos', 'Shorts', 'Live']) {
       assert.deepEqual(app.events, ['completed', 'finished'])
     })
   }
+}
+
+for (const status of [429, 500]) {
+  test(`Shorts load through the API when YouTube's feeds return HTTP ${status}, and later channels skip the feeds`, async () => {
+    const app = createRefresh({ rssStatus: status })
+    app.getters.getBackendFallback = false
+    app.reconnect()
+    await app.refresh({ t: key => key })
+    assert.equal(app.toasts.length, 0)
+    assert.equal(app.errors.size, 0)
+    assert.equal(app.writes.filter(write => write.key === 'updateSubscriptionShortsCacheByChannel').length, 20)
+    // Only the channels already in flight when the feeds failed request them
+    assert.ok(app.requests.filter(url => url.includes('/feeds/videos.xml')).length <= 8)
+  })
 }
 
 for (const feed of ['Videos', 'Shorts', 'Live']) {
