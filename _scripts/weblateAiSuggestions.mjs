@@ -63,6 +63,8 @@ async function api(pathOrUrl, { method = 'GET', body } = {}) {
       method,
       headers: {
         Accept: 'application/json',
+        // Keeps error messages in English, which isDuplicateSuggestion matches.
+        'Accept-Language': 'en',
         Authorization: `Token ${token}`,
         ...(body && { 'Content-Type': 'application/json' })
       },
@@ -78,10 +80,21 @@ async function api(pathOrUrl, { method = 'GET', body } = {}) {
       continue
     }
     if (!response.ok) {
-      throw new Error(`${method} ${url.pathname}${url.search}: ${response.status} ${await response.text()}`)
+      const text = await response.text()
+      const error = new Error(`${method} ${url.pathname}${url.search}: ${response.status} ${text}`)
+      try {
+        error.body = JSON.parse(text)
+      } catch {}
+      throw error
     }
     return response.json()
   }
+}
+
+// Weblate rejects a suggestion identical to one the unit already has, for
+// example from a run that timed out after Weblate stored it, or from a translator.
+function isDuplicateSuggestion(error) {
+  return error.body?.errors?.some(item => item.attr === 'target' && item.detail === 'Your suggestion already exists!')
 }
 
 async function list(path) {
@@ -148,11 +161,17 @@ try {
       else if (ledger.has(key)) count('previously-submitted')
       else if (!options.apply) count('would-submit')
       else {
-        await api(`/api/units/${unit.id}/suggestions/`, { method: 'POST', body: { target: [target] } })
+        let result = 'submitted'
+        try {
+          await api(`/api/units/${unit.id}/suggestions/`, { method: 'POST', body: { target: [target] } })
+        } catch (error) {
+          if (!isDuplicateSuggestion(error)) throw error
+          result = 'already-suggested'
+        }
         ledger.add(key)
         // Record it right away, so a cancelled run never offers it again.
         appendFileSync(options.ledger, `${key}\n`)
-        count('submitted')
+        count(result)
       }
     }
     console.log(JSON.stringify({ locale, counts }))
