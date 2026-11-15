@@ -146,6 +146,19 @@ test('turns off stored automatic saving that a disabled per-channel switch kept 
   })
 })
 
+test('skips string migrations for stored values of another type', async () => {
+  const settings = new Datastore()
+  await settings.insertAsync([
+    { _id: 'currentLocale', value: 123 },
+    { _id: 'externalPlayerCustomArgs', value: null },
+  ])
+
+  await migrateStoredSettings(settings)
+
+  const stored = Object.fromEntries((await settings.findAsync({})).map(({ _id, value }) => [_id, value]))
+  assert.deepEqual(stored, { currentLocale: 123, externalPlayerCustomArgs: null })
+})
+
 test('migrates the legacy AI video summary visibility preference', () => {
   assert.deepEqual(migrateLegacySettings({ hideAiVideoSummaries: true }), {
     aiVideoSummaryMode: 'hide',

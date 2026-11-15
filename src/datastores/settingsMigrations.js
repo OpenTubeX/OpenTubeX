@@ -120,7 +120,9 @@ export async function migrateStoredSettings(datastore) {
 
   // In FreeTube 0.21.3 and earlier the locales 'en-GB', 'es-AR' and 'nb-NO' had underscores instead of a hyphens
   // This is a one time migration for users that are using one of those locales
-  if (currentLocale?.value.includes('_')) {
+  // Imported or synced values can have any type, and a throw here would block
+  // every later settings read and write.
+  if (typeof currentLocale?.value === 'string' && currentLocale.value.includes('_')) {
     await save('currentLocale', currentLocale.value.replace('_', '-'))
   }
 
@@ -129,7 +131,7 @@ export async function migrateStoredSettings(datastore) {
   // This is a one time migration that converts the old string to a JSON array
   const externalPlayerCustomArgs = stored.get('externalPlayerCustomArgs')
 
-  if (externalPlayerCustomArgs && !externalPlayerCustomArgs.value.startsWith('[')) {
+  if (typeof externalPlayerCustomArgs?.value === 'string' && !externalPlayerCustomArgs.value.startsWith('[')) {
     let newValue = '[]'
 
     if (externalPlayerCustomArgs.value.length > 0) {
