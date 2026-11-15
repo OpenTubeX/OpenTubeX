@@ -4216,17 +4216,23 @@ export default defineComponent({
               this.refreshVisionOsStreams = videoInfo.refreshVisionOsStreams ?? null
               this.loadWebLegacyFormats = videoInfo.loadLegacyFormats ?? null
             } else {
-              // Neither a SABR streaming URL nor playable adaptive format URLs,
-              // so the only thing left is the 360p legacy stream. This is a
-              // silent quality drop, so make it identifiable in the logs.
-              console.error(`No SABR or adaptive stream URLs for ${this.videoId}, falling back to the legacy formats...`)
               this.manifestSrc = null
-              this.enableLegacyFormat()
+              // yt-dlp provides the streams. Android loads for it skip the token
+              // that SABR needs, so missing stream URLs are expected there.
+              if (!this.isYtDlpPlaybackRequested()) {
+                // Neither a SABR streaming URL nor playable adaptive format URLs,
+                // so the only thing left is the 360p legacy stream. This is a
+                // silent quality drop, so make it identifiable in the logs.
+                console.error(`No SABR or adaptive stream URLs for ${this.videoId}, falling back to the legacy formats...`)
+                this.enableLegacyFormat()
+              }
             }
           } else if (!metadataOnly && this.restrictedPlaybackError === null) {
-            console.error(`No adaptive formats for ${this.videoId}, falling back to the legacy formats...`)
             this.manifestSrc = null
-            this.enableLegacyFormat()
+            if (!this.isYtDlpPlaybackRequested()) {
+              console.error(`No adaptive formats for ${this.videoId}, falling back to the legacy formats...`)
+              this.enableLegacyFormat()
+            }
           }
         }
 
