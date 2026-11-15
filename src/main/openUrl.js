@@ -222,7 +222,6 @@ export function createUrlOpener({ rootAppUrl, createWindow, confirmUrl }) {
    * @param {string | null | undefined} url
    * @param {object} [options]
    * @param {boolean} [options.replaceMainWindow]
-   * @param {boolean} [options.showWindowNow]
    * @param {boolean} [options.reuseEmptyRootTab]
    * @returns {Promise<import('electron').BrowserWindow>}
    */

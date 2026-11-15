@@ -256,10 +256,7 @@ function runApp() {
       {
         label: dockMediaLabels.newWindow,
         click: () => {
-          createWindow({
-            replaceMainWindow: false,
-            showWindowNow: true
-          })
+          createWindow({ replaceMainWindow: false })
         }
       }
     ])
@@ -431,7 +428,7 @@ function runApp() {
           // Only show the option for in-app URLs and not external ones
           visible: isInAppUrl,
           click: () => {
-            createWindow({ replaceMainWindow: false, windowStartupUrl: parameters.linkURL, showWindowNow: true })
+            createWindow({ replaceMainWindow: false, windowStartupUrl: parameters.linkURL })
           }
         },
         // Only show select all in text fields
@@ -561,7 +558,6 @@ function runApp() {
               replaceMainWindow: false,
               windowStartupUrl: `${ROOT_APP_URL}#/search/${encodeURIComponent(selectionText)}`,
               searchQueryText: selectionText,
-              showWindowNow: true,
             })
           }
         },
@@ -954,7 +950,6 @@ function runApp() {
 
       if (!mainWindow || mainWindow.isDestroyed()) {
         createWindowForOpenUrl(url, {
-          showWindowNow: true,
           reuseEmptyRootTab: true
         }).catch(error => {
           console.error('Failed to open notification URL', error)
@@ -1080,7 +1075,6 @@ function runApp() {
         if (commandLine.includes('--new-window')) {
           // The user wants to create a new window in the existing instance
           await createWindowForOpenUrl(newStartupUrl, {
-            showWindowNow: true,
             replaceMainWindow: true,
             reuseEmptyRootTab: true
           })
@@ -1104,7 +1098,6 @@ function runApp() {
 
         await createWindowForOpenUrl(newStartupUrl, {
           replaceMainWindow: false,
-          showWindowNow: true,
           reuseEmptyRootTab: true
         })
       }
@@ -1580,7 +1573,6 @@ function runApp() {
       for (let i = 1; i < savedSessions.length; i++) {
         await createWindow({
           replaceMainWindow: false,
-          showWindowNow: true,
           sessionData: savedSessions[i],
           loadInactiveTabsOnRestore: startupBehavior === 'loadAllTabs',
           restoreTabLoadStateOnRestore: startupBehavior === 'restoreTabLoadState',
@@ -1652,7 +1644,7 @@ function runApp() {
       ? mainWindow
       : BrowserWindow.getAllWindows()[0]
     if (!window) {
-      createWindow({ showWindowNow: true })
+      createWindow()
     } else if (window.isVisible() && !window.isMinimized() && !trayWindows.includes(window)) {
       hideWindowToTray(window)
     } else {
@@ -1746,7 +1738,6 @@ function runApp() {
         label: dockMediaLabels.newWindow,
         icon: iconFor('clone'),
         click: () => createWindow({
-          showWindowNow: true,
           replaceMainWindow: !mainWindow || mainWindow.isDestroyed() || trayWindows.includes(mainWindow)
         })
       },
@@ -2656,7 +2647,6 @@ function runApp() {
 
     createWindow({
       replaceMainWindow: false,
-      showWindowNow: true,
       windowStartupUrl,
       searchQueryText
     })
@@ -2996,7 +2986,6 @@ function runApp() {
 
     await createWindowForOpenUrl(newStartupUrl, {
       replaceMainWindow: false,
-      showWindowNow: true,
       reuseEmptyRootTab: true
     })
   })
@@ -3265,10 +3254,7 @@ function runApp() {
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.NEW_WINDOW),
             click: (_menuItem, browserWindow, _event) => {
               if (browserWindow && appShortcutBlockedWindows.has(browserWindow)) { return }
-              createWindow({
-                replaceMainWindow: false,
-                showWindowNow: true
-              })
+              createWindow({ replaceMainWindow: false })
             },
             type: 'normal'
           },
