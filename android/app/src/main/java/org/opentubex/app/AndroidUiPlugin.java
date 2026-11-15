@@ -71,7 +71,6 @@ public class AndroidUiPlugin extends Plugin {
 
         // Listening for gamepads makes Chromium poll them 60 times a second, so
         // the page only listens while one is connected.
-        gamepadConnected = hasGamepad();
         gamepadListener = new InputManager.InputDeviceListener() {
             @Override
             public void onInputDeviceAdded(int deviceId) {
@@ -90,6 +89,8 @@ public class AndroidUiPlugin extends Plugin {
         };
         getContext().getSystemService(InputManager.class)
             .registerInputDeviceListener(gamepadListener, new Handler(Looper.getMainLooper()));
+        // Read the state after registering, so no change falls between the two.
+        gamepadConnected = hasGamepad();
     }
 
     private void updateGamepadConnected() {
