@@ -100,6 +100,8 @@ const SUBSCRIPTION_FETCH_BATCH_DELAY_MS = 2000
 const SUBSCRIPTION_FETCH_CONCURRENCY = 8
 const RSS_ENRICHMENT_CONCURRENCY = 3
 const RSS_ENRICHMENT_TIMEOUT_MS = 15_000
+// YouTube's RSS feeds list a channel's 15 newest uploads
+const RSS_FEED_ENTRY_COUNT = 15
 
 // YouTube's feeds can be down for hours, answering every request with 404,
 // and rate limit large refreshes. After such failures, feed requests are
@@ -1835,15 +1837,13 @@ async function getChannelShortsLocal(channel, t, failedAttempts = 0) {
           video.authorId ??= channel.id
         })
         // A playlist lists up to 100 Shorts, so only date those that can be new.
-        await fillLocalShortDates(videos, channel.id, true)
-        return { videos }
+        return { videos: await fillLocalShortDates(videos, channel.id, true) }
       } catch (error) {
         if (error.message !== 'The playlist does not exist.') throw error
         // Some channels have Shorts even though their automatic playlist is missing.
         const shortsTab = await channelPage.getShorts()
         const videos = parseLocalChannelShorts(shortsTab.videos, channel.id, channel.name)
-        await fillLocalShortDates(videos, channel.id)
-        return { videos }
+        return { videos: await fillLocalShortDates(videos, channel.id) }
       }
     }
 
@@ -1874,22 +1874,28 @@ async function getChannelShortsLocal(channel, t, failedAttempts = 0) {
  * for sorting and New badges: undated entries can never be marked as new.
  * Cached dates are reused and the rest are loaded from watch pages. With
  * `newOnly`, only entries ahead of the first cached one are loaded, as only
- * those can become new (see reconcileFetchedSubscriptionEntries).
+ * those can become new (see reconcileFetchedSubscriptionEntries), or the RSS
+ * feed's window when none is cached. Entries left undated are dropped.
  * @param {any[]} videos
  * @param {string} channelId
  * @param {boolean} [newOnly]
+ * @returns {Promise<any[]>} The dated entries
  */
 async function fillLocalShortDates(videos, channelId, newOnly = false) {
   const cachedDates = new Map((store.getters.getShortsCache[channelId]?.videos ?? [])
+    .filter(entry => Number.isFinite(entry.published))
     .map(entry => [entry.videoId, entry.published]))
   const firstCachedIndex = videos.findIndex(video => cachedDates.has(video.videoId))
-  const fetchLimit = !newOnly ? videos.length : Math.max(firstCachedIndex, 0)
+  let fetchLimit = videos.length
+  if (newOnly) {
+    fetchLimit = firstCachedIndex >= 0 ? firstCachedIndex : RSS_FEED_ENTRY_COUNT
+  }
   // One missing date fails the channel, so stop the other lookups too.
   const lookups = new AbortController()
   await mapConcurrently(videos, RSS_ENRICHMENT_CONCURRENCY, async (video, index) => {
     if (Number.isFinite(video.published)) return
     const cached = cachedDates.get(video.videoId)
-    if (Number.isFinite(cached)) {
+    if (cached !== undefined) {
       video.published = cached
       return
     }
@@ -1913,6 +1919,7 @@ async function fillLocalShortDates(videos, channelId, newOnly = false) {
     lookups.abort()
     throw error
   })
+  return videos.filter(video => Number.isFinite(video.published))
 }
 
 async function getLocalShortThumbnailEntries(playlistId) {

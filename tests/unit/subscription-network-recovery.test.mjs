@@ -678,7 +678,8 @@ for (const status of [429, 500]) {
     assert.equal(app.errors.size, 0)
     const writes = app.writes.filter(write => write.key === 'updateSubscriptionShortsCacheByChannel')
     assert.equal(writes.length, 20)
-    assert.ok(writes.every(write => write.value.videos.some(video => video.videoId === 'api-short')))
+    // Nothing is cached, so the Shorts are dated for sorting
+    assert.ok(writes.every(write => write.value.videos.some(video => video.videoId === 'api-short' && Number.isFinite(video.published))))
     // Only the channels already in flight when the feeds failed request them
     assert.ok(app.requests.filter(url => url.includes('/feeds/videos.xml')).length <= 8)
   })
@@ -925,10 +926,10 @@ test('Shorts playlist fallback dates new Shorts so they can be marked as new', a
   const { videos } = app.writes.find(write => write.key === 'updateSubscriptionShortsCacheByChannel').value
   assert.deepEqual(videos.map(video => [video.videoId, video.published, video.isNewInSubscriptionFeed]), [
     ['new-short', Date.parse('2026-09-06T12:00:00Z'), true],
-    ['old-short', Date.parse('2026-09-01T00:00:00Z'), false],
-    ['older-short', undefined, false]
+    ['old-short', Date.parse('2026-09-01T00:00:00Z'), false]
   ])
-  // Entries after the first cached one cannot be new, so they need no watch page.
+  // Entries after the first cached one cannot be new, so they need no watch
+  // page, and are dropped like the RSS feed omits them instead of saved undated.
   assert.deepEqual(app.requests.filter(url => url.includes('/watch?v=')), ['https://www.youtube.com/watch?v=new-short'])
 })
 
