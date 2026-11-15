@@ -17,6 +17,12 @@
   animation: tooltip-open var(--motion-fast-effects);
 }
 
+/* Shaka keeps a tooltip up briefly after the pointer leaves, so that it can be
+   hovered, but these ignore the pointer. Hide them right away instead. */
+:deep(.shaka-tooltips-on > :is(.shaka-tooltip, .shaka-tooltip-status)::after) {
+  transition: none;
+}
+
 @keyframes tooltip-open {
   from {
     opacity: 0;
