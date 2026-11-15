@@ -10,6 +10,7 @@
     dropdown-position-x="left"
     dropdown-class="content-width"
     :dropdown-position-y="dropdownPositionY"
+    :dropdown-portal="dropdownPortal"
     :force-dropdown="true"
   >
     <div class="shareMenu">
@@ -134,6 +135,10 @@ const props = defineProps({
   dropdownPositionY: {
     type: String,
     default: 'bottom'
+  },
+  dropdownPortal: {
+    type: Boolean,
+    default: false
   },
   size: {
     type: Number,

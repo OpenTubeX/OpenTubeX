@@ -13,7 +13,7 @@ test.use({
   },
 })
 
-test('Shorts playlist popover stays above the video player', async ({ app, page }, testInfo) => {
+async function openShortsPlayer(app, page) {
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
   const watch = await page.evaluateHandle(findWatchComponent)
@@ -23,6 +23,10 @@ test('Shorts playlist popover stays above the video player', async ({ app, page 
     await component.proxy.$nextTick()
   })
   await watch.dispose()
+}
+
+test('Shorts playlist popover stays above the video player', async ({ app, page }, testInfo) => {
+  await openShortsPlayer(app, page)
 
   const button = page.locator('.shortsActionRail').getByRole('button', { name: /^Add to Playlist$/i })
   const picker = page.locator('.addToPlaylistDropdown')
@@ -57,4 +61,26 @@ test('Shorts playlist popover stays above the video player', async ({ app, page 
     await expect(picker).toBeHidden()
     await expect(button).toBeFocused()
   }
+})
+
+test('Shorts share menu is not clipped by the action rail', async ({ app, page }, testInfo) => {
+  await openShortsPlayer(app, page)
+  await setWindowSize(app, page, { width: 1500, height: 850 })
+
+  const button = page.locator('.shortsActionRail').getByRole('button', { name: /^Share Video$/i })
+  const menu = page.locator('.shareMenu')
+  await button.click()
+  await expect(menu).toBeVisible()
+
+  const action = menu.getByRole('button', { name: /^Copy Link$/i }).first()
+  await expect.poll(() => action.evaluate(element => {
+    const bounds = element.getBoundingClientRect()
+    const x = bounds.left + bounds.width / 2
+    const y = bounds.top + bounds.height / 2
+    return element.contains(document.elementFromPoint(x, y))
+  }), { message: 'share actions must be visible and receive clicks' }).toBe(true)
+  await page.screenshot({ path: testInfo.outputPath('shorts-share-menu.png') })
+
+  await action.click()
+  await expect(menu).toBeHidden()
 })
