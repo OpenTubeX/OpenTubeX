@@ -154,6 +154,47 @@ test('a note\'s history lists only the target branch commits that changed it', (
   assert.deepEqual(listReleaseNoteHistory('release-notes/feature.md', { cwd }).commits, [featureMerge])
 })
 
+test('a note restored after an unpublished release keeps its history until the release is published', (t) => {
+  const cwd = mkdtempSync(join(tmpdir(), 'release-notes-'))
+  t.after(() => rmSync(cwd, { force: true, recursive: true }))
+  let date = ''
+  const git = (...args) => execFileSync('git', ['-c', 'commit.gpgsign=false', '-c', 'tag.gpgsign=false', '-c', 'user.name=Test', '-c', 'user.email=test@example.com', ...args], {
+    cwd,
+    encoding: 'utf8',
+    env: { ...process.env, GIT_AUTHOR_DATE: date, GIT_COMMITTER_DATE: date },
+  }).trim()
+  const commit = (message, commitDate) => {
+    date = commitDate
+    git('add', '--all')
+    git('commit', '-m', message)
+    return git('rev-parse', 'HEAD')
+  }
+  const file = 'release-notes/feature.md'
+
+  git('init', '-b', 'development')
+  mkdirSync(join(cwd, 'release-notes'))
+  writeFileSync(join(cwd, file), 'Original note')
+  const added = commit('Add the note', '2026-11-01T00:00:00Z')
+  rmSync(join(cwd, file))
+  const release = commit('Bump version', '2026-11-02T00:00:00Z')
+  git('tag', 'v1.0.0-nightly-1')
+  writeFileSync(join(cwd, file), 'Original note')
+  const restored = commit('Restore the note', '2026-11-03T00:00:00Z')
+
+  assert.deepEqual(listReleaseNoteHistory(file, { cwd }), {
+    commits: [restored, release, added],
+    createdAt: Date.parse('2026-11-01T00:00:00Z') / 1000,
+  })
+
+  // Once the release is published, the file name holds a new note.
+  git('tag', 'v1.0.0-beta', release)
+
+  assert.deepEqual(listReleaseNoteHistory(file, { cwd }), {
+    commits: [restored],
+    createdAt: Date.parse('2026-11-03T00:00:00Z') / 1000,
+  })
+})
+
 test('a pull request merged with a merge commit is credited only for that commit', () => {
   const pullRequest = (number, mergeCommit, parents) => ({
     baseRefName: 'development',

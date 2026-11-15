@@ -17,6 +17,7 @@ const DESKTOP_PLATFORMS = ['linux', 'macos', 'windows']
 const FRONT_MATTER_KEYS = new Set(['category', 'platforms', 'references'])
 const MAX_NOTE_LENGTH = 300
 const NO_RELEASE_NOTE_PATTERN = /^\s*-\s*\[[xX]\]\s+No release note needed\s*$/m
+const NIGHTLY_TAG_PATTERN = /-nightly-\d+$/
 const MAX_IMAGE_HEIGHT = 300
 const IMAGE_DOWNLOAD_TIMEOUT_MS = 30_000
 const ALLOWED_IMAGE_HOSTS = new Set([
@@ -493,7 +494,8 @@ export function validatePullRequest(body, changedFiles) {
 
 /**
  * Lists the commits that touched a release note since it was last added,
- * newest first. A reused file name does not pull in an earlier note's history.
+ * newest first. A reused file name does not pull in an earlier note's history,
+ * but a note restored after a release that was never published keeps its own.
  */
 export function listReleaseNoteHistory(file, { cwd } = {}) {
   // Only follow the target branch: each pull request's merge or squash commit
@@ -512,13 +514,31 @@ export function listReleaseNoteHistory(file, { cwd } = {}) {
 
     if (commit) {
       commits.push({ oid: commit[1], time: Number(commit[2]) })
-    } else if (line.startsWith('A\t')) {
-      return { commits: commits.map(({ oid }) => oid), createdAt: commits.at(-1).time }
+    } else if (/^[ADM]\t/.test(line)) {
+      commits.at(-1).status = line[0]
     }
+  }
+
+  for (const [index, commit] of commits.entries()) {
+    if (commit.status !== 'A') { continue }
+
+    // The draft release deletes the notes it consumes. If that release is
+    // deleted instead of published, restoring the notes continues their history.
+    const deletion = commits[index + 1]
+
+    if (deletion?.status === 'D' && !isInPublishedRelease(deletion.oid, cwd)) { continue }
+
+    return { commits: commits.slice(0, index + 1).map(({ oid }) => oid), createdAt: commit.time }
   }
 
   // Notes that are not committed yet sort last.
   return { commits: commits.map(({ oid }) => oid), createdAt: Number.MAX_SAFE_INTEGER }
+}
+
+function isInPublishedRelease(commit, cwd) {
+  const tags = execFileSync('git', ['tag', '--contains', commit], { cwd, encoding: 'utf8' })
+
+  return tags.split('\n').some((tag) => tag !== '' && !NIGHTLY_TAG_PATTERN.test(tag))
 }
 
 export function selectPullRequests(responses, { repository, target }) {
