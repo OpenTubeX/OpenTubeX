@@ -309,11 +309,16 @@ const activeProfile = computed(() => {
   return store.getters.getActiveProfile
 })
 
+// Captured when the menu opens, so toggling a profile doesn't move its chip,
+// which would drop its focus and close the menu.
+/** @type {import('vue').ShallowRef<Set<string>>} */
+const subscribedProfileIdsAtOpen = shallowRef(new Set())
+
 const profileDisplayList = computed(() => [
   profileList.value[0],
   ...(activeProfile.value._id !== MAIN_PROFILE_ID ? [activeProfile.value] : []),
-  ...profileList.value.filter((profile, i) => i !== 0 && !isActiveProfile(profile) && !isProfileSubscribed(profile)),
-  ...profileList.value.filter((profile, i) => i !== 0 && !isActiveProfile(profile) && isProfileSubscribed(profile))
+  ...profileList.value.filter((profile, i) => i !== 0 && !isActiveProfile(profile) && subscribedProfileIdsAtOpen.value.has(profile._id)),
+  ...profileList.value.filter((profile, i) => i !== 0 && !isActiveProfile(profile) && !subscribedProfileIdsAtOpen.value.has(profile._id))
 ])
 
 const profileInitials = computed(() => {
@@ -753,6 +758,7 @@ function toggleProfileDropdown() {
   if (isProfileDropdownOpen.value) {
     closeProfileDropdown()
   } else {
+    subscribedProfileIdsAtOpen.value = new Set(profileList.value.filter(isProfileSubscribed).map(profile => profile._id))
     profileSheet.value = phoneLayout.value
     profileSheetOpen.value = true
     profileDropdownTarget.value = subscribeButton.value?.closest(':fullscreen') ?? document.body
