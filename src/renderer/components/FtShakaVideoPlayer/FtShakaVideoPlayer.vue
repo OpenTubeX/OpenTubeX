@@ -3465,8 +3465,14 @@ const playerVisible = computed(() => playerIsPresented.value || presentedOutside
 // hidden tabs, where every open watch tab would otherwise keep doing that.
 watch(playerVisible, visible => {
   ui?.setEnabled(visible)
+  if (!visible) return
   // Disabled controls ignore buffering changes, so refresh their spinner.
-  if (visible) player?.dispatchEvent(new shaka.util.FakeEvent('buffering', { buffering: player.isBuffering() }))
+  player?.dispatchEvent(new shaka.util.FakeEvent('buffering', { buffering: player.isBuffering() }))
+  // Range inputs built or blurred while the controls were disabled stay
+  // disabled until Shaka announces the controls. It only does that when they
+  // appear, which paused controls that stayed shown never do.
+  const controls = ui?.getControls()
+  if (controls?.isOpaque()) controls.dispatchEvent(new shaka.util.FakeEvent('showingui'))
 })
 
 const {

@@ -89,7 +89,7 @@ Do not add tests that assert exact cosmetic styling (colors, spacing, alignment,
 
 - After any visual change or implementation, show the user a screenshot (static appearance) or short recording (interaction, animation, transitions) of the finished result in the final response. Link a copy outside `e2e/results`, which the next test run clears.
 - UI Scale changes Electron's zoom factor, so fractional CSS-pixel geometry is legitimate. Changes involving scrolling, measurements, positioning, reflow, or animation boundaries must work at non-100% scales; do not treat subpixel differences from integer layout properties as stale or invalid state.
-- Before adding or changing Shaka player controls, read `src/renderer/components/FtShakaVideoPlayer/README.md`.
+- Before adding or changing Shaka player controls or how they are enabled, shown, or hidden, read `src/renderer/components/FtShakaVideoPlayer/README.md`.
 - Labeled action buttons, such as Enable, Load more, Refresh, and Reset, need a relevant icon from the registry beside their visible label; hide decorative icons from assistive technology.
 
 ### Icons
