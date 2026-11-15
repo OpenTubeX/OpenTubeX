@@ -626,6 +626,7 @@
               :get-timestamp="getTimestamp"
               :playlist-id="playlistId"
               dropdown-position-y="top"
+              dropdown-portal
             />
             <span>{{ $t('Share.Share Video') }}</span>
           </div>
