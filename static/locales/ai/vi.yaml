@@ -880,6 +880,7 @@ Settings:
       Unavailable: Không thể điều chỉnh các điều khiển phát lại.
     yt-dlp Streaming: "Phát trực tuyến bằng yt-dlp"
     Continue Playback When Screen Is Locked: 'Tiếp tục phát khi màn hình bị khóa'
+    Ignore Headphone Controls: 'Bỏ qua điều khiển từ tai nghe'
     Music Visualizer: Trình trực quan hóa nhạc
     Automatically Open Chapters: Tự động mở chương
     Caption Appearance:
@@ -2342,6 +2343,7 @@ Tooltips:
     Normalize Loudness: 'Giảm âm lượng của những video to hơn phần lớn video khác để âm lượng không thay đổi đột ngột giữa các video. Video nhỏ tiếng vẫn giữ nguyên âm lượng. Chỉ hoạt động với video được tải bằng API địa phương.'
     Pause on Stream Recovery: "Khi luồng video bị lỗi và trình phát tải lại hoặc chuyển sang định dạng hay công cụ khác, video sẽ tạm dừng và lỗi được hiển thị ở đầu trình phát cho đến khi bạn đóng nó. Khi tắt, video tiếp tục phát và lỗi xuất hiện ngắn dưới dạng thông báo."
     Continue Playback When Screen Is Locked: 'Tiếp tục phát âm thanh trong nền và cung cấp các nút điều khiển phương tiện của Android. Tắt tùy chọn này để tạm dừng khi ứng dụng không còn hiển thị.'
+    Ignore Headphone Controls: 'Bỏ qua các lệnh phát, tạm dừng và bỏ qua từ thiết bị Bluetooth, tai nghe có dây và phím đa phương tiện trên bàn phím, để việc vô tình chạm vào tai nghe không làm gián đoạn phát lại. Các điều khiển trong ứng dụng và trong thông báo đa phương tiện vẫn hoạt động.'
     Enable Caption Translations: Khi bật, nút phụ đề và phím tắt C sẽ ưu tiên bản phụ đề tự động dịch sang ngôn ngữ phụ đề ưu tiên nếu video không có bản gốc phù hợp.
     Use Quick Playback Speed Bar: Hiện thanh tốc độ phát nhanh trong phần điều khiển bên phải của trình phát. Nếu bật lưu tốc độ phát thủ công theo kênh, thanh này cũng có nút lưu tốc độ cho kênh hiện tại.
     Multiply Seek Interval by Playback Rate: Khi bật, khoảng tua bằng phím mũi tên và J/L được nhân với tốc độ phát hiện tại. Khi tắt, khoảng tua không đổi bất kể tốc độ phát.

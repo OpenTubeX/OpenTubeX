@@ -883,6 +883,7 @@ Settings:
       Unavailable: Methu addasu rheolyddion chwarae.
     yt-dlp Streaming: "Ffrydio yt-dlp"
     Continue Playback When Screen Is Locked: 'Parhau i chwarae pan fydd y sgrin wedi’i chloi'
+    Ignore Headphone Controls: 'Anwybyddu rheolyddion clustffonau'
     Music Visualizer: Delweddydd cerddoriaeth
     Automatically Open Chapters: Agor penodau'n awtomatig
     Caption Appearance:
@@ -2363,6 +2364,7 @@ Tooltips:
     Normalize Loudness: 'Yn troi i lawr fideos sy''n uwch na''r rhan fwyaf, fel nad yw''r sain yn neidio rhwng fideos. Mae fideos tawel yn cadw eu sain. Yn gweithio dim ond ar gyfer fideos a lwythwyd gyda''r API Lleol.'
     Pause on Stream Recovery: "Pan fydd y ffrwd fideo yn methu a'r chwaraewr yn ei hail-lwytho neu'n newid i fformat neu beiriant arall, mae chwarae'n cael ei seibio ac mae'r gwall yn aros ar frig y chwaraewr nes i chi ei wrthod. Pan fydd wedi'i analluogi, mae chwarae'n parhau ac mae'r gwall yn ymddangos yn fyr fel hysbysiad."
     Continue Playback When Screen Is Locked: 'Yn cadw sain yn chwarae yn y cefndir ac yn darparu rheolyddion cyfryngau Android. Diffoddwch hyn i oedi pan nad yw’r ap yn weladwy mwyach.'
+    Ignore Headphone Controls: 'Yn anwybyddu gorchmynion chwarae, oedi a hepgor o ddyfeisiau Bluetooth, clustffonau â gwifren ac allweddi cyfryngau ar fysellfyrddau, fel nad yw tapiau damweiniol ar glustffonau yn torri ar draws y chwarae. Mae''r rheolyddion yn yr ap ac yn yr hysbysiad cyfryngau yn dal i weithio.'
     Enable Caption Translations: Pan fydd wedi'i alluogi ac nad yw'r fideo'n darparu trac gwreiddiol cyfatebol, bydd y botwm capsiynau a'r llwybr byr C yn rhoi blaenoriaeth i drac sydd wedi'i gyfieithu'n awtomatig yn yr iaith capsiynau ddewisol.
     Use Quick Playback Speed Bar: Mae'n dangos bar cyflymder chwarae cyflym yn rheolyddion y chwaraewr ar y dde. Os yw cadw cyflymder chwarae â llaw fesul sianel wedi'i alluogi, mae'r bar hefyd yn cynnwys y botwm i gadw'r cyflymder ar gyfer y sianel bresennol.
     Multiply Seek Interval by Playback Rate: Pan fydd wedi'i alluogi, caiff cyfyngau neidio, gan gynnwys y bysellau saeth a J/L, eu lluosi â'r gyfradd chwarae bresennol. Pan fydd wedi'i analluogi, mae'r cyfyngau'n aros yn gyson beth bynnag fo'r gyfradd chwarae.

@@ -959,6 +959,7 @@ Settings:
       Unavailable: No se pudieron ajustar los controles de reproducción.
     yt-dlp Streaming: "Streaming con yt-dlp"
     Continue Playback When Screen Is Locked: 'Continuar la reproducción con la pantalla bloqueada'
+    Ignore Headphone Controls: 'Ignorar los controles de los auriculares'
     Music Visualizer: Visualizador de música
     Automatically Open Chapters: Abrir capítulos automáticamente
     Caption Appearance:
@@ -2785,6 +2786,7 @@ Tooltips:
     Normalize Loudness: 'Baja el volumen de los videos que suenan más fuerte que la mayoría para que el volumen no salte entre videos. Los videos silenciosos mantienen su volumen. Solo funciona con videos cargados con la API local.'
     Pause on Stream Recovery: "Cuando la transmisión de video falla y el reproductor la recarga o cambia a otro formato o motor, la reproducción se pausa y el error queda en la parte superior del reproductor hasta que lo descartes. Si está desactivado, la reproducción continúa y el error aparece brevemente como notificación."
     Continue Playback When Screen Is Locked: 'Mantiene el audio reproduciéndose en segundo plano y ofrece controles multimedia de Android. Desactivá esta opción para pausar cuando la aplicación deje de estar visible.'
+    Ignore Headphone Controls: 'Ignora los comandos de reproducción, pausa y salto de los dispositivos Bluetooth, los auriculares con cable y las teclas multimedia de los teclados, para que los toques accidentales en los auriculares no interrumpan la reproducción. Los controles de la app y de la notificación multimedia siguen funcionando.'
     Enable Caption Translations: Al activarlo, el botón de subtítulos y el atajo C prefieren una pista traducida automáticamente al idioma de subtítulos elegido cuando el video no ofrece una pista original coincidente.
     Proxy Videos Through Invidious: Se conectará a Invidious para obtener videos en lugar de conectar directamente con YouTube.
     Default Media Format: Seleccioná el formato usado para reproducir videos. El formato DASH puede reproducir resoluciones más altas. El formato Legacy está limitado a 360p, pero requiere menos ancho de banda. El formato del audio se limita al reproducir solo audio.

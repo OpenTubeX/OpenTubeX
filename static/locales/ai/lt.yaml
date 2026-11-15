@@ -1066,6 +1066,7 @@ Settings:
       Unavailable: Nepavyko sureguliuoti atkūrimo valdiklių.
     yt-dlp Streaming: "yt-dlp srautinis perdavimas"
     Continue Playback When Screen Is Locked: 'Tęsti atkūrimą, kai ekranas užrakintas'
+    Ignore Headphone Controls: 'Nepaisyti ausinių valdiklių'
     Music Visualizer: Muzikos vizualizacija
     Automatically Open Chapters: Automatiškai atverti skyrius
     Caption Appearance:
@@ -2750,6 +2751,7 @@ Tooltips:
     Normalize Loudness: 'Pritildo vaizdo įrašus, kurie garsesni už daugumą, kad garsumas nešokinėtų tarp vaizdo įrašų. Tylūs vaizdo įrašai išlaiko savo garsumą. Veikia tik su vaizdo įrašais, įkeltais per vietinį API.'
     Pause on Stream Recovery: "Kai vaizdo srautas nepavyksta ir grotuvas jį įkelia iš naujo arba perjungia į kitą formatą ar variklį, atkūrimas pristabdomas, o klaida lieka grotuvo viršuje, kol ją uždarysite. Išjungus atkūrimas tęsiamas, o klaida trumpai parodoma kaip pranešimas."
     Continue Playback When Screen Is Locked: 'Toliau leidžia garsą fone ir pateikia „Android“ medijos valdiklius. Išjunkite, kad atkūrimas būtų pristabdytas, kai programa nebematoma.'
+    Ignore Headphone Controls: 'Ignoruoja leidimo, pristabdymo ir praleidimo komandas iš Bluetooth įrenginių, laidinių ausinių ir klaviatūrų medijos klavišų, kad atsitiktiniai ausinių palietimai nenutrauktų atkūrimo. Valdikliai programoje ir medijos pranešime toliau veikia.'
     Enable Caption Translations: Įjungus subtitrų mygtukas ir spartusis klavišas C teikia pirmenybę automatiškai išverstam takeliui pageidaujama subtitrų kalba, jei vaizdo įraše nėra atitinkamo originalaus takelio.
     Use Quick Playback Speed Bar: Dešinėje leistuvo valdiklių pusėje rodo sparčiojo atkūrimo greičio juostą. Jei įjungtas rankinis atkūrimo greičio išsaugojimas kiekvienam kanalui, juostoje taip pat yra mygtukas dabartinio kanalo greičiui išsaugoti.
     Skip by Scrolling Over Video Player: Slinkimo ratuku persukti vaizdo įrašą kaip MPV.

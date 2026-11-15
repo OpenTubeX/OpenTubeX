@@ -67,6 +67,16 @@ public class AndroidMediaSessionService extends Service {
         playbackWakeLock.setReferenceCounted(false);
         mediaSession.setCallback(new MediaSession.Callback() {
             @Override
+            public boolean onMediaButtonEvent(Intent mediaButtonIntent) {
+                // Bluetooth devices and wired headsets send media key events.
+                // System media controls call the transport methods below, and
+                // notification buttons use this service's PendingIntents, so
+                // neither passes through here.
+                if (AndroidMediaSessionPlugin.ignoresMediaButtons()) return true;
+                return super.onMediaButtonEvent(mediaButtonIntent);
+            }
+
+            @Override
             public void onPlay() {
                 startPlaybackAction(AndroidMediaActions.PLAY);
             }

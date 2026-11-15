@@ -1424,6 +1424,7 @@ Settings:
     Rewind on Resume: Rewind on Resume
     Minimum Pause Before Rewinding: Minimum Pause Before Rewinding
     Continue Playback When Screen Is Locked: Continue playback when the screen is locked
+    Ignore Headphone Controls: Ignore headphone controls
     Voice-over Translation:
       Title: Voice-over translation
       Attribution: (powered by Yandex)
@@ -3443,6 +3444,7 @@ Tooltips:
     Rewind on Resume: Jumps back this many seconds when you resume a paused video, so you can catch the last moments again. Set to 0 to turn it off.
     Minimum Pause Before Rewinding: Only rewinds when the video was paused for at least this long. Set to 0 to rewind after every pause.
     Continue Playback When Screen Is Locked: Keeps audio playing in the background and provides Android media controls. Turn this off to pause when the app is no longer visible.
+    Ignore Headphone Controls: Ignores play, pause, and skip commands from Bluetooth devices, wired headphones, and keyboard media keys, so accidental earbud taps don't interrupt playback. Controls in the app and in the media notification keep working.
     Voice-over Translation: Sends the video ID, duration, and selected language to the unofficial Yandex voice-over translation service when you request a translation. Disabled by default.
     Hold to Speed Up: Hold the Spacebar or left mouse button over the player to temporarily multiply the current playback speed by the selected amount.
     Ambient Mode: Blends the video's colors into the area around the player.

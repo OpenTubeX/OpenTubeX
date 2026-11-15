@@ -880,6 +880,7 @@ Settings:
       Unavailable: 無法調整播放控制項。
     yt-dlp Streaming: "yt-dlp 串流"
     Continue Playback When Screen Is Locked: '螢幕鎖定時繼續播放'
+    Ignore Headphone Controls: '忽略耳機控制'
     Music Visualizer: 音樂視覺化工具
     Automatically Open Chapters: 自動開啟章節
     Caption Appearance:
@@ -2329,6 +2330,7 @@ Tooltips:
     Normalize Loudness: '降低比多數影片更大聲的影片音量，避免切換影片時音量忽大忽小。較安靜的影片會維持原本的音量。僅適用於透過本機 API 載入的影片。'
     Pause on Stream Recovery: "當影片串流失敗且播放器重新載入或切換至其他格式或引擎時，暫停播放，並在播放器頂端保留錯誤訊息，直到你將其關閉。停用後，播放會繼續，錯誤會以通知短暫顯示。"
     Continue Playback When Screen Is Locked: '在背景繼續播放音訊並提供 Android 媒體控制項。關閉此選項後，應用程式不再顯示時將暫停播放。'
+    Ignore Headphone Controls: '忽略來自藍牙裝置、有線耳機和鍵盤媒體鍵的播放、暫停和跳過指令，避免誤觸耳機中斷播放。應用程式內和媒體通知中的控制項仍可正常使用。'
     Enable Caption Translations: 啟用後，若影片未提供符合偏好字幕語言的原始字幕軌，字幕按鈕與 C 快捷鍵會優先選用自動翻譯的字幕軌。
     Use Quick Playback Speed Bar: 在播放器右側的控制項中顯示快速播放速度列。若已啟用手動儲存各頻道播放速度，速度列也會顯示用來儲存目前頻道播放速度的按鈕。
     Multiply Seek Interval by Playback Rate: 啟用後，快轉與倒轉間隔（方向鍵及 J/L）會乘以目前的播放速率。停用後，無論播放速率為何，間隔都保持不變。

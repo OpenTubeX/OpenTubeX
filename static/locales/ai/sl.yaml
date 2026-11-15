@@ -1076,6 +1076,7 @@ Settings:
       Unavailable: Kontrolnikov predvajanja ni bilo mogoče prilagoditi.
     yt-dlp Streaming: "Pretakanje z yt-dlp"
     Continue Playback When Screen Is Locked: 'Nadaljuj predvajanje, ko je zaslon zaklenjen'
+    Ignore Headphone Controls: 'Prezri kontrolnike slušalk'
     Music Visualizer: Glasbeni vizualizator
     Automatically Open Chapters: Samodejno odpri poglavja
     Caption Appearance:
@@ -2835,6 +2836,7 @@ Tooltips:
     Normalize Loudness: 'Utiša videoposnetke, ki so glasnejši od večine, da glasnost med videoposnetki ne skače. Tihi videoposnetki ohranijo svojo glasnost. Deluje samo za videoposnetke, naložene prek lokalnega APV.'
     Pause on Stream Recovery: "Ko video pretok ne uspe in predvajalnik ga znova naloži ali preklopi na drug format ali pogon, se predvajanje začasno ustavi, napaka pa ostane na vrhu predvajalnika, dokler je ne opustite. Ko je izklopljeno, se predvajanje nadaljuje, napaka pa se na kratko prikaže kot obvestilo."
     Continue Playback When Screen Is Locked: 'Nadaljuje predvajanje zvoka v ozadju in omogoča predstavnostne kontrolnike Android. Izklopite, da se predvajanje začasno ustavi, ko aplikacija ni več vidna.'
+    Ignore Headphone Controls: 'Prezre ukaze za predvajanje, premor in preskok iz naprav Bluetooth, žičnih slušalk in predstavnostnih tipk na tipkovnicah, da nenamerni dotiki slušalk ne prekinejo predvajanja. Kontrolniki v aplikaciji in v obvestilu o predstavnosti še naprej delujejo.'
     Enable Caption Translations: Ko je možnost omogočena in videoposnetek nima ustrezne izvirne sledi, imata gumb za podnapise in bližnjica C prednostno samodejno prevedeno sled v prednostnem jeziku podnapisov.
     Proxy Videos Through Invidious: Za posredovanje videoposnetkov se poveže z Invidiousom namesto neposredno z YouTubom.
     Default Media Format: Nastavite oblike zapisa za predvajanje videoposnetkov. Oblike DASH omogočajo višjo kakovost. Starejše oblike so omejene na največ 360p, vendar porabijo manj pasovne širine. Zvočne oblike vsebujejo le zvočni pretok.

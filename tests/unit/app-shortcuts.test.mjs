@@ -79,6 +79,7 @@ test('retained startup clicks and running-app clicks navigate and update localiz
     initializeCapacitorLiveReminderActions: async () => () => {},
     showInAppNotification: () => {},
     addAndroidMediaSessionActionListener: async () => () => {},
+    setAndroidMediaButtonsIgnored: () => {},
     setAndroidAppVisible() {},
     setAndroidAppActive() {},
     clearTimeout,
@@ -95,6 +96,7 @@ test('retained startup clicks and running-app clicks navigate and update localiz
       },
     },
     watch: (watchedLocale, callback, options) => {
+      if (typeof watchedLocale === 'function') return () => {}
       assert.equal(watchedLocale, locale)
       assert.equal(options.immediate, true)
       updateLocale = callback

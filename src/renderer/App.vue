@@ -738,6 +738,7 @@ import { initializeCapacitorLiveReminderActions } from './helpers/liveReminders'
 import { showInAppNotification, supportsNotificationHistory } from './helpers/notificationHistory'
 import {
   addAndroidMediaSessionActionListener,
+  setAndroidMediaButtonsIgnored,
   shouldPauseAndroidPlaybackOnAppStateChange,
 } from './helpers/androidMediaSession'
 import { classifyRequestFailure } from './helpers/api/requestDiagnostics'
@@ -4599,6 +4600,11 @@ async function enableCapacitorIntegrations() {
   const removeMediaActions = await addAndroidMediaSessionActionListener(({ action, ...details }) => {
     tabMediaCoordinator.dispatchAction(action, details)
   })
+  const stopMediaButtonSetting = watch(
+    () => store.getters.getIgnoreHeadphoneControls,
+    setAndroidMediaButtonsIgnored,
+    { immediate: true }
+  )
   const handleTaskRemoved = () => tabMediaCoordinator.pauseAll()
   window.addEventListener('opentubex:android-task-removed', handleTaskRemoved)
   let receivedAppState = false
@@ -4662,6 +4668,7 @@ async function enableCapacitorIntegrations() {
     setAndroidAppVisible(null)
     removeReminderActions()
     removeMediaActions()
+    stopMediaButtonSetting()
   }
 }
 

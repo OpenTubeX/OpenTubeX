@@ -17,6 +17,7 @@ import java.lang.ref.WeakReference;
 @CapacitorPlugin(name = "AndroidMediaSession")
 public class AndroidMediaSessionPlugin extends Plugin {
     private static WeakReference<AndroidMediaSessionPlugin> activePlugin = new WeakReference<>(null);
+    private static volatile boolean ignoreMediaButtons = false;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     @Override
@@ -80,6 +81,16 @@ public class AndroidMediaSessionPlugin extends Plugin {
             }
             call.resolve();
         });
+    }
+
+    @PluginMethod
+    public void setIgnoreMediaButtons(PluginCall call) {
+        ignoreMediaButtons = Boolean.TRUE.equals(call.getBoolean("ignored", false));
+        call.resolve();
+    }
+
+    static boolean ignoresMediaButtons() {
+        return ignoreMediaButtons;
     }
 
     static void emitAction(String action) {

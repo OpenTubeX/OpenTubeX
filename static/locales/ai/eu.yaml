@@ -880,6 +880,7 @@ Settings:
       Unavailable: Ezin izan dira erreprodukzio-kontrolak doitu.
     yt-dlp Streaming: "yt-dlp transmisioa"
     Continue Playback When Screen Is Locked: 'Jarraitu erreproduzitzen pantaila blokeatuta dagoenean'
+    Ignore Headphone Controls: 'Ez ikusi egin entzungailuen kontrolei'
     Music Visualizer: Musika-bistaratzailea
     Automatically Open Chapters: Ireki kapituluak automatikoki
     Caption Appearance:
@@ -2336,6 +2337,7 @@ Tooltips:
     Normalize Loudness: 'Gehienak baino ozenagoak diren bideoen bolumena jaisten du, bideoen artean bolumenak jauzirik egin ez dezan. Bideo isilek beren bolumena mantentzen dute. Tokiko APIarekin kargatutako bideoekin soilik dabil.'
     Pause on Stream Recovery: "Bideo-jarioak huts egiten duenean eta erreproduzigailuak berriro kargatzen duenean edo beste formatu edo motor batera aldatzen denean, erreprodukzioa pausatu egiten da eta errorea erreproduzigailuaren goialdean geratzen da baztertu arte. Desgaituta badago, erreprodukzioak jarraitzen du eta errorea jakinarazpen gisa agertzen da laburki."
     Continue Playback When Screen Is Locked: 'Audioa atzeko planoan erreproduzitzen mantentzen du eta Android multimedia-kontrolak eskaintzen ditu. Desaktibatu aplikazioa ikusgai ez dagoenean erreprodukzioa pausatzeko.'
+    Ignore Headphone Controls: 'Bluetooth gailuetatik, kabledun entzungailuetatik eta teklatuetako multimedia-tekletatik datozen erreprodukzio-, pausa- eta saltatze-aginduei ez die jaramonik egiten, entzungailuetan nahi gabe sakatzeak erreprodukzioa eten ez dezan. Aplikazioko eta multimedia-jakinarazpeneko kontrolek funtzionatzen jarraitzen dute.'
     Enable Caption Translations: Gaituta dagoenean, azpitituluen botoiak eta C lasterbideak hobetsitako azpititulu-hizkuntzara automatikoki itzulitako pista aukeratzen dute, bideoak hizkuntza horretako jatorrizko pistarik ez badu.
     Use Quick Playback Speed Bar: Erreprodukzio-abiaduraren barra azkar bat erakusten du eskuineko erreproduzigailu-kontroletan. Kanal bakoitzaren erreprodukzio-abiadura eskuz gordetzea gaituta badago, barrak uneko kanalerako abiadura gordetzeko botoia ere izango du.
     Multiply Seek Interval by Playback Rate: Gaituta dagoenean, bilaketa-tarteak (gezi-teklak eta J/L) uneko erreprodukzio-abiadurarekin biderkatzen dira. Desgaituta dagoenean, tarteak ez dira aldatzen erreprodukzio-abiadura edozein dela ere.

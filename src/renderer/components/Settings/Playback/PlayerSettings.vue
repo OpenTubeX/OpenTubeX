@@ -96,6 +96,15 @@
         :tooltip="t('Tooltips.Player Settings.Continue Playback When Screen Is Locked')"
         @change="updateContinuePlaybackWhenScreenIsLocked"
       />
+      <FtToggleSwitch
+        v-if="IS_CAPACITOR && !IS_IOS"
+        :label="t('Settings.Player Settings.Ignore Headphone Controls')"
+        :compact="true"
+        :default-value="store.getters.getIgnoreHeadphoneControls"
+        setting-key="ignoreHeadphoneControls"
+        :tooltip="t('Tooltips.Player Settings.Ignore Headphone Controls')"
+        @change="store.dispatch('updateIgnoreHeadphoneControls', $event)"
+      />
     </div>
     <FtFlexBox class="playerSelectGrid">
       <FtSelect

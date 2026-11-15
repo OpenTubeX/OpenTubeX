@@ -411,6 +411,7 @@ export const NON_SYNCABLE_SETTINGS = new Set([
   'capacitorLayoutMode',
   'alwaysShowMobileSearchBar',
   'continuePlaybackWhenScreenIsLocked',
+  'ignoreHeadphoneControls',
   'hapticFeedback',
   'hapticFeedbackIgnoresSystemSetting',
   'uiScale',
