@@ -1703,7 +1703,7 @@
           <div
             class="mobileMiniBarProgress"
           >
-            <!-- renderMobileMiniBarProgress writes the progress, so playback does not re-render the player -->
+            <!-- renderMiniPlayerProgress writes the progress, so playback does not re-render the player -->
             <div
               ref="mobileMiniBarProgressFill"
               aria-hidden="true"
@@ -1895,6 +1895,25 @@
           <ft-icon :icon="['fas', 'times']" />
         </button>
         <button
+          v-if="!scrollMiniPlayerStashed && canSkipPrevious"
+          type="button"
+          :tabindex="scrollMiniPlayerDetached ? 0 : -1"
+          class="scrollMiniSkip scrollMiniSkipPrevious"
+          :class="{ isHidden: !scrollMiniPlayPauseVisible }"
+          :title="$t('Video.Previous')"
+          :aria-label="$t('Video.Previous')"
+          @click.stop.prevent="$emit('skip-to-prev')"
+          @mouseenter="handleScrollMiniPlayPauseMouseEnter"
+          @focusin="handleScrollMiniPlayPauseMouseEnter"
+          @pointerdown.stop
+          @mousedown.stop.prevent
+        >
+          <ft-icon
+            :icon="['fas', 'step-backward']"
+            aria-hidden="true"
+          />
+        </button>
+        <button
           v-if="!scrollMiniPlayerStashed"
           type="button"
           :tabindex="scrollMiniPlayerDetached ? 0 : -1"
@@ -1909,6 +1928,25 @@
         >
           <ft-icon
             :icon="['fas', playbackEnded ? 'replay' : scrollMiniIsPaused ? 'play' : 'pause']"
+            aria-hidden="true"
+          />
+        </button>
+        <button
+          v-if="!scrollMiniPlayerStashed && canSkipNext"
+          type="button"
+          :tabindex="scrollMiniPlayerDetached ? 0 : -1"
+          class="scrollMiniSkip scrollMiniSkipNext"
+          :class="{ isHidden: !scrollMiniPlayPauseVisible }"
+          :title="$t('Video.Next')"
+          :aria-label="$t('Video.Next')"
+          @click.stop.prevent="$emit('skip-to-next')"
+          @mouseenter="handleScrollMiniPlayPauseMouseEnter"
+          @focusin="handleScrollMiniPlayPauseMouseEnter"
+          @pointerdown.stop
+          @mousedown.stop.prevent
+        >
+          <ft-icon
+            :icon="['fas', 'step-forward']"
             aria-hidden="true"
           />
         </button>
@@ -1942,6 +1980,36 @@
               @pointerdown.stop="handleScrollMiniVolumePointerDown"
             >
           </div>
+        </div>
+        <div
+          v-if="!scrollMiniPlayerStashed && !mobileMiniBar"
+          class="scrollMiniProgress"
+        >
+          <div
+            ref="scrollMiniProgressFill"
+            class="scrollMiniProgressFill"
+            aria-hidden="true"
+          />
+          <input
+            ref="scrollMiniSeekInput"
+            class="scrollMiniSeek"
+            :class="{ scrollMiniSeeking: mobileMiniBarSeeking }"
+            type="range"
+            min="0"
+            max="100"
+            step="0.1"
+            :tabindex="scrollMiniPlayerDetached ? 0 : -1"
+            :disabled="mobileMiniBarSeekDisabled"
+            :aria-label="mobileMiniBarSeekLabel"
+            @input="handleMobileMiniBarSeekInput"
+            @pointerdown.stop="startMobileMiniBarSeek"
+            @pointerup="mobileMiniBarSeeking = false"
+            @pointercancel="mobileMiniBarSeeking = false"
+            @lostpointercapture="mobileMiniBarSeeking = false"
+            @blur="mobileMiniBarSeeking = false"
+            @keydown.stop
+            @click.stop
+          >
         </div>
         <div
           v-if="!scrollMiniPlayerStashed"
@@ -7283,7 +7351,7 @@ function handleTimeupdate() {
     const currentTime = video.value.currentTime
     updateMobileMiniBarProgress()
     // A live seek range moves on without changing the progress, so refresh its time text.
-    renderMobileMiniBarProgress()
+    renderMiniPlayerProgress()
     sponsorBlockCurrentTime.value = currentTime
     annotationCurrentTime = currentTime
     updateActiveAnnotations()
@@ -7526,16 +7594,18 @@ watch([mobileMiniBarSeekDisabled, scrollMiniPlayerActive], ([disabled, active]) 
 })
 const mobileMiniBarProgressFill = useTemplateRef('mobileMiniBarProgressFill')
 const mobileMiniBarSeekInput = useTemplateRef('mobileMiniBarSeekInput')
+const scrollMiniProgressFill = useTemplateRef('scrollMiniProgressFill')
+const scrollMiniSeekInput = useTemplateRef('scrollMiniSeekInput')
 
 // Progress changes on every timeupdate. Writing it here instead of binding it
 // in the template keeps the player's render function out of playback.
-function renderMobileMiniBarProgress() {
+function renderMiniPlayerProgress() {
   const progress = mobileMiniBarProgress.value
-  if (mobileMiniBarProgressFill.value) {
-    mobileMiniBarProgressFill.value.style.transform = `scaleX(${progress})`
+  for (const fill of [mobileMiniBarProgressFill.value, scrollMiniProgressFill.value]) {
+    if (fill) fill.style.transform = `scaleX(${progress})`
   }
-  const input = mobileMiniBarSeekInput.value
-  if (input) {
+  for (const input of [mobileMiniBarSeekInput.value, scrollMiniSeekInput.value]) {
+    if (!input) continue
     const value = String(progress * 100)
     if (input.value !== value) input.value = value
     const range = player?.seekRange()
@@ -7545,7 +7615,11 @@ function renderMobileMiniBarProgress() {
   }
 }
 
-watch([mobileMiniBarProgress, mobileMiniBarProgressFill, mobileMiniBarSeekInput], renderMobileMiniBarProgress, { flush: 'post' })
+watch(
+  [mobileMiniBarProgress, mobileMiniBarProgressFill, mobileMiniBarSeekInput, scrollMiniProgressFill, scrollMiniSeekInput],
+  renderMiniPlayerProgress,
+  { flush: 'post' }
+)
 
 /** @param {Event} event */
 function handleMobileMiniBarSeekInput(event) {
