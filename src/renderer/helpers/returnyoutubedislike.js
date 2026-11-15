@@ -36,7 +36,9 @@ export async function getVideoDislikes(videoId) {
 
   // Some instances, including the default proxy, send no CORS headers,
   // so the mobile WebView has to use the native HTTP client.
-  const response = await (process.env.IS_CAPACITOR ? capacitorHttpFetch : fetch)(requestUrl)
+  const response = await (process.env.IS_CAPACITOR
+    ? capacitorHttpFetch(requestUrl, { allowHttp: true })
+    : fetch(requestUrl))
     .then(res => res.json())
 
   return response.dislikes
