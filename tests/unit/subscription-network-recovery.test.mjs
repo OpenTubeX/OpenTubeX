@@ -669,13 +669,16 @@ for (const feed of ['Videos', 'Shorts', 'Live']) {
 
 for (const status of [429, 500]) {
   test(`Shorts load through the API when YouTube's feeds return HTTP ${status}, and later channels skip the feeds`, async () => {
-    const app = createRefresh({ rssStatus: status })
+    const short = { type: 'ShortsLockupView', on_tap_endpoint: { payload: { videoId: 'api-short' } }, overlay_metadata: { primary_text: { text: 'API Short' } }, thumbnail: [] }
+    const app = createRefresh({ rssStatus: status, playlistItems: [short] })
     app.getters.getBackendFallback = false
     app.reconnect()
     await app.refresh({ t: key => key })
     assert.equal(app.toasts.length, 0)
     assert.equal(app.errors.size, 0)
-    assert.equal(app.writes.filter(write => write.key === 'updateSubscriptionShortsCacheByChannel').length, 20)
+    const writes = app.writes.filter(write => write.key === 'updateSubscriptionShortsCacheByChannel')
+    assert.equal(writes.length, 20)
+    assert.ok(writes.every(write => write.value.videos.some(video => video.videoId === 'api-short')))
     // Only the channels already in flight when the feeds failed request them
     assert.ok(app.requests.filter(url => url.includes('/feeds/videos.xml')).length <= 8)
   })
