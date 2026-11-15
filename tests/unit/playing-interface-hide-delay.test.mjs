@@ -8,8 +8,8 @@ test('shipped bundle uses the delay for movement, touch, keyboard and seeking', 
   const scheduled = []
   const timer = { stop() {}, tickAfter: seconds => scheduled.push(seconds), aa: seconds => scheduled.push(seconds) }
   const container = { classList: { remove() {} }, dataset: {} }
-  const move = vm.runInNewContext(`(${bundle.match(/function CP\(a,b\)\{[\s\S]*?\}(?=function VP\()/)[0]})`, { LP() {}, DP() {} })
-  const seek = vm.runInNewContext(`({${bundle.match(/ci\(a\)\{\(this\.ba=\s*a\)[\s\S]*?\}/)[0]}})`).ci
+  const move = vm.runInNewContext(`(${bundle.match(/function KP\(a,b\)\{[\s\S]*?\}(?=function cQ\()/)[0]})`, { LP() {}, TP() {} })
+  const seek = vm.runInNewContext(`({${bundle.match(/di\(a\)\{\(this\.O=\s*a\)[\s\S]*?\}/)[0]}})`).di
   const controls = {
     videoContainer_: container,
     controlsContainer_: container,
@@ -18,16 +18,16 @@ test('shipped bundle uses the delay for movement, touch, keyboard and seeking', 
     computeOpacity() {},
     isOpaque: () => true,
     i: container,
-    l: container,
-    U: timer,
-    W: timer,
-    Ha: () => true,
+    j: container,
+    V: timer,
+    $: timer,
+    Fa: () => true,
   }
   for (const delay of [undefined, '7.5']) {
     if (delay === undefined) delete container.dataset.playingInterfaceHideDelay
     else container.dataset.playingInterfaceHideDelay = delay
     for (const type of ['mousemove', 'touchend', 'wheel', 'keyup']) {
-      controls.lastTouchEventTime_ = controls.V = null
+      controls.lastTouchEventTime_ = controls.W = null
       move(controls, { type })
       assert.equal(scheduled.pop(), delay === undefined ? 3 : Number(delay))
     }
