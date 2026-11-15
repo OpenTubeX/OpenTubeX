@@ -6545,6 +6545,7 @@ let cleanupSubmenuScrolling = null
 /** @type {MutationObserver|null} */
 let fullscreenControlsVisibilityObserver = null
 let androidStatusBarVisible = true
+let androidNavigationBarHiddenForFullscreen = false
 
 function handleSubMenuOpen() {
   isSubMenuOpened.value = true
@@ -6564,6 +6565,7 @@ function syncAndroidStatusBarVisibility() {
     controlsContainer.setAttribute('shown', 'true')
   }
   shakaControlsShown.value = controlsContainer?.hasAttribute('shown') === true
+  syncAndroidNavigationBarVisibility()
   const visible = shouldShowAndroidStatusBar({
     active: isActiveTab.value,
     fullscreen: isNativeFullscreenActive() || androidRotationFullscreen,
@@ -6572,10 +6574,24 @@ function syncAndroidStatusBarVisibility() {
   if (visible === androidStatusBarVisible) return
 
   androidStatusBarVisible = visible
+  // An edge swipe reveals both system bars. Hide them again with the controls.
+  if (!visible && !process.env.IS_IOS) setAndroidNavigationBarVisible(false).catch(() => {})
   setAndroidStatusBarVisible(visible).catch(error => {
     androidStatusBarVisible = !visible
     console.error('Failed to update Android status bar visibility:', error)
   })
+}
+
+// Native fullscreen covers the WebView only, so hide the navigation bar
+// like rotation fullscreen does.
+function syncAndroidNavigationBarVisibility() {
+  if (process.env.IS_IOS) return
+  const hidden = isActiveTab.value && isNativeFullscreenActive()
+  if (hidden === androidNavigationBarHiddenForFullscreen) return
+  androidNavigationBarHiddenForFullscreen = hidden
+  // Rotation fullscreen restores the bar itself when it ends.
+  if (!hidden && androidRotationFullscreen) return
+  setAndroidNavigationBarVisible(!hidden).catch(() => {})
 }
 
 function restoreAndroidStatusBarVisibility() {
@@ -11537,6 +11553,8 @@ function fullscreenChangeHandler() {
   }
 
   if (!isActiveTab.value) {
+    // Switching tabs can exit native fullscreen after this player hid the bar.
+    syncAndroidNavigationBarVisibility()
     return
   }
 
@@ -12857,6 +12875,10 @@ onBeforeUnmount(() => {
   if (!androidStatusBarVisible) {
     androidStatusBarVisible = true
     setAndroidStatusBarVisible(true).catch(() => {})
+  }
+  if (androidNavigationBarHiddenForFullscreen) {
+    androidNavigationBarHiddenForFullscreen = false
+    setAndroidNavigationBarVisible(true).catch(() => {})
   }
 
   if (videoResizeObserver) {
