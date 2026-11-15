@@ -2028,6 +2028,7 @@ Video:
       Copied: Märge kopeeriti Markdownina
       Obsidian Failed: Obsidiani avamine ebaõnnestus
   External Media:
+    Open Local Network Link: "Kas avada {url}? See link viitab sellele arvutile või sinu kohtvõrku."
     Dislikes: "Ei meeldi | Ei meeldi"
     Reposts: "Taaspostitus | Taaspostitused"
     Saves: "Salvestamine | Salvestamised"

@@ -14,7 +14,6 @@ const IpcChannels = {
   OPEN_EXTERNAL_LINK_IN_BACKGROUND: 'open-external-link-in-background',
   OPEN_OBSIDIAN_NOTE: 'open-obsidian-note',
   READ_CLIPBOARD: 'read-clipboard',
-  GET_NAVIGATION_HISTORY: 'get-navigation-history',
   IS_WAYLAND_PLATFORM: 'is-wayland-platform',
   STOP_POWER_SAVE_BLOCKER: 'stop-power-save-blocker',
   START_POWER_SAVE_BLOCKER: 'start-power-save-blocker',

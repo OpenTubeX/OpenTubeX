@@ -2354,6 +2354,7 @@ Video:
   Playlist:
     Unavailable videos are hidden: 1 video no disponible está oculto | {count} videos no disponibles están ocultos | {count} videos no disponibles están ocultos
   External Media:
+    Open Local Network Link: "¿Abrir {url}? Este enlace apunta a esta computadora o a tu red local."
     Dislikes: "No me gusta | No me gusta | No me gusta"
     Reposts: "Repost | Reposts | Reposts"
     Saves: "Guardado | Guardados | Guardados"

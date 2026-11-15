@@ -2030,6 +2030,7 @@ Video:
       Copied: 已將筆記複製為 Markdown
       Obsidian Failed: 無法開啟 Obsidian
   External Media:
+    Open Local Network Link: "要開啟 {url} 嗎？此連結指向這台電腦或你的區域網路。"
     Dislikes: "倒讚"
     Reposts: "轉發"
     Saves: "收藏"

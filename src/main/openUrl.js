@@ -1,6 +1,7 @@
 import { BrowserWindow } from 'electron'
 
 import { IpcChannels } from '../constants'
+import { isYouTubeHostname } from '../youTubeHostname'
 import { TabManager } from './tabs/TabManager'
 import { isOpenTubeXUrl } from './utils'
 import { isTrustedSender } from './ipc'
@@ -71,16 +72,6 @@ export function getDirectOpenUrl(url, rootAppUrl) {
   }
 
   return null
-}
-
-/**
- * @param {string} hostname
- * @returns {boolean}
- */
-function isYouTubeHostname(hostname) {
-  hostname = hostname.toLowerCase().replace(/\.$/, '')
-  return hostname === 'youtu.be' || hostname === 'youtube.com' || hostname.endsWith('.youtube.com') ||
-    hostname === 'youtube-nocookie.com' || hostname.endsWith('.youtube-nocookie.com')
 }
 
 /**
@@ -219,8 +210,10 @@ function createAppRouteUrl(rootAppUrl, path, query = {}) {
  * @param {object} options
  * @param {string} options.rootAppUrl
  * @param {(options?: object) => Promise<import('electron').BrowserWindow>} options.createWindow
+ * @param {(url: string, browserWindow: import('electron').BrowserWindow) => Promise<boolean>} options.confirmUrl
+ *   whether to open a URL that the renderer resolves
  */
-export function createUrlOpener({ rootAppUrl, createWindow }) {
+export function createUrlOpener({ rootAppUrl, createWindow, confirmUrl }) {
   /** @type {Map<number, Array<{url: string, tabId: string | null}>>} */
   const pendingOpenUrlsByWebContentsId = new Map()
   const openUrlReadyWebContentsIds = new Set()
@@ -229,7 +222,6 @@ export function createUrlOpener({ rootAppUrl, createWindow }) {
    * @param {string | null | undefined} url
    * @param {object} [options]
    * @param {boolean} [options.replaceMainWindow]
-   * @param {boolean} [options.showWindowNow]
    * @param {boolean} [options.reuseEmptyRootTab]
    * @returns {Promise<import('electron').BrowserWindow>}
    */
@@ -258,11 +250,24 @@ export function createUrlOpener({ rootAppUrl, createWindow }) {
       return
     }
 
+    openConfirmedUrlInWindow(browserWindow, url, options).catch(error => {
+      console.error('Failed to open URL:', error)
+    })
+  }
+
+  /**
+   * @param {import('electron').BrowserWindow} browserWindow
+   * @param {string} url
+   * @param {{ reuseEmptyRootTab?: boolean }} options
+   */
+  async function openConfirmedUrlInWindow(browserWindow, url, options) {
+    // Links the app maps to its own routes need no confirmation.
+    if (!getDirectOpenUrl(url, rootAppUrl) && !await confirmUrl(url, browserWindow)) return
+    if (browserWindow.isDestroyed()) return
+
     const tabManager = TabManager.getForWindow(browserWindow.id)
     if (tabManager) {
-      openUrlInTab(tabManager, url, options).catch(error => {
-        console.error('Failed to open URL in a tab:', error)
-      })
+      await openUrlInTab(tabManager, url, options)
       return
     }
 

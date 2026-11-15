@@ -2028,6 +2028,7 @@ Video:
       Copied: Nota copiada como Markdown
       Obsidian Failed: Não foi possível abrir o Obsidian
   External Media:
+    Open Local Network Link: "Abrir {url}? Esta ligação aponta para este computador ou para a sua rede local."
     Dislikes: "Voto negativo | Votos negativos | Votos negativos"
     Reposts: "Republicação | Republicações | Republicações"
     Saves: "Guardado | Guardados | Guardados"

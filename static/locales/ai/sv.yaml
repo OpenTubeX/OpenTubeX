@@ -2028,6 +2028,7 @@ Video:
       Copied: Anteckningen kopierades som Markdown
       Obsidian Failed: Det gick inte att öppna Obsidian
   External Media:
+    Open Local Network Link: "Öppna {url}? Länken pekar på den här datorn eller ditt lokala nätverk."
     Dislikes: "Ogillamarkering | Ogillamarkeringar"
     Reposts: "Återinlägg | Återinlägg"
     Saves: "Sparat objekt | Sparade objekt"

@@ -1363,6 +1363,7 @@ Video:
       Copied: Skopiowano notatkę jako Markdown
       Obsidian Failed: Nie można otworzyć Obsidiana
   External Media:
+    Open Local Network Link: "Otworzyć {url}? Ten link prowadzi do tego komputera lub Twojej sieci lokalnej."
     Dislikes: "Niepolubienie | Niepolubienia | Niepolubień"
     Reposts: "Repost | Reposty | Repostów"
     Saves: "Zapisanie | Zapisania | Zapisań"

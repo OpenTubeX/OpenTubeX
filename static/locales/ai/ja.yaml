@@ -2026,6 +2026,7 @@ Video:
       Copied: メモを Markdown としてコピーしました
       Obsidian Failed: Obsidian を開けませんでした
   External Media:
+    Open Local Network Link: "{url} を開きますか？このリンクはこのコンピューターまたはローカルネットワークを指しています。"
     Dislikes: "低評価"
     Reposts: "再投稿"
     Saves: "保存"

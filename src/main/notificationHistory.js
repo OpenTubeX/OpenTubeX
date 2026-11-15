@@ -1,6 +1,4 @@
 // @ts-check
-import { readFile } from 'node:fs/promises'
-
 import {
   addNotificationHistoryEntries,
   applyNotificationDismissals,
@@ -13,6 +11,7 @@ import {
   recordNotificationDismissals,
   removeNotificationHistoryEntry
 } from '../notificationHistory.js'
+import { readJsonState } from './readJsonState.js'
 import { createSerialQueue } from './serialQueue.js'
 import { writeFileAtomic } from './writeFileAtomic.js'
 
@@ -21,19 +20,6 @@ import { writeFileAtomic } from './writeFileAtomic.js'
  * @typedef {import('../notificationHistory.js').NotificationDismissals} NotificationDismissals
  * @typedef {{ entries: NotificationHistoryEntry[], dismissals: NotificationDismissals }} NotificationHistoryState
  */
-
-/**
- * @param {string} file
- * @param {string} label
- */
-function readJson(file, label) {
-  return readFile(file, 'utf8')
-    .then(text => JSON.parse(text))
-    .catch(error => {
-      if (error.code !== 'ENOENT') console.error(`Failed to read the ${label}`, error)
-      return null
-    })
-}
 
 /**
  * @param {string} file
@@ -66,9 +52,16 @@ export function createNotificationHistory({ file, dismissalsFile, onChange, onDi
 
   // Every caller shares the first read, so a slow one cannot replace newer entries.
   function load() {
-    loaded ??= Promise.all([readJson(file, 'notification history'), readJson(dismissalsFile, 'notification dismissals')])
+    loaded ??= Promise.all([
+      readJsonState(file, 'notification history', Array.isArray),
+      readJsonState(dismissalsFile, 'notification dismissals', saved => Array.isArray(/** @type {{ dismissals?: unknown } | undefined} */ (saved)?.dismissals))
+    ])
       .then(([entries, dismissals]) => {
         state = { entries: normalizeNotificationHistory(entries), dismissals: normalizeNotificationDismissals(dismissals) }
+      }, error => {
+        // Retry on the next use instead of saving over files that could not be read.
+        loaded = null
+        throw error
       })
     return loaded.then(() => /** @type {NotificationHistoryState} */ (state))
   }

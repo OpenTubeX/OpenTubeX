@@ -1992,6 +1992,7 @@ Video:
   External DRM Protected: Video’s met DRM-beskerming kan nie in OpenTubeX gespeel word nie, aangesien hulle eiendoms-, geslotebron-komponente vereis.
   Invalid Media URL: Ongeldige media-URL
   External Media:
+    Open Local Network Link: "Maak {url} oop? Hierdie skakel wys na hierdie rekenaar of jou plaaslike netwerk."
     Dislikes: afkeur | afkeure
     Reposts: herplasing | herplasings
     Saves: stoor | stoor

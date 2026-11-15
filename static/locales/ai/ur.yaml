@@ -1855,6 +1855,7 @@ Video:
   External DRM Protected: DRM سے محفوظ ویڈیوز OpenTubeX میں نہیں چلائی جا سکتیں، کیونکہ ان کے لیے ملکیتی، بند سورس اجزاء درکار ہوتے ہیں۔
   Invalid Media URL: غلط میڈیا URL
   External Media:
+    Open Local Network Link: "کیا {url} کھولیں؟ یہ ربط اس کمپیوٹر یا آپ کے مقامی نیٹ ورک کی طرف اشارہ کرتا ہے۔"
     Dislikes: ناپسند | ناپسند
     Reposts: ری پوسٹ | ری پوسٹس
     Saves: محفوظ | محفوظ

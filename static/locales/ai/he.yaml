@@ -2082,6 +2082,7 @@ Video:
   Playlist:
     Unavailable videos are hidden: סרטון אחד שאינו זמין מוסתר | {count} סרטונים לא זמינים מוסתרים | {count} סרטונים לא זמינים מוסתרים
   External Media:
+    Open Local Network Link: "לפתוח את {url}? הקישור מפנה למחשב זה או לרשת המקומית שלך."
     Dislikes: "דיסלייק | דיסלייקים | דיסלייקים"
     Reposts: "פרסום מחדש | פרסומים מחדש | פרסומים מחדש"
     Saves: "שמירה | שמירות | שמירות"

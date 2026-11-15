@@ -2061,6 +2061,7 @@ Video:
   Playlist:
     Unavailable videos are hidden: Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae 1 fideo nad yw ar gael wedi'i guddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio
   External Media:
+    Open Local Network Link: "Agor {url}? Mae’r ddolen hon yn pwyntio at y cyfrifiadur hwn neu eich rhwydwaith lleol."
     Dislikes: "Ddim yn hoffi | Ddim yn hoffi | Ddim yn hoffi | Ddim yn hoffi | Ddim yn hoffi | Ddim yn hoffi"
     Reposts: "Ail-bostiadau | Ail-bost | Ail-bostiadau | Ail-bostiadau | Ail-bostiadau | Ail-bostiadau"
     Saves: "Cadwadau | Cadwad | Cadwadau | Cadwadau | Cadwadau | Cadwadau"

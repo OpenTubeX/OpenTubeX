@@ -235,6 +235,7 @@ export async function handleYtDlpGetPlaybackInfo(
   }
 
   const args = [
+    '--ignore-config',
     '--no-playlist',
     '--no-progress',
     '--socket-timeout',
@@ -401,7 +402,7 @@ export async function handleYtDlpGetHistoryMetadata(event, videoId) {
       const result = await downloadManagedYtDlp()
       if ('error' in result) return { error: result.error }
     }
-    const args = historyRepairYtDlpArguments()
+    const args = ['--ignore-config', ...historyRepairYtDlpArguments()]
     const authenticationError = await pushYtDlpPlaybackAuthenticationArguments(args)
     if (authenticationError !== null) return { error: authenticationError }
     await pushProxyArgument(args)
@@ -488,6 +489,7 @@ export async function handleYtDlpGetRecommendations(event, currentVideoId) {
   }
 
   const args = [
+    '--ignore-config',
     '--dump-single-json',
     '--flat-playlist',
     '--playlist-end',

@@ -974,13 +974,6 @@ export default {
   getZoomFactor: () => webFrame.getZoomFactor(),
 
   /**
-   * @returns {Promise<{ label: string, value: number, active: boolean }[]>}
-   */
-  getNavigationHistory: () => {
-    return ipcRenderer.invoke(IpcChannels.GET_NAVIGATION_HISTORY)
-  },
-
-  /**
    * @param {string} url
    * @returns {Promise<string>}
    */

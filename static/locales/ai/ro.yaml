@@ -2074,6 +2074,7 @@ Video:
   Playlist:
     Unavailable videos are hidden: 1 videoclip indisponibil este ascuns | {count} videoclipuri indisponibile sunt ascunse | {count} de videoclipuri indisponibile sunt ascunse
   External Media:
+    Open Local Network Link: "Deschizi {url}? Acest link indică spre acest computer sau spre rețeaua ta locală."
     Dislikes: "Apreciere negativă | Aprecieri negative | Aprecieri negative"
     Reposts: "Repostare | Repostări | Repostări"
     Saves: "Salvare | Salvări | Salvări"

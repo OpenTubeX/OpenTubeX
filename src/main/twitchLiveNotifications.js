@@ -1,6 +1,7 @@
 // @ts-check
-import { readFile, rm } from 'node:fs/promises'
+import { rm } from 'node:fs/promises'
 
+import { readJsonState } from './readJsonState.js'
 import { writeFileAtomic } from './writeFileAtomic.js'
 import { fetchTwitchChannels, getTwitchLiveNotificationTarget, takeNewTwitchStreams } from '../twitchFollows.js'
 
@@ -34,6 +35,15 @@ export function normalizeTwitchLiveConfiguration(value) {
 }
 
 /**
+ * Whether saved state lists the streams already announced per channel.
+ * @param {unknown} value
+ */
+function hasKnownStreams(value) {
+  const known = /** @type {{ known?: unknown } | null | undefined} */ (value)?.known
+  return typeof known === 'object' && known !== null && !Array.isArray(known)
+}
+
+/**
  * Checks whether followed Twitch channels went live while the app runs, also
  * while it has no windows, and announces each broadcast once.
  * @param {{
@@ -63,12 +73,11 @@ export function createTwitchLiveNotifier({
 
   async function loadKnown() {
     if (known) return known
-    try {
-      const saved = JSON.parse(await readFile(file, 'utf8'))
-      known = saved?.known && typeof saved.known === 'object' && !Array.isArray(saved.known) ? saved.known : {}
-    } catch {
-      known = {}
-    }
+    // Other read errors propagate, so a later save cannot replace the streams
+    // already announced and announce them all again.
+    const saved = /** @type {{ known: Record<string, string[]> } | undefined} */ (
+      await readJsonState(file, 'Twitch live notification state', hasKnownStreams))
+    known = saved?.known ?? {}
     return /** @type {Record<string, string[]>} */ (known)
   }
 

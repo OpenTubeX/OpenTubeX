@@ -4,7 +4,7 @@ import { createSerialQueue } from './serialQueue.js'
 import { writeFileAtomic } from './writeFileAtomic.js'
 import { fetchRumblePage } from './rumblePages.js'
 import {
-  app, BrowserWindow, Menu, ipcMain,
+  app, BrowserWindow, Menu, dialog, ipcMain,
   powerSaveBlocker, screen, session,
   nativeTheme, net, protocol, clipboard, ClipboardItem,
   shell, Tray, Notification, ShareMenu, nativeImage,
@@ -100,6 +100,7 @@ import { getWindowButtonLayout, onWindowButtonLayoutChanged } from './windowButt
 import { watchTrayColorScheme } from './trayColorScheme'
 import { setDiagnosticLogging, setupDiagnosticLogIpc } from './diagnosticLog'
 import { createMainTranslator } from './mainTranslator'
+import { pointsToLocalNetwork } from './localNetworkLink'
 import { createConfirmations } from './confirmations'
 import { setupCustomThemes } from './customThemes'
 import { contextMenuLabel, setupContextMenu, truncateSelectionForLabel } from './contextMenu'
@@ -255,10 +256,7 @@ function runApp() {
       {
         label: dockMediaLabels.newWindow,
         click: () => {
-          createWindow({
-            replaceMainWindow: false,
-            showWindowNow: true
-          })
+          createWindow({ replaceMainWindow: false })
         }
       }
     ])
@@ -430,7 +428,7 @@ function runApp() {
           // Only show the option for in-app URLs and not external ones
           visible: isInAppUrl,
           click: () => {
-            createWindow({ replaceMainWindow: false, windowStartupUrl: parameters.linkURL, showWindowNow: true })
+            createWindow({ replaceMainWindow: false, windowStartupUrl: parameters.linkURL })
           }
         },
         // Only show select all in text fields
@@ -560,7 +558,6 @@ function runApp() {
               replaceMainWindow: false,
               windowStartupUrl: `${ROOT_APP_URL}#/search/${encodeURIComponent(selectionText)}`,
               searchQueryText: selectionText,
-              showWindowNow: true,
             })
           }
         },
@@ -778,8 +775,14 @@ function runApp() {
       case 'acknowledge': return backgroundSubscriptions.acknowledge(value)
       case 'completed': return backgroundSubscriptions.completed(value)
       case 'configureUploadNotifications':
-        await uploadNotifier.configure(value)
-        return backgroundSubscriptions.configureUploads(value)
+        try {
+          await uploadNotifier.configure(value)
+        } finally {
+          // The worker still needs the channels when the saved state could not
+          // be read, so its notifications resume once the file is readable.
+          await backgroundSubscriptions.configureUploads(value)
+        }
+        return
       case 'observeUploads': return uploadNotifier.observe(value)
     }
   })
@@ -953,7 +956,6 @@ function runApp() {
 
       if (!mainWindow || mainWindow.isDestroyed()) {
         createWindowForOpenUrl(url, {
-          showWindowNow: true,
           reuseEmptyRootTab: true
         }).catch(error => {
           console.error('Failed to open notification URL', error)
@@ -1079,7 +1081,6 @@ function runApp() {
         if (commandLine.includes('--new-window')) {
           // The user wants to create a new window in the existing instance
           await createWindowForOpenUrl(newStartupUrl, {
-            showWindowNow: true,
             replaceMainWindow: true,
             reuseEmptyRootTab: true
           })
@@ -1103,7 +1104,6 @@ function runApp() {
 
         await createWindowForOpenUrl(newStartupUrl, {
           replaceMainWindow: false,
-          showWindowNow: true,
           reuseEmptyRootTab: true
         })
       }
@@ -1155,8 +1155,7 @@ function runApp() {
           return new Response(decompressed, {
             status: 200,
             headers: {
-              'Content-Type': 'application/json',
-              'Content-Encoding': 'br'
+              'Content-Type': 'application/json'
             }
           })
         } else {
@@ -1348,8 +1347,9 @@ function runApp() {
       let { requestHeaders } = details
       const { url, webContents } = details
       const urlObj = new URL(url)
+      const isAppRequest = webContents != null && isOpenTubeXUrl(webContents.getURL())
 
-      if (webContents && isOpenTubeXUrl(webContents.getURL())) {
+      if (isAppRequest) {
         applySyncServerUserAgent(requestHeaders)
         applyYouTubeUserAgent(url, requestHeaders)
       }
@@ -1409,7 +1409,7 @@ function runApp() {
         }
       }
 
-      if (webContents && isOpenTubeXUrl(webContents.getURL())) {
+      if (isAppRequest) {
         Object.assign(requestHeaders, getYtDlpExternalStreamHeaders(webContents, url))
         applyTwitchPlaylistOrigin(urlObj, requestHeaders)
         if (isYtDlpStoryboardUrl(webContents, url)) storyboardRequestIds.add(details.id)
@@ -1429,7 +1429,7 @@ function runApp() {
       }
 
       rendererCors.rememberRequest({ ...details, requestHeaders }, originalOrigin)
-      if (details.resourceType === 'xhr' && webContents && isOpenTubeXUrl(webContents.getURL())) {
+      if (details.resourceType === 'xhr' && isAppRequest) {
         requestErrors.rememberRequest(details)
       }
       // eslint-disable-next-line n/no-callback-literal
@@ -1440,11 +1440,12 @@ function runApp() {
     const httpRequestFilter = { urls: ['https://*/*', 'http://*/*'] }
     session.defaultSession.webRequest.onHeadersReceived(httpRequestFilter, (details, callback) => {
       const { url, responseHeaders } = details
+      const parsedUrl = URL.parse(url)
       if (responseHeaders && (
         url === 'https://www.youtube.com/sw.js_data' ||
         url === 'https://www.youtube.com/iframe_api' ||
         url.startsWith('https://www.youtube.com/watch?') ||
-        (new URL(url).origin === 'https://www.youtube.com' && new URL(url).pathname === '/')
+        (parsedUrl?.origin === 'https://www.youtube.com' && parsedUrl.pathname === '/')
       )) {
         delete responseHeaders['set-cookie']
         delete responseHeaders['content-security-policy']
@@ -1579,7 +1580,6 @@ function runApp() {
       for (let i = 1; i < savedSessions.length; i++) {
         await createWindow({
           replaceMainWindow: false,
-          showWindowNow: true,
           sessionData: savedSessions[i],
           loadInactiveTabsOnRestore: startupBehavior === 'loadAllTabs',
           restoreTabLoadStateOnRestore: startupBehavior === 'restoreTabLoadState',
@@ -1651,7 +1651,7 @@ function runApp() {
       ? mainWindow
       : BrowserWindow.getAllWindows()[0]
     if (!window) {
-      createWindow({ showWindowNow: true })
+      createWindow()
     } else if (window.isVisible() && !window.isMinimized() && !trayWindows.includes(window)) {
       hideWindowToTray(window)
     } else {
@@ -1745,7 +1745,6 @@ function runApp() {
         label: dockMediaLabels.newWindow,
         icon: iconFor('clone'),
         click: () => createWindow({
-          showWindowNow: true,
           replaceMainWindow: !mainWindow || mainWindow.isDestroyed() || trayWindows.includes(mainWindow)
         })
       },
@@ -2415,7 +2414,31 @@ function runApp() {
     openPendingUrlForReadyWebContents,
     forgetOpenUrlRenderer,
     forgetOpenUrlWebContents
-  } = createUrlOpener({ rootAppUrl: ROOT_APP_URL, createWindow })
+  } = createUrlOpener({ rootAppUrl: ROOT_APP_URL, createWindow, confirmUrl: confirmLocalNetworkLink })
+
+  /**
+   * Asks before opening a link to this computer or the local network, as
+   * other apps and websites can open links in the app.
+   * @param {string} url
+   * @param {BrowserWindow} browserWindow
+   */
+  async function confirmLocalNetworkLink(url, browserWindow) {
+    const isLocal = await pointsToLocalNetwork(url, async hostname => (
+      await session.defaultSession.resolveHost(hostname, { cacheUsage: 'disallowed' })
+    ).endpoints.map(({ address }) => address))
+    if (!isLocal) return true
+    const t = await getMainTranslator()
+    if (browserWindow.isDestroyed()) return false
+    const { response } = await dialog.showMessageBox(browserWindow, {
+      type: 'question',
+      message: t('Video.External Media.Open Local Network Link', { url }),
+      buttons: [t('Cancel'), t('Yes')],
+      defaultId: 0,
+      cancelId: 0,
+      noLink: true
+    })
+    return response === 1
+  }
 
   ipcMain.handle(IpcChannels.SHARE_LINK, createDesktopShareHandler({
     platform: process.platform,
@@ -2545,10 +2568,6 @@ function runApp() {
     await session.defaultSession.closeAllConnections()
   })
 
-  // Logical tab history is renderer-owned. The retained API returns an empty
-  // list for older callers; TopNav reads the active tab runtime directly.
-  handleTrusted(IpcChannels.GET_NAVIGATION_HISTORY, () => [])
-
   setupSystemInfoIpc()
   setupDiagnosticLogIpc()
   baseHandlers.settings._findOne('diagnosticLogging').then((setting) => {
@@ -2631,7 +2650,6 @@ function runApp() {
 
     createWindow({
       replaceMainWindow: false,
-      showWindowNow: true,
       windowStartupUrl,
       searchQueryText
     })
@@ -2971,7 +2989,6 @@ function runApp() {
 
     await createWindowForOpenUrl(newStartupUrl, {
       replaceMainWindow: false,
-      showWindowNow: true,
       reuseEmptyRootTab: true
     })
   })
@@ -3240,10 +3257,7 @@ function runApp() {
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.NEW_WINDOW),
             click: (_menuItem, browserWindow, _event) => {
               if (browserWindow && appShortcutBlockedWindows.has(browserWindow)) { return }
-              createWindow({
-                replaceMainWindow: false,
-                showWindowNow: true
-              })
+              createWindow({ replaceMainWindow: false })
             },
             type: 'normal'
           },
@@ -3305,7 +3319,8 @@ function runApp() {
             label: t('App Menu.Enter Inspect Element Mode'),
             accelerator: 'CmdOrCtrl+Shift+Alt+C',
             click: (_, window) => {
-              if (appShortcutBlockedWindows.has(window)) { return }
+              // macOS keeps the menu without any window
+              if (!window || appShortcutBlockedWindows.has(window)) { return }
               if (window.webContents.isDevToolsOpened()) {
                 window.devToolsWebContents.executeJavaScript('DevToolsAPI.enterInspectElementMode()')
               } else {

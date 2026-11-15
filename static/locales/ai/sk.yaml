@@ -2034,6 +2034,7 @@ Video:
       Copied: Poznámka bola skopírovaná ako Markdown
       Obsidian Failed: Obsidian sa nepodarilo otvoriť
   External Media:
+    Open Local Network Link: "Otvoriť {url}? Tento odkaz smeruje na tento počítač alebo do vašej miestnej siete."
     Dislikes: "Negatívne hodnotenie | Negatívne hodnotenia | Negatívnych hodnotení"
     Reposts: "Opätovné zdieľanie | Opätovné zdieľania | Opätovných zdieľaní"
     Saves: "Uloženie | Uloženia | Uložení"

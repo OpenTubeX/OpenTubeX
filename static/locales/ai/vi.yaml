@@ -2040,6 +2040,7 @@ Video:
   Playlist:
     Unavailable videos are hidden: '{count} video không có sẵn đã bị ẩn'
   External Media:
+    Open Local Network Link: "Mở {url}? Liên kết này trỏ đến máy tính này hoặc mạng cục bộ của bạn."
     Dislikes: "Lượt không thích"
     Reposts: "Lượt đăng lại"
     Saves: "Lượt lưu"
