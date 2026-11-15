@@ -1,5 +1,6 @@
 import { findPlatformChannel, getPlatformChannelRoute } from '../../platforms/index.js'
 import { isYtDlpMediaUrl } from '../../ytDlpArguments.js'
+import { isYouTubeHostname } from '../../youTubeHostname.js'
 
 /**
  * URLs entered in the search bar may be handed to yt-dlp for media extraction.
@@ -10,14 +11,9 @@ export function isExternalMediaUrl(value) {
   return isYtDlpMediaUrl(value)
 }
 
-function isYouTubeHostname(hostname) {
-  return hostname === 'youtu.be' || hostname === 'youtube.com' || hostname.endsWith('.youtube.com') ||
-    hostname === 'youtube-nocookie.com' || hostname.endsWith('.youtube-nocookie.com')
-}
-
 export function isYouTubeMediaUrl(value) {
   if (!isExternalMediaUrl(value)) return false
-  return isYouTubeHostname(new URL(value).hostname.toLowerCase().replace(/\.$/, ''))
+  return isYouTubeHostname(new URL(value).hostname)
 }
 
 /**

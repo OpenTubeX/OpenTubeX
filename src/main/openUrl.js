@@ -1,6 +1,7 @@
 import { BrowserWindow } from 'electron'
 
 import { IpcChannels } from '../constants'
+import { isYouTubeHostname } from '../youTubeHostname'
 import { TabManager } from './tabs/TabManager'
 import { isOpenTubeXUrl } from './utils'
 import { isTrustedSender } from './ipc'
@@ -71,16 +72,6 @@ export function getDirectOpenUrl(url, rootAppUrl) {
   }
 
   return null
-}
-
-/**
- * @param {string} hostname
- * @returns {boolean}
- */
-function isYouTubeHostname(hostname) {
-  hostname = hostname.toLowerCase().replace(/\.$/, '')
-  return hostname === 'youtu.be' || hostname === 'youtube.com' || hostname.endsWith('.youtube.com') ||
-    hostname === 'youtube-nocookie.com' || hostname.endsWith('.youtube-nocookie.com')
 }
 
 /**
