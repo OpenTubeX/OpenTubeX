@@ -83,7 +83,7 @@ test.describe('subscribed channels', () => {
     }
   })
 
-  test('focuses the profile dropdown and restores focus after Escape', async ({ page }) => {
+  test('focuses the profile dropdown, keeps a toggled profile focused and restores focus after Escape', async ({ page }) => {
     await goTo(page, 'subscribedchannels')
 
     const alpha = page.locator('.channel', { hasText: 'Alpha Channel' })
@@ -92,6 +92,19 @@ test.describe('subscribed channels', () => {
 
     const dropdown = page.locator('.profileDropdown')
     await expect(dropdown).toBeFocused()
+
+    // Selecting a profile from the middle of the list must not move its chip,
+    // which would drop its focus and close the dropdown.
+    const chips = dropdown.getByRole('group', { name: 'Profiles' }).getByRole('checkbox')
+    const names = () => chips.evaluateAll(elements => elements.map(element => element.querySelector('bdi').textContent))
+    const order = await names()
+    const profile = dropdown.getByRole('checkbox', { name: 'Profile 2', exact: true })
+    await profile.focus()
+    await page.keyboard.press('Space')
+    await expect(profile).toBeChecked()
+    await expect(profile).toBeFocused()
+    await expect(dropdown).toBeVisible()
+    expect(await names()).toEqual(order)
 
     await page.keyboard.press('Escape')
 
