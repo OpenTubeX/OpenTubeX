@@ -281,7 +281,11 @@ User Playlists:
   Add new videos to the top (custom order): "Ouzhpennañ ar videoioù nevez e penn al listenn (urzh personelaet)"
   Shuffle videos by default: "Meskañ ar videoioù dre ziouer"
   Remove videos once watched: "Dilemel ar videoioù goude bezañ sellet outo"
-  Remove videos once watched Tooltip: "Pa lennit ar roll-lenn-mañ, e vez dilamet pep video diouti kerkent ha ma tizh an dregantad sellet termenet en arventennoù prevezded."
+  Remove videos once watched Tooltip: "Pa lennit ar roll-lenn-mañ, e vez dilamet pep video diouti kerkent ha ma tizh ar gwehin dilemel."
+  Use global watched threshold: "Implijout ar gwehin hollek evit dregantad sellet"
+  Use global watched threshold Tooltip: "Dilemel a ra ar videoioù kerkent ha ma tizhont ar gwehin evit dregantad sellet termenet en arventennoù prevezded."
+  Removal threshold: "Gwehin dilemel"
+  Removal threshold Tooltip: "Dilamet e vez ar videoioù goude tizhout an dregantad diuzet pa chom 2 vunutenn d'ar muiañ. Gant 0% e vezont dilamet pa grog al lenn. Gant 100% e vezont dilamet pa echu al lenn."
   Repair Playlists: Ratreañ ar rolloù lenn
   Repair Description: Adkavit titouroù ar videoioù a vank goude enporzhiañ ur ZIP YouTube Takeout. Urzh ar rolloù lenn a chom digemm.
   Remove Unavailable Videos: "Dilemel ar videoioù n'int ket hegerz"

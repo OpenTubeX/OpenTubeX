@@ -286,7 +286,11 @@ User Playlists:
   Add new videos to the top (custom order): "Tilføj nye videoer øverst (brugerdefineret rækkefølge)"
   Shuffle videos by default: "Bland videoer som standard"
   Remove videos once watched: "Fjern videoer, når de er set"
-  Remove videos once watched Tooltip: "Når du afspiller denne playliste, fjernes hver video fra den, så snart den når grænsen for set procentdel, der er angivet i privatlivsindstillingerne."
+  Remove videos once watched Tooltip: "Når du afspiller denne playliste, fjernes hver video fra den, så snart den når grænsen for fjernelse."
+  Use global watched threshold: "Brug den globale procentgrænse for set"
+  Use global watched threshold Tooltip: "Fjerner videoer, så snart de når procentgrænsen for set, der er angivet i privatlivsindstillingerne."
+  Removal threshold: "Grænse for fjernelse"
+  Removal threshold Tooltip: "Videoer fjernes, når den valgte procentdel er nået, og der højst er 2 minutter tilbage. Ved 0 % fjernes de, når afspilningen begynder. Ved 100 % fjernes de, når afspilningen slutter."
   Repair Playlists: Reparer afspilningslister
   Repair Description: Gendan manglende videooplysninger efter import af en YouTube Takeout-ZIP. Rækkefølgen i afspilningslisterne ændres ikke.
   Remove Unavailable Videos: "Fjern utilgængelige videoer"

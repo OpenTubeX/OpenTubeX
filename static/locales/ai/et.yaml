@@ -281,7 +281,11 @@ User Playlists:
   Add new videos to the top (custom order): "Lisa uued videod algusesse (kohandatud järjestus)"
   Shuffle videos by default: "Esita videod vaikimisi juhuslikus järjekorras"
   Remove videos once watched: "Eemalda videod pärast vaatamist"
-  Remove videos once watched Tooltip: "Kui esitad seda esitusloendit, eemaldatakse iga video sellest kohe, kui see jõuab privaatsusseadetes määratud vaadatud protsendi lävendini."
+  Remove videos once watched Tooltip: "Kui esitad seda esitusloendit, eemaldatakse iga video sellest kohe, kui see jõuab eemaldamise lävendini."
+  Use global watched threshold: "Kasuta üldist vaadatuks märkimise lävendit"
+  Use global watched threshold Tooltip: "Eemaldab videod kohe, kui need jõuavad privaatsusseadetes määratud vaadatuks märkimise lävendini."
+  Removal threshold: "Eemaldamise lävend"
+  Removal threshold Tooltip: "Video eemaldatakse, kui valitud protsent videost on vaadatud ja lõpuni on jäänud kuni 2 minutit. Väärtuse 0% korral eemaldatakse video esitamise alguses. Väärtuse 100% korral eemaldatakse see esitamise lõpus."
   Repair Playlists: Paranda esitusloendeid
   Repair Description: Taasta puuduvad videoandmed pärast YouTube Takeouti ZIP-faili importimist. Esitusloendite järjekord ei muutu.
   Remove Unavailable Videos: "Eemalda kättesaamatud videod"

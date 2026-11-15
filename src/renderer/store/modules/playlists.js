@@ -9,7 +9,7 @@ import {
 } from '../../helpers/playlist-video-counts'
 import { generateRandomUniqueId, processToBeAddedPlaylistVideo } from '../../helpers/playlists'
 import { getQuickBookmarkIconValue } from '../../helpers/quickBookmarkIcons'
-import { PLAYLIST_PREFERENCE_KEYS, getNextPlaylistPreferencesTimestamp } from '../../helpers/playlist-preferences-sync'
+import { stampPlaylistPreferenceEdits } from '../../helpers/playlist-preferences-sync'
 import { deepCopy } from '../../helpers/utils'
 import { reportYouTubePlaylistChange } from '../../helpers/youtube-playlist-changes'
 
@@ -242,11 +242,7 @@ const actions = {
     const current = state.playlists.find(item => item._id === playlist._id)
     const previousDetails = current?.youTube ? { playlistName: current.playlistName, description: current.description ?? '' } : null
     // Sync merges these per playlist by their edit time
-    if (current && PLAYLIST_PREFERENCE_KEYS.some(key => (
-      Object.hasOwn(playlist, key) && (playlist[key] === true) !== (current[key] === true)
-    ))) {
-      playlist.preferencesUpdatedAt = getNextPlaylistPreferencesTimestamp(current)
-    }
+    if (current) stampPlaylistPreferenceEdits(playlist, current)
     // Ensure playlist name trimmed
     if (typeof playlist.playlistName === 'string') {
       playlist.playlistName = playlist.playlistName.trim()

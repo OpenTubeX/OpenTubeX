@@ -92,13 +92,39 @@
             :sync-setting-keys="preferencesSyncKeys"
             @change="newShuffleByDefault = $event"
           />
-          <FtToggleSwitch
-            :label="t('User Playlists.Remove videos once watched')"
-            :tooltip="t('User Playlists.Remove videos once watched Tooltip')"
-            :default-value="newRemoveWatchedVideos"
-            :sync-setting-keys="preferencesSyncKeys"
-            @change="newRemoveWatchedVideos = $event"
-          />
+          <div class="removeWatchedOptions">
+            <FtToggleSwitch
+              :label="t('User Playlists.Remove videos once watched')"
+              :tooltip="t('User Playlists.Remove videos once watched Tooltip')"
+              :default-value="newRemoveWatchedVideos"
+              :sync-setting-keys="preferencesSyncKeys"
+              @change="newRemoveWatchedVideos = $event"
+            />
+            <div
+              v-if="newRemoveWatchedVideos"
+              class="removalThresholdOptions"
+            >
+              <FtToggleSwitch
+                :label="t('User Playlists.Use global watched threshold')"
+                :tooltip="t('User Playlists.Use global watched threshold Tooltip')"
+                :default-value="newRemoveWatchedVideosThreshold === null"
+                :sync-setting-keys="thresholdSyncKeys"
+                @change="useGlobalWatchedThreshold"
+              />
+              <FtSlider
+                v-if="newRemoveWatchedVideosThreshold !== null"
+                class="removalThreshold"
+                :label="t('User Playlists.Removal threshold')"
+                :tooltip="t('User Playlists.Removal threshold Tooltip')"
+                :default-value="newRemoveWatchedVideosThreshold"
+                :min-value="0"
+                :max-value="100"
+                :step="1"
+                value-extension="%"
+                @change="newRemoveWatchedVideosThreshold = $event"
+              />
+            </div>
+          </div>
         </div>
       </div>
       <div class="editPickers">
@@ -401,6 +427,7 @@ import FtButtonGroup from '../FtButtonGroup/FtButtonGroup.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
+import FtSlider from '../FtSlider/FtSlider.vue'
 import FtPlaylistThumbnailPicker from '../FtPlaylistThumbnailPicker.vue'
 import FtQuickBookmarkIconPicker from '../FtQuickBookmarkIconPicker/FtQuickBookmarkIconPicker.vue'
 import FtShareButton from '../FtShareButton/FtShareButton.vue'
@@ -423,7 +450,7 @@ import {
 import { addingMissingVideos, addMissingPlaylistVideos, loadPlaylistVideos, scanPlaylistForUnavailableVideos, unavailableVideoScans } from '../../helpers/playlistTasks'
 import { isHistoryEntryWatched } from '../../helpers/history'
 import { getQuickBookmarkIconValue } from '../../helpers/quickBookmarkIcons'
-import { PLAYLIST_PREFERENCES_SYNC_KEY } from '../../helpers/playlist-preferences-sync'
+import { PLAYLIST_PREFERENCES_SYNC_KEY, PLAYLIST_WATCHED_THRESHOLD_SYNC_KEY, normalizeRemoveWatchedVideosThreshold } from '../../helpers/playlist-preferences-sync'
 import { openButtonMenu } from '../../helpers/buttonMenu'
 import { isRejectedByYouTube, YOUTUBE_REJECTED_PLAYLIST_CHARACTERS } from '../../helpers/youtube-sync'
 import { useFittedButtonLabels } from '../../composables/useFittedButtonLabels'
@@ -558,8 +585,19 @@ const newDescription = ref(props.description)
 const newAddVideosToTop = ref(false)
 const newShuffleByDefault = ref(false)
 const newRemoveWatchedVideos = ref(false)
+/** @type {import('vue').Ref<number | null>} null uses the global watched percentage threshold */
+const newRemoveWatchedVideosThreshold = ref(null)
 // Preferences sync only for playlists on the server
 const preferencesSyncKeys = computed(() => store.state.settings.syncServerSyncPlaylists ? [PLAYLIST_PREFERENCES_SYNC_KEY] : [])
+const thresholdSyncKeys = computed(() => store.state.settings.syncServerSyncPlaylists ? [PLAYLIST_WATCHED_THRESHOLD_SYNC_KEY] : [])
+
+/** @param {boolean} useGlobal */
+function useGlobalWatchedThreshold(useGlobal) {
+  // A custom threshold starts at the global one
+  newRemoveWatchedVideosThreshold.value = useGlobal
+    ? null
+    : normalizeRemoveWatchedVideosThreshold(Math.round(store.getters.getWatchedPercentageThreshold)) ?? 100
+}
 const newQuickBookmarkIcon = ref('bookmark')
 const newCustomThumbnail = ref('')
 const thumbnailLoading = ref(false)
@@ -1016,6 +1054,7 @@ async function savePlaylistInfo() {
     addVideosToTop: newAddVideosToTop.value,
     shuffleByDefault: newShuffleByDefault.value,
     removeWatchedVideos: newRemoveWatchedVideos.value,
+    removeWatchedVideosThreshold: newRemoveWatchedVideosThreshold.value,
     quickBookmarkIcon: newQuickBookmarkIcon.value,
     customThumbnail: newCustomThumbnail.value,
     _id: props.id,
@@ -1044,6 +1083,7 @@ function enterEditMode() {
   newAddVideosToTop.value = selectedUserPlaylist.value.addVideosToTop === true
   newShuffleByDefault.value = selectedUserPlaylist.value.shuffleByDefault === true
   newRemoveWatchedVideos.value = selectedUserPlaylist.value.removeWatchedVideos === true
+  newRemoveWatchedVideosThreshold.value = normalizeRemoveWatchedVideosThreshold(selectedUserPlaylist.value.removeWatchedVideosThreshold)
   newQuickBookmarkIcon.value = getQuickBookmarkIconValue(selectedUserPlaylist.value)
   newCustomThumbnail.value = selectedUserPlaylist.value.customThumbnail || ''
   thumbnailLoading.value = false

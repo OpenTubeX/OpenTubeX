@@ -168,6 +168,7 @@ import FtButton from '../../FtButton/FtButton.vue'
 import FtLoader from '../../FtLoader/FtLoader.vue'
 import FtPrompt from '../../FtPrompt/FtPrompt.vue'
 import { SYNC_SETTING_LABELS, SYNC_SETTING_VALUE_LABELS } from '../../../helpers/sync-setting-labels'
+import { PLAYLIST_PREFERENCES_SYNC_KEYS } from '../../../helpers/playlist-preferences-sync'
 import {
   CAPTION_EDGE_STYLES,
   CAPTION_FONT_FAMILIES,
@@ -273,6 +274,7 @@ const detailLabels = {
   addVideosToTop: 'User Playlists.Add new videos to the top (custom order)',
   shuffleByDefault: 'User Playlists.Shuffle videos by default',
   removeWatchedVideos: 'User Playlists.Remove videos once watched',
+  removeWatchedVideosThreshold: 'User Playlists.Removal threshold',
 }
 const feedTypeLabels = {
   videos: 'Global.Videos', shorts: 'Global.Shorts', live: 'Global.Live', posts: 'Global.Posts',
@@ -295,6 +297,9 @@ function displayActivityValue(entry) {
       // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
       ? entry.value.split(',').map(type => feedTypeLabels[type] ? t(feedTypeLabels[type]) : type).join(', ')
       : t('Settings.Sync Settings.No Feed Types')
+  }
+  if (entry.detail === 'removeWatchedVideosThreshold') {
+    return entry.value === null ? t('Channel.Use global setting') : `${entry.value}%`
   }
   if (entry.detail === 'dailyVideoLimit') {
     if (entry.value === 'global') return t('Channel.Use global setting')
@@ -367,7 +372,7 @@ const visibleEntries = computed(() => (showAll.value ? entries.value : entries.v
     const shortcutLabel = shortcutLabels.value.get(entry.detail)
     if (shortcutLabel) labels.push(shortcutLabel)
   }
-  const detailKey = entry.key === 'subscriptionChannelSettings' || entry.key === 'playlistPreferences'
+  const detailKey = ['subscriptionChannelSettings', ...PLAYLIST_PREFERENCES_SYNC_KEYS].includes(entry.key)
     ? detailLabels[entry.detail]
     : entry.key === 'defaultCaptionSettings' && entry.detail
       ? `Settings.Player Settings.Caption Appearance.${entry.detail}`
@@ -375,10 +380,10 @@ const visibleEntries = computed(() => (showAll.value ? entries.value : entries.v
   if (entry.item && entry.key && (entry.key !== 'customThemes' || entry.action === 'updated')) labels.push(entry.item)
   // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
   if (detailKey && te(detailKey)) labels.push(t(detailKey))
-  // The caption opacities are null by default
+  // The caption opacities are null by default, and null removal thresholds use the global one
   const hasValue = entry.key && (entry.key !== 'keyboardShortcuts' || entry.detail) &&
     (['string', 'number', 'boolean'].includes(typeof entry.value) ||
-      (entry.key === 'defaultCaptionSettings' && entry.value === null))
+      ((entry.key === 'defaultCaptionSettings' || entry.detail === 'removeWatchedVideosThreshold') && entry.value === null))
   const messageKey = entry.action === 'added'
     ? 'Settings.Sync Settings.Item Added'
     : entry.action === 'removed'

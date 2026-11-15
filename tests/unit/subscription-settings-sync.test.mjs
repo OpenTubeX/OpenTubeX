@@ -424,12 +424,44 @@ test('playlist preferences sync between devices that know the playlist by differ
   other.previous = await context.syncSettings(client, other.store, other.previous, other.snapshot)
   creator.previous = await context.syncSettings(client, creator.store, creator.previous, creator.snapshot)
   other.previous = await context.syncSettings(client, other.store, other.previous, other.snapshot)
-  assert.deepEqual(creator.store.state.playlists.playlists.map(playlistPreferencesSync.normalizePlaylistPreferences), [
+  const preferences = playlist => playlistPreferencesSync.normalizePlaylistPreferences(playlist, playlistKey)
+  assert.deepEqual(creator.store.state.playlists.playlists.map(preferences), [
     { addVideosToTop: true, shuffleByDefault: false, removeWatchedVideos: false },
     { addVideosToTop: false, shuffleByDefault: false, removeWatchedVideos: true },
   ])
-  assert.deepEqual(other.store.state.playlists.playlists.map(playlistPreferencesSync.normalizePlaylistPreferences),
-    creator.store.state.playlists.playlists.map(playlistPreferencesSync.normalizePlaylistPreferences))
+  assert.deepEqual(other.store.state.playlists.playlists.map(preferences), creator.store.state.playlists.playlists.map(preferences))
+})
+
+test('playlist removal thresholds sync and survive released clients rewriting the other preferences', async () => {
+  const thresholdKey = playlistPreferencesSync.PLAYLIST_WATCHED_THRESHOLD_SYNC_KEY
+  const client = createPlaylistClient()
+  const edit = { _id: 'playlist', removeWatchedVideos: true, removeWatchedVideosThreshold: 100 }
+  playlistPreferencesSync.stampPlaylistPreferenceEdits(edit, { _id: 'playlist' })
+  const creator = createPlaylistDevice([edit], { playlist: { remoteId: 'playlist' } })
+  const other = createPlaylistDevice([{ _id: 'playlist' }], { playlist: { remoteId: 'playlist' } })
+  creator.previous = await context.syncSettings(client, creator.store, creator.previous, creator.snapshot)
+  other.previous = await context.syncSettings(client, other.store, other.previous, other.snapshot)
+  assert.deepEqual(playlistPreferencesSync.normalizePlaylistPreferences(other.store.state.playlists.playlists[0]),
+    { addVideosToTop: false, shuffleByDefault: false, removeWatchedVideos: true, removeWatchedVideosThreshold: 100 })
+
+  // Released clients rewrite only the preferences they know.
+  const preferences = client.entries.find(entry => entry.key === playlistKey)
+  preferences.value.playlist = { value: { addVideosToTop: false, shuffleByDefault: true, removeWatchedVideos: true }, updatedAt: preferences.value.playlist.updatedAt + 1 }
+  preferences.updatedAt = preferences.value.playlist.updatedAt
+  other.previous = await context.syncSettings(client, other.store, other.previous, other.snapshot)
+  const playlist = other.store.state.playlists.playlists[0]
+  assert.equal(playlist.shuffleByDefault, true)
+  assert.equal(playlist.removeWatchedVideosThreshold, 100)
+  assert.deepEqual(client.entries.find(entry => entry.key === thresholdKey).value.playlist.value, { removeWatchedVideosThreshold: 100 })
+
+  // Going back to the global threshold syncs too.
+  const reset = { removeWatchedVideosThreshold: null }
+  playlistPreferencesSync.stampPlaylistPreferenceEdits(reset, playlist)
+  Object.assign(playlist, reset)
+  other.previous = await context.syncSettings(client, other.store, other.previous, other.snapshot)
+  creator.previous = await context.syncSettings(client, creator.store, creator.previous, creator.snapshot)
+  assert.equal(creator.store.state.playlists.playlists[0].removeWatchedVideosThreshold, null)
+  assert.equal(creator.store.state.playlists.playlists[0].shuffleByDefault, true)
 })
 
 test('playlist preferences without a playlist snapshot stay as the server has them', async () => {

@@ -56,6 +56,7 @@ import { createTheatreModeAnimator, isTheatreLayoutAvailable } from '../../helpe
 import { createShortsFeedNavigation } from './shortsFeedNavigation'
 import { clampOverlayScrollTop, isOverlayScrollTopOutOfBounds, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { hasReachedWatchedThreshold, isHistoryEntryWatched } from '../../helpers/history'
+import { normalizeRemoveWatchedVideosThreshold } from '../../helpers/playlist-preferences-sync'
 import { liveReminder, supportsLiveReminders } from '../../helpers/liveReminders'
 import { withThumbnail } from '../../helpers/notificationHistory'
 import { getYouTubeChannelKey, isSignedInToYouTube } from '../../helpers/youtube-account-state'
@@ -5146,7 +5147,8 @@ export default defineComponent({
 
     /**
      * Removes the playing video from its user playlist once it reaches the
-     * watched threshold, even when it was already marked as watched before.
+     * playlist's removal threshold, or the watched threshold, even when it was
+     * already marked as watched before.
      * @param {number} currentSeconds
      * @param {boolean} isFinished
      */
@@ -5164,7 +5166,7 @@ export default defineComponent({
       if (!isFinished && (this.isPlaybackPaused() || !hasReachedWatchedThreshold(
         currentSeconds,
         this.videoLengthSeconds,
-        this.watchedPercentageThreshold
+        normalizeRemoveWatchedVideosThreshold(playlist.removeWatchedVideosThreshold) ?? this.watchedPercentageThreshold
       ))) {
         return
       }

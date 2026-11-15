@@ -281,7 +281,11 @@ User Playlists:
   Add new videos to the top (custom order): "Přidávat nová videa na začátek (vlastní pořadí)"
   Shuffle videos by default: "Ve výchozím nastavení přehrávat videa náhodně"
   Remove videos once watched: "Odebírat videa po zhlédnutí"
-  Remove videos once watched Tooltip: "Když přehráváte tento playlist, každé video se z něj odebere, jakmile dosáhne prahu zhlédnutí v procentech nastaveného v nastavení soukromí."
+  Remove videos once watched Tooltip: "Když přehráváte tento playlist, každé video se z něj odebere, jakmile dosáhne prahu pro odebrání."
+  Use global watched threshold: "Použít globální hranici označení za zhlédnuté"
+  Use global watched threshold Tooltip: "Odebírá videa, jakmile dosáhnou hranice označení za zhlédnuté nastavené v nastavení soukromí."
+  Removal threshold: "Práh pro odebrání"
+  Removal threshold Tooltip: "Videa se odeberou po dosažení vybraného procenta, pokud do konce nezbývají více než 2 minuty. Při 0 % se odeberou na začátku přehrávání. Při 100 % se odeberou po skončení přehrávání."
   Repair Playlists: Opravit playlisty
   Repair Description: Obnovte chybějící údaje o videích po importu ZIP archivu YouTube Takeout. Pořadí v playlistech se nezmění.
   Remove Unavailable Videos: "Odstraňte nedostupná videa"

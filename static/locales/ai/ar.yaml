@@ -284,7 +284,11 @@ User Playlists:
   Add new videos to the top (custom order): "إضافة الفيديوهات الجديدة في الأعلى (ترتيب مخصص)"
   Shuffle videos by default: "تشغيل الفيديوهات بترتيب عشوائي افتراضيًا"
   Remove videos once watched: "إزالة مقاطع الفيديو بعد مشاهدتها"
-  Remove videos once watched Tooltip: "عند تشغيل قائمة التشغيل هذه، تتم إزالة كل فيديو منها بمجرد وصوله إلى حد نسبة المشاهدة المحدد في إعدادات الخصوصية."
+  Remove videos once watched Tooltip: "عند تشغيل قائمة التشغيل هذه، تتم إزالة كل فيديو منها بمجرد وصوله إلى عتبة الإزالة."
+  Use global watched threshold: "استخدام عتبة النسبة المئوية المشاهدة العامة"
+  Use global watched threshold Tooltip: "تتم إزالة مقاطع الفيديو بمجرد وصولها إلى عتبة النسبة المئوية المشاهدة المحددة في إعدادات الخصوصية."
+  Removal threshold: "عتبة الإزالة"
+  Removal threshold Tooltip: "تتم إزالة مقاطع الفيديو بعد الوصول إلى النسبة المئوية المحددة وعدم تبقّي أكثر من 2 دقيقة. عند 0%، تتم إزالتها عند بدء التشغيل. عند 100%، تتم إزالتها عند انتهاء التشغيل."
   Repair Playlists: إصلاح قوائم التشغيل
   Repair Description: استعد تفاصيل الفيديو المفقودة بعد استيراد ملف ZIP من YouTube Takeout. يبقى ترتيب قوائم التشغيل دون تغيير.
   Remove Unavailable Videos: "إزالة مقاطع الفيديو غير المتاحة"

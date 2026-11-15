@@ -336,7 +336,11 @@ User Playlists:
   Add new videos to the top (custom order): "Afegeix els vídeos nous al principi (ordre personalitzat)"
   Shuffle videos by default: "Reprodueix els vídeos en ordre aleatori per defecte"
   Remove videos once watched: "Elimina els vídeos un cop vistos"
-  Remove videos once watched Tooltip: "Quan reprodueixes aquesta llista de reproducció, cada vídeo se n'elimina en arribar al llindar de percentatge vist definit a la configuració de privadesa."
+  Remove videos once watched Tooltip: "Quan reprodueixes aquesta llista de reproducció, cada vídeo se n'elimina en arribar al llindar d'eliminació."
+  Use global watched threshold: "Utilitza el llindar global de percentatge vist"
+  Use global watched threshold Tooltip: "Elimina els vídeos en arribar al llindar de percentatge vist definit a la configuració de privadesa."
+  Removal threshold: "Llindar d'eliminació"
+  Removal threshold Tooltip: "Els vídeos s'eliminen després d'arribar al percentatge seleccionat i quan no els queden més de 2 minuts. Amb el 0%, s'eliminen en començar la reproducció. Amb el 100%, s'eliminen quan acaba."
   Repair Playlists: Repara les llistes
   Repair Description: Restaura les dades que falten dels vídeos després d’importar un ZIP de YouTube Takeout. L’ordre dels vídeos a les llistes de reproducció es manté.
   Remove Unavailable Videos: "Suprimeix els vídeos no disponibles"

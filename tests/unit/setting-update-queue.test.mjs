@@ -495,7 +495,7 @@ test('settings sync waits for an optimistic edit to save its edit time', async (
     resolveMergedThemeEntry,
     CUSTOM_THEMES_SYNC_KEY: 'customThemes',
     SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY: 'subscriptionChannelSettings',
-    PLAYLIST_PREFERENCES_SYNC_KEY: 'playlistPreferences',
+    PLAYLIST_PREFERENCES_SYNC_KEYS: ['playlistPreferences', 'playlistWatchedThresholds'],
     normalizeCustomThemes: value => value,
     getSyncableSettingKeys: () => [key],
     isSettingSyncEnabled: () => false,

@@ -585,6 +585,8 @@ test.describe('watch page', () => {
         _id: 'ft-playlist--watched-removal',
         playlistName: 'Watched removal',
         removeWatchedVideos: true,
+        // The playlist's threshold, not the global one, decides when to remove a video
+        removeWatchedVideosThreshold: 90,
         videos: [
           { videoId: 'jNQXAC9IVRw', playlistItemId: 'first', title: 'First' },
           { videoId: 'dQw4w9WgXcQ', playlistItemId: 'second', title: 'Second' },
@@ -593,6 +595,7 @@ test.describe('watch page', () => {
       })
       await view.$store.dispatch('updateUserPlaylistSortOrder', 'custom')
       await view.$store.dispatch('updateDefaultInterval', 0)
+      await view.$store.dispatch('updateWatchedPercentageThreshold', 0)
       await view.tabRouter.push({
         path: '/watch/jNQXAC9IVRw',
         query: { playlistId: 'ft-playlist--watched-removal', playlistType: 'user', playlistItemId: 'first' }
@@ -602,6 +605,8 @@ test.describe('watch page', () => {
     const video = await waitForPlayback(page)
     const playlistItemIds = () => watchView.evaluate(view =>
       view.$store.getters.getPlaylist('ft-playlist--watched-removal').videos.map(item => item.playlistItemId))
+    // The global threshold of 0% marks the video as watched once it plays
+    await expect.poll(() => watchView.evaluate(view => view.historyEntry?.isWatched)).toBe(true)
     expect(await playlistItemIds()).toEqual(['first', 'second', 'third'])
 
     await video.evaluate(element => { element.currentTime = element.duration - 2 })

@@ -281,7 +281,11 @@ User Playlists:
   Add new videos to the top (custom order): "Új videók hozzáadása felülre (egyéni sorrend)"
   Shuffle videos by default: "Videók alapértelmezetten véletlenszerű sorrendben"
   Remove videos once watched: "Videók eltávolítása megnézés után"
-  Remove videos once watched Tooltip: "Amikor lejátssza ezt a lejátszási listát, minden videó lekerül róla, amint eléri az adatvédelmi beállításokban megadott megtekintési százalékküszöböt."
+  Remove videos once watched Tooltip: "Amikor lejátssza ezt a lejátszási listát, minden videó lekerül róla, amint eléri az eltávolítási küszöböt."
+  Use global watched threshold: "A globális megtekintési százalékküszöb használata"
+  Use global watched threshold Tooltip: "Eltávolítja a videókat, amint elérik az adatvédelmi beállításokban megadott megtekintési százalékküszöböt."
+  Removal threshold: "Eltávolítási küszöb"
+  Removal threshold Tooltip: "A videók eltávolításra kerülnek, ha elérik a kiválasztott százalékot, és legfeljebb 2 perc van hátra belőlük. 0%-nál a lejátszás kezdetekor, 100%-nál a lejátszás végén kerülnek eltávolításra."
   Repair Playlists: Lejátszási listák javítása
   Repair Description: Állítsa vissza a hiányzó videóadatokat egy YouTube Takeout ZIP importálása után. A listák sorrendje nem változik.
   Remove Unavailable Videos: "Távolítsa el a nem elérhető videókat"

@@ -343,7 +343,11 @@ User Playlists:
   Add new videos to the top (custom order): Voeg nuwe video’s bo-aan by (pasgemaakte volgorde)
   Shuffle videos by default: Skommel video’s by verstek
   Remove videos once watched: "Verwyder video's sodra hulle gekyk is"
-  Remove videos once watched Tooltip: "Wanneer jy hierdie snitlys speel, word elke video daaruit verwyder sodra dit die drempel vir gekykte persentasie in die privaatheidsinstellings bereik."
+  Remove videos once watched Tooltip: "Wanneer jy hierdie snitlys speel, word elke video daaruit verwyder sodra dit die verwyderingsdrempel bereik."
+  Use global watched threshold: "Gebruik die globale drempelpersentasie vir gekyk"
+  Use global watched threshold Tooltip: "Verwyder video's sodra hulle die drempelpersentasie vir gekyk bereik wat in die privaatheidsinstellings gestel is."
+  Removal threshold: "Verwyderingsdrempel"
+  Removal threshold Tooltip: "Video's word verwyder nadat die gekose persentasie bereik is en daar nie meer as 2 minute oor is nie. By 0% word hulle verwyder wanneer afspeel begin. By 100% word hulle verwyder wanneer afspeel eindig."
   Repair Playlists: Herstel afspeellyste
   Repair Description: Herstel ontbrekende videobesonderhede nadat ’n YouTube Takeout-ZIP ingevoer is. Die volgorde van die afspeellys bly onveranderd.
   Add Missing Videos: Voeg ontbrekende video’s van die bronafspeellys by

@@ -3,6 +3,8 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
 
+import * as playlistPreferences from '../../src/renderer/helpers/playlist-preferences-sync.js'
+
 const source = await readFile(new URL('../../src/renderer/components/Settings/Data/DataSettings.vue', import.meta.url), 'utf8')
 const importSource = source.slice(source.indexOf('async function importPlaylists()'), source.indexOf('async function exportPlaylists()'))
 const takeoutSource = source.slice(source.indexOf('async function importTakeoutPlaylist('), source.indexOf('async function normalizeImportedPlaylistThumbnail('))
@@ -14,6 +16,7 @@ for (const [preference, existing] of [[undefined, true], [false, true], [true, f
     const toasts = []
     const writes = []
     const run = vm.runInNewContext(importSource + '\nimportPlaylists', {
+      ...playlistPreferences,
       allPlaylists: { value: existing ? [current] : [] },
       pickFilesWithPicker: async () => [{ name: 'playlist.db', text: async () => JSON.stringify(imported) }],
       IMPORT_DIRECTORY_ID: 'import',
@@ -69,6 +72,7 @@ test('playlist import applies each picked database file to the previous file\'s 
     text: async () => JSON.stringify({ _id: 'custom', playlistName: 'My playlist', videos: [{ videoId, title: videoId, lengthSeconds: 60, timeAdded: 1 }] }),
   })
   const run = vm.runInNewContext(importSource + '\nimportPlaylists', {
+    ...playlistPreferences,
     allPlaylists: playlists,
     pickFilesWithPicker: async () => [file('first'), file('second')],
     IMPORT_DIRECTORY_ID: 'import',
@@ -98,6 +102,7 @@ test('playlist import reports a malformed database file and continues with the n
   const toasts = []
   const writes = []
   const run = vm.runInNewContext(importSource + '\nimportPlaylists', {
+    ...playlistPreferences,
     allPlaylists: { value: [] },
     pickFilesWithPicker: async () => [
       { name: 'broken.db', text: async () => '[not json]' },

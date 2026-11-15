@@ -112,6 +112,20 @@
   .switch-ctn {
     margin-inline: 0;
   }
+
+  // The threshold options belong to their switch, so they take a row of their own
+  .removeWatchedOptions:has(.removalThresholdOptions) {
+    flex-basis: 100%;
+  }
+
+  .removalThresholdOptions {
+    padding-inline-start: 24px;
+  }
+
+  .removalThreshold {
+    margin-inline: 0;
+    max-inline-size: 100%;
+  }
 }
 
 .playlistChannel {

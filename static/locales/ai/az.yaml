@@ -283,7 +283,11 @@ User Playlists:
   Add new videos to the top (custom order): "Yeni videoları yuxarıya əlavə et (fərdi sıra)"
   Shuffle videos by default: "Videoları defolt olaraq qarışıq sırada oynat"
   Remove videos once watched: "Videoları baxıldıqdan sonra sil"
-  Remove videos once watched Tooltip: "Bu pleylisti oynatdığınız zaman hər video Məxfilik ayarlarında təyin edilmiş baxılma faizi həddinə çatan kimi ondan silinir."
+  Remove videos once watched Tooltip: "Bu pleylisti oynatdığınız zaman hər video silinmə həddinə çatan kimi ondan silinir."
+  Use global watched threshold: "Qlobal baxılmış sayılma faizindən istifadə et"
+  Use global watched threshold Tooltip: "Videoları Məxfilik ayarlarında təyin edilmiş baxılmış sayılma faizinə çatan kimi silir."
+  Removal threshold: "Silinmə həddi"
+  Removal threshold Tooltip: "Seçilmiş faizə çatdıqda və sonuna ən çox 2 dəqiqə qaldıqda videolar silinir. 0% seçildikdə oxutma başlayanda, 100% seçildikdə isə oxutma bitəndə silinir."
   Repair Playlists: Pleylistləri düzəlt
   Repair Description: YouTube Takeout ZIP faylını idxal etdikdən sonra çatışmayan video məlumatlarını bərpa edin. Pleylist sırası dəyişmir.
   Remove Unavailable Videos: "Əlçatan olmayan videoları silin"

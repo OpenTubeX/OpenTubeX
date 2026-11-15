@@ -120,11 +120,11 @@ test('playlist import restores the shuffle by default and watched removal prefer
   await openPlaylist(page)
   await page.evaluate(async id => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-    await store.dispatch('updatePlaylist', { _id: id, shuffleByDefault: true, removeWatchedVideos: true })
+    await store.dispatch('updatePlaylist', { _id: id, shuffleByDefault: true, removeWatchedVideos: true, removeWatchedVideosThreshold: 100 })
     const playlist = store.getters.getPlaylist(id)
     const contents = JSON.stringify(playlist) + '\n' + JSON.stringify({ ...playlist, _id: 'imported-shuffle-default', playlistName: 'Imported mix' })
     window.showOpenFilePicker = async () => [{ getFile: async () => new File([contents], 'playlists.db', { type: 'application/x-freetube-db' }) }]
-    await store.dispatch('updatePlaylist', { _id: id, shuffleByDefault: false, removeWatchedVideos: false })
+    await store.dispatch('updatePlaylist', { _id: id, shuffleByDefault: false, removeWatchedVideos: false, removeWatchedVideosThreshold: null })
   }, playlistId)
   const section = await goToSettingsSection(page, 'data')
   await section.getByRole('button', { name: /^Import playlists$/i }).click()
@@ -132,10 +132,10 @@ test('playlist import restores the shuffle by default and watched removal prefer
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
     return [id, 'imported-shuffle-default'].flatMap(id => {
       const playlist = store.getters.getPlaylist(id)
-      return [playlist?.shuffleByDefault, playlist?.removeWatchedVideos]
+      return [playlist?.shuffleByDefault, playlist?.removeWatchedVideos, playlist?.removeWatchedVideosThreshold]
     })
-  }, playlistId)).toEqual([true, true, true, true])
-  await expect(page.getByText(/^Unknown data key: (shuffleByDefault|removeWatchedVideos)$/)).toHaveCount(0)
+  }, playlistId)).toEqual([true, true, 100, true, true, 100])
+  await expect(page.getByText(/^Unknown data key: /)).toHaveCount(0)
 })
 
 test('a shuffle by default playlist opened outside its playlist page also starts shuffled', async ({ app, page }) => {

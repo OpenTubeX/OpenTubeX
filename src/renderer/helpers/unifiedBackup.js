@@ -1,6 +1,5 @@
 import { MAIN_PROFILE_ID } from '../../constants.js'
-import { areJsonValuesEqual } from './jsonValues.js'
-import { PLAYLIST_PREFERENCE_KEYS, getNextPlaylistPreferencesTimestamp, normalizePlaylistPreferences } from './playlist-preferences-sync.js'
+import { PLAYLIST_PREFERENCE_TIMESTAMP_KEYS, stampPlaylistPreferenceEdits } from './playlist-preferences-sync.js'
 import { Unzip, UnzipInflate, zipSync, strToU8, strFromU8 } from 'fflate'
 
 export const BACKUP_SECTIONS = ['settings', 'profiles', 'playlists', 'history', 'searchHistory', 'watchStats']
@@ -34,21 +33,20 @@ export function mergeBackupProfile(current, imported) {
  * Restored options are a new local edit, so sync keeps them over the server's
  * copy. The backup's own edit time would be older than that copy.
  * @param {object} playlist the merged playlist
- * @param {object} imported
  * @param {object} [current]
  */
-function withRestoredPreferencesTime(playlist, imported, current) {
-  const { preferencesUpdatedAt: _backupTime, ...restored } = playlist
-  const changed = current
-    ? !areJsonValuesEqual(normalizePlaylistPreferences(restored), normalizePlaylistPreferences(current))
-    : PLAYLIST_PREFERENCE_KEYS.some(key => Object.hasOwn(imported, key))
-  if (changed) restored.preferencesUpdatedAt = getNextPlaylistPreferencesTimestamp(current)
-  else if (current?.preferencesUpdatedAt !== undefined) restored.preferencesUpdatedAt = current.preferencesUpdatedAt
+function withRestoredPreferencesTime(playlist, current) {
+  const restored = { ...playlist }
+  for (const key of PLAYLIST_PREFERENCE_TIMESTAMP_KEYS) {
+    if (current?.[key] !== undefined) restored[key] = current[key]
+    else delete restored[key]
+  }
+  stampPlaylistPreferenceEdits(restored, current)
   return restored
 }
 
 export function mergeBackupPlaylist(current, imported) {
-  if (!current) return withRestoredPreferencesTime(imported, imported)
+  if (!current) return withRestoredPreferencesTime(imported)
   const videos = [...current.videos]
   // Indexed, as comparing every imported video with every saved one takes
   // minutes for playlists with tens of thousands of videos.
@@ -70,7 +68,7 @@ export function mergeBackupPlaylist(current, imported) {
       add(video)
     }
   }
-  return withRestoredPreferencesTime({ ...current, ...imported, protected: current.protected, videos }, imported, current)
+  return withRestoredPreferencesTime({ ...current, ...imported, protected: current.protected, videos }, current)
 }
 
 export function mergeBackupHistoryRecord(current, imported) {

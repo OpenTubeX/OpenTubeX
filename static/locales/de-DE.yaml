@@ -274,7 +274,11 @@ User Playlists:
   Add new videos to the top (custom order): "Neue Videos oben hinzufügen (benutzerdefinierte Reihenfolge)"
   Shuffle videos by default: "Videos standardmäßig zufällig abspielen"
   Remove videos once watched: "Videos nach dem Ansehen entfernen"
-  Remove videos once watched Tooltip: "Wenn du diese Playlist abspielst, wird jedes Video daraus entfernt, sobald es die in den Datenschutzeinstellungen festgelegte Prozentschwelle für angesehene Videos erreicht."
+  Remove videos once watched Tooltip: "Wenn du diese Playlist abspielst, wird jedes Video daraus entfernt, sobald es die Schwelle zum Entfernen erreicht."
+  Use global watched threshold: "Globale Prozentschwelle für angesehene Videos verwenden"
+  Use global watched threshold Tooltip: "Entfernt Videos, sobald sie die in den Datenschutzeinstellungen festgelegte Prozentschwelle für angesehene Videos erreichen."
+  Removal threshold: "Schwelle zum Entfernen"
+  Removal threshold Tooltip: "Videos werden entfernt, sobald der ausgewählte Prozentsatz erreicht ist und höchstens 2 Minuten verbleiben. Bei 0 % werden sie zu Beginn der Wiedergabe und bei 100 % am Ende entfernt."
   Repair Playlists: Playlists reparieren
   Repair Description: Stelle fehlende Videodaten nach dem Import einer YouTube-Takeout-ZIP-Datei wieder her. Die Reihenfolge der Playlists bleibt unverändert.
   Add Missing Videos: "Fehlende Videos aus der Quellplaylist hinzufügen"

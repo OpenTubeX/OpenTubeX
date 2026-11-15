@@ -285,7 +285,11 @@ User Playlists:
   Add new videos to the top (custom order): "Yeni videoları en üste ekle (özel sıralama)"
   Shuffle videos by default: "Videoları varsayılan olarak karışık oynat"
   Remove videos once watched: "Videoları izlendikten sonra kaldır"
-  Remove videos once watched Tooltip: "Bu oynatma listesini oynattığınızda, her video Gizlilik ayarlarında belirlenen izlenme yüzdesi eşiğine ulaştığı anda listeden kaldırılır."
+  Remove videos once watched Tooltip: "Bu oynatma listesini oynattığınızda, her video kaldırma eşiğine ulaştığı anda listeden kaldırılır."
+  Use global watched threshold: "Genel izlenmiş sayılma yüzdesi eşiğini kullan"
+  Use global watched threshold Tooltip: "Videoları, Gizlilik ayarlarında belirlenen izlenmiş sayılma yüzdesi eşiğine ulaştıkları anda kaldırır."
+  Removal threshold: "Kaldırma eşiği"
+  Removal threshold Tooltip: "Videolar seçilen yüzdeye ulaştığında ve en fazla 2 dakika kaldığında kaldırılır. %0'da oynatma başladığında, %100'de ise oynatma bittiğinde kaldırılır."
   Repair Playlists: Oynatma listelerini onar
   Repair Description: YouTube Takeout ZIP dosyasını içe aktardıktan sonra eksik video bilgilerini geri yükleyin. Oynatma listesi sırası değişmez.
   Remove Unavailable Videos: "Kullanılamayan videoları kaldır"

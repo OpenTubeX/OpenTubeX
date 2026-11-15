@@ -285,7 +285,11 @@ User Playlists:
   Add new videos to the top (custom order): "将新视频添加到顶部（自定义顺序）"
   Shuffle videos by default: "默认随机播放视频"
   Remove videos once watched: "观看后移除视频"
-  Remove videos once watched Tooltip: "播放此播放列表时，每个视频一旦达到隐私设置中设定的已观看百分比阈值，就会从列表中移除。"
+  Remove videos once watched Tooltip: "播放此播放列表时，每个视频一旦达到移除阈值，就会从列表中移除。"
+  Use global watched threshold: "使用全局已观看百分比阈值"
+  Use global watched threshold Tooltip: "视频达到隐私设置中设定的已观看百分比阈值后即会移除。"
+  Removal threshold: "移除阈值"
+  Removal threshold Tooltip: "播放进度达到所选百分比且剩余时长不超过 2 分钟后，视频会被移除。设为 0% 时，开始播放即会移除；设为 100% 时，播放结束才会移除。"
   Repair Playlists: 修复播放列表
   Repair Description: 导入 YouTube Takeout ZIP 后恢复缺失的视频信息。播放列表顺序保持不变。
   Remove Unavailable Videos: "删除不可用的视频"
