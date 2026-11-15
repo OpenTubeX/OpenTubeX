@@ -53,7 +53,8 @@ public class AndroidUiPlugin extends Plugin {
     private ConnectivityManager.NetworkCallback networkMeteredCallback;
     private Boolean networkMetered;
     private InputManager.InputDeviceListener gamepadListener;
-    private boolean gamepadConnected;
+    // Written on the main looper, read on the plugin thread.
+    private volatile boolean gamepadConnected;
 
     @Override
     public void load() {
@@ -102,14 +103,16 @@ public class AndroidUiPlugin extends Plugin {
 
     @PluginMethod
     public void getGamepadConnected(PluginCall call) {
-        call.resolve(new JSObject().put("connected", hasGamepad()));
+        // Answer with the reported state, so every later change arrives as an
+        // event. A fresh scan could see a change whose event then nets out.
+        call.resolve(new JSObject().put("connected", gamepadConnected));
     }
 
     private boolean hasGamepad() {
         InputManager inputManager = getContext().getSystemService(InputManager.class);
         for (int deviceId : inputManager.getInputDeviceIds()) {
             InputDevice device = inputManager.getInputDevice(deviceId);
-            if (device != null && isGamepadDevice(device.getSources())) {
+            if (device != null && isGamepadDevice(device.getName(), device.getSources())) {
                 return true;
             }
         }
@@ -117,8 +120,10 @@ public class AndroidUiPlugin extends Plugin {
     }
 
     /** Matches the devices Chromium reports through the Gamepad API. */
-    static boolean isGamepadDevice(int sources) {
-        return (sources & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK;
+    static boolean isGamepadDevice(String name, int sources) {
+        // Some fingerprint sensors claim to be joysticks.
+        return !"uinput-fpc".equals(name)
+            && (sources & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK;
     }
 
     @PluginMethod
