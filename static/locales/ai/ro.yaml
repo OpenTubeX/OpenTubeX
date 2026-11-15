@@ -285,7 +285,11 @@ User Playlists:
   Add new videos to the top (custom order): "Adaugă videoclipurile noi la început (ordine personalizată)"
   Shuffle videos by default: "Redă videoclipurile în ordine aleatorie în mod implicit"
   Remove videos once watched: "Elimină videoclipurile după vizionare"
-  Remove videos once watched Tooltip: "Când redai acest playlist, fiecare videoclip este eliminat din el imediat ce atinge pragul de procent vizionat setat în setările de confidențialitate."
+  Remove videos once watched Tooltip: "Când redai acest playlist, fiecare videoclip este eliminat din el imediat ce atinge pragul de eliminare."
+  Use global watched threshold: "Folosește pragul procentual global pentru vizionare"
+  Use global watched threshold Tooltip: "Elimină videoclipurile imediat ce ating pragul procentual pentru vizionare setat în setările de confidențialitate."
+  Removal threshold: "Prag de eliminare"
+  Removal threshold Tooltip: "Videoclipurile sunt eliminate după atingerea procentului selectat și când au rămas cel mult 2 minute. La 0%, sunt eliminate când începe redarea. La 100%, sunt eliminate la încheierea redării."
   Repair Playlists: Repară listele de redare
   Repair Description: Restabilește detaliile video lipsă după importarea unui ZIP YouTube Takeout. Ordinea listelor de redare rămâne neschimbată.
   Remove Unavailable Videos: "Eliminați videoclipurile indisponibile"

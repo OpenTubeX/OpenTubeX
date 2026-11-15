@@ -62,7 +62,7 @@ import {
   applySubscriptionSettingsSync
 } from './subscription-settings-sync'
 import {
-  PLAYLIST_PREFERENCES_SYNC_KEY,
+  PLAYLIST_PREFERENCES_SYNC_KEYS,
   getPlaylistPreferencesForSync,
   applyPlaylistPreferencesSync
 } from './playlist-preferences-sync'
@@ -1678,10 +1678,12 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
   if (isSettingSyncEnabled(store.state.settings, SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY)) {
     local[SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY] = getSubscriptionSettingsForSync(store)
   }
-  if (playlistSnapshot && isSettingSyncEnabled(store.state.settings, PLAYLIST_PREFERENCES_SYNC_KEY)) {
-    local[PLAYLIST_PREFERENCES_SYNC_KEY] = getPlaylistPreferencesForSync(store.state.playlists.playlists, playlistSnapshot)
+  for (const key of PLAYLIST_PREFERENCES_SYNC_KEYS) {
+    if (playlistSnapshot && isSettingSyncEnabled(store.state.settings, key)) {
+      local[key] = getPlaylistPreferencesForSync(store.state.playlists.playlists, playlistSnapshot, key)
+    }
   }
-  const itemKeys = new Set([SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY, PLAYLIST_PREFERENCES_SYNC_KEY])
+  const itemKeys = new Set([SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY, ...PLAYLIST_PREFERENCES_SYNC_KEYS])
 
   // Set when another window changed the themes, so the ones the server's
   // theme selections name may be missing here
@@ -1732,8 +1734,8 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
     if (!valuesEqual) {
       if (key === SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY) {
         await applySubscriptionSettingsSync(store, entry.value, value)
-      } else if (key === PLAYLIST_PREFERENCES_SYNC_KEY) {
-        await applyPlaylistPreferencesSync(store, entry.value, playlistSnapshot, value)
+      } else if (PLAYLIST_PREFERENCES_SYNC_KEYS.includes(key)) {
+        await applyPlaylistPreferencesSync(store, entry.value, playlistSnapshot, value, key)
       } else if (key === CUSTOM_THEMES_SYNC_KEY) {
         const previousThemes = store.state.utils.customThemes
         const themes = await replaceCustomThemes(entry.value, value)

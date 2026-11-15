@@ -282,7 +282,11 @@ User Playlists:
   Add new videos to the top (custom order): "Legg til nye videoar øvst (eigendefinert rekkjefølgje)"
   Shuffle videos by default: "Spel av videoar i tilfeldig rekkjefølgje som standard"
   Remove videos once watched: "Fjern videoar når dei er sette"
-  Remove videos once watched Tooltip: "Når du spelar av denne spelelista, vert kvar video fjerna frå ho så snart han når terskelen for sett prosentdel som er sett i personverninnstillingane."
+  Remove videos once watched Tooltip: "Når du spelar av denne spelelista, vert kvar video fjerna frå ho så snart han når terskelen for fjerning."
+  Use global watched threshold: "Bruk den globale terskelen for sett prosentdel"
+  Use global watched threshold Tooltip: "Fjernar videoar så snart dei når terskelen for sett prosentdel som er sett i personverninnstillingane."
+  Removal threshold: "Terskel for fjerning"
+  Removal threshold Tooltip: "Videoar blir fjerna når dei har nådd den valde prosentdelen og det står att høgst 2 minutt. Ved 0 % blir dei fjerna når avspelinga tek til. Ved 100 % blir dei fjerna når avspelinga er ferdig."
   Repair Playlists: Reparer spelelister
   Repair Description: Gjenopprett manglande videodetaljar etter import av ein YouTube Takeout-ZIP. Rekkjefølgja i spelelistene vert ikkje endra.
   Remove Unavailable Videos: "Fjern utilgjengelege videoar"

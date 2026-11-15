@@ -281,7 +281,11 @@ User Playlists:
   Add new videos to the top (custom order): "新しい動画を先頭に追加（カスタム順）"
   Shuffle videos by default: "デフォルトで動画をシャッフル再生"
   Remove videos once watched: "視聴後に動画を削除"
-  Remove videos once watched Tooltip: "この再生リストを再生すると、各動画はプライバシー設定で指定した視聴済みの割合のしきい値に達した時点でリストから削除されます。"
+  Remove videos once watched Tooltip: "この再生リストを再生すると、各動画は削除のしきい値に達した時点でリストから削除されます。"
+  Use global watched threshold: "全体の「視聴済みとする割合」を使用"
+  Use global watched threshold Tooltip: "プライバシー設定で指定した「視聴済みとする割合」に達した時点で動画を削除します。"
+  Removal threshold: "削除のしきい値"
+  Removal threshold Tooltip: "選択した割合に達し、残り時間が2分以下になると削除されます。0%では再生開始時、100%では再生終了時に削除されます。"
   Repair Playlists: プレイリストを修復
   Repair Description: YouTube TakeoutのZIPをインポートした後、欠けている動画情報を復元します。プレイリストの順序は変わりません。
   Remove Unavailable Videos: "利用できない動画を削除する"

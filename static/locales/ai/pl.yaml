@@ -151,7 +151,11 @@ User Playlists:
   Add new videos to the top (custom order): "Dodawaj nowe filmy na początku (kolejność niestandardowa)"
   Shuffle videos by default: "Domyślnie odtwarzaj filmy losowo"
   Remove videos once watched: "Usuwaj filmy po obejrzeniu"
-  Remove videos once watched Tooltip: "Gdy odtwarzasz tę playlistę, każdy film jest z niej usuwany, gdy tylko osiągnie próg procentu obejrzenia ustawiony w ustawieniach prywatności."
+  Remove videos once watched Tooltip: "Gdy odtwarzasz tę playlistę, każdy film jest z niej usuwany, gdy tylko osiągnie próg usunięcia."
+  Use global watched threshold: "Użyj globalnego progu oznaczenia jako „obejrzany”"
+  Use global watched threshold Tooltip: "Usuwa filmy, gdy tylko osiągną próg oznaczenia jako „obejrzany” ustawiony w ustawieniach prywatności."
+  Removal threshold: "Próg usunięcia"
+  Removal threshold Tooltip: "Filmy są usuwane po osiągnięciu wybranego procentu i gdy pozostały nie więcej niż 2 minuty. Przy wartości 0% są one usuwane w momencie rozpoczęcia odtwarzania. Przy wartości 100% są one usuwane po zakończeniu odtwarzania."
   Repair Playlists: Napraw playlisty
   Repair Description: Przywróć brakujące dane filmów po zaimportowaniu archiwum ZIP z YouTube Takeout. Kolejność na playlistach pozostaje bez zmian.
   Remove Unavailable Videos: "Usuń niedostępne filmy"

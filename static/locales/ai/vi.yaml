@@ -285,7 +285,11 @@ User Playlists:
   Add new videos to the top (custom order): "Thêm video mới lên đầu (thứ tự tùy chỉnh)"
   Shuffle videos by default: "Phát ngẫu nhiên video theo mặc định"
   Remove videos once watched: "Xóa video sau khi đã xem"
-  Remove videos once watched Tooltip: "Khi bạn phát danh sách phát này, mỗi video sẽ bị xóa khỏi danh sách ngay khi đạt ngưỡng phần trăm đã xem được đặt trong cài đặt quyền riêng tư."
+  Remove videos once watched Tooltip: "Khi bạn phát danh sách phát này, mỗi video sẽ bị xóa khỏi danh sách ngay khi đạt ngưỡng xóa."
+  Use global watched threshold: "Dùng ngưỡng phần trăm đã xem chung"
+  Use global watched threshold Tooltip: "Xóa video ngay khi đạt ngưỡng phần trăm đã xem được đặt trong cài đặt quyền riêng tư."
+  Removal threshold: "Ngưỡng xóa"
+  Removal threshold Tooltip: "Video bị xóa sau khi đạt tỷ lệ đã chọn và còn không quá 2 phút. Ở mức 0%, video bị xóa khi bắt đầu phát. Ở mức 100%, video bị xóa khi phát xong."
   Repair Playlists: Sửa danh sách phát
   Repair Description: Khôi phục thông tin video bị thiếu sau khi nhập ZIP YouTube Takeout. Thứ tự danh sách phát không thay đổi.
   Remove Unavailable Videos: "Xóa video không có sẵn"

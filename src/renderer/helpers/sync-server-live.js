@@ -3,7 +3,7 @@ import { getConfiguredKeyboardShortcuts } from '../../constants.js'
 import { keyboardShortcutsEqual } from './keyboardShortcuts.js'
 import { areJsonValuesEqual } from './jsonValues.js'
 import { normalizeSubscriptionChannelSettings } from './subscription-channels.js'
-import { PLAYLIST_PREFERENCES_SYNC_KEY, PLAYLIST_PREFERENCE_KEYS, normalizePlaylistPreferences } from './playlist-preferences-sync.js'
+import { PLAYLIST_PREFERENCES_SYNC_KEYS, normalizePlaylistPreferences } from './playlist-preferences-sync.js'
 import { parseCaptionSettings } from './player/caption-settings.js'
 
 // Decrypted collections are cached only for this renderer session. A new account,
@@ -194,18 +194,18 @@ function describeSubscriptionSettings(before, after, changes, channelNames) {
   }
 }
 
-function describePlaylistPreferences(before, after, changes, playlistNames) {
+function describePlaylistPreferences(key, before, after, changes, playlistNames) {
   const oldPlaylists = before ?? {}
   const currentPlaylists = after ?? {}
   for (const id of new Set([...Object.keys(oldPlaylists), ...Object.keys(currentPlaylists)])) {
-    const previous = normalizePlaylistPreferences(oldPlaylists[id]?.value)
-    const current = normalizePlaylistPreferences(currentPlaylists[id]?.value)
+    const previous = normalizePlaylistPreferences(oldPlaylists[id]?.value, key)
+    const current = normalizePlaylistPreferences(currentPlaylists[id]?.value, key)
     if (areJsonValuesEqual(previous, current)) continue
     const playlist = playlistNames.get(id)
-    if (!playlist) { addSummary(changes, 'key', PLAYLIST_PREFERENCES_SYNC_KEY); continue }
-    for (const detail of PLAYLIST_PREFERENCE_KEYS) {
+    if (!playlist) { addSummary(changes, 'key', key); continue }
+    for (const detail of Object.keys(current)) {
       if (previous[detail] !== current[detail]) {
-        changes.push({ key: PLAYLIST_PREFERENCES_SYNC_KEY, detail, item: playlist, value: current[detail] })
+        changes.push({ key, detail, item: playlist, value: current[detail] })
       }
     }
   }
@@ -276,8 +276,8 @@ export function createSyncActivity(collection, before, after, deviceId, deviceNa
         describeSubscriptionSettings(previous.get(entry.key), entry.value, changes, channelNames)
         continue
       }
-      if (entry.key === PLAYLIST_PREFERENCES_SYNC_KEY) {
-        describePlaylistPreferences(previous.get(entry.key), entry.value, changes,
+      if (PLAYLIST_PREFERENCES_SYNC_KEYS.includes(entry.key)) {
+        describePlaylistPreferences(entry.key, previous.get(entry.key), entry.value, changes,
           new Map(playlists.map(playlist => [playlist?.id, activityText(playlist?.title)])))
         continue
       }

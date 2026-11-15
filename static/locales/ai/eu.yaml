@@ -281,7 +281,11 @@ User Playlists:
   Add new videos to the top (custom order): "Gehitu bideo berriak hasieran (ordena pertsonalizatua)"
   Shuffle videos by default: "Erreproduzitu bideoak ausazko ordenan modu lehenetsian"
   Remove videos once watched: "Kendu bideoak ikusi ondoren"
-  Remove videos once watched Tooltip: "Erreprodukzio-zerrenda hau erreproduzitzen duzunean, bideo bakoitza zerrendatik kentzen da pribatutasun-ezarpenetan ezarritako ikusitako ehunekoaren atalasera iristen denean."
+  Remove videos once watched Tooltip: "Erreprodukzio-zerrenda hau erreproduzitzen duzunean, bideo bakoitza zerrendatik kentzen da kentzeko atalasera iristen denean."
+  Use global watched threshold: "Erabili ikusitako ehunekoaren atalase orokorra"
+  Use global watched threshold Tooltip: "Bideoak kentzen ditu pribatutasun-ezarpenetan ezarritako ikusitako ehunekoaren atalasera iristen direnean."
+  Removal threshold: "Kentzeko atalasea"
+  Removal threshold Tooltip: "Bideoak kendu egingo dira hautatutako ehunekora iritsi eta gehienez 2 minutu geratzen direnean. % 0 hautatuz gero, erreprodukzioa hastean kenduko dira; % 100 hautatuz gero, amaitzean."
   Repair Playlists: Konpondu erreprodukzio-zerrendak
   Repair Description: Berreskuratu falta diren bideo-datuak YouTube Takeout ZIP bat inportatu ondoren. Zerrenden ordena ez da aldatzen.
   Remove Unavailable Videos: "Kendu erabilgarri ez dauden bideoak"

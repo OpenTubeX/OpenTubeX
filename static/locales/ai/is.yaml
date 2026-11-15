@@ -281,7 +281,11 @@ User Playlists:
   Add new videos to the top (custom order): "Bæta nýjum myndskeiðum efst (sérsniðin röð)"
   Shuffle videos by default: "Spila myndskeið í slembiröð sjálfgefið"
   Remove videos once watched: "Fjarlægja myndskeið eftir áhorf"
-  Remove videos once watched Tooltip: "Þegar þú spilar þennan spilunarlista er hvert myndskeið fjarlægt af honum um leið og það nær þröskuldi áhorfshlutfalls sem stilltur er í persónuverndarstillingum."
+  Remove videos once watched Tooltip: "Þegar þú spilar þennan spilunarlista er hvert myndskeið fjarlægt af honum um leið og það nær mörkum fyrir fjarlægingu."
+  Use global watched threshold: "Nota almenn prósentumörk fyrir áhorf"
+  Use global watched threshold Tooltip: "Fjarlægir myndskeið um leið og þau ná prósentumörkum fyrir áhorf sem stillt eru í persónuverndarstillingum."
+  Removal threshold: "Mörk fyrir fjarlægingu"
+  Removal threshold Tooltip: "Myndskeið eru fjarlægð þegar valinni prósentu er náð og ekki meira en 2 mínútur eru eftir. Við 0% eru þau fjarlægð þegar spilun hefst. Við 100% eru þau fjarlægð þegar spilun lýkur."
   Repair Playlists: Lagfæra spilunarlista
   Repair Description: Endurheimtu upplýsingar sem vantar um myndskeið eftir innflutning á YouTube Takeout ZIP-skrá. Röð spilunarlista helst óbreytt.
   Remove Unavailable Videos: "Fjarlægðu ótiltæk myndbönd"

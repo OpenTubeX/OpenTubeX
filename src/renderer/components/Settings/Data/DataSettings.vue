@@ -356,6 +356,7 @@ import {
   writeFileWithPicker,
 } from '../../../helpers/utils'
 import { isPlaylistSortOrder, processToBeAddedPlaylistVideo } from '../../../helpers/playlists'
+import { normalizeRemoveWatchedVideosThreshold, stampPlaylistPreferenceEdits } from '../../../helpers/playlist-preferences-sync'
 import { normalizePlaylistThumbnail } from '../../../helpers/playlist-thumbnails'
 import {
   convertLibreTubeSubscriptions,
@@ -1785,6 +1786,7 @@ async function importPlaylistDatabase(data) {
     'addVideosToTop',
     'shuffleByDefault',
     'removeWatchedVideos',
+    'removeWatchedVideosThreshold',
     'sortOrder',
     'sourcePlaylistId',
   ]
@@ -1798,6 +1800,7 @@ async function importPlaylistDatabase(data) {
     'lastUpdatedAt',
     'lastPlayedAt',
     'preferencesUpdatedAt',
+    'watchedThresholdUpdatedAt',
     'removeOnWatched',
 
     'thumbnail',
@@ -1877,6 +1880,8 @@ async function importPlaylistDatabase(data) {
         if (isPlaylistSortOrder(playlistData.sortOrder)) {
           playlistObject.sortOrder = playlistData.sortOrder
         }
+      } else if (key === 'removeWatchedVideosThreshold') {
+        playlistObject.removeWatchedVideosThreshold = normalizeRemoveWatchedVideosThreshold(playlistData.removeWatchedVideosThreshold)
       } else if (key === 'sourcePlaylistId') {
         if (typeof playlistData.sourcePlaylistId === 'string' && playlistData.sourcePlaylistId !== '') {
           playlistObject.sourcePlaylistId = playlistData.sourcePlaylistId
@@ -1906,9 +1911,7 @@ async function importPlaylistDatabase(data) {
 
     if (targetPlaylist === undefined) {
       // Saved options are a local edit, so sync keeps them over the server's copy of the playlist
-      if (BOOLEAN_PLAYLIST_KEYS.some(key => Object.hasOwn(playlistObject, key))) {
-        playlistObject.preferencesUpdatedAt = Date.now()
-      }
+      stampPlaylistPreferenceEdits(playlistObject)
       newPlaylists.push(playlistObject)
       return
     }
@@ -1982,6 +1985,7 @@ async function importPlaylistDatabase(data) {
       ...(Object.hasOwn(playlistObject, 'addVideosToTop') ? { addVideosToTop: playlistObject.addVideosToTop } : {}),
       ...(Object.hasOwn(playlistObject, 'shuffleByDefault') ? { shuffleByDefault: playlistObject.shuffleByDefault } : {}),
       ...(Object.hasOwn(playlistObject, 'removeWatchedVideos') ? { removeWatchedVideos: playlistObject.removeWatchedVideos } : {}),
+      ...(Object.hasOwn(playlistObject, 'removeWatchedVideosThreshold') ? { removeWatchedVideosThreshold: playlistObject.removeWatchedVideosThreshold } : {}),
       ...(Object.hasOwn(playlistObject, 'sortOrder') ? { sortOrder: playlistObject.sortOrder } : {}),
       ...(Object.hasOwn(playlistObject, 'sourcePlaylistId') ? { sourcePlaylistId: playlistObject.sourcePlaylistId } : {}),
       videos: orderedVideos

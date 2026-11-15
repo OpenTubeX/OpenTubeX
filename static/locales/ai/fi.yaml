@@ -281,7 +281,11 @@ User Playlists:
   Add new videos to the top (custom order): "Lisää uudet videot alkuun (oma järjestys)"
   Shuffle videos by default: "Toista videot oletuksena satunnaisessa järjestyksessä"
   Remove videos once watched: "Poista videot, kun ne on katsottu"
-  Remove videos once watched Tooltip: "Kun toistat tätä soittolistaa, jokainen video poistetaan siitä heti, kun se saavuttaa tietosuoja-asetuksissa määritetyn katsotun prosenttiosuuden kynnyksen."
+  Remove videos once watched Tooltip: "Kun toistat tätä soittolistaa, jokainen video poistetaan siitä heti, kun se saavuttaa poistorajan."
+  Use global watched threshold: "Käytä yleistä katsotuksi merkitsemisen rajaa"
+  Use global watched threshold Tooltip: "Poistaa videot heti, kun ne saavuttavat tietosuoja-asetuksissa määritetyn katsotuksi merkitsemisen rajan."
+  Removal threshold: "Poistoraja"
+  Removal threshold Tooltip: "Video poistetaan, kun valittu prosenttiosuus on saavutettu ja videota on jäljellä enintään 2 minuuttia. Jos rajaksi valitaan 0 %, video poistetaan toiston alkaessa. Jos rajaksi valitaan 100 %, video poistetaan toiston päättyessä."
   Repair Playlists: Korjaa soittolistat
   Repair Description: Palauta puuttuvat videotiedot YouTube Takeout -ZIP-tiedoston tuonnin jälkeen. Soittolistojen järjestys ei muutu.
   Remove Unavailable Videos: "Poista videot, jotka eivät ole käytettävissä"

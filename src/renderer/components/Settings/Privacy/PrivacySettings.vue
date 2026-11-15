@@ -160,6 +160,7 @@ import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
 import FtTooltip from '../../FtTooltip/FtTooltip.vue'
 
 import { compactAllDatastores } from '../../../../datastores/handlers/index'
+import { normalizeRemoveWatchedVideosThreshold } from '../../../helpers/playlist-preferences-sync'
 import { showToast } from '../../../helpers/utils'
 import store from '../../../store/index'
 
@@ -316,9 +317,12 @@ function updateWatchedProgressSavingMode(value) {
   store.dispatch('updateWatchedProgressSavingMode', value)
 }
 
-// Playlists that remove watched videos use the threshold even without history
+// Playlists that remove watched videos use the threshold even without history,
+// unless they have their own
 /** @type {import('vue').ComputedRef<boolean>} */
-const playlistRemovesWatchedVideos = computed(() => store.getters.getAllPlaylists.some(playlist => playlist.removeWatchedVideos === true))
+const playlistRemovesWatchedVideos = computed(() => store.getters.getAllPlaylists.some(playlist => (
+  playlist.removeWatchedVideos === true && normalizeRemoveWatchedVideosThreshold(playlist.removeWatchedVideosThreshold) === null
+)))
 
 /** @type {import('vue').ComputedRef<number>} */
 const watchedPercentageThreshold = computed(() => store.getters.getWatchedPercentageThreshold)

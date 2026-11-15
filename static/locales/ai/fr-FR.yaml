@@ -281,7 +281,11 @@ User Playlists:
   Add new videos to the top (custom order): "Ajouter les nouvelles vidéos en haut (ordre personnalisé)"
   Shuffle videos by default: "Lire les vidéos en ordre aléatoire par défaut"
   Remove videos once watched: "Retirer les vidéos une fois regardées"
-  Remove videos once watched Tooltip: "Lorsque vous lisez cette playlist, chaque vidéo en est retirée dès qu’elle atteint le seuil de pourcentage visionné défini dans les paramètres de confidentialité."
+  Remove videos once watched Tooltip: "Lorsque vous lisez cette playlist, chaque vidéo en est retirée dès qu’elle atteint le seuil de retrait."
+  Use global watched threshold: "Utiliser le seuil de visionnage global"
+  Use global watched threshold Tooltip: "Retire les vidéos dès qu’elles atteignent le seuil de visionnage en pourcentage défini dans les paramètres de confidentialité."
+  Removal threshold: "Seuil de retrait"
+  Removal threshold Tooltip: "Les vidéos sont retirées lorsque le pourcentage sélectionné est atteint et qu’il reste au maximum 2 minutes. À 0 %, elles le sont au début de la lecture. À 100 %, elles le sont à la fin de la lecture."
   Repair Playlists: Réparer les playlists
   Repair Description: Restaurez les informations vidéo manquantes après l’importation d’un ZIP YouTube Takeout. L’ordre des playlists reste inchangé.
   Remove Unavailable Videos: "Supprimer les vidéos indisponibles"

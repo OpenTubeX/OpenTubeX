@@ -284,7 +284,11 @@ User Playlists:
   Add new videos to the top (custom order): "Dodaj nove videozapise na vrh (prilagođeni redoslijed)"
   Shuffle videos by default: "Prema zadanim postavkama reproduciraj videozapise nasumično"
   Remove videos once watched: "Ukloni videozapise nakon gledanja"
-  Remove videos once watched Tooltip: "Kada reproduciraš ovaj popis za reprodukciju, svaki se videozapis uklanja s njega čim dosegne prag postotka gledanja postavljen u postavkama privatnosti."
+  Remove videos once watched Tooltip: "Kada reproduciraš ovaj popis za reprodukciju, svaki se videozapis uklanja s njega čim dosegne prag za uklanjanje."
+  Use global watched threshold: "Koristi globalni prag postotka gledanja"
+  Use global watched threshold Tooltip: "Uklanja videozapise čim dosegnu prag postotka gledanja postavljen u postavkama privatnosti."
+  Removal threshold: "Prag za uklanjanje"
+  Removal threshold Tooltip: "Videozapisi se uklanjaju nakon što dosegnu odabrani postotak i preostanu im najviše 2 minute. Pri 0 % uklanjaju se na početku reprodukcije. Pri 100 % uklanjaju se na završetku reprodukcije."
   Repair Playlists: Popravi popise za reprodukciju
   Repair Description: Vrati nedostajuće podatke o videozapisima nakon uvoza ZIP datoteke iz usluge YouTube Takeout. Redoslijed u popisima ostaje isti.
   Remove Unavailable Videos: "Uklonite nedostupne videozapise"

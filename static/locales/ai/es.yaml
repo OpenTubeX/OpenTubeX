@@ -225,7 +225,11 @@ User Playlists:
   Add new videos to the top (custom order): "Añadir vídeos nuevos al principio (orden personalizado)"
   Shuffle videos by default: "Reproducir vídeos en orden aleatorio de forma predeterminada"
   Remove videos once watched: "Quitar los vídeos una vez vistos"
-  Remove videos once watched Tooltip: "Cuando reproduces esta lista de reproducción, cada vídeo se quita de ella en cuanto alcanza el umbral de porcentaje visto definido en los ajustes de privacidad."
+  Remove videos once watched Tooltip: "Cuando reproduces esta lista de reproducción, cada vídeo se quita de ella en cuanto alcanza el umbral de eliminación."
+  Use global watched threshold: "Usar el umbral global de porcentaje visto"
+  Use global watched threshold Tooltip: "Quita los vídeos en cuanto alcanzan el umbral de porcentaje visto definido en los ajustes de privacidad."
+  Removal threshold: "Umbral de eliminación"
+  Removal threshold Tooltip: "Los vídeos se quitan después de alcanzar el porcentaje seleccionado y cuando quedan como máximo 2 minutos. Al 0 %, se quitan al iniciar la reproducción. Al 100 %, se quitan cuando termina."
   Repair Playlists: Reparar listas de reproducción
   Repair Description: Restaura los datos de vídeo que faltan tras importar un ZIP de YouTube Takeout. El orden de las listas se mantiene.
   Remove Unavailable Videos: "Eliminar vídeos no disponibles"

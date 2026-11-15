@@ -282,7 +282,11 @@ User Playlists:
   Add new videos to the top (custom order): "Tambahkan video baru di bagian atas (urutan khusus)"
   Shuffle videos by default: "Acak video secara default"
   Remove videos once watched: "Hapus video setelah ditonton"
-  Remove videos once watched Tooltip: "Saat Anda memutar playlist ini, setiap video dihapus darinya begitu mencapai ambang persentase ditonton yang diatur di pengaturan privasi."
+  Remove videos once watched Tooltip: "Saat Anda memutar playlist ini, setiap video dihapus darinya begitu mencapai ambang penghapusan."
+  Use global watched threshold: "Gunakan ambang persentase sudah ditonton global"
+  Use global watched threshold Tooltip: "Menghapus video begitu mencapai ambang persentase sudah ditonton yang diatur di pengaturan privasi."
+  Removal threshold: "Ambang penghapusan"
+  Removal threshold Tooltip: "Video dihapus setelah mencapai persentase yang dipilih dan menyisakan waktu tidak lebih dari 2 menit. Pada 0%, video dihapus saat pemutaran dimulai. Pada 100%, video dihapus saat pemutaran berakhir."
   Repair Playlists: Perbaiki playlist
   Repair Description: Pulihkan detail video yang hilang setelah mengimpor ZIP YouTube Takeout. Urutan playlist tetap sama.
   Remove Unavailable Videos: "Hapus video yang tidak tersedia"

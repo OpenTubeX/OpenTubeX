@@ -282,7 +282,11 @@ User Playlists:
   Add new videos to the top (custom order): "Ychwanegu fideos newydd ar y brig (trefn bersonol)"
   Shuffle videos by default: "Cymysgu fideos yn ddiofyn"
   Remove videos once watched: "Tynnu fideos ar ôl eu gwylio"
-  Remove videos once watched Tooltip: "Pan fyddwch yn chwarae'r rhestr chwarae hon, caiff pob fideo ei dynnu ohoni cyn gynted ag y bydd yn cyrraedd y trothwy canran gwylio a osodwyd yn y gosodiadau preifatrwydd."
+  Remove videos once watched Tooltip: "Pan fyddwch yn chwarae'r rhestr chwarae hon, caiff pob fideo ei dynnu ohoni cyn gynted ag y bydd yn cyrraedd y trothwy tynnu."
+  Use global watched threshold: "Defnyddio'r trothwy canran gwylio byd-eang"
+  Use global watched threshold Tooltip: "Yn tynnu fideos cyn gynted ag y byddant yn cyrraedd y trothwy canran gwylio a osodwyd yn y gosodiadau preifatrwydd."
+  Removal threshold: "Trothwy tynnu"
+  Removal threshold Tooltip: "Caiff fideos eu tynnu ar ôl cyrraedd y ganran a ddewiswyd a phan nad oes mwy na 2 funud ar ôl. Ar 0%, cânt eu tynnu pan fydd chwarae'n dechrau. Ar 100%, cânt eu tynnu pan fydd chwarae'n gorffen."
   Repair Playlists: Atgyweirio rhestrau chwarae
   Repair Description: Adfer manylion fideo coll ar ôl mewnforio ZIP YouTube Takeout. Mae trefn y rhestrau chwarae yn aros yr un fath.
   Remove Unavailable Videos: "Dileu fideos nad ydynt ar gael"
