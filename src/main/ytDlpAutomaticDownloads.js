@@ -182,6 +182,7 @@ async function getAutomaticVideoPublishedAt(videoId, channelId) {
   }
 
   const args = [
+    '--ignore-config',
     '--flat-playlist',
     '--dump-single-json',
     '--no-playlist',

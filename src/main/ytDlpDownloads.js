@@ -523,7 +523,10 @@ async function startYtDlpDownload(
     return { skipped: 'already-downloaded' }
   }
 
+  // yt-dlp would otherwise load a yt-dlp.conf from the download folder, which
+  // anything that saves there can write, and run its `--exec` commands.
   const args = [
+    '--ignore-config',
     '--newline',
     '--progress',
     '--print',
@@ -675,7 +678,7 @@ async function startYtDlpDownload(
   if (directoryFields.length > 0) {
     // Restricted names apply Unicode normalization, which can join an ASCII
     // letter with a following mark into a character that sanitizing removes.
-    // This also overrides the option from a yt-dlp configuration file.
+    // This also overrides a `--restrict-filenames` custom argument.
     args.push('--replace-in-metadata', directoryFields.join(','), DOT_FIELD_PATTERN, '_', '--no-restrict-filenames')
   }
 
