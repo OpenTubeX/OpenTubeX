@@ -159,7 +159,8 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     youTubeAccountWatchHistory: false,
     // Loading a video's rating tells YouTube which videos are opened.
     youTubeAccountVideoRatings: false,
-    youTubeAccountReplyNotifications: false,
+    // Watches the comments posted with the account for replies.
+    youTubeAccountReplyNotifications: true,
     ytDlpPlaybackAuthMode: 'none',
     ytDlpPlaybackCookiesPath: '',
     ytDlpPlaybackCookiesBrowser: '',
@@ -531,6 +532,8 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     subscribedChannelsCustomOrder: [],
     generalAutoLoadMorePaginatedItemsEnabled: true,
     autoLoadComments: true,
+    // Watching comments for replies, with the bell on comments.
+    commentReplyNotifications: true,
     enablePullToRefresh: true,
     hapticFeedback: true,
     hapticFeedbackIgnoresSystemSetting: false,

@@ -64,14 +64,6 @@
         @change="updateGeneralAutoLoadMorePaginatedItemsEnabled"
       />
       <FtToggleSwitch
-        :label="t('Settings.General Settings.Auto Load Comments.Label')"
-        :default-value="store.getters.getAutoLoadComments"
-        setting-key="autoLoadComments"
-        :compact="true"
-        :tooltip="t('Settings.General Settings.Auto Load Comments.Tooltip')"
-        @change="store.dispatch('updateAutoLoadComments', $event)"
-      />
-      <FtToggleSwitch
         v-if="USING_ELECTRON"
         :label="t('Settings.General Settings.Use tray icon')"
         :default-value="trayEnabled"
@@ -581,19 +573,23 @@ function updateStartupBehavior(value) {
 
 const enableDownloads = computed(() => store.getters.getEnableDownloads)
 
-/** @type {import('vue').ComputedRef<'' | 'history' | 'markAsFullySeen' | 'copyYoutube' | 'openYoutube' | 'download'>} */
+/** @type {import('vue').ComputedRef<'' | 'history' | 'markAsFullySeen' | 'markAsSeen' | 'playNext' | 'addToQueue' | 'openBackgroundTab' | 'copyYoutube' | 'openYoutube' | 'download'>} */
 const extraThumbnailAction = computed(() => store.getters.getExtraThumbnailAction)
 
 const effectiveExtraThumbnailAction = computed(() => (
-  !enableDownloads.value && extraThumbnailAction.value === 'download'
-    ? ''
-    : extraThumbnailAction.value
+  extraThumbnailActionValues.value.includes(extraThumbnailAction.value)
+    ? extraThumbnailAction.value
+    : ''
 ))
 
 const extraThumbnailActionValues = computed(() => [
   '',
   'history',
   'markAsFullySeen',
+  'markAsSeen',
+  'playNext',
+  'addToQueue',
+  ...(USING_ELECTRON && store.getters.getTabsEnabled ? ['openBackgroundTab'] : []),
   'copyYoutube',
   'openYoutube',
   ...(supportsYtDlp && enableDownloads.value ? ['download'] : [])
@@ -603,13 +599,17 @@ const extraThumbnailActionNames = computed(() => [
   t('Settings.General Settings.Extra Thumbnail Action Button.None'),
   t('Settings.General Settings.Extra Thumbnail Action Button.Mark as Watched'),
   t('Video.Mark As Fully Watched'),
+  t('Subscriptions.Mark As Seen'),
+  t('Video.Play Next'),
+  t('Video.Add to Queue'),
+  ...(USING_ELECTRON && store.getters.getTabsEnabled ? [t('Context Menu.Open in a Background Tab')] : []),
   t('Settings.General Settings.Extra Thumbnail Action Button.Copy YouTube Link'),
   t('Settings.General Settings.Extra Thumbnail Action Button.Open in YouTube'),
   ...(supportsYtDlp && enableDownloads.value ? [t('Downloads.Download Video')] : [])
 ])
 
 /**
- * @param {'' | 'history' | 'markAsFullySeen' | 'copyYoutube' | 'openYoutube' | 'download'} value
+ * @param {'' | 'history' | 'markAsFullySeen' | 'markAsSeen' | 'playNext' | 'addToQueue' | 'openBackgroundTab' | 'copyYoutube' | 'openYoutube' | 'download'} value
  */
 function updateExtraThumbnailAction(value) {
   store.dispatch('updateExtraThumbnailAction', value)

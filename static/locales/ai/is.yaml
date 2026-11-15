@@ -356,6 +356,7 @@ History:
 Settings:
   Experimental Badge: Tilraun
   YouTube Account Settings:
+    Watch Posted Comments: "Vakta svör við athugasemdum sem ég birti"
     YouTube Account Settings: "YouTube-reikningur"
     Unofficial App Warning: "OpenTubeX er ekki opinbert YouTube-forrit. Þegar þú skráir þig inn tengist það sem þú gerir hér Google-reikningnum þínum og Google getur takmarkað eða bannað reikninga sem nota óopinber forrit. Skráðu þig aðeins inn með reikningi sem þú mátt við að missa."
     Sign In Explanation: "OpenTubeX skráir sig inn eins og sjónvarpsforrit: þú samþykkir innskráninguna á vefsvæði Google og OpenTubeX sér aldrei lykilorðið þitt. Innskráningin helst á þessu tæki og er hvorki samstillt né afrituð."
@@ -387,7 +388,6 @@ Settings:
     Sync Now: "Samstilla núna"
     Synced: "Samstillt við YouTube"
     Sync Failed: "Ekki tókst að samstilla við YouTube: {error}"
-    Reply Notifications: "Láta mig vita af svörum við athugasemdum mínum"
   Diagnostics:
     Diagnostics: Greining
     Description: Á meðan greiningarannáll er virkur geymir OpenTubeX nýleg annálaskilaboð í minni svo þú getir hengt þau við villutilkynningar. Það vistar þau aldrei né sendir að eigin frumkvæði og ef slökkt er á annálnum er þeim eytt. Skýrslur sleppa vafrakökum, tókum, IP-tölum og URL-færibreytum, en þær geta innihaldið auðkenni myndskeiða sem þú spilaðir, svo farðu yfir skýrslu áður en þú deilir henni.
@@ -478,6 +478,11 @@ Settings:
       Off: "Slökkt"
       On Metered Networks: "Á mældum netum"
       Always: "Alltaf"
+    Stop Watching: "Hætta að vakta"
+    No Watched Comments: "Engar athugasemdir eru vaktaðar. Vaktaðu athugasemd með bjölluhnappnum við hliðina á henni."
+    Your Comment: "Athugasemdin þín"
+    Watched Comments: "Vaktaðar athugasemdir"
+    Reply Notifications: "Virkja tilkynningar um svör"
     Built-in Streams:
       Built-in Streams: "Innbyggðir straumar"
       Automatic: "Sjálfvirkt"
@@ -554,7 +559,6 @@ Settings:
       Force On: Alltaf á
       Force Off: Alltaf af
     Comment Translation:
-      Title: Þýðingar ummæla
       Enable: Virkja þýðingar ummæla
       Never Translate: Aldrei þýða ummæli á
       Choose Language: Veldu tungumál
@@ -2248,6 +2252,9 @@ Chapters:
   Chapter Loop Stopped: 'Hætt að endurtaka kafla'
   Sync to Video Time: 'Samstilla við tíma myndskeiðs'
 Comments:
+  Watch Failed: "Ekki tókst að vakta svör við athugasemdinni"
+  Stop Watching for Replies: "Hætta að vakta svör"
+  Watch for Replies: "Vakta svör"
   Image unavailable: "Myndin er ekki tiltæk"
   Comment Count: '{count} athugasemd | {count} athugasemdir'
   Show Comments: Sýna athugasemdir
@@ -2285,12 +2292,13 @@ Description:
   Music: Tónlist
 Tooltips:
   YouTube Account Settings:
+    Watch Posted Comments: "Athugasemdir sem þú birtir hér eru vaktaðar sjálfkrafa fyrir svör, svo lengi sem kveikt er á tilkynningum um svör í stillingum athugasemda."
     Add to YouTube Watch History: "Myndskeið sem þú spilar bætast við áhorfsferilinn þinn á YouTube, svo meðmæli YouTube læri af þeim. Engu er bætt við á meðan ferillinn er í bið á YouTube."
     Rate Videos: "Sýnir hnappa til að líka við og líka ekki við myndskeið. Til að sýna einkunnina þína er hvert myndskeið sem þú opnar flett upp á YouTube með reikningnum þínum, svo YouTube veit hvaða myndskeið þú opnar, jafnvel þegar þeim er ekki bætt við áhorfsferilinn þinn."
     Sync Subscriptions: "Rásum sem þú gerist áskrifandi að á YouTube er bætt við „Allar rásir“, og rásir sem þú segir upp áskrift að þar eru fjarlægðar úr öllum notkunarsniðum. Að gerast áskrifandi eða segja upp áskrift hér í „Allar rásir“ gerir það sama á YouTube."
     Sync Playlists: "YouTube-spilunarlistarnir þínir, „Horfa síðar“ og „Myndskeið sem mér líkar“ birtast í „Spilunarlistarnir þínir“, og breytingar sem þú gerir á þeim hér eru einnig gerðar á YouTube. Þeir eru ekki samstilltir við önnur tæki þín og eru ekki teknir með þegar þú flytur út alla spilunarlista eða tekur afrit af gögnunum þínum. Ef slökkt er á þessu eru þeir fjarlægðir úr þessu tæki en ekki af YouTube."
-    Reply Notifications: "OpenTubeX athugar hvort ný svör hafi borist við athugasemdum sem þú birtir hér síðustu 30 daga. Athugasemdir sem þú birtir annars staðar, t.d. á vefsvæði YouTube, eru ekki teknar með."
   General Settings:
+    Reply Notifications: "OpenTubeX athugar í 30 daga hvort ný svör berist við athugasemdunum sem þú vaktar. Vaktaðu hvaða athugasemd sem er með bjölluhnappnum við hliðina á henni."
     Built-in Streams: |
       Sjálfvirkt spilar flest myndskeið í gegnum visionOS-biðlara YouTube, sem byrjar hraðar og styður sjálfvirk gæði. Beinar útsendingar og myndskeið sem hann getur ekki spilað nota SABR.
       Aðeins SABR notar alltaf vefbiðlara YouTube, sem byrjar hægar og hefur engin sjálfvirk gæði.
@@ -2809,6 +2817,7 @@ Platforms:
   Load Error: Ekki tókst að hlaða þessari síðu frá {platform}.
   Empty Tab: Hér er ekkert ennþá.
 YouTube Account:
+  "{author} replied to {commentAuthor}": "{author} svaraði {commentAuthor}"
   Like: "Líkar við"
   Dislike: "Líkar ekki við"
   Rating Failed: "Ekki tókst að gefa einkunn á YouTube: {error}"

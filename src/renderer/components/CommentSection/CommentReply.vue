@@ -131,6 +131,20 @@
           />
         </button>
         <button
+          v-if="canWatchComments && reply.authorId"
+          type="button"
+          class="commentWatchButton"
+          :class="{ active: isCommentWatched(reply) }"
+          :title="watchLabel(reply)"
+          :aria-label="watchLabel(reply)"
+          :aria-pressed="isCommentWatched(reply)"
+          @click="toggleCommentWatch(reply)"
+        >
+          <FtIcon
+            :icon="['fas', isCommentWatched(reply) ? 'bell' : 'bell-outline']"
+          />
+        </button>
+        <button
           type="button"
           class="commentCopyLink"
           :title="$t('Video.Copy YouTube Link')"
@@ -312,11 +326,13 @@ import FtLoader from '../FtLoader/FtLoader.vue'
 import CommentAccountActions from './CommentAccountActions.vue'
 import CommentComposer from './CommentComposer.vue'
 import { getRootCommentId, youTubeCommentsKey } from './youTubeComments'
+import { useCommentWatching } from './commentWatching'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import { formatViewCount, getRelativeTimeFromDate } from '../../helpers/utils'
 import { getCommentReplyCount } from '../../helpers/comment-replies'
 
 const { t } = useI18n()
+const { canWatchComments, isCommentWatched, watchLabel, toggleCommentWatch } = useCommentWatching()
 const youTubeComments = inject(youTubeCommentsKey, null)
 
 const props = defineProps({

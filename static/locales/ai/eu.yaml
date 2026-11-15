@@ -356,6 +356,7 @@ History:
 Settings:
   Experimental Badge: Esperimentala
   YouTube Account Settings:
+    Watch Posted Comments: "Jarraitu argitaratzen ditudan iruzkinen erantzunak"
     YouTube Account Settings: "YouTube kontua"
     Unofficial App Warning: "OpenTubeX ez da YouTube-ren aplikazio ofiziala. Saioa hastean, hemen egiten duzuna zure Google kontuarekin lotzen da, eta Google-k aplikazio ez-ofizialak erabiltzen dituzten kontuak mugatu edo blokeatu ditzake. Hasi saioa galtzea axola ez zaizun kontu batekin soilik."
     Sign In Explanation: "OpenTubeX-ek telebista-aplikazio batek bezala hasten du saioa: Google-ren webgunean onartzen duzu, eta OpenTubeX-ek ez du inoiz zure pasahitza ikusten. Saioa gailu honetan geratzen da, eta ez da sinkronizatzen ez babeskopietan gordetzen."
@@ -387,7 +388,6 @@ Settings:
     Sync Now: "Sinkronizatu orain"
     Synced: "YouTube-rekin sinkronizatuta"
     Sync Failed: "Ezin izan da YouTube-rekin sinkronizatu: {error}"
-    Reply Notifications: "Jakinarazi nire iruzkinei emandako erantzunak"
   Diagnostics:
     Diagnostics: Diagnostikoa
     Description: Diagnostiko-erregistroa aktibatuta dagoen bitartean, OpenTubeX-ek azken erregistro-mezuak memorian gordetzen ditu, akats-txostenei erantsi ahal izateko. Ez ditu inoiz bere kabuz gordetzen edo bidaltzen, eta erregistroa desaktibatzean ezabatu egiten dira. Txostenek ez dituzte cookieak, tokenak, IP helbideak eta URL parametroak barne hartzen, baina erreproduzitu dituzun bideoen IDak izan ditzakete; beraz, berrikusi txostena partekatu aurretik.
@@ -478,6 +478,11 @@ Settings:
       Off: "Desaktibatuta"
       On Metered Networks: "Sare neurtuetan"
       Always: "Beti"
+    Stop Watching: "Utzi jarraitzeari"
+    No Watched Comments: "Ez da iruzkinik jarraitzen. Jarraitu iruzkin bat ondoko kanpai-botoiarekin."
+    Your Comment: "Zure iruzkina"
+    Watched Comments: "Jarraitutako iruzkinak"
+    Reply Notifications: "Gaitu erantzunen jakinarazpenak"
     Built-in Streams:
       Built-in Streams: "Korronte integratuak"
       Automatic: "Automatikoa"
@@ -554,7 +559,6 @@ Settings:
       Force On: Behartu gaituta
       Force Off: Behartu desgaituta
     Comment Translation:
-      Title: Iruzkinen itzulpena
       Enable: Gaitu iruzkinen itzulpena
       Never Translate: Ez itzuli hizkuntza honetako iruzkinak
       Choose Language: Aukeratu hizkuntza
@@ -2243,6 +2247,9 @@ Chapters:
   Chapter Loop Stopped: 'Kapituluaren errepikapena gelditu da'
   Sync to Video Time: 'Sinkronizatu bideoaren denborarekin'
 Comments:
+  Watch Failed: "Ezin izan dira iruzkinaren erantzunak jarraitu"
+  Stop Watching for Replies: "Utzi erantzunak jarraitzeari"
+  Watch for Replies: "Jarraitu erantzunak"
   Image unavailable: "Irudia ez dago erabilgarri"
   Comment Count: Iruzkin 1 | {count} iruzkin
   Show Comments: Erakutsi iruzkinak
@@ -2280,12 +2287,13 @@ Description:
   Music: Musika
 Tooltips:
   YouTube Account Settings:
+    Watch Posted Comments: "Hemen argitaratzen dituzun iruzkinen erantzunak automatikoki jarraitzen dira, iruzkinen ezarpenetan erantzunen jakinarazpenak aktibatuta dauden bitartean."
     Add to YouTube Watch History: "Erreproduzitzen dituzun bideoak zure YouTube-ko ikustaldi-historikora gehitzen dira, YouTube-ren gomendioek haietatik ikas dezaten. Historikoa YouTube-n pausatuta dagoen bitartean, ez da ezer gehitzen."
     Rate Videos: "Bideoetan gustuko dut eta ez dut gustuko botoiak erakusten ditu. Zure balorazioa erakusteko, irekitzen duzun bideo bakoitza zure kontuarekin bilatzen da YouTuben, beraz YouTubek badaki zein bideo irekitzen dituzun, ikusitakoen historian gehitzen ez badira ere."
     Sync Subscriptions: "YouTube-n harpidetzen zaren kanalak «Kanal guztiak» profilera gehitzen dira, eta han harpidetza kentzen diezun kanalak profil guztietatik kentzen dira. Hemen «Kanal guztiak» profilean harpidetzeak edo harpidetza kentzeak gauza bera egiten du YouTube-n."
     Sync Playlists: "Zure YouTube-ko erreprodukzio-zerrendak, «Ikusi geroago» eta «Gustuko bideoak» «Zure erreprodukzio-zerrendak» atalean agertzen dira, eta hemen haietan egiten dituzun aldaketak YouTube-n ere egiten dira. Ez dira zure beste gailuekin sinkronizatzen, eta ez dira sartzen erreprodukzio-zerrenda guztiak esportatzen dituzunean edo zure datuen babeskopia egiten duzunean. Hau desaktibatzean gailu honetatik kentzen dira, baina ez YouTube-tik."
-    Reply Notifications: "OpenTubeX-ek azken 30 egunetan hemen argitaratu dituzun iruzkinek erantzun berririk duten egiaztatzen du. Beste nonbait argitaratutako iruzkinak, adibidez YouTube-ren webgunean, ez dira sartzen."
   General Settings:
+    Reply Notifications: "OpenTubeX-ek 30 egunez egiaztatzen du jarraitzen dituzun iruzkinek erantzun berririk duten. Jarraitu edozein iruzkin ondoko kanpai-botoiarekin."
     Built-in Streams: |
       Automatikoak bideo gehienak YouTuberen visionOS bezeroaren bidez erreproduzitzen ditu; azkarrago hasten da eta kalitate automatikoa onartzen du. Zuzeneko emanaldiek eta erreproduzitu ezin dituen bideoek SABR erabiltzen dute.
       SABR soilik aukerak beti YouTuberen web bezeroa erabiltzen du; motelago hasten da eta ez du kalitate automatikorik.
@@ -2804,6 +2812,7 @@ Platforms:
   Load Error: Ezin izan da orri hau {platform} plataformatik kargatu.
   Empty Tab: Ez dago ezer hemen oraindik.
 YouTube Account:
+  "{author} replied to {commentAuthor}": "{author}(e)k {commentAuthor}(r)i erantzun dio"
   Like: "Atsegin dut"
   Dislike: "Ez dut atsegin"
   Rating Failed: "Ezin izan da YouTube-n balorazioa eman: {error}"

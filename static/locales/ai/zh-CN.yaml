@@ -356,6 +356,7 @@ History:
 Settings:
   Experimental Badge: 实验性
   YouTube Account Settings:
+    Watch Posted Comments: "关注我发布的评论的回复"
     YouTube Account Settings: "YouTube 账号"
     Unofficial App Warning: "OpenTubeX 不是 YouTube 官方应用。登录后，你在这里的操作会与你的 Google 账号关联，Google 可能会限制或封禁使用非官方应用的账号。请只使用你能承受丢失的账号登录。"
     Sign In Explanation: "OpenTubeX 像电视应用一样登录：你在 Google 网站上批准登录，OpenTubeX 永远不会看到你的密码。登录信息仅保存在此设备上，不会同步或备份。"
@@ -387,7 +388,6 @@ Settings:
     Sync Now: "立即同步"
     Synced: "已与 YouTube 同步"
     Sync Failed: "无法与 YouTube 同步：{error}"
-    Reply Notifications: "我的评论收到回复时通知我"
   Diagnostics:
     Diagnostics: 诊断
     Description: 启用诊断日志后，OpenTubeX 会在内存中保留最近的日志消息，方便你将其附加到错误报告中。它绝不会自行保存或发送这些消息，关闭日志会将其删除。报告不包含 Cookie、令牌、IP 地址和 URL 参数，但可能包含你播放过的视频 ID，因此分享前请检查报告。
@@ -478,6 +478,11 @@ Settings:
       Off: "关闭"
       On Metered Networks: "按流量计费的网络"
       Always: "始终"
+    Stop Watching: "取消关注"
+    No Watched Comments: "没有正在关注的评论。使用评论旁边的铃铛按钮即可关注评论。"
+    Your Comment: "你的评论"
+    Watched Comments: "关注的评论"
+    Reply Notifications: "启用回复通知"
     Built-in Streams:
       Built-in Streams: "内置流"
       Automatic: "自动"
@@ -554,7 +559,6 @@ Settings:
       Force On: 强制开启
       Force Off: 强制关闭
     Comment Translation:
-      Title: 评论翻译
       Enable: 启用评论翻译
       Never Translate: 不翻译以下语言的评论
       Choose Language: 选择语言
@@ -2232,6 +2236,9 @@ Chapters:
   Chapter Loop Stopped: '已停止循环播放章节'
   Sync to Video Time: '同步到视频时间'
 Comments:
+  Watch Failed: "无法关注该评论的回复"
+  Stop Watching for Replies: "取消关注回复"
+  Watch for Replies: "关注回复"
   Image unavailable: "图片不可用"
   Comment Count: '{count} 条评论'
   Show Comments: 显示评论
@@ -2269,12 +2276,13 @@ Description:
   Music: 音乐
 Tooltips:
   YouTube Account Settings:
+    Watch Posted Comments: "只要在评论设置中开启了回复通知，你在此处发布的评论就会自动关注回复。"
     Sync Subscriptions: "你在 YouTube 上订阅的频道会添加到“所有频道”，在 YouTube 上取消订阅的频道会从所有配置文件中移除。在此处的“所有频道”中订阅或取消订阅，也会在 YouTube 上执行相同操作。"
     Sync Playlists: "你的 YouTube 播放列表、“稍后观看”和“赞过的视频”会显示在“您的播放列表”中，你在此处对它们所做的更改也会在 YouTube 上生效。它们不会同步到你的其他设备，在你导出所有播放列表或备份数据时也不会包含在内。关闭此选项会将它们从此设备中移除，但不会从 YouTube 中移除。"
     Add to YouTube Watch History: "你播放的视频会添加到你的 YouTube 观看历史记录中，让 YouTube 的推荐据此学习。在 YouTube 上暂停历史记录时，不会添加任何内容。"
     Rate Videos: "在视频上显示顶和踩按钮。为了显示你的评价，你打开的每个视频都会用你的账号在 YouTube 上查询，因此即使视频没有添加到观看记录中，YouTube 也会知道你打开了哪些视频。"
-    Reply Notifications: "OpenTubeX 会检查你在过去 30 天内在此发布的评论是否有新回复。在其他地方（例如 YouTube 网站）发布的评论不包括在内。"
   General Settings:
+    Reply Notifications: "OpenTubeX 会在 30 天内检查你关注的评论是否有新回复。使用评论旁边的铃铛按钮即可关注任意评论。"
     Built-in Streams: |
       自动模式通过 YouTube 的 visionOS 客户端播放大多数视频，启动更快并支持自动画质。直播和它无法播放的视频使用 SABR。
       仅 SABR 始终使用 YouTube 的网页客户端，启动较慢且没有自动画质。
@@ -2793,6 +2801,7 @@ Platforms:
   Load Error: 无法从 {platform} 加载此页面。
   Empty Tab: 这里还没有任何内容。
 YouTube Account:
+  "{author} replied to {commentAuthor}": "{author} 回复了 {commentAuthor}"
   Like: "喜欢"
   Dislike: "不喜欢"
   Rating Failed: "无法在 YouTube 上评分：{error}"

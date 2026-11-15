@@ -357,6 +357,7 @@ History:
 Settings:
   Experimental Badge: Arbrofol
   YouTube Account Settings:
+    Watch Posted Comments: "Dilyn atebion i sylwadau rwy'n eu postio"
     YouTube Account Settings: "Cyfrif YouTube"
     Unofficial App Warning: "Nid yw OpenTubeX yn ap YouTube swyddogol. Mae mewngofnodi yn cysylltu'r hyn rydych yn ei wneud yma â'ch cyfrif Google, a gall Google gyfyngu ar gyfrifon sy'n defnyddio apiau answyddogol neu eu gwahardd. Dim ond mewngofnodi gyda chyfrif y gallwch fforddio ei golli."
     Sign In Explanation: "Mae OpenTubeX yn mewngofnodi fel ap teledu: rydych chi'n ei gymeradwyo ar wefan Google, a dydy OpenTubeX byth yn gweld eich cyfrinair. Mae'r mewngofnodi'n aros ar y ddyfais hon ac nid yw'n cael ei gysoni na'i gadw wrth gefn."
@@ -388,7 +389,6 @@ Settings:
     Sync Now: "Cysoni nawr"
     Synced: "Wedi cysoni â YouTube"
     Sync Failed: "Methu cysoni â YouTube: {error}"
-    Reply Notifications: "Rhoi gwybod i mi am atebion i'm sylwadau"
   Diagnostics:
     Diagnostics: Diagnosteg
     Description: Tra bo'r log diagnostig ymlaen, mae OpenTubeX yn cadw negeseuon log diweddar yn y cof fel y gallwch eu hatodi i adroddiadau bygiau. Nid yw byth yn eu cadw na'u hanfon ar ei ben ei hun, ac mae diffodd y log yn eu dileu. Mae adroddiadau'n hepgor cwcis, tocynnau, cyfeiriadau IP a pharamedrau URL, ond gallant gynnwys IDs fideos rydych wedi'u chwarae, felly gwiriwch adroddiad cyn ei rannu.
@@ -479,6 +479,11 @@ Settings:
       Off: "I ffwrdd"
       On Metered Networks: "Ar rwydweithiau â mesurydd"
       Always: "Bob amser"
+    Stop Watching: "Peidio â dilyn"
+    No Watched Comments: "Does dim sylwadau'n cael eu dilyn. Dilynwch sylw gyda'r botwm cloch wrth ei ymyl."
+    Your Comment: "Eich sylw"
+    Watched Comments: "Sylwadau a ddilynir"
+    Reply Notifications: "Galluogi hysbysiadau atebion"
     Built-in Streams:
       Built-in Streams: "Ffrydiau adeiledig"
       Automatic: "Awtomatig"
@@ -555,7 +560,6 @@ Settings:
       Force On: Gorfodi ymlaen
       Force Off: Gorfodi i ffwrdd
     Comment Translation:
-      Title: Cyfieithiadau sylwadau
       Enable: Galluogi cyfieithiadau sylwadau
       Never Translate: Peidio byth â chyfieithu sylwadau yn
       Choose Language: Dewis iaith
@@ -2269,6 +2273,9 @@ Chapters:
   Chapter Loop Stopped: 'Wedi stopio ailadrodd y bennod'
   Sync to Video Time: 'Cysoni ag amser y fideo'
 Comments:
+  Watch Failed: "Methu dilyn y sylw am atebion"
+  Stop Watching for Replies: "Peidio â dilyn atebion"
+  Watch for Replies: "Dilyn atebion"
   Image unavailable: "Delwedd ddim ar gael"
   Comment Count: '{count} o sylwadau | 1 sylw | {count} sylw | {count} sylw | {count} sylw | {count} o sylwadau'
   Show Comments: Dangos sylwadau
@@ -2307,12 +2314,13 @@ Description:
   Music: Cerddoriaeth
 Tooltips:
   YouTube Account Settings:
+    Watch Posted Comments: "Caiff sylwadau rydych chi'n eu postio yma eu dilyn yn awtomatig am atebion, cyn belled â bod hysbysiadau atebion wedi'u troi ymlaen yng ngosodiadau'r sylwadau."
     Sync Subscriptions: "Mae sianeli rydych chi'n tanysgrifio iddyn nhw ar YouTube yn cael eu hychwanegu at “Pob Sianel”, ac mae sianeli rydych chi'n dad-danysgrifio ohonyn nhw yno yn cael eu tynnu o bob proffil. Mae tanysgrifio neu ddad-danysgrifio yn “Pob Sianel” yma yn gwneud yr un peth ar YouTube."
     Sync Playlists: "Mae eich rhestrau chwarae YouTube, “Gwylio Nes Ymlaen” a “Fideos a hoffwyd” yn ymddangos yn “Eich Rhestrau Chwarae”, ac mae newidiadau rydych chi'n eu gwneud iddyn nhw yma yn cael eu gwneud ar YouTube hefyd. Dydyn nhw ddim yn cael eu cysoni â'ch dyfeisiau eraill na'u cynnwys pan fyddwch chi'n allforio pob rhestr chwarae neu'n gwneud copi wrth gefn o'ch data. Mae diffodd hyn yn eu tynnu o'r ddyfais hon ond nid o YouTube."
     Add to YouTube Watch History: "Mae fideos rydych chi'n eu chwarae yn cael eu hychwanegu at eich hanes gwylio YouTube, fel bod argymhellion YouTube yn dysgu ohonyn nhw. Does dim yn cael ei ychwanegu tra bo'r hanes wedi'i oedi ar YouTube."
     Rate Videos: "Yn dangos botymau hoffi a pheidio â hoffi ar fideos. I ddangos eich sgôr, mae pob fideo rydych chi'n ei agor yn cael ei chwilio ar YouTube gyda'ch cyfrif, felly mae YouTube yn dysgu pa fideos rydych chi'n eu hagor, hyd yn oed pan nad ydyn nhw'n cael eu hychwanegu at eich hanes gwylio."
-    Reply Notifications: "Mae OpenTubeX yn gwirio'r sylwadau a bostiwyd gennych yma yn ystod y 30 diwrnod diwethaf am atebion newydd. Nid yw sylwadau a bostiwyd gennych yn rhywle arall, fel ar wefan YouTube, wedi'u cynnwys."
   General Settings:
+    Reply Notifications: "Mae OpenTubeX yn gwirio'r sylwadau rydych chi'n eu dilyn am atebion newydd am 30 diwrnod. Dilynwch unrhyw sylw gyda'r botwm cloch wrth ei ymyl."
     Built-in Streams: |
       Mae Awtomatig yn chwarae'r rhan fwyaf o fideos drwy gleient visionOS YouTube, sy'n cychwyn yn gynt ac yn cefnogi ansawdd awtomatig. Mae ffrydiau byw a fideos na all eu chwarae yn defnyddio SABR.
       Mae SABR yn unig bob amser yn defnyddio cleient gwe YouTube, sy'n cychwyn yn arafach ac nad oes ganddo ansawdd awtomatig.
@@ -2832,6 +2840,7 @@ Platforms:
   Load Error: Doedd dim modd llwytho'r dudalen hon o {platform}.
   Empty Tab: Does dim byd yma eto.
 YouTube Account:
+  "{author} replied to {commentAuthor}": "Atebodd {author} {commentAuthor}"
   Like: "Hoffi"
   Dislike: "Ddim yn hoffi"
   Rating Failed: "Methu rhoi sgôr ar YouTube: {error}"

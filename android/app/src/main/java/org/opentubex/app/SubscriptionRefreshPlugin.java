@@ -266,12 +266,31 @@ public class SubscriptionRefreshPlugin extends Plugin {
     }
 
     @PluginMethod
-    public void clearCommentReplies(PluginCall call) {
+    public void listCommentReplies(PluginCall call) {
+        // Reads under the lock the writes take, so it need not wait for upload checks.
+        try {
+            call.resolve(new JSObject().put("threads", CommentReplyNotifications.list(getContext())));
+        } catch (Exception error) {
+            call.reject("Unable to list the watched comments", error);
+        }
+    }
+
+    @PluginMethod
+    public void untrackCommentReplies(PluginCall call) {
+        JSObject comment = call.getObject("comment");
+        if (comment == null) {
+            call.reject("A comment is required");
+            return;
+        }
         Context context = getContext();
-        // After the tracking writes queued before it, which would bring the comments back.
+        // After the tracking writes queued before it, which would bring the comment back.
         UPLOADS.execute(() -> {
-            CommentReplyNotifications.clear(context);
-            call.resolve();
+            try {
+                CommentReplyNotifications.untrack(context, comment);
+                call.resolve();
+            } catch (Exception error) {
+                call.reject("Unable to stop watching the comment", error);
+            }
         });
     }
 

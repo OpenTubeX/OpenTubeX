@@ -356,6 +356,7 @@ History:
 Settings:
   Experimental Badge: Thử nghiệm
   YouTube Account Settings:
+    Watch Posted Comments: "Theo dõi phản hồi cho bình luận tôi đăng"
     YouTube Account Settings: "Tài khoản YouTube"
     Unofficial App Warning: "OpenTubeX không phải là ứng dụng YouTube chính thức. Khi đăng nhập, những gì bạn làm ở đây sẽ được liên kết với tài khoản Google của bạn, và Google có thể hạn chế hoặc cấm các tài khoản dùng ứng dụng không chính thức. Chỉ đăng nhập bằng tài khoản mà bạn chấp nhận bị mất."
     Sign In Explanation: "OpenTubeX đăng nhập giống như một ứng dụng TV: bạn phê duyệt trên trang web của Google và OpenTubeX không bao giờ thấy mật khẩu của bạn. Thông tin đăng nhập chỉ lưu trên thiết bị này và không được đồng bộ hay sao lưu."
@@ -387,7 +388,6 @@ Settings:
     Sync Now: "Đồng bộ ngay"
     Synced: "Đã đồng bộ với YouTube"
     Sync Failed: "Không thể đồng bộ với YouTube: {error}"
-    Reply Notifications: "Thông báo cho tôi về phản hồi cho bình luận của tôi"
   Diagnostics:
     Diagnostics: Chẩn đoán
     Description: Khi nhật ký chẩn đoán đang bật, OpenTubeX giữ các thông báo nhật ký gần đây trong bộ nhớ để bạn có thể đính kèm chúng vào báo cáo lỗi. Ứng dụng không bao giờ tự lưu hay gửi chúng, và tắt nhật ký sẽ xóa chúng. Báo cáo bỏ qua cookie, token, địa chỉ IP và tham số URL, nhưng có thể chứa ID của các video bạn đã phát, vì vậy hãy kiểm tra báo cáo trước khi chia sẻ.
@@ -478,6 +478,11 @@ Settings:
       Off: "Tắt"
       On Metered Networks: "Trên mạng đo lưu lượng"
       Always: "Luôn luôn"
+    Stop Watching: "Ngừng theo dõi"
+    No Watched Comments: "Không có bình luận nào đang được theo dõi. Theo dõi một bình luận bằng nút chuông bên cạnh."
+    Your Comment: "Bình luận của bạn"
+    Watched Comments: "Bình luận đang theo dõi"
+    Reply Notifications: "Bật thông báo phản hồi"
     Built-in Streams:
       Built-in Streams: "Luồng tích hợp"
       Automatic: "Tự động"
@@ -554,7 +559,6 @@ Settings:
       Force On: Luôn bật
       Force Off: Luôn tắt
     Comment Translation:
-      Title: Dịch bình luận
       Enable: Bật dịch bình luận
       Never Translate: Không bao giờ dịch bình luận bằng
       Choose Language: Chọn ngôn ngữ
@@ -2248,6 +2252,9 @@ Chapters:
   Chapter Loop Stopped: 'Đã dừng lặp lại chương'
   Sync to Video Time: 'Đồng bộ với thời gian video'
 Comments:
+  Watch Failed: "Không thể theo dõi phản hồi cho bình luận"
+  Stop Watching for Replies: "Ngừng theo dõi phản hồi"
+  Watch for Replies: "Theo dõi phản hồi"
   Image unavailable: "Hình ảnh không khả dụng"
   Comment Count: '{count} bình luận'
   Show Comments: Hiện bình luận
@@ -2286,12 +2293,13 @@ Description:
   Music: Âm nhạc
 Tooltips:
   YouTube Account Settings:
+    Watch Posted Comments: "Bình luận bạn đăng ở đây sẽ được tự động theo dõi phản hồi, miễn là thông báo phản hồi đang bật trong phần cài đặt bình luận."
     Sync Subscriptions: "Các kênh bạn đăng ký trên YouTube sẽ được thêm vào Tất cả kênh, còn các kênh bạn hủy đăng ký ở đó sẽ bị xóa khỏi mọi hồ sơ. Đăng ký hoặc hủy đăng ký trong Tất cả kênh tại đây cũng sẽ thực hiện tương tự trên YouTube."
     Sync Playlists: "Danh sách phát YouTube, Xem sau và Video đã thích của bạn sẽ xuất hiện trong Danh sách phát của bạn, và những thay đổi bạn thực hiện với chúng tại đây cũng được áp dụng trên YouTube. Chúng không được đồng bộ sang các thiết bị khác của bạn và không được bao gồm khi bạn xuất tất cả danh sách phát hoặc sao lưu dữ liệu. Tắt tùy chọn này sẽ xóa chúng khỏi thiết bị này nhưng không xóa khỏi YouTube."
     Add to YouTube Watch History: "Video bạn phát sẽ được thêm vào lịch sử xem YouTube của bạn để đề xuất của YouTube học hỏi từ đó. Không có gì được thêm khi lịch sử đang bị tạm dừng trên YouTube."
     Rate Videos: "Hiển thị nút thích và không thích trên video. Để hiển thị đánh giá của bạn, mỗi video bạn mở sẽ được tra cứu trên YouTube bằng tài khoản của bạn, vì vậy YouTube biết bạn mở những video nào, kể cả khi chúng không được thêm vào nhật ký xem."
-    Reply Notifications: "OpenTubeX kiểm tra phản hồi mới cho những bình luận bạn đã đăng tại đây trong 30 ngày qua. Các bình luận bạn đăng ở nơi khác, chẳng hạn như trên trang web YouTube, không được tính."
   General Settings:
+    Reply Notifications: "OpenTubeX kiểm tra phản hồi mới cho các bình luận bạn theo dõi trong 30 ngày. Theo dõi bất kỳ bình luận nào bằng nút chuông bên cạnh."
     Built-in Streams: |
       Tự động phát hầu hết video qua ứng dụng khách visionOS của YouTube, khởi động nhanh hơn và hỗ trợ chất lượng tự động. Các buổi phát trực tiếp và video mà nó không phát được sẽ dùng SABR.
       Chỉ SABR luôn dùng ứng dụng khách web của YouTube, khởi động chậm hơn và không có chất lượng tự động.
@@ -2811,6 +2819,7 @@ Platforms:
   Load Error: Không thể tải trang này từ {platform}.
   Empty Tab: Chưa có gì ở đây.
 YouTube Account:
+  "{author} replied to {commentAuthor}": "{author} đã trả lời {commentAuthor}"
   Like: "Thích"
   Dislike: "Không thích"
   Rating Failed: "Không thể đánh giá trên YouTube: {error}"

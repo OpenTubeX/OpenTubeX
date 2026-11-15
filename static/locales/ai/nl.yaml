@@ -361,6 +361,7 @@ History:
 Settings:
   Experimental Badge: Experimenteel
   YouTube Account Settings:
+    Watch Posted Comments: "Antwoorden volgen op reacties die ik plaats"
     YouTube Account Settings: "YouTube-account"
     Unofficial App Warning: "OpenTubeX is geen officiële YouTube-app. Als u inlogt, wordt wat u hier doet aan uw Google-account gekoppeld, en Google kan accounts die onofficiële apps gebruiken beperken of blokkeren. Log alleen in met een account dat u zich kunt veroorloven te verliezen."
     Sign In Explanation: "OpenTubeX logt in zoals een tv-app: u keurt het inloggen goed op de website van Google en OpenTubeX ziet uw wachtwoord nooit. De aanmelding blijft op dit apparaat en wordt niet gesynchroniseerd of in back-ups opgenomen."
@@ -392,7 +393,6 @@ Settings:
     Sync Now: "Nu synchroniseren"
     Synced: "Gesynchroniseerd met YouTube"
     Sync Failed: "Kan niet synchroniseren met YouTube: {error}"
-    Reply Notifications: "Laat me weten wanneer iemand op mijn reacties reageert"
   Diagnostics:
     Diagnostics: Diagnostiek
     Description: Zolang het diagnoselogboek is ingeschakeld, bewaart OpenTubeX recente logberichten in het geheugen zodat je ze aan bugrapporten kunt toevoegen. Het slaat ze nooit uit zichzelf op en verstuurt ze nooit, en als je het logboek uitschakelt, worden ze verwijderd. Rapporten laten cookies, tokens, IP-adressen en URL-parameters weg, maar kunnen ID's bevatten van video's die je hebt afgespeeld, dus controleer een rapport voordat je het deelt.
@@ -483,6 +483,11 @@ Settings:
       Off: "Uit"
       On Metered Networks: "Op netwerken met datalimiet"
       Always: "Altijd"
+    Stop Watching: "Niet meer volgen"
+    No Watched Comments: "Er worden geen reacties gevolgd. Volg een reactie met de belknop ernaast."
+    Your Comment: "Je reactie"
+    Watched Comments: "Gevolgde reacties"
+    Reply Notifications: "Meldingen over antwoorden inschakelen"
     Built-in Streams:
       Built-in Streams: "Ingebouwde streams"
       Automatic: "Automatisch"
@@ -559,7 +564,6 @@ Settings:
       Force On: Altijd aan
       Force Off: Altijd uit
     Comment Translation:
-      Title: Reacties vertalen
       Enable: Vertaling van reacties inschakelen
       Never Translate: Reacties nooit vertalen uit het
       Choose Language: Kies een taal
@@ -2299,6 +2303,9 @@ Chapters:
   Chapter Loop Stopped: 'Herhalen van hoofdstuk gestopt'
   Sync to Video Time: 'Synchroniseren met videotijd'
 Comments:
+  Watch Failed: "Kan antwoorden op de reactie niet volgen"
+  Stop Watching for Replies: "Antwoorden niet meer volgen"
+  Watch for Replies: "Antwoorden volgen"
   Image unavailable: "Afbeelding niet beschikbaar"
   Comment Count: 1 reactie | {count} reacties
   Show Comments: Reacties tonen
@@ -2337,12 +2344,13 @@ Description:
   Music: Muziek
 Tooltips:
   YouTube Account Settings:
+    Watch Posted Comments: "Reacties die je hier plaatst, worden automatisch gevolgd op antwoorden, zolang meldingen over antwoorden aanstaan in de instellingen bij Opmerkingen."
     Add to YouTube Watch History: "Video's die u afspeelt, worden toegevoegd aan uw YouTube-kijkgeschiedenis, zodat de aanbevelingen van YouTube ervan leren. Er wordt niets toegevoegd zolang de geschiedenis op YouTube is onderbroken."
     Rate Videos: "Toont knoppen om video's leuk of niet leuk te vinden. Om je beoordeling te tonen, wordt elke video die je opent met je account op YouTube opgezocht, zodat YouTube weet welke video's je opent, ook als ze niet aan je kijkgeschiedenis worden toegevoegd."
     Sync Subscriptions: "Kanalen waarop u zich op YouTube abonneert, worden toegevoegd aan ‘Alle kanalen’, en kanalen waarvan u daar het abonnement opzegt, worden uit elk profiel verwijderd. Abonneren of deabonneren hier in ‘Alle kanalen’ doet hetzelfde op YouTube."
     Sync Playlists: "Uw YouTube-afspeellijsten, ‘Later bekijken’ en ‘Video's die ik leuk vind’ verschijnen in ‘Jouw afspeellijsten’, en wijzigingen die u er hier in aanbrengt, worden ook op YouTube doorgevoerd. Ze worden niet gesynchroniseerd met uw andere apparaten en niet meegenomen wanneer u alle afspeellijsten exporteert of een back-up van uw gegevens maakt. Als u dit uitschakelt, worden ze van dit apparaat verwijderd, maar niet van YouTube."
-    Reply Notifications: "OpenTubeX controleert de reacties die je hier in de afgelopen 30 dagen hebt geplaatst op nieuwe antwoorden. Reacties die je ergens anders hebt geplaatst, zoals op de website van YouTube, worden niet meegenomen."
   General Settings:
+    Reply Notifications: "OpenTubeX controleert de reacties die je volgt 30 dagen lang op nieuwe antwoorden. Volg een reactie met de belknop ernaast."
     Built-in Streams: |
       Automatisch speelt de meeste video's af via de visionOS-client van YouTube, die sneller start en automatische kwaliteit ondersteunt. Livestreams en video's die hij niet kan afspelen, gebruiken SABR.
       Alleen SABR gebruikt altijd de webclient van YouTube, die langzamer start en geen automatische kwaliteit heeft.
@@ -2866,6 +2874,7 @@ Platforms:
   Load Error: Deze pagina kon niet worden geladen van {platform}.
   Empty Tab: Er is hier nog niets.
 YouTube Account:
+  "{author} replied to {commentAuthor}": "{author} heeft {commentAuthor} geantwoord"
   Like: "Vind ik leuk"
   Dislike: "Vind ik niet leuk"
   Rating Failed: "Kan niet beoordelen op YouTube: {error}"

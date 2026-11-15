@@ -645,6 +645,7 @@ History:
   History Older Than Days Removed: Watch history older than 1 day has been removed | Watch history older than {days} days has been removed
 Settings:
   YouTube Account Settings:
+    Watch Posted Comments: "Watch comments I post for replies"
     YouTube Account Settings: "YouTube Account"
     Unofficial App Warning: "OpenTubeX is not an official YouTube app. Signing in links what you do here to your Google account, and Google can restrict or ban accounts that use unofficial apps. Only sign in with an account you can afford to lose."
     Sign In Explanation: "OpenTubeX signs in like a TV app: you approve it on Google's website, and OpenTubeX never sees your password. The sign-in stays on this device and is not synced or backed up."
@@ -673,7 +674,6 @@ Settings:
     Sync Playlists: "Sync playlists with YouTube"
     Add to YouTube Watch History: "Add watched videos to YouTube history"
     Rate Videos: "Like and dislike videos"
-    Reply Notifications: "Notify me about replies to my comments"
     Sync Now: "Sync now"
     Synced: "Synced with YouTube"
     Sync Failed: "Could not sync with YouTube: {error}"
@@ -768,6 +768,11 @@ Settings:
   The app needs to restart for changes to take effect. Restart and apply change?: The
     app needs to restart for changes to take effect. Restart and apply change?
   General Settings:
+    Stop Watching: "Stop watching"
+    No Watched Comments: "No comments are being watched. Watch a comment with the bell button next to it."
+    Your Comment: "Your comment"
+    Watched Comments: "Watched comments"
+    Reply Notifications: "Enable reply notifications"
     Preferred Video Codec: Preferred video codec
     Enable Tabs: "Enable Tabs"
     Thumbnail Swipe Gestures:
@@ -839,7 +844,7 @@ Settings:
       Label: Auto Load Next Page
       Lists Tooltip: Load additional pages of feeds, search results, and other lists automatically.
     Auto Load Comments:
-      Label: Auto Load Comments
+      Label: Auto load comments
       Tooltip: Load comments when the page opens and load more comments as you scroll.
     Default Landing Page: Default Landing Page
     New Tab Position:
@@ -871,7 +876,6 @@ Settings:
       Force Off: Force off
     System Default: System Default
     Comment Translation:
-      Title: Comment translations
       Enable: Enable comment translations
       Never Translate: Never translate comments in
       Choose Language: Choose a language
@@ -3281,6 +3285,9 @@ Chapters:
 
 Mini Player: Mini Player
 Comments:
+  Watch Failed: "Could not watch the comment for replies"
+  Stop Watching for Replies: "Stop watching for replies"
+  Watch for Replies: "Watch for replies"
   Image unavailable: "Image unavailable"
   Comments: Comments
   Comment Count: 1 Comment | {count} Comments
@@ -3344,12 +3351,13 @@ Description:
 #Tooltips
 Tooltips:
   YouTube Account Settings:
+    Watch Posted Comments: "Comments you post here are watched for replies automatically, as long as reply notifications are on in the comment settings."
     Sync Subscriptions: "Channels you subscribe to on YouTube are added to All Channels, and channels you unsubscribe from there are removed from every profile. Subscribing or unsubscribing in All Channels here does the same on YouTube."
     Sync Playlists: "Your YouTube playlists, Watch later, and Liked videos appear in Your Playlists, and changes you make to them here are made on YouTube too. They are not synced to your other devices or included when you export all playlists or back up your data. Turning this off removes them from this device but not from YouTube."
     Add to YouTube Watch History: "Videos you play are added to your YouTube watch history, so YouTube's recommendations learn from them. Nothing is added while the history is paused on YouTube."
     Rate Videos: "Shows like and dislike buttons on videos. To show your rating, each video you open is looked up on YouTube with your account, so YouTube learns which videos you open, even when they are not added to your watch history."
-    Reply Notifications: "OpenTubeX checks the comments you posted here in the last 30 days for new replies. Comments you posted elsewhere, such as on the YouTube website, are not included."
   General Settings:
+    Reply Notifications: "OpenTubeX checks the comments you watch for new replies for 30 days. Watch any comment with the bell button next to it."
     Preferred Video Codec: |
       Auto prefers codecs that your device can decode in hardware.
       AV1: the best quality for the least data, but not every video has it. Without hardware decoding, it can drain the battery or drop frames.
@@ -4008,6 +4016,7 @@ Platforms:
   Load Error: This page could not be loaded from {platform}.
   Empty Tab: There is nothing here yet.
 YouTube Account:
+  "{author} replied to {commentAuthor}": "{author} replied to {commentAuthor}"
   Like: "Like"
   Dislike: "Dislike"
   Rating Failed: "Could not rate on YouTube: {error}"

@@ -309,6 +309,7 @@ History:
 Settings:
   Experimental Badge: Experimental
   YouTube Account Settings:
+    Watch Posted Comments: "Acompanhar respostas aos comentários que eu publicar"
     YouTube Account Settings: "Conta do YouTube"
     Unofficial App Warning: "O OpenTubeX não é um app oficial do YouTube. Ao entrar na conta, o que você faz aqui fica vinculado à sua conta do Google, e o Google pode restringir ou banir contas que usam apps não oficiais. Só entre com uma conta que você não se importe de perder."
     Sign In Explanation: "O OpenTubeX faz login como um app de TV: você aprova o acesso no site do Google, e o OpenTubeX nunca vê sua senha. O login fica neste dispositivo e não é sincronizado nem incluído em backups."
@@ -340,7 +341,6 @@ Settings:
     Sync Now: "Sincronizar agora"
     Synced: "Sincronizado com o YouTube"
     Sync Failed: "Não foi possível sincronizar com o YouTube: {error}"
-    Reply Notifications: "Avisar sobre respostas aos meus comentários"
   Diagnostics:
     Diagnostics: Diagnóstico
     Description: Enquanto o log de diagnóstico estiver ativado, o OpenTubeX mantém as mensagens de log recentes na memória para que você possa anexá-las a relatórios de bugs. Ele nunca as salva nem as envia por conta própria, e desativar o log as apaga. Os relatórios omitem cookies, tokens, endereços IP e parâmetros de URL, mas podem incluir os IDs dos vídeos que você reproduziu, então confira o relatório antes de compartilhá-lo.
@@ -431,6 +431,11 @@ Settings:
       Off: "Desativado"
       On Metered Networks: "Em redes limitadas"
       Always: "Sempre"
+    Stop Watching: "Parar de acompanhar"
+    No Watched Comments: "Nenhum comentário está sendo acompanhado. Acompanhe um comentário com o botão de sino ao lado dele."
+    Your Comment: "Seu comentário"
+    Watched Comments: "Comentários acompanhados"
+    Reply Notifications: "Ativar notificações de respostas"
     Built-in Streams:
       Built-in Streams: "Transmissões integradas"
       Automatic: "Automático"
@@ -507,7 +512,6 @@ Settings:
       Force On: Forçar ativação
       Force Off: Forçar desativação
     Comment Translation:
-      Title: Tradução de comentários
       Enable: Ativar tradução de comentários
       Never Translate: Nunca traduzir comentários em
       Choose Language: Escolher um idioma
@@ -2187,6 +2191,9 @@ Chapters:
   Chapter Loop Stopped: 'Repetição do capítulo interrompida'
   Sync to Video Time: 'Sincronizar com o tempo do vídeo'
 Comments:
+  Watch Failed: "Não foi possível acompanhar as respostas do comentário"
+  Stop Watching for Replies: "Parar de acompanhar respostas"
+  Watch for Replies: "Acompanhar respostas"
   Image unavailable: "Imagem indisponível"
   Comment Count: 1 comentário | {count} comentários | {count} comentários
   Show Comments: Mostrar comentários
@@ -2224,12 +2231,13 @@ Description:
   Music: Música
 Tooltips:
   YouTube Account Settings:
+    Watch Posted Comments: "Os comentários que você publica aqui são acompanhados automaticamente para detectar novas respostas, desde que os avisos de respostas estejam ativados nas configurações de comentários."
     Sync Subscriptions: "Os canais em que você se inscreve no YouTube são adicionados a Todos os canais, e os canais dos quais você cancela a inscrição lá são removidos de todos os perfis. Inscrever-se ou cancelar a inscrição em Todos os canais aqui faz o mesmo no YouTube."
     Sync Playlists: "Suas playlists do YouTube, Assistir mais tarde e Vídeos marcados com \"Gostei\" aparecem em Suas playlists, e as alterações que você fizer nelas aqui também são feitas no YouTube. Elas não são sincronizadas com seus outros dispositivos nem incluídas quando você exporta todas as playlists ou faz backup dos seus dados. Desativar esta opção as remove deste dispositivo, mas não do YouTube."
     Add to YouTube Watch History: "Os vídeos que você assiste são adicionados ao seu histórico de reprodução do YouTube, para que as recomendações do YouTube aprendam com eles. Nada é adicionado enquanto o histórico estiver pausado no YouTube."
     Rate Videos: "Mostra os botões gostei e não gostei nos vídeos. Para mostrar sua avaliação, cada vídeo que você abre é consultado no YouTube com sua conta, então o YouTube fica sabendo quais vídeos você abre, mesmo quando eles não são adicionados ao seu histórico de exibição."
-    Reply Notifications: "O OpenTubeX verifica se há novas respostas aos comentários que você publicou aqui nos últimos 30 dias. Comentários publicados em outros lugares, como no site do YouTube, não são incluídos."
   General Settings:
+    Reply Notifications: "O OpenTubeX verifica por 30 dias se os comentários que você acompanha receberam novas respostas. Acompanhe qualquer comentário com o botão de sino ao lado dele."
     Built-in Streams: |
       Automático reproduz a maioria dos vídeos pelo cliente visionOS do YouTube, que inicia mais rápido e oferece suporte à qualidade automática. Transmissões ao vivo e vídeos que ele não consegue reproduzir usam SABR.
       Somente SABR sempre usa o cliente web do YouTube, que inicia mais devagar e não tem qualidade automática.
@@ -2740,6 +2748,7 @@ Platforms:
   Load Error: Não foi possível carregar esta página de {platform}.
   Empty Tab: Ainda não há nada aqui.
 YouTube Account:
+  "{author} replied to {commentAuthor}": "{author} respondeu a {commentAuthor}"
   Like: "Gostei"
   Dislike: "Não gostei"
   Rating Failed: "Não foi possível avaliar no YouTube: {error}"

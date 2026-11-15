@@ -356,6 +356,7 @@ History:
 Settings:
   Experimental Badge: Experimentell
   YouTube Account Settings:
+    Watch Posted Comments: "Bevaka svar på kommentarer jag skriver"
     YouTube Account Settings: "YouTube-konto"
     Unofficial App Warning: "OpenTubeX är inte en officiell YouTube-app. När du loggar in kopplas det du gör här till ditt Google-konto, och Google kan begränsa eller stänga av konton som använder inofficiella appar. Logga bara in med ett konto som du har råd att förlora."
     Sign In Explanation: "OpenTubeX loggar in som en tv-app: du godkänner inloggningen på Googles webbplats och OpenTubeX ser aldrig ditt lösenord. Inloggningen stannar på den här enheten och varken synkroniseras eller säkerhetskopieras."
@@ -387,7 +388,6 @@ Settings:
     Sync Now: "Synkronisera nu"
     Synced: "Synkroniserat med YouTube"
     Sync Failed: "Det gick inte att synkronisera med YouTube: {error}"
-    Reply Notifications: "Meddela mig om svar på mina kommentarer"
   Diagnostics:
     Diagnostics: Diagnostik
     Description: Medan diagnostikloggen är på sparar OpenTubeX de senaste loggmeddelandena i minnet så att du kan bifoga dem till felrapporter. Det sparar eller skickar dem aldrig på egen hand, och när du stänger av loggen raderas de. Rapporter utelämnar kakor, token, IP-adresser och URL-parametrar, men de kan innehålla id:n för videor du har spelat upp, så granska en rapport innan du delar den.
@@ -478,6 +478,11 @@ Settings:
       Off: "Av"
       On Metered Networks: "På begränsade nätverk"
       Always: "Alltid"
+    Stop Watching: "Sluta bevaka"
+    No Watched Comments: "Inga kommentarer bevakas. Bevaka en kommentar med klockknappen bredvid den."
+    Your Comment: "Din kommentar"
+    Watched Comments: "Bevakade kommentarer"
+    Reply Notifications: "Aktivera aviseringar om svar"
     Built-in Streams:
       Built-in Streams: "Inbyggda strömmar"
       Automatic: "Automatiskt"
@@ -554,7 +559,6 @@ Settings:
       Force On: Alltid på
       Force Off: Alltid av
     Comment Translation:
-      Title: Översättning av kommentarer
       Enable: Aktivera översättning av kommentarer
       Never Translate: Översätt aldrig kommentarer på
       Choose Language: Välj ett språk
@@ -2234,6 +2238,9 @@ Chapters:
   Chapter Loop Stopped: 'Slutade upprepa kapitel'
   Sync to Video Time: 'Synka med videons tid'
 Comments:
+  Watch Failed: "Det gick inte att bevaka kommentaren för svar"
+  Stop Watching for Replies: "Sluta bevaka svar"
+  Watch for Replies: "Bevaka svar"
   Image unavailable: "Bilden är inte tillgänglig"
   Comment Count: 1 kommentar | {count} kommentarer
   Show Comments: Visa kommentarer
@@ -2271,12 +2278,13 @@ Description:
   Music: Musik
 Tooltips:
   YouTube Account Settings:
+    Watch Posted Comments: "Kommentarer du skriver här bevakas automatiskt efter svar, så länge svarsaviseringar är aktiverade i kommentarsinställningarna."
     Sync Subscriptions: "Kanaler som du prenumererar på via YouTube läggs till i Alla kanaler, och kanaler som du slutar prenumerera på där tas bort från alla profiler. Att prenumerera eller avsluta en prenumeration i Alla kanaler här gör samma sak på YouTube."
     Sync Playlists: "Dina YouTube-spellistor, Titta senare och Gillade videor visas i Dina spellistor, och ändringar som du gör i dem här görs även på YouTube. De synkroniseras inte till dina andra enheter och tas inte med när du exporterar alla spellistor eller säkerhetskopierar dina data. Om du stänger av detta tas de bort från den här enheten men inte från YouTube."
     Add to YouTube Watch History: "Videor du spelar upp läggs till i din visningshistorik på YouTube, så att rekommendationerna på YouTube lär sig av dem. Inget läggs till medan historiken är pausad på YouTube."
     Rate Videos: "Visar knappar för att gilla och ogilla videor. För att visa ditt betyg slås varje video du öppnar upp på YouTube med ditt konto, så YouTube får veta vilka videor du öppnar, även när de inte läggs till i din visningshistorik."
-    Reply Notifications: "OpenTubeX kontrollerar om kommentarer du har skrivit här under de senaste 30 dagarna har fått nya svar. Kommentarer du har skrivit på andra ställen, till exempel på YouTubes webbplats, ingår inte."
   General Settings:
+    Reply Notifications: "OpenTubeX kontrollerar kommentarerna du bevakar efter nya svar i 30 dagar. Bevaka valfri kommentar med klockknappen bredvid den."
     Built-in Streams: |
       Automatiskt spelar de flesta videor via YouTubes visionOS-klient, som startar snabbare och stöder automatisk kvalitet. Direktsändningar och videor som den inte kan spela upp använder SABR.
       Endast SABR använder alltid YouTubes webbklient, som startar långsammare och saknar automatisk kvalitet.
@@ -2794,6 +2802,7 @@ Platforms:
   Load Error: Den här sidan kunde inte läsas in från {platform}.
   Empty Tab: Här finns inget ännu.
 YouTube Account:
+  "{author} replied to {commentAuthor}": "{author} svarade {commentAuthor}"
   Like: "Gilla"
   Dislike: "Ogilla"
   Rating Failed: "Det gick inte att betygsätta på YouTube: {error}"

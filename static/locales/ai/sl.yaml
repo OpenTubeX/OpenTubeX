@@ -484,6 +484,7 @@ History:
 Settings:
   Experimental Badge: Eksperimentalno
   YouTube Account Settings:
+    Watch Posted Comments: "Spremljaj odgovore na komentarje, ki jih objavim"
     YouTube Account Settings: "Račun YouTube"
     Unofficial App Warning: "OpenTubeX ni uradna aplikacija storitve YouTube. Ob prijavi se to, kar počnete tukaj, poveže z vašim Google računom, Google pa lahko omeji ali prepove račune, ki uporabljajo neuradne aplikacije. Prijavite se samo z računom, ki si ga lahko privoščite izgubiti."
     Sign In Explanation: "OpenTubeX se prijavi kot aplikacija za televizor: prijavo odobrite na spletnem mestu Google, OpenTubeX pa nikoli ne vidi vašega gesla. Prijava ostane v tej napravi in se ne sinhronizira ali varnostno kopira."
@@ -515,7 +516,6 @@ Settings:
     Sync Now: "Sinhroniziraj zdaj"
     Synced: "Sinhronizirano s storitvijo YouTube"
     Sync Failed: "Sinhronizacija s storitvijo YouTube ni uspela: {error}"
-    Reply Notifications: "Obvesti me o odgovorih na moje komentarje"
   Diagnostics:
     Diagnostics: Diagnostika
     Description: Dokler je diagnostični dnevnik vklopljen, OpenTubeX hrani nedavna sporočila dnevnika v pomnilniku, da jih lahko priložite poročilom o napakah. Nikoli jih ne shrani ali pošlje sam, izklop dnevnika pa jih izbriše. Poročila izpustijo piškotke, žetone, naslove IP in parametre URL, vendar lahko vsebujejo ID-je predvajanih videoposnetkov, zato poročilo pred deljenjem preglejte.
@@ -603,6 +603,11 @@ Settings:
       Off: "Izklopljeno"
       On Metered Networks: "V omrežjih z omejitvijo prenosa"
       Always: "Vedno"
+    Stop Watching: "Ne spremljaj več"
+    No Watched Comments: "Noben komentar se ne spremlja. Komentar spremljajte z gumbom z zvoncem poleg njega."
+    Your Comment: "Vaš komentar"
+    Watched Comments: "Spremljani komentarji"
+    Reply Notifications: "Omogoči obvestila o odgovorih"
     Built-in Streams:
       Built-in Streams: "Vgrajeni tokovi"
       Automatic: "Samodejno"
@@ -684,7 +689,6 @@ Settings:
       Force On: Vedno vklopljeno
       Force Off: Vedno izklopljeno
     Comment Translation:
-      Title: Prevodi komentarjev
       Enable: Omogoči prevajanje komentarjev
       Never Translate: Ne prevajaj komentarjev v jeziku
       Choose Language: Izberite jezik
@@ -2723,6 +2727,9 @@ Chapters:
   Chapter Loop Stopped: 'Ponavljanje poglavja ustavljeno'
   Sync to Video Time: 'Sinhroniziraj s časom videoposnetka'
 Comments:
+  Watch Failed: "Odgovorov na komentar ni bilo mogoče spremljati"
+  Stop Watching for Replies: "Ne spremljaj več odgovorov"
+  Watch for Replies: "Spremljaj odgovore"
   Image unavailable: "Slika ni na voljo"
   Comment Count: '{count} komentar | {count} komentarja | {count} komentarji | {count} komentarjev'
   Show Comments: Prikaži komentarje
@@ -2771,12 +2778,13 @@ Description:
   Music: Glasba
 Tooltips:
   YouTube Account Settings:
+    Watch Posted Comments: "Komentarji, ki jih tukaj objavite, se samodejno spremljajo za odgovore, dokler so v nastavitvah komentarjev vklopljena obvestila o odgovorih."
     Sync Subscriptions: "Kanali, na katere se naročite v storitvi YouTube, se dodajo v profil Vsi kanali, kanali, katerih naročnino tam prekličete, pa se odstranijo iz vseh profilov. Naročanje ali preklic naročnine tukaj v profilu Vsi kanali naredi enako v storitvi YouTube."
     Sync Playlists: "Vaši seznami predvajanja iz storitve YouTube, Za poznejši ogled in Všečkani videoposnetki so prikazani v razdelku Vaši seznami predvajanja, spremembe, ki jih tukaj naredite v njih, pa se izvedejo tudi v storitvi YouTube. Ne sinhronizirajo se z vašimi drugimi napravami in niso vključeni, ko izvozite vse sezname predvajanja ali naredite varnostno kopijo podatkov. Če to možnost izklopite, se odstranijo iz te naprave, ne pa iz storitve YouTube."
     Add to YouTube Watch History: "Videoposnetki, ki jih predvajate, se dodajo v vašo zgodovino predvajanj v storitvi YouTube, zato se priporočila YouTube učijo iz njih. Ko je zgodovina v storitvi YouTube začasno zaustavljena, se ne doda nič."
     Rate Videos: "Prikaže gumba Všeč mi je in Ni mi všeč na videoposnetkih. Za prikaz vaše ocene se vsak odprt videoposnetek z vašim računom poišče v YouTubu, zato YouTube izve, katere videoposnetke odpirate, tudi ko niso dodani v zgodovino ogledov."
-    Reply Notifications: "OpenTubeX preverja, ali so na komentarje, ki ste jih tukaj objavili v zadnjih 30 dneh, prispeli novi odgovori. Komentarji, objavljeni drugje, na primer na spletnem mestu YouTube, niso vključeni."
   General Settings:
+    Reply Notifications: "OpenTubeX 30 dni preverja, ali so na komentarje, ki jih spremljate, prispeli novi odgovori. Kateri koli komentar spremljajte z gumbom z zvoncem poleg njega."
     Built-in Streams: |
       Samodejni način predvaja večino videoposnetkov prek YouTubovega odjemalca visionOS, ki se zažene hitreje in podpira samodejno kakovost. Prenosi v živo in videoposnetki, ki jih ne more predvajati, uporabljajo SABR.
       Samo SABR vedno uporablja YouTubov spletni odjemalec, ki se zažene počasneje in nima samodejne kakovosti.
@@ -3391,6 +3399,7 @@ Platforms:
   Load Error: Te strani ni bilo mogoče naložiti s platforme {platform}.
   Empty Tab: Tukaj še ni ničesar.
 YouTube Account:
+  "{author} replied to {commentAuthor}": "{author} je odgovoril(-a) uporabniku {commentAuthor}"
   Like: "Všeč mi je"
   Dislike: "Ni mi všeč"
   Rating Failed: "Ocenjevanje v storitvi YouTube ni uspelo: {error}"

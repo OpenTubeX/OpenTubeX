@@ -358,6 +358,7 @@ History:
 Settings:
   Experimental Badge: Eksperimental
   YouTube Account Settings:
+    Watch Posted Comments: "Yazdığım şərhləri cavablar üçün izlə"
     YouTube Account Settings: "YouTube hesabı"
     Unofficial App Warning: "OpenTubeX rəsmi YouTube tətbiqi deyil. Daxil olduqda burada etdikləriniz Google hesabınızla əlaqələndirilir və Google qeyri-rəsmi tətbiqlərdən istifadə edən hesabları məhdudlaşdıra və ya bloklaya bilər. Yalnız itirməyə razı olduğunuz hesabla daxil olun."
     Sign In Explanation: "OpenTubeX TV tətbiqi kimi daxil olur: girişi Google-un saytında təsdiqləyirsiniz və OpenTubeX parolunuzu heç vaxt görmür. Giriş bu cihazda qalır, sinxronlaşdırılmır və ehtiyat nüsxəyə daxil edilmir."
@@ -389,7 +390,6 @@ Settings:
     Sync Now: "İndi sinxronlaşdır"
     Synced: "YouTube ilə sinxronlaşdırıldı"
     Sync Failed: "YouTube ilə sinxronlaşdırmaq mümkün olmadı: {error}"
-    Reply Notifications: "Şərhlərimə cavablar barədə mənə bildiriş göndər"
   Diagnostics:
     Diagnostics: Diaqnostika
     Description: Diaqnostika jurnalı aktiv olduqda OpenTubeX son jurnal mesajlarını yaddaşda saxlayır ki, onları xəta hesabatlarına əlavə edə biləsiniz. Onları heç vaxt özbaşına saxlamır və ya göndərmir, jurnalı söndürdükdə isə onlar silinir. Hesabatlara kukilər, tokenlər, IP ünvanları və URL parametrləri daxil edilmir, lakin oynatdığınız videoların ID-ləri ola bilər, ona görə də hesabatı paylaşmazdan əvvəl yoxlayın.
@@ -480,6 +480,11 @@ Settings:
       Off: "Söndürülüb"
       On Metered Networks: "Limitli şəbəkələrdə"
       Always: "Həmişə"
+    Stop Watching: "İzləməni dayandır"
+    No Watched Comments: "Heç bir şərh izlənmir. Şərhi yanındakı zəng düyməsi ilə izləyin."
+    Your Comment: "Sizin şərhiniz"
+    Watched Comments: "İzlənən şərhlər"
+    Reply Notifications: "Cavab bildirişlərini aktivləşdir"
     Built-in Streams:
       Built-in Streams: "Daxili yayımlar"
       Automatic: "Avtomatik"
@@ -561,7 +566,6 @@ Settings:
       Force On: Məcburi aktivləşdir
       Force Off: Məcburi söndür
     Comment Translation:
-      Title: Şərh tərcümələri
       Enable: Şərh tərcümələrini aktivləşdir
       Never Translate: Bu dillərdəki şərhləri heç vaxt tərcümə etmə
       Choose Language: Dil seçin
@@ -2244,6 +2248,9 @@ Chapters:
   Chapter Loop Stopped: 'Fəslin təkrarı dayandırıldı'
   Sync to Video Time: 'Video vaxtı ilə sinxronlaşdır'
 Comments:
+  Watch Failed: "Şərhi cavablar üçün izləmək mümkün olmadı"
+  Stop Watching for Replies: "Cavabları izləməni dayandır"
+  Watch for Replies: "Cavabları izlə"
   Image unavailable: "Şəkil mövcud deyil"
   Comment Count: 1 şərh | {count} şərh
   Show Comments: Şərhləri göstər
@@ -2282,12 +2289,13 @@ Description:
   Music: Musiqi
 Tooltips:
   YouTube Account Settings:
+    Watch Posted Comments: "Şərh ayarlarında cavab bildirişləri aktiv olduqca, burada yazdığınız şərhlər cavablar üçün avtomatik izlənir."
     Sync Subscriptions: "YouTube-da abunə olduğunuz kanallar “Bütün Kanallar” bölməsinə əlavə olunur, orada abunəlikdən çıxdığınız kanallar isə bütün profillərdən silinir. Burada “Bütün Kanallar” bölməsində abunə olmaq və ya abunəlikdən çıxmaq YouTube-da da eyni şeyi edir."
     Sync Playlists: "YouTube pleylistləriniz, “Sonra baxın” və “Bəyənilən videolar” “Pleylistləriniz” bölməsində görünür və burada onlara etdiyiniz dəyişikliklər YouTube-da da edilir. Onlar digər cihazlarınızla sinxronlaşdırılmır və bütün pleylistləri ixrac etdikdə və ya məlumatlarınızın ehtiyat nüsxəsini çıxardıqda daxil edilmir. Bunu söndürmək onları bu cihazdan silir, lakin YouTube-dan silmir."
     Add to YouTube Watch History: "Oxutduğunuz videolar YouTube baxış tarixçənizə əlavə olunur, beləliklə YouTube tövsiyələri onlardan öyrənir. YouTube-da tarixçə dayandırılıbsa, heç nə əlavə olunmur."
     Rate Videos: "Videolarda bəyən və bəyənmə düymələrini göstərir. Qiymətləndirmənizi göstərmək üçün açdığınız hər video hesabınızla YouTube-da yoxlanılır, buna görə YouTube hansı videoları açdığınızı öyrənir, hətta onlar baxış tarixçənizə əlavə edilməsə belə."
-    Reply Notifications: "OpenTubeX son 30 gündə burada yazdığınız şərhlərə yeni cavabların olub-olmadığını yoxlayır. Başqa yerdə, məsələn, YouTube saytında yazdığınız şərhlər daxil deyil."
   General Settings:
+    Reply Notifications: "OpenTubeX izlədiyiniz şərhləri 30 gün ərzində yeni cavablar üçün yoxlayır. İstənilən şərhi yanındakı zəng düyməsi ilə izləyin."
     Built-in Streams: |
       Avtomatik rejim əksər videoları YouTube-un visionOS müştərisi ilə oynadır; o, daha tez başlayır və avtomatik keyfiyyəti dəstəkləyir. Canlı yayımlar və onun oynada bilmədiyi videolar SABR istifadə edir.
       Yalnız SABR həmişə YouTube-un veb müştərisindən istifadə edir; o, daha gec başlayır və avtomatik keyfiyyət yoxdur.
@@ -2803,6 +2811,7 @@ Platforms:
   Load Error: Bu səhifə {platform} saytından yüklənə bilmədi.
   Empty Tab: Burada hələ heç nə yoxdur.
 YouTube Account:
+  "{author} replied to {commentAuthor}": "{author} {commentAuthor} istifadəçisinə cavab verdi"
   Like: "Bəyən"
   Dislike: "Bəyənmə"
   Rating Failed: "YouTube-da qiymətləndirmək mümkün olmadı: {error}"

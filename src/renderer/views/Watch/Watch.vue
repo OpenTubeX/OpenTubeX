@@ -1365,6 +1365,7 @@
             :id="videoId"
             class="watchVideo"
             :class="{ theatreWatchVideo: useTheatreMode }"
+            :video-title="videoTitle"
             :channel-thumbnail="channelThumbnail"
             :channel-name="channelName"
             :offline="isOffline"

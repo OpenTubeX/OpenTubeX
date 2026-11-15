@@ -200,6 +200,10 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     if (group === 'Comment Translation') {
       return supportsLocalApi
     }
+    if (['Reply Notifications', 'Watched Comments'].includes(group)) {
+      return (usingElectron || isCapacitor) && store.getters.getNotificationMode !== 'off' &&
+        (group === 'Reply Notifications' || store.getters.getCommentReplyNotifications)
+    }
     if (group === 'Avoid translation') {
       return supportsLocalApi && (
         store.getters.getBackendPreference === 'local' || store.getters.getBackendFallback

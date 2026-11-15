@@ -361,6 +361,7 @@ History:
 Settings:
   Experimental Badge: تجريبي
   YouTube Account Settings:
+    Watch Posted Comments: "متابعة الردود على التعليقات التي أنشرها"
     YouTube Account Settings: "حساب YouTube"
     Unofficial App Warning: "OpenTubeX ليس تطبيقًا رسميًا من YouTube. يؤدي تسجيل الدخول إلى ربط ما تفعله هنا بحسابك على Google، وقد تقيّد Google الحسابات التي تستخدم تطبيقات غير رسمية أو تحظرها. لا تسجّل الدخول إلا بحساب يمكنك تحمّل خسارته."
     Sign In Explanation: "يسجّل OpenTubeX الدخول كما يفعل تطبيق التلفاز: توافق على ذلك في موقع Google، ولا يرى OpenTubeX كلمة مرورك أبدًا. يبقى تسجيل الدخول على هذا الجهاز ولا تتم مزامنته أو نسخه احتياطيًا."
@@ -392,7 +393,6 @@ Settings:
     Sync Now: "المزامنة الآن"
     Synced: "تمت المزامنة مع YouTube"
     Sync Failed: "تعذّرت المزامنة مع YouTube: {error}"
-    Reply Notifications: "إعلامي بالردود على تعليقاتي"
   Diagnostics:
     Diagnostics: التشخيص
     Description: أثناء تفعيل سجل التشخيص، يحتفظ OpenTubeX برسائل السجل الحديثة في الذاكرة حتى تتمكن من إرفاقها بتقارير الأخطاء. لا يحفظها أو يرسلها من تلقاء نفسه أبدًا، ويؤدي إيقاف السجل إلى حذفها. لا تتضمن التقارير ملفات تعريف الارتباط أو الرموز المميزة أو عناوين IP أو معلمات عناوين URL، لكنها قد تتضمن معرّفات الفيديوهات التي شغّلتها، لذا راجع التقرير قبل مشاركته.
@@ -483,6 +483,11 @@ Settings:
       Off: "إيقاف"
       On Metered Networks: "على الشبكات المحدودة"
       Always: "دائمًا"
+    Stop Watching: "إيقاف المتابعة"
+    No Watched Comments: "لا تتم متابعة أي تعليقات. تابع تعليقًا باستخدام زر الجرس بجانبه."
+    Your Comment: "تعليقك"
+    Watched Comments: "التعليقات المتابَعة"
+    Reply Notifications: "تمكين إشعارات الردود"
     Built-in Streams:
       Built-in Streams: "البث المدمج"
       Automatic: "تلقائي"
@@ -559,7 +564,6 @@ Settings:
       Force On: تشغيل دائم
       Force Off: إيقاف دائم
     Comment Translation:
-      Title: ترجمات التعليق
       Enable: تمكين ترجمات التعليق
       Never Translate: لا تترجم التعليقات مطلقًا
       Choose Language: اختر لغة
@@ -2284,6 +2288,9 @@ Chapters:
   Chapter Loop Stopped: 'تم إيقاف تكرار الفصل'
   Sync to Video Time: 'المزامنة مع وقت الفيديو'
 Comments:
+  Watch Failed: "تعذّرت متابعة الردود على التعليق"
+  Stop Watching for Replies: "إيقاف متابعة الردود"
+  Watch for Replies: "متابعة الردود"
   Image unavailable: "الصورة غير متاحة"
   Comment Count: 'لا توجد تعليقات ({count}) | تعليق واحد | تعليقان ({count}) | {count} تعليقات | {count} تعليقًا | {count} تعليق'
   Show Comments: عرض التعليقات
@@ -2322,12 +2329,13 @@ Description:
   Music: الموسيقى
 Tooltips:
   YouTube Account Settings:
+    Watch Posted Comments: "تتم متابعة الردود على التعليقات التي تنشرها هنا تلقائيًا، طالما أن الإعلام بالردود مفعّل في إعدادات التعليقات."
     Sync Subscriptions: "تُضاف القنوات التي تشترك فيها على YouTube إلى «جميع القنوات»، وتُزال القنوات التي تلغي اشتراكك فيها هناك من كل الملفات الشخصية. والاشتراك أو إلغاء الاشتراك في «جميع القنوات» هنا يُطبَّق كذلك على YouTube."
     Sync Playlists: "تظهر قوائم التشغيل الخاصة بك على YouTube و«المشاهدة لاحقًا» و«الفيديوهات التي أعجبتني» في «قوائم التشغيل الخاصة بك»، وتُطبَّق التغييرات التي تجريها عليها هنا على YouTube أيضًا. لا تتم مزامنتها مع أجهزتك الأخرى، ولا تُضمَّن عند تصدير جميع قوائم التشغيل أو نسخ بياناتك احتياطيًا. يؤدي إيقاف هذا الخيار إلى إزالتها من هذا الجهاز دون إزالتها من YouTube."
     Add to YouTube Watch History: "تُضاف مقاطع الفيديو التي تشغّلها إلى سجلّ المشاهدات في YouTube، فتتعلّم منها اقتراحات YouTube. لا يُضاف أي شيء ما دام السجلّ متوقفًا مؤقتًا على YouTube."
     Rate Videos: "يعرض زرَّي الإعجاب وعدم الإعجاب في الفيديوهات. لعرض تقييمك، يُبحث عن كل فيديو تفتحه على YouTube باستخدام حسابك، فيعرف YouTube الفيديوهات التي تفتحها حتى إن لم تُضَف إلى سجل المشاهدة."
-    Reply Notifications: "يتحقق OpenTubeX من وجود ردود جديدة على التعليقات التي نشرتها هنا خلال آخر 30 يومًا. لا تُضمَّن التعليقات التي نشرتها في مكان آخر، مثل موقع YouTube."
   General Settings:
+    Reply Notifications: "يتحقق OpenTubeX من وجود ردود جديدة على التعليقات التي تتابعها لمدة 30 يومًا. تابع أي تعليق باستخدام زر الجرس بجانبه."
     Built-in Streams: |
       يشغّل الوضع التلقائي معظم الفيديوهات عبر عميل visionOS من YouTube، الذي يبدأ أسرع ويدعم الجودة التلقائية. تستخدم البثوث المباشرة والفيديوهات التي لا يستطيع تشغيلها SABR.
       يستخدم وضع SABR فقط دائمًا عميل الويب من YouTube، الذي يبدأ أبطأ ولا يدعم الجودة التلقائية.
@@ -2834,6 +2842,7 @@ Platforms:
   Load Error: تعذّر تحميل هذه الصفحة من {platform}.
   Empty Tab: لا يوجد شيء هنا بعد.
 YouTube Account:
+  "{author} replied to {commentAuthor}": "ردّ {author} على {commentAuthor}"
   Like: "إعجاب"
   Dislike: "عدم الإعجاب"
   Rating Failed: "تعذّر التقييم على YouTube: {error}"

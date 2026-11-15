@@ -474,6 +474,7 @@ History:
 Settings:
   Experimental Badge: Eksperimentinis
   YouTube Account Settings:
+    Watch Posted Comments: "Stebėti atsakymus į mano paskelbtus komentarus"
     YouTube Account Settings: "YouTube paskyra"
     Unofficial App Warning: "OpenTubeX nėra oficiali YouTube programa. Prisijungus tai, ką čia darote, susiejama su jūsų Google paskyra, o Google gali apriboti arba užblokuoti paskyras, kurios naudoja neoficialias programas. Prisijunkite tik su paskyra, kurios netekti jums nebūtų gaila."
     Sign In Explanation: "OpenTubeX prisijungia kaip TV programėlė: prisijungimą patvirtinate Google svetainėje, o OpenTubeX niekada nemato jūsų slaptažodžio. Prisijungimas lieka šiame įrenginyje ir nėra sinchronizuojamas ar įtraukiamas į atsargines kopijas."
@@ -505,7 +506,6 @@ Settings:
     Sync Now: "Sinchronizuoti dabar"
     Synced: "Sinchronizuota su YouTube"
     Sync Failed: "Nepavyko sinchronizuoti su YouTube: {error}"
-    Reply Notifications: "Pranešti man apie atsakymus į mano komentarus"
   Diagnostics:
     Diagnostics: Diagnostika
     Description: Kol diagnostikos žurnalas įjungtas, OpenTubeX laiko naujausius žurnalo pranešimus atmintyje, kad galėtumėte juos pridėti prie pranešimų apie klaidas. Jis niekada jų neišsaugo ir nesiunčia pats, o išjungus žurnalą jie ištrinami. Ataskaitose nėra slapukų, prieigos raktų, IP adresų ir URL parametrų, tačiau jose gali būti jūsų paleistų vaizdo įrašų ID, todėl prieš dalindamiesi ataskaita ją peržiūrėkite.
@@ -593,6 +593,11 @@ Settings:
       Off: "Išjungta"
       On Metered Networks: "Matuojamuose tinkluose"
       Always: "Visada"
+    Stop Watching: "Nebestebėti"
+    No Watched Comments: "Nestebimas nė vienas komentaras. Stebėkite komentarą naudodami šalia jo esantį varpelio mygtuką."
+    Your Comment: "Jūsų komentaras"
+    Watched Comments: "Stebimi komentarai"
+    Reply Notifications: "Įjungti pranešimus apie atsakymus"
     Built-in Streams:
       Built-in Streams: "Integruoti srautai"
       Automatic: "Automatiškai"
@@ -674,7 +679,6 @@ Settings:
       Force On: Visada įjungta
       Force Off: Visada išjungta
     Comment Translation:
-      Title: Komentarų vertimas
       Enable: Įjungti komentarų vertimą
       Never Translate: Niekada neversti komentarų šiomis kalbomis
       Choose Language: Pasirinkti kalbą
@@ -2646,6 +2650,9 @@ Chapters:
   Chapter Loop Stopped: 'Skyriaus kartojimas sustabdytas'
   Sync to Video Time: 'Sinchronizuoti su vaizdo įrašo laiku'
 Comments:
+  Watch Failed: "Nepavyko stebėti komentaro atsakymų"
+  Stop Watching for Replies: "Nebestebėti atsakymų"
+  Watch for Replies: "Stebėti atsakymus"
   Image unavailable: "Vaizdas nepasiekiamas"
   Comment Count: '{count} komentaras | {count} komentarai | {count} komentarų'
   Show Comments: Rodyti komentarus
@@ -2693,12 +2700,13 @@ Description:
   Music: Muzika
 Tooltips:
   YouTube Account Settings:
+    Watch Posted Comments: "Čia paskelbti jūsų komentarai automatiškai stebimi dėl atsakymų, jei komentarų nustatymuose įjungti pranešimai apie atsakymus."
     Add to YouTube Watch History: "Jūsų paleisti vaizdo įrašai įtraukiami į jūsų YouTube žiūrėjimo istoriją, kad YouTube rekomendacijos iš jų mokytųsi. Kol istorija YouTube pristabdyta, niekas neįtraukiama."
     Rate Videos: "Rodo vaizdo įrašuose mygtukus „Patinka“ ir „Nepatinka“. Kad būtų parodytas jūsų įvertinimas, kiekvienas atidarytas vaizdo įrašas patikrinamas „YouTube“ naudojant jūsų paskyrą, todėl „YouTube“ sužino, kokius vaizdo įrašus atidarote, net jei jie nepridedami prie žiūrėjimo istorijos."
     Sync Subscriptions: "Kanalai, kuriuos užsiprenumeruojate YouTube, įtraukiami į „Visi kanalai“, o kanalai, kurių prenumeratą ten atšaukiate, pašalinami iš visų profilių. Užsiprenumeravus ar atšaukus prenumeratą čia, „Visi kanalai“, tas pats atliekama ir YouTube."
     Sync Playlists: "Jūsų YouTube grojaraščiai, „Žiūrėti vėliau“ ir „Patikę vaizdo įrašai“ rodomi skiltyje „Tavo grojaraščiai“, o čia juose atlikti pakeitimai atliekami ir YouTube. Jie nesinchronizuojami su kitais jūsų įrenginiais ir neįtraukiami, kai eksportuojate visus grojaraščius ar kuriate atsarginę duomenų kopiją. Tai išjungus, jie pašalinami iš šio įrenginio, bet ne iš YouTube."
-    Reply Notifications: "OpenTubeX tikrina, ar į komentarus, kuriuos čia paskelbėte per pastarąsias 30 dienų, yra naujų atsakymų. Komentarai, paskelbti kitur, pavyzdžiui, YouTube svetainėje, neįtraukiami."
   General Settings:
+    Reply Notifications: "OpenTubeX 30 dienų tikrina, ar į jūsų stebimus komentarus yra naujų atsakymų. Stebėkite bet kurį komentarą naudodami šalia jo esantį varpelio mygtuką."
     Built-in Streams: |
       Automatinis režimas daugumą vaizdo įrašų leidžia per YouTube visionOS klientą, kuris paleidžia greičiau ir palaiko automatinę kokybę. Tiesioginės transliacijos ir vaizdo įrašai, kurių jis negali paleisti, naudoja SABR.
       Tik SABR visada naudoja YouTube žiniatinklio klientą, kuris paleidžia lėčiau ir neturi automatinės kokybės.
@@ -3297,6 +3305,7 @@ Platforms:
   Load Error: Nepavyko įkelti šio puslapio iš {platform}.
   Empty Tab: Čia dar nieko nėra.
 YouTube Account:
+  "{author} replied to {commentAuthor}": "{author} atsakė naudotojui {commentAuthor}"
   Like: "Patinka"
   Dislike: "Nepatinka"
   Rating Failed: "Nepavyko įvertinti YouTube: {error}"

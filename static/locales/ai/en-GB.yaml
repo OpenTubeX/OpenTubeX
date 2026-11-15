@@ -355,6 +355,7 @@ History:
 Settings:
   Experimental Badge: Experimental
   YouTube Account Settings:
+    Watch Posted Comments: "Watch comments I post for replies"
     YouTube Account Settings: "YouTube Account"
     Unofficial App Warning: "OpenTubeX is not an official YouTube app. Signing in links what you do here to your Google account, and Google can restrict or ban accounts that use unofficial apps. Only sign in with an account you can afford to lose."
     Sign In Explanation: "OpenTubeX signs in like a TV app: you approve it on Google's website, and OpenTubeX never sees your password. The sign-in stays on this device and is not synced or backed up."
@@ -386,7 +387,6 @@ Settings:
     Sync Now: "Sync now"
     Synced: "Synced with YouTube"
     Sync Failed: "Could not sync with YouTube: {error}"
-    Reply Notifications: "Notify me about replies to my comments"
   Diagnostics:
     Diagnostics: Diagnostics
     Description: While diagnostic logging is on, OpenTubeX keeps recent log messages in memory so you can attach them to bug reports. It never saves or sends them on its own, and turning logging off deletes them. Reports leave out cookies, tokens, IP addresses and URL parameters, but they can include IDs of videos you played, so check a report before you share it.
@@ -475,6 +475,11 @@ Settings:
       Off: "Off"
       On Metered Networks: "On metered networks"
       Always: "Always"
+    Stop Watching: "Stop watching"
+    No Watched Comments: "No comments are being watched. Watch a comment with the bell button next to it."
+    Your Comment: "Your comment"
+    Watched Comments: "Watched comments"
+    Reply Notifications: "Enable reply notifications"
     Built-in Streams:
       Built-in Streams: "Built-in streams"
       Automatic: "Automatic"
@@ -546,7 +551,6 @@ Settings:
       Start with an empty session: Start with an empty session
       Load landing page, keep other tabs unloaded: Load landing page, keep other tabs unloaded
     Comment Translation:
-      Title: Comment translations
       Enable: Enable comment translations
       Never Translate: Never translate comments in
       Choose Language: Choose a language
@@ -2227,6 +2231,9 @@ Chapters:
   Chapter Loop Stopped: 'Stopped looping chapter'
   Sync to Video Time: 'Sync to video time'
 Comments:
+  Watch Failed: "Could not watch the comment for replies"
+  Stop Watching for Replies: "Stop watching for replies"
+  Watch for Replies: "Watch for replies"
   Image unavailable: "Image unavailable"
   Comment Count: 1 Comment | {count} Comments
   Show Comments: Show Comments
@@ -2265,12 +2272,13 @@ Description:
   Music: Music
 Tooltips:
   YouTube Account Settings:
+    Watch Posted Comments: "Comments you post here are watched for replies automatically, as long as reply notifications are on in the comment settings."
     Sync Subscriptions: "Channels you subscribe to on YouTube are added to All Channels, and channels you unsubscribe from there are removed from every profile. Subscribing or unsubscribing in All Channels here does the same on YouTube."
     Sync Playlists: "Your YouTube playlists, Watch later and Liked videos appear in Your playlists, and changes you make to them here are made on YouTube too. They are not synced to your other devices or included when you export all playlists or back up your data. Turning this off removes them from this device but not from YouTube."
     Add to YouTube Watch History: "Videos you play are added to your YouTube watch history, so YouTube's recommendations learn from them. Nothing is added while the history is paused on YouTube."
     Rate Videos: "Shows like and dislike buttons on videos. To show your rating, each video you open is looked up on YouTube with your account, so YouTube learns which videos you open, even when they are not added to your watch history."
-    Reply Notifications: "OpenTubeX checks the comments you posted here in the last 30 days for new replies. Comments you posted elsewhere, such as on the YouTube website, are not included."
   General Settings:
+    Reply Notifications: "OpenTubeX checks the comments you watch for new replies for 30 days. Watch any comment with the bell button next to it."
     Built-in Streams: |
       Automatic plays most videos through YouTube's visionOS client, which starts faster and supports automatic quality. Live streams and videos it can't play use SABR.
       SABR only always uses YouTube's web client, which starts slower and has no automatic quality.
@@ -2787,6 +2795,7 @@ Platforms:
   Load Error: This page could not be loaded from {platform}.
   Empty Tab: There is nothing here yet.
 YouTube Account:
+  "{author} replied to {commentAuthor}": "{author} replied to {commentAuthor}"
   Like: "Like"
   Dislike: "Dislike"
   Rating Failed: "Could not rate on YouTube: {error}"
