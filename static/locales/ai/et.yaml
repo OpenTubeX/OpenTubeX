@@ -1011,6 +1011,7 @@ Settings:
       Modern Formats: "Kaasaegsed vormingud"
     Ask Before Preloading Large Playlists: "Küsi enne suurte esitusloendite eellaadimist"
     Timestamp Notes:
+      Enable: "Luba ajatempliga märkmed"
       Obsidian Vault: Obsidiani hoidla
   Channel Settings:
     Channel Settings: Kanali seaded
@@ -2356,6 +2357,7 @@ Tooltips:
     Concurrent Preloads: "Suurim arv yt-dlp protsesse, mida kasutatakse videote samaaegseks eellaadimiseks. Suuremad väärtused kasutavad rohkem protsessorit, mälu ja võrgu läbilaskevõimet."
     Ignore System Rotation Lock for Fullscreen: Pööra seadet füüsiliselt täisekraani avamiseks ja sulgemiseks ka siis, kui Androidi automaatne pööramine on välja lülitatud.
     Ask Before Preloading Large Playlists: "Küsib kinnitust enne, kui eellaaditakse kõik videod esitusloendist, milles on üle {count} video."
+    Enable Timestamp Notes: "Lisab mängijasse nupu ja otsetee N, mis peatavad video ja avavad märkme, mis viitab praegusele hetkele. Märkmeid saab kopeerida Markdownina või arvutis lisada Obsidiani."
     Obsidian Vault: Ajatempliga märkmete jaoks kasutatava Obsidiani hoidla nimi. Kui see on määratud, saab märkmeid Obsidiani lisada. Iga video märkmed kogutakse video järgi nimetatud märkmesse hoidla uute märkmete kaustas.
   Download Settings:
     Download Folder: Videod salvestatakse sellesse kausta. Süsteemi allalaadimiste kausta kasutamiseks jäta väli tühjaks.

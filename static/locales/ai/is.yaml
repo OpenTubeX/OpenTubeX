@@ -1013,6 +1013,7 @@ Settings:
       Modern Formats: "Nútímaleg snið"
     Ask Before Preloading Large Playlists: "Spyrja áður en stórir spilunarlistar eru forhlaðnir"
     Timestamp Notes:
+      Enable: "Virkja tímamerktar glósur"
       Obsidian Vault: Obsidian-hvelfing
   Channel Settings:
     Channel Settings: Rásarstillingar
@@ -2369,6 +2370,7 @@ Tooltips:
     Concurrent Preloads: "Hámarksfjöldi yt-dlp-ferla sem eru notaðir til að forhlaða myndskeiðum samtímis. Hærri gildi nota meira örgjörvaafl, minni og netbandvídd."
     Ignore System Rotation Lock for Fullscreen: Snúðu tækinu til að opna og loka öllum skjánum, jafnvel þótt slökkt sé á sjálfvirkum snúningi í Android.
     Ask Before Preloading Large Playlists: "Biður um staðfestingu áður en öll myndskeið spilunarlista með fleiri en {count} myndskeið eru forhlaðin."
+    Enable Timestamp Notes: "Bætir við hnappi í spilarann og flýtilyklinum N sem gera hlé á myndskeiðinu og opna glósu sem tengir á núverandi augnablik. Hægt er að afrita glósur sem Markdown eða, á tölvu, bæta þeim við Obsidian."
     Obsidian Vault: Heiti Obsidian-hvelfingarinnar fyrir tímamerktar glósur. Þegar það er stillt er hægt að bæta glósum við Obsidian. Glósur hvers myndskeiðs eru teknar saman í glósu sem nefnd er eftir myndskeiðinu, í möppu hvelfingarinnar fyrir nýjar glósur.
   Download Settings:
     Download Folder: Myndbönd vistast í þessa möppu. Skildu reitinn eftir auðan til að nota niðurhalsmöppu kerfisins.

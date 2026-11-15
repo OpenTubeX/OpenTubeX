@@ -2,7 +2,7 @@
 category: feature
 ---
 
-The player can take timestamp notes: press N or use the player menu to write a note that links to the current moment, then copy it as Markdown or add it to an Obsidian vault on desktop.
+The player can take timestamp notes once you enable them in the player settings: press N or use the player menu to write a note that links to the current moment, then copy it as Markdown or add it to an Obsidian vault on desktop.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/adeceadf-b8de-42b2-8434-142cbef2cb5b">

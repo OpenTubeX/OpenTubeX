@@ -1071,6 +1071,7 @@ Settings:
     Enable FCast: FCast فعال کریں
     Ask Before Preloading Large Playlists: "بڑی پلے لسٹس پہلے سے لوڈ کرنے سے پہلے پوچھیں"
     Timestamp Notes:
+      Enable: "ٹائم اسٹیمپ نوٹس فعال کریں"
       Obsidian Vault: Obsidian والٹ
   Channel Settings:
     Channel Settings: چینل سیٹنگز
@@ -2468,6 +2469,7 @@ Tooltips:
     Concurrent Preloads: ایک ساتھ ویڈیوز پہلے سے لوڈ کرنے کے لیے استعمال ہونے والے yt-dlp پروسیسز کی زیادہ سے زیادہ تعداد۔ زیادہ قدریں زیادہ CPU، میموری اور نیٹ ورک بینڈوڈتھ استعمال کرتی ہیں۔
     Ignore System Rotation Lock for Fullscreen: Android کی خودکار گردش بند ہونے پر بھی فل اسکرین میں جانے اور نکلنے کے لیے ڈیوائس کی جسمانی گردش استعمال کریں۔
     Ask Before Preloading Large Playlists: "{count} سے زیادہ ویڈیوز والی پلے لسٹ کی تمام ویڈیوز پہلے سے لوڈ کرنے سے پہلے تصدیق مانگتا ہے۔"
+    Enable Timestamp Notes: "پلیئر میں ایک بٹن اور N شارٹ کٹ شامل کرتا ہے جو ویڈیو روک کر موجودہ لمحے کے لنک والا نوٹ کھولتے ہیں۔ نوٹس کو Markdown کے طور پر کاپی کیا جا سکتا ہے یا ڈیسک ٹاپ پر Obsidian میں شامل کیا جا سکتا ہے۔"
     Obsidian Vault: ٹائم اسٹیمپ نوٹس کے لیے Obsidian والٹ کا نام۔ سیٹ ہونے پر نوٹس Obsidian میں شامل کیے جا سکتے ہیں۔ ہر ویڈیو کے نوٹس والٹ میں نئے نوٹس کے فولڈر کے اندر ویڈیو کے نام والے ایک نوٹ میں جمع کیے جاتے ہیں۔
   Download Settings:
     Download Folder: ویڈیوز اس فولڈر میں محفوظ ہوتی ہیں۔ اپنے سسٹم کا ڈاؤن لوڈز فولڈر استعمال کرنے کے لیے خالی چھوڑیں۔

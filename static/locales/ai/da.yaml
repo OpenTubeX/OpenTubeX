@@ -1036,6 +1036,7 @@ Settings:
     Enable FCast: "Aktivér FCast"
     Ask Before Preloading Large Playlists: "Spørg før forudindlæsning af store playlister"
     Timestamp Notes:
+      Enable: "Aktivér tidsstempelnoter"
       Obsidian Vault: Obsidian-boks
   Channel Settings:
     Channel Settings: Kanalindstillinger
@@ -2443,6 +2444,7 @@ Tooltips:
     Concurrent Preloads: "Det højeste antal yt-dlp-processer, der bruges til at forudindlæse videoer samtidig. Højere værdier bruger mere CPU, hukommelse og netværksbåndbredde."
     Ignore System Rotation Lock for Fullscreen: Drej enheden fysisk for at åbne og afslutte fuld skærm, selv når automatisk rotation er slået fra i Android.
     Ask Before Preloading Large Playlists: "Beder om bekræftelse, før alle videoer i en playliste med mere end {count} videoer forudindlæses."
+    Enable Timestamp Notes: "Tilføjer en afspillerknap og genvejen N, der sætter videoen på pause og åbner en note, der linker til det aktuelle øjeblik. Noter kan kopieres som Markdown eller på computeren føjes til Obsidian."
     Obsidian Vault: Navnet på Obsidian-boksen til tidsstempelnoter. Når den er angivet, kan noter føjes til Obsidian. Noterne for hver video samles i en note opkaldt efter videoen i boksens mappe til nye noter.
   Download Settings:
     Download Folder: Videoer gemmes i denne mappe. Lad feltet stå tomt for at bruge systemets Downloads-mappe.

@@ -629,6 +629,7 @@ Settings:
       Modern Formats: "Nowoczesne formaty"
     Ask Before Preloading Large Playlists: "Pytaj przed wstępnym wczytaniem dużych playlist"
     Timestamp Notes:
+      Enable: "Włącz notatki ze znacznikami czasu"
       Obsidian Vault: Sejf Obsidiana
   Channel Settings:
     Enable Channel Playback Settings: Włącz ustawienia odtwarzania dla kanałów
@@ -1585,6 +1586,7 @@ Tooltips:
     Concurrent Preloads: "Maksymalna liczba procesów yt-dlp używanych do jednoczesnego wstępnego ładowania filmów. Wyższe wartości zużywają więcej procesora, pamięci i przepustowości sieci."
     Ignore System Rotation Lock for Fullscreen: Obróć fizycznie urządzenie, aby włączyć lub wyłączyć pełny ekran, nawet gdy automatyczne obracanie w Androidzie jest wyłączone.
     Ask Before Preloading Large Playlists: "Prosi o potwierdzenie przed wstępnym wczytaniem wszystkich filmów z playlisty zawierającej więcej niż {count} filmów."
+    Enable Timestamp Notes: "Dodaje do odtwarzacza przycisk i skrót N, które wstrzymują film i otwierają notatkę z linkiem do bieżącego momentu. Notatki można skopiować jako Markdown lub na komputerze dodać do Obsidiana."
     Obsidian Vault: Nazwa sejfu Obsidiana dla notatek ze znacznikami czasu. Po jej ustawieniu notatki można dodawać do Obsidiana. Notatki z każdego filmu są zbierane w notatce nazwanej tak jak film, w folderze sejfu na nowe notatki.
   Download Settings:
     Global Additional yt-dlp Arguments: Dodatkowe argumenty wiersza poleceń przekazywane do yt-dlp przy każdym pobieraniu, na przykład --cookies-from-browser firefox.

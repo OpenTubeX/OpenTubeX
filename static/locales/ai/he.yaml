@@ -1026,6 +1026,7 @@ Settings:
     Enable FCast: "הפעלת FCast"
     Ask Before Preloading Large Playlists: "לשאול לפני טעינה מראש של פלייליסטים גדולים"
     Timestamp Notes:
+      Enable: "הפעלת הערות עם חותמת זמן"
       Obsidian Vault: כספת Obsidian
   Channel Settings:
     Channel Settings: הגדרות ערוץ
@@ -2412,6 +2413,7 @@ Tooltips:
     Concurrent Preloads: "המספר המרבי של תהליכי yt-dlp המשמשים לטעינה מראש של סרטונים בו־זמנית. ערכים גבוהים יותר משתמשים ביותר מעבד, זיכרון ורוחב פס רשת."
     Ignore System Rotation Lock for Fullscreen: סובבו את המכשיר כדי להיכנס למסך מלא ולצאת ממנו, גם כשהסיבוב האוטומטי של Android כבוי.
     Ask Before Preloading Large Playlists: "מבקש אישור לפני טעינה מראש של כל הסרטונים בפלייליסט עם יותר מ־{count} סרטונים."
+    Enable Timestamp Notes: "מוסיף לנגן כפתור ואת קיצור הדרך N, שמשהים את הסרטון ופותחים הערה עם קישור לרגע הנוכחי. ניתן להעתיק הערות כ־Markdown או, במחשב, להוסיף אותן ל־Obsidian."
     Obsidian Vault: שם כספת Obsidian עבור הערות עם חותמת זמן. כשהוא מוגדר, ניתן להוסיף הערות ל־Obsidian. ההערות של כל סרטון נאספות בהערה הנקראת על שם הסרטון, בתיקיית ההערות החדשות של הכספת.
   Download Settings:
     Download Folder: הסרטונים נשמרים בתיקייה זו. השאירו ריק כדי להשתמש בתיקיית ההורדות של המערכת.

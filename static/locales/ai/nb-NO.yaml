@@ -1011,6 +1011,7 @@ Settings:
       Modern Formats: "Moderne formater"
     Ask Before Preloading Large Playlists: "Spør før forhåndslasting av store spillelister"
     Timestamp Notes:
+      Enable: "Slå på tidsstempelnotater"
       Obsidian Vault: Obsidian-hvelv
   Channel Settings:
     Channel Settings: Kanalinnstillinger
@@ -2359,6 +2360,7 @@ Tooltips:
     Concurrent Preloads: "Det høyeste antallet yt-dlp-prosesser som brukes til å forhåndslaste videoer samtidig. Høyere verdier bruker mer prosessorkraft, minne og nettverksbåndbredde."
     Ignore System Rotation Lock for Fullscreen: Roter enheten fysisk for å åpne og avslutte fullskjerm, selv når automatisk rotasjon er slått av i Android.
     Ask Before Preloading Large Playlists: "Ber om bekreftelse før alle videoene i en spilleliste med mer enn {count} videoer forhåndslastes."
+    Enable Timestamp Notes: "Legger til en avspillerknapp og snarveien N som setter videoen på pause og åpner et notat som lenker til det nåværende øyeblikket. Notater kan kopieres som Markdown eller, på datamaskinen, legges til i Obsidian."
     Obsidian Vault: Navnet på Obsidian-hvelvet for tidsstempelnotater. Når det er angitt, kan notater legges til i Obsidian. Notatene for hver video samles i et notat oppkalt etter videoen, i hvelvets mappe for nye notater.
   Download Settings:
     Download Folder: Videoer lagres i denne mappen. La feltet stå tomt for å bruke systemets nedlastingsmappe.

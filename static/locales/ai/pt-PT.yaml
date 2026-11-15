@@ -1022,6 +1022,7 @@ Settings:
       Modern Formats: "Formatos modernos"
     Ask Before Preloading Large Playlists: "Perguntar antes de pré-carregar listas de reprodução grandes"
     Timestamp Notes:
+      Enable: "Ativar notas com marca temporal"
       Obsidian Vault: Cofre do Obsidian
   Channel Settings:
     Channel Settings: Definições dos canais
@@ -2402,6 +2403,7 @@ Tooltips:
     Concurrent Preloads: "O número máximo de processos do yt-dlp utilizados para pré-carregar vídeos ao mesmo tempo. Valores mais elevados utilizam mais CPU, memória e largura de banda da rede."
     Ignore System Rotation Lock for Fullscreen: Rode fisicamente o dispositivo para entrar e sair do ecrã inteiro, mesmo quando a rotação automática do Android está desligada.
     Ask Before Preloading Large Playlists: "Pede confirmação antes de pré-carregar todos os vídeos de uma lista de reprodução com mais de {count} vídeos."
+    Enable Timestamp Notes: "Adiciona um botão ao reprodutor e o atalho N, que colocam o vídeo em pausa e abrem uma nota com ligação para o momento atual. As notas podem ser copiadas como Markdown ou, no computador, adicionadas ao Obsidian."
     Obsidian Vault: Nome do cofre do Obsidian para as notas com marca temporal. Quando definido, as notas podem ser adicionadas ao Obsidian. As notas de cada vídeo são reunidas numa nota com o nome do vídeo, na pasta do cofre para novas notas.
   Download Settings:
     Download Folder: Os vídeos são guardados nesta pasta. Deixe em branco para utilizar a pasta Transferências do sistema.

@@ -1011,6 +1011,7 @@ Settings:
       Modern Formats: "Moderna format"
     Ask Before Preloading Large Playlists: "Fråga innan stora spellistor förinläses"
     Timestamp Notes:
+      Enable: "Aktivera tidsstämpelanteckningar"
       Obsidian Vault: Obsidian-valv
   Channel Settings:
     Channel Settings: Kanalinställningar
@@ -2355,6 +2356,7 @@ Tooltips:
     Concurrent Preloads: "Det högsta antalet yt-dlp-processer som används för att förinläsa videor samtidigt. Högre värden använder mer processor, minne och nätverksbandbredd."
     Ignore System Rotation Lock for Fullscreen: Rotera enheten fysiskt för att öppna och avsluta helskärm, även när automatisk rotation är avstängd i Android.
     Ask Before Preloading Large Playlists: "Ber om bekräftelse innan alla videor i en spellista med fler än {count} videor förinläses."
+    Enable Timestamp Notes: "Lägger till en spelarknapp och kortkommandot N som pausar videon och öppnar en anteckning som länkar till det aktuella ögonblicket. Anteckningar kan kopieras som Markdown eller, på datorn, läggas till i Obsidian."
     Obsidian Vault: Namnet på Obsidian-valvet för tidsstämpelanteckningar. När det är angivet kan anteckningar läggas till i Obsidian. Anteckningarna för varje video samlas i en anteckning med videons namn, i valvets mapp för nya anteckningar.
   Download Settings:
     Download Folder: Videor sparas i den här mappen. Lämna tomt för att använda systemets nedladdningsmapp.

@@ -1011,6 +1011,7 @@ Settings:
       Modern Formats: "Moderní formáty"
     Ask Before Preloading Large Playlists: "Ptát se před přednačtením velkých playlistů"
     Timestamp Notes:
+      Enable: "Povolit poznámky s časovými značkami"
       Obsidian Vault: Trezor Obsidian
   Channel Settings:
     Channel Settings: Nastavení kanálů
@@ -2355,6 +2356,7 @@ Tooltips:
     Concurrent Preloads: "Maximální počet procesů yt-dlp použitých k současnému přednačítání videí. Vyšší hodnoty využívají více výkonu procesoru, paměti a šířky pásma sítě."
     Ignore System Rotation Lock for Fullscreen: Fyzickým otočením zařízení zapnete a vypnete celou obrazovku, i když je automatické otáčení v Androidu vypnuté.
     Ask Before Preloading Large Playlists: "Před přednačtením všech videí playlistu s více než {count} videi požádá o potvrzení."
+    Enable Timestamp Notes: "Přidá do přehrávače tlačítko a zkratku N, které pozastaví video a otevřou poznámku s odkazem na aktuální okamžik. Poznámky lze zkopírovat jako Markdown nebo je na počítači přidat do Obsidianu."
     Obsidian Vault: Název trezoru Obsidian pro poznámky s časovými značkami. Pokud je nastaven, lze poznámky přidávat do Obsidianu. Poznámky ke každému videu se shromažďují v poznámce pojmenované podle videa, ve složce trezoru pro nové poznámky.
   Download Settings:
     Download Folder: Videa se ukládají do této složky. Chcete-li použít systémovou složku Stažené, ponechte pole prázdné.

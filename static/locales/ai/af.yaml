@@ -1188,6 +1188,7 @@ Settings:
     Enable FCast: Aktiveer FCast
     Ask Before Preloading Large Playlists: "Vra voordat groot snitlyste vooraf gelaai word"
     Timestamp Notes:
+      Enable: "Aktiveer tydstempelnotas"
       Obsidian Vault: Obsidian-kluis
   Channel Settings:
     Channel Settings: Kanaalinstellings
@@ -2609,6 +2610,7 @@ Tooltips:
     Concurrent Preloads: Die maksimum aantal yt-dlp-prosesse wat gelyktydig gebruik word om video’s vooraf te laai. Hoër waardes gebruik meer SVE, geheue en netwerkbandwydte.
     Ignore System Rotation Lock for Fullscreen: Gebruik fisiese toesteldraaiing om volskerm te betree en te verlaat, selfs wanneer Android se outodraai af is.
     Ask Before Preloading Large Playlists: "Vra vir bevestiging voordat alle video’s van ’n snitlys met meer as {count} video’s vooraf gelaai word."
+    Enable Timestamp Notes: "Voeg 'n spelerknoppie en die N-kortpad by wat die video laat wag en 'n notas oopmaak wat na die huidige oomblik skakel. Notas kan as Markdown gekopieer word of, op die rekenaar, by Obsidian gevoeg word."
     Obsidian Vault: Naam van die Obsidian-kluis vir tydstempelnotas. Wanneer dit gestel is, kan notas by Obsidian gevoeg word. Die notas van elke video word versamel in 'n nota wat na die video vernoem is, in die kluis se vouer vir nuwe notas.
   Download Settings:
     Download Folder: Video’s word in hierdie vouer gestoor. Laat leeg om u stelsel se Aflaaie-vouer te gebruik.

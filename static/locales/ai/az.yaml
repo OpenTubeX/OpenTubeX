@@ -1013,6 +1013,7 @@ Settings:
       Modern Formats: "Müasir formatlar"
     Ask Before Preloading Large Playlists: "Böyük pleylistləri əvvəlcədən yükləməzdən əvvəl soruş"
     Timestamp Notes:
+      Enable: "Zaman nişanlı qeydləri aktivləşdir"
       Obsidian Vault: Obsidian anbarı
   Channel Settings:
     Channel Settings: Kanal tənzimləmələri
@@ -2366,6 +2367,7 @@ Tooltips:
     Concurrent Preloads: Videoları eyni anda öncədən yükləmək üçün istifadə olunan yt-dlp proseslərinin maksimum sayı. Yüksək dəyərlər daha çox prosessor, yaddaş və şəbəkə resursu istifadə edir.
     Ignore System Rotation Lock for Fullscreen: Android-də avtomatik fırlanma söndürülsə belə, cihazı fiziki olaraq döndərərək tam ekrana keçin və çıxın.
     Ask Before Preloading Large Playlists: "{count} videodan çox olan pleylistin bütün videolarını əvvəlcədən yükləməzdən əvvəl təsdiq istəyir."
+    Enable Timestamp Notes: "Videonu dayandıran və cari ana keçid verən qeyd açan pleyer düyməsi və N qısayolu əlavə edir. Qeydləri Markdown kimi kopyalamaq və ya masaüstündə Obsidian-a əlavə etmək olar."
     Obsidian Vault: Zaman nişanlı qeydlər üçün Obsidian anbarının adı. Təyin edildikdə qeydləri Obsidian-a əlavə etmək olar. Hər videonun qeydləri anbarın yeni qeydlər qovluğunda videonun adını daşıyan bir qeyddə toplanır.
   Download Settings:
     Download Folder: Videolar bu qovluqda saxlanır. Sistemin Yükləmələr qovluğunu istifadə etmək üçün boş buraxın.

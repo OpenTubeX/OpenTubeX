@@ -198,6 +198,7 @@ const showFullscreenActionsWhenPaused = computed(() => store.getters.getShowFull
 // The mobile player always shows its center button.
 const displayVideoPlayButton = computed(() => IS_CAPACITOR || store.getters.getDisplayVideoPlayButton)
 const enableScreenshot = computed(() => store.getters.getEnableScreenshot)
+const enableTimestampNotes = computed(() => store.getters.getEnableTimestampNotes)
 
 // Parse and label the options like the player's quick playback speed bar.
 const quickPlaybackRates = computed(() => {
@@ -225,6 +226,7 @@ const CONTROL_BAR_ICONS = {
   playbackRate: SHAKA_PREVIEW_ICONS.PLAYBACK_RATE,
   loop: SHAKA_PREVIEW_ICONS.LOOP,
   screenshot: PlayerIcons.PHOTO_CAMERA_FILLED,
+  timestampNote: PlayerIcons.EDIT_NOTE_DEFAULT,
   autoplay: PlayerIcons.PAUSE_CIRCLE_FILLED,
   captions: SHAKA_PREVIEW_ICONS.CLOSED_CAPTIONS,
   menu: SHAKA_PREVIEW_ICONS.OPEN_OVERFLOW,
@@ -237,9 +239,10 @@ const CONTROL_BAR_ICONS = {
 const COMPACT_CONTROL_BAR_BUTTONS = ['captions', 'menu', 'fullscreen', ...(IS_CAPACITOR ? ['pictureInPicture'] : [])]
 
 const controlBarButtons = computed(() => store.getters.getControlBarButtons
-  // The screenshot button only shows while screenshots are enabled, and the
-  // chapters button sits next to the time.
-  .filter(id => (id !== 'screenshot' || enableScreenshot.value) && id !== 'chapters')
+  // The screenshot and timestamp note buttons only show while their features
+  // are enabled, and the chapters button sits next to the time.
+  .filter(id => (id !== 'screenshot' || enableScreenshot.value) &&
+    (id !== 'timestampNote' || enableTimestampNotes.value) && id !== 'chapters')
   // Like the player, fullscreen hides the theatre mode and full window buttons.
   .filter(id => compact.value
     ? COMPACT_CONTROL_BAR_BUTTONS.includes(id)
@@ -324,6 +327,7 @@ const overflowItems = computed(() => {
     theatreMode: !compact.value && controlBarMenuItem('theatreMode'),
     fullWindow: !IS_CAPACITOR && controlBarMenuItem('fullWindow'),
     screenshot: enableScreenshot.value && { path: PlayerIcons.PHOTO_CAMERA_FILLED, label: t('Video.Player.Take Screenshot'), value: '' },
+    timestampNote: enableTimestampNotes.value && { path: PlayerIcons.EDIT_NOTE_DEFAULT, label: t('Video.Player.Timestamp Notes.Take Note'), value: '' },
   }
   return store.getters.getPlayerMenuControls
     .filter(id => items[id] && !hidden.has(id) &&

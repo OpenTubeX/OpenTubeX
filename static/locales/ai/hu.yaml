@@ -1011,6 +1011,7 @@ Settings:
       Modern Formats: "Modern formátumok"
     Ask Before Preloading Large Playlists: "Kérdezzen nagy lejátszási listák előtöltése előtt"
     Timestamp Notes:
+      Enable: "Időbélyeges jegyzetek engedélyezése"
       Obsidian Vault: Obsidian-széf
   Channel Settings:
     Channel Settings: Csatornabeállítások
@@ -2355,6 +2356,7 @@ Tooltips:
     Concurrent Preloads: "A videók egyidejű előtöltésére használt yt-dlp-folyamatok legnagyobb száma. A magasabb értékek több processzort, memóriát és hálózati sávszélességet használnak."
     Ignore System Rotation Lock for Fullscreen: A készülék fizikai elforgatásával léphet teljes képernyőre és ki onnan akkor is, ha az Android automatikus forgatása ki van kapcsolva.
     Ask Before Preloading Large Playlists: "Megerősítést kér, mielőtt egy {count} videónál többet tartalmazó lejátszási lista összes videóját előtöltené."
+    Enable Timestamp Notes: "Hozzáad a lejátszóhoz egy gombot és az N billentyűparancsot, amelyek szüneteltetik a videót, és megnyitnak egy jegyzetet, amely az aktuális pillanatra hivatkozik. A jegyzetek Markdownként másolhatók, vagy asztali gépen hozzáadhatók az Obsidianhoz."
     Obsidian Vault: Az időbélyeges jegyzetekhez használt Obsidian-széf neve. Ha meg van adva, a jegyzetek hozzáadhatók az Obsidianhoz. Az egyes videók jegyzetei egy, a videóról elnevezett jegyzetben gyűlnek össze, a széf új jegyzeteknek szánt mappájában.
   Download Settings:
     Download Folder: A videók ebbe a mappába kerülnek. Hagyja üresen a rendszer Letöltések mappájának használatához.

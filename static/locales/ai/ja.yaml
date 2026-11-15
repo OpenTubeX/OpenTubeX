@@ -1011,6 +1011,7 @@ Settings:
       Modern Formats: "新しい形式"
     Ask Before Preloading Large Playlists: "大きな再生リストを先読みする前に確認"
     Timestamp Notes:
+      Enable: "タイムスタンプメモを有効にする"
       Obsidian Vault: Obsidian の保管庫
   Channel Settings:
     Channel Settings: チャンネル設定
@@ -2353,6 +2354,7 @@ Tooltips:
     Concurrent Preloads: "動画の先読みに同時使用する yt-dlp プロセスの最大数です。値を大きくすると、CPU、メモリ、ネットワーク帯域をより多く使用します。"
     Ignore System Rotation Lock for Fullscreen: Androidの自動回転がオフでも、端末を実際に回転させることで全画面表示の開始と終了を切り替えます。
     Ask Before Preloading Large Playlists: "{count} 本を超える動画を含む再生リストのすべての動画を先読みする前に確認します。"
+    Enable Timestamp Notes: "動画を一時停止し、現在の位置へのリンクを含むメモを開くプレーヤーボタンと N ショートカットを追加します。メモは Markdown としてコピーするか、デスクトップでは Obsidian に追加できます。"
     Obsidian Vault: タイムスタンプメモに使用する Obsidian の保管庫の名前。設定すると、メモを Obsidian に追加できます。各動画のメモは、保管庫の新規ノート用フォルダー内にある、動画名を付けたノートにまとめられます。
   Download Settings:
     Download Folder: 動画をこのフォルダーに保存します。空欄にすると、システムのダウンロードフォルダーを使用します。
