@@ -182,7 +182,7 @@ import PlatformResultList from '../../components/PlatformResultList/PlatformResu
 
 import store from '../../store/index'
 import { getPlatformFetch } from '../../helpers/platformFetch'
-import { forgetChannel, getRecentChannel, rememberChannel } from '../../helpers/recentPlatformChannels'
+import { forgetChannel, getRecentChannel, rememberChannel, startChannelLoad } from '../../helpers/recentPlatformChannels'
 import { useAutoLoadRevision } from '../../composables/useAutoLoadRevision'
 import { formatSubscriberCount, openExternalLink } from '../../helpers/utils'
 import { useTabAvatar, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
@@ -229,8 +229,8 @@ const pages = reactive({})
 const page = computed(() => pages[currentTab.value] ?? { results: [], continuation: null, loading: true, error: false, loaded: false })
 
 let loadGeneration = 0
-/** When the shown channel started loading, which its remembered pages keep */
-let loadedAt = 0
+/** The load of the shown channel, which its remembered pages keep */
+let channelLoad = startChannelLoad()
 
 async function loadChannel() {
   const generation = ++loadGeneration
@@ -248,7 +248,7 @@ async function loadChannel() {
   const tab = platform.value.channelTabs.includes(requested) ? requested : platform.value.channelTabs[0]
   // Shown at once, so going back also restores the scroll position
   const recent = getRecentChannel(platform.value.id, channelId.value)
-  loadedAt = recent?.savedAt ?? Date.now()
+  channelLoad = recent ?? startChannelLoad()
   if (recent) {
     for (const [key, cached] of Object.entries(recent.pages)) {
       pages[key] = { ...cached, loading: false, error: false, loaded: true }
@@ -293,7 +293,7 @@ function showChannel(shown, tab) {
 function rememberLoadedPages() {
   const loaded = Object.entries(pages).flatMap(([tab, { results, continuation, loaded }]) =>
     loaded ? [[tab, { results: toRaw(results), continuation }]] : [])
-  rememberChannel(platform.value.id, channelId.value, channel.value, Object.fromEntries(loaded), loadedAt)
+  rememberChannel(platform.value.id, channelId.value, channel.value, Object.fromEntries(loaded), channelLoad)
 }
 
 /**
