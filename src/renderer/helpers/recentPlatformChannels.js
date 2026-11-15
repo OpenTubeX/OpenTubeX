@@ -45,3 +45,11 @@ export function rememberChannel(platform, id, channel, pages) {
   recent.set(key, { channel, pages, savedAt })
   if (recent.size > MAX_CHANNELS) recent.delete(/** @type {string} */ (recent.keys().next().value))
 }
+
+/**
+ * @param {string} platform
+ * @param {string} id the ID the page was opened with
+ */
+export function forgetChannel(platform, id) {
+  recent.delete(`${platform}:${id}`)
+}

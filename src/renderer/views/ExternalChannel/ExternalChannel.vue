@@ -182,10 +182,10 @@ import PlatformResultList from '../../components/PlatformResultList/PlatformResu
 
 import store from '../../store/index'
 import { getPlatformFetch } from '../../helpers/platformFetch'
-import { getRecentChannel, rememberChannel } from '../../helpers/recentPlatformChannels'
+import { forgetChannel, getRecentChannel, rememberChannel } from '../../helpers/recentPlatformChannels'
 import { useAutoLoadRevision } from '../../composables/useAutoLoadRevision'
 import { formatSubscriberCount, openExternalLink } from '../../helpers/utils'
-import { useTabAvatar, useTabTitle } from '../../tabs/TabContext'
+import { useTabAvatar, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
 import { getPlatform, PLATFORM_ICONS } from '../../../platforms/index'
 
 const TAB_ICONS = {
@@ -361,6 +361,13 @@ function focusNextTab(tab, event) {
   changeTab(next)
   tabRefs.get(next)?.focus()
 }
+
+// Reloading the tab, also by pulling down, loads the channel again
+useTabLifecycle({
+  beforeReload() {
+    if (platform.value && channelId.value) forgetChannel(platform.value.id, channelId.value)
+  }
+})
 
 // Only another channel needs loading, not another tab of it
 watch([() => route.query.platform, () => route.query.id], loadChannel, { immediate: true })

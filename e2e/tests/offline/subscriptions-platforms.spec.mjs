@@ -598,6 +598,11 @@ test.describe('Channels on other platforms', () => {
       await expect(page.locator('.channelHeader .channelName')).toHaveText('Makers')
       await expect(page.locator('.ft-list-item .h3Title')).toHaveText(['Makers video 1', 'Makers video 2', 'Makers video 3'])
       expect(apiRequests).toHaveLength(requestCount)
+
+      // Reloading the tab loads it again
+      await page.evaluate(() => window.$store.dispatch('reloadTab', window.$store.getters.getPresentedTabId))
+      await expect.poll(() => apiRequests.slice(requestCount)).toContain('/api/v1/video-channels/makers')
+      await expect(page.locator('.ft-list-item .h3Title')).toHaveText(['Makers video 1', 'Makers video 2', 'Makers video 3'])
     })
   })
 
