@@ -2,10 +2,12 @@
 
 version: 1
 reviews:
-  # Review each PR once when it opens; request more with `@cubic-dev-ai incremental review`
+  # Review only on request (`@cubic-dev-ai review`); see AGENTS.md for when to ask
   incremental_commits: false
   ultrareview: manual
   ignore:
+    # Skips every automatic review; manual requests bypass this threshold
+    max_changed_lines: 1
     files:
       - "tests/**"
       - "e2e/tests/**"
