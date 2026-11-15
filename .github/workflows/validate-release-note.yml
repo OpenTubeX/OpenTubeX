@@ -16,8 +16,10 @@ jobs:
     if: >-
       ${{
         github.event.pull_request.user.login != 'dependabot[bot]' &&
-        github.head_ref != 'weblate-opentubex-application' &&
-        github.head_ref != 'upstream-sync' &&
+        !(
+          github.event.pull_request.head.repo.full_name == github.repository &&
+          (github.head_ref == 'weblate-opentubex-application' || github.head_ref == 'upstream-sync')
+        ) &&
         !(
           github.event.pull_request.user.login == 'pull[bot]' &&
           github.event.pull_request.head.repo.full_name == 'FreeTubeApp/FreeTube' &&
