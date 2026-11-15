@@ -8,6 +8,15 @@ import { writeFileAtomic } from './writeFileAtomic.js'
 const ORIGINAL_TITLE_TIMEOUT_MS = 5000
 
 /**
+ * Whether saved state lists the known uploads per feed and the notified ones.
+ * @param {unknown} value
+ */
+function isUploadNotificationState(value) {
+  const { known, notified } = /** @type {{ known?: unknown, notified?: unknown } | null | undefined} */ (value) ?? {}
+  return typeof known === 'object' && known !== null && !Array.isArray(known) && Array.isArray(notified)
+}
+
+/**
  * Feeds can carry YouTube's auto-translated titles; oEmbed returns the original one.
  * @param {typeof fetch} fetchUrl
  * @param {string} videoId
@@ -49,7 +58,7 @@ export function createUploadNotifier({ file, show, fetch: fetchUrl = fetch }) {
   async function load() {
     if (state) return state
     // Other read errors propagate, so a later save cannot overwrite the state.
-    state = (await readJsonState(file, 'upload notification state', saved => saved?.known && Array.isArray(saved.notified))) ??
+    state = (await readJsonState(file, 'upload notification state', isUploadNotificationState)) ??
       createUploadNotificationState()
     return state
   }

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
@@ -124,6 +124,23 @@ test('the desktop notifier persists state and shows localized notifications', as
 
     await restarted.configure({ enabled: false })
     await assert.rejects(readFile(file))
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
+
+test('saved state without known feeds is kept as a backup and replaced', async t => {
+  t.mock.method(console, 'error', () => {})
+  const directory = await mkdtemp(path.join(tmpdir(), 'upload-notifications-'))
+  try {
+    const file = path.join(directory, 'state.json')
+    const saved = JSON.stringify({ known: true, notified: [] })
+    await writeFile(file, saved)
+    const notifier = createUploadNotifier({ file, show: () => {} })
+    await notifier.configure({ enabled: true, titles: {}, channels: { UC1: { name: 'One', feedTypes: ['videos'], membersOnly: false } } })
+    await notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('a')] })
+    const [backup] = (await readdir(directory)).filter(name => name.startsWith('state.json.corrupt-'))
+    assert.equal(await readFile(path.join(directory, backup), 'utf8'), saved)
   } finally {
     await rm(directory, { recursive: true, force: true })
   }
