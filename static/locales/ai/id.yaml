@@ -2052,6 +2052,7 @@ Video:
   Playlist:
     Unavailable videos are hidden: '{count} video yang tidak tersedia disembunyikan'
   External Media:
+    Open Local Network Link: "Buka {url}? Tautan ini mengarah ke komputer ini atau jaringan lokal Anda."
     Dislikes: "Tidak suka"
     Reposts: "Posting ulang"
     Saves: "Simpanan"

@@ -2026,6 +2026,7 @@ Video:
       Copied: Note copiée en Markdown
       Obsidian Failed: Impossible d’ouvrir Obsidian
   External Media:
+    Open Local Network Link: "Ouvrir {url} ? Ce lien pointe vers cet ordinateur ou votre réseau local."
     Dislikes: "Vote négatif | Votes négatifs | Votes négatifs"
     Reposts: "Republication | Republications | Republications"
     Saves: "Enregistrement | Enregistrements | Enregistrements"

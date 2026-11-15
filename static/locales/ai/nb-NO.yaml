@@ -2032,6 +2032,7 @@ Video:
       Copied: Notatet ble kopiert som Markdown
       Obsidian Failed: Kunne ikke åpne Obsidian
   External Media:
+    Open Local Network Link: "Åpne {url}? Denne lenken peker til denne datamaskinen eller ditt lokale nettverk."
     Dislikes: "Misliking | Mislikinger"
     Reposts: "Videredeling | Videredelinger"
     Saves: "Lagring | Lagringer"

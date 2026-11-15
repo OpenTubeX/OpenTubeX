@@ -2504,6 +2504,7 @@ Video:
   Playlist:
     Unavailable videos are hidden: '{count} nedostopen videoposnetek je skrit | {count} nedostopna videoposnetka sta skrita | {count} nedostopni videoposnetki so skriti | {count} nedostopnih videoposnetkov je skritih'
   External Media:
+    Open Local Network Link: "Odprem {url}? Ta povezava kaže na ta računalnik ali vaše lokalno omrežje."
     Dislikes: "Negativna ocena | Negativni oceni | Negativne ocene | Negativnih ocen"
     Reposts: "Ponovna objava | Ponovni objavi | Ponovne objave | Ponovnih objav"
     Saves: "Shranitev | Shranitvi | Shranitve | Shranitev"

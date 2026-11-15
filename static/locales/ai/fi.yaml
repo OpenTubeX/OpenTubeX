@@ -2035,6 +2035,7 @@ Video:
       Obsidian Failed: Obsidianin avaaminen epäonnistui
   Station: Asema
   External Media:
+    Open Local Network Link: "Avataanko {url}? Tämä linkki osoittaa tähän tietokoneeseen tai lähiverkkoosi."
     Dislikes: "Ei-tykkäys | Ei-tykkäystä"
     Reposts: "Uudelleenjulkaisu | Uudelleenjulkaisua"
     Saves: "Tallennus | Tallennusta"

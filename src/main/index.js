@@ -4,7 +4,7 @@ import { createSerialQueue } from './serialQueue.js'
 import { writeFileAtomic } from './writeFileAtomic.js'
 import { fetchRumblePage } from './rumblePages.js'
 import {
-  app, BrowserWindow, Menu, ipcMain,
+  app, BrowserWindow, Menu, dialog, ipcMain,
   powerSaveBlocker, screen, session,
   nativeTheme, net, protocol, clipboard, ClipboardItem,
   shell, Tray, Notification, ShareMenu, nativeImage,
@@ -100,6 +100,7 @@ import { getWindowButtonLayout, onWindowButtonLayoutChanged } from './windowButt
 import { watchTrayColorScheme } from './trayColorScheme'
 import { setDiagnosticLogging, setupDiagnosticLogIpc } from './diagnosticLog'
 import { createMainTranslator } from './mainTranslator'
+import { pointsToLocalNetwork } from './localNetworkLink'
 import { createConfirmations } from './confirmations'
 import { setupCustomThemes } from './customThemes'
 import { contextMenuLabel, setupContextMenu, truncateSelectionForLabel } from './contextMenu'
@@ -2415,7 +2416,31 @@ function runApp() {
     openPendingUrlForReadyWebContents,
     forgetOpenUrlRenderer,
     forgetOpenUrlWebContents
-  } = createUrlOpener({ rootAppUrl: ROOT_APP_URL, createWindow })
+  } = createUrlOpener({ rootAppUrl: ROOT_APP_URL, createWindow, confirmUrl: confirmLocalNetworkLink })
+
+  /**
+   * Asks before opening a link to this computer or the local network, as
+   * other apps and websites can open links in the app.
+   * @param {string} url
+   * @param {BrowserWindow} browserWindow
+   */
+  async function confirmLocalNetworkLink(url, browserWindow) {
+    const isLocal = await pointsToLocalNetwork(url, async hostname => (
+      await session.defaultSession.resolveHost(hostname, { cacheUsage: 'disallowed' })
+    ).endpoints.map(({ address }) => address))
+    if (!isLocal) return true
+    const t = await getMainTranslator()
+    if (browserWindow.isDestroyed()) return false
+    const { response } = await dialog.showMessageBox(browserWindow, {
+      type: 'question',
+      message: t('Video.External Media.Open Local Network Link', { url }),
+      buttons: [t('Cancel'), t('Yes')],
+      defaultId: 0,
+      cancelId: 0,
+      noLink: true
+    })
+    return response === 1
+  }
 
   ipcMain.handle(IpcChannels.SHARE_LINK, createDesktopShareHandler({
     platform: process.platform,

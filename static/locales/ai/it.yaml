@@ -2027,6 +2027,7 @@ Video:
       Copied: Nota copiata come Markdown
       Obsidian Failed: Impossibile aprire Obsidian
   External Media:
+    Open Local Network Link: "Aprire {url}? Questo link punta a questo computer o alla tua rete locale."
     Dislikes: "Non mi piace | Non mi piace | Non mi piace"
     Reposts: "Repost | Repost | Repost"
     Saves: "Salvataggio | Salvataggi | Salvataggi"

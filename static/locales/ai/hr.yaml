@@ -2061,6 +2061,7 @@ Video:
   Playlist:
     Unavailable videos are hidden: '{count} nedostupan videozapis je skriven | {count} nedostupna videozapisa su skrivena | {count} nedostupnih videozapisa je skriveno'
   External Media:
+    Open Local Network Link: "Otvoriti {url}? Ova poveznica vodi na ovo računalo ili u vašu lokalnu mrežu."
     Dislikes: "Nesviđanje | Nesviđanja | Nesviđanja"
     Reposts: "Ponovna objava | Ponovne objave | Ponovnih objava"
     Saves: "Spremanje | Spremanja | Spremanja"

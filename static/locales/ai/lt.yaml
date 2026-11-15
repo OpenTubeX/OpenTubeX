@@ -2423,6 +2423,7 @@ Video:
   Playlist:
     Unavailable videos are hidden: '{count} nepasiekiamas vaizdo įrašas paslėptas | {count} nepasiekiami vaizdo įrašai paslėpti | {count} nepasiekiamų vaizdo įrašų paslėpta'
   External Media:
+    Open Local Network Link: "Atidaryti {url}? Ši nuoroda nukreipia į šį kompiuterį arba jūsų vietinį tinklą."
     Dislikes: "Nepatinka | Nepatinka | Nepatinka"
     Reposts: "Pakartotinis įrašas | Pakartotiniai įrašai | Pakartotinių įrašų"
     Saves: "Išsaugojimas | Išsaugojimai | Išsaugojimų"

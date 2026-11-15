@@ -1800,6 +1800,7 @@ Video:
   External DRM Protected: Videaĵoj protektitaj de DRM ne ludeblas en OpenTubeX, ĉar ili postulas proprietajn fermitkodajn komponaĵojn.
   Invalid Media URL: Nevalida aŭdvidaĵa URL
   External Media:
+    Open Local Network Link: "Ĉu malfermi {url}? Ĉi tiu ligilo celas ĉi tiun komputilon aŭ vian lokan reton."
     Dislikes: malŝato | malŝatoj
     Reposts: reafiŝo | reafiŝoj
     Saves: konservo | konservoj

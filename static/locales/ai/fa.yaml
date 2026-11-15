@@ -2121,6 +2121,7 @@ Video:
   Playlist:
     Unavailable videos are hidden: ۱ ویدیوی در دسترس‌نبوده پنهان است | {count} ویدیوی در دسترس‌نبوده پنهان هستند
   External Media:
+    Open Local Network Link: "{url} باز شود؟ این پیوند به این رایانه یا شبکهٔ محلی شما اشاره دارد."
     Dislikes: "دیسلایک | دیسلایک‌ها"
     Reposts: "بازنشر | بازنشرها"
     Saves: "ذخیره | ذخیره‌ها"

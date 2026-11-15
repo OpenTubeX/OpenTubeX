@@ -2109,6 +2109,7 @@ Video:
   Playlist:
     Unavailable videos are hidden: 1 utilgængelig video er skjult | {count} utilgængelige videoer er skjult
   External Media:
+    Open Local Network Link: "Åbn {url}? Linket peger på denne computer eller dit lokale netværk."
     Dislikes: "Negativ bedømmelse | Negative bedømmelser"
     Reposts: "Genindlæg | Genindlæg"
     Saves: "Gemt element | Gemte elementer"

@@ -2073,6 +2073,7 @@ Video:
   Playlist:
     Unavailable videos are hidden: 1 vídeo indisponível está oculto | {count} vídeos indisponíveis estão ocultos | {count} vídeos indisponíveis estão ocultos
   External Media:
+    Open Local Network Link: "Abrir {url}? Esta ligação aponta para este computador ou para a sua rede local."
     Dislikes: "Voto negativo | Votos negativos | Votos negativos"
     Reposts: "Republicação | Republicações | Republicações"
     Saves: "Guardado | Guardados | Guardados"

@@ -2526,6 +2526,7 @@ Video:
   Playlist:
     Unavailable videos are hidden: 1 vídeo no disponible està ocult | {count} vídeos no disponibles estan ocults | {count} vídeos no disponibles estan ocults
   External Media:
+    Open Local Network Link: "Voleu obrir {url}? Aquest enllaç apunta a aquest ordinador o a la vostra xarxa local."
     Dislikes: "No m'agrada | No m'agrada | No m'agrada"
     Reposts: "Repost | Reposts | Reposts"
     Saves: "Desat | desats | desats"

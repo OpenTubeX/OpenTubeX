@@ -2019,6 +2019,7 @@ Video:
   Playlist:
     Unavailable videos are hidden: 1 unavailable video is hidden | {count} unavailable videos are hidden
   External Media:
+    Open Local Network Link: "Open {url}? This link points to this computer or your local network."
     Dislikes: "dislike | dislikes"
     Reposts: "repost | reposts"
     Saves: "save | saves"

@@ -2042,6 +2042,7 @@ Video:
       Copied: Glósa afrituð sem Markdown
       Obsidian Failed: Ekki tókst að opna Obsidian
   External Media:
+    Open Local Network Link: "Opna {url}? Þessi tengill vísar á þessa tölvu eða staðarnetið þitt."
     Dislikes: "Neikvætt atkvæði | Neikvæð atkvæði"
     Reposts: "Endurbirting | Endurbirtingar"
     Saves: "Vistun | Vistanir"

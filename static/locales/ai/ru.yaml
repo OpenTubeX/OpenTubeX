@@ -1994,6 +1994,7 @@ Video:
       Copied: Заметка скопирована как Markdown
       Obsidian Failed: Не удалось открыть Obsidian
   External Media:
+    Open Local Network Link: "Открыть {url}? Эта ссылка ведёт на этот компьютер или в вашу локальную сеть."
     Dislikes: "Дизлайк | Дизлайки | Дизлайков"
     Reposts: "Репост | Репосты | Репостов"
     Saves: "Сохранение | Сохранения | Сохранений"

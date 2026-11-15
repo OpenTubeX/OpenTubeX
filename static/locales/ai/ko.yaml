@@ -2389,6 +2389,7 @@ Video:
   Playlist:
     Unavailable videos are hidden: 사용할 수 없는 동영상 {count}개가 숨겨졌습니다
   External Media:
+    Open Local Network Link: "{url}을(를) 여시겠습니까? 이 링크는 이 컴퓨터 또는 로컬 네트워크를 가리킵니다."
     Dislikes: "싫어요"
     Reposts: "리포스팅"
     Saves: "저장"
