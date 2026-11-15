@@ -181,6 +181,7 @@ Subscriptions:
     Summary: "1 kanal yenilənə bilmədi. | {count} kanal yenilənə bilmədi."
     Toast: "Abunə olduğunuz bəzi kanallar yenilənə bilmədi. Baxmaq üçün klikləyin."
     Retry Channel: "{channel} üçün yenidən cəhd edin"
+    Retry All: "Hamısı üçün yenidən cəhd edin"
     Show All: "Hamısını göstər"
     Show Fewer: "Daha az göstər"
   Cache Load Error: Saxlanmış abunəlik lentləriniz yüklənə bilmədi.

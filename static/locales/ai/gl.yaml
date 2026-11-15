@@ -181,6 +181,7 @@ Subscriptions:
     Summary: "Non se puido actualizar 1 canle. | Non se puideron actualizar {count} canles."
     Toast: "Non se puideron actualizar algunhas canles subscritas. Fai clic para velas."
     Retry Channel: "Tentar de novo {channel}"
+    Retry All: "Tentar de novo todos"
     Show All: "Amosar todas"
     Show Fewer: "Amosar menos"
   Cache Load Error: Non se puideron cargar as túas fontes de subscricións gardadas.

@@ -181,6 +181,7 @@ Subscriptions:
     Summary: "{count} 件のチャンネルを更新できませんでした。"
     Toast: "一部の登録チャンネルを更新できませんでした。クリックして表示します。"
     Retry Channel: "{channel} を再試行"
+    Retry All: "すべて再試行"
     Show All: "すべて表示"
     Show Fewer: "表示を減らす"
   Cache Load Error: 保存済みの登録チャンネルのフィードを読み込めませんでした。

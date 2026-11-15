@@ -181,6 +181,7 @@ Subscriptions:
     Summary: "{count} saluran tidak dapat dimuat ulang."
     Toast: "Beberapa saluran langganan tidak dapat dimuat ulang. Klik untuk melihatnya."
     Retry Channel: "Coba lagi {channel}"
+    Retry All: "Coba lagi semua"
     Show All: "Tampilkan semua"
     Show Fewer: "Tampilkan lebih sedikit"
   Cache Load Error: Feed langganan tersimpan Anda tidak dapat dimuat.

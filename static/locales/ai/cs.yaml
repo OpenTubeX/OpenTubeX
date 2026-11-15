@@ -181,6 +181,7 @@ Subscriptions:
     Summary: "1 kanál se nepodařilo obnovit. | {count} kanály se nepodařilo obnovit. | {count} kanálů se nepodařilo obnovit."
     Toast: "Některé odebírané kanály se nepodařilo obnovit. Kliknutím je zobrazíte."
     Retry Channel: "Zkusit znovu {channel}"
+    Retry All: "Zkusit znovu vše"
     Show All: "Zobrazit vše"
     Show Fewer: "Zobrazit méně"
   Cache Load Error: Uložené kanály odběrů se nepodařilo načíst.

@@ -63,6 +63,7 @@ Subscriptions:
     Summary: "Nie udało się odświeżyć 1 kanału. | Nie udało się odświeżyć {count} kanałów. | Nie udało się odświeżyć {count} kanałów."
     Toast: "Nie udało się odświeżyć niektórych subskrybowanych kanałów. Kliknij, aby je zobaczyć."
     Retry Channel: "Ponów dla {channel}"
+    Retry All: "Ponów dla wszystkich"
     Show All: "Pokaż wszystkie"
     Show Fewer: "Pokaż mniej"
   Cache Load Error: Nie udało się wczytać zapisanych kanałów subskrypcji.

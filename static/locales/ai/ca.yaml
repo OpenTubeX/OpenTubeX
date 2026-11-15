@@ -219,6 +219,7 @@ Subscriptions:
     Summary: "No s'ha pogut actualitzar 1 canal. | No s'han pogut actualitzar {count} canals. | No s'han pogut actualitzar {count} canals."
     Toast: "No s'han pogut actualitzar alguns canals subscrits. Feu clic per veure'ls."
     Retry Channel: "Torna-ho a provar amb {channel}"
+    Retry All: "Torna-ho a provar amb tots"
     Show All: "Mostra-ho tot"
     Show Fewer: "Mostra'n menys"
   Cache Load Error: 'No s''han pogut carregar els vostres canals de subscripcions desats.'

@@ -181,6 +181,7 @@ Subscriptions:
     Summary: "Ekki tókst að endurnýja {count} rás. | Ekki tókst að endurnýja {count} rásir."
     Toast: "Ekki tókst að endurnýja sumar áskriftarrásir. Smelltu til að skoða þær."
     Retry Channel: "Reyna aftur: {channel}"
+    Retry All: "Reyna aftur við allar"
     Show All: "Sýna allt"
     Show Fewer: "Sýna færri"
   Cache Load Error: Ekki tókst að hlaða vistuðum áskriftarstraumum þínum.

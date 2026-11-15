@@ -20,6 +20,18 @@
         {{ rows.length > 0 ? t('Subscriptions.Channel Errors.Summary', { count: rows.length }, rows.length) : '' }}
       </p>
       <template v-if="rows.length > 0">
+        <FtButton
+          v-if="retryableRows.length > 1"
+          class="channelErrorsRetryAll"
+          :icon="['fas', 'sync']"
+          :disabled="refreshInProgress"
+          variant="text"
+          @click="retrySubscriptionChannels(retryableRows, t)"
+        >
+          <template #label>
+            <span class="channelErrorsRetryAllLabel">{{ t('Subscriptions.Channel Errors.Retry All') }}</span>
+          </template>
+        </FtButton>
         <FtIconButton
           :title="t('Subscriptions.Copy Error Details')"
           :icon="['fas', 'copy']"
@@ -80,7 +92,7 @@
           :disabled="refreshInProgress"
           :background-color="null"
           :text-color="null"
-          @click="retrySubscriptionChannel(row.id, row.feeds, t)"
+          @click="retrySubscriptionChannels([row], t)"
         />
       </li>
     </ul>
@@ -113,7 +125,7 @@ import {
   subscriptionChannelErrors
 } from '../../helpers/subscriptionRefreshErrors'
 import { isSubscriptionFeedTypeEnabled } from '../../helpers/subscription-channels'
-import { retrySubscriptionChannel } from '../../helpers/subscriptions'
+import { retrySubscriptionChannels } from '../../helpers/subscriptions'
 import { copyToClipboard } from '../../helpers/utils'
 import { useTabContext } from '../../tabs/TabContext'
 
@@ -162,6 +174,9 @@ const rows = computed(() => {
   }
   return rows.sort((a, b) => Number(b.unavailable) - Number(a.unavailable) || a.name.localeCompare(b.name))
 })
+
+// Channels that do not exist anymore need the user's decision instead
+const retryableRows = computed(() => rows.value.filter(row => !row.unavailable))
 
 const shownRows = computed(() => expanded.value ? rows.value : rows.value.slice(0, COLLAPSED_ROW_COUNT))
 

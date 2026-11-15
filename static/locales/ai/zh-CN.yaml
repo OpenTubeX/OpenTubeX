@@ -181,6 +181,7 @@ Subscriptions:
     Summary: "{count} 个频道无法刷新。"
     Toast: "部分已订阅频道无法刷新。点击查看。"
     Retry Channel: "重试 {channel}"
+    Retry All: "全部重试"
     Show All: "显示全部"
     Show Fewer: "收起"
   Cache Load Error: 无法加载已保存的订阅源。

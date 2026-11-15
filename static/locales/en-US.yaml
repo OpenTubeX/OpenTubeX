@@ -322,6 +322,7 @@ Subscriptions:
     Summary: 1 channel could not be refreshed. | {count} channels could not be refreshed.
     Toast: Some subscribed channels could not be refreshed. Click to view them.
     Retry Channel: Retry {channel}
+    Retry All: Retry all
     Show All: Show all
     Show Fewer: Show fewer
   Never show {type} from this channel in feeds again: Never show {type} from this channel in feeds again

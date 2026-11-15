@@ -181,6 +181,7 @@ Subscriptions:
     Summary: "1 kanal yenilenemedi. | {count} kanal yenilenemedi."
     Toast: "Abone olunan bazı kanallar yenilenemedi. Görmek için tıklayın."
     Retry Channel: "{channel} için yeniden dene"
+    Retry All: "Tümü için yeniden dene"
     Show All: "Tümünü göster"
     Show Fewer: "Daha az göster"
   Cache Load Error: Kaydedilmiş abonelik akışlarınız yüklenemedi.

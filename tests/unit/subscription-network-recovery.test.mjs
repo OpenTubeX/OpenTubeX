@@ -182,7 +182,7 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
       init?.signal?.addEventListener('abort', () => reject(createAbortError()), { once: true })
     })
   }
-  vm.runInContext(`${errorStoreSource}\n${source}\nglobalThis.api = { refreshSubscriptionVideosFromRemote, refreshSubscriptionShortsFromRemote, refreshSubscriptionLiveFromRemote, refreshSubscriptionPostsFromRemote, retrySubscriptionChannel, cancelSubscriptionRefresh, updateVideoListAfterProcessing, subscriptionChannelErrors, setSubscriptionChannelError, clearSubscriptionChannelErrors, registerShownSubscriptionErrorBox, notifyNewSubscriptionChannelErrors }`, context)
+  vm.runInContext(`${errorStoreSource}\n${source}\nglobalThis.api = { refreshSubscriptionVideosFromRemote, refreshSubscriptionShortsFromRemote, refreshSubscriptionLiveFromRemote, refreshSubscriptionPostsFromRemote, retrySubscriptionChannels, cancelSubscriptionRefresh, updateVideoListAfterProcessing, subscriptionChannelErrors, setSubscriptionChannelError, clearSubscriptionChannelErrors, registerShownSubscriptionErrorBox, notifyNewSubscriptionChannelErrors }`, context)
   return {
     get details() {
       return [...context.api.subscriptionChannelErrors.values()].flatMap(errors => Object.values(errors).map(error => error.trace)).join('\n')
@@ -785,17 +785,18 @@ test('failures of channels outside the active profile need no notification', asy
   assert.equal(app.toasts.length, 0)
 })
 
-test('retrying a channel fetches only that channel without counting as a feed refresh', async () => {
+test('retrying channels fetches only those channels in one refresh without counting as a feed refresh', async () => {
   const app = createRefresh({ error: Object.assign(new Error('HTTP 500'), { status: 500 }) })
-  app.getters.getActiveProfile.subscriptions = [{ id: 'UC0' }, { id: 'UC1' }]
+  app.getters.getActiveProfile.subscriptions = [{ id: 'UC0' }, { id: 'UC1' }, { id: 'UC2' }]
   await app.refresh({ t: key => key })
-  assert.equal(app.errors.size, 2)
+  assert.equal(app.errors.size, 3)
   app.events.length = 0
   app.requests.length = 0
   app.reconnect()
-  await app.retrySubscriptionChannel('UC1', ['shorts'], key => key)
-  assert.ok(app.requests.length > 0)
-  assert.ok(app.requests.every(url => url.includes('UC1')), 'other channels are not fetched again')
+  await app.retrySubscriptionChannels([{ id: 'UC1', feeds: ['shorts'] }, { id: 'UC2', feeds: ['shorts'] }], key => key)
+  assert.ok(app.requests.some(url => url.includes('UC1')))
+  assert.ok(app.requests.some(url => url.includes('UC2')))
+  assert.ok(app.requests.every(url => !url.includes('UC0')), 'other channels are not fetched again')
   assert.deepEqual([...app.errors.keys()], ['UC0'])
   assert.deepEqual(app.events, ['finished'], 'a retry does not mark the feed as refreshed')
 })
@@ -804,7 +805,7 @@ test('a channel retry cancelled between two feeds does not fetch the next one', 
   // On Android, the cancellation can arrive while the first feed hands back the native refresh
   const app = createRefresh({ error: Object.assign(new Error('HTTP 500'), { status: 500 }), finishNative: async () => app.cancelSubscriptionRefresh() })
   app.getters.getActiveProfile.subscriptions = [{ id: 'UC0' }]
-  await app.retrySubscriptionChannel('UC0', ['videos', 'shorts'], key => key)
+  await app.retrySubscriptionChannels([{ id: 'UC0', feeds: ['videos', 'shorts'] }], key => key)
   assert.deepEqual(app.events, ['finished'])
 })
 

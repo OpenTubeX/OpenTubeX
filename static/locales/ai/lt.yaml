@@ -210,6 +210,7 @@ Subscriptions:
     Summary: "Nepavyko atnaujinti {count} kanalo. | Nepavyko atnaujinti {count} kanalų. | Nepavyko atnaujinti {count} kanalų."
     Toast: "Nepavyko atnaujinti kai kurių prenumeruojamų kanalų. Spustelėkite, kad juos peržiūrėtumėte."
     Retry Channel: "Bandyti dar kartą: {channel}"
+    Retry All: "Bandyti dar kartą visus"
     Show All: "Rodyti visus"
     Show Fewer: "Rodyti mažiau"
   Cache Load Error: Nepavyko įkelti išsaugotų prenumeratų sklaidos kanalų.

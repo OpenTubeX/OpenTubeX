@@ -181,6 +181,7 @@ Subscriptions:
     Summary: "1 kanal kunne ikke oppdateres. | {count} kanaler kunne ikke oppdateres."
     Toast: "Noen abonnerte kanaler kunne ikke oppdateres. Klikk for å se dem."
     Retry Channel: "Prøv {channel} igjen"
+    Retry All: "Prøv alle igjen"
     Show All: "Vis alle"
     Show Fewer: "Vis færre"
   Cache Load Error: Kunne ikke laste inn de lagrede abonnementsstrømmene dine.

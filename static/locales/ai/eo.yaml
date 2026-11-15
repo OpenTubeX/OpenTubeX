@@ -201,6 +201,7 @@ Subscriptions:
     Summary: "1 kanalo ne povis esti aktualigita. | {count} kanaloj ne povis esti aktualigitaj."
     Toast: "Kelkaj abonitaj kanaloj ne povis esti aktualigitaj. Alklaku por vidi ilin."
     Retry Channel: "Reprovi {channel}"
+    Retry All: "Reprovi ĉiujn"
     Show All: "Montri ĉiujn"
     Show Fewer: "Montri malpli"
   Cache Load Error: Viaj konservitaj abonaj fluoj ne povis esti ŝargitaj.

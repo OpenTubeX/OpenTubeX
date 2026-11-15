@@ -181,6 +181,7 @@ Subscriptions:
     Summary: "1 kanalit ei õnnestunud värskendada. | {count} kanalit ei õnnestunud värskendada."
     Toast: "Mõnda tellitud kanalit ei õnnestunud värskendada. Klõpsa nende vaatamiseks."
     Retry Channel: "Proovi uuesti: {channel}"
+    Retry All: "Proovi kõiki uuesti"
     Show All: "Näita kõiki"
     Show Fewer: "Näita vähem"
   Cache Load Error: Salvestatud tellimuste vooge ei õnnestunud laadida.

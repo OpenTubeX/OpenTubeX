@@ -218,6 +218,7 @@ Subscriptions:
     Summary: "{count} kanala ni bilo mogoče osvežiti. | {count} kanalov ni bilo mogoče osvežiti. | {count} kanalov ni bilo mogoče osvežiti. | {count} kanalov ni bilo mogoče osvežiti."
     Toast: "Nekaterih naročenih kanalov ni bilo mogoče osvežiti. Kliknite za ogled."
     Retry Channel: "Poskusi znova: {channel}"
+    Retry All: "Poskusi znova vse"
     Show All: "Pokaži vse"
     Show Fewer: "Pokaži manj"
   Cache Load Error: Shranjenih virov naročnin ni bilo mogoče naložiti.

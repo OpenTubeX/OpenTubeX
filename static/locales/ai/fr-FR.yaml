@@ -181,6 +181,7 @@ Subscriptions:
     Summary: "1 chaîne n’a pas pu être actualisée. | {count} chaînes n’ont pas pu être actualisées. | {count} chaînes n’ont pas pu être actualisées."
     Toast: "Certains abonnements n’ont pas pu être actualisés. Cliquez pour les afficher."
     Retry Channel: "Réessayer {channel}"
+    Retry All: "Tout réessayer"
     Show All: "Tout afficher"
     Show Fewer: "Afficher moins"
   Cache Load Error: 'Impossible de charger vos flux d''abonnements enregistrés.'

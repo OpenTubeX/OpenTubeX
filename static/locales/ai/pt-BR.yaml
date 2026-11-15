@@ -134,6 +134,7 @@ Subscriptions:
     Summary: "Não foi possível atualizar 1 canal. | Não foi possível atualizar {count} canais. | Não foi possível atualizar {count} canais."
     Toast: "Não foi possível atualizar alguns canais inscritos. Clique para vê-los."
     Retry Channel: "Tentar novamente {channel}"
+    Retry All: "Tentar novamente todos"
     Show All: "Mostrar tudo"
     Show Fewer: "Mostrar menos"
   Cache Load Error: Não foi possível carregar seus feeds de inscrições salvos.

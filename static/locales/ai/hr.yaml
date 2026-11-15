@@ -181,6 +181,7 @@ Subscriptions:
     Summary: "{count} kanal nije moguće osvježiti. | {count} kanala nije moguće osvježiti. | {count} kanala nije moguće osvježiti."
     Toast: "Neke pretplaćene kanale nije moguće osvježiti. Kliknite za prikaz."
     Retry Channel: "Pokušaj ponovno: {channel}"
+    Retry All: "Pokušaj ponovno sve"
     Show All: "Prikaži sve"
     Show Fewer: "Prikaži manje"
   Cache Load Error: Spremljeni feedovi pretplata nisu se mogli učitati.

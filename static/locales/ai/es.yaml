@@ -124,6 +124,7 @@ Subscriptions:
     Summary: "No se ha podido actualizar 1 canal. | No se han podido actualizar {count} canales. | No se han podido actualizar {count} canales."
     Toast: "No se han podido actualizar algunos canales suscritos. Haz clic para verlos."
     Retry Channel: "Reintentar {channel}"
+    Retry All: "Reintentar todos"
     Show All: "Mostrar todos"
     Show Fewer: "Mostrar menos"
   Cache Load Error: No se pudieron cargar tus feeds de suscripciones guardados.
