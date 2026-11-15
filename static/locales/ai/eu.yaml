@@ -181,6 +181,7 @@ Subscriptions:
     Summary: "Ezin izan da kanal 1 freskatu. | Ezin izan dira {count} kanal freskatu."
     Toast: "Harpidetutako kanal batzuk ezin izan dira freskatu. Egin klik ikusteko."
     Retry Channel: "Saiatu berriro: {channel}"
+    Retry All: "Saiatu berriro guztiekin"
     Show All: "Erakutsi guztiak"
     Show Fewer: "Erakutsi gutxiago"
   Cache Load Error: Ezin izan dira gordetako harpidetza-jarioak kargatu.

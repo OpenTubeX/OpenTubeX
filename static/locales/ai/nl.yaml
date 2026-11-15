@@ -181,6 +181,7 @@ Subscriptions:
     Summary: "1 kanaal kon niet worden vernieuwd. | {count} kanalen konden niet worden vernieuwd."
     Toast: "Sommige geabonneerde kanalen konden niet worden vernieuwd. Klik om ze te bekijken."
     Retry Channel: "{channel} opnieuw proberen"
+    Retry All: "Alles opnieuw proberen"
     Show All: "Alles tonen"
     Show Fewer: "Minder tonen"
   Cache Load Error: Je opgeslagen abonnementsfeeds konden niet worden geladen.

@@ -181,6 +181,7 @@ Subscriptions:
     Summary: "1 kanavaa ei voitu päivittää. | {count} kanavaa ei voitu päivittää."
     Toast: "Joitakin tilattuja kanavia ei voitu päivittää. Näytä ne napsauttamalla."
     Retry Channel: "Yritä uudelleen: {channel}"
+    Retry All: "Yritä kaikkia uudelleen"
     Show All: "Näytä kaikki"
     Show Fewer: "Näytä vähemmän"
   Cache Load Error: Tallennettuja tilaussyötteitä ei voitu ladata.

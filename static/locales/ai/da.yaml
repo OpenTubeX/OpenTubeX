@@ -183,6 +183,7 @@ Subscriptions:
     Summary: "1 kanal kunne ikke opdateres. | {count} kanaler kunne ikke opdateres."
     Toast: "Nogle abonnerede kanaler kunne ikke opdateres. Klik for at se dem."
     Retry Channel: "Prøv {channel} igen"
+    Retry All: "Prøv alle igen"
     Show All: "Vis alle"
     Show Fewer: "Vis færre"
   Cache Load Error: Dine gemte abonnementsfeeds kunne ikke indlæses.

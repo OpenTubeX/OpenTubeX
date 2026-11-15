@@ -212,6 +212,7 @@ Subscriptions:
     Summary: "1 kanaal kon nie herlaai word nie. | {count} kanale kon nie herlaai word nie."
     Toast: "Sommige ingetekende kanale kon nie herlaai word nie. Klik om hulle te sien."
     Retry Channel: "Probeer {channel} weer"
+    Retry All: "Probeer almal weer"
     Show All: "Wys alles"
     Show Fewer: "Wys minder"
   Cache Load Error: Jou gestoorde intekeningvoere kon nie gelaai word nie.

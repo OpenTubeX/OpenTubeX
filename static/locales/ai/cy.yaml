@@ -181,6 +181,7 @@ Subscriptions:
     Summary: "Methwyd adnewyddu {count} o sianeli. | Methwyd adnewyddu 1 sianel. | Methwyd adnewyddu {count} sianel. | Methwyd adnewyddu {count} sianel. | Methwyd adnewyddu {count} sianel. | Methwyd adnewyddu {count} o sianeli."
     Toast: "Methwyd adnewyddu rhai sianeli rydych wedi tanysgrifio iddynt. Cliciwch i'w gweld."
     Retry Channel: "Ceisio {channel} eto"
+    Retry All: "Ceisio pob un eto"
     Show All: "Dangos y cyfan"
     Show Fewer: "Dangos llai"
   Cache Load Error: 'Nid oedd modd llwytho''ch ffrydiau tanysgrifio a gadwyd.'

@@ -181,6 +181,7 @@ Subscriptions:
     Summary: "1 canal nu a putut fi reîmprospătat. | {count} canale nu au putut fi reîmprospătate. | {count} de canale nu au putut fi reîmprospătate."
     Toast: "Unele canale la care v-ați abonat nu au putut fi reîmprospătate. Faceți clic pentru a le vedea."
     Retry Channel: "Reîncearcă {channel}"
+    Retry All: "Reîncearcă toate"
     Show All: "Afișează tot"
     Show Fewer: "Afișează mai puțin"
   Cache Load Error: Fluxurile de abonamente salvate nu au putut fi încărcate.

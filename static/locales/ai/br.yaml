@@ -181,6 +181,7 @@ Subscriptions:
     Summary: "N'eus ket bet gallet adkargañ {count} chadenn. | N'eus ket bet gallet adkargañ {count} chadenn. | N'eus ket bet gallet adkargañ {count} chadenn. | N'eus ket bet gallet adkargañ {count} a chadennoù. | N'eus ket bet gallet adkargañ {count} chadenn."
     Toast: "N'eus ket bet gallet adkargañ chadennoù koumanantet zo. Klikit evit o gwelout."
     Retry Channel: "Klask en-dro {channel}"
+    Retry All: "Klask en-dro an holl"
     Show All: "Diskouez pep tra"
     Show Fewer: "Diskouez nebeutoc'h"
   Cache Load Error: 'N''eus ket bet gallet kargañ ho lanvioù koumanantoù enrollet.'

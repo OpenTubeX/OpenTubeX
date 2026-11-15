@@ -181,6 +181,7 @@ Subscriptions:
     Summary: "Không thể làm mới {count} kênh."
     Toast: "Không thể làm mới một số kênh đã đăng ký. Nhấp để xem."
     Retry Channel: "Thử lại {channel}"
+    Retry All: "Thử lại tất cả"
     Show All: "Hiển thị tất cả"
     Show Fewer: "Hiển thị ít hơn"
   Cache Load Error: Không thể tải các nguồn cấp dữ liệu kênh đăng ký đã lưu của bạn.

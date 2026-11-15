@@ -113,4 +113,18 @@
     justify-self: start;
     margin-block-start: 4px;
   }
+
+  /* Leaves the room to the summary, the label stays the button's accessible name */
+  .channelErrorsRetryAll {
+    position: relative;
+  }
+
+  .channelErrorsRetryAllLabel {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
 }

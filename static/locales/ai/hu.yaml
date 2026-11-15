@@ -181,6 +181,7 @@ Subscriptions:
     Summary: "1 csatornát nem sikerült frissíteni. | {count} csatornát nem sikerült frissíteni."
     Toast: "Néhány feliratkozott csatornát nem sikerült frissíteni. Kattintson a megtekintésükhöz."
     Retry Channel: "{channel} újrapróbálása"
+    Retry All: "Összes újrapróbálása"
     Show All: "Összes megjelenítése"
     Show Fewer: "Kevesebb megjelenítése"
   Cache Load Error: A mentett feliratkozási hírfolyamokat nem sikerült betölteni.

@@ -1531,12 +1531,11 @@ async function refreshSubscriptionPostsFromRemoteUnlocked({
 }
 
 /**
- * Fetches the given feeds of a single channel again.
- * @param {string} channelId
- * @param {('videos' | 'shorts' | 'live' | 'posts')[]} feeds
+ * Fetches the given feeds of the given channels again, one refresh per feed.
+ * @param {{ id: string, feeds: ('videos' | 'shorts' | 'live' | 'posts')[] }[]} channels
  * @param {(key: string, named?: Record<string, unknown>) => string} t
  */
-export async function retrySubscriptionChannel(channelId, feeds, t) {
+export async function retrySubscriptionChannels(channels, t) {
   const refreshers = {
     videos: refreshSubscriptionVideosFromRemote,
     shorts: refreshSubscriptionShortsFromRemote,
@@ -1544,9 +1543,11 @@ export async function retrySubscriptionChannel(channelId, feeds, t) {
     posts: refreshSubscriptionPostsFromRemote
   }
   const cancelCountAtStart = cancelCount
-  for (const feed of feeds) {
+  for (const [feed, refresh] of Object.entries(refreshers)) {
+    const channelIds = channels.filter(channel => channel.feeds.includes(feed)).map(channel => channel.id)
+    if (channelIds.length === 0) continue
     // Cancelled, also between two feeds, or another refresh is running
-    if (cancelCount !== cancelCountAtStart || await refreshers[feed]({ t, channelIds: [channelId] }) === null) return
+    if (cancelCount !== cancelCountAtStart || await refresh({ t, channelIds }) === null) return
   }
 }
 
