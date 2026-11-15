@@ -160,4 +160,49 @@ test.describe('player', () => {
       target: '.shaka-player-ui-thumbnail-container'
     }, 20)
   })
+
+  // Shaka refreshes the seek bar eight times a second, also while paused. Each
+  // layout it causes draws a frame, which keeps an idle phone busy.
+  test('a paused player does not lay out on each seek bar refresh', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    const video = await openMockedVideo(page)
+    await video.evaluate(element => element.pause())
+    await page.locator('.ftVideoPlayer').hover()
+    await expect(page.locator('.shaka-controls-container')).toHaveAttribute('shown', 'true')
+    // The controls fade in, which lays out on its own. Wait for animations
+    // that end; scroll-driven ones only end at the end of their scroller.
+    await page.evaluate(() => Promise.all(document.getAnimations()
+      .filter(animation => animation.playState === 'running' && animation.timeline === document.timeline &&
+        animation.effect?.getComputedTiming().iterations !== Infinity)
+      .map(animation => animation.finished.catch(() => {}))))
+    const session = await page.context().newCDPSession(page)
+    const events = []
+    session.on('Tracing.dataCollected', ({ value }) => events.push(...value))
+    await session.send('Tracing.start', { categories: 'devtools.timeline', transferMode: 'ReportEvents' })
+    await video.evaluate(element => new Promise(resolve => {
+      const controls = element.ui.getControls()
+      const seekBar = element.closest('.ftVideoPlayer').querySelector('.shaka-seek-bar')
+      let refreshes = 0
+      const refreshed = () => {
+        // Reading geometry runs any layout the refresh left pending.
+        seekBar.getBoundingClientRect()
+        if (++refreshes === 1) console.timeStamp('seek bar refreshes start')
+        if (refreshes < 9) return
+        console.timeStamp('seek bar refreshes end')
+        controls.removeEventListener('timeandseekrangeupdated', refreshed)
+        resolve()
+      }
+      controls.addEventListener('timeandseekrangeupdated', refreshed)
+    }))
+    const complete = new Promise(resolve => session.once('Tracing.tracingComplete', resolve))
+    await session.send('Tracing.end')
+    await complete
+    await session.detach()
+
+    const stamp = message => events.find(event => event.name === 'TimeStamp' && event.args?.data?.message === message)
+    const start = stamp('seek bar refreshes start')
+    const end = stamp('seek bar refreshes end')
+    const layouts = events.filter(event => event.name === 'Layout' && event.tid === start.tid && event.ts > start.ts && event.ts < end.ts)
+    expect(layouts.length, 'layouts during eight paused seek bar refreshes').toBe(0)
+  })
 })
