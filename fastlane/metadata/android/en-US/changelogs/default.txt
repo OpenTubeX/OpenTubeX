@@ -1,6 +1,5 @@
-Highlights
-• Follow channels on Twitch, SoundCloud, PeerTube, Rumble and Odysee without an account. Their uploads appear in a Platforms tab and the New feed, their channels and playlists open in the app, search covers these platforms, and you can be notified when a Twitch channel goes live.
-
 New features
-• A new Auto Load Comments setting controls whether comments load automatically, separately from Auto Load Next Page for feeds and other lists.
+• Follow conferences on media.ccc.de, search its talks, and watch them like media from the other supported platforms. Conference links open their page in the app.
+• Subscription imports can sort channels into groups, from group names after the channel title in a .csv file or from the folders of an .opml file. The group editor can also select or clear all channels matching a search.
+• The app font setting now includes Libron, a serif font designed for comfortable reading.
 …and more
