@@ -14,7 +14,11 @@ const MAX_CHANNELS = 10
 /** Long enough to go back from what the channel's page led to */
 const MAX_AGE_MS = 5 * 60_000
 
-/** @type {Map<string, RecentChannel>} oldest first */
+/**
+ * Forgotten channels keep the time they were forgotten, so that pages loaded
+ * before that don't come back.
+ * @type {Map<string, RecentChannel | { savedAt: number, channel?: undefined }>} oldest first
+ */
 const recent = new Map()
 
 /**
@@ -23,27 +27,34 @@ const recent = new Map()
  * @returns {RecentChannel | null}
  */
 export function getRecentChannel(platform, id) {
-  const key = `${platform}:${id}`
-  const entry = recent.get(key)
-  if (entry && Date.now() - entry.savedAt <= MAX_AGE_MS) return entry
-  recent.delete(key)
-  return null
+  const entry = recent.get(`${platform}:${id}`)
+  return entry?.channel && Date.now() - entry.savedAt <= MAX_AGE_MS ? entry : null
 }
 
 /**
- * Keeps the loaded pages of a channel, which stay as old as its first load.
+ * @param {string} key
+ * @param {RecentChannel | { savedAt: number }} entry
+ */
+function save(key, entry) {
+  // Moves it to the end, as the most recent
+  recent.delete(key)
+  recent.set(key, entry)
+  if (recent.size > MAX_CHANNELS) recent.delete(/** @type {string} */ (recent.keys().next().value))
+}
+
+/**
+ * Keeps the loaded pages of a channel, unless they are too old or the channel
+ * was loaded again or forgotten since.
  * @param {string} platform
  * @param {string} id the ID the page was opened with
  * @param {PlatformChannel} channel
  * @param {Record<string, PlatformPage>} pages
+ * @param {number} savedAt when the channel started loading
  */
-export function rememberChannel(platform, id, channel, pages) {
+export function rememberChannel(platform, id, channel, pages, savedAt) {
   const key = `${platform}:${id}`
-  const savedAt = getRecentChannel(platform, id)?.savedAt ?? Date.now()
-  // Moves it to the end, as the most recent
-  recent.delete(key)
-  recent.set(key, { channel, pages, savedAt })
-  if (recent.size > MAX_CHANNELS) recent.delete(/** @type {string} */ (recent.keys().next().value))
+  if (Date.now() - savedAt > MAX_AGE_MS || (recent.get(key)?.savedAt ?? 0) > savedAt) return
+  save(key, { channel, pages, savedAt })
 }
 
 /**
@@ -51,5 +62,5 @@ export function rememberChannel(platform, id, channel, pages) {
  * @param {string} id the ID the page was opened with
  */
 export function forgetChannel(platform, id) {
-  recent.delete(`${platform}:${id}`)
+  save(`${platform}:${id}`, { savedAt: Date.now() })
 }

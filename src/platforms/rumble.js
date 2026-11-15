@@ -549,7 +549,10 @@ async function getChannelWithPage(fetcher, id, tab, signal) {
   const html = await request(fetcher, `${ORIGIN}/${id}`, signal)
   if (html === null) return null
   const channel = parseChannelPage(html, id)
-  return { channel, page: Promise.resolve(tab === 'videos' ? parseChannelVideoPage(html, channel, 1) : emptyPage()) }
+  // Videos that fail to parse leave the channel shown, with the page to retry
+  const page = new Promise(resolve => resolve(tab === 'videos' ? parseChannelVideoPage(html, channel, 1) : emptyPage()))
+  page.catch(() => {})
+  return { channel, page }
 }
 
 /**
