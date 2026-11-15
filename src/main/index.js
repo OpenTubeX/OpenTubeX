@@ -1149,8 +1149,7 @@ function runApp() {
           return new Response(decompressed, {
             status: 200,
             headers: {
-              'Content-Type': 'application/json',
-              'Content-Encoding': 'br'
+              'Content-Type': 'application/json'
             }
           })
         } else {
