@@ -629,6 +629,21 @@
   --scrollbar-color: var(--dropdown-item-hover-color);
 }
 
+/* Android WebView can draw a new list's first frame before its scrolling rows
+   are rastered, and then shows the empty panel. Fade the list in so that frame
+   stays invisible, and keep its layer so the end of the fade doesn't raster it
+   again. */
+.app.capacitorTabs .list {
+  animation: list-enter var(--motion-fast-effects);
+  will-change: opacity;
+}
+
+@keyframes list-enter {
+  from {
+    opacity: 0;
+  }
+}
+
 .search .list {
   --search-option-row-size: 2rem;
 
