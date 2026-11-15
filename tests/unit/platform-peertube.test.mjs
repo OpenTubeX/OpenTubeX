@@ -189,6 +189,36 @@ test('pages through channel videos and lists remote, live and private ones corre
   assert.equal(last.continuation, null)
 })
 
+test('loads a channel and its first page in parallel', async () => {
+  const channelData = { name: 'my_channel', host: 'video.example.org', displayName: 'My Channel' }
+  const urls = []
+  /** @type {(() => void)[]} */
+  const pending = []
+  const fetcher = (url) => {
+    urls.push(new URL(url).pathname)
+    const response = url.includes('/videos')
+      ? Response.json({ total: 1, data: [video()] })
+      : url.includes('/gone') ? new Response('', { status: 404 }) : Response.json(channelData)
+    return new Promise(resolve => pending.push(() => resolve(response)))
+  }
+  /** Answers the requests once both are out, not one after the other */
+  async function answer(loading) {
+    await new Promise(resolve => setImmediate(resolve))
+    assert.equal(pending.length, 2)
+    pending.splice(0).forEach(respond => respond())
+    return await loading
+  }
+
+  const { channel: loaded, page } = await answer(peertube.getChannelWithPage(fetcher, 'my_channel@video.example.org', 'videos'))
+  assert.equal(loaded.id, 'my_channel@video.example.org')
+  assert.deepEqual((await page).results.map(result => result.item.id), [UUID])
+  assert.deepEqual(urls.sort(), ['/api/v1/video-channels/my_channel', '/api/v1/video-channels/my_channel/videos'])
+
+  assert.equal(await answer(peertube.getChannelWithPage(fetcher, 'gone@video.example.org', 'videos')), null)
+  assert.equal(await peertube.getChannelWithPage(fetcher, 'my_channel@localhost', 'videos'), null)
+  assert.equal(urls.length, 4)
+})
+
 test('lists the lives on air before the newest uploads', async () => {
   const LIVE_UUID = '3c2e6c87-4d2f-4f1a-9a5b-2d0c1e6f7a8b'
   const { fetcher } = fakeFetch({

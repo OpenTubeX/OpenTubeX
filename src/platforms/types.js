@@ -67,6 +67,7 @@
  *   parseChannelUrl: (url: string) => string | null,
  *   getChannel: (fetch: PlatformFetch, id: string, signal?: AbortSignal) => Promise<PlatformChannel | null>,
  *   getChannelPage: (fetch: PlatformFetch, channel: PlatformChannel, tab: PlatformChannelTab, continuation: string | null, signal?: AbortSignal) => Promise<PlatformPage>,
+ *   getChannelWithPage: (fetch: PlatformFetch, id: string, tab: PlatformChannelTab, signal?: AbortSignal) => Promise<{ channel: PlatformChannel, page: Promise<PlatformPage> } | null>,
  *   getLatestItems: (fetch: PlatformFetch, channel: PlatformChannel, signal?: AbortSignal) => Promise<PlatformItem[]>,
  *   search: (fetch: PlatformFetch, query: string, type: PlatformSearchType, continuation: string | null, signal?: AbortSignal) => Promise<PlatformPage>,
  *   getPlaylist: (fetch: PlatformFetch, id: string, continuation: string | null, signal?: AbortSignal) => Promise<{ playlist: PlatformPlaylist | null, page: PlatformPage }>,
@@ -77,6 +78,9 @@
  *   pages of the channel itself, not for its videos, or null.
  * - `getChannel` takes an ID from `parseChannelUrl` or from an earlier
  *   PlatformChannel, and returns null for unknown channels.
+ * - `getChannelWithPage` loads a channel and the first page of a tab for the
+ *   channel's page, from one response or with the page loading alongside the
+ *   channel where its ID allows that. It returns null for unknown channels.
  * - `getLatestItems` returns the newest uploads for the subscription feed,
  *   newest first, a page of them, and the live stream first where the platform has one.
  * - `getFeed`, where a platform has it, loads the feed of many channels in a

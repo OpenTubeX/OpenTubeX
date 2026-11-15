@@ -1,4 +1,5 @@
 // @ts-check
+import { loadChannelWithPage } from './channelWithPage.js'
 
 /**
  * PeerTube instances and SepiaSearch, the search index across them. Channels
@@ -429,9 +430,19 @@ async function getChannel(fetch, id, signal) {
  */
 async function getChannelPage(fetch, channel, tab, continuation, signal) {
   const parsed = splitId(channel.id, isName)
-  if (!parsed || (tab !== 'videos' && tab !== 'playlists')) return emptyPage()
-  const { name, host } = parsed
-  const start = offset(continuation)
+  return parsed ? loadChannelPage(fetch, parsed, tab, offset(continuation), signal) : emptyPage()
+}
+
+/**
+ * @param {PlatformFetch} fetch
+ * @param {{ name: string, host: string }} channel
+ * @param {PlatformChannelTab} tab
+ * @param {number} start
+ * @param {AbortSignal} [signal]
+ * @returns {Promise<PlatformPage>}
+ */
+async function loadChannelPage(fetch, { name, host }, tab, start, signal) {
+  if (tab !== 'videos' && tab !== 'playlists') return emptyPage()
   const base = `https://${host}/api/v1/video-channels/${encodeURIComponent(name)}`
   if (tab === 'videos') {
     const data = await request(fetch, withParams(`${base}/videos`, { start, count: PAGE_SIZE, sort: '-publishedAt' }), signal)
@@ -439,6 +450,20 @@ async function getChannelPage(fetch, channel, tab, continuation, signal) {
   }
   const data = await request(fetch, withParams(`${base}/video-playlists`, { start, count: PAGE_SIZE }), signal)
   return listPage(data, start, playlist => playlistResult(playlist, host))
+}
+
+/**
+ * The page only needs the ID, so it loads alongside the channel.
+ * @param {PlatformFetch} fetch
+ * @param {string} id
+ * @param {PlatformChannelTab} tab
+ * @param {AbortSignal} [signal]
+ * @returns {Promise<{ channel: PlatformChannel, page: Promise<PlatformPage> } | null>}
+ */
+function getChannelWithPage(fetch, id, tab, signal) {
+  const parsed = splitId(id, isName)
+  if (!parsed) return Promise.resolve(null)
+  return loadChannelWithPage({ getChannel, getChannelPage }, fetch, id, tab, signal, loadChannelPage(fetch, parsed, tab, 0, signal))
 }
 
 /**
@@ -528,6 +553,7 @@ const peertube = {
   parseChannelUrl,
   getChannel,
   getChannelPage,
+  getChannelWithPage,
   getLatestItems,
   search,
   getPlaylist

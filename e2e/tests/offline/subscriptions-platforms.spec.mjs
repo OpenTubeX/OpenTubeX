@@ -552,10 +552,12 @@ test.describe('Channels on other platforms', () => {
   test.describe('with a followed PeerTube channel', () => {
     test.use({ seed: { settings: { ...SETTINGS, followedChannels: [{ platform: 'peertube', id: 'makers@peertube.example.test', name: 'Makers', url: 'https://peertube.example.test/video-channels/makers' }] } } })
 
-    test('keeps loading channel pages while the end of the list stays in view', async ({ page }) => {
+    test('keeps loading channel pages while the end of the list stays in view, and keeps them for going back', async ({ page }) => {
+      const apiRequests = []
       await page.route('https://peertube.example.test/**', (route) => {
         const url = new URL(route.request().url())
         if (url.pathname.startsWith('/lazy-static/')) return route.fulfill({ path: THUMBNAIL_PATH })
+        apiRequests.push(url.pathname)
         if (url.pathname === '/api/v1/video-channels/makers') {
           return route.fulfill({ json: { name: 'makers', host: 'peertube.example.test', displayName: 'Makers', url: 'https://peertube.example.test/video-channels/makers' } })
         }
@@ -587,6 +589,15 @@ test.describe('Channels on other platforms', () => {
       await expect(page.locator('.channelHeader .channelName')).toHaveText('Makers')
       await expect(page.locator('.ft-list-item .h3Title')).toHaveText(['Makers video 1', 'Makers video 2', 'Makers video 3'])
       await expect(page.locator('.ft-auto-load-next-page-wrapper')).toHaveCount(0)
+
+      // Going back to the channel shows the pages it loaded, without loading them again
+      const requestCount = apiRequests.length
+      await page.locator(sel.backButton).click()
+      await expect(page.locator('#subscriptionsPanel')).toBeVisible()
+      await page.locator(sel.forwardButton).click()
+      await expect(page.locator('.channelHeader .channelName')).toHaveText('Makers')
+      await expect(page.locator('.ft-list-item .h3Title')).toHaveText(['Makers video 1', 'Makers video 2', 'Makers video 3'])
+      expect(apiRequests).toHaveLength(requestCount)
     })
   })
 

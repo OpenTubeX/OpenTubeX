@@ -276,6 +276,14 @@ const mediaccc = {
     return { results: conference?.items.map(itemResult) ?? [], continuation: null }
   },
 
+  async getChannelWithPage(fetch, id, tab, signal) {
+    const conference = await getConference(fetch, id, signal)
+    return conference && {
+      channel: conference.channel,
+      page: Promise.resolve(tab === 'videos' ? { results: conference.items.map(itemResult), continuation: null } : emptyPage())
+    }
+  },
+
   async getLatestItems(fetch, channel, signal) {
     return (await getConference(fetch, channel.id, signal))?.items.slice(0, LATEST_COUNT) ?? []
   },

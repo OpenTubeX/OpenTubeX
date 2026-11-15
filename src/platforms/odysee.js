@@ -1,4 +1,5 @@
 // @ts-check
+import { loadChannelWithPage } from './channelWithPage.js'
 
 /**
  * @typedef {import('./types.js').Platform} Platform
@@ -333,6 +334,20 @@ async function getChannelClaims(fetch, channelId, claimType, pageNumber, signal)
   return page(results, pageNumber < totalPages ? String(pageNumber + 1) : null)
 }
 
+/**
+ * @param {PlatformFetch} fetch
+ * @param {string} channelId
+ * @param {import('./types.js').PlatformChannelTab} tab
+ * @param {string | null} continuation
+ * @param {AbortSignal} [signal]
+ * @returns {Promise<PlatformPage>}
+ */
+async function getChannelTab(fetch, channelId, tab, continuation, signal) {
+  const offset = parseContinuation(continuation)
+  if (!isClaimId(channelId) || offset === null || (tab !== 'videos' && tab !== 'playlists')) return page([], null)
+  return getChannelClaims(fetch, channelId, tab === 'videos' ? 'stream' : 'collection', Math.max(offset, 1), signal)
+}
+
 /** @type {Platform} */
 const odysee = {
   id: 'odysee',
@@ -377,10 +392,14 @@ const odysee = {
     return parseChannel(result[url])
   },
 
+  // Claim IDs load the page alongside the channel, references resolve first
+  getChannelWithPage(fetch, id, tab, signal) {
+    const early = isClaimId(id) ? getChannelTab(fetch, id, tab, null, signal) : undefined
+    return loadChannelWithPage(odysee, fetch, id, tab, signal, early)
+  },
+
   async getChannelPage(fetch, channel, tab, continuation, signal) {
-    const offset = parseContinuation(continuation)
-    if (!isClaimId(channel.id) || offset === null || (tab !== 'videos' && tab !== 'playlists')) return page([], null)
-    return getChannelClaims(fetch, channel.id, tab === 'videos' ? 'stream' : 'collection', Math.max(offset, 1), signal)
+    return getChannelTab(fetch, channel.id, tab, continuation, signal)
   },
 
   async getLatestItems(fetch, channel, signal) {
