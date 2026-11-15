@@ -1,0 +1,135 @@
+import { TWITCH_CHAT_CLIENT_ID } from '../twitchChatReplayRequest.js'
+
+/**
+ * Resolve a creator image from yt-dlp metadata or a public creator profile.
+ * Only known first-party endpoints are requested; arbitrary extractor URLs
+ * must not become main-process network requests.
+ * @param {Record<string, unknown>} info
+ * @param {(url: string, options: RequestInit) => Promise<Response>} fetchPage
+ * @returns {Promise<string | null>}
+ */
+export async function resolveYtDlpCreatorAvatarUrl(info, fetchPage) {
+  const httpsUrl = value => {
+    try {
+      const url = new URL(value)
+      return url.protocol === 'https:' ? url.href : null
+    } catch {
+      return null
+    }
+  }
+
+  const supplied = httpsUrl(info.channel_thumbnail) ?? httpsUrl(info.channel_avatar) ??
+    httpsUrl(info.uploader_thumbnail) ?? httpsUrl(info.uploader_avatar)
+  if (supplied) return supplied
+
+  let pageUrl
+  try {
+    pageUrl = new URL(info.webpage_url)
+  } catch {
+    return null
+  }
+  if (pageUrl.protocol !== 'https:') return null
+
+  let profileUrl = null
+  let source = null
+  const uploaderUrl = httpsUrl(info.uploader_url)
+  const twitchCreatorUrl = getTwitchCreatorUrl(info)
+  if (['soundcloud.com', 'www.soundcloud.com'].includes(pageUrl.hostname) && uploaderUrl) {
+    const url = new URL(uploaderUrl)
+    if (['soundcloud.com', 'www.soundcloud.com'].includes(url.hostname)) {
+      profileUrl = url.href
+      source = 'soundcloud'
+    }
+  } else if (['tiktok.com', 'www.tiktok.com'].includes(pageUrl.hostname) && uploaderUrl) {
+    const url = new URL(uploaderUrl)
+    if (['tiktok.com', 'www.tiktok.com'].includes(url.hostname)) {
+      profileUrl = url.href
+      source = 'tiktok'
+    }
+  } else if (twitchCreatorUrl) {
+    profileUrl = twitchCreatorUrl
+    source = 'twitch'
+  } else if (['dailymotion.com', 'www.dailymotion.com'].includes(pageUrl.hostname) && /^[a-zA-Z0-9]+$/.test(info.uploader_id ?? '')) {
+    profileUrl = `https://api.dailymotion.com/user/${info.uploader_id}?fields=avatar_360_url`
+    source = 'dailymotion'
+  }
+  if (!profileUrl) return null
+
+  try {
+    const response = await fetchPage(source === 'twitch' ? 'https://gql.twitch.tv/gql' : profileUrl, {
+      credentials: 'omit',
+      redirect: 'manual',
+      signal: AbortSignal.timeout(3000),
+      ...(source === 'twitch'
+        ? {
+            method: 'POST',
+            headers: { 'Client-ID': TWITCH_CHAT_CLIENT_ID, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              query: 'query($login: String!) { user(login: $login) { profileImageURL(width: 300) } }',
+              variables: { login: new URL(profileUrl).pathname.slice(1) }
+            })
+          }
+        : {})
+    })
+    if (!response.ok || Number(response.headers.get('content-length')) > 1_000_000) return null
+    const contentType = response.headers.get('content-type') ?? ''
+    if (!contentType.includes(['dailymotion', 'twitch'].includes(source) ? 'application/json' : 'text/html')) return null
+    if (!response.body) return null
+    const reader = response.body.getReader()
+    const decoder = new TextDecoder()
+    let body = ''
+    let size = 0
+    try {
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        size += value.byteLength
+        if (size > 1_000_000) {
+          await reader.cancel()
+          return null
+        }
+        body += decoder.decode(value, { stream: true })
+      }
+      body += decoder.decode()
+    } finally {
+      reader.releaseLock()
+    }
+
+    if (source === 'dailymotion') {
+      return httpsUrl(JSON.parse(body).avatar_360_url)
+    }
+    if (source === 'twitch') {
+      return httpsUrl(JSON.parse(body)?.data?.user?.profileImageURL)
+    }
+    if (source === 'tiktok') {
+      const script = body.match(/<script\b[^>]*\bid=["']__UNIVERSAL_DATA_FOR_REHYDRATION__["'][^>]*>([\s\S]*?)<\/script>/i)?.[1]
+      const avatar = script?.match(/"avatarThumb":"((?:\\.|[^"\\])*)"/)?.[1]
+      return avatar ? httpsUrl(JSON.parse(`"${avatar}"`)) : null
+    }
+
+    const imageMeta = [...body.matchAll(/<meta\b[^>]*>/gi)].find(([tag]) =>
+      /\b(?:property|name)=["']og:image["']/i.test(tag))?.[0]
+    const imageUrl = httpsUrl(imageMeta?.match(/\bcontent=["']([^"']+)/i)?.[1]?.replaceAll('&amp;', '&'))
+    if (source === 'soundcloud' && !imageUrl?.includes('/avatars-')) return null
+    return imageUrl
+  } catch {
+    return null
+  }
+}
+
+/** @param {Record<string, unknown>} info */
+export function getTwitchCreatorUrl(info) {
+  try {
+    const pageUrl = new URL(info.webpage_url)
+    if (pageUrl.protocol !== 'https:' || !['twitch.tv', 'www.twitch.tv', 'm.twitch.tv', 'go.twitch.tv', 'player.twitch.tv', 'clips.twitch.tv'].includes(pageUrl.hostname)) return null
+    // Clips name the broadcaster's display name, which can differ from the
+    // login, and their uploader is whoever made the clip. The clip page names the login.
+    const clipLogin = pageUrl.pathname.match(/^\/([a-zA-Z0-9_]+)\/clip\//)?.[1]
+    const isClip = pageUrl.hostname === 'clips.twitch.tv' || clipLogin !== undefined
+    const login = [clipLogin, isClip ? info.channel : info.channel ?? info.uploader_id]
+      .find(value => typeof value === 'string' && /^[a-zA-Z0-9_]+$/.test(value))
+    return login ? `https://www.twitch.tv/${login.toLowerCase()}` : null
+  } catch {
+    return null
+  }
+}

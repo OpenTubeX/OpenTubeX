@@ -1,0 +1,53 @@
+/**
+ * Choose landscape thumbnail quality without changing portraits,
+ * selected frames, custom thumbnails, or the chosen image proxy.
+ * @param {string} src
+ * @param {boolean} dataSaver
+ * @returns {string}
+ */
+export function getVideoThumbnailSource(src, dataSaver = false) {
+  return src.replace(/(\/vi(?:_webp)?\/[^/?]+\/)(?:maxres|sd|hq|mq)default(\.(?:jpg|webp)(?=[?#]|$))/, `$1${dataSaver ? 'mq' : 'maxres'}default$2`)
+}
+
+/**
+ * Smaller versions of the same YouTube thumbnail, including Invidious proxies.
+ * Shorts without a selected portrait thumbnail fall back to their middle frame.
+ * Preserve query parameters and leave chosen frames and custom thumbnails alone.
+ * @param {string} src
+ * @returns {string | null}
+ */
+export function getVideoThumbnailFallbackUrl(src) {
+  const fallbacks = { maxresdefault: 'sddefault', sddefault: 'hqdefault', hqdefault: 'mqdefault', oardefault: 'oar2' }
+  const match = src.match(/\/vi(?:_webp)?\/[^/?]+\/(maxresdefault|sddefault|hqdefault|oardefault)\.(?:jpg|webp)(?=[?#]|$)/)
+  if (!match) return null
+
+  return src.replace(match[0], match[0].replace(match[1], fallbacks[match[1]]))
+}
+
+// Windowed lists remount their cards while scrolling. Remember resolutions a
+// video does not have, so each remount skips the requests that failed before.
+const MISSING_THUMBNAIL_LIMIT = 5000
+/** @type {Map<string, string>} */
+const missingThumbnails = new Map()
+
+/**
+ * @param {string} src a thumbnail that failed to load
+ * @param {string} fallback the smaller version used instead
+ */
+export function rememberMissingThumbnail(src, fallback) {
+  missingThumbnails.delete(src)
+  missingThumbnails.set(src, fallback)
+  if (missingThumbnails.size > MISSING_THUMBNAIL_LIMIT) {
+    missingThumbnails.delete(missingThumbnails.keys().next().value)
+  }
+}
+
+/**
+ * @param {string} src
+ * @returns {string} the largest version not known to be missing
+ */
+export function skipMissingThumbnails(src) {
+  let source = src
+  while (missingThumbnails.has(source)) source = missingThumbnails.get(source)
+  return source
+}

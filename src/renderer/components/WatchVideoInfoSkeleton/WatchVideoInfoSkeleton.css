@@ -1,0 +1,35 @@
+.infoSkeleton {
+  padding: 16px;
+  border-radius: var(--shape-corner-medium);
+  background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
+  box-sizing: border-box;
+}
+
+.skeletonLine {
+  block-size: 14px;
+  border-radius: var(--shape-corner-extra-small);
+}
+
+.skeletonTitle {
+  inline-size: 60%;
+  block-size: 22px;
+  margin-block-end: 20px;
+}
+
+.skeletonInfoRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.skeletonAvatar {
+  inline-size: 48px;
+  block-size: 48px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.skeletonChannel {
+  inline-size: 150px;
+}

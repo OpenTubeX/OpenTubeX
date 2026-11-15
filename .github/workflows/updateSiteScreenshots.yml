@@ -1,0 +1,85 @@
+name: Update Website Screenshots
+
+on:
+  push:
+    branches: [ development ]
+    paths:
+      - 'docs/screenshots/*.png'
+  workflow_dispatch:
+
+cache-mode: none
+permissions: {}
+
+concurrency:
+  group: update-site-screenshots
+  cancel-in-progress: false
+
+jobs:
+  update-screenshots:
+    name: Update website screenshots
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        path: app
+        persist-credentials: false
+        sparse-checkout: docs/screenshots
+
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        repository: OpenTubeX/opentubex.github.io
+        path: site
+        token: ${{ secrets.PUSH_TOKEN }}
+        persist-credentials: true
+
+    # The same encoder version reproduces unchanged images byte for byte.
+    - name: Install WebP encoder
+      shell: bash
+      run: |
+        set -euo pipefail
+        archive=libwebp-1.6.0-linux-x86-64.tar.gz
+        curl --fail --silent --show-error --location --remote-name \
+          "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/$archive"
+        echo "1c5ffab71efecefa0e3c23516c3a3a1dccb45cc310ae1095c6f14ae268e38067  $archive" | sha256sum --check
+        tar --extract --gzip --file "$archive" --strip-components=2 libwebp-1.6.0-linux-x86-64/bin/cwebp
+        mv cwebp "$RUNNER_TEMP/cwebp"
+
+    - name: Convert screenshots
+      shell: bash
+      run: |
+        set -euo pipefail
+        for png in app/docs/screenshots/OpenTubeX[0-9]*.png; do
+          name="$(basename "$png" .png)"
+          webp="site/src/assets/screenshots/opentubex-${name#OpenTubeX}.webp"
+          # The website keeps the desktop captures lossless.
+          if [[ "$name" == *-mobile-* ]]; then
+            "$RUNNER_TEMP/cwebp" -quiet -q 90 -m 6 "$png" -o "$webp"
+          else
+            "$RUNNER_TEMP/cwebp" -quiet -lossless -z 9 "$png" -o "$webp"
+          fi
+        done
+
+    - name: Commit and push
+      working-directory: site
+      shell: bash
+      env:
+        SHA: ${{ github.sha }}
+      run: |
+        set -euo pipefail
+        git add src/assets/screenshots
+
+        if git diff --cached --quiet; then
+          echo "The website screenshots are up to date."
+          exit 0
+        fi
+
+        git -c user.name='github-actions[bot]' \
+            -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+            commit -m "chore: refresh the screenshots" \
+            -m "From OpenTubeX/OpenTubeX docs/screenshots at ${SHA:0:9}." \
+            --signoff
+        git push origin HEAD:master

@@ -1,0 +1,319 @@
+import { IpcChannels } from '../../../src/constants.js'
+import { test, expect, setWindowSize, openInterfaceCustomizer } from '../../helpers/app.mjs'
+
+const editors = [
+  { name: 'quick setting categories', tab: 'quick settings', row: '.selectedSection', attribute: 'data-section-id' },
+  { name: 'quick settings within a category', tab: 'quick settings', row: '[data-section-id="appearance"] .selectedSetting', attribute: 'data-setting-id' },
+  { name: 'navigation', tab: 'navigation', row: '.selectedItem', attribute: 'data-navigation-item-id' },
+  { name: 'fullscreen actions', tab: 'fullscreen actions', row: '.selectedAction', attribute: 'data-fullscreen-action-id' },
+  // The chapters button keeps its place next to the time, so it has no drag handle.
+  { name: 'control bar buttons', tab: 'control bar', row: '[data-placement-section="bar"] .placementItem:not(.unordered)', attribute: 'data-control-bar-button-id' },
+  { name: 'player menu controls', tab: 'control bar', row: '[data-placement-section="menu"] .placementItem', attribute: 'data-player-menu-control-id' },
+]
+
+/** Return visible geometry with a useful failure instead of a null dereference. */
+async function visibleBox(locator) {
+  const box = await locator.boundingBox()
+  expect(box, `Expected visible geometry for ${locator}`).not.toBeNull()
+  return box
+}
+
+async function expectQuickSettingScrollRange(scroller) {
+  let measurements
+  await expect.poll(async () => {
+    measurements = await scroller.evaluate(element => {
+      const content = element.querySelector('.selectedSettings, .emptyState')
+      const end = content.getBoundingClientRect().bottom - element.getBoundingClientRect().top +
+        element.scrollTop + Number.parseFloat(getComputedStyle(content).marginBottom) +
+        Number.parseFloat(getComputedStyle(element).paddingBottom)
+      const maximum = Math.max(0, end - element.clientHeight)
+      const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+      const track = scrollbar.querySelector('.os-scrollbar-track').getBoundingClientRect()
+      const handle = scrollbar.querySelector('.os-scrollbar-handle')
+      const thumb = handle.getBoundingClientRect()
+      const expectedRatio = Math.max(element.clientHeight / element.scrollHeight,
+        Number.parseFloat(getComputedStyle(handle).minHeight) / track.height)
+      const validRange = element.scrollTop <= maximum + 1 &&
+        element.scrollHeight - element.clientHeight <= maximum + 1
+      const validScrollbar = maximum <= 1
+        ? scrollbar.classList.contains('os-scrollbar-unusable')
+        : !scrollbar.classList.contains('os-scrollbar-unusable') &&
+          Math.abs(thumb.height / track.height - expectedRatio) < 0.02
+      return {
+        valid: validRange && validScrollbar,
+        maximum,
+        actualRange: element.scrollHeight - element.clientHeight,
+        scrollTop: element.scrollTop,
+        thumbRatio: thumb.height / track.height,
+        expectedRatio,
+        unusable: scrollbar.classList.contains('os-scrollbar-unusable')
+      }
+    })
+    return measurements.valid
+  }, { message: 'quick-settings viewport and scrollbar match the rendered content range' }).toBe(true).catch(error => {
+    error.message += `\nScroll measurements: ${JSON.stringify(measurements)}`
+    throw error
+  })
+}
+
+test.describe('quick-settings scroll range', { tag: '@scale' }, () => {
+  test.use({
+    seed: {
+      settings: {
+        quickSettings: ['baseTheme', 'mainColor', 'uiScale', 'thumbnailSize', 'uiRoundness', 'animationSpeed',
+          'defaultQuality', 'playNextVideo', 'enableSubtitlesByDefault', 'listType', 'playlistViewType',
+          'hideComments', 'currentLocale', 'region', 'rememberHistory'],
+      }
+    }
+  })
+
+  test('clamps after removing rows and whole categories, resetting, and resizing', async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 500, height: 600 })
+    await openInterfaceCustomizer(page, 'quick settings')
+    const scroller = page.locator('.customizerEditorScroll:visible')
+    const scrollToBottom = async () => {
+      await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+      await expectQuickSettingScrollRange(scroller)
+    }
+    for (const id of ['rememberHistory', 'hideComments', 'hideRecommendedVideos', 'listType']) {
+      await scrollToBottom()
+      const setting = page.locator(`[data-setting-id="${id}"]`)
+      await setting.getByRole('button', { name: /^Remove / }).click()
+      await expect(setting).toHaveCount(0)
+      await expectQuickSettingScrollRange(scroller)
+      if (id === 'rememberHistory') {
+        await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+        await scrollToBottom()
+        await page.getByRole('button', { name: /^Reset to defaults$/i }).evaluate(element => element.click())
+        await expect(page.locator('[data-setting-id="animationSpeed"]')).toHaveCount(0)
+        await expectQuickSettingScrollRange(scroller)
+      }
+    }
+    await scrollToBottom()
+    await setWindowSize(app, page, { width: 1000, height: 900 })
+    await expectQuickSettingScrollRange(scroller)
+    await setWindowSize(app, page, { width: 500, height: 600 })
+    await scrollToBottom()
+    const settings = page.locator('.selectedSetting')
+    while (await settings.count() > 0) {
+      await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await settings.last().getByRole('button', { name: /^Remove / }).click()
+      await expectQuickSettingScrollRange(scroller)
+    }
+    await expect(page.locator('.emptyState')).toBeVisible()
+    await expectQuickSettingScrollRange(scroller)
+  })
+})
+
+for (const [editor, method] of [
+  [editors[0], 'pointer'],
+  [editors[0], 'button'],
+]) {
+  test(`does not announce a failed ${editor.name} ${method} reorder and retries after relaunch`, async ({ app, page }) => {
+    const openEditor = async () => {
+      await openInterfaceCustomizer(page, editor.tab)
+      return page.locator(editor.row)
+    }
+    let rows = await openEditor()
+    const ids = () => rows.evaluateAll((elements, attribute) => elements.map(element => element.getAttribute(attribute)), editor.attribute)
+    const initial = await ids()
+    await app.electronApp.evaluate(({ ipcMain }, channel) => {
+      ipcMain.removeHandler(channel)
+      ipcMain.handle(channel, () => { throw new Error('Reorder save failed') })
+    }, IpcChannels.DB_SETTINGS)
+
+    const moveFirstDown = async () => {
+      if (method === 'button') {
+        await rows.first().locator('.sectionHeader').getByRole('button', { name: / down$/ }).click()
+        return
+      }
+      const handle = rows.first().locator('.dragHandle').first()
+      await handle.scrollIntoViewIfNeeded()
+      const start = await visibleBox(handle)
+      const source = await visibleBox(rows.first())
+      const target = await visibleBox(rows.nth(1))
+      const y = start.y + start.height / 2
+      await page.mouse.move(start.x + start.width / 2, y)
+      await page.mouse.down()
+      await page.mouse.move(start.x + start.width / 2, y + target.y + target.height - source.y - source.height, { steps: 10 })
+      await page.mouse.up()
+    }
+    const errorLogged = page.waitForEvent('console', {
+      predicate: message => message.type() === 'error' && message.text().includes('Reorder save failed')
+    })
+    await moveFirstDown()
+    await errorLogged
+    await expect.poll(ids).toEqual(initial)
+    await expect(page.locator('.reorderStatus')).toHaveText('')
+
+    // Relaunch restores the production handler without inspecting Electron internals.
+    ;({ page } = await app.relaunch())
+    rows = await openEditor()
+    await expect.poll(ids).toEqual(initial)
+    await moveFirstDown()
+    await expect.poll(ids).toEqual([initial[1], initial[0], ...initial.slice(2)])
+    await expect(page.locator('.reorderStatus')).not.toHaveText('')
+  })
+}
+
+test.describe('in-place settings reordering', { tag: '@scale' }, () => {
+  test.use({
+    seed: {
+      settings: {
+        quickSettings: ['baseTheme', 'mainColor', 'defaultQuality', 'playNextVideo', 'hideComments'],
+      }
+    }
+  })
+
+  for (const editor of [editors[0], editors[4]]) {
+    test(`slides ${editor.name} in place and persists only on drop`, async ({ app, page, uiScale }) => {
+      if (uiScale === 125) await setWindowSize(app, page, { width: 500, height: 850 })
+      await openInterfaceCustomizer(page, editor.tab)
+      const rows = page.locator(editor.row)
+      const ids = () => rows.evaluateAll((elements, attribute) => elements.map(element => element.getAttribute(attribute)), editor.attribute)
+      const initial = await ids()
+      const first = rows.first()
+      const second = rows.nth(1)
+      const handle = first.locator('.dragHandle').first()
+      // Leave the editor height below the preview for both rows.
+      await first.evaluate(element => element.scrollIntoView({ block: 'start' }))
+      const start = await visibleBox(handle)
+      const source = await visibleBox(first)
+      const target = await visibleBox(second)
+      const last = await visibleBox(rows.last())
+      const x = start.x + start.width / 2
+      const y = start.y + start.height / 2
+      const distance = target.y + target.height / 2 - source.y - source.height / 2 + 8
+      // The drag starts inside the edge auto-scroll zone, so a busy machine can scroll the list a little.
+      const scrollTop = () => first.evaluate(element => {
+        let scroller = element.parentElement
+        while (scroller && !/auto|scroll/.test(getComputedStyle(scroller).overflowY)) scroller = scroller.parentElement
+        return scroller?.scrollTop ?? 0
+      })
+      const scrollStart = await scrollTop()
+      await page.mouse.move(x, y)
+      await page.mouse.down()
+      await page.mouse.move(x, y + distance, { steps: 12 })
+      await expect(first).toHaveClass(/dragging/)
+      await expect(first).toHaveCSS('z-index', '2')
+      await expect(first).not.toHaveCSS('box-shadow', 'none')
+      await expect.poll(() => second.evaluate(element => new DOMMatrixReadOnly(getComputedStyle(element).transform).m42)).toBeLessThan(-10)
+      await expect.poll(ids).toEqual(initial)
+      const dragged = await visibleBox(first)
+      const scrolled = await scrollTop() - scrollStart
+      // The row follows the pointer until it reaches the end of the list, which moves with the scroll.
+      expect(dragged.y - source.y).toBeCloseTo(Math.min(distance, last.y + last.height - source.y - source.height - scrolled), 0)
+      await page.mouse.up()
+      const reordered = [initial[1], initial[0], ...initial.slice(2)]
+      await expect.poll(ids).toEqual(reordered)
+      await expect(rows.locator('[style*="translateY"]')).toHaveCount(0)
+      await expect.poll(() => rows.evaluateAll(elements => elements.every(element => getComputedStyle(element).transform === 'none'))).toBe(true)
+      await page.reload()
+      await openInterfaceCustomizer(page, editor.tab)
+      await expect.poll(ids).toEqual(reordered)
+    })
+  }
+
+  test('confines individual quick settings to their category and cancels with Escape', async ({ page }) => {
+    await openInterfaceCustomizer(page, 'quick settings')
+    const rows = page.locator('.selectedSetting')
+    const ids = () => rows.evaluateAll(elements => elements.map(element => element.dataset.settingId))
+    const original = await ids()
+    const handle = page.locator('[data-setting-id="baseTheme"] .dragHandle')
+    const start = await visibleBox(handle)
+    const target = await visibleBox(page.locator('[data-section-id="playback"]'))
+    await page.mouse.move(start.x + start.width / 2, start.y + start.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(start.x + start.width / 2, target.y + target.height / 2, { steps: 10 })
+    await page.keyboard.press('Escape')
+    await page.mouse.up()
+    await expect.poll(ids).toEqual(original)
+    await expect(page.locator('.selectedSection')).toHaveCount(3)
+    await handle.dragTo(page.locator('[data-section-id="playback"] .sectionHeader'))
+    await expect.poll(ids).toEqual(['mainColor', 'baseTheme', ...original.slice(2)])
+    await expect(page.locator('.selectedSection h3')).toHaveText(['Appearance', 'Playback', 'Content'])
+  })
+})
+
+for (const cancellation of ['pointercancel', 'resize']) {
+  test(`cancels a navigation drag on ${cancellation}`, async ({ app, page }) => {
+    await openInterfaceCustomizer(page, 'navigation')
+    const rows = page.locator('.selectedItem')
+    const ids = () => rows.evaluateAll(elements => elements.map(element => element.dataset.navigationItemId))
+    const original = await ids()
+    const handle = rows.first().locator('.dragHandle')
+    await handle.evaluate(element => element.addEventListener('pointerdown', event => {
+      element.dataset.testPointerId = event.pointerId
+    }, { once: true }))
+    const source = await visibleBox(handle)
+    const target = await visibleBox(rows.nth(1))
+    await page.mouse.move(source.x + source.width / 2, source.y + source.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(source.x + source.width / 2, target.y + target.height / 2 + 8, { steps: 8 })
+    await expect(rows.first()).toHaveClass(/dragging/)
+    if (cancellation === 'resize') {
+      await setWindowSize(app, page, { width: 900, height: 700 })
+    } else {
+      await handle.evaluate(element => {
+        const pointerId = Number(element.dataset.testPointerId)
+        element.dispatchEvent(new PointerEvent('pointercancel', { pointerId }))
+      })
+    }
+    await page.mouse.up()
+    await expect.poll(ids).toEqual(original)
+    await expect(page.locator('.selectedItem.dragging')).toHaveCount(0)
+    await expect.poll(() => rows.evaluateAll(elements => elements.every(element => getComputedStyle(element).transform === 'none'))).toBe(true)
+  })
+}
+
+test.describe('unequal category heights', () => {
+  test.use({ seed: { settings: { quickSettings: ['baseTheme', 'mainColor', 'uiScale', 'defaultQuality'] } } })
+
+  test('moves a tall category past a shorter last category without increasing the scroll range', async ({ page }) => {
+    await openInterfaceCustomizer(page, 'quick settings')
+    const first = page.locator('.selectedSection').first()
+    const last = page.locator('.selectedSection').last()
+    const original = await page.locator('.selectedSection').evaluateAll(elements => elements.map(element => element.dataset.sectionId))
+    const source = await visibleBox(first.locator('.dragHandle').first())
+    const listBounds = await visibleBox(page.locator('.selectedSettings'))
+    const firstBounds = await visibleBox(first)
+    const lastBounds = await visibleBox(last)
+    expect(firstBounds.height).toBeGreaterThan(lastBounds.height)
+    const x = source.x + source.width / 2
+    const y = source.y + source.height / 2
+    await page.mouse.move(x, y)
+    await page.mouse.down()
+    await page.mouse.move(x, y + lastBounds.y + lastBounds.height - firstBounds.y - firstBounds.height, { steps: 15 })
+    const draggingBounds = await visibleBox(first)
+    expect(draggingBounds.y + draggingBounds.height).toBeLessThanOrEqual(listBounds.y + listBounds.height + 1)
+    await page.mouse.up()
+    await expect.poll(() => page.locator('.selectedSection').evaluateAll(elements => elements.map(element => element.dataset.sectionId)))
+      .toEqual([...original.slice(1), original[0]])
+  })
+})
+
+test.describe('reorder edge scrolling', () => {
+  test.use({ seed: { settings: { uiScale: 125 } } })
+
+  test('scrolls while holding a row near the edge without extending the content range', async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 800, height: 600 })
+    await openInterfaceCustomizer(page, 'navigation')
+    const rows = page.locator('.selectedItem')
+    const original = await rows.evaluateAll(elements => elements.map(element => element.dataset.navigationItemId))
+    const scroller = page.locator('.customizerEditorScroll')
+    await scroller.evaluate(element => { element.scrollTop = 0 })
+    const scrollHeight = await scroller.evaluate(element => element.scrollHeight)
+    const bounds = await visibleBox(scroller)
+    const handle = await visibleBox(rows.first().locator('.dragHandle'))
+    await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(handle.x + handle.width / 2, bounds.y + bounds.height - 8, { steps: 10 })
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(60)
+    expect(await scroller.evaluate(element => element.scrollHeight)).toBe(scrollHeight)
+    await page.mouse.up()
+    await expect.poll(() => rows.evaluateAll(elements => elements.map(element => element.dataset.navigationItemId))).not.toEqual(original)
+    await expect(page.locator('.selectedItem.dragging')).toHaveCount(0)
+    expect(await scroller.evaluate(element => element.scrollHeight)).toBe(scrollHeight)
+  })
+})

@@ -1,0 +1,66 @@
+{
+  "manifest_version": 3,
+  "name": "OpenTubeX Local API",
+  "version": "1.0.0",
+  "description": "Lets the OpenTubeX web app use the local API by allowing it to request YouTube directly.",
+  "homepage_url": "https://opentubex.org/",
+  "icons": {
+    "128": "icon.png"
+  },
+  "permissions": [
+    "declarativeNetRequestWithHostAccess",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://opentubex.org/*",
+    "http://localhost/*",
+    "http://127.0.0.1/*",
+    "https://*.youtube.com/*",
+    "https://*.googlevideo.com/*",
+    "https://*.ytimg.com/*",
+    "https://*.ggpht.com/*",
+    "https://*.googleusercontent.com/*"
+  ],
+  "optional_host_permissions": [
+    "https://*/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://opentubex.org/*",
+        "http://localhost/*",
+        "http://127.0.0.1/*"
+      ],
+      "js": [
+        "marker.js"
+      ],
+      "run_at": "document_start",
+      "world": "MAIN",
+      "all_frames": true
+    }
+  ],
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "local-api",
+        "enabled": true,
+        "path": "rules.json"
+      }
+    ]
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "local-api@opentubex.org",
+      "strict_min_version": "128.0",
+      "data_collection_permissions": {
+        "required": [
+          "none"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,324 @@
+import assert from 'node:assert/strict'
+import test from 'node:test'
+
+import {
+  buildYtDlpPlaybackCacheKey,
+  preloadYtDlpPlaybackSources,
+  selectYtDlpPreloadVideoIds,
+} from '../../src/renderer/helpers/player/ytDlpPlaybackPreload.js'
+
+const video = videoId => ({ videoId })
+const source = videoId => ({
+  videoId,
+  isLive: false,
+  expiryDate: new Date(Date.now() + 10 * 60 * 1000),
+})
+
+test('reuses preloaded playback sources across proxy changes', () => {
+  const directGetters = {
+    getYtDlpSource: 'system',
+    getYtDlpChannel: 'stable',
+    getYtDlpPath: '/usr/bin/yt-dlp',
+    getUseProxy: false,
+    getYtDlpPlaybackAuthMode: 'browser',
+    getYtDlpPlaybackCookiesPath: '',
+    getYtDlpPlaybackCookiesBrowser: 'firefox',
+    getYtDlpPlaybackCookiesBrowserProfile: 'default',
+  }
+  const proxyGetters = {
+    ...directGetters,
+    getUseProxy: true,
+    getProxyProtocol: 'socks5',
+    getProxyHostname: 'localhost',
+    getProxyPort: 9050,
+    getProxyUsername: 'user',
+    getProxyPassword: 'password',
+  }
+  const directKey = buildYtDlpPlaybackCacheKey(directGetters)
+
+  assert.equal(
+    directKey,
+    buildYtDlpPlaybackCacheKey(proxyGetters)
+  )
+
+  for (const [setting, value] of Object.entries({
+    getYtDlpSource: 'bundled',
+    getYtDlpChannel: 'nightly',
+    getYtDlpPath: '/opt/yt-dlp',
+    getYtDlpPlaybackAuthMode: 'cookies',
+    getYtDlpPlaybackCookiesPath: '/tmp/cookies.txt',
+    getYtDlpPlaybackCookiesBrowser: 'chromium',
+    getYtDlpPlaybackCookiesBrowserProfile: 'Profile 1',
+  })) {
+    assert.notEqual(
+      directKey,
+      buildYtDlpPlaybackCacheKey({ ...directGetters, [setting]: value }),
+      setting
+    )
+  }
+})
+
+test('preloads queued videos before playlist or recommendation candidates', () => {
+  assert.deepEqual(selectYtDlpPreloadVideoIds({
+    currentVideoId: 'current00001',
+    limit: 3,
+    queuedVideos: [video('queue000001'), video('queue000002'), video('queue000003'), video('queue000004')],
+    playlistVideos: [video('list0000001'), video('list0000002')],
+    recommendedVideos: [video('recommend01')],
+  }), ['queue000001', 'queue000002', 'queue000003'])
+})
+
+test('uses the active playlist when the watch queue is empty', () => {
+  assert.deepEqual(selectYtDlpPreloadVideoIds({
+    currentVideoId: 'current00001',
+    limit: 4,
+    queuedVideos: [],
+    playlistVideos: [
+      video('current00001'),
+      video('list0000001'),
+      video('list0000001'),
+      { title: 'Unavailable' },
+      video('list0000002'),
+    ],
+    recommendedVideos: [video('recommend01')],
+  }), ['list0000001', 'list0000002'])
+})
+
+test('uses recommendations outside a queue or playlist', () => {
+  assert.deepEqual(selectYtDlpPreloadVideoIds({
+    currentVideoId: 'current00001',
+    limit: 2,
+    queuedVideos: [],
+    playlistVideos: null,
+    recommendedVideos: [video('current00001'), video('recommend01'), video('recommend02'), video('recommend03')],
+  }), ['recommend01', 'recommend02'])
+})
+
+test('does not fall back to recommendations at the end of a playlist', () => {
+  assert.deepEqual(selectYtDlpPreloadVideoIds({
+    currentVideoId: 'current00001',
+    limit: 2,
+    queuedVideos: [],
+    playlistVideos: [],
+    recommendedVideos: [video('recommend01')],
+  }), [])
+})
+
+test('preloads unique videos with bounded concurrency and reports failures', async () => {
+  let active = 0
+  let peakActive = 0
+  const loaded = []
+  const progressUpdates = []
+  const release = new Map()
+  let failureReleased = false
+  const loadSource = videoId => new Promise((resolve, reject) => {
+    if (videoId === 'video000002' && failureReleased) {
+      reject(new Error('unavailable'))
+      return
+    }
+    active++
+    peakActive = Math.max(peakActive, active)
+    loaded.push(videoId)
+    release.set(videoId, (error = null) => {
+      active--
+      if (error !== null) failureReleased = true
+      error === null ? resolve(source(videoId)) : reject(error)
+    })
+  })
+
+  const resultPromise = preloadYtDlpPlaybackSources(
+    ['video000001', 'video000002', 'video000001', 'video000003'],
+    {
+      concurrency: 2,
+      loadSource,
+      onProgress: progress => progressUpdates.push(progress),
+    }
+  )
+
+  await new Promise(resolve => setImmediate(resolve))
+  assert.deepEqual(loaded, ['video000001', 'video000002'])
+  release.get('video000001')()
+  await new Promise(resolve => setImmediate(resolve))
+  assert.deepEqual(loaded, ['video000001', 'video000002', 'video000003'])
+  release.get('video000002')(new Error('unavailable'))
+  release.get('video000003')()
+
+  assert.deepEqual(await resultPromise, {
+    requested: 3,
+    preloaded: 2,
+    failed: 1,
+  })
+  assert.equal(peakActive, 2)
+  assert.deepEqual(progressUpdates.at(-1), { requested: 3, completed: 3, preloaded: 2, failed: 1 })
+  assert.ok(progressUpdates.slice(0, -1).every(progress => progress.completed < 3))
+})
+
+test('shares the preload concurrency limit across overlapping runs', async () => {
+  let active = 0
+  let peakActive = 0
+  const loaded = []
+  const releases = []
+  const loadSource = videoId => new Promise(resolve => {
+    active++
+    peakActive = Math.max(peakActive, active)
+    loaded.push(videoId)
+    releases.push(() => {
+      active--
+      resolve(source(videoId))
+    })
+  })
+
+  const firstRun = preloadYtDlpPlaybackSources(['first00001', 'first00002', 'first00003'], { loadSource })
+  const secondRun = preloadYtDlpPlaybackSources(['second0001', 'second0002'], { loadSource })
+
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(loaded.length, 2)
+
+  for (let completed = 0; completed < 5; completed++) {
+    const release = releases.shift()
+    assert.ok(release)
+    release()
+    await new Promise(resolve => setImmediate(resolve))
+  }
+
+  await Promise.all([firstRun, secondRun])
+  assert.equal(peakActive, 2)
+  assert.deepEqual(new Set(loaded), new Set([
+    'first00001',
+    'first00002',
+    'first00003',
+    'second0001',
+    'second0002',
+  ]))
+})
+
+test('raises the shared preload concurrency limit when configured', async () => {
+  let active = 0
+  let peakActive = 0
+  const releases = []
+  const loadSource = videoId => new Promise(resolve => {
+    active++
+    peakActive = Math.max(peakActive, active)
+    releases.push(() => {
+      active--
+      resolve(source(videoId))
+    })
+  })
+
+  const firstRun = preloadYtDlpPlaybackSources(
+    Array.from({ length: 20 }, (_, index) => `first${index}`),
+    { concurrency: 32, loadSource }
+  )
+  const secondRun = preloadYtDlpPlaybackSources(
+    Array.from({ length: 20 }, (_, index) => `second${index}`),
+    { concurrency: 32, loadSource }
+  )
+
+  await new Promise(resolve => setImmediate(resolve))
+  const initiallyActive = active
+
+  for (let completed = 0; completed < 40; completed++) {
+    const release = releases.shift()
+    assert.ok(release)
+    release()
+    await new Promise(resolve => setImmediate(resolve))
+  }
+
+  await Promise.all([firstRun, secondRun])
+  assert.equal(initiallyActive, 32)
+  assert.equal(peakActive, 32)
+})
+
+test('reports sources that cannot be cached as preload failures', async () => {
+  const attempts = new Map()
+  const results = new Map([
+    ['live0000001', { isLive: true, expiryDate: new Date(Date.now() + 10 * 60 * 1000) }],
+    ['noexpiry001', { isLive: false, expiryDate: null }],
+    ['expired0001', { isLive: false, expiryDate: new Date(0) }],
+    ['partial0001', { isLive: false, incomplete: true, expiryDate: new Date(Date.now() + 10 * 60 * 1000) }],
+    ['cached00001', source('cached00001')],
+  ])
+
+  assert.deepEqual(await preloadYtDlpPlaybackSources([...results.keys()], {
+    loadSource: async videoId => {
+      attempts.set(videoId, (attempts.get(videoId) ?? 0) + 1)
+      return results.get(videoId)
+    }
+  }), {
+    requested: 5,
+    preloaded: 1,
+    failed: 4,
+  })
+  assert.equal(attempts.get('partial0001'), 3)
+  for (const videoId of ['live0000001', 'noexpiry001', 'expired0001', 'cached00001']) {
+    assert.equal(attempts.get(videoId), 1)
+  }
+})
+
+test('retries incomplete metadata after the bulk playlist preload finishes', async () => {
+  const videoIds = Array.from({ length: 64 }, (_, index) => `video${index}`)
+  const incompleteVideoIds = new Set(videoIds.slice(0, 20))
+  const attempts = new Map()
+  const loaded = []
+  const progressUpdates = []
+  let activeRetries = 0
+  let peakActiveRetries = 0
+
+  const result = await preloadYtDlpPlaybackSources(videoIds, {
+    concurrency: 32,
+    loadSource: async videoId => {
+      loaded.push(videoId)
+      const attempt = (attempts.get(videoId) ?? 0) + 1
+      attempts.set(videoId, attempt)
+      if (attempt > 1) {
+        activeRetries++
+        peakActiveRetries = Math.max(peakActiveRetries, activeRetries)
+        await new Promise(resolve => setImmediate(resolve))
+        activeRetries--
+      }
+      return {
+        ...source(videoId),
+        incomplete: incompleteVideoIds.has(videoId) && attempt < 3,
+      }
+    },
+    onProgress: progress => progressUpdates.push(progress),
+  })
+
+  assert.deepEqual(result, { requested: 64, preloaded: 64, failed: 0 })
+  assert.equal(attempts.get('video5'), 3)
+  assert.equal(attempts.get('video20'), 1)
+  assert.deepEqual(loaded.slice(64), [...incompleteVideoIds, ...incompleteVideoIds])
+  assert.equal(peakActiveRetries, 16)
+  assert.equal(progressUpdates.at(-1).completed, 64)
+  assert.ok(progressUpdates.slice(0, -1).every(progress => progress.completed < 64))
+})
+
+test('retries a failed playlist extraction and reports only its final result', async () => {
+  let attempts = 0
+  const progressUpdates = []
+  const result = await preloadYtDlpPlaybackSources(['video000001'], {
+    loadSource: async videoId => {
+      if (++attempts === 1) throw new Error('yt-dlp extraction timed out')
+      return source(videoId)
+    },
+    onProgress: progress => progressUpdates.push(progress),
+  })
+
+  assert.deepEqual(result, { requested: 1, preloaded: 1, failed: 0 })
+  assert.equal(attempts, 2)
+  assert.deepEqual(progressUpdates.at(-1), { requested: 1, completed: 1, preloaded: 1, failed: 0 })
+})
+
+test('reports a missing or unavailable executable without retrying', async () => {
+  for (const message of ['yt-dlp could not be found', 'yt-dlp is not available']) {
+    let attempts = 0
+    const result = await preloadYtDlpPlaybackSources(['video000001'], {
+      loadSource: async () => {
+        attempts++
+        throw new Error(message)
+      },
+    })
+    assert.deepEqual(result, { requested: 1, preloaded: 0, failed: 1 })
+    assert.equal(attempts, 1, message)
+  }
+})

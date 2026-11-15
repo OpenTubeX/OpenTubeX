@@ -1,28 +1,51 @@
 <template>
   <button
     class="btn ripple"
-    :data-settings-search-label="label"
+    :class="[buttonTheme, `variant-${buttonVariant}`, `shape-${shape}`, `size-${size}`, { selected }]"
+    :aria-pressed="selected ?? $attrs['aria-pressed']"
     :style="{
-      color: textColor,
-      backgroundColor: backgroundColor,
-      borderColor: backgroundColor
+      '--button-base': buttonTheme === '' ? backgroundColor : undefined,
+      '--button-on-base': buttonTheme === '' ? textColor : undefined
     }"
     @click="click"
   >
     <slot>
-      <FontAwesomeIcon
+      <FtIcon
         v-if="icon"
         :icon="icon"
+        aria-hidden="true"
       />
-      {{ label }}
+      <slot name="label">
+        {{ label }}
+      </slot>
     </slot>
   </button>
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
+import { computed } from 'vue'
 
-defineProps({
+const props = defineProps({
+  variant: {
+    type: String,
+    default: '',
+    validator: value => ['', 'filled', 'tonal', 'outlined', 'text', 'elevated'].includes(value)
+  },
+  shape: {
+    type: String,
+    default: 'round',
+    validator: value => ['round', 'square'].includes(value)
+  },
+  size: {
+    type: String,
+    default: 'small',
+    validator: value => ['extra-small', 'small', 'medium', 'large', 'extra-large'].includes(value)
+  },
+  selected: {
+    type: Boolean,
+    default: null
+  },
   label: {
     type: String,
     default: ''
@@ -35,6 +58,10 @@ defineProps({
     type: String,
     default: 'var(--accent-color)'
   },
+  theme: {
+    type: String,
+    default: ''
+  },
   icon: {
     type: Array,
     default: null
@@ -42,6 +69,21 @@ defineProps({
 })
 
 const emit = defineEmits(['click'])
+
+const buttonTheme = computed(() => {
+  if (props.theme !== '') return props.theme
+  if (props.backgroundColor === 'var(--primary-color)' && props.textColor === 'var(--text-with-main-color)') {
+    return 'primary'
+  }
+  if (props.backgroundColor === 'var(--accent-color)' && props.textColor === 'var(--text-with-accent-color)') {
+    return 'secondary'
+  }
+  return ''
+})
+
+const buttonVariant = computed(() => props.variant || (
+  props.backgroundColor === null || props.backgroundColor === 'null' ? 'outlined' : 'tonal'
+))
 
 function click() {
   emit('click')

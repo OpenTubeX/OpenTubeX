@@ -23,10 +23,16 @@
   align-items: baseline;
   justify-content: center;
   gap: 0.5rem;
-  block-size: inherit;
+  flex: 0 0 auto;
+  block-size: auto;
 }
 
 .clearFilterButton {
+  --icon-width: 1em;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
   border-style: none;
   background-color: transparent;
@@ -35,23 +41,32 @@
   font-size: 20px;
   line-height: 1em;
   padding: 10px;
-  transition: background 0.2s ease-out;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 
   &:hover {
     background-color: var(--side-nav-hover-color);
     color: var(--side-nav-hover-text-color);
-    transition: background 0.2s ease-in;
   }
 
   &:active {
-    background-color: var(--tertiary-text-color);
+    border-radius: var(--shape-corner-medium);
+    background-color: var(--side-nav-active-color);
     color: var(--side-nav-active-text-color);
-    transition: background 0.2s ease-in;
   }
 }
 
-.clearFilterIcon {
-  vertical-align: -0.25em;
+@media (width > 680px) and (height > 600px) and (not (any-pointer: coarse)) {
+  /* Half the 40px state layer keeps it inside the column regardless of font height. */
+  .searchRadio {
+    padding-block-end: 20px;
+  }
+
+  .searchRadio :deep(input + label) {
+    min-block-size: 0;
+    padding-block: 0;
+    margin-block-start: 10px;
+    line-height: normal;
+  }
 }
 
 @media only screen and (width <= 680px) {
@@ -62,5 +77,25 @@
 
   .radioFlexBox {
     flex-flow: column;
+  }
+}
+
+@media (width <= 600px), (height <= 600px) {
+  .titleContainer {
+    flex-wrap: wrap;
+  }
+
+  .clearFilterButton {
+    min-inline-size: var(--phone-touch-target, 48px);
+    min-block-size: var(--phone-touch-target, 48px);
+  }
+
+  .searchRadio :deep(input[type='radio'] + label),
+  .searchRadio :deep(input[type='checkbox'] + label) {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    min-block-size: var(--phone-touch-target, 48px);
+    inline-size: 100%;
   }
 }

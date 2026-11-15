@@ -1,93 +1,135 @@
 <template>
   <div>
-    <FtLoader
-      v-if="isLoading"
+    <SubscriptionChannelErrors
+      v-if="channelErrorFeeds.length > 0"
+      :feeds="channelErrorFeeds"
     />
-    <template
-      v-else
+    <FtFlexBox
+      v-if="subscriptionCacheLoadFailed"
+      class="cacheLoadError"
     >
-      <div
-        v-if="errorChannels.length !== 0"
-      >
-        <h3> {{ $t("Subscriptions.Error Channels") }}</h3>
-        <FtFlexBox>
-          <FtChannelBubble
-            v-for="channel in errorChannels"
-            :key="channel.id"
-            :channel-name="channel.name"
-            :channel-id="channel.id"
-            :channel-thumbnail="channel.thumbnail"
-          />
-        </FtFlexBox>
-      </div>
-      <FtFlexBox
-        v-if="activeVideoList.length === 0"
-      >
-        <p
-          v-if="!activeProfileHasSubscriptions"
-          class="message"
-        >
-          {{ $t("Subscriptions['Your Subscription list is currently empty. Start adding subscriptions to see them here.']") }}
-        </p>
-        <p
-          v-else-if="!fetchSubscriptionsAutomatically && !attemptedFetch"
-          class="message"
-        >
-          {{ $t("Subscriptions.Disabled Automatic Fetching") }}
-        </p>
-        <p
-          v-else
-          class="message"
-        >
-          {{ isCommunity ? $t("Subscriptions.Empty Posts") : $t("Subscriptions.Empty Channels") }}
-        </p>
-      </FtFlexBox>
-      <FtElementList
-        v-else
-        :data="activeVideoList"
-        :use-channels-hidden-preference="false"
-        :display="isCommunity ? 'list' : ''"
+      <p class="message">
+        {{ $t('Subscriptions.Cache Load Error') }}
+      </p>
+      <FtButton
+        :label="$t('User Playlists.SinglePlaylistView.Retry')"
+        :icon="['fas', 'sync']"
+        background-color="var(--primary-color)"
+        text-color="var(--text-with-main-color)"
+        @click="retrySubscriptionCacheLoad"
       />
-      <FtAutoLoadNextPageWrapper
-        v-if="videoList.length > dataLimit"
-        @load-next-page="increaseLimit"
-      >
-        <FtFlexBox>
-          <FtButton
-            :label="isCommunity ? $t('Subscriptions.Load More Posts') : $t('Subscriptions.Load More Videos')"
-            background-color="var(--primary-color)"
-            text-color="var(--text-with-main-color)"
-            @click="increaseLimit"
-          />
-        </FtFlexBox>
-      </FtAutoLoadNextPageWrapper>
-    </template>
-
-    <FtRefreshWidget
-      :disable-refresh="isLoading || !activeProfileHasSubscriptions"
-      :last-refresh-timestamp="lastRefreshTimestamp"
-      :title="title"
-      @click="refresh"
+    </FtFlexBox>
+    <FtLoader
+      v-else-if="showsLoadingPlaceholder && isCommunity"
     />
+    <FtSkeletonGrid
+      v-else-if="showsLoadingPlaceholder && !isCommunity"
+      :youtube-style-shorts="youtubeStyleShorts"
+    />
+    <FtFlexBox
+      v-if="showsEmptyState"
+    >
+      <p
+        v-if="!activeProfileHasSubscriptions"
+        class="message"
+      >
+        {{ $t("Subscriptions['Your Subscription list is currently empty. Start adding subscriptions to see them here.']") }}
+      </p>
+      <p
+        v-else-if="activeGroupIsEmpty"
+        class="message"
+      >
+        {{ $t('Subscription Groups.Empty Group') }}
+      </p>
+      <p
+        v-else-if="onlyShowNew"
+        class="message"
+      >
+        {{ $t("Subscriptions.No New Content") }}
+      </p>
+      <p
+        v-else-if="!fetchSubscriptionsAutomatically && !attemptedFetch"
+        class="message"
+      >
+        {{ $t("Subscriptions.Disabled Automatic Fetching") }}
+      </p>
+      <p
+        v-else
+        class="message"
+      >
+        {{ isCommunity ? $t("Subscriptions.Empty Posts") : $t("Subscriptions.Empty Channels") }}
+      </p>
+    </FtFlexBox>
+    <slot
+      name="before-list"
+      :has-visible-content="activeVideoList.length > 0"
+    />
+    <FtElementList
+      :data="activeVideoList"
+      :data-overrides="dataOverrides"
+      :subscription-feed-type="subscriptionFeedType ?? refreshTab"
+      :use-channels-hidden-preference="false"
+      :display="isCommunity ? 'list' : ''"
+      :stable-item-keys="stableItemKeys"
+      :render-all-items-lazily="isElectron"
+      :youtube-style-shorts="youtubeStyleShorts"
+    />
+    <slot />
+    <FtAutoLoadNextPageWrapper
+      v-if="activeVideoList.length > 0 && filteredVideoList.length > dataLimit"
+      @load-next-page="increaseLimit"
+    >
+      <FtFlexBox>
+        <FtButton
+          :label="isCommunity ? $t('Subscriptions.Load More Posts') : $t('Subscriptions.Load More Videos')"
+          :icon="['fas', 'arrow-down']"
+          background-color="var(--primary-color)"
+          text-color="var(--text-with-main-color)"
+          @click="increaseLimit"
+        />
+      </FtFlexBox>
+    </FtAutoLoadNextPageWrapper>
   </div>
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 
 import FtAutoLoadNextPageWrapper from '../FtAutoLoadNextPageWrapper.vue'
 import FtButton from '../FtButton/FtButton.vue'
-import FtChannelBubble from '../FtChannelBubble/FtChannelBubble.vue'
 import FtElementList from '../FtElementList/FtElementList.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtLoader from '../FtLoader/FtLoader.vue'
-import FtRefreshWidget from '../FtRefreshWidget/FtRefreshWidget.vue'
+import FtSkeletonGrid from '../FtSkeletonGrid/FtSkeletonGrid.vue'
+import SubscriptionChannelErrors from '../SubscriptionChannelErrors/SubscriptionChannelErrors.vue'
 
 import store from '../../store/index'
 
-import { KeyboardShortcuts } from '../../../constants'
+import { useFeedRefreshShortcut } from '../../composables/useFeedRefreshShortcut'
+import { useKeepAliveEffectScope } from '../../composables/useKeepAliveEffectScope'
+import { useSubscriptionEntryVersion } from '../../composables/useSubscriptionEntryVersion'
+import { isHistoryEntryWatched } from '../../helpers/history'
+import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
+import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
+import {
+  applySubscriptionVideoLimit,
+  filterMembersOnlySubscriptionVideos
+} from '../../helpers/subscription-channels'
+import { useTabContext } from '../../tabs/TabContext'
+
+const { tabId } = useTabContext()
+const isElectron = process.env.IS_ELECTRON
+useKeepAliveEffectScope()
 
 const props = defineProps({
+  dataOverrides: {
+    type: Object,
+    default: null
+  },
+  subscriptionFeedType: {
+    type: String,
+    default: null
+  },
   isLoading: {
     type: Boolean,
     default: false
@@ -100,9 +142,10 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  errorChannels: {
+  /** The feeds whose channel errors are listed, by default the one of `refreshTab` */
+  errorFeeds: {
     type: Array,
-    default: () => []
+    default: null
   },
   attemptedFetch: {
     type: Boolean,
@@ -112,32 +155,113 @@ const props = defineProps({
     type: Number,
     default: 100
   },
-  lastRefreshTimestamp: {
-    type: String,
-    required: true
+  onlyShowNew: {
+    type: Boolean,
+    default: false
   },
-  title: {
+  trackGlobalRefresh: {
+    type: Boolean,
+    default: true
+  },
+  refreshTab: {
     type: String,
-    required: true
+    default: null
+  },
+  stableItemKeys: {
+    type: Boolean,
+    default: true
+  },
+  hasAdditionalContent: {
+    type: Boolean,
+    default: false
+  },
+  /** The refresh also covers sources besides the subscriptions, such as RSS feeds */
+  hasOtherRefreshSources: {
+    type: Boolean,
+    default: false
+  },
+  youtubeStyleShorts: {
+    type: Boolean,
+    default: false
+  },
+  /**
+   * Shows a skeleton instead of the empty state while an empty feed loads.
+   * Without it, the empty state stays visible during refreshes.
+   */
+  showLoadingPlaceholder: {
+    type: Boolean,
+    default: true
   }
 })
 
 const emit = defineEmits(['refresh'])
 
-const subscriptionLimit = sessionStorage.getItem('subscriptionLimit')
+const paginationKey = props.refreshTab ?? (props.onlyShowNew ? 'new' : 'subscriptions')
+const subscriptionLimitStorageKey = tabId
+  ? `Subscriptions/${tabId}/${paginationKey}/dataLimit`
+  : `subscriptionLimit/${paginationKey}`
+const subscriptionLimit = sessionStorage.getItem(subscriptionLimitStorageKey)
 
 const dataLimit = ref(subscriptionLimit !== null ? parseInt(subscriptionLimit) : props.initialDataLimit)
+const subscriptionEntryVersion = useSubscriptionEntryVersion()
 
 const activeVideoList = computed(() => {
+  let activeEntries
   if (filteredVideoList.value.length < dataLimit.value) {
-    return filteredVideoList.value
+    activeEntries = filteredVideoList.value
   } else {
-    return filteredVideoList.value.slice(0, dataLimit.value)
+    activeEntries = filteredVideoList.value.slice(0, dataLimit.value)
   }
+
+  // Only the rendered page needs field-level reactivity. Tracking every field
+  // in a large cached feed makes mounting the tab scale with the full cache.
+  return activeEntries.map(entry => reactive(entry))
 })
 
 const activeProfileHasSubscriptions = computed(() => {
   return store.getters.getActiveProfile.subscriptions.length > 0
+})
+
+const channelErrorFeeds = computed(() => props.errorFeeds ?? (props.refreshTab === null ? [] : [props.refreshTab]))
+
+const activeGroupIsEmpty = computed(() => {
+  return store.getters.getActiveSubscriptionGroup !== null && store.getters.getActiveGroupSubscriptions.length === 0
+})
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const subscriptionCacheLoadFailed = computed(() => store.getters.getSubscriptionCacheLoadFailed)
+
+function retrySubscriptionCacheLoad() {
+  store.dispatch('grabAllSubscriptions')
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const subscriptionFeedRefreshInProgress = computed(() => {
+  return store.getters.getSubscriptionFeedRefreshInProgress
+})
+
+const subscriptionFeedRefreshTab = computed(() => {
+  return store.getters.getSubscriptionFeedRefreshTab
+})
+
+const displayIsLoading = computed(() => {
+  const isRelevantGlobalRefresh = props.trackGlobalRefresh &&
+    subscriptionFeedRefreshInProgress.value &&
+    (props.refreshTab === null || subscriptionFeedRefreshTab.value === props.refreshTab)
+
+  return props.isLoading || isRelevantGlobalRefresh
+})
+
+const showsLoadingPlaceholder = computed(() => {
+  return props.showLoadingPlaceholder && displayIsLoading.value && activeVideoList.value.length === 0
+})
+
+const showsEmptyState = computed(() => {
+  // A failed cache load says nothing about whether the channels have content
+  return !subscriptionCacheLoadFailed.value &&
+    activeVideoList.value.length === 0 &&
+    !props.hasAdditionalContent &&
+    (props.showLoadingPlaceholder ? !displayIsLoading.value : store.getters.getSubscriptionCacheReady)
 })
 
 /** @type {import('vue').ComputedRef<boolean>} */
@@ -153,90 +277,90 @@ const hideWatchedSubs = computed(() => {
   return store.getters.getHideWatchedSubs
 })
 
-const onlyShowLatestFromChannel = computed(() => {
-  return store.getters.getOnlyShowLatestFromChannel
-})
+const globalVideoLimit = computed(() => (
+  store.getters.getOnlyShowLatestFromChannel
+    ? store.getters.getOnlyShowLatestFromChannelNumber
+    : null
+))
 
-const onlyShowLatestFromChannelNumber = computed(() => {
-  return store.getters.getOnlyShowLatestFromChannelNumber
-})
+const hideLiveStreams = computed(() => store.getters.getHideLiveStreams)
+const hideUpcomingPremieres = computed(() => store.getters.getHideUpcomingPremieres)
+const forbiddenTitles = computed(() => store.getters.getForbiddenTitlesToRemove)
+const restrictedPlaybackConfigured = computed(() => (
+  hasConfiguredRestrictedPlaybackAuthentication(store.getters)
+))
 
 const filteredVideoList = computed(() => {
-  if (props.isCommunity) {
-    return props.videoList
+  // Copy after in-place cache mutations so the rendered page receives fresh
+  // props even though the full cached array stays non-reactive.
+  let videoList = subscriptionEntryVersion.value === 0
+    ? props.videoList
+    : props.videoList.slice()
+
+  if (!props.isCommunity) {
+    videoList = filterMembersOnlySubscriptionVideos(
+      videoList,
+      store.getters.getActiveProfile.subscriptions,
+      restrictedPlaybackConfigured.value
+    )
   }
 
-  let videoList = props.videoList
+  // Subscription feeds intentionally ignore the general hidden-channel list.
+  // Active metadata filters must track in-place cache edits before pagination.
+  // Keep the unfiltered scan raw so large feeds avoid unnecessary tracking.
+  const trackMetadata = hideLiveStreams.value || hideUpcomingPremieres.value || forbiddenTitles.value.length > 0
+  videoList = videoList.filter(video => !isVideoHiddenByPreferences(trackMetadata ? reactive(video) : video, {
+    hideLiveStreams: hideLiveStreams.value,
+    hideUpcomingPremieres: hideUpcomingPremieres.value,
+    forbiddenTitles: forbiddenTitles.value
+  }))
 
-  if (hideWatchedSubs.value) {
-    videoList = videoList.filter((video) => {
-      return historyCacheById.value[video.videoId] === undefined
+  if (props.onlyShowNew) {
+    videoList = videoList.filter(entry => {
+      return entry.isNewInSubscriptionFeed === true &&
+        (entry.videoId == null || !isHistoryEntryWatched(historyCacheById.value[entry.videoId]))
     })
   }
 
-  if (onlyShowLatestFromChannel.value) {
-    const authors = new Map()
+  if (!props.isCommunity && hideWatchedSubs.value) {
     videoList = videoList.filter((video) => {
-      if (!video.authorId) {
-        return true
-      }
-
-      if (!authors.has(video.authorId)) {
-        authors.set(video.authorId, 1)
-        return true
-      } else {
-        const currentVideos = authors.get(video.authorId)
-
-        if (currentVideos < onlyShowLatestFromChannelNumber.value) {
-          authors.set(video.authorId, currentVideos + 1)
-          return true
-        }
-      }
-
-      return false
+      return video.videoId == null || !isHistoryEntryWatched(historyCacheById.value[video.videoId])
     })
+  }
+
+  if (!props.isCommunity) {
+    videoList = applySubscriptionVideoLimit(
+      videoList,
+      store.getters.getActiveProfile.subscriptions,
+      globalVideoLimit.value
+    )
   }
 
   return videoList
 })
 
+const hasNewContent = computed(() => {
+  return filteredVideoList.value.some(entry => {
+    return entry.isNewInSubscriptionFeed === true &&
+      (entry.videoId == null || !isHistoryEntryWatched(historyCacheById.value[entry.videoId]))
+  })
+})
+
 function increaseLimit() {
   dataLimit.value += props.initialDataLimit
-  sessionStorage.setItem('subscriptionLimit', dataLimit.value.toFixed(0))
+  sessionStorage.setItem(subscriptionLimitStorageKey, dataLimit.value.toFixed(0))
 }
 
-/**
- * @param {KeyboardEvent} event
- */
-function keyboardShortcutHandler(event) {
-  if (document.activeElement.classList.contains('ft-input')) {
-    return
-  }
-  // Avoid handling events due to user holding a key (not released)
-  // https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/repeat
-  if (event.repeat) { return }
-
-  switch (event.key.toLowerCase()) {
-    case 'f5':
-    case KeyboardShortcuts.APP.SITUATIONAL.REFRESH:
-      if (!props.isLoading && activeProfileHasSubscriptions.value) {
-        refresh()
-      }
-      break
-  }
-}
-
-onMounted(() => {
-  document.addEventListener('keydown', keyboardShortcutHandler)
-})
-
-onBeforeUnmount(() => {
-  document.removeEventListener('keydown', keyboardShortcutHandler)
-})
+useFeedRefreshShortcut(
+  () => !displayIsLoading.value && (activeProfileHasSubscriptions.value || props.hasOtherRefreshSources),
+  refresh
+)
 
 function refresh() {
   emit('refresh')
 }
+
+defineExpose({ hasNewContent })
 </script>
 
 <style scoped src="./SubscriptionsTabUi.css" />

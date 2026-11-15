@@ -1,6 +1,6 @@
 # Put the name of your locale in the same language
 Locale Name: 'Azərbaycanca'
-FreeTube: 'FreeTube'
+OpenTubeX: 'OpenTubeX'
 
 # Webkit Menu Bar
 File: 'Fayl'
@@ -245,7 +245,7 @@ Settings:
     Auto Load Next Page:
       Label: Növbəti Səhifəni Avtomatik Yüklə
       Tooltip: Əlavə səhifələri və şərhləri avtomatik yüklə.
-    Open Deep Links In New Window: FreeTube-a Ötürülən URL-ləri Yeni Pəncərədə Aç
+    Open Deep Links In New Window: OpenTubeX-a Ötürülən URL-ləri Yeni Pəncərədə Aç
     Minimize to system tray: Sistem sahəsinə qədər kiçilt
   Theme Settings:
     Main Color Theme:
@@ -364,7 +364,7 @@ Settings:
     Hide Side Bar Labels: Kənar Cərgə Etiketlərini Gizlət
     Theme Settings: Kolorit
     Expand Side Bar by Default: Kənar Cərgəni İlkin Olaraq Genişləndir
-    Hide FreeTube Header Logo: FreeTube Başlıq Simvolunu Gizlət
+    Hide OpenTubeX Header Logo: OpenTubeX Başlıq Simvolunu Gizlət
     Secondary Color Theme: İkinci Dərəcəli Rəng Koloriti
   Player Settings:
     Screenshot:
@@ -550,7 +550,7 @@ Settings:
     Search history file: Axtarış tarixçəsi faylı
     Settings File: Tənzimləmələr Faylı
     Export Subscriptions: Abunəlikləri İxrac Et
-    Export FreeTube: FreeTube-u İxrac et
+    Export FreeTube: OpenTubeX-u İxrac et
     Export YouTube: YouTube-u İxrac et
     Export NewPipe: NewPipe-ı İxrac et
     Import History: Tarixçəni İdxal et
@@ -589,7 +589,7 @@ Settings:
     Playlists have been successfully imported: 1/{total} pleylist uğurla idxal edildi | {count}/{total} pleylist uğurla idxal edildi
   Proxy Settings:
     Proxy Settings: Proksi
-    Proxy Warning: FreeTube tərkibində daxili proksi yoxdur, lakin cihazınızda icra olunan Tor və ya bəzi VPN-lərin təqdim etdiyi SOCKS5 kimi xarici proksiyə qoşula bilir. Aktivdirsə, proksi/Tor tənzimləmələrinin doğruluğunu yoxlayın, əks halda FreeTube hər hansı məlumat əldə edə bilməyəcək.
+    Proxy Warning: OpenTubeX tərkibində daxili proksi yoxdur, lakin cihazınızda icra olunan Tor və ya bəzi VPN-lərin təqdim etdiyi SOCKS5 kimi xarici proksiyə qoşula bilir. Aktivdirsə, proksi/Tor tənzimləmələrinin doğruluğunu yoxlayın, əks halda OpenTubeX hər hansı məlumat əldə edə bilməyəcək.
     Enable Tor / Proxy: Tor / Proksi-ni Aktivləşdir
     Proxy Protocol: Proksi Protokolu
     Proxy Host: Proksi Host
@@ -634,6 +634,7 @@ Channel:
       Newest: Ən yeni
       Oldest: Ən köhnə
       Most Popular: Ən Məşhur
+    This channel does not currently have any videos: Bu kanalda hazırda heç bir video yoxdur
     This channel has videos but none could be displayed, try fetching more: Bu kanalın videoları var, amma heç biri göstərilə bilmədi, daha çox əldə etməyə çalışın
   Playlists:
     Playlists: Pleylistlər
@@ -651,7 +652,7 @@ Channel:
   Your search results have returned 0 results: Axtarış nəticələriniz 0 nəticə verdi
   This channel does not exist: Bu kanal mövcud deyil
   This channel does not allow searching: Bu kanal axtarışa icazə vermir
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: Bu kanal yaş məhdudiyyətlidir və hazırda FreeTube-da baxıla bilməz.
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: Bu kanal yaş məhdudiyyətlidir və hazırda OpenTubeX-da baxıla bilməz.
   Channel Tabs: Kanal Cərgələri
   View All: Hamısına Bax
   Shorts:
@@ -688,7 +689,7 @@ Channel:
     View Full Post: Tam Posta Bax
     Reveal Answers: Cavabları Göstərin
     Hide Answers: Cavabları Gizlət
-    Video hidden by FreeTube: FreeTube tərəfindən gizlədilən video
+    Video hidden by OpenTubeX: OpenTubeX tərəfindən gizlədilən video
   Shows:
     Shows: Verilişlər
     This channel does not currently have any shows: Bu kanalın hazırda heç bir verilişi yoxdur
@@ -708,10 +709,10 @@ Video:
       shuffling playlists: pleylistləri qarışdırır
       looping playlists: pleylistləri təkrarlayır
   IP block: YouTube IP ünvanınızı video izləməkdən bloklayıb və ya bu video YouTube-un daxil olmamış istifadəçilər üçün məhdudlaşdırdığı yeniyetmələrin yer aldığı məzmun ehtiva edə bilər. Əgər bu IP blokudursa, başqa VPN və ya proksiyə keçməyə cəhd edin.
-  MembersOnly: Şəxsi üzvlük videoları Google ilə daxil olmağı və kanal sahibinə üzvlük ödənişi tələb etdiyi üçün FreeTube vasitəsilə izlənilə bilməz.
-  AgeRestricted: Yaş məhdudiyyəti olan videolar Google ilə daxil olmağı və yaşı təsdiqlənmiş YouTube hesabın istifadə etməyi tələb etdiyi üçün FreeTube vasitəsilə izlənilə bilməz.
-  DRMProtected: DRM ilə qorunan videolar xüsusi, qapalı mənbəli komponentlər tələb etdiyindən FreeTube vasitəsilə oynadıla bilmir. Əgər bu videoya baxmaq istəyirsinizsə, xahiş olunur DRM aktivləşdirilmiş veb brauzerdə rəsmi YouTube veb saytın istifadə edəsiniz.
-  Private: Şəxsi videolar Google ilə daxil olmağı və videonun mülkiyyət hüququnu tələb etdiyi üçün FreeTube-da izlənilə bilməz.
+  MembersOnly: Şəxsi üzvlük videoları Google ilə daxil olmağı və kanal sahibinə üzvlük ödənişi tələb etdiyi üçün OpenTubeX vasitəsilə izlənilə bilməz.
+  AgeRestricted: Yaş məhdudiyyəti olan videolar Google ilə daxil olmağı və yaşı təsdiqlənmiş YouTube hesabın istifadə etməyi tələb etdiyi üçün OpenTubeX vasitəsilə izlənilə bilməz.
+  DRMProtected: DRM ilə qorunan videolar xüsusi, qapalı mənbəli komponentlər tələb etdiyindən OpenTubeX vasitəsilə oynadıla bilmir. Əgər bu videoya baxmaq istəyirsinizsə, xahiş olunur DRM aktivləşdirilmiş veb brauzerdə rəsmi YouTube veb saytın istifadə edəsiniz.
+  Private: Şəxsi videolar Google ilə daxil olmağı və videonun mülkiyyət hüququnu tələb etdiyi üçün OpenTubeX-da izlənilə bilməz.
   More Options: Daha Çox Seçim
   Mark As Watched: İzlənmiş Kimi İşarələ
   Remove From History: Tarixçədən Sil
@@ -815,20 +816,20 @@ Video:
   Enable SponsorBlock on Channel: Kanalda SponsorBlock-u Aktivləşdir
   Disable SponsorBlock on Channel: Kanalda SponsorBlock-u Qapat
   AI: Sİ
-  'AI: Content was made with AI': 'Süni intellekt: Məzmun süni intellektlə hazırlanmışdır'
+  AI-generated content: "Süni intellekt: Məzmun süni intellektlə hazırlanmışdır"
   How this was made: Bu necə hazırlanıb
   Reload Page: Səhifəni Yenidən Yüklə
 Tooltips:
   General Settings:
-    Preferred API Backend: FreeTube-un məlumatları əldə etmək üçün istifadə edəcəyi arxa uc sistemini seçin. Yerli API daxili çıxarıcıdır. Invidious API isə Invidious serverinə qoşulmağı tələb edir.
-    Fallback to Non-Preferred Backend on Failure: Üstünlük verdiyiniz API-də problem yarandıqda, aktiv edilibsə FreeTube avtomatik olaraq ehtiyat üsul kimi digər API-ni istifadə etməyə cəhd edəcək.
-    Thumbnail Preference: FreeTube üzrə bütün miniatürlər standart miniatür əvəzinə videodan bir kadrla əvəz olunacaq, bulanıqlaşdırılacaq və ya gizlədiləcək.
-    Invidious Instance: FreeTube-un API sorğuları üçün qoşulacağı Invidious serveri. Bu serveri standart olaraq təyin etməsəniz, bu seçim üçün dəyişikliklər yalnız cari pəncərəyə tətbiq olunacaq.
+    Preferred API Backend: OpenTubeX-un məlumatları əldə etmək üçün istifadə edəcəyi arxa uc sistemini seçin. Yerli API daxili çıxarıcıdır. Invidious API isə Invidious serverinə qoşulmağı tələb edir.
+    Fallback to Non-Preferred Backend on Failure: Üstünlük verdiyiniz API-də problem yarandıqda, aktiv edilibsə OpenTubeX avtomatik olaraq ehtiyat üsul kimi digər API-ni istifadə etməyə cəhd edəcək.
+    Thumbnail Preference: OpenTubeX üzrə bütün miniatürlər standart miniatür əvəzinə videodan bir kadrla əvəz olunacaq, bulanıqlaşdırılacaq və ya gizlədiləcək.
+    Invidious Instance: OpenTubeX-un API sorğuları üçün qoşulacağı Invidious serveri. Bu serveri standart olaraq təyin etməsəniz, bu seçim üçün dəyişikliklər yalnız cari pəncərəyə tətbiq olunacaq.
     Region for Trending: Trendlər bölgəsi baxmaq istədiyiniz trend videoların hansı ölkəyə aid olacağını seçməyə sizə imkan verir.
     External Link Handling: |
-      FreeTube-da açıla bilməyən linkə kliklədikdə standart davranışı seçin.
-      İlkin olaraq, FreeTube kliklədiyiniz linki standart brauzerinizdə açacaq.
-    Open Deep Links In New Window: Brauzer yönləndirmə əlavələri və ya əmr xətti arqumentləri ilə FreeTube-a ötürülən URL-lər yeni pəncərədə açılır.
+      OpenTubeX-da açıla bilməyən linkə kliklədikdə standart davranışı seçin.
+      İlkin olaraq, OpenTubeX kliklədiyiniz linki standart brauzerinizdə açacaq.
+    Open Deep Links In New Window: Brauzer yönləndirmə əlavələri və ya əmr xətti arqumentləri ilə OpenTubeX-a ötürülən URL-lər yeni pəncərədə açılır.
   Player Settings:
     Proxy Videos Through Invidious: Videoları YouTube-a birbaşa qoşulmaq əvəzinə təqdim etmək üçün Invidious-a qoşulacaq.
     Default Media Format: Video oynadılarkən istifadə olunan formatları təyin et. DASH formatları daha yüksək keyfiyyətdə oynadıla bilir. Köhnə formatlar maksimum 360p ilə məhdudlaşır, lakin daha az şəbəkə trafiki istifadə edir. Səs formatları isə yalnız səsdən ibarət yayımlardır.
@@ -836,7 +837,7 @@ Tooltips:
     Skip by Scrolling Over Video Player: MPV üslubundakı kimi, videoda ötürmək üçün siçan çarxın istifadə et.
   External Player Settings:
     External Player: 'Xarici oynadıcı seçildikdə, videonu (dəstəklənirsə, pleylisti) xarici oynadıcıda açmaq üçün miniatür üzərində nişan göstəriləcək. Xəbərdarlıq: Invidious tənzimləmələri xarici oynadıcılara şamil olunmur.'
-    Custom External Player Executable: İlkin olaraq FreeTube seçilmiş xarici oynadıcının PATH mühit dəyişəni vasitəsilə tapıla biləcəyini fərz edir. Ehtiyac olarsa, burada fərdi yol təyin edilə bilər.
+    Custom External Player Executable: İlkin olaraq OpenTubeX seçilmiş xarici oynadıcının PATH mühit dəyişəni vasitəsilə tapıla biləcəyini fərz edir. Ehtiyac olarsa, burada fərdi yol təyin edilə bilər.
     Ignore Warnings: Cari xarici oynadıcı mövcud fəaliyyəti (məsələn, pleylisti tərsinə çevirmək və s.) dəstəkləmədikdə xəbərdarlıqları gizlət.
     Ignore Default Arguments: Video URL-indən başqa xarici oynadıcıya heç bir standart arqument (məsələn, oynatma sürəti, pleylist URL-si və s.) göndərməyin. Fərdi arqumentlər yenə də ötürüləcək.
     Custom External Player Arguments: Xarici oynadıcıya ötürülməsini istədiyiniz istənilən fərdi əmr xətti arqumentləri.
@@ -844,11 +845,11 @@ Tooltips:
   Distraction Free Settings:
     Hide Channels: Kanalın bütün videolarını, pleylistlərini və kanalın özünü axtarış, trendlər, ən məşhur və tövsiyə olunan bölmələrdə gizlətmək üçün kanal ID-sini daxil edin. Daxil edilən kanal ID-si tam uyğun olmalı və böyük-kiçik hərflərə həssas olmalıdır.
     Hide Subscriptions Live: Bu tənzimləmə "{settingsSection}" bölməsinin "{subsection}" alt bölməsindəki tətbiqmiqyaslı "{appWideSetting}" tənzimləməsi tərəfindən əvəzlənir
-    Hide Videos, Playlists and Channels Containing Text: Tarixçə, Pleylistləriniz və pleylistləriniz daxilindəki videolar istisna olmaqla, FreeTube üzrə orijinal başlığında həmin ifadə keçən bütün videoları, pleylistləri və kanalları gizlətmək üçün bir söz, söz hissəciyi və ya ifadə (böyük-kiçik hərfə həssas deyil) daxil edin.
+    Hide Videos, Playlists and Channels Containing Text: Tarixçə, Pleylistləriniz və pleylistləriniz daxilindəki videolar istisna olmaqla, OpenTubeX üzrə orijinal başlığında həmin ifadə keçən bütün videoları, pleylistləri və kanalları gizlətmək üçün bir söz, söz hissəciyi və ya ifadə (böyük-kiçik hərfə həssas deyil) daxil edin.
     Hide Videos on Watch: Baxılmış videoları Abunəlik və Kanal səhifələrindəki Videolar, Shorts və Canlı panellərindən gizlədir. Bu, Kanal səhifələrindəki Əsas səhifə bölməsinə təsir etmir
   Subscription Settings:
-    Fetch Feeds from RSS: Aktiv edildikdə, FreeTube abunəlik lentinizi əldə etmək üçün standart üsul əvəzinə RSS istifadə edəcək. RSS daha sürətlidir və IP bloklanmasının qarşısını alır, lakin video müddəti, canlı yayım statusu və ya postlar kimi müəyyən məlumatları təmin etmir
-    Fetch Automatically: Aktiv edildikdə, FreeTube başlanğıcda və yeni pəncərə açıldıqda abunəlik lentinizi avtomatik əldə edəcək.
+    Fetch Feeds from RSS: Aktiv edildikdə, OpenTubeX abunəlik lentinizi əldə etmək üçün standart üsul əvəzinə RSS istifadə edəcək. RSS daha sürətlidir və IP bloklanmasının qarşısını alır, lakin video müddəti, canlı yayım statusu və ya postlar kimi müəyyən məlumatları təmin etmir
+    Fetch Automatically: Aktiv edildikdə, OpenTubeX başlanğıcda və yeni pəncərə açıldıqda abunəlik lentinizi avtomatik əldə edəcək.
   Experimental Settings:
     Replace HTTP Cache: Electron-un disklə işləyən HTTP keşini qapadır və fərdi yaddaş içi təsvir keşini aktivləşdirir. RAM istifadəsinin artmasına səbəb olacaq.
     Disable Hardware Acceleration: GPU aparat sürətləndirməsini qapadır. Qrafik problemləri düzəldə bilər, lakin çox güman ki, məhsuldarlığı aşağı salacaq.
@@ -1008,7 +1009,7 @@ About:
   Downloads / Changelog: Yükləmələr / Dəyişiklik Jurnalı
   GitHub releases: GitHub Buraxılışları
   Help: Kömək
-  FreeTube Wiki: FreeTube Wiki
+  OpenTubeX Wiki: OpenTubeX Wiki
   FAQ: FAQ
   Discussions: Müzakirələr
   Report a problem: Problemi bildir
@@ -1021,7 +1022,7 @@ About:
   room rules: otaq qaydaları
   Translate: Tərcümə et
   Credits: Müəlliflər
-  FreeTube is made possible by {creditsPageLink}: FreeTube {creditsPageLink} dəstəyi ilə yaradılmışdır
+  OpenTubeX is made possible by {creditsPageLink}: OpenTubeX {creditsPageLink} dəstəyi ilə yaradılmışdır
   these people and projects: bu şəxslər və layihələr
   Donate: İanə et
 Keys:

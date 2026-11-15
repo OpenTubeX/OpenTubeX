@@ -1,0 +1,31 @@
+/* Shaka's control tooltips match the app's title tooltips (titleTooltips.css). */
+:deep(.shaka-tooltips-on > :is(.shaka-tooltip, .shaka-tooltip-status):is(:hover, :focus-visible, :active)::after),
+:deep(.shaka-tooltips-on > .ft-volume-control-group > .shaka-mute-button:is(:hover, :focus-visible, :active)::after) {
+  box-sizing: border-box;
+  min-block-size: 24px;
+  padding-block: 4px;
+  padding-inline: 8px;
+  border-radius: var(--shape-corner-extra-small);
+  background: var(--primary-text-color);
+  color: var(--card-bg-color);
+  font-family: var(--app-font-family);
+  font-size: 12px;
+  letter-spacing: 0.4px;
+  line-height: 16px;
+  pointer-events: none;
+  transform-origin: bottom center;
+  animation: tooltip-open var(--motion-fast-effects);
+}
+
+@keyframes tooltip-open {
+  from {
+    opacity: 0;
+    scale: 0.8;
+  }
+}
+
+/* Line the presets' title tooltips up with Shaka's, which end 62px above the
+   bottom of the 48px row in which the 26px presets are centered. */
+:deep(.ft-quick-playback-rate-bar) {
+  --title-tooltip-gap: 25px;
+}

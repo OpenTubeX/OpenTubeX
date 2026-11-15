@@ -1,0 +1,210 @@
+{
+  "contentId": "sampleCollab",
+  "contentType": "LOCKUP_CONTENT_TYPE_VIDEO",
+  "contentImage": {
+    "thumbnailViewModel": {
+      "image": {
+        "sources": [
+          {
+            "url": "https://i.ytimg.com/vi/sampleCollab/hqdefault.jpg",
+            "width": 336,
+            "height": 188
+          }
+        ]
+      },
+      "overlays": [
+        {
+          "thumbnailBottomOverlayViewModel": {
+            "badges": [
+              {
+                "thumbnailBadgeViewModel": {
+                  "text": "12:34",
+                  "badgeStyle": "THUMBNAIL_OVERLAY_BADGE_STYLE_DEFAULT"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "lockupMetadataViewModel": {
+      "title": {
+        "content": "Sample collaboration"
+      },
+      "image": {
+        "avatarStackViewModel": {
+          "avatars": [
+            {
+              "avatarViewModel": {
+                "image": {
+                  "sources": [
+                    {
+                      "url": "https://yt3.ggpht.com/sample-one=s68-c-k-c0x00ffffff-no-rj"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "avatarViewModel": {
+                "image": {
+                  "sources": [
+                    {
+                      "url": "https://yt3.ggpht.com/sample-two=s88-c-k-c0x00ffffff-no-rj"
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "rendererContext": {
+            "accessibilityContext": {
+              "label": "Collaboration channels"
+            },
+            "commandContext": {
+              "onTap": {
+                "innertubeCommand": {
+                  "showDialogCommand": {
+                    "panelLoadingStrategy": {
+                      "inlineContent": {
+                        "dialogViewModel": {
+                          "header": {
+                            "dialogHeaderViewModel": {
+                              "headline": {
+                                "content": "Collaborators"
+                              }
+                            }
+                          },
+                          "customContent": {
+                            "listViewModel": {
+                              "listItems": [
+                                {
+                                  "listItemViewModel": {
+                                    "title": {
+                                      "content": "Channel One"
+                                    },
+                                    "subtitle": {
+                                      "content": "‎⁨@channelone⁩ • ⁨1.2M subscribers⁩"
+                                    },
+                                    "leadingAccessory": {
+                                      "avatarViewModel": {
+                                        "image": {
+                                          "sources": [
+                                            {
+                                              "url": "https://yt3.ggpht.com/sample-one=s68-c-k-c0x00ffffff-no-rj"
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    },
+                                    "rendererContext": {
+                                      "commandContext": {
+                                        "onTap": {
+                                          "innertubeCommand": {
+                                            "commandMetadata": {
+                                              "webCommandMetadata": {
+                                                "url": "/channel/UC-sample-channel-one",
+                                                "webPageType": "WEB_PAGE_TYPE_CHANNEL"
+                                              }
+                                            },
+                                            "browseEndpoint": {
+                                              "browseId": "UC-sample-channel-one"
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                {
+                                  "listItemViewModel": {
+                                    "title": {
+                                      "content": "Channel Two"
+                                    },
+                                    "subtitle": {
+                                      "content": "‎⁨@channeltwo⁩ • ⁨345K subscribers⁩"
+                                    },
+                                    "leadingAccessory": {
+                                      "avatarViewModel": {
+                                        "image": {
+                                          "sources": [
+                                            {
+                                              "url": "https://yt3.ggpht.com/sample-two=s88-c-k-c0x00ffffff-no-rj"
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    },
+                                    "rendererContext": {
+                                      "commandContext": {
+                                        "onTap": {
+                                          "innertubeCommand": {
+                                            "commandMetadata": {
+                                              "webCommandMetadata": {
+                                                "url": "/channel/UC-sample-channel-two",
+                                                "webPageType": "WEB_PAGE_TYPE_CHANNEL"
+                                              }
+                                            },
+                                            "browseEndpoint": {
+                                              "browseId": "UC-sample-channel-two"
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "metadata": {
+        "contentMetadataViewModel": {
+          "metadataRows": [
+            {
+              "metadataParts": [
+                {
+                  "text": {
+                    "content": "Channel One"
+                  }
+                },
+                {
+                  "text": {
+                    "content": "and Channel Two "
+                  }
+                }
+              ]
+            },
+            {
+              "metadataParts": [
+                {
+                  "text": {
+                    "content": "67K"
+                  },
+                  "accessibilityLabel": "67 thousand views"
+                },
+                {
+                  "text": {
+                    "content": "2w ago"
+                  },
+                  "accessibilityLabel": "2 weeks ago"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  }
+}

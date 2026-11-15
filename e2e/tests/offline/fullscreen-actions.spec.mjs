@@ -1,0 +1,175 @@
+import { defaultThemeClass, test, expect, setPlayerFullscreen, setWindowSize, openInterfaceCustomizer } from '../../helpers/app.mjs'
+import { openMockedVideo } from '../../helpers/player.mjs'
+import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
+
+for (const { uiScale, width, height, colorScheme } of [
+  { uiScale: 125, width: 420, height: 800, colorScheme: 'light' },
+]) {
+  test.describe(`fullscreen actions at ${uiScale}% scale`, () => {
+    test.use({ seed: { settings: { uiScale, videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true } } })
+
+    test('customizes, persists and uses the selected fullscreen actions', async ({ app, page }, testInfo) => {
+      await setWindowSize(app, page, { width, height })
+      await page.emulateMedia({ colorScheme })
+      await expect(page.locator('body')).toHaveClass(defaultThemeClass(colorScheme))
+      await openInterfaceCustomizer(page, 'fullscreen actions')
+      const rows = page.locator('.selectedAction')
+      await expect(rows).toHaveCount(9)
+      await page.locator('.interfaceCustomizer').screenshot({ path: testInfo.outputPath(`customizer-${colorScheme}.png`) })
+      while (await rows.count()) {
+        await rows.last().getByRole('button', { name: /^Remove / }).click()
+      }
+      await expect(page.getByText('No fullscreen actions selected', { exact: true })).toBeVisible()
+      for (const name of ['Share Video', 'Comments']) {
+        await page.getByRole('button', { name: 'Add action', exact: true }).click()
+        const menu = page.getByRole('menu', { name: 'Add action', exact: true })
+        await menu.getByRole('menuitem', { name, exact: true }).click()
+        await menu.getByRole('menuitem').first().press('Escape')
+      }
+      await page.getByRole('button', { name: 'Move Comments up', exact: true }).click()
+      const selectedIds = () => rows.evaluateAll(elements => elements.map(element => element.dataset.fullscreenActionId))
+      await expect.poll(selectedIds).toEqual(['comments', 'share'])
+      // The new order shows before it's saved. Saving it again finishes after
+      // the queued saves, so the reload reads it back.
+      await page.evaluate(() => window.$store.dispatch('updateFullscreenActions', window.$store.getters.getFullscreenActions))
+      await page.reload()
+      await openInterfaceCustomizer(page, 'fullscreen actions')
+      await expect.poll(selectedIds).toEqual(['comments', 'share'])
+      await page.locator('.settingsCloseButton').click()
+
+      await mockPlayableWatchPage(app, page)
+      if (await page.getByRole('button', { name: 'Open Search Container', exact: true }).isVisible()) {
+        await page.getByRole('button', { name: 'Open Search Container', exact: true }).click()
+      }
+      await openMockedVideo(page)
+      await setPlayerFullscreen(page, true)
+      const player = page.locator('.ftVideoPlayer')
+      await player.locator('video').evaluate(element => element.pause())
+      const dock = player.locator('.fullscreenActions')
+      await expect(dock).toBeVisible()
+      await expect.poll(() => dock.locator('.fullscreenActionsContent > *').evaluateAll(elements => elements.map(element => (
+        element.classList.contains('fullscreenCommentsToggle') ? 'comments' : 'share'
+      )))).toEqual(['comments', 'share'])
+      await player.hover({ position: { x: 20, y: 20 } })
+      await dock.getByRole('button', { name: 'Comments', exact: true }).click()
+      await expect(player.locator('.fullscreenCommentsOverlay.open')).toBeVisible()
+      // Opening the panel slides the dock; let that movement finish before clicking again.
+      await dock.evaluate(async element => {
+        await Promise.all(element.getAnimations().map(animation => animation.finished.catch(() => {})))
+      })
+      await dock.getByRole('button', { name: 'Comments', exact: true }).click()
+      await expect(player.locator('.fullscreenCommentsOverlay.open')).toHaveCount(0)
+      await dock.screenshot({ path: testInfo.outputPath(`actions-${colorScheme}.png`) })
+      await page.evaluate(async () => {
+        const store = window.$store
+        await store.dispatch('updateFullscreenActions', ['liveChat'])
+      })
+      await expect(dock).toHaveCount(0)
+      await expect(player).toHaveAttribute('data-action-dock-visible', 'false')
+      await page.evaluate(async () => {
+        const store = window.$store
+        await store.dispatch('updateFullscreenActions', [])
+      })
+      await expect(dock).toHaveCount(0)
+      await setPlayerFullscreen(page, false)
+      await expect(page.locator('.watchVideoInfo .shareButton')).toBeVisible()
+    })
+
+    test('clamps customization scrolling after removal and responsive resize', async ({ app, page }) => {
+      await setWindowSize(app, page, { width: 375, height: 600 })
+      await openInterfaceCustomizer(page, 'fullscreen actions')
+      const rows = page.locator('.selectedAction')
+      const scroller = page.locator('.customizerEditorScroll')
+      const expectAtContentEnd = async () => {
+        await expect.poll(() => scroller.evaluate(element => {
+          const content = element.querySelector('.customizerEditor')
+          const contentEnd = content.getBoundingClientRect().bottom + Number.parseFloat(getComputedStyle(element).paddingBottom)
+          const viewportEnd = element.getBoundingClientRect().bottom
+          return Math.abs(Math.max(-element.scrollTop, contentEnd - viewportEnd)) * devicePixelRatio
+        })).toBeLessThanOrEqual(2)
+      }
+      const scrollToBottom = async () => {
+        await scroller.hover()
+        await page.mouse.wheel(0, 10000)
+        await expectAtContentEnd()
+      }
+      const expectValidScroll = async () => {
+        await expect.poll(() => scroller.evaluate(element => {
+          const content = element.querySelector('.customizerEditor')
+          const contentEnd = content.getBoundingClientRect().bottom + Number.parseFloat(getComputedStyle(element).paddingBottom)
+          const viewportEnd = element.getBoundingClientRect().bottom
+          const maximum = Math.max(0, contentEnd - viewportEnd + element.scrollTop)
+          const tolerance = 2 / devicePixelRatio
+          const hasOverflow = maximum > tolerance
+          const thumbVisible = element.querySelector(':scope > .os-scrollbar-vertical').classList.contains('os-scrollbar-visible')
+          return element.scrollTop >= 0 && element.scrollTop <= maximum + tolerance && thumbVisible === hasOverflow
+        })).toBe(true)
+      }
+      await scrollToBottom()
+      await setWindowSize(app, page, { width: 900, height: 650 })
+      await expectValidScroll()
+      await setWindowSize(app, page, { width: 375, height: 600 })
+      while (await rows.count()) {
+        await scrollToBottom()
+        await rows.last().getByRole('button', { name: /^Remove / }).click()
+        await expectValidScroll()
+      }
+      await expect(page.getByText('No fullscreen actions selected', { exact: true })).toBeVisible()
+    })
+  })
+}
+
+test.describe('fullscreen action dock spacing', () => {
+  test.use({ seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true, fullscreenActions: ['comments'] } } })
+
+  test('keeps the scrollbar gutter beside actions while the dock scrolls', { tag: '@scale' }, async ({ app, page }) => {
+    // Portrait fullscreen uses a bottom panel, so use a short phone-like landscape window for the side dock to overflow.
+    await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setMinimumSize(0, 0))
+    await setWindowSize(app, page, { width: 400, height: 240 })
+    await page.evaluate(() => window.$store.dispatch('updateFullscreenActions', ['comments', 'queue', 'playlist', 'share', 'addToPlaylist', 'quickBookmark', 'download', 'recommendations']))
+    await mockPlayableWatchPage(app, page)
+    if (await page.getByRole('button', { name: 'Open Search Container', exact: true }).isVisible()) {
+      await page.getByRole('button', { name: 'Open Search Container', exact: true }).click()
+    }
+    await openMockedVideo(page)
+    await setPlayerFullscreen(page, true)
+    const player = page.locator('.ftVideoPlayer')
+    await player.locator('video').evaluate(element => element.pause())
+    const dock = player.locator('.fullscreenActions')
+    await expect(dock).toBeVisible()
+    await dock.getByRole('button', { name: 'Comments', exact: true }).click()
+    await expect(player.locator('.fullscreenCommentsOverlay.open')).toBeVisible()
+    await expect.poll(() => dock.evaluate(element => {
+      const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+      if (!scrollbar || scrollbar.classList.contains('os-scrollbar-unusable')) return 'not scrollable'
+      const trackStart = scrollbar.querySelector('.os-scrollbar-track').getBoundingClientRect().left
+      const actionsEnd = Math.max(...[...element.querySelectorAll('.fullscreenActionsContent > *')].map(action => action.getBoundingClientRect().right))
+      return actionsEnd <= trackStart + 0.5
+    })).toBe(true)
+  })
+})
+
+test.describe('fullscreen action dock layering', () => {
+  test.use({ seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true, fullscreenActions: ['addToPlaylist'] } } })
+
+  test('drops behind the seek preview and opens its popover outside the dock', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    await setPlayerFullscreen(page, true)
+    const player = page.locator('.ftVideoPlayer')
+    await player.locator('video').evaluate(element => element.pause())
+    const dock = player.locator('.fullscreenActions')
+    await expect(dock).toBeVisible()
+    await expect(dock).toHaveCSS('z-index', '4')
+
+    await player.hover({ position: { x: 20, y: 20 } })
+    await player.locator('.shaka-seek-bar-container').hover()
+    await expect(dock).toHaveCSS('z-index', '0')
+    await player.hover({ position: { x: 20, y: 20 } })
+    await expect(dock).toHaveCSS('z-index', '4')
+
+    await dock.getByRole('button', { name: 'Add to playlist', exact: true }).click()
+    await expect(player.getByRole('dialog', { name: 'Add to playlist' })).toBeVisible()
+    await expect(dock.locator('.iconDropdown')).toHaveCount(0)
+  })
+})

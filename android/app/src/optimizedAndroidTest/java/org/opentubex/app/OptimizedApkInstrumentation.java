@@ -1,0 +1,536 @@
+package org.opentubex.app;
+
+import android.accessibilityservice.AccessibilityServiceInfo;
+import android.app.Activity;
+import android.app.Instrumentation;
+import android.app.NotificationManager;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.ShortcutManager;
+import android.os.Bundle;
+import android.os.SystemClock;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityNodeInfo;
+import android.webkit.WebView;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import java.io.File;
+import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+
+/** Exercises the shipped APK without depending on classes that R8 can inline or remove. */
+public class OptimizedApkInstrumentation extends Instrumentation {
+    private volatile Activity resumedActivity;
+    private boolean permissionsOnly;
+
+    @Override public void callActivityOnResume(Activity activity) {
+        super.callActivityOnResume(activity);
+        resumedActivity = activity;
+    }
+
+    @Override public void onCreate(Bundle arguments) {
+        super.onCreate(arguments);
+        permissionsOnly = arguments != null && "true".equals(arguments.getString("permissionsOnly"));
+        start();
+    }
+
+    @Override public void onStart() {
+        Bundle result = new Bundle();
+        Activity activity = null;
+        File fixture = new File(getTargetContext().getCacheDir(), "optimized-apk-demo.webm");
+        File converted = new File(getTargetContext().getCacheDir(), "optimized-apk-demo.mp3");
+        int resultCode = Activity.RESULT_CANCELED;
+        try {
+            Intent intent = new Intent().setClassName(getTargetContext(), "org.opentubex.app.MainActivity")
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            activity = startActivitySync(intent);
+            AtomicReference<WebView> found = new AtomicReference<>();
+            Activity launched = activity;
+            runOnMainSync(() -> found.set(findWebView(launched.getWindow().getDecorView())));
+            WebView web = found.get();
+            check(web != null, "Main activity has a WebView");
+            await(web, "document.readyState === 'complete' && !!window.Capacitor");
+            check(call(web, "App", "getInfo", new JSONObject()).getString("id")
+                .equals(getTargetContext().getPackageName()), "Generated Capacitor plugins survive shrinking");
+            String permission = call(web, "LocalNotifications", "checkPermissions", new JSONObject()).getString("display");
+            check(Arrays.asList("granted", "denied", "prompt", "prompt-with-rationale").contains(permission),
+                "Notification permission metadata survives shrinking: " + permission);
+            report("Bridge passed");
+            if (permissionsOnly) {
+                result.putString("stream", "\nOK (startup and notification permissions)\n");
+                resultCode = Activity.RESULT_OK;
+                return;
+            }
+
+            // WebView detects fullscreen support from WebChromeClient overrides,
+            // including the empty onHideCustomView method that R8 can remove.
+            check("true".equals(evaluate(web, "document.fullscreenEnabled")), "WebView advertises fullscreen support");
+            checkLauncherShortcuts(web);
+            report("Launcher shortcuts passed");
+            checkPluginCallbacks(web, permission);
+            report("Plugin callbacks passed");
+
+            JSONObject info = call(web, "YtDlp", "info", new JSONObject());
+            for (String binary : new String[] { "ytDlp", "ffmpeg", "ffprobe" }) {
+                check(info.getJSONObject(binary).getBoolean("available"), binary + " is available");
+                check(!info.getJSONObject(binary).getString("version").isEmpty(), binary + " executes");
+            }
+            try (var input = getContext().getAssets().open("demo.webm")) {
+                Files.copy(input, fixture.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            }
+            check(execute("qjs", "--eval", "print(1 + 1)").trim().equals("2"), "QuickJS executes without its static archive");
+            File installation = new File(getTargetContext().getNoBackupFilesDir(), "youtubedl-android");
+            File script = YtDlpCodeCache.prepare(new File(installation, "yt-dlp/yt-dlp"),
+                new File(installation, "yt-dlp-code"));
+            check(execute("python", script.getPath(), "--enable-file-urls", "--dump-single-json", fixture.toURI().toString())
+                .contains("optimized-apk-demo"), "Python and yt-dlp extract local media");
+            execute("ffmpeg", "-y", "-i", fixture.getPath(), converted.getPath());
+            check(converted.length() > 0, "FFmpeg converts audio");
+            check(Double.parseDouble(execute("ffprobe", "-v", "error", "-show_entries", "format=duration",
+                "-of", "default=noprint_wrappers=1:nokey=1", converted.getPath()).trim()) > 0, "FFprobe reads converted audio");
+            report("Runtimes passed");
+
+            try {
+                evaluate(web, "(() => { const video = document.createElement('video'); " +
+                    "video.id = 'optimized-video'; video.muted = true; " +
+                    "video.src = Capacitor.convertFileSrc(" + JSONObject.quote(fixture.getAbsolutePath()) + "); " +
+                    "document.body.append(video); video.play(); })()");
+                await(web, "document.querySelector('#optimized-video')?.currentTime > 0.25");
+            } finally { evaluate(web, "document.querySelector('#optimized-video')?.remove()"); }
+            checkFullscreen(web);
+            report("Playback passed");
+
+            JSONObject refresh = call(web, "SubscriptionRefresh", "start", new JSONObject()
+                .put("title", "Optimized APK test").put("cancelLabel", "Cancel"));
+            check(refresh.getBoolean("acquired"), "Subscription refresh starts");
+            try {
+                // A renderer refresh moves into a foreground service with a notification
+                // only while the app is out of view.
+                resumedActivity = null;
+                getContext().startActivity(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                NotificationManager notifications = getTargetContext().getSystemService(NotificationManager.class);
+                long deadline = SystemClock.elapsedRealtime() + 15000;
+                boolean notified;
+                do {
+                    notified = Arrays.stream(notifications.getActiveNotifications())
+                        .anyMatch(notification -> "Optimized APK test".contentEquals(
+                            notification.getNotification().extras.getCharSequence("android.title", "")));
+                    if (notified) break;
+                    Thread.sleep(100);
+                } while (SystemClock.elapsedRealtime() < deadline);
+                check(notified, "The background refresh service posts its notification");
+            } finally {
+                getTargetContext().startActivity(intent);
+                long deadline = SystemClock.elapsedRealtime() + 15000;
+                while (resumedActivity != activity && SystemClock.elapsedRealtime() < deadline) Thread.sleep(100);
+                check(resumedActivity == activity, "Main activity returns to the foreground");
+                call(web, "SubscriptionRefresh", "finish", new JSONObject().put("token", refresh.getString("token")));
+            }
+            report("Background refresh passed");
+
+            // Pairing scans QR codes from the WebView camera. Capacitor's WebChromeClient
+            // must turn the WebView request into Android's camera permission prompt.
+            evaluate(web, "window.optimizedScan = 'pending'; navigator.mediaDevices.getUserMedia({video: {facingMode: 'environment'}})" +
+                ".then(stream => { window.optimizedScan = stream.getVideoTracks().length > 0 ? 'opened' : 'no video';" +
+                " stream.getTracks().forEach(track => track.stop()) }, error => window.optimizedScan = error.name)");
+            if (getTargetContext().checkSelfPermission(android.Manifest.permission.CAMERA)
+                    != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                clickPermissionAllow();
+            }
+            await(web, "window.optimizedScan === 'opened'");
+            checkPlayerFullscreen(web, fixture);
+            report("Player fullscreen passed");
+            result.putString("stream", "\nOK (8 checks: bridge, shortcuts, callbacks, runtimes, playback, refresh, scanner, fullscreen)\n");
+            resultCode = Activity.RESULT_OK;
+        } catch (Throwable failure) {
+            result.putString("stream", "\nFAILURE\n" + android.util.Log.getStackTraceString(failure));
+        } finally {
+            if (activity != null) {
+                Activity opened = activity;
+                runOnMainSync(opened::finish);
+                // Let activity teardown run before instrumentation ends the process.
+                waitForIdleSync();
+            }
+            fixture.delete();
+            converted.delete();
+            finish(resultCode, result);
+        }
+    }
+
+    private void checkLauncherShortcuts(WebView web) throws Exception {
+        // These names come from the renderer, so Java resource references in
+        // this test would hide a resource-shrinking regression.
+        String[] pages = { "subscriptions", "userplaylists", "history", "downloads" };
+        String[] icons = { "subscriptions", "playlists", "history", "downloads" };
+        JSONArray shortcuts = new JSONArray();
+        for (int index = 0; index < pages.length; index++) {
+            shortcuts.put(new JSONObject().put("id", pages[index]).put("title", pages[index])
+                .put("androidIcon", "ic_shortcut_" + icons[index]));
+        }
+        ShortcutManager manager = getTargetContext().getSystemService(ShortcutManager.class);
+        var previous = manager.getDynamicShortcuts();
+        try {
+            call(web, "AppShortcuts", "set", new JSONObject().put("shortcuts", shortcuts));
+            var registered = manager.getDynamicShortcuts();
+            for (int index = 0; index < pages.length; index++) {
+                String page = pages[index];
+                check(registered.stream().anyMatch(shortcut -> shortcut.getId().equals(page)),
+                    "Launcher shortcut is registered: " + page);
+                int resource = getTargetContext().getResources().getIdentifier("ic_shortcut_" + icons[index],
+                    "drawable", getTargetContext().getPackageName());
+                check(resource != 0 && getTargetContext().getDrawable(resource) != null,
+                    "Launcher shortcut icon survives resource shrinking: " + page);
+            }
+        } finally { manager.setDynamicShortcuts(previous); }
+    }
+
+    private void checkFullscreen(WebView web) throws Exception {
+        evaluate(web, "(() => { const target = document.createElement('div'); " +
+            "target.id = 'optimized-fullscreen'; " +
+            "target.style.cssText = 'position:fixed;inset:0;z-index:2147483647;background:black'; " +
+            "const button = document.createElement('button'); button.textContent = 'Fullscreen'; " +
+            "button.style.cssText = 'width:100%;height:100%'; " +
+            "button.onclick = () => target.requestFullscreen(); target.append(button); " +
+            "const player = document.createElement('div'); player.id = 'optimized-player'; " +
+            "target.append(player); document.body.append(target); })()");
+        try {
+            int[] origin = new int[2];
+            int[] size = new int[2];
+            runOnMainSync(() -> {
+                web.getLocationOnScreen(origin);
+                size[0] = web.getWidth();
+                size[1] = web.getHeight();
+            });
+            tapScreen(origin[0] + size[0] / 2f, origin[1] + size[1] / 2f);
+            await(web, "document.fullscreenElement?.id === 'optimized-fullscreen'");
+            evaluate(web, "document.querySelector('#optimized-player').remove()");
+            check("true".equals(evaluate(web, "document.fullscreenElement?.id === 'optimized-fullscreen'")),
+                "Fullscreen survives replacing the player element");
+        } finally {
+            evaluate(web, "document.exitFullscreen().catch(() => {}); " +
+                "document.querySelector('#optimized-fullscreen')?.remove()");
+        }
+        await(web, "document.fullscreenElement === null");
+    }
+
+    private void checkPlayerFullscreen(WebView web, File fixture) throws Exception {
+        long deadline = SystemClock.elapsedRealtime() + 15000;
+        AtomicReference<Boolean> focused = new AtomicReference<>(false);
+        do {
+            runOnMainSync(() -> focused.set(resumedActivity != null && resumedActivity.hasWindowFocus() &&
+                resumedActivity.getClass().getName().equals("org.opentubex.app.MainActivity")));
+            if (focused.get()) break;
+            Thread.sleep(100);
+        } while (SystemClock.elapsedRealtime() < deadline);
+        check(focused.get(), "Main activity regains focus after the camera check");
+        await(web, "!!document.querySelector('.app') && document.visibilityState === 'visible'");
+        // A fresh install may show the tutorial over the real player controls.
+        evaluate(web, "document.querySelector('.tutorialOverlay .tutorialSkip button')?.click()");
+        // Never persist this synthetic route for a later launch. Instrumentation
+        // can end the process before WebView flushes the cleanup navigation.
+        // Keep this narrow guard until the test process exits.
+        evaluate(web, "(() => { const setItem = Storage.prototype.setItem; " +
+            "Storage.prototype.setItem = function(key, value) { " +
+            "if (this === localStorage && key === 'opentubex-capacitor-tabs' && " +
+            "String(value).includes('/watch/optimized-apk-demo')) return; " +
+            "return setItem.call(this, key, value); }; })()");
+        // This fixture has no YouTube metadata. Exercise downloaded playback
+        // offline instead of parsing live player scripts on the WebView thread.
+        evaluate(web, "window.optimizedOnlineDescriptor = Object.getOwnPropertyDescriptor(navigator, 'onLine'); " +
+            "Object.defineProperty(navigator, 'onLine', {configurable: true, get: () => false}); " +
+            "window.dispatchEvent(new Event('offline'))");
+        // Replay a WebView error delivered during loading without a MediaError.
+        // Shaka must still finish loading the new source.
+        evaluate(web, "window.optimizedStaleMediaError = false; " +
+            "window.optimizedLoadStart = event => { const video = event.target; " +
+            "if (!(video instanceof HTMLVideoElement) || !video.src.includes('optimized-apk-demo') || " +
+            "video.error !== null || window.optimizedStaleMediaError) return; " +
+            "window.optimizedStaleMediaError = true; video.dispatchEvent(new Event('error')); }; " +
+            "document.addEventListener('loadstart', window.optimizedLoadStart, true)");
+        // Keep a player failure primary when cleanup also fails.
+        try (AutoCloseable cleanup = () -> cleanupPlayerFixture(web)) {
+            JSONObject file = new JSONObject().put("videoId", "optimized-apk-demo")
+                .put("path", fixture.getAbsolutePath()).put("extension", "webm")
+                .put("available", true).put("width", 320).put("height", 240).put("duration", 30);
+            JSONObject download = new JSONObject().put("id", 91218).put("status", "completed")
+                .put("mode", "video").put("videoId", "optimized-apk-demo")
+                .put("title", "Optimized APK demo").put("files", new JSONArray().put(file));
+            evaluate(web, "(() => { const app = document.querySelector('#app').__vue_app__; " +
+                "app.config.globalProperties.$store.commit('upsertYtDlpDownload', " + download + "); " +
+                "app.config.globalProperties.$router.push({path: '/watch/optimized-apk-demo', " +
+                "query: {downloadId: '91218'}}); })()");
+            await(web, "!!document.querySelector('.ftVideoPlayer .shaka-fullscreen-button')");
+            await(web, "window.optimizedStaleMediaError && " +
+                "document.querySelector('.ftVideoPlayer video')?.readyState >= 2");
+            tapCss(web, ".ftVideoPlayer");
+            await(web, "getComputedStyle(document.querySelector('.ftVideoPlayer .shaka-fullscreen-button')).visibility === 'visible'");
+            String enterLabel = evaluate(web,
+                "document.querySelector('.ftVideoPlayer .shaka-fullscreen-button').getAttribute('aria-label')");
+            tapCss(web, ".ftVideoPlayer .shaka-fullscreen-button");
+            await(web, "document.fullscreenElement?.classList.contains('videoLayout') === true");
+            check(!enterLabel.equals(evaluate(web,
+                "document.querySelector('.ftVideoPlayer .shaka-fullscreen-button').getAttribute('aria-label')")),
+                "Shaka fullscreen control switches to exit mode");
+            tapCss(web, ".ftVideoPlayer");
+            await(web, "getComputedStyle(document.querySelector('.ftVideoPlayer .shaka-fullscreen-button')).visibility === 'visible'");
+            tapCss(web, ".ftVideoPlayer .shaka-fullscreen-button");
+            await(web, "document.fullscreenElement === null");
+        }
+    }
+
+    private void cleanupPlayerFixture(WebView web) throws Exception {
+        try {
+            // Do not restore or reload the synthetic watch route next launch.
+            evaluate(web, "document.querySelector('#app').__vue_app__.config.globalProperties.$router.replace('/subscriptions')");
+            await(web, "location.hash === '#/subscriptions'");
+            await(web, "!document.querySelector('.ftVideoPlayer') || " +
+                "!!document.querySelector('.mobileMiniBarDismiss:not(:disabled), .scrollMiniDismiss:not(:disabled)')");
+            evaluate(web, "document.querySelector('.mobileMiniBarDismiss:not(:disabled), .scrollMiniDismiss:not(:disabled)')?.click()");
+            await(web, "!document.querySelector('.ftVideoPlayer')");
+        } finally {
+            evaluate(web, "document.removeEventListener('loadstart', window.optimizedLoadStart, true); " +
+                "delete window.optimizedLoadStart; delete window.optimizedStaleMediaError");
+            evaluate(web, "if (window.optimizedOnlineDescriptor) { " +
+                "Object.defineProperty(navigator, 'onLine', window.optimizedOnlineDescriptor); " +
+                "} else { delete navigator.onLine; } delete window.optimizedOnlineDescriptor; " +
+                "window.dispatchEvent(new Event(navigator.onLine ? 'online' : 'offline'))");
+        }
+    }
+
+    private void tapCss(WebView web, String selector) throws Exception {
+        String position = null;
+        String previous = null;
+        String lastResult = null;
+        int[] bounds = new int[5];
+        boolean[] ready = new boolean[1];
+        long deadline = SystemClock.elapsedRealtime() + 30000;
+        do {
+            String result = evaluate(web, "(() => { const element = document.querySelector(" +
+                JSONObject.quote(selector) + "); if (!element) return null; const rect = element.getBoundingClientRect(); " +
+                "if (!rect.width || !rect.height) return null; return {x: rect.x + rect.width / 2, " +
+                "y: rect.y + rect.height / 2, viewportWidth: innerWidth, viewportHeight: innerHeight}; })()");
+            runOnMainSync(() -> {
+                web.getLocationOnScreen(bounds);
+                bounds[2] = web.getWidth();
+                bounds[3] = web.getHeight();
+                bounds[4] = web.getDisplay().getRotation();
+                ready[0] = web.isShown() && web.hasWindowFocus() && !web.isLayoutRequested();
+            });
+            lastResult = result;
+            String sample = null;
+            if (ready[0] && result != null && !"null".equals(result)) {
+                JSONObject point = new JSONObject(result);
+                double scale = bounds[2] / point.getDouble("viewportWidth");
+                double x = point.getDouble("x") * scale;
+                double y = point.getDouble("y") * scale;
+                // Fullscreen can resize the native view before Chromium's viewport.
+                // Allow CSS-pixel rounding, but never combine portrait DOM coordinates
+                // with landscape native bounds. Require an unchanged sample as well.
+                if (scale > 0 && Math.abs(bounds[3] - point.getDouble("viewportHeight") * scale) <= 2 * scale
+                        && x >= 0 && x < bounds[2] && y >= 0 && y < bounds[3]) {
+                    sample = result + Arrays.toString(bounds);
+                    if (sample.equals(previous)) {
+                        position = result;
+                        break;
+                    }
+                }
+            }
+            previous = sample;
+            Thread.sleep(100);
+        } while (SystemClock.elapsedRealtime() < deadline);
+        check(position != null, "Timed out waiting to tap " + selector + ": DOM=" + lastResult +
+            ", native=" + Arrays.toString(bounds) + ", ready=" + ready[0]);
+        JSONObject point = new JSONObject(position);
+        double scale = bounds[2] / point.getDouble("viewportWidth");
+        tapScreen((float) (bounds[0] + point.getDouble("x") * scale),
+            (float) (bounds[1] + point.getDouble("y") * scale));
+    }
+
+    private void tapScreen(float x, float y) {
+        long now = SystemClock.uptimeMillis();
+        MotionEvent down = MotionEvent.obtain(now, now, MotionEvent.ACTION_DOWN, x, y, 0);
+        MotionEvent up = MotionEvent.obtain(now, now + 50, MotionEvent.ACTION_UP, x, y, 0);
+        try {
+            sendPointerSync(down);
+            sendPointerSync(up);
+        } finally {
+            down.recycle();
+            up.recycle();
+        }
+    }
+
+    private void checkPluginCallbacks(WebView web, String permission) throws Exception {
+        // A permission check alone does not exercise the reflected result callback.
+        if (!permission.equals("granted")) {
+            beginCall(web, "LocalNotifications", "requestPermissions", new JSONObject());
+            clickPermissionAllow();
+            check(finishCall(web, "LocalNotifications.requestPermissions").getString("display").equals("granted"),
+                "Notification permission callback survives shrinking");
+        }
+        JSONObject notification = new JSONObject().put("id", 91218).put("title", "Optimized notification test")
+            .put("body", "Resource and callback check").put("channelId", "live-reminders")
+            .put("foreground", true).put("isExactNotification", false);
+        JSONObject notifications = new JSONObject().put("notifications", new JSONArray().put(notification));
+        try {
+            call(web, "LocalNotifications", "schedule", notifications);
+            NotificationManager manager = getTargetContext().getSystemService(NotificationManager.class);
+            long deadline = SystemClock.elapsedRealtime() + 5000;
+            android.app.Notification delivered = null;
+            do {
+                for (var active : manager.getActiveNotifications()) {
+                    if (active.getId() == 91218) delivered = active.getNotification();
+                }
+                if (delivered != null) break;
+                Thread.sleep(100);
+            } while (SystemClock.elapsedRealtime() < deadline);
+            check(delivered != null, "Local notification is delivered");
+            int expectedIcon = getTargetContext().getResources().getIdentifier("ic_stat_opentubex", "drawable",
+                getTargetContext().getPackageName());
+            check(expectedIcon != 0 && delivered.getSmallIcon().getResId() == expectedIcon,
+                "Notification uses its configured icon after shrinking");
+        } finally {
+            call(web, "LocalNotifications", "cancel", notifications);
+            call(web, "LocalNotifications", "removeDeliveredNotifications", notifications);
+        }
+
+        // Return a cancelled picker result through Android and Capacitor's real
+        // activity-result dispatch, without depending on a document provider UI.
+        checkCancelledPicker(web, "AndroidStorage", "chooseDirectory", new JSONObject(), Intent.ACTION_OPEN_DOCUMENT_TREE);
+        JSONObject saved = checkCancelledPicker(web, "AndroidStorage", "saveFile", new JSONObject()
+            .put("fileName", "optimized-test.txt").put("data", "dGVzdA=="), Intent.ACTION_CREATE_DOCUMENT);
+        check(!saved.getBoolean("saved"), "Cancelled export resolves without saving");
+        checkCancelledPicker(web, "YtDlp", "chooseCookies", new JSONObject(), Intent.ACTION_OPEN_DOCUMENT);
+
+        // Fail before network access, inside the separate BotGuard WebView.
+        // Its @JavascriptInterface rejection must reach the original plugin call.
+        beginCall(web, "PoToken", "generate", new JSONObject().put("videoId", "optimized-test")
+            .put("sessionContext", "{}").put("initialAttestationData", "{\"R\":{}}")
+            .put("ytConfig", "{}"));
+        await(web, "window.optimizedResult !== null");
+        check(new JSONObject(evaluate(web, "window.optimizedResult")).optString("error")
+            .contains("Failed to get BotGuard challenge"), "PO-token JavaScript rejection survives shrinking");
+    }
+
+    private JSONObject checkCancelledPicker(WebView web, String plugin, String method, JSONObject options,
+                                            String action) throws Exception {
+        IntentFilter filter = new IntentFilter(action);
+        if (!action.equals(Intent.ACTION_OPEN_DOCUMENT_TREE)) {
+            filter.addCategory(Intent.CATEGORY_OPENABLE);
+            filter.addDataType("*/*");
+        }
+        ActivityMonitor monitor = addMonitor(filter, new ActivityResult(Activity.RESULT_CANCELED, null), true);
+        try {
+            JSONObject result = call(web, plugin, method, options);
+            check(monitor.getHits() == 1, plugin + "." + method + " launches the picker");
+            return result;
+        } finally { removeMonitor(monitor); }
+    }
+
+    private void clickPermissionAllow() throws Exception {
+        var automation = getUiAutomation();
+        AccessibilityServiceInfo original = automation.getServiceInfo();
+        AccessibilityServiceInfo info = automation.getServiceInfo();
+        info.flags |= AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS;
+        automation.setServiceInfo(info);
+        try {
+            long deadline = SystemClock.elapsedRealtime() + 10000;
+            do {
+                AccessibilityNodeInfo root = automation.getRootInActiveWindow();
+                if (root != null) {
+                    for (String controller : new String[] { "com.android.permissioncontroller", "com.google.android.permissioncontroller",
+                            "com.android.packageinstaller", "com.google.android.packageinstaller" }) {
+                        for (String id : new String[] { "permission_allow_button", "permission_allow_foreground_only_button" }) {
+                            for (var button : root.findAccessibilityNodeInfosByViewId(controller + ":id/" + id)) {
+                                if (button.performAction(AccessibilityNodeInfo.ACTION_CLICK)) return;
+                            }
+                        }
+                    }
+                }
+                Thread.sleep(100);
+            } while (SystemClock.elapsedRealtime() < deadline);
+            throw new AssertionError("Permission dialog opens");
+        } finally { automation.setServiceInfo(original); }
+    }
+
+    private void report(String message) {
+        Bundle status = new Bundle();
+        status.putString("stream", message + "\n");
+        sendStatus(0, status);
+    }
+
+    private String execute(String binary, String... arguments) throws Exception {
+        File nativeDir = new File(getTargetContext().getApplicationInfo().nativeLibraryDir);
+        File packages = new File(getTargetContext().getNoBackupFilesDir(), "youtubedl-android/packages");
+        var command = new java.util.ArrayList<String>();
+        command.add(new File(nativeDir, "lib" + binary + ".so").getPath());
+        command.addAll(Arrays.asList(arguments));
+        File log = new File(getTargetContext().getCacheDir(), "optimized-apk-process.log");
+        ProcessBuilder builder = new ProcessBuilder(command).redirectErrorStream(true).redirectOutput(log);
+        // Match YtDlpRuntime: the APK's libraries replace runtime libraries trim-runtime.gradle removes.
+        builder.environment().put("LD_LIBRARY_PATH", new File(packages, "python/usr/lib") + ":" + new File(packages, "ffmpeg/usr/lib") + ":" + nativeDir);
+        builder.environment().put("PYTHONHOME", new File(packages, "python/usr").getPath());
+        Process process = builder.start();
+        try {
+            check(process.waitFor(30, TimeUnit.SECONDS), binary + " finishes");
+            String output = new String(Files.readAllBytes(log.toPath()), java.nio.charset.StandardCharsets.UTF_8);
+            check(process.exitValue() == 0, binary + ": " + output);
+            return output;
+        } finally { process.destroyForcibly(); log.delete(); }
+    }
+
+    private JSONObject call(WebView web, String plugin, String method, JSONObject options) throws Exception {
+        beginCall(web, plugin, method, options);
+        return finishCall(web, plugin + "." + method);
+    }
+
+    private void beginCall(WebView web, String plugin, String method, JSONObject options) throws Exception {
+        evaluate(web, "window.optimizedResult = null; Capacitor.nativePromise(" + JSONObject.quote(plugin) + "," +
+            JSONObject.quote(method) + "," + options + ").then(value => window.optimizedResult = {value: value || {}}," +
+            "error => window.optimizedResult = {error: String(error)})");
+    }
+
+    private JSONObject finishCall(WebView web, String description) throws Exception {
+        await(web, "window.optimizedResult !== null");
+        JSONObject result = new JSONObject(evaluate(web, "window.optimizedResult"));
+        check(!result.has("error"), description + ": " + result);
+        return result.getJSONObject("value");
+    }
+
+    private void await(WebView web, String condition) throws Exception {
+        long deadline = SystemClock.elapsedRealtime() + 30000;
+        do {
+            if ("true".equals(evaluate(web, condition))) return;
+            Thread.sleep(100);
+        } while (SystemClock.elapsedRealtime() < deadline);
+        throw new AssertionError("Timed out: " + condition);
+    }
+
+    private String evaluate(WebView web, String script) throws Exception {
+        CountDownLatch done = new CountDownLatch(1);
+        AtomicReference<String> value = new AtomicReference<>();
+        runOnMainSync(() -> web.evaluateJavascript(script, result -> { value.set(result); done.countDown(); }));
+        check(done.await(5, TimeUnit.SECONDS), "WebView responds");
+        return value.get();
+    }
+
+    private static WebView findWebView(View view) {
+        if (view instanceof WebView) return (WebView) view;
+        if (view instanceof ViewGroup group) {
+            for (int index = 0; index < group.getChildCount(); index++) {
+                WebView found = findWebView(group.getChildAt(index));
+                if (found != null) return found;
+            }
+        }
+        return null;
+    }
+
+    private static void check(boolean condition, String message) {
+        if (!condition) throw new AssertionError(message);
+    }
+}

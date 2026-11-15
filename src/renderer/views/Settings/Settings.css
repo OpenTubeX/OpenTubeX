@@ -1,334 +1,786 @@
-.settingsPage {
-  display: flex;
-  gap: 20px;
-}
+.settingsWindow {
+  --settings-row-gap: 20px;
 
-.settingsSections,
-.switchRow {
-  overflow-x: hidden;
-  max-inline-size: 90%;
-}
-
-.switchRow {
-  display: flex;
-  gap: 10px;
-  box-sizing: border-box;
-  inline-size: 100%;
-  padding-block: 8px;
-  padding-inline: 16px;
-  margin-inline-end: auto;
-  align-items: center;
-  margin-block-end: 16px;
-  background-color: var(--card-bg-color);
-  box-shadow: 0 2px 1px 0 var(--primary-shadow-color);
-}
-
-@media only screen and (width >= 1016px) {
-  .switchRow {
-    position: sticky;
-    inset-block-start: 60px;
-    margin-block-start: -36px;
-    z-index: 3;
-  }
-
-  :global(.banner-wrapper + .settingsPage .switchRow) {
-    margin-block-start: 0;
-  }
-}
-
-.settingsSearchDesktop {
-  flex: 1;
-  min-inline-size: 140px;
-  max-inline-size: 320px;
-}
-
-.settingsSearchMobileCard {
-  inline-size: 100%;
-  box-sizing: border-box;
-  padding-block: 8px;
-  margin-block: 0;
-  margin-inline: 0;
-}
-
-.settingsSearchMobile {
-  flex: 1;
-  min-inline-size: 0;
-}
-
-.settingsSearchMobileRow {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.settingsSearchDesktop :deep(.ft-input),
-.settingsSearchMobile :deep(.ft-input) {
-  margin-block-end: 0;
-}
-
-.settingsContent {
-  flex: 1;
-  min-inline-size: 0;
-}
-
-.settingsSearchResults {
-  inline-size: 100%;
-  max-inline-size: 90%;
-  box-sizing: border-box;
-  overflow-anchor: none;
-}
-
-.settingsSearchEmptyCard {
-  box-sizing: border-box;
-  inline-size: 100%;
-  padding-block: 24px;
-  margin: 0;
-}
-
-.settingsSearchStatus {
-  margin-block: 0 12px;
-  margin-inline: 16px;
-  color: var(--tertiary-text-color);
-  font-size: 14px;
-}
-
-.settingsSearchStatusHidden {
-  position: absolute;
-  inline-size: 1px;
-  block-size: 1px;
-  padding: 0;
-  margin: -1px;
+  position: fixed;
+  z-index: 9;
+  min-inline-size: min(360px, calc(100vw - 24px));
+  min-block-size: min(360px, calc(100vh - 24px));
+  max-inline-size: calc(100vw - 24px);
+  max-block-size: calc(100vh - 24px);
+  resize: none;
   overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-  border: 0;
-}
-
-.settingsSearchResultsCard {
+  flex: none;
+  margin: 0 !important;
   box-sizing: border-box;
-  inline-size: 100%;
-  padding-block: 12px 0;
-  padding-inline: 0;
-  margin: 0;
+  display: flex;
+  flex-direction: column;
+  color: var(--primary-text-color);
+  background: var(--card-bg-color);
+  background-image: var(--card-bg-image);
+  background-attachment: fixed;
+  backdrop-filter: var(--card-bg-blur, none);
+  border: 1px solid var(--border-color);
+  border-radius: calc(10px * var(--ui-roundness));
+  box-shadow: 0 12px 40px rgb(0 0 0 / 38%);
+  container-name: settings-window;
+  container-type: inline-size;
 }
 
-.settingsSearchGroup + .settingsSearchGroup {
-  padding-block-start: 12px;
-  border-block-start: 1px solid var(--tertiary-text-color);
+.settingsWindow.maximized {
+  padding-inline: var(--app-safe-area-inset-left, 0) var(--app-safe-area-inset-right, 0);
+
+  /* WebKit can retain an old vw size after native sheets close. Percentage
+     widths still follow the fixed-position containing viewport. */
+  max-inline-size: 100%;
+  min-block-size: 0;
+  max-block-size: calc(100dvh - var(--app-safe-area-inset-top, 0px) - var(--connection-status-space, 0px));
+  border-width: 0;
+  border-radius: 0;
 }
 
-.settingsSearchGroup h2 {
-  margin-block: 0 8px;
-  margin-inline: 16px;
-  color: var(--secondary-text-color);
-  font-size: 16px;
-  font-weight: 600;
+/* The app page keeps its own scrollbar behind the modal. Do not let it show
+   through beside the settings content while the modal covers the viewport. */
+:global(:root.appSettingsMaximized body > .os-scrollbar) {
+  visibility: hidden;
 }
 
-.settingsSearchResult {
-  scroll-margin-block: 140px 80px;
+.settingsWindow.settings-window-enter-active {
+  transform-origin: center;
+  transition:
+    opacity var(--motion-fast-effects),
+    transform var(--motion-default-spatial);
+}
+
+.settingsWindow.settings-window-enter-from {
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
+}
+
+/* A closing window must not take clicks meant for the controls it uncovers. */
+.settingsWindow.settings-window-leave-active {
+  transform-origin: center;
+  animation: settings-window-leave var(--motion-fast-effects);
+  pointer-events: none;
+}
+
+@keyframes settings-window-leave {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
+:root[data-reduced-motion='reduce'] .settingsWindow.settings-window-enter-active,
+:root[data-reduced-motion='reduce'] .settingsWindow.settings-window-leave-active {
+  animation: none;
+  transition: none;
+}
+
+.settingsWindowHeader {
+  flex: 0 0 auto;
+  min-block-size: 52px;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 4px;
-  inline-size: 100%;
-  padding-block: 12px;
-  padding-inline: 32px;
-  border: 0;
-  border-block-end: 1px solid var(--tertiary-text-color);
-  background: transparent;
+  gap: 8px;
+  padding-block: 6.5px;
+  padding-inline: 10px;
   color: var(--primary-text-color);
+  background: var(--side-nav-color);
+  border-block-end: 1px solid var(--divider-color);
+  cursor: move;
+  user-select: none;
+}
+
+.settingsWindowIcon {
+  display: block;
+  flex: 0 0 auto;
+  inline-size: 18px;
+  block-size: 18px;
+  color: var(--tertiary-text-color);
+  vertical-align: 0;
+}
+
+.settingsHeaderNavigation {
+  min-inline-size: 0;
+  flex: 1 1 160px;
+  display: flex;
+  align-items: center;
+  gap: inherit;
+}
+
+.settingsBreadcrumb {
+  min-inline-size: 0;
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  font-size: 18px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.settingsBreadcrumbLabel {
+  min-inline-size: 0;
+}
+
+.settingsBreadcrumbSeparator {
+  flex: 0 0 auto;
+  color: var(--tertiary-text-color);
+  font-size: 13px;
+}
+
+.settingsBreadcrumbCategoryIcon {
+  display: block;
+  flex: 0 0 auto;
+  inline-size: 18px;
+  block-size: 18px;
+  color: var(--tertiary-text-color);
+  vertical-align: 0;
+}
+
+.settingsBreadcrumbRoot,
+.settingsBreadcrumbParent,
+.settingsHeaderButton {
+  border: 0;
+  color: inherit;
+  background: transparent;
   font: inherit;
-  text-align: start;
-  transition: background 0.2s ease-out;
   cursor: pointer;
 }
 
-.settingsSearchResultText {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+.settingsBreadcrumbRoot,
+.settingsBreadcrumbParent,
+.settingsBreadcrumbLabel {
+  min-block-size: 24px;
+  min-inline-size: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  line-height: 1.2;
 }
 
-.settingsSearchResultIcon {
+.settingsBreadcrumbText {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.settingsBreadcrumbAction {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  font-size: 16px;
+}
+
+.settingsBreadcrumbRoot,
+.settingsBreadcrumbParent {
+  appearance: none;
+  padding: 0;
   color: var(--tertiary-text-color);
 }
 
-.settingsSearchResult:hover,
-.settingsSearchResult:focus-visible {
-  background-color: var(--side-nav-hover-color);
+.settingsBreadcrumbRoot:hover,
+.settingsBreadcrumbParent:hover {
+  color: var(--primary-text-color);
+}
+
+.settingsSearch {
+  --input-bottom-spacing: 0;
+  --form-control-height: 36px;
+  --search-bar-color: var(--settings-search-bar-color);
+  --search-bar-blur: var(--settings-search-bar-blur, none);
+
+  flex: 0 1 300px;
+  min-inline-size: 150px;
+}
+
+.settingsHeaderActions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.settingsHeaderButton {
+  inline-size: 38px;
+  block-size: 38px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border-radius: 50%;
+  color: var(--tertiary-text-color);
+  transition: border-radius var(--motion-fast-spatial);
+}
+
+.settingsHeaderButton:active {
+  border-radius: var(--shape-corner-medium);
+}
+
+.settingsHeaderButton > svg {
+  display: block;
+}
+
+/* Touch taps leave :hover applied, which must not look like an enabled toggle. */
+@media (hover: hover) {
+  .settingsHeaderButton:hover {
+    color: var(--side-nav-hover-text-color);
+    background: var(--side-nav-hover-color);
+  }
+}
+
+.settingsHeaderButton:focus-visible {
   color: var(--side-nav-hover-text-color);
-  outline: 2px solid var(--side-nav-hover-text-color);
-  outline-offset: -2px;
-  transition: background 0.2s ease-in;
+  background: var(--side-nav-hover-color);
 }
 
-.settingsSearchResult:active {
-  background-color: var(--side-nav-active-color);
-  color: var(--side-nav-active-text-color);
-  transition: background 0.2s ease-in;
+.settingsHeaderButton.active {
+  border-radius: var(--shape-corner-medium);
+  color: var(--on-selected-container-color);
+  background: var(--selected-container-color);
 }
 
-.settingsSearchResult small {
-  color: var(--secondary-text-color);
+.settingsHeaderButton.active:active {
+  border-radius: var(--shape-corner-small);
 }
 
-.settingsSearchResult:hover small,
-.settingsSearchResult:focus-visible small,
-.settingsSearchResult:active small {
-  color: inherit;
+.settingsHeaderButton.active:is(:hover, :focus-visible) {
+  background: var(--selected-container-hover-color);
 }
 
-.settingsSearchResult:hover .settingsSearchResultIcon,
-.settingsSearchResult:focus-visible .settingsSearchResultIcon,
-.settingsSearchResult:active .settingsSearchResultIcon {
-  color: inherit;
+.settingsPage {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  min-inline-size: 0;
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
+  overflow: hidden;
+  background: var(--base-color);
 }
 
-.settingsSearchResult:last-child {
-  border-block-end: 0;
+.settingsMenu,
+.settingsContent,
+.settingsSubpageScroll,
+.settingsPassword {
+  min-block-size: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
 }
 
-.settingsSearchEmpty {
-  margin: 0;
+.settingsContentPane {
+  min-block-size: 0;
+  min-inline-size: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.settingsContentHeader {
+  flex: 0 0 auto;
+  padding-block-start: 20px;
+  padding-inline: 20px;
+}
+
+.settingsSectionTabs {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(var(--settings-section-tab-count), minmax(0, 1fr));
+  container-type: inline-size;
+}
+
+/* Three or more labels beside their icons wrap awkwardly in narrow windows. */
+@container (max-width: 600px) {
+  .settingsSectionTab:nth-last-child(n + 3),
+  .settingsSectionTab:nth-last-child(n + 3) ~ .settingsSectionTab {
+    flex-direction: column;
+    gap: 4px;
+    padding-inline: 8px;
+  }
+}
+
+.settingsContent {
+  flex: 1 1 auto;
+  container-name: settings-content;
+  container-type: inline-size;
+  overflow-x: hidden !important;
+  max-inline-size: 100%;
+}
+
+.settingsContent .section,
+.settingsContent :deep(.settingsSection),
+.settingsContent :deep(.sectionBody) {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  inline-size: 100%;
+}
+
+.settingsContent :deep(.sectionBody) {
+  box-sizing: border-box;
+  padding-block-start: 5px;
+}
+
+.settingsContent :deep(.settingsCategory) {
+  display: grid;
+  gap: 20px;
+}
+
+.settingsMenu {
+  border-inline-end: 1px solid var(--divider-color);
+}
+
+.settingsContent,
+.settingsSubpageScroll,
+.settingsPassword {
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.settingsPassword {
+  grid-column: 1 / -1;
+  display: grid;
+  place-items: center;
+}
+
+.settingsNoResults {
+  grid-column: 1 / -1;
+  margin: auto;
   color: var(--tertiary-text-color);
   text-align: center;
 }
 
-.settingsSections :deep([data-search-highlight]:not(.select, .switch-ctn)),
-.switchRow :deep([data-search-highlight]:not(.switch-ctn)) {
-  outline: 2px solid var(--primary-text-color);
+.settingsSearchResults {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+  align-content: start;
+  gap: 12px;
+}
+
+.settingsSearchResultsEmpty {
+  block-size: 100%;
+}
+
+.settingsSearchResult {
+  min-inline-size: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  padding: 14px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--shape-corner-large);
+  background: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
+}
+
+.settingsSearchResultHeading {
+  margin: 0;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--primary-text-color);
+  font: inherit;
+  font-size: 1.0625rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  text-align: start;
+}
+
+.settingsSearchResultHeading > svg {
+  inline-size: 18px;
+  block-size: 18px;
+  color: var(--primary-color);
+}
+
+.settingsSearchResultMatch {
+  padding-block: 6px;
+  padding-inline: 8px;
+  border: 0;
+  border-radius: var(--shape-corner-small);
+  overflow: hidden;
+  color: var(--tertiary-text-color);
+  background: transparent;
+  font: inherit;
+  text-align: start;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    color var(--motion-fast-effects),
+    background-color var(--motion-fast-effects),
+    border-radius var(--motion-fast-spatial);
+}
+
+.settingsSearchResultMatch:active {
+  border-radius: var(--shape-corner-extra-small);
+}
+
+.settingsSearchResultMatch:hover,
+.settingsSearchResultMatch:focus-visible {
+  color: var(--primary-text-color);
+  background: var(--side-nav-hover-color);
+}
+
+.settingsContent :deep(.settingsSearchTarget),
+.settingsSubpageScroll :deep(.settingsSearchTarget),
+.settingsContent :deep(.select.settingsSearchTarget > .selectSearchHighlightFrame),
+.settingsSubpageScroll :deep(.select.settingsSearchTarget > .selectSearchHighlightFrame) {
+  outline: 2px solid transparent;
   outline-offset: 4px;
-  border-radius: 4px;
+  border-radius: var(--shape-corner-extra-small);
+  animation: settings-search-highlight 2.2s ease-in-out;
 }
 
-.settingsSections :deep(.switch-ctn[data-search-highlight] .switch-label),
-.switchRow :deep(.switch-ctn[data-search-highlight] .switch-label) {
-  outline: 2px solid var(--primary-text-color);
-  outline-offset: -2px;
-  border-radius: 4px;
+.settingsContent :deep(.select.settingsSearchTarget),
+.settingsSubpageScroll :deep(.select.settingsSearchTarget) {
+  outline: none;
+  animation: none;
 }
 
-.settingsSections :deep(.select[data-search-highlight]::before) {
-  content: '';
+@keyframes settings-search-highlight {
+  0%,
+  40%,
+  80%,
+  100% {
+    outline-color: transparent;
+  }
+
+  10%,
+  30%,
+  50%,
+  70% {
+    outline-color: var(--primary-color);
+  }
+}
+
+.settingsContent :deep(.sectionTitle) {
+  display: none;
+}
+
+.settingsContent :deep(.settingsCategory .sectionTitle) {
+  display: block;
+}
+
+:deep(.settingsCategory.hideFirstSectionTitle > .settingsSection:first-child .sectionTitle) {
+  display: none;
+}
+
+/* Every control reserves the marker gutter while highlighting is on, including
+   controls that cannot be reset. Otherwise those controls sit further towards
+   the edge than their resettable neighbours. The low-specificity :where keeps
+   the colored marker rule below in control when a setting has changed. */
+.settingsContent.highlightChangedSettings :deep(:where(
+  .switch-ctn,
+  .select,
+  .ft-input-component,
+  .pure-material-slider,
+  .pure-checkbox,
+  .inputTags,
+  .sponsorBlockCategory
+)) {
+  --select-outline-inline-start: 9px;
+
+  border-inline-start: 3px solid transparent;
+  padding-inline-start: 9px;
+}
+
+/* Reserve the marker gutter for labels that still use absolute positioning. */
+.settingsContent.highlightChangedSettings :deep(.select-label) {
+  inset-inline-start: 25px;
+}
+
+:deep(.switch-ctn:has(.changedSettingIndicator)),
+:deep(.select:has(.changedSettingIndicator)),
+:deep(.ft-input-component:has(.changedSettingIndicator)),
+:deep(.pure-material-slider:has(.changedSettingIndicator)),
+:deep(.pure-checkbox:has(.changedSettingIndicator)),
+:deep(.inputTags:has(.changedSettingIndicator)),
+:deep(.sponsorBlockCategory:has(.changedSettingIndicator)) {
+  --select-outline-inline-start: 9px;
+
+  border-inline-start: 3px solid var(--settings-changed-color, var(--primary-color));
+  padding-inline-start: 9px;
+}
+
+/* Keep tag and password fields centered when reserving the marker gutter. */
+.settingsContent.highlightChangedSettings :deep(.ft-input-tags-component .ft-input-component),
+.settingsContent.highlightChangedSettings :deep(.passwordForm .ft-input-component),
+.settingsContent.highlightChangedSettings :deep(.ft-flex-box:not(.restrictedPlaybackBrowserProfile) > .ft-input-component:only-child),
+.settingsContent.highlightChangedSettings :deep(.centeredSettingsInput),
+:deep(.ft-input-tags-component .ft-input-component:has(.changedSettingIndicator)),
+:deep(.passwordForm .ft-input-component:has(.changedSettingIndicator)),
+:deep(.ft-flex-box:not(.restrictedPlaybackBrowserProfile) > .ft-input-component:only-child:has(.changedSettingIndicator)),
+:deep(.centeredSettingsInput:has(.changedSettingIndicator)) {
+  padding-inline-end: 12px;
+}
+
+.settingsSubpageScroll {
+  grid-column: 1 / -1;
+}
+
+.settingsSubpageScroll.settingsSubpageFlush {
+  overflow: hidden;
+  padding: 0;
+}
+
+.settingsAboutPage {
+  /* Center the page vertically, but keep its top reachable when it overflows. */
+  display: grid;
+  align-content: safe center;
+
+  /* Keep the page's min-content width (logo, version) from widening the column past the window. */
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.settingsDownloadsPage {
+  background: var(--base-color);
+}
+
+.settingsKeyboardShortcutPage {
+  overflow: hidden;
+}
+
+.settingsSubpageScroll :deep(.card > h2:first-child) {
+  display: none;
+}
+
+.compactSettings {
+  display: block;
+}
+
+.compactSettings .settingsMenu,
+.compactSettings .settingsContentPane,
+.compactSettings .settingsContent,
+.compactSettings .settingsSubpageScroll,
+.compactSettings .settingsPassword {
+  block-size: 100%;
+}
+
+.compactSettings .settingsMenu,
+.compactSettings .settingsContent {
+  border-inline-end: 0;
+}
+
+.compactSettings .settingsContent {
+  padding: 14px;
+}
+
+.compactSettings .settingsContentHeader {
+  padding-block-start: 14px;
+  padding-inline: 14px;
+}
+
+.settingsSectionSlideForward {
+  animation: settings-section-slide-forward var(--motion-default-effects);
+}
+
+.settingsSectionSlideBackward {
+  animation: settings-section-slide-backward var(--motion-default-effects);
+}
+
+.settingsCompactSlideForward {
+  animation: settings-compact-slide-forward var(--motion-slow-effects);
+}
+
+.settingsCompactSlideBackward {
+  animation: settings-compact-slide-backward var(--motion-slow-effects);
+}
+
+@keyframes settings-section-slide-forward {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+
+@keyframes settings-section-slide-backward {
+  from {
+    opacity: 0;
+    transform: translateY(-18px);
+  }
+}
+
+@keyframes settings-compact-slide-forward {
+  from {
+    opacity: 0;
+    transform: translateX(calc(28px * var(--horizontal-directionality-coefficient)));
+  }
+}
+
+@keyframes settings-compact-slide-backward {
+  from {
+    opacity: 0;
+    transform: translateX(calc(-28px * var(--horizontal-directionality-coefficient)));
+  }
+}
+
+:root[data-reduced-motion='reduce'] .settingsSectionSlideForward,
+:root[data-reduced-motion='reduce'] .settingsSectionSlideBackward,
+:root[data-reduced-motion='reduce'] .settingsCompactSlideForward,
+:root[data-reduced-motion='reduce'] .settingsCompactSlideBackward {
+  animation: none;
+}
+
+/* On its own layer, a moving window is only recomposited instead of
+   repainting itself and the page below it on every frame. Promoting it only
+   during the gesture keeps subpixel text antialiasing while it rests. */
+:global(html.draggingSettingsWindow .settingsWindow),
+:global(html.resizingSettingsWindow .settingsWindow) {
+  will-change: translate;
+}
+
+.settingsResizeHandle {
   position: absolute;
-  inset-block: -24px -4px;
-  inset-inline: -4px;
-  border: 2px solid var(--primary-text-color);
-  border-radius: 8px;
-  pointer-events: none;
+  z-index: 2;
 }
 
-.settingsToggle {
-  padding-block: 0;
-  margin-block: 0;
+.resize-n,
+.resize-s {
+  inset-inline: 12px;
+  block-size: 8px;
 }
 
-.keyboardShortcutsButton {
-  flex-shrink: 0;
+.resize-e,
+.resize-w {
+  inset-block: 12px;
+  inline-size: 8px;
 }
 
-.section {
-  /* enables anchor link clicks to land with the section title in the top quarter of the page */
-  scroll-margin-top: 24vh;
+.resize-n {
+  inset-block-start: -2px;
+  cursor: ns-resize;
 }
 
-@media only screen and (width >= 1015px) {
-  .section + .section {
-    padding-block-start: 20px;
+.resize-s {
+  inset-block-end: -2px;
+  cursor: ns-resize;
+}
+
+.resize-e {
+  inset-inline-end: -2px;
+  cursor: ew-resize;
+}
+
+.resize-w {
+  inset-inline-start: -2px;
+  cursor: ew-resize;
+}
+
+.resize-ne,
+.resize-se,
+.resize-sw,
+.resize-nw {
+  /* The window clips its rounded corners, so keep each corner handle's center
+     inside the corner arc (about 0.29 of the radius in from both edges). */
+  --resize-corner-inset: max(-2px, calc(calc(10px * var(--ui-roundness)) * 0.29 - 6px));
+
+  inline-size: 16px;
+  block-size: 16px;
+}
+
+.resize-ne {
+  inset-block-start: var(--resize-corner-inset);
+  inset-inline-end: var(--resize-corner-inset);
+  cursor: nesw-resize;
+}
+
+.resize-se {
+  inset-block-end: var(--resize-corner-inset);
+  inset-inline-end: var(--resize-corner-inset);
+  cursor: nwse-resize;
+}
+
+.resize-sw {
+  inset-block-end: var(--resize-corner-inset);
+  inset-inline-start: var(--resize-corner-inset);
+  cursor: nesw-resize;
+}
+
+.resize-nw {
+  inset-block-start: var(--resize-corner-inset);
+  inset-inline-start: var(--resize-corner-inset);
+  cursor: nwse-resize;
+}
+
+@container settings-window (width < 760px) {
+  .settingsWindowHeader {
+    flex-wrap: wrap;
+    padding-block: 5px;
+    padding-inline: 10px;
+    gap: 3px;
   }
 
-  .settingsSections:last-child {
-    /* Add enough blank space to have the last setting section be active on the FtSettingsMenu when scrolled to */
-    margin-block-end: calc(76vh - 150px);
+  .settingsSearch {
+    order: 3;
+    flex-basis: 100%;
+    min-inline-size: 100%;
   }
 }
 
-@media only screen and (width <= 1200px) {
-  .settingsSections,
-  .switchRow,
-  .settingsSearchResults {
-    max-inline-size: 100%;
+@container settings-window (width <= 560px) {
+  .settingsHeaderButton {
+    inline-size: 34px;
+    block-size: 34px;
+  }
+
+  .settingsBreadcrumb {
+    font-size: 16px;
   }
 }
 
-@media only screen and (width <= 1015px) {
+@media (any-pointer: coarse), (width <= 680px) {
+  .settingsWindowHeader,
+  .settingsHeaderActions {
+    gap: 8px;
+  }
+
+  .settingsSearch {
+    --form-control-height: 48px;
+  }
+
+  .settingsHeaderButton {
+    inline-size: 48px;
+    block-size: 48px;
+  }
+
+  .settingsBreadcrumbRoot,
+  .settingsBreadcrumbParent {
+    min-block-size: 48px;
+  }
+
   .settingsSearchResult {
-    scroll-margin-block-start: 70px;
+    gap: 8px;
   }
 
-  :global(.banner-wrapper + .settingsPage .settingsSearchMobileCard) {
-    margin-block-start: 18px;
+  .settingsSearchResultHeading,
+  .settingsSearchResultMatch {
+    box-sizing: border-box;
+    min-block-size: 48px;
+    padding: 12px;
+    overflow-wrap: anywhere;
+    white-space: normal;
   }
 
-  /* Needed to overcome routerView styling for margin-block */
-  .settingsPage.settingsPage {
-    margin-block: 0;
-    flex-direction: column;
-    gap: 10px;
+  .settingsSearchResultHeading > svg {
+    flex-shrink: 0;
   }
 
-  .switchRow,
-  .settingsSections {
-    margin-inline: auto;
-  }
-
-  .switchRow {
-    display: none;
-  }
-
-  .settingsSearchResults {
-    margin-inline: auto;
-  }
-
-  .settingsSearchResultsEmpty {
-    max-inline-size: 100%;
-  }
-
-  .settingsSections {
-    overflow-y: hidden;
-    margin-block-end: 80px;
-  }
-
-  .hideOnMobile {
-    display: none;
-  }
-
-  .returnToMenuMobileButton {
-    display: flex;
-    flex: 0 0 40px;
-    inline-size: 40px;
-    block-size: 45px;
-    padding: 0;
-    margin: 0;
-    align-items: center;
-    justify-content: center;
-    background-color: transparent;
-    color: inherit;
-    cursor: pointer;
-    border-style: none;
-    font-size: 30px;
-    line-height: 1em;
-  }
-
-  .returnToMenuMobileButtonHidden {
-    visibility: hidden;
-  }
-
-  .returnToMenuMobileIcon {
-    inline-size: 1em;
+  .settingsSearchResultMatch:active {
+    color: var(--primary-text-color);
+    background: var(--side-nav-hover-color);
   }
 }
 
-@media only screen and (width <= 680px) {
-  .settingsSearchResults {
-    margin-block-end: 80px;
-  }
+/* The window controls of a custom title bar sit over the maximized header's
+   corners, at physical window edges. */
+/* stylelint-disable liberty/use-logical-spec */
+.app.customTitleBar .settingsWindow.maximized .settingsWindowHeader {
+  padding-left: max(10px, var(--title-bar-inset-left));
+  padding-right: max(10px, var(--title-bar-inset-right));
 }
-
-@media only screen and (width > 680px) and (width <= 1015px) {
-  .settingsSearchMobileCard {
-    margin-block-start: -18px;
-  }
-
-}
+/* stylelint-enable liberty/use-logical-spec */

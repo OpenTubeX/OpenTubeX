@@ -1,0 +1,53 @@
+import { findPlatformChannel, getPlatformChannelRoute } from '../../platforms/index.js'
+import { isYtDlpMediaUrl } from '../../ytDlpArguments.js'
+import { isYouTubeHostname } from '../../youTubeHostname.js'
+
+/**
+ * URLs entered in the search bar may be handed to yt-dlp for media extraction.
+ * Keep this limited to web URLs, with no embedded credentials.
+ * @param {unknown} value
+ */
+export function isExternalMediaUrl(value) {
+  return isYtDlpMediaUrl(value)
+}
+
+export function isYouTubeMediaUrl(value) {
+  if (!isExternalMediaUrl(value)) return false
+  return isYouTubeHostname(new URL(value).hostname)
+}
+
+/**
+ * Keep YouTube and the selected Invidious instance on their existing routes.
+ * Other sites go straight to yt-dlp before the YouTube path parser can mistake
+ * e.g. `vimeo.com/12345` for a channel.
+ * @param {unknown} value
+ * @param {string} invidiousInstanceUrl
+ */
+export function shouldOpenExternalMediaUrl(value, invidiousInstanceUrl = '') {
+  if (!isExternalMediaUrl(value)) return false
+
+  const url = new URL(value)
+  const hostname = url.hostname.toLowerCase().replace(/\.$/, '')
+  if (isYouTubeHostname(hostname) || hostname === 'redirect.invidious.io') return false
+
+  try {
+    const instance = new URL(invidiousInstanceUrl)
+    const instanceHost = instance.hostname.toLowerCase().replace(/\.$/, '')
+    const instancePath = instance.pathname.replace(/\/$/, '')
+    if (url.protocol === instance.protocol && hostname === instanceHost && url.port === instance.port &&
+      (url.pathname === instancePath || url.pathname.startsWith(`${instancePath}/`))) return false
+  } catch { /* No configured instance. */ }
+
+  return true
+}
+
+/**
+ * The in-app page of a URL from another site: the channel page for channels of
+ * supported platforms, which yt-dlp would play as their live stream or first
+ * upload, and yt-dlp playback for everything else.
+ * @param {string} url
+ */
+export function getExternalUrlRoute(url) {
+  const channel = findPlatformChannel(url)
+  return channel ? getPlatformChannelRoute(channel.platform, channel.id) : { path: '/external-media', query: { url } }
+}

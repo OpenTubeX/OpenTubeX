@@ -1,0 +1,142 @@
+.autoRefreshInterval {
+  inline-size: 100%;
+  max-inline-size: 380px;
+}
+
+.autoRefreshInterval > :deep(.select) {
+  box-sizing: border-box;
+  inline-size: 100%;
+}
+
+.channelsHeader {
+  --input-bottom-spacing: 0;
+
+  display: grid;
+  flex: none;
+  gap: 16px;
+  padding-block: 0 20px;
+  padding-inline: 20px;
+}
+
+.channelsHeader p {
+  margin: 0;
+}
+
+.channelsHeader :deep(.ft-input-component) {
+  inline-size: 100%;
+  margin-block: 0;
+}
+
+.channelsScroller {
+  flex: 1;
+  min-block-size: 0;
+  padding-inline: 20px;
+}
+
+.emptyState {
+  color: var(--tertiary-text-color);
+  margin: 0;
+  padding-block-end: 24px;
+}
+
+.channelList {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding-block: 0 24px;
+  padding-inline: 0;
+}
+
+.channelRow {
+  align-items: center;
+  border: 1px solid var(--tertiary-text-color);
+  border-radius: var(--shape-corner-medium);
+  display: flex;
+  gap: 12px;
+  padding-block: 8px;
+  padding-inline: 16px 8px;
+}
+
+.channelAvatar {
+  block-size: 32px;
+  border-radius: 50%;
+  flex: none;
+  inline-size: 32px;
+  object-fit: cover;
+}
+
+.channelText {
+  display: grid;
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.channelName,
+.channelPlatform {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.channelPlatform {
+  color: var(--tertiary-text-color);
+  font-size: 0.85em;
+}
+
+.channelInput {
+  position: relative;
+}
+
+/* Runs along the inside of the field's bottom border, clear of its rounded corners */
+.addChannelProgress {
+  position: absolute;
+  inset-block-end: 1px;
+  inset-inline: calc(4px * var(--ui-roundness));
+  block-size: 2px;
+  overflow: hidden;
+  background-color: color-mix(in srgb, var(--primary-color) 25%, transparent);
+  pointer-events: none;
+}
+
+/* Moves with translate, measured in its own 40% width, so the endless
+   animation does not lay out the page on every frame. */
+.addChannelProgress::before {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  inline-size: 40%;
+  background-color: var(--primary-color);
+  content: '';
+  animation: add-channel-progress 1.2s ease-in-out infinite;
+}
+
+.addChannelProgress:dir(rtl)::before {
+  animation-name: add-channel-progress-rtl;
+}
+
+/* Without animations, a full bar still shows that the channel loads */
+:root[data-reduced-motion='reduce'] .addChannelProgress::before {
+  inline-size: 100%;
+  animation: none;
+}
+
+@keyframes add-channel-progress {
+  from {
+    translate: -100%;
+  }
+
+  to {
+    translate: 250%;
+  }
+}
+
+@keyframes add-channel-progress-rtl {
+  from {
+    translate: 100%;
+  }
+
+  to {
+    translate: -250%;
+  }
+}

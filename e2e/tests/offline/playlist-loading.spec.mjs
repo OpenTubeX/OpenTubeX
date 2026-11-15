@@ -1,0 +1,699 @@
+import { choosePickerPaths, test, expect, goTo, sel, updateInputWithoutScrolling } from '../../helpers/app.mjs'
+import { fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
+
+test.use({
+  seed: {
+    settings: {
+      backendPreference: 'invidious',
+      backendFallback: false,
+      // Suggestions would contact the fake instance and block playlist requests
+      // while network recovery waits for that unrelated request to succeed.
+      enableSearchSuggestions: false,
+      defaultInvidiousInstance: 'https://invidious.test',
+      generalAutoLoadMorePaginatedItemsEnabled: true
+    }
+  }
+})
+
+function playlistVideo(index, videoId = `video-${String(index).padStart(5, '0')}`) {
+  return {
+    type: 'video',
+    title: `Playlist video ${index + 1}`,
+    videoId,
+    author: 'Playlist channel',
+    authorId: 'UCplaylistchannel',
+    authorUrl: '/channel/UCplaylistchannel',
+    videoThumbnails: [],
+    index,
+    lengthSeconds: 60,
+    liveNow: false
+  }
+}
+
+function playlistResponse(videos, videoCount = videos.length) {
+  return {
+    type: 'playlist',
+    title: 'Pagination test playlist',
+    playlistId: 'pagination-test',
+    author: 'Playlist channel',
+    authorId: 'UCplaylistchannel',
+    authorThumbnails: [
+      { url: 'https://yt3.ggpht.com/test=s32' },
+      { url: 'https://yt3.ggpht.com/test=s48' },
+      { url: 'https://yt3.ggpht.com/test=s76' }
+    ],
+    description: '',
+    descriptionHtml: '',
+    videoCount,
+    viewCount: 1,
+    updated: 1_700_000_000,
+    videos
+  }
+}
+
+async function openPlaylistTab(page, route) {
+  const tab = await page.evaluate((playlistRoute) => window.ftElectron.tabs.create({
+    route: playlistRoute,
+    makeActive: false
+  }), route)
+  await page.locator(`.tab[data-tab-id="${tab.id}"]`).click()
+  await expect(page).toHaveURL(/#\/playlist\//)
+}
+
+test('loads an Invidious Mix response from the playlist endpoint', async ({ page, attachScreenshot }) => {
+  await page.route('https://invidious.test/vi/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
+  const playlistId = 'RDnGusAJYHcjo'
+  const errors = []
+  page.on('console', message => {
+    if (message.type() === 'error') errors.push(message.text())
+  })
+  // Invidious redirects RD playlists to /mixes, whose JSON only has these fields.
+  await page.route(new RegExp(`/api/v1/playlists/${playlistId}\\?`), route => route.fulfill({
+    json: {
+      title: 'Mix - Playlist video 1',
+      mixId: playlistId,
+      videos: [playlistVideo(0, 'nGusAJYHcjo'), playlistVideo(1)],
+    },
+  }))
+
+  await openPlaylistTab(page, `/playlist/${playlistId}`)
+
+  const playlistPage = page.locator('.playlistPage')
+  await expect(playlistPage.getByText('Playlist video 1', { exact: true })).toBeVisible()
+  await expect(playlistPage.getByText('Playlist video 2', { exact: true })).toBeVisible()
+  await expect(playlistPage.locator('.playlistInfo')).toContainText('2 videos')
+  await expect(playlistPage.locator('.playlistInfo')).not.toContainText('Invalid Date')
+  await expect(playlistPage.locator('.playlistInfo')).not.toContainText('Last Updated')
+  await expect(playlistPage.locator('.playlistInfo')).not.toContainText('views')
+  await expect(playlistPage.locator('.playlistChannel')).toHaveCount(0)
+  await expect(playlistPage.locator('.ft-auto-load-next-page-wrapper')).toHaveCount(0)
+  await expect(playlistPage.locator('.playlistThumbnail a')).toHaveAttribute('href', /\/watch\/nGusAJYHcjo/)
+  expect(errors).toEqual([])
+  await attachScreenshot('loaded-invidious-mix')
+
+  await playlistPage.getByText('Playlist video 1', { exact: true }).click()
+  const watchPlaylist = page.locator('.watchVideoPlaylist')
+  await expect(watchPlaylist.locator('.playlistItem')).toHaveCount(2)
+  await expect(watchPlaylist.locator('.playlistIndex label')).toHaveText('1 / 2')
+  await expect(watchPlaylist.locator('.playlistIndexBadge')).toHaveText(['1', '2'])
+  await expect(watchPlaylist.locator('.videoIndexIcon')).toHaveCount(1)
+})
+
+test('displays an unknown Mix video count without a negative badge', async ({ page, attachScreenshot }) => {
+  await page.route('https://invidious.test/api/v1/search/**', route => route.fulfill({
+    json: [{
+      type: 'playlist',
+      title: 'Mix - Playlist video 1',
+      playlistId: 'RDnGusAJYHcjo',
+      playlistThumbnail: 'https://i.ytimg.com/vi/nGusAJYHcjo/hqdefault.jpg',
+      author: 'YouTube',
+      authorId: '',
+      videoCount: -1,
+      videos: [],
+    }],
+  }))
+
+  await page.locator(sel.searchInput).fill('mix')
+  await page.locator(sel.searchInput).press('Enter')
+
+  const mix = page.getByRole('link', { name: 'Mix - Playlist video 1' }).last()
+    .locator('xpath=ancestor::div[contains(@class, "ft-list-item")]')
+  await expect(mix.locator('.videoCountContainer')).toHaveText('∞')
+  await attachScreenshot('mix-search-count')
+})
+
+test('settles a missing user playlist into a persistent not-found state', async ({ page }) => {
+  await openPlaylistTab(page, '/playlist/missing-playlist?playlistType=user')
+
+  const playlistPage = page.locator('.playlistPage')
+  await expect(playlistPage.getByText('This playlist does not exist', { exact: true })).toBeVisible()
+  await expect(playlistPage.locator('[data-tab-loading-indicator]')).toHaveCount(0)
+})
+
+test('shows a persistent initial error and retries without navigation', async ({ page }) => {
+  let requestCount = 0
+  await page.route(/\/api\/v1\/playlists\/initial-retry\?/, async (route) => {
+    requestCount++
+    if (requestCount === 1) {
+      await route.fulfill({ status: 500, json: { error: 'Synthetic initial failure' } })
+    } else {
+      await route.fulfill({ json: playlistResponse([playlistVideo(0)]) })
+    }
+  })
+
+  await openPlaylistTab(page, '/playlist/initial-retry')
+
+  const playlistPage = page.locator('.playlistPage')
+  await expect(playlistPage.getByText('This playlist could not be loaded.', { exact: true })).toBeVisible()
+  await playlistPage.getByRole('button', { name: 'Retry', exact: true }).click()
+
+  await expect(playlistPage.getByText('Playlist video 1', { exact: true })).toBeVisible()
+  expect(requestCount).toBe(2)
+})
+
+test('saves a YouTube playlist as a read-only link and persists it', async ({ app, page }) => {
+  const playlistId = 'saved-playlist'
+  const response = {
+    ...playlistResponse([playlistVideo(0)], 1),
+    title: 'Saved YouTube playlist',
+    playlistId,
+  }
+  const mockPlaylist = currentPage => currentPage.route(
+    new RegExp(`/api/v1/playlists/${playlistId}\\?`),
+    route => route.fulfill({ json: response })
+  )
+
+  await mockPlaylist(page)
+  await page.route('https://invidious.test/vi/video-00000/maxresdefault.jpg', route => route.fulfill({
+    contentType: 'image/svg+xml',
+    body: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="9"/>',
+  }))
+  await openPlaylistTab(page, `/playlist/${playlistId}`)
+
+  const saveButton = page.getByTitle('Save Playlist')
+  await expect(saveButton).toHaveAttribute('aria-pressed', 'false')
+  await saveButton.click()
+  await expect(page.getByTitle('Remove Saved Playlist')).toHaveAttribute('aria-pressed', 'true')
+
+  await goTo(page, 'userplaylists')
+  const savedPlaylistLink = page.getByRole('link', { name: 'Saved YouTube playlist' })
+  await expect(savedPlaylistLink).toBeVisible()
+  const savedPlaylistCard = savedPlaylistLink
+    .locator('xpath=ancestor::div[contains(@class, "ft-list-item")]')
+  const savedPlaylistThumbnail = savedPlaylistCard.locator('img.thumbnailImage:not(.retryImagePlaceholder)')
+  await expect(savedPlaylistThumbnail).toHaveAttribute(
+    'src',
+    'https://invidious.test/vi/video-00000/maxresdefault.jpg'
+  )
+  await expect.poll(() => savedPlaylistThumbnail.evaluate(image => image.naturalWidth))
+    .toBeGreaterThan(0)
+
+  ;({ page } = await app.relaunch())
+  await goTo(page, 'userplaylists')
+  await expect(page.getByRole('link', { name: 'Saved YouTube playlist' })).toBeVisible()
+  await page.getByRole('link', { name: 'Saved YouTube playlist' }).click({ button: 'right' })
+  await page.getByRole('menuitem', { name: 'Pin to Top', exact: true }).click()
+  await expect.poll(() => page.evaluate(() => window.$store.getters.getUserPlaylistsPinnedIds)).toEqual([playlistId])
+
+  await mockPlaylist(page)
+  await page.getByRole('link', { name: 'Saved YouTube playlist' }).click()
+  await expect(page).toHaveURL(new RegExp(`#/playlist/${playlistId}(?:\\?|$)`))
+  await expect(page.getByTitle('Edit Playlist Info')).toHaveCount(0)
+
+  await page.getByTitle('Remove Saved Playlist').click()
+  await goTo(page, 'userplaylists')
+  await expect(page.getByRole('link', { name: 'Saved YouTube playlist' })).toHaveCount(0)
+  // Saving it again should not restore the pin.
+  await expect.poll(() => page.evaluate(() => window.$store.getters.getUserPlaylistsPinnedIds)).toEqual([])
+})
+
+test('keeps the search result thumbnail when saving a playlist', async ({ page }) => {
+  await page.route('https://invidious.test/vi/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
+  const playlistId = 'search-thumbnail-playlist'
+  const searchThumbnailVideoId = 'search-thumbnail-video'
+  const firstPlaylistVideoId = 'first-playlist-video'
+
+  await page.route('https://invidious.test/api/v1/search/**', route => route.fulfill({
+    json: [{
+      type: 'playlist',
+      title: 'Playlist with search thumbnail',
+      playlistId,
+      playlistThumbnail: `https://i.ytimg.com/vi/${searchThumbnailVideoId}/hqdefault.jpg`,
+      author: 'Playlist channel',
+      authorId: 'UCplaylistchannel',
+      authorUrl: '/channel/UCplaylistchannel',
+      authorVerified: false,
+      videoCount: 1,
+      videos: [],
+    }],
+  }))
+  await page.route(new RegExp(`/api/v1/playlists/${playlistId}\\?`), route => route.fulfill({
+    json: {
+      ...playlistResponse([playlistVideo(0, firstPlaylistVideoId)], 1),
+      title: 'Playlist with search thumbnail',
+      playlistId,
+    },
+  }))
+
+  await page.locator(sel.searchInput).fill('playlist thumbnail')
+  await page.locator(sel.searchInput).press('Enter')
+
+  const searchResultLink = page.getByRole('link', { name: 'Playlist with search thumbnail' }).last()
+  const searchResultCard = searchResultLink
+    .locator('xpath=ancestor::div[contains(@class, "ft-list-item")]')
+  const searchResultThumbnail = searchResultCard.locator('img.thumbnailImage:not(.retryImagePlaceholder)')
+  const expectedThumbnail = `https://invidious.test/vi/${searchThumbnailVideoId}/maxresdefault.jpg`
+  await expect(searchResultThumbnail).toHaveAttribute('src', expectedThumbnail)
+
+  await searchResultLink.click()
+  await page.getByTitle('Save Playlist').click()
+  await goTo(page, 'userplaylists')
+
+  const savedPlaylistLink = page.getByRole('link', { name: 'Playlist with search thumbnail' }).last()
+  const savedPlaylistCard = savedPlaylistLink
+    .locator('xpath=ancestor::div[contains(@class, "ft-list-item")]')
+  await expect(savedPlaylistCard.locator('img.thumbnailImage:not(.retryImagePlaceholder)'))
+    .toHaveAttribute('src', expectedThumbnail)
+})
+
+test('refreshes saved playlist metadata after opening the playlist again', async ({ app, page }) => {
+  await page.route('https://invidious.test/vi/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
+  const playlistId = 'dynamic-saved-playlist'
+  let firstVideoId = 'original-first-video'
+  let videoCount = 1
+  let playlistTitle = 'Dynamic saved playlist'
+  let playlistDescription = 'Original playlist description'
+  let channelName = 'Playlist channel'
+  let channelId = 'UCplaylistchannel'
+  let channelAvatar = 'https://yt3.ggpht.com/original-avatar=s76'
+  const getSavedPlaylistCard = () => page.locator('.ft-list-video:visible', {
+    has: page.locator(`a.title[href*="/playlist/${playlistId}"]`)
+  })
+  let markStaleRequestStarted
+  const staleRequestStarted = new Promise(resolve => { markStaleRequestStarted = resolve })
+  let releaseStaleRequest
+  const staleRequestRelease = new Promise(resolve => { releaseStaleRequest = resolve })
+  let markStaleRequestFinished
+  const staleRequestFinished = new Promise(resolve => { markStaleRequestFinished = resolve })
+
+  await page.route(new RegExp(`/api/v1/playlists/${playlistId}\\?`), route => route.fulfill({
+    json: {
+      ...playlistResponse([playlistVideo(0, firstVideoId)], videoCount),
+      title: playlistTitle,
+      description: playlistDescription,
+      playlistId,
+      author: channelName,
+      authorId: channelId,
+      authorThumbnails: [{ url: channelAvatar }],
+    },
+  }))
+  await page.route(/\/api\/v1\/playlists\/stale-thumbnail-source\?/, async route => {
+    markStaleRequestStarted()
+    await staleRequestRelease
+    await route.fulfill({
+      json: {
+        ...playlistResponse([playlistVideo(0, 'stale-first-video')], 1),
+        title: 'Stale thumbnail source',
+        playlistId: 'stale-thumbnail-source',
+      },
+    })
+    markStaleRequestFinished()
+  })
+
+  await openPlaylistTab(page, `/playlist/${playlistId}`)
+  await page.getByTitle('Save Playlist').click()
+  await goTo(page, 'userplaylists')
+
+  let savedPlaylistCard = getSavedPlaylistCard()
+  let savedPlaylistThumbnail = savedPlaylistCard.locator('img.thumbnailImage:not(.retryImagePlaceholder)')
+  await expect(savedPlaylistThumbnail).toHaveAttribute(
+    'src',
+    'https://invidious.test/vi/original-first-video/maxresdefault.jpg'
+  )
+  await expect(savedPlaylistCard.locator('.videoCountContainer')).toHaveText('1')
+
+  videoCount = 5
+  playlistTitle = 'Updated saved playlist'
+  playlistDescription = 'Updated playlist description'
+  channelName = 'Updated playlist channel'
+  channelId = 'UCupdatedplaylistchannel'
+  channelAvatar = 'https://yt3.ggpht.com/updated-avatar=s76'
+  await openPlaylistTab(page, '/playlist/stale-thumbnail-source')
+  await staleRequestStarted
+  await page.locator(sel.searchInput).fill(`https://www.youtube.com/playlist?list=${playlistId}`)
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(page.getByText('Playlist video 1', { exact: true })).toBeVisible()
+  await expect(page.locator('.playlistInfo')).toContainText('5 videos')
+  releaseStaleRequest()
+  await staleRequestFinished
+  await goTo(page, 'userplaylists')
+
+  savedPlaylistCard = getSavedPlaylistCard()
+  savedPlaylistThumbnail = savedPlaylistCard.locator('img.thumbnailImage:not(.retryImagePlaceholder)')
+  await expect(savedPlaylistCard.locator('.h3Title')).toHaveText(playlistTitle)
+  await expect(savedPlaylistCard.locator('.channelNameText')).toHaveText(channelName)
+  await expect(savedPlaylistCard.locator('.channelName')).toHaveAttribute('href', `#/channel/${channelId}`)
+  await expect(savedPlaylistThumbnail).toHaveAttribute(
+    'src',
+    'https://invidious.test/vi/original-first-video/maxresdefault.jpg'
+  )
+  await expect(savedPlaylistCard.locator('.videoCountContainer')).toHaveText('5')
+
+  firstVideoId = 'updated-first-video'
+  await page.getByRole('link', { name: playlistTitle }).click()
+  await expect(page.getByText('Playlist video 1', { exact: true })).toBeVisible()
+  await goTo(page, 'userplaylists')
+
+  const updatedThumbnailUrl = 'https://invidious.test/vi/updated-first-video/maxresdefault.jpg'
+  await expect(savedPlaylistThumbnail).toHaveAttribute('src', updatedThumbnailUrl)
+
+  // Restore an image-free route so thumbnails cannot fail before the new
+  // page's fixture is installed, then open the persisted playlist cards.
+  await goTo(page, 'history')
+  ;({ page } = await app.relaunch())
+  await page.route('https://invidious.test/vi/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
+  await goTo(page, 'userplaylists')
+  const persistedPlaylistCard = getSavedPlaylistCard()
+  await expect(persistedPlaylistCard.locator('.h3Title')).toHaveText(playlistTitle)
+  await expect(persistedPlaylistCard.locator('.channelNameText')).toHaveText(channelName)
+  await expect(persistedPlaylistCard.locator('.channelName')).toHaveAttribute('href', `#/channel/${channelId}`)
+  await expect(persistedPlaylistCard.locator('img.thumbnailImage:not(.retryImagePlaceholder)'))
+    .toHaveAttribute('src', updatedThumbnailUrl)
+  await expect(persistedPlaylistCard.locator('.videoCountContainer')).toHaveText('5')
+  await expect(page.evaluate(id => {
+    const store = window.$store
+    return store.getters.getPlaylistBookmark(id)
+  }, playlistId)).resolves.toMatchObject({
+    playlist: {
+      title: playlistTitle,
+      description: playlistDescription,
+    },
+    uploader: {
+      id: channelId,
+      name: channelName,
+      avatar: 'https://yt3.googleusercontent.com/updated-avatar=s76',
+    },
+  })
+})
+
+test('retries the failed Invidious page and merges its overlapping videos once', async ({ page }) => {
+  const requestedPages = []
+  await page.route(/\/api\/v1\/playlists\/pagination-test\?/, async (route) => {
+    const pageNumber = new URL(route.request().url()).searchParams.get('page')
+    if (pageNumber === null) {
+      await route.fulfill({ json: playlistResponse([playlistVideo(0), playlistVideo(1)], 150) })
+      return
+    }
+
+    requestedPages.push(pageNumber)
+    if (requestedPages.length === 1) {
+      await route.fulfill({ status: 500, json: { error: 'Synthetic continuation failure' } })
+      return
+    }
+
+    await route.fulfill({
+      json: playlistResponse([playlistVideo(1), playlistVideo(2), playlistVideo(3)], 150)
+    })
+  })
+
+  await openPlaylistTab(page, '/playlist/pagination-test')
+  const playlistPage = page.locator('.playlistPage')
+  await expect(playlistPage.getByText('Playlist video 1', { exact: true })).toBeVisible()
+
+  await expect(playlistPage.getByText('More videos could not be loaded.', { exact: true })).toBeVisible()
+  await playlistPage.getByRole('button', { name: 'Retry', exact: true }).click()
+
+  await expect(playlistPage.getByText('Playlist video 4', { exact: true })).toBeVisible()
+  await expect(playlistPage.getByText('Playlist video 2', { exact: true })).toHaveCount(1)
+  await expect(playlistPage.locator('.ft-auto-load-next-page-wrapper')).toHaveCount(0)
+  expect(requestedPages).toEqual(['2', '2'])
+})
+
+test('uses the first playable video found on a later Invidious page', async ({ page }) => {
+  await page.route(/\/api\/v1\/playlists\/later-playable\?/, async (route) => {
+    const pageNumber = new URL(route.request().url()).searchParams.get('page')
+    if (pageNumber === null) {
+      await route.fulfill({
+        json: playlistResponse([{
+          ...playlistVideo(0),
+          title: '',
+          author: '',
+          authorId: null
+        }], 150)
+      })
+      return
+    }
+
+    await route.fulfill({ json: playlistResponse([playlistVideo(1)], 150) })
+  })
+
+  await openPlaylistTab(page, '/playlist/later-playable')
+  const playlistPage = page.locator('.playlistPage')
+  await expect(playlistPage.getByText('Playlist video 2', { exact: true })).toBeVisible()
+  await expect(playlistPage.locator('.playlistThumbnail a')).toHaveAttribute('href', /\/watch\/video-00001/)
+})
+
+test('ignores an Invidious continuation that finishes after playlist navigation', async ({ page }) => {
+  let markContinuationStarted
+  const continuationStarted = new Promise((resolve) => { markContinuationStarted = resolve })
+  let releaseContinuation
+  const continuationRelease = new Promise((resolve) => { releaseContinuation = resolve })
+  let markContinuationFinished
+  const continuationFinished = new Promise((resolve) => { markContinuationFinished = resolve })
+
+  await page.route(/\/api\/v1\/playlists\/(stale-source|fresh-target)\?/, async (route) => {
+    const requestUrl = new URL(route.request().url())
+    const pageNumber = requestUrl.searchParams.get('page')
+
+    if (requestUrl.pathname.endsWith('/stale-source') && pageNumber !== null) {
+      markContinuationStarted()
+      await continuationRelease
+      await route.fulfill({ json: playlistResponse([playlistVideo(99)], 150) })
+      markContinuationFinished()
+      return
+    }
+
+    const videos = requestUrl.pathname.endsWith('/stale-source')
+      ? [playlistVideo(0)]
+      : [playlistVideo(49)]
+    const count = requestUrl.pathname.endsWith('/stale-source') ? 150 : 1
+    await route.fulfill({ json: playlistResponse(videos, count) })
+  })
+
+  await openPlaylistTab(page, '/playlist/stale-source')
+  await continuationStarted
+
+  await page.locator(sel.searchInput).fill('https://www.youtube.com/playlist?list=fresh-target')
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(page).toHaveURL(/#\/playlist\/fresh-target/)
+  await expect(page.locator('.playlistPage').getByText('Playlist video 50', { exact: true })).toBeVisible()
+
+  releaseContinuation()
+  await continuationFinished
+  await page.waitForTimeout(100)
+  await expect(page.locator('.playlistPage').getByText('Playlist video 100', { exact: true })).toHaveCount(0)
+})
+
+test.describe('saved playlist thumbnails', () => {
+  test.use({
+    seed: {
+      settings: {
+        backendPreference: 'local',
+        defaultInvidiousInstance: 'https://invidious.test',
+        playlistBookmarks: [{
+          playlist: {
+            id: 'saved-local-playlist',
+            title: 'Saved local playlist',
+            description: '',
+            thumbnail_url: 'https://i.ytimg.com/vi/saved-video/mqdefault.jpg',
+            video_count: 1,
+          },
+          uploader: {
+            id: 'saved-channel',
+            name: 'Saved channel',
+            avatar: null,
+            verified: false,
+          },
+          savedAt: 1_700_000_000_000,
+        }],
+      },
+    },
+  })
+
+  test('loads a saved playlist thumbnail through the active local backend', async ({ page }) => {
+    await page.route('https://i.ytimg.com/vi/saved-video/maxresdefault.jpg', route => route.fulfill({
+      contentType: 'image/svg+xml',
+      body: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="9"/>',
+    }))
+    await page.route('https://invidious.test/vi/saved-video/maxresdefault.jpg', route => route.abort())
+
+    await goTo(page, 'userplaylists')
+
+    const playlistCard = page.getByRole('link', { name: 'Saved local playlist' })
+      .locator('xpath=ancestor::div[contains(@class, "ft-list-item")]')
+    const thumbnail = playlistCard.locator('img.thumbnailImage:not(.retryImagePlaceholder)')
+    await expect(thumbnail).toHaveAttribute(
+      'src',
+      'https://i.ytimg.com/vi/saved-video/maxresdefault.jpg'
+    )
+    await expect.poll(() => thumbnail.evaluate(image => image.naturalWidth)).toBeGreaterThan(0)
+  })
+})
+
+test.describe('YouTube playlist search', () => {
+  test.use({
+    seed: {
+      settings: {
+        backendPreference: 'invidious',
+        backendFallback: false,
+        enableSearchSuggestions: false,
+        defaultInvidiousInstance: 'https://invidious.test',
+        generalAutoLoadMorePaginatedItemsEnabled: false,
+        playlistViewType: 'list'
+      }
+    }
+  })
+
+  test('loads the remaining pages and filters every video', async ({ page, attachScreenshot }) => {
+    const requestedPages = []
+    await page.route(/\/api\/v1\/playlists\/search-test\?/, async (route) => {
+      const pageNumber = Number(new URL(route.request().url()).searchParams.get('page') ?? 1)
+      if (pageNumber > 1) requestedPages.push(pageNumber)
+      const videos = Array.from({ length: 100 }, (_, index) => playlistVideo((pageNumber - 1) * 100 + index))
+      await route.fulfill({ json: playlistResponse(videos, 300) })
+    })
+
+    await openPlaylistTab(page, '/playlist/search-test')
+    const playlistPage = page.locator('.playlistPage')
+    await expect(playlistPage.getByText('Playlist video 1', { exact: true })).toBeVisible()
+    expect(requestedPages).toEqual([])
+
+    const search = playlistPage.locator('.playlistInfo').getByRole('searchbox', { name: 'Search for Videos' })
+    await search.fill('video 25')
+    await expect(page).toHaveURL(/searchQueryText=video(%20|\+)25/)
+    // Replacing the route keeps the playlist's tab title
+    await expect(page.locator('.tab.active')).toHaveText('Pagination test playlist | Playlist channel')
+
+    const items = playlistPage.locator('.playlistItem')
+    await expect(items).toHaveCount(11)
+    await expect(items.first().locator('.playlistIndexBadge')).toHaveText('25')
+    await expect(playlistPage.getByText('Playlist video 250', { exact: true })).toBeVisible()
+    await expect(playlistPage.locator('.ft-auto-load-next-page-wrapper')).toHaveCount(0)
+    expect(requestedPages).toEqual([2, 3])
+    await attachScreenshot('youtube-playlist-search')
+
+    await search.fill('no such video')
+    await expect(playlistPage.getByText('There are no videos in this playlist that match your search', { exact: true })).toBeVisible()
+
+    await search.fill('')
+    await expect(playlistPage.getByText('Playlist video 1', { exact: true })).toBeVisible()
+    await expect(items).toHaveCount(300)
+  })
+
+  test('keeps a valid offset when searching from the end of the loaded page', { tag: '@scale' }, async ({ page }) => {
+    await page.route(/\/api\/v1\/playlists\/search-test\?/, async (route) => {
+      const pageNumber = Number(new URL(route.request().url()).searchParams.get('page') ?? 1)
+      // Only the first 90 videos match, so searching removes the videos at the end of the
+      // loaded page without moving the content above them, which scroll anchoring would follow
+      const videos = Array.from({ length: 100 }, (_, index) => {
+        const video = playlistVideo((pageNumber - 1) * 100 + index)
+        return pageNumber === 1 && index < 90 ? { ...video, title: video.title.replace('Playlist', 'Marked') } : video
+      })
+      await route.fulfill({ json: playlistResponse(videos, 300) })
+    })
+
+    await openPlaylistTab(page, '/playlist/search-test')
+    const playlistPage = page.locator('.playlistPage')
+    const items = playlistPage.locator('.playlistItem')
+    await expect(items).toHaveCount(100)
+    // Placeholders grow as they mount, so the end only counts once the last row is real
+    await expect.poll(() => page.evaluate(() => {
+      window.scrollTo(0, document.documentElement.scrollHeight)
+      const last = [...document.querySelectorAll('.playlistPage .playlistItem')].at(-1)
+      return window.scrollY > 0 && !!last.querySelector('.ft-list-video') &&
+        window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 1
+    })).toBe(true)
+    const lastItemGap = () => page.evaluate(() =>
+      window.innerHeight - [...document.querySelectorAll('.playlistPage .playlistItem')].at(-1).getBoundingClientRect().bottom)
+    const gapAtEnd = await lastItemGap()
+
+    // Typing through fill() would scroll the field into view and leave the end
+    await updateInputWithoutScrolling(playlistPage.locator('.playlistInfo').getByRole('searchbox', { name: 'Search for Videos' }), 'Marked')
+    await expect(items).toHaveCount(90)
+    await expect(playlistPage.locator('.ft-auto-load-next-page-wrapper, .loadNextPageWrapper')).toHaveCount(0)
+    await expect.poll(() => page.evaluate(() => {
+      const maximum = document.documentElement.scrollHeight - window.innerHeight
+      return { atEnd: window.scrollY > 0, offsetValid: window.scrollY <= Math.max(0, maximum) + 1 }
+    })).toEqual({ atEnd: true, offsetValid: true })
+    // No more space is left below the last result than below the last video before searching
+    await expect.poll(lastItemGap).toBeLessThanOrEqual(gapAtEnd + 1)
+  })
+
+  test('numbers search results like the playlist when a members-only video is hidden', async ({ app, page }) => {
+    await app.electronApp.evaluate(({ ipcMain }) => {
+      globalThis.__externalLaunches = []
+      ipcMain.removeHandler('open-in-external-player')
+      ipcMain.handle('open-in-external-player', (event, payload) => {
+        globalThis.__externalLaunches.push(payload.playlistIndex)
+        return null
+      })
+    })
+    await page.evaluate(() => window.$store.dispatch('updateExternalPlayer', 'mpv'))
+    await page.route(/\/api\/v1\/playlists\/members-only\?/, route => route.fulfill({
+      json: playlistResponse([playlistVideo(0), { ...playlistVideo(1), isMembersOnly: true }, playlistVideo(2)])
+    }))
+
+    await openPlaylistTab(page, '/playlist/members-only')
+    const playlistPage = page.locator('.playlistPage')
+    const indexes = playlistPage.locator('.playlistItem .playlistIndexBadge')
+    await expect(indexes).toHaveText(['1', '2'])
+    const thirdVideo = playlistPage.locator('.playlistItem').filter({ hasText: 'Playlist video 3' })
+    await thirdVideo.locator('.externalPlayerIcon').click()
+
+    await playlistPage.locator('.playlistInfo').getByRole('searchbox', { name: 'Search for Videos' }).fill('video 3')
+    await expect(indexes).toHaveText(['2'])
+    await thirdVideo.locator('.externalPlayerIcon').click()
+
+    // The external player gets the whole playlist, so it counts the hidden video
+    await expect.poll(() => app.electronApp.evaluate(() => globalThis.__externalLaunches)).toEqual([2, 2])
+  })
+
+  test('reports an external player that cannot be started', async ({ app, page }) => {
+    await choosePickerPaths(app, page, { externalPlayerExecutable: '/nonexistent/opentubex-external-player' })
+    await page.evaluate(async () => {
+      await window.$store.dispatch('updateExternalPlayer', 'mpv')
+    })
+    await page.route(/\/api\/v1\/playlists\/missing-player\?/, route => route.fulfill({
+      json: playlistResponse([playlistVideo(0)])
+    }))
+
+    await openPlaylistTab(page, '/playlist/missing-player')
+    await page.locator('.playlistPage .playlistItem').first().locator('.externalPlayerIcon').click()
+
+    await expect(page.locator('.toast .message', {
+      hasText: 'Could not start mpv. Make sure it is installed, or set its executable path in the external player settings.'
+    })).toBeVisible()
+    await expect(page.locator('.toast .message', { hasText: 'Opening' })).toHaveCount(0)
+    expect(await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().length)).toBeGreaterThan(0)
+  })
+
+  test('keeps a restored search editable on a playlist with one video', async ({ page }) => {
+    await page.route(/\/api\/v1\/playlists\/single-video\?/, route => route.fulfill({
+      json: playlistResponse([playlistVideo(0)])
+    }))
+
+    await openPlaylistTab(page, '/playlist/single-video?searchQueryText=no%20match')
+    const playlistPage = page.locator('.playlistPage')
+    const search = playlistPage.locator('.playlistInfo').getByRole('searchbox', { name: 'Search for Videos' })
+    await expect(search).toHaveValue('no match')
+    await expect(playlistPage.getByText('There are no videos in this playlist that match your search', { exact: true })).toBeVisible()
+
+    await search.fill('')
+    await expect(playlistPage.getByText('Playlist video 1', { exact: true })).toBeVisible()
+  })
+})
+
+test.describe('user playlist search', () => {
+  test.use({
+    seed: {
+      settings: { playlistViewType: 'list' },
+      playlists: [{
+        _id: 'duration-sorted',
+        playlistName: 'Duration sorted',
+        sortOrder: 'video_duration_descending',
+        videos: [
+          { videoId: 'aaaaaaaaaaa', playlistItemId: 'item-a', title: 'Alpha clip', author: 'Channel', lengthSeconds: 10, type: 'video' },
+          { videoId: 'bbbbbbbbbbb', playlistItemId: 'item-b', title: 'Beta clip', author: 'Channel', lengthSeconds: 30, type: 'video' },
+          { videoId: 'ccccccccccc', playlistItemId: 'item-c', title: 'Gamma', author: 'Channel', lengthSeconds: 20, type: 'video' }
+        ]
+      }]
+    }
+  })
+
+  test('numbers duration-sorted search results by their playlist position', async ({ page }) => {
+    await openPlaylistTab(page, '/playlist/duration-sorted?playlistType=user&searchQueryText=clip')
+    const items = page.locator('.playlistPage .playlistItem')
+    await expect(items).toHaveCount(2)
+    await expect(items.locator('.playlistIndexBadge')).toHaveText(['2', '1'])
+  })
+})

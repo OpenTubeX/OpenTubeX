@@ -1,0 +1,15 @@
+{
+  "appId": "org.opentubex.app",
+  "appName": "OpenTubeX",
+  "webDir": "dist/capacitor",
+  "loggingBehavior": "none",
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_opentubex",
+      "iconColor": "#FF3B30"
+    }
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}

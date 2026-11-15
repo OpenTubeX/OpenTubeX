@@ -1,136 +1,109 @@
 <template>
   <FtIconButton
     ref="iconButton"
+    class="shareButton"
     :title="shareTitle"
     theme="secondary"
     :size="size"
     :icon="['fas', 'share-alt']"
     :dropdown-modal-on-mobile="true"
     dropdown-position-x="left"
+    dropdown-class="content-width"
     :dropdown-position-y="dropdownPositionY"
     :force-dropdown="true"
   >
-    <FtFlexBox>
-      <FtToggleSwitch
-        v-if="isVideo"
-        :label="t('Share.Include Timestamp')"
-        :compact="true"
-        :default-value="includeTimestamp"
-        @change="updateIncludeTimestamp"
-      />
-    </FtFlexBox>
-    <div class="shareLinks">
-      <div class="header">
-        <img
-          id="youtubeShareImage"
-          class="youtubeLogo"
-          src="~../../assets/img/yt_logo_mono_dark.png"
-          alt="YouTube"
-          width="794"
-          height="178"
-        >
+    <div class="shareMenu">
+      <div
+        v-if="isVideo && !externalUrl"
+        class="shareTimestamp"
+      >
+        <FtIcon
+          class="shareTimestampIcon"
+          :icon="['fas', 'clock']"
+          aria-hidden="true"
+        />
+        <FtToggleSwitch
+          :label="t('Share.Include Timestamp')"
+          compact
+          trailing
+          :default-value="includeTimestamp"
+          @change="updateIncludeTimestamp"
+        />
       </div>
-
-      <div class="buttons">
-        <FtButton
-          class="action"
-          aria-describedby="youtubeShareImage"
-          :icon="['fas', 'copy']"
-          :label="t('Share.Copy Link')"
-          @click="copyYoutube"
-        />
-        <FtButton
-          class="action"
-          aria-describedby="youtubeShareImage"
-          :icon="['fas', 'globe']"
-          :label="t('Share.Open Link')"
-          @click="openYoutube"
-        />
+      <div class="shareLinks">
         <template
-          v-if="isVideo || isPlaylist"
+          v-for="(section, sectionIndex) in shareSections"
+          :key="section.id"
         >
-          <FtButton
-            class="action"
-            aria-describedby="youtubeShareImage"
-            background-color="var(--accent-color-active)"
-            :icon="['fas', 'copy']"
-            :label="t('Share.Copy Embed')"
-            @click="copyYoutubeEmbed"
+          <div
+            v-if="sectionIndex > 0"
+            class="shareSectionDivider"
           />
-          <FtButton
-            class="action"
-            aria-describedby="youtubeShareImage"
-            background-color="var(--accent-color-active)"
-            :icon="['fas', 'globe']"
-            :label="t('Share.Open Embed')"
-            @click="openYoutubeEmbed"
-          />
+          <section
+            class="shareSection"
+            :aria-labelledby="section.id"
+          >
+            <div
+              :id="section.id"
+              class="shareSectionHeader"
+            >
+              <img
+                v-if="section.kind === 'youtube'"
+                class="youtubeLogo"
+                src="~../../assets/img/yt_logo_mono_dark.png"
+                alt="YouTube"
+                width="794"
+                height="178"
+              >
+              <template v-else-if="section.kind === 'invidious'">
+                <span class="invidiousLogo" /> Invidious
+              </template>
+              <template v-else>
+                {{ section.label }}
+              </template>
+            </div>
+            <template
+              v-for="action in section.actions"
+              :key="action.label"
+            >
+              <div
+                v-if="action.embedStart"
+                class="shareActionDivider"
+              />
+              <button
+                type="button"
+                class="shareAction promptAction"
+                @click="action.run"
+              >
+                <FtIcon
+                  :icon="action.icon"
+                  aria-hidden="true"
+                />
+                <span>{{ action.label }}</span>
+              </button>
+            </template>
+          </section>
         </template>
       </div>
-
-      <template v-if="showInvidiousOptions">
-        <div class="divider" />
-
-        <div
-          id="invidiousShare"
-          class="header invidious"
-        >
-          <span class="invidiousLogo" /> Invidious
-        </div>
-
-        <div class="buttons">
-          <FtButton
-            aria-describedby="invidiousShare"
-            class="action"
-            :icon="['fas', 'copy']"
-            :label="t('Share.Copy Link')"
-            @click="copyInvidious"
-          />
-          <FtButton
-            aria-describedby="invidiousShare"
-            class="action"
-            :icon="['fas', 'globe']"
-            :label="t('Share.Open Link')"
-            @click="openInvidious"
-          />
-          <template
-            v-if="isVideo || isPlaylist"
-          >
-            <FtButton
-              aria-describedby="invidiousShare"
-              class="action"
-              background-color="var(--accent-color-active)"
-              :icon="['fas', 'copy']"
-              :label="t('Share.Copy Embed')"
-              @click="copyInvidiousEmbed"
-            />
-            <FtButton
-              aria-describedby="invidiousShare"
-              class="action"
-              background-color="var(--accent-color-active)"
-              :icon="['fas', 'globe']"
-              :label="t('Share.Open Embed')"
-              @click="openInvidiousEmbed"
-            />
-          </template>
-        </div>
-      </template>
     </div>
   </FtIconButton>
 </template>
 
 <script setup>
-import { computed, ref, useTemplateRef } from 'vue'
-import { copyToClipboard, openExternalLink } from '../../helpers/utils'
+import { computed, ref, useId, useTemplateRef } from 'vue'
+import { copyToClipboard, openExternalLink, shareLink } from '../../helpers/utils'
+import { appendTimestamp, getInvidiousVideoUrl, getYoutubeVideoShareUrl } from '../../helpers/share'
 import { useI18n } from 'vue-i18n'
 
-import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
+import { FtIcon } from '@opentubex/icons'
+
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
-import FtButton from '../FtButton/FtButton.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 import store from '../../store/index'
+import { usesInvidiousInstance } from '../../../apiBackends'
 
 const { t } = useI18n()
+const canShare = process.env.IS_CAPACITOR || (process.env.IS_ELECTRON && ['darwin', 'win32'].includes(process.platform))
 
 const props = defineProps({
   shareTargetType: {
@@ -145,6 +118,10 @@ const props = defineProps({
   id: {
     type: String,
     required: true
+  },
+  externalUrl: {
+    type: String,
+    default: ''
   },
   playlistId: {
     type: String,
@@ -164,6 +141,7 @@ const props = defineProps({
   }
 })
 
+const sectionId = useId()
 const includeTimestamp = ref(false)
 const iconButton = useTemplateRef('iconButton')
 
@@ -181,6 +159,14 @@ const isPost = computed(() => {
 
 const isVideo = computed(() => {
   return props.shareTargetType === 'Video'
+})
+
+const externalHostname = computed(() => {
+  try {
+    return new URL(props.externalUrl).hostname
+  } catch {
+    return ''
+  }
 })
 
 const shareTitle = computed(() => {
@@ -201,7 +187,7 @@ const currentInvidiousInstanceUrl = computed(() => {
 })
 
 const showInvidiousOptions = computed(() => {
-  return store.getters.getBackendPreference === 'invidious' || store.getters.getBackendFallback
+  return usesInvidiousInstance(store.getters.getBackendPreference, store.getters.getBackendFallback)
 })
 
 const selectedUserPlaylist = computed(() => {
@@ -226,13 +212,11 @@ const invidiousURL = computed(() => {
   if (isPost.value) {
     return `${currentInvidiousInstanceUrl.value}/post/${props.id}`
   }
-  let videoUrl = `${currentInvidiousInstanceUrl.value}/watch?v=${props.id}`
-  // `playlistId` can be undefined
-  if (playlistSharable.value) {
-    // `index` seems can be ignored
-    videoUrl += `&list=${props.playlistId}`
-  }
-  return videoUrl
+  return getInvidiousVideoUrl(
+    currentInvidiousInstanceUrl.value,
+    props.id,
+    playlistSharable.value ? props.playlistId : ''
+  )
 })
 
 const invidiousEmbedURL = computed(() => {
@@ -278,12 +262,7 @@ const youtubeShareURL = computed(() => {
   if (isPost.value) {
     return `https://www.youtube.com/post/${props.id}`
   }
-  const videoUrl = `https://youtu.be/${props.id}`
-  if (playlistSharable.value) {
-    // `index` seems can be ignored
-    return `${videoUrl}?list=${props.playlistId}`
-  }
-  return videoUrl
+  return getYoutubeVideoShareUrl(props.id, playlistSharable.value ? props.playlistId : '')
 })
 
 const youtubeEmbedURL = computed(() => {
@@ -293,8 +272,75 @@ const youtubeEmbedURL = computed(() => {
   return `https://www.youtube-nocookie.com/embed/${props.id}`
 })
 
-if (isVideo.value && !props.getTimestamp) {
+/**
+ * @param {() => void} share
+ * @param {() => void} copy
+ * @param {() => void} open
+ * @param {{ copy: () => void, open: () => void } | null} [embed]
+ */
+function linkActions(share, copy, open, embed = null) {
+  return [
+    ...(canShare ? [{ icon: ['fas', 'share-alt'], label: t('Share.Share Link'), run: share }] : []),
+    { icon: ['fas', 'copy'], label: t('Share.Copy Link'), run: copy },
+    { icon: ['fas', 'globe'], label: t('Share.Open Link'), run: open },
+    ...(embed
+      ? [
+          { icon: ['fas', 'copy'], label: t('Share.Copy Embed'), run: embed.copy, embedStart: true },
+          { icon: ['fas', 'globe'], label: t('Share.Open Embed'), run: embed.open }
+        ]
+      : [])
+  ]
+}
+
+const shareSections = computed(() => {
+  if (props.externalUrl) {
+    return [{ id: `${sectionId}-external`, kind: 'external', label: externalHostname.value, actions: linkActions(shareExternal, copyExternal, openExternal) }]
+  }
+  const hasEmbed = isVideo.value || isPlaylist.value
+  const sections = [{
+    id: `${sectionId}-youtube`,
+    kind: 'youtube',
+    actions: linkActions(shareYoutube, copyYoutube, openYoutube, hasEmbed ? { copy: copyYoutubeEmbed, open: openYoutubeEmbed } : null)
+  }]
+  if (showInvidiousOptions.value) {
+    sections.push({
+      id: `${sectionId}-invidious`,
+      kind: 'invidious',
+      actions: linkActions(shareInvidious, copyInvidious, openInvidious, hasEmbed ? { copy: copyInvidiousEmbed, open: openInvidiousEmbed } : null)
+    })
+  }
+  return sections
+})
+
+if (isVideo.value && !props.externalUrl && !props.getTimestamp) {
   console.error('Error in props validation: A Video FtShareButton requires a valid get-timestamp function.')
+}
+
+function shareExternal() {
+  iconButton.value.hideDropdown()
+  return shareLink(props.externalUrl)
+}
+
+function copyExternal() {
+  copyToClipboard(props.externalUrl)
+  iconButton.value.hideDropdown()
+}
+
+function openExternal() {
+  openExternalLink(props.externalUrl)
+  iconButton.value.hideDropdown()
+}
+
+function shareYoutube() {
+  const url = getFinalUrl(youtubeShareURL.value)
+  iconButton.value.hideDropdown()
+  return shareLink(url)
+}
+
+function shareInvidious() {
+  const url = getFinalUrl(invidiousURL.value)
+  iconButton.value.hideDropdown()
+  return shareLink(url)
 }
 
 function openInvidious() {
@@ -303,7 +349,9 @@ function openInvidious() {
 }
 
 function copyInvidious() {
-  copyToClipboard(getFinalUrl(invidiousURL.value), { messageOnSuccess: t('Share.Invidious URL copied to clipboard') })
+  copyToClipboard(getFinalUrl(invidiousURL.value), {
+    messageOnSuccess: getCopySuccessMessage(t('Share.Invidious URL copied to clipboard'))
+  })
   iconButton.value.hideDropdown()
 }
 
@@ -313,7 +361,9 @@ function openYoutube() {
 }
 
 function copyYoutube() {
-  copyToClipboard(getFinalUrl(youtubeShareURL.value), { messageOnSuccess: t('Share.YouTube URL copied to clipboard') })
+  copyToClipboard(getFinalUrl(youtubeShareURL.value), {
+    messageOnSuccess: getCopySuccessMessage(t('Share.YouTube URL copied to clipboard'))
+  })
   iconButton.value.hideDropdown()
 }
 
@@ -323,7 +373,9 @@ function openYoutubeEmbed() {
 }
 
 function copyYoutubeEmbed() {
-  copyToClipboard(getFinalUrl(youtubeEmbedURL.value), { messageOnSuccess: t('Share.YouTube Embed URL copied to clipboard') })
+  copyToClipboard(getFinalUrl(youtubeEmbedURL.value), {
+    messageOnSuccess: getCopySuccessMessage(t('Share.YouTube Embed URL copied to clipboard'))
+  })
   iconButton.value.hideDropdown()
 }
 
@@ -333,8 +385,14 @@ function openInvidiousEmbed() {
 }
 
 function copyInvidiousEmbed() {
-  copyToClipboard(getFinalUrl(invidiousEmbedURL.value), { messageOnSuccess: t('Share.Invidious Embed URL copied to clipboard') })
+  copyToClipboard(getFinalUrl(invidiousEmbedURL.value), {
+    messageOnSuccess: getCopySuccessMessage(t('Share.Invidious Embed URL copied to clipboard'))
+  })
   iconButton.value.hideDropdown()
+}
+
+function getCopySuccessMessage(defaultMessage) {
+  return includeTimestamp.value ? t('Share.Timestamp Link Copied') : defaultMessage
 }
 
 function updateIncludeTimestamp() {
@@ -345,10 +403,7 @@ function getFinalUrl(url) {
   if (isChannel.value || isPlaylist.value || isPost.value) {
     return url
   }
-  if (url.indexOf('?') === -1) {
-    return includeTimestamp.value ? `${url}?t=${props.getTimestamp()}` : url
-  }
-  return includeTimestamp.value ? `${url}&t=${props.getTimestamp()}` : url
+  return includeTimestamp.value ? appendTimestamp(url, props.getTimestamp()) : url
 }
 </script>
 <style scoped src="./FtShareButton.css" />

@@ -7,17 +7,11 @@
     @click="click"
     @keydown.space.enter.prevent="click"
   >
-    <div
+    <FtProfileIcon
       class="bubble"
-      :style="{ background: backgroundColor, color: textColor }"
-    >
-      <div
-        class="initial"
-        dir="auto"
-      >
-        {{ profileInitial }}
-      </div>
-    </div>
+      :profile="profile"
+      :fallback="profileInitial"
+    />
     <div
       :id="id"
       class="profileName"
@@ -33,6 +27,7 @@ import { computed, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { getFirstCharacter } from '../../helpers/strings'
+import FtProfileIcon from '../FtProfileIcon/FtProfileIcon.vue'
 
 const props = defineProps({
   profileName: {
@@ -50,6 +45,10 @@ const props = defineProps({
   textColor: {
     type: String,
     required: true
+  },
+  icon: {
+    type: Object,
+    default: null
   }
 })
 
@@ -66,6 +65,12 @@ const profileInitial = computed(() => {
     ? getFirstCharacter(translatedProfileName.value, locale.value)
     : ''
 })
+
+const profile = computed(() => ({
+  bgColor: props.backgroundColor,
+  textColor: props.textColor,
+  icon: props.icon
+}))
 
 const emit = defineEmits(['click'])
 

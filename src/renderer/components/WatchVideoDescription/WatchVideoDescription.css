@@ -1,55 +1,300 @@
 .videoDescription {
   position: relative;
+
+  /* Keep the layered controls inside the card, below dropdowns from earlier cards. */
+  isolation: isolate;
   display: flex;
   flex-direction: column;
+}
+
+.videoDescription:not(:has(.descriptionStatus)) {
+  padding-block: 16px;
+}
+
+.descriptionScroll {
   overflow-y: auto;
+  overflow-anchor: none;
   max-block-size: 20lh;
+
+  /* stretch into the card's inline padding so the scrollbar stays anchored to the card edge */
+  margin-inline: -16px;
+  padding-inline: 16px;
+}
+
+.videoDescription.short .descriptionScroll {
+  max-block-size: 5lh;
+  overflow-y: clip;
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 16px), transparent);
+}
+
+.videoDescription.alwaysExpanded .descriptionScroll {
+  max-block-size: none;
+  overflow: visible;
+}
+
+.videoDescription:not(.short, .alwaysExpanded) .descriptionScroll {
+  --description-fade-size: 16px;
+  --description-scrollbar-reserve: 14px;
+  --description-fade-top: #000;
+  --description-fade-bottom: #000;
+
+  /* Fade clipped text at either edge while keeping the overlay scrollbar sharp. */
+  mask-image:
+    linear-gradient(
+      to bottom,
+      var(--description-fade-top),
+      #000 var(--description-fade-size),
+      #000 calc(100% - var(--description-fade-size)),
+      var(--description-fade-bottom)
+    ),
+    linear-gradient(#000 0 0);
+  mask-size:
+    calc(100% - var(--description-scrollbar-reserve)) 100%,
+    var(--description-scrollbar-reserve) 100%;
+  mask-position: 0 0, 100% 0;
+  mask-repeat: no-repeat;
+  mask-composite: add;
+}
+
+.videoDescription:not(.short, .alwaysExpanded) .descriptionScroll.descriptionFadeTop {
+  --description-fade-top: transparent;
+}
+
+.videoDescription:not(.short, .alwaysExpanded) .descriptionScroll.descriptionFadeBottom {
+  --description-fade-bottom: transparent;
+}
+
+.videoDescription:not(.short, .alwaysExpanded) .descriptionScroll:dir(rtl) {
+  mask-position: 100% 0, 0 0;
 }
 
 .description {
-  font-family: Roboto, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  font-family: var(--app-font-family);
   font-size: 17px;
+  line-height: 1.4;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+  padding-inline-end: 40px;
 }
 
-.descriptionStatus {
-  margin: 0;
-  text-decoration: underline;
-  cursor: pointer;
-  color: var(--title-color);
+.videoDescription:not(:has(.descriptionStatus)) .description {
+  margin-block: 0;
+}
+
+.descriptionCopyButton {
+  position: absolute;
+  z-index: 2;
+  inset-block-start: 8px;
+  inset-inline-end: 8px;
 }
 
 .videoDescription.short {
   cursor: pointer;
 }
 
-.videoDescription.short .descriptionStatus {
-  position: absolute;
-  inset-block-end: calc(1lh + 12px);
-  padding-block: 2px;
-  inset-inline-end: 16px;
-  padding-inline-start: 40px;
-  background: linear-gradient(270deg, var(--card-bg-color) 75%, transparent 100%);
-  text-decoration: none;
+/* Full-width footer that toggles the description, like an expandable card. */
+.descriptionStatus {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-block-size: 40px;
+  margin-block: 0 -16px;
+  margin-inline: -16px;
+  padding-block: 8px;
+  padding-inline: 16px;
+  border: 0;
+  border-block-start: 1px solid var(--divider-color);
+  border-end-start-radius: inherit;
+  border-end-end-radius: inherit;
+  background-color: transparent;
+  color: var(--secondary-text-color);
+  font-family: var(--app-font-family);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  cursor: pointer;
+  transition: background-color var(--motion-fast-effects), color var(--motion-fast-effects);
 }
 
-.videoDescription:not(.short) .descriptionStatus {
-  position: relative;
-  margin-block-start: 1em;
+.descriptionStatus:is(:hover, :focus-visible) {
+  background-color: color-mix(in srgb, var(--primary-text-color) 8%, transparent);
+  color: var(--primary-text-color);
 }
 
-.videoDescription.short .descriptionStatus:dir(rtl) {
-  background: linear-gradient(270deg, transparent 0%, var(--card-bg-color) 25%);
+.descriptionStatus:active {
+  background-color: color-mix(in srgb, var(--primary-text-color) 12%, transparent);
+}
+
+.descriptionStatus:focus-visible {
+  outline: 2px solid var(--primary-text-color);
+  outline-offset: -3px;
 }
 
 .videoDescription.short .description {
-  max-block-size: 4lh;
+  /* Measure overflow in the text separately from the collapsed card. */
+  min-block-size: 1lh;
+  max-block-size: 5lh;
   overflow: hidden;
 }
 
+.videoDescription.short .description:empty {
+  min-block-size: 0;
+}
+
+/* Without text, the empty paragraph's top margin spaces the first metadata section from the card edge. */
+.description:empty + * {
+  margin-block-start: 0;
+}
+
+.descriptionContentEnd {
+  display: block;
+}
+
+.videoDescription:has(.descriptionStatus) .descriptionContentEnd {
+  /* Keep the last content clear of the footer and bottom fade. */
+  block-size: 16px;
+}
+
 .license {
-  margin-block: 1em;
+  /* bdi is inline by default, block keeps the margins now that it isn't a flex item */
+  display: block;
+
+  /* The sections after it bring their own top margins. */
+  margin-block: 1em 0;
+}
+
+.videoTags {
+  margin-block-start: 1em;
+  overflow-wrap: anywhere;
+}
+
+.videoTagList {
+  display: flex;
+  flex-flow: row wrap;
+  gap: 5px 15px;
+  justify-content: center;
+  margin-block: 0.75em 0;
+  margin-inline: 0;
+  padding: 0;
+}
+
+.videoTag {
+  display: flex;
+  list-style: none;
+}
+
+.videoTagLink {
+  background-color: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
+  backdrop-filter: var(--secondary-card-bg-blur, none);
+  color: var(--primary-text-color);
+  border-radius: var(--shape-corner-small);
+  padding: 7px;
+  text-decoration: none;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+}
+
+.videoTagLink:hover {
+  background-color: color-mix(in srgb, var(--primary-color) 26%, var(--card-bg-color));
+}
+
+.videoTagLink:active {
+  border-radius: var(--shape-corner-extra-small);
+}
+
+.gamesHeading,
+.musicHeading {
+  margin-block: 1em 0.5em;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--primary-text-color);
+}
+
+.gameList,
+.musicTrackList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.game {
+  display: flex;
+
+  /* shrink wrap, so that the empty space next to the game isn't clickable too */
+  inline-size: fit-content;
+  align-items: flex-start;
+  gap: 16px;
+  padding-block: 6px;
+  color: inherit;
+  text-decoration: none;
+}
+
+/* YouTube renders the box art at 164x230, the source image is 160x224 */
+.gameBoxArt {
+  inline-size: 160px;
+  block-size: 224px;
+  object-fit: cover;
+  border-radius: var(--shape-corner-medium);
+}
+
+.gameText {
+  display: flex;
+  flex-direction: column;
+}
+
+.gameTitle {
+  color: var(--primary-text-color);
+}
+
+.gameSubtitle {
+  font-size: 14px;
+  color: var(--secondary-text-color);
+}
+
+.musicTrack {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-block: 6px;
+}
+
+.musicTrackArt {
+  flex-shrink: 0;
+  inline-size: 64px;
+  block-size: 64px;
+  object-fit: cover;
+  border-radius: var(--shape-corner-small);
+}
+
+.musicTrackText {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.musicTrackTitle {
+  color: var(--primary-text-color);
+}
+
+.musicTrackArtist,
+.musicTrackDetail {
+  font-size: 14px;
+  color: var(--secondary-text-color);
+}
+
+.musicTrackTitle,
+.musicTrackArtist {
+  text-decoration: none;
+}
+
+.musicTrackTitle[href]:hover,
+.musicTrackArtist[href]:hover,
+.musicTrackTitle[href]:focus-visible,
+.musicTrackArtist[href]:focus-visible {
+  text-decoration: underline;
 }
 
 .contentDisclosureSection {
@@ -59,7 +304,8 @@
 .contentDisclosureTitle {
   font-size: 20px;
   font-weight: 600;
-  margin-block-end: 12px;
+  letter-spacing: -0.01em;
+  margin-block: 0 12px;
 }
 
 .contentDisclosureHeader {

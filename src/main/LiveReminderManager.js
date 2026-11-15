@@ -1,0 +1,133 @@
+// @ts-check
+import { createSerialQueue } from './serialQueue.js'
+
+const MAX_TIMER_DELAY = 2_147_483_647
+// A stream that started while the app was closed is likely still live.
+const MISSED_REMINDER_GRACE_MS = 60 * 60 * 1000
+
+export class LiveReminderManager {
+  constructor({
+    notify,
+    onChange,
+    datastore,
+    now = Date.now,
+    setTimer = setTimeout,
+    clearTimer = clearTimeout
+  }) {
+    this.notify = notify
+    this.onChange = onChange
+    this.now = now
+    this.datastore = datastore
+    this.setTimer = setTimer
+    this.clearTimerCallback = clearTimer
+    this.reminders = new Map()
+    this.timers = new Map()
+    this.enqueue = createSerialQueue()
+  }
+
+  initialize() {
+    return this.enqueue(async () => {
+      const reminders = await this.datastore.findAsync({})
+
+      for (const reminder of reminders) {
+        if (
+          typeof reminder.videoId !== 'string' ||
+          !Number.isFinite(reminder.startTimestamp) ||
+          reminder.startTimestamp <= this.now() - MISSED_REMINDER_GRACE_MS
+        ) {
+          await this.datastore.removeAsync({ _id: reminder._id })
+        } else {
+          this.reminders.set(reminder.videoId, reminder)
+          // A reminder that came due while the app was closed fires right away.
+          this.armTimer(reminder)
+        }
+      }
+    })
+  }
+
+  /** @param {string} videoId */
+  get(videoId) {
+    return this.enqueue(() => this.reminders.get(videoId) ?? null)
+  }
+
+  list() {
+    return this.enqueue(() => [...this.reminders.values()].sort((a, b) => a.startTimestamp - b.startTimestamp))
+  }
+
+  /** @param {import('./liveReminderIpc').LiveReminderRequest} reminder */
+  schedule(reminder) {
+    return this.enqueue(async () => {
+      if (reminder.startTimestamp <= this.now()) {
+        return false
+      }
+
+      const record = { ...reminder, _id: reminder.videoId }
+      await this.datastore.updateAsync(
+        { _id: record._id },
+        record,
+        { upsert: true }
+      )
+      this.reminders.set(record.videoId, record)
+      this.armTimer(record)
+      this.onChange(record.videoId, true)
+      return true
+    })
+  }
+
+  /** @param {string} videoId */
+  cancel(videoId) {
+    return this.enqueue(async () => {
+      await this.datastore.removeAsync({ _id: videoId })
+      this.clearTimer(videoId)
+      const removed = this.reminders.delete(videoId)
+      if (removed) {
+        this.onChange(videoId, false)
+      }
+      return removed
+    })
+  }
+
+  armTimer(reminder) {
+    this.clearTimer(reminder.videoId)
+    const delay = Math.max(0, Math.min(reminder.startTimestamp - this.now(), MAX_TIMER_DELAY))
+
+    this.timers.set(reminder.videoId, this.setTimer(() => {
+      this.timers.delete(reminder.videoId)
+      if (reminder.startTimestamp > this.now()) {
+        this.armTimer(reminder)
+      } else {
+        this.fire(reminder.videoId)
+      }
+    }, delay))
+  }
+
+  clearTimer(videoId) {
+    const timer = this.timers.get(videoId)
+    if (timer !== undefined) {
+      this.clearTimerCallback(timer)
+      this.timers.delete(videoId)
+    }
+  }
+
+  fire(videoId) {
+    this.enqueue(async () => {
+      const reminder = this.reminders.get(videoId)
+      if (!reminder || reminder.startTimestamp > this.now()) {
+        if (reminder) this.armTimer(reminder)
+        return
+      }
+
+      try {
+        await this.datastore.removeAsync({ _id: reminder._id })
+      } catch (error) {
+        // Still notify; the next startup removes the expired record.
+        console.error('Failed to remove a due live stream reminder', error)
+      }
+      this.reminders.delete(videoId)
+      this.onChange(videoId, false)
+      this.notify(reminder)
+    }).catch(error => {
+      console.error('Failed to show live stream reminder', error)
+    })
+  }
+}

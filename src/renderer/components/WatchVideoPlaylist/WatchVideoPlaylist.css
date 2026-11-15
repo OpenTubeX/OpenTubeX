@@ -1,7 +1,18 @@
 .playlistTitle {
+  letter-spacing: -0.01em;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+}
+
+.playlistTitleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  min-inline-size: 0;
+  margin-block-end: 4px;
+  padding-block-start: 8px;
 }
 
 .playlistTitleLink,
@@ -12,13 +23,9 @@
 
 .channelName {
   font-size: 15px;
-  position: relative;
-  inset-block-end: 0;
 }
 
 .playlistIndex {
-  position: relative;
-  inset-block-end: 0;
   color: var(--tertiary-text-color);
 }
 
@@ -37,10 +44,11 @@
   cursor: pointer;
   background-color: var(--secondary-text-color);
   block-size: 6px;
-  border-radius: 3px;
+  border-radius: var(--shape-corner-full);
   overflow: visible;
   position: relative;
-  transition: block-size 0.2s ease, margin-block 0.2s ease;
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- a small progress bar grows on hover and with progress */
+  transition: block-size var(--motion-fast-effects), margin-block var(--motion-fast-effects);
 }
 
 .playlistProgressBar.expanded {
@@ -52,21 +60,27 @@
   block-size: 100%;
   background-color: var(--accent-color);
   border-radius: inherit;
-  transition: inline-size 0.2s ease;
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- a small progress bar grows on hover and with progress */
+  transition: inline-size var(--motion-default-effects);
 }
 
 .progressBarPreview {
   position: absolute;
   inset-block-start: -65px;
+  max-inline-size: var(--playlist-preview-max-inline-size);
   transform: translateX(-50%);
   z-index: 10;
   pointer-events: none;
 }
 
 .previewTooltip {
+  box-sizing: border-box;
+  inline-size: max-content;
+  max-inline-size: 100%;
   background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
   border: 1px solid var(--primary-border-color);
-  border-radius: 8px;
+  border-radius: var(--shape-corner-medium);
   padding-block: 8px;
   padding-inline: 12px;
   font-size: 12px;
@@ -77,7 +91,7 @@
   display: grid;
   grid-template:
     'thumb index title' auto /
-    max-content max-content max-content;
+    max-content max-content minmax(0, 240px);
   align-items: center;
   gap: 8px;
 }
@@ -87,7 +101,7 @@
   block-size: 36px;
   inline-size: 48px;
   object-fit: cover;
-  border-radius: 4px;
+  border-radius: var(--shape-corner-extra-small);
 }
 
 .previewText {
@@ -98,7 +112,8 @@
   grid-area: title;
   font-weight: 400;
   color: var(--secondary-text-color);
-  inline-size: 240px;
+  min-inline-size: 0;
+  max-inline-size: 240px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -123,53 +138,56 @@
   margin-block: 8px;
 }
 
+.phonePlaylistActions {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+}
+
+.phonePlaylistActions .playlistButton.playlistButtonActive {
+  color: var(--accent-color);
+}
+
 .playlistButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background-color: transparent;
   font-size: 20px;
-  line-height: 1em;
+  line-height: 0;
   padding: 10px;
   margin-block-start: -25px;
   cursor: pointer;
   border-radius: 50%;
   border-style: none;
   color: var(--tertiary-text-color);
-  transition: background 0.2s ease-out;
-  stroke-width: 20;
-  stroke: var(--bg-color);
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+}
+
+.playlistButton:active {
+  border-radius: var(--shape-corner-medium);
+}
+
+.playlistButton :deep(.ft-icon) {
+  display: block;
+  vertical-align: 0;
 }
 
 .playlistButton:hover {
   background-color: var(--side-nav-hover-color);
   color: var(--side-nav-hover-text-color);
-  stroke-width: 20;
-  stroke: var(--side-nav-hover-color);
-  transition: background 0.2s ease-in;
 }
 
 .playlistButtonActive {
   color: var(--accent-color);
-  stroke-width: 10;
-  stroke: var(--accent-color);
 }
 
 .playlistButtonActive:hover {
   background-color: var(--side-nav-hover-color);
   color: var(--accent-color-hover);
-  stroke-width: 10;
-  stroke: var(--accent-color-hover);
-  transition: background 0.2s ease-in;
 }
 
-.playlistHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  margin-block-end: 4px;
-  padding-block-start: 8px;
-}
-
-.playlistHeader .playlistCollapseButton {
+.playlistTitleRow .playlistCollapseButton {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -180,36 +198,219 @@
   font-size: 16px;
 }
 
-.playlistHeader .playlistTitle {
+.playlistTitleRow .playlistTitle {
   flex: 1;
   min-inline-size: 0;
   margin: 0;
 }
 
 .playlistIcon {
+  display: block;
   inline-size: 1em;
+  block-size: 1em;
+  line-height: 0;
+  vertical-align: 0;
 }
 
 .playlistItemsWrapper {
   overflow-y: auto;
+  overflow-anchor: none;
   block-size: 360px;
+  min-block-size: 180px;
+  resize: vertical;
 }
 
+.fullscreenPlaylist {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  box-sizing: border-box;
+  flex-direction: column;
+  block-size: auto;
+  min-block-size: 0;
+  margin: 0 !important;
+  padding: 0;
+  overflow: hidden;
+}
+
+.fullscreenPlaylistContent {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-block-size: 0;
+  box-sizing: border-box;
+  padding-block: 8px 16px;
+  padding-inline: 16px;
+
+  /* The playlist items provide the dock's scroll viewport. Keep this wrapper
+     visible so the progress preview can extend over the dock header. */
+  overflow: visible;
+}
+
+.fullscreenPlaylist .playlistHeader {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
+}
+
+.playlistDockHeader {
+  display: flex;
+  flex: 0 0 52px;
+  box-sizing: border-box;
+  inline-size: 100%;
+  align-items: center;
+  gap: 9px;
+  margin-inline: 0;
+  padding-inline: 16px 8px;
+  background-color: rgb(20 20 20 / 52%);
+  border-block-end: 1px solid rgb(255 255 255 / 10%);
+}
+
+.playlistDockClose {
+  display: grid;
+  flex: 0 0 36px;
+  place-items: center;
+  inline-size: 36px;
+  block-size: 36px;
+  margin-inline-start: auto;
+  padding: 0;
+  color: #fff;
+  background-color: transparent;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+}
+
+.playlistDockClose:active {
+  border-radius: var(--shape-corner-medium);
+}
+
+.playlistDockClose:hover,
+.playlistDockClose:focus-visible {
+  background-color: rgb(255 255 255 / 20%);
+}
+
+.playlistDockHeader h3 {
+  min-inline-size: 0;
+  margin: 0;
+  overflow: hidden;
+  font-size: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fullscreenPlaylist .playlistItemsWrapper {
+  flex: 1 1 auto;
+  block-size: 0;
+  min-block-size: 0;
+  overflow: hidden auto;
+  overscroll-behavior: contain;
+  resize: none;
+}
+
+.fullscreenPlaylist :is(.fullscreenPlaylistContent, .playlistItemsWrapper) {
+  --scrollbar-color: rgb(255 255 255 / 45%);
+  --scrollbar-color-hover: rgb(255 255 255 / 65%);
+}
+
+.phonePlaylist,
+.phonePlaylist > div {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-block-size: 0;
+}
+
+.phonePlaylist .playlistItemsWrapper {
+  flex: 1;
+  block-size: 0;
+  min-block-size: 0;
+  resize: none;
+}
+
+.phonePlaylist .playlistHeader {
+  flex: none;
+}
+
+.playlistItemsWrapper::-webkit-resizer {
+  background:
+    linear-gradient(
+      135deg,
+      transparent 0 55%,
+      var(--tertiary-text-color) 55% 61%,
+      transparent 61% 70%,
+      var(--tertiary-text-color) 70% 76%,
+      transparent 76%
+    ) var(--card-bg-color);
+}
+
+/* Rows form one segmented list: large outer corners, tight inner ones. */
 .playlistItem {
   display: grid;
-  grid-template-columns: fit-content(50px) 1fr;
+  grid-template-columns: fit-content(50px) minmax(0, 1fr) auto;
   align-items: center;
-  transition: background 0.2s ease-out;
+  background-color: color-mix(in srgb, var(--primary-text-color) 6%, transparent);
+  border-radius: var(--shape-corner-extra-small);
+  transition: background-color var(--motion-default-effects);
+}
+
+.playlistItem-move {
+  transition: transform var(--motion-default-effects);
+}
+
+.playlistItem :deep(.videoSwipeFrame),
+.playlistItem :deep(.info) {
+  min-inline-size: 0;
+}
+
+.playlistItem :deep(.playlistItemMenu) {
+  margin-inline-end: var(--scrollbar-track-width);
 }
 
 .playlistItem:not(:last-child) {
-  margin-block-end: 8px;
+  margin-block-end: 2px;
 }
 
 .playlistItem:hover {
   background-color: var(--side-nav-hover-color);
   color: var(--side-nav-hover-text-color);
-  transition: background 0.2s ease-in;
+}
+
+.fullscreenPlaylist .playlistItem {
+  align-items: start;
+}
+
+.fullscreenPlaylist .playlistItem :deep(.ft-list-item) {
+  padding-block: 4px;
+}
+
+.fullscreenPlaylist .playlistItem :deep(.title) {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.playlistItem:first-child {
+  border-start-start-radius: var(--shape-corner-large-increased);
+  border-start-end-radius: var(--shape-corner-large-increased);
+}
+
+/* The overlay scrollbars follow the rows inside the scroller. */
+.playlistItem:nth-last-child(1 of .playlistItem) {
+  border-end-start-radius: var(--shape-corner-large-increased);
+  border-end-end-radius: var(--shape-corner-large-increased);
+}
+
+/* The current video is the only row with the play icon in its index area. */
+.playlistItem:has(> .videoIndexArea .videoIndexIcon) {
+  background-color: color-mix(in srgb, var(--primary-color) 24%, transparent);
+}
+
+.playlistItem:has(> .videoIndexArea .videoIndexIcon):hover {
+  background-color: color-mix(in srgb, var(--primary-color) 32%, transparent);
 }
 
 .videoInfo {
@@ -260,5 +461,125 @@
   .playlistProgressBar {
     block-size: 12px;
     margin-block: -3px;
+  }
+}
+
+@media (width <= 600px), (height <= 600px) {
+  .phonePlaylist .channelNameSeparator,
+  .phonePlaylist .playlistIndex,
+  .fullscreenPlaylist .channelNameSeparator,
+  .fullscreenPlaylist .playlistIndex {
+    display: none;
+  }
+}
+
+@media (orientation: landscape) and (height <= 600px) {
+  .fullscreenPlaylistContent {
+    padding-block: 4px 8px;
+    padding-inline: 8px;
+  }
+
+  .fullscreenPlaylist .playlistHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .fullscreenPlaylist .playlistHeader > .channelName {
+    display: none;
+  }
+
+  .fullscreenPlaylist .playlistButtons {
+    display: flex;
+    margin: 0;
+  }
+
+  .fullscreenPlaylist .playlistButton {
+    inline-size: var(--phone-touch-target, 48px);
+    block-size: var(--phone-touch-target, 48px);
+    margin: 0;
+    padding: 8px;
+  }
+
+  .fullscreenPlaylist .playlistItem {
+    align-items: center;
+    grid-template-columns: 32px minmax(0, 1fr) auto;
+  }
+
+  /* Match the child card's thumbnail rule so its fixed height cannot win. */
+  /* stylelint-disable-next-line selector-max-compound-selectors */
+  .fullscreenPlaylist .playlistItem :deep(.ft-list-item .videoThumbnail .thumbnailImage) {
+    inline-size: 80px;
+    block-size: 45px;
+    object-fit: cover;
+  }
+
+  .fullscreenPlaylist .playlistItem :deep(.info) {
+    min-inline-size: 0;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  /* stylelint-disable-next-line selector-max-compound-selectors */
+  .fullscreenPlaylist :deep(.ft-list-item .info .infoLine) {
+    font-size: 11px;
+    row-gap: 3px;
+  }
+
+  /* stylelint-disable-next-line selector-max-compound-selectors */
+  .fullscreenPlaylist :deep(.ft-list-item .info .infoLine .videoInfo) {
+    column-gap: 0.5em;
+  }
+
+  .fullscreenPlaylist :deep(.videoThumbnail) {
+    inline-size: 80px;
+    grid-template-columns: max-content minmax(0, 1fr);
+  }
+
+  /* stylelint-disable-next-line selector-max-compound-selectors */
+  .fullscreenPlaylist :deep(.ft-list-item .videoThumbnail > *) {
+    grid-column: 1 / -1;
+  }
+
+  /* stylelint-disable-next-line selector-max-compound-selectors */
+  .fullscreenPlaylist :deep(.ft-list-item .videoThumbnail .playlistIndexBadge) {
+    grid-column: 1;
+  }
+
+  /* Match the child card's overlay rule to keep the labels apart. */
+  /* stylelint-disable-next-line selector-max-compound-selectors */
+  .fullscreenPlaylist :deep(.ft-list-item .videoThumbnail .videoWatched),
+  /* stylelint-disable-next-line selector-max-compound-selectors */
+  .fullscreenPlaylist :deep(.ft-list-item .videoThumbnail .playlistIndexBadge) {
+    margin-block: 2px 0;
+    font-size: 10px;
+    padding-block: 1px;
+  }
+
+  /* stylelint-disable-next-line selector-max-compound-selectors */
+  .fullscreenPlaylist :deep(.ft-list-item .videoThumbnail .videoWatched) {
+    grid-column: 2;
+    place-self: start end;
+    box-sizing: border-box;
+    min-inline-size: 0;
+    max-inline-size: calc(100% - 4px);
+    margin-inline: 0 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Not even the SponsorBlock icon fits beside the duration in these thumbnails. */
+  .fullscreenPlaylist :deep(.sponsorBlockVideoLabel) {
+    display: none;
+  }
+
+  .fullscreenPlaylist .playlistItem :deep(.restArea) {
+    display: none;
+  }
+
+  .fullscreenPlaylist .playlistItem :deep(.videoIndexArea) {
+    margin-block: 0;
   }
 }

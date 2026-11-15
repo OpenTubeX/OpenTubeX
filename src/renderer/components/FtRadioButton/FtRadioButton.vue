@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="pure-radiobutton filter">
     <h3 class="radioTitle">
       {{ title }}
     </h3>
@@ -17,7 +17,6 @@
         type="radio"
       >
       <label
-        class="label"
         :for="id + values[index]"
       >
         {{ label }}

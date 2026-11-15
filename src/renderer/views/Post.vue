@@ -1,6 +1,11 @@
 <template>
   <div>
     <FtLoader v-if="isLoading" />
+    <FtCard v-else-if="unsupported">
+      <p class="message">
+        {{ $t('Yattee Server.Unsupported page', { fallbackSetting: $t('Settings.General Settings.Fallback to Non-Preferred Backend on Failure') }) }}
+      </p>
+    </FtCard>
     <template
       v-else
     >
@@ -16,18 +21,18 @@
         :id="post.postId"
         :channel-name="post.author"
         :post-author-id="authorId"
-        :video-player-ready="false"
         :force-state="null"
         :is-post-comments="true"
         :channel-thumbnail="post.authorThumbnails[0].url"
         :show-sort-by="backendPreference == 'local'"
+        :initial-comment-count="post.commentCount"
       />
     </template>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, ref, shallowRef, watch } from 'vue'
+import { computed, ref, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 
@@ -37,22 +42,27 @@ import FtLoader from '../components/FtLoader/FtLoader.vue'
 import CommentSection from '../components/CommentSection/CommentSection.vue'
 
 import store from '../store/index'
+import { usesInvidiousApi } from '../../apiBackends'
 
 import { getInvidiousCommunityPost } from '../helpers/api/invidious'
+import { YatteeUnsupportedError } from '../helpers/api/yattee'
 import { getLocalCommunityPost } from '../helpers/api/local'
-import { copyToClipboard, showToast } from '../helpers/utils'
+import { getInvidiousApiErrorMessage, showInvidiousFallbackToast, showApiErrorToast, showToast } from '../helpers/utils'
+import { useTabTitle } from '../tabs/TabContext'
 
 const { t } = useI18n()
 
 const router = useRouter()
 const route = useRoute()
+const setTabTitle = useTabTitle()
 
 const id = ref('')
 const authorId = ref('')
 const post = shallowRef(null)
 const isLoading = ref(true)
+const unsupported = ref(false)
 
-/** @type {import('vue').ComputedRef<'invidious' | 'local'>} */
+/** @type {import('vue').ComputedRef<'local' | 'invidious' | 'yattee'>} */
 const backendPreference = computed(() => {
   return store.getters.getBackendPreference
 })
@@ -67,19 +77,31 @@ const hideComments = computed(() => {
   return store.getters.getHideComments
 })
 
-onMounted(async () => {
-  id.value = route.params.id
-  authorId.value = route.query.authorId
-
-  if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
-    await loadDataInvidiousAsync()
-  } else {
-    await loadDataLocalAsync()
-  }
+const subscriptionCacheReady = computed(() => {
+  return store.getters.getSubscriptionCacheReady
 })
 
+let postLoadGeneration = 0
+
+async function loadPost() {
+  const generation = ++postLoadGeneration
+  id.value = route.params.id
+  authorId.value = route.query.authorId
+  post.value = null
+  isLoading.value = true
+  unsupported.value = false
+
+  if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backendPreference.value)) {
+    await loadDataInvidiousAsync(generation)
+  } else {
+    await loadDataLocalAsync(generation)
+  }
+}
+
 function updateTitleAndRoute() {
-  store.commit('setAppTitle', post.value.author)
+  const titlePrefix = 'Community Post'
+  const title = post.value.author ? `${titlePrefix} | ${post.value.author}` : titlePrefix
+  setTabTitle(title)
   isLoading.value = false
 
   // If the authorId is missing from the URL we should add it,
@@ -95,56 +117,59 @@ function updateTitleAndRoute() {
   }
 }
 
-async function loadDataLocalAsync() {
+async function loadDataLocalAsync(generation) {
   try {
-    post.value = await getLocalCommunityPost(id.value, authorId.value)
+    const loadedPost = await getLocalCommunityPost(id.value, authorId.value)
+    if (generation !== postLoadGeneration) return
+    post.value = loadedPost
     authorId.value = post.value.authorId
     updateTitleAndRoute()
   } catch (error) {
+    if (generation !== postLoadGeneration) return
     console.error(error)
     const errorMessage = t('Local API Error (Click to copy)')
-    showToast(`${errorMessage}: ${error}`, 10000, () => {
-      copyToClipboard(error)
-    })
+    showApiErrorToast(errorMessage, error)
     if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast(t('Falling back to Invidious API'))
-      await loadDataInvidiousAsync()
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
+      await loadDataInvidiousAsync(generation)
     } else {
       isLoading.value = false
     }
   }
 }
 
-async function loadDataInvidiousAsync() {
+async function loadDataInvidiousAsync(generation) {
   try {
-    post.value = await getInvidiousCommunityPost(id.value, authorId.value)
+    const loadedPost = await getInvidiousCommunityPost(id.value, authorId.value)
+    if (generation !== postLoadGeneration) return
+    post.value = loadedPost
     authorId.value = post.value.authorId
     updateTitleAndRoute()
   } catch (error) {
+    if (generation !== postLoadGeneration) return
     console.error(error)
-    const errorMessage = t('Invidious API Error (Click to copy)')
-    showToast(`${errorMessage}: ${error}`, 10000, () => {
-      copyToClipboard(error)
-    })
+    const isUnsupported = error instanceof YatteeUnsupportedError
+    if (!isUnsupported) {
+      showApiErrorToast(getInvidiousApiErrorMessage(backendPreference.value), error)
+    }
 
-    if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showToast(t('Falling back to Local API'))
-      await loadDataLocalAsync()
+    if (process.env.SUPPORTS_LOCAL_API && usesInvidiousApi(backendPreference.value) && backendFallback.value) {
+      showInvidiousFallbackToast(backendPreference.value)
+      await loadDataLocalAsync(generation)
     } else {
+      unsupported.value = isUnsupported
       isLoading.value = false
     }
   }
 }
 
-watch(() => route.params.id, async () => {
-  // react to route changes...
-  isLoading.value = true
-  id.value = route.params.id
-  authorId.value = route.query.authorId
-  if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
-    await loadDataInvidiousAsync()
-  } else {
-    await loadDataLocalAsync()
+// Single trigger for the initial load and any subsequent route id change.
+// loadPost resets the route-derived state (id, authorId, post, isLoading)
+// before loading either backend.
+watch(() => route.params.id, loadPost, { immediate: true })
+watch([() => route.params.id, subscriptionCacheReady], ([postId, cacheReady]) => {
+  if (cacheReady) {
+    store.dispatch('markSubscriptionPostAsSeen', postId)
   }
-})
+}, { immediate: true })
 </script>

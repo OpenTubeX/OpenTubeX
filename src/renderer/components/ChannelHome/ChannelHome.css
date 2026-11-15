@@ -1,10 +1,17 @@
 .shelfContainer {
   margin-block-start: 0.5em;
-  max-inline-size: 85vw;
+  margin-inline: auto;
+  max-inline-size: 85dvw;
+}
+
+.shelfContainer:first-child {
+  margin-block-start: 0;
 }
 
 .shelfTitle {
   font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   cursor: pointer;
 
   /* Prevents overflow for long values */
@@ -23,6 +30,8 @@
 
 .playAllSpan {
   font-size: 18px;
+  font-weight: 400;
+  letter-spacing: normal;
   margin-inline-start: 10px;
 }
 
@@ -30,12 +39,23 @@
   font-style: italic;
   padding-block: 5px;
   padding-inline: 7px;
-  border-radius: 10px;
+  border-radius: var(--shape-corner-medium);
   text-decoration: none;
+  transition: background-color var(--motion-fast-effects);
+}
+
+/* The radius only transitions under the pointer, so UI Roundness changes stay
+   instant. */
+.playAllLink:is(:hover, :active) {
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 }
 
 .playAllLink:hover {
   background-color: var(--bg-color);
+}
+
+.playAllLink:active {
+  border-radius: var(--shape-corner-small);
 }
 
 .shelfSubtitle {

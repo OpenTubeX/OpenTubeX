@@ -1,6 +1,49 @@
 import store from '../store/index'
+import packageDetails from '../../../package.json'
+import { selectSponsorBlockFullVideoLabel } from './player/sponsorBlockFullVideo'
 
-async function getVideoHash(videoId) {
+const SPONSOR_BLOCK_ID_CHARSET = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+const SPONSOR_BLOCK_USER_ID_LENGTH = 30
+// Each entry covers every video sharing a hash prefix, so cards with the same
+// prefix and remounted cards reuse one response.
+const SPONSOR_BLOCK_VIDEO_LABEL_CACHE_SIZE = 256
+/** @type {Map<string, Promise<{ videoID: string, segments: object[] }[]>>} */
+const sponsorBlockVideoLabelCache = new Map()
+const VIDEO_HASH_CACHE_SIZE = 1024
+/** @type {Map<string, Promise<string>>} */
+const videoHashCache = new Map()
+
+function generateSponsorBlockUserId() {
+  const randomValues = new Uint32Array(SPONSOR_BLOCK_USER_ID_LENGTH)
+  crypto.getRandomValues(randomValues)
+
+  return Array.from(randomValues, value => {
+    return SPONSOR_BLOCK_ID_CHARSET[value % SPONSOR_BLOCK_ID_CHARSET.length]
+  }).join('')
+}
+
+/**
+ * SponsorBlock and DeArrow look videos up by the same hash prefix and list
+ * cards request both, so the digest only runs once per video.
+ * @param {string} videoId
+ * @returns {Promise<string>}
+ */
+function getVideoHash(videoId) {
+  let hash = videoHashCache.get(videoId)
+
+  if (!hash) {
+    hash = digestVideoHash(videoId)
+
+    if (videoHashCache.size >= VIDEO_HASH_CACHE_SIZE) {
+      videoHashCache.delete(videoHashCache.keys().next().value)
+    }
+    videoHashCache.set(videoId, hash)
+  }
+
+  return hash
+}
+
+async function digestVideoHash(videoId) {
   const videoIdBuffer = new TextEncoder().encode(videoId)
 
   const hashBuffer = await crypto.subtle.digest('SHA-256', videoIdBuffer)
@@ -10,13 +53,32 @@ async function getVideoHash(videoId) {
     hashArray[1].toString(16).padStart(2, '0')
 }
 
+async function getUserHash(userId) {
+  const textEncoder = new TextEncoder()
+  let hashHex = userId
+
+  for (let round = 0; round < 5000; round++) {
+    const hashBuffer = await crypto.subtle.digest('SHA-256', textEncoder.encode(hashHex))
+    hashHex = Array.from(new Uint8Array(hashBuffer), value => {
+      return value.toString(16).padStart(2, '0')
+    }).join('')
+  }
+
+  return hashHex
+}
+
 /**
- * @typedef {'sponsor' | 'selfpromo' | 'interaction' | 'intro' | 'outro' | 'preview' | 'music_offtopic' | 'filler'} SponsorBlockCategory
+ * @typedef {'sponsor' | 'selfpromo' | 'interaction' | 'intro' | 'outro' | 'preview' | 'hook' | 'music_offtopic' | 'filler' | 'poi_highlight' | 'exclusive_access' | 'chapter'} SponsorBlockCategory
+ */
+
+/**
+ * @typedef {'skip' | 'mute' | 'full' | 'poi' | 'chapter'} SponsorBlockActionType
  */
 
 /**
  * @param {string} videoId
  * @param {SponsorBlockCategory[]} categories
+ * @param {SponsorBlockActionType[]} [actionTypes=['skip']]
  * @returns {Promise<{
  *   UUID: string,
  *   actionType: string,
@@ -31,9 +93,11 @@ async function getVideoHash(videoId) {
  *   votes: number
  * }[]>}
  */
-export async function sponsorBlockSkipSegments(videoId, categories) {
+export async function sponsorBlockSkipSegments(videoId, categories, actionTypes = ['skip']) {
   const videoIdHashPrefix = await getVideoHash(videoId)
-  const requestUrl = `${store.getters.getSponsorBlockUrl}/api/skipSegments/${videoIdHashPrefix}?categories=${JSON.stringify(categories)}`
+  const requestUrl = `${store.getters.getSponsorBlockUrl}/api/skipSegments/${videoIdHashPrefix}` +
+    `?categories=${encodeURIComponent(JSON.stringify(categories))}` +
+    `&actionTypes=${encodeURIComponent(JSON.stringify(actionTypes))}`
 
   try {
     const response = await fetch(requestUrl)
@@ -58,7 +122,72 @@ export async function sponsorBlockSkipSegments(videoId, categories) {
   }
 }
 
-export async function deArrowData(videoId) {
+/**
+ * @param {string} videoId
+ * @returns {Promise<{
+ *   UUID: string,
+ *   actionType: 'full',
+ *   category: 'sponsor' | 'exclusive_access' | 'selfpromo',
+ *   locked: 1|0,
+ *   segment: [0, 0],
+ *   videoDuration: number,
+ *   votes: number
+ * } | null>}
+ */
+export async function getSponsorBlockVideoLabel(videoId) {
+  const sponsorBlockUrl = store.getters.getSponsorBlockUrl
+  const videoIdHashPrefix = await getVideoHash(videoId)
+  const cacheKey = `${sponsorBlockUrl}:${videoIdHashPrefix}`
+  let results = sponsorBlockVideoLabelCache.get(cacheKey)
+
+  if (!results) {
+    const requestUrl = `${sponsorBlockUrl}/api/videoLabels/${videoIdHashPrefix}`
+
+    results = (async () => {
+      try {
+        const response = await fetch(requestUrl)
+        // 404 means that no video with this hash prefix has labels
+        if (response.status === 404) {
+          return []
+        }
+
+        if (!response.ok) {
+          throw new Error(await response.text())
+        }
+
+        return await response.json()
+      } catch (error) {
+        sponsorBlockVideoLabelCache.delete(cacheKey)
+        console.error('failed to fetch SponsorBlock video label', requestUrl, error)
+        throw error
+      }
+    })()
+
+    if (sponsorBlockVideoLabelCache.size >= SPONSOR_BLOCK_VIDEO_LABEL_CACHE_SIZE) {
+      sponsorBlockVideoLabelCache.delete(sponsorBlockVideoLabelCache.keys().next().value)
+    }
+    sponsorBlockVideoLabelCache.set(cacheKey, results)
+  }
+
+  const segments = (await results).find(result => result.videoID === videoId)?.segments ?? []
+  return selectSponsorBlockFullVideoLabel(segments)
+}
+
+/** @type {Map<string, Promise<object | undefined>>} */
+const pendingDeArrowData = new Map()
+
+export function deArrowData(videoId) {
+  // Cards showing the same video (for example on overlapping home shelves)
+  // share one request until the result lands in the store cache.
+  let pending = pendingDeArrowData.get(videoId)
+  if (pending === undefined) {
+    pending = fetchDeArrowData(videoId).finally(() => pendingDeArrowData.delete(videoId))
+    pendingDeArrowData.set(videoId, pending)
+  }
+  return pending
+}
+
+async function fetchDeArrowData(videoId) {
   const videoIdHashPrefix = await getVideoHash(videoId)
   const requestUrl = `${store.getters.getSponsorBlockUrl}/api/branding/${videoIdHashPrefix}`
 
@@ -68,6 +197,10 @@ export async function deArrowData(videoId) {
     // 404 means that there are no segments registered for the video
     if (response.status === 404) {
       return undefined
+    }
+    // Other failures are temporary; callers must not cache them as "no data".
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`)
     }
 
     const json = await response.json()
@@ -102,6 +235,149 @@ export async function deArrowThumbnail(videoId, timestamp) {
     return undefined
   } catch (error) {
     console.error('failed to fetch DeArrow data', requestUrl, error)
+    throw error
+  }
+}
+
+/**
+ * @param {string} rawUserId
+ * @returns {string}
+ */
+export function validateSponsorBlockUserId(rawUserId) {
+  return rawUserId.trim()
+}
+
+/**
+ * @returns {string}
+ */
+function getExistingSponsorBlockUserId() {
+  const importedUserId = validateSponsorBlockUserId(store.getters.getSponsorBlockUserId)
+  return importedUserId || store.getters.getSponsorBlockGeneratedUserId
+}
+
+/**
+ * @returns {Promise<{
+ *   segmentCount: number,
+ *   viewCount: number,
+ *   minutesSaved: number
+ * } | null>}
+ */
+export async function getSponsorBlockContributionStats() {
+  const userId = getExistingSponsorBlockUserId()
+  if (userId === '') {
+    return null
+  }
+
+  const searchParams = new URLSearchParams({
+    publicUserID: await getUserHash(userId),
+    values: JSON.stringify(['segmentCount', 'viewCount', 'minutesSaved'])
+  })
+  const requestUrl = `${store.getters.getSponsorBlockUrl}/api/userInfo?${searchParams}`
+
+  try {
+    const response = await fetch(requestUrl)
+    if (!response.ok) {
+      throw new Error(await response.text())
+    }
+
+    const stats = await response.json()
+    return Object.fromEntries(
+      ['segmentCount', 'viewCount', 'minutesSaved'].map((key) => {
+        const value = Number(stats[key])
+        return [key, Number.isFinite(value) && value >= 0 ? value : 0]
+      })
+    )
+  } catch (error) {
+    console.error('failed to fetch SponsorBlock contribution stats', requestUrl, error)
+    throw error
+  }
+}
+
+/**
+ * @returns {Promise<string>}
+ */
+export async function getOrCreateSponsorBlockUserId() {
+  const importedUserId = validateSponsorBlockUserId(store.getters.getSponsorBlockUserId)
+  if (importedUserId !== '') {
+    return importedUserId
+  }
+
+  let generatedUserId = store.getters.getSponsorBlockGeneratedUserId
+  if (generatedUserId === '') {
+    generatedUserId = generateSponsorBlockUserId()
+    await store.dispatch('updateSponsorBlockGeneratedUserId', generatedUserId)
+  }
+
+  return generatedUserId
+}
+
+/**
+ * @param {string} videoId
+ * @param {number} videoDuration
+ * @param {{
+ *   segment: [number, number]
+ *   category: SponsorBlockCategory
+ *   actionType: 'skip' | 'mute' | 'full' | 'poi'
+ *   description: string
+ * }[]} segments
+ */
+export async function submitSponsorBlockSegments(videoId, videoDuration, segments) {
+  const userID = await getOrCreateSponsorBlockUserId()
+  const requestUrl = `${store.getters.getSponsorBlockUrl}/api/skipSegments`
+
+  try {
+    const response = await fetch(requestUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        videoID: videoId,
+        userID,
+        videoDuration,
+        userAgent: `${packageDetails.productName}/${packageDetails.version}`,
+        segments
+      })
+    })
+
+    if (!response.ok) {
+      const error = new Error(await response.text())
+      error.name = `SponsorBlockSubmitError:${response.status}`
+      throw error
+    }
+
+    return await response.json()
+  } catch (error) {
+    console.error('failed to submit SponsorBlock segments', requestUrl, error)
+    throw error
+  }
+}
+
+/**
+ * @param {string} videoId
+ * @param {string} uuid
+ * @param {0|1|20|SponsorBlockCategory} vote
+ */
+export async function voteOnSponsorBlockSegment(videoId, uuid, vote) {
+  const userID = await getOrCreateSponsorBlockUserId()
+  const searchParams = new URLSearchParams({
+    UUID: uuid,
+    videoID: videoId,
+    userID,
+    ...(typeof vote === 'string' ? { category: vote } : { type: String(vote) })
+  })
+  const requestUrl = `${store.getters.getSponsorBlockUrl}/api/voteOnSponsorTime?${searchParams}`
+
+  try {
+    const response = await fetch(requestUrl, { method: 'POST' })
+
+    if (!response.ok) {
+      const error = new Error(await response.text())
+      error.name = `SponsorBlockVoteError:${response.status}`
+      throw error
+    }
+  } catch (error) {
+    console.error('failed to vote on SponsorBlock segment', requestUrl, error)
     throw error
   }
 }

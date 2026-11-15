@@ -1,144 +1,172 @@
 .settingsMenu {
-  /* top nav + margin */
-  inset-block-start: 96px;
-  position: sticky;
   display: flex;
   flex-direction: column;
-  padding-inline-start: 0;
-  block-size: calc(85vh - 96px);
-  max-block-size: 600px;
+  gap: 4px;
+  min-inline-size: 0;
+  block-size: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  margin: 0;
+  list-style: none;
+  background: var(--side-nav-color);
 }
 
-.header {
-  inline-size: fit-content;
-  margin-block: 0 10px;
-}
-
-.headingIcon {
-  color: var(--primary-color);
+.titleItem {
+  flex: 0 0 auto;
+  min-block-size: 58px;
+  display: flex;
 }
 
 .title {
-  text-decoration: none;
-  color: var(--tertiary-text-color);
-  inline-size: 220px;
-  flex: 1 1 auto;
+  inline-size: 100%;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
+  padding-block: 8px;
+  padding-inline: 14px;
+  border: 0;
+
+  /* Items with descriptions are two lines tall, so a pill radius would curve
+     into the icon. */
+  border-radius: var(--shape-corner-large);
+  color: var(--tertiary-text-color);
+  background: transparent;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition: border-radius var(--motion-fast-spatial);
 }
 
-/* prevent hover styling from showing on title click for mobile */
-@media (hover: hover) {
-  .title:hover {
-    color: var(--primary-text-color);
-  }
+.title:active {
+  border-radius: var(--shape-corner-medium);
 }
 
-.titleContent {
-  inline-size: fit-content;
-  max-inline-size: 100%;
+.title:hover,
+.title:focus-visible {
+  color: var(--side-nav-hover-text-color);
+  background: var(--side-nav-hover-color);
 }
 
+/* A tint at a fixed lightness, like other selected states, keeps the title and
+   description readable with every main color. Hover softens it instead of
+   strengthening it. */
+.title.active {
+  color: var(--primary-text-color);
+  background: color-mix(in srgb, oklch(from var(--primary-color) var(--tint-lightness) c h) 24%, transparent);
+  font-weight: 600;
+}
+
+.title.active:is(:hover, :focus-visible) {
+  background: color-mix(in srgb, oklch(from var(--primary-color) var(--tint-lightness) c h) 20%, transparent);
+}
+
+.settingsMenu.filtered .titleItem {
+  flex-grow: 0;
+}
+
+.titleContent,
+.iconAndTitleText {
+  min-inline-size: 0;
+  inline-size: 100%;
+}
 
 .iconAndTitleText {
-  overflow-x: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: start;
+}
 
-  /* needed to have underline poke out */
-  margin-inline-start: 3px;
+.titleIcon {
+  grid-row: 1 / 3;
+  inline-size: 18px;
+  block-size: 18px;
+  margin-block-start: 2px;
+}
+
+.titleText,
+.titleDescription {
+  overflow-wrap: anywhere;
+  white-space: normal;
+  line-height: 1.25;
+}
+
+.titleDescription {
+  color: inherit;
+  font-size: 11px;
+  font-weight: 400;
 }
 
 .titleUnderline {
-  /* have underline poke out */
-  inline-size: calc(100% + 6px);
-
-  /* prevent "active" border from visibly pushing the content up */
-  border-block-end: 4px solid transparent;
+  display: none;
 }
 
-@media only screen and (width <= 1200px) {
-  .isSideNavOpen .settingsMenu {
-    display: none;
-  }
+.emptyMessage {
+  margin: auto;
+  color: var(--tertiary-text-color);
+  text-align: center;
 }
 
-@media only screen and (width >= 1015px) {
+.settingsMenu.mobileSettingsMenu {
+  inline-size: 100%;
+  font-size: 18px;
+  padding: 12px;
+}
+
+.settingsMenu.mobileSettingsMenu .titleItem {
+  min-block-size: 48px;
+}
+
+.settingsMenu.compact .titleItem {
+  min-block-size: 36px;
+}
+
+.settingsMenu.compact .title {
+  padding-block: 6px;
+}
+
+.settingsMenu.compact .iconAndTitleText {
+  align-items: center;
+}
+
+.settingsMenu.compact .titleIcon {
+  grid-row: 1;
+  margin-block-start: 0;
+}
+
+@media (any-pointer: coarse), (width <= 680px) {
   .settingsMenu {
-    margin-block: 0;
-    font-size: 16px;
+    gap: 8px;
   }
 
-  .header {
-    margin-block-start: 10px;
-    font-size: 26px;
-  }
-
-  .titleIcon {
-    inline-size: 16px;
-    block-size: 16px;
-  }
-
-  .title.active {
-    color: var(--primary-text-color);
-    font-weight: 600;
-  }
-
-  .title.active .titleUnderline {
-    border-block-end: 4px solid var(--primary-color);
-  }
-}
-
-/* overall mobile breakpoint; large text */
-@media only screen and (width <= 1015px) {
-  .settingsMenu {
-    inline-size: fit-content;
-    margin-inline: auto;
-    position: relative;
-    inset-block-start: 0;
-    font-size: 30px;
-    max-block-size: 1100px;
-  }
-
-  .titleIcon {
-    inline-size: 30px;
-    block-size: 30px;
-    margin-inline-end: 10px;
+  .settingsMenu .titleItem,
+  .settingsMenu.mobileSettingsMenu .titleItem {
+    min-block-size: 64px;
   }
 
   .title {
-    inline-size: fit-content;
-    max-inline-size: 90vw;
+    padding-block: 12px;
   }
 
-  .header {
-    font-size: 32px;
+  .title:active {
+    color: var(--side-nav-hover-text-color);
+    background: var(--side-nav-hover-color);
   }
 
-  /* hide the settings icon on mobile to avoid confusion */
-  .headingIcon {
-    display: none;
+  .settingsMenu.compact {
+    gap: 4px;
   }
 
-  .isSideNavOpen .settingsMenu {
-    display: unset;
-  }
-}
-
-/* small height or width mobile breakpoint; intermediary text */
-@media only screen and (width <= 1015px) and (height <= 830px),
-  only screen and (width <= 500px) {
-  .settingsMenu {
-    font-size: 25px;
+  .settingsMenu.compact .titleItem {
+    min-block-size: 48px;
   }
 
-  .titleIcon {
-    inline-size: 25px;
-    block-size: 25px;
-    margin-inline-end: 5px;
+  .settingsMenu.compact .title {
+    padding-block: 8px;
   }
 
-  .header {
-    font-size: 25px;
+  .titleDescription {
+    font-size: 13px;
+    margin-block-start: 4px;
   }
+
 }

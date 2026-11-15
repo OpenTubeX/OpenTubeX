@@ -38,7 +38,6 @@ Global:
     Watching Count: 1 個正在觀看 | {count} 個正在觀看
     Comment Count: 1 則留言 | {count} 則留言
     Like Count: 1 個喜歡 | {count} 個喜歡
-    Replies Remaining: （還有 1 則）|（還有 {count} 則）
 Search / Go to URL: '搜尋/ 前往網址'
   # In Filter Button
 Search Filters:
@@ -247,7 +246,7 @@ Settings:
     Auto Load Next Page:
       Tooltip: 自動載入額外頁面與留言。
       Label: 自動載入下一頁
-    Open Deep Links In New Window: 在新視窗中開啟傳遞給 FreeTube 的 URL
+    Open Deep Links In New Window: 在新視窗中開啟傳遞給 OpenTubeX 的 URL
     Minimize to system tray: 最小化至系統匣
   Theme Settings:
     Theme Settings: '主題'
@@ -368,7 +367,7 @@ Settings:
     Expand Side Bar by Default: 預設展開側邊欄
     Disable Smooth Scrolling: 停用平滑捲動
     Hide Side Bar Labels: 隱藏側邊欄標籤
-    Hide FreeTube Header Logo: 隱藏 FreeTube 標題圖示
+    Hide OpenTubeX Header Logo: 隱藏 OpenTubeX 標題圖示
   Player Settings:
     Player Settings: '播放器'
     Play Next Video: '自動播放建議影片'
@@ -434,7 +433,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: '訂閱'
     Fetch Feeds from RSS: 從RSS擷取推送
-    Fetch Automatically: 自動擷取 Feed
     Confirm Before Unsubscribing: 避免意外取消訂閱
 
     'Limit the number of videos displayed for each channel': 限制每個頻道顯示的影片數量
@@ -483,7 +481,7 @@ Settings:
     Import History: 匯入觀看紀錄
     Export NewPipe: 匯出 NewPipe
     Export YouTube: 匯出 YouTube
-    Export FreeTube: 匯出 FreeTube
+    Export OpenTubeX: 匯出 OpenTubeX
     Export Subscriptions: 匯出訂閱
     Import Subscriptions: 匯入訂閱
     Select Export Type: 選取匯出類型
@@ -496,9 +494,9 @@ Settings:
     Subscription File: 訂閱檔案
     History File: 歷史紀錄檔案
     Playlist File: 播放清單檔案
-    Export Playlists For Older FreeTube Versions:
-      Label: 匯出較舊 FreeTube 版本的播放清單
-      Tooltip: "此選項將所有播放清單中的影片匯出到名為「我的最愛」的播放清單中。\n如何匯出和匯入舊版 FreeTube 播放清單中的影片：\n1. 啟用此選項後匯出播放清單。\n2. 使用「隱私設定」下的「刪除所有播放清單」選項刪除所有現有播放清單。\n3. 啟動舊版的 FreeTube 並導入匯出的播放清單。”"
+    Export Playlists For Older OpenTubeX Versions:
+      Label: 匯出較舊 OpenTubeX 版本的播放清單
+      Tooltip: "此選項將所有播放清單中的影片匯出到名為「我的最愛」的播放清單中。\n如何匯出和匯入舊版 OpenTubeX 播放清單中的影片：\n1. 啟用此選項後匯出播放清單。\n2. 使用「隱私設定」下的「刪除所有播放清單」選項刪除所有現有播放清單。\n3. 啟動舊版的 OpenTubeX 並導入匯出的播放清單。”"
     Search history file: 搜尋歷史紀錄檔案
     Search history: 搜尋歷史紀錄
     Import search history: 匯入搜尋歷史紀錄
@@ -581,11 +579,11 @@ Settings:
     Proxy Protocol: 代理伺服器協定
     Enable Tor / Proxy: 啟用 Tor 或代理伺服器
     Proxy Settings: 代理伺服器
-    Proxy Warning: FreeTube 沒有內建代理伺服器，但可以連線至外部代理伺服器，例如在您的機器上執行的代理伺服器，如 Tor 或外部代理伺服器，如某些 VPN 提供的 SOCKS5 代理伺服器。如果啟用，請確定您的代理伺服器/Tor 已經正確設定，否則 FreeTube 將無法取得任何資料。
+    Proxy Warning: OpenTubeX 沒有內建代理伺服器，但可以連線至外部代理伺服器，例如在您的機器上執行的代理伺服器，如 Tor 或外部代理伺服器，如某些 VPN 提供的 SOCKS5 代理伺服器。如果啟用，請確定您的代理伺服器/Tor 已經正確設定，否則 OpenTubeX 將無法取得任何資料。
     Proxy Username: 代理伺服器使用者名稱
     Proxy Password: 代理伺服器密碼
   SponsorBlock Settings:
-    Notify when sponsor segment is skipped: 當贊助商片段被跳過時通知
+    Notify when sponsor segment is skipped: 在跳過片段後顯示通知
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': SponsorBlock API 網址（預設為 https://sponsor.ajay.app）
     Enable SponsorBlock: 啟用 SponsorBlock
     SponsorBlock Settings: SponsorBlock
@@ -653,7 +651,7 @@ About:
   Donate: 捐款
   Help: 說明
   these people and projects: 這些人與專案
-  FreeTube is made possible by {creditsPageLink}: FreeTube 誕生都要感謝{creditsPageLink}
+  OpenTubeX is made possible by {creditsPageLink}: OpenTubeX 誕生都要感謝{creditsPageLink}
   Translate: 翻譯
   room rules: 聊天室規則
   Please read the {roomRulesLink}: 請閱讀{roomRulesLink}
@@ -662,7 +660,7 @@ About:
   Please check for duplicates before posting: 提交前請檢查有無重複的問題
   GitHub issues: GitHub 問題追蹤器
   Report a problem: 回報問題
-  FreeTube Wiki: FreeTube Wiki
+  OpenTubeX Wiki: OpenTubeX Wiki
   GitHub releases: GitHub 版本
   Downloads / Changelog: 下載 / 變更紀錄
   Source code: 原始碼
@@ -680,6 +678,7 @@ Channel:
       Newest: '最新'
       Oldest: '最舊'
       Most Popular: '最熱門'
+    This channel does not currently have any videos: '這個頻道目前沒有任何影片'
     This channel has videos but none could be displayed, try fetching more: 此頻道有影片，但均無法顯示，請嘗試載入更多影片
   Playlists:
     Playlists: '播放清單'
@@ -702,7 +701,7 @@ Channel:
   Added channel to your subscriptions: 已新增頻道至您的訂閱
   Removed subscription from {count} other channel(s): 從{count}個其他頻道移除訂閱
   Channel has been removed from your subscriptions: 頻道已從您的訂閱中移除
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: 此頻道有年齡限制，目前無法在 FreeTube 中檢視。
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: 此頻道有年齡限制，目前無法在 OpenTubeX 中檢視。
   Channel Tabs: 頻道分頁
   This channel does not exist: 此頻道不存在
   This channel does not allow searching: 此頻道不允許搜尋
@@ -711,7 +710,7 @@ Channel:
     votes: '{votes} 票'
     Reveal Answers: 揭露答案
     Hide Answers: 隱藏答案
-    Video hidden by FreeTube: 由 FreeTube 隱藏的影片
+    Video hidden by OpenTubeX: 由 OpenTubeX 隱藏的影片
     Viewing Posts Only Supported By Invidious: 僅 Invidious 支援檢視貼文。前往頻道的社群分頁即可檢視其中的內容而不需使用 Invidious。
     View Full Post: 檢視完整貼文
   Live:
@@ -777,14 +776,21 @@ Video:
   Video has been saved: 影片已儲存
   Save Video: 儲存影片至播放清單
   Sponsor Block category:
-    music offtopic: 音樂離題
-    interaction: 互動
-    self-promotion: 自我推廣
-    outro: 其他
-    intro: 介紹
-    sponsor: 贊助商
+    music offtopic: 音樂：非音樂部分
+    interaction: 互動提醒（訂閱）
+    self-promotion: 非付費/自我推廣
+    outro: 片尾畫面/鳴謝
+    intro: 過場/開頭動畫
+    sponsor: 贊助廣告
     recap: 回顧
-    filler: 填充
+    filler: 離題/笑話
+    highlight: 精華
+    exclusive access: 獨家限定
+  Sponsor Block category short:
+    intro: 過場
+    interaction: 互動提醒
+    music offtopic: 非音樂片段
+    filler: 離題
   External Player:
     Unsupported Actions:
       looping playlists: 循環播放清單
@@ -833,25 +839,25 @@ Video:
       CodecsVideoAudioNoItags: 編解碼器：{videoCodec} / {audioCodec}
     You appear to be offline: 您似乎已離線。
     Playback will resume automatically when your connection comes back: 當您的連線恢復時，將會自動繼續播放。
-    Skipped segment: 已跳過 {segmentCategory} 段
+    Skipped segment: '已跳過 {segmentCategory}'
     Autoplay is on: 自動播放已開啟
     Autoplay is off: 自動播放已關閉
   IP block: YouTube 已封鎖您的 IP 位址，使其無法觀看影片；或者，這支影片可能包含涉及未成年人的內容，而 YouTube 會限制未登入帳號的使用者觀看此類內容。若這是 IP 封鎖，請嘗試切換至其他 VPN 或代理伺服器。
-  MembersOnly: 會員專屬影片無法使用 FreeTube 觀看，因為這些影片需要 Google 登入並且必須訂閱上傳者的付費頻道。
-  AgeRestricted: 由於需要 Google 登入並使用經過年齡驗證的 YouTube 帳戶，FreeTube 無法觀看有限制年齡的影片。
+  MembersOnly: 會員專屬影片無法使用 OpenTubeX 觀看，因為這些影片需要 Google 登入並且必須訂閱上傳者的付費頻道。
+  AgeRestricted: 由於需要 Google 登入並使用經過年齡驗證的 YouTube 帳戶，OpenTubeX 無法觀看有限制年齡的影片。
   Unlisted: 未公開
   DeArrow:
     Show Original Details: 顯示原始詳細資訊
     Show Modified Details: 顯示修改後的詳細資訊
 #& Playlists
-  DRMProtected: 受 DRM 保護的影片無法在 FreeTube 上播放，因為它們需要專屬的封閉原始碼元件。如果您想觀賞此影片，請使用支援 DRM 的網路瀏覽器在 YouTube 官方網站觀賞。
+  DRMProtected: 受 DRM 保護的影片無法在 OpenTubeX 上播放，因為它們需要專屬的封閉原始碼元件。如果您想觀賞此影片，請使用支援 DRM 的網路瀏覽器在 YouTube 官方網站觀賞。
   Save Watched Progress: 儲存觀看進度
   Watched Progress Saved: 觀看進度已儲存
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 剩餘前置廣告時間：{remindingTimeSeconds}秒
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 剩餘 SABR 後退時間：{remindingTimeSeconds}秒
   Popout Live Chat: 彈出式聊天
-  Private: 無法在 FreeTube 觀看私人影片，因為觀看私人影片需要 Google 登入和影片所有權。
+  Private: 無法在 OpenTubeX 觀看私人影片，因為觀看私人影片需要 Google 登入和影片所有權。
   Collapse Playlist: 折疊播放清單
   Expand Playlist: 展開播放清單
   Station: 站台
@@ -861,9 +867,7 @@ Video:
   Enable SponsorBlock on Channel: 在頻道啟用 SponsorBlock
   Disable SponsorBlock on Channel: 在頻道停用 SponsorBlock
   AI: 人工智慧
-  'AI: Content was made with AI': 人工智慧：內容使用人工智慧製作
   How this was made: 這部作品的製作過程
-  Reload Page: 重新載入頁面
 Playlist:
   #& About
   View Full Playlist: '觀看完整播放清單'
@@ -929,7 +933,7 @@ Comments:
   Hearted: 喜歡的
   Subscribed: 已訂閱
   There are no comments available for this post: 此貼文尚無留言
-  Hide Replies: 隱藏回覆
+  Hide {replyCount} replies: 隱藏 1 則回覆 | 隱藏 {replyCount} 則回覆
   View 1 reply from {channelName}: 檢視來自 {channelName} 的 1 則回覆
   View {replyCount} replies from {channelName} and others: 檢視來自 {channelName} 與其他頻道的 {replyCount} 則回覆
   Loading replies: 正在載入回覆⋯⋯
@@ -1001,25 +1005,24 @@ Version {versionNumber} is now available!  Click for more details: 有新版本�
 This video is unavailable because of missing formats. This can happen due to country unavailability.: 沒有這個影片因為缺少格式。這個可能發生由於國家不可用。
 Tooltips:
   Subscription Settings:
-    Fetch Feeds from RSS: 啟用後，FreeTube 將使用 RSS 替代其預設方法來擷取您的訂閱 feed。RSS 的速度較快，而且可以防止 IP 封鎖，但它可能不會提供某些資訊，例如影片長度、直播狀態或貼文
-    Fetch Automatically: 啟用後，FreeTube 將會在啟動時和開啟新視窗時自動擷取您的訂閱 feed。
+    Fetch Feeds from RSS: 啟用後，OpenTubeX 將使用 RSS 替代其預設方法來擷取您的訂閱 feed。RSS 的速度較快，而且可以防止 IP 封鎖，但它可能不會提供某些資訊，例如影片長度、直播狀態或貼文
   Player Settings:
     Default Media Format: 設定要用於影片播放的格式。DASH 格式有更高的畫質。傳統格式會限制在 360p 但頻寬需求更低。音訊格式為僅有音訊的串流。
     Proxy Videos Through Invidious: 將連線到 Invidious 而非直接連線到 YouTube 來提供影片。
     Scroll Playback Rate Over Video Player: 當游標停在影片上時，按住 Ctrl 鍵（Mac 的話則是 Command 鍵），然後向前或向後滾動滑鼠滾輪來控制播放速度。按住 Ctrl 鍵（Mac 的話則是 Command 鍵）並點擊滑鼠左鍵以快速回到預設的播放速度（1x，除非在設定中更改）。
     Skip by Scrolling Over Video Player: 使用滾輪跳過影片，MPV 風格。
   General Settings:
-    Invidious Instance: FreeTube 將用於進行 API 呼叫的 Invidious 站台。除非您將此站台設為預設值，否則此設定的變更僅適用於目前的視窗。
-    Thumbnail Preference: FreeTube 中所有縮圖都會被替換為經過模糊處理或隱藏的影片畫面而非預設縮圖。
-    Fallback to Non-Preferred Backend on Failure: 當您的偏好 API 有問題時，FreeTube 將自動嘗試使用您的非偏好 API 作為汰退方案。
-    Preferred API Backend: 選擇 FreeTube 要用於取得YouTube資料的伺服器。本地 API 是內建擷取器。Invidious API 需要 Invidious 伺服器才能連線。
+    Invidious Instance: OpenTubeX 將用於進行 API 呼叫的 Invidious 站台。除非您將此站台設為預設值，否則此設定的變更僅適用於目前的視窗。
+    Thumbnail Preference: OpenTubeX 中所有縮圖都會被替換為經過模糊處理或隱藏的影片畫面而非預設縮圖。
+    Fallback to Non-Preferred Backend on Failure: 當您的偏好 API 有問題時，OpenTubeX 將自動嘗試使用您的非偏好 API 作為汰退方案。
+    Preferred API Backend: 選擇 OpenTubeX 要用於取得YouTube資料的伺服器。本地 API 是內建擷取器。Invidious API 需要 Invidious 伺服器才能連線。
     Region for Trending: 熱門影片區域可以讓您選擇想要顯示哪個國家的熱門影片。
-    External Link Handling: "選擇點擊後無法在 FreeTube 中開啟連結時的預設行為。\n預設情況下 FreeTube 將會在您的預設瀏覽器中開啟點擊的連結。\n"
-    Open Deep Links In New Window: 傳遞給 FreeTube 的 URL，例如透過重定向瀏覽器擴充套件或命令列引數，會在新視窗中開啟。
+    External Link Handling: "選擇點擊後無法在 OpenTubeX 中開啟連結時的預設行為。\n預設情況下 OpenTubeX 將會在您的預設瀏覽器中開啟點擊的連結。\n"
+    Open Deep Links In New Window: 傳遞給 OpenTubeX 的 URL，例如透過重定向瀏覽器擴充套件或命令列引數，會在新視窗中開啟。
   External Player Settings:
     Custom External Player Arguments: 要傳給外部播放器的任何自訂命令列引數。
     Ignore Warnings: 當目前的外部播放程式不支援目前動作時（例如反向播放清單等等），消除警告。
-    Custom External Player Executable: 預設情況下，FreeTube 會假設選定的外部播放程式可以透過 PATH 環境變數找到。如果需要的話，請在此設定自訂路徑。
+    Custom External Player Executable: 預設情況下，OpenTubeX 會假設選定的外部播放程式可以透過 PATH 環境變數找到。如果需要的話，請在此設定自訂路徑。
     External Player: 選擇外部播放程式將會在縮圖上顯示圖示，用來在外部播放程式中開啟影片（若支援的話，播放清單也可以）。警告：Invidious 設定不會影響外部播放程式。
     DefaultCustomArgumentsTemplate: （預設：'{defaultCustomArguments}'）
     Ignore Default Arguments: 除了影片 URL 之外，不要向外部播放器傳送任何預設引數（例如播放速率、播放清單 URL 等）。 自訂引數仍會被傳遞。
@@ -1029,7 +1032,7 @@ Tooltips:
   Distraction Free Settings:
     Hide Channels: 輸入頻道 ID 以隱藏所有影片、播放清單與頻道本身，使其完全不出現在搜尋、趨勢、熱門與建議中。輸入的頻道 ID 必須完全符合，且區分大小寫。
     Hide Subscriptions Live: 此設定會被「{settingsSection}」的「{subsection}」部分中應用程式範圍的「{appWideSetting}」設定覆寫
-    Hide Videos, Playlists and Channels Containing Text: 輸入單字、單字片段或片語（不分大小寫），以隱藏整個 FreeTube 中原始標題包含該單字、單字片段或片語的所有影片與播放清單，僅不包括歷史紀錄、您的播放清單與播放清單內的影片。
+    Hide Videos, Playlists and Channels Containing Text: 輸入單字、單字片段或片語（不分大小寫），以隱藏整個 OpenTubeX 中原始標題包含該單字、單字片段或片語的所有影片與播放清單，僅不包括歷史紀錄、您的播放清單與播放清單內的影片。
     Hide Videos on Watch: 在訂閱和頻道頁面上的影片、短片和直播頁面中隱藏已觀看的影片。這不會影響頻道頁面上的主頁
   SponsorBlock Settings:
     UseDeArrowTitles: 將影片標題取代為 DeArrow 使用者遞交的標題。

@@ -1,0 +1,78 @@
+name: Schedule Nightly
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  dispatch:
+    name: Build development nightly
+    if: github.repository == 'OpenTubeX/OpenTubeX'
+    runs-on: ubuntu-latest
+
+    permissions:
+      actions: write
+      contents: read
+
+    steps:
+    - name: Check for an existing release
+      id: nightly
+      env:
+        GH_TOKEN: ${{ github.token }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        development_sha="$(gh api "repos/${GITHUB_REPOSITORY}/commits/development" --jq .sha)"
+        existing_tag="$(
+          gh api "repos/${GITHUB_REPOSITORY}/releases?per_page=100" \
+            --jq "[.[] | select(
+              .prerelease
+              and .target_commitish == \"$development_sha\"
+              and (.tag_name | test(\"^v[0-9]+\\\\.[0-9]+\\\\.[0-9]+-nightly-[0-9]+$\"))
+            )] | first | .tag_name // \"\""
+        )"
+
+        if [[ -z "$existing_tag" ]]; then
+          release_tags="$(
+            gh api --paginate "repos/${GITHUB_REPOSITORY}/releases?per_page=100" \
+              --jq '.[] | select(.draft == false and .prerelease == false) | .tag_name'
+          )"
+          while IFS= read -r tag; do
+            [[ -z "$tag" ]] && continue
+            if release_sha="$(
+              gh api "repos/${GITHUB_REPOSITORY}/commits/$tag" --jq .sha 2>&1
+            )"; then
+              :
+            elif [[ "$release_sha" == *"(HTTP 404)"* ||
+              "$release_sha" == *"No commit found for SHA:"*"(HTTP 422)"* ]]; then
+              continue
+            else
+              echo "$release_sha" >&2
+              exit 1
+            fi
+            if [[ "$release_sha" == "$development_sha" ]]; then
+              existing_tag="$tag"
+              break
+            fi
+          done <<< "$release_tags"
+        fi
+
+        if [[ -n "$existing_tag" ]]; then
+          echo "Release $existing_tag already contains development commit $development_sha."
+          echo "needed=false" >> "$GITHUB_OUTPUT"
+        else
+          echo "No release contains development commit $development_sha."
+          echo "needed=true" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Dispatch development build
+      if: steps.nightly.outputs.needed == 'true'
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        gh workflow run build.yml \
+          --repo "$GITHUB_REPOSITORY" \
+          --ref development \
+          -f publishNightly=true

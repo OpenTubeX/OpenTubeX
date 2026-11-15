@@ -6,6 +6,7 @@
   padding-inline: 10px;
   box-shadow: 0 2px 1px 0 var(--primary-shadow-color);
   background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
   border-inline-start: 2px solid var(--primary-shadow-color);
   display: flex;
   align-items: center;
@@ -15,7 +16,7 @@
   @include utils.fixed-top-bar;
 }
 
-.floatingRefreshSection:has(.lastRefreshTimestamp + .refreshButton) {
+.floatingRefreshSection:not(.embedded):has(.lastRefreshTimestamp + .refreshActions) {
   justify-content: space-between;
 }
 
@@ -25,11 +26,213 @@
   font-size: 16px;
 }
 
+.refreshActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-inline-start: auto;
+}
+
+.nextAutoRefreshTimestamp {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  .lastRefreshTimestamp {
+    text-align: end;
+  }
+}
+
+.nextAutoRefreshCountdown {
+  display: block;
+  flex: 0 0 20px;
+  inline-size: 20px;
+  block-size: 20px;
+
+  svg {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+  }
+}
+
+.countdownTrack {
+  fill: none;
+  stroke: currentcolor;
+  stroke-width: 2px;
+  opacity: 0.25;
+}
+
+.countdownProgress {
+  fill: none;
+  stroke: currentcolor;
+  stroke-width: 2px;
+  stroke-linecap: round;
+  stroke-dasharray: 43.9823;
+  stroke-dashoffset: var(--countdown-offset);
+  transform: rotate(-90deg);
+  transform-origin: 9px 9px;
+  transition: stroke-dashoffset 1s linear;
+}
+
+.countdownHourglassOutline {
+  fill: none;
+  stroke: currentcolor;
+  stroke-width: 1.25px;
+}
+
+.countdownHourglassUpper,
+.countdownHourglassLower {
+  fill: currentcolor;
+}
+
+.countdownHourglass {
+  transform-box: view-box;
+  transform-origin: 9px 9px;
+}
+
+.nextAutoRefreshCountdown.finalMinute .countdownHourglass {
+  animation: countdown-hourglass-spin 1s linear infinite;
+}
+
+.nextAutoRefreshCountdown.spinHourglass:not(.finalMinute) .countdownHourglass {
+  animation: countdown-hourglass-spin 1s ease-in-out;
+}
+
+@keyframes countdown-hourglass-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.floatingRefreshSection.embedded {
+  position: static;
+  inset: auto;
+  inline-size: auto;
+  padding-block: 0;
+  padding-inline: 0;
+  border: 0;
+  box-shadow: none;
+  background-color: transparent;
+  backdrop-filter: none;
+  gap: 12px;
+  justify-content: flex-end;
+  z-index: auto;
+
+  .lastRefreshTimestamp {
+    color: var(--tertiary-text-color);
+    font-size: 14px;
+  }
+
+  .refreshActions {
+    gap: 8px;
+    margin-inline-start: 0;
+  }
+}
+
+/* Stacking the last update and next auto refresh keeps the subscriptions
+   header actions narrow enough to stay beside the tabs */
+@media only screen and (width > 680px) {
+  .floatingRefreshSection.embedded.subscriptionsHeaderRefreshWidget:has(> .lastRefreshTimestamp):has(.nextAutoRefreshTimestamp) {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    place-items: center start;
+    gap: 0 8px;
+
+    .refreshActions,
+    .nextAutoRefreshTimestamp {
+      display: contents;
+    }
+
+    /* The countdown sits beside both lines instead of indenting the second */
+    .nextAutoRefreshCountdown {
+      grid-column: 1;
+      grid-row: 1 / span 2;
+    }
+
+    .lastRefreshTimestamp {
+      grid-column: 2;
+      grid-row: 2;
+      text-align: start;
+    }
+
+    > .lastRefreshTimestamp {
+      grid-row: 1;
+    }
+
+    .refreshButton {
+      grid-column: 3;
+      grid-row: 1 / span 2;
+    }
+  }
+}
+
 @media only screen and (width <= 680px) {
   .floatingRefreshSection,
   .floatingRefreshSection.sideNavOpen,
   .floatingRefreshSection.hideLabelsSideBar {
     inline-size: 100%;
     border-inline-start: none;
+  }
+
+  .floatingRefreshSection.embedded.subscriptionsHeaderRefreshWidget:not(:has(> .lastRefreshTimestamp)) {
+    display: contents;
+  }
+
+  .floatingRefreshSection.embedded,
+  .floatingRefreshSection.embedded.sideNavOpen,
+  .floatingRefreshSection.embedded.hideLabelsSideBar {
+    inline-size: 100%;
+    justify-content: space-between;
+  }
+
+  .floatingRefreshSection.embedded.subscriptionsHeaderRefreshWidget .refreshActions {
+    flex: 1 1 150px;
+    min-inline-size: 0;
+    margin-inline-start: 0;
+    order: 2;
+  }
+
+  .floatingRefreshSection.embedded.subscriptionsHeaderRefreshWidget .refreshActions:not(:has(.nextAutoRefreshTimestamp)) {
+    flex: 0 0 auto;
+  }
+
+  .floatingRefreshSection.embedded.subscriptionsHeaderRefreshWidget .nextAutoRefreshTimestamp {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+
+    .lastRefreshTimestamp {
+      text-align: start;
+    }
+  }
+
+  .floatingRefreshSection.embedded.subscriptionsHeaderRefreshWidget:has(> .lastRefreshTimestamp) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+
+    .refreshActions {
+      display: contents;
+    }
+
+    > .lastRefreshTimestamp {
+      grid-column: 1;
+      grid-row: 1;
+      text-align: start;
+    }
+
+    .nextAutoRefreshTimestamp {
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    .refreshButton {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    &:has(.nextAutoRefreshTimestamp) .refreshButton {
+      grid-row: 1 / span var(--refresh-button-row-span, 2);
+    }
   }
 }

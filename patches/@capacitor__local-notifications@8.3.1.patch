@@ -1,0 +1,111 @@
+diff --git a/android/src/main/kotlin/com/capacitorjs/plugins/localnotifications/LocalNotificationsPlugin.kt b/android/src/main/kotlin/com/capacitorjs/plugins/localnotifications/LocalNotificationsPlugin.kt
+index 779b7b809ed2cd4d184d365fde13e37799bbd2c1..1a9b46861f88fe5eeeb909fc18069dc062ef2a7f 100644
+--- a/android/src/main/kotlin/com/capacitorjs/plugins/localnotifications/LocalNotificationsPlugin.kt
++++ b/android/src/main/kotlin/com/capacitorjs/plugins/localnotifications/LocalNotificationsPlugin.kt
+@@ -48,6 +48,20 @@ class LocalNotificationsPlugin : Plugin() {
+         notificationManager = activity.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+         staticBridge = bridge
+         LegacyNotificationMigrator.run(context, notificationStorage, manager)
++        dismissalTarget = this
++        reportDismissals()
++    }
++
++    override fun handleOnDestroy() {
++        if (dismissalTarget === this) dismissalTarget = null
++        super.handleOnDestroy()
++    }
++
++    /** Reports the queued dismissals; the events wait for a listener. */
++    private fun reportDismissals() {
++        for (data in notificationStorage.takeDismissals()) {
++            notifyListeners("localNotificationActionPerformed", data, true)
++        }
+     }
+ 
+     override fun handleOnNewIntent(data: Intent) {
+@@ -535,6 +549,13 @@ class LocalNotificationsPlugin : Plugin() {
+         const val LOCAL_NOTIFICATIONS = "display"
+ 
+         private var staticBridge: Bridge? = null
++        private var dismissalTarget: LocalNotificationsPlugin? = null
++
++        /** Queues a dismissal, and reports it right away when the plugin is loaded. */
++        fun fireDismissed(context: Context, data: JSObject) {
++            NotificationStorage(context).appendDismissal(data)
++            dismissalTarget?.reportDismissals()
++        }
+ 
+         fun fireReceived(notification: JSObject?) {
+             getLocalNotificationsInstance()?.dispatchReceived(notification)
+diff --git a/android/src/main/kotlin/com/capacitorjs/plugins/localnotifications/NotificationDismissReceiver.kt b/android/src/main/kotlin/com/capacitorjs/plugins/localnotifications/NotificationDismissReceiver.kt
+index 9368292d42347412daa2b360d4e6f5d6970f6a2f..8817f02764dfb8b9c56752a2b4f539fa20c6108a 100644
+--- a/android/src/main/kotlin/com/capacitorjs/plugins/localnotifications/NotificationDismissReceiver.kt
++++ b/android/src/main/kotlin/com/capacitorjs/plugins/localnotifications/NotificationDismissReceiver.kt
+@@ -3,6 +3,7 @@ package com.capacitorjs.plugins.localnotifications
+ import android.content.BroadcastReceiver
+ import android.content.Context
+ import android.content.Intent
++import com.getcapacitor.JSObject
+ import com.getcapacitor.Logger
+ 
+ /**
+@@ -17,6 +18,9 @@ class NotificationDismissReceiver : BroadcastReceiver() {
+             return
+         }
+         val storage = NotificationStorage(context)
++        // Reported like the tap action, so the app also learns of dismissals while it is not running.
++        val notification = storage.getSavedNotificationAsJSObject(intExtra.toString()) ?: JSObject().put("id", intExtra)
++        LocalNotificationsPlugin.fireDismissed(context, JSObject().put("actionId", "dismiss").put("notification", notification))
+         val existing = storage.getSavedNotification(intExtra.toString())
+         if (LocalNotificationManager.isSafeToForget(existing)) {
+             storage.deleteNotification(intExtra.toString())
+diff --git a/android/src/main/kotlin/com/capacitorjs/plugins/localnotifications/NotificationStorage.kt b/android/src/main/kotlin/com/capacitorjs/plugins/localnotifications/NotificationStorage.kt
+index b7ff07bba69cf4026c38096d1112309dde5962da..b2887165a8727afec2917a71636189953d48864e 100644
+--- a/android/src/main/kotlin/com/capacitorjs/plugins/localnotifications/NotificationStorage.kt
++++ b/android/src/main/kotlin/com/capacitorjs/plugins/localnotifications/NotificationStorage.kt
+@@ -4,6 +4,7 @@ import android.content.Context
+ import android.content.SharedPreferences
+ import com.getcapacitor.JSObject
+ import java.text.ParseException
++import org.json.JSONArray
+ import org.json.JSONException
+ 
+ /**
+@@ -131,8 +132,37 @@ class NotificationStorage(private val context: Context) {
+         }
+     }
+ 
++    /** Queues a dismissal until a loaded plugin reports it. */
++    fun appendDismissal(data: JSObject) {
++        synchronized(DISMISSAL_LOCK) {
++            val queued = readDismissals()
++            queued.put(data)
++            getStorage(DISMISSAL_STORE_ID).edit().putString(DISMISSAL_KEY, queued.toString()).commit()
++        }
++    }
++
++    /** Returns and clears the queued dismissals, oldest first. */
++    fun takeDismissals(): List<JSObject> {
++        synchronized(DISMISSAL_LOCK) {
++            val queued = readDismissals()
++            if (queued.length() > 0) getStorage(DISMISSAL_STORE_ID).edit().remove(DISMISSAL_KEY).commit()
++            return (0 until queued.length()).mapNotNull { index ->
++                queued.optJSONObject(index)?.let { item -> try { JSObject(item.toString()) } catch (ex: JSONException) { null } }
++            }
++        }
++    }
++
++    private fun readDismissals(): JSONArray = try {
++        JSONArray(getStorage(DISMISSAL_STORE_ID).getString(DISMISSAL_KEY, null) ?: "[]")
++    } catch (ex: JSONException) {
++        JSONArray()
++    }
++
+     companion object {
+         private const val NOTIFICATION_STORE_ID = "NOTIFICATION_STORE"
+         private const val ACTION_TYPES_ID = "ACTION_TYPE_STORE"
++        private const val DISMISSAL_STORE_ID = "NOTIFICATION_DISMISSAL_STORE"
++        private const val DISMISSAL_KEY = "dismissals"
++        private val DISMISSAL_LOCK = Any()
+     }
+ }

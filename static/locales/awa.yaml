@@ -299,7 +299,7 @@ Settings:
     Disable Smooth Scrolling: ''
     UI Scale: ''
     Hide Side Bar Labels: ''
-    Hide FreeTube Header Logo: ''
+    Hide OpenTubeX Header Logo: ''
     Base Theme:
       Base Theme: ''
       Black: ''
@@ -474,7 +474,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: ''
     Fetch Feeds from RSS: ''
-    Fetch Automatically: ''
     'Limit the number of videos displayed for each channel': ''
     To: ''
     Confirm Before Unsubscribing: ''
@@ -530,14 +529,14 @@ Settings:
     History File: ''
     Playlist File: ''
     Export Subscriptions: ''
-    Export FreeTube: ''
+    Export OpenTubeX: ''
     Export YouTube: ''
     Export NewPipe: ''
     Import History: ''
     Export History: ''
     Import Playlists: ''
     Export Playlists: ''
-    Export Playlists For Older FreeTube Versions:
+    Export Playlists For Older OpenTubeX Versions:
       Label: ''
       # |- = Keep newlines, No newline at end
       Tooltip: |
@@ -613,7 +612,7 @@ About:
   Downloads / Changelog: ''
   GitHub releases: ''
   Help: ''
-  FreeTube Wiki: ''
+  OpenTubeX Wiki: ''
   FAQ: ''
   Discussions: ''
   Report a problem: ''
@@ -680,7 +679,7 @@ Channel:
   Your search results have returned 0 results: ''
   This channel does not exist: ''
   This channel does not allow searching: ''
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: ''
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: ''
   Channel Tabs: ''
   Videos:
     Videos: 'वीडियोज'
@@ -688,6 +687,7 @@ Channel:
       Newest: ''
       Oldest: ''
       Most Popular: ''
+    This channel does not currently have any videos: ''
   Shorts:
     This channel does not currently have any shorts: ''
   Live:
@@ -725,7 +725,7 @@ Channel:
     View Full Post: ''
     Reveal Answers: ''
     Hide Answers: ''
-    Video hidden by FreeTube: ''
+    Video hidden by OpenTubeX: ''
     Viewing Posts Only Supported By Invidious: ''
 Video:
   IP block: ''
@@ -941,7 +941,6 @@ Tooltips:
     Hide Videos, Playlists and Channels Containing Text: ''
   Subscription Settings:
     Fetch Feeds from RSS: ''
-    Fetch Automatically: ''
   Experimental Settings:
     Replace HTTP Cache: ''
   SponsorBlock Settings:

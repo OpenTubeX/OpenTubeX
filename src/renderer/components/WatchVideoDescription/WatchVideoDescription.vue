@@ -1,82 +1,221 @@
 <template>
   <FtCard
-    v-if="shownDescription.length > 0 || showHowThisWasMade"
-    :class="{ videoDescription: true, short: !showFullDescription }"
+    v-if="shownDescription.length > 0 || hasMetadata"
+    ref="descriptionCard"
+    :class="{
+      videoDescription: true,
+      short: !isExpanded,
+      alwaysExpanded
+    }"
+    @click="expandDescriptionWithClick"
   >
-    <span
-      v-if="showControls && !showFullDescription"
-      class="descriptionStatus"
-      role="button"
-      tabindex="0"
-      @click="expandDescription"
-      @keydown.enter.space.prevent="expandDescription"
-    >
-      {{ $t("Description.Expand Description") }}
-    </span>
-    <FtTimestampCatcher
+    <FtIconButton
       v-if="shownDescription.length > 0"
-      ref="descriptionContainer"
-      class="description"
-      :input-html="processedShownDescription"
-      :link-tab-index="linkTabIndex"
-      @timestamp-event="onTimestamp"
-      @click="expandDescriptionWithClick"
+      class="descriptionCopyButton"
+      :title="t('Description.Copy Description')"
+      :icon="['fas', 'copy']"
+      theme="base"
+      @click="copyDescription"
     />
     <div
-      v-if="showHowThisWasMade && showFullDescription"
-      class="contentDisclosureSection"
+      ref="descriptionScroll"
+      v-overlay-scrollbars="!alwaysExpanded"
+      class="descriptionScroll"
+      :class="{ descriptionFadeTop, descriptionFadeBottom }"
+      @scroll="updateDescriptionFadeState"
     >
-      <div class="contentDisclosureTitle">
-        {{ t('Video.How this was made') }}
-      </div>
+      <FtTimestampCatcher
+        ref="descriptionContainer"
+        class="description"
+        :input-html="processedShownDescription"
+        :link-tab-index="linkTabIndex"
+        @timestamp-event="onTimestamp"
+      />
       <div
-        v-for="(item, index) in contentDisclosures"
-        :key="index"
-        class="contentDisclosureItem"
+        v-if="(contentDisclosures?.length ?? 0) > 0"
+        class="contentDisclosureSection"
       >
-        <div class="contentDisclosureHeader">
-          {{ item.label }}
-        </div>
+        <h3 class="contentDisclosureTitle">
+          {{ t('Video.How this was made') }}
+        </h3>
         <div
-          v-if="item.description"
-          class="contentDisclosureBody"
+          v-for="(item, index) in contentDisclosures"
+          :key="index"
+          class="contentDisclosureItem"
         >
-          {{ item.description }}
-        </div>
-        <div
-          v-if="item.attribution"
-          class="contentDisclosureAttribution"
-        >
-          {{ item.attribution }}
+          <div class="contentDisclosureHeader">
+            {{ item.label }}
+          </div>
+          <div
+            v-if="item.description"
+            class="contentDisclosureBody"
+          >
+            {{ item.description }}
+          </div>
+          <div
+            v-if="item.attribution"
+            class="contentDisclosureAttribution"
+          >
+            {{ item.attribution }}
+          </div>
         </div>
       </div>
+      <bdi
+        v-if="license"
+        class="license"
+      >
+        {{ license }}
+      </bdi>
+      <template v-if="games.length > 0">
+        <h3 class="gamesHeading">
+          {{ $t("Description.Games") }}
+        </h3>
+        <ul class="gameList">
+          <li
+            v-for="(game, index) in shownGames"
+            :key="game.channelId ?? index"
+          >
+            <component
+              :is="game.channelId ? 'RouterLink' : 'div'"
+              :to="`/channel/${game.channelId}`"
+              :tabindex="game.channelId ? linkTabIndex : null"
+              class="game"
+            >
+              <FtRetryImage
+                v-if="game.thumbnail"
+                :fallback-icon="['fas', 'gamepad']"
+                :src="game.thumbnail"
+                class="gameBoxArt"
+                alt=""
+                loading="lazy"
+              />
+              <span class="gameText">
+                <bdi class="gameTitle">{{ game.title }}</bdi>
+                <bdi
+                  v-if="game.subtitle"
+                  class="gameSubtitle"
+                >{{ game.subtitle }}</bdi>
+              </span>
+            </component>
+          </li>
+        </ul>
+      </template>
+      <template v-if="musicTracks.length > 0">
+        <h3 class="musicHeading">
+          {{ t('Description.Music') }}
+        </h3>
+        <ul class="musicTrackList">
+          <li
+            v-for="(track, index) in shownMusicTracks"
+            :key="index"
+            class="musicTrack"
+          >
+            <FtRetryImage
+              v-if="track.thumbnail"
+              :fallback-icon="['fas', 'music']"
+              :src="track.thumbnail"
+              class="musicTrackArt"
+              alt=""
+              loading="lazy"
+            />
+            <span class="musicTrackText">
+              <component
+                :is="track.videoId ? 'RouterLink' : 'bdi'"
+                :to="track.videoId && `/watch/${track.videoId}`"
+                :tabindex="track.videoId ? linkTabIndex : null"
+                class="musicTrackTitle"
+              >{{ track.title }}</component>
+              <component
+                :is="track.channelId ? 'RouterLink' : 'bdi'"
+                v-if="track.artist"
+                :to="track.channelId && `/channel/${track.channelId}`"
+                :tabindex="track.channelId ? linkTabIndex : null"
+                class="musicTrackArtist"
+              >{{ track.artist }}</component>
+              <bdi
+                v-if="track.album"
+                class="musicTrackDetail"
+              >{{ track.album }}</bdi>
+              <bdi
+                v-if="track.license"
+                class="musicTrackDetail"
+              >{{ track.license }}</bdi>
+            </span>
+          </li>
+        </ul>
+      </template>
+      <div
+        v-if="tags.length > 0"
+        class="videoTags"
+      >
+        <strong>{{ t('Description.Video Tags') }}</strong>
+        <ul class="videoTagList">
+          <li
+            v-for="tag in tags"
+            :key="tag"
+            class="videoTag"
+            dir="auto"
+          >
+            <router-link
+              v-if="!hideSearchBar"
+              class="videoTagLink"
+              :title="$t('Channel.About.Tags.Search for', { tag })"
+              :to="{
+                path: `/search/${encodeURIComponent(tag)}`,
+                query: searchSettings
+              }"
+              :tabindex="linkTabIndex"
+            >
+              {{ tag }}
+            </router-link>
+            <span
+              v-else
+              class="videoTagLink"
+            >
+              {{ tag }}
+            </span>
+          </li>
+        </ul>
+      </div>
+      <span
+        ref="descriptionContentEnd"
+        class="descriptionContentEnd"
+        aria-hidden="true"
+      />
     </div>
-    <bdi
-      v-if="license && showFullDescription"
-      class="license"
-    >
-      {{ license }}
-    </bdi>
-    <span
-      v-if="showControls && showFullDescription"
+    <button
+      v-if="showControls && !alwaysExpanded"
+      type="button"
       class="descriptionStatus"
-      role="button"
-      tabindex="0"
-      @click="collapseDescription"
-      @keydown.enter.space.prevent="collapseDescription"
+      :aria-expanded="isExpanded"
+      @click="isExpanded ? collapseDescription() : expandDescription()"
+      @keydown.space.stop
+      @keyup.space.stop
     >
-      {{ $t("Description.Collapse Description") }}
-    </span>
+      <span>{{ isExpanded ? t('Description.Collapse Description') : t('Description.Expand Description') }}</span>
+      <FtIcon
+        :icon="['fas', isExpanded ? 'angle-up' : 'angle-down']"
+        aria-hidden="true"
+      />
+    </button>
   </FtCard>
 </template>
 
 <script setup>
-import autolinker from 'autolinker'
-
-import { onMounted, ref, computed, useTemplateRef } from 'vue'
+import FtRetryImage from '../FtRetryImage.vue'
+import { onBeforeUnmount, onMounted, ref, computed, nextTick, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import FtCard from '../ft-card/ft-card.vue'
+import { FtIcon } from '@opentubex/icons'
+import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtTimestampCatcher from '../FtTimestampCatcher.vue'
+
+import { linkifyDescription, linkifyHashtagsAndHandles } from '../../helpers/descriptionLinks'
+import { copyToClipboard } from '../../helpers/utils'
+import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { useTabContext } from '../../tabs/TabContext'
+
+import store from '../../store/index'
 
 const props = defineProps({
   description: {
@@ -87,54 +226,98 @@ const props = defineProps({
     type: String,
     default: ''
   },
+  tags: {
+    type: Array,
+    default: () => [],
+  },
   license: {
     type: String,
     default: null,
   },
+  /** @type {import('vue').PropType<import('../../helpers/video-games').LocalVideoGame[]>} */
+  games: {
+    type: Array,
+    default: () => [],
+  },
+  /** @type {import('vue').PropType<import('../../helpers/video-music').VideoMusicTrack[]>} */
+  musicTracks: {
+    type: Array,
+    default: () => [],
+  },
   contentDisclosures: {
     type: Array,
-    default: null
+    default: () => [],
+  },
+  /** Starts expanded, while still letting the user collapse it. */
+  expanded: { type: Boolean, default: false },
+  alwaysExpanded: {
+    type: Boolean,
+    default: false,
   }
 })
 
+const emit = defineEmits(['timestamp-event'])
 const { t } = useI18n()
 
-const showHowThisWasMade = computed(() => (props.contentDisclosures?.length ?? 0) > 0)
-
-const emit = defineEmits(['timestamp-event'])
-
-let shownDescription = ''
+const descriptionScroll = useTemplateRef('descriptionScroll')
+const descriptionContentEnd = useTemplateRef('descriptionContentEnd')
 const descriptionContainer = useTemplateRef('descriptionContainer')
-const showFullDescription = ref(false)
+const descriptionCard = useTemplateRef('descriptionCard')
+const showFullDescription = ref(props.expanded)
 const showControls = ref(false)
+let userWantsExpandedDescription = props.expanded
+const descriptionFadeTop = ref(false)
+const descriptionFadeBottom = ref(false)
+const isExpanded = computed(() => props.alwaysExpanded || showFullDescription.value)
 
-if (props.descriptionHtml !== '') {
-  const parsed = parseDescriptionHtml(props.descriptionHtml)
+const descriptionContent = computed(() => {
+  let shownDescription = ''
+  let descriptionText = props.description
+  if (props.descriptionHtml !== '') {
+    const parsed = parseDescriptionHtml(props.descriptionHtml)
 
-  // the invidious API returns emtpy html elements when the description is empty
-  // so we need to parse it to see if there is any meaningful text in the html
-  // or if it's just empty html elements e.g. `<p></p>`
+    // Invidious can return empty HTML elements such as `<p></p>`.
+    // Template contents stay inert while extracting text from remote HTML.
+    const template = document.createElement('template')
+    template.innerHTML = parsed
+    const plainText = template.content.textContent ?? ''
 
-  const testDiv = document.createElement('div')
-  testDiv.innerHTML = parsed
-
-  if (!/^\s*$/.test(testDiv.innerText)) {
-    shownDescription = parsed
+    if (!/^\s*$/.test(plainText)) {
+      descriptionText ||= plainText
+      shownDescription = linkifyHashtagsAndHandles(parsed)
+    }
+  } else if (!/^\s*$/.test(props.description)) {
+    shownDescription = linkifyDescription(props.description)
   }
-} else {
-  if (!/^\s*$/.test(props.description)) {
-    shownDescription = autolinker.link(props.description)
-  }
-}
+  return { html: shownDescription, text: descriptionText }
+})
+const shownDescription = computed(() => descriptionContent.value.html)
 
 const processedShownDescription = computed(() => {
-  if (shownDescription === '') { return shownDescription }
+  if (shownDescription.value === '') { return '' }
 
-  return processDescriptionHtml(shownDescription, linkTabIndex.value)
+  return processDescriptionHtml(shownDescription.value, linkTabIndex.value)
 })
 
 const linkTabIndex = computed(() => {
-  return showFullDescription.value ? '0' : '-1'
+  return isExpanded.value ? '0' : '-1'
+})
+
+// drop the channel ids when channel links are disabled, so that the games render as plain text
+const shownGames = computed(() => {
+  if (!store.getters.getDisableChannelLinks) {
+    return props.games
+  }
+
+  return props.games.map(game => ({ ...game, channelId: undefined }))
+})
+
+const shownMusicTracks = computed(() => {
+  if (!store.getters.getDisableChannelLinks) {
+    return props.musicTracks
+  }
+
+  return props.musicTracks.map(track => ({ ...track, channelId: undefined }))
 })
 
 /**
@@ -144,12 +327,18 @@ function onTimestamp(timestamp) {
   emit('timestamp-event', timestamp)
 }
 
+async function copyDescription() {
+  await copyToClipboard(descriptionContent.value.text, {
+    messageOnSuccess: t('Description.Description Copied')
+  })
+}
+
 /**
  @param {PointerEvent} e
  */
 function expandDescriptionWithClick(e) {
-  // Ignore link clicks
-  if (e.target.tagName === 'A') { return }
+  // Links and controls handle their own clicks, including clicks on their children.
+  if (props.alwaysExpanded || isExpanded.value || e.target.closest('a, button, [role="button"]')) { return }
 
   expandDescription()
 }
@@ -158,6 +347,8 @@ function expandDescriptionWithClick(e) {
  * Enables user to view entire contents of description
  */
 function expandDescription() {
+  if (isExpanded.value) { return }
+  userWantsExpandedDescription = true
   showFullDescription.value = true
 }
 
@@ -165,8 +356,20 @@ function expandDescription() {
  * Enables user to collapse contents of description
  */
 function collapseDescription() {
+  restoreOverlayScrollTop(descriptionScroll.value, 0)
+  userWantsExpandedDescription = false
   showFullDescription.value = false
 }
+
+const { tabId: injectedTabId, isTabPresented } = useTabContext()
+const tabId = injectedTabId ?? 'web'
+
+const hideSearchBar = computed(() => store.getters.getHideSearchBar)
+const searchSettings = computed(() => store.getters.getSearchSettings(tabId))
+
+let hasMeasured = false
+
+const hasMetadata = computed(() => props.tags.length > 0 || props.games.length > 0 || props.musicTracks.length > 0 || Boolean(props.license) || (props.contentDisclosures?.length ?? 0) > 0)
 
 /**
  * Returns true when description content does not overflow description container
@@ -174,47 +377,172 @@ function collapseDescription() {
  */
 function isShortDescription() {
   const descriptionElem = descriptionContainer.value?.$el
-  return descriptionElem?.clientHeight >= descriptionElem?.scrollHeight
+  if (!descriptionElem) { return false }
+
+  // Preserve the original four-line expansion threshold with the taller preview.
+  const collapsedHeight = 4 * Number.parseFloat(getComputedStyle(descriptionElem).lineHeight)
+  if (!hasMetadata.value) {
+    return descriptionElem.scrollHeight <= collapsedHeight + 1
+  }
+
+  // Metadata sections render below the text, so measure every rendered block up to the content end.
+  let top = Infinity
+  let bottom = -Infinity
+  for (let element = descriptionElem; element && element !== descriptionContentEnd.value; element = element.nextElementSibling) {
+    const bounds = element.getBoundingClientRect()
+    if (bounds.height === 0) { continue }
+    top = Math.min(top, bounds.top)
+    bottom = Math.max(bottom, bounds.bottom)
+  }
+  return bottom - top <= collapsedHeight + 1
 }
 
-onMounted(() => {
-  // There is no description, so do not show the controls
-  if (shownDescription.length === 0) {
-    showFullDescription.value = true
-    showControls.value = false
+// To verify whether or not the description is too short for displaying
+// description controls, we need to check the description's dimensions.
+// A tab can mount while it isn't the one on screen (background preload, session
+// restore), in which case it is `display: none` and every dimension reads 0,
+// which would misdetect the description as short and leave it permanently
+// expanded with no collapse control. Only measure once the element has a real
+// layout, retrying when the tab is first presented.
+function measureDescription() {
+  if (hasMeasured || props.alwaysExpanded) {
     return
   }
 
-  // To verify whether or not the description is too short for displaying
-  // description controls, we need to check the description's dimensions.
-  // The only way to make this work is to check on mount.
-  showFullDescription.value = isShortDescription()
-  showControls.value = !showFullDescription.value
+  const descriptionElem = descriptionContainer.value?.$el
+  if (!descriptionElem || (
+    descriptionElem.clientHeight === 0 && descriptionElem.scrollHeight === 0 &&
+    (!hasMetadata.value || !descriptionCard.value?.$el?.clientHeight)
+  )) {
+    return
+  }
+
+  const shortDescription = isShortDescription()
+  showFullDescription.value = shortDescription || userWantsExpandedDescription
+  showControls.value = !shortDescription
+  hasMeasured = true
+
+  nextTick(updateDescriptionLayout)
+}
+
+function updateDescriptionLayout() {
+  if (isExpanded.value && descriptionScroll.value && descriptionContentEnd.value) {
+    clampOverlayScrollTop(descriptionScroll.value, descriptionContentEnd.value)
+  }
+  updateDescriptionFadeState()
+}
+
+let descriptionResizeObserver = null
+let cardInlineSize = 0
+let remeasureFrame = 0
+
+/**
+ * A narrower or wider card rewraps the text, which can cross the four-line threshold.
+ * Only its inline size counts, so the card's own height changes cannot retrigger it.
+ * The next frame applies the result, outside of the ResizeObserver delivery.
+ * @param {ResizeObserverEntry[]} entries
+ */
+function onDescriptionResize(entries) {
+  const cardEntry = entries.find(entry => entry.target === descriptionCard.value?.$el)
+  const inlineSize = cardEntry?.contentBoxSize[0]?.inlineSize
+  if (inlineSize !== undefined && inlineSize !== cardInlineSize) {
+    cardInlineSize = inlineSize
+    cancelAnimationFrame(remeasureFrame)
+    remeasureFrame = requestAnimationFrame(() => {
+      hasMeasured = false
+      measureDescription()
+    })
+  }
+  updateDescriptionLayout()
+}
+
+function observeDescriptionElements() {
+  descriptionResizeObserver?.disconnect()
+  if (descriptionScroll.value) {
+    descriptionResizeObserver?.observe(descriptionScroll.value)
+  }
+  const descriptionCardElement = descriptionCard.value?.$el
+  if (descriptionCardElement) {
+    descriptionResizeObserver?.observe(descriptionCardElement)
+  }
+}
+
+onMounted(() => {
+  measureDescription()
+
+  descriptionResizeObserver = new ResizeObserver(onDescriptionResize)
+  observeDescriptionElements()
+
+  nextTick(updateDescriptionLayout)
 })
+
+onBeforeUnmount(() => {
+  descriptionResizeObserver?.disconnect()
+  cancelAnimationFrame(remeasureFrame)
+})
+
+watch(isExpanded, () => nextTick(updateDescriptionLayout))
+watch([shownDescription, () => props.tags, () => props.games, () => props.musicTracks, () => props.license, () => props.contentDisclosures], async () => {
+  // Metadata can arrive or disappear after the card has mounted.
+  // Control visibility follows the content, independently of the user's expansion choice.
+  hasMeasured = false
+  await nextTick()
+  observeDescriptionElements()
+  measureDescription()
+  updateDescriptionLayout()
+}, { deep: true })
+
+watch(() => props.expanded, (expanded) => {
+  // The card is not rendered without description content or metadata.
+  if (!expanded && descriptionScroll.value) restoreOverlayScrollTop(descriptionScroll.value, 0)
+  userWantsExpandedDescription = expanded
+  // Short descriptions stay fully shown; unmeasured ones apply the choice when measured.
+  if (showControls.value) showFullDescription.value = expanded
+})
+
+watch(() => props.alwaysExpanded, (alwaysExpanded, wasAlwaysExpanded) => {
+  if (!alwaysExpanded && wasAlwaysExpanded) {
+    nextTick(measureDescription)
+  }
+})
+
+if (isTabPresented) {
+  watch(isTabPresented, (presented) => {
+    if (presented) {
+      nextTick(measureDescription)
+    }
+  })
+}
+
+function updateDescriptionFadeState() {
+  const element = descriptionScroll.value
+  descriptionFadeTop.value = (element?.scrollTop ?? 0) > 1
+  descriptionFadeBottom.value = element != null &&
+    element.scrollHeight - element.clientHeight - element.scrollTop > 1
+}
 
 /**
  * @param {string} descriptionText
  * @returns {string}
  */
 function parseDescriptionHtml(descriptionText) {
+  // Attributes match through their closing quote, so remote text can't take quadratic time
   return descriptionText
+    .replaceAll(/href="([^"]*)"/g, (attribute, href) => {
+      // Unwrap YouTube's redirect links, leaving other links and their parameters alone
+      const redirect = /^(?:https:\/\/www\.youtube\.com)?\/redirect\?(.*)$/.exec(href)
+      const target = redirect && new URLSearchParams(redirect[1].replaceAll('&amp;', '&')).get('q')
+      return target ? `href="${target.replaceAll('"', '%22')}"` : attribute
+    })
     .replaceAll('target="_blank"', '')
-    .replaceAll(/\/redirect.+?(?=q=)/g, '')
-    .replaceAll('q=', '')
     .replaceAll(/rel="nofollow\snoopener"/g, '')
-    .replaceAll(/class=.+?(?=")./g, '')
-    .replaceAll(/id=.+?(?=")./g, '')
-    .replaceAll(/data-target-new-window=.+?(?=")./g, '')
-    .replaceAll(/data-url=.+?(?=")./g, '')
-    .replaceAll(/data-sessionlink=.+?(?=")./g, '')
+    .replaceAll(/class="[^"\n]*"/g, '')
+    .replaceAll(/id="[^"\n]*"/g, '')
+    .replaceAll(/data-target-new-window="[^"\n]*"/g, '')
+    .replaceAll(/data-url="[^"\n]*"/g, '')
+    .replaceAll(/data-sessionlink="[^"\n]*"/g, '')
     .replaceAll('&amp;', '&')
-    .replaceAll('%3A', ':')
-    .replaceAll('%2F', '/')
-    .replaceAll(/&v.+?(?=")/g, '')
-    .replaceAll(/&redirect-token.+?(?=")/g, '')
-    .replaceAll(/&redir_token.+?(?=")/g, '')
     .replaceAll('href="/', 'href="https://www.youtube.com/')
-    .replaceAll('href="/hashtag/', 'href="https://wwww.youtube.com/hashtag/')
     .replaceAll('yt.www.watch.player.seekTo', 'changeDuration')
 }
 
