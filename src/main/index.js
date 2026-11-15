@@ -2561,10 +2561,6 @@ function runApp() {
     await session.defaultSession.closeAllConnections()
   })
 
-  // Logical tab history is renderer-owned. The retained API returns an empty
-  // list for older callers; TopNav reads the active tab runtime directly.
-  handleTrusted(IpcChannels.GET_NAVIGATION_HISTORY, () => [])
-
   setupSystemInfoIpc()
   setupDiagnosticLogIpc()
   baseHandlers.settings._findOne('diagnosticLogging').then((setting) => {
