@@ -13,6 +13,7 @@ import { settings } from '../datastores/handlers/base'
 import { isTrustedSender } from './ipc'
 import { IpcChannels } from '../constants'
 import { createSerialQueue } from './serialQueue'
+import { readJsonState } from './readJsonState'
 import { writeFileAtomic } from './writeFileAtomic'
 import { shouldUseGioTrash } from './trashPlatform'
 import { killProcessTreeSync, PROCESS_TREE_SPAWN_OPTIONS, signalProcessTree } from './processTree'
@@ -362,25 +363,25 @@ function releaseDownloadSlot() {
 
 function loadDownloadRecords() {
   downloadRecordsLoadPromise ??= (async () => {
-    try {
-      const records = JSON.parse(await readFile(getDownloadRecordsPath(), 'utf8'))
-      if (!Array.isArray(records)) return
-      for (const record of records) {
-        if (Number.isInteger(record?.id) && typeof record.title === 'string' &&
-          ['queued', 'paused', 'completed', 'failed', 'cancelled', 'skipped'].includes(record.status)) {
-          const normalizedRecord = {
-            ...record,
-            queuePosition: Number.isFinite(record.queuePosition) ? record.queuePosition : record.id,
-          }
-          if (!downloadRecords.has(record.id)) downloadRecords.set(record.id, normalizedRecord)
-          downloadCounter = Math.max(downloadCounter, record.id)
-          downloadQueuePositionCounter = Math.max(downloadQueuePositionCounter, normalizedRecord.queuePosition)
+    // A failed read must not leave the history empty, as the next save would
+    // replace it and automatic downloads would fetch every video again.
+    const records = await readJsonState(getDownloadRecordsPath(), 'download history', Array.isArray) ?? []
+    for (const record of records) {
+      if (Number.isInteger(record?.id) && typeof record.title === 'string' &&
+        ['queued', 'paused', 'completed', 'failed', 'cancelled', 'skipped'].includes(record.status)) {
+        const normalizedRecord = {
+          ...record,
+          queuePosition: Number.isFinite(record.queuePosition) ? record.queuePosition : record.id,
         }
+        if (!downloadRecords.has(record.id)) downloadRecords.set(record.id, normalizedRecord)
+        downloadCounter = Math.max(downloadCounter, record.id)
+        downloadQueuePositionCounter = Math.max(downloadQueuePositionCounter, normalizedRecord.queuePosition)
       }
-    } catch (error) {
-      if (error.code !== 'ENOENT') console.warn('Could not load download history', error)
     }
-  })()
+  })().catch(error => {
+    downloadRecordsLoadPromise = null
+    throw error
+  })
   return downloadRecordsLoadPromise
 }
 
@@ -391,7 +392,9 @@ function hasAutomaticDownloadRecord(videoId) {
 }
 
 function saveDownloadRecords() {
-  return enqueueDownloadRecordsSave(() => {
+  return enqueueDownloadRecordsSave(async () => {
+    // Saved records the history could not read yet would be lost.
+    await loadDownloadRecords()
     const records = [...downloadRecords.values()]
       .map(record => ['preparing', 'downloading', 'processing', 'pausing'].includes(record.status)
         ? { ...record, status: record.status === 'pausing' ? 'paused' : 'queued', speed: null, eta: null }

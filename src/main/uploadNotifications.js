@@ -1,6 +1,7 @@
-import { readFile, rm } from 'node:fs/promises'
+import { rm } from 'node:fs/promises'
 import { getUploadTarget } from '../notificationHistory.js'
 import { getUploadThumbnailUrl, createUploadNotificationState, forgetUnconfiguredFeeds, getUploadUrl, isWithinQuietHours, takeVisibleUploads } from '../newUploadNotifications.js'
+import { readJsonState } from './readJsonState.js'
 import { createSerialQueue } from './serialQueue.js'
 import { writeFileAtomic } from './writeFileAtomic.js'
 
@@ -47,21 +48,9 @@ export function createUploadNotifier({ file, show, fetch: fetchUrl = fetch }) {
 
   async function load() {
     if (state) return state
-    let text
-    try {
-      text = await readFile(file, 'utf8')
-    } catch (error) {
-      // Other read errors propagate, so a later save cannot overwrite the state.
-      if (error.code !== 'ENOENT') throw error
-      state = createUploadNotificationState()
-      return state
-    }
-    try {
-      const saved = JSON.parse(text)
-      state = saved?.known && Array.isArray(saved.notified) ? saved : createUploadNotificationState()
-    } catch {
-      state = createUploadNotificationState()
-    }
+    // Other read errors propagate, so a later save cannot overwrite the state.
+    state = (await readJsonState(file, 'upload notification state', saved => saved?.known && Array.isArray(saved.notified))) ??
+      createUploadNotificationState()
     return state
   }
 
