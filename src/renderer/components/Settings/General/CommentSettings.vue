@@ -1,8 +1,42 @@
 <template>
   <FtSettingsSection
-    :title="t('Settings.General Settings.Comment Translation.Title')"
+    :title="t('Comments.Comments')"
   >
-    <div class="commentTranslationSettings">
+    <div class="commentSettings">
+      <!-- Side by side when there is room, like the general switches. -->
+      <div
+        class="commentSwitches"
+        :class="{ 'switchColumnGrid switchFlowGrid': canNotifyReplies }"
+      >
+        <FtToggleSwitch
+          :label="t('Settings.General Settings.Auto Load Comments.Label')"
+          :default-value="store.getters.getAutoLoadComments"
+          setting-key="autoLoadComments"
+          :compact="true"
+          :tooltip="t('Settings.General Settings.Auto Load Comments.Tooltip')"
+          @change="store.dispatch('updateAutoLoadComments', $event)"
+        />
+        <FtToggleSwitch
+          v-if="canNotifyReplies"
+          :label="t('Settings.General Settings.Reply Notifications')"
+          :default-value="store.getters.getCommentReplyNotifications"
+          setting-key="commentReplyNotifications"
+          :compact="true"
+          :tooltip="t('Tooltips.General Settings.Reply Notifications')"
+          @change="updateReplyNotifications"
+        />
+      </div>
+      <FtButton
+        v-if="canNotifyReplies && store.getters.getCommentReplyNotifications"
+        :label="t('Settings.General Settings.Watched Comments')"
+        :icon="['fas', 'bell']"
+        @click="watchedCommentsOpen = true"
+      />
+    </div>
+    <div
+      v-if="SUPPORTS_LOCAL_API"
+      class="commentSettings"
+    >
       <FtToggleSwitch
         :label="t('Settings.General Settings.Comment Translation.Enable')"
         :default-value="commentTranslationsEnabled"
@@ -53,25 +87,37 @@
         </li>
       </ul>
     </div>
+    <WatchedCommentsPrompt
+      v-if="watchedCommentsOpen"
+      @close="watchedCommentsOpen = false"
+    />
   </FtSettingsSection>
 </template>
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, useId } from 'vue'
+import { computed, ref, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import FtButton from '../../FtButton/FtButton.vue'
 import FtSelect from '../../FtSelect/FtSelect.vue'
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
+import WatchedCommentsPrompt from './WatchedCommentsPrompt.vue'
 
 import {
   COMMENT_TRANSLATION_LANGUAGE_CODES,
   normalizeCommentTranslationLanguageCode,
 } from '../../../helpers/comment-translations'
+import { supportsNotificationHistory } from '../../../helpers/notificationHistory'
+import { requestCapacitorNotificationPermission } from '../../../helpers/platformFeed'
 import store from '../../../store/index'
 
+const SUPPORTS_LOCAL_API = !!process.env.SUPPORTS_LOCAL_API
+
 const { locale, t } = useI18n()
+const watchedCommentsOpen = ref(false)
+const canNotifyReplies = computed(() => supportsNotificationHistory && store.getters.getNotificationMode !== 'off')
 const descriptionId = useId()
 const commentTranslationsEnabled = computed(() => store.getters.getEnableCommentTranslations)
 
@@ -127,9 +173,15 @@ function removeLanguage(language) {
   )
 }
 
+/** @param {boolean} value */
+function updateReplyNotifications(value) {
+  store.dispatch('updateCommentReplyNotifications', value)
+  if (process.env.IS_CAPACITOR && value) requestCapacitorNotificationPermission()
+}
+
 function updateCommentTranslationsEnabled(value) {
   store.dispatch('updateEnableCommentTranslations', value)
 }
 </script>
 
-<style scoped src="./CommentTranslationSettings.css" />
+<style scoped src="./CommentSettings.css" />

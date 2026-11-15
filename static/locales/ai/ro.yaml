@@ -356,6 +356,7 @@ History:
 Settings:
   Experimental Badge: Experimental
   YouTube Account Settings:
+    Watch Posted Comments: "Urmărește răspunsurile la comentariile pe care le postez"
     YouTube Account Settings: "Cont YouTube"
     Unofficial App Warning: "OpenTubeX nu este o aplicație oficială YouTube. La conectare, ceea ce faceți aici este asociat contului dvs. Google, iar Google poate restricționa sau bloca conturile care folosesc aplicații neoficiale. Conectați-vă doar cu un cont pe care vă permiteți să îl pierdeți."
     Sign In Explanation: "OpenTubeX se conectează ca o aplicație TV: aprobați conectarea pe site-ul Google, iar OpenTubeX nu vă vede niciodată parola. Conectarea rămâne pe acest dispozitiv și nu este sincronizată sau inclusă în copiile de rezervă."
@@ -387,7 +388,6 @@ Settings:
     Sync Now: "Sincronizați acum"
     Synced: "Sincronizat cu YouTube"
     Sync Failed: "Sincronizarea cu YouTube nu a reușit: {error}"
-    Reply Notifications: "Anunță-mă despre răspunsurile la comentariile mele"
   Diagnostics:
     Diagnostics: Diagnosticare
     Description: Cât timp jurnalul de diagnosticare este activ, OpenTubeX păstrează în memorie mesajele recente din jurnal, ca să le poți atașa la rapoartele de erori. Nu le salvează și nu le trimite niciodată de la sine, iar dezactivarea jurnalului le șterge. Rapoartele omit cookie-urile, tokenurile, adresele IP și parametrii URL, dar pot include ID-urile videoclipurilor redate, așa că verifică un raport înainte de a-l distribui.
@@ -474,6 +474,11 @@ Settings:
       Network: rețea
       Disk: disc
   General Settings:
+    Stop Watching: "Nu mai urmări"
+    No Watched Comments: "Nu este urmărit niciun comentariu. Urmărește un comentariu cu butonul clopoțel de lângă el."
+    Your Comment: "Comentariul tău"
+    Watched Comments: "Comentarii urmărite"
+    Reply Notifications: "Activează notificările pentru răspunsuri"
     Built-in Streams:
       Built-in Streams: "Fluxuri integrate"
       Automatic: "Automat"
@@ -550,7 +555,6 @@ Settings:
       Force On: Activează forțat
       Force Off: Dezactivează forțat
     Comment Translation:
-      Title: Traducerea comentariilor
       Enable: Activează traducerea comentariilor
       Never Translate: Nu traduce niciodată comentariile în
       Choose Language: Alegeți o limbă
@@ -2279,6 +2283,9 @@ Chapters:
   Chapter Loop Stopped: 'Repetarea capitolului a fost oprită'
   Sync to Video Time: 'Sincronizează cu timpul videoclipului'
 Comments:
+  Watch Failed: "Nu s-au putut urmări răspunsurile la comentariu"
+  Stop Watching for Replies: "Nu mai urmări răspunsurile"
+  Watch for Replies: "Urmărește răspunsurile"
   Image unavailable: "Imagine indisponibilă"
   Comment Count: 1 comentariu | {count} comentarii | {count} de comentarii
   Show Comments: Afișează comentariile
@@ -2320,12 +2327,13 @@ Description:
   Music: Muzică
 Tooltips:
   YouTube Account Settings:
+    Watch Posted Comments: "Comentariile pe care le postezi aici sunt urmărite automat pentru răspunsuri, cât timp notificările despre răspunsuri sunt activate în setările comentariilor."
     Sync Subscriptions: "Canalele la care vă abonați pe YouTube sunt adăugate în „Toate canalele”, iar canalele de la care vă dezabonați acolo sunt eliminate din toate profilurile. Abonarea sau dezabonarea în „Toate canalele” de aici face același lucru pe YouTube."
     Sync Playlists: "Listele dvs. de redare de pe YouTube, „Vizionează mai târziu” și „Videoclipuri apreciate” apar în „Listele tale de redare”, iar modificările pe care le faceți aici în ele se fac și pe YouTube. Acestea nu sunt sincronizate cu celelalte dispozitive ale dvs. și nu sunt incluse când exportați toate listele de redare sau faceți o copie de rezervă a datelor. Dezactivarea acestei opțiuni le elimină de pe acest dispozitiv, dar nu și de pe YouTube."
     Add to YouTube Watch History: "Videoclipurile pe care le redați sunt adăugate în istoricul vizionărilor YouTube, astfel încât recomandările YouTube să învețe din ele. Nu se adaugă nimic cât timp istoricul este întrerupt pe YouTube."
     Rate Videos: "Afișează butoanele de apreciere și neapreciere pe videoclipuri. Pentru a-ți afișa evaluarea, fiecare videoclip pe care îl deschizi este căutat pe YouTube cu contul tău, așa că YouTube află ce videoclipuri deschizi, chiar și atunci când nu sunt adăugate în istoricul de vizionare."
-    Reply Notifications: "OpenTubeX verifică dacă au apărut răspunsuri noi la comentariile pe care le-ai publicat aici în ultimele 30 de zile. Comentariile publicate în altă parte, de exemplu pe site-ul YouTube, nu sunt incluse."
   General Settings:
+    Reply Notifications: "OpenTubeX verifică timp de 30 de zile dacă există răspunsuri noi la comentariile pe care le urmărești. Urmărește orice comentariu cu butonul clopoțel de lângă el."
     Built-in Streams: |
       Modul automat redă majoritatea videoclipurilor prin clientul visionOS al YouTube, care pornește mai repede și acceptă calitatea automată. Transmisiunile live și videoclipurile pe care nu le poate reda folosesc SABR.
       Doar SABR folosește întotdeauna clientul web al YouTube, care pornește mai încet și nu are calitate automată.
@@ -2847,6 +2855,7 @@ Platforms:
   Load Error: Această pagină nu a putut fi încărcată de pe {platform}.
   Empty Tab: Încă nu există nimic aici.
 YouTube Account:
+  "{author} replied to {commentAuthor}": "{author} i-a răspuns lui {commentAuthor}"
   Like: "Îmi place"
   Dislike: "Nu îmi place"
   Rating Failed: "Evaluarea pe YouTube nu a reușit: {error}"

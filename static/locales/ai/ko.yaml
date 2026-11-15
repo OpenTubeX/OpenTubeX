@@ -449,6 +449,7 @@ History:
 Settings:
   Experimental Badge: 실험적
   YouTube Account Settings:
+    Watch Posted Comments: "내가 작성한 댓글의 답글 확인"
     YouTube Account Settings: "YouTube 계정"
     Unofficial App Warning: "OpenTubeX는 YouTube 공식 앱이 아닙니다. 로그인하면 여기서 하는 활동이 Google 계정에 연결되며, Google은 비공식 앱을 사용하는 계정을 제한하거나 정지할 수 있습니다. 잃어도 괜찮은 계정으로만 로그인하세요."
     Sign In Explanation: "OpenTubeX는 TV 앱처럼 로그인합니다. Google 웹사이트에서 로그인을 승인하므로 OpenTubeX는 비밀번호를 볼 수 없습니다. 로그인 정보는 이 기기에만 저장되며 동기화되거나 백업되지 않습니다."
@@ -480,7 +481,6 @@ Settings:
     Sync Now: "지금 동기화"
     Synced: "YouTube와 동기화했습니다"
     Sync Failed: "YouTube와 동기화할 수 없습니다: {error}"
-    Reply Notifications: "내 댓글에 달린 답글 알림 받기"
   Diagnostics:
     Diagnostics: 진단
     Description: 진단 로그가 켜져 있는 동안 OpenTubeX는 최근 로그 메시지를 메모리에 보관하여 버그 보고서에 첨부할 수 있게 합니다. 스스로 저장하거나 전송하지 않으며, 로그를 끄면 삭제됩니다. 보고서에는 쿠키, 토큰, IP 주소, URL 매개변수가 포함되지 않지만 재생한 동영상의 ID가 포함될 수 있으므로 공유하기 전에 보고서를 확인하세요.
@@ -568,6 +568,11 @@ Settings:
       Disk: 디스크
   Return to Settings Menu: 설정 메뉴로 돌아가기
   General Settings:
+    Stop Watching: "확인 중지"
+    No Watched Comments: "확인 중인 댓글이 없습니다. 댓글 옆의 종 버튼을 눌러 댓글을 확인 목록에 추가하세요."
+    Your Comment: "내 댓글"
+    Watched Comments: "확인 중인 댓글"
+    Reply Notifications: "답글 알림 활성화"
     Built-in Streams:
       Built-in Streams: "내장 스트림"
       Automatic: "자동"
@@ -649,7 +654,6 @@ Settings:
       Force On: 강제로 켜기
       Force Off: 강제로 끄기
     Comment Translation:
-      Title: 댓글 번역
       Enable: 댓글 번역 활성화
       Never Translate: 다음 언어의 댓글은 번역하지 않기
       Choose Language: 언어 선택
@@ -2608,6 +2612,9 @@ Chapters:
   Chapter Loop Stopped: '챕터 반복을 중지했습니다'
   Sync to Video Time: '동영상 시간에 동기화'
 Comments:
+  Watch Failed: "댓글의 답글을 확인 목록에 추가하지 못했습니다"
+  Stop Watching for Replies: "답글 확인 중지"
+  Watch for Replies: "답글 확인"
   Image unavailable: "이미지를 사용할 수 없습니다"
   Comment Count: '댓글 {count}개'
   Show Comments: 댓글 표시
@@ -2653,12 +2660,13 @@ Description:
   Music: 음악
 Tooltips:
   YouTube Account Settings:
+    Watch Posted Comments: "댓글 설정에서 답글 알림이 켜져 있으면 여기에 작성한 댓글은 자동으로 답글 확인 목록에 추가됩니다."
     Add to YouTube Watch History: "재생한 동영상이 YouTube 시청 기록에 추가되어 YouTube 추천에 반영됩니다. YouTube에서 기록이 일시중지된 동안에는 아무것도 추가되지 않습니다."
     Rate Videos: "동영상에 좋아요 및 싫어요 버튼을 표시합니다. 평가를 표시하려면 여는 모든 동영상을 계정으로 YouTube에서 조회하므로, 시청 기록에 추가되지 않더라도 YouTube는 어떤 동영상을 열었는지 알게 됩니다."
     Sync Subscriptions: "YouTube에서 구독한 채널은 “모든 채널”에 추가되고, YouTube에서 구독 취소한 채널은 모든 프로필에서 삭제됩니다. 여기서 “모든 채널”의 채널을 구독하거나 구독 취소하면 YouTube에서도 똑같이 적용됩니다."
     Sync Playlists: "YouTube 재생 목록, “나중에 볼 동영상”, “좋아요 표시한 동영상”이 “나의 재생 목록”에 표시되며, 여기서 변경한 내용은 YouTube에도 반영됩니다. 다른 기기와 동기화되지 않으며 모든 재생 목록을 내보내거나 데이터를 백업할 때도 포함되지 않습니다. 이 옵션을 끄면 이 기기에서는 삭제되지만 YouTube에서는 삭제되지 않습니다."
-    Reply Notifications: "OpenTubeX는 최근 30일 동안 여기에서 작성한 댓글에 새 답글이 있는지 확인합니다. YouTube 웹사이트 등 다른 곳에서 작성한 댓글은 포함되지 않습니다."
   General Settings:
+    Reply Notifications: "OpenTubeX는 확인 중인 댓글에 새 답글이 있는지 30일 동안 확인합니다. 댓글 옆의 종 버튼을 눌러 원하는 댓글을 확인 목록에 추가하세요."
     Built-in Streams: |
       자동은 대부분의 동영상을 YouTube의 visionOS 클라이언트로 재생하며, 더 빨리 시작되고 자동 화질을 지원합니다. 실시간 스트림과 재생할 수 없는 동영상은 SABR을 사용합니다.
       SABR만은 항상 YouTube의 웹 클라이언트를 사용하며, 더 느리게 시작되고 자동 화질이 없습니다.
@@ -3247,6 +3255,7 @@ Platforms:
   Load Error: '{platform}에서 이 페이지를 불러올 수 없습니다.'
   Empty Tab: 아직 아무것도 없습니다.
 YouTube Account:
+  "{author} replied to {commentAuthor}": "{author}님이 {commentAuthor}님에게 답글을 남겼습니다"
   Like: "좋아요"
   Dislike: "싫어요"
   Rating Failed: "YouTube에서 평가할 수 없습니다: {error}"

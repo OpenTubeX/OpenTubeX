@@ -19,6 +19,7 @@ const GENERAL_EVERYDAY_KEYS = new Set([
   'Open Deep Links In New Window',
   'Reduced Motion',
   'Region for Trending',
+  'Reply Notifications',
   'Startup Behavior',
   'Swipe to refresh',
   'Haptic Feedback',
@@ -27,7 +28,8 @@ const GENERAL_EVERYDAY_KEYS = new Set([
   'System Default',
   'Tab Close Focus',
   'Update Relative Timestamps',
-  'Use AI Translation Completions'
+  'Use AI Translation Completions',
+  'Watched Comments'
 ])
 
 const GENERAL_APPEARANCE_KEYS = new Set([
@@ -295,7 +297,7 @@ export const SETTINGS_SEARCH_SOURCES = {
   }, {
     type: 'youtube-account',
     key: 'Settings.YouTube Account Settings',
-    include: new Set(['YouTube Account Settings', 'Sign In', 'Sign Out', 'Sync Subscriptions', 'Sync Playlists', 'Add to YouTube Watch History', 'Rate Videos', 'Reply Notifications']),
+    include: new Set(['YouTube Account Settings', 'Sign In', 'Sign Out', 'Sync Subscriptions', 'Sync Playlists', 'Add to YouTube Watch History', 'Rate Videos', 'Watch Posted Comments']),
     electronOnly: true,
     capacitorSupported: true,
     tab: 'youtube-account'
@@ -390,7 +392,7 @@ export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
     'Startup Behavior': ['Startup Behavior'],
     'Reduced Motion': ['Reduced Motion'],
     'Avoid translation': ['Avoid translation'],
-    'Comment Translation': ['Title', 'Enable', 'Never Translate'],
+    'Comment Translation': ['Enable', 'Never Translate'],
     'Preferred API Backend': ['Preferred API Backend'],
     'Yattee Server': ['Server URL', 'Username', 'Password', 'Proxy Videos', 'Test Connection'],
     'Playlist View Type': ['Playlist View Type'],

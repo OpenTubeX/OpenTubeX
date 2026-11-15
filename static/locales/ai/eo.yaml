@@ -393,6 +393,7 @@ History:
 Settings:
   Experimental Badge: Eksperimenta
   YouTube Account Settings:
+    Watch Posted Comments: "Observi miajn afiŝitajn komentojn por respondoj"
     YouTube Account Settings: "YouTube-konto"
     Unofficial App Warning: "OpenTubeX ne estas oficiala aplikaĵo de YouTube. Ensalutante vi ligas tion, kion vi faras ĉi tie, al via Google-konto, kaj Google povas limigi aŭ forbari kontojn, kiuj uzas neoficialajn aplikaĵojn. Ensalutu nur per konto, kies perdon vi povas akcepti."
     Sign In Explanation: "OpenTubeX ensalutas kiel televida aplikaĵo: vi aprobas ĝin en la retejo de Google, kaj OpenTubeX neniam vidas vian pasvorton. La ensaluto restas en ĉi tiu aparato kaj estas nek sinkronigata nek sekurkopiata."
@@ -424,7 +425,6 @@ Settings:
     Sync Now: "Sinkronigi nun"
     Synced: "Sinkronigita kun YouTube"
     Sync Failed: "Ne eblis sinkronigi kun YouTube: {error}"
-    Reply Notifications: "Sciigi min pri respondoj al miaj komentoj"
   Tab Unloading:
     Automatically unload tabs: Aŭtomate malŝargi langetojn
     Memory threshold: Memorsojlo
@@ -510,6 +510,11 @@ Settings:
       Network: reto
       Disk: disko
   General Settings:
+    Stop Watching: "Ĉesi observi"
+    No Watched Comments: "Neniuj komentoj estas observataj. Observu komenton per la sonorila butono apud ĝi."
+    Your Comment: "Via komento"
+    Watched Comments: "Observataj komentoj"
+    Reply Notifications: "Ŝalti sciigojn pri respondoj"
     Built-in Streams:
       Built-in Streams: "Enkonstruitaj fluoj"
       Automatic: "Aŭtomata"
@@ -591,7 +596,6 @@ Settings:
       Force On: Devigi ŝaltita
       Force Off: Devigi malŝaltita
     Comment Translation:
-      Title: Tradukoj de komentoj
       Enable: Ŝalti tradukojn de komentoj
       Never Translate: Neniam traduki komentojn en
       Choose Language: Elektu lingvon
@@ -2277,6 +2281,9 @@ Chapters:
   Chapter Loop Stopped: Ĉesis ripeti ĉapitron
   Sync to Video Time: 'Sinkronigi kun la videotempo'
 Comments:
+  Watch Failed: "Ne eblis observi la komenton por respondoj"
+  Stop Watching for Replies: "Ĉesi observi respondojn"
+  Watch for Replies: "Observi respondojn"
   Image unavailable: Bildo ne disponeblas
   Comment Count: 1 komento | {count} komentoj
   Show Comments: Montri komentojn
@@ -2314,12 +2321,13 @@ Description:
   Music: Muziko
 Tooltips:
   YouTube Account Settings:
+    Watch Posted Comments: "Komentoj, kiujn vi afiŝas ĉi tie, estas aŭtomate observataj por respondoj, kondiĉe ke sciigoj pri respondoj estas ŝaltitaj en la komentaj agordoj."
     Sync Subscriptions: "Kanaloj, kiujn vi abonas ĉe YouTube, aldoniĝas al “Ĉiuj kanaloj”, kaj kanaloj, kies abonon vi tie nuligas, foriĝas el ĉiuj profiloj. Aboni aŭ malaboni en “Ĉiuj kanaloj” ĉi tie faras la samon ĉe YouTube."
     Sync Playlists: "Viaj YouTube-ludlistoj, “Spekti poste” kaj “Ŝatitaj videaĵoj” aperas en “Viaj ludlistoj”, kaj ŝanĝoj, kiujn vi faras al ili ĉi tie, fariĝas ankaŭ ĉe YouTube. Ili ne estas sinkronigataj al viaj aliaj aparatoj nek inkluzivataj, kiam vi eksportas ĉiujn ludlistojn aŭ savkopias viajn datumojn. Malŝalto de ĉi tio forigas ilin el ĉi tiu aparato, sed ne el YouTube."
     Add to YouTube Watch History: "Videaĵoj, kiujn vi ludas, aldoniĝas al via YouTube-spekthistorio, do la rekomendoj de YouTube lernas el ili. Nenio aldoniĝas dum la historio estas paŭzigita ĉe YouTube."
     Rate Videos: "Montras butonojn por ŝati kaj malŝati videojn. Por montri vian takson, ĉiu video, kiun vi malfermas, estas serĉata ĉe YouTube per via konto, do YouTube ekscias, kiujn videojn vi malfermas, eĉ se ili ne estas aldonitaj al via spekta historio."
-    Reply Notifications: "OpenTubeX kontrolas la komentojn, kiujn vi afiŝis ĉi tie dum la lastaj 30 tagoj, por novaj respondoj. Komentoj, kiujn vi afiŝis aliloke, ekzemple en la retejo de YouTube, ne estas inkluzivitaj."
   General Settings:
+    Reply Notifications: "OpenTubeX kontrolas la komentojn, kiujn vi observas, por novaj respondoj dum 30 tagoj. Observu ajnan komenton per la sonorila butono apud ĝi."
     Built-in Streams: |
       Aŭtomata ludas la plimulton de videoj per la visionOS-kliento de YouTube, kiu komenciĝas pli rapide kaj subtenas aŭtomatan kvaliton. Rektaj elsendoj kaj videoj, kiujn ĝi ne povas ludi, uzas SABR.
       Nur SABR ĉiam uzas la retan klienton de YouTube, kiu komenciĝas pli malrapide kaj ne havas aŭtomatan kvaliton.
@@ -2790,6 +2798,7 @@ Platforms:
   Load Error: Ne eblis ŝargi ĉi tiun paĝon de {platform}.
   Empty Tab: Ankoraŭ estas nenio ĉi tie.
 YouTube Account:
+  "{author} replied to {commentAuthor}": "{author} respondis al {commentAuthor}"
   Like: "Ŝati"
   Dislike: "Malŝati"
   Rating Failed: "Ne eblis taksi ĉe YouTube: {error}"

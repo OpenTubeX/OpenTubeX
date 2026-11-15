@@ -356,6 +356,7 @@ History:
 Settings:
   Experimental Badge: Kokeellinen
   YouTube Account Settings:
+    Watch Posted Comments: "Seuraa julkaisemieni kommenttien vastauksia"
     YouTube Account Settings: "YouTube-tili"
     Unofficial App Warning: "OpenTubeX ei ole YouTuben virallinen sovellus. Kun kirjaudut sisään, täällä tekemäsi asiat yhdistetään Google-tiliisi, ja Google voi rajoittaa tai estää tilejä, jotka käyttävät epävirallisia sovelluksia. Kirjaudu sisään vain tilillä, jonka olet valmis menettämään."
     Sign In Explanation: "OpenTubeX kirjautuu sisään kuten TV-sovellus: hyväksyt kirjautumisen Googlen verkkosivustolla, eikä OpenTubeX koskaan näe salasanaasi. Kirjautuminen säilyy tällä laitteella, eikä sitä synkronoida tai varmuuskopioida."
@@ -387,7 +388,6 @@ Settings:
     Sync Now: "Synkronoi nyt"
     Synced: "Synkronoitu YouTuben kanssa"
     Sync Failed: "Synkronointi YouTuben kanssa epäonnistui: {error}"
-    Reply Notifications: "Ilmoita minulle vastauksista kommentteihini"
   Diagnostics:
     Diagnostics: Vianmääritys
     Description: Kun vianmääritysloki on käytössä, OpenTubeX säilyttää viimeisimmät lokiviestit muistissa, jotta voit liittää ne virheraportteihin. Se ei koskaan tallenna tai lähetä niitä itsestään, ja lokin poistaminen käytöstä poistaa ne. Raportit jättävät pois evästeet, tunnukset, IP-osoitteet ja URL-parametrit, mutta ne voivat sisältää toistamiesi videoiden tunnuksia, joten tarkista raportti ennen kuin jaat sen.
@@ -474,6 +474,11 @@ Settings:
       Network: verkko
       Disk: levytila
   General Settings:
+    Stop Watching: "Lopeta seuraaminen"
+    No Watched Comments: "Mitään kommentteja ei seurata. Seuraa kommenttia sen vieressä olevalla kellopainikkeella."
+    Your Comment: "Kommenttisi"
+    Watched Comments: "Seuratut kommentit"
+    Reply Notifications: "Ota vastausilmoitukset käyttöön"
     Built-in Streams:
       Built-in Streams: "Sisäänrakennetut striimit"
       Automatic: "Automaattinen"
@@ -550,7 +555,6 @@ Settings:
       Force On: Pakota käyttöön
       Force Off: Pakota pois käytöstä
     Comment Translation:
-      Title: Kommenttien käännökset
       Enable: Ota kommenttien käännökset käyttöön
       Never Translate: Älä koskaan käännä näillä kielillä kirjoitettuja kommentteja
       Choose Language: Valitse kieli
@@ -2237,6 +2241,9 @@ Chapters:
   Chapter Loop Stopped: 'Luvun toisto lopetettu'
   Sync to Video Time: 'Synkronoi videon aikaan'
 Comments:
+  Watch Failed: "Kommentin vastausten seuraaminen epäonnistui"
+  Stop Watching for Replies: "Lopeta vastausten seuraaminen"
+  Watch for Replies: "Seuraa vastauksia"
   Image unavailable: "Kuva ei ole saatavilla"
   Comment Count: 1 kommentti | {count} kommenttia
   Show Comments: Näytä kommentit
@@ -2274,12 +2281,13 @@ Description:
   Music: Musiikki
 Tooltips:
   YouTube Account Settings:
+    Watch Posted Comments: "Täällä julkaisemiesi kommenttien vastauksia seurataan automaattisesti, kun vastausilmoitukset ovat käytössä kommenttiasetuksissa."
     Add to YouTube Watch History: "Toistamasi videot lisätään YouTube-katseluhistoriaasi, jotta YouTuben suositukset oppivat niistä. Mitään ei lisätä, kun historia on keskeytetty YouTubessa."
     Rate Videos: "Näyttää videoissa tykkää- ja en tykkää -painikkeet. Arviosi näyttämiseksi jokainen avaamasi video haetaan YouTubesta tililläsi, joten YouTube saa tietää, mitä videoita avaat, vaikka niitä ei lisättäisi katseluhistoriaasi."
     Sync Subscriptions: "YouTubessa tilaamasi kanavat lisätään profiiliin ”Kaikki kanavat”, ja kanavat, joiden tilauksen perut siellä, poistetaan kaikista profiileista. Kun tilaat kanavan tai perut tilauksen täällä profiilissa ”Kaikki kanavat”, sama tehdään myös YouTubessa."
     Sync Playlists: "YouTube-soittolistasi, ”Katso myöhemmin” ja ”Tykätyt videot” näkyvät kohdassa ”Omat soittolistat”, ja niihin täällä tekemäsi muutokset tehdään myös YouTubessa. Niitä ei synkronoida muille laitteillesi, eikä niitä sisällytetä, kun viet kaikki soittolistat tai varmuuskopioit tietosi. Tämän poistaminen käytöstä poistaa ne tältä laitteelta mutta ei YouTubesta."
-    Reply Notifications: "OpenTubeX tarkistaa, onko täällä viimeisten 30 päivän aikana lähettämiisi kommentteihin tullut uusia vastauksia. Muualla, kuten YouTuben verkkosivustolla, lähettämiäsi kommentteja ei huomioida."
   General Settings:
+    Reply Notifications: "OpenTubeX tarkistaa seuraamiesi kommenttien uudet vastaukset 30 päivän ajan. Seuraa mitä tahansa kommenttia sen vieressä olevalla kellopainikkeella."
     Built-in Streams: |
       Automaattinen toistaa useimmat videot YouTuben visionOS-asiakasohjelman kautta, joka käynnistyy nopeammin ja tukee automaattista laatua. Suorat lähetykset ja videot, joita se ei voi toistaa, käyttävät SABRia.
       Vain SABR käyttää aina YouTuben verkkoasiakasohjelmaa, joka käynnistyy hitaammin eikä tue automaattista laatua.
@@ -2798,6 +2806,7 @@ Platforms:
   Load Error: Tätä sivua ei voitu ladata palvelusta {platform}.
   Empty Tab: Täällä ei ole vielä mitään.
 YouTube Account:
+  "{author} replied to {commentAuthor}": "{author} vastasi käyttäjälle {commentAuthor}"
   Like: "Tykkää"
   Dislike: "En tykkää"
   Rating Failed: "Arviointi YouTubessa epäonnistui: {error}"

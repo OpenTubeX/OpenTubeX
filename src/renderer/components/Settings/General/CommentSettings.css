@@ -1,8 +1,16 @@
-.commentTranslationSettings {
+.commentSettings {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding-block-end: 12px !important;
+}
+
+.commentSwitches.switchColumnGrid {
+  align-self: stretch;
+}
+
+.commentSettings + .commentSettings {
+  margin-block-start: 12px;
 }
 
 .commentTranslationDescription {

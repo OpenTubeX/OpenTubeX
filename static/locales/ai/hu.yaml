@@ -356,6 +356,7 @@ History:
 Settings:
   Experimental Badge: Kísérleti
   YouTube Account Settings:
+    Watch Posted Comments: "Az általam közzétett hozzászólások válaszainak figyelése"
     YouTube Account Settings: "YouTube-fiók"
     Unofficial App Warning: "Az OpenTubeX nem hivatalos YouTube-alkalmazás. Bejelentkezéskor az itt végzett tevékenysége a Google-fiókjához kapcsolódik, és a Google korlátozhatja vagy letilthatja a nem hivatalos alkalmazásokat használó fiókokat. Csak olyan fiókkal jelentkezzen be, amelynek elvesztését megengedheti magának."
     Sign In Explanation: "Az OpenTubeX úgy jelentkezik be, mint egy tévéalkalmazás: a bejelentkezést a Google webhelyén hagyja jóvá, és az OpenTubeX soha nem látja a jelszavát. A bejelentkezés ezen az eszközön marad, és nem kerül szinkronizálásra vagy biztonsági mentésre."
@@ -387,7 +388,6 @@ Settings:
     Sync Now: "Szinkronizálás most"
     Synced: "Szinkronizálva a YouTube-bal"
     Sync Failed: "Nem sikerült szinkronizálni a YouTube-bal: {error}"
-    Reply Notifications: "Értesítést kérek a hozzászólásaimra érkező válaszokról"
   Diagnostics:
     Diagnostics: Diagnosztika
     Description: Amíg a diagnosztikai naplózás be van kapcsolva, az OpenTubeX a legutóbbi naplóüzeneteket a memóriában tartja, hogy hibajelentésekhez csatolhasd őket. Soha nem menti és nem küldi el őket magától, a naplózás kikapcsolása pedig törli őket. A jelentések nem tartalmaznak sütiket, tokeneket, IP-címeket és URL-paramétereket, de tartalmazhatják a lejátszott videók azonosítóit, ezért megosztás előtt ellenőrizd a jelentést.
@@ -474,6 +474,11 @@ Settings:
       Network: hálózat
       Disk: lemez
   General Settings:
+    Stop Watching: "Figyelés leállítása"
+    No Watched Comments: "Nincsenek figyelt hozzászólások. Egy hozzászólást a mellette lévő csengő gombbal figyelhetsz."
+    Your Comment: "Saját hozzászólás"
+    Watched Comments: "Figyelt hozzászólások"
+    Reply Notifications: "Válaszértesítések engedélyezése"
     Built-in Streams:
       Built-in Streams: "Beépített streamek"
       Automatic: "Automatikus"
@@ -550,7 +555,6 @@ Settings:
       Force On: Mindig bekapcsolva
       Force Off: Mindig kikapcsolva
     Comment Translation:
-      Title: Hozzászólások fordítása
       Enable: Hozzászólások fordításának engedélyezése
       Never Translate: Ne fordítsa az ilyen nyelvű hozzászólásokat
       Choose Language: Nyelv kiválasztása
@@ -2229,6 +2233,9 @@ Chapters:
   Chapter Loop Stopped: 'A fejezet ismétlése leállítva'
   Sync to Video Time: 'Szinkronizálás a videó idejével'
 Comments:
+  Watch Failed: "Nem sikerült figyelni a hozzászólásra érkező válaszokat"
+  Stop Watching for Replies: "Válaszok figyelésének leállítása"
+  Watch for Replies: "Válaszok figyelése"
   Image unavailable: "A kép nem érhető el"
   Comment Count: 1 hozzászólás | {count} hozzászólás
   Show Comments: Hozzászólások megjelenítése
@@ -2267,12 +2274,13 @@ Description:
   Music: Zene
 Tooltips:
   YouTube Account Settings:
+    Watch Posted Comments: "Az itt közzétett hozzászólásaidra érkező válaszokat automatikusan figyeljük, amíg a válaszértesítések be vannak kapcsolva a hozzászólások beállításaiban."
     Add to YouTube Watch History: "A lejátszott videók bekerülnek a YouTube megtekintési előzményeibe, így a YouTube ajánlásai tanulhatnak belőlük. Amíg az előzmények szüneteltetve vannak a YouTube-on, semmi sem kerül be."
     Rate Videos: "Megjeleníti a videóknál a Tetszik és Nem tetszik gombokat. Az értékelésed megjelenítéséhez minden megnyitott videót lekérdez a YouTube-on a fiókoddal, így a YouTube megtudja, mely videókat nyitod meg, akkor is, ha nem kerülnek be a megtekintési előzményeidbe."
     Sync Subscriptions: "Azok a csatornák, amelyekre a YouTube-on feliratkozik, bekerülnek az „Összes csatorna” profilba, azok pedig, amelyekről ott leiratkozik, minden profilból törlődnek. Ha itt az „Összes csatorna” profilban feliratkozik vagy leiratkozik, az a YouTube-on is megtörténik."
     Sync Playlists: "A YouTube-lejátszási listái, a „Megnézendő” és a „Kedvelt videók” megjelennek a „Saját lejátszási listák” között, és az itt rajtuk végzett módosítások a YouTube-on is megtörténnek. Nem szinkronizálódnak a többi eszközére, és nem kerülnek bele, amikor az összes lejátszási listát exportálja, vagy biztonsági mentést készít az adatairól. Ha ezt kikapcsolja, eltűnnek erről az eszközről, de a YouTube-ról nem."
-    Reply Notifications: "Az OpenTubeX ellenőrzi, hogy érkezett-e új válasz az itt az elmúlt 30 napban közzétett hozzászólásaidra. A máshol, például a YouTube webhelyén közzétett hozzászólások nem számítanak bele."
   General Settings:
+    Reply Notifications: "Az OpenTubeX 30 napig ellenőrzi, hogy érkezett-e új válasz az általad figyelt hozzászólásokra. Bármelyik hozzászólást figyelheted a mellette lévő csengő gombbal."
     Built-in Streams: |
       Az automatikus mód a legtöbb videót a YouTube visionOS-kliensével játssza le, amely gyorsabban indul és támogatja az automatikus minőséget. Az élő közvetítések és az általa nem lejátszható videók SABR-t használnak.
       A Csak SABR mindig a YouTube webes kliensét használja, amely lassabban indul, és nincs automatikus minősége.
@@ -2791,6 +2799,7 @@ Platforms:
   Load Error: 'Ezt az oldalt nem sikerült betölteni innen: {platform}.'
   Empty Tab: Itt még nincs semmi.
 YouTube Account:
+  "{author} replied to {commentAuthor}": "{author} válaszolt {commentAuthor} hozzászólására"
   Like: "Tetszik"
   Dislike: "Nem tetszik"
   Rating Failed: "Nem sikerült értékelni a YouTube-on: {error}"

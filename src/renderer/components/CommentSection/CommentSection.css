@@ -725,7 +725,8 @@
 }
 
 .commentCopyLink,
-.commentPinButton {
+.commentPinButton,
+.commentWatchButton {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -747,13 +748,17 @@
 .commentCopyLink:focus-visible,
 .commentPinButton:hover,
 .commentPinButton:focus-visible,
-.commentPinButton.active {
+.commentPinButton.active,
+.commentWatchButton:hover,
+.commentWatchButton:focus-visible,
+.commentWatchButton.active {
   color: var(--side-nav-hover-text-color);
   background-color: var(--side-nav-hover-color);
 }
 
 .commentCopyLink:active,
-.commentPinButton:active {
+.commentPinButton:active,
+.commentWatchButton:active {
   border-radius: var(--shape-corner-small);
 }
 

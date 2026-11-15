@@ -407,6 +407,7 @@ History:
 Settings:
   Experimental Badge: تجرباتی
   YouTube Account Settings:
+    Watch Posted Comments: "میرے پوسٹ کیے گئے تبصروں کے جوابات کی نگرانی کریں"
     YouTube Account Settings: "YouTube اکاؤنٹ"
     Unofficial App Warning: "OpenTubeX، YouTube کی آفیشل ایپ نہیں ہے۔ سائن ان کرنے سے یہاں آپ جو کچھ کرتے ہیں وہ آپ کے Google اکاؤنٹ سے منسلک ہو جاتا ہے، اور Google غیر آفیشل ایپس استعمال کرنے والے اکاؤنٹس کو محدود یا بین کر سکتا ہے۔ صرف ایسے اکاؤنٹ سے سائن ان کریں جسے کھونا آپ برداشت کر سکیں۔"
     Sign In Explanation: "OpenTubeX ایک ٹی وی ایپ کی طرح سائن ان کرتا ہے: آپ Google کی ویب سائٹ پر اسے منظور کرتے ہیں، اور OpenTubeX کبھی آپ کا پاس ورڈ نہیں دیکھتا۔ سائن ان اسی آلے پر رہتا ہے اور نہ مطابقت پذیر ہوتا ہے نہ اس کا بیک اپ بنتا ہے۔"
@@ -438,7 +439,6 @@ Settings:
     Sync Now: "ابھی سنک کریں"
     Synced: "YouTube کے ساتھ سنک ہو گیا"
     Sync Failed: "YouTube کے ساتھ سنک نہیں ہو سکا: {error}"
-    Reply Notifications: "میرے تبصروں کے جوابات کی اطلاع دیں"
   Tab Unloading:
     Automatically unload tabs: ٹیبز خود بخود ان لوڈ کریں
     Memory threshold: میموری کی حد
@@ -524,6 +524,11 @@ Settings:
       Network: نیٹ ورک
       Disk: ڈسک
   General Settings:
+    Stop Watching: "نگرانی بند کریں"
+    No Watched Comments: "کوئی تبصرہ زیرِ نگرانی نہیں ہے۔ کسی تبصرے کو اس کے ساتھ موجود گھنٹی کے بٹن سے زیرِ نگرانی رکھیں۔"
+    Your Comment: "آپ کا تبصرہ"
+    Watched Comments: "زیرِ نگرانی تبصرے"
+    Reply Notifications: "جوابات کی اطلاعات فعال کریں"
     Built-in Streams:
       Built-in Streams: "بلٹ اِن اسٹریمز"
       Automatic: "خودکار"
@@ -605,7 +610,6 @@ Settings:
       Force On: ہمیشہ آن
       Force Off: ہمیشہ آف
     Comment Translation:
-      Title: کمنٹس کے ترجمے
       Enable: کمنٹس کے ترجمے فعال کریں
       Never Translate: ان زبانوں کے کمنٹس کا کبھی ترجمہ نہ کریں
       Choose Language: زبان منتخب کریں
@@ -2342,6 +2346,9 @@ Chapters:
   Chapter Loop Stopped: چیپٹر کا لوپ روک دیا گیا
   Sync to Video Time: 'ویڈیو کے وقت سے ہم آہنگ کریں'
 Comments:
+  Watch Failed: "تبصرے کے جوابات کی نگرانی نہیں ہو سکی"
+  Stop Watching for Replies: "جوابات کی نگرانی بند کریں"
+  Watch for Replies: "جوابات کی نگرانی کریں"
   Image unavailable: تصویر دستیاب نہیں
   Comment Count: 1 کمنٹ | {count} کمنٹس
   Show Comments: کمنٹس دکھائیں
@@ -2380,12 +2387,13 @@ Description:
   Music: موسیقی
 Tooltips:
   YouTube Account Settings:
+    Watch Posted Comments: "یہاں پوسٹ کیے گئے آپ کے تبصرے جوابات کے لیے خود بخود زیرِ نگرانی رکھے جاتے ہیں، جب تک کمنٹس کی ترتیبات میں جوابات کی اطلاعات آن ہوں۔"
     Sync Subscriptions: "جن چینلز کو آپ YouTube پر سبسکرائب کرتے ہیں وہ تمام چینلز میں شامل کر دیے جاتے ہیں، اور جن چینلز کو آپ وہاں ان سبسکرائب کرتے ہیں وہ ہر پروفائل سے ہٹا دیے جاتے ہیں۔ یہاں تمام چینلز میں سبسکرائب یا ان سبسکرائب کرنے سے YouTube پر بھی یہی ہوتا ہے۔"
     Sync Playlists: "آپ کی YouTube پلے لسٹس، بعد میں دیکھیں، اور پسند کردہ ویڈیوز آپ کی پلے لسٹس میں نظر آتی ہیں، اور یہاں ان میں کی گئی تبدیلیاں YouTube پر بھی ہو جاتی ہیں۔ یہ آپ کی دوسری ڈیوائسز کے ساتھ سنک نہیں ہوتیں، اور تمام پلے لسٹس ایکسپورٹ کرنے یا اپنے ڈیٹا کا بیک اپ لینے پر شامل نہیں ہوتیں۔ اسے بند کرنے سے یہ اس ڈیوائس سے ہٹ جاتی ہیں لیکن YouTube سے نہیں۔"
     Add to YouTube Watch History: "آپ جو ویڈیوز چلاتے ہیں وہ آپ کی YouTube واچ ہسٹری میں شامل ہو جاتی ہیں، تاکہ YouTube کی تجاویز ان سے سیکھیں۔ جب YouTube پر ہسٹری موقوف ہو تو کچھ بھی شامل نہیں کیا جاتا۔"
     Rate Videos: "ویڈیوز پر پسند اور ناپسند کے بٹن دکھاتا ہے۔ آپ کی درجہ بندی دکھانے کے لیے، آپ کی کھولی ہوئی ہر ویڈیو آپ کے اکاؤنٹ کے ساتھ YouTube پر تلاش کی جاتی ہے، اس لیے YouTube جان لیتا ہے کہ آپ کون سی ویڈیوز کھولتے ہیں، چاہے وہ آپ کی دیکھنے کی سرگزشت میں شامل نہ ہوں۔"
-    Reply Notifications: "OpenTubeX گزشتہ 30 دنوں میں یہاں پوسٹ کیے گئے آپ کے تبصروں پر نئے جوابات چیک کرتا ہے۔ کہیں اور، جیسے YouTube کی ویب سائٹ پر، پوسٹ کیے گئے تبصرے شامل نہیں ہیں۔"
   General Settings:
+    Reply Notifications: "OpenTubeX آپ کے زیرِ نگرانی تبصروں پر نئے جوابات 30 دن تک چیک کرتا ہے۔ کسی بھی تبصرے کو اس کے ساتھ موجود گھنٹی کے بٹن سے زیرِ نگرانی رکھیں۔"
     Built-in Streams: |
       خودکار زیادہ تر ویڈیوز کو YouTube کے visionOS کلائنٹ سے چلاتا ہے، جو تیزی سے شروع ہوتا ہے اور خودکار معیار کو سپورٹ کرتا ہے۔ لائیو اسٹریمز اور وہ ویڈیوز جو یہ نہیں چلا سکتا، SABR استعمال کرتی ہیں۔
       صرف SABR ہمیشہ YouTube کا ویب کلائنٹ استعمال کرتا ہے، جو آہستہ شروع ہوتا ہے اور اس میں خودکار معیار نہیں ہوتا۔
@@ -2860,6 +2868,7 @@ Platforms:
   Load Error: یہ صفحہ {platform} سے لوڈ نہیں ہو سکا۔
   Empty Tab: یہاں ابھی کچھ نہیں ہے۔
 YouTube Account:
+  "{author} replied to {commentAuthor}": "{author} نے {commentAuthor} کو جواب دیا"
   Like: "پسند کریں"
   Dislike: "ناپسند کریں"
   Rating Failed: "YouTube پر ریٹنگ نہیں ہو سکی: {error}"

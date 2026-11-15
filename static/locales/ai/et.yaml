@@ -356,6 +356,7 @@ History:
 Settings:
   Experimental Badge: Eksperimentaalne
   YouTube Account Settings:
+    Watch Posted Comments: "Jälgi minu postitatud kommentaaride vastuseid"
     YouTube Account Settings: "YouTube'i konto"
     Unofficial App Warning: "OpenTubeX ei ole YouTube'i ametlik rakendus. Sisselogimisel seotakse see, mida siin teed, sinu Google'i kontoga, ja Google võib mitteametlikke rakendusi kasutavaid kontosid piirata või blokeerida. Logi sisse ainult kontoga, mille kaotamist saad endale lubada."
     Sign In Explanation: "OpenTubeX logib sisse nagu teleri rakendus: kinnitad selle Google'i veebisaidil ja OpenTubeX ei näe kunagi sinu parooli. Sisselogimine jääb sellesse seadmesse ning seda ei sünkroonita ega varundata."
@@ -387,7 +388,6 @@ Settings:
     Sync Now: "Sünkrooni kohe"
     Synced: "YouTube'iga sünkroonitud"
     Sync Failed: "YouTube'iga sünkroonimine nurjus: {error}"
-    Reply Notifications: "Teavita mind vastustest minu kommentaaridele"
   Diagnostics:
     Diagnostics: Diagnostika
     Description: Kui diagnostikalogi on sisse lülitatud, hoiab OpenTubeX viimaseid logisõnumeid mälus, et saaksid need veateadetele lisada. See ei salvesta ega saada neid kunagi ise ning logi väljalülitamine kustutab need. Aruanded jätavad välja küpsised, märgid, IP-aadressid ja URL-i parameetrid, kuid võivad sisaldada esitatud videote ID-sid, seega kontrolli aruannet enne jagamist.
@@ -474,6 +474,11 @@ Settings:
       Network: võrgu
       Disk: ketta
   General Settings:
+    Stop Watching: "Lõpeta jälgimine"
+    No Watched Comments: "Ühtegi kommentaari ei jälgita. Jälgi kommentaari selle kõrval oleva kellanupuga."
+    Your Comment: "Sinu kommentaar"
+    Watched Comments: "Jälgitavad kommentaarid"
+    Reply Notifications: "Luba vastuste teavitused"
     Built-in Streams:
       Built-in Streams: "Sisseehitatud vood"
       Automatic: "Automaatne"
@@ -550,7 +555,6 @@ Settings:
       Force On: Lülita alati sisse
       Force Off: Lülita alati välja
     Comment Translation:
-      Title: Kommentaaride tõlked
       Enable: Luba kommentaaride tõlkimine
       Never Translate: Ära tõlgi kommentaare järgmises keeles
       Choose Language: Vali keel
@@ -2230,6 +2234,9 @@ Chapters:
   Chapter Loop Stopped: 'Peatüki kordamine peatatud'
   Sync to Video Time: 'Sünkrooni video ajaga'
 Comments:
+  Watch Failed: "Kommentaari vastuste jälgimine ebaõnnestus"
+  Stop Watching for Replies: "Lõpeta vastuste jälgimine"
+  Watch for Replies: "Jälgi vastuseid"
   Image unavailable: "Pilt pole saadaval"
   Comment Count: 1 kommentaar | {count} kommentaari
   Show Comments: Kuva kommentaarid
@@ -2268,12 +2275,13 @@ Description:
   Music: Muusika
 Tooltips:
   YouTube Account Settings:
+    Watch Posted Comments: "Kommentaare, mille siin postitad, jälgitakse automaatselt uute vastuste suhtes, kui vastuste teavitused on kommentaaride seadetes sisse lülitatud."
     Sync Subscriptions: "Kanalid, mille YouTube'is tellid, lisatakse jaotisesse „Kõik kanalid“ ja kanalid, mille tellimuse seal tühistad, eemaldatakse kõigist profiilidest. Kui tellid siin jaotises „Kõik kanalid“ kanali või tühistad tellimuse, juhtub sama ka YouTube'is."
     Sync Playlists: "Sinu YouTube'i esitusloendid, „Vaata hiljem“ ja „Meeldivad videod“ kuvatakse jaotises „Sinu esitusloendid“ ning neis siin tehtud muudatused tehakse ka YouTube'is. Neid ei sünkroonita sinu teistesse seadmetesse ega kaasata, kui ekspordid kõik esitusloendid või varundad oma andmed. Selle väljalülitamine eemaldab need sellest seadmest, kuid mitte YouTube'ist."
     Add to YouTube Watch History: "Sinu esitatud videod lisatakse sinu YouTube'i vaatamiste ajalukku, nii et YouTube'i soovitused õpivad neist. Kui ajalugu on YouTube'is peatatud, ei lisata midagi."
     Rate Videos: "Näitab videotel meeldimise ja mittemeeldimise nuppe. Sinu hinnangu näitamiseks otsitakse iga avatud video sinu kontoga YouTube'ist üles, nii et YouTube saab teada, milliseid videoid sa avad, isegi kui neid sinu vaatamisajalukku ei lisata."
-    Reply Notifications: "OpenTubeX kontrollib uusi vastuseid kommentaaridele, mille oled siin viimase 30 päeva jooksul postitanud. Mujal, näiteks YouTube'i veebisaidil postitatud kommentaare ei arvestata."
   General Settings:
+    Reply Notifications: "OpenTubeX kontrollib sinu jälgitavaid kommentaare 30 päeva jooksul uute vastuste suhtes. Jälgi mis tahes kommentaari selle kõrval oleva kellanupuga."
     Built-in Streams: |
       Automaatne esitab enamikku videoid YouTube'i visionOS-i kliendi kaudu, mis käivitub kiiremini ja toetab automaatset kvaliteeti. Otseülekanded ja videod, mida see esitada ei saa, kasutavad SABR-i.
       Ainult SABR kasutab alati YouTube'i veebiklienti, mis käivitub aeglasemalt ja millel pole automaatset kvaliteeti.
@@ -2792,6 +2800,7 @@ Platforms:
   Load Error: Seda lehte ei õnnestunud platvormilt {platform} laadida.
   Empty Tab: Siin pole veel midagi.
 YouTube Account:
+  "{author} replied to {commentAuthor}": "{author} vastas kasutajale {commentAuthor}"
   Like: "Meeldib"
   Dislike: "Ei meeldi"
   Rating Failed: "YouTube'is hindamine nurjus: {error}"

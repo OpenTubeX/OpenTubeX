@@ -356,6 +356,7 @@ History:
 Settings:
   Experimental Badge: 試験的
   YouTube Account Settings:
+    Watch Posted Comments: "投稿したコメントへの返信を監視"
     YouTube Account Settings: "YouTube アカウント"
     Unofficial App Warning: "OpenTubeX は YouTube の公式アプリではありません。ログインすると、ここでの操作が Google アカウントに関連付けられます。Google は非公式アプリを使用するアカウントを制限または停止する場合があります。失っても構わないアカウントでのみログインしてください。"
     Sign In Explanation: "OpenTubeX はテレビアプリと同じ方法でログインします。Google のウェブサイトで承認するため、OpenTubeX がパスワードを見ることはありません。ログイン情報はこのデバイスにのみ保存され、同期やバックアップの対象にはなりません。"
@@ -387,7 +388,6 @@ Settings:
     Sync Now: "今すぐ同期"
     Synced: "YouTube と同期しました"
     Sync Failed: "YouTube と同期できませんでした: {error}"
-    Reply Notifications: "自分のコメントへの返信を通知する"
   Diagnostics:
     Diagnostics: 診断
     Description: 診断ログが有効な間、OpenTubeX は最近のログメッセージをメモリに保持し、バグ報告に添付できるようにします。自動で保存や送信をすることはなく、ログを無効にすると削除されます。レポートには Cookie、トークン、IP アドレス、URL パラメーターは含まれませんが、再生した動画の ID が含まれる場合があるため、共有する前にレポートを確認してください。
@@ -474,6 +474,11 @@ Settings:
       Network: ネットワーク
       Disk: ディスク
   General Settings:
+    Stop Watching: "監視を停止"
+    No Watched Comments: "監視中のコメントはありません。コメントの横にあるベルボタンで監視できます。"
+    Your Comment: "あなたのコメント"
+    Watched Comments: "監視中のコメント"
+    Reply Notifications: "返信の通知を有効化"
     Built-in Streams:
       Built-in Streams: "組み込みストリーム"
       Automatic: "自動"
@@ -550,7 +555,6 @@ Settings:
       Force On: 常に有効
       Force Off: 常に無効
     Comment Translation:
-      Title: コメントの翻訳
       Enable: コメントの翻訳を有効化
       Never Translate: 次の言語のコメントは翻訳しない
       Choose Language: 言語を選択
@@ -2228,6 +2232,9 @@ Chapters:
   Chapter Loop Stopped: 'チャプターのループを停止しました'
   Sync to Video Time: '動画の再生位置に同期'
 Comments:
+  Watch Failed: "コメントの返信を監視できませんでした"
+  Stop Watching for Replies: "返信の監視を停止"
+  Watch for Replies: "返信を監視"
   Image unavailable: "画像は利用できません"
   Comment Count: '{count}件のコメント'
   Show Comments: コメントを表示
@@ -2265,12 +2272,13 @@ Description:
   Music: 音楽
 Tooltips:
   YouTube Account Settings:
+    Watch Posted Comments: "ここで投稿したコメントは、コメント設定で返信通知がオンになっている間、自動的に返信が監視されます。"
     Add to YouTube Watch History: "再生した動画は YouTube の視聴履歴に追加され、YouTube のおすすめに反映されます。YouTube で履歴が一時停止されている間は何も追加されません。"
     Rate Videos: "動画に高評価と低評価のボタンを表示します。評価を表示するため、開いた動画はすべてアカウントを使って YouTube で照会されます。そのため、再生履歴に追加されない場合でも、どの動画を開いたかが YouTube に伝わります。"
     Sync Subscriptions: "YouTube で登録したチャンネルは「すべてのチャンネル」に追加され、YouTube で登録解除したチャンネルはすべてのプロファイルから削除されます。ここで「すべてのチャンネル」でチャンネル登録または登録解除すると、YouTube でも同じ操作が行われます。"
     Sync Playlists: "YouTube の再生リスト、「後で見る」、「高く評価した動画」が「あなたの再生リスト」に表示され、ここで加えた変更は YouTube にも反映されます。これらは他のデバイスに同期されず、すべての再生リストのエクスポートやデータのバックアップにも含まれません。この設定をオフにすると、このデバイスからは削除されますが、YouTube からは削除されません。"
-    Reply Notifications: "OpenTubeX は、過去 30 日間にここで投稿したコメントへの新しい返信を確認します。YouTube のウェブサイトなど、ほかの場所で投稿したコメントは含まれません。"
   General Settings:
+    Reply Notifications: "OpenTubeX は監視中のコメントに新しい返信がないか 30 日間確認します。コメントの横にあるベルボタンで、任意のコメントを監視できます。"
     Built-in Streams: |
       自動では、ほとんどの動画を YouTube の visionOS クライアントで再生します。起動が速く、自動画質に対応しています。ライブ配信や再生できない動画には SABR を使用します。
       SABR のみでは、常に YouTube のウェブクライアントを使用します。起動が遅く、自動画質はありません。
@@ -2789,6 +2797,7 @@ Platforms:
   Load Error: '{platform} からこのページを読み込めませんでした。'
   Empty Tab: まだ何もありません。
 YouTube Account:
+  "{author} replied to {commentAuthor}": "{author} さんが {commentAuthor} さんに返信しました"
   Like: "高く評価"
   Dislike: "低く評価"
   Rating Failed: "YouTube で評価できませんでした: {error}"

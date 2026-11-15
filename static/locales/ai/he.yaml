@@ -361,6 +361,7 @@ History:
 Settings:
   Experimental Badge: ניסיוני
   YouTube Account Settings:
+    Watch Posted Comments: "מעקב אחר תשובות לתגובות שאני מפרסם"
     YouTube Account Settings: "חשבון YouTube"
     Unofficial App Warning: "OpenTubeX אינה אפליקציה רשמית של YouTube. הכניסה לחשבון מקשרת את מה שנעשה כאן לחשבון Google, ו־Google עלולה להגביל או לחסום חשבונות שמשתמשים באפליקציות לא רשמיות. יש להיכנס רק עם חשבון שאין בעיה לאבד."
     Sign In Explanation: "OpenTubeX נכנס לחשבון כמו אפליקציית טלוויזיה: האישור מתבצע באתר של Google, ו־OpenTubeX אף פעם לא רואה את הסיסמה שלך. הכניסה נשמרת במכשיר הזה בלבד ואינה מסונכרנת או מגובה."
@@ -392,7 +393,6 @@ Settings:
     Sync Now: "סנכרון עכשיו"
     Synced: "הסנכרון עם YouTube הושלם"
     Sync Failed: "לא ניתן לסנכרן עם YouTube: {error}"
-    Reply Notifications: "להודיע לי על תגובות לתגובות שלי"
   Diagnostics:
     Diagnostics: אבחון
     Description: כל עוד יומן האבחון פועל, OpenTubeX שומר הודעות יומן אחרונות בזיכרון כדי שתוכלו לצרף אותן לדיווחי באגים. הוא אף פעם לא שומר או שולח אותן מעצמו, וכיבוי היומן מוחק אותן. הדוחות אינם כוללים קובצי Cookie, אסימונים, כתובות IP ופרמטרים של כתובות URL, אך הם עשויים לכלול מזהים של סרטונים שניגנתם, לכן בדקו דוח לפני שתשתפו אותו.
@@ -479,6 +479,11 @@ Settings:
       Network: רשת
       Disk: כונן
   General Settings:
+    Stop Watching: "הפסקת מעקב"
+    No Watched Comments: "אין תגובות במעקב. עקוב אחר תגובה באמצעות כפתור הפעמון שלידה."
+    Your Comment: "התגובה שלך"
+    Watched Comments: "תגובות במעקב"
+    Reply Notifications: "הפעלת התראות על תשובות"
     Built-in Streams:
       Built-in Streams: "זרמים מובנים"
       Automatic: "אוטומטי"
@@ -555,7 +560,6 @@ Settings:
       Force On: תמיד
       Force Off: לעולם לא
     Comment Translation:
-      Title: תרגום תגובות
       Enable: הפעלת תרגום תגובות
       Never Translate: לא לתרגם תגובות בשפה
       Choose Language: בחירת שפה
@@ -2286,6 +2290,9 @@ Chapters:
   Chapter Loop Stopped: 'ההפעלה החוזרת של הפרק הופסקה'
   Sync to Video Time: 'סנכרון לזמן הסרטון'
 Comments:
+  Watch Failed: "לא ניתן לעקוב אחר תשובות לתגובה"
+  Stop Watching for Replies: "הפסקת מעקב אחר תשובות"
+  Watch for Replies: "מעקב אחר תשובות"
   Image unavailable: "התמונה אינה זמינה"
   Comment Count: 1 תגובה | {count} תגובות | {count} תגובות
   Show Comments: הצגת התגובות
@@ -2324,12 +2331,13 @@ Description:
   Music: מוזיקה
 Tooltips:
   YouTube Account Settings:
+    Watch Posted Comments: "תגובות שאתה מפרסם כאן נכנסות אוטומטית למעקב אחר תשובות, כל עוד התראות על תשובות מופעלות בהגדרות התגובות."
     Add to YouTube Watch History: "סרטונים שמופעלים נוספים להיסטוריית הצפייה שלך ב־YouTube, כך שההמלצות של YouTube לומדות מהם. כשההיסטוריה מושהית ב־YouTube, שום דבר לא נוסף."
     Rate Videos: "מציג כפתורי אהבתי ולא אהבתי בסרטונים. כדי להציג את הדירוג שלך, כל סרטון שנפתח נבדק ב-YouTube עם החשבון שלך, כך ש-YouTube יודע אילו סרטונים פתחת, גם כשהם לא נוספים להיסטוריית הצפייה שלך."
     Sync Subscriptions: "ערוצים שנרשמת אליהם למינוי ב־YouTube נוספים אל „כל הערוצים”, וערוצים שביטלת את המינוי אליהם שם מוסרים מכל הפרופילים. הרשמה למינוי או ביטול מינוי כאן ב„כל הערוצים” עושים את אותו הדבר ב־YouTube."
     Sync Playlists: "רשימות הנגינה שלך ב־YouTube, „לצפייה בהמשך” ו„סרטונים שאהבתי” מופיעים ב„רשימות הנגינה שלך”, ושינויים שנעשים בהם כאן מתבצעים גם ב־YouTube. הם לא מסונכרנים למכשירים האחרים שלך ולא נכללים כשמייצאים את כל רשימות הנגינה או מגבים את הנתונים שלך. כיבוי האפשרות מסיר אותם מהמכשיר הזה, אך לא מ־YouTube."
-    Reply Notifications: "OpenTubeX בודק אם יש תשובות חדשות לתגובות שפרסמת כאן ב־30 הימים האחרונים. תגובות שפרסמת במקום אחר, כמו באתר של YouTube, אינן נכללות."
   General Settings:
+    Reply Notifications: "OpenTubeX בודק במשך 30 יום אם יש תשובות חדשות לתגובות שאתה עוקב אחריהן. עקוב אחר כל תגובה באמצעות כפתור הפעמון שלידה."
     Built-in Streams: |
       מצב אוטומטי מנגן את רוב הסרטונים דרך לקוח visionOS של YouTube, שמתחיל מהר יותר ותומך באיכות אוטומטית. שידורים חיים וסרטונים שהוא לא יכול לנגן משתמשים ב־SABR.
       ‏SABR בלבד משתמש תמיד בלקוח האינטרנט של YouTube, שמתחיל לאט יותר ואין בו איכות אוטומטית.
@@ -2853,6 +2861,7 @@ Platforms:
   Load Error: לא ניתן היה לטעון את הדף הזה מ־{platform}.
   Empty Tab: אין כאן עדיין כלום.
 YouTube Account:
+  "{author} replied to {commentAuthor}": "{author} השיב/ה ל-{commentAuthor}"
   Like: "לייק"
   Dislike: "דיסלייק"
   Rating Failed: "לא ניתן לדרג ב־YouTube: {error}"
