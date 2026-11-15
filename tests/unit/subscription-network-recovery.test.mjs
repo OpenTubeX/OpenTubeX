@@ -697,6 +697,14 @@ for (const feed of ['Videos', 'Shorts', 'Live']) {
   }
 }
 
+test('Videos keep the Invidious fallback while YouTube\'s feeds are paused', async () => {
+  const app = createRefresh({ feed: 'Videos', rssStatus: 429, fallbackWorks: true, scraperError: new Error('Could not parse the videos tab') })
+  app.reconnect()
+  await app.refresh({ t: key => key })
+  assert.ok(app.requests.filter(url => url.includes('/feeds/videos.xml')).length <= 8)
+  assert.equal(app.writes.filter(write => write.key === 'updateSubscriptionVideosCacheByChannel').length, 20)
+})
+
 const translateSummary = createI18n({
   legacy: false,
   locale: 'en-US',

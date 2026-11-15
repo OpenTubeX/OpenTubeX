@@ -108,6 +108,8 @@ const YOUTUBE_FEED_PAUSE_MS = 15 * 60 * 1000
 const YOUTUBE_FEED_OUTAGE_FAILURES = 3
 let youTubeFeedsPausedUntil = 0
 let consecutiveYouTubeFeedFailures = 0
+// Lets a paused feed take the fallbacks of a failed one without reporting an error
+const youTubeFeedsPausedError = new Error('YouTube feeds are paused')
 
 /**
  * Fetches a YouTube RSS feed. Resolves to null while feed requests are paused.
@@ -1671,8 +1673,9 @@ async function getChannelVideosLocalRSS(channel, t, failedAttempts = 0) {
 
   try {
     const response = await fetchYouTubeFeed(`playlist_id=${playlistId}`)
+    if (response === null) throw youTubeFeedsPausedError
 
-    if (response === null || response.status === 404) {
+    if (response.status === 404) {
       // RSS can return 404 for channels that still exist. Verify through
       // the API instead of treating a second RSS response as channel removal.
       return await getChannelVideosLocalScraper(channel, t, 3)
@@ -1681,10 +1684,12 @@ async function getChannelVideosLocalRSS(channel, t, failedAttempts = 0) {
     checkSubscriptionFeedResponse(response)
     return await parseYouTubeRSSFeed(await response.text(), channel.id)
   } catch (error) {
-    handleSubscriptionFetchError(channel, error, t('Local API Error (Click to copy)'), {
-      category: 'subscription videos',
-      backend: 'YouTube RSS'
-    })
+    if (error !== youTubeFeedsPausedError) {
+      handleSubscriptionFetchError(channel, error, t('Local API Error (Click to copy)'), {
+        category: 'subscription videos',
+        backend: 'YouTube RSS'
+      })
+    }
 
     switch (failedAttempts) {
       case 0:
@@ -2036,18 +2041,21 @@ async function getChannelLiveLocalRSS(channel, t, failedAttempts = 0) {
 
   try {
     const response = await fetchYouTubeFeed(`playlist_id=${playlistId}`)
+    if (response === null) throw youTubeFeedsPausedError
 
-    if (response === null || response.status === 404) {
+    if (response.status === 404) {
       return await getChannelLiveLocal(channel, t, 3)
     }
 
     checkSubscriptionFeedResponse(response)
     return await parseYouTubeRSSFeed(await response.text(), channel.id)
   } catch (error) {
-    handleSubscriptionFetchError(channel, error, t('Local API Error (Click to copy)'), {
-      category: 'subscription live streams',
-      backend: 'YouTube RSS'
-    })
+    if (error !== youTubeFeedsPausedError) {
+      handleSubscriptionFetchError(channel, error, t('Local API Error (Click to copy)'), {
+        category: 'subscription live streams',
+        backend: 'YouTube RSS'
+      })
+    }
 
     switch (failedAttempts) {
       case 0:
