@@ -13,6 +13,7 @@ import { notificationThumbnailsAllowed, openNotificationEntry, showInAppNotifica
 import { isRssFeedItemSeen, onRssFeedSeenItemsSynced, parseRssFeedSeenItems, toRssFeedSeenMarks } from './rssFeedSeenItems'
 import { unwatchExternalMediaMarkedUnseen } from './externalMediaHistory'
 import { supportsYtDlp } from './ytDlpCapabilities'
+import { forEachConcurrently } from './forEachConcurrently'
 import {
   findPlatformChannel,
   getPlatform,
@@ -48,8 +49,12 @@ const MAX_HISTORY_PER_CHANNEL = 300
 /** The streams of each channel at the last check, on iOS, where the app checks on its own */
 const KNOWN_STREAMS_STORAGE_KEY = 'twitchKnownStreams'
 const LIVE_CHECK_INTERVAL_MS = 3 * 60_000
-/** Channels of platforms without batch requests that load at once */
+/**
+ * Channels of platforms without batch requests that load at once from one
+ * server, and from all servers of a platform, such as PeerTube instances
+ */
 const CHANNEL_CONCURRENCY = 4
+const PLATFORM_CONCURRENCY = 12
 const isAndroid = process.env.IS_CAPACITOR && !process.env.IS_IOS
 
 /** @returns {PlatformFeedCache} */
@@ -441,18 +446,16 @@ function toFollowedChannel({ platform, id, name, url, avatar }) {
 }
 
 /**
- * Runs the task for every value, a few at a time, until the signal aborts.
- * @template T
- * @param {T[]} values
- * @param {AbortSignal} signal
- * @param {(value: T) => Promise<void>} task
+ * The server a channel's requests go to, as far as its web page tells. All
+ * channels of most platforms share one.
+ * @param {FollowedChannel} channel
  */
-async function forEachConcurrently(values, signal, task) {
-  let next = 0
-  const worker = async () => {
-    while (next < values.length && !signal.aborted) await task(values[next++])
+function channelServer(channel) {
+  try {
+    return new URL(channel.url).hostname
+  } catch {
+    return ''
   }
-  await Promise.all(Array.from({ length: Math.min(CHANNEL_CONCURRENCY, values.length) }, worker))
 }
 
 /**
@@ -508,6 +511,7 @@ export async function refreshPlatformFeed() {
         }
         return
       }
+      const limits = { limit: PLATFORM_CONCURRENCY, perGroup: CHANNEL_CONCURRENCY, group: channelServer }
       await forEachConcurrently(channels, controller.signal, async (channel) => {
         try {
           items.push(...await loadChannelItems(platform, channel, controller.signal))
@@ -515,7 +519,7 @@ export async function refreshPlatformFeed() {
           if (!controller.signal.aborted) console.error(`Failed to refresh the ${platform.name} channel ${channel.id}`, error)
           failed.add(getPlatformChannelKey(channel))
         }
-      })
+      }, limits)
     }))
     if (controller.signal.aborted) return
 
