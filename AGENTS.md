@@ -4,6 +4,8 @@
 
 Requests such as "implement issue #X" authorize local changes, not a PR. Open a PR only when the user explicitly requests or approves one for that repository. Approval for an application PR does not authorize a website PR, or vice versa.
 
+- Squash-merge PRs (`gh pr merge --squash`). Use a merge commit only for upstream merges and syncs, which must keep upstream's ancestry. Do not infer the method from `development`'s history: since November 2026 it is full of merge commits that broke this rule.
+
 - Give a milestone only to PRs that fix user-facing bugs or add user-facing features. Leave all other PRs without one, including upstream merges and syncs, CI, dependency, test, and documentation changes, and minor changes users won't notice.
 - For a PR that needs a milestone, copy the linked issue's milestone. If it has none, assign the open milestone with the lowest version in its title: query open milestones with `gh api --paginate` and compare titles by numeric version order (1.10 after 1.9), not alphabetically or by milestone number. Pass the exact title to `gh pr create --milestone` or `gh pr edit --milestone`. If no version milestone is open, report that instead of creating one.
 - When a PR with a milestone is created, gains a closing issue link, or changes milestone, assign its milestone to every issue it closes that has none, immediately, even while the PR is open. Keep existing issue milestones and verify the assignments on GitHub.
