@@ -231,6 +231,8 @@ const page = computed(() => pages[currentTab.value] ?? { results: [], continuati
 let loadGeneration = 0
 /** The load of the shown channel, which its remembered pages keep */
 let channelLoad = startChannelLoad()
+/** The shown channel, kept for its requests, which can finish after the route moved on */
+let channelKey = { platform: '', id: '' }
 
 async function loadChannel() {
   const generation = ++loadGeneration
@@ -247,7 +249,8 @@ async function loadChannel() {
   const requested = route.query.tab
   const tab = platform.value.channelTabs.includes(requested) ? requested : platform.value.channelTabs[0]
   // Shown at once, so going back also restores the scroll position
-  const recent = getRecentChannel(platform.value.id, channelId.value)
+  channelKey = { platform: platform.value.id, id: channelId.value }
+  const recent = getRecentChannel(channelKey.platform, channelKey.id)
   channelLoad = recent ?? startChannelLoad()
   if (recent) {
     for (const [key, cached] of Object.entries(recent.pages)) {
@@ -293,7 +296,7 @@ function showChannel(shown, tab) {
 function rememberLoadedPages() {
   const loaded = Object.entries(pages).flatMap(([tab, { results, continuation, loaded }]) =>
     loaded ? [[tab, { results: toRaw(results), continuation }]] : [])
-  rememberChannel(platform.value.id, channelId.value, channel.value, Object.fromEntries(loaded), channelLoad)
+  rememberChannel(channelKey.platform, channelKey.id, channel.value, Object.fromEntries(loaded), channelLoad)
 }
 
 /**
