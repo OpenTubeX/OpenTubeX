@@ -1,3 +1,4 @@
+import { uid } from '@seald-io/nedb/lib/customUtils.js'
 import { playlistRepairPatch } from '../../playlistRepair'
 import * as db from '../index'
 import { updateSettingIfUnchanged } from '../settingRepair'
@@ -576,25 +577,29 @@ class WatchStats {
         retainedCurrent, currentAdjustment, retainedImported, backup.adjustment
       )
       const currentByDate = new Map(currentRecords.map(record => [record.date, record]))
-      for (const record of records) {
-        const current = currentByDate.get(record.date)
-        if (record === current) continue
-        const withoutImportedId = { ...record }
-        delete withoutImportedId._id
-        await db.watchStats.updateAsync(
-          { date: record.date },
-          current ? { ...withoutImportedId, _id: current._id } : withoutImportedId,
-          { upsert: true }
-        )
-      }
-      await db.watchStats.updateAsync(
-        { _id: this.migrationId },
+      // Imported ids could match another stored document, so days keep their
+      // stored id and new ones get their own.
+      const changed = records
+        .filter(record => record !== currentByDate.get(record.date))
+        .map(record => ({ ...record, _id: currentByDate.get(record.date)?._id ?? uid(16) }))
+      await this._replaceDocuments([
+        ...changed,
         { _id: this.migrationId, completedAt: Date.now(), hadEstimates: records.some(record => record.historyEstimateApplied === true), adjustment },
-        { upsert: true }
-      )
+      ])
       this.migrationPromise = null
       return { records, adjustment }
     })
+  }
+
+  /**
+   * Replaces or inserts whole documents. The desktop and mobile datastores
+   * commit them in one transaction, which costs one disk sync instead of one
+   * per day. NeDB, used by unit tests, writes them one by one.
+   * @param {object[]} docs documents with their `_id`
+   */
+  static async _replaceDocuments(docs) {
+    if (typeof db.watchStats.replaceManyAsync === 'function') return db.watchStats.replaceManyAsync(docs)
+    for (const doc of docs) await db.watchStats.updateAsync({ _id: doc._id }, doc, { upsert: true })
   }
 
   static addWatchTime(date, seconds) {
@@ -702,6 +707,7 @@ class WatchStats {
     )
     const reconstructedEstimates = await this._getHistoryEstimates(migration.completedAt)
     const records = await db.watchStats.findAsync({ historyEstimateApplied: true })
+    const adjusted = []
 
     for (const record of records) {
       const secondsByChannel = record.historyEstimateByChannel ?? reconstructedEstimates.get(record.date) ?? {}
@@ -727,24 +733,17 @@ class WatchStats {
       }, 0)
       const seconds = Math.max(0, Number(record.seconds) - previousAdjustedSeconds + adjustedSeconds)
 
-      await db.watchStats.updateAsync(
-        { _id: record._id },
-        {
-          $set: {
-            seconds,
-            historyEstimateSeconds: baselineSeconds,
-            historyAdjustedSeconds: adjustedSeconds,
-            historyEstimateByChannel: secondsByChannel,
-          }
-        }
-      )
+      adjusted.push({
+        ...record,
+        seconds,
+        historyEstimateSeconds: baselineSeconds,
+        historyAdjustedSeconds: adjustedSeconds,
+        historyEstimateByChannel: secondsByChannel,
+      })
     }
 
     const adjustment = { defaultSpeed: normalizedDefaultSpeed, updatedAt: Date.now() }
-    await db.watchStats.updateAsync(
-      { _id: this.migrationId },
-      { $set: { adjustment } }
-    )
+    await this._replaceDocuments([...adjusted, { ...migration, adjustment }])
 
     return { records: await this.find(), ...adjustment }
   }
