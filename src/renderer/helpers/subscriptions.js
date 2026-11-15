@@ -100,6 +100,39 @@ const SUBSCRIPTION_FETCH_BATCH_DELAY_MS = 2000
 const SUBSCRIPTION_FETCH_CONCURRENCY = 8
 const RSS_ENRICHMENT_CONCURRENCY = 3
 const RSS_ENRICHMENT_TIMEOUT_MS = 15_000
+// YouTube's RSS feeds list a channel's 15 newest uploads
+const RSS_FEED_ENTRY_COUNT = 15
+
+// YouTube's feeds can be down for hours, answering every request with 404,
+// and rate limit large refreshes. After such failures, feed requests are
+// skipped for a while and refreshes use the API instead.
+const YOUTUBE_FEED_PAUSE_MS = 15 * 60 * 1000
+const YOUTUBE_FEED_OUTAGE_FAILURES = 3
+let youTubeFeedsPausedUntil = 0
+let consecutiveYouTubeFeedFailures = 0
+// Lets a paused feed take the fallbacks of a failed one without reporting an error
+const youTubeFeedsPausedError = new Error('YouTube feeds are paused')
+
+/**
+ * Fetches a YouTube RSS feed. Resolves to null while feed requests are paused.
+ * @param {string} query `channel_id=…` or `playlist_id=…`
+ * @param {RequestInit & { nativeTimeoutMs?: number }} [init]
+ */
+async function fetchYouTubeFeed(query, init = { signal: activeRefresh?.controller.signal }) {
+  if (Date.now() < youTubeFeedsPausedUntil) return null
+
+  const response = await localApiFetch(`https://www.youtube.com/feeds/videos.xml?${query}`, init)
+  // Playlist feeds of tabs a channel doesn't have are missing, while every
+  // channel has a channel feed.
+  const outageFailure = response.status >= 500 || (response.status === 404 && query.startsWith('channel_id='))
+  if (response.ok) {
+    consecutiveYouTubeFeedFailures = 0
+  } else if (response.status === 429 || (outageFailure && ++consecutiveYouTubeFeedFailures >= YOUTUBE_FEED_OUTAGE_FAILURES)) {
+    youTubeFeedsPausedUntil = Date.now() + YOUTUBE_FEED_PAUSE_MS
+    consecutiveYouTubeFeedFailures = 0
+  }
+  return response
+}
 
 /**
  * Channel upload feeds shared by the feed refreshes of one refresh-all.
@@ -521,10 +554,8 @@ function getChannelUploads(channelId) {
   if (existing) return existing
 
   const promise = (async () => {
-    const response = await localApiFetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`, {
-      signal: activeRefresh?.controller.signal
-    })
-    return response.status === 200 ? parseSubscriptionRss(await response.text(), channelId).videos : null
+    const response = await fetchYouTubeFeed(`channel_id=${channelId}`)
+    return response?.status === 200 ? parseSubscriptionRss(await response.text(), channelId).videos : null
   })().catch(() => null)
 
   if (shared) {
@@ -1037,19 +1068,16 @@ async function enrichScrapedUpcomingPublicationDates(channelId, videos) {
   }
 
   try {
-    const response = await localApiFetch(
-      `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`,
-      {
-        // Cancelling the refresh must not wait for this optional lookup.
-        signal: AbortSignal.any([
-          AbortSignal.timeout(RSS_ENRICHMENT_TIMEOUT_MS),
-          ...(activeRefresh ? [activeRefresh.controller.signal] : [])
-        ]),
-        nativeTimeoutMs: RSS_ENRICHMENT_TIMEOUT_MS,
-      }
-    )
+    const response = await fetchYouTubeFeed(`channel_id=${channelId}`, {
+      // Cancelling the refresh must not wait for this optional lookup.
+      signal: AbortSignal.any([
+        AbortSignal.timeout(RSS_ENRICHMENT_TIMEOUT_MS),
+        ...(activeRefresh ? [activeRefresh.controller.signal] : [])
+      ]),
+      nativeTimeoutMs: RSS_ENRICHMENT_TIMEOUT_MS,
+    })
 
-    if (!response.ok) {
+    if (!response?.ok) {
       return videos
     }
 
@@ -1162,11 +1190,7 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
       }
     }
 
-    if (useRss) {
-      await fetchSubscriptionsConcurrently(subscriptionList, fetchChannel)
-    } else {
-      await fetchSubscriptionsInBatches(subscriptionList, fetchChannel)
-    }
+    await fetchSubscriptionsInBatches(subscriptionList, fetchChannel)
 
     store.dispatch('batchUpdateSubscriptionDetails', subscriptionUpdates)
 
@@ -1228,7 +1252,7 @@ async function refreshSubscriptionShortsFromRemoteUnlocked({
   let channelCount = 0
 
   try {
-    await fetchSubscriptionsConcurrently(subscriptionList, async (channel, backend = store.getters.getBackendPreference) => {
+    await fetchSubscriptionsInBatches(subscriptionList, async (channel, backend = store.getters.getBackendPreference) => {
       if (await keepUnchangedSubscriptionFeed('shorts', channel, backend, t)) {
         channelCount++
         setSubscriptionRefreshProgress((channelCount / subscriptionList.length) * 100)
@@ -1391,11 +1415,7 @@ async function refreshSubscriptionLiveFromRemoteUnlocked({
       }
     }
 
-    if (useRss) {
-      await fetchSubscriptionsConcurrently(subscriptionList, fetchChannel)
-    } else {
-      await fetchSubscriptionsInBatches(subscriptionList, fetchChannel)
-    }
+    await fetchSubscriptionsInBatches(subscriptionList, fetchChannel)
 
     store.dispatch('batchUpdateSubscriptionDetails', subscriptionUpdates)
 
@@ -1653,10 +1673,10 @@ function checkSubscriptionFeedResponse(response) {
 
 async function getChannelVideosLocalRSS(channel, t, failedAttempts = 0) {
   const playlistId = getChannelPlaylistId(channel.id, 'videos', 'newest')
-  const feedUrl = `https://www.youtube.com/feeds/videos.xml?playlist_id=${playlistId}`
 
   try {
-    const response = await localApiFetch(feedUrl, { signal: activeRefresh?.controller.signal })
+    const response = await fetchYouTubeFeed(`playlist_id=${playlistId}`)
+    if (response === null) throw youTubeFeedsPausedError
 
     if (response.status === 404) {
       // RSS can return 404 for channels that still exist. Verify through
@@ -1667,10 +1687,12 @@ async function getChannelVideosLocalRSS(channel, t, failedAttempts = 0) {
     checkSubscriptionFeedResponse(response)
     return await parseYouTubeRSSFeed(await response.text(), channel.id)
   } catch (error) {
-    handleSubscriptionFetchError(channel, error, t('Local API Error (Click to copy)'), {
-      category: 'subscription videos',
-      backend: 'YouTube RSS'
-    })
+    if (error !== youTubeFeedsPausedError) {
+      handleSubscriptionFetchError(channel, error, t('Local API Error (Click to copy)'), {
+        category: 'subscription videos',
+        backend: 'YouTube RSS'
+      })
+    }
 
     switch (failedAttempts) {
       case 0:
@@ -1786,12 +1808,15 @@ async function getChannelVideosInvidiousRSS(channel, t, failedAttempts = 0) {
 
 async function getChannelShortsLocal(channel, t, failedAttempts = 0) {
   const playlistId = getChannelPlaylistId(channel.id, 'shorts', 'newest')
-  const feedUrl = `https://www.youtube.com/feeds/videos.xml?playlist_id=${playlistId}`
+  let backend = 'YouTube RSS'
 
   try {
-    const response = await localApiFetch(feedUrl, { signal: activeRefresh?.controller.signal })
+    const response = await fetchYouTubeFeed(`playlist_id=${playlistId}`)
 
-    if (response.status === 404) {
+    // The feed is missing for channels without Shorts, and also unavailable
+    // during YouTube outages and rate limits.
+    if (!response?.ok) {
+      backend = 'local API'
       const channelPage = await getLocalChannel(channel.id, activeRefresh?.controller.signal)
       if (channelPage.alert) {
         handleSubscriptionFetchError(channel, new Error(String(channelPage.alert)), t('Local API Error (Click to copy)'), {
@@ -1813,19 +1838,16 @@ async function getChannelShortsLocal(channel, t, failedAttempts = 0) {
           video.authorId ??= channel.id
         })
         // A playlist lists up to 100 Shorts, so only date those that can be new.
-        await fillLocalShortDates(videos, channel.id, true)
-        return { videos }
+        return { videos: await fillLocalShortDates(videos, channel.id, true) }
       } catch (error) {
         if (error.message !== 'The playlist does not exist.') throw error
         // Some channels have Shorts even though their automatic playlist is missing.
         const shortsTab = await channelPage.getShorts()
         const videos = parseLocalChannelShorts(shortsTab.videos, channel.id, channel.name)
-        await fillLocalShortDates(videos, channel.id)
-        return { videos }
+        return { videos: await fillLocalShortDates(videos, channel.id) }
       }
     }
 
-    checkSubscriptionFeedResponse(response)
     const [result, thumbnailEntries] = await Promise.all([
       parseYouTubeRSSFeed(await response.text(), channel.id),
       getLocalShortThumbnailEntries(playlistId)
@@ -1836,7 +1858,7 @@ async function getChannelShortsLocal(channel, t, failedAttempts = 0) {
   } catch (error) {
     handleSubscriptionFetchError(channel, error, t('Local API Error (Click to copy)'), {
       category: 'subscription Shorts',
-      backend: 'YouTube RSS'
+      backend
     })
 
     if (failedAttempts === 0 && store.getters.getBackendFallback) {
@@ -1853,22 +1875,28 @@ async function getChannelShortsLocal(channel, t, failedAttempts = 0) {
  * for sorting and New badges: undated entries can never be marked as new.
  * Cached dates are reused and the rest are loaded from watch pages. With
  * `newOnly`, only entries ahead of the first cached one are loaded, as only
- * those can become new (see reconcileFetchedSubscriptionEntries).
+ * those can become new (see reconcileFetchedSubscriptionEntries), or the RSS
+ * feed's window when none is cached. Entries left undated are dropped.
  * @param {any[]} videos
  * @param {string} channelId
  * @param {boolean} [newOnly]
+ * @returns {Promise<any[]>} The dated entries
  */
 async function fillLocalShortDates(videos, channelId, newOnly = false) {
   const cachedDates = new Map((store.getters.getShortsCache[channelId]?.videos ?? [])
+    .filter(entry => Number.isFinite(entry.published))
     .map(entry => [entry.videoId, entry.published]))
   const firstCachedIndex = videos.findIndex(video => cachedDates.has(video.videoId))
-  const fetchLimit = !newOnly ? videos.length : Math.max(firstCachedIndex, 0)
+  let fetchLimit = videos.length
+  if (newOnly) {
+    fetchLimit = firstCachedIndex >= 0 ? firstCachedIndex : RSS_FEED_ENTRY_COUNT
+  }
   // One missing date fails the channel, so stop the other lookups too.
   const lookups = new AbortController()
   await mapConcurrently(videos, RSS_ENRICHMENT_CONCURRENCY, async (video, index) => {
     if (Number.isFinite(video.published)) return
     const cached = cachedDates.get(video.videoId)
-    if (Number.isFinite(cached)) {
+    if (cached !== undefined) {
       video.published = cached
       return
     }
@@ -1892,6 +1920,7 @@ async function fillLocalShortDates(videos, channelId, newOnly = false) {
     lookups.abort()
     throw error
   })
+  return videos.filter(video => Number.isFinite(video.published))
 }
 
 async function getLocalShortThumbnailEntries(playlistId) {
@@ -2017,10 +2046,10 @@ async function getChannelLiveLocal(channel, t, failedAttempts = 0) {
 
 async function getChannelLiveLocalRSS(channel, t, failedAttempts = 0) {
   const playlistId = getChannelPlaylistId(channel.id, 'live', 'newest')
-  const feedUrl = `https://www.youtube.com/feeds/videos.xml?playlist_id=${playlistId}`
 
   try {
-    const response = await localApiFetch(feedUrl, { signal: activeRefresh?.controller.signal })
+    const response = await fetchYouTubeFeed(`playlist_id=${playlistId}`)
+    if (response === null) throw youTubeFeedsPausedError
 
     if (response.status === 404) {
       return await getChannelLiveLocal(channel, t, 3)
@@ -2029,10 +2058,12 @@ async function getChannelLiveLocalRSS(channel, t, failedAttempts = 0) {
     checkSubscriptionFeedResponse(response)
     return await parseYouTubeRSSFeed(await response.text(), channel.id)
   } catch (error) {
-    handleSubscriptionFetchError(channel, error, t('Local API Error (Click to copy)'), {
-      category: 'subscription live streams',
-      backend: 'YouTube RSS'
-    })
+    if (error !== youTubeFeedsPausedError) {
+      handleSubscriptionFetchError(channel, error, t('Local API Error (Click to copy)'), {
+        category: 'subscription live streams',
+        backend: 'YouTube RSS'
+      })
+    }
 
     switch (failedAttempts) {
       case 0:
