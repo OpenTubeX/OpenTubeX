@@ -703,6 +703,14 @@
   background: rgb(0 0 0 / 75%);
 }
 
+/* Auto-hide must not leave a keyboard-focused control invisible. */
+.scrollMiniPlayPause.isHidden:focus-visible,
+.scrollMiniSkip.isHidden:focus-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 0.15s ease;
+}
+
 .scrollMiniSkip {
   --scroll-mini-skip-size: 36px;
   --scroll-mini-skip-gap: 12px;

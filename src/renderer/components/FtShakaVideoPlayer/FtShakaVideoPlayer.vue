@@ -1902,7 +1902,7 @@
           :class="{ isHidden: !scrollMiniPlayPauseVisible }"
           :title="$t('Video.Previous')"
           :aria-label="$t('Video.Previous')"
-          @click.stop.prevent="$emit('skip-to-prev')"
+          @click.stop.prevent="isScrollMiniVideoDoubleClick($event) || $emit('skip-to-prev')"
           @mouseenter="handleScrollMiniPlayPauseMouseEnter"
           @focusin="handleScrollMiniPlayPauseMouseEnter"
           @pointerdown.stop
@@ -1939,7 +1939,7 @@
           :class="{ isHidden: !scrollMiniPlayPauseVisible }"
           :title="$t('Video.Next')"
           :aria-label="$t('Video.Next')"
-          @click.stop.prevent="$emit('skip-to-next')"
+          @click.stop.prevent="isScrollMiniVideoDoubleClick($event) || $emit('skip-to-next')"
           @mouseenter="handleScrollMiniPlayPauseMouseEnter"
           @focusin="handleScrollMiniPlayPauseMouseEnter"
           @pointerdown.stop
@@ -7534,6 +7534,7 @@ const {
   scrollMiniScrollToTop,
   scrollMiniTogglePlayPause,
   trackScrollMiniClick,
+  isScrollMiniVideoDoubleClick,
   handleScrollMiniDoubleClick,
   revealScrollMiniPlayerControls,
   scrollMiniVolume,
