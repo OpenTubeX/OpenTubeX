@@ -1383,6 +1383,40 @@ function closePhoneSearch(event) {
   nextTick(() => (pinnedSearchTrigger.value ?? searchTrigger.value)?.focus({ preventScroll: true }))
 }
 
+const searchContainer = useTemplateRef('searchContainer')
+const OUTSIDE_PRESS_FOLLOW_UP_EVENTS = ['pointerup', 'mousedown', 'mouseup', 'touchstart', 'touchend', 'contextmenu', 'click', 'auxclick']
+// Set from the outside press until its click, or the next press when it has none.
+let swallowOutsidePress = false
+
+/**
+ * Like a modal, the focused phone search closes on the first press outside it
+ * and keeps that press from reaching the page underneath.
+ * @param {PointerEvent} event
+ */
+function handleOutsidePointerDown(event) {
+  swallowOutsidePress = false
+  const container = searchContainer.value
+  if (!phoneLayout.value || !showSearchContainer.value || container == null ||
+    !container.contains(document.activeElement) || container.contains(event.target)) return
+  swallowOutsidePress = true
+  event.preventDefault()
+  event.stopImmediatePropagation()
+  closePhoneSearch()
+}
+
+/** @param {Event} event */
+function swallowOutsidePressEvent(event) {
+  if (!swallowOutsidePress) return
+  if (event.type === 'click' || event.type === 'auxclick') {
+    swallowOutsidePress = false
+    // Keyboard clicks have no detail and never belong to the swallowed press.
+    if (event.detail === 0) return
+  }
+  // Window touch listeners are passive, so touches only stop propagating.
+  if (!event.type.startsWith('touch')) event.preventDefault()
+  event.stopImmediatePropagation()
+}
+
 function handleFocusSearch() {
   setTimeout(() => focusSearch(true), 0)
 }
@@ -1432,6 +1466,8 @@ onMounted(() => {
   }, 0)
 
   window.addEventListener('opentubex:focus-search', handleFocusSearch)
+  window.addEventListener('pointerdown', handleOutsidePointerDown, true)
+  for (const type of OUTSIDE_PRESS_FOLLOW_UP_EVENTS) window.addEventListener(type, swallowOutsidePressEvent, true)
 
   const searchText = getSearchTextFromPath(presentedRoutePath.value)
   if (currentSearchText.value.length === 0 && searchText) {
@@ -1453,6 +1489,8 @@ onBeforeUnmount(() => {
   cancelSearchSuggestions()
   headerResizeObserver.disconnect()
   window.removeEventListener('opentubex:focus-search', handleFocusSearch)
+  window.removeEventListener('pointerdown', handleOutsidePointerDown, true)
+  for (const type of OUTSIDE_PRESS_FOLLOW_UP_EVENTS) window.removeEventListener(type, swallowOutsidePressEvent, true)
 
   if (process.env.IS_ELECTRON) {
     window.removeEventListener('keydown', handleKeyboardShortcuts)
