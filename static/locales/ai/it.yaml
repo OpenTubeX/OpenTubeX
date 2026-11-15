@@ -1393,7 +1393,6 @@ Settings:
     Invalid channel playback speeds file: "Nessuna velocità di riproduzione dei canali trovata in questo file"
     Channel playback speeds imported: "Importata la velocità di riproduzione di {count} canale | Importate le velocità di riproduzione di {count} di canali | Importate le velocità di riproduzione di {count} canali"
     Channels not found: "Impossibile trovare {count} canale | Impossibile trovare {count} di canali | Impossibile trovare {count} canali"
-    Playlists have been successfully imported: "1/{total} playlist importata correttamente | {count}/{total} playlist importate correttamente | {count}/{total} playlist importate correttamente"
     Import subscription groups hint: Per ordinare i canali in gruppi, aggiungi una colonna dopo il titolo del canale in un file .csv con i nomi dei gruppi separati da punto e virgola, oppure importa un file .opml con cartelle. I gruppi mancanti vengono creati.
   Sync Settings:
     Signed Out After Restore: 'La sincronizzazione è stata disconnessa perché questi dati dell''app sono stati ripristinati da un backup o da un altro dispositivo. Accedi di nuovo per sincronizzare questo dispositivo.'

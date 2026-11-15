@@ -186,7 +186,8 @@
   font: inherit;
 }
 
-:deep(.ft-caption-timing-offset input:focus-visible) {
+/* Outranks Shaka's keyboard focus ring for menus. */
+:deep(.shaka-controls-container .ft-caption-timing-offset input[type='number']:focus-visible) {
   outline: 2px solid var(--primary-color);
   outline-offset: 2px;
 }

@@ -88,6 +88,11 @@
   outline-offset: 2px;
 }
 
+/* The group draws the ring, so Shaka's keyboard focus ring stays off the button. */
+:deep(.ft-time-display-group > button) {
+  --shaka-focus-ring-width: 0;
+}
+
 :deep(.ft-time-display-group > .shaka-current-time),
 :deep(.ft-shaka-highlight-button-label) {
   font-family: var(--app-font-family);
@@ -234,7 +239,8 @@
   }
 }
 
-:deep(.ft-quick-playback-rate-button:focus-visible) {
+/* Outranks Shaka's keyboard focus ring for the button panel. */
+:deep(.shaka-controls-container .ft-quick-playback-rate-bar .ft-quick-playback-rate-button:focus-visible) {
   outline: 2px solid rgb(255 255 255 / 60%);
   outline-offset: 1px;
 }

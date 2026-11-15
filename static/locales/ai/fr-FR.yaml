@@ -1393,7 +1393,6 @@ Settings:
     Invalid channel playback speeds file: "Aucune vitesse de lecture de chaîne n'a été trouvée dans ce fichier"
     Channel playback speeds imported: "Vitesse de lecture de {count} chaîne importée | Vitesses de lecture de {count} de chaînes importées | Vitesses de lecture de {count} chaînes importées"
     Channels not found: "{count} chaîne est introuvable | {count} de chaînes sont introuvables | {count} chaînes sont introuvables"
-    Playlists have been successfully imported: "1/{total} liste de lecture a été importée avec succès | {count}/{total} listes de lecture ont été importées avec succès | {count}/{total} listes de lecture ont été importées avec succès"
     Import subscription groups hint: Pour classer les chaînes dans des groupes, ajoutez dans un fichier .csv, après le titre de la chaîne, une colonne contenant des noms de groupes séparés par des points-virgules, ou importez un fichier .opml avec des dossiers. Les groupes manquants sont créés.
   Sync Settings:
     Signed Out After Restore: 'La synchronisation a été déconnectée, car les données de cette application ont été restaurées depuis une sauvegarde ou un autre appareil. Reconnectez-vous pour synchroniser cet appareil.'

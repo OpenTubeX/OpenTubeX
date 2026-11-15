@@ -124,7 +124,7 @@
     "qrcode": "^1.5.4",
     "quickjs-emscripten-core": "^0.32.0",
     "sax": "^1.6.1",
-    "shaka-player": "^5.3.3",
+    "shaka-player": "^5.3.4",
     "swiper": "^14.4.0",
     "vue": "^3.5.45",
     "vue-i18n": "^11.4.18",
