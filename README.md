@@ -32,7 +32,7 @@ endorsed by, maintained by, or supported by the FreeTube project.
   <a href="https://scorecard.dev/viewer/?uri=github.com/OpenTubeX/OpenTubeX">
     <img alt="OpenSSF Scorecard" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/scorecard.svg" />
   </a>
-  <a href="https://weblate.opentubex.org/engage/opentubex/">
+  <a href="https://hosted.weblate.org/engage/opentubex/">
     <img alt="Translation status" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/translations.svg" />
   </a>
 </p>
@@ -275,20 +275,16 @@ have your help.  Send a pull request and someone will review your code.
 
 <a id="localization"></a>
 ## 🌍 Localization
-<a href="https://weblate.opentubex.org/engage/opentubex/">
+<a href="https://hosted.weblate.org/engage/opentubex/">
   <picture>
-    <source media="(prefers-color-scheme: light)" srcset="https://weblate.opentubex.org/widgets/opentubex/-/287x66-grey.png">
-    <source media="(prefers-color-scheme: dark)" srcset="https://weblate.opentubex.org/widgets/opentubex/-/287x66-black.png">
-    <img src="https://weblate.opentubex.org/widgets/opentubex/-/287x66-grey.png" alt="Translation status" />
+    <source media="(prefers-color-scheme: light)" srcset="https://hosted.weblate.org/widget/opentubex/287x66-grey.png">
+    <source media="(prefers-color-scheme: dark)" srcset="https://hosted.weblate.org/widget/opentubex/287x66-black.png">
+    <img src="https://hosted.weblate.org/widget/opentubex/287x66-grey.png" alt="Translation status" />
   </picture>
-  <picture>
-    <source media="(prefers-color-scheme: light)" srcset="https://weblate.opentubex.org/widget/opentubex/application/matrix-auto.svg">
-    <source media="(prefers-color-scheme: dark)" srcset="https://weblate.opentubex.org/widget/opentubex/application/matrix-dark.svg">
-    <img src="https://weblate.opentubex.org/widget/opentubex/application/matrix-auto.svg" alt="Translation matrix" />
-  </picture>
+  <img src="https://hosted.weblate.org/widget/opentubex/application/matrix-auto.svg" alt="Translation matrix" />
 </a>
 
-We are actively looking for translations! We use [Weblate](https://weblate.opentubex.org/engage/opentubex/) to make it easy for translators to get involved. Click on one of the graphics above to learn how to get involved.
+We are actively looking for translations! We use [Weblate](https://hosted.weblate.org/engage/opentubex/) to make it easy for translators to get involved. Click on one of the graphics above to learn how to get involved.
 
 For the Linux Flatpak, the desktop entry comment string can be translated at our [Flatpak repository](https://github.com/OpenTubeX/flatpak/blob/main/org.opentubex.OpenTubeX.desktop).
 

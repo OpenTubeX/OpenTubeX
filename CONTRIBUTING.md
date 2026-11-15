@@ -5,7 +5,7 @@ Thanks for helping out. A small team maintains OpenTubeX in its spare time, so w
 ## Ways to help
 
 * Send bug fixes and features as pull requests, as described below.
-* Translate OpenTubeX on [Weblate](https://weblate.opentubex.org/engage/opentubex/).
+* Translate OpenTubeX on [Weblate](https://hosted.weblate.org/engage/opentubex/).
 * Report bugs and request features with the [issue templates](https://github.com/OpenTubeX/OpenTubeX/issues/new/choose).
 * Report security issues privately as described in [SECURITY.md](SECURITY.md).
 
