@@ -114,6 +114,11 @@ public class CommentReplyNotificationsTest {
         assertEquals("First", threads.getJSONObject(0).getString("text"));
         assertEquals("Renamed", threads.getJSONObject(0).getString("videoTitle"));
         assertEquals(0, CommentReplyNotifications.normalize(threads, 5000 + CommentReplyNotifications.TRACKING_MILLIS).size());
+        // Watching it again after it expired starts from the replies it has now.
+        JSONObject again = CommentReplyNotifications.trackComment(threads,
+            new JSONObject(comment.toString()).put("seen", new JSONArray().put("thread1.a").put("thread1.b")),
+            5000 + CommentReplyNotifications.TRACKING_MILLIS).getJSONObject(0);
+        assertEquals("[\"thread1.a\",\"thread1.b\"]", again.getJSONArray("seen").toString());
     }
 
     @Test

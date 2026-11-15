@@ -395,9 +395,8 @@ final class CommentReplyNotifications {
         String commentId = comment.getString("commentId");
         JSONObject tracked = null;
         List<JSONObject> others = new ArrayList<>();
-        for (int index = 0; index < threads.length(); index++) {
-            JSONObject thread = threads.optJSONObject(index);
-            if (thread == null) continue;
+        // An expired watch does not carry over, so watching again starts from now.
+        for (JSONObject thread : normalize(threads, now)) {
             if (tracked == null && isSameComment(thread, comment)) {
                 tracked = thread;
             } else {

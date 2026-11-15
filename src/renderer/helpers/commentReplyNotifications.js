@@ -153,7 +153,9 @@ export async function unwatchComment({ videoId, threadId, channelId }) {
  */
 export function findWatchedComment(videoId, { id, authorId }) {
   const key = { videoId, threadId: id.split('.')[0], channelId: authorId }
-  return watchedComments.value.find(thread => isSameWatchedComment(thread, key)) ?? null
+  // Watching only the author's replies does not cover their top-level comment's whole thread.
+  return watchedComments.value.find(thread => isSameWatchedComment(thread, key) &&
+    (id !== key.threadId || thread.commentId === key.threadId)) ?? null
 }
 
 /** @returns {Promise<TrackedCommentThread[]>} the watched comments, newest first */
