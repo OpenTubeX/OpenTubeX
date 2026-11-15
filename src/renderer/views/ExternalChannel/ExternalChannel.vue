@@ -362,9 +362,11 @@ function focusNextTab(tab, event) {
   tabRefs.get(next)?.focus()
 }
 
-// Reloading the tab, also by pulling down, loads the channel again
+// Reloading the tab, also by pulling down, loads the channel again, and
+// requests of the page it replaces no longer keep their results
 useTabLifecycle({
   beforeReload() {
+    loadGeneration++
     if (platform.value && channelId.value) forgetChannel(platform.value.id, channelId.value)
   }
 })
