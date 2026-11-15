@@ -6,7 +6,7 @@
 // reviewers reject are never offered again, even after they leave Git.
 
 import { createHash } from 'node:crypto'
-import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { appendFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { parseArgs } from 'node:util'
@@ -150,6 +150,8 @@ try {
       else {
         await api(`/api/units/${unit.id}/suggestions/`, { method: 'POST', body: { target: [target] } })
         ledger.add(key)
+        // Record it right away, so a cancelled run never offers it again.
+        appendFileSync(options.ledger, `${key}\n`)
         count('submitted')
       }
     }
