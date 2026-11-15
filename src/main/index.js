@@ -1342,8 +1342,9 @@ function runApp() {
       let { requestHeaders } = details
       const { url, webContents } = details
       const urlObj = new URL(url)
+      const isAppRequest = webContents != null && isOpenTubeXUrl(webContents.getURL())
 
-      if (webContents && isOpenTubeXUrl(webContents.getURL())) {
+      if (isAppRequest) {
         applySyncServerUserAgent(requestHeaders)
         applyYouTubeUserAgent(url, requestHeaders)
       }
@@ -1403,7 +1404,7 @@ function runApp() {
         }
       }
 
-      if (webContents && isOpenTubeXUrl(webContents.getURL())) {
+      if (isAppRequest) {
         Object.assign(requestHeaders, getYtDlpExternalStreamHeaders(webContents, url))
         applyTwitchPlaylistOrigin(urlObj, requestHeaders)
         if (isYtDlpStoryboardUrl(webContents, url)) storyboardRequestIds.add(details.id)
@@ -1423,7 +1424,7 @@ function runApp() {
       }
 
       rendererCors.rememberRequest({ ...details, requestHeaders }, originalOrigin)
-      if (details.resourceType === 'xhr' && webContents && isOpenTubeXUrl(webContents.getURL())) {
+      if (details.resourceType === 'xhr' && isAppRequest) {
         requestErrors.rememberRequest(details)
       }
       // eslint-disable-next-line n/no-callback-literal
@@ -1434,11 +1435,12 @@ function runApp() {
     const httpRequestFilter = { urls: ['https://*/*', 'http://*/*'] }
     session.defaultSession.webRequest.onHeadersReceived(httpRequestFilter, (details, callback) => {
       const { url, responseHeaders } = details
+      const parsedUrl = URL.parse(url)
       if (responseHeaders && (
         url === 'https://www.youtube.com/sw.js_data' ||
         url === 'https://www.youtube.com/iframe_api' ||
         url.startsWith('https://www.youtube.com/watch?') ||
-        (new URL(url).origin === 'https://www.youtube.com' && new URL(url).pathname === '/')
+        (parsedUrl?.origin === 'https://www.youtube.com' && parsedUrl.pathname === '/')
       )) {
         delete responseHeaders['set-cookie']
         delete responseHeaders['content-security-policy']
