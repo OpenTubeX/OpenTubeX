@@ -230,6 +230,11 @@
     pointer-events: none;
   }
 
+  /* Leave at once instead of sliding across the page above the opening keyboard. */
+  .sideNav.scrollHidden.keyboardHidden {
+    transition: none;
+  }
+
   .topNavOption {
     margin-block-start: 0;
     padding-inline: 10px;

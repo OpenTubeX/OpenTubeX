@@ -1,7 +1,7 @@
 <template>
   <FtFlexBox
     class="sideNav"
-    :class="[{ opened: isOpen, expanded: isOpen || props.forceExpanded, scrollHidden, compactLabels: compactNavigationLabels, highlightTransitionsDisabled, layoutTransitionsDisabled }, applyHiddenLabels]"
+    :class="[{ opened: isOpen, expanded: isOpen || props.forceExpanded, scrollHidden: scrollHidden || softwareKeyboardOpen, keyboardHidden: softwareKeyboardOpen, compactLabels: compactNavigationLabels, highlightTransitionsDisabled, layoutTransitionsDisabled }, applyHiddenLabels]"
     data-tutorial="navigation"
     role="navigation"
     @focusin="resetScrollVisibility"
@@ -204,6 +204,7 @@ import { getConfiguredKeyboardShortcuts } from '../../../constants'
 import { NAVIGATION_ITEM_DEFINITIONS } from '../../../navigationItems'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { createMobileNavigationScroll, mobileNavigationMinimizePreview } from '../../helpers/mobileNavigationScroll'
+import { softwareKeyboardOpen } from '../../helpers/phoneViewport'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { sortUserPlaylists } from '../../helpers/playlists'
 import { sortSubscribedChannels } from '../../helpers/subscription-groups'

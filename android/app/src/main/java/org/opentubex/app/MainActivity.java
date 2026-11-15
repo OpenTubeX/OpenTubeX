@@ -6,12 +6,15 @@ import android.content.res.Configuration;
 import android.hardware.input.InputManager;
 import android.os.Bundle;
 import android.os.Build;
+import android.view.WindowInsets;
+import android.view.WindowInsetsAnimation;
 
 import com.getcapacitor.BridgeActivity;
 import com.getcapacitor.PluginHandle;
 import com.capacitorjs.plugins.share.SharePlugin;
 
 import java.net.CookieHandler;
+import java.util.List;
 
 public class MainActivity extends BridgeActivity {
     /** AndroidProxyRelay.clock when the app was last hidden, kept if Android recreates the activity. */
@@ -115,6 +118,20 @@ public class MainActivity extends BridgeActivity {
         // The player hides the status bar again with its controls.
         androidx.core.view.WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView())
             .setSystemBarsBehavior(androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_DEFAULT);
+        // Without an insets animation callback, Android keeps the keyboard-sized
+        // layout until a keyboard closed by predictive back has left the screen,
+        // so the page stays short and the bottom navigation floats mid-screen.
+        // With one, the page grows when the keyboard starts to close.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            getWindow().getDecorView().setWindowInsetsAnimationCallback(
+                new WindowInsetsAnimation.Callback(WindowInsetsAnimation.Callback.DISPATCH_MODE_CONTINUE_ON_SUBTREE) {
+                    @Override
+                    public WindowInsets onProgress(WindowInsets insets, List<WindowInsetsAnimation> animations) {
+                        return insets;
+                    }
+                }
+            );
+        }
         try {
             AppIconPlugin.updateTaskIcon(this);
         } catch (android.content.pm.PackageManager.NameNotFoundException | RuntimeException error) {

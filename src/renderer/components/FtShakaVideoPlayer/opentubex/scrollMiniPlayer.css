@@ -204,6 +204,14 @@
     /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- the phone mini bar expands and its controls rearrange */
     transition: height var(--mobile-mini-expand-duration, 0ms) ease, translate 220ms cubic-bezier(0.4, 0, 1, 1), transform var(--mobile-mini-dismiss-duration, 0ms) ease-out;
   }
+
+  /* Like the navigation bar, leave the keyboard-sized page instead of
+     floating where the keyboard was after it closes. */
+  /* stylelint-disable-next-line selector-max-compound-selectors */
+  :global(.app.capacitorPhoneLayout > .sideNav.scrollHidden.keyboardHidden ~ * .ftVideoPlayer.scrollMiniPlayer.mobileMiniBar) {
+    translate: 0 calc(100% + var(--mobile-nav-height) + var(--connection-progress-inset, 0px) + var(--connection-status-height, 0px));
+    transition: none;
+  }
 }
 
 :global(:root.appMiniBar .app.capacitorTabs > .routerView) {
