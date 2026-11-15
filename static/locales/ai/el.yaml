@@ -475,6 +475,10 @@ Settings:
       Network: δικτύου
       Disk: δίσκου
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Ανενεργό"
+      On Metered Networks: "Σε δίκτυα με χρέωση δεδομένων"
+      Always: "Πάντα"
     Stop Watching: "Διακοπή παρακολούθησης"
     No Watched Comments: "Δεν παρακολουθούνται σχόλια. Παρακολουθήστε ένα σχόλιο με το κουμπί με το καμπανάκι δίπλα του."
     Your Comment: "Το σχόλιό σας"

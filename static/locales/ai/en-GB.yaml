@@ -472,6 +472,10 @@ Settings:
       Network: network
       Disk: disk
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Off"
+      On Metered Networks: "On metered networks"
+      Always: "Always"
     Stop Watching: "Stop watching"
     No Watched Comments: "No comments are being watched. Watch a comment with the bell button next to it."
     Your Comment: "Your comment"

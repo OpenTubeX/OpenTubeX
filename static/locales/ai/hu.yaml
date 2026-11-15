@@ -475,6 +475,10 @@ Settings:
       Network: hálózat
       Disk: lemez
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Ki"
+      On Metered Networks: "Forgalomkorlátos hálózatokon"
+      Always: "Mindig"
     Stop Watching: "Figyelés leállítása"
     No Watched Comments: "Nincsenek figyelt hozzászólások. Egy hozzászólást a mellette lévő csengő gombbal figyelhetsz."
     Your Comment: "Saját hozzászólás"

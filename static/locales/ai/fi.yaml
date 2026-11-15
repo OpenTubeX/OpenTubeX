@@ -475,6 +475,10 @@ Settings:
       Network: verkko
       Disk: levytila
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Pois"
+      On Metered Networks: "Rajoitetuissa verkoissa"
+      Always: "Aina"
     Stop Watching: "Lopeta seuraaminen"
     No Watched Comments: "Mitään kommentteja ei seurata. Seuraa kommenttia sen vieressä olevalla kellopainikkeella."
     Your Comment: "Kommenttisi"

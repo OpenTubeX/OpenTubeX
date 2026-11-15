@@ -486,6 +486,10 @@ Settings:
       Network: netværk
       Disk: diskplads
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Fra"
+      On Metered Networks: "På netværk med datamåling"
+      Always: "Altid"
     Stop Watching: "Stop overvågning"
     No Watched Comments: "Ingen kommentarer overvåges. Overvåg en kommentar med klokkeknappen ved siden af den."
     Your Comment: "Din kommentar"

@@ -481,6 +481,36 @@ test('migrates Hold to Double Playback Speed to the Hold to Speed Up multiplier'
   assert.deepEqual(migrateLegacySettings({ holdToDoublePlaybackSpeed: true }), { holdPlaybackRateMultiplier: 2 })
 })
 
+test('migrates the Data Saver Thumbnails switch to its mode select', async () => {
+  for (const [initial, expected] of [
+    [
+      [
+        { _id: 'thumbnailDataSaver', value: true },
+        { _id: 'quickSettings', value: ['thumbnailDataSaver', 'hideComments'] },
+      ],
+      { thumbnailDataSaverMode: 'always', quickSettings: ['thumbnailDataSaverMode', 'hideComments'] },
+    ],
+    // Off was the default, which the mode's default keeps.
+    [[{ _id: 'thumbnailDataSaver', value: false }], {}],
+    [
+      [{ _id: 'thumbnailDataSaver', value: true }, { _id: 'thumbnailDataSaverMode', value: 'metered' }],
+      { thumbnailDataSaverMode: 'metered' },
+    ],
+  ]) {
+    const settings = new Datastore()
+    await settings.insertAsync(initial)
+
+    await migrateStoredSettings(settings)
+    await migrateStoredSettings(settings)
+
+    const stored = Object.fromEntries((await settings.findAsync({})).map(({ _id, value }) => [_id, value]))
+    assert.deepEqual(stored, expected)
+  }
+
+  assert.deepEqual(migrateLegacySettings({ thumbnailDataSaver: true }), { thumbnailDataSaverMode: 'always' })
+  assert.deepEqual(migrateLegacySettings({ thumbnailDataSaver: false }), { thumbnailDataSaverMode: 'off' })
+})
+
 test('migrates the mini player switches to the scroll player select', async () => {
   for (const [initial, expected] of [
     [

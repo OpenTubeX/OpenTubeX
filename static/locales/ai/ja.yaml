@@ -475,6 +475,10 @@ Settings:
       Network: ネットワーク
       Disk: ディスク
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "オフ"
+      On Metered Networks: "従量制ネットワークのみ"
+      Always: "常に"
     Stop Watching: "監視を停止"
     No Watched Comments: "監視中のコメントはありません。コメントの横にあるベルボタンで監視できます。"
     Your Comment: "あなたのコメント"

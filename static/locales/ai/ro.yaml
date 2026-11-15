@@ -475,6 +475,10 @@ Settings:
       Network: rețea
       Disk: disc
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Dezactivat"
+      On Metered Networks: "În rețelele contorizate"
+      Always: "Întotdeauna"
     Stop Watching: "Nu mai urmări"
     No Watched Comments: "Nu este urmărit niciun comentariu. Urmărește un comentariu cu butonul clopoțel de lângă el."
     Your Comment: "Comentariul tău"

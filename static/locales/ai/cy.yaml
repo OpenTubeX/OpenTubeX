@@ -476,6 +476,10 @@ Settings:
       Network: rhwydwaith
       Disk: disg
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "I ffwrdd"
+      On Metered Networks: "Ar rwydweithiau â mesurydd"
+      Always: "Bob amser"
     Stop Watching: "Peidio â dilyn"
     No Watched Comments: "Does dim sylwadau'n cael eu dilyn. Dilynwch sylw gyda'r botwm cloch wrth ei ymyl."
     Your Comment: "Eich sylw"

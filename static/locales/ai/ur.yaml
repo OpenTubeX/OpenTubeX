@@ -525,6 +525,10 @@ Settings:
       Network: نیٹ ورک
       Disk: ڈسک
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "بند"
+      On Metered Networks: "میٹرڈ نیٹ ورکس پر"
+      Always: "ہمیشہ"
     Stop Watching: "نگرانی بند کریں"
     No Watched Comments: "کوئی تبصرہ زیرِ نگرانی نہیں ہے۔ کسی تبصرے کو اس کے ساتھ موجود گھنٹی کے بٹن سے زیرِ نگرانی رکھیں۔"
     Your Comment: "آپ کا تبصرہ"

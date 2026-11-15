@@ -475,6 +475,10 @@ Settings:
       Network: sarea
       Disk: diskoa
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Desaktibatuta"
+      On Metered Networks: "Sare neurtuetan"
+      Always: "Beti"
     Stop Watching: "Utzi jarraitzeari"
     No Watched Comments: "Ez da iruzkinik jarraitzen. Jarraitu iruzkin bat ondoko kanpai-botoiarekin."
     Your Comment: "Zure iruzkina"

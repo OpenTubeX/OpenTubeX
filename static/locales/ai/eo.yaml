@@ -511,6 +511,10 @@ Settings:
       Network: reto
       Disk: disko
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Malŝaltita"
+      On Metered Networks: "Ĉe mezurataj retoj"
+      Always: "Ĉiam"
     Stop Watching: "Ĉesi observi"
     No Watched Comments: "Neniuj komentoj estas observataj. Observu komenton per la sonorila butono apud ĝi."
     Your Comment: "Via komento"

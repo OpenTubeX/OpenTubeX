@@ -569,6 +569,10 @@ Settings:
       Disk: 디스크
   Return to Settings Menu: 설정 메뉴로 돌아가기
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "끄기"
+      On Metered Networks: "종량제 네트워크에서"
+      Always: "항상"
     Stop Watching: "확인 중지"
     No Watched Comments: "확인 중인 댓글이 없습니다. 댓글 옆의 종 버튼을 눌러 댓글을 확인 목록에 추가하세요."
     Your Comment: "내 댓글"

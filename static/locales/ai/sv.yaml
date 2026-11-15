@@ -475,6 +475,10 @@ Settings:
       Network: nätverk
       Disk: diskutrymme
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Av"
+      On Metered Networks: "På begränsade nätverk"
+      Always: "Alltid"
     Stop Watching: "Sluta bevaka"
     No Watched Comments: "Inga kommentarer bevakas. Bevaka en kommentar med klockknappen bredvid den."
     Your Comment: "Din kommentar"

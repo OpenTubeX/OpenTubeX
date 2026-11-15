@@ -480,6 +480,10 @@ Settings:
       Network: רשת
       Disk: כונן
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "כבוי"
+      On Metered Networks: "ברשתות עם הגבלת נתונים"
+      Always: "תמיד"
     Stop Watching: "הפסקת מעקב"
     No Watched Comments: "אין תגובות במעקב. עקוב אחר תגובה באמצעות כפתור הפעמון שלידה."
     Your Comment: "התגובה שלך"

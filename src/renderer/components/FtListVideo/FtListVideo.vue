@@ -1939,7 +1939,7 @@ const thumbnail = computed(() => {
       backendPreference.value,
       currentInvidiousInstanceUrl.value,
       thumbnailPreference.value,
-      store.getters.getThumbnailDataSaver
+      store.getters.getUseDataSaverThumbnails
     ) ?? thumbnailPlaceholder
   }
 

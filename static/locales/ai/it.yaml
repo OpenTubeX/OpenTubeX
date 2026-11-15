@@ -475,6 +475,10 @@ Settings:
       Network: rete
       Disk: disco
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Disattivato"
+      On Metered Networks: "Sulle reti a consumo"
+      Always: "Sempre"
     Stop Watching: "Smetti di seguire"
     No Watched Comments: "Nessun commento è seguito. Segui un commento con il pulsante a forma di campanella accanto."
     Your Comment: "Il tuo commento"

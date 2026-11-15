@@ -480,6 +480,10 @@ Settings:
       Network: мережа
       Disk: диск
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Вимк."
+      On Metered Networks: "У лімітних мережах"
+      Always: "Завжди"
     Stop Watching: "Припинити відстеження"
     No Watched Comments: "Жоден коментар не відстежується. Відстежуйте коментар за допомогою кнопки з дзвіночком поруч із ним."
     Your Comment: "Ваш коментар"

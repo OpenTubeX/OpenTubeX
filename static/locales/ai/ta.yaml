@@ -488,6 +488,10 @@ Settings:
       Network: பிணையம்
       Disk: வட்டு
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "முடக்கு"
+      On Metered Networks: "அளவிடப்பட்ட நெட்வொர்க்குகளில்"
+      Always: "எப்போதும்"
     Stop Watching: "கண்காணிப்பதை நிறுத்து"
     No Watched Comments: "எந்தக் கருத்தும் கண்காணிக்கப்படவில்லை. ஒரு கருத்தை அதன் அருகிலுள்ள மணி பொத்தானைக் கொண்டு கண்காணிக்கவும்."
     Your Comment: "உங்கள் கருத்து"

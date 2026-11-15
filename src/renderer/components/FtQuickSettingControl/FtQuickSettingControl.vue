@@ -66,6 +66,7 @@ const selectNames = computed(() => props.definition.optionLabels?.(t) ?? props.d
 }) ?? [])
 
 function emitUpdate(value) {
-  emit('update', props.definition.id, value)
+  // Switches for non-boolean settings, such as Data Saver Thumbnails, map to `toggleValues`.
+  emit('update', props.definition.id, props.definition.toggleValues?.[value ? 1 : 0] ?? value)
 }
 </script>

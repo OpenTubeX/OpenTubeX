@@ -475,6 +475,10 @@ Settings:
       Network: nettverk
       Disk: disk
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Av"
+      On Metered Networks: "På nettverk med datamåling"
+      Always: "Alltid"
     Stop Watching: "Slutt å overvåke"
     No Watched Comments: "Ingen kommentarer overvåkes. Overvåk en kommentar med bjelleknappen ved siden av."
     Your Comment: "Din kommentar"

@@ -475,6 +475,10 @@ Settings:
       Network: 網路
       Disk: 磁碟
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "關閉"
+      On Metered Networks: "計量付費網路"
+      Always: "一律"
     Stop Watching: "取消追蹤"
     No Watched Comments: "沒有正在追蹤的留言。使用留言旁的鈴鐺按鈕即可追蹤留言。"
     Your Comment: "你的留言"

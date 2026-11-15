@@ -478,6 +478,10 @@ Settings:
       Network: mreže
       Disk: diska
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Isključeno"
+      On Metered Networks: "Na mrežama s ograničenjem podataka"
+      Always: "Uvijek"
     Stop Watching: "Prestani pratiti"
     No Watched Comments: "Ne prati se nijedan komentar. Pratite komentar pomoću gumba sa zvonom pokraj njega."
     Your Comment: "Vaš komentar"

@@ -389,7 +389,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
       skip: 'promptToSkip'
     },
     thumbnailPreference: '',
-    thumbnailDataSaver: false,
+    thumbnailDataSaverMode: 'off',
     // 0 shows titles in full.
     titleLineLimit: 2,
     linkUnderline: 'hover',

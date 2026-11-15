@@ -477,6 +477,10 @@ Settings:
       Network: şəbəkə
       Disk: disk
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Söndürülüb"
+      On Metered Networks: "Limitli şəbəkələrdə"
+      Always: "Həmişə"
     Stop Watching: "İzləməni dayandır"
     No Watched Comments: "Heç bir şərh izlənmir. Şərhi yanındakı zəng düyməsi ilə izləyin."
     Your Comment: "Sizin şərhiniz"

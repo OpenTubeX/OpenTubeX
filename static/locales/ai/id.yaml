@@ -476,6 +476,10 @@ Settings:
       Network: jaringan
       Disk: disk
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Mati"
+      On Metered Networks: "Di jaringan terukur"
+      Always: "Selalu"
     Stop Watching: "Berhenti memantau"
     No Watched Comments: "Tidak ada komentar yang dipantau. Pantau komentar dengan tombol lonceng di sebelahnya."
     Your Comment: "Komentar Anda"

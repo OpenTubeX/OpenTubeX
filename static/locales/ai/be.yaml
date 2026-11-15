@@ -498,6 +498,10 @@ Settings:
       Network: сетка
       Disk: дыск
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Выкл."
+      On Metered Networks: "У лімітных сетках"
+      Always: "Заўсёды"
     Stop Watching: "Перастаць адсочваць"
     No Watched Comments: "Ніводзін каментарый не адсочваецца. Адсочвайце каментарый з дапамогай кнопкі са званочкам побач з ім."
     Your Comment: "Ваш каментарый"

@@ -113,7 +113,7 @@ for (const dataSaver of [false, true]) {
     await page.evaluate(async dataSaver => {
       const store = window.$store
       await store.dispatch('updateAutoplayVideos', false)
-      await store.dispatch('updateThumbnailDataSaver', dataSaver)
+      await store.dispatch('updateThumbnailDataSaverMode', dataSaver ? 'always' : 'off')
     }, dataSaver)
     await mockPlayableWatchPage(app, page)
     const requests = []
@@ -194,9 +194,9 @@ test('shows recommended thumbnails over a darkened poster with working keyboard 
   await expect(page.locator('.endedPoster img:not(.retryImagePlaceholder)')).toHaveCSS('opacity', '0.35')
   await expect(cards.first()).toHaveAttribute('href', '#/watch/video000000')
   await expect(cards.first().locator('img:not(.retryImagePlaceholder)')).toHaveAttribute('src', /\/vi\/video000000\/maxresdefault.jpg$/)
-  await watch.evaluate(component => component.proxy.$store.dispatch('updateThumbnailDataSaver', true))
+  await watch.evaluate(component => component.proxy.$store.dispatch('updateThumbnailDataSaverMode', 'always'))
   await expect(cards.first().locator('img:not(.retryImagePlaceholder)')).toHaveAttribute('src', /\/vi\/video000000\/mqdefault.jpg$/)
-  await watch.evaluate(component => component.proxy.$store.dispatch('updateThumbnailDataSaver', false))
+  await watch.evaluate(component => component.proxy.$store.dispatch('updateThumbnailDataSaverMode', 'off'))
   await expect(cards.first().locator('img:not(.retryImagePlaceholder)')).toHaveAttribute('src', /\/vi\/video000000\/maxresdefault.jpg$/)
   await expect.poll(() => cards.first().locator('img:not(.retryImagePlaceholder)').evaluate(image => image.naturalWidth)).toBeGreaterThan(0)
   await cards.first().click({ trial: true })

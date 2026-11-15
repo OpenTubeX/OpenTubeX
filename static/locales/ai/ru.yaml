@@ -434,6 +434,10 @@ Settings:
       Network: сеть
       Disk: диск
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Выкл."
+      On Metered Networks: "В лимитных сетях"
+      Always: "Всегда"
     Stop Watching: "Перестать отслеживать"
     No Watched Comments: "Нет отслеживаемых комментариев. Отслеживайте комментарий с помощью кнопки с колокольчиком рядом с ним."
     Your Comment: "Ваш комментарий"

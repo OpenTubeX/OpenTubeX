@@ -480,6 +480,10 @@ Settings:
       Network: rede
       Disk: disco
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Desactivado"
+      On Metered Networks: "En redes con límite de datos"
+      Always: "Sempre"
     Stop Watching: "Deixar de seguir"
     No Watched Comments: "Non se segue ningún comentario. Segue un comentario co botón da campá que hai ao lado."
     Your Comment: "O teu comentario"

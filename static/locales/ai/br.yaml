@@ -475,6 +475,10 @@ Settings:
       Network: "ar rouedad"
       Disk: "ar bladenn"
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Lazhet"
+      On Metered Networks: "War ar rouedadoù muzuliet"
+      Always: "Atav"
     Stop Watching: "Paouez da heuliañ"
     No Watched Comments: "N'eus evezhiadenn ebet heuliet. Heuliit un evezhiadenn gant ar bouton kloc'h e-kichen."
     Your Comment: "Hoc'h evezhiadenn"

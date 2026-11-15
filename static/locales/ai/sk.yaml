@@ -475,6 +475,10 @@ Settings:
       Network: sieť
       Disk: disk
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Vypnuté"
+      On Metered Networks: "V meraných sieťach"
+      Always: "Vždy"
     Stop Watching: "Prestať sledovať"
     No Watched Comments: "Nesledujú sa žiadne komentáre. Komentár môžete sledovať pomocou tlačidla so zvončekom vedľa neho."
     Your Comment: "Váš komentár"

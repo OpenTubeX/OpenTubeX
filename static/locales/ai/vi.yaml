@@ -475,6 +475,10 @@ Settings:
       Network: mạng
       Disk: ổ đĩa
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Tắt"
+      On Metered Networks: "Trên mạng đo lưu lượng"
+      Always: "Luôn luôn"
     Stop Watching: "Ngừng theo dõi"
     No Watched Comments: "Không có bình luận nào đang được theo dõi. Theo dõi một bình luận bằng nút chuông bên cạnh."
     Your Comment: "Bình luận của bạn"

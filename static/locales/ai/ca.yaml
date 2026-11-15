@@ -608,6 +608,10 @@ Settings:
       Disk: disc
   Return to Settings Menu: Torna al menú de configuració
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Desactivat"
+      On Metered Networks: "En xarxes amb límit de dades"
+      Always: "Sempre"
     Stop Watching: "Deixa de seguir"
     No Watched Comments: "No se segueix cap comentari. Segueix un comentari amb el botó de la campana que hi ha al costat."
     Your Comment: "El teu comentari"

@@ -204,7 +204,25 @@ export const BASIC_QUICK_SETTING_DEFINITIONS = Object.freeze([
   ['useAiSlopList', 'Settings.AiSList Settings.Hide AI Slop Channels', 'content', ['fas', 'users-slash'], { electronOnly: true, capacitorSupported: true }],
   ['showFamilyFriendlyOnly', 'Settings.Parental Control Settings.Show Family Friendly Only', 'content', ['fas', 'shield-halved'], { passwordProtected: true }],
   ['showThumbnailPreviews', 'Settings.General Settings.Show Thumbnail Previews', 'content', ['fas', 'photo-film']],
-  ['thumbnailDataSaver', 'Settings.General Settings.Data Saver Thumbnails', 'content', ['fas', 'images']],
+  {
+    id: 'thumbnailDataSaverMode',
+    section: 'content',
+    labelKey: 'Settings.General Settings.Data Saver Thumbnails',
+    control: 'select',
+    values: ['off', 'metered', 'always'],
+    optionLabelKeys: [
+      'Settings.General Settings.Data Saver Thumbnail Modes.Off',
+      'Settings.General Settings.Data Saver Thumbnail Modes.On Metered Networks',
+      'Settings.General Settings.Data Saver Thumbnail Modes.Always',
+    ],
+    icon: ['fas', 'images'],
+    // Only Android reports metered networks, elsewhere a switch toggles Always.
+    withoutMeteredDetection: {
+      control: 'toggle',
+      effectiveValue: settings => settings.thumbnailDataSaverMode === 'always',
+      toggleValues: ['off', 'always'],
+    },
+  },
   ['enableCaptionTranslations', 'Settings.Player Settings.Caption Appearance.Enable Translations', 'language', ['fas', 'closed-captioning']],
   ['enableCommentTranslations', 'Settings.General Settings.Comment Translation.Enable', 'language', ['fas', 'language']],
   ['useVoiceOverTranslation', 'Settings.Player Settings.Voice-over Translation.Enable', 'language', ['fas', 'headphones'], { electronOnly: true, capacitorSupported: true, iosUnsupported: true }],
@@ -277,6 +295,7 @@ export function createQuickSettingCatalog(t, usingElectron, isCapacitor = false,
       (!definition.capacitorUnsupported || !isCapacitor))
     .map(definition => ({
       ...definition,
+      ...(!isCapacitor || isIos ? definition.withoutMeteredDetection : undefined),
       // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
       label: t(definition.labelKey),
     }))

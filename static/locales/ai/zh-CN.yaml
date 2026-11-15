@@ -475,6 +475,10 @@ Settings:
       Network: 网络
       Disk: 磁盘
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "关闭"
+      On Metered Networks: "按流量计费的网络"
+      Always: "始终"
     Stop Watching: "取消关注"
     No Watched Comments: "没有正在关注的评论。使用评论旁边的铃铛按钮即可关注评论。"
     Your Comment: "你的评论"

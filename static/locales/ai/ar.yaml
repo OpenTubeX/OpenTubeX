@@ -480,6 +480,10 @@ Settings:
       Network: شبكة
       Disk: القرص
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "إيقاف"
+      On Metered Networks: "على الشبكات المحدودة"
+      Always: "دائمًا"
     Stop Watching: "إيقاف المتابعة"
     No Watched Comments: "لا تتم متابعة أي تعليقات. تابع تعليقًا باستخدام زر الجرس بجانبه."
     Your Comment: "تعليقك"

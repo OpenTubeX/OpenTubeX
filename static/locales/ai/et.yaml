@@ -475,6 +475,10 @@ Settings:
       Network: võrgu
       Disk: ketta
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Väljas"
+      On Metered Networks: "Mahupiiranguga võrkudes"
+      Always: "Alati"
     Stop Watching: "Lõpeta jälgimine"
     No Watched Comments: "Ühtegi kommentaari ei jälgita. Jälgi kommentaari selle kõrval oleva kellanupuga."
     Your Comment: "Sinu kommentaar"

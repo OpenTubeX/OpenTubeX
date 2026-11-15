@@ -475,6 +475,10 @@ Settings:
       Network: nets
       Disk: disks
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Slökkt"
+      On Metered Networks: "Á mældum netum"
+      Always: "Alltaf"
     Stop Watching: "Hætta að vakta"
     No Watched Comments: "Engar athugasemdir eru vaktaðar. Vaktaðu athugasemd með bjölluhnappnum við hliðina á henni."
     Your Comment: "Athugasemdin þín"

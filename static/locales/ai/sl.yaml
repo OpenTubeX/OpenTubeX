@@ -600,6 +600,10 @@ Settings:
       Disk: disk
   Return to Settings Menu: Nazaj v meni z nastavitvami
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Izklopljeno"
+      On Metered Networks: "V omrežjih z omejitvijo prenosa"
+      Always: "Vedno"
     Stop Watching: "Ne spremljaj več"
     No Watched Comments: "Noben komentar se ne spremlja. Komentar spremljajte z gumbom z zvoncem poleg njega."
     Your Comment: "Vaš komentar"

@@ -278,6 +278,10 @@ Settings:
     Advanced Description: Backendy, buforowanie, narzędzia zewnętrzne, proxy i diagnostyka
     Alternative providers: Dostawcy filmów i metadanych
   General Settings:
+    Data Saver Thumbnail Modes:
+      Off: "Wyłączone"
+      On Metered Networks: "W sieciach z pomiarem użycia danych"
+      Always: "Zawsze"
     Stop Watching: "Przestań obserwować"
     No Watched Comments: "Żadne komentarze nie są obserwowane. Obserwuj komentarz za pomocą przycisku z dzwonkiem obok niego."
     Your Comment: "Twój komentarz"
