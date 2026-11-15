@@ -4,7 +4,6 @@ import {
   getTwitchChannelUrl,
   parseChannel,
   parseTwitchChannelLogin,
-  parseTwitchClip,
   parseTwitchUser,
   parseTwitchVideo,
   requestTwitch
@@ -66,26 +65,50 @@ function toPlatformChannel(user) {
 }
 
 /**
- * Twitch identifies channels by login in URLs and by ID for following.
- * @param {PlatformChannel} channel
- */
-function channelLogin(channel) {
-  return parseTwitchChannelLogin(channel.url) ?? ''
-}
-
-/**
- * @param {any} connection
- */
-function nodes(connection) {
-  return Array.isArray(connection?.edges) ? connection.edges.map(edge => edge?.node).filter(Boolean) : []
-}
-
-/**
  * @param {PlatformItem} item
  * @returns {import('./types.js').PlatformResult}
  */
 function itemResult(item) {
   return { kind: 'item', item }
+}
+
+/**
+ * Selects a user by ID, or by login for `@login` and logins with letters.
+ * @param {string} id
+ * @returns {{ id: string } | { login: string } | null}
+ */
+function userVariables(id) {
+  if (!id.startsWith('@') && ID_PATTERN.test(id)) return { id }
+  const login = parseTwitchChannelLogin(id)
+  return login ? { login } : null
+}
+
+/**
+ * @param {string} fields what the query loads besides the channel
+ */
+function userQuery(fields) {
+  return `query($id: ID, $login: String) { user(id: $id, login: $login) { ${CHANNEL_FIELDS} ${fields} } }`
+}
+
+/**
+ * @param {import('./types.js').PlatformChannelTab} tab
+ */
+function tabFields(tab) {
+  return tab === 'clips'
+    ? `clips(first: ${CHANNEL_PAGE_SIZE}, criteria: { period: ALL_TIME, sort: VIEWS_DESC }) { edges { node { ${CLIP_FIELDS} } } }`
+    : `${STREAM_FIELDS} videos(first: ${CHANNEL_PAGE_SIZE}, sort: TIME) { edges { node { ${VIDEO_FIELDS} } } }`
+}
+
+/**
+ * @param {any} user
+ * @param {import('./types.js').PlatformChannelTab} tab
+ * @returns {PlatformPage}
+ */
+function tabPage(user, tab) {
+  const parsed = parseTwitchUser(user)
+  // The live stream comes first, without the video recording it
+  const items = !parsed ? [] : tab === 'clips' ? parsed.feed.clips : [...parsed.feed.live, ...parsed.feed.videos]
+  return { results: items.map(itemResult), continuation: null }
 }
 
 /** @type {Platform} */
@@ -104,29 +127,25 @@ const twitch = {
   },
 
   async getChannel(fetch, id, signal) {
-    const variable = !id.startsWith('@') && ID_PATTERN.test(id) ? { id } : { login: parseTwitchChannelLogin(id) }
-    if (!variable.id && !variable.login) return null
-    const data = await requestTwitch(fetch,
-      `query($id: ID, $login: String) { user(id: $id, login: $login) { ${CHANNEL_FIELDS} } }`,
-      variable, signal)
+    const variables = userVariables(id)
+    if (!variables) return null
+    const data = await requestTwitch(fetch, userQuery(''), variables, signal)
     return toPlatformChannel(data.user)
+  },
+
+  // One query has the channel and the whole tab
+  async getChannelWithPage(fetch, id, tab, signal) {
+    const variables = userVariables(id)
+    if (!variables) return null
+    const data = await requestTwitch(fetch, userQuery(tabFields(tab)), variables, signal)
+    const channel = toPlatformChannel(data.user)
+    return channel && { channel, page: Promise.resolve(tabPage(data.user, tab)) }
   },
 
   async getChannelPage(fetch, channel, tab, continuation, signal) {
     if (!ID_PATTERN.test(channel.id) || continuation !== null) return { results: [], continuation: null }
-    const twitchChannel = { id: channel.id, login: channelLogin(channel), name: channel.name }
-    if (tab === 'clips') {
-      const data = await requestTwitch(fetch,
-        `query($id: ID!) { user(id: $id) { clips(first: ${CHANNEL_PAGE_SIZE}, criteria: { period: ALL_TIME, sort: VIEWS_DESC }) { edges { node { ${CLIP_FIELDS} } } } } }`,
-        { id: channel.id }, signal)
-      return { results: nodes(data.user?.clips).flatMap(clip => parseTwitchClip(clip, twitchChannel)).map(itemResult), continuation: null }
-    }
-    const data = await requestTwitch(fetch,
-      `query($id: ID!) { user(id: $id) { ${CHANNEL_FIELDS} ${STREAM_FIELDS} videos(first: ${CHANNEL_PAGE_SIZE}, sort: TIME) { edges { node { ${VIDEO_FIELDS} } } } } }`,
-      { id: channel.id }, signal)
-    const parsed = parseTwitchUser(data.user)
-    // The live stream comes first, without the video recording it
-    return { results: parsed ? [...parsed.feed.live, ...parsed.feed.videos].map(itemResult) : [], continuation: null }
+    const data = await requestTwitch(fetch, userQuery(tabFields(tab)), { id: channel.id }, signal)
+    return tabPage(data.user, tab)
   },
 
   async getLatestItems(fetch, channel, signal) {

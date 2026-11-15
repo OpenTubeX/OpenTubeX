@@ -160,6 +160,16 @@ test('reads the channel header, with the canonical case of its ID', async () => 
   assert.equal(await rumble.getChannel(fetcher, 'c/Missing'), null)
   assert.equal(await rumble.getChannel(fetcher, '../search'), null)
   assert.equal(requests.length, 2)
+
+  // The channel page also has its first videos
+  const { channel, page } = await rumble.getChannelWithPage(fetcher, 'c/examplechannel', 'videos')
+  assert.deepEqual(channel, await rumble.getChannel(fetcher, 'c/examplechannel'))
+  const { results, continuation } = await page
+  assert.equal(continuation, '2')
+  assert.deepEqual(results.map(result => [result.item.id, result.item.channelId]).slice(0, 2), [['v1live1', 'c/ExampleChannel'], ['v1next1', 'c/ExampleChannel']])
+  assert.equal(results.length, 6)
+  assert.equal(await rumble.getChannelWithPage(fetcher, 'c/Missing', 'videos'), null)
+  assert.equal(requests.length, 5)
   await assert.rejects(rumble.getChannel(async () => new Response('', { status: 503 }), 'c/ExampleChannel'), /HTTP 503/)
 })
 

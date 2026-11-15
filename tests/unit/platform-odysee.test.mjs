@@ -102,6 +102,19 @@ test('looks up channels by claim ID and by name, and finds no unknown channels',
   assert.deepEqual(requests[0].body.params.claim_type, ['channel'])
   assert.ok(requests.every(({ init }) => init.credentials === 'omit' && init.referrerPolicy === 'no-referrer'))
 
+  // Claim IDs load the videos alongside the channel, references resolve first
+  requests.length = 0
+  assert.deepEqual((await odysee.getChannelWithPage(fetch, CHANNEL_ID, 'videos')).channel, expected)
+  assert.deepEqual((await odysee.getChannelWithPage(fetch, '@Creator:a', 'videos')).channel, expected)
+  assert.equal(await odysee.getChannelWithPage(fetch, '@Missing', 'videos'), null)
+  assert.deepEqual(requests.map(({ body }) => [body.method, body.params.claim_ids ?? body.params.channel_ids ?? body.params.urls]), [
+    ['claim_search', [CHANNEL_ID]],
+    ['claim_search', [CHANNEL_ID]],
+    ['resolve', ['lbry://@Creator#a']],
+    ['claim_search', [CHANNEL_ID]],
+    ['resolve', ['lbry://@Missing']]
+  ])
+
   const failing = fakeFetch(() => ({ jsonrpc: '2.0', error: { code: -32080, message: 'authentication token missing' } }))
   await assert.rejects(odysee.getChannel(failing.fetch, CHANNEL_ID), /authentication token missing/)
 })

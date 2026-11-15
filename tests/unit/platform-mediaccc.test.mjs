@@ -101,7 +101,16 @@ test('loads a conference with its talks newest first, and finds no unknown ones'
 
   assert.deepEqual((await mediaccc.getLatestItems(fetch, channel)).map(item => item.id), ['guid-3', 'guid-2', 'guid-1'])
   assert.equal(await mediaccc.getChannel(fetch, 'missing'), null)
-  const requestCount = requests.length
+
+  // The conference has its talks, so one request loads both
+  let requestCount = requests.length
+  const withPage = await mediaccc.getChannelWithPage(fetch, 'exc24', 'videos')
+  assert.deepEqual(withPage.channel, channel)
+  assert.deepEqual(await withPage.page, page)
+  assert.equal(requests.length, requestCount + 1)
+  assert.equal(await mediaccc.getChannelWithPage(fetch, 'missing', 'videos'), null)
+
+  requestCount = requests.length
   assert.equal(await mediaccc.getChannel(fetch, '../events'), null)
   assert.equal(requests.length, requestCount)
 })

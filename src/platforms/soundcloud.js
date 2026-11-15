@@ -1,4 +1,5 @@
 // @ts-check
+import { loadChannelWithPage } from './channelWithPage.js'
 
 /**
  * @typedef {import('./types.js').Platform} Platform
@@ -453,10 +454,34 @@ async function getChannel(fetcher, id, signal) {
  * @returns {Promise<PlatformPage>}
  */
 async function getChannelPage(fetcher, channel, tab, continuation, signal) {
+  return userPage(fetcher, channel.id, tab, continuation, signal)
+}
+
+/**
+ * @param {PlatformFetch} fetcher
+ * @param {string} id
+ * @param {PlatformChannelTab} tab
+ * @param {string | null} continuation
+ * @param {AbortSignal} [signal]
+ * @returns {Promise<PlatformPage>}
+ */
+async function userPage(fetcher, id, tab, continuation, signal) {
   const path = Object.hasOwn(CHANNEL_TAB_PATHS, tab) ? CHANNEL_TAB_PATHS[tab] : null
   if (!path) throw new Error(`SoundCloud channels have no ${tab} tab`)
-  if (!ID_PATTERN.test(channel.id)) return { results: [], continuation: null }
-  return listPage(fetcher, path(channel.id), {}, continuation, signal)
+  if (!ID_PATTERN.test(id)) return { results: [], continuation: null }
+  return listPage(fetcher, path(id), {}, continuation, signal)
+}
+
+/**
+ * User IDs load the page alongside the channel, permalinks resolve first.
+ * @param {PlatformFetch} fetcher
+ * @param {string} id
+ * @param {PlatformChannelTab} tab
+ * @param {AbortSignal} [signal]
+ */
+function getChannelWithPage(fetcher, id, tab, signal) {
+  const early = ID_PATTERN.test(id) ? userPage(fetcher, id, tab, null, signal) : undefined
+  return loadChannelWithPage({ getChannel, getChannelPage }, fetcher, id, tab, signal, early)
 }
 
 /**
@@ -554,6 +579,7 @@ export default {
   parseChannelUrl,
   getChannel,
   getChannelPage,
+  getChannelWithPage,
   getLatestItems,
   search,
   getPlaylist

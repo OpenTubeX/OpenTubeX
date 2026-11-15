@@ -164,7 +164,7 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, shallowRef, useId, watch } from 'vue'
+import { computed, reactive, ref, shallowRef, toRaw, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { FtIcon } from '@opentubex/icons'
@@ -182,9 +182,10 @@ import PlatformResultList from '../../components/PlatformResultList/PlatformResu
 
 import store from '../../store/index'
 import { getPlatformFetch } from '../../helpers/platformFetch'
+import { forgetChannel, getRecentChannel, rememberChannel, startChannelLoad } from '../../helpers/recentPlatformChannels'
 import { useAutoLoadRevision } from '../../composables/useAutoLoadRevision'
 import { formatSubscriberCount, openExternalLink } from '../../helpers/utils'
-import { useTabAvatar, useTabTitle } from '../../tabs/TabContext'
+import { useTabAvatar, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
 import { getPlatform, PLATFORM_ICONS } from '../../../platforms/index'
 
 const TAB_ICONS = {
@@ -228,6 +229,10 @@ const pages = reactive({})
 const page = computed(() => pages[currentTab.value] ?? { results: [], continuation: null, loading: true, error: false, loaded: false })
 
 let loadGeneration = 0
+/** The load of the shown channel, which its remembered pages keep */
+let channelLoad = startChannelLoad()
+/** The shown channel, kept for its requests, which can finish after the route moved on */
+let channelKey = { platform: '', id: '' }
 
 async function loadChannel() {
   const generation = ++loadGeneration
@@ -241,17 +246,30 @@ async function loadChannel() {
     return
   }
   setTabTitle(platform.value.name)
+  const requested = route.query.tab
+  const tab = platform.value.channelTabs.includes(requested) ? requested : platform.value.channelTabs[0]
+  // Shown at once, so going back also restores the scroll position
+  channelKey = { platform: platform.value.id, id: channelId.value }
+  const recent = getRecentChannel(channelKey.platform, channelKey.id)
+  channelLoad = recent ?? startChannelLoad()
+  if (recent) {
+    for (const [key, cached] of Object.entries(recent.pages)) {
+      pages[key] = { ...cached, loading: false, error: false, loaded: true }
+    }
+    showChannel(recent.channel, tab)
+    isLoading.value = false
+    // Unless the tab didn't load before
+    loadPage(tab)
+    return
+  }
   try {
-    const result = await platform.value.getChannel(getPlatformFetch(platform.value.id), channelId.value)
+    const result = await platform.value.getChannelWithPage(getPlatformFetch(platform.value.id), channelId.value, tab)
     if (generation !== loadGeneration) return
-    channel.value = result
+    channel.value = result?.channel ?? null
     notFound.value = result === null
     if (result) {
-      setTabTitle(result.name)
-      if (result.avatar) setTabAvatar(result.avatar)
-      const requested = route.query.tab
-      currentTab.value = platform.value.channelTabs.includes(requested) ? requested : platform.value.channelTabs[0]
-      loadPage(currentTab.value)
+      showChannel(result.channel, tab)
+      loadPage(tab, false, result.page)
     }
   } catch (error) {
     if (generation !== loadGeneration) return
@@ -262,10 +280,31 @@ async function loadChannel() {
 }
 
 /**
+ * @param {import('../../../platforms/types').PlatformChannel} shown
+ * @param {string} tab
+ */
+function showChannel(shown, tab) {
+  channel.value = shown
+  setTabTitle(shown.name)
+  if (shown.avatar) setTabAvatar(shown.avatar)
+  currentTab.value = tab
+}
+
+/**
+ * Keeps the loaded tabs for going back to the channel.
+ */
+function rememberLoadedPages() {
+  const loaded = Object.entries(pages).flatMap(([tab, { results, continuation, loaded }]) =>
+    loaded ? [[tab, { results: toRaw(results), continuation }]] : [])
+  rememberChannel(channelKey.platform, channelKey.id, channel.value, Object.fromEntries(loaded), channelLoad)
+}
+
+/**
  * @param {string} tab
  * @param {boolean} [more] whether to load the next page
+ * @param {Promise<import('../../../platforms/types').PlatformPage>} [firstPage] the page that loads with the channel
  */
-async function loadPage(tab, more = false) {
+async function loadPage(tab, more = false, firstPage = undefined) {
   const generation = loadGeneration
   pages[tab] ??= { results: [], continuation: null, loading: false, error: false, loaded: false }
   // The reactive copy, which renders the changes
@@ -274,11 +313,12 @@ async function loadPage(tab, more = false) {
   current.loading = true
   current.error = false
   try {
-    const result = await platform.value.getChannelPage(getPlatformFetch(platform.value.id), channel.value, tab, more ? current.continuation : null)
+    const result = await (firstPage ?? platform.value.getChannelPage(getPlatformFetch(platform.value.id), channel.value, tab, more ? current.continuation : null))
     if (generation !== loadGeneration) return
     current.results = more ? [...current.results, ...result.results] : result.results
     current.continuation = result.continuation
     current.loaded = true
+    rememberLoadedPages()
   } catch (error) {
     if (generation !== loadGeneration) return
     console.error('Failed to load the channel page', error)
@@ -327,6 +367,15 @@ function focusNextTab(tab, event) {
   changeTab(next)
   tabRefs.get(next)?.focus()
 }
+
+// Reloading the tab, also by pulling down, loads the channel again, and
+// requests of the page it replaces no longer keep their results
+useTabLifecycle({
+  beforeReload() {
+    loadGeneration++
+    if (platform.value && channelId.value) forgetChannel(platform.value.id, channelId.value)
+  }
+})
 
 // Only another channel needs loading, not another tab of it
 watch([() => route.query.platform, () => route.query.id], loadChannel, { immediate: true })

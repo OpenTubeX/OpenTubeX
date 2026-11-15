@@ -520,11 +520,39 @@ async function getChannelPage(fetcher, channel, tab, continuation, signal) {
   const path = `/${channel.id}`
   // Pages after the last one are missing
   const html = await request(fetcher, `${ORIGIN}${path}${page > 1 ? `?page=${page}` : ''}`, signal)
-  if (html === null) return emptyPage()
+  return html === null ? emptyPage() : parseChannelVideoPage(html, channel, page)
+}
+
+/**
+ * @param {string} html
+ * @param {PlatformChannel} channel
+ * @param {number} page
+ * @returns {PlatformPage}
+ */
+function parseChannelVideoPage(html, channel, page) {
   return {
     results: parseChannelVideos(html, channel).map(item => ({ kind: 'item', item })),
-    continuation: linksToPage(html, path, page + 1) ? String(page + 1) : null
+    continuation: linksToPage(html, `/${channel.id}`, page + 1) ? String(page + 1) : null
   }
+}
+
+/**
+ * The channel's page also lists its first videos.
+ * @param {PlatformFetch} fetcher
+ * @param {string} id
+ * @param {PlatformChannelTab} tab
+ * @param {AbortSignal} [signal]
+ * @returns {Promise<{ channel: PlatformChannel, page: Promise<PlatformPage> } | null>}
+ */
+async function getChannelWithPage(fetcher, id, tab, signal) {
+  if (!CHANNEL_ID_PATTERN.test(id)) return null
+  const html = await request(fetcher, `${ORIGIN}/${id}`, signal)
+  if (html === null) return null
+  const channel = parseChannelPage(html, id)
+  // Videos that fail to parse leave the channel shown, with the page to retry
+  const page = new Promise(resolve => resolve(tab === 'videos' ? parseChannelVideoPage(html, channel, 1) : emptyPage()))
+  page.catch(() => {})
+  return { channel, page }
 }
 
 /**
@@ -576,6 +604,7 @@ const rumble = {
   // Rumble's playlists aren't supported
   getChannel,
   getChannelPage,
+  getChannelWithPage,
   getLatestItems,
   search,
   getPlaylist: async () => ({ playlist: null, page: emptyPage() })
