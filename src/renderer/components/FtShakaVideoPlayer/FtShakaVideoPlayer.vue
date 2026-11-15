@@ -10879,6 +10879,11 @@ async function keyboardShortcutHandler(event) {
     return
   }
 
+  // A cross-tab mini player's controls belong to that player, not the active tab's.
+  if (event.target instanceof Element && event.target.closest('.ftVideoPlayer') && !container.value?.contains(event.target)) {
+    return
+  }
+
   // Notice buttons, such as Retry now, activate like other buttons
   if ((isSpaceKey(event) || event.key === 'Enter') && event.target instanceof Element &&
     event.target.closest('.streamRecoveryNotice button')) {
