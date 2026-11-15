@@ -278,6 +278,18 @@ test('a video loaded in a background tab plays from its controls once shown', as
   await expect.poll(() => player.evaluate(element => element.ui.getControls().isOpaque())).toBe(false)
 
   await page.evaluate(id => window.ftElectron.tabs.activate(id), backgroundTab.id)
+  // The paused controls stay shown throughout, and the seek bar must accept a drag anyway.
+  const seekBar = player.locator('.shaka-seek-bar')
+  await expect(seekBar).toBeEnabled()
+  const bounds = await seekBar.boundingBox()
+  const y = bounds.y + bounds.height / 2
+  await page.mouse.move(bounds.x + 6, y)
+  await page.mouse.down()
+  await page.mouse.move(bounds.x + bounds.width / 2, y, { steps: 4 })
+  await page.mouse.up()
+  const duration = await video.evaluate(element => element.duration)
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(duration / 2, 0)
+
   await player.getByRole('button', { name: 'Play (k)' }).click()
   await waitForPlayback(page)
 })
