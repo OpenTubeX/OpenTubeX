@@ -427,7 +427,8 @@
         color-mix(in srgb, var(--primary-text-color) 10%, transparent) 48%,
         transparent 61%
       );
-      animation: shorts-skeleton-sweep 1.2s linear infinite;
+      // Like .ft-shimmer, stop sweeping during a slow load to let Android redraw less
+      animation: shorts-skeleton-sweep 1.2s linear 3;
     }
 
     .shortsSkeletonControls {

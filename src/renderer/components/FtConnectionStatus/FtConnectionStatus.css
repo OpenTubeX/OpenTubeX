@@ -28,7 +28,10 @@
   block-size: 2px;
   background-color: currentcolor;
   opacity: 0.6;
-  animation: connection-sweep 1.8s ease-in-out infinite;
+
+  /* An outage can last for hours, and a running animation keeps Android
+     redrawing the app at the display's refresh rate. The message stays. */
+  animation: connection-sweep 1.8s ease-in-out 3 forwards;
 }
 
 @keyframes connection-sweep {

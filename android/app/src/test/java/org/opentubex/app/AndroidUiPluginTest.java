@@ -42,4 +42,19 @@ public class AndroidUiPluginTest {
             InputDevice.KEYBOARD_TYPE_ALPHABETIC
         ));
     }
+
+    @Test
+    public void controllersWithSticksCountAsGamepadsButRemotesDoNot() {
+        assertTrue(AndroidUiPlugin.isGamepadDevice(
+            "Controller",
+            InputDevice.SOURCE_GAMEPAD | InputDevice.SOURCE_JOYSTICK | InputDevice.SOURCE_KEYBOARD
+        ));
+        // A TV remote's D-pad keeps reaching the page as arrow keys.
+        assertFalse(AndroidUiPlugin.isGamepadDevice(
+            "Remote",
+            InputDevice.SOURCE_DPAD | InputDevice.SOURCE_KEYBOARD
+        ));
+        // Chromium ignores this fingerprint sensor, so it must not start polling.
+        assertFalse(AndroidUiPlugin.isGamepadDevice("uinput-fpc", InputDevice.SOURCE_JOYSTICK));
+    }
 }

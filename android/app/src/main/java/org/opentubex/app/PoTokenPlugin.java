@@ -41,6 +41,7 @@ public class PoTokenPlugin extends Plugin {
     /** BotGuard returns a longer token when it doesn't trust the attestation. */
     static final int MAX_ATTESTED_PO_TOKEN_LENGTH = 120;
     private static final Pattern EXPORT_PATTERN = Pattern.compile("export\\{(\\w+) as default\\};");
+    private static final String INLINE_EXPORT = "export default ";
     private final SerialTaskQueue requestQueue = new SerialTaskQueue();
     private final Handler handler = new Handler(Looper.getMainLooper());
 
@@ -305,20 +306,28 @@ public class PoTokenPlugin extends Plugin {
             script = builder.toString();
         }
 
+        return toBotGuardCall(script, String.join(",",
+            JSONObject.quote(videoId),
+            new JSONObject(sessionContext).toString(),
+            new JSONObject(initialAttestationData).toString(),
+            new JSONObject(ytConfig).toString()
+        ));
+    }
+
+    /**
+     * Turns the bundled BotGuard module into a script that calls its default
+     * export. Rspack emits the export inline or as {@code export{name as default};}.
+     */
+    static String toBotGuardCall(String script, String arguments) throws IOException {
         Matcher exportMatcher = EXPORT_PATTERN.matcher(script);
-        if (!exportMatcher.find()) {
+        if (exportMatcher.find()) {
+            return exportMatcher.replaceFirst(Matcher.quoteReplacement(";" + exportMatcher.group(1) + "(" + arguments + ")"));
+        }
+        if (!script.contains(INLINE_EXPORT)) {
             throw new IOException("BotGuard entry point was not found");
         }
-
-        String invocation = String.format(
-            ";%s(%s,%s,%s,%s)",
-            exportMatcher.group(1),
-            JSONObject.quote(videoId),
-            new JSONObject(sessionContext),
-            new JSONObject(initialAttestationData),
-            new JSONObject(ytConfig)
-        );
-        return exportMatcher.replaceFirst(Matcher.quoteReplacement(invocation));
+        return script.replaceFirst(Pattern.quote(INLINE_EXPORT), "const ftBotGuardScript=") +
+            ";ftBotGuardScript(" + arguments + ")";
     }
 
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})

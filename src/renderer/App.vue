@@ -695,7 +695,8 @@ import {
   getAndroidHardwareKeyboardState,
   isAndroidLauncherReturnInProgress,
   setAndroidPictureInPictureDocumentState,
-  setAndroidSystemBarsBackground
+  setAndroidSystemBarsBackground,
+  whileAndroidGamepadConnected
 } from './helpers/androidUi'
 import {
   applyThemeToDocument,
@@ -1419,11 +1420,14 @@ function scheduleIdleStartupWork() {
     preloadUtilityRoutes()
     // Chromium starts polling gamepads as soon as a page listens for them,
     // which blocks this thread until the main process has set that up.
-    removeGamepadNavigation = initializeGamepadNavigation({
+    const startGamepadNavigation = () => initializeGamepadNavigation({
       onBack: handleGamepadBack,
       onNavigate: () => store.dispatch('showOutlines'),
       onPlayPause: handleGamepadPlayPause,
     })
+    removeGamepadNavigation = process.env.IS_CAPACITOR && !process.env.IS_IOS
+      ? whileAndroidGamepadConnected(startGamepadNavigation)
+      : startGamepadNavigation()
   }
 
   if (typeof window.requestIdleCallback === 'function') {

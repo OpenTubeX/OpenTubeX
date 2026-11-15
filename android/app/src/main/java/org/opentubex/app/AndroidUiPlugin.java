@@ -15,6 +15,8 @@ import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
@@ -50,6 +52,9 @@ public class AndroidUiPlugin extends Plugin {
     private Boolean deviceLandscape;
     private ConnectivityManager.NetworkCallback networkMeteredCallback;
     private Boolean networkMetered;
+    private InputManager.InputDeviceListener gamepadListener;
+    // Written on the main looper, read on the plugin thread.
+    private volatile boolean gamepadConnected;
 
     @Override
     public void load() {
@@ -64,6 +69,61 @@ public class AndroidUiPlugin extends Plugin {
             }
         };
         getContext().getSystemService(ConnectivityManager.class).registerDefaultNetworkCallback(networkMeteredCallback);
+
+        // Listening for gamepads makes Chromium poll them 60 times a second, so
+        // the page only listens while one is connected.
+        gamepadListener = new InputManager.InputDeviceListener() {
+            @Override
+            public void onInputDeviceAdded(int deviceId) {
+                updateGamepadConnected();
+            }
+
+            @Override
+            public void onInputDeviceRemoved(int deviceId) {
+                updateGamepadConnected();
+            }
+
+            @Override
+            public void onInputDeviceChanged(int deviceId) {
+                updateGamepadConnected();
+            }
+        };
+        getContext().getSystemService(InputManager.class)
+            .registerInputDeviceListener(gamepadListener, new Handler(Looper.getMainLooper()));
+        // Read the state after registering, so no change falls between the two.
+        gamepadConnected = hasGamepad();
+    }
+
+    private void updateGamepadConnected() {
+        boolean connected = hasGamepad();
+        if (connected == gamepadConnected) return;
+        gamepadConnected = connected;
+        notifyListeners("gamepadChange", new JSObject().put("connected", connected));
+    }
+
+    @PluginMethod
+    public void getGamepadConnected(PluginCall call) {
+        // Answer with the reported state, so every later change arrives as an
+        // event. A fresh scan could see a change whose event then nets out.
+        call.resolve(new JSObject().put("connected", gamepadConnected));
+    }
+
+    private boolean hasGamepad() {
+        InputManager inputManager = getContext().getSystemService(InputManager.class);
+        for (int deviceId : inputManager.getInputDeviceIds()) {
+            InputDevice device = inputManager.getInputDevice(deviceId);
+            if (device != null && isGamepadDevice(device.getName(), device.getSources())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Matches the devices Chromium reports through the Gamepad API. */
+    static boolean isGamepadDevice(String name, int sources) {
+        // Some fingerprint sensors claim to be joysticks.
+        return !"uinput-fpc".equals(name)
+            && (sources & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK;
     }
 
     @PluginMethod
@@ -534,6 +594,7 @@ public class AndroidUiPlugin extends Plugin {
         if (deviceRotationListener != null) deviceRotationListener.disable();
         if (pictureInPictureSurface != null) pictureInPictureSurface.clear();
         getContext().getSystemService(ConnectivityManager.class).unregisterNetworkCallback(networkMeteredCallback);
+        getContext().getSystemService(InputManager.class).unregisterInputDeviceListener(gamepadListener);
         super.handleOnDestroy();
     }
 

@@ -333,6 +333,44 @@ export async function observeAndroidNetworkMetered(callback) {
   if (!changed) callback(metered)
 }
 
+/**
+ * Runs `start` while a game controller is connected, and the cleanup it
+ * returns once none is. Listening for gamepads makes Chromium poll them 60
+ * times a second, which costs a phone without a controller CPU time for nothing.
+ * Once a page has read gamepads, Chromium resumes polling whenever the page
+ * becomes visible again, so this saves the most when no controller was used.
+ * @param {() => () => void} start
+ * @returns {() => void} stops watching
+ */
+export function whileAndroidGamepadConnected(start) {
+  let stop = null
+  let disposed = false
+  let changed = false
+  const update = connected => {
+    if (disposed) return
+    if (connected && !stop) {
+      stop = start()
+    } else if (!connected && stop) {
+      stop()
+      stop = null
+    }
+  }
+  const listener = AndroidUi.addListener('gamepadChange', ({ connected }) => {
+    changed = true
+    update(connected)
+  })
+  AndroidUi.getGamepadConnected()
+    // A change that arrived in the meantime may be newer than this reading.
+    .then(({ connected }) => { if (!changed) update(connected) })
+    .catch(error => console.warn('Could not check for game controllers', error))
+  return () => {
+    disposed = true
+    stop?.()
+    stop = null
+    listener.then(handle => handle.remove())
+  }
+}
+
 export function setAndroidPictureInPictureDocumentState(active, { transitioning = false, layout = null } = {}) {
   const classes = document.body.classList
   stopPictureInPictureTransition?.()

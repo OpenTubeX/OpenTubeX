@@ -920,6 +920,13 @@ final class AppTests: XCTestCase {
         XCTAssertNil(PoTokenPlugin.attestationExpiry(token: attested, startedAt: startedAt, validForSecs: 1, now: now))
     }
 
+    func testBotGuardScriptCallsTheDefaultExportRspackEmits() throws {
+        XCTAssertEqual(try PoTokenPlugin.botGuardCall("let a=1;export default async function(e){return e+a}\n", arguments: "...[\"id\"]"),
+                       "let a=1;const ftBotGuardScript=async function(e){return e+a}\n;ftBotGuardScript(...[\"id\"])")
+        XCTAssertEqual(try PoTokenPlugin.botGuardCall("async function bg(e){return e}export{bg as default};\n", arguments: "...[\"id\"]"),
+                       "async function bg(e){return e};bg(...[\"id\"])\n")
+    }
+
     func testPoTokenWebViewKeepsYouTubeNavigationInsideApp() async throws {
         let redirected = expectation(description: "Blocked navigation to a YouTube watch page")
         let guardDelegate = RecordingPoTokenNavigationGuard { url, policy in

@@ -109,6 +109,17 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
     super.setValue(this.previewTime ?? this.keyboardSeekTime ?? time)
   }
 
+  /**
+   * Shaka sets the range eight times a second. Setting an unchanged min or
+   * max still repaints the bar, which keeps a paused player drawing frames.
+   * @param {number} min
+   * @param {number} max
+   */
+  setRange(min, max) {
+    if (this.bar.min === String(min) && this.bar.max === String(max)) return
+    super.setRange(min, max)
+  }
+
   update() {
     super.update()
     updateSponsorBlockSeekBarState(this.container)

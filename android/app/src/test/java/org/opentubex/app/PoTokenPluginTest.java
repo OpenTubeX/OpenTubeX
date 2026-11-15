@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+
 import org.junit.Test;
 
 public class PoTokenPluginTest {
@@ -43,5 +45,21 @@ public class PoTokenPluginTest {
     @Test
     public void attestsAgainWhenTheProxyChanges() {
         assertFalse(PoTokenPlugin.canMintFrom(10_000, proxy("a"), proxy("b"), 1_000));
+    }
+
+    @Test
+    public void callsAnInlineDefaultExport() throws IOException {
+        assertEquals(
+            "let a=1;const ftBotGuardScript=async function(e){return e+a}\n;ftBotGuardScript(\"id\",{})",
+            PoTokenPlugin.toBotGuardCall("let a=1;export default async function(e){return e+a}\n", "\"id\",{}")
+        );
+    }
+
+    @Test
+    public void callsANamedDefaultExport() throws IOException {
+        assertEquals(
+            "async function bg(e){return e};bg(\"id\",{})\n",
+            PoTokenPlugin.toBotGuardCall("async function bg(e){return e}export{bg as default};\n", "\"id\",{}")
+        );
     }
 }

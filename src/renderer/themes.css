@@ -2620,7 +2620,11 @@ a:visited {
     var(--secondary-card-bg-color) 37%,
     var(--card-bg-color) 63%
   );
-  animation: ft-shimmer 1.4s ease infinite;
+
+  /* A few sweeps cover a normal load. Any running animation keeps a WebView
+     drawing at the display's refresh rate, which costs Android phones about a
+     CPU core, so a slow load keeps the placeholder without the sweep. */
+  animation: ft-shimmer 1.4s ease 3;
 }
 
 .ft-shimmer:not([data-shimmer-visible])::before,
