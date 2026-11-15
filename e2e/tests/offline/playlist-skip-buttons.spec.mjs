@@ -213,6 +213,50 @@ test('continues a playlist after a Short ends', async ({ app, page }) => {
   await waitForPlayback(page)
 })
 
+test('seeks and skips from the desktop mini player', async ({ app, page, attachScreenshot }) => {
+  await mockPlayableWatchPage(app, page)
+
+  await goTo(page, 'userplaylists')
+  await page.getByText('Skip button playlist').click()
+  await page.getByText(VIDEO_TITLES[1]).first().click()
+  await expect(page).toHaveURL(/#\/watch\/skipvideo1\?.*playlistId=e2eskipplaylist/)
+
+  const video = await waitForPlayback(page)
+  await video.evaluate(element => element.pause())
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  await player.evaluate(element => window.scrollTo(0, window.scrollY + element.getBoundingClientRect().bottom))
+  await expect(player).toHaveClass(/scrollMiniPlayer/)
+  await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating|mobileMiniBar/)
+
+  const seek = player.locator('.scrollMiniSeek')
+  await expect(seek).toBeEnabled()
+  const bounds = await seek.boundingBox()
+  // The 12px thumb keeps the range's value half a thumb inside each end.
+  const pointAt = fraction => bounds.x + 6 + (bounds.width - 12) * fraction
+  const y = bounds.y + bounds.height / 2
+  await page.mouse.move(pointAt(0.25), y)
+  await page.mouse.down()
+  // Dragging keeps seeking after the pointer leaves the thin bar.
+  await page.mouse.move(pointAt(0.75), y - 30, { steps: 5 })
+  await page.mouse.up()
+
+  const duration = await video.evaluate(element => element.duration)
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(duration * 0.75, 0)
+  await expect.poll(() => video.evaluate(element => element.paused)).toBe(true)
+  await expect(player).toHaveClass(/scrollMiniPlayer/)
+  await expect(page).toHaveURL(/#\/watch\/skipvideo1\?/)
+  // The focused seek bar keeps arrow keys but leaves player shortcuts working.
+  await expect(seek).toBeFocused()
+  await page.keyboard.press('k')
+  await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
+  await video.evaluate(element => element.pause())
+  await attachScreenshot('desktop mini player controls')
+
+  await expect(player.getByRole('button', { name: 'Previous', exact: true })).toBeVisible()
+  await player.getByRole('button', { name: 'Next', exact: true }).click()
+  await expect(page).toHaveURL(/#\/watch\/skipvideo2\?.*playlistId=e2eskipplaylist/)
+})
+
 test('offers skipping to a queued video without a playlist', async ({ page }) => {
   await page.route(/^https?:\/\//, (route) => route.fulfill({ status: 404, body: '' }))
 

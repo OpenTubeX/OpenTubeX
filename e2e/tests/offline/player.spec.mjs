@@ -1955,6 +1955,19 @@ test.describe('scroll mini player', () => {
       await expect(page.locator('.ftVideoPlayer.scrollMiniPlayer')).toHaveCount(1)
     })
 
+    test('keeps shortcuts from the cross-tab mini player away from the active player', async ({ app, page }) => {
+      const { activePlayer, firstPlayer } = await openCrossTabMiniPlayerOverWatchTab({ app, page })
+      const activeVideo = activePlayer.locator('video')
+      await activeVideo.evaluate(element => element.pause())
+
+      await firstPlayer.locator('.scrollMiniPlayPause').focus()
+      await page.keyboard.press('k')
+      await page.evaluate(() => document.activeElement.blur())
+      // Had the first press reached the active player, this one would pause it again.
+      await page.keyboard.press('k')
+      await expect.poll(() => activeVideo.evaluate(element => element.paused)).toBe(false)
+    })
+
     test('keeps the active tab docked when a hidden tab cannot take the mini player', async ({ app, page }) => {
       await openDemoVideo({ app, page })
       const firstTab = page.locator('.tabBar .tab').first()

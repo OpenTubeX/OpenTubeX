@@ -1348,6 +1348,15 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     if (scrollMiniClickStartedOnVideo) scrollMiniScrollToTop(event)
   }
 
+  /**
+   * Whether a control click is the second click of a double-click on the video,
+   * which returns to the full player instead.
+   * @param {MouseEvent} [event]
+   */
+  function isScrollMiniVideoDoubleClick(event) {
+    return event?.detail > 1 && scrollMiniClickStartedOnVideo
+  }
+
   function dismissCrossTabMiniPlayer(event) {
     event?.preventDefault()
     event?.stopPropagation()
@@ -1369,7 +1378,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     event?.preventDefault()
     event?.stopPropagation()
 
-    if (event?.detail > 1 && scrollMiniClickStartedOnVideo) return
+    if (isScrollMiniVideoDoubleClick(event)) return
 
     const videoElement = video.value
     if (!videoElement) return
@@ -1890,6 +1899,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     restoreScrollMiniPlayerFromTap,
     scrollMiniTogglePlayPause,
     trackScrollMiniClick,
+    isScrollMiniVideoDoubleClick,
     handleScrollMiniDoubleClick,
     revealScrollMiniPlayerControls,
     scrollMiniVolume,
