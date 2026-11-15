@@ -775,8 +775,14 @@ function runApp() {
       case 'acknowledge': return backgroundSubscriptions.acknowledge(value)
       case 'completed': return backgroundSubscriptions.completed(value)
       case 'configureUploadNotifications':
-        await uploadNotifier.configure(value)
-        return backgroundSubscriptions.configureUploads(value)
+        try {
+          await uploadNotifier.configure(value)
+        } finally {
+          // The worker still needs the channels when the saved state could not
+          // be read, so its notifications resume once the file is readable.
+          await backgroundSubscriptions.configureUploads(value)
+        }
+        return
       case 'observeUploads': return uploadNotifier.observe(value)
     }
   })
