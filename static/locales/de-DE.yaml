@@ -3128,7 +3128,7 @@ Tooltips:
     Continue Playback When Screen Is Locked: >-
       Spielt Audio im Hintergrund weiter und stellt Android-Mediensteuerungen bereit. Deaktiviere diese Option, um die
       Wiedergabe anzuhalten, sobald die App nicht mehr sichtbar ist.
-    Ignore Headphone Controls: Ignoriert Befehle zum Abspielen, Pausieren und Überspringen von Bluetooth-Geräten und kabelgebundenen Kopfhörern, etwa versehentliches Tippen auf Earbuds. Die Steuerung in der App und in der Medienbenachrichtigung funktioniert weiterhin.
+    Ignore Headphone Controls: Ignoriert Befehle zum Abspielen, Pausieren und Überspringen von Bluetooth-Geräten, kabelgebundenen Kopfhörern und Medientasten von Tastaturen, sodass versehentliches Tippen auf Earbuds die Wiedergabe nicht unterbricht. Die Steuerung in der App und in der Medienbenachrichtigung funktioniert weiterhin.
     Voice-over Translation: >-
       Sendet Video-ID, Dauer und ausgewählte Sprache an den inoffiziellen Yandex-Dienst für Voice-over-Übersetzungen, wenn
       du eine Übersetzung anforderst. Standardmäßig deaktiviert.
