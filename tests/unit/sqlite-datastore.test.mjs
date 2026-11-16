@@ -225,7 +225,9 @@ test('secrets removed from older copies are gone from the legacy file and backup
   await upgraded.findAsync({})
   assert.equal(changes.length, 1)
 
-  await upgraded.removeOlderCopiesAsync(byIds, [JSON.stringify(['proxyPassword', 'syncServerToken'])])
+  // One that cannot be cleaned stops neither the other backups nor the legacy file.
+  await writeFile(changes[0].backup.replace(/\d+$/, '0'), 'not a database')
+  await assert.rejects(upgraded.removeOlderCopiesAsync(byIds, [JSON.stringify(['proxyPassword', 'syncServerToken'])]), /Unable to clean every backup/)
   assert.doesNotMatch(await readFile(legacyFile, 'utf8'), /secret/)
   assert.deepEqual(await loadWithNedb(legacyFile), [{ _id: 'theme', value: 'older' }], 'an older version still opens the rest')
   assert.doesNotMatch((await readFile(changes[0].backup)).toString('latin1'), /secret/)

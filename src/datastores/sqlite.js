@@ -839,27 +839,42 @@ export class SqliteDatastore {
   removeOlderCopiesAsync(condition, params = []) {
     return this._exclusive(async () => {
       if (this.dropped) return
-      await this.driver.cleanBackups?.([
-        [`DELETE FROM children WHERE parent IN (SELECT id FROM docs WHERE ${condition})`, params],
-        [`DELETE FROM docs WHERE ${condition}`, params],
-      ])
-      if (!this.legacy?.removeDocuments) return
-      // Replaced versions of a document can still hold a secret.
-      const data = this.legacy.records ? await this.legacy.records() : (await this.legacy.read()).data
-      const [rows] = await this._execute([[
+      let backupFailure = null
+      try {
+        await this.driver.cleanBackups?.([
+          [`DELETE FROM children WHERE parent IN (SELECT id FROM docs WHERE ${condition})`, params],
+          [`DELETE FROM docs WHERE ${condition}`, params],
+        ])
+      } catch (error) {
+        // A backup that cannot be changed must not keep the secrets in the legacy datastore.
+        backupFailure = error
+      }
+      await this._removeLegacyCopies(condition, params)
+      if (backupFailure) throw backupFailure
+    }, 'read')
+  }
+
+  /**
+   * @param {string} condition
+   * @param {unknown[]} params
+   */
+  async _removeLegacyCopies(condition, params) {
+    if (!this.legacy?.removeDocuments) return
+    // Replaced versions of a document can still hold a secret.
+    const data = this.legacy.records ? await this.legacy.records() : (await this.legacy.read()).data
+    const [rows] = await this._execute([[
         `SELECT json_extract(data, '$._id') FROM (SELECT value AS data FROM json_each(?)) WHERE ${condition}`,
         [JSON.stringify(data), ...params],
-      ]])
-      const ids = [...new Set(rows.map(([id]) => id))]
-      if (ids.length === 0) return
-      const fingerprint = await this.legacy.fingerprint?.() ?? null
-      const applied = fingerprint === await this._meta('legacyFingerprint')
-      // First, so an interrupted rewrite cannot look like an older version deleted them.
-      await this._execute(ids.map(id => [SQL.removeBase, [keyOf(id)]]), true)
-      if (!await this.legacy.removeDocuments(ids)) return
-      // Changes an older version made before still get applied on the next start.
-      if (applied) await this._execute([[SQL.setMeta, ['legacyFingerprint', await this.legacy.fingerprint?.() ?? null]]])
-    }, 'read')
+    ]])
+    const ids = [...new Set(rows.map(([id]) => id))]
+    if (ids.length === 0) return
+    const fingerprint = await this.legacy.fingerprint?.() ?? null
+    const applied = fingerprint === await this._meta('legacyFingerprint')
+    // First, so an interrupted rewrite cannot look like an older version deleted them.
+    await this._execute(ids.map(id => [SQL.removeBase, [keyOf(id)]]), true)
+    if (!await this.legacy.removeDocuments(ids)) return
+    // Changes an older version made before still get applied on the next start.
+    if (applied) await this._execute([[SQL.setMeta, ['legacyFingerprint', await this.legacy.fingerprint?.() ?? null]]])
   }
 
   /**
