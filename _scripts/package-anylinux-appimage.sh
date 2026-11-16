@@ -4,6 +4,13 @@ set -e
 
 DEB_PATH=$1
 
+# Only the pinned package download below gets the workflow token. It
+# authenticates GitHub API requests that hit the anonymous rate limit on shared
+# runners. Nothing else in this container, including tools quick-sharun
+# downloads, should see it.
+github_token=${GITHUB_TOKEN-}
+unset GITHUB_TOKEN
+
 if [ ! -f "$DEB_PATH" ]; then
 	>&2 echo "ERROR: Debian package not found: $1"
 	exit 1
@@ -45,13 +52,13 @@ pacman_retry -Syu --noconfirm \
 	zsync
 
 mkdir -p /usr/local/bin
-TOOLS_SOURCE=https://raw.githubusercontent.com/pkgforge-dev/Anylinux-AppImages/refs/heads/main/useful-tools
+TOOLS_SOURCE=https://raw.githubusercontent.com/pkgforge-dev/Anylinux-AppImages/cb443209ea867d8ef9a58974232b90a6033e8b72/useful-tools
 wget --retry-connrefused --tries=30 \
 	"$TOOLS_SOURCE"/quick-sharun.sh -O /usr/local/bin/quick-sharun
 wget --retry-connrefused --tries=30 \
 	"$TOOLS_SOURCE"/get-debloated-pkgs.sh -O /usr/local/bin/get-debloated-pkgs
 chmod +x /usr/local/bin/quick-sharun /usr/local/bin/get-debloated-pkgs
-get-debloated-pkgs --add-common --prefer-nano
+GITHUB_TOKEN=$github_token get-debloated-pkgs --add-common --prefer-nano
 
 mkdir -p ./AppDir/bin
 extracted_deb=$(mktemp -d)
