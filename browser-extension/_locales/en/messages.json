@@ -8,7 +8,11 @@
     "description": "Short description in the browser and the add-on stores. At most 132 characters."
   },
   "optionsIntro": {
-    "message": "The extension works on opentubex.org and localhost. Add the address of your own OpenTubeX server to use the local API there too. Browsers can't limit extensions to one port, so the extension also changes the YouTube requests of other web apps on other ports of that server."
+    "message": "The extension works on opentubex.org. Add the address of your own OpenTubeX server to use the local API there too."
+  },
+  "optionsScopeNote": {
+    "message": "Browsers can't limit the extension to one port or leave out subdomains. For each address you add, it also changes the YouTube requests of other web apps on that server's other ports and on its subdomains, such as app.tube.example.com.",
+    "description": "tube.example.com is the example server address in the field below."
   },
   "serverAddressLabel": {
     "message": "Server address",
@@ -23,7 +27,7 @@
     "description": "Button next to an added server address that removes it."
   },
   "invalidAddressError": {
-    "message": "Enter an https:// address."
+    "message": "Enter an https:// address, or http://localhost for a server on this computer."
   },
   "permissionDeniedError": {
     "message": "The extension needs access to the server to work there.",

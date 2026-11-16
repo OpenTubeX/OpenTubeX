@@ -24,7 +24,7 @@ document.documentElement.dir = ext.i18n.getMessage('@@bidi_dir')
 localize(document)
 localize(removeButton.content)
 
-/** @returns {Promise<string[]>} the added origins, such as `https://tube.example.com` */
+/** @returns {Promise<string[]>} the added origins, such as `https://tube.example.com` or `http://localhost` */
 async function getOrigins() {
   const [script] = await ext.scripting.getRegisteredContentScripts({ ids: [SCRIPT_ID] })
   return script?.matches.map(pattern => pattern.slice(0, -'/*'.length)) ?? []
@@ -35,16 +35,16 @@ async function getOrigins() {
  * @param {string[]} origins
  */
 async function setOrigins(origins) {
-  const oldRules = await ext.declarativeNetRequest.getDynamicRules()
-  const rules = origins.length === 0
-    ? []
-    : (await (await fetch(ext.runtime.getURL('rules.json'))).json()).map(rule => ({
-        ...rule,
-        condition: { ...rule.condition, initiatorDomains: origins.map(origin => new URL(origin).hostname) }
-      }))
+  const rules = await (await fetch(ext.runtime.getURL('rules.json'))).json()
   await ext.declarativeNetRequest.updateDynamicRules({
-    removeRuleIds: oldRules.map(rule => rule.id),
-    addRules: rules
+    // Leaves the development rules that background.js adds alone
+    removeRuleIds: rules.map(rule => rule.id),
+    addRules: origins.length === 0
+      ? []
+      : rules.map(rule => ({
+          ...rule,
+          condition: { ...rule.condition, initiatorDomains: origins.map(origin => new URL(origin).hostname) }
+        }))
   })
 
   await ext.scripting.unregisterContentScripts({ ids: [SCRIPT_ID] }).catch(() => {})
@@ -97,8 +97,10 @@ form.addEventListener('submit', event => {
   let origin
   try {
     const url = new URL(input.value.trim())
-    if (url.protocol !== 'https:') throw new Error()
-    origin = `https://${url.hostname}`
+    // Browsers treat these as secure, so self-hosted servers on this computer don't need HTTPS
+    const local = url.protocol === 'http:' && ['localhost', '127.0.0.1'].includes(url.hostname)
+    if (url.protocol !== 'https:' && !local) throw new Error()
+    origin = `${url.protocol}//${url.hostname}`
   } catch {
     errorText.textContent = ext.i18n.getMessage('invalidAddressError')
     return

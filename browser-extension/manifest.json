@@ -8,6 +8,12 @@
   "icons": {
     "128": "icon.png"
   },
+  "background": {
+    "service_worker": "background.js",
+    "scripts": [
+      "background.js"
+    ]
+  },
   "permissions": [
     "declarativeNetRequestWithHostAccess",
     "scripting"
@@ -28,9 +34,7 @@
   "content_scripts": [
     {
       "matches": [
-        "https://opentubex.org/*",
-        "http://localhost/*",
-        "http://127.0.0.1/*"
+        "https://opentubex.org/*"
       ],
       "js": [
         "marker.js"
