@@ -116,6 +116,8 @@ test('isolates foreign frames and keeps their cross-origin requests restricted',
 })
 
 test('content security policy blocks injected scripts, framing the app and foreign base URLs', async ({ app, page }) => {
+  // Only the violations this test causes may be cleared below.
+  expect(app.cspViolations).toEqual([])
   const result = await page.evaluate(async () => {
     // Markup that slips past the sanitizer must not run script.
     const script = document.createElement('script')
@@ -159,7 +161,8 @@ test('content security policy blocks injected scripts, framing the app and forei
   const blocked = ['inline script', 'inline event handler', 'string as JavaScript', 'base URI', 'Framing']
   await expect.poll(() => blocked.filter(action => !app.cspViolations.some(message => message.includes(action))))
     .toEqual([])
-  app.cspViolations.splice(0)
+  const unexpected = app.cspViolations.filter(message => !blocked.some(action => message.includes(action)))
+  app.cspViolations.splice(0, Infinity, ...unexpected)
 })
 
 test('preserves app API requests, redirects, HTTP errors, ranges and image pixels', async ({ page }) => {

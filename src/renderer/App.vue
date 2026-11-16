@@ -2673,7 +2673,9 @@ function showArm64TranslationNotice() {
         primary: true,
         action: () => {
           handleExternalLink(getArm64DownloadUrl(tagName))
-          dismiss()
+          // Show it again next time if the link was blocked or still needs confirmation
+          if (resolveExternalLinkAction(externalLinkHandling.value) === 'open') dismiss()
+          else release()
         },
       }],
     })
