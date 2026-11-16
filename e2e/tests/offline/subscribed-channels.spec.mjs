@@ -60,7 +60,9 @@ test.describe('subscribed channels', () => {
     await expect(scroller).toHaveAttribute('data-overlayscrollbars-viewport')
     expect(await scroller.evaluate((element) => element.scrollHeight > element.clientHeight)).toBe(true)
 
-    await alpha.locator('.profileDropdownToggle').click()
+    // In this short window the popover fits neither above nor below, so it covers its toggle.
+    await page.keyboard.press('Escape')
+    await expect(dropdown).toHaveCount(0)
     for (const direction of ['ltr', 'rtl']) {
       await page.evaluate(value => { document.body.dir = value }, direction)
       await alpha.locator('.profileDropdownToggle').click()
@@ -79,7 +81,8 @@ test.describe('subscribed channels', () => {
       expect(Math.abs(dropdownBox.x - expectedX)).toBeLessThanOrEqual(1)
       expect(await page.evaluate(() => document.documentElement.scrollWidth === document.documentElement.clientWidth)).toBe(true)
 
-      await alpha.locator('.profileDropdownToggle').click()
+      await page.keyboard.press('Escape')
+      await expect(dropdown).toHaveCount(0)
     }
   })
 
@@ -350,7 +353,7 @@ test.describe('large subscribed channel lists', () => {
     await expect(page.locator('.navChannel')).toHaveCount(50)
 
     await page.getByLabel('Search Channels').fill('Channel 899')
-    expect(await page.locator('.count').textContent()).toContain('1 channel(s) found.')
+    await expect(page.getByText('1 channel(s) found.')).toBeVisible()
     await expect(page.locator('.channel', { hasText: 'Channel 899' })).toBeVisible()
 
     await page.getByLabel('Search Channels').fill('')
