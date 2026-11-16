@@ -114,7 +114,6 @@
       v-if="showTutorial"
       :initial-step="tutorialStep"
       @close="completeTutorial"
-      @open-settings="openTutorialSettings"
     />
     <FtCommandPalette
       v-if="commandPaletteOpen"
@@ -1176,8 +1175,6 @@ watch(useTemplateRef('appRoot'), (app, _previous, onCleanup) => {
 useTitleBarOverlay(() => [dataReady.value, tabBarPosition.value])
 const tutorialStep = computed(() => store.getters.getTutorialStep)
 const showTutorial = computed(() => tutorialStep.value !== null)
-// The step to resume at once the settings window opened from the tutorial closes
-let tutorialResumeStep = null
 const findbarVisible = ref(false)
 const findbarQuery = ref('')
 const findbarMatchIndex = ref(0)
@@ -1767,25 +1764,6 @@ if (isElectron) {
       console.error('Failed to update tab shortcuts for the tutorial', error)
     }
   })
-}
-
-watch(
-  () => !store.getters.getSettingsWindowOpen && !store.getters.getSettingsWindowMinimized,
-  (settingsWindowClosed) => {
-    if (!settingsWindowClosed || tutorialResumeStep === null) return
-
-    // A replay started from About while the window was open keeps its own step
-    if (store.getters.getTutorialStep === null) store.commit('setTutorialStep', tutorialResumeStep)
-    tutorialResumeStep = null
-  }
-)
-
-async function openTutorialSettings(section, resumeStep) {
-  tutorialResumeStep = resumeStep
-  store.commit('setTutorialStep', null)
-  await nextTick()
-  store.commit('setSettingsWindowSection', section)
-  store.dispatch('showSettingsWindow')
 }
 
 async function completeTutorial() {

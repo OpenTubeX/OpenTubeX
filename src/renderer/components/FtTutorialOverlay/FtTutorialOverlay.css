@@ -4,6 +4,12 @@
   z-index: 1001;
 }
 
+/* Settings pages in the card open prompts, like a theme preview or a delete
+   confirmation, which must show above the tutorial. */
+:global(.app:has(> .tutorialOverlay) > .prompt) {
+  z-index: 1002;
+}
+
 .tutorialOverlay.centered {
   background-color: rgb(0 0 0 / 72%);
   display: grid;
@@ -30,6 +36,8 @@
 }
 
 .tutorialCard {
+  --tutorial-card-padding: 24px;
+
   position: fixed;
   display: flex;
   flex-direction: column;
@@ -38,7 +46,7 @@
   max-block-size: calc(100dvh - 24px);
   overflow: hidden;
   margin: 0;
-  padding: 24px;
+  padding: var(--tutorial-card-padding);
   color: var(--primary-text-color);
   box-shadow: 0 18px 55px rgb(0 0 0 / 55%);
   text-align: center;
@@ -51,6 +59,13 @@
 /* Gives the theme preview names one line and the selects their usual width side by side */
 .tutorialWideCard {
   inline-size: min(580px, calc(100vw - 24px));
+}
+
+/* The theme gallery, also under the pages it opens, gets about the width it has
+   in the settings window, so it can put its colors beside the theme modes and
+   show more themes per row. */
+.tutorialCard:has(.tutorialSubpage .themeGallery) {
+  inline-size: min(1040px, calc(100vw - 24px));
 }
 
 .tutorialSkip {
@@ -102,9 +117,15 @@
   content: '';
 }
 
+.tutorialStepHeader {
+  display: contents;
+}
+
 .tutorialProgress,
 .tutorialIcon,
-.tutorialCard h2 {
+.tutorialCard h2,
+.tutorialSubpageHeader,
+.tutorialSubpageActions {
   flex-shrink: 0;
 }
 
@@ -122,8 +143,66 @@
   text-wrap: pretty;
 }
 
+.tutorialSubpageHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-block: -8px 12px;
+  margin-inline-start: -8px;
+  text-align: start;
+}
+
+.tutorialCard .tutorialSubpageHeader h2 {
+  flex: 1;
+  min-inline-size: 0;
+  margin: 0;
+}
+
+.tutorialSubpageAction:empty {
+  display: none;
+}
+
+/* Settings pages lay out against the width they get, like in the settings
+   window, with room for selection and focus outlines that the viewport would clip. */
+.tutorialSubpage {
+  container-name: settings-content;
+  container-type: inline-size;
+  padding: 8px;
+  text-align: start;
+}
+
+.tutorialSubpageActions {
+  margin-block-start: 16px;
+}
+
+/* Flush pages, like theme discovery, scroll on their own, so they fill the
+   card's full height edge to edge instead of growing with their content. */
+.tutorialFlushCard {
+  block-size: calc(100dvh - 24px);
+}
+
+.tutorialScroll.tutorialFlushScroll {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  padding-inline: 0;
+  overflow: hidden;
+}
+
+.tutorialFlushScroll > .tutorialSubpage {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-block-size: 0;
+  padding: 0;
+}
+
+/* The viewport spans the card's side padding so its scrollbar runs along the
+   card's edge instead of beside the content. */
 .tutorialScroll {
   min-block-size: 0;
+  margin-inline: calc(-1 * var(--tutorial-card-padding));
+  padding-inline: var(--tutorial-card-padding);
   overflow-y: auto;
 }
 
@@ -170,38 +249,28 @@
   margin: 0;
 }
 
+/* The selects grow to fit their labels and wrap onto their own rows when they
+   no longer fit side by side. Room for the indicators on both sides keeps the
+   visible fields centered. */
 .tutorialSelectRow {
   display: flex;
-  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px 4px;
   justify-self: stretch;
   margin-block-start: 12px;
 }
 
 .tutorialSelectRow > :deep(.select) {
-  flex: 1 1 0;
-  inline-size: auto;
-  min-inline-size: 0;
   margin-block: 0;
-}
-
-.tutorialSelectRow > :deep(.select:first-child) {
   margin-inline-start: var(--select-indicator-space);
 }
 
-/* Side by side, narrower selects would cut off their labels and values. */
-@media only screen and (width <= 620px) {
-  .tutorialSelectRow {
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  .tutorialSelectRow > :deep(.select) {
-    margin-inline-start: var(--select-indicator-space);
-  }
-}
-
-.tutorialPreferences > .tutorialMoreThemes {
-  margin: 0;
+.tutorialPreferences > :deep(.themePickerEntry) {
+  /* Matches the theme mode previews, which sit inside 7px of padding, and keeps
+     the same room on the start as the 25px reset indicator takes at the end. */
+  justify-self: stretch;
+  margin-inline: 32px 7px;
 }
 
 .tutorialActions {
@@ -222,7 +291,7 @@
 
 @media only screen and (width <= 500px) {
   .tutorialCard {
-    padding: 20px;
+    --tutorial-card-padding: 20px;
   }
 
   .tutorialSkip {

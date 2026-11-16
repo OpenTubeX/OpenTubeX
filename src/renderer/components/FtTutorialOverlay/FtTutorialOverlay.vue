@@ -15,50 +15,88 @@
       <FtCard
         ref="cardRef"
         class="tutorialCard"
-        :class="{ tutorialWideCard: step.id === 'preferences' }"
+        :class="{ tutorialWideCard: step.id === 'preferences' || currentSubpage !== null, tutorialFlushCard: currentSubpage?.flush }"
         :style="cardStyle"
         role="dialog"
         aria-modal="true"
-        :aria-labelledby="titleId"
-        :aria-describedby="descriptionId"
+        :aria-labelledby="currentSubpage ? subpageTitleId : titleId"
+        :aria-describedby="currentSubpage ? null : descriptionId"
       >
-        <FtIconButton
-          class="tutorialSkip"
-          :title="t('Tutorial.Skip')"
-          :icon="['fas', 'xmark']"
-          :padding="8"
-          :size="18"
-          @click="finishTutorial"
-        />
         <div
-          class="tutorialProgress"
-          aria-hidden="true"
+          v-show="currentSubpage === null"
+          class="tutorialStepHeader"
         >
+          <FtIconButton
+            class="tutorialSkip"
+            :title="t('Tutorial.Skip')"
+            :icon="['fas', 'xmark']"
+            :padding="8"
+            :size="18"
+            @click="finishTutorial"
+          />
+          <div
+            class="tutorialProgress"
+            aria-hidden="true"
+          >
+            <span
+              v-for="(_, index) in steps"
+              :key="index"
+              :class="{ active: index === stepIndex }"
+            />
+          </div>
+          <div
+            class="tutorialIcon"
+            aria-hidden="true"
+          >
+            <FtIcon :icon="step.icon" />
+          </div>
+          <h2
+            :id="titleId"
+            ref="titleRef"
+            tabindex="-1"
+          >
+            {{ step.title }}
+          </h2>
+        </div>
+        <!-- Settings pages opened from a step, like the theme gallery, replace
+             it in the card until Back or Done returns to the step. -->
+        <div
+          v-show="currentSubpage !== null"
+          class="tutorialSubpageHeader"
+        >
+          <FtIconButton
+            :title="t('Back')"
+            :icon="['fas', 'arrow-left']"
+            :padding="8"
+            :size="18"
+            @click="closeSubpagesFrom(subpageStack.length - 1)"
+          />
+          <h2
+            :id="subpageTitleId"
+            ref="subpageTitleRef"
+            tabindex="-1"
+          >
+            {{ currentSubpage?.title }}
+          </h2>
           <span
-            v-for="(_, index) in steps"
-            :key="index"
-            :class="{ active: index === stepIndex }"
+            :id="subpageBreadcrumbTargetId"
+            class="tutorialSubpageAction"
           />
         </div>
         <div
-          class="tutorialIcon"
-          aria-hidden="true"
-        >
-          <FtIcon :icon="step.icon" />
-        </div>
-        <h2
-          :id="titleId"
-          ref="titleRef"
-          tabindex="-1"
-        >
-          {{ step.title }}
-        </h2>
-        <div
           ref="scrollRef"
           v-overlay-scrollbars
-          class="tutorialScroll"
+          class="tutorialScroll settingsSubpageScroll"
+          :class="{ tutorialFlushScroll: currentSubpage?.flush }"
         >
           <div
+            v-show="currentSubpage !== null"
+            :id="subpageTargetId"
+            ref="subpageRef"
+            class="tutorialSubpage"
+          />
+          <div
+            v-show="currentSubpage === null"
             ref="contentRef"
             class="tutorialContent"
           >
@@ -70,16 +108,10 @@
               class="tutorialPreferences"
             >
               <ThemeModePicker />
-              <FtButton
-                class="tutorialMoreThemes"
-                :label="t('Settings.Theme Settings.Theme and Colors')"
-                :icon="['fas', 'palette']"
-                :text-color="null"
-                :background-color="null"
-                @click="openSettings({ section: 'appearance', subpage: 'theme' }, stepIndex)"
-              />
+              <ThemeGallery />
               <div class="tutorialSelectRow">
                 <FtSelect
+                  size-to-content
                   :placeholder="t('Settings.General Settings.Default Landing Page')"
                   :value="landingPage"
                   setting-key="landingPage"
@@ -90,6 +122,7 @@
                 />
                 <FtSelect
                   v-if="regionValues.length > 0"
+                  size-to-content
                   :placeholder="t('Settings.General Settings.Region for Trending')"
                   :value="region"
                   setting-key="region"
@@ -156,8 +189,17 @@
                 :text-color="null"
                 :background-color="null"
                 :icon="['fas', 'database']"
-                @click="openSettings('data', stepIndex + 1)"
+                @click="showImport = true"
               />
+              <FtSettingsSubpage
+                :open="showImport"
+                :title="t('Tutorial.Welcome.Import Data')"
+                :icon="['fas', 'database']"
+                grow-with-content
+                @close="showImport = false"
+              >
+                <DataSettings import-only />
+              </FtSettingsSubpage>
             </div>
             <div
               v-else
@@ -179,6 +221,17 @@
             </div>
           </div>
         </div>
+        <!-- Flush pages, like the theme editor, bring their own actions. -->
+        <div
+          v-show="currentSubpage !== null && !currentSubpage.flush"
+          class="tutorialActions tutorialSubpageActions"
+        >
+          <FtButton
+            :label="t('Tutorial.Done')"
+            :icon="['fas', 'check']"
+            @click="closeSubpagesFrom(0)"
+          />
+        </div>
       </FtCard>
     </div>
   </Teleport>
@@ -186,7 +239,7 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
+import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, provide, ref, shallowRef, useId, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import store from '../../store/index'
@@ -199,7 +252,10 @@ import FtButton from '../FtButton/FtButton.vue'
 import FtCard from '../ft-card/ft-card.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
+import FtSettingsSubpage from '../FtSettingsSubpage/FtSettingsSubpage.vue'
+import { settingsSubpageKey } from '../FtSettingsSubpage/settingsSubpage'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
+import ThemeGallery from '../Settings/Appearance/ThemeGallery.vue'
 import ThemeModePicker from '../Settings/Appearance/ThemeModePicker.vue'
 import { lockBodyScroll, unlockBodyScroll } from '../FtPrompt/scrollLock'
 
@@ -207,19 +263,26 @@ const props = defineProps({
   initialStep: { type: Number, default: 0 }
 })
 
-const emit = defineEmits(['close', 'open-settings'])
+const DataSettings = defineAsyncComponent(() => import('../Settings/Data/DataSettings.vue'))
+
+const emit = defineEmits(['close'])
 
 const IS_ELECTRON = process.env.IS_ELECTRON
 
 const { t } = useI18n()
 const titleId = useId()
 const descriptionId = useId()
+const subpageTitleId = useId()
+const subpageTargetId = `tutorial-subpage-${useId().replaceAll(':', '')}`
+const subpageBreadcrumbTargetId = `tutorial-subpage-breadcrumb-${useId().replaceAll(':', '')}`
 const promptId = useId()
 const cardRef = useTemplateRef('cardRef')
 const primaryButtonRef = useTemplateRef('primaryButtonRef')
 const titleRef = useTemplateRef('titleRef')
+const subpageTitleRef = useTemplateRef('subpageTitleRef')
 const scrollRef = useTemplateRef('scrollRef')
 const contentRef = useTemplateRef('contentRef')
+const subpageRef = useTemplateRef('subpageRef')
 const stepIndex = ref(props.initialStep)
 const targetRect = ref(null)
 const cardStyle = ref({})
@@ -228,6 +291,61 @@ let lastActiveElement = null
 let contentResizeObserver = null
 let targetResizeObserver = null
 let observedTarget = null
+
+const showImport = ref(false)
+
+/**
+ * Settings pages that a step opens, like the theme gallery, show in the card
+ * instead of the settings window. Each entry keeps its parent's scroll offset.
+ * Flush pages, like theme discovery, scroll on their own.
+ * @type {import('vue').ShallowRef<{ title: string, icon: string[] | null, flush: boolean, close: () => void, scrollTop: number }[]>}
+ */
+const subpageStack = shallowRef([])
+const currentSubpage = computed(() => subpageStack.value.at(-1) ?? null)
+
+provide(settingsSubpageKey, {
+  isActive: computed(() => true),
+  targetId: subpageTargetId,
+  breadcrumbTargetId: subpageBreadcrumbTargetId,
+  isCurrent: close => currentSubpage.value?.close === close,
+  open(title, close, icon = null, flush = false) {
+    const stack = subpageStack.value
+    const index = stack.findIndex(entry => entry.close === close)
+    if (index !== -1) {
+      subpageStack.value = stack.with(index, { ...stack[index], title, icon, flush })
+      return
+    }
+    subpageStack.value = [...stack, { title, icon, flush, close, scrollTop: scrollRef.value?.scrollTop ?? 0 }]
+    showSubpage(0)
+  },
+  close(close) {
+    const index = subpageStack.value.findIndex(entry => entry.close === close)
+    if (index !== -1) closeSubpagesFrom(index, true)
+  }
+})
+
+/**
+ * Removes the subpages from `depth` on and asks them to close. `closedSelf`
+ * skips the one at `depth`, which is already closing.
+ */
+function closeSubpagesFrom(depth, closedSelf = false) {
+  if (depth < 0 || depth >= subpageStack.value.length) return
+
+  const closing = subpageStack.value.slice(depth + (closedSelf ? 1 : 0))
+  const { scrollTop } = subpageStack.value[depth]
+  subpageStack.value = subpageStack.value.slice(0, depth)
+  closing.reverse().forEach(({ close }) => close())
+  showSubpage(scrollTop)
+}
+
+async function showSubpage(scrollTop) {
+  await nextTick()
+  if (scrollRef.value) restoreOverlayScrollTop(scrollRef.value, scrollTop)
+  clampTutorialScroll()
+  await updatePosition()
+  const heading = currentSubpage.value === null ? titleRef.value : subpageTitleRef.value
+  heading?.focus()
+}
 
 const RESOLUTION_VALUES = ['2160', '1440', '1080', '720', '480', '360', '240', '144']
 
@@ -402,8 +520,10 @@ function schedulePositionUpdate() {
 }
 
 function clampTutorialScroll() {
-  if (scrollRef.value && contentRef.value) {
-    clampOverlayScrollTop(scrollRef.value, contentRef.value)
+  // Hidden subpages and the hidden step leave only the shown view in the viewport
+  const content = currentSubpage.value === null ? contentRef.value : subpageRef.value
+  if (scrollRef.value && content) {
+    clampOverlayScrollTop(scrollRef.value, content)
   }
 }
 
@@ -413,6 +533,7 @@ function observeTutorialContent() {
 
   contentResizeObserver = new ResizeObserver(clampTutorialScroll)
   contentResizeObserver.observe(contentRef.value)
+  contentResizeObserver.observe(subpageRef.value)
   clampTutorialScroll()
 }
 
@@ -523,7 +644,8 @@ async function updatePosition() {
 
 function handleDocumentKeydown(event) {
   if (event.key === 'Escape') {
-    if (event.target.closest?.('.tutorialCard .select.open')) return
+    // A subpage's own popups close first; handleKeydown closes the subpage itself
+    if (event.target.closest?.('.tutorialCard .select.open') || currentSubpage.value !== null) return
 
     event.preventDefault()
     event.stopPropagation()
@@ -533,13 +655,22 @@ function handleDocumentKeydown(event) {
 function handleKeydown(event) {
   event.stopPropagation()
 
+  if (event.key === 'Escape' && currentSubpage.value !== null && !event.defaultPrevented &&
+    !event.target.closest?.('.select.open')) {
+    event.preventDefault()
+    closeSubpagesFrom(subpageStack.value.length - 1)
+    return
+  }
+
   // Select pickers open inside the card and handle their own Tab
   if (event.key !== 'Tab' || event.target.closest?.('.mobileSheet, .selectDropdown')) return
 
-  // A radio group is one stop at its checked radio; arrow keys move within it.
+  // A radio group is one stop at its checked radio, and a tab list one at its
+  // selected tab; arrow keys move within them. Hidden views keep their controls.
   const buttons = Array.from(cardRef.value?.$el.querySelectorAll(
-    'button:not(:disabled), input[type="radio"]:checked, input[type="checkbox"]:not(:disabled)'
-  ) ?? [])
+    'button:not(:disabled, [tabindex="-1"]), a[href], input[type="radio"]:checked, ' +
+    'input:not([type="radio"], [type="hidden"]):not(:disabled), textarea:not(:disabled)'
+  ) ?? []).filter(element => element.checkVisibility({ visibilityProperty: true }))
   if (buttons.length === 0) return
 
   const currentIndex = buttons.indexOf(document.activeElement)
@@ -558,11 +689,6 @@ async function updateTabBarPosition(value) {
 
 function updateSetting(action, value) {
   store.dispatch(`update${action}`, value)
-}
-
-/** Opens a settings section, then the tutorial continues at resumeStep once the settings window closes */
-function openSettings(section, resumeStep) {
-  emit('open-settings', section, resumeStep)
 }
 
 async function advanceTutorial() {
