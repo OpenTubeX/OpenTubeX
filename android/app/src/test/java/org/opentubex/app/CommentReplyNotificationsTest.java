@@ -167,6 +167,9 @@ public class CommentReplyNotificationsTest {
         assertEquals(1, CommentReplyNotifications.normalize(opened, now).size());
         assertEquals(1000, opened.getJSONObject(0).getLong("postedAt"));
         assertNull(CommentReplyNotifications.markThreadOpened(new JSONArray().put(thread), "video1", "thread2", now - 1));
+        // Opening an expired one, as from an old notification, does not bring it back.
+        thread.put("activeAt", 1000);
+        assertNull(CommentReplyNotifications.markThreadOpened(new JSONArray().put(thread), "video1", "thread1", now));
     }
 
     @Test

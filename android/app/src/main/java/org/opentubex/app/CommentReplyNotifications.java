@@ -538,15 +538,16 @@ final class CommentReplyNotifications {
      * @return null when none of them is watched
      */
     static JSONArray markThreadOpened(JSONArray threads, String videoId, String threadId, long now) throws JSONException {
+        // An expired watch stays expired.
+        List<JSONObject> kept = normalize(threads, now);
         boolean found = false;
-        for (int index = 0; index < threads.length(); index++) {
-            JSONObject thread = threads.optJSONObject(index);
-            if (thread != null && thread.optString("videoId").equals(videoId) && thread.optString("threadId").equals(threadId)) {
+        for (JSONObject thread : kept) {
+            if (thread.optString("videoId").equals(videoId) && thread.optString("threadId").equals(threadId)) {
                 thread.put("activeAt", now);
                 found = true;
             }
         }
-        return found ? new JSONArray(normalize(threads, now)) : null;
+        return found ? new JSONArray(normalize(new JSONArray(kept), now)) : null;
     }
 
     /** Stops watching a comment, with its author's other comments in the thread. */
