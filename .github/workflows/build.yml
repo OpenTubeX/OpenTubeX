@@ -476,9 +476,15 @@ jobs:
     - name: Test Android APK packaging
       run: python3 -m unittest discover -s tests/android
 
+    - name: Build WebAssembly modules from source
+      # F-Droid rebuilds the APKs the same way and rejects prebuilt WebAssembly.
+      run: node _scripts/androidWasm.mjs docker
+
     - name: Build Android APKs
       id: apk
       shell: bash
+      env:
+        ANDROID_WASM_FROM_SOURCE: '1'
       run: |
         set -euo pipefail
         base_version="$(jq --raw-output .version package.json)"
@@ -501,10 +507,10 @@ jobs:
         pnpm run capacitor:sync:android
         ./android/gradlew --project-dir android :app:assembleNightly -PsplitApks \
           -I ../tests/android/build-identity.init.gradle verifyBuildIdentity
-        python3 _scripts/android_apks.py android/app/build/outputs/apk/nightly android-apks
+        python3 _scripts/android_apks.py android/app/build/outputs/apk/nightly android-apks --wasm-dir build/android-wasm/out
         ./android/gradlew --project-dir android :app:assembleNightly -PsplitApks -Plite \
           -I ../tests/android/build-identity.init.gradle verifyBuildIdentity
-        python3 _scripts/android_apks.py android/app/build/outputs/apk/nightly android-lite-apks --lite
+        python3 _scripts/android_apks.py android/app/build/outputs/apk/nightly android-lite-apks --lite --wasm-dir build/android-wasm/out
         printf 'version=%s\n' "$version" >> "$GITHUB_OUTPUT"
 
     - name: Sign Android APKs with the nightly key

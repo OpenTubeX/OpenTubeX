@@ -1,6 +1,7 @@
 """Validate, name and report the APKs produced by Gradle's ABI splits."""
 
 import argparse
+import hashlib
 import io
 import json
 from pathlib import Path
@@ -130,7 +131,7 @@ def check_page_alignment(apk, arch):
                         check(f"{entry}!{info.filename}", archive.read(info))
 
 
-def inspect_apk(path, abi, lite=False):
+def inspect_apk(path, abi, lite=False, wasm=None):
     sizes = dict(native=0, dex=0, web=0, other=0)
     with zipfile.ZipFile(path) as apk:
         if apk.testzip() is not None:
@@ -162,6 +163,8 @@ def inspect_apk(path, abi, lite=False):
                 match = PROPRIETARY_CLASS.search(apk.read(name))
                 if match:
                     raise ValueError(f"{path}: {name} references proprietary class {match[0][1:-1].decode()}")
+            if wasm is not None and name.endswith(".wasm") and hashlib.sha256(apk.read(name)).hexdigest() not in wasm:
+                raise ValueError(f"{path}: {name} is not built from source by _scripts/androidWasm.mjs")
             category = (
                 "native" if name.startswith("lib/") else
                 "dex" if name.endswith(".dex") else
@@ -172,7 +175,8 @@ def inspect_apk(path, abi, lite=False):
     return sizes
 
 
-def prepare(source, destination, *, release=False, lite=False, max_abi_mib=None, max_universal_mib=None):
+def prepare(source, destination, *, release=False, lite=False, max_abi_mib=None, max_universal_mib=None,
+            wasm_dir=None):
     max_abi_mib = max_abi_mib or (LITE_ABI_MIB if lite else 75)
     max_universal_mib = max_universal_mib or (LITE_UNIVERSAL_MIB if lite else 225)
     metadata = json.loads((source / "output-metadata.json").read_text())
@@ -209,9 +213,13 @@ def prepare(source, destination, *, release=False, lite=False, max_abi_mib=None,
     if not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+(?:-[A-Za-z0-9.-]+)?", version):
         raise ValueError(f"Invalid APK version: {version}")
 
+    # F-Droid rejects prebuilt WebAssembly, so its rebuild of these APKs needs
+    # every module built from source.
+    wasm = None if wasm_dir is None else {hashlib.sha256(file.read_bytes()).hexdigest()
+                                          for file in wasm_dir.rglob("*.wasm")}
     rows = []
     for abi, path in sorted(apks.items()):
-        sizes = inspect_apk(path, abi, lite)
+        sizes = inspect_apk(path, abi, lite, wasm)
         limit = max_universal_mib if abi == "universal" else max_abi_mib
         total = sum(sizes.values()) / MIB
         if total > limit:
@@ -245,5 +253,6 @@ if __name__ == "__main__":
     parser.add_argument("--lite", action="store_true", help="validate APKs built without the yt-dlp runtime")
     parser.add_argument("--max-abi-mib", type=float)
     parser.add_argument("--max-universal-mib", type=float)
+    parser.add_argument("--wasm-dir", type=Path, help="require WebAssembly built from source in this directory")
     args = parser.parse_args()
     print(prepare(**vars(args)), end="")
