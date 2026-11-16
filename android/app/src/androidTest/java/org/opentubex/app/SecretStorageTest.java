@@ -113,6 +113,9 @@ public class SecretStorageTest {
         String testAlias = "settings-secrets-test";
         KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
         keyStore.load(null);
+        OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(SubscriptionRefreshWorker.class)
+            .setInputData(new Data.Builder().putString(SubscriptionRefreshWorker.FEED_TYPE_INPUT, "videos").build())
+            .build();
         try {
             SubscriptionRefreshConfiguration.save(context, new JSONObject()
                 .put("intervals", new JSONObject().put("videos", 1800000))
@@ -138,9 +141,6 @@ public class SecretStorageTest {
             SubscriptionRefreshScheduler.reconcile(context);
             assertFalse("the schedule stays", workManager.getWorkInfosForUniqueWork(schedule).get().get(0).getState().isFinished());
 
-            OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(SubscriptionRefreshWorker.class)
-                .setInputData(new Data.Builder().putString(SubscriptionRefreshWorker.FEED_TYPE_INPUT, "videos").build())
-                .build();
             workManager.enqueue(request).getResult().get();
             long deadline = android.os.SystemClock.elapsedRealtime() + 30000;
             WorkInfo info;
@@ -150,10 +150,10 @@ public class SecretStorageTest {
                 assertTrue("the refresh runs", android.os.SystemClock.elapsedRealtime() < deadline);
                 Thread.sleep(100);
             }
-            workManager.cancelWorkById(request.getId()).getResult().get();
             SecretStorage.alias = appAlias;
             assertEquals("the app's own key still decrypts", "app secret", SecretStorage.decrypt(appSecret));
         } finally {
+            workManager.cancelWorkById(request.getId()).getResult().get();
             SecretStorage.alias = appAlias;
             keyStore.deleteEntry(testAlias);
             if (original == null) preferences.edit().remove("configuration").remove("encryptedConfiguration").commit();
