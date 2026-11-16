@@ -2720,6 +2720,7 @@ Mobile Navigation:
   popular: "人气"
   stats: "统计"
   more: "更多"
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: 创建桌面快捷方式
@@ -2821,6 +2822,8 @@ Platforms:
   Empty Tab: 这里还没有任何内容。
   Browser Check: "{platform} 要求你先验证自己是真人，然后才会显示此页面。"
   Verify: "验证"
+  Categories: "分类"
+  Category Not Found: "找不到此分类。"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} 回复了 {commentAuthor}"
   Like: "喜欢"
@@ -2851,3 +2854,6 @@ YouTube Account:
   Recommendations Failed: "无法加载你的 YouTube 推荐。"
   "{author} replied to your comment": "{author} 回复了你的评论"
   "{author} hearted your comment": "{author} 为你的评论点了爱心"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "搜索 Twitch"

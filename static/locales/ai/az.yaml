@@ -2730,6 +2730,7 @@ Mobile Navigation:
   popular: "Populyar"
   stats: "Statistika"
   more: "Daha çox"
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: İş masasında qısayol yarat
@@ -2831,6 +2832,8 @@ Platforms:
   Empty Tab: Burada hələ heç nə yoxdur.
   Browser Check: "{platform} bu səhifəni göstərməzdən əvvəl insan olduğunuzu təsdiqləməyinizi istəyir."
   Verify: "Təsdiqlə"
+  Categories: "Kateqoriyalar"
+  Category Not Found: "Bu kateqoriya tapılmadı."
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} {commentAuthor} istifadəçisinə cavab verdi"
   Like: "Bəyən"
@@ -2861,3 +2864,6 @@ YouTube Account:
   Recommendations Failed: "YouTube tövsiyələrinizi yükləmək mümkün olmadı."
   "{author} replied to your comment": "{author} şərhinizə cavab verdi"
   "{author} hearted your comment": "{author} şərhinizə ürək verdi"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Twitch-də axtar"

@@ -2731,6 +2731,7 @@ Mobile Navigation:
   popular: "Poblek"
   stats: "Stadegoù"
   more: "Muioc'h"
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: Krouiñ ur verradenn war ar burev
@@ -2832,6 +2833,8 @@ Platforms:
   Empty Tab: N'eus netra amañ c'hoazh.
   Browser Check: "{platform} a c’houlenn ganeoc’h gwiriañ ez oc’h un den a-raok diskouez ar bajenn-mañ."
   Verify: "Gwiriañ"
+  Categories: "Rummadoù"
+  Category Not Found: "N'eus ket bet kavet ar rummad-mañ."
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} en deus respontet da {commentAuthor}"
   Like: "Plijout a ra din"
@@ -2862,3 +2865,6 @@ YouTube Account:
   Recommendations Failed: "N'eus ket bet gallet kargañ hoc'h erbedadennoù YouTube."
   "{author} replied to your comment": "{author} en deus respontet d'hoc'h evezhiadenn"
   "{author} hearted your comment": "{author} en deus roet ur galon d'hoc'h evezhiadenn"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Klask war Twitch"

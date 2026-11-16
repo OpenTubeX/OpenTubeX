@@ -2823,6 +2823,7 @@ Mobile Navigation:
   popular: "Папулярнае"
   stats: "Статыстыка"
   more: "Больш"
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: Стварыць ярлык на працоўным стале
@@ -2924,6 +2925,8 @@ Platforms:
   Empty Tab: Тут пакуль нічога няма.
   Browser Check: "{platform} просіць пацвердзіць, што вы чалавек, перш чым паказаць гэту старонку."
   Verify: "Пацвердзіць"
+  Categories: "Катэгорыі"
+  Category Not Found: "Гэтую катэгорыю не ўдалося знайсці."
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} адказаў карыстальніку {commentAuthor}"
   Like: "Падабаецца"
@@ -2954,3 +2957,6 @@ YouTube Account:
   Recommendations Failed: "Не ўдалося загрузіць вашы рэкамендацыі YouTube."
   "{author} replied to your comment": "{author} адказаў на ваш каментарый"
   "{author} hearted your comment": "{author} адзначыў(-ла) ваш каментарый сэрцам"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Пошук у Twitch"

@@ -51,10 +51,20 @@
  *   itemCount?: number
  * }} PlatformPlaylist
  *
- * @typedef {'videos' | 'tracks' | 'clips' | 'playlists'} PlatformChannelTab
- * @typedef {'videos' | 'tracks' | 'channels' | 'playlists'} PlatformSearchType
+ * @typedef {{
+ *   platform: string,
+ *   id: string,
+ *   name: string,
+ *   url: string,
+ *   thumbnail: string,
+ *   viewerCount?: number
+ * }} PlatformCategory A game or topic that live streams belong to.
+ * `thumbnail` is portrait box art. `viewerCount` counts the viewers of its live streams.
  *
- * @typedef {{ kind: 'item', item: PlatformItem } | { kind: 'channel', channel: PlatformChannel } | { kind: 'playlist', playlist: PlatformPlaylist }} PlatformResult
+ * @typedef {'videos' | 'tracks' | 'clips' | 'playlists'} PlatformChannelTab
+ * @typedef {'videos' | 'tracks' | 'channels' | 'playlists' | 'categories'} PlatformSearchType
+ *
+ * @typedef {{ kind: 'item', item: PlatformItem } | { kind: 'channel', channel: PlatformChannel } | { kind: 'playlist', playlist: PlatformPlaylist } | { kind: 'category', category: PlatformCategory }} PlatformResult
  * @typedef {{ results: PlatformResult[], continuation: string | null }} PlatformPage
  * `continuation` loads the next page, null at the end.
  *
@@ -71,7 +81,9 @@
  *   getLatestItems: (fetch: PlatformFetch, channel: PlatformChannel, signal?: AbortSignal) => Promise<PlatformItem[]>,
  *   search: (fetch: PlatformFetch, query: string, type: PlatformSearchType, continuation: string | null, signal?: AbortSignal) => Promise<PlatformPage>,
  *   getPlaylist: (fetch: PlatformFetch, id: string, continuation: string | null, signal?: AbortSignal) => Promise<{ playlist: PlatformPlaylist | null, page: PlatformPage }>,
- *   getFeed?: (fetch: PlatformFetch, channels: PlatformChannel[], signal?: AbortSignal) => Promise<{ channels: PlatformChannel[], items: PlatformItem[], clips: PlatformItem[] }>
+ *   getFeed?: (fetch: PlatformFetch, channels: PlatformChannel[], signal?: AbortSignal) => Promise<{ channels: PlatformChannel[], items: PlatformItem[], clips: PlatformItem[] }>,
+ *   getCategory?: (fetch: PlatformFetch, id: string, signal?: AbortSignal) => Promise<{ category: PlatformCategory, items: PlatformItem[] } | null>,
+ *   getBrowse?: (fetch: PlatformFetch, signal?: AbortSignal) => Promise<{ categories: PlatformCategory[], items: PlatformItem[] }>
  * }} Platform
  * - `liveStreams` tells whether its channels stream live.
  * - `parseChannelUrl` returns the ID of the channel a page belongs to, for
@@ -85,6 +97,11 @@
  *   newest first, a page of them, and the live stream first where the platform has one.
  * - `getFeed`, where a platform has it, loads the feed of many channels in a
  *   few requests, with their current details, instead of `getLatestItems`.
+ * - `getCategory`, where a platform has categories, loads one by the `id` of
+ *   a PlatformCategory with its live streams, most viewers first, or returns
+ *   null for unknown categories.
+ * - `getBrowse`, where a platform has it, loads its most watched categories
+ *   and live streams for its own page.
  */
 
 export {}

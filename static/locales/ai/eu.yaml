@@ -2731,6 +2731,7 @@ Mobile Navigation:
   popular: "Ikusienak"
   stats: "Estatist."
   more: "Gehiago"
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: Sortu lasterbide bat mahaigainean
@@ -2832,6 +2833,8 @@ Platforms:
   Empty Tab: Ez dago ezer hemen oraindik.
   Browser Check: "{platform}(e)k gizakia zarela egiaztatzeko eskatzen dizu orri hau erakutsi aurretik."
   Verify: "Egiaztatu"
+  Categories: "Kategoriak"
+  Category Not Found: "Ezin izan da kategoria hau aurkitu."
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author}(e)k {commentAuthor}(r)i erantzun dio"
   Like: "Atsegin dut"
@@ -2862,3 +2865,6 @@ YouTube Account:
   Playlist Update Failed: "Ezin izan da {playlistName} YouTube-n eguneratu: {error}"
   "{author} replied to your comment": "{author}(e)k zure iruzkinari erantzun dio"
   "{author} hearted your comment": "{author}(e)k bihotz bat eman dio zure iruzkinari"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Bilatu Twitch-en"

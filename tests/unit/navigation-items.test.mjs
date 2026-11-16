@@ -9,8 +9,8 @@ import {
 
 test('keeps valid navigation items in the selected order', () => {
   assert.deepEqual(
-    normalizeNavigationItems(['history', 'home', 'history', 'removed']),
-    ['history', 'home']
+    normalizeNavigationItems(['history', 'home', 'history', 'removed', 'twitch']),
+    ['history', 'home', 'twitch']
   )
 })
 

@@ -2761,6 +2761,7 @@ Mobile Navigation:
   popular: "الشائع"
   stats: "إحصاءات"
   more: "المزيد"
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: إنشاء اختصار على سطح المكتب
@@ -2862,6 +2863,8 @@ Platforms:
   Empty Tab: لا يوجد شيء هنا بعد.
   Browser Check: "يطلب منك {platform} التحقق من أنك إنسان قبل عرض هذه الصفحة."
   Verify: "تحقّق"
+  Categories: "الفئات"
+  Category Not Found: "تعذّر العثور على هذه الفئة."
 YouTube Account:
   "{author} replied to {commentAuthor}": "ردّ {author} على {commentAuthor}"
   Like: "إعجاب"
@@ -2892,3 +2895,6 @@ YouTube Account:
   Recommendations Failed: "تعذّر تحميل اقتراحاتك من YouTube."
   "{author} replied to your comment": "ردّ {author} على تعليقك"
   "{author} hearted your comment": "منح {author} تعليقك قلبًا"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "البحث في Twitch"

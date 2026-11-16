@@ -173,6 +173,7 @@ import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 import store from '../../store/index'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { listenForOutsidePress } from '../../helpers/outsidePress'
+import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { useOrderedItemReorder } from '../../composables/useOrderedItemReorder'
 import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
 import { moveItemByVisibleOffset } from '../../../orderedItems'
@@ -196,7 +197,7 @@ let navigationResizeObserver = null
 const settingsOverlayActive = useSettingsOverlay(closeItemPicker)
 
 const catalog = computed(() => NAVIGATION_ITEM_DEFINITIONS
-  .filter(item => !item.requiresLocalApi || process.env.SUPPORTS_LOCAL_API)
+  .filter(item => (!item.requiresLocalApi || process.env.SUPPORTS_LOCAL_API) && (!item.requiresYtDlp || supportsYtDlp))
   .map(item => ({
     ...item,
     // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys

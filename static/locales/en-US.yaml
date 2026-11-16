@@ -4004,6 +4004,7 @@ Mobile Navigation:
   trending: "Trending"
   popular: "Popular"
   stats: "Stats"
+  twitch: "Twitch"
   more: "More"
 
 Installer:
@@ -4036,6 +4037,8 @@ Platforms:
   Empty Tab: There is nothing here yet.
   Browser Check: "{platform} asks you to verify that you're human before it shows this page."
   Verify: "Verify"
+  Categories: "Categories"
+  Category Not Found: "This category could not be found."
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} replied to {commentAuthor}"
   Like: "Like"
@@ -4066,3 +4069,6 @@ YouTube Account:
   Edit Comment Failed: "Could not edit the comment: {error}"
   Recommendations: "YouTube recommendations"
   Recommendations Failed: "Could not load your YouTube recommendations."
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Search Twitch"

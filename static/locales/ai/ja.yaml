@@ -2720,6 +2720,7 @@ Mobile Navigation:
   popular: "人気"
   stats: "統計"
   more: "その他"
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: デスクトップにショートカットを作成
@@ -2821,6 +2822,8 @@ Platforms:
   Empty Tab: まだ何もありません。
   Browser Check: "{platform} でこのページを表示するには、人間であることの確認が必要です。"
   Verify: "確認"
+  Categories: "カテゴリー"
+  Category Not Found: "このカテゴリーは見つかりませんでした。"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} さんが {commentAuthor} さんに返信しました"
   Like: "高く評価"
@@ -2851,3 +2854,6 @@ YouTube Account:
   Playlist Update Failed: "YouTube で {playlistName} を更新できませんでした: {error}"
   "{author} replied to your comment": "{author} さんがあなたのコメントに返信しました"
   "{author} hearted your comment": "{author} さんがあなたのコメントにハートを付けました"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Twitch を検索"

@@ -2853,6 +2853,7 @@ Mobile Navigation:
   popular: مقبول
   stats: شماریات
   more: مزید
+  twitch: "Twitch"
 Installer:
   Create Desktop Shortcut: ڈیسک ٹاپ شارٹ کٹ بنائیں
 Invidious Fallback Warning: یہ درخواست آپ کے ترتیب دیے گئے Invidious انسٹنس کو بائی پاس کر کے براہ راست YouTube سے منسلک ہوتی ہے، جس سے آپ کا IP ایڈریس ظاہر ہو جاتا ہے۔
@@ -2892,6 +2893,8 @@ Platforms:
   Empty Tab: یہاں ابھی کچھ نہیں ہے۔
   Browser Check: "{platform} یہ صفحہ دکھانے سے پہلے آپ سے تصدیق چاہتا ہے کہ آپ انسان ہیں۔"
   Verify: "تصدیق کریں"
+  Categories: "زمرے"
+  Category Not Found: "یہ زمرہ نہیں مل سکا۔"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} نے {commentAuthor} کو جواب دیا"
   Like: "پسند کریں"
@@ -2922,3 +2925,6 @@ YouTube Account:
   Recommendations Failed: "آپ کی YouTube تجاویز لوڈ نہیں ہو سکیں۔"
   "{author} replied to your comment": "{author} نے آپ کے تبصرے کا جواب دیا"
   "{author} hearted your comment": "{author} نے آپ کے تبصرے کو دل دیا"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Twitch پر تلاش کریں"

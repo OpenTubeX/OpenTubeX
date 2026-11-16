@@ -15,6 +15,7 @@ import {
  * @typedef {import('./types.js').PlatformItem} PlatformItem
  * @typedef {import('./types.js').PlatformPage} PlatformPage
  * @typedef {import('./types.js').PlatformFetch} PlatformFetch
+ * @typedef {import('./types.js').PlatformCategory} PlatformCategory
  */
 
 const PAGE_SIZE = 20
@@ -25,10 +26,18 @@ const ID_PATTERN = /^\d{1,20}$/
 /** Clip and video pages name their channel, but aren't its pages */
 const CONTENT_PAGE_PATTERN = /^https?:\/\/[^/?#]+\/[^/?#]+\/(?:clip|v|video)(?:[/?#]|$)/i
 const CURSOR_PATTERN = /^[\w|:=+/.-]{1,300}$/
+const CATEGORY_PATTERN = /^[a-z0-9][a-z0-9-]{0,99}$/
+// Later pages of streams and categories need a browser integrity token too,
+// so these lists are as long as one request allows
+const CATEGORY_STREAMS = 100
+const BROWSE_CATEGORIES = 100
+const BROWSE_STREAMS = 30
 const CHANNEL_FIELDS = 'id login displayName profileImageURL(width: 300) bannerImageURL description followers { totalCount }'
 const STREAM_FIELDS = 'stream { id title createdAt viewersCount previewImageURL(width: 640, height: 360) game { displayName } archiveVideo { id } }'
 const VIDEO_FIELDS = 'id title publishedAt createdAt lengthSeconds viewCount previewThumbnailURL(width: 640, height: 360) game { displayName }'
 const CLIP_FIELDS = 'slug title createdAt durationSeconds viewCount thumbnailURL(width: 480, height: 272) game { displayName }'
+const CATEGORY_FIELDS = 'slug displayName viewersCount boxArtURL(width: 285, height: 380)'
+const STREAM_NODE_FIELDS = 'id title createdAt viewersCount previewImageURL(width: 640, height: 360) game { displayName } archiveVideo { id } broadcaster { id login displayName profileImageURL(width: 70) }'
 
 /**
  * @param {unknown} value
@@ -70,6 +79,37 @@ function toPlatformChannel(user) {
  */
 function itemResult(item) {
   return { kind: 'item', item }
+}
+
+/**
+ * @param {any} game
+ * @returns {PlatformCategory | null}
+ */
+function toPlatformCategory(game) {
+  if (typeof game?.slug !== 'string' || !CATEGORY_PATTERN.test(game.slug)) return null
+  const name = typeof game.displayName === 'string' && game.displayName.trim() ? game.displayName.trim() : game.slug
+  const viewerCount = game.viewersCount
+  return {
+    platform: 'twitch',
+    id: game.slug,
+    name,
+    url: `https://www.twitch.tv/directory/category/${game.slug}`,
+    thumbnail: httpsUrl(game.boxArtURL) ?? '',
+    ...(Number.isFinite(viewerCount) && viewerCount >= 0 ? { viewerCount } : {})
+  }
+}
+
+/**
+ * The live streams of a connection of streams, each with its channel.
+ * @param {any} connection
+ * @returns {PlatformItem[]}
+ */
+function streamItems(connection) {
+  const edges = Array.isArray(connection?.edges) ? connection.edges : []
+  return edges.flatMap(edge => {
+    const stream = edge?.node
+    return stream ? parseTwitchUser({ ...stream.broadcaster, stream })?.feed.live ?? [] : []
+  })
 }
 
 /**
@@ -116,7 +156,7 @@ const twitch = {
   id: 'twitch',
   name: 'Twitch',
   channelTabs: ['videos', 'clips'],
-  searchTypes: ['videos', 'channels'],
+  searchTypes: ['videos', 'channels', 'categories'],
   liveStreams: true,
 
   parseChannelUrl(url) {
@@ -171,27 +211,52 @@ const twitch = {
   async search(fetch, query, type, continuation, signal) {
     if (typeof query !== 'string' || !query.trim() || query.length > 200 ||
       (continuation !== null && !CURSOR_PATTERN.test(continuation))) return { results: [], continuation: null }
-    const index = type === 'channels' ? 'CHANNEL' : 'VOD'
-    const fields = type === 'channels'
-      ? `channels { cursor items { ${CHANNEL_FIELDS} } }`
-      : `videos { cursor items { ${VIDEO_FIELDS} owner { id login displayName profileImageURL(width: 70) } } }`
+    const { index, section, fields } = {
+      channels: { index: 'CHANNEL', section: 'channels', fields: CHANNEL_FIELDS },
+      categories: { index: 'GAME', section: 'games', fields: CATEGORY_FIELDS }
+    }[type] ?? { index: 'VOD', section: 'videos', fields: `${VIDEO_FIELDS} owner { id login displayName profileImageURL(width: 70) }` }
     const data = await requestTwitch(fetch,
-      `query($query: String!, $cursor: String) { searchFor(userQuery: $query, platform: "web", target: { index: ${index}, cursor: $cursor, limit: ${PAGE_SIZE} }) { ${fields} } }`,
+      `query($query: String!, $cursor: String) { searchFor(userQuery: $query, platform: "web", target: { index: ${index}, cursor: $cursor, limit: ${PAGE_SIZE} }) { ${section} { cursor items { ${fields} } } } }`,
       { query: query.trim(), cursor: continuation }, signal)
-    const section = type === 'channels' ? data.searchFor?.channels : data.searchFor?.videos
-    const items = Array.isArray(section?.items) ? section.items : []
-    const results = type === 'channels'
-      ? items.flatMap(user => {
-          const channel = toPlatformChannel(user)
-          return channel ? [{ kind: /** @type {const} */ ('channel'), channel }] : []
-        })
-      : items.flatMap(video => {
-          const owner = parseChannel(video?.owner)
-          return owner ? parseTwitchVideo(video, owner).map(itemResult) : []
-        })
+    const found = data.searchFor?.[section]
+    const items = Array.isArray(found?.items) ? found.items : []
+    /** @type {import('./types.js').PlatformResult[]} */
+    const results = items.flatMap(entry => {
+      if (type === 'channels') {
+        const channel = toPlatformChannel(entry)
+        return channel ? [{ kind: /** @type {const} */ ('channel'), channel }] : []
+      }
+      if (type === 'categories') {
+        const category = toPlatformCategory(entry)
+        return category ? [{ kind: /** @type {const} */ ('category'), category }] : []
+      }
+      const owner = parseChannel(entry?.owner)
+      return owner ? parseTwitchVideo(entry, owner).map(itemResult) : []
+    })
     // The cursor keeps coming at the end, so a short page is the last one
-    const cursor = typeof section?.cursor === 'string' && items.length >= PAGE_SIZE ? section.cursor : null
+    const cursor = typeof found?.cursor === 'string' && items.length >= PAGE_SIZE ? found.cursor : null
     return { results, continuation: cursor }
+  },
+
+  async getCategory(fetch, id, signal) {
+    if (!CATEGORY_PATTERN.test(id)) return null
+    const data = await requestTwitch(fetch,
+      `query($slug: String!) { game(slug: $slug) { ${CATEGORY_FIELDS} streams(first: ${CATEGORY_STREAMS}, options: { sort: VIEWER_COUNT }) { edges { node { ${STREAM_NODE_FIELDS} } } } } }`,
+      { slug: id }, signal)
+    const category = toPlatformCategory(data.game)
+    return category && { category, items: streamItems(data.game.streams) }
+  },
+
+  async getBrowse(fetch, signal) {
+    const data = await requestTwitch(fetch,
+      `query { games(first: ${BROWSE_CATEGORIES}) { edges { node { ${CATEGORY_FIELDS} } } } streams(first: ${BROWSE_STREAMS}) { edges { node { ${STREAM_NODE_FIELDS} } } } }`,
+      {}, signal)
+    const games = Array.isArray(data.games?.edges) ? data.games.edges : []
+    const categories = games.flatMap(edge => toPlatformCategory(edge?.node) ?? [])
+    const items = streamItems(data.streams)
+    // A failed list leaves its field empty, and then there is nothing to show
+    if (categories.length === 0 && items.length === 0) throw new Error('Twitch returned no categories or streams')
+    return { categories, items }
   },
 
   async getPlaylist() {

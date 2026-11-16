@@ -31,6 +31,7 @@ export function isMostPopularAvailable({ backendPreference, backendFallback }) {
  * @param {'local' | 'invidious' | 'yattee'} options.backendPreference
  * @param {boolean} options.backendFallback
  * @param {boolean} options.showWatchStats
+ * @param {boolean} options.supportsYtDlp Pages of other platforms play through yt-dlp
  * @returns {string[]}
  */
 export function filterAvailableNavigationItems(items, options) {
@@ -38,4 +39,5 @@ export function filterAvailableNavigationItems(items, options) {
     .filter(id => id !== 'trending' || isTrendingAvailable(options))
     .filter(id => id !== 'popular' || isMostPopularAvailable(options))
     .filter(id => id !== 'stats' || options.showWatchStats)
+    .filter(id => id !== 'twitch' || options.supportsYtDlp)
 }

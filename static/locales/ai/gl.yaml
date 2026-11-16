@@ -2785,6 +2785,7 @@ Mobile Navigation:
   popular: "Populares"
   stats: "Estatíst."
   more: "Máis"
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: Crear un atallo no escritorio
@@ -2886,6 +2887,8 @@ Platforms:
   Empty Tab: Aínda non hai nada aquí.
   Browser Check: "{platform} pídeche que verifiques que es unha persoa antes de amosar esta páxina."
   Verify: "Verificar"
+  Categories: "Categorías"
+  Category Not Found: "Non se puido atopar esta categoría."
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} respondeu a {commentAuthor}"
   Like: "Gústame"
@@ -2916,3 +2919,6 @@ YouTube Account:
   Playlist Update Failed: "Non se puido actualizar {playlistName} en YouTube: {error}"
   "{author} replied to your comment": "{author} respondeu ao teu comentario"
   "{author} hearted your comment": "{author} puxo un corazón no teu comentario"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Buscar en Twitch"

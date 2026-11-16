@@ -2776,6 +2776,7 @@ Mobile Navigation:
   popular: "Популярне"
   stats: "Статистика"
   more: "Ще"
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: Створити ярлик на робочому столі
@@ -2877,6 +2878,8 @@ Platforms:
   Empty Tab: Тут поки нічого немає.
   Browser Check: "{platform} просить підтвердити, що ви людина, перш ніж показати цю сторінку."
   Verify: "Підтвердити"
+  Categories: "Категорії"
+  Category Not Found: "Не вдалося знайти цю категорію."
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} відповідає користувачу {commentAuthor}"
   Like: "Подобається"
@@ -2907,3 +2910,6 @@ YouTube Account:
   Recommendations Failed: "Не вдалося завантажити ваші рекомендації YouTube."
   "{author} replied to your comment": "{author} відповідає на ваш коментар"
   "{author} hearted your comment": "{author} відзначає ваш коментар сердечком"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Пошук у Twitch"

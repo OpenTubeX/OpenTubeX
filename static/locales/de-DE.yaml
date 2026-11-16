@@ -3993,6 +3993,7 @@ Mobile Navigation:
   trending: "Trends"
   popular: "Beliebt"
   stats: "Statistik"
+  twitch: "Twitch"
   more: "Mehr"
 
 Installer:
@@ -4025,6 +4026,8 @@ Platforms:
   Empty Tab: Hier gibt es noch nichts.
   Browser Check: "{platform} zeigt diese Seite erst, wenn du bestätigt hast, dass du ein Mensch bist."
   Verify: "Bestätigen"
+  Categories: "Kategorien"
+  Category Not Found: "Diese Kategorie wurde nicht gefunden."
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} hat {commentAuthor} geantwortet"
   Like: "Mag ich"
@@ -4055,3 +4058,6 @@ YouTube Account:
   Edit Comment Failed: "Kommentar konnte nicht bearbeitet werden: {error}"
   Recommendations: "YouTube-Empfehlungen"
   Recommendations Failed: "Deine YouTube-Empfehlungen konnten nicht geladen werden."
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Twitch durchsuchen"

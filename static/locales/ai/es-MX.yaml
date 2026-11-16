@@ -3162,6 +3162,7 @@ Mobile Navigation:
   popular: "Popular"
   stats: "Estadíst."
   more: "Más"
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: Crear un acceso directo en el escritorio
@@ -3263,6 +3264,8 @@ Platforms:
   Empty Tab: Todavía no hay nada aquí.
   Browser Check: "{platform} te pide que verifiques que eres una persona antes de mostrar esta página."
   Verify: "Verificar"
+  Categories: "Categorías"
+  Category Not Found: "No se pudo encontrar esta categoría."
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} respondió a {commentAuthor}"
   Like: "Me gusta"
@@ -3293,3 +3296,6 @@ YouTube Account:
   Recommendations Failed: "No se pudieron cargar tus recomendaciones de YouTube."
   "{author} replied to your comment": "{author} respondió a tu comentario"
   "{author} hearted your comment": "{author} le dio un corazón a tu comentario"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Buscar en Twitch"

@@ -2784,6 +2784,7 @@ Mobile Navigation:
   popular: "פופולרי"
   stats: "נתונים"
   more: "עוד"
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: יצירת קיצור דרך בשולחן העבודה
@@ -2885,6 +2886,8 @@ Platforms:
   Empty Tab: אין כאן עדיין כלום.
   Browser Check: "{platform} מבקשת ממך לאמת שאתה אדם לפני שהיא מציגה את הדף הזה."
   Verify: "אימות"
+  Categories: "קטגוריות"
+  Category Not Found: "לא ניתן היה למצוא את הקטגוריה הזו."
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} השיב/ה ל-{commentAuthor}"
   Like: "לייק"
@@ -2915,3 +2918,6 @@ YouTube Account:
   Playlist Update Failed: "לא ניתן לעדכן את {playlistName} ב־YouTube: {error}"
   "{author} replied to your comment": "{author} השיב/ה לתגובה שלך"
   "{author} hearted your comment": "{author} נתן/ה לב לתגובה שלך"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "חיפוש ב-Twitch"

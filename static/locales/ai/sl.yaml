@@ -3318,6 +3318,7 @@ Mobile Navigation:
   popular: "Priljublj."
   stats: "Statistika"
   more: "Več"
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: Ustvari bližnjico na namizju
@@ -3419,6 +3420,8 @@ Platforms:
   Empty Tab: Tukaj še ni ničesar.
   Browser Check: "{platform} vas prosi, da potrdite, da ste človek, preden prikaže to stran."
   Verify: "Preveri"
+  Categories: "Kategorije"
+  Category Not Found: "Te kategorije ni bilo mogoče najti."
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} je odgovoril(-a) uporabniku {commentAuthor}"
   Like: "Všeč mi je"
@@ -3449,3 +3452,6 @@ YouTube Account:
   Recommendations Failed: "Vaših priporočil YouTube ni bilo mogoče naložiti."
   "{author} replied to your comment": "{author} je odgovoril(-a) na vaš komentar"
   "{author} hearted your comment": "{author} je vašemu komentarju dal(-a) srček"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Iskanje po Twitchu"

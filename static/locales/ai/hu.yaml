@@ -2721,6 +2721,7 @@ Mobile Navigation:
   popular: "Népszerű"
   stats: "Statiszt."
   more: "Több"
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: Asztali parancsikon létrehozása
@@ -2822,6 +2823,8 @@ Platforms:
   Empty Tab: Itt még nincs semmi.
   Browser Check: "A(z) {platform} az oldal megjelenítése előtt arra kér, hogy igazold, hogy ember vagy."
   Verify: "Ellenőrzés"
+  Categories: "Kategóriák"
+  Category Not Found: "Ez a kategória nem található."
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} válaszolt {commentAuthor} hozzászólására"
   Like: "Tetszik"
@@ -2852,3 +2855,6 @@ YouTube Account:
   Playlist Update Failed: "Nem sikerült frissíteni a(z) {playlistName} listát a YouTube-on: {error}"
   "{author} replied to your comment": "{author} válaszolt a hozzászólásodra"
   "{author} hearted your comment": "{author} szívet adott a hozzászólásodra"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Keresés a Twitchen"

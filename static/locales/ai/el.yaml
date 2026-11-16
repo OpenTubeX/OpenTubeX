@@ -2735,6 +2735,7 @@ Mobile Navigation:
   popular: "Δημοφιλή"
   stats: "Στατιστικά"
   more: "Περισσ."
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: Δημιουργία συντόμευσης στην επιφάνεια εργασίας
@@ -2836,6 +2837,8 @@ Platforms:
   Empty Tab: Δεν υπάρχει τίποτα εδώ ακόμη.
   Browser Check: "Η πλατφόρμα {platform} σάς ζητά να επιβεβαιώσετε ότι είστε άνθρωπος πριν εμφανίσει αυτήν τη σελίδα."
   Verify: "Επαλήθευση"
+  Categories: "Κατηγορίες"
+  Category Not Found: "Δεν ήταν δυνατή η εύρεση αυτής της κατηγορίας."
 YouTube Account:
   "{author} replied to {commentAuthor}": "Ο χρήστης {author} απάντησε στον χρήστη {commentAuthor}"
   Like: "Μου αρέσει"
@@ -2866,3 +2869,6 @@ YouTube Account:
   Recommendations Failed: "Δεν ήταν δυνατή η φόρτωση των προτάσεών σας από το YouTube."
   "{author} replied to your comment": "Ο χρήστης {author} απάντησε στο σχόλιό σας"
   "{author} hearted your comment": "Ο χρήστης {author} έδωσε καρδιά στο σχόλιό σας"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Αναζήτηση στο Twitch"

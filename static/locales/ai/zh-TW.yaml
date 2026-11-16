@@ -2724,6 +2724,7 @@ Mobile Navigation:
   popular: "熱門"
   stats: "統計"
   more: "更多"
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: 建立桌面捷徑
@@ -2825,6 +2826,8 @@ Platforms:
   Empty Tab: 這裡還沒有任何內容。
   Browser Check: "{platform} 要求你先驗證自己是真人，才會顯示此頁面。"
   Verify: "驗證"
+  Categories: "分類"
+  Category Not Found: "找不到此分類。"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} 回覆了 {commentAuthor}"
   Like: "喜歡"
@@ -2855,3 +2858,6 @@ YouTube Account:
   Recommendations Failed: "無法載入您的 YouTube 推薦內容。"
   "{author} replied to your comment": "{author} 回覆了你的留言"
   "{author} hearted your comment": "{author} 為你的留言加上了愛心"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "搜尋 Twitch"

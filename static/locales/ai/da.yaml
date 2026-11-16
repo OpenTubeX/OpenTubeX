@@ -2818,6 +2818,7 @@ Mobile Navigation:
   popular: "Populære"
   stats: "Statistik"
   more: "Mere"
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: Opret en genvej på skrivebordet
@@ -2919,6 +2920,8 @@ Platforms:
   Empty Tab: Der er intet her endnu.
   Browser Check: "{platform} beder dig bekræfte, at du er et menneske, før siden vises."
   Verify: "Bekræft"
+  Categories: "Kategorier"
+  Category Not Found: "Denne kategori kunne ikke findes."
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} svarede {commentAuthor}"
   Like: "Synes godt om"
@@ -2949,3 +2952,6 @@ YouTube Account:
   Recommendations Failed: "Kunne ikke indlæse dine YouTube-anbefalinger."
   "{author} replied to your comment": "{author} svarede på din kommentar"
   "{author} hearted your comment": "{author} gav din kommentar et hjerte"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Søg på Twitch"

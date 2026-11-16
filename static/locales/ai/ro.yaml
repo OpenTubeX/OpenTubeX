@@ -2778,6 +2778,7 @@ Mobile Navigation:
   popular: "Populare"
   stats: "Statistici"
   more: "Mai mult"
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: Creează o scurtătură pe desktop
@@ -2879,6 +2880,8 @@ Platforms:
   Empty Tab: Încă nu există nimic aici.
   Browser Check: "{platform} îți cere să confirmi că ești om înainte de a afișa această pagină."
   Verify: "Verifică"
+  Categories: "Categorii"
+  Category Not Found: "Această categorie nu a putut fi găsită."
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} i-a răspuns lui {commentAuthor}"
   Like: "Îmi place"
@@ -2909,3 +2912,6 @@ YouTube Account:
   Recommendations Failed: "Recomandările dvs. YouTube nu au putut fi încărcate."
   "{author} replied to your comment": "{author} a răspuns la comentariul tău"
   "{author} hearted your comment": "{author} a dat o inimă comentariului tău"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Caută pe Twitch"

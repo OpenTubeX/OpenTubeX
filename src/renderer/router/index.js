@@ -57,6 +57,8 @@ const Watch = createAsyncRoute(() => import('../views/Watch/Watch.vue'))
 const ExternalMedia = createAsyncRoute(() => import('../views/ExternalMedia/ExternalMedia.vue'))
 const ExternalChannel = createAsyncRoute(() => import('../views/ExternalChannel/ExternalChannel.vue'))
 const ExternalPlaylist = createAsyncRoute(() => import('../views/ExternalPlaylist/ExternalPlaylist.vue'))
+const ExternalCategory = createAsyncRoute(() => import('../views/ExternalCategory/ExternalCategory.vue'))
+const TwitchPage = createAsyncRoute(() => import('../views/TwitchPage/TwitchPage.vue'))
 const Hashtag = createAsyncRoute(() => import('../views/Hashtag/Hashtag.vue'))
 const Post = createAsyncRoute(() => import('../views/Post.vue'))
 
@@ -218,11 +220,27 @@ export const routes = [
           hasResizableThumbnails: true
         },
         component: ExternalPlaylist
+      }, {
+        path: '/external-category',
+        meta: {
+          hasResizableThumbnails: true
+        },
+        component: ExternalCategory
+      }, {
+        path: '/twitch',
+        name: 'twitch',
+        meta: {
+          title: getFixedInternalRouteTitle('/twitch'),
+          hasResizableThumbnails: true
+        },
+        component: TwitchPage
       }]
     : [
         { path: '/external-media', redirect: '/' },
         { path: '/external-channel', redirect: '/' },
-        { path: '/external-playlist', redirect: '/' }
+        { path: '/external-playlist', redirect: '/' },
+        { path: '/external-category', redirect: '/' },
+        { path: '/twitch', redirect: '/' }
       ]),
   {
     path: '/hashtag/:hashtag',
