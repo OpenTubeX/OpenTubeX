@@ -77,12 +77,19 @@ test('active stream abortion reaches both WebKit and native transport', async ()
 
 test('unrelated hosts, HTTP and non-GET media requests keep the standard transport', async () => {
   const f = fixture()
-  for (const url of ['https://example.org/video', 'https://googlevideo.com.attacker.invalid/video', 'http://rr1.googlevideo.com/video', 'https://user:password@rr1.googlevideo.com/video']) {
+  for (const url of ['https://example.org/video', 'https://googlevideo.com.attacker.invalid/video', 'http://rr1.googlevideo.com/video', 'https://user:password@rr1.googlevideo.com/video',
+    'https://euc1.playlist.ttvnw.net.attacker.invalid/v1/playlist/session.m3u8', 'https://euc1.playlist.ttvnw.net/v1/segment/session.ts']) {
     await f.request(url, get, 0).promise
   }
   await f.request(manifest, { ...get, method: 'POST' }, 0).promise
   assert.equal(f.prepared.length, 0)
-  assert.equal(f.fetched.length, 5)
+  assert.equal(f.fetched.length, 7)
+})
+
+test('Twitch live playlists, which reject WebKit\'s origin, use the native transport', async () => {
+  const f = fixture()
+  await f.request('https://euc1.playlist.ttvnw.net/v1/playlist/session.m3u8', get, 0).promise
+  assert.equal(f.prepared[0].url, 'https://euc1.playlist.ttvnw.net/v1/playlist/session.m3u8')
 })
 
 test('failed native requests report the stream URL instead of the local one', async () => {

@@ -2323,6 +2323,7 @@ import {
 import { useMusicVisualizer } from './opentubex/useMusicVisualizer'
 import { useScrollMiniPlayer } from './opentubex/useScrollMiniPlayer'
 import { useSecondaryCaptions } from './opentubex/useSecondaryCaptions'
+import { useTwitchLiveAds } from './opentubex/useTwitchLiveAds'
 import { useTwitchLiveRewind } from './opentubex/useTwitchLiveRewind'
 import { useSilenceSkipping } from './opentubex/useSilenceSkipping'
 import { useSleepTimer } from './opentubex/useSleepTimer'
@@ -2371,6 +2372,11 @@ const props = defineProps({
    */
   twitchLiveRecording: {
     type: Object,
+    default: null
+  },
+  /** The channel of a Twitch livestream, whose ad-free playlists replace ad breaks */
+  twitchLiveLogin: {
+    type: String,
     default: null
   },
   /**
@@ -3707,6 +3713,13 @@ function webmProjectionResponseFilter(type, response) {
 }
 
 /** @type {shaka.extern.ResponseFilter} */
+function twitchLiveAdResponseFilter(type, response, context) {
+  if (type === RequestType.MANIFEST && context?.type === AdvancedRequestType.MEDIA_PLAYLIST) {
+    twitchLiveAds.handleMediaPlaylistResponse(response)
+  }
+}
+
+/** @type {shaka.extern.ResponseFilter} */
 function twitchSubOnlyVodResponseFilter(type, response, context) {
   if (type !== RequestType.MANIFEST || context?.type !== AdvancedRequestType.MEDIA_PLAYLIST) return
   const manifest = new TextDecoder().decode(response.data)
@@ -3726,6 +3739,12 @@ const twitchLiveRewind = useTwitchLiveRewind({
   getPlayer: () => player,
   props,
   video,
+})
+
+const twitchLiveAds = useTwitchLiveAds({
+  getLogin: () => props.twitchLiveLogin,
+  isLiveSource: () => twitchLiveRewind.mode.value === 'live',
+  replaceLiveSource: twitchLiveRewind.replaceLiveSource,
 })
 
 const {
@@ -11973,6 +11992,7 @@ onMounted(async () => {
     videoElement.addEventListener('timeupdate', twitchLiveRewind.handleTimeUpdate)
     localPlayer.addEventListener('loaded', twitchLiveRewind.handleLoaded)
   }
+  if (props.twitchLiveLogin) localPlayer.addEventListener('loaded', twitchLiveAds.handleLoaded)
 
   ui = new shaka.ui.Overlay(
     localPlayer,
@@ -12076,6 +12096,9 @@ onMounted(async () => {
   }
   if (props.twitchSubOnlyVod || props.twitchLiveRecording) {
     player.getNetworkingEngine().registerResponseFilter(twitchSubOnlyVodResponseFilter)
+  }
+  if (props.twitchLiveLogin) {
+    player.getNetworkingEngine().registerResponseFilter(twitchLiveAdResponseFilter)
   }
   if (process.env.IS_ELECTRON) {
     player.getNetworkingEngine().registerRequestFilter(async (_type, request) => {
@@ -12683,7 +12706,7 @@ let pendingFormatSwitchState = null
 let restartedSourceKey = null
 
 watch(
-  () => [props.format, props.playbackSourceKey, twitchLiveRewind.mode.value],
+  () => [props.format, props.playbackSourceKey, twitchLiveRewind.mode.value, twitchLiveRewind.liveManifestSrc.value],
   /**
    * Handles changing between formats. It tries its best to backup and restore the settings:
    * - playback position

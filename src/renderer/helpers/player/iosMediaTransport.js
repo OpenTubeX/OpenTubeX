@@ -1,12 +1,16 @@
 import { DESKTOP_USER_AGENT } from '../api/capacitor-http.js'
 
 /**
+ * Twitch's live playlists reject WebKit's origin, so they load natively, like
+ * YouTube's streams. Keep in sync with `IOSNetwork.isMediaURL`.
  * @param {URL} url
  * @returns {boolean} whether iOS playback transports this URL natively
  */
 export function isIOSNativeMediaUrl(url) {
-  return url.protocol === 'https:' && !url.username && !url.password &&
-    (url.hostname === 'googlevideo.com' || url.hostname.endsWith('.googlevideo.com'))
+  if (url.protocol !== 'https:' || url.username || url.password || url.port) return false
+  const host = url.hostname
+  return host === 'googlevideo.com' || host.endsWith('.googlevideo.com') ||
+    ((host === 'playlist.ttvnw.net' || host.endsWith('.playlist.ttvnw.net')) && url.pathname.startsWith('/v1/playlist/'))
 }
 
 /** Stream HLS manifests/segments through the same native transport as SABR.

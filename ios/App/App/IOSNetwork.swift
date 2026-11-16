@@ -5,9 +5,12 @@ import WebKit
 // handler instead of being copied through the Capacitor JSON bridge.
 final class IOSNetwork: NSObject, URLSessionDataDelegate {
     static let shared = IOSNetwork()
+    // Twitch's live playlists reject WebKit's origin. Keep in sync with isIOSNativeMediaUrl.
     static func isMediaURL(_ url: URL) -> Bool {
-        guard url.scheme == "https", let host = url.host?.lowercased(), url.user == nil, url.password == nil else { return false }
-        return host == "googlevideo.com" || host.hasSuffix(".googlevideo.com")
+        guard url.scheme == "https", let host = url.host?.lowercased(), url.user == nil, url.password == nil,
+              url.port == nil else { return false }
+        return host == "googlevideo.com" || host.hasSuffix(".googlevideo.com") ||
+            ((host == "playlist.ttvnw.net" || host.hasSuffix(".playlist.ttvnw.net")) && url.path.hasPrefix("/v1/playlist/"))
     }
     private var prepared: [String: URLRequest] = [:]
     private var external: [String: URLRequest] = [:]

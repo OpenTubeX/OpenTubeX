@@ -1577,8 +1577,12 @@ final class AppTests: XCTestCase {
     }
 
     func testMediaRequestOrigins() throws {
-        XCTAssertTrue(IOSNetwork.isMediaURL(try XCTUnwrap(URL(string: "https://rr1.googlevideo.com/videoplayback"))))
-        for address in ["http://rr1.googlevideo.com/videoplayback", "https://googlevideo.com.attacker.invalid/", "https://notgooglevideo.com/", "https://user:password@rr1.googlevideo.com/"] {
+        for address in ["https://rr1.googlevideo.com/videoplayback", "https://euc1.playlist.ttvnw.net/v1/playlist/session.m3u8"] {
+            XCTAssertTrue(IOSNetwork.isMediaURL(try XCTUnwrap(URL(string: address))), address)
+        }
+        for address in ["http://rr1.googlevideo.com/videoplayback", "https://googlevideo.com.attacker.invalid/", "https://notgooglevideo.com/", "https://user:password@rr1.googlevideo.com/",
+                        "https://euc1.playlist.ttvnw.net.attacker.invalid/v1/playlist/session.m3u8", "https://euc1.playlist.ttvnw.net/v1/segment/session.ts",
+                        "https://euc1.playlist.ttvnw.net:8443/v1/playlist/session.m3u8", "https://usher.ttvnw.net/api/channel/hls/example.m3u8"] {
             XCTAssertFalse(IOSNetwork.isMediaURL(try XCTUnwrap(URL(string: address))), address)
         }
     }

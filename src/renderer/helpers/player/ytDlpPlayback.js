@@ -11,6 +11,7 @@ import { waitForYtDlpFormatAvailability } from './ytDlpFormatAvailability'
 import { getEarliestYtDlpFormatExpiry, YtDlpPlaybackSourceCache } from './ytDlpPlaybackCache'
 import { capacitorHttpFetch } from '../api/capacitor-http'
 import { fetchTwitchLiveVod, fetchTwitchSubOnlyVod, getTwitchVodId } from '../../../twitchSubOnlyVod'
+import { fetchTwitchAdFreeLivePlaylist } from '../../../twitchLiveAds'
 import { parseTwitchChannelLogin } from '../../../twitchFollows'
 import { mapExternalPlaybackMetadata } from '../../../ytDlpMetadata'
 import { probeHlsManifest as probeYtDlpHlsManifest } from './hlsManifest'
@@ -32,6 +33,7 @@ import { probeHlsManifest as probeYtDlpHlsManifest } from './hlsManifest'
  * @property {boolean} [twitchSubOnlyVod]
  * @property {{ manifestSrc: string, startedAt: number } | null} [twitchLiveRecording] the recording of an ongoing
  *   Twitch broadcast, which the player switches to when seeking behind the live playlist
+ * @property {string | null} [twitchLiveLogin] the channel of a Twitch livestream, whose ad-free playlists replace ad breaks
  * @property {string | null} [twitchVodRegistrationId]
  * @property {string | null} [separateAudioUrl] audio supplied separately from an external video file
  * @property {number | null} duration
@@ -164,8 +166,9 @@ export function invalidateAllYtDlpPlaybackSources() {
  * The caller keeps the original URL as the stable identity for its tab.
  * @param {string} url
  * @param {boolean} useAuthentication
+ * @param {Promise<string | null> | null} liveManifestRequest a manifest that replaces yt-dlp's streams of a livestream
  */
-async function getExternalYtDlpPlaybackSourceFromYtDlp(url, useAuthentication) {
+async function getExternalYtDlpPlaybackSourceFromYtDlp(url, useAuthentication, liveManifestRequest = null) {
   const info = await ytDlp.ytDlpGetPlaybackInfo(url, true, useAuthentication)
   if (info === null) throw new Error('yt-dlp is not available')
   if ('error' in info) throw new Error(info.error === 'ENOENT' ? 'yt-dlp could not be found' : info.error)
@@ -176,6 +179,22 @@ async function getExternalYtDlpPlaybackSourceFromYtDlp(url, useAuthentication) {
     : `data:text/vtt;charset=utf-8,${encodeURIComponent(info.storyboardVtt)}`
   if (info.liveStatus === 'is_upcoming' && info.formats.length === 0) {
     return { info, source: null }
+  }
+  // iOS drops yt-dlp's HLS formats of other sites, which it cannot load
+  const liveManifest = isLive ? await liveManifestRequest : null
+  if (liveManifest) {
+    return {
+      info,
+      source: {
+        manifestSrc: liveManifest,
+        manifestMimeType: MANIFEST_TYPE_HLS,
+        legacyFormats: [],
+        captions: info.captions ?? [],
+        captionTranslations: info.captionTranslations ?? [],
+        storyboardSrc: null,
+        isLive
+      }
+    }
   }
   const audioOnly = info.formats.length > 0 && info.formats.every(format =>
     format.vcodec === 'none' && isAudioFormat(format)
@@ -335,35 +354,50 @@ async function getTwitchLiveVod(login) {
   }
 }
 
+/**
+ * The playlists of yt-dlp's Twitch livestreams include Twitch's ads.
+ * @param {string} login
+ * @param {boolean} allowAds whether a playlist with ads may replace a missing ad-free one
+ * @returns {Promise<string | null>} the `data:` URL of a master playlist
+ */
+export async function getTwitchAdFreeLiveManifest(login, allowAds = false) {
+  try {
+    const playlist = process.env.IS_CAPACITOR
+      ? await fetchTwitchAdFreeLivePlaylist(login, capacitorHttpFetch, allowAds)
+      : await window.ftElectron.twitchAdFreeLivePlaylist(login, allowAds)
+    return playlist ? `data:${MANIFEST_TYPE_HLS};charset=UTF-8,${encodeURIComponent(playlist)}` : null
+  } catch (error) {
+    console.warn('Could not load an ad-free Twitch playlist, ads stay in the stream', error)
+    return null
+  }
+}
+
 export async function getExternalYtDlpPlaybackSource(url, useAuthentication = false) {
   const twitchLogin = parseTwitchChannelLogin(url)
-  // Requested alongside yt-dlp, whose live playlist only covers the last few seconds
-  const liveVodRequest = twitchLogin === null ? null : getTwitchLiveVod(twitchLogin)
+  // Requested alongside yt-dlp, whose live playlist only covers the last few seconds.
+  // iOS fails to load the recording and switches to it without a seek, which stops playback.
+  const liveVodRequest = twitchLogin === null || process.env.IS_IOS ? null : getTwitchLiveVod(twitchLogin)
+  // iOS cannot play yt-dlp's playlists, which other platforms keep when every session has ads
+  const adFreeRequest = twitchLogin === null ? null : getTwitchAdFreeLiveManifest(twitchLogin, !!process.env.IS_IOS)
   try {
-    const result = await getExternalYtDlpPlaybackSourceFromYtDlp(url, useAuthentication)
-    const liveVod = result.source?.isLive && result.source.manifestMimeType === MANIFEST_TYPE_HLS
-      ? await liveVodRequest
-      : null
-    if (!liveVod) return result
+    const result = await getExternalYtDlpPlaybackSourceFromYtDlp(url, useAuthentication, adFreeRequest)
+    if (twitchLogin === null || !result.source?.isLive || result.source.manifestMimeType !== MANIFEST_TYPE_HLS) return result
 
-    let twitchVodRegistrationId
+    const source = { ...result.source, twitchLiveLogin: twitchLogin }
+    const liveVod = await liveVodRequest
+    if (!liveVod) return { info: result.info, source }
+
     try {
-      twitchVodRegistrationId = await registerTwitchVod(liveVod.playlist)
+      source.twitchVodRegistrationId = await registerTwitchVod(liveVod.playlist)
     } catch (error) {
       console.warn('Could not register the Twitch broadcast recording, seeking stays unavailable', error)
-      return result
+      return { info: result.info, source }
     }
-    return {
-      info: result.info,
-      source: {
-        ...result.source,
-        twitchLiveRecording: {
-          manifestSrc: `data:${MANIFEST_TYPE_HLS};charset=UTF-8,${encodeURIComponent(liveVod.playlist)}`,
-          startedAt: liveVod.startedAt
-        },
-        twitchVodRegistrationId
-      }
+    source.twitchLiveRecording = {
+      manifestSrc: `data:${MANIFEST_TYPE_HLS};charset=UTF-8,${encodeURIComponent(liveVod.playlist)}`,
+      startedAt: liveVod.startedAt
     }
+    return { info: result.info, source }
   } catch (error) {
     const videoId = getTwitchVodId(url)
     if (videoId === null) throw error

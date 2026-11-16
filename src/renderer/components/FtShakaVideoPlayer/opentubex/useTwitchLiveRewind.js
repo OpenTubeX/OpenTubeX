@@ -5,6 +5,7 @@ import { computed, ref } from 'vue'
  * switches to the recording of the broadcast, and seeking past the end of the
  * recording returns to the live playlist, which has the lowest latency.
  * Both sources report the whole broadcast as their seek range.
+ * An ad-free playlist can replace the live playlist during ad breaks.
  * @param {{
  *   getPlayer: () => import('shaka-player').Player | null,
  *   getControls: () => import('shaka-player').ui.Controls | null,
@@ -17,9 +18,11 @@ export function useTwitchLiveRewind({ getPlayer, getControls, props, video }) {
   const mode = ref('live')
   /** @type {'live' | 'recording' | null} The source Shaka has loaded, null while switching */
   let loadedMode = null
+  /** @type {import('vue').Ref<string | null>} The playlist that replaces `props.manifestSrc` */
+  const liveManifestSrc = ref(null)
   const manifestSrc = computed(() => mode.value === 'recording' && props.twitchLiveRecording
     ? props.twitchLiveRecording.manifestSrc
-    : props.manifestSrc)
+    : liveManifestSrc.value ?? props.manifestSrc)
 
   /** The time since the epoch, in ms, at which the live source's timeline starts */
   let liveOrigin = null
@@ -132,6 +135,21 @@ export function useTwitchLiveRewind({ getPlayer, getControls, props, video }) {
   }
 
   /**
+   * Replaces the loaded live playlist, which reloads at the live edge, as timelines differ between playlists.
+   * The recording has no ads, so returning from it checks the live playlist again.
+   * @param {string} src
+   * @returns {boolean} whether the player loads the playlist
+   */
+  function replaceLiveSource(src) {
+    if (mode.value !== 'live') return false
+    liveManifestSrc.value = src
+    loadedMode = null
+    liveOrigin = null
+    switchStartTime = null
+    return true
+  }
+
+  /**
    * The start time of a load caused by switching sources, as positions differ between them.
    * @returns {number | null | undefined} undefined when the load keeps the current position
    */
@@ -141,5 +159,5 @@ export function useTwitchLiveRewind({ getPlayer, getControls, props, video }) {
     return time
   }
 
-  return { attach, handleLoaded, handleTimeUpdate, manifestSrc, mode, takeSwitchStartTime }
+  return { attach, handleLoaded, handleTimeUpdate, liveManifestSrc, manifestSrc, mode, replaceLiveSource, takeSwitchStartTime }
 }

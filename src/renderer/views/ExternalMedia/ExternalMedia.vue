@@ -88,6 +88,7 @@
                 :manifest-mime-type="source.manifestMimeType"
                 :twitch-sub-only-vod="source.twitchSubOnlyVod === true"
                 :twitch-live-recording="source.twitchLiveRecording ?? null"
+                :twitch-live-login="source.twitchLiveLogin ?? null"
                 :legacy-formats="source.legacyFormats"
                 :format="source.manifestSrc ? (source.audioOnly ? 'audio' : 'dash') : 'legacy'"
                 :captions="source.captions"

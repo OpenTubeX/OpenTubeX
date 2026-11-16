@@ -30,6 +30,28 @@ public class ExternalStreamRequestRegistryTest {
         assertEquals("session=secret", registry.headersFor(new URL("https://cdn.cloudfront.net/archive-key/360p30/segment.ts")).get("Cookie"));
     }
 
+    @Test public void sendsTwitchOriginOnlyToTwitchLivePlaylists() throws Exception {
+        ExternalStreamRequestRegistry registry = new ExternalStreamRequestRegistry();
+        assertEquals(Map.of("Origin", "https://www.twitch.tv"),
+            registry.headersFor(new URL("https://euc13.playlist.ttvnw.net/v1/playlist/session-token.m3u8")));
+        // Also on hosts whose playlists yt-dlp registered
+        registry.register(new JSONArray().put(new JSONObject()
+            .put("url", "https://euc13.playlist.ttvnw.net/v1/playlist/yt-dlp-session.m3u8").put("protocol", "m3u8_native")
+            .put("http_headers", new JSONObject().put("User-Agent", "agent"))), "");
+        assertEquals(Map.of("Origin", "https://www.twitch.tv", "User-Agent", "agent"),
+            registry.headersFor(new URL("https://euc13.playlist.ttvnw.net/v1/playlist/session-token.m3u8")));
+        for (String url : new String[]{
+            "http://euc13.playlist.ttvnw.net/v1/playlist/session-token.m3u8",
+            "https://euc13.playlist.ttvnw.net.example.com/v1/playlist/session-token.m3u8",
+            "https://user@euc13.playlist.ttvnw.net/v1/playlist/session-token.m3u8",
+            "https://euc13.playlist.ttvnw.net:8443/v1/playlist/session-token.m3u8",
+            "https://euc13.playlist.ttvnw.net/v1/segment/session-token.ts",
+            "https://usher.ttvnw.net/api/channel/hls/example.m3u8",
+        }) {
+            assertNull(url, registry.headersFor(new URL(url)));
+        }
+    }
+
     @Test public void rejectsUntrustedTwitchVodCdnUrls() {
         ExternalStreamRequestRegistry registry = new ExternalStreamRequestRegistry();
         for (String url : new String[] {

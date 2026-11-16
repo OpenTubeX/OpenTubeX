@@ -48,7 +48,10 @@ async function prepareTwitchYtDlp(app, page, mediaUrl, live, description = '', c
     const store = window.$store
     await store.dispatch('updateYtDlpSource', 'system')
   })
-  if (live) await mockTwitchLiveVod(app, null)
+  if (live) {
+    await mockTwitchLiveVod(app, null)
+    await mockTwitchAdFreeLivePlaylists(app, [{ playlist: null }])
+  }
 }
 
 /** Twitch's recording of the ongoing broadcast, null for channels that keep no VODs */
@@ -57,6 +60,23 @@ async function mockTwitchLiveVod(app, recording) {
     ipcMain.removeHandler('twitch-live-vod')
     ipcMain.handle('twitch-live-vod', () => recording)
   }, recording)
+}
+
+/**
+ * The ad-free master playlists that Twitch returns, one per request, repeating the last.
+ * `playlist` is null when every player's playlists have ads.
+ * @param {{ playlist: string | null, delayMs?: number }[]} responses
+ */
+async function mockTwitchAdFreeLivePlaylists(app, responses) {
+  await app.electronApp.evaluate(({ ipcMain }, responses) => {
+    let request = 0
+    ipcMain.removeHandler('twitch-ad-free-live-playlist')
+    ipcMain.handle('twitch-ad-free-live-playlist', async () => {
+      const { playlist, delayMs = 0 } = responses[Math.min(request++, responses.length - 1)]
+      await new Promise(resolve => setTimeout(resolve, delayMs))
+      return playlist
+    })
+  }, responses)
 }
 
 /**
@@ -1432,6 +1452,7 @@ test('Twitch livestream seeks back through the recording of its broadcast and re
     playlist: `#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=8534000,CODECS="avc1.64001f",RESOLUTION=1920x1080\n${recordingUrl}\n`,
     startedAt
   })
+  await mockTwitchAdFreeLivePlaylists(app, [{ playlist: null }])
   const playlist = (body) => route => route.fulfill({
     contentType: 'application/vnd.apple.mpegurl',
     headers: { 'Access-Control-Allow-Origin': '*' },
@@ -1502,6 +1523,109 @@ ${Array.from({ length: 35 }, (_, index) => `#EXTINF:2.000,\n${index}.mp4`).join(
   await liveTime.click()
   // The recording is an EVENT playlist, which Shaka does not consider live
   await expect.poll(isLive).toBe(true)
+})
+
+test('Twitch livestream plays an ad-free playlist and replaces it when an ad break starts', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const fixture = await readFile(path.join(repoRoot, 'e2e/fixtures/media/hls-1080.mp4'))
+  const fragmentStart = fixture.indexOf(Buffer.from('moof')) - 4
+  expect(fragmentStart).toBeGreaterThan(0)
+  const masterUrl = 'https://live.example.test/master.m3u8'
+  const liveUrl = 'https://live.example.test/1080.m3u8'
+  const firstUrl = 'https://first.example.test/1080.m3u8'
+  const secondUrl = 'https://second.example.test/1080.m3u8'
+  const executable = path.join(app.userDataDir, 'twitch-live-ads-yt-dlp.sh')
+  const response = JSON.stringify({
+    title: 'A Twitch livestream',
+    webpage_url: 'https://www.twitch.tv/testchannel',
+    live_status: 'is_live',
+    manifest_url: masterUrl,
+    formats: [{ format_id: '1080p', url: liveUrl, manifest_url: masterUrl, protocol: 'm3u8_native', ext: 'mp4', vcodec: 'avc1.64001f', acodec: 'none', width: 1920, height: 1080 }]
+  })
+  await writeFile(executable, [
+    '#!/bin/sh',
+    'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
+    `printf '%s\\n' '${response}'`
+  ].join('\n'))
+  await chmod(executable, 0o755)
+  await choosePickerPaths(app, page, { ytDlpPath: executable })
+  await page.evaluate(() => window.$store.dispatch('updateYtDlpSource', 'system'))
+  await mockTwitchLiveVod(app, null)
+  // The stream opens on an ad-free session, which later gets an ad break. Finding
+  // another session without ads takes a while, during which the first lists ads.
+  const master = url => `#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=6000000,CODECS="avc1.64001f",RESOLUTION=1920x1080\n${url}\n`
+  await mockTwitchAdFreeLivePlaylists(app, [{ playlist: master(firstUrl) }, { playlist: master(secondUrl), delayMs: 3000 }])
+
+  const liveStart = Date.now() - 20_000
+  /** @type {number | null} the segment from which the first session has ads */
+  let firstAd = null
+  const mediaPlaylist = (origin, withAds) => {
+    const last = Math.floor((Date.now() - liveStart) / 2000) - 1
+    const segments = Array.from({ length: 4 }, (_, index) => last - 3 + index).map(index => {
+      const isAd = withAds && firstAd !== null && index >= firstAd
+      return `#EXT-X-PROGRAM-DATE-TIME:${new Date(liveStart + index * 2000).toISOString()}\n#EXTINF:2.000,${isAd ? 'Advertiser|1234' : 'live'}\n${origin}/${isAd ? 'ad-' : ''}${index}.mp4`
+    })
+    const adRange = withAds && firstAd !== null
+      ? `#EXT-X-DATERANGE:ID="stitched-ad-${firstAd}",CLASS="twitch-stitched-ad",START-DATE="${new Date(liveStart + firstAd * 2000).toISOString()}",DURATION=30.000\n`
+      : ''
+    return `#EXTM3U
+#EXT-X-VERSION:6
+#EXT-X-TARGETDURATION:2
+#EXT-X-MEDIA-SEQUENCE:${last - 3}
+${adRange}#EXT-X-MAP:URI="${origin}/init.mp4"
+${segments.join('\n')}
+`
+  }
+  const playlist = body => route => route.fulfill({
+    contentType: 'application/vnd.apple.mpegurl',
+    headers: { 'Access-Control-Allow-Origin': '*' },
+    body: body()
+  })
+  // yt-dlp's playlist, which has Twitch's ads
+  let ytDlpPlaylistRequested = false
+  await page.route(/^https:\/\/live\.example\.test\//, route => {
+    ytDlpPlaylistRequested = true
+    return route.abort()
+  })
+  let firstRequested = false
+  let secondRequested = false
+  await page.route(firstUrl, playlist(() => {
+    firstRequested = true
+    return mediaPlaylist('https://first.example.test', true)
+  }))
+  await page.route(secondUrl, playlist(() => {
+    secondRequested = true
+    return mediaPlaylist('https://second.example.test', false)
+  }))
+  const adRequests = []
+  await page.route(/^https:\/\/(?:first|second)\.example\.test\/(?:init|ad-\d+|\d+)\.mp4$/, route => {
+    const url = route.request().url()
+    if (url.includes('/ad-')) adRequests.push(url)
+    return route.fulfill({
+      contentType: 'video/mp4',
+      headers: { 'Access-Control-Allow-Origin': '*' },
+      body: url.endsWith('/init.mp4') ? fixture.subarray(0, fragmentStart) : fixture.subarray(fragmentStart)
+    })
+  })
+
+  await openLiveStream(page, 'https://www.twitch.tv/testchannel')
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  const video = player.locator('video')
+  const isLive = () => player.evaluate(element => element.ui?.getControls().getPlayer().isLive() ?? false)
+  await expect.poll(isLive).toBe(true)
+  await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
+  expect(firstRequested).toBe(true)
+  expect(secondRequested).toBe(false)
+
+  // The break starts with the next segment of the first session
+  firstAd = Math.floor((Date.now() - liveStart) / 2000)
+  await expect.poll(() => secondRequested).toBe(true)
+  await expect.poll(isLive).toBe(true)
+  await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
+  const resumedAt = await video.evaluate(element => element.currentTime)
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(resumedAt + 1)
+  expect(adRequests).toEqual([])
+  expect(ytDlpPlaylistRequested).toBe(false)
 })
 
 test('external media starts at the default playback speed', async ({ app, page }) => {
