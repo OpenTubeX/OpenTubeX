@@ -2,6 +2,7 @@ package org.opentubex.app;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -13,8 +14,12 @@ import java.util.List;
 
 final class SubscriptionRefreshConfiguration {
     static final String[] FEED_TYPES = { "videos", "shorts", "live", "posts" };
+    private static final String TAG = "SubscriptionRefresh";
     private static final String PREFERENCES = "subscription-refresh";
+    // Earlier versions saved it unencrypted, and so does this one when the Keystore fails.
     private static final String CONFIGURATION_KEY = "configuration";
+    // It holds the API server's Authorization header.
+    private static final String ENCRYPTED_CONFIGURATION_KEY = "encryptedConfiguration";
 
     static final class Feed {
         final String profileId;
@@ -50,12 +55,51 @@ final class SubscriptionRefreshConfiguration {
 
     private SubscriptionRefreshConfiguration() {}
 
-    static void save(Context context, JSONObject configuration) {
-        preferences(context).edit().putString(CONFIGURATION_KEY, configuration.toString()).commit();
+    static synchronized void save(Context context, JSONObject configuration) {
+        write(preferences(context), configuration.toString());
+    }
+
+    /** Saves the configuration encrypted, or as it is when the Keystore fails. */
+    private static void write(SharedPreferences preferences, String configuration) {
+        SharedPreferences.Editor editor = preferences.edit();
+        try {
+            editor.putString(ENCRYPTED_CONFIGURATION_KEY, SecretStorage.encrypt(configuration)).remove(CONFIGURATION_KEY);
+        } catch (Exception error) {
+            Log.e(TAG, "Unable to encrypt the background refresh settings, saving them unencrypted", error);
+            editor.putString(CONFIGURATION_KEY, configuration).remove(ENCRYPTED_CONFIGURATION_KEY);
+        }
+        editor.commit();
+    }
+
+    /**
+     * The saved configuration. One this installation cannot decrypt, such as
+     * one restored from another device, is deleted until the app configures
+     * the refreshes again. One saved unencrypted is encrypted.
+     */
+    static synchronized String read(Context context) {
+        SharedPreferences preferences = preferences(context);
+        String encrypted = preferences.getString(ENCRYPTED_CONFIGURATION_KEY, null);
+        if (encrypted == null) {
+            String configuration = preferences.getString(CONFIGURATION_KEY, null);
+            if (configuration != null) write(preferences, configuration);
+            return configuration;
+        }
+        try {
+            String configuration = SecretStorage.decrypt(encrypted);
+            if (configuration == null) {
+                Log.w(TAG, "Deleting the background refresh settings, which cannot be decrypted on this device");
+                preferences.edit().remove(ENCRYPTED_CONFIGURATION_KEY).commit();
+            }
+            return configuration;
+        } catch (Exception error) {
+            // The next refresh tries again.
+            Log.e(TAG, "Unable to decrypt the background refresh settings", error);
+            return null;
+        }
     }
 
     static List<Feed> readFeeds(Context context) {
-        String encoded = preferences(context).getString(CONFIGURATION_KEY, null);
+        String encoded = read(context);
         if (encoded == null) return Collections.emptyList();
 
         try {

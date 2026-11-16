@@ -159,7 +159,7 @@ public class SubscriptionRefreshBackgroundTest {
         java.util.concurrent.atomic.AtomicInteger running = new java.util.concurrent.atomic.AtomicInteger();
         java.util.concurrent.atomic.AtomicInteger mostRunning = new java.util.concurrent.atomic.AtomicInteger();
         android.content.SharedPreferences preferences = context.getSharedPreferences("subscription-refresh", Context.MODE_PRIVATE);
-        String savedConfiguration = preferences.getString("configuration", null);
+        String savedConfiguration = SubscriptionRefreshConfiguration.read(context);
         File results = new File(context.getFilesDir(), "subscription-refresh-results");
         java.net.ProxySelector original = java.net.ProxySelector.getDefault();
         try (ServerSocket server = new ServerSocket(0, 16, java.net.InetAddress.getByName("127.0.0.1"))) {
@@ -230,8 +230,8 @@ public class SubscriptionRefreshBackgroundTest {
             assertEquals("completion", savedResult(results, customProfile + "\nvideos\ncompletion").getString("kind"));
         } finally {
             java.net.ProxySelector.setDefault(original);
-            if (savedConfiguration == null) preferences.edit().remove("configuration").commit();
-            else preferences.edit().putString("configuration", savedConfiguration).commit();
+            if (savedConfiguration == null) preferences.edit().remove("configuration").remove("encryptedConfiguration").commit();
+            else SubscriptionRefreshConfiguration.save(context, new JSONObject(savedConfiguration));
             for (String profileId : List.of(allProfile, customProfile)) {
                 for (String slot : new String[] { "completion", "failure", "UCa", "UCb", "UCc", "UCd", "UCe", "UCf", "UCg", "UCh" }) {
                     File file = new File(results, slotName(profileId + "\nvideos\n" + slot) + ".json");
