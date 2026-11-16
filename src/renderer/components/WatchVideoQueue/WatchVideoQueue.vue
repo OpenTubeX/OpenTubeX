@@ -140,6 +140,7 @@
             <FtRetryImage
               class="queueThumbnail"
               :src="item.thumbnail"
+              sizes="134px"
               alt=""
             />
             <span class="queueDetails">

@@ -66,6 +66,7 @@
               width="35"
               loading="lazy"
               :src="pinnedPlaylistThumbnail(playlist)"
+              sizes="35px"
               :alt="isOpen ? '' : playlist.playlistName"
             />
             <FtIcon

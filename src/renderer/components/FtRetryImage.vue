@@ -2,6 +2,8 @@
   <!-- Keep a small box for lazy loading without expanding scroll overflow. -->
   <img
     v-bind="{ ...$attrs, ...parentScope }"
+    :sizes="srcset ? imageSizes : undefined"
+    :srcset="srcset || undefined"
     :src="imageUrl || undefined"
     :alt="$attrs.alt ?? ''"
     :style="hasLoaded ? null : {
@@ -45,10 +47,10 @@
 </template>
 
 <script setup>
-import { computed, getCurrentInstance, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, getCurrentInstance, inject, onBeforeUnmount, ref, watch } from 'vue'
 import { FtIcon } from '@opentubex/icons'
 import store from '../store/index'
-import { getVideoThumbnailSource, getVideoThumbnailFallbackUrl, rememberMissingThumbnail, skipMissingThumbnails } from '../helpers/videoThumbnail.js'
+import { getVideoThumbnailSource, getVideoThumbnailFallbackUrl, getVideoThumbnailSrcset, isMissingThumbnailPlaceholder, rememberMissingThumbnail, skipMissingThumbnails, thumbnailSizesKey } from '../helpers/videoThumbnail.js'
 import thumbnailPlaceholder from '../assets/img/thumbnail_placeholder.svg'
 
 defineOptions({ inheritAttrs: false })
@@ -69,6 +71,15 @@ const props = defineProps({
   fallbackIcon: {
     type: [Array, String, Object],
     default: null
+  },
+  /**
+   * The slot's rendered width as an `<img sizes>` value. Lets full-resolution
+   * video thumbnails load their 320px version where that is sharp enough.
+   * Defaults to the value provided by a list, such as a thumbnail grid.
+   */
+  sizes: {
+    type: String,
+    default: null
   }
 })
 
@@ -79,6 +90,10 @@ const preferredSource = computed(() => {
   return skipMissingThumbnails(getVideoThumbnailSource(src.startsWith('//') ? 'https:' + src : src, store.getters.getUseDataSaverThumbnails))
 })
 const imageUrl = ref(preferredSource.value)
+const providedSizes = inject(thumbnailSizesKey, null)
+const imageSizes = computed(() => props.sizes ?? providedSizes?.value ?? null)
+// Retries keep their query parameter on both candidates.
+const srcset = computed(() => imageSizes.value ? getVideoThumbnailSrcset(imageUrl.value) : null)
 const hasLoaded = ref(false)
 const hasFailed = ref(false)
 const isLoading = computed(() => !hasLoaded.value && !hasFailed.value && !!preferredSource.value && preferredSource.value !== thumbnailPlaceholder)
@@ -193,12 +208,11 @@ function useSmallerThumbnail(missing = false) {
 }
 
 function handleImageLoad(event) {
-  if (hasLoaded.value) return
   // YouTube can return a decodable 120x90 placeholder for missing resolutions.
+  // A srcset can switch to that candidate after the smaller one loaded.
   const image = event.target
-  if (image.naturalWidth === 120 && image.naturalHeight === 90) {
-    if (useSmallerThumbnail(true)) return
-  }
+  if (isMissingThumbnailPlaceholder(image) && useSmallerThumbnail(true)) return
+  if (hasLoaded.value) return
   clearTimeout(skeletonTimeoutId)
   cancelNativeRecovery()
   stopVisibilityObserver()

@@ -50,6 +50,7 @@
             >
               <FtRetryImage
                 :src="hideThumbnails ? thumbnailPlaceholder : video.thumbnail || thumbnailPlaceholder"
+                sizes="120px"
                 alt=""
                 class="offlineDownloadThumbnail"
                 :class="{ blur: blurThumbnails }"

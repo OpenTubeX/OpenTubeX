@@ -144,7 +144,11 @@ test('renders live chat members with empty badge thumbnails without image setup 
   expect(rendererErrors).toEqual([])
 })
 
-test('slow missing-resolution thumbnails give the smaller source a full loading deadline', async ({ page }, testInfo) => {
+test('slow missing-resolution thumbnails give the smaller source a full loading deadline', async ({ app, page }, testInfo) => {
+  // A high-density screen chooses the full-resolution srcset candidate.
+  await app.electronApp.evaluate(({ BrowserWindow }) => {
+    BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(2)
+  })
   await page.clock.install()
   const pending = []
   await page.route('https://i.ytimg.com/vi/deadline/**', route => { pending.push(route) })
@@ -164,6 +168,7 @@ test('slow missing-resolution thumbnails give the smaller source a full loading 
   const placeholder = card.locator('.retryImagePlaceholder')
   const image = card.locator('.thumbnailImage:not(.retryImagePlaceholder)')
   await expect.poll(() => pending.length).toBe(1)
+  expect(pending[0].request().url()).toMatch(/\/maxresdefault\.jpg$/)
   await expect(placeholder).toHaveClass(/ft-shimmer/)
   await page.clock.fastForward(9000)
   await pending[0].fulfill({ contentType: 'image/svg+xml', body: '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="90"/>' })

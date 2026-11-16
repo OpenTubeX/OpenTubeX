@@ -75,3 +75,27 @@ export function getThumbnailListStyles(thumbnailSize) {
     '--thumbnail-list-mobile-max-size': `${30 * scale}vw`
   }
 }
+
+/**
+ * The `<img sizes>` value for a grid card of the given width. Rounding up keeps
+ * resizes from updating every card on each frame.
+ * @param {number} size
+ */
+export function getThumbnailGridSizes(size) {
+  return `${Math.ceil(size / 32) * 32}px`
+}
+
+/**
+ * The `<img sizes>` value matching the list thumbnail width from
+ * {@link getThumbnailListStyles}, `min(336px, 25vw)` or `30vw` on phones.
+ * @param {number} thumbnailSize
+ * @param {number} [widthFactor] the share of that width a view displays
+ */
+export function getThumbnailListSizes(thumbnailSize, widthFactor = 1) {
+  const scale = thumbnailSize / DEFAULT_THUMBNAIL_SIZE
+  const round = value => Math.round(value * 100) / 100
+  const width = 336 * scale * widthFactor
+  // 25vw reaches the fixed width at this viewport width.
+  const fixedWidthViewport = width / (0.25 * scale)
+  return `(max-width: ${PHONE_THUMBNAIL_VIEWPORT_WIDTH}px) ${round(30 * scale)}vw, (max-width: ${round(fixedWidthViewport)}px) ${round(25 * scale)}vw, ${round(width)}px`
+}

@@ -128,6 +128,7 @@
                     <FtRetryImage
                       v-if="previewVideoThumbnail"
                       :src="previewVideoThumbnail"
+                      sizes="48px"
                       alt=""
                       class="previewThumbnail"
                     />

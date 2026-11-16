@@ -78,6 +78,7 @@
         >
           <FtRetryImage
             :src="thumbnail"
+            :sizes="SIDEBAR_THUMBNAIL_SIZES[appearance]"
             class="thumbnailImage"
             :class="{
               blur: blurThumbnails,
@@ -631,6 +632,9 @@ import { getYoutubeVideoShareUrl } from '../../helpers/share'
 import { isTileMarkShortcut, tileKeyboardShortcutsKey } from '../../helpers/tileNavigation'
 import { playInBackgroundKey, watchNavigationKey } from '../../tabs/TabContext'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
+
+// Sidebar rows have fixed thumbnail widths; lists and grids provide theirs.
+const SIDEBAR_THUMBNAIL_SIZES = { recommendation: '163px', watchPlaylistItem: '134px' }
 
 const props = defineProps({
   data: {

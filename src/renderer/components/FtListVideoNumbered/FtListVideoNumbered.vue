@@ -84,7 +84,7 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, inject, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
+import { computed, inject, nextTick, onBeforeUnmount, provide, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { usePlaylistDrag } from '../../composables/usePlaylistDrag'
@@ -95,6 +95,8 @@ import { restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { openButtonMenu } from '../../helpers/buttonMenu'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { thumbnailSizeSettingKey } from '../../composables/useThumbnailSizeSlider'
+import { getThumbnailListSizes } from '../../constants/thumbnailSize'
+import { thumbnailSizesKey } from '../../helpers/videoThumbnail.js'
 
 import FtListVideo from '../FtListVideo/FtListVideo.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
@@ -249,6 +251,8 @@ const windowed = process.env.IS_CAPACITOR || process.env.IS_ELECTRON
 const row = useTemplateRef('row')
 const shellHeight = ref(0)
 const thumbnailSizeSetting = inject(thumbnailSizeSettingKey, 'thumbnailSize')
+// Playlist page rows show 60% of the list thumbnail width. Watch page rows set their own.
+provide(thumbnailSizesKey, computed(() => getThumbnailListSizes(store.state.settings[thumbnailSizeSetting], 0.6)))
 if (windowed) {
   let windowItem = null
   watch(row, element => {

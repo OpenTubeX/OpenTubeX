@@ -10,6 +10,7 @@
       class="itemImageIcon"
       :class="{ roundImageIcon: item.roundIcon }"
       :src="item.icon"
+      sizes="16px"
       alt=""
       referrerpolicy="no-referrer"
       @error="failedImageIcon = item.icon"

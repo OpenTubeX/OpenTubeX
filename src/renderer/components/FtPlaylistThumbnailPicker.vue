@@ -7,6 +7,7 @@
     <FtRetryImage
       class="thumbnailPreview"
       :src="thumbnailForDisplay"
+      sizes="240px"
       :class="{ blur: store.getters.getBlurThumbnails }"
       alt=""
     />

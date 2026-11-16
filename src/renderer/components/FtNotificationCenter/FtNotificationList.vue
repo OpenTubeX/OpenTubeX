@@ -34,6 +34,7 @@
           >
             <FtRetryImage
               :src="entry.thumbnail"
+              sizes="112px"
               :class="{ blur: blurThumbnails }"
               :fallback-icon="NOTIFICATION_KIND_ICONS[entry.kind]"
               loading="lazy"

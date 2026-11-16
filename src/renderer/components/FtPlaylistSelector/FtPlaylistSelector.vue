@@ -20,6 +20,7 @@
       <FtRetryImage
         alt=""
         :src="thumbnail"
+        :sizes="appearance === 'list' ? '112px' : '245px'"
         class="thumbnailImage"
         :class="{ blur: store.getters.getBlurThumbnails }"
       />
