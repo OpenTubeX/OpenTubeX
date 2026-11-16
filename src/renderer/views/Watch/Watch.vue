@@ -1037,6 +1037,7 @@
           :key="videoId"
           :comments="commentPreviews"
           :panel-open="mobilePanel === 'comments'"
+          :video-playing="videoPlaying"
           class="watchVideo"
           @open="openPhonePanel('comments')"
         />

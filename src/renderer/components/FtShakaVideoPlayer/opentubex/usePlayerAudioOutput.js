@@ -41,6 +41,15 @@ export function usePlayerAudioOutput(video) {
     }
   }
 
+  // A running context keeps rendering silence after the video pauses, which
+  // keeps an audio thread and the device's audio output busy. A resume that
+  // finishes after the pause also lands here through 'statechange'.
+  function suspendWhilePaused() {
+    if (audioContext?.state === 'running' && routedVideo?.paused) {
+      audioContext.suspend().catch(error => console.warn('Unable to suspend player audio output', error))
+    }
+  }
+
   async function setupGraph() {
     const videoElement = video.value
     if (!videoElement) {
@@ -68,7 +77,11 @@ export function usePlayerAudioOutput(video) {
     gainNodes = nodes
     routedVideo = videoElement
     audioContext.addEventListener('statechange', resumeWhilePlaying)
+    audioContext.addEventListener('statechange', suspendWhilePaused)
+    videoElement.addEventListener('play', resumeWhilePlaying)
     videoElement.addEventListener('playing', resumeWhilePlaying)
+    videoElement.addEventListener('pause', suspendWhilePaused)
+    suspendWhilePaused()
   }
 
   async function ensureGraph() {
@@ -129,7 +142,10 @@ export function usePlayerAudioOutput(video) {
   onBeforeUnmount(() => {
     destroyed = true
     audioContext?.removeEventListener('statechange', resumeWhilePlaying)
+    audioContext?.removeEventListener('statechange', suspendWhilePaused)
+    routedVideo?.removeEventListener('play', resumeWhilePlaying)
     routedVideo?.removeEventListener('playing', resumeWhilePlaying)
+    routedVideo?.removeEventListener('pause', suspendWhilePaused)
     routedVideo = null
     audioContext?.close().catch(() => {})
     audioContext = null

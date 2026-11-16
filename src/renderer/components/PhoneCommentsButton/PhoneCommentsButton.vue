@@ -91,7 +91,8 @@ import FtRetryImage from '../FtRetryImage.vue'
 
 const props = defineProps({
   comments: { type: Array, default: () => [] },
-  panelOpen: { type: Boolean, default: false }
+  panelOpen: { type: Boolean, default: false },
+  videoPlaying: { type: Boolean, default: false }
 })
 const emit = defineEmits(['open'])
 const previewId = useId()
@@ -115,7 +116,9 @@ watch(previewIds, () => {
   currentIndex.value = 0
 })
 
-watch([previewIds, () => previews.value.length > 1 && !reducedMotion.value &&
+// Each rotation redraws the page while the video already redraws it for every
+// frame, so the preview holds still during playback.
+watch([previewIds, () => previews.value.length > 1 && !reducedMotion.value && !props.videoPlaying &&
   documentVisible.value && isTabPresented?.value !== false],
 ([, rotate], _, onCleanup) => {
   if (!rotate) return
