@@ -2245,7 +2245,7 @@ Tooltips:
     Add to YouTube Watch History: "Os vídeos que você assiste são adicionados ao seu histórico de reprodução do YouTube, para que as recomendações do YouTube aprendam com eles. Nada é adicionado enquanto o histórico estiver pausado no YouTube."
     Rate Videos: "Mostra os botões gostei e não gostei nos vídeos. Para mostrar sua avaliação, cada vídeo que você abre é consultado no YouTube com sua conta, então o YouTube fica sabendo quais vídeos você abre, mesmo quando eles não são adicionados ao seu histórico de exibição."
   General Settings:
-    Reply Notifications: "O OpenTubeX verifica por 30 dias se os comentários que você acompanha receberam novas respostas. Ele também avisa quando um criador dá um coração a um dos seus comentários. Acompanhe qualquer comentário com o botão de sino ao lado dele."
+    Reply Notifications: "O OpenTubeX verifica se os comentários que você acompanha receberam novas respostas. Ele também avisa quando um criador dá um coração a um dos seus comentários. Um comentário continua sendo acompanhado até passarem 30 dias sem novas respostas, corações ou sem você abri-lo. Até 50 comentários podem ser acompanhados ao mesmo tempo, então acompanhar mais faz você deixar de acompanhar os que estão inativos há mais tempo. Acompanhe qualquer comentário com o botão de sino ao lado dele."
     Built-in Streams: |
       Automático reproduz a maioria dos vídeos pelo cliente visionOS do YouTube, que inicia mais rápido e oferece suporte à qualidade automática. Transmissões ao vivo e vídeos que ele não consegue reproduzir usam SABR.
       Somente SABR sempre usa o cliente web do YouTube, que inicia mais devagar e não tem qualidade automática.

@@ -2295,7 +2295,7 @@ Tooltips:
     Add to YouTube Watch History: "您播放的影片會加入您的 YouTube 觀看紀錄，讓 YouTube 的推薦內容從中學習。在 YouTube 上暫停觀看紀錄時，不會加入任何內容。"
     Rate Videos: "在影片上顯示喜歡和不喜歡按鈕。為了顯示你的評價，你開啟的每部影片都會用你的帳戶在 YouTube 上查詢，因此即使影片沒有加入觀看記錄，YouTube 也會知道你開啟了哪些影片。"
   General Settings:
-    Reply Notifications: "OpenTubeX 會在 30 天內檢查你追蹤的留言是否有新回覆。創作者為你的留言加上愛心時，也會通知你。使用留言旁的鈴鐺按鈕即可追蹤任何留言。"
+    Reply Notifications: "OpenTubeX 會檢查你追蹤的留言是否有新回覆。創作者為你的留言加上愛心時，也會通知你。留言會持續被追蹤，直到 30 天內沒有新回覆、新愛心，你也沒有開啟過它。最多可同時追蹤 50 則留言，追蹤更多時，會取消追蹤最久沒有動靜的留言。使用留言旁的鈴鐺按鈕即可追蹤任何留言。"
     Built-in Streams: |
       自動模式透過 YouTube 的 visionOS 用戶端播放大多數影片，啟動更快並支援自動畫質。直播和它無法播放的影片會使用 SABR。
       僅 SABR 一律使用 YouTube 的網頁用戶端，啟動較慢且沒有自動畫質。

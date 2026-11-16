@@ -2793,7 +2793,7 @@ Tooltips:
     Add to YouTube Watch History: "Videoposnetki, ki jih predvajate, se dodajo v vašo zgodovino predvajanj v storitvi YouTube, zato se priporočila YouTube učijo iz njih. Ko je zgodovina v storitvi YouTube začasno zaustavljena, se ne doda nič."
     Rate Videos: "Prikaže gumba Všeč mi je in Ni mi všeč na videoposnetkih. Za prikaz vaše ocene se vsak odprt videoposnetek z vašim računom poišče v YouTubu, zato YouTube izve, katere videoposnetke odpirate, tudi ko niso dodani v zgodovino ogledov."
   General Settings:
-    Reply Notifications: "OpenTubeX 30 dni preverja, ali so na komentarje, ki jih spremljate, prispeli novi odgovori. Obvesti vas tudi, ko ustvarjalec da srček kateremu od vaših komentarjev. Kateri koli komentar spremljajte z gumbom z zvoncem poleg njega."
+    Reply Notifications: "OpenTubeX preverja, ali so na komentarje, ki jih spremljate, prispeli novi odgovori. Obvesti vas tudi, ko ustvarjalec da srček kateremu od vaših komentarjev. Komentar ostane spremljan, dokler ne mine 30 dni brez novih odgovorov, srčkov ali vašega odpiranja. Hkrati lahko spremljate do 50 komentarjev, zato se ob spremljanju novih preneha spremljanje tistih, ki so najdlje neaktivni. Kateri koli komentar spremljajte z gumbom z zvoncem poleg njega."
     Built-in Streams: |
       Samodejni način predvaja večino videoposnetkov prek YouTubovega odjemalca visionOS, ki se zažene hitreje in podpira samodejno kakovost. Prenosi v živo in videoposnetki, ki jih ne more predvajati, uporabljajo SABR.
       Samo SABR vedno uporablja YouTubov spletni odjemalec, ki se zažene počasneje in nima samodejne kakovosti.

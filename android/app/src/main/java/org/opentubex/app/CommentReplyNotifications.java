@@ -101,9 +101,19 @@ final class CommentReplyNotifications {
         writeState(file, state);
     }
 
-    /** The watched threads, newest first, for the list of watched comments. */
+    /** The watched threads, last active first, for the list of watched comments. */
     static synchronized JSONArray list(Context context) throws Exception {
         return new JSONArray(normalize(threads(readState(stateFile(context))), System.currentTimeMillis()));
+    }
+
+    /** Counts opening a thread as activity of the comments watched in it. */
+    static synchronized void touch(Context context, String videoId, String threadId) throws Exception {
+        File file = stateFile(context);
+        JSONObject state = readState(file);
+        JSONArray threads = markThreadOpened(threads(state), videoId, threadId, System.currentTimeMillis());
+        if (threads == null) return;
+        state.put("threads", threads);
+        writeState(file, state);
     }
 
 
@@ -118,16 +128,19 @@ final class CommentReplyNotifications {
         if (!configuration.optBoolean("enabled")) return;
         JSONObject request = configuration.optJSONObject("request");
         if (request == null) return;
+        // Watches expire from when the check started, so a reply found after one
+        // ran out during the check still keeps it watched.
+        long startedAt = System.currentTimeMillis();
         List<JSONObject> threads;
         synchronized (CommentReplyNotifications.class) {
-            threads = normalize(threads(readState(stateFile(context))), System.currentTimeMillis());
+            threads = normalize(threads(readState(stateFile(context))), startedAt);
         }
         // Comments of several authors in a thread can be watched, and a reply can answer more than one.
         Set<String> announced = new HashSet<>();
         for (JSONObject thread : threads) {
             if (!configuration(context).optBoolean("enabled")) return;
             try {
-                observe(context, thread, fetchThread(request, thread), announced);
+                observe(context, thread, fetchThread(request, thread), announced, startedAt);
             } catch (Exception error) {
                 // One thread must not stop the checks of the others.
                 android.util.Log.w("OpenTubeXReplies", "Unable to check a comment for replies", error);
@@ -139,12 +152,13 @@ final class CommentReplyNotifications {
      * Announces the new replies of a checked thread before it saves them as
      * seen, so a check that stops in between repeats a reply rather than losing it.
      * @param result null when the thread is gone
+     * @param startedAt when the check started, which the watch must have outlasted
      */
-    private static void observe(Context context, JSONObject fetched, JSONObject result, Set<String> announced) throws Exception {
+    private static void observe(Context context, JSONObject fetched, JSONObject result, Set<String> announced, long startedAt) throws Exception {
         // The entry as it is now, as the user may have stopped watching it while it loaded.
         JSONObject checked = null;
         synchronized (CommentReplyNotifications.class) {
-            for (JSONObject thread : normalize(threads(readState(stateFile(context))), System.currentTimeMillis())) {
+            for (JSONObject thread : normalize(threads(readState(stateFile(context))), startedAt)) {
                 if (isSameComment(thread, fetched)) checked = thread;
             }
         }
@@ -152,6 +166,7 @@ final class CommentReplyNotifications {
         JSONObject configuration = configuration(context);
         String videoId = checked.getString("videoId");
         JSONArray seen = checked.optJSONArray("seen");
+        boolean active = false;
         if (result != null && result.has("replies")) {
             JSONObject found = findNewReplies(checked, result.getJSONArray("replies"), configuration.optString("accountId"));
             JSONArray added = found.getJSONArray("added");
@@ -161,6 +176,7 @@ final class CommentReplyNotifications {
                 if (announced.add(videoId + "/" + reply.optString("id"))) announce(context, configuration, checked, reply);
             }
             seen = found.getJSONArray("seen");
+            active = found.optBoolean("active");
         }
         // The heart belongs to the comment it loaded, which watching the top-level comment meanwhile changes.
         JSONObject heart = result == null || !watchedCommentId(checked).equals(watchedCommentId(fetched))
@@ -168,8 +184,10 @@ final class CommentReplyNotifications {
         boolean hearted = heart != null && heart.optBoolean("hearted");
         // Announced once. Comments watched before hearts were checked have no
         // state yet, and their first check only saves it, as the heart may be old.
-        if (hearted && checked.has("hearted") && !checked.optBoolean("hearted") && isOwnComment(checked) &&
-            configuration(context).optBoolean("enabled")) {
+        // A new heart counts as activity, also on others' comments.
+        boolean newHeart = hearted && checked.has("hearted") && !checked.optBoolean("hearted");
+        active |= newHeart;
+        if (newHeart && isOwnComment(checked) && configuration(context).optBoolean("enabled")) {
             announceHeart(context, configuration, checked, heart.optString("author"));
         }
         synchronized (CommentReplyNotifications.class) {
@@ -184,6 +202,7 @@ final class CommentReplyNotifications {
                 else if (result != null) {
                     thread.put("replyCount", result.getInt("replyCount")).put("seen", seen == null ? new JSONArray() : seen);
                     if (heart != null) thread.put("hearted", hearted || checked.optBoolean("hearted"));
+                    if (active) thread.put("activeAt", System.currentTimeMillis());
                     kept.put(thread);
                 }
             }
@@ -417,7 +436,12 @@ final class CommentReplyNotifications {
         }
     }
 
-    /** Keeps the valid threads still watched, newest first. */
+    /** When a watched comment was last active, which its watching follows. */
+    static long lastActivity(JSONObject thread) {
+        return thread.optLong("activeAt", thread.optLong("postedAt"));
+    }
+
+    /** Keeps the valid threads still watched, last active first. */
     static List<JSONObject> normalize(JSONArray threads, long now) {
         List<JSONObject> kept = new ArrayList<>();
         for (int index = 0; index < threads.length(); index++) {
@@ -425,10 +449,10 @@ final class CommentReplyNotifications {
             if (thread == null || !ID.matcher(thread.optString("videoId")).matches() ||
                 !ID.matcher(thread.optString("threadId")).matches() || thread.optString("commentId").isEmpty() ||
                 !TOKEN.matcher(thread.optString("token")).matches() ||
-                now - thread.optLong("postedAt") >= TRACKING_MILLIS) continue;
+                now - lastActivity(thread) >= TRACKING_MILLIS) continue;
             kept.add(thread);
         }
-        kept.sort((left, right) -> Long.compare(right.optLong("postedAt"), left.optLong("postedAt")));
+        kept.sort((left, right) -> Long.compare(lastActivity(right), lastActivity(left)));
         return kept.size() > TRACKING_LIMIT ? new ArrayList<>(kept.subList(0, TRACKING_LIMIT)) : kept;
     }
 
@@ -447,8 +471,9 @@ final class CommentReplyNotifications {
     }
 
     /**
-     * Watches a comment for replies, for 30 days. Each author's comments in a
-     * thread are watched together, from the earliest one or from their
+     * Watches a comment for replies, until 30 days pass without activity: being
+     * watched, a new reply or heart, or being opened. Each author's comments in
+     * a thread are watched together, from the earliest one or from their
      * top-level comment, which covers the whole thread.
      */
     static JSONArray trackComment(JSONArray threads, JSONObject comment, long now) throws JSONException {
@@ -506,10 +531,27 @@ final class CommentReplyNotifications {
         }
         String videoTitle = comment.optString("videoTitle");
         if (!videoTitle.isEmpty()) tracked.put("videoTitle", videoTitle);
-        tracked.put("postedAt", now);
+        tracked.put("postedAt", now).put("activeAt", now);
         JSONArray all = new JSONArray().put(tracked);
         for (JSONObject thread : others) all.put(thread);
         return new JSONArray(normalize(all, now));
+    }
+
+    /**
+     * Counts opening a thread as activity of the comments watched in it.
+     * @return null when none of them is watched
+     */
+    static JSONArray markThreadOpened(JSONArray threads, String videoId, String threadId, long now) throws JSONException {
+        // An expired watch stays expired.
+        List<JSONObject> kept = normalize(threads, now);
+        boolean found = false;
+        for (JSONObject thread : kept) {
+            if (thread.optString("videoId").equals(videoId) && thread.optString("threadId").equals(threadId)) {
+                thread.put("activeAt", now);
+                found = true;
+            }
+        }
+        return found ? new JSONArray(normalize(new JSONArray(kept), now)) : null;
     }
 
     /** Stops watching a comment, with its author's other comments in the thread. */
@@ -526,7 +568,8 @@ final class CommentReplyNotifications {
      * The replies to announce, except the account's own: for a top-level
      * comment, every reply in its thread, otherwise those that follow the
      * comment and mention its author's handle.
-     * @return the new replies under `added`, and the replies seen so far under `seen`
+     * @return the new replies under `added`, the replies seen so far under `seen`, and under `active`
+     *     whether any new reply counts as activity: one announced, or one of the account's that follows the comment
      */
     static JSONObject findNewReplies(JSONObject thread, JSONArray replies) throws JSONException {
         return findNewReplies(thread, replies, "");
@@ -561,20 +604,24 @@ final class CommentReplyNotifications {
         Set<String> alreadySeen = new LinkedHashSet<>(seen);
         String accountId = thread.has("accountId") ? thread.optString("accountId") : thread.optString("channelId");
         JSONArray added = new JSONArray();
+        boolean ownReply = false;
         for (int index = 0; index < replies.length(); index++) {
             JSONObject reply = replies.getJSONObject(index);
             String id = reply.optString("id");
             seen.add(id);
+            if (index < start || alreadySeen.contains(id)) continue;
             String authorId = reply.optString("authorId");
-            if (index < start || alreadySeen.contains(id) || (!accountId.isEmpty() && accountId.equals(authorId)) ||
-                (!signedInId.isEmpty() && signedInId.equals(authorId))) continue;
+            if ((!accountId.isEmpty() && accountId.equals(authorId)) || (!signedInId.isEmpty() && signedInId.equals(authorId))) {
+                ownReply = true;
+                continue;
+            }
             Matcher matcher = mention == null ? null : mention.matcher(reply.optString("text"));
             if (wholeThread || (matcher != null && matcher.find())) added.put(reply);
         }
         List<String> all = new ArrayList<>(seen);
         JSONArray kept = new JSONArray();
         for (int index = Math.max(0, all.size() - SEEN_REPLY_LIMIT); index < all.size(); index++) kept.put(all.get(index));
-        return new JSONObject().put("added", added).put("seen", kept);
+        return new JSONObject().put("added", added).put("seen", kept).put("active", ownReply || added.length() > 0);
     }
 
     private static JSONArray threads(JSONObject state) {
