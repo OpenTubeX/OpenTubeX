@@ -268,6 +268,7 @@
                 :title="recommendation.title"
                 :data-tab-title="recommendation.title"
                 :aria-label="recommendation.title"
+                @click="handleDocumentClick"
               >
                 <span class="endedRecommendationThumbnail">
                   <FtRetryImage

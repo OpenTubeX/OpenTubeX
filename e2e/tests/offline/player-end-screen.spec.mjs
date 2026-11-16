@@ -1,8 +1,10 @@
 import { fileURLToPath } from 'node:url'
-import { test, expect, setWindowSize, setPlayerFullscreen } from '../../helpers/app.mjs'
+import { test, expect, sel, setWindowSize, setPlayerFullscreen } from '../../helpers/app.mjs'
 import { findWatchComponent, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { mockCapacitorPhoneLayout } from '../../helpers/mobile.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
+
+const shortcutModifier = process.platform === 'darwin' ? 'Meta' : 'Control'
 
 test.use({
   seed: {
@@ -231,6 +233,12 @@ test('shows recommended thumbnails over a darkened poster with working keyboard 
   await watch.evaluate(async component => {
     await component.proxy.$store.dispatch('updateHideRecommendedVideos', false)
   })
+  const [newWindow] = await Promise.all([
+    app.electronApp.waitForEvent('window', { timeout: 5000 }),
+    cards.nth(1).click({ modifiers: [shortcutModifier, 'Shift'] })
+  ])
+  await expect(newWindow).toHaveURL(/#\/watch\/video000001$/)
+  await expect(page.locator(sel.tabs)).toHaveCount(1)
   await cards.first().focus()
   await cards.first().press('Enter')
   await expect(page).toHaveURL(/#\/watch\/video000000$/)
