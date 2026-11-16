@@ -1,4 +1,10 @@
 {
+  "language": {
+    "message": "de"
+  },
+  "direction": {
+    "message": "ltr"
+  },
   "extensionName": {
     "message": "OpenTubeX Lokale API"
   },

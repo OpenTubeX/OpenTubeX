@@ -19,8 +19,9 @@ function localize(root) {
   }
 }
 
-document.documentElement.lang = ext.i18n.getMessage('@@ui_locale').replace('_', '-')
-document.documentElement.dir = ext.i18n.getMessage('@@bidi_dir')
+// Follows the translation shown, which can be a fallback from the browser language
+document.documentElement.lang = ext.i18n.getMessage('language')
+document.documentElement.dir = ext.i18n.getMessage('direction')
 localize(document)
 localize(removeButton.content)
 

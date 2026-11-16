@@ -1,4 +1,12 @@
 {
+  "language": {
+    "message": "en",
+    "description": "Language code of this translation, such as de or pt-BR. Screen readers use it to pick the voice."
+  },
+  "direction": {
+    "message": "ltr",
+    "description": "Writing direction of this translation: ltr for left to right, rtl for right to left, such as Arabic or Hebrew."
+  },
   "extensionName": {
     "message": "OpenTubeX Local API",
     "description": "Name of the extension in the browser and the add-on stores. At most 75 characters. Local API is the name of a backend in the OpenTubeX app's settings."
