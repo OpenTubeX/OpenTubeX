@@ -165,7 +165,10 @@ test.describe('player', () => {
   // layout it causes draws a frame, which keeps an idle phone busy.
   test('a paused player does not lay out on each seek bar refresh', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
+    // Avatars that fail to load swap in their fallbacks, which lays out too.
+    await page.route('https://yt3.ggpht.com/**', route => fulfillVisualFixture(route, 'avatar'))
     const video = await openMockedVideo(page)
+    await expectImagesLoaded(page.locator('img:is(.channelThumbnail, .tabAvatar)'))
     await video.evaluate(element => element.pause())
     await page.locator('.ftVideoPlayer').hover()
     await expect(page.locator('.shaka-controls-container')).toHaveAttribute('shown', 'true')
