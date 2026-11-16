@@ -8,13 +8,57 @@
             class="headingIcon"
           />
           {{ $t('Channels.Title') }}
+          <span
+            v-if="activeChannelEntries.length > 0"
+            class="countBadge"
+            :title="countLabel"
+          >
+            <span aria-hidden="true">{{ formattedCount }}</span>
+            <span class="visuallyHidden">{{ countLabel }}</span>
+          </span>
         </h2>
+        <!-- Beside the title, like on the search page, and below it only when it doesn't fit -->
+        <FtSelect
+          v-if="supportsPlatformFollows"
+          class="platformSelect"
+          :value="selectedPlatform"
+          :select-names="platformNames"
+          :select-values="PLATFORM_VALUES"
+          :option-icons="PLATFORM_OPTION_ICONS"
+          :placeholder="$t('Subscriptions.Platforms.Platform')"
+          :icon="['fas', 'globe']"
+          @change="changePlatform"
+        />
       </div>
       <div
-        v-if="activeProfileSubscriptions.length > 1"
+        v-if="showSearchAndSort || selectedPlatform !== 'youtube'"
         class="controls"
       >
+        <div
+          v-if="selectedPlatform !== 'youtube'"
+          class="channelInput"
+        >
+          <ft-input
+            ref="channelInput"
+            :label="$t('Subscriptions.Platforms.Add Channel')"
+            :placeholder="$t('Subscriptions.Platforms.Channel URL')"
+            :icon="['fas', 'link']"
+            :show-label="true"
+            :show-action-button="true"
+            :action-button-label="$t('Subscriptions.Platforms.Add Channel')"
+            :force-action-button-icon-name="['fas', 'plus']"
+            :disabled="isAdding"
+            @click="addChannel"
+          />
+          <div
+            v-if="isAdding"
+            class="addChannelProgress"
+            role="progressbar"
+            :aria-label="$t('Subscriptions.Platforms.Add Channel')"
+          />
+        </div>
         <ft-input
+          v-if="showSearchAndSort"
           ref="searchBarChannels"
           class="channelSearch"
           input-type="search"
@@ -27,50 +71,55 @@
           @input="handleQueryChange"
         />
         <FtSelect
-          class="sortSelect"
+          v-if="showSearchAndSort"
+          class="controlSelect"
           :value="sortBy"
           :select-names="sortByNames"
-          :select-values="SORT_BY_VALUES"
+          :select-values="sortByValues"
           :placeholder="$t('Global.Sort By')"
           :icon="sortByIcon"
           @change="updateSortBy"
         />
       </div>
       <FtSubscriptionGroupBar
-        v-if="hasSubscriptions"
+        v-if="selectedPlatform === 'youtube' && hasSubscriptions"
         class="groupBar"
         panel-id="subscribedChannelsList"
       />
       <ft-flex-box
-        v-if="activeSubscriptionList.length === 0"
+        v-if="activeChannelEntries.length === 0"
+        class="emptyState"
       >
         <p class="message">
-          {{ activeProfileSubscriptions.length === 0 ? $t('Channels.Empty') : $t('Subscription Groups.Empty Group') }}
+          {{ emptyMessage }}
+        </p>
+        <p
+          v-if="selectedPlatform !== 'youtube'"
+          class="description"
+        >
+          {{ $t('Subscriptions.Platforms.Description') }}
         </p>
       </ft-flex-box>
       <template v-else>
-        <ft-flex-box class="count">
-          {{ $t('Channels.Count', { number: channelList.length }, channelList.length) }}
-        </ft-flex-box>
         <!-- Moves only animate while reordering, as the transition measures every card -->
         <component
           :is="canReorder ? TransitionGroup : 'div'"
           id="subscribedChannelsList"
           v-bind="canReorder ? { tag: 'div', name: 'channelMove' } : {}"
           class="channels"
-          :role="hasSubscriptionGroups ? 'tabpanel' : null"
+          :role="selectedPlatform === 'youtube' && hasSubscriptionGroups ? 'tabpanel' : null"
         >
           <div
-            v-for="channel in displayedChannels"
-            :key="channel.id"
+            v-for="entry in displayedChannels"
+            :key="entry.key"
             class="channel"
-            :class="{ reorderable: canReorder, draggedChannel: draggedChannel?.videoId === channel.id }"
+            :class="{ reorderable: canReorder, draggedChannel: draggedChannel?.videoId === entry.key }"
             :draggable="canReorder && !pointerDragging"
             :data-playlist-drag-item="canReorder ? '' : null"
-            :data-video-id="channel.id"
-            @pointerdown.capture="canReorder && startPointerDrag($event, channelDragData(channel))"
-            @keydown="canReorder && moveWithKeyboard($event, channelDragData(channel))"
-            v-on="canReorder ? channelDragHandlers(channel) : {}"
+            :data-video-id="canReorder ? entry.key : null"
+            @pointerdown.capture="canReorder && startPointerDrag($event, channelDragData(entry.channel))"
+            @keydown="canReorder && moveWithKeyboard($event, channelDragData(entry.channel))"
+            v-on="canReorder ? channelDragHandlers(entry.channel) : {}"
           >
             <div
               v-if="canReorder"
@@ -91,16 +140,16 @@
               tabindex="-1"
               class="thumbnailContainer"
               :draggable="canReorder ? 'false' : null"
-              :to="`/channel/${channel.id}`"
+              :to="entry.route"
             >
               <FtRetryImage
-                v-if="hasUsableThumbnail(channel.thumbnail)"
+                v-if="entry.thumbnail !== null"
                 :fallback-icon="['fas', 'circle-user']"
                 class="channelThumbnail"
-                :src="thumbnailURL(channel.thumbnail)"
+                :src="entry.thumbnail"
                 alt=""
                 :draggable="canReorder ? 'false' : null"
-                @error.once="handleThumbnailError(channel)"
+                @error.once="entry.platform === 'youtube' && handleThumbnailError(entry.channel)"
               />
               <ft-icon
                 v-else
@@ -114,21 +163,31 @@
                 class="channelName"
                 :tabindex="enableChannelLinks ? null : -1"
                 :role="enableChannelLinks ? null : 'group'"
-                :aria-label="channel.name"
+                :aria-label="entry.name"
                 dir="auto"
-                :title="channel.name"
+                :title="entry.name"
                 :draggable="canReorder ? 'false' : null"
-                :to="`/channel/${channel.id}`"
+                :to="entry.route"
               >
-                {{ channel.name }}
+                {{ entry.name }}
               </component>
               <span
-                v-if="channel.handle"
+                v-if="entry.handle"
                 class="channelHandle"
                 dir="auto"
-                :title="channel.handle"
+                :title="entry.handle"
               >
-                {{ channel.handle }}
+                {{ entry.handle }}
+              </span>
+              <span
+                v-if="selectedPlatform === 'all'"
+                class="channelPlatform"
+              >
+                <FtIcon
+                  :icon="PLATFORM_OPTION_ICONS[PLATFORM_VALUES.indexOf(entry.platform)] ?? ['fas', 'globe']"
+                  aria-hidden="true"
+                />
+                {{ platformNames[PLATFORM_VALUES.indexOf(entry.platform)] ?? entry.platform }}
               </span>
             </div>
             <div
@@ -136,11 +195,17 @@
               class="unsubscribeContainer"
             >
               <ft-subscribe-button
-                :channel-id="channel.id"
-                :channel-name="channel.name"
-                :channel-thumbnail="channel.thumbnail"
-                :channel-handle="channel.handle"
+                v-if="entry.platform === 'youtube'"
+                :channel-id="entry.channel.id"
+                :channel-name="entry.channel.name"
+                :channel-thumbnail="entry.channel.thumbnail"
+                :channel-handle="entry.channel.handle"
                 :open-dropdown-on-subscribe="false"
+              />
+              <PlatformFollowButton
+                v-else
+                :platform="entry.platform"
+                :channel-id="entry.channel.id"
               />
             </div>
           </div>
@@ -178,11 +243,19 @@ import FtInput from '../../components/FtInput/FtInput.vue'
 import FtSelect from '../../components/FtSelect/FtSelect.vue'
 import FtSubscribeButton from '../../components/FtSubscribeButton/FtSubscribeButton.vue'
 import FtSubscriptionGroupBar from '../../components/FtSubscriptionGroupBar/FtSubscriptionGroupBar.vue'
+import PlatformFollowButton from '../../components/PlatformFollowButton/PlatformFollowButton.vue'
 import { invidiousGetChannelInfo, youtubeImageUrlToInvidious, invidiousImageUrlToInvidious } from '../../helpers/api/invidious'
 import { getLocalChannel, parseLocalChannelHeader } from '../../helpers/api/local'
 import { useListPagination } from '../../composables/useListPagination'
 import { usePlaylistDrag } from '../../composables/usePlaylistDrag'
-import { ctrlFHandler, getIconForSortPreference, throttle } from '../../helpers/utils'
+import { ctrlFHandler, getIconForSortPreference, showToast, throttle } from '../../helpers/utils'
+import {
+  followChannelByUrl,
+  getFollowedChannels,
+  PlatformChannelInputError,
+  supportsPlatformFollows
+} from '../../helpers/platformFeed'
+import { getPlatformChannelKey, getPlatformChannelRoute, PLATFORM_ICONS, PLATFORMS } from '../../../platforms/index'
 import {
   SUBSCRIBED_CHANNELS_SORT_BY_OPTIONS as SORT_BY_OPTIONS,
   sortSubscribedChannels
@@ -245,18 +318,47 @@ const activeSubscriptionList = computed(() => {
   return store.getters.getActiveGroupSubscriptions
 })
 
+const CHANNELS_PLATFORM_STORAGE_KEY = 'channelsPlatform'
+const PLATFORM_VALUES = ['all', 'youtube', ...PLATFORMS.map(platform => platform.id)]
+const PLATFORM_OPTION_ICONS = [['fas', 'globe'], ['fab', 'youtube'], ...PLATFORMS.map(platform => PLATFORM_ICONS[platform.id])]
+const platformNames = computed(() => [
+  t('Subscriptions.Platforms.All Platforms'),
+  'YouTube',
+  ...PLATFORMS.map(platform => platform.name)
+])
+
+// The last platform shown stays selected for later visits, like on the search page
+/** @type {import('vue').ComputedRef<string>} */
+const selectedPlatform = computed(() => {
+  if (!supportsPlatformFollows) return 'youtube'
+  const requested = route.query.platform ?? localStorage.getItem(CHANNELS_PLATFORM_STORAGE_KEY)
+  return PLATFORM_VALUES.includes(requested) ? requested : 'youtube'
+})
+
+/**
+ * @param {string} platform
+ */
+function changePlatform(platform) {
+  localStorage.setItem(CHANNELS_PLATFORM_STORAGE_KEY, platform)
+  router.replace({ name: 'subscribedChannels', query: { ...route.query, platform } })
+}
+
 const SORT_BY_VALUES = Object.values(SORT_BY_OPTIONS)
+// Only YouTube subscriptions have a custom order
+const sortByValues = computed(() => selectedPlatform.value === 'youtube'
+  ? SORT_BY_VALUES
+  : SORT_BY_VALUES.filter(value => value !== SORT_BY_OPTIONS.Custom))
 
 const sortByNames = computed(() => [
   t('User Playlists.Sort By.NameAscending'),
   t('User Playlists.Sort By.NameDescending'),
   t('Playlist.Sort By.Custom')
-])
+].slice(0, sortByValues.value.length))
 
 /** @type {import('vue').ComputedRef<'name_ascending' | 'name_descending' | 'custom'>} */
 const sortBy = computed(() => {
   const value = store.getters.getSubscribedChannelsSortBy
-  return SORT_BY_VALUES.includes(value) ? value : SORT_BY_OPTIONS.NameAscending
+  return sortByValues.value.includes(value) ? value : SORT_BY_OPTIONS.NameAscending
 })
 
 const sortByIcon = computed(() => getIconForSortPreference(sortBy.value))
@@ -270,37 +372,117 @@ const collator = computed(() => new Intl.Collator([locale.value, 'en'], { sensit
 /** @type {import('vue').Ref<string[] | null>} Order shown while dragging, saved on drop */
 const tempCustomOrder = ref(null)
 
-/** @type {import('vue').ComputedRef<Array>} */
-const subscribedChannels = computed(() => {
-  return sortSubscribedChannels(
-    activeSubscriptionList.value,
-    sortBy.value,
-    tempCustomOrder.value ?? store.getters.getSubscribedChannelsCustomOrderList,
-    collator.value
-  )
+// The entries resolve thumbnails while the list paginates during setup
+/** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
+const backendPreference = computed(() => {
+  return store.getters.getBackendPreference
 })
 
-/** @type {import('vue').ComputedRef<Array>} */
+/** @type {import('vue').ComputedRef<string>} */
+const currentInvidiousInstanceUrl = computed(() => {
+  return store.getters.getCurrentInvidiousInstanceUrl
+})
+
+/**
+ * @typedef {object} ChannelEntry
+ * @property {string} key
+ * @property {string} platform `youtube` or the ID of another platform
+ * @property {{ id: string, name: string, handle?: string, thumbnail?: string }} channel
+ * @property {string} name
+ * @property {string | null} handle
+ * @property {string | null} thumbnail
+ * @property {string | import('vue-router').RouteLocationRaw} route
+ */
+
+/**
+ * @param {{ id: string, name: string, handle?: string, thumbnail?: string }} channel
+ * @returns {ChannelEntry}
+ */
+function youtubeEntry(channel) {
+  return {
+    key: channel.id,
+    platform: 'youtube',
+    channel,
+    name: channel.name,
+    handle: typeof channel.handle === 'string' ? channel.handle : null,
+    thumbnail: hasUsableThumbnail(channel.thumbnail) ? thumbnailURL(channel.thumbnail) : null,
+    route: `/channel/${channel.id}`
+  }
+}
+
+/**
+ * @param {import('../../helpers/platformFeed').FollowedChannel} channel
+ * @returns {ChannelEntry}
+ */
+function platformEntry(channel) {
+  return {
+    key: getPlatformChannelKey(channel),
+    platform: channel.platform,
+    channel,
+    name: channel.name,
+    handle: null,
+    thumbnail: channel.avatar || null,
+    route: getPlatformChannelRoute(channel.platform, channel.id)
+  }
+}
+
+/**
+ * The channels of the selected platform, before searching. Groups only hold
+ * YouTube subscriptions, so the other views list the whole profile.
+ * @type {import('vue').ComputedRef<ChannelEntry[]>}
+ */
+const activeChannelEntries = computed(() => {
+  if (selectedPlatform.value === 'youtube') {
+    return sortSubscribedChannels(
+      activeSubscriptionList.value,
+      sortBy.value,
+      tempCustomOrder.value ?? store.getters.getSubscribedChannelsCustomOrderList,
+      collator.value
+    ).map(youtubeEntry)
+  }
+
+  const followed = getFollowedChannels()
+    .filter(channel => selectedPlatform.value === 'all' || channel.platform === selectedPlatform.value)
+    .map(platformEntry)
+  const entries = selectedPlatform.value === 'all'
+    ? [...activeProfileSubscriptions.value.map(youtubeEntry), ...followed]
+    : followed
+  return sortSubscribedChannels(entries, sortBy.value, [], collator.value)
+})
+
+const showSearchAndSort = computed(() => activeChannelEntries.value.length > 1 || query.value !== '')
+
+/** @type {import('vue').ComputedRef<ChannelEntry[]>} */
 const channelList = computed(() => {
   if (query.value === '') {
-    return subscribedChannels.value
+    return activeChannelEntries.value
   }
 
   const escapedQuery = query.value.replaceAll(/[$()*+.?[\\\]^{|}]/g, '\\$&')
   const re = new RegExp(escapedQuery, 'i')
-  return subscribedChannels.value.filter(channel => {
-    return re.test(channel.name) || (typeof channel.handle === 'string' && re.test(channel.handle))
+  return activeChannelEntries.value.filter(entry => {
+    return re.test(entry.name) || (entry.handle !== null && re.test(entry.handle))
   })
+})
+
+const formattedCount = computed(() => new Intl.NumberFormat([locale.value, 'en']).format(channelList.value.length))
+const countLabel = computed(() => t('Channels.Count', { number: formattedCount.value }, channelList.value.length))
+
+const emptyMessage = computed(() => {
+  if (selectedPlatform.value === 'youtube') {
+    return activeProfileSubscriptions.value.length === 0 ? t('Channels.Empty') : t('Subscription Groups.Empty Group')
+  }
+  return selectedPlatform.value === 'all' ? t('Channels.Empty') : t('Subscriptions.Platforms.No Channels')
 })
 
 const { page: channelPage, displayedItems: displayedChannels, hasMore: hasMoreChannels, loadMore: loadMoreChannels } = useListPagination(channelList, {
   pageSize: channelsPerPage,
   append: true,
-  resetOn: [query, activeProfileId, activeGroupId],
+  resetOn: [query, activeProfileId, activeGroupId, selectedPlatform],
   focusItem: index => channelsContainer.value?.querySelectorAll('.channel')[index]?.querySelector('.channelName')?.focus()
 })
 
-const canReorder = computed(() => sortBy.value === SORT_BY_OPTIONS.Custom && query.value === '')
+const canReorder = computed(() => selectedPlatform.value === 'youtube' && sortBy.value === SORT_BY_OPTIONS.Custom && query.value === '')
 
 /** @type {import('vue').Ref<import('../../helpers/dragAndDrop').VideoData | null>} */
 const draggedChannel = ref(null)
@@ -377,7 +559,7 @@ function getFullCustomOrder() {
  * @param {(index: number, lastIndex: number) => number} getTargetIndex
  */
 async function moveChannel(channelId, getTargetIndex) {
-  const visibleIds = channelList.value.map(channel => channel.id)
+  const visibleIds = channelList.value.map(entry => entry.key)
   const index = visibleIds.indexOf(channelId)
   const targetIndex = getTargetIndex(index, visibleIds.length - 1)
   if (index === -1 || targetIndex === index || targetIndex < 0 || targetIndex >= visibleIds.length) return
@@ -457,16 +639,6 @@ async function onDragChannelEnd() {
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideUnsubscribeButton = computed(() => {
   return store.getters.getHideUnsubscribeButton
-})
-
-/** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
-const backendPreference = computed(() => {
-  return store.getters.getBackendPreference
-})
-
-/** @type {import('vue').ComputedRef<string>} */
-const currentInvidiousInstanceUrl = computed(() => {
-  return store.getters.getCurrentInvidiousInstanceUrl
 })
 
 function thumbnailURL(originalURL) {
@@ -556,6 +728,46 @@ function updateThumbnail(channel) {
   thumbnailRetryTimers.add(timer)
 }
 
+const isAdding = ref(false)
+const channelInput = useTemplateRef('channelInput')
+
+/**
+ * @param {string} message
+ */
+function showError(message) {
+  showToast({ message, icon: ['fas', 'circle-exclamation'] })
+}
+
+/**
+ * Follows the channel at an address on another platform.
+ * @param {string} text
+ */
+async function addChannel(text) {
+  if (isAdding.value) return
+  isAdding.value = true
+  try {
+    const result = await followChannelByUrl(text)
+    if (result === null) {
+      showError(t('Subscriptions.Platforms.Channel Not Found'))
+    } else if (!result.followed) {
+      showError(t('Subscriptions.Platforms.Channel Already Followed'))
+    } else {
+      channelInput.value?.clear()
+      // Shows the new channel when it's on another platform than the selected one
+      if (selectedPlatform.value !== 'all' && selectedPlatform.value !== result.channel.platform) {
+        changePlatform(result.channel.platform)
+      }
+    }
+  } catch (error) {
+    if (!(error instanceof PlatformChannelInputError)) console.error('Failed to follow the channel', error)
+    showError(error instanceof PlatformChannelInputError
+      ? t('Subscriptions.Platforms.Invalid Channel')
+      : t('Subscriptions.Platforms.Channel Could Not Be Loaded'))
+  } finally {
+    isAdding.value = false
+  }
+}
+
 function handleQueryChange(val) {
   query.value = val
 
@@ -563,20 +775,10 @@ function handleQueryChange(val) {
 }
 
 async function saveStateInRouter(query) {
-  if (query === '') {
-    await router.replace({ name: 'subscribedChannels' }).catch(failure => {
-      if (isNavigationFailure(failure, NavigationFailureType.duplicated)) {
-        return
-      }
-
-      throw failure
-    })
-    return
-  }
-
+  const { searchQueryText: _, ...otherQuery } = route.query
   await router.replace({
     name: 'subscribedChannels',
-    query: { searchQueryText: query },
+    query: query === '' ? otherQuery : { ...otherQuery, searchQueryText: query },
   }).catch(failure => {
     if (isNavigationFailure(failure, NavigationFailureType.duplicated)) {
       return
