@@ -254,54 +254,21 @@
         />
       </div>
     </FtSettingsSubpage>
-    <FtSettingsSubpage
-      :open="showExportSubscriptionsPrompt"
-      :title="t('Settings.Data Settings.Select Export Type')"
-      :icon="['fas', 'file-download']"
-      @close="showExportSubscriptionsPrompt = false"
-    >
-      <FtFlexBox class="exportTypeButtons">
-        <FtButton
-          v-for="(name, index) in exportSubscriptionsPromptNames.slice(0, SUBSCRIPTIONS_PROMPT_VALUES.length - 1)"
-          :key="SUBSCRIPTIONS_PROMPT_VALUES[index]"
-          :label="name"
-          :icon="['fas', 'file-download']"
-          @click="exportSubscriptions(SUBSCRIPTIONS_PROMPT_VALUES[index])"
-        />
-      </FtFlexBox>
-    </FtSettingsSubpage>
-    <FtSettingsSubpage
-      :open="showExportWatchHistoryPrompt"
-      :title="t('Settings.Data Settings.Select Export Type')"
-      :icon="['fas', 'file-download']"
-      @close="showExportWatchHistoryPrompt = false"
-    >
-      <FtFlexBox class="exportTypeButtons">
-        <FtButton
-          v-for="(name, index) in exportWatchSearchHistoryPromptNames.slice(0, WATCH_SEARCH_HISTORY_PROMPT_VALUES.length)"
-          :key="WATCH_SEARCH_HISTORY_PROMPT_VALUES[index]"
-          :label="name"
-          :icon="['fas', 'file-download']"
-          @click="exportWatchHistory(WATCH_SEARCH_HISTORY_PROMPT_VALUES[index])"
-        />
-      </FtFlexBox>
-    </FtSettingsSubpage>
-    <FtSettingsSubpage
-      :open="showExportSearchHistoryPrompt"
-      :title="t('Settings.Data Settings.Select Export Type')"
-      :icon="['fas', 'file-download']"
-      @close="showExportSearchHistoryPrompt = false"
-    >
-      <FtFlexBox class="exportTypeButtons">
-        <FtButton
-          v-for="(name, index) in exportWatchSearchHistoryPromptNames.slice(0, WATCH_SEARCH_HISTORY_PROMPT_VALUES.length)"
-          :key="WATCH_SEARCH_HISTORY_PROMPT_VALUES[index]"
-          :label="name"
-          :icon="['fas', 'file-download']"
-          @click="exportSearchHistory(WATCH_SEARCH_HISTORY_PROMPT_VALUES[index])"
-        />
-      </FtFlexBox>
-    </FtSettingsSubpage>
+    <ExportTypePrompt
+      v-if="showExportSubscriptionsPrompt"
+      :options="subscriptionsExportOptions"
+      @select="exportSubscriptions"
+    />
+    <ExportTypePrompt
+      v-if="showExportWatchHistoryPrompt"
+      :options="historyExportOptions"
+      @select="exportWatchHistory"
+    />
+    <ExportTypePrompt
+      v-if="showExportSearchHistoryPrompt"
+      :options="historyExportOptions"
+      @select="exportSearchHistory"
+    />
   </FtSettingsSection>
   <ScheduledBackupSettings v-if="USING_ELECTRON && !importOnly" />
   <FtSettingsSection
@@ -343,6 +310,7 @@ import FtButton from '../../FtButton/FtButton.vue'
 import FtCheckboxList from '../../FtCheckboxList/FtCheckboxList.vue'
 import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
 import FtSettingsSubpage from '../../FtSettingsSubpage/FtSettingsSubpage.vue'
+import ExportTypePrompt from '../../ExportTypePrompt/ExportTypePrompt.vue'
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
 import FtTooltip from '../../FtTooltip/FtTooltip.vue'
 import ScheduledBackupSettings from './ScheduledBackupSettings.vue'
@@ -775,27 +743,16 @@ function isJsonObject(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value)
 }
 
-const SUBSCRIPTIONS_PROMPT_VALUES = [
-  'freetube',
-  'youtubenew',
-  'youtube',
-  'youtubeold',
-  'newpipe',
-  'close'
-]
-
-const exportSubscriptionsPromptNames = computed(() => {
+const subscriptionsExportOptions = computed(() => {
   const exportFreeTube = t('Settings.Data Settings.Export OpenTubeX')
   const exportYouTube = t('Settings.Data Settings.Export YouTube')
-  const exportNewPipe = t('Settings.Data Settings.Export NewPipe')
 
   return [
-    `${exportFreeTube} (.db)`,
-    `${exportYouTube} (.csv)`,
-    `${exportYouTube} (.json)`,
-    `${exportYouTube} (.opml)`,
-    `${exportNewPipe} (.json)`,
-    t('Close')
+    { label: `${exportFreeTube} (.db)`, value: 'freetube', icon: ['fas', 'database'] },
+    { label: `${exportYouTube} (.csv)`, value: 'youtubenew', icon: ['fab', 'youtube'] },
+    { label: `${exportYouTube} (.json)`, value: 'youtube', icon: ['fab', 'youtube'] },
+    { label: `${exportYouTube} (.opml)`, value: 'youtubeold', icon: ['fab', 'youtube'] },
+    { label: `${t('Settings.Data Settings.Export NewPipe')} (.json)`, value: 'newpipe', icon: ['fas', 'file-export'] }
   ]
 })
 
@@ -1203,7 +1160,7 @@ function importNewPipeSubscriptions(newPipeData) {
 const showExportSubscriptionsPrompt = ref(false)
 
 /**
- * @param {'freetube' | 'youtubenew' | 'youtube' | 'youtubeold' | 'newpipe' | 'close' | null} option
+ * @param {'freetube' | 'youtubenew' | 'youtube' | 'youtubeold' | 'newpipe' | null} option
  */
 function exportSubscriptions(option) {
   showExportSubscriptionsPrompt.value = false
@@ -1380,15 +1337,9 @@ async function exportNewPipeSubscriptions() {
 
 // #endregion subscriptions export
 
-const WATCH_SEARCH_HISTORY_PROMPT_VALUES = [
-  'freetube',
-  'youtube'
-]
-
-const exportWatchSearchHistoryPromptNames = computed(() => [
-  `${t('Settings.Data Settings.Export OpenTubeX')} (.db)`,
-  `${t('Settings.Data Settings.Export YouTube')} (.json)`,
-  t('Close')
+const historyExportOptions = computed(() => [
+  { label: `${t('Settings.Data Settings.Export OpenTubeX')} (.db)`, value: 'freetube', icon: ['fas', 'database'] },
+  { label: `${t('Settings.Data Settings.Export YouTube')} (.json)`, value: 'youtube', icon: ['fab', 'youtube'] }
 ])
 
 // #region watch history
