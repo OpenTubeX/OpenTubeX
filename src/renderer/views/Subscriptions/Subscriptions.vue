@@ -865,7 +865,9 @@ const currentTabView = computed(() => currentTab.value === 'platforms' ? platfor
 
 /** Lists the followed channels of the platforms the feed shows on the channels page */
 function openPlatformChannelList() {
-  router.push({ name: 'subscribedChannels', query: { platform: activePlatformFeedFilter.value } })
+  // Only the Platforms tab filters by platform, the New feed shows them all
+  const platform = currentTab.value === 'platforms' ? activePlatformFeedFilter.value : 'all'
+  router.push({ name: 'subscribedChannels', query: { platform } })
 }
 
 const platformFilterOptions = computed(() => [
