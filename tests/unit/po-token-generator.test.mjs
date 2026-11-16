@@ -96,6 +96,7 @@ function load({ attest, mint = () => attested, validForSecs = 600, clearData = a
     join: (...parts) => parts.join('/'),
     isAttestedPoToken,
     mintAttestedPoToken,
+    disableSpellChecker() {},
     withTimeout,
     process: { env: {} },
     __dirname: '',

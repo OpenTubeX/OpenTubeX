@@ -560,21 +560,29 @@ function positionProfileDropdown() {
   const viewportMargin = 8
   const gap = 4
   const triggerRect = trigger.getBoundingClientRect()
+  // Measure the height the popover wants, not the limit from a previous placement.
+  dropdown.style.maxBlockSize = ''
   const dropdownWidth = dropdown.offsetWidth
-  const dropdownHeight = dropdown.offsetHeight
+  const naturalHeight = dropdown.offsetHeight
   const horizontalPosition = getProfileDropdownHorizontalPosition(
     trigger,
     triggerRect,
     dropdownWidth
   )
   const below = triggerRect.bottom + gap
+  const spaceBelow = window.innerHeight - viewportMargin - below
+  const spaceAbove = triggerRect.top - gap - viewportMargin
+  const fitsBelow = naturalHeight <= spaceBelow
+  // When neither side fits, open on the roomier one and shrink to it instead of covering the trigger.
+  const opensAbove = !fitsBelow && (naturalHeight <= spaceAbove || spaceAbove > spaceBelow)
+  const availableHeight = floorToDevicePixels(Math.max(0, opensAbove ? spaceAbove : spaceBelow))
+  const limitsHeight = naturalHeight > availableHeight
+  const dropdownHeight = limitsHeight ? availableHeight : naturalHeight
   const above = triggerRect.top - dropdownHeight - gap
   const maximumTop = Math.max(viewportMargin, window.innerHeight - dropdownHeight - viewportMargin)
-  const opensAbove = below + dropdownHeight > window.innerHeight - viewportMargin &&
-    above >= viewportMargin
   const preferredTop = opensAbove ? above : below
 
-  profileDropdownStyle.value = getAnchoredPosition(
+  const position = getAnchoredPosition(
     profileDropdownAnchor, triggerRect, snapToDevicePixels(horizontalPosition.left), snapToDevicePixels(preferredTop), {
       minLeft: viewportMargin,
       maxLeft: Math.max(viewportMargin, window.innerWidth - dropdownWidth - viewportMargin),
@@ -582,6 +590,7 @@ function positionProfileDropdown() {
       maxTop: maximumTop
     }, { above: opensAbove, gap, bottomMargin: viewportMargin }
   )
+  profileDropdownStyle.value = { ...position, maxBlockSize: limitsHeight ? `${availableHeight}px` : null }
   profileDropdownAnchoredLeftEdge.value = horizontalPosition.anchoredLeftEdge
   profileDropdownOpensAbove.value = opensAbove
   isProfileDropdownPositioned.value = true
@@ -632,6 +641,14 @@ function getProfileDropdownHorizontalPosition(trigger, triggerRect, dropdownWidt
 function snapToDevicePixels(value) {
   const ratio = window.devicePixelRatio || 1
   return Math.round(value * ratio) / ratio
+}
+
+/**
+ * @param {number} value
+ */
+function floorToDevicePixels(value) {
+  const ratio = window.devicePixelRatio || 1
+  return Math.floor(value * ratio) / ratio
 }
 
 function scheduleProfileDropdownPositionUpdate() {

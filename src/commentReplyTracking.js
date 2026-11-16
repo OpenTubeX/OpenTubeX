@@ -12,6 +12,9 @@ const SEEN_REPLY_LIMIT = 500
 /** Characters of a comment kept to show it in the list of watched comments. */
 export const COMMENT_TEXT_LIMIT = 500
 
+/** An author's comments per thread whose hearts are checked, as each may need a request of its own. */
+export const HEART_COMMENT_LIMIT = 10
+
 const ID_PATTERN = /^[\w-]+$/
 
 const HANDLE_CHARACTERS = String.raw`\p{L}\p{M}\p{N}_\-·`
@@ -26,9 +29,11 @@ const HANDLE_CHARACTERS = String.raw`\p{L}\p{M}\p{N}_\-·`
  * activity: being watched, a new reply or heart, or being opened. Watching
  * ends 30 days after it. Comments watched before activity counted lack it.
  *
- * `hearted` tells whether the video's creator hearted the watched comment,
- * which is announced for the account's own comments. Comments watched before
- * hearts were checked lack it until their first check.
+ * `comments` lists the author's comments watched in the thread, the watched
+ * one first, then the newest others, and whether the video's creator hearted
+ * each, which is announced for the account's own comments. A comment watched
+ * without its heart lacks `hearted` until its first check, and entries watched
+ * before hearts were checked lack the list, which then holds the watched comment.
  *
  * Comments watched before others' comments could be watched are the account's
  * own and lack `accountId`, which is `channelId` then. Those watched before
@@ -44,15 +49,20 @@ const HANDLE_CHARACTERS = String.raw`\p{L}\p{M}\p{N}_\-·`
  *   activeAt?: number,
  *   replyCount: number,
  *   seen: string[],
- *   hearted?: boolean,
+ *   comments?: WatchedComment[],
  *   text?: string,
  *   videoTitle?: string
  * }} TrackedCommentThread
  */
 
 /**
+ * @typedef {{ id: string, hearted?: boolean }} WatchedComment `id` is the full ID, `threadId.replyId` for a reply
+ */
+
+/**
  * @typedef {{ id: string, authorId: string, author: string, text: string }} CommentReply
- * @typedef {{ hearted: boolean, author: string }} CommentHeart `author` is the handle of the creator who hearted it, if known
+ * @typedef {{ hearted: boolean, author: string, text: string }} CommentHeart `author` is the handle of the creator
+ *   who hearted it, if known, and `text` the comment's
  */
 
 /**
@@ -70,7 +80,8 @@ function isTrackedCommentThread(value) {
     (value.activeAt === undefined || Number.isFinite(value.activeAt)) &&
     Number.isInteger(value.replyCount) &&
     Array.isArray(value.seen) && value.seen.every(id => typeof id === 'string') &&
-    (value.hearted === undefined || typeof value.hearted === 'boolean') &&
+    (value.comments === undefined || (Array.isArray(value.comments) && value.comments.every(comment =>
+      typeof comment?.id === 'string' && (comment.hearted === undefined || typeof comment.hearted === 'boolean')))) &&
     (value.text === undefined || typeof value.text === 'string') &&
     (value.videoTitle === undefined || typeof value.videoTitle === 'string')
 }
@@ -134,7 +145,7 @@ export function isSameWatchedComment(left, right) {
  *   replyCount?: number,
  *   seen?: string[],
  *   hearted?: boolean
- * }} comment `replyCount` and `seen` describe the replies it already has, `hearted` whether it is hearted
+ * }} comment `replyCount` and `seen` describe the replies it already has, `hearted` whether it is hearted, if known
  * @param {number} [now]
  * @returns {TrackedCommentThread[]}
  */
@@ -149,7 +160,7 @@ export function trackComment(threads, comment, now = Date.now()) {
         // The text stays the watched comment's. A top-level comment watches the
         // whole thread, starting from the replies it had when watched.
         ...(commentId === threadId && existing.commentId !== threadId
-          ? { commentId, text, hearted: comment.hearted, seen: [...new Set([...existing.seen, ...(comment.seen ?? [])])].slice(-SEEN_REPLY_LIMIT) }
+          ? { commentId, text, seen: [...new Set([...existing.seen, ...(comment.seen ?? [])])].slice(-SEEN_REPLY_LIMIT) }
           : {}),
         ...(accountId && !existing.accountId ? { accountId } : {}),
         videoTitle: videoTitle || existing.videoTitle,
@@ -167,11 +178,36 @@ export function trackComment(threads, comment, now = Date.now()) {
         activeAt: now,
         replyCount: comment.replyCount ?? -1,
         seen: (comment.seen ?? []).slice(-SEEN_REPLY_LIMIT),
-        hearted: comment.hearted,
         text,
         videoTitle
       }
+  tracked.comments = addWatchedComment(existing ? getHeartComments(existing) : [], getWatchedCommentId(tracked),
+    { id: getWatchedCommentId(comment), ...(comment.hearted === undefined ? {} : { hearted: comment.hearted }) })
   return normalizeTrackedCommentThreads([tracked, ...others], now)
+}
+
+/**
+ * Adds a comment to an entry's comments, keeping a heart state already known,
+ * so watching it again does not announce an old heart.
+ * @param {WatchedComment[]} comments
+ * @param {string} watchedId the full ID of the watched comment, which stays first
+ * @param {WatchedComment} added
+ * @returns {WatchedComment[]}
+ */
+function addWatchedComment(comments, watchedId, added) {
+  const known = comments.find(comment => comment.id === added.id)
+  const all = [...comments.filter(comment => comment !== known), known?.hearted === undefined ? added : { ...added, hearted: known.hearted }]
+  const watched = all.find(comment => comment.id === watchedId) ?? { id: watchedId }
+  return [watched, ...all.filter(comment => comment !== watched).slice(1 - HEART_COMMENT_LIMIT)]
+}
+
+/**
+ * The author's comments watched in a thread, whose hearts are checked.
+ * @param {TrackedCommentThread} thread
+ * @returns {WatchedComment[]}
+ */
+export function getHeartComments(thread) {
+  return thread.comments ?? [{ id: getWatchedCommentId(thread) }]
 }
 
 /**
@@ -234,19 +270,45 @@ export function findNewReplies(thread, replies, signedInId = '') {
 }
 
 /**
- * Whether a watched comment's creator heart is new and should be announced:
+ * Which of a watched entry's comments got a new creator heart, to announce
  * only for the account's own comments, and not on the first check of a
- * comment watched before hearts were checked, as it may be old.
+ * comment watched without its heart, as it may be old.
  * @param {TrackedCommentThread} thread
- * @param {CommentHeart | null} heart null when the response lacks the comment
- * @returns {{ announce: boolean, active: boolean, hearted: boolean | undefined }} whether to announce it,
- *   whether it is new and so counts as activity, also for others' comments, and the state to save
+ * @param {Map<string, CommentHeart>} hearts by full comment ID, without the comments the responses lacked
+ * @returns {{ announce: { id: string, heart: CommentHeart }[], active: boolean, comments: WatchedComment[] }}
+ *   the hearts to announce, whether any is new and so counts as activity, also for others' comments, and the comments to save
  */
-export function checkCommentHeart(thread, heart) {
-  if (!heart) return { announce: false, active: false, hearted: thread.hearted }
-  // Announced once, even if the heart is taken back and given again.
-  const active = thread.hearted === false && heart.hearted
-  return { announce: active && isOwnWatchedComment(thread), active, hearted: !!thread.hearted || heart.hearted }
+export function checkCommentHearts(thread, hearts) {
+  const own = isOwnWatchedComment(thread)
+  /** @type {{ id: string, heart: CommentHeart }[]} */
+  const announce = []
+  let active = false
+  const comments = getHeartComments(thread).map(comment => {
+    const heart = hearts.get(comment.id)
+    if (!heart) return comment
+    // Announced once, even if the heart is taken back and given again.
+    if (comment.hearted === false && heart.hearted) {
+      active = true
+      if (own) announce.push({ id: comment.id, heart })
+    }
+    return { ...comment, hearted: !!comment.hearted || heart.hearted }
+  })
+  return { announce, active, comments }
+}
+
+/**
+ * The comments whose hearts need a request that links each: the account's
+ * own ones that the responses so far lacked, except the watched comment,
+ * which the first request links. Hearts on others' comments are not announced.
+ * @param {TrackedCommentThread} thread
+ * @param {Map<string, CommentHeart>} hearts by full comment ID, as found so far
+ * @returns {WatchedComment[]}
+ */
+export function findCommentsToLink(thread, hearts) {
+  const watchedId = getWatchedCommentId(thread)
+  return isOwnWatchedComment(thread)
+    ? getHeartComments(thread).filter(comment => comment.id !== watchedId && !hearts.has(comment.id))
+    : []
 }
 
 /**
@@ -260,7 +322,8 @@ export function getWatchedCommentId({ threadId, commentId }) {
 
 /**
  * Reads whether a comment is hearted from a comments response that includes
- * it, as one that links the comment does, also when it is a reply.
+ * it, as one that links the comment does, also when it is a reply, and as
+ * reply pages do for their replies.
  * @param {any} response a YouTube comments response, as JSON
  * @param {string} commentId the full ID, `threadId.replyId` for a reply
  * @returns {CommentHeart | null} null without the comment
@@ -276,10 +339,21 @@ export function findCommentHeart(response, commentId) {
   if (!state) return null
   // The tooltip reads like "❤ by @handle", in the language of the response.
   const tooltip = typeof comment.toolbar?.heartActiveTooltip === 'string' ? comment.toolbar.heartActiveTooltip : ''
+  const text = typeof comment.properties.content?.content === 'string' ? comment.properties.content.content : ''
   return {
     hearted: state.heartState === 'TOOLBAR_HEART_STATE_HEARTED',
-    author: tooltip.match(new RegExp(`@[${HANDLE_CHARACTERS}.]*[${HANDLE_CHARACTERS}]`, 'u'))?.[0] ?? ''
+    author: tooltip.match(new RegExp(`@[${HANDLE_CHARACTERS}.]*[${HANDLE_CHARACTERS}]`, 'u'))?.[0] ?? '',
+    text: cleanCommentText(text)
   }
+}
+
+/**
+ * A comment's text without the extra spaces, zero-width spaces, and
+ * bidirectional isolates that come around mentions.
+ * @param {string} text
+ */
+export function cleanCommentText(text) {
+  return text.replaceAll(/[\u200B-\u200D\u2066-\u2069]/g, '').replaceAll(/\s+/g, ' ').trim()
 }
 
 /**

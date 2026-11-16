@@ -51,6 +51,7 @@ import { createTwitchLiveNotifier } from './twitchLiveNotifications'
 import { isYtDlpStoryboardUrl, getYtDlpExternalStreamCookieHeader, getYtDlpExternalStreamHeaders, refreshYtDlpDownloadQueue, restoreYtDlpDownloadQueue, shutdownYtDlpDownloads } from './ytDlp'
 import { applyYtDlpPlaybackCacheSettings } from './ytDlpPlaybackCache'
 import { generatePoToken, mintPoTokenFromAttestation } from './poTokenGenerator'
+import { disableSpellChecker } from './spellChecker'
 import { getObsidianAppendUri } from './obsidian'
 import { buildProxyUrl, DEFAULT_PROXY_SETTINGS, isConfiguredProxyChallenge, isExternalBrowserUrl, isOpenTubeXUrl } from './utils'
 import { createBackgroundExternalLinkOpener } from './backgroundExternalLink'
@@ -1113,6 +1114,7 @@ function runApp() {
   let proxyUrl
 
   app.on('ready', async (_, __) => {
+    disableSpellChecker(session.defaultSession)
     scheduledBackupTimer = setInterval(checkScheduledBackup, 60_000)
     checkScheduledBackup()
     // None of these gate the first window: the playback cache and download

@@ -9,6 +9,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
 
+import java.util.List;
+
 public class CommentReplyNotificationsTest {
     private static JSONObject entity(String id, String channelId, String name, String text, String replyCount) throws Exception {
         return new JSONObject().put("payload", new JSONObject().put("commentEntityPayload", new JSONObject()
@@ -91,9 +93,90 @@ public class CommentReplyNotificationsTest {
         JSONObject heart = CommentReplyNotifications.parseHeart(response, "thread1.a");
         assertEquals(true, heart.getBoolean("hearted"));
         assertEquals("@Creator.Name", heart.getString("author"));
+        assertEquals("Reply", heart.getString("text"));
         // Without its toolbar state, as in a response that does not link it
         assertNull(CommentReplyNotifications.parseHeart(response, "thread1"));
         assertNull(CommentReplyNotifications.parseHeart(response, "thread1.b"));
+
+        // Hearts found already are kept, and comments a response lacks stay missing.
+        JSONArray comments = new JSONArray().put(new JSONObject().put("id", "thread1.a")).put(new JSONObject().put("id", "thread1.b"));
+        JSONObject hearts = new JSONObject().put("thread1.b", new JSONObject().put("hearted", false));
+        CommentReplyNotifications.readHearts(response, comments, hearts);
+        assertTrue(hearts.getJSONObject("thread1.a").getBoolean("hearted"));
+        assertFalse(hearts.getJSONObject("thread1.b").getBoolean("hearted"));
+        JSONObject none = new JSONObject();
+        CommentReplyNotifications.readHearts(response, new JSONArray().put(new JSONObject().put("id", "thread1.c")), none);
+        assertEquals(0, none.length());
+    }
+
+    private static JSONObject own(String commentId, String token) throws Exception {
+        return new JSONObject().put("videoId", "video1").put("threadId", "thread1").put("commentId", commentId)
+            .put("channelId", "UCme").put("handle", "@Me").put("accountId", "UCme").put("token", token).put("hearted", false);
+    }
+
+    private static JSONObject heart(boolean hearted, String text) throws Exception {
+        return new JSONObject().put("hearted", hearted).put("author", "@Creator").put("text", text);
+    }
+
+    @Test
+    public void announcesHeartsOnEachOwnCommentWatchedTogetherInAThread() throws Exception {
+        // Two replies, then the top-level comment, which then is the watched one
+        JSONArray threads = CommentReplyNotifications.trackComment(new JSONArray(), own("thread1.a", "tokenA"), 1000);
+        threads = CommentReplyNotifications.trackComment(threads, own("b", "tokenB"), 2000);
+        threads.getJSONObject(0).getJSONArray("comments").getJSONObject(0).put("hearted", true);
+        JSONObject top = own("thread1", "tokenTop");
+        top.remove("hearted");
+        JSONObject thread = CommentReplyNotifications.trackComment(threads, top, 3000).getJSONObject(0);
+        assertEquals("thread1", thread.getString("commentId"));
+        assertEquals("tokenTop", thread.getString("token"));
+        // A known heart stays known, and one unknown is only saved on its first check.
+        JSONArray comments = thread.getJSONArray("comments");
+        assertEquals(3, comments.length());
+        assertEquals("thread1", comments.getJSONObject(0).getString("id"));
+        assertFalse(comments.getJSONObject(0).has("hearted"));
+        assertEquals("thread1.a", comments.getJSONObject(1).getString("id"));
+        assertTrue(comments.getJSONObject(1).getBoolean("hearted"));
+        assertEquals("thread1.b", comments.getJSONObject(2).getString("id"));
+        assertEquals("tokenB", comments.getJSONObject(2).getString("token"));
+
+        JSONObject hearts = new JSONObject().put("thread1", heart(true, "Top")).put("thread1.a", heart(false, "A")).put("thread1.b", heart(true, "B"));
+        JSONObject checked = CommentReplyNotifications.checkHearts(thread, hearts);
+        JSONArray announce = checked.getJSONArray("announce");
+        assertEquals(1, announce.length());
+        assertEquals("thread1.b", announce.getJSONObject(0).getString("id"));
+        assertEquals("B", announce.getJSONObject(0).getString("text"));
+        assertTrue(checked.getBoolean("active"));
+        for (int index = 0; index < 3; index++) assertTrue(checked.getJSONArray("comments").getJSONObject(index).getBoolean("hearted"));
+        // Others' comments are not announced, but a new heart keeps them watched.
+        JSONObject theirs = new JSONObject(thread.toString()).put("channelId", "UCother");
+        assertEquals(0, CommentReplyNotifications.checkHearts(theirs, hearts).getJSONArray("announce").length());
+        assertTrue(CommentReplyNotifications.checkHearts(theirs, hearts).getBoolean("active"));
+
+        // The request for the watched comment covers it, so only the others found nowhere else get one each.
+        List<JSONObject> linked = CommentReplyNotifications.commentsToLink(thread, new JSONObject().put("thread1.a", heart(true, "A")));
+        assertEquals(1, linked.size());
+        assertEquals("tokenB", linked.get(0).getString("token"));
+        assertEquals(0, CommentReplyNotifications.commentsToLink(theirs, new JSONObject()).size());
+    }
+
+    @Test
+    public void checksTheHeartsOfTheWatchedCommentAndTheNewestOthers() throws Exception {
+        JSONArray threads = new JSONArray();
+        for (int index = 0; index < 15; index++) {
+            threads = CommentReplyNotifications.trackComment(threads, own("thread1.r" + index, "token" + index), 1000 + index);
+        }
+        JSONArray comments = threads.getJSONObject(0).getJSONArray("comments");
+        assertEquals(CommentReplyNotifications.HEART_COMMENT_LIMIT, comments.length());
+        assertEquals("thread1.r0", comments.getJSONObject(0).getString("id"));
+        assertEquals("thread1.r6", comments.getJSONObject(1).getString("id"));
+        assertEquals("thread1.r14", comments.getJSONObject(comments.length() - 1).getString("id"));
+
+        // Saved before hearts were checked, the watched comment's first check only saves its state.
+        JSONObject older = new JSONObject(threads.getJSONObject(0).toString());
+        older.remove("comments");
+        JSONObject checked = CommentReplyNotifications.checkHearts(older, new JSONObject().put("thread1.r0", heart(true, "R0")));
+        assertEquals(0, checked.getJSONArray("announce").length());
+        assertTrue(checked.getJSONArray("comments").getJSONObject(0).getBoolean("hearted"));
     }
 
     @Test

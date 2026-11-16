@@ -1574,14 +1574,20 @@ export { parseLocalVideoCollaborators } from '../video-collaborators'
  * @param {string} id
  * @param {'TOP_COMMENTS' | 'NEWEST_FIRST' | undefined} sortBy
  * @param {string | undefined} commentId
+ */
+export async function getLocalComments(id, sortBy = undefined, commentId = undefined) {
+  return (await createLocalCommentsClient()).getComments(id, sortBy, commentId)
+}
+
+/**
+ * A session for loading comments, which several requests can share.
  * @param {(data: object) => void} [onResponse] receives each JSON response, for what youtubei.js leaves out
  */
-export async function getLocalComments(id, sortBy = undefined, commentId = undefined, onResponse = undefined) {
-  const innertube = await createInnertube({
+export function createLocalCommentsClient(onResponse = undefined) {
+  return createInnertube({
     generateSessionLocally: false,
     fetchFunc: async (input, init) => normalizeCommentFetchResponse(await localApiFetch(input, init), onResponse)
   })
-  return innertube.getComments(id, sortBy, commentId)
 }
 
 /**
