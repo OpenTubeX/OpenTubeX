@@ -229,7 +229,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     // Digital wellbeing. Limits and intervals are in minutes; 0 turns them off.
     // 'off' | 'always' | 'bedtime' | 'limit'
     grayscaleMode: 'off',
-    // 'app' | 'content'
+    // 'app' | 'content' | 'notDownloaded'
     grayscaleScope: 'app',
     dailyWatchTimeLimit: 0,
     // Devices whose watch time counts toward the daily limit: 'all' | 'local'

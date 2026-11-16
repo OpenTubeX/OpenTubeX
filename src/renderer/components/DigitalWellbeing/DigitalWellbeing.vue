@@ -97,11 +97,13 @@ const grayscale = computed(() => {
   }
 })
 watchEffect(() => {
-  const contentOnly = store.getters.getGrayscaleScope === 'content'
+  const scope = store.getters.getGrayscaleScope
+  const contentOnly = scope !== 'app'
   document.documentElement.classList.toggle('grayscale', grayscale.value && !contentOnly)
   document.documentElement.classList.toggle('grayscaleContent', grayscale.value && contentOnly)
+  document.documentElement.classList.toggle('grayscaleExceptDownloads', grayscale.value && scope === 'notDownloaded')
 })
-onBeforeUnmount(() => document.documentElement.classList.remove('grayscale', 'grayscaleContent'))
+onBeforeUnmount(() => document.documentElement.classList.remove('grayscale', 'grayscaleContent', 'grayscaleExceptDownloads'))
 
 /**
  * @param {'watch' | 'shorts'} kind

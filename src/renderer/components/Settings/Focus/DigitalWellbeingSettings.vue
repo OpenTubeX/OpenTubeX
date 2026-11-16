@@ -184,7 +184,7 @@ const uploadNotificationsAvailable = computed(() => uploadNotificationsSupported
 const { locale, t } = useI18n()
 
 const GRAYSCALE_MODES = ['off', 'always', 'bedtime', 'limit']
-const GRAYSCALE_SCOPES = ['app', 'content']
+const GRAYSCALE_SCOPES = ['app', 'content', 'notDownloaded']
 const DAILY_LIMIT_ACTIONS = ['remind', 'pause']
 const LIMIT_DEVICES = ['all', 'local']
 const BEDTIME_TIMES = Array.from({ length: 48 }, (_, index) =>
@@ -199,6 +199,7 @@ const grayscaleModeNames = computed(() => [
 const grayscaleScopeNames = computed(() => [
   t('Settings.Distraction Free Settings.Digital Wellbeing.Whole App'),
   t('Settings.Distraction Free Settings.Digital Wellbeing.Videos and Images'),
+  t('Settings.Distraction Free Settings.Digital Wellbeing.Videos and Images Not Downloaded'),
 ])
 const dailyLimitActionNames = computed(() => [
   t('Settings.Distraction Free Settings.Digital Wellbeing.Remind Me'),

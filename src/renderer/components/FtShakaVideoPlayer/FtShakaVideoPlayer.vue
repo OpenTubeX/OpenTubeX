@@ -5,7 +5,8 @@
       ambientWideLayout: theatrePossible && !useTheatreMode,
       theatreUnavailable: !theatrePossible,
       shortsPlayer,
-      scrollPinnedPlayer
+      scrollPinnedPlayer,
+      downloadedPlayer: downloaded
     }"
   >
     <Teleport to="body">
@@ -73,6 +74,7 @@
       :inert="scrollMiniPlayerDismissed"
       :aria-hidden="scrollMiniPlayerDismissed ? 'true' : undefined"
       :class="{
+        downloadedPlayer: downloaded,
         autoQualityUnavailable: !autoQualitySupported,
         classicPlayerControls: !useFrostedGlassPlayerUi,
         fullWindow: fullWindowEnabled || androidFullscreenHostActive,
@@ -2401,6 +2403,11 @@ const props = defineProps({
     default: false
   },
   localFilePlayback: {
+    type: Boolean,
+    default: false
+  },
+  // The video has a local download, so it keeps its colors when grayscale spares downloads.
+  downloaded: {
     type: Boolean,
     default: false
   },

@@ -63,6 +63,7 @@
       </div>
       <div
         class="videoThumbnail"
+        :class="{ downloadedContent: localDownloadId !== undefined }"
         draggable="true"
         @dragstart="onDragStart"
       >
