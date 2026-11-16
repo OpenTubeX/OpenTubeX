@@ -32,6 +32,27 @@ test('searching selected text in a new tab uses the default filters', async ({ p
   await expect(page.locator('.searchRadio', { hasText: 'Duration' }).locator('input[value=""]')).toBeChecked()
 })
 
+test('opens in-app links in a new tab behind the current one', async ({ page }) => {
+  await goTo(page, 'history')
+  const pageURL = page.url()
+  const { activeTabId } = await page.evaluate(() => window.ftElectron.tabs.getState())
+  const contextMenu = await page.evaluate(parameters => window.ftElectron.contextMenu.open(parameters), {
+    pageURL,
+    linkURL: `${pageURL.split('#')[0]}#/settings`
+  })
+  const newTab = contextMenu.items.find(item => item.label === 'Open in a New Tab')
+
+  await page.evaluate(({ sessionId, actionId }) => {
+    return window.ftElectron.contextMenu.execute(sessionId, actionId)
+  }, { sessionId: contextMenu.sessionId, actionId: newTab.actionId })
+
+  await expect(page.locator(sel.tabs)).toHaveCount(2)
+  const state = await page.evaluate(() => window.ftElectron.tabs.getState())
+  expect(state.activeTabId).toBe(activeTabId)
+  expect(state.tabs.find(tab => tab.id !== activeTabId).route.path).toBe('/settings')
+  await expect(page).toHaveURL(/#\/history$/)
+})
+
 test('truncates long selections so the rest of the label is never cut off', async ({ page }) => {
   const selectionText = 'OpenTubeX is a privacy respecting YouTube client for the desktop'
   const contextMenu = await page.evaluate((selection) => window.ftElectron.contextMenu.open({

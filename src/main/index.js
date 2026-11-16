@@ -415,8 +415,13 @@ function runApp() {
           click: () => {
             const manager = TabManager.getFromWebContents(webContents)
             if (manager) {
+              // Like in browsers, the current tab stays in front
               manager.createTabWithPreferenceFromOpener(
-                { url: parameters.linkURL, makeActive: true },
+                {
+                  url: parameters.linkURL,
+                  makeActive: false,
+                  preloadInBackground: parameters.linkURL.split('#')[1]?.startsWith('/watch/') === true
+                },
                 manager.contextMenuTabId ?? manager.presentedTabId ?? manager.activeTabId
               ).catch(error => {
                 console.error('Failed to open link in a new tab:', error)

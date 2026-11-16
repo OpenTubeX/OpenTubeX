@@ -411,7 +411,8 @@ const menuItems = computed(() => {
       shortLabel: t('New Tab'),
       icon: ['fas', 'arrow-up-right-from-square'],
       quickAction: true,
-      run: () => openElsewhere()
+      // Like in browsers, desktop keeps the current tab in front
+      run: () => openElsewhere({ background: process.env.IS_ELECTRON })
     })
   }
   if (process.env.IS_ELECTRON) {
@@ -471,8 +472,9 @@ const menuItems = computed(() => {
   return items.map(item => item.type === 'separator' ? item : { enabled: true, ...item })
 })
 
-// Like on YouTube videos, phones can open the item without leaving the page
-const thumbnailActions = computed(() => (process.env.IS_ELECTRON || process.env.IS_CAPACITOR) && store.getters.getTabsEnabled
+// Like on YouTube videos, phones can open the item without leaving the page.
+// Desktop opens new tabs in the background already.
+const thumbnailActions = computed(() => process.env.IS_CAPACITOR && store.getters.getTabsEnabled
   ? [{
       label: t('Context Menu.Open in a Background Tab'),
       shortLabel: t('Context Menu.Background Tab'),
