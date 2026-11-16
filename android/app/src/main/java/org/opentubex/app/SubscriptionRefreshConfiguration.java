@@ -8,6 +8,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -74,9 +76,10 @@ final class SubscriptionRefreshConfiguration {
     /**
      * The saved configuration. One this installation cannot decrypt, such as
      * one restored from another device, is deleted until the app configures
-     * the refreshes again. One saved unencrypted is encrypted.
+     * the refreshes again. One saved unencrypted is encrypted. Throws when the
+     * Keystore fails, which may pass.
      */
-    static synchronized String read(Context context) {
+    static synchronized String read(Context context) throws GeneralSecurityException, IOException {
         SharedPreferences preferences = preferences(context);
         String encrypted = preferences.getString(ENCRYPTED_CONFIGURATION_KEY, null);
         if (encrypted == null) {
@@ -84,22 +87,23 @@ final class SubscriptionRefreshConfiguration {
             if (configuration != null) write(preferences, configuration);
             return configuration;
         }
+        String configuration = SecretStorage.decrypt(encrypted);
+        if (configuration == null) {
+            Log.w(TAG, "Deleting the background refresh settings, which cannot be decrypted on this device");
+            preferences.edit().remove(ENCRYPTED_CONFIGURATION_KEY).commit();
+        }
+        return configuration;
+    }
+
+    /** Every feed, or null when the settings cannot be read now. */
+    static List<Feed> readFeeds(Context context) {
+        String encoded;
         try {
-            String configuration = SecretStorage.decrypt(encrypted);
-            if (configuration == null) {
-                Log.w(TAG, "Deleting the background refresh settings, which cannot be decrypted on this device");
-                preferences.edit().remove(ENCRYPTED_CONFIGURATION_KEY).commit();
-            }
-            return configuration;
-        } catch (Exception error) {
-            // The next refresh tries again.
+            encoded = read(context);
+        } catch (GeneralSecurityException | IOException error) {
             Log.e(TAG, "Unable to decrypt the background refresh settings", error);
             return null;
         }
-    }
-
-    static List<Feed> readFeeds(Context context) {
-        String encoded = read(context);
         if (encoded == null) return Collections.emptyList();
 
         try {
@@ -109,9 +113,15 @@ final class SubscriptionRefreshConfiguration {
         }
     }
 
+    /** The feeds of a type, or null when the settings cannot be read now. */
     static List<Feed> findFeeds(Context context, String type) {
+        List<Feed> feeds = readFeeds(context);
+        return feeds == null ? null : ofType(feeds, type);
+    }
+
+    static List<Feed> ofType(List<Feed> feeds, String type) {
         List<Feed> matches = new ArrayList<>();
-        for (Feed feed : readFeeds(context)) {
+        for (Feed feed : feeds) {
             if (feed.type.equals(type)) matches.add(feed);
         }
         return matches;
