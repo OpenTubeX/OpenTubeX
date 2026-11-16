@@ -2,6 +2,7 @@ package org.opentubex.app;
 
 import android.content.Context;
 import android.util.AtomicFile;
+import android.util.Log;
 import android.webkit.HttpAuthHandler;
 import android.webkit.WebView;
 import com.getcapacitor.JSObject;
@@ -11,6 +12,7 @@ import androidx.webkit.ProxyController;
 import androidx.webkit.WebViewFeature;
 import androidx.core.content.ContextCompat;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -38,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 
 /** Installed before activities and background workers can send requests. */
 final class AndroidProxy {
+    private static final String TAG = "AndroidProxy";
     private static AndroidProxyRelay relay;
     private static AtomicFile settings;
     private static ProxyConfiguration configuration;
@@ -51,7 +54,16 @@ final class AndroidProxy {
         try {
             // AtomicFile restores its backup in openRead, even if the base file
             // disappeared during an interrupted write on older Android versions.
-            configuration = configuration(new JSONObject(new String(settings.readFully(), StandardCharsets.UTF_8)));
+            JSONObject saved = new JSONObject(new String(settings.readFully(), StandardCharsets.UTF_8));
+            boolean rewrite = decryptPassword(saved);
+            configuration = configuration(saved);
+            if (rewrite) {
+                try {
+                    write(saved);
+                } catch (Exception error) {
+                    Log.e(TAG, "Unable to save the proxy settings", error);
+                }
+            }
         } catch (FileNotFoundException error) {
             File base = settings.getBaseFile();
             boolean incompleteWrite = base.exists() || new File(base + ".bak").exists() || new File(base + ".new").exists();
@@ -168,15 +180,61 @@ final class AndroidProxy {
         // Apply even invalid enabled input as a blocking policy while the user edits it.
         // Never retain an old direct route after the enable switch has been turned on.
         relay.configure(next);
+        try {
+            write(value);
+            configuration = next;
+        } catch (Exception error) {
+            relay.configure(new ProxyConfiguration(true, "invalid", "", "0", "", ""));
+            throw error;
+        }
+    }
+
+    /**
+     * Decrypts the saved password into {@code password}. One this installation
+     * cannot decrypt, such as one restored from another device, is left empty,
+     * so the user enters it again.
+     * @return whether the settings need to be saved again: to encrypt a password
+     *     an earlier version saved, or to delete one that cannot be decrypted
+     */
+    static boolean decryptPassword(JSONObject saved) throws JSONException {
+        String encrypted = saved.optString("encryptedPassword", "");
+        if (encrypted.isEmpty()) return !saved.optString("password", "").isEmpty();
+        String password = null;
+        boolean rewrite = false;
+        try {
+            password = SecretStorage.decrypt(encrypted);
+            if (password == null) {
+                Log.w(TAG, "Deleting the saved proxy password, which cannot be decrypted on this device");
+                rewrite = true;
+            }
+        } catch (Exception error) {
+            // The next start tries again.
+            Log.e(TAG, "Unable to decrypt the saved proxy password", error);
+        }
+        saved.put("password", password == null ? "" : password);
+        return rewrite;
+    }
+
+    /** Saves the settings with the password encrypted, or as it is when the Keystore fails. */
+    private static void write(JSONObject value) throws Exception {
+        JSONObject saved = new JSONObject(value.toString());
+        String password = saved.optString("password", "");
+        saved.remove("encryptedPassword");
+        if (!password.isEmpty()) {
+            try {
+                saved.put("encryptedPassword", SecretStorage.encrypt(password));
+                saved.remove("password");
+            } catch (Exception error) {
+                Log.e(TAG, "Unable to encrypt the proxy password, saving it unencrypted", error);
+            }
+        }
         FileOutputStream output = null;
         try {
             output = settings.startWrite();
-            output.write(value.toString().getBytes(StandardCharsets.UTF_8));
+            output.write(saved.toString().getBytes(StandardCharsets.UTF_8));
             settings.finishWrite(output);
-            configuration = next;
         } catch (IOException error) {
             settings.failWrite(output);
-            relay.configure(new ProxyConfiguration(true, "invalid", "", "0", "", ""));
             throw error;
         }
     }
