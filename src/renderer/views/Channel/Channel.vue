@@ -397,6 +397,7 @@ import {
   parseChannelHomeTab
 } from '../../helpers/api/local'
 import { resolveChannelId } from '../../helpers/channels'
+import { isHistoryEntryWatched } from '../../helpers/history'
 import { useTabAvatar, useTabContext, useTabTitle } from '../../tabs/TabContext'
 import { setChannelShortsNavigationContext } from '../../helpers/player/shorts'
 import {
@@ -3178,7 +3179,7 @@ function handleSubscription() {
 
 function filterWatchedArray(videos) {
   const historyCache = store.getters.getHistoryCacheById
-  return videos.filter(video => historyCache[video.videoId] === undefined)
+  return videos.filter(video => !isHistoryEntryWatched(historyCache[video.videoId]))
 }
 </script>
 
