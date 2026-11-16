@@ -96,8 +96,8 @@ export async function decodeSettings(docs, datastore, cipherPromise) {
 /**
  * Encrypts secrets saved by a version that stored them as they are, and deletes
  * the ones this device's keyring cannot decrypt. Then removes their old content from
- * the database file.
- * @param {import('@seald-io/nedb').default & { vacuumAsync?: () => Promise<void> }} datastore
+ * the database file and from the copies kept for older versions.
+ * @param {import('@seald-io/nedb').default & { vacuumAsync?: () => Promise<void>, removeOlderCopiesAsync?: (ids: string[]) => Promise<void> }} datastore
  * @param {Promise<SecretCipher | null>} cipherPromise
  */
 export async function migrateSecretSettings(datastore, cipherPromise) {
@@ -110,6 +110,7 @@ export async function migrateSecretSettings(datastore, cipherPromise) {
   const decoded = await decodeSettings(docs, datastore, cipherPromise)
   // Without a keyring, secrets are only left out, so nothing was deleted.
   let changed = cipher !== null && decoded.length < docs.length
+  let encryptedAll = cipher !== null
   const plaintext = docs.filter(doc => !isEncrypted(doc) && doc.value !== undefined)
   if (plaintext.length > 0) {
     if (cipher) {
@@ -120,8 +121,18 @@ export async function migrateSecretSettings(datastore, cipherPromise) {
         }
         changed = true
       } catch (error) {
+        encryptedAll = false
         console.error('Unable to encrypt saved credentials', error)
       }
+    }
+  }
+  // The copies kept for older versions and recovery would still hold them
+  // unencrypted. An older version then asks to sign in again.
+  if (encryptedAll) {
+    try {
+      await datastore.removeOlderCopiesAsync?.([...SECRET_SETTINGS])
+    } catch (error) {
+      console.error('Unable to remove saved credentials from older copies of the settings', error)
     }
   }
   // Rebuilding the file drops the deleted rows, which SQLite otherwise keeps

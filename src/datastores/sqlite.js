@@ -182,6 +182,27 @@ export async function parseLegacyDatafile(raw) {
 }
 
 /**
+ * The lines of a NeDB datafile without the given documents, including their
+ * earlier versions and deletions, or null when it has none of them.
+ * @param {string | null | undefined} raw
+ * @param {string[]} ids
+ * @returns {string[] | null}
+ */
+export function legacyLinesWithout(raw, ids) {
+  const removed = new Set(ids)
+  const lines = (raw ?? '').split('\n').filter(line => line !== '')
+  const kept = lines.filter(line => {
+    try {
+      return !removed.has(JSON.parse(line)._id)
+    } catch {
+      // NeDB decides what to make of a line it cannot parse.
+      return true
+    }
+  })
+  return kept.length === lines.length ? null : kept
+}
+
+/**
  * @typedef {[sql: string, params?: unknown[]]} Statement
  * @typedef {object} SqliteDriver
  * @property {(statements: Statement[], transaction?: boolean) => Promise<unknown[][][]>} execute
@@ -191,12 +212,15 @@ export async function parseLegacyDatafile(raw) {
  * @property {() => Promise<string>} [backup] Copies the database, returning the copy's name.
  * @property {(sql: string, params?: unknown[]) => Promise<unknown[][]>} [read] Runs a large read-only query.
  * @property {() => void | Promise<void>} [close] Closes the connection; the next statement reopens it.
+ * @property {(statements: Statement[]) => Promise<void>} [cleanBackups] Runs statements in every backup.
  *
  * @typedef {object} LegacySource The NeDB datastore this database replaces.
  * @property {() => Promise<{ data: object[], indexes: string[] }>} read
  * @property {() => Promise<string | null>} [fingerprint] Changes whenever the legacy data is written.
  * @property {(text: string) => string} [hash]
  * @property {() => Promise<void>} [remove]
+ * @property {(ids: string[]) => Promise<boolean>} [removeDocuments] Rewrites the datafile without
+ *   these documents, returning whether it had any.
  */
 
 /**
@@ -819,6 +843,33 @@ export class SqliteDatastore {
     return this._exclusive(async () => {
       if (this.dropped) return
       await this._execute([['VACUUM'], ['PRAGMA wal_checkpoint(TRUNCATE)']])
+    }, 'read')
+  }
+
+  /**
+   * Removes documents from the copies kept for older versions and recovery:
+   * the legacy datastore an older version opens, and the backups made before
+   * applying its changes. This is for secrets that this database now keeps
+   * encrypted. An older version then starts without them, and this one does
+   * not apply their absence as a deletion.
+   * @param {string[]} ids
+   */
+  removeOlderCopiesAsync(ids) {
+    return this._exclusive(async () => {
+      if (this.dropped) return
+      const keys = JSON.stringify(ids.map(keyOf))
+      await this.driver.cleanBackups?.([
+        ['DELETE FROM docs WHERE id IN (SELECT value FROM json_each(?))', [keys]],
+        ['DELETE FROM children WHERE parent IN (SELECT value FROM json_each(?))', [keys]],
+      ])
+      if (!this.legacy?.removeDocuments) return
+      const fingerprint = await this.legacy.fingerprint?.() ?? null
+      const applied = fingerprint === await this._meta('legacyFingerprint')
+      // First, so an interrupted rewrite cannot look like an older version deleted them.
+      await this._execute(ids.map(id => [SQL.removeBase, [keyOf(id)]]), true)
+      if (!await this.legacy.removeDocuments(ids)) return
+      // Changes an older version made before still get applied on the next start.
+      if (applied) await this._execute([[SQL.setMeta, ['legacyFingerprint', await this.legacy.fingerprint?.() ?? null]]])
     }, 'read')
   }
 

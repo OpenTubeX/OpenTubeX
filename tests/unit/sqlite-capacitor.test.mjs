@@ -10,6 +10,10 @@ const legacyFiles = {
     JSON.stringify({ _id: 'gone', playlistName: 'Deleted', videos: [] }),
     JSON.stringify({ $$deleted: true, _id: 'gone' }),
   ].join('\n'),
+  'settings.db': [
+    JSON.stringify({ _id: 'proxyPassword', value: 'proxy-secret' }),
+    JSON.stringify({ _id: 'theme', value: 'dark' }),
+  ].join('\n'),
 }
 const drivers = new Map()
 const driver = name => {
@@ -26,7 +30,10 @@ globalThis.fetch = async url => {
     : { ok: true, status: 200, json: async () => JSON.parse(contents) }
 }
 const modules = {
-  './androidStorage.js': { readFileAsync: async filename => legacyFiles[filename] ?? '' },
+  './androidStorage.js': {
+    readFileAsync: async filename => legacyFiles[filename] ?? '',
+    appendFileAsync: async (filename, contents) => { legacyFiles[filename] += `\n${contents}` },
+  },
   '@capacitor/core': {
     Capacitor: { convertFileSrc: path => `https://localhost/_capacitor_file_${path}` },
     registerPlugin: () => ({
@@ -68,4 +75,13 @@ test('Capacitor loads whole datastores through result files and releases them', 
   // Released asynchronously after reading.
   await new Promise(resolve => setImmediate(resolve))
   assert.equal(resultFiles.size, 0)
+})
+
+test('Capacitor builds remove secrets from the record storage with deletion records', async () => {
+  const settings = createBrowserDatastore('settings')
+  assert.equal((await settings.findOneAsync({ _id: 'proxyPassword' })).value, 'proxy-secret')
+  await settings.removeOlderCopiesAsync(['proxyPassword', 'syncServerToken'])
+  // The record storage replaces a document's record, so a deletion removes its value.
+  assert.deepEqual(legacyFiles['settings.db'].trim().split('\n').slice(2).map(line => JSON.parse(line)), [{ $$deleted: true, _id: 'proxyPassword' }])
+  assert.equal((await settings.findOneAsync({ _id: 'proxyPassword' })).value, 'proxy-secret', 'the library keeps it')
 })

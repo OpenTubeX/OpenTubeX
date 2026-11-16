@@ -1,5 +1,5 @@
 // @ts-check
-import { rmSync } from 'node:fs'
+import { readdirSync, rmSync } from 'node:fs'
 import { basename, dirname, join } from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
 
@@ -75,6 +75,26 @@ export function createNodeSqliteDriver(filename, backupDirectory = dirname(filen
       const target = join(backupDirectory, `${basename(filename)}.backup-${Date.now()}`)
       open().exec(`VACUUM INTO '${target.replaceAll('\'', '\'\'')}'`)
       return target
+    },
+    async cleanBackups(list) {
+      const prefix = `${basename(filename)}.backup-`
+      /** @type {string[]} */
+      let names = []
+      try {
+        names = readdirSync(backupDirectory).filter(name => name.startsWith(prefix))
+      } catch (error) {
+        if (/** @type {NodeJS.ErrnoException} */ (error).code !== 'ENOENT') throw error
+      }
+      for (const name of names) {
+        const backup = new DatabaseSync(join(backupDirectory, name))
+        try {
+          const changes = list.reduce((total, [sql, params = []]) => total + Number(backup.prepare(sql).run(...(/** @type {import('node:sqlite').SQLInputValue[]} */ (params))).changes), 0)
+          // Rebuilding drops the deleted rows from the file's free pages.
+          if (changes > 0) backup.exec('VACUUM')
+        } finally {
+          backup.close()
+        }
+      }
     },
     async drop() {
       close()

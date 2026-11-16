@@ -71,6 +71,7 @@ test('secrets saved unencrypted by an earlier version are encrypted on startup',
   ])
   t.mock.method(settings, 'cipher', () => Promise.resolve(cipher('device')))
   const vacuum = t.mock.method(datastore, 'vacuumAsync')
+  const removeOlderCopies = t.mock.method(datastore, 'removeOlderCopiesAsync')
 
   assert.deepEqual(await saved(), { youTubeAccount: ACCOUNT, proxyPassword: 'proxy-secret', yatteePassword: '', proxyUsername: 'user' })
   for (const id of ['youTubeAccount', 'proxyPassword', 'yatteePassword']) {
@@ -79,12 +80,17 @@ test('secrets saved unencrypted by an earlier version are encrypted on startup',
   assert.equal((await stored('proxyUsername')).value, 'user')
   // Rebuilding the file drops the old values from its free space.
   assert.equal(vacuum.mock.callCount(), 1)
+  // The copies an older version reads lose them too.
+  assert.deepEqual(removeOlderCopies.mock.calls.map(call => call.arguments[0].sort()), [['proxyPassword', 'syncServerPrivacyKey', 'syncServerToken', 'yatteePassword', 'youTubeAccount']])
 })
 
 test('without a system keyring, secrets stay unencrypted', async t => {
   await datastore.insertAsync({ _id: 'proxyPassword', value: 'proxy-secret' })
   t.mock.method(settings, 'cipher', () => Promise.resolve(null))
+  const removeOlderCopies = t.mock.method(datastore, 'removeOlderCopiesAsync')
   await settings.upsert('syncServerToken', 'sync-secret')
+  // An older version keeps them, as this database has them unencrypted too.
+  assert.equal(removeOlderCopies.mock.callCount(), 0)
 
   assert.deepEqual(await saved(), { proxyPassword: 'proxy-secret', syncServerToken: 'sync-secret' })
   assert.equal((await stored('proxyPassword')).value, 'proxy-secret')

@@ -69,13 +69,25 @@ const createDriver = process.env.IS_CAPACITOR ? nativeDrivers() : workerDrivers(
 const legacyStorage = process.env.IS_CAPACITOR ? require('./androidStorage.js') : require('@seald-io/nedb/lib/storage.js')
 
 /**
- * The NeDB datastore this database replaces. It is only read and stays in place.
+ * The NeDB datastore this database replaces. It stays in place and is only
+ * read, apart from removing secrets in the apps.
  * @param {string} filename
  * @returns {import('./sqlite.js').LegacySource}
  */
 function legacySource(filename) {
+  const read = async () => parseLegacyDatafile(await legacyStorage.readFileAsync(filename))
   return {
-    read: async () => parseLegacyDatafile(await legacyStorage.readFileAsync(filename)),
+    read,
+    // The apps keep one record per document, which a deletion removes.
+    ...(process.env.IS_CAPACITOR && {
+      async removeDocuments(ids) {
+        const present = new Set((await read()).data.map(doc => doc._id))
+        const removed = ids.filter(id => present.has(id))
+        if (removed.length === 0) return false
+        await legacyStorage.appendFileAsync(filename, removed.map(_id => JSON.stringify({ $$deleted: true, _id })).join('\n') + '\n')
+        return true
+      },
+    }),
   }
 }
 
