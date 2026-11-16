@@ -17,7 +17,12 @@ export function useYouTubeProfileSwitch() {
     switching.value = true
     try {
       if (await selectYouTubeProfile(profile.pageId)) {
-        showToast({ message: t('Settings.YouTube Account Settings.Using Channel', { name: profile.name }), icon: ['fas', 'circle-user'] })
+        showToast({
+          message: t('Settings.YouTube Account Settings.Using Channel', { name: profile.name }),
+          image: profile.thumbnail,
+          avatar: true,
+          icon: ['fas', 'circle-user']
+        })
       }
     } catch (error) {
       console.error(error)
