@@ -923,9 +923,11 @@ async function requestLiveHead(scheme, audioFormat, videoFormat, networkingEngin
 
 /**
  * Lists the segments of a live SABR stream, which YouTube numbers by `sq`.
- * Each lasts the target duration, so their times follow from the head the
- * server reports. Shaka places media by its own timestamps, so the estimate's
- * small drift from them does not misplace it.
+ * Their times are estimated from the head the server reports and the target
+ * duration. Segments can be shorter, so older footage can start seconds after
+ * its estimate. The transport therefore starts with the segment that contains
+ * a requested time and continues from the one it delivered, and Shaka places
+ * media by its own timestamps.
  */
 class SabrLiveWindow {
   /**

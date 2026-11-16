@@ -1177,9 +1177,8 @@ test('requests at the end of an ad break carry its cue point so SABR resumes the
 })
 
 test('a live request that SABR answers with a neighboring segment asks again within the requested one', async t => {
-  // As on a live stream after a short segment, the estimated segment times are
-  // off by more than half a segment, so SABR answers the requested time with a
-  // neighbor. Segment 10 lasts only 0.4s.
+  // After a short segment, the time derived from the previous segment falls in
+  // the next one, so SABR answers it with a neighbor. Segment 10 lasts only 0.4s.
   const timeline = [
     { sequenceNumber: 9, startMs: 16_000 },
     { sequenceNumber: 10, startMs: 18_000 },
@@ -1202,11 +1201,52 @@ test('a live request that SABR answers with a neighboring segment asks again wit
   })
   const transport = createSabrTransport(sabrData, () => context)
   t.after(() => transport.cleanup())
+  const previous = 'sabr1:audio?formatId=140-123-&targetDurationMs=2000&startTimeMs=17000&sq=9'
+  assert.deepEqual([...(await transport.request(previous, request(previous), 1).promise).data], [9])
+  requestedTimes.length = 0
   const uri = 'sabr1:audio?formatId=140-123-&targetDurationMs=2000&startTimeMs=19000&sq=10'
   const segment = await transport.request(uri, request(uri), 1).promise
 
   assert.deepEqual([...segment.data], [10])
   assert.ok(requestedTimes.length <= 5, `requested ${requestedTimes.join(', ')}`)
+})
+
+test('older live footage starts at the segment SABR has for the requested time', async t => {
+  // Segments last 4.92s, so ten minutes behind the head, sq 878 starts almost
+  // ten seconds after the five-second estimate of the live window
+  const realStartMs = sequenceNumber => 5_000_000 - (1000 - sequenceNumber) * 4920
+  const captionFormatId = { itag: 387, lastModified: '0' }
+  const { createSabrTransport } = load(async (_uri, options) => {
+    const body = protos.VideoPlaybackAbrRequest.decode(options.body)
+    const playerTimeMs = Number(body.clientAbrState.playerTimeMs)
+    const sequenceNumber = 1000 - Math.ceil((5_000_000 - playerTimeMs) / 4920)
+    const buffer = new CompositeBuffer([])
+    const writer = new UmpWriter(buffer)
+    writer.write(protos.UMPPartId.MEDIA_HEADER, protos.MediaHeader.encode({
+      headerId: 1,
+      formatId: body.clientAbrState.enabledTrackTypesBitfield === 7 ? captionFormatId : audioFormatId,
+      sequenceNumber,
+      startMs: String(realStartMs(sequenceNumber)),
+    }).finish())
+    writer.write(protos.UMPPartId.MEDIA, Uint8Array.of(1, sequenceNumber - 800))
+    writer.write(protos.UMPPartId.MEDIA_END, Uint8Array.of(1))
+    return new Response(utils.concatenateChunks(buffer.chunks))
+  })
+  const transport = createSabrTransport(sabrData, uri => uri.startsWith('sabr1:text') ? { ...context, captionFormatId } : context)
+  t.after(() => transport.cleanup())
+  const get = async uri => (await transport.request(uri, request(uri), 1).promise).data[0] + 800
+
+  // The estimates place sq 878 at 4390s, so seeking there asks for 4392.5s
+  assert.equal(await get('sabr1:audio?formatId=140-123-&targetDurationMs=5000&startTimeMs=4392500&sq=878'), 876)
+  // The next segments continue from the delivered one rather than the estimates
+  assert.equal(await get('sabr1:audio?formatId=140-123-&targetDurationMs=5000&startTimeMs=4397500&sq=879'), 877)
+  assert.equal(await get('sabr1:audio?formatId=140-123-&targetDurationMs=5000&startTimeMs=4402500&sq=880'), 878)
+  // Buffered ranges report the delivered segments by their reported start
+  assert.deepEqual([...transport.deliveredLiveStartsMs.keys()], [876, 877, 878])
+  assert.equal(transport.deliveredLiveStartsMs.get(877), realStartMs(877))
+
+  // Captions turned on there start at the same time
+  assert.equal(await get('sabr1:text?formatId=387-0-&targetDurationMs=5000&startTimeMs=4392500&sq=878'), 876)
 })
 
 test('a live buffered range ends with the last segment whose middle is buffered', () => {
