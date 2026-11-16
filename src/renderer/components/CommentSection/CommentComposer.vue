@@ -4,6 +4,7 @@
     class="commentComposer"
     :class="{ topLevelComposer: isTopLevel }"
     @keydown.stop
+    @input.capture="rememberInputType"
   >
     <!-- Shows which channel the comment will be posted as, and switches it
          when the account has more than one. -->
@@ -46,9 +47,48 @@
         :maxlength="10000"
         :disabled="posting"
         :show-action-button="false"
+        :highlights="mentionRanges"
+        :input-attributes="{
+          'aria-autocomplete': 'list',
+          'aria-controls': suggestions.length > 0 ? suggestionsId : null,
+          'aria-activedescendant': suggestions.length > 0 ? `${suggestionsId}-${activeSuggestion}` : null
+        }"
         multiline
-        @input="text = $event"
+        @input="handleInput"
+        @keydown="handleKeydown"
+        @keyup="updateCaret"
+        @pointerup="updateCaret"
       />
+      <!-- The text box keeps the focus, so the options are picked with its keys. -->
+      <ul
+        v-if="suggestions.length > 0"
+        :id="suggestionsId"
+        class="commentComposerSuggestions"
+        role="listbox"
+        :aria-label="t('YouTube Account.Mention Suggestions')"
+      >
+        <!-- eslint-disable-next-line vuejs-accessibility/click-events-have-key-events -->
+        <li
+          v-for="(suggestion, index) in suggestions"
+          :id="`${suggestionsId}-${index}`"
+          :key="suggestion.channelId"
+          class="commentComposerSuggestion"
+          :class="{ active: index === activeSuggestion }"
+          role="option"
+          tabindex="-1"
+          :aria-selected="index === activeSuggestion"
+          @pointerdown.prevent
+          @click="insertMention(suggestion)"
+        >
+          <FtRetryImage
+            :src="suggestion.thumbnail"
+            :fallback-icon="['fas', 'circle-user']"
+            class="commentComposerSuggestionImage"
+            alt=""
+          />
+          <span class="commentComposerSuggestionHandle">{{ suggestion.handle }}</span>
+        </li>
+      </ul>
       <div class="commentComposerActions">
         <FtButton
           type="button"
@@ -62,7 +102,7 @@
           type="submit"
           :label="editComment ? t('YouTube Account.Save') : parentId ? t('YouTube Account.Reply') : t('YouTube Account.Comment')"
           :icon="['fas', editComment ? 'check' : parentId ? 'reply' : 'comment']"
-          :disabled="posting || text.trim() === '' || (editComment !== null && text.trim() === originalText.trim())"
+          :disabled="posting || text.trim() === '' || (editComment !== null && submitText === originalSubmitText)"
         />
       </div>
     </form>
@@ -70,7 +110,7 @@
 </template>
 
 <script setup>
-import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
+import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtButton from '../FtButton/FtButton.vue'
@@ -85,13 +125,14 @@ import { useYouTubeProfileSwitch } from '../../composables/useYouTubeProfileSwit
 import { ERROR_TOAST_ICON, showToast } from '../../helpers/utils'
 import { editYouTubeComment, postYouTubeComment } from '../../helpers/api/youtube-account'
 import { trackCommentReplies } from '../../helpers/commentReplyNotifications'
-import { getCommentEditText, youTubeCommentsKey } from './youTubeComments'
+import { MENTION_START, findCommentMentions, getCommentEditDraft, getCommentSubmitText, getRootCommentId, youTubeCommentsKey } from './youTubeComments'
 
 const props = defineProps({
   // Posts a reply to this top-level comment instead of a new comment.
   parentId: { type: String, default: null },
   // Starts a reply to a reply with a mention of its author.
-  initialText: { type: String, default: '' },
+  /** @type {import('vue').PropType<import('./youTubeComments').CommentMention | null>} */
+  initialMention: { type: Object, default: null },
   // Edits this comment or reply of the account instead of posting a new one.
   editComment: { type: Object, default: null }
 })
@@ -99,8 +140,15 @@ const emit = defineEmits(['done'])
 const { t } = useI18n()
 const comments = inject(youTubeCommentsKey)
 
-const originalText = props.editComment ? getCommentEditText(props.editComment) : props.initialText
-const text = ref(originalText)
+const draft = props.editComment
+  ? getCommentEditDraft(props.editComment)
+  : { text: props.initialMention ? `${props.initialMention.handle} ` : '', mentions: props.initialMention ? [props.initialMention] : [] }
+const text = ref(draft.text)
+/** The channels picked for mentions, which stay mentions while their handles are in the text. */
+const mentions = ref(draft.mentions)
+const mentionRanges = computed(() => findCommentMentions(text.value, mentions.value))
+const submitText = computed(() => getCommentSubmitText(text.value.trim(), mentions.value))
+const originalSubmitText = getCommentSubmitText(draft.text.trim(), draft.mentions)
 const posting = ref(false)
 const input = useTemplateRef('input')
 const profile = computed(() => getSelectedYouTubeProfile(store.getters.getYouTubeAccount))
@@ -135,8 +183,164 @@ async function expand() {
   input.value?.focus?.()
 }
 
+// Like on YouTube, typing @ suggests people from the comments, and a picked
+// mention is a link that the caret skips and Backspace removes whole.
+const suggestionsId = useId()
+const caret = ref(text.value.length)
+const dismissedQueryStart = ref(-1)
+const activeSuggestion = ref(0)
+const threadId = props.parentId ?? (props.editComment ? getRootCommentId(props.editComment.id) : null)
+
+const mentionQuery = computed(() => {
+  const match = /@([^\s@]{0,30})$/u.exec(text.value.slice(0, caret.value))
+  if (!match) return null
+  const start = caret.value - match[1].length - 1
+  if (!MENTION_START.test(text.value.slice(Math.max(0, start - 1), start))) return null
+  if (start === dismissedQueryStart.value || mentionRanges.value.some(range => start >= range.start && start < range.end)) return null
+  return { start, query: match[1].toLowerCase() }
+})
+
+const suggestions = computed(() => {
+  const query = mentionQuery.value?.query
+  if (query === undefined) return []
+  const matches = comments.getMentionCandidates(threadId)
+    .filter(candidate => candidate.handle.slice(1).toLowerCase().includes(query))
+  return matches
+    .filter(candidate => candidate.handle.slice(1).toLowerCase().startsWith(query))
+    .concat(matches.filter(candidate => !candidate.handle.slice(1).toLowerCase().startsWith(query)))
+    .slice(0, 6)
+})
+watch(suggestions, () => { activeSuggestion.value = 0 })
+
+function getTextarea() {
+  return root.value?.querySelector('textarea') ?? null
+}
+
+// Removed mentions, which undo and redo can bring back. A handle typed again
+// stays plain text until it is picked.
+/** @type {import('./youTubeComments').CommentMention[]} */
+let removedMentions = []
+let lastInputType = ''
+
+/** @param {Event} event */
+function rememberInputType(event) {
+  lastInputType = event instanceof InputEvent ? event.inputType : ''
+}
+
+/** @param {string} value */
+function handleInput(value) {
+  text.value = value
+  const restoring = lastInputType === 'historyUndo' || lastInputType === 'historyRedo'
+  const candidates = restoring ? [...mentions.value, ...removedMentions] : mentions.value
+  const ranges = findCommentMentions(value, candidates)
+  const kept = candidates.filter(mention => ranges.some(range => range.mention === mention))
+  if (kept.length !== mentions.value.length || kept.some((mention, index) => mention !== mentions.value[index])) {
+    removedMentions = [...new Set([...removedMentions, ...mentions.value])].filter(mention => !kept.includes(mention))
+    mentions.value = kept
+  }
+  // A new @ in place of a dismissed one suggests again.
+  if (value[dismissedQueryStart.value] !== '@') dismissedQueryStart.value = -1
+  updateCaret()
+}
+
+// The caret skips over mentions.
+function updateCaret() {
+  const textarea = getTextarea()
+  if (!textarea) return
+  const { selectionStart, selectionEnd } = textarea
+  if (selectionStart === selectionEnd) {
+    const range = mentionRanges.value.find(({ start, end }) => selectionStart > start && selectionStart < end)
+    if (range) {
+      const edge = selectionStart - range.start < range.end - selectionStart ? range.start : range.end
+      textarea.setSelectionRange(edge, edge)
+    }
+  }
+  caret.value = textarea.selectionEnd
+}
+
+/**
+ * Edits like typing does, so undo still works.
+ * @param {HTMLTextAreaElement} textarea
+ * @param {number} start
+ * @param {number} end
+ * @param {string} replacement
+ */
+function replaceText(textarea, start, end, replacement) {
+  textarea.setSelectionRange(start, end)
+  if (!document.execCommand(replacement === '' ? 'delete' : 'insertText', false, replacement)) {
+    textarea.setRangeText(replacement, start, end, 'end')
+    textarea.dispatchEvent(new Event('input', { bubbles: true }))
+  }
+}
+
+/** @param {import('./youTubeComments').MentionCandidate} candidate */
+function insertMention({ handle, channelId }) {
+  const textarea = getTextarea()
+  const query = mentionQuery.value
+  if (!textarea || !query) return
+  if (!mentions.value.some(mention => mention.handle === handle)) {
+    mentions.value = [...mentions.value, { handle, channelId }]
+  }
+  textarea.focus()
+  replaceText(textarea, query.start, caret.value, `${handle} `)
+}
+
+/** @param {KeyboardEvent} event */
+function handleKeydown(event) {
+  const textarea = event.target
+  if (event.isComposing || !(textarea instanceof HTMLTextAreaElement)) return
+
+  const count = suggestions.value.length
+  if (count > 0) {
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      activeSuggestion.value = (activeSuggestion.value + (event.key === 'ArrowDown' ? 1 : count - 1)) % count
+    } else if ((event.key === 'Enter' || event.key === 'Tab') && !event.shiftKey) {
+      insertMention(suggestions.value[activeSuggestion.value])
+    } else if (event.key === 'Escape') {
+      dismissedQueryStart.value = mentionQuery.value.start
+    } else {
+      return handleMentionKey(event, textarea)
+    }
+    event.preventDefault()
+    return
+  }
+  handleMentionKey(event, textarea)
+}
+
+/**
+ * @param {KeyboardEvent} event
+ * @param {HTMLTextAreaElement} textarea
+ */
+function handleMentionKey(event, textarea) {
+  const { selectionStart, selectionEnd } = textarea
+  const ranges = mentionRanges.value
+  // Deleting part of a mention deletes all of it.
+  if (selectionStart !== selectionEnd && (event.key === 'Backspace' || event.key === 'Delete')) {
+    const start = ranges.find(range => range.start < selectionStart && range.end > selectionStart)?.start ?? selectionStart
+    const end = ranges.find(range => range.start < selectionEnd && range.end > selectionEnd)?.end ?? selectionEnd
+    textarea.setSelectionRange(start, end)
+    return
+  }
+  if (selectionStart !== selectionEnd || event.shiftKey || event.altKey || event.metaKey) return
+  /** @type {{ start: number, end: number } | undefined} */
+  let range
+  if (event.key === 'Backspace' && (range = ranges.find(({ end }) => end === selectionStart))) {
+    replaceText(textarea, range.start, range.end, '')
+  } else if (event.key === 'Delete' && (range = ranges.find(({ start }) => start === selectionStart))) {
+    replaceText(textarea, range.start, range.end, '')
+  } else if (event.key === 'ArrowLeft' && !event.ctrlKey && (range = ranges.find(({ end }) => end === selectionStart))) {
+    textarea.setSelectionRange(range.start, range.start)
+  } else if (event.key === 'ArrowRight' && !event.ctrlKey && (range = ranges.find(({ start }) => start === selectionStart))) {
+    textarea.setSelectionRange(range.end, range.end)
+  } else {
+    return
+  }
+  event.preventDefault()
+  caret.value = textarea.selectionEnd
+}
+
 function cancel() {
-  text.value = ''
+  clearDraft()
   if (isTopLevel) {
     expanded.value = false
   } else {
@@ -151,17 +355,18 @@ async function submit() {
     await saveEdit(commentText)
     return
   }
+  const usedMentions = getUsedMentions(commentText)
 
   posting.value = true
   // The comment belongs to the channel in use now, even after a switch while it posts.
   const account = store.getters.getYouTubeAccount
   try {
-    const created = await postYouTubeComment(comments.videoId.value, commentText, props.parentId ?? undefined, account)
+    const created = await postYouTubeComment(comments.videoId.value, getCommentSubmitText(commentText, usedMentions), props.parentId ?? undefined, account)
     // Loaded replies are `parentId.replyId`, which a posted reply's ID may lack.
     const posted = props.parentId && !created.id.includes('.') ? { ...created, id: `${props.parentId}.${created.id}` } : created
-    comments.addComment(posted, commentText, props.parentId, account)
+    comments.addComment(posted, commentText, usedMentions, props.parentId, account)
     trackCommentReplies(comments.videoId.value, props.parentId ?? posted.id, posted.id, account, commentText, comments.videoTitle.value)
-    text.value = ''
+    clearDraft()
     if (!props.parentId) expanded.value = false
     showToast({
       message: props.parentId ? t('YouTube Account.Reply Posted') : t('YouTube Account.Comment Posted'),
@@ -179,13 +384,27 @@ async function submit() {
   }
 }
 
+// The top-level comment box stays for the next comment.
+function clearDraft() {
+  text.value = ''
+  mentions.value = []
+  removedMentions = []
+  dismissedQueryStart.value = -1
+}
+
+/** @param {string} commentText */
+function getUsedMentions(commentText) {
+  return [...new Set(findCommentMentions(commentText, mentions.value).map(range => range.mention))]
+}
+
 /** @param {string} commentText */
 async function saveEdit(commentText) {
   posting.value = true
   const commentId = props.editComment.id
   try {
-    await editYouTubeComment(comments.videoId.value, commentId, commentText, store.getters.getYouTubeAccount)
-    comments.updateComment(commentId, commentText)
+    const usedMentions = getUsedMentions(commentText)
+    await editYouTubeComment(comments.videoId.value, commentId, getCommentSubmitText(commentText, usedMentions), store.getters.getYouTubeAccount)
+    comments.updateComment(commentId, commentText, usedMentions)
     showToast({ message: t('YouTube Account.Comment Edited'), icon: ['fas', 'edit'] })
     emit('done')
   } catch (error) {
@@ -306,6 +525,52 @@ button.commentComposerAvatar:focus-visible {
 
 .commentComposerForm :deep(.ft-input.multiline) {
   min-block-size: 5rem;
+}
+
+.commentComposerSuggestions {
+  display: flex;
+  flex-direction: column;
+  max-inline-size: 320px;
+  margin: 0;
+  padding-block: 4px;
+  padding-inline: 4px;
+  border-radius: var(--shape-corner-large);
+  list-style: none;
+
+  /* Matches the select menus. */
+  box-shadow: 0 2px 6px 2px rgb(0 0 0 / 15%), 0 1px 2px rgb(0 0 0 / 30%);
+  background-color: color-mix(in srgb, var(--primary-color) 4%, var(--card-bg-color));
+}
+
+.commentComposerSuggestion {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding-block: 6px;
+  padding-inline: 8px;
+  border-radius: var(--shape-corner-medium);
+  cursor: pointer;
+}
+
+.commentComposerSuggestion:hover,
+.commentComposerSuggestion.active {
+  background-color: var(--dropdown-item-hover-color);
+  color: var(--dropdown-item-hover-text-color);
+}
+
+.commentComposerSuggestionImage {
+  flex: none;
+  block-size: 24px;
+  border-radius: 50%;
+  font-size: 24px;
+  inline-size: 24px;
+  object-fit: cover;
+}
+
+.commentComposerSuggestionHandle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .commentComposerActions {

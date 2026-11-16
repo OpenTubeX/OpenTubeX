@@ -221,7 +221,7 @@
         v-if="youTubeComments?.enabled.value && youTubeComments.replyingTo.value === reply.id"
         class="replyComposer"
         :parent-id="getRootCommentId(reply.id)"
-        :initial-text="reply.author.startsWith('@') ? `${reply.author} ` : ''"
+        :initial-mention="reply.author.startsWith('@') && reply.authorId ? { handle: reply.author, channelId: reply.authorId } : null"
         @done="youTubeComments.closeReply(reply.id)"
       />
     </div>
