@@ -132,5 +132,10 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
  * @returns {Record<string, unknown>}
  */
 export function getTransferableSettings(settings) {
-  return Object.fromEntries(Object.entries(settings).filter(([key]) => !NON_TRANSFERABLE_SETTINGS.has(key)))
+  const transferable = Object.fromEntries(Object.entries(settings).filter(([key]) => !NON_TRANSFERABLE_SETTINGS.has(key)))
+  // Saving splits credentials off, but not off a URL that does not parse, such as one with an invalid port.
+  if (typeof transferable.defaultInvidiousInstance === 'string') {
+    transferable.defaultInvidiousInstance = transferable.defaultInvidiousInstance.trim().replace(/^([a-z][\w+.-]*:[/\\]*)[^/\\?#]*@/i, '$1')
+  }
+  return transferable
 }
