@@ -258,9 +258,10 @@ function findEndScreenOverlaps() {
 
 test('keeps phone end screen recommendations and replay clear of the controls', async ({ app, page, attachScreenshot }) => {
   test.slow()
+  // The player picks its controls from the layout when it is created.
+  await mockCapacitorPhoneLayout(page)
   const { video, watch } = await openVideo({ app, page })
   await setWindowSize(app, page, { width: 412, height: 860 })
-  await mockCapacitorPhoneLayout(page)
   await watch.evaluate(async component => {
     await component.proxy.$store.dispatch('updateHideRecommendedVideos', false)
     component.proxy.recommendedVideos = Array.from({ length: 6 }, (_, index) => ({
