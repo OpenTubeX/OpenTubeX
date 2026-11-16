@@ -284,6 +284,12 @@ test('keeps phone end screen recommendations and replay clear of the controls', 
   // The narrowest phones leave the least room above the controls.
   await setWindowSize(app, page, { width: 320, height: 700 })
   await expect.poll(() => page.evaluate(findEndScreenOverlaps)).toEqual([])
+  // A 2.39:1 video makes the player shorter still.
+  const player = page.locator('.ftVideoPlayer')
+  await player.evaluate(element => { element.style.height = '134px' })
+  await expect(replay).toBeVisible()
+  await expect.poll(() => page.evaluate(findEndScreenOverlaps)).toEqual([])
+  await player.evaluate(element => element.style.removeProperty('height'))
 
   await setWindowSize(app, page, { width: 900, height: 412 })
   await setPlayerFullscreen(page, true)

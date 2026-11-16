@@ -285,10 +285,44 @@
   }
 }
 
-/* Players on the narrowest phones are too short for the channel above Replay. */
+/*
+  Short players (narrow phones, ultrawide videos) leave little room above the controls,
+  so drop the channel, the heading, the second title line, and then the title.
+*/
 @container (width < 560px) and (height < 200px) {
   :global(.capacitorTabs .ftVideoPlayer .endedRecommendationAuthor) {
     display: none;
+  }
+}
+
+@container (width < 560px) and (height < 190px) {
+  :global(.capacitorTabs .ftVideoPlayer .endedScreenHeading) {
+    display: none;
+  }
+
+  :global(.capacitorTabs .ftVideoPlayer .endedRecommendationTitle) {
+    margin-block-start: 0;
+  }
+}
+
+@container (width < 560px) and (height < 170px) {
+  :global(.capacitorTabs .ftVideoPlayer .endedRecommendationTitleText) {
+    -webkit-line-clamp: 1;
+  }
+}
+
+@container (width < 560px) and (height < 152px) {
+  :global(.capacitorTabs .ftVideoPlayer .endedScreenLayout) {
+    --ended-band-padding: 4px;
+  }
+
+  :global(.capacitorTabs .ftVideoPlayer .endedRecommendationTitle) {
+    display: none;
+  }
+
+  :global(.capacitorTabs .ftVideoPlayer .endedReplayButton) {
+    inset-block-start: 0;
+    margin-block: auto;
   }
 }
 
