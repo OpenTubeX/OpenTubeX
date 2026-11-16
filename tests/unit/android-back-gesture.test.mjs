@@ -3,7 +3,7 @@ import test from 'node:test'
 import { readFileSync } from 'node:fs'
 import vm from 'node:vm'
 import { nextTick } from 'vue'
-import { createAndroidBackGestureHandler, getAndroidBackPlayer, registerAndroidBackPlayer, settleAndroidBackAnimation } from '../../src/renderer/helpers/androidBackGesture.js'
+import { combineAndroidBackPreviews, createAndroidBackGestureHandler, getAndroidBackPlayer, registerAndroidBackPlayer, settleAndroidBackAnimation } from '../../src/renderer/helpers/androidBackGesture.js'
 
 const appSource = readFileSync(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
 const dialogSource = readFileSync(new URL('../../src/renderer/helpers/androidBackDialog.js', import.meta.url), 'utf8')
@@ -24,6 +24,8 @@ function loadPreviewSelection(context) {
     mobileContextLink: { value: null },
     mobileContextActions: { value: null },
     createAndroidBackDialogPreview,
+    combineAndroidBackPreviews,
+    getAndroidBackView: () => null,
     isAnyPromptOpen: { value: false },
     settingsWindowOpen: { value: false },
     getComputedStyle: () => ({ inlineSize: '200px' }),

@@ -288,7 +288,8 @@ const emit = defineEmits([
 const { t } = useI18n()
 const sheetRef = useTemplateRef('sheetRef')
 const { startDrag, moveTouch, updateScrollAction, filterClick, enter, leave } = useBottomSheetDismiss(sheetRef, () => emit('dismiss'), {
-  canDismissOnBack: () => !activeMenu.value
+  canDismissOnBack: () => !activeMenu.value,
+  submenu: { getElement: () => actionList.value, back: () => setMenu(null) }
 })
 const activeMenu = ref(null)
 const deviceMenuItem = computed(() => getTabDeviceMenuItem(props.tab ? [props.tab] : [], t))

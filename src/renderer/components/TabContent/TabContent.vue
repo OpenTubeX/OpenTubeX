@@ -86,7 +86,7 @@ import { playInBackgroundKey, tabIdKey, tabLifecycleKey } from '../../tabs/TabCo
 import { getPreviousBrowsingRoute, isPlayerRoutePath } from '../../tabs/playerDockDestination'
 import { showTabPage } from '../../tabs/tabPages'
 import { registerAndroidBackPage } from '../../helpers/androidBackGesture'
-import { createAndroidBackPagePreview } from '../../helpers/androidBackPage'
+import { createAndroidBackSlidePreview } from '../../helpers/androidBackSlide'
 
 const TAB_LOADER_SELECTOR = '[data-tab-loading-indicator]'
 const TAB_LOADER_LOADING_SOURCE = 'loader'
@@ -317,8 +317,8 @@ watch(isWatchRoute, scheduleLoaderUpdate)
 watch(currentPageKey, scheduleLoaderUpdate)
 
 /**
- * Back shrinks the current page over the retained page it returns to. Without
- * one, such as on Watch or after an earlier Back, the whole tab shrinks.
+ * Back slides the current page off the retained page it returns to. Without
+ * one, such as on Watch or after an earlier Back, the whole tab slides.
  */
 function getAndroidBackTarget() {
   const root = tabContentRef.value
@@ -327,13 +327,26 @@ function getAndroidBackTarget() {
   const previous = pages.value.at(-2)
   const index = props.tab.historyIndex
   const element = root.querySelector(':scope > .routerView:not(.retainedPage)')
+  const area = root.closest('.app > .routerView')
   if (!isWatchRoute.value && element && current?.index === index && previous?.index === index - 1 &&
     previous.route.fullPath === getEntryPath(index - 1)) {
     // Show the retained page at its own scroll position, which Back restores.
     const scrollTop = props.tab.history[index - 1].scroll?.top ?? 0
-    return { element, reveal: { key: previous.key, top: window.scrollY - scrollTop } }
+    const reveal = { key: previous.key, top: window.scrollY - scrollTop }
+    return { element, area, styles: getAndroidBackCover(element), reveal: shown => setBackReveal(shown ? reveal : null) }
   }
-  return { element: root, reveal: null }
+  return { element: root, area, styles: getAndroidBackCover(root) }
+}
+
+/**
+ * Cover the page behind, also below the end of a short page.
+ * @param {HTMLElement} element
+ */
+function getAndroidBackCover(element) {
+  return {
+    'background-color': 'var(--bg-color)',
+    'min-block-size': `${Math.max(0, window.innerHeight - element.getBoundingClientRect().top)}px`
+  }
 }
 
 onMounted(() => {
@@ -342,10 +355,9 @@ onMounted(() => {
   }
 
   if (RETAINS_PAGES) {
-    removeAndroidBackPage = registerAndroidBackPage(props.tab.id, options => createAndroidBackPagePreview({
+    removeAndroidBackPage = registerAndroidBackPage(props.tab.id, options => createAndroidBackSlidePreview({
       ...options,
-      getTarget: getAndroidBackTarget,
-      setReveal: setBackReveal
+      getTarget: getAndroidBackTarget
     }))
   }
 

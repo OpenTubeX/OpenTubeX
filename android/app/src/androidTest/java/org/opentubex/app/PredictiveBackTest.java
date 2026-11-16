@@ -137,14 +137,21 @@ public class PredictiveBackTest {
                 evaluate(view, "document.querySelector('.settingsMenu [data-section=\"appearance\"]').click()");
                 await(view, "!!document.querySelector('.settingsWindow[data-android-back-nested]')");
                 Thread.sleep(300);
-                verifyDialogGesture(view, ".settingsContent", false);
+                // The category slides off the menu it returns to, like a page.
+                start(BackEventCompat.EDGE_LEFT);
+                progress(0.5f, BackEventCompat.EDGE_LEFT);
+                await(view, "!!document.querySelector('.settingsMenu[data-settings-back-reveal]') && " +
+                    "document.querySelector('.settingsContentPane').getBoundingClientRect().left > 0");
+                onMain(activity -> activity.getOnBackPressedDispatcher().dispatchOnBackCancelled());
+                await(view, "!document.querySelector('[data-settings-back-reveal]')");
+                verifyDialogGesture(view, ".settingsContentPane", false);
                 await(view, "!document.querySelector('.settingsWindow[data-android-back-nested]') && " + STORE + ".getters.getSettingsWindowOpen");
                 evaluate(view, "document.querySelector('.settingsMenu [data-section=\"appearance\"]').click()");
                 await(view, "!!document.querySelector('.settingsWindow[data-android-back-nested]')");
                 Thread.sleep(300);
                 start(BackEventCompat.EDGE_LEFT);
                 progress(0.5f, BackEventCompat.EDGE_LEFT);
-                await(view, "document.querySelector('.settingsContent').getAnimations().some(a => a.playState === 'paused')");
+                await(view, "document.querySelector('.settingsContentPane').getAnimations().some(a => a.playState === 'paused')");
                 onMain(activity -> {
                     activity.getOnBackPressedDispatcher().onBackPressed();
                     activity.getOnBackPressedDispatcher().onBackPressed();
@@ -194,7 +201,9 @@ public class PredictiveBackTest {
         start(BackEventCompat.EDGE_LEFT);
         progress(0.6f, BackEventCompat.EDGE_LEFT);
         await(view, "window.__modalElement.getAnimations().some(a => a.playState === 'paused' && a.currentTime > 0)");
-        progress(0f, BackEventCompat.EDGE_LEFT);
+        // Views that slide follow the finger, so it returns to the edge as well.
+        onMain(activity -> activity.getOnBackPressedDispatcher().dispatchOnBackProgressed(
+            new BackEventCompat(0, 400, 0f, BackEventCompat.EDGE_LEFT)));
         await(view, "window.__modalElement.getAnimations().some(a => a.playState === 'paused' && a.currentTime === 0)");
         evaluate(view, """
             (() => {

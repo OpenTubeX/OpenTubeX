@@ -473,6 +473,8 @@ import { shouldCloseSwipedTab } from '../../helpers/capacitorTabSwipe'
 import { lightHaptic } from '../../helpers/mobileHaptics'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { registerAndroidBackView } from '../../helpers/androidBackGesture'
+import { createAndroidBackSlidePreview } from '../../helpers/androidBackSlide'
 import { formatDeviceSessionLabel, shouldShowOtherDeviceSessions } from '../../helpers/sync-sessions'
 import { showToast } from '../../helpers/utils'
 import { getCapacitorTabService } from '../../tabs/CapacitorTabService'
@@ -515,6 +517,28 @@ const syncedTabsScrollRef = useTemplateRef('syncedTabsScrollRef')
 const syncedTabsContentRef = useTemplateRef('syncedTabsContentRef')
 const historyScrollRef = useTemplateRef('historyScrollRef')
 const historyContentRef = useTemplateRef('historyContentRef')
+
+if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
+  // Back from tab history slides it off toward the open tabs, which come in behind it.
+  watch(dialogRef, (dialog, _previous, onCleanup) => {
+    if (!dialog) return
+    onCleanup(registerAndroidBackView(dialog, options => createAndroidBackSlidePreview({
+      ...options,
+      getTarget: () => activeView.value === 'history' && !selecting.value && historyScrollRef.value
+        ? {
+            element: historyScrollRef.value,
+            area: dialog,
+            // Nothing waits behind it, so it casts no shadow.
+            styles: { 'box-shadow': 'none' },
+            getEntering: async () => {
+              await nextTick()
+              return activeScrollRef()
+            }
+          }
+        : null
+    })))
+  })
+}
 const tabs = computed(() => store.getters.getTabs)
 const closedTabs = computed(() => store.getters.getClosedTabs)
 const activeTabId = computed(() => store.getters.getActiveTabId)
