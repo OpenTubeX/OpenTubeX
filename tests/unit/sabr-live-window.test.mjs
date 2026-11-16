@@ -106,3 +106,37 @@ for (const segmentDurationMs of [5040, 4960]) {
     assert.ok(requestTimeMs > timeMs && requestTimeMs < timeMs + segmentDurationMs, `${requestTimeMs} is outside sq 1100`)
   })
 }
+
+test('live SABR captions land on the media timeline of their segment', async () => {
+  const { SabrLiveCaptionParser } = await import('../../src/renderer/helpers/player/SabrLiveCaptionParser.js')
+  const box = (type, payload) => {
+    const bytes = new Uint8Array(8 + payload.length)
+    new DataView(bytes.buffer).setUint32(0, bytes.length)
+    bytes.set(new TextEncoder().encode(type), 4)
+    bytes.set(payload, 8)
+    return bytes
+  }
+  // A self-initializing segment as SABR sends it, with one WebVTT document as its sample.
+  // MPEGTS is 200240.5 seconds at 90 kHz, beyond the 33-bit range that HLS wraps at.
+  const document = 'WEBVTT\nX-TIMESTAMP-MAP=LOCAL:00:00.000,MPEGTS:18021645000\nKind: captions\n\n' +
+    '00:00:00.000 --> 00:00:00.300\nfirst placeholder\n\n00:00:00.350 --> 00:00:02.100\nsecond placeholder\n'
+  const segment = new Uint8Array([
+    ...box('ftyp', new Uint8Array(16)),
+    ...box('moov', new Uint8Array(0)),
+    ...box('moof', new Uint8Array(0)),
+    ...box('mdat', new TextEncoder().encode(document)),
+  ])
+
+  const parser = new SabrLiveCaptionParser()
+  parser.parseInit(segment)
+  const cues = parser.parseMedia(segment, { periodStart: 0, segmentStart: 200240, segmentEnd: 200245, vttOffset: 0 }, null, [])
+
+  assert.deepEqual(cues.map(cue => [cue.startTime, cue.endTime, cue.payload]), [
+    [200240.5, 200240.8, 'first placeholder'],
+    [200240.85, 200242.6, 'second placeholder'],
+  ])
+
+  // Segments without captions have an empty sample
+  const silentSegment = new Uint8Array([...box('moof', new Uint8Array(0)), ...box('mdat', new Uint8Array(0))])
+  assert.deepEqual(parser.parseMedia(silentSegment, { periodStart: 0, segmentStart: 200245, segmentEnd: 200250, vttOffset: 0 }, null, []), [])
+})

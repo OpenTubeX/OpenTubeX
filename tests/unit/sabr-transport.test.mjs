@@ -1020,6 +1020,31 @@ test('the Shaka adapter retains format selection, registration and teardown beha
   assert.equal(schemes.size, 0)
 })
 
+test('a live caption request asks SABR for only the caption format', async () => {
+  let body
+  const captionFormatId = { itag: 387, lastModified: '0', xtags: 'CgoKBGxhbmcSAmVu' }
+  const { setupSabrScheme, schemes } = load(async (_uri, options) => {
+    body = protos.VideoPlaybackAbrRequest.decode(options.body)
+    return response([7, 8], false, captionFormatId)
+  })
+  const player = {
+    isAudioOnly: () => false,
+    getVariantTracks: () => [{ active: true, originalVideoId: '137-456-', originalAudioId: '140-123-', audioRoles: ['main'] }],
+    getStats: () => ({ estimatedBandwidth: 1234567 }),
+    getPlaybackRate: () => 1,
+  }
+  const transport = setupSabrScheme(sabrData, () => player, () => ({}), { value: 1920 }, { value: 1080 })
+  const uri = 'sabr1:text?formatId=387-0-CgoKBGxhbmcSAmVu&targetDurationMs=5000&startTimeMs=12500&sq=1'
+  const segment = await schemes.get('sabr1')(uri, request(uri), 1).promise
+  transport.cleanup()
+
+  assert.deepEqual([...segment.data], [7, 8])
+  // SABR sends captions only with audio and video enabled, which are reported as buffered
+  assert.equal(body.clientAbrState.enabledTrackTypesBitfield, 7)
+  assert.deepEqual(body.preferredSubtitleFormatIds, [captionFormatId])
+  assert.deepEqual(body.bufferedRanges.map(range => [range.formatId.itag, range.endSegmentIndex]), [[140, 2147483647], [137, 2147483647]])
+})
+
 /**
  * @param {number} headSequenceNumber
  * @param {number[]} [segmentData] media of segment `headSequenceNumber - 4`, if any

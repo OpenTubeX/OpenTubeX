@@ -147,6 +147,7 @@ import {
   ShortsPlaybackCache
 } from '../../helpers/player/shorts'
 import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
+import { SABR_LIVE_CAPTION_ITAG } from '../../helpers/player/SabrLiveCaptionParser'
 import { getSabrLiveTargetDuration, isSabrLiveBroadcastUrl } from '../../helpers/player/sabrProtocol'
 import { isAttestedPoToken } from '../../../main/attestedPoToken'
 import { getAutoQualityFallback, playbackEngineSupportsAutoQuality } from '../../helpers/player/autoQuality'
@@ -3916,12 +3917,13 @@ export default defineComponent({
 
           // Unlike for videos, SABR withholds live media after about 30 seconds
           // from a session pending attestation, and HLS needs no attestation.
-          // Live captions are text formats that only HLS delivers so far.
+          // Live captions are text formats, and SABR only plays their WebVTT one.
           const liveTargetDurationSec = this.isLive && !this.isPostLiveDvr && poToken && isAttestedPoToken(poToken) &&
             result.streaming_data?.server_abr_streaming_url &&
             result.player_config?.media_common_config.media_ustreamer_request_config &&
             isSabrLiveBroadcastUrl(result.streaming_data.server_abr_streaming_url) &&
-            !result.streaming_data.adaptive_formats.some(format => format.mime_type.startsWith('text/'))
+            (!result.streaming_data.adaptive_formats.some(format => format.has_text) ||
+              result.streaming_data.adaptive_formats.some(format => format.itag === SABR_LIVE_CAPTION_ITAG))
             ? getSabrLiveTargetDuration(result.streaming_data.adaptive_formats)
             : null
 
@@ -7115,7 +7117,7 @@ export default defineComponent({
       // needs its own scheme so one SABR player cannot replace or unregister
       // another player's request handler.
       const scheme = `sabr${nextSabrSchemeId++}`
-      const formats = getCompatibleAdaptiveFormats(videoInfo.streaming_data.adaptive_formats)
+      const formats = getCompatibleAdaptiveFormats(videoInfo.streaming_data.adaptive_formats.filter(format => !format.has_text))
       const formatDurationsMs = formats
         .map(format => format.approx_duration_ms)
         .filter(Number.isFinite)
@@ -7167,8 +7169,19 @@ export default defineComponent({
           colorTransferCharacteristics: format.color_info?.transfer_characteristics,
           colorPrimaries: format.color_info?.primaries
         })),
-        // Shaka cannot add external text tracks to a live presentation
+        // Shaka cannot add external text tracks to a live presentation, which streams its captions instead
         captions: liveTargetDurationSec !== null ? [] : this.captions,
+        liveCaptions: liveTargetDurationSec === null
+          ? []
+          : videoInfo.streaming_data.adaptive_formats
+              .filter(format => format.itag === SABR_LIVE_CAPTION_ITAG)
+              .map(format => ({
+                itag: format.itag,
+                lastModified: format.last_modified_ms,
+                xtags: format.xtags,
+                label: format.caption_track?.display_name ?? format.language,
+                language: format.language
+              })),
         chapters: this.videoChapters,
         storyboards
       }
