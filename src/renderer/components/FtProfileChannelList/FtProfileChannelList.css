@@ -48,7 +48,7 @@ h2 {
   flex: 1 1 0;
 
   /* One row of channels */
-  min-block-size: 120px;
+  min-block-size: 128px;
 }
 
 /* An empty scroller would still scroll its own scrollbar's padding. */

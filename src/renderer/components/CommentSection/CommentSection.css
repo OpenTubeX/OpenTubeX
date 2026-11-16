@@ -232,6 +232,7 @@
   inset-inline-end: 40px;
   display: flex;
   flex-direction: column;
+  gap: 2px;
   inline-size: 260px;
   max-inline-size: calc(40vw - 48px);
   padding: 6px;

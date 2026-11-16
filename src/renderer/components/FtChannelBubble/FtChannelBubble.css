@@ -3,6 +3,9 @@
   inline-size: 100px;
   block-size: 100px;
   padding: 10px;
+
+  /* Keeps the rounded backgrounds of neighboring bubbles apart */
+  margin: 4px;
   cursor: pointer;
   display: flex;
   flex-direction: column;

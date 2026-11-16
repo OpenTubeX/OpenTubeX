@@ -153,6 +153,8 @@
 }
 
 .profileList {
+  display: grid;
+  gap: 2px;
   padding-block: 4px;
   padding-inline: 8px;
 }

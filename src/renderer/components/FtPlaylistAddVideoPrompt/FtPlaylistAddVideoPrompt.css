@@ -149,6 +149,11 @@
   box-sizing: border-box;
 }
 
+/* Keeps the rounded backgrounds of neighboring tiles apart */
+.playlists-container .ft-flex-box {
+  gap: 8px;
+}
+
 .playlist-selector-container:not(.disabled) {
   /* Make them look selectable */
   cursor: pointer;

@@ -233,6 +233,13 @@
   color: #8e24aa;
 }
 
+/* Keeps a checked row's tint apart from a hovered neighbor's */
+.menuContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .separator {
   block-size: 1px;
   margin-block: 4px;
