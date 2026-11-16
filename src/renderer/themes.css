@@ -2767,7 +2767,8 @@ a:visited {
 
 .openTubeXDark {
   --toggle-track-color: #6b6b6b;
-  --toggle-checked-track-color: rgb(from oklch(from var(--signal-accent-color) 60% min(c, 0.16) h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255));
+  --control-fill-color: rgb(from oklch(from var(--signal-accent-color) 60% min(c, 0.16) h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255));
+  --toggle-checked-track-color: var(--control-fill-color);
   --toggle-thumb-color: #f2f2f2;
   --bg-glow-ink: rgb(from var(--signal-accent-color) r g b / 5%);
   --bg-gradient-start: color-mix(in srgb, var(--signal-accent-color) 4%, #151515);
@@ -2788,7 +2789,8 @@ a:visited {
 
   /* Accents stay light enough to read on the dark surfaces and their own
      20% tints, and capped chroma keeps them in gamut. The primary color
-     also colors selected labels, so filled controls use dark text. */
+     also colors selected labels, so it is too light for white text; filled
+     controls use the darker switch track fill instead (below). */
   --accent-color: rgb(from oklch(from var(--signal-accent-color) max(l, 0.74) min(c, 0.2) h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255));
   --primary-color: var(--accent-color);
   --primary-color-hover: var(--accent-color-hover);
@@ -2801,6 +2803,19 @@ a:visited {
   --text-with-accent-color: #111;
   --scrollbar-color: color-mix(in srgb, var(--accent-color) 42%, #7a7a7a);
   --scrollbar-color-active: var(--accent-color-hover);
+}
+
+/* Checkboxes, filled buttons, and the subscribe button share the checked
+   switch's fill and white foreground. States darken, away from the label. */
+.openTubeXDark :is(.pure-checkbox, .btn.variant-filled:not([aria-pressed='false'], .selected), .buttonList:not(.subscribed)) {
+  --primary-color: var(--control-fill-color);
+  --primary-color-hover: rgb(from oklch(from var(--control-fill-color) calc(l - 0.06) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255));
+  --primary-color-active: rgb(from oklch(from var(--control-fill-color) calc(l - 0.1) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255));
+  --accent-color: var(--primary-color);
+  --accent-color-hover: var(--primary-color-hover);
+  --accent-color-active: var(--primary-color-active);
+  --text-with-main-color: #fff;
+  --text-with-accent-color: #fff;
 }
 
 
