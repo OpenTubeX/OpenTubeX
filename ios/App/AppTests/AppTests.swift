@@ -50,6 +50,20 @@ final class AppTests: XCTestCase {
         }
     }
 
+    func testSecretStorageEncryptsWithTheKeychainKeyAndRejectsOtherValues() throws {
+        let encrypted = try SecretStorage.encrypt("token ä中")
+        XCTAssertFalse(encrypted.contains("token"))
+        XCTAssertNotEqual(encrypted, try SecretStorage.encrypt("token ä中"), "Each value gets its own nonce")
+        XCTAssertEqual(try SecretStorage.decrypt(encrypted), "token ä中")
+
+        var tampered = try XCTUnwrap(Data(base64Encoded: encrypted))
+        tampered[tampered.count - 1] ^= 1
+        XCTAssertNil(try SecretStorage.decrypt(tampered.base64EncodedString()))
+        // Like a value restored from another device, encrypted with its key.
+        XCTAssertNil(try SecretStorage.decrypt(Data(count: 40).base64EncodedString()))
+        XCTAssertNil(try SecretStorage.decrypt("not base64!"))
+    }
+
     func testLoopbackStartupRejectsOccupiedPort() async throws {
         let listener = try makeLoopbackListener()
         listener.newConnectionHandler = { $0.cancel() }
