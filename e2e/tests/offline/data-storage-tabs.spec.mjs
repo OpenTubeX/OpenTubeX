@@ -107,7 +107,7 @@ test('keeps both tabs above the scroller when scrolling, switching tabs and resi
 
   await tabs.getByRole('tab', { name: 'Data', exact: true }).click()
   await scrollToBottom()
-  await content.getByRole('button', { name: 'Export Subscriptions', exact: true }).click()
+  await content.getByRole('button', { name: 'Export backup', exact: true }).click()
   await expect(tabs).toBeHidden()
   await page.locator('.settingsBreadcrumbParent').click()
   await expectFixedTabs()
