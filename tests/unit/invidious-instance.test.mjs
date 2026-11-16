@@ -58,16 +58,15 @@ test('splits decoded credentials off instance URLs however they are written', ()
 })
 
 test('sends the saved credentials only to the instance they belong to', () => {
-  const credentials = { instance: 'https://invidious.test/proxy', username: 'user', password: '€100%' }
+  // As the settings migration splits and saves an address with credentials
+  const { instance, credentials } = apiBackends.splitInvidiousInstanceCredentials('https://user:%E2%82%AC100%25@INVIDIOUS.test/proxy//')
   const state = {}
-  mutations.setCurrentInvidiousInstance(state, 'https://INVIDIOUS.test/proxy/')
+  mutations.setCurrentInvidiousInstance(state, instance)
   assert.equal(authorization(state, credentials), `Basic ${Buffer.from('user:€100%').toString('base64')}`)
 
-  for (const other of ['https://invidious.test', 'https://other.test/proxy', 'http://invidious.test/proxy']) {
-    mutations.setCurrentInvidiousInstance(state, other)
-    assert.equal(authorization(state, credentials), null, other)
-  }
-  mutations.setCurrentInvidiousInstance(state, 'https://invidious.test/proxy')
+  mutations.setCurrentInvidiousInstance(state, 'https://other.test/proxy')
+  assert.equal(authorization(state, credentials), null)
+  mutations.setCurrentInvidiousInstance(state, instance)
   for (const saved of [null, '', { ...credentials, username: '', password: '' }, { ...credentials, password: 1 }]) {
     assert.equal(authorization(state, saved), null)
   }

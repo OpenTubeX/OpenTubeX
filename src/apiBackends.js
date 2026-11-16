@@ -83,7 +83,7 @@ export function normalizeInvidiousInstanceUrl(value) {
     const url = new URL(value)
     url.username = ''
     url.password = ''
-    return url.toString().replace(/\/$/, '')
+    return url.toString().replace(/\/+$/, '')
   } catch {
     return value
   }
