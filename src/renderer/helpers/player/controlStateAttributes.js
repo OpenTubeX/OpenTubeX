@@ -34,15 +34,20 @@ export function mirrorControlStates(player, controlsContainer) {
   let frame = null
 
   function updatePointerStates() {
-    frame = null
     for (const [attribute, selector] of Object.entries(POINTER_STATES)) {
       player.toggleAttribute(attribute, controlsContainer.querySelector(selector) !== null)
     }
   }
 
-  // The states are current by the next frame, before its styles are calculated.
-  const schedulePointerStates = () => {
-    frame ??= requestAnimationFrame(updatePointerStates)
+  // Update at once: a press right after the pointer moves onto a dock action
+  // must find the dock raised again. Check once more in the next frame for
+  // states that settle after their event.
+  const syncPointerStates = () => {
+    updatePointerStates()
+    frame ??= requestAnimationFrame(() => {
+      frame = null
+      updatePointerStates()
+    })
   }
 
   function updateMenuButtons() {
@@ -56,10 +61,10 @@ export function mirrorControlStates(player, controlsContainer) {
 
   for (const event of POINTER_EVENTS) {
     // Capturing, as the controls stop some events from reaching their container.
-    controlsContainer.addEventListener(event, schedulePointerStates, { capture: true, passive: true })
+    controlsContainer.addEventListener(event, syncPointerStates, { capture: true, passive: true })
   }
   for (const event of RELEASE_EVENTS) {
-    controlsContainer.ownerDocument.addEventListener(event, schedulePointerStates, { capture: true, passive: true })
+    controlsContainer.ownerDocument.addEventListener(event, syncPointerStates, { capture: true, passive: true })
   }
   menuObserver.observe(controlsContainer, { attributes: true, attributeFilter: ['class'], subtree: true })
   updatePointerStates()
@@ -67,10 +72,10 @@ export function mirrorControlStates(player, controlsContainer) {
 
   return () => {
     for (const event of POINTER_EVENTS) {
-      controlsContainer.removeEventListener(event, schedulePointerStates, { capture: true })
+      controlsContainer.removeEventListener(event, syncPointerStates, { capture: true })
     }
     for (const event of RELEASE_EVENTS) {
-      controlsContainer.ownerDocument.removeEventListener(event, schedulePointerStates, { capture: true })
+      controlsContainer.ownerDocument.removeEventListener(event, syncPointerStates, { capture: true })
     }
     menuObserver.disconnect()
     if (frame !== null) cancelAnimationFrame(frame)
