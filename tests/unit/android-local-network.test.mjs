@@ -6,8 +6,13 @@ import { classifyRequestFailure } from '../../src/renderer/helpers/api/requestDi
 
 const source = await readFile(new URL('../../src/renderer/helpers/androidLocalNetwork.js', import.meta.url), 'utf8')
 
-function fixture (native, env = { IS_CAPACITOR: true }, message = 'Nearby devices permission was denied') {
-  const context = vm.createContext({ process: { env }, registerPlugin: () => native, i18n: { global: { t: () => message } } })
+function fixture (native, env = { IS_CAPACITOR: true }, message = 'Nearby devices permission was denied', hiddenRenderer = false) {
+  const context = vm.createContext({
+    process: { env },
+    registerPlugin: () => native,
+    i18n: { global: { t: () => message } },
+    isAndroidBackgroundSyncRenderer: hiddenRenderer,
+  })
   vm.runInContext(source.replace(/^import .*\n/gm, '').replace('export async function', 'async function')
     .replace("await import('../i18n/index.js')", '({ default: globalThis.i18n })'), context)
   return context.ensureAndroidLocalNetworkAccess
@@ -30,6 +35,17 @@ test('LAN requests share a permission prompt and resume only after a grant', asy
   finish({ localNetwork: 'granted' })
   await requests
   assert.equal(completed, true)
+})
+
+test('the renderer that syncs while the app is closed rejects LAN requests instead of prompting', async () => {
+  let prompts = 0
+  const access = fixture({
+    checkAccess: async () => ({ required: true }),
+    requestPermissions: async () => { prompts++; return { localNetwork: 'granted' } },
+  }, undefined, undefined, true)
+  // Without an activity, a permission request would crash the app's process.
+  await assert.rejects(access({ url: 'http://192.168.1.2' }), error => error.code === 'LOCAL_ACCESS_DENIED')
+  assert.equal(prompts, 0)
 })
 
 test('denying LAN permission rejects the request and a later request can recover', async () => {

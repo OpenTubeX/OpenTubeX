@@ -372,7 +372,10 @@ function isSameSyncAccount(settings, account) {
   return getSyncAccount(settings).every((value, index) => value === account[index])
 }
 
-async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, automatic = false, remoteOnly = false } = {}) {
+// `notifications: false` leaves out live reminders and notification
+// dismissals. The renderer that syncs while the Android app is closed lacks the
+// notification plugin, which belongs to the app's renderer.
+async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, automatic = false, remoteOnly = false, notifications = true } = {}) {
   const { commit, dispatch, rootGetters, rootState } = context
   const settings = rootState.settings
   const encrypted = requiresEncryptedSync(settings)
@@ -448,11 +451,12 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     ...(settings.syncServerSyncPlaylists ? ['playlistBookmarks'] : []),
     ...(settings.syncServerSyncHistory ? ['history'] : []),
     ...(encrypted && settings.syncServerSyncWatchStats ? ['watchStats'] : []),
-    ...((process.env.IS_ELECTRON || process.env.IS_CAPACITOR) && encrypted &&
+    ...((process.env.IS_ELECTRON || process.env.IS_CAPACITOR) && encrypted && notifications &&
       settings.syncServerSyncLiveReminders
       ? ['liveReminders']
       : []),
-    ...((process.env.IS_ELECTRON || process.env.IS_CAPACITOR) && encrypted && settings.syncServerSyncNotifications
+    ...((process.env.IS_ELECTRON || process.env.IS_CAPACITOR) && encrypted && notifications &&
+      settings.syncServerSyncNotifications
       ? ['notificationDismissals']
       : []),
     ...(settings.syncServerSyncProfiles ? ['profiles'] : []),
@@ -1827,7 +1831,7 @@ const actions = {
     commit('setSyncServerPendingDeletion', null)
   },
 
-  async initializeSyncServer({ commit, dispatch, rootState }, { skipIfRecent = true } = {}) {
+  async initializeSyncServer({ commit, dispatch, rootState }, { skipIfRecent = true, notifications = true } = {}) {
     if (!reminderSyncListenerStarted && (process.env.IS_ELECTRON || process.env.IS_CAPACITOR)) {
       reminderSyncListenerStarted = true
       liveReminder.onUpdated(() => dispatch('scheduleSyncServer', 'liveReminders'))
@@ -1941,7 +1945,7 @@ const actions = {
 
     await dispatch('startSyncServerAutoSync')
     if (rootState.settings.syncServerAutoSync) {
-      await dispatch('syncWithSyncServer', { skipIfRecent, automatic: true })
+      await dispatch('syncWithSyncServer', { skipIfRecent, automatic: true, notifications })
     }
   },
 

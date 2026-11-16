@@ -17,6 +17,8 @@ import { initializeAndroidDynamicColors } from './helpers/dynamicColors'
 import { observeAndroidNetworkMetered } from './helpers/androidUi'
 import './helpers/reducedTransparency'
 import { networkMetered } from './helpers/player/meteredNetworkQuality'
+import { isAndroidBackgroundSyncRenderer } from './helpers/androidBackgroundSync'
+import { runAndroidBackgroundSync } from './startup/androidBackgroundSync'
 // import the styles
 import './helpers/overlayScrollbars.css'
 // Only the positioning and stacking rules are used, FtToast supplies the design
@@ -53,47 +55,55 @@ installTitleTooltips()
 
 const tabNavigation = initializeTabNavigationService(router, store)
 
-// Read the initial state before a restored Watch page picks its starting quality,
-// but don't let a missing answer prevent the application from mounting.
-let networkMeteredTimeout
-const networkMeteredReady = Promise.race([
-  observeAndroidNetworkMetered(metered => { networkMetered.value = metered }).catch(error => {
-    console.error('Failed to observe metered networks:', error)
-  }),
-  new Promise(resolve => { networkMeteredTimeout = setTimeout(resolve, 1500) }),
-]).finally(() => clearTimeout(networkMeteredTimeout))
+if (isAndroidBackgroundSyncRenderer) {
+  runAndroidBackgroundSync(store)
+} else {
+  startApp()
+}
 
-// Resolve native colors before App applies its first theme and system-bar style.
-const dynamicColorsReady = process.env.IS_CAPACITOR
-  ? initializeAndroidDynamicColors().catch(error => {
-      console.error('Failed to load initial Android dynamic colors:', error)
-    })
-  : Promise.resolve()
+function startApp() {
+  // Read the initial state before a restored Watch page picks its starting quality,
+  // but don't let a missing answer prevent the application from mounting.
+  let networkMeteredTimeout
+  const networkMeteredReady = Promise.race([
+    observeAndroidNetworkMetered(metered => { networkMetered.value = metered }).catch(error => {
+      console.error('Failed to observe metered networks:', error)
+    }),
+    new Promise(resolve => { networkMeteredTimeout = setTimeout(resolve, 1500) }),
+  ]).finally(() => clearTimeout(networkMeteredTimeout))
 
-Promise.all([router.isReady(), dynamicColorsReady, networkMeteredReady]).then(async () => {
-  // The web app's library lives in browser storage, which can be unavailable
-  // (plain http:// addresses) or held by another tab.
-  if (process.env.IS_CAPACITOR ? !process.env.IS_IOS : !process.env.IS_ELECTRON) {
-    try {
-      const { waitForDatastores } = await import('../datastores/index')
-      await waitForDatastores()
-    } catch (error) {
-      console.error('App storage is unavailable:', error)
-      // Use the system locale without reading or writing failed app storage.
-      // A failed locale or region request must not keep the error hidden.
-      await store.dispatch('triggerCurrentLocaleSideEffects', 'system').catch(console.error)
-      const { setIconPack } = await import('./icons/iconPackState')
-      await setIconPack('material')
-      const { default: StorageStartupError } = await import('./components/StorageStartupError/StorageStartupError.vue')
-      createApp(StorageStartupError).use(i18n).mount('#app')
-      document.getElementById('startup-splash')?.remove()
-      document.getElementById('app')?.removeAttribute('inert')
-      return
+  // Resolve native colors before App applies its first theme and system-bar style.
+  const dynamicColorsReady = process.env.IS_CAPACITOR
+    ? initializeAndroidDynamicColors().catch(error => {
+        console.error('Failed to load initial Android dynamic colors:', error)
+      })
+    : Promise.resolve()
+
+  Promise.all([router.isReady(), dynamicColorsReady, networkMeteredReady]).then(async () => {
+    // The web app's library lives in browser storage, which can be unavailable
+    // (plain http:// addresses) or held by another tab.
+    if (process.env.IS_CAPACITOR ? !process.env.IS_IOS : !process.env.IS_ELECTRON) {
+      try {
+        const { waitForDatastores } = await import('../datastores/index')
+        await waitForDatastores()
+      } catch (error) {
+        console.error('App storage is unavailable:', error)
+        // Use the system locale without reading or writing failed app storage.
+        // A failed locale or region request must not keep the error hidden.
+        await store.dispatch('triggerCurrentLocaleSideEffects', 'system').catch(console.error)
+        const { setIconPack } = await import('./icons/iconPackState')
+        await setIconPack('material')
+        const { default: StorageStartupError } = await import('./components/StorageStartupError/StorageStartupError.vue')
+        createApp(StorageStartupError).use(i18n).mount('#app')
+        document.getElementById('startup-splash')?.remove()
+        document.getElementById('app')?.removeAttribute('inert')
+        return
+      }
     }
-  }
-  app.mount('#app')
-  initializeAppScrollbars({ useNativePageScrollbar: process.env.IS_CAPACITOR })
-})
+    app.mount('#app')
+    initializeAppScrollbars({ useNativePageScrollbar: process.env.IS_CAPACITOR })
+  })
+}
 
 // to avoid accessing electron api from web app build
 if (process.env.IS_ELECTRON) {
@@ -119,7 +129,7 @@ if (process.env.IS_ELECTRON) {
   })
 }
 
-if (supportsYtDlp) {
+if (supportsYtDlp && !isAndroidBackgroundSyncRenderer) {
   const removedDownloadIds = new Set()
 
   ytDlp.handleYtDlpDownloadStatus((download) => {

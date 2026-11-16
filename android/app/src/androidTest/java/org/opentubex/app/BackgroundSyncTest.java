@@ -6,9 +6,7 @@ import android.content.Context;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
-import androidx.work.WorkInfo;
-import androidx.work.WorkManager;
-import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -16,31 +14,19 @@ import org.junit.runner.RunWith;
 public class BackgroundSyncTest {
     private final Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
 
-    private WorkInfo.State periodicState() throws Exception {
-        List<WorkInfo> infos = WorkManager.getInstance(context).getWorkInfosForUniqueWork("background-sync").get();
-        return infos.isEmpty() ? null : infos.get(infos.size() - 1).getState();
-    }
-
     @Test
-    public void aProcessWithoutARendererPausesPeriodicSyncUntilARendererLoads() throws Exception {
-        try {
-            BackgroundSyncWorker.schedule(context, true);
-            assertEquals(WorkInfo.State.ENQUEUED, periodicState());
+    public void aClosedAppSyncsInAHiddenRendererThatGivesWayToTheApp() throws Exception {
+        assertFalse("no renderer runs in the test process", BackgroundSyncPlugin.hasRenderer());
+        // Capacitor's bridge expects an activity. A worker has none, so a stand-in
+        // must load the page and let it report back without crashing the process.
+        assertTrue("the hidden renderer reports the end of its sync",
+            BackgroundSyncRenderer.sync(context, TimeUnit.MINUTES.toMillis(2), () -> false));
+        assertFalse("the hidden renderer is not the app's", BackgroundSyncPlugin.hasRenderer());
 
-            assertTrue("no renderer runs in the test process", BackgroundSyncPlugin.pauseWithoutRenderer(context));
-            assertEquals("a process that cannot sync stops waking up for it", WorkInfo.State.CANCELLED, periodicState());
-
-            try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
-                assertEquals("the next renderer restores the job without waiting for the sync server",
-                    WorkInfo.State.ENQUEUED, periodicState());
-                assertFalse("a running renderer keeps the job", BackgroundSyncPlugin.pauseWithoutRenderer(context));
-            }
-
-            BackgroundSyncWorker.schedule(context, false);
-            BackgroundSyncWorker.resume(context);
-            assertEquals("disabled sync stays off", WorkInfo.State.CANCELLED, periodicState());
-        } finally {
-            BackgroundSyncWorker.schedule(context, false);
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            assertTrue(BackgroundSyncPlugin.hasRenderer());
+            assertFalse("the app's renderer syncs by itself",
+                BackgroundSyncRenderer.sync(context, TimeUnit.MINUTES.toMillis(2), () -> false));
         }
     }
 }

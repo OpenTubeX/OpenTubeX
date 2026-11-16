@@ -8,6 +8,17 @@ const BackgroundSync = process.env.IS_CAPACITOR && !process.env.IS_IOS
 
 let periodicSyncEnabled = null
 
+/**
+ * Whether this page is the hidden renderer that the periodic job loads to sync
+ * while the app is closed, rather than the app.
+ */
+export const isAndroidBackgroundSyncRenderer = Boolean(BackgroundSync) && 'OpenTubeXBackgroundSync' in window
+
+/** Tells the periodic job that the hidden renderer's sync ended. */
+export function finishAndroidBackgroundSync() {
+  return BackgroundSync.finishHiddenSync()
+}
+
 /** @returns {() => void} Releases the hold. */
 export function holdAndroidBackgroundWork() {
   if (!BackgroundSync) return () => {}
