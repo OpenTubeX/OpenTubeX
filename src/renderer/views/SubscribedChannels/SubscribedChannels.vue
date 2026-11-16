@@ -329,9 +329,11 @@ const platformNames = computed(() => [
 
 // The last platform shown stays selected for later visits, like on the search page
 /** @type {import('vue').ComputedRef<string>} */
+// Read once, so a choice made in another tab doesn't switch this page
+const storedPlatform = localStorage.getItem(CHANNELS_PLATFORM_STORAGE_KEY)
 const selectedPlatform = computed(() => {
   if (!supportsPlatformFollows) return 'youtube'
-  const requested = route.query.platform ?? localStorage.getItem(CHANNELS_PLATFORM_STORAGE_KEY)
+  const requested = route.query.platform ?? storedPlatform
   return PLATFORM_VALUES.includes(requested) ? requested : 'youtube'
 })
 
