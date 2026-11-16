@@ -103,6 +103,7 @@ const ShakaError = shaka.util.Error
  * @typedef DeliveredLiveSegment
  * @type {object}
  * @property {number} liveWindowSequenceNumber the segment the live window asked for
+ * @property {number} liveWindowGeneration how often the live window had re-timed its segments then
  * @property {number} sequenceNumber the segment SABR delivered for it
  * @property {number} startMs
  */
@@ -933,6 +934,7 @@ async function doRequest(
     if (operationInputs.targetDurationMs) {
       currentState.sabrStreamState.lastLiveSegments.set(operationInputs.streamKind, {
         liveWindowSequenceNumber: operationInputs.liveWindowSequenceNumber,
+        liveWindowGeneration: operationInputs.liveWindowGeneration,
         sequenceNumber: mediaSequenceNumber,
         startMs: mediaStartMs,
       })
@@ -1260,7 +1262,8 @@ export function createSabrTransport(sabrData, getRequestContext) {
       // such as a seek or captions turned on, starts with the segment that
       // contains the requested time, which is where SABR places it.
       const previous = sabrStreamState.lastLiveSegments.get(url.pathname)
-      if (previous?.liveWindowSequenceNumber === liveWindowSequenceNumber - 1) {
+      // Re-timing renumbers the window, so earlier numbers say nothing about the order
+      if (previous?.liveWindowGeneration === liveWindowGeneration && previous.liveWindowSequenceNumber === liveWindowSequenceNumber - 1) {
         sequenceNumber = previous.sequenceNumber + 1
         if (Number.isFinite(previous.startMs)) {
           playerTimeMs = String(Math.round(previous.startMs + 1.5 * targetDurationMs))

@@ -1249,6 +1249,9 @@ test('older live footage starts at the segment SABR has for the requested time',
   // The live window learns which segment it got, so it can re-time the rest
   assert.deepEqual({ ...reported[0] }, { windowSequenceNumber: 878, windowGeneration: 0, sequenceNumber: 876, startMs: realStartMs(876) })
   assert.equal(reported.length, 3)
+  // After re-timing, the window's numbers say nothing about the order, so a seek is looked up
+  assert.equal(await get('sabr1:audio?formatId=140-123-&windowGeneration=1&targetDurationMs=5000&startTimeMs=4430000&sq=881'), 884)
+  reported.pop()
 
   // Captions turned on there start at the same time, but can start apart from the media segments
   assert.equal(await get('sabr1:text?formatId=387-0-&targetDurationMs=5000&startTimeMs=4392500&sq=878'), 876)
