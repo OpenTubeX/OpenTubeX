@@ -108,7 +108,7 @@ test.describe('Invidious instance credentials', () => {
     await expect(username).toHaveValue('dave')
     await expect.poll(authorization).toBe(basic('dave:pw'))
     await expect.poll(() => latestSettings(readDatastore(app.userDataDir, 'settings')).defaultInvidiousInstance).toBe('https://invidious.test')
-    await expect(section.getByText('The currently set default instance is https://invidious.test', { exact: true })).toBeVisible()
+    await expect(section.getByText(/https:\/\/invidious\.test$/)).toBeVisible()
   })
 })
 

@@ -6,7 +6,7 @@ It only changes requests that pages on opentubex.org and the servers you add mak
 
 The extension works on opentubex.org. To use it with your own server, open the extension's options and add the server's `https://` address, or `http://localhost` for a server on your computer. Browsers can't limit extensions to one port or leave out subdomains, so it then also changes the YouTube requests of other web apps on other ports of that host name and on its subdomains.
 
-For the web app's development server, add `http://localhost` the same way.
+For the web app's development server, add `http://localhost` the same way, or `http://127.0.0.1` if you open it at that address.
 
 ## Install
 
