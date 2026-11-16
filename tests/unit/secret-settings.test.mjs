@@ -84,6 +84,18 @@ test('secrets saved unencrypted by an earlier version are encrypted on startup',
   assert.deepEqual(removeOlderCopies.mock.calls.map(call => call.arguments[0].sort()), [['proxyPassword', 'syncServerPrivacyKey', 'syncServerToken', 'yatteePassword', 'youTubeAccount']])
 })
 
+test('Invidious credentials saved in the instance URL move to an encrypted setting on startup', async t => {
+  await datastore.insertAsync({ _id: 'defaultInvidiousInstance', value: 'https://alice:p%40ss@invidious.example/' })
+  t.mock.method(settings, 'cipher', () => Promise.resolve(cipher('device')))
+  const vacuum = t.mock.method(datastore, 'vacuumAsync')
+
+  const credentials = { instance: 'https://invidious.example', username: 'alice', password: 'p@ss' }
+  assert.deepEqual(await saved(), { defaultInvidiousInstance: 'https://invidious.example', invidiousInstanceCredentials: credentials })
+  assert.equal((await stored('defaultInvidiousInstance')).value, 'https://invidious.example')
+  assert.doesNotMatch(JSON.stringify(await stored('invidiousInstanceCredentials')), /alice|p%40ss|p@ss/)
+  assert.equal(vacuum.mock.callCount(), 1)
+})
+
 test('without a system keyring, secrets stay unencrypted', async t => {
   await datastore.insertAsync({ _id: 'proxyPassword', value: 'proxy-secret' })
   t.mock.method(settings, 'cipher', () => Promise.resolve(null))

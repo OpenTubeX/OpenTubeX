@@ -479,6 +479,8 @@ Settings:
       Network: le réseau
       Disk: le disque
   General Settings:
+    Invidious Instance Username: 'Nom d''utilisateur de l''instance'
+    Invidious Instance Password: 'Mot de passe de l''instance'
     Data Saver Thumbnail Modes:
       Off: "Désactivé"
       On Metered Networks: "Sur les réseaux limités"
@@ -2290,6 +2292,7 @@ Tooltips:
     Sync Subscriptions: "Les chaînes auxquelles vous vous abonnez sur YouTube sont ajoutées à « Toutes les chaînes », et celles dont vous vous désabonnez là-bas sont retirées de tous les profils. S’abonner ou se désabonner ici dans « Toutes les chaînes » fait de même sur YouTube."
     Sync Playlists: "Vos playlists YouTube, « À regarder plus tard » et « Vidéos J’aime » apparaissent dans « Vos playlists », et les modifications que vous y apportez ici sont aussi effectuées sur YouTube. Elles ne sont pas synchronisées avec vos autres appareils, ni incluses lorsque vous exportez toutes les playlists ou sauvegardez vos données. Désactiver cette option les retire de cet appareil, mais pas de YouTube."
   General Settings:
+    Invidious Instance Credentials: 'Nécessaire uniquement si l''instance demande un nom d''utilisateur et un mot de passe. Ils sont enregistrés uniquement sur cet appareil et envoyés uniquement à cette instance.'
     Reply Notifications: "OpenTubeX vérifie si les commentaires que vous suivez reçoivent de nouvelles réponses. Il vous prévient aussi lorsqu’un créateur ajoute un cœur à l’un de vos commentaires. Un commentaire reste suivi jusqu’à ce que 30 jours s’écoulent sans nouvelle réponse, sans cœur et sans que vous l’ouvriez. Jusqu’à 50 commentaires restent suivis ; en suivre davantage met fin au suivi de ceux qui sont inactifs depuis le plus longtemps. Suivez n’importe quel commentaire avec le bouton en forme de cloche à côté."
     Built-in Streams: |
       Automatique lit la plupart des vidéos via le client visionOS de YouTube, qui démarre plus vite et prend en charge la qualité automatique. Les diffusions en direct et les vidéos qu’il ne peut pas lire utilisent SABR.

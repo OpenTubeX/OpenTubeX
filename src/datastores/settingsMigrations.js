@@ -1,3 +1,5 @@
+import { splitInvidiousInstanceCredentials } from '../apiBackends.js'
+
 /**
  * The removed per-channel Enable switches, each with the automatic saving
  * switch that only took effect while it was on.
@@ -111,7 +113,7 @@ export async function migrateStoredSettings(datastore) {
         'scrollMiniPlayerEnabled', 'scrollMiniPlayerOnAllTabs', 'scrollPlayerMode',
         'limitTitlesToTwoLines', 'titleLineLimit', 'syncServerSettingUpdatedAt',
         'holdToDoublePlaybackSpeed', 'holdPlaybackRateMultiplier',
-        'thumbnailDataSaver', 'thumbnailDataSaverMode',
+        'thumbnailDataSaver', 'thumbnailDataSaverMode', 'defaultInvidiousInstance',
         ...FORMER_CHANNEL_SETTING_SWITCHES.flat(),
       ]
     }
@@ -231,6 +233,14 @@ export async function migrateStoredSettings(datastore) {
   // shows the mini player.
   if (stored.has('scrollMiniPlayerOnAllTabs')) {
     await datastore.removeAsync({ _id: 'scrollMiniPlayerOnAllTabs' })
+  }
+  // Older versions saved an Invidious instance's credentials in its URL, which
+  // exports and sync include. They are a secret setting now, which
+  // migrateSecretSettings encrypts next.
+  const { instance, credentials } = splitInvidiousInstanceCredentials(stored.get('defaultInvidiousInstance')?.value)
+  if (credentials) {
+    await save('invidiousInstanceCredentials', credentials)
+    await save('defaultInvidiousInstance', instance)
   }
   // Selects derived from a switch keep its sync edit time, so a newer choice from
   // another device still wins over an edit made here before the upgrade.

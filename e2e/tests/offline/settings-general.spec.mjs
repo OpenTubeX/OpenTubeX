@@ -69,6 +69,49 @@ test.describe('Invidious instance list without Invidious API use', () => {
   })
 })
 
+test.describe('Invidious instance credentials', () => {
+  test.use({ seed: { settings: { backendPreference: 'invidious', defaultInvidiousInstance: 'https://alice:old%20secret@invidious.test/' } } })
+
+  test('keep the credentials out of the instance URL and send them only to their instance', async ({ app, page }) => {
+    const basic = credentials => `Basic ${Buffer.from(credentials).toString('base64')}`
+    const authorization = () => page.evaluate(() => window.$store.getters.getApiServerAuthorization)
+    // Credentials an earlier version saved in the URL keep working.
+    await expect.poll(authorization).toBe(basic('alice:old secret'))
+    expect(latestSettings(readDatastore(app.userDataDir, 'settings')).defaultInvidiousInstance).toBe('https://invidious.test')
+
+    const section = await goToSettingsSection(page, 'advanced')
+    const url = section.getByRole('textbox', { name: 'Invidious instance' })
+    const username = section.getByRole('textbox', { name: 'Instance username' })
+    const password = section.getByLabel('Instance password', { exact: true })
+    await expect(url).toHaveValue('https://invidious.test')
+    await expect(username).toHaveValue('alice')
+    await expect(password).toHaveValue('old secret')
+    await expect(password).toHaveAttribute('type', 'password')
+
+    // A URL with credentials still sets them, and the field then hides them.
+    await url.fill('https://bob:new@other.invidious.test')
+    await url.blur()
+    await expect(url).toHaveValue('https://other.invidious.test')
+    await expect(username).toHaveValue('bob')
+    await expect(password).toHaveValue('new')
+    await expect.poll(authorization).toBe(basic('bob:new'))
+
+    // Another instance does not receive them.
+    await url.fill('https://invidious.test')
+    await expect(username).toHaveValue('')
+    await expect.poll(authorization).toBe(null)
+    await username.fill('carol')
+    await expect.poll(authorization).toBe(basic('carol:'))
+
+    // Imported and synced URLs with credentials are split before they are saved.
+    expect(await page.evaluate(() => window.$store.dispatch('updateDefaultInvidiousInstance', 'https://dave:pw@invidious.test/'))).toBe(true)
+    await expect(username).toHaveValue('dave')
+    await expect.poll(authorization).toBe(basic('dave:pw'))
+    await expect.poll(() => latestSettings(readDatastore(app.userDataDir, 'settings')).defaultInvidiousInstance).toBe('https://invidious.test')
+    await expect(section.getByText('The currently set default instance is https://invidious.test', { exact: true })).toBeVisible()
+  })
+})
+
 test.describe('settings', () => {
   test('the vertical tab height slider only becomes usable with vertical tabs', { tag: '@scale' }, async ({ app, page }) => {
     await goTo(page, 'settings')

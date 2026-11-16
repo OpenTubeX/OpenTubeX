@@ -105,11 +105,34 @@
           placeholder="https://your-instance.example"
           :show-action-button="false"
           :show-label="true"
-          :value="currentInvidiousInstance"
+          :value="invidiousInstanceInput"
           setting-key="defaultInvidiousInstance"
           :data-list="invidiousInstancesList"
           :tooltip="t('Tooltips.General Settings.Invidious Instance')"
           @input="handleInvidiousInstanceInput"
+          @blur="handleInvidiousInstanceBlur"
+        />
+      </FtFlexBox>
+      <FtFlexBox>
+        <FtInput
+          :icon="['fas', 'circle-user']"
+          :label="t('Settings.General Settings.Invidious Instance Username')"
+          :show-action-button="false"
+          :show-label="true"
+          :value="invidiousUsername"
+          setting-key="invidiousInstanceCredentials"
+          :tooltip="t('Tooltips.General Settings.Invidious Instance Credentials')"
+          @input="handleInvidiousUsernameInput"
+        />
+        <FtInput
+          :icon="['fas', 'lock']"
+          :label="t('Settings.General Settings.Invidious Instance Password')"
+          :placeholder="t('Form Inputs.Enter Password Hint')"
+          :show-action-button="false"
+          :show-label="true"
+          :value="invidiousPassword"
+          input-type="password"
+          @input="handleInvidiousPasswordInput"
         />
       </FtFlexBox>
       <FtFlexBox>
@@ -221,7 +244,7 @@ import FtButton from '../../FtButton/FtButton.vue'
 import store from '../../../store/index'
 
 import { debounce, randomArrayItem, showToast } from '../../../helpers/utils'
-import { normalizeYatteeServerUrl, usesInvidiousInstance } from '../../../../apiBackends'
+import { getInvidiousInstanceCredentials, normalizeYatteeServerUrl, splitInvidiousInstanceCredentials, usesInvidiousInstance } from '../../../../apiBackends'
 import { checkYatteeServer, createYatteeAuthorization } from '../../../helpers/api/yattee'
 import { capacitorHttpFetch } from '../../../helpers/api/capacitor-http'
 
@@ -420,9 +443,23 @@ onBeforeUnmount(() => {
   }
 })
 
-const setCurrentInvidiousInstanceBounce = debounce((/** @type {string} */instance) => {
+// Keeps what the user types, including credentials, until the field loses focus.
+const invidiousInstanceInput = ref(currentInvidiousInstance.value)
+watch(currentInvidiousInstance, instance => {
+  if (splitInvidiousInstanceCredentials(invidiousInstanceInput.value).instance !== instance) {
+    invidiousInstanceInput.value = instance
+  }
+})
+
+/** @param {string} value */
+function applyInvidiousInstanceInput(value) {
+  // A URL such as https://user:password@instance.example also sets the credentials.
+  const { instance, credentials } = splitInvidiousInstanceCredentials(value)
+  if (credentials) store.dispatch('updateInvidiousInstanceCredentials', credentials)
   store.commit('setCurrentInvidiousInstance', instance)
-}, 500)
+}
+
+const setCurrentInvidiousInstanceBounce = debounce(applyInvidiousInstanceInput, 500)
 
 /**
  * @param {string} input
@@ -434,7 +471,48 @@ function handleInvidiousInstanceInput(input) {
     instance = input.replace(/\/$/, '')
   }
 
+  invidiousInstanceInput.value = input
   setCurrentInvidiousInstanceBounce(instance)
+}
+
+function handleInvidiousInstanceBlur() {
+  const { instance, credentials } = splitInvidiousInstanceCredentials(invidiousInstanceInput.value)
+  if (!credentials) return
+  setCurrentInvidiousInstanceBounce.cancel()
+  applyInvidiousInstanceInput(invidiousInstanceInput.value)
+  // Only the masked password field shows the password from now on.
+  invidiousInstanceInput.value = /** @type {string} */ (instance)
+}
+
+/** The saved credentials, if they belong to the current instance. */
+const invidiousCredentials = computed(() => getInvidiousInstanceCredentials(
+  store.getters.getInvidiousInstanceCredentials, store.getters.getCurrentInvidiousInstanceUrl
+))
+const invidiousUsername = ref('')
+const invidiousPassword = ref('')
+watch(invidiousCredentials, credentials => {
+  invidiousUsername.value = credentials?.username ?? ''
+  invidiousPassword.value = credentials?.password ?? ''
+}, { immediate: true })
+
+function saveInvidiousCredentials() {
+  const username = invidiousUsername.value
+  const password = invidiousPassword.value
+  store.dispatch('updateInvidiousInstanceCredentials', username === '' && password === ''
+    ? null
+    : { instance: store.getters.getCurrentInvidiousInstanceUrl, username, password })
+}
+
+/** @param {string} value */
+function handleInvidiousUsernameInput(value) {
+  invidiousUsername.value = value
+  saveInvidiousCredentials()
+}
+
+/** @param {string} value */
+function handleInvidiousPasswordInput(value) {
+  invidiousPassword.value = value
+  saveInvidiousCredentials()
 }
 
 /** @type {import('vue').ComputedRef<string>} */

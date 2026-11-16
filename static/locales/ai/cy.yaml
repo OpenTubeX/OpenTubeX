@@ -480,6 +480,8 @@ Settings:
       Network: rhwydwaith
       Disk: disg
   General Settings:
+    Invidious Instance Username: 'Enw defnyddiwr yr enghraifft'
+    Invidious Instance Password: 'Cyfrinair yr enghraifft'
     Data Saver Thumbnail Modes:
       Off: "I ffwrdd"
       On Metered Networks: "Ar rwydweithiau â mesurydd"
@@ -2329,6 +2331,7 @@ Tooltips:
     Add to YouTube Watch History: "Mae fideos rydych chi'n eu chwarae yn cael eu hychwanegu at eich hanes gwylio YouTube, fel bod argymhellion YouTube yn dysgu ohonyn nhw. Does dim yn cael ei ychwanegu tra bo'r hanes wedi'i oedi ar YouTube."
     Rate Videos: "Yn dangos botymau hoffi a pheidio â hoffi ar fideos. I ddangos eich sgôr, mae pob fideo rydych chi'n ei agor yn cael ei chwilio ar YouTube gyda'ch cyfrif, felly mae YouTube yn dysgu pa fideos rydych chi'n eu hagor, hyd yn oed pan nad ydyn nhw'n cael eu hychwanegu at eich hanes gwylio."
   General Settings:
+    Invidious Instance Credentials: 'Dim ond ei angen os yw''r enghraifft yn gofyn am enw defnyddiwr a chyfrinair. Maen nhw''n cael eu cadw ar y ddyfais hon yn unig a''u hanfon at yr enghraifft hon yn unig.'
     Reply Notifications: "Mae OpenTubeX yn gwirio'r sylwadau rydych chi'n eu dilyn am atebion newydd. Mae hefyd yn rhoi gwybod i chi pan fydd crëwr yn rhoi calon i un o'ch sylwadau. Mae sylw yn aros yn cael ei ddilyn nes bod 30 diwrnod yn mynd heibio heb atebion newydd, calonnau na'ch bod chi'n ei agor. Mae hyd at 50 sylw yn cael eu dilyn ar y tro, felly os dilynwch fwy, bydd y rhai sydd wedi bod yn anweithgar am y cyfnod hiraf yn peidio â chael eu dilyn. Dilynwch unrhyw sylw gyda'r botwm cloch wrth ei ymyl."
     Built-in Streams: |
       Mae Awtomatig yn chwarae'r rhan fwyaf o fideos drwy gleient visionOS YouTube, sy'n cychwyn yn gynt ac yn cefnogi ansawdd awtomatig. Mae ffrydiau byw a fideos na all eu chwarae yn defnyddio SABR.

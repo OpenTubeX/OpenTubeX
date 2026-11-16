@@ -492,6 +492,8 @@ Settings:
       Disk: disk
   Return to Settings Menu: Tilbake til innstillingsmenyen
   General Settings:
+    Invidious Instance Username: 'Brukarnamn for instansen'
+    Invidious Instance Password: 'Passord for instansen'
     Data Saver Thumbnail Modes:
       Off: "Av"
       On Metered Networks: "På nettverk med datamåling"
@@ -2603,6 +2605,7 @@ Tooltips:
     Sync Subscriptions: "Når du abonnerer på ein kanal på YouTube, blir han lagd til i «Alle kanalar», og når du avsluttar abonnementet der, blir han fjerna frå alle profilar. Å abonnere eller avslutte abonnementet her i «Alle kanalar» gjer det same på YouTube."
     Sync Playlists: "YouTube-spelelistene dine, «Sjå seinare» og «Lika videoar» blir viste i «Dine spelelistar», og endringar du gjer i dei her, blir òg gjorde på YouTube. Dei blir ikkje synkroniserte til dei andre einingane dine og blir ikkje tekne med når du eksporterer alle spelelistene eller tek sikkerheitskopi av dataa dine. Om du slår av dette, blir dei fjerna frå denne eininga, men ikkje frå YouTube."
   General Settings:
+    Invidious Instance Credentials: 'Berre naudsynt dersom instansen ber om brukarnamn og passord. Dei vert berre lagra på denne eininga og berre sende til denne instansen.'
     Reply Notifications: "OpenTubeX sjekkar kommentarane du overvakar for nye svar. OpenTubeX varslar deg òg når ein skapar gjev ein av kommentarane dine eit hjarte. Ein kommentar blir overvaka til det har gått 30 dagar utan nye svar, hjarte eller at du opnar han. Opptil 50 kommentarar blir overvaka, så om du overvakar fleire, sluttar OpenTubeX å overvake dei som har vore inaktive lengst. Overvak kva kommentar som helst med bjølleknappen ved sida av."
     Built-in Streams: |
       Automatisk spelar dei fleste videoane via visionOS-klienten til YouTube, som startar raskare og støttar automatisk kvalitet. Direktesendingar og videoar han ikkje kan spela av, brukar SABR.

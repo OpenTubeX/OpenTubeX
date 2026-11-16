@@ -479,6 +479,8 @@ Settings:
       Network: sarea
       Disk: diskoa
   General Settings:
+    Invidious Instance Username: 'Instantziaren erabiltzaile-izena'
+    Invidious Instance Password: 'Instantziaren pasahitza'
     Data Saver Thumbnail Modes:
       Off: "Desaktibatuta"
       On Metered Networks: "Sare neurtuetan"
@@ -2302,6 +2304,7 @@ Tooltips:
     Sync Subscriptions: "YouTube-n harpidetzen zaren kanalak «Kanal guztiak» profilera gehitzen dira, eta han harpidetza kentzen diezun kanalak profil guztietatik kentzen dira. Hemen «Kanal guztiak» profilean harpidetzeak edo harpidetza kentzeak gauza bera egiten du YouTube-n."
     Sync Playlists: "Zure YouTube-ko erreprodukzio-zerrendak, «Ikusi geroago» eta «Gustuko bideoak» «Zure erreprodukzio-zerrendak» atalean agertzen dira, eta hemen haietan egiten dituzun aldaketak YouTube-n ere egiten dira. Ez dira zure beste gailuekin sinkronizatzen, eta ez dira sartzen erreprodukzio-zerrenda guztiak esportatzen dituzunean edo zure datuen babeskopia egiten duzunean. Hau desaktibatzean gailu honetatik kentzen dira, baina ez YouTube-tik."
   General Settings:
+    Invidious Instance Credentials: 'Instantziak erabiltzaile-izena eta pasahitza eskatzen baditu bakarrik behar da. Gailu honetan bakarrik gordetzen dira eta instantzia honi bakarrik bidaltzen zaizkio.'
     Reply Notifications: "OpenTubeX-ek egiaztatzen du jarraitzen dituzun iruzkinek erantzun berririk duten. Sortzaile batek zure iruzkinetako bati bihotz bat ematen dionean ere jakinarazten dizu. Iruzkin bat jarraituta egoten da, erantzun berririk, bihotzik edo zuk irekitzerik gabe 30 egun igaro arte. Gehienez 50 iruzkin jarrai daitezke aldi berean; beraz, gehiago jarraitzen badituzu, gehien denbora daramaten aktibitaterik gabe dauden iruzkinak jarraitzeari utziko zaio. Jarraitu edozein iruzkin ondoko kanpai-botoiarekin."
     Built-in Streams: |
       Automatikoak bideo gehienak YouTuberen visionOS bezeroaren bidez erreproduzitzen ditu; azkarrago hasten da eta kalitate automatikoa onartzen du. Zuzeneko emanaldiek eta erreproduzitu ezin dituen bideoek SABR erabiltzen dute.

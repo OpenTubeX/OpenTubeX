@@ -2,4 +2,4 @@
 category: improvement
 ---
 
-Your YouTube account sign-in, sync server credentials, and proxy and Yattee passwords are now encrypted with your system's keychain when one is available. After you move your data to another computer or phone, or go back to an older version of OpenTubeX, you sign in to them again.
+Your YouTube sign-in, sync server credentials, and proxy, Yattee, and Invidious passwords are now encrypted with your system's keychain when one is available. Invidious instances get username and password fields. On another device or an older version, you enter them again.

@@ -476,6 +476,8 @@ Settings:
       Network: network
       Disk: disk
   General Settings:
+    Invidious Instance Username: 'Instance username'
+    Invidious Instance Password: 'Instance password'
     Data Saver Thumbnail Modes:
       Off: "Off"
       On Metered Networks: "On metered networks"
@@ -2287,6 +2289,7 @@ Tooltips:
     Add to YouTube Watch History: "Videos you play are added to your YouTube watch history, so YouTube's recommendations learn from them. Nothing is added while the history is paused on YouTube."
     Rate Videos: "Shows like and dislike buttons on videos. To show your rating, each video you open is looked up on YouTube with your account, so YouTube learns which videos you open, even when they are not added to your watch history."
   General Settings:
+    Invidious Instance Credentials: 'Only needed if the instance asks for a username and password. They are only stored on this device and only sent to this instance.'
     Reply Notifications: "OpenTubeX checks the comments you watch for new replies, and tells you when a creator hearts one of yours. A comment stays watched until 30 days pass without new replies, hearts, or you opening it. Up to 50 comments stay watched, so watching more stops watching the ones inactive the longest. Watch any comment with the bell button next to it."
     Built-in Streams: |
       Automatic plays most videos through YouTube's visionOS client, which starts faster and supports automatic quality. Live streams and videos it can't play use SABR.

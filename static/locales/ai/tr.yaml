@@ -479,6 +479,8 @@ Settings:
       Network: ağ
       Disk: disk
   General Settings:
+    Invidious Instance Username: 'Örnek kullanıcı adı'
+    Invidious Instance Password: 'Örnek parolası'
     Data Saver Thumbnail Modes:
       Off: "Kapalı"
       On Metered Networks: "Sınırlı ağlarda"
@@ -2292,6 +2294,7 @@ Tooltips:
     Add to YouTube Watch History: "Oynattığınız videolar YouTube izleme geçmişinize eklenir, böylece YouTube önerileri bunlardan öğrenir. Geçmiş YouTube'da duraklatılmışken hiçbir şey eklenmez."
     Rate Videos: "Videolarda beğen ve beğenme düğmelerini gösterir. Puanınızı göstermek için açtığınız her video hesabınızla YouTube'da sorgulanır; bu nedenle YouTube, izleme geçmişinize eklenmeseler bile hangi videoları açtığınızı öğrenir."
   General Settings:
+    Invidious Instance Credentials: 'Yalnızca örnek bir kullanıcı adı ve parola isterse gerekir. Yalnızca bu cihazda saklanır ve yalnızca bu örneğe gönderilir.'
     Reply Notifications: "OpenTubeX, izlediğiniz yorumlara gelen yeni yanıtları denetler. Bir içerik üreticisi yorumlarınızdan birine kalp bıraktığında da sizi bilgilendirir. Bir yorum, yeni yanıt, kalp veya sizin açmanız olmadan 30 gün geçene kadar izlenmeye devam eder. En fazla 50 yorum izlenmeye devam eder; bu nedenle daha fazlasını izlerseniz en uzun süredir etkin olmayan yorumların izlenmesi durdurulur. Herhangi bir yorumu yanındaki zil düğmesiyle izleyin."
     Built-in Streams: |
       Otomatik, çoğu videoyu YouTube'un visionOS istemcisiyle oynatır; bu istemci daha hızlı başlar ve otomatik kaliteyi destekler. Canlı yayınlar ve oynatamadığı videolar SABR kullanır.
