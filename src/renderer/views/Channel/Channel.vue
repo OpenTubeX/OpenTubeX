@@ -179,10 +179,17 @@
           aria-labelledby="liveTab"
         />
         <FtFlexBox
-          v-if="currentTab === 'live' && filteredLive.length === 0"
+          v-if="currentTab === 'live' && filteredLive.length === 0 && !allLoadedVideosWatched"
         >
           <p class="message">
             {{ $t("Channel.Live.This channel does not currently have any live streams") }}
+          </p>
+        </FtFlexBox>
+        <FtFlexBox
+          v-if="allLoadedVideosWatched"
+        >
+          <p class="message">
+            {{ $t('Channel.All Videos Watched') }}
           </p>
         </FtFlexBox>
         <FtElementList
@@ -650,12 +657,24 @@ const hideWatchedSubs = computed(() => store.getters.getHideWatchedSubs)
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideWatched = computed(() => hideWatchedOverride.value ?? hideWatchedSubs.value)
 
-// Like the sort select, but counting watched videos too so the switch never hides itself.
+// Counts watched videos too so the switch never hides itself, and shows for a single
+// video because the switch may already be on from another channel.
 const showHideWatchedSwitch = computed(() => {
   switch (currentTab.value) {
-    case 'videos': return showFetchMoreButton.value || latestVideos.value.length > 1
-    case 'shorts': return !hideChannelShorts.value && (showFetchMoreButton.value || latestShorts.value.length > 1)
-    case 'live': return showFetchMoreButton.value || latestLive.value.length > 1
+    case 'videos': return showFetchMoreButton.value || latestVideos.value.length > 0
+    case 'shorts': return !hideChannelShorts.value && (showFetchMoreButton.value || latestShorts.value.length > 0)
+    case 'live': return showFetchMoreButton.value || latestLive.value.length > 0
+    default: return false
+  }
+})
+
+// Hide Watched removed every loaded video of the tab, which would otherwise leave it blank.
+const allLoadedVideosWatched = computed(() => {
+  if (!hideWatched.value) return false
+  switch (currentTab.value) {
+    case 'videos': return filteredVideos.value.length === 0 && latestVideos.value.length > 0
+    case 'shorts': return !hideChannelShorts.value && filteredShorts.value.length === 0 && latestShorts.value.length > 0
+    case 'live': return filteredLive.value.length === 0 && latestLive.value.some(video => !shouldHideLiveStreamVideo(video))
     default: return false
   }
 })

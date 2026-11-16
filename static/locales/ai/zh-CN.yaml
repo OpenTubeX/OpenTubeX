@@ -1681,6 +1681,7 @@ Profile:
   Theme Color: 主题颜色
 Channel:
   Hide Watched: 隐藏已观看
+  All Videos Watched: "这些视频你都看过了。关闭“隐藏已观看”即可显示。"
   Fewer videos per day: "减少每日视频数"
   More videos per day: "增加每日视频数"
   Verified: 已验证

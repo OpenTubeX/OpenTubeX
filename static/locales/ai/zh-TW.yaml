@@ -1682,6 +1682,7 @@ Profile:
   Theme Color: 佈景主題色彩
 Channel:
   Hide Watched: 隱藏已觀看
+  All Videos Watched: "這些影片你都看過了。關閉「隱藏已觀看」即可顯示。"
   Fewer videos per day: "減少每日影片數"
   More videos per day: "增加每日影片數"
   Verified: 已驗證

@@ -1680,6 +1680,7 @@ Profile:
   Theme Color: Couleur du thème
 Channel:
   Hide Watched: Masquer les vidéos visionnées
+  All Videos Watched: "Vous avez regardé toutes ces vidéos. Désactivez « Masquer les vidéos visionnées » pour les afficher."
   Fewer videos per day: "Moins de vidéos par jour"
   More videos per day: "Plus de vidéos par jour"
   Verified: Validé

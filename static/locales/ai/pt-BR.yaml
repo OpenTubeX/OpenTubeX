@@ -1634,6 +1634,7 @@ Profile:
   Theme Color: Cor do tema
 Channel:
   Hide Watched: Ocultar assistidos
+  All Videos Watched: "Você já assistiu a todos esses vídeos. Desative \"Ocultar assistidos\" para mostrá-los."
   Fewer videos per day: "Menos vídeos por dia"
   More videos per day: "Mais vídeos por dia"
   Verified: Verificado
