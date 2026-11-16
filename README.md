@@ -100,7 +100,7 @@ Subscriptions, playlists and history stay on your device unless you turn on sync
 - **Playback.** Save speed and quality per channel, remap keyboard shortcuts, skip silent parts and loop a section with A-B repeat. SponsorBlock skips the segment categories you pick, except on channels you exempt.
 - **Tabs.** Videos open in tabs, and the mini player keeps playing while you switch between them. You can queue videos, and the desktop app restores your tabs when you reopen it.
 - **Interface.** Pick a theme or make your own, reorder the navigation and pin the settings you change often to Quick Settings. The Home page can show subscriptions, videos you haven't finished, playlists and more.
-- **Sync.** Sync is off by default. Enhanced-privacy sync encrypts your data on your device before upload, if the server supports it. The [privacy policy](https://opentubex.org/privacy/#desktop-and-mobile-apps) lists what each option shares.
+- **Sync.** Sync is off by default. When you turn it on, your data is end-to-end encrypted, so the sync server can't read it. The [privacy policy](https://opentubex.org/privacy/#desktop-and-mobile-apps) lists what each option shares.
 - **History.** Charts show your daily and weekly watch time. You can search your history and set how long OpenTubeX keeps it.
 
 <a id="screenshots"></a>
@@ -145,8 +145,6 @@ Subscriptions, playlists and history stay on your device unless you turn on sync
 OpenTubeX uses a built-in extractor to request data and videos directly from YouTube. The [Invidious API](https://github.com/iv-org/invidious) can be used instead; depending on the video proxy setting, media requests may still go directly to YouTube. OpenTubeX does not use YouTube's official API.
 
 OpenTubeX does not load the standard YouTube website or its page JavaScript, which reduces the browser-based tracking surface. It does not hide network requests: YouTube, an Invidious operator, or an optional service may still observe request metadata, including your IP address unless a proxy is used. See the [privacy policy](https://opentubex.org/privacy/#privacy-and-threat-model) for the complete threat model.
-
-If you turn on sync with a server that doesn't support enhanced-privacy sync, the server may receive your data unencrypted.
 
 > [!IMPORTANT]
 > Use a VPN or Tor to hide your IP address from YouTube and Invidious instances.
