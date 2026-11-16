@@ -16,6 +16,7 @@ class FakeElement {
 
   get firstElementChild() { return this.children[0] }
   setAttribute(name, value) { this.attributes[name] = value }
+  removeAttribute(name) { delete this.attributes[name] }
   append(...children) {
     for (const child of children) {
       child.parent = this
@@ -47,10 +48,11 @@ const tile = (index, extra = {}) => ({
 })
 
 function fixture(getThumbnails = async (_, time) => tile(Math.floor(time))) {
+  const videoContainer = Object.assign(new FakeElement(), { getBoundingClientRect: () => ({ height: 400 }) })
   const seekBar = {
     container: new FakeElement(),
     bar: { min: '0', max: '30', getBoundingClientRect: () => ({ width: 700 }) },
-    controls: { getVideoContainer: () => ({ getBoundingClientRect: () => ({ height: 400 }) }) },
+    controls: { getVideoContainer: () => videoContainer },
     player: { getImageTracks: () => [{}], getThumbnails },
   }
   const filmstrip = new SeekFilmstrip(seekBar)

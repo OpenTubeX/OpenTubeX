@@ -68,6 +68,8 @@ export function setupSubmenuScrolling(menu, controls, selector = SCROLLING_SUBME
       openFrame = null
       for (const submenu of submenus.filter(isOpenScroller)) {
         restoreOverlayScrollTop(submenu, 0)
+        // Unscaling the zoom restyles the menu twice, for nothing when all options fit.
+        if (submenu.scrollHeight <= submenu.clientHeight) continue
         measureWithoutMenuZoom(submenu, () => {
           submenu.querySelector('.shaka-chosen-item')?.closest('button')
             ?.scrollIntoView({ block: 'nearest', container: 'nearest' })

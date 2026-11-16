@@ -22,7 +22,9 @@ export function setupMenuTransitions(menu, controls) {
 
   /**
    * Shaka also sends this when the menu opens or closes, and on every seek bar
-   * input, so only a submenu that was open counts.
+   * input, so only a submenu that was open counts. The marker expires in a
+   * hidden player, where nothing zooms. Checking for that here would restyle
+   * the entries Shaka has just shown once without the zoom and once with it.
    *
    * @param {Event & { container?: unknown }} event
    */
@@ -33,7 +35,7 @@ export function setupMenuTransitions(menu, controls) {
     ) {
       return
     }
-    if (!menu.classList.contains('shaka-hidden') && menu.checkVisibility()) {
+    if (!menu.classList.contains('shaka-hidden')) {
       markMenuTransition(container, 'out')
     }
   }

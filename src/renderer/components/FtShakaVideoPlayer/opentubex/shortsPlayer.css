@@ -76,7 +76,7 @@
 }
 
 .ftVideoPlayer.shortsPlayer.shortsPaused > .shortsTopControls,
-.ftVideoPlayer.shortsPlayer:has(:deep(.shaka-controls-container[shown='true'])) > .shortsTopControls {
+.ftVideoPlayer.shortsPlayer[data-shaka-controls-shown='true'] > .shortsTopControls {
   --ft-controls-fade: 1;
   --shorts-controls-fade-timing: 150ms ease;
 
@@ -323,8 +323,9 @@
   transition: none;
 }
 
-.ftVideoPlayer.shortsPlayer:has(:deep(.ft-quick-playback-rate-bar)) :deep(
-  .shaka-seek-bar-container
+/* stylelint-disable-next-line selector-max-compound-selectors -- Checking the seek bar's own siblings, unlike the player, restyles only the seek bar when the controls change. */
+.ftVideoPlayer.shortsPlayer :deep(
+  .shaka-seek-bar-container:has(~ .shaka-controls-button-panel > .ft-quick-playback-rate-bar)
 ) {
   z-index: 3;
 }

@@ -73,6 +73,8 @@ export class SeekFilmstrip {
 
     container.style.setProperty('--ft-seek-filmstrip-height', `${height}px`)
     container.classList.add('ft-seek-filmstrip-active')
+    // For the player's overlays that make way for the strip (`controlBar.css`, `fullscreen.css`).
+    controls.getVideoContainer().setAttribute('data-seek-filmstrip-active', '')
     this.marker.style.left = `${markerX}px`
     const elements = [...this.element.querySelectorAll('.ft-seek-filmstrip-frame')]
     frames.forEach((frame, index) => {
@@ -95,6 +97,7 @@ export class SeekFilmstrip {
     this.frames.clear()
     this.pixelsPerSecond = 0
     this.seekBar.container.classList.remove('ft-seek-filmstrip-active')
+    this.seekBar.controls.getVideoContainer().removeAttribute('data-seek-filmstrip-active')
   }
 
   /**
