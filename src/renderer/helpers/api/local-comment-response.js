@@ -45,10 +45,14 @@ function asThread(item) {
   return item.commentViewModel ? { commentThreadRenderer: { commentViewModel: item } } : item
 }
 
-/** @param {Response} response */
-export async function normalizeCommentFetchResponse(response) {
+/**
+ * @param {Response} response
+ * @param {(data: object) => void} [onResponse] receives the JSON response before it is normalized
+ */
+export async function normalizeCommentFetchResponse(response, onResponse = undefined) {
   if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) return response
   const data = await response.json()
+  onResponse?.(data)
   normalizeCommentResponse(data)
   const headers = new Headers(response.headers)
   headers.delete('content-length')

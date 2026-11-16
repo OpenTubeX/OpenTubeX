@@ -2329,7 +2329,7 @@ Tooltips:
     Add to YouTube Watch History: "Mae fideos rydych chi'n eu chwarae yn cael eu hychwanegu at eich hanes gwylio YouTube, fel bod argymhellion YouTube yn dysgu ohonyn nhw. Does dim yn cael ei ychwanegu tra bo'r hanes wedi'i oedi ar YouTube."
     Rate Videos: "Yn dangos botymau hoffi a pheidio â hoffi ar fideos. I ddangos eich sgôr, mae pob fideo rydych chi'n ei agor yn cael ei chwilio ar YouTube gyda'ch cyfrif, felly mae YouTube yn dysgu pa fideos rydych chi'n eu hagor, hyd yn oed pan nad ydyn nhw'n cael eu hychwanegu at eich hanes gwylio."
   General Settings:
-    Reply Notifications: "Mae OpenTubeX yn gwirio'r sylwadau rydych chi'n eu dilyn am atebion newydd am 30 diwrnod. Dilynwch unrhyw sylw gyda'r botwm cloch wrth ei ymyl."
+    Reply Notifications: "Mae OpenTubeX yn gwirio'r sylwadau rydych chi'n eu dilyn am atebion newydd am 30 diwrnod. Mae hefyd yn rhoi gwybod i chi pan fydd crëwr yn rhoi calon i un o'ch sylwadau. Dilynwch unrhyw sylw gyda'r botwm cloch wrth ei ymyl."
     Built-in Streams: |
       Mae Awtomatig yn chwarae'r rhan fwyaf o fideos drwy gleient visionOS YouTube, sy'n cychwyn yn gynt ac yn cefnogi ansawdd awtomatig. Mae ffrydiau byw a fideos na all eu chwarae yn defnyddio SABR.
       Mae SABR yn unig bob amser yn defnyddio cleient gwe YouTube, sy'n cychwyn yn arafach ac nad oes ganddo ansawdd awtomatig.
@@ -2882,3 +2882,4 @@ YouTube Account:
   Recommendations: "Argymhellion YouTube"
   Recommendations Failed: "Methu llwytho eich argymhellion YouTube."
   "{author} replied to your comment": "Atebodd {author} eich sylw"
+  "{author} hearted your comment": "Rhoddodd {author} galon i'ch sylw"

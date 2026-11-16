@@ -2381,7 +2381,7 @@ Tooltips:
     Add to YouTube Watch History: "Videoer, du afspiller, føjes til din YouTube-visningshistorik, så YouTubes anbefalinger lærer af dem. Der føjes intet til, mens historikken er sat på pause på YouTube."
     Rate Videos: "Viser knapperne Synes godt om og Synes ikke om på videoer. For at vise din bedømmelse slås hver video, du åbner, op på YouTube med din konto, så YouTube får at vide, hvilke videoer du åbner, også når de ikke føjes til din visningshistorik."
   General Settings:
-    Reply Notifications: "OpenTubeX tjekker de kommentarer, du overvåger, for nye svar i 30 dage. Overvåg en kommentar med klokkeknappen ved siden af den."
+    Reply Notifications: "OpenTubeX tjekker de kommentarer, du overvåger, for nye svar i 30 dage. Den giver dig også besked, når en skaber giver en af dine kommentarer et hjerte. Overvåg en kommentar med klokkeknappen ved siden af den."
     Built-in Streams: |
       Automatisk afspiller de fleste videoer via YouTubes visionOS-klient, som starter hurtigere og understøtter automatisk kvalitet. Livestreams og videoer, den ikke kan afspille, bruger SABR.
       Kun SABR bruger altid YouTubes webklient, som starter langsommere og ikke har automatisk kvalitet.
@@ -2941,3 +2941,4 @@ YouTube Account:
   Recommendations: "YouTube-anbefalinger"
   Recommendations Failed: "Kunne ikke indlæse dine YouTube-anbefalinger."
   "{author} replied to your comment": "{author} svarede på din kommentar"
+  "{author} hearted your comment": "{author} gav din kommentar et hjerte"

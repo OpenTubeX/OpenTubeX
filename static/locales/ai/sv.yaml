@@ -2292,7 +2292,7 @@ Tooltips:
     Add to YouTube Watch History: "Videor du spelar upp läggs till i din visningshistorik på YouTube, så att rekommendationerna på YouTube lär sig av dem. Inget läggs till medan historiken är pausad på YouTube."
     Rate Videos: "Visar knappar för att gilla och ogilla videor. För att visa ditt betyg slås varje video du öppnar upp på YouTube med ditt konto, så YouTube får veta vilka videor du öppnar, även när de inte läggs till i din visningshistorik."
   General Settings:
-    Reply Notifications: "OpenTubeX kontrollerar kommentarerna du bevakar efter nya svar i 30 dagar. Bevaka valfri kommentar med klockknappen bredvid den."
+    Reply Notifications: "OpenTubeX kontrollerar kommentarerna du bevakar efter nya svar i 30 dagar. Den meddelar dig också när en kreatör ger en av dina kommentarer ett hjärta. Bevaka valfri kommentar med klockknappen bredvid den."
     Built-in Streams: |
       Automatiskt spelar de flesta videor via YouTubes visionOS-klient, som startar snabbare och stöder automatisk kvalitet. Direktsändningar och videor som den inte kan spela upp använder SABR.
       Endast SABR använder alltid YouTubes webbklient, som startar långsammare och saknar automatisk kvalitet.
@@ -2843,3 +2843,4 @@ YouTube Account:
   Recommendations: "YouTube-rekommendationer"
   Recommendations Failed: "Det gick inte att läsa in dina YouTube-rekommendationer."
   "{author} replied to your comment": "{author} svarade på din kommentar"
+  "{author} hearted your comment": "{author} gav din kommentar ett hjärta"

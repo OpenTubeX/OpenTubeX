@@ -156,8 +156,8 @@ final class UploadNotifications {
      * Shows a notification, or leaves it to the visible app. With a history, it
      * is queued until the app adds it to its notification history. Also used for
      * Twitch streams, whose `feedType` is `twitch` and whose ID is `login/streamId`,
-     * and for comment replies, whose `feedType` is `comment-reply` and whose ID is
-     * `videoId/replyId`.
+     * and for comment replies and hearts, whose `feedType` is `comment-reply` or
+     * `comment-heart` and whose ID is `videoId/commentId`.
      */
     static synchronized void deliver(Context context, String feedType, String id, boolean live, String title,
         String body, String thumbnail, boolean history, boolean silent) {
@@ -525,14 +525,16 @@ final class UploadNotifications {
      * the broadcasts of a channel share its address.
      */
     private static int notificationId(String feedType, String id) {
-        return (feedType.equals("twitch") ? "twitch:" + id : url(feedType, id)).hashCode();
+        // A heart and a reply could lead to the same comment.
+        return (feedType.equals("twitch") || feedType.equals(CommentReplyNotifications.HEART_FEED_TYPE)
+            ? feedType + ":" + id : url(feedType, id)).hashCode();
     }
 
     static String url(String feedType, String id) {
         // Twitch notifications lead to the live stream of the channel
         if (feedType.equals("twitch")) return "https://www.twitch.tv/" + Uri.encode(id.substring(0, Math.max(0, id.indexOf('/'))));
-        // Replies lead to their video with the reply highlighted, and their ID is `videoId/replyId`.
-        if (feedType.equals(CommentReplyNotifications.FEED_TYPE)) {
+        // Replies and hearts lead to their video with the comment highlighted, and their ID is `videoId/commentId`.
+        if (CommentReplyNotifications.isFeedType(feedType)) {
             int separator = Math.max(0, id.indexOf('/'));
             return "https://www.youtube.com/watch?v=" + Uri.encode(id.substring(0, separator)) +
                 "&lc=" + Uri.encode(id.substring(Math.min(id.length(), separator + 1)));
@@ -550,7 +552,7 @@ final class UploadNotifications {
         int notificationId = notificationId(feedType, id);
         OpenTubeXNotificationChannels.createAll(context);
         Notification.Builder builder = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
-            ? new Notification.Builder(context, feedType.equals(CommentReplyNotifications.FEED_TYPE)
+            ? new Notification.Builder(context, CommentReplyNotifications.isFeedType(feedType)
                 ? OpenTubeXNotificationChannels.COMMENT_REPLIES_ID
                 : OpenTubeXNotificationChannels.NEW_UPLOADS_ID)
             : new Notification.Builder(context);

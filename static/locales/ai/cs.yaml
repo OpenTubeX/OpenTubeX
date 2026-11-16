@@ -2293,7 +2293,7 @@ Tooltips:
     Add to YouTube Watch History: "Videa, která přehrajete, se přidají do vaší historie sledování na YouTube, takže se z nich učí doporučení YouTube. Když je historie na YouTube pozastavená, nic se nepřidá."
     Rate Videos: "Zobrazuje u videí tlačítka Líbí se a Nelíbí se. Aby se zobrazilo vaše hodnocení, každé otevřené video se vyhledá na YouTube s vaším účtem, takže YouTube zjistí, která videa otevíráte, i když se nepřidají do historie sledování."
   General Settings:
-    Reply Notifications: "OpenTubeX po dobu 30 dní kontroluje, zda na komentáře, které sledujete, přibyly nové odpovědi. Libovolný komentář můžete sledovat pomocí tlačítka se zvonečkem vedle něj."
+    Reply Notifications: "OpenTubeX po dobu 30 dní kontroluje, zda na komentáře, které sledujete, přibyly nové odpovědi. Také vás upozorní, když autor dá srdíčko některému z vašich komentářů. Libovolný komentář můžete sledovat pomocí tlačítka se zvonečkem vedle něj."
     Built-in Streams: |
       Automatický režim přehrává většinu videí přes klienta visionOS od YouTube, který začíná rychleji a podporuje automatickou kvalitu. Živé přenosy a videa, která nedokáže přehrát, používají SABR.
       Pouze SABR vždy používá webového klienta YouTube, který začíná pomaleji a nemá automatickou kvalitu.
@@ -2845,3 +2845,4 @@ YouTube Account:
   Recommendations: "Doporučení YouTube"
   Recommendations Failed: "Vaše doporučení YouTube se nepodařilo načíst."
   "{author} replied to your comment": "{author} odpověděl(a) na váš komentář"
+  "{author} hearted your comment": "{author} dal(a) srdíčko vašemu komentáři"
