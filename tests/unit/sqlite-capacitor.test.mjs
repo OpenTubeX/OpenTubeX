@@ -15,6 +15,7 @@ const legacyFiles = {
     JSON.stringify({ _id: 'theme', value: 'dark' }),
   ].join('\n'),
 }
+const removals = []
 const drivers = new Map()
 const driver = name => {
   if (!drivers.has(name)) drivers.set(name, createNodeSqliteDriver(':memory:'))
@@ -32,9 +33,9 @@ globalThis.fetch = async url => {
 const modules = {
   './androidStorage.js': {
     readFileAsync: async filename => legacyFiles[filename] ?? '',
-    removeDocumentsAsync: async (filename, ids) => {
-      legacyFiles[filename] += '\n' + ids.map(_id => JSON.stringify({ $$deleted: true, _id })).join('\n')
-    },
+    // The WebView copy Android imported from, which can still hold secrets the records no longer have
+    readRetainedAsync: async filename => filename === 'settings.db' ? JSON.stringify({ _id: 'syncServerToken', value: 'retained-secret' }) : '',
+    removeDocumentsAsync: async (filename, ids) => { removals.push({ filename, ids }) },
   },
   '@capacitor/core': {
     Capacitor: { convertFileSrc: path => `https://localhost/_capacitor_file_${path}` },
@@ -79,11 +80,10 @@ test('Capacitor loads whole datastores through result files and releases them', 
   assert.equal(resultFiles.size, 0)
 })
 
-test('Capacitor builds remove secrets from the record storage with deletion records', async () => {
+test('Capacitor builds remove secrets from the record storage and the WebView copy it was imported from', async () => {
   const settings = createBrowserDatastore('settings')
   assert.equal((await settings.findOneAsync({ _id: 'proxyPassword' })).value, 'proxy-secret')
   await settings.removeOlderCopiesAsync("json_extract(data, '$._id') IN (SELECT value FROM json_each(?))", [JSON.stringify(['proxyPassword', 'syncServerToken'])])
-  // The record storage replaces a document's record, so a deletion removes its value.
-  assert.deepEqual(legacyFiles['settings.db'].trim().split('\n').slice(2).map(line => JSON.parse(line)), [{ $$deleted: true, _id: 'proxyPassword' }])
+  assert.deepEqual(removals, [{ filename: 'settings.db', ids: ['proxyPassword', 'syncServerToken'] }])
   assert.equal((await settings.findOneAsync({ _id: 'proxyPassword' })).value, 'proxy-secret', 'the library keeps it')
 })

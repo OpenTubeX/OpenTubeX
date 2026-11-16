@@ -4,7 +4,12 @@ import { legacyLinesWithout } from './legacyLines.js'
 // adapter changes. Store each serialized document separately, including dates
 // in NeDB's own format, rather than copying an ever-growing append log.
 export function createAndroidRecordStorage(factory = indexedDB, native = null) {
-  if (native) return createNativeRecordStorage(native, filename => readShippedRecords(factory, filename), (filename, ids) => removeShippedRecords(factory, filename, ids))
+  if (native) {
+    return createNativeRecordStorage(native, filename => readShippedRecords(factory, filename), {
+      read: filename => readShippedLines(factory, filename),
+      remove: (filename, ids) => removeShippedRecords(factory, filename, ids),
+    })
+  }
   const databases = new Map()
 
   function transaction(database, stores, mode, operation) {
@@ -228,10 +233,25 @@ async function removeShippedRecords(factory, filename, ids) {
   })
 }
 
+/**
+ * Every line of the WebView copies that native storage was imported from.
+ * @param {IDBFactory} factory
+ * @param {string} filename
+ * @returns {Promise<string>}
+ */
+async function readShippedLines(factory, filename) {
+  const records = await withExistingDatabase(factory, `opentubex-records-${filename}`, async database =>
+    database.objectStoreNames.contains('records') ? (await get(database, 'records')).join('\n') : '')
+  const raw = await withExistingDatabase(factory, 'NeDB', database => database.objectStoreNames.contains('nedbdata')
+    ? get(database, 'nedbdata', filename)
+    : Promise.resolve(''))
+  return `${records ?? ''}\n${raw ?? ''}`
+}
+
 /** NeDB lines that delete the documents, which record storage applies by removing their records */
 const deletions = ids => ids.map(_id => JSON.stringify({ $$deleted: true, _id })).join('\n') + '\n'
 
-function createNativeRecordStorage(native, readLegacy, removeLegacy) {
+function createNativeRecordStorage(native, readLegacy, shipped) {
   const initialized = new Map()
   async function initialize(filename) {
     if (!initialized.has(filename)) {
@@ -264,10 +284,13 @@ function createNativeRecordStorage(native, readLegacy, removeLegacy) {
       await initialize(filename)
       await native.clearRecords({ filename })
     },
+    /** The lines of the WebView copies that older versions still read */
+    readRetainedAsync: filename => shipped.read(filename),
     async removeDocumentsAsync(filename, ids) {
       await initialize(filename)
+      // First, so a failure leaves the native records to select them again.
+      await shipped.remove(filename, ids)
       await native.appendRecords({ filename, contents: deletions(ids) })
-      await removeLegacy(filename, ids)
     },
     async crashSafeWriteFileLinesAsync() {},
     async existsAsync() { return true },
