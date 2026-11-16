@@ -730,6 +730,7 @@ function updateThumbnail(channel) {
 
 const isAdding = ref(false)
 const channelInput = useTemplateRef('channelInput')
+let isUnmounted = false
 
 /**
  * @param {string} message
@@ -751,7 +752,8 @@ async function addChannel(text) {
       showError(t('Subscriptions.Platforms.Channel Not Found'))
     } else if (!result.followed) {
       showError(t('Subscriptions.Platforms.Channel Already Followed'))
-    } else {
+    } else if (!isUnmounted) {
+      // The follow is saved either way, but the page must not navigate after it's left
       channelInput.value?.clear()
       // Shows the new channel when it's on another platform than the selected one
       if (selectedPlatform.value !== 'all' && selectedPlatform.value !== result.channel.platform) {
@@ -811,6 +813,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  isUnmounted = true
   document.removeEventListener('keydown', keyboardShortcutHandler)
   // Pending refreshes would otherwise keep fetching channel pages after leaving.
   for (const timer of thumbnailRetryTimers) clearTimeout(timer)
