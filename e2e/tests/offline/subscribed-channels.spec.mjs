@@ -60,8 +60,20 @@ test.describe('subscribed channels', () => {
     await expect(scroller).toHaveAttribute('data-overlayscrollbars-viewport')
     expect(await scroller.evaluate((element) => element.scrollHeight > element.clientHeight)).toBe(true)
 
-    // In this short window the popover fits neither above nor below, so it covers its toggle.
-    await page.keyboard.press('Escape')
+    // In this short window the popover fits neither above nor below. It shrinks
+    // to the roomier side instead of covering its toggle, which still closes it.
+    await expect(dropdown).toHaveClass(/profileDropdownPositioned/)
+    await dropdown.evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
+    const [toggleBox, shrunkDropdownBox, viewportHeight] = await Promise.all([
+      alpha.locator('.buttonList').boundingBox(),
+      dropdown.boundingBox(),
+      page.evaluate(() => window.innerHeight)
+    ])
+    expect(shrunkDropdownBox.y >= toggleBox.y + toggleBox.height ||
+      shrunkDropdownBox.y + shrunkDropdownBox.height <= toggleBox.y).toBe(true)
+    expect(shrunkDropdownBox.y).toBeGreaterThanOrEqual(0)
+    expect(shrunkDropdownBox.y + shrunkDropdownBox.height).toBeLessThanOrEqual(viewportHeight)
+    await alpha.locator('.profileDropdownToggle').click()
     await expect(dropdown).toHaveCount(0)
     for (const direction of ['ltr', 'rtl']) {
       await page.evaluate(value => { document.body.dir = value }, direction)
