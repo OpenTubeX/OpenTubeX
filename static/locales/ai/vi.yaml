@@ -2308,7 +2308,7 @@ Tooltips:
     Add to YouTube Watch History: "Video bạn phát sẽ được thêm vào lịch sử xem YouTube của bạn để đề xuất của YouTube học hỏi từ đó. Không có gì được thêm khi lịch sử đang bị tạm dừng trên YouTube."
     Rate Videos: "Hiển thị nút thích và không thích trên video. Để hiển thị đánh giá của bạn, mỗi video bạn mở sẽ được tra cứu trên YouTube bằng tài khoản của bạn, vì vậy YouTube biết bạn mở những video nào, kể cả khi chúng không được thêm vào nhật ký xem."
   General Settings:
-    Reply Notifications: "OpenTubeX kiểm tra phản hồi mới cho các bình luận bạn theo dõi. Ứng dụng cũng thông báo khi nhà sáng tạo thả tim một bình luận của bạn. Một bình luận vẫn được theo dõi cho đến khi qua 30 ngày mà không có phản hồi mới, lượt thả tim mới hoặc bạn không mở nó. Theo dõi bất kỳ bình luận nào bằng nút chuông bên cạnh."
+    Reply Notifications: "OpenTubeX kiểm tra phản hồi mới cho các bình luận bạn theo dõi. Ứng dụng cũng thông báo khi nhà sáng tạo thả tim một bình luận của bạn. Một bình luận vẫn được theo dõi cho đến khi qua 30 ngày mà không có phản hồi mới, lượt thả tim mới hoặc bạn không mở nó. Tối đa 50 bình luận được theo dõi cùng lúc, vì vậy khi theo dõi thêm, các bình luận không hoạt động lâu nhất sẽ ngừng được theo dõi. Theo dõi bất kỳ bình luận nào bằng nút chuông bên cạnh."
     Built-in Streams: |
       Tự động phát hầu hết video qua ứng dụng khách visionOS của YouTube, khởi động nhanh hơn và hỗ trợ chất lượng tự động. Các buổi phát trực tiếp và video mà nó không phát được sẽ dùng SABR.
       Chỉ SABR luôn dùng ứng dụng khách web của YouTube, khởi động chậm hơn và không có chất lượng tự động.

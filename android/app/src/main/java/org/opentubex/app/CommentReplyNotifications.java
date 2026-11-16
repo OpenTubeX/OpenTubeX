@@ -128,16 +128,19 @@ final class CommentReplyNotifications {
         if (!configuration.optBoolean("enabled")) return;
         JSONObject request = configuration.optJSONObject("request");
         if (request == null) return;
+        // Watches expire from when the check started, so a reply found after one
+        // ran out during the check still keeps it watched.
+        long startedAt = System.currentTimeMillis();
         List<JSONObject> threads;
         synchronized (CommentReplyNotifications.class) {
-            threads = normalize(threads(readState(stateFile(context))), System.currentTimeMillis());
+            threads = normalize(threads(readState(stateFile(context))), startedAt);
         }
         // Comments of several authors in a thread can be watched, and a reply can answer more than one.
         Set<String> announced = new HashSet<>();
         for (JSONObject thread : threads) {
             if (!configuration(context).optBoolean("enabled")) return;
             try {
-                observe(context, thread, fetchThread(request, thread), announced);
+                observe(context, thread, fetchThread(request, thread), announced, startedAt);
             } catch (Exception error) {
                 // One thread must not stop the checks of the others.
                 android.util.Log.w("OpenTubeXReplies", "Unable to check a comment for replies", error);
@@ -149,12 +152,13 @@ final class CommentReplyNotifications {
      * Announces the new replies of a checked thread before it saves them as
      * seen, so a check that stops in between repeats a reply rather than losing it.
      * @param result null when the thread is gone
+     * @param startedAt when the check started, which the watch must have outlasted
      */
-    private static void observe(Context context, JSONObject fetched, JSONObject result, Set<String> announced) throws Exception {
+    private static void observe(Context context, JSONObject fetched, JSONObject result, Set<String> announced, long startedAt) throws Exception {
         // The entry as it is now, as the user may have stopped watching it while it loaded.
         JSONObject checked = null;
         synchronized (CommentReplyNotifications.class) {
-            for (JSONObject thread : normalize(threads(readState(stateFile(context))), System.currentTimeMillis())) {
+            for (JSONObject thread : normalize(threads(readState(stateFile(context))), startedAt)) {
                 if (isSameComment(thread, fetched)) checked = thread;
             }
         }

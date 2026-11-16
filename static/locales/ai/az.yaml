@@ -2304,7 +2304,7 @@ Tooltips:
     Add to YouTube Watch History: "Oxutduğunuz videolar YouTube baxış tarixçənizə əlavə olunur, beləliklə YouTube tövsiyələri onlardan öyrənir. YouTube-da tarixçə dayandırılıbsa, heç nə əlavə olunmur."
     Rate Videos: "Videolarda bəyən və bəyənmə düymələrini göstərir. Qiymətləndirmənizi göstərmək üçün açdığınız hər video hesabınızla YouTube-da yoxlanılır, buna görə YouTube hansı videoları açdığınızı öyrənir, hətta onlar baxış tarixçənizə əlavə edilməsə belə."
   General Settings:
-    Reply Notifications: "OpenTubeX izlədiyiniz şərhləri yeni cavablar üçün yoxlayır. Müəllif şərhlərinizdən birinə ürək verdikdə də sizə bildirir. Şərh, yeni cavab, ürək olmadan və ya siz onu açmadan 30 gün keçənə qədər izlənilməyə davam edir. İstənilən şərhi yanındakı zəng düyməsi ilə izləyin."
+    Reply Notifications: "OpenTubeX izlədiyiniz şərhləri yeni cavablar üçün yoxlayır. Müəllif şərhlərinizdən birinə ürək verdikdə də sizə bildirir. Şərh, yeni cavab, ürək olmadan və ya siz onu açmadan 30 gün keçənə qədər izlənilməyə davam edir. Eyni anda ən çoxu 50 şərh izlənilə bilər, ona görə də daha çoxunu izləsəniz, ən uzun müddət aktiv olmayanların izlənməsi dayandırılır. İstənilən şərhi yanındakı zəng düyməsi ilə izləyin."
     Built-in Streams: |
       Avtomatik rejim əksər videoları YouTube-un visionOS müştərisi ilə oynadır; o, daha tez başlayır və avtomatik keyfiyyəti dəstəkləyir. Canlı yayımlar və onun oynada bilmədiyi videolar SABR istifadə edir.
       Yalnız SABR həmişə YouTube-un veb müştərisindən istifadə edir; o, daha gec başlayır və avtomatik keyfiyyət yoxdur.

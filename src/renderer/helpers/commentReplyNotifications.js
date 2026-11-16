@@ -52,9 +52,10 @@ const isAndroid = !!process.env.IS_CAPACITOR && !process.env.IS_IOS
 export const watchedComments = ref([])
 
 /** @returns {TrackedCommentThread[]} */
-function loadThreads() {
+/** @param {number} [now] when the watches must still run */
+function loadThreads(now = Date.now()) {
   try {
-    return normalizeTrackedCommentThreads(JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]'))
+    return normalizeTrackedCommentThreads(JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]'), now)
   } catch {
     return []
   }
@@ -339,10 +340,13 @@ async function checkThreads() {
   // Comments of several authors in a thread can be watched, and a reply can answer more than one.
   const announced = new Set()
   const signedInId = getSignedInChannelId()
-  for (const key of loadThreads()) {
+  // Watches expire from when the check started, so a reply found after one
+  // ran out during the check still keeps it watched.
+  const startedAt = Date.now()
+  for (const key of loadThreads(startedAt)) {
     if (!isCommentWatchingEnabled()) return
     // Reloaded for each thread, as comments watched meanwhile change the list.
-    const thread = loadThreads().find(item => isSameWatchedComment(item, key))
+    const thread = loadThreads(startedAt).find(item => isSameWatchedComment(item, key))
     if (!thread) continue
     let result
     try {
@@ -352,7 +356,7 @@ async function checkThreads() {
       continue
     }
     // Stopped watching while it loaded
-    const current = loadThreads().find(item => isSameWatchedComment(item, key))
+    const current = loadThreads(startedAt).find(item => isSameWatchedComment(item, key))
     if (!current) continue
     const { added, seen, active } = result ? findNewReplies(current, result.replies, signedInId) : { added: [], seen: current.seen, active: false }
     // The heart belongs to the comment it loaded, which watching the top-level comment meanwhile changes.
@@ -375,7 +379,7 @@ async function checkThreads() {
       await announce('comment-heart', current.videoId, getWatchedCommentId(current), title, current.text ?? '')
         .catch(error => console.error('Failed to announce a comment heart', error))
     }
-    const threads = loadThreads()
+    const threads = loadThreads(startedAt)
     const index = threads.findIndex(item => isSameWatchedComment(item, key))
     if (index !== -1) {
       if (result) {
