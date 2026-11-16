@@ -3,6 +3,7 @@ import { readFile } from 'fs/promises'
 import { join } from 'path'
 
 import { isAttestedPoToken, mintAttestedPoToken } from './attestedPoToken'
+import { disableSpellChecker } from './spellChecker'
 import { withTimeout } from './promiseTimeout'
 
 // #region queue
@@ -103,6 +104,7 @@ async function sharedInit() {
   // setup session
 
   theSession = session.fromPartition('potoken', { cache: false })
+  disableSpellChecker(theSession)
 
   theSession.setPermissionCheckHandler(() => false)
   // eslint-disable-next-line n/no-callback-literal
