@@ -2287,7 +2287,7 @@ Tooltips:
     Add to YouTube Watch History: "Videos you play are added to your YouTube watch history, so YouTube's recommendations learn from them. Nothing is added while the history is paused on YouTube."
     Rate Videos: "Shows like and dislike buttons on videos. To show your rating, each video you open is looked up on YouTube with your account, so YouTube learns which videos you open, even when they are not added to your watch history."
   General Settings:
-    Reply Notifications: "OpenTubeX checks the comments you watch for new replies for 30 days. Watch any comment with the bell button next to it."
+    Reply Notifications: "OpenTubeX checks the comments you watch for new replies for 30 days, and tells you when a creator hearts one of yours. Watch any comment with the bell button next to it."
     Built-in Streams: |
       Automatic plays most videos through YouTube's visionOS client, which starts faster and supports automatic quality. Live streams and videos it can't play use SABR.
       SABR only always uses YouTube's web client, which starts slower and has no automatic quality.
@@ -2833,3 +2833,4 @@ YouTube Account:
   Recommendations: "YouTube recommendations"
   Recommendations Failed: "Could not load your YouTube recommendations."
   "{author} replied to your comment": "{author} replied to your comment"
+  "{author} hearted your comment": "{author} hearted your comment"

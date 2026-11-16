@@ -20,12 +20,13 @@ export function getTwitchLocalNotificationId(streamId) {
 }
 
 /**
- * The ID of the system notification for a reply to the account's comment.
- * @param {string} replyId
+ * The ID of the system notification for a reply to a watched comment, or a heart on the account's.
+ * @param {'comment-reply' | 'comment-heart'} kind
+ * @param {string} commentId the reply's, or the hearted comment's
  */
-export function getCommentReplyLocalNotificationId(replyId) {
+export function getCommentLocalNotificationId(kind, commentId) {
   let hash = 0x811c9dc5
-  for (const character of `comment-reply:${replyId}`) {
+  for (const character of `${kind}:${commentId}`) {
     hash ^= character.codePointAt(0)
     hash = Math.imul(hash, 0x01000193)
   }
@@ -63,15 +64,16 @@ export async function closeCapacitorSystemNotifications(entries) {
   /** @type {Map<string, number>} */
   const reminders = new Map()
   const uploads = []
-  /** @type {number[]} replies and Twitch broadcasts that iOS announced itself */
+  /** @type {number[]} replies, hearts, and Twitch broadcasts that iOS announced itself */
   const localIds = []
   for (const { kind, path, query, createdAt } of entries) {
     const id = path.split('/').at(-1)
     const twitchLogin = path === '/external-media' ? parseTwitchChannelLogin(query?.url) : null
+    const commentId = kind === 'comment-reply' || kind === 'comment-heart' ? query?.commentId : undefined
     if (kind === 'live-reminder') reminders.set(id, createdAt)
-    else if (kind === 'comment-reply' && query?.commentId && process.env.IS_IOS) localIds.push(getCommentReplyLocalNotificationId(query.commentId))
-    // Android announces replies like uploads
-    else if (kind === 'comment-reply' && query?.commentId) uploads.push({ feedType: 'comment-reply', id: `${id}/${query.commentId}` })
+    else if (commentId && process.env.IS_IOS) localIds.push(getCommentLocalNotificationId(kind, commentId))
+    // Android announces replies and hearts like uploads
+    else if (commentId) uploads.push({ feedType: kind, id: `${id}/${commentId}` })
     else if (twitchLogin && query?.stream && process.env.IS_IOS) localIds.push(getTwitchLocalNotificationId(query.stream))
     else if (twitchLogin && query?.stream) uploads.push({ feedType: 'twitch', id: getTwitchNotificationId(twitchLogin, query.stream) })
     else if (kind in UPLOAD_FEED_TYPES) uploads.push({ feedType: UPLOAD_FEED_TYPES[kind], id })

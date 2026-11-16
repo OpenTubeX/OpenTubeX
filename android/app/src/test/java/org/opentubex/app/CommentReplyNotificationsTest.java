@@ -74,6 +74,27 @@ public class CommentReplyNotificationsTest {
     }
 
     @Test
+    public void readsWhetherTheLinkedCommentOrReplyIsHearted() throws Exception {
+        JSONObject reply = entity("thread1.a", "UCme", "@Me", "Reply", "");
+        JSONObject replyEntity = reply.getJSONObject("payload").getJSONObject("commentEntityPayload");
+        replyEntity.getJSONObject("properties").put("toolbarStateKey", "state1");
+        replyEntity.getJSONObject("toolbar").put("heartActiveTooltip", "❤ by @Creator.Name");
+        JSONObject response = new JSONObject().put("frameworkUpdates", new JSONObject().put("entityBatchUpdate",
+            new JSONObject().put("mutations", new JSONArray()
+                .put(entity("thread1", "UCother", "@Other", "Comment", "1"))
+                .put(reply)
+                .put(new JSONObject().put("payload", new JSONObject().put("engagementToolbarStateEntityPayload",
+                    new JSONObject().put("key", "state1").put("heartState", "TOOLBAR_HEART_STATE_HEARTED")))))));
+
+        JSONObject heart = CommentReplyNotifications.parseHeart(response, "thread1.a");
+        assertEquals(true, heart.getBoolean("hearted"));
+        assertEquals("@Creator.Name", heart.getString("author"));
+        // Without its toolbar state, as in a response that does not link it
+        assertNull(CommentReplyNotifications.parseHeart(response, "thread1"));
+        assertNull(CommentReplyNotifications.parseHeart(response, "thread1.b"));
+    }
+
+    @Test
     public void announcesRepliesLikeTheOtherPlatforms() throws Exception {
         JSONObject comment = new JSONObject().put("videoId", "video1").put("threadId", "thread1").put("commentId", "thread1")
             .put("channelId", "UCme").put("handle", "@Me").put("token", "token%3D");

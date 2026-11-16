@@ -2,10 +2,12 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import {
+  checkCommentHeart,
   COMMENT_REPLY_TRACKING_LIMIT,
   COMMENT_REPLY_TRACKING_MS,
+  findCommentHeart,
   findNewReplies,
-  getCommentReplyTarget,
+  getCommentNotificationTarget,
   getWatchedCommentTarget,
   isOwnWatchedComment,
   normalizeTrackedCommentThreads,
@@ -71,13 +73,57 @@ test('watches only recent comments, up to the limit', () => {
   assert.ok(!kept.some(thread => thread.threadId === 'old'))
 })
 
-test('reply targets accept only reply IDs of a video', () => {
-  assert.deepEqual(getCommentReplyTarget('video1', 'thread1.a'), {
+test('reply targets accept only reply IDs of a video, and heart targets comment IDs too', () => {
+  assert.deepEqual(getCommentNotificationTarget('comment-reply', 'video1', 'thread1.a'), {
     kind: 'comment-reply', path: '/watch/video1', query: { commentId: 'thread1.a' }
   })
-  assert.equal(getCommentReplyTarget('video1', 'thread1'), null)
-  assert.equal(getCommentReplyTarget('../video', 'thread1.a'), null)
-  assert.equal(getCommentReplyTarget('video1', 'thread1.a&x=1'), null)
+  assert.equal(getCommentNotificationTarget('comment-reply', 'video1', 'thread1'), null)
+  assert.equal(getCommentNotificationTarget('comment-reply', '../video', 'thread1.a'), null)
+  assert.equal(getCommentNotificationTarget('comment-reply', 'video1', 'thread1.a&x=1'), null)
+  assert.deepEqual(getCommentNotificationTarget('comment-heart', 'video1', 'thread1'), {
+    kind: 'comment-heart', path: '/watch/video1', query: { commentId: 'thread1' }
+  })
+  assert.equal(getCommentNotificationTarget('comment-heart', 'video1', 'thread1.a.b'), null)
+  assert.equal(getCommentNotificationTarget('video', 'video1', 'thread1'), null)
+})
+
+test('reads whether a linked comment or reply is hearted, and by whom, from the response', () => {
+  const comment = (commentId, stateKey, tooltip) => ({
+    entityKey: `entity-${commentId}`,
+    payload: { commentEntityPayload: { properties: { commentId, toolbarStateKey: stateKey }, toolbar: { heartActiveTooltip: tooltip } } }
+  })
+  const state = (key, heartState) => ({ entityKey: key, payload: { engagementToolbarStateEntityPayload: { key, heartState } } })
+  const response = {
+    frameworkUpdates: {
+      entityBatchUpdate: {
+        mutations: [
+          comment('thread1', 'state1', '❤ by @Creator.Name'),
+          state('state1', 'TOOLBAR_HEART_STATE_UNHEARTED'),
+          comment('thread1.a', 'state2', '❤ von @Creator.Name'),
+          state('state2', 'TOOLBAR_HEART_STATE_HEARTED')
+        ]
+      }
+    }
+  }
+  assert.deepEqual(findCommentHeart(response, 'thread1'), { hearted: false, author: '@Creator.Name' })
+  assert.deepEqual(findCommentHeart(response, 'thread1.a'), { hearted: true, author: '@Creator.Name' })
+  assert.equal(findCommentHeart(response, 'thread1.b'), null)
+  assert.equal(findCommentHeart({}, 'thread1'), null)
+})
+
+test('announces a heart on an own comment once, but not one it had before hearts were checked', () => {
+  const [posted] = trackComment([], { ...own, accountId: 'UCme', threadId: 'thread1', commentId: 'thread1', hearted: false }, 1000)
+  const hearted = { hearted: true, author: '@Creator' }
+  assert.deepEqual(checkCommentHeart(posted, { hearted: false, author: '' }), { announce: false, hearted: false })
+  assert.deepEqual(checkCommentHeart(posted, hearted), { announce: true, hearted: true })
+  // Missing from the response, as when it was deleted, it keeps its state.
+  assert.deepEqual(checkCommentHeart(posted, null), { announce: false, hearted: false })
+  assert.deepEqual(checkCommentHeart({ ...posted, hearted: true }, { hearted: false, author: '' }), { announce: false, hearted: true })
+
+  const { hearted: _, ...older } = posted
+  assert.deepEqual(checkCommentHeart(older, hearted), { announce: false, hearted: true })
+  const others = { ...posted, channelId: 'UCother', accountId: 'UCme' }
+  assert.equal(checkCommentHeart(others, hearted).announce, false)
 })
 
 test('watched comments open with the account\'s comment highlighted', () => {

@@ -1179,10 +1179,11 @@ export default {
     mergeDismissals: (dismissals) => ipcRenderer.invoke(IpcChannels.NOTIFICATION_DISMISSALS_MERGE, dismissals),
 
     /**
-     * Announces a reply to a comment the YouTube account posted.
-     * @param {{ videoId: string, replyId: string, title: string, body: string, thumbnail?: string }} reply
+     * Announces a reply to a watched comment, or a heart on the account's.
+     * @param {{ kind: 'comment-reply' | 'comment-heart', videoId: string, commentId: string, title: string, body: string, thumbnail?: string }} notification
+     *   `commentId` is the reply's, or the hearted comment's
      */
-    notifyCommentReply: (reply) => ipcRenderer.invoke(IpcChannels.NOTIFICATION_COMMENT_REPLY, reply),
+    notifyComment: (notification) => ipcRenderer.invoke(IpcChannels.NOTIFICATION_COMMENT, notification),
 
     /**
      * Notifications read or removed on this device, for other devices.

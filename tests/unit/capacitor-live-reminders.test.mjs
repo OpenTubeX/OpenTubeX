@@ -5,7 +5,7 @@ import vm from 'node:vm'
 import { importWithStubs, sourceUrl } from '../helpers/module-stubs.mjs'
 
 const systemNotifications = { calls: [], all: [] }
-const [{ closeCapacitorSystemNotifications, getCommentReplyLocalNotificationId, getTwitchLocalNotificationId }] = await importWithStubs([sourceUrl('src/renderer/helpers/capacitorSystemNotifications.js')], {
+const [{ closeCapacitorSystemNotifications, getCommentLocalNotificationId, getTwitchLocalNotificationId }] = await importWithStubs([sourceUrl('src/renderer/helpers/capacitorSystemNotifications.js')], {
   '@capacitor/local-notifications': {
     LocalNotifications: {
       getAll: async () => ({ notifications: systemNotifications.all }),
@@ -58,7 +58,7 @@ test('closing Twitch live entries on iOS and comment reply entries removes the n
     delete process.env.IS_CAPACITOR
     delete process.env.IS_IOS
   }
-  assert.deepEqual(systemNotifications.calls, [['removeDelivered', [getTwitchLocalNotificationId('12345'), getCommentReplyLocalNotificationId('thread1.reply1')]]])
+  assert.deepEqual(systemNotifications.calls, [['removeDelivered', [getTwitchLocalNotificationId('12345'), getCommentLocalNotificationId('comment-reply', 'thread1.reply1')]]])
 })
 
 async function loadCapacitorReminder(notifications, context = {}) {

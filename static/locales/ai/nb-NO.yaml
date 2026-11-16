@@ -2296,7 +2296,7 @@ Tooltips:
     Sync Subscriptions: "Når du abonnerer på en kanal på YouTube, legges den til i «Alle kanaler», og når du avslutter abonnementet der, fjernes den fra alle profiler. Å abonnere eller avslutte abonnementet her i «Alle kanaler» gjør det samme på YouTube."
     Sync Playlists: "YouTube-spillelistene dine, «Se senere» og «Likte videoer» vises i «Dine spillelister», og endringer du gjør i dem her, gjøres også på YouTube. De synkroniseres ikke til de andre enhetene dine og tas ikke med når du eksporterer alle spillelister eller sikkerhetskopierer dataene dine. Hvis du slår av dette, fjernes de fra denne enheten, men ikke fra YouTube."
   General Settings:
-    Reply Notifications: "OpenTubeX sjekker kommentarene du overvåker for nye svar i 30 dager. Overvåk en hvilken som helst kommentar med bjelleknappen ved siden av."
+    Reply Notifications: "OpenTubeX sjekker kommentarene du overvåker for nye svar i 30 dager. Den varsler deg også når en skaper gir en av kommentarene dine et hjerte. Overvåk en hvilken som helst kommentar med bjelleknappen ved siden av."
     Built-in Streams: |
       Automatisk spiller de fleste videoer via YouTubes visionOS-klient, som starter raskere og støtter automatisk kvalitet. Direktesendinger og videoer den ikke kan spille av, bruker SABR.
       Bare SABR bruker alltid YouTubes nettklient, som starter tregere og ikke har automatisk kvalitet.
@@ -2843,3 +2843,4 @@ YouTube Account:
   Subscriptions Synced: "Abonnementer synkronisert fra YouTube: {added} lagt til, {removed} fjernet"
   Playlist Update Failed: "Kunne ikke oppdatere {playlistName} på YouTube: {error}"
   "{author} replied to your comment": "{author} svarte på kommentaren din"
+  "{author} hearted your comment": "{author} ga kommentaren din et hjerte"
