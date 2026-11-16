@@ -55,9 +55,12 @@ public class AndroidUiPlugin extends Plugin {
     private InputManager.InputDeviceListener gamepadListener;
     // Written on the main looper, read on the plugin thread.
     private volatile boolean gamepadConnected;
+    private final Runnable applyPictureInPictureActions = this::applyPictureInPictureActions;
 
     @Override
     public void load() {
+        PictureInPictureActions.setListener(applyPictureInPictureActions);
+
         // Capability updates repeat for signal changes, so only report metered changes.
         networkMeteredCallback = new ConnectivityManager.NetworkCallback() {
             @Override
@@ -589,8 +592,16 @@ public class AndroidUiPlugin extends Plugin {
         else complete.run();
     }
 
+    private void applyPictureInPictureActions() {
+        if (!supportsPictureInPicture() || getActivity().isFinishing() || getActivity().isDestroyed()) return;
+        // A rejected update keeps the previous controls until the next playback change.
+        PictureInPicture.configure(getActivity(), pictureInPictureAspectRatio,
+            autoPictureInPictureEnabled && pictureInPictureSourceRect != null, pictureInPictureSourceRect);
+    }
+
     @Override
     protected void handleOnDestroy() {
+        PictureInPictureActions.clearListener(applyPictureInPictureActions);
         if (deviceRotationListener != null) deviceRotationListener.disable();
         if (pictureInPictureSurface != null) pictureInPictureSurface.clear();
         getContext().getSystemService(ConnectivityManager.class).unregisterNetworkCallback(networkMeteredCallback);
@@ -641,7 +652,8 @@ public class AndroidUiPlugin extends Plugin {
         ) {
             PictureInPictureParams.Builder builder = new PictureInPictureParams.Builder()
                 .setAspectRatio(aspectRatio)
-                .setSourceRectHint(sourceRect);
+                .setSourceRectHint(sourceRect)
+                .setActions(PictureInPictureActions.get());
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 builder.setAutoEnterEnabled(automatic);

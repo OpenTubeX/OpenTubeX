@@ -2,10 +2,12 @@ package org.opentubex.app;
 
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.app.RemoteAction;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Icon;
 import android.media.MediaMetadata;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
@@ -49,6 +51,7 @@ public class AndroidMediaSessionService extends Service {
     private String artworkUrl = "";
     private String metadataSignature = "";
     private String notificationSignature = "";
+    private List<String> pictureInPictureActions = new ArrayList<>();
 
     @Override
     public void onCreate() {
@@ -213,6 +216,7 @@ public class AndroidMediaSessionService extends Service {
             .setActions(toPlaybackActions(actions))
             .setState(nativeState, positionMs, playbackRate)
             .build());
+        updatePictureInPictureActions(transportActions(actions, playbackState));
 
         String nextNotificationSignature = AndroidMediaNotificationState.notificationSignature(
             nextMetadataSignature,
@@ -374,7 +378,56 @@ public class AndroidMediaSessionService extends Service {
         }
     }
 
+    private void updatePictureInPictureActions(List<String> actions) {
+        if (actions.equals(pictureInPictureActions)) return;
+        pictureInPictureActions = actions;
+        List<RemoteAction> remoteActions = new ArrayList<>();
+        for (int index = 0; index < actions.size(); index++) {
+            remoteActions.add(buildPictureInPictureAction(actions.get(index), index));
+        }
+        PictureInPictureActions.set(remoteActions);
+    }
+
+    private RemoteAction buildPictureInPictureAction(String action, int requestCode) {
+        int icon;
+        int label;
+        switch (action) {
+            case AndroidMediaActions.PAUSE:
+                icon = R.drawable.ic_pip_pause;
+                label = R.string.media_pause;
+                break;
+            case AndroidMediaActions.PREVIOUS:
+                icon = R.drawable.ic_pip_previous;
+                label = R.string.media_previous;
+                break;
+            case AndroidMediaActions.NEXT:
+                icon = R.drawable.ic_pip_next;
+                label = R.string.media_next;
+                break;
+            case AndroidMediaActions.SEEK_BACKWARD:
+                icon = R.drawable.ic_pip_rewind;
+                label = R.string.media_rewind;
+                break;
+            case AndroidMediaActions.SEEK_FORWARD:
+                icon = R.drawable.ic_pip_forward;
+                label = R.string.media_fast_forward;
+                break;
+            default:
+                icon = R.drawable.ic_pip_play;
+                label = R.string.media_play;
+                break;
+        }
+        String title = getString(label);
+        return new RemoteAction(Icon.createWithResource(this, icon), title, title, controlIntent(action, requestCode));
+    }
+
     private List<String> notificationActions(Set<String> actions, String playbackState) {
+        List<String> result = transportActions(actions, playbackState);
+        if (actions.contains(AndroidMediaActions.STOP)) result.add(AndroidMediaActions.STOP);
+        return result;
+    }
+
+    private List<String> transportActions(Set<String> actions, String playbackState) {
         List<String> result = new ArrayList<>();
         if (actions.contains(AndroidMediaActions.PREVIOUS)) result.add(AndroidMediaActions.PREVIOUS);
         else if (actions.contains(AndroidMediaActions.SEEK_BACKWARD)) result.add(AndroidMediaActions.SEEK_BACKWARD);
@@ -384,8 +437,6 @@ public class AndroidMediaSessionService extends Service {
 
         if (actions.contains(AndroidMediaActions.NEXT)) result.add(AndroidMediaActions.NEXT);
         else if (actions.contains(AndroidMediaActions.SEEK_FORWARD)) result.add(AndroidMediaActions.SEEK_FORWARD);
-
-        if (actions.contains(AndroidMediaActions.STOP)) result.add(AndroidMediaActions.STOP);
         return result;
     }
 
@@ -436,6 +487,7 @@ public class AndroidMediaSessionService extends Service {
         artworkLoader.cancel();
         metadataSignature = "";
         notificationSignature = "";
+        updatePictureInPictureActions(new ArrayList<>());
         mainHandler.removeCallbacks(releasePlaybackWakeLock);
         releasePlaybackWakeLock.run();
         mediaSession.setActive(false);
@@ -451,6 +503,7 @@ public class AndroidMediaSessionService extends Service {
         SubscriptionRefreshWebView.setPlaybackActive(false);
         artworkUrl = "";
         artworkLoader.close();
+        updatePictureInPictureActions(new ArrayList<>());
         mainHandler.removeCallbacks(releasePlaybackWakeLock);
         releasePlaybackWakeLock.run();
         mediaSession.release();
