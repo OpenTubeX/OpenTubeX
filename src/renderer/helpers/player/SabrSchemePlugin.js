@@ -1110,7 +1110,7 @@ export function setupSabrScheme(sabrData, getPlayer, getManifest, playerWidth, p
     }
 
     const drcEnabled = url.searchParams.has('drc') || !!(activeVariant && activeVariant.audioRoles.includes('drc'))
-    const enableVoiceBoost = url.searchParams.has('vb') || !!(activeVariant && activeVariant.audioRoles.includes('vb'))
+    const enableVoiceBoost = url.searchParams.has('vb') || !!(activeVariant && activeVariant.audioRoles.includes('voice-boost'))
 
     return {
       audioFormatId,
