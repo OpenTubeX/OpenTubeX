@@ -36,6 +36,11 @@
     </FtFlexBox>
     <h4 class="groupTitle">
       {{ $t('Subscriptions.Subscriptions') }}
+      <FtTooltip
+        class="selectTooltip"
+        position="top"
+        :tooltip="t('Settings.Data Settings.Import subscription groups hint')"
+      />
     </h4>
     <FtFlexBox class="box">
       <FtButton
@@ -56,9 +61,6 @@
     </FtFlexBox>
     <p class="importFormatsHint">
       {{ t('Settings.Data Settings.Import subscriptions formats') }}
-    </p>
-    <p class="importFormatsHint">
-      {{ t('Settings.Data Settings.Import subscription groups hint') }}
     </p>
     <FtFlexBox>
       <p>
