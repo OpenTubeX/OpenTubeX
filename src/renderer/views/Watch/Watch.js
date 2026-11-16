@@ -635,6 +635,9 @@ export default defineComponent({
       sabrErrorRecoveryLastSeconds: null,
       sabrErrorRecoveryPlayedSeconds: 0,
       recommendationPlaybackSample: null,
+      // Holds the phone comment preview still, since redrawing it costs power
+      // on top of the video frames.
+      videoPlaying: false,
       // The video and channel last added to the YouTube account's watch history.
       youTubeHistoryKey: null,
       recommendationWatchSession: null,
@@ -1564,6 +1567,7 @@ export default defineComponent({
     },
     isLoading(loading) {
       this.deferSecondaryContent(loading)
+      if (loading) this.videoPlaying = false
       if (!loading) {
         // Upcoming videos without a trailer never mount a player to report a
         // playback state. Their settled page must still release startup tabs.
@@ -5245,6 +5249,7 @@ export default defineComponent({
       this._saveWatchProgress()
     },
     handleVideoPause() {
+      this.videoPlaying = false
       this.recommendationPlaybackSample = null
       // A reload remembers whether the outgoing player was playing, but the
       // user can still pause it before the replacement starts loading. Do not
@@ -5300,6 +5305,7 @@ export default defineComponent({
       })
     },
     handleVideoPlay() {
+      this.videoPlaying = true
       if (this.chromecastActive) {
         this.$refs.player?.pause()
         return

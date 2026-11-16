@@ -1,11 +1,12 @@
 import { test, expect, sel, setWindowSize } from '../../helpers/app.mjs'
-import { openMockedVideo } from '../../helpers/player.mjs'
+import { activeTab, openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, recordWatchViewChanges, watchViewHandle } from '../../helpers/watch.mjs'
 import { fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
 
 test.use({ seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true } } })
 
-async function openPhoneVideo(app, page) {
+// The preview only rotates while the video is paused.
+async function openPhoneVideo(app, page, { pause = true } = {}) {
   await mockPlayableWatchPage(app, page)
   await page.route(/https:\/\/yt3\.(ggpht|googleusercontent)\.com\//, route => fulfillVisualFixture(route, 'avatar'))
   await openMockedVideo(page)
@@ -15,6 +16,7 @@ async function openPhoneVideo(app, page) {
   await expect(button.locator('.phoneCommentDot')).toHaveCount(5)
   await expect(button.locator('.phoneCommentExcerpt')).toHaveCount(1)
   await page.mouse.move(0, 0)
+  if (pause) await page.locator(`${activeTab} video`).evaluate(video => video.pause())
   return button
 }
 
@@ -36,11 +38,24 @@ async function alignRotationOnFirstComment(page, activeDot) {
   expect(await activeDot()).toBe(0)
 }
 
-test('phone comment previews keep rotating while comments open and after focus returns on close', async ({ app, page }) => {
+test('phone comment previews hold still during playback and keep rotating while comments open and after focus returns on close', async ({ app, page }) => {
   await page.clock.install()
-  const button = await openPhoneVideo(app, page)
+  const button = await openPhoneVideo(app, page, { pause: false })
   const open = button.getByRole('button', { name: 'Comments', exact: true })
   const activeDot = () => button.locator('.phoneCommentDot').evaluateAll(dots => dots.findIndex(dot => dot.classList.contains('active')))
+
+  const video = page.locator(`${activeTab} video`)
+  const shown = await activeDot()
+  await page.clock.fastForward(10000)
+  expect(await video.evaluate(element => element.paused)).toBe(false)
+  expect(await activeDot()).toBe(shown)
+  await video.evaluate(element => element.pause())
+  await page.clock.fastForward(5000)
+  await expect.poll(activeDot).toBe((shown + 1) % 5)
+  for (let step = 0; step < 5 && await activeDot() !== 0; step++) {
+    await page.clock.fastForward(5000)
+  }
+  expect(await activeDot()).toBe(0)
 
   await open.focus()
   await page.keyboard.press('Enter')
