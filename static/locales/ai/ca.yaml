@@ -2831,7 +2831,7 @@ Tooltips:
     Add to YouTube Watch History: "Els vídeos que reprodueixes s'afegeixen al teu historial de visualitzacions de YouTube, perquè les recomanacions de YouTube n'aprenguin. No s'hi afegeix res mentre l'historial està en pausa a YouTube."
     Rate Videos: "Mostra els botons de m'agrada i no m'agrada als vídeos. Per mostrar la teva valoració, cada vídeo que obres es consulta a YouTube amb el teu compte, de manera que YouTube sap quins vídeos obres, encara que no s'afegeixin a l'historial de visualitzacions."
   General Settings:
-    Reply Notifications: "OpenTubeX comprova durant 30 dies si els comentaris que segueixes tenen respostes noves. Segueix qualsevol comentari amb el botó de la campana que hi ha al costat."
+    Reply Notifications: "OpenTubeX comprova durant 30 dies si els comentaris que segueixes tenen respostes noves. També t'avisa quan un creador posa un cor a un dels teus comentaris. Segueix qualsevol comentari amb el botó de la campana que hi ha al costat."
     Built-in Streams: |
       Automàtic reprodueix la majoria de vídeos amb el client visionOS de YouTube, que comença més ràpid i admet la qualitat automàtica. Les emissions en directe i els vídeos que no pot reproduir fan servir SABR.
       Només SABR sempre fa servir el client web de YouTube, que comença més lentament i no té qualitat automàtica.
@@ -3491,3 +3491,4 @@ YouTube Account:
   Recommendations: "Recomanacions de YouTube"
   Recommendations Failed: "No s'han pogut carregar les teves recomanacions de YouTube."
   "{author} replied to your comment": "{author} ha respost al vostre comentari"
+  "{author} hearted your comment": "{author} ha posat un cor al vostre comentari"

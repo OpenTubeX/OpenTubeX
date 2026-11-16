@@ -2291,7 +2291,7 @@ Tooltips:
     Sync Subscriptions: "I canali a cui ti iscrivi su YouTube vengono aggiunti a «Tutti i canali», e quelli da cui annulli l'iscrizione lì vengono rimossi da tutti i profili. Iscriversi o annullare l'iscrizione qui in «Tutti i canali» fa lo stesso su YouTube."
     Sync Playlists: "Le tue playlist di YouTube, «Guarda più tardi» e «Video piaciuti» compaiono in «Le tue playlist», e le modifiche che vi apporti qui vengono applicate anche su YouTube. Non vengono sincronizzate con gli altri tuoi dispositivi né incluse quando esporti tutte le playlist o esegui il backup dei tuoi dati. Disattivando questa opzione vengono rimosse da questo dispositivo, ma non da YouTube."
   General Settings:
-    Reply Notifications: "OpenTubeX controlla per 30 giorni se i commenti che segui ricevono nuove risposte. Segui qualsiasi commento con il pulsante a forma di campanella accanto."
+    Reply Notifications: "OpenTubeX controlla per 30 giorni se i commenti che segui ricevono nuove risposte. Ti avvisa anche quando un creator mette un cuore a uno dei tuoi commenti. Segui qualsiasi commento con il pulsante a forma di campanella accanto."
     Built-in Streams: |
       Automatico riproduce la maggior parte dei video tramite il client visionOS di YouTube, che si avvia più rapidamente e supporta la qualità automatica. Le dirette e i video che non può riprodurre usano SABR.
       Solo SABR usa sempre il client web di YouTube, che si avvia più lentamente e non ha la qualità automatica.
@@ -2843,3 +2843,4 @@ YouTube Account:
   Subscriptions Synced: "Iscrizioni sincronizzate da YouTube: {added} aggiunte, {removed} rimosse"
   Playlist Update Failed: "Impossibile aggiornare {playlistName} su YouTube: {error}"
   "{author} replied to your comment": "{author} ha risposto al tuo commento"
+  "{author} hearted your comment": "{author} ha messo un cuore al tuo commento"

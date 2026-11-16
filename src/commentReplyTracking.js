@@ -22,6 +22,10 @@ const HANDLE_CHARACTERS = String.raw`\p{L}\p{M}\p{N}_\-·`
  * `channelId` and `handle` belong to its author, and replies from `accountId`,
  * the signed-in channel when it was watched, are not announced.
  *
+ * `hearted` tells whether the video's creator hearted the watched comment,
+ * which is announced for the account's own comments. Comments watched before
+ * hearts were checked lack it until their first check.
+ *
  * Comments watched before others' comments could be watched are the account's
  * own and lack `accountId`, which is `channelId` then. Those watched before
  * the list of watched comments existed also lack `text` and `videoTitle`.
@@ -35,6 +39,7 @@ const HANDLE_CHARACTERS = String.raw`\p{L}\p{M}\p{N}_\-·`
  *   postedAt: number,
  *   replyCount: number,
  *   seen: string[],
+ *   hearted?: boolean,
  *   text?: string,
  *   videoTitle?: string
  * }} TrackedCommentThread
@@ -42,6 +47,7 @@ const HANDLE_CHARACTERS = String.raw`\p{L}\p{M}\p{N}_\-·`
 
 /**
  * @typedef {{ id: string, authorId: string, author: string, text: string }} CommentReply
+ * @typedef {{ hearted: boolean, author: string }} CommentHeart `author` is the handle of the creator who hearted it, if known
  */
 
 /**
@@ -58,6 +64,7 @@ function isTrackedCommentThread(value) {
     Number.isFinite(value.postedAt) &&
     Number.isInteger(value.replyCount) &&
     Array.isArray(value.seen) && value.seen.every(id => typeof id === 'string') &&
+    (value.hearted === undefined || typeof value.hearted === 'boolean') &&
     (value.text === undefined || typeof value.text === 'string') &&
     (value.videoTitle === undefined || typeof value.videoTitle === 'string')
 }
@@ -111,8 +118,9 @@ export function isSameWatchedComment(left, right) {
  *   text: string,
  *   videoTitle: string,
  *   replyCount?: number,
- *   seen?: string[]
- * }} comment `replyCount` and `seen` describe the replies it already has
+ *   seen?: string[],
+ *   hearted?: boolean
+ * }} comment `replyCount` and `seen` describe the replies it already has, `hearted` whether it is hearted
  * @param {number} [now]
  * @returns {TrackedCommentThread[]}
  */
@@ -127,7 +135,7 @@ export function trackComment(threads, comment, now = Date.now()) {
         // The text stays the watched comment's. A top-level comment watches the
         // whole thread, starting from the replies it had when watched.
         ...(commentId === threadId && existing.commentId !== threadId
-          ? { commentId, text, seen: [...new Set([...existing.seen, ...(comment.seen ?? [])])].slice(-SEEN_REPLY_LIMIT) }
+          ? { commentId, text, hearted: comment.hearted, seen: [...new Set([...existing.seen, ...(comment.seen ?? [])])].slice(-SEEN_REPLY_LIMIT) }
           : {}),
         ...(accountId && !existing.accountId ? { accountId } : {}),
         videoTitle: videoTitle || existing.videoTitle,
@@ -143,6 +151,7 @@ export function trackComment(threads, comment, now = Date.now()) {
         postedAt: now,
         replyCount: comment.replyCount ?? -1,
         seen: (comment.seen ?? []).slice(-SEEN_REPLY_LIMIT),
+        hearted: comment.hearted,
         text,
         videoTitle
       }
@@ -194,16 +203,66 @@ export function findNewReplies(thread, replies, signedInId = '') {
 }
 
 /**
- * Where a reply notification leads: the video, with the reply highlighted.
- * @param {string} videoId
- * @param {string} replyId
+ * Whether a watched comment's creator heart is new and should be announced:
+ * only for the account's own comments, and not on the first check of a
+ * comment watched before hearts were checked, as it may be old.
+ * @param {TrackedCommentThread} thread
+ * @param {CommentHeart | null} heart null when the response lacks the comment
+ * @returns {{ announce: boolean, hearted: boolean | undefined }} whether to announce it, and the state to save
+ */
+export function checkCommentHeart(thread, heart) {
+  if (!heart) return { announce: false, hearted: thread.hearted }
+  // Announced once, even if the heart is taken back and given again.
+  return { announce: thread.hearted === false && heart.hearted && isOwnWatchedComment(thread), hearted: !!thread.hearted || heart.hearted }
+}
+
+/**
+ * The full ID of the watched comment, `threadId.replyId` for a reply.
+ * @param {Pick<TrackedCommentThread, 'threadId' | 'commentId'>} thread
+ */
+export function getWatchedCommentId({ threadId, commentId }) {
+  // Posted replies may lack the `threadId.` that loaded ones start with.
+  return commentId === threadId || commentId.startsWith(`${threadId}.`) ? commentId : `${threadId}.${commentId}`
+}
+
+/**
+ * Reads whether a comment is hearted from a comments response that includes
+ * it, as one that links the comment does, also when it is a reply.
+ * @param {any} response a YouTube comments response, as JSON
+ * @param {string} commentId the full ID, `threadId.replyId` for a reply
+ * @returns {CommentHeart | null} null without the comment
+ */
+export function findCommentHeart(response, commentId) {
+  const mutations = response?.frameworkUpdates?.entityBatchUpdate?.mutations
+  if (!Array.isArray(mutations)) return null
+  const comment = mutations.find(mutation => mutation?.payload?.commentEntityPayload?.properties?.commentId === commentId)
+    ?.payload.commentEntityPayload
+  const stateKey = comment?.properties.toolbarStateKey
+  const state = stateKey && mutations.find(mutation => mutation?.payload?.engagementToolbarStateEntityPayload?.key === stateKey)
+    ?.payload.engagementToolbarStateEntityPayload
+  if (!state) return null
+  // The tooltip reads like "❤ by @handle", in the language of the response.
+  const tooltip = typeof comment.toolbar?.heartActiveTooltip === 'string' ? comment.toolbar.heartActiveTooltip : ''
+  return {
+    hearted: state.heartState === 'TOOLBAR_HEART_STATE_HEARTED',
+    author: tooltip.match(new RegExp(`@[${HANDLE_CHARACTERS}.]*[${HANDLE_CHARACTERS}]`, 'u'))?.[0] ?? ''
+  }
+}
+
+/**
+ * Where a reply or heart notification leads: the video, with the reply or
+ * the hearted comment highlighted.
+ * @param {unknown} kind `comment-reply` or `comment-heart`
+ * @param {unknown} videoId
+ * @param {unknown} commentId a reply's ID is `threadId.replyId`
  * @returns {import('./notificationHistory.js').NotificationHistoryTarget | null}
  */
-export function getCommentReplyTarget(videoId, replyId) {
-  const [threadId, ...rest] = typeof replyId === 'string' ? replyId.split('.') : []
-  if (typeof videoId !== 'string' || !ID_PATTERN.test(videoId) || !threadId || !ID_PATTERN.test(threadId) ||
-    rest.length !== 1 || !ID_PATTERN.test(rest[0])) return null
-  return { kind: 'comment-reply', path: `/watch/${videoId}`, query: { commentId: replyId } }
+export function getCommentNotificationTarget(kind, videoId, commentId) {
+  const [threadId, ...rest] = typeof commentId === 'string' ? commentId.split('.') : []
+  if ((kind !== 'comment-reply' && kind !== 'comment-heart') || typeof videoId !== 'string' || !ID_PATTERN.test(videoId) ||
+    !threadId || !ID_PATTERN.test(threadId) || rest.length > 1 || (rest.length === 0 && kind === 'comment-reply') ||
+    !rest.every(id => ID_PATTERN.test(id))) return null
+  return { kind, path: `/watch/${videoId}`, query: { commentId: /** @type {string} */ (commentId) } }
 }
 
 /**
@@ -211,8 +270,6 @@ export function getCommentReplyTarget(videoId, replyId) {
  * watched comment highlighted.
  * @param {TrackedCommentThread} thread
  */
-export function getWatchedCommentTarget({ videoId, threadId, commentId }) {
-  // Posted replies may lack the `threadId.` that loaded ones start with.
-  const highlighted = commentId === threadId || commentId.startsWith(`${threadId}.`) ? commentId : `${threadId}.${commentId}`
-  return { path: `/watch/${videoId}`, query: { commentId: highlighted } }
+export function getWatchedCommentTarget(thread) {
+  return { path: `/watch/${thread.videoId}`, query: { commentId: getWatchedCommentId(thread) } }
 }

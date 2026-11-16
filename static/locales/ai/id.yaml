@@ -2318,7 +2318,7 @@ Tooltips:
     Sync Subscriptions: "Kanal yang Anda langgani di YouTube ditambahkan ke “Semua Kanal”, dan kanal yang langganannya Anda hentikan di sana dihapus dari setiap profil. Berlangganan atau berhenti berlangganan di “Semua Kanal” di sini juga melakukan hal yang sama di YouTube."
     Sync Playlists: "Daftar putar YouTube Anda, “Tonton Nanti”, dan “Video yang disukai” muncul di “Daftar Putar Anda”, dan perubahan yang Anda buat padanya di sini juga diterapkan di YouTube. Semuanya tidak diselaraskan ke perangkat Anda yang lain dan tidak disertakan saat Anda mengekspor semua daftar putar atau mencadangkan data Anda. Menonaktifkan ini akan menghapusnya dari perangkat ini, tetapi tidak dari YouTube."
   General Settings:
-    Reply Notifications: "OpenTubeX memeriksa balasan baru pada komentar yang Anda pantau selama 30 hari. Pantau komentar mana pun dengan tombol lonceng di sebelahnya."
+    Reply Notifications: "OpenTubeX memeriksa balasan baru pada komentar yang Anda pantau selama 30 hari. OpenTubeX juga memberi tahu Anda saat kreator memberi hati pada salah satu komentar Anda. Pantau komentar mana pun dengan tombol lonceng di sebelahnya."
     Built-in Streams: |
       Otomatis memutar sebagian besar video melalui klien visionOS YouTube, yang dimulai lebih cepat dan mendukung kualitas otomatis. Siaran langsung dan video yang tidak dapat diputarnya menggunakan SABR.
       Hanya SABR selalu menggunakan klien web YouTube, yang dimulai lebih lambat dan tidak memiliki kualitas otomatis.
@@ -2870,3 +2870,4 @@ YouTube Account:
   Subscriptions Synced: "Langganan diselaraskan dari YouTube: {added} ditambahkan, {removed} dihapus"
   Playlist Update Failed: "Tidak dapat memperbarui {playlistName} di YouTube: {error}"
   "{author} replied to your comment": "{author} membalas komentar Anda"
+  "{author} hearted your comment": "{author} memberi hati pada komentar Anda"

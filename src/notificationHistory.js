@@ -1,5 +1,5 @@
 // @ts-check
-import { getCommentReplyTarget } from './commentReplyTracking.js'
+import { getCommentNotificationTarget } from './commentReplyTracking.js'
 import { parseTwitchNotificationId } from './twitchFollows.js'
 
 /** Older entries are dropped once the history holds this many. */
@@ -12,6 +12,7 @@ export const NOTIFICATION_HISTORY_KINDS = /** @type {const} */ ([
   'short',
   'post',
   'comment-reply',
+  'comment-heart',
   'download-started',
   'download-completed',
   'download-failed'
@@ -141,10 +142,10 @@ export function getLiveReminderTarget(videoId) {
 export function getUploadTarget(feedType, id, live = false) {
   // Android announces Twitch streams like uploads
   if (feedType === 'twitch') return parseTwitchNotificationId(id)
-  // and replies to the account's comments, whose ID is `videoId/replyId`
-  if (feedType === 'comment-reply') {
-    const [videoId, replyId, ...rest] = typeof id === 'string' ? id.split('/') : []
-    return rest.length === 0 ? getCommentReplyTarget(videoId, replyId) : null
+  // and replies to watched comments and hearts on the account's, whose ID is `videoId/commentId`
+  if (feedType === 'comment-reply' || feedType === 'comment-heart') {
+    const [videoId, commentId, ...rest] = typeof id === 'string' ? id.split('/') : []
+    return rest.length === 0 ? getCommentNotificationTarget(feedType, videoId, commentId) : null
   }
   if (typeof id !== 'string' || !ID_PATTERN.test(id)) return null
   if (feedType === 'posts') return { kind: 'post', path: `/post/${id}` }

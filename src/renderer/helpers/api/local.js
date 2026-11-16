@@ -1574,11 +1574,12 @@ export { parseLocalVideoCollaborators } from '../video-collaborators'
  * @param {string} id
  * @param {'TOP_COMMENTS' | 'NEWEST_FIRST' | undefined} sortBy
  * @param {string | undefined} commentId
+ * @param {(data: object) => void} [onResponse] receives each JSON response, for what youtubei.js leaves out
  */
-export async function getLocalComments(id, sortBy = undefined, commentId = undefined) {
+export async function getLocalComments(id, sortBy = undefined, commentId = undefined, onResponse = undefined) {
   const innertube = await createInnertube({
     generateSessionLocally: false,
-    fetchFunc: async (input, init) => normalizeCommentFetchResponse(await localApiFetch(input, init))
+    fetchFunc: async (input, init) => normalizeCommentFetchResponse(await localApiFetch(input, init), onResponse)
   })
   return innertube.getComments(id, sortBy, commentId)
 }

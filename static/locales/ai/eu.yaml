@@ -2302,7 +2302,7 @@ Tooltips:
     Sync Subscriptions: "YouTube-n harpidetzen zaren kanalak «Kanal guztiak» profilera gehitzen dira, eta han harpidetza kentzen diezun kanalak profil guztietatik kentzen dira. Hemen «Kanal guztiak» profilean harpidetzeak edo harpidetza kentzeak gauza bera egiten du YouTube-n."
     Sync Playlists: "Zure YouTube-ko erreprodukzio-zerrendak, «Ikusi geroago» eta «Gustuko bideoak» «Zure erreprodukzio-zerrendak» atalean agertzen dira, eta hemen haietan egiten dituzun aldaketak YouTube-n ere egiten dira. Ez dira zure beste gailuekin sinkronizatzen, eta ez dira sartzen erreprodukzio-zerrenda guztiak esportatzen dituzunean edo zure datuen babeskopia egiten duzunean. Hau desaktibatzean gailu honetatik kentzen dira, baina ez YouTube-tik."
   General Settings:
-    Reply Notifications: "OpenTubeX-ek 30 egunez egiaztatzen du jarraitzen dituzun iruzkinek erantzun berririk duten. Jarraitu edozein iruzkin ondoko kanpai-botoiarekin."
+    Reply Notifications: "OpenTubeX-ek 30 egunez egiaztatzen du jarraitzen dituzun iruzkinek erantzun berririk duten. Sortzaile batek zure iruzkinetako bati bihotz bat ematen dionean ere jakinarazten dizu. Jarraitu edozein iruzkin ondoko kanpai-botoiarekin."
     Built-in Streams: |
       Automatikoak bideo gehienak YouTuberen visionOS bezeroaren bidez erreproduzitzen ditu; azkarrago hasten da eta kalitate automatikoa onartzen du. Zuzeneko emanaldiek eta erreproduzitu ezin dituen bideoek SABR erabiltzen dute.
       SABR soilik aukerak beti YouTuberen web bezeroa erabiltzen du; motelago hasten da eta ez du kalitate automatikorik.
@@ -2854,3 +2854,4 @@ YouTube Account:
   Subscriptions Synced: "Harpidetzak YouTube-tik sinkronizatuta: {added} gehituta, {removed} kenduta"
   Playlist Update Failed: "Ezin izan da {playlistName} YouTube-n eguneratu: {error}"
   "{author} replied to your comment": "{author}(e)k zure iruzkinari erantzun dio"
+  "{author} hearted your comment": "{author}(e)k bihotz bat eman dio zure iruzkinari"

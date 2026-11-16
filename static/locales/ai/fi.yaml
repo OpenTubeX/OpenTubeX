@@ -2300,7 +2300,7 @@ Tooltips:
     Sync Subscriptions: "YouTubessa tilaamasi kanavat lisätään profiiliin ”Kaikki kanavat”, ja kanavat, joiden tilauksen perut siellä, poistetaan kaikista profiileista. Kun tilaat kanavan tai perut tilauksen täällä profiilissa ”Kaikki kanavat”, sama tehdään myös YouTubessa."
     Sync Playlists: "YouTube-soittolistasi, ”Katso myöhemmin” ja ”Tykätyt videot” näkyvät kohdassa ”Omat soittolistat”, ja niihin täällä tekemäsi muutokset tehdään myös YouTubessa. Niitä ei synkronoida muille laitteillesi, eikä niitä sisällytetä, kun viet kaikki soittolistat tai varmuuskopioit tietosi. Tämän poistaminen käytöstä poistaa ne tältä laitteelta mutta ei YouTubesta."
   General Settings:
-    Reply Notifications: "OpenTubeX tarkistaa seuraamiesi kommenttien uudet vastaukset 30 päivän ajan. Seuraa mitä tahansa kommenttia sen vieressä olevalla kellopainikkeella."
+    Reply Notifications: "OpenTubeX tarkistaa seuraamiesi kommenttien uudet vastaukset 30 päivän ajan. Se kertoo myös, kun sisällöntuottaja antaa sydämen jollekin kommentillesi. Seuraa mitä tahansa kommenttia sen vieressä olevalla kellopainikkeella."
     Built-in Streams: |
       Automaattinen toistaa useimmat videot YouTuben visionOS-asiakasohjelman kautta, joka käynnistyy nopeammin ja tukee automaattista laatua. Suorat lähetykset ja videot, joita se ei voi toistaa, käyttävät SABRia.
       Vain SABR käyttää aina YouTuben verkkoasiakasohjelmaa, joka käynnistyy hitaammin eikä tue automaattista laatua.
@@ -2852,3 +2852,4 @@ YouTube Account:
   Subscriptions Synced: "Tilaukset synkronoitu YouTubesta: {added} lisätty, {removed} poistettu"
   Playlist Update Failed: "Soittolistan {playlistName} päivittäminen YouTubessa epäonnistui: {error}"
   "{author} replied to your comment": "{author} vastasi kommenttiisi"
+  "{author} hearted your comment": "{author} antoi kommentillesi sydämen"

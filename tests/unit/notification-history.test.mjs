@@ -72,6 +72,7 @@ test('entries lead to the uploaded item or the download', () => {
   assert.deepEqual(getUploadTarget('posts', 'Ugk-x_1'), { kind: 'post', path: '/post/Ugk-x_1' })
   assert.deepEqual(getUploadTarget('comment-reply', 'abc/thread1.reply1'), { kind: 'comment-reply', path: '/watch/abc', query: { commentId: 'thread1.reply1' } })
   assert.equal(getUploadTarget('comment-reply', 'abc/thread1.reply1/x'), null)
+  assert.deepEqual(getUploadTarget('comment-heart', 'abc/thread1'), { kind: 'comment-heart', path: '/watch/abc', query: { commentId: 'thread1' } })
   assert.equal(getUploadTarget('videos', '../settings'), null)
   assert.equal(getUploadTarget('videos', undefined), null)
 
