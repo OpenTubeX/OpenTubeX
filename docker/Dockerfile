@@ -21,7 +21,7 @@ COPY src src
 COPY static static
 RUN pnpm run pack:web
 
-FROM caddy:2.11.9-alpine@sha256:0bbb055bda6793c999bde78b1b5ce3e89f829fb031af2cf50056ea1246559fee
+FROM caddy:2.11.9-alpine@sha256:003a97808e781aa9f7e75cc2f43d34d461099031faf5e20faefb9f61126836f0
 
 COPY docker/Caddyfile /etc/caddy/Caddyfile
 COPY --from=build /app/dist/web /srv
