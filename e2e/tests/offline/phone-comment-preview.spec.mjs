@@ -88,13 +88,17 @@ test('phone comment preview rotates the first five comments and opens the commen
   const activeDot = () => button.locator('.phoneCommentDot').evaluateAll(dots => dots.findIndex(dot => dot.classList.contains('active')))
   const originalHeight = await button.evaluate(element => element.getBoundingClientRect().height)
 
+  // The clock follows real time until it is paused, so a slow start can
+  // already have rotated past the first comment. The paused clock still has
+  // to run the preview transition's animation frames.
+  await alignRotationOnFirstComment(page, activeDot)
+  await page.clock.runFor(1000)
   await expect(excerpt).toContainText(comments[0].author)
   const open = button.getByRole('button', { name: 'Comments', exact: true })
   await expect(open).toHaveAccessibleDescription(`${comments[0].author} ${comments[0].text.replaceAll(/\s+/g, ' ').trim()}`)
   await open.focus()
   await open.blur()
-  await alignRotationOnFirstComment(page, activeDot)
-  await page.clock.fastForward(4000)
+  await page.clock.fastForward(3000)
   await expect.poll(activeDot).toBe(0)
   // Preview transitions need the clock. Each fastForward below still fires the
   // rotation once, as the assertions between them take far less than five seconds.
