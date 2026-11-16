@@ -146,6 +146,11 @@ function updateYtDlpDownloadBandwidthLimit(value) {
   margin-block: var(--settings-control-margin);
 }
 
+/* Narrow windows stretch compact switches, so center the lone switch inside. */
+.downloadEnable :deep(.switch-label) {
+  justify-content: center;
+}
+
 .downloadActions {
   align-items: stretch;
   gap: 10px;
