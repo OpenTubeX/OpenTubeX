@@ -757,8 +757,9 @@
 }
 
 /* Lies exactly over the textarea, which has the same classes, so the text
-   wraps the same. */
-.inputHighlights {
+   wraps the same. As specific as the input's background rules, so it never
+   covers the caret and selection. */
+.ft-input-component .ft-input.inputHighlights {
   position: absolute;
   inset: 0;
   z-index: 1;
