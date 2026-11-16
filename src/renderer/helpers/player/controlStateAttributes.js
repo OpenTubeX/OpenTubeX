@@ -11,11 +11,15 @@ const RELEASE_EVENTS = ['pointerup', 'pointercancel']
 
 const OPEN_MENU = '.shaka-overflow-menu:not(.shaka-hidden), .shaka-sub-menu:not(.shaka-hidden)'
 const MENU_BUTTON_STATE = 'data-menu-open'
+// Submenus and the control bar's own menus, unlike the options menu itself.
+const OPEN_NESTED_MENU = '.shaka-settings-menu:not(.shaka-hidden), .shaka-sub-menu:not(.shaka-hidden)'
+const NESTED_MENU_STATE = 'data-nested-menu-open'
 
 /**
  * Marks the player while its seek bar is hovered or a control bar tooltip
- * shows, so that its overlays can make way for them (`fullscreen.css`), and
- * the options button while a menu is open (`controlBar.css`).
+ * shows, or a nested menu is open, so that its overlays can make way for them
+ * (`fullscreen.css`), and the options button while a menu is open
+ * (`controlBar.css`).
  *
  * A `.ftVideoPlayer:has(...) .overlay` rule would need no script, but Chromium
  * restyles every descendant of such an ancestor that any rule like it could
@@ -50,14 +54,15 @@ export function mirrorControlStates(player, controlsContainer) {
     })
   }
 
-  function updateMenuButtons() {
+  function updateMenuStates() {
     const open = controlsContainer.querySelector(OPEN_MENU) !== null
     for (const button of controlsContainer.querySelectorAll('.shaka-overflow-menu-button')) {
       button.toggleAttribute(MENU_BUTTON_STATE, open)
     }
+    player.toggleAttribute(NESTED_MENU_STATE, controlsContainer.querySelector(OPEN_NESTED_MENU) !== null)
   }
   // Menus also close on timers and clicks elsewhere, so follow their classes.
-  const menuObserver = new MutationObserver(updateMenuButtons)
+  const menuObserver = new MutationObserver(updateMenuStates)
 
   for (const event of POINTER_EVENTS) {
     // Capturing, as the controls stop some events from reaching their container.
@@ -68,7 +73,7 @@ export function mirrorControlStates(player, controlsContainer) {
   }
   menuObserver.observe(controlsContainer, { attributes: true, attributeFilter: ['class'], subtree: true })
   updatePointerStates()
-  updateMenuButtons()
+  updateMenuStates()
 
   return () => {
     for (const event of POINTER_EVENTS) {
@@ -80,6 +85,7 @@ export function mirrorControlStates(player, controlsContainer) {
     menuObserver.disconnect()
     if (frame !== null) cancelAnimationFrame(frame)
     for (const attribute of Object.keys(POINTER_STATES)) player.removeAttribute(attribute)
+    player.removeAttribute(NESTED_MENU_STATE)
     for (const button of controlsContainer.querySelectorAll('.shaka-overflow-menu-button')) {
       button.removeAttribute(MENU_BUTTON_STATE)
     }

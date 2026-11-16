@@ -1,4 +1,5 @@
 import { test, expect, goTo } from '../../helpers/app.mjs'
+import { mockCapacitorPhoneLayout } from '../../helpers/mobile.mjs'
 import { openMockedVideo, openPlayerOptions } from '../../helpers/player.mjs'
 import { expectImagesLoaded, fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
@@ -174,12 +175,18 @@ test.describe('player', () => {
     const player = page.locator('.ftVideoPlayer')
     await player.hover()
     await openPlayerOptions(player)
-    // The entry, and the icons and scrollbars of the menu, which hides them
-    // while one of its submenus scrolls by itself, restyle: about 40 elements.
+    // The entry and the scrollbars of the menu, which hides them while one of
+    // its submenus scrolls by itself, restyle: about 25 elements.
     await expectLocalRestyle(page, 'options menu entry visibility', '.videoLayout', {
       class: 'shaka-hidden',
       target: '.shaka-overflow-menu > .loop-button'
-    }, 60)
+    }, 35)
+    // Phones style the player's buttons and fullscreen dock by its state too.
+    await mockCapacitorPhoneLayout(page)
+    await expectLocalRestyle(page, 'phone options menu entry visibility', '.videoLayout', {
+      class: 'shaka-hidden',
+      target: '.shaka-overflow-menu > .loop-button'
+    }, 35)
   })
 
   // Shaka refreshes the seek bar eight times a second, also while paused. Each
