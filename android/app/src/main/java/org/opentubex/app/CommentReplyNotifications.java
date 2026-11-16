@@ -162,7 +162,9 @@ final class CommentReplyNotifications {
             }
             seen = found.getJSONArray("seen");
         }
-        JSONObject heart = result == null ? null : result.optJSONObject("heart");
+        // The heart belongs to the comment it loaded, which watching the top-level comment meanwhile changes.
+        JSONObject heart = result == null || !watchedCommentId(checked).equals(watchedCommentId(fetched))
+            ? null : result.optJSONObject("heart");
         boolean hearted = heart != null && heart.optBoolean("hearted");
         // Announced once. Comments watched before hearts were checked have no
         // state yet, and their first check only saves it, as the heart may be old.

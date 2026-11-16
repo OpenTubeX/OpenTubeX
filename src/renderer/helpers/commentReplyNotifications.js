@@ -336,7 +336,8 @@ async function checkThreads() {
     const current = loadThreads().find(item => isSameWatchedComment(item, key))
     if (!current) continue
     const { added, seen } = result ? findNewReplies(current, result.replies, signedInId) : { added: [], seen: current.seen }
-    const heart = checkCommentHeart(current, result?.heart ?? null)
+    // The heart belongs to the comment it loaded, which watching the top-level comment meanwhile changes.
+    const heart = checkCommentHeart(current, getWatchedCommentId(current) === getWatchedCommentId(thread) ? result?.heart ?? null : null)
     // Announced before they count as seen, so closing the app in between
     // repeats a reply or heart rather than losing it. Those whose announcement
     // fails count as seen too, as retrying could add them to the history twice,
@@ -407,8 +408,7 @@ export function startCommentReplyNotifications() {
     document.addEventListener('visibilitychange', checkWhenVisible)
     LocalNotifications.addListener('localNotificationActionPerformed', ({ actionId, notification }) => {
       const target = notification?.extra?.commentReplyTarget
-      // Notifications shown before hearts were announced lack the kind.
-      const checked = getCommentNotificationTarget(target?.kind ?? 'comment-reply', target?.path?.split('/')[2], target?.query?.commentId)
+      const checked = getCommentNotificationTarget(target?.kind, target?.path?.split('/')[2], target?.query?.commentId)
       if (!checked) return
       capacitorNotificationHistory.markTargetsRead([checked])
       if (actionId !== 'dismiss') openNotificationEntry({ ...checked, read: true })
