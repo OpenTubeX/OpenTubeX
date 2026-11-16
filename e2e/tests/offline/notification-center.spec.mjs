@@ -162,9 +162,12 @@ test('middle and Ctrl clicks open notifications in new tabs', async ({ app, page
   const entries = dropdown.locator('.notificationEntry')
   const startUrl = page.url()
 
-  await entries.nth(1).click({ button: 'middle' })
+  // Ctrl+Alt leaves the tab unloaded, so it shows the video's title instead of its route.
+  await entries.nth(1).click({ button: 'middle', modifiers: ['Control', 'Alt'] })
   await expect(page.locator(sel.tabs)).toHaveCount(2)
   await expect(page.locator(sel.tabs).first()).toHaveClass(/active/)
+  await expect(page.locator(sel.tabs).nth(1)).toHaveClass(/unloaded/)
+  await expect(page.locator(sel.tabs).nth(1).locator('.tabTitleText')).toHaveText(`Upload ${first}`)
   await expect.poll(() => page.evaluate(async () => {
     const state = await window.ftElectron.tabs.getState()
     return state.tabs.find(tab => tab.id !== state.activeTabId)?.route.fullPath

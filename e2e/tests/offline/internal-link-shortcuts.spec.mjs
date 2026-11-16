@@ -63,6 +63,34 @@ test('Ctrl+Alt+middle-clicking an internal link leaves its background tab unload
   await expect(page.locator(sel.tabs).nth(1)).not.toHaveClass(/unloaded/)
 })
 
+test.describe('unloaded YouTube video tabs', () => {
+  const instanceUrl = 'https://invidious.test'
+
+  test.use({
+    seed: {
+      settings: { backendPreference: 'invidious', defaultInvidiousInstance: instanceUrl }
+    }
+  })
+
+  test('look up the title of a video link that only shows its URL', async ({ page }) => {
+    const videoId = 'abcdefghijk'
+    await page.route(`${instanceUrl}/api/v1/videos/**`, route => route.fulfill({
+      json: { videoId, title: 'Linked video', author: 'Channel', authorId: 'UCaaaaaaaaaaaaaaaaaaaaaa', lengthSeconds: 60, published: 1, liveNow: false }
+    }))
+    await goTo(page, 'subscriptions')
+    const url = `https://www.youtube.com/watch?v=${videoId}`
+    await page.locator('body').evaluate((body, url) => {
+      body.insertAdjacentHTML('beforeend', `<a href="${url}">${url}</a>`)
+    }, url)
+
+    await page.locator('body').getByRole('link', { name: url }).click({ button: 'middle', modifiers: ['Control', 'Alt'] })
+
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+    await expect(page.locator(sel.tabs).nth(1)).toHaveClass(/unloaded/)
+    await expect(page.locator(sel.tabs).nth(1).locator('.tabTitleText')).toHaveText('Linked video')
+  })
+})
+
 test('Ctrl or Cmd-clicking an internal link opens it in an active tab', async ({ page }) => {
   const linkLabel = await historyLinkLabel(page)
 

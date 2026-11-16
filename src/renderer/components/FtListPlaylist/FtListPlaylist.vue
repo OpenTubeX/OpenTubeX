@@ -31,6 +31,7 @@
       <RouterLink
         class="thumbnailLink"
         :to="playlistPageLinkTo"
+        :data-tab-title="titleForDisplay"
         tabindex="-1"
         aria-hidden="true"
       >
@@ -57,6 +58,7 @@
       <RouterLink
         class="title"
         :to="playlistPageLinkTo"
+        :data-tab-title="titleForDisplay"
         :title="store.getters.getTitleLineLimit > 0 ? playlistMetadata.title : null"
       >
         <h3
@@ -90,6 +92,7 @@
           class="channelName"
           dir="auto"
           :to="`/channel/${playlistMetadata.channelId}`"
+          :data-tab-title="playlistMetadata.channelName"
         >
           <FtChannelAvatar
             v-if="showChannelAvatar"

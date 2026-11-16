@@ -20,6 +20,7 @@
           >
             <router-link
               class="playAllLink"
+              :data-tab-title="shelf.title"
               :to="{
                 path: `/playlist/${shelf.playlistId}`
               }"

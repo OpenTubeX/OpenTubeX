@@ -124,6 +124,7 @@
               >
                 <RouterLink
                   :to="continueWatchingRoute(video)"
+                  :data-tab-title="video.title"
                   @click.capture="activateExistingContinueWatchingTab($event, video)"
                 >
                   <span class="mediaThumbnail">
@@ -325,7 +326,10 @@
                   :blocked="isBlurredByBlockLists(item.entry, { useChannelsHidden: false })"
                   :reveal-key="item.entry.videoId ?? item.entry.postId"
                 >
-                  <RouterLink :to="newSubscriptionEntryRoute(item)">
+                  <RouterLink
+                    :to="newSubscriptionEntryRoute(item)"
+                    :data-tab-title="newSubscriptionEntryTabTitle(item.entry)"
+                  >
                     <span class="mediaThumbnail">
                       <FtRetryImage
                         v-if="item.entry.videoId"
@@ -387,6 +391,7 @@
               >
                 <RouterLink
                   :to="video.route ?? `/watch/${video.videoId}`"
+                  :data-tab-title="video.title"
                   @click="playQueuedVideo(video.queueItemId, $event)"
                 >
                   <span class="mediaThumbnail">
@@ -433,7 +438,10 @@
                 v-for="playlist in items"
                 :key="playlist._id"
               >
-                <RouterLink :to="{ path: `/playlist/${playlist._id}`, query: { playlistType: 'user' } }">
+                <RouterLink
+                  :to="{ path: `/playlist/${playlist._id}`, query: { playlistType: 'user' } }"
+                  :data-tab-title="playlist.playlistName"
+                >
                   <span class="mediaThumbnail playlistThumbnail">
                     <FtRetryImage
                       :src="playlistThumbnail(playlist)"
@@ -489,7 +497,7 @@
                 <component
                   :is="route ? RouterLink : 'button'"
                   class="activityLink"
-                  v-bind="route ? { to: route } : { type: 'button', onClick: openDownloads }"
+                  v-bind="route ? { to: route, 'data-tab-title': download.title } : { type: 'button', onClick: openDownloads }"
                 >
                   <span class="activityIcon">
                     <FtIcon :icon="['fas', 'download']" />
@@ -610,6 +618,7 @@ import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { getExternalMediaHistoryId, isExternalMediaHistoryId } from '../../helpers/externalMediaHistory'
 import { isSignedInToYouTube } from '../../helpers/youtube-account-state'
 import { showToast } from '../../helpers/utils'
+import { getPostTabTitle } from '../../helpers/tabTitles'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 import { formatDateTime } from '../../helpers/dateFormat'
 import { useHomeRecommendations } from '../../composables/useHomeRecommendations'
@@ -846,6 +855,11 @@ function playlistThumbnail(playlist) {
 
 function newSubscriptionEntryTitle(entry) {
   return entry.title ?? entry.postText ?? t('Global.Posts')
+}
+
+/** Matches the title the opened page shows. */
+function newSubscriptionEntryTabTitle(entry) {
+  return entry.postId ? getPostTabTitle(entry.author) : entry.title
 }
 
 function newSubscriptionCategoryLabel(category) {

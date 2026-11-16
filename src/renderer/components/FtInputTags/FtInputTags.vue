@@ -52,6 +52,7 @@
             <RouterLink
               v-if="tag.icon"
               :to="tag.iconHref ?? ''"
+              :data-tab-title="tag.preferredName || tag.name"
               class="tag-icon-link"
             >
               <FtRetryImage

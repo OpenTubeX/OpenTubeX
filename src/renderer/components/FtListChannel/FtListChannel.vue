@@ -11,6 +11,7 @@
       <component
         :is="enableChannelLinks ? 'router-link' : 'div'"
         :to="`/channel/${id}`"
+        :data-tab-title="name"
         class="channelThumbnailLink"
         tabindex="-1"
         aria-hidden="true"
@@ -32,6 +33,7 @@
           :is="enableChannelLinks ? 'router-link' : 'span'"
           class="title"
           :to="`/channel/${id}`"
+          :data-tab-title="name"
         >
           <h3
             class="h3Title"
@@ -55,6 +57,7 @@
             class="handle"
             dir="auto"
             :to="`/channel/${id}`"
+            :data-tab-title="name"
           >
             {{ handle }}
           </component>

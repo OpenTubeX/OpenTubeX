@@ -1,5 +1,5 @@
 import { app } from 'electron'
-import { getFixedInternalRouteTitle } from '../../internalRoutes.js'
+import { getFixedInternalRouteTitle, getRouteDerivedTitle } from '../../internalRoutes.js'
 
 const MAX_PERSISTED_NAV_HISTORY_ENTRIES = 25
 
@@ -63,7 +63,7 @@ export function sanitizeNavigationHistory(history, historyIndex) {
  */
 export function formatDefaultTabTitle(url) {
   const route = getRouteFromUrl(url)
-  return getFixedInternalRouteTitle(route.path) ?? route.fullPath
+  return getFixedInternalRouteTitle(route.path) ?? getRouteDerivedTitle(route.path) ?? route.fullPath
 }
 
 /**

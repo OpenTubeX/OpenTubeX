@@ -43,6 +43,7 @@
               :is="channelRoute ? 'router-link' : 'span'"
               v-if="playlist.author"
               :to="channelRoute ?? undefined"
+              :data-tab-title="playlist.author"
               dir="auto"
             >
               {{ playlist.author }}

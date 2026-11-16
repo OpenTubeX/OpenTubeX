@@ -45,6 +45,7 @@
           class="thumbnailLink"
           tabindex="-1"
           :to="to"
+          :data-tab-title="data.title"
           :aria-label="data.title"
           @click="markAsSeen"
           @auxclick.middle="markAsSeen"
@@ -93,6 +94,7 @@
         <RouterLink
           class="title"
           :to="to"
+          :data-tab-title="data.title"
           :title="store.getters.getTitleLineLimit > 0 ? data.title : null"
           @click="markAsSeen"
           @auxclick.middle="markAsSeen"
@@ -111,6 +113,7 @@
             class="channelName"
             dir="auto"
             :to="channelRoute ?? undefined"
+            :data-tab-title="data.author"
           >
             <FtChannelAvatar
               v-if="avatar && !hideChannelAvatars"

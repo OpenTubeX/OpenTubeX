@@ -49,6 +49,7 @@
                   class="playlistTitleLink"
                   dir="auto"
                   :to="playlistPageLinkTo"
+                  :data-tab-title="playlistTitle"
                 >
                   {{ playlistTitle }}
                 </RouterLink>
@@ -76,6 +77,7 @@
               class="channelName"
               dir="auto"
               :to="`/channel/${channelId}`"
+              :data-tab-title="channelName"
             >
               {{ channelName }}<span
                 class="channelNameSeparator"

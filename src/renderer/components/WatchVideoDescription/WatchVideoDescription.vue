@@ -78,6 +78,7 @@
             <component
               :is="game.channelId ? 'RouterLink' : 'div'"
               :to="`/channel/${game.channelId}`"
+              :data-tab-title="game.title"
               :tabindex="game.channelId ? linkTabIndex : null"
               class="game"
             >
@@ -122,6 +123,7 @@
               <component
                 :is="track.videoId ? 'RouterLink' : 'bdi'"
                 :to="track.videoId && `/watch/${track.videoId}`"
+                :data-tab-title="track.title"
                 :tabindex="track.videoId ? linkTabIndex : null"
                 class="musicTrackTitle"
               >{{ track.title }}</component>
@@ -129,6 +131,7 @@
                 :is="track.channelId ? 'RouterLink' : 'bdi'"
                 v-if="track.artist"
                 :to="track.channelId && `/channel/${track.channelId}`"
+                :data-tab-title="track.artist"
                 :tabindex="track.channelId ? linkTabIndex : null"
                 class="musicTrackArtist"
               >{{ track.artist }}</component>

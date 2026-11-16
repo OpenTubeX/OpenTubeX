@@ -113,6 +113,7 @@
                   :role="channel.route ? null : 'group'"
                   :aria-label="channel.name"
                   :to="channel.route ?? undefined"
+                  :data-tab-title="channel.name"
                 >
                   <FtRetryImage
                     v-if="channel.thumbnail"

@@ -141,6 +141,7 @@
               class="thumbnailContainer"
               :draggable="canReorder ? 'false' : null"
               :to="entry.route"
+              :data-tab-title="entry.name"
             >
               <FtRetryImage
                 v-if="entry.thumbnail !== null"
@@ -168,6 +169,7 @@
                 :title="entry.name"
                 :draggable="canReorder ? 'false' : null"
                 :to="entry.route"
+                :data-tab-title="entry.name"
               >
                 {{ entry.name }}
               </component>

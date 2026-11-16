@@ -33,6 +33,7 @@
           <RouterLink
             class="channelAvatarLink"
             :to="annotation.route"
+            :data-tab-title="annotation.title"
             :title="annotation.title"
             :aria-label="annotation.title"
           >
@@ -48,6 +49,7 @@
               <RouterLink
                 class="channelHovercardTitle"
                 :to="annotation.route"
+                :data-tab-title="annotation.title"
                 dir="auto"
               >
                 {{ annotation.title }}
@@ -78,6 +80,7 @@
           :class="`annotation-${annotation.type.toLowerCase()}`"
           :style="getAnnotationStyle(annotation)"
           :to="annotation.route"
+          :data-tab-title="annotation.title"
           :title="annotation.title"
           :aria-label="annotation.title"
         >

@@ -275,6 +275,7 @@
                   class="channelName"
                   dir="auto"
                   :to="`/channel/${superChat.author.id}`"
+                  :data-tab-title="superChat.author.name"
                 >
                   {{ superChat.author.name }}
                 </RouterLink>
@@ -345,6 +346,7 @@
                       class="channelName"
                       dir="auto"
                       :to="`/channel/${comment.author.id}`"
+                      :data-tab-title="comment.author.name"
                     >
                       {{ comment.author.name }}
                     </RouterLink>
@@ -393,6 +395,7 @@
                     }"
                     dir="auto"
                     :to="`/channel/${comment.author.id}`"
+                    :data-tab-title="comment.author.name"
                   >
                     {{ comment.author.name }}
                   </RouterLink>

@@ -487,7 +487,7 @@ export function openInternalPath({ path, query = undefined, doCreateNewWindow = 
       if (route.startsWith('/')) {
         route = route.substring(1)
       }
-      return window.ftElectron.tabs.create({
+      const creation = window.ftElectron.tabs.create({
         route,
         query,
         title,
@@ -497,6 +497,16 @@ export function openInternalPath({ path, query = undefined, doCreateNewWindow = 
         openerTabId: getTabNavigationService().getPresentedTabId(),
         preloadInBackground: !makeActive && !lazyLoad && path.startsWith('/watch/')
       })
+      if (lazyLoad && !makeActive && !title) {
+        creation
+          .then(async tab => {
+            if (!tab) return
+            const { resolveUnloadedTabTitle } = await import('./unloadedTabTitles')
+            await resolveUnloadedTabTitle(tab.id, path, query)
+          })
+          .catch(error => console.error('Failed to title an unloaded tab', error))
+      }
+      return creation
     } else if (doCreateNewWindow) {
       // Open in new window
       window.ftElectron.openInNewWindow(path, query, searchQueryText)
