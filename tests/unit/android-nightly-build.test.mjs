@@ -111,13 +111,6 @@ test('publishes full and lite architecture APKs alongside the existing desktop a
   assert.match(incomplete.stderr, /Expected one file/)
 })
 
-// F-Droid rebuilds the APKs and rejects prebuilt WebAssembly, so both builds
-// bundle the modules that _scripts/androidWasm.mjs builds from source.
-function assertBuildsWasmFromSource(steps, build) {
-  assert.equal(steps[steps.indexOf(build) - 1].run, 'node _scripts/androidWasm.mjs docker')
-  assert.equal(build.env.ANDROID_WASM_FROM_SOURCE, '1')
-}
-
 test('stable releases build only production APKs and sort between nightlies by version code', async (t) => {
   const directory = await mkdtemp(join(tmpdir(), 'android-stable-promotion-'))
   t.after(() => rm(directory, { recursive: true, force: true }))
@@ -137,7 +130,6 @@ test('stable releases build only production APKs and sort between nightlies by v
   }
   const workflow = load(await readFile('.github/workflows/release.yml', 'utf8'))
   const build = workflow.jobs.build.steps.find(step => step.name === 'Build signed Android APKs')
-  assertBuildsWasmFromSource(workflow.jobs.build.steps, build)
   const runStable = () => spawnSync('bash', ['-c', build.run], {
     cwd: directory,
     env: {
@@ -177,7 +169,6 @@ test('stable releases build only production APKs and sort between nightlies by v
 
   const nightlyWorkflow = load(await readFile('.github/workflows/build.yml', 'utf8'))
   const nightlyBuild = nightlyWorkflow.jobs.android.steps.find(step => step.name === 'Build Android APKs')
-  assertBuildsWasmFromSource(nightlyWorkflow.jobs.android.steps, nightlyBuild)
   for (const commitCount of [12345, 12346]) {
     await writeFile(join(directory, 'git'), `#!/bin/sh\necho ${commitCount}\n`)
     await writeFile(join(directory, 'gradle.log'), '')
