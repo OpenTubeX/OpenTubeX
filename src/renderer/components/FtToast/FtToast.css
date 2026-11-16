@@ -541,6 +541,28 @@
   border-radius: var(--shape-corner-small);
 }
 
+/* Sized and spaced like the fixed-width icon it replaces, which keeps its size
+   at every Font Size setting */
+:is(.toast-holder, .progress-toast-holder) .image.avatar {
+  --font-scale: 1;
+
+  inline-size: 1em;
+  block-size: 1em;
+  margin-inline: 0.125em;
+  font-size: 18px;
+  border-radius: 50%;
+}
+
+/* The fallback icon looks like the regular toast icon on the dark toast */
+:is(.toast-holder, .progress-toast-holder) .toastMessage .avatar.retryImagePlaceholder {
+  color: inherit;
+  opacity: 0.85;
+}
+
+.toastMessage .avatar.retryImagePlaceholder.ft-icon .ft-icon__glyph {
+  scale: 1.2;
+}
+
 :is(.toast-holder, .progress-toast-holder) .icon {
   flex-shrink: 0;
   font-size: 18px;

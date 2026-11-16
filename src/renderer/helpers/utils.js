@@ -228,9 +228,10 @@ export const ERROR_TOAST_ICON = ['fas', 'circle-exclamation']
  * @property {boolean} [verticalButtons] whether buttons should be stacked vertically
  * @property {boolean} [dismissible] whether Escape and swipe gestures can dismiss the toast
  * @property {AbortSignal} [abortSignal]
- * @property {string} [image] optional image URL (e.g. a video thumbnail) shown alongside the message
+ * @property {string | null} [image] optional image URL (e.g. a video thumbnail) shown alongside the message
+ * @property {boolean} [avatar] shows the image as a round avatar, with the icon as its fallback
  * @property {[string, string]} [icon] optional semantic icon (e.g. `['fas', 'trash']`) shown
- *   alongside the message, ignored when an image is given
+ *   alongside the message, ignored when an image is given unless it is an avatar
  * @property {boolean} [important] keeps the toast when only important notifications are allowed,
  *   for reminders the user set up. Errors, warnings, and toasts with buttons other than Undo are kept regardless
  */
@@ -244,6 +245,7 @@ export const ERROR_TOAST_ICON = ['fas', 'circle-exclamation']
  */
 export function showToast(message, time = null, action = null, abortSignal = null) {
   let image = null
+  let avatar = false
   let icon = null
   let buttons = []
   let buttonAction = null
@@ -255,7 +257,7 @@ export function showToast(message, time = null, action = null, abortSignal = nul
   // Allow calling with a single options object while staying backwards compatible
   // with the positional (message, time, action, abortSignal) signature
   if (message !== null && typeof message === 'object') {
-    ({ message, time = null, action = null, abortSignal = null, image = null, icon = null, buttons = [], buttonAction = null, verticalButtons = false, dismissible = true, dismissOnAction = true, important = false } = message)
+    ({ message, time = null, action = null, abortSignal = null, image = null, avatar = false, icon = null, buttons = [], buttonAction = null, verticalButtons = false, dismissible = true, dismissOnAction = true, important = false } = message)
   }
 
   // Sometimes caller just pass user setting based value in and it can be zero
@@ -270,6 +272,7 @@ export function showToast(message, time = null, action = null, abortSignal = nul
     action,
     abortSignal,
     image,
+    avatar,
     icon,
     buttons,
     buttonAction,

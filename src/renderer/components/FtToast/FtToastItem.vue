@@ -6,7 +6,7 @@
     <div
       class="toast"
       :class="{
-        hasImage: toast.image,
+        hasImage: toast.image && !toast.avatar,
         actionable: toast.action,
         indefinite: !Number.isFinite(toast.duration)
       }"
@@ -22,7 +22,9 @@
         <FtRetryImage
           v-if="toast.image"
           :src="toast.image"
+          :fallback-icon="toast.avatar ? toast.icon : null"
           class="image"
+          :class="{ avatar: toast.avatar }"
           alt=""
           draggable="false"
         />

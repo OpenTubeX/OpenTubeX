@@ -116,6 +116,7 @@ const { t } = useI18n()
  * @property {boolean} dismissible whether Escape and swipe gestures can dismiss the toast
  * @property {Function} dismiss closes the toast even when gestures are disabled
  * @property {string | null} image
+ * @property {boolean} avatar whether the image is a round channel avatar, with the icon as its fallback
  * @property {[string, string] | null} icon
  * @property {number} duration lifetime of the toast in milliseconds
  */
@@ -456,14 +457,14 @@ function stopProgressToastPointerTracking() {
 }
 
 /**
- * @param {CustomEvent<{ message: string | (({elapsedMs: number, remainingMs: number}) => string), time: number | null, action: Function | null, abortSignal: AbortSignal | null, image: string | null, icon: [string, string] | null, buttons: { label: string, action?: Function, primary?: boolean, icon?: [string, string] }[], buttonAction: 'open-sync-settings' | null, verticalButtons: boolean, dismissible: boolean, dismissOnAction?: boolean, important?: boolean }>} event
+ * @param {CustomEvent<{ message: string | (({elapsedMs: number, remainingMs: number}) => string), time: number | null, action: Function | null, abortSignal: AbortSignal | null, image: string | null, avatar?: boolean, icon: [string, string] | null, buttons: { label: string, action?: Function, primary?: boolean, icon?: [string, string] }[], buttonAction: 'open-sync-settings' | null, verticalButtons: boolean, dismissible: boolean, dismissOnAction?: boolean, important?: boolean }>} event
  */
 function open(event) {
   if (store.getters.getOnlyShowImportantToasts && !isImportantToast(event.detail)) {
     return
   }
 
-  let { message, time, action, abortSignal, image, icon, buttons, buttonAction, verticalButtons, dismissible, dismissOnAction } = event.detail
+  let { message, time, action, abortSignal, image, avatar, icon, buttons, buttonAction, verticalButtons, dismissible, dismissOnAction } = event.detail
   if (buttonAction === 'open-sync-settings') {
     buttons = [{
       label: t('Settings.Sync Settings.Sync Settings'),
@@ -493,6 +494,7 @@ function open(event) {
       }
     },
     image: image ?? null,
+    avatar: avatar ?? false,
     icon: icon ?? null,
     duration: time
   })
