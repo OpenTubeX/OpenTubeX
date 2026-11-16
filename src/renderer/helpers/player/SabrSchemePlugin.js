@@ -581,6 +581,10 @@ async function doRequest(
       }
       shouldReloadDueToBackoffLoop = true
     }
+    if ((shouldReloadDueToBackoffLoop || currentState.cumulativeRetries >= 100) && operationInputs.streamKind === 'text') {
+      // Stuck captions fail their segment instead of reloading the audio and video that still play
+      throw new Error('captions kept backing off')
+    }
     if (shouldReloadDueToBackoffLoop || currentState.cumulativeRetries >= 100) {
       // Fire fake reload event due to detecting retry loop
       currentState.sabrStreamState.playerReloadRequested = true

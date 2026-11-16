@@ -643,6 +643,23 @@ for (const backoffMs of [100, 10000]) {
   })
 }
 
+test('captions that keep backing off fail their segment without reloading playback', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 0 })
+  let reloads = 0
+  const { createSabrTransport } = load(async () => policyResponse(100), { Date })
+  const transport = createSabrTransport(sabrData, () => ({ ...context, captionFormatId: { itag: 387, lastModified: '0' } }))
+  t.after(() => transport.cleanup())
+  transport.onReloadOnce(() => reloads++)
+  const captions = 'sabr1:text?formatId=387-0-&targetDurationMs=5000&sq=1'
+  const rejected = assert.rejects(transport.request(captions, request(captions), 1).promise, { code: 1002 })
+  for (let index = 0; index < 6; index++) {
+    await flushRequests()
+    t.mock.timers.tick(100)
+  }
+  await rejected
+  assert.equal(reloads, 0)
+})
+
 test('resumed audio and video requests retain the playback cookie from a completed init segment', async t => {
   // Include an explicit zero and an unknown field, as in server cookies. The
   // opaque cookie must survive without decoding and re-encoding it.
