@@ -44,6 +44,7 @@
           :data="shelf.content"
           :use-channels-hidden-preference="false"
           :display="shelf.isCommunity ? 'list' : ''"
+          :youtube-style-shorts="shelf.isShorts && useCustomShortsPlayer"
           :render-all-items-lazily="index > 2"
         />
       </details>
@@ -64,6 +65,9 @@ const props = defineProps({
     default: () => []
   }
 })
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const useCustomShortsPlayer = computed(() => store.getters.getUseCustomShortsPlayer)
 
 /** @type {import('vue').ComputedRef<bool>} */
 const hideFeaturedChannels = computed(() => {

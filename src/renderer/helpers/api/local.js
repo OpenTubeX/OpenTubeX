@@ -2096,6 +2096,7 @@ export function parseChannelHomeTab(homeTab, channelId, channelName) {
 
   shelves.forEach(e => {
     e['isCommunity'] = e.content.at(0)?.type === 'community'
+    e['isShorts'] = e.content.length > 0 && e.content.every(item => item.isShort)
   })
   return shelves
 }
