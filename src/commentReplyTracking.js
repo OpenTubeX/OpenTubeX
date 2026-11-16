@@ -1,6 +1,6 @@
 // @ts-check
 
-/** Comments are watched for replies this long after they were posted or watched. */
+/** Comments are watched for replies this long after their last activity. */
 export const COMMENT_REPLY_TRACKING_MS = 30 * 24 * 60 * 60 * 1000
 
 /** Each check requests every watched thread, so only the newest are watched. */
@@ -22,6 +22,10 @@ const HANDLE_CHARACTERS = String.raw`\p{L}\p{M}\p{N}_\-·`
  * `channelId` and `handle` belong to its author, and replies from `accountId`,
  * the signed-in channel when it was watched, are not announced.
  *
+ * `postedAt` is when it was posted or last watched, and `activeAt` its last
+ * activity: being watched, a new reply or heart, or being opened. Watching
+ * ends 30 days after it. Comments watched before activity counted lack it.
+ *
  * `hearted` tells whether the video's creator hearted the watched comment,
  * which is announced for the account's own comments. Comments watched before
  * hearts were checked lack it until their first check.
@@ -37,6 +41,7 @@ const HANDLE_CHARACTERS = String.raw`\p{L}\p{M}\p{N}_\-·`
  *   handle: string | null,
  *   accountId?: string,
  *   postedAt: number,
+ *   activeAt?: number,
  *   replyCount: number,
  *   seen: string[],
  *   hearted?: boolean,
@@ -62,6 +67,7 @@ function isTrackedCommentThread(value) {
     (value.handle === null || typeof value.handle === 'string') &&
     (value.accountId === undefined || typeof value.accountId === 'string') &&
     Number.isFinite(value.postedAt) &&
+    (value.activeAt === undefined || Number.isFinite(value.activeAt)) &&
     Number.isInteger(value.replyCount) &&
     Array.isArray(value.seen) && value.seen.every(id => typeof id === 'string') &&
     (value.hearted === undefined || typeof value.hearted === 'boolean') &&
@@ -70,7 +76,15 @@ function isTrackedCommentThread(value) {
 }
 
 /**
- * Keeps the valid threads still watched, newest first.
+ * When a watched comment was last active, which its watching follows.
+ * @param {TrackedCommentThread} thread
+ */
+export function getLastActivity(thread) {
+  return thread.activeAt ?? thread.postedAt
+}
+
+/**
+ * Keeps the valid threads still watched, last active first.
  * @param {unknown} value
  * @param {number} [now]
  * @returns {TrackedCommentThread[]}
@@ -78,8 +92,8 @@ function isTrackedCommentThread(value) {
 export function normalizeTrackedCommentThreads(value, now = Date.now()) {
   return Array.isArray(value)
     ? value.filter(isTrackedCommentThread)
-        .filter(thread => now - thread.postedAt < COMMENT_REPLY_TRACKING_MS)
-        .sort((left, right) => right.postedAt - left.postedAt)
+        .filter(thread => now - getLastActivity(thread) < COMMENT_REPLY_TRACKING_MS)
+        .sort((left, right) => getLastActivity(right) - getLastActivity(left))
         .slice(0, COMMENT_REPLY_TRACKING_LIMIT)
     : []
 }
@@ -103,10 +117,10 @@ export function isSameWatchedComment(left, right) {
 }
 
 /**
- * Watches a comment for replies, for 30 days. Each author's comments in a
- * thread are watched together, from the earliest one, which every later reply
- * follows, or from their top-level comment, which covers the whole thread.
- * Watching another of them watches for 30 days from then.
+ * Watches a comment for replies, until 30 days pass without activity. Each
+ * author's comments in a thread are watched together, from the earliest one,
+ * which every later reply follows, or from their top-level comment, which
+ * covers the whole thread. Watching another of them counts as activity.
  * @param {TrackedCommentThread[]} threads
  * @param {{
  *   videoId: string,
@@ -139,7 +153,8 @@ export function trackComment(threads, comment, now = Date.now()) {
           : {}),
         ...(accountId && !existing.accountId ? { accountId } : {}),
         videoTitle: videoTitle || existing.videoTitle,
-        postedAt: now
+        postedAt: now,
+        activeAt: now
       }
     : {
         videoId,
@@ -149,6 +164,7 @@ export function trackComment(threads, comment, now = Date.now()) {
         handle,
         accountId,
         postedAt: now,
+        activeAt: now,
         replyCount: comment.replyCount ?? -1,
         seen: (comment.seen ?? []).slice(-SEEN_REPLY_LIMIT),
         hearted: comment.hearted,
@@ -156,6 +172,20 @@ export function trackComment(threads, comment, now = Date.now()) {
         videoTitle
       }
   return normalizeTrackedCommentThreads([tracked, ...others], now)
+}
+
+/**
+ * Counts opening a thread as activity of the comments watched in it.
+ * @param {TrackedCommentThread[]} threads
+ * @param {string} videoId
+ * @param {string} threadId
+ * @param {number} [now]
+ * @returns {TrackedCommentThread[] | null} null when none of them is watched
+ */
+export function markThreadOpened(threads, videoId, threadId, now = Date.now()) {
+  if (!threads.some(thread => thread.videoId === videoId && thread.threadId === threadId)) return null
+  return normalizeTrackedCommentThreads(threads.map(thread =>
+    thread.videoId === videoId && thread.threadId === threadId ? { ...thread, activeAt: now } : thread), now)
 }
 
 /**
@@ -174,7 +204,8 @@ export function untrackComment(threads, comment) {
  * @param {TrackedCommentThread} thread
  * @param {CommentReply[]} replies the thread's replies in order, oldest first
  * @param {string} [signedInId] the channel signed in now, which may differ from the one it was watched with
- * @returns {{ added: CommentReply[], seen: string[] }} the new replies, and the replies seen so far
+ * @returns {{ added: CommentReply[], seen: string[], active: boolean }} the new replies, the replies seen
+ *   so far, and whether any new reply counts as activity: one announced, or one of the account's that follows the comment
  */
 export function findNewReplies(thread, replies, signedInId = '') {
   const wholeThread = thread.commentId === thread.threadId
@@ -191,13 +222,13 @@ export function findNewReplies(thread, replies, signedInId = '') {
     : null
   const accountId = thread.accountId ?? thread.channelId
   const seen = new Set(thread.seen)
-  const added = replies.filter((reply, index) => index >= start &&
-    !seen.has(reply.id) &&
-    (accountId === '' || reply.authorId !== accountId) &&
-    (signedInId === '' || reply.authorId !== signedInId) &&
-    (wholeThread || mention?.test(reply.text)))
+  const isOwn = (/** @type {CommentReply} */ reply) => (accountId !== '' && reply.authorId === accountId) ||
+    (signedInId !== '' && reply.authorId === signedInId)
+  const fresh = replies.filter((reply, index) => index >= start && !seen.has(reply.id))
+  const added = fresh.filter(reply => !isOwn(reply) && (wholeThread || mention?.test(reply.text)))
   return {
     added,
+    active: added.length > 0 || fresh.some(isOwn),
     seen: [...new Set([...thread.seen, ...replies.map(reply => reply.id)])].slice(-SEEN_REPLY_LIMIT)
   }
 }
@@ -208,12 +239,14 @@ export function findNewReplies(thread, replies, signedInId = '') {
  * comment watched before hearts were checked, as it may be old.
  * @param {TrackedCommentThread} thread
  * @param {CommentHeart | null} heart null when the response lacks the comment
- * @returns {{ announce: boolean, hearted: boolean | undefined }} whether to announce it, and the state to save
+ * @returns {{ announce: boolean, active: boolean, hearted: boolean | undefined }} whether to announce it,
+ *   whether it is new and so counts as activity, also for others' comments, and the state to save
  */
 export function checkCommentHeart(thread, heart) {
-  if (!heart) return { announce: false, hearted: thread.hearted }
+  if (!heart) return { announce: false, active: false, hearted: thread.hearted }
   // Announced once, even if the heart is taken back and given again.
-  return { announce: thread.hearted === false && heart.hearted && isOwnWatchedComment(thread), hearted: !!thread.hearted || heart.hearted }
+  const active = thread.hearted === false && heart.hearted
+  return { announce: active && isOwnWatchedComment(thread), active, hearted: !!thread.hearted || heart.hearted }
 }
 
 /**

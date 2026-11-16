@@ -2299,7 +2299,7 @@ Tooltips:
     Add to YouTube Watch History: "Prehrávané videá sa pridávajú do vašej histórie pozerania na YouTube, aby sa z nich učili odporúčania YouTube. Keď je história na YouTube pozastavená, nič sa nepridáva."
     Rate Videos: "Zobrazuje pri videách tlačidlá Páči sa mi a Nepáči sa mi. Aby sa zobrazilo vaše hodnotenie, každé otvorené video sa vyhľadá na YouTube s vaším účtom, takže YouTube zistí, ktoré videá otvárate, aj keď sa nepridajú do histórie pozerania."
   General Settings:
-    Reply Notifications: "OpenTubeX počas 30 dní kontroluje, či na komentáre, ktoré sledujete, pribudli nové odpovede. Upozorní vás aj vtedy, keď autor dá srdiečko niektorému z vašich komentárov. Ľubovoľný komentár môžete sledovať pomocou tlačidla so zvončekom vedľa neho."
+    Reply Notifications: "OpenTubeX kontroluje, či na komentáre, ktoré sledujete, pribudli nové odpovede. Upozorní vás aj vtedy, keď autor dá srdiečko niektorému z vašich komentárov. Komentár zostáva sledovaný, kým neuplynie 30 dní bez nových odpovedí, srdiečok alebo jeho otvorenia. Ľubovoľný komentár môžete sledovať pomocou tlačidla so zvončekom vedľa neho."
     Built-in Streams: |
       Automatický režim prehráva väčšinu videí cez klienta visionOS od YouTube, ktorý sa spúšťa rýchlejšie a podporuje automatickú kvalitu. Živé prenosy a videá, ktoré nedokáže prehrať, používajú SABR.
       Iba SABR vždy používa webového klienta YouTube, ktorý sa spúšťa pomalšie a nemá automatickú kvalitu.

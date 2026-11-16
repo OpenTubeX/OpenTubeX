@@ -143,7 +143,7 @@ export async function trackAndroidCommentReplies(comment) {
   if (SubscriptionRefresh) await SubscriptionRefresh.trackCommentReplies({ comment })
 }
 
-/** @returns {Promise<unknown[]>} the threads Android watches, newest first */
+/** @returns {Promise<unknown[]>} the threads Android watches, last active first */
 export async function listAndroidCommentReplies() {
   if (!SubscriptionRefresh) return []
   const { threads } = await SubscriptionRefresh.listCommentReplies()
@@ -156,6 +156,14 @@ export async function listAndroidCommentReplies() {
  */
 export async function untrackAndroidCommentReplies(comment) {
   if (SubscriptionRefresh) await SubscriptionRefresh.untrackCommentReplies({ comment })
+}
+
+/**
+ * Has Android count opening a thread as activity of the comments watched in it.
+ * @param {{ videoId: string, threadId: string }} thread
+ */
+export async function touchAndroidCommentReplies(thread) {
+  if (SubscriptionRefresh) await SubscriptionRefresh.touchCommentReplies({ thread })
 }
 
 export async function isAndroidSubscriptionRefreshActive() {

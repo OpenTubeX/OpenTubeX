@@ -10,6 +10,7 @@ import {
   getCommentNotificationTarget,
   getWatchedCommentTarget,
   isOwnWatchedComment,
+  markThreadOpened,
   normalizeTrackedCommentThreads,
   trackComment,
   untrackComment
@@ -73,6 +74,28 @@ test('watches only recent comments, up to the limit', () => {
   assert.ok(!kept.some(thread => thread.threadId === 'old'))
 })
 
+test('new replies, the account\'s replies, and opening the thread keep a comment watched', () => {
+  const [thread] = trackComment([], { ...own, accountId: 'UCme', threadId: 'thread1', commentId: 'thread1.mine' }, 1000)
+  const mine = reply('mine', 'UCme')
+  assert.equal(findNewReplies(thread, [mine, reply('unrelated', 'UCother', 'Not for you')]).active, false)
+  assert.equal(findNewReplies(thread, [mine, reply('mention', 'UCother', 'Thanks @Me')]).active, true)
+  // Posted elsewhere, as on YouTube's website, so it is not announced.
+  const elsewhere = findNewReplies(thread, [mine, reply('later', 'UCme', 'More')])
+  assert.deepEqual(elsewhere, { added: [], active: true, seen: ['thread1.mine', 'thread1.later'] })
+  assert.equal(findNewReplies({ ...thread, seen: elsewhere.seen }, [mine, reply('later', 'UCme', 'More')]).active, false)
+
+  // Watching ends 30 days after the last activity, or after watching for entries saved before activity counted.
+  const now = 1000 + COMMENT_REPLY_TRACKING_MS
+  assert.equal(normalizeTrackedCommentThreads([{ ...thread, activeAt: now - 1 }], now).length, 1)
+  const { activeAt: _, ...older } = thread
+  assert.equal(normalizeTrackedCommentThreads([older], now).length, 0)
+
+  const [opened] = markThreadOpened([older], 'video1', 'thread1', now - 1)
+  assert.equal(opened.activeAt, now - 1)
+  assert.equal(opened.postedAt, 1000)
+  assert.equal(markThreadOpened([older], 'video1', 'thread2', now - 1), null)
+})
+
 test('reply targets accept only reply IDs of a video, and heart targets comment IDs too', () => {
   assert.deepEqual(getCommentNotificationTarget('comment-reply', 'video1', 'thread1.a'), {
     kind: 'comment-reply', path: '/watch/video1', query: { commentId: 'thread1.a' }
@@ -114,16 +137,17 @@ test('reads whether a linked comment or reply is hearted, and by whom, from the 
 test('announces a heart on an own comment once, but not one it had before hearts were checked', () => {
   const [posted] = trackComment([], { ...own, accountId: 'UCme', threadId: 'thread1', commentId: 'thread1', hearted: false }, 1000)
   const hearted = { hearted: true, author: '@Creator' }
-  assert.deepEqual(checkCommentHeart(posted, { hearted: false, author: '' }), { announce: false, hearted: false })
-  assert.deepEqual(checkCommentHeart(posted, hearted), { announce: true, hearted: true })
+  assert.deepEqual(checkCommentHeart(posted, { hearted: false, author: '' }), { announce: false, active: false, hearted: false })
+  assert.deepEqual(checkCommentHeart(posted, hearted), { announce: true, active: true, hearted: true })
   // Missing from the response, as when it was deleted, it keeps its state.
-  assert.deepEqual(checkCommentHeart(posted, null), { announce: false, hearted: false })
-  assert.deepEqual(checkCommentHeart({ ...posted, hearted: true }, { hearted: false, author: '' }), { announce: false, hearted: true })
+  assert.deepEqual(checkCommentHeart(posted, null), { announce: false, active: false, hearted: false })
+  assert.deepEqual(checkCommentHeart({ ...posted, hearted: true }, { hearted: false, author: '' }), { announce: false, active: false, hearted: true })
 
   const { hearted: _, ...older } = posted
-  assert.deepEqual(checkCommentHeart(older, hearted), { announce: false, hearted: true })
+  assert.deepEqual(checkCommentHeart(older, hearted), { announce: false, active: false, hearted: true })
+  // Others' comments are not announced, but a new heart keeps them watched.
   const others = { ...posted, channelId: 'UCother', accountId: 'UCme' }
-  assert.equal(checkCommentHeart(others, hearted).announce, false)
+  assert.deepEqual(checkCommentHeart(others, hearted), { announce: false, active: true, hearted: true })
 })
 
 test('watched comments open with the account\'s comment highlighted', () => {

@@ -2346,7 +2346,7 @@ Tooltips:
     Add to YouTube Watch History: "Videoclipurile pe care le redați sunt adăugate în istoricul vizionărilor YouTube, astfel încât recomandările YouTube să învețe din ele. Nu se adaugă nimic cât timp istoricul este întrerupt pe YouTube."
     Rate Videos: "Afișează butoanele de apreciere și neapreciere pe videoclipuri. Pentru a-ți afișa evaluarea, fiecare videoclip pe care îl deschizi este căutat pe YouTube cu contul tău, așa că YouTube află ce videoclipuri deschizi, chiar și atunci când nu sunt adăugate în istoricul de vizionare."
   General Settings:
-    Reply Notifications: "OpenTubeX verifică timp de 30 de zile dacă există răspunsuri noi la comentariile pe care le urmărești. Te anunță și când un creator dă o inimă unuia dintre comentariile tale. Urmărește orice comentariu cu butonul clopoțel de lângă el."
+    Reply Notifications: "OpenTubeX verifică dacă există răspunsuri noi la comentariile pe care le urmărești. Te anunță și când un creator dă o inimă unuia dintre comentariile tale. Un comentariu rămâne urmărit până când trec 30 de zile fără răspunsuri noi, inimi sau fără să îl deschizi. Urmărește orice comentariu cu butonul clopoțel de lângă el."
     Built-in Streams: |
       Modul automat redă majoritatea videoclipurilor prin clientul visionOS al YouTube, care pornește mai repede și acceptă calitatea automată. Transmisiunile live și videoclipurile pe care nu le poate reda folosesc SABR.
       Doar SABR folosește întotdeauna clientul web al YouTube, care pornește mai încet și nu are calitate automată.

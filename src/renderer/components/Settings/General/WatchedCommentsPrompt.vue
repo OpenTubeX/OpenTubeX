@@ -98,7 +98,7 @@ import FtPrompt from '../../FtPrompt/FtPrompt.vue'
 import FtRetryImage from '../../FtRetryImage.vue'
 
 import store from '../../../store/index'
-import { getWatchedComments, unwatchComment, watchedComments as threads } from '../../../helpers/commentReplyNotifications'
+import { getWatchedComments, unwatchComment, watchedComments } from '../../../helpers/commentReplyNotifications'
 import { getRelativeTimeFromDate, getVideoThumbnailUrl, openInternalPath } from '../../../helpers/utils'
 import { getWatchedCommentTarget, isOwnWatchedComment } from '../../../../commentReplyTracking.js'
 
@@ -108,6 +108,8 @@ const { locale, t } = useI18n()
 const loaded = ref(false)
 const now = Date.now()
 
+// Listed by when they were watched, which each shows, rather than by activity.
+const threads = computed(() => watchedComments.value.toSorted((left, right) => right.postedAt - left.postedAt))
 const showThumbnails = computed(() => store.getters.getThumbnailPreference !== 'hidden')
 const blurThumbnails = computed(() => store.getters.getBlurThumbnails)
 

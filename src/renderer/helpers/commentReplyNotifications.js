@@ -9,6 +9,7 @@ import { createLinkedCommentsContinuation } from './api/youtube-account-parsers'
 import {
   configureAndroidCommentReplies,
   listAndroidCommentReplies,
+  touchAndroidCommentReplies,
   trackAndroidCommentReplies,
   untrackAndroidCommentReplies
 } from './androidSubscriptionRefresh'
@@ -27,6 +28,7 @@ import {
   getWatchedCommentId,
   isOwnWatchedComment,
   isSameWatchedComment,
+  markThreadOpened,
   normalizeTrackedCommentThreads,
   trackComment,
   untrackComment
@@ -153,6 +155,23 @@ export async function unwatchComment({ videoId, threadId, channelId }) {
 }
 
 /**
+ * Counts opening a thread, as from a notification or the list of watched
+ * comments, as activity of the comments watched in it.
+ * @param {string} videoId
+ * @param {string} commentId a comment in the thread, `threadId.replyId` for a reply
+ */
+export async function markWatchedThreadOpened(videoId, commentId) {
+  const threadId = commentId.split('.')[0]
+  if (isAndroid) {
+    await touchAndroidCommentReplies({ videoId, threadId })
+    await getWatchedComments()
+  } else {
+    const threads = markThreadOpened(loadThreads(), videoId, threadId)
+    if (threads) saveThreads(threads)
+  }
+}
+
+/**
  * The watched comment that covers a loaded comment, if any.
  * @param {string} videoId
  * @param {{ id: string, authorId: string }} comment
@@ -164,7 +183,7 @@ export function findWatchedComment(videoId, { id, authorId }) {
     (id !== key.threadId || thread.commentId === key.threadId)) ?? null
 }
 
-/** @returns {Promise<TrackedCommentThread[]>} the watched comments, newest first */
+/** @returns {Promise<TrackedCommentThread[]>} the watched comments, last active first */
 export async function getWatchedComments() {
   const threads = isAndroid ? normalizeTrackedCommentThreads(await listAndroidCommentReplies()) : loadThreads()
   watchedComments.value = threads
@@ -335,7 +354,7 @@ async function checkThreads() {
     // Stopped watching while it loaded
     const current = loadThreads().find(item => isSameWatchedComment(item, key))
     if (!current) continue
-    const { added, seen } = result ? findNewReplies(current, result.replies, signedInId) : { added: [], seen: current.seen }
+    const { added, seen, active } = result ? findNewReplies(current, result.replies, signedInId) : { added: [], seen: current.seen, active: false }
     // The heart belongs to the comment it loaded, which watching the top-level comment meanwhile changes.
     const heart = checkCommentHeart(current, getWatchedCommentId(current) === getWatchedCommentId(thread) ? result?.heart ?? null : null)
     // Announced before they count as seen, so closing the app in between
@@ -359,8 +378,17 @@ async function checkThreads() {
     const threads = loadThreads()
     const index = threads.findIndex(item => isSameWatchedComment(item, key))
     if (index !== -1) {
-      if (result) threads[index] = { ...threads[index], replyCount: result.replyCount, seen, hearted: heart.hearted }
-      else threads.splice(index, 1)
+      if (result) {
+        threads[index] = {
+          ...threads[index],
+          replyCount: result.replyCount,
+          seen,
+          hearted: heart.hearted,
+          ...(active || heart.active ? { activeAt: Date.now() } : {})
+        }
+      } else {
+        threads.splice(index, 1)
+      }
       saveThreads(threads)
     }
     if (disabled) return

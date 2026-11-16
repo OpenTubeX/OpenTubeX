@@ -1544,7 +1544,7 @@ Tooltips:
     Add to YouTube Watch History: "Odtwarzane filmy są dodawane do twojej historii oglądania na YouTube, więc rekomendacje YouTube uczą się na ich podstawie. Gdy historia jest wstrzymana na YouTube, nic nie jest dodawane."
     Rate Videos: "Pokazuje przy filmach przyciski Podoba mi się i Nie podoba mi się. Aby pokazać Twoją ocenę, każdy otwarty film jest sprawdzany w YouTube przy użyciu Twojego konta, więc YouTube wie, które filmy otwierasz, nawet jeśli nie są dodawane do historii oglądania."
   General Settings:
-    Reply Notifications: "OpenTubeX przez 30 dni sprawdza, czy pod obserwowanymi komentarzami pojawiły się nowe odpowiedzi. Powiadamia też, gdy twórca da serduszko jednemu z Twoich komentarzy. Obserwuj dowolny komentarz za pomocą przycisku z dzwonkiem obok niego."
+    Reply Notifications: "OpenTubeX sprawdza, czy pod obserwowanymi komentarzami pojawiły się nowe odpowiedzi. Powiadamia też, gdy twórca da serduszko jednemu z Twoich komentarzy. Komentarz pozostaje obserwowany, dopóki nie minie 30 dni bez nowych odpowiedzi, serduszek ani otwarcia go przez Ciebie. Obserwuj dowolny komentarz za pomocą przycisku z dzwonkiem obok niego."
     Built-in Streams: |
       Tryb automatyczny odtwarza większość filmów przez klienta visionOS YouTube, który uruchamia się szybciej i obsługuje automatyczną jakość. Transmisje na żywo i filmy, których nie może odtworzyć, używają SABR.
       Tylko SABR zawsze używa klienta internetowego YouTube, który uruchamia się wolniej i nie ma automatycznej jakości.

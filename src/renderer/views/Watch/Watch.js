@@ -59,6 +59,7 @@ import { hasReachedWatchedThreshold, isHistoryEntryWatched } from '../../helpers
 import { normalizeRemoveWatchedVideosThreshold } from '../../helpers/playlist-preferences-sync'
 import { liveReminder, supportsLiveReminders } from '../../helpers/liveReminders'
 import { withThumbnail } from '../../helpers/notificationHistory'
+import { markWatchedThreadOpened } from '../../helpers/commentReplyNotifications'
 import { getYouTubeChannelKey, isSignedInToYouTube } from '../../helpers/youtube-account-state'
 import { addToYouTubeWatchHistory } from '../../helpers/api/youtube-account'
 import { DOWNLOADED_MEDIA_MIME_TYPES } from '../../../constants'
@@ -1493,6 +1494,17 @@ export default defineComponent({
         this.openedLinkedCommentId = commentId
         if (this.shortsPhonePanelsEnabled) this.openShortsPhonePanel('comments')
         else this.openPhonePanel('comments')
+      },
+      immediate: true
+    },
+    // Opening a link to a comment, as from a notification or the list of
+    // watched comments, keeps the comments watched in its thread watched longer.
+    'tabRoute.query.commentId': {
+      handler(commentId) {
+        const videoId = this.tabRoute.params.id
+        if (typeof commentId !== 'string' || typeof videoId !== 'string') return
+        markWatchedThreadOpened(videoId, commentId)
+          .catch(error => console.error('Failed to count opening a watched comment', error))
       },
       immediate: true
     },

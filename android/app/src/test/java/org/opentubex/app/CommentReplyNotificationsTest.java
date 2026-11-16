@@ -1,7 +1,9 @@
 package org.opentubex.app;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -140,6 +142,31 @@ public class CommentReplyNotificationsTest {
             new JSONObject(comment.toString()).put("seen", new JSONArray().put("thread1.a").put("thread1.b")),
             5000 + CommentReplyNotifications.TRACKING_MILLIS).getJSONObject(0);
         assertEquals("[\"thread1.a\",\"thread1.b\"]", again.getJSONArray("seen").toString());
+    }
+
+    @Test
+    public void keepsWatchingAfterRepliesTheAccountsRepliesAndOpeningTheThread() throws Exception {
+        JSONObject comment = new JSONObject().put("videoId", "video1").put("threadId", "thread1").put("commentId", "thread1.mine")
+            .put("channelId", "UCme").put("handle", "@Me").put("accountId", "UCme").put("token", "token%3D");
+        JSONObject thread = CommentReplyNotifications.trackComment(new JSONArray(), comment, 1000).getJSONObject(0);
+        JSONObject mine = reply("mine", "UCme", "My reply");
+        assertFalse(CommentReplyNotifications.findNewReplies(thread, new JSONArray().put(mine)
+            .put(reply("unrelated", "UCother", "Not for you"))).getBoolean("active"));
+        assertTrue(CommentReplyNotifications.findNewReplies(thread, new JSONArray().put(mine)
+            .put(reply("mention", "UCother", "Thanks @Me"))).getBoolean("active"));
+        // Posted elsewhere, as on YouTube's website, so it is not announced.
+        JSONObject elsewhere = CommentReplyNotifications.findNewReplies(thread, new JSONArray().put(mine).put(reply("later", "UCme", "More")));
+        assertTrue(elsewhere.getBoolean("active"));
+        assertEquals(0, elsewhere.getJSONArray("added").length());
+
+        // Watching ends 30 days after the last activity, or after watching for entries saved before activity counted.
+        long now = 1000 + CommentReplyNotifications.TRACKING_MILLIS;
+        thread.remove("activeAt");
+        assertEquals(0, CommentReplyNotifications.normalize(new JSONArray().put(new JSONObject(thread.toString())), now).size());
+        JSONArray opened = CommentReplyNotifications.markThreadOpened(new JSONArray().put(thread), "video1", "thread1", now - 1);
+        assertEquals(1, CommentReplyNotifications.normalize(opened, now).size());
+        assertEquals(1000, opened.getJSONObject(0).getLong("postedAt"));
+        assertNull(CommentReplyNotifications.markThreadOpened(new JSONArray().put(thread), "video1", "thread2", now - 1));
     }
 
     @Test

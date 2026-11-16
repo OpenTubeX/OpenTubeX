@@ -295,6 +295,25 @@ public class SubscriptionRefreshPlugin extends Plugin {
     }
 
     @PluginMethod
+    public void touchCommentReplies(PluginCall call) {
+        JSObject thread = call.getObject("thread");
+        if (thread == null) {
+            call.reject("A thread is required");
+            return;
+        }
+        Context context = getContext();
+        // After the tracking writes queued before it, so it counts for the comments they watch.
+        UPLOADS.execute(() -> {
+            try {
+                CommentReplyNotifications.touch(context, thread.optString("videoId"), thread.optString("threadId"));
+                call.resolve();
+            } catch (Exception error) {
+                call.reject("Unable to count opening the watched comments", error);
+            }
+        });
+    }
+
+    @PluginMethod
     public void observeTwitchLive(PluginCall call) {
         JSArray streams = call.getArray("streams");
         JSArray channelIds = call.getArray("channelIds");

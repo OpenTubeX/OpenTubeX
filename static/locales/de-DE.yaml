@@ -3053,7 +3053,7 @@ Tooltips:
     Add to YouTube Watch History: "Videos, die du abspielst, werden zu deinem YouTube-Verlauf hinzugefügt, damit die Empfehlungen von YouTube daraus lernen. Solange der Verlauf auf YouTube pausiert ist, wird nichts hinzugefügt."
     Rate Videos: "Zeigt bei Videos die Schaltflächen „Mag ich“ und „Mag ich nicht“. Um deine Bewertung anzuzeigen, wird jedes Video, das du öffnest, mit deinem Konto bei YouTube abgefragt. So erfährt YouTube, welche Videos du öffnest, auch wenn sie nicht zu deinem Verlauf hinzugefügt werden."
   General Settings:
-    Reply Notifications: "OpenTubeX prüft beobachtete Kommentare 30 Tage lang auf neue Antworten und meldet, wenn ein Kanal einem deiner Kommentare ein Herz gibt. Beobachte einen Kommentar mit der Glocke daneben."
+    Reply Notifications: "OpenTubeX prüft beobachtete Kommentare auf neue Antworten und meldet, wenn ein Kanal einem deiner Kommentare ein Herz gibt. Ein Kommentar bleibt beobachtet, bis er 30 Tage lang keine neuen Antworten oder Herzen bekommt und du ihn nicht öffnest. Beobachte einen Kommentar mit der Glocke daneben."
     Preferred Video Codec: |
       Auto bevorzugt Codecs, die dein Gerät per Hardware decodieren kann.
       AV1: die beste Qualität bei geringstem Datenverbrauch, aber nicht jedes Video bietet ihn an. Ohne Hardware-Decodierung kann er den Akku belasten oder Bilder auslassen.
