@@ -60,6 +60,26 @@ public class AndroidMediaSessionLifecycleTest {
         }
     }
 
+    @Test public void pictureInPictureControlsFollowPlaybackState() {
+        // System UI finds no media session for apps in a work profile, so the
+        // Picture-in-Picture menu shows only these app actions there.
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        String actions = ",\"actions\":[\"play\",\"pause\",\"seekbackward\",\"seekforward\"]}";
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            scenario.onActivity(activity -> activity.getBridge().getWebView().loadUrl("about:blank"));
+            sendState(context, "{\"title\":\"PiP controls\",\"playbackState\":\"playing\"" + actions);
+            awaitPictureInPictureActions(context, R.string.media_rewind, R.string.media_pause, R.string.media_fast_forward);
+            sendState(context, "{\"title\":\"PiP controls\",\"playbackState\":\"paused\"" + actions);
+            awaitPictureInPictureActions(context, R.string.media_rewind, R.string.media_play, R.string.media_fast_forward);
+            context.startService(new Intent(context, AndroidMediaSessionService.class)
+                .setAction(AndroidMediaSessionService.ACTION_UPDATE)
+                .putExtra(AndroidMediaSessionService.EXTRA_STATE, "{\"playbackState\":\"none\"}"));
+            awaitPictureInPictureActions(context);
+        } finally {
+            context.stopService(new Intent(context, AndroidMediaSessionService.class));
+        }
+    }
+
     @Test public void finalPositionUpdateAfterClearDoesNotCrashTheProcess() {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
@@ -120,6 +140,28 @@ public class AndroidMediaSessionLifecycleTest {
             SystemClock.sleep(1500);
             assertFalse("activity teardown removes media controls", hasForegroundNotification(context));
         }
+    }
+
+    private static void sendState(Context context, String state) {
+        ContextCompat.startForegroundService(context, new Intent(context, AndroidMediaSessionService.class)
+            .setAction(AndroidMediaSessionService.ACTION_UPDATE)
+            .putExtra(AndroidMediaSessionService.EXTRA_STATE, state));
+    }
+
+    private static void awaitPictureInPictureActions(Context context, int... labels) {
+        java.util.List<String> expected = Arrays.stream(labels).mapToObj(context::getString)
+            .collect(java.util.stream.Collectors.toList());
+        java.util.List<String> actual = java.util.Collections.emptyList();
+        long deadline = SystemClock.uptimeMillis() + 3000;
+        while (SystemClock.uptimeMillis() < deadline) {
+            java.util.List<String> titles = new java.util.ArrayList<>();
+            InstrumentationRegistry.getInstrumentation().runOnMainSync(() ->
+                PictureInPictureActions.get().forEach(action -> titles.add(action.getTitle().toString())));
+            actual = titles;
+            if (actual.equals(expected)) return;
+            SystemClock.sleep(20);
+        }
+        assertEquals("Picture-in-Picture controls", expected, actual);
     }
 
     private static boolean hasForegroundNotification(Context context) {
