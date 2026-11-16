@@ -247,6 +247,8 @@
 
 .chartPoint:hover,
 .chartPoint:focus-visible {
+  /* Each point is its own stacking context, so raise the active one to keep its tooltip above later points */
+  z-index: 1;
   background-color: var(--primary-color);
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary-color) 22%, transparent);
 }
