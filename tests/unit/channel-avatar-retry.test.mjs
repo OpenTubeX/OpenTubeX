@@ -4,7 +4,13 @@ import test from 'node:test'
 import { runInNewContext } from 'node:vm'
 import * as Vue from 'vue'
 import { compileScript, parse } from 'vue/compiler-sfc'
-import { getVideoThumbnailSource, getVideoThumbnailFallbackUrl } from '../../src/renderer/helpers/videoThumbnail.js'
+import {
+  getVideoThumbnailSource,
+  getVideoThumbnailFallbackUrl,
+  getVideoThumbnailSrcset,
+  isMissingThumbnailPlaceholder,
+  thumbnailSizesKey
+} from '../../src/renderer/helpers/videoThumbnail.js'
 import { getCustomIconImageSource } from '../../src/renderer/helpers/customIcons.js'
 
 async function compileComponent(path, bindings = {}) {
@@ -14,10 +20,10 @@ async function compileComponent(path, bindings = {}) {
     .replace(/^import .* from .*\n/gm, '')
     .replace("import('../helpers/api/capacitor-http')", 'loadNativeHttp()')
     .replace('export default', 'const component =')
-  return runInNewContext(`${source}; component`, { Vue, process: { env: { IS_CAPACITOR: true } }, URL, Date, Event, getVideoThumbnailSource, getVideoThumbnailFallbackUrl, rememberMissingThumbnail: () => {}, skipMissingThumbnails: src => src, ...bindings })
+  return runInNewContext(`${source}; component`, { Vue, process: { env: { IS_CAPACITOR: true } }, URL, Date, Event, getVideoThumbnailSource, getVideoThumbnailFallbackUrl, getVideoThumbnailSrcset, isMissingThumbnailPlaceholder, thumbnailSizesKey, rememberMissingThumbnail: () => {}, skipMissingThumbnails: src => src, ...bindings })
 }
 
-async function mountAvatar(t, nativeResult, componentPath = 'FtChannelAvatar/FtChannelAvatar.vue', cachedSources = new Map(), attrs = {}, { isCapacitor = true } = {}) {
+async function mountAvatar(t, nativeResult, componentPath = 'FtChannelAvatar/FtChannelAvatar.vue', cachedSources = new Map(), attrs = {}, { isCapacitor = true, pickCandidate = srcset => srcset.split(', ')[0].split(' ')[0] } = {}) {
   const requests = []
   const instances = []
   const authorizations = []
@@ -78,8 +84,11 @@ async function mountAvatar(t, nativeResult, componentPath = 'FtChannelAvatar/FtC
     patchProp: (node, key, previous, value) => {
       node.props[key] = value
       if (key === 'loading') node.loading = value
+      if (key === 'srcset') node.srcset = value ?? ''
       if (node.tag === 'img' && key === 'src') {
-        const size = cachedSources.get(value)
+        // Natural sizes of srcset candidates are scaled by their density.
+        node.currentSrc = node.srcset ? pickCandidate(node.srcset) : value
+        const size = cachedSources.get(node.currentSrc)
         node.complete = !!size
         node.naturalWidth = size?.[0] ?? 0
         node.naturalHeight = size?.[1] ?? 0
@@ -152,6 +161,50 @@ test('cached missing-resolution thumbnails still fall back and reveal an already
   assert.equal(f.loads.length, 1)
   assert.equal(f.loads[0].type, 'load')
   assert.ok(Vue.toRaw(f.loads[0].currentTarget) === f.find('img'), 'cached load events retain the image for consumers')
+})
+
+test('a missing full-resolution srcset candidate falls back to the next plain resolution', async t => {
+  const src = 'https://i.ytimg.com/vi/srcset/maxresdefault.jpg'
+  const fallback = getVideoThumbnailFallbackUrl(src)
+  // A 120x90 placeholder chosen as the 1280w candidate of a 320px slot.
+  const f = await mountAvatar(t, null, 'FtRetryImage.vue', new Map([[src, [30, 23]], [fallback, [640, 480]]]), { sizes: '320px' }, {
+    pickCandidate: srcset => srcset.split(', ')[1].split(' ')[0]
+  })
+  f.thumbnail.value = src
+  await Vue.nextTick()
+  const image = f.find('img')
+  assert.equal(image.props.src, fallback)
+  assert.equal(image.props.srcset, undefined, 'the 4:3 fallbacks are no srcset candidates')
+  assert.equal(f.loads.length, 1)
+})
+
+test('a missing full-resolution candidate chosen after a resize still falls back', async t => {
+  const src = 'https://i.ytimg.com/vi/srcset/maxresdefault.jpg'
+  const medium = 'https://i.ytimg.com/vi/srcset/mqdefault.jpg'
+  const f = await mountAvatar(t, null, 'FtRetryImage.vue', new Map([[medium, [320, 180]]]), { sizes: '320px' })
+  f.thumbnail.value = src
+  await Vue.nextTick()
+  const image = f.find('img')
+  assert.equal(f.loads.length, 1)
+  // A larger slot or UI Scale picks the 1280w candidate, which is YouTube's 120x90 placeholder.
+  Object.assign(image, { currentSrc: src, naturalWidth: 30, naturalHeight: 23 })
+  image.props.onLoad({ target: image })
+  await Vue.nextTick()
+  assert.equal(image.props.src, getVideoThumbnailFallbackUrl(src))
+  assert.equal(image.props.srcset, undefined)
+})
+
+test('small slots keep the medium-resolution srcset candidate', async t => {
+  const src = 'https://invidious.test/vi/srcset/maxresdefault.jpg?host=i.ytimg.com'
+  const medium = 'https://invidious.test/vi/srcset/mqdefault.jpg?host=i.ytimg.com'
+  const f = await mountAvatar(t, null, 'FtRetryImage.vue', new Map([[medium, [35, 20]]]), { sizes: '35px' })
+  f.thumbnail.value = src
+  await Vue.nextTick()
+  const image = f.find('img')
+  assert.equal(image.props.srcset, `${medium} 320w, ${src} 1280w`)
+  assert.equal(image.props.sizes, '35px')
+  assert.equal(image.props.src, src)
+  assert.equal(f.loads.length, 1)
 })
 
 test('undecodable embedded images keep their placeholder without an invalid HTTP retry', async t => {

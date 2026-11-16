@@ -50,6 +50,7 @@
               <FtRetryImage
                 v-if="thumbnailSource(version)"
                 :src="thumbnailSource(version)"
+                sizes="280px"
                 :alt="versionLabel(index)"
               />
             </div>

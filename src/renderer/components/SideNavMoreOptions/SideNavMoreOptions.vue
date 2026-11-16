@@ -105,6 +105,7 @@
                       width="32"
                       loading="lazy"
                       :src="item.thumbnail"
+                      sizes="32px"
                     />
                     <FtIcon
                       v-else

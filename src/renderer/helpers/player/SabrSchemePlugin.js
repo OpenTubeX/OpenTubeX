@@ -127,6 +127,8 @@ const MAX_REPORTED_CUEPOINTS = 8
 /** More than a live buffer holds, even with one-second segments */
 const MAX_DELIVERED_LIVE_SEGMENTS = 512
 const LIVE_START_TOLERANCE_SECONDS = 0.1
+/** Audio, video and captions; SABR sends no captions without both of the others */
+const ENABLED_TRACK_TYPES_WITH_CAPTIONS = 7
 
 /**
  * @param {shaka.media.SegmentReference} reference
@@ -579,6 +581,21 @@ async function doRequest(
       }
       shouldReloadDueToBackoffLoop = true
     }
+    if ((shouldReloadDueToBackoffLoop || currentState.cumulativeRetries >= 100) && operationInputs.streamKind === 'text') {
+      // Stuck captions skip their segment. A reload or a failed text request
+      // would stop the audio and video that still play.
+      warnFailure('captions kept backing off, skipping the segment')
+      /** @type {shaka.extern.Response} */
+      return {
+        uri: operationInputs.uri,
+        originalUri: operationInputs.uri,
+        data: new Uint8Array(0),
+        status: 200,
+        headers: {},
+        fromCache: false,
+        originalRequest: operationInputs.request,
+      }
+    }
     if (shouldReloadDueToBackoffLoop || currentState.cumulativeRetries >= 100) {
       // Fire fake reload event due to detecting retry loop
       currentState.sabrStreamState.playerReloadRequested = true
@@ -898,7 +915,8 @@ async function doRequest(
     if (!operationInputs.isInit) {
       currentState.sabrStreamState.deliveredMediaFor.add(operationInputs.streamKind)
     }
-    if (operationInputs.targetDurationMs) {
+    // Caption segments can start apart from the media segments with their sequence number
+    if (operationInputs.targetDurationMs && operationInputs.streamKind !== 'text') {
       const { deliveredLiveStartsMs } = currentState.sabrStreamState
       // Refresh the order, which decides what to forget first
       deliveredLiveStartsMs.delete(operationInputs.sequenceNumber)
@@ -1071,9 +1089,11 @@ export function setupSabrScheme(sabrData, getPlayer, getManifest, playerWidth, p
 
     const streamIsAudio = url.pathname === 'audio'
     const streamIsVideo = url.pathname === 'video'
+    const streamIsText = url.pathname === 'text'
 
     let audioFormatId
     let videoFormatId
+    let captionFormatId
 
     if (streamIsAudio) {
       audioFormatId = parseSabrFormatId(formatIdString)
@@ -1100,21 +1120,31 @@ export function setupSabrScheme(sabrData, getPlayer, getManifest, playerWidth, p
 
         audioFormatId = parseSabrFormatId(probableAudioFormat.originalAudioId)
       }
+    } else if (streamIsText) {
+      captionFormatId = parseSabrFormatId(formatIdString)
+
+      const variant = activeVariant ?? variantTracks[0]
+      audioFormatId = parseSabrFormatId(variant.originalAudioId)
+      videoFormatId = parseSabrFormatId(isAudioOnly ? url.searchParams.get('videoFormatId') : variant.originalVideoId)
     }
 
     /** @type {import('googlevideo/protos').BufferedRange[]} */
     const bufferedRanges = []
 
-    if (!isInit && activeVariant) {
+    if (streamIsText) {
+      // SABR only sends captions together with audio and video, so report both as buffered
+      bufferedRanges.push(createFullBufferRange(audioFormatId), createFullBufferRange(videoFormatId))
+    } else if (!isInit && activeVariant) {
       /** @__NOINLINE__ */ fillBufferedRanges(player, getManifest(), isAudioOnly, streamIsVideo, streamIsAudio, bufferedRanges, activeVariant, transport.deliveredLiveStartsMs)
     }
 
     const drcEnabled = url.searchParams.has('drc') || !!(activeVariant && activeVariant.audioRoles.includes('drc'))
-    const enableVoiceBoost = url.searchParams.has('vb') || !!(activeVariant && activeVariant.audioRoles.includes('vb'))
+    const enableVoiceBoost = url.searchParams.has('vb') || !!(activeVariant && activeVariant.audioRoles.includes('voice-boost'))
 
     return {
       audioFormatId,
       videoFormatId,
+      captionFormatId,
       bufferedRanges,
       drcEnabled,
       enableVoiceBoost,
@@ -1188,7 +1218,7 @@ export function createSabrTransport(sabrData, getRequestContext) {
     const isLiveHead = url.pathname === 'live'
     const resolution = streamIsVideo ? parseInt(url.searchParams.get('resolution')) : undefined
     const playerTimeMs = isLiveHead ? SABR_LIVE_HEAD_TIME_MS : url.searchParams.get('startTimeMs') ?? '0'
-    const { audioFormatId, videoFormatId, bufferedRanges, drcEnabled, enableVoiceBoost } = context
+    const { audioFormatId, videoFormatId, captionFormatId, bufferedRanges, drcEnabled, enableVoiceBoost } = context
 
     const { sabrContexts, unsentSabrContexts } = prepareSabrContexts(sabrStreamState)
 
@@ -1200,7 +1230,7 @@ export function createSabrTransport(sabrData, getRequestContext) {
         stickyResolution: resolution,
         lastManualSelectedResolution: resolution,
         playbackRate: context.playbackRate,
-        enabledTrackTypesBitfield: streamIsAudio ? 1 : 0,
+        enabledTrackTypesBitfield: captionFormatId ? ENABLED_TRACK_TYPES_WITH_CAPTIONS : streamIsAudio ? 1 : 0,
         drcEnabled,
         enableVoiceBoost,
         playerTimeMs,
@@ -1210,8 +1240,8 @@ export function createSabrTransport(sabrData, getRequestContext) {
       },
       preferredAudioFormatIds: [audioFormatId],
       preferredVideoFormatIds: [videoFormatId],
-      preferredSubtitleFormatIds: [],
-      selectedFormatIds: isInit ? [] : [audioFormatId, videoFormatId],
+      preferredSubtitleFormatIds: captionFormatId ? [captionFormatId] : [],
+      selectedFormatIds: isInit ? [] : [audioFormatId, videoFormatId, ...(captionFormatId ? [captionFormatId] : [])],
       bufferedRanges,
       streamerContext: {
         poToken,

@@ -1310,7 +1310,7 @@
 /* Match the native Android player: the center owns play/pause, while the
    toolbar retains replay when recommendations cover the center at the end. */
 /* stylelint-disable-next-line selector-max-compound-selectors */
-.app.capacitorTabs :deep(.ftVideoPlayer:not(:has(.endedScreen)) .shaka-controls-button-panel > .shaka-play-button) {
+.app.capacitorTabs :deep(.ftVideoPlayer:not(.endedScreenShown) .shaka-controls-button-panel > .shaka-play-button) {
   display: none !important;
 }
 

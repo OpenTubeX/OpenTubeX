@@ -3,7 +3,7 @@
     "id": 1,
     "priority": 1,
     "condition": {
-      "initiatorDomains": ["opentubex.org", "localhost", "127.0.0.1"],
+      "initiatorDomains": ["opentubex.org"],
       "requestDomains": ["youtube.com", "googlevideo.com", "ytimg.com", "ggpht.com", "googleusercontent.com"],
       "excludedResourceTypes": ["main_frame", "sub_frame"]
     },
@@ -26,7 +26,7 @@
     "id": 2,
     "priority": 1,
     "condition": {
-      "initiatorDomains": ["opentubex.org", "localhost", "127.0.0.1"],
+      "initiatorDomains": ["opentubex.org"],
       "requestDomains": ["youtube.com"],
       "excludedRequestMethods": ["options"],
       "excludedResourceTypes": ["main_frame", "sub_frame"]
@@ -44,7 +44,7 @@
     "id": 3,
     "priority": 1,
     "condition": {
-      "initiatorDomains": ["opentubex.org", "localhost", "127.0.0.1"],
+      "initiatorDomains": ["opentubex.org"],
       "requestDomains": ["youtube.com"],
       "requestMethods": ["options"],
       "excludedResourceTypes": ["main_frame", "sub_frame"]
@@ -61,7 +61,7 @@
     "id": 4,
     "priority": 2,
     "condition": {
-      "initiatorDomains": ["opentubex.org", "localhost", "127.0.0.1"],
+      "initiatorDomains": ["opentubex.org"],
       "urlFilter": "||www.youtube.com/api/timedtext",
       "excludedResourceTypes": ["main_frame", "sub_frame"]
     },
@@ -76,7 +76,7 @@
     "id": 5,
     "priority": 1,
     "condition": {
-      "initiatorDomains": ["opentubex.org", "localhost", "127.0.0.1"],
+      "initiatorDomains": ["opentubex.org"],
       "requestDomains": ["googlevideo.com", "ytimg.com", "ggpht.com", "googleusercontent.com"],
       "excludedResourceTypes": ["main_frame", "sub_frame"]
     },

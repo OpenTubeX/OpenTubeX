@@ -1,0 +1,44 @@
+{
+  "language": {
+    "message": "en",
+    "description": "Language code of this translation, such as de or pt-BR. Screen readers use it to pick the voice."
+  },
+  "direction": {
+    "message": "ltr",
+    "description": "Writing direction of this translation: ltr for left to right, rtl for right to left, such as Arabic or Hebrew."
+  },
+  "extensionName": {
+    "message": "OpenTubeX Local API",
+    "description": "Name of the extension in the browser and the add-on stores. At most 75 characters. Local API is the name of a backend in the OpenTubeX app's settings."
+  },
+  "extensionDescription": {
+    "message": "Lets the OpenTubeX web app use the local API by allowing it to request YouTube directly.",
+    "description": "Short description in the browser and the add-on stores. At most 132 characters."
+  },
+  "optionsIntro": {
+    "message": "The extension works on opentubex.org. Add the address of your own OpenTubeX server to use the local API there too."
+  },
+  "optionsScopeNote": {
+    "message": "Browsers can't limit the extension to one port or leave out subdomains. For each address you add, it also changes the YouTube requests of other web apps on that server's other ports and on its subdomains, such as app.tube.example.com.",
+    "description": "tube.example.com is the example server address in the field below."
+  },
+  "serverAddressLabel": {
+    "message": "Server address",
+    "description": "Label of the field for the address of a self-hosted OpenTubeX server."
+  },
+  "addButton": {
+    "message": "Add",
+    "description": "Button that adds the entered server address."
+  },
+  "removeButton": {
+    "message": "Remove",
+    "description": "Button next to an added server address that removes it."
+  },
+  "invalidAddressError": {
+    "message": "Enter an https:// address, or http://localhost for a server on this computer."
+  },
+  "permissionDeniedError": {
+    "message": "The extension needs access to the server to work there.",
+    "description": "Shown when the user declines the browser's permission prompt for an added server."
+  }
+}

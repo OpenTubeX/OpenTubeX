@@ -42,8 +42,9 @@ for (const backend of ['local']) {
     await app.electronApp.evaluate(({ BrowserWindow }) => {
       const window = BrowserWindow.getAllWindows()[0]
       window.setMinimumSize(0, 0)
-      window.webContents.setZoomFactor(1.25)
-      window.setContentSize(515, 1000)
+      // Two phone columns at a fractional density still need the 1280w candidate.
+      window.webContents.setZoomFactor(1.75)
+      window.setContentSize(900, 1000)
     })
     await page.evaluate(async backend => {
       const store = window.$store
@@ -79,8 +80,11 @@ for (const backend of ['local']) {
     await goTo(page, 'subscriptions')
     for (const [index, quality, width] of [[0, 'maxresdefault', 1280], [1, 'sddefault', 640], [2, 'hqdefault', 480]]) {
       const image = page.locator('.ft-list-video').filter({ has: page.getByRole('heading', { name: videos[index].title, exact: true }) }).locator('.thumbnailImage').first()
-      await expect(image).toHaveAttribute('src', `${origin}/vi/${videos[index].videoId}/${quality}.jpg`)
-      await expect.poll(() => image.evaluate(element => element.naturalWidth)).toBe(width)
+      const url = `${origin}/vi/${videos[index].videoId}/${quality}.jpg`
+      await expect(image).toHaveAttribute('src', url)
+      await expect.poll(() => image.evaluate(element => element.currentSrc)).toBe(url)
+      // The 4:3 fallbacks are plain sources; a srcset scales the natural width by its density.
+      if (width !== 1280) expect(await image.evaluate(element => element.naturalWidth)).toBe(width)
       const dimensions = await image.evaluate(element => ({
         width: element.getBoundingClientRect().width,
         height: element.getBoundingClientRect().height,
@@ -118,6 +122,6 @@ for (const backend of ['local']) {
     await expect.poll(() => portrait.evaluate(element => element.naturalWidth)).toBe(720)
     await page.locator('[data-subscription-feed-tab="videos"]').click()
     await expect(images.first()).toHaveAttribute('src', `${origin}/vi/${videos[0].videoId}/maxresdefault.jpg`)
-    await expect.poll(() => images.first().evaluate(element => element.naturalWidth)).toBe(1280)
+    await expect.poll(() => images.first().evaluate(element => element.currentSrc)).toBe(`${origin}/vi/${videos[0].videoId}/maxresdefault.jpg`)
   })
 }

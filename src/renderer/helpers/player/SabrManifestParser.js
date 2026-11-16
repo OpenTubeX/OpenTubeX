@@ -3,6 +3,7 @@ import { parseWebmSegmentIndex } from './WebmSegmentIndexParser'
 import { parseMp4SegmentIndex } from './Mp4SegmentIndexParser'
 import { decodeSabrLiveHead, onSabrLiveHead } from './sabrProtocol'
 import { getSabrFormatId } from './formatIds'
+import { SABR_LIVE_CAPTION_MIME_TYPE } from './SabrLiveCaptionParser'
 
 /**
  * @typedef {{
@@ -41,6 +42,13 @@ import { getSabrFormatId } from './formatIds'
  *     label: string | undefined,
  *     colorTransferCharacteristics: 'BT709' | 'BT2020_10' | 'SMPTEST2084' | 'ARIB_STD_B67' | undefined,
  *     colorPrimaries: 'BT709' | 'BT2020' | undefined
+ *   }[],
+ *   liveCaptions?: {
+ *     itag: number,
+ *     lastModified: string,
+ *     xtags: string | undefined,
+ *     label: string,
+ *     language: string
  *   }[],
  *   captions: {
  *     id: string,
@@ -292,6 +300,12 @@ class SabrManifestParser {
 
     const textStreams = /** @__NOINLINE__ */ createTextStreams(manifestData.captions, presentationTimeline, currentId)
     currentId += textStreams.length
+
+    if (liveWindow) {
+      for (const format of manifestData.liveCaptions ?? []) {
+        textStreams.push(/** @__NOINLINE__ */ createLiveTextStream(format, currentId++, manifestData.scheme, liveWindow, fakeVideoFormatId))
+      }
+    }
 
     const imageStreams = /** @__NOINLINE__ */ createImageStreams(manifestData.storyboards, presentationTimeline, currentId)
 
@@ -590,6 +604,64 @@ function createTextStreams(captions, presentationTimeline, currentId) {
 
     return stream
   })
+}
+
+/**
+ * Live captions are segmented like the media, unlike the caption files of videos
+ * @param {SabrManifest['liveCaptions'][0]} format
+ * @param {number} id
+ * @param {string} scheme
+ * @param {SabrLiveWindow} liveWindow
+ * @param {string | undefined} fakeVideoFormatId
+ */
+function createLiveTextStream(format, id, scheme, liveWindow, fakeVideoFormatId) {
+  /** @type {shaka.extern.Stream} */
+  const stream = {
+    type: 'text',
+    id,
+    originalId: getSabrFormatId(format),
+    mimeType: SABR_LIVE_CAPTION_MIME_TYPE,
+    codecs: '',
+    fullMimeTypes: new Set([SABR_LIVE_CAPTION_MIME_TYPE]),
+    label: format.label,
+    language: format.language,
+    originalLanguage: format.language,
+    kind: 'captions',
+    segmentIndex: null,
+    createSegmentIndex: () => {
+      if (!stream.segmentIndex) {
+        liveWindow.openSegmentIndex(stream, buildSegmentUrl(format, stream, scheme, fakeVideoFormatId))
+      }
+      return Promise.resolve()
+    },
+    closeSegmentIndex: () => {
+      liveWindow.closeSegmentIndex(stream)
+      if (stream.segmentIndex) {
+        stream.segmentIndex.release()
+        stream.segmentIndex = null
+      }
+    },
+
+    accessibilityPurpose: null,
+    audioSamplingRate: null,
+    channelsCount: null,
+    closedCaptions: null,
+    drmInfos: [],
+    emsgSchemeIdUris: null,
+    encrypted: false,
+    external: false,
+    fastSwitching: false,
+    forced: false,
+    groupId: null,
+    isAudioMuxedInVideo: false,
+    keyIds: new Set(),
+    primary: false,
+    roles: [],
+    spatialAudio: false,
+    trickModeVideo: null
+  }
+
+  return stream
 }
 
 /**

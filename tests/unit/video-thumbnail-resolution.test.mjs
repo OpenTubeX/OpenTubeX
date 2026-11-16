@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
-import { getVideoThumbnailSource, getVideoThumbnailFallbackUrl } from '../../src/renderer/helpers/videoThumbnail.js'
+import { getVideoThumbnailSource, getVideoThumbnailFallbackUrl, getVideoThumbnailSrcset, isMissingThumbnailPlaceholder } from '../../src/renderer/helpers/videoThumbnail.js'
 import { getPreferredShortThumbnailUrl } from '../../src/renderer/helpers/player/shorts.js'
 import { YTNodes } from 'youtubei.js'
 import { createLocalFeedParsers } from '../../src/renderer/helpers/api/local-feed-parsers.js'
@@ -85,4 +85,28 @@ test('resolution fallback preserves proxies and parameters without changing othe
   assert.equal(getVideoThumbnailFallbackUrl('https://invidious.test/vi/short/oardefault.jpg?host=x'), 'https://invidious.test/vi/short/oar2.jpg?host=x')
   assert.equal(getVideoThumbnailFallbackUrl('https://yt3.ggpht.com/avatar'), null)
   assert.equal(getVideoThumbnailFallbackUrl('data:image/png;base64,AA=='), null)
+})
+
+test('only full-resolution landscape thumbnails get a medium-resolution srcset candidate', () => {
+  assert.equal(getVideoThumbnailSrcset('https://invidious.test/vi_webp/video/maxresdefault.webp?host=x&opentubex_retry=1'),
+    'https://invidious.test/vi_webp/video/mqdefault.webp?host=x&opentubex_retry=1 320w, https://invidious.test/vi_webp/video/maxresdefault.webp?host=x&opentubex_retry=1 1280w')
+  for (const name of ['mqdefault', 'sddefault', 'hqdefault', 'oardefault', 'oar2', 'mq1']) {
+    assert.equal(getVideoThumbnailSrcset(`https://i.ytimg.com/vi/video/${name}.jpg`), null)
+  }
+  assert.equal(getVideoThumbnailSrcset('https://dearrow-thumb.test/api/v1/getThumbnail?videoID=video'), null)
+  assert.equal(getVideoThumbnailSrcset('data:image/png;base64,AA=='), null)
+})
+
+test('missing-resolution placeholders are recognized at any srcset density', () => {
+  const maxres = 'https://i.ytimg.com/vi/video/maxresdefault.jpg'
+  const mq = 'https://i.ytimg.com/vi/video/mqdefault.jpg'
+  const srcset = `${mq} 320w, ${maxres} 1280w`
+  assert.equal(isMissingThumbnailPlaceholder({ naturalWidth: 120, naturalHeight: 90, currentSrc: 'https://i.ytimg.com/vi/video/sddefault.jpg', srcset: '' }), true)
+  assert.equal(isMissingThumbnailPlaceholder({ naturalWidth: 640, naturalHeight: 480, currentSrc: 'https://i.ytimg.com/vi/video/sddefault.jpg', srcset: '' }), false)
+  // 120x90 chosen as the 1280w candidate of a 288px slot measures a rounded 27x20.
+  assert.equal(isMissingThumbnailPlaceholder({ naturalWidth: 27, naturalHeight: 20, currentSrc: maxres, srcset }), true)
+  assert.equal(isMissingThumbnailPlaceholder({ naturalWidth: 288, naturalHeight: 162, currentSrc: maxres, srcset }), false)
+  assert.equal(isMissingThumbnailPlaceholder({ naturalWidth: 36, naturalHeight: 20, currentSrc: maxres, srcset }), false)
+  // A density-scaled medium candidate that happens to measure 120x90 is still the smallest fallback.
+  assert.equal(isMissingThumbnailPlaceholder({ naturalWidth: 120, naturalHeight: 90, currentSrc: mq, srcset }), false)
 })

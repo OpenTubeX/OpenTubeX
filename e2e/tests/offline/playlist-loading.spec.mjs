@@ -164,7 +164,8 @@ test('saves a YouTube playlist as a read-only link and persists it', async ({ ap
   )
 
   await mockPlaylist(page)
-  await page.route('https://invidious.test/vi/video-00000/maxresdefault.jpg', route => route.fulfill({
+  // The card loads whichever srcset candidate its size needs.
+  await page.route('https://invidious.test/vi/video-00000/*', route => route.fulfill({
     contentType: 'image/svg+xml',
     body: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="9"/>',
   }))
@@ -501,11 +502,11 @@ test.describe('saved playlist thumbnails', () => {
   })
 
   test('loads a saved playlist thumbnail through the active local backend', async ({ page }) => {
-    await page.route('https://i.ytimg.com/vi/saved-video/maxresdefault.jpg', route => route.fulfill({
+    await page.route('https://i.ytimg.com/vi/saved-video/*', route => route.fulfill({
       contentType: 'image/svg+xml',
       body: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="9"/>',
     }))
-    await page.route('https://invidious.test/vi/saved-video/maxresdefault.jpg', route => route.abort())
+    await page.route('https://invidious.test/vi/saved-video/*', route => route.abort())
 
     await goTo(page, 'userplaylists')
 

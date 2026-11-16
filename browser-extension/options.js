@@ -7,8 +7,25 @@ const form = document.getElementById('add-form')
 const input = document.getElementById('origin')
 const errorText = document.getElementById('error')
 const list = document.getElementById('origins')
+const removeButton = document.getElementById('remove-button')
 
-/** @returns {Promise<string[]>} the added origins, such as `https://tube.example.com` */
+/**
+ * Fills in the text of the elements with a `data-i18n` message name.
+ * @param {ParentNode} root
+ */
+function localize(root) {
+  for (const element of root.querySelectorAll('[data-i18n]')) {
+    element.textContent = ext.i18n.getMessage(element.dataset.i18n)
+  }
+}
+
+// Follows the translation shown, which can be a fallback from the browser language
+document.documentElement.lang = ext.i18n.getMessage('language')
+document.documentElement.dir = ext.i18n.getMessage('direction')
+localize(document)
+localize(removeButton.content)
+
+/** @returns {Promise<string[]>} the added origins, such as `https://tube.example.com` or `http://localhost` */
 async function getOrigins() {
   const [script] = await ext.scripting.getRegisteredContentScripts({ ids: [SCRIPT_ID] })
   return script?.matches.map(pattern => pattern.slice(0, -'/*'.length)) ?? []
@@ -19,16 +36,16 @@ async function getOrigins() {
  * @param {string[]} origins
  */
 async function setOrigins(origins) {
-  const oldRules = await ext.declarativeNetRequest.getDynamicRules()
-  const rules = origins.length === 0
-    ? []
-    : (await (await fetch(ext.runtime.getURL('rules.json'))).json()).map(rule => ({
-        ...rule,
-        condition: { ...rule.condition, initiatorDomains: origins.map(origin => new URL(origin).hostname) }
-      }))
+  const rules = await (await fetch(ext.runtime.getURL('rules.json'))).json()
   await ext.declarativeNetRequest.updateDynamicRules({
-    removeRuleIds: oldRules.map(rule => rule.id),
-    addRules: rules
+    // Leaves the development rules that background.js adds alone
+    removeRuleIds: rules.map(rule => rule.id),
+    addRules: origins.length === 0
+      ? []
+      : rules.map(rule => ({
+          ...rule,
+          condition: { ...rule.condition, initiatorDomains: origins.map(origin => new URL(origin).hostname) }
+        }))
   })
 
   await ext.scripting.unregisterContentScripts({ ids: [SCRIPT_ID] }).catch(() => {})
@@ -58,13 +75,14 @@ function updateOrigins(change) {
 }
 
 async function render() {
-  list.replaceChildren(...(await getOrigins()).map(origin => {
+  list.replaceChildren(...(await getOrigins()).map((origin, index) => {
     const item = document.createElement('li')
     const name = document.createElement('span')
+    name.id = `origin-${index}`
     name.textContent = origin
-    const remove = document.createElement('button')
-    remove.type = 'button'
-    remove.textContent = 'Remove'
+    const remove = removeButton.content.firstElementChild.cloneNode(true)
+    // Tells screen reader users which server each Remove button removes
+    remove.setAttribute('aria-describedby', name.id)
     remove.addEventListener('click', async () => {
       await updateOrigins(origins => origins.filter(other => other !== origin))
       // Built-in origins, such as opentubex.org, keep their required permission
@@ -83,17 +101,19 @@ form.addEventListener('submit', event => {
   let origin
   try {
     const url = new URL(input.value.trim())
-    if (url.protocol !== 'https:') throw new Error()
-    origin = `https://${url.hostname}`
+    // Browsers treat these as secure, so self-hosted servers on this computer don't need HTTPS
+    const local = url.protocol === 'http:' && ['localhost', '127.0.0.1'].includes(url.hostname)
+    if (url.protocol !== 'https:' && !local) throw new Error()
+    origin = `${url.protocol}//${url.hostname}`
   } catch {
-    errorText.textContent = 'Enter an https:// address.'
+    errorText.textContent = ext.i18n.getMessage('invalidAddressError')
     return
   }
 
   // Browsers only show the permission prompt in direct response to the click
   ext.permissions.request({ origins: [`${origin}/*`] }).then(async granted => {
     if (!granted) {
-      errorText.textContent = 'The extension needs access to the server to work there.'
+      errorText.textContent = ext.i18n.getMessage('permissionDeniedError')
       return
     }
     await updateOrigins(origins => origins.includes(origin) ? origins : [...origins, origin])

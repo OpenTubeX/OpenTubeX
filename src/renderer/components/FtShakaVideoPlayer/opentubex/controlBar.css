@@ -521,7 +521,8 @@
   transform: translate(-50%, -50%) rotate(45deg) scaleX(0);
 }
 
-:deep(.shaka-play-button:has(> .ft-play-pause-morph-icon)) {
+/* Marked along with adding the morphing icon (`syncPlayPauseControlIcons`). */
+:deep(.shaka-play-button[data-ft-play-pause-state]) {
   position: relative;
 }
 
@@ -530,7 +531,7 @@
   font-size: 24px;
 }
 
-:deep(.shaka-play-button:has(> .ft-play-pause-morph-icon) > .shaka-ui-icon:not(.ft-play-pause-morph-icon)) {
+:deep(.shaka-play-button[data-ft-play-pause-state] > .shaka-ui-icon:not(.ft-play-pause-morph-icon)) {
   opacity: 0;
 }
 
@@ -568,7 +569,7 @@
 
 /* WebKit does not support CSS path morphing. Keep Shaka's stateful icon. */
 @supports not (d: path('M0 0L1 1')) {
-  :deep(.shaka-play-button:has(> .ft-play-pause-morph-icon) > .shaka-ui-icon:not(.ft-play-pause-morph-icon)) {
+  :deep(.shaka-play-button[data-ft-play-pause-state] > .shaka-ui-icon:not(.ft-play-pause-morph-icon)) {
     opacity: 1;
   }
 

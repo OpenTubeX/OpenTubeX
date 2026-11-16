@@ -643,6 +643,24 @@ for (const backoffMs of [100, 10000]) {
   })
 }
 
+test('captions that keep backing off skip their segment without stopping playback', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 0 })
+  let reloads = 0
+  const { createSabrTransport } = load(async () => policyResponse(100), { Date })
+  const transport = createSabrTransport(sabrData, () => ({ ...context, captionFormatId: { itag: 387, lastModified: '0' } }))
+  t.after(() => transport.cleanup())
+  transport.onReloadOnce(() => reloads++)
+  const captions = 'sabr1:text?formatId=387-0-&targetDurationMs=5000&sq=1'
+  const pending = transport.request(captions, request(captions), 1).promise
+  for (let index = 0; index < 6; index++) {
+    await flushRequests()
+    t.mock.timers.tick(100)
+  }
+  // An empty segment has no cues, while a failed text request is a critical player error
+  assert.equal((await pending).data.byteLength, 0)
+  assert.equal(reloads, 0)
+})
+
 test('resumed audio and video requests retain the playback cookie from a completed init segment', async t => {
   // Include an explicit zero and an unknown field, as in server cookies. The
   // opaque cookie must survive without decoding and re-encoding it.
@@ -1018,6 +1036,31 @@ test('the Shaka adapter retains format selection, registration and teardown beha
   assert.equal(body.preferredVideoFormatIds[0].itag, 137)
   transport.cleanup()
   assert.equal(schemes.size, 0)
+})
+
+test('a live caption request asks SABR for only the caption format', async () => {
+  let body
+  const captionFormatId = { itag: 387, lastModified: '0', xtags: 'CgoKBGxhbmcSAmVu' }
+  const { setupSabrScheme, schemes } = load(async (_uri, options) => {
+    body = protos.VideoPlaybackAbrRequest.decode(options.body)
+    return response([7, 8], false, captionFormatId)
+  })
+  const player = {
+    isAudioOnly: () => false,
+    getVariantTracks: () => [{ active: true, originalVideoId: '137-456-', originalAudioId: '140-123-', audioRoles: ['main'] }],
+    getStats: () => ({ estimatedBandwidth: 1234567 }),
+    getPlaybackRate: () => 1,
+  }
+  const transport = setupSabrScheme(sabrData, () => player, () => ({}), { value: 1920 }, { value: 1080 })
+  const uri = 'sabr1:text?formatId=387-0-CgoKBGxhbmcSAmVu&targetDurationMs=5000&startTimeMs=12500&sq=1'
+  const segment = await schemes.get('sabr1')(uri, request(uri), 1).promise
+  transport.cleanup()
+
+  assert.deepEqual([...segment.data], [7, 8])
+  // SABR sends captions only with audio and video enabled, which are reported as buffered
+  assert.equal(body.clientAbrState.enabledTrackTypesBitfield, 7)
+  assert.deepEqual(body.preferredSubtitleFormatIds, [captionFormatId])
+  assert.deepEqual(body.bufferedRanges.map(range => [range.formatId.itag, range.endSegmentIndex]), [[140, 2147483647], [137, 2147483647]])
 })
 
 /**

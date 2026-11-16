@@ -129,6 +129,7 @@
                   <span class="mediaThumbnail">
                     <FtRetryImage
                       :src="videoThumbnail(video)"
+                      sizes="144px"
                       :class="{ blur: blurThumbnails }"
                       width="160"
                       height="90"
@@ -329,6 +330,7 @@
                       <FtRetryImage
                         v-if="item.entry.videoId"
                         :src="videoThumbnail(item.entry)"
+                        sizes="144px"
                         :class="{ blur: blurThumbnails }"
                         width="160"
                         height="90"
@@ -390,6 +392,7 @@
                   <span class="mediaThumbnail">
                     <FtRetryImage
                       :src="videoThumbnail(video)"
+                      sizes="144px"
                       :class="{ blur: blurThumbnails }"
                       width="160"
                       height="90"
@@ -434,6 +437,7 @@
                   <span class="mediaThumbnail playlistThumbnail">
                     <FtRetryImage
                       :src="playlistThumbnail(playlist)"
+                      sizes="144px"
                       :class="{ blur: blurThumbnails }"
                       width="160"
                       height="90"

@@ -114,6 +114,7 @@
         videoZoomTouchEnabled: videoZoomPossible,
         vrMode: useVrMode,
         playerPaused: playerPaused && hasLoaded,
+        endedScreenShown: showEndedScreen && endedRecommendations.length > 0,
         pausedInterfaceRevealed,
         hidePlayerControlsWhenPaused: !showPlayerControlsWhenPaused,
         hideVideoTitleWhenPaused: !showVideoTitleWhenPaused,

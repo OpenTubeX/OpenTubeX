@@ -38,6 +38,7 @@ For Android, run `pnpm run capacitor:sync:android`, then `./gradlew assembleDebu
 * **Commits.** Use [semantic commit messages](https://www.conventionalcommits.org/), for example `fix(player): keep the seek bar stable while dragging`.
 * **Dependencies.** Add one only when you need it. It must be free software. It must not add trackers or telemetry, or contact third-party services the feature doesn't need, such as Google Fonts. Use its latest stable release and commit the updated `pnpm-lock.yaml`.
 * **Translations.** Add new strings to `static/locales/en-US.yaml`. Add human translations for any other languages you know to their files in `static/locales`. Every other active locale needs an AI completion in `static/locales/ai/<locale>.yaml`, and `pnpm run test:unit` fails if one is missing. Keep the placeholders and plural forms, then run `node _scripts/aiTranslations.mjs cleanup --all --write`. To fix an existing translation, use Weblate.
+  The Local API browser extension keeps its strings in `browser-extension/_locales/<locale>/messages.json`. Add new ones to `en`, and to other languages you know; it has no AI translations, and browsers show English for strings that aren't translated yet.
 * **UI.**
   * Register new icons in `src/renderer/icons` with mappings for both the Material and Remix icon packs.
   * Nested scrollable elements use `v-overlay-scrollbars`, not native scrollbars.

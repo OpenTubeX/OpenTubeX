@@ -172,10 +172,7 @@
 }
 
 /* Nested Shaka menus occupy the same corner as the phone action dock. */
-:global(.capacitorTabs .ftVideoPlayer:is(:fullscreen, .fullWindow):has(
-  .shaka-settings-menu:not(.shaka-hidden),
-  .shaka-sub-menu:not(.shaka-hidden)
-) .fullscreenActions) {
+:global(.capacitorTabs .ftVideoPlayer:is(:fullscreen, .fullWindow)[data-nested-menu-open] .fullscreenActions) {
   opacity: 0;
   pointer-events: none;
 }

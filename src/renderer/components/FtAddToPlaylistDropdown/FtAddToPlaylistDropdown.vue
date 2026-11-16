@@ -54,6 +54,7 @@
               class="playlistThumbnail"
               :class="{ blur: store.getters.getBlurThumbnails }"
               :src="playlistThumbnail(playlist)"
+              sizes="48px"
             />
             <span class="playlistDetails">
               <span class="playlistName">{{ playlist.playlistName }}</span>

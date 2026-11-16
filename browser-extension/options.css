@@ -46,3 +46,16 @@ li {
   min-block-size: 1lh;
   color: #d93025;
 }
+
+button {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+button svg {
+  inline-size: 1.25em;
+  block-size: 1.25em;
+  fill: currentcolor;
+}

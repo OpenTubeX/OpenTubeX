@@ -1,0 +1,35 @@
+{
+  "language": {
+    "message": "de"
+  },
+  "direction": {
+    "message": "ltr"
+  },
+  "extensionName": {
+    "message": "OpenTubeX Lokale API"
+  },
+  "extensionDescription": {
+    "message": "Lässt die OpenTubeX-Web-App die lokale API nutzen, indem sie YouTube direkt anfragen darf."
+  },
+  "optionsIntro": {
+    "message": "Die Erweiterung funktioniert auf opentubex.org. Füge die Adresse deines eigenen OpenTubeX-Servers hinzu, um die lokale API auch dort zu nutzen."
+  },
+  "optionsScopeNote": {
+    "message": "Browser können die Erweiterung nicht auf einen Port beschränken oder Subdomains ausnehmen. Für jede hinzugefügte Adresse ändert sie daher auch die YouTube-Anfragen anderer Web-Apps auf den anderen Ports dieses Servers und auf seinen Subdomains, etwa app.tube.example.com."
+  },
+  "serverAddressLabel": {
+    "message": "Serveradresse"
+  },
+  "addButton": {
+    "message": "Hinzufügen"
+  },
+  "removeButton": {
+    "message": "Entfernen"
+  },
+  "invalidAddressError": {
+    "message": "Gib eine https://-Adresse ein oder http://localhost für einen Server auf diesem Computer."
+  },
+  "permissionDeniedError": {
+    "message": "Die Erweiterung braucht Zugriff auf den Server, um dort zu funktionieren."
+  }
+}

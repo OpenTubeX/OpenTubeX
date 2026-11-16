@@ -23,6 +23,7 @@
           v-if="toast.image"
           :src="toast.image"
           :fallback-icon="toast.avatar ? toast.icon : null"
+          sizes="64px"
           class="image"
           :class="{ avatar: toast.avatar }"
           alt=""

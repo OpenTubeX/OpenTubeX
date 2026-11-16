@@ -8,7 +8,7 @@ on:
   push:
     branches: [ development ]
     # Translation-only pushes, like Weblate merges, skip E2E as their PRs do.
-    paths-ignore: [ 'static/locales/**' ]
+    paths-ignore: [ 'static/locales/**', 'browser-extension/_locales/**' ]
   schedule:
     # Nightly full suite, including network tests against the real YouTube servers
     - cron: '30 3 * * *'

@@ -24,11 +24,12 @@
 </template>
 
 <script setup>
-import { computed, inject, nextTick, onActivated, onBeforeUnmount, onBeforeUpdate, onDeactivated, onMounted, onUpdated, provide, ref, useTemplateRef, watch } from 'vue'
+import { computed, inject, nextTick, onActivated, onBeforeUnmount, onBeforeUpdate, onDeactivated, onMounted, onUpdated, provide, ref, shallowRef, useTemplateRef, watch } from 'vue'
 
 import store from '../../store/index'
 
-import { getThumbnailGridStyles, PHONE_THUMBNAIL_VIEWPORT_WIDTH } from '../../constants/thumbnailSize'
+import { getThumbnailGridSizes, getThumbnailGridStyles, getThumbnailListSizes, PHONE_THUMBNAIL_VIEWPORT_WIDTH } from '../../constants/thumbnailSize'
+import { thumbnailSizesKey } from '../../helpers/videoThumbnail.js'
 import { GRID_COLUMNS_SETTINGS, setThumbnailGridVisible, thumbnailSizeSettingKey, VIEW_TYPE_SETTINGS } from '../../composables/useThumbnailSizeSlider'
 import { applyAnimationSpeed, getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
@@ -73,6 +74,11 @@ const MOVE_TRANSITION_MAX_ITEMS = 50
 const gridElement = useTemplateRef('gridElement')
 provide(tileKeyboardShortcutsKey, true)
 const thumbnailSizeSetting = inject(thumbnailSizeSettingKey, 'thumbnailSize')
+const getCardSizes = styles => getThumbnailGridSizes(Number.parseFloat(styles['--thumbnail-grid-size']))
+// Only the thumbnails read this, so a new card width does not re-render the
+// grid. Until the grid is measured, cards have their default width.
+const gridThumbnailSizes = shallowRef(getCardSizes(getThumbnailGridStyles(store.state.settings[thumbnailSizeSetting])))
+provide(thumbnailSizesKey, computed(() => props.grid ? gridThumbnailSizes.value : getThumbnailListSizes(store.state.settings[thumbnailSizeSetting])))
 const animationSpeedMultiplier = computed(() => getAnimationSpeedMultiplier(store.getters.getAnimationSpeed))
 const feedTransitionDuration = computed(() => `${300 / animationSpeedMultiplier.value}ms`)
 
@@ -159,6 +165,7 @@ function applyThumbnailSizeStyles() {
   for (const [property, value] of Object.entries(styles)) {
     element.style.setProperty(property, value)
   }
+  gridThumbnailSizes.value = getCardSizes(styles)
 }
 
 watch(() => [

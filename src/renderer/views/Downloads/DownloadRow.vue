@@ -36,6 +36,7 @@
       <div class="downloadMain">
         <FtRetryImage
           :src="download.thumbnail || thumbnailPlaceholder"
+          sizes="144px"
           class="downloadThumbnail"
           alt=""
         />
@@ -286,6 +287,7 @@
         <div class="downloadMetadata">
           <FtRetryImage
             :src="download.thumbnail || thumbnailPlaceholder"
+            sizes="144px"
             class="downloadThumbnail"
             alt=""
           />
