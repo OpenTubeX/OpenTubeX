@@ -63,6 +63,26 @@ const SCROLL_MINI_RESTORE_SCROLL_STALL_MS = 300
 // Tabs each run this, so only the player that offset the page scrollbar resets it.
 let pageScrollbarStartOwner = null
 let pageScrollbarBlockEnd = 0
+/** @type {WeakMap<Element, Set<object>>} the players pinned in each watch layout */
+const pinnedLayoutPlayers = new WeakMap()
+
+/**
+ * Marks a watch layout while one of its players is pinned, which turns it into
+ * a column (`_watch-layout.scss`). Matching the player with `:has()` instead
+ * would restyle much of the page whenever the player's controls change
+ * (`controlStateAttributes.js`).
+ *
+ * @param {Element} layout
+ * @param {object} player
+ * @param {boolean} pinned
+ */
+function markPinnedLayout(layout, player, pinned) {
+  const players = pinnedLayoutPlayers.get(layout) ?? new Set()
+  if (pinned) players.add(player)
+  else players.delete(player)
+  pinnedLayoutPlayers.set(layout, players)
+  layout.toggleAttribute('data-pinned-player', players.size > 0)
+}
 
 /**
  * OpenTubeX's scroll mini-player integration. Keeping this composable outside the
@@ -1781,9 +1801,13 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   watch(scrollPlayerMode, () => updateScrollMiniPlayer())
   // The pinned player covers the top of the page, so the page scrollbar starts below it.
   let pinnedAreaObservers = []
-  function releasePageScrollbarStart() {
+  /** @type {Element | null} */
+  let pinnedLayout = null
+  function releasePinnedArea() {
     for (const observer of pinnedAreaObservers) observer.disconnect()
     pinnedAreaObservers = []
+    if (pinnedLayout) markPinnedLayout(pinnedLayout, container, false)
+    pinnedLayout = null
     if (pageScrollbarStartOwner !== container) return
     pageScrollbarStartOwner = null
     setPageScrollbarStart(0)
@@ -1802,10 +1826,12 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     })
   }
   watch(scrollPinnedPlayer, pinned => {
-    releasePageScrollbarStart()
+    releasePinnedArea()
     const area = pinned ? container.value?.closest('.videoArea') : null
     if (!area) return
     pageScrollbarStartOwner = container
+    pinnedLayout = area.closest('.videoLayout')
+    if (pinnedLayout) markPinnedLayout(pinnedLayout, container, true)
     const update = () => {
       // Wide layouts keep the player in the page and dock it instead.
       const style = getComputedStyle(area)
@@ -1817,11 +1843,10 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     resizeObserver.observe(area)
     // Opening a sidebar panel in theatre mode stops the pinning without resizing the player.
     const layoutObserver = new MutationObserver(update)
-    const layout = area.closest('.videoLayout')
-    if (layout) layoutObserver.observe(layout, { attributes: true, attributeFilter: ['class'] })
+    if (pinnedLayout) layoutObserver.observe(pinnedLayout, { attributes: true, attributeFilter: ['class'] })
     pinnedAreaObservers = [resizeObserver, layoutObserver]
   }, { flush: 'post' })
-  onBeforeUnmount(releasePageScrollbarStart)
+  onBeforeUnmount(releasePinnedArea)
   watch(() => watchNavigation?.detached.value, detached => {
     if (detached) fullWindowEnabled.value = false
   }, { flush: 'sync' })

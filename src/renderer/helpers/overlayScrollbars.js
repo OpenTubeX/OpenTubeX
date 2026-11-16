@@ -116,6 +116,26 @@ function getResizeObserver() {
   return resizeObserver
 }
 
+/** Instances whose update waits for the next frame. @type {Set<Instance>} */
+const scheduledInstances = new Set()
+let scheduledFrame = null
+
+/**
+ * Updates the instance in the next frame, together with the others scheduled
+ * for it, so that none of them reads styles that another has just changed.
+ *
+ * @param {Instance} instance
+ */
+function scheduleInstanceUpdate(instance) {
+  scheduledInstances.add(instance)
+  scheduledFrame ??= requestAnimationFrame(() => {
+    scheduledFrame = null
+    const changed = new Map([...scheduledInstances].map(scheduled => [scheduled, false]))
+    scheduledInstances.clear()
+    updateInstances(changed)
+  })
+}
+
 /** @param {Map<Instance, boolean>} changed instances and whether to force their update */
 function updateInstances(changed) {
   const stages = []
@@ -226,7 +246,6 @@ function create(element) {
   // Windowed lists estimate rows that never mounted, so their range can grow
   // after a scroll to the end mounts the last rows.
   const keepEnd = !isPage && element.matches('[data-scrollbar-keep-end]')
-  let updateFrame = null
   let reportedStatic = false
 
   /** @type {Instance} */
@@ -434,10 +453,7 @@ function create(element) {
   const onScroll = () => syncScrollPosition()
 
   const scheduleUpdate = () => {
-    updateFrame ??= requestAnimationFrame(() => {
-      updateFrame = null
-      update()
-    })
+    scheduleInstanceUpdate(instance)
   }
 
   /** Keeps observing the container's direct children, whose sizes make up its content. */
@@ -526,7 +542,7 @@ function create(element) {
   }
 
   function destroy() {
-    if (updateFrame !== null) cancelAnimationFrame(updateFrame)
+    scheduledInstances.delete(instance)
     if (positionFrame !== null) cancelAnimationFrame(positionFrame)
     positionEventTarget.removeEventListener('scroll', schedulePosition)
     mutationObserver.disconnect()

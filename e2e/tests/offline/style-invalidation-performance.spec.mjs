@@ -1,5 +1,5 @@
 import { test, expect, goTo } from '../../helpers/app.mjs'
-import { openMockedVideo } from '../../helpers/player.mjs'
+import { openMockedVideo, openPlayerOptions } from '../../helpers/player.mjs'
 import { expectImagesLoaded, fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
@@ -12,7 +12,7 @@ test.use({ seed: { settings: { currentLocale: 'en-US' } } })
  * @param {import('@playwright/test').Page} page
  * @param {string} name
  * @param {string} selector
- * @param {{ class: string } | { scrollbarState: true } | { properties: string[], target?: string }} change
+ * @param {{ class: string, target?: string } | { scrollbarState: true } | { properties: string[], target?: string }} change
  * @param {number} [maxRestyled]
  */
 async function expectLocalRestyle(page, name, selector, change, maxRestyled = 10) {
@@ -23,8 +23,9 @@ async function expectLocalRestyle(page, name, selector, change, maxRestyled = 10
   const subtreeSize = await page.locator(selector).evaluate((element, { name, change }) => {
     const apply = () => {
       if (change.class) {
-        element.classList.add(change.class)
-        return () => element.classList.remove(change.class)
+        const target = change.target ? element.querySelector(change.target) : element
+        target.classList.add(change.class)
+        return () => target.classList.remove(change.class)
       }
       if (change.scrollbarState) {
         // The scrollbar helper writes these whenever a scroller's size,
@@ -159,6 +160,26 @@ test.describe('player', () => {
       properties: ['left'],
       target: '.shaka-player-ui-thumbnail-container'
     }, 20)
+  })
+
+  // Shaka switches the options menu's views with a class, and the pointer and
+  // focus move between its entries. A `:has()` that checks such a state on an
+  // ancestor that it doesn't style itself makes Chromium restyle the
+  // ancestor's descendants that any such rule could style, on every change:
+  // much of the player, or the watch page from the page layout.
+  test('options menu changes restyle only the menu', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    const video = await openMockedVideo(page)
+    await video.evaluate(element => element.pause())
+    const player = page.locator('.ftVideoPlayer')
+    await player.hover()
+    await openPlayerOptions(player)
+    // The entry, and the icons and scrollbars of the menu, which hides them
+    // while one of its submenus scrolls by itself, restyle: about 40 elements.
+    await expectLocalRestyle(page, 'options menu entry visibility', '.videoLayout', {
+      class: 'shaka-hidden',
+      target: '.shaka-overflow-menu > .loop-button'
+    }, 60)
   })
 
   // Shaka refreshes the seek bar eight times a second, also while paused. Each

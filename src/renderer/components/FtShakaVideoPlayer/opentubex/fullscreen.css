@@ -136,23 +136,27 @@
   display: flex;
 }
 
-/* Let Shaka's seek preview pass in front of annotations and the fullscreen action pill. */
-.ftVideoPlayer:has(:deep(.shaka-seek-bar-container:hover)) :deep(.shaka-controls-container) {
+/*
+  Let Shaka's seek preview and the control bar's tooltips pass in front of
+  annotations and the fullscreen action pill. The player mirrors the states of
+  its controls into attributes for these rules (`controlStateAttributes.js`).
+*/
+.ftVideoPlayer[data-seek-bar-hovered] :deep(.shaka-controls-container) {
   z-index: 3;
 }
 
-.ftVideoPlayer:has(:deep(.shaka-seek-bar-container:hover)) :is(.fullscreenActions, .skippedSegmentsWrapper),
-.ftVideoPlayer:has(:deep(.shaka-controls-button-panel > :is(.shaka-tooltip, .shaka-tooltip-status):is(:hover, :focus-visible, :active))) .fullscreenActions {
+.ftVideoPlayer[data-seek-bar-hovered] :is(.fullscreenActions, .skippedSegmentsWrapper),
+.ftVideoPlayer[data-control-tooltip-shown] .fullscreenActions {
   z-index: 0;
 }
 
 /* Touch drags never hover, and the filmstrip spans the pill's corner. */
-.ftVideoPlayer:has(:deep(.ft-seek-filmstrip-active)) .fullscreenActions {
+.ftVideoPlayer[data-seek-filmstrip-active] .fullscreenActions {
   visibility: hidden;
 }
 
-.ftVideoPlayer:fullscreen:has(:deep(.shaka-controls-container[shown='true'])) .fullscreenActions,
-.ftVideoPlayer.fullWindow:has(:deep(.shaka-controls-container[shown='true'])) .fullscreenActions,
+.ftVideoPlayer:fullscreen[data-shaka-controls-shown='true'] .fullscreenActions,
+.ftVideoPlayer.fullWindow[data-shaka-controls-shown='true'] .fullscreenActions,
 .ftVideoPlayer.shortsPlayer:fullscreen .fullscreenActions,
 .ftVideoPlayer.shortsPlayer.fullWindow .fullscreenActions {
   opacity: 1;

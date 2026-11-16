@@ -175,9 +175,7 @@
   transition: opacity 150ms ease;
 }
 
-.ftVideoPlayer:is(:fullscreen, .fullWindow):has(
-  :deep(.shaka-controls-container[shown='true'])
-):not(.playerPaused.hideVideoTitleWhenPaused:not(.pausedInterfaceRevealed)) > .paidPromotionOverlay {
+.ftVideoPlayer:is(:fullscreen, .fullWindow)[data-shaka-controls-shown='true']:not(.playerPaused.hideVideoTitleWhenPaused:not(.pausedInterfaceRevealed)) > .paidPromotionOverlay {
   /* Keep the badge clear of the single-line fullscreen title overlay. */
   inset-block-start: 65px;
   transition-delay: 0s, 0s;

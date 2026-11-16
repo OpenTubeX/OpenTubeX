@@ -68,6 +68,7 @@
       :data-tab-id="tabId"
       :data-action-dock-visible="actionDockVisible"
       :data-player-controls-shown="playerControlsShown"
+      :data-shaka-controls-shown="shakaControlsShown"
       :data-submenu-opened="isSubMenuOpened"
       :inert="scrollMiniPlayerDismissed"
       :aria-hidden="scrollMiniPlayerDismissed ? 'true' : undefined"
@@ -2084,6 +2085,7 @@
 import { setupPhoneOptionsMenu } from '../../helpers/player/phoneOptionsMenu'
 import { CONTROL_BAR_MENUS, setupSubmenuScrolling } from '../../helpers/player/submenuScrolling'
 import { setupMenuTransitions } from '../../helpers/player/menuTransitions'
+import { mirrorControlStates } from '../../helpers/player/controlStateAttributes'
 import { setupCaptionCueLayout } from '../../helpers/player/captionCueLayout'
 import { chooseAndroidDirectory } from '../../helpers/androidStorage'
 import { isAppHidden, getAndroidAppActive, waitForAndroidAppState } from '../../helpers/appVisibility.js'
@@ -6141,6 +6143,8 @@ function addUICustomizations() {
   controls.removeEventListener('submenuclose', handleSubMenuClose)
   controls.addEventListener('submenuopen', handleSubMenuOpen)
   controls.addEventListener('submenuclose', handleSubMenuClose)
+  cleanupControlStates?.()
+  cleanupControlStates = mirrorControlStates(container.value, controlsContainer)
 
   controlsContainer.removeEventListener('wheel', handleControlsContainerWheel)
   controlsContainer.removeEventListener('click', handleControlsContainerClick, true)
@@ -6618,6 +6622,7 @@ let overflowMenuIdleHeight = 0
 let overflowMenuElement = null
 let cleanupPhoneOptionsMenu = null
 let cleanupSubmenuScrolling = null
+let cleanupControlStates = null
 
 /** @type {MutationObserver|null} */
 let fullscreenControlsVisibilityObserver = null
@@ -12940,6 +12945,8 @@ onBeforeUnmount(() => {
   cleanupPhoneOptionsMenu = null
   cleanupSubmenuScrolling?.()
   cleanupSubmenuScrolling = null
+  cleanupControlStates?.()
+  cleanupControlStates = null
   if (overflowMenuElement) {
     removeOverlayScrollbars(overflowMenuElement)
     overflowMenuElement = null

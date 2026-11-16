@@ -261,6 +261,8 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
     if (this.dragStartValue !== null && !this.controls.getControlsContainer()?.contains(this.bar)) this.onChangeEnd()
     // The new config copies the old one.
     this.restoreShowUIAlways()
+    // The strip leaves with this bar, along with its mark on the player.
+    this.filmstrip.hide()
     super.release()
   }
 

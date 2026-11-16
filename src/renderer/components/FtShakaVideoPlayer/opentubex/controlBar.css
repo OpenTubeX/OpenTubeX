@@ -71,7 +71,7 @@
 }
 
 /* On small players the central play button would cover the strip and its time. */
-.ftVideoPlayer:has(:deep(.ft-seek-filmstrip-active)) :deep(.shaka-big-buttons-container) {
+.ftVideoPlayer[data-seek-filmstrip-active] :deep(.shaka-big-buttons-container) {
   visibility: hidden;
 }
 
@@ -474,10 +474,8 @@
   }
 }
 
-:deep(.shaka-controls-container:has(
-  .shaka-overflow-menu:not(.shaka-hidden),
-  .shaka-sub-menu:not(.shaka-hidden)
-) .shaka-overflow-menu-button > .shaka-ui-icon) {
+/* Marked while a menu is open (`controlStateAttributes.js`). */
+:deep(.shaka-overflow-menu-button[data-menu-open] > .shaka-ui-icon) {
   transform: rotate(35deg);
 }
 

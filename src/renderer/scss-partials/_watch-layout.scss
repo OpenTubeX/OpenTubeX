@@ -20,9 +20,10 @@
 
 // A grid item sticks only within its own row, so a pinned player turns the
 // single column into a flex column, where the video area can stick across the
-// whole page. The player docks instead in layouts that keep the grid.
+// whole page. The player docks instead in layouts that keep the grid. It marks
+// the layout itself (`useScrollMiniPlayer.js`).
 @mixin pinned-player-column {
-  &:has(.scrollPinnedPlayer):not(.shortsPlayerActive) {
+  &[data-pinned-player]:not(.shortsPlayerActive) {
     display: flex;
     flex-direction: column;
     align-items: stretch;
