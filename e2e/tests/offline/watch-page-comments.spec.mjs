@@ -932,6 +932,10 @@ test.describe('manual comment loading', () => {
     await replyInput.press('Backspace')
     await replyInput.press('Backspace')
     await expect(replyInput).toHaveValue('')
+    // Typing a removed mention's handle again leaves it plain text.
+    await replyInput.pressSequentially(handle)
+    await expect(composer.locator('.inputHighlight')).toHaveCount(0)
+    await replyInput.fill('')
     await replyInput.pressSequentially('Hi (@')
     await expect(composer.getByRole('option')).not.toHaveCount(0)
     // Narrowing the query after moving down picks from the remaining options.
@@ -943,9 +947,9 @@ test.describe('manual comment loading', () => {
     await expect(composer.getByRole('listbox')).toHaveCount(0)
     // Punctuation around a mention keeps it.
     await replyInput.press('Backspace')
-    await replyInput.pressSequentially(') there')
+    await replyInput.pressSequentially('...) there')
     await composer.getByRole('button', { name: 'Reply', exact: true }).click()
-    await expect.poll(() => replyTexts.at(-1)).toBe(`Hi (@${channelId}) there`)
+    await expect.poll(() => replyTexts.at(-1)).toBe(`Hi (@${channelId}...) there`)
   })
 
   test.describe('comment filtering at 125% UI scale', () => {

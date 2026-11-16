@@ -218,6 +218,10 @@ function getTextarea() {
 /** @param {string} value */
 function handleInput(value) {
   text.value = value
+  // A deleted mention's handle typed again stays plain text until picked.
+  if (mentionRanges.value.length < mentions.value.length) {
+    mentions.value = mentions.value.filter(mention => mentionRanges.value.some(range => range.mention === mention))
+  }
   // A new @ in place of a dismissed one suggests again.
   if (value[dismissedQueryStart.value] !== '@') dismissedQueryStart.value = -1
   updateCaret()

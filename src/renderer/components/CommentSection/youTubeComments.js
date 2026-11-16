@@ -65,8 +65,9 @@ export function findCommentMentions(text, mentions) {
     let start = text.indexOf(mention.handle)
     while (start !== -1) {
       const end = start + mention.handle.length
-      // A period after a handle can end the sentence.
-      const next = text[end] === '.' ? end + 1 : end
+      // Periods after a handle can end the sentence.
+      let next = end
+      while (text[next] === '.') next++
       if (MENTION_START.test(text.slice(Math.max(0, start - 1), start)) && (next === text.length || !HANDLE_CHARACTER.test(text[next]))) {
         ranges.push({ start, end, mention })
       }
