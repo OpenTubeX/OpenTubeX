@@ -122,6 +122,8 @@ When adding or changing translatable strings:
 3. Run `node _scripts/aiTranslations.mjs cleanup --all --write` to drop AI entries that now have human translations.
 4. In your final response, list every `de-DE` string you added or changed, with its key and the `en-US` source, so the user can review the German wording.
 
+The Local API browser extension keeps its strings in `browser-extension/_locales/<locale>/messages.json`, a separate Weblate component. Update its `en` and `de` files and list the `de` strings the same way, but add no AI translations for it.
+
 ## Upstream, naming, and related repositories
 
 - Merge `upstream/development`. Prefer OpenTubeX changes when resolving conflicts, and replace "FreeTube" with "OpenTubeX" in new translations. Add release notes to `release-notes/` for user-facing upstream changes in the same merge.

@@ -1,0 +1,32 @@
+{
+  "extensionName": {
+    "message": "OpenTubeX Local API",
+    "description": "Name of the extension in the browser and the add-on stores. At most 75 characters. Local API is the name of a backend in the OpenTubeX app's settings."
+  },
+  "extensionDescription": {
+    "message": "Lets the OpenTubeX web app use the local API by allowing it to request YouTube directly.",
+    "description": "Short description in the browser and the add-on stores. At most 132 characters."
+  },
+  "optionsIntro": {
+    "message": "The extension works on opentubex.org and localhost. Add the address of your own OpenTubeX server to use the local API there too. Browsers can't limit extensions to one port, so the extension also changes the YouTube requests of other web apps on other ports of that server."
+  },
+  "serverAddressLabel": {
+    "message": "Server address",
+    "description": "Label of the field for the address of a self-hosted OpenTubeX server."
+  },
+  "addButton": {
+    "message": "Add",
+    "description": "Button that adds the entered server address."
+  },
+  "removeButton": {
+    "message": "Remove",
+    "description": "Button next to an added server address that removes it."
+  },
+  "invalidAddressError": {
+    "message": "Enter an https:// address."
+  },
+  "permissionDeniedError": {
+    "message": "The extension needs access to the server to work there.",
+    "description": "Shown when the user declines the browser's permission prompt for an added server."
+  }
+}

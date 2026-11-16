@@ -7,6 +7,22 @@ const form = document.getElementById('add-form')
 const input = document.getElementById('origin')
 const errorText = document.getElementById('error')
 const list = document.getElementById('origins')
+const removeButton = document.getElementById('remove-button')
+
+/**
+ * Fills in the text of the elements with a `data-i18n` message name.
+ * @param {ParentNode} root
+ */
+function localize(root) {
+  for (const element of root.querySelectorAll('[data-i18n]')) {
+    element.textContent = ext.i18n.getMessage(element.dataset.i18n)
+  }
+}
+
+document.documentElement.lang = ext.i18n.getMessage('@@ui_locale').replace('_', '-')
+document.documentElement.dir = ext.i18n.getMessage('@@bidi_dir')
+localize(document)
+localize(removeButton.content)
 
 /** @returns {Promise<string[]>} the added origins, such as `https://tube.example.com` */
 async function getOrigins() {
@@ -62,9 +78,7 @@ async function render() {
     const item = document.createElement('li')
     const name = document.createElement('span')
     name.textContent = origin
-    const remove = document.createElement('button')
-    remove.type = 'button'
-    remove.textContent = 'Remove'
+    const remove = removeButton.content.firstElementChild.cloneNode(true)
     remove.addEventListener('click', async () => {
       await updateOrigins(origins => origins.filter(other => other !== origin))
       // Built-in origins, such as opentubex.org, keep their required permission
@@ -86,14 +100,14 @@ form.addEventListener('submit', event => {
     if (url.protocol !== 'https:') throw new Error()
     origin = `https://${url.hostname}`
   } catch {
-    errorText.textContent = 'Enter an https:// address.'
+    errorText.textContent = ext.i18n.getMessage('invalidAddressError')
     return
   }
 
   // Browsers only show the permission prompt in direct response to the click
   ext.permissions.request({ origins: [`${origin}/*`] }).then(async granted => {
     if (!granted) {
-      errorText.textContent = 'The extension needs access to the server to work there.'
+      errorText.textContent = ext.i18n.getMessage('permissionDeniedError')
       return
     }
     await updateOrigins(origins => origins.includes(origin) ? origins : [...origins, origin])

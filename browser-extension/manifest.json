@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "OpenTubeX Local API",
+  "name": "__MSG_extensionName__",
   "version": "1.0.0",
-  "description": "Lets the OpenTubeX web app use the local API by allowing it to request YouTube directly.",
+  "description": "__MSG_extensionDescription__",
+  "default_locale": "en",
   "homepage_url": "https://opentubex.org/",
   "icons": {
     "128": "icon.png"

@@ -1,30 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>OpenTubeX Local API</title>
+    <title data-i18n="extensionName"></title>
     <link rel="stylesheet" href="options.css" />
   </head>
   <body>
     <main>
-      <h1>OpenTubeX Local API</h1>
-      <p>
-        The extension works on opentubex.org and localhost. Add the address of
-        your own OpenTubeX server to use the local API there too. Browsers
-        can't limit extensions to one port, so the extension also changes the
-        YouTube requests of other web apps on other ports of that server.
-      </p>
+      <h1 data-i18n="extensionName"></h1>
+      <p data-i18n="optionsIntro"></p>
       <form id="add-form">
-        <label for="origin">Server address</label>
+        <label for="origin" data-i18n="serverAddressLabel"></label>
         <div class="row">
           <input id="origin" type="url" placeholder="https://tube.example.com" required />
-          <button type="submit">Add</button>
+          <button type="submit">
+            <!-- Material Symbols add-rounded, as in the app's Material icon pack -->
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M11 13H6q-.425 0-.712-.288T5 12t.288-.712T6 11h5V6q0-.425.288-.712T12 5t.713.288T13 6v5h5q.425 0 .713.288T19 12t-.288.713T18 13h-5v5q0 .425-.288.713T12 19t-.712-.288T11 18z" /></svg>
+            <span data-i18n="addButton"></span>
+          </button>
         </div>
         <p id="error" class="error" role="alert"></p>
       </form>
       <ul id="origins"></ul>
     </main>
+    <template id="remove-button">
+      <button type="button">
+        <!-- Material Symbols delete-outline, as in the app's Material icon pack -->
+        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M7 21q-.825 0-1.412-.587T5 19V6H4V4h5V3h6v1h5v2h-1v13q0 .825-.587 1.413T17 21zM17 6H7v13h10zM9 17h2V8H9zm4 0h2V8h-2zM7 6v13z" /></svg>
+        <span data-i18n="removeButton"></span>
+      </button>
+    </template>
     <script src="options.js"></script>
   </body>
 </html>
