@@ -10,7 +10,9 @@ mkdir -p "$fixture/_scripts" "$fixture/bin" \
   "$fixture/ios/App/python-packages/yt_dlp_plugins/extractor"
 cp "$(dirname "$0")/../_scripts/setupIosYtDlp.sh" "$fixture/_scripts/setupIosYtDlp.sh"
 cp "$(dirname "$0")/../_scripts/iosYtDlpWebkitNavigation.patch" "$fixture/_scripts/"
-printf '3.14-b11' > "$fixture/ios/App/Python.xcframework/.opentubex-release-tag"
+eval "$(grep '^release_tag=' "$fixture/_scripts/setupIosYtDlp.sh")"
+export release_tag
+printf '%s' "$release_tag" > "$fixture/ios/App/Python.xcframework/.opentubex-release-tag"
 touch "$fixture/ios/App/python-packages/yt_dlp_plugins/extractor/webkit_jsi.py"
 printf 'obsolete pins' > "$fixture/ios/App/python-packages/.pins"
 
@@ -52,12 +54,12 @@ printf 'release\n' >> "$IOS_SETUP_TEST_CALLS"
 while [[ "$1" != '--dir' ]]; do shift; done
 mkdir -p "$2/archive/Python.xcframework"
 printf 'fixture' > "$2/archive/Python.xcframework/Info.plist"
-tar -czf "$2/Python-3.14-iOS-support.b11.tar.gz" -C "$2/archive" Python.xcframework
+tar -czf "$2/Python-${release_tag%-*}-iOS-support.${release_tag#*-}.tar.gz" -C "$2/archive" Python.xcframework
 GH
 chmod +x "$fixture/bin/gh"
 printf 'obsolete release' > "$fixture/ios/App/Python.xcframework/.opentubex-release-tag"
 PATH="$fixture/bin:$PATH" bash "$fixture/_scripts/setupIosYtDlp.sh"
-[[ "$(cat "$fixture/ios/App/Python.xcframework/.opentubex-release-tag")" == '3.14-b11' ]]
+[[ "$(cat "$fixture/ios/App/Python.xcframework/.opentubex-release-tag")" == "$release_tag" ]]
 [[ "$(wc -l < "$IOS_SETUP_TEST_CALLS")" == 3 ]]
 rm -r "$fixture/ios/App/python-packages/mutagen"
 PATH="$fixture/bin:$PATH" bash "$fixture/_scripts/setupIosYtDlp.sh"
