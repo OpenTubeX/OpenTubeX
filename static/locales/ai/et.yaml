@@ -2782,6 +2782,10 @@ Yattee Server:
 Yattee Fallback Warning: See päring läheb sinu seadistatud Yattee serverist mööda ja ühendub otse YouTube'iga, avaldades sinu IP-aadressi.
 Update With Package Manager: 'Uuenda {packageManager} abil:'
 Update Command Copied: 'Uuenduskäsk kopeeriti'
+Intel Build on Apple Silicon: 'Kasutad Apple silicon’iga Macis Inteli versiooni, seega töötab rakendus aeglasemalt. Paigalda selle asemel Apple siliconi versioon.'
+Download for Apple Silicon: 'Laadi alla Apple siliconi jaoks'
+x64 Build on Windows on Arm: 'Kasutad Arm-protsessoriga Windowsi arvutis x64 versiooni, seega töötab rakendus aeglasemalt. Paigalda selle asemel Arm64 versioon.'
+Download for Arm64: 'Laadi alla Arm64 jaoks'
 Digital Wellbeing:
   Watch time limit almost reached: "Sinu päevase vaatamisaja limiidini on jäänud {duration}"
   Shorts limit almost reached: "Sinu päevase Shorts-videote limiidini on jäänud {duration}"

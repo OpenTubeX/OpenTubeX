@@ -20,8 +20,12 @@ function cookieShape() {
   return `\n.startupSplash { --splash-cookie: ${polygon}; --splash-cookie-mask: url("data:image/svg+xml,${encodeURIComponent(svg)}"); }\n`
 }
 
+// index.ejs loads it as boot.js; the page's Content-Security-Policy blocks inline scripts.
+const STARTUP_SCRIPT = path.join(__dirname, '../src/renderer/startup/boot.js')
+
 module.exports = ({ stillSplash = false } = {}) => ({
   styles: readFileSync(path.join(__dirname, '../src/renderer/startup/splash.css'), 'utf8') + cookieShape() + (stillSplash ? STILL_SPLASH : ''),
-  script: readFileSync(path.join(__dirname, '../src/renderer/startup/boot.js'), 'utf8'),
   logo: readFileSync(path.join(__dirname, '../_icons/iconColorSmall.svg'), 'utf8').replaceAll('#212121', 'currentColor')
 })
+
+module.exports.copyPattern = { from: STARTUP_SCRIPT, to: 'boot.js' }

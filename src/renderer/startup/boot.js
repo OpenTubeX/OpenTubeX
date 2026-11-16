@@ -1,7 +1,8 @@
-// Inlined in <head> before the app's stylesheet, so the first paint needs no
-// Vue initialization, locale fetch, or separate image request. A script after
-// the splash would wait for that stylesheet, and Chromium can paint the splash
-// in its default colors before running it.
+// Loaded in <head> before the app's stylesheet, so the first paint needs no
+// Vue initialization or locale fetch. A script after the splash would wait for
+// that stylesheet, and Chromium can paint the splash in its default colors
+// before running it. It is a file rather than inline so that the page's
+// Content-Security-Policy can allow only the app's own scripts.
 (() => {
   // Electron's main process reads the settings and the library while the
   // deferred bundles load, compile and run. Starting here, rather than in the

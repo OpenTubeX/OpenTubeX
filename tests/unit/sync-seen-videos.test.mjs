@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict'
 import { migrateStoredSettings } from '../../src/datastores/settingsMigrations.js'
+import * as secretSettings from '../../src/datastores/secretSettings.js'
+import { getSecretCipher } from '../../src/datastores/secretCipher.js'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
@@ -183,7 +185,7 @@ async function settingsFixture(history = []) {
   }
   if (history.length > 0) await db.history.insertAsync(history)
   const { Settings, History } = vm.runInNewContext(baseSource.slice(baseSource.indexOf('class Settings {'),
-    baseSource.indexOf('\nclass WatchStats {')) + '\n({ Settings, History })', { db, ...seenVideos, ...historyHelpers, migrateStoredSettings })
+    baseSource.indexOf('\nclass WatchStats {')) + '\n({ Settings, History })', { db, ...seenVideos, ...historyHelpers, ...secretSettings, getSecretCipher, migrateStoredSettings })
   return { db, Settings, History }
 }
 

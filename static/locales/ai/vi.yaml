@@ -2797,6 +2797,10 @@ Yattee Server:
 Yattee Fallback Warning: Yêu cầu này bỏ qua máy chủ Yattee bạn đã cấu hình và kết nối trực tiếp đến YouTube, làm lộ địa chỉ IP của bạn.
 Update With Package Manager: 'Cập nhật bằng {packageManager}:'
 Update Command Copied: 'Đã sao chép lệnh cập nhật'
+Intel Build on Apple Silicon: 'Bạn đang dùng phiên bản Intel trên máy Mac dùng Apple silicon nên ứng dụng chạy chậm hơn. Hãy cài đặt phiên bản Apple silicon thay thế.'
+Download for Apple Silicon: 'Tải xuống cho Apple silicon'
+x64 Build on Windows on Arm: 'Bạn đang dùng phiên bản x64 trên máy tính Windows dùng bộ xử lý Arm nên ứng dụng chạy chậm hơn. Hãy cài đặt phiên bản Arm64 thay thế.'
+Download for Arm64: 'Tải xuống cho Arm64'
 Digital Wellbeing:
   Watch time limit almost reached: "Còn {duration} là đạt giới hạn thời gian xem hằng ngày của bạn"
   Shorts limit almost reached: "Còn {duration} là đạt giới hạn Shorts hằng ngày của bạn"

@@ -79,6 +79,10 @@ Dismiss: نظر انداز کریں
 Update to {version}: '{version} پر اپ ڈیٹ کریں'
 Update With Package Manager: '{packageManager} کے ذریعے اپ ڈیٹ کریں:'
 Update Command Copied: اپ ڈیٹ کمانڈ کاپی ہو گئی
+Intel Build on Apple Silicon: 'آپ Apple silicon والے Mac پر Intel ورژن استعمال کر رہے ہیں، اس لیے ایپ سست چلتی ہے۔ اس کی بجائے Apple silicon ورژن انسٹال کریں۔'
+Download for Apple Silicon: 'Apple silicon کے لیے ڈاؤن لوڈ کریں'
+x64 Build on Windows on Arm: 'آپ Arm پروسیسر والے Windows PC پر x64 ورژن استعمال کر رہے ہیں، اس لیے ایپ سست چلتی ہے۔ اس کی بجائے Arm64 ورژن انسٹال کریں۔'
+Download for Arm64: 'Arm64 کے لیے ڈاؤن لوڈ کریں'
 Global:
   Ambient Mode: ایمبیئنٹ موڈ
   Loading More: مزید لوڈ ہو رہا ہے

@@ -3038,6 +3038,10 @@ The playlist has been reversed: Die Playlist wurde umgedreht
 Download From Site: Von der Website herunterladen
 Update With Package Manager: 'Mit {packageManager} aktualisieren:'
 Update Command Copied: Aktualisierungsbefehl kopiert
+Intel Build on Apple Silicon: Du verwendest die Intel-Version auf einem Mac mit Apple Silicon, daher läuft die App langsamer. Installiere stattdessen die Apple-Silicon-Version.
+Download for Apple Silicon: Für Apple Silicon herunterladen
+x64 Build on Windows on Arm: Du verwendest die x64-Version auf einem Windows-PC mit Arm-Prozessor, daher läuft die App langsamer. Installiere stattdessen die Arm64-Version.
+Download for Arm64: Für Arm64 herunterladen
 Version {versionNumber} is now available.: Version {versionNumber} ist jetzt verfügbar.
 See changes and update: Änderungen ansehen und aktualisieren
 Dismiss: Ausblenden

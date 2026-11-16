@@ -3,6 +3,8 @@ import { playlistRepairPatch } from '../../playlistRepair'
 import * as db from '../index'
 import { updateSettingIfUnchanged } from '../settingRepair'
 import { migrateStoredSettings } from '../settingsMigrations'
+import { getSecretCipher } from '../secretCipher'
+import { decodeSettings, encodeSetting, migrateSecretSettings } from '../secretSettings'
 import { MAIN_PROFILE_ID, PlaylistVideoAddResult } from '../../constants'
 import { hasReachedWatchedThreshold, mergeLibreTubeHistoryRecord, mergeTakeoutHistoryRecord, migrateLegacyHistoryRecord, newestUniqueHistoryRecords } from '../../history'
 import { mergeSearchHistoryEntries, resolveSearchHistoryEntry, sortSearchHistoryByLastUpdatedAt } from '../../search-history'
@@ -113,20 +115,28 @@ class Settings {
 
   static async find() {
     await this.migrate()
-    return db.settings.findAsync({ _id: { $ne: 'bounds' } })
+    return decodeSettings(await db.settings.findAsync({ _id: { $ne: 'bounds' } }), db.settings, this.cipher())
+  }
+
+  /** Where secret settings are encrypted, the system's cipher for them. */
+  static cipher() {
+    return getSecretCipher()
   }
 
   static migrate() {
     this.migrationPromise ??= migrateStoredSettings(db.settings).catch(error => {
       this.migrationPromise = null
       throw error
-    })
+    }).then(() => migrateSecretSettings(db.settings, this.cipher()).catch(error => {
+      // Secrets left as they are keep working, and the next start tries again.
+      console.error('Unable to migrate saved credentials', error)
+    }))
     return this.migrationPromise
   }
 
   static async upsert(_id, value) {
     await this.migrate()
-    return db.settings.updateAsync({ _id }, { _id, value }, { upsert: true })
+    return db.settings.updateAsync({ _id }, await encodeSetting(_id, value, this.cipher()), { upsert: true })
   }
 
   static _updateIfUnchanged(_id, expectedValue, value) {
@@ -162,8 +172,10 @@ class Settings {
     })
   }
 
-  static _findOne(_id) {
-    return db.settings.findOneAsync({ _id })
+  static async _findOne(_id) {
+    const doc = await db.settings.findOneAsync({ _id })
+    if (!doc) return null
+    return (await decodeSettings([doc], db.settings, this.cipher()))[0] ?? null
   }
 
   static _updateBounds(value) {

@@ -291,6 +291,10 @@ export default {
     hideSplash: process.argv.includes('--hide-startup-splash=true')
   },
   customTitleBar: process.argv.includes('--custom-title-bar=true'),
+  /** Whether the x64 build runs through emulation on Apple silicon or Windows on Arm */
+  runningUnderArm64Translation: process.argv.includes('--arm64-translation=true'),
+  /** Whether this is the Windows portable build */
+  portableBuild: process.argv.includes('--portable=true'),
   /**
    * @param {{ color: string, symbolColor: string, height: number }} overlay height in CSS pixels
    */

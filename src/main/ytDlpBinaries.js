@@ -12,7 +12,9 @@ import { buildProxyUrl, isOpenTubeXUrl } from './utils'
 import { isTrustedSender } from './ipc'
 import { IpcChannels } from '../constants'
 import { getMatchingDownloadValidators, getYtDlpAssetName } from './ytDlpAsset'
-import { verifySha256Checksum, verifyYtDlpReleaseAsset } from './ytDlpSignature'
+import { verifyYtDlpReleaseAsset } from './ytDlpSignature'
+import { getPinnedFfmpegBuild, verifyPinnedFfmpegArchive } from './ffmpegBuilds'
+import ffmpegBuilds from './ffmpegBuilds.json'
 
 const execFileAsync = promisify(execFile)
 
@@ -22,11 +24,6 @@ const YT_DLP_RELEASE_REPOSITORIES = {
   nightly: 'yt-dlp/yt-dlp-nightly-builds',
   master: 'yt-dlp/yt-dlp-master-builds'
 }
-
-// yt-dlp's own FFmpeg builds for Windows, patched for use with yt-dlp
-const WINDOWS_FFMPEG_RELEASE_URL = 'https://github.com/yt-dlp/FFmpeg-Builds/releases/latest/download'
-const WINDOWS_FFMPEG_ASSET_NAME = 'ffmpeg-master-latest-win64-gpl.zip'
-const WINDOWS_FFMPEG_URL = `${WINDOWS_FFMPEG_RELEASE_URL}/${WINDOWS_FFMPEG_ASSET_NAME}`
 
 // the Developer ID of Martin Riedl, who signs the macOS FFmpeg builds
 const MACOS_FFMPEG_CODE_REQUIREMENT = 'anchor apple generic and certificate leaf[subject.OU] = "KU3N25YGLU"'
@@ -477,56 +474,6 @@ function getLatestReleaseDownloadUrl(repository) {
 }
 
 /**
- * Daily builds of the latest FFmpeg release for Linux and macOS
- * https://ffmpeg.martin-riedl.de
- * @param {'ffmpeg' | 'ffprobe'} binaryName
- * @returns {string} a redirect to the latest build
- */
-function getLatestFfmpegBuildUrl(binaryName) {
-  const platform = process.platform === 'darwin' ? 'macos' : 'linux'
-  const arch = process.arch === 'arm64' ? 'arm64' : 'amd64'
-  return `https://ffmpeg.martin-riedl.de/redirect/latest/${platform}/${arch}/release/${binaryName}.zip`
-}
-
-/**
- * Resolves the redirect from {@link getLatestFfmpegBuildUrl}, so a build and
- * its checksum file are fetched from the same build, even if a newer one is
- * published in between. The redirect answers HEAD requests with 404, so this
- * sends a GET request that is cancelled at the redirect.
- * @param {string} latestUrl
- * @returns {Promise<string>}
- */
-function resolveFfmpegBuildUrl(latestUrl) {
-  return new Promise((resolve, reject) => {
-    const failure = managedToolError('MANAGED_TOOL_RELEASE_NOT_FOUND', 'Could not find the latest FFmpeg build')
-    const request = net.request({ url: latestUrl, redirect: 'manual' })
-    const timeout = setTimeout(() => {
-      request.abort()
-      reject(new Error('Timed out resolving the latest FFmpeg build'))
-    }, MANAGED_BINARY_UPDATE_CHECK_TIMEOUT_MS)
-    request.on('redirect', (statusCode, method, redirectUrl) => {
-      clearTimeout(timeout)
-      if (redirectUrl.startsWith('https://ffmpeg.martin-riedl.de/download/')) {
-        resolve(redirectUrl)
-      } else {
-        reject(failure)
-      }
-    })
-    request.on('response', () => {
-      clearTimeout(timeout)
-      // A direct response could be the archive itself, so don't download it here
-      request.abort()
-      reject(failure)
-    })
-    request.on('error', (error) => {
-      clearTimeout(timeout)
-      reject(error)
-    })
-    request.end()
-  })
-}
-
-/**
  * Checks a managed download without transferring its payload.
  * A missing validator means there is no trustworthy installed-release baseline.
  * @param {string} url
@@ -886,9 +833,27 @@ function toErrorResult(error) {
 }
 
 /**
- * Downloads up-to-date FFmpeg and FFprobe builds into the user data directory.
- * They are kept together because yt-dlp locates both through one
- * `--ffmpeg-location` argument.
+ * Whether the installed binary came from the pinned archive.
+ * @param {string} binaryPath
+ * @param {import('./ffmpegBuilds').PinnedFfmpegArchive} archive
+ * @returns {Promise<boolean>}
+ */
+async function isPinnedFfmpegArchiveInstalled(binaryPath, archive) {
+  if (!existsSync(binaryPath)) {
+    return false
+  }
+
+  try {
+    return JSON.parse(await readFile(`${binaryPath}.download.json`, 'utf8'))?.sha256 === archive.sha256
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Downloads the FFmpeg and FFprobe builds pinned in ffmpegBuilds.json into the
+ * user data directory. They are kept together because yt-dlp locates both
+ * through one `--ffmpeg-location` argument.
  * @param {BinaryDownloadProgressCallback} [onProgress]
  * @param {() => void} [onDownloadStart]
  * @returns {Promise<{ version: string, updated: boolean } | { error: string, errorCode?: string }>}
@@ -896,66 +861,45 @@ function toErrorResult(error) {
 export async function downloadManagedFfmpeg(onProgress, onDownloadStart) {
   const ffmpegPath = getManagedBinaryPath('ffmpeg')
   const ffprobePath = getManagedBinaryPath('ffprobe')
-  const pendingValidatorWrites = []
   const pendingInstalls = []
 
-  if (process.platform === 'win32') {
-    // yt-dlp's FFmpeg builds are only extractable without extra dependencies for Windows (zip)
-    const url = WINDOWS_FFMPEG_URL
+  try {
+    const build = getPinnedFfmpegBuild(ffmpegBuilds, process.platform, process.arch)
 
-    try {
-      // Existing FFmpeg-only installations must fetch the archive again so
-      // FFprobe can be added even when its validators would return 304.
-      const validators = existsSync(ffprobePath)
-        ? await readDownloadValidators(ffmpegPath, url)
-        : null
-      const download = await downloadFile(url, onProgress, onDownloadStart, validators)
-
-      if (download.data !== null) {
-        // The `latest` release is replaced in place, so a build published
-        // between both requests fails verification until the next attempt.
-        const checksums = await fetchBuffer(`${WINDOWS_FFMPEG_RELEASE_URL}/checksums.sha256`)
-        verifySha256Checksum(download.data, WINDOWS_FFMPEG_ASSET_NAME, checksums)
-        pendingInstalls.push(
-          { data: await extractZipEntry(download.data, name => name.endsWith('/bin/ffmpeg.exe')), path: ffmpegPath },
-          { data: await extractZipEntry(download.data, name => name.endsWith('/bin/ffprobe.exe')), path: ffprobePath }
-        )
-        pendingValidatorWrites.push(
-          { path: ffmpegPath, validators: download.validators, url },
-          { path: ffprobePath, validators: download.validators, url }
-        )
+    // Windows extracts both binaries from one archive, so it is downloaded once
+    /** @type {Map<string, { archive: import('./ffmpegBuilds').PinnedFfmpegArchive, binaries: { name: 'ffmpeg' | 'ffprobe', path: string }[] }>} */
+    const archives = new Map()
+    for (const binary of [{ name: 'ffmpeg', path: ffmpegPath }, { name: 'ffprobe', path: ffprobePath }]) {
+      const archive = build[binary.name]
+      if (!await isPinnedFfmpegArchiveInstalled(binary.path, archive)) {
+        const entry = archives.get(archive.url) ?? { archive, binaries: [] }
+        entry.binaries.push(binary)
+        archives.set(archive.url, entry)
       }
-    } catch (error) {
-      return toErrorResult(error)
     }
-  } else {
-    const binaries = [
-      { name: 'ffmpeg', path: ffmpegPath },
-      { name: 'ffprobe', path: ffprobePath }
-    ]
-    try {
-      for (const [index, binary] of binaries.entries()) {
-        const url = getLatestFfmpegBuildUrl(binary.name)
-        const buildUrl = await resolveFfmpegBuildUrl(url)
-        const download = await downloadFile(
-          buildUrl,
-          percent => onProgress?.(percent === null ? null : Math.round((index * 100 + percent) / binaries.length)),
-          onDownloadStart,
-          await readDownloadValidators(binary.path, url)
-        )
 
-        if (download.data !== null) {
-          verifySha256Checksum(download.data, `${binary.name}.zip`, await fetchBuffer(`${buildUrl}.sha256`))
-          pendingInstalls.push({
-            data: await extractZipEntry(download.data, name => name === binary.name),
-            path: binary.path
-          })
-          pendingValidatorWrites.push({ path: binary.path, validators: download.validators, url })
-        }
+    for (const [index, { archive, binaries }] of [...archives.values()].entries()) {
+      const download = await downloadFile(
+        archive.url,
+        percent => onProgress?.(percent === null ? null : Math.round((index * 100 + percent) / archives.size)),
+        onDownloadStart,
+        null
+      )
+      verifyPinnedFfmpegArchive(download.data, archive)
+
+      for (const binary of binaries) {
+        const matches = process.platform === 'win32'
+          ? name => name.endsWith(`/bin/${binary.name}.exe`)
+          : name => name === binary.name
+        pendingInstalls.push({
+          data: await extractZipEntry(download.data, matches),
+          path: binary.path,
+          archive
+        })
       }
-    } catch (error) {
-      return toErrorResult(error)
     }
+  } catch (error) {
+    return toErrorResult(error)
   }
 
   let version
@@ -984,8 +928,8 @@ export async function downloadManagedFfmpeg(onProgress, onDownloadStart) {
   }
 
   try {
-    await Promise.all(pendingValidatorWrites.map(({ path, validators, url }) =>
-      writeDownloadValidators(path, validators, url)))
+    await Promise.all(pendingInstalls.map(({ path, archive }) =>
+      writeFile(`${path}.download.json`, JSON.stringify({ url: archive.url, sha256: archive.sha256 }))))
   } catch (error) {
     console.warn('Could not save FFmpeg and FFprobe download metadata', error)
   }
@@ -994,7 +938,7 @@ export async function downloadManagedFfmpeg(onProgress, onDownloadStart) {
 }
 
 /**
- * Checks whether the selected managed binary has a newer remote asset.
+ * Checks whether the selected managed binary has a newer release.
  * @param {'yt-dlp' | 'ffmpeg'} binary
  * @returns {Promise<boolean>}
  */
@@ -1008,15 +952,11 @@ async function isManagedBinaryUpdateAvailable(binary) {
     return isFileUpdateAvailable(source, await readDownloadValidators(managedPath, source, channel))
   }
 
-  const ffmpegPath = getManagedBinaryPath('ffmpeg')
-  if (process.platform === 'win32') {
-    return isFileUpdateAvailable(WINDOWS_FFMPEG_URL, await readDownloadValidators(ffmpegPath, WINDOWS_FFMPEG_URL))
-  }
-
-  for (const binaryName of ['ffmpeg', 'ffprobe']) {
-    const url = getLatestFfmpegBuildUrl(binaryName)
-    const validators = await readDownloadValidators(getManagedBinaryPath(binaryName), url)
-    if (validators !== null && await isFileUpdateAvailable(await resolveFfmpegBuildUrl(url), validators)) {
+  // FFmpeg updates with the pins in a new app release, so this needs no network
+  const build = getPinnedFfmpegBuild(ffmpegBuilds, process.platform, process.arch)
+  for (const binaryName of /** @type {const} */ (['ffmpeg', 'ffprobe'])) {
+    const binaryPath = getManagedBinaryPath(binaryName)
+    if (existsSync(binaryPath) && !await isPinnedFfmpegArchiveInstalled(binaryPath, build[binaryName])) {
       return true
     }
   }

@@ -1164,10 +1164,11 @@ function runApp() {
           }
 
           if (pathname.endsWith('.html')) {
-            // Restrict only what the renderer never uses. index.ejs repeats the
-            // directives a meta tag supports for dev, web and Capacitor builds;
-            // frame-ancestors only works as a header.
-            headers['Content-Security-Policy'] = "object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'"
+            // Keep in sync with index.ejs, which repeats the directives a meta
+            // tag supports for dev, web and Capacitor builds; frame-ancestors
+            // only works as a header. script-src keeps markup that slips past
+            // the sanitizer from running script next to the user's credentials.
+            headers['Content-Security-Policy'] = "object-src 'none'; base-uri 'self'; form-action 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self' blob:; frame-ancestors 'none'"
           }
 
           return new Response(contents.buffer, {
@@ -1941,7 +1942,10 @@ function runApp() {
           `--startup-dark=${nativeTheme.shouldUseDarkColors}`,
           `--system-accent-color=${getSystemAccentColor() ?? ''}`,
           `--hide-startup-splash=${hideStartupSplash}`,
-          `--custom-title-bar=${customTitleBar}`
+          `--custom-title-bar=${customTitleBar}`,
+          // The x64 build runs through much slower emulation on Apple silicon and Windows on Arm
+          `--arm64-translation=${app.runningUnderARM64Translation === true}`,
+          `--portable=${isPortableBuild()}`
         ],
         preload: process.env.NODE_ENV === 'development'
           ? path.resolve(__dirname, '../../dist/preload.js')

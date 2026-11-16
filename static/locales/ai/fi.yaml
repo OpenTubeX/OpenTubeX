@@ -2788,6 +2788,10 @@ Yattee Server:
 Yattee Fallback Warning: Tämä pyyntö ohittaa määrittämäsi Yattee-palvelimen ja muodostaa yhteyden suoraan YouTubeen paljastaen IP-osoitteesi.
 Update With Package Manager: 'Päivitä käyttäen {packageManager}:'
 Update Command Copied: 'Päivityskomento kopioitu'
+Intel Build on Apple Silicon: 'Käytät Intel-versiota Macissa, jossa on Apple silicon, joten sovellus toimii hitaammin. Asenna sen sijaan Apple silicon -versio.'
+Download for Apple Silicon: 'Lataa Apple siliconille'
+x64 Build on Windows on Arm: 'Käytät x64-versiota Windows-tietokoneessa, jossa on Arm-suoritin, joten sovellus toimii hitaammin. Asenna sen sijaan Arm64-versio.'
+Download for Arm64: 'Lataa Arm64:lle'
 Digital Wellbeing:
   Watch time limit almost reached: "{duration} jäljellä päivittäisestä katseluaikarajastasi"
   Shorts limit almost reached: "{duration} jäljellä päivittäisestä Shorts-rajastasi"

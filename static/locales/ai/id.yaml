@@ -2806,6 +2806,10 @@ Yattee Server:
 Yattee Fallback Warning: Permintaan ini melewati server Yattee yang Anda konfigurasi dan terhubung langsung ke YouTube, sehingga mengungkap alamat IP Anda.
 Update With Package Manager: 'Perbarui dengan {packageManager}:'
 Update Command Copied: 'Perintah pembaruan disalin'
+Intel Build on Apple Silicon: 'Anda menggunakan versi Intel di Mac dengan Apple silicon, sehingga aplikasi berjalan lebih lambat. Pasang versi Apple silicon sebagai gantinya.'
+Download for Apple Silicon: 'Unduh untuk Apple silicon'
+x64 Build on Windows on Arm: 'Anda menggunakan versi x64 di PC Windows dengan prosesor Arm, sehingga aplikasi berjalan lebih lambat. Pasang versi Arm64 sebagai gantinya.'
+Download for Arm64: 'Unduh untuk Arm64'
 Digital Wellbeing:
   Watch time limit almost reached: "Tersisa {duration} dari batas waktu tonton harian Anda"
   Shorts limit almost reached: "Tersisa {duration} dari batas Shorts harian Anda"

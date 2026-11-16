@@ -2837,6 +2837,10 @@ Yattee Server:
 Yattee Fallback Warning: Această cerere ocolește serverul Yattee configurat și se conectează direct la YouTube, expunându-vă adresa IP.
 Update With Package Manager: 'Actualizează cu {packageManager}:'
 Update Command Copied: 'Comanda de actualizare a fost copiată'
+Intel Build on Apple Silicon: 'Folosești versiunea pentru Intel pe un Mac cu Apple silicon, așa că aplicația rulează mai lent. Instalează în schimb versiunea pentru Apple silicon.'
+Download for Apple Silicon: 'Descarcă pentru Apple silicon'
+x64 Build on Windows on Arm: 'Folosești versiunea x64 pe un PC cu Windows și procesor Arm, așa că aplicația rulează mai lent. Instalează în schimb versiunea Arm64.'
+Download for Arm64: 'Descarcă pentru Arm64'
 Digital Wellbeing:
   Watch time limit almost reached: "Au mai rămas {duration} până la limita zilnică de vizionare"
   Shorts limit almost reached: "Au mai rămas {duration} până la limita zilnică pentru Shorts"

@@ -2780,6 +2780,10 @@ Yattee Server:
 Yattee Fallback Warning: Ez a kérés megkerüli a beállított Yattee-kiszolgálót, és közvetlenül a YouTube-hoz csatlakozik, felfedve az IP-címét.
 Update With Package Manager: 'Frissítés a(z) {packageManager} segítségével:'
 Update Command Copied: 'Frissítési parancs másolva'
+Intel Build on Apple Silicon: 'Az Intel-verziót használod egy Apple siliconos Macen, ezért az alkalmazás lassabban fut. Telepítsd helyette az Apple silicon-verziót.'
+Download for Apple Silicon: 'Letöltés Apple siliconra'
+x64 Build on Windows on Arm: 'Az x64-es verziót használod egy Arm processzoros Windows-gépen, ezért az alkalmazás lassabban fut. Telepítsd helyette az Arm64-es verziót.'
+Download for Arm64: 'Letöltés Arm64-re'
 Digital Wellbeing:
   Watch time limit almost reached: "Még {duration} van hátra a napi nézési időkorlátjából"
   Shorts limit almost reached: "Még {duration} van hátra a napi Shorts-korlátjából"

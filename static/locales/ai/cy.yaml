@@ -2818,6 +2818,10 @@ Yattee Server:
 Yattee Fallback Warning: Mae'r cais hwn yn osgoi'r gweinydd Yattee rydych wedi'i ffurfweddu ac yn cysylltu'n uniongyrchol â YouTube, gan ddatgelu eich cyfeiriad IP.
 Update With Package Manager: 'Diweddaru gyda {packageManager}:'
 Update Command Copied: 'Wedi copïo''r gorchymyn diweddaru'
+Intel Build on Apple Silicon: 'Rydych chi’n defnyddio’r fersiwn Intel ar Mac gydag Apple silicon, felly mae’r ap yn rhedeg yn arafach. Gosodwch y fersiwn Apple silicon yn lle hynny.'
+Download for Apple Silicon: 'Llwytho i lawr ar gyfer Apple silicon'
+x64 Build on Windows on Arm: 'Rydych chi’n defnyddio’r fersiwn x64 ar gyfrifiadur Windows gyda phrosesydd Arm, felly mae’r ap yn rhedeg yn arafach. Gosodwch y fersiwn Arm64 yn lle hynny.'
+Download for Arm64: 'Llwytho i lawr ar gyfer Arm64'
 Digital Wellbeing:
   Watch time limit almost reached: "{duration} ar ôl tan eich terfyn amser gwylio dyddiol"
   Shorts limit almost reached: "{duration} ar ôl tan eich terfyn Byrion dyddiol"

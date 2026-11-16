@@ -2790,6 +2790,10 @@ Yattee Server:
 Yattee Fallback Warning: Eskaera honek konfiguratutako Yattee zerbitzaria saihesten du eta zuzenean YouTubera konektatzen da, zure IP helbidea agerian utziz.
 Update With Package Manager: 'Eguneratu {packageManager} erabiliz:'
 Update Command Copied: 'Eguneratze-komandoa kopiatu da'
+Intel Build on Apple Silicon: 'Intelen bertsioa erabiltzen ari zara Apple silicon duen Mac batean, eta horregatik aplikazioa motelago dabil. Instalatu Apple siliconen bertsioa.'
+Download for Apple Silicon: 'Deskargatu Apple siliconentzat'
+x64 Build on Windows on Arm: 'x64 bertsioa erabiltzen ari zara Arm prozesadorea duen Windows ordenagailu batean, eta horregatik aplikazioa motelago dabil. Instalatu Arm64 bertsioa.'
+Download for Arm64: 'Deskargatu Arm64rentzat'
 Digital Wellbeing:
   Watch time limit almost reached: "{duration} geratzen zaizu eguneko ikusteko denbora-mugara iristeko"
   Shorts limit almost reached: "{duration} geratzen zaizu eguneko Shorts bideoen mugara iristeko"

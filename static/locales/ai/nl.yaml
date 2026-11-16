@@ -2852,6 +2852,10 @@ Yattee Server:
 Yattee Fallback Warning: Dit verzoek omzeilt je ingestelde Yattee-server en maakt rechtstreeks verbinding met YouTube, waardoor je IP-adres wordt blootgesteld.
 Update With Package Manager: 'Bijwerken met {packageManager}:'
 Update Command Copied: 'Bijwerkopdracht gekopieerd'
+Intel Build on Apple Silicon: 'Je gebruikt de Intel-versie op een Mac met Apple silicon, waardoor de app trager werkt. Installeer in plaats daarvan de Apple silicon-versie.'
+Download for Apple Silicon: 'Downloaden voor Apple silicon'
+x64 Build on Windows on Arm: 'Je gebruikt de x64-versie op een Windows-pc met een Arm-processor, waardoor de app trager werkt. Installeer in plaats daarvan de Arm64-versie.'
+Download for Arm64: 'Downloaden voor Arm64'
 Digital Wellbeing:
   Watch time limit almost reached: "Nog {duration} tot je daglimiet voor kijktijd"
   Shorts limit almost reached: "Nog {duration} tot je daglimiet voor Shorts"

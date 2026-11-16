@@ -115,8 +115,29 @@ test('isolates foreign frames and keeps their cross-origin requests restricted',
   )).toBe(true)
 })
 
-test('content security policy blocks framing the app and foreign base URLs', async ({ page }) => {
+test('content security policy blocks injected scripts, framing the app and foreign base URLs', async ({ app, page }) => {
+  // Only the violations this test causes may be cleared below.
+  expect(app.cspViolations).toEqual([])
   const result = await page.evaluate(async () => {
+    // Markup that slips past the sanitizer must not run script.
+    const script = document.createElement('script')
+    script.textContent = 'window.injectedScriptRan = true'
+    document.head.append(script)
+    const image = document.createElement('img')
+    image.setAttribute('onerror', 'window.injectedHandlerRan = true')
+    await new Promise(resolve => {
+      image.addEventListener('error', resolve)
+      image.src = 'data:,invalid'
+      document.body.append(image)
+    })
+    image.remove()
+    // Page code's own string evaluation stays blocked too.
+    // eslint-disable-next-line no-implied-eval -- the test checks that CSP blocks string evaluation
+    setTimeout('window.injectedStringRan = true')
+    await new Promise(resolve => setTimeout(resolve, 100))
+    const injectedScriptsRan = ['injectedScriptRan', 'injectedHandlerRan', 'injectedStringRan']
+      .filter(name => window[name])
+
     const baseURI = document.baseURI
     const base = document.createElement('base')
     base.href = 'https://base.otx-test.invalid/'
@@ -134,9 +155,14 @@ test('content security policy blocks framing the app and foreign base URLs', asy
     })
     const framedAppLoaded = frame.contentDocument?.getElementById('app') != null
     frame.remove()
-    return { foreignBaseApplied, framedAppLoaded }
+    return { injectedScriptsRan, foreignBaseApplied, framedAppLoaded }
   })
-  expect(result).toEqual({ foreignBaseApplied: false, framedAppLoaded: false })
+  expect(result).toEqual({ injectedScriptsRan: [], foreignBaseApplied: false, framedAppLoaded: false })
+  const blocked = ['inline script', 'inline event handler', 'string as JavaScript', 'base URI', 'Framing']
+  await expect.poll(() => blocked.filter(action => !app.cspViolations.some(message => message.includes(action))))
+    .toEqual([])
+  const unexpected = app.cspViolations.filter(message => !blocked.some(action => message.includes(action)))
+  app.cspViolations.splice(0, Infinity, ...unexpected)
 })
 
 test('preserves app API requests, redirects, HTTP errors, ranges and image pixels', async ({ page }) => {

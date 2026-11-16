@@ -273,11 +273,17 @@ config.plugins.push(
   new rspack.CopyRspackPlugin({
     patterns: [
       ...(isCapacitor
-        ? []
-        : [{
-            from: path.join(__dirname, '../static/pwabuilder-sw.js'),
-            to: path.join(outputPath, 'pwabuilder-sw.js'),
-          }]),
+        ? [getStartupSplash.copyPattern]
+        : [
+            {
+              from: path.join(__dirname, '../static/pwabuilder-sw.js'),
+              to: path.join(outputPath, 'pwabuilder-sw.js'),
+            },
+            {
+              from: path.join(__dirname, '../src/renderer/startup/register-service-worker.js'),
+              to: path.join(outputPath, 'register-service-worker.js'),
+            }
+          ]),
       ...(isDevMode
         ? []
         : [
