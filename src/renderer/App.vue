@@ -715,7 +715,13 @@ import { calculateColorLuminance, resolveColor } from './helpers/colors'
 import { matchesKeyboardShortcut } from './helpers/keyboardShortcuts'
 import { hasVisibleGamepadLayer, initializeGamepadNavigation } from './helpers/gamepadNavigation'
 import { initializeAndroidBack } from './helpers/androidBack'
-import { getAndroidBackPage, getAndroidBackPlayer, getAndroidBackSheet } from './helpers/androidBackGesture'
+import {
+  combineAndroidBackPreviews,
+  getAndroidBackPage,
+  getAndroidBackPlayer,
+  getAndroidBackSheet,
+  getAndroidBackView
+} from './helpers/androidBackGesture'
 import { createAndroidBackDialogPreview } from './helpers/androidBackDialog'
 import { getSettingsWindowIconButton, getUtilityWindowCloseKeyframes, getUtilityWindowMorphHooks } from './helpers/utilityWindowMorph'
 import { keyboardEventInitFromShortcut, OPEN_COMMAND_PALETTE_EVENT } from './helpers/commandPalette'
@@ -1265,7 +1271,8 @@ const {
   updateScrollAction: updateMobileContextScrollAction,
   enter: enterMobileContextSheet, leave: leaveMobileContextSheet
 } = useBottomSheetDismiss(mobileLinkActionsRef, closeMobileLinkActions, {
-  canDismissOnBack: () => mobileContextMenuStack.value.length === 1
+  canDismissOnBack: () => mobileContextMenuStack.value.length === 1,
+  submenu: { getElement: () => mobileLinkActionsScrollRef.value, back: backMobileContextMenu }
 })
 const mobileLinkActionsScrollRef = useTemplateRef('mobileLinkActionsScrollRef')
 const mobileLinkActionsContentRef = useTemplateRef('mobileLinkActionsContentRef')
@@ -2923,20 +2930,6 @@ function getAndroidBackPopup(target) {
   return controlled?.matches('[role="listbox"], [role="menu"], [role="dialog"]') ? controlled : null
 }
 
-/** Use the first preview that can begin; the rest keep their ordinary Back. */
-function combineAndroidBackPreviews(previews) {
-  let active = null
-  return {
-    begin(event) {
-      active = previews.find(preview => preview?.begin(event)) ?? null
-      return active !== null
-    },
-    update(progress, drag) { active?.update(progress, drag) },
-    finish(commit) { return active?.finish(commit) },
-    cancel() { active?.cancel() },
-  }
-}
-
 function getAndroidBackPreview() {
   if (mobileContextLink.value || mobileContextActions.value) {
     return mobileLinkActionsRef.value ? getAndroidBackSheet(mobileLinkActionsRef.value) : null
@@ -2964,26 +2957,32 @@ function getAndroidBackPreview() {
   const dialog = target.closest?.('.settingsWindow, .prompt, dialog[open]')
   if (dialog && !target.closest?.('[aria-expanded="true"]')) {
     const nested = dialog.hasAttribute('data-android-back-nested')
-    const content = nested
-      ? dialog.querySelector('.settingsContent') ?? dialog
-      : dialog
     const isAvailable = () =>
-      content.isConnected && dialog.hasAttribute('data-android-back-nested') === nested &&
+      dialog.isConnected && dialog.hasAttribute('data-android-back-nested') === nested &&
       getAndroidBackTarget().closest?.('.settingsWindow, .prompt, dialog[open]') === dialog
-    if (!nested && dialog.matches('.settingsWindow')) {
+    // Back returns to the dialog's previous view, which it uncovers like a page.
+    if (nested) return getAndroidBackView(dialog)?.({ back: handleAndroidBack, isAvailable }) ?? null
+    if (dialog.matches('.settingsWindow')) {
       // An opening morph owns the window. Ordinary Back closes it once the morph ends.
       if (store.getters.getSettingsWindowMorphing) return null
       // The gesture plays the morph into the header button, so closing must not replay it.
       return createAndroidBackDialogPreview(dialog, () => store.dispatch('hideSettingsWindow'), isAvailable, element =>
         getUtilityWindowCloseKeyframes(element, getSettingsWindowIconButton(store.getters.getSettingsWindowView)))
     }
-    return createAndroidBackDialogPreview(content, handleAndroidBack, isAvailable)
+    return createAndroidBackDialogPreview(dialog, handleAndroidBack, isAvailable)
   }
   const tabOverlay = target.closest?.('.capacitorPhoneTabOverlay')
   if (tabOverlay) {
+    const isTarget = () => tabOverlay.isConnected && getAndroidBackTarget().closest?.('.capacitorPhoneTabOverlay') === tabOverlay
+    const tabDialog = tabOverlay.querySelector('.capacitorPhoneTabDialog:not([inert])')
     // Back returns from tab history to open tabs inside the switcher.
-    const isClosing = () => tabOverlay.isConnected && !tabOverlay.querySelector('.capacitorPhoneTabDialog:is([inert], [data-android-back-nested])') &&
-      getAndroidBackTarget().closest?.('.capacitorPhoneTabOverlay') === tabOverlay
+    if (tabDialog?.hasAttribute('data-android-back-nested')) {
+      return getAndroidBackView(tabDialog)?.({
+        back: handleAndroidBack,
+        isAvailable: () => isTarget() && tabDialog.isConnected && tabDialog.matches('[data-android-back-nested]:not([inert])')
+      }) ?? null
+    }
+    const isClosing = () => isTarget() && !tabOverlay.querySelector('.capacitorPhoneTabDialog:is([inert], [data-android-back-nested])')
     if (!isClosing()) return null
     return createAndroidBackDialogPreview(tabOverlay, handleAndroidBack, isClosing, () => [
       { opacity: 1, transform: 'none' },

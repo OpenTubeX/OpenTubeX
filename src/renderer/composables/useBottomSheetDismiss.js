@@ -1,6 +1,7 @@
 import { nextTick, onBeforeUnmount, watch } from 'vue'
 import { applyAnimationSpeed } from '../helpers/animationSpeed'
-import { registerAndroidBackSheet, settleAndroidBackAnimation } from '../helpers/androidBackGesture'
+import { combineAndroidBackPreviews, registerAndroidBackSheet, settleAndroidBackAnimation } from '../helpers/androidBackGesture'
+import { createAndroidBackSlidePreview } from '../helpers/androidBackSlide'
 import { isReducedMotionEnabled } from '../helpers/reducedMotion'
 import { takeOverLeavingModalBackdrop, trackLeavingModalBackdrop } from '../helpers/modalBackdropHandoff'
 
@@ -13,7 +14,8 @@ const HIDDEN_BACKDROP = { backgroundColor: 'transparent', backdropFilter: 'blur(
 // Shared by navigation and context sheets. Native upward scrolling remains
 // available; downward pulls only take over at the top of the touched scrollport.
 // `canDismissOnBack` is false while Back would return to a parent submenu.
-export function useBottomSheetDismiss(sheet, dismiss, { canDismissOnBack = () => true } = {}) {
+// `submenu` slides the submenu's view off the sheet when Back returns from it.
+export function useBottomSheetDismiss(sheet, dismiss, { canDismissOnBack = () => true, submenu = null } = {}) {
   let drag = null
   let suppressClick = false
   let sheetAnimation = null
@@ -28,7 +30,16 @@ export function useBottomSheetDismiss(sheet, dismiss, { canDismissOnBack = () =>
   if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
     watch(sheet, (element, _previous, onCleanup) => {
       if (!element) return
-      const unregister = registerAndroidBackSheet(element, {
+      const returnPreview = submenu && createAndroidBackSlidePreview({
+        getTarget: () => {
+          const view = submenu.getElement()
+          // Nothing waits behind a submenu, so its view casts no shadow.
+          return view && { element: view, area: element, styles: { 'box-shadow': 'none' } }
+        },
+        back: async () => { await submenu.back() },
+        isAvailable: () => sheet.value === element && !isLeaving && !drag?.active && !canDismissOnBack()
+      })
+      const unregister = registerAndroidBackSheet(element, combineAndroidBackPreviews([returnPreview, {
         begin() {
           if (isLeaving || drag?.active || isReducedMotionEnabled() || !canDismissOnBack()) return false
           const transform = getComputedStyle(element).transform
@@ -59,10 +70,11 @@ export function useBottomSheetDismiss(sheet, dismiss, { canDismissOnBack = () =>
           if (backPreview === current) cancelBackPreview()
         },
         cancel: cancelBackPreview,
-      })
+      }]))
       onCleanup(() => {
         unregister()
         cancelBackPreview()
+        returnPreview?.cancel()
       })
     }, { immediate: true, flush: 'post' })
   }

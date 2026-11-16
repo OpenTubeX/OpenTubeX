@@ -285,6 +285,7 @@
           />
           <div
             v-show="protectedSettingsVisible && !subpageTitle && (isInDesktopView || activeSection || settingsSearchQuery !== '')"
+            ref="settingsContentPaneRef"
             class="settingsContentPane"
           >
             <div
@@ -396,6 +397,11 @@
           />
         </template>
       </SettingsView>
+      <!-- Dims the view Back reveals, between it and the current view. -->
+      <div
+        v-if="backRevealing"
+        class="settingsBackScrim"
+      />
       <div
         v-if="!unlocked && !isStandaloneViewOpen"
         v-overlay-scrollbars
@@ -425,6 +431,8 @@ import FtTabs from '../../components/FtTabs/FtTabs.vue'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { supportsYouTubeAccount } from '../../helpers/youtube-account-state'
 import { useRootClass } from '../../helpers/rootClasses'
+import { registerAndroidBackView } from '../../helpers/androidBackGesture'
+import { createAndroidBackSlidePreview } from '../../helpers/androidBackSlide'
 import { FtIcon } from '@opentubex/icons'
 import {
   computed,
@@ -567,6 +575,7 @@ const settingsContentTransitionClass = ref('')
 const settingsMenuTransitionClass = ref('')
 const settingsWindowRef = useTemplateRef('settingsWindowRef')
 const settingsPageRef = useTemplateRef('settingsPageRef')
+const settingsContentPaneRef = useTemplateRef('settingsContentPaneRef')
 const settingsContentHeaderRef = useTemplateRef('settingsContentHeaderRef')
 const settingsContentRef = useTemplateRef('settingsContentRef')
 const settingsSubpageContentRef = useTemplateRef('settingsSubpageContentRef')
@@ -955,8 +964,15 @@ useRootClass('appSettingsMaximized', () => windowActive.value && isWindowMaximiz
 onUpdated(() => {
   if (liveBounds !== null) applyLiveBounds()
 })
+let removeAndroidBackView = null
 onMounted(() => {
   handleMounted()
+  if (process.env.IS_CAPACITOR && !process.env.IS_IOS && settingsWindowRef.value) {
+    removeAndroidBackView = registerAndroidBackView(settingsWindowRef.value, options => createAndroidBackSlidePreview({
+      ...options,
+      getTarget: getAndroidBackTarget
+    }))
+  }
 })
 onActivated(() => {
   windowActive.value = true
@@ -975,6 +991,7 @@ onDeactivated(() => {
   stopResizing()
 })
 onBeforeUnmount(() => {
+  removeAndroidBackView?.()
   stopObserving()
   stopDragging()
   stopResizing()
@@ -1538,9 +1555,90 @@ function returnToSettingsMenu() {
       content.scrollLeft = 0
     }
     activeSection.value = null
-    animateSettingsElement(menuRef, settingsMenuTransitionClass, 'settingsCompactSlideBackward')
+    // The predictive back gesture already brought the menu in.
+    if (backRevealView !== (menuRef.value?.$el ?? menuRef.value)) {
+      animateSettingsElement(menuRef, settingsMenuTransitionClass, 'settingsCompactSlideBackward')
+    }
     nextTick(() => menuRef.value?.focusLink(previousSection))
   }
+}
+
+// Renders the scrim over the view the predictive back gesture shows behind the current one.
+const backRevealing = ref(false)
+/** @type {HTMLElement | null} */
+let backRevealView = null
+
+/** Back slides the current phone view off the view it returns to, when that view stays mounted. */
+function getAndroidBackTarget() {
+  const page = settingsPageRef.value
+  const view = page && getVisibleSettingsView(page)
+  if (!view) return null
+  let element = view
+  let previous = getAndroidBackReveal()
+  let position = { top: 0, inline: 0 }
+  const stack = subpageStack.value
+  if (stack.length > 1 && view === settingsSubpageContentRef.value) {
+    // A subpage that opened another one stays mounted underneath it in the
+    // shared viewport. Show the parent where Back puts it: at its own scroll
+    // position, inside the padding it has unless it is flush.
+    const contents = [...view.querySelectorAll(':scope > .settingsSubpageContent')]
+    const index = contents.findIndex(content => content instanceof HTMLElement && content.style.display !== 'none')
+    if (index > 0) {
+      const parent = stack.at(-2)
+      const padding = parent.flush ? 0 : parseFloat(getComputedStyle(view).getPropertyValue('--settings-subpage-padding')) || 0
+      element = contents[index]
+      previous = contents[index - 1]
+      position = { top: padding + view.scrollTop - parent.scrollTop, inline: padding }
+    }
+  }
+  return {
+    element,
+    area: page,
+    // The window's own background, which the page area shows through.
+    styles: {
+      'background-color': 'var(--card-bg-color)',
+      'background-image': 'var(--card-bg-image)',
+      'background-attachment': 'fixed',
+      position: 'relative',
+      'z-index': '2'
+    },
+    reveal: previous ? shown => setBackReveal(shown ? previous : null, position) : undefined,
+    getEntering: async () => {
+      await nextTick()
+      return getVisibleSettingsView(page)
+    }
+  }
+}
+
+/** @param {HTMLElement} page */
+function getVisibleSettingsView(page) {
+  return [...page.children].find(child => child instanceof HTMLElement && child.style.display !== 'none' &&
+    !child.matches('[data-settings-back-reveal], .settingsBackScrim')) ?? null
+}
+
+/** @returns {HTMLElement | null} */
+function getAndroidBackReveal() {
+  if (!protectedSettingsVisible.value || isProfileManagerOpen.value || isKeyboardShortcutPromptOpen.value) return null
+  if (subpageStack.value.length > 0) return subpageStack.value.length === 1 ? settingsContentPaneRef.value : null
+  return activeSection.value !== null && settingsSearchQuery.value === '' ? menuRef.value?.$el ?? null : null
+}
+
+/**
+ * @param {HTMLElement | null} view
+ * @param {{ top: number, inline: number }} position Offsets of the view in the viewport that contains it.
+ */
+async function setBackReveal(view, position) {
+  backRevealView?.removeAttribute('data-settings-back-reveal')
+  backRevealView?.style.removeProperty('--settings-back-reveal-top')
+  backRevealView?.style.removeProperty('--settings-back-reveal-inline')
+  backRevealView = view
+  backRevealing.value = view !== null
+  if (!view) return null
+  view.setAttribute('data-settings-back-reveal', '')
+  view.style.setProperty('--settings-back-reveal-top', `${position.top}px`)
+  view.style.setProperty('--settings-back-reveal-inline', `${position.inline}px`)
+  await nextTick()
+  return { page: view, scrim: settingsPageRef.value?.querySelector(':scope > .settingsBackScrim') ?? null }
 }
 
 function returnToCategory() {

@@ -336,8 +336,12 @@
 .settingsContent,
 .settingsSubpageScroll,
 .settingsPassword {
-  padding: 20px;
   box-sizing: border-box;
+}
+
+.settingsContent,
+.settingsPassword {
+  padding: 20px;
 }
 
 .settingsPassword {
@@ -520,7 +524,11 @@
 }
 
 .settingsSubpageScroll {
+  /* Flush subpages remove the padding, and Back reads it to place their parent. */
+  --settings-subpage-padding: 20px;
+
   grid-column: 1 / -1;
+  padding: var(--settings-subpage-padding);
 }
 
 .settingsSubpageScroll.settingsSubpageFlush {
@@ -550,7 +558,29 @@
 }
 
 .compactSettings {
+  position: relative;
   display: block;
+}
+
+/* Back shows the view it returns to behind the current one, which slides off it. */
+.compactSettings :deep([data-settings-back-reveal]) {
+  position: absolute;
+  inset-block-start: var(--settings-back-reveal-top, 0);
+  inset-inline: var(--settings-back-reveal-inline, 0);
+  z-index: 0;
+  display: flex !important;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.settingsBackScrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background-color: #000;
+  opacity: 0;
+  pointer-events: none;
+  will-change: opacity;
 }
 
 .compactSettings .settingsMenu,

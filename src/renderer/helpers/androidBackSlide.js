@@ -1,9 +1,9 @@
 import { applyAnimationSpeed } from './animationSpeed'
 import { isReducedMotionEnabled } from './reducedMotion'
 
-/** How far toward the swipe edge the page behind starts, as a share of the width. */
+/** How far toward the swipe edge the view behind starts, as a share of the width. */
 const PARALLAX = 0.25
-/** How much the page behind is dimmed while the current page still covers it. */
+/** How much the view behind is dimmed while the current view still covers it. */
 const SCRIM_OPACITY = 0.3
 /** The gesture maps onto these keyframes, so they need a length but no real duration. */
 const TIMELINE = 1000
@@ -12,13 +12,13 @@ const SETTLE_EASING = 'cubic-bezier(0.2, 0, 0, 1)'
 
 /**
  * Frames for each layer of the slide, from the start of the gesture (0) to a
- * page that has left the screen (1).
+ * view that has left its area (1).
  * @param {'left' | 'right' | 'none'} edge
+ * @param {number} width
  */
-export function getAndroidBackPageSlide(edge) {
-  // The page follows the finger away from the edge the swipe started at.
+export function getAndroidBackSlide(edge, width) {
+  // The view follows the finger away from the edge the swipe started at.
   const direction = edge === 'right' ? -1 : 1
-  const width = window.innerWidth
   return {
     /** @param {number} drag */
     current: drag => ({ transform: `translateX(${direction * width * drag}px)` }),
@@ -31,28 +31,35 @@ export function getAndroidBackPageSlide(edge) {
 }
 
 /**
+ * @typedef {{ page: HTMLElement | null, scrim: HTMLElement | null }} AndroidBackSlideReveal
+ * @typedef {object} AndroidBackSlideTarget
+ * @property {HTMLElement} element The view Back leaves, which slides away with the finger.
+ * @property {HTMLElement | null} [area] Clips the slide, and its width is the distance to slide.
+ * @property {Record<string, string>} [styles] Lets the view cover the one behind it while it slides.
+ * @property {(shown: boolean) => Promise<AndroidBackSlideReveal | null>} [reveal]
+ *   Shows the view Back returns to behind the current one, or hides it again.
+ * @property {() => HTMLElement | null | Promise<HTMLElement | null>} [getEntering]
+ *   The view Back shows when nothing was revealed. Defaults to `element`.
  * @typedef {{ element: HTMLElement, frame: (drag: number) => Keyframe, animation: Animation }} SlideLayer
  * @typedef {{
- *   element: HTMLElement, revealed: boolean, drag: number, slide: ReturnType<typeof getAndroidBackPageSlide>,
+ *   target: AndroidBackSlideTarget, drag: number, slide: ReturnType<typeof getAndroidBackSlide>,
  *   layers: SlideLayer[], styles: { element: HTMLElement, name: string, value: string, priority: string }[]
  * }} SlideState
  */
 
 /**
- * Preview Back to the tab's previous page like Chromium's back navigation:
- * the page slides away with the finger and uncovers the page Back returns to.
- * When the tab kept that page mounted, it comes in from behind with a slight
- * parallax and Back shows it in place. Otherwise the new page slides in from
- * the same place once it loads.
+ * Preview Back to a previous view like Chromium's back navigation: the view
+ * slides away with the finger and uncovers the view Back returns to. When that
+ * view is still mounted, it comes in from behind with a slight parallax and
+ * Back shows it in place. Otherwise the new view slides in from the same place
+ * once Back shows it.
  *
  * @param {object} options
- * @param {() => { element: HTMLElement, reveal: { key: number, top: number } | null } | null} options.getTarget
- * @param {(reveal: { key: number, top: number } | null) => Promise<{ page: HTMLElement | null, scrim: HTMLElement | null } | null>} options.setReveal
- *   Shows the retained page behind the current one and resolves with its rendered elements.
+ * @param {() => AndroidBackSlideTarget | null} options.getTarget
  * @param {() => Promise<void>} options.back
  * @param {() => boolean} options.isAvailable
  */
-export function createAndroidBackPagePreview({ getTarget, setReveal, back, isAvailable }) {
+export function createAndroidBackSlidePreview({ getTarget, back, isAvailable }) {
   /** @type {SlideState | null} */
   let state = null
 
@@ -61,11 +68,12 @@ export function createAndroidBackPagePreview({ getTarget, setReveal, back, isAva
     if (!current) return
     state = null
     current.layers.forEach(layer => layer.animation.cancel())
-    for (const { element, name, value, priority } of current.styles) {
+    // Later styles can override earlier ones on the same element, so undo them in reverse.
+    for (const { element, name, value, priority } of current.styles.toReversed()) {
       if (value) element.style.setProperty(name, value, priority)
       else element.style.removeProperty(name)
     }
-    if (current.revealed) setReveal(null)
+    current.target.reveal?.(false)
   }
 
   /**
@@ -107,8 +115,8 @@ export function createAndroidBackPagePreview({ getTarget, setReveal, back, isAva
       if (!isAvailable() || isReducedMotionEnabled()) return false
       const target = getTarget()
       if (!target?.element.isConnected) return false
-      const { element, reveal } = target
-      const slide = getAndroidBackPageSlide(edge)
+      const { element, area } = target
+      const slide = getAndroidBackSlide(edge, area?.clientWidth ?? window.innerWidth)
       /** @type {SlideState['styles']} */
       const styles = []
       /** @param {HTMLElement} styled @param {string} name @param {string} value */
@@ -116,29 +124,24 @@ export function createAndroidBackPagePreview({ getTarget, setReveal, back, isAva
         styles.push({ element: styled, name, value: styled.style.getPropertyValue(name), priority: styled.style.getPropertyPriority(name) })
         styled.style.setProperty(name, value, 'important')
       }
-      // The page must follow the finger without a competing CSS transition.
+      // The view must follow the finger without a competing CSS transition.
       setStyle(element, 'transition', 'none')
-      // Without this hint, Chromium paints the page again on every move.
+      // Without this hint, Chromium paints the view again on every move.
       setStyle(element, 'will-change', 'transform')
-      // Cover the page behind, also below the end of a short page.
-      setStyle(element, 'background-color', 'var(--bg-color)')
-      setStyle(element, 'min-block-size', `${Math.max(0, window.innerHeight - element.getBoundingClientRect().top)}px`)
       setStyle(element, 'box-shadow', slide.shadow)
-      // A page moved aside must not widen the document.
-      const pageArea = element.closest('.app > .routerView')
-      if (pageArea instanceof HTMLElement) setStyle(pageArea, 'overflow-x', 'clip')
+      for (const [name, value] of Object.entries(target.styles ?? {})) setStyle(element, name, value)
+      // A view moved aside must not widen its area.
+      if (area) setStyle(area, 'overflow-x', 'clip')
 
       /** @type {SlideState} */
-      const current = { element, revealed: reveal !== null, drag: 0, slide, layers: [], styles }
+      const current = { target, drag: 0, slide, layers: [], styles }
       state = current
       addLayer(current, element, slide.current)
-      if (reveal) {
-        setReveal(reveal).then(rendered => {
-          if (state !== current || !rendered?.page) return
-          addLayer(current, rendered.page, slide.previous)
-          if (rendered.scrim) addLayer(current, rendered.scrim, slide.scrim)
-        })
-      }
+      target.reveal?.(true).then(rendered => {
+        if (state !== current || !rendered?.page) return
+        addLayer(current, rendered.page, slide.previous)
+        if (rendered.scrim) addLayer(current, rendered.scrim, slide.scrim)
+      })
       return true
     },
     /** @param {number} _progress @param {number} drag */
@@ -157,8 +160,8 @@ export function createAndroidBackPagePreview({ getTarget, setReveal, back, isAva
         cancel()
         return
       }
-      // The page behind has arrived. Drop its preview frames before Back makes
-      // it the current page, so nothing moves when it does.
+      // The view behind has arrived. Drop its preview frames before Back makes
+      // it the current view, so nothing moves when it does.
       current.layers.slice(1).forEach(layer => layer.animation.cancel())
       let wentBack = false
       try {
@@ -167,17 +170,16 @@ export function createAndroidBackPagePreview({ getTarget, setReveal, back, isAva
           wentBack = true
         }
       } finally {
-        if (state === current) {
-          cancel()
-          // A newly loaded page arrives from where a kept page would have been.
-          if (wentBack && !current.revealed && current.element.isConnected) {
-            applyAnimationSpeed(current.element.animate([
-              { ...current.slide.previous(0), opacity: 0 },
-              { ...current.slide.previous(1), opacity: 1 }
-            ], { duration: SETTLE_DURATION, easing: SETTLE_EASING }))
-          }
-        }
+        if (state === current) cancel()
       }
+      // A view that was not kept arrives from where a kept view would have been.
+      if (!wentBack || current.target.reveal) return
+      const entering = await (current.target.getEntering?.() ?? current.target.element)
+      if (state !== null || !entering?.isConnected) return
+      applyAnimationSpeed(entering.animate([
+        { ...current.slide.previous(0), opacity: 0 },
+        { ...current.slide.previous(1), opacity: 1 }
+      ], { duration: SETTLE_DURATION, easing: SETTLE_EASING }))
     },
     cancel,
   }

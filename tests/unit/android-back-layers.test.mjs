@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
 import { nextTick, ref, watch } from 'vue'
-import { settleAndroidBackAnimation } from '../../src/renderer/helpers/androidBackGesture.js'
+import { combineAndroidBackPreviews, settleAndroidBackAnimation } from '../../src/renderer/helpers/androidBackGesture.js'
 
 const appSource = readFileSync(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
 const sheetSource = readFileSync(new URL('../../src/renderer/composables/useBottomSheetDismiss.js', import.meta.url), 'utf8')
@@ -28,7 +28,7 @@ function animation() {
 }
 
 test('a declined player preview falls back to the next preview for the whole gesture', async () => {
-  const combine = appFunction('combineAndroidBackPreviews')
+  const combine = combineAndroidBackPreviews
   const calls = []
   const preview = (name, available) => ({
     begin: () => { calls.push(`${name}:begin`); return available },
@@ -76,6 +76,8 @@ function bottomSheet({ canDismissOnBack, onDismiss = () => {} } = {}) {
     nextTick,
     onBeforeUnmount() {},
     settleAndroidBackAnimation,
+    combineAndroidBackPreviews,
+    createAndroidBackSlidePreview: () => null,
     applyAnimationSpeed: animation => animation,
     isReducedMotionEnabled: () => false,
     registerAndroidBackSheet: (_element, preview) => { previews.push(preview); return () => {} },

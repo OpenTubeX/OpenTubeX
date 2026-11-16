@@ -12,6 +12,8 @@ const players = new Map()
 const pages = new Map()
 /** @type {WeakMap<HTMLElement, AndroidBackPreview>} */
 const sheets = new WeakMap()
+/** @type {WeakMap<Element, AndroidBackPageFactory>} */
+const views = new WeakMap()
 
 /** Finish from the held position; reversing at zero would replay from the end.
  * @param {Animation} animation
@@ -70,6 +72,42 @@ export function registerAndroidBackPage(tabId, createPreview) {
 /** @param {string} tabId */
 export function getAndroidBackPage(tabId) {
   return pages.get(tabId) ?? null
+}
+
+/**
+ * Previews Back inside a dialog, from one of its views to the one it returns to.
+ * @param {Element} element The dialog
+ * @param {AndroidBackPageFactory} createPreview
+ */
+export function registerAndroidBackView(element, createPreview) {
+  views.set(element, createPreview)
+  return () => {
+    if (views.get(element) === createPreview) views.delete(element)
+  }
+}
+
+/** @param {Element} element */
+export function getAndroidBackView(element) {
+  return views.get(element) ?? null
+}
+
+/**
+ * Use the first preview that can begin; the rest keep their ordinary Back.
+ * @param {(AndroidBackPreview | null | undefined)[]} previews
+ * @returns {AndroidBackPreview}
+ */
+export function combineAndroidBackPreviews(previews) {
+  /** @type {AndroidBackPreview | null} */
+  let active = null
+  return {
+    begin(event) {
+      active = previews.find(preview => preview?.begin(event)) ?? null
+      return active !== null
+    },
+    update(progress, drag) { active?.update(progress, drag) },
+    async finish(commit) { await active?.finish(commit) },
+    cancel() { active?.cancel() },
+  }
 }
 
 /**
