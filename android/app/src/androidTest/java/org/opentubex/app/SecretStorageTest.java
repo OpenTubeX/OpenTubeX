@@ -4,11 +4,19 @@ import static org.junit.Assert.*;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.KeyProperties;
 import android.util.Base64;
 import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.work.Data;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkInfo;
+import androidx.work.WorkManager;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.security.KeyStore;
+import javax.crypto.KeyGenerator;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -90,6 +98,60 @@ public class SecretStorageTest {
         } finally {
             if (original == null) preferences.edit().remove("configuration").remove("encryptedConfiguration").commit();
             else SubscriptionRefreshConfiguration.save(context, new JSONObject(original));
+        }
+    }
+
+    @Test
+    public void backgroundRefreshesStayScheduledAndRetryWhileTheKeystoreFails() throws Exception {
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        SharedPreferences preferences = context.getSharedPreferences("subscription-refresh", Context.MODE_PRIVATE);
+        WorkManager workManager = WorkManager.getInstance(context);
+        String schedule = SubscriptionRefreshScheduler.uniqueName("videos");
+        KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+        keyStore.load(null);
+        try {
+            SubscriptionRefreshConfiguration.save(context, new JSONObject()
+                .put("intervals", new JSONObject().put("videos", 1800000))
+                .put("requests", new JSONObject().put("videos", new JSONArray().put(new JSONObject()
+                    .put("format", "rss").put("url", "http://127.0.0.1:9/feed/%CHANNEL%"))))
+                .put("profiles", new JSONArray().put(new JSONObject().put("id", "allChannels")
+                    .put("channels", new JSONObject().put("videos", new JSONArray().put("UCa"))))));
+            SubscriptionRefreshScheduler.reconcile(context);
+            assertFalse(workManager.getWorkInfosForUniqueWork(schedule).get().get(0).getState().isFinished());
+
+            // A key that can only encrypt makes decrypting throw, like a failing Keystore.
+            keyStore.deleteEntry("settings-secrets");
+            KeyGenerator generator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
+            generator.init(new KeyGenParameterSpec.Builder("settings-secrets", KeyProperties.PURPOSE_ENCRYPT)
+                .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                .setKeySize(256)
+                .build());
+            generator.generateKey();
+            assertNull(SubscriptionRefreshConfiguration.readFeeds(context));
+            assertTrue("the settings stay saved", preferences.contains("encryptedConfiguration"));
+
+            SubscriptionRefreshScheduler.reconcile(context);
+            assertFalse("the schedule stays", workManager.getWorkInfosForUniqueWork(schedule).get().get(0).getState().isFinished());
+
+            OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(SubscriptionRefreshWorker.class)
+                .setInputData(new Data.Builder().putString(SubscriptionRefreshWorker.FEED_TYPE_INPUT, "videos").build())
+                .build();
+            workManager.enqueue(request).getResult().get();
+            long deadline = android.os.SystemClock.elapsedRealtime() + 30000;
+            WorkInfo info;
+            while ((info = workManager.getWorkInfoById(request.getId()).get()).getRunAttemptCount() < 1
+                    || info.getState() != WorkInfo.State.ENQUEUED) {
+                assertFalse("the refresh is retried: " + info.getState(), info.getState().isFinished());
+                assertTrue("the refresh runs", android.os.SystemClock.elapsedRealtime() < deadline);
+                Thread.sleep(100);
+            }
+            workManager.cancelWorkById(request.getId()).getResult().get();
+        } finally {
+            // The next use creates a new key.
+            keyStore.deleteEntry("settings-secrets");
+            preferences.edit().remove("configuration").remove("encryptedConfiguration").commit();
+            workManager.cancelUniqueWork(schedule).getResult().get();
         }
     }
 }
