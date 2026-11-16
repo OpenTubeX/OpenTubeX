@@ -11,6 +11,7 @@ import Datastore from '@seald-io/nedb'
 import { SqliteDatastore } from '../../src/datastores/sqlite.js'
 import { createDesktopDatastore, createNedbFileSource, createNodeSqliteDriver, createWorkerDrivers, desktopDatastorePaths } from '../../src/datastores/sqliteNode.js'
 
+const byIds = "json_extract(data, '$._id') IN (SELECT value FROM json_each(?))"
 const lines = docs => docs.map(doc => typeof doc === 'string' ? doc : JSON.stringify(doc)).join('\n') + '\n'
 const video = (videoId, playlistItemId = `item-${videoId}`) => ({ videoId, playlistItemId, title: `Title ${videoId}`, timeAdded: 1 })
 
@@ -222,7 +223,7 @@ test('secrets removed from older copies are gone from the legacy file and backup
   await upgraded.findAsync({})
   assert.equal(changes.length, 1)
 
-  await upgraded.removeOlderCopiesAsync(['proxyPassword', 'syncServerToken'])
+  await upgraded.removeOlderCopiesAsync(byIds, [JSON.stringify(['proxyPassword', 'syncServerToken'])])
   assert.doesNotMatch(await readFile(legacyFile, 'utf8'), /secret/)
   assert.deepEqual(await loadWithNedb(legacyFile), [{ _id: 'theme', value: 'older' }], 'an older version still opens the rest')
   assert.doesNotMatch((await readFile(changes[0].backup)).toString('latin1'), /secret/)
@@ -623,7 +624,7 @@ test('desktop databases run in a worker thread', async (t) => {
   assert.deepEqual(await store.findOneAsync({ _id: 'p' }), { _id: 'p', playlistName: 'Legacy', videos: [video('a'), video('b')] })
   await assert.rejects(store.driver.execute([['SELECT * FROM missing']]), /no such table/)
   const backup = await store.driver.backup()
-  await store.removeOlderCopiesAsync(['p'])
+  await store.removeOlderCopiesAsync(byIds, [JSON.stringify(['p'])])
   assert.doesNotMatch(await readFile(join(dir, 'playlists.db'), 'utf8'), /Legacy/)
   assert.doesNotMatch((await readFile(backup)).toString('latin1'), /Legacy/)
   await store.dropDatabaseAsync()

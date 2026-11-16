@@ -852,17 +852,25 @@ export class SqliteDatastore {
    * applying its changes. This is for secrets that this database now keeps
    * encrypted. An older version then starts without them, and this one does
    * not apply their absence as a deletion.
-   * @param {string[]} ids
+   * @param {string} condition an SQL expression on a document's serialized `data`,
+   *   so the legacy datastore and the backups follow the same rule
+   * @param {unknown[]} [params] for the placeholders in `condition`
    */
-  removeOlderCopiesAsync(ids) {
+  removeOlderCopiesAsync(condition, params = []) {
     return this._exclusive(async () => {
       if (this.dropped) return
-      const keys = JSON.stringify(ids.map(keyOf))
       await this.driver.cleanBackups?.([
-        ['DELETE FROM docs WHERE id IN (SELECT value FROM json_each(?))', [keys]],
-        ['DELETE FROM children WHERE parent IN (SELECT value FROM json_each(?))', [keys]],
+        [`DELETE FROM children WHERE parent IN (SELECT id FROM docs WHERE ${condition})`, params],
+        [`DELETE FROM docs WHERE ${condition}`, params],
       ])
       if (!this.legacy?.removeDocuments) return
+      const { data } = await this.legacy.read()
+      const [rows] = await this._execute([[
+        `SELECT json_extract(data, '$._id') FROM (SELECT value AS data FROM json_each(?)) WHERE ${condition}`,
+        [JSON.stringify(data), ...params],
+      ]])
+      const ids = rows.map(([id]) => id)
+      if (ids.length === 0) return
       const fingerprint = await this.legacy.fingerprint?.() ?? null
       const applied = fingerprint === await this._meta('legacyFingerprint')
       // First, so an interrupted rewrite cannot look like an older version deleted them.

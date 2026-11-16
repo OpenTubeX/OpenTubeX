@@ -94,10 +94,20 @@ export async function decodeSettings(docs, datastore, cipherPromise) {
 }
 
 /**
+ * The secrets in the copies of the settings kept for older versions, which
+ * also saved Invidious credentials in the instance URL, as `user:password@`.
+ */
+// What follows the scheme, with a slash added so the address always ends with one
+const AUTHORITY = "substr(json_extract(data, '$.value'), instr(json_extract(data, '$.value'), '://') + 3) || '/'"
+const OLDER_COPY_SECRETS = `json_extract(data, '$._id') IN (SELECT value FROM json_each(?)) OR
+  (json_extract(data, '$._id') = 'defaultInvidiousInstance' AND instr(json_extract(data, '$.value'), '://') > 0 AND
+    instr(${AUTHORITY}, '@') BETWEEN 1 AND instr(${AUTHORITY}, '/'))`
+
+/**
  * Encrypts secrets saved by a version that stored them as they are, and deletes
  * the ones this device's keyring cannot decrypt. Then removes their old content from
  * the database file and from the copies kept for older versions.
- * @param {import('@seald-io/nedb').default & { vacuumAsync?: () => Promise<void>, removeOlderCopiesAsync?: (ids: string[]) => Promise<void> }} datastore
+ * @param {import('@seald-io/nedb').default & { vacuumAsync?: () => Promise<void>, removeOlderCopiesAsync?: (condition: string, params?: unknown[]) => Promise<void> }} datastore
  * @param {Promise<SecretCipher | null>} cipherPromise
  */
 export async function migrateSecretSettings(datastore, cipherPromise) {
@@ -130,7 +140,7 @@ export async function migrateSecretSettings(datastore, cipherPromise) {
   // unencrypted. An older version then asks to sign in again.
   if (encryptedAll) {
     try {
-      await datastore.removeOlderCopiesAsync?.([...SECRET_SETTINGS])
+      await datastore.removeOlderCopiesAsync?.(OLDER_COPY_SECRETS, [JSON.stringify([...SECRET_SETTINGS])])
     } catch (error) {
       console.error('Unable to remove saved credentials from older copies of the settings', error)
     }

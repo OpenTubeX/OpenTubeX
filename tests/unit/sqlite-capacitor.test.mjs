@@ -80,7 +80,7 @@ test('Capacitor loads whole datastores through result files and releases them', 
 test('Capacitor builds remove secrets from the record storage with deletion records', async () => {
   const settings = createBrowserDatastore('settings')
   assert.equal((await settings.findOneAsync({ _id: 'proxyPassword' })).value, 'proxy-secret')
-  await settings.removeOlderCopiesAsync(['proxyPassword', 'syncServerToken'])
+  await settings.removeOlderCopiesAsync("json_extract(data, '$._id') IN (SELECT value FROM json_each(?))", [JSON.stringify(['proxyPassword', 'syncServerToken'])])
   // The record storage replaces a document's record, so a deletion removes its value.
   assert.deepEqual(legacyFiles['settings.db'].trim().split('\n').slice(2).map(line => JSON.parse(line)), [{ $$deleted: true, _id: 'proxyPassword' }])
   assert.equal((await settings.findOneAsync({ _id: 'proxyPassword' })).value, 'proxy-secret', 'the library keeps it')

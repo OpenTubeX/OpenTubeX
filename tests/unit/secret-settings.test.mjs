@@ -1,8 +1,12 @@
 import assert from 'node:assert/strict'
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { registerHooks } from 'node:module'
 import test from 'node:test'
 import { createDesktopDatastore } from '../../src/datastores/sqliteNode.js'
 import { createSafeStorageCipher } from '../../src/datastores/secretCipher.js'
+import { migrateSecretSettings } from '../../src/datastores/secretSettings.js'
 
 const datastore = createDesktopDatastore(':memory:')
 globalThis.__secretSettingsDatastore = datastore
@@ -81,7 +85,25 @@ test('secrets saved unencrypted by an earlier version are encrypted on startup',
   // Rebuilding the file drops the old values from its free space.
   assert.equal(vacuum.mock.callCount(), 1)
   // The copies an older version reads lose them too.
-  assert.deepEqual(removeOlderCopies.mock.calls.map(call => call.arguments[0].sort()), [['proxyPassword', 'syncServerPrivacyKey', 'syncServerToken', 'yatteePassword', 'youTubeAccount']])
+  assert.equal(removeOlderCopies.mock.callCount(), 1)
+})
+
+test('the copies kept for older versions lose secrets and Invidious credentials, and keep the rest', async t => {
+  const dir = await mkdtemp(join(tmpdir(), 'opentubex-secrets-'))
+  t.after(() => rm(dir, { recursive: true, force: true }))
+  for (const [name, instance] of [['with', 'https://user:instance-secret@invidious.example'], ['without', 'https://invidious.example/@path']]) {
+    const legacyFile = join(dir, `${name}.db`)
+    await writeFile(legacyFile, [
+      { _id: 'proxyPassword', value: 'proxy-secret' },
+      { _id: 'defaultInvidiousInstance', value: instance },
+      { _id: 'proxyUsername', value: 'user' },
+    ].map(doc => JSON.stringify(doc)).join('\n') + '\n')
+    const store = createDesktopDatastore(join(dir, `${name}.sqlite`), legacyFile)
+    t.after(() => store.driver.close())
+    await migrateSecretSettings(store, Promise.resolve(cipher('device')))
+    const legacy = (await readFile(legacyFile, 'utf8')).trim().split('\n').map(line => JSON.parse(line)._id)
+    assert.deepEqual(legacy, name === 'with' ? ['proxyUsername'] : ['defaultInvidiousInstance', 'proxyUsername'])
+  }
 })
 
 test('Invidious credentials saved in the instance URL move to an encrypted setting on startup', async t => {
