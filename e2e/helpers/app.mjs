@@ -812,6 +812,8 @@ function recordAppDiagnostics(testInfo, recordTrace) {
 }
 
 const UNPOSITIONED_VIEWPORT_ERROR = 'Overlay scrollbars need a positioned scroll container'
+// Chromium logs every script and eval() it blocks.
+const CSP_VIOLATION = /Content Security Policy/
 
 export const test = base.extend({
   // Each worker's private X server picks a free display.
@@ -890,6 +892,9 @@ export const test = base.extend({
       // overlayScrollbars.js reports once, also while mounting, without
       // breaking any assertion.
       const scrollbarErrors = []
+      // The renderer may only run its own scripts. A violation means a script
+      // the app needs is blocked, or untrusted markup tried to run one.
+      const cspViolations = []
       const launchOptions = {
         appRoot,
         onPhase,
@@ -899,8 +904,11 @@ export const test = base.extend({
           await diagnostics.save()
         },
         onConsole: message => {
-          if (message.type() === 'error' && message.text().startsWith(UNPOSITIONED_VIEWPORT_ERROR)) {
+          if (message.type() !== 'error') return
+          if (message.text().startsWith(UNPOSITIONED_VIEWPORT_ERROR)) {
             scrollbarErrors.push(message.text())
+          } else if (CSP_VIOLATION.test(message.text())) {
+            cspViolations.push(message.text())
           }
         }
       }
@@ -924,7 +932,8 @@ export const test = base.extend({
         return next
       }
 
-      appHandle = { electronApp, page, userDataDir, relaunch }
+      // Tests that provoke violations on purpose remove them from this list.
+      appHandle = { electronApp, page, userDataDir, relaunch, cspViolations }
 
       if (!showTutorial && seed.freshProfile) {
         const tutorial = page.locator('.tutorialOverlay')
@@ -936,6 +945,7 @@ export const test = base.extend({
       settingUp = false
       await use(appHandle)
       expect.soft(scrollbarErrors, 'Overlay scrollbar containers must not be static').toEqual([])
+      expect.soft(cspViolations, 'The renderer must not violate its Content-Security-Policy').toEqual([])
     } finally {
       // A failed launch has not set the test's status yet.
       const failed = settingUp || testInfo.status !== testInfo.expectedStatus
