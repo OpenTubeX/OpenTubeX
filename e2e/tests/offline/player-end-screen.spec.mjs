@@ -1,6 +1,7 @@
 import { fileURLToPath } from 'node:url'
 import { test, expect, setWindowSize, setPlayerFullscreen } from '../../helpers/app.mjs'
 import { findWatchComponent, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
+import { mockCapacitorPhoneLayout } from '../../helpers/mobile.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 test.use({
@@ -235,6 +236,79 @@ test('shows recommended thumbnails over a darkened poster with working keyboard 
   await expect(page).toHaveURL(/#\/watch\/video000000$/)
   await expect(page.locator('.endedPoster')).toHaveCount(0)
   await waitForPlayback(page)
+})
+
+// Returns the end screen controls that a visible player control or card text covers.
+function findEndScreenOverlaps() {
+  const isShown = element => element.getClientRects().length > 0 && getComputedStyle(element).visibility !== 'hidden'
+  const player = document.querySelector('.ftVideoPlayer')
+  const targets = [...player.querySelectorAll('.endedRecommendation, .endedReplayButton')].filter(isShown)
+  const obstacles = [...player.querySelectorAll(
+    '.shaka-bottom-controls, .shaka-big-buttons-container > button, .playerFullscreenTitleOverlay, .fullscreenActions'
+  )].filter(isShown)
+  const cardText = [...player.querySelectorAll('.endedRecommendationTitle, .endedRecommendationAuthor')].filter(isShown)
+  return targets.flatMap(target => {
+    const a = target.getBoundingClientRect()
+    return [...obstacles, ...(target.matches('.endedReplayButton') ? cardText : [])].filter(obstacle => {
+      const b = obstacle.getBoundingClientRect()
+      return a.left < b.right - 1 && b.left < a.right - 1 && a.top < b.bottom - 1 && b.top < a.bottom - 1
+    }).map(obstacle => `${target.className} under ${obstacle.className}`)
+  })
+}
+
+test('keeps phone end screen recommendations and replay clear of the controls', async ({ app, page, attachScreenshot }) => {
+  test.slow()
+  // The player picks its controls from the layout when it is created.
+  await mockCapacitorPhoneLayout(page)
+  const { video, watch } = await openVideo({ app, page })
+  await setWindowSize(app, page, { width: 412, height: 860 })
+  await watch.evaluate(async component => {
+    await component.proxy.$store.dispatch('updateHideRecommendedVideos', false)
+    component.proxy.recommendedVideos = Array.from({ length: 6 }, (_, index) => ({
+      videoId: `video00000${index}`,
+      title: `Recommended video ${index + 1} with a title long enough to wrap`,
+      author: 'Example channel',
+      type: 'video',
+      lengthSeconds: 754,
+    }))
+  })
+  await endVideo(video)
+  const cards = page.locator('.endedRecommendation')
+  const replay = page.locator('.endedReplayButton')
+  await expect(cards.first()).toBeVisible()
+  await expect(cards.nth(1)).toBeHidden()
+  await expect(cards.first().locator('.endedRecommendationAuthor')).toBeVisible()
+  await expect(replay).toBeVisible()
+  await expect.poll(() => page.evaluate(findEndScreenOverlaps)).toEqual([])
+  await attachScreenshot('phone portrait end screen')
+  // The narrowest phones leave the least room above the controls.
+  await setWindowSize(app, page, { width: 320, height: 700 })
+  await expect.poll(() => page.evaluate(findEndScreenOverlaps)).toEqual([])
+  // A 2.39:1 video makes the player shorter still.
+  const player = page.locator('.ftVideoPlayer')
+  await player.evaluate(element => { element.style.height = '134px' })
+  await expect(replay).toBeVisible()
+  await expect.poll(() => page.evaluate(findEndScreenOverlaps)).toEqual([])
+  await player.evaluate(element => element.style.removeProperty('height'))
+
+  await setWindowSize(app, page, { width: 900, height: 412 })
+  await setPlayerFullscreen(page, true)
+  await expect(cards.nth(2)).toBeVisible()
+  await expect(replay).toBeVisible()
+  await expect.poll(() => page.evaluate(findEndScreenOverlaps)).toEqual([])
+  await attachScreenshot('phone landscape fullscreen end screen')
+  await setPlayerFullscreen(page, false)
+  // Ultrawide videos on tablets make wide players too short for a row of cards.
+  await setWindowSize(app, page, { width: 800, height: 1200 })
+  await player.evaluate(element => { element.style.height = '220px' })
+  await expect(cards.nth(1)).toBeHidden()
+  await expect(replay).toBeVisible()
+  await expect.poll(() => page.evaluate(findEndScreenOverlaps)).toEqual([])
+  await player.evaluate(element => element.style.removeProperty('height'))
+
+  await replay.click()
+  await expect(page.locator('.endedPoster')).toHaveCount(0)
+  await expect.poll(() => video.evaluate(element => !element.paused && element.currentTime < element.duration / 2)).toBe(true)
 })
 
 test('shows the poster and recommendations after canceling autoplay, and starts a fresh countdown on replay', async ({ app, page }) => {

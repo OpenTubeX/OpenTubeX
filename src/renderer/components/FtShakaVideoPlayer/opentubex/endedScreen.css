@@ -83,6 +83,18 @@
   text-shadow: 0 1px 2px #000;
 }
 
+.endedRecommendationThumbnail {
+  position: relative;
+  display: block;
+  block-size: 100%;
+}
+
+.endedScreenHeader,
+.endedRecommendationDuration,
+.endedRecommendationAuthor {
+  display: none;
+}
+
 .endedRecommendationTitleText {
   display: -webkit-box;
   overflow: hidden;
@@ -103,6 +115,274 @@
 
   .endedRecommendation:nth-child(n + 5) {
     display: none;
+  }
+}
+
+/* Phones: the large controls stay usable and visible, so the end screen
+   fills only the space between them, measured into --ended-screen-top and
+   --ended-screen-bottom. Its replay button replaces the center buttons. */
+:global(.capacitorTabs .ftVideoPlayer.endedScreenVisible .shaka-big-buttons-container) {
+  visibility: hidden;
+}
+
+:global(.capacitorTabs .ftVideoPlayer .endedScreenLayout) {
+  --ended-band-padding: 10px;
+  --ended-gap: 12px;
+  --ended-replay-size: 32px;
+  --ended-available-block-size: calc(
+    100cqh - var(--ended-screen-top, 0px) - var(--ended-screen-bottom, 76px) - 2 * var(--ended-band-padding)
+  );
+
+  position: absolute;
+  inset-block: calc(var(--ended-screen-top, 0px) + var(--ended-band-padding))
+    calc(var(--ended-screen-bottom, 76px) + var(--ended-band-padding));
+  color: #fff;
+}
+
+:global(.capacitorTabs .ftVideoPlayer .endedRecommendations) {
+  position: static;
+  display: block;
+}
+
+:global(.capacitorTabs .ftVideoPlayer .endedRecommendation) {
+  overflow: visible;
+  background: none;
+}
+
+:global(.capacitorTabs .ftVideoPlayer .endedRecommendationThumbnail) {
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  block-size: auto;
+  background: #000;
+  border-radius: calc(6px * var(--ui-roundness));
+}
+
+:global(.capacitorTabs .ftVideoPlayer .endedRecommendationDuration) {
+  position: absolute;
+  inset-inline-end: 4px;
+  inset-block-end: 4px;
+  display: block;
+  padding: 1px 4px;
+  background-color: rgb(0 0 0 / 80%);
+  border-radius: calc(3px * var(--ui-roundness));
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+:global(.capacitorTabs .ftVideoPlayer .endedRecommendationTitle) {
+  position: static;
+  display: block;
+  padding: 0;
+  background: none;
+  font-size: 13px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+:global(.capacitorTabs .ftVideoPlayer .endedRecommendationAuthor) {
+  display: block;
+  margin-block-start: 2px;
+  overflow: hidden;
+  color: rgb(255 255 255 / 70%);
+  font-size: 12px;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:global(.capacitorTabs .ftVideoPlayer .endedScreenHeading) {
+  color: rgb(255 255 255 / 75%);
+  font-size: 12px;
+  line-height: 1.5;
+  text-shadow: 0 1px 2px #000;
+}
+
+:global(.capacitorTabs .ftVideoPlayer .endedReplayButton) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  block-size: var(--ended-replay-size);
+  padding-inline: 10px 14px;
+  color: #fff;
+  background-color: rgb(255 255 255 / 18%);
+  border: 0;
+  border-radius: calc(var(--ended-replay-size) / 2 * var(--ui-roundness));
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+:global(.capacitorTabs .ftVideoPlayer .endedReplayButton:focus-visible) {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+/* Portrait and short players: the first recommendation beside its title, with Replay under the title. */
+@container (width < 560px) or (height < 380px) {
+  :global(.capacitorTabs .ftVideoPlayer .endedScreenLayout) {
+    --ended-heading-size: 18px;
+    --ended-thumbnail-size: min(45cqw, var(--ended-available-block-size) * 16 / 9);
+    --ended-text-start: calc(var(--ended-thumbnail-size) + var(--ended-gap));
+
+    inset-inline: 14px;
+    block-size: min(
+      var(--ended-available-block-size),
+      max(var(--ended-thumbnail-size) * 9 / 16, var(--ended-heading-size) + var(--ended-replay-size) + 64px)
+    );
+    margin-block: auto;
+  }
+
+  :global(.capacitorTabs .ftVideoPlayer .endedScreenHeader) {
+    display: contents;
+  }
+
+  :global(.capacitorTabs .ftVideoPlayer :is(.endedScreenHeading, .endedReplayButton)) {
+    position: absolute;
+    z-index: 1;
+    inset-inline-start: var(--ended-text-start);
+  }
+
+  :global(.capacitorTabs .ftVideoPlayer .endedScreenHeading) {
+    inset-block-start: 0;
+  }
+
+  :global(.capacitorTabs .ftVideoPlayer .endedReplayButton) {
+    inset-block-end: 0;
+  }
+
+  :global(.capacitorTabs .ftVideoPlayer .endedRecommendations) {
+    block-size: 100%;
+  }
+
+  :global(.capacitorTabs .ftVideoPlayer .endedRecommendation) {
+    display: grid;
+    grid-template-columns: var(--ended-thumbnail-size) minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    column-gap: var(--ended-gap);
+    align-items: start;
+    block-size: 100%;
+  }
+
+  :global(.capacitorTabs .ftVideoPlayer .endedRecommendation:not(:first-child)) {
+    display: none;
+  }
+
+  :global(.capacitorTabs .ftVideoPlayer .endedRecommendationThumbnail) {
+    grid-row: 1 / -1;
+    align-self: center;
+  }
+
+  :global(.capacitorTabs .ftVideoPlayer .endedRecommendationTitle) {
+    margin-block-start: var(--ended-heading-size);
+  }
+
+  :global(.capacitorTabs .ftVideoPlayer .endedRecommendationAuthor) {
+    grid-column: 2;
+    margin-block-start: 0;
+  }
+}
+
+/*
+  Short players (narrow phones, ultrawide videos) leave little room above the controls,
+  so drop the channel, the heading, the second title line, and then the title.
+*/
+@container (height < 200px) {
+  :global(.capacitorTabs .ftVideoPlayer .endedRecommendationAuthor) {
+    display: none;
+  }
+}
+
+@container (height < 190px) {
+  :global(.capacitorTabs .ftVideoPlayer .endedScreenHeading) {
+    display: none;
+  }
+
+  :global(.capacitorTabs .ftVideoPlayer .endedRecommendationTitle) {
+    margin-block-start: 0;
+  }
+}
+
+@container (height < 170px) {
+  :global(.capacitorTabs .ftVideoPlayer .endedRecommendationTitleText) {
+    -webkit-line-clamp: 1;
+  }
+}
+
+@container (height < 152px) {
+  :global(.capacitorTabs .ftVideoPlayer .endedScreenLayout) {
+    --ended-band-padding: 4px;
+  }
+
+  :global(.capacitorTabs .ftVideoPlayer .endedRecommendationTitle) {
+    display: none;
+  }
+
+  :global(.capacitorTabs .ftVideoPlayer .endedReplayButton) {
+    inset-block-start: 0;
+    margin-block: auto;
+  }
+}
+
+/* Landscape fullscreen and tablets: a row of cards below a heading with Replay, when they fit. */
+@container (width >= 560px) and (height >= 380px) {
+  :global(.capacitorTabs .ftVideoPlayer .endedScreenLayout) {
+    --ended-columns: 3;
+    --ended-header-size: var(--ended-replay-size);
+    --ended-card-text-size: 64px;
+    --ended-card-size: min(
+      (100cqw - 40px - (var(--ended-columns) - 1) * var(--ended-gap)) / var(--ended-columns),
+      (var(--ended-available-block-size) - var(--ended-header-size) - var(--ended-gap) - var(--ended-card-text-size)) * 16 / 9
+    );
+
+    inset-inline: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ended-gap);
+  }
+
+  :global(.capacitorTabs .ftVideoPlayer :is(.endedScreenHeader, .endedRecommendations)) {
+    inline-size: calc(var(--ended-columns) * var(--ended-card-size) + (var(--ended-columns) - 1) * var(--ended-gap));
+  }
+
+  :global(.capacitorTabs .ftVideoPlayer .endedScreenHeader) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    block-size: var(--ended-header-size);
+  }
+
+  :global(.capacitorTabs .ftVideoPlayer .endedRecommendations) {
+    display: grid;
+    grid-template-columns: repeat(var(--ended-columns), minmax(0, 1fr));
+    grid-template-rows: none;
+    gap: var(--ended-gap);
+  }
+
+  :global(.capacitorTabs .endedRecommendation:nth-child(n + 4)) {
+    display: none;
+  }
+
+  :global(.capacitorTabs .ftVideoPlayer .endedRecommendationTitle) {
+    margin-block-start: 10px;
+  }
+
+  :global(.capacitorTabs .ftVideoPlayer .endedRecommendationAuthor) {
+    margin-block-start: 4px;
+  }
+}
+
+@container (width >= 760px) and (height >= 380px) {
+  :global(.capacitorTabs .ftVideoPlayer .endedScreenLayout) {
+    --ended-columns: 4;
+  }
+
+  :global(.capacitorTabs .ftVideoPlayer .endedRecommendation:nth-child(4)) {
+    display: block;
   }
 }
 
