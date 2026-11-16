@@ -1,3 +1,7 @@
+.feedButtons {
+  justify-content: center;
+}
+
 .autoRefreshInterval {
   inline-size: 100%;
   max-inline-size: 380px;
@@ -102,8 +106,14 @@
   flex: 1 1 16em;
 }
 
-.rssHubButton {
+.feedSourceButtons {
+  display: flex;
   flex: none;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.feedSourceButtons .btn {
   margin: 0;
 }
 

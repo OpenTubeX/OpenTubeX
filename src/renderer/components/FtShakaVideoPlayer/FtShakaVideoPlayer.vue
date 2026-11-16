@@ -161,7 +161,7 @@
       <video
         ref="video"
         class="player"
-        :class="{ audioOnly: format === 'audio', musicAudioTrack }"
+        :class="{ audioOnly: audioOnlyMedia, musicAudioTrack }"
         :style="videoZoomStyle"
         preload="auto"
         crossorigin="anonymous"
@@ -2390,6 +2390,11 @@ const props = defineProps({
     type: Array,
     default: () => ([])
   },
+  /** Whether the legacy formats only have audio, such as a podcast episode's MP3 file */
+  audioOnly: {
+    type: Boolean,
+    default: false
+  },
   playbackSourceKey: {
     type: Number,
     default: 0
@@ -3647,8 +3652,11 @@ const musicAudioTrack = computed(() => {
   return props.musicMediaType === MUSIC_MEDIA_TYPE.AUDIO_TRACK
 })
 
+/** Audio manifests and legacy formats without video have no picture to show, capture or pop out */
+const audioOnlyMedia = computed(() => props.format === 'audio' || (props.format === 'legacy' && props.audioOnly))
+
 const audioPlayerMode = computed(() => {
-  return props.format === 'audio' || musicAudioTrack.value
+  return audioOnlyMedia.value || musicAudioTrack.value
 })
 
 const musicVisualizer = computed(() => {
@@ -3884,7 +3892,7 @@ const rotateFullscreenToLandscape = computed(() => {
 const fullscreenRotationIgnoresSystemLock = computed(() => store.getters.getFullscreenRotationIgnoresSystemLock)
 
 const fullscreenAspectRatio = computed(() => {
-  if (props.format === 'audio') return null
+  if (audioOnlyMedia.value) return null
   return getFullscreenAspectRatio(props.videoAspectRatio, props.shortsPlayer)
 })
 
@@ -5218,7 +5226,7 @@ const uiConfig = computed(() => {
     removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'playback_rate')
   }
 
-  if (!enableScreenshot.value || props.format === 'audio') {
+  if (!enableScreenshot.value || audioOnlyMedia.value) {
     removeFromArrayIfExists(uiConfig.controlPanelElements, 'ft_screenshot')
     removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_screenshot')
   }
@@ -5253,12 +5261,12 @@ const uiConfig = computed(() => {
     removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_autoplay_toggle')
   }
 
-  if (props.format === 'audio') {
+  if (audioOnlyMedia.value) {
     removeFromArrayIfExists(uiConfig.controlPanelElements, pictureInPictureElement)
     removeFromArrayIfExists(uiConfig.overflowMenuButtons, pictureInPictureElement)
   }
 
-  if (props.format === 'audio' || useVrMode.value) {
+  if (audioOnlyMedia.value || useVrMode.value) {
     removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_ambient_mode')
   }
 
@@ -6927,7 +6935,7 @@ function registerMediaSessionHandlers() {
       }
     },
     enterpictureinpicture: () => {
-      if (props.format !== 'audio' && ui?.getControls?.().isPiPAllowed()) {
+      if (!audioOnlyMedia.value && ui?.getControls?.().isPiPAllowed()) {
         ui.getControls().togglePiP()
       }
     }
@@ -7299,7 +7307,7 @@ function applyPendingPresentationModes() {
 
   if (
     startInPip &&
-    props.format !== 'audio' &&
+    !audioOnlyMedia.value &&
     video.value?.readyState >= HTMLMediaElement.HAVE_METADATA &&
     ui.getControls().isPiPAllowed() &&
     process.env.IS_ELECTRON
@@ -7778,7 +7786,7 @@ function handleAndroidRotation(landscape) {
   // Resume can deliver portrait before the visibility event reaches the renderer.
   if (!mobileAdjustmentsVisible.value) return
   // Use display rotation by default; physical rotation is an explicit opt-in.
-  if (!enterFullscreenOnDisplayRotate.value || scrollMiniPlayerActive.value || props.format === 'audio' || props.shortsPlayer) return
+  if (!enterFullscreenOnDisplayRotate.value || scrollMiniPlayerActive.value || audioOnlyMedia.value || props.shortsPlayer) return
   if (!video.value?.readyState || pictureInPictureActive.value) return
   if (androidRotationFullscreen || isNativeFullscreenActive() || !androidFullscreenHost) return
   androidFullscreenHost.setAttribute('popover', 'manual')
@@ -7941,7 +7949,7 @@ useTabLifecycle({
 const ambientModeVisible = computed(() => {
   return isActiveTab.value &&
     ambientMode.value &&
-    props.format !== 'audio' &&
+    !audioOnlyMedia.value &&
     props.vrProjection !== 'EQUIRECTANGULAR' &&
     !scrollMiniPlayerActive.value &&
     !scrollMiniPlayerAnimating.value &&
@@ -10859,7 +10867,7 @@ function mouseScrollVolumeHandler(event) {
  * @param {number} step
  */
 function frameByFrame(step) {
-  if (props.format === 'audio' || !canSeek()) {
+  if (audioOnlyMedia.value || !canSeek()) {
     return
   }
 
@@ -11249,7 +11257,7 @@ async function keyboardShortcutHandler(event) {
     }
     case matches(KeyboardShortcuts.VIDEO_PLAYER.GENERAL.PICTURE_IN_PICTURE):
       // Toggle picture in picture
-      if (props.format !== 'audio') {
+      if (!audioOnlyMedia.value) {
         const controls = ui.getControls()
         if (controls.isPiPAllowed()) {
           event.preventDefault()
@@ -11334,7 +11342,7 @@ async function keyboardShortcutHandler(event) {
       }
       break
     case matches(KeyboardShortcuts.VIDEO_PLAYER.GENERAL.TAKE_SCREENSHOT):
-      if (enableScreenshot.value && props.format !== 'audio') {
+      if (enableScreenshot.value && !audioOnlyMedia.value) {
         event.preventDefault()
         // Holding the key would start a slow JPEG XL encode per repeat.
         if (!event.repeat) takeScreenshot()

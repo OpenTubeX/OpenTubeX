@@ -89,6 +89,7 @@
                 :twitch-sub-only-vod="source.twitchSubOnlyVod === true"
                 :twitch-live-recording="source.twitchLiveRecording ?? null"
                 :legacy-formats="source.legacyFormats"
+                :audio-only="source.audioOnly === true"
                 :format="source.manifestSrc ? (source.audioOnly ? 'audio' : 'dash') : 'legacy'"
                 :captions="source.captions"
                 :caption-translations="source.captionTranslations"
@@ -534,6 +535,8 @@ import { useMediaSessionMetadata } from '../../composables/useMediaSessionMetada
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import { isExternalMediaUrl } from '../../helpers/externalMediaUrl'
 import { getExternalMediaAuthorId, getExternalMediaHistoryId } from '../../helpers/externalMediaHistory'
+import { isMediaFileTitle, withMediaFileMetadata } from '../../helpers/podcasts'
+import { findRssFeedMediaItem } from '../../helpers/rssFeeds'
 import { hasReachedWatchedThreshold, isHistoryEntryWatched } from '../../helpers/history'
 import { findPlatformChannel, getPlatformChannelRoute } from '../../../platforms/index'
 import { createWatchTimeTracker } from '../../helpers/watchTimeTracker'
@@ -1346,6 +1349,39 @@ function handlePlayerError(error) {
     : error?.message ?? String(error)
 }
 
+/**
+ * Media files, such as podcast episodes, take their title and cover from their
+ * feed, or from the history once they left it.
+ * @param {string} url
+ * @param {import('../../../main/ytDlpPlayback').YtDlpPlaybackInfo} mediaInfo
+ */
+function withMediaFileMetadataFor(url, mediaInfo) {
+  const feedItem = findRssFeedMediaItem(url)
+  if (feedItem) {
+    const { item, feed } = feedItem
+    return withMediaFileMetadata(mediaInfo, {
+      title: item.title,
+      creator: feed?.title || item.author,
+      creatorAvatar: feed?.avatar ?? null,
+      thumbnail: item.thumbnail,
+      published: item.published,
+      duration: item.duration ?? null
+    })
+  }
+  const entry = historyEntry.value
+  // Media files can redirect to a differently named file, which yt-dlp names them after
+  if (!entry || !(isMediaFileTitle(mediaInfo.title, url) ||
+    (mediaInfo.webpageUrl !== null && isMediaFileTitle(mediaInfo.title, mediaInfo.webpageUrl)))) return mediaInfo
+  return withMediaFileMetadata(mediaInfo, {
+    title: entry.title,
+    creator: entry.author,
+    creatorAvatar: entry.authorThumbnail ?? null,
+    thumbnail: entry.thumbnail,
+    published: entry.published || null,
+    duration: entry.lengthSeconds || null
+  })
+}
+
 async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysUseCookies) {
   savePositionOnExit()
   releaseTwitchVodRegistration(source.value)
@@ -1409,7 +1445,7 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
       releaseTwitchVodRegistration(result.source)
       return
     }
-    info.value = result.info
+    info.value = withMediaFileMetadataFor(url, result.info)
     applyChannelPreferences()
     if (!result.source?.isLive) {
       startTimestamp = getQueryTimestamp()
@@ -1418,7 +1454,7 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
       lastSavedPosition = startTime.value ?? 0
     }
     source.value = result.source
-    setTabTitle(result.info.title || hostname.value)
+    setTabTitle(info.value.title || hostname.value)
     consumeTimestamp()
     if (creatorAvatarUrl.value) setTabAvatar(creatorAvatarUrl.value)
   } catch (error) {

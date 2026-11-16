@@ -238,6 +238,26 @@ Subscriptions:
       Not Set: Ezarri gabe
     Retry Feed: Saiatu berriro {feed} kargatzen
     Reloading Feed: '{feed} berriro kargatzen'
+    Import OPML: Inportatu OPML
+    Export OPML: Esportatu OPML
+    OPML File: OPML fitxategia
+    Invalid OPML File: Fitxategi honek ez du jariorik.
+    Feeds Could Not Be Saved: Ezin izan dira jarioak gorde.
+    Feeds Imported: Jario berri 1 inportatu da. | {count} jario berri inportatu dira.
+    All Feeds Already Followed: Dagoeneko fitxategi honetako jario guztiak jarraitzen dituzu.
+    YouTube Channels Skipped: YouTube kanalak saltatu egin dira. Haietara harpidetzeko, inportatu fitxategia Datuak eta biltegiratzea atalean.
+    Feeds Exported: Zure RSS jarioak esportatu dira.
+    Podcasts:
+      Open: Bilatu podcastak
+      Title: Aurkitu podcast bat
+      Description: Bilatu Apple Podcasts direktorioan eta jarraitu podcast baten jarioa. Zure bilaketak Apple-ri bidaltzen zaizkio.
+      Search: Bilatu podcastak
+      Search Placeholder: Podcastaren izena edo gaia
+      Searching: Podcastak bilatzen…
+      Search Failed: Ezin izan dira podcastak bilatu. Egiaztatu konexioa eta saiatu berriro.
+      No Results: Ez da podcastik aurkitu.
+      Results: Aurkitutako podcastak
+      Follow Podcast: Jarraitu {podcast}
   Platforms:
     Tab: Plataformak
     Platform: Plataforma

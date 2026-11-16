@@ -254,6 +254,26 @@ Subscriptions:
       Not Set: 설정 안 함
     Retry Feed: '{feed} 다시 시도'
     Reloading Feed: '{feed} 다시 불러오는 중'
+    Import OPML: OPML 가져오기
+    Export OPML: OPML 내보내기
+    OPML File: OPML 파일
+    Invalid OPML File: 이 파일에는 피드가 없습니다.
+    Feeds Could Not Be Saved: 피드를 저장할 수 없습니다.
+    Feeds Imported: 새 피드 {count}개를 가져왔습니다.
+    All Feeds Already Followed: 이 파일의 모든 피드를 이미 팔로우하고 있습니다.
+    YouTube Channels Skipped: YouTube 채널은 건너뛰었습니다. 구독하려면 '데이터 및 저장 공간'에서 파일을 가져오세요.
+    Feeds Exported: RSS 피드를 내보냈습니다.
+    Podcasts:
+      Open: 팟캐스트 검색
+      Title: 팟캐스트 찾기
+      Description: Apple Podcasts 디렉터리를 검색하고 팟캐스트 피드를 팔로우하세요. 검색어는 Apple로 전송됩니다.
+      Search: 팟캐스트 검색
+      Search Placeholder: 팟캐스트 이름 또는 주제
+      Searching: 팟캐스트 검색 중…
+      Search Failed: 팟캐스트를 검색할 수 없습니다. 연결을 확인하고 다시 시도하세요.
+      No Results: 팟캐스트를 찾을 수 없습니다.
+      Results: 찾은 팟캐스트
+      Follow Podcast: "{podcast} 팔로우"
   Platforms:
     Tab: 플랫폼
     Platform: 플랫폼

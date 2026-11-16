@@ -62,6 +62,7 @@ function androidRotationHarness(overrides = {}) {
     enterFullscreenOnDisplayRotate: { value: true },
     fullscreenRotationIgnoresSystemLock: { value: false },
     scrollMiniPlayerActive: { value: false },
+    audioOnlyMedia: { value: false },
     props: { format: 'legacy', shortsPlayer: false, startInFullwindow: false },
     ...overrides,
   }
@@ -136,7 +137,7 @@ for (const [state, overrides] of [
   ['manual fullscreen entry pending', { androidFullscreenEntering: true }],
   ['fullscreen-on-rotate disabled', { enterFullscreenOnDisplayRotate: { value: false } }],
   ['minimized player', { scrollMiniPlayerActive: { value: true } }],
-  ['audio playback', { props: { format: 'audio', shortsPlayer: false } }],
+  ['audio playback', { audioOnlyMedia: { value: true } }],
   ['Shorts player', { props: { format: 'legacy', shortsPlayer: true } }],
   ['Picture-in-Picture', { pictureInPictureActive: { value: true } }],
   ['background app', { mobileAdjustmentsVisible: { value: false } }],

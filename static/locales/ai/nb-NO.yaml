@@ -238,6 +238,26 @@ Subscriptions:
       Not Set: Ikke angitt
     Retry Feed: Prøv {feed} på nytt
     Reloading Feed: Laster inn {feed} på nytt
+    Import OPML: Importer OPML
+    Export OPML: Eksporter OPML
+    OPML File: OPML-fil
+    Invalid OPML File: Denne filen inneholder ingen feeder.
+    Feeds Could Not Be Saved: Kunne ikke lagre feedene.
+    Feeds Imported: 1 ny feed importert. | {count} nye feeder importert.
+    All Feeds Already Followed: Du følger allerede alle feedene i denne filen.
+    YouTube Channels Skipped: YouTube-kanaler ble hoppet over. Importer filen under Data og lagring for å abonnere på dem.
+    Feeds Exported: RSS-feedene dine er eksportert.
+    Podcasts:
+      Open: Søk etter podkaster
+      Title: Finn en podkast
+      Description: Søk i Apple Podcasts-katalogen og følg en podkasts feed. Søkene dine sendes til Apple.
+      Search: Søk etter podkaster
+      Search Placeholder: Podkastens navn eller emne
+      Searching: Søker etter podkaster …
+      Search Failed: Kunne ikke søke etter podkaster. Sjekk tilkoblingen og prøv igjen.
+      No Results: Fant ingen podkaster.
+      Results: Podkaster funnet
+      Follow Podcast: Følg {podcast}
   Platforms:
     Tab: Plattformer
     Platform: Plattform

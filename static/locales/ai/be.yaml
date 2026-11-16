@@ -253,6 +253,26 @@ Subscriptions:
       Not Set: Не зададзена
     Retry Feed: Паўтарыць спробу для {feed}
     Reloading Feed: Перазагрузка {feed}
+    Import OPML: Імпартаваць OPML
+    Export OPML: Экспартаваць OPML
+    OPML File: Файл OPML
+    Invalid OPML File: Гэты файл не змяшчае стужак.
+    Feeds Could Not Be Saved: Не ўдалося захаваць стужкі.
+    Feeds Imported: Імпартавана {count} новая стужка. | Імпартавана {count} новыя стужкі. | Імпартавана {count} новых стужак.
+    All Feeds Already Followed: Вы ўжо падпісаны на ўсе стужкі з гэтага файла.
+    YouTube Channels Skipped: Каналы YouTube прапушчаны. Каб падпісацца на іх, імпартуйце файл у раздзеле «Даныя і сховішча».
+    Feeds Exported: Вашы RSS-стужкі экспартаваны.
+    Podcasts:
+      Open: Шукаць падкасты
+      Title: Знайсці падкаст
+      Description: Шукайце ў каталогу Apple Podcasts і падпісвайцеся на стужку падкаста. Вашы пошукавыя запыты адпраўляюцца ў Apple.
+      Search: Шукаць падкасты
+      Search Placeholder: Назва або тэма падкаста
+      Searching: Пошук падкастаў…
+      Search Failed: Не ўдалося выканаць пошук падкастаў. Праверце злучэнне і паспрабуйце зноў.
+      No Results: Падкасты не знойдзены.
+      Results: Знойдзеныя падкасты
+      Follow Podcast: Падпісацца на {podcast}
   Platforms:
     Tab: Платформы
     Platform: Платформа

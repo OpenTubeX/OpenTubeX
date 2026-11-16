@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { parseOpmlFeeds } from '../../src/renderer/helpers/opml.js'
+import { buildOpml, getOpmlYouTubeChannelId, parseOpmlFeeds } from '../../src/renderer/helpers/opml.js'
 
 const feed = id => `https://www.youtube.com/feeds/videos.xml?channel_id=${id}`
 
@@ -59,4 +59,28 @@ test('reads nested folders, except one wrapping every feed', () => {
     <outline xmlUrl="${feed('UCa')}" /><outline xmlUrl="${feed('UCb')}" />
   </outline></outline></body></opml>`
   assert.deepEqual(parseOpmlFeeds(shared).map(({ folders }) => folders), [['Tech'], ['Tech']])
+})
+
+test('tells YouTube channel feeds apart from other feeds such as podcasts', () => {
+  const id = `UC${'a'.repeat(22)}`
+  assert.equal(getOpmlYouTubeChannelId(feed(id)), id)
+  assert.equal(getOpmlYouTubeChannelId(`https://yewtu.be/feed/channel/${id}`), id)
+  assert.equal(getOpmlYouTubeChannelId('https://podcast.example.test/feed/channel/episodes'), null)
+  assert.equal(getOpmlYouTubeChannelId(`https://podcast.example.test/feeds/videos.xml?channel_id=${id}`), null)
+  assert.equal(getOpmlYouTubeChannelId('https://podcast.example.test/rss.xml'), null)
+  assert.equal(getOpmlYouTubeChannelId('not a url'), null)
+})
+
+test('writes OPML that reads back with the same feeds', () => {
+  const feeds = [
+    { xmlUrl: 'https://podcast.example.test/rss?a=1&b=2', title: 'Q & A <"live">' },
+    { xmlUrl: 'https://feeds.example.test/show.xml', title: "It's a show" },
+  ]
+  assert.deepEqual(parseOpmlFeeds(buildOpml('RSS Feeds', feeds)), feeds.map(feed => ({ ...feed, folders: [] })))
+})
+
+test('names feeds by their outline text without a title', () => {
+  assert.deepEqual(parseOpmlFeeds('<opml><body><outline text="Show" type="rss" xmlUrl="https://podcast.example.test/rss" /></body></opml>'), [
+    { xmlUrl: 'https://podcast.example.test/rss', title: 'Show', folders: [] },
+  ])
 })

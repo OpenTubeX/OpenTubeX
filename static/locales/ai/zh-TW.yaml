@@ -238,6 +238,26 @@ Subscriptions:
       Not Set: 未設定
     Retry Feed: 重試 {feed}
     Reloading Feed: 正在重新載入 {feed}
+    Import OPML: 匯入 OPML
+    Export OPML: 匯出 OPML
+    OPML File: OPML 檔案
+    Invalid OPML File: 此檔案不含任何訂閱源。
+    Feeds Could Not Be Saved: 無法儲存訂閱源。
+    Feeds Imported: 已匯入 {count} 個新訂閱源。
+    All Feeds Already Followed: 你已追蹤此檔案中的所有訂閱源。
+    YouTube Channels Skipped: 已略過 YouTube 頻道。如要訂閱這些頻道，請在「資料與儲存空間」中匯入此檔案。
+    Feeds Exported: 你的 RSS 訂閱源已匯出。
+    Podcasts:
+      Open: 搜尋 Podcast
+      Title: 尋找 Podcast
+      Description: 在 Apple Podcasts 目錄中搜尋並追蹤 Podcast 的訂閱源。你的搜尋內容會傳送給 Apple。
+      Search: 搜尋 Podcast
+      Search Placeholder: Podcast 名稱或主題
+      Searching: 正在搜尋 Podcast…
+      Search Failed: 無法搜尋 Podcast。請檢查連線後再試一次。
+      No Results: 找不到 Podcast。
+      Results: 找到的 Podcast
+      Follow Podcast: 追蹤 {podcast}
   Platforms:
     Tab: 平台
     Platform: 平台

@@ -38,7 +38,7 @@ function controls({ props = {}, overflow = false, controlBarButtons = DEFAULT_CO
   }
   for (const name of [
     'displayVideoPlayButton', 'contextMenuElements', 'hasMultipleAudioTracks', 'useVrMode',
-    'enableScreenshot', 'enableTimestampNotes', 'useSponsorBlock', 'audioPlayerMode', 'videoZoomPossible',
+    'enableScreenshot', 'enableTimestampNotes', 'useSponsorBlock', 'audioOnlyMedia', 'audioPlayerMode', 'videoZoomPossible',
     'showLightsOffToggle', 'showMonoAudioToggle', 'showMusicModeToggle', 'showSkipSilenceButton',
     'voiceOverTranslationAvailable', 'disableAbRepeat', 'seekHistoryAvailable',
   ]) state[name] = { value: false }

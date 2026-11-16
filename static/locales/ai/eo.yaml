@@ -262,6 +262,26 @@ Subscriptions:
       Not Set: Ne agordita
     Retry Feed: Reprovi {feed}
     Reloading Feed: Reŝargante {feed}
+    Import OPML: Importi OPML
+    Export OPML: Eksporti OPML
+    OPML File: OPML-dosiero
+    Invalid OPML File: Ĉi tiu dosiero enhavas neniujn fluojn.
+    Feeds Could Not Be Saved: Ne eblis konservi la fluojn.
+    Feeds Imported: 1 nova fluo importita. | {count} novaj fluoj importitaj.
+    All Feeds Already Followed: Vi jam sekvas ĉiujn fluojn en ĉi tiu dosiero.
+    YouTube Channels Skipped: YouTube-kanaloj estis preterlasitaj. Por aboni ilin, importu la dosieron en Datumoj kaj konservejo.
+    Feeds Exported: Viaj RSS-fluoj estis eksportitaj.
+    Podcasts:
+      Open: Serĉi podkastojn
+      Title: Trovi podkaston
+      Description: Serĉu en la katalogo de Apple Podcasts kaj sekvu la fluon de podkasto. Viaj serĉoj estas senditaj al Apple.
+      Search: Serĉi podkastojn
+      Search Placeholder: Nomo aŭ temo de la podkasto
+      Searching: Serĉante podkastojn…
+      Search Failed: Ne eblis serĉi la podkastojn. Kontrolu vian konekton kaj reprovu.
+      No Results: Neniu podkasto trovita.
+      Results: Trovitaj podkastoj
+      Follow Podcast: Sekvi {podcast}
   Platforms:
     Tab: Platformoj
     Platform: Platformo

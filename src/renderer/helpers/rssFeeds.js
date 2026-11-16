@@ -11,6 +11,7 @@ import { isRssFeedItemSeen, onRssFeedSeenItemsSynced, parseRssFeedSeenItems, toR
 import { unwatchExternalMediaMarkedUnseen } from './externalMediaHistory'
 import { resolveYtDlpCreatorAvatarUrl } from '../../main/ytDlpCreatorAvatar'
 import { holdAndroidBackgroundWork } from './androidBackgroundSync.js'
+import { parsePodcastDuration } from './podcasts.js'
 
 const FETCH_TIMEOUT_MS = 15_000
 const MAX_ITEMS_PER_FEED = 50
@@ -25,6 +26,8 @@ const MAX_ITEMS_PER_FEED = 50
  *   thumbnail: string,
  *   published: number | null,
  *   feedUrl: string,
+ *   duration?: number,
+ *   enclosure?: boolean,
  *   isNew?: boolean
  * }} RssFeedItem
  */
@@ -82,17 +85,28 @@ function childPlainText(parent, names) {
 }
 
 /**
+ * Podcast episodes play from their media, their page often only has show notes.
  * @param {Element} item
  * @param {string} base
+ * @returns {string | null}
+ */
+function itemMedia(item, base) {
+  const media = [
+    ...childElements(item, ['enclosure']).map(element => [element.getAttribute('url'), element.getAttribute('type')]),
+    ...childElements(item, ['link']).filter(link => link.getAttribute('rel') === 'enclosure')
+      .map(link => [link.getAttribute('href'), link.getAttribute('type')])
+  ].find(([url, type]) => /^(?:audio|video)\//.test(type ?? '') && normalizeHttpUrl(url, base))
+  return media ? normalizeHttpUrl(media[0], base) : null
+}
+
+/**
+ * The page of an item
+ * @param {Element} item
+ * @param {string} base
+ * @returns {string | null}
  */
 function itemLink(item, base) {
   const links = childElements(item, ['link'])
-  // Podcast episodes play from their media, their page often only has show notes
-  const media = [
-    ...childElements(item, ['enclosure']).map(element => [element.getAttribute('url'), element.getAttribute('type')]),
-    ...links.filter(link => link.getAttribute('rel') === 'enclosure').map(link => [link.getAttribute('href'), link.getAttribute('type')])
-  ].find(([url, type]) => /^(?:audio|video)\//.test(type ?? '') && normalizeHttpUrl(url, base))
-  if (media) return normalizeHttpUrl(media[0], base)
 
   // Atom links carry their target in `href`, preferring the alternate page
   const atomLink = links.find(link => link.hasAttribute('href') && (link.getAttribute('rel') ?? 'alternate') === 'alternate')
@@ -104,9 +118,18 @@ function itemLink(item, base) {
     const permalink = normalizeHttpUrl(guid.textContent, base)
     if (permalink) return permalink
   }
+  return null
+}
 
-  // Podcast feeds without a page link still point to their media
-  return normalizeHttpUrl(childElements(item, ['enclosure'])[0]?.getAttribute('url'), base)
+/**
+ * Podcast episodes link their audio as an enclosure.
+ * @param {Element} item
+ */
+function isPodcastEpisode(item) {
+  return [
+    ...childElements(item, ['enclosure']),
+    ...childElements(item, ['link']).filter(link => link.getAttribute('rel') === 'enclosure')
+  ].some(element => element.getAttribute('type')?.startsWith('audio/'))
 }
 
 /**
@@ -228,28 +251,38 @@ export function parseRssFeed(source, feedUrl, baseUrl = feedUrl) {
   if (!channel) throw new Error('Not an RSS or Atom feed')
 
   const title = childPlainText(channel, ['title']) || new URL(feedUrl).hostname
+  const image = feedImage(channel, baseUrl)
   const entries = root.localName === 'feed'
     ? childElements(root, ['entry'])
     : childElements(root.localName === 'RDF' ? root : channel, ['item'])
 
   const items = entries.flatMap(entry => {
-    const url = itemLink(entry, baseUrl)
+    // Podcast feeds without a page link still point to their media
+    const media = itemMedia(entry, baseUrl) ??
+      (itemLink(entry, baseUrl) ? null : normalizeHttpUrl(childElements(entry, ['enclosure'])[0]?.getAttribute('url'), baseUrl))
+    const url = media ?? itemLink(entry, baseUrl)
     if (!url) return []
+    const podcastEpisode = isPodcastEpisode(entry)
+    const duration = podcastEpisode ? parsePodcastDuration(childText(entry, ['duration'])) : undefined
     return [{
       id: childText(entry, ['id', 'guid']) || url,
       url,
       title: childPlainText(entry, ['title']) || url,
       author: itemAuthor(entry) || title,
-      thumbnail: itemThumbnail(entry, baseUrl),
+      // Episodes without their own image show the podcast's cover
+      thumbnail: itemThumbnail(entry, baseUrl) || (podcastEpisode ? image ?? '' : ''),
       published: itemPublished(entry),
-      feedUrl
+      feedUrl,
+      ...(duration === undefined ? {} : { duration }),
+      // Media files carry no title or cover of their own, so the item supplies them
+      ...(media === null ? {} : { enclosure: true })
     }]
   })
   items.sort(compareFeedItems)
   return {
     title,
     items: items.slice(0, MAX_ITEMS_PER_FEED),
-    image: feedImage(channel, baseUrl),
+    image,
     isRssHub: childText(channel, ['generator']).startsWith('RSSHub')
   }
 }
@@ -604,6 +637,20 @@ export function getCachedRssFeedUrls() {
   if (refreshedAllHere) return new Set(refreshedFeedUrls)
   if (store.getters.getFetchSubscriptionsAutomatically) return new Set()
   return new Set([...seenHistory.keys(), ...refreshedFeedUrls])
+}
+
+/**
+ * The cached item whose media file is at `url`, such as a podcast episode, and
+ * the followed feed it belongs to.
+ * @param {string} url
+ * @returns {{ item: RssFeedItem, feed: RssFeed | null } | null}
+ */
+export function findRssFeedMediaItem(url) {
+  const item = rssFeedItems.value.find(candidate => candidate.enclosure === true && candidate.url === url)
+  if (!item) return null
+  /** @type {RssFeed[]} */
+  const feeds = store.getters.getFollowedRssFeeds
+  return { item, feed: feeds.find(feed => feed.url === item.feedUrl) ?? null }
 }
 
 /**

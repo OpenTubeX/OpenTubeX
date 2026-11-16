@@ -238,6 +238,26 @@ Subscriptions:
       Not Set: Ei asetettu
     Retry Feed: Yritä ladata {feed} uudelleen
     Reloading Feed: Ladataan {feed} uudelleen
+    Import OPML: Tuo OPML
+    Export OPML: Vie OPML
+    OPML File: OPML-tiedosto
+    Invalid OPML File: Tiedostossa ei ole syötteitä.
+    Feeds Could Not Be Saved: Syötteitä ei voitu tallentaa.
+    Feeds Imported: 1 uusi syöte tuotiin. | {count} uutta syötettä tuotiin.
+    All Feeds Already Followed: Seuraat jo kaikkia tämän tiedoston syötteitä.
+    YouTube Channels Skipped: YouTube-kanavat ohitettiin. Tilaa ne tuomalla tiedosto kohdassa Tiedot ja tallennustila.
+    Feeds Exported: RSS-syötteesi on viety.
+    Podcasts:
+      Open: Hae podcasteja
+      Title: Etsi podcast
+      Description: Hae Apple Podcastsin hakemistosta ja seuraa podcastin syötettä. Hakusi lähetetään Applelle.
+      Search: Hae podcasteja
+      Search Placeholder: Podcastin nimi tai aihe
+      Searching: Haetaan podcasteja…
+      Search Failed: Podcasteja ei voitu hakea. Tarkista yhteys ja yritä uudelleen.
+      No Results: Podcasteja ei löytynyt.
+      Results: Löydetyt podcastit
+      Follow Podcast: "Seuraa: {podcast}"
   Platforms:
     Tab: Alustat
     Platform: Alusta

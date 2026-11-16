@@ -238,6 +238,26 @@ Subscriptions:
       Not Set: Heb ei osod
     Retry Feed: Rhoi cynnig arall ar {feed}
     Reloading Feed: Yn ail-lwytho {feed}
+    Import OPML: Mewnforio OPML
+    Export OPML: Allforio OPML
+    OPML File: Ffeil OPML
+    Invalid OPML File: Does dim ffrydiau yn y ffeil hon.
+    Feeds Could Not Be Saved: Doedd dim modd cadw'r ffrydiau.
+    Feeds Imported: Mewnforiwyd {count} o ffrydiau newydd. | Mewnforiwyd 1 ffrwd newydd. | Mewnforiwyd {count} ffrwd newydd. | Mewnforiwyd {count} ffrwd newydd. | Mewnforiwyd {count} ffrwd newydd. | Mewnforiwyd {count} o ffrydiau newydd.
+    All Feeds Already Followed: Rydych chi eisoes yn dilyn pob ffrwd yn y ffeil hon.
+    YouTube Channels Skipped: Cafodd sianeli YouTube eu hepgor. I danysgrifio iddyn nhw, mewnforiwch y ffeil o dan Data a storfa.
+    Feeds Exported: Mae eich ffrydiau RSS wedi'u hallforio.
+    Podcasts:
+      Open: Chwilio podlediadau
+      Title: Dod o hyd i bodlediad
+      Description: Chwiliwch gyfeiriadur Apple Podcasts a dilyn ffrwd podlediad. Mae eich chwiliadau'n cael eu hanfon at Apple.
+      Search: Chwilio podlediadau
+      Search Placeholder: Enw neu bwnc y podlediad
+      Searching: Wrthi'n chwilio podlediadau…
+      Search Failed: Doedd dim modd chwilio'r podlediadau. Gwiriwch eich cysylltiad a rhowch gynnig arall arni.
+      No Results: Heb ganfod podlediadau.
+      Results: Podlediadau a ganfuwyd
+      Follow Podcast: Dilyn {podcast}
   Platforms:
     Tab: Llwyfannau
     Platform: Llwyfan

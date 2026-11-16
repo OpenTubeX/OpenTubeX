@@ -28,7 +28,7 @@ import { probeHlsManifest as probeYtDlpHlsManifest } from './hlsManifest'
  * @property {boolean} isLive
  * @property {boolean} [isLiveDvrEnabled] whether the live source can be rewound, regardless of YouTube's metadata
  * @property {'EQUIRECTANGULAR' | null} [vrProjection]
- * @property {boolean} [audioOnly] whether an external manifest has no video formats
+ * @property {boolean} [audioOnly] whether an external manifest or the legacy formats have no video
  * @property {boolean} [twitchSubOnlyVod]
  * @property {{ manifestSrc: string, startedAt: number } | null} [twitchLiveRecording] the recording of an ongoing
  *   Twitch broadcast, which the player switches to when seeking behind the live playlist
@@ -178,7 +178,7 @@ async function getExternalYtDlpPlaybackSourceFromYtDlp(url, useAuthentication) {
     return { info, source: null }
   }
   const audioOnly = info.formats.length > 0 && info.formats.every(format =>
-    format.vcodec === 'none' && isAudioFormat(format)
+    format.vcodec === 'none' && (isAudioFormat(format) || isExternalProgressiveAudioFormat(format))
   )
   const httpFormats = info.formats.filter(format =>
     ['http', 'https'].includes(format.protocol) &&
@@ -193,7 +193,8 @@ async function getExternalYtDlpPlaybackSourceFromYtDlp(url, useAuthentication) {
   const h265Formats = httpFormats.filter(format => format.vcodec === 'h265')
   let legacyFormats = await convertLegacyFormats(preferredHttpFormats.filter(format =>
     (isAudioFormat(format) && (!hasVideoFormats || isVideoFormat(format))) ||
-    isExternalProgressiveVideoFormat(format)
+    isExternalProgressiveVideoFormat(format) ||
+    (!hasVideoFormats && isExternalProgressiveAudioFormat(format))
   ))
 
   const hlsFormats = info.formats.filter(format =>
@@ -300,7 +301,8 @@ async function getExternalYtDlpPlaybackSourceFromYtDlp(url, useAuthentication) {
         captions: info.captions ?? [],
         captionTranslations: info.captionTranslations ?? [],
         storyboardSrc,
-        isLive
+        isLive,
+        audioOnly
       }
     }
   }
@@ -438,6 +440,11 @@ function isAudioFormat(format) {
   return format.acodec !== null && format.acodec !== 'none'
 }
 
+/** Direct audio files, such as podcast episodes in M4A or Ogg, have no codec names. */
+function isExternalProgressiveAudioFormat(format) {
+  return format.vcodec === 'none' && format.acodec === null && ['m4a', 'mp3', 'ogg', 'opus'].includes(format.ext)
+}
+
 /** Some extractors omit codec names for otherwise playable progressive video. */
 function isExternalProgressiveVideoFormat(format) {
   return format.vcodec === null && (format.acodec === null || format.acodec === 'none') &&
@@ -454,6 +461,7 @@ function buildMimeType(format) {
   const container = format.ext === 'webm' ? 'webm' : 'mp4'
 
   if (isExternalProgressiveVideoFormat(format)) return `video/${container}`
+  if (isExternalProgressiveAudioFormat(format)) return `audio/${container}`
 
   if (isVideoFormat(format)) {
     const codecs = isAudioFormat(format) ? `${format.vcodec}, ${format.acodec}` : format.vcodec

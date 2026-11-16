@@ -1,0 +1,95 @@
+.podcastSearchForm {
+  --input-bottom-spacing: 0;
+
+  display: grid;
+  gap: 16px;
+  inline-size: min(600px, calc(100vw - 100px));
+  max-inline-size: 100%;
+  padding-block-end: 8px;
+}
+
+.podcastSearchForm :deep(.ft-input-component) {
+  inline-size: 100%;
+  margin-block: 0;
+}
+
+.formHint,
+.formMessage {
+  margin: 0;
+}
+
+.formMessage {
+  align-items: baseline;
+  color: var(--tertiary-text-color);
+  display: flex;
+  gap: 8px;
+}
+
+.formMessage.error {
+  color: var(--error-text-color);
+}
+
+.results {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.result {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+}
+
+.artwork {
+  block-size: 48px;
+  border-radius: var(--shape-corner-small);
+  flex: none;
+  inline-size: 48px;
+  object-fit: cover;
+}
+
+.artworkPlaceholder {
+  align-items: center;
+  background-color: var(--secondary-card-bg-color);
+  color: var(--tertiary-text-color);
+  display: flex;
+  font-size: 24px;
+  justify-content: center;
+}
+
+.resultText {
+  display: grid;
+  flex: 1;
+  min-inline-size: 0;
+}
+
+/* Long titles get a second line on narrow screens before they are cut off */
+.resultTitle {
+  -webkit-box-orient: vertical;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+.resultAuthor {
+  color: var(--tertiary-text-color);
+  font-size: 0.85em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.followButton {
+  flex: none;
+  margin: 0;
+}
+
+@media only screen and (width <= 680px) {
+  .podcastSearchForm {
+    inline-size: 100%;
+  }
+}

@@ -240,6 +240,26 @@ Subscriptions:
       Not Set: לא מוגדר
     Retry Feed: ניסיון חוזר עבור {feed}
     Reloading Feed: טוען מחדש את {feed}
+    Import OPML: ייבוא OPML
+    Export OPML: ייצוא OPML
+    OPML File: קובץ OPML
+    Invalid OPML File: הקובץ הזה לא מכיל פידים.
+    Feeds Could Not Be Saved: לא ניתן היה לשמור את הפידים.
+    Feeds Imported: יובא פיד חדש אחד. | יובאו {count} פידים חדשים. | יובאו {count} פידים חדשים.
+    All Feeds Already Followed: את/ה כבר עוקב/ת אחר כל הפידים בקובץ הזה.
+    YouTube Channels Skipped: ערוצי YouTube דולגו. כדי להירשם אליהם, יש לייבא את הקובץ תחת נתונים ואחסון.
+    Feeds Exported: פידי ה־RSS שלך יוצאו.
+    Podcasts:
+      Open: חיפוש פודקאסטים
+      Title: מציאת פודקאסט
+      Description: חפשו במדריך של Apple Podcasts ועקבו אחר הפיד של פודקאסט. החיפושים שלכם נשלחים ל־Apple.
+      Search: חיפוש פודקאסטים
+      Search Placeholder: שם או נושא הפודקאסט
+      Searching: מתבצע חיפוש פודקאסטים…
+      Search Failed: לא ניתן היה לחפש פודקאסטים. בדקו את החיבור ונסו שוב.
+      No Results: לא נמצאו פודקאסטים.
+      Results: פודקאסטים שנמצאו
+      Follow Podcast: מעקב אחר {podcast}
   Platforms:
     Tab: פלטפורמות
     Platform: פלטפורמה

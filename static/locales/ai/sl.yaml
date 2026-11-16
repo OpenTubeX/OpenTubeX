@@ -281,6 +281,26 @@ Subscriptions:
       Not Set: Ni nastavljeno
     Retry Feed: Poskusi znova naložiti {feed}
     Reloading Feed: Ponovno nalaganje {feed}
+    Import OPML: Uvozi OPML
+    Export OPML: Izvozi OPML
+    OPML File: Datoteka OPML
+    Invalid OPML File: Ta datoteka ne vsebuje virov.
+    Feeds Could Not Be Saved: Virov ni bilo mogoče shraniti.
+    Feeds Imported: Uvožen je {count} nov vir. | Uvožena sta {count} nova vira. | Uvoženi so {count} novi viri. | Uvoženih je {count} novih virov.
+    All Feeds Already Followed: Vse vire v tej datoteki že spremljate.
+    YouTube Channels Skipped: Kanali YouTube so bili preskočeni. Če se želite nanje naročiti, uvozite datoteko v razdelku Podatki in shramba.
+    Feeds Exported: Vaši viri RSS so bili izvoženi.
+    Podcasts:
+      Open: Iskanje podkastov
+      Title: Poišči podkast
+      Description: Preiščite imenik Apple Podcasts in spremljajte vir podkasta. Vaša iskanja se pošljejo podjetju Apple.
+      Search: Iskanje podkastov
+      Search Placeholder: Ime ali tema podkasta
+      Searching: Iskanje podkastov …
+      Search Failed: Podkastov ni bilo mogoče poiskati. Preverite povezavo in poskusite znova.
+      No Results: Ni najdenih podkastov.
+      Results: Najdeni podkasti
+      Follow Podcast: Spremljaj {podcast}
   Platforms:
     Tab: Platforme
     Platform: Platforma

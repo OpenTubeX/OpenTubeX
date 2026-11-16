@@ -242,6 +242,26 @@ Subscriptions:
       Not Set: Није подешено
     Retry Feed: Покушај поново да учиташ {feed}
     Reloading Feed: Поново се учитава {feed}
+    Import OPML: Увези OPML
+    Export OPML: Извези OPML
+    OPML File: OPML датотека
+    Invalid OPML File: Ова датотека не садржи фидове.
+    Feeds Could Not Be Saved: Фидове није било могуће сачувати.
+    Feeds Imported: Увезен је {count} нови фид. | Увезена су {count} нова фида. | Увезено је {count} нових фидова.
+    All Feeds Already Followed: Већ пратите све фидове из ове датотеке.
+    YouTube Channels Skipped: YouTube канали су прескочени. Да бисте се претплатили на њих, увезите датотеку у одељку Подаци и складиште.
+    Feeds Exported: Ваши RSS фидови су извезени.
+    Podcasts:
+      Open: Претражи подкасте
+      Title: Пронађи подкаст
+      Description: Претражите каталог Apple Podcasts и пратите фид подкаста. Ваше претраге се шаљу компанији Apple.
+      Search: Претражи подкасте
+      Search Placeholder: Назив или тема подкаста
+      Searching: Претраживање подкаста…
+      Search Failed: Подкасте није било могуће претражити. Проверите везу и покушајте поново.
+      No Results: Није пронађен ниједан подкаст.
+      Results: Пронађени подкасти
+      Follow Podcast: Прати {podcast}
   Platforms:
     Tab: Платформе
     Platform: Платформа

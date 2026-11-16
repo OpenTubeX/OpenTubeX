@@ -357,7 +357,6 @@ import { MAIN_PROFILE_ID } from '../../../../constants'
 import { calculateColorLuminance, getRandomColor } from '../../../helpers/colors'
 import {
   deepCopy,
-  escapeHTML,
   getTodayDateStrLocalTimezone,
   pickFilesWithPicker,
   pickFileWithPicker,
@@ -377,7 +376,7 @@ import {
   isLibreTubeWatchHistoryBackup,
 } from '../../../helpers/libretube'
 import { parseLineDelimitedJson } from '../../../helpers/line-delimited-json'
-import { parseOpmlFeeds } from '../../../helpers/opml'
+import { buildOpml, getOpmlYouTubeChannelId, parseOpmlFeeds } from '../../../helpers/opml'
 import { addChannelsToNamedGroups, normalizeSubscriptionGroups } from '../../../helpers/subscription-groups'
 import { updateChannelPreferences } from '../../../helpers/channel-preferences'
 import { checkYoutubeChannelId, resolveChannelId } from '../../../helpers/channels'
@@ -1087,44 +1086,20 @@ function importYouTubeSubscriptions(filename, content) {
  * @param {string} data
  */
 function importOpmlYouTubeSubscriptions(data) {
-  const feedData = parseOpmlFeeds(data)
-  if (feedData.length === 0) {
-    const message = t('Settings.Data Settings.Invalid subscriptions file')
-    showToast({ message: message, icon: ['fas', 'circle-exclamation'] })
+  const subscriptions = parseOpmlFeeds(data).flatMap(({ xmlUrl, title, folders }) => {
+    const id = getOpmlYouTubeChannelId(xmlUrl)
+    if (id === null) {
+      console.error(`Unknown xmlUrl format: ${xmlUrl}`)
+      return []
+    }
+    return [{ id, name: title, thumbnail: null, groups: folders }]
+  })
+  if (subscriptions.length === 0) {
+    showToast({ message: t('Settings.Data Settings.Invalid subscriptions file'), icon: ['fas', 'circle-exclamation'] })
     return
   }
 
-  return runWithDataImportProgress(async progressOperation => {
-    const subscriptions = []
-
-    let count = 0
-
-    feedData.forEach(({ xmlUrl, title: channelName, folders }) => {
-      let channelId
-      if (xmlUrl.includes('https://www.youtube.com/feeds/videos.xml?channel_id=')) {
-        channelId = new URL(xmlUrl).searchParams.get('channel_id')
-      } else if (xmlUrl.includes('/feed/channel/')) {
-        // handle invidious exports https://yewtu.be/feed/channel/{CHANNELID}
-        channelId = new URL(xmlUrl).pathname.split('/').filter(part => part).at(-1)
-      } else {
-        console.error(`Unknown xmlUrl format: ${xmlUrl}`)
-      }
-
-      subscriptions.push({
-        id: channelId,
-        name: channelName,
-        thumbnail: null,
-        groups: folders,
-      })
-
-      count++
-
-      const progressPercentage = (count / feedData.length) * 100
-      progressOperation.update({ percentage: progressPercentage })
-    })
-
-    await addSubscriptionsToPrimaryProfile(subscriptions)
-  })
+  return runWithDataImportProgress(() => addSubscriptionsToPrimaryProfile(subscriptions))
 }
 
 /**
@@ -1301,21 +1276,14 @@ async function exportYouTubeSubscriptions() {
 async function exportOpmlYouTubeSubscriptions() {
   const dateStr = getTodayDateStrLocalTimezone()
   const exportFileName = 'youtube-subscriptions-' + dateStr + '.opml'
-
-  let opmlData = '<opml version="1.1"><body><outline text="YouTube Subscriptions" title="YouTube Subscriptions">'
-
-  profileList.value[0].subscriptions.forEach((channel) => {
-    const escapedName = escapeHTML(channel.name)
-
-    const channelOpmlString = `<outline text="${escapedName}" title="${escapedName}" type="rss" xmlUrl="https://www.youtube.com/feeds/videos.xml?channel_id=${channel.id}"/>`
-    opmlData += channelOpmlString
-  })
-
-  opmlData += '</outline></body></opml>'
+  const feeds = profileList.value[0].subscriptions.map(channel => ({
+    xmlUrl: `https://www.youtube.com/feeds/videos.xml?channel_id=${channel.id}`,
+    title: channel.name,
+  }))
 
   await promptAndWriteToFile(
     exportFileName,
-    opmlData,
+    buildOpml('YouTube Subscriptions', feeds),
     t('Settings.Data Settings.Subscription File'),
     'application/xml',
     '.opml',

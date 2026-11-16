@@ -238,6 +238,26 @@ Subscriptions:
       Not Set: Nincs beállítva
     Retry Feed: '{feed} újrapróbálása'
     Reloading Feed: '{feed} újratöltése'
+    Import OPML: OPML importálása
+    Export OPML: OPML exportálása
+    OPML File: OPML-fájl
+    Invalid OPML File: Ez a fájl nem tartalmaz hírcsatornát.
+    Feeds Could Not Be Saved: A hírcsatornákat nem sikerült menteni.
+    Feeds Imported: 1 új hírcsatorna importálva. | {count} új hírcsatorna importálva.
+    All Feeds Already Followed: Már követi a fájl összes hírcsatornáját.
+    YouTube Channels Skipped: A YouTube-csatornák kimaradtak. Ha fel szeretne iratkozni rájuk, importálja a fájlt a(z) Adatok és tárhely részben.
+    Feeds Exported: Az RSS-csatornái exportálva.
+    Podcasts:
+      Open: Podcastok keresése
+      Title: Podcast keresése
+      Description: Keressen az Apple Podcasts katalógusában, és kövesse egy podcast hírcsatornáját. A keresései az Apple-höz kerülnek.
+      Search: Podcastok keresése
+      Search Placeholder: A podcast neve vagy témája
+      Searching: Podcastok keresése…
+      Search Failed: Nem sikerült podcastokat keresni. Ellenőrizze a kapcsolatot, és próbálja újra.
+      No Results: Nem található podcast.
+      Results: Talált podcastok
+      Follow Podcast: "{podcast} követése"
   Platforms:
     Tab: Platformok
     Platform: Platform

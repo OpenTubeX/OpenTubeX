@@ -272,6 +272,26 @@ Subscriptions:
       Not Set: Nenustatyta
     Retry Feed: Bandyti dar kartą įkelti {feed}
     Reloading Feed: Iš naujo įkeliamas {feed}
+    Import OPML: Importuoti OPML
+    Export OPML: Eksportuoti OPML
+    OPML File: OPML failas
+    Invalid OPML File: Šiame faile nėra kanalų.
+    Feeds Could Not Be Saved: Nepavyko išsaugoti kanalų.
+    Feeds Imported: Importuotas {count} naujas kanalas. | Importuoti {count} nauji kanalai. | Importuota {count} naujų kanalų.
+    All Feeds Already Followed: Jau sekate visus šio failo kanalus.
+    YouTube Channels Skipped: „YouTube“ kanalai praleisti. Norėdami juos prenumeruoti, importuokite failą skiltyje „Duomenys ir saugykla“.
+    Feeds Exported: Jūsų RSS kanalai eksportuoti.
+    Podcasts:
+      Open: Ieškoti tinklalaidžių
+      Title: Rasti tinklalaidę
+      Description: Ieškokite Apple Podcasts kataloge ir sekite tinklalaidės sklaidos kanalą. Jūsų paieškos siunčiamos „Apple“.
+      Search: Ieškoti tinklalaidžių
+      Search Placeholder: Tinklalaidės pavadinimas arba tema
+      Searching: Ieškoma tinklalaidžių…
+      Search Failed: Nepavyko ieškoti tinklalaidžių. Patikrinkite ryšį ir bandykite dar kartą.
+      No Results: Tinklalaidžių nerasta.
+      Results: Rastos tinklalaidės
+      Follow Podcast: Sekti {podcast}
   Platforms:
     Tab: Platformos
     Platform: Platforma

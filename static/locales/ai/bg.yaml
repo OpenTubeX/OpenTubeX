@@ -240,6 +240,26 @@ Subscriptions:
       Not Set: Не е зададено
     Retry Feed: Повторен опит за {feed}
     Reloading Feed: Презареждане на {feed}
+    Import OPML: Импортиране на OPML
+    Export OPML: Експортиране на OPML
+    OPML File: OPML файл
+    Invalid OPML File: Този файл не съдържа емисии.
+    Feeds Could Not Be Saved: Емисиите не можаха да бъдат запазени.
+    Feeds Imported: Импортирана е 1 нова емисия. | Импортирани са {count} нови емисии.
+    All Feeds Already Followed: Вече следвате всички емисии в този файл.
+    YouTube Channels Skipped: Каналите в YouTube бяха пропуснати. За да се абонирате за тях, импортирайте файла в „Данни и хранилище“.
+    Feeds Exported: Вашите RSS емисии бяха експортирани.
+    Podcasts:
+      Open: Търсене на подкасти
+      Title: Намиране на подкаст
+      Description: Търсете в каталога на Apple Podcasts и следвайте емисията на подкаст. Търсенията ви се изпращат до Apple.
+      Search: Търсене на подкасти
+      Search Placeholder: Име или тема на подкаста
+      Searching: Търсене на подкасти…
+      Search Failed: Подкастите не можаха да бъдат потърсени. Проверете връзката си и опитайте отново.
+      No Results: Не са намерени подкасти.
+      Results: Намерени подкасти
+      Follow Podcast: Следване на {podcast}
   Platforms:
     Tab: Платформи
     Platform: Платформа
