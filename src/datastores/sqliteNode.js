@@ -5,7 +5,8 @@ import { basename, dirname, join, resolve } from 'node:path'
 import { Worker } from 'node:worker_threads'
 import Datastore from '@seald-io/nedb'
 import storage from '@seald-io/nedb/lib/storage.js'
-import { legacyLinesWithout, SqliteDatastore } from './sqlite.js'
+import { legacyLinesWithout } from './legacyLines.js'
+import { SqliteDatastore } from './sqlite.js'
 import { createNodeSqliteDriver } from './sqliteNodeDriver.js'
 
 export { createNodeSqliteDriver }
@@ -91,6 +92,18 @@ export function createNedbFileSource(filename) {
       return JSON.stringify([path === filename ? 'db' : 'db~', size, mtimeMs])
     },
     hash: text => createHash('sha256').update(text).digest('base64'),
+    async records() {
+      const path = source()
+      if (!path) return []
+      return readFileSync(path, 'utf8').split('\n').flatMap(line => {
+        try {
+          const record = JSON.parse(line)
+          return record !== null && typeof record === 'object' && '_id' in record ? [record] : []
+        } catch {
+          return []
+        }
+      })
+    },
     async removeDocuments(ids) {
       const path = source()
       const lines = path ? legacyLinesWithout(readFileSync(path, 'utf8'), ids) : null

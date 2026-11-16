@@ -32,7 +32,9 @@ globalThis.fetch = async url => {
 const modules = {
   './androidStorage.js': {
     readFileAsync: async filename => legacyFiles[filename] ?? '',
-    appendFileAsync: async (filename, contents) => { legacyFiles[filename] += `\n${contents}` },
+    removeDocumentsAsync: async (filename, ids) => {
+      legacyFiles[filename] += '\n' + ids.map(_id => JSON.stringify({ $$deleted: true, _id })).join('\n')
+    },
   },
   '@capacitor/core': {
     Capacitor: { convertFileSrc: path => `https://localhost/_capacitor_file_${path}` },

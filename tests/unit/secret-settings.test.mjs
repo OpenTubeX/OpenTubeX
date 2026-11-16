@@ -91,7 +91,11 @@ test('secrets saved unencrypted by an earlier version are encrypted on startup',
 test('the copies kept for older versions lose secrets and Invidious credentials, and keep the rest', async t => {
   const dir = await mkdtemp(join(tmpdir(), 'opentubex-secrets-'))
   t.after(() => rm(dir, { recursive: true, force: true }))
-  for (const [name, instance] of [['with', 'https://user:instance-secret@invidious.example'], ['without', 'https://invidious.example/@path']]) {
+  for (const [name, instance] of [
+    ['with', 'https://user:instance-secret@invidious.example'],
+    ['slashless', 'https:user:instance-secret@invidious.example'],
+    ['without', 'https://invidious.example/@path'],
+  ]) {
     const legacyFile = join(dir, `${name}.db`)
     await writeFile(legacyFile, [
       { _id: 'proxyPassword', value: 'proxy-secret' },
@@ -102,7 +106,7 @@ test('the copies kept for older versions lose secrets and Invidious credentials,
     t.after(() => store.driver.close())
     await migrateSecretSettings(store, Promise.resolve(cipher('device')))
     const legacy = (await readFile(legacyFile, 'utf8')).trim().split('\n').map(line => JSON.parse(line)._id)
-    assert.deepEqual(legacy, name === 'with' ? ['proxyUsername'] : ['defaultInvidiousInstance', 'proxyUsername'])
+    assert.deepEqual(legacy, name === 'without' ? ['defaultInvidiousInstance', 'proxyUsername'] : ['proxyUsername'])
   }
 })
 

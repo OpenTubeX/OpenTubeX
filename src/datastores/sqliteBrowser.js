@@ -79,12 +79,13 @@ function legacySource(filename) {
   return {
     read,
     // The apps keep one record per document, which a deletion removes.
+    // Android also removes them from the WebView storage it was imported from.
     ...(process.env.IS_CAPACITOR && {
       async removeDocuments(ids) {
         const present = new Set((await read()).data.map(doc => doc._id))
         const removed = ids.filter(id => present.has(id))
         if (removed.length === 0) return false
-        await legacyStorage.appendFileAsync(filename, removed.map(_id => JSON.stringify({ $$deleted: true, _id })).join('\n') + '\n')
+        await legacyStorage.removeDocumentsAsync(filename, removed)
         return true
       },
     }),

@@ -1,8 +1,10 @@
+import { legacyLinesWithout } from './legacyLines.js'
+
 // NeDB keeps its query/index implementation; only its Android persistence
 // adapter changes. Store each serialized document separately, including dates
 // in NeDB's own format, rather than copying an ever-growing append log.
 export function createAndroidRecordStorage(factory = indexedDB, native = null) {
-  if (native) return createNativeRecordStorage(native, filename => readShippedRecords(factory, filename))
+  if (native) return createNativeRecordStorage(native, filename => readShippedRecords(factory, filename), (filename, ids) => removeShippedRecords(factory, filename, ids))
   const databases = new Map()
 
   function transaction(database, stores, mode, operation) {
@@ -131,6 +133,9 @@ export function createAndroidRecordStorage(factory = indexedDB, native = null) {
     async unlinkAsync(filename) {
       return transaction(await database(filename), ['records'], 'readwrite', tx => tx.objectStore('records').clear())
     },
+    async removeDocumentsAsync(filename, ids) {
+      return transaction(await database(filename), ['records'], 'readwrite', tx => apply(tx.objectStore('records'), deletions(ids).split('\n')))
+    },
     // Records are already compacted on every update. Startup compaction must
     // not rewrite them or overwrite a concurrent transaction's newer records.
     async crashSafeWriteFileLinesAsync() {},
@@ -140,46 +145,62 @@ export function createAndroidRecordStorage(factory = indexedDB, native = null) {
   }
 }
 
+/**
+ * Opens a migration source only if it exists, without creating an empty
+ * IndexedDB: WebView may already be refusing writes under storage pressure.
+ * @template T
+ * @param {IDBFactory} factory
+ * @param {string} name
+ * @param {(database: IDBDatabase) => Promise<T>} operation
+ * @returns {Promise<T | null>}
+ */
+async function withExistingDatabase(factory, name, operation) {
+  if (typeof factory.databases === 'function' && !(await factory.databases()).some(database => database.name === name)) return null
+  const database = await new Promise((resolve, reject) => {
+    let missing = false
+    const request = factory.open(name)
+    // Without enumeration, probe the known names but roll back an attempted
+    // creation. Never leave an empty database.
+    request.onupgradeneeded = () => {
+      missing = true
+      request.transaction.abort()
+    }
+    request.onsuccess = () => resolve(request.result)
+    request.onerror = () => missing ? resolve(null) : reject(request.error)
+  })
+  if (!database) return null
+  try { return await operation(database) } finally { database.close() }
+}
+
+function get(database, store, key) {
+  return new Promise((resolve, reject) => {
+    const tx = database.transaction(store)
+    const request = key == null ? tx.objectStore(store).getAll() : tx.objectStore(store).get(key)
+    tx.oncomplete = () => resolve(request.result)
+    tx.onabort = () => reject(tx.error)
+  })
+}
+
+function write(database, store, operation) {
+  return new Promise((resolve, reject) => {
+    const tx = database.transaction(store, 'readwrite')
+    operation(tx.objectStore(store))
+    tx.oncomplete = () => resolve()
+    tx.onabort = () => reject(tx.error)
+  })
+}
+
 async function readShippedRecords(factory, filename) {
-  // Read migration sources without creating an empty IndexedDB or writing an
-  // import marker: WebView may already be refusing writes under storage pressure.
-  const names = typeof factory.databases === 'function'
-    ? new Set((await factory.databases()).map(database => database.name))
-    : null
-  async function read(name, operation) {
-    if (names && !names.has(name)) return null
-    const database = await new Promise((resolve, reject) => {
-      let missing = false
-      const request = factory.open(name)
-      // Without enumeration, probe the known names but roll back an attempted
-      // creation. Never leave an empty database or modify an existing source.
-      request.onupgradeneeded = () => {
-        missing = true
-        request.transaction.abort()
-      }
-      request.onsuccess = () => resolve(request.result)
-      request.onerror = () => missing ? resolve(null) : reject(request.error)
-    })
-    if (!database) return null
-    try { return await operation(database) } finally { database.close() }
-  }
-  function get(database, store, key) {
-    return new Promise((resolve, reject) => {
-      const tx = database.transaction(store)
-      const request = key == null ? tx.objectStore(store).getAll() : tx.objectStore(store).get(key)
-      tx.oncomplete = () => resolve(request.result)
-      tx.onabort = () => reject(tx.error)
-    })
-  }
-  const contents = await read(`opentubex-records-${filename}`, async database => {
+  // Read migration sources without writing an import marker.
+  const contents = await withExistingDatabase(factory, `opentubex-records-${filename}`, async database => {
     if (!database.objectStoreNames.contains('metadata') || !database.objectStoreNames.contains('records')) return null
     if (!await get(database, 'metadata', 'imported')) return null
     return (await get(database, 'records')).join('\n')
   })
   if (contents !== null) return contents
-  const raw = await read('NeDB', database => database.objectStoreNames.contains('nedbdata')
+  const raw = await withExistingDatabase(factory, 'NeDB', database => database.objectStoreNames.contains('nedbdata')
     ? get(database, 'nedbdata', filename)
-    : '')
+    : Promise.resolve(''))
   return (raw || '').split('\n').filter(line => {
     try {
       const record = JSON.parse(line)
@@ -188,7 +209,29 @@ async function readShippedRecords(factory, filename) {
   }).join('\n')
 }
 
-function createNativeRecordStorage(native, readLegacy) {
+/**
+ * Removes documents from the WebView copies that native storage was imported
+ * from, which older versions still read.
+ * @param {IDBFactory} factory
+ * @param {string} filename
+ * @param {string[]} ids
+ */
+async function removeShippedRecords(factory, filename, ids) {
+  await withExistingDatabase(factory, `opentubex-records-${filename}`, async database => {
+    if (!database.objectStoreNames.contains('records')) return
+    await write(database, 'records', store => { for (const id of ids) store.delete(`document:${id}`) })
+  })
+  await withExistingDatabase(factory, 'NeDB', async database => {
+    if (!database.objectStoreNames.contains('nedbdata')) return
+    const lines = legacyLinesWithout(await get(database, 'nedbdata', filename), ids)
+    if (lines) await write(database, 'nedbdata', store => store.put(lines.join('\n') + '\n', filename))
+  })
+}
+
+/** NeDB lines that delete the documents, which record storage applies by removing their records */
+const deletions = ids => ids.map(_id => JSON.stringify({ $$deleted: true, _id })).join('\n') + '\n'
+
+function createNativeRecordStorage(native, readLegacy, removeLegacy) {
   const initialized = new Map()
   async function initialize(filename) {
     if (!initialized.has(filename)) {
@@ -220,6 +263,11 @@ function createNativeRecordStorage(native, readLegacy) {
     async unlinkAsync(filename) {
       await initialize(filename)
       await native.clearRecords({ filename })
+    },
+    async removeDocumentsAsync(filename, ids) {
+      await initialize(filename)
+      await native.appendRecords({ filename, contents: deletions(ids) })
+      await removeLegacy(filename, ids)
     },
     async crashSafeWriteFileLinesAsync() {},
     async existsAsync() { return true },

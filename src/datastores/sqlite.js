@@ -182,27 +182,6 @@ export async function parseLegacyDatafile(raw) {
 }
 
 /**
- * The lines of a NeDB datafile without the given documents, including their
- * earlier versions and deletions, or null when it has none of them.
- * @param {string | null | undefined} raw
- * @param {string[]} ids
- * @returns {string[] | null}
- */
-export function legacyLinesWithout(raw, ids) {
-  const removed = new Set(ids)
-  const lines = (raw ?? '').split('\n').filter(line => line !== '')
-  const kept = lines.filter(line => {
-    try {
-      return !removed.has(JSON.parse(line)._id)
-    } catch {
-      // NeDB decides what to make of a line it cannot parse.
-      return true
-    }
-  })
-  return kept.length === lines.length ? null : kept
-}
-
-/**
  * @typedef {[sql: string, params?: unknown[]]} Statement
  * @typedef {object} SqliteDriver
  * @property {(statements: Statement[], transaction?: boolean) => Promise<unknown[][][]>} execute
@@ -219,6 +198,7 @@ export function legacyLinesWithout(raw, ids) {
  * @property {() => Promise<string | null>} [fingerprint] Changes whenever the legacy data is written.
  * @property {(text: string) => string} [hash]
  * @property {() => Promise<void>} [remove]
+ * @property {() => Promise<object[]>} [records] Every version of each document, including replaced ones.
  * @property {(ids: string[]) => Promise<boolean>} [removeDocuments] Rewrites the datafile without
  *   these documents, returning whether it had any.
  */
@@ -864,12 +844,13 @@ export class SqliteDatastore {
         [`DELETE FROM docs WHERE ${condition}`, params],
       ])
       if (!this.legacy?.removeDocuments) return
-      const { data } = await this.legacy.read()
+      // Replaced versions of a document can still hold a secret.
+      const data = this.legacy.records ? await this.legacy.records() : (await this.legacy.read()).data
       const [rows] = await this._execute([[
         `SELECT json_extract(data, '$._id') FROM (SELECT value AS data FROM json_each(?)) WHERE ${condition}`,
         [JSON.stringify(data), ...params],
       ]])
-      const ids = rows.map(([id]) => id)
+      const ids = [...new Set(rows.map(([id]) => id))]
       if (ids.length === 0) return
       const fingerprint = await this.legacy.fingerprint?.() ?? null
       const applied = fingerprint === await this._meta('legacyFingerprint')

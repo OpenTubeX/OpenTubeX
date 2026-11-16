@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { execFile } from 'node:child_process'
 import { existsSync, mkdirSync, readdirSync, realpathSync, symlinkSync } from 'node:fs'
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { appendFile, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
@@ -219,6 +219,8 @@ test('secrets removed from older copies are gone from the legacy file and backup
   store.driver.close()
   // A downgrade leaves a backup with the secret in it.
   await editAsOlderVersion(legacyFile, older => older.updateAsync({ _id: 'theme' }, { $set: { value: 'older' } }))
+  // Its session also saved a secret and deleted it again; the earlier line still holds it.
+  await appendFile(legacyFile, lines([{ _id: 'syncServerToken', value: 'deleted-secret' }, { $$deleted: true, _id: 'syncServerToken' }]))
   const upgraded = open(t, dir, 'settings', options)
   await upgraded.findAsync({})
   assert.equal(changes.length, 1)
