@@ -846,7 +846,7 @@ const commentCount = ref(props.initialCommentCount)
 
 // Comments deleted or edited here, for comment lists that were loading meanwhile.
 const deletedCommentIds = new Set()
-/** @type {Map<string, string>} */
+/** @type {Map<string, { text: string, mentions: import('./youTubeComments').CommentMention[] }>} */
 const editedCommentTexts = new Map()
 
 // The signed-in YouTube account can rate, write and delete video comments.
@@ -866,6 +866,7 @@ const youTubeComments = {
   // missing. Kept in memory only, as the key contains the sign-in token.
   postedBy: reactive(new Map()),
   clampScroll: () => clampCommentsScrollAfterRender(),
+  getMentionCandidates,
   // A reply that finishes posting late must not close another reply box.
   closeReply(commentId) {
     if (youTubeComments.replyingTo.value === commentId) youTubeComments.replyingTo.value = null
@@ -873,8 +874,8 @@ const youTubeComments = {
   closeEdit(commentId) {
     if (youTubeComments.editing.value === commentId) youTubeComments.editing.value = null
   },
-  addComment(posted, text, parentId, account) {
-    const comment = createPostedComment(posted, text, account)
+  addComment(posted, text, mentions, parentId, account) {
+    const comment = createPostedComment(posted, text, mentions, account)
     youTubeComments.postedBy.set(comment.id, getYouTubeChannelKey(account))
     if (parentId === null) {
       // A reload while posting can have loaded it already.
@@ -895,19 +896,19 @@ const youTubeComments = {
     thread.numReplies++
     thread.showReplies = true
   },
-  updateComment(commentId, text) {
-    editedCommentTexts.set(commentId, text)
+  updateComment(commentId, text, mentions) {
+    editedCommentTexts.set(commentId, { text, mentions })
     const rootId = getRootCommentId(commentId)
     const thread = commentData.value.find(entry => entry.id === rootId)
     const parent = thread && rootId !== commentId ? findCommentParent(thread, commentId) : null
     const comment = rootId === commentId ? thread : parent?.replies.find(reply => reply.id === commentId)
-    if (comment) Object.assign(comment, getEditedCommentFields(comment, text))
+    if (comment) Object.assign(comment, getEditedCommentFields(comment, text, mentions))
     // A new list, so the reply tree, which nests replies by their mentions, is rebuilt.
     if (parent) parent.replies = [...parent.replies]
 
     /** @param {Comment} entry */
     const edit = entry => entry.id === commentId
-      ? { ...entry, ...getEditedCommentFields(entry, text) }
+      ? { ...entry, ...getEditedCommentFields(entry, text, mentions) }
       : { ...entry, replies: (entry.replies ?? []).map(edit) }
     updatePinnedSnapshot(rootId, edit)
   },
@@ -993,6 +994,33 @@ function mergeReplies(replies, loadedReplies) {
 }
 
 /**
+ * The people in the loaded comments, which the comment box suggests for
+ * mentions: those in the thread first, as on YouTube.
+ * @param {string | null} threadId
+ * @returns {import('./youTubeComments').MentionCandidate[]}
+ */
+function getMentionCandidates(threadId) {
+  const ownChannelId = youTubeComments.channelId.value
+  /** @type {Map<string, import('./youTubeComments').MentionCandidate>} */
+  const candidates = new Map()
+  /** @param {Comment} comment */
+  const add = (comment) => {
+    if (comment.author.startsWith('@') && comment.authorId && comment.authorId !== ownChannelId && !candidates.has(comment.authorId)) {
+      candidates.set(comment.authorId, {
+        handle: comment.author,
+        channelId: comment.authorId,
+        thumbnail: hideCommentPhotos.value && !comment.isOwner ? '' : comment.authorThumb
+      })
+    }
+    comment.replies?.forEach(add)
+  }
+  const thread = threadId ? commentData.value.find(comment => comment.id === threadId) : undefined
+  if (thread) add(thread)
+  commentData.value.forEach(add)
+  return [...candidates.values()]
+}
+
+/**
  * YouTube can still return a comment as it was before it was deleted or
  * edited here, for example from a request that started before.
  * @param {Comment[]} comments
@@ -1002,8 +1030,8 @@ function withLocalCommentChanges(comments) {
   return comments
     .filter(comment => !deletedCommentIds.has(comment.id))
     .map(comment => {
-      const text = editedCommentTexts.get(comment.id)
-      const changed = text === undefined ? comment : { ...comment, ...getEditedCommentFields(comment, text) }
+      const edit = editedCommentTexts.get(comment.id)
+      const changed = edit === undefined ? comment : { ...comment, ...getEditedCommentFields(comment, edit.text, edit.mentions) }
       // A thread can come with its replies, as when it is the highlighted one.
       return comment.replies?.length > 0 ? { ...changed, replies: withLocalCommentChanges(comment.replies) } : changed
     })

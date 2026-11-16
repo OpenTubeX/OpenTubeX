@@ -9,6 +9,7 @@
       numberInput: inputType === 'number',
       floatingLabel: showLabel,
       hasValue: inputDataPresent,
+      hasHighlights: highlightSegments !== null,
       hasSupportingText: supportingText !== '',
       outlined: variant === 'outlined' && !isSearch
     }"
@@ -43,7 +44,23 @@
         @focus="handleFocus"
         @blur="handleInputBlur"
         @keydown="handleKeyDown"
+        @scroll="highlightsRef && (highlightsRef.scrollTop = $event.target.scrollTop)"
       />
+      <!-- Draws the text with its highlights, as the textarea cannot color
+           parts of it. Its text is transparent instead. Only for multiline. -->
+      <span
+        v-if="highlightSegments !== null"
+        ref="highlightsRef"
+        class="ft-input multiline inputHighlights"
+        :class="{ disabled }"
+        aria-hidden="true"
+      ><template
+        v-for="(segment, index) in highlightSegments"
+        :key="index"
+      ><mark
+        v-if="segment.highlighted"
+        class="inputHighlight"
+      >{{ segment.text }}</mark><template v-else>{{ segment.text }}</template></template></span>
       <fieldset
         v-if="showLabel"
         class="inputOutline"
@@ -357,6 +374,12 @@ const props = defineProps({
   inputAttributes: {
     type: Object,
     default: null
+  },
+  // Ranges of a multiline value to highlight, in order and not overlapping.
+  /** @type {import('vue').PropType<{ start: number, end: number }[]>} */
+  highlights: {
+    type: Array,
+    default: () => []
   }
 })
 
@@ -531,6 +554,22 @@ const inputDataDisplayed = computed(() => {
 })
 
 const inputDataPresent = computed(() => inputDataDisplayed.value.length > 0)
+
+const highlightsRef = useTemplateRef('highlightsRef')
+// A line break at the end needs a character after it to take up its line.
+const highlightSegments = computed(() => {
+  if (props.highlights.length === 0) return null
+  const text = inputDataDisplayed.value
+  const segments = []
+  let index = 0
+  for (const { start, end } of props.highlights) {
+    if (start > index) segments.push({ text: text.slice(index, start), highlighted: false })
+    segments.push({ text: text.slice(start, end), highlighted: true })
+    index = end
+  }
+  segments.push({ text: `${text.slice(index)} `, highlighted: false })
+  return segments
+})
 const inputTextStyle = computed(() => {
   if (!props.isSearch) return null
 

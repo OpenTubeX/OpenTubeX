@@ -755,3 +755,28 @@
   overflow: hidden;
   resize: none;
 }
+
+/* Lies exactly over the textarea, which has the same classes, so the text
+   wraps the same. */
+.inputHighlights {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  border-color: transparent;
+  background: none;
+  pointer-events: none;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+.hasHighlights .ft-input:not(.inputHighlights) {
+  color: transparent;
+  caret-color: var(--primary-text-color);
+  overflow-wrap: break-word;
+}
+
+.inputHighlight {
+  background: none;
+  color: var(--link-color);
+}

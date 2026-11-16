@@ -862,6 +862,90 @@ test.describe('manual comment loading', () => {
     expect(requests).toHaveLength(2)
   })
 
+  test('mentions people from the comments in replies', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    await page.evaluate(() => window.$store.dispatch('updateYouTubeAccount', {
+      credentials: { access_token: 'token', refresh_token: 'token', expiry_date: new Date(Date.now() + 3_600_000).toISOString(), client: { client_id: 'id', client_secret: 'secret' } },
+      profiles: [{ name: 'Commenter', handle: '@commenter', thumbnail: null, pageId: null }],
+      pageId: null,
+      channelId: 'UCcommenterchannel0000000'
+    }))
+    const replyTexts = []
+    await page.route(/\/youtubei\/v1\/comment\/create_comment_reply/, (route, request) => {
+      replyTexts.push(JSON.parse(request.postData()).commentText)
+      return route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({
+          actionResult: { status: 'STATUS_SUCCEEDED' },
+          actions: [{ commentRenderer: { commentId: `Ugmentionreply${replyTexts.length}`, authorText: { simpleText: '@commenter' } } }]
+        })
+      })
+    })
+
+    await page.locator('.getCommentsTitle').click()
+    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
+    const thread = page.locator('.commentThread').filter({ has: page.locator(':scope > .commentThreadLineToggle') }).first()
+    await thread.locator(':scope > .commentThreadLineToggle').click()
+    const target = thread.locator('.commentReplyBranchRoot').filter({
+      has: page.locator(':scope > .commentReplyContent .commentAuthor', { hasText: /^\s*@/ })
+    }).first()
+    const handle = (await target.locator('.commentAuthor').first().textContent()).trim()
+    const channelId = (await target.locator('.commentAuthor').first().getAttribute('href')).split('/channel/')[1]
+    const composer = target.locator('.replyComposer')
+
+    // The reply starts with a mention, shown as a link.
+    const replyInput = composer.locator('textarea')
+    await target.getByRole('button', { name: 'Reply', exact: true }).first().click()
+    await expect(replyInput).toHaveValue(`${handle} `)
+    await expect(composer.locator('.inputHighlight')).toHaveText(handle)
+    await replyInput.pressSequentially('Example reply')
+    await composer.getByRole('button', { name: 'Reply', exact: true }).click()
+    await expect(composer).toHaveCount(0)
+    // Like YouTube's web client, it mentions by channel ID, which YouTube links.
+    expect(replyTexts).toEqual([`@${channelId} Example reply`])
+    // The posted reply links the mention like loaded replies do.
+    const posted = thread.locator('.commentText').filter({ hasText: 'Example reply' })
+    await expect(posted.getByRole('link', { name: handle })).toHaveAttribute('href', `https://www.youtube.com/channel/${channelId}`)
+
+    // Editing it keeps the mention.
+    const editTexts = []
+    await page.route(/\/youtubei\/v1\/comment\/update_comment_reply/, (route, request) => {
+      editTexts.push(JSON.parse(request.postData()).replyText)
+      return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ actionResult: { status: 'STATUS_SUCCEEDED' } }) })
+    })
+    const postedBranchId = await thread.locator('.commentReplyBranch').filter({ has: page.locator('.commentText', { hasText: 'Example reply' }) }).last().getAttribute('id')
+    const postedReply = page.locator(`#${postedBranchId} > .commentReplyContent`)
+    await postedReply.getByRole('button', { name: 'Edit comment' }).click()
+    const editor = postedReply.locator('.editComposer')
+    await expect(editor.locator('textarea')).toHaveValue(`${handle} Example reply`)
+    await expect(editor.locator('.inputHighlight')).toHaveText(handle)
+    await editor.locator('textarea').fill(`${handle} Edited reply`)
+    await editor.getByRole('button', { name: 'Save' }).click()
+    await expect(editor).toHaveCount(0)
+    expect(editTexts).toEqual([`@${channelId} Edited reply`])
+    await expect(postedReply.locator('.commentText')).toContainText('Edited reply')
+    await expect(postedReply.locator('.commentText').getByRole('link', { name: handle })).toBeVisible()
+
+    // Backspace removes a mention whole, and typing @ suggests people from the comments.
+    await target.getByRole('button', { name: 'Reply', exact: true }).first().click()
+    await replyInput.press('Backspace')
+    await replyInput.press('Backspace')
+    await expect(replyInput).toHaveValue('')
+    await replyInput.pressSequentially('Hi @')
+    await expect(composer.getByRole('option')).not.toHaveCount(0)
+    // Narrowing the query after moving down picks from the remaining options.
+    await replyInput.press('ArrowDown')
+    await replyInput.pressSequentially(handle.slice(1, -1))
+    await expect(composer.getByRole('option')).toHaveCount(1)
+    await replyInput.press('Enter')
+    await expect(replyInput).toHaveValue(`Hi ${handle} `)
+    await expect(composer.getByRole('listbox')).toHaveCount(0)
+    await replyInput.pressSequentially('there')
+    await composer.getByRole('button', { name: 'Reply', exact: true }).click()
+    await expect.poll(() => replyTexts.at(-1)).toBe(`Hi @${channelId} there`)
+  })
+
   test.describe('comment filtering at 125% UI scale', () => {
     test.use({
       seed: {
