@@ -220,8 +220,8 @@
   outline-offset: 2px;
 }
 
-/* Portrait: the first recommendation beside its title, with Replay under the title. */
-@container (width < 560px) {
+/* Portrait and short players: the first recommendation beside its title, with Replay under the title. */
+@container (width < 560px) or (height < 380px) {
   :global(.capacitorTabs .ftVideoPlayer .endedScreenLayout) {
     --ended-heading-size: 18px;
     --ended-thumbnail-size: min(45cqw, var(--ended-available-block-size) * 16 / 9);
@@ -289,13 +289,13 @@
   Short players (narrow phones, ultrawide videos) leave little room above the controls,
   so drop the channel, the heading, the second title line, and then the title.
 */
-@container (width < 560px) and (height < 200px) {
+@container (height < 200px) {
   :global(.capacitorTabs .ftVideoPlayer .endedRecommendationAuthor) {
     display: none;
   }
 }
 
-@container (width < 560px) and (height < 190px) {
+@container (height < 190px) {
   :global(.capacitorTabs .ftVideoPlayer .endedScreenHeading) {
     display: none;
   }
@@ -305,13 +305,13 @@
   }
 }
 
-@container (width < 560px) and (height < 170px) {
+@container (height < 170px) {
   :global(.capacitorTabs .ftVideoPlayer .endedRecommendationTitleText) {
     -webkit-line-clamp: 1;
   }
 }
 
-@container (width < 560px) and (height < 152px) {
+@container (height < 152px) {
   :global(.capacitorTabs .ftVideoPlayer .endedScreenLayout) {
     --ended-band-padding: 4px;
   }
@@ -326,8 +326,8 @@
   }
 }
 
-/* Landscape and tablets: a row of cards below a heading with Replay. */
-@container (width >= 560px) {
+/* Landscape fullscreen and tablets: a row of cards below a heading with Replay, when they fit. */
+@container (width >= 560px) and (height >= 380px) {
   :global(.capacitorTabs .ftVideoPlayer .endedScreenLayout) {
     --ended-columns: 3;
     --ended-header-size: var(--ended-replay-size);
@@ -376,7 +376,7 @@
   }
 }
 
-@container (width >= 760px) {
+@container (width >= 760px) and (height >= 380px) {
   :global(.capacitorTabs .ftVideoPlayer .endedScreenLayout) {
     --ended-columns: 4;
   }

@@ -298,6 +298,13 @@ test('keeps phone end screen recommendations and replay clear of the controls', 
   await expect.poll(() => page.evaluate(findEndScreenOverlaps)).toEqual([])
   await attachScreenshot('phone landscape fullscreen end screen')
   await setPlayerFullscreen(page, false)
+  // Ultrawide videos on tablets make wide players too short for a row of cards.
+  await setWindowSize(app, page, { width: 800, height: 1200 })
+  await player.evaluate(element => { element.style.height = '220px' })
+  await expect(cards.nth(1)).toBeHidden()
+  await expect(replay).toBeVisible()
+  await expect.poll(() => page.evaluate(findEndScreenOverlaps)).toEqual([])
+  await player.evaluate(element => element.style.removeProperty('height'))
 
   await replay.click()
   await expect(page.locator('.endedPoster')).toHaveCount(0)
