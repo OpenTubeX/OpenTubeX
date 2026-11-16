@@ -95,6 +95,7 @@ test('the copies kept for older versions lose secrets and Invidious credentials,
     ['with', 'https://user:instance-secret@invidious.example'],
     ['slashless', 'https:user:instance-secret@invidious.example'],
     ['without', 'https://invidious.example/@path'],
+    ['without-in-query', 'https://invidious.example?from=a@b'],
   ]) {
     const legacyFile = join(dir, `${name}.db`)
     await writeFile(legacyFile, [
@@ -106,7 +107,7 @@ test('the copies kept for older versions lose secrets and Invidious credentials,
     t.after(() => store.driver.close())
     await migrateSecretSettings(store, Promise.resolve(cipher('device')))
     const legacy = (await readFile(legacyFile, 'utf8')).trim().split('\n').map(line => JSON.parse(line)._id)
-    assert.deepEqual(legacy, name === 'without' ? ['defaultInvidiousInstance', 'proxyUsername'] : ['proxyUsername'])
+    assert.deepEqual(legacy, name.startsWith('without') ? ['defaultInvidiousInstance', 'proxyUsername'] : ['proxyUsername'])
   }
 })
 
