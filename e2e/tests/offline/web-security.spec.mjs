@@ -130,7 +130,7 @@ test('content security policy blocks injected scripts, framing the app and forei
     })
     image.remove()
     // Page code's own string evaluation stays blocked too.
-    // eslint-disable-next-line no-implied-eval
+    // eslint-disable-next-line no-implied-eval -- the test checks that CSP blocks string evaluation
     setTimeout('window.injectedStringRan = true')
     await new Promise(resolve => setTimeout(resolve, 100))
     const injectedScriptsRan = ['injectedScriptRan', 'injectedHandlerRan', 'injectedStringRan']

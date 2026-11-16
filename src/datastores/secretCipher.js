@@ -10,7 +10,7 @@
  * @param {typeof import('electron')} electron
  * @returns {Promise<SecretCipher | null>}
  */
-async function createSafeStorageCipher({ app, safeStorage }) {
+export async function createSafeStorageCipher({ app, safeStorage }) {
   // The backend is only known once the app is ready.
   await app.whenReady()
   const backend = process.platform === 'linux' ? safeStorage.getSelectedStorageBackend() : null
@@ -20,13 +20,19 @@ async function createSafeStorageCipher({ app, safeStorage }) {
   }
   return {
     encrypt: async texts => texts.map(text => safeStorage.encryptString(text).toString('base64')),
-    decrypt: async texts => texts.map(text => {
-      try {
-        return safeStorage.decryptString(Buffer.from(text, 'base64'))
-      } catch {
-        return null
-      }
-    }),
+    decrypt: async texts => {
+      // Rejecting keeps the secrets until the keyring is available again.
+      if (!safeStorage.isEncryptionAvailable()) throw new Error('The system keyring is unavailable')
+      return texts.map(text => {
+        try {
+          return safeStorage.decryptString(Buffer.from(text, 'base64'))
+        } catch (error) {
+          // Only a value this keyring's key cannot decrypt is deleted.
+          if (!safeStorage.isEncryptionAvailable()) throw error
+          return null
+        }
+      })
+    },
   }
 }
 

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { registerHooks } from 'node:module'
 import test from 'node:test'
 import { createDesktopDatastore } from '../../src/datastores/sqliteNode.js'
+import { createSafeStorageCipher } from '../../src/datastores/secretCipher.js'
 
 const datastore = createDesktopDatastore(':memory:')
 globalThis.__secretSettingsDatastore = datastore
@@ -137,4 +138,25 @@ test('secrets are kept when the keyring cannot be reached', async t => {
   settings.migrationPromise = null
   t.mock.method(settings, 'cipher', () => Promise.resolve(cipher('device')))
   assert.deepEqual(await saved(), { syncServerToken: 'sync-secret', proxyPassword: 'proxy-secret' })
+})
+
+test('safeStorage keeps secrets when the keyring stops being available', async () => {
+  let available = true
+  const safeStorage = {
+    getSelectedStorageBackend: () => 'kwallet6',
+    isEncryptionAvailable: () => available,
+    encryptString: text => Buffer.from(`key:${text}`),
+    decryptString: buffer => {
+      const text = buffer.toString()
+      if (!available || !text.startsWith('key:')) throw new Error('Error while decrypting')
+      return text.slice('key:'.length)
+    },
+  }
+  const cipher = await createSafeStorageCipher({ app: { whenReady: async () => {} }, safeStorage })
+  const [encrypted] = await cipher.encrypt(['secret'])
+  const foreign = Buffer.from('other-key').toString('base64')
+
+  assert.deepEqual(await cipher.decrypt([encrypted, foreign]), ['secret', null])
+  available = false
+  await assert.rejects(cipher.decrypt([encrypted]))
 })
