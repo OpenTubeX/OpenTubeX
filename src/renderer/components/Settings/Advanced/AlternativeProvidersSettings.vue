@@ -459,7 +459,12 @@ function applyInvidiousInstanceInput(value) {
   store.commit('setCurrentInvidiousInstance', instance)
 }
 
-const setCurrentInvidiousInstanceBounce = debounce(applyInvidiousInstanceInput, 500)
+/** @type {string | null} the typed address that is not applied yet */
+let pendingInvidiousInstance = null
+const setCurrentInvidiousInstanceBounce = debounce((/** @type {string} */ instance) => {
+  pendingInvidiousInstance = null
+  applyInvidiousInstanceInput(instance)
+}, 500)
 
 /**
  * @param {string} input
@@ -472,16 +477,20 @@ function handleInvidiousInstanceInput(input) {
   }
 
   invidiousInstanceInput.value = input
+  pendingInvidiousInstance = instance
   setCurrentInvidiousInstanceBounce(instance)
 }
 
 function handleInvidiousInstanceBlur() {
+  // Apply a typed address now, so credentials entered next belong to it.
+  if (pendingInvidiousInstance !== null) {
+    setCurrentInvidiousInstanceBounce.cancel()
+    applyInvidiousInstanceInput(pendingInvidiousInstance)
+    pendingInvidiousInstance = null
+  }
   const { instance, credentials } = splitInvidiousInstanceCredentials(invidiousInstanceInput.value)
-  if (!credentials) return
-  setCurrentInvidiousInstanceBounce.cancel()
-  applyInvidiousInstanceInput(invidiousInstanceInput.value)
   // Only the masked password field shows the password from now on.
-  invidiousInstanceInput.value = /** @type {string} */ (instance)
+  if (credentials) invidiousInstanceInput.value = /** @type {string} */ (instance)
 }
 
 /** The saved credentials, if they belong to the current instance. */
