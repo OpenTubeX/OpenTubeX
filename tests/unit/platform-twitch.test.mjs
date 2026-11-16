@@ -84,7 +84,7 @@ test('loads a category with its live streams, nothing for unknown ones, and fail
   assert.equal(requests.length, 3)
 })
 
-test('browses the most watched categories and streams, and fails when Twitch refuses both', async () => {
+test('browses the most watched categories and streams, and fails when Twitch refuses either', async () => {
   const { fetcher } = answer(() => ({
     data: {
       games: { edges: [{ node: game() }] },
@@ -97,8 +97,8 @@ test('browses the most watched categories and streams, and fails when Twitch ref
 
   // Twitch answers like this when it wants an integrity token
   const refused = answer(() => ({
-    errors: [{ message: 'failed integrity check', path: ['games'] }, { message: 'failed integrity check', path: ['streams'] }],
-    data: { games: null, streams: null }
+    errors: [{ message: 'failed integrity check', path: ['streams'] }],
+    data: { games: { edges: [{ node: game() }] }, streams: null }
   }))
   await assert.rejects(twitch.getBrowse(refused.fetcher))
 })

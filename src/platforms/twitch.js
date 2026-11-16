@@ -254,12 +254,13 @@ const twitch = {
     const data = await requestTwitch(fetch,
       `query { games(first: ${BROWSE_CATEGORIES}) { edges { node { ${CATEGORY_FIELDS} } } } streams(first: ${BROWSE_STREAMS}) { edges { node { ${STREAM_NODE_FIELDS} } } } }`,
       {}, signal)
-    const games = Array.isArray(data.games?.edges) ? data.games.edges : []
-    const categories = games.flatMap(edge => toPlatformCategory(edge?.node) ?? [])
-    const items = streamItems(data.streams)
-    // A failed list leaves its field empty, and then there is nothing to show
-    if (categories.length === 0 && items.length === 0) throw new Error('Twitch returned no categories or streams')
-    return { categories, items }
+    // A list fails on its own and leaves its field null, which must not look
+    // like an empty list that a retry can't load again
+    if (!Array.isArray(data.games?.edges) || !Array.isArray(data.streams?.edges)) {
+      throw new Error('Twitch returned no categories or streams')
+    }
+    const categories = data.games.edges.flatMap(edge => toPlatformCategory(edge?.node) ?? [])
+    return { categories, items: streamItems(data.streams) }
   },
 
   async getPlaylist() {
