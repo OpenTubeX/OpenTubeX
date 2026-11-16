@@ -19,31 +19,15 @@ endorsed by, maintained by, or supported by the FreeTube project.
 </p>
 
 <p align="center">
-  <a href="https://github.com/OpenTubeX/OpenTubeX/releases/latest">
-    <img alt="Latest release" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/release.svg" />
-  </a>
-  <a href="https://hosted.weblate.org/engage/opentubex/">
-    <img alt="Translation status" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/translations.svg" />
-  </a>
-  <a href="https://fluxer.opentubex.org">
-    <img alt="Fluxer members" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/fluxer.svg" />
-  </a>
-  <a href="https://matrix.opentubex.org">
-    <img alt="Matrix" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/matrix.svg" />
-  </a>
+  <a href="https://github.com/OpenTubeX/OpenTubeX/releases/latest"><img alt="Latest release" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/release.svg" /></a>
+  <a href="https://hosted.weblate.org/engage/opentubex/"><img alt="Translation status" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/translations.svg" /></a>
+  <a href="https://fluxer.opentubex.org"><img alt="Fluxer members" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/fluxer.svg" /></a>
+  <a href="https://matrix.opentubex.org"><img alt="Matrix" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/matrix.svg" /></a>
   <br>
-  <a href="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/build.yml">
-    <img alt="Build status" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/build.svg" />
-  </a>
-  <a href="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/e2e.yml">
-    <img alt="E2E tests" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/e2e.svg" />
-  </a>
-  <a href="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/codeql.yml">
-    <img alt="CodeQL" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/codeql.svg" />
-  </a>
-  <a href="https://scorecard.dev/viewer/?uri=github.com/OpenTubeX/OpenTubeX">
-    <img alt="OpenSSF Scorecard" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/scorecard.svg" />
-  </a>
+  <a href="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/build.yml"><img alt="Build status" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/build.svg" /></a>
+  <a href="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/e2e.yml"><img alt="E2E tests" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/e2e.svg" /></a>
+  <a href="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/codeql.yml"><img alt="CodeQL" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/codeql.svg" /></a>
+  <a href="https://scorecard.dev/viewer/?uri=github.com/OpenTubeX/OpenTubeX"><img alt="OpenSSF Scorecard" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/scorecard.svg" /></a>
 </p>
 
 <p align="center">
@@ -162,9 +146,7 @@ These extensions open YouTube links in OpenTubeX. They don't work with the Linux
 ### Official downloads
 
 <p>
-  <a href="https://github.com/OpenTubeX/OpenTubeX/releases">
-    <img alt="GitHub downloads" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/downloads.svg" />
-  </a>
+  <a href="https://github.com/OpenTubeX/OpenTubeX/releases"><img alt="GitHub downloads" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/downloads.svg" /></a>
 </p>
 
 > [!CAUTION]
