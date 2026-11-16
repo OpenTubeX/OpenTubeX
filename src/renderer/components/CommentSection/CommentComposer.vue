@@ -4,6 +4,7 @@
     class="commentComposer"
     :class="{ topLevelComposer: isTopLevel }"
     @keydown.stop
+    @input.capture="rememberInputType"
   >
     <!-- Shows which channel the comment will be posted as, and switches it
          when the account has more than one. -->
@@ -215,12 +216,27 @@ function getTextarea() {
   return root.value?.querySelector('textarea') ?? null
 }
 
+// Removed mentions, which undo and redo can bring back. A handle typed again
+// stays plain text until it is picked.
+/** @type {import('./youTubeComments').CommentMention[]} */
+let removedMentions = []
+let lastInputType = ''
+
+/** @param {Event} event */
+function rememberInputType(event) {
+  lastInputType = event instanceof InputEvent ? event.inputType : ''
+}
+
 /** @param {string} value */
 function handleInput(value) {
   text.value = value
-  // A deleted mention's handle typed again stays plain text until picked.
-  if (mentionRanges.value.length < mentions.value.length) {
-    mentions.value = mentions.value.filter(mention => mentionRanges.value.some(range => range.mention === mention))
+  const restoring = lastInputType === 'historyUndo' || lastInputType === 'historyRedo'
+  const candidates = restoring ? [...mentions.value, ...removedMentions] : mentions.value
+  const ranges = findCommentMentions(value, candidates)
+  const kept = candidates.filter(mention => ranges.some(range => range.mention === mention))
+  if (kept.length !== mentions.value.length || kept.some((mention, index) => mention !== mentions.value[index])) {
+    removedMentions = [...new Set([...removedMentions, ...mentions.value])].filter(mention => !kept.includes(mention))
+    mentions.value = kept
   }
   // A new @ in place of a dismissed one suggests again.
   if (value[dismissedQueryStart.value] !== '@') dismissedQueryStart.value = -1
@@ -372,6 +388,7 @@ async function submit() {
 function clearDraft() {
   text.value = ''
   mentions.value = []
+  removedMentions = []
   dismissedQueryStart.value = -1
 }
 

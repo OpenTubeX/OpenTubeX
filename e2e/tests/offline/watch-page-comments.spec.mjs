@@ -932,7 +932,12 @@ test.describe('manual comment loading', () => {
     await replyInput.press('Backspace')
     await replyInput.press('Backspace')
     await expect(replyInput).toHaveValue('')
-    // Typing a removed mention's handle again leaves it plain text.
+    // Undo brings a removed mention back, but typing its handle again leaves it plain text.
+    await replyInput.press('ControlOrMeta+z')
+    await expect(replyInput).toHaveValue(handle)
+    await expect(composer.locator('.inputHighlight')).toHaveText(handle)
+    await replyInput.press('Backspace')
+    await expect(replyInput).toHaveValue('')
     await replyInput.pressSequentially(handle)
     await expect(composer.locator('.inputHighlight')).toHaveCount(0)
     await replyInput.fill('')
