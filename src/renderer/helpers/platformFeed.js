@@ -649,11 +649,6 @@ store.watch((_, getters) => getters.getFollowedChannels, (channels, previous) =>
   }
 })
 
-export function openPlatformChannelManager() {
-  store.commit('setSettingsWindowSection', { section: 'subscriptions', subpage: 'platform-channels' })
-  store.dispatch('showSettingsWindow')
-}
-
 export async function requestCapacitorNotificationPermission() {
   try {
     let status = await LocalNotifications.checkPermissions()

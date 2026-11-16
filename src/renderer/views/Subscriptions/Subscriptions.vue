@@ -333,7 +333,7 @@
                   :padding="8"
                   :size="20"
                   theme="base-no-default"
-                  @click="openPlatformChannelManager"
+                  @click="openPlatformChannelList"
                 />
                 <FtSelect
                   v-if="currentTab === 'new'"
@@ -638,7 +638,6 @@ import {
   getFollowedChannels,
   getPlatformFeedAutoRefreshInterval,
   markPlatformItemsAsSeen,
-  openPlatformChannelManager,
   platformFeed,
   platformFeedCategories,
   platformFeedNextAutoRefresh,
@@ -863,6 +862,13 @@ async function togglePlatformFeedView() {
 
 /** The view of the New feed or the Platforms tab, which have a combined and a tabbed one */
 const currentTabView = computed(() => currentTab.value === 'platforms' ? platformFeedView.value : newFeedView.value)
+
+/** Lists the followed channels of the platforms the feed shows on the channels page */
+function openPlatformChannelList() {
+  // Only the Platforms tab filters by platform, the New feed shows them all
+  const platform = currentTab.value === 'platforms' ? activePlatformFeedFilter.value : 'all'
+  router.push({ name: 'subscribedChannels', query: { platform } })
+}
 
 const platformFilterOptions = computed(() => [
   { id: 'all', label: t('Subscriptions.Platforms.All Platforms'), icon: ['fas', 'globe'] },

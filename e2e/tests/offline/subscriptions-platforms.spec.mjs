@@ -210,7 +210,7 @@ test.describe('Channels on other platforms', () => {
   test.describe('with a followed channel', () => {
     test.use({ seed: { settings: { ...SETTINGS, followedChannels: [followed(CHANNEL)] } } })
 
-    test('adds and removes channels in the settings and refreshes the tab', async ({ page }) => {
+    test('adds and removes channels on the channels page and refreshes the tab', async ({ page }) => {
       const users = { [CHANNEL.id]: twitchUser(CHANNEL), [OTHER_CHANNEL.id]: twitchUser(OTHER_CHANNEL) }
       const requests = await mockTwitch(page, users)
       await goTo(page, 'subscriptions')
@@ -220,13 +220,16 @@ test.describe('Channels on other platforms', () => {
       await expect(titles).toHaveText(['Streamer newest VOD', 'Streamer older VOD'])
       await expect(page.locator('[data-platform-section="live"]')).toHaveCount(0)
 
+      // The tab's edit button lists the followed channels of the platforms it shows
       await page.getByRole('button', { name: 'Manage Followed Channels' }).click()
-      const manager = page.locator('.settingsSubpageContent')
-      const rows = manager.locator('.channelRow')
+      await expect.poll(() => page.evaluate(() => window.$router.currentRoute.value.fullPath))
+        .toBe('/subscribedchannels?platform=all')
+      const rows = page.locator('#subscribedChannelsList .channel')
       await expect(rows).toHaveCount(1)
       await expect(rows.first()).toContainText('Streamer')
+      await expect(rows.first()).toContainText('Twitch')
 
-      const input = manager.getByRole('textbox', { name: 'Add Channel' })
+      const input = page.getByRole('textbox', { name: 'Add Channel' })
       // Videos aren't channels, and names alone don't say which platform they are on
       const invalid = page.getByText('Enter the address of a channel page on Twitch, SoundCloud, PeerTube, Rumble, Odysee or media.ccc.de.')
       for (const [index, text] of ['https://www.twitch.tv/videos/123', 'Other'].entries()) {
@@ -247,11 +250,11 @@ test.describe('Channels on other platforms', () => {
 
       await input.fill('https://m.twitch.tv/Other/videos')
       await input.press('Enter')
-      await expect(rows).toHaveCount(2)
-      await expect(rows.last()).toContainText('Other')
+      // Sorted by name, like YouTube subscriptions
+      await expect(rows.locator('.channelName')).toHaveText(['Other', 'Streamer'])
       await expect(input).toHaveValue('')
 
-      await manager.getByRole('button', { name: 'Unfollow Streamer' }).click()
+      await rows.filter({ hasText: 'Streamer' }).getByRole('button', { name: 'Following' }).click()
       await expect(rows).toHaveCount(1)
       expect(await page.evaluate(() => window.$store.getters.getFollowedChannels)).toEqual([followed(OTHER_CHANNEL)])
       // Its items and history are forgotten as soon as the setting changes, as for
@@ -262,7 +265,7 @@ test.describe('Channels on other platforms', () => {
         return { items: items.length, cached: feed.channelKeys.includes(key), history: key in JSON.parse(localStorage.getItem('platformFeedHistory') ?? '{}') }
       }, `twitch:${CHANNEL.id}`)).toEqual({ items: 0, cached: false, history: false })
 
-      await page.locator('.settingsCloseButton').click()
+      await page.locator(sel.backButton).click()
       await expect(titles).toHaveText(['Other newest VOD', 'Other older VOD'])
 
       // Twitch renamed the channel, and a refresh picks that up
@@ -274,10 +277,9 @@ test.describe('Channels on other platforms', () => {
       await expect.poll(() => page.evaluate(() => window.$store.getters.getFollowedChannels))
         .toEqual([followed({ ...OTHER_CHANNEL, login: 'renamed', name: 'Renamed' })])
 
-      // The manager opens the page of a channel in place of the settings
+      // The channel list opens the page of a channel
       await page.getByRole('button', { name: 'Manage Followed Channels' }).click()
-      await manager.getByRole('button', { name: 'Go to Renamed' }).click()
-      await expect(page.locator('.settingsWindow')).toBeHidden()
+      await rows.locator('.channelName', { hasText: 'Renamed' }).click()
       await expect.poll(() => page.evaluate(() => {
         const { path, query } = window.$router.currentRoute.value
         return { path, query }
@@ -700,14 +702,22 @@ test.describe('Channels on other platforms', () => {
       await expect(titles).toHaveText(['Streamer newest VOD', 'Streamer older VOD'])
 
       await page.getByRole('button', { name: 'Manage Followed Channels' }).click()
-      const manager = page.locator('.settingsSubpageContent')
-      const input = manager.getByRole('textbox', { name: 'Add Channel' })
+      // Choosing a platform lists only its channels
+      await page.getByRole('combobox', { name: 'Platform' }).click()
+      await page.getByRole('option', { name: 'Twitch' }).click()
+      const rows = page.locator('#subscribedChannelsList .channel')
+      await expect(rows).toHaveCount(1)
+      const input = page.getByRole('textbox', { name: 'Add Channel' })
       await input.fill('https://peertube.example.test/c/makers/videos')
       await input.press('Enter')
-      await expect(manager.locator('.channelRow')).toHaveCount(2)
-      await expect(manager.locator('.channelRow').last()).toContainText('Makers')
-      await expect(manager.locator('.channelRow').last()).toContainText('PeerTube')
-      await page.locator('.settingsCloseButton').click()
+      // The list switches to the platform of a channel added on another one
+      await expect(page.getByRole('combobox', { name: 'Platform' })).toContainText('PeerTube')
+      await expect(rows).toHaveCount(1)
+      await expect(rows).toContainText('Makers')
+      await page.getByRole('combobox', { name: 'Platform' }).click()
+      await page.getByRole('option', { name: 'All platforms' }).click()
+      await expect(rows.locator('.channelName')).toHaveText(['Makers', 'Streamer'])
+      await page.locator(sel.backButton).click()
 
       // Both platforms in one feed, newest first
       await expect(titles).toHaveText(['Streamer newest VOD', 'Makers newest video', 'Makers older video', 'Streamer older VOD'])
