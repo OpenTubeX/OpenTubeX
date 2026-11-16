@@ -27,6 +27,7 @@ import {
   parseSabrFormatId,
   parseSabrLiveHead,
   publishSabrLiveHead,
+  publishSabrLiveSegment,
   readCompleteUmpParts,
   SABR_LIVE_HEAD_TIME_MS
 } from './sabrProtocol'
@@ -944,6 +945,12 @@ async function doRequest(
       if (deliveredLiveStartsMs.size > MAX_DELIVERED_LIVE_SEGMENTS) {
         deliveredLiveStartsMs.delete(deliveredLiveStartsMs.keys().next().value)
       }
+      // The live window re-times its segments before the player asks for the next one
+      publishSabrLiveSegment(currentState.scheme, {
+        windowSequenceNumber: operationInputs.liveWindowSequenceNumber,
+        sequenceNumber: mediaSequenceNumber,
+        startMs: mediaStartMs,
+      })
     }
     if (shouldRetryDueToNextRequestPolicy && nextRequestPlaybackCookieBytes !== undefined) {
       // Policies received before MEDIA_END can establish the session cookie

@@ -1,7 +1,7 @@
 import shaka from 'shaka-player'
 import { parseWebmSegmentIndex } from './WebmSegmentIndexParser'
 import { parseMp4SegmentIndex } from './Mp4SegmentIndexParser'
-import { decodeSabrLiveHead, onSabrLiveHead } from './sabrProtocol'
+import { decodeSabrLiveHead, onSabrLiveHead, onSabrLiveSegment } from './sabrProtocol'
 import { getSabrFormatId } from './formatIds'
 import { SABR_LIVE_CAPTION_MIME_TYPE } from './SabrLiveCaptionParser'
 
@@ -924,9 +924,10 @@ async function requestLiveHead(scheme, audioFormat, videoFormat, networkingEngin
 /**
  * Lists the segments of a live SABR stream, which YouTube numbers by `sq`.
  * Their times are estimated from the head the server reports and the target
- * duration. Segments can be shorter, so older footage can start seconds after
- * its estimate. The transport therefore starts with the segment that contains
- * a requested time and continues from the one it delivered, and Shaka places
+ * duration. Segments can be shorter or longer, so older footage can start
+ * seconds away from its estimate. The transport therefore starts with the
+ * segment that contains a requested time and continues from the one it
+ * delivered, and the window re-times its segments from that one. Shaka places
  * media by its own timestamps.
  */
 class SabrLiveWindow {
@@ -957,6 +958,17 @@ class SabrLiveWindow {
      * @type {(() => void) | null}
      */
     this._removeHeadListener = null
+    /**
+     * @private
+     * @type {(() => void) | null}
+     */
+    this._removeSegmentListener = null
+    /**
+     * The segment each reference was created for, so re-timing reaches them
+     * @private
+     * @type {WeakMap<shaka.media.SegmentReference, LiveSegment>}
+     */
+    this._referenceSegments = new WeakMap()
     /**
      * @private
      * @type {() => Promise<unknown>}
@@ -996,6 +1008,8 @@ class SabrLiveWindow {
       this._update()
     })
 
+    this._removeSegmentListener = onSabrLiveSegment(scheme, segment => this._retime(segment))
+
     // A paused player makes no requests, so follow the clock between head reports
     this._intervalId = setInterval(() => this._update(), LIVE_UPDATE_INTERVAL_MS)
   }
@@ -1005,6 +1019,8 @@ class SabrLiveWindow {
     this._intervalId = null
     this._removeHeadListener?.()
     this._removeHeadListener = null
+    this._removeSegmentListener?.()
+    this._removeSegmentListener = null
     this._streams.clear()
   }
 
@@ -1060,6 +1076,71 @@ class SabrLiveWindow {
   }
 
   /**
+   * The window numbers older segments by its estimated times. When SABR
+   * delivers another segment for one of them, such as after a seek, the
+   * numbers that follow are off by as many segments, and catching up would
+   * stop short of the head or ask for segments past it. Renumber and re-time
+   * the segments from the delivered one, paced to reach the head.
+   * @private
+   * @param {import('./sabrProtocol').SabrLiveSegment} delivered
+   */
+  _retime({ windowSequenceNumber, sequenceNumber, startMs }) {
+    const segments = this._segments
+    const first = segments[0].sequenceNumber
+    const last = segments.at(-1).sequenceNumber
+    const start = startMs / 1000
+    // Segments are numbered consecutively, so their position follows from their number
+    const delivered = segments[sequenceNumber - first]
+    if (
+      !Number.isFinite(start) ||
+      // The window already places it there, such as after the other stream reported it
+      (delivered && Math.abs(delivered.startTime - start) < this._targetDuration / 2) ||
+      // The requested segment left the window, or SABR is ahead of the last head
+      !segments[windowSequenceNumber - first] || sequenceNumber > last
+    ) {
+      return
+    }
+
+    const head = this._head
+    let duration = (head.timeMs / 1000 - start) / (head.sequenceNumber - sequenceNumber)
+    if (!(duration > this._targetDuration / 2 && duration < this._targetDuration * 2)) duration = this._targetDuration
+    const startOf = number => start + (number - sequenceNumber) * duration
+
+    // Shaka keeps fetching by position, so each segment keeps its position
+    const offset = sequenceNumber - windowSequenceNumber
+    for (const segment of segments) {
+      segment.sequenceNumber += offset
+      segment.startTime = startOf(segment.sequenceNumber)
+      segment.endTime = startOf(segment.sequenceNumber + 1)
+      segment.requestTimeMs = Math.round((segment.startTime + duration / 2) * 1000)
+    }
+
+    // Longer segments leave fewer of them up to the head
+    const kept = segments.findIndex(segment => segment.sequenceNumber > last)
+    if (kept >= 0) segments.splice(kept)
+
+    const windowStart = this.presentationTimeline.getSegmentAvailabilityStart()
+    for (const stream of this._streams.keys()) {
+      if (!stream.segmentIndex) continue
+
+      let lastReference = null
+      for (const reference of stream.segmentIndex) {
+        const segment = this._referenceSegments.get(reference)
+        if (!segment) continue
+        if (segment.sequenceNumber > last) break
+        reference.startTime = segment.startTime
+        reference.endTime = segment.endTime
+        lastReference = reference
+      }
+      // Merging drops the references after the given one
+      if (lastReference) stream.segmentIndex.mergeAndEvict([lastReference], windowStart)
+    }
+
+    // Shorter segments leave more of them up to the head
+    this._update()
+  }
+
+  /**
    * @private
    * @param {number} first
    * @param {number} last
@@ -1108,13 +1189,14 @@ class SabrLiveWindow {
   _createReference(stream, url, segment) {
     // The duration lets the transport correct a request time that SABR maps to another segment
     const targetDurationMs = Math.round(this._targetDuration * 1000)
-    const uris = [`${url}&targetDurationMs=${targetDurationMs}&startTimeMs=${segment.requestTimeMs}&sq=${segment.sequenceNumber}`]
+    // Re-timing changes the segment
+    const uris = () => [`${url}&targetDurationMs=${targetDurationMs}&startTimeMs=${segment.requestTimeMs}&sq=${segment.sequenceNumber}`]
 
     // Live segments are self-initializing, so they have no init segment
     const reference = new shaka.media.SegmentReference(
       segment.startTime,
       segment.endTime,
-      () => uris,
+      uris,
       0,
       null,
       null,
@@ -1125,6 +1207,7 @@ class SabrLiveWindow {
 
     reference.mimeType = stream.mimeType
     reference.codecs = stream.codecs
+    this._referenceSegments.set(reference, segment)
 
     return reference
   }

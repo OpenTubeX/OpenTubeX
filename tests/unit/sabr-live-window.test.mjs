@@ -142,3 +142,46 @@ test('live SABR captions land on the media timeline of their segment', async () 
   // The transport skips a segment that keeps backing off with an empty response
   assert.deepEqual(parser.parseMedia(new Uint8Array(0), { periodStart: 0, segmentStart: 200250, segmentEnd: 200255, vttOffset: 0 }, null, []), [])
 })
+
+for (const segmentDurationMs of [4920, 5040]) {
+  test(`catching up after a seek into older ${segmentDurationMs} ms live SABR segments reaches the head`, t => {
+    const { liveWindow, scheme, stream: video } = load(t)
+    const audio = { mimeType: 'audio/mp4', codecs: 'mp4a.40.2' }
+    liveWindow.openSegmentIndex(audio, `${scheme}:audio?formatId=140-0-`)
+
+    // The window places sq 900 at 4500s, but segments are shorter or longer than five seconds
+    const realStartMs = sequenceNumber => 5_000_000 + (sequenceNumber - 1000) * segmentDurationMs
+    const realSequenceNumber = timeMs => 1000 + Math.floor((timeMs - 5_000_000) / segmentDurationMs)
+
+    // Like Shaka, fetch the segments in order from a seek, and like the
+    // transport, start with the segment SABR has for the requested time and
+    // continue from the one delivered
+    const players = [video, audio].map(stream => ({ stream, position: stream.segmentIndex.find(4510), delivered: [] }))
+    const request = player => {
+      const reference = player.stream.segmentIndex.get(player.position++)
+      if (!reference) return null
+      const params = new URL(reference.getUris()[0]).searchParams
+      const windowSequenceNumber = Number(params.get('sq'))
+      const sequenceNumber = player.previous?.windowSequenceNumber === windowSequenceNumber - 1
+        ? player.previous.sequenceNumber + 1
+        : realSequenceNumber(Number(params.get('startTimeMs')))
+      player.previous = { windowSequenceNumber, sequenceNumber }
+      player.delivered.push(sequenceNumber)
+      return { windowSequenceNumber, sequenceNumber, startMs: realStartMs(sequenceNumber) }
+    }
+
+    // Audio and video both ask before either segment arrives
+    for (const segment of players.map(request)) protocol.publishSabrLiveSegment(scheme, segment)
+    for (const player of players) {
+      for (let segment; (segment = request(player));) protocol.publishSabrLiveSegment(scheme, segment)
+    }
+
+    // SABR answers the seek with the segment at the middle of the window's segment
+    const first = realSequenceNumber(4512_500)
+    const expected = Array.from({ length: 1001 - first }, (_, index) => first + index)
+    for (const { delivered } of players) assert.deepEqual(delivered, expected)
+    const last = video.segmentIndex.get(video.segmentIndex.find(5_000_000 / 1000 + 1))
+    assert.match(last.getUris()[0], /&sq=1000$/)
+    assert.ok(Math.abs(last.startTime - 5000) < 0.1, `sq 1000 starts at ${last.startTime}`)
+  })
+}

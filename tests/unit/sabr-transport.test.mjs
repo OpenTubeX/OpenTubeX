@@ -1234,6 +1234,8 @@ test('older live footage starts at the segment SABR has for the requested time',
   })
   const transport = createSabrTransport(sabrData, uri => uri.startsWith('sabr1:text') ? { ...context, captionFormatId } : context)
   t.after(() => transport.cleanup())
+  const reported = []
+  t.after(protocol.onSabrLiveSegment('sabr1', segment => reported.push(segment)))
   const get = async uri => (await transport.request(uri, request(uri), 1).promise).data[0] + 800
 
   // The estimates place sq 878 at 4390s, so seeking there asks for 4392.5s
@@ -1244,9 +1246,13 @@ test('older live footage starts at the segment SABR has for the requested time',
   // Buffered ranges report the delivered segments by their reported start
   assert.deepEqual([...transport.deliveredLiveStartsMs.keys()], [876, 877, 878])
   assert.equal(transport.deliveredLiveStartsMs.get(877), realStartMs(877))
+  // The live window learns which segment it got, so it can re-time the rest
+  assert.deepEqual({ ...reported[0] }, { windowSequenceNumber: 878, sequenceNumber: 876, startMs: realStartMs(876) })
+  assert.equal(reported.length, 3)
 
-  // Captions turned on there start at the same time
+  // Captions turned on there start at the same time, but can start apart from the media segments
   assert.equal(await get('sabr1:text?formatId=387-0-&targetDurationMs=5000&startTimeMs=4392500&sq=878'), 876)
+  assert.equal(reported.length, 3)
 })
 
 test('a live buffered range ends with the last segment whose middle is buffered', () => {

@@ -188,28 +188,64 @@ export function parseSabrLiveHead(liveMetadata, receivedAtMs) {
   }
 }
 
-/** @type {Map<string, Set<(head: SabrLiveHead) => void>>} */
-const liveHeadListeners = new Map()
+/**
+ * @typedef SabrLiveSegment
+ * @property {number} windowSequenceNumber the live window's segment that was requested
+ * @property {number} sequenceNumber the segment SABR delivered for it
+ * @property {number} startMs media start time SABR reported for it
+ */
 
 /**
- * The SABR transport sees every live head update, while the manifest parser
- * extends the timeline. Both share the player's unique scheme.
+ * The SABR transport sees every live head and delivered segment, while the
+ * manifest parser keeps the timeline. Both share the player's unique scheme.
+ * @template T
+ */
+class SabrLiveEvents {
+  constructor() {
+    /** @type {Map<string, Set<(value: T) => void>>} */
+    this.listeners = new Map()
+  }
+
+  /**
+   * @param {string} scheme
+   * @param {(value: T) => void} listener
+   * @returns {() => void} removes the listener
+   */
+  on(scheme, listener) {
+    let listeners = this.listeners.get(scheme)
+    if (!listeners) {
+      listeners = new Set()
+      this.listeners.set(scheme, listeners)
+    }
+    listeners.add(listener)
+
+    return () => {
+      listeners.delete(listener)
+      if (listeners.size === 0 && this.listeners.get(scheme) === listeners) this.listeners.delete(scheme)
+    }
+  }
+
+  /**
+   * @param {string} scheme
+   * @param {T} value
+   */
+  publish(scheme, value) {
+    for (const listener of this.listeners.get(scheme) ?? []) listener(value)
+  }
+}
+
+/** @type {SabrLiveEvents<SabrLiveHead>} */
+const liveHeads = new SabrLiveEvents()
+/** @type {SabrLiveEvents<SabrLiveSegment>} */
+const liveSegments = new SabrLiveEvents()
+
+/**
  * @param {string} scheme
  * @param {(head: SabrLiveHead) => void} listener
  * @returns {() => void} removes the listener
  */
 export function onSabrLiveHead(scheme, listener) {
-  let listeners = liveHeadListeners.get(scheme)
-  if (!listeners) {
-    listeners = new Set()
-    liveHeadListeners.set(scheme, listeners)
-  }
-  listeners.add(listener)
-
-  return () => {
-    listeners.delete(listener)
-    if (listeners.size === 0 && liveHeadListeners.get(scheme) === listeners) liveHeadListeners.delete(scheme)
-  }
+  return liveHeads.on(scheme, listener)
 }
 
 /**
@@ -217,7 +253,26 @@ export function onSabrLiveHead(scheme, listener) {
  * @param {SabrLiveHead} head
  */
 export function publishSabrLiveHead(scheme, head) {
-  for (const listener of liveHeadListeners.get(scheme) ?? []) listener(head)
+  liveHeads.publish(scheme, head)
+}
+
+/**
+ * @param {string} scheme
+ * @param {(segment: SabrLiveSegment) => void} listener
+ * @returns {() => void} removes the listener
+ */
+export function onSabrLiveSegment(scheme, listener) {
+  return liveSegments.on(scheme, listener)
+}
+
+/**
+ * Reports a delivered live audio or video segment, which the live window
+ * compares with its estimate before the player asks for the next one.
+ * @param {string} scheme
+ * @param {SabrLiveSegment} segment
+ */
+export function publishSabrLiveSegment(scheme, segment) {
+  liveSegments.publish(scheme, segment)
 }
 
 /**
