@@ -337,25 +337,37 @@ test('walks new users through setup and the essential controls', async ({ page }
   await expect(page.locator('.tutorialOverlay')).toHaveCount(0)
 })
 
-test('resumes the tutorial after opening settings from it and replays it from About', async ({ page }) => {
+test('opens import and theme settings inside the card and replays it from About', async ({ page }) => {
   await page.evaluate(() => localStorage.setItem('opentubex.tutorial.audience', 'new'))
   await page.reload()
 
   const tutorial = page.locator('.tutorialCard')
   await tutorial.getByRole('button', { name: 'Import data' }).click()
-  await expect(tutorial).toBeHidden()
-  await expect(page.locator('.settingsContent [data-section="data"]')
-    .getByRole('button', { name: 'Import subscriptions', exact: true })).toBeVisible()
+  await expect(tutorial).toHaveAccessibleName('Import data')
+  await expect(tutorial.getByRole('button', { name: 'Import subscriptions', exact: true })).toBeVisible()
+  await expect(tutorial.getByRole('button', { name: 'Export subscriptions', exact: true })).toHaveCount(0)
+  await expect(page.locator('.settingsWindow')).toHaveCount(0)
 
-  await page.locator('.settingsCloseButton').click()
-  await expect(tutorial).toHaveAccessibleName('Make it yours')
+  await page.keyboard.press('Escape')
+  await expect(tutorial).toHaveAccessibleName('Welcome to OpenTubeX')
+  await tutorial.getByRole('button', { name: 'Import data' }).click()
+  await tutorial.getByRole('button', { name: 'Done', exact: true }).click()
+  await expect(tutorial).toHaveAccessibleName('Welcome to OpenTubeX')
   expect(await page.evaluate(() => localStorage.getItem('opentubex.tutorial.audience'))).toBe('new')
 
-  await tutorial.getByRole('button', { name: 'Theme and colors' }).click()
-  await expect(tutorial).toBeHidden()
-  await expect(page.locator('.themeGallery .themeSection')).toBeVisible()
-  await page.locator('.settingsCloseButton').click()
+  await tutorial.getByRole('button', { name: 'Start fresh' }).click()
+  await tutorial.getByRole('button', { name: /^Theme and colors/ }).click()
+  await expect(tutorial).toHaveAccessibleName('Theme and colors')
+  await expect(tutorial.locator('.themeGallery .themeSection')).toBeVisible()
+  // Tab moves past controls that the gallery keeps rendered but hidden
+  const discoverThemes = tutorial.getByRole('button', { name: 'Discover themes' })
+  await expect.poll(async () => {
+    await page.keyboard.press('Tab')
+    return discoverThemes.evaluate(element => element === document.activeElement)
+  }, { intervals: [0], timeout: 10_000 }).toBe(true)
+  await tutorial.getByRole('button', { name: 'Back', exact: true }).first().click()
   await expect(tutorial).toHaveAccessibleName('Make it yours')
+  await expect(page.locator('.settingsWindow')).toHaveCount(0)
 
   await tutorial.getByRole('button', { name: 'Skip', exact: true }).click()
   await expect(tutorial).toBeHidden()
@@ -363,15 +375,6 @@ test('resumes the tutorial after opening settings from it and replays it from Ab
 
   await page.locator('.profileTrigger').click()
   await page.getByRole('dialog', { name: 'Quick settings' }).getByRole('button', { name: 'About' }).click()
-  await page.getByRole('dialog', { name: 'About' }).getByRole('button', { name: 'Show tutorial' }).click()
-  await expect(page.locator('.settingsWindow')).toHaveCount(0)
-  await expect(tutorial).toHaveAccessibleName('Welcome to OpenTubeX')
-
-  // A replay from About starts over even while the tutorial waits to resume
-  await tutorial.getByRole('button', { name: 'Start fresh' }).click()
-  await tutorial.getByRole('button', { name: 'Theme and colors' }).click()
-  await expect(page.locator('.themeGallery .themeSection')).toBeVisible()
-  await page.evaluate(() => window.$store.dispatch('showSettingsWindow', 'about'))
   await page.getByRole('dialog', { name: 'About' }).getByRole('button', { name: 'Show tutorial' }).click()
   await expect(page.locator('.settingsWindow')).toHaveCount(0)
   await expect(tutorial).toHaveAccessibleName('Welcome to OpenTubeX')

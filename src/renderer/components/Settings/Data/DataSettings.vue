@@ -14,6 +14,7 @@
         @click="selectUnifiedBackup"
       />
       <FtButton
+        v-if="!importOnly"
         :label="t('Settings.Data Settings.Export backup')"
         :icon="['fas', 'file-download']"
         :disabled="backupBusy"
@@ -49,11 +50,13 @@
         @click="importSubscriptions"
       />
       <FtButton
+        v-if="!importOnly"
         :label="$t('Settings.Data Settings.Manage Subscriptions')"
         :icon="['fas', 'users']"
         @click="openProfileSettings"
       />
       <FtButton
+        v-if="!importOnly"
         :label="$t('Settings.Data Settings.Export Subscriptions')"
         :icon="['fas', 'file-download']"
         @click="showExportSubscriptionsPrompt = true"
@@ -82,6 +85,7 @@
         @click="importWatchHistory"
       />
       <FtButton
+        v-if="!importOnly"
         :label="$t('Settings.Data Settings.Export History')"
         :icon="['fas', 'file-download']"
         @click="showExportWatchHistoryPrompt = true"
@@ -100,6 +104,7 @@
         @click="importPlaylists"
       />
       <FtButton
+        v-if="!importOnly"
         :label="$t('Settings.Data Settings.Export Playlists')"
         :icon="['fas', 'file-download']"
         @click="exportPlaylists"
@@ -118,6 +123,7 @@
         @click="importSearchHistory"
       />
       <FtButton
+        v-if="!importOnly"
         :label="t('Settings.Data Settings.Export search history')"
         :icon="['fas', 'file-download']"
         @click="showExportSearchHistoryPrompt = true"
@@ -141,6 +147,7 @@
         @click="importSettings"
       />
       <FtButton
+        v-if="!importOnly"
         :label="t('Settings.Data Settings.Export Settings')"
         :icon="['fas', 'file-download']"
         @click="exportSettings"
@@ -296,8 +303,9 @@
       </FtFlexBox>
     </FtSettingsSubpage>
   </FtSettingsSection>
-  <ScheduledBackupSettings v-if="USING_ELECTRON" />
+  <ScheduledBackupSettings v-if="USING_ELECTRON && !importOnly" />
   <FtSettingsSection
+    v-if="!importOnly"
     class="advancedDataSettings"
     :title="t('Settings.Categories.Advanced')"
   >
@@ -386,6 +394,14 @@ import {
   normalizeSearchHistoryEntry,
   normalizeSearchSettings,
 } from '../../../../search-history'
+
+defineProps({
+  /** Leaves out exports, scheduled backups, and advanced imports, for onboarding */
+  importOnly: {
+    type: Boolean,
+    default: false
+  }
+})
 
 const IMPORT_DIRECTORY_ID = 'data-settings-import'
 const START_IN_DIRECTORY = 'downloads'
