@@ -892,6 +892,16 @@ test('volume boost amplifies the audio within its tab', async ({ app, page, atta
   await boostMenu.getByRole('button', { name: '200%' }).click()
   await expect.poll(outputGain).toBe(2)
 
+  // The output stops rendering while the video is paused and runs again when it plays.
+  const outputState = () => page.evaluate(() => window.__volumeBoostSources.at(-1).context.state)
+  const video = page.locator(`${activeTab} video`)
+  await expect.poll(outputState).toBe('running')
+  await video.evaluate(element => element.pause())
+  await expect.poll(outputState).toBe('suspended')
+  await video.evaluate(element => element.play())
+  await expect.poll(outputState).toBe('running')
+  await expect.poll(outputGain).toBe(2)
+
   // Another video in the same tab keeps the boost, and loudness
   // normalization turns it down because YouTube reports it as louder.
   await openMockedVideo(page, 'aqz-KE-bpKQ')
