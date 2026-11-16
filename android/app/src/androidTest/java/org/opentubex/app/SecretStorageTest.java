@@ -107,6 +107,10 @@ public class SecretStorageTest {
         SharedPreferences preferences = context.getSharedPreferences("subscription-refresh", Context.MODE_PRIVATE);
         WorkManager workManager = WorkManager.getInstance(context);
         String schedule = SubscriptionRefreshScheduler.uniqueName("videos");
+        String original = SubscriptionRefreshConfiguration.read(context);
+        String appSecret = SecretStorage.encrypt("app secret");
+        String appAlias = SecretStorage.alias;
+        String testAlias = "settings-secrets-test";
         KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
         keyStore.load(null);
         try {
@@ -120,14 +124,14 @@ public class SecretStorageTest {
             assertFalse(workManager.getWorkInfosForUniqueWork(schedule).get().get(0).getState().isFinished());
 
             // A key that can only encrypt makes decrypting throw, like a failing Keystore.
-            keyStore.deleteEntry("settings-secrets");
             KeyGenerator generator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
-            generator.init(new KeyGenParameterSpec.Builder("settings-secrets", KeyProperties.PURPOSE_ENCRYPT)
+            generator.init(new KeyGenParameterSpec.Builder(testAlias, KeyProperties.PURPOSE_ENCRYPT)
                 .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
                 .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
                 .setKeySize(256)
                 .build());
             generator.generateKey();
+            SecretStorage.alias = testAlias;
             assertNull(SubscriptionRefreshConfiguration.readFeeds(context));
             assertTrue("the settings stay saved", preferences.contains("encryptedConfiguration"));
 
@@ -147,11 +151,14 @@ public class SecretStorageTest {
                 Thread.sleep(100);
             }
             workManager.cancelWorkById(request.getId()).getResult().get();
+            SecretStorage.alias = appAlias;
+            assertEquals("the app's own key still decrypts", "app secret", SecretStorage.decrypt(appSecret));
         } finally {
-            // The next use creates a new key.
-            keyStore.deleteEntry("settings-secrets");
-            preferences.edit().remove("configuration").remove("encryptedConfiguration").commit();
-            workManager.cancelUniqueWork(schedule).getResult().get();
+            SecretStorage.alias = appAlias;
+            keyStore.deleteEntry(testAlias);
+            if (original == null) preferences.edit().remove("configuration").remove("encryptedConfiguration").commit();
+            else SubscriptionRefreshConfiguration.save(context, new JSONObject(original));
+            SubscriptionRefreshScheduler.reconcile(context);
         }
     }
 }
