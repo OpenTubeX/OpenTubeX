@@ -6,7 +6,7 @@ runtime="$root/ios/App/Python.xcframework"
 packages="$root/ios/App/python-packages"
 scratch="$(mktemp -d)"
 trap 'rm -rf "$scratch"' EXIT
-release_tag=3.14-b11
+release_tag=3.14-b14
 runtime_stamp="$runtime/.opentubex-release-tag"
 pins=('yt-dlp==2026.10.26' 'yt-dlp-ejs==0.8.0' 'yt-dlp-apple-webkit-jsi==0.1.1' 'certifi==2026.10.23' 'mutagen==1.48.1')
 package_stamp="$packages/.pins"
