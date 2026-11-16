@@ -9,10 +9,11 @@ const VIDEO = {
 }
 
 const CONFIGURED_LIMIT = 4
+const MANIFEST_TYPE_SABR = 'application/sabr+json'
 
 /**
  * Reads the limit shaka-player is actually running with, together with the
- * playback engine that ended up serving the streams.
+ * playback engine and manifest type that ended up serving the streams.
  *
  * @param {import('@playwright/test').Page} page
  */
@@ -28,6 +29,7 @@ async function readPrefetchState(page) {
 
     return {
       engine: watchComponent.proxy.activePlaybackEngine,
+      manifestMimeType: watchComponent.proxy.manifestMimeType,
       segmentPrefetchLimit: shakaPlayer.getConfiguration().streaming.segmentPrefetchLimit
     }
   }, watchComponent)
@@ -62,6 +64,8 @@ test.describe('concurrent segment downloads', () => {
         settings: {
           segmentPrefetchLimit: CONFIGURED_LIMIT,
           videoPlaybackEngine: 'built-in',
+          // the visionOS streams are played as DASH otherwise
+          builtInStreams: 'sabr',
           // the built-in engine is migrated away from on startup otherwise
           ytDlpPlaybackEngineDefaultMigration: true
         }
@@ -73,8 +77,9 @@ test.describe('concurrent segment downloads', () => {
       await openVideoOrSkip(test, page, VIDEO)
       await waitForPlaybackOrSkip(test, page)
 
-      const { engine, segmentPrefetchLimit } = await readPrefetchState(page)
+      const { engine, manifestMimeType, segmentPrefetchLimit } = await readPrefetchState(page)
       expect(engine).toBe('built-in')
+      expect(manifestMimeType).toBe(MANIFEST_TYPE_SABR)
 
       // SABR requests depend on the state the server returned for the previous
       // one, so they can't be parallelised and the setting has to be ignored
