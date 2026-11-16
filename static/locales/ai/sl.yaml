@@ -3377,6 +3377,10 @@ Yattee Server:
 Yattee Fallback Warning: Ta zahteva zaobide nastavljeni strežnik Yattee in se poveže neposredno z YouTubom ter razkrije vaš naslov IP.
 Update With Package Manager: 'Posodobi z upravitljem {packageManager}:'
 Update Command Copied: 'Ukaz za posodobitev je kopiran'
+Intel Build on Apple Silicon: 'Uporabljate različico za Intel na Macu z Apple silicon, zato aplikacija deluje počasneje. Namesto nje namestite različico za Apple silicon.'
+Download for Apple Silicon: 'Prenesi za Apple silicon'
+x64 Build on Windows on Arm: 'Uporabljate različico x64 na računalniku z Windows in procesorjem Arm, zato aplikacija deluje počasneje. Namesto nje namestite različico Arm64.'
+Download for Arm64: 'Prenesi za Arm64'
 Digital Wellbeing:
   Watch time limit almost reached: "Še {duration} do vaše dnevne omejitve časa gledanja"
   Shorts limit almost reached: "Še {duration} do vaše dnevne omejitve kratkih videoposnetkov"

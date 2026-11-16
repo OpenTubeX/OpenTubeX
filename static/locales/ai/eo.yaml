@@ -79,6 +79,10 @@ Dismiss: Ignori
 Update to {version}: Ĝisdatigi al {version}
 Update With Package Manager: 'Ĝisdatigi per {packageManager}:'
 Update Command Copied: Ĝisdatiga komando kopiita
+Intel Build on Apple Silicon: 'Vi uzas la Intel-version en Mac kun Apple silicon, do la aplikaĵo funkcias pli malrapide. Instalu anstataŭe la Apple silicon-version.'
+Download for Apple Silicon: 'Elŝuti por Apple silicon'
+x64 Build on Windows on Arm: 'Vi uzas la x64-version en Windows-komputilo kun Arm-procesoro, do la aplikaĵo funkcias pli malrapide. Instalu anstataŭe la Arm64-version.'
+Download for Arm64: 'Elŝuti por Arm64'
 Global:
   Ambient Mode: Ĉirkaŭa reĝimo
   Loading More: Ŝargado de pli

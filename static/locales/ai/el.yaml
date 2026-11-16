@@ -2794,6 +2794,10 @@ Yattee Server:
 Yattee Fallback Warning: Αυτό το αίτημα παρακάμπτει τον ρυθμισμένο διακομιστή Yattee και συνδέεται απευθείας στο YouTube, αποκαλύπτοντας τη διεύθυνση IP σας.
 Update With Package Manager: 'Ενημέρωση με {packageManager}:'
 Update Command Copied: 'Η εντολή ενημέρωσης αντιγράφηκε'
+Intel Build on Apple Silicon: 'Χρησιμοποιείτε την έκδοση για Intel σε Mac με Apple silicon, γι’ αυτό η εφαρμογή λειτουργεί πιο αργά. Εγκαταστήστε την έκδοση για Apple silicon.'
+Download for Apple Silicon: 'Λήψη για Apple silicon'
+x64 Build on Windows on Arm: 'Χρησιμοποιείτε την έκδοση x64 σε υπολογιστή Windows με επεξεργαστή Arm, γι’ αυτό η εφαρμογή λειτουργεί πιο αργά. Εγκαταστήστε την έκδοση Arm64.'
+Download for Arm64: 'Λήψη για Arm64'
 Digital Wellbeing:
   Watch time limit almost reached: "Απομένουν {duration} έως το ημερήσιο όριο χρόνου παρακολούθησης"
   Shorts limit almost reached: "Απομένουν {duration} έως το ημερήσιο όριο Shorts"

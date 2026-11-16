@@ -3176,6 +3176,10 @@ Yattee Server:
 Yattee Fallback Warning: Denne førespurnaden går utanom den konfigurerte Yattee-tenaren din og koplar direkte til YouTube, noko som avslører IP-adressa di.
 Update With Package Manager: 'Oppdater med {packageManager}:'
 Update Command Copied: 'Oppdateringskommandoen er kopiert'
+Intel Build on Apple Silicon: 'Du brukar Intel-versjonen på ein Mac med Apple silicon, så appen køyrer seinare. Installer Apple silicon-versjonen i staden.'
+Download for Apple Silicon: 'Last ned for Apple silicon'
+x64 Build on Windows on Arm: 'Du brukar x64-versjonen på ein Windows-PC med Arm-prosessor, så appen køyrer seinare. Installer Arm64-versjonen i staden.'
+Download for Arm64: 'Last ned for Arm64'
 Digital Wellbeing:
   Watch time limit almost reached: "{duration} att av den daglege sjåtidsgrensa di"
   Shorts limit almost reached: "{duration} att av den daglege Shorts-grensa di"

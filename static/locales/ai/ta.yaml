@@ -2844,6 +2844,10 @@ Yattee Server:
 Yattee Fallback Warning: இந்தக் கோரிக்கை நீங்கள் கட்டமைத்த Yattee சேவையகத்தைத் தவிர்த்து நேரடியாக YouTube உடன் இணைகிறது. இதனால் உங்கள் IP முகவரி வெளிப்படும்.
 Update With Package Manager: '{packageManager} மூலம் புதுப்பிக்கவும்:'
 Update Command Copied: 'புதுப்பிப்புக் கட்டளை நகலெடுக்கப்பட்டது'
+Intel Build on Apple Silicon: 'Apple silicon உள்ள Mac-இல் Intel பதிப்பைப் பயன்படுத்துகிறீர்கள், அதனால் செயலி மெதுவாக இயங்குகிறது. அதற்குப் பதிலாக Apple silicon பதிப்பை நிறுவவும்.'
+Download for Apple Silicon: 'Apple silicon-க்குப் பதிவிறக்கு'
+x64 Build on Windows on Arm: 'Arm செயலி உள்ள Windows கணினியில் x64 பதிப்பைப் பயன்படுத்துகிறீர்கள், அதனால் செயலி மெதுவாக இயங்குகிறது. அதற்குப் பதிலாக Arm64 பதிப்பை நிறுவவும்.'
+Download for Arm64: 'Arm64-க்குப் பதிவிறக்கு'
 Digital Wellbeing:
   Watch time limit almost reached: "உங்கள் தினசரிப் பார்க்கும் நேர வரம்பில் {duration} மீதமுள்ளது"
   Shorts limit almost reached: "உங்கள் தினசரி Shorts வரம்பில் {duration} மீதமுள்ளது"

@@ -2843,6 +2843,10 @@ Yattee Server:
 Yattee Fallback Warning: בקשה זו עוקפת את שרת Yattee שהגדרת ומתחברת ישירות ל־YouTube, תוך חשיפת כתובת ה־IP שלך.
 Update With Package Manager: 'עדכון באמצעות {packageManager}:'
 Update Command Copied: 'פקודת העדכון הועתקה'
+Intel Build on Apple Silicon: 'אתם משתמשים בגרסת Intel ב־Mac עם Apple silicon, ולכן היישום פועל לאט יותר. התקינו במקומה את גרסת Apple silicon.'
+Download for Apple Silicon: 'הורדה עבור Apple silicon'
+x64 Build on Windows on Arm: 'אתם משתמשים בגרסת x64 במחשב Windows עם מעבד Arm, ולכן היישום פועל לאט יותר. התקינו במקומה את גרסת Arm64.'
+Download for Arm64: 'הורדה עבור Arm64'
 Digital Wellbeing:
   Watch time limit almost reached: "נותרו {duration} עד למגבלת זמן הצפייה היומית"
   Shorts limit almost reached: "נותרו {duration} עד למגבלת ה־Shorts היומית"

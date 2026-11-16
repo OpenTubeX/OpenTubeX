@@ -170,7 +170,7 @@
         />
         <FtButton
           v-else
-          :label="t('Download From Site')"
+          :label="runningUnderArm64Translation ? getArm64DownloadLabel() : t('Download From Site')"
           :icon="['fas', 'download']"
           @click="openDownloadsPage"
         />
@@ -772,6 +772,7 @@ import {
   setTutorialAudience,
 } from './helpers/tutorialState'
 import { dismissAutoSyncNotice, shouldShowAutoSyncNotice, showAutoSyncNoticeOnce } from './helpers/sync-auto-sync-notice'
+import { dismissNotice, showNoticeOnce } from './helpers/oneTimeNotice'
 import { invalidateAllYtDlpPlaybackSources } from './helpers/player/ytDlpPlayback'
 import { getTabNavigationService } from './tabs/TabNavigationService'
 import { isPlayerRoutePath } from './tabs/playerDockDestination'
@@ -2021,6 +2022,7 @@ onMounted(async () => {
         })
       })
     }
+    if (runningUnderArm64Translation) showArm64TranslationNotice()
     scheduleIdleStartupWork()
     if (isCapacitor) {
       initializeHapticFeedback(store)
@@ -2623,8 +2625,65 @@ function copyPackageManagerUpdateCommand() {
   copyToClipboard(packageManagerUpdate.value.command, { messageOnSuccess: t('Update Command Copied') })
 }
 
+const ARM64_TRANSLATION_NOTICE_STORAGE_KEY = 'opentubex.arm64-translation-notice'
+// The x64 build runs through much slower emulation on Apple silicon and Windows on Arm
+const runningUnderArm64Translation = window.ftElectron?.runningUnderArm64Translation === true
+const isWindows = process.platform === 'win32'
+// The download service path and release asset suffix of the arm64 build in the format the user installed
+const [arm64DownloadPath, arm64AssetSuffix] = !isWindows
+  ? ['macos/dmg-arm64', 'mac-arm64.dmg']
+  : window.ftElectron?.portableBuild === true
+    ? ['windows/zip-arm64', 'win-arm64-portable.zip']
+    : ['windows/exe-arm64', 'setup-arm64.exe']
+
+function getArm64DownloadLabel() {
+  return isWindows ? t('Download for Arm64') : t('Download for Apple Silicon')
+}
+
+/**
+ * @param {string | null} tagName the release to download, or null for the latest stable one
+ */
+function getArm64DownloadUrl(tagName) {
+  return tagName === null
+    ? `https://download.opentubex.org/${arm64DownloadPath}`
+    : `https://github.com/OpenTubeX/OpenTubeX/releases/download/${tagName}/opentubex-${tagName.replace(/^v/, '')}-${arm64AssetSuffix}`
+}
+
+function showArm64TranslationNotice() {
+  // Nightly builds offer the same nightly, as the latest stable release is older
+  const tagName = /-nightly-\d+$/.test(packageDetails.version) ? `v${packageDetails.version}` : null
+  showNoticeOnce(ARM64_TRANSLATION_NOTICE_STORAGE_KEY, release => {
+    const dismiss = () => {
+      dismissNotice(ARM64_TRANSLATION_NOTICE_STORAGE_KEY)
+      release()
+    }
+    showToast({
+      message: isWindows ? t('x64 Build on Windows on Arm') : t('Intel Build on Apple Silicon'),
+      time: Infinity,
+      dismissible: false,
+      icon: ['fas', 'gauge'],
+      verticalButtons: true,
+      buttons: [{
+        label: t('Dismiss'),
+        icon: ['fas', 'xmark'],
+        action: dismiss,
+      }, {
+        label: getArm64DownloadLabel(),
+        icon: ['fas', 'download'],
+        primary: true,
+        action: () => {
+          handleExternalLink(getArm64DownloadUrl(tagName))
+          dismiss()
+        },
+      }],
+    })
+  })
+}
+
 function openDownloadsPage() {
-  handleExternalLink('https://opentubex.org/downloads/')
+  handleExternalLink(runningUnderArm64Translation
+    ? getArm64DownloadUrl(availableUpdate?.tagName ?? null)
+    : 'https://opentubex.org/downloads/')
   // Keep the update reachable unless the link opened right away
   if (resolveExternalLinkAction(externalLinkHandling.value) !== 'open') return
   dismissAvailableUpdate()

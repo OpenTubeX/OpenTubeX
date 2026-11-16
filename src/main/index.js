@@ -1942,7 +1942,10 @@ function runApp() {
           `--startup-dark=${nativeTheme.shouldUseDarkColors}`,
           `--system-accent-color=${getSystemAccentColor() ?? ''}`,
           `--hide-startup-splash=${hideStartupSplash}`,
-          `--custom-title-bar=${customTitleBar}`
+          `--custom-title-bar=${customTitleBar}`,
+          // The x64 build runs through much slower emulation on Apple silicon and Windows on Arm
+          `--arm64-translation=${app.runningUnderARM64Translation === true}`,
+          `--portable=${isPortableBuild()}`
         ],
         preload: process.env.NODE_ENV === 'development'
           ? path.resolve(__dirname, '../../dist/preload.js')

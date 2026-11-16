@@ -2831,6 +2831,10 @@ Yattee Server:
 Yattee Fallback Warning: Este pedido ignora o servidor Yattee configurado e liga-se diretamente ao YouTube, expondo o seu endereço IP.
 Update With Package Manager: 'Atualizar com {packageManager}:'
 Update Command Copied: 'Comando de atualização copiado'
+Intel Build on Apple Silicon: 'Está a usar a versão para Intel num Mac com Apple silicon, por isso a aplicação é mais lenta. Instale antes a versão para Apple silicon.'
+Download for Apple Silicon: 'Transferir para Apple silicon'
+x64 Build on Windows on Arm: 'Está a usar a versão x64 num PC com Windows e processador Arm, por isso a aplicação é mais lenta. Instale antes a versão Arm64.'
+Download for Arm64: 'Transferir para Arm64'
 Digital Wellbeing:
   Watch time limit almost reached: "Restam {duration} para o seu limite diário de tempo de visualização"
   Shorts limit almost reached: "Restam {duration} para o seu limite diário de Shorts"

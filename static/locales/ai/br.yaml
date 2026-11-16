@@ -2790,6 +2790,10 @@ Yattee Server:
 Yattee Fallback Warning: An azgoulenn-mañ a dremen heb ho servijer Yattee kefluniet hag a gennask war-eeun ouzh YouTube, o tiskouez ho chomlec'h IP.
 Update With Package Manager: 'Hizivaat gant {packageManager}:'
 Update Command Copied: 'Eilet eo bet an urzhiad hizivaat'
+Intel Build on Apple Silicon: 'Implijout a rit stumm Intel war ur Mac gant Apple silicon, setu e ya an arload gorrekoc’h. Staliit stumm Apple silicon e-lec’h.'
+Download for Apple Silicon: 'Pellgargañ evit Apple silicon'
+x64 Build on Windows on Arm: 'Implijout a rit stumm x64 war un urzhiataer Windows gant ur prosesor Arm, setu e ya an arload gorrekoc’h. Staliit stumm Arm64 e-lec’h.'
+Download for Arm64: 'Pellgargañ evit Arm64'
 Digital Wellbeing:
   Watch time limit almost reached: "{duration} a chom a-raok ho pevenn bemdeziek amzer sellet"
   Shorts limit almost reached: "{duration} a chom a-raok ho pevenn bemdeziek Shorts"

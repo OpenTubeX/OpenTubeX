@@ -3237,6 +3237,10 @@ Yattee Server:
 Yattee Fallback Warning: 이 요청은 설정한 Yattee 서버를 우회하여 YouTube에 직접 연결하므로 IP 주소가 노출됩니다.
 Update With Package Manager: '{packageManager}(으)로 업데이트:'
 Update Command Copied: '업데이트 명령을 복사했습니다'
+Intel Build on Apple Silicon: 'Apple 실리콘 Mac에서 Intel 버전을 사용 중이므로 앱이 더 느리게 실행됩니다. 대신 Apple 실리콘 버전을 설치하세요.'
+Download for Apple Silicon: 'Apple 실리콘용 다운로드'
+x64 Build on Windows on Arm: 'Arm 프로세서가 탑재된 Windows PC에서 x64 버전을 사용 중이므로 앱이 더 느리게 실행됩니다. 대신 Arm64 버전을 설치하세요.'
+Download for Arm64: 'Arm64용 다운로드'
 Digital Wellbeing:
   Watch time limit almost reached: "일일 시청 시간 한도까지 {duration} 남음"
   Shorts limit almost reached: "일일 Shorts 한도까지 {duration} 남음"

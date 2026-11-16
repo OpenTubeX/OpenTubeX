@@ -2780,6 +2780,10 @@ Yattee Server:
 Yattee Fallback Warning: Bu istek, yapılandırdığınız Yattee sunucusunu atlayarak doğrudan YouTube'a bağlanır ve IP adresinizi açığa çıkarır.
 Update With Package Manager: '{packageManager} ile güncelle:'
 Update Command Copied: 'Güncelleme komutu kopyalandı'
+Intel Build on Apple Silicon: 'Apple silicon''lu bir Mac''te Intel sürümünü kullanıyorsunuz, bu yüzden uygulama daha yavaş çalışıyor. Bunun yerine Apple silicon sürümünü yükleyin.'
+Download for Apple Silicon: 'Apple silicon için indir'
+x64 Build on Windows on Arm: 'Arm işlemcili bir Windows bilgisayarda x64 sürümünü kullanıyorsunuz, bu yüzden uygulama daha yavaş çalışıyor. Bunun yerine Arm64 sürümünü yükleyin.'
+Download for Arm64: 'Arm64 için indir'
 Digital Wellbeing:
   Watch time limit almost reached: "Günlük izleme süresi sınırınıza {duration} kaldı"
   Shorts limit almost reached: "Günlük kısa video sınırınıza {duration} kaldı"

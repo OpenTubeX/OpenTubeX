@@ -2779,6 +2779,10 @@ Yattee Server:
 Yattee Fallback Warning: このリクエストは設定した Yattee サーバーを経由せず、YouTube に直接接続するため、IP アドレスが公開されます。
 Update With Package Manager: '{packageManager} で更新:'
 Update Command Copied: '更新コマンドをコピーしました'
+Intel Build on Apple Silicon: 'Apple シリコン搭載の Mac で Intel 版を使用しているため、アプリの動作が遅くなっています。代わりに Apple シリコン版をインストールしてください。'
+Download for Apple Silicon: 'Apple シリコン版をダウンロード'
+x64 Build on Windows on Arm: 'Arm プロセッサ搭載の Windows PC で x64 版を使用しているため、アプリの動作が遅くなっています。代わりに Arm64 版をインストールしてください。'
+Download for Arm64: 'Arm64 版をダウンロード'
 Digital Wellbeing:
   Watch time limit almost reached: "1日の視聴時間の上限まで残り{duration}"
   Shorts limit almost reached: "1日のショート動画の上限まで残り{duration}"

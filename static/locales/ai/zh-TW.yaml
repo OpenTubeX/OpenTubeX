@@ -2783,6 +2783,10 @@ Yattee Server:
 Yattee Fallback Warning: 此請求繞過了您設定的 Yattee 伺服器，直接連線至 YouTube，因而暴露您的 IP 位址。
 Update With Package Manager: '使用 {packageManager} 更新：'
 Update Command Copied: '已複製更新指令'
+Intel Build on Apple Silicon: '你正在搭載 Apple 晶片的 Mac 上使用 Intel 版本，因此 App 執行速度較慢。請改為安裝 Apple 晶片版本。'
+Download for Apple Silicon: '下載 Apple 晶片版本'
+x64 Build on Windows on Arm: '你正在搭載 Arm 處理器的 Windows 電腦上使用 x64 版本，因此 App 執行速度較慢。請改為安裝 Arm64 版本。'
+Download for Arm64: '下載 Arm64 版本'
 Digital Wellbeing:
   Watch time limit almost reached: "距離每日觀看時間上限還剩 {duration}"
   Shorts limit almost reached: "距離每日 Shorts 上限還剩 {duration}"

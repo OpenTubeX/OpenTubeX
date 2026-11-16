@@ -3283,6 +3283,10 @@ Yattee Server:
 Yattee Fallback Warning: Ši užklausa apeina jūsų sukonfigūruotą Yattee serverį ir jungiasi tiesiogiai prie YouTube, atskleisdama jūsų IP adresą.
 Update With Package Manager: 'Atnaujinti naudojant {packageManager}:'
 Update Command Copied: 'Atnaujinimo komanda nukopijuota'
+Intel Build on Apple Silicon: 'Naudojate „Intel“ versiją „Mac“ kompiuteryje su „Apple silicon“, todėl programa veikia lėčiau. Vietoj jos įdiekite „Apple silicon“ versiją.'
+Download for Apple Silicon: 'Atsisiųsti „Apple silicon“ versiją'
+x64 Build on Windows on Arm: 'Naudojate x64 versiją „Windows“ kompiuteryje su „Arm“ procesoriumi, todėl programa veikia lėčiau. Vietoj jos įdiekite Arm64 versiją.'
+Download for Arm64: 'Atsisiųsti Arm64 versiją'
 Digital Wellbeing:
   Watch time limit almost reached: "Iki dienos žiūrėjimo laiko limito liko {duration}"
   Shorts limit almost reached: "Iki dienos „Shorts“ limito liko {duration}"

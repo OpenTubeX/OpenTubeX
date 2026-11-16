@@ -2795,6 +2795,10 @@ Yattee Server:
 Yattee Fallback Warning: Þessi beiðni fer fram hjá Yattee-netþjóninum sem þú stilltir og tengist beint við YouTube, sem afhjúpar IP-töluna þína.
 Update With Package Manager: 'Uppfæra með {packageManager}:'
 Update Command Copied: 'Uppfærsluskipun afrituð'
+Intel Build on Apple Silicon: 'Þú notar Intel-útgáfuna á Mac með Apple silicon, svo forritið keyrir hægar. Settu frekar upp Apple silicon-útgáfuna.'
+Download for Apple Silicon: 'Sækja fyrir Apple silicon'
+x64 Build on Windows on Arm: 'Þú notar x64-útgáfuna á Windows-tölvu með Arm-örgjörva, svo forritið keyrir hægar. Settu frekar upp Arm64-útgáfuna.'
+Download for Arm64: 'Sækja fyrir Arm64'
 Digital Wellbeing:
   Watch time limit almost reached: "{duration} eftir af daglegu hámarki áhorfstíma"
   Shorts limit almost reached: "{duration} eftir af daglegu hámarki Shorts-myndbanda"

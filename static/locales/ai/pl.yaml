@@ -2016,6 +2016,10 @@ Yattee Server:
 Yattee Fallback Warning: To żądanie pomija skonfigurowany serwer Yattee i łączy się bezpośrednio z YouTube, ujawniając Twój adres IP.
 Update With Package Manager: 'Zaktualizuj za pomocą {packageManager}:'
 Update Command Copied: 'Skopiowano polecenie aktualizacji'
+Intel Build on Apple Silicon: 'Używasz wersji dla procesorów Intel na Macu z Apple silicon, więc aplikacja działa wolniej. Zainstaluj zamiast niej wersję dla Apple silicon.'
+Download for Apple Silicon: 'Pobierz dla Apple silicon'
+x64 Build on Windows on Arm: 'Używasz wersji x64 na komputerze z systemem Windows i procesorem Arm, więc aplikacja działa wolniej. Zainstaluj zamiast niej wersję Arm64.'
+Download for Arm64: 'Pobierz dla Arm64'
 Chapters:
   Auto-generated: Te rozdziały zostały wygenerowane automatycznie
   Loop Chapter: 'Zapętl rozdział: {chapter}'

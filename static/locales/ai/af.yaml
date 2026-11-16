@@ -81,6 +81,10 @@ Dismiss: Maak toe
 Update to {version}: Werk by na {version}
 Update With Package Manager: 'Werk by met {packageManager}:'
 Update Command Copied: Bywerkopdrag gekopieer
+Intel Build on Apple Silicon: 'Jy gebruik die Intel-weergawe op ’n Mac met Apple silicon, dus loop die toep stadiger. Installeer eerder die Apple silicon-weergawe.'
+Download for Apple Silicon: 'Laai af vir Apple silicon'
+x64 Build on Windows on Arm: 'Jy gebruik die x64-weergawe op ’n Windows-rekenaar met ’n Arm-verwerker, dus loop die toep stadiger. Installeer eerder die Arm64-weergawe.'
+Download for Arm64: 'Laai af vir Arm64'
 Global:
   Ambient Mode: Omgewingsmodus
   Loading More: Laai meer

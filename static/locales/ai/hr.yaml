@@ -2820,6 +2820,10 @@ Yattee Server:
 Yattee Fallback Warning: Ovaj zahtjev zaobilazi postavljeni Yattee poslužitelj i povezuje se izravno s YouTubeom, otkrivajući vašu IP adresu.
 Update With Package Manager: 'Ažuriraj pomoću {packageManager}:'
 Update Command Copied: 'Naredba za ažuriranje kopirana'
+Intel Build on Apple Silicon: 'Koristite verziju za Intel na Macu s Apple siliconom, pa aplikacija radi sporije. Umjesto nje instalirajte verziju za Apple silicon.'
+Download for Apple Silicon: 'Preuzmi za Apple silicon'
+x64 Build on Windows on Arm: 'Koristite x64 verziju na Windows računalu s Arm procesorom, pa aplikacija radi sporije. Umjesto nje instalirajte Arm64 verziju.'
+Download for Arm64: 'Preuzmi za Arm64'
 Digital Wellbeing:
   Watch time limit almost reached: "Do dnevnog ograničenja vremena gledanja preostalo je {duration}"
   Shorts limit almost reached: "Do dnevnog ograničenja Shorts videozapisa preostalo je {duration}"

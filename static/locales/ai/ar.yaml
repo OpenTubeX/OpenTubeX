@@ -2820,6 +2820,10 @@ Yattee Server:
 Yattee Fallback Warning: يتجاوز هذا الطلب خادم Yattee الذي أعددته ويتصل مباشرةً بـ YouTube، مما يكشف عنوان IP الخاص بك.
 Update With Package Manager: 'التحديث باستخدام {packageManager}:'
 Update Command Copied: 'تم نسخ أمر التحديث'
+Intel Build on Apple Silicon: 'أنت تستخدم إصدار Intel على جهاز Mac بمعالج Apple silicon، لذا يعمل التطبيق ببطء أكبر. ثبّت إصدار Apple silicon بدلًا منه.'
+Download for Apple Silicon: 'تنزيل لـ Apple silicon'
+x64 Build on Windows on Arm: 'أنت تستخدم إصدار x64 على جهاز Windows بمعالج Arm، لذا يعمل التطبيق ببطء أكبر. ثبّت إصدار Arm64 بدلًا منه.'
+Download for Arm64: 'تنزيل لـ Arm64'
 Digital Wellbeing:
   Watch time limit almost reached: "تبقى {duration} من حدك اليومي لوقت المشاهدة"
   Shorts limit almost reached: "تبقى {duration} من حدك اليومي لـ Shorts"
