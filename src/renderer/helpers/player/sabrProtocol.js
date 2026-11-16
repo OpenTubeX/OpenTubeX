@@ -191,6 +191,7 @@ export function parseSabrLiveHead(liveMetadata, receivedAtMs) {
 /**
  * @typedef SabrLiveSegment
  * @property {number} windowSequenceNumber the live window's segment that was requested
+ * @property {number} windowGeneration how often the live window had re-timed its segments when it was requested
  * @property {number} sequenceNumber the segment SABR delivered for it
  * @property {number} startMs media start time SABR reported for it
  */

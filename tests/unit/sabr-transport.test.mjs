@@ -1247,7 +1247,7 @@ test('older live footage starts at the segment SABR has for the requested time',
   assert.deepEqual([...transport.deliveredLiveStartsMs.keys()], [876, 877, 878])
   assert.equal(transport.deliveredLiveStartsMs.get(877), realStartMs(877))
   // The live window learns which segment it got, so it can re-time the rest
-  assert.deepEqual({ ...reported[0] }, { windowSequenceNumber: 878, sequenceNumber: 876, startMs: realStartMs(876) })
+  assert.deepEqual({ ...reported[0] }, { windowSequenceNumber: 878, windowGeneration: 0, sequenceNumber: 876, startMs: realStartMs(876) })
   assert.equal(reported.length, 3)
 
   // Captions turned on there start at the same time, but can start apart from the media segments

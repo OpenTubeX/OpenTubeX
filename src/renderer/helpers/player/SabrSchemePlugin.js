@@ -51,6 +51,7 @@ const ShakaError = shaka.util.Error
  * @property {number} sequenceNumber - a live lookup accepts any segment instead
  * @property {boolean} isLiveLookup - asks for the live segment that contains the requested time
  * @property {number} liveWindowSequenceNumber - the live window's estimate of the sequence number
+ * @property {number} liveWindowGeneration - how often the live window had re-timed its segments
  * @property {number | undefined} targetDurationMs - only live segments have one
  * @property {string} streamKind
  */
@@ -948,6 +949,7 @@ async function doRequest(
       // The live window re-times its segments before the player asks for the next one
       publishSabrLiveSegment(currentState.scheme, {
         windowSequenceNumber: operationInputs.liveWindowSequenceNumber,
+        windowGeneration: operationInputs.liveWindowGeneration,
         sequenceNumber: mediaSequenceNumber,
         startMs: mediaStartMs,
       })
@@ -1247,6 +1249,7 @@ export function createSabrTransport(sabrData, getRequestContext) {
     const resolution = streamIsVideo ? parseInt(url.searchParams.get('resolution')) : undefined
     let playerTimeMs = isLiveHead ? SABR_LIVE_HEAD_TIME_MS : url.searchParams.get('startTimeMs') ?? '0'
     const liveWindowSequenceNumber = parseInt(url.searchParams.get('sq'))
+    const liveWindowGeneration = Number(url.searchParams.get('windowGeneration') ?? 0)
     let sequenceNumber = liveWindowSequenceNumber
     const targetDurationMs = Number(url.searchParams.get('targetDurationMs')) || undefined
     let isLiveLookup = false
@@ -1327,6 +1330,7 @@ export function createSabrTransport(sabrData, getRequestContext) {
       sequenceNumber,
       isLiveLookup,
       liveWindowSequenceNumber,
+      liveWindowGeneration,
       targetDurationMs,
       streamKind: url.pathname,
     }

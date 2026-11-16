@@ -167,7 +167,8 @@ for (const segmentDurationMs of [4920, 5040]) {
         : realSequenceNumber(Number(params.get('startTimeMs')))
       player.previous = { windowSequenceNumber, sequenceNumber }
       player.delivered.push(sequenceNumber)
-      return { windowSequenceNumber, sequenceNumber, startMs: realStartMs(sequenceNumber) }
+      const windowGeneration = Number(params.get('windowGeneration'))
+      return { windowSequenceNumber, windowGeneration, sequenceNumber, startMs: realStartMs(sequenceNumber) }
     }
 
     // Audio and video both ask before either segment arrives
@@ -183,5 +184,12 @@ for (const segmentDurationMs of [4920, 5040]) {
     const last = video.segmentIndex.get(video.segmentIndex.find(5_000_000 / 1000 + 1))
     assert.match(last.getUris()[0], /&sq=1000$/)
     assert.ok(Math.abs(last.startTime - 5000) < 0.1, `sq 1000 starts at ${last.startTime}`)
+
+    // A request from before the window was re-timed numbered its segments the
+    // old way, so its segment leaves the window as it is, even one that starts elsewhere
+    const placed = () => [...video.segmentIndex].map(reference => [reference.startTime, reference.getUris()[0]])
+    const before = placed()
+    protocol.publishSabrLiveSegment(scheme, { windowSequenceNumber: 995, windowGeneration: 0, sequenceNumber: 990, startMs: realStartMs(990) + 3000 })
+    assert.deepEqual(placed(), before)
   })
 }

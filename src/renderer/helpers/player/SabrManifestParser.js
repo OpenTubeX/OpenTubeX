@@ -970,6 +970,11 @@ class SabrLiveWindow {
      */
     this._referenceSegments = new WeakMap()
     /**
+     * Counts the re-timings, as the numbers of requests made before one no longer match
+     * @private
+     */
+    this._generation = 0
+    /**
      * @private
      * @type {() => Promise<unknown>}
      */
@@ -1084,7 +1089,10 @@ class SabrLiveWindow {
    * @private
    * @param {import('./sabrProtocol').SabrLiveSegment} delivered
    */
-  _retime({ windowSequenceNumber, sequenceNumber, startMs }) {
+  _retime({ windowSequenceNumber, windowGeneration, sequenceNumber, startMs }) {
+    // A request from before the last re-timing used the numbers it replaced
+    if (windowGeneration !== this._generation) return
+
     const segments = this._segments
     const first = segments[0].sequenceNumber
     const last = segments.at(-1).sequenceNumber
@@ -1107,6 +1115,7 @@ class SabrLiveWindow {
     const startOf = number => start + (number - sequenceNumber) * duration
 
     // Shaka keeps fetching by position, so each segment keeps its position
+    this._generation++
     const offset = sequenceNumber - windowSequenceNumber
     for (const segment of segments) {
       segment.sequenceNumber += offset
@@ -1127,10 +1136,10 @@ class SabrLiveWindow {
       for (const reference of stream.segmentIndex) {
         const segment = this._referenceSegments.get(reference)
         if (!segment) continue
-        if (segment.sequenceNumber > last) break
+        // All of them, so the index stays sorted for merging
         reference.startTime = segment.startTime
         reference.endTime = segment.endTime
-        lastReference = reference
+        if (segment.sequenceNumber <= last) lastReference = reference
       }
       // Merging drops the references after the given one
       if (lastReference) stream.segmentIndex.mergeAndEvict([lastReference], windowStart)
@@ -1190,7 +1199,7 @@ class SabrLiveWindow {
     // The duration lets the transport correct a request time that SABR maps to another segment
     const targetDurationMs = Math.round(this._targetDuration * 1000)
     // Re-timing changes the segment
-    const uris = () => [`${url}&targetDurationMs=${targetDurationMs}&startTimeMs=${segment.requestTimeMs}&sq=${segment.sequenceNumber}`]
+    const uris = () => [`${url}&windowGeneration=${this._generation}&targetDurationMs=${targetDurationMs}&startTimeMs=${segment.requestTimeMs}&sq=${segment.sequenceNumber}`]
 
     // Live segments are self-initializing, so they have no init segment
     const reference = new shaka.media.SegmentReference(
