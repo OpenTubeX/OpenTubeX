@@ -98,6 +98,7 @@
         fullscreenQueueOpen: showFullscreenQueue,
         fullscreenRecommendationsOpen: showFullscreenRecommendations,
         chaptersOverlayOpen: showChaptersOverlay && chapters.length > 0,
+        endedScreenVisible,
         fullscreenDockLayoutOpen,
         portraitFullscreenDocks,
         fullscreenAmbientBarsVisible,
@@ -221,36 +222,80 @@
       <template v-if="showEndedScreen">
         <div
           v-if="endedRecommendations.length > 0"
+          ref="endedScreenElement"
           class="endedScreen"
+          :style="endedScreenInsets && {
+            '--ended-screen-top': `${endedScreenInsets.top}px`,
+            '--ended-screen-bottom': `${endedScreenInsets.bottom}px`
+          }"
         >
-          <nav
-            class="endedRecommendations shaka-no-propagation"
-            :aria-label="$t('Up Next')"
+          <div
+            class="endedScreenLayout shaka-no-propagation"
             @click.stop
             @dblclick.stop
             @pointerdown.stop
           >
-            <router-link
-              v-for="recommendation in endedRecommendations"
-              :key="recommendation.videoId"
-              class="endedRecommendation"
-              :to="{ path: `/watch/${recommendation.videoId}`, query: recommendation.isMusic === true ? { musicVideo: 'true' } : undefined }"
-              :title="recommendation.title"
-              :aria-label="recommendation.title"
-            >
-              <FtRetryImage
-                :class="{ blur: blurThumbnails }"
-                :src="recommendation.thumbnail"
-                alt=""
-              />
+            <!-- Phones only: there the replay button replaces the center buttons. -->
+            <div class="endedScreenHeader">
               <span
-                class="endedRecommendationTitle"
-                dir="auto"
+                class="endedScreenHeading"
+                aria-hidden="true"
               >
-                <span class="endedRecommendationTitleText">{{ recommendation.title }}</span>
+                {{ $t('Up Next') }}
               </span>
-            </router-link>
-          </nav>
+              <button
+                type="button"
+                class="endedReplayButton"
+                @click="replayEndedVideo"
+              >
+                <ft-icon
+                  :icon="['fas', 'replay']"
+                  aria-hidden="true"
+                />
+                {{ replayLabel }}
+              </button>
+            </div>
+            <nav
+              class="endedRecommendations"
+              :aria-label="$t('Up Next')"
+            >
+              <router-link
+                v-for="recommendation in endedRecommendations"
+                :key="recommendation.videoId"
+                class="endedRecommendation"
+                :to="{ path: `/watch/${recommendation.videoId}`, query: recommendation.isMusic === true ? { musicVideo: 'true' } : undefined }"
+                :title="recommendation.title"
+                :aria-label="recommendation.title"
+              >
+                <span class="endedRecommendationThumbnail">
+                  <FtRetryImage
+                    :class="{ blur: blurThumbnails }"
+                    :src="recommendation.thumbnail"
+                    alt=""
+                  />
+                  <span
+                    v-if="recommendation.duration"
+                    class="endedRecommendationDuration"
+                  >
+                    {{ recommendation.duration }}
+                  </span>
+                </span>
+                <span
+                  class="endedRecommendationTitle"
+                  dir="auto"
+                >
+                  <span class="endedRecommendationTitleText">{{ recommendation.title }}</span>
+                </span>
+                <span
+                  v-if="recommendation.author"
+                  class="endedRecommendationAuthor"
+                  dir="auto"
+                >
+                  {{ recommendation.author }}
+                </span>
+              </router-link>
+            </nav>
+          </div>
         </div>
       </template>
       <div
@@ -2834,8 +2879,10 @@ const endedRecommendations = computed(() => props.endScreenRecommendations.map(v
   title: preferOriginalRecommendationTitles.value
     ? originalEndedTitles.value[video.videoId] ?? video.title
     : video.title,
-  thumbnail: getRecommendationThumbnail(video.videoId)
+  thumbnail: getRecommendationThumbnail(video.videoId),
+  duration: formatRecommendationDuration(video.lengthSeconds)
 })))
+const endedScreenVisible = computed(() => showEndedScreen.value && endedRecommendations.value.length > 0)
 const showPoster = ref(true)
 const showPaidPromotion = ref(false)
 let paidPromotionTimer = null
@@ -2872,12 +2919,14 @@ function getRecommendationThumbnail(videoId) {
     store.getters.getThumbnailPreference
   ) ?? thumbnailPlaceholder
 }
-const autoplayDuration = computed(() => {
-  const lengthSeconds = Number(autoplayNextVideo.value?.lengthSeconds)
+const autoplayDuration = computed(() => formatRecommendationDuration(autoplayNextVideo.value?.lengthSeconds))
+
+function formatRecommendationDuration(value) {
+  const lengthSeconds = Number(value)
   return Number.isFinite(lengthSeconds) && lengthSeconds > 0
     ? formatDurationAsTimestamp(lengthSeconds)
     : ''
-})
+}
 
 function cancelAutoplayCountdown() {
   autoplayCanceled.value = true
@@ -2936,6 +2985,10 @@ onUpdated(() => {
 const mobileMiniBarOverlay = useTemplateRef('mobileMiniBarOverlay')
 
 const video = useTemplateRef('video')
+
+function replayEndedVideo() {
+  video.value?.play()
+}
 
 const sleepTimer = useSleepTimer({
   getVideoId: () => props.videoId || props.externalUrl,
@@ -2996,6 +3049,36 @@ watch(fullscreenActionsContent, (content, _previous, onCleanup) => {
   const observer = new ResizeObserver(() => clampOverlayScrollTop(scroller, content))
   observer.observe(content)
   observer.observe(scroller)
+  onCleanup(() => observer.disconnect())
+}, { flush: 'post' })
+const endedScreenElement = useTemplateRef('endedScreenElement')
+/** @type {import('vue').Ref<{ top: number, bottom: number } | null>} */
+const endedScreenInsets = ref(null)
+// Shaka recreates the controls on every configure, including fullscreen changes.
+const controlsRebuilds = ref(0)
+// Phone controls are large and sit over the end screen, so keep the cards
+// between the fullscreen title and the bottom controls and action dock.
+watch([endedScreenElement, fullscreenActionsElement, controlsRebuilds], ([element, actions], _previous, onCleanup) => {
+  endedScreenInsets.value = null
+  const controls = container.value?.querySelector('.shaka-controls-container')
+  if (!element || !controls || !isCapacitorMobilePlayer()) return
+
+  const title = controls.querySelector(':scope > .playerFullscreenTitleOverlay')
+  const bottomControls = controls.querySelector(':scope > .shaka-bottom-controls')
+  const isRendered = target => target?.getClientRects().length > 0
+  // Offsets ignore the transforms of fullscreen and mini player transitions.
+  // The controls container and the action dock share the end screen's box.
+  const observer = new ResizeObserver(() => {
+    const height = element.clientHeight
+    const bottomEdges = [bottomControls, actions].filter(isRendered).map(obstacle => obstacle.offsetTop)
+    endedScreenInsets.value = {
+      top: isRendered(title) ? title.offsetTop + title.offsetHeight : 0,
+      bottom: height - Math.min(height, ...bottomEdges)
+    }
+  })
+  for (const target of [element, title, bottomControls, actions]) {
+    if (target) observer.observe(target)
+  }
   onCleanup(() => observer.disconnect())
 }, { flush: 'post' })
 /** @type {number|null} */
@@ -6231,6 +6314,7 @@ function addUICustomizations() {
   updateSponsorBlockSubmissionState()
   setupAdaptiveControlPanelLayout()
   setupOverflowMenuLayout(controlsContainer)
+  controlsRebuilds.value++
 }
 
 /**
