@@ -2,10 +2,11 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import {
-  checkCommentHeart,
+  checkCommentHearts,
   COMMENT_REPLY_TRACKING_LIMIT,
   COMMENT_REPLY_TRACKING_MS,
   findCommentHeart,
+  findCommentsToLink,
   findNewReplies,
   getCommentNotificationTarget,
   getWatchedCommentTarget,
@@ -113,7 +114,12 @@ test('reply targets accept only reply IDs of a video, and heart targets comment 
 test('reads whether a linked comment or reply is hearted, and by whom, from the response', () => {
   const comment = (commentId, stateKey, tooltip) => ({
     entityKey: `entity-${commentId}`,
-    payload: { commentEntityPayload: { properties: { commentId, toolbarStateKey: stateKey }, toolbar: { heartActiveTooltip: tooltip } } }
+    payload: {
+      commentEntityPayload: {
+        properties: { commentId, toolbarStateKey: stateKey, content: { content: `\u200B \u2068Text of ${commentId}\u2069 ` } },
+        toolbar: { heartActiveTooltip: tooltip }
+      }
+    }
   })
   const state = (key, heartState) => ({ entityKey: key, payload: { engagementToolbarStateEntityPayload: { key, heartState } } })
   const response = {
@@ -128,26 +134,64 @@ test('reads whether a linked comment or reply is hearted, and by whom, from the 
       }
     }
   }
-  assert.deepEqual(findCommentHeart(response, 'thread1'), { hearted: false, author: '@Creator.Name' })
-  assert.deepEqual(findCommentHeart(response, 'thread1.a'), { hearted: true, author: '@Creator.Name' })
+  assert.deepEqual(findCommentHeart(response, 'thread1'), { hearted: false, author: '@Creator.Name', text: 'Text of thread1' })
+  assert.deepEqual(findCommentHeart(response, 'thread1.a'), { hearted: true, author: '@Creator.Name', text: 'Text of thread1.a' })
   assert.equal(findCommentHeart(response, 'thread1.b'), null)
   assert.equal(findCommentHeart({}, 'thread1'), null)
 })
 
 test('announces a heart on an own comment once, but not one it had before hearts were checked', () => {
   const [posted] = trackComment([], { ...own, accountId: 'UCme', threadId: 'thread1', commentId: 'thread1', hearted: false }, 1000)
-  const hearted = { hearted: true, author: '@Creator' }
-  assert.deepEqual(checkCommentHeart(posted, { hearted: false, author: '' }), { announce: false, active: false, hearted: false })
-  assert.deepEqual(checkCommentHeart(posted, hearted), { announce: true, active: true, hearted: true })
+  const hearted = { hearted: true, author: '@Creator', text: 'First' }
+  const check = (thread, heart) => checkCommentHearts(thread, new Map(heart ? [['thread1', heart]] : []))
+  assert.deepEqual(check(posted, { ...hearted, hearted: false }), { announce: [], active: false, comments: [{ id: 'thread1', hearted: false }] })
+  assert.deepEqual(check(posted, hearted), { announce: [{ id: 'thread1', heart: hearted }], active: true, comments: [{ id: 'thread1', hearted: true }] })
   // Missing from the response, as when it was deleted, it keeps its state.
-  assert.deepEqual(checkCommentHeart(posted, null), { announce: false, active: false, hearted: false })
-  assert.deepEqual(checkCommentHeart({ ...posted, hearted: true }, { hearted: false, author: '' }), { announce: false, active: false, hearted: true })
+  assert.deepEqual(check(posted, null), { announce: [], active: false, comments: [{ id: 'thread1', hearted: false }] })
+  const announced = { ...posted, comments: [{ id: 'thread1', hearted: true }] }
+  assert.deepEqual(check(announced, { ...hearted, hearted: false }), { announce: [], active: false, comments: [{ id: 'thread1', hearted: true }] })
 
-  const { hearted: _, ...older } = posted
-  assert.deepEqual(checkCommentHeart(older, hearted), { announce: false, active: false, hearted: true })
+  // Saved before hearts were checked
+  const { comments: _, ...older } = posted
+  assert.deepEqual(check(older, hearted), { announce: [], active: false, comments: [{ id: 'thread1', hearted: true }] })
   // Others' comments are not announced, but a new heart keeps them watched.
   const others = { ...posted, channelId: 'UCother', accountId: 'UCme' }
-  assert.deepEqual(checkCommentHeart(others, hearted), { announce: false, active: true, hearted: true })
+  assert.deepEqual(check(others, hearted), { announce: [], active: true, comments: [{ id: 'thread1', hearted: true }] })
+})
+
+test('announces hearts on each own comment watched together in a thread', () => {
+  const comment = { ...own, accountId: 'UCme', threadId: 'thread1', hearted: false }
+  // Two replies, then the top-level comment, which then is the watched one
+  let threads = trackComment([], { ...comment, commentId: 'thread1.a' }, 1000)
+  threads = trackComment(threads, { ...comment, commentId: 'b' }, 2000)
+  threads = trackComment([{ ...threads[0], comments: [{ id: 'thread1.a', hearted: true }, threads[0].comments[1]] }],
+    { ...comment, commentId: 'thread1', hearted: undefined }, 3000)
+  const [thread] = threads
+  assert.equal(thread.commentId, 'thread1')
+  // A known heart stays known, and one unknown is only saved on its first check.
+  assert.deepEqual(thread.comments, [{ id: 'thread1' }, { id: 'thread1.a', hearted: true }, { id: 'thread1.b', hearted: false }])
+
+  const heart = (text, hearted = true) => ({ hearted, author: '@Creator', text })
+  const { announce, comments } = checkCommentHearts(thread, new Map([
+    ['thread1', heart('Top')], ['thread1.a', heart('A', false)], ['thread1.b', heart('B')]
+  ]))
+  assert.deepEqual(announce, [{ id: 'thread1.b', heart: heart('B') }])
+  assert.deepEqual(comments, [{ id: 'thread1', hearted: true }, { id: 'thread1.a', hearted: true }, { id: 'thread1.b', hearted: true }])
+
+  // The request for the watched comment covers it, so only the others found nowhere else get one each.
+  assert.deepEqual(findCommentsToLink(thread, new Map([['thread1.a', heart('A')]])), [{ id: 'thread1.b', hearted: false }])
+  assert.deepEqual(findCommentsToLink({ ...thread, channelId: 'UCother' }, new Map()), [])
+})
+
+test('checks the hearts of the watched comment and the newest others in a thread', () => {
+  const comment = { ...own, accountId: 'UCme', threadId: 'thread1', hearted: false }
+  let threads = []
+  for (let index = 0; index < 15; index++) threads = trackComment(threads, { ...comment, commentId: `thread1.r${index}` }, 1000 + index)
+  const ids = threads[0].comments.map(item => item.id)
+  assert.deepEqual(ids, ['thread1.r0', ...Array.from({ length: 9 }, (_, index) => `thread1.r${index + 6}`)])
+  // Valid entries keep the list, malformed ones are dropped.
+  assert.equal(normalizeTrackedCommentThreads(threads, 2000).length, 1)
+  assert.equal(normalizeTrackedCommentThreads([{ ...threads[0], comments: [{ id: 1 }] }], 2000).length, 0)
 })
 
 test('watched comments open with the account\'s comment highlighted', () => {

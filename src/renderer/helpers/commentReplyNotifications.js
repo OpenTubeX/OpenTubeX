@@ -4,7 +4,7 @@ import { Constants } from 'youtubei.js'
 
 import store from '../store/index'
 import i18n from '../i18n/index'
-import { getLocalComments } from './api/local'
+import { createLocalCommentsClient } from './api/local'
 import { createLinkedCommentsContinuation } from './api/youtube-account-parsers'
 import {
   configureAndroidCommentReplies,
@@ -20,10 +20,13 @@ import { getNotificationThumbnailUrl, openNotificationEntry, showInAppNotificati
 import { requestCapacitorNotificationPermission } from './platformFeed'
 import { getSelectedYouTubeProfile, isSignedInToYouTube } from './youtube-account-state'
 import {
-  checkCommentHeart,
+  checkCommentHearts,
+  cleanCommentText,
   COMMENT_TEXT_LIMIT,
   findCommentHeart,
+  findCommentsToLink,
   findNewReplies,
+  getHeartComments,
   getCommentNotificationTarget,
   getWatchedCommentId,
   isOwnWatchedComment,
@@ -124,7 +127,8 @@ export async function watchComment(videoId, videoTitle, { id, authorId, author, 
   // The replies so far count as seen, and a heart it has already counts as announced, so only new ones are announced.
   const result = await fetchThread({ ...watched, postedAt: 0, replyCount: -1, seen: [] })
   if (!result) return false
-  await saveComment({ ...watched, replyCount: result.replyCount, seen: result.replies.map(reply => reply.id), hearted: result.heart?.hearted })
+  const heart = result.hearts.get(getWatchedCommentId(watched))
+  await saveComment({ ...watched, replyCount: result.replyCount, seen: result.replies.map(reply => reply.id), hearted: heart?.hearted })
   return true
 }
 
@@ -240,30 +244,48 @@ function startAndroidCommentReplyNotifications() {
 
 /**
  * The thread's reply count and replies, oldest first, and whether the watched
- * comment is hearted. Loads at most MAX_REPLY_PAGES pages, and none when the
+ * comments are hearted. Loads at most MAX_REPLY_PAGES pages, and none when the
  * count did not change. For a linked thread, YouTube lists answers to replies
  * after them instead of nesting them.
  * @param {import('../../commentReplyTracking.js').TrackedCommentThread} thread
  * @returns {Promise<{
  *   replyCount: number,
  *   replies: import('../../commentReplyTracking.js').CommentReply[],
- *   heart: import('../../commentReplyTracking.js').CommentHeart | null
- * } | null>} null when the thread is gone
+ *   hearts: Map<string, import('../../commentReplyTracking.js').CommentHeart>
+ * } | null>} null when the thread is gone; `hearts` lacks the comments it did not find
  */
 async function fetchThread(thread) {
-  const commentId = getWatchedCommentId(thread)
-  /** @type {import('../../commentReplyTracking.js').CommentHeart | null} */
-  let heart = null
-  // The thread of the linked comment comes first, and a linked reply comes
-  // with it, though youtubei.js leaves it out, so its heart is read from the response.
-  const comments = await getLocalComments(thread.videoId, undefined, commentId, data => {
-    heart ??= findCommentHeart(data, commentId)
+  const ids = getHeartComments(thread).map(comment => comment.id)
+  /** @type {Map<string, import('../../commentReplyTracking.js').CommentHeart>} */
+  const hearts = new Map()
+  // A linked reply comes with its thread, and reply pages with their replies,
+  // though youtubei.js leaves out their hearts, so they are read from the responses.
+  const innertube = await createLocalCommentsClient(data => {
+    for (const id of ids) {
+      const heart = hearts.has(id) ? null : findCommentHeart(data, id)
+      if (heart) hearts.set(id, heart)
+    }
   })
+  // The thread of the linked comment comes first.
+  const comments = await innertube.getComments(thread.videoId, undefined, getWatchedCommentId(thread))
   const commentThread = comments.contents.find(item => item.comment?.comment_id === thread.threadId)
   if (!commentThread) return null
   const replyCount = Number.parseInt(String(commentThread.comment.reply_count ?? '0').replaceAll(/\D/g, '') || '0')
-  if (replyCount === thread.replyCount || !commentThread.has_replies) return { replyCount, replies: [], heart }
+  const replies = replyCount === thread.replyCount || !commentThread.has_replies ? [] : await fetchReplies(commentThread)
+  // Own comments not found so far each need a request that links them.
+  for (const { id } of findCommentsToLink(thread, hearts)) {
+    await innertube.getComments(thread.videoId, undefined, id)
+      .catch(error => console.warn('Could not check a comment for a heart', error))
+  }
+  return { replyCount, replies, hearts }
+}
 
+/**
+ * Loads the replies of a thread, oldest first, at most MAX_REPLY_PAGES pages.
+ * @param {any} commentThread
+ * @returns {Promise<import('../../commentReplyTracking.js').CommentReply[]>}
+ */
+async function fetchReplies(commentThread) {
   const replies = []
   /** @param {any[] | undefined} items */
   const collect = items => {
@@ -273,8 +295,7 @@ async function fetchThread(thread) {
         id: comment.comment_id,
         authorId: comment.author?.id ?? '',
         author: comment.author?.name ?? '',
-        // Mentions come with extra spaces, zero-width spaces, and bidirectional isolates around them.
-        text: (comment.content?.toString() ?? '').replaceAll(/[\u200B-\u200D\u2066-\u2069]/g, '').replaceAll(/\s+/g, ' ').trim()
+        text: cleanCommentText(comment.content?.toString() ?? '')
       })
     }
   }
@@ -286,7 +307,7 @@ async function fetchThread(thread) {
     page = await page.getContinuation()
     collect(page.replies)
   }
-  return { replyCount, replies, heart }
+  return replies
 }
 
 /**
@@ -359,8 +380,7 @@ async function checkThreads() {
     const current = loadThreads(startedAt).find(item => isSameWatchedComment(item, key))
     if (!current) continue
     const { added, seen, active } = result ? findNewReplies(current, result.replies, signedInId) : { added: [], seen: current.seen, active: false }
-    // The heart belongs to the comment it loaded, which watching the top-level comment meanwhile changes.
-    const heart = checkCommentHeart(current, getWatchedCommentId(current) === getWatchedCommentId(thread) ? result?.heart ?? null : null)
+    const hearts = checkCommentHearts(current, result?.hearts ?? new Map())
     // Announced before they count as seen, so closing the app in between
     // repeats a reply or heart rather than losing it. Those whose announcement
     // fails count as seen too, as retrying could add them to the history twice,
@@ -374,9 +394,11 @@ async function checkThreads() {
       await announce('comment-reply', thread.videoId, reply.id, getReplyTitle(thread, reply.author || '?'), reply.text)
         .catch(error => console.error('Failed to announce a comment reply', error))
     }
-    if (heart.announce && isCommentWatchingEnabled()) {
-      const title = i18n.global.t('YouTube Account.{author} hearted your comment', { author: result.heart.author || '?' })
-      await announce('comment-heart', current.videoId, getWatchedCommentId(current), title, current.text ?? '')
+    for (const { id, heart } of hearts.announce) {
+      disabled ||= !isCommentWatchingEnabled()
+      if (disabled) break
+      const title = i18n.global.t('YouTube Account.{author} hearted your comment', { author: heart.author || '?' })
+      await announce('comment-heart', current.videoId, id, title, heart.text)
         .catch(error => console.error('Failed to announce a comment heart', error))
     }
     const threads = loadThreads(startedAt)
@@ -387,8 +409,9 @@ async function checkThreads() {
           ...threads[index],
           replyCount: result.replyCount,
           seen,
-          hearted: heart.hearted,
-          ...(active || heart.active ? { activeAt: Date.now() } : {})
+          // Applied to the entry as it is now, which may watch more comments meanwhile.
+          comments: checkCommentHearts(threads[index], result.hearts).comments,
+          ...(active || hearts.active ? { activeAt: Date.now() } : {})
         }
       } else {
         threads.splice(index, 1)

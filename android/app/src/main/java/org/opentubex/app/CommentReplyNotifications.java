@@ -50,6 +50,8 @@ final class CommentReplyNotifications {
     static final long TRACKING_MILLIS = 30L * 24 * 60 * 60 * 1000;
     static final int TRACKING_LIMIT = 50;
     private static final int SEEN_REPLY_LIMIT = 500;
+    // An author's comments per thread whose hearts are checked, as each may need a request of its own.
+    static final int HEART_COMMENT_LIMIT = 10;
     // Reply pages hold 10 replies each.
     static final int MAX_REPLY_PAGES = 10;
     private static final int TIMEOUT_MILLIS = 15_000;
@@ -178,17 +180,13 @@ final class CommentReplyNotifications {
             seen = found.getJSONArray("seen");
             active = found.optBoolean("active");
         }
-        // The heart belongs to the comment it loaded, which watching the top-level comment meanwhile changes.
-        JSONObject heart = result == null || !watchedCommentId(checked).equals(watchedCommentId(fetched))
-            ? null : result.optJSONObject("heart");
-        boolean hearted = heart != null && heart.optBoolean("hearted");
-        // Announced once. Comments watched before hearts were checked have no
-        // state yet, and their first check only saves it, as the heart may be old.
+        JSONObject hearts = result == null || !result.has("hearts") ? new JSONObject() : result.getJSONObject("hearts");
+        JSONObject checkedHearts = checkHearts(checked, hearts);
         // A new heart counts as activity, also on others' comments.
-        boolean newHeart = hearted && checked.has("hearted") && !checked.optBoolean("hearted");
-        active |= newHeart;
-        if (newHeart && isOwnComment(checked) && configuration(context).optBoolean("enabled")) {
-            announceHeart(context, configuration, checked, heart.optString("author"));
+        active |= checkedHearts.getBoolean("active");
+        JSONArray announcedHearts = checkedHearts.getJSONArray("announce");
+        for (int index = 0; index < announcedHearts.length() && configuration(context).optBoolean("enabled"); index++) {
+            announceHeart(context, configuration, checked, announcedHearts.getJSONObject(index));
         }
         synchronized (CommentReplyNotifications.class) {
             File file = stateFile(context);
@@ -201,7 +199,8 @@ final class CommentReplyNotifications {
                 if (!same) kept.put(thread);
                 else if (result != null) {
                     thread.put("replyCount", result.getInt("replyCount")).put("seen", seen == null ? new JSONArray() : seen);
-                    if (heart != null) thread.put("hearted", hearted || checked.optBoolean("hearted"));
+                    // Applied to the entry as it is now, which may watch more comments meanwhile.
+                    thread.put("comments", checkHearts(thread, hearts).getJSONArray("comments"));
                     if (active) thread.put("activeAt", System.currentTimeMillis());
                     kept.put(thread);
                 }
@@ -226,13 +225,15 @@ final class CommentReplyNotifications {
             reply.optString("text"), thumbnail, "both".equals(configuration.optString("mode")), false);
     }
 
-    private static void announceHeart(Context context, JSONObject configuration, JSONObject thread, String author) {
+    /** @param heart the hearted comment's `id`, with the `author` and `text` that parseHeart reads */
+    private static void announceHeart(Context context, JSONObject configuration, JSONObject thread, JSONObject heart) {
         String videoId = thread.optString("videoId");
+        String author = heart.optString("author");
         String title = configuration.optString("heartTitle", "{author}").replace("{author}", author.isEmpty() ? "?" : author);
         String template = configuration.optString("thumbnail", "");
         String thumbnail = template.startsWith("https://") ? template.replace("%VIDEO%", videoId) : null;
-        UploadNotifications.deliver(context, HEART_FEED_TYPE, videoId + "/" + watchedCommentId(thread), false, title,
-            thread.optString("text"), thumbnail, "both".equals(configuration.optString("mode")), false);
+        UploadNotifications.deliver(context, HEART_FEED_TYPE, videoId + "/" + heart.optString("id"), false, title,
+            heart.optString("text"), thumbnail, "both".equals(configuration.optString("mode")), false);
     }
 
     /** The full ID of the watched comment, `threadId.replyId` for a reply. */
@@ -244,28 +245,120 @@ final class CommentReplyNotifications {
     }
 
     /**
+     * The author's comments watched in a thread, whose hearts are checked: the
+     * watched one first, then the newest others, each with its `id`, the `token`
+     * that links it, and whether it is `hearted`, which a comment watched without
+     * its heart lacks until its first check. Entries watched before hearts were
+     * checked lack the list, which then holds the watched comment.
+     */
+    static JSONArray heartComments(JSONObject thread) throws JSONException {
+        JSONArray comments = thread.optJSONArray("comments");
+        return comments != null ? comments : new JSONArray().put(new JSONObject().put("id", watchedCommentId(thread)));
+    }
+
+    /**
      * Loads the reply count of a thread, and its replies, oldest first, unless the
-     * count did not change, and whether the watched comment is hearted. Returns
-     * null when the thread is gone.
+     * count did not change, and under `hearts` whether its watched comments are
+     * hearted, by their IDs, without those it did not find. Returns null when the
+     * thread is gone.
      */
     private static JSONObject fetchThread(JSONObject request, JSONObject thread) throws Exception {
         String threadId = thread.getString("threadId");
+        JSONArray comments = heartComments(thread);
+        JSONObject hearts = new JSONObject();
         JSONObject first = post(request, thread.getString("token"));
         JSONObject parsed = parseThread(first, threadId);
         if (parsed == null) return null;
         int replyCount = parsed.getInt("replyCount");
-        // Comments watched before hearts were checked link their thread, which lacks a watched reply.
-        JSONObject result = new JSONObject().put("replyCount", replyCount).putOpt("heart", parseHeart(first, watchedCommentId(thread)));
+        // A linked reply comes with its thread, though comments watched before
+        // hearts were checked link their thread, which then lacks a watched reply.
+        readHearts(first, comments, hearts);
+        JSONObject result = new JSONObject().put("replyCount", replyCount).put("hearts", hearts);
         String token = parsed.optString("repliesToken", null);
-        if (replyCount == thread.optInt("replyCount", -1) || token == null) return result;
-        JSONArray replies = new JSONArray();
-        for (int page = 0; token != null && page < MAX_REPLY_PAGES; page++) {
-            JSONObject replyPage = parseReplies(post(request, token));
-            JSONArray pageReplies = replyPage.getJSONArray("replies");
-            for (int index = 0; index < pageReplies.length(); index++) replies.put(pageReplies.get(index));
-            token = replyPage.optString("nextToken", null);
+        if (replyCount != thread.optInt("replyCount", -1) && token != null) {
+            JSONArray replies = new JSONArray();
+            for (int page = 0; token != null && page < MAX_REPLY_PAGES; page++) {
+                JSONObject response = post(request, token);
+                // Reply pages come with the hearts of their replies.
+                readHearts(response, comments, hearts);
+                JSONObject replyPage = parseReplies(response);
+                JSONArray pageReplies = replyPage.getJSONArray("replies");
+                for (int index = 0; index < pageReplies.length(); index++) replies.put(pageReplies.get(index));
+                token = replyPage.optString("nextToken", null);
+            }
+            result.put("replies", replies);
         }
-        return result.put("replies", replies);
+        // Own comments not found so far each need a request that links them.
+        for (JSONObject comment : commentsToLink(thread, hearts)) {
+            try {
+                readHearts(post(request, comment.getString("token")), comments, hearts);
+            } catch (Exception error) {
+                android.util.Log.w("OpenTubeXReplies", "Unable to check a comment for a heart", error);
+            }
+        }
+        return result;
+    }
+
+    /** Adds the hearts of the comments that a response includes, unless already found. */
+    static void readHearts(JSONObject response, JSONArray comments, JSONObject hearts) throws JSONException {
+        for (int index = 0; index < comments.length(); index++) {
+            JSONObject comment = comments.optJSONObject(index);
+            String id = comment == null ? "" : comment.optString("id");
+            if (!id.isEmpty() && !hearts.has(id)) hearts.putOpt(id, parseHeart(response, id));
+        }
+    }
+
+    /**
+     * The comments whose hearts need a request that links each: the account's
+     * own ones that the responses so far lacked, except the watched comment,
+     * which the first request links. Hearts on others' comments are not announced.
+     */
+    static List<JSONObject> commentsToLink(JSONObject thread, JSONObject hearts) throws JSONException {
+        List<JSONObject> linked = new ArrayList<>();
+        if (!isOwnComment(thread)) return linked;
+        JSONArray comments = heartComments(thread);
+        String watchedId = watchedCommentId(thread);
+        for (int index = 0; index < comments.length(); index++) {
+            JSONObject comment = comments.optJSONObject(index);
+            String id = comment == null ? "" : comment.optString("id");
+            if (id.isEmpty() || id.equals(watchedId) || hearts.has(id) || !TOKEN.matcher(comment.optString("token")).matches()) continue;
+            linked.add(comment);
+        }
+        return linked;
+    }
+
+    /**
+     * Which of a watched entry's comments got a new creator heart, to announce
+     * only for the account's own comments, and not on the first check of a
+     * comment watched without its heart, as it may be old.
+     * @param hearts what parseHeart read, by comment ID, without the comments the responses lacked
+     * @return under `announce` the hearts to announce, each with its comment's `id`, under `active`
+     *     whether any is new and so counts as activity, also for others' comments, and the comments to save under `comments`
+     */
+    static JSONObject checkHearts(JSONObject thread, JSONObject hearts) throws JSONException {
+        boolean own = isOwnComment(thread);
+        JSONArray comments = heartComments(thread);
+        JSONArray checked = new JSONArray();
+        JSONArray announce = new JSONArray();
+        boolean active = false;
+        for (int index = 0; index < comments.length(); index++) {
+            JSONObject comment = comments.optJSONObject(index);
+            if (comment == null) continue;
+            String id = comment.optString("id");
+            JSONObject heart = hearts.optJSONObject(id);
+            if (heart == null) {
+                checked.put(comment);
+                continue;
+            }
+            boolean hearted = heart.optBoolean("hearted");
+            // Announced once, even if the heart is taken back and given again.
+            if (hearted && comment.has("hearted") && !comment.optBoolean("hearted")) {
+                active = true;
+                if (own) announce.put(new JSONObject(heart.toString()).put("id", id));
+            }
+            checked.put(new JSONObject(comment.toString()).put("hearted", hearted || comment.optBoolean("hearted")));
+        }
+        return new JSONObject().put("announce", announce).put("active", active).put("comments", checked);
     }
 
     /**
@@ -291,8 +384,9 @@ final class CommentReplyNotifications {
 
     /**
      * Reads whether a comment is hearted from a comments response that links
-     * it, which includes it also when it is a reply. Returns null without the
-     * comment; otherwise `author` is the handle of the creator who hearted it, if known.
+     * it, which includes it also when it is a reply, or from a reply page.
+     * Returns null without the comment; otherwise `author` is the handle of the
+     * creator who hearted it, if known, and `text` the comment's.
      */
     static JSONObject parseHeart(JSONObject response, String commentId) throws JSONException {
         JSONObject entity = commentEntities(response).optJSONObject(commentId);
@@ -307,7 +401,8 @@ final class CommentReplyNotifications {
             Matcher handle = HEART_HANDLE.matcher(toolbar == null ? "" : toolbar.optString("heartActiveTooltip"));
             return new JSONObject()
                 .put("hearted", "TOOLBAR_HEART_STATE_HEARTED".equals(state.optString("heartState")))
-                .put("author", handle.find() ? handle.group() : "");
+                .put("author", handle.find() ? handle.group() : "")
+                .put("text", text(entity));
         }
         return null;
     }
@@ -343,15 +438,19 @@ final class CommentReplyNotifications {
     private static JSONObject reply(JSONObject entity) throws JSONException {
         JSONObject properties = entity.getJSONObject("properties");
         JSONObject author = entity.optJSONObject("author");
-        JSONObject content = properties.optJSONObject("content");
-        // Mentions come with extra spaces, zero-width spaces, and bidirectional isolates around them.
-        String text = (content == null ? "" : content.optString("content"))
-            .replaceAll("[\\u200B-\\u200D\\u2066-\\u2069]", "").replaceAll("\\s+", " ").trim();
         return new JSONObject()
             .put("id", properties.getString("commentId"))
             .put("authorId", author == null ? "" : author.optString("channelId"))
             .put("author", author == null ? "" : author.optString("displayName"))
-            .put("text", text);
+            .put("text", text(entity));
+    }
+
+    private static String text(JSONObject entity) {
+        JSONObject properties = entity.optJSONObject("properties");
+        JSONObject content = properties == null ? null : properties.optJSONObject("content");
+        // Mentions come with extra spaces, zero-width spaces, and bidirectional isolates around them.
+        return (content == null ? "" : content.optString("content"))
+            .replaceAll("[\\u200B-\\u200D\\u2066-\\u2069]", "").replaceAll("\\s+", " ").trim();
     }
 
     private static int parseCount(JSONObject entity) {
@@ -489,6 +588,8 @@ final class CommentReplyNotifications {
                 others.add(thread);
             }
         }
+        // Read before a top-level comment replaces the watched one.
+        JSONArray previous = tracked == null ? new JSONArray() : heartComments(tracked);
         if (tracked == null) {
             JSONArray seen = comment.optJSONArray("seen");
             JSONArray keptSeen = new JSONArray();
@@ -507,7 +608,6 @@ final class CommentReplyNotifications {
                 .put("token", comment.getString("token"))
                 .put("replyCount", comment.optInt("replyCount", -1))
                 .put("seen", keptSeen)
-                .putOpt("hearted", comment.has("hearted") ? comment.optBoolean("hearted") : null)
                 .put("text", comment.optString("text"));
         } else {
             // The text stays the watched comment's. A top-level comment watches the
@@ -522,9 +622,6 @@ final class CommentReplyNotifications {
                     .put("seen", new JSONArray(all.subList(Math.max(0, all.size() - SEEN_REPLY_LIMIT), all.size())))
                     // The token links the watched comment, so its heart can be checked.
                     .put("token", comment.getString("token"));
-                // Whether the top-level comment is hearted is not known without it.
-                if (comment.has("hearted")) tracked.put("hearted", comment.optBoolean("hearted"));
-                else tracked.remove("hearted");
             }
             String accountId = comment.optString("accountId");
             if (!accountId.isEmpty() && tracked.optString("accountId").isEmpty()) tracked.put("accountId", accountId);
@@ -532,9 +629,39 @@ final class CommentReplyNotifications {
         String videoTitle = comment.optString("videoTitle");
         if (!videoTitle.isEmpty()) tracked.put("videoTitle", videoTitle);
         tracked.put("postedAt", now).put("activeAt", now);
+        JSONObject added = new JSONObject().put("id", watchedCommentId(comment)).put("token", comment.getString("token"))
+            .putOpt("hearted", comment.has("hearted") ? comment.optBoolean("hearted") : null);
+        tracked.put("comments", addComment(previous, watchedCommentId(tracked), added));
         JSONArray all = new JSONArray().put(tracked);
         for (JSONObject thread : others) all.put(thread);
         return new JSONArray(normalize(all, now));
+    }
+
+    /**
+     * Adds a comment to an entry's comments, keeping a heart state already
+     * known, so watching it again does not announce an old heart.
+     * @param watchedId the full ID of the watched comment, which stays first
+     */
+    private static JSONArray addComment(JSONArray comments, String watchedId, JSONObject added) throws JSONException {
+        JSONObject watched = null;
+        List<JSONObject> others = new ArrayList<>();
+        for (int index = 0; index < comments.length(); index++) {
+            JSONObject comment = comments.optJSONObject(index);
+            if (comment == null) continue;
+            String id = comment.optString("id");
+            if (id.equals(added.getString("id"))) {
+                if (comment.has("hearted")) added.put("hearted", comment.optBoolean("hearted"));
+            } else if (id.equals(watchedId)) {
+                watched = comment;
+            } else {
+                others.add(comment);
+            }
+        }
+        if (added.getString("id").equals(watchedId)) watched = added;
+        else others.add(added);
+        JSONArray kept = new JSONArray().put(watched == null ? new JSONObject().put("id", watchedId) : watched);
+        for (int index = Math.max(0, others.size() - (HEART_COMMENT_LIMIT - 1)); index < others.size(); index++) kept.put(others.get(index));
+        return kept;
     }
 
     /**
