@@ -2,7 +2,7 @@ import { ClosedWindowHistory } from './tabs/ClosedWindowHistory.js'
 import { createFileWatchQueue } from './watchQueue.js'
 import { createSerialQueue } from './serialQueue.js'
 import { writeFileAtomic } from './writeFileAtomic.js'
-import { fetchRumblePage } from './rumblePages.js'
+import { fetchRumblePage, passRumbleChallenge } from './rumblePages.js'
 import {
   app, BrowserWindow, Menu, dialog, ipcMain,
   powerSaveBlocker, screen, session,
@@ -723,6 +723,10 @@ function runApp() {
   })
   handleTrusted(IpcChannels.TWITCH_LIVE_CONFIGURE, (_event, configuration) => twitchLiveNotifier.configure(configuration))
   handleTrusted(IpcChannels.RUMBLE_FETCH, (_event, url) => fetchRumblePage(net, url))
+  handleTrusted(IpcChannels.RUMBLE_PASS_CHALLENGE, (event, url) => passRumbleChallenge({
+    BrowserWindow,
+    parent: BrowserWindow.fromWebContents(event.sender)
+  }, url))
   const uploadNotifier = createUploadNotifier({
     file: path.join(userDataPath, 'upload-notifications.json'),
     show: showUrlNotification,

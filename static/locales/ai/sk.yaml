@@ -2824,6 +2824,8 @@ Platforms:
   Playlist Not Found: Tento playlist sa nenašiel.
   Load Error: Túto stránku sa nepodarilo načítať z platformy {platform}.
   Empty Tab: Zatiaľ tu nič nie je.
+  Browser Check: "{platform} vás pred zobrazením tejto stránky žiada o overenie, že ste človek."
+  Verify: "Overiť"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} odpovedal(a) používateľovi {commentAuthor}"
   Like: "Páči sa mi to"

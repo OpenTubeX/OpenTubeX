@@ -3028,6 +3028,8 @@ Platforms:
   Playlist Not Found: Hierdie speellys kon nie gevind word nie.
   Load Error: Hierdie bladsy kon nie van {platform} gelaai word nie.
   Empty Tab: Hier is nog niks nie.
+  Browser Check: "{platform} vra jou om te bevestig dat jy ’n mens is voordat dit hierdie bladsy wys."
+  Verify: "Bevestig"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} het op {commentAuthor} geantwoord"
   Like: "Hou van"

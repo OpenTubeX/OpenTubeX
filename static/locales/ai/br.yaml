@@ -2827,6 +2827,8 @@ Platforms:
   Playlist Not Found: N'eus ket bet kavet ar roll lenn-mañ.
   Load Error: N'eus ket bet gallet kargañ ar bajenn-mañ diwar {platform}.
   Empty Tab: N'eus netra amañ c'hoazh.
+  Browser Check: "{platform} a c’houlenn ganeoc’h gwiriañ ez oc’h un den a-raok diskouez ar bajenn-mañ."
+  Verify: "Gwiriañ"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} en deus respontet da {commentAuthor}"
   Like: "Plijout a ra din"

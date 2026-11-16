@@ -2816,6 +2816,8 @@ Platforms:
   Playlist Not Found: Den här spellistan kunde inte hittas.
   Load Error: Den här sidan kunde inte läsas in från {platform}.
   Empty Tab: Här finns inget ännu.
+  Browser Check: "{platform} ber dig bekräfta att du är en människa innan sidan visas."
+  Verify: "Verifiera"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} svarade {commentAuthor}"
   Like: "Gilla"

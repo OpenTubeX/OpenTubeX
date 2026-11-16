@@ -3414,6 +3414,8 @@ Platforms:
   Playlist Not Found: Tega seznama predvajanja ni bilo mogoče najti.
   Load Error: Te strani ni bilo mogoče naložiti s platforme {platform}.
   Empty Tab: Tukaj še ni ničesar.
+  Browser Check: "{platform} vas prosi, da potrdite, da ste človek, preden prikaže to stran."
+  Verify: "Preveri"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} je odgovoril(-a) uporabniku {commentAuthor}"
   Like: "Všeč mi je"

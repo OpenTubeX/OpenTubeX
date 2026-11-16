@@ -12,10 +12,9 @@
         {{ errorMessage }}
       </p>
       <FtFlexBox>
-        <FtButton
-          :label="t('User Playlists.SinglePlaylistView.Retry')"
-          :icon="['fas', 'sync']"
-          @click="loadChannel"
+        <PlatformRetryButton
+          :error="channelError"
+          @retry="loadChannel"
         />
       </FtFlexBox>
     </FtCard>
@@ -119,7 +118,7 @@
             v-if="page.error"
             class="message"
           >
-            {{ t('Platforms.Load Error', { platform: platform.name }) }}
+            {{ canPassBrowserCheck(page.cause) ? t('Platforms.Browser Check', { platform: platform.name }) : t('Platforms.Load Error', { platform: platform.name }) }}
           </p>
           <p
             v-else-if="page.results.length === 0"
@@ -127,12 +126,11 @@
           >
             {{ t('Platforms.Empty Tab') }}
           </p>
-          <!-- Later pages try again with their next page button -->
-          <FtFlexBox v-if="page.error && !page.loaded">
-            <FtButton
-              :label="t('User Playlists.SinglePlaylistView.Retry')"
-              :icon="['fas', 'sync']"
-              @click="loadPage(currentTab)"
+          <!-- Later pages try again with their next page button, unless a check fails them -->
+          <FtFlexBox v-if="page.error && (!page.loaded || canPassBrowserCheck(page.cause))">
+            <PlatformRetryButton
+              :error="page.cause"
+              @retry="page.loaded ? loadMore() : loadPage(currentTab)"
             />
           </FtFlexBox>
           <PlatformResultList
@@ -170,7 +168,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { FtIcon } from '@opentubex/icons'
 
 import FtAutoLoadNextPageWrapper from '../../components/FtAutoLoadNextPageWrapper.vue'
-import FtButton from '../../components/FtButton/FtButton.vue'
 import FtCard from '../../components/ft-card/ft-card.vue'
 import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
 import FtIconButton from '../../components/FtIconButton/FtIconButton.vue'
@@ -179,9 +176,10 @@ import FtRetryImage from '../../components/FtRetryImage.vue'
 import FtTabs from '../../components/FtTabs/FtTabs.vue'
 import PlatformFollowButton from '../../components/PlatformFollowButton/PlatformFollowButton.vue'
 import PlatformResultList from '../../components/PlatformResultList/PlatformResultList.vue'
+import PlatformRetryButton from '../../components/PlatformRetryButton/PlatformRetryButton.vue'
 
 import store from '../../store/index'
-import { getPlatformFetch } from '../../helpers/platformFetch'
+import { canPassBrowserCheck, getPlatformFetch } from '../../helpers/platformFetch'
 import { forgetChannel, getRecentChannel, rememberChannel, startChannelLoad } from '../../helpers/recentPlatformChannels'
 import { useAutoLoadRevision } from '../../composables/useAutoLoadRevision'
 import { formatSubscriberCount, openExternalLink } from '../../helpers/utils'
@@ -219,14 +217,19 @@ const channelId = computed(() => typeof route.query.id === 'string' ? route.quer
 const channel = shallowRef(null)
 const isLoading = ref(true)
 const notFound = ref(false)
-const errorMessage = computed(() => notFound.value || !platform.value
-  ? t('Platforms.Channel Not Found')
-  : t('Platforms.Load Error', { platform: platform.value.name }))
+/** What failed the channel to load */
+const channelError = shallowRef(/** @type {unknown} */ (null))
+const errorMessage = computed(() => {
+  if (notFound.value || !platform.value) return t('Platforms.Channel Not Found')
+  return canPassBrowserCheck(channelError.value)
+    ? t('Platforms.Browser Check', { platform: platform.value.name })
+    : t('Platforms.Load Error', { platform: platform.value.name })
+})
 
 const currentTab = ref('videos')
-/** @type {Record<string, { results: import('../../../platforms/types').PlatformResult[], continuation: string | null, loading: boolean, error: boolean, loaded: boolean }>} */
+/** @type {Record<string, { results: import('../../../platforms/types').PlatformResult[], continuation: string | null, loading: boolean, error: boolean, cause: unknown, loaded: boolean }>} */
 const pages = reactive({})
-const page = computed(() => pages[currentTab.value] ?? { results: [], continuation: null, loading: true, error: false, loaded: false })
+const page = computed(() => pages[currentTab.value] ?? { results: [], continuation: null, loading: true, error: false, cause: null, loaded: false })
 
 let loadGeneration = 0
 /** The load of the shown channel, which its remembered pages keep */
@@ -238,6 +241,7 @@ async function loadChannel() {
   const generation = ++loadGeneration
   isLoading.value = true
   notFound.value = false
+  channelError.value = null
   channel.value = null
   for (const key of Object.keys(pages)) delete pages[key]
   if (!platform.value || !channelId.value) {
@@ -254,7 +258,7 @@ async function loadChannel() {
   channelLoad = recent ?? startChannelLoad()
   if (recent) {
     for (const [key, cached] of Object.entries(recent.pages)) {
-      pages[key] = { ...cached, loading: false, error: false, loaded: true }
+      pages[key] = { ...cached, loading: false, error: false, cause: null, loaded: true }
     }
     showChannel(recent.channel, tab)
     isLoading.value = false
@@ -274,6 +278,7 @@ async function loadChannel() {
   } catch (error) {
     if (generation !== loadGeneration) return
     console.error('Failed to load the channel', error)
+    channelError.value = error
   } finally {
     if (generation === loadGeneration) isLoading.value = false
   }
@@ -306,12 +311,13 @@ function rememberLoadedPages() {
  */
 async function loadPage(tab, more = false, firstPage = undefined) {
   const generation = loadGeneration
-  pages[tab] ??= { results: [], continuation: null, loading: false, error: false, loaded: false }
+  pages[tab] ??= { results: [], continuation: null, loading: false, error: false, cause: null, loaded: false }
   // The reactive copy, which renders the changes
   const current = pages[tab]
   if (current.loading || (current.loaded && !more)) return
   current.loading = true
   current.error = false
+  current.cause = null
   try {
     const result = await (firstPage ?? platform.value.getChannelPage(getPlatformFetch(platform.value.id), channel.value, tab, more ? current.continuation : null))
     if (generation !== loadGeneration) return
@@ -323,6 +329,7 @@ async function loadPage(tab, more = false, firstPage = undefined) {
     if (generation !== loadGeneration) return
     console.error('Failed to load the channel page', error)
     current.error = true
+    current.cause = error
   } finally {
     if (generation === loadGeneration) current.loading = false
   }

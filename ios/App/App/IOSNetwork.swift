@@ -1,3 +1,4 @@
+import UIKit
 import Capacitor
 import WebKit
 
@@ -307,10 +308,12 @@ final class RumblePages: NSObject, URLSessionTaskDelegate {
     // For the page with all its redirects
     private static let timeout: TimeInterval = 30
     // The user agent of the app's other requests
-    private static let userAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+    private static let appUserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
     private var session: URLSession!
     // Only Rumble's pages use them, so names are enough
     private var cookies: [String: HTTPCookie] = [:]
+    // The browser's once the user passed Cloudflare's check there, as Cloudflare ties its cookie to it
+    private var userAgent = RumblePages.appUserAgent
     private let lock = NSLock()
 
     init(configuration: URLSessionConfiguration = .ephemeral) {
@@ -330,7 +333,19 @@ final class RumblePages: NSObject, URLSessionTaskDelegate {
         return host == "rumble.com" || host.hasSuffix(".rumble.com")
     }
 
-    func fetch(_ raw: String?) async throws -> (status: Int, text: String) {
+    /// Takes the cookies of a browser where the user passed Cloudflare's check.
+    func acceptBrowserSession(cookies received: [HTTPCookie], userAgent: String) {
+        let rumble = received.filter { cookie in
+            let domain = cookie.domain.lowercased()
+            return domain == "rumble.com" || domain.hasSuffix(".rumble.com")
+        }
+        lock.withLock {
+            for cookie in rumble { cookies[cookie.name] = cookie }
+            self.userAgent = userAgent
+        }
+    }
+
+    func fetch(_ raw: String?) async throws -> (status: Int, text: String, challenge: Bool) {
         var url = raw.flatMap(URL.init(string:))
         let deadline = Date().addingTimeInterval(Self.timeout)
         var redirects = 0
@@ -339,7 +354,7 @@ final class RumblePages: NSObject, URLSessionTaskDelegate {
             let remaining = deadline.timeIntervalSinceNow
             if remaining <= 0 { throw Self.error("Timed out loading the Rumble page") }
             var request = URLRequest(url: target, timeoutInterval: remaining)
-            request.setValue(Self.userAgent, forHTTPHeaderField: "User-Agent")
+            request.setValue(lock.withLock { userAgent }, forHTTPHeaderField: "User-Agent")
             request.setValue("text/html", forHTTPHeaderField: "Accept")
             let current = lock.withLock { cookies.values.filter { ($0.expiresDate ?? .distantFuture) > Date() } }
             for (name, value) in HTTPCookie.requestHeaderFields(with: current) { request.setValue(value, forHTTPHeaderField: name) }
@@ -354,7 +369,9 @@ final class RumblePages: NSObject, URLSessionTaskDelegate {
                 continue
             }
             if data.count > Self.maxPageBytes { throw Self.error("Rumble page is too large") }
-            return (response.statusCode, String(decoding: data, as: UTF8.self))
+            // Cloudflare wants a browser to pass its check first
+            let challenge = response.value(forHTTPHeaderField: "cf-mitigated")?.lowercased() == "challenge"
+            return (response.statusCode, String(decoding: data, as: UTF8.self), challenge)
         }
     }
 
@@ -366,5 +383,88 @@ final class RumblePages: NSObject, URLSessionTaskDelegate {
 
     private static func error(_ message: String) -> NSError {
         NSError(domain: "RumblePages", code: 1, userInfo: [NSLocalizedDescriptionKey: message])
+    }
+}
+
+/// Shows a Rumble page in a browser of its own, without the app's bridge, so
+/// the user can pass Cloudflare's check. Once the page itself loads, its cookies
+/// and user agent load Rumble's pages for the app: Cloudflare ties its cookie to
+/// them, and only accepts it after its check loaded the page again. The browser
+/// may only show Rumble pages.
+final class RumbleChallengeController: UIViewController, WKNavigationDelegate, UIAdaptivePresentationControllerDelegate {
+    private let url: URL
+    private var onClose: (() -> Void)?
+    private var webView: WKWebView?
+    /// Whether the page that loads is Rumble's own, rather than Cloudflare's check, which answers with 403
+    private var loadsPage = false
+
+    init(url: URL, onClose: @escaping () -> Void) {
+        self.url = url
+        self.onClose = onClose
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) { nil }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        title = "rumble.com"
+        view.backgroundColor = .systemBackground
+        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .close, target: self, action: #selector(close))
+        let configuration = WKWebViewConfiguration()
+        // Apart from the app's other browsers, and gone once the user passed
+        configuration.websiteDataStore = .nonPersistent()
+        let webView = WKWebView(frame: view.bounds, configuration: configuration)
+        webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        webView.navigationDelegate = self
+        view.addSubview(webView)
+        self.webView = webView
+        webView.load(URLRequest(url: url))
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        navigationController?.presentationController?.delegate = self
+    }
+
+    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction,
+                 decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        // No new windows, and no other sites, apart from frames such as the check's
+        guard let frame = navigationAction.targetFrame else { return decisionHandler(.cancel) }
+        decisionHandler(!frame.isMainFrame || RumblePages.isRumblePage(navigationAction.request.url) ? .allow : .cancel)
+    }
+
+    func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse,
+                 decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
+        if navigationResponse.isForMainFrame {
+            let status = (navigationResponse.response as? HTTPURLResponse)?.statusCode ?? 0
+            loadsPage = (200..<400).contains(status) && RumblePages.isRumblePage(navigationResponse.response.url)
+        }
+        decisionHandler(.allow)
+    }
+
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        guard loadsPage else { return }
+        loadsPage = false
+        webView.configuration.websiteDataStore.httpCookieStore.getAllCookies { cookies in
+            webView.evaluateJavaScript("navigator.userAgent") { [weak self] userAgent, _ in
+                if let userAgent = userAgent as? String {
+                    RumblePages.shared.acceptBrowserSession(cookies: cookies, userAgent: userAgent)
+                }
+                self?.close()
+            }
+        }
+    }
+
+    func presentationControllerDidDismiss(_ presentationController: UIPresentationController) { finish() }
+
+    @objc private func close() {
+        dismiss(animated: true) { [weak self] in self?.finish() }
+    }
+
+    private func finish() {
+        webView?.stopLoading()
+        onClose?()
+        onClose = nil
     }
 }

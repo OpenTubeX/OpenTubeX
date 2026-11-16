@@ -2887,6 +2887,8 @@ Platforms:
   Playlist Not Found: یہ پلے لسٹ نہیں مل سکی۔
   Load Error: یہ صفحہ {platform} سے لوڈ نہیں ہو سکا۔
   Empty Tab: یہاں ابھی کچھ نہیں ہے۔
+  Browser Check: "{platform} یہ صفحہ دکھانے سے پہلے آپ سے تصدیق چاہتا ہے کہ آپ انسان ہیں۔"
+  Verify: "تصدیق کریں"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} نے {commentAuthor} کو جواب دیا"
   Like: "پسند کریں"

@@ -2881,6 +2881,8 @@ Platforms:
   Playlist Not Found: Non se puido atopar esta listaxe de reprodución.
   Load Error: Non se puido cargar esta páxina desde {platform}.
   Empty Tab: Aínda non hai nada aquí.
+  Browser Check: "{platform} pídeche que verifiques que es unha persoa antes de amosar esta páxina."
+  Verify: "Verificar"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} respondeu a {commentAuthor}"
   Like: "Gústame"

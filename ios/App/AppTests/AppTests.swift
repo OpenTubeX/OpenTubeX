@@ -996,6 +996,36 @@ final class AppTests: XCTestCase {
         XCTAssertEqual(Set(cookies[1]?.components(separatedBy: "; ") ?? []), ["RNSC=1", "__cf_bm=token"])
     }
 
+    func testRumblePagesReportTheCheckAndUseTheBrowserThatPassedIt() async throws {
+        let url = "https://rumble.com/search/video?q=news"
+        var requests: [URLRequest] = []
+        RumbleStubProtocol.respond = { request in
+            requests.append(request)
+            return request.value(forHTTPHeaderField: "Cookie")?.contains("cf_clearance=passed") == true
+                ? (200, [:], "<html>results</html>")
+                : (403, ["cf-mitigated": "challenge"], "Just a moment...")
+        }
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [RumbleStubProtocol.self]
+        let pages = RumblePages(configuration: configuration)
+
+        let check = try await pages.fetch(url)
+        XCTAssertEqual(check.status, 403)
+        XCTAssertTrue(check.challenge)
+
+        let browserAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+        let cookie = { (name: String, domain: String) in
+            HTTPCookie(properties: [.name: name, .value: "passed", .domain: domain, .path: "/"])!
+        }
+        // Only Rumble's cookies are taken
+        pages.acceptBrowserSession(cookies: [cookie("cf_clearance", ".rumble.com"), cookie("other", ".example.test")], userAgent: browserAgent)
+        let page = try await pages.fetch(url)
+        XCTAssertEqual(page.status, 200)
+        XCTAssertFalse(page.challenge)
+        XCTAssertEqual(requests.last?.value(forHTTPHeaderField: "Cookie"), "cf_clearance=passed")
+        XCTAssertEqual(requests.last?.value(forHTTPHeaderField: "User-Agent"), browserAgent)
+    }
+
     func testRumblePagesLoadOnlyRumblePages() async throws {
         XCTAssertTrue(RumblePages.isRumblePage(URL(string: "https://rumble.com/c/Example?page=2")))
         for url in ["http://rumble.com/c/Example", "https://rumble.com.example.test/c/Example", "https://notrumble.com/c/Example",

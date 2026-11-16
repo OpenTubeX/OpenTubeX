@@ -2817,6 +2817,8 @@ Platforms:
   Playlist Not Found: Ĉi tiu ludlisto ne troviĝis.
   Load Error: Ne eblis ŝargi ĉi tiun paĝon de {platform}.
   Empty Tab: Ankoraŭ estas nenio ĉi tie.
+  Browser Check: "{platform} petas vin konfirmi, ke vi estas homo, antaŭ ol montri ĉi tiun paĝon."
+  Verify: "Konfirmi"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} respondis al {commentAuthor}"
   Like: "Ŝati"

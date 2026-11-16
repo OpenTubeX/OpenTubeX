@@ -2834,6 +2834,8 @@ Platforms:
   Playlist Not Found: Không tìm thấy danh sách phát này.
   Load Error: Không thể tải trang này từ {platform}.
   Empty Tab: Chưa có gì ở đây.
+  Browser Check: "{platform} yêu cầu bạn xác minh rằng bạn là người trước khi hiển thị trang này."
+  Verify: "Xác minh"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} đã trả lời {commentAuthor}"
   Like: "Thích"

@@ -3320,6 +3320,8 @@ Platforms:
   Playlist Not Found: Šio grojaraščio rasti nepavyko.
   Load Error: Nepavyko įkelti šio puslapio iš {platform}.
   Empty Tab: Čia dar nieko nėra.
+  Browser Check: "{platform} prašo patvirtinti, kad esate žmogus, prieš parodant šį puslapį."
+  Verify: "Patvirtinti"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} atsakė naudotojui {commentAuthor}"
   Like: "Patinka"

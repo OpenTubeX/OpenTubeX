@@ -2817,6 +2817,8 @@ Platforms:
   Playlist Not Found: Ez a lejátszási lista nem található.
   Load Error: 'Ezt az oldalt nem sikerült betölteni innen: {platform}.'
   Empty Tab: Itt még nincs semmi.
+  Browser Check: "A(z) {platform} az oldal megjelenítése előtt arra kér, hogy igazold, hogy ember vagy."
+  Verify: "Ellenőrzés"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} válaszolt {commentAuthor} hozzászólására"
   Like: "Tetszik"

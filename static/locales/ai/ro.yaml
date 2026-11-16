@@ -2874,6 +2874,8 @@ Platforms:
   Playlist Not Found: Această listă de redare nu a putut fi găsită.
   Load Error: Această pagină nu a putut fi încărcată de pe {platform}.
   Empty Tab: Încă nu există nimic aici.
+  Browser Check: "{platform} îți cere să confirmi că ești om înainte de a afișa această pagină."
+  Verify: "Verifică"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} i-a răspuns lui {commentAuthor}"
   Like: "Îmi place"

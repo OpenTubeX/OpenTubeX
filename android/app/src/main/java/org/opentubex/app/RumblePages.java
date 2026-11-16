@@ -26,16 +26,34 @@ import org.json.JSONObject;
 final class RumblePages {
     interface Transport { JSONObject send(JSONObject payload) throws Exception; }
 
+    /** The cookies of Rumble's pages, and the browser they belong to. */
+    static final class Session {
+        // Only Rumble's pages use them, so names and values are enough
+        final Map<String, String> cookies = new LinkedHashMap<>();
+        /**
+         * The user agent of the browser where the user passed Cloudflare's
+         * check, as Cloudflare ties its cookie to it, or null for the helper's own.
+         */
+        volatile String userAgent;
+    }
+
     private static final int MAX_REDIRECTS = 10;
     private static final int MAX_PAGE_BYTES = 10_000_000;
     // For the page with all its redirects
     private static final long TIMEOUT_MS = 30_000;
     private static final Pattern MAX_AGE = Pattern.compile(";\\s*max-age\\s*=\\s*(-?\\d+)", Pattern.CASE_INSENSITIVE);
     private static final Pattern EXPIRES = Pattern.compile(";\\s*expires\\s*=\\s*([^;]+)", Pattern.CASE_INSENSITIVE);
-    // Only Rumble's pages use them, so names and values are enough
-    private static final Map<String, String> COOKIES = new LinkedHashMap<>();
+    private static final Session SESSION = new Session();
 
     private RumblePages() {}
+
+    static boolean isRumblePage(String url) {
+        try {
+            return url != null && isRumblePage(URI.create(url));
+        } catch (IllegalArgumentException error) {
+            return false;
+        }
+    }
 
     static boolean isRumblePage(URI uri) {
         String host = uri.getHost() == null ? "" : uri.getHost().toLowerCase(Locale.ROOT);
@@ -45,14 +63,30 @@ final class RumblePages {
 
     /** @param requestedAt from {@link System#nanoTime()}, so the time a request waits to start counts too */
     static JSONObject fetch(String url, Transport transport, long requestedAt) throws Exception {
-        return fetch(url, transport, COOKIES, requestedAt);
+        return fetch(url, transport, SESSION, requestedAt);
     }
 
-    static JSONObject fetch(String url, Transport transport, Map<String, String> cookies) throws Exception {
-        return fetch(url, transport, cookies, System.nanoTime());
+    static JSONObject fetch(String url, Transport transport, Session session) throws Exception {
+        return fetch(url, transport, session, System.nanoTime());
     }
 
-    private static JSONObject fetch(String url, Transport transport, Map<String, String> cookies, long requestedAt) throws Exception {
+    /** Takes the cookies of a browser where the user passed Cloudflare's check, from its Cookie header. */
+    static void acceptBrowserSession(String cookieHeader, String userAgent) {
+        acceptBrowserSession(SESSION, cookieHeader, userAgent);
+    }
+
+    static void acceptBrowserSession(Session session, String cookieHeader, String userAgent) {
+        synchronized (session.cookies) {
+            for (String pair : cookieHeader == null ? new String[0] : cookieHeader.split(";")) {
+                int equals = pair.indexOf('=');
+                if (equals > 0) session.cookies.put(pair.substring(0, equals).trim(), pair.substring(equals + 1).trim());
+            }
+        }
+        session.userAgent = userAgent;
+    }
+
+    private static JSONObject fetch(String url, Transport transport, Session session, long requestedAt) throws Exception {
+        Map<String, String> cookies = session.cookies;
         URI uri = url == null ? null : URI.create(url);
         long deadline = requestedAt + TimeUnit.MILLISECONDS.toNanos(TIMEOUT_MS);
         for (int redirect = 0; ; redirect++) {
@@ -62,10 +96,13 @@ final class RumblePages {
             JSONObject headers = new JSONObject().put("Accept", "text/html");
             String cookie = cookieHeader(cookies);
             if (!cookie.isEmpty()) headers.put("Cookie", cookie);
+            String userAgent = session.userAgent;
+            if (userAgent != null) headers.put("User-Agent", userAgent);
             JSONObject result = transport.send(new JSONObject().put("url", uri.toString()).put("method", "GET")
                 .put("headers", headers).put("timeout", remaining));
 
             String location = null;
+            boolean challenge = false;
             JSONObject rawHeaders = result.getJSONObject("headers");
             for (var names = rawHeaders.keys(); names.hasNext();) {
                 String name = names.next();
@@ -73,6 +110,8 @@ final class RumblePages {
                 for (int index = 0; index < values.length(); index++) {
                     if (name.equalsIgnoreCase("Set-Cookie")) saveCookie(cookies, values.getString(index));
                     else if (name.equalsIgnoreCase("Location")) location = values.getString(index);
+                    // Cloudflare wants a browser to pass its check first
+                    else if (name.equalsIgnoreCase("cf-mitigated")) challenge |= values.getString(index).equalsIgnoreCase("challenge");
                 }
             }
 
@@ -84,7 +123,8 @@ final class RumblePages {
             }
             byte[] body = Base64.getDecoder().decode(result.getString("body"));
             if (body.length > MAX_PAGE_BYTES) throw new IOException("Rumble page is too large");
-            return new JSONObject().put("status", status).put("text", new String(body, StandardCharsets.UTF_8));
+            return new JSONObject().put("status", status).put("text", new String(body, StandardCharsets.UTF_8))
+                .put("challenge", challenge);
         }
     }
 

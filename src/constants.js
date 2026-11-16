@@ -233,6 +233,7 @@ const IpcChannels = {
   TWITCH_LIVE_CONFIGURE: 'twitch-live-configure',
   TWITCH_LIVE_UPDATED: 'twitch-live-updated',
   RUMBLE_FETCH: 'rumble-fetch',
+  RUMBLE_PASS_CHALLENGE: 'rumble-pass-challenge',
   YT_DLP_GET_RECOMMENDATIONS: 'yt-dlp-get-recommendations',
   YT_DLP_SEARCH: 'yt-dlp-search',
   YT_DLP_PLAYBACK_CACHE_GET: 'yt-dlp-playback-cache-get',

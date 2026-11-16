@@ -2905,6 +2905,8 @@ Platforms:
   Playlist Not Found: Ова плејлиста није пронађена.
   Load Error: Ова страница није могла да се учита са платформе {platform}.
   Empty Tab: Овде још нема ничега.
+  Browser Check: "{platform} тражи да потврдите да сте човек пре него што прикаже ову страницу."
+  Verify: "Потврди"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} је одговорио/ла кориснику {commentAuthor}"
   Like: "Свиђа ми се"

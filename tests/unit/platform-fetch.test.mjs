@@ -49,4 +49,10 @@ test('stops waiting for a mobile Rumble page once its request aborts', async (t)
   const page = await fetch(url, { signal: new AbortController().signal })
   assert.equal(page.status, 200)
   assert.equal(await page.text(), '<html></html>')
+
+  // Cloudflare's check reaches the platform as the header it answers with
+  bridge.fetch = async () => ({ status: 403, text: 'Just a moment...', challenge: true })
+  const check = await fetch(url)
+  assert.equal(check.status, 403)
+  assert.equal(check.headers.get('cf-mitigated'), 'challenge')
 })

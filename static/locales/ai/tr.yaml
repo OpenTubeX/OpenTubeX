@@ -2817,6 +2817,8 @@ Platforms:
   Playlist Not Found: Bu oynatma listesi bulunamadı.
   Load Error: Bu sayfa {platform} üzerinden yüklenemedi.
   Empty Tab: Burada henüz bir şey yok.
+  Browser Check: "{platform}, bu sayfayı göstermeden önce insan olduğunuzu doğrulamanızı istiyor."
+  Verify: "Doğrula"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author}, {commentAuthor} adlı kullanıcıyı yanıtladı"
   Like: "Beğen"

@@ -2831,6 +2831,8 @@ Platforms:
   Playlist Not Found: Δεν ήταν δυνατή η εύρεση αυτής της λίστας αναπαραγωγής.
   Load Error: Δεν ήταν δυνατή η φόρτωση αυτής της σελίδας από το {platform}.
   Empty Tab: Δεν υπάρχει τίποτα εδώ ακόμη.
+  Browser Check: "Η πλατφόρμα {platform} σάς ζητά να επιβεβαιώσετε ότι είστε άνθρωπος πριν εμφανίσει αυτήν τη σελίδα."
+  Verify: "Επαλήθευση"
 YouTube Account:
   "{author} replied to {commentAuthor}": "Ο χρήστης {author} απάντησε στον χρήστη {commentAuthor}"
   Like: "Μου αρέσει"
