@@ -1950,6 +1950,7 @@ Profile:
   Go To Profile Manager: 프로필 관리자로 이동
 Channel:
   Hide Watched: 시청한 동영상 숨기기
+  All Videos Watched: "이 동영상을 모두 시청했습니다. 표시하려면 \"시청한 동영상 숨기기\"를 끄세요."
   Fewer videos per day: "일일 동영상 수 줄이기"
   More videos per day: "일일 동영상 수 늘리기"
   Verified: 인증됨

@@ -3,6 +3,7 @@ import { test, expect, scrollPageToEnd, expectPageScrollWithinRenderedRange } fr
 const CHANNEL_ID = 'UCaaaaaaaaaaaaaaaaaaaaaa'
 const OTHER_CHANNEL_ID = 'UCbbbbbbbbbbbbbbbbbbbbbb'
 const LONG_CHANNEL_ID = 'UCdddddddddddddddddddddd'
+const SINGLE_VIDEO_CHANNEL_ID = 'UCeeeeeeeeeeeeeeeeeeeeee'
 // Every other video of the long channel is watched.
 const LONG_CHANNEL_VIDEO_IDS = Array.from({ length: 40 }, (_, index) => `long${String(index).padStart(7, '0')}`)
 const LONG_CHANNEL_WATCHED_IDS = LONG_CHANNEL_VIDEO_IDS.filter((_, index) => index % 2 === 0)
@@ -49,6 +50,8 @@ test.use({
     },
     history: [
       historyEntry('watched0001', 'Watched video', CHANNEL_ID),
+      // Started but not finished, so Hide Watched keeps it.
+      { ...historyEntry('started0001', 'Started video', CHANNEL_ID), watchProgress: 10, isWatched: false },
       historyEntry('watched0002', 'Other watched video', OTHER_CHANNEL_ID),
       ...LONG_CHANNEL_WATCHED_IDS.map(videoId => historyEntry(videoId, videoId, LONG_CHANNEL_ID))
     ]
@@ -58,8 +61,10 @@ test.use({
 function channelVideos(channelId) {
   switch (channelId) {
     case LONG_CHANNEL_ID: return LONG_CHANNEL_VIDEO_IDS.map(videoId => video(videoId, videoId, channelId))
+    case SINGLE_VIDEO_CHANNEL_ID: return [video('watched0001', 'Watched video', channelId)]
     case CHANNEL_ID: return [
       video('watched0001', 'Watched video', channelId),
+      video('started0001', 'Started video', channelId),
       video('unwatched01', 'Unwatched video', channelId)
     ]
     default: return [
@@ -111,12 +116,12 @@ async function openChannel(page, channelId) {
 
 test('the channel switch hides watched videos without changing the setting', async ({ page }) => {
   let channel = await openChannel(page, CHANNEL_ID)
-  await expect(channel.titles).toHaveText(['Watched video', 'Unwatched video'])
+  await expect(channel.titles).toHaveText(['Watched video', 'Started video', 'Unwatched video'])
   await expect(channel.toggle).not.toBeChecked()
 
   await channel.toggleLabel.click()
   await expect(channel.toggle).toBeChecked()
-  await expect(channel.titles).toHaveText(['Unwatched video'])
+  await expect(channel.titles).toHaveText(['Started video', 'Unwatched video'])
   expect(await page.evaluate(() => window.$store.getters.getHideWatchedSubs)).toBe(false)
 
   // The choice carries over to other channel pages in this session.
@@ -141,7 +146,13 @@ test('changing the setting while no channel page is open resets the switch', asy
   await page.evaluate(() => window.$store.dispatch('updateHideWatchedSubs', true))
   channel = await openChannel(page, CHANNEL_ID)
   await expect(channel.toggle).toBeChecked()
-  await expect(channel.titles).toHaveText(['Unwatched video'])
+  await expect(channel.titles).toHaveText(['Started video', 'Unwatched video'])
+
+  // A channel with a single watched video still offers the switch to show it.
+  channel = await openChannel(page, SINGLE_VIDEO_CHANNEL_ID)
+  await expect(page.locator('.channelContent:visible .message')).toContainText('watched all of these videos')
+  await channel.toggleLabel.click()
+  await expect(channel.titles).toHaveText(['Watched video'])
 })
 
 test('hiding watched videos from the bottom of a long channel keeps a valid scroll position', { tag: '@scale' }, async ({ page }) => {
