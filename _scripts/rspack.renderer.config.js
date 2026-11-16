@@ -218,6 +218,7 @@ const config = {
     }),
     new rspack.CopyRspackPlugin({
       patterns: [
+        getStartupSplash.copyPattern,
         {
           from: '*/LICENSE',
           context: path.join(__dirname, '../node_modules/@fontsource-variable'),

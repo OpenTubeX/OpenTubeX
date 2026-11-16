@@ -5,9 +5,17 @@
 
   <head>
     <meta charset="utf-8" />
-    <!-- Electron's app:// handler sends this policy with frame-ancestors as a header. -->
+    <!-- Electron's app:// handler sends this policy with frame-ancestors as a header.
+         Only the app's own files may run script. Its workers compile WebAssembly,
+         and browsers that apply this policy to them need wasm-unsafe-eval.
+         qr-scanner starts its worker from a blob: URL, which only script that
+         already runs can create.
+         Development builds wrap each module in eval() for source maps.
+         On WebViews without document-start scripts, Capacitor inserts its
+         Android bridge as an inline script right after a literal <head>, ahead
+         of this tag, so keep <head> without attributes. -->
     <meta http-equiv="Content-Security-Policy"
-          content="object-src 'none'; base-uri 'self'; form-action 'none'" />
+          content="object-src 'none'; base-uri 'self'; form-action 'none'; script-src 'self' 'wasm-unsafe-eval'<% if (process.env.NODE_ENV === 'development') { %> 'unsafe-eval'<% } %>; worker-src 'self' blob:" />
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <% if (!process.env.IS_ELECTRON && !process.env.IS_CAPACITOR) { %>
@@ -19,7 +27,7 @@
     <% if (typeof startupSplash !== 'undefined') { %>
     <style><%= startupSplash.styles %></style>
     <!-- Before the injected stylesheet, which a later script would wait for -->
-    <script><%= startupSplash.script %></script>
+    <script src="boot.js"></script>
     <% } %>
   </head>
 
@@ -36,23 +44,8 @@
     <script src="self-hosted.js"></script>
     <% } %>
     <% if (!process.env.IS_ELECTRON && !process.env.IS_CAPACITOR) { %>
-    <script>
-    // This is the service worker with the Advanced caching
-
-    // Add this below content to your HTML page, or add the js file to your page at the very top to register service worker
-
-    // Check compatibility for the browser we're running this in
-    if ("serviceWorker" in navigator) {
-      // Each build registers its own worker version, which replaces the previous build's cache
-      navigator.serviceWorker
-        .register("pwabuilder-sw.js?v=<%= compilation.hash %>", {
-          scope: "./"
-        })
-        .then(function (reg) {
-          console.log("[PWA Builder] Service worker has been registered for scope: " + reg.scope);
-        });
-    }
-    </script>
+    <!-- Each build registers its own worker version, which replaces the previous build's cache -->
+    <script src="register-service-worker.js" data-version="<%= compilation.hash %>"></script>
     <% } %>
     <!-- Rspack builds are automatically injected -->
   </body>

@@ -1164,10 +1164,11 @@ function runApp() {
           }
 
           if (pathname.endsWith('.html')) {
-            // Restrict only what the renderer never uses. index.ejs repeats the
-            // directives a meta tag supports for dev, web and Capacitor builds;
-            // frame-ancestors only works as a header.
-            headers['Content-Security-Policy'] = "object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'"
+            // Keep in sync with index.ejs, which repeats the directives a meta
+            // tag supports for dev, web and Capacitor builds; frame-ancestors
+            // only works as a header. script-src keeps markup that slips past
+            // the sanitizer from running script next to the user's credentials.
+            headers['Content-Security-Policy'] = "object-src 'none'; base-uri 'self'; form-action 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self' blob:; frame-ancestors 'none'"
           }
 
           return new Response(contents.buffer, {
