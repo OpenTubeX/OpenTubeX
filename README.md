@@ -22,6 +22,16 @@ endorsed by, maintained by, or supported by the FreeTube project.
   <a href="https://github.com/OpenTubeX/OpenTubeX/releases/latest">
     <img alt="Latest release" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/release.svg" />
   </a>
+  <a href="https://hosted.weblate.org/engage/opentubex/">
+    <img alt="Translation status" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/translations.svg" />
+  </a>
+  <a href="https://fluxer.opentubex.org">
+    <img alt="Fluxer members" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/fluxer.svg" />
+  </a>
+  <a href="https://matrix.opentubex.org">
+    <img alt="Matrix" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/matrix.svg" />
+  </a>
+  <br>
   <a href="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/build.yml">
     <img alt="Build status" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/build.svg" />
   </a>
@@ -33,18 +43,6 @@ endorsed by, maintained by, or supported by the FreeTube project.
   </a>
   <a href="https://scorecard.dev/viewer/?uri=github.com/OpenTubeX/OpenTubeX">
     <img alt="OpenSSF Scorecard" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/scorecard.svg" />
-  </a>
-  <a href="https://hosted.weblate.org/engage/opentubex/">
-    <img alt="Translation status" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/translations.svg" />
-  </a>
-</p>
-
-<p align="center">
-  <a href="https://fluxer.opentubex.org">
-    <img alt="Fluxer members" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/fluxer.svg" />
-  </a>
-  <a href="https://matrix.opentubex.org">
-    <img alt="Matrix" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/matrix.svg" />
   </a>
 </p>
 
@@ -64,6 +62,7 @@ endorsed by, maintained by, or supported by the FreeTube project.
   <a href="#features"><img src="https://opentubex-badges.withered-flower-f0f2.workers.dev/features.svg" alt="Features"></a>
   <a href="#how-does-it-work"><img src="https://opentubex-badges.withered-flower-f0f2.workers.dev/how-it-works.svg" alt="How does it work?"></a>
   <a href="#download-links"><img src="https://opentubex-badges.withered-flower-f0f2.workers.dev/download-links.svg" alt="Download Links"></a>
+  <br>
   <a href="#contributing"><img src="https://opentubex-badges.withered-flower-f0f2.workers.dev/contributing.svg" alt="Contributing"></a>
   <a href="#localization"><img src="https://opentubex-badges.withered-flower-f0f2.workers.dev/localization.svg" alt="Localization"></a>
   <a href="#contact"><img src="https://opentubex-badges.withered-flower-f0f2.workers.dev/contact.svg" alt="Contact"></a>
