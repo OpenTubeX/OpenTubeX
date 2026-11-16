@@ -74,11 +74,14 @@ function updateOrigins(change) {
 }
 
 async function render() {
-  list.replaceChildren(...(await getOrigins()).map(origin => {
+  list.replaceChildren(...(await getOrigins()).map((origin, index) => {
     const item = document.createElement('li')
     const name = document.createElement('span')
+    name.id = `origin-${index}`
     name.textContent = origin
     const remove = removeButton.content.firstElementChild.cloneNode(true)
+    // Tells screen reader users which server each Remove button removes
+    remove.setAttribute('aria-describedby', name.id)
     remove.addEventListener('click', async () => {
       await updateOrigins(origins => origins.filter(other => other !== origin))
       // Built-in origins, such as opentubex.org, keep their required permission
