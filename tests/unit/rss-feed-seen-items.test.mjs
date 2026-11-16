@@ -4,6 +4,8 @@ import { test } from 'node:test'
 import vm from 'node:vm'
 import Datastore from '@seald-io/nedb'
 import { migrateStoredSettings } from '../../src/datastores/settingsMigrations.js'
+import * as secretSettings from '../../src/datastores/secretSettings.js'
+import { getSecretCipher } from '../../src/datastores/secretCipher.js'
 import * as rssSeenItems from '../../src/renderer/helpers/rssFeedSeenItems.js'
 
 const {
@@ -21,7 +23,7 @@ async function settingsDatabase() {
   const source = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
   const db = { settings: new Datastore({ inMemoryOnly: true }) }
   const Settings = vm.runInNewContext(source.slice(source.indexOf('class Settings {'), source.indexOf('\nclass History {')) +
-    '\nSettings', { db, ...rssSeenItems, migrateStoredSettings })
+    '\nSettings', { db, ...rssSeenItems, ...secretSettings, getSecretCipher, migrateStoredSettings })
   return { db, Settings }
 }
 

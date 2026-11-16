@@ -812,6 +812,17 @@ export class SqliteDatastore {
   }
 
   /**
+   * Rebuilds the database file, so it keeps no content of changed or deleted
+   * documents, and truncates the write-ahead log.
+   */
+  vacuumAsync() {
+    return this._exclusive(async () => {
+      if (this.dropped) return
+      await this._execute([['VACUUM'], ['PRAGMA wal_checkpoint(TRUNCATE)']])
+    }, 'read')
+  }
+
+  /**
    * Deletes the database together with its legacy datastore, which would
    * otherwise be imported again. The next write starts an empty database.
    * It never opens the database, so even one that cannot be opened is removed.

@@ -1,4 +1,15 @@
+// Passwords, keys and account tokens. They are encrypted at rest where the
+// system can hold the key, and never leave this device.
+export const SECRET_SETTINGS = new Set([
+  'youTubeAccount',
+  'proxyPassword',
+  'syncServerToken',
+  'syncServerPrivacyKey',
+  'yatteePassword',
+])
+
 export const NON_TRANSFERABLE_SETTINGS = new Set([
+  ...SECRET_SETTINGS,
   // Local migration bookkeeping is not a user preference.
   'historyWatchedStatusMigrated',
   'channelSettingsSyncMigration',
