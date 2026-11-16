@@ -124,7 +124,7 @@ import { useYouTubeProfileSwitch } from '../../composables/useYouTubeProfileSwit
 import { ERROR_TOAST_ICON, showToast } from '../../helpers/utils'
 import { editYouTubeComment, postYouTubeComment } from '../../helpers/api/youtube-account'
 import { trackCommentReplies } from '../../helpers/commentReplyNotifications'
-import { findCommentMentions, getCommentEditDraft, getCommentSubmitText, getRootCommentId, youTubeCommentsKey } from './youTubeComments'
+import { MENTION_START, findCommentMentions, getCommentEditDraft, getCommentSubmitText, getRootCommentId, youTubeCommentsKey } from './youTubeComments'
 
 const props = defineProps({
   // Posts a reply to this top-level comment instead of a new comment.
@@ -191,9 +191,10 @@ const activeSuggestion = ref(0)
 const threadId = props.parentId ?? (props.editComment ? getRootCommentId(props.editComment.id) : null)
 
 const mentionQuery = computed(() => {
-  const match = /(?:^|\s)@([^\s@]{0,30})$/u.exec(text.value.slice(0, caret.value))
+  const match = /@([^\s@]{0,30})$/u.exec(text.value.slice(0, caret.value))
   if (!match) return null
   const start = caret.value - match[1].length - 1
+  if (!MENTION_START.test(text.value.slice(Math.max(0, start - 1), start))) return null
   if (start === dismissedQueryStart.value || mentionRanges.value.some(range => start >= range.start && start < range.end)) return null
   return { start, query: match[1].toLowerCase() }
 })
@@ -319,8 +320,7 @@ function handleMentionKey(event, textarea) {
 }
 
 function cancel() {
-  text.value = ''
-  dismissedQueryStart.value = -1
+  clearDraft()
   if (isTopLevel) {
     expanded.value = false
   } else {
@@ -346,7 +346,7 @@ async function submit() {
     const posted = props.parentId && !created.id.includes('.') ? { ...created, id: `${props.parentId}.${created.id}` } : created
     comments.addComment(posted, commentText, usedMentions, props.parentId, account)
     trackCommentReplies(comments.videoId.value, props.parentId ?? posted.id, posted.id, account, commentText, comments.videoTitle.value)
-    text.value = ''
+    clearDraft()
     if (!props.parentId) expanded.value = false
     showToast({
       message: props.parentId ? t('YouTube Account.Reply Posted') : t('YouTube Account.Comment Posted'),
@@ -362,6 +362,13 @@ async function submit() {
   } finally {
     posting.value = false
   }
+}
+
+// The top-level comment box stays for the next comment.
+function clearDraft() {
+  text.value = ''
+  mentions.value = []
+  dismissedQueryStart.value = -1
 }
 
 /** @param {string} commentText */

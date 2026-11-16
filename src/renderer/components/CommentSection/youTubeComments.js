@@ -47,6 +47,8 @@ export function getRootCommentId(commentId) {
 
 // Handles are letters, digits, underscores, hyphens, periods and middle dots.
 const HANDLE_CHARACTER = /[\p{L}\p{M}\p{N}_.\-·]/u
+/** Where a mention can start, like after a space or an opening parenthesis. */
+export const MENTION_START = /(?:^|[^\p{L}\p{M}\p{N}_.\-·@])$/u
 // YouTube wraps handles in mentions in isolates.
 const ISOLATES = /[\u2066-\u2069]/g
 
@@ -65,7 +67,7 @@ export function findCommentMentions(text, mentions) {
       const end = start + mention.handle.length
       // A period after a handle can end the sentence.
       const next = text[end] === '.' ? end + 1 : end
-      if ((start === 0 || /\s/.test(text[start - 1])) && (next === text.length || !HANDLE_CHARACTER.test(text[next]))) {
+      if (MENTION_START.test(text.slice(Math.max(0, start - 1), start)) && (next === text.length || !HANDLE_CHARACTER.test(text[next]))) {
         ranges.push({ start, end, mention })
       }
       start = text.indexOf(mention.handle, end)

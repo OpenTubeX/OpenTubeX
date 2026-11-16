@@ -932,18 +932,20 @@ test.describe('manual comment loading', () => {
     await replyInput.press('Backspace')
     await replyInput.press('Backspace')
     await expect(replyInput).toHaveValue('')
-    await replyInput.pressSequentially('Hi @')
+    await replyInput.pressSequentially('Hi (@')
     await expect(composer.getByRole('option')).not.toHaveCount(0)
     // Narrowing the query after moving down picks from the remaining options.
     await replyInput.press('ArrowDown')
     await replyInput.pressSequentially(handle.slice(1, -1))
     await expect(composer.getByRole('option')).toHaveCount(1)
     await replyInput.press('Enter')
-    await expect(replyInput).toHaveValue(`Hi ${handle} `)
+    await expect(replyInput).toHaveValue(`Hi (${handle} `)
     await expect(composer.getByRole('listbox')).toHaveCount(0)
-    await replyInput.pressSequentially('there')
+    // Punctuation around a mention keeps it.
+    await replyInput.press('Backspace')
+    await replyInput.pressSequentially(') there')
     await composer.getByRole('button', { name: 'Reply', exact: true }).click()
-    await expect.poll(() => replyTexts.at(-1)).toBe(`Hi @${channelId} there`)
+    await expect.poll(() => replyTexts.at(-1)).toBe(`Hi (@${channelId}) there`)
   })
 
   test.describe('comment filtering at 125% UI scale', () => {
