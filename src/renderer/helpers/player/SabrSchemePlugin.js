@@ -582,8 +582,19 @@ async function doRequest(
       shouldReloadDueToBackoffLoop = true
     }
     if ((shouldReloadDueToBackoffLoop || currentState.cumulativeRetries >= 100) && operationInputs.streamKind === 'text') {
-      // Stuck captions fail their segment instead of reloading the audio and video that still play
-      throw new Error('captions kept backing off')
+      // Stuck captions skip their segment. A reload or a failed text request
+      // would stop the audio and video that still play.
+      warnFailure('captions kept backing off, skipping the segment')
+      /** @type {shaka.extern.Response} */
+      return {
+        uri: operationInputs.uri,
+        originalUri: operationInputs.uri,
+        data: new Uint8Array(0),
+        status: 200,
+        headers: {},
+        fromCache: false,
+        originalRequest: operationInputs.request,
+      }
     }
     if (shouldReloadDueToBackoffLoop || currentState.cumulativeRetries >= 100) {
       // Fire fake reload event due to detecting retry loop

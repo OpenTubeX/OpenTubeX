@@ -643,7 +643,7 @@ for (const backoffMs of [100, 10000]) {
   })
 }
 
-test('captions that keep backing off fail their segment without reloading playback', async t => {
+test('captions that keep backing off skip their segment without stopping playback', async t => {
   t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 0 })
   let reloads = 0
   const { createSabrTransport } = load(async () => policyResponse(100), { Date })
@@ -651,12 +651,13 @@ test('captions that keep backing off fail their segment without reloading playba
   t.after(() => transport.cleanup())
   transport.onReloadOnce(() => reloads++)
   const captions = 'sabr1:text?formatId=387-0-&targetDurationMs=5000&sq=1'
-  const rejected = assert.rejects(transport.request(captions, request(captions), 1).promise, { code: 1002 })
+  const pending = transport.request(captions, request(captions), 1).promise
   for (let index = 0; index < 6; index++) {
     await flushRequests()
     t.mock.timers.tick(100)
   }
-  await rejected
+  // An empty segment has no cues, while a failed text request is a critical player error
+  assert.equal((await pending).data.byteLength, 0)
   assert.equal(reloads, 0)
 })
 

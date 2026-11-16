@@ -139,4 +139,6 @@ test('live SABR captions land on the media timeline of their segment', async () 
   // Segments without captions have an empty sample
   const silentSegment = new Uint8Array([...box('moof', new Uint8Array(0)), ...box('mdat', new Uint8Array(0))])
   assert.deepEqual(parser.parseMedia(silentSegment, { periodStart: 0, segmentStart: 200245, segmentEnd: 200250, vttOffset: 0 }, null, []), [])
+  // The transport skips a segment that keeps backing off with an empty response
+  assert.deepEqual(parser.parseMedia(new Uint8Array(0), { periodStart: 0, segmentStart: 200250, segmentEnd: 200255, vttOffset: 0 }, null, []), [])
 })
