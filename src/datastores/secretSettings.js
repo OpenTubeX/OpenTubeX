@@ -98,10 +98,12 @@ export async function decodeSettings(docs, datastore, cipherPromise) {
  * also saved Invidious credentials in the instance URL, as `user:password@`.
  */
 // What follows the scheme and its slashes, with a slash added so it always ends
-// with one, and the other characters that end the host turned into slashes
-const AFTER_SCHEME = "replace(replace(replace(ltrim(substr(json_extract(data, '$.value'), instr(json_extract(data, '$.value'), ':') + 1), '/\\') || '/', '\\', '/'), '?', '/'), '#', '/')"
+// with one, and the other characters that end the host turned into slashes.
+// URLs ignore tabs and line breaks, so they are removed first.
+const VALUE = "replace(replace(replace(json_extract(data, '$.value'), char(9), ''), char(10), ''), char(13), '')"
+const AFTER_SCHEME = `replace(replace(replace(ltrim(substr(${VALUE}, instr(${VALUE}, ':') + 1), '/\\') || '/', '\\', '/'), '?', '/'), '#', '/')`
 const OLDER_COPY_SECRETS = `json_extract(data, '$._id') IN (SELECT value FROM json_each(?)) OR
-  (json_extract(data, '$._id') = 'defaultInvidiousInstance' AND instr(json_extract(data, '$.value'), ':') > 0 AND
+  (json_extract(data, '$._id') = 'defaultInvidiousInstance' AND instr(${VALUE}, ':') > 0 AND
     instr(${AFTER_SCHEME}, '@') BETWEEN 1 AND instr(${AFTER_SCHEME}, '/'))`
 
 /**

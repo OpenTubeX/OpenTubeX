@@ -93,7 +93,7 @@ test('exports drop Invidious credentials however the instance URL is written', (
   for (const [instance, expected] of [
     ['https:user:pass@invidious.example', 'https:invidious.example'],
     ['https:\\\\user:pass@invidious.example/', 'https:\\\\invidious.example/'],
-    ['https://user:pass@invidious.example:84433', 'https://invidious.example:84433'],
+    ['https:\t//user:pass@invidious.example:84433', 'https://invidious.example:84433'],
     ['https://invidious.example/watch@later', 'https://invidious.example/watch@later'],
   ]) {
     assert.equal(getTransferableSettings({ defaultInvidiousInstance: instance }).defaultInvidiousInstance, expected)

@@ -94,6 +94,7 @@ test('the copies kept for older versions lose secrets and Invidious credentials,
   for (const [name, instance] of [
     ['with', 'https://user:instance-secret@invidious.example'],
     ['slashless', 'https:user:instance-secret@invidious.example'],
+    ['with-tab', 'https:\t//user:instance-secret@invidious.example'],
     ['without', 'https://invidious.example/@path'],
     ['without-in-query', 'https://invidious.example?from=a@b'],
   ]) {

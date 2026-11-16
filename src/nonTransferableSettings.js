@@ -135,7 +135,10 @@ export function getTransferableSettings(settings) {
   const transferable = Object.fromEntries(Object.entries(settings).filter(([key]) => !NON_TRANSFERABLE_SETTINGS.has(key)))
   // Saving splits credentials off, but not off a URL that does not parse, such as one with an invalid port.
   if (typeof transferable.defaultInvidiousInstance === 'string') {
-    transferable.defaultInvidiousInstance = transferable.defaultInvidiousInstance.trim().replace(/^([a-z][\w+.-]*:[/\\]*)[^/\\?#]*@/i, '$1')
+    transferable.defaultInvidiousInstance = transferable.defaultInvidiousInstance.trim()
+      // URLs ignore tabs and line breaks
+      .replaceAll(/[\t\n\r]/g, '')
+      .replace(/^([a-z][\w+.-]*:[/\\]*)[^/\\?#]*@/i, '$1')
   }
   return transferable
 }
