@@ -7,15 +7,20 @@ let browser
 before(async () => { browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH }) })
 after(async () => { await browser?.close() })
 
+const repository = new URL('../../', import.meta.url)
+
 async function pageWithModule(path) {
   const context = await browser.newContext({ viewport: { width: 400, height: 700 } })
   const page = await context.newPage()
-  await page.route('http://mobile.test/**', route => route.fulfill({ contentType: 'text/html', body: '<!doctype html><body></body>' }))
+  // Serve the repository's files, so the module's relative imports resolve.
+  await page.route('http://mobile.test/**', async route => {
+    const { pathname } = new URL(route.request().url())
+    if (pathname === '/') return route.fulfill({ contentType: 'text/html', body: '<!doctype html><body></body>' })
+    return route.fulfill({ contentType: 'text/javascript', body: await readFile(new URL(`.${pathname}`, repository), 'utf8') })
+  })
   await page.goto('http://mobile.test')
-  const source = await readFile(new URL(path, import.meta.url), 'utf8')
-  await page.evaluate(async source => {
-    window.module = await import(URL.createObjectURL(new Blob([source], { type: 'text/javascript' })))
-  }, source)
+  const url = new URL(new URL(path, import.meta.url).href.slice(repository.href.length), 'http://mobile.test/').href
+  await page.evaluate(async url => { window.module = await import(url) }, url)
   return { page, context }
 }
 
