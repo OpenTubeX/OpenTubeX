@@ -64,10 +64,12 @@ test('searches categories page by page and skips categories without a valid addr
   assert.equal(page.continuation, 'MjA=')
 })
 
-test('loads a category with its live streams, and nothing for unknown ones', async () => {
+test('loads a category with its live streams, nothing for unknown ones, and fails without its streams', async () => {
   const { fetcher, requests } = answer(({ variables }) => variables.slug === 'chess'
     ? { data: { game: { ...game(), streams: { edges: [{ node: stream('11') }, { node: stream('12', null) }, null] } } } }
-    : { data: { game: null } })
+    : variables.slug === 'refused'
+      ? { errors: [{ message: 'failed integrity check', path: ['game', 'streams'] }], data: { game: { ...game(), streams: null } } }
+      : { data: { game: null } })
 
   const result = await twitch.getCategory(fetcher, 'chess')
   assert.equal(result.category.name, 'Chess')
@@ -78,7 +80,8 @@ test('loads a category with its live streams, and nothing for unknown ones', asy
 
   assert.equal(await twitch.getCategory(fetcher, 'unknown'), null)
   assert.equal(await twitch.getCategory(fetcher, 'Not/A Slug'), null)
-  assert.equal(requests.length, 2)
+  await assert.rejects(twitch.getCategory(fetcher, 'refused'))
+  assert.equal(requests.length, 3)
 })
 
 test('browses the most watched categories and streams, and fails when Twitch refuses both', async () => {

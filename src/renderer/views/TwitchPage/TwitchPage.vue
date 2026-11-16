@@ -16,6 +16,7 @@
         input-type="search"
         :label="t('Twitch Page.Search')"
         :placeholder="t('Twitch Page.Search')"
+        :action-button-label="t('Twitch Page.Search')"
         :icon="['fas', 'search']"
         :value="query"
         :maxlength="200"

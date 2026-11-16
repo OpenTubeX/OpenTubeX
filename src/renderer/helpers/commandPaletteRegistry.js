@@ -259,7 +259,7 @@ function addNavigationCommands(commands, context) {
     ['trending', isTrendingAvailable(providerOptions)],
     ['popular', isMostPopularAvailable(providerOptions)],
     // Without yt-dlp, its route only redirects
-    ['twitch', (isElectron || isCapacitor) && !isLiteBuild],
+    ['twitch', Boolean((isElectron || isCapacitor) && !isLiteBuild)],
   ])
 
   for (const [id, path, labelKey, aliases, icon] of navigationCommands) {

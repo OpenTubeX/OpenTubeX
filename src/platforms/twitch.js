@@ -244,7 +244,10 @@ const twitch = {
       `query($slug: String!) { game(slug: $slug) { ${CATEGORY_FIELDS} streams(first: ${CATEGORY_STREAMS}, options: { sort: VIEWER_COUNT }) { edges { node { ${STREAM_NODE_FIELDS} } } } } }`,
       { slug: id }, signal)
     const category = toPlatformCategory(data.game)
-    return category && { category, items: streamItems(data.game.streams) }
+    if (!category) return null
+    // A failed streams field must not look like a category nobody streams
+    if (!Array.isArray(data.game.streams?.edges)) throw new Error('Twitch returned no streams')
+    return { category, items: streamItems(data.game.streams) }
   },
 
   async getBrowse(fetch, signal) {

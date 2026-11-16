@@ -2,7 +2,7 @@
 category: feature
 ---
 
-A new Twitch page lists the most watched categories and live streams, and searches Twitch for channels and categories. Add it to the navigation in the interface settings. Twitch searches on the Search page can now find categories too.
+A new Twitch page, which you can add to the navigation in the interface settings, lists the most watched categories and live streams and searches Twitch for channels and categories. Twitch searches on the Search page can now find categories too.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/27d3b744-253d-4d04-8191-82585835bde6">
