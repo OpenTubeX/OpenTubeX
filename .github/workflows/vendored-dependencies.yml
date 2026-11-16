@@ -2,8 +2,10 @@ name: Update vendored dependencies
 
 # Dependabot cannot track the yt-dlp and libwebp releases that android/app/build.gradle bundles,
 # the Python runtime and PyPI pins that _scripts/setupIosYtDlp.sh installs, the
-# FFmpegKit binaries that ios/App/FFmpegKit/Package.swift links, or the Libron font in
-# src/renderer/assets/font/libron, so this opens a PR when any of them has a new stable release.
+# FFmpegKit binaries that ios/App/FFmpegKit/Package.swift links, the Libron font in
+# src/renderer/assets/font/libron, or the AppImage tool scripts that
+# _scripts/package-anylinux-appimage.sh pins to a commit, so this opens a PR when any of them has a
+# new stable release, or when the pinned tool scripts change.
 # A PR opened with GITHUB_TOKEN would not run CI, so the PR step uses UPSTREAM_SYNC_TOKEN.
 on:
   schedule:
@@ -184,6 +186,30 @@ jobs:
             echo "- App: [Libron $version](https://github.com/$repository/releases/tag/$tag) (from $current)" >> "$RUNNER_TEMP/changes.md"
           fi
 
+          # The AppImage tool scripts have no releases, so follow main, but move the pin only
+          # when a script the build downloads changed.
+          file=_scripts/package-anylinux-appimage.sh
+          repository=pkgforge-dev/Anylinux-AppImages
+          current=$(grep -oP "^TOOLS_SOURCE=https://raw\.githubusercontent\.com/$repository/\K[0-9a-f]{40}(?=/useful-tools$)" "$file")
+          head=$(gh api "repos/$repository/commits/main" --jq .sha)
+          if [[ -z "$current" || ! "$head" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::Cannot update the AppImage tools from ${current:-nothing} to ${head:-nothing}."
+            exit 1
+          fi
+          if [[ "$current" != "$head" ]]; then
+            changed=false
+            for script in quick-sharun.sh get-debloated-pkgs.sh; do
+              for sha in "$current" "$head"; do
+                curl -fsSL "https://raw.githubusercontent.com/$repository/$sha/useful-tools/$script" -o "$RUNNER_TEMP/$sha-$script"
+              done
+              cmp -s "$RUNNER_TEMP/$current-$script" "$RUNNER_TEMP/$head-$script" || changed=true
+            done
+            if [[ "$changed" == true ]]; then
+              sed -i "s|/$repository/$current/useful-tools|/$repository/$head/useful-tools|" "$file"
+              echo "- AppImage packaging: [Anylinux-AppImages tools ${head:0:7}](https://github.com/$repository/compare/$current...$head) (from ${current:0:7})" >> "$RUNNER_TEMP/changes.md"
+            fi
+          fi
+
           if [[ -f "$RUNNER_TEMP/changes.md" ]]; then
             {
               echo 'changes<<EOF'
@@ -203,7 +229,7 @@ jobs:
           commit-message: "build: update vendored dependencies"
           title: "build: update vendored dependencies"
           body: |
-            Updates the dependencies that the app bundles in `android/app/build.gradle`, `_scripts/setupIosYtDlp.sh`, `ios/App/FFmpegKit/Package.swift` and `src/renderer/assets/font/libron`:
+            Updates the dependencies that the app bundles in `android/app/build.gradle`, `_scripts/setupIosYtDlp.sh`, `ios/App/FFmpegKit/Package.swift` and `src/renderer/assets/font/libron`, and the AppImage tool scripts that `_scripts/package-anylinux-appimage.sh` downloads:
 
             ${{ steps.update.outputs.changes }}
 
