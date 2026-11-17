@@ -2,7 +2,7 @@
 category: improvement
 ---
 
-The Stats page has a fresh look: calmer summary cards with icons, a smooth daily curve that marks today, and rounded weekly bars that highlight the current week.
+The Stats page has a new design. The summary cards are neutral with an icon each, the daily chart is a smooth curve that marks today, and the weekly bars are rounded and highlight the current week.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/aca93603-90ad-43b7-9936-ac101614da19">
