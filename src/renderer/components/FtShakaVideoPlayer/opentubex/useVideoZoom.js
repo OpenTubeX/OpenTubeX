@@ -20,7 +20,7 @@ import {
  *   mediaTabId: string,
  *   onPinchStart: () => void,
  *   props: { format: string, shortsPlayer: boolean, videoId: string },
- *   showValueChange: (message: string, icons: string, invertContentOrder?: boolean, seekSeconds?: number, revealControls?: boolean) => void,
+ *   showValueChange: (message: string, icons: string, options?: { revealControls?: boolean }) => void,
  *   useVrMode: import('vue').ComputedRef<boolean>,
  *   video: import('vue').Ref<HTMLVideoElement | null>,
  * }} options
@@ -438,7 +438,7 @@ export function useVideoZoom({
     if (!stale) {
       if (finalZoom === fillZoom && !cancelled) recenterVideoZoom()
       updateVideoZoom(finalZoom)
-      if (!cancelled) showValueChange(formatVideoZoom(finalZoom), 'search', false, 0, false)
+      if (!cancelled) showValueChange(formatVideoZoom(finalZoom), 'search', { revealControls: false })
     }
     videoZoomGestureZoom.value = null
     videoZoomPinchStart = null

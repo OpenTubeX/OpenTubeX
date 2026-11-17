@@ -56,9 +56,60 @@
   }
 }
 
-.valueChangeText {
-  min-width: 0;
-  overflow-wrap: anywhere;
+/* Material 3 Expressive OSD: a pill on a dark, blurred surface, the icon in a
+   filled badge and, for levels such as the volume, a linear indicator. */
+.valueChangePopup {
+  position: absolute;
+  top: clamp(16px, 5%, 32px);
+  left: 50%;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: calc(100% - 32px);
+  min-height: 48px;
+  padding-block: 6px;
+  padding-inline: 6px 20px;
+  border-radius: var(--shape-corner-full);
+  color: #fff;
+  background-color: rgb(24 24 27 / 78%);
+  box-shadow: 0 6px 24px rgb(0 0 0 / 28%);
+  backdrop-filter: blur(16px) saturate(1.4);
+  font-size: 15px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.25;
+  translate: -50% 0;
+  pointer-events: none;
+}
+
+.valueChangePopup.invert-content-order {
+  flex-direction: row-reverse;
+  padding-inline: 20px 6px;
+}
+
+.valueChangePopup:not(:has(> .valueChangeIcons)) {
+  padding-inline: 20px;
+}
+
+.valueChangePopup-enter-active {
+  transition: opacity var(--motion-fast-effects), scale var(--motion-fast-spatial);
+}
+
+.valueChangePopup-leave-active {
+  transition: opacity var(--motion-default-effects), scale var(--motion-default-effects);
+}
+
+.valueChangePopup-enter-from {
+  opacity: 0;
+  scale: 0.8;
+}
+
+.valueChangePopup-leave-to {
+  opacity: 0;
+  scale: 0.92;
 }
 
 .ftVideoPlayer:is(:fullscreen, .fullWindow) .valueChangePopup {
@@ -66,11 +117,28 @@
   top: calc(56px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px)));
 }
 
+/* Keyed by the message, so every change pops the badge again. */
 .valueChangeIcons {
   display: inline-flex;
   flex: none;
   align-items: center;
-  gap: 2px;
+  justify-content: center;
+  gap: 4px;
+  box-sizing: border-box;
+  min-width: 36px;
+  height: 36px;
+  padding-inline: 9px;
+  border-radius: var(--shape-corner-full);
+  color: var(--text-with-main-color);
+  background-color: var(--primary-color);
+  font-size: 17px;
+  animation: value-change-icon-pop var(--motion-fast-spatial);
+}
+
+@keyframes value-change-icon-pop {
+  from {
+    scale: 0.7;
+  }
 }
 
 .valueChangeCustomIcon {
@@ -78,6 +146,120 @@
   width: 1em;
   height: 1em;
   fill: currentcolor;
+}
+
+.valueChangeText {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Material 3 linear indicator: active part, gap, track and stop indicator. */
+.valueChangeLevel {
+  position: relative;
+  flex: 0 1 auto;
+
+  /* A width, unlike a flex basis, counts towards the max-content popup width. */
+  width: 112px;
+  min-width: 40px;
+  height: 6px;
+}
+
+.valueChangeLevelActive,
+.valueChangeLevelTrack,
+.valueChangeLevelTrack::after {
+  position: absolute;
+  inset-block: 0;
+  border-radius: var(--shape-corner-full);
+}
+
+.valueChangeLevelActive {
+  inset-inline: 0;
+  background-color: var(--primary-color);
+  clip-path: inset(0 calc((1 - var(--value-change-level)) * 100%) 0 0 round var(--shape-corner-full));
+  transition: clip-path var(--motion-default-effects);
+}
+
+.valueChangeLevelActive:dir(rtl) {
+  clip-path: inset(0 0 0 calc((1 - var(--value-change-level)) * 100%) round var(--shape-corner-full));
+}
+
+.valueChangeLevelTrack {
+  inset-inline: 0;
+  background-color: color-mix(in srgb, var(--primary-color) 38%, rgb(255 255 255 / 14%));
+  clip-path: inset(0 0 0 calc(var(--value-change-level) * 100% + 4px) round var(--shape-corner-full));
+  transition: clip-path var(--motion-default-effects);
+}
+
+.valueChangeLevelTrack:dir(rtl) {
+  clip-path: inset(0 calc(var(--value-change-level) * 100% + 4px) 0 0 round var(--shape-corner-full));
+}
+
+.valueChangeLevelTrack::after {
+  inset-inline-end: 0;
+  aspect-ratio: 1;
+  background-color: var(--primary-color);
+  content: '';
+}
+
+/* Percentages keep their width, so the indicator does not shift while they change. */
+.hasValueChangeLevel .valueChangeText {
+  min-width: 4ch;
+  text-align: end;
+}
+
+/* Double-tap seek feedback: a floating panel on the tapped side whose inner
+   edge is a half ellipse, springing out from the screen edge while shown,
+   with the icon in a filled badge like the OSD and the time below it. The
+   panel is a pseudo-element, so the container keeps its full tap area. */
+:deep(.shaka-fast-forward-container),
+:deep(.shaka-rewind-container) {
+  isolation: isolate;
+  flex-direction: column-reverse;
+  gap: 8px;
+  background-color: transparent;
+  font-size: 15px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 4px rgb(0 0 0 / 60%);
+  transition: opacity var(--motion-fast-effects);
+}
+
+:deep(:is(.shaka-fast-forward-container, .shaka-rewind-container)::before) {
+  position: absolute;
+  z-index: -1;
+  inset: 8px;
+  background-color: rgb(0 0 0 / 45%);
+  content: '';
+  pointer-events: none;
+  scale: 0.9;
+  transition: scale var(--motion-fast-spatial);
+}
+
+/* The mobile gesture code and Shaka show the feedback with an inline opacity. */
+:deep(:is(.shaka-fast-forward-container, .shaka-rewind-container)[style*='opacity: 1']::before) {
+  scale: 1;
+}
+
+:deep(.shaka-rewind-container::before) {
+  border-radius: var(--shape-corner-extra-large) 50% 50% var(--shape-corner-extra-large) / var(--shape-corner-extra-large) 50% 50% var(--shape-corner-extra-large);
+  transform-origin: left center;
+}
+
+:deep(.shaka-fast-forward-container::before) {
+  border-radius: 50% var(--shape-corner-extra-large) var(--shape-corner-extra-large) 50% / 50% var(--shape-corner-extra-large) var(--shape-corner-extra-large) 50%;
+  transform-origin: right center;
+}
+
+:deep(.shaka-forward-rewind-container-icon) {
+  box-sizing: content-box;
+  width: 28px;
+  height: 28px;
+  padding: 12px;
+  border-radius: var(--shape-corner-full);
+  color: var(--text-with-main-color);
+
+  /* Shaka sets an inline transparent background on its icons. */
+  background-color: var(--primary-color) !important;
 }
 
 .countdownPoster {

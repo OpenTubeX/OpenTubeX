@@ -22,6 +22,7 @@ function fixture(t, { time = 50, live = false } = {}) {
     valueChangeIcons: { value: [] },
     showValueChangePopup: { value: false },
     invertValueChangeContentOrder: { value: false },
+    valueChangeLevel: { value: null },
     valueChangeTimeout: null,
     showOverlayControls() {},
     noteSeekHistoryJump() {},

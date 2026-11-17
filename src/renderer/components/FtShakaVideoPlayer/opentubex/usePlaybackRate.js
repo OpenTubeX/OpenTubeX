@@ -55,7 +55,7 @@ export function getPlaybackRatePresets(step, maximum) {
  *   onPlaybackRateUpdated: (rate: number) => void,
  *   onPlaybackRateUserSet: (rate: number) => void,
  *   updatePendingPlaybackRateMenu: () => void,
- *   showValueChange: (message: string, icons: string, invertContentOrder?: boolean, seekSeconds?: number, revealControls?: boolean) => void,
+ *   showValueChange: (message: string, icons: string, options?: { revealControls?: boolean }) => void,
  *   showToast: (options: { message: string, icon: [string, string] }) => void,
  *   t: (key: string) => string,
  * }} options
@@ -541,7 +541,7 @@ export function usePlaybackRate({
     // The provided playback rate (0.05) is not in the supported playback range.
     if (newPlaybackRate > 0.07 && newPlaybackRate <= maxVideoPlaybackRate.value) {
       setPlaybackRate(newPlaybackRate)
-      showValueChange(`${newPlaybackRateString}x`, 'gauge', false, 0, revealControls)
+      showValueChange(`${newPlaybackRateString}x`, 'gauge', { revealControls })
     }
   }
 
