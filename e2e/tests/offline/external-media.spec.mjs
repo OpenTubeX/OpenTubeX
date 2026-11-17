@@ -173,11 +173,12 @@ test('external media opens a description timestamp link in a new tab at its time
   await expect.poll(() => linkedVideo.evaluate(element => element.readyState).catch(() => 0)).toBeGreaterThanOrEqual(1)
   await linkedVideo.evaluate(element => element.pause())
   await expect.poll(() => linkedVideo.evaluate(element => element.currentTime)).toBeCloseTo(15, 0)
-  // The tab drops the timestamp once used, so restoring it resumes instead.
-  await expect.poll(() => page.evaluate(async () => {
+  const tabTimestamp = () => page.evaluate(async () => {
     const state = await window.ftElectron.tabs.getState()
     return state.tabs.find(tab => tab.id === state.activeTabId)?.route.query.timestamp ?? null
-  })).toBeNull()
+  })
+  // Until the media is watched, restoring the tab returns to the link instead of the saved position.
+  await expect.poll(tabTimestamp).toBe('15')
 
   // Opening another timestamp of the same media in this tab seeks without reloading.
   await app.electronApp.evaluate(({ BrowserWindow }, { channel, route }) => {
@@ -186,6 +187,10 @@ test('external media opens a description timestamp link in a new tab at its time
   await expect.poll(() => linkedVideo.evaluate(element => element.currentTime)).toBeCloseTo(22, 0)
   // Opening timestamp links without watching keeps the saved position.
   expect(await savedExternalPosition(page, mediaUrl)).toBe(5)
+  // Once watched, the tab drops the timestamp, so restoring it resumes instead.
+  await linkedVideo.evaluate(seekAsViewer, 25)
+  await expect.poll(tabTimestamp).toBeNull()
+  await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBeCloseTo(25, 0)
 })
 
 test('external media resets completed playback and clears positions with watch history', async ({ app, page }) => {
@@ -421,7 +426,7 @@ for (const seekBeforeMetadata of [false, true]) {
       await expect.poll(() => page.evaluate(async () => {
         const state = await window.ftElectron.tabs.getState()
         return state.tabs.find(tab => tab.id === state.activeTabId)?.route.query.timestamp ?? null
-      })).toBeNull()
+      })).toBe(String(timestamp))
       releaseAudio()
       await expect.poll(() => audio.evaluate(element => element.currentTime)).toBeCloseTo(timestamp, 1)
       await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(timestamp % videoDuration, 1)
@@ -445,6 +450,8 @@ for (const seekBeforeMetadata of [false, true]) {
     await expect.poll(() => audio.evaluate(element => element.currentTime).catch(() => 0)).toBeCloseTo(position, 1)
     const videoDuration = await video.evaluate(element => element.duration)
     await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(position % videoDuration, 1)
+    // Reaching the end counts as watching only after the viewer played or chose a position.
+    await video.evaluate(seekAsViewer, 0)
     await audio.evaluate(element => { element.currentTime = element.duration - 0.1 })
     await video.evaluate(element => element.play())
     await expect.poll(() => audio.evaluate(element => element.ended)).toBe(true)

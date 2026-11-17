@@ -652,6 +652,8 @@ export default defineComponent({
       historyPlaybackSeconds: 0,
       // The viewer played the video for a few seconds or chose a position
       historyEngaged: false,
+      /** @type {number | null} where the viewer seeked to, until the video joins the history */
+      historyChosenSeconds: null,
       playbackHistoryStarted: false,
       /** @type {Promise<unknown> | null} the latest history write of the current video */
       latestHistoryWrite: null,
@@ -2681,6 +2683,7 @@ export default defineComponent({
       this.videoPlayerLoaded = false
       this.historyPlaybackSeconds = 0
       this.historyEngaged = false
+      this.historyChosenSeconds = null
       this.playbackHistoryStarted = false
       this.latestHistoryWrite = null
       this.videoMetadataIncomplete = false
@@ -5134,11 +5137,12 @@ export default defineComponent({
      */
     engageHistory(chosenSeconds) {
       this.historyEngaged = true
-      this.startPlaybackHistory(chosenSeconds)
+      // A seek before the player has loaded still decides the first write
+      if (chosenSeconds !== undefined) this.historyChosenSeconds = chosenSeconds
+      this.startPlaybackHistory()
     },
 
-    /** @param {number} [chosenSeconds] */
-    startPlaybackHistory(chosenSeconds) {
+    startPlaybackHistory() {
       if (this.playbackHistoryStarted || !this.historyEngaged || !this.videoPlayerLoaded) { return }
       this.playbackHistoryStarted = true
 
@@ -5147,7 +5151,7 @@ export default defineComponent({
         // Otherwise, the chosen position also keeps this write from overtaking the progress
         // saved right after it, such as when leaving.
         this.addToHistory(this.watchedProgressSavingEnabled
-          ? chosenSeconds ?? this.timestamp ?? this.historyEntry?.watchProgress ?? 0
+          ? this.historyChosenSeconds ?? this.timestamp ?? this.historyEntry?.watchProgress ?? 0
           : (this.historyEntry?.watchProgress ?? 0))
 
         // Must be called AFTER history entry inserted

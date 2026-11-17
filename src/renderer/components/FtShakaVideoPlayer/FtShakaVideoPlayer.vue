@@ -5043,6 +5043,8 @@ function stepSeekHistory(direction) {
   updateSeekHistory(step.history)
   seekHistoryJump = null
   setCurrentTime(step.target)
+  // Unlike its other seeks, undoing or redoing is not recorded again, but the viewer chose it
+  emit('viewer-seek', step.target)
   showValueChange(formatDurationAsTimestamp(step.target), icon, !back)
 }
 

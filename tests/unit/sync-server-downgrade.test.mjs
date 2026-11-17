@@ -2544,7 +2544,7 @@ for (const rememberHistory of [false, true]) {
       watchSource.indexOf('\n\n    checkIfPlaylist:')
     ).trim().replace(/,$/, '')})`)
       const startPlaybackHistory = vm.runInNewContext(`(function ${watchSource.slice(
-      watchSource.indexOf('    startPlaybackHistory(chosenSeconds) {') + '    '.length,
+      watchSource.indexOf('    startPlaybackHistory() {') + '    '.length,
       watchSource.indexOf('\n\n    keepHistoryEntryAlive(currentSeconds) {')
     ).trim().replace(/,$/, '')})`, { process: { env: { IS_CAPACITOR: true, IS_ELECTRON: false } } })
       const savedPositions = []

@@ -603,6 +603,8 @@ const currentTime = ref(0)
 const startTime = ref(null)
 /** @type {number | null} where a timestamp link starts the media, instead of the saved position */
 let startTimestamp = null
+/** @type {string | undefined | null} the timestamp query the position already follows */
+let appliedQueryTimestamp = null
 let lastPositionSave = 0
 let lastSavedPosition = 0
 let lastPlaybackPosition = 0
@@ -1111,6 +1113,7 @@ function getQueryTimestamp() {
 
 /** Like on the watch page, restoring or reloading the tab later resumes instead of returning to the timestamp. */
 function consumeTimestamp() {
+  appliedQueryTimestamp = null
   if (!('timestamp' in route.query)) return
   const query = { ...route.query }
   delete query.timestamp
@@ -1167,13 +1170,15 @@ function addToHistory(watchProgress, isWatched = isHistoryEntryWatched(historyEn
 }
 
 function engageHistory() {
-  historyEngaged = true
+  handleViewerSeek()
   addToHistoryOnce()
 }
 
 /** The media joins the history once the seek completes, see handleSeeked. */
 function handleViewerSeek() {
   historyEngaged = true
+  // Until then, restoring the tab returns to the link instead of the older saved position
+  consumeTimestamp()
 }
 
 /**
@@ -1202,7 +1207,7 @@ function markAsWatchedIfFinished(seconds, isFinished = false) {
   if (isFinished && historyPlaybackSeconds > 0) engageHistory()
   if (!hasBeenPresented || !store.getters.getRememberHistory || source.value?.isLive ||
     isHistoryEntryWatched(historyEntry.value) || watchedMarkPending) return
-  if (!isFinished && !historyEngaged) return
+  if (!historyEngaged) return
   if (!isFinished && player.value?.isPaused()) return
   // Until both tracks' lengths are known, the threshold would use the shorter video.
   if (!isFinished && source.value?.separateAudioUrl && !hasCompanionMetadata()) return
@@ -1221,7 +1226,8 @@ function hasCompanionMetadata() {
 
 function applyQueryTimestamp() {
   const seconds = getQueryTimestamp()
-  if (seconds === null || loading.value || !player.value?.hasLoaded) return
+  if (seconds === null || route.query.timestamp === appliedQueryTimestamp || loading.value || !player.value?.hasLoaded) return
+  appliedQueryTimestamp = route.query.timestamp
   if (source.value?.separateAudioUrl && !hasCompanionMetadata()) {
     // Only both tracks' lengths tell which one supplies the timeline, so the
     // companion restore applies the link once the soundtrack's metadata arrives.
@@ -1233,7 +1239,7 @@ function applyQueryTimestamp() {
     // Opening a link is not watching yet, see handleViewerSeek
     seekTo(seconds, false)
   }
-  consumeTimestamp()
+  if (historyEngaged) consumeTimestamp()
 }
 
 function updateCompanionLoop() {
@@ -1374,7 +1380,7 @@ function updateCurrentTime(seconds) {
   const looped = media?.loop === true && !media.paused && position < lastPlaybackPosition && lastPlaybackPosition >= duration - 2
   // Only natural playback counts towards joining the history, not seeks
   const elapsed = position - lastPlaybackPosition
-  if (!historyEngaged && media && !media.paused && elapsed > 0 && elapsed <= 2) {
+  if (!historyEngaged && !seeking.value && media && !media.paused && elapsed > 0 && elapsed <= 2) {
     historyPlaybackSeconds += elapsed
     if (historyPlaybackSeconds >= HISTORY_MIN_PLAYBACK_SECONDS) engageHistory()
   }
@@ -1554,6 +1560,7 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
   currentTime.value = 0
   startTime.value = null
   startTimestamp = null
+  appliedQueryTimestamp = null
   lastPositionSave = 0
   lastSavedPosition = 0
   lastPlaybackPosition = 0
@@ -1601,7 +1608,9 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
     }
     source.value = result.source
     setTabTitle(info.value.title || hostname.value)
-    consumeTimestamp()
+    // The start position already uses the link
+    appliedQueryTimestamp = route.query.timestamp
+    if (result.source?.isLive) consumeTimestamp()
     if (creatorAvatarUrl.value) setTabAvatar(creatorAvatarUrl.value)
   } catch (error) {
     if (generation !== loadGeneration) return
