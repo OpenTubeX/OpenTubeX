@@ -2031,10 +2031,22 @@
           @focusin="handleScrollMiniVolumeMouseEnter"
           @focusout="handleScrollMiniVolumeMouseLeave"
         >
-          <ft-icon
+          <button
+            type="button"
+            :tabindex="scrollMiniPlayerDetached ? 0 : -1"
             class="scrollMiniVolumeIcon"
-            :icon="scrollMiniVolumeIcon"
-          />
+            :title="$t('KeyboardShortcutPrompt.Mute')"
+            :aria-label="$t('KeyboardShortcutPrompt.Mute')"
+            :aria-pressed="scrollMiniVolume === 0 ? 'true' : 'false'"
+            @click.stop.prevent="toggleScrollMiniMuted"
+            @pointerdown.stop
+            @mousedown.stop.prevent
+          >
+            <ft-icon
+              :icon="scrollMiniVolumeIcon"
+              aria-hidden="true"
+            />
+          </button>
           <div
             ref="scrollMiniVolumeTrack"
             class="shaka-range-container scrollMiniVolumeTrack"
@@ -7767,6 +7779,7 @@ const {
   updateScrollMiniDragHandleContrast,
   updateScrollMiniPlayer,
   updateScrollMiniVideoAspectRatio,
+  toggleScrollMiniMuted,
   updateScrollMiniVolume,
 } = useScrollMiniPlayer({
   container,

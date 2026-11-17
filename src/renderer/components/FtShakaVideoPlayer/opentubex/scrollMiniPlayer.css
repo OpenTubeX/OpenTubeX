@@ -903,9 +903,14 @@
 
 .scrollMiniVolumeIcon {
   width: 16px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
   font-size: 14px;
   text-align: center;
   flex-shrink: 0;
+  cursor: pointer;
 }
 
 .scrollMiniVolumeTrack {
