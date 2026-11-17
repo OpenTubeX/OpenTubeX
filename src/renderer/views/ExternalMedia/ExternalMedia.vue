@@ -1378,9 +1378,9 @@ function updateCurrentTime(seconds) {
   // A looping soundtrack, as on Coub, starts over without ending.
   const duration = getMediaDuration()
   const looped = media?.loop === true && !media.paused && position < lastPlaybackPosition && lastPlaybackPosition >= duration - 2
-  // Only natural playback counts towards joining the history, not seeks
+  // Only natural playback counts towards joining the history, not seeks. Faster playback moves further between time updates.
   const elapsed = position - lastPlaybackPosition
-  if (!historyEngaged && !seeking.value && media && !media.paused && elapsed > 0 && elapsed <= 2) {
+  if (!historyEngaged && !seeking.value && media && !media.paused && elapsed > 0 && elapsed <= 2 * Math.max(1, media.playbackRate)) {
     historyPlaybackSeconds += elapsed
     if (historyPlaybackSeconds >= HISTORY_MIN_PLAYBACK_SECONDS) engageHistory()
   }

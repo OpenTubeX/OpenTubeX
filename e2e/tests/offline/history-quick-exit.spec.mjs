@@ -145,10 +145,19 @@ test('opening a video leaves its history unchanged until it plays for a few seco
   await expect(page).not.toHaveURL(/#\/watch/)
   expect(savedRecord(app)).toEqual(seeded)
 
+  // At this speed, playback moves more than two seconds between time updates.
+  await page.evaluate(async () => {
+    await window.$store.dispatch('updateMaxVideoPlaybackRate', 10)
+    await window.$store.dispatch('updateDefaultPlayback', 10)
+  })
   const video = await openMockedVideo(page, 'jNQXAC9IVRw', { waitForPlayback: false })
   await playWhenLoaded(video)
+  // Stop before the end, which would count as watching on its own.
+  await expect.poll(() => video.evaluate(element => element.currentTime), { intervals: [50] })
+    .toBeGreaterThanOrEqual(seeded.watchProgress + 8)
+  await video.evaluate(element => element.pause())
+  expect(await video.evaluate(element => element.ended)).toBe(false)
   await expect.poll(() => savedRecord(app).timeWatched).toBeGreaterThan(seeded.timeWatched)
-  expect(await video.evaluate(element => element.currentTime)).toBeGreaterThanOrEqual(seeded.watchProgress + 5)
 })
 
 for (const existing of [true, false]) {

@@ -5021,6 +5021,14 @@ export default defineComponent({
       this.shortsCompletionBlockedBySeek = shortsCompletion.blockedBySeek
       this.shortsPlaybackAfterSeekSeconds = shortsCompletion.playbackAfterSeekSeconds
 
+      // Faster playback moves further between time updates
+      if (!this.skipNextPlaybackTick && !this.historyEngaged && this.videoPlayerLoaded && elapsedSeconds > 0 &&
+        elapsedSeconds <= SABR_ERROR_RECOVERY_MAX_TICK_SECONDS * Math.max(1, this.currentPlaybackRate ?? 1) &&
+        !this.isPlaybackPaused()) {
+        this.historyPlaybackSeconds += elapsedSeconds
+        if (this.historyPlaybackSeconds >= HISTORY_MIN_PLAYBACK_SECONDS) this.engageHistory()
+      }
+
       if (this.skipNextPlaybackTick) {
         this.skipNextPlaybackTick = false
       } else if (
@@ -5029,12 +5037,6 @@ export default defineComponent({
         !this.isPlaybackPaused()
       ) {
         this.playbackProgressedForCurrentVideo = true
-        if (!this.historyEngaged && this.videoPlayerLoaded) {
-          this.historyPlaybackSeconds += elapsedSeconds
-          if (this.historyPlaybackSeconds >= HISTORY_MIN_PLAYBACK_SECONDS) {
-            this.engageHistory()
-          }
-        }
         if (this.playbackNetworkRetryPending) {
           this.playbackNetworkRetryPlayedSeconds += elapsedSeconds
           if (this.playbackNetworkRetryPlayedSeconds >= SABR_ERROR_RECOVERY_SETTLE_SECONDS) {
