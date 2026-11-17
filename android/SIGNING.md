@@ -82,5 +82,6 @@ F-Droid rebuilds each stable release from its tag with `:app:assembleRelease -Ps
 
 - Build with the Go toolchain from `_scripts/cast-sender/go.mod`, the NDK in `app/build.gradle`, Java 21 and the pnpm version in `package.json`'s `packageManager` field.
 - Install 7-Zip. Release builds fail without it because the other packer produces different runtime archives.
+- Bundle WebAssembly built from source, because F-Droid rejects the prebuilt modules in npm packages. `node _scripts/androidWasm.mjs docker` builds QuickJS and the JPEG XL encoder from pinned sources with Debian trixie's emscripten 3.1.69, and `ANDROID_WASM_FROM_SOURCE=1 pnpm run capacitor:sync:android` bundles them. F-Droid installs the same emscripten package and runs the script's `fetch` and `build` steps. `_scripts/android_apks.py --wasm-dir build/android-wasm/out` rejects APKs with any other WebAssembly. The mobile apps use the system's SQLite, so their bundle leaves out SQLite's WebAssembly. Updating `@jitl/quickjs-wasmfile-release-sync` or `@jsquash/jxl` requires updating the script's pinned sources.
 - Do not embed timestamps, absolute paths or CI-only environment variables in the web bundle or APK. The web bundle embeds the checked-out commit rather than `GITHUB_SHA`.
 - The APK must not include Google's encrypted dependency metadata block.

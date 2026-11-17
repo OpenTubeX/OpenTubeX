@@ -74,7 +74,7 @@ class ApkPackagingTest(unittest.TestCase):
                         apk.writestr(f"lib/{arch}/libffmpeg.so", b"fixture")
 
     def write_apk(self, name, abis, build_only=False, ffmpeg=b"fixture", python_files=(), ffmpeg_files=(),
-                  native_files=(), dex=b"fixture"):
+                  native_files=(), dex=b"fixture", assets=()):
         def runtime(files):
             data = io.BytesIO()
             with zipfile.ZipFile(data, "w") as archive:
@@ -87,6 +87,8 @@ class ApkPackagingTest(unittest.TestCase):
 
         with zipfile.ZipFile(self.source / name, "w") as apk:
             apk.writestr("classes.dex", dex)
+            for entry, content in assets:
+                apk.writestr(f"assets/public/{entry}", content)
             for abi in abis:
                 for executable in ("python", "qjs", "ffprobe"):
                     apk.writestr(f"lib/{abi}/lib{executable}.so", b"fixture")
@@ -178,6 +180,21 @@ class ApkPackagingTest(unittest.TestCase):
                     apks.prepare(self.source, self.output)
                 self.assertFalse(self.output.exists())
 
+    def test_accepts_only_webassembly_built_from_source(self):
+        # F-Droid rejects prebuilt WebAssembly, so its rebuild needs these modules built from source.
+        wasm_dir = Path(self.temp.name) / "wasm"
+        (wasm_dir / "quickjs").mkdir(parents=True)
+        (wasm_dir / "quickjs/emscripten-module.wasm").write_bytes(b"\0asm built from source")
+        self.write_apk("app-arm64-v8a-nightly.apk", {"arm64-v8a"}, assets=[("1a2b.wasm", b"\0asm built from source")])
+        apks.prepare(self.source, self.output, wasm_dir=wasm_dir)
+
+        for path in self.output.iterdir():
+            path.unlink()
+        self.write_apk("app-arm64-v8a-nightly.apk", {"arm64-v8a"}, assets=[("3c4d.wasm", b"\0asm from npm")])
+        with self.assertRaisesRegex(ValueError, "assets/public/3c4d.wasm is not built from source"):
+            apks.prepare(self.source, self.output, wasm_dir=wasm_dir)
+        self.assertFalse(any(self.output.iterdir()))
+
     def test_rejects_build_only_runtime_files(self):
         self.write_apk("app-arm64-v8a-nightly.apk", {"arm64-v8a"}, build_only=True)
         with self.assertRaisesRegex(ValueError, "build-only"):
@@ -232,8 +249,8 @@ class ApkPackagingTest(unittest.TestCase):
     def test_accepts_universal_apk_with_bundled_sqlite(self):
         inspect = apks.inspect_apk
 
-        def inspect_with_sqlite(path, abi, lite=False):
-            sizes = inspect(path, abi, lite)
+        def inspect_with_sqlite(path, abi, lite=False, wasm=None):
+            sizes = inspect(path, abi, lite, wasm)
             if abi == "universal":
                 # Size observed in the first nightly with bundled SQLite.
                 sizes["native"] += round(217.61 * apks.MIB) - sum(sizes.values())
@@ -248,8 +265,8 @@ class ApkPackagingTest(unittest.TestCase):
     def test_enforces_universal_download_size_budget(self):
         inspect = apks.inspect_apk
 
-        def inspect_oversized_universal(path, abi, lite=False):
-            sizes = inspect(path, abi, lite)
+        def inspect_oversized_universal(path, abi, lite=False, wasm=None):
+            sizes = inspect(path, abi, lite, wasm)
             if abi == "universal":
                 sizes["native"] += round(225.01 * apks.MIB) - sum(sizes.values())
             return sizes

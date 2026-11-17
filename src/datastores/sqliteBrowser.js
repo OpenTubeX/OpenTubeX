@@ -1,13 +1,16 @@
 import { parseLegacyDatafile, SqliteDatastore } from './sqlite.js'
 
-/** @returns {(name: string) => import('./sqlite.js').SqliteDriver} */
-function workerDrivers() {
+/**
+ * @param {() => Worker} startWorker
+ * @returns {(name: string) => import('./sqlite.js').SqliteDriver}
+ */
+function workerDrivers(startWorker) {
   let worker = null
   let nextId = 0
   const pending = new Map()
   function call(method, args) {
     if (!worker) {
-      worker = new Worker(new URL('./sqliteWorker.js', import.meta.url), { type: 'module' })
+      worker = startWorker()
       worker.onmessage = ({ data: { id, result, error } }) => {
         const request = pending.get(id)
         pending.delete(id)
@@ -61,8 +64,11 @@ function nativeDrivers() {
 }
 
 // Android and iOS use the system's native SQLite through an app plugin, so
-// the library stays outside WebView storage.
-const createDriver = process.env.IS_CAPACITOR ? nativeDrivers() : workerDrivers()
+// the library stays outside WebView storage. Starting the worker only in the
+// other branch keeps SQLite's WebAssembly out of their bundles.
+const createDriver = process.env.IS_CAPACITOR
+  ? nativeDrivers()
+  : workerDrivers(() => new Worker(new URL('./sqliteWorker.js', import.meta.url), { type: 'module' }))
 
 // The adapter that stored each platform's NeDB files. Capacitor builds
 // replace only NeDB's own relative import of it, so choose it explicitly.

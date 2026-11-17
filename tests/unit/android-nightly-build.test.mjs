@@ -120,7 +120,7 @@ test('stable releases build only production APKs and sort between nightlies by v
   await writeFile(join(directory, 'android/app/version.properties'), `# Base code\nversionCode=${stableCode}\n`)
   const stubs = {
     git: '#!/bin/sh\necho 12345\n',
-    pnpm: '#!/bin/sh\nexit 0\n',
+    pnpm: '#!/bin/sh\nprintf "%s|%s\\n" "$*" "$ANDROID_WASM_FROM_SOURCE" >> pnpm.log\n',
     'android/gradlew': '#!/bin/sh\nprintf "%s|%s|%s\\n" "$*" "$ANDROID_VERSION_CODE" "$ANDROID_VERSION_NAME" >> gradle.log\n',
     python3: '#!/bin/sh\nprintf "%s\\n" "$*" >> packaging.log\n'
   }
@@ -138,6 +138,7 @@ test('stable releases build only production APKs and sort between nightlies by v
       ANDROID_RELEASE_KEYSTORE_BASE64: Buffer.from('fixture').toString('base64'),
       ANDROID_RELEASE_STORE_PASSWORD: 'fixture',
       ANDROID_RELEASE_KEYSTORE: join(directory, 'android/release.keystore'),
+      ANDROID_WASM_FROM_SOURCE: build.env.ANDROID_WASM_FROM_SOURCE,
       ANDROID_VERSION_CODE: '',
       ANDROID_VERSION_NAME: ''
     },
@@ -145,6 +146,7 @@ test('stable releases build only production APKs and sort between nightlies by v
   })
   const result = runStable()
   assert.equal(result.status, 0, result.stderr)
+  assert.equal(await readFile(join(directory, 'pnpm.log'), 'utf8'), 'run capacitor:sync:android|1\n')
   const invocations = (await readFile(join(directory, 'gradle.log'), 'utf8')).trim().split('\n')
   assert.equal(invocations.length, 2)
   for (const invocation of invocations) {
@@ -156,8 +158,8 @@ test('stable releases build only production APKs and sort between nightlies by v
   assert.ok(!invocations[0].includes('-Plite'))
   assert.ok(invocations[1].includes('-Plite'))
   const packaging = await readFile(join(directory, 'packaging.log'), 'utf8')
-  assert.match(packaging, /apk\/release android-apks --release\n/)
-  assert.match(packaging, /apk\/release android-lite-apks --release --lite/)
+  assert.match(packaging, /apk\/release android-apks --release --wasm-dir build\/android-wasm\/out\n/)
+  assert.match(packaging, /apk\/release android-lite-apks --release --lite --wasm-dir build\/android-wasm\/out\n/)
   assert.doesNotMatch(packaging, /apk\/nightly/)
 
   await writeFile(join(directory, 'android/app/version.properties'), `versionCode=${stableCode - 2}\n`)
@@ -171,6 +173,7 @@ test('stable releases build only production APKs and sort between nightlies by v
     await writeFile(join(directory, 'git'), `#!/bin/sh\necho ${commitCount}\n`)
     await writeFile(join(directory, 'gradle.log'), '')
     await writeFile(join(directory, 'packaging.log'), '')
+    await writeFile(join(directory, 'pnpm.log'), '')
     await writeFile(join(directory, 'package.json'), JSON.stringify({ version: '0.35.0' }))
     const nightly = spawnSync('bash', ['-c', nightlyBuild.run], {
       cwd: directory,
@@ -179,11 +182,13 @@ test('stable releases build only production APKs and sort between nightlies by v
         PATH: `${directory}:${process.env.PATH}`,
         GITHUB_REF: 'refs/heads/development',
         GITHUB_RUN_NUMBER: '1234',
+        ANDROID_WASM_FROM_SOURCE: nightlyBuild.env.ANDROID_WASM_FROM_SOURCE,
         GITHUB_OUTPUT: join(directory, 'output')
       },
       encoding: 'utf8'
     })
     assert.equal(nightly.status, 0, nightly.stderr)
+    assert.equal(await readFile(join(directory, 'pnpm.log'), 'utf8'), 'run capacitor:sync:android|1\n')
     const nightlyInvocations = (await readFile(join(directory, 'gradle.log'), 'utf8')).trim().split('\n')
     const nightlyCode = Number(nightlyInvocations[0].split('|')[1])
     assert.equal(nightlyInvocations.length, 2)
@@ -195,8 +200,8 @@ test('stable releases build only production APKs and sort between nightlies by v
     assert.ok(!nightlyInvocations[0].includes('-Plite'))
     assert.ok(nightlyInvocations[1].includes('-Plite'))
     assert.equal(await readFile(join(directory, 'packaging.log'), 'utf8'),
-      '_scripts/android_apks.py android/app/build/outputs/apk/nightly android-apks\n' +
-      '_scripts/android_apks.py android/app/build/outputs/apk/nightly android-lite-apks --lite\n')
+      '_scripts/android_apks.py android/app/build/outputs/apk/nightly android-apks --wasm-dir build/android-wasm/out\n' +
+      '_scripts/android_apks.py android/app/build/outputs/apk/nightly android-lite-apks --lite --wasm-dir build/android-wasm/out\n')
     assert.ok(commitCount === 12345 ? nightlyCode < stableCode : nightlyCode > stableCode,
       'Stable promotion must update the same-commit nightly and accept the next nightly update')
   }

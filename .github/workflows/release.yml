@@ -223,10 +223,16 @@ jobs:
           sleep 10
         done
 
+    - name: Build WebAssembly modules from source
+      if: matrix.runtime == 'android'
+      # F-Droid rebuilds these APKs and rejects prebuilt WebAssembly.
+      run: node _scripts/androidWasm.mjs docker
+
     - name: Build signed Android APKs
       if: matrix.runtime == 'android'
       shell: bash
       env:
+        ANDROID_WASM_FROM_SOURCE: '1'
         ANDROID_RELEASE_KEYSTORE_BASE64: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
         ANDROID_RELEASE_STORE_PASSWORD: ${{ secrets.ANDROID_RELEASE_KEYSTORE_PASSWORD }}
         ANDROID_RELEASE_KEYSTORE: ${{ github.workspace }}/android/release.keystore
@@ -248,10 +254,10 @@ jobs:
         fi
         pnpm run capacitor:sync:android
         ./android/gradlew --project-dir android :app:assembleRelease -PsplitApks
-        python3 _scripts/android_apks.py android/app/build/outputs/apk/release android-apks --release
+        python3 _scripts/android_apks.py android/app/build/outputs/apk/release android-apks --release --wasm-dir build/android-wasm/out
         # Lite APKs omit yt-dlp and FFmpeg for devices with little storage.
         ./android/gradlew --project-dir android :app:assembleRelease -PsplitApks -Plite
-        python3 _scripts/android_apks.py android/app/build/outputs/apk/release android-lite-apks --release --lite
+        python3 _scripts/android_apks.py android/app/build/outputs/apk/release android-lite-apks --release --lite --wasm-dir build/android-wasm/out
 
     - name: Convert x64 AppImage to Anylinux AppImage
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-x64')
