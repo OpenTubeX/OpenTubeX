@@ -1,0 +1,49 @@
+name: Token expiry
+
+# Opens an issue in OpenTubeX/OpenTubeX when a secret expires within 30 days or stops working.
+# Other OpenTubeX repositories call this workflow with their own secrets.
+on:
+  workflow_call:
+    inputs:
+      tokens:
+        description: 'Secrets to check, as space-separated NAME:kind pairs (kind: github, gitlab, cloudflare, snap, gpg)'
+        type: string
+        required: true
+  schedule:
+    - cron: '23 6 * * 1'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  check:
+    if: github.repository_owner == 'OpenTubeX'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: OpenTubeX/OpenTubeX
+          # Callers use the workflow from development, so the script comes from there too.
+          ref: development
+          sparse-checkout: _scripts/tokenExpiry.mjs
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+      - if: contains(inputs.tokens, ':snap')
+        run: sudo snap install snapcraft --classic
+      - uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        id: app-token
+        with:
+          client-id: ${{ vars.TOKEN_CHECK_APP_CLIENT_ID }}
+          private-key: ${{ secrets.TOKEN_CHECK_APP_PRIVATE_KEY }}
+          owner: OpenTubeX
+          repositories: OpenTubeX
+      - name: Check secrets
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          REPOSITORY: ${{ github.repository }}
+          TOKENS: ${{ inputs.tokens || 'GITLAB_SYNC_BOT_TOKEN:gitlab GITLAB_MIRROR_TOKEN:gitlab PUSH_TOKEN:github PACKAGE_SUBMISSION_TOKEN:github SCORECARD_TOKEN:github UPSTREAM_SYNC_TOKEN:github' }}
+          SECRETS: ${{ toJSON(secrets) }}
+        run: node _scripts/tokenExpiry.mjs
