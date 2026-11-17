@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import re
 import subprocess
+import threading
 
 from opentubex_ios_ffmpeg import set_control_file
 
@@ -146,6 +147,10 @@ def _download(request):
     progress_file = Path(request['progressFile'])
     control_file = Path(request['controlFile'])
     saved_files = set()
+    payload = request.get('payload', {})
+    video_ids = payload.get('videoIds') if isinstance(payload.get('videoIds'), list) else []
+    progress_lock = threading.Lock()
+    parts = []
 
     def collect(info):
         paths = [info.get('filepath')]
@@ -154,58 +159,32 @@ def _download(request):
         paths.extend(chapter.get('filepath') for chapter in info.get('chapters') or [])
         saved_files.update(Path(path) for path in paths if path)
 
-    def processed(progress):
-        if progress['postprocessor'] == 'CurrentVideo':
-            return
-        report({'status': 'finished'})
-        if progress['status'] == 'finished' and progress['postprocessor'] == 'MoveFiles':
-            collect(progress['info_dict'])
+    def position(part):
+        current = part['current']
+        if current.get('playlistIndex'):
+            return current['playlistIndex']
+        video_id = current.get('currentVideoId')
+        return video_ids.index(video_id) + 1 if video_id in video_ids else float('inf')
 
-    class CollectPlaylistFilesPP(PostProcessor):
-        def run(self, info):
-            # Progress hooks receive a copy from before concatenation. Collect
-            # the actual result after the playlist post-processors instead.
-            collect(info)
-            return [], info
-
-    current = {}
-
-    class CurrentVideoPP(PostProcessor):
-        # Desktop and Android parse a --print video: line, which forceprint
-        # cannot deliver here. This stage runs at the same point of each video.
-        def run(self, info):
-            title = info.get('title')
-            current.update({
-                'currentVideoId': info.get('id') if re.fullmatch(r'[\w-]{11}', str(info.get('id')), re.ASCII) else '',
-                'currentTitle': title[:255] if isinstance(title, str) else '',
-                'playlistIndex': _positive(info.get('playlist_autonumber')),
-                'playlistCount': _positive(info.get('n_entries')),
-            })
-            progress_file.write_text(json.dumps({**current, 'status': 'preparing', 'percent': 0,
-                                                 'speed': None, 'eta': None}), encoding='utf-8')
-            return [], info
-
-    def report(progress):
-        if control_file.exists():
-            raise yt_dlp.utils.DownloadError('Download interrupted')
-        total = progress.get('total_bytes') or progress.get('total_bytes_estimate') or 0
-        value = progress.get('downloaded_bytes') or 0
-        processing = progress.get('status') == 'finished'
-        speed = None if processing else progress.get('speed')
-        eta = None if processing else progress.get('eta')
-        # Format them like the _speed_str and _eta_str fields that desktop and Android show.
-        data = {'status': 'processing' if processing else 'downloading',
-                'percent': 0 if processing or not total else min(100, value * 100 / total),
-                'speed': None if speed is None else FileDownloader.format_speed(speed).strip(),
-                'eta': None if eta is None else FileDownloader.format_eta(eta).strip(), **current}
-        progress_file.write_text(json.dumps(data), encoding='utf-8')
+    def write_progress():
+        # Like desktop and Android, show the earliest video still in progress
+        # with the speed of every part of a split playlist.
+        with progress_lock:
+            active = [part for part in parts if not part['done']]
+            shown = min(active, key=position) if active else parts[0]
+            speeds = [part['speed'] for part in active if part['speed'] is not None]
+            speed = sum(speeds) if speeds else None
+            data = {**shown['current'], 'status': shown['status'], 'percent': shown['percent'],
+                    'speed': None if speed is None else FileDownloader.format_speed(speed).strip(),
+                    'eta': None if shown['eta'] is None else FileDownloader.format_eta(shown['eta']).strip(),
+                    'activeParts': len(active)}
+            progress_file.write_text(json.dumps(data), encoding='utf-8')
 
     _validate_arguments(request['args'])
     parsed = yt_dlp.parse_options(['--ignore-config', *request['args']])
     # Inspect the unvalidated options: yt-dlp supplies bestaudio/best itself
     # for -x, so the parsed selector alone cannot identify a user's -f choice.
     requested, _ = parsed.parser.parse_args(request['args'])
-    payload = request.get('payload', {})
     selects_codec = any(field.split(':', 1)[0].lstrip('+-') in
                         ('codec', 'vcodec', 'acodec', 'ext', 'vext', 'aext')
                         for field in parsed.ydl_opts['format_sort'])
@@ -226,8 +205,6 @@ def _download(request):
         'paths': {'home': str(folder), 'temp': str(folder)},
         'quiet': True, 'no_warnings': True, 'logger': logger,
         'forceprint': {}, 'print_to_file': {},
-        'progress_hooks': [report],
-        'postprocessor_hooks': [processed],
     })
     if request.get('cookies'):
         options['cookiefile'] = request['cookies']
@@ -235,42 +212,140 @@ def _download(request):
         bandwidth = yt_dlp.utils.parse_bytes(str(request['bandwidth']) + 'K') or 0
         if bandwidth > 0:
             options['ratelimit'] = max(1, min(bandwidth, 10_000_000 * 1024) // max(1, request.get('concurrency', 1)))
-    set_control_file(str(control_file))
-    try:
+
+    # The renderer limits the parts to what the playlist and its custom
+    # arguments allow, like splitDownloadArguments in src/ytDlpArguments.js.
+    urls = parsed.urls
+    count = max(1, int(request.get('parts') or 1)) if payload.get('isPlaylist') is True else 1
+    if video_ids:
+        count = min(count, len(urls))
+    for index in range(count):
+        part_options = dict(options)
+        if count == 1:
+            part_urls = urls
+        elif video_ids:
+            # Consecutive videos keep their autonumbers in playlist order.
+            start = index * len(urls) // count
+            part_urls = urls[start:(index + 1) * len(urls) // count]
+            part_options['autonumber_start'] = start + 1
+        else:
+            # Every part takes every count-th entry, so entries keep their playlist index.
+            part_urls = urls
+            part_options['playlist_items'] = f'{index + 1}::{count}'
+        parts.append({'options': part_options, 'urls': part_urls, 'current': {}, 'status': 'preparing',
+                      'percent': 0, 'speed': None, 'eta': None, 'done': False})
+
+    def run_part(part):
+        current = part['current']
+
+        def report(progress):
+            if control_file.exists():
+                raise yt_dlp.utils.DownloadError('Download interrupted')
+            total = progress.get('total_bytes') or progress.get('total_bytes_estimate') or 0
+            value = progress.get('downloaded_bytes') or 0
+            processing = progress.get('status') == 'finished'
+            # Formatted later like the _speed_str and _eta_str fields that desktop and Android show.
+            part.update({'status': 'processing' if processing else 'downloading',
+                         'percent': 0 if processing or not total else min(100, value * 100 / total),
+                         'speed': None if processing else progress.get('speed'),
+                         'eta': None if processing else progress.get('eta')})
+            write_progress()
+
+        def processed(progress):
+            if progress['postprocessor'] == 'CurrentVideo':
+                return
+            report({'status': 'finished'})
+            if progress['status'] == 'finished' and progress['postprocessor'] == 'MoveFiles':
+                collect(progress['info_dict'])
+
+        class CollectPlaylistFilesPP(PostProcessor):
+            def run(self, info):
+                # Progress hooks receive a copy from before concatenation. Collect
+                # the actual result after the playlist post-processors instead.
+                collect(info)
+                return [], info
+
+        class CurrentVideoPP(PostProcessor):
+            # Desktop and Android parse a --print video: line, which forceprint
+            # cannot deliver here. This stage runs at the same point of each video.
+            def run(self, info):
+                title = info.get('title')
+                current.update({
+                    'currentVideoId': info.get('id') if re.fullmatch(r'[\w-]{11}', str(info.get('id')), re.ASCII) else '',
+                    'currentTitle': title[:255] if isinstance(title, str) else '',
+                    # Selected entries keep their playlist index, and only the playlist
+                    # count includes the entries that another part downloads.
+                    'playlistIndex': _positive(info.get('playlist_index')),
+                    'playlistCount': _positive(info.get('playlist_count')) or _positive(info.get('n_entries')),
+                })
+                part.update({'status': 'preparing', 'percent': 0, 'speed': None, 'eta': None})
+                write_progress()
+                return [], info
+
+        set_control_file(str(control_file))
+        try:
+            if control_file.exists():
+                raise yt_dlp.utils.DownloadError('Download interrupted')
+            with yt_dlp.YoutubeDL({**part['options'], 'progress_hooks': [report],
+                                   'postprocessor_hooks': [processed]}) as ydl:
+                prepare_filename = ydl.prepare_filename
+
+                def contained_filename(*args, **kwargs):
+                    # Templates may create subdirectories, but all output must remain in this
+                    # job's staging directory until the security-scoped Files export succeeds.
+                    # Check yt-dlp's result: it expands ~ and $VARIABLES and keeps '..' titles.
+                    filename = prepare_filename(*args, **kwargs)
+                    if filename and not Path(filename).resolve().is_relative_to(folder.resolve()):
+                        raise ValueError('Output template must stay inside the download folder')
+                    return filename
+
+                ydl.prepare_filename = contained_filename
+                ydl.add_post_processor(CurrentVideoPP(ydl), when='video')
+                ydl.add_post_processor(CollectPlaylistFilesPP(ydl), when='playlist')
+                return ydl.download(part['urls'])
+        finally:
+            set_control_file('')
+            part['done'] = True
+            if len(parts) > 1:
+                write_progress()
+
+    if len(parts) == 1:
+        result = run_part(parts[0])
+    else:
+        results = [1] * len(parts)
+        failures = []
+
+        def run_thread(index):
+            try:
+                results[index] = run_part(parts[index])
+            except Exception as error:
+                failures.append(error)
+
+        threads = [threading.Thread(target=run_thread, args=(index,)) for index in range(len(parts))]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
         if control_file.exists():
             raise yt_dlp.utils.DownloadError('Download interrupted')
-        with yt_dlp.YoutubeDL(options) as ydl:
-            prepare_filename = ydl.prepare_filename
-
-            def contained_filename(*args, **kwargs):
-                # Templates may create subdirectories, but all output must remain in this
-                # job's staging directory until the security-scoped Files export succeeds.
-                # Check yt-dlp's result: it expands ~ and $VARIABLES and keeps '..' titles.
-                filename = prepare_filename(*args, **kwargs)
-                if filename and not Path(filename).resolve().is_relative_to(folder.resolve()):
-                    raise ValueError('Output template must stay inside the download folder')
-                return filename
-
-            ydl.prepare_filename = contained_filename
-            ydl.add_post_processor(CurrentVideoPP(ydl), when='video')
-            ydl.add_post_processor(CollectPlaylistFilesPP(ydl), when='playlist')
-            result = ydl.download(parsed.urls)
-        files = []
-        for path in sorted(saved_files):
-            if not path.is_file():
-                continue
-            if not path.resolve().is_relative_to(folder.resolve()):
-                raise ValueError('Downloaded file escapes the download folder')
-            files.append(str(path.relative_to(folder)))
-        if result != 0:
-            # yt-dlp skips playlist entries it cannot download, such as members-only
-            # videos, but still reports an error after downloading the others.
-            if payload.get('isPlaylist') is True and files:
-                return {'files': files, 'skippedError': _redact('\n'.join(logger.errors), 2000)}
-            raise ValueError(logger.last_error or 'yt-dlp could not download this media')
-        return {'files': files}
-    finally:
-        set_control_file('')
+        # A part that stopped with an error counts like a skipped playlist entry.
+        for error in failures:
+            logger.error(str(error))
+        result = 0 if all(code == 0 for code in results) else 1
+    files = []
+    for path in sorted(saved_files):
+        if not path.is_file():
+            continue
+        if not path.resolve().is_relative_to(folder.resolve()):
+            raise ValueError('Downloaded file escapes the download folder')
+        files.append(str(path.relative_to(folder)))
+    if result != 0:
+        # yt-dlp skips playlist entries it cannot download, such as members-only
+        # videos, but still reports an error after downloading the others.
+        if payload.get('isPlaylist') is True and files:
+            return {'files': files, 'skippedError': _redact('\n'.join(logger.errors), 2000)}
+        raise ValueError(logger.last_error or 'yt-dlp could not download this media')
+    return {'files': files}
 
 
 def _positive(value):

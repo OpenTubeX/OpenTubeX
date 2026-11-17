@@ -305,9 +305,12 @@ final class YtDlpRuntime {
         } finally { process.destroy(); }
     }
 
+    /** Stops every process of a download, including the other parts of a split playlist. */
     static void cancel(long id) {
-        RunningProcess process = PROCESSES.get("download-" + id);
-        if (process != null) process.stop();
+        String key = "download-" + id;
+        PROCESSES.forEach((name, process) -> {
+            if (name.equals(key) || name.startsWith(key + "-")) process.stop();
+        });
     }
 
 }

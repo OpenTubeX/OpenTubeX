@@ -239,6 +239,8 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
     private var records: [Int: [String: Any]] = [:]
     private var nextId = 0
     private var running: Set<Int> = []
+    // A playlist takes several slots for parallel parts and frees them as its parts finish.
+    private var slots: [Int: Int] = [:]
     private var configuration: [String: Any] = [:]
     private var timer: Timer?
     private let storageKey = "iosYtDlpDownloads"
@@ -433,7 +435,9 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
             "thumbnail": payload["thumbnail"] ?? "", "videoId": payload["videoId"] ?? "",
             "playlistId": payload["playlistId"] ?? "", "playlistKey": payload["playlistKey"] ?? "",
             "template": payload["template"] ?? "", "folder": reference,
-            "destinations": [], "files": [], "queuePosition": id
+            "destinations": [], "files": [], "queuePosition": id,
+            // how many parts of a playlist can download at the same time
+            "partLimit": min(10, max(1, call.getInt("partLimit") ?? 1))
         ]
         record["errorMessage"] = NSNull()
         records[id] = record
@@ -444,11 +448,14 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
 
     private func startNext() {
         let limit = min(10, max(1, configuration["concurrency"] as? Int ?? 1))
-        guard running.count < limit,
+        let usedSlots = slots.values.reduce(0, +)
+        guard usedSlots < limit,
               let id = queueIDs(with: ["queued"]).first(where: { !running.contains($0) && records[$0]?["args"] != nil }),
               let payload = records[id]?["retryPayload"] as? [String: Any],
               let args = records[id]?["args"] as? [String] else { return }
+        let parts = min(max(1, records[id]?["partLimit"] as? Int ?? 1), limit - usedSlots)
         running.insert(id)
+        slots[id] = parts
         let staging = folder(for: id)
         try? FileManager.default.createDirectory(at: staging, withIntermediateDirectories: true)
         try? FileManager.default.removeItem(at: controlFile(for: id))
@@ -462,7 +469,7 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
         IOSYtDlpRuntime.run(["operation": "download", "payload": payload, "args": args,
                              "cookies": configuration["useCookies"] as? Bool == true ? configuration["cookies"] ?? "" : "",
                              "bandwidth": configuration["bandwidth"] ?? "",
-                             "concurrency": limit,
+                             "concurrency": limit, "parts": parts,
                              "staging": staging.path, "progressFile": progressFile(for: id).path,
                              "controlFile": controlFile(for: id).path]) { [weak self] result in
             switch result {
@@ -519,6 +526,18 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
             for key in Self.currentVideoKeys { records[id]?[key] = progress[key] }
             publish(id)
         }
+        // Finished parts free their slots for other downloads. The last one stays
+        // claimed until the export finishes.
+        var released = false
+        for id in running {
+            guard let held = slots[id], held > 1,
+                  let data = try? Data(contentsOf: progressFile(for: id)),
+                  let progress = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  let active = progress["activeParts"] as? Int, max(1, active) < held else { continue }
+            slots[id] = max(1, active)
+            released = true
+        }
+        if released { startNext() }
     }
 
     private func finish(_ id: Int, result: Result<[String: Any], Error>) {
@@ -581,6 +600,7 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
                     self.records[id]?["status"] = "paused"
                 }
                 self.running.remove(id)
+                self.slots[id] = nil
                 self.publish(id)
                 self.startNext()
             }

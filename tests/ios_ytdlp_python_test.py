@@ -3,6 +3,7 @@ import os
 import subprocess
 import sys
 import tempfile
+import threading
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -81,7 +82,49 @@ class SelectingYoutubeDL(FakeYoutubeDL):
         return 0
 
 
+class PartYoutubeDL(FakeYoutubeDL):
+    calls = []
+    barrier = None
+
+    def download(self, urls):
+        PartYoutubeDL.calls.append((self.options.get('playlist_items'), self.options.get('autonumber_start'), urls))
+        # Every part must be running before any of them finishes.
+        PartYoutubeDL.barrier.wait(timeout=10)
+        folder = Path(self.options['paths']['home'])
+        name = f"{self.options.get('playlist_items') or self.options.get('autonumber_start')}.mp4".replace(':', '_')
+        folder.joinpath(name).write_bytes(b'media')
+        self.options['postprocessor_hooks'][0]({
+            'status': 'finished', 'postprocessor': 'MoveFiles', 'info_dict': {'filepath': str(folder / name)},
+        })
+        return 0
+
+
 class IOSYtDlpPythonTest(unittest.TestCase):
+    @patch.object(bridge.yt_dlp, 'YoutubeDL', PartYoutubeDL)
+    def test_playlist_parts_download_at_the_same_time(self):
+        urls = [f'https://www.youtube.com/watch?v={video_id}' for video_id in ('aaaaaaaaaaa', 'bbbbbbbbbbb', 'ccccccccccc')]
+        cases = [
+            ({'videoIds': ['aaaaaaaaaaa', 'bbbbbbbbbbb', 'ccccccccccc']}, ['--no-playlist', *urls],
+             [(None, 1, urls[:1]), (None, 2, urls[1:])]),
+            ({'playlistId': 'PL1234567890'}, ['https://www.youtube.com/playlist?list=PL1234567890'],
+             [('1::2', 1, ['https://www.youtube.com/playlist?list=PL1234567890']),
+              ('2::2', 1, ['https://www.youtube.com/playlist?list=PL1234567890'])]),
+        ]
+        for payload, args, expected in cases:
+            PartYoutubeDL.calls = []
+            PartYoutubeDL.barrier = threading.Barrier(2)
+            with tempfile.TemporaryDirectory() as temp:
+                stage = Path(temp) / 'stage'
+                result = bridge._download({
+                    'payload': {'mode': 'video', 'isPlaylist': True, **payload},
+                    'args': ['--output', '%(autonumber)s.%(ext)s', *args], 'parts': 2,
+                    'staging': str(stage), 'progressFile': str(stage / 'progress.json'),
+                    'controlFile': str(stage / 'control'),
+                })
+                self.assertEqual(sorted(PartYoutubeDL.calls, key=str), sorted(expected, key=str))
+                self.assertEqual(len(result['files']), 2)
+                self.assertEqual(json.loads((stage / 'progress.json').read_text())['activeParts'], 0)
+
     @patch.object(bridge.yt_dlp, 'YoutubeDL', SelectingYoutubeDL)
     def test_default_downloads_select_ios_playable_tracks(self):
         for mode, args, expected in [

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import {
+  combineDownloadSpeeds,
   resumePendingDownload,
   updatePendingDownloadStatuses,
 } from '../../src/main/downloadQueue.js'
@@ -31,4 +32,9 @@ test('preserves an individual resume when a restarted download joins a paused qu
   assert.equal(resumePendingDownload(record, individuallyResumedIds, true), true)
   assert.equal(record.status, 'queued')
   assert.deepEqual([...individuallyResumedIds], [record.id])
+})
+
+test('adds the speeds of parallel playlist processes in yt-dlp units', () => {
+  assert.equal(combineDownloadSpeeds(['  2.50MiB/s', '512.00KiB/s', null, 'Unknown B/s']), '3.00MiB/s')
+  assert.equal(combineDownloadSpeeds([null, 'Unknown B/s']), null)
 })
