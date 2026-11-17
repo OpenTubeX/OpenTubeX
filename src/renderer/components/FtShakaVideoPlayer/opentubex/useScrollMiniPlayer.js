@@ -3,7 +3,7 @@ import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, watch } fr
 import store from '../../../store/index'
 import { applyAnimationSpeed, getAnimationSpeedMultiplier } from '../../../helpers/animationSpeed'
 import {
-  hasCrossTabMiniPlayerOwner,
+  hasVisibleCrossTabMiniPlayer,
   isCrossTabMiniPlayerOwner,
   markCrossTabMiniPlayerActive,
   markCrossTabMiniPlayerInactive,
@@ -161,6 +161,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   const crossTabMiniPlayerCandidate = {
     canShow: () => canShowCrossTabMiniPlayer(),
     hide: () => deactivateScrollMiniPlayer(),
+    isDismissed: () => scrollMiniPlayerDismissed.value,
     show: () => {
       if (!inlineDrag) dockFromOrigin()
       return scrollMiniPlayerActive.value
@@ -685,7 +686,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     if (!canUseScrollMiniPlayerBase()) return false
 
     if (isActiveTab.value) {
-      return scrollPlayerMode.value !== 'off' && !hasCrossTabMiniPlayerOwner()
+      return scrollPlayerMode.value !== 'off' && !hasVisibleCrossTabMiniPlayer()
     }
 
     return !autoPictureInPictureOnTabChange.value &&
@@ -1852,8 +1853,8 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   }, { flush: 'sync' })
   watch(scrollMiniPlayerOnAllTabs, () => updateScrollMiniPlayer())
   // The presented tab yields to another tab's floating player, and may dock
-  // again once that player is released.
-  watch(hasCrossTabMiniPlayerOwner, () => {
+  // again once that player is released or hidden.
+  watch(hasVisibleCrossTabMiniPlayer, () => {
     if (isActiveTab.value) updateScrollMiniPlayer()
   })
   watch(autoPictureInPictureOnTabChange, () => updateScrollMiniPlayer())

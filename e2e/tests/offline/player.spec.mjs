@@ -1967,7 +1967,7 @@ test.describe('scroll mini player', () => {
     })
 
     test('does not show a second mini player after switching between watch tabs', async ({ app, page }) => {
-      const { activePlayer } = await openCrossTabMiniPlayerOverWatchTab({ app, page })
+      const { activePlayer, firstPlayer } = await openCrossTabMiniPlayerOverWatchTab({ app, page })
 
       await expectNoScrollMiniPlayerActivation(
         page,
@@ -1975,6 +1975,11 @@ test.describe('scroll mini player', () => {
         () => scrollBelowPlayer(activePlayer)
       )
       await expect(page.locator('.ftVideoPlayer.scrollMiniPlayer')).toHaveCount(1)
+
+      // A hidden mini player keeps playing, but no longer stops this tab from docking.
+      await firstPlayer.getByRole('button', { name: 'Hide mini player' }).click()
+      await expect(firstPlayer).toHaveClass(/scrollMiniPlayerDismissed/)
+      await expect(activePlayer).toHaveClass(/scrollMiniPlayer/)
     })
 
     test('keeps shortcuts from the cross-tab mini player away from the active player', async ({ app, page }) => {

@@ -10,6 +10,7 @@ import { shallowRef } from 'vue'
  * @typedef {{
  *   canShow: () => boolean,
  *   hide: () => void,
+ *   isDismissed: () => boolean,
  *   show: () => boolean
  * }} CrossTabMiniPlayerCandidate
  */
@@ -91,10 +92,14 @@ export function isCrossTabMiniPlayerOwner(candidate) {
 }
 
 /**
+ * Whether the presented tab must yield its own scroll mini player. A player
+ * the user hid keeps its ownership so it can keep playing until its tab is
+ * revisited, but it must not stop the presented tab from docking.
+ *
  * @returns {boolean}
  */
-export function hasCrossTabMiniPlayerOwner() {
-  return owner.value !== null
+export function hasVisibleCrossTabMiniPlayer() {
+  return owner.value !== null && !owner.value.isDismissed()
 }
 
 /**
