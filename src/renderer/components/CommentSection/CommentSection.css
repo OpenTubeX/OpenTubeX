@@ -599,6 +599,12 @@
 }
 
 .commentAuthorWrapper {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+
+  /* Keeps wrapped action buttons clear of the author handle's pill. */
+  row-gap: 6px;
   font-weight: bold;
   font-size: 14px;
   margin-inline-start: 68px;
@@ -617,6 +623,8 @@
 
 
 .commentAuthor {
+  /* Lets long handles wrap instead of overflowing the flex row. */
+  min-inline-size: 0;
   color: inherit;
   text-decoration: none;
 }
