@@ -4,6 +4,8 @@ import test from 'node:test'
 import vm from 'node:vm'
 import { computed, effectScope, nextTick, reactive, ref, shallowRef, watch } from 'vue'
 
+import { getPostTabTitle } from '../../src/renderer/helpers/tabTitles.js'
+
 const source = readFileSync(new URL('../../src/renderer/views/Post.vue', import.meta.url), 'utf8')
   .split('<script setup>')[1].split('</script>')[0]
   .replace(/^import .*\n/gm, '')
@@ -43,6 +45,7 @@ function mountPost(t, backend, fallback = true) {
     getInvidiousCommunityPost: request('invidious'),
     YatteeUnsupportedError: class extends Error {},
     getInvidiousApiErrorMessage: value => value,
+    getPostTabTitle,
     showApiErrorToast: (...args) => errors.push(args),
     showToast: value => toasts.push(value),
     showInvidiousFallbackToast: value => toasts.push(value),

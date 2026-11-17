@@ -48,6 +48,7 @@ import { getInvidiousCommunityPost } from '../helpers/api/invidious'
 import { YatteeUnsupportedError } from '../helpers/api/yattee'
 import { getLocalCommunityPost } from '../helpers/api/local'
 import { getInvidiousApiErrorMessage, showInvidiousFallbackToast, showApiErrorToast, showToast } from '../helpers/utils'
+import { getPostTabTitle } from '../helpers/tabTitles'
 import { useTabTitle } from '../tabs/TabContext'
 
 const { t } = useI18n()
@@ -99,9 +100,7 @@ async function loadPost() {
 }
 
 function updateTitleAndRoute() {
-  const titlePrefix = 'Community Post'
-  const title = post.value.author ? `${titlePrefix} | ${post.value.author}` : titlePrefix
-  setTabTitle(title)
+  setTabTitle(getPostTabTitle(post.value.author))
   isLoading.value = false
 
   // If the authorId is missing from the URL we should add it,

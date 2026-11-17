@@ -6,6 +6,7 @@
     <div class="channelThumbnail">
       <RouterLink
         :to="route"
+        :data-tab-title="channel.name"
         class="channelThumbnailLink"
         tabindex="-1"
         aria-hidden="true"
@@ -23,6 +24,7 @@
         <RouterLink
           class="title"
           :to="route"
+          :data-tab-title="channel.name"
         >
           <h3
             class="h3Title"

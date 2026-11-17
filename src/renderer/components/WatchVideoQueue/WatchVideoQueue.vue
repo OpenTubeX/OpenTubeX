@@ -135,6 +135,7 @@
             v-else
             class="queueVideo externalQueueVideo"
             :to="item.route ?? `/watch/${item.videoId}`"
+            :data-tab-title="item.title"
             @click="playExternalQueuedVideo(item.queueItemId, $event)"
           >
             <FtRetryImage

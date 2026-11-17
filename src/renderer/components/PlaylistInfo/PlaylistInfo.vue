@@ -17,6 +17,7 @@
             playlistItemId: startVideo.playlistItemId,
           },
         }"
+        :data-tab-title="startVideoTitle"
         tabindex="-1"
         @click="pickShuffledStartVideo"
       >
@@ -191,6 +192,7 @@
         v-if="!isUserPlaylist && channelId"
         class="playlistChannel"
         :to="`/channel/${channelId}`"
+        :data-tab-title="channelName"
       >
         <FtRetryImage
           v-if="channelThumbnail"
@@ -715,6 +717,8 @@ const startVideo = computed(() => shuffledStartVideo.value ?? {
   videoId: props.firstVideoId,
   playlistItemId: props.firstVideoPlaylistItemId,
 })
+const startVideoTitle = computed(() => startVideo.value.title ??
+  props.videos.find(video => video.videoId === startVideo.value.videoId)?.title)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const userPlaylistAnyVideoWatched = computed(() => {

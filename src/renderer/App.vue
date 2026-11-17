@@ -4319,11 +4319,14 @@ function handleLinkClick(event, link) {
 
   const platformChannel = getLinkedPlatformChannel(href)
   if (isYoutubeLink) {
+    // Channel mentions in descriptions and comments show the channel's handle or name.
+    const linkText = link.textContent.trim()
     handleYoutubeLink(href, {
       doCreateNewWindow,
       doCreateNewTab,
       isMiddleClick,
-      lazyLoad: isUnloadedBackgroundTabClick(event)
+      lazyLoad: isUnloadedBackgroundTabClick(event),
+      channelTitle: linkText.startsWith('@') ? linkText : undefined
     })
   } else if (platformChannel) {
     openInternalPath({
@@ -4353,6 +4356,7 @@ async function handleYoutubeLink(href, {
   doCreateNewTab = false,
   isMiddleClick = false,
   lazyLoad = false,
+  channelTitle = undefined,
   tabId = null
 } = {}) {
   const result = await store.dispatch('getYoutubeUrlInfo', tabId ? { url: href, tabId } : href)
@@ -4449,6 +4453,7 @@ async function handleYoutubeLink(href, {
 
       openPath({
         path: `/channel/${channelId}/${subPath}`,
+        title: channelTitle,
         doCreateNewWindow,
         doCreateNewTab,
         makeActive,

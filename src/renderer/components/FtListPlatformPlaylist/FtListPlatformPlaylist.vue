@@ -14,6 +14,7 @@
       <RouterLink
         class="thumbnailLink"
         :to="route"
+        :data-tab-title="playlist.title"
         tabindex="-1"
         aria-hidden="true"
       >
@@ -45,6 +46,7 @@
       <RouterLink
         class="title"
         :to="route"
+        :data-tab-title="playlist.title"
         :title="titleLineLimit > 0 ? playlist.title : null"
       >
         <h3
@@ -60,6 +62,7 @@
           class="channelName"
           dir="auto"
           :to="channelRoute ?? undefined"
+          :data-tab-title="playlist.author"
         >
           {{ playlist.author }}
         </component>

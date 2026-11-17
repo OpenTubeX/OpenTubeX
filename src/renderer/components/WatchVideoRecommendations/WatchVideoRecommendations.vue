@@ -45,6 +45,7 @@
           >
             <router-link
               :to="video.route"
+              :data-tab-title="video.title"
               class="offlineDownloadRecommendation"
               @click="pausePlayer"
             >

@@ -280,6 +280,7 @@
           <component
             :is="enableChannelLinks ? 'router-link' : 'div'"
             :to="`/channel/${comment.authorLink}`"
+            :data-tab-title="comment.author"
             :aria-label="enableChannelLinks ? comment.author : null"
             tabindex="-1"
           >
@@ -333,6 +334,7 @@
                 commentOwner: comment.isOwner
               }"
               :to="`/channel/${comment.authorLink}`"
+              :data-tab-title="comment.author"
             >
               <template
                 v-for="(segment, segmentIndex) in getCommentAuthorSearchSegments(comment.author)"

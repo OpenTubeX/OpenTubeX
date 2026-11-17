@@ -94,6 +94,7 @@
                     :class="{ disabledNavOption: !item.path }"
                     :title="item.label"
                     :to="item.path ? { path: item.path, query: item.query } : undefined"
+                    :data-tab-title="item.label"
                     @click="closeMenu"
                   >
                     <FtRetryImage

@@ -14,6 +14,7 @@
         <router-link
           v-if="enableChannelLinks && authorId"
           :to="`/channel/${authorId}`"
+          :data-tab-title="author"
           class="authorThumbnailLink"
           tabindex="-1"
           aria-hidden="true"
@@ -41,6 +42,7 @@
         <router-link
           v-if="authorId && enableChannelLinks"
           :to="`/channel/${authorId}`"
+          :data-tab-title="author"
           class="authorNameLink"
         >
           {{ author }}
@@ -189,6 +191,7 @@
           path: `/post/${postId}`,
           query: authorId ? { authorId } : undefined
         }"
+        :data-tab-title="getPostTabTitle(author)"
         class="commentsLink"
         :aria-label="$t('Channel.Posts.View Full Post')"
       >
@@ -252,6 +255,7 @@ import {
   formatNumber,
   getRelativeTimeFromDate,
 } from '../../helpers/utils'
+import { getPostTabTitle } from '../../helpers/tabTitles'
 import { isRoundedNumber } from '../../helpers/viewCounts'
 import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
