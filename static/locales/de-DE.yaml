@@ -968,6 +968,7 @@ Settings:
     Loaded Tab Icons: 'Fehlendes Tab-Symbol geladen: {count} | Fehlende Tab-Symbole geladen: {count}'
     Loaded Tab Icons With Failures: '{loaded} Tab-Symbole geladen; {failed} konnten nicht geladen werden'
     Show Tab Previews: Tab-Vorschauen anzeigen
+    Toggle Playback With Tab Icon: Mit dem Tab-Symbol abspielen und pausieren
     Use Fixed Tab Width: Im horizontalen Modus feste Tab-Breite verwenden
     Use Custom Title Bar: Eigene Titelleiste verwenden
     Tab Width: Tab-Breite
@@ -3288,6 +3289,7 @@ Tooltips:
     Scroll Speed: Ändert die Scrollweite von Mausrad- und Touchpad-Gesten.
     Visible Search Suggestions: Legt fest, wie viele Einträge aus dem Suchverlauf und Suchvorschläge die Suchleiste anzeigt, bevor ihre Liste scrollt. Die Liste reicht nie über den unteren Fensterrand hinaus.
     Use Fixed Tab Width: Gibt jedem Tab in der horizontalen Tableiste dieselbe Breite, statt sie an den Titel anzupassen.
+    Toggle Playback With Tab Icon: Ein Klick auf das Symbol eines Tabs mit laufendem oder pausiertem Video pausiert es oder setzt es fort, ohne zu diesem Tab zu wechseln.
     Use Custom Title Bar: Ersetzt die Titelleiste des Systems durch die Tableiste oder, wenn die Tabs nicht oben sind, durch die obere Navigation, um vertikalen Platz zu sparen. Die Fenstersteuerung erscheint in der Ecke dieser Leiste.
     Use Grid Player Menu: Ordnet das Einstellungsmenü des Videoplayers als Kachelraster statt als Liste an.
     UI Density: Ändert die Abstände in Listen, Menüs, der Seitenleiste und den Einstellungen.

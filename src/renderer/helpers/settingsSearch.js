@@ -390,6 +390,7 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     if ([
       'Disable Smooth Scrolling',
       'Show Tab Previews',
+      'Toggle Playback With Tab Icon',
       'Tab Layout',
       'Tab Loading Indicator',
       'Vertical Tab Height',

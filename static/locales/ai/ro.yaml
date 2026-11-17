@@ -662,6 +662,7 @@ Settings:
     Invalid Engine: Introduceți un nume și o adresă URL de căutare HTTP sau HTTPS validă, care conține %s.
     Engine Limit: Puteți adăuga până la {count} motoare de căutare personalizate.
   Theme Settings:
+    Toggle Playback With Tab Icon: Redare și pauză cu pictograma filei
     Theme and Colors: "Temă și culori"
     Font Size: Dimensiunea fontului
     Sections:
@@ -2508,6 +2509,7 @@ Tooltips:
     Platforms Auto Refresh Interval: Cât de des reîmprospătează OpenTubeX automat canalele pe care le urmărești pe alte platforme cât timp aplicația este deschisă.
     Twitch Notify When Live: Te anunță când unul dintre canalele Twitch pe care le urmărești începe o transmisiune. OpenTubeX verifică la fiecare câteva minute cât timp este deschis, și de asemenea cât timp este închis, dacă atunci actualizează abonamentele.
   Theme Settings:
+    Toggle Playback With Tab Icon: Un clic pe pictograma unei file cu un videoclip redat sau pus pe pauză îl pune pe pauză sau îl reia fără a comuta la acea filă.
     Only Show Important Notifications: Ascunde notificările din aplicație care doar confirmă o acțiune sau raportează o stare, inclusiv cele care oferă Anulare. Erorile, avertismentele, mementourile pe care le-ați configurat și notificările care cer o decizie, precum solicitările de actualizare, apar în continuare. Progresul operațiunilor din fundal, precum reîmprospătarea abonamentelor, este afișat în bara de progres globală în loc de o notificare. Notificările sistemului nu sunt afectate.
     Visible Search Suggestions: "Stabilește câte intrări din istoricul căutărilor și sugestii afișează bara de căutare înainte ca lista ei să fie derulată. Lista nu depășește niciodată marginea de jos a ferestrei."
     Thumbnail Size: "Scalează miniaturile videoclipurilor în grile și liste. Grilele cu un număr fix de coloane sau tipul de vizualizare Lățime completă umplu în schimb fiecare rând, așa că acolo modifică doar miniaturile din liste și Shorts. În ferestrele de mărimea unui telefon, miniaturile din grilă sunt limitate la 100%."

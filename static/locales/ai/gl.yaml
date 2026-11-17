@@ -667,6 +667,7 @@ Settings:
     Invalid Engine: Introduce un nome e unha URL de busca HTTP ou HTTPS válida que conteña %s.
     Engine Limit: Podes engadir ata {count} motores de busca personalizados.
   Theme Settings:
+    Toggle Playback With Tab Icon: Reproducir e pausar coa icona da lapela
     Theme and Colors: "Tema e cores"
     Font Size: Tamaño do tipo de letra
     Sections:
@@ -2515,6 +2516,7 @@ Tooltips:
     Platforms Auto Refresh Interval: Con que frecuencia OpenTubeX actualiza automaticamente as canles que segues noutras plataformas mentres a aplicación está aberta.
     Twitch Notify When Live: Avísate cando unha das canles de Twitch que segues comeza a emitir. OpenTubeX compróbao cada poucos minutos mentres está aberto, e tamén mentres está pechado se entón actualiza as subscricións.
   Theme Settings:
+    Toggle Playback With Tab Icon: Ao premer na icona dunha lapela cun vídeo en reprodución ou en pausa, ponse en pausa ou retómase sen cambiar a esa lapela.
     Only Show Important Notifications: Oculta as notificacións da aplicación que só confirman unha acción ou informan dun estado, incluídas as que ofrecen Desfacer. Os erros, os avisos, os recordatorios que configuraches e as notificacións que piden unha decisión, como as solicitudes de actualización, seguen aparecendo. O progreso das operacións en segundo plano, como a actualización das subscricións, móstrase na barra de progreso global en lugar dunha notificación. As notificacións do sistema non se ven afectadas.
     Visible Search Suggestions: "Define cantas entradas do historial de busca e suxestións mostra a barra de busca antes de que a súa lista se desprace. A lista nunca se estende máis alá da parte inferior da xanela."
     Thumbnail Size: "Escala as miniaturas dos vídeos en grellas e listas. As grellas cun número fixo de columnas ou o tipo de vista Ancho completo enchen cada fila, así que alí só cambia as miniaturas das listas e os Shorts. Nas xanelas do tamaño dun teléfono, as miniaturas da grella limítanse ao 100 %."

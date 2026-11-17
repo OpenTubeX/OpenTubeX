@@ -662,6 +662,7 @@ Settings:
     Invalid Engine: Zadejte název a platnou adresu URL vyhledávání s protokolem HTTP nebo HTTPS, která obsahuje %s.
     Engine Limit: Můžete přidat až {count} vlastních vyhledávačů.
   Theme Settings:
+    Toggle Playback With Tab Icon: Přehrávat a pozastavovat ikonou karty
     Theme and Colors: "Motiv a barvy"
     Font Size: Velikost písma
     Sections:
@@ -2453,6 +2454,7 @@ Tooltips:
     Platforms Auto Refresh Interval: Jak často OpenTubeX automaticky obnovuje kanály, které sledujete na jiných platformách, když je aplikace otevřená.
     Twitch Notify When Live: Upozorní vás, když některý z vašich sledovaných kanálů na Twitchi začne vysílat. OpenTubeX kontroluje každých několik minut, když je otevřený, a také když je zavřený, pokud v tu dobu aktualizuje odběry.
   Theme Settings:
+    Toggle Playback With Tab Icon: Kliknutím na ikonu karty s přehrávaným nebo pozastaveným videem jej pozastavíte nebo obnovíte, aniž byste na tuto kartu přepnuli.
     Only Show Important Notifications: Skryje oznámení v aplikaci, která pouze potvrzují akci nebo hlásí stav, včetně těch s možností Zpět. Chyby, varování, nastavená připomenutí a oznámení vyžadující rozhodnutí, například výzvy k aktualizaci, se zobrazují i nadále. Průběh operací na pozadí, například obnovování odběrů, se místo oznámení zobrazuje v globálním ukazateli průběhu. Systémová oznámení nejsou ovlivněna.
     Visible Search Suggestions: "Určuje, kolik položek historie vyhledávání a návrhů zobrazí vyhledávací pole, než se jeho seznam začne posouvat. Seznam nikdy nepřesáhne spodní okraj okna."
     Thumbnail Size: "Mění velikost miniatur videí v mřížkách a seznamech. Mřížky s pevným počtem sloupců nebo zobrazení Plná šířka místo toho vyplní každý řádek, takže tam mění jen miniatury v seznamech a Shorts. V oknech velikosti telefonu jsou miniatury v mřížce omezeny na 100 %."
