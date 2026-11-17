@@ -1,5 +1,5 @@
 import { registerPlugin } from '@capacitor/core'
-import { isAndroidBackgroundSyncRenderer } from './androidBackgroundSync.js'
+import { isAndroidBackgroundRenderer } from './androidBackgroundSync.js'
 
 const AndroidLocalNetwork = process.env.IS_CAPACITOR && !process.env.IS_IOS
   ? registerPlugin('AndroidLocalNetwork')
@@ -24,7 +24,7 @@ export async function ensureAndroidLocalNetworkAccess(options = {}) {
   if (!required) return
   // Concurrent sync and discovery requests share the same system prompt.
   // The renderer that syncs while the app is closed cannot show one.
-  if (options.requestPermission !== false && !isAndroidBackgroundSyncRenderer) {
+  if (options.requestPermission !== false && !isAndroidBackgroundRenderer) {
     pendingPermission ??= AndroidLocalNetwork.requestPermissions()
       .finally(() => { pendingPermission = undefined })
   }

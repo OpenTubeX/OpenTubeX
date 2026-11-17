@@ -84,7 +84,7 @@ final class OpenTubeXNotificationChannels {
                 NotificationManager.IMPORTANCE_DEFAULT,
                 true
             ),
-            // CommentReplyNotifications owns replies to watched comments and hearts on the account's.
+            // Replies to watched comments and hearts on the account's
             new ChannelSpec(
                 COMMENT_REPLIES_ID,
                 R.string.notification_channel_comment_replies_name,

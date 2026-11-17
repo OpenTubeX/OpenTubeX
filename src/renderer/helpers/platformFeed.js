@@ -4,8 +4,12 @@ import { LocalNotifications } from '@capacitor/local-notifications'
 import store from '../store/index'
 import i18n from '../i18n/index'
 import { getPlatformFetch } from './platformFetch'
-import { holdAndroidBackgroundWork } from './androidBackgroundSync.js'
-import { configureAndroidTwitchLive, observeAndroidTwitchLive } from './androidSubscriptionRefresh'
+import {
+  deliverAndroidNotification,
+  holdAndroidBackgroundWork,
+  onPeriodicBackgroundTask,
+  setPeriodicBackgroundTask
+} from './androidBackgroundSync.js'
 import { isAppHidden } from './appVisibility'
 import { capacitorNotificationHistory } from './capacitorNotificationHistory'
 import { getTwitchLocalNotificationId } from './capacitorSystemNotifications'
@@ -24,6 +28,7 @@ import {
 import {
   fetchTwitchChannels,
   getTwitchLiveNotificationTarget,
+  getTwitchNotificationId,
   parseTwitchChannelLogin,
   sortNewestFirst,
   takeNewTwitchStreams
@@ -46,7 +51,7 @@ const FILTER_STORAGE_KEY = 'platformFeedFilter'
 /** The items each channel had when it loaded before, so that later ones are new */
 const HISTORY_STORAGE_KEY = 'platformFeedHistory'
 const MAX_HISTORY_PER_CHANNEL = 300
-/** The streams of each channel at the last check, on iOS, where the app checks on its own */
+/** The streams of each channel at the last check, on mobile, where the app checks on its own */
 const KNOWN_STREAMS_STORAGE_KEY = 'twitchKnownStreams'
 const LIVE_CHECK_INTERVAL_MS = 3 * 60_000
 /**
@@ -664,7 +669,7 @@ export async function requestCapacitorNotificationPermission() {
 
 /**
  * Which channels to check, and how to announce their streams.
- * @returns {TwitchLiveConfiguration & { mode?: string, closedApp?: boolean, thumbnails?: boolean }}
+ * @returns {TwitchLiveConfiguration}
  */
 function getLiveConfiguration() {
   const channels = getFollowedChannels().flatMap(({ platform, id, name, url }) => {
@@ -674,20 +679,12 @@ function getLiveConfiguration() {
   return {
     enabled: store.getters.getTwitchLiveNotifications && store.getters.getNotificationMode !== 'off' && channels.length > 0,
     channels,
-    title: i18n.global.t('Subscriptions.{channel} is live', { channel: '{channel}' }),
-    // Android checks on its own while the app is hidden or closed
-    ...(isAndroid
-      ? {
-          mode: store.getters.getNotificationMode,
-          closedApp: store.getters.getEnableClosedAppSubscriptionRefresh,
-          thumbnails: notificationThumbnailsAllowed()
-        }
-      : {})
+    title: i18n.global.t('Subscriptions.{channel} is live', { channel: '{channel}' })
   }
 }
 
 /**
- * Announces a stream on iOS, where the app checks only while it runs.
+ * Announces a stream on mobile, where the app checks on its own.
  * @param {TwitchLiveConfiguration} configuration
  * @param {PlatformItem} stream
  */
@@ -701,6 +698,18 @@ async function announceStream(configuration, stream) {
     ...(stream.thumbnail && notificationThumbnailsAllowed() ? { thumbnail: stream.thumbnail } : {})
   }
   if (store.getters.getNotificationMode === 'off') return
+  if (isAndroid) {
+    // Android shows it like an upload, or leaves it to the visible app, which
+    // adds it to the history.
+    await deliverAndroidNotification({
+      feedType: 'twitch',
+      id: getTwitchNotificationId(channel.login, stream.id),
+      live: true,
+      ...notification,
+      history: store.getters.getNotificationMode === 'both'
+    })
+    return
+  }
   // Checked first, as the system suspends hidden apps, also during the check,
   // so the app may be visible again once it returns
   const granted = (await LocalNotifications.checkPermissions()).display === 'granted'
@@ -737,11 +746,6 @@ async function checkLiveStreams(configuration) {
   try {
     const { feed } = await fetchTwitchChannels(getPlatformFetch('twitch'), channelIds, { liveOnly: true })
     applyTwitchLiveStreams(feed.live)
-    if (isAndroid) {
-      // Android keeps the streams it announced, also for its own checks
-      await observeAndroidTwitchLive(channelIds, feed.live.map(({ channelId, id, title, thumbnail }) => ({ channelId, id, title, ...(thumbnail ? { thumbnail } : {}) })))
-      return
-    }
     let known = {}
     try {
       known = JSON.parse(localStorage.getItem(KNOWN_STREAMS_STORAGE_KEY) ?? '{}') ?? {}
@@ -760,8 +764,29 @@ async function checkLiveStreams(configuration) {
 }
 
 /**
+ * Whether Android checks while the app is hidden or closed, which it does when
+ * it may refresh subscriptions then.
+ */
+function checksWhileClosed() {
+  return Boolean(isAndroid) && getLiveConfiguration().enabled && store.getters.getEnableClosedAppSubscriptionRefresh
+}
+
+/**
+ * Checks the followed channels once in the renderer that the periodic job
+ * loads while the Android app is closed.
+ */
+export async function checkTwitchLiveInBackground() {
+  if (!supportsPlatformFollows || !checksWhileClosed()) {
+    setPeriodicBackgroundTask('twitchLive', false)
+    return
+  }
+  await checkLiveStreams(getLiveConfiguration())
+}
+
+/**
  * Keeps the live stream checks configured, and checks while the app is in use
- * on mobile.
+ * on mobile. Android's periodic job checks while the app is hidden, also
+ * after it was closed, if it may refresh subscriptions then.
  * @returns {() => void} stops the checks
  */
 export function startTwitchLiveNotifications() {
@@ -806,8 +831,6 @@ export function startTwitchLiveNotifications() {
     if (process.env.IS_ELECTRON) {
       window.ftElectron.configureTwitchLiveNotifications(configuration)
         .catch(error => console.error('Failed to configure the Twitch live checks', error))
-    } else if (isAndroid) {
-      configureAndroidTwitchLive(configuration).catch(error => console.error('Failed to configure the Twitch live checks', error))
     } else if (!configuration.enabled) {
       // Turning notifications on again starts from the streams that are live then
       localStorage.removeItem(KNOWN_STREAMS_STORAGE_KEY)
@@ -817,6 +840,14 @@ export function startTwitchLiveNotifications() {
 
   let removeLiveListener = null
   let removeTapListener = null
+  let stopBackgroundChecks = null
+  if (isAndroid) {
+    stopBackgroundChecks = store.watch(checksWhileClosed, enabled => setPeriodicBackgroundTask('twitchLive', enabled), { immediate: true })
+    // While the app is hidden, but not yet closed
+    onPeriodicBackgroundTask(async () => {
+      if (!stopped && !checking && checksWhileClosed()) await checkLiveStreams(getLiveConfiguration())
+    })
+  }
   if (process.env.IS_ELECTRON) {
     removeLiveListener = window.ftElectron.onTwitchLiveUpdated(applyTwitchLiveStreams)
   } else if (process.env.IS_CAPACITOR) {
@@ -838,6 +869,7 @@ export function startTwitchLiveNotifications() {
     stopped = true
     clearTimeout(timer)
     stopConfiguring()
+    stopBackgroundChecks?.()
     removeLiveListener?.()
     removeTapListener?.()
     document.removeEventListener('visibilitychange', checkWhenVisible)

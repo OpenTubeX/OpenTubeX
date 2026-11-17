@@ -225,7 +225,7 @@ const platformHooks = { holdAndroidBackgroundWork: () => () => {}, isAppHidden: 
 const [{ createSyncScheduler }] = await importWithStubs([sourceUrl('src/renderer/helpers/sync-server-scheduler.js')], {
   [sourceUrl('src/renderer/helpers/androidBackgroundSync.js')]: {
     holdAndroidBackgroundWork: () => platformHooks.holdAndroidBackgroundWork(),
-    setPeriodicBackgroundSync: () => {},
+    setPeriodicBackgroundTask: () => {},
   },
   [sourceUrl('src/renderer/helpers/appVisibility.js')]: { isAppHidden: () => platformHooks.isAppHidden() },
 })

@@ -1,5 +1,5 @@
 // @ts-check
-import { holdAndroidBackgroundWork, setPeriodicBackgroundSync } from './androidBackgroundSync.js'
+import { holdAndroidBackgroundWork, setPeriodicBackgroundTask } from './androidBackgroundSync.js'
 import { isAppHidden } from './appVisibility.js'
 import { AUTO_SYNC_INTERVAL_MS, isRecentSync, isSyncReasonEnabled } from './sync-server-scheduling'
 
@@ -150,7 +150,7 @@ export function createSyncScheduler({
 
     if (autoSyncController.signal.aborted) autoSyncController = new AbortController()
     if (!isSyncReasonEnabled(getSettings(), 'automatic')) return
-    setPeriodicBackgroundSync(true)
+    setPeriodicBackgroundTask('sync', true)
     const { signal } = autoSyncController
     autoSyncTimer = setTimeout(async () => {
       autoSyncTimer = null
@@ -188,7 +188,7 @@ export function createSyncScheduler({
   function stop() {
     autoSyncController.abort()
     stopLive()
-    setPeriodicBackgroundSync(false)
+    setPeriodicBackgroundTask('sync', false)
     clearTimeout(autoSyncTimer ?? undefined)
     clearEventSyncTimers()
     hiddenEventSyncReasons.clear()
