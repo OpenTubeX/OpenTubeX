@@ -177,30 +177,43 @@ test('a swipe exits rotation fullscreen without entering native fullscreen', asy
   assert.equal(nativeToggles, 0)
 })
 
-for (const interrupt of ['none', 'new touch', 'cancel', 'unmount', 'fullscreen changed']) {
-  test(`fullscreen swipe paints its reset before handoff (${interrupt})`, async t => {
+for (const outcome of ['released', 'new touch', 'cancel', 'not toggled']) {
+  test(`fullscreen swipe carries its preview into the handoff (${outcome})`, async t => {
     let fullscreen = false
-    const { gestures: g, event, calls, paint, unmount } = fixture(t, {
+    const { gestures: g, event, calls } = fixture(t, {
       fullscreen: () => fullscreen,
+      toggleFullscreen: () => {
+        calls.push('fullscreen')
+        fullscreen = outcome !== 'not toggled'
+      },
     })
     t.mock.timers.enable({ apis: ['setTimeout'] })
     g.startMobileFullscreenGesture(event(210, 150))
     g.moveMobileFullscreenGesture(event(210, 50))
+    const preview = { ...g.mobileFullscreenSwipeStyle.value }
     g.finishMobileFullscreenGesture(event(210, 50))
-    t.mock.timers.tick(0)
+    assert.deepEqual(calls, ['fullscreen'], 'Toggle without returning the preview first')
     await nextTick()
+    if (outcome !== 'not toggled') {
+      assert.deepEqual(g.mobileFullscreenSwipeStyle.value, preview, 'Keep the preview until released')
+    }
+    if (outcome === 'released') {
+      const { offset, scale } = g.releaseMobileFullscreenSwipe()
+      assert.deepEqual(
+        { '--mobile-fullscreen-swipe-offset': `${offset}px`, '--mobile-fullscreen-swipe-scale': String(scale) },
+        preview,
+        'Release the preview that was handed off'
+      )
+    }
+    if (outcome === 'new touch') g.startMobileFullscreenGesture(event(210, 150))
+    if (outcome === 'cancel') g.cancelMobileFullscreenGesture()
+    await nextTick()
+    if (outcome === 'not toggled') {
+      assert.equal(g.mobileFullscreenSwipeStyle.value?.['--mobile-fullscreen-swipe-offset'], '0px', 'Spring back when fullscreen did not change')
+      assert.equal(g.releaseMobileFullscreenSwipe(), null, 'A returning preview is not handed off')
+      t.mock.timers.tick(0)
+    }
     assert.equal(g.mobileFullscreenSwipeStyle.value, undefined)
-    assert.equal(calls.includes('fullscreen'), false)
-    paint()
-    assert.equal(calls.includes('fullscreen'), false, 'One animation callback does not guarantee a painted frame')
-    if (interrupt === 'new touch') g.startMobileFullscreenGesture(event(210, 150))
-    if (interrupt === 'cancel') g.cancelMobileFullscreenGesture()
-    if (interrupt === 'unmount') unmount()
-    if (interrupt === 'fullscreen changed') fullscreen = true
-    paint()
-    await Promise.resolve()
-    assert.equal(calls.includes('fullscreen'), interrupt === 'none')
-    await Promise.resolve()
   })
 }
 

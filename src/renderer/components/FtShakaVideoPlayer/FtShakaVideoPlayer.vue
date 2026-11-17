@@ -5713,6 +5713,7 @@ const {
   mobileMiniPlayerDismissSettling,
   mobileSeekPreview,
   moveMobileFullscreenGesture,
+  releaseMobileFullscreenSwipe,
   startMobileFullscreenGesture,
 } = useMobileFullscreenGestures({
   getContainer: () => container.value,
@@ -9747,7 +9748,15 @@ function registerFullWindowButton() {
       ? FULL_WINDOW_ANIMATION_DURATION_MS / getAnimationSpeedMultiplier(store.getters.getAnimationSpeed)
       : FULL_WINDOW_ANIMATION_DURATION_MS
     suppressPanelTransitions(animationDuration + 50)
-    const previousRect = shouldAnimate ? playerContainer.getBoundingClientRect() : null
+    let previousRect = shouldAnimate ? playerContainer.getBoundingClientRect() : null
+    // Start from where a fullscreen swipe displaced the video, which fills the
+    // player, without the video zoom that stays on it.
+    const swipe = releaseMobileFullscreenSwipe()
+    if (previousRect && swipe) {
+      const { x, y, width, height } = previousRect
+      const { offset, scale } = swipe
+      previousRect = new DOMRect(x + width * (1 - scale) / 2, y + height * (1 - scale) / 2 + offset, width * scale, height * scale)
+    }
 
     if (event.detail) {
       fullWindowPlaceholderHeight.value = playerContainer.getBoundingClientRect().height
@@ -11697,7 +11706,12 @@ function retainAndroidFullscreenDuringRotation() {
     cancelAnimationFrame(restoredFrame)
     window.removeEventListener('resize', resized)
     finishAndroidFullscreenExit = () => {}
-    if (!preserveOrientation) androidFullscreenRotationRequested = false
+    // When preserving the orientation, another fullscreen request takes over
+    // this surface, including any swipe preview on it.
+    if (!preserveOrientation) {
+      androidFullscreenRotationRequested = false
+      releaseMobileFullscreenSwipe()
+    }
     if (host.matches(':popover-open')) host.hidePopover()
     host.removeAttribute('popover')
     androidFullscreenHostActive.value = document.fullscreenElement === host
@@ -11705,6 +11719,9 @@ function retainAndroidFullscreenDuringRotation() {
   }
   const resized = () => {
     if ((window.innerHeight >= window.innerWidth) === portraitBeforeUnlock || restoredFrame !== null) return
+    // Android's rotation already captured the swiped surface, and holds the
+    // window until the rotated viewport has drawn.
+    releaseMobileFullscreenSwipe()
     // Paint the restored viewport before replacing its fullscreen surface.
     restoredFrame = requestAnimationFrame(() => {
       restoredFrame = requestAnimationFrame(() => finish())
@@ -11729,9 +11746,15 @@ function retainAndroidFullscreenDuringRotation() {
 }
 
 function fullscreenChangeHandler() {
-  if (shortsNavigationSuspended.value) return
   const fullscreen = isNativeFullscreenActive()
   const wasFullscreen = isFullscreen.value
+  const retainDuringRotation = !shortsNavigationSuspended.value && isActiveTab.value &&
+    wasFullscreen && !fullscreen && process.env.IS_CAPACITOR && !process.env.IS_IOS &&
+    !!androidFullscreenHost && androidFullscreenRotationRequested
+  // A fullscreen swipe's preview ends in the first frame of the new
+  // presentation. The retained exit surface keeps it until rotation.
+  if (!retainDuringRotation) releaseMobileFullscreenSwipe()
+  if (shortsNavigationSuspended.value) return
   finishAndroidFullscreenExit(true)
   androidFullscreenHostActive.value = !!androidFullscreenHost && document.fullscreenElement === androidFullscreenHost
   handleVideoZoomFullscreenChange(fullscreen)
@@ -11755,9 +11778,7 @@ function fullscreenChangeHandler() {
   }
 
   updateFullscreenOrientation(fullscreen)
-  if (wasFullscreen && !fullscreen && process.env.IS_CAPACITOR && !process.env.IS_IOS) {
-    retainAndroidFullscreenDuringRotation()
-  }
+  if (retainDuringRotation) retainAndroidFullscreenDuringRotation()
   syncAndroidStatusBarVisibility()
 
   if (fullscreen) {
