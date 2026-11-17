@@ -622,6 +622,8 @@ Settings:
       Auto: 自動
     Preferred API Backend:
       Yattee Server: Yattee 伺服器
+      Local API Extension Required: 網頁應用程式必須搭配 OpenTubeX Local API 瀏覽器擴充功能才能使用本機 API。
+      Install Local API Extension: 安裝擴充功能
     Yattee Server:
       Server URL: Yattee 伺服器 URL
       Username: 使用者名稱

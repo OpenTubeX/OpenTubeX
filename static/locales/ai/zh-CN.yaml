@@ -622,6 +622,8 @@ Settings:
       Auto: 自动
     Preferred API Backend:
       Yattee Server: Yattee 服务器
+      Local API Extension Required: 网页应用只有安装 OpenTubeX Local API 浏览器扩展后才能使用本地 API。
+      Install Local API Extension: 安装扩展
     Yattee Server:
       Server URL: Yattee 服务器 URL
       Username: 用户名

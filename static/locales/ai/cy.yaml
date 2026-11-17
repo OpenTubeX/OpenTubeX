@@ -623,6 +623,8 @@ Settings:
       Auto: Awtomatig
     Preferred API Backend:
       Yattee Server: Gweinydd Yattee
+      Local API Extension Required: Dim ond gydag estyniad porwr OpenTubeX Local API y gall yr ap gwe ddefnyddio’r API lleol.
+      Install Local API Extension: Gosod yr estyniad
     Yattee Server:
       Server URL: URL gweinydd Yattee
       Username: Enw defnyddiwr

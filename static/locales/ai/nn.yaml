@@ -643,6 +643,8 @@ Settings:
       Auto: Automatisk
     Preferred API Backend:
       Yattee Server: Yattee-tenar
+      Local API Extension Required: Nettappen kan berre bruke det lokale API-et med nettlesarutvidinga OpenTubeX Local API.
+      Install Local API Extension: Installer utvidinga
     Yattee Server:
       Server URL: URL til Yattee-tenar
       Username: Brukarnamn

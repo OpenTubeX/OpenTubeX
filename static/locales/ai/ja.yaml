@@ -622,6 +622,8 @@ Settings:
       Auto: 自動
     Preferred API Backend:
       Yattee Server: Yattee Server
+      Local API Extension Required: Web アプリでローカル API を使うには、ブラウザー拡張機能「OpenTubeX Local API」が必要です。
+      Install Local API Extension: 拡張機能をインストール
     Yattee Server:
       Server URL: Yattee サーバーの URL
       Username: ユーザー名

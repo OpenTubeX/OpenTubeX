@@ -625,6 +625,8 @@ Settings:
       Auto: Автоматично
     Preferred API Backend:
       Yattee Server: Сървър Yattee
+      Local API Extension Required: Уеб приложението може да използва локалния API само с разширението за браузър OpenTubeX Local API.
+      Install Local API Extension: Инсталиране на разширението
     Yattee Server:
       Server URL: URL адрес на сървъра Yattee
       Username: Потребителско име

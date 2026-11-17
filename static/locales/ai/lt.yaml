@@ -745,6 +745,8 @@ Settings:
       Auto: Automatiškai
     Preferred API Backend:
       Yattee Server: Yattee serveris
+      Local API Extension Required: Žiniatinklio programa vietinę API gali naudoti tik su naršyklės plėtiniu „OpenTubeX Local API“.
+      Install Local API Extension: Įdiegti plėtinį
     Yattee Server:
       Server URL: Yattee serverio URL
       Username: Naudotojo vardas

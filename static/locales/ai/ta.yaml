@@ -635,6 +635,8 @@ Settings:
       Auto: தானியங்கு
     Preferred API Backend:
       Yattee Server: Yattee சேவையகம்
+      Local API Extension Required: OpenTubeX Local API உலாவி நீட்டிப்புடன் மட்டுமே வலை செயலி உள்ளக API-ஐப் பயன்படுத்த முடியும்.
+      Install Local API Extension: நீட்டிப்பை நிறுவு
     Yattee Server:
       Server URL: Yattee சேவையக URL
       Username: பயனர்பெயர்

@@ -663,6 +663,8 @@ Settings:
       Entire App: پوری ایپ
     Preferred API Backend:
       Yattee Server: Yattee سرور
+      Local API Extension Required: ویب ایپ مقامی API صرف OpenTubeX Local API براؤزر ایکسٹینشن کے ساتھ استعمال کر سکتی ہے۔
+      Install Local API Extension: ایکسٹینشن انسٹال کریں
     Video View Type:
       Full Width: پوری چوڑائی
     Playlist View Type:

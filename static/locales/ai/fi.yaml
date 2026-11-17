@@ -622,6 +622,8 @@ Settings:
       Auto: Automaattinen
     Preferred API Backend:
       Yattee Server: Yattee-palvelin
+      Local API Extension Required: Verkkosovellus voi käyttää paikallista API:a vain OpenTubeX Local API -selainlaajennuksen kanssa.
+      Install Local API Extension: Asenna laajennus
     Yattee Server:
       Server URL: Yattee-palvelimen URL
       Username: Käyttäjänimi

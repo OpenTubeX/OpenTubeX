@@ -623,6 +623,8 @@ Settings:
       Auto: Otomatis
     Preferred API Backend:
       Yattee Server: Server Yattee
+      Local API Extension Required: Aplikasi web hanya dapat menggunakan API lokal dengan ekstensi browser OpenTubeX Local API.
+      Install Local API Extension: Pasang ekstensi
     Yattee Server:
       Server URL: URL server Yattee
       Username: Nama pengguna

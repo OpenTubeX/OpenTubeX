@@ -649,6 +649,8 @@ Settings:
       Entire App: Tuta aplikaĵo
     Preferred API Backend:
       Yattee Server: Yattee-servilo
+      Local API Extension Required: La retaplikaĵo povas uzi la lokan API-on nur kun la retumila etendaĵo OpenTubeX Local API.
+      Install Local API Extension: Instali la etendaĵon
     Video View Type:
       Full Width: Plena larĝo
     Playlist View Type:

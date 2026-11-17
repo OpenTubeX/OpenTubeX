@@ -320,6 +320,9 @@ jobs:
               "release-assets/opentubex-${VERSION}-beta.amd64.rpm"
             cp "build/opentubex-${VERSION}.pacman" \
               "release-assets/opentubex-${VERSION}-beta-amd64.pacman"
+            # The web app's Local API extension. Its name has no version, so
+            # releases/latest/download/ links always find the newest one.
+            (cd browser-extension && zip -q -r -X ../release-assets/opentubex-local-api-extension.zip . -x README.md)
             ;;
           linux-arm64)
             cp "build/opentubex-${VERSION}-arm64.zip" \
