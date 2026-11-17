@@ -687,6 +687,10 @@ export default defineComponent({
     timeFormatPreference: function () {
       return this.$store.getters.getTimeFormat
     },
+    // Includes playable files of failed Android downloads, which the format prompt leaves out.
+    isDownloaded: function () {
+      return this.$store.getters.getLocalPlaybackDownloadIds.has(this.videoId)
+    },
     localPlaybackDownloads: function () {
       const downloads = Object.values(this.$store.getters.getYtDlpDownloads)
         .filter(download => download.status === 'completed' && ['video', 'audio'].includes(download.mode))

@@ -38,7 +38,7 @@
           :src="download.thumbnail || thumbnailPlaceholder"
           sizes="144px"
           class="downloadThumbnail"
-          :class="{ downloadedContent: download.status === 'completed' }"
+          :class="{ downloadedContent: canPlay }"
           alt=""
         />
         <div class="downloadDetails">
@@ -290,7 +290,7 @@
             :src="download.thumbnail || thumbnailPlaceholder"
             sizes="144px"
             class="downloadThumbnail"
-            :class="{ downloadedContent: download.status === 'completed' }"
+            :class="{ downloadedContent: canPlay }"
             alt=""
           />
           <h3 dir="auto">

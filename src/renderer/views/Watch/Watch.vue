@@ -225,7 +225,7 @@
               :shorts-metadata-open="shortsMetadataOpen"
               :shorts-aspect-ratio="videoAspectRatio"
               :video-aspect-ratio="videoAspectRatio"
-              :downloaded="localPlaybackDownloads.length > 0"
+              :downloaded="isDownloaded"
               class="videoPlayer"
               @error="handlePlayerError"
               @loaded="handleVideoLoaded"
@@ -1151,7 +1151,7 @@
         <WatchVideoChaptersPanel
           v-if="showSidebarChapters && !isLoading && videoChapters.length > 0"
           class="watchVideoSideBar"
-          :class="{ downloadedPlayer: localPlaybackDownloads.length > 0 }"
+          :class="{ downloadedPlayer: isDownloaded }"
           :title="videoChaptersKind === 'keyMoments' ? $t('Chapters.Key Moments') : $t('Chapters.Chapters')"
           :note="videoChaptersKind === 'autoChapters' ? $t('Chapters.Auto-generated') : ''"
           :chapters="videoChapters"
