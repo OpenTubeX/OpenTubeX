@@ -79,7 +79,7 @@ const ShakaError = shaka.util.Error
  * @property {number} cumulativeRetries
  * @property {number} startedAtMs
  * @property {(() => number) | undefined} getBufferedAheadSeconds
- * @property {number} playbackRate
+ * @property {(() => number) | undefined} getPlaybackRate
  * @property {string} scheme
  * @property {{ afterMs: number, beforeMs: number }} liveTimeBounds - the requested live segment lies between these times
  */
@@ -561,7 +561,7 @@ async function doRequest(
       // At the live edge, SABR paces every segment with a short backoff while
       // a few seconds still play. Captions never hold playback back.
       if (operationInputs.streamKind !== 'text') {
-        const bufferedMs = (currentState.getBufferedAheadSeconds?.() ?? 0) * 1000 / (currentState.playbackRate || 1)
+        const bufferedMs = (currentState.getBufferedAheadSeconds?.() ?? 0) * 1000 / (currentState.getPlaybackRate?.() || 1)
         const playableMs = hasDeliveredMedia() ? bufferedMs - BACKOFF_STALL_BUFFER_MS : 0
         if (playableMs > 0) {
           waitMs = Math.min(waitMs, Math.max(playableMs, BACKOFF_BUFFER_POLL_MS))
@@ -1123,6 +1123,7 @@ export function setupSabrScheme(sabrData, getPlayer, getManifest, playerWidth, p
         width: playerWidth.value,
         height: playerHeight.value,
         getBufferedAheadSeconds: () => 0,
+        getPlaybackRate: () => 1,
       }
     }
 
@@ -1198,6 +1199,7 @@ export function setupSabrScheme(sabrData, getPlayer, getManifest, playerWidth, p
       width: playerWidth.value,
       height: playerHeight.value,
       getBufferedAheadSeconds: () => getBufferedAheadSeconds(player),
+      getPlaybackRate: () => player.getPlaybackRate(),
     }
   })
   shaka.net.NetworkingEngine.registerScheme(sabrData.scheme, transport.request)
@@ -1404,7 +1406,7 @@ export function createSabrTransport(sabrData, getRequestContext) {
       cumulativeRetries: 0,
       startedAtMs: Date.now(),
       getBufferedAheadSeconds: context.getBufferedAheadSeconds,
-      playbackRate: context.playbackRate,
+      getPlaybackRate: context.getPlaybackRate,
       scheme: sabrData.scheme,
       liveTimeBounds: { afterMs: -Infinity, beforeMs: Infinity },
     }

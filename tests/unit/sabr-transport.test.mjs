@@ -943,9 +943,10 @@ test('a backoff shows its countdown only once playback runs out of buffered medi
     }
     return response([calls])
   }, { Date })
-  // Playback at 1.5x drains 2.25 seconds of buffered media in 1.5 seconds
-  const getBufferedAheadSeconds = () => Math.max(0, 2.25 - 1.5 * Date.now() / 1000)
-  const transport = createSabrTransport(sabrData, () => ({ ...context, getBufferedAheadSeconds }))
+  // The request reported 1.5x, but playback now runs at 2x and drains
+  // 3 seconds of buffered media in 1.5 seconds
+  const getBufferedAheadSeconds = () => Math.max(0, 3 - 2 * Date.now() / 1000)
+  const transport = createSabrTransport(sabrData, () => ({ ...context, getBufferedAheadSeconds, getPlaybackRate: () => 2 }))
   t.after(() => transport.cleanup())
   transport.onBackoffRequested(({ backoffMs }) => waits.push(backoffMs))
   const uri = 'sabr1:audio?formatId=140-123-&sq=1'
