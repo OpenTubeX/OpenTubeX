@@ -110,6 +110,40 @@ export function findWatchComponent() {
 }
 
 /**
+ * Seeks like the viewer does with the seek bar or a chapter. Setting
+ * `currentTime` directly is an automatic seek, like the one to the start
+ * position, which leaves the history and the saved position unchanged until the
+ * video has played for a few seconds. Pass this function to `video.evaluate()`
+ * with the target seconds; it resolves once the seek completes.
+ *
+ * @param {HTMLMediaElement} video
+ * @param {number} seconds
+ */
+export function seekAsViewer(video, seconds) {
+  const find = (vnode) => {
+    const component = vnode?.component
+    // The mini player can move the video out of its player's element
+    if (component?.exposed?.setCurrentTime && component.refs?.video === video) return component.exposed
+    const match = component?.subTree ? find(component.subTree) : null
+    if (match) return match
+    if (Array.isArray(vnode?.children)) {
+      for (const child of vnode.children) {
+        const childMatch = find(child)
+        if (childMatch) return childMatch
+      }
+    }
+    return null
+  }
+
+  const player = find(document.querySelector('#app')?.__vue_app__?._container?._vnode)
+  if (!player) throw new Error('no player contains this video')
+  return new Promise(resolve => {
+    video.addEventListener('seeked', resolve, { once: true })
+    player.setCurrentTime(seconds, true)
+  })
+}
+
+/**
  * Opens a video that is served entirely from local mocks (see
  * `mockPlayableWatchPage` in watch.mjs), so nothing has to be skipped.
  *

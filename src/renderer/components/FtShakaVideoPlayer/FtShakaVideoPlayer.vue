@@ -2765,6 +2765,7 @@ const emit = defineEmits([
   'open-phone-panel',
   'seeking',
   'seeked',
+  'viewer-seek',
 ])
 
 /** @typedef {import('../../helpers/sponsorblock').SponsorBlockCategory} SponsorBlockCategory */
@@ -13236,7 +13237,11 @@ function getActiveCaption() {
  * @param {boolean} [recordSeekHistory] Whether this is the viewer's own seek, so leaving the current position adds to the seek history
  */
 function rememberSeekPosition(time, recordSeekHistory = false) {
-  if (recordSeekHistory) noteSeekHistoryJump(time)
+  if (recordSeekHistory) {
+    noteSeekHistoryJump(time)
+    // Unlike automatic seeks, such as to the start position or past SponsorBlock segments
+    emit('viewer-seek', time)
+  }
   // Playback should resume from the chosen position, even when it starts
   // before the seeking event arrives.
   rewindOnResumePausedAt = null

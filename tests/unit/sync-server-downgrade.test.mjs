@@ -2540,8 +2540,12 @@ for (const rememberHistory of [false, true]) {
       watchSource.indexOf('\n\n    handleFormatChange:')
     ).trim().replace(/,$/, '')})`)
       const loaded = vm.runInNewContext(`(${watchSource.slice(
-      watchSource.indexOf('    handleVideoLoaded: async function (mediaMetadata) {') + '    handleVideoLoaded: '.length,
+      watchSource.indexOf('    handleVideoLoaded: function (mediaMetadata) {') + '    handleVideoLoaded: '.length,
       watchSource.indexOf('\n\n    checkIfPlaylist:')
+    ).trim().replace(/,$/, '')})`)
+      const startPlaybackHistory = vm.runInNewContext(`(function ${watchSource.slice(
+      watchSource.indexOf('    startPlaybackHistory(chosenSeconds) {') + '    '.length,
+      watchSource.indexOf('\n\n    keepHistoryEntryAlive(currentSeconds) {')
     ).trim().replace(/,$/, '')})`, { process: { env: { IS_CAPACITOR: true, IS_ELECTRON: false } } })
       const savedPositions = []
       Object.assign(watch, {
@@ -2555,8 +2559,13 @@ for (const rememberHistory of [false, true]) {
         consumeTimestamp: () => consumeTimestamp.call(watch),
         tabRouter: { async replace(route) { watch.tabRoute = route } },
       })
-      await loaded.call(watch)
-      assert.equal(watch.tabRoute.query.timestamp, undefined, 'Android consumes the handoff timestamp after loading')
+      loaded.call(watch)
+      assert.deepEqual(savedPositions, [], 'loading alone leaves the history unchanged')
+      assert.equal(startTime.call(watch), Math.floor(position), 'a reload before playback still starts at the handoff position')
+      watch.historyEngaged = true
+      startPlaybackHistory.call(watch)
+      await new Promise(resolve => setImmediate(resolve))
+      assert.equal(watch.tabRoute.query.timestamp, undefined, 'Android consumes the handoff timestamp once playback joins the history')
       assert.deepEqual(savedPositions, rememberHistory ? [Math.floor(position)] : [])
       if (rememberHistory) assert.equal(startTime.call(watch), Math.floor(position) || null, 'a later source load cannot resurrect stale history')
       watch.historyEntry.watchProgress = 30

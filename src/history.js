@@ -7,6 +7,9 @@ export { DEFAULT_WATCHED_PERCENTAGE_THRESHOLD, WATCHED_MAX_REMAINING_SECONDS }
 
 const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000
 
+/** Playback after which a video joins the history, so opening it only to read its comments leaves the history unchanged */
+export const HISTORY_MIN_PLAYBACK_SECONDS = 5
+
 /**
  * The oldest timestamp history retention keeps.
  * @param {unknown} days

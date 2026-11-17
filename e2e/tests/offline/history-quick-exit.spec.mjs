@@ -1,7 +1,7 @@
 import { test, expect, sel, readDatastore } from '../../helpers/app.mjs'
-import { findWatchComponent, openMockedVideo } from '../../helpers/player.mjs'
+import { findWatchComponent, openMockedVideo, playWhenLoaded, seekAsViewer } from '../../helpers/player.mjs'
 import { DEMO_MEDIA_URL } from '../../helpers/media.mjs'
-import { mockPlayableWatchPage, watchHistoryEntry } from '../../helpers/watch.mjs'
+import { mockPlayableWatchPage, watchHistoryEntry, watchViewHandle } from '../../helpers/watch.mjs'
 
 test.use({
   seed: {
@@ -18,10 +18,14 @@ test.use({
   },
 })
 
-async function savedProgress(app) {
+function savedRecord(app) {
   const contents = readDatastore(app.userDataDir, 'history')
   return contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
-    .filter(record => record.videoId === 'jNQXAC9IVRw').at(-1)?.watchProgress
+    .filter(record => record.videoId === 'jNQXAC9IVRw').at(-1)
+}
+
+async function savedProgress(app) {
+  return savedRecord(app)?.watchProgress
 }
 
 function collectManifestWarnings(page) {
@@ -82,13 +86,8 @@ for (const position of [0, 12]) {
     await expect(page).toHaveURL(/#\/history/)
     const video = await openMockedVideo(page)
     await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThanOrEqual(10)
-    await video.evaluate((element, seconds) => {
-      element.pause()
-      return new Promise(resolve => {
-        element.addEventListener('seeked', resolve, { once: true })
-        element.currentTime = seconds
-      })
-    }, position)
+    await video.evaluate(element => element.pause())
+    await video.evaluate(seekAsViewer, position)
     await page.locator(sel.backButton).click()
     await expect(page).toHaveURL(/#\/history/)
     await expect.poll(() => savedProgress(app)).toBe(position)
@@ -107,13 +106,8 @@ for (const exit of ['navigate', 'close tab']) {
         await expect(page.locator(sel.tabs).nth(1)).toHaveClass(/active/)
       }
       const video = await openMockedVideo(page)
-      await video.evaluate((element, seconds) => {
-        element.pause()
-        return new Promise(resolve => {
-          element.addEventListener('seeked', resolve, { once: true })
-          element.currentTime = seconds
-        })
-      }, position)
+      await video.evaluate(element => element.pause())
+      await video.evaluate(seekAsViewer, position)
       if (exit === 'navigate') {
         await page.locator(sel.sideNavRouteLink('history')).first().evaluate(element => element.click())
         await expect(page).toHaveURL(/#\/history/)
@@ -131,15 +125,30 @@ for (const exit of ['navigate', 'close tab']) {
 test('persists the latest seek when quitting the desktop app', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)
-  await video.evaluate(element => {
-    element.pause()
-    return new Promise(resolve => {
-      element.addEventListener('seeked', resolve, { once: true })
-      element.currentTime = 15
-    })
-  })
+  await video.evaluate(element => element.pause())
+  await video.evaluate(seekAsViewer, 15)
   await app.electronApp.close()
   expect(await savedProgress(app)).toBe(15)
+})
+
+test('opening a video leaves its history unchanged until it plays for a few seconds', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await page.evaluate(() => window.$store.dispatch('updateAutoplayVideos', false))
+  const seeded = savedRecord(app)
+  await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+  await page.locator(sel.searchInput).press('Enter')
+  await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(element => element.readyState).catch(() => 0))
+    .toBeGreaterThanOrEqual(2)
+  const watch = await watchViewHandle(page)
+  await expect.poll(() => watch.evaluate(view => view.videoPlayerLoaded)).toBe(true)
+  await page.locator(sel.backButton).click()
+  await expect(page).not.toHaveURL(/#\/watch/)
+  expect(savedRecord(app)).toEqual(seeded)
+
+  const video = await openMockedVideo(page, 'jNQXAC9IVRw', { waitForPlayback: false })
+  await playWhenLoaded(video)
+  await expect.poll(() => savedRecord(app).timeWatched).toBeGreaterThan(seeded.timeWatched)
+  expect(await video.evaluate(element => element.currentTime)).toBeGreaterThanOrEqual(seeded.watchProgress + 5)
 })
 
 for (const existing of [true, false]) {
@@ -175,7 +184,8 @@ for (const existing of [true, false]) {
     }
     await page.locator(sel.sideNavRouteLink('history')).first().evaluate(element => element.click())
     await expect(page).toHaveURL(/#\/history/)
-    await page.evaluate(backSelector => {
+    const seek = await page.evaluateHandle(`(${seekAsViewer})`)
+    await page.evaluate(([backSelector, seekVideo]) => {
       document.addEventListener('loadedmetadata', event => {
         const video = event.target
         video.addEventListener('seeking', () => {
@@ -183,9 +193,9 @@ for (const existing of [true, false]) {
           // leaving, without waiting for seeked or any media data.
           queueMicrotask(() => document.querySelector(backSelector).click())
         }, { once: true })
-        video.currentTime = 15
+        seekVideo(video, 15)
       }, { capture: true, once: true })
-    }, sel.backButton)
+    }, [sel.backButton, seek])
     await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
     await page.locator(sel.searchInput).press('Enter')
     await expect.poll(() => savedProgress(app)).toBe(15)

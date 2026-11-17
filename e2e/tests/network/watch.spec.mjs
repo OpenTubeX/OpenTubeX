@@ -1,6 +1,6 @@
 import { chooseSelectOption, openPlaylistMenuItem, sel } from '../../helpers/app.mjs'
 import { test, expect, setPlayerFullscreen } from '../../helpers/innertube.mjs'
-import { findWatchComponent, openVideoOrSkip, playWhenLoaded, waitForPlaybackOrSkip } from '../../helpers/player.mjs'
+import { findWatchComponent, openVideoOrSkip, playWhenLoaded, seekAsViewer, waitForPlaybackOrSkip } from '../../helpers/player.mjs'
 
 // "Me at the zoo" - the oldest video on YouTube, short and stable.
 const VIDEO_URL = 'https://www.youtube.com/watch?v=jNQXAC9IVRw'
@@ -1930,13 +1930,8 @@ test.describe('custom Shorts player', () => {
     await expect.poll(() => video.evaluate(element => element.duration))
       .toBeGreaterThan(0)
     const duration = await video.evaluate(element => element.duration)
-    await video.evaluate(async (element, scrubbedTo) => {
-      element.pause()
-      element.currentTime = scrubbedTo
-      if (element.seeking) {
-        await new Promise(resolve => element.addEventListener('seeked', resolve, { once: true }))
-      }
-    }, duration - 0.25)
+    await video.evaluate(element => element.pause())
+    await video.evaluate(seekAsViewer, duration - 0.25)
 
     // Scrubbing to the end must not count as completing the Short.
     await expect.poll(() => page.evaluate((expectedDuration) => {

@@ -1,6 +1,6 @@
 import { test, expect, goTo, goToSettingsSection, sel } from '../../helpers/app.mjs'
 import { mockPlayableWatchPage, watchHistoryEntry, watchViewHandle } from '../../helpers/watch.mjs'
-import { openPlayerOptions } from '../../helpers/player.mjs'
+import { openPlayerOptions, seekAsViewer } from '../../helpers/player.mjs'
 
 const musicModeSeed = {
   settings: {
@@ -77,7 +77,7 @@ test('player toggles music mode without rewinding or changing saved defaults', a
   await expect(page.locator('.musicModeIndicator')).toHaveCount(0)
   expect(await watch.evaluate(view => view.$store.getters.getDefaultPlayback)).toBe(2)
   expect(await watch.evaluate(view => JSON.parse(view.$store.getters.getChannelPlaybackSpeeds)[view.channelId])).toBe(2.5)
-  await video.evaluate(element => { element.currentTime = 5 })
+  await video.evaluate(seekAsViewer, 5)
   await watch.evaluate(view => view.handleWatchProgressAutoSaveWhenProgressEnabled())
   await expect.poll(() => watch.evaluate(view => view.historyEntry.watchProgress)).toBeCloseTo(5, 0)
 })
@@ -106,7 +106,7 @@ for (const source of ['queue end', 'recommendation']) {
     await expect(page).toHaveURL(/#\/watch\/musicvideo1$/)
     await expectPlayback(page, 0, 1)
     const nextWatch = await watchViewHandle(page)
-    await page.locator(videoSelector).evaluate(element => { element.currentTime = 5 })
+    await page.locator(videoSelector).evaluate(seekAsViewer, 5)
     await nextWatch.evaluate(view => view.handleWatchProgressAutoSaveWhenProgressEnabled())
     await expect.poll(() => nextWatch.evaluate(view => view.historyEntry.watchProgress)).toBeCloseTo(5, 0)
   })

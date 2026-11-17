@@ -3,7 +3,7 @@ import { createServer } from 'node:http'
 import path from 'node:path'
 
 import { defaultThemeClass, choosePickerPaths, expect, goTo, repoRoot, sel, setWindowSize, test } from '../../helpers/app.mjs'
-import { activeTab, openMockedVideo, waitForPlayback, openPlayerOptions } from '../../helpers/player.mjs'
+import { activeTab, openMockedVideo, waitForPlayback, openPlayerOptions, seekAsViewer } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { DEMO_MEDIA_PATH, DEMO_MEDIA_URL, routeDemoMedia } from '../../helpers/media.mjs'
 import { expectImagesLoaded, fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
@@ -135,16 +135,16 @@ test('external media resumes its last playback position after reopening and rest
   await page.locator(sel.searchInput).press('Enter')
   const video = await waitForPlayback(page)
   await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBeGreaterThan(1)
-  await video.evaluate(element => { element.pause(); element.currentTime = 12 })
-  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(12, 0)
+  await video.evaluate(element => element.pause())
+  await video.evaluate(seekAsViewer, 12)
   await goTo(page, 'history')
   await page.locator(sel.searchInput).fill(mediaUrl)
   await page.locator(sel.searchInput).press('Enter')
   await waitForPlayback(page)
   await video.evaluate(element => element.pause())
   expect(await video.evaluate(element => element.currentTime)).toBeGreaterThanOrEqual(12)
-  await video.evaluate(element => { element.pause(); element.currentTime = 18 })
-  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(18, 0)
+  await video.evaluate(element => element.pause())
+  await video.evaluate(seekAsViewer, 18)
   const { page: restartedPage } = await app.relaunch()
   await routeDemoMedia(restartedPage)
   await restartedPage.locator(sel.searchInput).fill(mediaUrl)
@@ -201,7 +201,8 @@ test('external media resets completed playback and clears positions with watch h
     return waitForPlayback(page)
   }
   let video = await open()
-  await video.evaluate(element => { element.pause(); element.currentTime = 12 })
+  await video.evaluate(element => element.pause())
+  await video.evaluate(seekAsViewer, 12)
   await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBeCloseTo(12, 0)
   await video.evaluate(element => { element.currentTime = element.duration - 0.1; return element.play() })
   await expect.poll(() => video.evaluate(element => element.ended)).toBe(true)
@@ -212,7 +213,7 @@ test('external media resets completed playback and clears positions with watch h
   video = await open()
   await video.evaluate(element => element.pause())
   expect(await video.evaluate(element => element.currentTime)).toBeLessThan(2)
-  await video.evaluate(element => { element.currentTime = 12 })
+  await video.evaluate(seekAsViewer, 12)
   await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBeCloseTo(12, 0)
   await goTo(page, 'history')
   await page.evaluate(() => window.$store.dispatch('removeAllHistory'))
@@ -230,7 +231,8 @@ test('external media joins the watch history, where its menu marks it as watched
   await page.locator(sel.searchInput).fill(mediaUrl)
   await page.locator(sel.searchInput).press('Enter')
   const video = await waitForPlayback(page)
-  await video.evaluate(element => { element.pause(); element.currentTime = 12 })
+  await video.evaluate(element => element.pause())
+  await video.evaluate(seekAsViewer, 12)
   await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBeCloseTo(12, 0)
 
   await goTo(page, 'history')
@@ -300,7 +302,8 @@ test('external media restarts when its extracted duration is shorter than the sa
   await page.locator(sel.searchInput).fill(mediaUrl)
   await page.locator(sel.searchInput).press('Enter')
   let video = await waitForPlayback(page)
-  await video.evaluate(element => { element.pause(); element.currentTime = 18 })
+  await video.evaluate(element => element.pause())
+  await video.evaluate(seekAsViewer, 18)
   await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBeCloseTo(18, 0)
   await goTo(page, 'history')
   await prepareTwitchYtDlp(app, page, mediaUrl, false, '', [], 8)
@@ -385,8 +388,8 @@ for (const seekBeforeMetadata of [false, true]) {
       expect(await audio.evaluate(element => Number.isFinite(element.duration))).toBe(false)
       // The second seek lands within the playback drift tolerance of the first.
       for (const seconds of [1.2, 0.75]) {
-        await video.evaluate((element, seconds) => { element.pause(); element.currentTime = seconds }, seconds)
-        await expect.poll(() => video.evaluate(element => element.seeking)).toBe(false)
+        await video.evaluate(element => element.pause())
+        await video.evaluate(seekAsViewer, seconds)
       }
       releaseAudio()
       await expect.poll(() => audio.evaluate(element => Number.isFinite(element.duration))).toBe(true)
@@ -425,6 +428,8 @@ for (const seekBeforeMetadata of [false, true]) {
     await open()
     await expect(video).toHaveJSProperty('loop', true)
     const position = await audio.evaluate(element => element.duration / 2)
+    // Choosing a position lets the media join the history before it has played for a few seconds.
+    await video.evaluate(seekAsViewer, 0)
     await audio.evaluate((element, seconds) => { element.currentTime = seconds }, position)
     await expect.poll(() => audio.evaluate(element => element.seeking)).toBe(false)
     await video.evaluate(element => element.dispatchEvent(new Event('pause')))
@@ -473,6 +478,8 @@ test('external media keeps a longer soundtrack\'s position while it plays in the
   await video.evaluate(element => element.pause())
   // The soundtrack continues past the end of the looping video.
   const videoDuration = await video.evaluate(element => element.duration)
+  // Choosing a position lets the media join the history before it has played for a few seconds.
+  await video.evaluate(seekAsViewer, 0)
   await audio.evaluate((element, seconds) => { element.currentTime = seconds }, videoDuration + 0.5)
   await expect.poll(() => audio.evaluate(element => element.seeking)).toBe(false)
   await goTo(page, 'history')
@@ -544,6 +551,8 @@ test('external media keeps a watched mark that is still saving when the length c
   await page.locator(sel.searchInput).fill(mediaUrl)
   await page.locator(sel.searchInput).press('Enter')
   const video = await waitForPlayback(page)
+  await video.evaluate(seekAsViewer, 1)
+  await expect.poll(async () => (await savedExternalEntry(page, mediaUrl))?.isWatched).toBe(false)
   await video.evaluate(element => { element.currentTime = element.duration - 0.1; return element.play() })
   await expect.poll(() => app.electronApp.evaluate(() => typeof globalThis.releaseWatchedMark)).toBe('function')
   expect((await savedExternalEntry(page, mediaUrl))?.isWatched).toBe(false)
@@ -570,7 +579,8 @@ test('external media saves on pause in semi-auto mode without periodically savin
   await page.locator(sel.searchInput).fill(mediaUrl)
   await page.locator(sel.searchInput).press('Enter')
   const video = await waitForPlayback(page)
-  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(3)
+  // Past the playback after which the media joins the history
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(6)
   expect(await savedExternalPosition(page, mediaUrl)).toBeNull()
   await video.evaluate(element => element.pause())
   const pausedTime = await video.evaluate(element => element.currentTime)
@@ -626,7 +636,8 @@ test('external media keeps background pause and completion positions after switc
   await page.locator(sel.searchInput).press('Enter')
   await waitForPlayback(page)
   const video = page.locator('.videoPlayer video')
-  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(3)
+  // Past the playback after which the media joins the history
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(6)
   await video.evaluate(element => element.requestPictureInPicture())
   await page.locator(sel.newTabButton).click()
   await expect(page.locator(`${activeTab} .externalMedia`)).toHaveCount(0)
@@ -659,14 +670,16 @@ for (const newerPosition of [18, 0]) {
     await page.locator(sel.searchInput).fill(mediaUrl)
     await page.locator(sel.searchInput).press('Enter')
     const olderVideo = await waitForPlayback(page)
-    await olderVideo.evaluate(element => { element.pause(); element.currentTime = 12 })
+    await olderVideo.evaluate(element => element.pause())
+    await olderVideo.evaluate(seekAsViewer, 12)
     await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBeCloseTo(12, 0)
     const olderTabId = await page.evaluate(async () => (await window.ftElectron.tabs.getState()).activeTabId)
     await page.locator(sel.newTabButton).click()
     await page.locator(sel.searchInput).fill(mediaUrl)
     await page.locator(sel.searchInput).press('Enter')
     const newerVideo = await waitForPlayback(page)
-    await newerVideo.evaluate((element, seconds) => { element.pause(); element.currentTime = seconds }, newerPosition)
+    await newerVideo.evaluate(element => element.pause())
+    await newerVideo.evaluate(seekAsViewer, newerPosition)
     const expected = newerPosition || null
     await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBe(expected)
     await page.evaluate(id => window.ftElectron.tabs.close(id), olderTabId)

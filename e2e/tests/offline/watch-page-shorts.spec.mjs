@@ -1,5 +1,5 @@
 import { sel, setPlayerFullscreen, setWindowSize, test, expect } from '../../helpers/app.mjs'
-import { waitForPlayback } from '../../helpers/player.mjs'
+import { seekAsViewer, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 import { WATCH_PAGE_SEED } from '../../helpers/watch-page.mjs'
 
@@ -69,11 +69,8 @@ test.describe('Shorts transcript navigation', () => {
     await page.locator(sel.searchInput).fill(`https://www.youtube.com/shorts/${CAPTIONED_SHORT_IDS[0]}`)
     await page.locator(sel.searchInput).press('Enter')
     const video = await waitForPlayback(page)
-    await video.evaluate(async element => {
-      element.pause()
-      element.currentTime = element.duration - 0.25
-      await new Promise(resolve => element.addEventListener('seeked', resolve, { once: true }))
-    })
+    await video.evaluate(element => element.pause())
+    await video.evaluate(seekAsViewer, await video.evaluate(element => element.duration - 0.25))
     const view = await watchViewHandle(page)
     await expect.poll(() => view.evaluate(view => ({
       complete: view.shortsPlaybackCompleted,

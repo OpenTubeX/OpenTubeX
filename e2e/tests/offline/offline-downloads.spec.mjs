@@ -2,6 +2,7 @@ import path from 'node:path'
 
 import { test, expect, abortUnmockedRequest, goTo, repoRoot, setWindowSize, waitForAppReady } from '../../helpers/app.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
+import { seekAsViewer } from '../../helpers/player.mjs'
 
 const downloadSource = (id, videoId, filePath) => `downloadmedia://file/${id}/${videoId}?path=${encodeURIComponent(filePath)}`
 const mediaPath = path.join(repoRoot, 'e2e/fixtures/media/demo.webm')
@@ -385,6 +386,8 @@ test.describe('mobile downloaded audio mini player', { tag: '@scale' }, () => {
     await expect.poll(() => page.evaluate(() => window.$store.getters.getWatchQueueLength)).toBe(0)
     // The mini player shows the next video, so pausing it saves its progress.
     await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(1)
+    // Choosing a position lets the 4 second audio join the history.
+    await video.evaluate(seekAsViewer, 1)
     const progress = await video.evaluate(element => { element.pause(); return element.currentTime })
     await expect.poll(() => page.evaluate(() => window.$store.getters.getHistoryCacheById.offline0002?.watchProgress))
       .toBeCloseTo(progress, 1)
