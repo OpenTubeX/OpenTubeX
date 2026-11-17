@@ -1,6 +1,6 @@
 import { test, expect, sel } from '../../helpers/app.mjs'
-import { openMockedVideo } from '../../helpers/player.mjs'
-import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
+import { openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
+import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
 // Search suggestions would need the network
 test.use({ seed: { settings: { enableSearchSuggestions: false } } })
@@ -54,4 +54,36 @@ test('incognito tabs save no watch or search history, unlike regular tabs', asyn
   // Once the regular tab's history is saved, the incognito tab's would have been too
   await expect.poll(() => savedHistory(page, 'bbbbbbbbbbb', 'regular query')).toEqual({ watched: true, searched: true })
   expect(await savedHistory(page, 'aaaaaaaaaaa', 'incognito query')).toEqual({ watched: false, searched: false })
+})
+
+test('finishing a playlist video in an incognito tab keeps it in a playlist that removes watched videos', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await page.keyboard.press('Control+Shift+P')
+  await expect(page.locator('.tab.active .incognitoIcon')).toBeVisible()
+  await openMockedVideo(page)
+  const watchView = await watchViewHandle(page)
+  await watchView.evaluate(async view => {
+    await view.$store.dispatch('addPlaylist', {
+      _id: 'ft-playlist--incognito-removal',
+      playlistName: 'Incognito removal',
+      removeWatchedVideos: true,
+      videos: [
+        { videoId: 'jNQXAC9IVRw', playlistItemId: 'first', title: 'First' },
+        { videoId: 'dQw4w9WgXcQ', playlistItemId: 'second', title: 'Second' },
+      ]
+    })
+    await view.$store.dispatch('updateUserPlaylistSortOrder', 'custom')
+    await view.tabRouter.push({
+      path: '/watch/jNQXAC9IVRw',
+      query: { playlistId: 'ft-playlist--incognito-removal', playlistType: 'user', playlistItemId: 'first' }
+    })
+  })
+  await expect.poll(() => watchView.evaluate(view => view.watchingPlaylist && !!view.$refs.watchVideoPlaylist)).toBe(true)
+  const video = await waitForPlayback(page)
+  await video.evaluate(element => { element.currentTime = element.duration - 1 })
+  // A regular tab removes the video before the playlist moves on
+  await expect(page).toHaveURL(/watch\/dQw4w9WgXcQ.*playlistItemId=second/)
+  expect(await watchView.evaluate(view =>
+    view.$store.getters.getPlaylist('ft-playlist--incognito-removal').videos.map(item => item.playlistItemId)))
+    .toEqual(['first', 'second'])
 })

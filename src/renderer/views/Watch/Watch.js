@@ -5290,6 +5290,7 @@ export default defineComponent({
       const playlist = this.selectedUserPlaylist
       if (
         playlist?.removeWatchedVideos !== true ||
+        this.isIncognitoTab ||
         this.isUpcoming ||
         this.isLive ||
         this.isRemovedPlaylistEntry()
