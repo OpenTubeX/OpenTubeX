@@ -294,7 +294,8 @@ const playbackToggleAttributes = computed(() => canTogglePlayback.value
       'aria-label': togglePlaybackState.value === 'playing' ? t('Video.Player.Scroll Mini Player.Pause') : t('Video.Player.Scroll Mini Player.Play'),
       onClick: togglePlayback,
       onPointerdown: stopPropagation,
-      onMousedown: stopPropagation
+      onMousedown: stopPropagation,
+      onKeydown: stopActivationKeys
     }
   : {})
 
@@ -311,6 +312,15 @@ function togglePlayback(event) {
  */
 function stopPropagation(event) {
   event.stopPropagation()
+}
+
+/**
+ * Keeps the active tab's player shortcuts from handling the keys that press
+ * this button.
+ * @param {KeyboardEvent} event
+ */
+function stopActivationKeys(event) {
+  if (event.key === ' ' || event.key === 'Enter') event.stopPropagation()
 }
 
 function handleAvatarError() {
