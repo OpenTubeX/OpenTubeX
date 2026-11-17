@@ -16,6 +16,8 @@
  * @typedef {import('./types.js').PlatformSearchType} PlatformSearchType
  */
 
+import { PlatformBrowserCheckError } from './browserCheck.js'
+
 const PLATFORM = 'rumble'
 const ORIGIN = 'https://rumble.com'
 const REQUEST_TIMEOUT_MS = 15_000
@@ -282,6 +284,7 @@ async function request(fetcher, url, signal) {
     headers: { Accept: 'text/html' },
     signal: signal ? AbortSignal.any([signal, timeout]) : timeout
   })
+  if (response.headers.get('cf-mitigated') === 'challenge') throw new PlatformBrowserCheckError(PLATFORM, url)
   if (response.status === 404) return null
   if (!response.ok) throw new Error(`Rumble returned HTTP ${response.status}`)
   return response.text()

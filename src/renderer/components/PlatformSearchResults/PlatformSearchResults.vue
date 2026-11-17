@@ -7,14 +7,13 @@
         class="searchStatus"
         role="alert"
       >
-        {{ t('Platforms.Load Error', { platform: platform.name }) }}
+        {{ canPassBrowserCheck(error.cause) ? t('Platforms.Browser Check', { platform: platform.name }) : t('Platforms.Load Error', { platform: platform.name }) }}
       </p>
-      <!-- Later pages try again with their next page button -->
-      <FtFlexBox v-if="error && results.length === 0">
-        <FtButton
-          :label="t('User Playlists.SinglePlaylistView.Retry')"
-          :icon="['fas', 'sync']"
-          @click="search(false)"
+      <!-- Later pages try again with their next page button, unless a check fails them -->
+      <FtFlexBox v-if="error && (results.length === 0 || canPassBrowserCheck(error.cause))">
+        <PlatformRetryButton
+          :error="error.cause"
+          @retry="search(error.more)"
         />
       </FtFlexBox>
       <PlatformResultList :results="results" />
@@ -23,7 +22,7 @@
         v-if="continuation !== null"
         :key="`${platform.id}:${type}:${query}:${autoLoadRevision}`"
         :loading="loading"
-        :paused="error"
+        :paused="error !== null"
         @load-next-page="loadMore"
       >
         <div
@@ -37,7 +36,7 @@
         </div>
       </FtAutoLoadNextPageWrapper>
       <p
-        v-else-if="!error"
+        v-else-if="error === null"
         class="searchStatus"
         role="status"
       >
@@ -53,12 +52,12 @@ import { useI18n } from 'vue-i18n'
 import { FtIcon } from '@opentubex/icons'
 
 import FtAutoLoadNextPageWrapper from '../FtAutoLoadNextPageWrapper.vue'
-import FtButton from '../FtButton/FtButton.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtLoader from '../FtLoader/FtLoader.vue'
 import PlatformResultList from '../PlatformResultList/PlatformResultList.vue'
+import PlatformRetryButton from '../PlatformRetryButton/PlatformRetryButton.vue'
 
-import { getPlatformFetch } from '../../helpers/platformFetch'
+import { canPassBrowserCheck, getPlatformFetch } from '../../helpers/platformFetch'
 import { useAutoLoadRevision } from '../../composables/useAutoLoadRevision'
 
 const props = defineProps({
@@ -84,7 +83,8 @@ const { t } = useI18n()
 const results = shallowRef([])
 const continuation = ref(/** @type {string | null} */ (null))
 const loading = ref(false)
-const error = ref(false)
+/** What failed the last page, and whether it was a later one */
+const error = shallowRef(/** @type {{ cause: unknown, more: boolean } | null} */ (null))
 let generation = 0
 
 /**
@@ -93,7 +93,7 @@ let generation = 0
 async function search(more) {
   const current = ++generation
   loading.value = true
-  error.value = false
+  error.value = null
   if (!more) {
     results.value = []
     continuation.value = null
@@ -106,7 +106,7 @@ async function search(more) {
   } catch (searchError) {
     if (current !== generation) return
     console.error('Failed to search', searchError)
-    error.value = true
+    error.value = { cause: searchError, more }
   } finally {
     if (current === generation) loading.value = false
   }

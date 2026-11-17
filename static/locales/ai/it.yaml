@@ -2819,6 +2819,8 @@ Platforms:
   Playlist Not Found: Impossibile trovare questa playlist.
   Load Error: Impossibile caricare questa pagina da {platform}.
   Empty Tab: Non c’è ancora niente qui.
+  Browser Check: "{platform} ti chiede di verificare di essere una persona prima di mostrare questa pagina."
+  Verify: "Verifica"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} ha risposto a {commentAuthor}"
   Like: "Mi piace"

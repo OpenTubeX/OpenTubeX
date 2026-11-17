@@ -253,6 +253,18 @@ public final class YtDlpPlugin extends Plugin {
         long requestedAt = System.nanoTime();
         run(rumbleExecutor, call, () -> RumblePages.fetch(call.getString("url"), payload -> RumbleManifestTransport.send(getContext(), payload), requestedAt));
     }
+    /** Settles once the user passed Cloudflare's check on the page, or left it. */
+    @PluginMethod public void passRumbleChallenge(PluginCall call) {
+        String url = call.getString("url");
+        if (!RumblePages.isRumblePage(url)) {
+            call.reject("Not a Rumble page");
+            return;
+        }
+        startActivityForResult(call, new Intent(getContext(), RumbleChallengeActivity.class).putExtra("url", url), "rumbleChallengeClosed");
+    }
+    @ActivityCallback private void rumbleChallengeClosed(PluginCall call, ActivityResult result) {
+        if (call != null) call.resolve();
+    }
 
     private static String repository(String channel) {
         return "nightly".equals(channel) ? "yt-dlp/yt-dlp-nightly-builds" : "master".equals(channel) ? "yt-dlp/yt-dlp-master-builds" : "yt-dlp/yt-dlp";

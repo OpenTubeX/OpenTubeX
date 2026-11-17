@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
+import { PlatformBrowserCheckError } from '../../src/platforms/browserCheck.js'
 import rumble from '../../src/platforms/rumble.js'
 
 const CDN = 'https://cdn.rumble.cloud'
@@ -319,4 +320,15 @@ test('searches channels', async () => {
       }
     }
   ])
+})
+
+test('reports when Cloudflare wants a browser to pass its check', async () => {
+  const url = 'https://rumble.com/search/video?q=example'
+  const fetcher = async () => new Response('Just a moment...', { status: 403, headers: { 'Content-Type': 'text/html', 'cf-mitigated': 'challenge' } })
+  await assert.rejects(rumble.search(fetcher, 'example', 'videos', null), (error) => {
+    assert.ok(error instanceof PlatformBrowserCheckError)
+    assert.equal(error.platform, 'rumble')
+    assert.equal(error.url, url)
+    return true
+  })
 })

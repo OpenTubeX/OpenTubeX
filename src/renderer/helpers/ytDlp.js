@@ -300,10 +300,20 @@ const capacitor = {
  * Loads a Rumble page natively, with its own cookies. Android uses the Chrome
  * transport of its Rumble HTTP helper, as Rumble rejects its HTTP client.
  * @param {string} url
- * @returns {Promise<{ status: number, text: string }>}
+ * @returns {Promise<{ status: number, text: string, challenge: boolean }>}
  */
 export function fetchMobileRumblePage(url) {
   return native.fetchRumblePage({ url })
+}
+
+/**
+ * Shows a Rumble page in a native browser where the user can pass Cloudflare's
+ * check. Settles once they passed it or closed the browser.
+ * @param {string} url
+ * @returns {Promise<void>}
+ */
+export async function passMobileRumbleChallenge(url) {
+  await native.passRumbleChallenge({ url })
 }
 
 export function initializeCapacitorYtDlp() {

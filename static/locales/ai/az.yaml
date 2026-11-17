@@ -2829,6 +2829,8 @@ Platforms:
   Playlist Not Found: Bu pleylist tapılmadı.
   Load Error: Bu səhifə {platform} saytından yüklənə bilmədi.
   Empty Tab: Burada hələ heç nə yoxdur.
+  Browser Check: "{platform} bu səhifəni göstərməzdən əvvəl insan olduğunuzu təsdiqləməyinizi istəyir."
+  Verify: "Təsdiqlə"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} {commentAuthor} istifadəçisinə cavab verdi"
   Like: "Bəyən"

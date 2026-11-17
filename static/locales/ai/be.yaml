@@ -2922,6 +2922,8 @@ Platforms:
   Playlist Not Found: Гэты плэй-ліст не знойдзены.
   Load Error: Не ўдалося загрузіць гэтую старонку з {platform}.
   Empty Tab: Тут пакуль нічога няма.
+  Browser Check: "{platform} просіць пацвердзіць, што вы чалавек, перш чым паказаць гэту старонку."
+  Verify: "Пацвердзіць"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} адказаў карыстальніку {commentAuthor}"
   Like: "Падабаецца"

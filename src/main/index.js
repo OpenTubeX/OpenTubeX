@@ -2,7 +2,7 @@ import { ClosedWindowHistory } from './tabs/ClosedWindowHistory.js'
 import { createFileWatchQueue } from './watchQueue.js'
 import { createSerialQueue } from './serialQueue.js'
 import { writeFileAtomic } from './writeFileAtomic.js'
-import { fetchRumblePage } from './rumblePages.js'
+import { fetchRumblePage, passRumbleChallenge } from './rumblePages.js'
 import {
   app, BrowserWindow, Menu, dialog, ipcMain,
   powerSaveBlocker, screen, session,
@@ -357,7 +357,7 @@ function runApp() {
    * @param {BrowserWindow} browserWindow
    */
   async function confirmCloseWindow(browserWindow) {
-    const isLastWindow = BrowserWindow.getAllWindows().length === 1
+    const isLastWindow = TabManager.getWindows().length === 1
     if (isLastWindow) return confirmCloseApp(browserWindow)
 
     const manager = TabManager.getForWindow(browserWindow.id)
@@ -365,8 +365,8 @@ function runApp() {
       return false
     }
     // Closing the other windows meanwhile turns this close into a quit. A
-    // window stays in getAllWindows() until it is destroyed, after its close.
-    const openWindowCount = BrowserWindow.getAllWindows()
+    // window stays in TabManager.getWindows() until it is destroyed, after its close.
+    const openWindowCount = TabManager.getWindows()
       .filter(window => !closingWindowIds.has(window.id)).length
     return openWindowCount > 1 || confirmCloseApp(browserWindow)
   }
@@ -723,6 +723,10 @@ function runApp() {
   })
   handleTrusted(IpcChannels.TWITCH_LIVE_CONFIGURE, (_event, configuration) => twitchLiveNotifier.configure(configuration))
   handleTrusted(IpcChannels.RUMBLE_FETCH, (_event, url) => fetchRumblePage(net, url))
+  handleTrusted(IpcChannels.RUMBLE_PASS_CHALLENGE, (event, url) => passRumbleChallenge({
+    BrowserWindow,
+    parent: BrowserWindow.fromWebContents(event.sender)
+  }, url))
   const uploadNotifier = createUploadNotifier({
     file: path.join(userDataPath, 'upload-notifications.json'),
     show: showUrlNotification,
@@ -789,7 +793,7 @@ function runApp() {
   })
 
   function updateBackgroundSubscriptionVisibility() {
-    const hidden = BrowserWindow.getAllWindows().every(window => !window.isVisible() || window.isMinimized())
+    const hidden = TabManager.getWindows().every(window => !window.isVisible() || window.isMinimized())
     backgroundSubscriptions.setBackground(hidden && !isSubscriptionAutoRefreshInProgress()).catch(console.error)
   }
 
@@ -1526,7 +1530,7 @@ function runApp() {
       confirmCloseWindow,
       confirmMultipleTabsAction,
       markWindowCloseConfirmed: (browserWindow) => {
-        if (BrowserWindow.getAllWindows().length === 1) {
+        if (TabManager.getWindows().length === 1) {
           closeConfirmedWindowIds.add(browserWindow.id)
         }
       },
@@ -1652,7 +1656,7 @@ function runApp() {
   function toggleTrayWindow() {
     const window = mainWindow && !mainWindow.isDestroyed()
       ? mainWindow
-      : BrowserWindow.getAllWindows()[0]
+      : TabManager.getWindows()[0]
     if (!window) {
       createWindow()
     } else if (window.isVisible() && !window.isMinimized() && !trayWindows.includes(window)) {
@@ -1716,7 +1720,7 @@ function runApp() {
   }
 
   function defaultTrayMenu() {
-    const windows = BrowserWindow.getAllWindows()
+    const windows = TabManager.getWindows()
     const iconFor = name => getTrayMenuIcon(name, trayMenuIconPack)
     const isShown = window => window.isVisible() && !window.isMinimized() && !trayWindows.includes(window)
     return [
@@ -1756,7 +1760,7 @@ function runApp() {
             label: trayTranslate('Tray.Show All Windows'),
             icon: iconFor('eye'),
             click: () => {
-              for (const window of BrowserWindow.getAllWindows()) {
+              for (const window of TabManager.getWindows()) {
                 if (!isShown(window)) trayClick(window)
               }
             }
@@ -1767,7 +1771,7 @@ function runApp() {
             label: trayTranslate('Tray.Hide All Windows'),
             icon: iconFor('eye-slash'),
             click: () => {
-              for (const window of BrowserWindow.getAllWindows()) {
+              for (const window of TabManager.getWindows()) {
                 if (isShown(window)) hideWindowToTray(window)
               }
             }
@@ -2292,7 +2296,7 @@ function runApp() {
         return
       }
 
-      const wasLastWindow = BrowserWindow.getAllWindows().length === 1
+      const wasLastWindow = TabManager.getWindows().length === 1
 
       if (!isQuitting && !closeConfirmedWindowIds.delete(newWindow.id) &&
           (wasLastWindow || tabManager.tabs.size > 1)) {
@@ -2305,7 +2309,7 @@ function runApp() {
         let confirmed = quitsApp
           ? await confirmCloseApp(newWindow, keepRefreshingInBackground, hideWithoutPrompt)
           : await confirmCloseWindowWithMultipleTabs(newWindow, tabManager.tabs.size)
-        const openWindowCount = BrowserWindow.getAllWindows()
+        const openWindowCount = TabManager.getWindows()
           .filter(window => !closingWindowIds.has(window.id)).length
         if (confirmed && !wasLastWindow && openWindowCount === 1) {
           confirmed = await confirmCloseApp(newWindow, keepRefreshingInBackground, hideWithoutPrompt)
@@ -2332,7 +2336,7 @@ function runApp() {
 
       // A confirmation can remain open while another window closes. Recompute
       // this after the async prompt so the session decision uses current state.
-      const isLastWindow = BrowserWindow.getAllWindows()
+      const isLastWindow = TabManager.getWindows()
         .filter(window => window.id === newWindow.id || !closingWindowIds.has(window.id))
         .length === 1
 
@@ -2347,7 +2351,7 @@ function runApp() {
         fullScreen: newWindow.isFullScreen() && !htmlFullscreen
       }
 
-      // The current window is still part of getAllWindows() at the point the
+      // The current window is still part of TabManager.getWindows() at the point the
       // `close` event fires, so length === 1 means we're closing the last one.
       // Preserve this window's tab session when:
       //   - the app is quitting (so every open window comes back on next launch)
@@ -2382,7 +2386,7 @@ function runApp() {
     }
     newWindow.once('closed', () => {
       closingWindowIds.delete(newWindow.id)
-      const allWindows = BrowserWindow.getAllWindows()
+      const allWindows = TabManager.getWindows()
       if (allWindows.length !== 0 && newWindow === mainWindow) {
         // Replace mainWindow to avoid accessing `mainWindow.webContents`
         // Which raises "Object has been destroyed" error
@@ -2956,7 +2960,7 @@ function runApp() {
   // MacOS event
   // https://www.electronjs.org/docs/latest/api/app#event-activate-macos
   app.on('activate', (_event, hasVisibleWindows) => {
-    if (BrowserWindow.getAllWindows().length === 0) {
+    if (TabManager.getWindows().length === 0) {
       createWindow()
     } else if (!hasVisibleWindows) {
       // Windows hidden to the tray or kept for background refreshes come back from the Dock.
@@ -3527,7 +3531,7 @@ function runApp() {
                   const tabIds = tabManager.selectedTabIds.length > 1
                     ? [...tabManager.selectedTabIds]
                     : [tabManager.activeTabId]
-                  const closesLastWindow = BrowserWindow.getAllWindows().length === 1 &&
+                  const closesLastWindow = TabManager.getWindows().length === 1 &&
                     await tabManager.closingTabsClosesWindow(tabIds.length)
                   if (!closesLastWindow && !await confirmMultipleTabsAction(tabManager, tabIds.length, 'close')) {
                     return

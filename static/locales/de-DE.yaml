@@ -4023,6 +4023,8 @@ Platforms:
   Playlist Not Found: Diese Playlist wurde nicht gefunden.
   Load Error: Diese Seite konnte nicht von {platform} geladen werden.
   Empty Tab: Hier gibt es noch nichts.
+  Browser Check: "{platform} zeigt diese Seite erst, wenn du bestätigt hast, dass du ein Mensch bist."
+  Verify: "Bestätigen"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} hat {commentAuthor} geantwortet"
   Like: "Mag ich"

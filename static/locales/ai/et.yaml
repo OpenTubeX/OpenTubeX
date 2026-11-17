@@ -2822,6 +2822,8 @@ Platforms:
   Playlist Not Found: Seda esitusloendit ei leitud.
   Load Error: Seda lehte ei õnnestunud platvormilt {platform} laadida.
   Empty Tab: Siin pole veel midagi.
+  Browser Check: "{platform} palub sul enne selle lehe näitamist kinnitada, et oled inimene."
+  Verify: "Kinnita"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} vastas kasutajale {commentAuthor}"
   Like: "Meeldib"

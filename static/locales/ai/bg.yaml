@@ -2856,6 +2856,8 @@ Platforms:
   Playlist Not Found: Този плейлист не можа да бъде намерен.
   Load Error: Тази страница не можа да бъде заредена от {platform}.
   Empty Tab: Тук все още няма нищо.
+  Browser Check: "{platform} иска да потвърдите, че сте човек, преди да покаже тази страница."
+  Verify: "Потвърждаване"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} отговори на {commentAuthor}"
   Like: "Харесване"

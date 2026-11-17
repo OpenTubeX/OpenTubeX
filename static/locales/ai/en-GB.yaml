@@ -2813,6 +2813,8 @@ Platforms:
   Playlist Not Found: This playlist could not be found.
   Load Error: This page could not be loaded from {platform}.
   Empty Tab: There is nothing here yet.
+  Browser Check: "{platform} asks you to verify that you're human before it shows this page."
+  Verify: "Verify"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} replied to {commentAuthor}"
   Like: "Like"

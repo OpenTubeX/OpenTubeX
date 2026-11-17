@@ -2823,6 +2823,8 @@ Platforms:
   Playlist Not Found: 找不到這個播放清單。
   Load Error: 無法從 {platform} 載入這個頁面。
   Empty Tab: 這裡還沒有任何內容。
+  Browser Check: "{platform} 要求你先驗證自己是真人，才會顯示此頁面。"
+  Verify: "驗證"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} 回覆了 {commentAuthor}"
   Like: "喜歡"

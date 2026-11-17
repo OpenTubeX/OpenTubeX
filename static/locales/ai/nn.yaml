@@ -3216,6 +3216,8 @@ Platforms:
   Playlist Not Found: Fann ikkje denne spelelista.
   Load Error: Kunne ikkje lasta inn denne sida frå {platform}.
   Empty Tab: Det er ingenting her enno.
+  Browser Check: "{platform} ber deg stadfeste at du er eit menneske før sida blir vist."
+  Verify: "Stadfest"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} svarte {commentAuthor}"
   Like: "Lik"

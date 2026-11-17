@@ -871,9 +871,16 @@ export default {
   /**
    * Loads a Rumble page with the cookies of the app's session.
    * @param {string} url
-   * @returns {Promise<{ status: number, text: string }>}
+   * @returns {Promise<{ status: number, text: string, challenge: boolean }>}
    */
   fetchRumblePage: url => ipcRenderer.invoke(IpcChannels.RUMBLE_FETCH, url),
+  /**
+   * Opens a Rumble page in a window where the user can pass Cloudflare's check.
+   * Settles once they passed it or closed the window.
+   * @param {string} url
+   * @returns {Promise<void>}
+   */
+  passRumbleChallenge: url => ipcRenderer.invoke(IpcChannels.RUMBLE_PASS_CHALLENGE, url),
   /**
    * @param {(live: import('../twitchFollows').TwitchFeedItem[]) => void} handler
    * @returns {() => void} removes the listener

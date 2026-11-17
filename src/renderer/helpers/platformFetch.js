@@ -1,3 +1,4 @@
+import { PlatformBrowserCheckError } from '../../platforms/browserCheck'
 import { appFetch } from './rssHub'
 
 /**
@@ -23,7 +24,45 @@ async function fetchRumblePage(url, init) {
     load(url).then(resolve, reject).finally(() => signal?.removeEventListener('abort', abort))
   })
   // Responses without content, like 204, can't have a body
-  return new Response(page.text || null, { status: page.status, headers: { 'Content-Type': 'text/html' } })
+  return new Response(page.text || null, {
+    status: page.status,
+    headers: { 'Content-Type': 'text/html', ...(page.challenge ? { 'cf-mitigated': 'challenge' } : {}) }
+  })
+}
+
+/**
+ * Whether the user can pass the browser check that failed a request, in a
+ * browser of the app.
+ * @param {unknown} error
+ * @returns {error is PlatformBrowserCheckError}
+ */
+export function canPassBrowserCheck(error) {
+  return !!(process.env.IS_ELECTRON || process.env.IS_CAPACITOR) &&
+    error instanceof PlatformBrowserCheckError && error.platform === 'rumble'
+}
+
+/** @type {Promise<void> | null} */
+let pendingBrowserCheck = null
+
+/**
+ * Lets the user pass the check in a browser of the app. Settles once they
+ * passed it or closed the browser. Pages that hit the check meanwhile share it.
+ * @param {PlatformBrowserCheckError} error
+ * @returns {Promise<void>}
+ */
+export function passBrowserCheck(error) {
+  pendingBrowserCheck ??= (async () => {
+    try {
+      if (process.env.IS_ELECTRON) {
+        await window.ftElectron.passRumbleChallenge(error.url)
+      } else {
+        await (await import('./ytDlp')).passMobileRumbleChallenge(error.url)
+      }
+    } finally {
+      pendingBrowserCheck = null
+    }
+  })()
+  return pendingBrowserCheck
 }
 
 /**

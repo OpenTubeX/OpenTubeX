@@ -2828,6 +2828,8 @@ Platforms:
   Playlist Not Found: Tätä soittolistaa ei löytynyt.
   Load Error: Tätä sivua ei voitu ladata palvelusta {platform}.
   Empty Tab: Täällä ei ole vielä mitään.
+  Browser Check: "{platform} pyytää sinua vahvistamaan, että olet ihminen, ennen kuin se näyttää tämän sivun."
+  Verify: "Vahvista"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} vastasi käyttäjälle {commentAuthor}"
   Like: "Tykkää"

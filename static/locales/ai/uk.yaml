@@ -2875,6 +2875,8 @@ Platforms:
   Playlist Not Found: Цю добірку не знайдено.
   Load Error: Не вдалося завантажити цю сторінку з {platform}.
   Empty Tab: Тут поки нічого немає.
+  Browser Check: "{platform} просить підтвердити, що ви людина, перш ніж показати цю сторінку."
+  Verify: "Підтвердити"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} відповідає користувачу {commentAuthor}"
   Like: "Подобається"

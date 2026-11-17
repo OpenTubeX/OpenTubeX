@@ -2883,6 +2883,8 @@ Platforms:
   Playlist Not Found: רשימת הנגינה הזאת לא נמצאה.
   Load Error: לא ניתן היה לטעון את הדף הזה מ־{platform}.
   Empty Tab: אין כאן עדיין כלום.
+  Browser Check: "{platform} מבקשת ממך לאמת שאתה אדם לפני שהיא מציגה את הדף הזה."
+  Verify: "אימות"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} השיב/ה ל-{commentAuthor}"
   Like: "לייק"

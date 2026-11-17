@@ -2917,6 +2917,8 @@ Platforms:
   Playlist Not Found: این فهرست پخش پیدا نشد.
   Load Error: بارگیری این صفحه از {platform} ممکن نشد.
   Empty Tab: هنوز چیزی اینجا نیست.
+  Browser Check: "{platform} پیش از نمایش این صفحه از شما می‌خواهد تأیید کنید که انسان هستید."
+  Verify: "تأیید"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} به {commentAuthor} پاسخ داد"
   Like: "پسندیدن"

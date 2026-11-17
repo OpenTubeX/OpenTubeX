@@ -2846,6 +2846,8 @@ Platforms:
   Playlist Not Found: Daftar putar ini tidak dapat ditemukan.
   Load Error: Halaman ini tidak dapat dimuat dari {platform}.
   Empty Tab: Belum ada apa pun di sini.
+  Browser Check: "{platform} meminta Anda memverifikasi bahwa Anda manusia sebelum menampilkan halaman ini."
+  Verify: "Verifikasi"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} membalas {commentAuthor}"
   Like: "Suka"

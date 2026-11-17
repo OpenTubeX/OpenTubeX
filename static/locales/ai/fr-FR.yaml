@@ -2818,6 +2818,8 @@ Platforms:
   Playlist Not Found: Cette playlist est introuvable.
   Load Error: Impossible de charger cette page depuis {platform}.
   Empty Tab: Il n’y a encore rien ici.
+  Browser Check: "{platform} vous demande de confirmer que vous êtes un humain avant d’afficher cette page."
+  Verify: "Vérifier"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} a répondu à {commentAuthor}"
   Like: "J’aime"

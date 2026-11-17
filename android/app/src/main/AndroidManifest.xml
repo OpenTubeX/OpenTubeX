@@ -432,6 +432,10 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density|assetsPaths"
             android:exported="false" android:theme="@style/AppTheme.NoActionBar" />
 
+        <activity android:name=".RumbleChallengeActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density|assetsPaths"
+            android:exported="false" android:theme="@style/AppTheme.NoActionBar" />
+
         <!-- App icon presets:start -->
         <!-- App icon presets:end -->
 

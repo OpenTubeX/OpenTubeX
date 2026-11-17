@@ -2787,6 +2787,8 @@ Platforms:
   Playlist Not Found: Этот плейлист не найден.
   Load Error: Не удалось загрузить эту страницу с {platform}.
   Empty Tab: Здесь пока ничего нет.
+  Browser Check: "{platform} просит подтвердить, что вы человек, прежде чем показать эту страницу."
+  Verify: "Подтвердить"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} ответил(а) пользователю {commentAuthor}"
   Like: "Нравится"

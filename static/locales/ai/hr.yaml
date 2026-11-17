@@ -2860,6 +2860,8 @@ Platforms:
   Playlist Not Found: Ova zbirka nije pronađena.
   Load Error: Ova se stranica nije mogla učitati s platforme {platform}.
   Empty Tab: Ovdje još nema ničega.
+  Browser Check: "{platform} traži da potvrdite da ste čovjek prije nego što prikaže ovu stranicu."
+  Verify: "Potvrdi"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} je odgovorio korisniku {commentAuthor}"
   Like: "Sviđa mi se"

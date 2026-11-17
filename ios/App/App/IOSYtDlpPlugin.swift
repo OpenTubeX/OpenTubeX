@@ -232,7 +232,7 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
     public let identifier = "IOSYtDlpPlugin"
     public let jsName = "YtDlp"
     public let pluginMethods: [CAPPluginMethod] = [
-        "info", "extract", "registerMedia", "download", "list", "configure", "control", "queue", "clear", "remove", "open", "play", "cache", "checkUpdate", "update", "fetchRumblePage"
+        "info", "extract", "registerMedia", "download", "list", "configure", "control", "queue", "clear", "remove", "open", "play", "cache", "checkUpdate", "update", "fetchRumblePage", "passRumbleChallenge"
     ].map { CAPPluginMethod(name: $0, returnType: CAPPluginReturnPromise) }
 
     private let exports = DispatchQueue(label: "org.opentubex.ytdlp.export", qos: .userInitiated)
@@ -775,11 +775,22 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
         Task {
             do {
                 let page = try await RumblePages.shared.fetch(call.getString("url"))
-                call.resolve(["status": page.status, "text": page.text])
+                call.resolve(["status": page.status, "text": page.text, "challenge": page.challenge])
             } catch {
                 call.reject(error.localizedDescription)
             }
         }
+    }
+    /// Settles once the user passed Cloudflare's check on the page, or closed it.
+    @objc func passRumbleChallenge(_ call: CAPPluginCall) {
+        if onMain({ self.passRumbleChallenge(call) }) { return }
+        guard let url = call.getString("url").flatMap(URL.init(string:)), RumblePages.isRumblePage(url) else {
+            call.reject("Not a Rumble page"); return
+        }
+        guard var controller = bridge?.viewController else { call.reject("No window to show the page in"); return }
+        while let presented = controller.presentedViewController { controller = presented }
+        let challenge = RumbleChallengeController(url: url) { call.resolve() }
+        controller.present(UINavigationController(rootViewController: challenge), animated: true)
     }
     @objc func checkUpdate(_ call: CAPPluginCall) { call.resolve(["available": false]) }
     @objc func update(_ call: CAPPluginCall) {

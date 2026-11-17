@@ -2823,6 +2823,8 @@ Platforms:
   Playlist Not Found: Fant ikke denne spillelisten.
   Load Error: Kunne ikke laste inn denne siden fra {platform}.
   Empty Tab: Det er ingenting her ennå.
+  Browser Check: "{platform} ber deg bekrefte at du er et menneske før siden vises."
+  Verify: "Bekreft"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} svarte {commentAuthor}"
   Like: "Lik"

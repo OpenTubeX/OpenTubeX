@@ -2858,6 +2858,8 @@ Platforms:
   Playlist Not Found: Doedd dim modd dod o hyd i'r rhestr chwarae hon.
   Load Error: Doedd dim modd llwytho'r dudalen hon o {platform}.
   Empty Tab: Does dim byd yma eto.
+  Browser Check: "Mae {platform} yn gofyn i chi gadarnhau eich bod yn ddynol cyn iddo ddangos y dudalen hon."
+  Verify: "Gwirio"
 YouTube Account:
   "{author} replied to {commentAuthor}": "Atebodd {author} {commentAuthor}"
   Like: "Hoffi"

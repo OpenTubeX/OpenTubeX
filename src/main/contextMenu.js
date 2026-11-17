@@ -1,7 +1,7 @@
 import * as http from 'node:http'
 import * as https from 'node:https'
 import { isIP } from 'node:net'
-import { BrowserWindow, clipboard, ipcMain, net, session, shell } from 'electron'
+import { clipboard, ipcMain, net, session, shell } from 'electron'
 
 import { IpcChannels } from '../constants'
 import * as baseHandlers from '../datastores/handlers/base'
@@ -413,7 +413,7 @@ export function setupContextMenu(contextMenuOptions, { createWindow, confirmClos
       const hasRemainingTabs = await manager.closeTabs(existingTabIds)
       if (!hasRemainingTabs) {
         // confirmCloseWindow confirmed the quit if this became the last window
-        if (BrowserWindow.getAllWindows().length === 1) closeConfirmedWindowIds.add(manager.browserWindow.id)
+        if (TabManager.getWindows().length === 1) closeConfirmedWindowIds.add(manager.browserWindow.id)
         manager.browserWindow.close()
       }
     }

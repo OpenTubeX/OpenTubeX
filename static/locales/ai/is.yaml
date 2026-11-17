@@ -2835,6 +2835,8 @@ Platforms:
   Playlist Not Found: Þessi spilunarlisti fannst ekki.
   Load Error: Ekki tókst að hlaða þessari síðu frá {platform}.
   Empty Tab: Hér er ekkert ennþá.
+  Browser Check: "{platform} biður þig að staðfesta að þú sért manneskja áður en síðan birtist."
+  Verify: "Staðfesta"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} svaraði {commentAuthor}"
   Like: "Líkar við"

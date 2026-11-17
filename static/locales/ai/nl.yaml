@@ -2892,6 +2892,8 @@ Platforms:
   Playlist Not Found: Deze afspeellijst kon niet worden gevonden.
   Load Error: Deze pagina kon niet worden geladen van {platform}.
   Empty Tab: Er is hier nog niets.
+  Browser Check: "{platform} vraagt je te bevestigen dat je een mens bent voordat deze pagina wordt getoond."
+  Verify: "Verifiëren"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} heeft {commentAuthor} geantwoord"
   Like: "Vind ik leuk"

@@ -2830,6 +2830,8 @@ Platforms:
   Playlist Not Found: Ezin izan da erreprodukzio-zerrenda hau aurkitu.
   Load Error: Ezin izan da orri hau {platform} plataformatik kargatu.
   Empty Tab: Ez dago ezer hemen oraindik.
+  Browser Check: "{platform}(e)k gizakia zarela egiaztatzeko eskatzen dizu orri hau erakutsi aurretik."
+  Verify: "Egiaztatu"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author}(e)k {commentAuthor}(r)i erantzun dio"
   Like: "Atsegin dut"
