@@ -326,7 +326,12 @@ public class DlnaCastingTest {
                 // Local playback uses the same bytes without WebView HTTP restrictions;
                 // casting reads the actual HTTP source through the native relay.
                 evaluate(webView, String.format(java.util.Locale.ROOT, "watchFixture.legacyFormats=watchFixture.legacyFormats.map(format=>({...format,url:'http://%s:%d/real.mp4'}));true", host, fixture.getLocalPort()));
-                if (privateInstance) evaluate(webView, "testStore.commit('setCurrentInvidiousInstance','http://fixture:secret@" + host + ":" + fixture.getLocalPort() + "');true");
+                if (privateInstance) {
+                    // The credentials are their own setting, which only the instance they belong to receives
+                    String instance = "http://" + host + ":" + fixture.getLocalPort();
+                    evaluate(webView, "testStore.commit('setInvidiousInstanceCredentials',{instance:'" + instance + "',username:'fixture',password:'secret'});" +
+                        "testStore.commit('setCurrentInvidiousInstance','" + instance + "');true");
+                }
                 evaluate(webView, "document.querySelector('video').loop=true;document.querySelector('video').play();document.querySelector('.dlnaCastControl button').click();true");
                 await(webView, "!!document.querySelector('.mobileLinkActions button[aria-label=\"Android test TV\"]:not(:disabled)')");
                 evaluate(webView, "document.querySelector('video').currentTime=dlnaMergedUi?0:0.5;document.querySelector('.mobileLinkActions button[aria-label=\"Android test TV\"]:not(:disabled)').click();true");
