@@ -925,6 +925,35 @@ test('later native segments do not repeat an expired server backoff', async t =>
   assert.equal(calls, 3)
 })
 
+test('a backoff shows its countdown only once playback runs out of buffered media', async t => {
+  // At the live edge, SABR paces each segment with a short backoff while the
+  // previous ones still play. The countdown covers the video.
+  t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 0 })
+  let calls = 0
+  const waits = []
+  const { createSabrTransport } = load(async () => {
+    calls++
+    return calls === 2 ? policyResponse(2000) : response([calls])
+  }, { Date })
+  // Playback drains 1.5 seconds of buffered media
+  const getBufferedAheadSeconds = () => Math.max(0, 1.5 - Date.now() / 1000)
+  const transport = createSabrTransport(sabrData, () => ({ ...context, getBufferedAheadSeconds }))
+  t.after(() => transport.cleanup())
+  transport.onBackoffRequested(({ backoffMs }) => waits.push(backoffMs))
+  const uri = 'sabr1:audio?formatId=140-123-&sq=1'
+  await transport.request(uri, request(uri), 1).promise
+
+  const paced = transport.request(uri, { uris: [uri], retryParameters: { timeout: 30000 } }, 1).promise
+  await flushRequests()
+  assert.deepEqual(waits, [], 'buffered playback hides the countdown')
+  t.mock.timers.tick(1000)
+  await flushRequests()
+  assert.deepEqual(waits, [1000], 'stalling playback counts down the rest of the backoff')
+  t.mock.timers.tick(1000)
+  assert.deepEqual([...(await paced).data], [3])
+  assert.equal(calls, 3)
+})
+
 test('closing a native source cancels its backoff without sending a delayed request', async t => {
   t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 0 })
   let calls = 0
