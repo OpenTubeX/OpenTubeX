@@ -79,6 +79,7 @@ const ShakaError = shaka.util.Error
  * @property {number} cumulativeRetries
  * @property {number} startedAtMs
  * @property {(() => number) | undefined} getBufferedAheadSeconds
+ * @property {number} playbackRate
  * @property {string} scheme
  * @property {{ afterMs: number, beforeMs: number }} liveTimeBounds - the requested live segment lies between these times
  */
@@ -560,7 +561,8 @@ async function doRequest(
       // At the live edge, SABR paces every segment with a short backoff while
       // a few seconds still play. Captions never hold playback back.
       if (operationInputs.streamKind !== 'text') {
-        const playableMs = hasDeliveredMedia() ? (currentState.getBufferedAheadSeconds?.() ?? 0) * 1000 - BACKOFF_STALL_BUFFER_MS : 0
+        const bufferedMs = (currentState.getBufferedAheadSeconds?.() ?? 0) * 1000 / (currentState.playbackRate || 1)
+        const playableMs = hasDeliveredMedia() ? bufferedMs - BACKOFF_STALL_BUFFER_MS : 0
         if (playableMs > 0) {
           waitMs = Math.min(waitMs, Math.max(playableMs, BACKOFF_BUFFER_POLL_MS))
         } else {
@@ -568,14 +570,13 @@ async function doRequest(
         }
       }
       await waitUnlessAborted(waitMs, currentState.abortController.signal)
-      // Must reset AFTER waiting to avoid requested aborted
-      // Since long backoff time mostly happens on the start of video playback we only reset timeout once
-      // i.e. backoff time parts received will not reset timeout - counted as video loading issue
-      currentState.timeoutController?.resetTimeoutOnce()
-
       currentState.cumulativeBackOffTimeMs += waitMs
     }
     if (waitedForBackoff) {
+      // Must reset AFTER the whole backoff to avoid requested aborted
+      // Since long backoff time mostly happens on the start of video playback we only reset timeout once
+      // i.e. backoff time parts received will not reset timeout - counted as video loading issue
+      currentState.timeoutController?.resetTimeoutOnce()
       currentState.cumulativeBackOffRequested++
       // Pacing is normal once this stream has delivered media. An unstarted
       // video still needs a bounded recovery even when its audio works. One
@@ -1403,6 +1404,7 @@ export function createSabrTransport(sabrData, getRequestContext) {
       cumulativeRetries: 0,
       startedAtMs: Date.now(),
       getBufferedAheadSeconds: context.getBufferedAheadSeconds,
+      playbackRate: context.playbackRate,
       scheme: sabrData.scheme,
       liveTimeBounds: { afterMs: -Infinity, beforeMs: Infinity },
     }
