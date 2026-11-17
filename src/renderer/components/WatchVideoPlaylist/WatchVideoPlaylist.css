@@ -348,6 +348,9 @@
 
 /* Rows form one segmented list: large outer corners, tight inner ones. */
 .playlistItem {
+  --icon-button-hover-color: color-mix(in srgb, var(--primary-text-color) 12%, transparent);
+  --icon-button-hover-text-color: var(--primary-text-color);
+
   display: grid;
   grid-template-columns: fit-content(50px) minmax(0, 1fr) auto;
   align-items: center;
@@ -374,8 +377,8 @@
 }
 
 .playlistItem:hover {
-  background-color: var(--side-nav-hover-color);
-  color: var(--side-nav-hover-text-color);
+  /* A state layer on top of the resting tint, like the chapters. */
+  background-color: color-mix(in srgb, var(--primary-text-color) 14%, transparent);
 }
 
 .fullscreenPlaylist .playlistItem {
