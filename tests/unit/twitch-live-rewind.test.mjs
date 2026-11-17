@@ -44,48 +44,54 @@ test('a forward nudge behind the live playlist stays live, while a seek back loa
   assert.equal(rewind.manifestSrc.value, 'recording')
 })
 
-test('a source replacement before autoplay starts keeps playing it', async () => {
-  const { readFile } = await import('node:fs/promises')
-  const { runInNewContext } = await import('node:vm')
-  const source = await readFile(new URL('../../src/renderer/components/FtShakaVideoPlayer/FtShakaVideoPlayer.vue', import.meta.url), 'utf8')
-  const helper = source.match(/^function isPausedByUser\([\s\S]*?^}/m)[0]
-  const start = source.indexOf('  async ([newFormat, newSourceKey], [oldFormat, oldSourceKey]) => {')
-  const watcher = source.slice(start, source.indexOf('\n  }\n)', start) + '\n  }'.length)
-  const calls = []
-  // Loaded, with autoplay still waiting for enough data
-  const videoElement = {
-    autoplay: true,
-    paused: true,
-    played: { length: 0 },
-    readyState: 2,
-    currentTime: 0,
-    pause: () => calls.push('pause'),
-    play: () => calls.push('play'),
-  }
-  const context = {
-    HTMLMediaElement: { HAVE_ENOUGH_DATA: 4 },
-    initialAutoplayCanceled: false,
-    props: { autoplayRequested: false, captions: [], captionTranslations: [], pauseForStreamRecovery: false },
-    formatSwitchGeneration: 0,
-    pendingFormatSwitchState: null,
-    restartedSourceKey: null,
-    foregroundLoadAbortController: null,
-    ignoreErrors: false,
-    hasLoaded: { value: true },
-    hasPlaybackPosition: { value: true },
-    video: { value: videoElement },
-    twitchLiveRewind: { takeSwitchStartTime: () => undefined },
-    pendingMetadataSeek: null,
-    player: { getTextTracks: () => [], getConfiguration: () => ({ abr: { enabled: true } }) },
-    captionSources: new Map(),
-    queuePlaybackRateRestore() {},
-    preferAutoQuality: { value: true },
-    restoreCaptionTranslation: null,
-    restoreCaptionIndex: null,
-    unloadForFormatSwitch: async () => {},
-    setLegacyQuality: async () => calls.push('load'),
-  }
-  const switchSource = runInNewContext(`${helper}\n(${watcher})`, context)
-  await switchSource(['legacy', 1], ['legacy', 0])
-  assert.deepEqual(calls, ['pause', 'load', 'play'])
-})
+for (const pauseDuringLoad of [false, true]) {
+  test(`a source replacement before autoplay starts ${pauseDuringLoad ? 'stays paused after a pause during the load' : 'keeps playing it'}`, async () => {
+    const { readFile } = await import('node:fs/promises')
+    const { runInNewContext } = await import('node:vm')
+    const source = await readFile(new URL('../../src/renderer/components/FtShakaVideoPlayer/FtShakaVideoPlayer.vue', import.meta.url), 'utf8')
+    const helper = source.match(/^function isPausedByUser\([\s\S]*?^}/m)[0]
+    const start = source.indexOf('  async ([newFormat, newSourceKey], [oldFormat, oldSourceKey]) => {')
+    const watcher = source.slice(start, source.indexOf('\n  }\n)', start) + '\n  }'.length)
+    const calls = []
+    // Loaded, with autoplay still waiting for enough data
+    const videoElement = {
+      autoplay: true,
+      paused: true,
+      played: { length: 0 },
+      readyState: 2,
+      currentTime: 0,
+      pause: () => calls.push('pause'),
+      play: () => calls.push('play'),
+    }
+    const context = {
+      HTMLMediaElement: { HAVE_ENOUGH_DATA: 4 },
+      initialAutoplayCanceled: false,
+      props: { autoplayRequested: false, captions: [], captionTranslations: [], pauseForStreamRecovery: false },
+      formatSwitchGeneration: 0,
+      pendingFormatSwitchState: null,
+      restartedSourceKey: null,
+      foregroundLoadAbortController: null,
+      ignoreErrors: false,
+      hasLoaded: { value: true },
+      hasPlaybackPosition: { value: true },
+      video: { value: videoElement },
+      twitchLiveRewind: { takeSwitchStartTime: () => undefined },
+      pendingMetadataSeek: null,
+      player: { getTextTracks: () => [], getConfiguration: () => ({ abr: { enabled: true } }) },
+      captionSources: new Map(),
+      queuePlaybackRateRestore() {},
+      preferAutoQuality: { value: true },
+      restoreCaptionTranslation: null,
+      restoreCaptionIndex: null,
+      unloadForFormatSwitch: async () => {},
+      setLegacyQuality: async () => {
+        calls.push('load')
+        // A pause, such as from the Media Session, cancels autoplay of the paused element
+        if (pauseDuringLoad) context.initialAutoplayCanceled = true
+      },
+    }
+    const switchSource = runInNewContext(`${helper}\n(${watcher})`, context)
+    await switchSource(['legacy', 1], ['legacy', 0])
+    assert.deepEqual(calls, ['pause', 'load', pauseDuringLoad ? 'pause' : 'play'])
+  })
+}

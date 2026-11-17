@@ -12695,6 +12695,7 @@ let formatSwitchGeneration = 0
  * @type {{
  *   oldFormat: 'dash'|'audio'|'legacy',
  *   wasPaused: boolean,
+ *   awaitingAutoplay: boolean,
  *   playbackPosition: number | null,
  *   useAutoQuality: boolean,
  *   audioBandwidth: number|undefined,
@@ -12775,10 +12776,13 @@ watch(
       // Queue the current speed before unloading so later user choices
       // replace it instead of being overwritten by a pre-switch snapshot.
       queuePlaybackRateRestore()
+      // A new source, such as refreshed streams, can arrive before autoplay starts
+      const pausedByUser = isPausedByUser(video_)
       pendingFormatSwitchState = {
         oldFormat,
-        // A new source, such as refreshed streams, can arrive before autoplay starts
-        wasPaused: isPausedByUser(video_),
+        wasPaused: pausedByUser,
+        // Pausing it during the switch only cancels autoplay, as the element is already paused
+        awaitingAutoplay: video_.paused && !pausedByUser,
         // Twitch's live playlist and the broadcast's recording have different timelines
         playbackPosition: switchStartTime === undefined ? video_.currentTime : switchStartTime,
         // The legacy formats don't have an ABR configuration to carry over,
@@ -12832,6 +12836,7 @@ watch(
     const {
       oldFormat: sourceFormat,
       wasPaused,
+      awaitingAutoplay,
       playbackPosition,
       useAutoQuality,
       audioBandwidth,
@@ -12931,7 +12936,7 @@ watch(
     }
 
     pendingFormatSwitchState = null
-    if (wasPaused || props.pauseForStreamRecovery) {
+    if (wasPaused || (awaitingAutoplay && initialAutoplayCanceled) || props.pauseForStreamRecovery) {
       video_.pause()
     } else {
       video_.play()
