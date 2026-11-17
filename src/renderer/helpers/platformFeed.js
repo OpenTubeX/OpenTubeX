@@ -53,6 +53,8 @@ const HISTORY_STORAGE_KEY = 'platformFeedHistory'
 const MAX_HISTORY_PER_CHANNEL = 300
 /** The streams of each channel at the last check, on mobile, where the app checks on its own */
 const KNOWN_STREAMS_STORAGE_KEY = 'twitchKnownStreams'
+// Turning notifications off counts up, so checks that started before keep no streams.
+let knownStreamsGeneration = 0
 const LIVE_CHECK_INTERVAL_MS = 3 * 60_000
 /**
  * Channels of platforms without batch requests that load at once from one
@@ -743,9 +745,11 @@ async function announceStream(configuration, stream) {
  */
 async function checkLiveStreams(configuration) {
   const channelIds = configuration.channels.map(channel => channel.id)
+  const generation = knownStreamsGeneration
   try {
     const { feed } = await fetchTwitchChannels(getPlatformFetch('twitch'), channelIds, { liveOnly: true })
     applyTwitchLiveStreams(feed.live)
+    if (generation !== knownStreamsGeneration) return
     let known = {}
     try {
       known = JSON.parse(localStorage.getItem(KNOWN_STREAMS_STORAGE_KEY) ?? '{}') ?? {}
@@ -832,6 +836,7 @@ export function startTwitchLiveNotifications() {
         .catch(error => console.error('Failed to configure the Twitch live checks', error))
     } else if (!configuration.enabled) {
       // Turning notifications on again starts from the streams that are live then
+      knownStreamsGeneration++
       localStorage.removeItem(KNOWN_STREAMS_STORAGE_KEY)
     }
     if (process.env.IS_CAPACITOR && configuration.enabled && !stopped) check()

@@ -48,6 +48,8 @@ export function setPeriodicBackgroundTask(task, enabled) {
   if (!BackgroundSync || enabledTasks.get(task) === enabled) return
   enabledTasks.set(task, enabled)
   BackgroundSync.setEnabled({ task, enabled }).catch(error => {
+    // Sent again with the next call
+    if (enabledTasks.get(task) === enabled) enabledTasks.delete(task)
     console.error('Failed to schedule an Android background task', error)
   })
 }

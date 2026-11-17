@@ -458,7 +458,8 @@ export function startCommentReplyNotifications() {
   let timer = null
   let lastCheck = 0
   // Also cancels the native checks of earlier versions, whether or not comments are watched.
-  const migrated = migrateAndroidWatchedComments()
+  // Each check retries it after a failure.
+  migrateAndroidWatchedComments()
 
   const check = async () => {
     clearTimeout(timer)
@@ -466,7 +467,7 @@ export function startCommentReplyNotifications() {
     if (stopped) return
     if (isCommentWatchingEnabled() && !(process.env.IS_CAPACITOR && isAppHidden())) {
       lastCheck = Date.now()
-      await migrated
+      await migrateAndroidWatchedComments()
       await checkOnce().catch(error => console.error('Failed to check comments for replies', error))
     }
     if (!stopped) timer = setTimeout(check, CHECK_INTERVAL_MS)
@@ -491,7 +492,7 @@ export function startCommentReplyNotifications() {
     // While the app is hidden, but not yet closed
     onPeriodicBackgroundTask(async () => {
       if (stopped || !checksWhileClosed()) return
-      await migrated
+      await migrateAndroidWatchedComments()
       await checkOnce()
     })
   } else if (process.env.IS_CAPACITOR) {
