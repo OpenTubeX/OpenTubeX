@@ -158,7 +158,7 @@ import { isAttestedPoToken } from '../../../main/attestedPoToken'
 import { getAutoQualityFallback, playbackEngineSupportsAutoQuality } from '../../helpers/player/autoQuality'
 import { limitQualityOnMeteredNetwork } from '../../helpers/player/meteredNetworkQuality'
 import { useI18n } from 'vue-i18n'
-import { useTabAvatar, useTabContext, useTabTitle, watchNavigationKey } from '../../tabs/TabContext'
+import { useIncognitoTab, useTabAvatar, useTabContext, useTabTitle, watchNavigationKey } from '../../tabs/TabContext'
 import { SCROLL_MINI_MIN_INLINE_LAYOUT_HEIGHT } from '../../helpers/scrollMiniPlayer'
 import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
 import { isPlayerRoutePath } from '../../tabs/playerDockDestination'
@@ -276,6 +276,7 @@ export default defineComponent({
     const tabRoute = useRoute()
     const tabRouter = useRouter()
     const { tabId, isTabPresented, lifecycle: tabLifecycle } = useTabContext()
+    const isIncognitoTab = useIncognitoTab()
     const watchNavigation = inject(watchNavigationKey, null)
     const setTabTitle = useTabTitle()
     const setTabAvatar = useTabAvatar()
@@ -292,6 +293,7 @@ export default defineComponent({
       portraitLayout: usePhoneLayout('(orientation: portrait)'),
       currentLocale: locale,
       tabId,
+      isIncognitoTab,
       isTabPresented,
       tabLifecycle,
       watchNavigation,
@@ -848,9 +850,6 @@ export default defineComponent({
       return this.isCurrentVideoQuickBookmarked
         ? this.$t('User Playlists.Remove from Favorites', translationProperties)
         : this.$t('User Playlists.Add to Favorites', translationProperties)
-    },
-    isIncognitoTab: function () {
-      return this.$store.getters.getTabIncognito(this.tabId)
     },
     rememberHistory: function () {
       return this.$store.getters.getRememberHistory && !this.isIncognitoTab
@@ -5430,7 +5429,7 @@ export default defineComponent({
     addToYouTubeWatchHistory() {
       // Each channel and sign-in has its own history.
       const key = `${this.videoId}\n${getYouTubeChannelKey(this.$store.getters.getYouTubeAccount)}`
-      if (this.youTubeHistoryKey === key || this.localFilePlayback || this.isOffline ||
+      if (this.youTubeHistoryKey === key || this.localFilePlayback || this.isOffline || this.isIncognitoTab ||
         !isSignedInToYouTube(this.$store.getters) || !this.$store.getters.getYouTubeAccountWatchHistory) {
         return
       }

@@ -1857,7 +1857,7 @@ function handleOptionsClick(option) {
       hideSubscriptionFeedType()
       break
     case 'playInBackground':
-      markSubscriptionVideoAsSeen()
+      markSubscriptionVideoAsOpened()
       playInBackground({ path: `/watch/${id.value}`, query: watchPageLinkQuery.value })
       break
     case 'playNext':
@@ -2220,7 +2220,7 @@ async function handleWatchPageLinkClick(event) {
     return
   }
 
-  markSubscriptionVideoAsSeen()
+  markSubscriptionVideoAsOpened()
   // Lists such as the queue consume a video that a plain click plays here.
   const plainLeftClick = event?.button === 0 && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey
 
@@ -2382,8 +2382,13 @@ function markSubscriptionVideoAsSeen() {
   }
 }
 
+/** Opening a video from an incognito tab leaves it new */
+function markSubscriptionVideoAsOpened() {
+  if (!isIncognitoTab.value) markSubscriptionVideoAsSeen()
+}
+
 function handleExternalPlayer() {
-  markSubscriptionVideoAsSeen()
+  markSubscriptionVideoAsOpened()
   openInExternalPlayer()
 }
 

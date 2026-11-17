@@ -24,7 +24,9 @@ export function useTabContext() {
 /** @returns {import('vue').ComputedRef<boolean>} whether this page belongs to an incognito tab */
 export function useIncognitoTab() {
   const { tabId } = useTabContext()
-  return computed(() => store.getters.getTabIncognito(tabId))
+  // A closing tab leaves the store before its pages save on unmount, so remember it
+  let incognito = false
+  return computed(() => (incognito ||= store.getters.getTabIncognito(tabId)))
 }
 
 export function useTabTitle() {

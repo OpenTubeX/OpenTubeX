@@ -48,8 +48,8 @@
           :to="to"
           :data-tab-title="data.title"
           :aria-label="data.title"
-          @click="markAsSeen"
-          @auxclick.middle="markAsSeen"
+          @click="markAsOpened"
+          @auxclick.middle="markAsOpened"
         >
           <FtRetryImage
             v-if="thumbnail"
@@ -97,8 +97,8 @@
           :to="to"
           :data-tab-title="data.title"
           :title="store.getters.getTitleLineLimit > 0 ? data.title : null"
-          @click="markAsSeen"
-          @auxclick.middle="markAsSeen"
+          @click="markAsOpened"
+          @auxclick.middle="markAsOpened"
         >
           <h3
             class="h3Title"
@@ -212,6 +212,7 @@ import {
 } from '../../helpers/utils'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { isTileMarkShortcut, tileKeyboardShortcutsKey } from '../../helpers/tileNavigation'
+import { useIncognitoTab } from '../../tabs/TabContext'
 import { getPlatform, getPlatformChannelRoute, PLATFORM_ICONS } from '../../../platforms/index'
 
 const props = defineProps({
@@ -328,6 +329,13 @@ function markAsSeen() {
   markSeen([props.data])
 }
 
+const isIncognitoTab = useIncognitoTab()
+
+/** Opening an item from an incognito tab, or into one, leaves it new */
+function markAsOpened() {
+  if (!isIncognitoTab.value) markAsSeen()
+}
+
 function markAsUnseen() {
   // The New feed leaves out watched items
   if (position.value?.watched) store.dispatch('updateHistory', { ...historyEntry.value, isWatched: false })
@@ -389,7 +397,7 @@ function removeFromHistory() {
 
 function openElsewhere({ newWindow = false, background = false, incognito = false } = {}) {
   openInternalPath({ ...to.value, title: props.data.title, doCreateNewTab: !newWindow, doCreateNewWindow: newWindow, makeActive: !background, incognito })
-  if (!incognito) markAsSeen()
+  if (!incognito) markAsOpened()
 }
 
 const copyLinkItem = computed(() => ({
