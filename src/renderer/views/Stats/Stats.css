@@ -126,13 +126,41 @@
   backdrop-filter: var(--card-bg-blur, none);
 }
 
-/* Tonal primary containers set the key numbers apart from the charts. */
 .summaryCard {
-  position: relative;
-  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-content: start;
+  column-gap: 12px;
   padding-block: 20px;
   padding-inline: 20px;
-  background-color: color-mix(in srgb, var(--primary-color) 16%, var(--card-bg-color));
+}
+
+.summaryCard > :not(.summaryIcon) {
+  grid-column: 1;
+}
+
+/* Material 3 Expressive cookie behind each card's icon. */
+.summaryIcon {
+  position: relative;
+  display: inline-flex;
+  grid-row: 1 / span 3;
+  grid-column: 2;
+  align-items: center;
+  justify-content: center;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  color: var(--text-with-main-color);
+  font-size: 1.25rem;
+  isolation: isolate;
+}
+
+.summaryIcon::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--primary-color);
+  clip-path: var(--shape-cookie-6);
+  content: '';
 }
 
 .summaryLabel,
@@ -189,8 +217,8 @@
 
 .chartScale {
   padding-block: 7px;
-  padding-inline: 10px;
-  border-radius: var(--shape-corner-small);
+  padding-inline: 12px;
+  border-radius: var(--shape-corner-full);
   color: var(--tertiary-text-color);
   background-color: color-mix(in srgb, var(--primary-color) 16%, var(--secondary-card-bg-color));
   font-size: 0.75rem;
@@ -209,6 +237,14 @@
   inline-size: 100%;
   block-size: 100%;
   overflow: visible;
+
+  /* The curve sweeps in from the start when the chart appears. */
+  clip-path: inset(-10px -10px -10px -10px);
+  transition: clip-path var(--motion-slow-effects);
+
+  @starting-style {
+    clip-path: inset(-10px 100% -10px -10px);
+  }
 }
 
 .gridLine {
@@ -231,26 +267,63 @@
   vector-effect: non-scaling-stroke;
 }
 
+/* A larger transparent target around the visible dot, drawn by ::before. */
 .chartPoint {
   position: absolute;
-  box-sizing: border-box;
-  inline-size: 12px;
-  block-size: 12px;
+  inline-size: 24px;
+  block-size: 24px;
   padding: 0;
-  border: 3px solid var(--primary-color);
+  border: 0;
   border-radius: 50%;
-  background-color: var(--card-bg-color);
-  backdrop-filter: var(--card-bg-blur, none);
+  background-color: transparent;
   cursor: pointer;
   transform: translate(-50%, -50%);
+}
+
+.chartPoint::before {
+  position: absolute;
+  inset: 7px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+  box-shadow: 0 0 0 3px var(--secondary-card-bg-color);
+  content: '';
+  transition: scale var(--motion-fast-spatial), rotate var(--motion-default-spatial);
+
+  /* Pops in as the sweeping curve reaches it. Filling only backwards lets
+     the hover transitions take over once it has played. */
+  animation: stats-point-pop var(--motion-default-spatial) backwards;
+  animation-delay: calc(var(--point-index) * 20ms);
+}
+
+@keyframes stats-point-pop {
+  from {
+    scale: 0;
+  }
+}
+
+/* Today's value gets the same expressive cookie as the summary icons. */
+.chartPoint.current::before {
+  inset: -4px;
+  border-radius: 0;
+  box-shadow: none;
+  clip-path: var(--shape-cookie-6);
 }
 
 .chartPoint:hover,
 .chartPoint:focus-visible {
   /* Each point is its own stacking context, so raise the active one to keep its tooltip above later points */
   z-index: 1;
-  background-color: var(--primary-color);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary-color) 22%, transparent);
+}
+
+.chartPoint:hover::before,
+.chartPoint:focus-visible::before {
+  scale: 1.5;
+}
+
+.chartPoint.current:hover::before,
+.chartPoint.current:focus-visible::before {
+  rotate: 60deg;
+  scale: 1.2;
 }
 
 .chartTooltip {
@@ -262,7 +335,7 @@
   padding-block: 7px;
   padding-inline: 10px;
   border: 1px solid color-mix(in srgb, var(--primary-text-color) 20%, transparent);
-  border-radius: var(--shape-corner-small);
+  border-radius: var(--shape-corner-medium);
   color: var(--card-bg-color);
   background-color: color-mix(in srgb, var(--primary-text-color) 94%, transparent);
   box-shadow: 0 6px 18px rgb(0 0 0 / 24%);
@@ -309,19 +382,28 @@
   text-align: center;
 }
 
+.currentLabel,
+.barColumn.current > span {
+  color: var(--primary-color);
+  font-weight: 700;
+}
+
+/* Columns share the label row, so a label that wraps on a narrow screen
+   does not shorten its bar. */
 .barChart {
   display: grid;
   grid-template-columns: repeat(8, minmax(22px, 1fr));
+  grid-template-rows: minmax(0, 1fr) auto;
   gap: 8px;
   block-size: 260px;
 }
 
 .barColumn {
-  display: flex;
+  display: grid;
+  grid-row: span 2;
+  grid-template-rows: subgrid;
   min-inline-size: 0;
-  flex-direction: column;
-  gap: 8px;
-  align-items: center;
+  justify-items: center;
   color: var(--tertiary-text-color);
   font-size: 0.65rem;
   text-align: center;
@@ -332,7 +414,6 @@
   display: flex;
   inline-size: 100%;
   min-block-size: 0;
-  flex: 1;
   align-items: flex-end;
   justify-content: center;
   padding: 0;
@@ -343,29 +424,42 @@
 }
 
 .barTarget:focus-visible {
-  border-radius: var(--shape-corner-small);
+  border-radius: var(--shape-corner-medium);
   box-shadow: 0 0 0 2px var(--primary-color);
   outline: none;
 }
 
 .barTrack {
   display: flex;
-  inline-size: min(26px, 80%);
+  inline-size: min(32px, 85%);
   block-size: 100%;
   min-block-size: 0;
   align-items: flex-end;
   overflow: hidden;
-  border-radius: var(--shape-corner-small);
-  background-color: color-mix(in srgb, var(--subtle-surface-color) 8%, transparent);
+  border-radius: var(--shape-corner-full);
+  background-color: color-mix(in srgb, var(--tertiary-text-color) 10%, transparent);
 }
 
+/* Past weeks are tonal so the current week stands out. */
 .bar {
   inline-size: 100%;
   block-size: var(--bar-height);
-  border-radius: var(--shape-corner-small);
-  background: linear-gradient(to top, var(--primary-color), color-mix(in srgb, var(--primary-color) 55%, rgb(255 255 255)));
+  border-radius: var(--shape-corner-full);
+  background-color: color-mix(in srgb, var(--primary-color) 45%, var(--secondary-card-bg-color));
+
+  /* Bars spring up from the baseline when the chart appears. */
   /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- chart bars and the segment indicator change size on selection */
-  transition: block-size var(--motion-slow-effects);
+  transition: block-size var(--motion-slow-spatial), background-color var(--motion-fast-effects);
+
+  @starting-style {
+    block-size: 0;
+  }
+}
+
+.barColumn.current .bar,
+.barTarget:hover .bar,
+.barTarget:focus-visible .bar {
+  background-color: var(--primary-color);
 }
 
 .barTarget .chartTooltip {
@@ -481,6 +575,15 @@
     border-radius: var(--shape-corner-large);
     padding-block: 16px;
     padding-inline: 16px;
+  }
+
+  /* Two narrow columns leave no room for the icon beside the text. */
+  .summaryCard {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .summaryIcon {
+    display: none;
   }
 
   .lineChartPlot {
