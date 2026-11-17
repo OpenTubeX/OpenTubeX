@@ -1699,8 +1699,8 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
   // Set when another window changed the themes, so the ones the server's
   // theme selections name may be missing here
   let themesDeferred = false
-  // Lists this sync didn't apply, which keep their previous baseline
-  const skippedLists = new Set()
+  // Lists and failed saves this sync didn't apply, which keep their previous baseline
+  const skippedSettings = new Set()
   // Server entries of the settings this sync merged and applied
   const applied = {}
   try {
@@ -1744,7 +1744,7 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
       const skip = () => {
         if (remoteEntry) merged[key] = remoteEntry
         else delete merged[key]
-        if (isListSetting(key)) skippedLists.add(key)
+        if (isListSetting(key)) skippedSettings.add(key)
       }
       if (!valuesEqual && !itemKeys.has(key) && key !== CUSTOM_THEMES_SYNC_KEY && !metadataEquals(currentValue, value)) {
         skip()
@@ -1774,26 +1774,30 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
             return applied ? deepCopy(entry.value) : current
           })
           if (!applied || saved === false) skip()
-        } else {
-          await store.dispatch(settingUpdater(key), deepCopy(entry.value))
+        } else if (await store.dispatch(settingUpdater(key), deepCopy(entry.value)) === false) {
+          // The local value did not change, so the next sync applies the server entry again
+          skip()
+          skippedSettings.add(key)
+          continue
         }
       }
-      if (remoteEntry && !skippedLists.has(key)) applied[key] = remoteEntry
+      if (remoteEntry && !skippedSettings.has(key)) applied[key] = remoteEntry
     }
   } finally {
     await store.persistSettingsSyncBaseline?.(applied)
   }
 
   onRetryBaseline?.(() => Object.fromEntries(Object.keys(local).filter(isListSetting).flatMap(key => {
-    const entry = skippedLists.has(key) ? previousLists[key] : remote[key]
+    const entry = skippedSettings.has(key) ? previousLists[key] : remote[key]
     return entry ? [[key, entry]] : []
   })))
   await client.putSettings(Object.values(merged))
-  if (skippedLists.size === 0) return merged
+  if (skippedSettings.size === 0) return merged
   // Items from the server that this device never applied must not count as removed here next time.
   const snapshot = { ...merged }
-  for (const key of skippedLists) {
-    if (previousLists[key]) snapshot[key] = previousLists[key]
+  for (const key of skippedSettings) {
+    const old = isListSetting(key) ? previousLists[key] : previous[key]
+    if (old) snapshot[key] = old
     else delete snapshot[key]
   }
   return snapshot
