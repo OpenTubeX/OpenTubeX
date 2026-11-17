@@ -2264,6 +2264,7 @@ Comments:
   Filter loaded comments: 読み込み済みのコメントを絞り込む
   Comment filters: コメントフィルター
   From creator: 作成者から
+  From you: 自分のコメント
   Contains timestamps: 再生時刻を含む
   Pin comment by author: '{author}のコメントを固定'
   Unpin comment by author: '{author}のコメントの固定を解除'
