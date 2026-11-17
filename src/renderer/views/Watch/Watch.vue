@@ -1276,7 +1276,7 @@
             :playlist-type="playlistType"
             :video-id="videoId"
             :playlist-item-id="playlistItemId"
-            :download-id="typeof tabRoute.query.downloadId === 'string' ? tabRoute.query.downloadId : ''"
+            :download-id="preferredDownload ? String(preferredDownload.id) : ''"
             :fullscreen-overlay="fullscreenPlaylistOpen"
             :phone-panel="(phonePanelsEnabled && !fullscreenPlaylistOpen) || shortsPhonePanelsEnabled"
             class="watchVideoSideBar watchVideoPlaylist resizablePlaylist"

@@ -7,6 +7,10 @@ const source = await readFile(new URL('../../src/renderer/views/Watch/Watch.js',
 function method(name, next) {
   return source.slice(source.indexOf(`    ${name}:`), source.indexOf(`    ${next}`))
 }
+// The computed download that applyDownloadedPlaybackSource plays by default.
+const { preferredDownload } = runInNewContext(`({ ${method('preferredDownload', 'localPlaybackDownloads')} })`, {
+  process: { env: {} },
+})
 
 for (const [android, backend, mode] of [[false, 'Local', 'video'], [true, 'Invidious', 'audio']]) {
   test(`${android ? 'Android' : 'Electron'} ${backend} plays downloaded ${mode} without waiting for metadata`, async () => {
@@ -48,6 +52,7 @@ for (const [android, backend, mode] of [[false, 'Local', 'video'], [true, 'Invid
         }
       },
       playbackSourceKey: 0,
+      get preferredDownload() { return preferredDownload.call(this) },
       isCurrentVideoLoad(generation) { return generation === this.videoLoadGeneration },
       cacheOnlinePlaybackSource() {},
       updateTitle() {},
@@ -264,6 +269,7 @@ for (const android of [false]) {
       updateTitle() {},
       cacheOnlinePlaybackSource() {},
       playbackSourceKey: 0,
+      get preferredDownload() { return preferredDownload.call(this) },
       t: key => key,
     }
     assert.equal(watch.applyDownloadedPlaybackSource(), files[1])
@@ -305,4 +311,25 @@ test('Electron protocol lookup accepts only the requested file recorded in the d
   assert.equal(await lookup(43, 'dupevideo01', '/private/unrecorded.webm'), null)
   existing.delete(files[1].path)
   assert.equal(await lookup(43, 'dupevideo01', files[1].path), null, 'A deleted selected file must not fall back to the first copy')
+})
+
+test('a video opened without this device\'s download plays it until the online video is chosen', () => {
+  const view = (query, onlinePlaybackChosen = false) => ({
+    videoId: 'video1',
+    tabRoute: { query },
+    onlinePlaybackChosen,
+    $store: {
+      getters: {
+        getYtDlpDownloads: { 7: { files: [{ videoId: 'other' }] }, 9: { files: [{ videoId: 'video1' }] } },
+        getEnableDownloads: true,
+        getLocalPlaybackDownloadIds: new Map([['video1', 9]]),
+      },
+    },
+  })
+  const pick = (...args) => ({ ...preferredDownload.call(view(...args)) })
+  assert.deepEqual(pick({ downloadId: '9', downloadFilePath: '/downloads/a.webm' }), { id: 9, filePath: '/downloads/a.webm' })
+  // A tab synced from another device carries that device's download ID.
+  assert.deepEqual(pick({ downloadId: '7' }), { id: 9, filePath: null })
+  assert.deepEqual(pick({}), { id: 9, filePath: null })
+  assert.equal(preferredDownload.call(view({}, true)), null)
 })

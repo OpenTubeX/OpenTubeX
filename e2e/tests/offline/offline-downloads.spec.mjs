@@ -2,7 +2,7 @@ import path from 'node:path'
 
 import { test, expect, abortUnmockedRequest, goTo, repoRoot, setWindowSize, waitForAppReady } from '../../helpers/app.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
-import { seekAsViewer } from '../../helpers/player.mjs'
+import { openMockedVideo, seekAsViewer } from '../../helpers/player.mjs'
 
 const downloadSource = (id, videoId, filePath) => `downloadmedia://file/${id}/${videoId}?path=${encodeURIComponent(filePath)}`
 const mediaPath = path.join(repoRoot, 'e2e/fixtures/media/demo.webm')
@@ -94,6 +94,39 @@ test.describe('download with unreachable YouTube', () => {
     // turns them on as the default subtitles setting asks.
     await expect.poll(textTrackCount).toBeGreaterThan(0)
     await expect.poll(() => video.evaluate(element => element.ui.getControls().getPlayer().getTextTracks().some(track => track.active))).toBe(true)
+  })
+})
+
+test.describe('download of a video opened without it', () => {
+  test.use({
+    seed: {
+      settings: { enableDownloads: true, videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true },
+      downloads: [{
+        id: 1,
+        videoId: 'jNQXAC9IVRw',
+        title: 'Offline download',
+        status: 'completed',
+        mode: 'video',
+        destination: mediaPath,
+        destinations: [mediaPath],
+        files: [{ videoId: 'jNQXAC9IVRw', path: mediaPath, extension: 'webm' }],
+      }],
+    },
+  })
+
+  test('plays the download until the online video is chosen', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    // Links and tabs synced from other devices open the video without its download.
+    const video = await openMockedVideo(page)
+    await expect(page).not.toHaveURL(/downloadId=/)
+    await expect(video).toHaveJSProperty('currentSrc', 'downloadmedia://file/1/jNQXAC9IVRw')
+
+    await page.getByRole('button', { name: 'Change Media Formats' }).click()
+    const formatPrompt = page.getByRole('dialog', { name: 'Change Media Formats' })
+    await expect(formatPrompt.getByRole('button', { name: /Local video file/ })).toHaveAttribute('aria-pressed', 'true')
+    await formatPrompt.getByRole('button', { name: /Online video/ }).click()
+    await expect.poll(() => video.evaluate(element => element.currentSrc)).not.toMatch(/^downloadmedia:/)
+    await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(0)
   })
 })
 
