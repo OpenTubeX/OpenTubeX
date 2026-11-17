@@ -271,6 +271,7 @@ test('Android retains the exit surface only for a requested rotation', async () 
   let open = false
   let cleanup
   let exitTimeout
+  let swipeReleases = 0
   const host = {
     setAttribute() {},
     removeAttribute() {},
@@ -283,6 +284,7 @@ test('Android retains the exit surface only for a requested rotation', async () 
     androidFullscreenHostActive: { value: false },
     document: { fullscreenElement: null },
     getAndroidDisplayOrientation: async () => 'landscape-primary',
+    releaseMobileFullscreenSwipe: () => { swipeReleases++ },
     onBeforeUnmount: callback => { cleanup = callback },
     watch() {},
     isActiveTab: {},
@@ -308,10 +310,12 @@ test('Android retains the exit surface only for a requested rotation', async () 
   context.window.innerHeight = 380 // System bars resize before rotation finishes.
   listeners.get('resize')()
   assert.equal(open, true)
+  assert.equal(swipeReleases, 0, 'Rotation snapshots the retained surface with its swipe preview')
   context.window.innerWidth = 400
   context.window.innerHeight = 800
   listeners.get('resize')()
   assert.equal(open, true, 'Keep the surface until the restored viewport paints')
+  assert.equal(swipeReleases, 1, 'Release the swipe preview once rotation hides it')
   frames.get(1)()
   assert.equal(open, true)
   frames.get(1)()

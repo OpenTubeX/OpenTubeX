@@ -12,6 +12,11 @@ const MOBILE_FULLSCREEN_SWIPE_MAX_SCALE = 0.05
 // Matches the spring that returns a cancelled swipe in App.css.
 const MOBILE_FULLSCREEN_SWIPE_SETTLE_MS = 400
 
+// Upward swipes grow the video toward fullscreen and downward swipes shrink it.
+function getMobileFullscreenSwipeScale(offset) {
+  return 1 - offset / MOBILE_FULLSCREEN_SWIPE_MAX_OFFSET * MOBILE_FULLSCREEN_SWIPE_MAX_SCALE
+}
+
 export function isCapacitorMobilePlayer() {
   return document.querySelector('.app')?.classList.contains('capacitorTabs') === true
 }
@@ -56,11 +61,9 @@ export function useMobileFullscreenGestures({
     }
     if (!mobileFullscreenSwiping.value && !mobileFullscreenSwipeSettling.value) return undefined
     const offset = mobileFullscreenSwipeOffset.value
-    // Upward swipes enter fullscreen and downward swipes leave it.
-    const scale = 1 - offset / MOBILE_FULLSCREEN_SWIPE_MAX_OFFSET * MOBILE_FULLSCREEN_SWIPE_MAX_SCALE
     return {
       '--mobile-fullscreen-swipe-offset': `${offset}px`,
-      '--mobile-fullscreen-swipe-scale': String(scale),
+      '--mobile-fullscreen-swipe-scale': String(getMobileFullscreenSwipeScale(offset)),
     }
   })
   /** @type {number | null} */
@@ -71,6 +74,8 @@ export function useMobileFullscreenGestures({
   /** @type {number | null} */
   let mobileFullscreenSettleTimer = null
   let mobileFullscreenSettleSequence = 0
+  // A committed swipe keeps its preview until the player releases it.
+  let mobileFullscreenSwipeHandoff = false
 
   /** @type {number | null} */
   let mobileSurfaceTapTimer = null
@@ -154,11 +159,9 @@ export function useMobileFullscreenGestures({
       lastMobileSideTap = null
     }
     if (!surfaceTap && !isSwipeControlTarget(event.target)) return
-    // A new touch supersedes a fullscreen handoff that has not painted yet.
+    // A new touch supersedes a fullscreen swipe that is still settling.
     mobileFullscreenSettleSequence++
-    clearTimeout(mobileFullscreenSettleTimer)
-    mobileFullscreenSwipeSettling.value = false
-    mobileFullscreenSwipeOffset.value = 0
+    releaseMobileFullscreenSwipe(true)
     mobileControlSuppressClickUntil = 0
     mobileSurfaceSuppressTouchEndUntil = 0
     mobileAdjustmentTouchEnd = false
@@ -472,37 +475,68 @@ export function useMobileFullscreenGestures({
   function settleMobileFullscreenGesture(shouldToggle, wasFullscreen, haptic = true) {
     const sequence = ++mobileFullscreenSettleSequence
     clearTimeout(mobileFullscreenSettleTimer)
+    mobileFullscreenSettleTimer = null
     mobileFullscreenSwiping.value = false
     mobileFullscreenSwipeSettling.value = true
-    // A committed swipe hands off to the system animation immediately.
-    // Only canceled gestures need to animate back to their starting position.
-    if (!shouldToggle) mobileFullscreenSwipeOffset.value = 0
-    const settleDuration = shouldToggle || document.documentElement.dataset.reducedMotion === 'reduce'
+    mobileFullscreenSwipeHandoff = false
+    if (!shouldToggle) {
+      springBackMobileFullscreenSwipe()
+      return
+    }
+    if (isFullscreenActive() !== wasFullscreen) {
+      releaseMobileFullscreenSwipe(true)
+      return
+    }
+    // A committed swipe hands its preview to the fullscreen transition instead
+    // of returning first. The player releases it once the next presentation
+    // covers it: on Android, the rotation frame or the retained exit surface.
+    mobileFullscreenSwipeHandoff = true
+    ;(async () => {
+      try {
+        await togglePlayerFullScreen()
+        if (sequence !== mobileFullscreenSettleSequence) return
+        if (isFullscreenActive() === wasFullscreen) {
+          springBackMobileFullscreenSwipe()
+          return
+        }
+        // Restart Shaka's touchmove-stopped idle timer with the fullscreen
+        // delay, without invoking the surface-tap handler on its child.
+        getContainer()?.dispatchEvent(new Event('touchend'))
+        if (haptic) lightHaptic()
+      } catch (error) {
+        console.warn('Fullscreen gesture failed', error)
+        if (sequence === mobileFullscreenSettleSequence) springBackMobileFullscreenSwipe()
+      }
+    })()
+  }
+
+  function springBackMobileFullscreenSwipe() {
+    mobileFullscreenSwipeHandoff = false
+    mobileFullscreenSwipeOffset.value = 0
+    const settleDuration = document.documentElement.dataset.reducedMotion === 'reduce'
       ? 0
       : MOBILE_FULLSCREEN_SWIPE_SETTLE_MS / getAnimationSpeedMultiplier()
-    mobileFullscreenSettleTimer = window.setTimeout(async () => {
+    mobileFullscreenSettleTimer = window.setTimeout(() => {
       mobileFullscreenSettleTimer = null
-      mobileFullscreenSwipeOffset.value = 0
       mobileFullscreenSwipeSettling.value = false
-      if (shouldToggle && isFullscreenActive() === wasFullscreen) {
-        try {
-          // Paint the reset swipe preview before Android snapshots the page
-          // for rotation and Chromium enters fullscreen.
-          await nextTick()
-          await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
-          if (sequence !== mobileFullscreenSettleSequence || isFullscreenActive() !== wasFullscreen) return
-          await togglePlayerFullScreen()
-          if (isFullscreenActive() !== wasFullscreen) {
-            // Restart Shaka's touchmove-stopped idle timer with the fullscreen
-            // delay, without invoking the surface-tap handler on its child.
-            getContainer()?.dispatchEvent(new Event('touchend'))
-            if (haptic) lightHaptic()
-          }
-        } catch (error) {
-          console.warn('Fullscreen gesture failed', error)
-        }
-      }
     }, settleDuration)
+  }
+
+  /**
+   * Removes a committed swipe's preview without animating it back.
+   * @param {boolean} [force] also remove a preview that was not handed off
+   * @returns {{ offset: number, scale: number } | null} the handed-off preview, if any
+   */
+  function releaseMobileFullscreenSwipe(force = false) {
+    const offset = mobileFullscreenSwipeOffset.value
+    const preview = mobileFullscreenSwipeHandoff ? { offset, scale: getMobileFullscreenSwipeScale(offset) } : null
+    if (!force && !preview) return null
+    mobileFullscreenSwipeHandoff = false
+    clearTimeout(mobileFullscreenSettleTimer)
+    mobileFullscreenSettleTimer = null
+    mobileFullscreenSwipeSettling.value = false
+    mobileFullscreenSwipeOffset.value = 0
+    return preview
   }
 
   function clearMobileMiniPlayerDismiss() {
@@ -545,9 +579,7 @@ export function useMobileFullscreenGestures({
     if (event && event.pointerId !== mobileFullscreenGesture?.pointerId) return false
 
     mobileFullscreenSettleSequence++
-    clearTimeout(mobileFullscreenSettleTimer)
-    mobileFullscreenSwipeSettling.value = false
-    mobileFullscreenSwipeOffset.value = 0
+    releaseMobileFullscreenSwipe(true)
 
     clearMobileMiniPlayerDismiss()
 
@@ -759,6 +791,7 @@ export function useMobileFullscreenGestures({
     mobileMiniPlayerDismissSettling,
     mobileSeekPreview,
     moveMobileFullscreenGesture,
+    releaseMobileFullscreenSwipe,
     startMobileFullscreenGesture,
   }
 }

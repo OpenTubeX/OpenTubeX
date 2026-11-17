@@ -158,6 +158,7 @@ test('Android fullscreen keeps the video inside the viewport throughout rotation
       }
       await page.evaluate(() => {
         window.__swipeFullscreenFrames = []
+        window.__swipePresentationFrames = []
         window.__originalRequestFullscreen = Element.prototype.requestFullscreen
         window.__originalExitFullscreen = document.exitFullscreen
         const sample = () => {
@@ -167,7 +168,24 @@ test('Android fullscreen keeps the video inside the viewport throughout rotation
             prepared: video.closest('.ftVideoPlayer').classList.contains('fullWindow'),
             fullscreen: !!document.fullscreenElement,
           })
+          window.__swipeHandedOff = true
         }
+        // The first frame after each presentation change, until the next swipe starts.
+        window.__recordSwipePresentation = event => {
+          if (event.type === 'touchstart') window.__swipeHandedOff = false
+          if (!window.__swipeHandedOff) return
+          requestAnimationFrame(() => {
+            window.__swipePresentationFrames.push({
+              type: event.type,
+              translate: getComputedStyle(document.querySelector('.ftVideoPlayer video')).translate,
+              fullscreen: !!document.fullscreenElement,
+              portrait: innerHeight > innerWidth,
+            })
+          })
+        }
+        document.addEventListener('fullscreenchange', window.__recordSwipePresentation)
+        window.addEventListener('resize', window.__recordSwipePresentation)
+        window.addEventListener('touchstart', window.__recordSwipePresentation, true)
         Element.prototype.requestFullscreen = function (...args) {
           sample()
           return window.__originalRequestFullscreen.apply(this, args)
@@ -198,19 +216,30 @@ test('Android fullscreen keeps the video inside the viewport throughout rotation
           message: `Swipe ${i + 1} at ${scale}%`, timeout: 10000,
         }).toBe(entering)
       }
-      const swipeFrames = await page.evaluate(() => {
+      await expect.poll(() => page.evaluate(() => innerHeight > innerWidth && !document.querySelector(':popover-open')), { timeout: 10000 }).toBe(true)
+      const { swipeFrames, presentationFrames } = await page.evaluate(() => {
         Element.prototype.requestFullscreen = window.__originalRequestFullscreen
         document.exitFullscreen = window.__originalExitFullscreen
+        document.removeEventListener('fullscreenchange', window.__recordSwipePresentation)
+        window.removeEventListener('resize', window.__recordSwipePresentation)
+        window.removeEventListener('touchstart', window.__recordSwipePresentation, true)
         delete window.__originalRequestFullscreen
         delete window.__originalExitFullscreen
-        return window.__swipeFullscreenFrames
+        delete window.__recordSwipePresentation
+        delete window.__swipeHandedOff
+        return { swipeFrames: window.__swipeFullscreenFrames, presentationFrames: window.__swipePresentationFrames }
       })
+      const displaced = translate => translate !== 'none' && translate !== '0px'
       assert.equal(swipeFrames.length, 6)
-      assert.deepEqual(swipeFrames.filter(({ translate }) => translate !== 'none' && translate !== '0px'), [],
-        `Fullscreen must not snapshot the displaced swipe preview at ${scale}%`)
+      assert.deepEqual(swipeFrames.filter(({ translate }) => !displaced(translate)), [],
+        `Carry the swipe preview into the fullscreen handoff without returning first at ${scale}%`)
+      assert.deepEqual(presentationFrames.filter(({ translate, fullscreen, portrait }) => (fullscreen || portrait) && displaced(translate)), [],
+        `Fullscreen and the rotated inline page must not keep the swipe preview at ${scale}%`)
+      const exitFrames = presentationFrames.filter(({ type, fullscreen, portrait }) => type === 'fullscreenchange' && !fullscreen && !portrait)
+      assert.ok(exitFrames.length > 0 && exitFrames.every(({ translate }) => displaced(translate)),
+        `Keep the swipe preview on the retained surface until rotation at ${scale}%: ${JSON.stringify(presentationFrames)}`)
       assert.ok(swipeFrames.every(({ prepared, fullscreen }) => prepared === fullscreen),
         `Keep the inline layout intact until native fullscreen at ${scale}%`)
-      await expect.poll(() => page.evaluate(() => innerHeight > innerWidth && !document.querySelector(':popover-open')), { timeout: 10000 }).toBe(true)
     }
     // Emulate a system policy that keeps landscape after unlocking (for example,
     // the user physically turned the phone while watching). The native display
@@ -286,6 +315,14 @@ test('Android fullscreen keeps the video inside the viewport throughout rotation
       }
       if (window.__originalRequestFullscreen) Element.prototype.requestFullscreen = window.__originalRequestFullscreen
       if (window.__originalExitFullscreen) document.exitFullscreen = window.__originalExitFullscreen
+      if (window.__recordSwipePresentation) {
+        document.removeEventListener('fullscreenchange', window.__recordSwipePresentation)
+        window.removeEventListener('resize', window.__recordSwipePresentation)
+        window.removeEventListener('touchstart', window.__recordSwipePresentation, true)
+      }
+      delete window.__recordSwipePresentation
+      delete window.__swipePresentationFrames
+      delete window.__swipeHandedOff
       delete window.__originalRequestFullscreen
       delete window.__originalExitFullscreen
       delete window.__swipeFullscreenFrames

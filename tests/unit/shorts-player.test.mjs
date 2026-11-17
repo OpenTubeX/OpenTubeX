@@ -394,6 +394,7 @@ test('an inactive Short ignores fullscreen events and synchronizes when activate
     androidFullscreenHostActive: ref(false),
     androidFullscreenHost: null,
     finishAndroidFullscreenExit() {},
+    releaseMobileFullscreenSwipe() {},
     handleVideoZoomFullscreenChange() {},
     props: { shortsPlayer: true },
     resetShortsOverflowMenu() {},
