@@ -570,7 +570,7 @@ test('a theme selection waits with its theme when another window changed the the
   assert.deepEqual(client.entries.find(entry => entry.key === 'baseTheme'), remoteSelection)
 })
 
-test('list settings keep items through an upload retry and a skipped apply', async (t) => {
+test('list settings keep items through upload retries, skipped applies, and saves from other windows', async (t) => {
   const getSyncableSettingKeys = context.getSyncableSettingKeys
   context.getSyncableSettingKeys = () => ['first', 'forbiddenTitles']
   t.after(() => { context.getSyncableSettingKeys = getSyncableSettingKeys })
@@ -581,12 +581,17 @@ test('list settings keep items through an upload retry and a skipped apply', asy
     async putSettings(value) { this.entries = structuredClone(value) },
   })
   const settings = { first: 'local', forbiddenTitles: '["B"]', syncServerSettingsExcluded: [] }
+  // Saved by another window after this sync read the settings
+  let savedElsewhere
   const store = {
     state: { profiles: { profileList: [{ subscriptions: [] }] }, settings, utils: { customThemes: [] } },
-    dispatch: async (action, value) => {
+    dispatch: async (action, update) => {
       // Editing Hide Text while sync saves the earlier setting
       if (action === 'updateFirst') settings.forbiddenTitles = '["A","C"]'
-      settings[action.charAt(6).toLowerCase() + action.slice(7)] = value
+      const name = action.charAt(6).toLowerCase() + action.slice(7)
+      if (name === 'forbiddenTitles' && savedElsewhere) settings[name] = savedElsewhere
+      settings[name] = typeof update === 'function' ? update(settings[name]) : update
+      return true
     },
   }
 
@@ -605,6 +610,14 @@ test('list settings keep items through an upload retry and a skipped apply', asy
   const client = createListClient([entry('forbiddenTitles', '["A","B"]', 20), entry('first', 'remote', 20)])
   const skipped = await context.syncSettings(client, store, previous)
   assert.equal(settings.forbiddenTitles, '["A","C"]')
-  await context.syncSettings(client, store, skipped)
+  const synced = await context.syncSettings(client, store, skipped)
   assert.equal(settings.forbiddenTitles, '["A","B","C"]', 'A server item never applied here must not count as removed')
+
+  client.entries.find(item => item.key === 'forbiddenTitles').value = '["A","B","C","E"]'
+  savedElsewhere = '["A","B","C","D"]'
+  const raced = await context.syncSettings(client, store, synced)
+  assert.equal(settings.forbiddenTitles, savedElsewhere, 'Sync must not overwrite a list another window saved meanwhile')
+  savedElsewhere = undefined
+  await context.syncSettings(client, store, raced)
+  assert.equal(settings.forbiddenTitles, '["A","B","C","E","D"]')
 })

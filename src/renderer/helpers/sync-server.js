@@ -1757,6 +1757,15 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
         }
         store.commit('setCustomThemes', themes)
         await repairCustomThemeReferences(store, previousThemes, themes)
+      } else if (isListSetting(key)) {
+        // Another window may save the list after this sync read it. That edit
+        // or a failed save keeps the server entry, and the next sync merges it.
+        let applied = false
+        const saved = await store.dispatch(settingUpdater(key), current => {
+          applied = metadataEquals(current, value)
+          return applied ? deepCopy(entry.value) : current
+        })
+        if (!applied || saved === false) skip()
       } else {
         await store.dispatch(settingUpdater(key), deepCopy(entry.value))
       }
