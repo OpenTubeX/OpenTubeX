@@ -2,15 +2,7 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import store from '../store/index'
-import {
-  getSubscriptionRefreshCancelCount,
-  refreshSubscriptionLiveFromRemote,
-  refreshSubscriptionPostsFromRemote,
-  refreshSubscriptionShortsFromRemote,
-  refreshSubscriptionVideosFromRemote,
-  withSharedChannelUploads
-} from '../helpers/subscriptions'
-import { withAndroidSubscriptionRefreshBatch } from '../helpers/androidSubscriptionRefresh'
+import { refreshSubscriptionFeeds } from '../helpers/subscriptionFeedRefresh'
 import { getEnabledSubscriptionFeedSources } from '../helpers/newSubscriptionFeed'
 import { refreshRssFeeds, rssFeedsRefreshing } from '../helpers/rssFeeds'
 import { getFollowedChannels, platformFeedRefreshing, refreshPlatformFeed } from '../helpers/platformFeed'
@@ -28,19 +20,7 @@ export function useRefreshAllSubscriptionFeeds() {
     return new Set(store.getters.getActiveProfile.subscriptions.map(channel => channel.id))
   })
 
-  const enabledFeeds = computed(() => {
-    const refreshByCategory = {
-      videos: refreshSubscriptionVideosFromRemote,
-      shorts: refreshSubscriptionShortsFromRemote,
-      live: refreshSubscriptionLiveFromRemote,
-      posts: refreshSubscriptionPostsFromRemote
-    }
-
-    return getEnabledSubscriptionFeedSources(store.getters).map(feed => ({
-      ...feed,
-      refresh: refreshByCategory[feed.category]
-    }))
-  })
+  const enabledFeeds = computed(() => getEnabledSubscriptionFeedSources(store.getters))
 
   const rssFeeds = computed(() => {
     return supportsYtDlp && store.getters.getEnableRssFeeds ? store.getters.getFollowedRssFeeds : []
@@ -80,20 +60,8 @@ export function useRefreshAllSubscriptionFeeds() {
     isRefreshing.value = true
     attemptedFetch.value = true
 
-    const cancelCountAtStart = getSubscriptionRefreshCancelCount()
-
     try {
-      await withAndroidSubscriptionRefreshBatch(() => withSharedChannelUploads(async () => {
-        for (const feed of enabledFeeds.value) {
-          // Also covers a cancellation between two feeds, when no feed refresh
-          // was running to receive it
-          if (getSubscriptionRefreshCancelCount() !== cancelCountAtStart) {
-            break
-          }
-
-          await feed.refresh({ t })
-        }
-      }), { title: t('Subscriptions.Subscriptions'), cancelLabel: t('Feed.Cancel Refresh') })
+      await refreshSubscriptionFeeds(enabledFeeds.value.map(feed => feed.category), { t })
     } finally {
       isRefreshing.value = false
     }

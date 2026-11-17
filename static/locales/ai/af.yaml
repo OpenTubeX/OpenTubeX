@@ -1475,6 +1475,7 @@ Settings:
     Cleanup Complete: Bergingsopruiming voltooi
     Cleanup Failed: Bergingsopruiming het misluk
   Subscription Settings:
+    Refresh These Feeds Together: "Verfris hierdie voere saam"
     Fetch Feed on Startup: Haal voer by opstart op
     Show New Content Feed: Wys voer vir nuwe inhoud
     RSS Feeds: RSS-voere
@@ -2697,6 +2698,7 @@ Tooltips:
     Bedtime Reminder: Pouseer die video en herinner u om op te hou kyk tussen die begin- en eindtyd.
     Shorten View Counts: Wys getalle van kyke, kommentaar en kommentaar-hou-van’s wat YouTube reeds afgerond het in ’n verkorte vorm, bv. 14K in plaas van 14 000. Presiese getalle word altyd volledig gewys.
   Subscription Settings:
+    Refresh These Feeds Together: "Wanneer jy een van die gemerkte voere verfris, word die ander gemerkte voere direk daarna verfris. Outomatiese verfrissings volg steeds elke voer se eie interval."
     Fetch Feed on Startup: Wanneer geaktiveer, sal OpenTubeX u intekeningvoer outomaties by opstart ophaal en wanneer ’n nuwe venster oopgemaak word.
     Show New Content Feed: Wys ’n Nuut-oortjie met intekeningvoeritems wat nie tydens die vorige ophaal teenwoordig was nie.
     Enable RSS Feeds: Wys ’n RSS-oortjie op die Intekeninge-blad met die items van RSS- of Atom-voere, sodat u skeppers op ander platforms kan volg. Die items daarvan word met yt-dlp oopgemaak.

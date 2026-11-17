@@ -5,6 +5,11 @@
       class="checkboxTitle"
     >
       {{ title }}
+      <FtTooltip
+        v-if="tooltip !== ''"
+        class="checkboxTooltip"
+        :tooltip="tooltip"
+      />
       <FtSyncedSettingIndicator
         :setting-key="settingKey"
         :setting-keys="syncSettingKeys"
@@ -77,6 +82,11 @@ const props = defineProps({
   indeterminateValues: {
     type: Array,
     default: () => []
+  },
+  /** Explains the whole list, shown beside its title */
+  tooltip: {
+    type: String,
+    default: ''
   },
   tooltips: {
     type: Object,

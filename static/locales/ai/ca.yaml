@@ -1554,6 +1554,7 @@ Settings:
     Cleanup Complete: Ha acabat la neteja de l'emmagatzematge
     Cleanup Failed: Ha fallat la neteja de l'emmagatzematge
   Subscription Settings:
+    Refresh These Feeds Together: "Actualitza aquests canals alhora"
     Fetch Feed on Startup: Obtén el canal en iniciar
     Show New Content Feed: Mostra el canal de contingut nou
     RSS Feeds: Canals RSS
@@ -3001,6 +3002,7 @@ Tooltips:
     Hide Videos, Playlists and Channels Containing Text: Introduïu una paraula, un fragment de paraula o una frase, sense distinció entre majúscules i minúscules, per ocultar a tot l'OpenTubeX els vídeos, les llistes de reproducció i els canals que la continguin al títol original. Només s'exclouen Historial, Les vostres llistes de reproducció i els vídeos dins de llistes.
     Hide Videos on Watch: Oculta els vídeos vistos de les pestanyes Vídeos, Vídeos curts i En directe de les pàgines de subscripcions i canals. No afecta la pestanya Inici de les pàgines dels canals
   Subscription Settings:
+    Refresh These Feeds Together: "Quan actualitzes un dels canals marcats, els altres canals marcats s'actualitzen just després. Les actualitzacions automàtiques continuen seguint l'interval de cada canal."
     Fetch Feeds from RSS: Si s'activa, l'OpenTubeX utilitza RSS en lloc del mètode predeterminat per obtenir el canal de subscripcions. RSS és més ràpid i evita els bloqueigs d'IP, però no proporciona algunes dades, com ara la durada dels vídeos, l'estat en directe o les publicacions
     Fetch Feed on Startup: Si s'activa, l'OpenTubeX obté automàticament el canal de subscripcions en iniciar-se i en obrir una finestra nova.
     Show New Content Feed: Mostra una pestanya Nou amb els elements del canal de subscripcions que no hi eren en l'obtenció anterior.

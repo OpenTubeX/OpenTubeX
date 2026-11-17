@@ -1290,6 +1290,7 @@ Settings:
     Cleanup Complete: Yaddaşın təmizlənməsi tamamlandı
     Cleanup Failed: Yaddaşın təmizlənməsi alınmadı
   Subscription Settings:
+    Refresh These Feeds Together: "Bu axınları birlikdə yenilə"
     Fetch Feed on Startup: Başladıqda lenti al
     Show New Content Feed: Yeni məzmun lentini göstər
     RSS Feeds: RSS Axınları
@@ -2450,6 +2451,7 @@ Tooltips:
     Bedtime Reminder: "Başlanğıc və bitmə vaxtı arasında videoya fasilə verir və baxmağı dayandırmağı sizə xatırladır."
     Shorten View Counts: YouTube-un artıq yuvarlaqlaşdırdığı baxış, şərh və şərh bəyənmə saylarını qısaldılmış formada, məsələn 14.000 əvəzinə 14K göstərir. Dəqiq saylar həmişə tam göstərilir.
   Subscription Settings:
+    Refresh These Feeds Together: "Seçilmiş axınlardan birini yenilədikdə, digər seçilmiş axınlar dərhal ondan sonra yenilənir. Avtomatik yeniləmələr hər axının öz intervalına uyğun davam edir."
     Fetch Feed on Startup: Aktivləşdirildikdə OpenTubeX başlanğıcda və yeni pəncərə açıldıqda abunəlik axınınızı avtomatik alır.
     Show New Content Feed: Əvvəlki alınma zamanı olmayan abunəlik axını elementlərini ehtiva edən Yeni səhifəsini göstərir.
     Enable RSS Feeds: Abunəliklər səhifəsində RSS və ya Atom axınlarının elementlərini göstərən RSS panelini göstərir ki, digər platformalardakı müəllifləri izləyə biləsiniz. Onun elementləri yt-dlp ilə açılır.

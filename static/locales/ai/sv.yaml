@@ -1288,6 +1288,7 @@ Settings:
     Cleanup Complete: Lagringsrensningen är klar
     Cleanup Failed: Lagringsrensningen misslyckades
   Subscription Settings:
+    Refresh These Feeds Together: "Uppdatera dessa flöden samtidigt"
     Fetch Feed on Startup: Hämta flöde vid start
     Show New Content Feed: Visa flöde med nytt innehåll
     RSS Feeds: RSS-flöden
@@ -2438,6 +2439,7 @@ Tooltips:
     Bedtime Reminder: "Pausar videon och påminner dig om att sluta titta mellan start- och sluttiden."
     Shorten View Counts: Visar antal visningar, kommentarer och gilla-markeringar på kommentarer i den förkortade form som YouTube redan har avrundat, exempelvis 14 tn i stället för 14 000. Exakta antal visas alltid i sin helhet.
   Subscription Settings:
+    Refresh These Feeds Together: "När du uppdaterar ett av de markerade flödena uppdateras de andra markerade flödena direkt efteråt. Automatiska uppdateringar följer fortfarande varje flödes eget intervall."
     Fetch Feed on Startup: När funktionen är aktiverad hämtar OpenTubeX automatiskt ditt prenumerationsflöde vid start och när ett nytt fönster öppnas.
     Show New Content Feed: Visar en flik med namnet Nytt som innehåller poster i prenumerationsflödet som inte fanns vid föregående hämtning.
     Enable RSS Feeds: Visar en RSS-flik på sidan Prenumerationer med objekten från RSS- eller Atom-flöden, så att du kan följa kreatörer på andra plattformar. Dess objekt öppnas med yt-dlp.

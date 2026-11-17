@@ -1288,6 +1288,7 @@ Settings:
     Cleanup Complete: ストレージのクリーンアップが完了しました
     Cleanup Failed: ストレージのクリーンアップに失敗しました
   Subscription Settings:
+    Refresh These Feeds Together: "これらのフィードをまとめて更新"
     Fetch Feed on Startup: 起動時にフィードを取得
     Show New Content Feed: 新着コンテンツのフィードを表示
     RSS Feeds: RSS フィード
@@ -2437,6 +2438,7 @@ Tooltips:
     Bedtime Reminder: "開始時刻から終了時刻までの間、動画を一時停止して視聴をやめるようリマインドします。"
     Shorten View Counts: YouTubeですでに丸められた視聴回数、コメント数、コメントの高評価数を、14,000ではなく14Kのように省略表示します。正確な数値は常に省略せず表示します。
   Subscription Settings:
+    Refresh These Feeds Together: "チェックしたフィードのいずれかを更新すると、チェックした他のフィードもその直後に更新されます。自動更新は引き続き各フィードの間隔に従います。"
     Fetch Feed on Startup: 有効にすると、OpenTubeXの起動時と新しいウィンドウを開いたときに登録チャンネルのフィードを自動取得します。
     Show New Content Feed: 前回の取得時にはなかった登録チャンネルのフィード項目を「新着」タブに表示します。
     Enable RSS Feeds: 登録チャンネルページに RSS または Atom フィードの項目を含む RSS タブを表示し、他のプラットフォームのクリエイターをフォローできるようにします。項目は yt-dlp で開きます。

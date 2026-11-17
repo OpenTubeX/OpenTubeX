@@ -18,6 +18,18 @@ async function loadHelpers(native, logger = console, notifications = { checkPerm
   })
 }
 
+async function loadFeedRefresh(context) {
+  const source = await readFile(new URL('../../src/renderer/helpers/subscriptionFeedRefresh.js', import.meta.url), 'utf8')
+  return vm.runInNewContext(`${source.slice(source.indexOf('/** @typedef')).replaceAll('export ', '')}
+    ({ refreshSubscriptionFeed, refreshSubscriptionFeeds })`, {
+    withSharedChannelUploads: refresh => refresh(),
+    getSubscriptionRefreshCancelCount: () => 0,
+    refreshSubscriptionLiveFromRemote() {},
+    refreshSubscriptionPostsFromRemote() {},
+    ...context,
+  })
+}
+
 test('Refresh All holds its native batch until every feed and its native finish settle', async () => {
   const firstFinish = Promise.withResolvers()
   const finishing = Promise.withResolvers()
@@ -54,13 +66,11 @@ test('Refresh All holds its native batch until every feed and its native finish 
     refreshPlatformFeed() {},
     platformFeedRefreshing: { value: false },
     getEnabledSubscriptionFeedSources: () => [{ category: 'videos' }, { category: 'shorts' }],
-    getSubscriptionRefreshCancelCount: () => 0,
-    refreshSubscriptionVideosFromRemote: refreshFeed(1),
-    refreshSubscriptionShortsFromRemote: refreshFeed(2),
-    refreshSubscriptionLiveFromRemote() {},
-    refreshSubscriptionPostsFromRemote() {},
-    withAndroidSubscriptionRefreshBatch: helpers.withAndroidSubscriptionRefreshBatch,
-    withSharedChannelUploads: refresh => refresh(),
+    ...await loadFeedRefresh({
+      refreshSubscriptionVideosFromRemote: refreshFeed(1),
+      refreshSubscriptionShortsFromRemote: refreshFeed(2),
+      withAndroidSubscriptionRefreshBatch: helpers.withAndroidSubscriptionRefreshBatch,
+    }),
   })
   const refresh = useRefreshAll()
   refresh.refresh()
@@ -72,6 +82,30 @@ test('Refresh All holds its native batch until every feed and its native finish 
   assert.deepEqual(events, ['begin', 'start1', 'finish:token1', 'start2', 'finish:token2', 'end'])
   await setImmediate()
   assert.equal(refresh.isRefreshing.value, false)
+})
+
+test('a feed refreshes the feeds chosen to refresh with it after itself, and only when started by the user', async () => {
+  const liveRefresh = Promise.withResolvers()
+  const calls = []
+  const { refreshSubscriptionFeed } = await loadFeedRefresh({
+    store: { getters: { getSubscriptionFeedsRefreshedTogether: ['videos', 'live', 'posts'] } },
+    // Posts are hidden, Shorts aren't chosen
+    getEnabledSubscriptionFeedSources: () => [{ category: 'videos' }, { category: 'shorts' }, { category: 'live' }],
+    withAndroidSubscriptionRefreshBatch: refresh => refresh(),
+    async refreshSubscriptionVideosFromRemote({ automatic }) { calls.push(`videos:${automatic}`); return 'videos' },
+    refreshSubscriptionShortsFromRemote() { assert.fail('Shorts must not refresh') },
+    async refreshSubscriptionLiveFromRemote() { calls.push('live'); await liveRefresh.promise },
+    refreshSubscriptionPostsFromRemote() { assert.fail('hidden posts must not refresh') },
+  })
+  // The feed shows its own results without waiting for the other feeds
+  assert.equal(await refreshSubscriptionFeed('videos', { t: value => value }), 'videos')
+  assert.deepEqual(calls, ['videos:undefined', 'live'])
+  liveRefresh.resolve()
+
+  calls.length = 0
+  assert.equal(await refreshSubscriptionFeed('videos', { t: value => value, automatic: true }), 'videos')
+  await setImmediate()
+  assert.deepEqual(calls, ['videos:true'])
 })
 
 test('failed batch acquisition does not run or release another refresh', async () => {

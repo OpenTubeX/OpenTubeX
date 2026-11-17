@@ -41,7 +41,7 @@ import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import { useSubscriptionChannelUpdates } from '../../composables/useSubscriptionChannelUpdates'
 import { getCachedRelativeTimeFormat, getRelativeTimeFromDate } from '../../helpers/utils'
 import { formatShortDateTime } from '../../helpers/dateFormat'
-import { refreshSubscriptionPostsFromRemote } from '../../helpers/subscriptions'
+import { refreshSubscriptionFeed } from '../../helpers/subscriptionFeedRefresh'
 import { getSubscriptionsForFeed } from '../../helpers/subscription-channels'
 
 const { locale, t } = useI18n()
@@ -299,7 +299,7 @@ async function loadPostsForSubscriptionsFromRemote(automatic = false) {
 
   let refreshedPosts = null
   try {
-    refreshedPosts = await refreshSubscriptionPostsFromRemote({
+    refreshedPosts = await refreshSubscriptionFeed('posts', {
       t,
       automatic
     })

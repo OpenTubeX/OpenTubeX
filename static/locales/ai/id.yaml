@@ -1291,6 +1291,7 @@ Settings:
     Cleanup Complete: Pembersihan penyimpanan selesai
     Cleanup Failed: Pembersihan penyimpanan gagal
   Subscription Settings:
+    Refresh These Feeds Together: "Segarkan umpan ini bersamaan"
     Fetch Feed on Startup: Ambil Umpan Saat Aplikasi Dimulai
     Show New Content Feed: Tampilkan Umpan Konten Baru
     RSS Feeds: Umpan RSS
@@ -2464,6 +2465,7 @@ Tooltips:
     Bedtime Reminder: "Menjeda video dan mengingatkan Anda untuk berhenti menonton antara waktu mulai dan waktu akhir."
     Shorten View Counts: Menampilkan jumlah penayangan, komentar dan suka komentar yang telah dibulatkan YouTube dalam bentuk singkat, misalnya 14 rb, bukan 14.000. Jumlah persis selalu ditampilkan penuh.
   Subscription Settings:
+    Refresh These Feeds Together: "Saat Anda menyegarkan salah satu umpan yang dicentang, umpan lain yang dicentang langsung disegarkan setelahnya. Penyegaran otomatis tetap mengikuti interval masing-masing umpan."
     Fetch Feed on Startup: Jika diaktifkan, OpenTubeX otomatis mengambil umpan langganan saat aplikasi dimulai dan ketika jendela baru dibuka.
     Show New Content Feed: Menampilkan tab Baru yang berisi item umpan langganan yang belum ada saat pengambilan sebelumnya.
     Enable RSS Feeds: Menampilkan tab RSS di halaman Langganan berisi item dari umpan RSS atau Atom, sehingga Anda dapat mengikuti kreator di platform lain. Itemnya dibuka dengan yt-dlp.

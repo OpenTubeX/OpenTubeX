@@ -1288,6 +1288,7 @@ Settings:
     Cleanup Complete: Biltegiratzea garbitu da
     Cleanup Failed: Ezin izan da biltegiratzea garbitu
   Subscription Settings:
+    Refresh These Feeds Together: "Freskatu jario hauek batera"
     Fetch Feed on Startup: Eskuratu jarioa abioan
     Show New Content Feed: Erakutsi eduki berriaren jarioa
     RSS Feeds: RSS jarioak
@@ -2448,6 +2449,7 @@ Tooltips:
     Bedtime Reminder: "Bideoa pausatzen du eta ikusteari uzteko gogorarazten dizu hasiera- eta amaiera-orduen artean."
     Shorten View Counts: YouTube-k dagoeneko biribildu dituen ikustaldi-, iruzkin- eta iruzkinetako atsegite-kopuruak modu laburtuan erakusten ditu; adibidez, 14K, 14.000 ordez. Kopuru zehatzak osorik erakusten dira beti.
   Subscription Settings:
+    Refresh These Feeds Together: "Markatutako jarioetako bat freskatzean, markatutako beste jarioak berehala freskatzen dira haren ondoren. Freskatze automatikoek jario bakoitzaren tartea jarraitzen dute."
     Fetch Feed on Startup: Gaituta dagoenean, OpenTubeX aplikazioak harpidetza-jarioa automatikoki eskuratuko du abioan eta leiho berri bat irekitzean.
     Show New Content Feed: Berria fitxa erakusten du, aurreko eskuratzean ez zeuden harpidetza-jarioko elementuekin.
     Enable RSS Feeds: RSS fitxa bat erakusten du Harpidetzak orrian RSS edo Atom jarioen elementuekin, beste plataformetako sortzaileei jarraitu ahal izateko. Bere elementuak yt-dlp-rekin irekitzen dira.

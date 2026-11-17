@@ -512,6 +512,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     subscriptionShortsAutoRefreshInterval: '0',
     subscriptionLiveAutoRefreshInterval: '0',
     subscriptionPostsAutoRefreshInterval: '0',
+    subscriptionFeedsRefreshedTogether: [],
     rssFeedsAutoRefreshInterval: '0',
     platformFeedAutoRefreshInterval: '0',
     platformFeedView: 'combined',
