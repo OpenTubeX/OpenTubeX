@@ -1230,7 +1230,8 @@ function applyQueryTimestamp() {
   } else {
     // The link wins over a restore still waiting for companion metadata.
     startTime.value = null
-    seekTo(seconds)
+    // Opening a link is not watching yet, see handleViewerSeek
+    seekTo(seconds, false)
   }
   consumeTimestamp()
 }
@@ -1464,7 +1465,11 @@ function handlePlaybackStopped() {
   watchTimeTracker.flush()
   savePosition()
 }
-function seekTo(seconds) {
+/**
+ * @param {number} seconds
+ * @param {boolean} [viewerSeek] whether the viewer chose this position, such as with a chapter
+ */
+function seekTo(seconds, viewerSeek = true) {
   // A looping video over a longer soundtrack follows the soundtrack's timeline.
   const audio = companionAudio.value
   const video = getCompanionVideo()
@@ -1472,9 +1477,9 @@ function seekTo(seconds) {
     audio.currentTime = seconds
     // Moving back from the end is not the soundtrack starting over.
     lastPlaybackPosition = seconds
-    player.value?.setCurrentTime(seconds % video.duration, true)
+    player.value?.setCurrentTime(seconds % video.duration, viewerSeek)
   } else {
-    player.value?.setCurrentTime(seconds, true)
+    player.value?.setCurrentTime(seconds, viewerSeek)
   }
 }
 function copyChapterTimestamp(seconds) { player.value?.copyChapterTimestamp(seconds) }

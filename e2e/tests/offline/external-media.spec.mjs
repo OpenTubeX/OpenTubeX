@@ -184,6 +184,8 @@ test('external media opens a description timestamp link in a new tab at its time
     BrowserWindow.getAllWindows()[0].webContents.send(channel, route)
   }, { channel: IpcChannels.CHANGE_VIEW, route: `/external-media?url=${encodeURIComponent(mediaUrl)}&timestamp=22` })
   await expect.poll(() => linkedVideo.evaluate(element => element.currentTime)).toBeCloseTo(22, 0)
+  // Opening timestamp links without watching keeps the saved position.
+  expect(await savedExternalPosition(page, mediaUrl)).toBe(5)
 })
 
 test('external media resets completed playback and clears positions with watch history', async ({ app, page }) => {
