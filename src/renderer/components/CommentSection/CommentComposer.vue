@@ -102,7 +102,7 @@
           type="submit"
           :label="editComment ? t('YouTube Account.Save') : parentId ? t('YouTube Account.Reply') : t('YouTube Account.Comment')"
           :icon="['fas', editComment ? 'check' : parentId ? 'reply' : 'comment']"
-          :disabled="posting || text.trim() === '' || (editComment !== null && submitText === originalSubmitText)"
+          :disabled="!canSubmit"
         />
       </div>
     </form>
@@ -150,6 +150,7 @@ const mentionRanges = computed(() => findCommentMentions(text.value, mentions.va
 const submitText = computed(() => getCommentSubmitText(text.value.trim(), mentions.value))
 const originalSubmitText = getCommentSubmitText(draft.text.trim(), draft.mentions)
 const posting = ref(false)
+const canSubmit = computed(() => !posting.value && text.value.trim() !== '' && (!props.editComment || submitText.value !== originalSubmitText))
 const input = useTemplateRef('input')
 const profile = computed(() => getSelectedYouTubeProfile(store.getters.getYouTubeAccount))
 const isTopLevel = !props.parentId && !props.editComment
@@ -290,6 +291,13 @@ function handleKeydown(event) {
   const textarea = event.target
   if (event.isComposing || !(textarea instanceof HTMLTextAreaElement)) return
 
+  // Ctrl+Enter, or Cmd+Enter on macOS, sends like the submit button.
+  if (event.key === 'Enter' && (event.ctrlKey || event.metaKey) && !event.shiftKey && !event.altKey) {
+    event.preventDefault()
+    if (canSubmit.value) submit()
+    return
+  }
+
   const count = suggestions.value.length
   if (count > 0) {
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
@@ -349,8 +357,8 @@ function cancel() {
 }
 
 async function submit() {
+  if (!canSubmit.value) return
   const commentText = text.value.trim()
-  if (commentText === '' || posting.value) return
   if (props.editComment) {
     await saveEdit(commentText)
     return

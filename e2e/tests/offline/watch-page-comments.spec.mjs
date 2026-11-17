@@ -953,7 +953,8 @@ test.describe('manual comment loading', () => {
     // Punctuation around a mention keeps it.
     await replyInput.press('Backspace')
     await replyInput.pressSequentially('...) there')
-    await composer.getByRole('button', { name: 'Reply', exact: true }).click()
+    // Ctrl+Enter sends like the button.
+    await replyInput.press('ControlOrMeta+Enter')
     await expect.poll(() => replyTexts.at(-1)).toBe(`Hi (@${channelId}...) there`)
   })
 
