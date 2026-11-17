@@ -1406,7 +1406,8 @@ function isSyncSettingsVisible() {
 }
 
 watch([dataReady, () => store.getters.getSyncServerError], ([ready, error]) => {
-  if (!ready || error === '' || isSyncSettingsVisible()) return
+  // Blocked deletions have their own notification that opens their review.
+  if (!ready || error === '' || isSyncSettingsVisible() || store.getters.getSyncServerPendingDeletion) return
 
   showToast({
     message: t('Settings.Sync Settings.Sync failed', { error }),

@@ -1577,6 +1577,8 @@ Settings:
     Data Loss Warning: Sinkronisasi akan menghapus {deleted} dari {previous} item yang sebelumnya disinkronkan di “{collection}” pada semua perangkat. Jika Anda tidak menghapusnya, misalnya karena server diatur ulang, pertahankan item tersebut untuk memulihkannya di mana saja.
     Keep Deleted Items: Pertahankan item
     Confirm Data Loss: Hapus dan lanjutkan
+    Automatic Sync Paused: 'Sinkronisasi otomatis dijeda karena sinkronisasi akan menghapus item yang sebelumnya telah disinkronkan. Tinjau penghapusan untuk melanjutkannya.'
+    Review Deletions: 'Tinjau penghapusan'
     Use Shared Tabs: 'Gunakan satu kumpulan tab bersama di semua perangkat'
     Shared Tabs Warning: 'Tab yang terbuka di perangkat ini menjadi kumpulan bersama. Saat perangkat lain disinkronkan, tab mereka yang terbuka diganti dengan kumpulan ini; tab dari perangkat berbeda tidak digabungkan.'
     Tabs From Other Devices: 'Tab dari perangkat lain'

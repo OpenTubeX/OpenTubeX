@@ -1827,6 +1827,8 @@ Settings:
     Data Loss Warning: Sinchronizuojant visuose įrenginiuose būtų ištrinta {deleted} iš {previous} anksčiau sinchronizuotų elementų rinkinyje „{collection}“. Jei jų neištrynėte patys, pavyzdžiui, nes serveris buvo atkurtas, palikite juos, kad jie būtų atkurti visur.
     Keep Deleted Items: Palikti elementus
     Confirm Data Loss: Ištrinti ir tęsti
+    Automatic Sync Paused: 'Automatinis sinchronizavimas pristabdytas, nes sinchronizavimas būtų ištrynęs anksčiau sinchronizuotus elementus. Peržiūrėkite ištrynimus, kad jį tęstumėte.'
+    Review Deletions: 'Peržiūrėti ištrynimus'
     Use Shared Tabs: 'Naudoti vieną bendrą kortelių rinkinį visuose įrenginiuose'
     Shared Tabs Warning: 'Šiame įrenginyje atvertos kortelės taps bendru rinkiniu. Sinchronizuojant kiti įrenginiai pakeis savo atvertas korteles šiuo rinkiniu; skirtingų įrenginių kortelės nesujungiamos.'
     Tabs From Other Devices: 'Kortelės iš kitų įrenginių'

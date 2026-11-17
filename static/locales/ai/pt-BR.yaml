@@ -1525,6 +1525,8 @@ Settings:
     Data Loss Warning: A sincronização excluiria {deleted} dos {previous} itens sincronizados anteriormente em “{collection}” em todos os dispositivos. Se você não os excluiu, por exemplo porque o servidor foi redefinido, mantenha-os para restaurá-los em todos os lugares.
     Keep Deleted Items: Manter itens
     Confirm Data Loss: Excluir e continuar
+    Automatic Sync Paused: 'A sincronização automática está pausada porque uma sincronização teria excluído itens sincronizados anteriormente. Revise as exclusões para retomá-la.'
+    Review Deletions: 'Revisar exclusões'
     Use Shared Tabs: 'Usar um único conjunto de abas compartilhado entre dispositivos'
     Shared Tabs Warning: 'As abas abertas neste dispositivo se tornam o conjunto compartilhado. Ao sincronizar, os outros dispositivos substituem suas abas abertas por esse conjunto; as abas de dispositivos diferentes não são combinadas.'
     Tabs From Other Devices: 'Abas de outros dispositivos'

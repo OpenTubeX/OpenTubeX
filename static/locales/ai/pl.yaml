@@ -938,6 +938,8 @@ Settings:
     Playlists have been successfully imported: "Pomyślnie zaimportowano 1/{total} playlistę | Pomyślnie zaimportowano {count}/{total} playlisty | Pomyślnie zaimportowano {count}/{total} playlist"
     Import subscription groups hint: Aby przydzielić kanały do grup, dodaj w pliku .csv po tytule kanału kolumnę z nazwami grup oddzielonymi średnikami albo zaimportuj plik .opml z folderami. Brakujące grupy zostaną utworzone.
   Sync Settings:
+    Automatic Sync Paused: 'Automatyczna synchronizacja jest wstrzymana, ponieważ synchronizacja usunęłaby wcześniej zsynchronizowane elementy. Przejrzyj usunięcia, aby ją wznowić.'
+    Review Deletions: 'Przejrzyj usunięcia'
     Signed Out After Restore: 'Synchronizacja została wylogowana, ponieważ te dane aplikacji przywrócono z kopii zapasowej lub z innego urządzenia. Zaloguj się ponownie, aby synchronizować to urządzenie.'
     Revoke Session Tabs Warning: "Zsynchronizowane zestawy kart tego urządzenia również zostaną usunięte."
     Revoke Session Partial Failure: "Zsynchronizowane zestawy kart zostały usunięte, ale nie udało się potwierdzić cofnięcia dostępu. Spróbuj ponownie cofnąć dostęp."

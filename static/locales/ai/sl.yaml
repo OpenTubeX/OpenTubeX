@@ -1860,6 +1860,8 @@ Settings:
     Data Loss Warning: Sinhronizacija bi na vseh napravah izbrisala {deleted} od {previous} prej sinhroniziranih elementov v »{collection}«. Če jih niste izbrisali vi, na primer zato, ker je bil strežnik ponastavljen, jih obdržite, da jih obnovite povsod.
     Keep Deleted Items: Obdrži elemente
     Confirm Data Loss: Izbriši in nadaljuj
+    Automatic Sync Paused: 'Samodejna sinhronizacija je zaustavljena, ker bi sinhronizacija izbrisala predhodno sinhronizirane elemente. Preglejte izbrise, da jo nadaljujete.'
+    Review Deletions: 'Preglej izbrise'
     Use Shared Tabs: 'Uporabi en skupni nabor zavihkov v vseh napravah'
     Shared Tabs Warning: 'Odprti zavihki v tej napravi postanejo skupni nabor. Druge naprave pri sinhronizaciji z njim zamenjajo svoje odprte zavihke; zavihki iz različnih naprav se ne združijo.'
     Tabs From Other Devices: 'Zavihki iz drugih naprav'

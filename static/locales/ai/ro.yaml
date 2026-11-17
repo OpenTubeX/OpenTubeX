@@ -1585,6 +1585,8 @@ Settings:
     Data Loss Warning: Sincronizarea ar șterge {deleted} din cele {previous} elemente sincronizate anterior în „{collection}” pe toate dispozitivele. Dacă nu le-ați șters dumneavoastră, de exemplu pentru că serverul a fost resetat, păstrați-le pentru a le restaura peste tot.
     Keep Deleted Items: Păstrează elementele
     Confirm Data Loss: Șterge și continuă
+    Automatic Sync Paused: 'Sincronizarea automată este întreruptă deoarece o sincronizare ar fi șters elemente sincronizate anterior. Verificați ștergerile pentru a o relua.'
+    Review Deletions: 'Verificați ștergerile'
     Use Shared Tabs: 'Folosește un singur set de file partajat între dispozitive'
     Shared Tabs Warning: 'Filele deschise pe acest dispozitiv devin setul partajat. Celelalte dispozitive își înlocuiesc filele deschise cu acest set când se sincronizează; filele de pe dispozitive diferite nu sunt combinate.'
     Tabs From Other Devices: 'File de pe alte dispozitive'

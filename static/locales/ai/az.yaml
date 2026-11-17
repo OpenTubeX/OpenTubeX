@@ -1582,6 +1582,8 @@ Settings:
     Data Loss Warning: Sinxronizasiya «{collection}» bölməsində əvvəllər sinxronlaşdırılmış {previous} elementdən {deleted} ədədini bütün cihazlarda siləcək. Əgər onları siz silməmisinizsə, məsələn, server sıfırlandığı üçün, onları hər yerdə bərpa etmək üçün saxlayın.
     Keep Deleted Items: Elementləri saxla
     Confirm Data Loss: Sil və davam et
+    Automatic Sync Paused: 'Avtomatik sinxronizasiya dayandırılıb, çünki sinxronizasiya əvvəl sinxronlaşdırılmış elementləri siləcəkdi. Davam etdirmək üçün silinmələri nəzərdən keçirin.'
+    Review Deletions: 'Silinmələri nəzərdən keçir'
     Server Update Required: "Şifrələnmiş canlı sinxronizasiyanı dəstəkləmək üçün bu serveri yeniləyin."
     Log In with Provider: '{provider} ilə daxil ol'
     Log In with Single Sign-On: 'Vahid girişlə daxil ol'

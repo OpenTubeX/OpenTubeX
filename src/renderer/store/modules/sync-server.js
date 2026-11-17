@@ -1,7 +1,7 @@
 import { runBackgroundJob } from '../../helpers/background-jobs.js'
 import { SyncLiveConnectionState, SyncCollectionCache, createSyncActivity, validateDeviceRequest, watchSyncChanges } from '../../helpers/sync-server-live'
 import i18n from '../../i18n/index'
-import { openExternalLink, showToastOnAllTabs } from '../../helpers/utils'
+import { openExternalLink, showToast, showToastOnAllTabs } from '../../helpers/utils'
 import { isAppHidden } from '../../helpers/appVisibility.js'
 import { isAndroidBackgroundRenderer, onAndroidWindowBlur, onPeriodicBackgroundTask } from '../../helpers/androidBackgroundSync.js'
 import { connectionEvents, getConnectionState } from '../../helpers/networkRecovery.js'
@@ -64,7 +64,14 @@ import { syncNotificationDismissals } from '../../helpers/sync-notification-dism
 import { notificationHistory } from '../../helpers/notificationHistory'
 import { MAIN_PROFILE_ID } from '../../../constants'
 import { historyChanges } from '../../helpers/sync-history-changes.js'
-import { syncDeletionKey, syncDeletions } from '../../helpers/sync-deletions.js'
+import {
+  SYNC_DELETION_MARKS_COLLECTION,
+  addSyncDeletionMarks,
+  readSyncDeletionMarks,
+  syncDeletionKey,
+  syncDeletions,
+  withRemoteSyncDeletions,
+} from '../../helpers/sync-deletions.js'
 import {
   SYNC_SERVER_OIDC_REDIRECT_URL,
   SyncServerOidcCallbacks,
@@ -368,6 +375,9 @@ function getSyncAccount(settings) {
     settings.syncServerPrivacyKey, settings.syncServerPrivacySalt]
 }
 
+// Nested lists share their parent's sync setting.
+const DELETION_MARK_STAGES = { playlistVideos: 'playlists', profileChannels: 'profiles' }
+
 function isSameSyncAccount(settings, account) {
   return getSyncAccount(settings).every((value, index) => value === account[index])
 }
@@ -376,6 +386,14 @@ function isSameSyncAccount(settings, account) {
 // reminders and notification dismissals, because the notification plugin
 // belongs to the app's renderer.
 const syncsNotifications = (process.env.IS_ELECTRON || process.env.IS_CAPACITOR) && !isAndroidBackgroundRenderer
+
+/** @param {boolean} allTabs */
+function showDataLossToast(allTabs) {
+  const message = i18n.global.t('Settings.Sync Settings.Destructive Sync Blocked')
+  const icon = ['fas', 'triangle-exclamation']
+  if (allTabs) showToastOnAllTabs(message, 15000, icon, 'open-sync-settings')
+  else showToast({ message, time: 15000, icon, buttonAction: 'open-sync-settings' })
+}
 
 async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, automatic = false, remoteOnly = false } = {}) {
   const { commit, dispatch, rootGetters, rootState } = context
@@ -403,6 +421,8 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
   const isSameAccount = () => isSameSyncAccount(rootState.settings, historyAccount)
   // Deletions made or reviewed before this sync; ones made while it runs wait for the next.
   const deletions = syncDeletions.snapshot()
+  // Merges also apply the deletions other devices confirmed.
+  let mergeDeletions = deletions
   const result = {}
   const skippedCollections = new Set()
   let tabRevocationError = null
@@ -527,6 +547,57 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     return takenHistoryChanges
   }
 
+  /** The shared deletion marks, from the cache while their revision is unchanged. */
+  async function downloadDeletionMarks(manifestRevision) {
+    if (manifestRevision === 0) return { revision: 0, data: undefined }
+    const known = collectionCache.latest(SYNC_DELETION_MARKS_COLLECTION)
+    if (known?.revision === manifestRevision) return known
+    const remote = await readSyncCollection(
+      SYNC_DELETION_MARKS_COLLECTION,
+      await networkClient.getEncryptedSyncCollection(SYNC_DELETION_MARKS_COLLECTION),
+      null,
+      settings.syncServerPrivacyKey
+    )
+    collectionCache.put(SYNC_DELETION_MARKS_COLLECTION, remote.revision, remote.data, cacheIdentity)
+    return remote
+  }
+
+  /**
+   * Shares this device's confirmed deletions before uploading them, so other
+   * devices apply them without asking.
+   * @param {{ revision: number, data: unknown }} marks
+   * @param {string[]} enabledCollections
+   */
+  async function uploadDeletionMarks({ revision, data }, enabledCollections) {
+    const includeKey = key => {
+      const collection = key.split(':', 1)[0]
+      return enabledCollections.includes(DELETION_MARK_STAGES[collection] ?? collection)
+    }
+    for (let attempt = 0; ; attempt++) {
+      const marks = addSyncDeletionMarks(readSyncDeletionMarks(data), deletions, { includeKey })
+      if (!marks) return
+      assertSyncStillActive()
+      startProgress('upload')
+      try {
+        const saved = await networkClient.putEncryptedSyncCollection(
+          SYNC_DELETION_MARKS_COLLECTION,
+          revision,
+          await encryptSyncDocument(marks, settings.syncServerPrivacyKey, settings.syncServerPrivacySalt)
+        )
+        collectionCache.put(SYNC_DELETION_MARKS_COLLECTION, saved.revision, marks, cacheIdentity)
+        return
+      } catch (error) {
+        if (error.status !== 409 || attempt === ENCRYPTED_SYNC_RETRIES - 1) throw error
+        ;({ revision, data } = await readSyncCollection(
+          SYNC_DELETION_MARKS_COLLECTION,
+          await networkClient.getEncryptedSyncCollection(SYNC_DELETION_MARKS_COLLECTION),
+          null,
+          settings.syncServerPrivacyKey
+        ))
+      }
+    }
+  }
+
   async function applyCollection(collection, targetClient) {
     const onRetryBaseline = getBaseline => { retryBaselines[collection] = getBaseline }
     switch (collection) {
@@ -544,7 +615,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           targetClient,
           store,
           baseline(collection),
-          { allowDataLoss, deletions, onRetryBaseline }
+          { allowDataLoss, deletions: mergeDeletions, onRetryBaseline }
         )
         result.subscriptions = next.subscriptions.length
         break
@@ -555,7 +626,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           baseline(collection),
           // Takeout only supplies video IDs. Encrypted sync can carry unknown
           // uploaders; the legacy server requires real channel metadata.
-          { allowDataLoss, deletions, allowMissingUploader: encrypted, onRetryBaseline }
+          { allowDataLoss, deletions: mergeDeletions, allowMissingUploader: encrypted, onRetryBaseline }
         )
         result.playlists = Object.keys(next.playlists).length
         break
@@ -564,7 +635,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           targetClient,
           store,
           previous.playlistBookmarks,
-          { allowDataLoss, deletions }
+          { allowDataLoss, deletions: mergeDeletions }
         )
         result.playlistBookmarks = next.playlistBookmarks.length
         break
@@ -579,7 +650,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           store,
           baseline(collection),
           // Imported playlist videos can enter history without uploader metadata.
-          { allowDataLoss, deletions, allowMissingUploader: encrypted, allowExternalMedia: encrypted },
+          { allowDataLoss, deletions: mergeDeletions, allowMissingUploader: encrypted, allowExternalMedia: encrypted },
           // Restoring entries can involve ones that did not change locally.
           { changedIds: unchangedRemote && !deletions.history ? changedIds : null, onRetryBaseline }
         )
@@ -621,7 +692,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
             targetClient,
             store,
             baseline(collection),
-            { allowDataLoss, deletions, onRetryBaseline }
+            { allowDataLoss, deletions: mergeDeletions, onRetryBaseline }
           )
           if (profiles !== null) {
             next.profiles = profiles
@@ -730,6 +801,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         uploadCollections,
         unchanged,
         migratedPlaybackSpeeds,
+        deletionMarks,
       } = await runStage('download', async () => {
         // The snapshot is saved only after successful collection uploads.
         // Never infer completed migration from unrelated encrypted settings.
@@ -806,7 +878,17 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
             settings.channelPlaybackSpeeds
           )
         }
-        return { document, original, remote: Object.fromEntries(entries), uploadCollections, migratedPlaybackSpeeds }
+        return {
+          document,
+          original,
+          remote: Object.fromEntries(entries),
+          uploadCollections,
+          migratedPlaybackSpeeds,
+          deletionMarks: capabilities.sync_deletions === 1
+            ? await downloadDeletionMarks(manifest.collections
+                .find(entry => entry.collection === SYNC_DELETION_MARKS_COLLECTION)?.revision ?? 0)
+            : null,
+        }
       })
       if (unchanged) {
         finishProgress()
@@ -815,11 +897,13 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
       }
       client = new EncryptedSyncAdapter(document)
       if (migratedPlaybackSpeeds) client.touched.add('settings')
+      if (deletionMarks) mergeDeletions = withRemoteSyncDeletions(deletions, readSyncDeletionMarks(deletionMarks.data))
       encryptedCollections = {
         original,
         remote,
         enabled: enabledCollections,
         upload: uploadCollections,
+        deletionMarks,
       }
     }
 
@@ -835,6 +919,9 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
 
     if (encryptedCollections) {
       await runStage('upload', async () => {
+        if (encryptedCollections.deletionMarks) {
+          await uploadDeletionMarks(encryptedCollections.deletionMarks, encryptedCollections.enabled)
+        }
         for (const collection of encryptedCollections.upload) {
           if (skippedCollections.has(collection)) continue
           assertSyncStillActive()
@@ -922,7 +1009,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
                 retryDocument.playlistBookmarks = data
                 const retryClient = new EncryptedSyncAdapter(retryDocument)
                 next.playlistBookmarks = await syncPlaylistBookmarks(
-                  retryClient, store, next.playlistBookmarks, { allowDataLoss, deletions }
+                  retryClient, store, next.playlistBookmarks, { allowDataLoss, deletions: mergeDeletions }
                 )
                 result.playlistBookmarks = next.playlistBookmarks.length
                 data = retryClient.document.playlistBookmarks
@@ -1000,14 +1087,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
       // Pause without treating it as the user's choice to disable automatic sync.
       await dispatch('updateSyncServerAutoSync', false, { root: true })
       await dispatch('stopSyncServerAutoSync')
-      if (notifyDataLoss) {
-        showToastOnAllTabs(
-          i18n.global.t('Settings.Sync Settings.Destructive Sync Blocked'),
-          15000,
-          ['fas', 'triangle-exclamation'],
-          'open-sync-settings'
-        )
-      }
+      if (notifyDataLoss) showDataLossToast(true)
     }
     commit('setSyncServerProgress', null)
     if (isSessionExpiredError(error)) {
@@ -1947,6 +2027,18 @@ const actions = {
     await dispatch('startSyncServerAutoSync')
     if (rootState.settings.syncServerAutoSync) {
       await dispatch('syncWithSyncServer', { skipIfRecent, automatic: true })
+    } else if (rootState.settings.syncServerResumeAutoSync) {
+      // The review of the deletions that paused automatic sync lives only in
+      // the window whose sync stopped. Check again, so it returns after a
+      // restart or a sync in the background, and automatic sync resumes once
+      // nothing would be deleted anymore.
+      try {
+        await dispatch('syncWithSyncServer', { notifyDataLoss: false })
+      } catch (error) {
+        if (!(error instanceof SyncServerDataLossError)) throw error
+        // Other windows already know, so a new window does not notify them again.
+        showDataLossToast(false)
+      }
     }
   },
 

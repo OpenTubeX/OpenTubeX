@@ -1573,6 +1573,8 @@ Settings:
     Data Loss Warning: 同步將在所有裝置上刪除「{collection}」中先前同步的 {previous} 個項目中的 {deleted} 個。如果這些項目不是您刪除的（例如伺服器已被重設），請保留它們以在所有裝置上還原。
     Keep Deleted Items: 保留項目
     Confirm Data Loss: 刪除並繼續
+    Automatic Sync Paused: '自動同步已暫停，因為一次同步原本會刪除先前已同步的項目。請檢查這些刪除以恢復自動同步。'
+    Review Deletions: '檢查刪除'
     Use Shared Tabs: '在各裝置上使用同一組共用分頁'
     Shared Tabs Warning: '此裝置上開啟的分頁會成為共用分頁組。其他裝置同步時會以這組分頁取代其目前開啟的分頁；不同裝置的分頁不會合併。'
     Tabs From Other Devices: '其他裝置的分頁'

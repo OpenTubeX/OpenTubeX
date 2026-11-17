@@ -1574,6 +1574,8 @@ Settings:
     Data Loss Warning: Synchronizácia by na všetkých zariadeniach odstránila {deleted} z {previous} predtým synchronizovaných položiek v „{collection}“. Ak ste ich neodstránili vy, napríklad preto, že server bol obnovený, ponechajte si ich, aby sa všade obnovili.
     Keep Deleted Items: Ponechať položky
     Confirm Data Loss: Odstrániť a pokračovať
+    Automatic Sync Paused: 'Automatická synchronizácia je pozastavená, pretože synchronizácia by odstránila predtým synchronizované položky. Skontrolujte odstránenia, aby ste ju obnovili.'
+    Review Deletions: 'Skontrolovať odstránenia'
     Use Shared Tabs: 'Používať jednu zdieľanú súpravu kariet vo všetkých zariadeniach'
     Shared Tabs Warning: 'Otvorené karty v tomto zariadení sa stanú spoločnou sadou. Ostatné zariadenia pri synchronizácii nahradia svoje otvorené karty touto sadou; karty z rôznych zariadení sa nezlúčia.'
     Tabs From Other Devices: 'Karty z iných zariadení'

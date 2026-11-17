@@ -2,9 +2,12 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import {
+  addSyncDeletionMarks,
   createSyncDeletionDecisions,
+  readSyncDeletionMarks,
   syncDeletionKey,
   trackLocalSyncDeletions,
+  withRemoteSyncDeletions,
 } from '../../src/renderer/helpers/sync-deletions.js'
 import { mergeIds } from '../../src/renderer/helpers/sync-history-merge.js'
 import { SyncServerDataLossError } from '../../src/renderer/helpers/sync-server-errors.js'
@@ -36,12 +39,67 @@ function trackedStore (state) {
   return { store, decisions }
 }
 
-test('removing the last item locally does not ask for confirmation', async () => {
-  const { store, decisions } = trackedStore({ history: { historyCacheSorted: [{ videoId: 'only' }] } })
-  assert.throws(() => mergeIds([], ['only'], ['only'], { collection: 'history' }), SyncServerDataLossError)
+test('removing the last items locally does not ask for confirmation', async () => {
+  const ids = ['a', 'b', 'c']
+  const { store, decisions } = trackedStore({ history: { historyCacheSorted: ids.map(videoId => ({ videoId })) } })
+  assert.throws(() => mergeIds([], ids, ids, { collection: 'history' }), SyncServerDataLossError)
 
-  await store.dispatch('removeFromHistory', () => { store.state.history.historyCacheSorted = [] })
-  assert.deepEqual(Array.from(mergeIds([], ['only'], ['only'], { collection: 'history', deletions: decisions.snapshot() })), [])
+  await store.dispatch('removeAllHistory', () => { store.state.history.historyCacheSorted = [] })
+  assert.deepEqual(Array.from(mergeIds([], ids, ids, { collection: 'history', deletions: decisions.snapshot() })), [])
+})
+
+test('emptying a list of fewer than three items is an ordinary edit', () => {
+  // Another device unsubscribed from the only two channels.
+  assert.deepEqual(Array.from(mergeIds(['a', 'b'], [], ['a', 'b'], { collection: 'subscriptions' })), [])
+})
+
+test('decisions survive a restart and are shared by every window', () => {
+  const values = new Map()
+  const storage = {
+    getItem: key => values.get(key) ?? null,
+    setItem: (key, value) => values.set(key, value),
+    removeItem: key => values.delete(key),
+  }
+  createSyncDeletionDecisions(storage).confirm('history', ['a'])
+  const otherWindow = createSyncDeletionDecisions(storage)
+  const used = otherWindow.snapshot()
+  assert.deepEqual(used, { history: { confirmed: ['a'], kept: [] } })
+  otherWindow.release(used)
+  assert.deepEqual(createSyncDeletionDecisions(storage).snapshot(), {})
+  assert.equal(values.size, 0)
+})
+
+test('another device\'s deletions apply without asking only to items the server lost', () => {
+  const previous = ['a', 'b', 'c', 'd']
+  const marks = readSyncDeletionMarks([{ key: 'subscriptions', at: Date.now(), ids: previous }])
+  const deletions = withRemoteSyncDeletions({}, marks)
+  // `d` was added back after the deletion, so this device keeps it.
+  assert.deepEqual(Array.from(mergeIds(previous, ['d'], previous, { collection: 'subscriptions', deletions })), ['d'])
+  // A local deletion is this device's own, which the marks do not confirm.
+  assert.throws(() => mergeIds([], previous, previous, { collection: 'subscriptions', deletions }), SyncServerDataLossError)
+  // A playlist restored after another device removed it keeps its videos.
+  const videos = withRemoteSyncDeletions({}, [{ key: syncDeletionKey('playlistVideos', 'list'), at: Date.now(), ids: previous }])
+  assert.deepEqual(Array.from(mergeIds(previous, [], previous, {
+    collection: 'playlistVideos', scope: 'list', restored: true, deletions: videos,
+  })), previous)
+})
+
+test('shared deletion marks expire, and new ones replace older marks of the same items', () => {
+  const now = Date.now()
+  const day = 24 * 60 * 60 * 1000
+  const marks = readSyncDeletionMarks([
+    { key: 'history', at: now - 31 * day, ids: ['expired'] },
+    { key: 'history', at: now - day, ids: ['a', 'b'] },
+    { key: 'history', at: now, ids: [1] },
+  ], now)
+  assert.deepEqual(marks, [{ key: 'history', at: now - day, ids: ['a', 'b'] }])
+
+  const decisions = { history: { confirmed: ['b'] }, subscriptions: { confirmed: ['c'] }, playlists: { kept: ['d'] } }
+  assert.deepEqual(addSyncDeletionMarks(marks, decisions, { now, includeKey: key => key !== 'subscriptions' }), [
+    { key: 'history', at: now - day, ids: ['a'] },
+    { key: 'history', at: now, ids: ['b'] },
+  ])
+  assert.equal(addSyncDeletionMarks(marks, { playlists: { kept: ['d'] } }, { now }), null)
 })
 
 test('local deletions are confirmed only for the list they changed', async () => {
@@ -97,7 +155,7 @@ test('a successful sync forgets only the decisions it used', () => {
 })
 
 test('kept deletions restore the items on the side that lost them', () => {
-  const previous = ['a', 'b']
+  const previous = ['a', 'b', 'c']
   const deletions = { subscriptions: { kept: previous } }
   assert.deepEqual(Array.from(mergeIds(previous, [], previous, { collection: 'subscriptions', deletions })), previous)
   assert.deepEqual(Array.from(mergeIds([], previous, previous, { collection: 'subscriptions', deletions })), previous)
@@ -106,12 +164,13 @@ test('kept deletions restore the items on the side that lost them', () => {
 })
 
 test('a partial confirmation still asks about the remaining deletions', () => {
-  assert.throws(() => mergeIds([], ['a', 'b'], ['a', 'b'], {
+  const ids = ['a', 'b', 'c', 'd']
+  assert.throws(() => mergeIds([], ids, ids, {
     collection: 'history',
     deletions: { history: { confirmed: ['a'] } },
   }), error => {
-    assert.equal(error.deleted, 1)
-    assert.deepEqual(error.items, [{ id: 'b', name: 'b' }])
+    assert.equal(error.deleted, 3)
+    assert.deepEqual(error.items, ['b', 'c', 'd'].map(id => ({ id, name: id })))
     return true
   })
 })

@@ -1572,6 +1572,8 @@ Settings:
     Data Loss Warning: 同步将在所有设备上删除“{collection}”中之前同步的 {previous} 个项目中的 {deleted} 个。如果这些项目不是您删除的（例如服务器已被重置），请保留它们以在所有设备上恢复。
     Keep Deleted Items: 保留项目
     Confirm Data Loss: 删除并继续
+    Automatic Sync Paused: '自动同步已暂停，因为一次同步本会删除之前已同步的项目。请检查这些删除以恢复自动同步。'
+    Review Deletions: '检查删除'
     Use Shared Tabs: '在各设备上使用同一组共享标签页'
     Shared Tabs Warning: '此设备上打开的标签页将成为共享标签页组。其他设备同步时会用这组标签页替换其当前打开的标签页；不同设备的标签页不会合并。'
     Tabs From Other Devices: '其他设备的标签页'

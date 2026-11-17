@@ -1814,6 +1814,8 @@ Settings:
     Data Loss Warning: 동기화하면 모든 기기에서 이전에 동기화된 ‘{collection}’ 항목 {previous}개 중 {deleted}개가 삭제됩니다. 서버가 초기화된 경우처럼 직접 삭제하지 않았다면 항목을 유지하여 모든 곳에 복원하세요.
     Keep Deleted Items: 항목 유지
     Confirm Data Loss: 삭제하고 계속
+    Automatic Sync Paused: '동기화가 이전에 동기화된 항목을 삭제하려 했기 때문에 자동 동기화가 일시 중지되었습니다. 다시 시작하려면 삭제 항목을 검토하세요.'
+    Review Deletions: '삭제 항목 검토'
     Use Shared Tabs: '기기 간에 하나의 탭 모음 공유'
     Shared Tabs Warning: '이 기기에 열려 있는 탭이 공유 탭 모음이 됩니다. 다른 기기는 동기화할 때 열려 있는 탭을 이 모음으로 대체하며, 서로 다른 기기의 탭은 합쳐지지 않습니다.'
     Tabs From Other Devices: '다른 기기의 탭'

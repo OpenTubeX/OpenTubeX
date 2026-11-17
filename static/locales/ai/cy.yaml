@@ -1577,6 +1577,8 @@ Settings:
     Data Loss Warning: Byddai cysoni yn dileu {deleted} o'r {previous} eitem a gysonwyd o'r blaen yn “{collection}” ar bob dyfais. Os nad chi a'u dileodd, er enghraifft oherwydd bod y gweinydd wedi'i ailosod, cadwch nhw i'w hadfer ym mhobman.
     Keep Deleted Items: Cadw eitemau
     Confirm Data Loss: Dileu a pharhau
+    Automatic Sync Paused: 'Mae cysoni awtomatig wedi''i oedi oherwydd byddai cysoni wedi dileu eitemau a gysonwyd o''r blaen. Adolygwch y dileadau i''w ailddechrau.'
+    Review Deletions: 'Adolygu dileadau'
     Use Shared Tabs: 'Defnyddio un set o dabiau a rennir ar draws dyfeisiau'
     Shared Tabs Warning: 'Bydd y tabiau sydd ar agor ar y ddyfais hon yn dod yn set a rennir. Pan fydd dyfeisiau eraill yn cysoni, byddant yn disodli eu tabiau agored â’r set hon; ni chyfunir tabiau o ddyfeisiau gwahanol.'
     Tabs From Other Devices: 'Tabiau o ddyfeisiau eraill'

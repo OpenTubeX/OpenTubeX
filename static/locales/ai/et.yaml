@@ -1572,6 +1572,8 @@ Settings:
     Data Loss Warning: Sünkroonimine kustutaks kõigis seadmetes kogust „{collection}“ {deleted} üksust {previous} varem sünkroonitud üksusest. Kui te ei kustutanud neid ise, näiteks seetõttu, et server lähtestati, säilitage need, et need kõikjal taastada.
     Keep Deleted Items: Säilita üksused
     Confirm Data Loss: Kustuta ja jätka
+    Automatic Sync Paused: 'Automaatne sünkroonimine on peatatud, sest sünkroonimine oleks kustutanud varem sünkroonitud üksused. Selle jätkamiseks vaata kustutamised üle.'
+    Review Deletions: 'Vaata kustutamised üle'
     Use Shared Tabs: 'Kasuta seadmetes üht jagatud vahelehtede komplekti'
     Shared Tabs Warning: 'Selles seadmes avatud vahekaardid saavad ühiseks vahekaartide kogumiks. Teised seadmed asendavad sünkroonimisel oma avatud vahekaardid selle kogumikuga; eri seadmete vahekaarte ei ühendata.'
     Tabs From Other Devices: 'Teiste seadmete vahelehed'

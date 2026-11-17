@@ -1573,6 +1573,8 @@ Settings:
     Data Loss Warning: "Ar goubredañ a zilamfe {deleted} diwar {previous} elfenn bet goubredet a-raok e «{collection}» war an holl drevnadoù. Ma n'ho peus ket dilamet anezho, da skouer peogwir eo bet adderaouekaet ar servijer, mirit anezho evit o adsevel e pep lec'h."
     Keep Deleted Items: "Mirout an elfennoù"
     Confirm Data Loss: "Dilemel ha kenderc'hel"
+    Automatic Sync Paused: 'Ehanet eo ar gempredañ emgefreek peogwir e vije bet dilamet gant ur gempredañ elfennoù kempredet a-raok. Gwiriit an dilamadurioù evit e adloc''hañ.'
+    Review Deletions: 'Gwiriañ an dilamadurioù'
     Use Shared Tabs: 'Arverañ an hevelep strollad ivinelloù war an holl drevnadoù'
     Shared Tabs Warning: 'An ivinelloù digor war an trevnad-mañ a zeu da vezañ an hollad rannet. Pa vez sinkronet an trevnadoù all, e vez erlec’hiet o ivinelloù digor gant an hollad-se; ne vez ket kendeuzet ivinelloù an trevnadoù disheñvel.'
     Tabs From Other Devices: 'Ivinelloù eus trevnadoù all'

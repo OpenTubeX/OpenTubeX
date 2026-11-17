@@ -1750,6 +1750,8 @@ Settings:
     Data Loss Warning: La sincronización eliminaría {deleted} de {previous} elementos sincronizados anteriormente en “{collection}” en todos los dispositivos. Si no los eliminaste tú, por ejemplo porque se restableció el servidor, consérvalos para restaurarlos en todas partes.
     Keep Deleted Items: Conservar elementos
     Confirm Data Loss: Eliminar y continuar
+    Automatic Sync Paused: 'La sincronización automática está en pausa porque una sincronización habría eliminado elementos sincronizados anteriormente. Revisa las eliminaciones para reanudarla.'
+    Review Deletions: 'Revisar eliminaciones'
     Use Shared Tabs: 'Usar un solo conjunto de pestañas compartido entre dispositivos'
     Shared Tabs Warning: 'Las pestañas abiertas en este dispositivo se convierten en el conjunto compartido. Al sincronizarse, los demás dispositivos reemplazan sus pestañas abiertas con este conjunto; las pestañas de distintos dispositivos no se combinan.'
     Tabs From Other Devices: 'Pestañas de otros dispositivos'

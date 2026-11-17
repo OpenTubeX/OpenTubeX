@@ -1572,6 +1572,8 @@ Settings:
     Data Loss Warning: A szinkronizálás minden eszközön törölne {deleted} elemet a(z) „{collection}” {previous} korábban szinkronizált eleme közül. Ha nem Ön törölte őket, például mert a kiszolgálót alaphelyzetbe állították, tartsa meg őket, hogy mindenhol visszaálljanak.
     Keep Deleted Items: Elemek megtartása
     Confirm Data Loss: Törlés és folytatás
+    Automatic Sync Paused: 'Az automatikus szinkronizálás szünetel, mert egy szinkronizálás korábban szinkronizált elemeket törölt volna. A folytatáshoz tekintse át a törléseket.'
+    Review Deletions: 'Törlések áttekintése'
     Use Shared Tabs: 'Egy közös lapkészlet használata minden eszközön'
     Shared Tabs Warning: 'Az ezen az eszközön nyitott lapok alkotják majd a megosztott készletet. A többi eszköz szinkronizáláskor erre a készletre cseréli a nyitott lapjait; a különböző eszközök lapjai nem egyesülnek.'
     Tabs From Other Devices: 'Más eszközök lapjai'

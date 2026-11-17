@@ -1733,6 +1733,8 @@ Settings:
     Data Loss Warning: Synkroniseringa vil sletta {deleted} av {previous} tidlegare synkroniserte element i «{collection}» på alle einingar. Dersom du ikkje sletta dei sjølv, til dømes fordi tenaren vart nullstilt, behald dei for å gjenoppretta dei overalt.
     Keep Deleted Items: Behald element
     Confirm Data Loss: Slett og hald fram
+    Automatic Sync Paused: 'Automatisk synkronisering er sett på pause fordi ei synkronisering ville ha sletta element som var synkroniserte før. Gå gjennom slettingane for å halde fram med ho.'
+    Review Deletions: 'Gå gjennom slettingar'
     Use Shared Tabs: 'Bruk eitt delt fanesett på tvers av einingar'
     Shared Tabs Warning: 'Dei opne fanene på denne eininga blir det delte fanesettet. Andre einingar erstattar dei opne fanene sine med dette settet når dei synkroniserer; faner frå ulike einingar blir ikkje slått saman.'
     Tabs From Other Devices: 'Faner frå andre einingar'

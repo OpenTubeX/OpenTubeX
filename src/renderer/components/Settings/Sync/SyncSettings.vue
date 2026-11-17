@@ -150,6 +150,19 @@
         >
           {{ t('Settings.Sync Settings.Enhanced Privacy Unsupported') }}
         </p>
+        <div
+          v-if="autoSyncPaused"
+          class="autoSyncPaused"
+          role="status"
+        >
+          <p>{{ t('Settings.Sync Settings.Automatic Sync Paused') }}</p>
+          <FtButton
+            :label="t('Settings.Sync Settings.Review Deletions')"
+            :icon="['fas', 'sync']"
+            :disabled="busy"
+            @click="syncNow"
+          />
+        </div>
         <FtFlexBox class="toggles syncOptions">
           <FtToggleSwitch
             class="autoSync"
@@ -675,6 +688,8 @@ const errorMessage = computed(() => {
     : message
 })
 const autoSync = computed(() => store.getters.getSyncServerAutoSync)
+// A sync that would delete many items paused automatic sync until they are reviewed.
+const autoSyncPaused = computed(() => store.getters.getSyncServerResumeAutoSync)
 const syncSubscriptionsEnabled = computed(() => store.getters.getSyncServerSyncSubscriptions)
 const syncPlaylistsEnabled = computed(() => store.getters.getSyncServerSyncPlaylists)
 const syncHistoryEnabled = computed(() => store.getters.getSyncServerSyncHistory)

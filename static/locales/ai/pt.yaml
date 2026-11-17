@@ -1572,6 +1572,8 @@ Settings:
     Data Loss Warning: A sincronização eliminaria {deleted} dos {previous} itens sincronizados anteriormente em «{collection}» em todos os dispositivos. Se não os eliminou, por exemplo porque o servidor foi reposto, mantenha-os para os restaurar em todo o lado.
     Keep Deleted Items: Manter itens
     Confirm Data Loss: Eliminar e continuar
+    Automatic Sync Paused: 'A sincronização automática está em pausa porque uma sincronização teria eliminado itens sincronizados anteriormente. Reveja as eliminações para a retomar.'
+    Review Deletions: 'Rever eliminações'
     Use Shared Tabs: 'Usar um único conjunto de separadores partilhado entre dispositivos'
     Shared Tabs Warning: 'Os separadores abertos neste dispositivo passam a ser o conjunto partilhado. Ao sincronizar, os outros dispositivos substituem os seus separadores abertos por este conjunto; os separadores de dispositivos diferentes não são combinados.'
     Tabs From Other Devices: 'Separadores de outros dispositivos'

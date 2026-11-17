@@ -154,6 +154,21 @@
   justify-content: center;
 }
 
+.autoSyncPaused {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-block: 0.75rem;
+  margin-inline: auto;
+  max-inline-size: 38rem;
+  text-align: center;
+}
+
+.autoSyncPaused p {
+  margin: 0;
+}
+
 .deleteAccountWarning {
   margin-inline: auto;
   max-inline-size: 38rem;

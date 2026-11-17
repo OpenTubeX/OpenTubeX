@@ -1573,6 +1573,8 @@ Settings:
     Data Loss Warning: Sinkronizazioak «{collection}» ataleko aurretik sinkronizatutako {previous} elementuetatik {deleted} ezabatuko lituzke gailu guztietan. Zuk ezabatu ez badituzu, adibidez zerbitzaria berrezarri delako, mantendu itzazu leku guztietan leheneratzeko.
     Keep Deleted Items: Mantendu elementuak
     Confirm Data Loss: Ezabatu eta jarraitu
+    Automatic Sync Paused: 'Sinkronizazio automatikoa pausatuta dago, sinkronizazio batek aurretik sinkronizatutako elementuak ezabatuko zituelako. Berrikusi ezabaketak berriro abiarazteko.'
+    Review Deletions: 'Berrikusi ezabaketak'
     Use Shared Tabs: 'Erabili partekatutako fitxa multzo bakarra gailu guztietan'
     Shared Tabs Warning: 'Gailu honetan irekita dauden fitxak multzo partekatua bihurtuko dira. Beste gailuek sinkronizatzean beren fitxa irekiak multzo horrekin ordeztuko dituzte; gailu desberdinetako fitxak ez dira bateratuko.'
     Tabs From Other Devices: 'Beste gailuetako fitxak'

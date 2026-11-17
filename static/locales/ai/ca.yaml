@@ -1896,6 +1896,8 @@ Settings:
     Data Loss Warning: La sincronització suprimiria {deleted} dels {previous} elements sincronitzats anteriorment a «{collection}» en tots els dispositius. Si no els heu suprimit vosaltres, per exemple perquè s'ha restablert el servidor, conserveu-los per restaurar-los a tot arreu.
     Keep Deleted Items: Conserva els elements
     Confirm Data Loss: Suprimeix i continua
+    Automatic Sync Paused: 'La sincronització automàtica està en pausa perquè una sincronització hauria suprimit elements sincronitzats anteriorment. Reviseu les supressions per reprendre-la.'
+    Review Deletions: 'Revisa les supressions'
     Use Shared Tabs: 'Utilitza un únic conjunt de pestanyes compartit entre dispositius'
     Shared Tabs Warning: 'Les pestanyes obertes en aquest dispositiu es converteixen en el conjunt compartit. Quan se sincronitzin, els altres dispositius substituiran les seves pestanyes obertes per aquest conjunt; les pestanyes de dispositius diferents no es combinaran.'
     Tabs From Other Devices: 'Pestanyes d’altres dispositius'

@@ -2189,6 +2189,10 @@ Settings:
       sie überall wiederherzustellen.
     Keep Deleted Items: Elemente behalten
     Confirm Data Loss: Löschen und fortfahren
+    Automatic Sync Paused: >-
+      Die automatische Synchronisierung ist pausiert, weil eine Synchronisierung zuvor synchronisierte Elemente gelöscht
+      hätte. Prüfe die Löschungen, um sie fortzusetzen.
+    Review Deletions: Löschungen prüfen
     Server Update Required: "Aktualisiere diesen Server, um verschlüsselte Live-Synchronisierung zu unterstützen."
     Signed Out After Restore: Die Synchronisierung wurde abgemeldet, weil diese App-Daten aus einer Sicherung oder von einem anderen Gerät wiederhergestellt wurden. Melde dich erneut an, um dieses Gerät zu synchronisieren.
   Search Settings: Einstellungen durchsuchen

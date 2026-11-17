@@ -1620,6 +1620,8 @@ Settings:
     Data Loss Warning: La sinkronigo forigus {deleted} el {previous} antaŭe sinkronigitaj eroj en “{collection}” en ĉiuj aparatoj. Se vi ne forigis ilin, ekzemple ĉar la servilo estis restarigita, konservu ilin por restarigi ilin ĉie.
     Keep Deleted Items: Konservi erojn
     Confirm Data Loss: Forigi kaj daŭrigi
+    Automatic Sync Paused: 'Aŭtomata sinkronigo estas paŭzigita, ĉar sinkronigo estus foriginta antaŭe sinkronigitajn erojn. Kontrolu la forigojn por daŭrigi ĝin.'
+    Review Deletions: 'Kontroli forigojn'
     Server Update Required: Ĝisdatigu ĉi tiun servilon por subteni ĉifritan tujan sinkronigon.
     Log In with Provider: 'Ensaluti per {provider}'
     Log In with Single Sign-On: 'Ensaluti per unuopa ensaluto'
