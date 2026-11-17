@@ -218,7 +218,10 @@ async function build() {
   await rm(join(root, 'build'), { recursive: true, force: true })
 }
 
-function docker() {
+async function docker() {
+  // The container runs as root. Create the output directory first, so that
+  // build/ and its other contents stay owned by the user.
+  await mkdir(root, { recursive: true })
   const script = [
     'set -eu',
     'apt-get update -qq',
