@@ -238,6 +238,26 @@ Subscriptions:
       Not Set: Nenastaveno
     Retry Feed: Zkusit znovu načíst {feed}
     Reloading Feed: Znovu se načítá {feed}
+    Import OPML: Importovat OPML
+    Export OPML: Exportovat OPML
+    OPML File: Soubor OPML
+    Invalid OPML File: Tento soubor neobsahuje žádné kanály.
+    Feeds Could Not Be Saved: Kanály se nepodařilo uložit.
+    Feeds Imported: Byl importován 1 nový kanál. | Byly importovány {count} nové kanály. | Bylo importováno {count} nových kanálů.
+    All Feeds Already Followed: Všechny kanály v tomto souboru již sledujete.
+    YouTube Channels Skipped: Kanály YouTube byly přeskočeny. Chcete-li je odebírat, importujte soubor v sekci Data a úložiště.
+    Feeds Exported: Vaše RSS kanály byly exportovány.
+    Podcasts:
+      Open: Hledat podcasty
+      Title: Najít podcast
+      Description: Prohledejte katalog Apple Podcasts a sledujte kanál podcastu. Vaše hledání se odesílají společnosti Apple.
+      Search: Hledat podcasty
+      Search Placeholder: Název nebo téma podcastu
+      Searching: Hledání podcastů…
+      Search Failed: Podcasty se nepodařilo vyhledat. Zkontrolujte připojení a zkuste to znovu.
+      No Results: Nebyly nalezeny žádné podcasty.
+      Results: Nalezené podcasty
+      Follow Podcast: Sledovat {podcast}
   Platforms:
     Tab: Platformy
     Platform: Platforma

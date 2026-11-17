@@ -238,6 +238,26 @@ Subscriptions:
       Not Set: Määramata
     Retry Feed: Proovi {feed} uuesti
     Reloading Feed: Laadin {feed} uuesti
+    Import OPML: Impordi OPML
+    Export OPML: Ekspordi OPML
+    OPML File: OPML-fail
+    Invalid OPML File: See fail ei sisalda ühtegi voogu.
+    Feeds Could Not Be Saved: Vooge ei õnnestunud salvestada.
+    Feeds Imported: Imporditi 1 uus voog. | Imporditi {count} uut voogu.
+    All Feeds Already Followed: Sa jälgid juba kõiki selle faili vooge.
+    YouTube Channels Skipped: YouTube'i kanalid jäeti vahele. Nende tellimiseks impordi fail jaotises Andmed ja salvestusruum.
+    Feeds Exported: Sinu RSS-vood on eksporditud.
+    Podcasts:
+      Open: Otsi taskuhäälingusaateid
+      Title: Leia taskuhäälingusaade
+      Description: Otsi Apple Podcastsi kataloogist ja jälgi saate voogu. Sinu otsingud saadetakse Apple'ile.
+      Search: Otsi taskuhäälingusaateid
+      Search Placeholder: Saate nimi või teema
+      Searching: Taskuhäälingusaadete otsimine…
+      Search Failed: Taskuhäälingusaateid ei õnnestunud otsida. Kontrolli ühendust ja proovi uuesti.
+      No Results: Taskuhäälingusaateid ei leitud.
+      Results: Leitud taskuhäälingusaated
+      Follow Podcast: Jälgi saadet {podcast}
   Platforms:
     Tab: Platvormid
     Platform: Platvorm

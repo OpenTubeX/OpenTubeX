@@ -1,4 +1,6 @@
+import { chmod, readFile, writeFile } from 'node:fs/promises'
 import { createServer } from 'node:http'
+import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import {
@@ -7,7 +9,9 @@ import {
   goTo,
   goToSettingsSection,
   abortUnmockedRequest,
+  choosePickerPaths,
   expectScrollAtRenderedEnd,
+  repoRoot,
   openNewWindowFromTabBar,
   setWindowSize,
   waitForAppReady
@@ -15,7 +19,7 @@ import {
 import { encryptSyncDocument, decryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
 import { SYNC_KEY, SYNC_SALT, mockSyncServer, syncWithSyncServer } from '../../helpers/sync-history.mjs'
 import { externalHistoryEntry, saveExternalHistoryEntry } from '../../helpers/external-media-history.mjs'
-import { activeTab } from '../../helpers/player.mjs'
+import { activeTab, waitForPlayback } from '../../helpers/player.mjs'
 import { swipeAction } from '../../helpers/thumbnail-swipe.mjs'
 
 const THUMBNAIL_PATH = fileURLToPath(new URL('../../fixtures/images/opentubex-playlist.jpg', import.meta.url))
@@ -1676,15 +1680,96 @@ test.describe('without followed feeds', () => {
       element.querySelector(':scope > .os-scrollbar-vertical').classList.contains('os-scrollbar-unusable'))).toBe(true)
   })
 
-  test('plays podcast episodes from their audio enclosure', async ({ page }) => {
+  test('follows a podcast found in the Apple Podcasts directory', async ({ page }) => {
+    await page.route(/^https?:\/\//, abortUnmockedRequest)
+    const searches = []
+    await page.route('https://itunes.apple.com/search?**', route => {
+      const url = new URL(route.request().url())
+      searches.push(url.searchParams.get('term'))
+      return route.fulfill({
+        json: url.searchParams.get('term') === 'nothing'
+          ? { resultCount: 0, results: [] }
+          : {
+              resultCount: 2,
+              results: [
+                { collectionName: 'Example Show', artistName: 'Example Host', feedUrl: 'https://rss.example.test/show.xml', artworkUrl100: 'https://rss.example.test/show.jpg' },
+                { collectionName: 'Other Show', artistName: 'Other Host', feedUrl: 'https://rss.example.test/other.xml' },
+              ]
+            }
+      })
+    })
+    await page.route('https://rss.example.test/**', route => {
+      const url = route.request().url()
+      if (url.endsWith('.jpg')) return route.fulfill({ path: THUMBNAIL_PATH })
+      if (url === 'https://rss.example.test/show.xml') {
+        return route.fulfill({ contentType: 'application/rss+xml', body: '<?xml version="1.0"?><rss version="2.0"><channel><title>Example Show</title></channel></rss>' })
+      }
+      return route.fulfill({ contentType: 'application/rss+xml', body: rssFeed })
+    })
+
+    const manager = await openFeedManager(page)
+    await manager.getByRole('button', { name: 'Search Podcasts' }).click()
+    const dialog = page.getByRole('dialog', { name: 'Find a podcast' })
+    const search = dialog.getByRole('textbox', { name: 'Search podcasts' })
+    await expect(search).toBeFocused()
+    await search.fill('nothing')
+    await search.press('Enter')
+    await expect(dialog.getByRole('status')).toBeVisible()
+
+    await search.fill('example')
+    await search.press('Enter')
+    const results = dialog.getByRole('list', { name: 'Podcasts found' }).getByRole('listitem')
+    await expect(results).toHaveCount(2)
+    await expect(results.first()).toContainText('Example Host')
+    await results.first().getByRole('button', { name: 'Follow Example Show' }).click()
+
+    await expect(dialog).toHaveCount(0)
+    await expect(manager.locator('.feedRow').last()).toContainText('Example Show')
+    expect(await page.evaluate(() => window.$store.getters.getFollowedRssFeeds.map(feed => feed.url))).toEqual(['https://rss.example.test/show.xml'])
+
+    // Followed podcasts can't be followed again
+    await manager.getByRole('button', { name: 'Search Podcasts' }).click()
+    await search.fill('example')
+    await search.press('Enter')
+    await expect(results.first().getByRole('button', { name: 'Following' })).toBeDisabled()
+    await expect(results.last().getByRole('button', { name: 'Follow Other Show' })).toBeEnabled()
+    expect(searches).toEqual(['nothing', 'example', 'example'])
+  })
+
+  test('plays podcast episodes from their audio enclosure with the metadata of their feed', async ({ app, page }) => {
+    test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+    const mediaUrl = 'https://cdn.example.test/episode-1.m4a'
+    // Like yt-dlp for a direct media file, which names it after the file and has no codec names for M4A files
+    const executable = path.join(app.userDataDir, 'podcast-yt-dlp.sh')
+    const response = JSON.stringify({
+      title: 'episode-1',
+      webpage_url: mediaUrl,
+      formats: [{ format_id: 'mp4', url: mediaUrl, protocol: 'https', ext: 'm4a', vcodec: 'none' }]
+    })
+    await writeFile(executable, [
+      '#!/bin/sh',
+      'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
+      `printf '%s\\n' '${response}'`
+    ].join('\n'))
+    await chmod(executable, 0o755)
+    await choosePickerPaths(app, page, { ytDlpPath: executable })
+    await page.evaluate(() => window.$store.dispatch('updateYtDlpSource', 'system'))
+
     await page.route(/^https?:\/\//, abortUnmockedRequest)
     await page.route('https://rss.example.test/podcast.xml', route => route.fulfill({
       contentType: 'application/rss+xml',
-      body: `<?xml version="1.0"?><rss version="2.0"><channel><title>Podcast</title>
+      body: `<?xml version="1.0"?><rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"><channel><title>Podcast</title>
+        <itunes:image href="https://rss.example.test/cover.jpg"/>
         <item><title>Episode 1</title><link>https://rss.example.test/episodes/1</link>
-          <enclosure url="https://cdn.example.test/episode-1.mp3" type="audio/mpeg" length="1"/>
+          <enclosure url="${mediaUrl}" type="audio/mp4" length="1"/>
+          <itunes:duration>1:02:03</itunes:duration>
           <pubDate>${new Date(now).toUTCString()}</pubDate></item>
       </channel></rss>`
+    }))
+    await page.route('https://rss.example.test/cover.jpg', route => route.fulfill({ path: THUMBNAIL_PATH }))
+    await page.route(mediaUrl, async route => route.fulfill({
+      contentType: 'audio/mp4',
+      body: Buffer.from((await readFile(path.join(repoRoot, 'e2e', 'fixtures', 'media', 'post-live-audio.m4a.b64'), 'utf8')).replaceAll('\n', ''), 'base64')
     }))
     const manager = await openFeedManager(page)
     const input = manager.getByRole('textbox', { name: 'Add Feed' })
@@ -1695,9 +1780,73 @@ test.describe('without followed feeds', () => {
 
     await goTo(page, 'subscriptions')
     await page.locator('[data-rss-feeds-tab]').click()
-    await page.locator('#subscriptionsPanel .h3Title', { hasText: 'Episode 1' }).click()
-    await expect.poll(() => page.evaluate(() => window.$router.currentRoute.value.query.url))
-      .toBe('https://cdn.example.test/episode-1.mp3')
+    // Episodes without their own image show the podcast's cover and their length
+    const episode = page.locator('#subscriptionsPanel .ft-list-item', { hasText: 'Episode 1' })
+    await expect(episode.locator('img.thumbnailImage')).toHaveAttribute('src', 'https://rss.example.test/cover.jpg')
+    await expect(episode.locator('.videoDuration')).toHaveText('1:02:03')
+    await episode.locator('.h3Title').click()
+    await expect.poll(() => page.evaluate(() => window.$router.currentRoute.value.query.url)).toBe(mediaUrl)
+
+    // The audio player shows the episode's title and cover instead of the file's name
+    await waitForPlayback(page)
+    const player = page.locator(`${activeTab} .videoPlayer`)
+    await expect(player.locator('video')).toHaveClass(/audioOnly/)
+    await expect(player.locator('.musicAudioSurface .musicAudioTitle')).toHaveText('Episode 1')
+    await expect(player.locator('.musicAudioSurface .musicAudioArtwork')).toHaveAttribute('src', 'https://rss.example.test/cover.jpg')
+    await expect(page.locator(`${activeTab} .externalMediaCreatorProfile`)).toHaveText('Podcast')
+    await expect.poll(() => page.evaluate(url => Object.values(window.$store.getters.getHistoryCacheById)
+      .find(entry => entry.videoId.includes(encodeURIComponent(url)) || entry.videoId.includes(url))?.title, mediaUrl))
+      .toBe('Episode 1')
+  })
+
+  test('imports and exports feeds as OPML from the RSS feed settings', async ({ page }) => {
+    await page.route(/^https?:\/\//, abortUnmockedRequest)
+    await page.route('https://rss.example.test/**', route => route.fulfill({ contentType: 'application/rss+xml', body: rssFeed }))
+    const section = await goToSettingsSection(page, 'subscriptions')
+    const pickFile = content => page.evaluate(content => {
+      Object.defineProperty(window, 'showOpenFilePicker', {
+        configurable: true,
+        value: async () => [{ getFile: async () => new File([content], 'podcasts.opml', { type: 'application/xml' }) }]
+      })
+    }, content)
+
+    // YouTube channels belong in the subscriptions
+    await pickFile(`<opml version="2.0"><body>
+      <outline text="Podcast &amp; Co" type="rss" xmlUrl="https://rss.example.test/podcast.xml"/>
+      <outline title="Other show" xmlUrl="https://rss.example.test/other.xml"/>
+      <outline title="Channel" xmlUrl="https://www.youtube.com/feeds/videos.xml?channel_id=UC${'a'.repeat(22)}"/>
+    </body></opml>`)
+    await section.getByRole('button', { name: 'Import OPML' }).click()
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getFollowedRssFeeds.map(({ url, title }) => ({ url, title }))))
+      .toEqual([
+        { url: 'https://rss.example.test/podcast.xml', title: 'Podcast & Co' },
+        { url: 'https://rss.example.test/other.xml', title: 'Other show' }
+      ])
+    expect(await page.evaluate(() => window.$store.getters.getProfileList[0].subscriptions)).toEqual([])
+
+    // Feeds already followed are not added twice
+    await pickFile(`<opml><body>
+      <outline xmlUrl="https://rss.example.test/podcast.xml"/>
+      <outline title="New show" xmlUrl="https://rss.example.test/new.xml"/>
+    </body></opml>`)
+    await section.getByRole('button', { name: 'Import OPML' }).click()
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getFollowedRssFeeds.map(({ url }) => url)))
+      .toEqual(['https://rss.example.test/podcast.xml', 'https://rss.example.test/other.xml', 'https://rss.example.test/new.xml'])
+
+    await page.evaluate(() => {
+      window.exportedOpml = null
+      window.showSaveFilePicker = async () => ({
+        createWritable: async () => ({
+          write: async content => { window.exportedOpml = content },
+          close: async () => {},
+        }),
+      })
+    })
+    await section.getByRole('button', { name: 'Export OPML' }).click()
+    await expect.poll(() => page.evaluate(() => window.exportedOpml)).not.toBeNull()
+    const content = await page.evaluate(() => window.exportedOpml)
+    expect(content).toContain('xmlUrl="https://rss.example.test/podcast.xml"')
+    expect(content).toContain('title="Podcast &amp; Co"')
   })
 })
 

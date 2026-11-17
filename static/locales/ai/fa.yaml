@@ -257,6 +257,26 @@ Subscriptions:
       Not Set: تنظیم نشده
     Retry Feed: تلاش دوباره برای {feed}
     Reloading Feed: در حال بارگذاری دوباره {feed}
+    Import OPML: درون‌ریزی OPML
+    Export OPML: برون‌بری OPML
+    OPML File: پرونده OPML
+    Invalid OPML File: این پرونده هیچ خوراکی ندارد.
+    Feeds Could Not Be Saved: ذخیره خوراک‌ها ممکن نشد.
+    Feeds Imported: ۱ خوراک جدید درون‌ریزی شد. | {count} خوراک جدید درون‌ریزی شد.
+    All Feeds Already Followed: شما همه خوراک‌های این پرونده را از قبل دنبال می‌کنید.
+    YouTube Channels Skipped: کانال‌های YouTube نادیده گرفته شدند. برای اشتراک در آن‌ها، پرونده را در «داده و فضای ذخیره‌سازی» درون‌ریزی کنید.
+    Feeds Exported: خوراک‌های RSS شما برون‌بری شدند.
+    Podcasts:
+      Open: جست‌وجوی پادکست‌ها
+      Title: یافتن پادکست
+      Description: در فهرست Apple Podcasts جست‌وجو کنید و خوراک یک پادکست را دنبال کنید. جست‌وجوهای شما برای Apple فرستاده می‌شود.
+      Search: جست‌وجوی پادکست‌ها
+      Search Placeholder: نام یا موضوع پادکست
+      Searching: در حال جست‌وجوی پادکست‌ها…
+      Search Failed: جست‌وجوی پادکست‌ها ممکن نشد. اتصال خود را بررسی کنید و دوباره تلاش کنید.
+      No Results: پادکستی پیدا نشد.
+      Results: پادکست‌های پیداشده
+      Follow Podcast: دنبال کردن {podcast}
   Platforms:
     Tab: پلتفرم‌ها
     Platform: پلتفرم

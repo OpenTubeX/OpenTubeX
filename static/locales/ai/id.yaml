@@ -238,6 +238,26 @@ Subscriptions:
       Not Set: Tidak diatur
     Retry Feed: Coba lagi {feed}
     Reloading Feed: Memuat ulang {feed}
+    Import OPML: Impor OPML
+    Export OPML: Ekspor OPML
+    OPML File: File OPML
+    Invalid OPML File: File ini tidak berisi feed apa pun.
+    Feeds Could Not Be Saved: Feed tidak dapat disimpan.
+    Feeds Imported: "{count} feed baru diimpor."
+    All Feeds Already Followed: Anda sudah mengikuti semua feed dalam file ini.
+    YouTube Channels Skipped: Saluran YouTube dilewati. Untuk berlangganan, impor file di Data & Penyimpanan.
+    Feeds Exported: Feed RSS Anda telah diekspor.
+    Podcasts:
+      Open: Cari podcast
+      Title: Temukan podcast
+      Description: Cari di direktori Apple Podcasts dan ikuti feed podcast. Pencarian Anda dikirim ke Apple.
+      Search: Cari podcast
+      Search Placeholder: Nama atau topik podcast
+      Searching: Mencari podcast…
+      Search Failed: Podcast tidak dapat dicari. Periksa koneksi Anda dan coba lagi.
+      No Results: Tidak ada podcast yang ditemukan.
+      Results: Podcast yang ditemukan
+      Follow Podcast: Ikuti {podcast}
   Platforms:
     Tab: Platform
     Platform: Platform

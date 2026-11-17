@@ -238,6 +238,26 @@ Subscriptions:
       Not Set: Nann-termenet
     Retry Feed: Klask en-dro {feed}
     Reloading Feed: O adkargañ {feed}
+    Import OPML: Enporzhiañ OPML
+    Export OPML: Ezporzhiañ OPML
+    OPML File: Restr OPML
+    Invalid OPML File: N'eus lanv ebet er restr-mañ.
+    Feeds Could Not Be Saved: N'eus ket bet gallet enrollañ al lanvoù.
+    Feeds Imported: "{count} lanv nevez enporzhiet. | {count} lanv nevez enporzhiet. | {count} lanv nevez enporzhiet. | {count} a lanvoù nevez enporzhiet. | {count} lanv nevez enporzhiet."
+    All Feeds Already Followed: Heuliañ a rit dija an holl lanvoù er restr-mañ.
+    YouTube Channels Skipped: Lammet eo bet ar chadennoù YouTube. Evit koumanantiñ dezho, enporzhiit ar restr e Roadennoù ha kadaviñ.
+    Feeds Exported: Ezporzhiet eo bet ho lanvoù RSS.
+    Podcasts:
+      Open: Klask podkastoù
+      Title: Kavout ur podkast
+      Description: Klaskit e roll Apple Podcasts ha heuliit lanv ur podkast. Kaset e vez ho klaskoù da Apple.
+      Search: Klask podkastoù
+      Search Placeholder: Anv pe danvez ar podkast
+      Searching: O klask podkastoù…
+      Search Failed: N'eus ket bet gallet klask ar podkastoù. Gwiriit ho kennask ha klaskit en-dro.
+      No Results: Podkast ebet kavet.
+      Results: Podkastoù kavet
+      Follow Podcast: Heuliañ {podcast}
   Platforms:
     Tab: Savennoù
     Platform: Savenn

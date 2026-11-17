@@ -238,6 +238,26 @@ Subscriptions:
       Not Set: Nesetat
     Retry Feed: Reîncearcă {feed}
     Reloading Feed: Se reîncarcă {feed}
+    Import OPML: Importă OPML
+    Export OPML: Exportă OPML
+    OPML File: Fișier OPML
+    Invalid OPML File: Acest fișier nu conține fluxuri.
+    Feeds Could Not Be Saved: Fluxurile nu au putut fi salvate.
+    Feeds Imported: A fost importat 1 flux nou. | Au fost importate {count} fluxuri noi. | Au fost importate {count} de fluxuri noi.
+    All Feeds Already Followed: Urmărești deja toate fluxurile din acest fișier.
+    YouTube Channels Skipped: Canalele YouTube au fost omise. Pentru a te abona la ele, importă fișierul în Date și spațiu de stocare.
+    Feeds Exported: Fluxurile tale RSS au fost exportate.
+    Podcasts:
+      Open: Caută podcasturi
+      Title: Găsește un podcast
+      Description: Caută în directorul Apple Podcasts și urmărește fluxul unui podcast. Căutările tale sunt trimise către Apple.
+      Search: Caută podcasturi
+      Search Placeholder: Numele sau subiectul podcastului
+      Searching: Se caută podcasturi…
+      Search Failed: Podcasturile nu au putut fi căutate. Verifică conexiunea și încearcă din nou.
+      No Results: Nu s-au găsit podcasturi.
+      Results: Podcasturi găsite
+      Follow Podcast: Urmărește {podcast}
   Platforms:
     Tab: Platforme
     Platform: Platformă

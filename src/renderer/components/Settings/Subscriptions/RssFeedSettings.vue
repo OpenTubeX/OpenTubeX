@@ -10,12 +10,26 @@
         @change="value => store.dispatch('updateEnableRssFeeds', value)"
       />
     </FtFlexBox>
-    <FtFlexBox v-if="enableRssFeeds">
+    <FtFlexBox
+      v-if="enableRssFeeds"
+      class="feedButtons"
+    >
       <FtButton
         :label="t('Settings.Subscription Settings.Manage RSS Feeds')"
         :icon="['fas', 'rss']"
         data-settings-subpage="rss-feeds"
         @click="showManager = true"
+      />
+      <FtButton
+        :label="t('Subscriptions.RSS Feeds.Import OPML')"
+        :icon="['fas', 'folder-open']"
+        @click="importOpml"
+      />
+      <FtButton
+        :label="t('Subscriptions.RSS Feeds.Export OPML')"
+        :icon="['fas', 'file-download']"
+        :disabled="feeds.length === 0"
+        @click="exportOpml"
       />
     </FtFlexBox>
     <FtFlexBox v-if="enableRssFeeds">
@@ -48,13 +62,20 @@
               <a :href="RSSHUB_URL">{{ RSSHUB_NAME }}</a>
             </template>
           </Translation>
-          <FtButton
-            class="rssHubButton"
-            :label="t('Subscriptions.RSS Feeds.RSSHub.Browse')"
-            :icon="['fas', 'magnifying-glass']"
-            :disabled="isAdding"
-            @click="showRssHubPrompt = true"
-          />
+          <div class="feedSourceButtons">
+            <FtButton
+              :label="t('Subscriptions.RSS Feeds.Podcasts.Open')"
+              :icon="['fas', 'podcast']"
+              :disabled="isAdding"
+              @click="showPodcastPrompt = true"
+            />
+            <FtButton
+              :label="t('Subscriptions.RSS Feeds.RSSHub.Browse')"
+              :icon="['fas', 'magnifying-glass']"
+              :disabled="isAdding"
+              @click="showRssHubPrompt = true"
+            />
+          </div>
         </div>
         <div class="feedInput">
           <FtInput
@@ -155,8 +176,13 @@
     </FtSettingsSubpage>
     <RssHubFeedPrompt
       v-if="showManager && showRssHubPrompt"
-      @add="addFeedFromRssHub"
+      @add="addFeedFromPrompt"
       @close="showRssHubPrompt = false"
+    />
+    <PodcastSearchPrompt
+      v-if="showManager && showPodcastPrompt"
+      @add="addFeedFromPrompt"
+      @close="showPodcastPrompt = false"
     />
   </FtSettingsSection>
 </template>
@@ -176,6 +202,7 @@ import FtSelect from '../../FtSelect/FtSelect.vue'
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
 import FtSettingsSubpage from '../../FtSettingsSubpage/FtSettingsSubpage.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
+import PodcastSearchPrompt from './PodcastSearchPrompt.vue'
 import RssHubFeedPrompt from './RssHubFeedPrompt.vue'
 
 import store from '../../../store/index'
@@ -184,13 +211,16 @@ import { clampOverlayScrollTop } from '../../../helpers/overlayScrollbars'
 import {
   addLoadedRssFeed,
   fetchRssFeed,
+  getCachedRssFeedUrls,
   normalizeHttpUrl,
+  refreshRssFeeds,
   retryRssFeed,
   RssFeedBrowserCheckError,
   rssFeedErrors,
   updateMissingRssFeedAvatars
 } from '../../../helpers/rssFeeds'
-import { showToast } from '../../../helpers/utils'
+import { getTodayDateStrLocalTimezone, readFileWithPicker, showToast, writeFileWithPicker } from '../../../helpers/utils'
+import { buildOpml, getOpmlYouTubeChannelId, parseOpmlFeeds } from '../../../helpers/opml'
 import { holdAndroidBackgroundWork } from '../../../helpers/androidBackgroundSync.js'
 
 const RSSHUB_NAME = 'RSSHub'
@@ -208,6 +238,7 @@ const errorFeedUrls = computed(() => new Set(rssFeedErrors.value))
 
 const showManager = ref(false)
 const showRssHubPrompt = ref(false)
+const showPodcastPrompt = ref(false)
 const isAdding = ref(false)
 const feedInput = useTemplateRef('feedInput')
 const feedScroller = useTemplateRef('feedScroller')
@@ -261,11 +292,12 @@ async function addFeedFromInput(text) {
  * and keeps the address for another try if it fails
  * @param {string} url
  */
-async function addFeedFromRssHub(url) {
+async function addFeedFromPrompt(url) {
   showRssHubPrompt.value = false
+  showPodcastPrompt.value = false
   feedInput.value?.setText(url)
   await addFeedFromInput(url)
-  // The dialog couldn't return focus to the Browse button, which is disabled while the feed loads
+  // The dialog couldn't return focus to the button that opened it, which is disabled while the feed loads
   await nextTick()
   if (document.activeElement === document.body) feedInput.value?.focus()
 }
@@ -334,6 +366,78 @@ async function retryFeed(feed) {
     showFeedError(error)
   } finally {
     retryingFeedUrls.value = new Set([...retryingFeedUrls.value].filter(url => url !== feed.url))
+  }
+}
+
+const OPML_DIRECTORY_ID = 'rss-feeds-opml'
+
+/**
+ * Follows the feeds of an OPML file, such as the podcasts exported from a
+ * podcast app. YouTube channels belong in the subscriptions instead.
+ */
+async function importOpml() {
+  let response
+  try {
+    response = await readFileWithPicker(
+      t('Subscriptions.RSS Feeds.OPML File'),
+      { 'application/xml': ['.xml', '.opml'] },
+      OPML_DIRECTORY_ID,
+      'downloads'
+    )
+  } catch (error) {
+    showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
+    return
+  }
+  if (response === null) return
+
+  const outlines = parseOpmlFeeds(response.content)
+  const youTubeChannelCount = outlines.filter(({ xmlUrl }) => getOpmlYouTubeChannelId(xmlUrl) !== null).length
+  /** @type {import('../../../helpers/rssFeeds').RssFeed[]} */
+  const imported = outlines.flatMap(({ xmlUrl, title }) => {
+    const url = getOpmlYouTubeChannelId(xmlUrl) === null ? normalizeHttpUrl(xmlUrl) : null
+    return url === null ? [] : [{ url, title: title?.trim() ?? '' }]
+  })
+  if (imported.length === 0 && youTubeChannelCount === 0) {
+    showToast({ message: t('Subscriptions.RSS Feeds.Invalid OPML File'), icon: ['fas', 'circle-exclamation'] })
+    return
+  }
+
+  let addedCount = 0
+  const saved = await store.dispatch('updateFollowedRssFeeds', followed => {
+    const urls = new Set(followed.map(feed => feed.url))
+    const added = imported.filter(feed => !urls.has(feed.url) && urls.add(feed.url))
+    addedCount = added.length
+    return [...followed, ...added]
+  })
+  if (saved === false) {
+    showToast({ message: t('Subscriptions.RSS Feeds.Feeds Could Not Be Saved'), icon: ['fas', 'circle-exclamation'] })
+    return
+  }
+  const messages = [
+    ...(addedCount > 0 ? [t('Subscriptions.RSS Feeds.Feeds Imported', { count: addedCount }, addedCount)] : []),
+    ...(addedCount === 0 && imported.length > 0 ? [t('Subscriptions.RSS Feeds.All Feeds Already Followed')] : []),
+    ...(youTubeChannelCount > 0 ? [t('Subscriptions.RSS Feeds.YouTube Channels Skipped')] : [])
+  ]
+  showToast({ message: messages.join(' '), icon: ['fas', addedCount > 0 ? 'check' : 'circle-exclamation'] })
+  // Loads the new feeds, which also finds their covers
+  if (addedCount > 0) refreshRssFeeds(store.getters.getFollowedRssFeeds, { cachedUrls: getCachedRssFeedUrls() })
+}
+
+/** Writes the followed feeds as OPML, for example to move podcasts to a podcast app */
+async function exportOpml() {
+  try {
+    const written = await writeFileWithPicker(
+      `rss-feeds-${getTodayDateStrLocalTimezone()}.opml`,
+      buildOpml('RSS Feeds', feeds.value.map(feed => ({ xmlUrl: feed.url, title: feed.title || feed.url }))),
+      t('Subscriptions.RSS Feeds.OPML File'),
+      'application/xml',
+      '.opml',
+      OPML_DIRECTORY_ID,
+      'downloads'
+    )
+    if (written) showToast({ message: t('Subscriptions.RSS Feeds.Feeds Exported'), icon: ['fas', 'check'] })
+  } catch (error) {
+    showToast({ message: `${t('Settings.Data Settings.Unable to write file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
   }
 }
 

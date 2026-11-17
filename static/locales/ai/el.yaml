@@ -238,6 +238,26 @@ Subscriptions:
       Not Set: Δεν έχει οριστεί
     Retry Feed: Νέα προσπάθεια για {feed}
     Reloading Feed: Επαναφόρτωση {feed}
+    Import OPML: Εισαγωγή OPML
+    Export OPML: Εξαγωγή OPML
+    OPML File: Αρχείο OPML
+    Invalid OPML File: Αυτό το αρχείο δεν περιέχει ροές.
+    Feeds Could Not Be Saved: Δεν ήταν δυνατή η αποθήκευση των ροών.
+    Feeds Imported: Εισήχθη 1 νέα ροή. | Εισήχθησαν {count} νέες ροές.
+    All Feeds Already Followed: Ακολουθείτε ήδη όλες τις ροές αυτού του αρχείου.
+    YouTube Channels Skipped: Τα κανάλια YouTube παραλείφθηκαν. Για να εγγραφείτε σε αυτά, εισαγάγετε το αρχείο στην ενότητα «Δεδομένα και αποθηκευτικός χώρος».
+    Feeds Exported: Οι ροές RSS σας εξήχθησαν.
+    Podcasts:
+      Open: Αναζήτηση podcast
+      Title: Εύρεση podcast
+      Description: Αναζητήστε στον κατάλογο του Apple Podcasts και ακολουθήστε τη ροή ενός podcast. Οι αναζητήσεις σας αποστέλλονται στην Apple.
+      Search: Αναζήτηση podcast
+      Search Placeholder: Όνομα ή θέμα του podcast
+      Searching: Αναζήτηση podcast…
+      Search Failed: Δεν ήταν δυνατή η αναζήτηση podcast. Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.
+      No Results: Δεν βρέθηκαν podcast.
+      Results: Podcast που βρέθηκαν
+      Follow Podcast: Ακολουθήστε το {podcast}
   Platforms:
     Tab: Πλατφόρμες
     Platform: Πλατφόρμα

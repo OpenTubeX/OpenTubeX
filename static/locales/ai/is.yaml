@@ -238,6 +238,26 @@ Subscriptions:
       Not Set: Ekki stillt
     Retry Feed: Reyna {feed} aftur
     Reloading Feed: Endurhleð {feed}
+    Import OPML: Flytja inn OPML
+    Export OPML: Flytja út OPML
+    OPML File: OPML-skrá
+    Invalid OPML File: Þessi skrá inniheldur enga strauma.
+    Feeds Could Not Be Saved: Ekki tókst að vista straumana.
+    Feeds Imported: "{count} nýr straumur fluttur inn. | {count} nýir straumar fluttir inn."
+    All Feeds Already Followed: Þú fylgir nú þegar öllum straumum í þessari skrá.
+    YouTube Channels Skipped: YouTube-rásum var sleppt. Til að gerast áskrifandi að þeim skaltu flytja skrána inn undir Gögn og geymsla.
+    Feeds Exported: RSS-straumarnir þínir hafa verið fluttir út.
+    Podcasts:
+      Open: Leita að hlaðvörpum
+      Title: Finna hlaðvarp
+      Description: Leitaðu í skrá Apple Podcasts og fylgdu straumi hlaðvarps. Leitirnar þínar eru sendar til Apple.
+      Search: Leita að hlaðvörpum
+      Search Placeholder: Heiti eða efni hlaðvarps
+      Searching: Leitar að hlaðvörpum…
+      Search Failed: Ekki tókst að leita að hlaðvörpum. Athugaðu tenginguna og reyndu aftur.
+      No Results: Engin hlaðvörp fundust.
+      Results: Hlaðvörp sem fundust
+      Follow Podcast: Fylgja {podcast}
   Platforms:
     Tab: Vettvangar
     Platform: Vettvangur

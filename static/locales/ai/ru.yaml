@@ -197,6 +197,26 @@ Subscriptions:
       Not Set: Не задано
     Retry Feed: Повторить попытку для {feed}
     Reloading Feed: Перезагрузка {feed}
+    Import OPML: Импортировать OPML
+    Export OPML: Экспортировать OPML
+    OPML File: Файл OPML
+    Invalid OPML File: В этом файле нет лент.
+    Feeds Could Not Be Saved: Не удалось сохранить ленты.
+    Feeds Imported: Импортирована {count} новая лента. | Импортировано {count} новые ленты. | Импортировано {count} новых лент.
+    All Feeds Already Followed: Вы уже подписаны на все ленты из этого файла.
+    YouTube Channels Skipped: Каналы YouTube пропущены. Чтобы подписаться на них, импортируйте файл в разделе «Данные и хранилище».
+    Feeds Exported: Ваши RSS-ленты экспортированы.
+    Podcasts:
+      Open: Искать подкасты
+      Title: Найти подкаст
+      Description: Ищите в каталоге Apple Podcasts и подписывайтесь на ленту подкаста. Ваши поисковые запросы отправляются в Apple.
+      Search: Искать подкасты
+      Search Placeholder: Название или тема подкаста
+      Searching: Поиск подкастов…
+      Search Failed: Не удалось выполнить поиск подкастов. Проверьте подключение и повторите попытку.
+      No Results: Подкасты не найдены.
+      Results: Найденные подкасты
+      Follow Podcast: Подписаться на {podcast}
   Platforms:
     Tab: Платформы
     Platform: Платформа

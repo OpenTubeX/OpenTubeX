@@ -238,6 +238,26 @@ Subscriptions:
       Not Set: Təyin edilməyib
     Retry Feed: '{feed} axınını yenidən sına'
     Reloading Feed: '{feed} yenidən yüklənir'
+    Import OPML: OPML idxal et
+    Export OPML: OPML ixrac et
+    OPML File: OPML faylı
+    Invalid OPML File: Bu faylda heç bir lent yoxdur.
+    Feeds Could Not Be Saved: Lentləri saxlamaq mümkün olmadı.
+    Feeds Imported: 1 yeni lent idxal edildi. | {count} yeni lent idxal edildi.
+    All Feeds Already Followed: Bu fayldakı bütün lentləri artıq izləyirsiniz.
+    YouTube Channels Skipped: YouTube kanalları ötürüldü. Onlara abunə olmaq üçün faylı Məlumat və yaddaş bölməsində idxal edin.
+    Feeds Exported: RSS lentləriniz ixrac edildi.
+    Podcasts:
+      Open: Podkastları axtar
+      Title: Podkast tap
+      Description: Apple Podcasts kataloqunda axtarın və podkastın lentini izləyin. Axtarışlarınız Apple-a göndərilir.
+      Search: Podkastları axtar
+      Search Placeholder: Podkastın adı və ya mövzusu
+      Searching: Podkastlar axtarılır…
+      Search Failed: Podkastları axtarmaq mümkün olmadı. Bağlantınızı yoxlayın və yenidən cəhd edin.
+      No Results: Podkast tapılmadı.
+      Results: Tapılan podkastlar
+      Follow Podcast: "{podcast} izlə"
   Platforms:
     Tab: Platformalar
     Platform: Platforma

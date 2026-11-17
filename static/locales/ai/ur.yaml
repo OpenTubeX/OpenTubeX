@@ -273,6 +273,26 @@ Subscriptions:
       Not Set: سیٹ نہیں
     Retry Feed: '{feed} دوبارہ آزمائیں'
     Reloading Feed: '{feed} دوبارہ لوڈ ہو رہا ہے'
+    Import OPML: OPML درآمد کریں
+    Export OPML: OPML برآمد کریں
+    OPML File: OPML فائل
+    Invalid OPML File: اس فائل میں کوئی فیڈ نہیں ہے۔
+    Feeds Could Not Be Saved: فیڈز محفوظ نہیں کی جا سکیں۔
+    Feeds Imported: 1 نئی فیڈ درآمد کی گئی۔ | {count} نئی فیڈز درآمد کی گئیں۔
+    All Feeds Already Followed: آپ اس فائل کی تمام فیڈز پہلے ہی فالو کر رہے ہیں۔
+    YouTube Channels Skipped: YouTube چینلز چھوڑ دیے گئے۔ انہیں سبسکرائب کرنے کے لیے فائل کو ڈیٹا اور اسٹوریج میں درآمد کریں۔
+    Feeds Exported: آپ کی RSS فیڈز برآمد کر دی گئیں۔
+    Podcasts:
+      Open: پوڈکاسٹ تلاش کریں
+      Title: پوڈکاسٹ ڈھونڈیں
+      Description: Apple Podcasts کی ڈائریکٹری میں تلاش کریں اور کسی پوڈکاسٹ کی فیڈ فالو کریں۔ آپ کی تلاشیں Apple کو بھیجی جاتی ہیں۔
+      Search: پوڈکاسٹ تلاش کریں
+      Search Placeholder: پوڈکاسٹ کا نام یا موضوع
+      Searching: پوڈکاسٹ تلاش کیے جا رہے ہیں…
+      Search Failed: پوڈکاسٹ تلاش نہیں کیے جا سکے۔ اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔
+      No Results: کوئی پوڈکاسٹ نہیں ملا۔
+      Results: ملنے والے پوڈکاسٹ
+      Follow Podcast: "{podcast} کو فالو کریں"
   Platforms:
     Tab: پلیٹ فارمز
     Platform: پلیٹ فارم

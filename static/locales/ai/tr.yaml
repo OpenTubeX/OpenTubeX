@@ -238,6 +238,26 @@ Subscriptions:
       Not Set: Ayarlanmadı
     Retry Feed: '{feed} akışını yeniden dene'
     Reloading Feed: '{feed} yeniden yükleniyor'
+    Import OPML: OPML içe aktar
+    Export OPML: OPML dışa aktar
+    OPML File: OPML dosyası
+    Invalid OPML File: Bu dosyada hiç akış yok.
+    Feeds Could Not Be Saved: Akışlar kaydedilemedi.
+    Feeds Imported: 1 yeni akış içe aktarıldı. | {count} yeni akış içe aktarıldı.
+    All Feeds Already Followed: Bu dosyadaki tüm akışları zaten takip ediyorsunuz.
+    YouTube Channels Skipped: YouTube kanalları atlandı. Onlara abone olmak için dosyayı Veri ve Depolama bölümünde içe aktarın.
+    Feeds Exported: RSS akışlarınız dışa aktarıldı.
+    Podcasts:
+      Open: Podcast ara
+      Title: Podcast bul
+      Description: Apple Podcasts dizininde arama yapın ve bir podcast'in akışını takip edin. Aramalarınız Apple'a gönderilir.
+      Search: Podcast ara
+      Search Placeholder: Podcast adı veya konusu
+      Searching: Podcast'ler aranıyor…
+      Search Failed: Podcast'ler aranamadı. Bağlantınızı kontrol edip yeniden deneyin.
+      No Results: Podcast bulunamadı.
+      Results: Bulunan podcast'ler
+      Follow Podcast: "{podcast} takip et"
   Platforms:
     Tab: Platformlar
     Platform: Platform

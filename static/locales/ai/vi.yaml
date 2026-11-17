@@ -238,6 +238,26 @@ Subscriptions:
       Not Set: Chưa đặt
     Retry Feed: Thử lại {feed}
     Reloading Feed: Đang tải lại {feed}
+    Import OPML: Nhập OPML
+    Export OPML: Xuất OPML
+    OPML File: Tệp OPML
+    Invalid OPML File: Tệp này không chứa nguồn cấp nào.
+    Feeds Could Not Be Saved: Không thể lưu các nguồn cấp.
+    Feeds Imported: Đã nhập {count} nguồn cấp mới.
+    All Feeds Already Followed: Bạn đã theo dõi mọi nguồn cấp trong tệp này.
+    YouTube Channels Skipped: Đã bỏ qua các kênh YouTube. Để đăng ký các kênh đó, hãy nhập tệp trong Dữ liệu và bộ nhớ.
+    Feeds Exported: Đã xuất nguồn cấp RSS của bạn.
+    Podcasts:
+      Open: Tìm podcast
+      Title: Tìm một podcast
+      Description: Tìm trong danh mục Apple Podcasts và theo dõi nguồn cấp của một podcast. Nội dung tìm kiếm của bạn được gửi đến Apple.
+      Search: Tìm podcast
+      Search Placeholder: Tên hoặc chủ đề podcast
+      Searching: Đang tìm podcast…
+      Search Failed: Không thể tìm podcast. Hãy kiểm tra kết nối và thử lại.
+      No Results: Không tìm thấy podcast nào.
+      Results: Podcast đã tìm thấy
+      Follow Podcast: Theo dõi {podcast}
   Platforms:
     Tab: Nền tảng
     Platform: Nền tảng

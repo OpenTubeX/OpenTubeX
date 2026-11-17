@@ -240,6 +240,26 @@ Subscriptions:
       Not Set: غير محدد
     Retry Feed: أعد محاولة تحميل {feed}
     Reloading Feed: جارٍ إعادة تحميل {feed}
+    Import OPML: استيراد OPML
+    Export OPML: تصدير OPML
+    OPML File: ملف OPML
+    Invalid OPML File: لا يحتوي هذا الملف على أي خلاصات.
+    Feeds Could Not Be Saved: تعذّر حفظ الخلاصات.
+    Feeds Imported: لم تُستورد أي خلاصة جديدة ({count}). | استُوردت خلاصة جديدة واحدة. | استُوردت خلاصتان جديدتان ({count}). | استُوردت {count} خلاصات جديدة. | استُوردت {count} خلاصةً جديدة. | استُوردت {count} خلاصة جديدة.
+    All Feeds Already Followed: أنت تتابع بالفعل كل خلاصات هذا الملف.
+    YouTube Channels Skipped: تم تخطي قنوات YouTube. للاشتراك فيها، استورد الملف من البيانات والتخزين.
+    Feeds Exported: تم تصدير خلاصات RSS.
+    Podcasts:
+      Open: البحث عن بودكاست
+      Title: العثور على بودكاست
+      Description: ابحث في دليل Apple Podcasts وتابع خلاصة بودكاست. تُرسَل عمليات البحث إلى Apple.
+      Search: البحث عن بودكاست
+      Search Placeholder: اسم البودكاست أو موضوعه
+      Searching: جارٍ البحث عن البودكاست…
+      Search Failed: تعذّر البحث عن البودكاست. تحقق من اتصالك وحاول مرة أخرى.
+      No Results: لم يُعثر على أي بودكاست.
+      Results: البودكاست التي عُثر عليها
+      Follow Podcast: متابعة {podcast}
   Platforms:
     Tab: المنصات
     Platform: المنصة

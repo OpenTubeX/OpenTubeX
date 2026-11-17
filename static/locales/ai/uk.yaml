@@ -240,6 +240,26 @@ Subscriptions:
       Not Set: Не задано
     Retry Feed: Повторити спробу для {feed}
     Reloading Feed: Перезавантаження {feed}
+    Import OPML: Імпортувати OPML
+    Export OPML: Експортувати OPML
+    OPML File: Файл OPML
+    Invalid OPML File: Цей файл не містить стрічок.
+    Feeds Could Not Be Saved: Не вдалося зберегти стрічки.
+    Feeds Imported: Імпортовано {count} нову стрічку. | Імпортовано {count} нові стрічки. | Імпортовано {count} нових стрічок.
+    All Feeds Already Followed: Ви вже стежите за всіма стрічками з цього файлу.
+    YouTube Channels Skipped: Канали YouTube пропущено. Щоб підписатися на них, імпортуйте файл у розділі «Дані та сховище».
+    Feeds Exported: Ваші RSS-стрічки експортовано.
+    Podcasts:
+      Open: Шукати подкасти
+      Title: Знайти подкаст
+      Description: Шукайте в каталозі Apple Podcasts і стежте за стрічкою подкасту. Ваші пошукові запити надсилаються Apple.
+      Search: Шукати подкасти
+      Search Placeholder: Назва або тема подкасту
+      Searching: Пошук подкастів…
+      Search Failed: Не вдалося виконати пошук подкастів. Перевірте з'єднання та спробуйте ще раз.
+      No Results: Подкастів не знайдено.
+      Results: Знайдені подкасти
+      Follow Podcast: Стежити за {podcast}
   Platforms:
     Tab: Платформи
     Platform: Платформа

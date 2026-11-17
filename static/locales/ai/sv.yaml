@@ -238,6 +238,26 @@ Subscriptions:
       Not Set: Inte angivet
     Retry Feed: Försök med {feed} igen
     Reloading Feed: Läser in {feed} igen
+    Import OPML: Importera OPML
+    Export OPML: Exportera OPML
+    OPML File: OPML-fil
+    Invalid OPML File: Den här filen innehåller inga flöden.
+    Feeds Could Not Be Saved: Flödena kunde inte sparas.
+    Feeds Imported: 1 nytt flöde importerat. | {count} nya flöden importerade.
+    All Feeds Already Followed: Du följer redan alla flöden i den här filen.
+    YouTube Channels Skipped: YouTube-kanaler hoppades över. Importera filen under Data och lagring för att prenumerera på dem.
+    Feeds Exported: Dina RSS-flöden har exporterats.
+    Podcasts:
+      Open: Sök efter poddar
+      Title: Hitta en podd
+      Description: Sök i Apple Podcasts-katalogen och följ en podds flöde. Dina sökningar skickas till Apple.
+      Search: Sök efter poddar
+      Search Placeholder: Poddens namn eller ämne
+      Searching: Söker efter poddar …
+      Search Failed: Det gick inte att söka efter poddar. Kontrollera anslutningen och försök igen.
+      No Results: Inga poddar hittades.
+      Results: Hittade poddar
+      Follow Podcast: Följ {podcast}
   Platforms:
     Tab: Plattformar
     Platform: Plattform

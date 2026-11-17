@@ -284,6 +284,26 @@ Subscriptions:
       Not Set: Nie gestel nie
     Retry Feed: Probeer {feed} weer
     Reloading Feed: Laai {feed} weer
+    Import OPML: Voer OPML in
+    Export OPML: Voer OPML uit
+    OPML File: OPML-lêer
+    Invalid OPML File: Hierdie lêer bevat geen voere nie.
+    Feeds Could Not Be Saved: Die voere kon nie gestoor word nie.
+    Feeds Imported: 1 nuwe voer ingevoer. | {count} nuwe voere ingevoer.
+    All Feeds Already Followed: Jy volg reeds elke voer in hierdie lêer.
+    YouTube Channels Skipped: YouTube-kanale is oorgeslaan. Voer die lêer onder Data en berging in om op hulle in te teken.
+    Feeds Exported: Jou RSS-voere is uitgevoer.
+    Podcasts:
+      Open: Soek podsendings
+      Title: Vind ’n podsending
+      Description: Deursoek die Apple Podcasts-gids en volg ’n podsending se voer. Jou soektogte word na Apple gestuur.
+      Search: Soek podsendings
+      Search Placeholder: Naam of onderwerp van podsending
+      Searching: Soek tans podsendings…
+      Search Failed: Die podsendings kon nie deursoek word nie. Gaan jou verbinding na en probeer weer.
+      No Results: Geen podsendings gevind nie.
+      Results: Podsendings gevind
+      Follow Podcast: Volg {podcast}
   Platforms:
     Tab: Platforms
     Platform: Platform

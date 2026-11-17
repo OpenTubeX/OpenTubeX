@@ -284,6 +284,26 @@ Subscriptions:
       Not Set: Sense definir
     Retry Feed: Torna a provar {feed}
     Reloading Feed: 'S''està tornant a carregar {feed}'
+    Import OPML: Importa OPML
+    Export OPML: Exporta OPML
+    OPML File: Fitxer OPML
+    Invalid OPML File: Aquest fitxer no conté cap canal.
+    Feeds Could Not Be Saved: No s'han pogut desar els canals.
+    Feeds Imported: S'ha importat 1 canal nou. | S'han importat {count} de canals nous. | S'han importat {count} canals nous.
+    All Feeds Already Followed: Ja segueixes tots els canals d'aquest fitxer.
+    YouTube Channels Skipped: S'han omès els canals de YouTube. Per subscriure-t'hi, importa el fitxer a Dades i emmagatzematge.
+    Feeds Exported: S'han exportat els teus canals RSS.
+    Podcasts:
+      Open: Cerca pòdcasts
+      Title: Troba un pòdcast
+      Description: Cerca al directori d'Apple Podcasts i segueix el canal d'un pòdcast. Les teves cerques s'envien a Apple.
+      Search: Cerca pòdcasts
+      Search Placeholder: Nom o tema del pòdcast
+      Searching: S'estan cercant pòdcasts…
+      Search Failed: No s'han pogut cercar els pòdcasts. Comprova la connexió i torna-ho a provar.
+      No Results: No s'ha trobat cap pòdcast.
+      Results: Pòdcasts trobats
+      Follow Podcast: Segueix {podcast}
   Platforms:
     Tab: Plataformes
     Platform: Plataforma

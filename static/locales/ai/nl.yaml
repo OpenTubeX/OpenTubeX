@@ -240,6 +240,26 @@ Subscriptions:
       Not Set: Niet ingesteld
     Retry Feed: '{feed} opnieuw proberen'
     Reloading Feed: '{feed} opnieuw laden'
+    Import OPML: OPML importeren
+    Export OPML: OPML exporteren
+    OPML File: OPML-bestand
+    Invalid OPML File: Dit bestand bevat geen feeds.
+    Feeds Could Not Be Saved: De feeds konden niet worden opgeslagen.
+    Feeds Imported: 1 nieuwe feed geïmporteerd. | {count} nieuwe feeds geïmporteerd.
+    All Feeds Already Followed: Je volgt alle feeds in dit bestand al.
+    YouTube Channels Skipped: YouTube-kanalen zijn overgeslagen. Importeer het bestand onder Gegevens en opslag om je erop te abonneren.
+    Feeds Exported: Je RSS-feeds zijn geëxporteerd.
+    Podcasts:
+      Open: Podcasts zoeken
+      Title: Een podcast vinden
+      Description: Zoek in de Apple Podcasts-catalogus en volg de feed van een podcast. Je zoekopdrachten worden naar Apple verzonden.
+      Search: Podcasts zoeken
+      Search Placeholder: Naam of onderwerp van de podcast
+      Searching: Podcasts zoeken…
+      Search Failed: De podcasts konden niet worden doorzocht. Controleer je verbinding en probeer het opnieuw.
+      No Results: Geen podcasts gevonden.
+      Results: Gevonden podcasts
+      Follow Podcast: "{podcast} volgen"
   Platforms:
     Tab: Platforms
     Platform: Platform

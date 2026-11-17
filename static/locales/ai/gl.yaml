@@ -240,6 +240,26 @@ Subscriptions:
       Not Set: Sen definir
     Retry Feed: Tentar de novo {feed}
     Reloading Feed: Recargando {feed}
+    Import OPML: Importar OPML
+    Export OPML: Exportar OPML
+    OPML File: Ficheiro OPML
+    Invalid OPML File: Este ficheiro non contén ningunha fonte.
+    Feeds Could Not Be Saved: Non se puideron gardar as fontes.
+    Feeds Imported: Importouse 1 fonte nova. | Importáronse {count} fontes novas.
+    All Feeds Already Followed: Xa segues todas as fontes deste ficheiro.
+    YouTube Channels Skipped: Omitíronse as canles de YouTube. Para subscribirte a elas, importa o ficheiro en Datos e almacenamento.
+    Feeds Exported: Exportáronse as túas fontes RSS.
+    Podcasts:
+      Open: Buscar podcasts
+      Title: Atopar un podcast
+      Description: Busca no directorio de Apple Podcasts e segue a fonte dun podcast. As túas buscas envíanse a Apple.
+      Search: Buscar podcasts
+      Search Placeholder: Nome ou tema do podcast
+      Searching: Buscando podcasts…
+      Search Failed: Non se puideron buscar os podcasts. Comproba a conexión e téntao de novo.
+      No Results: Non se atopou ningún podcast.
+      Results: Podcasts atopados
+      Follow Podcast: Seguir {podcast}
   Platforms:
     Tab: Plataformas
     Platform: Plataforma
