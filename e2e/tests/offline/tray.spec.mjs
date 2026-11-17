@@ -210,6 +210,37 @@ test('closing the final tab still exits while background refresh runs without a 
   await closed
 })
 
+test('closing the final tab offers Hide Window and Quit exits while background refresh runs', async ({ app, page }) => {
+  await setting(page, 'updateConfirmCloseApp', true)
+  await setting(page, 'updateEnableClosedAppSubscriptionRefresh', true)
+  await app.electronApp.evaluate(({ dialog }) => {
+    globalThis.testCloseButtons = []
+    globalThis.testCloseResponses = [1, 0]
+    dialog.showMessageBox = async (_window, options) => {
+      globalThis.testCloseButtons.push(options.buttons)
+      return { response: globalThis.testCloseResponses.shift() }
+    }
+  })
+  const tabs = await page.evaluate(() => window.$store.state.tabs.tabs.map(tab => tab.id))
+  const closeTab = () => page.evaluate(() => {
+    window.ftElectron.tabs.close(window.$store.state.tabs.tabs[0].id)
+  })
+
+  // Hide Window keeps the tab
+  await closeTab()
+  await expect.poll(() => windowVisible(app)).toBe(false)
+  expect(await app.electronApp.evaluate(() => globalThis.testCloseButtons)).toEqual([
+    ['Quit', 'Hide Window', 'Cancel', 'Never ask again']
+  ])
+  expect(await page.evaluate(() => window.$store.state.tabs.tabs.map(tab => tab.id))).toEqual(tabs)
+  await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].show())
+
+  // Quit exits instead of leaving the app in the tray without a window
+  const closed = app.electronApp.waitForEvent('close')
+  await closeTab()
+  await closed
+})
+
 test('cancelling explicit tray Close restores normal close-to-tray behavior', async ({ app, page }) => {
   await captureTray(app, page)
   await setting(page, 'updateHideToTrayOnClose', true)
