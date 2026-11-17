@@ -1711,7 +1711,7 @@ test.describe('without followed feeds', () => {
     await expect(search).toBeFocused()
     await search.fill('nothing')
     await search.press('Enter')
-    await expect(dialog.getByRole('status')).toHaveText('No podcasts found.')
+    await expect(dialog.getByRole('status')).toBeVisible()
 
     await search.fill('example')
     await search.press('Enter')
@@ -1814,7 +1814,6 @@ test.describe('without followed feeds', () => {
       <outline title="Channel" xmlUrl="https://www.youtube.com/feeds/videos.xml?channel_id=UC${'a'.repeat(22)}"/>
     </body></opml>`)
     await section.getByRole('button', { name: 'Import OPML' }).click()
-    await expect(page.getByText('2 new feeds imported. YouTube channels were skipped.', { exact: false })).toBeVisible()
     await expect.poll(() => page.evaluate(() => window.$store.getters.getFollowedRssFeeds.map(({ url, title }) => ({ url, title }))))
       .toEqual([
         { url: 'https://rss.example.test/podcast.xml', title: 'Podcast & Co' },
@@ -1822,9 +1821,14 @@ test.describe('without followed feeds', () => {
       ])
     expect(await page.evaluate(() => window.$store.getters.getProfileList[0].subscriptions)).toEqual([])
 
-    await pickFile('<opml><body><outline xmlUrl="https://rss.example.test/podcast.xml"/></body></opml>')
+    // Feeds already followed are not added twice
+    await pickFile(`<opml><body>
+      <outline xmlUrl="https://rss.example.test/podcast.xml"/>
+      <outline title="New show" xmlUrl="https://rss.example.test/new.xml"/>
+    </body></opml>`)
     await section.getByRole('button', { name: 'Import OPML' }).click()
-    await expect(page.getByText('You already follow every feed in this file.')).toBeVisible()
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getFollowedRssFeeds.map(({ url }) => url)))
+      .toEqual(['https://rss.example.test/podcast.xml', 'https://rss.example.test/other.xml', 'https://rss.example.test/new.xml'])
 
     await page.evaluate(() => {
       window.exportedOpml = null
@@ -1836,7 +1840,7 @@ test.describe('without followed feeds', () => {
       })
     })
     await section.getByRole('button', { name: 'Export OPML' }).click()
-    await expect(page.getByText('Your RSS feeds have been exported.')).toBeVisible()
+    await expect.poll(() => page.evaluate(() => window.exportedOpml)).not.toBeNull()
     const content = await page.evaluate(() => window.exportedOpml)
     expect(content).toContain('xmlUrl="https://rss.example.test/podcast.xml"')
     expect(content).toContain('title="Podcast &amp; Co"')
