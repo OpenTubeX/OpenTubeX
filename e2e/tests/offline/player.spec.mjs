@@ -2298,6 +2298,17 @@ test.describe('pinned player', () => {
     const pinnedAreaBottom = await page.locator('.videoArea').evaluate(element => element.getBoundingClientRect().bottom)
     await expect.poll(scrollbarTop).toBeCloseTo(pinnedAreaBottom, 0)
 
+    // Without the fullscreen swipe, upward drags on the pinned player must not
+    // scroll the page below it. Downward drags still dock it in JavaScript.
+    await page.locator('.app').evaluate(element => element.classList.add('capacitorTabs'))
+    await page.evaluate(async () => {
+      const store = window.$store
+      await store.dispatch('updateEnableVideoZoom', false)
+      await store.dispatch('updateEnableMobileFullscreenSwipe', false)
+    })
+    await expect(player).not.toHaveClass(/mobileFullscreenSwipeEnabled/)
+    await expect(player).toHaveCSS('touch-action', 'pan-x')
+
     // Half of this window is shorter than the player, so it docks instead.
     await setWindowSize(app, page, { width: 500, height: 420 })
     await expect(player).toHaveClass(/scrollMiniPlayer/)
