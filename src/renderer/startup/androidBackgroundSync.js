@@ -13,7 +13,10 @@ import { isSyncReasonEnabled } from '../helpers/sync-server-scheduling.js'
 export async function runAndroidBackgroundSync(store) {
   try {
     await waitForDatastores()
-    await store.dispatch('grabUserSettings')
+    const { hasExistingSettings } = await store.dispatch('grabUserSettings')
+    // The loaders report failures instead of throwing. Syncing default data
+    // would look like deleting the library, which pauses automatic sync.
+    if (hasExistingSettings === null) throw new Error('Unable to load the settings')
     // Restored app data must not sync as the installation it came from.
     await handleRestoredAndroidAppData(store)
     const settings = store.state.settings
@@ -27,11 +30,14 @@ export async function runAndroidBackgroundSync(store) {
     // The sync compares everything it syncs with the last synced state, so
     // anything left unloaded here would look deleted. Load it as App.vue does.
     store.commit('setCustomThemes', await loadCustomThemes())
-    await store.dispatch('grabAllProfiles', i18n.global.t('Profile.All Channels'))
-    await Promise.all([
+    const [profilesLoaded, historyLoaded] = await Promise.all([
+      store.dispatch('grabAllProfiles', i18n.global.t('Profile.All Channels')),
       store.dispatch('grabHistory'),
       store.dispatch('grabAllPlaylists'),
     ])
+    if (profilesLoaded === null || !historyLoaded || !store.state.playlists.playlistsReady) {
+      throw new Error('Unable to load the library')
+    }
     // Open tabs, live reminders and notifications belong to the app's
     // renderer, so they sync when the app opens.
     await store.dispatch('initializeSyncServer', { notifications: false })

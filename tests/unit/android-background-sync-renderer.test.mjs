@@ -16,9 +16,17 @@ const [{ runAndroidBackgroundSync }] = await importWithStubs([sourceUrl('src/ren
   [sourceUrl('src/renderer/helpers/customTheme.js')]: { loadCustomThemes: () => loadThemes() },
 })
 
-function createStore(settings) {
+// What each loader resolves to after a successful read
+const loaded = {
+  grabUserSettings: { hasExistingSettings: true },
+  grabAllProfiles: true,
+  grabHistory: true,
+}
+
+function createStore(settings, results = loaded) {
   return {
     state: {
+      playlists: { playlistsReady: true },
       settings: {
         syncServerEnabled: true,
         syncServerToken: 'token',
@@ -28,7 +36,10 @@ function createStore(settings) {
       },
     },
     commit: (mutation, value) => calls.push(`${mutation} ${JSON.stringify(value)}`),
-    dispatch: async (action, value) => calls.push(value === undefined ? action : `${action} ${JSON.stringify(value)}`),
+    dispatch: async (action, value) => {
+      calls.push(value === undefined ? action : `${action} ${JSON.stringify(value)}`)
+      return results[action]
+    },
   }
 }
 
@@ -55,17 +66,23 @@ test('the hidden renderer loads everything the sync compares before syncing', as
 })
 
 test('the hidden renderer does not sync when it cannot load the data', async () => {
-  calls.length = 0
-  loadThemes = async () => { throw new Error('Unreadable themes') }
   const error = console.error
   console.error = () => {}
   try {
-    await runAndroidBackgroundSync(createStore())
+    // A loader that throws, and one that only reports its failure
+    for (const [themes, results] of [
+      [async () => { throw new Error('Unreadable themes') }, loaded],
+      [async () => [], { ...loaded, grabHistory: false }],
+    ]) {
+      calls.length = 0
+      loadThemes = themes
+      await runAndroidBackgroundSync(createStore({}, results))
+      assert.equal(calls.some(call => call.startsWith('initializeSyncServer')), false)
+      assert.equal(calls.at(-1), 'finish')
+    }
   } finally {
     console.error = error
   }
-  assert.equal(calls.some(call => call.startsWith('initializeSyncServer')), false)
-  assert.equal(calls.at(-1), 'finish')
 })
 
 test('the hidden renderer cancels the periodic job once automatic sync is off', async () => {

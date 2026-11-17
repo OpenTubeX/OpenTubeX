@@ -98,8 +98,10 @@ const actions = {
       if (legacyPositions.records.length === 0 || await dispatch('mergeHistoryBackup', legacyPositions.records)) {
         removeLegacyExternalMediaPositions(legacyPositions.keys)
       }
+      return true
     } catch (errMessage) {
       console.error(errMessage)
+      return false
     }
   },
 
