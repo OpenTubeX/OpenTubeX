@@ -75,7 +75,7 @@ Search Filters:
   Search Results: Resultados
   Fetching results. Please wait: A procurar. Por favor aguarde
   Fetch more results: Obter mais resultados
-  There are no more results for this search: '> 20 minutos'
+  There are no more results for this search: 'Não existem mais resultados'
 # Sidebar
   Features:
     Subtitles: Legendas
@@ -1182,3 +1182,5 @@ Close Window Confirmation:
 Confirmations:
   Never Ask Again: Não voltar a perguntar
   Settings Hint: Pode reativar esta confirmação em Definições → Geral → Confirmar antes de…
+Close Multiple Tabs Confirmation:
+  Title: Fechar vários separadores?
