@@ -7,24 +7,45 @@
   page sidebar instead. When the comments panel is open too, chapters takes
   the available height is shared with the other open docks.
 */
+
+/* Fullscreen docks use the theme's colors, on a translucent card surface.
+   Their background is the video, not the app page, so light themes keep a
+   dark glass in the Dark theme's colors: only dark themes define the
+   --fullscreen-dock-* values, in themes.css. */
 :deep(.fullscreenDockSheet),
 :is(.chapterOverlay, .fullscreenMetadataOverlay, .fullscreenTranscriptOverlay, .fullscreenSponsorBlockOverlay, .fullscreenLiveChatOverlay, .fullscreenCommentsOverlay, .fullscreenPlaylistOverlay, .fullscreenQueueOverlay, .fullscreenRecommendationsOverlay) {
-  /* Fullscreen docks use the contrast-safe Catppuccin Mocha glass palette in
-     every app theme because their background is the video, not the app page. */
-  --primary-text-color: #cdd6f4;
-  --secondary-text-color: #bac2de;
-  --tertiary-text-color: #a6adc8;
-  --title-color: #cdd6f4;
-  --bg-color: #1e1e2e;
-  --card-bg-color: #181825;
-  --secondary-card-bg-color: #1e1e2e;
-  --scrollbar-color: #313244;
-  --scrollbar-color-hover: #3d4051;
-  --side-nav-color: #181825;
-  --side-nav-hover-color: #11111b;
-  --side-nav-hover-text-color: #cdd6f4;
-  --side-nav-active-color: #11111b;
-  --side-nav-active-text-color: #cdd6f4;
+  --fullscreen-dock-bg: color-mix(in srgb, var(--card-bg-color) 80%, transparent);
+  --native-color-scheme: dark;
+  --card-bg-image: var(--fullscreen-dock-card-bg-image, none);
+  --primary-text-color: var(--fullscreen-dock-primary-text-color, #eee);
+  --secondary-text-color: var(--fullscreen-dock-secondary-text-color, #ddd);
+  --tertiary-text-color: var(--fullscreen-dock-tertiary-text-color, #999);
+  --title-color: var(--fullscreen-dock-title-color, #eee);
+  --bg-color: var(--fullscreen-dock-bg-color, #0f0f0f);
+  --card-bg-color: var(--fullscreen-dock-card-bg-color, #1f1f1f);
+  --secondary-card-bg-color: var(--fullscreen-dock-secondary-card-bg-color, #181818);
+  --scrollbar-color: var(--fullscreen-dock-scrollbar-color, #3f3f3f);
+  --scrollbar-color-hover: var(--fullscreen-dock-scrollbar-color-hover, #606060);
+  --side-nav-color: var(--fullscreen-dock-side-nav-color, #121212);
+  --side-nav-hover-color: var(--fullscreen-dock-side-nav-hover-color, #272727);
+  --side-nav-hover-text-color: var(--fullscreen-dock-side-nav-hover-text-color, var(--primary-text-color));
+  --side-nav-active-color: var(--fullscreen-dock-side-nav-active-color, #3a3a3a);
+  --side-nav-active-text-color: var(--fullscreen-dock-side-nav-active-text-color, var(--primary-text-color));
+  --card-bg-blur: var(--fullscreen-dock-card-bg-blur, none);
+
+  /* The body resolves these from the light palette, so derive them again. */
+  --border-color: var(--fullscreen-dock-border-color, var(--tertiary-text-color));
+  --divider-color: var(--fullscreen-dock-divider-color, color-mix(in srgb, var(--border-color) 45%, transparent));
+  --subtle-surface-color: var(--fullscreen-dock-subtle-surface-color, var(--tertiary-text-color));
+  --watched-thumbnail-overlay-color: var(--fullscreen-dock-watched-thumbnail-overlay-color, rgb(from var(--bg-color) r g b / 70%));
+  --thumbnail-badge-bg-color: var(--fullscreen-dock-thumbnail-badge-bg-color, color-mix(in srgb, var(--card-bg-color) 85%, transparent));
+  --thumbnail-badge-blur: var(--fullscreen-dock-thumbnail-badge-blur, none);
+  --dropdown-item-hover-color: var(--fullscreen-dock-dropdown-item-hover-color, var(--scrollbar-color-hover));
+
+  /* No theme overrides these, so they need no --fullscreen-dock-* value. */
+  --selected-container-color: color-mix(in srgb, oklch(from var(--primary-color) var(--tint-lightness) c h) 24%, var(--card-bg-color));
+  --selected-container-hover-color: color-mix(in srgb, oklch(from var(--primary-color) var(--tint-lightness) c h) 20%, var(--card-bg-color));
+  --on-selected-container-color: var(--primary-text-color);
 }
 
 .fullscreenDockResizeHandle {
@@ -150,12 +171,12 @@
 
   /* Isolate dock content from the player and neighbouring panels. */
   contain: layout paint;
-  background-color: rgb(12 12 12 / 62%);
+  background-color: var(--fullscreen-dock-bg);
   border: 1px solid var(--side-nav-hover-color);
   border-radius: calc(12px * var(--ui-roundness));
   box-shadow: 0 8px 30px rgb(0 0 0 / 45%);
   backdrop-filter: blur(14px);
-  color: #fff;
+  color: var(--primary-text-color);
   user-select: auto;
   transition: transform 260ms cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -210,7 +231,7 @@
   border: 0;
   border-radius: 50%;
   background-color: transparent;
-  color: #fff;
+  color: inherit;
   cursor: pointer;
   font-size: 18px;
 }

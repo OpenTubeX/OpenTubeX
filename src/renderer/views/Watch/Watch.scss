@@ -908,12 +908,6 @@
       color: var(--primary-text-color);
     }
 
-    .shortsCommentsPanel :deep(.commentsContentWrapper) {
-      // This panel sits on a themed card instead of over the video.
-      --scrollbar-color: inherit;
-      --scrollbar-color-hover: inherit;
-    }
-
     .shortsCommentsPanel :deep(.fullscreenCommentHeader) {
       color: var(--primary-text-color);
       background-color: transparent;

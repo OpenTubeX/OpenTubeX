@@ -20,7 +20,7 @@
   padding-block: 0;
   padding-inline: 0;
   overflow: hidden;
-  color: #fff;
+  color: var(--primary-text-color);
   background: transparent;
   backdrop-filter: none;
   box-shadow: none;
@@ -37,11 +37,6 @@
   min-block-size: 0;
   overflow: hidden auto;
   overscroll-behavior: contain;
-
-  /* Sits above the video, so the scrollbar needs a light handle rather than the
-     theme's. The overlay scrollbars inherit these from their container. */
-  --scrollbar-color: rgb(255 255 255 / 45%);
-  --scrollbar-color-hover: rgb(255 255 255 / 65%);
 }
 
 /* Matches the chapter overlay header in the video player. */
@@ -105,7 +100,7 @@
   inline-size: 36px;
   block-size: 36px;
   padding: 0;
-  color: #fff;
+  color: inherit;
   background-color: transparent;
   border: 0;
   border-radius: 50%;
@@ -218,8 +213,8 @@
 }
 
 .fullscreenCommentFilterMenu {
-  color: #fff;
-  background-color: rgb(12 12 12 / 82%);
+  color: var(--primary-text-color);
+  background-color: var(--fullscreen-dock-bg, rgb(12 12 12 / 82%));
   border-color: rgb(255 255 255 / 12%);
   box-shadow: 0 8px 24px rgb(0 0 0 / 40%);
   backdrop-filter: blur(14px) saturate(1.05);
@@ -236,7 +231,7 @@
   inline-size: 260px;
   max-inline-size: calc(40vw - 48px);
   padding: 6px;
-  background-color: rgb(12 12 12 / 62%);
+  background-color: var(--fullscreen-dock-bg, rgb(12 12 12 / 62%));
   border: 1px solid rgb(255 255 255 / 10%);
   border-radius: var(--shape-corner-large);
   box-shadow: 0 6px 20px rgb(0 0 0 / 35%);
@@ -435,7 +430,7 @@
 }
 
 .fullscreenCommentCard > .commentTools :deep(.ft-input) {
-  color: #fff;
+  color: var(--primary-text-color);
   background-color: rgb(0 0 0 / 35%);
 }
 
@@ -459,7 +454,7 @@
 }
 
 .fullscreenCommentCard > .commentTools .commentFilterCount {
-  color: #fff;
+  color: var(--primary-text-color);
 }
 
 @container comments (width <= 520px) {
