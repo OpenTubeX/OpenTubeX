@@ -6,8 +6,15 @@ import android.content.res.Configuration;
 import android.hardware.input.InputManager;
 import android.os.Bundle;
 import android.os.Build;
+import android.view.MotionEvent;
+import android.view.ViewConfiguration;
 import android.view.WindowInsets;
 import android.view.WindowInsetsAnimation;
+
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 
 import com.getcapacitor.BridgeActivity;
 import com.getcapacitor.PluginHandle;
@@ -22,6 +29,8 @@ public class MainActivity extends BridgeActivity {
     private InputManager inputManager;
     private int lastOrientation;
     private WebViewRotationFrame rotationFrame;
+    private boolean transientSystemBars;
+    private StatusBarSwipeFilter statusBarSwipeFilter;
     private final InputManager.InputDeviceListener inputDeviceListener =
         new InputManager.InputDeviceListener() {
             @Override
@@ -246,10 +255,38 @@ public class MainActivity extends BridgeActivity {
      * hide again on their own, for players that keep the status bar hidden.
      */
     void setTransientSystemBars(boolean transientBars) {
-        androidx.core.view.WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView())
+        transientSystemBars = transientBars;
+        WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView())
             .setSystemBarsBehavior(transientBars
-                ? androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-                : androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_DEFAULT);
+                ? WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                : WindowInsetsControllerCompat.BEHAVIOR_DEFAULT);
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        if (statusBarSwipeFilter == null) {
+            statusBarSwipeFilter = new StatusBarSwipeFilter(ViewConfiguration.get(this).getScaledTouchSlop());
+        }
+        int action = event.getActionMasked();
+        boolean fromStatusBar = action == MotionEvent.ACTION_DOWN && transientSystemBars &&
+            event.getRawY() < statusBarHeight();
+        switch (statusBarSwipeFilter.onTouch(action, event.getRawX(), event.getRawY(), fromStatusBar)) {
+            case DROP:
+                return true;
+            case CANCEL:
+                MotionEvent cancel = MotionEvent.obtain(event);
+                cancel.setAction(MotionEvent.ACTION_CANCEL);
+                super.dispatchTouchEvent(cancel);
+                cancel.recycle();
+                return true;
+            default:
+                return super.dispatchTouchEvent(event);
+        }
+    }
+
+    private int statusBarHeight() {
+        WindowInsetsCompat insets = ViewCompat.getRootWindowInsets(getWindow().getDecorView());
+        return insets == null ? 0 : insets.getInsetsIgnoringVisibility(WindowInsetsCompat.Type.statusBars()).top;
     }
 
     void prepareFullscreenRotation() {
