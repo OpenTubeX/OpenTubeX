@@ -605,6 +605,8 @@ const startTime = ref(null)
 let startTimestamp = null
 /** @type {string | undefined | null} the timestamp query the position already follows */
 let appliedQueryTimestamp = null
+/** @type {number | null} where the viewer seeked to, until the media joins the history */
+let historyChosenSeconds = null
 let lastPositionSave = 0
 let lastSavedPosition = 0
 let lastPlaybackPosition = 0
@@ -1186,6 +1188,8 @@ function handleViewerSeek() {
  * @returns {boolean} whether the media joined the history now
  */
 function addToHistoryOnce(chosenSeconds) {
+  // The write can wait for companion metadata, which must not lose the chosen position.
+  if (historyEngaged && chosenSeconds !== undefined) historyChosenSeconds = chosenSeconds
   if (historyAdded || !historyEngaged || !hasBeenPresented ||
     !store.getters.getRememberHistory || historyId.value === null ||
     loading.value || !info.value || !source.value || !player.value?.hasLoaded ||
@@ -1193,7 +1197,7 @@ function addToHistoryOnce(chosenSeconds) {
     (source.value.separateAudioUrl && !hasCompanionMetadata())) return false
   historyAdded = true
   // With progress saving off, a seek or timestamp link only sets where playback continues.
-  const chosen = store.getters.getWatchedProgressSavingMode === 'never' ? null : chosenSeconds ?? startTimestamp
+  const chosen = store.getters.getWatchedProgressSavingMode === 'never' ? null : historyChosenSeconds ?? startTimestamp
   addToHistory(chosen ?? historyEntry.value?.watchProgress ?? 0)
   return true
 }
@@ -1562,6 +1566,7 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
   startTime.value = null
   startTimestamp = null
   appliedQueryTimestamp = null
+  historyChosenSeconds = null
   lastPositionSave = 0
   lastSavedPosition = 0
   lastPlaybackPosition = 0
