@@ -888,7 +888,7 @@ onBeforeUnmount(() => {
   window.ftElectron.tabs.setShortcutsBlocked(false).catch(() => {})
   unlockBodyScroll()
   nextTick(() => {
-    if (document.activeElement === document.body) lastActiveElement?.focus()
+    if (document.activeElement === document.body) lastActiveElement?.focus({ preventScroll: true })
   })
 })
 

@@ -230,7 +230,7 @@ function deactivatePrompt(vnode) {
     afterModalLeave(vnode.el, releaseRootClass)
     releaseRootClass = null
     nextTick(() => {
-      if (settingsOverlayActive.value) lastActiveElement?.focus()
+      if (settingsOverlayActive.value) lastActiveElement?.focus({ preventScroll: true })
     })
   }
   if (scrollLocked) {

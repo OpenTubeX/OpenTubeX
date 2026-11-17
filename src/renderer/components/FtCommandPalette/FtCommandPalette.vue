@@ -327,7 +327,7 @@ onBeforeUnmount(() => {
   store.commit('removeOpenPrompt', promptId)
   unlockBodyScroll()
   nextTick(() => {
-    if (document.activeElement === document.body) lastActiveElement?.focus()
+    if (document.activeElement === document.body) lastActiveElement?.focus({ preventScroll: true })
   })
 })
 

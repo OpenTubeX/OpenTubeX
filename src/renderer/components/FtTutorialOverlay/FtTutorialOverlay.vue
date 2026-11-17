@@ -515,7 +515,7 @@ onBeforeUnmount(() => {
   targetResizeObserver?.disconnect()
   store.commit('removeOpenPrompt', promptId)
   unlockBodyScroll()
-  nextTick(() => lastActiveElement?.focus())
+  nextTick(() => lastActiveElement?.focus({ preventScroll: true }))
 })
 
 function schedulePositionUpdate() {
