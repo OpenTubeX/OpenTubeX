@@ -2850,6 +2850,8 @@ async function playLibraryVideoFromCommandPalette(video, location) {
   }
   const history = store.getters.getHistoryCacheById[video.videoId]
   const saveProgress = ['auto', 'semi-auto'].includes(store.getters.getWatchedProgressSavingMode)
+  // The viewer can switch tabs while the player launches
+  const incognito = store.getters.getTabIncognito(presentedTabId.value)
   tabMediaCoordinator.dispatchAction('pause', {}, presentedTabId.value)
   const opened = await openInExternalPlayer({
     videoId: video.videoId,
@@ -2858,7 +2860,7 @@ async function playLibraryVideoFromCommandPalette(video, location) {
     startTime: saveProgress ? history?.watchProgress ?? 0 : 0,
     playbackRate: store.getters.getDefaultPlayback,
   })
-  if (opened && store.getters.getRememberHistory && !store.getters.getTabIncognito(presentedTabId.value) &&
+  if (opened && store.getters.getRememberHistory && !incognito &&
     canMarkHistoryEntryAsWatched(video)) {
     store.dispatch('updateHistory', {
       ...video,

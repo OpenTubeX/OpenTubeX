@@ -283,6 +283,8 @@ export function useHomeRecommendations(visible) {
     }
   }
   async function feedback(video, type) {
+    // Clicks are recorded automatically, unlike the feedback a viewer chooses
+    if (type === 'click' && isIncognitoTab.value) return true
     try {
       await store.dispatch('recordRecommendationEvent', { video, type })
       return true
