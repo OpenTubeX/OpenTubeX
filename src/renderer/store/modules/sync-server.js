@@ -3,7 +3,7 @@ import { SyncLiveConnectionState, SyncCollectionCache, createSyncActivity, valid
 import i18n from '../../i18n/index'
 import { openExternalLink, showToastOnAllTabs } from '../../helpers/utils'
 import { isAppHidden } from '../../helpers/appVisibility.js'
-import { onAndroidWindowBlur, onPeriodicBackgroundSync } from '../../helpers/androidBackgroundSync.js'
+import { isAndroidBackgroundSyncRenderer, onAndroidWindowBlur, onPeriodicBackgroundSync } from '../../helpers/androidBackgroundSync.js'
 import { connectionEvents, getConnectionState } from '../../helpers/networkRecovery.js'
 import {
   SyncServerClient,
@@ -372,10 +372,12 @@ function isSameSyncAccount(settings, account) {
   return getSyncAccount(settings).every((value, index) => value === account[index])
 }
 
-// `notifications: false` leaves out live reminders and notification
-// dismissals. The renderer that syncs while the Android app is closed lacks the
-// notification plugin, which belongs to the app's renderer.
-async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, automatic = false, remoteOnly = false, notifications = true } = {}) {
+// The renderer that syncs while the Android app is closed leaves out live
+// reminders and notification dismissals, because the notification plugin
+// belongs to the app's renderer.
+const syncsNotifications = (process.env.IS_ELECTRON || process.env.IS_CAPACITOR) && !isAndroidBackgroundSyncRenderer
+
+async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, automatic = false, remoteOnly = false } = {}) {
   const { commit, dispatch, rootGetters, rootState } = context
   const settings = rootState.settings
   const encrypted = requiresEncryptedSync(settings)
@@ -451,12 +453,11 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     ...(settings.syncServerSyncPlaylists ? ['playlistBookmarks'] : []),
     ...(settings.syncServerSyncHistory ? ['history'] : []),
     ...(encrypted && settings.syncServerSyncWatchStats ? ['watchStats'] : []),
-    ...((process.env.IS_ELECTRON || process.env.IS_CAPACITOR) && encrypted && notifications &&
+    ...(syncsNotifications && encrypted &&
       settings.syncServerSyncLiveReminders
       ? ['liveReminders']
       : []),
-    ...((process.env.IS_ELECTRON || process.env.IS_CAPACITOR) && encrypted && notifications &&
-      settings.syncServerSyncNotifications
+    ...(syncsNotifications && encrypted && settings.syncServerSyncNotifications
       ? ['notificationDismissals']
       : []),
     ...(settings.syncServerSyncProfiles ? ['profiles'] : []),
@@ -1831,7 +1832,7 @@ const actions = {
     commit('setSyncServerPendingDeletion', null)
   },
 
-  async initializeSyncServer({ commit, dispatch, rootState }, { skipIfRecent = true, notifications = true } = {}) {
+  async initializeSyncServer({ commit, dispatch, rootState }, { skipIfRecent = true } = {}) {
     if (!reminderSyncListenerStarted && (process.env.IS_ELECTRON || process.env.IS_CAPACITOR)) {
       reminderSyncListenerStarted = true
       liveReminder.onUpdated(() => dispatch('scheduleSyncServer', 'liveReminders'))
@@ -1945,7 +1946,7 @@ const actions = {
 
     await dispatch('startSyncServerAutoSync')
     if (rootState.settings.syncServerAutoSync) {
-      await dispatch('syncWithSyncServer', { skipIfRecent, automatic: true, notifications })
+      await dispatch('syncWithSyncServer', { skipIfRecent, automatic: true })
     }
   },
 

@@ -40,7 +40,7 @@ export async function runAndroidBackgroundSync(store) {
     }
     // Open tabs, live reminders and notifications belong to the app's
     // renderer, so they sync when the app opens.
-    await store.dispatch('initializeSyncServer', { notifications: false })
+    await store.dispatch('initializeSyncServer')
   } catch (error) {
     console.error('Android background sync failed', error)
   } finally {

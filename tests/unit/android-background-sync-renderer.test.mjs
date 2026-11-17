@@ -47,7 +47,7 @@ test('the hidden renderer loads everything the sync compares before syncing', as
   calls.length = 0
   loadThemes = async () => [{ id: 'saved' }]
   await runAndroidBackgroundSync(createStore())
-  const sync = calls.indexOf('initializeSyncServer {"notifications":false}')
+  const sync = calls.indexOf('initializeSyncServer')
   assert.notEqual(sync, -1)
   // A collection that isn't loaded looks deleted to the sync, which would
   // upload the deletion to every device.
