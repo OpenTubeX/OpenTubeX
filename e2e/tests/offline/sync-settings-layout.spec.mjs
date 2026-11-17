@@ -39,12 +39,15 @@ test.describe('sync switches', { tag: '@scale' }, () => {
       await setWindowSize(app, page, { width, height })
       await expect.poll(() => toggles.evaluate(element => {
         const columns = getComputedStyle(element).gridTemplateColumns.split(' ').length
-        const switches = [...element.querySelectorAll('.switch-label')]
-        return switches.every((label, index) => {
-          const rect = label.getBoundingClientRect()
-          const columnStart = switches[index % columns].getBoundingClientRect().left
-          return Math.abs(rect.left - columnStart) <= 1
-        })
+        // Full-width rows shift the column of later switches, so compare start positions instead of indexes
+        const starts = []
+        for (const label of element.querySelectorAll('.switch-label')) {
+          const left = label.getBoundingClientRect().left
+          if (!starts.some(start => Math.abs(start - left) <= 1)) {
+            starts.push(left)
+          }
+        }
+        return starts.length <= columns
       })).toBe(true)
       expect(await toggles.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
 
