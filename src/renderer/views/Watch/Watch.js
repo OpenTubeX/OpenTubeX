@@ -3069,7 +3069,10 @@ export default defineComponent({
     scheduleDownloadedPlaybackFallback: function (loadGeneration, videoId) {
       clearTimeout(this.downloadedPlaybackFallbackTimer)
       // Without metadata it's unknown whether the video is family friendly.
-      if (this.showFamilyFriendlyOnly || this.preferredDownload === null) return
+      if (this.showFamilyFriendlyOnly) return
+      // Download records load at startup, so the timer looks for the download again.
+      if (this.preferredDownload === null &&
+        !(this.$store.getters.getEnableDownloads && !this.$store.state.downloads.ytDlpDownloadsLoaded)) return
       this.downloadedPlaybackFallbackTimer = setTimeout(() => {
         if (this.isCurrentVideoLoad(loadGeneration, videoId) && this.isLoading && !this.localFilePlayback && !this.showFamilyFriendlyOnly) {
           this.finishDownloadedPlaybackWithoutMetadata()
