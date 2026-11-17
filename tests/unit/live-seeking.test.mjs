@@ -78,6 +78,7 @@ function absoluteSeekFixture(props) {
     handleVideoResize() {},
     handlePause() {},
     noteSeekHistoryJump() {},
+    emit() {},
     canSeek: () => seekingAllowed,
     accumulatedSeekSeconds: 5,
     video: { value: { currentTime: 10, duration: 30, paused: true, autoplay: false, pause() {}, play() { state.playCalls++; return Promise.resolve() }, fastSeek(time) { this.currentTime = time } } },
@@ -130,16 +131,20 @@ test('absolute seeking still works for ordinary videos and yt-dlp DVR', () => {
   }
 })
 
-test('adds only the viewer\'s own seeks to the seek history', () => {
+test('adds only the viewer\'s own seeks to the seek history and reports them', () => {
   const { state, setCurrentTime } = absoluteSeekFixture({ isLive: false })
   const noted = []
+  const viewerSeeks = []
   state.noteSeekHistoryJump = time => noted.push(time)
+  state.emit = (event, time) => { if (event === 'viewer-seek') viewerSeeks.push(time) }
 
   // Restoring a position, such as after casting, is not a jump.
   setCurrentTime(20)
   setCurrentTime(25, true)
   state.handlers.seekto({ seekTime: 2 })
   assert.deepEqual(noted, [25, 2])
+  // Only these let a video that has barely played join the watch history.
+  assert.deepEqual(viewerSeeks, [25, 2])
 })
 
 test('retains the latest absolute seek before metadata, including zero', () => {

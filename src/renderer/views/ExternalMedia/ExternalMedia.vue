@@ -142,6 +142,7 @@
                 @subtitles-state-user-set="handleSubtitlesStateUserSet"
                 @timeupdate="updateCurrentTime"
                 @seeking="handleSeeking"
+                @viewer-seek="handleViewerSeek"
                 @seeked="handleSeeked"
                 @dock-panel-change="handleDockPanelChange"
                 @toggle-theatre-mode="toggleTheatreMode"
@@ -567,7 +568,7 @@ import { isExternalMediaUrl } from '../../helpers/externalMediaUrl'
 import { getExternalMediaAuthorId, getExternalMediaHistoryId } from '../../helpers/externalMediaHistory'
 import { isMediaFileTitle, withMediaFileMetadata } from '../../helpers/podcasts'
 import { findRssFeedMediaItem } from '../../helpers/rssFeeds'
-import { hasReachedWatchedThreshold, isHistoryEntryWatched } from '../../helpers/history'
+import { HISTORY_MIN_PLAYBACK_SECONDS, hasReachedWatchedThreshold, isHistoryEntryWatched } from '../../helpers/history'
 import { findPlatformChannel, getPlatformChannelRoute } from '../../../platforms/index'
 import { createWatchTimeTracker } from '../../helpers/watchTimeTracker'
 import { useTabAvatar, useTabContext, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
@@ -602,6 +603,10 @@ const currentTime = ref(0)
 const startTime = ref(null)
 /** @type {number | null} where a timestamp link starts the media, instead of the saved position */
 let startTimestamp = null
+/** @type {string | undefined | null} the timestamp query the position already follows */
+let appliedQueryTimestamp = null
+/** @type {number | null} where the viewer seeked to, until the media joins the history */
+let historyChosenSeconds = null
 let lastPositionSave = 0
 let lastSavedPosition = 0
 let lastPlaybackPosition = 0
@@ -618,8 +623,11 @@ watch(() => isTabPresented?.value, presented => {
     if (phonePanelsEnabled.value) showChapters.value = false
   }
 })
-// Like on the watch page, media joins the history once it plays.
+// Like on the watch page, media joins the history once the viewer has played
+// it for a few seconds or chosen a position, see engageHistory.
 let historyAdded = false
+let historyPlaybackSeconds = 0
+let historyEngaged = false
 /** @type {Promise<unknown> | null} the watched write of the loaded media */
 let watchedMarkPending = null
 const historyId = computed(() => getExternalMediaHistoryId(mediaUrl.value))
@@ -871,7 +879,9 @@ function handleSeeking(time) {
 function handleSeeked(time) {
   currentTime.value = time
   syncCompanionAudio(time, 0)
-  if (store.getters.getWatchedProgressSavingMode === 'auto' || player.value?.isPaused()) savePosition()
+  // Joining the history saves the chosen position as well
+  if (!addToHistoryOnce(getPositionMedia()?.currentTime ?? time) &&
+    (store.getters.getWatchedProgressSavingMode === 'auto' || player.value?.isPaused())) savePosition()
   if (seekTimer !== null) clearTimeout(seekTimer)
   seekTimer = setTimeout(() => {
     seekTimer = null
@@ -1105,6 +1115,7 @@ function getQueryTimestamp() {
 
 /** Like on the watch page, restoring or reloading the tab later resumes instead of returning to the timestamp. */
 function consumeTimestamp() {
+  appliedQueryTimestamp = null
   if (!('timestamp' in route.query)) return
   const query = { ...route.query }
   delete query.timestamp
@@ -1160,15 +1171,35 @@ function addToHistory(watchProgress, isWatched = isHistoryEntryWatched(historyEn
   })
 }
 
-function addToHistoryOnce() {
-  if (historyAdded || !hasBeenPresented || !store.getters.getRememberHistory || historyId.value === null ||
+function engageHistory() {
+  handleViewerSeek()
+  addToHistoryOnce()
+}
+
+/** The media joins the history once the seek completes, see handleSeeked. */
+function handleViewerSeek() {
+  historyEngaged = true
+  // Until then, restoring the tab returns to the link instead of the older saved position
+  consumeTimestamp()
+}
+
+/**
+ * @param {number} [chosenSeconds] where the viewer seeked to
+ * @returns {boolean} whether the media joined the history now
+ */
+function addToHistoryOnce(chosenSeconds) {
+  // The write can wait for companion metadata, which must not lose the chosen position.
+  if (historyEngaged && chosenSeconds !== undefined) historyChosenSeconds = chosenSeconds
+  if (historyAdded || !historyEngaged || !hasBeenPresented ||
+    !store.getters.getRememberHistory || historyId.value === null ||
     loading.value || !info.value || !source.value || !player.value?.hasLoaded ||
     // Only both tracks' lengths tell how long the media is.
-    (source.value.separateAudioUrl && !hasCompanionMetadata())) return
+    (source.value.separateAudioUrl && !hasCompanionMetadata())) return false
   historyAdded = true
-  // With progress saving off, a timestamp link only sets where playback starts.
-  const timestamp = store.getters.getWatchedProgressSavingMode === 'never' ? null : startTimestamp
-  addToHistory(timestamp ?? historyEntry.value?.watchProgress ?? 0)
+  // With progress saving off, a seek or timestamp link only sets where playback continues.
+  const chosen = store.getters.getWatchedProgressSavingMode === 'never' ? null : historyChosenSeconds ?? startTimestamp
+  addToHistory(chosen ?? historyEntry.value?.watchProgress ?? 0)
+  return true
 }
 
 /**
@@ -1176,8 +1207,11 @@ function addToHistoryOnce() {
  * @param {boolean} [isFinished]
  */
 function markAsWatchedIfFinished(seconds, isFinished = false) {
+  // Media that ends within the first seconds of playback still counts as played
+  if (isFinished && historyPlaybackSeconds > 0) engageHistory()
   if (!hasBeenPresented || !store.getters.getRememberHistory || source.value?.isLive ||
     isHistoryEntryWatched(historyEntry.value) || watchedMarkPending) return
+  if (!historyEngaged) return
   if (!isFinished && player.value?.isPaused()) return
   // Until both tracks' lengths are known, the threshold would use the shorter video.
   if (!isFinished && source.value?.separateAudioUrl && !hasCompanionMetadata()) return
@@ -1196,18 +1230,21 @@ function hasCompanionMetadata() {
 
 function applyQueryTimestamp() {
   const seconds = getQueryTimestamp()
-  if (seconds === null || loading.value || !player.value?.hasLoaded) return
+  if (seconds === null || route.query.timestamp === appliedQueryTimestamp || loading.value || !player.value?.hasLoaded) return
+  appliedQueryTimestamp = route.query.timestamp
+  // The first history write also stores the latest link
+  startTimestamp = seconds
   if (source.value?.separateAudioUrl && !hasCompanionMetadata()) {
     // Only both tracks' lengths tell which one supplies the timeline, so the
     // companion restore applies the link once the soundtrack's metadata arrives.
-    startTimestamp = seconds
     startTime.value = seconds
   } else {
     // The link wins over a restore still waiting for companion metadata.
     startTime.value = null
-    seekTo(seconds)
+    // Opening a link is not watching yet, see handleViewerSeek
+    seekTo(seconds, false)
   }
-  consumeTimestamp()
+  if (historyEngaged) consumeTimestamp()
 }
 
 function updateCompanionLoop() {
@@ -1346,13 +1383,20 @@ function updateCurrentTime(seconds) {
   // A looping soundtrack, as on Coub, starts over without ending.
   const duration = getMediaDuration()
   const looped = media?.loop === true && !media.paused && position < lastPlaybackPosition && lastPlaybackPosition >= duration - 2
+  // Only natural playback counts towards joining the history, not seeks. Faster playback moves further between time updates.
+  const elapsed = position - lastPlaybackPosition
+  if (!historyEngaged && !seeking.value && media && !media.paused && elapsed > 0 && elapsed <= 2 * Math.max(1, media.playbackRate)) {
+    historyPlaybackSeconds += elapsed
+    if (historyPlaybackSeconds >= HISTORY_MIN_PLAYBACK_SECONDS) engageHistory()
+  }
   lastPlaybackPosition = position
   markAsWatchedIfFinished(looped ? duration : position, looped)
   if (store.getters.getWatchedProgressSavingMode === 'auto' && Date.now() - lastPositionSave >= 2000) savePosition()
 }
 
 function savePosition() {
-  if (!store.getters.getRememberHistory || store.getters.getWatchedProgressSavingMode === 'never' ||
+  // Until the first history write, which can wait for companion metadata, it would store an older position.
+  if (!historyAdded || !store.getters.getRememberHistory || store.getters.getWatchedProgressSavingMode === 'never' ||
     loading.value || !source.value || source.value.isLive || !player.value?.hasPlaybackPosition ||
     !hasBeenPresented || (source.value.separateAudioUrl && startTime.value !== null)) return
   const seconds = getPositionMedia()?.currentTime ?? player.value.getCurrentTime()
@@ -1433,7 +1477,11 @@ function handlePlaybackStopped() {
   watchTimeTracker.flush()
   savePosition()
 }
-function seekTo(seconds) {
+/**
+ * @param {number} seconds
+ * @param {boolean} [viewerSeek] whether the viewer chose this position, such as with a chapter
+ */
+function seekTo(seconds, viewerSeek = true) {
   // A looping video over a longer soundtrack follows the soundtrack's timeline.
   const audio = companionAudio.value
   const video = getCompanionVideo()
@@ -1441,9 +1489,9 @@ function seekTo(seconds) {
     audio.currentTime = seconds
     // Moving back from the end is not the soundtrack starting over.
     lastPlaybackPosition = seconds
-    player.value?.setCurrentTime(seconds % video.duration, true)
+    player.value?.setCurrentTime(seconds % video.duration, viewerSeek)
   } else {
-    player.value?.setCurrentTime(seconds, true)
+    player.value?.setCurrentTime(seconds, viewerSeek)
   }
 }
 function copyChapterTimestamp(seconds) { player.value?.copyChapterTimestamp(seconds) }
@@ -1518,11 +1566,15 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
   currentTime.value = 0
   startTime.value = null
   startTimestamp = null
+  appliedQueryTimestamp = null
+  historyChosenSeconds = null
   lastPositionSave = 0
   lastSavedPosition = 0
   lastPlaybackPosition = 0
   hasBeenPresented = isTabPresented?.value ?? true
   historyAdded = false
+  historyPlaybackSeconds = 0
+  historyEngaged = false
   watchedMarkPending = null
   showChapters.value = false
   showTranscript.value = false
@@ -1563,7 +1615,9 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
     }
     source.value = result.source
     setTabTitle(info.value.title || hostname.value)
-    consumeTimestamp()
+    // The start position already uses the link
+    appliedQueryTimestamp = route.query.timestamp
+    if (result.source?.isLive) consumeTimestamp()
     if (creatorAvatarUrl.value) setTabAvatar(creatorAvatarUrl.value)
   } catch (error) {
     if (generation !== loadGeneration) return

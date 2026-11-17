@@ -56,7 +56,7 @@ import { calculateColorLuminance } from '../../helpers/colors'
 import { createTheatreModeAnimator, isTheatreLayoutAvailable } from '../../helpers/watchLayout'
 import { createShortsFeedNavigation } from './shortsFeedNavigation'
 import { clampOverlayScrollTop, isOverlayScrollTopOutOfBounds, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
-import { hasReachedWatchedThreshold, isHistoryEntryWatched } from '../../helpers/history'
+import { HISTORY_MIN_PLAYBACK_SECONDS, hasReachedWatchedThreshold, isHistoryEntryWatched } from '../../helpers/history'
 import { normalizeRemoveWatchedVideosThreshold } from '../../helpers/playlist-preferences-sync'
 import { liveReminder, supportsLiveReminders } from '../../helpers/liveReminders'
 import { withThumbnail } from '../../helpers/notificationHistory'
@@ -648,6 +648,13 @@ export default defineComponent({
       recommendationWatchSession: null,
       recommendationLoadRetryAt: 0,
       historyLastTouchedAt: 0,
+      // Natural playback of the loaded video, until it joins the history
+      historyPlaybackSeconds: 0,
+      // The viewer played the video for a few seconds or chose a position
+      historyEngaged: false,
+      /** @type {number | null} where the viewer seeked to, until the video joins the history */
+      historyChosenSeconds: null,
+      playbackHistoryStarted: false,
       /** @type {Promise<unknown> | null} the latest history write of the current video */
       latestHistoryWrite: null,
       // A direct load that ended without /next has only the unlocalized /player metadata
@@ -2674,6 +2681,10 @@ export default defineComponent({
 
       this.firstLoad = true
       this.videoPlayerLoaded = false
+      this.historyPlaybackSeconds = 0
+      this.historyEngaged = false
+      this.historyChosenSeconds = null
+      this.playbackHistoryStarted = false
       this.latestHistoryWrite = null
       this.videoMetadataIncomplete = false
       // Re-evaluate per video: this instance is reused across same-tab
@@ -4294,7 +4305,7 @@ export default defineComponent({
           this.watchNextPending = false
           this.updateVideoMetadataCache()
           // Playback may have saved the /player title, description, and date already.
-          if (this.rememberHistory && this.videoPlayerLoaded) {
+          if (this.rememberHistory && this.playbackHistoryStarted) {
             this.refreshHistoryMetadata(loadGeneration, videoId)
           }
         } else if (watchNextPromise) {
@@ -5010,6 +5021,14 @@ export default defineComponent({
       this.shortsCompletionBlockedBySeek = shortsCompletion.blockedBySeek
       this.shortsPlaybackAfterSeekSeconds = shortsCompletion.playbackAfterSeekSeconds
 
+      // Faster playback moves further between time updates
+      if (!this.skipNextPlaybackTick && !this.historyEngaged && this.videoPlayerLoaded && elapsedSeconds > 0 &&
+        elapsedSeconds <= SABR_ERROR_RECOVERY_MAX_TICK_SECONDS * Math.max(1, this.currentPlaybackRate ?? 1) &&
+        !this.isPlaybackPaused()) {
+        this.historyPlaybackSeconds += elapsedSeconds
+        if (this.historyPlaybackSeconds >= HISTORY_MIN_PLAYBACK_SECONDS) this.engageHistory()
+      }
+
       if (this.skipNextPlaybackTick) {
         this.skipNextPlaybackTick = false
       } else if (
@@ -5112,12 +5131,51 @@ export default defineComponent({
       return this.latestHistoryWrite
     },
 
+    /**
+     * Lets the history and watched progress change once the viewer has played
+     * the video for a few seconds or chosen a position, so opening it only to
+     * read its comments leaves them unchanged.
+     * @param {number} [chosenSeconds] where the viewer seeked to
+     */
+    engageHistory(chosenSeconds) {
+      this.historyEngaged = true
+      // A seek before the player has loaded still decides the first write
+      if (chosenSeconds !== undefined) this.historyChosenSeconds = chosenSeconds
+      this.startPlaybackHistory()
+    },
+
+    startPlaybackHistory() {
+      if (this.playbackHistoryStarted || !this.historyEngaged || !this.videoPlayerLoaded) { return }
+      this.playbackHistoryStarted = true
+
+      if (this.rememberHistory) {
+        // With progress saving off, a seek or timestamp link only sets where playback continues.
+        // Otherwise, the chosen position also keeps this write from overtaking the progress
+        // saved right after it, such as when leaving.
+        this.addToHistory(this.watchedProgressSavingEnabled
+          ? this.historyChosenSeconds ?? this.timestamp ?? this.historyEntry?.watchProgress ?? 0
+          : (this.historyEntry?.watchProgress ?? 0))
+
+        // Must be called AFTER history entry inserted
+        // Otherwise the value is not saved for first time watched videos
+        this.handlePlaylistPersisting()
+      }
+
+      this.updateLocalPlaylistLastPlayedAtSometimes()
+
+      // Restoring or reloading the tab later resumes from the history instead.
+      // Until then, reloading the player keeps starting at the timestamp.
+      if ((process.env.IS_ELECTRON || process.env.IS_CAPACITOR) && this.timestamp !== null) {
+        this.consumeTimestamp()
+      }
+    },
+
     keepHistoryEntryAlive(currentSeconds) {
       const now = Date.now()
       if (
         !this.rememberHistory ||
         !this.historyRetentionEnabled ||
-        !this.videoPlayerLoaded ||
+        !this.playbackHistoryStarted ||
         this.isUpcoming ||
         this.isLive ||
         this.isPlaybackPaused() ||
@@ -5138,8 +5196,12 @@ export default defineComponent({
     markAsWatchedIfFinished(currentSeconds, isFinished = false) {
       this.removeFromPlaylistIfWatched(currentSeconds, isFinished)
 
+      // A video that ends within the first seconds of playback still counts as played
+      if (isFinished && this.historyPlaybackSeconds > 0) this.engageHistory()
+
       if (
         !this.rememberHistory ||
+        !this.playbackHistoryStarted ||
         this.isUpcoming ||
         this.isLive ||
         isHistoryEntryWatched(this.historyEntry) ||
@@ -5264,11 +5326,11 @@ export default defineComponent({
       saveChannelPreferenceWithToast(this.$store, this.channelId, 'volume', this.currentVolume, this.t)
     },
     handleWatchProgressAutoSave() {
-      if (!this.rememberHistory || !this.autosaveWatchedProgress) { return }
+      if (!this.rememberHistory || !this.autosaveWatchedProgress || !this.historyEngaged) { return }
       this._saveWatchProgress()
     },
     handleWatchProgressAutoSaveWhenProgressEnabled() {
-      if (!this.rememberHistory || !this.watchedProgressSavingEnabled) { return }
+      if (!this.rememberHistory || !this.watchedProgressSavingEnabled || !this.historyEngaged) { return }
       this._saveWatchProgress()
     },
     handleVideoPause() {
@@ -5299,6 +5361,12 @@ export default defineComponent({
     handleChromecastChange(active) {
       this.chromecastActive = active
       if (!active) this.chromecastStatus = null
+      // Casting is watching, even before the receiver reports playback
+      if (active) this.engageHistory()
+    },
+    handleDlnaChange(active) {
+      this.dlnaCastActive = active
+      if (active) this.engageHistory()
     },
     async getChromecastSource() {
       const source = selectCastSource(this.legacyFormats, this.manifestSrc, this.manifestMimeType)
@@ -5529,7 +5597,7 @@ export default defineComponent({
       this.secondaryContentReady = true
     },
 
-    handleVideoLoaded: async function (mediaMetadata) {
+    handleVideoLoaded: function (mediaMetadata) {
       if (this.isLoading || this.preparingVideoLoadGeneration !== null) { return }
       this.showSecondaryContent()
 
@@ -5561,27 +5629,8 @@ export default defineComponent({
       // Check isUpcoming to avoid marking upcoming videos as watched if the user has only watched the trailer
       if (!this.videoPlayerLoaded && !this.isUpcoming) {
         this.videoPlayerLoaded = true
-
-        if (this.rememberHistory) {
-          // With progress saving off, a timestamp link only sets where playback starts.
-          if (this.timestamp !== null && this.watchedProgressSavingEnabled) {
-            this.addToHistory(this.timestamp)
-          } else if (this.historyEntryExists) {
-            this.addToHistory(this.historyEntry.watchProgress)
-          } else {
-            this.addToHistory(0)
-          }
-
-          // Must be called AFTER history entry inserted
-          // Otherwise the value is not saved for first time watched videos
-          this.handlePlaylistPersisting()
-        }
-
-        this.updateLocalPlaylistLastPlayedAtSometimes()
-
-        if ((process.env.IS_ELECTRON || process.env.IS_CAPACITOR) && this.timestamp !== null) {
-          await this.consumeTimestamp()
-        }
+        // The history waits until the viewer plays the video or chooses a position
+        if (this.historyEngaged) this.startPlaybackHistory()
       }
     },
 

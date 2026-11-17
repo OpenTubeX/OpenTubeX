@@ -25,6 +25,7 @@ function fixture(t, { time = 50, live = false } = {}) {
     valueChangeTimeout: null,
     showOverlayControls() {},
     noteSeekHistoryJump() {},
+    emit() {},
     setTimeout,
     clearTimeout,
   }
