@@ -406,6 +406,9 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
   const result = {}
   const skippedCollections = new Set()
   let tabRevocationError = null
+  // The server has no settings entry for speeds this sync migrated, and a saved
+  // one would acknowledge the migration before its upload succeeded.
+  let migratedPlaybackSpeedsEntry = false
   const store = {
     state: rootState,
     getters: rootGetters,
@@ -444,6 +447,18 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         if (updated !== snapshot) await dispatch('updateSyncServerSnapshot', updated, { root: true })
         return
       }
+    },
+    async persistSettingsSyncBaseline(entries) {
+      // The applied server entries are its state even when the upload fails.
+      // Without them, the next sync would take them for local edits and
+      // upload items and values other devices changed since.
+      if (!isSameAccount()) return
+      const saved = parseSnapshot(rootState.settings.syncServerSnapshot)
+      const applied = { ...entries }
+      if (migratedPlaybackSpeedsEntry) delete applied.channelPlaybackSpeeds
+      const settings = { ...saved.settings, ...applied }
+      if (JSON.stringify(settings) === JSON.stringify(saved.settings ?? {})) return
+      await dispatch('updateSyncServerSnapshot', JSON.stringify({ ...saved, settings }), { root: true })
     },
   }
   const stages = [
@@ -814,7 +829,10 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         return null
       }
       client = new EncryptedSyncAdapter(document)
-      if (migratedPlaybackSpeeds) client.touched.add('settings')
+      if (migratedPlaybackSpeeds) {
+        client.touched.add('settings')
+        migratedPlaybackSpeedsEntry = true
+      }
       encryptedCollections = {
         original,
         remote,

@@ -1656,6 +1656,8 @@ const THEME_SELECTION_KEYS = new Set(['baseTheme', 'systemLightTheme', 'systemDa
 // `options.onRetryBaseline` receives a getter for the one a retry after a
 // rejected upload merges them against: the lists this sync applied. The
 // rejected result would drop this device's items the server never received.
+// `store.persistSettingsSyncBaseline` receives the server entries this sync
+// merged and applied, so a failed upload cannot make them look like local edits.
 export async function syncSettings(client, store, previousSnapshot = {}, playlistSnapshot = null, { listSnapshot = previousSnapshot, onRetryBaseline } = {}) {
   const remoteEntries = await client.getSettings()
   // Optimistic edits show their value before saving its edit time. Wait for
@@ -1696,80 +1698,87 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
   let themesDeferred = false
   // Lists this sync didn't apply, which keep their previous baseline
   const skippedLists = new Set()
-  for (const [key, value] of Object.entries(local)) {
-    const old = isListSetting(key) ? previousLists[key] : previous[key]
-    const remoteEntry = remote[key]
-    if (themesDeferred && THEME_SELECTION_KEYS.has(key)) {
-      if (remoteEntry) merged[key] = remoteEntry
-      else delete merged[key]
-      continue
-    }
-    const mergeEntry = itemKeys.has(key)
-      ? mergeSettingItemsEntry
-      : isListSetting(key) ? mergeSettingListEntry : mergeSettingEntry
-    let entry = mergeEntry({
-      key,
-      value,
-      old,
-      remoteEntry,
-      localUpdatedAt: localUpdatedAt[key],
-      now,
-    })
-
-    entry = resolveMergedThemeEntry(
-      entry, store.state.utils.customThemes, local[CUSTOM_THEMES_SYNC_KEY], now
-    )
-    merged[key] = entry
-    if (key === 'defaultProfile' &&
-        !store.state.profiles.profileList.some(profile => profile._id === entry.value)) {
-      entry = { key, value: MAIN_PROFILE_ID, updatedAt: now }
-      merged[key] = entry
-    }
-    const currentValue = key === CUSTOM_THEMES_SYNC_KEY || itemKeys.has(key)
-      ? value
-      : store.state.settings[key]
-    const valuesEqual = key === CUSTOM_THEMES_SYNC_KEY
-      ? areSyncSettingValuesEqual(key, currentValue, entry.value)
-      : metadataEquals(currentValue, entry.value)
-    // Edited while this sync saved an earlier setting. Applying the merge would
-    // undo the edit, so the server keeps its entry and the next sync merges it.
-    const skip = () => {
-      if (remoteEntry) merged[key] = remoteEntry
-      else delete merged[key]
-      if (isListSetting(key)) skippedLists.add(key)
-    }
-    if (!valuesEqual && !itemKeys.has(key) && key !== CUSTOM_THEMES_SYNC_KEY && !metadataEquals(currentValue, value)) {
-      skip()
-      continue
-    }
-    if (!valuesEqual) {
-      if (key === SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY) {
-        await applySubscriptionSettingsSync(store, entry.value, value)
-      } else if (PLAYLIST_PREFERENCES_SYNC_KEYS.includes(key)) {
-        await applyPlaylistPreferencesSync(store, entry.value, playlistSnapshot, value, key)
-      } else if (key === CUSTOM_THEMES_SYNC_KEY) {
-        const previousThemes = store.state.utils.customThemes
-        const themes = await replaceCustomThemes(entry.value, value)
-        if (themes === null) {
-          skip()
-          themesDeferred = true
-          continue
-        }
-        store.commit('setCustomThemes', themes)
-        await repairCustomThemeReferences(store, previousThemes, themes)
-      } else if (isListSetting(key)) {
-        // Another window may save the list after this sync read it. That edit
-        // or a failed save keeps the server entry, and the next sync merges it.
-        let applied = false
-        const saved = await store.dispatch(settingUpdater(key), current => {
-          applied = metadataEquals(current, value)
-          return applied ? deepCopy(entry.value) : current
-        })
-        if (!applied || saved === false) skip()
-      } else {
-        await store.dispatch(settingUpdater(key), deepCopy(entry.value))
+  // Server entries of the settings this sync merged and applied
+  const applied = {}
+  try {
+    for (const [key, value] of Object.entries(local)) {
+      const old = isListSetting(key) ? previousLists[key] : previous[key]
+      const remoteEntry = remote[key]
+      if (themesDeferred && THEME_SELECTION_KEYS.has(key)) {
+        if (remoteEntry) merged[key] = remoteEntry
+        else delete merged[key]
+        continue
       }
+      const mergeEntry = itemKeys.has(key)
+        ? mergeSettingItemsEntry
+        : isListSetting(key) ? mergeSettingListEntry : mergeSettingEntry
+      let entry = mergeEntry({
+        key,
+        value,
+        old,
+        remoteEntry,
+        localUpdatedAt: localUpdatedAt[key],
+        now,
+      })
+
+      entry = resolveMergedThemeEntry(
+        entry, store.state.utils.customThemes, local[CUSTOM_THEMES_SYNC_KEY], now
+      )
+      merged[key] = entry
+      if (key === 'defaultProfile' &&
+          !store.state.profiles.profileList.some(profile => profile._id === entry.value)) {
+        entry = { key, value: MAIN_PROFILE_ID, updatedAt: now }
+        merged[key] = entry
+      }
+      const currentValue = key === CUSTOM_THEMES_SYNC_KEY || itemKeys.has(key)
+        ? value
+        : store.state.settings[key]
+      const valuesEqual = key === CUSTOM_THEMES_SYNC_KEY
+        ? areSyncSettingValuesEqual(key, currentValue, entry.value)
+        : metadataEquals(currentValue, entry.value)
+      // Edited while this sync saved an earlier setting. Applying the merge would
+      // undo the edit, so the server keeps its entry and the next sync merges it.
+      const skip = () => {
+        if (remoteEntry) merged[key] = remoteEntry
+        else delete merged[key]
+        if (isListSetting(key)) skippedLists.add(key)
+      }
+      if (!valuesEqual && !itemKeys.has(key) && key !== CUSTOM_THEMES_SYNC_KEY && !metadataEquals(currentValue, value)) {
+        skip()
+        continue
+      }
+      if (!valuesEqual) {
+        if (key === SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY) {
+          await applySubscriptionSettingsSync(store, entry.value, value)
+        } else if (PLAYLIST_PREFERENCES_SYNC_KEYS.includes(key)) {
+          await applyPlaylistPreferencesSync(store, entry.value, playlistSnapshot, value, key)
+        } else if (key === CUSTOM_THEMES_SYNC_KEY) {
+          const previousThemes = store.state.utils.customThemes
+          const themes = await replaceCustomThemes(entry.value, value)
+          if (themes === null) {
+            skip()
+            themesDeferred = true
+            continue
+          }
+          store.commit('setCustomThemes', themes)
+          await repairCustomThemeReferences(store, previousThemes, themes)
+        } else if (isListSetting(key)) {
+          // Another window may save the list after this sync read it. That edit
+          // or a failed save keeps the server entry, and the next sync merges it.
+          let applied = false
+          const saved = await store.dispatch(settingUpdater(key), current => {
+            applied = metadataEquals(current, value)
+            return applied ? deepCopy(entry.value) : current
+          })
+          if (!applied || saved === false) skip()
+        } else {
+          await store.dispatch(settingUpdater(key), deepCopy(entry.value))
+        }
+      }
+      if (remoteEntry && !skippedLists.has(key)) applied[key] = remoteEntry
     }
+  } finally {
+    await store.persistSettingsSyncBaseline?.(applied)
   }
 
   onRetryBaseline?.(() => Object.fromEntries(Object.keys(local).filter(isListSetting).flatMap(key => {

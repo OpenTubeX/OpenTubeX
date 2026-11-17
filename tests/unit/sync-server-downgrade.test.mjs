@@ -253,6 +253,8 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
       }
       if (action === 'updateChannelPlaybackSpeeds') settings.channelPlaybackSpeeds = value
       if (action === 'updateAutoplayVideos') settings.autoplayVideos = value
+      if (action === 'updateBaseTheme') settings.baseTheme = value
+      if (action === 'updateChannelsHidden') settings.channelsHidden = typeof value === 'function' ? value(settings.channelsHidden) : value
       if (action === 'replaceSyncServerToken') settings.syncServerToken = value
       if (action === 'initializeSyncServer') return store.exports.actions.initializeSyncServer(context, value)
       if (action === 'syncWithSyncServer') return store.exports.actions.syncWithSyncServer(context, value)
@@ -1724,6 +1726,74 @@ test('live checks retry failed local uploads before clearing the sync error', as
   assert.equal(f.context.state.syncServerStatus, 'success')
   assert.equal(f.context.state.syncServerError, '')
   assert.equal(JSON.parse(f.settings.syncServerSnapshot).settings.autoplayVideos.value, false)
+})
+
+test('a failed upload keeps the applied server settings as the baseline, so removals on other devices stay removed', async () => {
+  const collections = new Map()
+  const respond = async (url, options) => {
+    const path = new URL(url).pathname
+    if (path === '/health') return { capabilities: { encrypted_sync: 1, live_sync: 1 } }
+    if (path === '/v1/encrypted_sync') {
+      return {
+        collections: [...collections].map(([collection, entry]) => ({ collection, revision: entry.revision })),
+        legacy_data: false,
+      }
+    }
+    if (path === '/v1/encrypted_sync/events') return []
+    if (path.startsWith('/v1/encrypted_sync/')) {
+      const collection = path.split('/').at(-1)
+      if (options.method === 'PUT') {
+        const body = JSON.parse(options.body)
+        collections.set(collection, { revision: body.revision + 1, payload: body.payload })
+      }
+      return collections.get(collection) ?? { revision: 0, payload: null }
+    }
+  }
+  const settings = { syncServerSyncSubscriptions: false, syncServerSyncSettings: true, autoplayVideos: true, baseTheme: 'dark', channelsHidden: '[]' }
+  const syncableSettingKeys = ['autoplayVideos', 'baseTheme', 'channelsHidden']
+  const a = fixture({ ...settings, syncServerDeviceId: 'desktop' }, { encrypted: true, respond, syncableSettingKeys })
+  const b = fixture({ ...settings, syncServerDeviceId: 'phone' }, { encrypted: true, respond, syncableSettingKeys })
+  const hidden = (...names) => JSON.stringify(names.map(name => ({ name, preferredName: '' })))
+  const edit = (f, key, value) => {
+    f.settings[key] = value
+    f.settings.syncServerSettingUpdatedAt = { ...f.settings.syncServerSettingUpdatedAt, [key]: Date.now() }
+  }
+  const remote = async () => Object.fromEntries((await privacy.decryptSyncDocument(
+    collections.get('settings').payload, a.settings.syncServerPrivacyKey
+  )).map(entry => [entry.key, entry.value]))
+  await a.actions.syncWithSyncServer(a.context)
+  await b.actions.syncWithSyncServer(b.context)
+
+  edit(b, 'channelsHidden', hidden('UC-hidden-elsewhere'))
+  edit(b, 'autoplayVideos', false)
+  await b.actions.syncWithSyncServer(b.context)
+
+  // This device applies the other device's settings, but its upload of its own edit fails.
+  edit(a, 'baseTheme', 'light')
+  const put = a.Client.prototype.putEncryptedSyncCollection
+  a.Client.prototype.putEncryptedSyncCollection = async () => {
+    throw Object.assign(new Error('Service Unavailable'), { status: 503 })
+  }
+  await assert.rejects(a.actions.syncWithSyncServer(a.context), /Service Unavailable/)
+  a.Client.prototype.putEncryptedSyncCollection = put
+  assert.equal(a.settings.channelsHidden, hidden('UC-hidden-elsewhere'))
+  assert.equal(a.settings.autoplayVideos, false)
+
+  // Meanwhile, this device hides another channel and the other device reverts its edits.
+  edit(a, 'channelsHidden', hidden('UC-hidden-elsewhere', 'UC-hidden-here'))
+  edit(b, 'channelsHidden', hidden())
+  edit(b, 'autoplayVideos', true)
+  await b.actions.syncWithSyncServer(b.context)
+
+  await a.actions.syncWithSyncServer(a.context)
+  const { autoplayVideos, baseTheme, channelsHidden } = await remote()
+  assert.deepEqual({ autoplayVideos, baseTheme, channelsHidden }, {
+    autoplayVideos: true,
+    baseTheme: 'light',
+    channelsHidden: hidden('UC-hidden-here'),
+  })
+  assert.equal(a.settings.channelsHidden, hidden('UC-hidden-here'))
+  assert.equal(a.settings.autoplayVideos, true)
 })
 
 for (const [scenario, desktopKeys, phoneKeys] of [
