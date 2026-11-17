@@ -1,5 +1,6 @@
 import { computed, nextTick, onUnmounted, ref } from 'vue'
 import { lightHaptic } from '../../../helpers/mobileHaptics.js'
+import { getTwoFingerTapPoint, isTwoFingerDoubleTap, TWO_FINGER_DOUBLE_TAP_GAP } from '../../../helpers/player/twoFingerTap.js'
 
 // A vertical swipe of this distance commits on release, even without a fling.
 const MOBILE_SWIPE_COMMIT_DISTANCE = 64
@@ -35,6 +36,8 @@ export function useMobileFullscreenGestures({
   isScrollMiniPlayerActive,
   isShortsPlayer,
   seekOnDoubleTap,
+  isTwoFingerTapEnabled = () => false,
+  onTwoFingerDoubleTap = () => false,
   getSwipeAction = () => 'disabled',
   getAnimationSpeedMultiplier = () => 1,
   adjustments,
@@ -758,7 +761,111 @@ export function useMobileFullscreenGestures({
     return true
   }
 
+  // #region two-finger taps
+
+  /** @type {{ touches: Map<number, { startX: number, startY: number, maxDistance: number, lifted: boolean }>, startTime: number, valid: boolean, controlsShownAtStart: boolean } | null} */
+  let mobileTwoFingerTap = null
+  /** @type {{ direction: number, endTime: number } | null} */
+  let lastMobileTwoFingerTap = null
+  /** @type {number | null} */
+  let mobileTwoFingerTapTimer = null
+
+  // Whether the fingers on the player could still become a two-finger tap.
+  function isMobileTwoFingerTapCandidate() {
+    return mobileTwoFingerTap?.valid === true && mobileTwoFingerTap.touches.size === 2
+  }
+
+  function clearMobileTwoFingerTaps() {
+    clearTimeout(mobileTwoFingerTapTimer)
+    mobileTwoFingerTapTimer = null
+    mobileTwoFingerTap = null
+    lastMobileTwoFingerTap = null
+  }
+
+  /**
+   * Follows every touch on the player, alongside the other gestures, to find
+   * two-finger double taps on either side. Fingers that move past the tap
+   * slop, as in a pinch, or a third finger never count.
+   * @param {PointerEvent} event
+   */
+  function trackMobileTwoFingerTap(event) {
+    if (event.pointerType !== 'touch') return
+    if (event.type === 'pointerdown') {
+      if (event.isPrimary) {
+        clearTimeout(mobileTwoFingerTapTimer)
+        mobileTwoFingerTapTimer = null
+        if (!isCapacitorMobilePlayer() || isScrollMiniPlayerActive() || isShortsPlayer() || !isTwoFingerTapEnabled()) {
+          clearMobileTwoFingerTaps()
+          return
+        }
+        mobileTwoFingerTap = {
+          touches: new Map(),
+          startTime: event.timeStamp,
+          valid: true,
+          controlsShownAtStart: getControls()?.getControlsContainer().hasAttribute('shown') === true,
+        }
+      }
+      if (!mobileTwoFingerTap) return
+      if (mobileTwoFingerTap.touches.size >= 2 || !isPlayerSurfaceTarget(event.target)) {
+        mobileTwoFingerTap.valid = false
+      }
+      mobileTwoFingerTap.touches.set(event.pointerId, { startX: event.clientX, startY: event.clientY, maxDistance: 0, lifted: false })
+      return
+    }
+
+    const tap = mobileTwoFingerTap
+    const touch = tap?.touches.get(event.pointerId)
+    if (!touch || touch.lifted) return
+    if (event.type === 'pointercancel') {
+      clearMobileTwoFingerTaps()
+      return
+    }
+    touch.maxDistance = Math.max(touch.maxDistance, Math.hypot(event.clientX - touch.startX, event.clientY - touch.startY))
+    if (event.type !== 'pointerup') return
+
+    touch.lifted = true
+    const touches = [...tap.touches.values()]
+    const point = tap.valid ? getTwoFingerTapPoint(touches, event.timeStamp - tap.startTime) : null
+    // Shaka would toggle its controls for the touchend of each finger.
+    if (point) mobileSurfaceSuppressTouchEndUntil = performance.now() + 350
+    if (touches.some(({ lifted }) => !lifted)) return
+
+    mobileTwoFingerTap = null
+    if (!point) {
+      lastMobileTwoFingerTap = null
+      return
+    }
+    const controls = getControls()
+    if (controls?.anySettingsMenusAreOpen()) {
+      lastMobileTwoFingerTap = null
+      controls.hideSettingsMenus()
+      return
+    }
+    const direction = getMobileTapDirection(point.x)
+    if (isTwoFingerDoubleTap(lastMobileTwoFingerTap, { direction, startTime: tap.startTime })) {
+      lastMobileTwoFingerTap = null
+      if (onTwoFingerDoubleTap(direction)) lightHaptic()
+      return
+    }
+    // A lone two-finger tap toggles the controls like a one-finger tap.
+    if (!direction) {
+      lastMobileTwoFingerTap = null
+      applyMobilePlayerSurfaceTap(!tap.controlsShownAtStart)
+      return
+    }
+    // Pair taps by their input times only: a busy main thread can run this
+    // timer before it handles a second tap that came in time.
+    lastMobileTwoFingerTap = { direction, endTime: event.timeStamp }
+    mobileTwoFingerTapTimer = window.setTimeout(() => {
+      mobileTwoFingerTapTimer = null
+      applyMobilePlayerSurfaceTap(!tap.controlsShownAtStart)
+    }, TWO_FINGER_DOUBLE_TAP_GAP)
+  }
+
+  // #endregion two-finger taps
+
   onUnmounted(() => {
+    clearMobileTwoFingerTaps()
     mobileFullscreenSettleSequence++
     clearMobileMiniPlayerDismiss()
     clearMobileSeekFeedback()
@@ -785,6 +892,7 @@ export function useMobileFullscreenGestures({
     handleMobilePlayerSurfaceClick,
     handleMobilePlayerTouchEnd,
     handleMobilePlayerTouchMove,
+    isMobileTwoFingerTapCandidate,
     mobileFullscreenSwipeSettling,
     mobileFullscreenSwipeStyle,
     mobileFullscreenSwiping,
@@ -793,5 +901,6 @@ export function useMobileFullscreenGestures({
     moveMobileFullscreenGesture,
     releaseMobileFullscreenSwipe,
     startMobileFullscreenGesture,
+    trackMobileTwoFingerTap,
   }
 }

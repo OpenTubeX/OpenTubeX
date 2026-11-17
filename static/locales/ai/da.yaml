@@ -1076,6 +1076,7 @@ Settings:
     Timestamp Notes:
       Enable: "Aktivér tidsstempelnoter"
       Obsidian Vault: Obsidian-boks
+    Double-Tap With Two Fingers to Skip Chapters: "Dobbelttryk med to fingre for at springe mellem kapitler"
   Channel Settings:
     Channel Settings: Kanalindstillinger
     Channel Settings Description: Husk de indstillinger, du vælger under afspilning, for hver kanal, så de anvendes igen, næste gang du ser en af kanalens videoer.
@@ -2501,6 +2502,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Beder om bekræftelse, før alle videoer i en playliste med mere end {count} videoer forudindlæses."
     Enable Timestamp Notes: "Tilføjer en afspillerknap og genvejen N, der sætter videoen på pause og åbner en note, der linker til det aktuelle øjeblik. Noter kan kopieres som Markdown eller på computeren føjes til Obsidian."
     Obsidian Vault: Navnet på Obsidian-boksen til tidsstempelnoter. Når den er angivet, kan noter føjes til Obsidian. Noterne for hver video samles i en note opkaldt efter videoen i boksens mappe til nye noter.
+    Double-Tap With Two Fingers to Skip Chapters: "Dobbelttryk med to fingre i højre side af videoen for at springe til næste kapitel, eller i venstre side for at gå tilbage til starten af det aktuelle kapitel. Gentag det straks i venstre side for at gå til det forrige kapitel."
   Download Settings:
     Download Folder: Videoer gemmes i denne mappe. Lad feltet stå tomt for at bruge systemets Downloads-mappe.
     Global Additional yt-dlp Arguments: Yderligere kommandolinjeargumenter, der sendes til yt-dlp ved hver download, f.eks. --cookies-from-browser firefox.

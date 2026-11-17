@@ -1062,6 +1062,7 @@ Settings:
     Timestamp Notes:
       Enable: "تفعيل ملاحظات الطوابع الزمنية"
       Obsidian Vault: خزنة Obsidian
+    Double-Tap With Two Fingers to Skip Chapters: "انقر مرتين بإصبعين لتخطي الفصول"
   Channel Settings:
     Channel Settings: إعدادات القناة
     Channel Settings Description: تذكر الإعدادات التي تختارها أثناء المشاهدة لكل قناة على حدة، بحيث يتم تطبيقها مرة أخرى في المرة التالية التي تشاهد فيها أحد مقاطع الفيديو الخاصة بها.
@@ -2449,6 +2450,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "يطلب التأكيد قبل التحميل المسبق لكل فيديوهات قائمة تشغيل تحتوي على أكثر من {count} فيديو."
     Enable Timestamp Notes: "يضيف زرًا إلى المشغل واختصار N لإيقاف الفيديو مؤقتًا وفتح ملاحظة ترتبط باللحظة الحالية. يمكن نسخ الملاحظات بتنسيق Markdown أو إضافتها إلى Obsidian على سطح المكتب."
     Obsidian Vault: اسم خزنة Obsidian لملاحظات الطوابع الزمنية. عند تعيينه، يمكن إضافة الملاحظات إلى Obsidian. تُجمع ملاحظات كل فيديو في ملاحظة تحمل اسم الفيديو، داخل مجلد الملاحظات الجديدة في الخزنة.
+    Double-Tap With Two Fingers to Skip Chapters: "انقر مرتين بإصبعين على الجانب الأيمن من الفيديو للانتقال إلى الفصل التالي، أو على الجانب الأيسر للعودة إلى بداية الفصل الحالي. كرر ذلك على الجانب الأيسر فورًا للانتقال إلى الفصل السابق."
   Download Settings:
     Download Folder: يتم حفظ مقاطع الفيديو في هذا المجلد. اتركه فارغًا لاستخدام مجلد التنزيلات الخاص بنظامك.
     Global Additional yt-dlp Arguments: يتم تمرير وسيطات سطر الأوامر الإضافية إلى yt-dlp لكل عملية تنزيل، على سبيل المثال --cookies-from-browser Firefox.

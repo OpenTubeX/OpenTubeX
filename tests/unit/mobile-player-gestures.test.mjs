@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs'
 import vm from 'node:vm'
 import { createRenderer, nextTick } from 'vue'
 import { useMobileFullscreenGestures } from '../../src/renderer/components/FtShakaVideoPlayer/opentubex/useMobileFullscreenGestures.js'
+import { TWO_FINGER_TAP_SLOP } from '../../src/renderer/helpers/player/twoFingerTap.js'
 
 const playerSource = readFileSync(new URL('../../src/renderer/components/FtShakaVideoPlayer/FtShakaVideoPlayer.vue', import.meta.url), 'utf8')
 
@@ -12,7 +13,7 @@ class ElementStub {
   closest(selectors) { return this.selector && selectors.includes(this.selector) ? this : null }
 }
 
-function fixture(t, { left = 'brightness', right = 'volume', fullscreenSwipe = true, seekSwipe = () => true, mobile = true, mini = false, dismissible = () => false, reducedMotion = true, shorts = false, height = 200.5, nativeReplay = false, minimize = false, fullscreen = () => false, controls, toggleFullscreen, animationSpeed = 1, width = 400, surfaceWidth = width, seekState = () => ({ time: 60, start: 0, end: 600 }) } = {}) {
+function fixture(t, { left = 'brightness', right = 'volume', fullscreenSwipe = true, seekSwipe = () => true, mobile = true, mini = false, dismissible = () => false, reducedMotion = true, shorts = false, height = 200.5, nativeReplay = false, minimize = false, fullscreen = () => false, controls, toggleFullscreen, animationSpeed = 1, width = 400, surfaceWidth = width, seekState = () => ({ time: 60, start: 0, end: 600 }), chapterTaps = false } = {}) {
   t.mock.method(globalThis, 'setTimeout', setTimeout)
   const previous = { document: globalThis.document, window: globalThis.window, Element: globalThis.Element, requestAnimationFrame: globalThis.requestAnimationFrame }
   const frames = []
@@ -53,6 +54,11 @@ function fixture(t, { left = 'brightness', right = 'volume', fullscreenSwipe = t
         isScrollMiniPlayerActive: () => mini,
         isShortsPlayer: () => shorts,
         getSwipeAction: side => side === 'left' ? left : right,
+        isTwoFingerTapEnabled: () => chapterTaps,
+        onTwoFingerDoubleTap: direction => {
+          calls.push(['chapter', direction])
+          return true
+        },
         getAnimationSpeedMultiplier: () => animationSpeed,
         miniPlayerDrag: {
           canDismiss: dismissible,
@@ -687,3 +693,92 @@ for (const [name, dynamic, time, duration, end, expected] of [
     assert.equal(video.value.paused, true)
   })
 }
+
+// Sends both fingers of a two-finger tap through the gesture handlers as the
+// player routes them. Each finger moves by `drift` before lifting.
+function twoFingerTap(g, event, { x = 370, start = 0, duration = 120, drift = 0, gap = 40 } = {}) {
+  const fingers = [{ pointerId: 1, isPrimary: true, x: x - 30 }, { pointerId: 2, isPrimary: false, x: x + 30 }]
+  const touchEnds = []
+  fingers.forEach((finger, index) => {
+    const down = event(finger.x, 100, { ...finger, type: 'pointerdown', timeStamp: start + index * gap })
+    g.trackMobileTwoFingerTap(down)
+    g.startMobileFullscreenGesture(down)
+  })
+  for (const finger of fingers) {
+    const move = event(finger.x + drift, 100, { ...finger, type: 'pointermove', timeStamp: start + duration / 2 })
+    g.trackMobileTwoFingerTap(move)
+    g.moveMobileFullscreenGesture(move)
+  }
+  fingers.forEach((finger, index) => {
+    const up = event(finger.x + drift, 100, { ...finger, type: 'pointerup', timeStamp: start + duration - (1 - index) * 10 })
+    g.trackMobileTwoFingerTap(up)
+    g.finishMobileFullscreenGesture(up)
+    const touchEnd = event(finger.x + drift, 100, { timeStamp: performance.now(), touches: [] })
+    g.handleMobilePlayerTouchEnd(touchEnd)
+    touchEnds.push(touchEnd.prevented === true)
+  })
+  return touchEnds
+}
+
+for (const [x, direction] of [[370, 1], [50, -1]]) {
+  test(`a two-finger double tap on the ${direction > 0 ? 'right' : 'left'} skips chapters without toggling controls`, t => {
+    const { gestures: g, event, calls } = fixture(t, { chapterTaps: true })
+    t.mock.timers.enable({ apis: ['setTimeout'] })
+    assert.deepEqual(twoFingerTap(g, event, { x }), [true, true])
+    assert.deepEqual(twoFingerTap(g, event, { x, start: 300 }), [true, true])
+    assert.deepEqual(calls, [['chapter', direction]])
+    t.mock.timers.tick(1000)
+    assert.deepEqual(calls, [['chapter', direction]])
+  })
+}
+
+// The first tap lifts its last finger at 120 ms.
+for (const [name, tap, secondStart, shows] of [
+  ['a pinch', { drift: TWO_FINGER_TAP_SLOP + 1 }, 300, 0],
+  ['a slow two-finger press', { duration: 451 }, 600, 0],
+  ['a center two-finger tap', { x: 210 }, 300, 2],
+  ['two-finger taps too far apart', {}, 471, 2],
+]) {
+  test(`${name} does not skip chapters`, t => {
+    const { gestures: g, event, calls } = fixture(t, { chapterTaps: true })
+    t.mock.timers.enable({ apis: ['setTimeout'] })
+    twoFingerTap(g, event, tap)
+    t.mock.timers.tick(secondStart - 120)
+    twoFingerTap(g, event, { ...tap, start: secondStart })
+    t.mock.timers.tick(1000)
+    assert.deepEqual(calls, Array(shows).fill('show'))
+  })
+}
+
+test('two-finger taps keep their previous handling when chapter taps are unavailable', t => {
+  const { gestures: g, event, calls } = fixture(t)
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  assert.deepEqual(twoFingerTap(g, event), [false, false])
+  assert.deepEqual(twoFingerTap(g, event, { start: 300 }), [false, false])
+  t.mock.timers.tick(1000)
+  assert.deepEqual(calls, [])
+})
+
+test('a second tap that came in time still pairs after a busy main thread ran the lone-tap timer', t => {
+  const { gestures: g, event, calls } = fixture(t, { chapterTaps: true })
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  twoFingerTap(g, event)
+  t.mock.timers.tick(400)
+  twoFingerTap(g, event, { start: 300 })
+  assert.deepEqual(calls, ['show', ['chapter', 1]])
+})
+
+test('a third finger cancels a two-finger double tap', t => {
+  const { gestures: g, event, calls } = fixture(t, { chapterTaps: true })
+  twoFingerTap(g, event)
+  g.trackMobileTwoFingerTap(event(340, 100, { pointerId: 1, type: 'pointerdown', timeStamp: 300 }))
+  g.trackMobileTwoFingerTap(event(400, 100, { pointerId: 2, isPrimary: false, type: 'pointerdown', timeStamp: 310 }))
+  // Video zoom defers its pinch only while the fingers can still form a tap.
+  assert.equal(g.isMobileTwoFingerTapCandidate(), true)
+  g.trackMobileTwoFingerTap(event(380, 140, { pointerId: 3, isPrimary: false, type: 'pointerdown', timeStamp: 320 }))
+  assert.equal(g.isMobileTwoFingerTapCandidate(), false)
+  for (const [pointerId, x, y] of [[1, 340, 100], [2, 400, 100], [3, 380, 140]]) {
+    g.trackMobileTwoFingerTap(event(x, y, { pointerId, type: 'pointerup', timeStamp: 400 }))
+  }
+  assert.deepEqual(calls, [])
+})

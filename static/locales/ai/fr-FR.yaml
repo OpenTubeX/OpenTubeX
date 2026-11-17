@@ -1051,6 +1051,7 @@ Settings:
     Timestamp Notes:
       Enable: "Activer les notes horodatées"
       Obsidian Vault: Coffre Obsidian
+    Double-Tap With Two Fingers to Skip Chapters: "Toucher deux fois avec deux doigts pour changer de chapitre"
   Channel Settings:
     Channel Settings: Paramètres des chaînes
     Channel Settings Description: Mémorisez séparément pour chaque chaîne les paramètres choisis pendant le visionnage afin de les appliquer de nouveau à la prochaine vidéo de cette chaîne.
@@ -2410,6 +2411,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Demande une confirmation avant de précharger toutes les vidéos d’une playlist de plus de {count} vidéos."
     Enable Timestamp Notes: "Ajoute un bouton au lecteur et le raccourci N, qui mettent la vidéo en pause et ouvrent une note renvoyant au moment actuel. Les notes peuvent être copiées en Markdown ou, sur ordinateur, ajoutées à Obsidian."
     Obsidian Vault: Nom du coffre Obsidian pour les notes horodatées. S’il est défini, les notes peuvent être ajoutées à Obsidian. Les notes de chaque vidéo sont regroupées dans une note portant le nom de la vidéo, dans le dossier du coffre destiné aux nouvelles notes.
+    Double-Tap With Two Fingers to Skip Chapters: "Touchez deux fois avec deux doigts le côté droit de la vidéo pour passer au chapitre suivant, ou le côté gauche pour revenir au début du chapitre actuel. Recommencez aussitôt à gauche pour aller au chapitre précédent."
   Download Settings:
     Download Folder: Les vidéos sont enregistrées dans ce dossier. Laissez ce champ vide pour utiliser le dossier Téléchargements de votre système.
     Global Additional yt-dlp Arguments: Arguments de ligne de commande supplémentaires transmis à yt-dlp pour chaque téléchargement, par exemple --cookies-from-browser firefox.

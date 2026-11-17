@@ -1300,6 +1300,7 @@ Settings:
     Timestamp Notes:
       Enable: "Activa les notes amb marca de temps"
       Obsidian Vault: Magatzem d'Obsidian
+    Double-Tap With Two Fingers to Skip Chapters: "Toc doble amb dos dits per saltar capítols"
   Channel Settings:
     Channel Settings: Configuració dels canals
     Channel Settings Description: Recorda per separat la configuració que trieu mentre mireu cada canal, per tornar-la a aplicar la propera vegada que mireu un dels seus vídeos.
@@ -2966,6 +2967,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Demana confirmació abans de precarregar tots els vídeos d’una llista de reproducció amb més de {count} vídeos."
     Enable Timestamp Notes: "Afegeix un botó al reproductor i la drecera N, que posen en pausa el vídeo i obren una nota que enllaça amb el moment actual. Les notes es poden copiar com a Markdown o, a l'escriptori, afegir a Obsidian."
     Obsidian Vault: Nom del magatzem d'Obsidian per a les notes amb marca de temps. Si s'estableix, les notes es poden afegir a Obsidian. Les notes de cada vídeo es recullen en una nota amb el nom del vídeo, a la carpeta del magatzem per a notes noves.
+    Double-Tap With Two Fingers to Skip Chapters: "Feu doble toc amb dos dits al costat dret del vídeo per saltar al capítol següent, o al costat esquerre per tornar a l'inici del capítol actual. Repetiu-ho de seguida a l'esquerra per anar al capítol anterior."
   External Player Settings:
     External Player: En triar un reproductor extern, es mostrarà a la miniatura una icona per obrir-hi el vídeo o, si s'admet, la llista de reproducció. La configuració d'Invidious no afecta els reproductors externs.
     Custom External Player Executable: De manera predeterminada, l'OpenTubeX suposa que el reproductor extern triat es pot trobar mitjançant la variable d'entorn PATH. Si cal, podeu definir aquí un camí personalitzat.

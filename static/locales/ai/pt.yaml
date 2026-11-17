@@ -1051,6 +1051,7 @@ Settings:
     Timestamp Notes:
       Enable: "Ativar notas com marca temporal"
       Obsidian Vault: Cofre do Obsidian
+    Double-Tap With Two Fingers to Skip Chapters: "Tocar duas vezes com dois dedos para saltar capítulos"
   Channel Settings:
     Channel Settings: Definições dos canais
     Channel Settings Description: Memorizar individualmente para cada canal as definições escolhidas durante a visualização, para que sejam aplicadas quando voltar a ver um dos seus vídeos.
@@ -2412,6 +2413,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Pede confirmação antes de pré-carregar todos os vídeos de uma lista de reprodução com mais de {count} vídeos."
     Enable Timestamp Notes: "Adiciona um botão ao reprodutor e o atalho N, que colocam o vídeo em pausa e abrem uma nota com ligação para o momento atual. As notas podem ser copiadas como Markdown ou, no computador, adicionadas ao Obsidian."
     Obsidian Vault: Nome do cofre do Obsidian para as notas com marca temporal. Quando definido, as notas podem ser adicionadas ao Obsidian. As notas de cada vídeo são reunidas numa nota com o nome do vídeo, na pasta do cofre para novas notas.
+    Double-Tap With Two Fingers to Skip Chapters: "Toque duas vezes com dois dedos no lado direito do vídeo para saltar para o capítulo seguinte, ou no lado esquerdo para voltar ao início do capítulo atual. Repita logo a seguir à esquerda para ir para o capítulo anterior."
   Download Settings:
     Download Folder: Os vídeos são guardados nesta pasta. Deixe em branco para utilizar a pasta Transferências do sistema.
     Global Additional yt-dlp Arguments: Argumentos adicionais da linha de comandos passados ao yt-dlp em cada descarga, por exemplo --cookies-from-browser firefox.

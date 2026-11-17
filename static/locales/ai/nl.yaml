@@ -1066,6 +1066,7 @@ Settings:
     Timestamp Notes:
       Enable: "Notities met tijdstempel inschakelen"
       Obsidian Vault: Obsidian-kluis
+    Double-Tap With Two Fingers to Skip Chapters: "Dubbeltik met twee vingers om hoofdstukken over te slaan"
   Channel Settings:
     Channel Settings: Kanaalinstellingen
     Channel Settings Description: Onthoud de instellingen die je tijdens het kijken kiest afzonderlijk voor elk kanaal, zodat ze weer worden toegepast wanneer je een andere video van dat kanaal bekijkt.
@@ -2479,6 +2480,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Vraagt om bevestiging voordat alle video’s van een afspeellijst met meer dan {count} video’s vooraf worden geladen."
     Enable Timestamp Notes: "Voegt een spelerknop en de sneltoets N toe die de video pauzeren en een notitie openen die naar het huidige moment linkt. Notities kunnen als Markdown worden gekopieerd of op de computer aan Obsidian worden toegevoegd."
     Obsidian Vault: Naam van de Obsidian-kluis voor notities met tijdstempel. Als deze is ingesteld, kunnen notities aan Obsidian worden toegevoegd. De notities van elke video worden verzameld in een notitie met de naam van de video, in de map van de kluis voor nieuwe notities.
+    Double-Tap With Two Fingers to Skip Chapters: "Dubbeltik met twee vingers op de rechterkant van de video om naar het volgende hoofdstuk te gaan, of op de linkerkant om terug te gaan naar het begin van het huidige hoofdstuk. Herhaal het meteen links om naar het vorige hoofdstuk te gaan."
   Download Settings:
     Download Folder: Video's worden in deze map opgeslagen. Laat dit leeg om de downloadmap van je systeem te gebruiken.
     Global Additional yt-dlp Arguments: Aanvullende opdrachtregelargumenten die bij elke download aan yt-dlp worden doorgegeven, bijvoorbeeld --cookies-from-browser firefox.

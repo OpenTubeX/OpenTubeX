@@ -1051,6 +1051,7 @@ Settings:
     Timestamp Notes:
       Enable: "啟用時間戳記筆記"
       Obsidian Vault: Obsidian 儲存庫
+    Double-Tap With Two Fingers to Skip Chapters: "雙指輕觸兩下以跳轉章節"
   Channel Settings:
     Channel Settings: 頻道設定
     Channel Settings Description: 為各頻道分別記住觀看時選擇的設定，下次觀看該頻道的影片時便會再次套用。
@@ -2414,6 +2415,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "預先載入超過 {count} 部影片的播放清單中的所有影片前要求確認。"
     Enable Timestamp Notes: "新增播放器按鈕與 N 快速鍵，可暫停影片並開啟一則連結至目前時間點的筆記。筆記可複製為 Markdown，或在桌面版中新增至 Obsidian。"
     Obsidian Vault: 用於時間戳記筆記的 Obsidian 儲存庫名稱。設定後即可將筆記新增至 Obsidian。每部影片的筆記會彙整在以該影片命名的筆記中，位於儲存庫的新筆記資料夾內。
+    Double-Tap With Two Fingers to Skip Chapters: "用雙指輕觸影片右側兩下可跳到下一個章節，輕觸左側兩下可回到目前章節的開頭。緊接著在左側再做一次可跳到上一個章節。"
   Download Settings:
     Download Folder: 影片會儲存至此資料夾。留白可使用系統的「下載」資料夾。
     Global Additional yt-dlp Arguments: 每次下載時傳遞給 yt-dlp 的額外命令列引數，例如 --cookies-from-browser firefox。

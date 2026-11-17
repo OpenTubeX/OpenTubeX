@@ -1051,6 +1051,7 @@ Settings:
     Timestamp Notes:
       Enable: "Ota aikaleimamuistiinpanot käyttöön"
       Obsidian Vault: Obsidian-holvi
+    Double-Tap With Two Fingers to Skip Chapters: "Siirry lukuihin kaksoisnapauttamalla kahdella sormella"
   Channel Settings:
     Channel Settings: Kanava-asetukset
     Channel Settings Description: Muista katselun aikana valitsemasi asetukset kanavakohtaisesti, jotta niitä käytetään uudelleen, kun katsot seuraavan kerran saman kanavan videota.
@@ -2420,6 +2421,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Pyytää vahvistusta ennen kuin kaikki videot esiladataan soittolistalta, jossa on yli {count} videota."
     Enable Timestamp Notes: "Lisää soittimeen painikkeen ja pikanäppäimen N, jotka keskeyttävät videon ja avaavat muistiinpanon, joka linkittää nykyiseen kohtaan. Muistiinpanot voi kopioida Markdownina tai työpöydällä lisätä Obsidianiin."
     Obsidian Vault: Aikaleimamuistiinpanoihin käytettävän Obsidian-holvin nimi. Kun se on asetettu, muistiinpanoja voi lisätä Obsidianiin. Kunkin videon muistiinpanot kootaan videon mukaan nimettyyn muistiinpanoon holvin uusien muistiinpanojen kansiossa.
+    Double-Tap With Two Fingers to Skip Chapters: "Kaksoisnapauta videon oikeaa reunaa kahdella sormella siirtyäksesi seuraavaan lukuun tai vasenta reunaa palataksesi nykyisen luvun alkuun. Toista vasemmalla heti perään siirtyäksesi edelliseen lukuun."
   Download Settings:
     Download Folder: Videot tallennetaan tähän kansioon. Jos kenttä jätetään tyhjäksi, käytetään järjestelmän Lataukset-kansiota.
     Global Additional yt-dlp Arguments: Kaikissa latauksissa yt-dlp:lle välitettävät komentorivin lisäargumentit, esimerkiksi --cookies-from-browser firefox.

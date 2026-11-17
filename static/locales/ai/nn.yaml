@@ -1149,6 +1149,7 @@ Settings:
     Timestamp Notes:
       Enable: "Slå på tidsstempelnotat"
       Obsidian Vault: Obsidian-kvelv
+    Double-Tap With Two Fingers to Skip Chapters: "Dobbelttrykk med to fingrar for å hoppe mellom kapittel"
   Channel Settings:
     Channel Settings: Kanalinnstillingar
     Channel Settings Description: Hugs innstillingane du vel medan du ser på kvar einskild kanal, slik at dei blir brukte att neste gong du ser ein av videoane til kanalen.
@@ -2724,6 +2725,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Ber om stadfesting før alle videoane i ei speleliste med meir enn {count} videoar vert førehandslasta."
     Enable Timestamp Notes: "Legg til ein avspelarknapp og snarvegen N som set videoen på pause og opnar eit notat som lenkjer til det noverande augeblinken. Notat kan kopierast som Markdown eller, på datamaskina, leggjast til i Obsidian."
     Obsidian Vault: Namnet på Obsidian-kvelven for tidsstempelnotat. Når det er sett, kan notat leggjast til i Obsidian. Notata for kvar video vert samla i eit notat kalla opp etter videoen, i mappa til kvelven for nye notat.
+    Double-Tap With Two Fingers to Skip Chapters: "Dobbelttrykk med to fingrar på høgre side av videoen for å hoppe til neste kapittel, eller på venstre side for å gå tilbake til starten av gjeldande kapittel. Gjenta det med ein gong på venstre side for å gå til førre kapittel."
   External Player Settings:
     Ignore Default Arguments: Ikkje send andre standardargument enn URL-en til videoen til den eksterne spelaren, til dømes avspelingsfart eller URL til spelelista. Eigne argument vert framleis sende vidare.
   Download Settings:

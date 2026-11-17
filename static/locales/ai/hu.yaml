@@ -1051,6 +1051,7 @@ Settings:
     Timestamp Notes:
       Enable: "Időbélyeges jegyzetek engedélyezése"
       Obsidian Vault: Obsidian-széf
+    Double-Tap With Two Fingers to Skip Chapters: "Fejezetek léptetése két ujjal való dupla koppintással"
   Channel Settings:
     Channel Settings: Csatornabeállítások
     Channel Settings Description: Csatornánként megjegyzi a videónézés közben kiválasztott beállításokat, és a csatorna következő videójánál újra alkalmazza őket.
@@ -2412,6 +2413,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Megerősítést kér, mielőtt egy {count} videónál többet tartalmazó lejátszási lista összes videóját előtöltené."
     Enable Timestamp Notes: "Hozzáad a lejátszóhoz egy gombot és az N billentyűparancsot, amelyek szüneteltetik a videót, és megnyitnak egy jegyzetet, amely az aktuális pillanatra hivatkozik. A jegyzetek Markdownként másolhatók, vagy asztali gépen hozzáadhatók az Obsidianhoz."
     Obsidian Vault: Az időbélyeges jegyzetekhez használt Obsidian-széf neve. Ha meg van adva, a jegyzetek hozzáadhatók az Obsidianhoz. Az egyes videók jegyzetei egy, a videóról elnevezett jegyzetben gyűlnek össze, a széf új jegyzeteknek szánt mappájában.
+    Double-Tap With Two Fingers to Skip Chapters: "Koppints duplán két ujjal a videó jobb oldalára a következő fejezetre ugráshoz, vagy a bal oldalára az aktuális fejezet elejére való visszatéréshez. Ismételd meg azonnal a bal oldalon az előző fejezetre lépéshez."
   Download Settings:
     Download Folder: A videók ebbe a mappába kerülnek. Hagyja üresen a rendszer Letöltések mappájának használatához.
     Global Additional yt-dlp Arguments: Minden letöltésnél a yt-dlp számára átadott további parancssori argumentumok, például --cookies-from-browser firefox.

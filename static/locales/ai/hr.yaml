@@ -1056,6 +1056,7 @@ Settings:
     Timestamp Notes:
       Enable: "Omogući bilješke s vremenskim oznakama"
       Obsidian Vault: Obsidian trezor
+    Double-Tap With Two Fingers to Skip Chapters: "Dvostruki dodir s dva prsta za preskakanje poglavlja"
   Channel Settings:
     Channel Settings: Postavke kanala
     Channel Settings Description: Postavke koje odaberete tijekom gledanja pamte se zasebno za svaki kanal kako bi se ponovno primijenile kada sljedeći put gledate neki njegov videozapis.
@@ -2449,6 +2450,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Traži potvrdu prije predučitavanja svih videozapisa s popisa za reprodukciju s više od {count} videozapisa."
     Enable Timestamp Notes: "Dodaje gumb u player i prečac N koji pauziraju videozapis i otvaraju bilješku s poveznicom na trenutačni trenutak. Bilješke se mogu kopirati kao Markdown ili ih na računalu dodati u Obsidian."
     Obsidian Vault: Naziv Obsidian trezora za bilješke s vremenskim oznakama. Kada je postavljen, bilješke se mogu dodati u Obsidian. Bilješke svakog videa skupljaju se u bilješci nazvanoj po videu, u mapi trezora za nove bilješke.
+    Double-Tap With Two Fingers to Skip Chapters: "Dvaput dodirnite s dva prsta desnu stranu videozapisa za prelazak na sljedeće poglavlje ili lijevu stranu za povratak na početak trenutnog poglavlja. Odmah ponovite lijevo za prelazak na prethodno poglavlje."
   Download Settings:
     Download Folder: Videozapisi se spremaju u ovu mapu. Ostavite prazno za upotrebu sustavske mape Preuzimanja.
     Global Additional yt-dlp Arguments: Dodatni argumenti naredbenog retka koji se prosljeđuju alatu yt-dlp pri svakom preuzimanju, primjerice --cookies-from-browser firefox.

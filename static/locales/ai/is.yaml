@@ -1053,6 +1053,7 @@ Settings:
     Timestamp Notes:
       Enable: "Virkja tímamerktar glósur"
       Obsidian Vault: Obsidian-hvelfing
+    Double-Tap With Two Fingers to Skip Chapters: "Tvísmella með tveimur fingrum til að hoppa á milli kafla"
   Channel Settings:
     Channel Settings: Rásarstillingar
     Channel Settings Description: Muna stillingarnar sem þú velur við áhorf fyrir hverja rás, svo þær verði notaðar aftur næst þegar þú horfir á myndband frá henni.
@@ -2427,6 +2428,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Biður um staðfestingu áður en öll myndskeið spilunarlista með fleiri en {count} myndskeið eru forhlaðin."
     Enable Timestamp Notes: "Bætir við hnappi í spilarann og flýtilyklinum N sem gera hlé á myndskeiðinu og opna glósu sem tengir á núverandi augnablik. Hægt er að afrita glósur sem Markdown eða, á tölvu, bæta þeim við Obsidian."
     Obsidian Vault: Heiti Obsidian-hvelfingarinnar fyrir tímamerktar glósur. Þegar það er stillt er hægt að bæta glósum við Obsidian. Glósur hvers myndskeiðs eru teknar saman í glósu sem nefnd er eftir myndskeiðinu, í möppu hvelfingarinnar fyrir nýjar glósur.
+    Double-Tap With Two Fingers to Skip Chapters: "Tvísmelltu með tveimur fingrum hægra megin á myndskeiðinu til að hoppa í næsta kafla, eða vinstra megin til að fara aftur í upphaf núverandi kafla. Endurtaktu strax vinstra megin til að fara í fyrri kafla."
   Download Settings:
     Download Folder: Myndbönd vistast í þessa möppu. Skildu reitinn eftir auðan til að nota niðurhalsmöppu kerfisins.
     Global Additional yt-dlp Arguments: Viðbótarviðföng skipanalínu sem eru send til yt-dlp við hvert niðurhal, til dæmis --cookies-from-browser firefox.

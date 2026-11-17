@@ -1251,6 +1251,7 @@ Settings:
     Timestamp Notes:
       Enable: "Įjungti laiko žymų pastabas"
       Obsidian Vault: Obsidian saugykla
+    Double-Tap With Two Fingers to Skip Chapters: "Dukart bakstelėkite dviem pirštais, kad praleistumėte skyrius"
   Channel Settings:
     Channel Settings: Kanalo nustatymai
     Channel Settings Description: Atskirai įsiminti kiekvienam kanalui žiūrint pasirinktus nustatymus, kad jie vėl būtų pritaikyti kitą kartą žiūrint vieną iš jo vaizdo įrašų.
@@ -2837,6 +2838,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Prašo patvirtinimo prieš iš anksto įkeliant visus grojaraščio, kuriame yra daugiau nei {count} vaizdo įrašų, vaizdo įrašus."
     Enable Timestamp Notes: "Prideda grotuvo mygtuką ir spartųjį klavišą N, kurie pristabdo vaizdo įrašą ir atveria pastabą su nuoroda į dabartinę akimirką. Pastabas galima nukopijuoti kaip Markdown arba kompiuteryje pridėti prie Obsidian."
     Obsidian Vault: Obsidian saugyklos, skirtos laiko žymų pastaboms, pavadinimas. Jį nustačius, pastabas galima pridėti į Obsidian. Kiekvieno vaizdo įrašo pastabos renkamos pagal vaizdo įrašą pavadintoje pastaboje, saugyklos naujų pastabų aplanke.
+    Double-Tap With Two Fingers to Skip Chapters: "Dukart bakstelėkite dviem pirštais dešinę vaizdo įrašo pusę, kad pereitumėte į kitą skyrių, arba kairę pusę, kad grįžtumėte į dabartinio skyriaus pradžią. Iškart pakartokite kairėje, kad pereitumėte į ankstesnį skyrių."
   External Player Settings:
     Ignore Default Arguments: Išoriniam leistuvui nesiųsti jokių numatytųjų argumentų, išskyrus vaizdo įrašo URL (pvz., atkūrimo greitį, grojaraščio URL ir kt.). Pasirinktiniai argumentai vis tiek bus perduoti.
   Download Settings:

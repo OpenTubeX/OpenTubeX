@@ -1093,6 +1093,7 @@ Settings:
     Timestamp Notes:
       Enable: "Ŝalti tempomarkajn notojn"
       Obsidian Vault: Obsidian-trezorejo
+    Double-Tap With Two Fingers to Skip Chapters: "Duoble tuŝeti per du fingroj por salti ĉapitrojn"
   Channel Settings:
     Channel Settings: Kanalaj agordoj
     Channel Settings Description: Memori la agordojn, kiujn vi elektas dum spektado, aparte por ĉiu kanalo, por ke ili estu reaplikitaj la venontan fojon, kiam vi spektos unu el ĝiaj videaĵoj.
@@ -2466,6 +2467,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Petas konfirmon antaŭ antaŭŝargi ĉiujn videaĵojn de ludlisto kun pli ol {count} videaĵoj."
     Enable Timestamp Notes: "Aldonas ludilan butonon kaj la klavkombinon N, kiuj paŭzigas la videon kaj malfermas noton, kiu ligas al la nuna momento. Notojn eblas kopii kiel Markdown aŭ, ĉe labortablo, aldoni al Obsidian."
     Obsidian Vault: Nomo de la Obsidian-trezorejo por tempomarkaj notoj. Se ĝi estas agordita, notoj aldoneblas al Obsidian. La notoj de ĉiu video estas kolektataj en noto nomita laŭ la video, en la dosierujo de la trezorejo por novaj notoj.
+    Double-Tap With Two Fingers to Skip Chapters: "Duoble tuŝetu per du fingroj la dekstran flankon de la video por salti al la sekva ĉapitro, aŭ la maldekstran flankon por reveni al la komenco de la nuna ĉapitro. Ripetu tuj maldekstre por iri al la antaŭa ĉapitro."
   Download Settings:
     Download Folder: Videaĵoj estas konservataj en ĉi tiu dosierujo. Lasu malplena por uzi la elŝutan dosierujon de via sistemo.
     Global Additional yt-dlp Arguments: Aldonaj komandliniaj argumentoj donataj al yt-dlp por ĉiu elŝuto, ekzemple --cookies-from-browser firefox.
