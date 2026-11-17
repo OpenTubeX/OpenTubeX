@@ -1718,6 +1718,48 @@ ${sequence.map(index => `#EXT-X-PROGRAM-DATE-TIME:${new Date(liveStart + index *
   await expect(page.locator(`${activeTab} .externalMediaError`)).toHaveCount(0)
 })
 
+test('Twitch livestream loads another session when its playlist fails to load without one to return to', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  // yt-dlp returns no HLS playlist to return to, as on iOS, which cannot play them
+  await prepareTwitchYtDlp(app, page, 'https://www.twitch.tv/testchannel', true)
+  const fixture = await readFile(path.join(repoRoot, 'e2e/fixtures/media/hls-1080.mp4'))
+  const fragmentStart = fixture.indexOf(Buffer.from('moof')) - 4
+  expect(fragmentStart).toBeGreaterThan(0)
+  const failingUrl = 'https://first.example.test/1080.m3u8'
+  const secondUrl = 'https://second.example.test/1080.m3u8'
+  const master = url => `#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=6000000,CODECS="avc1.64001f",RESOLUTION=1920x1080\n${url}\n`
+  await mockTwitchAdFreeLivePlaylists(app, [{ playlist: master(failingUrl) }, { playlist: master(secondUrl) }])
+
+  const liveStart = Date.now() - 20_000
+  await page.route(failingUrl, route => route.abort())
+  await page.route(secondUrl, route => {
+    const last = Math.floor((Date.now() - liveStart) / 2000) - 1
+    const sequence = Array.from({ length: 4 }, (_, index) => last - 3 + index)
+    return route.fulfill({
+      contentType: 'application/vnd.apple.mpegurl',
+      headers: { 'Access-Control-Allow-Origin': '*' },
+      body: `#EXTM3U
+#EXT-X-VERSION:6
+#EXT-X-TARGETDURATION:2
+#EXT-X-MEDIA-SEQUENCE:${sequence[0]}
+#EXT-X-MAP:URI="https://second.example.test/init.mp4"
+${sequence.map(index => `#EXT-X-PROGRAM-DATE-TIME:${new Date(liveStart + index * 2000).toISOString()}\n#EXTINF:2.000,live\nhttps://second.example.test/${index}.mp4`).join('\n')}
+`
+    })
+  })
+  await page.route(/^https:\/\/second\.example\.test\/(?:init|\d+)\.mp4$/, route => route.fulfill({
+    contentType: 'video/mp4',
+    headers: { 'Access-Control-Allow-Origin': '*' },
+    body: route.request().url().endsWith('/init.mp4') ? fixture.subarray(0, fragmentStart) : fixture.subarray(fragmentStart)
+  }))
+
+  await openLiveStream(page, 'https://www.twitch.tv/testchannel')
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  await expect.poll(() => player.evaluate(element => element.ui?.getControls().getPlayer().getAssetUri() ?? '')).toContain(encodeURIComponent(secondUrl))
+  await expectPlaybackToContinue(player.locator('video'))
+  await expect(page.locator(`${activeTab} .externalMediaError`)).toHaveCount(0)
+})
+
 test('external media starts at the default playback speed', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
   const mediaUrl = 'https://www.twitch.tv/videos/123456789'

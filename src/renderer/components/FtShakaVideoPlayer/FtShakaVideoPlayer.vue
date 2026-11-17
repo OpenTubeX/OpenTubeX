@@ -3752,6 +3752,7 @@ const twitchLiveAds = useTwitchLiveAds({
   isLiveSource: () => twitchLiveRewind.mode.value === 'live',
   replaceLiveSource: twitchLiveRewind.replaceLiveSource,
   restoreLiveSource: twitchLiveRewind.restoreLiveSource,
+  reportLoadError: error => handleError(error, 'loading another Twitch live playlist'),
 })
 
 const {

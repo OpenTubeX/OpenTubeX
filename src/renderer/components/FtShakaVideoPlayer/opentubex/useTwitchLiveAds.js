@@ -16,22 +16,30 @@ const FAILED_RETRY_DELAY_MS = 60_000
  *   isLiveSource: () => boolean,
  *   replaceLiveSource: (src: string) => boolean,
  *   restoreLiveSource: () => boolean,
+ *   reportLoadError: (error: unknown) => void,
  * }} options `startsReplaced` is whether the first playlist replaced one that it can return to,
  *   `replaceLiveSource` and `restoreLiveSource` return whether the player loads the playlist
  */
-export function useTwitchLiveAds({ getLogin, startsReplaced, isLiveSource, replaceLiveSource, restoreLiveSource }) {
+export function useTwitchLiveAds({ getLogin, startsReplaced, isLiveSource, replaceLiveSource, restoreLiveSource, reportLoadError }) {
   let requesting = false
   /** Set from replacing the playlist until the replacement loads */
   let replacing = startsReplaced
+  /** Set from loading another session after a failed load until a playlist loads */
+  let reloading = false
   let retryAt = 0
 
-  /** @param {string} login */
-  async function switchToAdFreeSource(login) {
+  /**
+   * @param {string} login
+   * @param {boolean} allowAds
+   * @returns {Promise<boolean>} whether the player loads another playlist
+   */
+  async function switchToAdFreeSource(login, allowAds = false) {
     requesting = true
-    const src = await getTwitchAdFreeLiveManifest(login)
+    const src = await getTwitchAdFreeLiveManifest(login, allowAds)
     requesting = false
     retryAt = Date.now() + RETRY_DELAY_MS
     if (src) replacing = replaceLiveSource(src)
+    return !!src && replacing
   }
 
   /**
@@ -51,19 +59,34 @@ export function useTwitchLiveAds({ getLogin, startsReplaced, isLiveSource, repla
 
   function handleLoaded() {
     replacing = false
+    reloading = false
   }
 
   /**
    * Returns to the playlist with ads when the ad-free playlist fails to load.
+   * Without one, such as on iOS, which cannot play yt-dlp's playlists, it loads
+   * another session once, also one with ads, before reporting the error.
    * @param {unknown} error
    * @returns {boolean} whether the error was handled
    */
   function handleLoadError(error) {
-    if (!replacing) return false
-    replacing = false
-    if (!restoreLiveSource()) return false
-    console.warn('Failed to load the ad-free Twitch playlist', error)
-    retryAt = Date.now() + FAILED_RETRY_DELAY_MS
+    const login = getLogin()
+    if (!login || !isLiveSource()) return false
+    if (replacing) {
+      replacing = false
+      if (!restoreLiveSource()) return false
+      console.warn('Failed to load the ad-free Twitch playlist', error)
+      retryAt = Date.now() + FAILED_RETRY_DELAY_MS
+      return true
+    }
+    if (reloading || requesting) return false
+    reloading = true
+    console.warn('Failed to load the Twitch playlist, loading another session', error)
+    switchToAdFreeSource(login, true).then((loads) => {
+      // The failed playlist is not worth returning to
+      if (loads) replacing = false
+      else reportLoadError(error)
+    })
     return true
   }
 
