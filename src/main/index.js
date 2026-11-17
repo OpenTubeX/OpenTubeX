@@ -358,7 +358,7 @@ function runApp() {
    */
   async function confirmCloseWindow(browserWindow) {
     const isLastWindow = TabManager.getWindows().length === 1
-    if (isLastWindow) return confirmCloseApp(browserWindow)
+    if (isLastWindow) return confirmQuitByClosingTabs(browserWindow)
 
     const manager = TabManager.getForWindow(browserWindow.id)
     if (manager && manager.tabs.size > 1 && !await confirmCloseWindowWithMultipleTabs(browserWindow, manager.tabs.size)) {
@@ -368,7 +368,19 @@ function runApp() {
     // window stays in TabManager.getWindows() until it is destroyed, after its close.
     const openWindowCount = TabManager.getWindows()
       .filter(window => !closingWindowIds.has(window.id)).length
-    return openWindowCount > 1 || confirmCloseApp(browserWindow)
+    return openWindowCount > 1 || confirmQuitByClosingTabs(browserWindow)
+  }
+
+  /**
+   * Closing the last window's last tabs offers the close button's choices.
+   * Without a prompt it still quits instead of hiding, also in background
+   * mode and on macOS, once the emptied window has closed.
+   * @param {BrowserWindow} browserWindow
+   */
+  async function confirmQuitByClosingTabs(browserWindow) {
+    const confirmed = await confirmCloseApp(browserWindow, keepRefreshingInBackground)
+    if (confirmed) isQuitConfirmed = true
+    return confirmed
   }
 
   // Becomes true once the user asks the app to quit (e.g. Ctrl+Q / "Quit" menu
@@ -2400,6 +2412,9 @@ function runApp() {
 
       stopPowerSaveBlockerForWindow(newWindow)
       updateBackgroundSubscriptionVisibility()
+      // Closing the last tabs confirmed the quit before closing their window.
+      // Auxiliary windows, such as GPU Internals, would keep window-all-closed from firing.
+      if (allWindows.length === 0 && isQuitConfirmed && !isQuitting) app.quit()
     })
 
     if (waitForInitialization) {
@@ -3537,13 +3552,16 @@ function runApp() {
                   const tabIds = tabManager.selectedTabIds.length > 1
                     ? [...tabManager.selectedTabIds]
                     : [tabManager.activeTabId]
-                  const closesLastWindow = TabManager.getWindows().length === 1 &&
-                    await tabManager.closingTabsClosesWindow(tabIds.length)
-                  if (!closesLastWindow && !await confirmMultipleTabsAction(tabManager, tabIds.length, 'close')) {
+                  // Confirm before closing the tabs, so canceling or hiding the window keeps them
+                  if (await tabManager.closingTabsClosesWindow(tabIds.length)) {
+                    if (!await confirmCloseWindow(browserWindow)) return
+                  } else if (!await confirmMultipleTabsAction(tabManager, tabIds.length, 'close')) {
                     return
                   }
                   const hasRemainingTabs = await tabManager.closeTabs(tabIds)
                   if (!hasRemainingTabs) {
+                    // confirmCloseWindow confirmed the quit if this became the last window
+                    if (TabManager.getWindows().length === 1) closeConfirmedWindowIds.add(browserWindow.id)
                     browserWindow.close()
                   }
                 } else {

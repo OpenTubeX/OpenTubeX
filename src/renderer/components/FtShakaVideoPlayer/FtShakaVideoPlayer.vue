@@ -3310,6 +3310,17 @@ let pendingMetadataSeek = null
 let seekBarMouseDown = false
 let resumeAutoplayAfterSeek = false
 let initialAutoplayCanceled = false
+
+/**
+ * A video still waiting for autoplay counts as playing.
+ * @param {HTMLVideoElement} mediaElement
+ */
+function isPausedByUser(mediaElement) {
+  const awaitingAutoplay = mediaElement.autoplay && mediaElement.played.length === 0 &&
+    !initialAutoplayCanceled && mediaElement.readyState < HTMLMediaElement.HAVE_ENOUGH_DATA
+  return mediaElement.paused && !awaitingAutoplay
+}
+
 // When the viewer paused playback, consumed by the next play.
 /** @type {number|null} */
 let rewindOnResumePausedAt = null
@@ -9921,11 +9932,8 @@ function registerLegacyQualitySelection() {
     const mediaElement = video.value
 
     if (userSelected && selectionPlaybackState === null) {
-      // A video still waiting for autoplay counts as playing.
-      const awaitingAutoplay = mediaElement.autoplay && mediaElement.played.length === 0 &&
-        !initialAutoplayCanceled && mediaElement.readyState < HTMLMediaElement.HAVE_ENOUGH_DATA
       const state = {
-        wasPaused: mediaElement.paused && !awaitingAutoplay,
+        wasPaused: isPausedByUser(mediaElement),
         autoplay: mediaElement.autoplay,
         // Playing or pausing while the selection is pending replaces that state. Loading the
         // new source pauses the element without a pause event, so this only sees other changes.
@@ -12742,6 +12750,7 @@ let formatSwitchGeneration = 0
  * @type {{
  *   oldFormat: 'dash'|'audio'|'legacy',
  *   wasPaused: boolean,
+ *   awaitingAutoplay: boolean,
  *   playbackPosition: number | null,
  *   useAutoQuality: boolean,
  *   audioBandwidth: number|undefined,
@@ -12822,9 +12831,13 @@ watch(
       // Queue the current speed before unloading so later user choices
       // replace it instead of being overwritten by a pre-switch snapshot.
       queuePlaybackRateRestore()
+      // A new source, such as refreshed streams, can arrive before autoplay starts
+      const pausedByUser = isPausedByUser(video_)
       pendingFormatSwitchState = {
         oldFormat,
-        wasPaused: video_.paused,
+        wasPaused: pausedByUser,
+        // Pausing it during the switch only cancels autoplay, as the element is already paused
+        awaitingAutoplay: video_.paused && !pausedByUser,
         // Twitch's live playlist and the broadcast's recording have different timelines
         playbackPosition: switchStartTime === undefined ? video_.currentTime : switchStartTime,
         // The legacy formats don't have an ABR configuration to carry over,
@@ -12878,6 +12891,7 @@ watch(
     const {
       oldFormat: sourceFormat,
       wasPaused,
+      awaitingAutoplay,
       playbackPosition,
       useAutoQuality,
       audioBandwidth,
@@ -12978,7 +12992,7 @@ watch(
     }
 
     pendingFormatSwitchState = null
-    if (wasPaused || props.pauseForStreamRecovery) {
+    if (wasPaused || (awaitingAutoplay && initialAutoplayCanceled) || props.pauseForStreamRecovery) {
       video_.pause()
     } else {
       video_.play()
