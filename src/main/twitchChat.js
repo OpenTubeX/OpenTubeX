@@ -2,6 +2,7 @@ import { net } from 'electron'
 import { isTrustedSender } from './ipc'
 import { createTwitchChatReplayRequest, readTwitchReplayResponse, TWITCH_CHAT_CLIENT_ID } from '../twitchChatReplayRequest'
 import { fetchTwitchLiveVod, fetchTwitchSubOnlyVod } from '../twitchSubOnlyVod'
+import { fetchTwitchAdFreeLivePlaylist } from '../twitchLiveAds'
 
 export async function handleTwitchSubOnlyVod(event, videoId) {
   if (!isTrustedSender(event) || typeof videoId !== 'string' || !/^\d{1,20}$/.test(videoId)) return null
@@ -11,6 +12,11 @@ export async function handleTwitchSubOnlyVod(event, videoId) {
 export async function handleTwitchLiveVod(event, login) {
   if (!isTrustedSender(event) || typeof login !== 'string') return null
   return fetchTwitchLiveVod(login, (url, options) => net.fetch(url, options))
+}
+
+export async function handleTwitchAdFreeLivePlaylist(event, login, allowAds) {
+  if (!isTrustedSender(event) || typeof login !== 'string' || typeof allowAds !== 'boolean') return null
+  return fetchTwitchAdFreeLivePlaylist(login, (url, options) => net.fetch(url, options), allowAds)
 }
 
 export async function handleTwitchChatReplayPage(event, videoId, position) {

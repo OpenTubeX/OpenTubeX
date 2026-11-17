@@ -863,6 +863,7 @@ export default {
   twitchChatReplayPage: (videoId, position) => ipcRenderer.invoke(IpcChannels.TWITCH_CHAT_REPLAY_PAGE, videoId, position),
   twitchSubOnlyVod: videoId => ipcRenderer.invoke(IpcChannels.TWITCH_SUB_ONLY_VOD, videoId),
   twitchLiveVod: login => ipcRenderer.invoke(IpcChannels.TWITCH_LIVE_VOD, login),
+  twitchAdFreeLivePlaylist: (login, allowAds) => ipcRenderer.invoke(IpcChannels.TWITCH_AD_FREE_LIVE_PLAYLIST, login, allowAds),
   /**
    * Which followed Twitch channels the main process checks for live streams.
    * @param {{ enabled: boolean, channels: { id: string, login: string, name: string }[], title: string }} configuration

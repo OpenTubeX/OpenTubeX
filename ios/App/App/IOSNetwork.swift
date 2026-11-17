@@ -6,10 +6,18 @@ import WebKit
 // handler instead of being copied through the Capacitor JSON bridge.
 final class IOSNetwork: NSObject, URLSessionDataDelegate {
     static let shared = IOSNetwork()
+    // Twitch's live playlists and recordings reject WebKit's origin. Keep in sync with isIOSNativeMediaUrl.
     static func isMediaURL(_ url: URL) -> Bool {
-        guard url.scheme == "https", let host = url.host?.lowercased(), url.user == nil, url.password == nil else { return false }
-        return host == "googlevideo.com" || host.hasSuffix(".googlevideo.com")
+        guard url.scheme == "https", let host = url.host?.lowercased(), url.user == nil, url.password == nil,
+              url.port == nil else { return false }
+        return host == "googlevideo.com" || host.hasSuffix(".googlevideo.com") ||
+            ((host == "playlist.ttvnw.net" || host.hasSuffix(".playlist.ttvnw.net")) && url.path.hasPrefix("/v1/playlist/")) ||
+            (host.range(of: #"^(?:[a-z0-9-]+\.)+(?:cloudfront\.net|jtvnw\.net|ttvnw\.net|twitch\.tv)$"#, options: .regularExpression) != nil &&
+                url.path.range(of: twitchRecordingPath, options: .regularExpression) != nil)
     }
+    // The playlists and segments of a Twitch recording, in one of its quality folders
+    private static let twitchRecordingPath =
+        #"^/(?:[a-zA-Z0-9_]+/[0-9]{1,20}/)?[a-zA-Z0-9_-]+/(?:chunked|1440p60|1080p60|720p60|480p30|360p30|160p30)/[a-zA-Z0-9_-]+\.(?:m3u8|mp4|ts)$"#
     private var prepared: [String: URLRequest] = [:]
     private var external: [String: URLRequest] = [:]
     private var externalOwners: [String: Set<String>] = [:]

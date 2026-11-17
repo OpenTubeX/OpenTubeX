@@ -182,14 +182,14 @@ async function buildPlaylist(preview, path, fetcher) {
   return `#EXTM3U\n${available.join('\n')}\n`
 }
 
-async function queryTwitch(query, fetcher) {
+export async function queryTwitch(query, fetcher) {
   const response = await fetcher('https://gql.twitch.tv/gql', {
     method: 'POST',
     headers: { 'Client-ID': TWITCH_CHAT_CLIENT_ID, 'Content-Type': 'application/json' },
     body: JSON.stringify({ query }),
     signal: AbortSignal.timeout(10_000)
   })
-  if (!response.ok) throw new Error(`Twitch VOD metadata returned HTTP ${response.status}`)
+  if (!response.ok) throw new Error(`Twitch's API returned HTTP ${response.status}`)
   return (await response.json())?.data
 }
 

@@ -45,7 +45,7 @@ import { handleOpenInExternalPlayer } from './externalPlayer'
 import { stopDlnaCast } from './dlnaCast'
 import { ChromecastManager } from './chromecast'
 import { FcastManager } from './fcast'
-import { handleTwitchChatReplayPage, handleTwitchLiveVod, handleTwitchSubOnlyVod } from './twitchChat'
+import { handleTwitchAdFreeLivePlaylist, handleTwitchChatReplayPage, handleTwitchLiveVod, handleTwitchSubOnlyVod } from './twitchChat'
 import { applyTwitchPlaylistOrigin } from '../twitchPlaylistOrigin'
 import { createTwitchLiveNotifier } from './twitchLiveNotifications'
 import { isYtDlpStoryboardUrl, getYtDlpExternalStreamCookieHeader, getYtDlpExternalStreamHeaders, refreshYtDlpDownloadQueue, restoreYtDlpDownloadQueue, shutdownYtDlpDownloads } from './ytDlp'
@@ -2690,6 +2690,7 @@ function runApp() {
   ipcMain.handle(IpcChannels.TWITCH_CHAT_REPLAY_PAGE, handleTwitchChatReplayPage)
   ipcMain.handle(IpcChannels.TWITCH_SUB_ONLY_VOD, handleTwitchSubOnlyVod)
   ipcMain.handle(IpcChannels.TWITCH_LIVE_VOD, handleTwitchLiveVod)
+  ipcMain.handle(IpcChannels.TWITCH_AD_FREE_LIVE_PLAYLIST, handleTwitchAdFreeLivePlaylist)
 
   handleTrusted(IpcChannels.GET_REPLACE_HTTP_CACHE, () => replaceHttpCache)
 

@@ -25,6 +25,8 @@ final class ExternalStreamRequestRegistry {
     private final LinkedHashMap<String, Map<String, String>> storyboardExact = new LinkedHashMap<>();
     private final LinkedHashMap<String, Map<String, String>> manifestPaths = new LinkedHashMap<>();
     private final LinkedHashMap<String, Set<String>> twitchVodRegistrations = new LinkedHashMap<>();
+    // Twitch rejects the WebView's origin, like Electron's request hook in twitchPlaylistOrigin.js
+    private static final Map<String, String> TWITCH_PLAYLIST_HEADERS = Map.of("Origin", "https://www.twitch.tv");
     private final List<Cookie> cookies = new ArrayList<>();
 
     static ExternalStreamRequestRegistry shared() { return SHARED; }
@@ -101,7 +103,20 @@ final class ExternalStreamRequestRegistry {
     synchronized Map<String, String> headersFor(URL url) {
         if (isTwitchVodPath(url)) return Map.of();
         Map<String, String> source = sourceHeadersFor(url);
+        if (isTwitchLivePlaylist(url)) {
+            Map<String, String> headers = source == null ? new HashMap<>() : withCookies(source, url);
+            headers.putAll(TWITCH_PLAYLIST_HEADERS);
+            return headers;
+        }
         return source == null ? null : withCookies(source, url);
+    }
+
+    /** Ad-free Twitch livestreams play the playlists of sessions that yt-dlp did not register. */
+    static boolean isTwitchLivePlaylist(URL url) {
+        String host = url.getHost().toLowerCase(Locale.ROOT);
+        return "https".equals(url.getProtocol()) && url.getUserInfo() == null && url.getPort() == -1 &&
+            (host.equals("playlist.ttvnw.net") || host.endsWith(".playlist.ttvnw.net")) &&
+            url.getPath().startsWith("/v1/playlist/");
     }
 
     synchronized void saveResponseCookies(URL url, Headers headers) {
