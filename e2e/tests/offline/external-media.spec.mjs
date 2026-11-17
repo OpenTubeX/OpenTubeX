@@ -1525,8 +1525,12 @@ ${Array.from({ length: 35 }, (_, index) => `#EXTINF:2.000,\n${index}.mp4`).join(
   await expect.poll(isLive).toBe(true)
 })
 
-test('Twitch livestream plays an ad-free playlist and replaces it when an ad break starts', async ({ app, page }) => {
-  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+/**
+ * Plays a Twitch livestream from an ad-free session, which gets an ad break,
+ * until the player requests the playlist of a second session without ads.
+ * @param {boolean} secondLoads whether the second session's playlist loads
+ */
+async function startTwitchLiveAdBreak(app, page, secondLoads) {
   const fixture = await readFile(path.join(repoRoot, 'e2e/fixtures/media/hls-1080.mp4'))
   const fragmentStart = fixture.indexOf(Buffer.from('moof')) - 4
   expect(fragmentStart).toBeGreaterThan(0)
@@ -1593,10 +1597,10 @@ ${segments.join('\n')}
     firstRequested = true
     return mediaPlaylist('https://first.example.test', true)
   }))
-  await page.route(secondUrl, playlist(() => {
+  await page.route(secondUrl, route => {
     secondRequested = true
-    return mediaPlaylist('https://second.example.test', false)
-  }))
+    return secondLoads ? playlist(() => mediaPlaylist('https://second.example.test', false))(route) : route.abort()
+  })
   const adRequests = []
   await page.route(/^https:\/\/(?:first|second)\.example\.test\/(?:init|ad-\d+|\d+)\.mp4$/, route => {
     const url = route.request().url()
@@ -1620,12 +1624,32 @@ ${segments.join('\n')}
   // The break starts with the next segment of the first session
   firstAd = Math.floor((Date.now() - liveStart) / 2000)
   await expect.poll(() => secondRequested).toBe(true)
-  await expect.poll(isLive).toBe(true)
+  return { adRequests, isLive, video, ytDlpPlaylistRequested: () => ytDlpPlaylistRequested }
+}
+
+/** @param {import('@playwright/test').Locator} video */
+async function expectPlaybackToContinue(video) {
   await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
   const resumedAt = await video.evaluate(element => element.currentTime)
   await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(resumedAt + 1)
+}
+
+test('Twitch livestream plays an ad-free playlist and replaces it when an ad break starts', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const { adRequests, isLive, video, ytDlpPlaylistRequested } = await startTwitchLiveAdBreak(app, page, true)
+  await expect.poll(isLive).toBe(true)
+  await expectPlaybackToContinue(video)
   expect(adRequests).toEqual([])
-  expect(ytDlpPlaylistRequested).toBe(false)
+  expect(ytDlpPlaylistRequested()).toBe(false)
+})
+
+test('Twitch livestream plays its ads when the ad-free replacement fails to load', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const { adRequests, isLive, video } = await startTwitchLiveAdBreak(app, page, false)
+  await expect.poll(() => adRequests.length).toBeGreaterThan(0)
+  await expect.poll(isLive).toBe(true)
+  await expectPlaybackToContinue(video)
+  await expect(page.locator(`${activeTab} .externalMediaError`)).toHaveCount(0)
 })
 
 test('external media starts at the default playback speed', async ({ app, page }) => {

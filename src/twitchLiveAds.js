@@ -98,8 +98,18 @@ async function fetchLivePlaylist(login, playerType, fetcher) {
  */
 export async function fetchTwitchAdFreeLivePlaylist(login, fetcher, allowAds = false) {
   if (typeof login !== 'string' || !/^[a-zA-Z0-9_]{1,25}$/.test(login)) return null
-  const playlists = (await Promise.all(AD_FREE_PLAYER_TYPES.map(playerType =>
+  const requests = AD_FREE_PLAYER_TYPES.map(playerType =>
     fetchLivePlaylist(login, playerType, fetcher).catch(() => null)
-  ))).filter(result => result !== null && (allowAds || !result.hasAds))
-  return (playlists.find(result => !result.hasAds) ?? playlists[0])?.playlist ?? null
+  )
+  try {
+    // The first playlist without ads, without waiting for the other players
+    return await Promise.any(requests.map(async (request) => {
+      const result = await request
+      if (result === null || result.hasAds) throw new Error('No ad-free playlist')
+      return result.playlist
+    }))
+  } catch {
+    if (!allowAds) return null
+    return (await Promise.all(requests)).find(result => result !== null)?.playlist ?? null
+  }
 }

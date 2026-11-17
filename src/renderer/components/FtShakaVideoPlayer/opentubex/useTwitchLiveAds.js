@@ -3,6 +3,8 @@ import { getTwitchAdFreeLiveManifest } from '../../../helpers/player/ytDlpPlayba
 
 // Also limits how often a playlist that gets ads right after loading reloads
 const RETRY_DELAY_MS = 10_000
+// Each failed attempt interrupts the ad-supported playlist
+const FAILED_RETRY_DELAY_MS = 60_000
 
 /**
  * Twitch inserts its ads into the live playlist. When an ad break starts, this
@@ -12,9 +14,10 @@ const RETRY_DELAY_MS = 10_000
  *   getLogin: () => string | null,
  *   isLiveSource: () => boolean,
  *   replaceLiveSource: (src: string) => boolean,
- * }} options `replaceLiveSource` returns whether the player loads the playlist
+ *   restoreLiveSource: () => boolean,
+ * }} options `replaceLiveSource` and `restoreLiveSource` return whether the player loads the playlist
  */
-export function useTwitchLiveAds({ getLogin, isLiveSource, replaceLiveSource }) {
+export function useTwitchLiveAds({ getLogin, isLiveSource, replaceLiveSource, restoreLiveSource }) {
   let requesting = false
   /** Set from replacing the playlist until the replacement loads */
   let replacing = false
@@ -48,5 +51,19 @@ export function useTwitchLiveAds({ getLogin, isLiveSource, replaceLiveSource }) 
     replacing = false
   }
 
-  return { handleLoaded, handleMediaPlaylistResponse }
+  /**
+   * Returns to the playlist with ads when the ad-free playlist fails to load.
+   * @param {unknown} error
+   * @returns {boolean} whether the error was handled
+   */
+  function handleLoadError(error) {
+    if (!replacing) return false
+    replacing = false
+    if (!restoreLiveSource()) return false
+    console.warn('Failed to load the ad-free Twitch playlist', error)
+    retryAt = Date.now() + FAILED_RETRY_DELAY_MS
+    return true
+  }
+
+  return { handleLoaded, handleLoadError, handleMediaPlaylistResponse }
 }

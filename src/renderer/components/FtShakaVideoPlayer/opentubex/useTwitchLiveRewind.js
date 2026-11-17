@@ -20,6 +20,8 @@ export function useTwitchLiveRewind({ getPlayer, getControls, props, video }) {
   let loadedMode = null
   /** @type {import('vue').Ref<string | null>} The playlist that replaces `props.manifestSrc` */
   const liveManifestSrc = ref(null)
+  /** @type {string | null} */
+  let replacedLiveManifestSrc = null
   const manifestSrc = computed(() => mode.value === 'recording' && props.twitchLiveRecording
     ? props.twitchLiveRecording.manifestSrc
     : liveManifestSrc.value ?? props.manifestSrc)
@@ -142,11 +144,27 @@ export function useTwitchLiveRewind({ getPlayer, getControls, props, video }) {
    */
   function replaceLiveSource(src) {
     if (mode.value !== 'live') return false
+    replacedLiveManifestSrc = liveManifestSrc.value
+    loadLiveSource(src)
+    return true
+  }
+
+  /**
+   * Returns to the playlist that the last replacement replaced, at the live edge.
+   * @returns {boolean} whether the player loads the playlist
+   */
+  function restoreLiveSource() {
+    if (mode.value !== 'live') return false
+    loadLiveSource(replacedLiveManifestSrc)
+    return true
+  }
+
+  /** @param {string | null} src */
+  function loadLiveSource(src) {
     liveManifestSrc.value = src
     loadedMode = null
     liveOrigin = null
     switchStartTime = null
-    return true
   }
 
   /**
@@ -159,5 +177,5 @@ export function useTwitchLiveRewind({ getPlayer, getControls, props, video }) {
     return time
   }
 
-  return { attach, handleLoaded, handleTimeUpdate, liveManifestSrc, manifestSrc, mode, replaceLiveSource, takeSwitchStartTime }
+  return { attach, handleLoaded, handleTimeUpdate, liveManifestSrc, manifestSrc, mode, replaceLiveSource, restoreLiveSource, takeSwitchStartTime }
 }

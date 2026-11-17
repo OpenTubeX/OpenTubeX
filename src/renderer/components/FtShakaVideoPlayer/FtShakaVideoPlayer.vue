@@ -3745,6 +3745,7 @@ const twitchLiveAds = useTwitchLiveAds({
   getLogin: () => props.twitchLiveLogin,
   isLiveSource: () => twitchLiveRewind.mode.value === 'live',
   replaceLiveSource: twitchLiveRewind.replaceLiveSource,
+  restoreLiveSource: twitchLiveRewind.restoreLiveSource,
 })
 
 const {
@@ -12434,7 +12435,7 @@ async function performFirstLoad(isCurrentLoad = () => true, startTime = props.st
         }
       }
     } catch (error) {
-      if (ui && player && isCurrentInitialLoad()) {
+      if (ui && player && isCurrentInitialLoad() && !twitchLiveAds.handleLoadError(error)) {
         handleError(error, 'loading dash/audio manifest and setting default quality in mounted')
       }
     }
@@ -12913,7 +12914,8 @@ watch(
           }
         }
       } catch (error) {
-        if (!isCurrentFormatSwitch()) return
+        // The reload of the replaced playlist reuses the state from before the switch
+        if (!isCurrentFormatSwitch() || twitchLiveAds.handleLoadError(error)) return
         handleError(error, 'loading dash/audio manifest for format switch', `${sourceFormat} -> ${newFormat}`)
       }
       activeLegacyFormat.value = null
