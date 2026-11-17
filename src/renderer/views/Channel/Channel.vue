@@ -52,7 +52,7 @@
           variant="outlined"
           :label="$t('Channel.View All')"
           :icon="['fas', 'arrow-right']"
-          @click="router.push(currentTabViewAllRoute)"
+          :to="currentTabViewAllRoute"
         />
         <FtToggleSwitch
           v-if="showHideWatchedSwitch"

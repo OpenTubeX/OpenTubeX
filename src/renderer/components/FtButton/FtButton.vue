@@ -1,5 +1,7 @@
 <template>
-  <button
+  <component
+    :is="to ? RouterLink : 'button'"
+    :to="to || undefined"
     class="btn ripple"
     :class="[buttonTheme, `variant-${buttonVariant}`, `shape-${shape}`, `size-${size}`, { selected }]"
     :aria-pressed="selected ?? $attrs['aria-pressed']"
@@ -19,12 +21,13 @@
         {{ label }}
       </slot>
     </slot>
-  </button>
+  </component>
 </template>
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
 import { computed } from 'vue'
+import { RouterLink } from 'vue-router'
 
 const props = defineProps({
   variant: {
@@ -64,6 +67,11 @@ const props = defineProps({
   },
   icon: {
     type: Array,
+    default: null
+  },
+  /** Makes the button a link to this route, so it can open in a new tab. */
+  to: {
+    type: [String, Object],
     default: null
   }
 })

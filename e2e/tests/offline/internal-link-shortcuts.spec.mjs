@@ -1,4 +1,4 @@
-import { test, expect, goTo, sel, waitForAppReady } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, sel, waitForAppReady } from '../../helpers/app.mjs'
 
 const shortcutModifier = process.platform === 'darwin' ? 'Meta' : 'Control'
 
@@ -169,4 +169,45 @@ test.describe('channel About links', () => {
     await expect(page.locator(`.tab[data-tab-id="${sourceTab.id}"]`)).toHaveClass(/active/)
     await expect(page).toHaveURL(new RegExp(`#/channel/${channelId}/about$`))
   })
+})
+
+test('middle and Ctrl clicks open watched comments in new tabs', async ({ page }) => {
+  const now = Date.now()
+  await page.evaluate(threads => localStorage.setItem('commentReplyThreads', JSON.stringify(threads)),
+    ['aaaaaaaaaaa', 'bbbbbbbbbbb'].map((videoId, index) => ({
+      videoId,
+      threadId: `UgThread${index}`,
+      commentId: `UgThread${index}`,
+      channelId: 'UCaaaaaaaaaaaaaaaaaaaaaa',
+      handle: '@commenter',
+      postedAt: now - index * 1000,
+      replyCount: 0,
+      seen: [],
+      text: `Comment ${index}`,
+      videoTitle: `Video ${index}`
+    })))
+  const general = await goToSettingsSection(page, 'general')
+  await general.getByRole('button', { name: 'Watched comments', exact: true }).click()
+  const entries = page.getByRole('link').filter({ has: page.locator('.watchedCommentBody') })
+  await expect(entries).toHaveCount(2)
+  const startUrl = page.url()
+
+  // Ctrl+Alt leaves the tab unloaded, so it shows the video's title instead of its route.
+  await entries.nth(1).click({ button: 'middle', modifiers: ['Control', 'Alt'] })
+  await expect(page.locator(sel.tabs)).toHaveCount(2)
+  await expect(page.locator(sel.tabs).first()).toHaveClass(/active/)
+  await expect(page.locator(sel.tabs).nth(1).locator('.tabTitleText')).toHaveText('Video 1')
+  await expect.poll(() => page.evaluate(async () => {
+    const state = await window.ftElectron.tabs.getState()
+    return state.tabs.find(tab => tab.id !== state.activeTabId)?.route.fullPath
+  })).toBe('/watch/bbbbbbbbbbb?commentId=UgThread1')
+  expect(page.url()).toBe(startUrl)
+  // The list stays open for more background tabs.
+  await expect(entries).toHaveCount(2)
+
+  await entries.nth(0).click({ modifiers: [shortcutModifier] })
+  await expect(page.locator(sel.tabs)).toHaveCount(3)
+  await expect(page.locator(sel.tabs).nth(2)).toHaveClass(/active/)
+  await expect(page).toHaveURL(/#\/watch\/aaaaaaaaaaa\?commentId=UgThread0$/)
+  await expect(page.locator('.settingsWindow')).toBeHidden()
 })
