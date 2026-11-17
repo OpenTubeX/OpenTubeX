@@ -81,8 +81,10 @@ function highlightHtmlText(inputHtml, query) {
 /** @type {import('vue').ComputedRef<string>} */
 const displayText = computed(() => {
   // Tags are kept as they are, so times in attributes such as `href` stay intact.
+  // So are links that show a label instead of their URL (see `processDescriptionHtml` in `WatchVideoDescription`),
+  // so that a video titled `A 10:00 timer` opens that video instead of seeking.
   // Starting only at the beginning of a number keeps long digit runs in remote text from taking quadratic time
-  const timestampHtml = props.inputHtml.replaceAll(/<[^<>]*>|(?<!\d)(?:(\d+):)?(\d+):(\d+)/gi, (timestamp, hours, minutes, seconds) => {
+  const timestampHtml = props.inputHtml.replaceAll(/<a\b[^<>]* data-link-icon="[a-z\d]+">(?:<img\b[^<>]*>)?[^<]*<\/a>|<[^<>]*>|(?<!\d)(?:(\d+):)?(\d+):(\d+)/gi, (timestamp, hours, minutes, seconds) => {
     if (minutes === undefined) {
       return timestamp
     }

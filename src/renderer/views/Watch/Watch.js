@@ -69,6 +69,7 @@ import { downloadWatchRoute, isPlayableDownloadFile, watchRouteForVideo } from '
 import { requestQueuedPlayback, takeQueuedPlayback } from '../../helpers/queuedPlayback'
 import { parseLocalVideoGames } from '../../helpers/video-games'
 import { parseLocalVideoDescriptionSections } from '../../helpers/video-description-sections'
+import { escapeHTML } from '../../helpers/feed-metadata'
 import { parseLocalVideoMusicTracks, parseVideoMusicTracks } from '../../helpers/video-music'
 import { saveChannelPreference, saveChannelPreferenceWithToast } from '../../helpers/channel-preferences'
 import {
@@ -3748,17 +3749,19 @@ export default defineComponent({
         }
         this.videoPublished = Number.isFinite(published) ? published : 0
 
+        // The description is HTML, like the parsed text runs, while the short description is plain text
+        const shortDescription = escapeHTML(result.basic_info.short_description ?? '')
         if (avoidTranslation) {
-          this.videoDescription = result.basic_info.short_description
+          this.videoDescription = shortDescription
         } else if (localizedDescription?.runs) {
           try {
             this.videoDescription = parseLocalTextRuns(localizedDescription.runs)
           } catch (error) {
             console.error('Failed to extract the localised description, falling back to the standard one.', error, JSON.stringify(localizedDescription.runs))
-            this.videoDescription = result.basic_info.short_description
+            this.videoDescription = shortDescription
           }
         } else {
-          this.videoDescription = result.basic_info.short_description
+          this.videoDescription = shortDescription
         }
 
         switch (this.thumbnailPreference) {

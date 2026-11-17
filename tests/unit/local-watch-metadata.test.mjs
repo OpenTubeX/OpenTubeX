@@ -7,6 +7,7 @@ import { createLocalFeedParsers, getAuthorVerification } from '../../src/rendere
 import { parseLocalVideoSummary } from '../../src/renderer/helpers/video-summary.js'
 import { parseLocalVideoGames } from '../../src/renderer/helpers/video-games.js'
 import { parseLocalVideoDescriptionSections } from '../../src/renderer/helpers/video-description-sections.js'
+import { escapeHTML } from '../../src/renderer/helpers/feed-metadata.js'
 import { parseLocalVideoMusicTracks } from '../../src/renderer/helpers/video-music.js'
 import { parseLocalVideoCollaborators } from '../../src/renderer/helpers/video-collaborators.js'
 import { getVideoPopularity } from '../../src/renderer/helpers/player/videoPopularity.js'
@@ -38,6 +39,7 @@ async function loadMetadata(info, avoidTranslation = 'disabled', options = {}) {
     parseLocalEndscreen: () => [],
     parseLocalVideoGames,
     parseLocalVideoDescriptionSections,
+    escapeHTML,
     parseLocalVideoMusicTracks,
     parseLocalVideoSummary,
     getVideoPopularity,

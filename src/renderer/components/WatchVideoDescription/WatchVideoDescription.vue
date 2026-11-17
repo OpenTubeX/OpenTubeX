@@ -260,6 +260,7 @@ import { useTabContext } from '../../tabs/TabContext'
 import store from '../../store/index'
 
 const props = defineProps({
+  /** HTML, e.g. parsed text runs from the local API. Plain text has to be escaped. */
   description: {
     type: String,
     default: ''
@@ -603,11 +604,12 @@ function processDescriptionHtml(descriptionText, tabIndex) {
   return descriptionText
     .replaceAll('<a', `<a tabindex="${tabIndex}"`)
     // Reruns when the icon pack changes, as the icons come from it
-    .replaceAll(/ data-link-icon="([a-z\d]+)">/g, (_, name) => `>${getDescriptionLinkIconHtml(name)}`)
+    // `FtTimestampCatcher` needs the marker to leave times in their label alone
+    .replaceAll(/ data-link-icon="([a-z\d]+)">/g, (marker, name) => `${marker}${getDescriptionLinkIconHtml(name)}`)
 }
 
 /**
- * The text of a description that can hold markup, e.g. formatted text runs from the local API.
+ * The text of an HTML description, e.g. formatted text runs from the local API.
  * @param {string} description
  * @returns {string}
  */
