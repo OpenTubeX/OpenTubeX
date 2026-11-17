@@ -176,8 +176,9 @@ export async function getWatchedComments() {
 }
 
 let androidMigration = null
-// A retry after a failed cleanup must not watch again what was unwatched meanwhile.
-let androidCommentsImported = false
+// Kept until the cleanup succeeds, so a retry, also after a restart, does not
+// watch again what was unwatched meanwhile.
+const ANDROID_IMPORTED_STORAGE_KEY = 'commentReplyThreadsImported'
 
 /**
  * Takes over the comments that the native checks of earlier Android versions
@@ -188,7 +189,7 @@ function migrateAndroidWatchedComments() {
   // The renderer of the periodic job lacks the plugin, and the app migrates once it opens.
   if (!isAndroid || isAndroidBackgroundRenderer) return Promise.resolve()
   androidMigration ??= (async () => {
-    if (!androidCommentsImported) {
+    if (localStorage.getItem(ANDROID_IMPORTED_STORAGE_KEY) === null) {
       const legacy = await readLegacyAndroidWatchedComments()
       if (legacy.length > 0) {
         const threads = loadThreads()
@@ -197,10 +198,11 @@ function migrateAndroidWatchedComments() {
           ...legacy.filter(thread => !threads.some(item => isSameWatchedComment(item, thread)))
         ]))
       }
-      androidCommentsImported = true
+      localStorage.setItem(ANDROID_IMPORTED_STORAGE_KEY, '1')
     }
     // Saved first, so stopping in between takes them over again instead of losing them.
     await clearLegacyAndroidNotificationChecks()
+    localStorage.removeItem(ANDROID_IMPORTED_STORAGE_KEY)
   })().catch(error => {
     androidMigration = null
     console.error('Failed to take over the watched comments', error)
