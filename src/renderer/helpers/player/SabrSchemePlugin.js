@@ -79,6 +79,7 @@ const ShakaError = shaka.util.Error
  * @property {number} cumulativeRetries
  * @property {number} startedAtMs
  * @property {(() => number) | undefined} getBufferedAheadSeconds
+ * @property {(() => number) | undefined} getPlaybackRate
  * @property {string} scheme
  * @property {{ afterMs: number, beforeMs: number }} liveTimeBounds - the requested live segment lies between these times
  */
@@ -132,6 +133,10 @@ const BACKOFF_ROUNDS_WITHOUT_MEDIA = 6
 /** Leaves time for a reload before playback runs out of withheld media. */
 const WITHHELD_MEDIA_RELOAD_BUFFER_SECONDS = 10
 const WITHHELD_MEDIA_POLL_MS = 1000
+/** Playback waits on a backoff once less than this is buffered. */
+const BACKOFF_STALL_BUFFER_MS = 500
+/** Checks the buffer at most this often while playback outlasts a backoff. */
+const BACKOFF_BUFFER_POLL_MS = 250
 /**
  * Ad breaks are minutes apart, so this keeps the ones around the playhead.
  * SABR sends an evicted break's cue point again when playback returns to it.
@@ -550,19 +555,28 @@ async function doRequest(
     while (currentState.sabrStreamState.backoffUntilMs > Date.now()) {
       waitedForBackoff = true
       const currentBackoffTimeMs = currentState.sabrStreamState.backoffUntilMs - Date.now()
-      // The countdown covers the video, so keep it for playback that waits on it
-      if (!hasDeliveredMedia() || needsMedia()) {
-        currentState.eventEmitter.emit('backoff-requested', { backoffMs: currentBackoffTimeMs })
+      let waitMs = currentBackoffTimeMs
+      // The countdown covers the video, so show it only while playback waits
+      // on the backoff: before the first media, or once the buffer runs out.
+      // At the live edge, SABR paces every segment with a short backoff while
+      // a few seconds still play. Captions never hold playback back.
+      if (operationInputs.streamKind !== 'text') {
+        const bufferedMs = (currentState.getBufferedAheadSeconds?.() ?? 0) * 1000 / (currentState.getPlaybackRate?.() || 1)
+        const playableMs = hasDeliveredMedia() ? bufferedMs - BACKOFF_STALL_BUFFER_MS : 0
+        if (playableMs > 0) {
+          waitMs = Math.min(waitMs, Math.max(playableMs, BACKOFF_BUFFER_POLL_MS))
+        } else {
+          currentState.eventEmitter.emit('backoff-requested', { backoffMs: currentBackoffTimeMs })
+        }
       }
-      await waitUnlessAborted(currentBackoffTimeMs, currentState.abortController.signal)
-      // Must reset AFTER waiting to avoid requested aborted
+      await waitUnlessAborted(waitMs, currentState.abortController.signal)
+      currentState.cumulativeBackOffTimeMs += waitMs
+    }
+    if (waitedForBackoff) {
+      // Must reset AFTER the whole backoff to avoid requested aborted
       // Since long backoff time mostly happens on the start of video playback we only reset timeout once
       // i.e. backoff time parts received will not reset timeout - counted as video loading issue
       currentState.timeoutController?.resetTimeoutOnce()
-
-      currentState.cumulativeBackOffTimeMs += currentBackoffTimeMs
-    }
-    if (waitedForBackoff) {
       currentState.cumulativeBackOffRequested++
       // Pacing is normal once this stream has delivered media. An unstarted
       // video still needs a bounded recovery even when its audio works. One
@@ -1109,6 +1123,7 @@ export function setupSabrScheme(sabrData, getPlayer, getManifest, playerWidth, p
         width: playerWidth.value,
         height: playerHeight.value,
         getBufferedAheadSeconds: () => 0,
+        getPlaybackRate: () => 1,
       }
     }
 
@@ -1184,6 +1199,7 @@ export function setupSabrScheme(sabrData, getPlayer, getManifest, playerWidth, p
       width: playerWidth.value,
       height: playerHeight.value,
       getBufferedAheadSeconds: () => getBufferedAheadSeconds(player),
+      getPlaybackRate: () => player.getPlaybackRate(),
     }
   })
   shaka.net.NetworkingEngine.registerScheme(sabrData.scheme, transport.request)
@@ -1390,6 +1406,7 @@ export function createSabrTransport(sabrData, getRequestContext) {
       cumulativeRetries: 0,
       startedAtMs: Date.now(),
       getBufferedAheadSeconds: context.getBufferedAheadSeconds,
+      getPlaybackRate: context.getPlaybackRate,
       scheme: sabrData.scheme,
       liveTimeBounds: { afterMs: -Infinity, beforeMs: Infinity },
     }

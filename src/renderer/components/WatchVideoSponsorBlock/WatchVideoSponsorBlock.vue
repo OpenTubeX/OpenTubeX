@@ -618,7 +618,8 @@ function isSegmentPassed(segment) {
 }
 
 .sponsorBlockSegment:hover {
-  background-color: var(--side-nav-hover-color);
+  /* A state layer on top of the resting tint, like the chapters. */
+  background-color: color-mix(in srgb, var(--primary-text-color) 14%, transparent);
 }
 
 .sponsorBlockSegment.selected {

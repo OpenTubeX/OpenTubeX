@@ -104,7 +104,7 @@ body,
   /* divider */
 
   --link-color: var(--accent-color);
-  --link-visited-color: var(--accent-color-visited);
+  --link-visited-color: var(--accent-color-visited, var(--link-color));
   --instance-menu-color: var(--search-bar-color);
   --settings-search-bar-color: var(--search-bar-color);
   --red-500: #f44336;
@@ -2871,7 +2871,7 @@ a:visited {
   --accent-color: rgb(var(--accent-color-rgb));
   --accent-color-light: var(--accent-color-hover);
   --link-color: var(--accent-color);
-  --link-visited-color: var(--accent-color-visited);
+  --link-visited-color: var(--accent-color-visited, var(--link-color));
   --favorite-icon-color: var(--accent-color);
   --destructive-color: var(--red-500);
   --destructive-hover-color: color-mix(in srgb, var(--red-500) 88%, var(--primary-text-color));

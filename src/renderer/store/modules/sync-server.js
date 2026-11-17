@@ -425,7 +425,16 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
   let mergeDeletions = deletions
   const result = {}
   const skippedCollections = new Set()
+  // Collections this sync merged into the local data, and in enhanced privacy
+  // mode the ones whose merge the server also holds
+  const appliedCollections = new Set()
+  const uploadedCollections = new Set()
+  // The playlists the current playlist merge saved locally, for when a later one fails
+  const savedPlaylistIds = new Set()
   let tabRevocationError = null
+  // The server has no settings entry for speeds this sync migrated, and a saved
+  // one would acknowledge the migration before its upload succeeded.
+  let migratedPlaybackSpeedsEntry = false
   const store = {
     state: rootState,
     getters: rootGetters,
@@ -434,7 +443,10 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     assertActive: assertSyncStillActive,
     async persistPlaylistSyncBaseline(id, { remoteId, metadata, applied = false, videos: syncedVideos, added = [], removed = [] }) {
       // Encrypted adapter mutations are only published in the final upload.
-      if (encrypted) return
+      if (encrypted) {
+        if (applied) savedPlaylistIds.add(id)
+        return
+      }
       if (!isSameAccount()) return
       const current = rootState.settings
       const saved = parseSnapshot(current.syncServerSnapshot)
@@ -464,6 +476,18 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         if (updated !== snapshot) await dispatch('updateSyncServerSnapshot', updated, { root: true })
         return
       }
+    },
+    async persistSettingsSyncBaseline(entries) {
+      // The applied server entries are its state even when the upload fails.
+      // Without them, the next sync would take them for local edits and
+      // upload items and values other devices changed since.
+      if (!isSameAccount()) return
+      const saved = parseSnapshot(rootState.settings.syncServerSnapshot)
+      const applied = { ...entries }
+      if (migratedPlaybackSpeedsEntry) delete applied.channelPlaybackSpeeds
+      const settings = { ...saved.settings, ...applied }
+      if (JSON.stringify(settings) === JSON.stringify(saved.settings ?? {})) return
+      await dispatch('updateSyncServerSnapshot', JSON.stringify({ ...saved, settings }), { root: true })
     },
   }
   const stages = [
@@ -598,6 +622,47 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     }
   }
 
+  // The next sync must not take what this one downloaded and applied for local
+  // additions, which would upload items that other devices removed meanwhile.
+  // A collection the server holds the merge of keeps it as its baseline. One
+  // the upload missed keeps the conflict retry's: the previous baseline plus
+  // the download, which still tells this device's unsent edits apart.
+  async function persistFailedSyncBaselines() {
+    if (!isSameAccount()) return
+    const saved = parseSnapshot(rootState.settings.syncServerSnapshot)
+    const updated = { ...saved }
+    for (const collection of appliedCollections) {
+      if (skippedCollections.has(collection)) continue
+      // syncSettings saves the entries it applied on its own
+      const value = !encryptedCollections || uploadedCollections.has(collection)
+        ? next[collection]
+        : collection === 'settings' ? undefined : retryBaselines[collection]?.()
+      if (value !== undefined) updated[collection] = value
+    }
+    const snapshot = JSON.stringify(updated)
+    if (snapshot !== rootState.settings.syncServerSnapshot) {
+      await dispatch('updateSyncServerSnapshot', snapshot, { root: true })
+    }
+  }
+
+  /**
+   * A playlist merge that failed keeps the baseline it started from, except
+   * for the playlists it saved, which take the download they merged.
+   * @param {Record<string, unknown>} startBaseline
+   */
+  function keepSavedPlaylistsBaseline(startBaseline) {
+    const mergeBaseline = retryBaselines.playlists
+    const savedIds = Array.from(savedPlaylistIds)
+    retryBaselines.playlists = () => {
+      const downloaded = mergeBaseline?.() ?? {}
+      const baseline = { ...startBaseline }
+      for (const id of savedIds) {
+        if (downloaded[id]) baseline[id] = downloaded[id]
+      }
+      return baseline
+    }
+  }
+
   async function applyCollection(collection, targetClient) {
     const onRetryBaseline = getBaseline => { retryBaselines[collection] = getBaseline }
     switch (collection) {
@@ -620,6 +685,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         result.subscriptions = next.subscriptions.length
         break
       case 'playlists':
+        savedPlaylistIds.clear()
         next.playlists = await syncPlaylists(
           targetClient,
           store,
@@ -635,7 +701,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           targetClient,
           store,
           previous.playlistBookmarks,
-          { allowDataLoss, deletions: mergeDeletions }
+          { allowDataLoss, deletions: mergeDeletions, onRetryBaseline }
         )
         result.playlistBookmarks = next.playlistBookmarks.length
         break
@@ -896,7 +962,10 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         return null
       }
       client = new EncryptedSyncAdapter(document)
-      if (migratedPlaybackSpeeds) client.touched.add('settings')
+      if (migratedPlaybackSpeeds) {
+        client.touched.add('settings')
+        migratedPlaybackSpeedsEntry = true
+      }
       if (deletionMarks) mergeDeletions = withRemoteSyncDeletions(deletions, readSyncDeletionMarks(deletionMarks.data))
       encryptedCollections = {
         original,
@@ -914,7 +983,16 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
       'settings',
     ].includes(stage))
     for (const collection of collections) {
-      await runStage(collection, () => applyCollection(collection, client))
+      try {
+        await runStage(collection, () => applyCollection(collection, client))
+      } catch (error) {
+        if (encryptedCollections && collection === 'playlists' && savedPlaylistIds.size > 0) {
+          keepSavedPlaylistsBaseline(previous.playlists ?? {})
+          appliedCollections.add(collection)
+        }
+        throw error
+      }
+      appliedCollections.add(collection)
     }
 
     if (encryptedCollections) {
@@ -934,6 +1012,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
               JSON.stringify(data) === JSON.stringify(encryptedCollections.original[collection])))) {
             if (collection === 'watchStats') await persistUploadedWatchStatsReset(data, store)
             if (collection === 'history') await persistUploadedHistoryRepairs(data, store)
+            uploadedCollections.add(collection)
             continue
           }
           startProgress('upload')
@@ -983,6 +1062,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
               assertSyncStillActive()
               if (collection === 'watchStats') await persistUploadedWatchStatsReset(data, store)
               if (collection === 'history') await persistUploadedHistoryRepairs(data, store)
+              uploadedCollections.add(collection)
               break
             } catch (error) {
               if (error.status !== 409 || attempt === ENCRYPTED_SYNC_RETRIES - 1) throw error
@@ -1008,9 +1088,19 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
                 })
                 retryDocument.playlistBookmarks = data
                 const retryClient = new EncryptedSyncAdapter(retryDocument)
+                const appliedBaseline = retryBaselines.playlistBookmarks
                 next.playlistBookmarks = await syncPlaylistBookmarks(
                   retryClient, store, next.playlistBookmarks, { allowDataLoss, deletions: mergeDeletions }
                 )
+                // The conflict merge also holds unsent local bookmarks, so only
+                // the downloaded ones this retry applied join the baseline.
+                const downloadedIds = (Array.isArray(remoteData) ? remoteData : [])
+                  .map(bookmark => bookmark?.playlist?.id)
+                  .filter(id => typeof id === 'string')
+                retryBaselines.playlistBookmarks = () => Array.from(new Set([
+                  ...(appliedBaseline?.() ?? previous.playlistBookmarks ?? []),
+                  ...downloadedIds,
+                ]))
                 result.playlistBookmarks = next.playlistBookmarks.length
                 data = retryClient.document.playlistBookmarks
                 changes = retryClient
@@ -1021,14 +1111,26 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
                 retryDocument.subscriptions = client.document.subscriptions
               }
               const retryClient = new EncryptedSyncAdapter(retryDocument)
-              if (collection === 'settings') {
-                next.settings = await syncSettings(retryClient, store, next.settings, playlistSnapshot(), {
-                  listSnapshot: baseline('settings') ?? {},
-                  onRetryBaseline: getBaseline => { retryBaselines.settings = getBaseline },
-                })
-                result.settings = Object.keys(next.settings).length
-              } else {
-                await applyCollection(collection, retryClient)
+              // The retry registers the download as its baseline before applying it
+              const appliedBaseline = retryBaselines[collection]
+              try {
+                if (collection === 'settings') {
+                  next.settings = await syncSettings(retryClient, store, next.settings, playlistSnapshot(), {
+                    listSnapshot: baseline('settings') ?? {},
+                    onRetryBaseline: getBaseline => { retryBaselines.settings = getBaseline },
+                  })
+                  result.settings = Object.keys(next.settings).length
+                } else {
+                  await applyCollection(collection, retryClient)
+                }
+              } catch (error) {
+                // Downloaded items it could not save must not look removed here next time
+                if (collection === 'playlists') {
+                  keepSavedPlaylistsBaseline(appliedBaseline?.() ?? previous.playlists ?? {})
+                } else {
+                  retryBaselines[collection] = appliedBaseline
+                }
+                throw error
               }
               if (skippedCollections.has(collection)) break
               revision = remote.revision
@@ -1071,6 +1173,13 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     if (liveSupported) refreshSyncServerAccount(context)
     return result
   } catch (error) {
+    if (!(error instanceof SyncServerCancelledError)) {
+      try {
+        await persistFailedSyncBaselines()
+      } catch (persistError) {
+        console.error('Failed to save the baselines of a failed sync:', persistError)
+      }
+    }
     // A failed sync may have uploaded history without saving its baseline.
     mergedHistory = null
     if (takenHistoryChanges !== undefined) historyChanges.restore(takenHistoryChanges)

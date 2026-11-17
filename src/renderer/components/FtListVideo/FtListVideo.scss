@@ -188,7 +188,8 @@
   &:not(.disabled) {
     &:hover,
     &:focus-visible {
-      background-color: var(--side-nav-hover-color);
+      // Tinted rows such as the queue and playlist panel set a visible fill.
+      background-color: var(--icon-button-hover-color, var(--side-nav-hover-color));
     }
 
     &:active {

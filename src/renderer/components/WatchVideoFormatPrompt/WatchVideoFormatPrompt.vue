@@ -476,7 +476,9 @@ function selectPlaybackEngine(value) {
 
 .formatOption:where(:not(:disabled)):hover,
 .formatOption:focus-visible {
-  background-color: var(--side-nav-hover-color);
+  /* A state layer on top of the resting tint, which --side-nav-hover-color
+     matches in many themes. */
+  background-color: color-mix(in srgb, var(--primary-text-color) 14%, var(--card-bg-color));
 }
 
 .formatOption.active {

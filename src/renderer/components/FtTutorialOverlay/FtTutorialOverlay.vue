@@ -226,10 +226,11 @@
           v-show="currentSubpage !== null && !currentSubpage.flush"
           class="tutorialActions tutorialSubpageActions"
         >
+          <!-- Importing is the welcome step's choice, so finishing it continues the tutorial -->
           <FtButton
-            :label="t('Tutorial.Done')"
-            :icon="['fas', 'check']"
-            @click="closeSubpagesFrom(0)"
+            :label="showImport ? t('Tutorial.Next') : t('Tutorial.Done')"
+            :icon="showImport ? ['fas', 'arrow-right'] : ['fas', 'check']"
+            @click="finishSubpages"
           />
         </div>
       </FtCard>
@@ -336,6 +337,12 @@ function closeSubpagesFrom(depth, closedSelf = false) {
   subpageStack.value = subpageStack.value.slice(0, depth)
   closing.reverse().forEach(({ close }) => close())
   showSubpage(scrollTop)
+}
+
+function finishSubpages() {
+  const continueTutorial = showImport.value
+  closeSubpagesFrom(0)
+  if (continueTutorial) advanceTutorial()
 }
 
 async function showSubpage(scrollTop) {
