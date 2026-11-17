@@ -39,9 +39,17 @@ export function isExcessIssue(issues, issue) {
     countEarlierIssues(issues, issue, Date.parse(issue.created_at) - WINDOW_MS) >= MAX_ISSUES
 }
 
+// Only the author or a maintainer can reopen an issue, so a reopen by anyone else
+// is a maintainer overriding the limit.
+export function reopenedByMaintainer(issue, events) {
+  return events.some(event => event.event === 'reopened' && event.actor?.id !== issue.user.id)
+}
+
 function closeExcessIssue(owner, repo, number) {
   const endpoint = `repos/${owner}/${repo}/issues/${number}`
-  if (github(endpoint).state !== 'open') return
+  const issue = github(endpoint)
+  if (issue.state !== 'open' ||
+    reopenedByMaintainer(issue, github(`${endpoint}/events?per_page=100`))) return
   github(`${endpoint}/comments`, 'POST', {
     body: `This issue was automatically closed because this account opened more than ${MAX_ISSUES} issues in 24 hours. Please wait before opening another issue or add related details to an existing report. If this was a mistake, contact a maintainer in Discussions.`
   })
