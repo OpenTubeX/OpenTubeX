@@ -2704,6 +2704,8 @@ Storage Startup Error:
   Retry: "Reintentar"
 Search Bar:
   Use Suggestion: Usar sugerencia
+  Video Link: "Vídeo: {title}"
+  Channel Link: "Canal: {title}"
 
 Native Permissions:
   Local Network Denied: "Se ha denegado el permiso para dispositivos cercanos."

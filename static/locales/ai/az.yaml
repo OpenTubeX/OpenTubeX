@@ -2753,6 +2753,8 @@ Storage Startup Error:
   Retry: "Yenidən cəhd et"
 Search Bar:
   Use Suggestion: Təklifi istifadə et
+  Video Link: "Video: {title}"
+  Channel Link: "Kanal: {title}"
 
 Native Permissions:
   Local Network Denied: "Yaxınlıqdakı cihazlara giriş icazəsi rədd edildi."

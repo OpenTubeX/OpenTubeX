@@ -6,6 +6,7 @@ import {
   mergeSearchHistoryEntries,
   normalizeSearchHistoryEntry,
   resolveSearchHistoryEntry,
+  searchHistoryEntryMatches,
   sortSearchHistoryByLastUpdatedAt,
 } from '../../../search-history'
 
@@ -24,9 +25,10 @@ const getters = {
 
   getLatestMatchingSearchHistoryEntries: (state) => (query) => {
     const matches = []
+    const lowerCaseQuery = query.toLowerCase()
 
     for (const entry of state.searchHistoryEntries) {
-      if (getSearchHistoryEntryQuery(entry).startsWith(query)) {
+      if (searchHistoryEntryMatches(entry, query, lowerCaseQuery)) {
         matches.push(entry)
 
         if (matches.length === MIXED_SEARCH_HISTORY_ENTRIES_DISPLAY_LIMIT) {

@@ -90,6 +90,8 @@ Global:
   Show Blocked Item: Montri blokitan eron
 Search Bar:
   Use Suggestion: Uzi proponon
+  Video Link: "Video: {title}"
+  Channel Link: "Kanalo: {title}"
 Search Listing:
   Label:
     Members Only: Nur por membroj

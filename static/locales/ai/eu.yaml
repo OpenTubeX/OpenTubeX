@@ -2754,6 +2754,8 @@ Storage Startup Error:
   Retry: "Saiatu berriro"
 Search Bar:
   Use Suggestion: Erabili iradokizuna
+  Video Link: "Bideoa: {title}"
+  Channel Link: "Kanala: {title}"
 
 Native Permissions:
   Local Network Denied: "Inguruko gailuetarako baimena ukatu da."

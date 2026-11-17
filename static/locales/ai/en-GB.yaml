@@ -2659,6 +2659,8 @@ Downloads:
   Remove File Failed: Could not remove the downloaded file.
 Search Bar:
   Use Suggestion: Use suggestion
+  Video Link: "Video: {title}"
+  Channel Link: "Channel: {title}"
 Theme Discovery:
   Discover Themes: "Discover themes"
   Refresh: "Refresh"

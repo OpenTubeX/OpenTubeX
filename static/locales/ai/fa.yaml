@@ -2772,6 +2772,8 @@ Search Bar:
   Use Suggestion: استفاده از پیشنهاد
   Open Search Container: باز کردن کادر جستجو
   Search: جستجو
+  Video Link: "ویدیو: {title}"
+  Channel Link: "کانال: {title}"
 Theme Discovery:
   Discover Themes: "کشف پوسته‌ها"
   Refresh: "تازه‌سازی"

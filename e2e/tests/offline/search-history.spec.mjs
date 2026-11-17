@@ -1,4 +1,6 @@
 import { test, expect, goTo, goToSettingsSection, sel, readDatastore } from '../../helpers/app.mjs'
+import { demoPlayerResponse } from '../../helpers/media.mjs'
+import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 // A closing filters prompt stays in the page while it fades out.
 const filters = page => page.locator('.prompt:not([inert])')
@@ -334,5 +336,55 @@ test.describe('search history suggestions', () => {
 
     await expect(page).toHaveURL(/#\/search\/different%20search/)
     expect(pageErrors).toEqual([])
+  })
+
+  test('a pasted video link is saved with its title, found by it, and opens the video again', async ({ app, page }) => {
+    const videoId = 'jNQXAC9IVRw'
+    await mockPlayableWatchPage(app, page)
+    const player = demoPlayerResponse(videoId)
+    await page.route('**/youtubei/v1/player**', route => route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ ...player, videoDetails: { ...player.videoDetails, title: 'Linked Video Title', author: 'Linked Channel' } }),
+    }))
+    const linkEntries = () => page.evaluate(() => window.$store.getters.getSearchHistoryEntries
+      .filter(entry => entry.linkType != null)
+      .map(({ query, linkType, title, searchSettings }) => ({ query, linkType, title, filterType: searchSettings.type })))
+    const input = page.locator(sel.searchInput)
+
+    // Without search suggestions no preview loads, so the title is loaded after submitting.
+    await input.fill(`https://youtu.be/${videoId}`)
+    await input.press('Enter')
+    await expect(page).toHaveURL(new RegExp(`#/watch/${videoId}`))
+    await expect.poll(linkEntries).toEqual([
+      { query: `https://youtu.be/${videoId}`, linkType: 'video', title: 'Linked Video Title', filterType: 'all' },
+    ])
+    await expect.poll(() => readDatastore(app.userDataDir, 'search-history')).toContain('"title":"Linked Video Title"')
+
+    await page.locator(sel.backButton).click()
+    await expect(page).not.toHaveURL(/#\/watch\//)
+    await input.fill('linked vi')
+    const link = suggestions(page).getByRole('link', { name: 'Video: Linked Video Title', exact: true })
+    await expect(link).toHaveText('Linked Video Title')
+    await expect(suggestions(page)).toHaveCount(1)
+    const searchType = () => page.evaluate(() => {
+      const store = window.$store
+      return store.getters.getSearchSettings(store.getters.getPresentedTabId ?? 'web').type
+    })
+    await page.evaluate(() => {
+      const store = window.$store
+      store.commit('setSearchType', { tabId: store.getters.getPresentedTabId ?? 'web', value: 'video' })
+    })
+    await link.click()
+    await expect(page).toHaveURL(new RegExp(`#/watch/${videoId}`))
+    // A link entry leaves the search filters alone.
+    expect(await searchType()).toBe('video')
+
+    await page.evaluate(() => window.$store.dispatch('updateRememberSearchHistory', false))
+    await input.fill(`https://www.youtube.com/watch?v=${videoId}`)
+    await input.press('Enter')
+    await expect(page).toHaveURL(new RegExp(`#/watch/${videoId}`))
+    // This wait proves that nothing is saved.
+    await page.waitForTimeout(500)
+    expect((await linkEntries()).map(({ query }) => query)).toEqual([`https://youtu.be/${videoId}`])
   })
 })

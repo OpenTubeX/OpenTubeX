@@ -2721,6 +2721,8 @@ Search Bar:
   Use Suggestion: Використати підказку
   Open Search Container: Відкрити поле пошуку
   Search: Пошук
+  Video Link: "Відео: {title}"
+  Channel Link: "Канал: {title}"
 Theme Discovery:
   Discover Themes: "Знайти теми"
   Refresh: "Оновити"

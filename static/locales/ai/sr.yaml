@@ -2754,6 +2754,8 @@ Search Bar:
   Use Suggestion: Користи предлог
   Open Search Container: Отвори поље за претрагу
   Search: Претрага
+  Video Link: "Видео: {title}"
+  Channel Link: "Канал: {title}"
 Theme Discovery:
   Discover Themes: "Откриј теме"
   Refresh: "Освежи"

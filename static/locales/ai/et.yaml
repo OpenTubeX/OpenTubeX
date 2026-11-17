@@ -2746,6 +2746,8 @@ Storage Startup Error:
   Retry: "Proovi uuesti"
 Search Bar:
   Use Suggestion: Kasuta soovitust
+  Video Link: "Video: {title}"
+  Channel Link: "Kanal: {title}"
 
 Native Permissions:
   Local Network Denied: "Läheduses olevate seadmete luba keelati."

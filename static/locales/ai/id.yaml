@@ -2770,6 +2770,8 @@ Storage Startup Error:
   Retry: "Coba lagi"
 Search Bar:
   Use Suggestion: Gunakan saran
+  Video Link: "Video: {title}"
+  Channel Link: "Kanal: {title}"
 
 Native Permissions:
   Local Network Denied: "Izin perangkat di sekitar ditolak."

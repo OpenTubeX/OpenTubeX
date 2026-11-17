@@ -3132,6 +3132,8 @@ Search Bar:
   Use Suggestion: 추천 검색어 사용
   Open Search Container: 검색창 열기
   Search: 검색
+  Video Link: "동영상: {title}"
+  Channel Link: "채널: {title}"
 Theme Discovery:
   Discover Themes: "테마 둘러보기"
   Refresh: "새로고침"

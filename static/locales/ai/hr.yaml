@@ -2706,6 +2706,8 @@ Search Bar:
   Use Suggestion: Upotrijebi prijedlog
   Open Search Container: Otvori polje za pretraživanje
   Search: Pretraži
+  Video Link: "Video: {title}"
+  Channel Link: "Kanal: {title}"
 Theme Discovery:
   Discover Themes: "Otkrij teme"
   Refresh: "Osvježi"

@@ -2744,6 +2744,8 @@ Storage Startup Error:
   Retry: "Újrapróbálkozás"
 Search Bar:
   Use Suggestion: Javaslat használata
+  Video Link: "Videó: {title}"
+  Channel Link: "Csatorna: {title}"
 
 Native Permissions:
   Local Network Denied: "A közeli eszközök engedélye megtagadva."

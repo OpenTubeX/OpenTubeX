@@ -2743,6 +2743,8 @@ Storage Startup Error:
   Retry: "Zkusit znovu"
 Search Bar:
   Use Suggestion: Použít návrh
+  Video Link: "Video: {title}"
+  Channel Link: "Kanál: {title}"
 
 Native Permissions:
   Local Network Denied: "Oprávnění k zařízením v okolí bylo zamítnuto."

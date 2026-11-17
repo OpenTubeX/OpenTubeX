@@ -2665,6 +2665,8 @@ Channels:
   Load More Channels: "Carregar mais canais"
 Search Bar:
   Use Suggestion: Usar sugestão
+  Video Link: "Vídeo: {title}"
+  Channel Link: "Canal: {title}"
 Theme Discovery:
   Discover Themes: "Descobrir temas"
   Refresh: "Recarregar"

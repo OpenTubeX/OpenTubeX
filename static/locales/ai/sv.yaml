@@ -2665,6 +2665,8 @@ Channels:
   Load More Channels: "Läs in fler kanaler"
 Search Bar:
   Use Suggestion: Använd förslag
+  Video Link: "Video: {title}"
+  Channel Link: "Kanal: {title}"
 Theme Discovery:
   Discover Themes: "Upptäck teman"
   Refresh: "Läs in igen"

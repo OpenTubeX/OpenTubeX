@@ -94,6 +94,8 @@ Search Bar:
   Use Suggestion: Gebruik voorstel
   Open Search Container: Maak soekhouer oop
   Search: Soek
+  Video Link: "Video: {title}"
+  Channel Link: "Kanaal: {title}"
 Search Listing:
   Label:
     Members Only: Slegs lede

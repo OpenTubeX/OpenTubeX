@@ -2674,6 +2674,8 @@ Channels:
 Search Bar:
   Use Suggestion: Käytä ehdotusta
   Open Search Container: Avaa hakukenttä
+  Video Link: "Video: {title}"
+  Channel Link: "Kanava: {title}"
 Theme Discovery:
   Discover Themes: "Löydä teemoja"
   Refresh: "Päivitä"

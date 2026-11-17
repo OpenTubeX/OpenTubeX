@@ -2704,6 +2704,8 @@ Channels:
   Load More Channels: "Llwytho mwy o sianeli"
 Search Bar:
   Use Suggestion: Defnyddio’r awgrym
+  Video Link: "Fideo: {title}"
+  Channel Link: "Sianel: {title}"
 Theme Discovery:
   Discover Themes: "Darganfod themâu"
   Refresh: "Adnewyddu"

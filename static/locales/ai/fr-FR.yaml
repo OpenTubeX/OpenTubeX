@@ -2742,6 +2742,8 @@ Storage Startup Error:
   Retry: "Réessayer"
 Search Bar:
   Use Suggestion: Utiliser la suggestion
+  Video Link: "Vidéo: {title}"
+  Channel Link: "Chaîne: {title}"
 
 Native Permissions:
   Local Network Denied: "L’autorisation d’accès aux appareils à proximité a été refusée."

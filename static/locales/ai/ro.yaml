@@ -2723,6 +2723,8 @@ Channels:
   Load More Channels: "Încarcă mai multe canale"
 Search Bar:
   Use Suggestion: Folosește sugestia
+  Video Link: "Videoclip: {title}"
+  Channel Link: "Canal: {title}"
 Theme Discovery:
   Discover Themes: "Descoperă teme"
   Refresh: "Reîncarcă"

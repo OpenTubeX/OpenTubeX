@@ -2683,6 +2683,8 @@ Channels:
   Load More Channels: "Tải thêm kênh"
 Search Bar:
   Use Suggestion: Dùng gợi ý
+  Video Link: "Video: {title}"
+  Channel Link: "Kênh: {title}"
 Theme Discovery:
   Discover Themes: "Khám phá giao diện"
   Refresh: "Làm mới"

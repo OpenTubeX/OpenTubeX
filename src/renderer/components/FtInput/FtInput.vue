@@ -1010,12 +1010,14 @@ async function updateVisibleDataList(preserveSelectionAfterRemoval = false) {
     visibleDataList.value = props.dataList
     visibleDataListIndexes.value = props.dataList.map((_, index) => index)
   } else {
-    // get list of items that match input
+    // Rows match by their value or the text they show instead, like the
+    // title of a link in the search history.
     const lowerCaseInputData = inputData.value.toLowerCase()
 
     visibleDataListIndexes.value = props.dataList
       .map((_, index) => index)
-      .filter(index => props.dataList[index].toLowerCase().includes(lowerCaseInputData))
+      .filter(index => props.dataList[index].toLowerCase().includes(lowerCaseInputData) ||
+        props.dataListProperties[index]?.displayText?.toLowerCase().includes(lowerCaseInputData))
     visibleDataList.value = visibleDataListIndexes.value.map(index => props.dataList[index])
   }
 

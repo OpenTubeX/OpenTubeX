@@ -93,6 +93,8 @@ Search Bar:
   Remove: Odstrani
   Open Search Container: Odpri iskalno polje
   Search: Iskanje
+  Video Link: "Videoposnetek: {title}"
+  Channel Link: "Kanal: {title}"
 Search character limit: Iskalna poizvedba presega omejitev {searchCharacterLimit} znakov
 Search Listing:
   Label:

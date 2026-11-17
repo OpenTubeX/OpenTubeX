@@ -4,6 +4,7 @@ import test from 'node:test'
 import vm from 'node:vm'
 import { createDesktopDatastore } from '../../src/datastores/sqliteNode.js'
 import { mergeSearchHistoryEntries, resolveSearchHistoryEntry, sortSearchHistoryByLastUpdatedAt } from '../../src/search-history.js'
+import { createUnifiedBackup, readUnifiedBackup } from '../../src/renderer/helpers/unifiedBackup.js'
 
 const source = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
 
@@ -51,4 +52,26 @@ test('search history retention removes only searches last used before the cutoff
   assert.deepEqual(remaining.map(entry => entry._id), ['recent', 'cutoff', 'legacy'])
   assert.deepEqual(await SearchHistory.find(), remaining)
   assert.equal(await SearchHistory.deleteOlderThan(10), null)
+})
+
+test('a link keeps its title when it is saved again and when a backup restores it', async (t) => {
+  const db = { searchHistory: createDesktopDatastore(':memory:') }
+  t.after(() => db.searchHistory.driver.close())
+  const SearchHistory = createSearchHistory(db)
+  const link = { query: 'https://youtu.be/abcdefghijk', lastUpdatedAt: 1, linkType: 'video', title: 'Old Title' }
+
+  const saved = await SearchHistory.upsert(link)
+  const renamed = await SearchHistory.upsert({ ...link, lastUpdatedAt: 2, title: 'New Title' })
+  assert.equal(renamed._id, saved._id)
+  assert.deepEqual(await SearchHistory.find(), [renamed])
+  assert.equal(renamed.title, 'New Title')
+
+  const backup = await readUnifiedBackup(createUnifiedBackup({ searchHistory: await SearchHistory.find() }))
+  await SearchHistory.deleteAll()
+  await SearchHistory.upsert({ query: 'daily news', lastUpdatedAt: 3 })
+  await SearchHistory.mergeImported(backup.data.searchHistory)
+  assert.deepEqual((await SearchHistory.find()).map(({ query, linkType, title }) => ({ query, linkType, title })), [
+    { query: 'daily news', linkType: undefined, title: undefined },
+    { query: link.query, linkType: 'video', title: 'New Title' },
+  ])
 })

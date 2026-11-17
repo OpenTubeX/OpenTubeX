@@ -2754,6 +2754,8 @@ Storage Startup Error:
   Retry: "Klask en-dro"
 Search Bar:
   Use Suggestion: Implij ar c’hinnig
+  Video Link: "Video: {title}"
+  Channel Link: "Chadenn: {title}"
 
 Native Permissions:
   Local Network Denied: "Nac’het eo bet an aotre evit an trevnadoù tost."

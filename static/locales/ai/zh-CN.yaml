@@ -2743,6 +2743,8 @@ Storage Startup Error:
   Retry: "重试"
 Search Bar:
   Use Suggestion: 使用建议
+  Video Link: "视频：{title}"
+  Channel Link: "频道：{title}"
 
 Native Permissions:
   Local Network Denied: "附近设备权限已被拒绝。"
