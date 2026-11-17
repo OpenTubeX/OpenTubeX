@@ -1548,23 +1548,33 @@ test('a failed upload after a bookmark conflict keeps unsent bookmarks out of th
   assert.deepEqual(JSON.parse(f.settings.syncServerSnapshot).playlistBookmarks, ['remote'])
 })
 
-test('a playlist conflict retry that cannot save a downloaded playlist keeps it out of the baseline', async () => {
-  let uploads = 0
-  const f = fixture({ syncServerSyncSubscriptions: false, syncServerSyncPlaylists: true }, {
-    encrypted: true,
-    respond: async (url, options) => {
-      if (!url.endsWith('/encrypted_sync/playlists')) return undefined
-      if (options.method === 'PUT') return new Response('{}', { status: ++uploads === 1 ? 409 : 503 })
-      if (!uploads) return { revision: 0, payload: null }
-      // The fixture cannot save new playlists
-      const remote = [{ playlist: { id: 'remote', title: 'Remote' }, videos: [] }]
-      return { revision: 1, payload: await privacy.encryptSyncDocument(remote, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt) }
-    },
+for (const conflict of [true, false]) {
+  test(`a playlist merge ${conflict ? 'retried after a conflict ' : ''}that fails to save a download keeps only the saved ones in the baseline`, async () => {
+    let uploads = 0
+    const f = fixture({ syncServerSyncSubscriptions: false, syncServerSyncPlaylists: true }, {
+      encrypted: true,
+      respond: async (url, options) => {
+        if (!url.endsWith('/encrypted_sync/playlists')) return undefined
+        if (options.method === 'PUT') return new Response('{}', { status: ++uploads === 1 ? 409 : 503 })
+        if (conflict && !uploads) return { revision: 0, payload: null }
+        const remote = ['saved', 'unsaved'].map(id => ({ playlist: { id, title: id }, videos: [] }))
+        return { revision: 1, payload: await privacy.encryptSyncDocument(remote, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt) }
+      },
+    })
+    const dispatch = f.context.dispatch
+    f.context.dispatch = async (action, value) => {
+      if (action !== 'addPlaylist') return dispatch(action, value)
+      if (value._id !== 'saved') return false
+      f.context.rootState.playlists.playlists.push(value)
+      return true
+    }
+    await assert.rejects(f.actions.syncWithSyncServer(f.context), /Could not save synced playlist/)
+    assert.equal(uploads, conflict ? 1 : 0)
+    // The next sync downloads the unsaved playlist again instead of removing it from the server,
+    // and a removal of the saved one on another device removes it here.
+    assert.deepEqual(Object.keys(JSON.parse(f.settings.syncServerSnapshot).playlists ?? {}), ['saved'])
   })
-  await assert.rejects(f.actions.syncWithSyncServer(f.context), /Could not save synced playlist/)
-  // The next sync downloads the playlist again instead of removing it from the server.
-  assert.deepEqual(Object.keys(JSON.parse(f.settings.syncServerSnapshot).playlists ?? {}), [])
-})
+}
 
 test('a shared tab closed during an upload conflict stays closed', async () => {
   const first = { sessionId: 'first', updatedAt: 1, tabs: [{ route: '/first' }] }

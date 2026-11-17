@@ -409,6 +409,8 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
   // mode the ones whose merge the server also holds
   const appliedCollections = new Set()
   const uploadedCollections = new Set()
+  // The playlists the current playlist merge saved locally, for when a later one fails
+  const savedPlaylistIds = new Set()
   let tabRevocationError = null
   // The server has no settings entry for speeds this sync migrated, and a saved
   // one would acknowledge the migration before its upload succeeded.
@@ -421,7 +423,10 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     assertActive: assertSyncStillActive,
     async persistPlaylistSyncBaseline(id, { remoteId, metadata, applied = false, videos: syncedVideos, added = [], removed = [] }) {
       // Encrypted adapter mutations are only published in the final upload.
-      if (encrypted) return
+      if (encrypted) {
+        if (applied) savedPlaylistIds.add(id)
+        return
+      }
       if (!isSameAccount()) return
       const current = rootState.settings
       const saved = parseSnapshot(current.syncServerSnapshot)
@@ -569,6 +574,24 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     }
   }
 
+  /**
+   * A playlist merge that failed keeps the baseline it started from, except
+   * for the playlists it saved, which take the download they merged.
+   * @param {Record<string, unknown>} startBaseline
+   */
+  function keepSavedPlaylistsBaseline(startBaseline) {
+    const mergeBaseline = retryBaselines.playlists
+    const savedIds = Array.from(savedPlaylistIds)
+    retryBaselines.playlists = () => {
+      const downloaded = mergeBaseline?.() ?? {}
+      const baseline = { ...startBaseline }
+      for (const id of savedIds) {
+        if (downloaded[id]) baseline[id] = downloaded[id]
+      }
+      return baseline
+    }
+  }
+
   async function applyCollection(collection, targetClient) {
     const onRetryBaseline = getBaseline => { retryBaselines[collection] = getBaseline }
     switch (collection) {
@@ -591,6 +614,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         result.subscriptions = next.subscriptions.length
         break
       case 'playlists':
+        savedPlaylistIds.clear()
         next.playlists = await syncPlaylists(
           targetClient,
           store,
@@ -875,7 +899,15 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
       'settings',
     ].includes(stage))
     for (const collection of collections) {
-      await runStage(collection, () => applyCollection(collection, client))
+      try {
+        await runStage(collection, () => applyCollection(collection, client))
+      } catch (error) {
+        if (encryptedCollections && collection === 'playlists' && savedPlaylistIds.size > 0) {
+          keepSavedPlaylistsBaseline(previous.playlists ?? {})
+          appliedCollections.add(collection)
+        }
+        throw error
+      }
       appliedCollections.add(collection)
     }
 
@@ -1006,7 +1038,11 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
                 }
               } catch (error) {
                 // Downloaded items it could not save must not look removed here next time
-                retryBaselines[collection] = appliedBaseline
+                if (collection === 'playlists') {
+                  keepSavedPlaylistsBaseline(appliedBaseline?.() ?? previous.playlists ?? {})
+                } else {
+                  retryBaselines[collection] = appliedBaseline
+                }
                 throw error
               }
               if (skippedCollections.has(collection)) break
