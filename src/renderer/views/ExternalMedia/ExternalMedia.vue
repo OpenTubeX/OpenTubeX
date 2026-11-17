@@ -1228,10 +1228,11 @@ function applyQueryTimestamp() {
   const seconds = getQueryTimestamp()
   if (seconds === null || route.query.timestamp === appliedQueryTimestamp || loading.value || !player.value?.hasLoaded) return
   appliedQueryTimestamp = route.query.timestamp
+  // The first history write also stores the latest link
+  startTimestamp = seconds
   if (source.value?.separateAudioUrl && !hasCompanionMetadata()) {
     // Only both tracks' lengths tell which one supplies the timeline, so the
     // companion restore applies the link once the soundtrack's metadata arrives.
-    startTimestamp = seconds
     startTime.value = seconds
   } else {
     // The link wins over a restore still waiting for companion metadata.
