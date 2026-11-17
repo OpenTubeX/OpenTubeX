@@ -1,5 +1,23 @@
+import { shallowRef } from 'vue'
+
 import store from '../store/index'
+import { subscribeToChannel, unsubscribeFromChannel } from './channel-subscriptions'
 import { showToast } from './utils'
+
+/**
+ * The unsubscribe confirmation that App shows for channel menus.
+ * @type {import('vue').ShallowRef<{ channelName: string, resolve: (confirmed: boolean) => void } | null>}
+ */
+export const channelUnsubscribeConfirmation = shallowRef(null)
+
+/** @param {string} channelName */
+function confirmUnsubscription(channelName) {
+  if (!store.getters.getUnsubscriptionPopupStatus) return Promise.resolve(true)
+  channelUnsubscribeConfirmation.value?.resolve(false)
+  return new Promise((resolve) => {
+    channelUnsubscribeConfirmation.value = { channelName, resolve }
+  })
+}
 
 export function getChannelLinkDetails(link) {
   const prefix = `${window.location.href.split('#')[0]}#/channel/`
@@ -34,7 +52,7 @@ export function getChannelLinkMenuItems({ id, name, thumbnail }, t) {
   const hidden = store.getters.getChannelsHiddenNames.has(id)
   const pinned = store.getters.getPinnedChannels.some(channel => channel.id === id)
 
-  return [{
+  const items = [{
     label: pinned ? t('User Playlists.Unpin from Navigation') : t('User Playlists.Pin to Navigation'),
     icon: ['fas', pinned ? 'thumbtack-slash' : 'thumbtack'],
     enabled: true,
@@ -68,4 +86,21 @@ export function getChannelLinkMenuItems({ id, name, thumbnail }, t) {
       })
     }
   }]
+
+  // Subscriptions are saved by channel ID only.
+  if (!/^UC[\w-]{22}$/.test(id)) return items
+
+  const subscribed = store.getters.getActiveSubscribedChannelIdSet.has(id)
+  return [{
+    label: subscribed ? t('Channel.Unsubscribe') : t('Channel.Subscribe'),
+    icon: ['fas', subscribed ? 'user-minus' : 'user-plus'],
+    enabled: true,
+    run: async () => {
+      if (!subscribed) {
+        subscribeToChannel(store.getters.getActiveProfile, { id, name, thumbnail }, t)
+      } else if (await confirmUnsubscription(name)) {
+        unsubscribeFromChannel(store.getters.getActiveProfile, id, t)
+      }
+    }
+  }, ...items]
 }

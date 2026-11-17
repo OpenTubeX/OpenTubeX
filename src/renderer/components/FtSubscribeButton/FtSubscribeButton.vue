@@ -224,8 +224,11 @@ import { supportsUploadNotifications } from '../../helpers/uploadNotifications'
 
 import { MAIN_PROFILE_ID } from '../../../constants'
 import { showToast } from '../../helpers/utils'
-import { mirrorYouTubeSubscription } from '../../helpers/youtube-sync'
-import { normalizeChannelHandle } from '../../helpers/feed-metadata'
+import {
+  isProfileSubscribed as isProfileSubscribedToChannel,
+  subscribeToChannel,
+  unsubscribeFromChannel
+} from '../../helpers/channel-subscriptions'
 import { getFirstCharacter } from '../../helpers/strings'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { getAnchoredPosition, supportsAnchorPositioning } from '../../helpers/anchoredPosition'
@@ -717,50 +720,12 @@ function handleSubscription(profile) {
       handleUnsubscription(profile)
     }
   } else {
-    const profileIds = [profile._id]
-
-    if (profile._id !== MAIN_PROFILE_ID) {
-      const primaryProfile = profileList.value.find(prof => {
-        return prof._id === MAIN_PROFILE_ID
-      })
-
-      if (!isProfileSubscribed(primaryProfile)) {
-        profileIds.push(MAIN_PROFILE_ID)
-      }
-    }
-
-    const channel = {
+    subscribeToChannel(profile, {
       id: props.channelId,
       name: props.channelName,
       thumbnail: props.channelThumbnail,
-      feedTypes: [...activeChannelSettings.value.feedTypes],
-      notificationFeedTypes: [...activeChannelSettings.value.notificationFeedTypes],
-      showMembersOnly: activeChannelSettings.value.showMembersOnly
-    }
-    if (activeChannelSettings.value.dailyVideoLimit !== undefined) {
-      channel.dailyVideoLimit = activeChannelSettings.value.dailyVideoLimit
-    }
-    // A saved handle can be newer than the one from a cached result.
-    const savedHandle = store.getters.getSubscribedChannelsById.get(props.channelId)?.handle
-    const handle = savedHandle ?? normalizeChannelHandle(props.channelHandle)
-    if (handle !== null) {
-      channel.handle = handle
-    }
-
-    store.dispatch('addChannelToProfiles', {
-      channel,
-      profileIds
-    })
-    // Profiles that already had the channel saved it without a handle.
-    if (handle !== null && savedHandle === undefined && !profileIds.includes(MAIN_PROFILE_ID)) {
-      store.dispatch('updateSubscriptionDetails', { channelId: props.channelId, channelHandle: handle })
-    }
-
-    showToast({ message: t('Channel.Added channel to your subscriptions'), icon: ['fas', 'subscriptions'] })
-    // Only the first profile to subscribe adds the channel to All Channels.
-    if (profileIds.includes(MAIN_PROFILE_ID)) {
-      mirrorYouTubeSubscription(props.channelId, true)
-    }
+      handle: props.channelHandle
+    }, t, activeChannelSettings.value)
     emit('subscribed')
   }
 
@@ -944,37 +909,7 @@ function handleUnsubscribeConfirmation(value) {
  * @param {Profile} profile
  */
 function handleUnsubscription(profile) {
-  const profileIds = [profile._id]
-
-  if (profile._id === MAIN_PROFILE_ID) {
-    // Check if a subscription exists in a different profile.
-    // Remove from there as well.
-
-    profileList.value.forEach((profileInList) => {
-      if (profileInList._id === MAIN_PROFILE_ID) {
-        return
-      }
-
-      if (isProfileSubscribed(profileInList)) {
-        profileIds.push(profileInList._id)
-      }
-    })
-  }
-
-  store.dispatch('removeChannelFromProfiles', { channelIds: [props.channelId], profileIds })
-  // Removing a channel from All Channels unsubscribes every profile.
-  if (profile._id === MAIN_PROFILE_ID) {
-    mirrorYouTubeSubscription(props.channelId, false)
-  }
-
-  showToast({ message: t('Channel.Channel has been removed from your subscriptions'), icon: ['fas', 'trash'] })
-
-  if (profile._id === MAIN_PROFILE_ID && profileIds.length > 1) {
-    showToast({
-      message: t('Channel.Removed subscription from {count} other channel(s)', { count: profileIds.length - 1 }, profileIds.length - 1),
-      icon: ['fas', 'trash'],
-    })
-  }
+  unsubscribeFromChannel(profile, props.channelId, t)
 }
 
 /**
@@ -988,9 +923,7 @@ function isActiveProfile(profile) {
  * @param {Profile} profile
  */
 function isProfileSubscribed(profile) {
-  const channelId = props.channelId
-
-  return profile.subscriptions.some((channel) => channel.id === channelId)
+  return isProfileSubscribedToChannel(profile, props.channelId)
 }
 </script>
 
