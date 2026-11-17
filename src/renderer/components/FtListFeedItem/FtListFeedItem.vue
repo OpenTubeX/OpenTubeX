@@ -452,10 +452,13 @@ const menuItems = computed(() => {
     items.push({
       label: t('Video.Play Next'),
       icon: ['fas', 'play-next'],
+      quickAction: true,
       run: () => addToWatchQueue(true)
     }, {
       label: t('Video.Add to Queue'),
+      shortLabel: t('Video.Queue'),
       icon: ['fas', 'add-to-queue'],
+      quickAction: true,
       run: () => addToWatchQueue(false)
     }, { type: 'separator' })
   }

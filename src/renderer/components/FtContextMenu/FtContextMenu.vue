@@ -30,7 +30,7 @@
           >
             <button
               v-for="item in quickActions"
-              :key="item.actionId"
+              :key="item.actionId ?? item.label"
               class="menuItem iconButton"
               :class="{ disabled: !item.enabled }"
               type="button"
