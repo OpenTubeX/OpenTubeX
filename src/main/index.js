@@ -239,16 +239,48 @@ function runApp() {
       .sort((left, right) => right.updatedAt - left.updatedAt)[0] ?? null
   }
 
-  function requestDockMediaAction(action) {
-    const session = getDockMediaSession()
+  /** @param {number} [windowId] Control this window's media instead of the app's current media. */
+  function getMediaControlSession(windowId) {
+    return windowId === undefined ? getDockMediaSession() : dockMediaSessions.get(windowId) ?? null
+  }
+
+  function requestDockMediaAction(action, windowId) {
+    const session = getMediaControlSession(windowId)
     if (!session || !session.actions.has(action)) {
       return
     }
     session.manager.bridge.send(IpcChannels.TABS_REQUEST_MEDIA_SESSION_ACTION, action)
   }
 
+  const thumbarSignatures = new Map()
+
+  // The thumbnail toolbar in the Windows taskbar controls the media of its own window.
+  function updateThumbarButtons() {
+    if (process.platform !== 'win32') return
+    for (const [windowId, { manager, actions }] of dockMediaSessions) {
+      const window = manager.browserWindow
+      if (window.isDestroyed()) continue
+      const items = actions.has('play') || actions.has('pause')
+        ? createMediaMenuItems(name => getTrayMenuIcon(name, trayMenuIconPack), windowId)
+        : []
+      const signature = JSON.stringify([trayMenuIconPack, items.map(({ label, enabled }) => [label, enabled])])
+      if (signature === thumbarSignatures.get(windowId)) continue
+      if (items.length === 0 && !thumbarSignatures.has(windowId)) continue
+      if (window.setThumbarButtons(items.map(({ label, icon, enabled, click }) => ({
+        tooltip: label,
+        icon,
+        // Electron rejects the documented 'enabled' flag.
+        flags: enabled ? [] : ['disabled'],
+        click
+      })))) {
+        thumbarSignatures.set(windowId, signature)
+      }
+    }
+  }
+
   function updateDockMenu() {
     createTrayContextMenu()
+    updateThumbarButtons()
     if (process.platform !== 'darwin' || !app.dock) {
       return
     }
@@ -293,6 +325,7 @@ function runApp() {
       manager.browserWindow.once('closed', () => {
         dockMediaSessions.delete(windowId)
         dockMediaTrackedWindowIds.delete(windowId)
+        thumbarSignatures.delete(windowId)
         updateDockMenu()
       })
     }
@@ -1775,8 +1808,8 @@ function runApp() {
     }
   }
 
-  function createMediaMenuItems(iconFor = () => undefined) {
-    const session = getDockMediaSession()
+  function createMediaMenuItems(iconFor = () => undefined, windowId = undefined) {
+    const session = getMediaControlSession(windowId)
     const actions = session?.actions ?? new Set()
     const toggleAction = session?.playbackState === 'playing' ? 'pause' : 'play'
     return [
@@ -1784,19 +1817,19 @@ function runApp() {
         label: dockMediaLabels.previous,
         icon: iconFor('step-backward'),
         enabled: actions.has('previoustrack'),
-        click: () => requestDockMediaAction('previoustrack')
+        click: () => requestDockMediaAction('previoustrack', windowId)
       },
       {
         label: toggleAction === 'pause' ? dockMediaLabels.pause : dockMediaLabels.play,
         icon: iconFor(toggleAction),
         enabled: actions.has(toggleAction),
-        click: () => requestDockMediaAction(toggleAction)
+        click: () => requestDockMediaAction(toggleAction, windowId)
       },
       {
         label: dockMediaLabels.next,
         icon: iconFor('step-forward'),
         enabled: actions.has('nexttrack'),
-        click: () => requestDockMediaAction('nexttrack')
+        click: () => requestDockMediaAction('nexttrack', windowId)
       }
     ]
   }
@@ -2900,7 +2933,7 @@ function runApp() {
         break
       case 'iconPack':
         trayMenuIconPack = data.value
-        createTrayContextMenu()
+        updateDockMenu()
         break
       case 'notificationMode':
         if (['both', 'system', 'off'].includes(data.value)) notificationMode = data.value
