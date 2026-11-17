@@ -190,13 +190,21 @@ for (const outcome of ['released', 'new touch', 'cancel', 'not toggled']) {
     t.mock.timers.enable({ apis: ['setTimeout'] })
     g.startMobileFullscreenGesture(event(210, 150))
     g.moveMobileFullscreenGesture(event(210, 50))
+    const preview = { ...g.mobileFullscreenSwipeStyle.value }
     g.finishMobileFullscreenGesture(event(210, 50))
     assert.deepEqual(calls, ['fullscreen'], 'Toggle without returning the preview first')
     await nextTick()
     if (outcome !== 'not toggled') {
-      assert.equal(g.mobileFullscreenSwipeStyle.value?.['--mobile-fullscreen-swipe-offset'], '-86.5px', 'Keep the preview until released')
+      assert.deepEqual(g.mobileFullscreenSwipeStyle.value, preview, 'Keep the preview until released')
     }
-    if (outcome === 'released') assert.deepEqual(g.releaseMobileFullscreenSwipe(), { offset: -86.5, scale: 1 + 86.5 / 124 * 0.05 })
+    if (outcome === 'released') {
+      const { offset, scale } = g.releaseMobileFullscreenSwipe()
+      assert.deepEqual(
+        { '--mobile-fullscreen-swipe-offset': `${offset}px`, '--mobile-fullscreen-swipe-scale': String(scale) },
+        preview,
+        'Release the preview that was handed off'
+      )
+    }
     if (outcome === 'new touch') g.startMobileFullscreenGesture(event(210, 150))
     if (outcome === 'cancel') g.cancelMobileFullscreenGesture()
     await nextTick()
