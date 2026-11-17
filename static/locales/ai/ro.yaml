@@ -520,7 +520,10 @@ Settings:
     Blur Thumbnails: Estompează miniaturile
     Navigation:
       Always Show Navigation Bar: Afișează întotdeauna bara de navigare când este în partea de jos
-      Compact Tab Labels: Bară de navigare compactă când este în partea de jos
+      Navigation Bar Labels: Etichetele barei de navigare când este în partea de jos
+      All Labels: Afișează toate
+      Current Page Label: Doar pagina curentă
+      No Labels: Ascunde (bară compactă)
       Show Active Subscriptions: Afișează abonamentele active în bara laterală
       Navigation: Navigare
       Customize Navigation: Personalizează navigarea
@@ -1284,6 +1287,7 @@ Settings:
       Notify When Live: Notifică atunci când canalele Twitch urmărite intră live
       Auto Refresh Interval: Interval de reîmprospătare automată a altor platforme
   Distraction Free Settings:
+    Hide Full Screen Video Title: Ascunde titlul videoclipului în fereastră completă / pe ecran complet
     Digital Wellbeing:
       Count Watch Time From: "Numără timpul de vizionare de pe"
       Break Reminder Action: "Când este timpul pentru o pauză"

@@ -111,7 +111,20 @@
     font-weight: 700;
   }
 
-  .sideNav:is(.compactLabels, .hiddenLabels) .mobileNavItem::before {
+  .sideNav:is(.compactLabels, .hiddenLabels) .mobileNavItem::before,
+  .sideNav.activeLabelOnly .mobileNavItem:not(.router-link-active)::before {
     inset-block-start: calc((var(--mobile-nav-content-height) - 32px) / 2);
+  }
+
+  .sideNav.activeLabelOnly .mobileNavItem:not(.router-link-active) .navLabel {
+    display: none;
+  }
+
+  .sideNav.activeLabelOnly .mobileNavItem.router-link-active .navLabel {
+    transition: opacity var(--motion-fast-effects);
+
+    @starting-style {
+      opacity: 0;
+    }
   }
 }

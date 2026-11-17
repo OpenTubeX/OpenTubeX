@@ -635,7 +635,10 @@ Settings:
     Blur Thumbnails: Sulieti miniatiūras
     Navigation:
       Always Show Navigation Bar: Visada rodyti naršymo juostą, kai ji yra apačioje
-      Compact Tab Labels: Kompaktiška naršymo juosta, kai ji yra apačioje
+      Navigation Bar Labels: Naršymo juostos etiketės, kai ji yra apačioje
+      All Labels: Rodyti visas
+      Current Page Label: Tik dabartinis puslapis
+      No Labels: Slėpti (kompaktiška juosta)
       Show Active Subscriptions: Rodyti aktyvias prenumeratas šoninėje juostoje
       Navigation: Naršymas
       Customize Navigation: Tinkinti naršymą
@@ -1500,6 +1503,7 @@ Settings:
       Notify When Live: Pranešti, kai sekami Twitch kanalai pradeda tiesioginę transliaciją
       Auto Refresh Interval: Kitų platformų automatinio atnaujinimo intervalas
   Distraction Free Settings:
+    Hide Full Screen Video Title: Slėpti vaizdo įrašo pavadinimą viso lango arba viso ekrano režimu
     Digital Wellbeing:
       Count Watch Time From: "Skaičiuoti žiūrėjimo laiką"
       Break Reminder Action: "Kai laikas padaryti pertrauką"

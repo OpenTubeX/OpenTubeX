@@ -520,7 +520,10 @@ Settings:
     Blur Thumbnails: Sumenna pikkukuvat
     Navigation:
       Always Show Navigation Bar: Näytä navigointipalkki aina, kun se on alareunassa
-      Compact Tab Labels: Tiivis navigointipalkki, kun se on alareunassa
+      Navigation Bar Labels: Navigointipalkin nimet, kun se on alareunassa
+      All Labels: Näytä kaikki
+      Current Page Label: Vain nykyinen sivu
+      No Labels: Piilota (tiivis palkki)
       Show Active Subscriptions: Näytä aktiiviset tilaukset sivupalkissa
       Navigation: Navigointi
       Customize Navigation: Mukauta navigointia
@@ -1282,6 +1285,7 @@ Settings:
       Notify When Live: Ilmoita, kun seuratut Twitch-kanavat aloittavat suoratoiston
       Auto Refresh Interval: Muiden alustojen automaattisen päivityksen aikaväli
   Distraction Free Settings:
+    Hide Full Screen Video Title: Piilota videon nimi koko ikkunan tai koko näytön tilassa
     Digital Wellbeing:
       Count Watch Time From: "Katseluaika lasketaan"
       Break Reminder Action: "Kun on tauon aika"

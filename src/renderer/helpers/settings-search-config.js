@@ -172,7 +172,7 @@ export const SETTINGS_SEARCH_SOURCES = {
   }, {
     type: 'navigation',
     key: 'Settings.General Settings.Navigation',
-    include: new Set(['Navigation', 'Customize Navigation', 'Show Active Subscriptions', 'Add Item', 'Always Show Navigation Bar', 'Compact Tab Labels']),
+    include: new Set(['Navigation', 'Customize Navigation', 'Show Active Subscriptions', 'Add Item', 'Always Show Navigation Bar', 'Navigation Bar Labels']),
     subpage: 'customize-interface',
     subpageTab: 'navigation'
   }, {

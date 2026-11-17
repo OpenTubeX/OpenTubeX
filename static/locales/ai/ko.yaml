@@ -614,7 +614,10 @@ Settings:
     Blur Thumbnails: 썸네일 흐리게 표시
     Navigation:
       Always Show Navigation Bar: 탐색 막대가 하단에 있을 때 항상 표시
-      Compact Tab Labels: 탐색 막대가 하단에 있을 때 간소화
+      Navigation Bar Labels: 탐색 막대가 하단에 있을 때의 라벨
+      All Labels: 모두 표시
+      Current Page Label: 현재 페이지만
+      No Labels: 숨기기(간소화된 막대)
       Show Active Subscriptions: 사이드바에 활성 구독 표시
       Navigation: 탐색
       Customize Navigation: 탐색 맞춤 설정
@@ -1480,6 +1483,7 @@ Settings:
       Notify When Live: 팔로우한 Twitch 채널이 방송을 시작하면 알림
       Auto Refresh Interval: 다른 플랫폼 자동 새로 고침 간격
   Distraction Free Settings:
+    Hide Full Screen Video Title: 전체 창 / 전체 화면에서 동영상 제목 숨기기
     Digital Wellbeing:
       Count Watch Time From: "시청 시간 계산 기준"
       Break Reminder Action: "휴식할 시간이 되면"

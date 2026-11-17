@@ -175,7 +175,7 @@
   transition: opacity 150ms ease;
 }
 
-.ftVideoPlayer:is(:fullscreen, .fullWindow)[data-shaka-controls-shown='true']:not(.playerPaused.hideVideoTitleWhenPaused:not(.pausedInterfaceRevealed)) > .paidPromotionOverlay {
+.ftVideoPlayer:is(:fullscreen, .fullWindow)[data-shaka-controls-shown='true']:not(.playerPaused.hideVideoTitleWhenPaused:not(.pausedInterfaceRevealed), .hideFullscreenVideoTitle) > .paidPromotionOverlay {
   /* Keep the badge clear of the single-line fullscreen title overlay. */
   inset-block-start: 65px;
   transition-delay: 0s, 0s;
@@ -430,6 +430,12 @@
 .ftVideoPlayer:fullscreen :deep(.playerFullscreenTitleOverlay),
 .ftVideoPlayer.fullWindow :deep(.playerFullscreenTitleOverlay) {
   display: block;
+}
+
+/* Hidden while playing and paused. The overflow menu opens the video
+   information instead. */
+.ftVideoPlayer.hideFullscreenVideoTitle:is(:fullscreen, .fullWindow) :deep(.playerFullscreenTitleOverlay) {
+  display: none;
 }
 
 /* Clears the window controls a custom title bar shows over the player on

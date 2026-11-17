@@ -530,7 +530,10 @@ Settings:
     Blur Thumbnails: Замагли сличице
     Navigation:
       Always Show Navigation Bar: Увек прикажи траку за навигацију када је на дну
-      Compact Tab Labels: Компактна трака за навигацију када је на дну
+      Navigation Bar Labels: Ознаке траке за навигацију када је на дну
+      All Labels: Прикажи све
+      Current Page Label: Само тренутна страница
+      No Labels: Сакриј (компактна трака)
       Show Active Subscriptions: Прикажи активне претплате у бочној траци
       Navigation: Навигација
       Customize Navigation: Прилагоди навигацију
@@ -1305,6 +1308,7 @@ Settings:
       Notify When Live: Обавести када праћени Twitch канали започну пренос уживо
       Auto Refresh Interval: Интервал аутоматског освежавања других платформи
   Distraction Free Settings:
+    Hide Full Screen Video Title: Сакриј наслов видео-снимка у целом прозору / преко целог екрана
     Digital Wellbeing:
       Count Watch Time From: "Рачунај време гледања"
       Break Reminder Action: "Када је време за паузу"

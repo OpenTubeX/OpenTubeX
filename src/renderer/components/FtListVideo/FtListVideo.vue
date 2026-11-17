@@ -23,6 +23,7 @@
       :class="{
         thumbnailSwipeReady: thumbnailSwipe.progress === 1,
         thumbnailSwipeLeft: thumbnailSwipe.direction === 'left',
+        thumbnailSwipeUndo: isThumbnailSwipeUndo(thumbnailSwipe.action),
       }"
       :title="thumbnailSwipe.action.label"
       aria-hidden="true"
@@ -1691,6 +1692,12 @@ function getThumbnailSwipeAction(direction) {
     .flatMap(item => item.submenu ?? item)
     .find(item => item.actionId === actionId)
   return action?.enabled !== false && action?.run ? action : null
+}
+
+// Swiping again reverses these actions, so the hint shows them in another color.
+function isThumbnailSwipeUndo(action) {
+  return action.undo === true || action.pressed === true || action.actionId === 'removeFromPlaylist' ||
+    (action.actionId === 'history' && isWatched.value)
 }
 
 const {

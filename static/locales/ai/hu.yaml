@@ -520,7 +520,10 @@ Settings:
     Blur Thumbnails: Bélyegképek elhomályosítása
     Navigation:
       Always Show Navigation Bar: Navigációs sáv megjelenítése mindig, amikor alul van
-      Compact Tab Labels: Kompakt navigációs sáv, amikor alul van
+      Navigation Bar Labels: Navigációs sáv feliratai, amikor alul van
+      All Labels: Összes megjelenítése
+      Current Page Label: Csak az aktuális oldal
+      No Labels: Elrejtés (kompakt sáv)
       Show Active Subscriptions: Aktív feliratkozások megjelenítése az oldalsávban
       Navigation: Navigáció
       Customize Navigation: Navigáció testreszabása
@@ -1282,6 +1285,7 @@ Settings:
       Notify When Live: Értesítés, amikor a követett Twitch-csatornák élő adást indítanak
       Auto Refresh Interval: Más platformok automatikus frissítésének időköze
   Distraction Free Settings:
+    Hide Full Screen Video Title: Videó címének elrejtése teljes ablakos vagy teljes képernyős módban
     Digital Wellbeing:
       Count Watch Time From: "Nézési idő számításának forrása"
       Break Reminder Action: "Amikor ideje szünetet tartani"

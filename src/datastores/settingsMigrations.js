@@ -48,6 +48,7 @@ const REPLACED_SETTING_IDS = new Map([
   ['limitTitlesToTwoLines', 'titleLineLimit'],
   ['holdToDoublePlaybackSpeed', 'holdPlaybackRateMultiplier'],
   ['thumbnailDataSaver', 'thumbnailDataSaverMode'],
+  ['compactNavigationLabels', 'navigationBarLabels'],
 ])
 
 /**
@@ -100,6 +101,15 @@ export function thumbnailDataSaverModeFromSwitch(enabled) {
   return enabled === true ? 'always' : 'off'
 }
 
+/**
+ * The Navigation Bar Labels select that replaced the former Compact Tab Labels
+ * switch, which hid every label.
+ * @param {unknown} enabled
+ */
+export function navigationBarLabelsFromCompactSwitch(enabled) {
+  return enabled === true ? 'none' : 'all'
+}
+
 /** Apply the stored setting migrations shared by manual and scheduled backups. */
 export async function migrateStoredSettings(datastore) {
   const save = (key, value) => datastore.updateAsync({ _id: key }, { _id: key, value }, { upsert: true })
@@ -114,6 +124,7 @@ export async function migrateStoredSettings(datastore) {
         'limitTitlesToTwoLines', 'titleLineLimit', 'syncServerSettingUpdatedAt',
         'holdToDoublePlaybackSpeed', 'holdPlaybackRateMultiplier',
         'thumbnailDataSaver', 'thumbnailDataSaverMode', 'defaultInvidiousInstance',
+        'compactNavigationLabels', 'navigationBarLabels',
         ...FORMER_CHANNEL_SETTING_SWITCHES.flat(),
       ]
     }
@@ -228,6 +239,15 @@ export async function migrateStoredSettings(datastore) {
       await save('thumbnailDataSaverMode', 'always')
     }
     await datastore.removeAsync({ _id: 'thumbnailDataSaver' })
+  }
+  // Compact Tab Labels became the Navigation Bar Labels select, which can also
+  // show only the current page's label.
+  const compactNavigationLabels = stored.get('compactNavigationLabels')
+  if (compactNavigationLabels) {
+    if (compactNavigationLabels.value === true && !stored.has('navigationBarLabels')) {
+      await save('navigationBarLabels', 'none')
+    }
+    await datastore.removeAsync({ _id: 'compactNavigationLabels' })
   }
   // Keep Playing When Navigating Away now also decides whether switching tabs
   // shows the mini player.

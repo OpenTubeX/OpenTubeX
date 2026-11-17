@@ -520,7 +520,10 @@ Settings:
     Blur Thumbnails: Gör miniatyrbilder suddiga
     Navigation:
       Always Show Navigation Bar: Visa alltid navigeringsfältet när det är längst ned
-      Compact Tab Labels: Kompakt navigeringsfält när det är längst ned
+      Navigation Bar Labels: Etiketter i navigeringsfältet när det är längst ned
+      All Labels: Visa alla
+      Current Page Label: Endast aktuell sida
+      No Labels: Dölj (kompakt fält)
       Show Active Subscriptions: Visa aktiva prenumerationer i sidofältet
       Navigation: Navigering
       Customize Navigation: Anpassa navigeringen
@@ -1282,6 +1285,7 @@ Settings:
       Notify When Live: Meddela när följda Twitch-kanaler börjar sända live
       Auto Refresh Interval: Intervall för automatisk uppdatering av andra plattformar
   Distraction Free Settings:
+    Hide Full Screen Video Title: Dölj videotitel i helfönster eller helskärm
     Digital Wellbeing:
       Count Watch Time From: "Räkna visningstid från"
       Break Reminder Action: "När det är dags för en paus"

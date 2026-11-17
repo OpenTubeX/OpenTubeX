@@ -520,7 +520,10 @@ Settings:
     Blur Thumbnails: 模糊缩略图
     Navigation:
       Always Show Navigation Bar: 导航栏位于底部时始终显示
-      Compact Tab Labels: 导航栏位于底部时使用紧凑布局
+      Navigation Bar Labels: 导航栏位于底部时的标签
+      All Labels: 全部显示
+      Current Page Label: 仅当前页面
+      No Labels: 隐藏（紧凑布局）
       Show Active Subscriptions: 在侧边栏显示活跃订阅
       Navigation: 导航
       Customize Navigation: 自定义导航
@@ -1282,6 +1285,7 @@ Settings:
       Notify When Live: 关注的 Twitch 频道开播时通知
       Auto Refresh Interval: 其他平台自动刷新间隔
   Distraction Free Settings:
+    Hide Full Screen Video Title: 在全窗口或全屏时隐藏视频标题
     Digital Wellbeing:
       Count Watch Time From: "观看时长统计范围"
       Break Reminder Action: "到休息时间时"

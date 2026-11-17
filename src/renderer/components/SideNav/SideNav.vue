@@ -1,7 +1,7 @@
 <template>
   <FtFlexBox
     class="sideNav"
-    :class="[{ opened: isOpen, expanded: isOpen || props.forceExpanded, scrollHidden: scrollHidden || softwareKeyboardOpen, keyboardHidden: softwareKeyboardOpen, compactLabels: compactNavigationLabels, highlightTransitionsDisabled, layoutTransitionsDisabled }, applyHiddenLabels]"
+    :class="[{ opened: isOpen, expanded: isOpen || props.forceExpanded, scrollHidden: scrollHidden || softwareKeyboardOpen, keyboardHidden: softwareKeyboardOpen, compactLabels: compactNavigationLabels, activeLabelOnly: navigationBarLabels === 'active', highlightTransitionsDisabled, layoutTransitionsDisabled }, applyHiddenLabels]"
     data-tutorial="navigation"
     role="navigation"
     @focusin="resetScrollVisibility"
@@ -507,7 +507,8 @@ onUpdated(scheduleLabelFit)
 const innerRef = useTemplateRef('innerRef')
 const scrollHidden = ref(false)
 const alwaysShowNavigationBar = computed(() => store.getters.getAlwaysShowNavigationBar)
-const compactNavigationLabels = computed(() => store.getters.getCompactNavigationLabels)
+const navigationBarLabels = computed(() => store.getters.getNavigationBarLabels)
+const compactNavigationLabels = computed(() => navigationBarLabels.value === 'none')
 const navigationScroll = createMobileNavigationScroll()
 let hideOnScroll = false
 let scrollResumeFrame = null

@@ -531,7 +531,10 @@ Settings:
     Blur Thumbnails: Slør miniaturebilleder
     Navigation:
       Always Show Navigation Bar: Vis altid navigationslinjen, når den er nederst
-      Compact Tab Labels: Kompakt navigationslinje, når den er nederst
+      Navigation Bar Labels: Navigationslinjens etiketter, når den er nederst
+      All Labels: Vis alle
+      Current Page Label: Kun aktuel side
+      No Labels: Skjul (kompakt linje)
       Show Active Subscriptions: Vis aktive abonnementer i sidepanelet
       Navigation: Navigation
       Customize Navigation: Tilpas navigation
@@ -1308,6 +1311,7 @@ Settings:
       Notify When Live: Giv besked, når fulgte Twitch-kanaler går live
       Auto Refresh Interval: Interval for automatisk opdatering af andre platforme
   Distraction Free Settings:
+    Hide Full Screen Video Title: Skjul videotitel i helt vindue eller fuld skærm
     Digital Wellbeing:
       Count Watch Time From: "Tæl visningstid fra"
       Break Reminder Action: "Når det er tid til at holde pause"

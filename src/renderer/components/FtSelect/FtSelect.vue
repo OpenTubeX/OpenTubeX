@@ -2,7 +2,7 @@
   <div
     ref="selectRoot"
     class="select"
-    :class="{ containsTooltip: tooltip !== '', open: dropdownShown, outlined: variant === 'outlined', contentSized: sizeToContent }"
+    :class="{ containsTooltip: tooltip !== '', open: dropdownShown, outlined: fieldVariant === 'outlined', rounded: fieldVariant === 'rounded', contentSized: sizeToContent }"
     @focusout="handleFocusOut"
   >
     <select
@@ -297,8 +297,9 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useId, useTemplateRef, watch, watchEffect } from 'vue'
+import { computed, inject, nextTick, onBeforeUnmount, ref, shallowRef, useId, useTemplateRef, watch, watchEffect } from 'vue'
 import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
+import { settingsSubpageKey } from '../FtSettingsSubpage/settingsSubpage'
 
 import FtMobileSheet from '../FtMobileSheet/FtMobileSheet.vue'
 import FtInput from '../FtInput/FtInput.vue'
@@ -314,10 +315,11 @@ import { getAnchoredPosition } from '../../helpers/anchoredPosition'
 import { useAnchoredViewportBounds } from '../../composables/useAnchoredViewportBounds'
 
 const props = defineProps({
+  // Settings default to the rounded variant, which matches the main search.
   variant: {
     type: String,
-    default: 'outlined',
-    validator: value => ['filled', 'outlined'].includes(value)
+    default: null,
+    validator: value => ['filled', 'outlined', 'rounded'].includes(value)
   },
   sizeToContent: {
     type: Boolean,
@@ -521,6 +523,8 @@ loadWhenVisible(loadPreviousSentinel, async () => {
 const dropdownShown = ref(false)
 useAnchoredViewportBounds(selectButton, dropdownSurface, computed(() => dropdownShown.value && !phoneLayout.value))
 const dropdownRendered = ref(false)
+const inSettings = inject(settingsSubpageKey, null) !== null
+const fieldVariant = computed(() => props.variant ?? (inSettings ? 'rounded' : 'outlined'))
 const settingsOverlayActive = useSettingsOverlay(() => {
   closeDropdown()
   dropdownRendered.value = false

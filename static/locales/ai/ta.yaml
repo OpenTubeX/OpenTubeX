@@ -533,7 +533,10 @@ Settings:
     Blur Thumbnails: சிறுபடங்களை மங்கலாக்கு
     Navigation:
       Always Show Navigation Bar: வழிசெலுத்தல் பட்டி கீழே இருக்கும்போது எப்போதும் காட்டு
-      Compact Tab Labels: வழிசெலுத்தல் பட்டி கீழே இருக்கும்போது சுருக்கமாகக் காட்டு
+      Navigation Bar Labels: வழிசெலுத்தல் பட்டி கீழே இருக்கும்போது அதன் லேபிள்கள்
+      All Labels: அனைத்தையும் காட்டு
+      Current Page Label: தற்போதைய பக்கம் மட்டும்
+      No Labels: மறை (சுருக்கமான பட்டி)
       Show Active Subscriptions: பக்கப்பட்டியில் செயலில் உள்ள சந்தாக்களைக் காட்டு
       Navigation: வழிசெலுத்தல்
       Customize Navigation: வழிசெலுத்தலைத் தனிப்பயனாக்கு
@@ -1303,6 +1306,7 @@ Settings:
       Notify When Live: பின்தொடரும் Twitch சேனல்கள் நேரலையைத் தொடங்கும்போது அறிவி
       Auto Refresh Interval: பிற தளங்களின் தானியக்கப் புதுப்பிப்பு இடைவெளி
   Distraction Free Settings:
+    Hide Full Screen Video Title: முழுச் சாளரம் / முழுத்திரையில் காணொளித் தலைப்பை மறை
     Digital Wellbeing:
       Count Watch Time From: "பார்க்கும் நேரத்தைக் கணக்கிடும் சாதனங்கள்"
       Break Reminder Action: "இடைவேளைக்கான நேரம் வரும்போது"

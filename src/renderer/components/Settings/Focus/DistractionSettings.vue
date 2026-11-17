@@ -186,7 +186,8 @@
         <FtToggleSwitch
           :label="t('Settings.Distraction Free Settings.Show Video Title')"
           :compact="true"
-          :default-value="showVideoTitleWhenPaused"
+          :disabled="hideFullscreenVideoTitle"
+          :default-value="showVideoTitleWhenPaused && !hideFullscreenVideoTitle"
           setting-key="showVideoTitleWhenPaused"
           @change="updateShowVideoTitleWhenPaused"
         />
@@ -438,6 +439,13 @@
           :default-value="hidePaidPromotion"
           setting-key="hidePaidPromotion"
           @change="updateHidePaidPromotion"
+        />
+        <FtToggleSwitch
+          :label="t('Settings.Distraction Free Settings.Hide Full Screen Video Title')"
+          :compact="true"
+          :default-value="hideFullscreenVideoTitle"
+          setting-key="hideFullscreenVideoTitle"
+          @change="store.dispatch('updateHideFullscreenVideoTitle', $event)"
         />
       </div>
       <div class="switchColumn">
@@ -907,6 +915,7 @@ function updateShowPlayerControlsWhenPaused(value) {
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const showVideoTitleWhenPaused = computed(() => store.getters.getShowVideoTitleWhenPaused)
+const hideFullscreenVideoTitle = computed(() => store.getters.getHideFullscreenVideoTitle)
 
 /**
  * @param {boolean} value
@@ -927,7 +936,7 @@ function updateShowFullscreenActionsWhenPaused(value) {
 
 const pausedInterfaceVisibilityUnchanged = computed(() => {
   return showPlayerControlsWhenPaused.value &&
-    showVideoTitleWhenPaused.value &&
+    (showVideoTitleWhenPaused.value || hideFullscreenVideoTitle.value) &&
     showFullscreenActionsWhenPaused.value
 })
 

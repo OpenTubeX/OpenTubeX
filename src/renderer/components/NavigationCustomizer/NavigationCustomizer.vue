@@ -144,12 +144,15 @@
       setting-key="alwaysShowNavigationBar"
       @change="store.dispatch('updateAlwaysShowNavigationBar', $event)"
     />
-    <FtToggleSwitch
-      :label="t('Settings.General Settings.Navigation.Compact Tab Labels')"
-      :compact="true"
-      :default-value="compactNavigationLabels"
-      setting-key="compactNavigationLabels"
-      @change="store.dispatch('updateCompactNavigationLabels', $event)"
+    <FtSelect
+      class="navigationBarLabelsSelect"
+      :placeholder="t('Settings.General Settings.Navigation.Navigation Bar Labels')"
+      :value="navigationBarLabels"
+      :select-names="navigationBarLabelNames"
+      :select-values="NAVIGATION_BAR_LABEL_VALUES"
+      :icon="['fas', 'font']"
+      setting-key="navigationBarLabels"
+      @change="store.dispatch('updateNavigationBarLabels', $event)"
     />
     <FtToggleSwitch
       :label="t('Settings.General Settings.Navigation.Show Active Subscriptions')"
@@ -168,6 +171,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
 import FtButton from '../FtButton/FtButton.vue'
+import FtSelect from '../FtSelect/FtSelect.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../../store/index'
@@ -206,7 +210,13 @@ const catalogById = computed(() => new Map(catalog.value.map(item => [item.id, i
 const navigationItems = computed(() => store.getters.getNavigationItems)
 const hideActiveSubscriptions = computed(() => store.getters.getHideActiveSubscriptions)
 const alwaysShowNavigationBar = computed(() => store.getters.getAlwaysShowNavigationBar)
-const compactNavigationLabels = computed(() => store.getters.getCompactNavigationLabels)
+const NAVIGATION_BAR_LABEL_VALUES = ['all', 'active', 'none']
+const navigationBarLabels = computed(() => store.getters.getNavigationBarLabels)
+const navigationBarLabelNames = computed(() => [
+  t('Settings.General Settings.Navigation.All Labels'),
+  t('Settings.General Settings.Navigation.Current Page Label'),
+  t('Settings.General Settings.Navigation.No Labels'),
+])
 const isDefaultNavigation = computed(() => (
   navigationItems.value.length === DEFAULT_NAVIGATION_ITEMS.length &&
   navigationItems.value.every((id, index) => id === DEFAULT_NAVIGATION_ITEMS[index])
@@ -493,6 +503,13 @@ function resetItems() {
 
 .selectedItem.dragging {
   border-radius: var(--shape-corner-large-increased);
+}
+
+.navigationBarLabelsSelect {
+  /* Fill the row, so the long label stays readable. */
+  inline-size: auto;
+  margin-block: 16px 8px;
+  margin-inline: 8px;
 }
 
 .fixedNavigationOptions {

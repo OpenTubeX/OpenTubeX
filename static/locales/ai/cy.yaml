@@ -521,7 +521,10 @@ Settings:
     Blur Thumbnails: Niwlio mân-luniau
     Navigation:
       Always Show Navigation Bar: Dangos y bar llywio bob amser pan fydd ar y gwaelod
-      Compact Tab Labels: Bar llywio cryno pan fydd ar y gwaelod
+      Navigation Bar Labels: Labeli'r bar llywio pan fydd ar y gwaelod
+      All Labels: Dangos y cyfan
+      Current Page Label: Y dudalen gyfredol yn unig
+      No Labels: Cuddio (bar cryno)
       Show Active Subscriptions: Dangos tanysgrifiadau gweithredol yn y bar ochr
       Navigation: Llywio
       Customize Navigation: Addasu'r llywio
@@ -1285,6 +1288,7 @@ Settings:
       Notify When Live: Hysbysu Pan Fydd Sianeli Twitch a Ddilynir yn Mynd yn Fyw
       Auto Refresh Interval: Cyfwng adnewyddu llwyfannau eraill yn awtomatig
   Distraction Free Settings:
+    Hide Full Screen Video Title: Cuddio teitl y fideo mewn ffenestr lawn / sgrin lawn
     Digital Wellbeing:
       Count Watch Time From: "Cyfrif Amser Gwylio O"
       Break Reminder Action: "Pan Fydd Hi'n Amser am Seibiant"

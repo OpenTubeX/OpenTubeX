@@ -571,7 +571,10 @@ Settings:
     Blur Thumbnails: تھمب نیلز دھندلے کریں
     Navigation:
       Always Show Navigation Bar: نیویگیشن بار نیچے ہونے پر اسے ہمیشہ دکھائیں
-      Compact Tab Labels: نیویگیشن بار نیچے ہونے پر اسے مختصر کریں
+      Navigation Bar Labels: نیویگیشن بار نیچے ہونے پر اس کے لیبل
+      All Labels: سب دکھائیں
+      Current Page Label: صرف موجودہ صفحہ
+      No Labels: چھپائیں (مختصر بار)
       Show Active Subscriptions: سائیڈ بار میں فعال سبسکرپشنز دکھائیں
       Navigation: نیویگیشن
       Customize Navigation: نیویگیشن کو حسب ضرورت بنائیں
@@ -1346,6 +1349,7 @@ Settings:
       Notify When Live: فالو کیے گئے Twitch چینلز کے لائیو ہونے پر مطلع کریں
       Auto Refresh Interval: دیگر پلیٹ فارمز کی خودکار ریفریش کا وقفہ
   Distraction Free Settings:
+    Hide Full Screen Video Title: پوری ونڈو / فل اسکرین میں ویڈیو کا عنوان چھپائیں
     Digital Wellbeing:
       Count Watch Time From: دیکھنے کا وقت شمار کریں از
       Break Reminder Action: جب وقفے کا وقت ہو

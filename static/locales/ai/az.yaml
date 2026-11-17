@@ -522,7 +522,10 @@ Settings:
     Blur Thumbnails: Miniatürləri bulanıqlaşdır
     Navigation:
       Always Show Navigation Bar: Naviqasiya paneli aşağıda olduqda onu həmişə göstər
-      Compact Tab Labels: Aşağıda olduqda yığcam naviqasiya paneli
+      Navigation Bar Labels: Naviqasiya paneli aşağıda olduqda etiketlər
+      All Labels: Hamısını göstər
+      Current Page Label: Yalnız cari səhifə
+      No Labels: Gizlət (yığcam panel)
       Show Active Subscriptions: Aktiv abunəlikləri yan paneldə göstər
       Navigation: Naviqasiya
       Customize Navigation: Naviqasiyanı fərdiləşdir
@@ -1284,6 +1287,7 @@ Settings:
       Notify When Live: İzlənilən Twitch kanalları canlı yayına başlayanda bildiriş göndər
       Auto Refresh Interval: Digər platformaların avtomatik yenilənmə aralığı
   Distraction Free Settings:
+    Hide Full Screen Video Title: Tam pəncərədə / tam ekranda video başlığını gizlət
     Digital Wellbeing:
       Count Watch Time From: "Baxış Vaxtı Sayılan Cihazlar"
       Break Reminder Action: "Fasilə Vaxtı Gələndə"

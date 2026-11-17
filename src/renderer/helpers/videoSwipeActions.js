@@ -12,6 +12,7 @@ export function queueSwipeAction(actionId, videos, queue, { t, commit, add }) {
   return {
     label: remove ? t('Video.Remove from Queue', { title: videos[0].title }) : actionId === 'playNext' ? t('Video.Play Next') : t('Video.Add to Queue'),
     icon: ['fas', remove ? 'trash' : actionId === 'playNext' ? 'play-next' : 'add-to-queue'],
+    undo: remove,
     run: () => {
       if (remove) {
         for (const item of queued) commit('removeVideoFromWatchQueue', item.queueItemId)
@@ -52,6 +53,7 @@ export function downloadSwipeAction(download, { t, cancel, remove }) {
   return {
     label: active ? t('Downloads.Cancel Download') : t('Downloads.Remove File'),
     icon: ['fas', active ? 'times' : 'trash'],
+    undo: true,
     run: () => active ? cancel(download) : remove(download),
   }
 }

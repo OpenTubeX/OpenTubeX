@@ -5,6 +5,7 @@ import {
   FORMER_CHANNEL_SETTING_SWITCHES,
   isFormerDefaultQuickSettings,
   holdPlaybackRateMultiplierFromSwitch,
+  navigationBarLabelsFromCompactSwitch,
   migrateSettingIds,
   scrollPlayerModeFromMiniPlayerSwitch,
   thumbnailDataSaverModeFromSwitch,
@@ -141,6 +142,13 @@ export function migrateLegacySettings(settings) {
       migratedSettings.thumbnailDataSaverMode = thumbnailDataSaverModeFromSwitch(migratedSettings.thumbnailDataSaver)
     }
     delete migratedSettings.thumbnailDataSaver
+  }
+
+  if (Object.hasOwn(migratedSettings, 'compactNavigationLabels')) {
+    if (!Object.hasOwn(migratedSettings, 'navigationBarLabels')) {
+      migratedSettings.navigationBarLabels = navigationBarLabelsFromCompactSwitch(migratedSettings.compactNavigationLabels)
+    }
+    delete migratedSettings.compactNavigationLabels
   }
 
   if (Object.hasOwn(migratedSettings, 'moveDownloadsToQuickSettings')) {

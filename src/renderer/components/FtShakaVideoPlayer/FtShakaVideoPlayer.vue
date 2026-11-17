@@ -121,6 +121,7 @@
         pausedInterfaceRevealed,
         hidePlayerControlsWhenPaused: !showPlayerControlsWhenPaused,
         hideVideoTitleWhenPaused: !showVideoTitleWhenPaused,
+        hideFullscreenVideoTitle,
         hideFullscreenActionsWhenPaused: !showFullscreenActionsWhenPaused,
         captionsUseAppFont
       }"
@@ -2209,7 +2210,7 @@ import { VoiceOverTranslationButton } from './player-components/VoiceOverTransla
 import { supportsVoiceOverTranslation } from '../../helpers/voiceOverTranslation'
 import { SleepTimer } from './player-components/SleepTimer'
 import { SeekHistoryMenu } from './player-components/SeekHistoryMenu'
-import { ShortsVideoInfoButton } from './player-components/ShortsVideoInfoButton'
+import { VideoInfoButton } from './player-components/VideoInfoButton'
 import { SponsorBlockCancelButton } from './player-components/SponsorBlockCancelButton'
 import { SponsorBlockClearButton } from './player-components/SponsorBlockClearButton'
 import { SponsorBlockEndButton } from './player-components/SponsorBlockEndButton'
@@ -3097,6 +3098,7 @@ let pausedInterfaceRevealTimeout = null
 const showPlayerControlsWhenPaused = computed(() => store.getters.getShowPlayerControlsWhenPaused)
 const useFrostedGlassPlayerUi = computed(() => store.getters.getUseFrostedGlassPlayerUi)
 const showVideoTitleWhenPaused = computed(() => store.getters.getShowVideoTitleWhenPaused)
+const hideFullscreenVideoTitle = computed(() => store.getters.getHideFullscreenVideoTitle)
 const showFullscreenActionsWhenPaused = computed(() => store.getters.getShowFullscreenActionsWhenPaused)
 const playingInterfaceHideDelay = computed(() => store.getters.getPlayingInterfaceHideDelay)
 const pausedInterfaceHideDelay = computed(() => store.getters.getPausedInterfaceHideDelay)
@@ -5168,6 +5170,9 @@ const uiConfig = computed(() => {
     monoAudio: 'ft_mono_audio',
     abRepeat: 'ft_ab_repeat',
   }
+  // Without the full screen title, which opens the video information, the
+  // menu offers it instead. It only shows in full screen and full window.
+  const showVideoInfoMenuItem = props.shortsPlayer || (store.getters.getHideFullscreenVideoTitle && !props.externalUrl)
   /** @param {(id: string) => boolean} include */
   const menuControls = include => store.getters.getPlayerMenuControls
     .filter(id => !hiddenMenuControls.has(id) && include(id))
@@ -5186,7 +5191,7 @@ const uiConfig = computed(() => {
     // so the menu keeps those.
     const chaptersNextToTime = mobile && !props.shortsPlayer && controlBarButtons.includes('chapters')
     uiConfig.overflowMenuButtons = [
-      ...(props.shortsPlayer ? ['ft_shorts_video_info'] : []),
+      ...(showVideoInfoMenuItem ? ['ft_video_info'] : []),
       ...menuControls(id => id !== 'theatreMode' && !(id === 'chapters' && chaptersNextToTime) &&
         !(id === 'autoplay' && props.shortsPlayer) &&
         !(id === 'fullWindow' && process.env.IS_CAPACITOR)),
@@ -5216,6 +5221,7 @@ const uiConfig = computed(() => {
     const controlBarIds = new Set(getControlBarButtonDefinitions(false).map(({ id }) => id))
     const removedButtons = new Set(getRemovedControlBarButtons(controlBarButtons))
     uiConfig.overflowMenuButtons.push(
+      ...(showVideoInfoMenuItem ? ['ft_video_info'] : []),
       ...menuControls(id => id === 'captions' || !controlBarIds.has(id) || removedButtons.has(id)),
       'recenter_vr',
       'toggle_stereoscopic',
@@ -9833,22 +9839,26 @@ function registerAndroidPictureInPictureButton() {
   registerOwnElement(shakaOverflowMenu, 'ft_android_picture_in_picture', factory)
 }
 
-function registerShortsVideoInfoButton() {
-  events.addEventListener('toggleShortsMetadata', () => {
-    emit('toggle-shorts-metadata')
+function registerVideoInfoButton() {
+  events.addEventListener('toggleVideoInfo', () => {
+    if (props.shortsPlayer) emit('toggle-shorts-metadata')
+    else if (props.shortsPhonePanels) requestShortsPhonePanel('metadata')
+    else setFullscreenMetadata(!showFullscreenMetadata.value)
   })
 
   /** @implements {shaka.extern.IUIElement.Factory} */
-  class ShortsVideoInfoButtonFactory {
+  class VideoInfoButtonFactory {
     create(rootElement, controls) {
-      return new ShortsVideoInfoButton(events, rootElement, controls)
+      // Outside full screen and full window, the information is on the page.
+      return new VideoInfoButton(events, rootElement, controls,
+        () => props.shortsPlayer || isNativeFullscreenActive() || fullWindowEnabled.value)
     }
   }
 
   registerOwnElement(
     shakaOverflowMenu,
-    'ft_shorts_video_info',
-    new ShortsVideoInfoButtonFactory()
+    'ft_video_info',
+    new VideoInfoButtonFactory()
   )
 }
 
@@ -12134,7 +12144,7 @@ onMounted(async () => {
   registerTheatreModeButton()
   registerFullWindowButton()
   registerAndroidPictureInPictureButton()
-  registerShortsVideoInfoButton()
+  registerVideoInfoButton()
 
   if (
     props.autoOpenChapters &&
