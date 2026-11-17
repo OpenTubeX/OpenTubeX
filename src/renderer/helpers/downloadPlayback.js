@@ -91,6 +91,23 @@ export function navigationDownloadId(getters, videoId, inheritedId) {
   return cardDownloadId(getters.getYtDlpDownloads, videoId, inheritedId, localId)
 }
 
+/**
+ * The watch route that the queue and autoplay open for a YouTube video.
+ * @param {object} getters the store getters
+ * @param {{ videoId: string, isMusic?: boolean }} video
+ */
+export function watchRouteForVideo(getters, video) {
+  const downloadId = navigationDownloadId(getters, video.videoId)
+  const query = {
+    ...(video.isMusic === true ? { musicVideo: 'true' } : {}),
+    ...(downloadId ? { downloadId } : {})
+  }
+  return {
+    path: `/watch/${video.videoId}`,
+    ...(Object.keys(query).length > 0 ? { query } : {})
+  }
+}
+
 export function downloadFileTitle(download, file) {
   return file.title || (download.videoId && download.videoId === file.videoId ? download.title : '') ||
     file.path?.split(/[/\\]/).at(-1)?.replace(/\.[^.]+$/, '') || file.videoId

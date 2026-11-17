@@ -5,7 +5,8 @@ import { runInNewContext } from 'node:vm'
 import { createStore } from 'vuex'
 import { computed, ref } from 'vue'
 import downloads from '../../src/renderer/store/modules/downloads.js'
-import { navigationDownloadId } from '../../src/renderer/helpers/downloadPlayback.js'
+import { watchRouteForVideo } from '../../src/renderer/helpers/downloadPlayback.js'
+import { requestQueuedPlayback } from '../../src/renderer/helpers/queuedPlayback.js'
 
 import watchQueue, {
   createWatchQueueState,
@@ -190,7 +191,7 @@ function watchMethods(source, names) {
     const start = source.indexOf(`    ${name}:`)
     const end = source.indexOf('\n    },', start)
     return source.slice(start, end) + '\n}'
-  }).join(',')} })`, { showToast() {}, process: { env: {} }, URL, navigationDownloadId })
+  }).join(',')} })`, { showToast() {}, process: { env: {} }, URL, watchRouteForVideo, requestQueuedPlayback })
 }
 
 test('bedtime and the daily limit stop autoplay only after the queued videos', async () => {

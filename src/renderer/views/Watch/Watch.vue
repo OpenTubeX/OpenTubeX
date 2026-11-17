@@ -989,30 +989,12 @@
           :panels="infoPanels"
           class="watchVideo"
         />
-        <button
+        <PhoneQueueButton
           v-if="phonePanelsEnabled && $store.getters.getNextQueuedVideo && !isLoading"
-          type="button"
-          class="phonePanelButton phonePanelCard phoneQueueButton watchVideo"
-          @click="openPhonePanel('queue')"
-          @keydown.space.stop
-          @keyup.space.stop
-        >
-          <ft-icon
-            :icon="['fas', 'queue']"
-            aria-hidden="true"
-          />
-          <span class="phoneCommentsLabel">
-            <span>{{ $t('Video.Queue') }}</span>
-            <span
-              class="phoneQueuePreview"
-              dir="auto"
-            >{{ $store.getters.getNextQueuedVideo.title }}</span>
-          </span>
-          <ft-icon
-            :icon="['fas', 'angle-down']"
-            aria-hidden="true"
-          />
-        </button>
+          class="watchVideo"
+          :next-title="$store.getters.getNextQueuedVideo.title"
+          @open="openPhonePanel('queue')"
+        />
         <button
           v-if="phonePanelsEnabled && watchingPlaylist && !isLoading"
           type="button"

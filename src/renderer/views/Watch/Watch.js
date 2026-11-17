@@ -39,6 +39,7 @@ import CommentSection from '../../components/CommentSection/CommentSection.vue'
 import WatchVideoLiveChat from '../../components/WatchVideoLiveChat/WatchVideoLiveChat.vue'
 import WatchVideoPlaylist from '../../components/WatchVideoPlaylist/WatchVideoPlaylist.vue'
 import WatchVideoQueue from '../../components/WatchVideoQueue/WatchVideoQueue.vue'
+import PhoneQueueButton from '../../components/PhoneQueueButton/PhoneQueueButton.vue'
 import WatchVideoRecommendations from '../../components/WatchVideoRecommendations/WatchVideoRecommendations.vue'
 import FtAgeRestricted from '../../components/FtAgeRestricted/FtAgeRestricted.vue'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
@@ -64,7 +65,8 @@ import { getYouTubeChannelKey, isSignedInToYouTube } from '../../helpers/youtube
 import { addToYouTubeWatchHistory } from '../../helpers/api/youtube-account'
 import { DOWNLOADED_MEDIA_MIME_TYPES } from '../../../constants'
 import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
-import { downloadWatchRoute, isPlayableDownloadFile, navigationDownloadId } from '../../helpers/downloadPlayback'
+import { downloadWatchRoute, isPlayableDownloadFile, watchRouteForVideo } from '../../helpers/downloadPlayback'
+import { requestQueuedPlayback, takeQueuedPlayback } from '../../helpers/queuedPlayback'
 import { parseLocalVideoGames } from '../../helpers/video-games'
 import { parseLocalVideoMusicTracks, parseVideoMusicTracks } from '../../helpers/video-music'
 import { saveChannelPreference, saveChannelPreferenceWithToast } from '../../helpers/channel-preferences'
@@ -236,6 +238,7 @@ export default defineComponent({
     'watch-video-live-chat': WatchVideoLiveChat,
     'watch-video-playlist': WatchVideoPlaylist,
     'watch-video-queue': WatchVideoQueue,
+    PhoneQueueButton,
     'watch-video-recommendations': WatchVideoRecommendations,
     'ft-age-restricted': FtAgeRestricted,
     FtSubscribeButton,
@@ -1729,6 +1732,8 @@ export default defineComponent({
     this.isShort = this.tabRoute.query.short === 'true'
     this.useCustomShortsPlayerForCurrentVideo = this.$store.getters.getUseCustomShortsPlayer
     this.videoAspectRatio = this.isShort ? 9 / 16 : null
+    // The queue moved on from media on another page.
+    if (takeQueuedPlayback(this.tabId, this.tabRoute.fullPath)) this.queuedPlaybackVideoId = this.videoId
     if (this.applyBackgroundStart()) {
       // Its Watch page has never been shown, so it cannot measure the inline
       // player. The smallest dockable height lets returning to it measure one.
@@ -6048,15 +6053,7 @@ export default defineComponent({
      * @param {{ videoId: string, isMusic?: boolean }} video
      */
     watchRouteForVideo: function (video) {
-      const downloadId = navigationDownloadId(this.$store.getters, video.videoId)
-      const query = {
-        ...(video.isMusic === true ? { musicVideo: 'true' } : {}),
-        ...(downloadId ? { downloadId } : {})
-      }
-      return {
-        path: `/watch/${video.videoId}`,
-        ...(Object.keys(query).length > 0 ? { query } : {})
-      }
+      return watchRouteForVideo(this.$store.getters, video)
     },
 
     playNextVideoNow: function (forcePlayback = true) {
@@ -6110,6 +6107,8 @@ export default defineComponent({
         this.restartCurrentVideo()
       } else {
         this.queuedPlaybackVideoId = nextVideo.videoId
+        // Other media plays on its own page.
+        if (!nextFullPath.startsWith('/watch/')) requestQueuedPlayback(this.tabId, nextFullPath)
         this.tabRouter.push(route)
       }
       showToast({ message: this.t('Playing Next Video'), icon: ['fas', 'step-forward'] })
