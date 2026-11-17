@@ -376,14 +376,10 @@
         :option-icons="[['fas', 'forward'], ['fas', 'xmark'], ['fas', 'eye-slash']]"
         @click="handlePreloadPlaylistPromptAnswer"
       />
-      <FtPrompt
+      <ExportTypePrompt
         v-if="showExportPrompt"
-        autosize
-        :label="t('Settings.Data Settings.Select Export Type')"
-        :option-names="exportNames"
-        :option-values="EXPORT_VALUES"
-        :option-icons="[['fas', 'database'], ['fab', 'youtube'], ['fas', 'link'], ['fas', 'xmark']]"
-        @click="handleExport"
+        :options="exportOptions"
+        @select="handleExport"
       />
       <WatchVideoDownloadPrompt
         v-if="enableDownloads && showDownloadPrompt"
@@ -427,6 +423,7 @@ import { FtIcon } from '@opentubex/icons'
 import FtButton from '../FtButton/FtButton.vue'
 import FtButtonGroup from '../FtButtonGroup/FtButtonGroup.vue'
 import FtInput from '../FtInput/FtInput.vue'
+import ExportTypePrompt from '../ExportTypePrompt/ExportTypePrompt.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 import FtSlider from '../FtSlider/FtSlider.vue'
@@ -1100,18 +1097,10 @@ function enterEditMode() {
   })
 }
 
-const EXPORT_VALUES = [
-  'database',
-  'youtube',
-  'urls',
-  'close'
-]
-
-const exportNames = computed(() => [
-  `${t('Settings.Data Settings.Export OpenTubeX')} (.db)`,
-  `${t('Settings.Data Settings.Export YouTube')} (.csv)`,
-  `${t('User Playlists.Export list of URLs')} (.txt)`,
-  t('Close')
+const exportOptions = computed(() => [
+  { label: `${t('Settings.Data Settings.Export OpenTubeX')} (.db)`, value: 'database', icon: ['fas', 'database'] },
+  { label: `${t('Settings.Data Settings.Export YouTube')} (.csv)`, value: 'youtube', icon: ['fab', 'youtube'] },
+  { label: `${t('User Playlists.Export list of URLs')} (.txt)`, value: 'urls', icon: ['fas', 'link'] }
 ])
 
 /**

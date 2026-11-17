@@ -2,12 +2,6 @@
   justify-content: center;
 }
 
-.exportTypeButtons {
-  align-content: center;
-  align-items: center;
-  flex: 1;
-}
-
 .advancedDataSettings {
   margin-block-start: 24px;
 }
