@@ -106,6 +106,8 @@ let eventsSince = ''
 let eventsRefresh = null
 const activeSyncClients = new Set()
 let lifecycleSyncStarted = false
+/** The full sync that the latest reconnect started. */
+let reconnectSync = null
 let reminderSyncListenerStarted = false
 let notificationSyncListenerStarted = false
 let deviceRefreshId = 0
@@ -2080,22 +2082,24 @@ const actions = {
     }
     if (!lifecycleSyncStarted && typeof window !== 'undefined') {
       lifecycleSyncStarted = true
-      connectionEvents.addEventListener('change', async ({ detail }) => {
+      connectionEvents.addEventListener('change', ({ detail }) => {
         if (detail === 'offline') {
           cancelActiveSyncClients()
           dispatch('stopSyncServerLive')
         } else if (detail === 'restored') {
-          try {
-            // A reconnect must start a fresh sync after cancellation finishes.
-            await scheduler?.waitForActiveSync()
-            dispatch('startSyncServerLive')
-            if (rootState.settings.syncServerAutoSync &&
-                isSyncReasonEnabled(rootState.settings, 'automatic')) {
-              await dispatch('initializeSyncServer', { skipIfRecent: false })
+          reconnectSync = (async () => {
+            try {
+              // A reconnect must start a fresh sync after cancellation finishes.
+              await scheduler?.waitForActiveSync()
+              dispatch('startSyncServerLive')
+              if (rootState.settings.syncServerAutoSync &&
+                  isSyncReasonEnabled(rootState.settings, 'automatic')) {
+                await dispatch('initializeSyncServer', { skipIfRecent: false })
+              }
+            } catch (error) {
+              console.error('Sync server reconnect sync failed', error)
             }
-          } catch (error) {
-            console.error('Sync server reconnect sync failed', error)
-          }
+          })()
         }
       })
       // Live notifications stop while the app is hidden; check periodically instead.
@@ -2105,11 +2109,11 @@ const actions = {
             !isSyncReasonEnabled(settings, 'automatic')) return
         // Android blocks a hidden app's network, so a connection that returned
         // while hidden still counts as lost until the app is shown. This job runs
-        // with network access. Edits made offline were never scheduled, so a
-        // regained connection needs a full sync.
+        // with network access. A regained connection publishes 'restored', whose
+        // full sync uploads the edits made offline; the job waits for it.
         if (isSyncServerOffline()) {
-          if (!await checkConnection() || isSyncServerOffline()) return
-          return dispatch('syncWithSyncServer', { automatic: true })
+          if (await checkConnection() && !isSyncServerOffline()) await reconnectSync
+          return
         }
         return dispatch('syncWithSyncServer', { skipIfRecent: true, automatic: true, remoteOnly: true })
       })

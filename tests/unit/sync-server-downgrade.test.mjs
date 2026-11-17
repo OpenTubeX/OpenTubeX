@@ -1212,12 +1212,14 @@ test('the Android background job rechecks a connection regained while hidden and
     // Android blocked the hidden app's check when the connection returned; the job has network access.
     checkConnection: async () => {
       f.network.state = 'restored'
+      f.connectionEvents.dispatchEvent(new CustomEvent('change', { detail: 'restored' }))
       return true
     },
   })
   await f.actions.initializeSyncServer(f.context)
   assert.equal(f.periodicTasks.length, 1)
   await f.periodicTasks[0]()
+  // The job waited for the reconnect's sync instead of starting another one.
   const syncs = f.dispatched.filter(([action]) => action === 'syncWithSyncServer').map(([, options]) => options)
   assert.equal(syncs.length, 1)
   assert.equal(syncs[0].remoteOnly, undefined, 'a remote-only check would skip the edits made offline')
