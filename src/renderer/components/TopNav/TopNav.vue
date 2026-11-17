@@ -1400,6 +1400,7 @@ function findSubscribedChannel(channelId, url) {
  */
 async function saveLinkToSearchHistory(queryText, link, previewTitle) {
   const lastUpdatedAt = Date.now()
+  const clearCount = store.getters.getSearchHistoryClearCount
   const savedTitle = store.getters.getSearchHistoryEntries
     .find(entry => entry.linkType === link.linkType && entry.query === queryText && entry.title)?.title
   let title = previewTitle ?? savedTitle
@@ -1411,7 +1412,8 @@ async function saveLinkToSearchHistory(queryText, link, previewTitle) {
       // The entry still opens the link, which it shows instead.
       console.error('Unable to load the title of a link in the search history', error)
     }
-    if (!store.getters.getRememberSearchHistory) return
+    // Clearing or turning off the history meanwhile drops this save.
+    if (!store.getters.getRememberSearchHistory || store.getters.getSearchHistoryClearCount !== clearCount) return
   }
 
   await store.dispatch('updateSearchHistoryEntry', { query: queryText, lastUpdatedAt, linkType: link.linkType, title })

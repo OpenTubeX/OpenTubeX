@@ -338,7 +338,7 @@ test.describe('search history suggestions', () => {
     expect(pageErrors).toEqual([])
   })
 
-  test('a pasted video link is saved with its title, found by it, and opens the video again', async ({ app, page }) => {
+  test('a pasted video link is saved with its title, found by it, and opens the video again, unless history is cleared or off', async ({ app, page }) => {
     const videoId = 'jNQXAC9IVRw'
     await mockPlayableWatchPage(app, page)
     const player = demoPlayerResponse(videoId)
@@ -379,12 +379,35 @@ test.describe('search history suggestions', () => {
     // A link entry leaves the search filters alone.
     expect(await searchType()).toBe('video')
 
+    // Clearing the history while a title loads drops the save.
+    const otherVideoId = 'dQw4w9WgXcQ'
+    let releaseTitle
+    const titleHeld = new Promise(resolve => { releaseTitle = resolve })
+    let heldRequests = 0
+    await page.route('**/youtubei/v1/player**', async route => {
+      heldRequests++
+      await titleHeld
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({ ...player, videoDetails: { ...player.videoDetails, videoId: otherVideoId, title: 'Cleared Video Title' } }),
+      })
+    })
+    await input.fill(`https://youtu.be/${otherVideoId}`)
+    await input.press('Enter')
+    await expect.poll(() => heldRequests).toBeGreaterThan(0)
+    expect(await page.evaluate(() => window.$store.dispatch('removeAllSearchHistoryEntries'))).toBe(true)
+    releaseTitle()
+    await expect(page).toHaveURL(new RegExp(`#/watch/${otherVideoId}`))
+    // This wait proves that nothing is saved.
+    await page.waitForTimeout(500)
+    expect(await linkEntries()).toEqual([])
+
     await page.evaluate(() => window.$store.dispatch('updateRememberSearchHistory', false))
     await input.fill(`https://www.youtube.com/watch?v=${videoId}`)
     await input.press('Enter')
     await expect(page).toHaveURL(new RegExp(`#/watch/${videoId}`))
     // This wait proves that nothing is saved.
     await page.waitForTimeout(500)
-    expect((await linkEntries()).map(({ query }) => query)).toEqual([`https://youtu.be/${videoId}`])
+    expect(await linkEntries()).toEqual([])
   })
 })

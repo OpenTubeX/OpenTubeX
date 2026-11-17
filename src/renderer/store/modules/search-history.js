@@ -11,12 +11,18 @@ import {
 } from '../../../search-history'
 
 const state = {
-  searchHistoryEntries: []
+  searchHistoryEntries: [],
+  /** Lets saves that waited for a title skip writing after the history was cleared. */
+  searchHistoryClearCount: 0,
 }
 
 const getters = {
   getSearchHistoryEntries: (state) => {
     return state.searchHistoryEntries
+  },
+
+  getSearchHistoryClearCount: (state) => {
+    return state.searchHistoryClearCount
   },
 
   getLatestSearchHistoryEntries: (state) => {
@@ -104,7 +110,7 @@ const actions = {
   async removeAllSearchHistoryEntries({ commit }) {
     try {
       await DBSearchHistoryHandlers.deleteAll()
-      commit('setSearchHistoryEntries', [])
+      commit('clearSearchHistoryEntries')
       return true
     } catch (errMessage) {
       console.error(errMessage)
@@ -117,6 +123,11 @@ const mutations = {
   mergeLoadedSearchHistoryEntries(state, searchHistoryEntries) {
     state.searchHistoryEntries = mergeSearchHistoryEntries(searchHistoryEntries, state.searchHistoryEntries)
     sortSearchHistoryByLastUpdatedAt(state.searchHistoryEntries)
+  },
+
+  clearSearchHistoryEntries(state) {
+    state.searchHistoryEntries = []
+    state.searchHistoryClearCount++
   },
 
   setSearchHistoryEntries(state, searchHistoryEntries) {
