@@ -4,6 +4,7 @@
       <RouterLink
         class="thumbnailLink"
         :to="route"
+        :data-tab-title="category.name"
         tabindex="-1"
         aria-hidden="true"
       >
@@ -19,6 +20,7 @@
       <RouterLink
         class="title"
         :to="route"
+        :data-tab-title="category.name"
         :title="category.name"
       >
         <h3
