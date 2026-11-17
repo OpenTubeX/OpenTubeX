@@ -905,6 +905,9 @@ export async function syncPlaylistBookmarks(client, store, previousIds = [], opt
   const localById = mapBy(localBookmarks, bookmark => bookmark.playlist.id)
   const remoteBookmarks = (await client.getPlaylistBookmarks()).filter(isValidPlaylistBookmark)
   const remoteById = mapBy(remoteBookmarks, bookmark => bookmark.playlist.id)
+  // Like for subscriptions, the baseline of a sync whose upload failed also
+  // holds the downloaded bookmarks, so their removal on the server is not undone.
+  options.onRetryBaseline?.(() => Array.from(new Set([...previousIds, ...remoteById.keys()])))
   const mergedIds = mergeIds(localById.keys(), remoteById.keys(), previousIds, {
     ...options,
     collection: 'playlistBookmarks',

@@ -405,6 +405,10 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
   const deletions = syncDeletions.snapshot()
   const result = {}
   const skippedCollections = new Set()
+  // Collections this sync merged into the local data, and in enhanced privacy
+  // mode the ones whose merge the server also holds
+  const appliedCollections = new Set()
+  const uploadedCollections = new Set()
   let tabRevocationError = null
   // The server has no settings entry for speeds this sync migrated, and a saved
   // one would acknowledge the migration before its upload succeeded.
@@ -542,6 +546,29 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     return takenHistoryChanges
   }
 
+  // The next sync must not take what this one downloaded and applied for local
+  // additions, which would upload items that other devices removed meanwhile.
+  // A collection the server holds the merge of keeps it as its baseline. One
+  // the upload missed keeps the conflict retry's: the previous baseline plus
+  // the download, which still tells this device's unsent edits apart.
+  async function persistFailedSyncBaselines() {
+    if (!isSameAccount()) return
+    const saved = parseSnapshot(rootState.settings.syncServerSnapshot)
+    const updated = { ...saved }
+    for (const collection of appliedCollections) {
+      if (skippedCollections.has(collection)) continue
+      // syncSettings saves the entries it applied on its own
+      const value = !encryptedCollections || uploadedCollections.has(collection)
+        ? next[collection]
+        : collection === 'settings' ? undefined : retryBaselines[collection]?.()
+      if (value !== undefined) updated[collection] = value
+    }
+    const snapshot = JSON.stringify(updated)
+    if (snapshot !== rootState.settings.syncServerSnapshot) {
+      await dispatch('updateSyncServerSnapshot', snapshot, { root: true })
+    }
+  }
+
   async function applyCollection(collection, targetClient) {
     const onRetryBaseline = getBaseline => { retryBaselines[collection] = getBaseline }
     switch (collection) {
@@ -579,7 +606,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           targetClient,
           store,
           previous.playlistBookmarks,
-          { allowDataLoss, deletions }
+          { allowDataLoss, deletions, onRetryBaseline }
         )
         result.playlistBookmarks = next.playlistBookmarks.length
         break
@@ -849,6 +876,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     ].includes(stage))
     for (const collection of collections) {
       await runStage(collection, () => applyCollection(collection, client))
+      appliedCollections.add(collection)
     }
 
     if (encryptedCollections) {
@@ -865,6 +893,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
               JSON.stringify(data) === JSON.stringify(encryptedCollections.original[collection])))) {
             if (collection === 'watchStats') await persistUploadedWatchStatsReset(data, store)
             if (collection === 'history') await persistUploadedHistoryRepairs(data, store)
+            uploadedCollections.add(collection)
             continue
           }
           startProgress('upload')
@@ -914,6 +943,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
               assertSyncStillActive()
               if (collection === 'watchStats') await persistUploadedWatchStatsReset(data, store)
               if (collection === 'history') await persistUploadedHistoryRepairs(data, store)
+              uploadedCollections.add(collection)
               break
             } catch (error) {
               if (error.status !== 409 || attempt === ENCRYPTED_SYNC_RETRIES - 1) throw error
@@ -940,7 +970,11 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
                 retryDocument.playlistBookmarks = data
                 const retryClient = new EncryptedSyncAdapter(retryDocument)
                 next.playlistBookmarks = await syncPlaylistBookmarks(
-                  retryClient, store, next.playlistBookmarks, { allowDataLoss, deletions }
+                  retryClient, store, next.playlistBookmarks, {
+                    allowDataLoss,
+                    deletions,
+                    onRetryBaseline: getBaseline => { retryBaselines.playlistBookmarks = getBaseline },
+                  }
                 )
                 result.playlistBookmarks = next.playlistBookmarks.length
                 data = retryClient.document.playlistBookmarks
@@ -1002,6 +1036,13 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     if (liveSupported) refreshSyncServerAccount(context)
     return result
   } catch (error) {
+    if (!(error instanceof SyncServerCancelledError)) {
+      try {
+        await persistFailedSyncBaselines()
+      } catch (persistError) {
+        console.error('Failed to save the baselines of a failed sync:', persistError)
+      }
+    }
     // A failed sync may have uploaded history without saving its baseline.
     mergedHistory = null
     if (takenHistoryChanges !== undefined) historyChanges.restore(takenHistoryChanges)

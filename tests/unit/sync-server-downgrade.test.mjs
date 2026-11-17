@@ -1796,6 +1796,65 @@ test('a failed upload keeps the applied server settings as the baseline, so remo
   assert.equal(a.settings.autoplayVideos, true)
 })
 
+test('a failed upload keeps what the sync applied as the baseline, so removals on other devices stay removed', async () => {
+  const collections = new Map()
+  let failingUpload = null
+  const respond = async (url, options) => {
+    const path = new URL(url).pathname
+    if (path === '/health') return { capabilities: { encrypted_sync: 1, live_sync: 1 } }
+    if (path === '/v1/encrypted_sync') {
+      return {
+        collections: [...collections].map(([collection, entry]) => ({ collection, revision: entry.revision })),
+        legacy_data: false,
+      }
+    }
+    if (path === '/v1/encrypted_sync/events') return []
+    if (path.startsWith('/v1/encrypted_sync/')) {
+      const collection = path.split('/').at(-1)
+      if (options.method === 'PUT') {
+        if (collection === failingUpload) return new Response('{}', { status: 503 })
+        const body = JSON.parse(options.body)
+        collections.set(collection, { revision: body.revision + 1, payload: body.payload })
+      }
+      return collections.get(collection) ?? { revision: 0, payload: null }
+    }
+  }
+  const bookmark = id => bookmarks.createPlaylistBookmark({ id, title: id, uploaderId: 'channel', uploaderName: 'Channel', savedAt: 1 })
+  const a = fixture({ syncServerSyncPlaylists: true, playlistBookmarks: [bookmark('PL-shared')], syncServerDeviceId: 'desktop' }, { encrypted: true, respond })
+  const b = fixture({ syncServerSyncPlaylists: true, playlistBookmarks: [], syncServerDeviceId: 'phone' }, { encrypted: true, respond })
+  const subscriptions = f => f.context.rootState.profiles.profileList[0].subscriptions
+  const remote = async collection => (await privacy.decryptSyncDocument(
+    collections.get(collection).payload, a.settings.syncServerPrivacyKey
+  ))
+  await a.actions.syncWithSyncServer(a.context)
+  await b.actions.syncWithSyncServer(b.context)
+
+  subscriptions(b).push({ id: 'UC-elsewhere', name: 'Elsewhere' })
+  b.settings.playlistBookmarks = [...b.settings.playlistBookmarks, bookmark('PL-elsewhere')]
+  await b.actions.syncWithSyncServer(b.context)
+
+  // The subscriptions upload succeeds, and the bookmarks upload of this device's own addition fails.
+  subscriptions(a).push({ id: 'UC-here', name: 'Here' })
+  a.settings.playlistBookmarks = [...a.settings.playlistBookmarks, bookmark('PL-here')]
+  failingUpload = 'playlistBookmarks'
+  await assert.rejects(a.actions.syncWithSyncServer(a.context))
+  failingUpload = null
+  assert.deepEqual(Array.from(subscriptions(a), channel => channel.id).sort(), ['UC-elsewhere', 'UC-here', 'private-channel'])
+  assert.deepEqual(Array.from(a.settings.playlistBookmarks, item => item.playlist.id).sort(), ['PL-elsewhere', 'PL-here', 'PL-shared'])
+
+  // Meanwhile, the other device removes what it added.
+  await b.actions.syncWithSyncServer(b.context)
+  b.context.rootState.profiles.profileList[0].subscriptions = subscriptions(b).filter(channel => channel.id !== 'UC-elsewhere')
+  b.settings.playlistBookmarks = b.settings.playlistBookmarks.filter(item => item.playlist.id !== 'PL-elsewhere')
+  await b.actions.syncWithSyncServer(b.context)
+
+  await a.actions.syncWithSyncServer(a.context)
+  assert.deepEqual(Array.from(await remote('subscriptions'), channel => channel.id).sort(), ['UC-here', 'private-channel'])
+  assert.deepEqual(Array.from(await remote('playlistBookmarks'), item => item.playlist.id).sort(), ['PL-here', 'PL-shared'])
+  assert.deepEqual(Array.from(subscriptions(a), channel => channel.id).sort(), ['UC-here', 'private-channel'])
+  assert.deepEqual(Array.from(a.settings.playlistBookmarks, item => item.playlist.id).sort(), ['PL-here', 'PL-shared'])
+})
+
 for (const [scenario, desktopKeys, phoneKeys] of [
   ['different setting orders', ['autoplayVideos', 'baseTheme'], ['baseTheme', 'autoplayVideos']],
   ['different enabled settings', ['baseTheme', 'autoplayVideos'], ['autoplayVideos']],
