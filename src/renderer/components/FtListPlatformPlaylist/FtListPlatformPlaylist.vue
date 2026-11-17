@@ -133,7 +133,7 @@ const menuItems = computed(() => {
       shortLabel: t('New Tab'),
       icon: ['fas', 'arrow-up-right-from-square'],
       quickAction: true,
-      run: () => openInternalPath({ ...route.value, title: props.playlist.title, doCreateNewTab: true })
+      run: () => openInternalPath({ ...route.value, title: props.playlist.title, doCreateNewTab: true, makeActive: !process.env.IS_ELECTRON })
     })
   }
   if (process.env.IS_ELECTRON) {

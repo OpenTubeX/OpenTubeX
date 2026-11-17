@@ -1585,7 +1585,8 @@ const useMobileThumbnailActions = computed(() => process.env.IS_CAPACITOR || pho
 const mobilePlaylistPickerOpen = ref(false)
 const mobileThumbnailActions = computed(() => {
   const actions = []
-  if ((process.env.IS_ELECTRON || process.env.IS_CAPACITOR) && store.getters.getTabsEnabled) {
+  // Desktop opens new tabs in the background already
+  if (process.env.IS_CAPACITOR && store.getters.getTabsEnabled) {
     actions.push({
       label: t('Context Menu.Open in a Background Tab'),
       shortLabel: t('Context Menu.Background Tab'),
@@ -1816,7 +1817,8 @@ function handleOptionsClick(option) {
         thumbnail: toastThumbnail.value,
         doCreateNewTab: option !== 'openNewWindow',
         doCreateNewWindow: option === 'openNewWindow',
-        makeActive: option !== 'openBackgroundTab'
+        // Like in browsers, desktop keeps the current tab in front
+        makeActive: option === 'openNewTab' && !process.env.IS_ELECTRON
       })
       break
     case 'copyYoutubeWithoutPlaylist':

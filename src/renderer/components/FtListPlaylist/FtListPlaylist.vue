@@ -203,7 +203,7 @@ const playlistMenuItems = computed(() => {
         shortLabel: t('New Tab'),
         icon: ['fas', 'arrow-up-right-from-square'],
         quickAction: true,
-        run: () => openInternalPath({ ...playlistPageLinkTo.value, title: titleForDisplay.value, doCreateNewTab: true, makeActive: true })
+        run: () => openInternalPath({ ...playlistPageLinkTo.value, title: titleForDisplay.value, doCreateNewTab: true, makeActive: !process.env.IS_ELECTRON })
       }]
     : []
   if (process.env.IS_ELECTRON) {

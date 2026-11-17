@@ -1258,11 +1258,14 @@ test.describe('with new items', () => {
     await item('Brand new VOD').locator('.title').click({ button: 'right' })
     await menu.getByRole('menuitem', { name: 'Open in a New Tab', exact: true }).click()
     await expect.poll(async () => (await tabState()).tabs.length).toBe(initialTabs.length + 1)
-    await expect(page).toHaveURL(/#\/external-media\?url=https:\/\/www\.twitch\.tv\/videos\/4$/)
+    // Like in browsers, the new tab opens behind the current one
+    const { tabs, activeTabId: newActiveTabId } = await tabState()
+    expect(newActiveTabId).toBe(activeTabId)
+    expect(tabs.find(tab => !initialTabs.some(initial => initial.id === tab.id)).route.query)
+      .toEqual({ url: 'https://www.twitch.tv/videos/4' })
+    await expect(page).toHaveURL(/#\/subscriptions$/)
     expect(await newTitles()).toEqual(['Second new VOD'])
 
-    await page.evaluate(tabId => window.ftElectron.tabs.activate(tabId), activeTabId)
-    await expect(page).toHaveURL(/#\/subscriptions$/)
     await item('Second new VOD').locator('.title').click({ button: 'right' })
     const [newWindow] = await Promise.all([
       app.electronApp.waitForEvent('window'),
