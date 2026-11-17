@@ -316,7 +316,8 @@ final class YtDlpDownloads {
                 downloads.add(() -> {
                     try {
                         YtDlpRuntime.execute(context, parts.get(part), part == 0 ? "download-" + id : "download-" + id + "-" + part, line -> {
-                            if (line.startsWith("__OPENTUBEX_FILE__:")) completedOutput.append(line).append('\n');
+                            // One call, so parts running at the same time cannot interleave a record.
+                            if (line.startsWith("__OPENTUBEX_FILE__:")) completedOutput.append(line + '\n');
                             if (line.startsWith("ERROR:")) synchronized (errorLines) {
                                 errorLines.add(line);
                                 if (errorLines.size() > 5) errorLines.removeFirst();
