@@ -1395,7 +1395,8 @@ function updateCurrentTime(seconds) {
 }
 
 function savePosition() {
-  if (!historyEngaged || !store.getters.getRememberHistory || store.getters.getWatchedProgressSavingMode === 'never' ||
+  // Until the first history write, which can wait for companion metadata, it would store an older position.
+  if (!historyAdded || !store.getters.getRememberHistory || store.getters.getWatchedProgressSavingMode === 'never' ||
     loading.value || !source.value || source.value.isLive || !player.value?.hasPlaybackPosition ||
     !hasBeenPresented || (source.value.separateAudioUrl && startTime.value !== null)) return
   const seconds = getPositionMedia()?.currentTime ?? player.value.getCurrentTime()
