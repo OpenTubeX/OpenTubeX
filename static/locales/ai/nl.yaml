@@ -484,6 +484,8 @@ Settings:
       Network: netwerk
       Disk: schijf
   General Settings:
+    Invidious Instance Username: 'Gebruikersnaam van instantie'
+    Invidious Instance Password: 'Wachtwoord van instantie'
     Data Saver Thumbnail Modes:
       Off: "Uit"
       On Metered Networks: "Op netwerken met datalimiet"
@@ -2360,6 +2362,7 @@ Tooltips:
     Sync Subscriptions: "Kanalen waarop u zich op YouTube abonneert, worden toegevoegd aan ‘Alle kanalen’, en kanalen waarvan u daar het abonnement opzegt, worden uit elk profiel verwijderd. Abonneren of deabonneren hier in ‘Alle kanalen’ doet hetzelfde op YouTube."
     Sync Playlists: "Uw YouTube-afspeellijsten, ‘Later bekijken’ en ‘Video's die ik leuk vind’ verschijnen in ‘Jouw afspeellijsten’, en wijzigingen die u er hier in aanbrengt, worden ook op YouTube doorgevoerd. Ze worden niet gesynchroniseerd met uw andere apparaten en niet meegenomen wanneer u alle afspeellijsten exporteert of een back-up van uw gegevens maakt. Als u dit uitschakelt, worden ze van dit apparaat verwijderd, maar niet van YouTube."
   General Settings:
+    Invidious Instance Credentials: 'Alleen nodig als de instantie om een gebruikersnaam en wachtwoord vraagt. Ze worden alleen op dit apparaat opgeslagen en alleen naar deze instantie verzonden.'
     Reply Notifications: "OpenTubeX controleert de reacties die je volgt op nieuwe antwoorden. Het laat je ook weten wanneer een maker een van je reacties een hartje geeft. Een reactie blijft gevolgd totdat er 30 dagen voorbijgaan zonder nieuwe antwoorden, hartjes of dat je de reactie opent. Maximaal 50 reacties blijven gevolgd, dus als je er meer volgt, stop je met het volgen van de reacties die het langst inactief zijn. Volg een reactie met de belknop ernaast."
     Built-in Streams: |
       Automatisch speelt de meeste video's af via de visionOS-client van YouTube, die sneller start en automatische kwaliteit ondersteunt. Livestreams en video's die hij niet kan afspelen, gebruiken SABR.

@@ -1,5 +1,6 @@
 import { createDefaultSettings, resolveDefaultLandingPage } from '../../../settingsDefaults.js'
 import { getTransferableSettings, NON_TRANSFERABLE_SETTINGS } from '../../../nonTransferableSettings.js'
+import { splitInvidiousInstanceCredentials } from '../../../apiBackends.js'
 import { normalizeMaterialSeedColor } from '../../../materialTheme.js'
 import { normalizeSignalAccentColor } from '../../../signalTheme.js'
 import i18n, { loadLocale, rememberStartupLocale, setAITranslationCompletionsEnabled } from '../../i18n/index'
@@ -1737,6 +1738,15 @@ for (const settingId of Object.keys(state)) {
       })).then(() => true, handleUpdateError)
     )
   }
+}
+
+// Older versions keep the credentials in the instance URL, and sync and
+// export it that way. Save them as their own setting instead.
+const saveDefaultInvidiousInstance = actions.updateDefaultInvidiousInstance
+actions.updateDefaultInvidiousInstance = async (context, value) => {
+  const { instance, credentials } = splitInvidiousInstanceCredentials(value)
+  if (credentials && !await context.dispatch('updateInvidiousInstanceCredentials', credentials)) return false
+  return saveDefaultInvidiousInstance(context, instance)
 }
 
 // Add all custom data/logic to their respective objects

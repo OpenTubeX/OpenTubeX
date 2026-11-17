@@ -1,9 +1,11 @@
 // @ts-check
 import { createHash } from 'node:crypto'
-import { createReadStream, existsSync, lstatSync, readlinkSync, realpathSync, rmSync, statSync } from 'node:fs'
+import { createReadStream, existsSync, lstatSync, readFileSync, readlinkSync, realpathSync, rmSync, statSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
 import { Worker } from 'node:worker_threads'
 import Datastore from '@seald-io/nedb'
+import storage from '@seald-io/nedb/lib/storage.js'
+import { legacyLinesWithout } from './legacyLines.js'
 import { SqliteDatastore } from './sqlite.js'
 import { createNodeSqliteDriver } from './sqliteNodeDriver.js'
 
@@ -58,6 +60,7 @@ export function createWorkerDrivers(workerPath) {
     return {
       execute: (statements, transaction = false) => call({ ...target, method: 'execute', statements, transaction }),
       backup: () => call({ ...target, method: 'backup' }),
+      cleanBackups: statements => call({ ...target, method: 'cleanBackups', statements }),
       drop: () => call({ ...target, method: 'drop' }),
       close: () => call({ ...target, method: 'close' }),
     }
@@ -65,9 +68,9 @@ export function createWorkerDrivers(workerPath) {
 }
 
 /**
- * A desktop NeDB datafile. It is only read, never modified, so an older
- * version keeps working with it; its size and modification time show when an
- * older version has written to it since.
+ * A desktop NeDB datafile. It is only read, apart from removing secrets, so an
+ * older version keeps working with it; its size and modification time show
+ * when an older version has written to it since.
  * @param {string} filename
  * @returns {import('./sqlite.js').LegacySource}
  */
@@ -89,6 +92,25 @@ export function createNedbFileSource(filename) {
       return JSON.stringify([path === filename ? 'db' : 'db~', size, mtimeMs])
     },
     hash: text => createHash('sha256').update(text).digest('base64'),
+    async records() {
+      const path = source()
+      if (!path) return []
+      return readFileSync(path, 'utf8').split('\n').flatMap(line => {
+        try {
+          const record = JSON.parse(line)
+          return record !== null && typeof record === 'object' && '_id' in record ? [record] : []
+        } catch {
+          return []
+        }
+      })
+    },
+    async removeDocuments(ids) {
+      const path = source()
+      const lines = path ? legacyLinesWithout(readFileSync(path, 'utf8'), ids) : null
+      if (!lines) return false
+      await storage.crashSafeWriteFileLinesAsync(filename, lines)
+      return true
+    },
     async remove() {
       rmSync(filename, { force: true })
       rmSync(`${filename}~`, { force: true })

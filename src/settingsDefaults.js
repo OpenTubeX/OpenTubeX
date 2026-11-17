@@ -551,6 +551,8 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     currentLocale: 'system',
     reducedMotion: 'system',
     defaultInvidiousInstance: '',
+    // The username and password of one Invidious instance, with its address.
+    invidiousInstanceCredentials: null,
     defaultVolume: 1,
     uiScale: 100,
     userPlaylistsSortBy: 'latest_played_first',

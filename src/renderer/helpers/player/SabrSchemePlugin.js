@@ -27,6 +27,7 @@ import {
   parseSabrFormatId,
   parseSabrLiveHead,
   publishSabrLiveHead,
+  publishSabrLiveSegment,
   readCompleteUmpParts,
   SABR_LIVE_HEAD_TIME_MS
 } from './sabrProtocol'
@@ -47,7 +48,10 @@ const ShakaError = shaka.util.Error
  * @property {string} formatIdString
  * @property {boolean} isInit
  * @property {boolean} isLiveHead - only asks for the live head, without media
- * @property {number} sequenceNumber
+ * @property {number} sequenceNumber - a live lookup accepts any segment instead
+ * @property {boolean} isLiveLookup - asks for the live segment that contains the requested time
+ * @property {number} liveWindowSequenceNumber - the live window's estimate of the sequence number
+ * @property {number} liveWindowGeneration - how often the live window had re-timed its segments
  * @property {number | undefined} targetDurationMs - only live segments have one
  * @property {string} streamKind
  */
@@ -93,6 +97,15 @@ const ShakaError = shaka.util.Error
  * @property {boolean} mediaWithheld
  * @property {Map<string, import('./sabrProtocol').SabrCuepoint>} cuepoints recent ad breaks, oldest first
  * @property {Map<number, number>} deliveredLiveStartsMs reported start of recently delivered live segments, by sequence number
+ * @property {Map<string, DeliveredLiveSegment>} lastLiveSegments the last live segment delivered for each stream kind
+ */
+/**
+ * @typedef DeliveredLiveSegment
+ * @type {object}
+ * @property {number} liveWindowSequenceNumber the segment the live window asked for
+ * @property {number} liveWindowGeneration how often the live window had re-timed its segments then
+ * @property {number} sequenceNumber the segment SABR delivered for it
+ * @property {number} startMs
  */
 /**
  * @typedef TimeoutController
@@ -513,6 +526,7 @@ async function doRequest(
    * @type {{ sequenceNumber: number, startMs: number } | undefined}
    */
   let neighborSegment
+  let mediaSequenceNumber
   let mediaStartMs
 
   let invalidPoToken = false
@@ -695,9 +709,11 @@ async function doRequest(
               ) {
                 if (
                   (operationInputs.isInit && mediaHeader.isInitSeg) ||
-                  (!operationInputs.isInit && !mediaHeader.isInitSeg && mediaHeader.sequenceNumber === operationInputs.sequenceNumber)
+                  (!operationInputs.isInit && !mediaHeader.isInitSeg &&
+                    (operationInputs.isLiveLookup || mediaHeader.sequenceNumber === operationInputs.sequenceNumber))
                 ) {
                   mediaHeaderId = mediaHeader.headerId
+                  mediaSequenceNumber = mediaHeader.sequenceNumber
                   mediaStartMs = Number(mediaHeader.startMs)
                   const rawHeader = part.data.chunks.length === 1
                     ? part.data.chunks[0]
@@ -915,15 +931,30 @@ async function doRequest(
     if (!operationInputs.isInit) {
       currentState.sabrStreamState.deliveredMediaFor.add(operationInputs.streamKind)
     }
+    if (operationInputs.targetDurationMs) {
+      currentState.sabrStreamState.lastLiveSegments.set(operationInputs.streamKind, {
+        liveWindowSequenceNumber: operationInputs.liveWindowSequenceNumber,
+        liveWindowGeneration: operationInputs.liveWindowGeneration,
+        sequenceNumber: mediaSequenceNumber,
+        startMs: mediaStartMs,
+      })
+    }
     // Caption segments can start apart from the media segments with their sequence number
     if (operationInputs.targetDurationMs && operationInputs.streamKind !== 'text') {
       const { deliveredLiveStartsMs } = currentState.sabrStreamState
       // Refresh the order, which decides what to forget first
-      deliveredLiveStartsMs.delete(operationInputs.sequenceNumber)
-      deliveredLiveStartsMs.set(operationInputs.sequenceNumber, mediaStartMs)
+      deliveredLiveStartsMs.delete(mediaSequenceNumber)
+      deliveredLiveStartsMs.set(mediaSequenceNumber, mediaStartMs)
       if (deliveredLiveStartsMs.size > MAX_DELIVERED_LIVE_SEGMENTS) {
         deliveredLiveStartsMs.delete(deliveredLiveStartsMs.keys().next().value)
       }
+      // The live window re-times its segments before the player asks for the next one
+      publishSabrLiveSegment(currentState.scheme, {
+        windowSequenceNumber: operationInputs.liveWindowSequenceNumber,
+        windowGeneration: operationInputs.liveWindowGeneration,
+        sequenceNumber: mediaSequenceNumber,
+        startMs: mediaStartMs,
+      })
     }
     if (shouldRetryDueToNextRequestPolicy && nextRequestPlaybackCookieBytes !== undefined) {
       // Policies received before MEDIA_END can establish the session cookie
@@ -1200,6 +1231,7 @@ export function createSabrTransport(sabrData, getRequestContext) {
     mediaWithheld: false,
     cuepoints: new Map(),
     deliveredLiveStartsMs: new Map(),
+    lastLiveSegments: new Map(),
   }
 
   const requestSegment = (uri, request, requestType, _progressUpdated, headersReceived = () => {}) => {
@@ -1217,7 +1249,29 @@ export function createSabrTransport(sabrData, getRequestContext) {
     const streamIsVideo = url.pathname === 'video'
     const isLiveHead = url.pathname === 'live'
     const resolution = streamIsVideo ? parseInt(url.searchParams.get('resolution')) : undefined
-    const playerTimeMs = isLiveHead ? SABR_LIVE_HEAD_TIME_MS : url.searchParams.get('startTimeMs') ?? '0'
+    let playerTimeMs = isLiveHead ? SABR_LIVE_HEAD_TIME_MS : url.searchParams.get('startTimeMs') ?? '0'
+    const liveWindowSequenceNumber = parseInt(url.searchParams.get('sq'))
+    const liveWindowGeneration = Number(url.searchParams.get('windowGeneration') ?? 0)
+    let sequenceNumber = liveWindowSequenceNumber
+    const targetDurationMs = Number(url.searchParams.get('targetDurationMs')) || undefined
+    let isLiveLookup = false
+    if (targetDurationMs) {
+      // The live window estimates segment times from the target duration, but
+      // segments can be shorter, by seconds over minutes of footage. Continue
+      // after the segment delivered for the previous estimate. Anything else,
+      // such as a seek or captions turned on, starts with the segment that
+      // contains the requested time, which is where SABR places it.
+      const previous = sabrStreamState.lastLiveSegments.get(url.pathname)
+      // Re-timing renumbers the window, so earlier numbers say nothing about the order
+      if (previous?.liveWindowGeneration === liveWindowGeneration && previous.liveWindowSequenceNumber === liveWindowSequenceNumber - 1) {
+        sequenceNumber = previous.sequenceNumber + 1
+        if (Number.isFinite(previous.startMs)) {
+          playerTimeMs = String(Math.round(previous.startMs + 1.5 * targetDurationMs))
+        }
+      } else {
+        isLiveLookup = true
+      }
+    }
     const { audioFormatId, videoFormatId, captionFormatId, bufferedRanges, drcEnabled, enableVoiceBoost } = context
 
     const { sabrContexts, unsentSabrContexts } = prepareSabrContexts(sabrStreamState)
@@ -1263,9 +1317,6 @@ export function createSabrTransport(sabrData, getRequestContext) {
       throw error
     }
 
-    const sequenceNumber = parseInt(url.searchParams.get('sq'))
-    const targetDurationMs = Number(url.searchParams.get('targetDurationMs')) || undefined
-
     /**
      * Stores whatever state that should be updated across the whole "session"
      * @type {OperationInputs}
@@ -1280,6 +1331,9 @@ export function createSabrTransport(sabrData, getRequestContext) {
       isInit,
       isLiveHead,
       sequenceNumber,
+      isLiveLookup,
+      liveWindowSequenceNumber,
+      liveWindowGeneration,
       targetDurationMs,
       streamKind: url.pathname,
     }

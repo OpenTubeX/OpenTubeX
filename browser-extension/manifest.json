@@ -8,20 +8,12 @@
   "icons": {
     "128": "icon.png"
   },
-  "background": {
-    "service_worker": "background.js",
-    "scripts": [
-      "background.js"
-    ]
-  },
   "permissions": [
     "declarativeNetRequestWithHostAccess",
     "scripting"
   ],
   "host_permissions": [
     "https://opentubex.org/*",
-    "http://localhost/*",
-    "http://127.0.0.1/*",
     "https://*.youtube.com/*",
     "https://*.googlevideo.com/*",
     "https://*.ytimg.com/*",
@@ -29,7 +21,9 @@
     "https://*.googleusercontent.com/*"
   ],
   "optional_host_permissions": [
-    "https://*/*"
+    "https://*/*",
+    "http://localhost/*",
+    "http://127.0.0.1/*"
   ],
   "content_scripts": [
     {

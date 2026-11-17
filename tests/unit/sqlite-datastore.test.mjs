@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { execFile } from 'node:child_process'
 import { existsSync, mkdirSync, readdirSync, realpathSync, symlinkSync } from 'node:fs'
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { appendFile, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
@@ -11,6 +11,7 @@ import Datastore from '@seald-io/nedb'
 import { SqliteDatastore } from '../../src/datastores/sqlite.js'
 import { createDesktopDatastore, createNedbFileSource, createNodeSqliteDriver, createWorkerDrivers, desktopDatastorePaths } from '../../src/datastores/sqliteNode.js'
 
+const byIds = "json_extract(data, '$._id') IN (SELECT value FROM json_each(?))"
 const lines = docs => docs.map(doc => typeof doc === 'string' ? doc : JSON.stringify(doc)).join('\n') + '\n'
 const video = (videoId, playlistItemId = `item-${videoId}`) => ({ videoId, playlistItemId, title: `Title ${videoId}`, timeAdded: 1 })
 
@@ -201,6 +202,45 @@ test('applies what an older version changed after a downgrade and keeps newer ed
   const again = open(t, dir, 'playlists', options)
   await again.findAsync({})
   assert.equal(changes.length, 1, 'the same legacy changes are applied once')
+})
+
+test('secrets removed from older copies are gone from the legacy file and backups, and not applied as deletions', async (t) => {
+  const dir = await directory(t)
+  const legacyFile = join(dir, 'settings.db')
+  await writeFile(legacyFile, lines([
+    { _id: 'proxyPassword', value: 'first-secret' },
+    { _id: 'theme', value: 'dark' },
+    { _id: 'proxyPassword', value: 'second-secret' },
+  ]))
+  const changes = []
+  const options = { onLegacyChanges: change => changes.push(change) }
+  const store = open(t, dir, 'settings', options)
+  await store.findAsync({})
+  store.driver.close()
+  // A downgrade leaves a backup with the secret in it.
+  await editAsOlderVersion(legacyFile, older => older.updateAsync({ _id: 'theme' }, { $set: { value: 'older' } }))
+  // Its session also saved a secret and deleted it again; the earlier line still holds it.
+  await appendFile(legacyFile, lines([{ _id: 'syncServerToken', value: 'deleted-secret' }, { $$deleted: true, _id: 'syncServerToken' }]))
+  const upgraded = open(t, dir, 'settings', options)
+  await upgraded.findAsync({})
+  assert.equal(changes.length, 1)
+
+  // One that cannot be cleaned stops neither the other backups nor the legacy file.
+  await writeFile(changes[0].backup.replace(/\d+$/, '0'), 'not a database')
+  await assert.rejects(upgraded.removeOlderCopiesAsync(byIds, [JSON.stringify(['proxyPassword', 'syncServerToken'])]), /Unable to clean every backup/)
+  assert.doesNotMatch(await readFile(legacyFile, 'utf8'), /secret/)
+  assert.deepEqual(await loadWithNedb(legacyFile), [{ _id: 'theme', value: 'older' }], 'an older version still opens the rest')
+  assert.doesNotMatch((await readFile(changes[0].backup)).toString('latin1'), /secret/)
+  upgraded.driver.close()
+
+  const reopened = open(t, dir, 'settings', options)
+  assert.deepEqual(await reopened.findAsync({}).sort({ _id: 1 }), [{ _id: 'proxyPassword', value: 'second-secret' }, { _id: 'theme', value: 'older' }])
+  assert.equal(changes.length, 1, 'their removal is not an older version deleting them')
+  reopened.driver.close()
+
+  await editAsOlderVersion(legacyFile, older => older.updateAsync({ _id: 'theme' }, { $set: { value: 'oldest' } }))
+  const again = open(t, dir, 'settings', options)
+  assert.deepEqual(await again.findAsync({}).sort({ _id: 1 }), [{ _id: 'proxyPassword', value: 'second-secret' }, { _id: 'theme', value: 'oldest' }])
 })
 
 test('changes from an older version wait for the next start when the backup fails', async (t) => {
@@ -587,6 +627,10 @@ test('desktop databases run in a worker thread', async (t) => {
   await store.updateAsync({ _id: 'p' }, { $push: { videos: video('b') } })
   assert.deepEqual(await store.findOneAsync({ _id: 'p' }), { _id: 'p', playlistName: 'Legacy', videos: [video('a'), video('b')] })
   await assert.rejects(store.driver.execute([['SELECT * FROM missing']]), /no such table/)
+  const backup = await store.driver.backup()
+  await store.removeOlderCopiesAsync(byIds, [JSON.stringify(['p'])])
+  assert.doesNotMatch(await readFile(join(dir, 'playlists.db'), 'utf8'), /Legacy/)
+  assert.doesNotMatch((await readFile(backup)).toString('latin1'), /Legacy/)
   await store.dropDatabaseAsync()
   assert.equal(existsSync(join(dir, 'playlists.sqlite')), false)
 })

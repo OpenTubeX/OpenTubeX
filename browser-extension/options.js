@@ -38,7 +38,6 @@ async function getOrigins() {
 async function setOrigins(origins) {
   const rules = await (await fetch(ext.runtime.getURL('rules.json'))).json()
   await ext.declarativeNetRequest.updateDynamicRules({
-    // Leaves the development rules that background.js adds alone
     removeRuleIds: rules.map(rule => rule.id),
     addRules: origins.length === 0
       ? []

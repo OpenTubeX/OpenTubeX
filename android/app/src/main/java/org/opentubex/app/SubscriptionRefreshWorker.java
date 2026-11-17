@@ -189,6 +189,7 @@ public final class SubscriptionRefreshWorker extends Worker {
 
         List<SubscriptionRefreshConfiguration.Feed> feeds =
             SubscriptionRefreshConfiguration.findFeeds(context, feedType);
+        if (feeds == null) return Result.retry();
         if (feeds.isEmpty()) return Result.success();
         SubscriptionRefreshConfiguration.Feed feed = feeds.get(0);
         Set<String> channelIds = new LinkedHashSet<>();

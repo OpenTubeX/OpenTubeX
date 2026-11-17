@@ -479,6 +479,8 @@ Settings:
       Network: verkko
       Disk: levytila
   General Settings:
+    Invidious Instance Username: 'Instanssin käyttäjänimi'
+    Invidious Instance Password: 'Instanssin salasana'
     Data Saver Thumbnail Modes:
       Off: "Pois"
       On Metered Networks: "Rajoitetuissa verkoissa"
@@ -2301,6 +2303,7 @@ Tooltips:
     Sync Subscriptions: "YouTubessa tilaamasi kanavat lisätään profiiliin ”Kaikki kanavat”, ja kanavat, joiden tilauksen perut siellä, poistetaan kaikista profiileista. Kun tilaat kanavan tai perut tilauksen täällä profiilissa ”Kaikki kanavat”, sama tehdään myös YouTubessa."
     Sync Playlists: "YouTube-soittolistasi, ”Katso myöhemmin” ja ”Tykätyt videot” näkyvät kohdassa ”Omat soittolistat”, ja niihin täällä tekemäsi muutokset tehdään myös YouTubessa. Niitä ei synkronoida muille laitteillesi, eikä niitä sisällytetä, kun viet kaikki soittolistat tai varmuuskopioit tietosi. Tämän poistaminen käytöstä poistaa ne tältä laitteelta mutta ei YouTubesta."
   General Settings:
+    Invidious Instance Credentials: 'Tarvitaan vain, jos instanssi pyytää käyttäjänimeä ja salasanaa. Ne tallennetaan vain tälle laitteelle ja lähetetään vain tälle instanssille.'
     Reply Notifications: "OpenTubeX tarkistaa seuraamiesi kommenttien uudet vastaukset. Se kertoo myös, kun sisällöntuottaja antaa sydämen jollekin kommentillesi. Kommentti pysyy seurattavana, kunnes 30 päivää on kulunut ilman uusia vastauksia, sydämiä tai sitä, että avaat sen. Enintään 50 kommenttia pysyy seurattavana, joten useamman seuraaminen lopettaa pisimpään passiivisina olleiden seuraamisen. Seuraa mitä tahansa kommenttia sen vieressä olevalla kellopainikkeella."
     Built-in Streams: |
       Automaattinen toistaa useimmat videot YouTuben visionOS-asiakasohjelman kautta, joka käynnistyy nopeammin ja tukee automaattista laatua. Suorat lähetykset ja videot, joita se ei voi toistaa, käyttävät SABRia.

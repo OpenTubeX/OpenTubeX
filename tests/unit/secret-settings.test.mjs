@@ -1,8 +1,12 @@
 import assert from 'node:assert/strict'
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { registerHooks } from 'node:module'
 import test from 'node:test'
 import { createDesktopDatastore } from '../../src/datastores/sqliteNode.js'
 import { createSafeStorageCipher } from '../../src/datastores/secretCipher.js'
+import { migrateSecretSettings } from '../../src/datastores/secretSettings.js'
 
 const datastore = createDesktopDatastore(':memory:')
 globalThis.__secretSettingsDatastore = datastore
@@ -71,6 +75,7 @@ test('secrets saved unencrypted by an earlier version are encrypted on startup',
   ])
   t.mock.method(settings, 'cipher', () => Promise.resolve(cipher('device')))
   const vacuum = t.mock.method(datastore, 'vacuumAsync')
+  const removeOlderCopies = t.mock.method(datastore, 'removeOlderCopiesAsync')
 
   assert.deepEqual(await saved(), { youTubeAccount: ACCOUNT, proxyPassword: 'proxy-secret', yatteePassword: '', proxyUsername: 'user' })
   for (const id of ['youTubeAccount', 'proxyPassword', 'yatteePassword']) {
@@ -79,12 +84,53 @@ test('secrets saved unencrypted by an earlier version are encrypted on startup',
   assert.equal((await stored('proxyUsername')).value, 'user')
   // Rebuilding the file drops the old values from its free space.
   assert.equal(vacuum.mock.callCount(), 1)
+  // The copies an older version reads lose them too.
+  assert.equal(removeOlderCopies.mock.callCount(), 1)
+})
+
+test('the copies kept for older versions lose secrets and Invidious credentials, and keep the rest', async t => {
+  const dir = await mkdtemp(join(tmpdir(), 'opentubex-secrets-'))
+  t.after(() => rm(dir, { recursive: true, force: true }))
+  for (const [name, instance] of [
+    ['with', 'https://user:instance-secret@invidious.example'],
+    ['slashless', 'https:user:instance-secret@invidious.example'],
+    ['with-tab', 'https:\t//user:instance-secret@invidious.example'],
+    ['without', 'https://invidious.example/@path'],
+    ['without-in-query', 'https://invidious.example?from=a@b'],
+  ]) {
+    const legacyFile = join(dir, `${name}.db`)
+    await writeFile(legacyFile, [
+      { _id: 'proxyPassword', value: 'proxy-secret' },
+      { _id: 'defaultInvidiousInstance', value: instance },
+      { _id: 'proxyUsername', value: 'user' },
+    ].map(doc => JSON.stringify(doc)).join('\n') + '\n')
+    const store = createDesktopDatastore(join(dir, `${name}.sqlite`), legacyFile)
+    t.after(() => store.driver.close())
+    await migrateSecretSettings(store, Promise.resolve(cipher('device')))
+    const legacy = (await readFile(legacyFile, 'utf8')).trim().split('\n').map(line => JSON.parse(line)._id)
+    assert.deepEqual(legacy, name.startsWith('without') ? ['defaultInvidiousInstance', 'proxyUsername'] : ['proxyUsername'])
+  }
+})
+
+test('Invidious credentials saved in the instance URL move to an encrypted setting on startup', async t => {
+  await datastore.insertAsync({ _id: 'defaultInvidiousInstance', value: 'https://alice:p%40ss@invidious.example/' })
+  t.mock.method(settings, 'cipher', () => Promise.resolve(cipher('device')))
+  const vacuum = t.mock.method(datastore, 'vacuumAsync')
+
+  const credentials = { instance: 'https://invidious.example', username: 'alice', password: 'p@ss' }
+  assert.deepEqual(await saved(), { defaultInvidiousInstance: 'https://invidious.example', invidiousInstanceCredentials: credentials })
+  assert.equal((await stored('defaultInvidiousInstance')).value, 'https://invidious.example')
+  assert.doesNotMatch(JSON.stringify(await stored('invidiousInstanceCredentials')), /alice|p%40ss|p@ss/)
+  assert.equal(vacuum.mock.callCount(), 1)
 })
 
 test('without a system keyring, secrets stay unencrypted', async t => {
   await datastore.insertAsync({ _id: 'proxyPassword', value: 'proxy-secret' })
   t.mock.method(settings, 'cipher', () => Promise.resolve(null))
+  const removeOlderCopies = t.mock.method(datastore, 'removeOlderCopiesAsync')
   await settings.upsert('syncServerToken', 'sync-secret')
+  // An older version keeps them, as this database has them unencrypted too.
+  assert.equal(removeOlderCopies.mock.callCount(), 0)
 
   assert.deepEqual(await saved(), { proxyPassword: 'proxy-secret', syncServerToken: 'sync-secret' })
   assert.equal((await stored('proxyPassword')).value, 'proxy-secret')

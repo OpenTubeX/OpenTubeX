@@ -16,7 +16,7 @@ function driver(filename, backupDirectory) {
 parentPort.on('message', async ({ id, method, filename, backupDirectory, statements, transaction }) => {
   try {
     const target = driver(filename, backupDirectory)
-    const result = method === 'execute' ? await target.execute(statements, transaction) : await target[method]()
+    const result = method === 'execute' ? await target.execute(statements, transaction) : await target[method](statements)
     if (method === 'drop' || method === 'close') drivers.delete(filename)
     parentPort.postMessage({ id, result })
   } catch (error) {

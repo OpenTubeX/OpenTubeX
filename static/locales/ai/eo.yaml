@@ -519,6 +519,8 @@ Settings:
       Network: reto
       Disk: disko
   General Settings:
+    Invidious Instance Username: 'Uzantnomo de la nodo'
+    Invidious Instance Password: 'Pasvorto de la nodo'
     Data Saver Thumbnail Modes:
       Off: "Malŝaltita"
       On Metered Networks: "Ĉe mezurataj retoj"
@@ -2345,6 +2347,7 @@ Tooltips:
     Add to YouTube Watch History: "Videaĵoj, kiujn vi ludas, aldoniĝas al via YouTube-spekthistorio, do la rekomendoj de YouTube lernas el ili. Nenio aldoniĝas dum la historio estas paŭzigita ĉe YouTube."
     Rate Videos: "Montras butonojn por ŝati kaj malŝati videojn. Por montri vian takson, ĉiu video, kiun vi malfermas, estas serĉata ĉe YouTube per via konto, do YouTube ekscias, kiujn videojn vi malfermas, eĉ se ili ne estas aldonitaj al via spekta historio."
   General Settings:
+    Invidious Instance Credentials: 'Necesa nur se la nodo petas uzantnomon kaj pasvorton. Ili estas konservataj nur en ĉi tiu aparato kaj sendataj nur al ĉi tiu nodo.'
     Reply Notifications: "OpenTubeX kontrolas la komentojn, kiujn vi observas, por novaj respondoj. Ĝi ankaŭ sciigas vin, kiam kreinto donas koron al unu el viaj komentoj. Komento restas observata ĝis pasas 30 tagoj sen novaj respondoj, koroj aŭ malfermo de vi. Ĝis 50 komentoj restas observataj, do observi pliajn ĉesigas la observadon de tiuj, kiuj estis neaktivaj plej longe. Observu ajnan komenton per la sonorila butono apud ĝi."
     Built-in Streams: |
       Aŭtomata ludas la plimulton de videoj per la visionOS-kliento de YouTube, kiu komenciĝas pli rapide kaj subtenas aŭtomatan kvaliton. Rektaj elsendoj kaj videoj, kiujn ĝi ne povas ludi, uzas SABR.

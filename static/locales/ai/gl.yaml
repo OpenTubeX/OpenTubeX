@@ -484,6 +484,8 @@ Settings:
       Network: rede
       Disk: disco
   General Settings:
+    Invidious Instance Username: 'Nome de usuario da instancia'
+    Invidious Instance Password: 'Contrasinal da instancia'
     Data Saver Thumbnail Modes:
       Off: "Desactivado"
       On Metered Networks: "En redes con límite de datos"
@@ -2354,6 +2356,7 @@ Tooltips:
     Sync Subscriptions: "As canles ás que te subscribes en YouTube engádense a «Tódalas canles», e as canles das que cancelas a subscrición alí elimínanse de todos os perfís. Subscribirse ou cancelar a subscrición aquí en «Tódalas canles» fai o mesmo en YouTube."
     Sync Playlists: "As túas listas de reprodución de YouTube, «Ver máis tarde» e «Vídeos que me gustan» aparecen en «As túas listaxes de reprodución», e os cambios que fagas nelas aquí tamén se fan en YouTube. Non se sincronizan cos teus outros dispositivos nin se inclúen cando exportas todas as listas de reprodución ou fas unha copia de seguranza dos teus datos. Ao desactivar isto elimínanse deste dispositivo, pero non de YouTube."
   General Settings:
+    Invidious Instance Credentials: 'Só é necesario se a instancia pide un nome de usuario e un contrasinal. Só se gardan neste dispositivo e só se envían a esta instancia.'
     Reply Notifications: "OpenTubeX comproba se os comentarios que segues teñen respostas novas. Tamén che avisa cando un creador pon un corazón nun dos teus comentarios. Un comentario segue sendo seguido ata que pasan 30 días sen respostas novas, corazóns nin que o abras. Pódense seguir ata 50 comentarios á vez, polo que, se segues máis, deixas de seguir os que levan máis tempo inactivos. Segue calquera comentario co botón da campá que hai ao lado."
     Built-in Streams: |
       Automático reproduce a maioría dos vídeos co cliente visionOS de YouTube, que comeza máis rápido e admite a calidade automática. As emisións en directo e os vídeos que non pode reproducir usan SABR.

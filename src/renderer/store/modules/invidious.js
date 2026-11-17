@@ -1,10 +1,9 @@
 import { base64EncodeUtf8, createWebURL, fetchWithTimeout, randomArrayItem } from '../../helpers/utils'
 import { createYatteeAuthorization } from '../../helpers/api/yattee'
-import { normalizeYatteeServerUrl } from '../../../apiBackends'
+import { getInvidiousInstanceCredentials, normalizeInvidiousInstanceUrl, normalizeYatteeServerUrl, splitInvidiousInstanceCredentials } from '../../../apiBackends'
 
 const state = {
   currentInvidiousInstance: '',
-  currentInvidiousInstanceAuthorization: null,
   currentInvidiousInstanceUrl: '',
   invidiousInstancesList: null
 }
@@ -18,8 +17,10 @@ const getters = {
     return state.currentInvidiousInstanceUrl
   },
 
-  getCurrentInvidiousInstanceAuthorization(state) {
-    return state.currentInvidiousInstanceAuthorization
+  /** Only the instance the saved credentials belong to receives them. */
+  getCurrentInvidiousInstanceAuthorization(state, _getters, rootState) {
+    const credentials = getInvidiousInstanceCredentials(rootState.settings.invidiousInstanceCredentials, state.currentInvidiousInstanceUrl)
+    return credentials && `Basic ${base64EncodeUtf8(`${credentials.username}:${credentials.password}`)}`
   },
 
   getInvidiousInstancesList(state) {
@@ -33,11 +34,11 @@ const getters = {
       : state.currentInvidiousInstanceUrl
   },
 
-  getApiServerAuthorization(state, _getters, rootState) {
+  getApiServerAuthorization(_state, getters, rootState) {
     const { backendPreference, yatteeUsername, yatteePassword } = rootState.settings
     return backendPreference === 'yattee'
       ? createYatteeAuthorization(yatteeUsername, yatteePassword)
-      : state.currentInvidiousInstanceAuthorization
+      : getters.getCurrentInvidiousInstanceAuthorization
   }
 }
 
@@ -100,45 +101,12 @@ const actions = {
   }
 }
 
-/** @param {string} value */
-function decodeCredential(value) {
-  try {
-    return decodeURIComponent(value)
-  } catch {
-    return value
-  }
-}
-
 const mutations = {
   setCurrentInvidiousInstance(state, value) {
-    state.currentInvidiousInstance = value
-
-    let url
-    try {
-      url = new URL(value)
-    } catch { }
-
-    let authorization = null
-
-    if (url && (url.username.length > 0 || url.password.length > 0)) {
-      // URL percent-encodes credentials, but servers compare the raw values
-      authorization = `Basic ${base64EncodeUtf8(`${decodeCredential(url.username)}:${decodeCredential(url.password)}`)}`
-    }
-
-    state.currentInvidiousInstanceAuthorization = authorization
-
-    let instanceUrl
-
-    if (url) {
-      url.username = ''
-      url.password = ''
-
-      instanceUrl = url.toString().replace(/\/$/, '')
-    } else {
-      instanceUrl = value
-    }
-
-    state.currentInvidiousInstanceUrl = instanceUrl
+    // The credentials are a separate setting, so the address never shows them.
+    const { instance } = splitInvidiousInstanceCredentials(value)
+    state.currentInvidiousInstance = instance
+    state.currentInvidiousInstanceUrl = normalizeInvidiousInstanceUrl(instance)
   },
 
   setInvidiousInstancesList(state, value) {

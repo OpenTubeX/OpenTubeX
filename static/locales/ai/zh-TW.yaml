@@ -479,6 +479,8 @@ Settings:
       Network: 網路
       Disk: 磁碟
   General Settings:
+    Invidious Instance Username: '執行個體使用者名稱'
+    Invidious Instance Password: '執行個體密碼'
     Data Saver Thumbnail Modes:
       Off: "關閉"
       On Metered Networks: "計量付費網路"
@@ -2296,6 +2298,7 @@ Tooltips:
     Add to YouTube Watch History: "您播放的影片會加入您的 YouTube 觀看紀錄，讓 YouTube 的推薦內容從中學習。在 YouTube 上暫停觀看紀錄時，不會加入任何內容。"
     Rate Videos: "在影片上顯示喜歡和不喜歡按鈕。為了顯示你的評價，你開啟的每部影片都會用你的帳戶在 YouTube 上查詢，因此即使影片沒有加入觀看記錄，YouTube 也會知道你開啟了哪些影片。"
   General Settings:
+    Invidious Instance Credentials: '僅在執行個體要求使用者名稱和密碼時需要。它們只會儲存在此裝置上，並且只會傳送到此執行個體。'
     Reply Notifications: "OpenTubeX 會檢查你追蹤的留言是否有新回覆。創作者為你的留言加上愛心時，也會通知你。留言會持續被追蹤，直到 30 天內沒有新回覆、新愛心，你也沒有開啟過它。最多可同時追蹤 50 則留言，追蹤更多時，會取消追蹤最久沒有動靜的留言。使用留言旁的鈴鐺按鈕即可追蹤任何留言。"
     Built-in Streams: |
       自動模式透過 YouTube 的 visionOS 用戶端播放大多數影片，啟動更快並支援自動畫質。直播和它無法播放的影片會使用 SABR。

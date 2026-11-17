@@ -1,5 +1,5 @@
 // @ts-check
-import { rmSync } from 'node:fs'
+import { readdirSync, rmSync } from 'node:fs'
 import { basename, dirname, join } from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
 
@@ -75,6 +75,34 @@ export function createNodeSqliteDriver(filename, backupDirectory = dirname(filen
       const target = join(backupDirectory, `${basename(filename)}.backup-${Date.now()}`)
       open().exec(`VACUUM INTO '${target.replaceAll('\'', '\'\'')}'`)
       return target
+    },
+    async cleanBackups(list) {
+      const prefix = `${basename(filename)}.backup-`
+      /** @type {string[]} */
+      let names = []
+      try {
+        names = readdirSync(backupDirectory).filter(name => name.startsWith(prefix))
+      } catch (error) {
+        if (/** @type {NodeJS.ErrnoException} */ (error).code !== 'ENOENT') throw error
+      }
+      const failures = []
+      for (const name of names) {
+        let backup
+        try {
+          backup = new DatabaseSync(join(backupDirectory, name))
+          // Overwrite the deleted rows, even if the rebuild below fails.
+          backup.exec('PRAGMA secure_delete = ON')
+          for (const [sql, params = []] of list) backup.prepare(sql).run(...(/** @type {import('node:sqlite').SQLInputValue[]} */ (params)))
+          // Return the pages they freed. A rebuild that failed before runs now.
+          if (Number(backup.prepare('PRAGMA freelist_count').get()?.freelist_count) > 0) backup.exec('VACUUM')
+        } catch (error) {
+          // The other backups still get cleaned.
+          failures.push(error)
+        } finally {
+          backup?.close()
+        }
+      }
+      if (failures.length > 0) throw new AggregateError(failures, 'Unable to clean every backup')
     },
     async drop() {
       close()

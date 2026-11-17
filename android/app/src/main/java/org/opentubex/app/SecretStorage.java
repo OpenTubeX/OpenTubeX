@@ -24,7 +24,8 @@ import javax.crypto.spec.GCMParameterSpec;
  */
 final class SecretStorage {
     private static final String KEYSTORE = "AndroidKeyStore";
-    private static final String ALIAS = "settings-secrets";
+    // Tests use a key of their own, so the app's saved secrets stay readable
+    static volatile String alias = "settings-secrets";
     private static final String TRANSFORMATION = "AES/GCM/NoPadding";
     private static final int IV_LENGTH = 12;
     private static final int TAG_BITS = 128;
@@ -34,10 +35,10 @@ final class SecretStorage {
     private static synchronized SecretKey key() throws GeneralSecurityException, IOException {
         KeyStore store = KeyStore.getInstance(KEYSTORE);
         store.load(null);
-        Key existing = store.getKey(ALIAS, null);
+        Key existing = store.getKey(alias, null);
         if (existing instanceof SecretKey key) return key;
         KeyGenerator generator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, KEYSTORE);
-        generator.init(new KeyGenParameterSpec.Builder(ALIAS, KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+        generator.init(new KeyGenParameterSpec.Builder(alias, KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
             .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
             .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
             .setKeySize(256)

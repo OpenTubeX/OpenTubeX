@@ -612,6 +612,8 @@ Settings:
       Disk: disc
   Return to Settings Menu: Torna al menú de configuració
   General Settings:
+    Invidious Instance Username: 'Nom d''usuari de la instància'
+    Invidious Instance Password: 'Contrasenya de la instància'
     Data Saver Thumbnail Modes:
       Off: "Desactivat"
       On Metered Networks: "En xarxes amb límit de dades"
@@ -2832,6 +2834,7 @@ Tooltips:
     Add to YouTube Watch History: "Els vídeos que reprodueixes s'afegeixen al teu historial de visualitzacions de YouTube, perquè les recomanacions de YouTube n'aprenguin. No s'hi afegeix res mentre l'historial està en pausa a YouTube."
     Rate Videos: "Mostra els botons de m'agrada i no m'agrada als vídeos. Per mostrar la teva valoració, cada vídeo que obres es consulta a YouTube amb el teu compte, de manera que YouTube sap quins vídeos obres, encara que no s'afegeixin a l'historial de visualitzacions."
   General Settings:
+    Invidious Instance Credentials: 'Només cal si la instància demana un nom d''usuari i una contrasenya. Només es desen en aquest dispositiu i només s''envien a aquesta instància.'
     Reply Notifications: "OpenTubeX comprova si els comentaris que segueixes tenen respostes noves. També t'avisa quan un creador posa un cor a un dels teus comentaris. Un comentari es continua seguint fins que passen 30 dies sense respostes noves, cors ni que l'obris. Es poden seguir fins a 50 comentaris alhora, de manera que, si en segueixes més, deixes de seguir els que fa més temps que estan inactius. Segueix qualsevol comentari amb el botó de la campana que hi ha al costat."
     Built-in Streams: |
       Automàtic reprodueix la majoria de vídeos amb el client visionOS de YouTube, que comença més ràpid i admet la qualitat automàtica. Les emissions en directe i els vídeos que no pot reproduir fan servir SABR.

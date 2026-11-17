@@ -479,6 +479,8 @@ Settings:
       Network: sítě
       Disk: disku
   General Settings:
+    Invidious Instance Username: 'Uživatelské jméno instance'
+    Invidious Instance Password: 'Heslo instance'
     Data Saver Thumbnail Modes:
       Off: "Vypnuto"
       On Metered Networks: "V měřených sítích"
@@ -2294,6 +2296,7 @@ Tooltips:
     Add to YouTube Watch History: "Videa, která přehrajete, se přidají do vaší historie sledování na YouTube, takže se z nich učí doporučení YouTube. Když je historie na YouTube pozastavená, nic se nepřidá."
     Rate Videos: "Zobrazuje u videí tlačítka Líbí se a Nelíbí se. Aby se zobrazilo vaše hodnocení, každé otevřené video se vyhledá na YouTube s vaším účtem, takže YouTube zjistí, která videa otevíráte, i když se nepřidají do historie sledování."
   General Settings:
+    Invidious Instance Credentials: 'Potřeba jen tehdy, když instance vyžaduje uživatelské jméno a heslo. Ukládají se jen v tomto zařízení a posílají se jen této instanci.'
     Reply Notifications: "OpenTubeX kontroluje, zda na komentáře, které sledujete, přibyly nové odpovědi. Také vás upozorní, když autor dá srdíčko některému z vašich komentářů. Komentář zůstává sledovaný, dokud neuplyne 30 dní bez nových odpovědí, srdíček nebo jeho otevření. Sledovat lze najednou nejvýše 50 komentářů, takže když začnete sledovat další, přestanou se sledovat ty, které byly nejdéle neaktivní. Libovolný komentář můžete sledovat pomocí tlačítka se zvonečkem vedle něj."
     Built-in Streams: |
       Automatický režim přehrává většinu videí přes klienta visionOS od YouTube, který začíná rychleji a podporuje automatickou kvalitu. Živé přenosy a videa, která nedokáže přehrát, používají SABR.

@@ -94,10 +94,23 @@ export async function decodeSettings(docs, datastore, cipherPromise) {
 }
 
 /**
+ * The secrets in the copies of the settings kept for older versions, which
+ * also saved Invidious credentials in the instance URL, as `user:password@`.
+ */
+// What follows the scheme and its slashes, with a slash added so it always ends
+// with one, and the other characters that end the host turned into slashes.
+// URLs ignore tabs and line breaks, so they are removed first.
+const VALUE = "replace(replace(replace(json_extract(data, '$.value'), char(9), ''), char(10), ''), char(13), '')"
+const AFTER_SCHEME = `replace(replace(replace(ltrim(substr(${VALUE}, instr(${VALUE}, ':') + 1), '/\\') || '/', '\\', '/'), '?', '/'), '#', '/')`
+const OLDER_COPY_SECRETS = `json_extract(data, '$._id') IN (SELECT value FROM json_each(?)) OR
+  (json_extract(data, '$._id') = 'defaultInvidiousInstance' AND instr(${VALUE}, ':') > 0 AND
+    instr(${AFTER_SCHEME}, '@') BETWEEN 1 AND instr(${AFTER_SCHEME}, '/'))`
+
+/**
  * Encrypts secrets saved by a version that stored them as they are, and deletes
  * the ones this device's keyring cannot decrypt. Then removes their old content from
- * the database file.
- * @param {import('@seald-io/nedb').default & { vacuumAsync?: () => Promise<void> }} datastore
+ * the database file and from the copies kept for older versions.
+ * @param {import('@seald-io/nedb').default & { vacuumAsync?: () => Promise<void>, removeOlderCopiesAsync?: (condition: string, params?: unknown[]) => Promise<void> }} datastore
  * @param {Promise<SecretCipher | null>} cipherPromise
  */
 export async function migrateSecretSettings(datastore, cipherPromise) {
@@ -110,6 +123,7 @@ export async function migrateSecretSettings(datastore, cipherPromise) {
   const decoded = await decodeSettings(docs, datastore, cipherPromise)
   // Without a keyring, secrets are only left out, so nothing was deleted.
   let changed = cipher !== null && decoded.length < docs.length
+  let encryptedAll = cipher !== null
   const plaintext = docs.filter(doc => !isEncrypted(doc) && doc.value !== undefined)
   if (plaintext.length > 0) {
     if (cipher) {
@@ -120,8 +134,18 @@ export async function migrateSecretSettings(datastore, cipherPromise) {
         }
         changed = true
       } catch (error) {
+        encryptedAll = false
         console.error('Unable to encrypt saved credentials', error)
       }
+    }
+  }
+  // The copies kept for older versions and recovery would still hold them
+  // unencrypted. An older version then asks to sign in again.
+  if (encryptedAll) {
+    try {
+      await datastore.removeOlderCopiesAsync?.(OLDER_COPY_SECRETS, [JSON.stringify([...SECRET_SETTINGS])])
+    } catch (error) {
+      console.error('Unable to remove saved credentials from older copies of the settings', error)
     }
   }
   // Rebuilding the file drops the deleted rows, which SQLite otherwise keeps

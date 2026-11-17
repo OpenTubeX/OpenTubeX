@@ -191,12 +191,16 @@ export async function parseLegacyDatafile(raw) {
  * @property {() => Promise<string>} [backup] Copies the database, returning the copy's name.
  * @property {(sql: string, params?: unknown[]) => Promise<unknown[][]>} [read] Runs a large read-only query.
  * @property {() => void | Promise<void>} [close] Closes the connection; the next statement reopens it.
+ * @property {(statements: Statement[]) => Promise<void>} [cleanBackups] Runs statements in every backup.
  *
  * @typedef {object} LegacySource The NeDB datastore this database replaces.
  * @property {() => Promise<{ data: object[], indexes: string[] }>} read
  * @property {() => Promise<string | null>} [fingerprint] Changes whenever the legacy data is written.
  * @property {(text: string) => string} [hash]
  * @property {() => Promise<void>} [remove]
+ * @property {() => Promise<object[]>} [records] Every version of each document, including replaced ones.
+ * @property {(ids: string[]) => Promise<boolean>} [removeDocuments] Rewrites the datafile without
+ *   these documents, returning whether it had any.
  */
 
 /**
@@ -820,6 +824,57 @@ export class SqliteDatastore {
       if (this.dropped) return
       await this._execute([['VACUUM'], ['PRAGMA wal_checkpoint(TRUNCATE)']])
     }, 'read')
+  }
+
+  /**
+   * Removes documents from the copies kept for older versions and recovery:
+   * the legacy datastore an older version opens, and the backups made before
+   * applying its changes. This is for secrets that this database now keeps
+   * encrypted. An older version then starts without them, and this one does
+   * not apply their absence as a deletion.
+   * @param {string} condition an SQL expression on a document's serialized `data`,
+   *   so the legacy datastore and the backups follow the same rule
+   * @param {unknown[]} [params] for the placeholders in `condition`
+   */
+  removeOlderCopiesAsync(condition, params = []) {
+    return this._exclusive(async () => {
+      if (this.dropped) return
+      let backupFailure = null
+      try {
+        await this.driver.cleanBackups?.([
+          [`DELETE FROM children WHERE parent IN (SELECT id FROM docs WHERE ${condition})`, params],
+          [`DELETE FROM docs WHERE ${condition}`, params],
+        ])
+      } catch (error) {
+        // A backup that cannot be changed must not keep the secrets in the legacy datastore.
+        backupFailure = error
+      }
+      await this._removeLegacyCopies(condition, params)
+      if (backupFailure) throw backupFailure
+    }, 'read')
+  }
+
+  /**
+   * @param {string} condition
+   * @param {unknown[]} params
+   */
+  async _removeLegacyCopies(condition, params) {
+    if (!this.legacy?.removeDocuments) return
+    // Replaced versions of a document can still hold a secret.
+    const data = this.legacy.records ? await this.legacy.records() : (await this.legacy.read()).data
+    const [rows] = await this._execute([[
+        `SELECT json_extract(data, '$._id') FROM (SELECT value AS data FROM json_each(?)) WHERE ${condition}`,
+        [JSON.stringify(data), ...params],
+    ]])
+    const ids = [...new Set(rows.map(([id]) => id))]
+    if (ids.length === 0) return
+    const fingerprint = await this.legacy.fingerprint?.() ?? null
+    const applied = fingerprint === await this._meta('legacyFingerprint')
+    // First, so an interrupted rewrite cannot look like an older version deleted them.
+    await this._execute(ids.map(id => [SQL.removeBase, [keyOf(id)]]), true)
+    if (!await this.legacy.removeDocuments(ids)) return
+    // Changes an older version made before still get applied on the next start.
+    if (applied) await this._execute([[SQL.setMeta, ['legacyFingerprint', await this.legacy.fingerprint?.() ?? null]]])
   }
 
   /**

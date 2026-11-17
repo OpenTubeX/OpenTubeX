@@ -423,6 +423,8 @@ Settings:
       Network: red
       Disk: disco
   General Settings:
+    Invidious Instance Username: 'Nombre de usuario de la instancia'
+    Invidious Instance Password: 'Contraseña de la instancia'
     Data Saver Thumbnail Modes:
       Off: "Desactivado"
       On Metered Networks: "En redes con medición"
@@ -2253,6 +2255,7 @@ Tooltips:
     Add to YouTube Watch History: "Los vídeos que reproduces se añaden a tu historial de reproducciones de YouTube, para que las recomendaciones de YouTube aprendan de ellos. No se añade nada mientras el historial esté en pausa en YouTube."
     Rate Videos: "Muestra los botones de me gusta y no me gusta en los vídeos. Para mostrar tu valoración, cada vídeo que abres se consulta en YouTube con tu cuenta, así que YouTube sabe qué vídeos abres, aunque no se añadan a tu historial de reproducciones."
   General Settings:
+    Invidious Instance Credentials: 'Solo es necesario si la instancia pide un nombre de usuario y una contraseña. Solo se guardan en este dispositivo y solo se envían a esta instancia.'
     Reply Notifications: "OpenTubeX revisa si los comentarios que sigues tienen respuestas nuevas. También te avisa cuando un creador le da un corazón a uno de tus comentarios. Un comentario se sigue hasta que pasan 30 días sin respuestas nuevas, corazones ni que lo abras. Se pueden seguir hasta 50 comentarios a la vez, así que, si sigues más, dejas de seguir los que llevan más tiempo inactivos. Sigue cualquier comentario con el botón de campana que tiene al lado."
     Built-in Streams: |
       Automático reproduce la mayoría de los vídeos con el cliente visionOS de YouTube, que empieza más rápido y admite la calidad automática. Las emisiones en directo y los vídeos que no puede reproducir usan SABR.

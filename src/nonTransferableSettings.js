@@ -6,6 +6,7 @@ export const SECRET_SETTINGS = new Set([
   'syncServerToken',
   'syncServerPrivacyKey',
   'yatteePassword',
+  'invidiousInstanceCredentials',
 ])
 
 export const NON_TRANSFERABLE_SETTINGS = new Set([
@@ -126,16 +127,18 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
 ])
 
 /**
- * The settings that exports and backups include. An Invidious instance URL can
- * contain the server's username and password, which stay on this device.
- * Importing the result on this device keeps them, since the values compare equal.
+ * The settings that exports and backups include.
  * @param {Record<string, unknown>} settings
  * @returns {Record<string, unknown>}
  */
 export function getTransferableSettings(settings) {
   const transferable = Object.fromEntries(Object.entries(settings).filter(([key]) => !NON_TRANSFERABLE_SETTINGS.has(key)))
+  // Saving splits credentials off, but not off a URL that does not parse, such as one with an invalid port.
   if (typeof transferable.defaultInvidiousInstance === 'string') {
-    transferable.defaultInvidiousInstance = transferable.defaultInvidiousInstance.trim().replace(/^([a-z][\w+.-]*:[/\\]*)[^/\\?#]*@/i, '$1')
+    transferable.defaultInvidiousInstance = transferable.defaultInvidiousInstance.trim()
+      // URLs ignore tabs and line breaks
+      .replaceAll(/[\t\n\r]/g, '')
+      .replace(/^([a-z][\w+.-]*:[/\\]*)[^/\\?#]*@/i, '$1')
   }
   return transferable
 }

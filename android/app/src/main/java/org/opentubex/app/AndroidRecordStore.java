@@ -20,6 +20,15 @@ final class AndroidRecordStore extends SQLiteOpenHelper {
     }
 
     @Override
+    public void onConfigure(SQLiteDatabase db) {
+        // Overwrite deleted records, such as removed plaintext credentials.
+        // Android builds SQLite with this on, but device makers may not.
+        try (Cursor cursor = db.rawQuery("PRAGMA secure_delete = ON", null)) {
+            cursor.moveToFirst();
+        }
+    }
+
+    @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE files (filename TEXT PRIMARY KEY NOT NULL)");
         db.execSQL("CREATE TABLE records (filename TEXT NOT NULL, record_key TEXT NOT NULL, " +

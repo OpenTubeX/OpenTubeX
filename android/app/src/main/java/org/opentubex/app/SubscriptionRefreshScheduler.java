@@ -28,9 +28,13 @@ final class SubscriptionRefreshScheduler {
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build();
 
+        List<SubscriptionRefreshConfiguration.Feed> allFeeds = SubscriptionRefreshConfiguration.readFeeds(context);
+        // Keep the schedules until the settings can be read again
+        if (allFeeds == null) return;
+
         for (String feedType : SubscriptionRefreshConfiguration.FEED_TYPES) {
             List<SubscriptionRefreshConfiguration.Feed> feeds =
-                SubscriptionRefreshConfiguration.findFeeds(context, feedType);
+                SubscriptionRefreshConfiguration.ofType(allFeeds, feedType);
             if (feeds.isEmpty()) continue;
             SubscriptionRefreshConfiguration.Feed feed = feeds.get(0);
             String name = uniqueName(feedType);
