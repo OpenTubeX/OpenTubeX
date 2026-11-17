@@ -2,7 +2,7 @@
 category: feature
 ---
 
-Grayscale can now leave downloaded videos in color, so they stay colorful when you watch them while everything else turns gray.
+Grayscale can now leave downloaded videos in color, while other videos and images turn gray.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/07d3bf89-9304-4cb4-afdc-366b61720d70">
