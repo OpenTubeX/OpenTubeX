@@ -100,7 +100,10 @@ export function useTwitchLiveRewind({ getPlayer, getControls, props, video }) {
   function requestSwitch(time) {
     if (!getPlayer() || !Number.isFinite(time)) return false
     const range = getRealSeekRange()
-    const switches = (loadedMode === 'live' && liveOrigin !== null && time < range.start - 0.5) ||
+    // Shaka's stall and gap handling moves a playhead that fell behind the
+    // live playlist forward, which is not a seek back into the recording
+    const switches = (loadedMode === 'live' && liveOrigin !== null && time < range.start - 0.5 &&
+      time < video.value.currentTime) ||
       (loadedMode === 'recording' && time > range.end + 0.5)
     // The latest seek wins, also when it returns into the loaded source while dragging
     requestedTime = switches ? time : null

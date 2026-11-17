@@ -3298,6 +3298,17 @@ let pendingMetadataSeek = null
 let seekBarMouseDown = false
 let resumeAutoplayAfterSeek = false
 let initialAutoplayCanceled = false
+
+/**
+ * A video still waiting for autoplay counts as playing.
+ * @param {HTMLVideoElement} mediaElement
+ */
+function isPausedByUser(mediaElement) {
+  const awaitingAutoplay = mediaElement.autoplay && mediaElement.played.length === 0 &&
+    !initialAutoplayCanceled && mediaElement.readyState < HTMLMediaElement.HAVE_ENOUGH_DATA
+  return mediaElement.paused && !awaitingAutoplay
+}
+
 // When the viewer paused playback, consumed by the next play.
 /** @type {number|null} */
 let rewindOnResumePausedAt = null
@@ -9882,11 +9893,8 @@ function registerLegacyQualitySelection() {
     const mediaElement = video.value
 
     if (userSelected && selectionPlaybackState === null) {
-      // A video still waiting for autoplay counts as playing.
-      const awaitingAutoplay = mediaElement.autoplay && mediaElement.played.length === 0 &&
-        !initialAutoplayCanceled && mediaElement.readyState < HTMLMediaElement.HAVE_ENOUGH_DATA
       const state = {
-        wasPaused: mediaElement.paused && !awaitingAutoplay,
+        wasPaused: isPausedByUser(mediaElement),
         autoplay: mediaElement.autoplay,
         // Playing or pausing while the selection is pending replaces that state. Loading the
         // new source pauses the element without a pause event, so this only sees other changes.
@@ -12769,7 +12777,8 @@ watch(
       queuePlaybackRateRestore()
       pendingFormatSwitchState = {
         oldFormat,
-        wasPaused: video_.paused,
+        // A new source, such as refreshed streams, can arrive before autoplay starts
+        wasPaused: isPausedByUser(video_),
         // Twitch's live playlist and the broadcast's recording have different timelines
         playbackPosition: switchStartTime === undefined ? video_.currentTime : switchStartTime,
         // The legacy formats don't have an ABR configuration to carry over,
