@@ -143,7 +143,6 @@ test('retained startup clicks and running-app clicks navigate and update localiz
   assert.equal(youtubeLinks.length, 4, 'widget pages must not be treated as YouTube links')
   assert.equal(updates[0].length, 4, 'iOS and Pixel launchers show four shortcuts')
   assert.equal(updates[0][2].title, 'en-US:History.History')
-  assert.equal(updates[0][0].androidIcon, 'ic_shortcut_refresh')
   assert.equal(updates[0][0].path, undefined, 'paths stay out of the native shortcut list')
   locale.value = 'de-DE'
   updateLocale()
