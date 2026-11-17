@@ -693,6 +693,7 @@ import {
   exitAndroidApp,
   getAndroidHardwareKeyboardState,
   isAndroidLauncherReturnInProgress,
+  setAndroidIncognitoKeyboard,
   setAndroidPictureInPictureDocumentState,
   setAndroidSystemBarsBackground,
   whileAndroidGamepadConnected
@@ -2026,6 +2027,9 @@ onMounted(async () => {
     scheduleIdleStartupWork()
     if (isCapacitor) {
       initializeHapticFeedback(store)
+      watch(() => store.getters.getTabIncognito(presentedTabId.value), incognito => {
+        setAndroidIncognitoKeyboard(incognito).catch(error => console.warn('Could not update the incognito keyboard', error))
+      }, { immediate: true })
       capacitorPullToRefreshSetup = initializeCapacitorPullToRefresh()
         .catch(error => console.error('Failed to initialize pull to refresh', error))
     }
