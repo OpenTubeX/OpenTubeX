@@ -232,6 +232,31 @@ test.describe('multi-tab window close confirmation', () => {
         })
       })
     }
+
+    test('confirms quitting while a window that is not an app window stays open', async ({ app, page }) => {
+      // Like the window where the user passes Rumble's check
+      await app.electronApp.evaluate(({ BrowserWindow, dialog }) => {
+        globalThis.windowCloseDialogMessages = []
+        globalThis.windowCloseDialogResponse = 1
+        dialog.showMessageBox = async (_window, options) => {
+          globalThis.windowCloseDialogMessages.push(options.message)
+          return { response: globalThis.windowCloseDialogResponse }
+        }
+        const [parent] = BrowserWindow.getAllWindows()
+        globalThis.otherWindow = new BrowserWindow({ parent, show: false })
+      })
+
+      await app.electronApp.evaluate(({ BrowserWindow }) => {
+        BrowserWindow.getAllWindows().find(window => window !== globalThis.otherWindow)?.close()
+      })
+      await expect.poll(() => app.electronApp.evaluate(() => globalThis.windowCloseDialogMessages)).toEqual([
+        'Are you sure you want to quit OpenTubeX?'
+      ])
+      expect(page.isClosed()).toBe(false)
+
+      // Let the fixture quit the app
+      await app.electronApp.evaluate(() => { globalThis.windowCloseDialogResponse = 0 })
+    })
   })
 
   test('confirms when the renderer closes every tab in a multi-tab window', async ({ app, page }) => {

@@ -68,6 +68,7 @@ function fixture(platform = 'linux') {
     getTrayMenuIcon: (name, pack) => `${pack}:${name}`,
     Tray,
     BrowserWindow: { getAllWindows: () => windows, getFocusedWindow: () => windows[0] },
+    TabManager: { getWindows: () => windows },
     Menu: { buildFromTemplate: items => items },
     createWindow: () => new Window(),
     requestQuit: () => {},

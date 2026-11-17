@@ -33,8 +33,9 @@ final class RumblePages {
         /**
          * The user agent of the browser where the user passed Cloudflare's
          * check, as Cloudflare ties its cookie to it, or null for the helper's own.
+         * Guarded by {@link #cookies}.
          */
-        volatile String userAgent;
+        String userAgent;
     }
 
     private static final int MAX_REDIRECTS = 10;
@@ -81,8 +82,8 @@ final class RumblePages {
                 int equals = pair.indexOf('=');
                 if (equals > 0) session.cookies.put(pair.substring(0, equals).trim(), pair.substring(equals + 1).trim());
             }
+            session.userAgent = userAgent;
         }
-        session.userAgent = userAgent;
     }
 
     private static JSONObject fetch(String url, Transport transport, Session session, long requestedAt) throws Exception {
@@ -94,9 +95,14 @@ final class RumblePages {
             long remaining = TimeUnit.NANOSECONDS.toMillis(deadline - System.nanoTime());
             if (remaining <= 0) throw new IOException("Timed out loading the Rumble page");
             JSONObject headers = new JSONObject().put("Accept", "text/html");
-            String cookie = cookieHeader(cookies);
+            // Cookies and user agent of the same browser
+            String cookie;
+            String userAgent;
+            synchronized (cookies) {
+                cookie = cookieHeader(cookies);
+                userAgent = session.userAgent;
+            }
             if (!cookie.isEmpty()) headers.put("Cookie", cookie);
-            String userAgent = session.userAgent;
             if (userAgent != null) headers.put("User-Agent", userAgent);
             JSONObject result = transport.send(new JSONObject().put("url", uri.toString()).put("method", "GET")
                 .put("headers", headers).put("timeout", remaining));

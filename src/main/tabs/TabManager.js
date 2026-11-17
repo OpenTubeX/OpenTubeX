@@ -177,6 +177,16 @@ export class TabManager {
   }
 
   /**
+   * The app's windows, without others such as the Rumble check or GPU
+   * internals. A window counts until it is destroyed, like in
+   * `BrowserWindow.getAllWindows()`.
+   * @returns {import('electron').BrowserWindow[]}
+   */
+  static getWindows() {
+    return [...tabManagers.values()].map(manager => manager.browserWindow)
+  }
+
+  /**
    * @param {number} windowId
    * @returns {TabManager|undefined}
    */

@@ -354,9 +354,10 @@ final class RumblePages: NSObject, URLSessionTaskDelegate {
             let remaining = deadline.timeIntervalSinceNow
             if remaining <= 0 { throw Self.error("Timed out loading the Rumble page") }
             var request = URLRequest(url: target, timeoutInterval: remaining)
-            request.setValue(lock.withLock { userAgent }, forHTTPHeaderField: "User-Agent")
+            // Cookies and user agent of the same browser
+            let (agent, current) = lock.withLock { (userAgent, cookies.values.filter { ($0.expiresDate ?? .distantFuture) > Date() }) }
+            request.setValue(agent, forHTTPHeaderField: "User-Agent")
             request.setValue("text/html", forHTTPHeaderField: "Accept")
-            let current = lock.withLock { cookies.values.filter { ($0.expiresDate ?? .distantFuture) > Date() } }
             for (name, value) in HTTPCookie.requestHeaderFields(with: current) { request.setValue(value, forHTTPHeaderField: name) }
             let (data, response) = try await session.data(for: request)
             guard let response = response as? HTTPURLResponse else { throw Self.error("Missing HTTP response") }
