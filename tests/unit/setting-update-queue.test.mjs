@@ -4,7 +4,7 @@ import test from 'node:test'
 import vm from 'node:vm'
 
 import { createOptimisticSettingUpdater, createSavedSettingEditor, createSettingUpdateQueue, createSettingWriteTracker } from '../../src/renderer/helpers/settingUpdateQueue.js'
-import { areSyncSettingValuesEqual, mergeSettingEntry, mergeSettingItemsEntry, migrateLegacySyncedSettings, resolveMergedThemeEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
+import { areSyncSettingValuesEqual, isListSetting, mergeSettingEntry, mergeSettingItemsEntry, mergeSettingListEntry, migrateLegacySyncedSettings, resolveMergedThemeEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
 
 const settingsSource = await readFile(new URL('../../src/renderer/store/modules/settings.js', import.meta.url), 'utf8')
 const settingsSection = (start, end) => settingsSource.slice(settingsSource.indexOf(start), settingsSource.indexOf(end))
@@ -491,6 +491,8 @@ test('settings sync waits for an optimistic edit to save its edit time', async (
     areSyncSettingValuesEqual,
     mergeSettingEntry,
     mergeSettingItemsEntry,
+    isListSetting,
+    mergeSettingListEntry,
     migrateLegacySyncedSettings,
     resolveMergedThemeEntry,
     CUSTOM_THEMES_SYNC_KEY: 'customThemes',

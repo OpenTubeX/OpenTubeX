@@ -625,7 +625,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         }
         break
       case 'settings':
-        next.settings = await syncSettings(targetClient, store, previous.settings, playlistSnapshot())
+        next.settings = await syncSettings(targetClient, store, previous.settings, playlistSnapshot(), { onRetryBaseline })
         result.settings = Object.keys(next.settings).length
         break
       case 'sessionsV2': {
@@ -930,7 +930,10 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
               }
               const retryClient = new EncryptedSyncAdapter(retryDocument)
               if (collection === 'settings') {
-                next.settings = await syncSettings(retryClient, store, next.settings, playlistSnapshot())
+                next.settings = await syncSettings(retryClient, store, next.settings, playlistSnapshot(), {
+                  listSnapshot: baseline('settings') ?? {},
+                  onRetryBaseline: getBaseline => { retryBaselines.settings = getBaseline },
+                })
                 result.settings = Object.keys(next.settings).length
               } else {
                 await applyCollection(collection, retryClient)

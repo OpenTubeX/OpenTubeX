@@ -3,7 +3,12 @@ import test from 'node:test'
 import { DEFAULT_CUSTOM_THEME, normalizeCustomThemes } from '../../src/customTheme.js'
 
 import { commitCustomThemesEdit } from '../../src/renderer/helpers/customThemeSync.js'
-import { mergeSettingEntry, migrateLegacySyncedSettings, resolveMergedThemeEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
+import {
+  mergeSettingEntry,
+  mergeSettingListEntry,
+  migrateLegacySyncedSettings,
+  resolveMergedThemeEntry,
+} from '../../src/renderer/helpers/sync-settings-conflict.js'
 
 test('theme sync does not echo colors filled in while loading a received theme', () => {
   const theme = structuredClone({ ...DEFAULT_CUSTOM_THEME, id: 'discussion-1196', name: 'D3SOX' })
@@ -306,4 +311,27 @@ test('devices read the Title Lines select from the Limit Titles to Two Lines swi
   assert.equal(migrateLegacySyncedSettings({ limitTitlesToTwoLines: { ...legacy, value: true } }).titleLineLimit.value, 2)
   const current = { key: 'titleLineLimit', value: 3, updatedAt: 5 }
   assert.equal(migrateLegacySyncedSettings({ limitTitlesToTwoLines: legacy, titleLineLimit: current }).titleLineLimit, current)
+})
+
+test('hidden channels added and removed on two devices before they sync are all kept', () => {
+  const channel = (name, preferredName = '') => ({ name, preferredName })
+  const old = { key: 'channelsHidden', value: JSON.stringify([channel('UC-a'), channel('UC-b')]), updatedAt: 10 }
+  // The other device hid C and unhid A; this device fetched B's name, hid D, and unhid nothing.
+  const remoteEntry = { key: 'channelsHidden', value: JSON.stringify([channel('UC-b'), channel('UC-c')]), updatedAt: 30 }
+  const value = JSON.stringify([channel('UC-a'), channel('UC-b', 'Channel B'), channel('UC-d')])
+  const entry = mergeSettingListEntry({ key: 'channelsHidden', value, old, remoteEntry, localUpdatedAt: 20, now: 40 })
+  assert.deepEqual(JSON.parse(entry.value), [channel('UC-b', 'Channel B'), channel('UC-c'), channel('UC-d')])
+  assert.ok(entry.updatedAt >= remoteEntry.updatedAt, 'The merged list must replace the server list on other devices')
+
+  const unchanged = mergeSettingListEntry({ key: 'channelsHidden', value: old.value, old, remoteEntry, now: 40 })
+  assert.equal(unchanged, remoteEntry, 'An unedited list must take the server list')
+
+  const firstSync = mergeSettingListEntry({
+    key: 'forbiddenTitles',
+    value: '["local"]',
+    old: undefined,
+    remoteEntry: { key: 'forbiddenTitles', value: '["remote"]', updatedAt: 30 },
+    now: 40,
+  })
+  assert.deepEqual(JSON.parse(firstSync.value), ['remote', 'local'], 'A first sync must keep both devices\' items')
 })
