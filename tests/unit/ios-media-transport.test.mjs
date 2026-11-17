@@ -93,7 +93,8 @@ test('Twitch live playlists and recordings, which reject WebKit\'s origin, use t
   const urls = ['https://euc1.playlist.ttvnw.net/v1/playlist/session.m3u8', 'https://d1example.cloudfront.net/key_channel_1/chunked/index-dvr.m3u8',
     'https://d1example.cloudfront.net/key_channel_1/720p60/12-muted.ts', 'https://d1example.cloudfront.net/channel/123/key_channel_1/chunked/init-0.mp4']
   for (const url of urls) await f.request(url, get, 0).promise
-  assert.deepEqual(f.prepared.map(request => request.url), urls)
+  await f.request('https://euc1.playlist.ttvnw.net:443/v1/playlist/session.m3u8', get, 0).promise
+  assert.deepEqual(f.prepared.map(request => request.url), [...urls, urls[0]])
 })
 
 test('failed native requests report the stream URL instead of the local one', async () => {

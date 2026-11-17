@@ -35,7 +35,8 @@ export function createIOSMediaTransport(shaka, native, parse = shaka.net.HttpFet
     const abortNative = () => requestId ? native.abort({ requestId }).catch(() => {}) : Promise.resolve()
     const promise = (async () => {
       const prepared = await native.prepare({
-        url: uri,
+        // The parsed URL omits the default port, which the native guard rejects
+        url: url.href,
         method: request.method,
         headers: { 'User-Agent': DESKTOP_USER_AGENT, ...request.headers }
       })
