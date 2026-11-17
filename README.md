@@ -201,11 +201,9 @@ Pull requests are welcome. Read the [contribution guidelines](https://github.com
 ## 🌍 Localization
 <a href="https://hosted.weblate.org/engage/opentubex/">
   <picture>
-    <source media="(prefers-color-scheme: light)" srcset="https://hosted.weblate.org/widget/opentubex/287x66-grey.png">
-    <source media="(prefers-color-scheme: dark)" srcset="https://hosted.weblate.org/widget/opentubex/287x66-black.png">
-    <img src="https://hosted.weblate.org/widget/opentubex/287x66-grey.png" alt="Translation status" />
+    <source media="(prefers-color-scheme: dark)" srcset="https://opentubex-badges.withered-flower-f0f2.workers.dev/translation-status.svg" />
+    <img alt="OpenTubeX translation status on Hosted Weblate" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/translation-status-light.svg" width="740" />
   </picture>
-  <img src="https://hosted.weblate.org/widget/opentubex/application/matrix-auto.svg" alt="Translation matrix" />
 </a>
 
 You can help translate OpenTubeX on [Weblate](https://hosted.weblate.org/engage/opentubex/). The comment in the Flatpak desktop entry is translated in the [Flatpak repository](https://github.com/OpenTubeX/flatpak/blob/main/org.opentubex.OpenTubeX.desktop).
