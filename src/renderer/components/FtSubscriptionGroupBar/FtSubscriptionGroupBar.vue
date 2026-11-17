@@ -43,15 +43,17 @@
           :size="18"
           @click="openEditor(activeGroup)"
         />
-        <FtIconButton
-          class="groupAction"
-          :title="t('Subscription Groups.New Group')"
-          :icon="['fas', 'plus']"
-          theme="base-no-default"
-          :padding="8"
-          :size="18"
+        <button
+          class="newGroupChip"
+          type="button"
           @click="openEditor(null)"
-        />
+        >
+          <FtIcon
+            :icon="['fas', 'plus']"
+            aria-hidden="true"
+          />
+          {{ t('Subscription Groups.New Group') }}
+        </button>
       </template>
       <FtButton
         v-else
@@ -65,6 +67,7 @@
       v-if="editorOpen"
       :group="editedGroup"
       @close="closeEditor"
+      @created="selectGroup"
     />
   </div>
 </template>

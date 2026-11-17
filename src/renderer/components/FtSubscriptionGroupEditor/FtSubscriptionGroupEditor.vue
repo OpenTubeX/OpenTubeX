@@ -186,10 +186,15 @@ const props = defineProps({
   group: {
     type: Object,
     default: null
+  },
+  /** Channels a new group starts with */
+  initialChannelIds: {
+    type: Array,
+    default: () => []
   }
 })
 
-const emit = defineEmits(['close'])
+const emit = defineEmits(['close', 'created'])
 
 const { locale, t } = useI18n()
 
@@ -216,7 +221,7 @@ const showDeletePrompt = ref(false)
 // Channels this device isn't subscribed to stay in the group, as other
 // devices may still be subscribed to them.
 /** @type {import('vue').Reactive<Set<string>>} */
-const selected = reactive(new Set(props.group?.channelIds ?? []))
+const selected = reactive(new Set(props.group?.channelIds ?? props.initialChannelIds))
 
 const channels = computed(() => {
   const instanceUrl = store.getters.getBackendPreference === 'invidious'
@@ -303,7 +308,7 @@ async function save() {
     if (props.group === null) {
       const id = await store.dispatch('createSubscriptionGroup', group)
       saved = id !== null
-      if (saved) store.dispatch('selectSubscriptionGroup', id)
+      if (saved) emit('created', id)
     } else {
       saved = await store.dispatch('saveSubscriptionGroup', { id: props.group.id, ...group })
     }
