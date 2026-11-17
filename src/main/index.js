@@ -2412,6 +2412,9 @@ function runApp() {
 
       stopPowerSaveBlockerForWindow(newWindow)
       updateBackgroundSubscriptionVisibility()
+      // Closing the last tabs confirmed the quit before closing their window.
+      // Auxiliary windows, such as GPU Internals, would keep window-all-closed from firing.
+      if (allWindows.length === 0 && isQuitConfirmed && !isQuitting) app.quit()
     })
 
     if (waitForInitialization) {
@@ -2889,11 +2892,6 @@ function runApp() {
   app.on('window-all-closed', () => {
     mainWindow = null
     trayWindows = []
-    // Closing the last tabs confirmed the quit before closing their window
-    if (isQuitConfirmed && !isQuitting) {
-      app.quit()
-      return
-    }
     if (keepRefreshingInBackground && !isQuitting) {
       ensureBackgroundTray()
       backgroundSubscriptions.setBackground(true).catch(error => console.error(error))

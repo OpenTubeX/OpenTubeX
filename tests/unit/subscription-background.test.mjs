@@ -381,21 +381,17 @@ test('closing the last window leaves process shutdown to Quit, including macOS r
   const closingIndex = source.indexOf('\n  })', start)
   assert.ok(closingIndex > start, 'window-all-closed handler must have a closing boundary')
   const end = closingIndex + '\n  }'.length
-  for (const [platform, enabled, quitting, expected, quitConfirmed = quitting] of [
+  for (const [platform, enabled, quitting, expected] of [
     ['linux', false, false, ['cleanup']], ['linux', true, false, ['tray', 'background']], ['linux', true, true, ['cleanup']],
-    ['darwin', false, false, []], ['darwin', true, false, ['tray', 'background']], ['darwin', true, true, ['cleanup']],
-    // Closing the last tabs confirms the quit before their window closes
-    ['linux', true, false, ['quit'], true], ['darwin', false, false, ['quit'], true]
+    ['darwin', false, false, []], ['darwin', true, false, ['tray', 'background']], ['darwin', true, true, ['cleanup']]
   ]) {
     const calls = []
     const closed = vm.runInNewContext(`(${source.slice(start, end)})`, {
-      app: { quit: () => calls.push('quit') },
       process: { platform },
       mainWindow: {},
       trayWindows: [],
       keepRefreshingInBackground: enabled,
       isQuitting: quitting,
-      isQuitConfirmed: quitConfirmed,
       backgroundSubscriptions: {
         stop: () => calls.push('stop'),
         setBackground: async value => { assert.equal(value, true); calls.push('background') }

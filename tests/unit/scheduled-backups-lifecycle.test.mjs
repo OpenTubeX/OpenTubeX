@@ -21,7 +21,6 @@ function lifecycle(platform) {
     ensureBackgroundTray: () => calls.push('tray'),
     backgroundSubscriptions: { setBackground: async () => calls.push('background') },
     isQuitting: false,
-    isQuitConfirmed: false,
     clearInterval: () => calls.push('clear timer'),
     scheduledBackupTimer: {},
     scheduledBackups: { stop: async () => calls.push('stop backups') },

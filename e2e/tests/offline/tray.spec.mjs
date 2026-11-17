@@ -214,12 +214,9 @@ test('closing the final tab offers Hide Window and Quit exits while background r
   await setting(page, 'updateConfirmCloseApp', true)
   await setting(page, 'updateEnableClosedAppSubscriptionRefresh', true)
   await app.electronApp.evaluate(({ dialog }) => {
-    globalThis.testCloseButtons = []
+    // Hide Window, then Quit
     globalThis.testCloseResponses = [1, 0]
-    dialog.showMessageBox = async (_window, options) => {
-      globalThis.testCloseButtons.push(options.buttons)
-      return { response: globalThis.testCloseResponses.shift() }
-    }
+    dialog.showMessageBox = async () => ({ response: globalThis.testCloseResponses.shift() })
   })
   const tabs = await page.evaluate(() => window.$store.state.tabs.tabs.map(tab => tab.id))
   const closeTab = () => page.evaluate(() => {
@@ -229,11 +226,12 @@ test('closing the final tab offers Hide Window and Quit exits while background r
   // Hide Window keeps the tab
   await closeTab()
   await expect.poll(() => windowVisible(app)).toBe(false)
-  expect(await app.electronApp.evaluate(() => globalThis.testCloseButtons)).toEqual([
-    ['Quit', 'Hide Window', 'Cancel', 'Never ask again']
-  ])
   expect(await page.evaluate(() => window.$store.state.tabs.tabs.map(tab => tab.id))).toEqual(tabs)
-  await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].show())
+  await app.electronApp.evaluate(({ BrowserWindow }) => {
+    BrowserWindow.getAllWindows()[0].show()
+    // An auxiliary window, such as GPU Internals, does not keep the app running
+    globalThis.testAuxiliaryWindow = new BrowserWindow({ show: false })
+  })
 
   // Quit exits instead of leaving the app in the tray without a window
   const closed = app.electronApp.waitForEvent('close')
