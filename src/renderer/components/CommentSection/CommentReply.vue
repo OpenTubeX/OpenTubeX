@@ -199,12 +199,13 @@
         <span
           v-if="reply.isHearted"
           class="commentHeartBadge"
+          role="img"
+          :title="$t('Comments.Hearted')"
+          :aria-label="$t('Comments.Hearted')"
         >
           <FtRetryImage
             :fallback-icon="['fas', 'circle-user']"
             :src="channelThumbnail"
-            :title="$t('Comments.Hearted')"
-            :aria-label="$t('Comments.Hearted')"
             class="commentHeartBadgeImg"
             alt=""
           />
