@@ -58,3 +58,29 @@ for (const dismissal of ['dismissed', 'expired']) {
     }
   })
 }
+
+test.describe('timeout indicator', () => {
+  test.use({ seed: { settings: { reducedMotion: 'off' } } })
+
+  test('drains without restyling the page on every frame', { tag: '@performance' }, async ({ page }) => {
+    await page.evaluate(() => window.ftElectron.showToastOnAllTabs('Drain audit', 10000))
+    const clip = page.locator('.timeout-indicator-clip')
+    // Past the hold that waits out the enter transition
+    await expect.poll(() => clip.evaluate(element => element.getAnimations()[0]?.currentTime ?? 0)).toBeGreaterThan(500)
+
+    const session = await page.context().newCDPSession(page)
+    try {
+      await session.send('Performance.enable')
+      const styleCount = async () => (await session.send('Performance.getMetrics')).metrics
+        .find(({ name }) => name === 'RecalcStyleCount').value
+      const before = await styleCount()
+      // A measuring window, not a wait: nothing else runs on the main thread
+      // meanwhile, so a drain the compositor cannot run would restyle the line
+      // on each of the ~30 frames it spans
+      await page.waitForTimeout(500)
+      expect(await styleCount() - before).toBeLessThanOrEqual(3)
+    } finally {
+      await session.detach()
+    }
+  })
+})

@@ -9,11 +9,7 @@
     <path
       class="embeddedProgressPath"
       :d="path"
-      :style="{
-        '--embedded-progress-gap-length': `${pathLength * 2}px`,
-        '--embedded-progress-path-length': `${pathLength}px`,
-        strokeDasharray: `${visibleLength}px ${pathLength * 2}px`,
-      }"
+      :style="{ strokeDasharray: `${visibleLength}px ${pathLength * 2}px` }"
     />
   </svg>
 </template>
@@ -88,6 +84,15 @@ const pathLength = computed(() => {
         (geometry.value.startArcAngle + geometry.value.endArcAngle)
   )
 })
+/**
+ * Distances in px from the inline start and end edges to the outermost painted
+ * points of the line, round caps included, so a clip can sweep across exactly
+ * the part of the box the line covers.
+ */
+const lineInsets = computed(() => ({
+  start: Math.max(0, geometry.value.startInset - props.lineWidth / 2),
+  end: Math.max(0, width.value - geometry.value.endInset - props.lineWidth / 2),
+}))
 const visibleLength = computed(() => pathLength.value * clampedProgress.value / 100)
 
 const path = computed(() => {
@@ -121,6 +126,8 @@ function updateGeometry(entry) {
   width.value = Math.max(1, box ? box.inlineSize : entry.contentRect.width)
   height.value = Math.max(1, box ? box.blockSize : entry.contentRect.height)
 }
+
+defineExpose({ lineInsets })
 
 onMounted(() => {
   resizeObserver = new ResizeObserver(entries => updateGeometry(entries[0]))

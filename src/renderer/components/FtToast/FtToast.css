@@ -122,16 +122,14 @@
 }
 
 /* The timeout indicator always retracts towards the screen corner the toast is
-   anchored to, so it drains away from the viewport rather than towards it. The
-   path is drawn from the inline start corner, which already follows the text
-   direction, so only positions anchored to the opposite physical edge need the
-   other keyframes. Centered toasts keep the reading direction. */
+   anchored to, so it drains away from the viewport rather than towards it.
+   Centered toasts retract towards the corner text starts from. */
 /* stylelint-disable liberty/use-logical-spec */
-.toast-holder.position-bottom-right:dir(ltr),
-.toast-holder.position-top-right:dir(ltr),
-.toast-holder.position-bottom-left:dir(rtl),
-.toast-holder.position-top-left:dir(rtl) {
-  --toast-drain: toast-timeout-away;
+.toast-holder.position-bottom-right,
+.toast-holder.position-top-right,
+.toast-holder:is(.position-bottom-center, .position-top-center):dir(rtl) {
+  --toast-drain: toast-timeout-right;
+  --toast-drain-line: toast-timeout-right-line;
 }
 /* stylelint-enable liberty/use-logical-spec */
 
@@ -482,7 +480,41 @@
 
 :is(.toast-holder, .progress-toast-holder) .timeout-indicator .embeddedProgressPath {
   filter: drop-shadow(0 0 2px color-mix(in srgb, var(--primary-color) 70%, transparent));
+}
 
+/* The drain slides a clip across the line instead of shortening its stroke: the
+   compositor runs transform animations off the main thread, while each frame of
+   a stroke or clip-path animation is restyled and repainted or rerasterized, and
+   stutters whenever the app is busy. The clip moves one way and the line inside
+   it moves back by as much, so the line stays put while the clip's edge sweeps
+   across it. */
+.toast-holder .timeout-indicator-clip {
+  /* Room around the line for its glow, which the clip must not cut off */
+  --toast-indicator-glow: 8px;
+
+  /* The clip is physical, the line's insets are logical */
+  --toast-indicator-left: var(--toast-indicator-start-inset);
+  --toast-indicator-right: var(--toast-indicator-end-inset);
+
+  position: absolute;
+  inset: calc(-1 * var(--toast-indicator-glow));
+  overflow: hidden;
+  animation-name: var(--toast-drain, toast-timeout-left);
+}
+
+.toast-holder .timeout-indicator-clip:dir(rtl) {
+  --toast-indicator-left: var(--toast-indicator-end-inset);
+  --toast-indicator-right: var(--toast-indicator-start-inset);
+}
+
+.toast-holder .timeout-indicator-clip .timeout-indicator {
+  inset: var(--toast-indicator-glow);
+  inline-size: calc(100% - 2 * var(--toast-indicator-glow));
+  block-size: calc(100% - 2 * var(--toast-indicator-glow));
+  animation-name: var(--toast-drain-line, toast-timeout-left-line);
+}
+
+.toast-holder :is(.timeout-indicator-clip, .timeout-indicator-clip .timeout-indicator) {
   /* Hold the line at its full length until the toast has finished animating in,
      so it always appears wrapped around both bottom corners. The corner arcs are
      only a few percent of the path, so without this the trailing arc is already
@@ -494,32 +526,51 @@
      duration. Such a toast is gone before the hold is over, so it just keeps the
      full line for its whole lifetime. */
   animation-duration: max(0s, var(--toast-duration) - var(--toast-transition-duration));
-  animation-name: var(--toast-drain, toast-timeout);
   animation-timing-function: linear;
   animation-fill-mode: forwards;
 }
 
-/* The persistent toast reports real progress, so its line is driven by the
-   `progress` prop rather than by the timeout drain. */
-:is(.toast-holder, .progress-toast-holder) .timeout-indicator.progress-indicator .embeddedProgressPath {
-  animation: none;
-}
+/* Retracts the line into its left end, and finally sweeps it out through the
+   bottom left corner. Percentages are of the clip's own width, which includes
+   the glow on both sides, and of the line's, which does not. */
+@keyframes toast-timeout-left {
+  from {
+    transform: translateX(calc(-1 * (var(--toast-indicator-glow) + var(--toast-indicator-right))));
+  }
 
-/* Shortens the line from its far end, so it retracts into the corner it starts
-   from and the trailing edge finally sweeps out through that corner's arc. */
-@keyframes toast-timeout {
   to {
-    stroke-dasharray: 0 var(--embedded-progress-gap-length);
+    transform: translateX(calc(var(--toast-indicator-glow) + var(--toast-indicator-left) - 100%));
   }
 }
 
-/* The same retraction towards the other corner: offsetting and shortening in
-   lockstep keeps the remaining line pinned to the path's end, with a round cap
-   on both of its ends. */
-@keyframes toast-timeout-away {
+@keyframes toast-timeout-left-line {
+  from {
+    transform: translateX(calc(var(--toast-indicator-glow) + var(--toast-indicator-right)));
+  }
+
   to {
-    stroke-dasharray: 0 var(--embedded-progress-gap-length);
-    stroke-dashoffset: calc(-1 * var(--embedded-progress-path-length));
+    transform: translateX(calc(100% + var(--toast-indicator-glow) - var(--toast-indicator-left)));
+  }
+}
+
+/* The same retraction towards the bottom right corner */
+@keyframes toast-timeout-right {
+  from {
+    transform: translateX(calc(var(--toast-indicator-glow) + var(--toast-indicator-left)));
+  }
+
+  to {
+    transform: translateX(calc(100% - var(--toast-indicator-glow) - var(--toast-indicator-right)));
+  }
+}
+
+@keyframes toast-timeout-right-line {
+  from {
+    transform: translateX(calc(-1 * (var(--toast-indicator-glow) + var(--toast-indicator-left))));
+  }
+
+  to {
+    transform: translateX(calc(var(--toast-indicator-right) - var(--toast-indicator-glow) - 100%));
   }
 }
 
@@ -577,7 +628,7 @@
 /* Sonner holds a toast's timer while the pointer is over the stack, the stack
    has focus, or the window is in the background. The indicator tracks the same
    clock, so it stops with it. */
-.toast-holder .timeout-indicator-track.paused .embeddedProgressPath {
+.toast-holder .timeout-indicator-track.paused :is(.timeout-indicator-clip, .timeout-indicator) {
   animation-play-state: paused;
 }
 

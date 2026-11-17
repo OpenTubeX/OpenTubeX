@@ -62,14 +62,23 @@
       :class="{ paused: isPaused }"
       aria-hidden="true"
     >
-      <FtEmbeddedProgress
-        class="timeout-indicator"
-        :corner-radius="toastProgressRadius"
-        :end-arc-fraction="0.5"
-        :line-width="toastProgressLineWidth"
-        :start-arc-fraction="0.5"
-        :style="{ '--toast-duration': `${toast.duration}ms` }"
-      />
+      <div
+        class="timeout-indicator-clip"
+        :style="{
+          '--toast-duration': `${toast.duration}ms`,
+          '--toast-indicator-start-inset': `${indicatorInsets.start}px`,
+          '--toast-indicator-end-inset': `${indicatorInsets.end}px`,
+        }"
+      >
+        <FtEmbeddedProgress
+          ref="indicator"
+          class="timeout-indicator"
+          :corner-radius="toastProgressRadius"
+          :end-arc-fraction="0.5"
+          :line-width="toastProgressLineWidth"
+          :start-arc-fraction="0.5"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -115,6 +124,9 @@ let pointerMoved = false
 let row = null
 
 const slot = useTemplateRef('slot')
+const indicator = useTemplateRef('indicator')
+/** Where the line starts and ends, for the clip that drains it */
+const indicatorInsets = computed(() => indicator.value?.lineInsets ?? { start: 0, end: 0 })
 
 const showTimeoutIndicator = computed(() => {
   return store.getters.getShowToastTimeoutIndicator && Number.isFinite(props.toast.duration)

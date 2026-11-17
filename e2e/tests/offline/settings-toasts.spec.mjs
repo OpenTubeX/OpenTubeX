@@ -32,10 +32,10 @@ test.describe('settings', () => {
       // The drain waits out the enter transition and then uses up the rest of
       // the toast's lifetime, so it empties just as the toast is dismissed
       await expect(
-        toast.locator('..').locator('.timeout-indicator .embeddedProgressPath')
+        toast.locator('..').locator('.timeout-indicator')
       ).toHaveCSS('animation-duration', '9.7s')
       await expect(
-        toast.locator('..').locator('.timeout-indicator .embeddedProgressPath')
+        toast.locator('..').locator('.timeout-indicator')
       ).toHaveCSS('animation-delay', '0.3s')
       // The row a toast sits in slides it into place, so let that settle before
       // anything measures where the toast ended up
@@ -452,7 +452,7 @@ test.describe('settings', () => {
     })
 
     const toast = page.locator('.toast', { hasText: 'Hover toast' })
-    const indicator = toast.locator('..').locator('.timeout-indicator .embeddedProgressPath')
+    const indicator = toast.locator('..').locator('.timeout-indicator')
 
     /**
      * Reported as a list so a failure says which animations were on the element
@@ -502,8 +502,8 @@ test.describe('settings', () => {
     })
     const firstAlternatingToast = page.locator('.toast', { hasText: 'First alternating toast' })
     const secondAlternatingToast = page.locator('.toast', { hasText: 'Second alternating toast' })
-    const firstIndicator = firstAlternatingToast.locator('..').locator('.timeout-indicator .embeddedProgressPath')
-    const secondIndicator = secondAlternatingToast.locator('..').locator('.timeout-indicator .embeddedProgressPath')
+    const firstIndicator = firstAlternatingToast.locator('..').locator('.timeout-indicator')
+    const secondIndicator = secondAlternatingToast.locator('..').locator('.timeout-indicator')
     await waitForToastsToSettle(page)
 
     // The stack is collapsed until it is hovered, so the toasts behind the front
