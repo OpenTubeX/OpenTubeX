@@ -8,7 +8,7 @@ import { DEFAULT_CUSTOM_THEME } from '../../src/customTheme.js'
 import { DEFAULT_PROFILE_ICON } from '../../src/renderer/helpers/profileIcons.js'
 import { copySubscriptionChannelSettings, getChannelWithUpdatedSettings, getNextSubscriptionSettingsTimestamp, isValidSubscriptionSettingsTimestamp } from '../../src/renderer/helpers/subscription-channels.js'
 import * as subscriptionSync from '../../src/renderer/helpers/subscription-settings-sync.js'
-import { areSyncSettingValuesEqual, mergeSettingEntry, mergeSettingItemsEntry, migrateLegacySyncedSettings, resolveMergedThemeEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
+import { areSyncSettingValuesEqual, isListSetting, mergeSettingEntry, mergeSettingItemsEntry, mergeSettingListEntry, migrateLegacySyncedSettings, resolveMergedThemeEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
 import * as playlistPreferencesSync from '../../src/renderer/helpers/playlist-preferences-sync.js'
 
 const key = subscriptionSync.SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY
@@ -26,6 +26,8 @@ const context = vm.createContext({
   areSyncSettingValuesEqual,
   mergeSettingEntry,
   mergeSettingItemsEntry,
+  isListSetting,
+  mergeSettingListEntry,
   migrateLegacySyncedSettings,
   resolveMergedThemeEntry,
   CUSTOM_THEMES_SYNC_KEY: 'customThemes',
@@ -566,4 +568,56 @@ test('a theme selection waits with its theme when another window changed the the
 
   assert.deepEqual(updates, [])
   assert.deepEqual(client.entries.find(entry => entry.key === 'baseTheme'), remoteSelection)
+})
+
+test('list settings keep items through upload retries, skipped applies, and saves from other windows', async (t) => {
+  const getSyncableSettingKeys = context.getSyncableSettingKeys
+  context.getSyncableSettingKeys = () => ['first', 'forbiddenTitles']
+  t.after(() => { context.getSyncableSettingKeys = getSyncableSettingKeys })
+  const entry = (key, value, updatedAt) => ({ key, value, updatedAt })
+  const createListClient = entries => ({
+    entries,
+    async getSettings() { return structuredClone(this.entries) },
+    async putSettings(value) { this.entries = structuredClone(value) },
+  })
+  const settings = { first: 'local', forbiddenTitles: '["B"]', syncServerSettingsExcluded: [] }
+  // Saved by another window after this sync read the settings
+  let savedElsewhere
+  const store = {
+    state: { profiles: { profileList: [{ subscriptions: [] }] }, settings, utils: { customThemes: [] } },
+    dispatch: async (action, update) => {
+      // Editing Hide Text while sync saves the earlier setting
+      if (action === 'updateFirst') settings.forbiddenTitles = '["A","C"]'
+      const name = action.charAt(6).toLowerCase() + action.slice(7)
+      if (name === 'forbiddenTitles' && savedElsewhere) settings[name] = savedElsewhere
+      settings[name] = typeof update === 'function' ? update(settings[name]) : update
+      return true
+    },
+  }
+
+  // The upload of A and B is rejected because another device removed A meanwhile.
+  let retryBaseline
+  const rejected = await context.syncSettings(createListClient([entry('forbiddenTitles', '["A"]', 5)]), store, {}, null, {
+    onRetryBaseline: getBaseline => { retryBaseline = getBaseline },
+  })
+  assert.equal(settings.forbiddenTitles, '["A","B"]')
+  const retry = createListClient([entry('forbiddenTitles', '[]', 6)])
+  await context.syncSettings(retry, store, rejected, null, { listSnapshot: retryBaseline() })
+  assert.equal(settings.forbiddenTitles, '["B"]', 'The retry must keep the unsent item and the removal')
+
+  settings.forbiddenTitles = '["A"]'
+  const previous = { forbiddenTitles: entry('forbiddenTitles', '["A"]', 10), first: entry('first', 'local', 10) }
+  const client = createListClient([entry('forbiddenTitles', '["A","B"]', 20), entry('first', 'remote', 20)])
+  const skipped = await context.syncSettings(client, store, previous)
+  assert.equal(settings.forbiddenTitles, '["A","C"]')
+  const synced = await context.syncSettings(client, store, skipped)
+  assert.equal(settings.forbiddenTitles, '["A","B","C"]', 'A server item never applied here must not count as removed')
+
+  client.entries.find(item => item.key === 'forbiddenTitles').value = '["A","B","C","E"]'
+  savedElsewhere = '["A","B","C","D"]'
+  const raced = await context.syncSettings(client, store, synced)
+  assert.equal(settings.forbiddenTitles, savedElsewhere, 'Sync must not overwrite a list another window saved meanwhile')
+  savedElsewhere = undefined
+  await context.syncSettings(client, store, raced)
+  assert.equal(settings.forbiddenTitles, '["A","B","C","E","D"]')
 })

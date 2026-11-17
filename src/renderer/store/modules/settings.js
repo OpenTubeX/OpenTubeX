@@ -898,6 +898,11 @@ const customActions = {
   ),
   updateFollowedRssFeeds: ({ commit, state }, update) => updateSharedSetting(commit, state, 'followedRssFeeds', update),
   updateFollowedChannels: ({ commit, state }, update) => updateSharedSetting(commit, state, 'followedChannels', update),
+  updateChannelsHidden: ({ commit, state }, update) => updateSharedSetting(commit, state, 'channelsHidden', update),
+  updateForbiddenTitles: ({ commit, state }, update) => updateSharedSetting(commit, state, 'forbiddenTitles', update),
+  updateSponsorBlockChannelWhitelist: ({ commit, state }, update) => updateSharedSetting(
+    commit, state, 'sponsorBlockChannelWhitelist', update
+  ),
   // The settings saved per channel, as JSON strings
   updateChannelPlaybackSpeeds: ({ commit, state }, update) => updateSharedSetting(commit, state, 'channelPlaybackSpeeds', update),
   updateChannelVideoQualities: ({ commit, state }, update) => updateSharedSetting(commit, state, 'channelVideoQualities', update),

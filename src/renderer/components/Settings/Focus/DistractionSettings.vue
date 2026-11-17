@@ -1037,11 +1037,7 @@ async function findChannelTagInfoWrapper(text) {
 }
 
 async function verifyChannelsHidden() {
-  const channelsHiddenCpy = [...channelsHidden.value]
-
-  for (let i = 0; i < channelsHiddenCpy.length; i++) {
-    const tag = channelsHiddenCpy[i]
-
+  for (const tag of channelsHidden.value) {
     // if channel has been processed and confirmed as non existent, skip
     if (tag.invalid) continue
 
@@ -1050,14 +1046,15 @@ async function verifyChannelsHidden() {
       channelHiderDisabled.value = true
 
       const { preferredName, icon, iconHref, invalidId } = await findChannelTagInfoWrapper(tag.name)
-      if (invalidId) {
-        channelsHiddenCpy[i] = { name: tag.name, invalid: invalidId }
-      } else {
-        channelsHiddenCpy[i] = { name: tag.name, preferredName, icon, iconHref }
-      }
+      const info = invalidId
+        ? { name: tag.name, invalid: invalidId }
+        : { name: tag.name, preferredName, icon, iconHref }
 
-      // update on every tag in case it closes
-      handleChannelsHidden(channelsHiddenCpy)
+      // Update on every tag in case it closes. Patch the saved list, which sync
+      // or another window may have changed during the lookup.
+      await store.dispatch('updateChannelsHidden', saved => JSON.stringify(JSON.parse(saved).map(channel => (
+        (typeof channel === 'string' ? channel : channel.name) === tag.name ? info : channel
+      ))))
     }
   }
 

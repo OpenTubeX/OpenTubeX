@@ -46,8 +46,10 @@ import { getOtherDeviceSessions, getRevokedSyncSessionLogins, mergeSyncSessions 
 import { isValidSyncServerDeviceId } from './sync-server-sessions'
 import {
   areSyncSettingValuesEqual,
+  isListSetting,
   mergeSettingEntry,
   mergeSettingItemsEntry,
+  mergeSettingListEntry,
   migrateLegacySyncedSettings,
   resolveMergedThemeEntry,
 } from './sync-settings-conflict'
@@ -1650,14 +1652,18 @@ const THEME_SELECTION_KEYS = new Set(['baseTheme', 'systemLightTheme', 'systemDa
 
 // `playlistSnapshot` holds the baselines of this sync's playlist merge, which
 // map local playlist IDs to the server's. Without it, playlist preferences stay
-// as the server has them.
-export async function syncSettings(client, store, previousSnapshot = {}, playlistSnapshot = null) {
+// as the server has them. Lists merge against `options.listSnapshot`, and
+// `options.onRetryBaseline` receives a getter for the one a retry after a
+// rejected upload merges them against: the lists this sync applied. The
+// rejected result would drop this device's items the server never received.
+export async function syncSettings(client, store, previousSnapshot = {}, playlistSnapshot = null, { listSnapshot = previousSnapshot, onRetryBaseline } = {}) {
   const remoteEntries = await client.getSettings()
   // Optimistic edits show their value before saving its edit time. Wait for
   // them, then read the local settings without awaiting anything in between.
   for (let pending = settingWritesSettled(); pending; pending = settingWritesSettled()) await pending
   // Migrate the last synced snapshot too, so local edits made before the first sync keep their edit time.
   const previous = migrateLegacySyncedSettings(previousSnapshot)
+  const previousLists = migrateLegacySyncedSettings(listSnapshot)
   const remote = migrateLegacySyncedSettings(Object.fromEntries(remoteEntries.map(entry => [entry.key, entry])))
   // Keep the server's entry order even when devices sync different keys.
   // Reordering unchanged settings would create revisions that wake each other.
@@ -1688,15 +1694,19 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
   // Set when another window changed the themes, so the ones the server's
   // theme selections name may be missing here
   let themesDeferred = false
+  // Lists this sync didn't apply, which keep their previous baseline
+  const skippedLists = new Set()
   for (const [key, value] of Object.entries(local)) {
-    const old = previous[key]
+    const old = isListSetting(key) ? previousLists[key] : previous[key]
     const remoteEntry = remote[key]
     if (themesDeferred && THEME_SELECTION_KEYS.has(key)) {
       if (remoteEntry) merged[key] = remoteEntry
       else delete merged[key]
       continue
     }
-    const mergeEntry = itemKeys.has(key) ? mergeSettingItemsEntry : mergeSettingEntry
+    const mergeEntry = itemKeys.has(key)
+      ? mergeSettingItemsEntry
+      : isListSetting(key) ? mergeSettingListEntry : mergeSettingEntry
     let entry = mergeEntry({
       key,
       value,
@@ -1726,6 +1736,7 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
     const skip = () => {
       if (remoteEntry) merged[key] = remoteEntry
       else delete merged[key]
+      if (isListSetting(key)) skippedLists.add(key)
     }
     if (!valuesEqual && !itemKeys.has(key) && key !== CUSTOM_THEMES_SYNC_KEY && !metadataEquals(currentValue, value)) {
       skip()
@@ -1746,12 +1757,32 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
         }
         store.commit('setCustomThemes', themes)
         await repairCustomThemeReferences(store, previousThemes, themes)
+      } else if (isListSetting(key)) {
+        // Another window may save the list after this sync read it. That edit
+        // or a failed save keeps the server entry, and the next sync merges it.
+        let applied = false
+        const saved = await store.dispatch(settingUpdater(key), current => {
+          applied = metadataEquals(current, value)
+          return applied ? deepCopy(entry.value) : current
+        })
+        if (!applied || saved === false) skip()
       } else {
         await store.dispatch(settingUpdater(key), deepCopy(entry.value))
       }
     }
   }
 
+  onRetryBaseline?.(() => Object.fromEntries(Object.keys(local).filter(isListSetting).flatMap(key => {
+    const entry = skippedLists.has(key) ? previousLists[key] : remote[key]
+    return entry ? [[key, entry]] : []
+  })))
   await client.putSettings(Object.values(merged))
-  return merged
+  if (skippedLists.size === 0) return merged
+  // Items from the server that this device never applied must not count as removed here next time.
+  const snapshot = { ...merged }
+  for (const key of skippedLists) {
+    if (previousLists[key]) snapshot[key] = previousLists[key]
+    else delete snapshot[key]
+  }
+  return snapshot
 }

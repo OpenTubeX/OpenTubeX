@@ -98,6 +98,64 @@ export function mergeSettingEntry({ key, value, old, remoteEntry, localUpdatedAt
   return old ?? { key, value, updatedAt: now }
 }
 
+// Lists whose items devices add and remove one at a time, by how they store an
+// item's identity
+const LIST_SETTINGS = {
+  channelsHidden: { json: true, id: item => typeof item === 'string' ? item : item?.name },
+  forbiddenTitles: { json: true, id: item => item },
+  sponsorBlockChannelWhitelist: { json: false, id: item => item },
+}
+
+export function isListSetting(key) {
+  return Object.hasOwn(LIST_SETTINGS, key)
+}
+
+function parseListSetting(key, value) {
+  if (!LIST_SETTINGS[key].json) return Array.isArray(value) ? value : null
+  try {
+    const list = JSON.parse(value)
+    return Array.isArray(list) ? list : null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Merges a list setting, such as Hide Channels, by item against the last
+ * synced list, so items added or removed on two devices before they synced are
+ * all kept. Without a synced list, both devices' items are kept.
+ */
+export function mergeSettingListEntry(options) {
+  const { key, value, old, remoteEntry, localUpdatedAt, now } = options
+  const local = parseListSetting(key, value)
+  const remote = remoteEntry && parseListSetting(key, remoteEntry.value)
+  const base = old ? parseListSetting(key, old.value) : []
+  if (!local || !remote || !base) return mergeSettingEntry(options)
+
+  const { id, json } = LIST_SETTINGS[key]
+  const baseItems = new Map(base.map(item => [id(item), item]))
+  const localItems = new Map(local.map(item => [id(item), item]))
+  const merged = new Map(remote.map(item => [id(item), item]))
+  for (const itemId of baseItems.keys()) {
+    if (!localItems.has(itemId)) merged.delete(itemId)
+  }
+  for (const [itemId, item] of localItems) {
+    // Added here, or edited here (such as a fetched channel name) and still on the server
+    if (!baseItems.has(itemId) ||
+        (merged.has(itemId) && !areJsonValuesEqual(item, baseItems.get(itemId)))) {
+      merged.set(itemId, item)
+    }
+  }
+
+  const list = [...merged.values()]
+  if (areJsonValuesEqual(list, remote)) return remoteEntry
+  return {
+    key,
+    value: json ? JSON.stringify(list) : list,
+    updatedAt: Math.max(localUpdatedAt ?? now, remoteEntry.updatedAt),
+  }
+}
+
 /**
  * Merges a virtual setting that holds `{ value, updatedAt }` records per item,
  * such as a channel or playlist, so edits to different items on two devices
