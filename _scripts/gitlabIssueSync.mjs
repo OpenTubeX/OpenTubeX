@@ -24,7 +24,9 @@ const repository = 'OpenTubeX/OpenTubeX'
 const mediaRepository = 'OpenTubeX/media'
 const mediaRelease = 'gitlab-uploads'
 const imageExtensions = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'avif']
-const githubBot = 'github-actions[bot]'
+// The sync posted as github-actions[bot] and the d3sox GitLab account before it had its own bots.
+const githubBots = ['opentubex-gitlab-sync[bot]', 'github-actions[bot]']
+const formerGitlabAuthor = 3150127
 const prefix = 'opentubex-sync'
 const marker = (kind, id) => `<!-- ${prefix}:${kind}:${id} -->`
 class SyncError extends Error {}
@@ -167,7 +169,8 @@ function commentBody(comment, side, issue, references, mirrored) {
   const url = gitlab ? `${issue.web_url}#note_${comment.id}` : comment.html_url
   const header = `${marker(side, comment.id)}\n${content(author)} on [${gitlab ? 'GitLab' : 'GitHub'}](${url}):`
   const body = references(content(comment.body, gitlab, mirrored), side)
-  return gitlab ? githubBody(header, body) : `${header}\n\n${body}`
+  // GitLab drops trailing whitespace, so an untrimmed copy would never compare as unchanged.
+  return gitlab ? githubBody(header, body) : `${header}\n\n${body}`.trimEnd()
 }
 
 function referenceResolver(sources, targets) {
@@ -181,7 +184,7 @@ function referenceResolver(sources, targets) {
     github.set(`#${target.number}`, target)
   }
   for (const target of targets) {
-    const source = !target.pull_request && target.user.login === githubBot && gitlab.get(`#${markedId(target.body, 'issue')}`)
+    const source = !target.pull_request && githubBots.includes(target.user.login) && gitlab.get(`#${markedId(target.body, 'issue')}`)
     if (source) pair(source, target)
   }
   // GitLab's importer renumbers issues. A unique issue title is evidence of
@@ -361,9 +364,11 @@ export async function list(client, side, path) {
   }
 }
 
+const bySync = (note, bot) => note.author.id === bot.id || note.author.id === formerGitlabAuthor
+
 // GitLab notes written by people, excluding the sync's own copies and backlinks.
 const gitlabNote = (note, bot) => !note.system && !note.internal && !note.confidential &&
-  !(note.author.id === bot.id && (markedId(note.body, 'github') || markedId(note.body, 'link')))
+  !(bySync(note, bot) && (markedId(note.body, 'github') || markedId(note.body, 'link')))
 
 export async function sync(client) {
   const glBase = `projects/${encodeURIComponent(project)}/issues`
@@ -374,7 +379,7 @@ export async function sync(client) {
   // Merge-request references use direct links; issue sync needs no MR API access.
   const references = referenceResolver(sources, allTargets)
   const targets = allTargets
-    .filter(issue => !issue.pull_request && issue.user.login === githubBot)
+    .filter(issue => !issue.pull_request && githubBots.includes(issue.user.login))
   let synced = 0
   const failures = []
   const prepared = []
@@ -388,7 +393,8 @@ export async function sync(client) {
       const glIssue = `${glBase}/${source.iid}`
       const notes = await list(client, 'gl', `${glIssue}/notes?sort=asc&order_by=created_at`)
       await media.add([source.description, ...notes.filter(note => gitlabNote(note, bot)).map(note => note.body)])
-      const link = notes.find(note => note.author.id === bot.id && markedId(note.body, 'link'))
+      // The newest backlink wins, since the bot replaces ones it cannot edit.
+      const link = notes.findLast(note => bySync(note, bot) && markedId(note.body, 'link'))
       const linkedNumber = link && Number(markedId(link.body, 'link'))
       let target = linkedNumber
         ? targets.find(issue => issue.number === linkedNumber)
@@ -429,16 +435,17 @@ export async function sync(client) {
           await client.gl(glIssue, 'PUT', { state_event: state === 'closed' ? 'close' : 'reopen' })
         }
       }
-      const backlink = linkBody(target, state)
-      if (!link) {
-        await client.gl(`${glIssue}/notes`, 'POST', { body: backlink })
-      } else if (link.body !== backlink) {
-        await client.gl(`${glIssue}/notes/${link.id}`, 'PUT', { body: backlink })
+      // Only authors can edit notes, so the bot posts a new one in place of the former account's.
+      const save = async (note, body) => {
+        if (note?.body === body) return
+        if (note?.author.id === bot.id) await client.gl(`${glIssue}/notes/${note.id}`, 'PUT', { body })
+        else await client.gl(`${glIssue}/notes`, 'POST', { body })
       }
+      await save(link, linkBody(target, state))
       const comments = await list(client, 'gh', `${ghBase}/${target.number}/comments`)
       for (const note of notes) {
         if (!gitlabNote(note, bot)) continue
-        const existing = comments.find(comment => comment.user.login === githubBot &&
+        const existing = comments.find(comment => githubBots.includes(comment.user.login) &&
           markedId(comment.body, 'gitlab') === String(note.id))
         const body = commentBody(note, 'gitlab', source, references.rewrite, media.url)
         if (!existing) {
@@ -448,15 +455,9 @@ export async function sync(client) {
         }
       }
       for (const comment of comments) {
-        if (comment.user.login === githubBot && markedId(comment.body, 'gitlab')) continue
-        const existing = notes.find(note => note.author.id === bot.id &&
-          markedId(note.body, 'github') === String(comment.id))
-        const body = commentBody(comment, 'github', source, references.rewrite)
-        if (!existing) {
-          await client.gl(`${glIssue}/notes`, 'POST', { body })
-        } else if (existing.body !== body) {
-          await client.gl(`${glIssue}/notes/${existing.id}`, 'PUT', { body })
-        }
+        if (githubBots.includes(comment.user.login) && markedId(comment.body, 'gitlab')) continue
+        const existing = notes.findLast(note => bySync(note, bot) && markedId(note.body, 'github') === String(comment.id))
+        await save(existing, commentBody(comment, 'github', source, references.rewrite))
       }
       synced++
     } catch (error) {

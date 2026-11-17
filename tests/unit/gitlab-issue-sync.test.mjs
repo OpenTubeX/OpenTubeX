@@ -25,6 +25,8 @@ function fixture() {
   const copy = value => structuredClone(value)
   const client = Object.fromEntries(['gl', 'gh'].map(side => [side, async (path, method = 'GET', body) => {
     const route = path.split('?')[0]
+    // GitLab drops trailing whitespace from notes.
+    if (side === 'gl' && typeof body?.body === 'string') body = { ...body, body: body.body.trimEnd() }
     if (method !== 'GET') state.writes.push({ side, route, method, body })
     if (side === 'gl' && route === 'user') return { id: 99 }
     assert.ok(!route.includes('/merge_requests'), 'Issue sync must not query GitLab merge requests')
@@ -40,7 +42,7 @@ function fixture() {
         ...body,
         state: 'open',
         html_url: `https://github.com/OpenTubeX/OpenTubeX/issues/${id}`,
-        user: { login: 'github-actions[bot]' },
+        user: { login: 'opentubex-gitlab-sync[bot]' },
         author: { id: 99, username: 'sync-bot' }
       }
       items.push(created)
@@ -131,6 +133,27 @@ test('user-supplied sync markers cannot suppress comments or forge a backlink', 
   assert.deepEqual(state.writes, [])
 })
 
+test('keeps reports mirrored by the former accounts and replaces notes the bot cannot edit', async () => {
+  const { state, client } = fixture()
+  const former = { id: 3150127, username: 'former' }
+  state.targets.push({ number: 50, title: 'Report', state: 'open', body: '<!-- opentubex-sync:issue:1 -->', user: { login: 'github-actions[bot]' }, html_url: 'https://github.com/OpenTubeX/OpenTubeX/issues/50' })
+  state.comments.push({ id: 20, body: 'Reply\n', user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+  await sync(client)
+  // Copies made by the former account, as they were before this run.
+  const notes = state.notes.map(note => ({ ...note, author: former }))
+  state.notes = notes
+  state.targets[0].state = 'closed'
+  state.writes = []
+  await sync(client)
+  assert.equal(state.targets.length, 1)
+  assert.equal(state.comments.length, 1)
+  assert.deepEqual(state.writes.map(write => `${write.side} ${write.method} ${write.route}`), ['gl PUT projects/opentubex%2FOpenTubeX/issues/1', 'gl POST projects/opentubex%2FOpenTubeX/issues/1/notes'])
+  assert.match(state.notes.at(-1).body, /state:closed/)
+  state.writes = []
+  await sync(client)
+  assert.deepEqual(state.writes, [])
+})
+
 test('omits missing, confidential, and ambiguous counterparts without leaking private titles', async () => {
   const { state, client } = fixture()
   state.sources.push({ ...state.sources[0], iid: 2, title: 'Duplicate', imported: true, imported_from: 'github', web_url: 'https://gitlab.com/issue/2' },
@@ -199,7 +222,8 @@ test('the privileged workflow job runs only on the canonical default branch', as
     assert.equal(run({ ...linkedIssue, user: { login: 'reporter' } }), false)
     assert.equal(run({ ...linkedIssue, body: 'Unlinked issue' }), false)
     assert.equal(run({ ...linkedIssue, body: null }), false)
-    assert.equal(run(linkedIssue, 'github-actions[bot]'), false)
+    assert.equal(run({ ...linkedIssue, user: { login: 'opentubex-gitlab-sync[bot]' } }), true)
+    assert.equal(run(linkedIssue, 'opentubex-gitlab-sync[bot]'), false)
     assert.equal(canRun('other/fork', 'refs/heads/development', eventName, linkedIssue), false)
     assert.equal(canRun('OpenTubeX/OpenTubeX', 'refs/heads/feature', eventName, linkedIssue), false)
   }
