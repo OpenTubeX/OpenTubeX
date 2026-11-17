@@ -29,7 +29,7 @@
         role="tablist"
         :aria-labelledby="headingId"
       >
-        <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
+        <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -- the tabs use a roving tabindex, which the rule can't see -->
         <div
           v-for="tab in TABS"
           :id="`${panelId}-${tab}`"
