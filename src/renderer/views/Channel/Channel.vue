@@ -1176,7 +1176,7 @@ async function getChannelAboutLocal() {
 
       videoCount.value = null
 
-      joined.value = about.joined_date.isEmpty() ? 0 : Date.parse(about.joined_date.text.replace('Joined').trim())
+      joined.value = about.joined_date.isEmpty() ? 0 : Date.parse(about.joined_date.text.replace('Joined', '').trim())
 
       location.value = about.country.isEmpty() ? null : about.country.text
     } else {
@@ -1188,7 +1188,7 @@ async function getChannelAboutLocal() {
       const videoCount_ = extractNumberFromString(about.metadata.video_count)
       videoCount.value = isNaN(videoCount_) ? null : videoCount_
 
-      joined.value = about.metadata.joined_date && !about.metadata.joined_date.isEmpty() ? Date.parse(about.metadata.joined_date.text.replace('Joined').trim()) : 0
+      joined.value = about.metadata.joined_date && !about.metadata.joined_date.isEmpty() ? Date.parse(about.metadata.joined_date.text.replace('Joined', '').trim()) : 0
 
       location.value = about.metadata.country ?? null
     }
