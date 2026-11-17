@@ -1210,7 +1210,7 @@ test.describe('OpenTubeX sync server', () => {
     })
 
     test('requires confirmation before an empty remote deletes local data', async ({ app, page }, testInfo) => {
-      const username = `opentubex-reset-guard-${Date.now()}-${Math.random().toString(16).slice(2)}`
+      const username = `opentubex-reset-guard-${randomUUID()}`
 
       await page.route('**/health', route => route.fulfill({
         contentType: 'application/json',
