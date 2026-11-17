@@ -1527,6 +1527,26 @@ test('bookmark upload conflicts persist the merged baseline and local bookmarks'
   assert.deepEqual(Array.from(f.settings.playlistBookmarks, item => item.playlist.id).sort(), ['local', 'remote'])
 })
 
+test('a failed upload after a bookmark conflict keeps unsent bookmarks out of the baseline', async () => {
+  const local = bookmarks.createPlaylistBookmark({ id: 'local', title: 'Local', uploaderId: 'channel', uploaderName: 'Channel', savedAt: 123 })
+  const remote = bookmarks.createPlaylistBookmark({ id: 'remote', title: 'Remote', uploaderId: 'channel', uploaderName: 'Channel', savedAt: 456 })
+  let uploads = 0
+  const f = fixture({ syncServerSyncSubscriptions: false, syncServerSyncPlaylists: true, playlistBookmarks: [local] }, {
+    encrypted: true,
+    respond: async (url, options) => {
+      if (!url.endsWith('/encrypted_sync/playlistBookmarks')) return undefined
+      if (options.method === 'PUT') return new Response('{}', { status: ++uploads === 1 ? 409 : 503 })
+      if (!uploads) return { revision: 0, payload: null }
+      return { revision: 1, payload: await privacy.encryptSyncDocument([bookmarks.playlistBookmarkForSync(remote)], f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt) }
+    },
+  })
+  await assert.rejects(f.actions.syncWithSyncServer(f.context))
+  assert.equal(uploads, 2)
+  assert.deepEqual(Array.from(f.settings.playlistBookmarks, item => item.playlist.id).sort(), ['local', 'remote'])
+  // The server never received the local bookmark, so the next sync uploads it instead of removing it.
+  assert.deepEqual(JSON.parse(f.settings.syncServerSnapshot).playlistBookmarks, ['remote'])
+})
+
 test('a shared tab closed during an upload conflict stays closed', async () => {
   const first = { sessionId: 'first', updatedAt: 1, tabs: [{ route: '/first' }] }
   const second = { sessionId: 'second', updatedAt: 5, tabs: [{ route: '/second' }] }

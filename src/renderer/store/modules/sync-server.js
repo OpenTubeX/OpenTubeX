@@ -969,13 +969,19 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
                 })
                 retryDocument.playlistBookmarks = data
                 const retryClient = new EncryptedSyncAdapter(retryDocument)
+                const appliedBaseline = retryBaselines.playlistBookmarks
                 next.playlistBookmarks = await syncPlaylistBookmarks(
-                  retryClient, store, next.playlistBookmarks, {
-                    allowDataLoss,
-                    deletions,
-                    onRetryBaseline: getBaseline => { retryBaselines.playlistBookmarks = getBaseline },
-                  }
+                  retryClient, store, next.playlistBookmarks, { allowDataLoss, deletions }
                 )
+                // The conflict merge also holds unsent local bookmarks, so only
+                // the downloaded ones this retry applied join the baseline.
+                const downloadedIds = (Array.isArray(remoteData) ? remoteData : [])
+                  .map(bookmark => bookmark?.playlist?.id)
+                  .filter(id => typeof id === 'string')
+                retryBaselines.playlistBookmarks = () => Array.from(new Set([
+                  ...(appliedBaseline?.() ?? previous.playlistBookmarks ?? []),
+                  ...downloadedIds,
+                ]))
                 result.playlistBookmarks = next.playlistBookmarks.length
                 data = retryClient.document.playlistBookmarks
                 changes = retryClient
