@@ -794,7 +794,8 @@ export function startTwitchLiveNotifications() {
   let stopped = false
   let timer = null
   let lastCheck = 0
-  let checking = false
+  /** @type {Promise<void> | null} */
+  let running = null
   let checkAgain = false
 
   // One check at a time. A check requested during another, such as after a
@@ -802,12 +803,11 @@ export function startTwitchLiveNotifications() {
   const check = async () => {
     clearTimeout(timer)
     timer = null
-    if (checking) {
+    if (running) {
       checkAgain = true
       return
     }
-    checking = true
-    try {
+    running = (async () => {
       do {
         checkAgain = false
         const configuration = getLiveConfiguration()
@@ -816,9 +816,8 @@ export function startTwitchLiveNotifications() {
           await checkLiveStreams(configuration)
         }
       } while (checkAgain)
-    } finally {
-      checking = false
-    }
+    })().finally(() => { running = null })
+    await running
     if (!stopped) timer = setTimeout(check, LIVE_CHECK_INTERVAL_MS)
   }
   // The checks pause while the app is hidden, and catch up when it returns
@@ -845,7 +844,10 @@ export function startTwitchLiveNotifications() {
     stopBackgroundChecks = store.watch(checksWhileClosed, enabled => setPeriodicBackgroundTask('twitchLive', enabled), { immediate: true })
     // While the app is hidden, but not yet closed
     onPeriodicBackgroundTask(async () => {
-      if (!stopped && !checking && checksWhileClosed()) await checkLiveStreams(getLiveConfiguration())
+      if (stopped || !checksWhileClosed()) return
+      // A check that started before the app was hidden keeps the app awake until it ends.
+      if (running) await running
+      else await checkLiveStreams(getLiveConfiguration())
     })
   }
   if (process.env.IS_ELECTRON) {

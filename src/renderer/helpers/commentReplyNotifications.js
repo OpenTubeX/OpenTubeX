@@ -423,12 +423,15 @@ function checksWhileClosed() {
   return isAndroid && isCommentWatchingEnabled() && store.getters.getEnableClosedAppSubscriptionRefresh
 }
 
-/** Checks the watched comments, unless a check already runs. */
+let activeCheck = null
+
+/** Checks the watched comments, or waits for the check that already runs here. */
 function checkOnce() {
   // Windows of the desktop app share the watched comments, so one checks them.
-  return navigator.locks.request(LOCK_NAME, { ifAvailable: true }, async lock => {
+  activeCheck ??= navigator.locks.request(LOCK_NAME, { ifAvailable: true }, async lock => {
     if (lock) await checkThreads()
-  })
+  }).finally(() => { activeCheck = null })
+  return activeCheck
 }
 
 /**

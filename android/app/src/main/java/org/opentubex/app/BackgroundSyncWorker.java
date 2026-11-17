@@ -84,6 +84,9 @@ public final class BackgroundSyncWorker extends Worker {
         if (getInputData().getBoolean(REQUEST_SYNC_INPUT, false)) {
             // The visible renderer runs its tasks by itself.
             if (AppVisibility.isVisible()) return Result.success();
+            // The tasks' requests go through the app's proxy relay, whose kept-alive
+            // tunnels the server may have closed while the app was frozen.
+            AndroidProxy.closeStaleTunnels(AndroidProxyRelay.clock.getAsLong());
             // After the app was closed, a hidden renderer runs them in its place.
             if (!BackgroundSyncPlugin.hasRenderer()) {
                 try {
