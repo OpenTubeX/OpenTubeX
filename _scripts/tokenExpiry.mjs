@@ -23,7 +23,8 @@ async function json(url, headers) {
   return { status: response.status, body: await response.json().catch(() => ({})) }
 }
 
-// Each check returns { expires: Date | null } or { problem: string } when the secret no longer works.
+// Each check returns { expires: Date | null }, { problem: string } when the secret no longer works,
+// or { unknown: string } when its expiry cannot be read.
 export const checks = {
   async github(token) {
     try {
@@ -36,6 +37,8 @@ export const checks = {
   },
   async gitlab(token) {
     const { status, body } = await json('https://gitlab.com/api/v4/personal_access_tokens/self', { 'PRIVATE-TOKEN': token })
+    // Tokens without an API scope may not read their own details.
+    if (status === 403) return { unknown: 'its scopes cannot read its expiry' }
     if (status !== 200) return { problem: `GitLab rejects it (HTTP ${status})` }
     // GitLab tokens stop working at the start of their expiry date.
     return { expires: body.expires_at ? new Date(`${body.expires_at}T00:00:00Z`) : null }
@@ -117,7 +120,8 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     const result = await checks[kind](secrets[name])
     const date = result.expires?.toISOString().slice(0, 10)
     const soon = result.expires && result.expires - Date.now() < warnDays * day
-    console.log(`${name}: ${result.problem ?? (date ? `expires ${date}` : 'does not expire')}`)
+    console.log(`${name}: ${result.problem ?? result.unknown ?? (date ? `expires ${date}` : 'does not expire')}`)
+    if (result.unknown) continue
     if (result.problem || soon) {
       if (issue) continue
       const status = result.problem
