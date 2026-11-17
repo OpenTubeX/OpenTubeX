@@ -13,7 +13,7 @@ Paste: Colar
 Delete: Eliminar
 Select all: Selecionar tudo
 Toggle Developer Tools: Comutar ferramentas de desenvolvimento
-Actual size: Tamanho real
+Actual size: Tamanho Real
 Zoom in: Ampliar
 Zoom out: Reduzir
 Toggle fullscreen: Comutar ecrã completo
@@ -73,9 +73,9 @@ Search Filters:
     '> 20 minutes': '> 20 minutos'
     '3 - 20 minutes': 3 - 20 minutos
   Search Results: Resultados
-  Fetching results. Please wait: A procurar. Por favor aguarde...
+  Fetching results. Please wait: A procurar. Por favor aguarde
   Fetch more results: Obter mais resultados
-  There are no more results for this search: Não existem mais resultados
+  There are no more results for this search: '> 20 minutos'
 # Sidebar
   Features:
     Subtitles: Legendas
@@ -90,6 +90,8 @@ Search Filters:
     360 Video: Vídeo 360
     VR180: VR180
   Clear Filters: Limpar filtros
+  Search only for: Pesquisar apenas {query}
+  Did you mean: Quis dizer {query}?
 Subscriptions:
     # On Subscriptions Page
   Subscriptions: Subscrições
@@ -1125,3 +1127,58 @@ Compact side navigation: Navegação lateral compacta
 Expand side navigation: Expandir navegação lateral
 Screenshot Clipboard Success: Captura de ecrã guardada para a área de transferência
 Screenshot Clipboard Error: Falha ao guardar a captura de ecrã para a área de transferência
+New Tab: Novo separador
+Color Picker:
+  Hue: Matiz
+  Opacity: Opacidade
+  Backdrop Blur: Desfocagem do fundo
+  Hex Color: Cor hexadecimal
+  Apply Color: Aplicar
+  Reset Color: Repor
+  Copy Color: Copiar
+  Copy From Another Color: Copiar de outra cor
+  Color Copied: Cor copiada
+  Invalid Color: Introduza uma cor hexadecimal válida
+  Clipboard Unavailable: Área de transferência indisponível
+  Saturation and Brightness: Saturação e luminosidade
+Maximize: Maximizar
+Restore: Restaurar
+Close Tab: Fechar separador
+App Menu:
+  About App: Acerca do {appName}
+  Services: Serviços
+  Hide App: Ocultar {appName}
+  Hide Others: Ocultar outros
+  Show All: Mostrar tudo
+  Quit App: Sair do {appName}
+  Reopen Closed Window: Reabrir janela fechada
+  Paste and Match Style: Colar e ajustar estilo
+  View: Ver
+  Enter Inspect Element Mode: Entrar no modo de inspeção de elementos
+  GPU Internals: Informações internas da GPU (chrome://gpu)
+  Navigate: Navegar
+  Next Tab: Separador seguinte
+  Previous Tab: Separador anterior
+  Help: Ajuda
+Close Confirmation:
+  Title: Sair do OpenTubeX?
+  Message: Tem a certeza de que pretende sair do OpenTubeX?
+  Background Sync Warning: Sair irá interromper a atualização de subscrições em segundo plano.
+  Hide Window: Ocultar janela
+  Quit: Sair
+  Never Ask Again: Não voltar a perguntar
+Older Version Changes:
+  Title: Alterações de uma versão anterior
+  Message: As alterações que fez numa versão anterior do OpenTubeX foram aplicadas à sua biblioteca.
+  Detail: Se um item foi alterado nas duas versões, foi mantida a alteração da versão anterior. Existe uma cópia de segurança da sua biblioteca anterior na pasta do perfil.
+Library Format Changed:
+  Title: Biblioteca transferida para um novo formato
+  Message: A sua biblioteca usa agora um novo formato de armazenamento.
+  Detail: As versões anteriores do OpenTubeX ainda podem abrir a sua biblioteca, mas mostram-na como estava antes desta atualização. As alterações que fizer numa versão anterior são adicionadas quando voltar a esta versão.
+Close Window Confirmation:
+  Title: Fechar a janela?
+  Message: Esta janela contém {count} separador. Tem a certeza de que pretende fechá-la? | Esta janela contém {count} separadores. Tem a certeza de que pretende fechá-la?
+  Close Window: Fechar janela
+Confirmations:
+  Never Ask Again: Não voltar a perguntar
+  Settings Hint: Pode reativar esta confirmação em Definições → Geral → Confirmar antes de…
