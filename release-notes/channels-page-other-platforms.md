@@ -2,7 +2,7 @@
 category: improvement
 ---
 
-The Channels page now also lists the channels you follow on other platforms, with a platform selector that can show every platform together. They moved there from the subscription settings, and the page shows the number of channels beside its title.
+The Channels page now also lists the channels you follow on other platforms, with a platform selector that can show every platform together. They moved there from the subscription settings. Pasting a channel's address into its search field follows the channel.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/1b4bee22-d013-43f4-a251-99a66ab2ac75">

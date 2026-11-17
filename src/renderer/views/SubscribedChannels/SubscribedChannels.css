@@ -30,7 +30,6 @@
   align-items: center;
   justify-content: flex-end;
   gap: calc(16px + var(--channels-field-label-outset)) 16px;
-  container: channel-controls / inline-size;
 
   /* The outlined labels sit above the fields. */
   margin-block-start: calc(var(--channels-heading-gap) + var(--channels-field-label-outset));
@@ -39,6 +38,7 @@
 .channelSearch {
   --input-bottom-spacing: 0;
 
+  position: relative;
   flex: 1;
   min-inline-size: 0;
 }
@@ -89,26 +89,6 @@
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
-}
-
-.channelInput {
-  --input-bottom-spacing: 0;
-
-  position: relative;
-  flex-basis: 100%;
-}
-
-/* Shares the row with the search and sort fields when both fields stay wide enough */
-@container channel-controls (width >= 760px) {
-  .channelInput {
-    flex: 1;
-    min-inline-size: 0;
-  }
-}
-
-.channelInput :deep(.ft-input-component) {
-  inline-size: 100%;
-  margin-block: 0;
 }
 
 /* Runs along the inside of the field's bottom border, clear of its rounded corners */

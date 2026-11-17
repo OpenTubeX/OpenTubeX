@@ -265,7 +265,7 @@ Subscriptions:
     Followed Channels: Κανάλια που ακολουθείτε σε άλλες πλατφόρμες
     Description: Ακολουθήστε κανάλια στα Twitch, SoundCloud, PeerTube, Rumble, Odysee και media.ccc.de για να βλέπετε τις νέες τους αναρτήσεις στην καρτέλα «Πλατφόρμες» των συνδρομών σας. Βρείτε κανάλια με την αναζήτηση ή προσθέστε τα με τη διεύθυνση της σελίδας τους. Το περιεχόμενό τους αναπαράγεται με το yt-dlp.
     Add Channel: Προσθήκη καναλιού
-    Channel URL: Διεύθυνση καναλιού
+    Search Or Paste Channel: Αναζητήστε ή επικολλήστε τη διεύθυνση ενός καναλιού
     Invalid Channel: Εισαγάγετε τη διεύθυνση της σελίδας ενός καναλιού στα Twitch, SoundCloud, PeerTube, Rumble, Odysee ή media.ccc.de.
     Channel Not Found: Δεν υπάρχει κανάλι σε αυτή τη διεύθυνση.
     Channel Already Followed: Ακολουθείτε ήδη αυτό το κανάλι.

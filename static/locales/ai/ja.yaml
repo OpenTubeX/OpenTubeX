@@ -265,7 +265,7 @@ Subscriptions:
     Followed Channels: 他のプラットフォームでフォロー中のチャンネル
     Description: Twitch、SoundCloud、PeerTube、Rumble、Odysee、media.ccc.de のチャンネルをフォローすると、その投稿が登録チャンネルの「プラットフォーム」タブに表示されます。チャンネルは検索で見つけるか、ページのアドレスで追加できます。メディアは yt-dlp で再生されます。
     Add Channel: チャンネルを追加
-    Channel URL: チャンネルのアドレス
+    Search Or Paste Channel: 検索するか、チャンネルのアドレスを貼り付け
     Invalid Channel: Twitch、SoundCloud、PeerTube、Rumble、Odysee、media.ccc.de のチャンネルページのアドレスを入力してください。
     Channel Not Found: このアドレスにチャンネルはありません。
     Channel Already Followed: このチャンネルは既にフォローしています。

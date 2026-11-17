@@ -299,7 +299,7 @@ Subscriptions:
     Followed Channels: Sekami kanalai kitose platformose
     Description: Sekite kanalus Twitch, SoundCloud, PeerTube, Rumble, Odysee ir media.ccc.de platformose, kad jų įkeltą turinį matytumėte savo prenumeratų skirtuke „Platformos“. Raskite kanalus paieška arba pridėkite juos pagal jų puslapio adresą. Jų medija atkuriama naudojant yt-dlp.
     Add Channel: Pridėti kanalą
-    Channel URL: Kanalo adresas
+    Search Or Paste Channel: Ieškokite arba įklijuokite kanalo adresą
     Invalid Channel: Įveskite kanalo puslapio adresą Twitch, SoundCloud, PeerTube, Rumble, Odysee arba media.ccc.de platformoje.
     Channel Not Found: Šiuo adresu kanalo nėra.
     Channel Already Followed: Jūs jau sekate šį kanalą.

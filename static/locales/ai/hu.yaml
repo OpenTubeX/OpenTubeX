@@ -265,7 +265,7 @@ Subscriptions:
     Followed Channels: Követett csatornák más platformokon
     Description: Kövessen csatornákat a Twitch, SoundCloud, PeerTube, Rumble, Odysee és media.ccc.de platformon, hogy feltöltéseiket a feliratkozásai Platformok lapján lássa. Keressen csatornákat a keresővel, vagy adja hozzá őket az oldaluk címével. Médiatartalmaik a yt-dlp segítségével játszhatók le.
     Add Channel: Csatorna hozzáadása
-    Channel URL: Csatorna címe
+    Search Or Paste Channel: Keressen, vagy illesszen be egy csatornacímet
     Invalid Channel: Adja meg egy Twitch-, SoundCloud-, PeerTube-, Rumble-, Odysee- vagy media.ccc.de-csatornaoldal címét.
     Channel Not Found: Ezen a címen nincs csatorna.
     Channel Already Followed: Már követi ezt a csatornát.

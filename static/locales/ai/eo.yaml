@@ -289,7 +289,7 @@ Subscriptions:
     Followed Channels: Sekvataj kanaloj en aliaj platformoj
     Description: Sekvu kanalojn en Twitch, SoundCloud, PeerTube, Rumble, Odysee kaj media.ccc.de por vidi iliajn alŝutaĵojn en la langeto Platformoj de viaj abonoj. Trovu kanalojn per la serĉo, aŭ aldonu ilin per la adreso de ilia paĝo. Iliaj aŭdvidaĵoj ludiĝas per yt-dlp.
     Add Channel: Aldoni kanalon
-    Channel URL: Adreso de kanalo
+    Search Or Paste Channel: Serĉu aŭ algluu adreson de kanalo
     Invalid Channel: Enigu la adreson de kanala paĝo en Twitch, SoundCloud, PeerTube, Rumble, Odysee aŭ media.ccc.de.
     Channel Not Found: Ne estas kanalo ĉe ĉi tiu adreso.
     Channel Already Followed: Vi jam sekvas ĉi tiun kanalon.

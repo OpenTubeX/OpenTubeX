@@ -284,7 +284,7 @@ Subscriptions:
     Followed Channels: کانال‌های دنبال‌شده در پلتفرم‌های دیگر
     Description: کانال‌هایی را در Twitch، SoundCloud، PeerTube، Rumble، Odysee و media.ccc.de دنبال کنید تا محتوای بارگذاری‌شدهٔ آن‌ها را در زبانهٔ پلتفرم‌ها در اشتراک‌هایتان ببینید. کانال‌ها را با جستجو پیدا کنید یا با نشانی صفحه‌شان اضافه کنید. رسانه‌های آن‌ها با yt-dlp پخش می‌شوند.
     Add Channel: افزودن کانال
-    Channel URL: نشانی کانال
+    Search Or Paste Channel: جست‌وجو کنید یا نشانی یک کانال را جای‌گذاری کنید
     Invalid Channel: نشانی صفحهٔ یک کانال در Twitch، SoundCloud، PeerTube، Rumble، Odysee یا media.ccc.de را وارد کنید.
     Channel Not Found: در این نشانی کانالی وجود ندارد.
     Channel Already Followed: شما از قبل این کانال را دنبال می‌کنید.

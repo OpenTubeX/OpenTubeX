@@ -211,7 +211,7 @@ test.describe('Channels on other platforms', () => {
   test.describe('with a followed channel', () => {
     test.use({ seed: { settings: { ...SETTINGS, followedChannels: [followed(CHANNEL)] } } })
 
-    test('adds and removes channels on the channels page and refreshes the tab', async ({ page }) => {
+    test('adds and removes channels on the channels page and refreshes the tab', async ({ app, page }) => {
       const users = { [CHANNEL.id]: twitchUser(CHANNEL), [OTHER_CHANNEL.id]: twitchUser(OTHER_CHANNEL) }
       const requests = await mockTwitch(page, users)
       await goTo(page, 'subscriptions')
@@ -230,16 +230,22 @@ test.describe('Channels on other platforms', () => {
       await expect(rows.first()).toContainText('Streamer')
       await expect(rows.first()).toContainText('Twitch')
 
-      const input = page.getByRole('textbox', { name: 'Add Channel' })
-      // Videos aren't channels, and names alone don't say which platform they are on
+      // One bar searches the list and follows channels by their address
+      const input = page.getByRole('searchbox', { name: 'Search Channels' })
+      // Names alone don't say which platform they are on, so they only search
+      await input.fill('Other')
+      await input.press('Enter')
+      await expect(rows).toHaveCount(0)
+      // Videos aren't channels
       const invalid = page.getByText('Enter the address of a channel page on Twitch, SoundCloud, PeerTube, Rumble, Odysee or media.ccc.de.')
-      for (const [index, text] of ['https://www.twitch.tv/videos/123', 'Other'].entries()) {
-        await input.fill(text)
+      for (let index = 0; index < 2; index++) {
+        await input.fill('https://www.twitch.tv/videos/123')
+        // Addresses aren't searched for
+        await expect(rows).toHaveCount(1)
         await input.press('Enter')
         // Each attempt shows its own message
         await expect(invalid).toHaveCount(index + 1)
       }
-      await expect(rows).toHaveCount(1)
 
       await input.fill('https://www.twitch.tv/Streamer')
       await input.press('Enter')
@@ -249,8 +255,10 @@ test.describe('Channels on other platforms', () => {
       await input.press('Enter')
       await expect(page.getByText('There is no channel at this address.')).toBeVisible()
 
-      await input.fill('https://m.twitch.tv/Other/videos')
-      await input.press('Enter')
+      // Pasting an address follows its channel
+      await input.fill('')
+      await app.electronApp.evaluate(({ clipboard }) => clipboard.writeText('https://m.twitch.tv/Other/videos'))
+      await input.press('ControlOrMeta+V')
       // Sorted by name, like YouTube subscriptions
       await expect(rows.locator('.channelName')).toHaveText(['Other', 'Streamer'])
       await expect(input).toHaveValue('')
@@ -763,7 +771,7 @@ test.describe('Channels on other platforms', () => {
       await page.getByRole('option', { name: 'Twitch' }).click()
       const rows = page.locator('#subscribedChannelsList .channel')
       await expect(rows).toHaveCount(1)
-      const input = page.getByRole('textbox', { name: 'Add Channel' })
+      const input = page.getByRole('searchbox', { name: 'Search Channels' })
       await input.fill('https://peertube.example.test/c/makers/videos')
       await input.press('Enter')
       // The list switches to the platform of a channel added on another one

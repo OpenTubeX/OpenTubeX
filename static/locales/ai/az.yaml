@@ -265,7 +265,7 @@ Subscriptions:
     Followed Channels: Digər platformalarda izlənilən kanallar
     Description: Abunəliklərinizin Platformalar tabında yükləmələrini görmək üçün Twitch, SoundCloud, PeerTube, Rumble, Odysee və media.ccc.de platformalarındakı kanalları izləyin. Kanalları axtarışla tapın və ya səhifələrinin ünvanı ilə əlavə edin. Onların mediası yt-dlp ilə oynadılır.
     Add Channel: Kanal əlavə et
-    Channel URL: Kanal ünvanı
+    Search Or Paste Channel: Axtarın və ya kanal ünvanını yapışdırın
     Invalid Channel: Twitch, SoundCloud, PeerTube, Rumble, Odysee və ya media.ccc.de platformasında kanal səhifəsinin ünvanını daxil edin.
     Channel Not Found: Bu ünvanda kanal yoxdur.
     Channel Already Followed: Bu kanalı artıq izləyirsiniz.

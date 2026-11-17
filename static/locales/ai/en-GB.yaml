@@ -264,7 +264,7 @@ Subscriptions:
     Followed Channels: Followed channels on other platforms
     Description: Follow channels on Twitch, SoundCloud, PeerTube, Rumble, Odysee and media.ccc.de to see their uploads in the Platforms tab of your subscriptions. Find channels with the search, or add them by the address of their page. Their media plays with yt-dlp.
     Add Channel: Add channel
-    Channel URL: Channel address
+    Search Or Paste Channel: Search or paste a channel address
     Invalid Channel: Enter the address of a channel page on Twitch, SoundCloud, PeerTube, Rumble, Odysee or media.ccc.de.
     Channel Not Found: There is no channel at this address.
     Channel Already Followed: You already follow this channel.
