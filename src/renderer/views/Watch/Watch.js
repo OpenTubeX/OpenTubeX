@@ -68,6 +68,7 @@ import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
 import { downloadWatchRoute, isPlayableDownloadFile, watchRouteForVideo } from '../../helpers/downloadPlayback'
 import { requestQueuedPlayback, takeQueuedPlayback } from '../../helpers/queuedPlayback'
 import { parseLocalVideoGames } from '../../helpers/video-games'
+import { parseLocalVideoDescriptionSections } from '../../helpers/video-description-sections'
 import { parseLocalVideoMusicTracks, parseVideoMusicTracks } from '../../helpers/video-music'
 import { saveChannelPreference, saveChannelPreferenceWithToast } from '../../helpers/channel-preferences'
 import {
@@ -411,6 +412,8 @@ export default defineComponent({
       videoTags: [],
       /** @type {import('../../helpers/video-games').LocalVideoGame[]} */
       videoGames: [],
+      /** @type {import('../../helpers/video-description-sections').VideoDescriptionSection[]} */
+      videoDescriptionSections: [],
       /** @type {import('../../helpers/video-music').VideoMusicTrack[]} */
       videoMusicTracks: [],
       license: '',
@@ -2787,6 +2790,7 @@ export default defineComponent({
       this.videoCategory = ''
       this.videoTags = []
       this.videoGames = []
+      this.videoDescriptionSections = []
       this.videoMusicTracks = []
       this.license = ''
       this.videoViewCount = null
@@ -3697,6 +3701,7 @@ export default defineComponent({
         this.videoViewCount = Number.isFinite(viewCount) ? viewCount : null
         this.license = result.secondary_info?.metadata?.rows.find(element => element.title?.text === 'License')?.contents[0]?.text
         this.videoGames = parseLocalVideoGames(result)
+        this.videoDescriptionSections = parseLocalVideoDescriptionSections(result)
         this.videoMusicTracks = parseLocalVideoMusicTracks(result)
 
         this.channelCollaborators = parseLocalVideoCollaborators(result)

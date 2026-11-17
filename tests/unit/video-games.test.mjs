@@ -122,3 +122,10 @@ test('extracts every game of a video that lists more than one', () => {
   assert.deepEqual(games.map(game => game.title), ['Hytale', 'Minecraft'])
   assert.equal(games[1].channelId, 'UCq6aw03lNILzV96UvEAASfQ')
 })
+
+test('ignores the people mentioned in a gaming video', () => {
+  const raw = rawGamesSection({ imageStyle: 'VIDEO_ATTRIBUTE_IMAGE_STYLE_SQUARE', title: 'Example Person', onTap: undefined })
+  raw.headerTitle = 'People mentioned'
+
+  assert.deepEqual(parseLocalVideoGames(videoInfo({ items: [new YTNodes.VideoAttributesSectionView(raw)] })), [])
+})

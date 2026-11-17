@@ -43,11 +43,11 @@ function descriptionLayout({ description, short, metadataHeight, hasMetadata }) 
   }
 }
 
-function measure({ alwaysExpanded = false, short = true, tags = [], games = [], musicTracks = [], license = null, contentDisclosures = [], description = 'Sie haben Post\nDer Klassiker von AOL', metadataHeight = 200 } = {}) {
-  const hasMetadata = tags.length > 0 || games.length > 0 || musicTracks.length > 0 || Boolean(license) || contentDisclosures.length > 0
+function measure({ alwaysExpanded = false, short = true, tags = [], games = [], musicTracks = [], sections = [], license = null, contentDisclosures = [], description = 'Sie haben Post\nDer Klassiker von AOL', metadataHeight = 200 } = {}) {
+  const hasMetadata = tags.length > 0 || games.length > 0 || musicTracks.length > 0 || sections.length > 0 || Boolean(license) || contentDisclosures.length > 0
   const layout = descriptionLayout({ description, short, metadataHeight, hasMetadata })
   const context = vm.createContext({
-    props: { alwaysExpanded, tags, games, musicTracks, license, contentDisclosures },
+    props: { alwaysExpanded, tags, games, musicTracks, sections, license, contentDisclosures },
     computed: getter => ({ value: getter() }),
     shownDescription: description,
     showFullDescription: { value: false },

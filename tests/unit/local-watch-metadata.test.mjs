@@ -2,10 +2,11 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import { compileFunction } from 'node:vm'
-import { YTNodes } from 'youtubei.js'
+import { Misc, YTNodes } from 'youtubei.js'
 import { createLocalFeedParsers, getAuthorVerification } from '../../src/renderer/helpers/api/local-feed-parsers.js'
 import { parseLocalVideoSummary } from '../../src/renderer/helpers/video-summary.js'
 import { parseLocalVideoGames } from '../../src/renderer/helpers/video-games.js'
+import { parseLocalVideoDescriptionSections } from '../../src/renderer/helpers/video-description-sections.js'
 import { parseLocalVideoMusicTracks } from '../../src/renderer/helpers/video-music.js'
 import { parseLocalVideoCollaborators } from '../../src/renderer/helpers/video-collaborators.js'
 import { getVideoPopularity } from '../../src/renderer/helpers/player/videoPopularity.js'
@@ -36,6 +37,7 @@ async function loadMetadata(info, avoidTranslation = 'disabled', options = {}) {
     areLocalCommentsDisabled: () => true,
     parseLocalEndscreen: () => [],
     parseLocalVideoGames,
+    parseLocalVideoDescriptionSections,
     parseLocalVideoMusicTracks,
     parseLocalVideoSummary,
     getVideoPopularity,
@@ -502,3 +504,41 @@ for (const original of [false]) {
     assert.deepEqual(watch.videoChapters.map(chapter => chapter.title), original ? ['Original chapter'] : ['Intro & setup', 'Main topic'])
   })
 }
+
+test('parses links that YouTube shows as an icon and a label', () => {
+  const video = '   • Example video, part <1> & more...  '
+  const mention = '   / @ExampleChannel  '
+  const social = '  / example.profile  '
+  const content = `Part 1: ${video}\nPlain: https://youtu.be/BBBBBBBBBBB\nBy ${mention}\nFollow ${social}`
+  const command = (url, webPageType, endpoint) => ({
+    innertubeCommand: { commandMetadata: { webCommandMetadata: { url, webPageType } }, ...endpoint }
+  })
+  const run = (text, onTap, length = text.length) => ({ startIndex: content.indexOf(text), length, onTap })
+  const icon = (text, url) => ({
+    startIndex: content.indexOf(text) + 3,
+    length: 0,
+    element: { type: { imageType: { image: { sources: [{ url }] } } } }
+  })
+  const redirect = `https://www.youtube.com/redirect?event=video_description&q=${encodeURIComponent('https://www.instagram.com/example.profile?utm_source=example')}`
+  const description = Misc.Text.fromAttributed({
+    content,
+    commandRuns: [
+      run(video, command('/watch?v=AAAAAAAAAAA&t=5s', 'WEB_PAGE_TYPE_WATCH', { watchEndpoint: { videoId: 'AAAAAAAAAAA' } })),
+      run('https', command('/watch?v=BBBBBBBBBBB', 'WEB_PAGE_TYPE_WATCH', { watchEndpoint: { videoId: 'BBBBBBBBBBB' } }), 28),
+      run(mention, command('/@ExampleChannel', 'WEB_PAGE_TYPE_CHANNEL', { browseEndpoint: { browseId: 'UC_TEST_CHANNEL' } })),
+      run(social, command(redirect, 'WEB_PAGE_TYPE_UNKNOWN', { urlEndpoint: { url: redirect } }))
+    ],
+    attachmentRuns: [
+      icon(video, 'https://www.gstatic.com/youtube/img/watch/yt_favicon_ringo2.png'),
+      icon(mention, 'https://www.gstatic.com/youtube/img/watch/yt_favicon.png'),
+      icon(social, 'https://www.gstatic.com/youtube/img/watch/social_media/instagram_1x.png')
+    ]
+  })
+
+  assert.equal(parseLocalTextRuns(description.runs), [
+    'Part 1: <a href="https://www.youtube.com/watch?v=AAAAAAAAAAA&amp;t=5s" data-link-icon="youtube">Example video, part &lt;1&gt; &amp; more...</a>',
+    'Plain: https://www.youtube.com/watch?v=BBBBBBBBBBB',
+    'By <a href="https://www.youtube.com/channel/UC_TEST_CHANNEL" data-link-icon="youtube">@ExampleChannel</a>',
+    'Follow <a href="https://www.instagram.com/example.profile" data-link-icon="instagram">example.profile</a>'
+  ].join('\n'))
+})
