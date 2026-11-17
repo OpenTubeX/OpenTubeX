@@ -74,6 +74,9 @@ public class MainActivity extends BridgeActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // Only one renderer may use the app's data, and this one replaces the
+        // hidden renderer that syncs while the app is closed.
+        BackgroundSyncRenderer.stop();
         registerPlugin(AndroidProxyPlugin.class);
         registerPlugin(SecretStoragePlugin.class);
         registerPlugin(AndroidLocalNetworkPlugin.class);

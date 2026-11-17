@@ -45,7 +45,7 @@ const helperSource = await readFile(new URL('../../src/renderer/helpers/sync-ser
 const storeSource = await readFile(new URL('../../src/renderer/store/modules/sync-server.js', import.meta.url), 'utf8')
 const schedulerSource = await readFile(new URL('../../src/renderer/helpers/sync-server-scheduler.js', import.meta.url), 'utf8')
 
-function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false, syncableSettingKeys = ['channelPlaybackSpeeds'], reminderService, connected = false, timer, locks, desktopTabs, connectionChanges, capacitor = false, backgroundJob = runBackgroundJob, settingsReader, receiptStorage, openExternalLink = async () => {}, notificationDismissals = normalizeNotificationDismissals(null) } = {}) {
+function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false, syncableSettingKeys = ['channelPlaybackSpeeds'], reminderService, connected = false, timer, locks, desktopTabs, connectionChanges, capacitor = false, backgroundJob = runBackgroundJob, settingsReader, receiptStorage, openExternalLink = async () => {}, notificationDismissals = normalizeNotificationDismissals(null), hiddenRenderer = false } = {}) {
   const connectionEvents = new EventTarget()
   const network = { state: connectionState, online }
   const requests = []
@@ -157,6 +157,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     setPeriodicBackgroundSync: () => {},
     onPeriodicBackgroundSync: () => {},
     onAndroidWindowBlur: () => {},
+    isAndroidBackgroundSyncRenderer: hiddenRenderer,
     structuredClone,
     TextEncoder,
     TextDecoder,
@@ -2741,3 +2742,26 @@ for (const supported of [true, false]) {
     assert.equal(uploads.length, 1)
   })
 }
+
+test('the renderer syncing while the Android app is closed leaves live reminders and notification dismissals to the app', async () => {
+  const requests = []
+  const f = fixture({ syncServerSyncSubscriptions: false, syncServerSyncLiveReminders: true, syncServerSyncNotifications: true }, {
+    encrypted: true,
+    capacitor: true,
+    hiddenRenderer: true,
+    respond: async (url) => {
+      requests.push(url)
+      if (url.endsWith('/health')) return { capabilities: { encrypted_sync: 1, live_sync: 1, live_reminders: 1, notification_dismissals: 1 } }
+      if (url.endsWith('/encrypted_sync')) {
+        return {
+          collections: [{ collection: 'liveReminders', revision: 1 }, { collection: 'notificationDismissals', revision: 1 }],
+          legacy_data: false
+        }
+      }
+    },
+  })
+  await f.actions.syncWithSyncServer(f.context)
+  assert.equal(f.context.state.syncServerStatus, 'success')
+  assert.equal(requests.some(url => url.endsWith('/encrypted_sync/liveReminders')), false)
+  assert.equal(requests.some(url => url.endsWith('/encrypted_sync/notificationDismissals')), false)
+})

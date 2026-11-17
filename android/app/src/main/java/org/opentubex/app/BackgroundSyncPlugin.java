@@ -16,20 +16,19 @@ public class BackgroundSyncPlugin extends Plugin {
 
     @Override
     public void load() {
+        // The renderer that syncs while the app is closed is not the app's.
+        if (BackgroundSyncRenderer.isHidden(getBridge())) return;
         synchronized (BackgroundSyncPlugin.class) {
             active = new WeakReference<>(this);
-            BackgroundSyncWorker.resume(getContext());
         }
     }
 
-    /** Pauses the periodic job unless a renderer loaded, which resumes it itself. */
-    static synchronized boolean pauseWithoutRenderer(Context context) {
-        if (active.get() != null) return false;
-        BackgroundSyncWorker.pause(context);
-        return true;
+    /** Whether the app's renderer is loaded, even if its activity is not. */
+    static synchronized boolean hasRenderer() {
+        return active.get() != null;
     }
 
-    /** Asks the renderer to sync, returning the hold it releases afterwards. */
+    /** Asks the app's renderer to sync, returning the hold it releases afterwards. */
     static String requestSync(Context context) {
         BackgroundSyncPlugin plugin = active.get();
         if (plugin == null || !plugin.hasListeners("sync")) return null;
@@ -49,6 +48,11 @@ public class BackgroundSyncPlugin extends Plugin {
     @PluginMethod
     public void begin(PluginCall call) {
         JSObject result = new JSObject();
+        // The job that loaded the hidden renderer already keeps it running.
+        if (BackgroundSyncRenderer.isHidden(getBridge())) {
+            call.resolve(result);
+            return;
+        }
         result.put("id", BackgroundSync.begin(getContext()));
         call.resolve(result);
     }
@@ -57,6 +61,13 @@ public class BackgroundSyncPlugin extends Plugin {
     public void end(PluginCall call) {
         String id = call.getString("id");
         if (id != null) BackgroundSync.end(getContext(), id);
+        call.resolve();
+    }
+
+    /** The hidden renderer reports that its sync ended. */
+    @PluginMethod
+    public void finishHiddenSync(PluginCall call) {
+        BackgroundSyncRenderer.finish(getBridge());
         call.resolve();
     }
 
@@ -70,7 +81,9 @@ public class BackgroundSyncPlugin extends Plugin {
     @Override
     protected void handleOnDestroy() {
         BackgroundSync.clear(getContext());
-        if (active.get() == this) active.clear();
+        synchronized (BackgroundSyncPlugin.class) {
+            if (active.get() == this) active.clear();
+        }
         super.handleOnDestroy();
     }
 }

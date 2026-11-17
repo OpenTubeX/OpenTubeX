@@ -13,12 +13,13 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -28,23 +29,26 @@ public class LibraryDatabasePlugin extends Plugin {
     // Each database runs its statements in order on its own thread, off the
     // thread that serves other plugins. Separate databases share no
     // transactions, so startup can read history and playlists concurrently.
-    private final Map<String, ExecutorService> executors = new ConcurrentHashMap<>();
+    // Every renderer in the process shares these threads, so the app's renderer
+    // reads after the writes that the renderer syncing in the background queued.
+    private static final Map<String, ExecutorService> EXECUTORS = new ConcurrentHashMap<>();
     private final Map<String, LibraryDatabase> databases = new ConcurrentHashMap<>();
+    private final Set<String> used = new HashSet<>();
 
-    private volatile boolean destroyed;
+    private boolean destroyed;
 
     /** Calls can still arrive from the WebView after its activity destroyed this plugin. */
-    private void run(PluginCall call, String name, Runnable task) {
-        try {
-            if (destroyed) throw new RejectedExecutionException("Library database closed");
-            executor(name).execute(task);
-        } catch (RejectedExecutionException error) {
-            call.reject("Library database closed", error);
+    private synchronized void run(PluginCall call, String name, Runnable task) {
+        if (destroyed) {
+            call.reject("Library database closed");
+            return;
         }
+        used.add(name);
+        executor(name).execute(task);
     }
 
-    private ExecutorService executor(String name) {
-        return executors.computeIfAbsent(name, key -> {
+    private static ExecutorService executor(String name) {
+        return EXECUTORS.computeIfAbsent(name, key -> {
             // Keep the per-database order, but let an idle database's thread exit.
             ThreadPoolExecutor executor = new ThreadPoolExecutor(1, 1, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
             executor.allowCoreThreadTimeOut(true);
@@ -155,14 +159,14 @@ public class LibraryDatabasePlugin extends Plugin {
     }
 
     @Override
-    protected void handleOnDestroy() {
+    protected synchronized void handleOnDestroy() {
         destroyed = true;
-        for (Map.Entry<String, ExecutorService> entry : executors.entrySet()) {
-            entry.getValue().execute(() -> {
-                LibraryDatabase database = databases.remove(entry.getKey());
+        // Close after the statements already queued, without waiting on the main thread.
+        for (String name : used) {
+            executor(name).execute(() -> {
+                LibraryDatabase database = databases.remove(name);
                 if (database != null) database.close();
             });
-            entry.getValue().shutdown();
         }
     }
 }

@@ -18,13 +18,11 @@ import androidx.work.WorkerParameters;
 
 import java.util.concurrent.TimeUnit;
 
-/** Runs while a hidden renderer syncs, and periodically asks it to sync. */
+/** Runs while a hidden app syncs, and periodically syncs while the app is hidden or closed. */
 public final class BackgroundSyncWorker extends Worker {
     private static final String PERIODIC_WORK = "background-sync";
     private static final String KEEP_ALIVE_WORK = "background-sync-keep-alive";
     private static final String REQUEST_SYNC_INPUT = "requestSync";
-    private static final String PREFERENCES = "background-sync";
-    private static final String ENABLED_KEY = "periodic";
     // WorkManager stops workers after ten minutes.
     private static final long MAXIMUM_WAIT_MILLIS = TimeUnit.MINUTES.toMillis(9);
 
@@ -33,9 +31,6 @@ public final class BackgroundSyncWorker extends Worker {
     }
 
     static void schedule(Context context, boolean enabled) {
-        // Remembered for processes whose job was paused because no renderer ran.
-        context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE)
-            .edit().putBoolean(ENABLED_KEY, enabled).apply();
         WorkManager workManager = WorkManager.getInstance(context);
         if (!enabled) {
             workManager.cancelUniqueWork(PERIODIC_WORK);
@@ -48,18 +43,6 @@ public final class BackgroundSyncWorker extends Worker {
             .setInputData(new Data.Builder().putBoolean(REQUEST_SYNC_INPUT, true).build())
             .build();
         workManager.enqueueUniquePeriodicWork(PERIODIC_WORK, ExistingPeriodicWorkPolicy.KEEP, request);
-    }
-
-    /** Restores a periodic job that a process without a renderer paused. */
-    static void resume(Context context) {
-        if (context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE).getBoolean(ENABLED_KEY, false)) {
-            schedule(context, true);
-        }
-    }
-
-    /** WorkManager runs operations in call order, so callers hold the plugin's lock. */
-    static void pause(Context context) {
-        WorkManager.getInstance(context).cancelUniqueWork(PERIODIC_WORK);
     }
 
     static void keepAlive(Context context) {
@@ -82,9 +65,15 @@ public final class BackgroundSyncWorker extends Worker {
         if (getInputData().getBoolean(REQUEST_SYNC_INPUT, false)) {
             // The visible renderer schedules its own syncs.
             if (AppVisibility.isVisible()) return Result.success();
-            // Without a renderer, this process was started for the job and cannot sync.
-            // The next renderer resumes the job when its plugin loads.
-            if (BackgroundSyncPlugin.pauseWithoutRenderer(context)) return Result.success();
+            // After the app was closed, a hidden renderer syncs in its place.
+            if (!BackgroundSyncPlugin.hasRenderer()) {
+                try {
+                    BackgroundSyncRenderer.sync(context, MAXIMUM_WAIT_MILLIS, this::isStopped);
+                } catch (InterruptedException error) {
+                    Thread.currentThread().interrupt();
+                }
+                return Result.success();
+            }
             keeper = BackgroundSync.claimKeeper();
             hold = BackgroundSyncPlugin.requestSync(context);
         }
