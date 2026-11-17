@@ -198,6 +198,14 @@ body,
   filter: none;
 }
 
+/* Downloaded videos keep their colors. Players also show other videos, avatars, and comments, so
+   only the current video's frames, artwork, and chapter thumbnails are spared there. The player
+   container carries its own class because the mini player teleports it out of its host. */
+:where(:root.grayscaleExceptDownloads) :where(.downloadedContent),
+:where(:root.grayscaleExceptDownloads) :where(.downloadedPlayer) :where(video, canvas, .countdownPoster, .musicAudioBackdrop, .musicAudioArtwork, .chapterThumbnail, .ft-seek-filmstrip-frame) {
+  --content-filter: initial;
+}
+
 /* Use fallback corners only when the control does not define its own shape. */
 :where(:root:not(.hideOutlines) :focus-visible:not(:disabled)) {
   border-radius: calc(4px * var(--ui-roundness));

@@ -46,7 +46,7 @@
             <router-link
               :to="video.route"
               :data-tab-title="video.title"
-              class="offlineDownloadRecommendation"
+              class="offlineDownloadRecommendation downloadedContent"
               @click="pausePlayer"
             >
               <FtRetryImage
