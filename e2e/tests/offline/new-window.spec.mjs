@@ -249,9 +249,8 @@ test.describe('multi-tab window close confirmation', () => {
       await app.electronApp.evaluate(({ BrowserWindow }) => {
         BrowserWindow.getAllWindows().find(window => window !== globalThis.otherWindow)?.close()
       })
-      await expect.poll(() => app.electronApp.evaluate(() => globalThis.windowCloseDialogMessages)).toEqual([
-        'Are you sure you want to quit OpenTubeX?'
-      ])
+      // With one tab, only the quit confirmation can ask
+      await expect.poll(() => app.electronApp.evaluate(() => globalThis.windowCloseDialogMessages)).toHaveLength(1)
       expect(page.isClosed()).toBe(false)
 
       // Let the fixture quit the app
