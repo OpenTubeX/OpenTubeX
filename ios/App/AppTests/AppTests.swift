@@ -685,11 +685,13 @@ final class AppTests: XCTestCase {
             let retained = try XCTUnwrap(IOSNetwork.shared.registeredMediaRequest(URL(string: "capacitor://localhost/_opentubex_media/\(id)")!), "A visible Watch source must survive registration expiry")
             XCTAssertEqual(retained.url?.absoluteString, "http://127.0.0.1:\(port)/real.mp4")
             if privateInstance {
+                // The credentials are their own setting, which only the instance they belong to receives
                 _ = try await webView.callAsyncJavaScript("""
+                testStore.commit('setInvidiousInstanceCredentials', {instance, username: 'fixture', password: 'secret'});
                 testStore.commit('setCurrentInvidiousInstance', instance);
                 watchFixture.legacyFormats=watchFixture.legacyFormats.map(format=>({...format,url:videoSource}));
                 window.dlnaExtractionFormats=dlnaExtractionFormats.map(format=>({...format,url:format.acodec==='none'?videoSource:audioSource}));
-                """, arguments: ["instance": "http://fixture:secret@127.0.0.1:\(port)", "videoSource": "http://127.0.0.1:\(port)/real.mp4", "audioSource": "http://127.0.0.1:\(port)/audio.m4a"], in: nil, contentWorld: .page)
+                """, arguments: ["instance": "http://127.0.0.1:\(port)", "videoSource": "http://127.0.0.1:\(port)/real.mp4", "audioSource": "http://127.0.0.1:\(port)/audio.m4a"], in: nil, contentWorld: .page)
             }
             _ = try await webView.callAsyncJavaScript("await testStore.dispatch('updateShowDlnaCastButton', true)", arguments: [:], in: nil, contentWorld: .page)
             try await wait("!!document.querySelector('.dlnaCastControl button')")
