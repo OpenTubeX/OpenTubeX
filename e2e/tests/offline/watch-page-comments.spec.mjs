@@ -943,6 +943,16 @@ test.describe('manual comment loading', () => {
     await replyInput.fill('')
     await replyInput.pressSequentially('Hi (@')
     await expect(composer.getByRole('option')).not.toHaveCount(0)
+    // Only people from the thread are suggested.
+    const threadHandles = new Set((await thread.locator('.commentAuthor').allTextContents()).map(text => text.trim()))
+    const otherHandle = (await page.locator('.commentAuthor').allTextContents())
+      .map(text => text.trim())
+      .find(text => text.startsWith('@') && ![...threadHandles].some(threadHandle => threadHandle.includes(text.slice(1))))
+    await replyInput.pressSequentially(otherHandle.slice(1))
+    await expect(composer.getByRole('listbox')).toHaveCount(0)
+    await replyInput.fill('')
+    await replyInput.pressSequentially('Hi (@')
+    await expect(composer.getByRole('option')).not.toHaveCount(0)
     // Narrowing the query after moving down picks from the remaining options.
     await replyInput.press('ArrowDown')
     await replyInput.pressSequentially(handle.slice(1, -1))
