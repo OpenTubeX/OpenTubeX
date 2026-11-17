@@ -3472,6 +3472,7 @@ segment.mp4
 test.describe('with a followed podcast feed', () => {
   const FEED_URL = 'https://feeds.example.test/podcast.xml'
   const EPISODES = ['https://media.example.test/episode-1', 'https://media.example.test/episode-2']
+  const THUMBNAIL = 'https://feeds.example.test/thumbnail.svg'
   test.use({
     seed: {
       settings: {
@@ -3492,9 +3493,11 @@ test.describe('with a followed podcast feed', () => {
       body: `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0"><channel><title>Example podcast</title><link>https://media.example.test/</link>
 ${EPISODES.map((url, index) => `<item><title>Episode ${index + 1}</title><link>${url}</link>` +
+  `<description><![CDATA[<img src="${THUMBNAIL}">]]></description>` +
   `<pubDate>${new Date(Date.now() - (index + 1) * 3600000).toUTCString()}</pubDate><guid>${url}</guid></item>`).join('\n')}
 </channel></rss>`
     }))
+    await page.route(THUMBNAIL, route => fulfillVisualFixture(route, 'video-thumbnail'))
 
     await goTo(page, 'subscriptions')
     await page.locator('[data-rss-feeds-tab]').click()
@@ -3525,6 +3528,13 @@ ${EPISODES.map((url, index) => `<item><title>Episode ${index + 1}</title><link>$
       await expect.poll(currentRoute).toBe(`/external-media?url=${episode}`)
       await expect(page.locator(`${activeTab} .externalMedia .watchQueue .queueItem h3`))
         .toHaveText(index === 0 ? ['Episode 2', 'Me at the zoo'] : ['Me at the zoo'])
+      if (index === 0) {
+        // Like the feed, the queue leaves out thumbnails while they are hidden.
+        const thumbnail = page.locator(`${activeTab} .externalMedia .watchQueue img[src="${THUMBNAIL}"]`)
+        await expect(thumbnail).toHaveCount(1)
+        await page.evaluate(() => window.$store.dispatch('updateThumbnailPreference', 'hidden'))
+        await expect(thumbnail).toHaveCount(0)
+      }
     }
     await playsToTheEnd()
     await expect.poll(currentRoute).toBe('/watch/jNQXAC9IVRw')
