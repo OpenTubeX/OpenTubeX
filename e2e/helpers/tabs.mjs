@@ -39,8 +39,14 @@ export async function selectChannelTab(page, id) {
   const more = page.locator('.channelDetails:visible #moreTab')
   await more.click()
   // Phones list the tabs in a bottom sheet with checkbox items; elsewhere they are radio items.
-  await page.locator('[role="menuitemradio"], [role="menuitemcheckbox"]')
-    .filter({ hasText: new RegExp(`^\\s*${label}\\s*$`) }).click()
+  const item = page.locator('[role="menuitemradio"], [role="menuitemcheckbox"]')
+    .filter({ hasText: new RegExp(`^\\s*${label}\\s*$`) })
+  // A click while the sheet slides in can press one row and release over
+  // another, which selects nothing and leaves the menu open.
+  await item.evaluate(element => Promise.all(element.closest('[role="menu"]').getAnimations({ subtree: true })
+    .filter(animation => animation.effect?.getComputedTiming().iterations !== Infinity)
+    .map(animation => animation.finished.catch(() => {}))))
+  await item.click()
   await expect(more).toHaveAttribute('aria-selected', 'true')
   await expect(more).toContainText(label)
 }
