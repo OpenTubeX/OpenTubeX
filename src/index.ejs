@@ -20,6 +20,8 @@
           content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <% if (!process.env.IS_ELECTRON && !process.env.IS_CAPACITOR) { %>
     <link rel="manifest" href="static/manifest.json" />
+    <!-- Without it, browsers request /favicon.ico, which a self-hosted server passes to Invidious -->
+    <link rel="icon" href="icon.svg" type="image/svg+xml" />
     <!-- Keeps the server's address from other services, like SponsorBlock -->
     <meta name="referrer" content="no-referrer" />
     <% } %>

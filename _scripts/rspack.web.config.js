@@ -282,6 +282,10 @@ config.plugins.push(
             {
               from: path.join(__dirname, '../src/renderer/startup/register-service-worker.js'),
               to: path.join(outputPath, 'register-service-worker.js'),
+            },
+            {
+              from: path.join(__dirname, '../_icons/icon.svg'),
+              to: path.join(outputPath, 'icon.svg'),
             }
           ]),
       ...(isDevMode
