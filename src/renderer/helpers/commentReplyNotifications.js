@@ -1,22 +1,20 @@
 import { LocalNotifications } from '@capacitor/local-notifications'
 import { ref } from 'vue'
-import { Constants } from 'youtubei.js'
 
 import store from '../store/index'
 import i18n from '../i18n/index'
 import { createLocalCommentsClient } from './api/local'
-import { createLinkedCommentsContinuation } from './api/youtube-account-parsers'
 import {
-  configureAndroidCommentReplies,
-  listAndroidCommentReplies,
-  touchAndroidCommentReplies,
-  trackAndroidCommentReplies,
-  untrackAndroidCommentReplies
-} from './androidSubscriptionRefresh'
+  deliverAndroidNotification,
+  isAndroidBackgroundRenderer,
+  onPeriodicBackgroundTask,
+  setPeriodicBackgroundTask
+} from './androidBackgroundSync.js'
+import { clearLegacyAndroidNotificationChecks, readLegacyAndroidWatchedComments } from './androidSubscriptionRefresh'
 import { isAppHidden } from './appVisibility'
 import { capacitorNotificationHistory } from './capacitorNotificationHistory'
 import { getCommentLocalNotificationId } from './capacitorSystemNotifications'
-import { getNotificationThumbnailUrl, openNotificationEntry, showInAppNotification, withThumbnail } from './notificationHistory'
+import { openNotificationEntry, showInAppNotification, withThumbnail } from './notificationHistory'
 import { requestCapacitorNotificationPermission } from './platformFeed'
 import { getSelectedYouTubeProfile, isSignedInToYouTube } from './youtube-account-state'
 import {
@@ -43,7 +41,6 @@ const CHECK_INTERVAL_MS = 15 * 60 * 1000
 // Reply pages hold 10 replies each.
 const MAX_REPLY_PAGES = 10
 const CHANNEL_ID = 'comment-replies'
-// Android checks natively, also while the app is closed.
 const isAndroid = !!process.env.IS_CAPACITOR && !process.env.IS_IOS
 
 /** @typedef {import('../../commentReplyTracking.js').TrackedCommentThread} TrackedCommentThread */
@@ -136,14 +133,7 @@ export async function watchComment(videoId, videoTitle, { id, authorId, author, 
 async function saveComment(comment) {
   // Watching is on unless turned off, so the first watched comment asks for the permission.
   if (process.env.IS_CAPACITOR) requestCapacitorNotificationPermission()
-  if (isAndroid) {
-    // Linking the watched comment includes it, also when it is a reply, so its heart can be checked.
-    const token = createLinkedCommentsContinuation(comment.videoId, getWatchedCommentId(comment))
-    await trackAndroidCommentReplies({ ...comment, token })
-    await getWatchedComments()
-  } else {
-    saveThreads(trackComment(loadThreads(), comment))
-  }
+  saveThreads(trackComment(loadThreads(), comment))
 }
 
 /**
@@ -151,12 +141,7 @@ async function saveComment(comment) {
  * @param {Pick<TrackedCommentThread, 'videoId' | 'threadId' | 'channelId'>} comment
  */
 export async function unwatchComment({ videoId, threadId, channelId }) {
-  if (isAndroid) {
-    await untrackAndroidCommentReplies({ videoId, threadId, channelId })
-    await getWatchedComments()
-  } else {
-    saveThreads(untrackComment(loadThreads(), { videoId, threadId, channelId }))
-  }
+  saveThreads(untrackComment(loadThreads(), { videoId, threadId, channelId }))
 }
 
 /**
@@ -166,14 +151,8 @@ export async function unwatchComment({ videoId, threadId, channelId }) {
  * @param {string} commentId a comment in the thread, `threadId.replyId` for a reply
  */
 export async function markWatchedThreadOpened(videoId, commentId) {
-  const threadId = commentId.split('.')[0]
-  if (isAndroid) {
-    await touchAndroidCommentReplies({ videoId, threadId })
-    await getWatchedComments()
-  } else {
-    const threads = markThreadOpened(loadThreads(), videoId, threadId)
-    if (threads) saveThreads(threads)
-  }
+  const threads = markThreadOpened(loadThreads(), videoId, commentId.split('.')[0])
+  if (threads) saveThreads(threads)
 }
 
 /**
@@ -190,9 +169,45 @@ export function findWatchedComment(videoId, { id, authorId }) {
 
 /** @returns {Promise<TrackedCommentThread[]>} the watched comments, last active first */
 export async function getWatchedComments() {
-  const threads = isAndroid ? normalizeTrackedCommentThreads(await listAndroidCommentReplies()) : loadThreads()
+  await migrateAndroidWatchedComments()
+  const threads = loadThreads()
   watchedComments.value = threads
   return threads
+}
+
+let androidMigration = null
+// Kept until the cleanup succeeds, so a retry, also after a restart, does not
+// watch again what was unwatched meanwhile.
+const ANDROID_IMPORTED_STORAGE_KEY = 'commentReplyThreadsImported'
+
+/**
+ * Takes over the comments that the native checks of earlier Android versions
+ * watched, keeping the entries watched here meanwhile.
+ * @returns {Promise<void>}
+ */
+function migrateAndroidWatchedComments() {
+  // The renderer of the periodic job lacks the plugin, and the app migrates once it opens.
+  if (!isAndroid || isAndroidBackgroundRenderer) return Promise.resolve()
+  androidMigration ??= (async () => {
+    if (localStorage.getItem(ANDROID_IMPORTED_STORAGE_KEY) === null) {
+      const legacy = await readLegacyAndroidWatchedComments()
+      if (legacy.length > 0) {
+        const threads = loadThreads()
+        saveThreads(normalizeTrackedCommentThreads([
+          ...threads,
+          ...legacy.filter(thread => !threads.some(item => isSameWatchedComment(item, thread)))
+        ]))
+      }
+      localStorage.setItem(ANDROID_IMPORTED_STORAGE_KEY, '1')
+    }
+    // Saved first, so stopping in between takes them over again instead of losing them.
+    await clearLegacyAndroidNotificationChecks()
+    localStorage.removeItem(ANDROID_IMPORTED_STORAGE_KEY)
+  })().catch(error => {
+    androidMigration = null
+    console.error('Failed to take over the watched comments', error)
+  })
+  return androidMigration
 }
 
 /**
@@ -209,37 +224,6 @@ function getReplyTitle(thread, author) {
 /** The channel signed in now, whose replies are never announced. */
 function getSignedInChannelId() {
   return isSignedInToYouTube(store.getters) ? store.getters.getYouTubeAccount?.channelId ?? '' : ''
-}
-
-/**
- * Hands the checks to Android, which announces replies like uploads.
- * @returns {() => void} stops updating the configuration
- */
-function startAndroidCommentReplyNotifications() {
-  return store.watch(() => {
-    // An 11-character placeholder, as the thumbnail settings expect a video ID.
-    const thumbnail = getNotificationThumbnailUrl('VIDEOIDXXXX')?.replace('VIDEOIDXXXX', '%VIDEO%') ?? ''
-    return JSON.stringify({
-      enabled: isCommentWatchingEnabled(),
-      accountId: getSignedInChannelId(),
-      mode: store.getters.getNotificationMode,
-      closedApp: store.getters.getEnableClosedAppSubscriptionRefresh,
-      title: i18n.global.t('YouTube Account.{author} replied to your comment', { author: '{author}' }),
-      otherTitle: i18n.global.t('YouTube Account.{author} replied to {commentAuthor}', { author: '{author}', commentAuthor: '{commentAuthor}' }),
-      heartTitle: i18n.global.t('YouTube Account.{author} hearted your comment', { author: '{author}' }),
-      thumbnail,
-      request: {
-        url: 'https://www.youtube.com/youtubei/v1/next?prettyPrint=false',
-        body: JSON.stringify({
-          context: { client: { clientName: 'WEB', clientVersion: Constants.CLIENTS.WEB.VERSION, hl: 'en', gl: store.getters.getRegion || 'US' } },
-          continuation: '%CONTINUATION%'
-        })
-      }
-    })
-  }, value => {
-    configureAndroidCommentReplies(JSON.parse(value))
-      .catch(error => console.error('Failed to configure the comment reply checks', error))
-  }, { immediate: true })
 }
 
 /**
@@ -322,6 +306,22 @@ async function announce(kind, videoId, commentId, title, body) {
   const target = getCommentNotificationTarget(kind, videoId, commentId)
   if (!target) return
   const thumbnail = withThumbnail(videoId).thumbnail
+
+  if (isAndroid) {
+    const mode = store.getters.getNotificationMode
+    if (!isCommentWatchingEnabled() || mode === 'off') return
+    // Android shows it like an upload, or leaves it to the visible app, which
+    // adds it to the history.
+    await deliverAndroidNotification({
+      feedType: kind,
+      id: `${videoId}/${commentId}`,
+      title,
+      body,
+      thumbnail,
+      history: mode === 'both'
+    })
+    return
+  }
 
   if (process.env.IS_ELECTRON) {
     await window.ftElectron.notificationHistory.notifyComment({ kind, videoId, commentId, title, body, thumbnail })
@@ -423,15 +423,50 @@ async function checkThreads() {
 }
 
 /**
+ * Whether Android checks while the app is hidden or closed, which it does when
+ * it may refresh subscriptions then.
+ */
+function checksWhileClosed() {
+  return isAndroid && isCommentWatchingEnabled() && store.getters.getEnableClosedAppSubscriptionRefresh
+}
+
+let activeCheck = null
+
+/** Checks the watched comments, or waits for the check that already runs here. */
+function checkOnce() {
+  // Windows of the desktop app share the watched comments, so one checks them.
+  activeCheck ??= navigator.locks.request(LOCK_NAME, { ifAvailable: true }, async lock => {
+    if (lock) await checkThreads()
+  }).finally(() => { activeCheck = null })
+  return activeCheck
+}
+
+/**
+ * Checks the watched comments once in the renderer that the periodic job loads
+ * while the Android app is closed.
+ */
+export async function checkCommentRepliesInBackground() {
+  if (!checksWhileClosed()) {
+    setPeriodicBackgroundTask('commentReplies', false)
+    return
+  }
+  await migrateAndroidWatchedComments()
+  await checkOnce()
+}
+
+/**
  * Checks the watched comments for replies, and the account's for hearts, while the app runs. On
- * iOS, the checks pause while the app is hidden; Android checks natively.
+ * iOS, the checks pause while the app is hidden; Android's periodic job checks
+ * then, also after the app was closed, if it may refresh subscriptions then.
  * @returns {() => void} stops the checks
  */
 export function startCommentReplyNotifications() {
-  if (isAndroid) return startAndroidCommentReplyNotifications()
   let stopped = false
   let timer = null
   let lastCheck = 0
+  // Also cancels the native checks of earlier versions, whether or not comments are watched.
+  // Each check retries it after a failure.
+  migrateAndroidWatchedComments()
 
   const check = async () => {
     clearTimeout(timer)
@@ -439,10 +474,8 @@ export function startCommentReplyNotifications() {
     if (stopped) return
     if (isCommentWatchingEnabled() && !(process.env.IS_CAPACITOR && isAppHidden())) {
       lastCheck = Date.now()
-      // Windows of the desktop app share the watched comments, so one checks them.
-      await navigator.locks.request(LOCK_NAME, { ifAvailable: true }, async lock => {
-        if (lock) await checkThreads()
-      }).catch(error => console.error('Failed to check comments for replies', error))
+      await migrateAndroidWatchedComments()
+      await checkOnce().catch(error => console.error('Failed to check comments for replies', error))
     }
     if (!stopped) timer = setTimeout(check, CHECK_INTERVAL_MS)
   }
@@ -459,7 +492,17 @@ export function startCommentReplyNotifications() {
   }
 
   let removeTapListener = null
-  if (process.env.IS_CAPACITOR) {
+  let stopBackgroundChecks = null
+  if (isAndroid) {
+    document.addEventListener('visibilitychange', checkWhenVisible)
+    stopBackgroundChecks = store.watch(checksWhileClosed, enabled => setPeriodicBackgroundTask('commentReplies', enabled), { immediate: true })
+    // While the app is hidden, but not yet closed
+    onPeriodicBackgroundTask(async () => {
+      if (stopped || !checksWhileClosed()) return
+      await migrateAndroidWatchedComments()
+      await checkOnce()
+    })
+  } else if (process.env.IS_CAPACITOR) {
     document.addEventListener('visibilitychange', checkWhenVisible)
     LocalNotifications.addListener('localNotificationActionPerformed', ({ actionId, notification }) => {
       const target = notification?.extra?.commentReplyTarget
@@ -478,6 +521,7 @@ export function startCommentReplyNotifications() {
     clearTimeout(timer)
     window.removeEventListener('storage', reloadWatchedComments)
     removeTapListener?.()
+    stopBackgroundChecks?.()
     document.removeEventListener('visibilitychange', checkWhenVisible)
   }
 }

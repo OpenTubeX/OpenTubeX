@@ -9,9 +9,12 @@ import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 
 import java.lang.ref.WeakReference;
+import java.util.Set;
 
 @CapacitorPlugin(name = "BackgroundSync")
 public class BackgroundSyncPlugin extends Plugin {
+    private static final Set<String> NOTIFICATION_FEED_TYPES =
+        Set.of("twitch", UploadNotifications.REPLY_FEED_TYPE, UploadNotifications.HEART_FEED_TYPE);
     private static WeakReference<BackgroundSyncPlugin> active = new WeakReference<>(null);
 
     @Override
@@ -28,7 +31,7 @@ public class BackgroundSyncPlugin extends Plugin {
         return active.get() != null;
     }
 
-    /** Asks the app's renderer to sync, returning the hold it releases afterwards. */
+    /** Asks the app's renderer to run its background tasks, returning the hold it releases afterwards. */
     static String requestSync(Context context) {
         BackgroundSyncPlugin plugin = active.get();
         if (plugin == null || !plugin.hasListeners("sync")) return null;
@@ -41,7 +44,32 @@ public class BackgroundSyncPlugin extends Plugin {
 
     @PluginMethod
     public void setEnabled(PluginCall call) {
-        BackgroundSyncWorker.schedule(getContext(), call.getBoolean("enabled", false));
+        String task = call.getString("task");
+        if (task == null || task.isEmpty()) {
+            call.reject("A task is required");
+            return;
+        }
+        BackgroundSyncWorker.schedule(getContext(), task, call.getBoolean("enabled", false));
+        call.resolve();
+    }
+
+    /**
+     * Shows a notification that a background task found, such as a comment reply,
+     * or leaves it to the visible app, like the notifications of new uploads.
+     */
+    @PluginMethod
+    public void deliverNotification(PluginCall call) {
+        String feedType = call.getString("feedType", "");
+        String id = call.getString("id", "");
+        String title = call.getString("title", "");
+        if (!NOTIFICATION_FEED_TYPES.contains(feedType) || id.isEmpty() || title.isEmpty()) {
+            call.reject("A notification needs its kind, ID and title");
+            return;
+        }
+        String thumbnail = call.getString("thumbnail");
+        UploadNotifications.deliver(getContext(), feedType, id, Boolean.TRUE.equals(call.getBoolean("live", false)), title,
+            call.getString("body", ""), thumbnail != null && thumbnail.startsWith("https://") ? thumbnail : null,
+            Boolean.TRUE.equals(call.getBoolean("history", false)), false);
         call.resolve();
     }
 
@@ -64,7 +92,7 @@ public class BackgroundSyncPlugin extends Plugin {
         call.resolve();
     }
 
-    /** The hidden renderer reports that its sync ended. */
+    /** The hidden renderer reports that its tasks ended. */
     @PluginMethod
     public void finishHiddenSync(PluginCall call) {
         BackgroundSyncRenderer.finish(getBridge());

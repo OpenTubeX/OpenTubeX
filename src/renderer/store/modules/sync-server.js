@@ -3,7 +3,7 @@ import { SyncLiveConnectionState, SyncCollectionCache, createSyncActivity, valid
 import i18n from '../../i18n/index'
 import { openExternalLink, showToastOnAllTabs } from '../../helpers/utils'
 import { isAppHidden } from '../../helpers/appVisibility.js'
-import { isAndroidBackgroundSyncRenderer, onAndroidWindowBlur, onPeriodicBackgroundSync } from '../../helpers/androidBackgroundSync.js'
+import { isAndroidBackgroundRenderer, onAndroidWindowBlur, onPeriodicBackgroundTask } from '../../helpers/androidBackgroundSync.js'
 import { connectionEvents, getConnectionState } from '../../helpers/networkRecovery.js'
 import {
   SyncServerClient,
@@ -375,7 +375,7 @@ function isSameSyncAccount(settings, account) {
 // The renderer that syncs while the Android app is closed leaves out live
 // reminders and notification dismissals, because the notification plugin
 // belongs to the app's renderer.
-const syncsNotifications = (process.env.IS_ELECTRON || process.env.IS_CAPACITOR) && !isAndroidBackgroundSyncRenderer
+const syncsNotifications = (process.env.IS_ELECTRON || process.env.IS_CAPACITOR) && !isAndroidBackgroundRenderer
 
 async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, automatic = false, remoteOnly = false } = {}) {
   const { commit, dispatch, rootGetters, rootState } = context
@@ -1862,7 +1862,7 @@ const actions = {
         }
       })
       // Live notifications stop while the app is hidden; check periodically instead.
-      onPeriodicBackgroundSync(() => {
+      onPeriodicBackgroundTask(() => {
         const settings = rootState.settings
         if (!settings.syncServerEnabled || !settings.syncServerAutoSync || !settings.syncServerToken ||
             !isSyncReasonEnabled(settings, 'automatic')) return

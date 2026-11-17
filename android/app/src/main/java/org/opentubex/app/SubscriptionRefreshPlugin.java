@@ -14,9 +14,7 @@ import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -225,113 +223,20 @@ public class SubscriptionRefreshPlugin extends Plugin {
         call.resolve();
     }
 
+    /** The comments that earlier versions watched for replies, for the renderer to take over. */
     @PluginMethod
-    public void configureTwitchLive(PluginCall call) {
-        JSObject configuration = call.getObject("configuration");
-        if (configuration == null) {
-            call.reject("A Twitch configuration is required");
-            return;
-        }
-        TwitchLiveNotifications.configure(getContext(), configuration);
-        call.resolve();
-    }
-
-    @PluginMethod
-    public void configureCommentReplies(PluginCall call) {
-        JSObject configuration = call.getObject("configuration");
-        if (configuration == null) {
-            call.reject("A comment reply configuration is required");
-            return;
-        }
-        CommentReplyNotifications.configure(getContext(), configuration);
-        call.resolve();
-    }
-
-    @PluginMethod
-    public void trackCommentReplies(PluginCall call) {
-        JSObject comment = call.getObject("comment");
-        if (comment == null) {
-            call.reject("A comment is required");
-            return;
-        }
-        Context context = getContext();
-        UPLOADS.execute(() -> {
-            try {
-                CommentReplyNotifications.track(context, comment);
-                call.resolve();
-            } catch (Exception error) {
-                call.reject("Unable to watch the comment for replies", error);
-            }
-        });
-    }
-
-    @PluginMethod
-    public void listCommentReplies(PluginCall call) {
-        // Reads under the lock the writes take, so it need not wait for upload checks.
+    public void readLegacyWatchedComments(PluginCall call) {
         try {
-            call.resolve(new JSObject().put("threads", CommentReplyNotifications.list(getContext())));
+            call.resolve(new JSObject().put("threads", LegacyNotificationChecks.readWatchedComments(getContext())));
         } catch (Exception error) {
-            call.reject("Unable to list the watched comments", error);
+            call.reject("Unable to read the watched comments", error);
         }
     }
 
     @PluginMethod
-    public void untrackCommentReplies(PluginCall call) {
-        JSObject comment = call.getObject("comment");
-        if (comment == null) {
-            call.reject("A comment is required");
-            return;
-        }
-        Context context = getContext();
-        // After the tracking writes queued before it, which would bring the comment back.
-        UPLOADS.execute(() -> {
-            try {
-                CommentReplyNotifications.untrack(context, comment);
-                call.resolve();
-            } catch (Exception error) {
-                call.reject("Unable to stop watching the comment", error);
-            }
-        });
-    }
-
-    @PluginMethod
-    public void touchCommentReplies(PluginCall call) {
-        JSObject thread = call.getObject("thread");
-        if (thread == null) {
-            call.reject("A thread is required");
-            return;
-        }
-        Context context = getContext();
-        // After the tracking writes queued before it, so it counts for the comments they watch.
-        UPLOADS.execute(() -> {
-            try {
-                CommentReplyNotifications.touch(context, thread.optString("videoId"), thread.optString("threadId"));
-                call.resolve();
-            } catch (Exception error) {
-                call.reject("Unable to count opening the watched comments", error);
-            }
-        });
-    }
-
-    @PluginMethod
-    public void observeTwitchLive(PluginCall call) {
-        JSArray streams = call.getArray("streams");
-        JSArray channelIds = call.getArray("channelIds");
-        if (streams == null || channelIds == null) {
-            call.reject("Twitch channels and streams are required");
-            return;
-        }
-        Context context = getContext();
-        UPLOADS.execute(() -> {
-            try {
-                List<String> checked = new ArrayList<>();
-                for (int index = 0; index < channelIds.length(); index++) checked.add(channelIds.optString(index));
-                TwitchLiveNotifications.observe(context, checked, streams);
-                call.resolve();
-            } catch (Exception error) {
-                call.reject("Unable to check for Twitch streams", error);
-            }
-        });
+    public void clearLegacyNotificationChecks(PluginCall call) {
+        LegacyNotificationChecks.clear(getContext());
+        call.resolve();
     }
 
     @PluginMethod

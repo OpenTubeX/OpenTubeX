@@ -276,8 +276,7 @@ const KNOWN_STREAMS_PER_CHANNEL = 20
 /**
  * Records the live streams of the followed channels and returns the ones that
  * started since the last check. The first check of a channel only records its
- * stream, so following a channel that is live announces nothing. Mirrored by
- * TwitchLiveNotifications.java.
+ * stream, so following a channel that is live announces nothing.
  * @param {Record<string, string[]>} known stream IDs by channel ID, updated in place
  * @param {string[]} channelIds the followed channels that were checked
  * @param {TwitchFeedItem[]} live their live streams

@@ -17,7 +17,7 @@ import { initializeAndroidDynamicColors } from './helpers/dynamicColors'
 import { observeAndroidNetworkMetered } from './helpers/androidUi'
 import './helpers/reducedTransparency'
 import { networkMetered } from './helpers/player/meteredNetworkQuality'
-import { isAndroidBackgroundSyncRenderer } from './helpers/androidBackgroundSync'
+import { isAndroidBackgroundRenderer } from './helpers/androidBackgroundSync'
 // import the styles
 import './helpers/overlayScrollbars.css'
 // Only the positioning and stacking rules are used, FtToast supplies the design
@@ -54,10 +54,10 @@ installTitleTooltips()
 
 const tabNavigation = initializeTabNavigationService(router, store)
 
-if (isAndroidBackgroundSyncRenderer) {
+if (isAndroidBackgroundRenderer) {
   // Loaded only here, as its datastore import would load NeDB at startup,
   // which throws in the desktop app.
-  import('./startup/androidBackgroundSync').then(({ runAndroidBackgroundSync }) => runAndroidBackgroundSync(store))
+  import('./startup/androidBackgroundTasks').then(({ runAndroidBackgroundTasks }) => runAndroidBackgroundTasks(store))
 } else {
   startApp()
 }
@@ -130,7 +130,7 @@ if (process.env.IS_ELECTRON) {
   })
 }
 
-if (supportsYtDlp && !isAndroidBackgroundSyncRenderer) {
+if (supportsYtDlp && !isAndroidBackgroundRenderer) {
   const removedDownloadIds = new Set()
 
   ytDlp.handleYtDlpDownloadStatus((download) => {

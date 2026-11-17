@@ -11,7 +11,7 @@ function fixture (native, env = { IS_CAPACITOR: true }, message = 'Nearby device
     process: { env },
     registerPlugin: () => native,
     i18n: { global: { t: () => message } },
-    isAndroidBackgroundSyncRenderer: hiddenRenderer,
+    isAndroidBackgroundRenderer: hiddenRenderer,
   })
   vm.runInContext(source.replace(/^import .*\n/gm, '').replace('export async function', 'async function')
     .replace("await import('../i18n/index.js')", '({ default: globalThis.i18n })'), context)

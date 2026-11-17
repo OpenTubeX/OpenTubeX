@@ -154,10 +154,10 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
       return () => clearTimeout(timeout)
     },
     holdAndroidBackgroundWork: () => () => {},
-    setPeriodicBackgroundSync: () => {},
-    onPeriodicBackgroundSync: () => {},
+    setPeriodicBackgroundTask: () => {},
+    onPeriodicBackgroundTask: () => {},
     onAndroidWindowBlur: () => {},
-    isAndroidBackgroundSyncRenderer: hiddenRenderer,
+    isAndroidBackgroundRenderer: hiddenRenderer,
     structuredClone,
     TextEncoder,
     TextDecoder,

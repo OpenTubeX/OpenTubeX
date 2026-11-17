@@ -6,16 +6,21 @@ const BackgroundSync = process.env.IS_CAPACITOR && !process.env.IS_IOS
   ? registerPlugin('BackgroundSync')
   : null
 
-let periodicSyncEnabled = null
+/** @typedef {'sync' | 'commentReplies' | 'twitchLive'} PeriodicBackgroundTask */
+
+/** @type {Map<PeriodicBackgroundTask, boolean>} */
+const enabledTasks = new Map()
+/** @type {(() => Promise<unknown>)[]} */
+const periodicTasks = []
 
 /**
- * Whether this page is the hidden renderer that the periodic job loads to sync
- * while the app is closed, rather than the app.
+ * Whether this page is the hidden renderer that the periodic job loads to run
+ * the background tasks while the app is closed, rather than the app.
  */
-export const isAndroidBackgroundSyncRenderer = Boolean(BackgroundSync) && 'OpenTubeXBackgroundSync' in window
+export const isAndroidBackgroundRenderer = Boolean(BackgroundSync) && 'OpenTubeXBackgroundSync' in window
 
-/** Tells the periodic job that the hidden renderer's sync ended. */
-export function finishAndroidBackgroundSync() {
+/** Tells the periodic job that the hidden renderer's tasks ended. */
+export function finishAndroidBackgroundTasks() {
   return BackgroundSync.finishHiddenSync()
 }
 
@@ -33,22 +38,54 @@ export function holdAndroidBackgroundWork() {
   }
 }
 
-/** Schedules or cancels the periodic sync of a hidden app. */
-export function setPeriodicBackgroundSync(enabled) {
-  if (!BackgroundSync || periodicSyncEnabled === enabled) return
-  periodicSyncEnabled = enabled
-  BackgroundSync.setEnabled({ enabled }).catch(error => {
-    console.error('Failed to schedule Android background sync', error)
+/**
+ * Turns a task of the periodic job on or off. The job runs while the app is
+ * hidden or closed, as long as any task is on.
+ * @param {PeriodicBackgroundTask} task
+ * @param {boolean} enabled
+ */
+export function setPeriodicBackgroundTask(task, enabled) {
+  if (!BackgroundSync || enabledTasks.get(task) === enabled) return
+  enabledTasks.set(task, enabled)
+  BackgroundSync.setEnabled({ task, enabled }).catch(error => {
+    // Sent again with the next call
+    if (enabledTasks.get(task) === enabled) enabledTasks.delete(task)
+    console.error('Failed to schedule an Android background task', error)
   })
 }
 
-/** @param {() => Promise<unknown>} sync Runs when the periodic job asks for a sync. */
-export function onPeriodicBackgroundSync(sync) {
-  BackgroundSync?.addListener('sync', ({ id }) => {
-    Promise.resolve().then(sync)
-      .catch(error => console.error('Android background sync failed', error))
-      .finally(() => BackgroundSync.end({ id }).catch(() => {}))
-  })
+/**
+ * Runs a task whenever the periodic job wakes the hidden app. The job keeps the
+ * app running until every task has finished.
+ * @param {() => Promise<unknown>} task
+ */
+export function onPeriodicBackgroundTask(task) {
+  if (!BackgroundSync) return
+  if (periodicTasks.length === 0) {
+    BackgroundSync.addListener('sync', ({ id }) => {
+      Promise.allSettled(periodicTasks.map(run => Promise.resolve().then(run).catch(error => {
+        console.error('Android background task failed', error)
+      }))).finally(() => BackgroundSync.end({ id }).catch(() => {}))
+    })
+  }
+  periodicTasks.push(task)
+}
+
+/**
+ * Shows a notification that a check found, or leaves it to the visible app.
+ * With `history`, the app adds it to its notification history.
+ * @param {{
+ *   feedType: 'twitch' | 'comment-reply' | 'comment-heart',
+ *   id: string,
+ *   title: string,
+ *   body: string,
+ *   thumbnail?: string | null,
+ *   live?: boolean,
+ *   history: boolean
+ * }} notification
+ */
+export async function deliverAndroidNotification(notification) {
+  await BackgroundSync.deliverNotification(notification)
 }
 
 /**

@@ -107,63 +107,16 @@ export async function cancelAndroidUploadNotifications(uploads) {
   if (SubscriptionRefresh) await SubscriptionRefresh.cancelUploadNotifications({ uploads })
 }
 
-/**
- * Which followed Twitch channels Android checks for live streams, also while
- * the app is closed if it may refresh subscriptions then.
- * @param {{ enabled: boolean, mode: string, closedApp: boolean, thumbnails: boolean, title: string, channels: { id: string, login: string, name: string }[] }} configuration
- */
-export async function configureAndroidTwitchLive(configuration) {
-  if (SubscriptionRefresh) await SubscriptionRefresh.configureTwitchLive({ configuration })
-}
-
-/**
- * Announces the streams that started since the last check, through the
- * notifications Android keeps for the notification history.
- * @param {string[]} channelIds the channels the streams were requested for
- * @param {{ channelId: string, id: string, title: string, thumbnail?: string }[]} streams
- */
-export async function observeAndroidTwitchLive(channelIds, streams) {
-  if (SubscriptionRefresh) await SubscriptionRefresh.observeTwitchLive({ channelIds, streams })
-}
-
-/**
- * How Android checks the comments the account posted for replies, while the
- * app is visible and, if it may refresh subscriptions then, while it is closed.
- * @param {{ enabled: boolean, mode: string, closedApp: boolean, title: string, thumbnail: string, request: { url: string, body: string } }} configuration
- */
-export async function configureAndroidCommentReplies(configuration) {
-  if (SubscriptionRefresh) await SubscriptionRefresh.configureCommentReplies({ configuration })
-}
-
-/**
- * Has Android watch a comment for replies.
- * @param {Parameters<typeof import('../../commentReplyTracking.js').trackComment>[1] & { token: string }} comment
- */
-export async function trackAndroidCommentReplies(comment) {
-  if (SubscriptionRefresh) await SubscriptionRefresh.trackCommentReplies({ comment })
-}
-
-/** @returns {Promise<unknown[]>} the threads Android watches, last active first */
-export async function listAndroidCommentReplies() {
+/** @returns {Promise<unknown[]>} the comments that the native checks of earlier versions watched */
+export async function readLegacyAndroidWatchedComments() {
   if (!SubscriptionRefresh) return []
-  const { threads } = await SubscriptionRefresh.listCommentReplies()
+  const { threads } = await SubscriptionRefresh.readLegacyWatchedComments()
   return threads
 }
 
-/**
- * Has Android stop watching a comment, with its author's other comments in the thread.
- * @param {{ videoId: string, threadId: string, channelId: string }} comment
- */
-export async function untrackAndroidCommentReplies(comment) {
-  if (SubscriptionRefresh) await SubscriptionRefresh.untrackCommentReplies({ comment })
-}
-
-/**
- * Has Android count opening a thread as activity of the comments watched in it.
- * @param {{ videoId: string, threadId: string }} thread
- */
-export async function touchAndroidCommentReplies(thread) {
-  if (SubscriptionRefresh) await SubscriptionRefresh.touchCommentReplies({ thread })
+/** Removes the native checks of earlier versions, with their watched comments and known Twitch streams. */
+export async function clearLegacyAndroidNotificationChecks() {
+  if (SubscriptionRefresh) await SubscriptionRefresh.clearLegacyNotificationChecks()
 }
 
 export async function isAndroidSubscriptionRefreshActive() {
