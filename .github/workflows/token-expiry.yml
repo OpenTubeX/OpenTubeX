@@ -1,14 +1,9 @@
 name: Token expiry
 
 # Opens an issue in OpenTubeX/OpenTubeX when a secret expires within 30 days or stops working.
-# Other OpenTubeX repositories call this workflow with their own secrets.
 on:
+  # Other repositories call this with `secrets: inherit`.
   workflow_call:
-    inputs:
-      tokens:
-        description: 'Secrets to check, as space-separated NAME:kind pairs (kind: github, gitlab, cloudflare, snap, gpg)'
-        type: string
-        required: true
   schedule:
     - cron: '23 6 * * 1'
   workflow_dispatch:
@@ -31,8 +26,6 @@ jobs:
           sparse-checkout: _scripts/tokenExpiry.mjs
           sparse-checkout-cone-mode: false
           persist-credentials: false
-      - if: contains(inputs.tokens, ':snap')
-        run: sudo snap install snapcraft --classic
       - uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         id: app-token
         with:
@@ -44,6 +37,17 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
           REPOSITORY: ${{ github.repository }}
-          TOKENS: ${{ inputs.tokens || 'GITLAB_SYNC_BOT_TOKEN:gitlab GITLAB_MIRROR_TOKEN:gitlab PUSH_TOKEN:github PACKAGE_SUBMISSION_TOKEN:github SCORECARD_TOKEN:github UPSTREAM_SYNC_TOKEN:github' }}
-          SECRETS: ${{ toJSON(secrets) }}
+          # Every secret that _scripts/tokenExpiry.mjs knows; unset ones are skipped.
+          GITLAB_SYNC_BOT_TOKEN: ${{ secrets.GITLAB_SYNC_BOT_TOKEN }}
+          GITLAB_MIRROR_TOKEN: ${{ secrets.GITLAB_MIRROR_TOKEN }}
+          PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
+          PACKAGE_SUBMISSION_TOKEN: ${{ secrets.PACKAGE_SUBMISSION_TOKEN }}
+          SCORECARD_TOKEN: ${{ secrets.SCORECARD_TOKEN }}
+          UPSTREAM_SYNC_TOKEN: ${{ secrets.UPSTREAM_SYNC_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
+          APT_GPG_PRIVATE_KEY: ${{ secrets.APT_GPG_PRIVATE_KEY }}
+          ARCH_GPG_PRIVATE_KEY: ${{ secrets.ARCH_GPG_PRIVATE_KEY }}
+          RPM_GPG_PRIVATE_KEY: ${{ secrets.RPM_GPG_PRIVATE_KEY }}
         run: node _scripts/tokenExpiry.mjs

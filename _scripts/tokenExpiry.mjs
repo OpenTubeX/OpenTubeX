@@ -40,17 +40,19 @@ export const checks = {
     // GitLab tokens stop working at the start of their expiry date.
     return { expires: body.expires_at ? new Date(`${body.expires_at}T00:00:00Z`) : null }
   },
-  async cloudflare(token, secrets) {
+  async cloudflare(token) {
+    const account = process.env.CLOUDFLARE_ACCOUNT_ID
     const headers = { authorization: `Bearer ${token}` }
     let { body } = await json('https://api.cloudflare.com/client/v4/user/tokens/verify', headers)
     // Account-owned tokens verify through the account instead.
-    if (!body.success && secrets.CLOUDFLARE_ACCOUNT_ID) {
-      ({ body } = await json(`https://api.cloudflare.com/client/v4/accounts/${secrets.CLOUDFLARE_ACCOUNT_ID}/tokens/verify`, headers))
+    if (!body.success && account) {
+      ({ body } = await json(`https://api.cloudflare.com/client/v4/accounts/${account}/tokens/verify`, headers))
     }
     if (!body.success || body.result?.status !== 'active') return { problem: 'Cloudflare rejects it' }
     return { expires: body.result.expires_on ? new Date(body.result.expires_on) : null }
   },
   async snap(credentials) {
+    run('sudo', ['snap', 'install', 'snapcraft', '--classic'])
     try {
       const expires = run('snapcraft', ['whoami'], { SNAPCRAFT_STORE_CREDENTIALS: credentials }).match(/^expires:\s*(.+)$/m)?.[1]
       return { expires: expires ? new Date(expires.trim()) : null }
@@ -77,6 +79,21 @@ export const checks = {
   },
 }
 
+// Secrets in OpenTubeX repositories that expire.
+const kinds = {
+  GITLAB_SYNC_BOT_TOKEN: 'gitlab',
+  GITLAB_MIRROR_TOKEN: 'gitlab',
+  PUSH_TOKEN: 'github',
+  PACKAGE_SUBMISSION_TOKEN: 'github',
+  SCORECARD_TOKEN: 'github',
+  UPSTREAM_SYNC_TOKEN: 'github',
+  CLOUDFLARE_API_TOKEN: 'cloudflare',
+  SNAPCRAFT_STORE_CREDENTIALS: 'snap',
+  APT_GPG_PRIVATE_KEY: 'gpg',
+  ARCH_GPG_PRIVATE_KEY: 'gpg',
+  RPM_GPG_PRIVATE_KEY: 'gpg',
+}
+
 const renewal = {
   github: 'Create a new fine-grained token with the same repository access and permissions, and replace the secret.',
   gitlab: 'Rotate the token in the GitLab account that owns it, or create a new one with the same scopes, and replace the secret.',
@@ -89,20 +106,15 @@ const ghWrite = (args, body) => execFileSync('gh', ['api', ...args, '--input', '
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const repository = process.env.REPOSITORY
-  const secrets = JSON.parse(process.env.SECRETS)
-  const tokens = process.env.TOKENS.trim().split(/\s+/).map(entry => entry.split(':'))
+  // The workflow passes every secret it knows; each repository has a few of them.
+  const secrets = Object.fromEntries(Object.entries(kinds).map(([name]) => [name, process.env[name]]).filter(([, value]) => value))
+  const tokens = Object.entries(kinds).filter(([name]) => secrets[name])
   const open = JSON.parse(run('gh', ['api', '--paginate', '--slurp', `repos/${inbox}/issues?state=open&creator=${encodeURIComponent(bot)}&per_page=100`])).flat()
-  let failed = false
 
   for (const [name, kind] of tokens) {
     const marker = `<!-- token-expiry:${repository}:${name} -->`
     const issue = open.find(item => item.body?.startsWith(marker))
-    if (!checks[kind] || !secrets[name]) {
-      console.error(`${name}: ${checks[kind] ? 'the secret is not set' : `unknown kind ${kind}`}`)
-      failed = true
-      continue
-    }
-    const result = await checks[kind](secrets[name], secrets)
+    const result = await checks[kind](secrets[name])
     const date = result.expires?.toISOString().slice(0, 10)
     const soon = result.expires && result.expires - Date.now() < warnDays * day
     console.log(`${name}: ${result.problem ?? (date ? `expires ${date}` : 'does not expire')}`)
@@ -120,6 +132,4 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
       ghWrite(['--method', 'PATCH', `repos/${inbox}/issues/${issue.number}`], { state: 'closed', state_reason: 'completed' })
     }
   }
-
-  if (failed) process.exitCode = 1
 }
