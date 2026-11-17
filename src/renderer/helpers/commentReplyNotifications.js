@@ -176,6 +176,8 @@ export async function getWatchedComments() {
 }
 
 let androidMigration = null
+// A retry after a failed cleanup must not watch again what was unwatched meanwhile.
+let androidCommentsImported = false
 
 /**
  * Takes over the comments that the native checks of earlier Android versions
@@ -186,13 +188,16 @@ function migrateAndroidWatchedComments() {
   // The renderer of the periodic job lacks the plugin, and the app migrates once it opens.
   if (!isAndroid || isAndroidBackgroundRenderer) return Promise.resolve()
   androidMigration ??= (async () => {
-    const legacy = await readLegacyAndroidWatchedComments()
-    if (legacy.length > 0) {
-      const threads = loadThreads()
-      saveThreads(normalizeTrackedCommentThreads([
-        ...threads,
-        ...legacy.filter(thread => !threads.some(item => isSameWatchedComment(item, thread)))
-      ]))
+    if (!androidCommentsImported) {
+      const legacy = await readLegacyAndroidWatchedComments()
+      if (legacy.length > 0) {
+        const threads = loadThreads()
+        saveThreads(normalizeTrackedCommentThreads([
+          ...threads,
+          ...legacy.filter(thread => !threads.some(item => isSameWatchedComment(item, thread)))
+        ]))
+      }
+      androidCommentsImported = true
     }
     // Saved first, so stopping in between takes them over again instead of losing them.
     await clearLegacyAndroidNotificationChecks()

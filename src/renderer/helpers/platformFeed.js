@@ -759,7 +759,7 @@ async function checkLiveStreams(configuration) {
     for (const stream of fresh) {
       // Nothing is announced once notifications are off, nor for channels unfollowed meanwhile
       const current = getLiveConfiguration()
-      if (!current.enabled) return
+      if (!current.enabled || generation !== knownStreamsGeneration) return
       await announceStream(current, stream).catch(error => console.error('Failed to announce a Twitch stream', error))
     }
   } catch (error) {
