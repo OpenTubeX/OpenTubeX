@@ -102,9 +102,8 @@ const title = computed(() => props.compact ? fullText.value : description.value)
   font-size: 0.7em;
   font-weight: 600;
   gap: 4px;
-  /* Symmetric, as the badge sits between the label and the tooltip or sync icons */
-  margin-inline: 6px;
-  max-inline-size: calc(100% - 12px);
+  /* The parent spaces the badge with a gap, so it lines up with the label once it wraps */
+  max-inline-size: 100%;
   padding-block: 1px;
   padding-inline: 6px;
   text-transform: uppercase;
@@ -117,7 +116,8 @@ const title = computed(() => props.compact ? fullText.value : description.value)
 
 .performanceImpactLabel {
   min-inline-size: 0;
-  overflow-wrap: anywhere;
+  /* Breaks between words before splitting one */
+  overflow-wrap: break-word;
 }
 
 .compact {

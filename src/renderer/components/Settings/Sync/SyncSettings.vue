@@ -152,6 +152,7 @@
         </p>
         <FtFlexBox class="toggles syncOptions">
           <FtToggleSwitch
+            class="autoSync"
             :label="t('Settings.Sync Settings.Sync Automatically')"
             :default-value="autoSync"
             compact

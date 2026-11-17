@@ -141,6 +141,11 @@
   justify-items: start;
 }
 
+/* Not a collection, and a column is too narrow for its performance badge */
+.autoSync {
+  grid-column: 1 / -1;
+}
+
 .fields :deep(.ft-input-component) {
   inline-size: min(100%, 32rem);
 }

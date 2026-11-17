@@ -45,7 +45,9 @@
   padding-block: 6px;
   padding-inline: calc(var(--switch-track-width) + 18px) 6px;
   position: relative;
-  row-gap: 4px;
+
+  /* Gaps instead of badge margins, so wrapped badges line up with the label text */
+  gap: 4px 6px;
   text-align: start;
 
   @media (width <= 680px) {
@@ -237,9 +239,6 @@
   font-size: 0.7em;
   font-weight: 600;
   gap: 4px;
-
-  /* Symmetric, like the performance impact badge it sits next to */
-  margin-inline: 6px;
   padding-block: 1px;
   padding-inline: 6px;
   text-transform: uppercase;
