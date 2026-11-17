@@ -104,6 +104,7 @@ export const SYNC_SETTING_LABELS = {
   enterFullscreenOnDisplayRotate: 'Settings.Player Settings.Enter Fullscreen on Display Rotate',
   fastSubscriptionRefresh: 'Settings.Subscription Settings.Faster Subscription Refresh',
   fullscreenRotationIgnoresSystemLock: 'Settings.Player Settings.Ignore System Rotation Lock for Fullscreen',
+  keepStatusBarHiddenInFullscreen: 'Settings.Player Settings.Keep Status Bar Hidden in Fullscreen',
   expandSideBar: 'Settings.Theme Settings.Expand Side Bar by Default',
   externalLinkHandling: 'Settings.General Settings.External Link Handling.External Link Handling',
   thumbnailLeftSwipeAction: 'Settings.General Settings.Thumbnail Swipe Gestures.Left',

@@ -1030,6 +1030,7 @@ Settings:
     Upcoming Videos to Preload: "Antal videoer, der skal forudindlæses"
     Concurrent Preloads: "Samtidige forudindlæsninger"
     Ignore System Rotation Lock for Fullscreen: Ignorer systemets rotationslås for fuld skærm
+    Keep Status Bar Hidden in Fullscreen: "Hold statuslinjen skjult i fuld skærm"
     Swipe Left or Right to Seek in Fullscreen: Stryg til venstre eller højre for at spole i fuld skærm
     Show Swipe to Seek Preview: Vis forhåndsvisning ved spoling med stryg
     Enable Google Cast: "Aktivér Google Cast"
@@ -2458,6 +2459,7 @@ Tooltips:
     Upcoming Videos to Preload: "Det højeste antal kommende videoer, hvis yt-dlp-streamadresser hentes i baggrunden."
     Concurrent Preloads: "Det højeste antal yt-dlp-processer, der bruges til at forudindlæse videoer samtidig. Højere værdier bruger mere CPU, hukommelse og netværksbåndbredde."
     Ignore System Rotation Lock for Fullscreen: Drej enheden fysisk for at åbne og afslutte fuld skærm, selv når automatisk rotation er slået fra i Android.
+    Keep Status Bar Hidden in Fullscreen: "Vis kun statuslinjen, når du stryger fra skærmkanten, og skjul den igen efter et øjeblik. Et tryk på afspilleren viser den ikke længere."
     Ask Before Preloading Large Playlists: "Beder om bekræftelse, før alle videoer i en playliste med mere end {count} videoer forudindlæses."
     Enable Timestamp Notes: "Tilføjer en afspillerknap og genvejen N, der sætter videoen på pause og åbner en note, der linker til det aktuelle øjeblik. Noter kan kopieres som Markdown eller på computeren føjes til Obsidian."
     Obsidian Vault: Navnet på Obsidian-boksen til tidsstempelnoter. Når den er angivet, kan noter føjes til Obsidian. Noterne for hver video samles i en note opkaldt efter videoen i boksens mappe til nye noter.

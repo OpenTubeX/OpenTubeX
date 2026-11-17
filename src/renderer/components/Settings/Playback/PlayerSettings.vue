@@ -542,6 +542,15 @@
         @change="updateFullscreenRotationIgnoresSystemLock"
       />
       <FtToggleSwitch
+        v-if="IS_CAPACITOR && !IS_IOS"
+        :label="t('Settings.Player Settings.Keep Status Bar Hidden in Fullscreen')"
+        :tooltip="t('Tooltips.Player Settings.Keep Status Bar Hidden in Fullscreen')"
+        :compact="true"
+        :default-value="store.getters.getKeepStatusBarHiddenInFullscreen"
+        setting-key="keepStatusBarHiddenInFullscreen"
+        @change="store.dispatch('updateKeepStatusBarHiddenInFullscreen', $event)"
+      />
+      <FtToggleSwitch
         v-if="IS_CAPACITOR"
         :label="t('Settings.Player Settings.Rotate Wide Videos to Landscape in Fullscreen')"
         :compact="true"

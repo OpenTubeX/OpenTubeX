@@ -401,6 +401,7 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
 
   if (sectionType === 'player' && [
     'Ignore System Rotation Lock for Fullscreen',
+    'Keep Status Bar Hidden in Fullscreen',
     'Quality Limit on Metered Networks',
   ].includes(group)) {
     return isCapacitor && !isIos

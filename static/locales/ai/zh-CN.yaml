@@ -1002,6 +1002,7 @@ Settings:
     Upcoming Videos to Preload: "要预加载的视频数量"
     Concurrent Preloads: "并发预加载数"
     Ignore System Rotation Lock for Fullscreen: 全屏时忽略系统旋转锁定
+    Keep Status Bar Hidden in Fullscreen: "全屏时保持状态栏隐藏"
     Swipe Left or Right to Seek in Fullscreen: 全屏时向左或向右滑动以快进或快退
     Show Swipe to Seek Preview: 滑动快进或快退时显示预览
     Enable Google Cast: "启用 Google Cast"
@@ -2368,6 +2369,7 @@ Tooltips:
     Upcoming Videos to Preload: "在后台获取 yt-dlp 流地址的后续视频数量上限。"
     Concurrent Preloads: "同时用于预加载视频的 yt-dlp 进程数上限。数值越高，使用的 CPU、内存和网络带宽越多。"
     Ignore System Rotation Lock for Fullscreen: 通过转动设备进入和退出全屏，即使 Android 的自动旋转已关闭。
+    Keep Status Bar Hidden in Fullscreen: "仅在从屏幕边缘滑动时显示状态栏，并在片刻后再次隐藏。点按播放器不再显示状态栏。"
     Ask Before Preloading Large Playlists: "预加载超过 {count} 个视频的播放列表中的所有视频前请求确认。"
     Enable Timestamp Notes: "添加一个播放器按钮和 N 快捷键，用于暂停视频并打开一条链接到当前时刻的笔记。笔记可以复制为 Markdown，或在桌面版中添加到 Obsidian。"
     Obsidian Vault: 用于时间戳笔记的 Obsidian 仓库名称。设置后，可将笔记添加到 Obsidian。每个视频的笔记会汇总到一篇以该视频命名的笔记中，位于仓库的新笔记文件夹内。

@@ -1002,6 +1002,7 @@ Settings:
     Upcoming Videos to Preload: "Počet videí na prednačítanie"
     Concurrent Preloads: "Súbežné prednačítania"
     Ignore System Rotation Lock for Fullscreen: Ignorovať systémový zámok otáčania pre celú obrazovku
+    Keep Status Bar Hidden in Fullscreen: "Ponechať stavový riadok skrytý na celej obrazovke"
     Swipe Left or Right to Seek in Fullscreen: Potiahnutím doľava alebo doprava posúvať prehrávanie na celej obrazovke
     Show Swipe to Seek Preview: Zobraziť náhľad pri pretáčaní potiahnutím
     Enable Google Cast: "Povoliť Google Cast"
@@ -2376,6 +2377,7 @@ Tooltips:
     Upcoming Videos to Preload: "Najvyšší počet nasledujúcich videí, ktorých adresy yt-dlp sa načítajú na pozadí."
     Concurrent Preloads: "Maximálny počet procesov yt-dlp použitých na súbežné prednačítanie videí. Vyššie hodnoty využívajú viac procesora, pamäte a šírky pásma siete."
     Ignore System Rotation Lock for Fullscreen: Fyzickým otočením zariadenia zapnete a vypnete celú obrazovku, aj keď je automatické otáčanie v Androide vypnuté.
+    Keep Status Bar Hidden in Fullscreen: "Zobraziť stavový riadok len pri potiahnutí od okraja obrazovky a po chvíli ho znova skryť. Ťuknutie na prehrávač ho už nezobrazí."
     Ask Before Preloading Large Playlists: "Pred prednačítaním všetkých videí playlistu s viac ako {count} videami požiada o potvrdenie."
     Enable Timestamp Notes: "Pridá do prehrávača tlačidlo a skratku N, ktoré pozastavia video a otvoria poznámku s odkazom na aktuálny okamih. Poznámky možno skopírovať ako Markdown alebo ich na počítači pridať do Obsidianu."
     Obsidian Vault: Názov trezoru Obsidian pre poznámky s časovými pečiatkami. Ak je nastavený, poznámky možno pridávať do Obsidianu. Poznámky ku každému videu sa zhromažďujú v poznámke pomenovanej podľa videa, v priečinku trezoru pre nové poznámky.

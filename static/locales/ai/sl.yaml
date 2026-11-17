@@ -1220,6 +1220,7 @@ Settings:
     Upcoming Videos to Preload: "Število videov za prednalaganje"
     Concurrent Preloads: "Sočasno prednalaganje"
     Ignore System Rotation Lock for Fullscreen: Prezri sistemski zaklep vrtenja za celoten zaslon
+    Keep Status Bar Hidden in Fullscreen: "Ohrani vrstico stanja skrito v celozaslonskem načinu"
     Swipe Left or Right to Seek in Fullscreen: Podrsnite levo ali desno za previjanje v celozaslonskem načinu
     Show Swipe to Seek Preview: Pokaži predogled pri previjanju s potegom
     Enable Google Cast: "Omogoči Google Cast"
@@ -2881,6 +2882,7 @@ Tooltips:
     Upcoming Videos to Preload: "Največje število naslednjih videov, katerih naslovi yt-dlp se pridobijo v ozadju."
     Concurrent Preloads: "Največje število procesov yt-dlp, ki se uporabljajo za sočasno prednalaganje videov. Višje vrednosti porabijo več procesorske moči, pomnilnika in omrežne pasovne širine."
     Ignore System Rotation Lock for Fullscreen: Fizično obrnite napravo za vstop in izstop iz celotnega zaslona, tudi ko je samodejno vrtenje v Androidu izklopljeno.
+    Keep Status Bar Hidden in Fullscreen: "Pokaži vrstico stanja samo, ko podrsate z roba zaslona, in jo čez trenutek znova skrij. Dotik predvajalnika je ne prikaže več."
     Ask Before Preloading Large Playlists: "Pred prednalaganjem vseh videoposnetkov s seznama predvajanja z več kot {count} videoposnetki zahteva potrditev."
     Enable Timestamp Notes: "V predvajalnik doda gumb in bližnjico N, ki zaustavita videoposnetek in odpreta opombo s povezavo do trenutnega trenutka. Opombe lahko kopirate kot Markdown ali jih na računalniku dodate v Obsidian."
     Obsidian Vault: Ime trezorja Obsidian za opombe s časovnimi oznakami. Ko je nastavljeno, lahko opombe dodajate v Obsidian. Opombe posameznega videoposnetka se zbirajo v opombi, poimenovani po videoposnetku, v mapi trezorja za nove opombe.

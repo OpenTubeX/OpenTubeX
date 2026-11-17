@@ -1002,6 +1002,7 @@ Settings:
     Upcoming Videos to Preload: "Niver a videoioù da rakgargañ"
     Concurrent Preloads: "Rakgargadennoù war un dro"
     Ignore System Rotation Lock for Fullscreen: Na ober van eus prenn troadur ar reizhiad evit ar skramm leun
+    Keep Status Bar Hidden in Fullscreen: "Kuzhat ar varrenn-stad atav e skramm a-bezh"
     Swipe Left or Right to Seek in Fullscreen: Riklañ a-gleiz pe a-zehou evit mont war-raok pe war-gil e skramm leun
     Show Swipe to Seek Preview: Diskouez ar rakwel pa rikler evit mont en a-raok pe war-gil
     Enable Google Cast: "Gweredekaat Google Cast"
@@ -2379,6 +2380,7 @@ Tooltips:
     Upcoming Videos to Preload: "Niver brasañ a videoioù da-heul a vez karget o liammoù yt-dlp en drekleur."
     Concurrent Preloads: "Niver brasañ a argerzhioù yt-dlp a vez implijet evit rakgargañ videoioù war un dro. An talvoudoù uheloc'h a implij muioc'h a c'halloud ar c'hewerier, a vemor hag a ledander rouedad."
     Ignore System Rotation Lock for Fullscreen: Troit an trevnad evit mont e skramm leun hag er-maez anezhañ, zoken pa vez diweredekaet an troadur emgefreek en Android.
+    Keep Status Bar Hidden in Fullscreen: "Diskouez ar varrenn-stad pa riklit eus bord ar skramm hepken, ha kuzhat anezhi en-dro goude ur pennadig. Stokañ al lenner ne ziskouez ket anezhi ken."
     Ask Before Preloading Large Playlists: "Goulenn a ra ur gadarnaat a-raok rakgargañ holl videoioù ur roll-lenn gant muioc’h eget {count} video."
     Enable Timestamp Notes: "Ouzhpennañ a ra ur bouton el lenner hag ar verradenn N a ehan ar video hag a zigor un notenn gant ul liamm d'ar mare-mañ. Gallout a reer eilañ an notennoù e Markdown pe, war an urzhiataer, o ouzhpennañ da Obsidian."
     Obsidian Vault: Anv kell Obsidian evit an notennoù gant merk-amzer. Pa vez termenet, e c'haller ouzhpennañ notennoù da Obsidian. Dastumet e vez notennoù pep video en un notenn anvet diwar ar video, e teuliad ar gell evit an notennoù nevez.

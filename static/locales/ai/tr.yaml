@@ -1002,6 +1002,7 @@ Settings:
     Upcoming Videos to Preload: "Önceden yüklenecek video sayısı"
     Concurrent Preloads: "Eş Zamanlı Ön Yüklemeler"
     Ignore System Rotation Lock for Fullscreen: Tam ekran için sistem döndürme kilidini yok say
+    Keep Status Bar Hidden in Fullscreen: "Tam ekranda durum çubuğunu gizli tut"
     Swipe Left or Right to Seek in Fullscreen: Tam ekranda ileri veya geri sarmak için sola veya sağa kaydırın
     Show Swipe to Seek Preview: Kaydırarak sararken önizlemeyi göster
     Enable Google Cast: "Google Cast özelliğini etkinleştir"
@@ -2369,6 +2370,7 @@ Tooltips:
     Upcoming Videos to Preload: "yt-dlp adresleri arka planda alınacak sonraki videoların azami sayısı."
     Concurrent Preloads: "Videoları aynı anda önceden yüklemek için kullanılan en fazla yt-dlp işlemi sayısı. Daha yüksek değerler daha fazla CPU, bellek ve ağ bant genişliği kullanır."
     Ignore System Rotation Lock for Fullscreen: Android otomatik döndürmesi kapalı olsa bile tam ekrana girmek ve çıkmak için cihazı fiziksel olarak döndürün.
+    Keep Status Bar Hidden in Fullscreen: "Durum çubuğunu yalnızca ekranın kenarından kaydırdığınızda göster ve kısa bir süre sonra yeniden gizle. Oynatıcıya dokunmak artık onu göstermez."
     Ask Before Preloading Large Playlists: "{count} videodan fazla içeren bir oynatma listesinin tüm videolarını önceden yüklemeden önce onay ister."
     Enable Timestamp Notes: "Videoyu duraklatan ve geçerli ana bağlantı veren bir not açan bir oynatıcı düğmesi ve N kısayolu ekler. Notlar Markdown olarak kopyalanabilir veya masaüstünde Obsidian'a eklenebilir."
     Obsidian Vault: Zaman damgalı notlar için Obsidian kasasının adı. Ayarlandığında notlar Obsidian'a eklenebilir. Her videonun notları, kasanın yeni notlar klasöründe videonun adını taşıyan bir notta toplanır.

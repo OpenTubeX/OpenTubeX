@@ -1196,6 +1196,7 @@ Settings:
       Legacy Formats: Verouderde formate
       Modern Formats: Moderne formate
     Ignore System Rotation Lock for Fullscreen: Ignoreer stelsel se rotasieslot vir volskerm
+    Keep Status Bar Hidden in Fullscreen: "Hou statusbalk versteek in volskerm"
     Swipe Left or Right to Seek in Fullscreen: Swiep links of regs om in volskerm te spoel
     Show Swipe to Seek Preview: Wys voorskou vir swiep-om-te-spoel
     Enable Google Cast: Aktiveer Google Cast
@@ -2628,6 +2629,7 @@ Tooltips:
     Upcoming Videos to Preload: Die maksimum aantal komende video’s waarvan die yt-dlp-stroom-URL’s in die agtergrond opgehaal word.
     Concurrent Preloads: Die maksimum aantal yt-dlp-prosesse wat gelyktydig gebruik word om video’s vooraf te laai. Hoër waardes gebruik meer SVE, geheue en netwerkbandwydte.
     Ignore System Rotation Lock for Fullscreen: Gebruik fisiese toesteldraaiing om volskerm te betree en te verlaat, selfs wanneer Android se outodraai af is.
+    Keep Status Bar Hidden in Fullscreen: "Wys die statusbalk slegs wanneer jy van die skermrand af swiep, en versteek dit weer na 'n oomblik. Om op die speler te tik, wys dit nie meer nie."
     Ask Before Preloading Large Playlists: "Vra vir bevestiging voordat alle video’s van ’n snitlys met meer as {count} video’s vooraf gelaai word."
     Enable Timestamp Notes: "Voeg 'n spelerknoppie en die N-kortpad by wat die video laat wag en 'n notas oopmaak wat na die huidige oomblik skakel. Notas kan as Markdown gekopieer word of, op die rekenaar, by Obsidian gevoeg word."
     Obsidian Vault: Naam van die Obsidian-kluis vir tydstempelnotas. Wanneer dit gestel is, kan notas by Obsidian gevoeg word. Die notas van elke video word versamel in 'n nota wat na die video vernoem is, in die kluis se vouer vir nuwe notas.

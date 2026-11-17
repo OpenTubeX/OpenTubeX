@@ -1005,6 +1005,7 @@ Settings:
     Upcoming Videos to Preload: "Jumlah video yang dipramuat"
     Concurrent Preloads: "Prapemuatan serentak"
     Ignore System Rotation Lock for Fullscreen: Abaikan kunci rotasi sistem untuk layar penuh
+    Keep Status Bar Hidden in Fullscreen: "Tetap sembunyikan bilah status dalam layar penuh"
     Swipe Left or Right to Seek in Fullscreen: Geser ke kiri atau kanan untuk mencari posisi dalam layar penuh
     Show Swipe to Seek Preview: Tampilkan pratinjau saat menggeser untuk mencari posisi
     Enable Google Cast: "Aktifkan Google Cast"
@@ -2395,6 +2396,7 @@ Tooltips:
     Upcoming Videos to Preload: "Jumlah maksimum video berikutnya yang URL yt-dlp-nya diambil di latar belakang."
     Concurrent Preloads: "Jumlah maksimum proses yt-dlp yang digunakan untuk pramuat video secara bersamaan. Nilai yang lebih tinggi menggunakan lebih banyak CPU, memori, dan bandwidth jaringan."
     Ignore System Rotation Lock for Fullscreen: Putar perangkat secara fisik untuk masuk dan keluar layar penuh meskipun rotasi otomatis Android dimatikan.
+    Keep Status Bar Hidden in Fullscreen: "Tampilkan bilah status hanya saat Anda menggeser dari tepi layar, lalu sembunyikan lagi setelah beberapa saat. Mengetuk pemutar tidak lagi menampilkannya."
     Ask Before Preloading Large Playlists: "Meminta konfirmasi sebelum pramuat semua video dari daftar putar yang berisi lebih dari {count} video."
     Enable Timestamp Notes: "Menambahkan tombol pemutar dan pintasan N yang menjeda video serta membuka catatan yang menautkan ke momen saat ini. Catatan dapat disalin sebagai Markdown atau, di desktop, ditambahkan ke Obsidian."
     Obsidian Vault: Nama brankas Obsidian untuk catatan stempel waktu. Jika diatur, catatan dapat ditambahkan ke Obsidian. Catatan setiap video dikumpulkan dalam catatan yang dinamai sesuai video, di folder brankas untuk catatan baru.

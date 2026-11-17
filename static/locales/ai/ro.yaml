@@ -1004,6 +1004,7 @@ Settings:
     Upcoming Videos to Preload: "Numărul de videoclipuri de preîncărcat"
     Concurrent Preloads: "Preîncărcări simultane"
     Ignore System Rotation Lock for Fullscreen: Ignoră blocarea rotirii sistemului pentru ecran complet
+    Keep Status Bar Hidden in Fullscreen: "Păstrează bara de stare ascunsă pe ecran complet"
     Swipe Left or Right to Seek in Fullscreen: Glisați la stânga sau la dreapta pentru a derula pe tot ecranul
     Show Swipe to Seek Preview: Afișează previzualizarea la derulare prin glisare
     Enable Google Cast: "Activează Google Cast"
@@ -2423,6 +2424,7 @@ Tooltips:
     Upcoming Videos to Preload: "Numărul maxim de videoclipuri următoare ale căror adrese yt-dlp sunt obținute în fundal."
     Concurrent Preloads: "Numărul maxim de procese yt-dlp utilizate pentru a preîncărca videoclipuri simultan. Valorile mai mari folosesc mai mult procesor, memorie și lățime de bandă a rețelei."
     Ignore System Rotation Lock for Fullscreen: Rotește fizic dispozitivul pentru a intra și ieși din ecranul complet, chiar dacă rotirea automată din Android este dezactivată.
+    Keep Status Bar Hidden in Fullscreen: "Afișează bara de stare doar când glisezi de la marginea ecranului și ascunde-o din nou după un moment. Atingerea playerului nu o mai afișează."
     Ask Before Preloading Large Playlists: "Cere confirmarea înainte de preîncărcarea tuturor videoclipurilor dintr-o listă de redare cu peste {count} videoclipuri."
     Enable Timestamp Notes: "Adaugă un buton în player și scurtătura N, care pun videoclipul pe pauză și deschid o notă cu link către momentul curent. Notele pot fi copiate ca Markdown sau, pe desktop, adăugate în Obsidian."
     Obsidian Vault: Numele seifului Obsidian pentru notele cu marcaj temporal. Când este setat, notele pot fi adăugate în Obsidian. Notele fiecărui videoclip sunt adunate într-o notă denumită după videoclip, în dosarul seifului pentru note noi.

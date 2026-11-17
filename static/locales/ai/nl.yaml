@@ -1020,6 +1020,7 @@ Settings:
     Upcoming Videos to Preload: "Aantal vooraf te laden video’s"
     Concurrent Preloads: "Gelijktijdige voorladingen"
     Ignore System Rotation Lock for Fullscreen: Negeer de rotatievergrendeling van het systeem voor volledig scherm
+    Keep Status Bar Hidden in Fullscreen: "Statusbalk verborgen houden in volledig scherm"
     Swipe Left or Right to Seek in Fullscreen: Veeg naar links of rechts om te spoelen op volledig scherm
     Show Swipe to Seek Preview: Voorbeeld tonen bij vegen om te spoelen
     Enable Google Cast: "Google Cast inschakelen"
@@ -2436,6 +2437,7 @@ Tooltips:
     Upcoming Videos to Preload: "Het maximale aantal volgende video’s waarvan de yt-dlp-URL’s op de achtergrond worden opgehaald."
     Concurrent Preloads: "Het maximale aantal yt-dlp-processen dat wordt gebruikt om video's tegelijk vooraf te laden. Hogere waarden gebruiken meer CPU, geheugen en netwerkbandbreedte."
     Ignore System Rotation Lock for Fullscreen: Draai het apparaat om volledig scherm te openen en te sluiten, ook als automatisch draaien in Android uitstaat.
+    Keep Status Bar Hidden in Fullscreen: "Toon de statusbalk alleen wanneer je vanaf de schermrand veegt en verberg deze na een moment weer. Tikken op de speler toont hem niet meer."
     Ask Before Preloading Large Playlists: "Vraagt om bevestiging voordat alle video’s van een afspeellijst met meer dan {count} video’s vooraf worden geladen."
     Enable Timestamp Notes: "Voegt een spelerknop en de sneltoets N toe die de video pauzeren en een notitie openen die naar het huidige moment linkt. Notities kunnen als Markdown worden gekopieerd of op de computer aan Obsidian worden toegevoegd."
     Obsidian Vault: Naam van de Obsidian-kluis voor notities met tijdstempel. Als deze is ingesteld, kunnen notities aan Obsidian worden toegevoegd. De notities van elke video worden verzameld in een notitie met de naam van de video, in de map van de kluis voor nieuwe notities.

@@ -1002,6 +1002,7 @@ Settings:
     Upcoming Videos to Preload: "Aurrekargatu beharreko bideo kopurua"
     Concurrent Preloads: "Aldibereko aurrekargak"
     Ignore System Rotation Lock for Fullscreen: Ez ikusi sistemaren biraketa-blokeoa pantaila osorako
+    Keep Status Bar Hidden in Fullscreen: "Mantendu egoera-barra ezkutatuta pantaila osoan"
     Swipe Left or Right to Seek in Fullscreen: Irristatu ezkerrera edo eskuinera pantaila osoan aurrera edo atzera egiteko
     Show Swipe to Seek Preview: Erakutsi aurrebista hatza irristatuz aurrera edo atzera egitean
     Enable Google Cast: "Gaitu Google Cast"
@@ -2379,6 +2380,7 @@ Tooltips:
     Upcoming Videos to Preload: "Atzeko planoan yt-dlp URLak eskuratuko zaizkien hurrengo bideoen gehieneko kopurua."
     Concurrent Preloads: "Bideoak aldi berean aurrekargatzeko erabilitako yt-dlp prozesuen gehieneko kopurua. Balio handiagoek PUZ, memoria eta sareko banda-zabalera gehiago erabiltzen dute."
     Ignore System Rotation Lock for Fullscreen: Biratu gailua fisikoki pantaila osoan sartzeko eta irteteko, Androiden biraketa automatikoa desaktibatuta badago ere.
+    Keep Status Bar Hidden in Fullscreen: "Erakutsi egoera-barra pantailaren ertzetik irristatzean soilik, eta ezkutatu berriro une baten ondoren. Erreproduzitzailea ukitzeak ez du gehiago erakusten."
     Ask Before Preloading Large Playlists: "Berrespena eskatzen du {count} bideo baino gehiagoko erreprodukzio-zerrenda baten bideo guztiak aurrekargatu aurretik."
     Enable Timestamp Notes: "Erreproduzigailuari botoi bat eta N lasterbidea gehitzen dizkio, bideoa pausatu eta uneko momentura estekatzen duen ohar bat irekitzen dutenak. Oharrak Markdown gisa kopia daitezke edo, mahaigainean, Obsidian-era gehitu."
     Obsidian Vault: Denbora-zigiludun oharretarako Obsidian biltegiaren izena. Ezartzen bada, oharrak Obsidian-era gehi daitezke. Bideo bakoitzaren oharrak bideoaren izena duen ohar batean biltzen dira, biltegiaren ohar berrien karpetan.

@@ -1020,6 +1020,7 @@ Settings:
     Upcoming Videos to Preload: "מספר הסרטונים לטעינה מראש"
     Concurrent Preloads: "טעינות מראש במקביל"
     Ignore System Rotation Lock for Fullscreen: התעלמות מנעילת סיבוב המערכת עבור מסך מלא
+    Keep Status Bar Hidden in Fullscreen: "השארת שורת המצב מוסתרת במסך מלא"
     Swipe Left or Right to Seek in Fullscreen: החלקה שמאלה או ימינה כדי לדלג במסך מלא
     Show Swipe to Seek Preview: הצגת תצוגה מקדימה בעת דילוג בהחלקה
     Enable Google Cast: "הפעלת Google Cast"
@@ -2427,6 +2428,7 @@ Tooltips:
     Upcoming Videos to Preload: "המספר המרבי של סרטונים הבאים שכתובות yt-dlp שלהם יאוחזרו ברקע."
     Concurrent Preloads: "המספר המרבי של תהליכי yt-dlp המשמשים לטעינה מראש של סרטונים בו־זמנית. ערכים גבוהים יותר משתמשים ביותר מעבד, זיכרון ורוחב פס רשת."
     Ignore System Rotation Lock for Fullscreen: סובבו את המכשיר כדי להיכנס למסך מלא ולצאת ממנו, גם כשהסיבוב האוטומטי של Android כבוי.
+    Keep Status Bar Hidden in Fullscreen: "הצגת שורת המצב רק בהחלקה מקצה המסך, והסתרתה שוב לאחר רגע. הקשה על הנגן כבר לא מציגה אותה."
     Ask Before Preloading Large Playlists: "מבקש אישור לפני טעינה מראש של כל הסרטונים בפלייליסט עם יותר מ־{count} סרטונים."
     Enable Timestamp Notes: "מוסיף לנגן כפתור ואת קיצור הדרך N, שמשהים את הסרטון ופותחים הערה עם קישור לרגע הנוכחי. ניתן להעתיק הערות כ־Markdown או, במחשב, להוסיף אותן ל־Obsidian."
     Obsidian Vault: שם כספת Obsidian עבור הערות עם חותמת זמן. כשהוא מוגדר, ניתן להוסיף הערות ל־Obsidian. ההערות של כל סרטון נאספות בהערה הנקראת על שם הסרטון, בתיקיית ההערות החדשות של הכספת.

@@ -115,10 +115,7 @@ public class MainActivity extends BridgeActivity {
         lastOrientation = getResources().getConfiguration().orientation;
         // Capacitor must select its no-title theme before the decor is created.
         StartupBackground.apply(getWindow(), StartupBackground.getColor(this));
-        // Keep swiped bars visible so a second swipe can open notifications.
-        // The player hides the status bar again with its controls.
-        androidx.core.view.WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView())
-            .setSystemBarsBehavior(androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_DEFAULT);
+        setTransientSystemBars(false);
         // Without an insets animation callback, Android keeps the keyboard-sized
         // layout until a keyboard closed by predictive back has left the screen,
         // so the page stays short and the bottom navigation floats mid-screen.
@@ -241,6 +238,18 @@ public class MainActivity extends BridgeActivity {
                     ",\"windowHeight\":" + config.screenHeightDp + "}"
             );
         });
+    }
+
+    /**
+     * By default, swiped bars stay visible so a second swipe can open notifications,
+     * and the player hides the status bar again with its controls. Transient bars
+     * hide again on their own, for players that keep the status bar hidden.
+     */
+    void setTransientSystemBars(boolean transientBars) {
+        androidx.core.view.WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView())
+            .setSystemBarsBehavior(transientBars
+                ? androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                : androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_DEFAULT);
     }
 
     void prepareFullscreenRotation() {

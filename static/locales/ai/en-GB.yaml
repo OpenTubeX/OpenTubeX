@@ -987,6 +987,7 @@ Settings:
     Upcoming Videos to Preload: "Upcoming Videos to Preload"
     Concurrent Preloads: "Concurrent Preloads"
     Ignore System Rotation Lock for Fullscreen: Ignore system rotation lock for fullscreen
+    Keep Status Bar Hidden in Fullscreen: "Keep status bar hidden in fullscreen"
     Swipe Left or Right to Seek in Fullscreen: Swipe left or right to seek in fullscreen
     Show Swipe to Seek Preview: Show swipe-to-seek preview
     Enable Google Cast: "Enable Google Cast"
@@ -2364,6 +2365,7 @@ Tooltips:
     Upcoming Videos to Preload: "The maximum number of upcoming videos whose yt-dlp stream URLs are fetched in the background."
     Concurrent Preloads: "The maximum number of yt-dlp processes used to preload videos at once. Higher values use more CPU, memory, and network bandwidth."
     Ignore System Rotation Lock for Fullscreen: Use physical device rotation to enter and exit fullscreen even when Android's auto-rotate is off.
+    Keep Status Bar Hidden in Fullscreen: "Show the status bar only when you swipe from the screen edge, and hide it again after a moment. Tapping the player no longer shows it."
     Ask Before Preloading Large Playlists: "Asks for confirmation before preloading all videos of a playlist with more than {count} videos."
     Enable Timestamp Notes: "Adds a player button and the N shortcut that pause the video and open a note linking to the current moment. Notes can be copied as Markdown or, on desktop, added to Obsidian."
     Obsidian Vault: Name of the Obsidian vault for timestamp notes. When set, notes can be added to Obsidian. The notes of each video are collected in a note named after the video, in the vault's folder for new notes.
