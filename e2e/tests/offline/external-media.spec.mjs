@@ -1652,6 +1652,72 @@ test('Twitch livestream plays its ads when the ad-free replacement fails to load
   await expect(page.locator(`${activeTab} .externalMediaError`)).toHaveCount(0)
 })
 
+test('Twitch livestream plays yt-dlp\'s playlist when the ad-free one fails to load at the start', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const fixture = await readFile(path.join(repoRoot, 'e2e/fixtures/media/hls-1080.mp4'))
+  const fragmentStart = fixture.indexOf(Buffer.from('moof')) - 4
+  expect(fragmentStart).toBeGreaterThan(0)
+  const masterUrl = 'https://live.example.test/master.m3u8'
+  const liveUrl = 'https://live.example.test/1080.m3u8'
+  const adFreeUrl = 'https://first.example.test/1080.m3u8'
+  const executable = path.join(app.userDataDir, 'twitch-live-fallback-yt-dlp.sh')
+  const response = JSON.stringify({
+    title: 'A Twitch livestream',
+    webpage_url: 'https://www.twitch.tv/testchannel',
+    live_status: 'is_live',
+    manifest_url: masterUrl,
+    formats: [{ format_id: '1080p', url: liveUrl, manifest_url: masterUrl, protocol: 'm3u8_native', ext: 'mp4', vcodec: 'avc1.64001f', acodec: 'none', width: 1920, height: 1080 }]
+  })
+  await writeFile(executable, [
+    '#!/bin/sh',
+    'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
+    `printf '%s\\n' '${response}'`
+  ].join('\n'))
+  await chmod(executable, 0o755)
+  await choosePickerPaths(app, page, { ytDlpPath: executable })
+  await page.evaluate(() => window.$store.dispatch('updateYtDlpSource', 'system'))
+  await mockTwitchLiveVod(app, null)
+  const master = url => `#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=6000000,CODECS="avc1.64001f",RESOLUTION=1920x1080\n${url}\n`
+  await mockTwitchAdFreeLivePlaylists(app, [{ playlist: master(adFreeUrl) }])
+
+  const liveStart = Date.now() - 20_000
+  const playlist = body => route => route.fulfill({
+    contentType: 'application/vnd.apple.mpegurl',
+    headers: { 'Access-Control-Allow-Origin': '*' },
+    body: body()
+  })
+  let adFreeRequested = false
+  await page.route(adFreeUrl, route => {
+    adFreeRequested = true
+    return route.abort()
+  })
+  await page.route(masterUrl, playlist(() => master(liveUrl)))
+  await page.route(liveUrl, playlist(() => {
+    const last = Math.floor((Date.now() - liveStart) / 2000) - 1
+    const sequence = Array.from({ length: 4 }, (_, index) => last - 3 + index)
+    return `#EXTM3U
+#EXT-X-VERSION:6
+#EXT-X-TARGETDURATION:2
+#EXT-X-MEDIA-SEQUENCE:${sequence[0]}
+#EXT-X-MAP:URI="https://live.example.test/init.mp4"
+${sequence.map(index => `#EXT-X-PROGRAM-DATE-TIME:${new Date(liveStart + index * 2000).toISOString()}\n#EXTINF:2.000,live\nhttps://live.example.test/${index}.mp4`).join('\n')}
+`
+  }))
+  await page.route(/^https:\/\/live\.example\.test\/(?:init|\d+)\.mp4$/, route => route.fulfill({
+    contentType: 'video/mp4',
+    headers: { 'Access-Control-Allow-Origin': '*' },
+    body: route.request().url().endsWith('/init.mp4') ? fixture.subarray(0, fragmentStart) : fixture.subarray(fragmentStart)
+  }))
+
+  await openLiveStream(page, 'https://www.twitch.tv/testchannel')
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  const video = player.locator('video')
+  await expect.poll(() => player.evaluate(element => element.ui?.getControls().getPlayer().getAssetUri() ?? null)).toBe(masterUrl)
+  expect(adFreeRequested).toBe(true)
+  await expectPlaybackToContinue(video)
+  await expect(page.locator(`${activeTab} .externalMediaError`)).toHaveCount(0)
+})
+
 test('external media starts at the default playback speed', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
   const mediaUrl = 'https://www.twitch.tv/videos/123456789'

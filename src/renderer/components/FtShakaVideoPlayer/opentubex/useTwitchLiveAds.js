@@ -12,15 +12,17 @@ const FAILED_RETRY_DELAY_MS = 60_000
  * loading in the meantime. Without such a playlist, the ads play.
  * @param {{
  *   getLogin: () => string | null,
+ *   startsReplaced: boolean,
  *   isLiveSource: () => boolean,
  *   replaceLiveSource: (src: string) => boolean,
  *   restoreLiveSource: () => boolean,
- * }} options `replaceLiveSource` and `restoreLiveSource` return whether the player loads the playlist
+ * }} options `startsReplaced` is whether the first playlist replaced one that it can return to,
+ *   `replaceLiveSource` and `restoreLiveSource` return whether the player loads the playlist
  */
-export function useTwitchLiveAds({ getLogin, isLiveSource, replaceLiveSource, restoreLiveSource }) {
+export function useTwitchLiveAds({ getLogin, startsReplaced, isLiveSource, replaceLiveSource, restoreLiveSource }) {
   let requesting = false
   /** Set from replacing the playlist until the replacement loads */
-  let replacing = false
+  let replacing = startsReplaced
   let retryAt = 0
 
   /** @param {string} login */

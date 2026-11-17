@@ -2379,6 +2379,11 @@ const props = defineProps({
     type: String,
     default: null
   },
+  /** The playlist with ads that plays if the ad-free `manifestSrc` of a Twitch livestream fails to load */
+  twitchLiveFallbackSrc: {
+    type: String,
+    default: null
+  },
   /**
    * Which engine provided the streams, as yt-dlp's manifests need a few
    * accommodations that must not change the behaviour for the built-in one.
@@ -3743,6 +3748,7 @@ const twitchLiveRewind = useTwitchLiveRewind({
 
 const twitchLiveAds = useTwitchLiveAds({
   getLogin: () => props.twitchLiveLogin,
+  startsReplaced: props.twitchLiveFallbackSrc !== null,
   isLiveSource: () => twitchLiveRewind.mode.value === 'live',
   replaceLiveSource: twitchLiveRewind.replaceLiveSource,
   restoreLiveSource: twitchLiveRewind.restoreLiveSource,

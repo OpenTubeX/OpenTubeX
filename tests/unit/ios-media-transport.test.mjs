@@ -78,18 +78,22 @@ test('active stream abortion reaches both WebKit and native transport', async ()
 test('unrelated hosts, HTTP and non-GET media requests keep the standard transport', async () => {
   const f = fixture()
   for (const url of ['https://example.org/video', 'https://googlevideo.com.attacker.invalid/video', 'http://rr1.googlevideo.com/video', 'https://user:password@rr1.googlevideo.com/video',
-    'https://euc1.playlist.ttvnw.net.attacker.invalid/v1/playlist/session.m3u8', 'https://euc1.playlist.ttvnw.net/v1/segment/session.ts']) {
+    'https://euc1.playlist.ttvnw.net.attacker.invalid/v1/playlist/session.m3u8', 'https://euc1.playlist.ttvnw.net/v1/segment/session.ts',
+    'https://d1example.cloudfront.net.attacker.invalid/key_channel_1/chunked/index-dvr.m3u8', 'https://d1example.cloudfront.net/key_channel_1/other/index-dvr.m3u8',
+    'https://d1example.cloudfront.net/key_channel_1/chunked/../../other.m3u8']) {
     await f.request(url, get, 0).promise
   }
   await f.request(manifest, { ...get, method: 'POST' }, 0).promise
   assert.equal(f.prepared.length, 0)
-  assert.equal(f.fetched.length, 7)
+  assert.equal(f.fetched.length, 10)
 })
 
-test('Twitch live playlists, which reject WebKit\'s origin, use the native transport', async () => {
+test('Twitch live playlists and recordings, which reject WebKit\'s origin, use the native transport', async () => {
   const f = fixture()
-  await f.request('https://euc1.playlist.ttvnw.net/v1/playlist/session.m3u8', get, 0).promise
-  assert.equal(f.prepared[0].url, 'https://euc1.playlist.ttvnw.net/v1/playlist/session.m3u8')
+  const urls = ['https://euc1.playlist.ttvnw.net/v1/playlist/session.m3u8', 'https://d1example.cloudfront.net/key_channel_1/chunked/index-dvr.m3u8',
+    'https://d1example.cloudfront.net/key_channel_1/720p60/12-muted.ts', 'https://d1example.cloudfront.net/channel/123/key_channel_1/chunked/init-0.mp4']
+  for (const url of urls) await f.request(url, get, 0).promise
+  assert.deepEqual(f.prepared.map(request => request.url), urls)
 })
 
 test('failed native requests report the stream URL instead of the local one', async () => {

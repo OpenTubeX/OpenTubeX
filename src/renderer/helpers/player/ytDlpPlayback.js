@@ -34,6 +34,8 @@ import { probeHlsManifest as probeYtDlpHlsManifest } from './hlsManifest'
  * @property {{ manifestSrc: string, startedAt: number } | null} [twitchLiveRecording] the recording of an ongoing
  *   Twitch broadcast, which the player switches to when seeking behind the live playlist
  * @property {string | null} [twitchLiveLogin] the channel of a Twitch livestream, whose ad-free playlists replace ad breaks
+ * @property {string | null} [twitchLiveFallbackSrc] yt-dlp's playlist of a Twitch livestream that starts on an ad-free
+ *   playlist, which plays if that fails to load
  * @property {string | null} [twitchVodRegistrationId]
  * @property {string | null} [separateAudioUrl] audio supplied separately from an external video file
  * @property {number | null} duration
@@ -183,11 +185,13 @@ async function getExternalYtDlpPlaybackSourceFromYtDlp(url, useAuthentication, l
   // iOS drops yt-dlp's HLS formats of other sites, which it cannot load
   const liveManifest = isLive ? await liveManifestRequest : null
   if (liveManifest) {
+    const hlsFormat = info.formats.find(format => ['m3u8', 'm3u8_native'].includes(format.protocol))
     return {
       info,
       source: {
         manifestSrc: liveManifest,
         manifestMimeType: MANIFEST_TYPE_HLS,
+        twitchLiveFallbackSrc: process.env.IS_IOS ? null : info.hlsManifestUrl ?? hlsFormat?.manifestUrl ?? hlsFormat?.url ?? null,
         legacyFormats: [],
         captions: info.captions ?? [],
         captionTranslations: info.captionTranslations ?? [],
@@ -374,9 +378,8 @@ export async function getTwitchAdFreeLiveManifest(login, allowAds = false) {
 
 export async function getExternalYtDlpPlaybackSource(url, useAuthentication = false) {
   const twitchLogin = parseTwitchChannelLogin(url)
-  // Requested alongside yt-dlp, whose live playlist only covers the last few seconds.
-  // iOS fails to load the recording and switches to it without a seek, which stops playback.
-  const liveVodRequest = twitchLogin === null || process.env.IS_IOS ? null : getTwitchLiveVod(twitchLogin)
+  // Requested alongside yt-dlp, whose live playlist only covers the last few seconds
+  const liveVodRequest = twitchLogin === null ? null : getTwitchLiveVod(twitchLogin)
   // iOS cannot play yt-dlp's playlists, which other platforms keep when every session has ads
   const adFreeRequest = twitchLogin === null ? null : getTwitchAdFreeLiveManifest(twitchLogin, !!process.env.IS_IOS)
   try {

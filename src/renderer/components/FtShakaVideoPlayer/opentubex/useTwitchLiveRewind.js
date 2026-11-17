@@ -9,7 +9,7 @@ import { computed, ref } from 'vue'
  * @param {{
  *   getPlayer: () => import('shaka-player').Player | null,
  *   getControls: () => import('shaka-player').ui.Controls | null,
- *   props: { manifestSrc: string, twitchLiveRecording: { manifestSrc: string, startedAt: number } | null },
+ *   props: { manifestSrc: string, twitchLiveFallbackSrc: string | null, twitchLiveRecording: { manifestSrc: string, startedAt: number } | null },
  *   video: import('vue').Ref<HTMLVideoElement | null>,
  * }} options
  */
@@ -20,8 +20,8 @@ export function useTwitchLiveRewind({ getPlayer, getControls, props, video }) {
   let loadedMode = null
   /** @type {import('vue').Ref<string | null>} The playlist that replaces `props.manifestSrc` */
   const liveManifestSrc = ref(null)
-  /** @type {string | null} */
-  let replacedLiveManifestSrc = null
+  /** @type {string | null} The playlist that the current one replaced, at first the one an ad-free playlist replaced */
+  let replacedLiveManifestSrc = props.twitchLiveFallbackSrc
   const manifestSrc = computed(() => mode.value === 'recording' && props.twitchLiveRecording
     ? props.twitchLiveRecording.manifestSrc
     : liveManifestSrc.value ?? props.manifestSrc)
