@@ -992,14 +992,22 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
                 retryDocument.subscriptions = client.document.subscriptions
               }
               const retryClient = new EncryptedSyncAdapter(retryDocument)
-              if (collection === 'settings') {
-                next.settings = await syncSettings(retryClient, store, next.settings, playlistSnapshot(), {
-                  listSnapshot: baseline('settings') ?? {},
-                  onRetryBaseline: getBaseline => { retryBaselines.settings = getBaseline },
-                })
-                result.settings = Object.keys(next.settings).length
-              } else {
-                await applyCollection(collection, retryClient)
+              // The retry registers the download as its baseline before applying it
+              const appliedBaseline = retryBaselines[collection]
+              try {
+                if (collection === 'settings') {
+                  next.settings = await syncSettings(retryClient, store, next.settings, playlistSnapshot(), {
+                    listSnapshot: baseline('settings') ?? {},
+                    onRetryBaseline: getBaseline => { retryBaselines.settings = getBaseline },
+                  })
+                  result.settings = Object.keys(next.settings).length
+                } else {
+                  await applyCollection(collection, retryClient)
+                }
+              } catch (error) {
+                // Downloaded items it could not save must not look removed here next time
+                retryBaselines[collection] = appliedBaseline
+                throw error
               }
               if (skippedCollections.has(collection)) break
               revision = remote.revision

@@ -182,6 +182,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     getSyncableSettingKeys: () => syncableSettingKeys,
     isSettingSyncEnabled: (settings, key) => !settings.syncServerSettingsExcluded?.includes(key),
     settingWritesSettled: () => null,
+    isPlaylistSortOrder: () => false,
     fetch: async (url, options) => {
       requests.push({ url, method: options.method ?? 'GET', body: options.body })
       if (respond) {
@@ -1547,6 +1548,24 @@ test('a failed upload after a bookmark conflict keeps unsent bookmarks out of th
   assert.deepEqual(JSON.parse(f.settings.syncServerSnapshot).playlistBookmarks, ['remote'])
 })
 
+test('a playlist conflict retry that cannot save a downloaded playlist keeps it out of the baseline', async () => {
+  let uploads = 0
+  const f = fixture({ syncServerSyncSubscriptions: false, syncServerSyncPlaylists: true }, {
+    encrypted: true,
+    respond: async (url, options) => {
+      if (!url.endsWith('/encrypted_sync/playlists')) return undefined
+      if (options.method === 'PUT') return new Response('{}', { status: ++uploads === 1 ? 409 : 503 })
+      if (!uploads) return { revision: 0, payload: null }
+      // The fixture cannot save new playlists
+      const remote = [{ playlist: { id: 'remote', title: 'Remote' }, videos: [] }]
+      return { revision: 1, payload: await privacy.encryptSyncDocument(remote, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt) }
+    },
+  })
+  await assert.rejects(f.actions.syncWithSyncServer(f.context), /Could not save synced playlist/)
+  // The next sync downloads the playlist again instead of removing it from the server.
+  assert.deepEqual(Object.keys(JSON.parse(f.settings.syncServerSnapshot).playlists ?? {}), [])
+})
+
 test('a shared tab closed during an upload conflict stays closed', async () => {
   const first = { sessionId: 'first', updatedAt: 1, tabs: [{ route: '/first' }] }
   const second = { sessionId: 'second', updatedAt: 5, tabs: [{ route: '/second' }] }
@@ -1748,14 +1767,15 @@ test('live checks retry failed local uploads before clearing the sync error', as
   assert.equal(JSON.parse(f.settings.syncServerSnapshot).settings.autoplayVideos.value, false)
 })
 
-test('a failed upload keeps the applied server settings as the baseline, so removals on other devices stay removed', async () => {
-  const collections = new Map()
-  const respond = async (url, options) => {
+// A server that keeps the encrypted collections devices upload, except the one named by `failingUpload`
+function encryptedSyncServer() {
+  const server = { collections: new Map(), failingUpload: null }
+  server.respond = async (url, options) => {
     const path = new URL(url).pathname
     if (path === '/health') return { capabilities: { encrypted_sync: 1, live_sync: 1 } }
     if (path === '/v1/encrypted_sync') {
       return {
-        collections: [...collections].map(([collection, entry]) => ({ collection, revision: entry.revision })),
+        collections: [...server.collections].map(([collection, entry]) => ({ collection, revision: entry.revision })),
         legacy_data: false,
       }
     }
@@ -1763,12 +1783,18 @@ test('a failed upload keeps the applied server settings as the baseline, so remo
     if (path.startsWith('/v1/encrypted_sync/')) {
       const collection = path.split('/').at(-1)
       if (options.method === 'PUT') {
+        if (collection === server.failingUpload) return new Response('{}', { status: 503 })
         const body = JSON.parse(options.body)
-        collections.set(collection, { revision: body.revision + 1, payload: body.payload })
+        server.collections.set(collection, { revision: body.revision + 1, payload: body.payload })
       }
-      return collections.get(collection) ?? { revision: 0, payload: null }
+      return server.collections.get(collection) ?? { revision: 0, payload: null }
     }
   }
+  return server
+}
+
+test('a failed upload keeps the applied server settings as the baseline, so removals on other devices stay removed', async () => {
+  const { collections, respond } = encryptedSyncServer()
   const settings = { syncServerSyncSubscriptions: false, syncServerSyncSettings: true, autoplayVideos: true, baseTheme: 'dark', channelsHidden: '[]' }
   const syncableSettingKeys = ['autoplayVideos', 'baseTheme', 'channelsHidden']
   const a = fixture({ ...settings, syncServerDeviceId: 'desktop' }, { encrypted: true, respond, syncableSettingKeys })
@@ -1816,29 +1842,40 @@ test('a failed upload keeps the applied server settings as the baseline, so remo
   assert.equal(a.settings.autoplayVideos, true)
 })
 
-test('a failed upload keeps what the sync applied as the baseline, so removals on other devices stay removed', async () => {
-  const collections = new Map()
-  let failingUpload = null
-  const respond = async (url, options) => {
-    const path = new URL(url).pathname
-    if (path === '/health') return { capabilities: { encrypted_sync: 1, live_sync: 1 } }
-    if (path === '/v1/encrypted_sync') {
-      return {
-        collections: [...collections].map(([collection, entry]) => ({ collection, revision: entry.revision })),
-        legacy_data: false,
-      }
-    }
-    if (path === '/v1/encrypted_sync/events') return []
-    if (path.startsWith('/v1/encrypted_sync/')) {
-      const collection = path.split('/').at(-1)
-      if (options.method === 'PUT') {
-        if (collection === failingUpload) return new Response('{}', { status: 503 })
-        const body = JSON.parse(options.body)
-        collections.set(collection, { revision: body.revision + 1, payload: body.payload })
-      }
-      return collections.get(collection) ?? { revision: 0, payload: null }
-    }
+test('a failed setting save keeps its baseline, so the next sync applies the server value', async () => {
+  const server = encryptedSyncServer()
+  const settings = { syncServerSyncSubscriptions: false, syncServerSyncSettings: true, autoplayVideos: true, baseTheme: 'dark' }
+  const options = { encrypted: true, respond: server.respond, syncableSettingKeys: ['autoplayVideos', 'baseTheme'] }
+  const a = fixture({ ...settings, syncServerDeviceId: 'desktop' }, options)
+  const b = fixture({ ...settings, syncServerDeviceId: 'phone' }, options)
+  await a.actions.syncWithSyncServer(a.context)
+  await b.actions.syncWithSyncServer(b.context)
+  b.settings.autoplayVideos = false
+  b.settings.syncServerSettingUpdatedAt = { autoplayVideos: Date.now() }
+  await b.actions.syncWithSyncServer(b.context)
+
+  // Saving the other device's value fails, with the upload of this device's edit failing and then succeeding.
+  a.settings.baseTheme = 'light'
+  a.settings.syncServerSettingUpdatedAt = { baseTheme: Date.now() }
+  const dispatch = a.context.dispatch
+  a.context.dispatch = async (action, value) => action === 'updateAutoplayVideos' ? false : dispatch(action, value)
+  for (const failingUpload of ['settings', null]) {
+    server.failingUpload = failingUpload
+    const sync = a.actions.syncWithSyncServer(a.context)
+    await (failingUpload ? assert.rejects(sync) : sync)
   }
+  a.context.dispatch = dispatch
+  assert.equal(a.settings.autoplayVideos, true)
+
+  await a.actions.syncWithSyncServer(a.context)
+  assert.equal(a.settings.autoplayVideos, false)
+  const remote = await privacy.decryptSyncDocument(server.collections.get('settings').payload, a.settings.syncServerPrivacyKey)
+  assert.equal(remote.find(entry => entry.key === 'autoplayVideos').value, false)
+})
+
+test('a failed upload keeps what the sync applied as the baseline, so removals on other devices stay removed', async () => {
+  const server = encryptedSyncServer()
+  const { collections, respond } = server
   const bookmark = id => bookmarks.createPlaylistBookmark({ id, title: id, uploaderId: 'channel', uploaderName: 'Channel', savedAt: 1 })
   const a = fixture({ syncServerSyncPlaylists: true, playlistBookmarks: [bookmark('PL-shared')], syncServerDeviceId: 'desktop' }, { encrypted: true, respond })
   const b = fixture({ syncServerSyncPlaylists: true, playlistBookmarks: [], syncServerDeviceId: 'phone' }, { encrypted: true, respond })
@@ -1856,9 +1893,9 @@ test('a failed upload keeps what the sync applied as the baseline, so removals o
   // The subscriptions upload succeeds, and the bookmarks upload of this device's own addition fails.
   subscriptions(a).push({ id: 'UC-here', name: 'Here' })
   a.settings.playlistBookmarks = [...a.settings.playlistBookmarks, bookmark('PL-here')]
-  failingUpload = 'playlistBookmarks'
+  server.failingUpload = 'playlistBookmarks'
   await assert.rejects(a.actions.syncWithSyncServer(a.context))
-  failingUpload = null
+  server.failingUpload = null
   assert.deepEqual(Array.from(subscriptions(a), channel => channel.id).sort(), ['UC-elsewhere', 'UC-here', 'private-channel'])
   assert.deepEqual(Array.from(a.settings.playlistBookmarks, item => item.playlist.id).sort(), ['PL-elsewhere', 'PL-here', 'PL-shared'])
 
