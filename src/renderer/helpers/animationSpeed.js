@@ -27,7 +27,7 @@ function updateActiveAnimations() {
 function isAnimationSpeedManaged(target) {
   return target instanceof Element && (
     target.matches('.feed-enter-active, .feed-move') ||
-    target.closest('[data-animation-speed-managed], .timeout-indicator') !== null
+    target.closest('[data-animation-speed-managed], .timeout-indicator, .timeout-indicator-clip') !== null
   )
 }
 
