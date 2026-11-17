@@ -14,10 +14,13 @@
         :key="`${thread.videoId}/${thread.threadId}/${thread.channelId}`"
         class="watchedCommentRow"
       >
-        <button
-          type="button"
+        <component
+          :is="opensTabs ? RouterLink : 'button'"
+          :type="opensTabs ? null : 'button'"
+          :to="opensTabs ? getWatchedCommentTarget(thread) : null"
+          :data-tab-title="opensTabs ? thread.videoTitle || undefined : null"
           class="watchedComment"
-          @click="open(thread)"
+          @click.capture="open(thread, $event)"
         >
           <span
             v-if="showThumbnails"
@@ -49,7 +52,7 @@
               :title="new Date(thread.postedAt).toLocaleString(locale)"
             >{{ getRelativeTimeFromDate(thread.postedAt, true, true, now) }}</time>
           </span>
-        </button>
+        </component>
         <button
           type="button"
           class="stopWatching"
@@ -91,6 +94,7 @@
 import { FtIcon } from '@opentubex/icons'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { RouterLink } from 'vue-router'
 
 import FtButton from '../../FtButton/FtButton.vue'
 import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
@@ -104,6 +108,10 @@ import { getWatchedCommentTarget, isOwnWatchedComment } from '../../../../commen
 
 const emit = defineEmits(['close'])
 const { locale, t } = useI18n()
+
+// The desktop app opens middle clicks on internal links in background tabs,
+// which leave this list open.
+const opensTabs = !!process.env.IS_ELECTRON
 
 const loaded = ref(false)
 const now = Date.now()
@@ -136,11 +144,29 @@ function stopWatching(thread) {
   unwatchComment(thread).catch(error => console.error('Failed to stop watching a comment', error))
 }
 
-/** @param {import('../../../../commentReplyTracking.js').TrackedCommentThread} thread */
-function open(thread) {
-  emit('close')
-  store.dispatch('hideSettingsWindow')
-  openInternalPath(getWatchedCommentTarget(thread))
+/**
+ * Opens Ctrl or Cmd clicks in a new tab here, not through the app's link
+ * shortcuts, so they close the settings window like plain clicks. Middle
+ * clicks go through those shortcuts and leave the list open.
+ * @param {import('../../../../commentReplyTracking.js').TrackedCommentThread} thread
+ * @param {MouseEvent} event
+ */
+function open(thread, event) {
+  event.preventDefault()
+  const ctrlOrCmdPressed = process.platform === 'darwin' ? event.metaKey : event.ctrlKey
+  const opensElsewhere = opensTabs && ctrlOrCmdPressed && !event.altKey
+  const doCreateNewWindow = opensElsewhere && event.shiftKey
+  // A new window leaves this one's settings open.
+  if (!doCreateNewWindow) {
+    emit('close')
+    store.dispatch('hideSettingsWindow')
+  }
+  openInternalPath({
+    ...getWatchedCommentTarget(thread),
+    title: thread.videoTitle || undefined,
+    doCreateNewWindow,
+    doCreateNewTab: opensElsewhere && !event.shiftKey
+  })
 }
 </script>
 
@@ -181,6 +207,7 @@ function open(thread) {
   font: inherit;
   line-height: 1.4;
   text-align: start;
+  text-decoration: none;
   cursor: pointer;
 }
 
