@@ -57,7 +57,22 @@ export function withThumbnail(videoId) {
   return thumbnail ? { thumbnail } : {}
 }
 
-/** @param {import('../../notificationHistory').NotificationHistoryEntry} entry */
+// These notifications show the title of what they lead to as their body.
+const BODY_IS_TITLE_KINDS = new Set(['video', 'short', 'live'])
+
+/**
+ * The title for a tab opened from the entry, which keeps it while unloaded.
+ * @param {import('../../notificationHistory').NotificationHistoryEntry} entry
+ * @returns {string | undefined}
+ */
+export function getNotificationTabTitle(entry) {
+  return BODY_IS_TITLE_KINDS.has(entry.kind) ? entry.body || undefined : undefined
+}
+
+/**
+ * Opens the entry in a new tab, so it does not replace the page in use.
+ * @param {import('../../notificationHistory').NotificationHistoryEntry} entry
+ */
 export function openNotificationEntry(entry) {
   if (!entry.read) notificationHistory.markRead(entry.id)
   if (entry.path === '/downloads') {
@@ -65,7 +80,12 @@ export function openNotificationEntry(entry) {
   } else {
     // A toast can be opened while settings cover the page it navigates.
     store.dispatch('hideSettingsWindow')
-    openInternalPath({ path: entry.path, query: entry.query })
+    openInternalPath({
+      path: entry.path,
+      query: entry.query,
+      title: getNotificationTabTitle(entry),
+      doCreateNewTab: true
+    })
   }
 }
 

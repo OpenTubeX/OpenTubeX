@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
+import { getNotificationOpenUrl } from '../../src/notificationHistory.js'
 import { shouldOpenExternalMediaUrl } from '../../src/renderer/helpers/externalMediaUrl.js'
 import { isSyncServerOidcCallbackUrl } from '../../src/renderer/helpers/sync-server-oidc.js'
 
@@ -15,14 +16,22 @@ function urlOpener(supportsYtDlp = true, platform = 'android') {
   const externalLinks = []
   const dispatched = []
   const browserClosed = []
+  const newTabs = []
   const openUrl = vm.runInNewContext(`${fragment}\nopenUrl`, {
     URL,
     isSyncServerOidcCallbackUrl,
     Capacitor: { getPlatform: () => platform },
     Browser: { close: async () => { browserClosed.push(true) } },
     getHomeWidgetPage: () => null,
-    handleYoutubeLink: url => youtube.push(url),
-    openExternalMedia: url => externalMedia.push(url),
+    getNotificationOpenUrl,
+    handleYoutubeLink: (url, { doCreateNewTab } = {}) => {
+      youtube.push(url)
+      if (doCreateNewTab) newTabs.push(url)
+    },
+    openExternalMedia: (url, doCreateNewTab) => {
+      externalMedia.push(url)
+      if (doCreateNewTab) newTabs.push(url)
+    },
     handleExternalLink: url => externalLinks.push(url),
     shouldOpenExternalMediaUrl,
     supportsYtDlp,
@@ -31,7 +40,7 @@ function urlOpener(supportsYtDlp = true, platform = 'android') {
       getters: { getCurrentInvidiousInstanceUrl: 'https://invidious.example' },
     }
   })
-  return { openUrl, youtube, externalMedia, externalLinks, dispatched, browserClosed }
+  return { openUrl, youtube, externalMedia, externalLinks, dispatched, browserClosed, newTabs }
 }
 
 for (const platform of ['android', 'ios']) {
@@ -56,6 +65,16 @@ for (const [input, expected] of [
     assert.deepEqual(externalMedia, [])
   })
 }
+
+test('Android notification links open in a new tab, and other links in the current one', async () => {
+  const { openUrl, youtube, externalMedia, newTabs } = urlOpener()
+  await openUrl('opentubex://notification?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3Dabcdefghijk')
+  await openUrl('opentubex://notification?url=https%3A%2F%2Fwww.twitch.tv%2Fstreamer')
+  await openUrl('https://www.youtube.com/watch?v=bcdefghijkl')
+  assert.deepEqual(youtube, ['https://www.youtube.com/watch?v=abcdefghijk', 'https://www.youtube.com/watch?v=bcdefghijkl'])
+  assert.deepEqual(externalMedia, ['https://www.twitch.tv/streamer'])
+  assert.deepEqual(newTabs, ['https://www.youtube.com/watch?v=abcdefghijk', 'https://www.twitch.tv/streamer'])
+})
 
 test('Capacitor opens links from other sites with yt-dlp', async () => {
   const { openUrl, youtube, externalMedia } = urlOpener()

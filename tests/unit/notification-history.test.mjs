@@ -15,6 +15,7 @@ import {
   normalizeNotificationDismissals,
   recordNotificationDismissals,
   getAutomaticDownloadTarget,
+  getNotificationOpenUrl,
   getUploadTarget,
   isThumbnailUrl,
   markNotificationHistoryRead,
@@ -80,6 +81,15 @@ test('entries lead to the uploaded item or the download', () => {
   assert.deepEqual(getAutomaticDownloadTarget('completed', undefined, 4), { kind: 'download-started', path: '/downloads' })
   assert.deepEqual(getAutomaticDownloadTarget('started', 'abc', null), { kind: 'download-started', path: '/downloads' })
   assert.deepEqual(getAutomaticDownloadTarget('failed', 'abc', null), { kind: 'download-failed', path: '/downloads' })
+})
+
+test('Android notification links open their web link', () => {
+  assert.equal(getNotificationOpenUrl('opentubex://notification?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3Dabc%26lc%3Dthread1'),
+    'https://www.youtube.com/watch?v=abc&lc=thread1')
+  assert.equal(getNotificationOpenUrl('https://www.youtube.com/watch?v=abc'), null)
+  assert.equal(getNotificationOpenUrl('opentubex://open/subscriptions'), null)
+  // Other links the app handles specially, such as sign-in callbacks, cannot be wrapped.
+  assert.equal(getNotificationOpenUrl('opentubex://notification?url=opentubex%3A%2F%2Fsync-callback'), null)
 })
 
 test('the desktop history persists changes and reports each one', async () => {

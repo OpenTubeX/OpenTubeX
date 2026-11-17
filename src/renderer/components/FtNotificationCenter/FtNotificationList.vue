@@ -24,7 +24,7 @@
           :is="opensTabs ? RouterLink : 'button'"
           :type="opensTabs ? null : 'button'"
           :to="opensTabs ? { path: entry.path, query: entry.query } : null"
-          :data-tab-title="opensTabs ? getTabTitle(entry) : null"
+          :data-tab-title="opensTabs ? getNotificationTabTitle(entry) : null"
           class="notificationEntry"
           @click.capture="handleClick(entry, $event)"
           @auxclick="handleAuxClick(entry, $event)"
@@ -118,7 +118,7 @@ import store from '../../store/index'
 
 import { finishTransition } from '../../helpers/animationSpeed'
 import { getRelativeTimeFromDate, openInternalPath } from '../../helpers/utils'
-import { NOTIFICATION_KIND_ICONS } from '../../helpers/notificationHistory'
+import { getNotificationTabTitle, NOTIFICATION_KIND_ICONS } from '../../helpers/notificationHistory'
 
 defineProps({
   /** @type {import('vue').PropType<import('../../../notificationHistory').NotificationHistoryEntry[]>} */
@@ -142,18 +142,6 @@ function makeInert(element) {
   element.inert = true
 }
 
-// These notifications show the title of what they lead to as their body.
-const BODY_IS_TITLE_KINDS = new Set(['video', 'short', 'live'])
-
-/**
- * The title for a tab opened from the entry, which keeps it while unloaded.
- * @param {import('../../../notificationHistory').NotificationHistoryEntry} entry
- * @returns {string | undefined}
- */
-function getTabTitle(entry) {
-  return BODY_IS_TITLE_KINDS.has(entry.kind) ? entry.body || undefined : undefined
-}
-
 /**
  * Opens Ctrl or Cmd clicks in a new tab, like the app's link shortcuts, which
  * never see clicks inside the dropdown.
@@ -166,7 +154,7 @@ function handleClick(entry, event) {
     event.preventDefault()
     // Like plain clicks, but a new window leaves this one's settings open.
     if (!event.shiftKey) store.dispatch('hideSettingsWindow')
-    openInternalPath({ path: entry.path, query: entry.query, title: getTabTitle(entry), doCreateNewWindow: event.shiftKey, doCreateNewTab: !event.shiftKey })
+    openInternalPath({ path: entry.path, query: entry.query, title: getNotificationTabTitle(entry), doCreateNewWindow: event.shiftKey, doCreateNewTab: !event.shiftKey })
     emit('opened-in-tab', entry, event)
     return
   }

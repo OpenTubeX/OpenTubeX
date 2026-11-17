@@ -9,6 +9,7 @@ import {
   takeSubscriptionFeedRefreshRequest,
 } from '../../src/renderer/helpers/subscriptionFeedRefreshRequest.js'
 import { getHomeWidgetPage } from '../../src/renderer/helpers/homeWidgetData.js'
+import { getNotificationOpenUrl } from '../../src/notificationHistory.js'
 import { shouldOpenExternalMediaUrl } from '../../src/renderer/helpers/externalMediaUrl.js'
 import { isSyncServerOidcCallbackUrl } from '../../src/renderer/helpers/sync-server-oidc.js'
 import { resolveMobileContextLinkCopyUrl } from '../../src/renderer/helpers/mobileLinkActions.js'
@@ -53,6 +54,7 @@ test('retained startup clicks and running-app clicks navigate and update localiz
     dataReady: { value: true },
     isAnyPromptOpen: { value: false },
     getHomeWidgetPage,
+    getNotificationOpenUrl,
     shouldOpenExternalMediaUrl,
     isSyncServerOidcCallbackUrl,
     syncHomeWidgets: () => () => { widgetSyncStopped = true },

@@ -742,6 +742,7 @@ import { copyToClipboard, isUnloadedBackgroundTabClick, openExternalLink, openIn
 import { getChannelLinkDetails, getChannelLinkMenuItems } from './helpers/channel-context-menu'
 import { initializeCapacitorLiveReminderActions } from './helpers/liveReminders'
 import { showInAppNotification, supportsNotificationHistory } from './helpers/notificationHistory'
+import { getNotificationOpenUrl } from '../notificationHistory'
 import {
   addAndroidMediaSessionActionListener,
   setAndroidMediaButtonsIgnored,
@@ -4514,8 +4515,12 @@ function enableOpenUrl() {
   }
 }
 
-function openExternalMedia(url) {
-  return openInternalPath(getExternalUrlRoute(url))
+/**
+ * @param {string} url
+ * @param {boolean} [doCreateNewTab]
+ */
+function openExternalMedia(url, doCreateNewTab = false) {
+  return openInternalPath({ ...getExternalUrlRoute(url), doCreateNewTab })
 }
 
 async function handleAndroidSharedText(text) {
@@ -4552,6 +4557,10 @@ function openSharedYoutubeLink() {
 async function enableCapacitorIntegrations() {
   const openUrl = async url => {
     if (!url) return
+    // Android notifications wrap their link, so it opens in a new tab like the notification list's.
+    const notificationUrl = getNotificationOpenUrl(url)
+    const doCreateNewTab = notificationUrl != null
+    if (doCreateNewTab) url = notificationUrl
     if (isSyncServerOidcCallbackUrl(url)) {
       // The browser stays open over the app on iOS.
       if (Capacitor.getPlatform() === 'ios') Browser.close().catch(() => {})
@@ -4603,9 +4612,9 @@ async function enableCapacitorIntegrations() {
         return handleExternalLink(target)
       }
       await store.dispatch('hideSettingsWindow')
-      return openExternalMedia(target)
+      return openExternalMedia(target, doCreateNewTab)
     }
-    return handleYoutubeLink(target)
+    return handleYoutubeLink(target, { doCreateNewTab })
   }
   const backButtonHandle = Capacitor.getPlatform() === 'android'
     ? await CapacitorApp.addListener('backButton', handleAndroidBack)
@@ -4645,7 +4654,7 @@ async function enableCapacitorIntegrations() {
   }, { immediate: true })
   const stopHomeWidgetUpdates = syncHomeWidgets(store, watch)
   const removeReminderActions = await initializeCapacitorLiveReminderActions((videoId) => {
-    handleYoutubeLink(`https://www.youtube.com/watch?v=${videoId}`)
+    handleYoutubeLink(`https://www.youtube.com/watch?v=${videoId}`, { doCreateNewTab: true })
   }, showInAppNotification)
   const removeMediaActions = await addAndroidMediaSessionActionListener(({ action, ...details }) => {
     tabMediaCoordinator.dispatchAction(action, details)
