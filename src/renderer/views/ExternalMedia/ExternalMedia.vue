@@ -1225,14 +1225,17 @@ function setCompanionFormat(format) {
 
 function handleCompanionAudioEnded() {
   if (!companionAudioNeeded.value) return
-  // A longer soundtrack ends the media while the video loops.
-  if (getPositionMedia() === companionAudio.value && !isCoub.value) markAsWatchedIfFinished(companionAudio.value.currentTime, true)
-  savePosition()
   if (!isCoub.value) {
+    // A shorter soundtrack leaves the video playing to its own end.
+    if (getPositionMedia() !== companionAudio.value) return
+    // A longer soundtrack ends the media while the video loops.
+    markAsWatchedIfFinished(companionAudio.value.currentTime, true)
+    savePosition()
     pauseCompanionVideo()
     continueWithQueue()
     return
   }
+  savePosition()
   const audio = companionAudio.value
   if (audio && !getCompanionVideo()?.paused) {
     audio.currentTime = 0
