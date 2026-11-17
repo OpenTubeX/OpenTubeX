@@ -849,15 +849,18 @@ export default defineComponent({
         ? this.$t('User Playlists.Remove from Favorites', translationProperties)
         : this.$t('User Playlists.Add to Favorites', translationProperties)
     },
+    isIncognitoTab: function () {
+      return this.$store.getters.getTabIncognito(this.tabId)
+    },
     rememberHistory: function () {
-      return this.$store.getters.getRememberHistory
+      return this.$store.getters.getRememberHistory && !this.isIncognitoTab
     },
     historyRetentionEnabled: function () {
       const days = Number(this.$store.getters.getHistoryRetentionDays)
       return Number.isInteger(days) && days > 0
     },
     enableVideoMetadataCache: function () {
-      return process.env.IS_ELECTRON && this.$store.getters.getEnableVideoMetadataCache
+      return process.env.IS_ELECTRON && this.$store.getters.getEnableVideoMetadataCache && !this.isIncognitoTab
     },
     wellbeingPauseRequest: function () {
       return this.$store.getters.getWellbeingPauseRequest
@@ -1739,7 +1742,7 @@ export default defineComponent({
     this.watchTimeIsShort = false
     this.watchTimeTracker = createWatchTimeTracker(
       () => !this.isPlaybackPaused() && !this.chromecastStatus?.buffering,
-      (date, seconds, retry) => this.$store.dispatch('recordPlaybackTime', { date, seconds, isShort: this.watchTimeIsShort, retry })
+      (date, seconds, retry) => this.$store.dispatch('recordPlaybackTime', { date, seconds, isShort: this.watchTimeIsShort, incognito: this.isIncognitoTab, retry })
     )
     retainIosMediaSources(() => this.legacyFormats.map(format => format.url))
     this.theatreModeAnimator = createTheatreModeAnimator()
@@ -7575,7 +7578,7 @@ export default defineComponent({
     },
 
     updateLocalPlaylistLastPlayedAtSometimes() {
-      if (this.selectedUserPlaylist == null) { return }
+      if (this.selectedUserPlaylist == null || this.isIncognitoTab) { return }
 
       const playlist = this.selectedUserPlaylist
       this.updatePlaylistLastPlayedAt({ _id: playlist._id })

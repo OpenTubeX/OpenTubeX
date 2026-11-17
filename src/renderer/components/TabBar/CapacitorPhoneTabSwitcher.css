@@ -334,6 +334,12 @@
   overflow-wrap: anywhere;
 }
 
+.capacitorPhoneTabIncognitoIcon {
+  flex-shrink: 0;
+  inline-size: 1em;
+  block-size: 1em;
+}
+
 .capacitorPhoneTabTitle > span[dir] {
   display: -webkit-box;
   overflow: hidden;
@@ -387,7 +393,7 @@
 }
 
 .capacitorPhoneTabFab,
-.capacitorPhoneTabReopen {
+.capacitorPhoneTabSecondaryAction {
   display: inline-grid;
   place-items: center;
   padding: 0;
@@ -407,7 +413,7 @@
   font-size: 22px;
 }
 
-.capacitorPhoneTabReopen {
+.capacitorPhoneTabSecondaryAction {
   inline-size: 48px;
   block-size: 48px;
   color: var(--on-selected-container-color);
@@ -416,16 +422,16 @@
   font-size: 20px;
 }
 
-.capacitorPhoneTabReopen:is(:hover, :active) {
+.capacitorPhoneTabSecondaryAction:is(:hover, :active) {
   background-color: var(--selected-container-hover-color);
 }
 
 .capacitorPhoneTabFab:active,
-.capacitorPhoneTabReopen:active {
+.capacitorPhoneTabSecondaryAction:active {
   border-radius: var(--shape-corner-medium);
 }
 
-.capacitorPhoneTabReopen :deep(.ft-icon) {
+.capacitorPhoneTabSecondaryAction :deep(.ft-icon) {
   display: block;
   inline-size: 1em;
   block-size: 1em;
@@ -576,7 +582,7 @@
 }
 
 .capacitorPhoneTabFab:focus-visible,
-.capacitorPhoneTabReopen:focus-visible {
+.capacitorPhoneTabSecondaryAction:focus-visible {
   outline: 2px solid var(--primary-color);
   outline-offset: -3px;
 }

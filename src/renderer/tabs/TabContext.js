@@ -21,6 +21,12 @@ export function useTabContext() {
   }
 }
 
+/** @returns {import('vue').ComputedRef<boolean>} whether this page belongs to an incognito tab */
+export function useIncognitoTab() {
+  const { tabId } = useTabContext()
+  return computed(() => store.getters.getTabIncognito(tabId))
+}
+
 export function useTabTitle() {
   const { tabId } = useTabContext()
   const watchNavigation = inject(watchNavigationKey, null)

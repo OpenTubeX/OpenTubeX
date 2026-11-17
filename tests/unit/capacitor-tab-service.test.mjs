@@ -220,6 +220,35 @@ for (const action of ['openSyncedSession', 'applySyncSessions']) {
   })
 }
 
+test('mobile incognito tabs stay out of saved, synced and closed tabs', async t => {
+  const writes = []
+  t.mock.method(globalThis.localStorage, 'setItem', (_key, value) => writes.push(JSON.parse(value)))
+  const store = createStore(createLoadedSession())
+  const service = new CapacitorTabService(createRouter(), store, createNavigation(store, true))
+  t.after(() => service.dispose())
+  const incognitoId = await service.createTab('/watch/video', 'Private video', true, { incognito: true })
+  assert.equal(store.getters.getTabById(incognitoId).isIncognito, true)
+
+  service.persist()
+  assert.deepEqual(writes.at(-1).tabs.map(tab => tab.id), ['tab-a'])
+  assert.equal(writes.at(-1).activeTabId, 'tab-a')
+  const [synced] = service.getSyncSessions()
+  assert.deepEqual(synced.tabs.map(tab => tab.id), ['tab-a'])
+  assert.equal(synced.activeTabId, 'tab-a')
+
+  // Another device's session neither closes the incognito tab nor leaves it
+  assert.equal(await service.applySyncSessions([{
+    activeTabId: 'tab-b',
+    tabs: [{ id: 'tab-b', title: 'Synced', url: 'https://localhost/home', isPinned: false }]
+  }]), true)
+  assert.deepEqual(store.getters.getTabs.map(tab => tab.id), ['tab-b', incognitoId])
+  assert.equal(store.getters.getActiveTabId, incognitoId)
+  assert.equal(store.getters.getTabById(incognitoId).isIncognito, true)
+
+  assert.equal(await service.closeTab(incognitoId), true)
+  assert.deepEqual(store.getters.getClosedTabs, [])
+})
+
 test('uses tab actions on Android WebViews without Array.toReversed', async () => {
   let session = createLoadedSession()
   session = addCapacitorTab(session, createCapacitorTab(WATCH_ROUTE, 'Video', 'tab-b'))

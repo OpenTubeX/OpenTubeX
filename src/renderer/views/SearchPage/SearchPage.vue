@@ -212,7 +212,7 @@ import { applyPublicationDates } from '../../helpers/api/missing-publication'
 import { getInvidiousSearchResults } from '../../helpers/api/invidious'
 import { SEARCH_CHAR_LIMIT } from '../../../constants'
 import { getSearchSettingsFromRouteQuery } from '../../../search-history'
-import { useTabContext, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
+import { useIncognitoTab, useTabContext, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
 import { ytDlp } from '../../helpers/ytDlp'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
@@ -317,7 +317,8 @@ const showCookieRetryWithoutNotice = computed(() => supportsCookieSearch &&
   (cookieSearchFailed.value || isEmptyLocalSearch.value))
 
 /** @type {import('vue').ComputedRef<boolean>} */
-const rememberSearchHistory = computed(() => store.getters.getRememberSearchHistory)
+const isIncognitoTab = useIncognitoTab()
+const rememberSearchHistory = computed(() => store.getters.getRememberSearchHistory && !isIncognitoTab.value)
 
 function restoreActiveSearchFilters(settings) {
   store.commit('setSearchPrioritize', { tabId, value: settings.prioritize })

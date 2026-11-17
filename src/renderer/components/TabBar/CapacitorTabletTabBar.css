@@ -189,6 +189,12 @@
   object-fit: cover;
 }
 
+.capacitorTabletTabIncognitoIcon {
+  flex: 0 0 auto;
+  inline-size: 16px;
+  block-size: 16px;
+}
+
 .capacitorTabletTabTitle {
   min-inline-size: 0;
   overflow: hidden;

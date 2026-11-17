@@ -632,7 +632,7 @@ import { useResultChannelAvatar } from '../../composables/useResultChannelAvatar
 import { formatDate, formatDateTime } from '../../helpers/dateFormat.js'
 import { getYoutubeVideoShareUrl } from '../../helpers/share'
 import { isTileMarkShortcut, tileKeyboardShortcutsKey } from '../../helpers/tileNavigation'
-import { playInBackgroundKey, watchNavigationKey } from '../../tabs/TabContext'
+import { playInBackgroundKey, useIncognitoTab, watchNavigationKey } from '../../tabs/TabContext'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 
 // Sidebar rows have fixed thumbnail widths; lists and grids provide theirs.
@@ -1179,6 +1179,13 @@ const videoMenuOptions = computed(() => {
           label: t('Context Menu.Open in a New Window'),
           value: 'openNewWindow',
           icon: ['fas', 'external-link-alt']
+        }]
+      : []),
+    ...(store.getters.getTabsEnabled
+      ? [{
+          label: t('Context Menu.Open in an Incognito Tab'),
+          value: 'openIncognitoTab',
+          icon: ['fas', 'user-secret']
         }]
       : []),
     { type: 'divider' },
@@ -1828,6 +1835,15 @@ function handleOptionsClick(option) {
         makeActive: option === 'openNewTab' && !process.env.IS_ELECTRON
       })
       break
+    case 'openIncognitoTab':
+      openInternalPath({
+        path: `/watch/${id.value}`,
+        query: watchPageLinkQuery.value,
+        title: title.value,
+        doCreateNewTab: true,
+        incognito: true
+      })
+      break
     case 'copyYoutubeWithoutPlaylist':
       copyToClipboard(`https://youtu.be/${id.value}`, { messageOnSuccess: t('Share.YouTube URL copied to clipboard') })
       break
@@ -2005,7 +2021,9 @@ const watchedProgressSavingEnabled = computed(() => {
 const watchedPercentageThreshold = computed(() => store.getters.getWatchedPercentageThreshold)
 
 /** @type {import('vue').ComputedRef<boolean>} */
-const rememberHistory = computed(() => store.getters.getRememberHistory)
+const isIncognitoTab = useIncognitoTab()
+// Opening the external player from an incognito tab does not mark the video as watched
+const rememberHistory = computed(() => store.getters.getRememberHistory && !isIncognitoTab.value)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const saveVideoHistoryWithLastViewedPlaylist = computed(() => store.getters.getSaveVideoHistoryWithLastViewedPlaylist)

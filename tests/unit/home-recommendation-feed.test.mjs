@@ -60,6 +60,7 @@ function createFeed({ records = [], candidates = [], playlists = [], settings = 
     runCooperatively,
     onBeforeUnmount: callback => cleanups.push(callback),
     useTabContext: () => ({}),
+    useIncognitoTab: () => ({ value: false }),
     getRecommendationLearningEntries,
     recommendationSubscriptionIds,
     mergeRecommendationCandidates,

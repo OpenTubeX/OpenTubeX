@@ -387,9 +387,9 @@ function removeFromHistory() {
   })
 }
 
-function openElsewhere({ newWindow = false, background = false } = {}) {
-  openInternalPath({ ...to.value, title: props.data.title, doCreateNewTab: !newWindow, doCreateNewWindow: newWindow, makeActive: !background })
-  markAsSeen()
+function openElsewhere({ newWindow = false, background = false, incognito = false } = {}) {
+  openInternalPath({ ...to.value, title: props.data.title, doCreateNewTab: !newWindow, doCreateNewWindow: newWindow, makeActive: !background, incognito })
+  if (!incognito) markAsSeen()
 }
 
 const copyLinkItem = computed(() => ({
@@ -446,6 +446,13 @@ const menuItems = computed(() => {
       icon: ['fas', 'external-link-alt'],
       quickAction: true,
       run: () => openElsewhere({ newWindow: true })
+    })
+  }
+  if (store.getters.getTabsEnabled) {
+    items.push({
+      label: t('Context Menu.Open in an Incognito Tab'),
+      icon: ['fas', 'user-secret'],
+      run: () => openElsewhere({ incognito: true })
     })
   }
   if (items.length > 0) items.push({ type: 'separator' })

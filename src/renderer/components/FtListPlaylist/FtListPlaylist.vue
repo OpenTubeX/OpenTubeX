@@ -215,6 +215,13 @@ const playlistMenuItems = computed(() => {
       run: () => openInternalPath({ ...playlistPageLinkTo.value, title: titleForDisplay.value, doCreateNewWindow: true, makeActive: true })
     })
   }
+  if (store.getters.getTabsEnabled) {
+    items.push({
+      label: t('Context Menu.Open in an Incognito Tab'),
+      icon: ['fas', 'user-secret'],
+      run: () => openInternalPath({ ...playlistPageLinkTo.value, title: titleForDisplay.value, doCreateNewTab: true, incognito: true })
+    })
+  }
   if (items.length > 0) items.push({ type: 'separator' })
   if (externalPlayer.value !== '' && !isUserPlaylist.value) {
     items.push({

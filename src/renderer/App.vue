@@ -2854,7 +2854,8 @@ async function playLibraryVideoFromCommandPalette(video, location) {
     startTime: saveProgress ? history?.watchProgress ?? 0 : 0,
     playbackRate: store.getters.getDefaultPlayback,
   })
-  if (opened && store.getters.getRememberHistory && canMarkHistoryEntryAsWatched(video)) {
+  if (opened && store.getters.getRememberHistory && !store.getters.getTabIncognito(presentedTabId.value) &&
+    canMarkHistoryEntryAsWatched(video)) {
     store.dispatch('updateHistory', {
       ...video,
       ...history,
@@ -3318,6 +3319,12 @@ function handleKeyboardShortcuts(event) {
     if (matchesKeyboardShortcut(event, shortcuts.NEW_TAB)) {
       event.preventDefault()
       store.dispatch('createTab', { makeActive: true })
+      return
+    }
+
+    if (matchesKeyboardShortcut(event, shortcuts.NEW_INCOGNITO_TAB)) {
+      event.preventDefault()
+      store.dispatch('createTab', { makeActive: true, isIncognito: true })
       return
     }
 

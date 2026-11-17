@@ -28,6 +28,12 @@
       >
         <span class="tabTitle">
           <FtIcon
+            v-if="tab.isIncognito"
+            :icon="['fas', 'user-secret']"
+            class="incognitoIcon"
+            aria-hidden="true"
+          />
+          <FtIcon
             v-if="tab.isPinned && !showIconContainer"
             :icon="['fas', 'thumbtack']"
             class="pinIcon"
@@ -236,9 +242,11 @@ const tabStyle = computed(() => {
 })
 
 const { t } = useI18n()
-const accessibleTitle = computed(() => props.tab.automaticallyUnloaded
-  ? `${props.tab.title} — ${t('Automatically unloaded to free memory')}`
-  : props.tab.title)
+const accessibleTitle = computed(() => [
+  props.tab.title,
+  ...(props.tab.isIncognito ? [t('Incognito Tab')] : []),
+  ...(props.tab.automaticallyUnloaded ? [t('Automatically unloaded to free memory')] : [])
+].join(' — '))
 
 // When a tab points at a channel page and no screenshot has been captured yet,
 // fall back to the channel's profile picture (cached by the Channel view).
@@ -445,6 +453,12 @@ watch(tabAvatarUrl, (avatarUrl) => {
 
 .tab.loading .tabTitleText {
   opacity: 0.8;
+}
+
+.incognitoIcon {
+  font-size: 12px;
+  color: var(--primary-text-color);
+  flex-shrink: 0;
 }
 
 .autoUnloadIcon {

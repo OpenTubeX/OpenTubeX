@@ -432,6 +432,28 @@ test('last active focus skips unavailable tabs and falls back right then left', 
   assert.equal(manager._getNeighborTabId('tab-2', false, new Set(['tab-4'])), 'tab-1')
 })
 
+test('incognito tabs stay out of saved, synced and closed tabs, and links from them stay incognito', async t => {
+  const manager = createManager(t)
+  await manager.restoreFromData(session(2), { restoreTabLoadState: true })
+  const incognito = manager.createTab({ route: '/history', isIncognito: true })
+  const link = await manager.createTabWithPreferenceFromOpener({ route: '/home', makeActive: false }, incognito.id)
+  assert.equal(link.isIncognito, true)
+  assert.equal(manager.getState().tabs.find(tab => tab.id === incognito.id).isIncognito, true)
+
+  const regularIds = ['tab-0', 'tab-1']
+  assert.deepEqual(manager.getSessionData().tabs.map(tab => tab.id), regularIds)
+  assert.equal(manager.getSessionData().activeTabId, 'tab-0')
+  assert.deepEqual(manager.getSyncSession().tabs.map(tab => tab.id), regularIds)
+
+  // Another device's session neither closes incognito tabs nor leaves the selected one
+  await manager.replaceFromSyncData({ ...manager.getSyncSession(), tabs: [manager.getSyncSession().tabs[0]], activeTabId: 'tab-0' })
+  assert.deepEqual([...manager.tabs.keys()], ['tab-0', incognito.id, link.id])
+  assert.equal(manager.activeTabId, incognito.id)
+
+  manager.closeTab(link.id)
+  assert.deepEqual(manager.getState().closedTabs, [])
+})
+
 test('desktop background closes preserve focus and closed history entries are skipped', async t => {
   TabManager.setTabCloseFocus('lastActiveTab')
   const manager = createManager(t)

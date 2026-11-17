@@ -16,6 +16,7 @@ export function getKeyboardShortcutLabelMappings(t, isCapacitor = false) {
     [t('KeyboardShortcutPrompt.New Window'), ['NEW_WINDOW']],
     [t('KeyboardShortcutPrompt.Reopen Closed Window'), ['RESTORE_CLOSED_WINDOW']],
     [t('KeyboardShortcutPrompt.New Tab'), ['NEW_TAB']],
+    [t('KeyboardShortcutPrompt.New Incognito Tab'), ['NEW_INCOGNITO_TAB']],
     [t('KeyboardShortcutPrompt.Close Tab'), ['CLOSE_TAB']],
     [t('KeyboardShortcutPrompt.Reload Tab'), ['RELOAD_TAB', 'RELOAD_TAB_ALT']],
     [t('KeyboardShortcutPrompt.Reopen Closed Tab'), ['RESTORE_CLOSED_TAB']],

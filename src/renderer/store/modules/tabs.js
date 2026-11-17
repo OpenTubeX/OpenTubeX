@@ -46,6 +46,8 @@ const getters = {
   getPresentedTabId: (state) => state.presentedTabId,
   getPresentedTab: (state, getters) => getters.getTabsById.get(state.presentedTabId) ?? null,
   getTabById: (_state, getters) => (tabId) => getters.getTabsById.get(tabId) ?? null,
+  // Incognito tabs keep watch and search history and recommendation signals to themselves
+  getTabIncognito: (_state, getters) => (tabId) => tabId != null && getters.getTabsById.get(tabId)?.isIncognito === true,
   getTabCount: (state) => state.tabs.length,
   getTabContainerIds: (state) => state.containerIds,
   getTabBarScrollPosition: (state) => state.tabBarScrollPosition,

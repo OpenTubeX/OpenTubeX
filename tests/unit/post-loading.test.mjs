@@ -32,6 +32,7 @@ function mountPost(t, backend, fallback = true) {
     useRouter: () => ({ replace: value => replacements.push(value) }),
     useI18n: () => ({ t: value => value }),
     useTabTitle: () => title => titles.push(title),
+    useIncognitoTab: () => ({ value: false }),
     store: {
       getters: {
         getBackendPreference: backend,
