@@ -81,7 +81,7 @@ export function normalizeYtDlpPreloadConcurrency(value) {
  * @param {object} options
  * @param {string} options.currentVideoId
  * @param {number} options.limit
- * @param {{ videoId?: string }[]} options.queuedVideos
+ * @param {{ videoId?: string, route?: { path?: string } }[]} options.queuedVideos
  * @param {{ videoId?: string }[] | null} options.playlistVideos null outside a playlist
  * @param {{ videoId?: string }[]} options.recommendedVideos
  */
@@ -106,6 +106,8 @@ export function selectYtDlpPreloadVideoIds({
   for (const candidate of candidates) {
     const videoId = candidate?.videoId
     if (typeof videoId !== 'string' || videoId === '' || seen.has(videoId)) continue
+    // Queued media from other sites plays on its own page, not as a YouTube video.
+    if (candidate.route && !candidate.route.path?.startsWith('/watch/')) continue
 
     seen.add(videoId)
     videoIds.push(videoId)

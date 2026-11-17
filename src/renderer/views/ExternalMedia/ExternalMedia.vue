@@ -118,6 +118,9 @@
                 :start-in-fullscreen="defaultViewingMode.startsWith('fullscreen')"
                 :start-in-fullwindow="defaultViewingMode.startsWith('fullwindow')"
                 :start-in-pip="defaultViewingMode === 'pip'"
+                :autoplay-requested="queuedAutoplay"
+                :can-skip-next="nextQueuedItem !== null"
+                :queue-available="queueAvailable"
                 playback-engine="yt-dlp"
                 @error="playerErrorHandler"
                 @loaded="handleMediaLoaded"
@@ -146,6 +149,7 @@
                 @looped-chapter-change="loopedChapterIndex = $event"
                 @toggle-transcript="toggleTranscript"
                 @open-download="showDownloadPrompt = true"
+                @skip-to-next="playNextQueuedItem"
               />
               <!-- eslint-disable-next-line vuejs-accessibility/media-has-caption -->
               <audio
@@ -388,6 +392,12 @@
             class="watchVideo phoneDescriptionPreview"
             @open="mobilePanel = 'description'"
           />
+          <PhoneQueueButton
+            v-if="phonePanelsEnabled && nextQueuedItem"
+            class="watchVideo"
+            :next-title="nextQueuedItem.title"
+            @open="mobilePanel = 'queue'"
+          />
           <FtPhonePanel
             :enabled="phonePanelsEnabled"
             :open="mobilePanel === 'description'"
@@ -472,6 +482,24 @@
               @close="closeChat"
             />
           </WatchSidebarPanel>
+          <WatchSidebarPanel
+            :dock-target="fullscreenQueueOpen ? fullscreenQueueTarget : null"
+            :phone-enabled="phonePanelsEnabled"
+            :phone-open="mobilePanel === 'queue'"
+            :title="t('Video.Queue')"
+            custom-header
+            @close="reason => closeSidebarPanel(reason, fullscreenQueueOpen, closeQueue)"
+            @leaving="setSidebarPanelLeaving"
+          >
+            <WatchVideoQueue
+              v-if="queueAvailable"
+              ref="watchVideoQueue"
+              :fullscreen-overlay="fullscreenQueueOpen"
+              class="watchVideoSideBar watchVideoQueue"
+              @close="player?.closeFullscreenQueue()"
+              @pause-player="player?.pause()"
+            />
+          </WatchSidebarPanel>
         </aside>
       </div>
     </template>
@@ -487,7 +515,7 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, provide, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, provide, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { FtIcon } from '@opentubex/icons'
@@ -502,10 +530,12 @@ import FtShareButton from '../../components/FtShareButton/FtShareButton.vue'
 import FtShakaVideoPlayer from '../../components/FtShakaVideoPlayer/FtShakaVideoPlayer.vue'
 import WatchVideoDescription from '../../components/WatchVideoDescription/WatchVideoDescription.vue'
 import PhoneDescriptionButton from '../../components/PhoneDescriptionButton/PhoneDescriptionButton.vue'
+import PhoneQueueButton from '../../components/PhoneQueueButton/PhoneQueueButton.vue'
 import WatchVideoChaptersPanel from '../../components/WatchVideoChaptersPanel/WatchVideoChaptersPanel.vue'
 import WatchVideoDownloadPrompt from '../../components/WatchVideoDownloadPrompt/lazyWatchVideoDownloadPrompt'
 import WatchVideoLikes from '../../components/WatchVideoLikes/WatchVideoLikes.vue'
 import WatchVideoTranscript from '../../components/WatchVideoTranscript/WatchVideoTranscript.vue'
+import WatchVideoQueue from '../../components/WatchVideoQueue/WatchVideoQueue.vue'
 import WatchSidebarPanel from '../../components/WatchSidebarPanel/WatchSidebarPanel.vue'
 import WatchVideoToolbar from '../../components/WatchVideoToolbar/WatchVideoToolbar.vue'
 import WatchVideoInfoSkeleton from '../../components/WatchVideoInfoSkeleton/WatchVideoInfoSkeleton.vue'
@@ -520,7 +550,7 @@ import { useRootClass } from '../../helpers/rootClasses'
 import { getPreferredCaption } from '../../../captionLanguages'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
-import { buildChaptersVttFile, formatDurationAsTimestamp, formatViewCount, getRelativeTimeFromDate } from '../../helpers/utils'
+import { buildChaptersVttFile, formatDurationAsTimestamp, formatViewCount, getRelativeTimeFromDate, showToast } from '../../helpers/utils'
 import {
   CHANNEL_PREFERENCE_TYPES,
   getPlatformChannelPreferenceKey,
@@ -538,6 +568,9 @@ import { hasReachedWatchedThreshold, isHistoryEntryWatched } from '../../helpers
 import { findPlatformChannel, getPlatformChannelRoute } from '../../../platforms/index'
 import { createWatchTimeTracker } from '../../helpers/watchTimeTracker'
 import { useTabAvatar, useTabContext, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
+import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
+import { watchRouteForVideo } from '../../helpers/downloadPlayback'
+import { requestQueuedPlayback, takeQueuedPlayback } from '../../helpers/queuedPlayback'
 import store from '../../store/index'
 
 const route = useRoute()
@@ -546,7 +579,7 @@ const { t, locale } = useI18n()
 const relativeTimeNow = useRelativeTimeClock()
 const setTabTitle = useTabTitle()
 const setTabAvatar = useTabAvatar()
-const { isTabPresented } = useTabContext()
+const { tabId, isTabPresented } = useTabContext()
 
 const loading = ref(true)
 const errorMessage = ref('')
@@ -621,9 +654,12 @@ const fullscreenLiveChatOpen = ref(false)
 const fullscreenLiveChatTarget = shallowRef(null)
 const fullscreenTranscriptOpen = ref(false)
 const fullscreenTranscriptTarget = shallowRef(null)
+const fullscreenQueueOpen = ref(false)
+const fullscreenQueueTarget = shallowRef(null)
 const sidebarPanelLeaving = ref(false)
 // Like on the watch page, phones show the panels as sheets over the page.
-const phonePanelsEnabled = computed(() => phoneLayout.value && !fullscreenLiveChatOpen.value && !fullscreenTranscriptOpen.value)
+const phonePanelsEnabled = computed(() => phoneLayout.value && !fullscreenLiveChatOpen.value &&
+  !fullscreenTranscriptOpen.value && !fullscreenQueueOpen.value)
 let loadGeneration = 0
 const canRetryWithCookies = computed(() => errorMessage.value && !drmError.value && isExternalMediaUrl(mediaUrl.value) && !attemptUsedCookies.value &&
   hasConfiguredRestrictedPlaybackAuthentication(store.getters))
@@ -669,7 +705,10 @@ const preferredTranscriptCaptionIndex = computed(() => {
   const caption = getPreferredCaption(captions, store.getters.getPreferredCaptionLocale || locale.value, store.getters.getEnableCaptionTranslations)
   return caption ? captions.indexOf(caption) : 0
 })
-const sidebarPanelsOpen = computed(() => Boolean(chatAvailable.value && chatOpen.value) || chaptersPanelOpen.value || transcriptPanelOpen.value)
+const queueAvailable = computed(() => store.getters.getWatchQueueLength > 0)
+const nextQueuedItem = computed(() => store.getters.getNextQueuedVideo)
+const sidebarPanelsOpen = computed(() => Boolean(chatAvailable.value && chatOpen.value) || chaptersPanelOpen.value ||
+  transcriptPanelOpen.value || queueAvailable.value)
 // Phones show the panels as sheets instead.
 const hasSidebar = computed(() => !phonePanelsEnabled.value && sidebarPanelsOpen.value)
 // Keep the sidebar column while its last panel animates out. This has to run
@@ -725,7 +764,7 @@ function playTranscriptSegment(seconds) {
 
 // Like on the watch page, phone sheets only open on request, not when the
 // layout switches to phone with a panel open.
-/** @type {import('vue').Ref<'chat' | 'transcript' | 'description' | null>} */
+/** @type {import('vue').Ref<'chat' | 'transcript' | 'description' | 'queue' | null>} */
 const mobilePanel = ref(null)
 const chatShown = computed(() => phonePanelsEnabled.value ? mobilePanel.value === 'chat' : chatOpen.value)
 const transcriptShown = computed(() => phonePanelsEnabled.value ? mobilePanel.value === 'transcript' : showTranscript.value)
@@ -780,9 +819,29 @@ function toggleChat() {
   if (phonePanelsEnabled.value) mobilePanel.value = 'chat'
 }
 
-/** The player only offers the live chat and transcript docks for external media. */
+watch(queueAvailable, available => {
+  if (!available && mobilePanel.value === 'queue') mobilePanel.value = null
+})
+
+function closeQueue() {
+  if (mobilePanel.value === 'queue') mobilePanel.value = null
+  player.value?.closeFullscreenQueue()
+}
+
+const watchVideoQueue = useTemplateRef('watchVideoQueue')
+// Like on the watch page, the docked queue and the sidebar keep their own positions.
+const queueScrollPositions = { sidebar: 0, fullscreen: 0 }
+
+/** The player only offers the live chat, transcript and queue docks for external media. */
 function handleDockPanelChange({ panel, open, target }) {
-  if (panel === 'transcript') {
+  if (panel === 'queue') {
+    const queue = watchVideoQueue.value
+    queueScrollPositions[fullscreenQueueOpen.value ? 'fullscreen' : 'sidebar'] = queue?.getScrollTop() ?? 0
+    fullscreenQueueTarget.value = open ? target : null
+    fullscreenQueueOpen.value = open && target !== null
+    const position = queueScrollPositions[fullscreenQueueOpen.value ? 'fullscreen' : 'sidebar']
+    nextTick(() => queue?.restoreScrollTop(position))
+  } else if (panel === 'transcript') {
     fullscreenTranscriptTarget.value = open ? target : null
     fullscreenTranscriptOpen.value = open && target !== null
   } else if (panel === 'liveChat') {
@@ -1166,13 +1225,17 @@ function setCompanionFormat(format) {
 
 function handleCompanionAudioEnded() {
   if (!companionAudioNeeded.value) return
-  // A longer soundtrack ends the media while the video loops.
-  if (getPositionMedia() === companionAudio.value && !isCoub.value) markAsWatchedIfFinished(companionAudio.value.currentTime, true)
-  savePosition()
   if (!isCoub.value) {
+    // A shorter soundtrack leaves the video playing to its own end.
+    if (getPositionMedia() !== companionAudio.value) return
+    // A longer soundtrack ends the media while the video loops.
+    markAsWatchedIfFinished(companionAudio.value.currentTime, true)
+    savePosition()
     pauseCompanionVideo()
+    continueWithQueue()
     return
   }
+  savePosition()
   const audio = companionAudio.value
   if (audio && !getCompanionVideo()?.paused) {
     audio.currentTime = 0
@@ -1312,10 +1375,55 @@ function savePositionOnExit() {
   if (store.getters.getWatchedProgressSavingMode === 'auto') savePosition()
 }
 
-function handleMediaEnded() {
+/** @param {boolean} [sleepTimerEnded] */
+function handleMediaEnded(sleepTimerEnded = false) {
   markAsWatchedIfFinished(getPositionMedia()?.currentTime ?? currentTime.value, true)
   handlePlaybackStopped()
+  // Android keeps its playback service for the next item until this reports
+  // that nothing follows.
+  if (sleepTimerEnded || !continueWithQueue()) tabMediaCoordinator.releaseEndedPlayback(tabId ?? 'web')
 }
+
+/** @returns {boolean} whether the next queued item starts */
+function continueWithQueue() {
+  // Like on the watch page, only media the user can see or hear moves on,
+  // and a digital wellbeing limit that blocks playback keeps the queue for later.
+  if (!(isTabPresented?.value ?? true) && player.value?.presentedOutsideTab !== true) return false
+  return !store.getters.getWellbeingPlaybackBlock(false) && playNextQueuedItem()
+}
+
+/**
+ * Plays the first queued item, a YouTube video or other media, and removes it from the queue.
+ * @returns {boolean} whether there was one
+ */
+function playNextQueuedItem() {
+  const item = nextQueuedItem.value
+  if (!item?.videoId) return false
+  store.commit('removeVideoFromWatchQueue', item.queueItemId)
+  const location = item.route ?? watchRouteForVideo(store.getters, item)
+  const fullPath = router.resolve(location).fullPath
+  if (withoutTimestamp(fullPath) === withoutTimestamp(route.fullPath)) {
+    seekTo(0)
+    player.value?.play()
+  } else {
+    requestQueuedPlayback(tabId, fullPath)
+    router.push(location)
+  }
+  showToast({ message: t('Playing Next Video'), icon: ['fas', 'step-forward'] })
+  return true
+}
+
+/** @param {string} fullPath */
+function withoutTimestamp(fullPath) {
+  const url = new URL(fullPath, 'https://opentubex.invalid')
+  url.searchParams.delete('timestamp')
+  return `${url.pathname}${url.search}`
+}
+
+// The operating system's media controls offer the same skip as the player.
+watch(() => nextQueuedItem.value !== null, available => {
+  tabMediaCoordinator.setActionHandlers(tabId ?? 'web', 'playlist', available ? { nexttrack: playNextQueuedItem } : {})
+}, { immediate: true })
 
 function handlePlaybackStopped() {
   pauseCompanionAudio()
@@ -1434,7 +1542,12 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
   }
 }
 
-watch(() => route.query.url, url => loadMedia(url), { immediate: true })
+// Media that the queue opens starts even where media doesn't start automatically.
+const queuedAutoplay = ref(false)
+watch(() => route.query.url, url => {
+  queuedAutoplay.value = takeQueuedPlayback(tabId, route.fullPath)
+  loadMedia(url)
+}, { immediate: true })
 // A timestamp link for the loaded media seeks instead of reloading it. While
 // it loads, the start position reads the link once extraction finishes, and
 // afterwards the player applies it once it has loaded.
@@ -1446,6 +1559,7 @@ useTabLifecycle({
   beforeDispose: savePositionOnExit,
 })
 onBeforeUnmount(() => {
+  tabMediaCoordinator.setActionHandlers(tabId ?? 'web', 'playlist', {})
   savePositionOnExit()
   releaseTwitchVodRegistration(source.value)
   theatreModeAnimator.cancel()

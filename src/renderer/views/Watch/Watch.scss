@@ -1834,16 +1834,6 @@
   }
 }
 
-.phoneQueuePreview {
-  display: block;
-  margin-block-start: 4px;
-  font-size: 0.875em;
-  color: var(--secondary-text-color);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 :global(.phonePanelContent .shortsPhoneSheetContent) {
   display: block;
   inline-size: 100%;

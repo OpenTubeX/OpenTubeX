@@ -130,7 +130,7 @@
             @open-video="playQueuedVideo(item.queueItemId)"
             @pause-player="emit('pause-player')"
           />
-          <!-- Other downloaded media has no YouTube metadata or actions -->
+          <!-- Downloads and media from other sites have no YouTube metadata or actions -->
           <RouterLink
             v-else
             class="queueVideo externalQueueVideo"
@@ -140,7 +140,7 @@
           >
             <FtRetryImage
               class="queueThumbnail"
-              :src="item.thumbnail"
+              :src="store.getters.getThumbnailPreference === 'hidden' ? '' : item.thumbnail"
               sizes="134px"
               alt=""
             />

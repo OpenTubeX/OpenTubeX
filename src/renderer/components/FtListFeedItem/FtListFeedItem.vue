@@ -198,6 +198,7 @@ import { isHistoryEntryWatched } from '../../helpers/history'
 import { lightHaptic } from '../../helpers/mobileHaptics'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import { markRssFeedItemsAsSeen, markRssFeedItemsAsUnseen } from '../../helpers/rssFeeds'
+import { queueSwipeAction } from '../../helpers/videoSwipeActions'
 import {
   copyToClipboard,
   formatDurationAsTimestamp,
@@ -398,6 +399,28 @@ const copyLinkItem = computed(() => ({
 const shareLinkItem = computed(() => process.env.IS_CAPACITOR
   ? { label: t('Share.Share Link'), icon: ['fas', 'share-alt'], run: () => shareLink(props.data.url) }
   : null)
+// The queue opens the item's media page, like the item itself.
+const queueVideo = computed(() => ({
+  videoId: historyId.value,
+  title: props.data.title,
+  author: props.data.author,
+  authorId: getExternalMediaAuthorId(props.data.platform, props.data.channelId),
+  thumbnail: props.data.thumbnail,
+  ...(props.data.duration > 0 ? { lengthSeconds: props.data.duration } : {}),
+  route: to.value
+}))
+// The media page only exists where yt-dlp plays the item.
+const canQueue = computed(() => supportsYtDlp && historyId.value !== null)
+
+function addToWatchQueue(playNext) {
+  store.commit('addVideoToWatchQueue', { video: queueVideo.value, playNext })
+  showToast({
+    message: playNext ? t('Video.Added to Play Next') : t('Video.Added to Queue'),
+    image: thumbnail.value || null,
+    icon: ['fas', 'list']
+  })
+}
+
 const downloadItem = computed(() => canDownload.value
   ? { label: t('Downloads.Download Video'), icon: ['fas', 'download'], run: () => { showDownloadPrompt.value = true } }
   : null)
@@ -425,6 +448,17 @@ const menuItems = computed(() => {
     })
   }
   if (items.length > 0) items.push({ type: 'separator' })
+  if (canQueue.value) {
+    items.push({
+      label: t('Video.Play Next'),
+      icon: ['fas', 'play-next'],
+      run: () => addToWatchQueue(true)
+    }, {
+      label: t('Video.Add to Queue'),
+      icon: ['fas', 'add-to-queue'],
+      run: () => addToWatchQueue(false)
+    }, { type: 'separator' })
+  }
   if (!props.data.isLive) {
     items.push({
       label: watched ? t('Video.Unmark As Watched') : t('Video.Mark As Watched'),
@@ -462,7 +496,9 @@ const menuItems = computed(() => {
     })
   }
   if (downloadItem.value) items.push(downloadItem.value)
-  items.push({ type: 'separator' }, copyLinkItem.value, {
+  // The queue group ends with a separator, which live items may not follow with any actions.
+  if (items.length > 0 && items.at(-1).type !== 'separator') items.push({ type: 'separator' })
+  items.push(copyLinkItem.value, {
     // Feeds that aren't from a supported platform link to any website
     label: platform.value ? t('Platforms.Open Website', { platform: platform.value.name }) : t('Share.Open Link'),
     icon: platformIcon.value ?? ['fas', 'external-link-alt'],
@@ -496,7 +532,7 @@ function openOptionsMenu() {
 
 /**
  * The swipe actions from the settings that apply to items from other
- * platforms. Playlists, bookmarks and the queue only take YouTube videos.
+ * platforms. Playlists and bookmarks only take YouTube videos.
  * @param {'left' | 'right'} direction
  */
 function getThumbnailSwipeAction(direction) {
@@ -523,6 +559,11 @@ function getThumbnailSwipeAction(direction) {
       return shareLinkItem.value
     case 'download':
       return downloadItem.value
+    case 'addToQueue':
+    case 'playNext':
+      return canQueue.value
+        ? queueSwipeAction(actionId, [queueVideo.value], store.getters.getWatchQueue, { t, commit: store.commit, add: addToWatchQueue })
+        : null
     default:
       return null
   }

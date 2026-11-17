@@ -58,11 +58,17 @@ test('reuses preloaded playback sources across proxy changes', () => {
   }
 })
 
-test('preloads queued videos before playlist or recommendation candidates', () => {
+test('preloads queued YouTube videos before playlist or recommendation candidates', () => {
   assert.deepEqual(selectYtDlpPreloadVideoIds({
     currentVideoId: 'current00001',
     limit: 3,
-    queuedVideos: [video('queue000001'), video('queue000002'), video('queue000003'), video('queue000004')],
+    queuedVideos: [
+      video('queue000001'),
+      { videoId: 'https://example.com/episode.mp3', route: { path: '/external-media', query: { url: 'https://example.com/episode.mp3' } } },
+      video('queue000002'),
+      video('queue000003'),
+      video('queue000004'),
+    ],
     playlistVideos: [video('list0000001'), video('list0000002')],
     recommendedVideos: [video('recommend01')],
   }), ['queue000001', 'queue000002', 'queue000003'])

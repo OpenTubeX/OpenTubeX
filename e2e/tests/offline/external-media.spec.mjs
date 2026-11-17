@@ -3468,3 +3468,78 @@ segment.mp4
     await new Promise(resolve => server.close(resolve))
   }
 })
+
+test.describe('with a followed podcast feed', () => {
+  const FEED_URL = 'https://feeds.example.test/podcast.xml'
+  const EPISODES = ['https://media.example.test/episode-1', 'https://media.example.test/episode-2']
+  const THUMBNAIL = 'https://feeds.example.test/thumbnail.svg'
+  test.use({
+    seed: {
+      settings: {
+        fetchSubscriptionsAutomatically: false,
+        enableRssFeeds: true,
+        followedRssFeeds: [{ url: FEED_URL, title: 'Example podcast' }]
+      }
+    }
+  })
+
+  test('the watch queue plays feed episodes between YouTube videos', async ({ app, page }) => {
+    test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+    await mockPlayableWatchPage(app, page)
+    await prepareTwitchYtDlp(app, page, 'https://media.example.test/', false)
+    // Registered last, so it takes precedence over the catch-all routes of the mocks.
+    await page.route(FEED_URL, route => route.fulfill({
+      contentType: 'application/rss+xml',
+      body: `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"><channel><title>Example podcast</title><link>https://media.example.test/</link>
+${EPISODES.map((url, index) => `<item><title>Episode ${index + 1}</title><link>${url}</link>` +
+  `<description><![CDATA[<img src="${THUMBNAIL}">]]></description>` +
+  `<pubDate>${new Date(Date.now() - (index + 1) * 3600000).toUTCString()}</pubDate><guid>${url}</guid></item>`).join('\n')}
+</channel></rss>`
+    }))
+    await page.route(THUMBNAIL, route => fulfillVisualFixture(route, 'video-thumbnail'))
+
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-rss-feeds-tab]').click()
+    for (const title of ['Episode 1', 'Episode 2']) {
+      await page.locator('#subscriptionsPanel .ft-list-item').filter({ hasText: title }).locator('.title').click({ button: 'right' })
+      await page.locator('.contextMenu').getByRole('menuitem', { name: 'Add to Queue' }).click()
+    }
+    await page.evaluate(() => window.$store.commit('addVideoToWatchQueue', {
+      video: { videoId: 'jNQXAC9IVRw', title: 'Me at the zoo', author: 'jawed', lengthSeconds: 19 }
+    }))
+
+    const video = await openMockedVideo(page)
+    const queue = page.locator(`${activeTab} .watchQueue`)
+    await expect(queue.locator('.queueItem h3')).toHaveText(['Episode 1', 'Episode 2', 'Me at the zoo'])
+    // Queued media starts even where videos don't start automatically.
+    await page.evaluate(() => window.$store.dispatch('updateAutoplayVideos', false))
+    const currentRoute = () => page.evaluate(() => {
+      const { path, query } = window.$router.currentRoute.value
+      return query.url ? `${path}?url=${query.url}` : path
+    })
+    const playsToTheEnd = async () => {
+      await expect.poll(() => video.evaluate(element => element.paused === false && element.readyState > 0).catch(() => false)).toBe(true)
+      await video.evaluate(element => { element.currentTime = element.duration - 0.1 })
+    }
+
+    for (const [index, episode] of EPISODES.entries()) {
+      await playsToTheEnd()
+      await expect.poll(currentRoute).toBe(`/external-media?url=${episode}`)
+      await expect(page.locator(`${activeTab} .externalMedia .watchQueue .queueItem h3`))
+        .toHaveText(index === 0 ? ['Episode 2', 'Me at the zoo'] : ['Me at the zoo'])
+      if (index === 0) {
+        // Like the feed, the queue leaves out thumbnails while they are hidden.
+        const thumbnail = page.locator(`${activeTab} .externalMedia .watchQueue img[src="${THUMBNAIL}"]`)
+        await expect(thumbnail).toHaveCount(1)
+        await page.evaluate(() => window.$store.dispatch('updateThumbnailPreference', 'hidden'))
+        await expect(thumbnail).toHaveCount(0)
+      }
+    }
+    await playsToTheEnd()
+    await expect.poll(currentRoute).toBe('/watch/jNQXAC9IVRw')
+    await expect.poll(() => video.evaluate(element => element.paused === false).catch(() => false)).toBe(true)
+    await expect(queue).toHaveCount(0)
+    expect(await page.evaluate(() => window.$store.getters.getWatchQueueLength)).toBe(0)
+  })
+})
