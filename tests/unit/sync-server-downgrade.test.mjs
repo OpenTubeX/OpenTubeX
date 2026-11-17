@@ -54,13 +54,14 @@ const helperSource = await readFile(new URL('../../src/renderer/helpers/sync-ser
 const storeSource = await readFile(new URL('../../src/renderer/store/modules/sync-server.js', import.meta.url), 'utf8')
 const schedulerSource = await readFile(new URL('../../src/renderer/helpers/sync-server-scheduler.js', import.meta.url), 'utf8')
 
-function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false, syncableSettingKeys = ['channelPlaybackSpeeds'], reminderService, connected = false, timer, locks, desktopTabs, connectionChanges, capacitor = false, backgroundJob = runBackgroundJob, settingsReader, receiptStorage, openExternalLink = async () => {}, notificationDismissals = normalizeNotificationDismissals(null), hiddenRenderer = false, deletions = createSyncDeletionDecisions(), unsentMarks = createUnsentSyncDeletionMarks() } = {}) {
+function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false, syncableSettingKeys = ['channelPlaybackSpeeds'], reminderService, connected = false, timer, locks, desktopTabs, connectionChanges, capacitor = false, backgroundJob = runBackgroundJob, settingsReader, receiptStorage, openExternalLink = async () => {}, notificationDismissals = normalizeNotificationDismissals(null), hiddenRenderer = false, deletions = createSyncDeletionDecisions(), unsentMarks = createUnsentSyncDeletionMarks(), checkConnection } = {}) {
   const connectionEvents = new EventTarget()
   const network = { state: connectionState, online }
   const requests = []
   const commits = []
   const notifications = []
   const dispatched = []
+  const periodicTasks = []
   const settings = {
     syncServerEnabled: true,
     syncServerUrl: 'https://sync.example',
@@ -143,6 +144,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     isSyncReasonEnabled,
     AUTO_SYNC_INTERVAL_MS: 5 * 60 * 1000,
     getConnectionState: () => network.state,
+    checkConnection: async () => checkConnection ? checkConnection() : network.state !== 'offline' && network.online,
     navigator: {
       get onLine() { return network.online },
       ...(locks ? { locks } : deferLock ? { locks: { request: (name, options, callback) => Promise.resolve().then(() => (callback ?? options)({ name })) } } : {})
@@ -164,7 +166,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     },
     holdAndroidBackgroundWork: () => () => {},
     setPeriodicBackgroundTask: () => {},
-    onPeriodicBackgroundTask: () => {},
+    onPeriodicBackgroundTask: task => { periodicTasks.push(task) },
     onAndroidWindowBlur: () => {},
     isAndroidBackgroundRenderer: hiddenRenderer,
     structuredClone,
@@ -276,7 +278,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
       if (action === 'syncWithSyncServer') return store.exports.actions.syncWithSyncServer(context, value)
     },
   }
-  return { network, connectionEvents, settings, requests, commits, notifications, dispatched, context, local, actions: store.exports.actions, Client: helper.exports.SyncServerClient }
+  return { network, connectionEvents, periodicTasks, settings, requests, commits, notifications, dispatched, context, local, actions: store.exports.actions, Client: helper.exports.SyncServerClient }
 }
 
 test('unsupported watch-stat initialization preserves another window’s newer sync baseline', async () => {
@@ -1200,6 +1202,26 @@ test('reconnect sync includes offline changes even when the last sync was recent
   f.connectionEvents.dispatchEvent(new CustomEvent('change', { detail: 'restored' }))
   for (let i = 0; i < 100 && !options; i++) await Promise.resolve()
   assert.equal(options?.skipIfRecent, false)
+})
+
+test('the Android background job rechecks a connection regained while hidden and uploads offline edits', async () => {
+  const f = fixture({}, {
+    encrypted: true,
+    connectionState: 'offline',
+    browser: true,
+    // Android blocked the hidden app's check when the connection returned; the job has network access.
+    checkConnection: async () => {
+      f.network.state = 'restored'
+      return true
+    },
+  })
+  await f.actions.initializeSyncServer(f.context)
+  assert.equal(f.periodicTasks.length, 1)
+  await f.periodicTasks[0]()
+  const syncs = f.dispatched.filter(([action]) => action === 'syncWithSyncServer').map(([, options]) => options)
+  assert.equal(syncs.length, 1)
+  assert.equal(syncs[0].remoteOnly, undefined, 'a remote-only check would skip the edits made offline')
+  assert.ok(f.requests.length > 0)
 })
 
 test('disconnect cancels an active sync and reconnect waits for it to settle', async () => {

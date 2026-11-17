@@ -4,7 +4,7 @@ import i18n from '../../i18n/index'
 import { openExternalLink, showToast, showToastOnAllTabs } from '../../helpers/utils'
 import { isAppHidden } from '../../helpers/appVisibility.js'
 import { isAndroidBackgroundRenderer, onAndroidWindowBlur, onPeriodicBackgroundTask } from '../../helpers/androidBackgroundSync.js'
-import { connectionEvents, getConnectionState } from '../../helpers/networkRecovery.js'
+import { checkConnection, connectionEvents, getConnectionState } from '../../helpers/networkRecovery.js'
 import {
   SyncServerClient,
   SyncServerCancelledError,
@@ -2099,10 +2099,18 @@ const actions = {
         }
       })
       // Live notifications stop while the app is hidden; check periodically instead.
-      onPeriodicBackgroundTask(() => {
+      onPeriodicBackgroundTask(async () => {
         const settings = rootState.settings
         if (!settings.syncServerEnabled || !settings.syncServerAutoSync || !settings.syncServerToken ||
             !isSyncReasonEnabled(settings, 'automatic')) return
+        // Android blocks a hidden app's network, so a connection that returned
+        // while hidden still counts as lost until the app is shown. This job runs
+        // with network access. Edits made offline were never scheduled, so a
+        // regained connection needs a full sync.
+        if (isSyncServerOffline()) {
+          if (!await checkConnection() || isSyncServerOffline()) return
+          return dispatch('syncWithSyncServer', { automatic: true })
+        }
         return dispatch('syncWithSyncServer', { skipIfRecent: true, automatic: true, remoteOnly: true })
       })
       // Swiping the app away stops syncing until it opens again, so pending
