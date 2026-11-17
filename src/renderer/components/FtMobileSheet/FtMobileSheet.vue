@@ -41,7 +41,14 @@
           />
         </button>
         <slot name="heading">
-          <h2>{{ title }}</h2>
+          <h2>
+            <FtIcon
+              v-if="icon"
+              :icon="icon"
+              aria-hidden="true"
+            />
+            {{ title }}
+          </h2>
         </slot>
         <slot name="actions" />
         <button
@@ -78,6 +85,7 @@ const props = defineProps({
   enabled: { type: Boolean, default: true },
   open: { type: Boolean, default: true },
   title: { type: String, required: true },
+  icon: { type: Array, default: null },
   back: { type: Boolean, default: false },
   compact: { type: Boolean, default: false },
   // Places a compact sheet along the bottom edge, for short menus

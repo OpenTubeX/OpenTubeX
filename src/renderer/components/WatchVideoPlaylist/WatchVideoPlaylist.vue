@@ -45,6 +45,12 @@
                 class="playlistTitle"
                 :title="playlistTitle"
               >
+                <FtIcon
+                  v-if="phonePanelHeader"
+                  class="phonePanelTitleIcon"
+                  :icon="['fas', 'list']"
+                  aria-hidden="true"
+                />
                 <RouterLink
                   class="playlistTitleLink"
                   dir="auto"

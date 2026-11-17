@@ -10,8 +10,9 @@
       <div class="transcriptHeader">
         <h3 class="transcriptTitle">
           <FtIcon
-            v-if="fullscreenOverlay"
+            v-if="fullscreenOverlay || phonePanelHeader"
             :icon="['fas', 'file-lines']"
+            aria-hidden="true"
           />
           {{ t('Video.Transcript.Title') }}
         </h3>
