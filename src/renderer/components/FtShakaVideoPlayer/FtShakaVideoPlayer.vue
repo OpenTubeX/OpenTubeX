@@ -441,7 +441,7 @@
       />
       <div
         v-if="shortsPlayer"
-        class="shortsTopControls shaka-no-propagation"
+        class="shortsTopControls shaka-no-propagation shaka-show-controls-on-mouse-over"
         @dblclick.stop.prevent
       >
         <div class="shortsTopControlsGroup">
@@ -623,7 +623,7 @@
         v-if="visibleFullscreenActions.length > 0"
         ref="fullscreenActionsElement"
         v-overlay-scrollbars
-        class="fullscreenActions shaka-no-propagation"
+        class="fullscreenActions shaka-no-propagation shaka-show-controls-on-mouse-over"
         @click.stop
         @dblclick.stop
         @pointerdown.stop
@@ -6317,7 +6317,7 @@ function addUICustomizations() {
   // placing this inside the controls container so that we can fade it in and out at the same time as the controls
   fullscreenTitleOverlay = document.createElement('h1')
   fullscreenTitleOverlay.textContent = props.title
-  fullscreenTitleOverlay.className = 'playerFullscreenTitleOverlay shaka-no-propagation'
+  fullscreenTitleOverlay.className = 'playerFullscreenTitleOverlay shaka-no-propagation shaka-show-controls-on-mouse-over'
   fullscreenTitleOverlay.dir = 'auto'
   if (props.externalUrl) {
     fullscreenTitleOverlay.classList.add('passiveTitle')
