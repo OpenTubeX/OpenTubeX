@@ -13,6 +13,23 @@ const videos = Array.from({ length: 6 }, (_, index) => ({
   lengthSeconds: 120,
 }))
 
+async function maxChannelDifference(page, first, second) {
+  return page.evaluate(async images => {
+    const pixels = await Promise.all(images.map(async base64 => {
+      const bitmap = await createImageBitmap(new Blob([
+        Uint8Array.from(atob(base64), character => character.charCodeAt(0))
+      ], { type: 'image/png' }))
+      const { width, height } = bitmap
+      const context = new OffscreenCanvas(width, height).getContext('2d')
+      context.drawImage(bitmap, 0, 0)
+      bitmap.close()
+      return context.getImageData(0, 0, width, height).data
+    }))
+    if (pixels[0].length !== pixels[1].length) return Infinity
+    return pixels[0].reduce((max, value, index) => Math.max(max, Math.abs(value - pixels[1][index])), 0)
+  }, [first.toString('base64'), second.toString('base64')])
+}
+
 for (const playlistViewType of ['grid', 'list']) {
   test.describe(`playlist ${playlistViewType} panel`, { tag: '@scale' }, () => {
     test.use({
@@ -87,13 +104,14 @@ for (const playlistViewType of ['grid', 'list']) {
         })
         const unclipped = await page.screenshot({ clip, animations: 'disabled' })
         await infoLine.evaluate((element, previous) => { element.style.overflowX = previous }, previousOverflow)
-        if (!actual.equals(unclipped)) {
-          // This comparison flakes rarely on CI. Keep what differed for diagnosis.
+        // Repainting without the clip can round an antialiased edge pixel by one
+        // level; clipping removes the avatar's circle (14 levels) or ring.
+        const difference = await maxChannelDifference(page, actual, unclipped)
+        if (difference > 2) {
           await testInfo.attach(`${pack} avatar clipped`, { body: actual, contentType: 'image/png' })
           await testInfo.attach(`${pack} avatar unclipped`, { body: unclipped, contentType: 'image/png' })
-          await testInfo.attach(`${pack} avatar markup`, { body: await avatar.evaluate(element => element.outerHTML), contentType: 'text/html' })
         }
-        expect(actual.equals(unclipped), `${pack} avatar should look the same without metadata clipping`).toBe(true)
+        expect(difference, `${pack} avatar should look the same without metadata clipping`).toBeLessThanOrEqual(2)
       }
       await page.evaluate(() => window.$store.dispatch('updateIconPack', 'material'))
 
