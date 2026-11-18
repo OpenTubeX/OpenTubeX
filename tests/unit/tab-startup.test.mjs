@@ -446,8 +446,13 @@ test('incognito tabs stay out of saved, synced and closed tabs, and links from t
   assert.deepEqual(manager.getSyncSession().tabs.map(tab => tab.id), regularIds)
 
   // Another device's session neither closes incognito tabs nor leaves the selected one
+  manager.tabs.get(incognito.id).placementOpenerTabId = 'tab-1'
+  manager.setTabPinned(incognito.id, true)
   await manager.replaceFromSyncData({ ...manager.getSyncSession(), tabs: [manager.getSyncSession().tabs[0]], activeTabId: 'tab-0' })
-  assert.deepEqual([...manager.tabs.keys()], ['tab-0', incognito.id, link.id])
+  // Pinned tabs stay first, and only openers the remote session closed are dropped
+  assert.deepEqual([...manager.tabs.keys()], [incognito.id, 'tab-0', link.id])
+  assert.equal(manager.tabs.get(incognito.id).placementOpenerTabId, null)
+  assert.equal(manager.tabs.get(link.id).placementOpenerTabId, incognito.id)
   assert.equal(manager.activeTabId, incognito.id)
 
   manager.closeTab(link.id)

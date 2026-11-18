@@ -2621,9 +2621,10 @@ export class TabManager {
       // Incognito tabs are never synced, so the remote session cannot close them
       const incognitoTabs = [...removedTabs].filter(tab => tab.isIncognito)
       if (incognitoTabs.length > 0) {
+        const keptTabIds = new Set([...syncedTabs.keys(), ...incognitoTabs.map(tab => tab.id)])
         for (const tab of incognitoTabs) {
           removedTabs.delete(tab)
-          if (!syncedTabs.has(tab.placementOpenerTabId)) tab.placementOpenerTabId = null
+          if (!keptTabIds.has(tab.placementOpenerTabId)) tab.placementOpenerTabId = null
         }
         // Stable sort, so pinned tabs stay first without reordering the rest
         const orderedTabs = [...syncedTabs.values(), ...incognitoTabs]
