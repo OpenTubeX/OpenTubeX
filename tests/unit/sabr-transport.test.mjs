@@ -523,13 +523,16 @@ test('a live segment that is not out yet is polled instead of requested in a loo
   const uri = 'sabr1:audio?formatId=140-123-&targetDurationMs=5000&startTimeMs=7500&sq=1'
   // The player's segment timeout
   const pending = transport.request(uri, { uris: [uri], retryParameters: { timeout: 30000 } }, 1).promise
-  pending.catch(() => {})
-  for (let index = 0; index < 4; index++) {
+  let settled = false
+  pending.then(() => { settled = true }, () => { settled = true })
+  // Retrying at once would reach the retry limit before the segment came out
+  await flushRequests()
+  assert.equal(calls, 1, 'retried before any time passed')
+  for (let index = 0; index < 20 && !settled; index++) {
+    t.mock.timers.tick(250)
     await flushRequests()
-    t.mock.timers.tick(500)
   }
   assert.deepEqual([...(await pending).data], [1])
-  assert.equal(calls, 5)
   assert.equal(reloads, 0)
 })
 

@@ -68,9 +68,21 @@ test('a live SABR window stays a segment behind the newest one SABR delivers', t
   // Without rewinding, SABR delivers segments up to the one starting at the
   // maximum seekable time, two behind the head. Playing that one runs out of
   // media just as the next one becomes available.
-  const { liveWindow } = load(t, { ...head(1000, 1_800_000_000_000), maxSeekableTimeMs: 4_990_000, minSeekableTimeMs: 4_990_000 })
+  const { liveWindow, stream } = load(t, { ...head(1000, 1_800_000_000_000), maxSeekableTimeMs: 4_990_000, minSeekableTimeMs: 4_985_000 })
 
-  assert.equal(liveWindow.presentationTimeline.getSeekRangeEnd(), 4985)
+  const end = liveWindow.presentationTimeline.getSeekRangeEnd()
+  assert.equal(end, 4985)
+  assert.match(stream.segmentIndex.get(stream.segmentIndex.find(end)).getUris()[0], /&sq=997$/)
+})
+
+test('a live SABR window joined without older segments starts on the oldest one', t => {
+  // Shaka clamps the live start to the seek range, which starts at the oldest
+  // segment until the next one comes out
+  const { liveWindow, stream } = load(t, { ...head(1000, 1_800_000_000_000), maxSeekableTimeMs: 4_990_000, minSeekableTimeMs: 4_990_000 })
+
+  const start = liveWindow.presentationTimeline.getSeekRangeStart()
+  assert.equal(start, 4990)
+  assert.match(stream.segmentIndex.get(stream.segmentIndex.find(start)).getUris()[0], /&sq=998$/)
 })
 
 test('a live SABR window follows reported heads and expects few segments without them', t => {
