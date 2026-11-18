@@ -126,7 +126,8 @@ test.describe('download of a video opened without it', () => {
     await expect(formatPrompt.getByRole('button', { name: /Local video file/ })).toHaveAttribute('aria-pressed', 'true')
     await formatPrompt.getByRole('button', { name: /Online video/ }).click()
     await expect.poll(() => video.evaluate(element => element.currentSrc)).not.toMatch(/^downloadmedia:/)
-    await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(0)
+    const onlineStart = await video.evaluate(element => element.currentTime)
+    await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(onlineStart)
   })
 })
 
