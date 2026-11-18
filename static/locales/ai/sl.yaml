@@ -1535,6 +1535,7 @@ Settings:
     Confirm Before Unsubscribing: Zahtevaj potrditev pred odjavo
     RSS Feeds Auto Refresh Interval: Interval samodejnega osveževanja virov RSS
     Faster Subscription Refresh: "Hitrejša osvežitev naročnin"
+    Show Collaborations From Other Channels: "Vključi sodelovanja, ki so jih naložili drugi kanali"
     Platforms:
       Other Platforms: Druge platforme
       Manage Channels: Upravljaj spremljane kanale
@@ -2964,6 +2965,7 @@ Tooltips:
     Notify About New Uploads: Prikazuje sistemska obvestila v tej napravi za kanale, ki ste jim obvestila vklopili v njihovih nastavitvah naročnine. OpenTubeX preveri novo vsebino ob osvežitvi naročnin, zato izberite interval samodejnega osveževanja. Če želite prejemati obvestila tudi, ko je aplikacija zaprta, vklopite še osveževanje, ko je aplikacija zaprta.
     RSS Feeds Auto Refresh Interval: Kako pogosto OpenTubeX samodejno osveži vaše vire RSS, ko je aplikacija odprta.
     Faster Subscription Refresh: "Najprej preveri vir RSS vsakega kanala in naloži videoposnetke, Shorts in prenose v živo samo s kanalov z novimi naloženimi vsebinami. Samodejne osvežitve preskočijo tudi kanale, naložene v zadnjih 10 minutah. Pri kanalih brez novih vsebin se število ogledov, odstranjeni videoposnetki in spremenjeni naslovi posodobijo le vsakih nekaj ur, nove vsebine pa se lahko prikažejo pozneje, ko vir RSS zaostaja. Ni na voljo z API-jem Invidious."
+    Show Collaborations From Other Channels: "Prikaže tudi videoposnetke, ki so jih naročeni kanali ustvarili skupaj z drugim kanalom, ki jih je naložil. YouTube jih navaja samo na zavihku Domov kanala, zato vsaka osvežitev videoposnetkov naloži eno stran več na kanal. Najdena so samo najnovejša sodelovanja, prikazana tam, nekateri kanali ne prikazujejo nobenega, datumi objave pa so približni. Ni na voljo z API-jem Invidious."
     Platforms Auto Refresh Interval: Kako pogosto OpenTubeX samodejno osveži kanale, ki jih spremljate na drugih platformah, ko je aplikacija odprta.
     Twitch Notify When Live: Obvesti vas, ko eden od kanalov Twitch, ki jih spremljate, začne oddajati. OpenTubeX preverja vsakih nekaj minut, ko je odprt, in tudi ko je zaprt, če takrat osvežuje naročnine.
   Theme Settings:

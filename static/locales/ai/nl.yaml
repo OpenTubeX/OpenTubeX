@@ -1315,6 +1315,7 @@ Settings:
     Notify About New Uploads: Melden bij nieuwe uploads
     RSS Feeds Auto Refresh Interval: Interval voor automatisch vernieuwen van RSS-feeds
     Faster Subscription Refresh: "Snellere vernieuwing van abonnementen"
+    Show Collaborations From Other Channels: "Samenwerkingen opnemen die door andere kanalen zijn geüpload"
     Platforms:
       Other Platforms: Andere platforms
       Manage Channels: Gevolgde kanalen beheren
@@ -2508,6 +2509,7 @@ Tooltips:
     Notify About New Uploads: Toont systeemmeldingen op dit apparaat voor kanalen waarvan je de meldingen hebt ingeschakeld in hun abonnementsinstellingen. OpenTubeX controleert op nieuwe inhoud wanneer abonnementen worden vernieuwd, dus kies een interval voor automatisch vernieuwen. Om ook meldingen te krijgen terwijl de app gesloten is, schakel je ook vernieuwen terwijl de app gesloten is in.
     RSS Feeds Auto Refresh Interval: Hoe vaak OpenTubeX je RSS-feeds automatisch vernieuwt terwijl de app geopend is.
     Faster Subscription Refresh: "Controleert eerst de RSS-feed van elk kanaal en laadt alleen de video's, Shorts en livestreams van kanalen met nieuwe uploads. Automatische vernieuwingen slaan ook kanalen over die in de afgelopen 10 minuten zijn geladen. Bij kanalen zonder nieuwe uploads worden weergaven, verwijderde video's en gewijzigde titels maar om de paar uur bijgewerkt, en nieuwe uploads kunnen later verschijnen als de RSS-feed achterloopt. Niet beschikbaar met de Invidious-API."
+    Show Collaborations From Other Channels: "Toont ook video's die kanalen waarop je bent geabonneerd hebben gemaakt samen met een ander kanaal dat ze heeft geüpload. YouTube toont deze alleen op het tabblad Home van een kanaal, dus elke vernieuwing van video's laadt één pagina meer per kanaal. Alleen de nieuwste samenwerkingen die daar worden getoond, worden gevonden, sommige kanalen tonen er geen en hun publicatiedatums zijn bij benadering. Niet beschikbaar met de Invidious-API."
     Platforms Auto Refresh Interval: Hoe vaak OpenTubeX de kanalen die je op andere platforms volgt automatisch vernieuwt terwijl de app geopend is.
     Twitch Notify When Live: Geeft een melding wanneer een van je gevolgde Twitch-kanalen begint met streamen. OpenTubeX controleert om de paar minuten zolang het geopend is, en ook wanneer het gesloten is als het dan abonnementen vernieuwt.
   Theme Settings:

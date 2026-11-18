@@ -1300,6 +1300,7 @@ Settings:
     Notify About New Uploads: Teavita uutest üleslaadimistest
     RSS Feeds Auto Refresh Interval: RSS-voogude automaatse värskendamise intervall
     Faster Subscription Refresh: "Kiirem tellimuste värskendamine"
+    Show Collaborations From Other Channels: "Kaasa teiste kanalite üles laaditud koostööd"
     Platforms:
       Other Platforms: Teised platvormid
       Manage Channels: Halda jälgitavaid kanaleid
@@ -2443,6 +2444,7 @@ Tooltips:
     Notify About New Uploads: Kuvab selles seadmes süsteemiteavitusi kanalite kohta, mille teavitused oled nende tellimuse seadetes sisse lülitanud. OpenTubeX kontrollib uut sisu tellimuste värskendamisel, seega vali automaatse värskendamise intervall. Et saada teavitusi ka siis, kui rakendus on suletud, luba ka värskendamine suletud rakenduse korral.
     RSS Feeds Auto Refresh Interval: Kui sageli OpenTubeX sinu RSS-voogusid automaatselt värskendab, kui rakendus on avatud.
     Faster Subscription Refresh: "Kontrollib esmalt iga kanali RSS-voogu ja laadib videod, Shorts'id ja otseülekanded ainult uute üleslaadimistega kanalitest. Automaatsed värskendused jätavad vahele ka kanalid, mis laaditi viimase 10 minuti jooksul. Uute üleslaadimisteta kanalite puhul uuenevad vaatamiste arvud, eemaldatud videod ja muudetud pealkirjad vaid iga mõne tunni tagant ning uued üleslaadimised võivad ilmuda hiljem, kui RSS-voog jääb maha. Invidiouse API-ga pole saadaval."
+    Show Collaborations From Other Channels: "Näitab ka videoid, mille tellitud kanalid tegid koos teise kanaliga, kes need üles laadis. YouTube näitab neid ainult kanali avalehe vahekaardil, seega laadib iga videote värskendus iga kanali kohta ühe lehe rohkem. Leitakse ainult seal näidatud uusimad koostööd, mõned kanalid ei näita ühtegi ja nende avaldamiskuupäevad on ligikaudsed. Pole Invidiouse API-ga saadaval."
     Platforms Auto Refresh Interval: Kui sageli OpenTubeX kanaleid, mida sa teistel platvormidel jälgid, automaatselt värskendab, kui rakendus on avatud.
     Twitch Notify When Live: Teavitab sind, kui mõni sinu jälgitavatest Twitchi kanalitest alustab ülekannet. OpenTubeX kontrollib iga paari minuti järel, kui see on avatud, ja ka siis, kui see on suletud, kui see siis tellimusi värskendab.
   Theme Settings:

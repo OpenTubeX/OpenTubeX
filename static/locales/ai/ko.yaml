@@ -1498,6 +1498,7 @@ Settings:
     Confirm Before Unsubscribing: 구독 취소 전 확인
     RSS Feeds Auto Refresh Interval: RSS 피드 자동 새로 고침 간격
     Faster Subscription Refresh: "더 빠른 구독 새로 고침"
+    Show Collaborations From Other Channels: "다른 채널이 업로드한 콜라보 포함"
     Platforms:
       Other Platforms: 다른 플랫폼
       Manage Channels: 팔로우한 채널 관리
@@ -2834,6 +2835,7 @@ Tooltips:
     Notify About New Uploads: 구독 설정에서 알림을 켠 채널에 대해 이 기기에 시스템 알림을 표시합니다. OpenTubeX는 구독을 새로 고칠 때 새 콘텐츠를 확인하므로 자동 새로 고침 간격을 선택하세요. 앱이 닫혀 있을 때도 알림을 받으려면 앱이 닫혀 있을 때 새로 고침도 사용하도록 설정하세요.
     RSS Feeds Auto Refresh Interval: 앱이 열려 있는 동안 OpenTubeX가 RSS 피드를 자동으로 새로 고치는 빈도입니다.
     Faster Subscription Refresh: "먼저 각 채널의 RSS 피드를 확인하고 새 업로드가 있는 채널의 동영상, Shorts, 라이브 스트림만 불러옵니다. 자동 새로 고침은 지난 10분 이내에 불러온 채널도 건너뜁니다. 새 업로드가 없는 채널은 조회수, 삭제된 동영상, 변경된 제목이 몇 시간마다만 업데이트되며, RSS 피드가 늦어지면 새 업로드가 늦게 표시될 수 있습니다. Invidious API에서는 사용할 수 없습니다."
+    Show Collaborations From Other Channels: "구독한 채널이 해당 동영상을 업로드한 다른 채널과 함께 만든 동영상도 표시합니다. YouTube는 이러한 동영상을 채널의 홈 탭에만 표시하므로 동영상을 새로고침할 때마다 채널당 한 페이지를 더 불러옵니다. 그곳에 표시되는 최신 콜라보만 찾을 수 있고, 일부 채널은 아무것도 표시하지 않으며, 게시 날짜는 대략적입니다. Invidious API에서는 사용할 수 없습니다."
     Platforms Auto Refresh Interval: 앱이 열려 있는 동안 OpenTubeX가 다른 플랫폼에서 팔로우한 채널을 자동으로 새로 고치는 빈도입니다.
     Twitch Notify When Live: 팔로우한 Twitch 채널 중 하나가 방송을 시작하면 알려 줍니다. OpenTubeX는 열려 있는 동안 몇 분마다 확인하며, 닫혀 있는 동안에도 그때 구독을 새로 고치면 확인합니다.
   Theme Settings:

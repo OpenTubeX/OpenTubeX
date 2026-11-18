@@ -1300,6 +1300,7 @@ Settings:
     Notify About New Uploads: Értesítés új feltöltésekről
     RSS Feeds Auto Refresh Interval: RSS-hírcsatornák automatikus frissítésének időköze
     Faster Subscription Refresh: "Gyorsabb feliratkozásfrissítés"
+    Show Collaborations From Other Channels: "Más csatornák által feltöltött közös videók belefoglalása"
     Platforms:
       Other Platforms: Más platformok
       Manage Channels: Követett csatornák kezelése
@@ -2441,6 +2442,7 @@ Tooltips:
     Notify About New Uploads: Rendszerértesítéseket jelenít meg ezen az eszközön azokról a csatornákról, amelyeknek a feliratkozási beállításaiban bekapcsolta az értesítéseket. Az OpenTubeX a feliratkozások frissítésekor keres új tartalmat, ezért válasszon automatikus frissítési időközt. Ha bezárt alkalmazásnál is értesítést szeretne kapni, kapcsolja be a bezárt alkalmazásnál történő frissítést is.
     RSS Feeds Auto Refresh Interval: Milyen gyakran frissíti automatikusan az OpenTubeX az RSS-hírcsatornáidat, amíg az alkalmazás nyitva van.
     Faster Subscription Refresh: "Először minden csatorna RSS-hírcsatornáját ellenőrzi, és csak az új feltöltéssel rendelkező csatornák videóit, Shorts-videóit és élő közvetítéseit tölti be. Az automatikus frissítések az elmúlt 10 percben betöltött csatornákat is kihagyják. Az új feltöltés nélküli csatornáknál a megtekintések száma, az eltávolított videók és a módosított címek csak néhány óránként frissülnek, és az új feltöltések később jelenhetnek meg, ha az RSS-hírcsatorna lemarad. Az Invidious API-val nem érhető el."
+    Show Collaborations From Other Channels: "Azokat a videókat is megjeleníti, amelyeket a feliratkozott csatornák egy másik, azokat feltöltő csatornával közösen készítettek. A YouTube ezeket csak a csatorna Kezdőlap lapján listázza, ezért minden videófrissítés csatornánként eggyel több oldalt tölt be. Csak az ott megjelenő legújabb közös videók találhatók meg, egyes csatornák egyet sem mutatnak, és a közzétételi dátumuk hozzávetőleges. Az Invidious API-val nem érhető el."
     Platforms Auto Refresh Interval: Milyen gyakran frissíti automatikusan az OpenTubeX a más platformokon követett csatornáidat, amíg az alkalmazás nyitva van.
     Twitch Notify When Live: Értesít, amikor valamelyik követett Twitch-csatornád adást indít. Az OpenTubeX néhány percenként ellenőriz, amíg nyitva van, és akkor is, amikor be van zárva, ha ilyenkor frissíti a feliratkozásokat.
   Theme Settings:

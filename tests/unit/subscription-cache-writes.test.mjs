@@ -4,7 +4,7 @@ import test from 'node:test'
 import vm from 'node:vm'
 import Datastore from '@seald-io/nedb'
 import { toRaw } from 'vue'
-import { ensureSubscriptionFeedEntryState } from '../../src/renderer/helpers/subscription-entries.js'
+import { ensureSubscriptionFeedEntryState, keepCachedSubscriptionCollaborations } from '../../src/renderer/helpers/subscription-entries.js'
 import * as seenData from '../../src/subscriptionSeenVideos.js'
 import * as feedState from '../../src/subscriptionFeedState.js'
 import { applySubscriptionSeenVideosToCache, applySubscriptionSeenPostsToCache } from '../../src/renderer/helpers/subscription-seen-videos.js'
@@ -194,6 +194,7 @@ for (const delayDatabaseReply of [false, true]) {
       console,
       ...feedState,
       ensureSubscriptionFeedEntryState,
+      keepCachedSubscriptionCollaborations,
       DBSubscriptionCacheHandlers: {
         async updateVideosByChannelId(channelId, videos, timestamp) {
           if (timestamp.getTime() !== 1000) {

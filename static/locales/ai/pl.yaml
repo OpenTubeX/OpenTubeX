@@ -824,6 +824,7 @@ Settings:
     Manage RSS Feeds: Zarządzaj kanałami RSS
     RSS Feeds Auto Refresh Interval: Interwał odświeżania kanałów RSS
     Faster Subscription Refresh: "Szybsze odświeżanie subskrypcji"
+    Show Collaborations From Other Channels: "Uwzględniaj współprace przesłane przez inne kanały"
     Platforms:
       Other Platforms: Inne platformy
       Manage Channels: Zarządzaj obserwowanymi kanałami
@@ -1662,6 +1663,7 @@ Tooltips:
     Enable RSS Feeds: Pokazuje zakładkę RSS na stronie Subskrypcje z elementami kanałów RSS lub Atom, aby można było obserwować twórców z innych platform. Jej elementy otwierają się za pomocą yt-dlp.
     RSS Feeds Auto Refresh Interval: Jak często OpenTubeX automatycznie odświeża Twoje kanały RSS, gdy aplikacja jest otwarta.
     Faster Subscription Refresh: "Najpierw sprawdza kanał RSS każdego kanału i wczytuje filmy, Shorts i transmisje na żywo tylko z kanałów z nowymi przesłanymi filmami. Automatyczne odświeżanie pomija też kanały wczytane w ciągu ostatnich 10 minut. W kanałach bez nowych filmów liczba wyświetleń, usunięte filmy i zmienione tytuły aktualizują się tylko co kilka godzin, a nowe filmy mogą pojawić się później, gdy kanał RSS jest opóźniony. Niedostępne z API Invidious."
+    Show Collaborations From Other Channels: "Pokazuje także filmy, które subskrybowane kanały nagrały razem z innym kanałem, który je przesłał. YouTube wyświetla je tylko na karcie Główna kanału, więc każde odświeżenie filmów wczytuje o jedną stronę więcej na kanał. Znajdowane są tylko najnowsze współprace widoczne w tym miejscu, niektóre kanały nie pokazują żadnych, a daty publikacji są przybliżone. Niedostępne z API Invidious."
     Platforms Auto Refresh Interval: Jak często OpenTubeX automatycznie odświeża kanały, które obserwujesz na innych platformach, gdy aplikacja jest otwarta.
     Twitch Notify When Live: Powiadamia, gdy któryś z obserwowanych kanałów Twitch rozpocznie transmisję. OpenTubeX sprawdza co kilka minut, gdy jest otwarty, a także gdy jest zamknięty, jeśli wtedy odświeża subskrypcje.
   Theme Settings:

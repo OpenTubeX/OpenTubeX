@@ -34,8 +34,9 @@ export function includeNotificationChannels(subscriptions, feedType) {
 }
 
 /**
- * Reports a freshly fetched channel feed, ordered newest first. Feeds without
- * notifications turned on are not sent; the receiver would discard them.
+ * Reports a freshly fetched channel feed, ordered newest first, with its
+ * collaborations after the uploads. Feeds without notifications turned on are
+ * not sent; the receiver would discard them.
  * @param {string} channelId
  * @param {'videos' | 'shorts' | 'live' | 'posts'} feedType
  * @param {object[]} entries
@@ -43,9 +44,19 @@ export function includeNotificationChannels(subscriptions, feedType) {
 export function reportSubscriptionUploads(channelId, feedType, entries) {
   if (!supportsUploadNotifications || !store.getters.getEnableUploadNotifications) return
   if (configuration?.enabled !== true || !configuration.channels[channelId]?.feedTypes.includes(feedType)) return
-  const value = { channelId, feedType, entries: normalizeUploadEntries(entries) }
-  const request = process.env.IS_ELECTRON
-    ? window.ftElectron.subscriptionAutoRefresh.observeUploads(value)
-    : observeAndroidUploads(value).then(collectNotificationHistory)
-  request.catch(error => console.error('Failed to check for new uploads', error))
+  const uploads = entries.filter(entry => entry?.isCollaboration !== true)
+  // New entries are the ones before the first known one, and collaborations
+  // follow the uploads, so each list is checked on its own. The receiver
+  // handles reports in order, so both share one baseline.
+  const lists = uploads.length === entries.length ? [entries] : [uploads]
+  if (uploads.length !== entries.length && store.getters.getIncludeSubscriptionCollaborations === true) {
+    lists.push(entries.filter(entry => entry?.isCollaboration === true))
+  }
+  for (const list of lists) {
+    const value = { channelId, feedType, entries: normalizeUploadEntries(list) }
+    const request = process.env.IS_ELECTRON
+      ? window.ftElectron.subscriptionAutoRefresh.observeUploads(value)
+      : observeAndroidUploads(value).then(collectNotificationHistory)
+    request.catch(error => console.error('Failed to check for new uploads', error))
+  }
 }

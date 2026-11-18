@@ -183,6 +183,7 @@ export const SYNC_SETTING_LABELS = {
   holdPlaybackRateMultiplier: 'Settings.Player Settings.Hold to Speed Up.Hold to Speed Up',
   homeSectionLayout: 'Home Page.Customize',
   iconPack: 'Settings.Theme Settings.Icon Pack.Icon Pack',
+  includeSubscriptionCollaborations: 'Settings.Subscription Settings.Show Collaborations From Other Channels',
   internetConnectivityChecks: 'Settings.Privacy Settings.Internet Connectivity Checks',
   keepPlayingOnNavigation: 'Settings.Player Settings.Scroll Mini Player.Leaving Video',
   keyboardShortcuts: 'KeyboardShortcutPrompt.Keyboard Shortcuts',

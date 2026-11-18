@@ -1367,6 +1367,7 @@ Settings:
     Refresh Subscriptions While App Is Closed: Abos bei geschlossener App aktualisieren
     Notify About New Uploads: Über neue Uploads benachrichtigen
     Faster Subscription Refresh: Schnellere Abo-Aktualisierung
+    Show Collaborations From Other Channels: Collabs anderer Kanäle anzeigen
   Privacy Settings:
     Internet Connectivity Checks: "Internetverbindung prüfen"
     Internet Connectivity Checks Tooltip: "Prüft den Internetzugang mit kleinen Anfragen an einen von GrapheneOS gehosteten Server."
@@ -3150,6 +3151,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Aktualisiert Feeds mit deinen gewählten Einstellungen. Auf dem Desktop bleibt OpenTubeX bis zum Beenden im Infobereich aktiv. Android bestimmt, wann Aktualisierungen im Hintergrund ausgeführt werden."
     Notify About New Uploads: "Zeigt auf diesem Gerät Systembenachrichtigungen für Kanäle, deren Benachrichtigungen du in ihren Abo-Einstellungen aktiviert hast. OpenTubeX sucht beim Aktualisieren der Abos nach neuen Inhalten, wähle daher ein automatisches Aktualisierungsintervall. Um auch bei geschlossener App benachrichtigt zu werden, aktiviere zusätzlich die Aktualisierung bei geschlossener App."
     Faster Subscription Refresh: Prüft zuerst den RSS-Feed jedes Kanals und lädt Videos, Shorts und Livestreams nur von Kanälen mit neuen Uploads. Automatische Aktualisierungen überspringen außerdem Kanäle, die in den letzten 10 Minuten geladen wurden. Bei Kanälen ohne neue Uploads werden Aufrufzahlen, entfernte Videos und geänderte Titel nur alle paar Stunden aktualisiert, und neue Uploads können später erscheinen, wenn der RSS-Feed hinterherhinkt. Mit der Invidious-API nicht verfügbar.
+    Show Collaborations From Other Channels: Zeigt auch Videos, die abonnierte Kanäle zusammen mit einem anderen Kanal gemacht haben, der sie hochgeladen hat. YouTube listet diese nur auf der Startseite eines Kanals, daher lädt jede Video-Aktualisierung pro Kanal eine Seite mehr. Nur die neuesten dort gezeigten Collabs werden gefunden, manche Kanäle zeigen keine, und ihre Veröffentlichungsdaten sind ungefähr. Mit der Invidious-API nicht verfügbar.
   Player Settings:
     Enable Timestamp Notes: Fügt dem Player eine Schaltfläche und das Tastenkürzel N hinzu, die das Video pausieren und eine Notiz öffnen, die auf die aktuelle Stelle verlinkt. Notizen können als Markdown kopiert oder auf dem Desktop zu Obsidian hinzugefügt werden.
     Obsidian Vault: Name des Obsidian-Vaults für Zeitstempel-Notizen. Ist er gesetzt, können Notizen zu Obsidian hinzugefügt werden. Die Notizen eines Videos werden in einer nach dem Video benannten Notiz im Ordner für neue Notizen des Vaults gesammelt.
