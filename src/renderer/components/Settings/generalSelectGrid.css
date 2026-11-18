@@ -3,7 +3,7 @@
   justify-content: center;
   column-gap: 0;
 
-  /* Keeps the columns within 1000px while the tile spans the section. */
+  /* Keeps the columns within 1000px while the block spans the section. */
   padding-inline: max(20px, calc((100% - 960px) / 2));
 }
 

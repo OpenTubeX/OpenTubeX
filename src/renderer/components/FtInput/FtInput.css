@@ -409,6 +409,29 @@
   box-shadow: inset 0 0 0 1px var(--input-border-color, transparent);
 }
 
+/* Sits where a floating label's icon would, so rounded fields line up with
+   and without a visible label. */
+.leadingIcon {
+  grid-area: 1 / 1;
+  align-self: center;
+  z-index: 1;
+  inline-size: 14px;
+  block-size: 14px;
+  font-size: 14px;
+  margin-inline-start: 16px;
+  color: var(--secondary-text-color);
+  pointer-events: none;
+}
+
+.ft-input-component.hasLeadingIcon .ft-input {
+  padding-inline-start: 36px;
+}
+
+/* The label shows inside the field, so hovering it must reach the input. */
+.ft-input-component.rounded .selectLabel {
+  pointer-events: none;
+}
+
 .ft-input-component.rounded .ft-input:not(:disabled):hover {
   background-color: color-mix(in srgb, var(--primary-text-color) 8%, var(--search-bar-color));
 }

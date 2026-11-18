@@ -11,8 +11,9 @@
       hasValue: inputDataPresent,
       hasHighlights: highlightSegments !== null,
       hasSupportingText: supportingText !== '',
-      outlined: fieldVariant === 'outlined' && !isSearch,
-      rounded: fieldVariant === 'rounded' && !isSearch
+      outlined: variant === 'outlined' && !isSearch,
+      rounded: variant === 'rounded' && !isSearch,
+      hasLeadingIcon: showLeadingIcon
     }"
     @focusout="handleFocusOut"
   >
@@ -46,6 +47,14 @@
         @blur="handleInputBlur"
         @keydown="handleKeyDown"
         @scroll="highlightsRef && (highlightsRef.scrollTop = $event.target.scrollTop)"
+      />
+      <!-- Rounded fields without a visible label show their icon where the
+           label's icon would be. -->
+      <FtIcon
+        v-if="showLeadingIcon"
+        :icon="icon"
+        class="leadingIcon"
+        aria-hidden="true"
       />
       <!-- Draws the text with its highlights, as the textarea cannot color
            parts of it. Its text is transparent instead. Only for multiline. -->
@@ -270,10 +279,9 @@ const props = defineProps({
   changeFilter: { type: Function, default: null },
   min: { type: [String, Number], default: null },
   step: { type: [String, Number], default: null },
-  // Search fields default to the rounded variant, which matches the main search.
   variant: {
     type: String,
-    default: null,
+    default: 'outlined',
     validator: value => ['filled', 'outlined', 'rounded'].includes(value)
   },
   inputType: {
@@ -388,10 +396,10 @@ const props = defineProps({
 const emit = defineEmits(['blur', 'change', 'clear', 'click', 'focus', 'input', 'keydown', 'remove'])
 
 const id = useId()
+const showLeadingIcon = computed(() => props.icon !== null && !props.showLabel && props.variant === 'rounded' && !props.isSearch)
 
 const inputRef = useTemplateRef('inputRef')
 const passwordVisible = ref(false)
-const fieldVariant = computed(() => props.variant ?? (props.inputType === 'search' ? 'rounded' : 'outlined'))
 const passwordVisibilityLabel = computed(() => passwordVisible.value
   ? t('Form Inputs.Hide Password')
   : t('Form Inputs.Show Password'))

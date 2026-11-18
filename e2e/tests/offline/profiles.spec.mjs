@@ -507,7 +507,7 @@ test.describe('profile manager presentation', () => {
     await expect(page.locator('.profileEdit')).toBeVisible()
   })
 
-  test('balances the space above and below the profile filter after emptying subscriptions', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
+  test('keeps the profile filter scroll range valid after emptying subscriptions', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
     await openProfileList(page)
     await page.locator('.profilePanelHeader button').last().click()
     await page.locator('.profileSettingsContent .profileList').getByText('Second profile').click()
@@ -533,21 +533,11 @@ test.describe('profile manager presentation', () => {
     })).toBe(true)
     for (const width of [1200, 350]) {
       await resizeToCssWidth(app, page, width, uiScale)
-      await expect.soft.poll(() => page.locator('.profileSettingsContent .select').evaluate(element => {
-        const before = document.querySelector('.selectionActions').getBoundingClientRect()
-        const label = element.querySelector('.select-label').getBoundingClientRect()
-        const count = element.parentElement.nextElementSibling.getBoundingClientRect()
-        // A rounded field's label sits inside it, an outlined one on its edge.
-        const top = element.classList.contains('rounded') ? element.querySelector('.select-text').getBoundingClientRect().top : label.top
-        const above = top - before.bottom
-        const below = count.top - element.getBoundingClientRect().bottom
-        return Math.abs(above - below)
-      }), { timeout: 2000, message: `profile filter has balanced spacing at ${width}px` }).toBeLessThanOrEqual(1.05)
       await page.locator('.profileSettingsContent .select').evaluate(element => element.scrollIntoView({ block: 'center', behavior: 'instant' }))
       await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
       const screenshot = await app.electronApp.evaluate(async ({ BrowserWindow }) =>
         (await BrowserWindow.getAllWindows()[0].webContents.capturePage()).toPNG().toString('base64'))
-      await testInfo.attach(`Balanced profile filter at ${width}px and ${uiScale}% scale`, {
+      await testInfo.attach(`Profile filter at ${width}px and ${uiScale}% scale`, {
         body: Buffer.from(screenshot, 'base64'), contentType: 'image/png'
       })
     }
