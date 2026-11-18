@@ -2,6 +2,11 @@
   justify-content: center;
 }
 
+/* The buttons' own margins already space a row from the next group title. */
+.box:has(+ .groupTitle) {
+  padding-block-end: 0;
+}
+
 .advancedDataSettings {
   margin-block-start: 24px;
 }

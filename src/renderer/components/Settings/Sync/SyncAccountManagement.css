@@ -2,7 +2,6 @@
   background-color: var(--secondary-card-bg-color);
   border-radius: var(--shape-corner-extra-large);
   box-sizing: border-box;
-  margin-block-start: 1.25rem;
   margin-inline: auto;
   max-inline-size: 64rem;
   padding: 1.25rem;

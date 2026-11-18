@@ -2,11 +2,14 @@ import { addIcon } from '@iconify/vue/offline'
 import { ref } from 'vue'
 
 import {
+  facDeArrow,
   facFluxer,
   facHorizontalTabs,
   facMatrix,
   facPlaylistAdd,
   facPlaylistCheck,
+  facRobotSlash,
+  facSponsorBlock,
   facVerticalTabs
 } from '../customIcons.js'
 
@@ -45,6 +48,10 @@ function registerCustomIcons() {
       width,
       height
     })
+  }
+
+  for (const { iconName, body, width, height } of [facDeArrow, facSponsorBlock, facRobotSlash]) {
+    addIcon(`otx:${iconName}`, { body, width, height })
   }
 }
 

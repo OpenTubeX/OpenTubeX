@@ -1,6 +1,6 @@
 <template>
   <section
-    class="accountManagement"
+    class="accountManagement settingsCard"
     :aria-labelledby="headingId"
   >
     <div class="managementHeader">

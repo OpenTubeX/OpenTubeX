@@ -31,9 +31,11 @@ const prefix = 'opentubex-sync'
 const marker = (kind, id) => `<!-- ${prefix}:${kind}:${id} -->`
 class SyncError extends Error {}
 class HttpError extends SyncError {
-  constructor(message, status) {
+  constructor(message, response) {
     super(message)
-    this.status = status
+    this.status = response.status
+    // GitLab.com allows 60 note requests per minute and reports when the quota resets.
+    if (response.status === 429) this.retryAfter = Number(response.headers?.get('retry-after') ?? 60)
   }
 }
 const transient = status => status === 429 || status >= 500
@@ -46,11 +48,14 @@ async function gitlab(retryDelay, label, request) {
       return await request()
     } catch (error) {
       if (error instanceof HttpError ? !transient(error.status) : error instanceof SyncError) throw error
-      if (!retryDelay || attempt === 3) {
+      // A rate-limited request was rejected, so even a POST can be repeated.
+      const limited = error.retryAfter >= 0 && error.retryAfter <= 300
+      if ((!retryDelay && !limited) || attempt === 3) {
         if (error instanceof SyncError) throw error
         throw new SyncError(`${label}: ${error.name}${error.cause?.code ? ` ${error.cause.code}` : ''}`)
       }
-      await setTimeout(retryDelay * attempt)
+      // Retry-After is rounded, so wait one more second to land after the reset.
+      await setTimeout(limited ? (error.retryAfter + 1) * 1000 : retryDelay * attempt)
     }
   }
 }
@@ -317,7 +322,7 @@ export function createClient(token, mediaToken, retryDelay = 2000) {
           redirect: 'error',
           signal: AbortSignal.timeout(30000),
         })
-        if (!response.ok) throw new HttpError(`GitLab ${method} ${path}: HTTP ${response.status}`, response.status)
+        if (!response.ok) throw new HttpError(`GitLab ${method} ${path}: HTTP ${response.status}`, response)
         return response.json()
       })
     },
@@ -343,7 +348,7 @@ export function createClient(token, mediaToken, retryDelay = 2000) {
     download(path) {
       return gitlab(retryDelay, 'GitLab upload download', async () => {
         const response = await fetch(uploadsUrl + path.slice('/uploads/'.length), { redirect: 'error', signal: AbortSignal.timeout(30000) })
-        if (transient(response.status)) throw new HttpError(`GitLab upload download: HTTP ${response.status}`, response.status)
+        if (transient(response.status)) throw new HttpError(`GitLab upload download: HTTP ${response.status}`, response)
         return {
           status: response.status,
           type: response.headers.get('content-type'),

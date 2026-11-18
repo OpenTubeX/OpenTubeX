@@ -65,16 +65,14 @@
     <p class="importFormatsHint">
       {{ t('Settings.Data Settings.Import subscriptions formats') }}
     </p>
-    <FtFlexBox>
-      <p>
-        <a
-          class="importHelpLink"
-          href="https://opentubex.org/docs/importing/"
-        >
-          {{ $t("Settings.Data Settings.How do I import my subscriptions?") }}
-        </a>
-      </p>
-    </FtFlexBox>
+    <p class="center">
+      <a
+        class="importHelpLink"
+        href="https://opentubex.org/docs/importing/"
+      >
+        {{ $t("Settings.Data Settings.How do I import my subscriptions?") }}
+      </a>
+    </p>
     <h4 class="groupTitle">
       {{ $t('History.History') }}
     </h4>
@@ -275,6 +273,7 @@
     v-if="!importOnly"
     class="advancedDataSettings"
     :title="t('Settings.Categories.Advanced')"
+    :icon="['fas', 'sliders-h']"
   >
     <h4 class="groupTitle">
       {{ t('Settings.Data Settings.Channel playback speeds') }}

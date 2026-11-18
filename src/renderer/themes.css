@@ -2858,15 +2858,54 @@ a:visited {
   --scrollbar-color-active: var(--accent-color-hover);
 }
 
-/* Checkboxes, filled buttons, and the subscribe button share the checked
-   switch's fill and white foreground. States darken, away from the label. */
-.openTubeXDark :is(.pure-checkbox, .btn.variant-filled:not([aria-pressed='false'], .selected), .buttonList:not(.subscribed)) {
+/* Every accent fill with a foreground on it (controls, badges, highlights,
+   and icon backdrops) shares the checked switch's fill and white
+   foreground. States darken, away from the label. Profiles in the theme
+   color keep these variables in stored inline styles, so their icons are
+   listed too. Pseudo-element fills are targeted directly where their host
+   also holds other accent-colored content. */
+.openTubeXDark .pure-checkbox,
+.openTubeXDark .btn.variant-filled:not([aria-pressed='false'], .selected),
+.openTubeXDark .buttonList:not(.subscribed),
+.openTubeXDark .profileTrigger,
+.openTubeXDark .previewProfileTrigger,
+.openTubeXDark .profileIcon,
+.openTubeXDark .themeColorOption,
+.openTubeXDark .title.active .titleIcon,
+.openTubeXDark .tutorialIcon,
+.openTubeXDark .summaryCard .summaryIcon,
+.openTubeXDark .activityTitle .activityIcon,
+.openTubeXDark .managementIcon,
+.openTubeXDark .currentSession .sessionDeviceIcon,
+.openTubeXDark .currentBadge,
+.openTubeXDark .channelSelectionOption,
+.openTubeXDark .accentSwatchEdit,
+.openTubeXDark .selectedBadge,
+.openTubeXDark .tabOrganizerRow.active .tabIcon,
+.openTubeXDark .tabIndicators .activeIndicator,
+.openTubeXDark .capacitorPhoneTabCount,
+.openTubeXDark .capacitorPhoneTabFab,
+.openTubeXDark .capacitorPhoneTabCheck,
+.openTubeXDark .capacitorTabSelectionFab,
+.openTubeXDark .liveReminderIcon.reminderActive .iconButton,
+.openTubeXDark .watchVideoChaptersPanel .chaptersSync,
+.openTubeXDark .valueChangeIcons,
+.openTubeXDark .shaka-forward-rewind-container-icon,
+.openTubeXDark .engineBadge,
+.openTubeXDark .proxy-warning,
+.openTubeXDark .commentText mark,
+.openTubeXDark .superChat,
+.openTubeXDark .superChatMessage,
+.openTubeXDark .channelName.owner,
+.openTubeXDark .scrollToBottom,
+.openTubeXDark :is(.notificationCenter[data-unread-count], .ft-seek-filmstrip-hint-label, .abRepeatMarkerB)::after {
   --primary-color: var(--control-fill-color);
   --primary-color-hover: rgb(from oklch(from var(--control-fill-color) calc(l - 0.06) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255));
   --primary-color-active: rgb(from oklch(from var(--control-fill-color) calc(l - 0.1) c h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255));
   --accent-color: var(--primary-color);
   --accent-color-hover: var(--primary-color-hover);
   --accent-color-active: var(--primary-color-active);
+  --accent-color-light: var(--accent-color-hover);
   --text-with-main-color: #fff;
   --text-with-accent-color: #fff;
 }

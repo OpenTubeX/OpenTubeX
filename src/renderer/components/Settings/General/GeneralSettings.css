@@ -2,13 +2,18 @@
   margin-block-start: 30px;
 }
 
+/* Two independent columns, so a label that wraps only lengthens its own
+   column instead of leaving a gap beside it. */
 .confirmations :deep(.pure-checkbox) {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  columns: 2 260px;
   column-gap: 40px;
   inline-size: min(100%, 700px);
 }
 
+.confirmations :deep(.pure-checkbox label) {
+  break-inside: avoid;
+}
+
 .confirmations :deep(.checkboxTitle) {
-  grid-column: 1 / -1;
+  column-span: all;
 }

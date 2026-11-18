@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { EventEmitter } from 'node:events'
 import { mkdtemp, readFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -21,8 +22,14 @@ test('PO token generation preserves replacement sequences in YouTube JSON argume
     cachedScript = 'capture(FT_PARAMS)';
     attest
   `, {
+    BaseWindow: class {
+      contentView = { addChildView() {} }
+      once() {}
+    },
+    BrowserWindow: { getAllWindows: () => [{}] },
     WebContentsView: class {
       webContents = {
+        once() {},
         setWindowOpenHandler() {},
         setAudioMuted() {},
         debugger: { attach() {}, async sendCommand() {} },
@@ -30,6 +37,7 @@ test('PO token generation preserves replacement sequences in YouTube JSON argume
         async executeJavaScript(script) {
           return vm.runInNewContext(script, { capture: (...args) => { received = args; return 'token' }, window: {} })
         },
+        isDestroyed: () => closed,
         close() { closed = true },
       }
 
@@ -50,33 +58,63 @@ const pending = 'p'.repeat(124)
 /**
  * @param {{ attest: () => string, mint?: () => string, validForSecs?: number | null, clearData?: () => Promise<void> }} botGuard
  */
-function load({ attest, mint = () => attested, validForSecs = 600, clearData = async () => {} }) {
+function load({ attest, mint = () => attested, validForSecs = 600, clearData = async () => {}, windowCount = 1 }) {
   const views = []
+  const hosts = []
   const proxies = []
   let cleanups = 0
   class WebContentsView {
     constructor() {
       views.push(this)
       this.closed = false
-      this.webContents = {
+      const webContents = Object.assign(new EventEmitter(), {
         setWindowOpenHandler() {},
         setAudioMuted() {},
         debugger: { attach() {}, async sendCommand() {} },
         async loadURL() {},
         isDestroyed: () => this.closed,
-        // Electron segfaults here for offscreen views outside a window
-        isFocused: () => { throw new Error('isFocused() crashes the main process') },
-        close: () => { this.closed = true },
+        close: () => {
+          this.closed = true
+          // Electron drops the web contents of a destroyed view
+          this.webContents = undefined
+          webContents.emit('destroyed')
+        },
         executeJavaScript: async (script) => {
           if (script.startsWith('window.ftMintPoToken')) return mint()
           if (script === 'window.ftPoTokenValidForSecs') return validForSecs
           return attest()
         },
-      }
+      })
+      this.webContents = webContents
     }
 
     setBounds() {}
   }
+  class BaseWindow extends EventEmitter {
+    constructor(options) {
+      super()
+      this.options = options
+      this.destroyed = false
+      this.contentView = { addChildView: view => { this.view = view } }
+      hosts.push(this)
+    }
+
+    isDestroyed() { return this.destroyed }
+
+    destroy() {
+      this.destroyed = true
+      this.emit('closed')
+    }
+  }
+  class BrowserWindow extends BaseWindow {
+    static all = []
+    static getAllWindows() { return BrowserWindow.all.filter(window => !window.destroyed) }
+
+    close() { this.destroy() }
+  }
+  for (let i = 0; i < windowCount; i++) BrowserWindow.all.push(new BrowserWindow())
+  hosts.length = 0
+  const app = { on() {} }
   const theSession = {
     setPermissionCheckHandler() {},
     setPermissionRequestHandler() {},
@@ -91,6 +129,9 @@ function load({ attest, mint = () => attested, validForSecs = 600, clearData = a
   }
   const { generatePoToken, mintPoTokenFromAttestation } = vm.runInNewContext(`${source}\n({ generatePoToken, mintPoTokenFromAttestation })`, {
     session: { fromPartition: () => theSession, defaultSession: { getUserAgent: () => 'agent' } },
+    app,
+    BaseWindow,
+    BrowserWindow,
     WebContentsView,
     readFile: async () => 'function bg(){}export{bg as default};',
     join: (...parts) => parts.join('/'),
@@ -112,7 +153,7 @@ function load({ attest, mint = () => attested, validForSecs = 600, clearData = a
   })
   const generate = proxyUrl => generatePoToken('videoId', '{}', '{}', '{}', proxyUrl)
   const mintOnly = proxyUrl => mintPoTokenFromAttestation('videoId', proxyUrl)
-  return { generate, mintOnly, views, proxies, cleanups: () => cleanups }
+  return { generate, mintOnly, views, hosts, windows: BrowserWindow.all, proxies, cleanups: () => cleanups }
 }
 
 test('later tokens reuse the attestation', async () => {
@@ -242,12 +283,30 @@ test('an attestation without a lifetime is not kept', async () => {
   assert.equal(cleanups(), 2)
 })
 
-test('the BotGuard view never asks Electron whether it is focused', async () => {
-  // Menu accelerators call isFocused() on every web contents while the view exists
-  const { generate, views } = load({ attest: () => attested })
+test('the BotGuard view and its hidden window close with the last app window', async () => {
+  // The hidden window would keep window-all-closed from firing, so the app would not quit
+  const { generate, mintOnly, views, hosts, windows } = load({ attest: () => attested, windowCount: 2 })
   await generate()
+  assert.equal(hosts[0].view, views[0])
+  windows[0].close()
   assert.equal(views[0].closed, false)
-  assert.equal(views[0].webContents.isFocused(), false)
+  windows[1].close()
+  assert.equal(views[0].closed, true)
+  assert.equal(hosts[0].destroyed, true)
+  assert.equal(await mintOnly(), null)
+  // A run after the last window closed would keep a hidden window nothing closes
+  await assert.rejects(generate())
+  assert.equal(hosts.length, 1)
+})
+
+test('closing the hidden window closes its BotGuard view', async () => {
+  // Quitting closes every window, and the view must not outlive its native view
+  const { generate, views, hosts } = load({ attest: () => attested })
+  await generate()
+  hosts[0].destroy()
+  assert.equal(views[0].closed, true)
+  assert.equal(await generate(), attested)
+  assert.equal(views.length, 2)
 })
 
 test('disabling the proxy restores the default route for the next attestation', async () => {

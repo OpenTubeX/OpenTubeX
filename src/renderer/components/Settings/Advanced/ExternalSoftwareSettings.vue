@@ -1,6 +1,7 @@
 <template>
   <FtSettingsSection
     :title="t('Settings.External Software Settings.External Software Settings')"
+    :icon="['fas', 'cube']"
   >
     <div class="externalSoftwareTools">
       <section
@@ -235,6 +236,7 @@
   <FtSettingsSection
     v-if="!IS_IOS"
     :title="t('Settings.External Software Settings.Restricted Playback Authentication')"
+    :icon="['fas', 'key']"
   >
     <FtFlexBox v-if="IS_CAPACITOR">
       <FtButton

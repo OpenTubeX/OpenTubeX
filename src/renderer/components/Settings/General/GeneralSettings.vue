@@ -1,131 +1,136 @@
 <template>
   <FtSettingsSection
     :title="t('Settings.General Settings.General Settings')"
+    :icon="['fas', 'gear']"
   >
-    <div class="switchColumnGrid switchFlowGrid">
-      <FtToggleSwitch
-        v-if="IS_CAPACITOR"
-        :label="t('Settings.General Settings.Enable Tabs')"
-        :tooltip="t('Tooltips.General Settings.Enable Tabs')"
-        :default-value="store.getters.getEnableMobileTabs"
-        setting-key="enableMobileTabs"
-        compact
-        @change="store.dispatch('updateEnableMobileTabs', $event)"
-      />
-      <FtToggleSwitch
-        :label="t('Settings.Privacy Settings.Enable Watch Statistics')"
-        compact
-        :disabled="!rememberHistory"
-        :default-value="enableWatchStats"
-        setting-key="enableWatchStats"
-        @change="updateEnableWatchStats"
-      />
-      <!-- Self-hosted servers are updated by their admin -->
-      <FtToggleSwitch
-        v-if="!IS_SELF_HOSTED"
-        :label="t('Settings.General Settings.Check for Updates')"
-        :default-value="checkForUpdates"
-        setting-key="checkForUpdates"
-        :compact="true"
-        @change="updateCheckForUpdates"
-      />
-      <FtToggleSwitch
-        v-if="USING_ELECTRON"
-        :label="t('Settings.General Settings.Open Deep Links In New Window')"
-        :default-value="openDeepLinksInNewWindow"
-        setting-key="openDeepLinksInNewWindow"
-        :compact="true"
-        :tooltip="t('Tooltips.General Settings.Open Deep Links In New Window')"
-        @change="updateOpenDeepLinksInNewWindow"
-      />
-      <FtToggleSwitch
-        v-if="USING_ELECTRON"
-        :label="t('Settings.General Settings.Close Window With Last Tab')"
-        :default-value="store.getters.getCloseWindowWithLastTab"
-        setting-key="closeWindowWithLastTab"
-        :compact="true"
-        :tooltip="t('Tooltips.General Settings.Close Window With Last Tab')"
-        @change="store.dispatch('updateCloseWindowWithLastTab', $event)"
-      />
-      <FtToggleSwitch
-        :label="t('Settings.General Settings.Update Relative Timestamps')"
-        :tooltip="t('Tooltips.General Settings.Update Relative Timestamps')"
-        :default-value="updateRelativeTimestamps"
-        setting-key="updateRelativeTimestamps"
-        :compact="true"
-        @change="updateRelativeTimestampsSetting"
-      />
-      <FtToggleSwitch
-        :label="t('Settings.General Settings.Auto Load Next Page.Label')"
-        :default-value="generalAutoLoadMorePaginatedItemsEnabled"
-        setting-key="generalAutoLoadMorePaginatedItemsEnabled"
-        :compact="true"
-        :tooltip="t('Settings.General Settings.Auto Load Next Page.Lists Tooltip')"
-        @change="updateGeneralAutoLoadMorePaginatedItemsEnabled"
-      />
-      <FtToggleSwitch
-        v-if="USING_ELECTRON"
-        :label="t('Settings.General Settings.Use tray icon')"
-        :default-value="trayEnabled"
-        :disabled="closedAppRefresh"
-        :tooltip="closedAppRefresh ? t('Settings.General Settings.Tray required for background refresh') : ''"
-        setting-key="useTrayIcon"
-        :compact="true"
-        @change="store.dispatch('updateUseTrayIcon', $event)"
-      />
-      <FtToggleSwitch
-        v-if="USING_ELECTRON"
-        :label="t('Settings.General Settings.Close to system tray')"
-        :default-value="store.getters.getHideToTrayOnClose"
-        :disabled="!trayEnabled"
-        setting-key="hideToTrayOnClose"
-        :compact="true"
-        @change="store.dispatch('updateHideToTrayOnClose', $event)"
-      />
-      <FtToggleSwitch
-        v-if="supportsAutoPictureInPictureMinimize && USING_ELECTRON"
-        :label="t('Settings.General Settings.Minimize to system tray')"
-        :default-value="hideToTrayOnMinimize"
-        :disabled="!trayEnabled"
-        setting-key="hideToTrayOnMinimize"
-        :compact="true"
-        @change="updateHideToTrayOnMinimize"
-      />
-      <FtToggleSwitch
-        v-if="IS_CAPACITOR && !IS_IOS"
-        :label="t('Settings.General Settings.Swipe to refresh')"
-        :default-value="enablePullToRefresh"
-        setting-key="enablePullToRefresh"
-        :compact="true"
-        @change="store.dispatch('updateEnablePullToRefresh', $event)"
-      />
-      <FtToggleSwitch
-        v-if="IS_CAPACITOR"
-        :label="t('Settings.General Settings.Haptic Feedback')"
-        :default-value="store.getters.getHapticFeedback"
-        setting-key="hapticFeedback"
-        :compact="true"
-        @change="store.dispatch('updateHapticFeedback', $event)"
-      />
-      <FtToggleSwitch
-        v-if="IS_CAPACITOR && !IS_IOS"
-        :label="t('Settings.General Settings.Ignore System Haptics Setting')"
-        :tooltip="t('Tooltips.General Settings.Ignore System Haptics Setting')"
-        :disabled="!store.getters.getHapticFeedback"
-        :default-value="store.getters.getHapticFeedbackIgnoresSystemSetting"
-        setting-key="hapticFeedbackIgnoresSystemSetting"
-        :compact="true"
-        @change="store.dispatch('updateHapticFeedbackIgnoresSystemSetting', $event)"
-      />
-      <FtToggleSwitch
-        :label="t('Settings.General Settings.Use AI Translation Completions')"
-        :default-value="useAITranslationCompletions"
-        setting-key="useAITranslationCompletions"
-        :compact="true"
-        :disabled="aiTranslationCompletionsDisabled"
-        :tooltip="t('Tooltips.General Settings.Use AI Translation Completions')"
-        @change="updateUseAITranslationCompletions"
-      />
+    <div class="switchColumnGrid">
+      <div class="switchColumn">
+        <FtToggleSwitch
+          v-if="IS_CAPACITOR"
+          :label="t('Settings.General Settings.Enable Tabs')"
+          :tooltip="t('Tooltips.General Settings.Enable Tabs')"
+          :default-value="store.getters.getEnableMobileTabs"
+          setting-key="enableMobileTabs"
+          compact
+          @change="store.dispatch('updateEnableMobileTabs', $event)"
+        />
+        <FtToggleSwitch
+          :label="t('Settings.Privacy Settings.Enable Watch Statistics')"
+          compact
+          :disabled="!rememberHistory"
+          :default-value="enableWatchStats"
+          setting-key="enableWatchStats"
+          @change="updateEnableWatchStats"
+        />
+        <!-- Self-hosted servers are updated by their admin -->
+        <FtToggleSwitch
+          v-if="!IS_SELF_HOSTED"
+          :label="t('Settings.General Settings.Check for Updates')"
+          :default-value="checkForUpdates"
+          setting-key="checkForUpdates"
+          :compact="true"
+          @change="updateCheckForUpdates"
+        />
+        <FtToggleSwitch
+          v-if="USING_ELECTRON"
+          :label="t('Settings.General Settings.Open Deep Links In New Window')"
+          :default-value="openDeepLinksInNewWindow"
+          setting-key="openDeepLinksInNewWindow"
+          :compact="true"
+          :tooltip="t('Tooltips.General Settings.Open Deep Links In New Window')"
+          @change="updateOpenDeepLinksInNewWindow"
+        />
+        <FtToggleSwitch
+          v-if="USING_ELECTRON"
+          :label="t('Settings.General Settings.Close Window With Last Tab')"
+          :default-value="store.getters.getCloseWindowWithLastTab"
+          setting-key="closeWindowWithLastTab"
+          :compact="true"
+          :tooltip="t('Tooltips.General Settings.Close Window With Last Tab')"
+          @change="store.dispatch('updateCloseWindowWithLastTab', $event)"
+        />
+        <FtToggleSwitch
+          :label="t('Settings.General Settings.Update Relative Timestamps')"
+          :tooltip="t('Tooltips.General Settings.Update Relative Timestamps')"
+          :default-value="updateRelativeTimestamps"
+          setting-key="updateRelativeTimestamps"
+          :compact="true"
+          @change="updateRelativeTimestampsSetting"
+        />
+      </div>
+      <div class="switchColumn">
+        <FtToggleSwitch
+          :label="t('Settings.General Settings.Auto Load Next Page.Label')"
+          :default-value="generalAutoLoadMorePaginatedItemsEnabled"
+          setting-key="generalAutoLoadMorePaginatedItemsEnabled"
+          :compact="true"
+          :tooltip="t('Settings.General Settings.Auto Load Next Page.Lists Tooltip')"
+          @change="updateGeneralAutoLoadMorePaginatedItemsEnabled"
+        />
+        <FtToggleSwitch
+          v-if="USING_ELECTRON"
+          :label="t('Settings.General Settings.Use tray icon')"
+          :default-value="trayEnabled"
+          :disabled="closedAppRefresh"
+          :tooltip="closedAppRefresh ? t('Settings.General Settings.Tray required for background refresh') : ''"
+          setting-key="useTrayIcon"
+          :compact="true"
+          @change="store.dispatch('updateUseTrayIcon', $event)"
+        />
+        <FtToggleSwitch
+          v-if="USING_ELECTRON"
+          :label="t('Settings.General Settings.Close to system tray')"
+          :default-value="store.getters.getHideToTrayOnClose"
+          :disabled="!trayEnabled"
+          setting-key="hideToTrayOnClose"
+          :compact="true"
+          @change="store.dispatch('updateHideToTrayOnClose', $event)"
+        />
+        <FtToggleSwitch
+          v-if="supportsAutoPictureInPictureMinimize && USING_ELECTRON"
+          :label="t('Settings.General Settings.Minimize to system tray')"
+          :default-value="hideToTrayOnMinimize"
+          :disabled="!trayEnabled"
+          setting-key="hideToTrayOnMinimize"
+          :compact="true"
+          @change="updateHideToTrayOnMinimize"
+        />
+        <FtToggleSwitch
+          v-if="IS_CAPACITOR && !IS_IOS"
+          :label="t('Settings.General Settings.Swipe to refresh')"
+          :default-value="enablePullToRefresh"
+          setting-key="enablePullToRefresh"
+          :compact="true"
+          @change="store.dispatch('updateEnablePullToRefresh', $event)"
+        />
+        <FtToggleSwitch
+          v-if="IS_CAPACITOR"
+          :label="t('Settings.General Settings.Haptic Feedback')"
+          :default-value="store.getters.getHapticFeedback"
+          setting-key="hapticFeedback"
+          :compact="true"
+          @change="store.dispatch('updateHapticFeedback', $event)"
+        />
+        <FtToggleSwitch
+          v-if="IS_CAPACITOR && !IS_IOS"
+          :label="t('Settings.General Settings.Ignore System Haptics Setting')"
+          :tooltip="t('Tooltips.General Settings.Ignore System Haptics Setting')"
+          :disabled="!store.getters.getHapticFeedback"
+          :default-value="store.getters.getHapticFeedbackIgnoresSystemSetting"
+          setting-key="hapticFeedbackIgnoresSystemSetting"
+          :compact="true"
+          @change="store.dispatch('updateHapticFeedbackIgnoresSystemSetting', $event)"
+        />
+        <FtToggleSwitch
+          :label="t('Settings.General Settings.Use AI Translation Completions')"
+          :default-value="useAITranslationCompletions"
+          setting-key="useAITranslationCompletions"
+          :compact="true"
+          :disabled="aiTranslationCompletionsDisabled"
+          :tooltip="t('Tooltips.General Settings.Use AI Translation Completions')"
+          @change="updateUseAITranslationCompletions"
+        />
+      </div>
     </div>
     <div class="switchGrid generalSelectGrid">
       <FtSelect

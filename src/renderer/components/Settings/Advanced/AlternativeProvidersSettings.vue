@@ -1,52 +1,60 @@
 <template>
   <FtSettingsSection
     :title="t('Settings.Categories.Alternative providers')"
+    :icon="['fas', 'server']"
   >
-    <div class="switchColumnGrid switchFlowGrid">
-      <FtToggleSwitch
-        v-if="supportsYtDlp"
-        :label="t('Settings.General Settings.Automatically switch stream extraction methods')"
-        :default-value="store.getters.getPlaybackEngineFallback"
-        setting-key="playbackEngineFallback"
-        :compact="true"
-        :tooltip="t('Tooltips.General Settings.Automatically switch stream extraction methods')"
-        @change="store.dispatch('updatePlaybackEngineFallback', $event)"
-      />
-      <FtToggleSwitch
-        v-if="SUPPORTS_LOCAL_API"
-        :label="t('Settings.General Settings.Fallback to Non-Preferred Backend on Failure')"
-        :default-value="backendFallback"
-        setting-key="backendFallback"
-        :compact="true"
-        :tooltip="t('Tooltips.General Settings.Fallback to Non-Preferred Backend on Failure')"
-        @change="updateBackendFallback"
-      />
-      <FtToggleSwitch
-        v-if="SUPPORTS_LOCAL_API"
-        :label="t('Settings.General Settings.Always Use Backup Media Server')"
-        :default-value="store.getters.getAlwaysUseBackupMediaServer"
-        setting-key="alwaysUseBackupMediaServer"
-        :compact="true"
-        :tooltip="t('Tooltips.General Settings.Always Use Backup Media Server')"
-        @change="store.dispatch('updateAlwaysUseBackupMediaServer', $event)"
-      />
-      <FtToggleSwitch
-        :label="t('Settings.Player Settings.Proxy Videos Through Invidious')"
-        :compact="true"
-        :default-value="showProxyVideosAsDisabled ? false : proxyVideos"
-        :disabled="showProxyVideosAsDisabled"
-        :tooltip="t('Tooltips.Player Settings.Proxy Videos Through Invidious')"
-        @change="updateProxyVideos"
-      />
-      <FtToggleSwitch
-        v-if="backendPreference === 'yattee'"
-        :label="t('Settings.General Settings.Yattee Server.Proxy Videos')"
-        :compact="true"
-        :default-value="yatteeProxyVideos"
-        setting-key="yatteeProxyVideos"
-        :tooltip="t('Tooltips.General Settings.Proxy Videos Through Yattee Server')"
-        @change="updateYatteeProxyVideos"
-      />
+    <div class="switchColumnGrid">
+      <div
+        v-if="supportsYtDlp || SUPPORTS_LOCAL_API"
+        class="switchColumn"
+      >
+        <FtToggleSwitch
+          v-if="supportsYtDlp"
+          :label="t('Settings.General Settings.Automatically switch stream extraction methods')"
+          :default-value="store.getters.getPlaybackEngineFallback"
+          setting-key="playbackEngineFallback"
+          :compact="true"
+          :tooltip="t('Tooltips.General Settings.Automatically switch stream extraction methods')"
+          @change="store.dispatch('updatePlaybackEngineFallback', $event)"
+        />
+        <FtToggleSwitch
+          v-if="SUPPORTS_LOCAL_API"
+          :label="t('Settings.General Settings.Fallback to Non-Preferred Backend on Failure')"
+          :default-value="backendFallback"
+          setting-key="backendFallback"
+          :compact="true"
+          :tooltip="t('Tooltips.General Settings.Fallback to Non-Preferred Backend on Failure')"
+          @change="updateBackendFallback"
+        />
+      </div>
+      <div class="switchColumn">
+        <FtToggleSwitch
+          v-if="SUPPORTS_LOCAL_API"
+          :label="t('Settings.General Settings.Always Use Backup Media Server')"
+          :default-value="store.getters.getAlwaysUseBackupMediaServer"
+          setting-key="alwaysUseBackupMediaServer"
+          :compact="true"
+          :tooltip="t('Tooltips.General Settings.Always Use Backup Media Server')"
+          @change="store.dispatch('updateAlwaysUseBackupMediaServer', $event)"
+        />
+        <FtToggleSwitch
+          :label="t('Settings.Player Settings.Proxy Videos Through Invidious')"
+          :compact="true"
+          :default-value="showProxyVideosAsDisabled ? false : proxyVideos"
+          :disabled="showProxyVideosAsDisabled"
+          :tooltip="t('Tooltips.Player Settings.Proxy Videos Through Invidious')"
+          @change="updateProxyVideos"
+        />
+        <FtToggleSwitch
+          v-if="backendPreference === 'yattee'"
+          :label="t('Settings.General Settings.Yattee Server.Proxy Videos')"
+          :compact="true"
+          :default-value="yatteeProxyVideos"
+          setting-key="yatteeProxyVideos"
+          :tooltip="t('Tooltips.General Settings.Proxy Videos Through Yattee Server')"
+          @change="updateYatteeProxyVideos"
+        />
+      </div>
     </div>
     <div class="switchGrid generalSelectGrid">
       <FtSelect
