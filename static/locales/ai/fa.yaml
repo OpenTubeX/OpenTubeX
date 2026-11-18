@@ -2839,6 +2839,7 @@ Mobile Navigation:
   popular: "محبوب"
   stats: "آمار"
   more: "بیشتر"
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: ایجاد میان‌بر روی دسکتاپ
@@ -2940,6 +2941,8 @@ Platforms:
   Empty Tab: هنوز چیزی اینجا نیست.
   Browser Check: "{platform} پیش از نمایش این صفحه از شما می‌خواهد تأیید کنید که انسان هستید."
   Verify: "تأیید"
+  Categories: "دسته‌ها"
+  Category Not Found: "این دسته پیدا نشد."
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} به {commentAuthor} پاسخ داد"
   Like: "پسندیدن"
@@ -2970,3 +2973,6 @@ YouTube Account:
   Playlist Update Failed: "به‌روزرسانی {playlistName} در YouTube ممکن نشد: {error}"
   "{author} replied to your comment": "{author} به نظر شما پاسخ داد"
   "{author} hearted your comment": "{author} به نظر شما قلب داد"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "جستجو در Twitch"

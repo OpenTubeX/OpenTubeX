@@ -3245,6 +3245,7 @@ Mobile Navigation:
   popular: "Populiaru"
   stats: "Statistika"
   more: "Daugiau"
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: Sukurti darbalaukio nuorodą
@@ -3346,6 +3347,8 @@ Platforms:
   Empty Tab: Čia dar nieko nėra.
   Browser Check: "{platform} prašo patvirtinti, kad esate žmogus, prieš parodant šį puslapį."
   Verify: "Patvirtinti"
+  Categories: "Kategorijos"
+  Category Not Found: "Šios kategorijos rasti nepavyko."
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} atsakė naudotojui {commentAuthor}"
   Like: "Patinka"
@@ -3376,3 +3379,6 @@ YouTube Account:
   Playlist Update Failed: "Nepavyko atnaujinti {playlistName} YouTube: {error}"
   "{author} replied to your comment": "{author} atsakė į jūsų komentarą"
   "{author} hearted your comment": "{author} uždėjo širdelę jūsų komentarui"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Ieškoti Twitch"

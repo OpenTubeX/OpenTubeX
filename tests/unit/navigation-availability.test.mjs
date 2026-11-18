@@ -23,12 +23,13 @@ test('exposes only navigation supported by the selected provider', () => {
 
 test('filters unavailable navigation items without changing their order', () => {
   assert.deepEqual(filterAvailableNavigationItems(
-    ['history', 'stats', 'popular', 'home', 'trending'],
+    ['history', 'stats', 'popular', 'twitch', 'home', 'trending'],
     {
       supportsLocalApi: true,
       backendPreference: 'local',
       backendFallback: false,
       showWatchStats: false,
+      supportsYtDlp: false,
     }
   ), ['history', 'home', 'trending'])
 })

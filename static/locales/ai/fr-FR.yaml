@@ -2740,6 +2740,7 @@ Mobile Navigation:
   popular: "Populaire"
   stats: "Stats"
   more: "Plus"
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: Créer un raccourci sur le bureau
@@ -2841,6 +2842,8 @@ Platforms:
   Empty Tab: Il n’y a encore rien ici.
   Browser Check: "{platform} vous demande de confirmer que vous êtes un humain avant d’afficher cette page."
   Verify: "Vérifier"
+  Categories: "Catégories"
+  Category Not Found: "Cette catégorie est introuvable."
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} a répondu à {commentAuthor}"
   Like: "J’aime"
@@ -2871,3 +2874,6 @@ YouTube Account:
   Playlist Update Failed: "Impossible de mettre à jour {playlistName} sur YouTube : {error}"
   "{author} replied to your comment": "{author} a répondu à votre commentaire"
   "{author} hearted your comment": "{author} a ajouté un cœur à votre commentaire"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Rechercher sur Twitch"

@@ -8,6 +8,7 @@ import { resolveSystemLocale } from '../../../systemLocale.js'
 import { applyKeyboardShortcutOverrides, resolveLandingPage, sanitizeKeyboardShortcutOverrides, SyncEvents } from '../../../constants'
 import { DBProfileHandlers, DBSettingHandlers } from '../../../datastores/handlers/index'
 import { hashPassword } from '../../helpers/passwords'
+import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { ANDROID_PROXY_SETTING_KEYS, configureAndroidProxy, readAndroidProxySettings } from '../../helpers/androidProxy'
 import { ensureAndroidLocalNetworkAccess } from '../../helpers/androidLocalNetwork'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
@@ -570,6 +571,7 @@ const customGetters = {
       backendPreference: getters.getBackendPreference,
       backendFallback: state.backendFallback,
       showWatchStats: state.rememberHistory && state.enableWatchStats,
+      supportsYtDlp,
     })
   ),
 

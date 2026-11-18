@@ -2782,6 +2782,7 @@ Mobile Navigation:
   popular: "Popularno"
   stats: "Statistika"
   more: "Još"
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: Stvori prečac na radnoj površini
@@ -2883,6 +2884,8 @@ Platforms:
   Empty Tab: Ovdje još nema ničega.
   Browser Check: "{platform} traži da potvrdite da ste čovjek prije nego što prikaže ovu stranicu."
   Verify: "Potvrdi"
+  Categories: "Kategorije"
+  Category Not Found: "Ova kategorija nije pronađena."
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} je odgovorio korisniku {commentAuthor}"
   Like: "Sviđa mi se"
@@ -2913,3 +2916,6 @@ YouTube Account:
   Playlist Update Failed: "Ažuriranje zbirke {playlistName} na YouTubeu nije uspjelo: {error}"
   "{author} replied to your comment": "{author} je odgovorio na tvoj komentar"
   "{author} hearted your comment": "{author} je dao srce tvom komentaru"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Pretraži Twitch"

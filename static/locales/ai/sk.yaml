@@ -2749,6 +2749,7 @@ Mobile Navigation:
   popular: "Populárne"
   stats: "Štatistiky"
   more: "Viac"
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: Vytvoriť odkaz na pracovnej ploche
@@ -2850,6 +2851,8 @@ Platforms:
   Empty Tab: Zatiaľ tu nič nie je.
   Browser Check: "{platform} vás pred zobrazením tejto stránky žiada o overenie, že ste človek."
   Verify: "Overiť"
+  Categories: "Kategórie"
+  Category Not Found: "Túto kategóriu sa nepodarilo nájsť."
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} odpovedal(a) používateľovi {commentAuthor}"
   Like: "Páči sa mi to"
@@ -2880,3 +2883,6 @@ YouTube Account:
   Recommendations Failed: "Vaše odporúčania YouTube sa nepodarilo načítať."
   "{author} replied to your comment": "{author} odpovedal(a) na váš komentár"
   "{author} hearted your comment": "{author} dal(a) srdiečko vášmu komentáru"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Hľadať na Twitchi"

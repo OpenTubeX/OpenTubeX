@@ -2778,6 +2778,7 @@ Mobile Navigation:
   popular: "Популярни"
   stats: "Статистика"
   more: "Още"
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: Създаване на пряк път на работния плот
@@ -2879,6 +2880,8 @@ Platforms:
   Empty Tab: Тук все още няма нищо.
   Browser Check: "{platform} иска да потвърдите, че сте човек, преди да покаже тази страница."
   Verify: "Потвърждаване"
+  Categories: "Категории"
+  Category Not Found: "Тази категория не може да бъде намерена."
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} отговори на {commentAuthor}"
   Like: "Харесване"
@@ -2909,3 +2912,6 @@ YouTube Account:
   Recommendations Failed: "Препоръките ви от YouTube не можаха да бъдат заредени."
   "{author} replied to your comment": "{author} отговори на коментара ви"
   "{author} hearted your comment": "{author} даде сърце на коментара ви"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Търсене в Twitch"

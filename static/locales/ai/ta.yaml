@@ -2806,6 +2806,7 @@ Mobile Navigation:
   popular: "பிரபலம்"
   stats: "புள்ளிவி."
   more: "மேலும்"
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: பணிமேடையில் குறுக்குவழியை உருவாக்கு
@@ -2907,6 +2908,8 @@ Platforms:
   Empty Tab: இங்கே இன்னும் எதுவும் இல்லை.
   Browser Check: "இந்தப் பக்கத்தைக் காட்டும் முன் நீங்கள் மனிதர் என்பதை உறுதிப்படுத்துமாறு {platform} கேட்கிறது."
   Verify: "சரிபார்"
+  Categories: "வகைகள்"
+  Category Not Found: "இந்த வகையைக் கண்டறிய முடியவில்லை."
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} {commentAuthor}-க்குப் பதிலளித்தார்"
   Like: "பிடித்துள்ளது"
@@ -2937,3 +2940,6 @@ YouTube Account:
   Recommendations Failed: "உங்கள் YouTube பரிந்துரைகளை ஏற்ற முடியவில்லை."
   "{author} replied to your comment": "{author} உங்கள் கருத்துக்குப் பதிலளித்தார்"
   "{author} hearted your comment": "{author} உங்கள் கருத்துக்கு இதயம் கொடுத்தார்"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Twitch இல் தேடு"

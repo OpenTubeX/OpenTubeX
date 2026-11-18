@@ -69,7 +69,7 @@ test('download settings commands respect Android availability', () => {
   assert.ok(openedSearch.match.label)
 })
 
-test('lite Android builds omit download commands', () => {
+test('lite Android builds omit download commands and pages that play through yt-dlp', () => {
   const createLiteRegistry = loadRegistry(true)
   const commands = createLiteRegistry({
     isElectron: false,
@@ -82,5 +82,5 @@ test('lite Android builds omit download commands', () => {
     store: { getters: { getChannelsHiddenParsed: [], getForbiddenTitlesParsed: [], getTabs: [], getProfileList: [], getAllPlaylists: [], getYtDlpDownloads: {}, getCustomThemes: [] } },
   })
   assert.ok(commands.some(command => command.id === 'settings.root'))
-  assert.ok(!commands.some(command => ['settings.download', 'downloads.open'].includes(command.id)))
+  assert.ok(!commands.some(command => ['settings.download', 'downloads.open', 'navigate.twitch'].includes(command.id)))
 })

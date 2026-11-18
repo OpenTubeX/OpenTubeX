@@ -2768,6 +2768,7 @@ Mobile Navigation:
   popular: "Populer"
   stats: "Statistik"
   more: "Lainnya"
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: Buat pintasan desktop
@@ -2869,6 +2870,8 @@ Platforms:
   Empty Tab: Belum ada apa pun di sini.
   Browser Check: "{platform} meminta Anda memverifikasi bahwa Anda manusia sebelum menampilkan halaman ini."
   Verify: "Verifikasi"
+  Categories: "Kategori"
+  Category Not Found: "Kategori ini tidak dapat ditemukan."
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} membalas {commentAuthor}"
   Like: "Suka"
@@ -2899,3 +2902,6 @@ YouTube Account:
   Playlist Update Failed: "Tidak dapat memperbarui {playlistName} di YouTube: {error}"
   "{author} replied to your comment": "{author} membalas komentar Anda"
   "{author} hearted your comment": "{author} memberi hati pada komentar Anda"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Cari di Twitch"

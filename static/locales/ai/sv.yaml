@@ -2741,6 +2741,7 @@ Mobile Navigation:
   popular: "Populärt"
   stats: "Statistik"
   more: "Mer"
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: Skapa en genväg på skrivbordet
@@ -2842,6 +2843,8 @@ Platforms:
   Empty Tab: Här finns inget ännu.
   Browser Check: "{platform} ber dig bekräfta att du är en människa innan sidan visas."
   Verify: "Verifiera"
+  Categories: "Kategorier"
+  Category Not Found: "Kategorin kunde inte hittas."
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} svarade {commentAuthor}"
   Like: "Gilla"
@@ -2872,3 +2875,6 @@ YouTube Account:
   Recommendations Failed: "Det gick inte att läsa in dina YouTube-rekommendationer."
   "{author} replied to your comment": "{author} svarade på din kommentar"
   "{author} hearted your comment": "{author} gav din kommentar ett hjärta"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Sök på Twitch"

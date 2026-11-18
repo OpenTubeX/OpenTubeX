@@ -1978,6 +1978,7 @@ Mobile Navigation:
   popular: "Popularne"
   stats: "Statystyki"
   more: "Więcej"
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: Utwórz skrót na pulpicie
@@ -2085,6 +2086,8 @@ Platforms:
   Empty Tab: Nic tu jeszcze nie ma.
   Browser Check: "{platform} prosi o potwierdzenie, że jesteś człowiekiem, zanim pokaże tę stronę."
   Verify: "Zweryfikuj"
+  Categories: "Kategorie"
+  Category Not Found: "Nie udało się znaleźć tej kategorii."
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} odpowiada użytkownikowi {commentAuthor}"
   Like: "Podoba mi się"
@@ -2131,3 +2134,6 @@ App Menu:
   Next Tab: Następna karta
   Previous Tab: Poprzednia karta
   Help: Pomoc
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Szukaj na Twitchu"

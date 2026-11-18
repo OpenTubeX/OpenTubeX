@@ -132,6 +132,7 @@ import store from '../../../../store/index'
 import { youtubeImageUrlToInvidious } from '../../../../helpers/api/invidious'
 import { getFirstCharacter } from '../../../../helpers/strings'
 import { translateProfileName } from '../../../../helpers/profileSwitching'
+import { supportsYtDlp } from '../../../../helpers/ytDlpCapabilities'
 import { filterAvailableNavigationItems } from '../../../../../navigationAvailability'
 import { NAVIGATION_ITEM_DEFINITIONS } from '../../../../../navigationItems'
 
@@ -161,6 +162,7 @@ const items = computed(() => filterAvailableNavigationItems(store.getters.getNav
   backendPreference: store.getters.getBackendPreference,
   backendFallback: store.getters.getBackendFallback,
   showWatchStats: store.getters.getRememberHistory && store.getters.getEnableWatchStats,
+  supportsYtDlp,
 })
   .map(id => definitions.get(id))
   .filter(item => item != null)

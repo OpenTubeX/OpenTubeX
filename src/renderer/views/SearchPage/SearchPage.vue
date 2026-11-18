@@ -239,7 +239,8 @@ const platformSearchTypeLabels = computed(() => ({
   videos: t('Search Filters.Type.Videos'),
   tracks: t('Platforms.Tracks'),
   channels: t('Search Filters.Type.Channels'),
-  playlists: t('Platforms.Playlists')
+  playlists: t('Platforms.Playlists'),
+  categories: t('Platforms.Categories')
 }))
 // The type stays selected for later searches on platforms that have it
 const selectedPlatformSearchType = ref('')

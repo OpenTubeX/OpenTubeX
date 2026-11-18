@@ -3389,6 +3389,7 @@ Mobile Navigation:
   popular: "Populars"
   stats: "Estadíst."
   more: "Més"
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: Crea una drecera a l’escriptori
@@ -3490,6 +3491,8 @@ Platforms:
   Empty Tab: Encara no hi ha res aquí.
   Browser Check: "{platform} us demana que verifiqueu que sou una persona abans de mostrar aquesta pàgina."
   Verify: "Verifica"
+  Categories: "Categories"
+  Category Not Found: "No s'ha pogut trobar aquesta categoria."
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} ha respost a {commentAuthor}"
   Like: "M'agrada"
@@ -3520,3 +3523,6 @@ YouTube Account:
   Recommendations Failed: "No s'han pogut carregar les teves recomanacions de YouTube."
   "{author} replied to your comment": "{author} ha respost al vostre comentari"
   "{author} hearted your comment": "{author} ha posat un cor al vostre comentari"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Cerca a Twitch"

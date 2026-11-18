@@ -2745,6 +2745,7 @@ Mobile Navigation:
   popular: "Populært"
   stats: "Statistikk"
   more: "Mer"
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: Opprett en snarvei på skrivebordet
@@ -2846,6 +2847,8 @@ Platforms:
   Empty Tab: Det er ingenting her ennå.
   Browser Check: "{platform} ber deg bekrefte at du er et menneske før siden vises."
   Verify: "Bekreft"
+  Categories: "Kategorier"
+  Category Not Found: "Fant ikke denne kategorien."
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} svarte {commentAuthor}"
   Like: "Lik"
@@ -2876,3 +2879,6 @@ YouTube Account:
   Playlist Update Failed: "Kunne ikke oppdatere {playlistName} på YouTube: {error}"
   "{author} replied to your comment": "{author} svarte på kommentaren din"
   "{author} hearted your comment": "{author} ga kommentaren din et hjerte"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Søk på Twitch"

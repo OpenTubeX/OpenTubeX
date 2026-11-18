@@ -506,6 +506,7 @@ export const SYNC_SETTING_VALUE_LABELS = {
     userplaylists: 'User Playlists.Your Playlists',
     history: 'History.History',
     stats: 'Stats.Stats',
+    twitch: 'Twitch Page.Twitch',
   },
   gridColumns: { 0: `${general}Grid Columns.Auto` },
   linkUnderline: { hover: `${general}Link Underlines.On Hover`, never: `${general}Link Underlines.Never`, always: `${general}Link Underlines.Always` },

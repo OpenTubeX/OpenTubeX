@@ -2780,6 +2780,7 @@ Mobile Navigation:
   popular: "Poblogaidd"
   stats: "Ystadegau"
   more: "Rhagor"
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: Creu llwybr byr ar y bwrdd gwaith
@@ -2881,6 +2882,8 @@ Platforms:
   Empty Tab: Does dim byd yma eto.
   Browser Check: "Mae {platform} yn gofyn i chi gadarnhau eich bod yn ddynol cyn iddo ddangos y dudalen hon."
   Verify: "Gwirio"
+  Categories: "Categorïau"
+  Category Not Found: "Doedd dim modd dod o hyd i'r categori hwn."
 YouTube Account:
   "{author} replied to {commentAuthor}": "Atebodd {author} {commentAuthor}"
   Like: "Hoffi"
@@ -2911,3 +2914,6 @@ YouTube Account:
   Recommendations Failed: "Methu llwytho eich argymhellion YouTube."
   "{author} replied to your comment": "Atebodd {author} eich sylw"
   "{author} hearted your comment": "Rhoddodd {author} galon i'ch sylw"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Chwilio Twitch"

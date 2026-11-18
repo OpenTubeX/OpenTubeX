@@ -71,6 +71,14 @@ export function getPlatformPlaylistRoute(platform, id) {
 }
 
 /**
+ * @param {string} platform
+ * @param {string} id
+ */
+export function getPlatformCategoryRoute(platform, id) {
+  return { path: '/external-category', query: { platform, id } }
+}
+
+/**
  * Identifies a followed channel across platforms.
  * @param {{ platform: string, id: string }} channel
  */

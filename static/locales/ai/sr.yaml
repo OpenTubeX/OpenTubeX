@@ -2830,6 +2830,7 @@ Mobile Navigation:
   popular: "Популарно"
   stats: "Статистика"
   more: "Више"
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: Направи пречицу на радној површини
@@ -2931,6 +2932,8 @@ Platforms:
   Empty Tab: Овде још нема ничега.
   Browser Check: "{platform} тражи да потврдите да сте човек пре него што прикаже ову страницу."
   Verify: "Потврди"
+  Categories: "Категорије"
+  Category Not Found: "Ова категорија није пронађена."
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} је одговорио/ла кориснику {commentAuthor}"
   Like: "Свиђа ми се"
@@ -2961,3 +2964,6 @@ YouTube Account:
   Recommendations Failed: "Учитавање ваших YouTube препорука није успело."
   "{author} replied to your comment": "{author} је одговорио/ла на ваш коментар"
   "{author} hearted your comment": "{author} је дао/ла срце вашем коментару"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Претражи Twitch"

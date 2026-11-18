@@ -3015,6 +3015,7 @@ Mobile Navigation:
   popular: Gewild
   stats: Statistieke
   more: Meer
+  twitch: "Twitch"
 Installer:
   Create Desktop Shortcut: Skep ’n kortpad op die lessenaar
 Invidious Fallback Warning: Hierdie versoek omseil u opgestelde Invidious-instansie en koppel direk aan YouTube, wat u IP-adres blootstel.
@@ -3054,6 +3055,8 @@ Platforms:
   Empty Tab: Hier is nog niks nie.
   Browser Check: "{platform} vra jou om te bevestig dat jy ’n mens is voordat dit hierdie bladsy wys."
   Verify: "Bevestig"
+  Categories: "Kategorieë"
+  Category Not Found: "Hierdie kategorie kon nie gevind word nie."
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} het op {commentAuthor} geantwoord"
   Like: "Hou van"
@@ -3084,3 +3087,6 @@ YouTube Account:
   Recommendations Failed: "Kon nie u YouTube-aanbevelings laai nie."
   "{author} replied to your comment": "{author} het op jou kommentaar geantwoord"
   "{author} hearted your comment": "{author} het ’n hartjie aan jou kommentaar gegee"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Deursoek Twitch"

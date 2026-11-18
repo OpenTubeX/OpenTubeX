@@ -10,6 +10,8 @@ const PAGE_ICONS = [
   [/^\/search(?:\/|$)/, ['fas', 'search']],
   [/^\/(?:external-)?channel(?:\/|$)/, ['fas', 'circle-user']],
   [/^\/external-playlist(?:\/|$)/, ['far', 'bookmark']],
+  [/^\/external-category(?:\/|$)/, ['fas', 'gamepad']],
+  [/^\/twitch(?:\/|$)/, ['fab', 'twitch']],
   [/^\/hashtag(?:\/|$)/, ['fas', 'hashtag']],
   [/^\/post(?:\/|$)/, ['fas', 'comment']],
   [/^\/watch(?:\/|$)/, ['fas', 'clapperboard']],

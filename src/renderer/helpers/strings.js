@@ -8,7 +8,8 @@ const WINDOW_TITLE_TRANSLATION_KEYS = {
   'Most Popular': 'Most Popular',
   'Your Playlists': 'User Playlists.Your Playlists',
   History: 'History.History',
-  Stats: 'Stats.Stats'
+  Stats: 'Stats.Stats',
+  Twitch: 'Twitch Page.Twitch'
 }
 
 /**

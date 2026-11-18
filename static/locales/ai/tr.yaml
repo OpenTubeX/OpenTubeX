@@ -2742,6 +2742,7 @@ Mobile Navigation:
   popular: "Popüler"
   stats: "İstatistik"
   more: "Daha"
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: Masaüstü kısayolu oluştur
@@ -2843,6 +2844,8 @@ Platforms:
   Empty Tab: Burada henüz bir şey yok.
   Browser Check: "{platform}, bu sayfayı göstermeden önce insan olduğunuzu doğrulamanızı istiyor."
   Verify: "Doğrula"
+  Categories: "Kategoriler"
+  Category Not Found: "Bu kategori bulunamadı."
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author}, {commentAuthor} adlı kullanıcıyı yanıtladı"
   Like: "Beğen"
@@ -2873,3 +2876,6 @@ YouTube Account:
   Recommendations Failed: "YouTube önerileriniz yüklenemedi."
   "{author} replied to your comment": "{author} yorumunuzu yanıtladı"
   "{author} hearted your comment": "{author} yorumunuza kalp bıraktı"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Twitch'te ara"

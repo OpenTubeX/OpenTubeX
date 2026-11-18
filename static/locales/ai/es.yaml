@@ -2702,6 +2702,7 @@ Mobile Navigation:
   popular: "Popular"
   stats: "Estadíst."
   more: "Más"
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: Crear un acceso directo en el escritorio
@@ -2795,6 +2796,8 @@ Platforms:
   Empty Tab: Todavía no hay nada aquí.
   Browser Check: "{platform} te pide que verifiques que eres una persona antes de mostrar esta página."
   Verify: "Verificar"
+  Categories: "Categorías"
+  Category Not Found: "No se ha podido encontrar esta categoría."
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} respondió a {commentAuthor}"
   Like: "Me gusta"
@@ -2841,3 +2844,6 @@ App Menu:
   Next Tab: Pestaña siguiente
   Previous Tab: Pestaña anterior
   Help: Ayuda
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Buscar en Twitch"

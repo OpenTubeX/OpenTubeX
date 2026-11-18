@@ -2735,6 +2735,7 @@ Mobile Navigation:
   popular: "Popular"
   stats: "Stats"
   more: "More"
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: Create a desktop shortcut
@@ -2836,6 +2837,8 @@ Platforms:
   Empty Tab: There is nothing here yet.
   Browser Check: "{platform} asks you to verify that you're human before it shows this page."
   Verify: "Verify"
+  Categories: "Categories"
+  Category Not Found: "This category could not be found."
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} replied to {commentAuthor}"
   Like: "Like"
@@ -2866,3 +2869,6 @@ YouTube Account:
   Recommendations Failed: "Could not load your YouTube recommendations."
   "{author} replied to your comment": "{author} replied to your comment"
   "{author} hearted your comment": "{author} hearted your comment"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Search Twitch"

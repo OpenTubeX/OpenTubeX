@@ -1,5 +1,5 @@
 import { test, expect, goTo, goToSettingsSection, sel, setWindowSize, openInterfaceCustomizer } from '../../helpers/app.mjs'
-import { DEFAULT_NAVIGATION_ITEMS } from '../../../src/navigationItems.js'
+import { DEFAULT_NAVIGATION_ITEMS, NAVIGATION_ITEM_DEFINITIONS } from '../../../src/navigationItems.js'
 
 // Fractional UI scales snap layout sizes to device pixels.
 async function expectHeight(locator, pixels) {
@@ -383,8 +383,9 @@ test.describe('side nav navigation', () => {
   test('clamps the add-item picker after its options shrink', async ({ page }) => {
     await openInterfaceCustomizer(page, 'navigation')
 
+    // Eight options overflow the picker, and seven fit. Electron offers every item.
     const selectedItems = page.locator('.selectedItems .selectedItem')
-    while (await selectedItems.count() > 0) {
+    while (await selectedItems.count() > NAVIGATION_ITEM_DEFINITIONS.length - 8) {
       await selectedItems.first().getByRole('button', { name: /^Remove / }).click()
     }
 

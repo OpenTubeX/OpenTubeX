@@ -2750,6 +2750,7 @@ Mobile Navigation:
   popular: "Suositut"
   stats: "Tilastot"
   more: "Lisää"
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: Luo työpöydälle pikakuvake
@@ -2851,6 +2852,8 @@ Platforms:
   Empty Tab: Täällä ei ole vielä mitään.
   Browser Check: "{platform} pyytää sinua vahvistamaan, että olet ihminen, ennen kuin se näyttää tämän sivun."
   Verify: "Vahvista"
+  Categories: "Kategoriat"
+  Category Not Found: "Tätä kategoriaa ei löytynyt."
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} vastasi käyttäjälle {commentAuthor}"
   Like: "Tykkää"
@@ -2881,3 +2884,6 @@ YouTube Account:
   Playlist Update Failed: "Soittolistan {playlistName} päivittäminen YouTubessa epäonnistui: {error}"
   "{author} replied to your comment": "{author} vastasi kommenttiisi"
   "{author} hearted your comment": "{author} antoi kommentillesi sydämen"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Hae Twitchistä"

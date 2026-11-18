@@ -7,13 +7,15 @@ export const NAVIGATION_ITEM_DEFINITIONS = Object.freeze([
   { id: 'trending', labelKey: 'Trending.Trending', icon: ['fas', 'fire'], requiresLocalApi: true },
   { id: 'popular', labelKey: 'Most Popular', icon: ['fas', 'users'] },
   { id: 'stats', labelKey: 'Stats.Stats', icon: ['fas', 'chart-line'] },
+  // Opt-in items are left out of the defaults, so they show once added
+  { id: 'twitch', labelKey: 'Twitch Page.Twitch', icon: ['fab', 'twitch'], optIn: true, requiresYtDlp: true },
 ].map(Object.freeze))
 
 export const DEFAULT_NAVIGATION_ITEMS = Object.freeze(
-  NAVIGATION_ITEM_DEFINITIONS.map(({ id }) => id)
+  NAVIGATION_ITEM_DEFINITIONS.filter(item => !item.optIn).map(({ id }) => id)
 )
 
-const NAVIGATION_ITEM_IDS = new Set(DEFAULT_NAVIGATION_ITEMS)
+const NAVIGATION_ITEM_IDS = new Set(NAVIGATION_ITEM_DEFINITIONS.map(({ id }) => id))
 
 /**
  * Removes unknown and duplicate entries while preserving the user's order.

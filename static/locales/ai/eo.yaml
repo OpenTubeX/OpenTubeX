@@ -2804,6 +2804,7 @@ Mobile Navigation:
   popular: Popularaj
   stats: Statistikoj
   more: Pli
+  twitch: "Twitch"
 Installer:
   Create Desktop Shortcut: Krei labortablan ligilon
 Invidious Fallback Warning: Ĉi tiu peto preterpasas vian agorditan Invidious-servilon kaj konektiĝas rekte al YouTube, malkaŝante vian IP-adreson.
@@ -2843,6 +2844,8 @@ Platforms:
   Empty Tab: Ankoraŭ estas nenio ĉi tie.
   Browser Check: "{platform} petas vin konfirmi, ke vi estas homo, antaŭ ol montri ĉi tiun paĝon."
   Verify: "Konfirmi"
+  Categories: "Kategorioj"
+  Category Not Found: "Ĉi tiu kategorio ne troviĝis."
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} respondis al {commentAuthor}"
   Like: "Ŝati"
@@ -2873,3 +2876,6 @@ YouTube Account:
   Recommendations Failed: "Ne eblis ŝargi viajn YouTube-rekomendojn."
   "{author} replied to your comment": "{author} respondis al via komento"
   "{author} hearted your comment": "{author} donis koron al via komento"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Serĉi en Twitch"

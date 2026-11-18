@@ -2757,6 +2757,7 @@ Mobile Navigation:
   popular: "Vinsælt"
   stats: "Tölfræði"
   more: "Meira"
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: Búa til flýtileið á skjáborði
@@ -2858,6 +2859,8 @@ Platforms:
   Empty Tab: Hér er ekkert ennþá.
   Browser Check: "{platform} biður þig að staðfesta að þú sért manneskja áður en síðan birtist."
   Verify: "Staðfesta"
+  Categories: "Flokkar"
+  Category Not Found: "Þessi flokkur fannst ekki."
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} svaraði {commentAuthor}"
   Like: "Líkar við"
@@ -2888,3 +2891,6 @@ YouTube Account:
   Playlist Update Failed: "Ekki tókst að uppfæra {playlistName} á YouTube: {error}"
   "{author} replied to your comment": "{author} svaraði athugasemdinni þinni"
   "{author} hearted your comment": "{author} gaf athugasemdinni þinni hjarta"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Leita á Twitch"

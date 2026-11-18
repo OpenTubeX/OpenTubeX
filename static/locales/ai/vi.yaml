@@ -2759,6 +2759,7 @@ Mobile Navigation:
   popular: "Phổ biến"
   stats: "Thống kê"
   more: "Thêm"
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: Tạo lối tắt trên màn hình nền
@@ -2860,6 +2861,8 @@ Platforms:
   Empty Tab: Chưa có gì ở đây.
   Browser Check: "{platform} yêu cầu bạn xác minh rằng bạn là người trước khi hiển thị trang này."
   Verify: "Xác minh"
+  Categories: "Danh mục"
+  Category Not Found: "Không tìm thấy danh mục này."
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} đã trả lời {commentAuthor}"
   Like: "Thích"
@@ -2890,3 +2893,6 @@ YouTube Account:
   Recommendations Failed: "Không thể tải đề xuất YouTube của bạn."
   "{author} replied to your comment": "{author} đã trả lời bình luận của bạn"
   "{author} hearted your comment": "{author} đã thả tim bình luận của bạn"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Tìm kiếm trên Twitch"

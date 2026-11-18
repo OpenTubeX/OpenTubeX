@@ -207,6 +207,7 @@ import { getVideoThumbnailUrl, localizeAndAddKeyboardShortcutToActionTitle } fro
 import { getConfiguredKeyboardShortcuts } from '../../../constants'
 import { NAVIGATION_ITEM_DEFINITIONS } from '../../../navigationItems'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { createMobileNavigationScroll, mobileNavigationMinimizePreview } from '../../helpers/mobileNavigationScroll'
 import { softwareKeyboardOpen } from '../../helpers/phoneViewport'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
@@ -371,6 +372,7 @@ const visibleNavigationItems = computed(() => filterAvailableNavigationItems(
     backendPreference: backendPreference.value,
     backendFallback: backendFallback.value,
     showWatchStats: showWatchStats.value,
+    supportsYtDlp,
   }
 )
   .map(id => navigationCatalog.value.get(id))

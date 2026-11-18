@@ -2744,6 +2744,7 @@ Mobile Navigation:
   popular: "Populaarne"
   stats: "Statistika"
   more: "Veel"
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: Loo töölauale otsetee
@@ -2845,6 +2846,8 @@ Platforms:
   Empty Tab: Siin pole veel midagi.
   Browser Check: "{platform} palub sul enne selle lehe näitamist kinnitada, et oled inimene."
   Verify: "Kinnita"
+  Categories: "Kategooriad"
+  Category Not Found: "Seda kategooriat ei leitud."
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} vastas kasutajale {commentAuthor}"
   Like: "Meeldib"
@@ -2875,3 +2878,6 @@ YouTube Account:
   Recommendations Failed: "Sinu YouTube'i soovituste laadimine nurjus."
   "{author} replied to your comment": "{author} vastas sinu kommentaarile"
   "{author} hearted your comment": "{author} andis sinu kommentaarile südame"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Otsi Twitchist"

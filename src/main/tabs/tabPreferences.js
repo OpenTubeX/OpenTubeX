@@ -173,6 +173,8 @@ export async function getStoredLandingRoute() {
       backendFallback: backendFallbackSetting?.value === true,
       showWatchStats: (rememberHistorySetting?.value ?? true) &&
         (enableWatchStatsSetting?.value ?? true),
+      // Electron always has yt-dlp
+      supportsYtDlp: true,
     })
 
     return normalizeRoutePath(resolveLandingPage(landingPage, availablePages))

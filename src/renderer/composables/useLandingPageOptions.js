@@ -3,6 +3,7 @@ import { useRouter } from 'vue-router'
 
 import store from '../store/index'
 import { translateWindowTitle } from '../helpers/strings'
+import { supportsYtDlp } from '../helpers/ytDlpCapabilities'
 import { filterAvailableNavigationItems } from '../../navigationAvailability'
 
 const SUPPORTS_LOCAL_API = !!process.env.SUPPORTS_LOCAL_API
@@ -18,6 +19,7 @@ export function useLandingPageOptions() {
       backendPreference: store.getters.getBackendPreference,
       backendFallback: store.getters.getBackendFallback,
       showWatchStats: store.getters.getRememberHistory && store.getters.getEnableWatchStats,
+      supportsYtDlp,
     })
       .map(id => routeByPath.get(id))
       .filter(route => route != null)

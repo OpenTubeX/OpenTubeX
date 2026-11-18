@@ -2814,6 +2814,7 @@ Mobile Navigation:
   popular: "Populair"
   stats: "Statistiek"
   more: "Meer"
+  twitch: "Twitch"
 
 Installer:
   Create Desktop Shortcut: Een snelkoppeling op het bureaublad maken
@@ -2915,6 +2916,8 @@ Platforms:
   Empty Tab: Er is hier nog niets.
   Browser Check: "{platform} vraagt je te bevestigen dat je een mens bent voordat deze pagina wordt getoond."
   Verify: "Verifiëren"
+  Categories: "Categorieën"
+  Category Not Found: "Deze categorie kan niet worden gevonden."
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} heeft {commentAuthor} geantwoord"
   Like: "Vind ik leuk"
@@ -2945,3 +2948,6 @@ YouTube Account:
   Playlist Update Failed: "Kan {playlistName} niet bijwerken op YouTube: {error}"
   "{author} replied to your comment": "{author} heeft op je reactie gereageerd"
   "{author} hearted your comment": "{author} heeft je reactie een hartje gegeven"
+Twitch Page:
+  Twitch: "Twitch"
+  Search: "Zoeken op Twitch"

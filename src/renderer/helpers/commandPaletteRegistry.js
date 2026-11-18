@@ -145,6 +145,7 @@ export function createCommandPaletteRegistry(context) {
     goHistory,
     store,
     isElectron,
+    isCapacitor,
     routeAvailable,
     supportsLocalApi,
   })
@@ -238,7 +239,7 @@ export function createCommandPaletteRegistry(context) {
 }
 
 function addNavigationCommands(commands, context) {
-  const { t, groups, navigate, routePath, goHistory, store, isElectron, routeAvailable, supportsLocalApi } = context
+  const { t, groups, navigate, routePath, goHistory, store, isElectron, isCapacitor, routeAvailable, supportsLocalApi } = context
   const navigationCommands = [
     ['subscriptions', '/subscriptions', 'Subscriptions.Subscriptions', ['home', 'feed'], ['fas', 'subscriptions']],
     ['channels', '/subscribedchannels', 'Channels.Channels', ['subscriptions', 'channel list'], ['fas', 'user-check']],
@@ -247,6 +248,7 @@ function addNavigationCommands(commands, context) {
     ['playlists', '/userplaylists', 'Playlists', ['saved videos'], ['far', 'bookmark']],
     ['history', '/history', 'History.History', ['watched videos'], ['fas', 'history']],
     ['stats', '/stats', 'Stats.Stats', ['watch statistics'], ['fas', 'chart-line']],
+    ['twitch', '/twitch', 'Twitch Page.Twitch', ['live streams', 'categories'], ['fab', 'twitch']],
   ]
   const providerOptions = {
     supportsLocalApi,
@@ -256,6 +258,8 @@ function addNavigationCommands(commands, context) {
   const providerAvailability = new Map([
     ['trending', isTrendingAvailable(providerOptions)],
     ['popular', isMostPopularAvailable(providerOptions)],
+    // Without yt-dlp, its route only redirects
+    ['twitch', Boolean((isElectron || isCapacitor) && !isLiteBuild)],
   ])
 
   for (const [id, path, labelKey, aliases, icon] of navigationCommands) {
