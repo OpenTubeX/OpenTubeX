@@ -5,34 +5,36 @@
 /**
  * Electron's safeStorage, which keeps its key in the Keychain on macOS, DPAPI on
  * Windows and the Secret Service or KWallet on Linux. Without one of those,
- * Linux would fall back to a key that is the same everywhere, so secrets stay
+ * Linux falls back to a key that is the same everywhere, so secrets stay
  * unencrypted instead.
  * @param {typeof import('electron')} electron
  * @returns {Promise<SecretCipher | null>}
  */
 export async function createSafeStorageCipher({ app, safeStorage }) {
-  // The backend is only known once the app is ready.
+  // safeStorage only works once the app is ready.
   await app.whenReady()
-  const backend = process.platform === 'linux' ? safeStorage.getSelectedStorageBackend() : null
-  if (!safeStorage.isEncryptionAvailable() || backend === 'basic_text' || backend === 'unknown') {
-    console.warn(`Saving credentials unencrypted, as no system keyring is available${backend ? ` (${backend})` : ''}`)
+  let available = await safeStorage.isAsyncEncryptionAvailable()
+  // Values encrypted with Chromium's fallback key on Linux start with v10.
+  if (available && process.platform === 'linux') {
+    available = !(await safeStorage.encryptStringAsync('probe')).toString('latin1').startsWith('v10')
+  }
+  if (!available) {
+    console.warn('Saving credentials unencrypted, as no system keyring is available')
     return null
   }
   return {
-    encrypt: async texts => texts.map(text => safeStorage.encryptString(text).toString('base64')),
-    decrypt: async texts => {
-      // Rejecting keeps the secrets until the keyring is available again.
-      if (!safeStorage.isEncryptionAvailable()) throw new Error('The system keyring is unavailable')
-      return texts.map(text => {
-        try {
-          return safeStorage.decryptString(Buffer.from(text, 'base64'))
-        } catch (error) {
-          // Only a value this keyring's key cannot decrypt is deleted.
-          if (!safeStorage.isEncryptionAvailable()) throw error
-          return null
-        }
-      })
-    },
+    encrypt: texts => Promise.all(texts.map(async text => (await safeStorage.encryptStringAsync(text)).toString('base64'))),
+    decrypt: texts => Promise.all(texts.map(async text => {
+      try {
+        return (await safeStorage.decryptStringAsync(Buffer.from(text, 'base64'))).result
+      } catch (error) {
+        // Only a value this keyring's key cannot decrypt is deleted. Other
+        // errors, such as a keyring that is temporarily unavailable, reject,
+        // which keeps the secrets until it is available again.
+        if (error instanceof Error && error.message.startsWith('Error while decrypting')) return null
+        throw error
+      }
+    })),
   }
 }
 

@@ -186,23 +186,31 @@ test('secrets are kept when the keyring cannot be reached', async t => {
   assert.deepEqual(await saved(), { syncServerToken: 'sync-secret', proxyPassword: 'proxy-secret' })
 })
 
-test('safeStorage keeps secrets when the keyring stops being available', async () => {
-  let available = true
+test('safeStorage deletes only values its key cannot decrypt, and keeps them while the keyring is unavailable', async () => {
+  let unavailable = false
   const safeStorage = {
-    getSelectedStorageBackend: () => 'kwallet6',
-    isEncryptionAvailable: () => available,
-    encryptString: text => Buffer.from(`key:${text}`),
-    decryptString: buffer => {
+    isAsyncEncryptionAvailable: async () => true,
+    encryptStringAsync: async text => Buffer.from(`v11${text}`),
+    decryptStringAsync: async buffer => {
       const text = buffer.toString()
-      if (!available || !text.startsWith('key:')) throw new Error('Error while decrypting')
-      return text.slice('key:'.length)
+      if (unavailable) throw new Error('safeStorage.decryptStringAsync is temporarily unavailable. Please try again.')
+      if (!text.startsWith('v11')) throw new Error('Error while decrypting the ciphertext provided to safeStorage.decryptStringAsync.')
+      return { shouldReEncrypt: false, result: text.slice('v11'.length) }
     },
   }
   const cipher = await createSafeStorageCipher({ app: { whenReady: async () => {} }, safeStorage })
   const [encrypted] = await cipher.encrypt(['secret'])
-  const foreign = Buffer.from('other-key').toString('base64')
+  const foreign = Buffer.from('v10other-key').toString('base64')
 
   assert.deepEqual(await cipher.decrypt([encrypted, foreign]), ['secret', null])
-  available = false
+  unavailable = true
   await assert.rejects(cipher.decrypt([encrypted]))
+})
+
+test('safeStorage is not used on Linux when it would fall back to the hardcoded key', { skip: process.platform !== 'linux' }, async () => {
+  const safeStorage = {
+    isAsyncEncryptionAvailable: async () => true,
+    encryptStringAsync: async text => Buffer.from(`v10${text}`),
+  }
+  assert.equal(await createSafeStorageCipher({ app: { whenReady: async () => {} }, safeStorage }), null)
 })
