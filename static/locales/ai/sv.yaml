@@ -1918,6 +1918,9 @@ Video:
     Zoom:
       Zoom: Zoom
       'Off': 'Av'
+    Lock Controls:
+      Lock Controls: "Lås kontroller"
+      Hold to Unlock: "Håll ned för att låsa upp"
     Volume Boost:
       Volume Boost: "Volymförstärkning"
       'Off': "Av"

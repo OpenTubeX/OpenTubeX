@@ -1945,6 +1945,9 @@ Video:
     Zoom:
       Zoom: Мащабиране
       'Off': 'Изключено'
+    Lock Controls:
+      Lock Controls: "Заключване на контролите"
+      Hold to Unlock: "Задръжте за отключване"
     Volume Boost:
       Volume Boost: "Усилване на звука"
       'Off': "Изключено"

@@ -323,6 +323,8 @@ const overflowItems = computed(() => {
     monoAudio: store.getters.getShowMonoAudioToggle && !process.env.IS_IOS && { icon: ['fas', 'speaker'], label: t('Settings.Player Settings.Mono Audio'), value: off },
     loop: { path: SHAKA_PREVIEW_ICONS.LOOP, label: t('Settings.Interface Customizer.Loop'), value: off },
     abRepeat: !store.getters.getDisableAbRepeat && { path: AB_REPEAT_PREVIEW_ICON.path, viewBox: AB_REPEAT_PREVIEW_ICON.viewBox, label: t('Video.Player.A-B Repeat.Set Repeat Start'), value: off },
+    // The player offers it in full screen only.
+    lockControls: IS_CAPACITOR && !process.env.IS_IOS && { icon: ['fas', 'lock'], label: t('Video.Player.Lock Controls.Lock Controls'), value: '' },
     pictureInPicture: controlBarMenuItem('pictureInPicture'),
     // Like the player, the compact menu has no theatre mode, and Capacitor no full window.
     theatreMode: !compact.value && controlBarMenuItem('theatreMode'),

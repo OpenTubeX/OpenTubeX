@@ -2008,6 +2008,9 @@ Video:
     Zoom:
       Zoom: Маштаб
       'Off': 'Выкл.'
+    Lock Controls:
+      Lock Controls: "Заблакіраваць кіраванне"
+      Hold to Unlock: "Утрымлівайце, каб разблакіраваць"
     Volume Boost:
       Volume Boost: "Узмацненне гучнасці"
       'Off': "Выкл."

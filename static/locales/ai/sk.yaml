@@ -1917,6 +1917,9 @@ Video:
     Zoom:
       Zoom: Priblíženie
       'Off': 'Vypnuté'
+    Lock Controls:
+      Lock Controls: "Zamknúť ovládanie"
+      Hold to Unlock: "Podržaním odomknete"
     Volume Boost:
       Volume Boost: "Zosilnenie hlasitosti"
       'Off': "Vypnuté"

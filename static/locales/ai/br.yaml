@@ -1928,6 +1928,9 @@ Video:
     Zoom:
       Zoom: "Zoum"
       'Off': "Lazhet"
+    Lock Controls:
+      Lock Controls: "Prennañ ar reolerioù"
+      Hold to Unlock: "Derc'hit evit dibrennañ"
     Volume Boost:
       Volume Boost: "Kreskiñ an ampled"
       'Off': "Lazhet"

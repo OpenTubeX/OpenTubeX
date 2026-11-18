@@ -2280,6 +2280,9 @@ Video:
     Zoom:
       Zoom: Mastelis
       'Off': 'Išjungta'
+    Lock Controls:
+      Lock Controls: "Užrakinti valdiklius"
+      Hold to Unlock: "Palaikykite, kad atrakintumėte"
     Volume Boost:
       Volume Boost: "Garsumo stiprinimas"
       'Off': "Išjungta"

@@ -2246,6 +2246,9 @@ Video:
     Zoom:
       Zoom: 확대/축소
       'Off': 끄기
+    Lock Controls:
+      Lock Controls: "컨트롤 잠금"
+      Hold to Unlock: "길게 눌러 잠금 해제"
     Volume Boost:
       Volume Boost: "볼륨 증폭"
       'Off': "끄기"

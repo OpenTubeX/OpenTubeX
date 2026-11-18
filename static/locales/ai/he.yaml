@@ -1970,6 +1970,9 @@ Video:
     Zoom:
       Zoom: תקריב
       'Off': 'כבוי'
+    Lock Controls:
+      Lock Controls: "נעילת פקדים"
+      Hold to Unlock: "יש ללחוץ לחיצה ארוכה לביטול הנעילה"
     Volume Boost:
       Volume Boost: "הגברת עוצמת קול"
       'Off': "כבוי"

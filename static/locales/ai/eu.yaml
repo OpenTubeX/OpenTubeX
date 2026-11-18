@@ -1928,6 +1928,9 @@ Video:
     Zoom:
       Zoom: Zooma
       'Off': 'Desaktibatuta'
+    Lock Controls:
+      Lock Controls: "Blokeatu kontrolak"
+      Hold to Unlock: "Eutsi sakatuta desblokeatzeko"
     Volume Boost:
       Volume Boost: "Bolumen-igoera"
       'Off': "Desaktibatuta"

@@ -40,6 +40,7 @@ function androidRotationHarness(overrides = {}) {
     video: { value: { readyState: 4 } },
     ui: { getControls: () => ({}) },
     fullWindowListenerReady: true,
+    touchControlsLocked: { value: false },
     androidFullscreenHost: createPopoverHost(),
     androidRotationFullscreenHandoffs: new WeakMap(),
     observeAndroidDisplayRotation: createRotationObserver(),
@@ -90,6 +91,19 @@ test('Android can rotate to fullscreen with the system rotation lock when explic
   handlers.handleAndroidRotation(false)
   assert.equal(isPopoverOpen(), false)
   assert.ok(calls.includes('orientation:false'))
+})
+
+test('Android keeps rotation fullscreen in portrait while the touch controls are locked', () => {
+  const { context, handlers, isPopoverOpen } = androidRotationHarness({
+    fullscreenRotationIgnoresSystemLock: { value: true },
+  })
+  handlers.handleAndroidRotation(true)
+  context.touchControlsLocked.value = true
+  handlers.handleAndroidRotation(false)
+  assert.equal(isPopoverOpen(), true)
+  context.touchControlsLocked.value = false
+  handlers.handleAndroidRotation(false)
+  assert.equal(isPopoverOpen(), false)
 })
 
 test('Android restores the system orientation policy when rotation fullscreen is dismissed', () => {

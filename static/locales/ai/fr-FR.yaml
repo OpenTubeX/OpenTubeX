@@ -1916,6 +1916,9 @@ Video:
     Zoom:
       Zoom: Zoom
       'Off': 'Désactivé'
+    Lock Controls:
+      Lock Controls: "Verrouiller les commandes"
+      Hold to Unlock: "Maintenir pour déverrouiller"
     Volume Boost:
       Volume Boost: "Amplification du volume"
       'Off': "Désactivée"

@@ -2918,6 +2918,9 @@ Video:
     Zoom:
       Zoom: Zoom
       Off: 'Off'
+    Lock Controls:
+      Lock Controls: Lock Controls
+      Hold to Unlock: Hold to unlock
     Volume Boost:
       Volume Boost: Volume Boost
       Off: 'Off'

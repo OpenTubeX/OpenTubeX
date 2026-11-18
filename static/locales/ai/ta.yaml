@@ -1978,6 +1978,9 @@ Video:
     Zoom:
       Zoom: பெரிதாக்கம்
       'Off': முடக்கம்
+    Lock Controls:
+      Lock Controls: "கட்டுப்பாடுகளைப் பூட்டு"
+      Hold to Unlock: "திறக்க அழுத்திப் பிடிக்கவும்"
     Volume Boost:
       Volume Boost: "ஒலியளவு அதிகரிப்பு"
       'Off': "முடக்கம்"

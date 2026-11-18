@@ -1994,6 +1994,9 @@ Video:
     Zoom:
       Zoom: Zoom
       'Off': 'Fra'
+    Lock Controls:
+      Lock Controls: "Lås betjening"
+      Hold to Unlock: "Hold for at låse op"
     Volume Boost:
       Volume Boost: "Lydstyrkeforstærkning"
       'Off': "Fra"
