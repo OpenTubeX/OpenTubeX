@@ -9440,6 +9440,7 @@ function registerChapterOverlayButton() {
 
 /** @type {Map<string, { change: object, cancelled: boolean }>} */
 const pendingDockPanelCloses = new Map()
+let unmountingDockPanels = false
 
 /**
  * Reports a dock change to the page, which teleports the dock's content. A
@@ -9454,7 +9455,7 @@ async function emitDockPanelChange(change) {
     pendingDockPanelCloses.delete(change.panel)
   }
 
-  if (change.open || !change.target || presentationModeChanging.value ||
+  if (change.open || !change.target || presentationModeChanging.value || unmountingDockPanels ||
     (!isNativeFullscreenActive() && !fullWindowEnabled.value)) {
     emit('dock-panel-change', change)
     return
@@ -9471,7 +9472,10 @@ async function emitDockPanelChange(change) {
   emit('dock-panel-change', change)
 }
 
+// Registered before the teardown below, so the docks it closes report at once
+// instead of after a slide that outlives the player.
 onBeforeUnmount(() => {
+  unmountingDockPanels = true
   for (const close of pendingDockPanelCloses.values()) {
     close.cancelled = true
     emit('dock-panel-change', close.change)
