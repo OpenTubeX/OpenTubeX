@@ -158,6 +158,7 @@ test('sync adapter edits replace shared collections and record what they touched
     addSubscriptionGroupChannel: ['profiles', 'profile', 'UC-channel'],
     removeSubscriptionGroupChannel: ['profiles', 'profile', 'UC-channel'],
     putSettings: ['settings', [{ key: 'baseTheme', value: 'light' }]],
+    putSeparateProfiles: ['separateProfiles', [{ id: 'separate', name: 'Separate', bgColor: '#000000', textColor: '#FFFFFF' }]],
   }
   const editors = Object.getOwnPropertyNames(EncryptedSyncAdapter.prototype)
     .filter(name => name !== 'constructor' && !/^(get|supports)/.test(name))

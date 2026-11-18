@@ -6,7 +6,7 @@ import { normalizeSignalAccentColor } from '../../../signalTheme.js'
 import i18n, { loadLocale, rememberStartupLocale, setAITranslationCompletionsEnabled } from '../../i18n/index'
 import { resolveSystemLocale } from '../../../systemLocale.js'
 import { applyKeyboardShortcutOverrides, resolveLandingPage, sanitizeKeyboardShortcutOverrides, SyncEvents } from '../../../constants'
-import { DBProfileHandlers, DBSettingHandlers } from '../../../datastores/handlers/index'
+import { DBProfileHandlers, DBSettingHandlers, getDataScope } from '../../../datastores/handlers/index'
 import { hashPassword } from '../../helpers/passwords'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { ANDROID_PROXY_SETTING_KEYS, configureAndroidProxy, readAndroidProxySettings } from '../../helpers/androidProxy'
@@ -575,13 +575,16 @@ const customGetters = {
     })
   ),
 
-  getPlaylistBookmarks: (state) => {
-    return Array.isArray(state.playlistBookmarks) ? state.playlistBookmarks : []
+  // A separate profile keeps the YouTube playlists it saved to itself.
+  getPlaylistBookmarks: (state, _getters, _rootState, rootGetters) => {
+    const bookmarks = rootGetters.getActiveDataScope === null
+      ? state.playlistBookmarks
+      : rootGetters.getActiveProfile.playlistBookmarks
+    return Array.isArray(bookmarks) ? bookmarks : []
   },
 
-  getPlaylistBookmark: (state) => (playlistId) => {
-    if (!Array.isArray(state.playlistBookmarks)) return undefined
-    return state.playlistBookmarks.find(bookmark => bookmark?.playlist?.id === playlistId)
+  getPlaylistBookmark: (_state, getters) => (playlistId) => {
+    return getters.getPlaylistBookmarks.find(bookmark => bookmark?.playlist?.id === playlistId)
   },
 
   // These parsed variants are cached by Vuex,
@@ -964,14 +967,14 @@ const customActions = {
     return settingWrites.track('ytDlpAutomaticDownloadRules', () => pendingAutomaticDownloadRuleUpdate)
   },
 
-  savePlaylistBookmark: ({ commit }, bookmark) => updateSavedPlaylistBookmarks(commit, bookmarks => [
+  savePlaylistBookmark: ({ dispatch }, bookmark) => dispatch('updateActivePlaylistBookmarks', bookmarks => [
     ...bookmarks.filter(entry => entry?.playlist?.id !== bookmark.playlist.id),
     bookmark,
   ]),
 
-  removePlaylistBookmark: async ({ commit, state }, playlistId) => {
-    const removed = await updateSavedPlaylistBookmarks(
-      commit,
+  removePlaylistBookmark: async ({ commit, dispatch, state }, playlistId) => {
+    const removed = await dispatch(
+      'updateActivePlaylistBookmarks',
       bookmarks => bookmarks.filter(bookmark => bookmark?.playlist?.id !== playlistId)
     )
     if (!removed) return false
@@ -982,7 +985,24 @@ const customActions = {
     return true
   },
 
-  // Takes the new list (imports, resets) or a function that derives it from the saved one (sync).
+  // Applies `update` to the bookmarks of the active profile: a separate
+  // profile's own, or the shared ones.
+  updateActivePlaylistBookmarks: ({ commit, rootGetters }, update) => {
+    const scope = rootGetters.getActiveDataScope
+    if (scope === null) return updateSavedPlaylistBookmarks(commit, update)
+    // Like the shared bookmarks, edits read the saved list inside a lock all windows share.
+    return runLockedSettingUpdate(`playlistBookmarks-${scope}`, async () => {
+      const profile = (await DBProfileHandlers.find()).find(profile => profile._id === scope)
+      if (profile?.separate !== true) throw new Error('The separate profile is gone')
+      const bookmarks = update(Array.isArray(profile.playlistBookmarks) ? profile.playlistBookmarks : [])
+      const saved = await DBProfileHandlers.updatePlaylistBookmarks(scope, bookmarks)
+      if (saved === null) throw new Error('The separate profile is gone')
+      commit('upsertProfileToList', saved)
+    })
+  },
+
+  // Takes the new list (imports, resets) or a function that derives it from the
+  // saved one (sync). These are the shared bookmarks, whichever profile is active.
   updatePlaylistBookmarks: ({ commit }, update) => updateSavedPlaylistBookmarks(
     commit,
     typeof update === 'function' ? update : () => update
@@ -1479,7 +1499,9 @@ const customActions = {
         }
       })
 
-      window.ftElectron.handleSyncHistory((event, data) => {
+      // Other windows can show another profile's data.
+      window.ftElectron.handleSyncHistory((event, data, scope) => {
+        if (scope !== getDataScope()) return
         switch (event) {
           case SyncEvents.GENERAL.UPSERT:
             commit('upsertToHistoryCache', data)
@@ -1535,7 +1557,8 @@ const customActions = {
         }
       })
 
-      window.ftElectron.handleSyncWatchStats((event, data) => {
+      window.ftElectron.handleSyncWatchStats((event, data, scope) => {
+        if (scope !== getDataScope()) return
         switch (event) {
           case SyncEvents.GENERAL.OVERWRITE:
             commit('setWatchStats', data.records)
@@ -1561,10 +1584,12 @@ const customActions = {
       })
 
       window.ftElectron.handleSyncRecommendations(data => {
+        if ((data?.scope ?? null) !== getDataScope()) return
         dispatch('receiveRecommendationUpdate', data).catch(error => console.error('Could not sync recommendation learning', error))
       })
 
-      window.ftElectron.handleSyncSearchHistory((event, data) => {
+      window.ftElectron.handleSyncSearchHistory((event, data, scope) => {
+        if (scope !== getDataScope()) return
         switch (event) {
           case SyncEvents.GENERAL.UPSERT:
             commit('upsertSearchHistoryEntryToList', data)
@@ -1588,7 +1613,8 @@ const customActions = {
         }
       })
 
-      window.ftElectron.handleSyncPlaylists((event, data) => {
+      window.ftElectron.handleSyncPlaylists((event, data, scope) => {
+        if (scope !== getDataScope()) return
         switch (event) {
           case SyncEvents.GENERAL.CREATE:
             commit('addPlaylists', data)

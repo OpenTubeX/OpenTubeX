@@ -1,5 +1,5 @@
 import { ClosedWindowHistory } from './tabs/ClosedWindowHistory.js'
-import { createFileWatchQueue } from './watchQueue.js'
+import { createScopedFileWatchQueues } from './watchQueue.js'
 import { createSerialQueue } from './serialQueue.js'
 import { writeFileAtomic } from './writeFileAtomic.js'
 import { fetchRumblePage, passRumbleChallenge } from './rumblePages.js'
@@ -33,7 +33,7 @@ import { resolveSystemTheme } from '../appearanceSettings'
 import { applySyncServerUserAgent } from '../syncServerUserAgent'
 import { applyYouTubeUserAgent } from '../youTubeUserAgent'
 import * as baseHandlers from '../datastores/handlers/base'
-import { liveReminders, waitForDatastores } from '../datastores'
+import { liveReminders, profileDatastorePrefix, waitForDatastores } from '../datastores'
 import { createImageCacheHandler, ImageCache } from './ImageCache'
 import { existsSync } from 'fs'
 import asyncFs from 'fs/promises'
@@ -95,7 +95,7 @@ import { getTrayMenuIcon } from './trayMenuIcons'
 import { createScheduledBackups } from './scheduledBackups'
 import { createBackupArchiveFactory } from './backupArchive'
 import { createDatastoreRequestTracker } from './datastoreRequests'
-import { setupDatastoreIpc } from './datastoreIpc'
+import { resolveScope, setupDatastoreIpc } from './datastoreIpc'
 import { settingSyncMessage, writeSynced } from './datastoreSync'
 import { getWindowButtonLayout, onWindowButtonLayoutChanged } from './windowButtonLayout'
 import { watchTrayColorScheme } from './trayColorScheme'
@@ -591,8 +591,9 @@ function runApp() {
     closeConfirmedWindowIds
   })
 
-  const updateWatchQueue = createFileWatchQueue(path.join(app.getPath('userData'), 'watch-queue.json'))
-  setupWatchQueueIpc(updateWatchQueue)
+  const watchQueues = createScopedFileWatchQueues(app.getPath('userData'), profileDatastorePrefix)
+  setupWatchQueueIpc(watchQueues.update, resolveScope)
+  baseHandlers.onScopeDataDeleted(scope => watchQueues.forget(scope))
 
   if (process.platform === 'win32' && !isPortableBuild()) {
     app.setUserTasks([
@@ -2951,8 +2952,7 @@ function runApp() {
         // A script left in KWin would act on a later process with the same ID
         closeKwinPictureInPictureBounds.then(close => close?.())
           .finally(() => pictureInPictureBoundsStore.settled()),
-        // Queue requests run in order, so a read waits for pending queue writes
-        updateWatchQueue({}),
+        watchQueues.settled(),
         baseHandlers.compactAllDatastores(),
         shutdownYtDlpDownloads(),
         // Uploads are saved as notified before an original title lookup, so a

@@ -1364,6 +1364,7 @@ Settings:
     Paused Interface Hide Delay: Pausatutako interfazea ezkutatzeko atzerapena
     Blur Blocked Items: Lausotu blokeatutako elementuak ezkutatu beharrean
   Data Settings:
+    Backup separate profile data: "Babeskopia honek {count} profil bereizien datuak ere badauzka, eta profil horretan leheneratzen dira. | Babeskopia honek {count} profil bereizien datuak ere badauzka, eta profil horietan leheneratzen dira."
     Subscription cache file: "Fitxategi honek zure harpidetzetako bideoak soilik gordetzen ditu cachean, ez kanalak. Aukeratu profiles.db edo harpidetzen esportazio bat."
     Settings could not be imported: "Ezin izan dira ezarpenak inportatu"
     Some settings could not be imported: "Ezin izan dira ezarpen guztiak inportatu ({total}etik {failed} huts egin dute)"
@@ -1684,6 +1685,13 @@ About:
   Email: Helbide elektronikoa
   Show tutorial: Erakutsi tutoriala
 Profile:
+  Keep Data Separate: "Mantendu datuak bereizita"
+  Keep Data Separate Tooltip: "Profil honi bere harpidetzak, ikustaldi-historia, erreprodukzio-zerrendak, bilaketa-historia, ikustaldien estatistikak eta ilara ematen dizkio. Zure beste profilek ez dituzte ikusten, eta profil honek ez ditu haienak ikusten. Ezin da aldatu profila sortu ondoren."
+  Separate Profile: "Profil bereizia"
+  Separate Profile Note: "Profil honek bere harpidetzak, historia eta erreprodukzio-zerrendak zure beste profiletatik bereizita mantentzen ditu."
+  Separate Profile Deletion Warning: "Bere harpidetzak, ikustaldi-historia, erreprodukzio-zerrendak, bilaketa-historia, ikustaldien estatistikak eta ilara ere ezabatuko dira."
+  Separate Data Notice: "{profile} profilak bere datuak bereizita mantentzen ditu, beraz beheko inportazio eta esportazioek haren harpidetzak, historia, erreprodukzio-zerrendak eta bilaketa-historia soilik erabiltzen dituzte."
+  Separate Data Storage Notice: "{profile} profilak bere datuak bereizita mantentzen ditu. Beheko botoiek haren datuak soilik ezabatzen dituzte, baina tamainek profil guztien datuak barne hartzen dituzte."
   Customization: Pertsonalizazioa
   Manage Profile Subscriptions: Kudeatu profileko harpidetzak
   Icon Names:

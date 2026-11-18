@@ -307,8 +307,7 @@ const activeProfileSubscriptions = computed(() => {
 const hasSubscriptionGroups = computed(() => store.getters.getSubscriptionGroupList.length > 0)
 
 // Groups can hold any subscription, even while the active profile is empty.
-// The all channels profile is always the first profile in the array
-const hasSubscriptions = computed(() => store.getters.getProfileList[0].subscriptions.length > 0)
+const hasSubscriptions = computed(() => store.getters.getSubscriptionRootProfile.subscriptions.length > 0)
 
 /** @type {import('vue').ComputedRef<string | null>} */
 const activeGroupId = computed(() => {
@@ -550,8 +549,7 @@ function channelDragHandlers(channel) {
 function getFullCustomOrder() {
   const order = tempCustomOrder.value ?? store.getters.getSubscribedChannelsCustomOrderList
   const orderedIds = new Set(order)
-  // The all channels profile is always the first profile in the array
-  const missingChannels = store.getters.getProfileList[0].subscriptions.filter(channel => !orderedIds.has(channel.id))
+  const missingChannels = store.getters.getSubscriptionRootProfile.subscriptions.filter(channel => !orderedIds.has(channel.id))
   return [
     ...order,
     ...sortSubscribedChannels(missingChannels, SORT_BY_OPTIONS.NameAscending, [], collator.value).map(channel => channel.id)

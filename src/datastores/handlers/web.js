@@ -1,6 +1,7 @@
 import * as baseHandlers from './base'
 import { loadLegacySubscriptionCache, removeLegacySubscriptionCache } from '../index'
 import { createBrowserSubscriptionCache } from '../browserSubscriptionCache'
+import { getDataScope } from './dataScope.js'
 
 export const subscriptionCache = createBrowserSubscriptionCache(
   loadLegacySubscriptionCache,
@@ -51,13 +52,28 @@ class Settings {
 // For the settings we use the wrapper class to hide some methods only needed in the Electron main process
 export { Settings as settings }
 
+/**
+ * Forwards each call to the handlers of the data scope active at that moment.
+ * @param {'history' | 'watchStats' | 'recommendations' | 'playlists' | 'searchHistory'} key
+ */
+function scoped(key) {
+  return new Proxy({}, {
+    get(_, property) {
+      const handlers = baseHandlers.scopedHandlers(getDataScope())[key]
+      const value = handlers[property]
+      return typeof value === 'function' ? value.bind(handlers) : value
+    },
+  })
+}
+
+export const history = scoped('history')
+export const watchStats = scoped('watchStats')
+export const recommendations = scoped('recommendations')
+export const playlists = scoped('playlists')
+export const searchHistory = scoped('searchHistory')
+
 // These classes don't require any changes from the base classes, so can be exported as-is.
 export {
-  history,
-  watchStats,
-  recommendations,
   profiles,
-  playlists,
-  searchHistory,
   compactAllDatastores,
 } from './base'

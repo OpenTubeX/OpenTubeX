@@ -707,7 +707,7 @@ function releasePlaylistPreloadUi() {
 }
 
 /** @type {import('vue').ComputedRef<string | undefined>} */
-const quickBookmarkPlaylistId = computed(() => store.getters.getQuickBookmarkTargetPlaylistId)
+const quickBookmarkPlaylistId = computed(() => store.getters.getActiveQuickBookmarkTargetPlaylistId)
 
 const quickBookmarkButtonEnabled = computed(() => {
   if (selectedUserPlaylist.value == null) { return true }

@@ -1364,6 +1364,7 @@ Settings:
     Paused Interface Hide Delay: Délai avant le masquage de l’interface en pause
     Blur Blocked Items: Flouter les éléments bloqués au lieu de les masquer
   Data Settings:
+    Backup separate profile data: "Cette sauvegarde contient aussi les données de {count} profil séparé, qui sont restaurées dans ce profil. | Cette sauvegarde contient aussi les données de {count} de profils séparés, qui sont restaurées dans ces profils. | Cette sauvegarde contient aussi les données de {count} profils séparés, qui sont restaurées dans ces profils."
     Subscription cache file: "Ce fichier ne met en cache que les vidéos de vos abonnements, pas les chaînes. Choisissez plutôt profiles.db ou une exportation des abonnements."
     Settings could not be imported: "Impossible d'importer les paramètres"
     Some settings could not be imported: "Certains paramètres n'ont pas pu être importés ({failed} sur {total} en échec)"
@@ -1682,6 +1683,13 @@ About:
   Matrix: Matrix
   Show tutorial: Afficher le tutoriel
 Profile:
+  Keep Data Separate: "Garder les données séparées"
+  Keep Data Separate Tooltip: "Donne à ce profil ses propres abonnements, historique de visionnage, playlists, historique de recherche, statistiques de visionnage et file d’attente. Vos autres profils ne les voient pas, et ce profil ne voit pas les leurs. Vous ne pouvez pas modifier ce choix après la création du profil."
+  Separate Profile: "Profil séparé"
+  Separate Profile Note: "Ce profil garde ses abonnements, son historique et ses playlists séparés de vos autres profils."
+  Separate Profile Deletion Warning: "Ses abonnements, son historique de visionnage, ses playlists, son historique de recherche, ses statistiques de visionnage et sa file d’attente seront également supprimés."
+  Separate Data Notice: "{profile} garde ses données séparées : les imports et exports ci-dessous n’utilisent donc que ses abonnements, son historique, ses playlists et son historique de recherche."
+  Separate Data Storage Notice: "{profile} garde ses données séparées. Les boutons ci-dessous ne suppriment que ses données, tandis que les tailles incluent les données de tous les profils."
   Customization: Personnalisation
   Manage Profile Subscriptions: Gérer les abonnements du profil
   Icon Names:

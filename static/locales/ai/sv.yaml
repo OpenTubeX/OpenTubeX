@@ -1364,6 +1364,7 @@ Settings:
     Paused Interface Hide Delay: Fördröjning innan pausgränssnittet döljs
     Blur Blocked Items: Gör blockerade objekt suddiga i stället för att dölja dem
   Data Settings:
+    Backup separate profile data: "Den här säkerhetskopian innehåller också data från {count} separat profil, som återställs till den profilen. | Den här säkerhetskopian innehåller också data från {count} separata profiler, som återställs till de profilerna."
     Subscription cache file: "Den här filen cachar bara videorna från dina prenumerationer, inte kanalerna. Välj profiles.db eller en export av prenumerationer i stället."
     Settings could not be imported: "Inställningarna kunde inte importeras"
     Some settings could not be imported: "Alla inställningar kunde inte importeras ({failed} av {total} misslyckades)"
@@ -1683,6 +1684,13 @@ About:
   Email: E-post
   Show tutorial: Visa guide
 Profile:
+  Keep Data Separate: "Håll data separat"
+  Keep Data Separate Tooltip: "Ger den här profilen egna prenumerationer, visningshistorik, spellistor, sökhistorik, visningsstatistik och kö. Dina andra profiler ser dem inte, och den här profilen ser inte deras. Du kan inte ändra det efter att profilen har skapats."
+  Separate Profile: "Separat profil"
+  Separate Profile Note: "Den här profilen håller sina prenumerationer, sin historik och sina spellistor separata från dina andra profiler."
+  Separate Profile Deletion Warning: "Dess prenumerationer, visningshistorik, spellistor, sökhistorik, visningsstatistik och kö raderas också."
+  Separate Data Notice: "{profile} håller sina data separat, så importerna och exporterna nedan använder bara dess prenumerationer, historik, spellistor och sökhistorik."
+  Separate Data Storage Notice: "{profile} håller sina data separat. Knapparna nedan raderar bara dess data, medan storlekarna omfattar alla profilers data."
   Customization: Anpassning
   Manage Profile Subscriptions: Hantera profilens prenumerationer
   Icon Names:

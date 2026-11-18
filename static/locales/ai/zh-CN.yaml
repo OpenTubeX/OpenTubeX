@@ -1364,6 +1364,7 @@ Settings:
     Paused Interface Hide Delay: 暂停界面隐藏延迟
     Blur Blocked Items: 模糊显示已屏蔽的项目，而不是隐藏
   Data Settings:
+    Backup separate profile data: "此备份还包含 {count} 个独立个人资料的数据，这些数据将恢复到对应的个人资料中。"
     Subscription cache file: "此文件只缓存了你订阅中的视频，不包含频道本身。请改为选择 profiles.db 或订阅导出文件。"
     Settings could not be imported: "无法导入设置"
     Some settings could not be imported: "部分设置无法导入（{total} 项中有 {failed} 项失败）"
@@ -1683,6 +1684,13 @@ About:
   Email: 电子邮件
   Show tutorial: 显示教程
 Profile:
+  Keep Data Separate: "单独保存数据"
+  Keep Data Separate Tooltip: "为此个人资料提供独立的订阅、观看历史记录、播放列表、搜索历史记录、观看统计和队列。你的其他个人资料看不到这些内容，此个人资料也看不到它们的数据。创建个人资料后无法更改此设置。"
+  Separate Profile: "独立个人资料"
+  Separate Profile Note: "此个人资料的订阅、历史记录和播放列表与你的其他个人资料相互独立。"
+  Separate Profile Deletion Warning: "它的订阅、观看历史记录、播放列表、搜索历史记录、观看统计和队列也将被删除。"
+  Separate Data Notice: "{profile} 的数据是单独保存的，因此下方的导入和导出只会使用它的订阅、历史记录、播放列表和搜索历史记录。"
+  Separate Data Storage Notice: "{profile} 的数据是单独保存的。下方的按钮只会删除它的数据，而大小则包含所有个人资料的数据。"
   Customization: 自定义
   Manage Profile Subscriptions: 管理个人资料的订阅
   Icon Names:

@@ -152,14 +152,16 @@ export function replaceWatchStatsDevice(devices, currentDeviceId, sourceDeviceId
     : device)
 }
 
-export async function syncWatchStats(client, store) {
+// The saved reset belongs to the shared statistics. A separate profile's
+// statistics (`shared` false) sync without one.
+export async function syncWatchStats(client, store, { shared = true } = {}) {
   const { syncServerDeviceId, syncServerDeviceName, syncServerWatchStatsReset } = store.state.settings
   const [remote, localRecords, deviceInfo] = await Promise.all([
     client.getWatchStats(),
     DBWatchStatsHandlers.find(),
     getCurrentSyncServerDeviceInfo(),
   ])
-  const reset = resolveWatchStatsReset(remote, syncServerDeviceId, syncServerWatchStatsReset)
+  const reset = resolveWatchStatsReset(remote, syncServerDeviceId, shared ? syncServerWatchStatsReset : null)
   const merged = mergeWatchStats(remote, localRecords, syncServerDeviceId, syncServerDeviceName,
     deviceInfo.platform, reset)
   if (JSON.stringify(remote) !== JSON.stringify(merged)) {

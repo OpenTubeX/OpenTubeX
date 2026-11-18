@@ -396,6 +396,15 @@ export class SyncServerClient {
     })
   }
 
+  /** Deletes a separate profile's collection. Servers refuse other collections. */
+  async deleteEncryptedSyncCollection(collection) {
+    try {
+      await this.request(`/v1/encrypted_sync/${encodeURIComponent(collection)}`, { method: 'DELETE' })
+    } catch (error) {
+      if (error.status !== 404) throw error
+    }
+  }
+
   appendEncryptedSyncChange(collection, revision, payload, activity) {
     return this.request(`/v1/encrypted_sync/${encodeURIComponent(collection)}/changes`, {
       method: 'POST',
@@ -821,6 +830,8 @@ function isSameLocalPlaylist(playlist, metadata, videos) {
 // `options.onRetryBaseline` receives a getter for the baseline to merge against
 // if the upload conflicts. It also holds the downloaded subscriptions, so their
 // removal on the server is not undone. Playlists and profiles accept it too.
+// `options.profileId` names the separate profile whose channels to sync, or is
+// null for the main profile's.
 export async function syncSubscriptions(client, store, previousIds = [], options = {}) {
   // Subscriptions edited here or in another window while the server responds
   // would be overwritten, so merge again from the changed subscriptions.
@@ -841,7 +852,14 @@ export async function syncSubscriptions(client, store, previousIds = [], options
 
 async function mergeSubscriptions(client, store, previousIds, options) {
   const profiles = deepCopy(store.state.profiles.profileList)
-  const mainProfile = profiles.find(profile => profile._id === MAIN_PROFILE_ID) ?? profiles[0]
+  const mainProfile = options.profileId == null
+    ? profiles.find(profile => profile._id === MAIN_PROFILE_ID) ?? profiles[0]
+    : profiles.find(profile => profile._id === options.profileId && profile.separate === true)
+  if (!mainProfile) throw new Error('Profiles changed during sync. Try again.')
+  // A separate profile's channels don't limit the other profiles, nor theirs it.
+  const scopeProfiles = mainProfile.separate === true
+    ? [mainProfile]
+    : profiles.filter(profile => profile.separate !== true)
   const localSubscriptions = mainProfile.subscriptions.map(channel => ({
     ...channel,
     thumbnail: normalizeChannelAvatar(channel.thumbnail),
@@ -876,7 +894,7 @@ async function mergeSubscriptions(client, store, previousIds, options) {
   const mergedIdSet = new Set(mergedIds)
 
   let mainProfileSaved = false
-  for (const profile of profiles) {
+  for (const profile of scopeProfiles) {
     const subscriptions = profile._id === mainProfile._id
       ? mergedSubscriptions
       : profile.subscriptions.filter(channel => mergedIdSet.has(channel.id))
@@ -1340,7 +1358,8 @@ export async function syncProfiles(client, store, previous = {}, options = {}) {
     // A profile deleted here meanwhile would look new on the server without a
     // baseline. Deleting it in the app confirms the deletion, so it needs no review.
     const remaining = new Set(store.state.profiles.profileList.map(profile => profile._id))
-    const deleted = read.filter(profile => profile._id !== MAIN_PROFILE_ID && !remaining.has(profile._id))
+    const deleted = read.filter(profile => profile._id !== MAIN_PROFILE_ID && profile.separate !== true &&
+      !remaining.has(profile._id))
     if (deleted.length === 0) continue
     for (const profile of deleted) {
       baseline[profile._id] ??= {
@@ -1368,7 +1387,10 @@ export async function syncProfiles(client, store, previous = {}, options = {}) {
 async function mergeProfiles(client, store, previous, options) {
   // A copy, because channels added meanwhile are pushed into the stored profile
   const profiles = deepCopy(store.state.profiles.profileList)
-  const localProfiles = profiles.filter(profile => profile._id !== MAIN_PROFILE_ID)
+  // Separate profiles sync in their own collection. Older versions would show
+  // their channels in every profile.
+  const separateIds = new Set(profiles.filter(profile => profile.separate === true).map(profile => profile._id))
+  const localProfiles = profiles.filter(profile => profile._id !== MAIN_PROFILE_ID && !separateIds.has(profile._id))
   const localById = mapBy(localProfiles, profile => profile._id)
   const remoteGroups = await client.getSubscriptionGroups()
   if (remoteGroups === null) return null
@@ -1379,7 +1401,7 @@ async function mergeProfiles(client, store, previous, options) {
     const remoteId = entry.group.id
     const localId = entry.group.local_id ?? localIdByRemoteId.get(remoteId) ?? remoteId
     return [localId, { ...entry, remoteId }]
-  }))
+  }).filter(([localId]) => !separateIds.has(localId)))
   const mergedIds = mergeIds(localById.keys(), remoteById.keys(), Object.keys(previous), {
     ...options,
     collection: 'profiles',
@@ -1499,6 +1521,132 @@ async function mergeProfiles(client, store, previous, options) {
     }
   }
 
+  return next
+}
+
+const SEPARATE_PROFILE_COLOR = /^(?:#[\da-f]{3,8}|transparent|var\(--[\w-]+\))$/i
+const SEPARATE_PROFILE_ICON_TYPES = new Set(['icon', 'emoji', 'image'])
+// Profile images are 256-pixel WebP data URLs, far below this.
+const MAX_SEPARATE_PROFILE_ICON_LENGTH = 1024 * 1024
+
+function separateProfileIcon(icon) {
+  if (icon?.type === 'initial') return { type: 'initial' }
+  if (!SEPARATE_PROFILE_ICON_TYPES.has(icon?.type) || typeof icon.value !== 'string' ||
+      icon.value.length === 0 || icon.value.length > MAX_SEPARATE_PROFILE_ICON_LENGTH ||
+      (icon.type === 'image' && !icon.value.startsWith('data:image/'))) return null
+  return { type: icon.type, value: icon.value }
+}
+
+function isValidSeparateProfileEntry(entry) {
+  // Profile IDs name the profile's datastores, which limits their length.
+  return typeof entry?.id === 'string' && entry.id.length > 0 && entry.id.length <= 64 &&
+    entry.id !== MAIN_PROFILE_ID && typeof entry.name === 'string' && entry.name.length > 0 &&
+    SEPARATE_PROFILE_COLOR.test(entry.bgColor) && SEPARATE_PROFILE_COLOR.test(entry.textColor)
+}
+
+function separateProfileEntry(profile) {
+  const icon = separateProfileIcon(profile.icon)
+  return { id: profile._id, name: profile.name, bgColor: profile.bgColor, textColor: profile.textColor, ...(icon ? { icon } : {}) }
+}
+
+/** The baseline of an entry, which fingerprints images instead of repeating them in each snapshot */
+function separateProfileMetadata(entry) {
+  const icon = separateProfileIcon(entry.icon)
+  return {
+    name: entry.name,
+    bgColor: entry.bgColor,
+    textColor: entry.textColor,
+    icon: icon?.type === 'image' ? { type: 'image', value: thumbnailFingerprint(icon.value) } : icon,
+  }
+}
+
+/**
+ * Syncs the names, colors, and icons of the profiles that keep their data
+ * separate. Their channels and data sync in their own collections while they
+ * are active. Deleting a separate profile deletes its history and playlists
+ * too, so a deletion from another device always asks first.
+ * @returns {Promise<Record<string, ReturnType<typeof separateProfileMetadata>>>} The baseline
+ */
+export async function syncSeparateProfiles(client, store, previous = {}, options = {}) {
+  const profiles = store.state.profiles.profileList
+  const local = profiles.filter(profile => profile.separate === true)
+  const localById = mapBy(local, profile => profile._id)
+  // Another device can't turn a profile of this one into a separate one.
+  const sharedIds = new Set(profiles.filter(profile => profile.separate !== true).map(profile => profile._id))
+  const remote = await client.getSeparateProfiles()
+  const remoteById = new Map(remote
+    .filter(entry => isValidSeparateProfileEntry(entry) && !sharedIds.has(entry.id))
+    .map(entry => [entry.id, entry]))
+  const mergedIds = mergeIds(localById.keys(), remoteById.keys(), Object.keys(previous), {
+    ...options,
+    collection: 'separateProfiles',
+    getItemName: id => localById.get(id)?.name || remoteById.get(id)?.name || previous[id]?.name,
+  })
+  // A conflicting upload merges again, also against the downloaded profiles,
+  // so their removal on the server is not undone.
+  options.onRetryBaseline?.(() => ({
+    ...previous,
+    ...Object.fromEntries(Array.from(remoteById, ([id, entry]) => [id, separateProfileMetadata(entry)])),
+  }))
+
+  const removedHere = Array.from(localById.keys()).filter(id => !mergedIds.has(id))
+  const confirmed = new Set(options.deletions?.separateProfiles?.confirmed)
+  const unconfirmed = removedHere.filter(id => !confirmed.has(id))
+  if (!options.allowDataLoss && unconfirmed.length > 0) {
+    throw new SyncServerDataLossError({
+      collection: 'separateProfiles',
+      deleted: unconfirmed.length,
+      previous: Object.keys(previous).length,
+      items: unconfirmed.map(id => ({ id, name: localById.get(id).name })),
+    })
+  }
+
+  const next = {}
+  const entries = []
+  for (const id of mergedIds) {
+    const localProfile = localById.get(id)
+    const remoteEntry = remoteById.get(id)
+    const localEntry = localProfile ? separateProfileEntry(localProfile) : null
+    const base = previous[id]
+    const remoteChanged = remoteEntry && base && !metadataEquals(separateProfileMetadata(remoteEntry), base)
+    const localChanged = localEntry && !metadataEquals(separateProfileMetadata(localEntry), base)
+    const entry = remoteEntry && (!localEntry || (remoteChanged && !localChanged)) ? remoteEntry : localEntry
+    // Entries without an icon keep the local one.
+    const icon = separateProfileIcon(entry.icon) ?? (localProfile ? separateProfileIcon(localProfile.icon) : null)
+    const synced = { id, name: entry.name, bgColor: entry.bgColor, textColor: entry.textColor, ...(icon ? { icon } : {}) }
+    if (!localProfile) {
+      const profile = {
+        _id: id,
+        name: synced.name,
+        bgColor: synced.bgColor,
+        textColor: synced.textColor,
+        ...(icon ? { icon } : {}),
+        subscriptions: [],
+        separate: true,
+      }
+      if (!await store.dispatch('saveSyncedProfile', { profile, previous: null })) {
+        throw new Error('Profiles changed during sync. Try again.')
+      }
+    } else if (!metadataEquals(separateProfileMetadata(synced), separateProfileMetadata(localEntry))) {
+      const details = { name: synced.name, bgColor: synced.bgColor, textColor: synced.textColor, icon: icon ?? localProfile.icon }
+      if (!await store.dispatch('updateProfileDetails', { profileId: id, details })) {
+        throw new Error('Could not save synced profile')
+      }
+    }
+    entries.push(synced)
+    next[id] = separateProfileMetadata(synced)
+  }
+
+  for (const id of removedHere) {
+    if (!await store.dispatch('removeProfile', id)) throw new Error('Could not remove synced profile')
+  }
+
+  // Keep entries this version can't read, and the server's order.
+  const order = new Map(remote.map((entry, index) => [entry?.id, index]))
+  const kept = remote.filter(entry => !remoteById.has(entry?.id))
+  const position = entry => order.get(entry.id) ?? remote.length
+  const merged = [...kept, ...entries.sort((a, b) => position(a) - position(b))]
+  if (!metadataEquals(remote, merged)) await client.putSeparateProfiles(merged)
   return next
 }
 

@@ -104,12 +104,16 @@ function takeStartupRead(channel) {
  * @param {string} channel
  * @param {number} action
  * @param {any} [data]
+ * @param {string | null} [scope] the separate profile whose data to use, or null for the shared data
+ * @param {boolean} [replacesState] whether the result of a full read replaces what the app shows
  */
-function requestDatastore(channel, action, data) {
+function requestDatastore(channel, action, data, scope = null, replacesState = false) {
   const startupRead = takeStartupRead(channel)
-  // Any other request may change what the startup read would have returned.
-  if (startupRead && action === DBActions.GENERAL.FIND && !data) return startupRead
-  return invokeDatastore(channel, data ? { action, data } : { action })
+  // Any other request may change what the startup read would have returned,
+  // which only holds the shared data.
+  if (startupRead && action === DBActions.GENERAL.FIND && !data && scope === null) return startupRead
+  const request = data ? { action, data } : { action }
+  return invokeDatastore(channel, scope === null ? request : { ...request, scope }, replacesState)
 }
 
 let currentUpdateSearchInputTextListener
@@ -144,12 +148,13 @@ function recordSettingRevision(id, revision) {
  * @param {string} channel
  * @param {{ action: number, data?: any }} request
  */
-async function invokeDatastore(channel, request) {
+async function invokeDatastore(channel, request, replacesState = false) {
   const { result, revision, savedSetting } = await ipcRenderer.invoke(channel, request)
   if (savedSetting) recordSettingRevision(savedSetting._id, savedSetting.revision)
   const listener = /** @type {SyncListener} */ (syncListeners.get(/** @type {string} */ (datastoreSyncChannels.get(channel))))
-  // Reads once the app listens, such as exports, need not replace what it shows.
-  if (revision !== undefined && !listener.handler) listener.readRevision = revision
+  // Reads once the app listens, such as exports, need not replace what it
+  // shows. Switching to a separate profile's data does.
+  if (revision !== undefined && (!listener.handler || replacesState)) listener.readRevision = revision
   return result
 }
 
@@ -241,8 +246,9 @@ export default {
   createBackupArchive: (sections, settings) => ipcRenderer.invoke(IpcChannels.CREATE_BACKUP_ARCHIVE, sections, settings),
   chooseScheduledBackupFolder: () => ipcRenderer.invoke(IpcChannels.CHOOSE_SCHEDULED_BACKUP_FOLDER),
   watchQueue: {
-    update: async request => {
-      const snapshot = await ipcRenderer.invoke(IpcChannels.WATCH_QUEUE_UPDATE, JSON.parse(JSON.stringify(request)))
+    update: async (request, scope = null) => {
+      const message = JSON.parse(JSON.stringify(request))
+      const snapshot = await ipcRenderer.invoke(IpcChannels.WATCH_QUEUE_UPDATE, scope === null ? message : { ...message, scope })
       if (snapshot.error) throw new Error(snapshot.error)
       return snapshot
     },
@@ -1023,20 +1029,25 @@ export default {
   /**
    * @param {number} action
    * @param {any} [data]
+   * @param {string | null} [scope]
+   * @param {boolean} [replacesState]
    */
-  dbHistory: (action, data) => {
-    return requestDatastore(IpcChannels.DB_HISTORY, action, data)
+  dbHistory: (action, data, scope, replacesState) => {
+    return requestDatastore(IpcChannels.DB_HISTORY, action, data, scope, replacesState)
   },
 
   /**
    * @param {number} action
    * @param {any} [data]
    */
-  dbWatchStats: (action, data) => {
-    return ipcRenderer.invoke(IpcChannels.DB_WATCH_STATS, data ? { action, data } : { action })
+  dbWatchStats: (action, data, scope = null) => {
+    const request = data ? { action, data } : { action }
+    return ipcRenderer.invoke(IpcChannels.DB_WATCH_STATS, scope === null ? request : { ...request, scope })
   },
 
-  dbRecommendations: (action, data) => ipcRenderer.invoke(IpcChannels.DB_RECOMMENDATIONS, { action, data }),
+  dbRecommendations: (action, data, scope = null) => (
+    ipcRenderer.invoke(IpcChannels.DB_RECOMMENDATIONS, scope === null ? { action, data } : { action, data, scope })
+  ),
 
   handleSyncRecommendations: handler => {
     ipcRenderer.on(IpcChannels.SYNC_RECOMMENDATIONS, (_, data) => handler(data))
@@ -1053,17 +1064,21 @@ export default {
   /**
    * @param {number} action
    * @param {any} [data]
+   * @param {string | null} [scope]
+   * @param {boolean} [replacesState]
    */
-  dbPlaylists: (action, data) => {
-    return requestDatastore(IpcChannels.DB_PLAYLISTS, action, data)
+  dbPlaylists: (action, data, scope, replacesState) => {
+    return requestDatastore(IpcChannels.DB_PLAYLISTS, action, data, scope, replacesState)
   },
 
   /**
    * @param {number} action
    * @param {any} [data]
+   * @param {string | null} [scope]
+   * @param {boolean} [replacesState]
    */
-  dbSearchHistory: (action, data) => {
-    return requestDatastore(IpcChannels.DB_SEARCH_HISTORY, action, data)
+  dbSearchHistory: (action, data, scope, replacesState) => {
+    return requestDatastore(IpcChannels.DB_SEARCH_HISTORY, action, data, scope, replacesState)
   },
 
   /**
@@ -1443,26 +1458,26 @@ export default {
   },
 
   /**
-   * @param {(event: number, data: any) => void} handler
+   * @param {(event: number, data: any, scope: string | null) => void} handler
    */
   handleSyncHistory: (handler) => {
-    listenForSync(IpcChannels.SYNC_HISTORY, ({ event, data }) => handler(event, data))
+    listenForSync(IpcChannels.SYNC_HISTORY, ({ event, data, scope }) => handler(event, data, scope ?? null))
   },
 
   /**
-   * @param {(event: number, data: any) => void} handler
+   * @param {(event: number, data: any, scope: string | null) => void} handler
    */
   handleSyncWatchStats: (handler) => {
-    ipcRenderer.on(IpcChannels.SYNC_WATCH_STATS, (_, { event, data }) => {
-      handler(event, data)
+    ipcRenderer.on(IpcChannels.SYNC_WATCH_STATS, (_, { event, data, scope }) => {
+      handler(event, data, scope ?? null)
     })
   },
 
   /**
-   * @param {(event: number, data: any) => void} handler
+   * @param {(event: number, data: any, scope: string | null) => void} handler
    */
   handleSyncSearchHistory: (handler) => {
-    listenForSync(IpcChannels.SYNC_SEARCH_HISTORY, ({ event, data }) => handler(event, data))
+    listenForSync(IpcChannels.SYNC_SEARCH_HISTORY, ({ event, data, scope }) => handler(event, data, scope ?? null))
   },
 
   /**
@@ -1473,10 +1488,10 @@ export default {
   },
 
   /**
-   * @param {(event: number, data: any) => void} handler
+   * @param {(event: number, data: any, scope: string | null) => void} handler
    */
   handleSyncPlaylists: (handler) => {
-    listenForSync(IpcChannels.SYNC_PLAYLISTS, ({ event, data }) => handler(event, data))
+    listenForSync(IpcChannels.SYNC_PLAYLISTS, ({ event, data, scope }) => handler(event, data, scope ?? null))
   },
 
   /**

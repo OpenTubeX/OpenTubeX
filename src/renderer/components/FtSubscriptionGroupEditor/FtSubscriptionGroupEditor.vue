@@ -223,8 +223,8 @@ const channels = computed(() => {
     ? store.getters.getCurrentInvidiousInstanceUrl
     : null
 
-  // The all channels profile is always the first profile in the array
-  return store.getters.getProfileList[0].subscriptions.map(({ id, name, thumbnail, handle }) => ({
+  // Groups can hold any channel of the profiles that share subscriptions
+  return store.getters.getSubscriptionRootProfile.subscriptions.map(({ id, name, thumbnail, handle }) => ({
     id,
     name: name ?? id,
     handle: handle ?? null,

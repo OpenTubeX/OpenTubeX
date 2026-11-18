@@ -5,24 +5,42 @@ export { createWatchQueueState, watchQueueGetters, watchQueueMutations, PERSISTE
 
 const STORAGE_KEY = 'opentubex-watch-queue'
 
+/** @param {string | null} scope */
+function storageKey(scope) {
+  return scope === null ? STORAGE_KEY : `${STORAGE_KEY}:${scope}`
+}
+
+/** Switches the queue to that of a data scope, see `getDataScope` */
+let switchScope = async (_scope) => {}
+/** Deletes a separate profile's queue */
+let forgetScope = async (_scope) => {}
+
+export function forgetWatchQueueScope(scope) {
+  return forgetScope(scope)
+}
+
 export function persistWatchQueue(store, storage, sharedQueue) {
   if (!sharedQueue) {
     if (process.env.IS_ELECTRON) sharedQueue = window.ftElectron.watchQueue
     else if (!process.env.IS_CAPACITOR && typeof indexedDB !== 'undefined') sharedQueue = createBrowserWatchQueue()
   }
-  let items = []
-  try {
-    if (!sharedQueue) {
+  /** Each separate profile has its own queue */
+  let scope = null
+  const readStoredItems = () => {
+    try {
       storage ??= localStorage
-      items = JSON.parse(storage.getItem(STORAGE_KEY) ?? '[]')
+      return JSON.parse(storage.getItem(storageKey(scope)) ?? '[]')
+    } catch (error) {
+      console.warn('Could not restore the watch queue', error)
+      return []
     }
-  } catch (error) {
-    console.warn('Could not restore the watch queue', error)
   }
 
   let latest = { revision: -1, items: [] }
   const pending = []
   const applySharedQueue = (snapshot, settled = false) => {
+    // Other windows and tabs can show another profile's queue.
+    if ((snapshot.scope ?? null) !== scope) return
     if (snapshot.revision > latest.revision) latest = snapshot
     else if (!settled) return
     // Keep local edits visible until their transactions commit, including
@@ -42,7 +60,7 @@ export function persistWatchQueue(store, storage, sharedQueue) {
     }
   }
   const updateSharedQueue = request => {
-    const result = sharedQueue.update(request)
+    const result = sharedQueue.update(request, scope)
     if (result instanceof Promise) {
       pending.push(request)
       result.then(snapshot => {
@@ -51,20 +69,46 @@ export function persistWatchQueue(store, storage, sharedQueue) {
       }).catch(error => {
         const index = pending.indexOf(request)
         if (index !== -1) pending.splice(index, 1)
-        applySharedQueue(latest, true)
+        applySharedQueue({ ...latest, scope }, true)
         console.warn('Could not persist the watch queue', error)
       })
     } else applySharedQueue(result)
   }
-  if (sharedQueue) {
-    sharedQueue.onUpdated(applySharedQueue)
-    try {
-      updateSharedQueue({})
-    } catch (error) {
-      console.warn('Could not restore the watch queue', error)
+  const restore = () => {
+    if (sharedQueue) {
+      try {
+        updateSharedQueue({})
+      } catch (error) {
+        console.warn('Could not restore the watch queue', error)
+      }
+    } else {
+      store.commit('restoreWatchQueue', readStoredItems())
     }
-  } else {
-    store.commit('restoreWatchQueue', items)
+  }
+  if (sharedQueue) sharedQueue.onUpdated(applySharedQueue)
+  restore()
+
+  switchScope = async (nextScope) => {
+    if (nextScope === scope) return
+    scope = nextScope
+    latest = { revision: -1, items: [] }
+    // Requests made before the switch keep their own scope.
+    pending.length = 0
+    store.commit('setWatchQueue', [])
+    restore()
+  }
+  forgetScope = async (forgottenScope) => {
+    // Electron deletes the queue file with the profile's other data.
+    if (process.env.IS_ELECTRON) return
+    if (sharedQueue) await sharedQueue.forget?.(forgottenScope)
+    else {
+      try {
+        storage ??= localStorage
+        storage.removeItem(storageKey(forgottenScope))
+      } catch (error) {
+        console.warn('Could not delete the watch queue', error)
+      }
+    }
   }
 
   store.subscribe((mutation, state) => {
@@ -82,7 +126,7 @@ export function persistWatchQueue(store, storage, sharedQueue) {
         return
       }
       storage ??= localStorage
-      storage.setItem(STORAGE_KEY, JSON.stringify(state.watchQueue.items))
+      storage.setItem(storageKey(scope), JSON.stringify(state.watchQueue.items))
     } catch (error) {
       console.warn('Could not save the watch queue', error)
     }
@@ -92,5 +136,10 @@ export function persistWatchQueue(store, storage, sharedQueue) {
 export default {
   state: createWatchQueueState,
   getters: watchQueueGetters,
-  mutations: watchQueueMutations
+  mutations: watchQueueMutations,
+  actions: {
+    loadWatchQueueScope(_context, scope) {
+      return switchScope(scope)
+    },
+  },
 }

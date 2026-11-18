@@ -24,6 +24,7 @@
     <p class="importFormatsHint">
       {{ t('Settings.Data Settings.Backup description') }}
     </p>
+    <FtDataScopeNotice />
     <h4 class="groupTitle">
       {{ t('Settings.Data Settings.Import YouTube Takeout ZIP') }}
     </h4>
@@ -201,6 +202,12 @@
           :rows="backupPreview.filter(row => selectedBackupSections.includes(row.category))"
           :labels="Object.fromEntries(backupImportSections.map((value, index) => [value, backupImportLabels[index]]))"
         />
+        <p
+          v-if="backupProfileDataCount > 0"
+          class="importFormatsHint"
+        >
+          {{ t('Settings.Data Settings.Backup separate profile data', { count: backupProfileDataCount }, backupProfileDataCount) }}
+        </p>
         <FtButton
           v-if="selectedBackupSections.length > 0"
           :label="t('Settings.Data Settings.Import selected data')"
@@ -312,6 +319,7 @@ import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
 import FtSettingsSubpage from '../../FtSettingsSubpage/FtSettingsSubpage.vue'
 import ExportTypePrompt from '../../ExportTypePrompt/ExportTypePrompt.vue'
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
+import FtDataScopeNotice from '../../FtDataScopeNotice/FtDataScopeNotice.vue'
 import FtTooltip from '../../FtTooltip/FtTooltip.vue'
 import ScheduledBackupSettings from './ScheduledBackupSettings.vue'
 
@@ -352,10 +360,10 @@ import { parseSpeedByChannelValues, resolveSpeedByChannelValues } from '../../..
 import { previewBackupImport, previewTakeoutImport, parseTakeoutSubscriptions, parseTakeoutWatchHistory, parseTakeoutSearchHistory } from '../../../helpers/import-preview'
 import FtImportPreview from '../../FtImportPreview/FtImportPreview.vue'
 import FtLoader from '../../FtLoader/FtLoader.vue'
-import { BACKUP_SECTIONS } from '../../../helpers/unifiedBackup'
+import { BACKUP_SECTIONS, PROFILE_DATA_SECTIONS } from '../../../helpers/unifiedBackup'
 import { runBackgroundJob } from '../../../helpers/background-jobs'
 import { isExternalMediaHistoryId } from '../../../helpers/externalMediaHistory'
-import { compactAllDatastores, DBHistoryHandlers, DBPlaylistHandlers, DBProfileHandlers, DBSearchHistoryHandlers, DBWatchStatsHandlers } from '../../../../datastores/handlers/index'
+import { compactAllDatastores, DBHistoryHandlers, DBPlaylistHandlers, DBProfileHandlers, DBSearchHistoryHandlers, DBWatchStatsHandlers, withDataScope } from '../../../../datastores/handlers/index'
 import { forEachTakeoutImportEntry, forEachTakeoutPlaylistFile, listYouTubeTakeoutZipEntries } from '../../../helpers/youtube-takeout-zip'
 import {
   normalizeSearchHistoryEntry,
@@ -410,16 +418,83 @@ const backupLabels = computed(() => [
 const backupImportSections = computed(() => BACKUP_SECTIONS.filter(section => Object.hasOwn(backupData.value ?? {}, section)))
 const backupImportLabels = computed(() => backupImportSections.value.map(section => backupLabels.value[BACKUP_SECTIONS.indexOf(section)]))
 
+/** Separate profiles whose data a backup holds, see `profileData` in `createUnifiedBackup` */
+const backupProfileDataCount = computed(() => Object.keys(backupData.value?.profileData ?? {}).length)
+
+/**
+ * The saved data of `sections`, which a backup's sections merge with. Like a
+ * backup, it holds the shared data, whichever profile is active.
+ * @param {string[]} sections
+ */
 async function readImportState(sections) {
   const readers = {
     settings: () => deepCopy(transferableSettings.value),
     profiles: () => DBProfileHandlers.find(),
-    playlists: () => DBPlaylistHandlers.find(),
-    history: () => DBHistoryHandlers.find(),
-    searchHistory: () => DBSearchHistoryHandlers.find(),
-    watchStats: () => DBWatchStatsHandlers.find(),
+    playlists: () => withDataScope(null, () => DBPlaylistHandlers.find()),
+    history: () => withDataScope(null, () => DBHistoryHandlers.find()),
+    searchHistory: () => withDataScope(null, () => DBSearchHistoryHandlers.find()),
+    watchStats: () => withDataScope(null, () => DBWatchStatsHandlers.find()),
   }
-  return Object.fromEntries(await Promise.all(sections.map(async section => [section, await readers[section]()])))
+  return Object.fromEntries(await Promise.all(sections.filter(section => Object.hasOwn(readers, section))
+    .map(async section => [section, await readers[section]()])))
+}
+
+/**
+ * Reads the sections of a data scope for a backup.
+ * @param {string | null} scope
+ * @param {string[]} sections
+ */
+async function readBackupSections(scope, sections) {
+  const readers = {
+    // Playlists synced from YouTube stay on YouTube.
+    playlists: async () => (await withDataScope(scope, () => DBPlaylistHandlers.find())).filter(playlist => !playlist.youTube),
+    history: () => withDataScope(scope, () => DBHistoryHandlers.find()),
+    searchHistory: () => withDataScope(scope, () => DBSearchHistoryHandlers.find()),
+    watchStats: async () => {
+      const [records, adjustment] = await withDataScope(scope, () => Promise.all([
+        DBWatchStatsHandlers.find(), DBWatchStatsHandlers.getHistoricalAdjustment(),
+      ]))
+      return { records, adjustment }
+    },
+  }
+  return Promise.all(sections.filter(section => Object.hasOwn(readers, section))
+    .map(async section => [section, await readers[section]()]))
+}
+
+/**
+ * Merges a backup's playlists, history, search history and watch statistics
+ * into a data scope. The app shows the result when the scope is active.
+ * @param {string | null} scope
+ * @param {Set<string>} selected
+ * @param {object} data
+ */
+async function restoreBackupSections(scope, selected, data) {
+  const active = () => scope === store.getters.getActiveDataScope
+  const inScope = operation => withDataScope(scope, operation)
+  if (selected.has('playlists') && data.playlists) {
+    for (const playlist of data.playlists) await normalizeImportedPlaylistThumbnail(playlist)
+    if (await inScope(() => store.dispatch('mergePlaylistBackup', data.playlists)) !== true) {
+      throw new Error('Could not restore playlists')
+    }
+  }
+  if (selected.has('history') && data.history) {
+    if (active()) {
+      if (await store.dispatch('mergeHistoryBackup', data.history) !== true) throw new Error('Could not restore history')
+    } else {
+      await inScope(() => DBHistoryHandlers.mergeBackup(data.history))
+    }
+  }
+  if (selected.has('searchHistory') && data.searchHistory) {
+    if (active()) {
+      if (await store.dispatch('importSearchHistory', data.searchHistory) !== true) throw new Error('Could not restore search history')
+    } else {
+      await inScope(() => DBSearchHistoryHandlers.mergeImported(data.searchHistory))
+    }
+  }
+  if (selected.has('watchStats') && data.watchStats) {
+    await inScope(() => DBWatchStatsHandlers.mergeBackup(data.watchStats))
+    if (active()) await store.dispatch('grabWatchStats')
+  }
 }
 
 function openBackupExport() {
@@ -447,20 +522,19 @@ async function exportUnifiedBackup() {
           await Promise.all([DBHistoryHandlers.sent(), DBPlaylistHandlers.sent()])
           return new Blob([await window.ftElectron.createBackupArchive(selected, settings)], { type: 'application/zip' })
         }
-        const readers = {
-          settings: () => deepCopy(transferableSettings.value),
-          profiles: () => DBProfileHandlers.find(),
-          // Playlists synced from YouTube stay on YouTube.
-          playlists: async () => (await DBPlaylistHandlers.find()).filter(playlist => !playlist.youTube),
-          history: () => DBHistoryHandlers.find(),
-          searchHistory: () => DBSearchHistoryHandlers.find(),
-          watchStats: async () => {
-            const [records, adjustment] = await Promise.all([DBWatchStatsHandlers.find(), DBWatchStatsHandlers.getHistoricalAdjustment()])
-            return { records, adjustment }
-          },
+        const backup = Object.fromEntries(await readBackupSections(null, selected))
+        if (selected.includes('settings')) backup.settings = deepCopy(transferableSettings.value)
+        const dataSelected = PROFILE_DATA_SECTIONS.some(section => selected.includes(section))
+        const profiles = selected.includes('profiles') || dataSelected ? await DBProfileHandlers.find() : []
+        if (selected.includes('profiles')) backup.profiles = profiles
+        // A complete backup holds every profile's data.
+        const separateProfiles = dataSelected ? profiles.filter(profile => profile.separate === true) : []
+        if (separateProfiles.length > 0) {
+          backup.profileData = Object.fromEntries(await Promise.all(separateProfiles.map(async profile => (
+            [profile._id, Object.fromEntries(await readBackupSections(profile._id, selected))]
+          ))))
         }
-        const entries = await Promise.all(selected.map(async section => [section, await readers[section]()]))
-        return runBackgroundJob('createUnifiedBackup', Object.fromEntries(entries))
+        return runBackgroundJob('createUnifiedBackup', backup)
       },
       t('Settings.Data Settings.Complete backup'), 'application/zip', '.zip',
       t('Settings.Data Settings.Backup exported')
@@ -506,19 +580,13 @@ async function importUnifiedBackup() {
       for (const profile of data.profiles) await DBProfileHandlers.mergeBackup(profile)
       await store.dispatch('grabAllProfiles')
     }
-    if (selected.has('playlists')) {
-      for (const playlist of data.playlists) await normalizeImportedPlaylistThumbnail(playlist)
-      if (await store.dispatch('mergePlaylistBackup', data.playlists) !== true) throw new Error('Could not restore playlists')
-    }
-    if (selected.has('history') && await store.dispatch('mergeHistoryBackup', data.history) !== true) {
-      throw new Error('Could not restore history')
-    }
-    if (selected.has('searchHistory')) {
-      if (await store.dispatch('importSearchHistory', data.searchHistory) !== true) throw new Error('Could not restore search history')
-    }
-    if (selected.has('watchStats')) {
-      await DBWatchStatsHandlers.mergeBackup(data.watchStats)
-      await store.dispatch('grabWatchStats')
+    // The shared data, then each separate profile's, whichever profile is active.
+    await restoreBackupSections(null, selected, data)
+    for (const [profileId, profileData] of Object.entries(data.profileData ?? {})) {
+      // Its data needs the profile, which the backup or this device has.
+      if (store.getters.profileById(profileId)?.separate === true) {
+        await restoreBackupSections(profileId, selected, profileData)
+      }
     }
     if (selected.has('settings')) {
       const failure = settingsImportFailureMessage(await applyImportedSettings(data.settings, authorizedRulesWrite))
@@ -756,7 +824,10 @@ const subscriptionsExportOptions = computed(() => {
 })
 
 const profileList = computed(() => store.getters.getProfileList)
-const primaryProfile = computed(() => deepCopy(profileList.value[0]))
+// Imports and exports use the active profile's data: a separate profile's own
+// subscriptions, or those of the profiles that share theirs.
+const primaryProfile = computed(() => deepCopy(store.getters.getSubscriptionRootProfile))
+const dataScopeProfiles = computed(() => store.getters.getDataScopeProfiles)
 
 // #region subscriptions import
 
@@ -939,12 +1010,15 @@ async function importFreeTubeSubscriptions(profileRecords) {
     'subscriptions'
   ]
   const optionalKeys = [
-    'icon'
+    'icon',
+    'separate',
   ]
   const knownKeys = [...requiredKeys, ...optionalKeys]
+  // A separate profile imports every channel into itself.
+  const importsIntoSeparateProfile = store.getters.getActiveDataScope !== null
   // Each write merges with the saved profile, so changes made meanwhile stay.
   // Every profile is checked before the first write, so a bad one cannot leave the import half done.
-  const importedPrimaryProfile = { _id: MAIN_PROFILE_ID, subscriptions: [] }
+  const importedPrimaryProfile = { _id: primaryProfile.value._id, subscriptions: [] }
   let shouldUpdatePrimaryProfile = false
   /** @type {(() => Promise<boolean>)[]} */
   const profileWrites = []
@@ -975,11 +1049,28 @@ async function importFreeTubeSubscriptions(profileRecords) {
     } else {
       profileObject.subscriptions = channels
       const icon = Object.hasOwn(profileObject, 'icon') ? { icon: profileObject.icon } : {}
-      if (profileObject._id === MAIN_PROFILE_ID) {
+      const separate = profileObject.separate === true
+      delete profileObject.separate
+      if (separate && !importsIntoSeparateProfile) {
+        // Keeps its channels to itself, so they are not added to All Channels.
+        const existingProfile = profileList.value.find(profile => profile.separate === true && profile._id === profileObject._id) ??
+          profileList.value.find(profile => profile.separate === true && profile.name === profileObject.name)
+        if (existingProfile !== undefined) {
+          profileWrites.push(() => store.dispatch('mergeImportedProfile', { ...profileObject, _id: existingProfile._id }))
+        } else {
+          const newProfile = { ...profileObject, separate: true }
+          delete newProfile._id
+          profileWrites.push(() => store.dispatch('createProfile', newProfile))
+        }
+        return
+      }
+      if (importsIntoSeparateProfile) {
+        // Its name, colors and icon stay its own.
+      } else if (profileObject._id === MAIN_PROFILE_ID) {
         Object.assign(importedPrimaryProfile, icon)
       } else {
         const existingProfile = profileList.value.find((profile) => {
-          return profile._id !== MAIN_PROFILE_ID && profile.name === profileObject.name
+          return profile._id !== MAIN_PROFILE_ID && profile.separate !== true && profile.name === profileObject.name
         })
 
         if (existingProfile !== undefined) {
@@ -1005,11 +1096,11 @@ async function importFreeTubeSubscriptions(profileRecords) {
     }
   })
 
-  if (!shouldUpdatePrimaryProfile) {
+  if (!shouldUpdatePrimaryProfile && profileWrites.length === 0) {
     return
   }
 
-  profileWrites.push(() => store.dispatch('mergeImportedProfile', importedPrimaryProfile))
+  if (shouldUpdatePrimaryProfile) profileWrites.push(() => store.dispatch('mergeImportedProfile', importedPrimaryProfile))
   const results = await Promise.all(profileWrites.map(write => write()))
   if (results.some(result => result !== true)) {
     throw new Error('Could not import profiles')
@@ -1083,7 +1174,7 @@ async function addSubscriptionsToPrimaryProfile(subscriptions) {
   const channels = subscriptions.filter(channel => typeof channel.id === 'string' && checkYoutubeChannelId(channel.id))
   // Merged with the saved subscriptions, which another window may change meanwhile
   const profile = {
-    _id: MAIN_PROFILE_ID,
+    _id: primaryProfile.value._id,
     subscriptions: channels.map(({ id, name, thumbnail }) => ({ id, name, thumbnail })),
   }
   if (await store.dispatch('mergeImportedProfile', profile) !== true) {
@@ -1164,7 +1255,7 @@ function exportSubscriptions(option) {
 }
 
 async function exportFreeTubeSubscriptions() {
-  const subscriptionsDb = profileList.value.map((profile) => {
+  const subscriptionsDb = dataScopeProfiles.value.map((profile) => {
     return JSON.stringify(profile)
   }).join('\n') + '\n'
   const dateStr = getTodayDateStrLocalTimezone()
@@ -1184,7 +1275,7 @@ async function exportYouTubeSubscriptions() {
   const dateStr = getTodayDateStrLocalTimezone()
   const exportFileName = 'youtube-subscriptions-' + dateStr + '.json'
 
-  const subscriptionsObject = profileList.value[0].subscriptions.map((channel) => {
+  const subscriptionsObject = primaryProfile.value.subscriptions.map((channel) => {
     const object = {
       contentDetails: {
         activityType: 'all',
@@ -1233,7 +1324,7 @@ async function exportYouTubeSubscriptions() {
 async function exportOpmlYouTubeSubscriptions() {
   const dateStr = getTodayDateStrLocalTimezone()
   const exportFileName = 'youtube-subscriptions-' + dateStr + '.opml'
-  const feeds = profileList.value[0].subscriptions.map(channel => ({
+  const feeds = primaryProfile.value.subscriptions.map(channel => ({
     xmlUrl: `https://www.youtube.com/feeds/videos.xml?channel_id=${channel.id}`,
     title: channel.name,
   }))
@@ -1253,7 +1344,7 @@ async function exportCsvYouTubeSubscriptions() {
   const exportFileName = 'youtube-subscriptions-' + dateStr + '.csv'
 
   let exportText = 'Channel ID,Channel URL,Channel title\n'
-  profileList.value[0].subscriptions.forEach((channel) => {
+  primaryProfile.value.subscriptions.forEach((channel) => {
     const channelUrl = `https://www.youtube.com/channel/${channel.id}`
 
     // always have channel name quoted to simplify things
@@ -1282,7 +1373,7 @@ async function exportNewPipeSubscriptions() {
     subscriptions: []
   }
 
-  profileList.value[0].subscriptions.forEach((channel) => {
+  primaryProfile.value.subscriptions.forEach((channel) => {
     const channelUrl = `https://www.youtube.com/channel/${channel.id}`
     const subscription = {
       service_id: 0,

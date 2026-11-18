@@ -752,6 +752,9 @@ test.describe('OpenTubeX sync server', () => {
         : []),
       ...(capabilities.notification_dismissals === 1
         ? [{ collection: 'notificationDismissals', revision: 1, payload: null }]
+        : []),
+      ...(capabilities.separate_profiles === 1
+        ? [{ collection: 'separateProfiles', revision: 1, payload: null }]
         : [])
     ]
     expect(encryptedUploadBodies).toHaveLength(expectedUploads.length)
@@ -934,6 +937,120 @@ test.describe('OpenTubeX sync server', () => {
 
       await sync(other.page)
       expect(await watchProgress(other.page)).toBe(150)
+    } finally {
+      const token = await page.evaluate(() => window.$store.getters.getSyncServerToken)
+      if (token) {
+        await fetch(`${syncServerUrl}/v1/account/delete`, {
+          method: 'DELETE',
+          headers: { Authorization: token, 'Content-Type': 'application/json', 'X-Forwarded-For': rateLimitClient(testInfo) },
+          body: JSON.stringify({ password })
+        })
+      }
+      await other?.electronApp.close()
+      await rm(otherUserData, { recursive: true, force: true })
+    }
+  })
+
+  test('keeps the library of a separate profile in its own collections', async ({ page }, testInfo) => {
+    const capabilities = await getSyncCapabilities()
+    test.skip(capabilities.encrypted_sync !== 1 || capabilities.separate_profiles !== 1, 'Server with separate profiles required')
+    const username = `opentubex-separate-${randomUUID()}`
+    const password = 'local-test-password'
+    const separateId = 'separate-profile'
+    const scope = Buffer.from(separateId).toString('hex')
+    const separateVideoId = 'jNQXAC9IVRw'
+    const otherUserData = await createUserDataDir({ settings: { syncServerEnabled: true } })
+    let other
+
+    async function configure(clientPage) {
+      await clientPage.evaluate(async () => {
+        const store = window.$store
+        await store.dispatch('updateSyncServerAutoSync', false)
+        for (const collection of ['Sessions', 'Settings', 'WatchStats', 'LiveReminders', 'Notifications']) {
+          await store.dispatch(`updateSyncServerSync${collection}`, false)
+        }
+      })
+      await clientPage.route('**/account/**', route => route.continue({
+        headers: { ...route.request().headers(), 'X-Forwarded-For': rateLimitClient(testInfo) }
+      }))
+    }
+
+    async function connect(clientPage, mode) {
+      const section = await goToSettingsSection(clientPage, 'sync')
+      await section.getByLabel('Sync server URL').fill(syncServerUrl)
+      await section.getByLabel('Username').fill(username)
+      await section.getByLabel('Password', { exact: true }).fill(password)
+      await section.getByLabel(/Privacy passphrase/).fill('local-test-privacy-passphrase')
+      await section.getByRole('button', { name: mode === 'register' ? 'Register' : /^Log in$/i }).click()
+      await expect(section.getByText(`Connected as ${username}`)).toBeVisible()
+      await expect(section.getByText(/Last synced:/)).toBeVisible()
+      await expect(section.locator('.syncProgress')).toBeHidden()
+    }
+
+    async function switchToSeparateProfile(clientPage) {
+      await clientPage.evaluate(id => window.$store.dispatch('updateActiveProfile', id), separateId)
+      await expect.poll(() => clientPage.evaluate(() => window.$store.getters.getActiveDataScope)).toBe(separateId)
+    }
+
+    const historyIds = clientPage => clientPage.evaluate(() => window.$store.getters.getHistoryCacheSorted.map(entry => entry.videoId))
+
+    async function readCollection(collection) {
+      const [token, privacyKey] = await page.evaluate(() => [window.$store.getters.getSyncServerToken, window.$store.state.settings.syncServerPrivacyKey])
+      const response = await fetch(`${syncServerUrl}/v1/encrypted_sync/${collection}?since=0`, { headers: { Authorization: token } })
+      expect(response.ok).toBe(true)
+      const { payload } = await response.json()
+      return payload ? decryptSyncDocument(payload, privacyKey) : null
+    }
+
+    try {
+      other = await launchApp(otherUserData)
+      await configure(page)
+      await configure(other.page)
+      await page.evaluate(async ({ separateId, channelId }) => {
+        await window.$store.dispatch('createProfile', {
+          _id: separateId,
+          name: 'Separate',
+          bgColor: '#336699',
+          textColor: '#FFFFFF',
+          separate: true,
+          subscriptions: [{ id: channelId, name: 'Rick Astley', thumbnail: '' }],
+        })
+      }, { separateId, channelId })
+      await switchToSeparateProfile(page)
+      await expect.poll(() => historyIds(page)).toEqual([])
+      await page.evaluate(async videoId => {
+        await window.$store.dispatch('updateHistory', {
+          videoId,
+          title: 'Separate video',
+          author: 'Separate channel',
+          authorId: 'UC4QobU6STFB0P71PMvOGN5A',
+          published: Date.now() - 60000,
+          description: '',
+          lengthSeconds: 19,
+          watchProgress: 5,
+          isWatched: false,
+          timeWatched: Date.now(),
+          isLive: false,
+          type: 'video',
+        })
+      }, separateVideoId)
+
+      // The first sync merges the data of the active separate profile.
+      await connect(page, 'register')
+      expect((await readCollection(`history.${scope}`)).map(entry => entry.video.id)).toEqual([separateVideoId])
+      expect((await readCollection(`subscriptions.${scope}`)).map(channel => channel.id)).toEqual([channelId])
+      expect(JSON.stringify(await readCollection('history') ?? [])).not.toContain(separateVideoId)
+      expect(JSON.stringify(await readCollection('profiles') ?? [])).not.toContain(separateId)
+      expect((await readCollection('separateProfiles')).map(entry => entry.id)).toEqual([separateId])
+
+      // Another device gets the profile, but its library only while the profile is active.
+      await connect(other.page, 'login')
+      expect(await other.page.evaluate(id => window.$store.getters.getProfileList.find(profile => profile._id === id)?.separate, separateId)).toBe(true)
+      expect(await historyIds(other.page)).not.toContain(separateVideoId)
+      await switchToSeparateProfile(other.page)
+      await other.page.evaluate(() => window.$store.dispatch('syncWithSyncServer'))
+      await expect.poll(() => historyIds(other.page)).toEqual([separateVideoId])
+      expect(await other.page.evaluate(id => window.$store.getters.getProfileList.find(profile => profile._id === id).subscriptions.map(channel => channel.id), separateId)).toEqual([channelId])
     } finally {
       const token = await page.evaluate(() => window.$store.getters.getSyncServerToken)
       if (token) {

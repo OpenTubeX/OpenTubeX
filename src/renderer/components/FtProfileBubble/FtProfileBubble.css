@@ -25,6 +25,12 @@
   font-size: 35px;
 }
 
+.separateProfileIcon {
+  margin-inline-start: 4px;
+  color: var(--tertiary-text-color);
+  font-size: 0.85em;
+}
+
 .profileName {
   color: var(--primary-text-color);
   font-size: 14px;

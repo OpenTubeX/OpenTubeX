@@ -1426,7 +1426,7 @@ function handleDeletePlaylistPromptAnswer(option) {
 function enableQuickBookmarkForThisPlaylist() {
   const currentQuickBookmarkTargetPlaylist = quickBookmarkPlaylist.value
 
-  store.dispatch('updateQuickBookmarkTargetPlaylistId', props.id)
+  store.dispatch('updateActiveQuickBookmarkTarget', props.id)
   if (currentQuickBookmarkTargetPlaylist != null) {
     showToast({
       message: t('User Playlists.SinglePlaylistView.Toast["This playlist is now used for quick bookmark instead of {oldPlaylistName}. Click here to undo"]', {
@@ -1434,7 +1434,7 @@ function enableQuickBookmarkForThisPlaylist() {
       }),
       time: 5000,
       action: () => {
-        store.dispatch('updateQuickBookmarkTargetPlaylistId', currentQuickBookmarkTargetPlaylist._id)
+        store.dispatch('updateActiveQuickBookmarkTarget', currentQuickBookmarkTargetPlaylist._id)
         showToast({
           message: t('User Playlists.SinglePlaylistView.Toast["Reverted to use {oldPlaylistName} for quick bookmark"]', {
             oldPlaylistName: currentQuickBookmarkTargetPlaylist.playlistName

@@ -1,6 +1,7 @@
 import { DBActions } from '../../constants'
 import { newestUniqueHistoryRecords } from '../../history'
 import { runBackgroundJob } from '../../renderer/helpers/background-jobs.js'
+import { getDataScope, withDataScope } from './dataScope.js'
 
 /**
  * Payloads can contain Vue reactivity proxies (e.g. objects taken from Vuex
@@ -21,16 +22,18 @@ const LARGE_PLAYLIST_VIDEO_COUNT = 1000
 
 /**
  * Sends requests in call order, even while an earlier large payload is still
- * being serialized in a worker, so it cannot overwrite a later write.
- * @param {(action: string, data: unknown) => Promise<unknown>} send
+ * being serialized in a worker, so it cannot overwrite a later write. Each
+ * request keeps the data scope that was active when it was made.
+ * @param {(action: string, data: unknown, scope: string | null, replacesState: boolean) => Promise<unknown>} send
  */
 function createOrderedSender(send) {
   let previous = Promise.resolve()
-  const sender = (action, data, { inWorker = false, beforeSend } = {}) => {
+  const sender = (action, data, { inWorker = false, beforeSend, replacesState = false } = {}) => {
+    const scope = getDataScope()
     const payload = inWorker ? runBackgroundJob('stringify', { value: data }) : toPlain(data)
     const sent = Promise.all([previous, payload]).then(([, value]) => {
       beforeSend?.()
-      return { response: send(action, value) }
+      return { response: send(action, value, scope, replacesState) }
     })
     previous = sent.then(() => {}, () => {})
     return sent.then(({ response }) => response)
@@ -41,9 +44,11 @@ function createOrderedSender(send) {
 }
 
 const dbSettings = (action, data) => window.ftElectron.dbSettings(action, toPlain(data))
-const dbHistory = createOrderedSender((action, data) => window.ftElectron.dbHistory(action, data))
-const dbWatchStats = (action, data) => window.ftElectron.dbWatchStats(action, toPlain(data))
-const dbRecommendations = (action, data) => window.ftElectron.dbRecommendations(action, toPlain(data))
+const dbHistory = createOrderedSender((action, data, scope, replacesState) => (
+  window.ftElectron.dbHistory(action, data, scope, replacesState)
+))
+const dbWatchStats = (action, data) => window.ftElectron.dbWatchStats(action, toPlain(data), getDataScope())
+const dbRecommendations = (action, data) => window.ftElectron.dbRecommendations(action, toPlain(data), getDataScope())
 
 export const recommendations = {
   find: () => dbRecommendations(DBActions.GENERAL.FIND),
@@ -52,8 +57,12 @@ export const recommendations = {
   reset: () => dbRecommendations(DBActions.GENERAL.DELETE_ALL),
 }
 const dbProfiles = (action, data) => window.ftElectron.dbProfiles(action, toPlain(data))
-const dbPlaylists = createOrderedSender((action, data) => window.ftElectron.dbPlaylists(action, data))
-const dbSearchHistory = (action, data) => window.ftElectron.dbSearchHistory(action, toPlain(data))
+const dbPlaylists = createOrderedSender((action, data, scope, replacesState) => (
+  window.ftElectron.dbPlaylists(action, data, scope, replacesState)
+))
+const dbSearchHistory = (action, data, replacesState = false) => (
+  window.ftElectron.dbSearchHistory(action, toPlain(data), getDataScope(), replacesState)
+)
 const dbSubscriptionCache = (action, data) => window.ftElectron.dbSubscriptionCache(action, toPlain(data))
 
 class Settings {
@@ -96,14 +105,16 @@ class History {
     return dbHistory(DBActions.HISTORY.UPDATE_SUBSCRIPTION_STATE, update)
   }
 
-  static async find() {
+  /** @param {boolean} [replacesState] whether the records replace the ones the app shows */
+  static async find(replacesState = false) {
     // The main process sends each record's stored JSON text. Strings cross IPC
     // and the context bridge far faster than the records' object graph.
-    const stored = await dbHistory(DBActions.GENERAL.FIND)
+    const scope = getDataScope()
+    const stored = await dbHistory(DBActions.GENERAL.FIND, undefined, { replacesState })
     const { records, duplicateIds } = newestUniqueHistoryRecords(stored.map(record => JSON.parse(record)))
     // The main process selects and removes duplicates in one queued step. Its
     // records replace these, which a write in between could have outdated.
-    if (duplicateIds.length > 0) return dbHistory(DBActions.HISTORY.REMOVE_DUPLICATES)
+    if (duplicateIds.length > 0) return withDataScope(scope, () => dbHistory(DBActions.HISTORY.REMOVE_DUPLICATES))
     return records
   }
 
@@ -265,6 +276,10 @@ class Profiles {
     return dbProfiles(DBActions.PROFILES.MERGE_IMPORTED, profile)
   }
 
+  static updatePlaylistBookmarks(profileId, playlistBookmarks) {
+    return dbProfiles(DBActions.PROFILES.UPDATE_PLAYLIST_BOOKMARKS, { profileId, playlistBookmarks })
+  }
+
   static delete(id) {
     return dbProfiles(DBActions.GENERAL.DELETE, id)
   }
@@ -287,9 +302,10 @@ class Playlists {
     return dbPlaylists(DBActions.GENERAL.CREATE, playlists)
   }
 
-  static async find() {
+  /** @param {boolean} [replacesState] whether the playlists replace the ones the app shows */
+  static async find(replacesState = false) {
     // The main process sends each playlist as JSON text, see History.find.
-    return (await dbPlaylists(DBActions.GENERAL.FIND)).map(playlist => JSON.parse(playlist))
+    return (await dbPlaylists(DBActions.GENERAL.FIND, undefined, { replacesState })).map(playlist => JSON.parse(playlist))
   }
 
   static sent() {
@@ -364,8 +380,9 @@ class Playlists {
 }
 
 class SearchHistory {
-  static find() {
-    return dbSearchHistory(DBActions.GENERAL.FIND)
+  /** @param {boolean} [replacesState] whether the searches replace the ones the app shows */
+  static find(replacesState = false) {
+    return dbSearchHistory(DBActions.GENERAL.FIND, undefined, replacesState)
   }
 
   static upsert(searchHistoryEntry) {

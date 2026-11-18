@@ -50,7 +50,7 @@ const yatteeChannelNames = new Map()
  */
 function getYatteeChannelName(channelId) {
   return yatteeChannelNames.get(channelId) ??
-    store.getters.getProfileList[0]?.subscriptions.find(channel => channel.id === channelId)?.name ?? ''
+    store.getters.getSubscribedChannelsById.get(channelId)?.name ?? ''
 }
 
 /**

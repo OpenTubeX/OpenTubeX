@@ -96,14 +96,19 @@ const getters = {
 }
 
 /**
- * The channels of the stored main profile, or `null` if it can't be read.
+ * The channels of the stored main profile and separate profiles, or `null`
+ * if they can't be read.
  * @returns {Promise<string[] | null>}
  */
 async function getStoredSubscribedChannelIds() {
   try {
     const profiles = await DBProfileHandlers.find()
-    const mainProfile = Array.isArray(profiles) ? profiles.find(profile => profile._id === MAIN_PROFILE_ID) : null
-    return Array.isArray(mainProfile?.subscriptions) ? mainProfile.subscriptions.map(channel => channel.id) : null
+    if (!Array.isArray(profiles)) return null
+    const mainProfile = profiles.find(profile => profile._id === MAIN_PROFILE_ID)
+    if (!Array.isArray(mainProfile?.subscriptions)) return null
+    return profiles
+      .filter(profile => profile === mainProfile || (profile.separate === true && Array.isArray(profile.subscriptions)))
+      .flatMap(profile => profile.subscriptions.map(channel => channel.id))
   } catch (error) {
     console.error(error)
     return null
@@ -121,7 +126,8 @@ const actions = {
       const communityPosts = {}
 
       const toBeRemovedChannelIds = []
-      let subscribedChannelIdSet = rootGetters.getSubscribedChannelIdSet
+      // Separate profiles' feeds stay cached while another profile is active.
+      let subscribedChannelIdSet = new Set(rootGetters.getAllRootSubscriptions.map(channel => channel.id))
       // Without loaded profiles every channel looks unsubscribed, so keep the data.
       let canRemoveUnsubscribed = rootState.profiles.profilesLoaded
       if (canRemoveUnsubscribed && payload.some(entry => !subscribedChannelIdSet.has(entry._id))) {

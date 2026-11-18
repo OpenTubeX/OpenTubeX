@@ -299,10 +299,20 @@ const profileDropdownAnchor = `--subscription-${id}`
  * @property {boolean|undefined} subscriptions[].showMembersOnly
  */
 
-/** @type {import('vue').ComputedRef<Profile[]>} */
+/**
+ * The profiles that share subscriptions with the active one. A separate
+ * profile keeps its subscriptions to itself.
+ * @type {import('vue').ComputedRef<Profile[]>}
+ */
 const profileList = computed(() => {
-  return store.getters.getProfileList
+  return store.getters.getDataScopeProfiles
 })
+
+/** The profile that every subscription of the other profiles in the list is also in */
+const rootProfileId = computed(() => store.getters.getSubscriptionRootProfile._id)
+
+/** Only the shared subscriptions are mirrored to the YouTube account, which syncs into All Channels */
+const mirrorsYouTubeAccount = computed(() => rootProfileId.value === MAIN_PROFILE_ID)
 
 /** @type {import('vue').ComputedRef<Profile>} */
 const activeProfile = computed(() => {
@@ -316,7 +326,7 @@ const subscribedProfileIdsAtOpen = shallowRef(new Set())
 
 const profileDisplayList = computed(() => [
   profileList.value[0],
-  ...(activeProfile.value._id !== MAIN_PROFILE_ID ? [activeProfile.value] : []),
+  ...(activeProfile.value._id !== rootProfileId.value ? [activeProfile.value] : []),
   ...profileList.value.filter((profile, i) => i !== 0 && !isActiveProfile(profile) && subscribedProfileIdsAtOpen.value.has(profile._id)),
   ...profileList.value.filter((profile, i) => i !== 0 && !isActiveProfile(profile) && !subscribedProfileIdsAtOpen.value.has(profile._id))
 ])
@@ -719,13 +729,13 @@ function handleSubscription(profile) {
   } else {
     const profileIds = [profile._id]
 
-    if (profile._id !== MAIN_PROFILE_ID) {
+    if (profile._id !== rootProfileId.value) {
       const primaryProfile = profileList.value.find(prof => {
-        return prof._id === MAIN_PROFILE_ID
+        return prof._id === rootProfileId.value
       })
 
       if (!isProfileSubscribed(primaryProfile)) {
-        profileIds.push(MAIN_PROFILE_ID)
+        profileIds.push(rootProfileId.value)
       }
     }
 
@@ -752,13 +762,13 @@ function handleSubscription(profile) {
       profileIds
     })
     // Profiles that already had the channel saved it without a handle.
-    if (handle !== null && savedHandle === undefined && !profileIds.includes(MAIN_PROFILE_ID)) {
+    if (handle !== null && savedHandle === undefined && !profileIds.includes(rootProfileId.value)) {
       store.dispatch('updateSubscriptionDetails', { channelId: props.channelId, channelHandle: handle })
     }
 
     showToast({ message: t('Channel.Added channel to your subscriptions'), icon: ['fas', 'subscriptions'] })
     // Only the first profile to subscribe adds the channel to All Channels.
-    if (profileIds.includes(MAIN_PROFILE_ID)) {
+    if (mirrorsYouTubeAccount.value && profileIds.includes(MAIN_PROFILE_ID)) {
       mirrorYouTubeSubscription(props.channelId, true)
     }
     emit('subscribed')
@@ -946,12 +956,13 @@ function handleUnsubscribeConfirmation(value) {
 function handleUnsubscription(profile) {
   const profileIds = [profile._id]
 
-  if (profile._id === MAIN_PROFILE_ID) {
+  const isRootProfile = profile._id === rootProfileId.value
+  if (isRootProfile) {
     // Check if a subscription exists in a different profile.
     // Remove from there as well.
 
     profileList.value.forEach((profileInList) => {
-      if (profileInList._id === MAIN_PROFILE_ID) {
+      if (profileInList._id === rootProfileId.value) {
         return
       }
 
@@ -963,13 +974,13 @@ function handleUnsubscription(profile) {
 
   store.dispatch('removeChannelFromProfiles', { channelIds: [props.channelId], profileIds })
   // Removing a channel from All Channels unsubscribes every profile.
-  if (profile._id === MAIN_PROFILE_ID) {
+  if (mirrorsYouTubeAccount.value && profile._id === MAIN_PROFILE_ID) {
     mirrorYouTubeSubscription(props.channelId, false)
   }
 
   showToast({ message: t('Channel.Channel has been removed from your subscriptions'), icon: ['fas', 'trash'] })
 
-  if (profile._id === MAIN_PROFILE_ID && profileIds.length > 1) {
+  if (isRootProfile && profileIds.length > 1) {
     showToast({
       message: t('Channel.Removed subscription from {count} other channel(s)', { count: profileIds.length - 1 }, profileIds.length - 1),
       icon: ['fas', 'trash'],

@@ -1364,6 +1364,7 @@ Settings:
     Paused Interface Hide Delay: 一時停止中のインターフェースを隠すまでの時間
     Blur Blocked Items: ブロックした項目を非表示にせずぼかす
   Data Settings:
+    Backup separate profile data: "このバックアップには、独立した {count} 件のプロフィールのデータも含まれており、それぞれのプロフィールに復元されます。"
     Subscription cache file: "このファイルには登録チャンネルの動画のキャッシュだけが含まれ、チャンネル自体は含まれません。代わりに profiles.db または登録チャンネルのエクスポートを選択してください。"
     Settings could not be imported: "設定をインポートできませんでした"
     Some settings could not be imported: "一部の設定をインポートできませんでした（{total} 件中 {failed} 件が失敗）"
@@ -1683,6 +1684,13 @@ About:
   Email: メール
   Show tutorial: チュートリアルを表示
 Profile:
+  Keep Data Separate: "データを分けて保持"
+  Keep Data Separate Tooltip: "このプロフィールに、独自の登録チャンネル、視聴履歴、再生リスト、検索履歴、視聴統計、キューを持たせます。他のプロフィールからは見えず、このプロフィールからも他のプロフィールのデータは見えません。プロフィールの作成後に変更することはできません。"
+  Separate Profile: "独立したプロフィール"
+  Separate Profile Note: "このプロフィールは、登録チャンネル、履歴、再生リストを他のプロフィールとは別に保持します。"
+  Separate Profile Deletion Warning: "このプロフィールの登録チャンネル、視聴履歴、再生リスト、検索履歴、視聴統計、キューも削除されます。"
+  Separate Data Notice: "{profile} はデータを分けて保持しているため、以下のインポートとエクスポートでは、このプロフィールの登録チャンネル、履歴、再生リスト、検索履歴のみが対象になります。"
+  Separate Data Storage Notice: "{profile} はデータを分けて保持しています。以下のボタンで削除されるのはこのプロフィールのデータのみですが、サイズにはすべてのプロフィールのデータが含まれます。"
   Customization: カスタマイズ
   Manage Profile Subscriptions: プロフィールの登録チャンネルを管理
   Icon Names:

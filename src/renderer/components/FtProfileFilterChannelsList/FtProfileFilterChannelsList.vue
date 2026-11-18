@@ -255,7 +255,8 @@ watch(profileList, fillProfileList, { deep: 2 })
 watch(() => props.profile, fillProfileList)
 
 function fillProfileList() {
-  const profiles = profileList.value.filter((profile) => profile._id !== props.profile._id)
+  // A separate profile's channels stay its own, so they can't be added to the others.
+  const profiles = profileList.value.filter((profile) => profile._id !== props.profile._id && profile.separate !== true)
 
   profileIdList.value = profiles.map((profile) => profile._id)
   profileNameList.value = profiles.map(translateProfileName)

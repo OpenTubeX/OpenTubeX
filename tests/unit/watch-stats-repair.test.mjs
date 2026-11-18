@@ -5,6 +5,7 @@ import { compileFunction } from 'node:vm'
 import { decryptSyncDocument, encryptSyncDocument, readSyncCollection } from '../../src/renderer/helpers/sync-server-privacy.js'
 import { createWatchStatsHelpers } from '../helpers/sync-watch-stats.mjs'
 import { areJsonValuesEqual } from '../../src/renderer/helpers/jsonValues.js'
+import { readScopedSnapshot, scopedSyncCollection, syncScopeKey, writeScopedSnapshot } from '../../src/renderer/helpers/sync-data-scope.js'
 
 const helpers = createWatchStatsHelpers()
 const storeSource = readFileSync(new URL('../../src/renderer/store/modules/sync-server.js', import.meta.url), 'utf8')
@@ -86,11 +87,17 @@ async function fixture({ sourceChanged = false, localChanged = false, conflict =
     releaseSyncClient: () => {},
     collectionCache: { put: () => {} },
     parseSnapshot: JSON.parse,
-    DBWatchStatsHandlers: { find: async () => records }
+    DBWatchStatsHandlers: { find: async () => records },
+    shownDataScope: () => null,
+    syncScopeKey,
+    scopedSyncCollection,
+    readScopedSnapshot,
+    writeScopedSnapshot,
   }
   const actions = compileFunction(`return ({${actionSource}})`, Object.keys(bindings))(...Object.values(bindings))
   const context = {
     rootState: { settings },
+    rootGetters: {},
     commit(name, value) {
       if (name === 'setSyncedWatchStats') visible = value
     },

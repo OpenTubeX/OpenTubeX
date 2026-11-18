@@ -1431,6 +1431,7 @@ Settings:
     Hide Channel Shows: چینل کا ”شوز“ ٹیب چھپائیں
     Blur Blocked Items: بلاک شدہ آئٹمز کو چھپانے کے بجائے دھندلا کریں
   Data Settings:
+    Backup separate profile data: "اس بیک اپ میں {count} الگ پروفائل کا ڈیٹا بھی شامل ہے، جو اسی پروفائل میں بحال کیا جائے گا۔ | اس بیک اپ میں {count} الگ پروفائلز کا ڈیٹا بھی شامل ہے، جو انہی پروفائلز میں بحال کیا جائے گا۔"
     Subscription cache file: "یہ فائل صرف آپ کی سبسکرپشنز کی ویڈیوز کو کیش کرتی ہے، چینلز کو نہیں۔ اس کے بجائے profiles.db یا سبسکرپشنز کی ایکسپورٹ منتخب کریں۔"
     Settings could not be imported: "ترتیبات درآمد نہیں کی جا سکیں"
     Some settings could not be imported: "تمام ترتیبات درآمد نہیں کی جا سکیں ({total} میں سے {failed} ناکام)"
@@ -1772,6 +1773,13 @@ About:
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX کو {creditsPageLink} نے ممکن بنایا ہے
   Show tutorial: ٹیوٹوریل دکھائیں
 Profile:
+  Keep Data Separate: "ڈیٹا الگ رکھیں"
+  Keep Data Separate Tooltip: "اس پروفائل کو اس کی اپنی سبسکرپشنز، دیکھنے کی ہسٹری، پلے لسٹس، سرچ ہسٹری، دیکھنے کے اعداد و شمار اور قطار دیتا ہے۔ آپ کے دوسرے پروفائلز انہیں نہیں دیکھتے، اور یہ پروفائل ان کا ڈیٹا نہیں دیکھتا۔ پروفائل بنانے کے بعد آپ اسے تبدیل نہیں کر سکتے۔"
+  Separate Profile: "الگ پروفائل"
+  Separate Profile Note: "یہ پروفائل اپنی سبسکرپشنز، ہسٹری اور پلے لسٹس کو آپ کے دوسرے پروفائلز سے الگ رکھتا ہے۔"
+  Separate Profile Deletion Warning: "اس کی سبسکرپشنز، دیکھنے کی ہسٹری، پلے لسٹس، سرچ ہسٹری، دیکھنے کے اعداد و شمار اور قطار بھی حذف ہو جائیں گی۔"
+  Separate Data Notice: "{profile} اپنا ڈیٹا الگ رکھتا ہے، اس لیے نیچے درآمد اور برآمد صرف اس کی سبسکرپشنز، ہسٹری، پلے لسٹس اور سرچ ہسٹری استعمال کرتے ہیں۔"
+  Separate Data Storage Notice: "{profile} اپنا ڈیٹا الگ رکھتا ہے۔ نیچے دیے گئے بٹن صرف اس کا ڈیٹا حذف کرتے ہیں، جبکہ سائز میں تمام پروفائلز کا ڈیٹا شامل ہے۔"
   Customization: حسب ضرورت
   Manage Profile Subscriptions: پروفائل سبسکرپشنز کا انتظام کریں
   Icon Names:

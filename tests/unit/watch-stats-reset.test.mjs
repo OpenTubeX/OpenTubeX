@@ -5,9 +5,9 @@ import { compileFunction } from 'node:vm'
 
 const source = readFileSync(new URL('../../src/renderer/store/modules/watch-stats.js', import.meta.url), 'utf8')
 const loadStore = compileFunction(source.replace(/^import .*\n/gm, '').replace('export default', 'return'),
-  ['DBWatchStatsHandlers', 'createWatchStatsReset', 'console'])
+  ['DBWatchStatsHandlers', 'getDataScope', 'createWatchStatsReset', 'console'])
 
-function fixture({ saveFails = false, deleteFails = false } = {}) {
+function fixture({ saveFails = false, deleteFails = false, dataScope = null } = {}) {
   let deleted = false
   const writes = []
   const previous = { id: 'previous', at: 100 }
@@ -20,7 +20,7 @@ function fixture({ saveFails = false, deleteFails = false } = {}) {
       if (deleteFails) throw new Error('Delete failed')
       deleted = true
     }
-  }, (_devices, _deviceId, at) => {
+  }, () => dataScope, (_devices, _deviceId, at) => {
     resetTimes.push(at)
     return reset
   }, { error: () => {} })
@@ -75,7 +75,7 @@ test('watch-time writes report whether the datastore saved them', async () => {
   const commits = []
   const store = loadStore({
     addWatchTime: async () => { if (fails) throw new Error('Write failed') }
-  }, () => null, { error: () => {} })
+  }, () => null, () => null, { error: () => {} })
   const context = { commit: (name, value) => commits.push([name, value]) }
   const payload = { date: '2026-10-20', seconds: 3 }
   assert.equal(await store.actions.recordWatchTime(context, payload), false)
@@ -83,4 +83,12 @@ test('watch-time writes report whether the datastore saved them', async () => {
   fails = false
   assert.equal(await store.actions.recordWatchTime(context, payload), true)
   assert.deepEqual(commits, [['addWatchTime', payload]])
+})
+
+test('a separate profile clears its statistics without changing the shared reset', async () => {
+  const f = fixture({ dataScope: 'separate' })
+  assert.equal(await f.run(), true)
+  assert.equal(f.deleted(), true)
+  assert.equal(f.settings.syncServerWatchStatsReset, f.previous)
+  assert.deepEqual(f.resetTimes, [])
 })

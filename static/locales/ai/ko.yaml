@@ -1590,6 +1590,7 @@ Settings:
     Remove: 제거
     Blur Blocked Items: 차단된 항목을 숨기지 않고 흐리게 표시
   Data Settings:
+    Backup separate profile data: "이 백업에는 독립 프로필 {count}개의 데이터도 포함되어 있으며, 해당 프로필로 복원됩니다."
     Subscription cache file: "이 파일에는 구독한 채널의 동영상 캐시만 있고 채널 자체는 없습니다. 대신 profiles.db 또는 구독 내보내기 파일을 선택하세요."
     Settings could not be imported: "설정을 가져올 수 없습니다"
     Some settings could not be imported: "일부 설정을 가져올 수 없습니다({total}개 중 {failed}개 실패)"
@@ -1945,6 +1946,13 @@ About:
   OpenTubeX is made possible by {creditsPageLink}: '{creditsPageLink}의 도움으로 OpenTubeX를 만들 수 있었습니다'
   Show tutorial: 튜토리얼 보기
 Profile:
+  Keep Data Separate: "데이터 별도 보관"
+  Keep Data Separate Tooltip: "이 프로필에 자체 구독, 시청 기록, 재생 목록, 검색 기록, 시청 통계, 대기열을 제공합니다. 다른 프로필에서는 이를 볼 수 없고, 이 프로필도 다른 프로필의 데이터를 볼 수 없습니다. 프로필을 만든 후에는 변경할 수 없습니다."
+  Separate Profile: "독립 프로필"
+  Separate Profile Note: "이 프로필은 구독, 기록, 재생 목록을 다른 프로필과 별도로 보관합니다."
+  Separate Profile Deletion Warning: "이 프로필의 구독, 시청 기록, 재생 목록, 검색 기록, 시청 통계, 대기열도 함께 삭제됩니다."
+  Separate Data Notice: "{profile} 프로필은 데이터를 별도로 보관하므로, 아래의 가져오기와 내보내기에는 이 프로필의 구독, 기록, 재생 목록, 검색 기록만 사용됩니다."
+  Separate Data Storage Notice: "{profile} 프로필은 데이터를 별도로 보관합니다. 아래 버튼은 이 프로필의 데이터만 삭제하지만, 크기에는 모든 프로필의 데이터가 포함됩니다."
   Customization: 맞춤 설정
   Manage Profile Subscriptions: 프로필 구독 관리
   Icon Names:

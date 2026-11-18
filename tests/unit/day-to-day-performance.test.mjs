@@ -21,7 +21,7 @@ function playlistStore(playlists) {
     { ...videoCounts, toRaw }
   )
   module.state.targetId = 'favorites'
-  module.getters.getQuickBookmarkTargetPlaylistId = state => state.targetId
+  module.getters.getActiveQuickBookmarkTargetPlaylistId = state => state.targetId
   module.getters.getPlaylistBookmarks = () => []
   module.getters.getUserPlaylistsSortBy = () => 'name_ascending'
   const store = createStore(module)

@@ -1364,6 +1364,7 @@ Settings:
     Paused Interface Hide Delay: Duraklatılmış Arayüzü Gizleme Gecikmesi
     Blur Blocked Items: Engellenen öğeleri gizlemek yerine bulanıklaştır
   Data Settings:
+    Backup separate profile data: "Bu yedek ayrıca {count} ayrı profilin verilerini de içerir ve bu veriler o profile geri yüklenir. | Bu yedek ayrıca {count} ayrı profilin verilerini de içerir ve bu veriler o profillere geri yüklenir."
     Subscription cache file: "Bu dosya yalnızca aboneliklerinizdeki videoları önbelleğe alır, kanalları değil. Bunun yerine profiles.db dosyasını veya bir abonelik dışa aktarımını seçin."
     Settings could not be imported: "Ayarlar içe aktarılamadı"
     Some settings could not be imported: "Ayarların tümü içe aktarılamadı ({total} ayardan {failed} tanesi başarısız oldu)"
@@ -1683,6 +1684,13 @@ About:
   Email: E-posta
   Show tutorial: Eğitimi göster
 Profile:
+  Keep Data Separate: "Verileri ayrı tut"
+  Keep Data Separate Tooltip: "Bu profile kendi abonelikleri, izleme geçmişi, oynatma listeleri, arama geçmişi, izleme istatistikleri ve kuyruğu verilir. Diğer profilleriniz bunları görmez, bu profil de onlarınkini görmez. Profil oluşturulduktan sonra bu değiştirilemez."
+  Separate Profile: "Ayrı profil"
+  Separate Profile Note: "Bu profil, aboneliklerini, geçmişini ve oynatma listelerini diğer profillerinizden ayrı tutar."
+  Separate Profile Deletion Warning: "Abonelikleri, izleme geçmişi, oynatma listeleri, arama geçmişi, izleme istatistikleri ve kuyruğu da silinecek."
+  Separate Data Notice: "{profile} verilerini ayrı tuttuğu için aşağıdaki içe ve dışa aktarmalar yalnızca onun aboneliklerini, geçmişini, oynatma listelerini ve arama geçmişini kullanır."
+  Separate Data Storage Notice: "{profile} verilerini ayrı tutar. Aşağıdaki düğmeler yalnızca onun verilerini siler, boyutlar ise tüm profillerin verilerini içerir."
   Customization: Özelleştirme
   Manage Profile Subscriptions: Profil aboneliklerini yönet
   Icon Names:

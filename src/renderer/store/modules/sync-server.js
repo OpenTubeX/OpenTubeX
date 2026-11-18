@@ -25,6 +25,7 @@ import {
   syncPlaylists,
   syncProfiles,
   syncSessions,
+  syncSeparateProfiles,
   syncSettings,
   syncSubscriptions,
 } from '../../helpers/sync-server'
@@ -57,7 +58,7 @@ import { syncSubscriptionSeenVideos, syncSubscriptionSeenPosts } from '../../hel
 import { syncRssFeedSeenItems } from '../../helpers/rssFeedSeenItems'
 import { containsWatchStatsDevice, mergeWatchStats, replaceWatchStatsDevice, persistUploadedWatchStatsReset, syncWatchStats, watchStatsDeviceDays } from '../../helpers/sync-watch-stats'
 import { areJsonValuesEqual } from '../../helpers/jsonValues'
-import { DBSettingHandlers, DBWatchStatsHandlers } from '../../../datastores/handlers/index'
+import { DBSettingHandlers, DBWatchStatsHandlers, getDataScope } from '../../../datastores/handlers/index'
 import { syncLiveReminders } from '../../helpers/sync-live-reminders'
 import { liveReminder } from '../../helpers/liveReminders'
 import { syncNotificationDismissals } from '../../helpers/sync-notification-dismissals'
@@ -67,13 +68,26 @@ import { historyChanges } from '../../helpers/sync-history-changes.js'
 import {
   SYNC_DELETION_MARKS_COLLECTION,
   addSyncDeletionMarks,
+  parseSyncDeletionListKey,
   readSyncDeletionMarks,
   syncDeletionKey,
+  syncDeletionListKey,
   syncDeletions,
   translateSyncDeletionMarks,
   unsentSyncDeletionMarks,
   withRemoteSyncDeletions,
 } from '../../helpers/sync-deletions.js'
+import {
+  SCOPED_SYNC_COLLECTIONS,
+  dataScopeLoading,
+  fromSharedSyncDeletionMarks,
+  isScopedSyncDeletionKey,
+  readScopedSnapshot,
+  scopedSyncCollection,
+  syncScopeKey,
+  toSharedSyncDeletionMarks,
+  writeScopedSnapshot,
+} from '../../helpers/sync-data-scope.js'
 import {
   SYNC_SERVER_OIDC_REDIRECT_URL,
   SyncServerOidcCallbacks,
@@ -98,7 +112,7 @@ let oidcFlow = 0
 const liveConnection = new SyncLiveConnectionState(typeof navigator !== 'undefined' ? navigator.locks : null)
 let liveClient = null
 let syncCapabilities = null
-/** The remote history revision the saved baseline was merged with. */
+/** The remote history revision and data scope the saved baseline was merged with. */
 let mergedHistory = null
 let liveLockController = null
 let liveGeneration = 0
@@ -227,6 +241,7 @@ const state = {
   /** Whether this device has deletions it failed to share with other devices */
   syncServerDeletionMarksPending: false,
   syncServerNotificationDismissalsSupported: null,
+  syncServerSeparateProfilesSupported: null,
   syncServerSessionExpired: false,
   syncServerOtherDeviceSessions: [],
   syncServerDevices: {},
@@ -256,6 +271,7 @@ const getters = {
   getSyncServerWatchStatsSupported: state => state.syncServerWatchStatsSupported,
   getSyncServerLiveRemindersSupported: state => state.syncServerLiveRemindersSupported,
   getSyncServerNotificationDismissalsSupported: state => state.syncServerNotificationDismissalsSupported,
+  getSyncServerSeparateProfilesSupported: state => state.syncServerSeparateProfilesSupported,
   getSyncServerOtherDeviceSessions: state => state.syncServerOtherDeviceSessions.map(session => ({
     ...session,
     syncDeviceName: state.syncServerDevices[session.syncDeviceId]?.name ?? '',
@@ -280,12 +296,49 @@ function parseSnapshot(value) {
   return { ...parsedSnapshot.snapshot }
 }
 
+/** The baselines without the watch statistics of every data scope */
+function withoutWatchStats(snapshot) {
+  const result = { ...snapshot }
+  delete result.watchStats
+  if (result.scopes) {
+    result.scopes = Object.fromEntries(Object.entries(result.scopes).map(([key, { watchStats: _watchStats, ...scope } = {}]) => [key, scope]))
+  }
+  return result
+}
+
+function hasWatchStats(snapshot) {
+  return 'watchStats' in snapshot || Object.values(snapshot.scopes ?? {}).some(scope => scope && 'watchStats' in scope)
+}
+
 async function clearUnsupportedWatchStats({ commit, dispatch, rootState }, snapshotValue = rootState.settings.syncServerSnapshot) {
   commit('setSyncedWatchStats', [])
   const snapshot = parseSnapshot(snapshotValue)
-  if (!('watchStats' in snapshot)) return
-  delete snapshot.watchStats
-  await dispatch('updateSyncServerSnapshot', JSON.stringify(snapshot), { root: true })
+  if (!hasWatchStats(snapshot)) return
+  await dispatch('updateSyncServerSnapshot', JSON.stringify(withoutWatchStats(snapshot)), { root: true })
+}
+
+/**
+ * The separate profile whose data the store shows, or undefined while a
+ * switch to another profile loads its data
+ * @returns {string | null | undefined}
+ */
+function shownDataScope(rootGetters) {
+  const scope = getDataScope()
+  return !dataScopeLoading() && (rootGetters.getActiveDataScope ?? null) === scope ? scope : undefined
+}
+
+/** The other devices' watch statistics of the data the store shows, as of the last sync */
+function syncedWatchStatsOf(snapshot, rootGetters) {
+  const watchStats = readScopedSnapshot(snapshot, syncScopeKey(rootGetters.getActiveDataScope ?? null)).watchStats
+  return Array.isArray(watchStats) ? watchStats : []
+}
+
+/** Keeps the baselines of the separate profiles that still exist */
+function withoutRemovedScopes(snapshot, profiles) {
+  if (!snapshot.scopes) return snapshot
+  const keys = new Set(profiles.filter(profile => profile.separate === true && profile._id.length <= 64)
+    .map(profile => syncScopeKey(profile._id)))
+  return { ...snapshot, scopes: Object.fromEntries(Object.entries(snapshot.scopes).filter(([key]) => keys.has(key))) }
 }
 
 async function persistUploadedHistoryRepairs(entries, store) {
@@ -420,6 +473,14 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
   const { commit, dispatch, rootGetters, rootState } = context
   const settings = rootState.settings
   const encrypted = requiresEncryptedSync(settings)
+  // A sync merges the history, playlists, watch statistics, and subscriptions
+  // of the data the store shows: a separate profile's, or else the shared ones.
+  // A profile switch first loads the other profile's data.
+  for (let loading = dataScopeLoading(); loading; loading = dataScopeLoading()) await loading.catch(() => {})
+  const dataScope = rootGetters.getActiveDataScope ?? null
+  const scopeKey = syncScopeKey(dataScope)
+  // The server keeps a separate profile's collections under their own names.
+  const remoteName = collection => scopedSyncCollection(collection, scopeKey)
   const networkClient = trackSyncClient(
     new SyncServerClient(settings.syncServerUrl, settings.syncServerToken)
   )
@@ -427,7 +488,8 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
   let encryptedCollections = null
   const cacheIdentity = JSON.stringify([settings.syncServerUrl, settings.syncServerToken, settings.syncServerPrivacyKey])
   collectionCache.use(cacheIdentity)
-  const previous = parseSnapshot(settings.syncServerSnapshot)
+  let savedSnapshot = parseSnapshot(settings.syncServerSnapshot)
+  const previous = readScopedSnapshot(savedSnapshot, scopeKey)
   const next = { ...previous }
   // After a conflicting upload, a collection merges again against the previous
   // baseline plus what this sync downloaded. The previous baseline alone would
@@ -436,22 +498,30 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
   /** @type {Record<string, () => unknown>} */
   const retryBaselines = {}
   const baseline = collection => retryBaselines[collection] ? retryBaselines[collection]() : previous[collection]
-  // Playlist preferences use the server's playlist IDs, which only this sync's playlist merge maps.
-  const playlistSnapshot = () => settings.syncServerSyncPlaylists ? next.playlists ?? null : null
+  // Playlist preferences use the server's playlist IDs, which only this sync's
+  // playlist merge maps. A separate profile's playlists have none.
+  const playlistSnapshot = () => settings.syncServerSyncPlaylists && dataScope === null ? next.playlists ?? null : null
   const historyAccount = getSyncAccount(settings)
   const isSameAccount = () => isSameSyncAccount(rootState.settings, historyAccount)
   // Deletions made or reviewed before this sync; ones made while it runs wait for the next.
-  const deletions = syncDeletions.snapshot()
+  // A separate profile's lists take the deletions made in its data.
+  const commonDeletions = Object.entries(syncDeletions.snapshot())
+    .filter(([key]) => dataScope === null || !isScopedSyncDeletionKey(key))
+  const scopeDeletions = dataScope === null
+    ? []
+    : Object.entries(syncDeletions.snapshot(dataScope)).filter(([key]) => isScopedSyncDeletionKey(key))
+  const deletions = Object.fromEntries([...commonDeletions, ...scopeDeletions])
   // Merges also apply the deletions other devices confirmed.
   let mergeDeletions = deletions
   // Unsent deletion marks stay with their account, also when its token is renewed.
   const deletionMarksAccount = JSON.stringify([settings.syncServerUrl, settings.syncServerUsername, settings.syncServerPrivacyKey])
-  // The confirmed deletions as other devices know the lists, by their server IDs
-  const sharedDeletions = Object.fromEntries(translateSyncDeletionMarks(
+  // The confirmed deletions as other devices know the lists, by their server
+  // IDs and with a separate profile's lists marked as its own
+  const sharedDeletions = Object.fromEntries(toSharedSyncDeletionMarks(translateSyncDeletionMarks(
     Object.entries(deletions).map(([key, { confirmed = [] }]) => ({ key, ids: confirmed })),
     previous,
     true
-  ).map(({ key, ids }) => [key, { confirmed: ids }]))
+  ), dataScope).map(({ key, ids }) => [key, { confirmed: ids }]))
   const result = {}
   const skippedCollections = new Set()
   // Collections this sync merged into the local data, and in enhanced privacy
@@ -468,7 +538,10 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     state: rootState,
     getters: rootGetters,
     commit,
-    dispatch: (...args) => dispatchRemoteSyncAction(dispatch, ...args),
+    // Saves go to the data the store shows, so none may follow a profile switch.
+    dispatch: (...args) => shownDataScope(rootGetters) === dataScope
+      ? dispatchRemoteSyncAction(dispatch, ...args)
+      : Promise.reject(new SyncServerCancelledError()),
     assertActive: assertSyncStillActive,
     async persistPlaylistSyncBaseline(id, { remoteId, metadata, applied = false, videos: syncedVideos, added = [], removed = [] }) {
       // Encrypted adapter mutations are only published in the final upload.
@@ -519,12 +592,14 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
       await dispatch('updateSyncServerSnapshot', JSON.stringify({ ...saved, settings }), { root: true })
     },
   }
+  // Separate profiles only sync with encryption.
+  const syncsScope = dataScope === null || encrypted
   const stages = [
     ...(encrypted ? ['download'] : []),
-    ...(settings.syncServerSyncSubscriptions ? ['subscriptions'] : []),
-    ...(settings.syncServerSyncPlaylists ? ['playlists'] : []),
+    ...(settings.syncServerSyncSubscriptions && syncsScope ? ['subscriptions'] : []),
+    ...(settings.syncServerSyncPlaylists && syncsScope ? ['playlists'] : []),
     ...(settings.syncServerSyncPlaylists ? ['playlistBookmarks'] : []),
-    ...(settings.syncServerSyncHistory ? ['history'] : []),
+    ...(settings.syncServerSyncHistory && syncsScope ? ['history'] : []),
     ...(encrypted && settings.syncServerSyncWatchStats ? ['watchStats'] : []),
     ...(syncsNotifications && encrypted &&
       settings.syncServerSyncLiveReminders
@@ -534,6 +609,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
       ? ['notificationDismissals']
       : []),
     ...(settings.syncServerSyncProfiles ? ['profiles'] : []),
+    ...(encrypted && settings.syncServerSyncProfiles ? ['separateProfiles'] : []),
     ...((process.env.IS_ELECTRON || process.env.IS_CAPACITOR) &&
       encrypted &&
       settings.syncServerSyncSessions
@@ -565,11 +641,15 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
 
   function assertSyncStillActive() {
     assertSyncEnabled(rootState, networkClient)
+    // The next sync merges the data of the profile switched to.
+    if (shownDataScope(rootGetters) !== dataScope) throw new SyncServerCancelledError()
   }
 
   async function runStage(stage, callback) {
     assertSyncStillActive()
-    const progressStage = ['seenVideos', 'seenPosts', 'seenRssItems'].includes(stage) ? 'history' : stage
+    const progressStage = ['seenVideos', 'seenPosts', 'seenRssItems'].includes(stage)
+      ? 'history'
+      : stage === 'separateProfiles' ? 'profiles' : stage
     if (progressStarted) {
       commit('setSyncServerProgress', {
         stage: progressStage,
@@ -658,7 +738,8 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
   async function persistFailedSyncBaselines() {
     if (!isSameAccount()) return
     const saved = parseSnapshot(rootState.settings.syncServerSnapshot)
-    const updated = { ...saved }
+    // A separate profile's baselines go to its own part of the snapshot.
+    const updated = readScopedSnapshot(saved, scopeKey)
     for (const collection of appliedCollections) {
       if (skippedCollections.has(collection)) continue
       // syncSettings saves the entries it applied on its own
@@ -667,7 +748,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         : collection === 'settings' ? undefined : retryBaselines[collection]?.()
       if (value !== undefined) updated[collection] = value
     }
-    const snapshot = JSON.stringify(updated)
+    const snapshot = JSON.stringify(writeScopedSnapshot(saved, updated, scopeKey))
     if (snapshot !== rootState.settings.syncServerSnapshot) {
       await dispatch('updateSyncServerSnapshot', snapshot, { root: true })
     }
@@ -691,11 +772,26 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     }
   }
 
+  /** @param {unknown[]} ids Separate profiles the server may still keep data for */
+  async function deleteRemovedProfileData(ids) {
+    const remaining = new Set(Object.keys(next.separateProfiles ?? {}))
+    for (const profile of rootState.profiles.profileList) remaining.add(profile._id)
+    for (const id of new Set(ids)) {
+      if (typeof id !== 'string' || id.length === 0 || id.length > 64 || remaining.has(id)) continue
+      for (const collection of SCOPED_SYNC_COLLECTIONS) {
+        assertSyncStillActive()
+        // A failure fails the sync before its baseline is saved, so the next
+        // sync finds the removed profile again and retries.
+        await networkClient.deleteEncryptedSyncCollection(scopedSyncCollection(collection, syncScopeKey(id)))
+      }
+    }
+  }
+
   async function applyCollection(collection, targetClient) {
     const onRetryBaseline = getBaseline => { retryBaselines[collection] = getBaseline }
     switch (collection) {
       case 'seenVideos':
-        result.seenVideos = await syncSubscriptionSeenVideos(targetClient, store)
+        result.seenVideos = await syncSubscriptionSeenVideos(targetClient, store, { updateHistory: dataScope === null })
         break
       case 'seenPosts':
         result.seenPosts = await syncSubscriptionSeenPosts(targetClient, store)
@@ -708,7 +804,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           targetClient,
           store,
           baseline(collection),
-          { allowDataLoss, deletions: mergeDeletions, onRetryBaseline }
+          { allowDataLoss, deletions: mergeDeletions, onRetryBaseline, profileId: dataScope }
         )
         result.subscriptions = next.subscriptions.length
         break
@@ -738,7 +834,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         // While the remote history is the one this window last merged, only
         // local changes since then need merging.
         const unchangedRemote = targetClient === client && mergedHistory?.identity === cacheIdentity &&
-          mergedHistory.revision === encryptedCollections?.remote.history?.revision
+          mergedHistory.scope === scopeKey && mergedHistory.revision === encryptedCollections?.remote.history?.revision
         const history = await syncHistory(
           targetClient,
           store,
@@ -758,7 +854,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         break
       }
       case 'watchStats':
-        next.watchStats = await syncWatchStats(targetClient, store)
+        next.watchStats = await syncWatchStats(targetClient, store, { shared: dataScope === null })
         result.watchStats = next.watchStats.length
         break
       case 'liveReminders':
@@ -793,6 +889,14 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
             result.profiles = Object.keys(profiles).length
           }
         }
+        break
+      case 'separateProfiles':
+        next.separateProfiles = await syncSeparateProfiles(
+          targetClient,
+          store,
+          baseline(collection),
+          { allowDataLoss, deletions, onRetryBaseline }
+        )
         break
       case 'settings':
         next.settings = await syncSettings(targetClient, store, previous.settings, playlistSnapshot(), { onRetryBaseline })
@@ -831,6 +935,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
   }
 
   try {
+    assertSyncStillActive()
     // Remote checks share recent discovery. Full syncs refresh it for subsequent
     // live checks too, so new support cannot be reverted by an old live client.
     // Recheck missing support before consuming a live notification, otherwise an
@@ -842,6 +947,10 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         ...(stages.includes('liveReminders') ? ['live_reminders'] : []),
         ...(stages.includes('notificationDismissals') ? ['notification_dismissals'] : []),
         ...(encrypted && settings.syncServerSyncHistory ? ['seen_videos', 'seen_posts', 'seen_rss_items'] : []),
+        ...(stages.includes('separateProfiles') ||
+          (dataScope !== null && stages.some(stage => SCOPED_SYNC_COLLECTIONS.has(stage)))
+          ? ['separate_profiles']
+          : []),
       ],
     })
     const watchStatsSupported = encrypted && capabilities.watch_stats === 1
@@ -851,7 +960,17 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
       if (index !== -1) stages.splice(index, 1)
       if (settings.syncServerSyncWatchStats) {
         delete next.watchStats
+        savedSnapshot = withoutWatchStats(savedSnapshot)
         await clearUnsupportedWatchStats(context)
+      }
+    }
+    // Without support, a separate profile's data stays on this device.
+    const separateProfilesSupported = encrypted && capabilities.separate_profiles === 1
+    commit('setSyncServerSeparateProfilesSupported', separateProfilesSupported)
+    if (!separateProfilesSupported) {
+      for (const stage of ['separateProfiles', ...(dataScope === null ? [] : SCOPED_SYNC_COLLECTIONS)]) {
+        const index = stages.indexOf(stage)
+        if (index !== -1) stages.splice(index, 1)
       }
     }
     const liveRemindersSupported = encrypted && capabilities.live_reminders === 1
@@ -914,8 +1033,10 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           : manifest.legacy_data
             ? await loadLegacySyncDocument(networkClient)
             : createEmptySyncDocument()
+        // Legacy data is the shared data, which migrates while a shared profile is active.
         const uploadCollections = manifest.legacy_data || legacyEncrypted?.payload
-          ? Array.from(new Set([...enabledCollections, ...LEGACY_ENCRYPTED_COLLECTIONS]))
+          ? Array.from(new Set([...enabledCollections, ...LEGACY_ENCRYPTED_COLLECTIONS
+              .filter(collection => remoteName(collection) === collection)]))
           : enabledCollections
         const hasLegacyPlaybackSpeeds = manifest.collections.some(
           entry => entry.collection === 'playbackSpeeds'
@@ -933,16 +1054,17 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         if (remoteOnly && context.state.syncServerStatus !== 'error' && !manifest.legacy_data && !legacyEncrypted?.payload &&
             !(capabilities.sync_deletions === 1 && unsentSyncDeletionMarks.read(deletionMarksAccount).length > 0) &&
             downloadCollections.every(collection => collectionCache.isSynced(
-              collection, manifest.collections.find(entry => entry.collection === collection)?.revision ?? 0
+              remoteName(collection), manifest.collections.find(entry => entry.collection === remoteName(collection))?.revision ?? 0
             ))) return { unchanged: true }
         const document = createEmptySyncDocument()
         // Legacy speeds are read for migration into settings, never uploaded.
         document.playbackSpeeds = legacy.playbackSpeeds ?? []
         const original = {}
         const entries = await Promise.all(downloadCollections.map(async collection => {
-          const manifestRevision = manifest.collections.find(entry => entry.collection === collection)?.revision ?? 0
+          const name = remoteName(collection)
+          const manifestRevision = manifest.collections.find(entry => entry.collection === name)?.revision ?? 0
           const known = !manifest.legacy_data && !legacyEncrypted?.payload
-            ? collectionCache.latest(collection)
+            ? collectionCache.latest(name)
             : null
           let remote = known?.revision === manifestRevision ? known : null
           if (!remote) {
@@ -951,7 +1073,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
             remote = await readSyncCollection(
               collection,
               await networkClient.getEncryptedSyncCollection(
-                collection, capabilities.collection_changes === 1 ? known?.revision ?? 0 : undefined
+                name, capabilities.collection_changes === 1 ? known?.revision ?? 0 : undefined
               ),
               known,
               settings.syncServerPrivacyKey
@@ -959,8 +1081,9 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           }
           // The document, its baseline and the cache share this value. The sync
           // adapter replaces collections instead of editing them.
-          document[collection] = (remote === known ? remote.data : remote.data ?? legacy[collection]) ?? document[collection]
-          if (remote !== known) collectionCache.put(collection, remote.revision, document[collection], cacheIdentity)
+          const legacyData = name === collection ? legacy[collection] : undefined
+          document[collection] = (remote === known ? remote.data : remote.data ?? legacyData) ?? document[collection]
+          if (remote !== known) collectionCache.put(name, remote.revision, document[collection], cacheIdentity)
           original[collection] = document[collection]
           return [collection, { revision: remote.revision }]
         }))
@@ -998,7 +1121,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
       if (deletionMarks) {
         mergeDeletions = withRemoteSyncDeletions(
           deletions,
-          translateSyncDeletionMarks(readSyncDeletionMarks(deletionMarks.data), previous, false)
+          translateSyncDeletionMarks(fromSharedSyncDeletionMarks(readSyncDeletionMarks(deletionMarks.data), dataScope), previous, false)
         )
       }
       encryptedCollections = {
@@ -1034,7 +1157,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
       await runStage('upload', async () => {
         if (encryptedCollections.shareDeletions) {
           const includeKey = key => {
-            const collection = key.split(':', 1)[0]
+            const collection = parseSyncDeletionListKey(key)?.[1].split(':', 1)[0] ?? ''
             return encryptedCollections.enabled.includes(DELETION_MARK_STAGES[collection] ?? collection)
           }
           const unsent = unsentSyncDeletionMarks.read(deletionMarksAccount)
@@ -1051,26 +1174,37 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           assertSyncStillActive()
           let revision = encryptedCollections.remote[collection].revision
           let data = client.document[collection]
+          // The saved watch statistics reset belongs to the shared statistics.
+          const persistUploaded = async () => {
+            if (collection === 'watchStats' && dataScope === null) await persistUploadedWatchStatsReset(data, store)
+            if (collection === 'history') await persistUploadedHistoryRepairs(data, store)
+          }
           // Untouched collections are still the downloaded value, and history
           // merges only write changed entries. Sending a collection to a worker
           // for comparison would cost more than serializing it here.
           if (revision > 0 && (!client.touched.has(collection) || (collection !== 'history' &&
               JSON.stringify(data) === JSON.stringify(encryptedCollections.original[collection])))) {
-            if (collection === 'watchStats') await persistUploadedWatchStatsReset(data, store)
-            if (collection === 'history') await persistUploadedHistoryRepairs(data, store)
+            await persistUploaded()
             uploadedCollections.add(collection)
             continue
           }
           startProgress('upload')
+          const name = remoteName(collection)
           let activityBefore = encryptedCollections.original[collection]
           let changes = client
           for (let attempt = 0; attempt < ENCRYPTED_SYNC_RETRIES; attempt++) {
-            const activity = createSyncActivity(
-              collection, activityBefore, data, settings.syncServerDeviceId, settings.syncServerDeviceName,
-              [...(encryptedCollections.original.subscriptions ?? []), ...(client.document.subscriptions ?? []),
-                ...(rootState.profiles.profileList.find(profile => profile._id === MAIN_PROFILE_ID)?.subscriptions ?? [])],
-              [...(encryptedCollections.original.playlists ?? []), ...(client.document.playlists ?? [])].map(entry => entry?.playlist)
-            )
+            // Older versions would show the activity of separate profiles as
+            // their own. A separate profile's names stay out of shared activity.
+            const activity = name !== collection || collection === 'separateProfiles'
+              ? null
+              : createSyncActivity(
+                  collection, activityBefore, data, settings.syncServerDeviceId, settings.syncServerDeviceName,
+                  [...(dataScope === null ? [...(encryptedCollections.original.subscriptions ?? []), ...(client.document.subscriptions ?? [])] : []),
+                    ...(rootState.profiles.profileList.find(profile => profile._id === MAIN_PROFILE_ID)?.subscriptions ?? [])],
+                  dataScope === null
+                    ? [...(encryptedCollections.original.playlists ?? []), ...(client.document.playlists ?? [])].map(entry => entry?.playlist)
+                    : []
+                )
             const activityPayload = activity
               ? await encryptSyncDocument(
                   activity, settings.syncServerPrivacyKey, settings.syncServerPrivacySalt
@@ -1086,7 +1220,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
                 try {
                   // Upload only the edits. Other devices apply them to their copy.
                   saved = await networkClient.appendEncryptedSyncChange(
-                    collection,
+                    name,
                     revision,
                     await encryptSyncChange(change, settings.syncServerPrivacyKey, settings.syncServerPrivacySalt),
                     activityPayload
@@ -1099,15 +1233,14 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
                 }
               }
               saved ??= await networkClient.putEncryptedSyncCollection(
-                collection,
+                name,
                 revision,
                 await encryptSyncDocument(data, settings.syncServerPrivacyKey, settings.syncServerPrivacySalt),
                 activityPayload
               )
-              collectionCache.put(collection, saved.revision, data, cacheIdentity)
+              collectionCache.put(name, saved.revision, data, cacheIdentity)
               assertSyncStillActive()
-              if (collection === 'watchStats') await persistUploadedWatchStatsReset(data, store)
-              if (collection === 'history') await persistUploadedHistoryRepairs(data, store)
+              await persistUploaded()
               uploadedCollections.add(collection)
               break
             } catch (error) {
@@ -1115,7 +1248,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
               const remote = await readSyncCollection(
                 collection,
                 await networkClient.getEncryptedSyncCollection(
-                  collection, capabilities.collection_changes === 1 ? revision : undefined
+                  name, capabilities.collection_changes === 1 ? revision : undefined
                 ),
                 { revision, data: activityBefore },
                 settings.syncServerPrivacyKey
@@ -1185,13 +1318,22 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
             }
           }
         }
+        // Once no profile lists them, the data of deleted separate profiles goes too.
+        if (encryptedCollections.upload.includes('separateProfiles') && !skippedCollections.has('separateProfiles')) {
+          await deleteRemovedProfileData([
+            ...Object.keys(previous.separateProfiles ?? {}),
+            ...(encryptedCollections.original.separateProfiles ?? []).map(entry => entry?.id),
+          ])
+        }
       })
     }
 
     await runStage('finishing', async () => {
       const lastSyncAt = Date.now()
       // Copying the baselines to a worker costs more than serializing them.
-      const snapshot = JSON.stringify(next)
+      const snapshot = JSON.stringify(withoutRemovedScopes(
+        writeScopedSnapshot(savedSnapshot, next, scopeKey), rootState.profiles.profileList
+      ))
       assertSyncStillActive()
       // Saving the snapshot writes and broadcasts it to every window. Skip that
       // when this sync confirmed the saved baseline.
@@ -1202,16 +1344,17 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     })
     if (encryptedCollections) {
       collectionCache.markSynced(Object.keys(encryptedCollections.remote)
-        .filter(collection => !skippedCollections.has(collection)))
+        .filter(collection => !skippedCollections.has(collection)).map(remoteName))
       // The saved baseline now matches this revision of the remote history.
       mergedHistory = takenHistoryChanges === undefined
         ? null
-        : { identity: cacheIdentity, revision: collectionCache.latest('history')?.revision }
+        : { identity: cacheIdentity, scope: scopeKey, revision: collectionCache.latest(remoteName('history'))?.revision }
     }
     if (settings.syncServerResumeAutoSync) {
       await dispatch('setSyncServerAutoSync', true)
     }
-    syncDeletions.release(deletions)
+    syncDeletions.release(Object.fromEntries(commonDeletions))
+    if (dataScope !== null) syncDeletions.release(Object.fromEntries(scopeDeletions), dataScope)
     commit('setSyncServerPendingDeletion', null)
     if (progressStarted) commit('setSyncServerLastResult', result)
     if (tabRevocationError) throw tabRevocationError
@@ -1256,7 +1399,10 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     commit('setSyncServerStatus', 'error')
     // Sync settings reviews these deletions when it opens. The review accepts
     // a choice only after the sync stopped.
-    if (error instanceof SyncServerDataLossError) commit('setSyncServerPendingDeletion', error.details)
+    // A separate profile's lists record their deletions in its data.
+    if (error instanceof SyncServerDataLossError) {
+      commit('setSyncServerPendingDeletion', { ...error.details, ...(dataScope === null ? {} : { dataScope }) })
+    }
     throw error
   } finally {
     releaseSyncClient(networkClient)
@@ -1346,6 +1492,7 @@ const actions = {
     commit('setSyncServerLiveRemindersPending', false)
     commit('setSyncServerDeletionMarksPending', false)
     commit('setSyncServerNotificationDismissalsSupported', null)
+    commit('setSyncServerSeparateProfilesSupported', null)
     commit('setSyncedWatchStats', [])
     clearSyncServerDevices(commit)
     if (rootState.settings.syncServerToken) await dispatch('initializeSyncServer')
@@ -1634,18 +1781,26 @@ const actions = {
     return withSyncLock(deleteSession)
   },
 
-  replaceSyncWatchStatsDevice({ commit, dispatch, rootState }, { source, overlap, localDays, currentDays, replacedDevices, localReset }) {
+  replaceSyncWatchStatsDevice({ commit, dispatch, rootGetters, rootState }, { source, overlap, localDays, currentDays, replacedDevices, localReset }) {
     const settings = { ...rootState.settings }
     if (!settings.syncServerEnabled || !settings.syncServerToken ||
         settings.syncServerPrivacyMode !== 'enhanced' || !settings.syncServerPrivacyKey ||
         !settings.syncServerSyncWatchStats) {
       throw new Error('Connect to the sync server first')
     }
+    // The statistics of the data the store shows, which for a separate profile
+    // sync without the shared reset.
+    const dataScope = shownDataScope(rootGetters)
+    if (dataScope === undefined) throw new SyncServerCancelledError()
+    const scopeKey = syncScopeKey(dataScope)
+    const collection = scopedSyncCollection('watchStats', scopeKey)
+    const savedReset = dataScope === null ? settings.syncServerWatchStatsReset : null
     const assertCurrentAccount = client => {
       assertSyncEnabled(rootState, client)
       if (activityAccountKey(rootState.settings) !== activityAccountKey(settings) ||
           rootState.settings.syncServerToken !== settings.syncServerToken ||
-          !rootState.settings.syncServerSyncWatchStats) throw new SyncServerCancelledError()
+          !rootState.settings.syncServerSyncWatchStats ||
+          shownDataScope(rootGetters) !== dataScope) throw new SyncServerCancelledError()
     }
     return withSyncLock(async () => {
       const client = trackSyncClient(new SyncServerClient(settings.syncServerUrl, settings.syncServerToken))
@@ -1653,7 +1808,7 @@ const actions = {
         for (let attempt = 0; attempt < ENCRYPTED_SYNC_RETRIES; attempt++) {
           assertCurrentAccount(client)
           const remote = await readSyncCollection(
-            'watchStats', await client.getEncryptedSyncCollection('watchStats', 0), null, settings.syncServerPrivacyKey
+            'watchStats', await client.getEncryptedSyncCollection(collection, 0), null, settings.syncServerPrivacyKey
           )
           const devices = remote.data ?? []
           const records = await DBWatchStatsHandlers.find()
@@ -1669,23 +1824,24 @@ const actions = {
             throw new Error(i18n.global.t('Stats.Replacement changed'))
           }
           const merged = mergeWatchStats(devices, records, settings.syncServerDeviceId,
-            settings.syncServerDeviceName, current?.platform, settings.syncServerWatchStatsReset)
+            settings.syncServerDeviceName, current?.platform, savedReset)
           const next = replaceWatchStatsDevice(merged, settings.syncServerDeviceId, source.deviceId, overlap, Date.now())
           const payload = await encryptSyncDocument(next, settings.syncServerPrivacyKey, settings.syncServerPrivacySalt)
           assertCurrentAccount(client)
           let saved
           try {
-            saved = await client.putEncryptedSyncCollection('watchStats', remote.revision, payload)
+            saved = await client.putEncryptedSyncCollection(collection, remote.revision, payload)
           } catch (error) {
             if (error.status === 409 && attempt < ENCRYPTED_SYNC_RETRIES - 1) continue
             throw error
           }
           assertCurrentAccount(client)
-          collectionCache.put('watchStats', saved.revision, next)
+          collectionCache.put(collection, saved.revision, next)
           assertCurrentAccount(client)
           const snapshot = parseSnapshot(rootState.settings.syncServerSnapshot)
-          snapshot.watchStats = next
-          await dispatch('updateSyncServerSnapshot', JSON.stringify(snapshot), { root: true })
+          await dispatch('updateSyncServerSnapshot', JSON.stringify(writeScopedSnapshot(
+            snapshot, { ...readScopedSnapshot(snapshot, scopeKey), watchStats: next }, scopeKey
+          )), { root: true })
           commit('setSyncedWatchStats', next)
           return true
         }
@@ -2057,7 +2213,8 @@ const actions = {
   async resolveSyncServerDeletion({ commit, dispatch, state }, choice) {
     const pending = state.syncServerPendingDeletion
     if (!pending) return null
-    const key = syncDeletionKey(pending.collection, pending.scope)
+    const deletionKey = syncDeletionKey(pending.collection, pending.scope)
+    const key = syncDeletionListKey(deletionKey, isScopedSyncDeletionKey(deletionKey) ? pending.dataScope ?? null : null)
     const ids = pending.items.map(item => item.id)
     if (choice === 'keep') syncDeletions.keep(key, ids)
     else syncDeletions.confirm(key, ids)
@@ -2069,7 +2226,15 @@ const actions = {
     commit('setSyncServerPendingDeletion', null)
   },
 
-  async initializeSyncServer({ commit, dispatch, rootState }, { skipIfRecent = true } = {}) {
+  /** Shows the synced data of the profile switched to and syncs it */
+  applySyncServerDataScope({ commit, dispatch, rootGetters, rootState }) {
+    const settings = rootState.settings
+    if (!settings.syncServerEnabled || !settings.syncServerToken) return
+    commit('setSyncedWatchStats', syncedWatchStatsOf(parseSnapshot(settings.syncServerSnapshot), rootGetters))
+    return dispatch('scheduleSyncServer', 'data')
+  },
+
+  async initializeSyncServer({ commit, dispatch, rootGetters, rootState }, { skipIfRecent = true } = {}) {
     if (!reminderSyncListenerStarted && (process.env.IS_ELECTRON || process.env.IS_CAPACITOR)) {
       reminderSyncListenerStarted = true
       liveReminder.onUpdated(() => dispatch('scheduleSyncServer', 'liveReminders'))
@@ -2121,7 +2286,7 @@ const actions = {
     if (!rootState.settings.syncServerEnabled || !rootState.settings.syncServerToken) return
 
     const snapshot = parseSnapshot(rootState.settings.syncServerSnapshot)
-    commit('setSyncedWatchStats', Array.isArray(snapshot.watchStats) ? snapshot.watchStats : [])
+    commit('setSyncedWatchStats', syncedWatchStatsOf(snapshot, rootGetters))
     commit(
       'setSyncServerOtherDeviceSessions',
       getSavedOtherDeviceSessions(
@@ -2148,6 +2313,7 @@ const actions = {
         commit('setSyncServerWatchStatsSupported', watchStatsSupported)
         commit('setSyncServerLiveRemindersSupported', privacySupported && capabilities.live_reminders === 1)
         commit('setSyncServerNotificationDismissalsSupported', privacySupported && capabilities.notification_dismissals === 1)
+        commit('setSyncServerSeparateProfilesSupported', privacySupported && capabilities.separate_profiles === 1)
         if (!watchStatsSupported && rootState.settings.syncServerSyncWatchStats) {
           const account = getSyncAccount(rootState.settings)
           await withSyncLock(async () => {
@@ -2249,6 +2415,7 @@ const actions = {
     commit('setSyncServerLiveRemindersPending', false)
     commit('setSyncServerDeletionMarksPending', false)
     commit('setSyncServerNotificationDismissalsSupported', null)
+    commit('setSyncServerSeparateProfilesSupported', null)
     commit('setSyncedWatchStats', [])
     clearSyncServerDevices(commit)
     await dispatch('updateSyncServerToken', token, { root: true })
@@ -2294,6 +2461,7 @@ const actions = {
       commit('setSyncServerWatchStatsSupported', null)
       commit('setSyncServerLiveRemindersSupported', null)
       commit('setSyncServerNotificationDismissalsSupported', null)
+      commit('setSyncServerSeparateProfilesSupported', null)
       clearSyncServerDevices(commit)
       return
     }
@@ -2359,6 +2527,9 @@ const mutations = {
   },
   setSyncServerNotificationDismissalsSupported(state, supported) {
     state.syncServerNotificationDismissalsSupported = supported
+  },
+  setSyncServerSeparateProfilesSupported(state, supported) {
+    state.syncServerSeparateProfilesSupported = supported
   },
   setSyncServerSessionExpired(state, expired) {
     state.syncServerSessionExpired = expired

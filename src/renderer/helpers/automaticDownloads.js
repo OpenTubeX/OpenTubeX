@@ -50,7 +50,7 @@ export function includeAutomaticDownloadChannels(activeSubscriptions, source) {
   }
 
   const includedIds = new Set(activeSubscriptions.map(channel => channel.id))
-  const allSubscriptions = store.getters.getProfileList[0]?.subscriptions ?? []
+  const allSubscriptions = store.getters.getAllRootSubscriptions
   return [
     ...activeSubscriptions,
     ...allSubscriptions.filter(channel => automaticChannelIds.has(channel.id) && !includedIds.has(channel.id))

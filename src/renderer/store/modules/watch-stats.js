@@ -1,4 +1,4 @@
-import { DBWatchStatsHandlers } from '../../../datastores/handlers/index'
+import { DBWatchStatsHandlers, getDataScope } from '../../../datastores/handlers/index'
 
 import { createWatchStatsReset } from '../../helpers/sync-watch-stats'
 
@@ -37,11 +37,14 @@ const getters = {
 const actions = {
   async grabWatchStats({ commit }) {
     try {
+      const scope = getDataScope()
       const hasHistoricalEstimate = await DBWatchStatsHandlers.migrateHistory()
       const [records, historicalAdjustment] = await Promise.all([
         DBWatchStatsHandlers.find(),
         DBWatchStatsHandlers.getHistoricalAdjustment(),
       ])
+      // A switch to another profile's data started meanwhile.
+      if (scope !== getDataScope()) return
       commit('setWatchStats', records)
       commit('setHasHistoricalWatchTimeEstimate', hasHistoricalEstimate)
       commit('setHistoricalWatchTimePlaybackSpeed', historicalAdjustment?.defaultSpeed ?? null)
@@ -67,6 +70,14 @@ const actions = {
 
   async clearWatchStats({ commit, dispatch, rootState, state }) {
     try {
+      // The saved reset belongs to the shared statistics. A separate profile's
+      // clear removes this device's time, which its next sync uploads.
+      if (getDataScope() !== null) {
+        const at = Date.now()
+        await DBWatchStatsHandlers.deleteAll(at)
+        commit('resetWatchStats', at)
+        return true
+      }
       const previous = rootState.settings.syncServerWatchStatsReset
       // Windows order clears by this time, so it grows even when the clock moved back
       const at = Math.max(Date.now(), (previous?.at ?? 0) + 1)

@@ -1382,6 +1382,7 @@ Settings:
     Hide Channel Shows: Kanaal­tabblad ‘Programma's’ verbergen
     Blur Blocked Items: Geblokkeerde items vervagen in plaats van verbergen
   Data Settings:
+    Backup separate profile data: "Deze back-up bevat ook de gegevens van {count} apart profiel, die in dat profiel worden hersteld. | Deze back-up bevat ook de gegevens van {count} aparte profielen, die in die profielen worden hersteld."
     Subscription cache file: "Dit bestand bevat alleen een cache van de video's van je abonnementen, niet de kanalen. Kies in plaats daarvan profiles.db of een export van abonnementen."
     Settings could not be imported: "De instellingen konden niet worden geïmporteerd"
     Some settings could not be imported: "Niet alle instellingen konden worden geïmporteerd ({failed} van {total} mislukt)"
@@ -1722,6 +1723,13 @@ About:
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX wordt mogelijk gemaakt door {creditsPageLink}
   Show tutorial: Rondleiding tonen
 Profile:
+  Keep Data Separate: "Gegevens gescheiden houden"
+  Keep Data Separate Tooltip: "Geeft dit profiel zijn eigen abonnementen, kijkgeschiedenis, afspeellijsten, zoekgeschiedenis, kijkstatistieken en wachtrij. Je andere profielen zien ze niet, en dit profiel ziet die van hen niet. Je kunt dit niet meer wijzigen nadat het profiel is aangemaakt."
+  Separate Profile: "Apart profiel"
+  Separate Profile Note: "Dit profiel houdt zijn abonnementen, geschiedenis en afspeellijsten gescheiden van je andere profielen."
+  Separate Profile Deletion Warning: "De abonnementen, kijkgeschiedenis, afspeellijsten, zoekgeschiedenis, kijkstatistieken en wachtrij van dit profiel worden ook verwijderd."
+  Separate Data Notice: "{profile} houdt zijn gegevens gescheiden, dus de imports en exports hieronder gebruiken alleen de abonnementen, geschiedenis, afspeellijsten en zoekgeschiedenis van dit profiel."
+  Separate Data Storage Notice: "{profile} houdt zijn gegevens gescheiden. De knoppen hieronder verwijderen alleen de gegevens van dit profiel, terwijl de groottes de gegevens van alle profielen omvatten."
   Customization: Aanpassen
   Manage Profile Subscriptions: Profielabonnementen beheren
   Icon Names:

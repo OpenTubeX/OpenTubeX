@@ -1330,6 +1330,7 @@ Settings:
     Hide Channel Shows: Ocultar o separador “Programas” do canal
     Blur Blocked Items: Desfocar itens bloqueados em vez de os ocultar
   Data Settings:
+    Backup separate profile data: "Esta cópia de segurança também contém os dados de {count} perfil separado, que são restaurados nesse perfil. | Esta cópia de segurança também contém os dados de {count} de perfis separados, que são restaurados nesses perfis. | Esta cópia de segurança também contém os dados de {count} perfis separados, que são restaurados nesses perfis."
     Subscription cache file: "Este ficheiro só guarda em cache os vídeos das suas subscrições, não os canais. Escolha antes profiles.db ou uma exportação de subscrições."
     Settings could not be imported: "Não foi possível importar as definições"
     Some settings could not be imported: "Não foi possível importar todas as definições (falharam {failed} de {total})"
@@ -1664,6 +1665,13 @@ About:
   Matrix: Matrix
   Show tutorial: Mostrar tutorial
 Profile:
+  Keep Data Separate: "Manter os dados separados"
+  Keep Data Separate Tooltip: "Dá a este perfil as suas próprias subscrições, histórico de visualizações, listas de reprodução, histórico de pesquisas, estatísticas de visualização e fila. Os seus outros perfis não os veem, e este perfil não vê os deles. Não pode alterar isto depois de criar o perfil."
+  Separate Profile: "Perfil separado"
+  Separate Profile Note: "Este perfil mantém as suas subscrições, histórico e listas de reprodução separados dos seus outros perfis."
+  Separate Profile Deletion Warning: "As suas subscrições, histórico de visualizações, listas de reprodução, histórico de pesquisas, estatísticas de visualização e fila também serão eliminados."
+  Separate Data Notice: "{profile} mantém os seus dados separados, por isso as importações e exportações abaixo só usam as suas subscrições, histórico, listas de reprodução e histórico de pesquisas."
+  Separate Data Storage Notice: "{profile} mantém os seus dados separados. Os botões abaixo só eliminam os seus dados, enquanto os tamanhos incluem os dados de todos os perfis."
   Customization: Personalização
   Manage Profile Subscriptions: Gerir subscrições do perfil
   Icon Names:

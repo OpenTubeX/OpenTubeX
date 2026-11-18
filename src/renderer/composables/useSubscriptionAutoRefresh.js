@@ -227,7 +227,7 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
       enabled: store.getters.getEnableUploadNotifications && store.getters.getNotificationMode !== 'off',
       mode: store.getters.getNotificationMode,
       thumbnailUrl: getNotificationThumbnailUrl('{id}'),
-      subscriptions: store.getters.getProfileList[0]?.subscriptions ?? [],
+      subscriptions: store.getters.getAllRootSubscriptions,
       hiddenFeedTypes: hiddenSubscriptionFeedTypes.value,
       showMembersOnly: hasConfiguredRestrictedPlaybackAuthentication(store.getters),
       quietHours: store.getters.getBedtimeSilenceNotifications

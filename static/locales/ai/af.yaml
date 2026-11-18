@@ -1557,6 +1557,7 @@ Settings:
     Remove: Verwyder
     Blur Blocked Items: Vervaag geblokkeerde items in plaas daarvan om hulle te versteek
   Data Settings:
+    Backup separate profile data: "Hierdie rugsteun bevat ook die data van {count} afsonderlike profiel, wat in daardie profiel herstel word. | Hierdie rugsteun bevat ook die data van {count} afsonderlike profiele, wat in daardie profiele herstel word."
     Subscription cache file: "Hierdie lêer kas net die video's van jou intekeninge, nie die kanale nie. Kies eerder profiles.db of 'n uitvoer van intekeninge."
     Settings could not be imported: "Instellings kon nie ingevoer word nie"
     Some settings could not be imported: "Nie alle instellings kon ingevoer word nie ({failed} van {total} het misluk)"
@@ -1907,6 +1908,13 @@ About:
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX word moontlik gemaak deur {creditsPageLink}
   Show tutorial: Wys tutoriaal
 Profile:
+  Keep Data Separate: "Hou data afsonderlik"
+  Keep Data Separate Tooltip: "Gee hierdie profiel sy eie intekeninge, kykgeskiedenis, afspeellyste, soekgeskiedenis, kykstatistieke en tou. Jou ander profiele sien dit nie, en hierdie profiel sien nie hulle s'n nie. Jy kan dit nie verander nadat die profiel geskep is nie."
+  Separate Profile: "Afsonderlike profiel"
+  Separate Profile Note: "Hierdie profiel hou sy intekeninge, geskiedenis en afspeellyste apart van jou ander profiele."
+  Separate Profile Deletion Warning: "Sy intekeninge, kykgeskiedenis, afspeellyste, soekgeskiedenis, kykstatistieke en tou sal ook uitgevee word."
+  Separate Data Notice: "{profile} hou sy data afsonderlik, daarom gebruik die invoere en uitvoere hieronder net sy intekeninge, geskiedenis, afspeellyste en soekgeskiedenis."
+  Separate Data Storage Notice: "{profile} hou sy data afsonderlik. Die knoppies hieronder vee net sy data uit, terwyl die groottes die data van elke profiel insluit."
   Customization: Aanpassing
   Manage Profile Subscriptions: Bestuur profielintekeninge
   Icon Names:

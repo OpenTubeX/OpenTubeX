@@ -20,6 +20,33 @@ export function syncDeletionKey(collection, scope = null) {
 }
 
 /**
+ * The key under which deletions are recorded: the {@link syncDeletionKey},
+ * and for a separate profile's data also the profile.
+ * @param {string} key
+ * @param {string | null} [dataScope] The separate profile, or null for the data every profile shares
+ */
+export function syncDeletionListKey(key, dataScope = null) {
+  return dataScope === null ? key : JSON.stringify([dataScope, key])
+}
+
+/**
+ * @param {string} listKey A {@link syncDeletionListKey}
+ * @returns {[string | null, string] | null} The data scope and the deletion key, or null for an invalid key
+ */
+export function parseSyncDeletionListKey(listKey) {
+  // Deletion keys start with their collection's name, never with a bracket.
+  if (!listKey.startsWith('[')) return [null, listKey]
+  try {
+    const parsed = JSON.parse(listKey)
+    return Array.isArray(parsed) && parsed.length === 2 && parsed.every(part => typeof part === 'string')
+      ? [parsed[0], parsed[1]]
+      : null
+  } catch {
+    return null
+  }
+}
+
+/**
  * @typedef {Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>} SyncDeletionStorage
  */
 
@@ -84,7 +111,7 @@ export function createSyncDeletionDecisions(storage = null) {
 
   return {
     /**
-     * @param {string} key
+     * @param {string} key A {@link syncDeletionListKey}
      * @param {Iterable<string>} ids
      */
     confirm(key, ids) {
@@ -99,7 +126,7 @@ export function createSyncDeletionDecisions(storage = null) {
     },
 
     /**
-     * @param {string} key
+     * @param {string} key A {@link syncDeletionListKey}
      * @param {Iterable<string>} ids
      */
     keep(key, ids) {
@@ -113,25 +140,33 @@ export function createSyncDeletionDecisions(storage = null) {
       })
     },
 
-    /** @returns {Record<string, SyncDeletionDecision>} A copy for one sync */
-    snapshot() {
+    /**
+     * @param {string | null} [dataScope] The separate profile whose deletions to take, or null for the shared ones
+     * @returns {Record<string, SyncDeletionDecision>} A copy for one sync, by {@link syncDeletionKey}
+     */
+    snapshot(dataScope = null) {
       load()
-      return snapshotOf(decisions)
+      return Object.fromEntries(Object.entries(snapshotOf(decisions)).flatMap(([listKey, decision]) => {
+        const parsed = parseSyncDeletionListKey(listKey)
+        return parsed && parsed[0] === dataScope ? [[parsed[1], decision]] : []
+      }))
     },
 
     /**
      * Forgets the decisions a successful sync applied. Decisions made while it
      * ran stay for the next sync.
      * @param {Record<string, SyncDeletionDecision>} applied A {@link snapshot}
+     * @param {string | null} [dataScope] The data scope of the snapshot
      */
-    release(applied) {
+    release(applied, dataScope = null) {
       update(() => {
         for (const [key, { confirmed = [], kept = [] }] of Object.entries(applied)) {
-          const value = decisions.get(key)
+          const listKey = syncDeletionListKey(key, dataScope)
+          const value = decisions.get(listKey)
           if (!value) continue
           for (const id of confirmed) value.confirmed.delete(id)
           for (const id of kept) value.kept.delete(id)
-          if (value.confirmed.size === 0 && value.kept.size === 0) decisions.delete(key)
+          if (value.confirmed.size === 0 && value.kept.size === 0) decisions.delete(listKey)
         }
       })
     },
@@ -182,23 +217,29 @@ export const SYNC_DELETION_ACTIONS = new Map([
  * @param {any} state The root store state
  * @param {'history' | 'playlists' | 'playlistBookmarks' | 'profiles'} family
  * @param {string} mainProfileId
- * @returns {Map<string, Set<string>>} IDs by {@link syncDeletionKey}
+ * @returns {Map<string, Set<string>>} IDs by {@link syncDeletionListKey}
  */
 export function syncedIdLists(state, family, mainProfileId) {
   // Scanning through reactive proxies costs several times more on large libraries.
   state = toRaw(state)
   /** @type {Map<string, Set<string>>} */
   const lists = new Map()
+  // The store holds the history and playlists of the active profile's data.
+  const activeProfile = state.profiles?.profileList?.find(profile => profile._id === state.profiles.activeProfile)
+  const dataScope = activeProfile?.separate === true ? activeProfile._id : null
   switch (family) {
     case 'history':
-      lists.set('history', new Set((state.history?.historyCacheSorted ?? []).map(record => record.videoId)))
+      lists.set(
+        syncDeletionListKey('history', dataScope),
+        new Set((state.history?.historyCacheSorted ?? []).map(record => record.videoId))
+      )
       break
     case 'playlists': {
       const playlists = state.playlists?.playlists ?? []
-      lists.set('playlists', new Set(playlists.map(playlist => playlist._id)))
+      lists.set(syncDeletionListKey('playlists', dataScope), new Set(playlists.map(playlist => playlist._id)))
       for (const playlist of playlists) {
         lists.set(
-          syncDeletionKey('playlistVideos', playlist._id),
+          syncDeletionListKey(syncDeletionKey('playlistVideos', playlist._id), dataScope),
           new Set((playlist.videos ?? []).map(video => video.videoId))
         )
       }
@@ -213,11 +254,20 @@ export function syncedIdLists(state, family, mainProfileId) {
       const profiles = state.profiles?.profileList ?? []
       const main = profiles.find(profile => profile._id === mainProfileId) ?? profiles[0]
       lists.set('subscriptions', new Set((main?.subscriptions ?? []).map(channel => channel.id)))
-      const others = profiles.filter(profile => profile._id !== mainProfileId)
+      const others = profiles.filter(profile => profile._id !== mainProfileId && profile.separate !== true)
       lists.set('profiles', new Set(others.map(profile => profile._id)))
       for (const profile of others) {
         lists.set(
           syncDeletionKey('profileChannels', profile._id),
+          new Set((profile.subscriptions ?? []).map(channel => channel.id))
+        )
+      }
+      // Separate profiles sync their channels like the main profile, in their own data.
+      const separate = profiles.filter(profile => profile.separate === true)
+      lists.set('separateProfiles', new Set(separate.map(profile => profile._id)))
+      for (const profile of separate) {
+        lists.set(
+          syncDeletionListKey('subscriptions', profile._id),
           new Set((profile.subscriptions ?? []).map(channel => channel.id))
         )
       }

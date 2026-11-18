@@ -387,7 +387,7 @@ test('refreshes of another profile also fetch channels with notifications turned
   const gamma = { id: 'UCc' }
   const context = vm.createContext({
     process: { env: { IS_ELECTRON: true } },
-    store: { getters: { getEnableUploadNotifications: true, getProfileList: [{ subscriptions: [alpha, beta, gamma] }] } },
+    store: { getters: { getEnableUploadNotifications: true, getAllRootSubscriptions: [alpha, beta, gamma] } },
     window: { ftElectron: { subscriptionAutoRefresh: { configureUploadNotifications: async () => {} } } },
   })
   vm.runInContext(source.replace(/^import .*\n/gm, '').replace(/^export /gm, ''), context)

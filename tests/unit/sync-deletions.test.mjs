@@ -271,3 +271,26 @@ test('deletions are not tracked while sync is off', async () => {
   await store.dispatch('removeFromHistory', () => { store.state.history.historyCacheSorted = [] })
   assert.deepEqual(decisions.snapshot(), {})
 })
+
+test('deletions in a separate profile are kept apart from the shared ones', async () => {
+  const separate = { _id: 'separate', separate: true, subscriptions: [{ id: 'channel' }] }
+  const { store, decisions } = trackedStore({
+    history: { historyCacheSorted: [{ videoId: 'video' }] },
+    profiles: { activeProfile: 'separate', profileList: [{ _id: MAIN_PROFILE_ID, subscriptions: [] }, separate] },
+  })
+  await store.dispatch('removeFromHistory', () => { store.state.history.historyCacheSorted = [] })
+  await store.dispatch('removeChannelFromProfiles', () => {
+    store.state.profiles.profileList[1] = { ...separate, subscriptions: [] }
+  })
+  assert.deepEqual(decisions.snapshot('separate'), {
+    history: { confirmed: ['video'], kept: [] },
+    subscriptions: { confirmed: ['channel'], kept: [] },
+  })
+  assert.deepEqual(decisions.snapshot(), {})
+
+  await store.dispatch('removeProfile', () => { store.state.profiles.profileList.splice(1, 1) })
+  assert.deepEqual(decisions.snapshot().separateProfiles.confirmed, ['separate'])
+  assert.equal(decisions.snapshot().profiles, undefined)
+  decisions.release(decisions.snapshot('separate'), 'separate')
+  assert.deepEqual(decisions.snapshot('separate'), {})
+})

@@ -1629,6 +1629,7 @@ Settings:
     Remove: Odstrani
     Blur Blocked Items: Zamegli blokirane elemente, namesto da bi jih skril
   Data Settings:
+    Backup separate profile data: "Ta varnostna kopija vsebuje tudi podatke {count} ločenega profila, ki se obnovijo v ta profil. | Ta varnostna kopija vsebuje tudi podatke {count} ločenih profilov, ki se obnovijo v ta profila. | Ta varnostna kopija vsebuje tudi podatke {count} ločenih profilov, ki se obnovijo v te profile. | Ta varnostna kopija vsebuje tudi podatke {count} ločenih profilov, ki se obnovijo v te profile."
     Subscription cache file: "Ta datoteka hrani v predpomnilniku samo videoposnetke iz vaših naročnin, ne kanalov. Namesto nje izberite profiles.db ali izvoz naročnin."
     Settings could not be imported: "Nastavitev ni bilo mogoče uvoziti"
     Some settings could not be imported: "Vseh nastavitev ni bilo mogoče uvoziti (neuspešno: {failed} od {total})"
@@ -2019,6 +2020,13 @@ About:
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX omogočajo {creditsPageLink}
   Show tutorial: Prikaži vodnik
 Profile:
+  Keep Data Separate: "Ohrani podatke ločeno"
+  Keep Data Separate Tooltip: "Temu profilu da lastne naročnine, zgodovino ogledov, sezname predvajanja, zgodovino iskanja, statistiko ogledov in čakalno vrsto. Vaši drugi profili jih ne vidijo, ta profil pa ne vidi njihovih. Tega po ustvarjanju profila ni mogoče spremeniti."
+  Separate Profile: "Ločen profil"
+  Separate Profile Note: "Ta profil ohranja svoje naročnine, zgodovino in sezname predvajanja ločeno od vaših drugih profilov."
+  Separate Profile Deletion Warning: "Izbrisani bodo tudi njegove naročnine, zgodovina ogledov, seznami predvajanja, zgodovina iskanja, statistika ogledov in čakalna vrsta."
+  Separate Data Notice: "Profil {profile} ohranja svoje podatke ločeno, zato spodnji uvozi in izvozi uporabljajo samo njegove naročnine, zgodovino, sezname predvajanja in zgodovino iskanja."
+  Separate Data Storage Notice: "Profil {profile} ohranja svoje podatke ločeno. Spodnji gumbi izbrišejo samo njegove podatke, velikosti pa vključujejo podatke vseh profilov."
   Customization: Prilagoditev
   Manage Profile Subscriptions: Upravljaj naročnine profila
   Icon Names:

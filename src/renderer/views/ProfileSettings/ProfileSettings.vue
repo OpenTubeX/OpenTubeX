@@ -16,6 +16,7 @@
           v-for="profile in profileList"
           :key="profile._id"
           :is-main-profile="profile._id === MAIN_PROFILE_ID"
+          :is-separate="profile.separate === true"
           :profile-name="profile.name"
           :background-color="profile.bgColor"
           :text-color="profile.textColor"
@@ -147,7 +148,7 @@
             :query="subscriptionQuery"
           />
           <FtProfileFilterChannelsList
-            v-if="!isMainProfile"
+            v-if="!isMainProfile && openSettingsProfile.separate !== true"
             class="channelList"
             :profile="openSettingsProfile"
             :query="subscriptionQuery"

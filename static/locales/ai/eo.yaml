@@ -1404,6 +1404,7 @@ Settings:
     Paused Interface Hide Delay: Prokrasto de kaŝo de la interfaco dum paŭzo
     Blur Blocked Items: Nebuligi blokitajn erojn anstataŭ kaŝi ilin
   Data Settings:
+    Backup separate profile data: "Ĉi tiu savkopio enhavas ankaŭ la datumojn de {count} aparta profilo, kiuj restariĝos en tiu profilo. | Ĉi tiu savkopio enhavas ankaŭ la datumojn de {count} apartaj profiloj, kiuj restariĝos en tiuj profiloj."
     Subscription cache file: "Ĉi tiu dosiero nur kaŝmemoras la videojn de viaj abonoj, ne la kanalojn. Elektu anstataŭe profiles.db aŭ eksporton de abonoj."
     Settings could not be imported: "Ne eblis importi la agordojn"
     Some settings could not be imported: "Ne eblis importi ĉiujn agordojn ({failed} el {total} malsukcesis)"
@@ -1726,6 +1727,13 @@ About:
   Email: Retpoŝto
   Show tutorial: Montri gvidilon
 Profile:
+  Keep Data Separate: "Konservi datumojn aparte"
+  Keep Data Separate Tooltip: "Donas al ĉi tiu profilo siajn proprajn abonojn, spekthistorion, ludlistojn, serĉan historion, spektajn statistikojn kaj vicon. Viaj aliaj profiloj ne vidas ilin, kaj ĉi tiu profilo ne vidas la datumojn de la aliaj. Vi ne povas ŝanĝi tion post kreo de la profilo."
+  Separate Profile: "Aparta profilo"
+  Separate Profile Note: "Ĉi tiu profilo konservas siajn abonojn, historion kaj ludlistojn aparte de viaj aliaj profiloj."
+  Separate Profile Deletion Warning: "Ĝiaj abonoj, spekthistorio, ludlistoj, serĉa historio, spektaj statistikoj kaj vico ankaŭ estos forigitaj."
+  Separate Data Notice: "{profile} konservas siajn datumojn aparte, do la enportoj kaj elportoj sube uzas nur ĝiajn abonojn, historion, ludlistojn kaj serĉan historion."
+  Separate Data Storage Notice: "{profile} konservas siajn datumojn aparte. La butonoj sube forigas nur ĝiajn datumojn, dum la grandoj inkluzivas la datumojn de ĉiuj profiloj."
   Customization: Personecigo
   Manage Profile Subscriptions: Administri profilajn abonojn
   Icon Names:

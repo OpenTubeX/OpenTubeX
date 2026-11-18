@@ -35,8 +35,8 @@ function evaluate (source, dependencies, exports = '') {
 function fixture () {
   const db = Object.fromEntries(['history', 'settings', 'recommendations'].map(name => [name, new Datastore({ inMemoryOnly: true })]))
   const handlers = evaluate(sources[0], { db, createRecommendationStore, createIdQuery, ...historyHelpers, ...seenHelpers }, 'return { history: History, recommendations }')
-  const history = evaluate(sources[1], { DBHistoryHandlers: handlers.history, toRaw, ...historyHelpers, ...externalMediaHistory })
-  const recommendations = evaluate(sources[2], { DBRecommendationHandlers: handlers.recommendations })
+  const history = evaluate(sources[1], { DBHistoryHandlers: handlers.history, toRaw, ...historyHelpers, ...externalMediaHistory, getDataScope: () => null })
+  const recommendations = evaluate(sources[2], { DBRecommendationHandlers: handlers.recommendations, getDataScope: () => null })
   const otherModules = Object.fromEntries([...sources[3].matchAll(/^import (\w+)(?:, \{[^}]*\})? from '\.\/modules\//gm)].map(([, name]) => [name, {}]))
   const store = evaluate(sources[3], {
     ...otherModules,

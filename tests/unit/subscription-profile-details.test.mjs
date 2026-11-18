@@ -76,8 +76,10 @@ async function profileStore(subscriptions = [{ id: 'channel', name: 'Old name', 
     const module = context.profileModule
     module.state.profileList = structuredClone(profiles)
     module.state.profilesLoaded = true
+    const getters = new Proxy({}, { get: (_, name) => module.getters[name](module.state, getters, {}, getters) })
     const store = {
       state: module.state,
+      getters,
       commit: (mutation, payload) => module.mutations[mutation](module.state, payload),
       dispatch: (action, payload) => module.actions[action](store, payload)
     }

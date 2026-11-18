@@ -1364,6 +1364,7 @@ Settings:
     Paused Interface Hide Delay: Prodleva skrytí rozhraní při pozastavení
     Blur Blocked Items: Rozmazat blokované položky místo jejich skrytí
   Data Settings:
+    Backup separate profile data: "Tato záloha obsahuje také data {count} samostatného profilu, která se obnoví do tohoto profilu. | Tato záloha obsahuje také data {count} samostatných profilů, která se obnoví do těchto profilů. | Tato záloha obsahuje také data {count} samostatných profilů, která se obnoví do těchto profilů."
     Subscription cache file: "Tento soubor obsahuje jen mezipaměť videí z vašich odběrů, ne samotné kanály. Vyberte místo něj profiles.db nebo export odběrů."
     Settings could not be imported: "Nastavení se nepodařilo importovat"
     Some settings could not be imported: "Některá nastavení se nepodařilo importovat (selhalo {failed} z {total})"
@@ -1685,6 +1686,13 @@ About:
   Email: E-mail
   Show tutorial: Zobrazit průvodce
 Profile:
+  Keep Data Separate: "Uchovávat data odděleně"
+  Keep Data Separate Tooltip: "Dá tomuto profilu vlastní odběry, historii sledování, playlisty, historii vyhledávání, statistiky sledování a frontu. Vaše ostatní profily je nevidí a tento profil nevidí jejich data. Po vytvoření profilu to nelze změnit."
+  Separate Profile: "Samostatný profil"
+  Separate Profile Note: "Tento profil uchovává své odběry, historii a playlisty odděleně od vašich ostatních profilů."
+  Separate Profile Deletion Warning: "Smažou se také jeho odběry, historie sledování, playlisty, historie vyhledávání, statistiky sledování a fronta."
+  Separate Data Notice: "Profil {profile} uchovává svá data odděleně, proto importy a exporty níže používají jen jeho odběry, historii, playlisty a historii vyhledávání."
+  Separate Data Storage Notice: "Profil {profile} uchovává svá data odděleně. Tlačítka níže smažou jen jeho data, zatímco velikosti zahrnují data všech profilů."
   Customization: Přizpůsobení
   Manage Profile Subscriptions: Spravovat odběry profilu
   Icon Names:

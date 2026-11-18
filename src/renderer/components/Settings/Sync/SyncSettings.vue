@@ -643,6 +643,7 @@ const dataLossCollectionLabels = {
   playlistBookmarks: () => t('Settings.Sync Settings.Saved Playlists'),
   history: () => t('History.History'),
   profiles: () => t('Settings.Sync Settings.Profiles'),
+  separateProfiles: () => t('Settings.Sync Settings.Profiles'),
 }
 // Nested lists show the name of their playlist or profile.
 const dataLossCollection = computed(() => {

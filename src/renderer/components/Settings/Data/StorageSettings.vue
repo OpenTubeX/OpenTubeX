@@ -229,6 +229,7 @@
     </FtSettingsSection>
 
     <FtSettingsSection :title="t('Settings.Storage Settings.History Data')">
+      <FtDataScopeNotice storage />
       <StorageItem
         v-if="USING_ELECTRON"
         :icon="['fas', 'film']"
@@ -365,6 +366,7 @@ import { useI18n } from 'vue-i18n'
 import FtButton from '../../FtButton/FtButton.vue'
 import FtPrompt from '../../FtPrompt/FtPrompt.vue'
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
+import FtDataScopeNotice from '../../FtDataScopeNotice/FtDataScopeNotice.vue'
 import FtSlider from '../../FtSlider/FtSlider.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
 import FtTooltip from '../../FtTooltip/FtTooltip.vue'
@@ -803,9 +805,20 @@ async function handleCleanupPrompt(option) {
   }
 }
 
+// Like the other deletions, this only affects the active profile's data:
+// a separate profile's own subscriptions, or the profiles that share theirs.
 async function removeSubscriptionsAndProfiles() {
+  if (store.getters.getActiveDataScope !== null) {
+    const profile = store.getters.getActiveProfile
+    const channelIds = profile.subscriptions.map(channel => channel.id)
+    await requireCleanupSuccess(store.dispatch('updateProfile', { ...profile, subscriptions: [] }))
+    // The other profiles keep the cached feeds of channels they follow too.
+    const followedElsewhere = new Set(store.getters.getAllRootSubscriptions.map(channel => channel.id))
+    await store.dispatch('clearSubscriptionsCacheForManyChannels', channelIds.filter(id => !followedElsewhere.has(id)))
+    return
+  }
   await store.dispatch('updateActiveProfile', MAIN_PROFILE_ID)
-  const cleanupResults = await Promise.all(profileList.value.map(profile => {
+  const cleanupResults = await Promise.all(profileList.value.filter(profile => profile.separate !== true).map(profile => {
     if (profile._id === MAIN_PROFILE_ID) {
       return store.dispatch('updateProfile', { ...profile, subscriptions: [] })
     }

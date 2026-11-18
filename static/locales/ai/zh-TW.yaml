@@ -1364,6 +1364,7 @@ Settings:
     Paused Interface Hide Delay: 暫停介面的隱藏延遲
     Blur Blocked Items: 模糊顯示已封鎖的項目，而非隱藏
   Data Settings:
+    Backup separate profile data: "此備份還包含 {count} 個獨立設定檔的資料，這些資料會還原到對應的設定檔中。"
     Subscription cache file: "此檔案只快取了你訂閱中的影片，不包含頻道本身。請改為選擇 profiles.db 或訂閱匯出檔案。"
     Settings could not be imported: "無法匯入設定"
     Some settings could not be imported: "部分設定無法匯入（{total} 項中有 {failed} 項失敗）"
@@ -1684,6 +1685,13 @@ About:
   Email: 電子郵件
   Show tutorial: 顯示教學
 Profile:
+  Keep Data Separate: "分開保存資料"
+  Keep Data Separate Tooltip: "為此設定檔提供獨立的訂閱、觀看記錄、播放清單、搜尋記錄、觀看統計資料和佇列。你的其他設定檔看不到這些內容，此設定檔也看不到它們的資料。建立設定檔後無法變更此設定。"
+  Separate Profile: "獨立設定檔"
+  Separate Profile Note: "此設定檔的訂閱、記錄和播放清單與你的其他設定檔相互獨立。"
+  Separate Profile Deletion Warning: "它的訂閱、觀看記錄、播放清單、搜尋記錄、觀看統計資料和佇列也會一併刪除。"
+  Separate Data Notice: "{profile} 的資料是分開保存的，因此下方的匯入和匯出只會使用它的訂閱、記錄、播放清單和搜尋記錄。"
+  Separate Data Storage Notice: "{profile} 的資料是分開保存的。下方的按鈕只會刪除它的資料，而大小則包含所有設定檔的資料。"
   Customization: 自訂
   Manage Profile Subscriptions: 管理個人資料的訂閱
   Icon Names:

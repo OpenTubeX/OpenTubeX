@@ -6,11 +6,14 @@ import {
   addSyncDeletionMarks,
   createSyncDeletionDecisions,
   createUnsentSyncDeletionMarks,
+  parseSyncDeletionListKey,
   readSyncDeletionMarks,
   syncDeletionKey,
+  syncDeletionListKey,
   translateSyncDeletionMarks,
   withRemoteSyncDeletions,
 } from '../../src/renderer/helpers/sync-deletions.js'
+import * as dataScopes from '../../src/renderer/helpers/sync-data-scope.js'
 import { executeBackgroundJob as runBackgroundJob } from '../../src/renderer/helpers/background-job-operations.js'
 import * as releasedClient from '../helpers/released-sync-sessions.mjs'
 import * as sessions from '../../src/renderer/helpers/sync-sessions.js'
@@ -54,7 +57,7 @@ const helperSource = await readFile(new URL('../../src/renderer/helpers/sync-ser
 const storeSource = await readFile(new URL('../../src/renderer/store/modules/sync-server.js', import.meta.url), 'utf8')
 const schedulerSource = await readFile(new URL('../../src/renderer/helpers/sync-server-scheduler.js', import.meta.url), 'utf8')
 
-function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false, syncableSettingKeys = ['channelPlaybackSpeeds'], reminderService, connected = false, timer, locks, desktopTabs, connectionChanges, capacitor = false, backgroundJob = runBackgroundJob, settingsReader, receiptStorage, openExternalLink = async () => {}, notificationDismissals = normalizeNotificationDismissals(null), hiddenRenderer = false, deletions = createSyncDeletionDecisions(), unsentMarks = createUnsentSyncDeletionMarks() } = {}) {
+function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false, syncableSettingKeys = ['channelPlaybackSpeeds'], reminderService, connected = false, timer, locks, desktopTabs, connectionChanges, capacitor = false, backgroundJob = runBackgroundJob, settingsReader, receiptStorage, openExternalLink = async () => {}, notificationDismissals = normalizeNotificationDismissals(null), hiddenRenderer = false, deletions = createSyncDeletionDecisions(), unsentMarks = createUnsentSyncDeletionMarks(), dataScope = null } = {}) {
   const connectionEvents = new EventTarget()
   const network = { state: connectionState, online }
   const requests = []
@@ -180,9 +183,13 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     syncDeletionKey,
     SYNC_DELETION_MARKS_COLLECTION,
     addSyncDeletionMarks,
+    parseSyncDeletionListKey,
     readSyncDeletionMarks,
     translateSyncDeletionMarks,
     withRemoteSyncDeletions,
+    syncDeletionListKey,
+    ...dataScopes,
+    getDataScope: () => dataScope,
     deepCopy: structuredClone,
     createSyncServerRequestHeaders,
     CUSTOM_THEMES_SYNC_KEY,
@@ -216,7 +223,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     },
   }
   const helper = vm.createContext({ ...common })
-  vm.runInContext(withoutImports(helperSource) + '\nglobalThis.exports = { SyncServerClient, syncSubscriptions, syncSettings, syncHistory, syncPlaylists, syncPlaylistBookmarks, syncSessions, normalizeSyncServerUrl };', helper)
+  vm.runInContext(withoutImports(helperSource) + '\nglobalThis.exports = { SyncServerClient, syncSubscriptions, syncSettings, syncHistory, syncPlaylists, syncPlaylistBookmarks, syncProfiles, syncSeparateProfiles, syncSessions, normalizeSyncServerUrl };', helper)
   const store = vm.createContext({ ...common, ...helper.exports, getSavedOtherDeviceSessions: () => [] })
   vm.runInContext(withoutImports(schedulerSource) + withoutImports(storeSource).replace('export default { state, getters, actions, mutations }', 'globalThis.exports = { state, actions, mutations }'), store)
   const context = {
@@ -228,7 +235,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
       utils: { customThemes: [] },
       profiles: { profileList: [{ _id: 'main', subscriptions: [{ id: 'private-channel', name: 'Private subscription' }] }] },
     },
-    rootGetters: {},
+    rootGetters: { getActiveDataScope: dataScope },
     state: store.exports.state,
     commit: (action, value) => {
       commits.push([action, value])
@@ -688,6 +695,91 @@ test('a subscription removed during an upload conflict stays removed, and unsent
   assert.deepEqual(uploaded.map(channel => channel.id), ['private-channel', 'local-channel'])
   assert.deepEqual(Array.from(f.context.rootState.profiles.profileList[0].subscriptions, channel => channel.id), ['private-channel', 'local-channel'])
   assert.deepEqual(JSON.parse(f.settings.syncServerSnapshot).subscriptions, ['private-channel', 'local-channel'])
+})
+
+test('a separate profile syncs its library only in its own collections and never into the shared ones', async () => {
+  const scope = Buffer.from('separate-1').toString('hex')
+  const key = Buffer.alloc(32, 1).toString('base64')
+  const salt = Buffer.alloc(16, 2).toString('base64')
+  const entry = id => ({ id, name: id, bgColor: '#123456', textColor: '#FFFFFF' })
+  const metadata = id => ({ name: id, bgColor: '#123456', textColor: '#FFFFFF', icon: null })
+  const sharedHistory = { 'shared-video': { added_date: 1, watched_state: 'watching', position_millis: 1000 } }
+  const uploads = {}
+  const f = fixture({
+    syncServerSyncHistory: true,
+    syncServerSyncProfiles: true,
+    syncServerSnapshot: JSON.stringify({
+      subscriptions: ['private-channel'],
+      history: sharedHistory,
+      separateProfiles: { 'separate-1': metadata('separate-1'), 'gone-1': metadata('gone-1') },
+    }),
+  }, {
+    encrypted: true,
+    dataScope: 'separate-1',
+    respond: async (url, options) => {
+      const path = new URL(url).pathname
+      if (path === '/health') return { capabilities: { encrypted_sync: 1, live_sync: 1, separate_profiles: 1 } }
+      if (path === '/v1/encrypted_sync') return { collections: [{ collection: 'separateProfiles', revision: 1 }], legacy_data: false }
+      if (path === '/v1/encrypted_sync/separateProfiles' && !options.method) {
+        // Another device deleted the profile `gone-1`.
+        return { revision: 1, payload: await privacy.encryptSyncDocument([entry('separate-1'), entry('gone-1')], key, salt) }
+      }
+      if (options.method === 'PUT') {
+        const body = JSON.parse(options.body)
+        uploads[path.split('/').at(-1)] = { activity: body.activity, data: await privacy.decryptSyncDocument(body.payload, key) }
+        return { revision: 2 }
+      }
+    },
+  })
+  f.context.rootState.profiles.profileList.push({
+    _id: 'separate-1',
+    name: 'separate-1',
+    bgColor: '#123456',
+    textColor: '#FFFFFF',
+    separate: true,
+    subscriptions: [{ id: 'separate-channel', name: 'Separate subscription' }],
+  })
+  f.context.rootState.history = {
+    historyCacheSorted: [{ videoId: 'separate-video', title: 'Separate video', authorId: 'channel', author: 'Channel', timeWatched: 1, watchProgress: 15, lengthSeconds: 120 }],
+  }
+  await f.actions.syncWithSyncServer(f.context)
+  assert.equal(f.context.state.syncServerStatus, 'success', f.context.state.syncServerError)
+
+  // The separate profile's data goes only to its collections, without activity older versions would show.
+  assert.equal(uploads.subscriptions, undefined)
+  assert.equal(uploads.history, undefined)
+  assert.deepEqual(uploads[`subscriptions.${scope}`].data.map(channel => channel.id), ['separate-channel'])
+  assert.deepEqual(uploads[`history.${scope}`].data.map(item => item.video.id), ['separate-video'])
+  assert.equal(uploads[`subscriptions.${scope}`].activity, undefined)
+  // Only shared profiles go to `profiles`.
+  assert.ok(!JSON.stringify(uploads.profiles?.data ?? []).includes('separate-1'))
+  assert.deepEqual(uploads.separateProfiles.data, [entry('separate-1')])
+  assert.equal(uploads.separateProfiles.activity, undefined)
+  // The deleted profile's data is deleted once no profile lists it.
+  assert.deepEqual(f.requests.filter(request => request.method === 'DELETE').map(request => new URL(request.url).pathname).sort(),
+    ['history', 'playlists', 'subscriptions', 'watchStats'].map(base => `/v1/encrypted_sync/${base}.${Buffer.from('gone-1').toString('hex')}`).sort())
+
+  // Neither profile lost channels, and the shared baselines stay for the next shared sync.
+  assert.deepEqual(Array.from(f.context.rootState.profiles.profileList, profile => Array.from(profile.subscriptions, channel => channel.id)),
+    [['private-channel'], ['separate-channel']])
+  const snapshot = JSON.parse(f.settings.syncServerSnapshot)
+  assert.deepEqual(snapshot.subscriptions, ['private-channel'])
+  assert.deepEqual(snapshot.history, sharedHistory)
+  assert.deepEqual(snapshot.scopes[scope].subscriptions, ['separate-channel'])
+  assert.deepEqual(Object.keys(snapshot.scopes[scope].history), ['separate-video'])
+  assert.deepEqual(Object.keys(snapshot.separateProfiles), ['separate-1'])
+})
+
+test('a separate profile does not sync its library without server support', async () => {
+  const f = fixture({ syncServerSyncHistory: true }, {
+    encrypted: true,
+    dataScope: 'separate-1',
+    respond: url => url.endsWith('/health') ? { capabilities: { encrypted_sync: 1, live_sync: 1 } } : undefined,
+  })
+  f.context.rootState.history = { historyCacheSorted: [{ videoId: 'separate-video', authorId: 'channel', timeWatched: 1, watchProgress: 15, lengthSeconds: 120 }] }
+  await f.actions.syncWithSyncServer(f.context)
+  assert.equal(f.context.state.syncServerStatus, 'success')
+  assert.deepEqual(f.requests.filter(request => /\/encrypted_sync\/(history|subscriptions|playlists|watchStats)/.test(request.url)), [])
 })
 
 for (const overrides of [
