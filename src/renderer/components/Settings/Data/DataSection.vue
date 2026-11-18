@@ -21,7 +21,9 @@ defineProps({
 </script>
 
 <style scoped>
+/* The tab's sections join the category's grid, so they are spaced like the
+   sections of other categories. */
 .dataStoragePanel {
-  min-inline-size: 0;
+  display: contents;
 }
 </style>

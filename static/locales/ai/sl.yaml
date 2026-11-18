@@ -559,7 +559,6 @@ Settings:
     Tabs to unload: "Zavihki za razložitev"
     Automatic unloading help: "Razloži najstarejše zavihke v ozadju, da sprosti pomnilnik. Aktivni zavihki in zavihki s predvajanjem ostanejo naloženi."
     Memory threshold help: "Odstotek omejitve pomnilnika izrisovalnika, ne celotnega sistemskega pomnilnika RAM."
-  Navigation and Controls: "Krmarjenje in kontrolniki"
   Control Bar:
     Title: "Nadzorna vrstica"
     Customize: "Prilagodi nadzorno vrstico"

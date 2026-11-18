@@ -512,7 +512,6 @@ Settings:
     Tabs to unload: "Zu entladende Tabs"
     Automatic unloading help: "Die ältesten Hintergrund-Tabs entladen, um Speicher freizugeben. Aktive und abspielende Tabs bleiben geladen."
     Memory threshold help: "Prozent des Speicherlimits des Renderers, nicht des gesamten Arbeitsspeichers."
-  Navigation and Controls: "Navigation & Bedienelemente"
   Interface Customizer:
     Customize Interface: Oberfläche anpassen
     Preview: Vorschau

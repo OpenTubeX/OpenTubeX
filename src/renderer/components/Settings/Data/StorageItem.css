@@ -15,12 +15,13 @@
   padding-block: 16px;
 }
 
-.storageItem + .storageItem {
-  border-block-start: 1px solid var(--divider-color);
+/* The card's own top padding already spaces the first item. */
+.storageItem:first-child {
+  padding-block-start: 8px;
 }
 
-.storageItem:last-child {
-  padding-block-end: 0;
+.storageItem + .storageItem {
+  border-block-start: 1px solid var(--divider-color);
 }
 
 .storageItemIcon {

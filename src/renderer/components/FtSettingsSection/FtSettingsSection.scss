@@ -22,7 +22,10 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding-block: 8px;
+
+  /* Text that starts a card sits as far below its top edge as the card's
+     content ends above its bottom edge, which includes a control's margin. */
+  padding-block: calc(8px + var(--settings-control-margin)) 8px;
   background-color: var(--settings-section-bg-color);
   backdrop-filter: var(--card-bg-blur, none);
   border-radius: var(--shape-corner-large-increased);
@@ -36,6 +39,56 @@
 
   > :deep(:is(h3, h4, p)) {
     padding-block: 8px 4px;
+  }
+
+  /* Text that ends a card leaves as much space below it as a control does. */
+  > :deep(p:last-child) {
+    padding-block-end: calc(8px + var(--settings-control-margin));
+  }
+
+  /* Buttons keep smaller margins than other controls (none in a button
+     group), so a row of them that ends a card makes up the difference. */
+  > :deep(:last-child:not(.buttonGroup):has(> .btn:last-child, > :last-child > .btn:last-child)) {
+    padding-block-end: calc(8px + var(--settings-control-margin) - 5px);
+  }
+
+  > :deep(.buttonGroup:last-child) {
+    padding-block-end: calc(8px + var(--settings-control-margin));
+  }
+
+  /* A switch's label padding already adds space below it. Compact switches
+     have no margin, so their row makes up the rest. */
+  > :deep(:last-child > .switch-ctn:not(.compact):last-child) {
+    margin-block-end: calc(var(--settings-control-margin) - 6px);
+  }
+
+  > :deep(:last-child:has(> .switch-ctn.compact:last-child, > .switchColumn:last-child > .switch-ctn.compact:last-child)) {
+    padding-block-end: calc(8px + var(--settings-control-margin) - 6px);
+  }
+
+  /* A slider's box extends below its handle. */
+  > :deep(:has(> .pure-material-slider:last-child)) {
+    padding-block-end: 0;
+  }
+
+  > :deep(:has(> .pure-material-slider:last-child) + :has(> .btn:first-child)) {
+    padding-block-start: 0;
+  }
+
+  /* Controls that start a card bring their own space above them: a switch
+     its label padding, a select or text field its margin, minus the label
+     that rises above its outline. */
+  > :deep(:first-child:has(> .switch-ctn:first-child, > .switchColumn > .switch-ctn:first-child, > .switchColumnGrid:first-child > .switchColumn > .switch-ctn:first-child)) {
+    padding-block-start: 2px;
+  }
+
+  > :deep(:first-child > .switch-ctn:first-child),
+  > :deep(:first-child > .switchColumn > .switch-ctn:first-child) {
+    margin-block-start: 0;
+  }
+
+  > :deep(:first-child:has(> :is(.select, .ft-input-component):first-child, > :first-child > :is(.select, .ft-input-component):first-child)) {
+    padding-block-start: 6px;
   }
 }
 

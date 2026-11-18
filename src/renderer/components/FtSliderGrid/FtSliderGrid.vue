@@ -8,6 +8,7 @@
 .sliderGrid {
   --slider-gap: 24px;
 
+  container: slider-grid / inline-size;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -40,9 +41,18 @@
   max-inline-size: var(--slider-size);
 }
 
+/* Four sliders share a row only while their labels fit on one line, and
+   otherwise form two rows of two. */
+@container slider-grid (width < 960px) {
+  .sliderGrid:has(> :nth-child(4):last-child) :deep(.pure-material-slider) {
+    flex-basis: calc((100% - var(--slider-gap)) / 2);
+  }
+}
+
 @media only screen and (width <= 680px) {
   .sliderGrid :deep(.pure-material-slider),
-  .sliderGrid:has(:nth-child(5)) :deep(.pure-material-slider) {
+  .sliderGrid:has(:nth-child(5)) :deep(.pure-material-slider),
+  .sliderGrid:has(> :nth-child(4):last-child) :deep(.pure-material-slider) {
     flex-basis: 100%;
     max-inline-size: 380px;
   }

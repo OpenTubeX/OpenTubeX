@@ -2,6 +2,8 @@
   margin-block: 0 1em;
   padding-inline: 20px;
   color: var(--secondary-text-color);
+  max-inline-size: 700px;
+  text-align: center;
 }
 
 .enableChannelSettingsToggle {

@@ -798,7 +798,7 @@ async function createYouTubeSession() {
   display: grid;
   gap: 18px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  padding-block: 8px 18px;
+  padding-block: 8px;
   padding-inline: max(20px, calc((100% - 820px) / 2));
 }
 
@@ -808,7 +808,7 @@ async function createYouTubeSession() {
   display: flex;
   flex-direction: column;
   min-inline-size: 0;
-  padding-block: 14px 18px;
+  padding-block: 0;
   padding-inline: 18px;
 }
 
@@ -847,7 +847,7 @@ async function createYouTubeSession() {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  margin-block: 20px 14px;
+  margin-block: 20px var(--settings-control-margin);
   text-align: center;
 }
 

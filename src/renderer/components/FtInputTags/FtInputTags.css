@@ -87,7 +87,9 @@
 }
 
 :deep(.ft-input-component .inputWrapper) {
-  margin-block-start: 10px;
+  /* The floating label rises about 7px above the field, so this leaves the
+     box's 20px padding between the heading and the label. */
+  margin-block-start: 27px;
 }
 
 :deep(.inputWrapper:has(.inputIndicators)) {

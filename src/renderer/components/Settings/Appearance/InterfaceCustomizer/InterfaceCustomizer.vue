@@ -1,17 +1,12 @@
 <template>
-  <FtSettingsSection
-    :title="t('Settings.Navigation and Controls')"
-    :icon="['fas', 'control-bar']"
-  >
-    <div class="customizerLauncher">
-      <FtButton
-        data-settings-subpage="customize-interface"
-        :label="t('Settings.Interface Customizer.Customize Interface')"
-        :icon="['fas', 'sliders-h']"
-        @click="open = true"
-      />
-    </div>
-  </FtSettingsSection>
+  <div class="customizerLauncher">
+    <FtButton
+      data-settings-subpage="customize-interface"
+      :label="t('Settings.Interface Customizer.Customize Interface')"
+      :icon="['fas', 'sliders-h']"
+      @click="open = true"
+    />
+  </div>
 
   <FtSettingsSubpage
     :open="open"
@@ -156,7 +151,6 @@ import { useI18n } from 'vue-i18n'
 import ActionListCustomizer from '../../../ActionListCustomizer/ActionListCustomizer.vue'
 import FtButton from '../../../FtButton/FtButton.vue'
 import FtQuickSettingsMenu from '../../../FtQuickSettingsMenu/FtQuickSettingsMenu.vue'
-import FtSettingsSection from '../../../FtSettingsSection/FtSettingsSection.vue'
 import FtSettingsSubpage from '../../../FtSettingsSubpage/FtSettingsSubpage.vue'
 import FtSyncedSettingIndicator from '../../../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
 import FtTabs from '../../../FtTabs/FtTabs.vue'
