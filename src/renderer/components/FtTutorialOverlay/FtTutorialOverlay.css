@@ -85,7 +85,7 @@
   inline-size: 7px;
   block-size: 7px;
   border-radius: 50%;
-  background-color: var(--subtle-surface-color);
+  background-color: var(--tertiary-text-color);
   /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- the tutorial highlight follows its target */
   transition: inline-size var(--motion-fast-spatial), background-color var(--motion-fast-effects);
 }
