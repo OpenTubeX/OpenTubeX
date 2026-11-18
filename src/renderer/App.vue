@@ -4643,8 +4643,9 @@ async function enableCapacitorIntegrations() {
       retainedLaunchUrl = null
       return
     }
-    // A link tapped during the setup below replaces the launch URL it opens at its end.
-    launchUrl = null
+    // A link tapped during the setup below replaces the launch URL it opens at
+    // its end, unless that URL is a sign-in callback rather than a destination.
+    if (!isSyncServerOidcCallbackUrl(launchUrl)) launchUrl = null
     retainedLaunchUrl = null
     openUrl(url)
   })

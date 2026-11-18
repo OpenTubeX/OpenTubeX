@@ -47,8 +47,10 @@ test('retained startup clicks and running-app clicks navigate and update localiz
   appWindow.addEventListener('opentubex:focus-search', () => { searchFocusRequests++ })
   const locale = { value: 'en-US' }
   const refreshRequests = []
+  let startupLaunchUrl = 'opentubex://https//www.youtube.com/feed/history'
   // A link tapped while the app is still starting, after the launch URL.
   let newerStartupTap = null
+  const oidcCallbacks = []
   const context = {
     window: appWindow,
     document: { getElementById: () => null },
@@ -71,14 +73,14 @@ test('retained startup clicks and running-app clicks navigate and update localiz
       addListener: async (name, callback) => {
         listeners.set(name, callback)
         // Native plugins also retain the launch URL until the renderer subscribes.
-        if (name === 'appUrlOpen') callback({ url: 'opentubex://https//www.youtube.com/feed/history' })
+        if (name === 'appUrlOpen') callback({ url: startupLaunchUrl })
         return { remove: () => listeners.delete(name) }
       },
       getState: async () => {
         if (newerStartupTap) listeners.get('appUrlOpen')({ url: newerStartupTap })
         return { isActive: true }
       },
-      getLaunchUrl: async () => ({ url: 'opentubex://https//www.youtube.com/feed/history' }),
+      getLaunchUrl: async () => ({ url: startupLaunchUrl }),
     },
     AppShortcuts: {
       addListener: async (name, callback) => {
@@ -103,6 +105,10 @@ test('retained startup clicks and running-app clicks navigate and update localiz
       dispatch: async (action, view) => {
         if (action === 'showSettingsWindow') {
           paths.push(`settings:${view}`)
+          return
+        }
+        if (action === 'receiveSyncServerOidcCallback') {
+          oidcCallbacks.push(view)
           return
         }
         assert.equal(action, 'hideSettingsWindow')
@@ -168,6 +174,11 @@ test('retained startup clicks and running-app clicks navigate and update localiz
   const openedBefore = youtubeLinks.length
   ;(await enable())()
   assert.deepEqual(youtubeLinks.slice(openedBefore), ['https://youtu.be/456'])
+
+  // A sign-in callback is not a destination, so a newer tap does not replace it.
+  startupLaunchUrl = 'opentubex://oidc?token=a.b.c'
+  ;(await enable())()
+  assert.deepEqual(oidcCallbacks, ['opentubex://oidc?token=a.b.c'])
 })
 
 test('a feed refresh request runs once, after the page has loaded', () => {
