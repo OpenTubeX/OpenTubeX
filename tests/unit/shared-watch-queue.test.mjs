@@ -269,3 +269,25 @@ test('a restore request waits for pending queue writes so quitting can drain the
   await Promise.all([write, drain])
   assert.deepEqual(saved.map(item => item.videoId), ['last'])
 })
+
+test('a reply for the previous profile’s queue keeps the next profile’s pending edits', async () => {
+  const requests = []
+  const adapter = {
+    update: (request, scope) => new Promise(resolve => requests.push({ request, scope, resolve })),
+    onUpdated() {},
+  }
+  const store = createStore({ modules: { watchQueue }, plugins: [store => persistWatchQueue(store, null, adapter)] })
+  const shared = requests.shift()
+  await store.dispatch('loadWatchQueueScope', 'separate')
+  const read = requests.shift()
+  addVideo(store, 'added')
+  const addition = requests.shift()
+  shared.resolve({ revision: 1, items: [], scope: null })
+  await settle()
+  read.resolve({ revision: 1, items: [], scope: 'separate' })
+  await settle()
+  assert.deepEqual(store.getters.getWatchQueue.map(item => item.videoId), ['added'])
+  addition.resolve({ revision: 2, items: [{ ...addition.request.payload.video, queueItemId: addition.request.payload.queueItemId }], scope: 'separate' })
+  await settle()
+  assert.deepEqual(store.getters.getWatchQueue.map(item => item.videoId), ['added'])
+})

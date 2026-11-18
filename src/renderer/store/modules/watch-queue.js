@@ -60,16 +60,21 @@ export function persistWatchQueue(store, storage, sharedQueue) {
     }
   }
   const updateSharedQueue = request => {
-    const result = sharedQueue.update(request, scope)
+    const requestScope = scope
+    const result = sharedQueue.update(request, requestScope)
     if (result instanceof Promise) {
       pending.push(request)
-      result.then(snapshot => {
-        pending.splice(pending.indexOf(request), 1)
-        applySharedQueue(snapshot, true)
-      }).catch(error => {
+      // After a profile switch, the pending list and queue are another profile's.
+      const settle = () => {
+        if (scope !== requestScope) return false
         const index = pending.indexOf(request)
         if (index !== -1) pending.splice(index, 1)
-        applySharedQueue({ ...latest, scope }, true)
+        return true
+      }
+      result.then(snapshot => {
+        if (settle()) applySharedQueue(snapshot, true)
+      }).catch(error => {
+        if (settle()) applySharedQueue({ ...latest, scope }, true)
         console.warn('Could not persist the watch queue', error)
       })
     } else applySharedQueue(result)
