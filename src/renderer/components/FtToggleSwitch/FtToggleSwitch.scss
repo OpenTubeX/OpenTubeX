@@ -202,6 +202,12 @@
   margin-inline-start: 5px;
 }
 
+/* A label without spaces can wrap inside the last box, so the icons follow
+   its last line. */
+.switch-label-end > .switch-label-icons {
+  align-self: flex-end;
+}
+
 .disabled {
   .switch-label {
     cursor: not-allowed;

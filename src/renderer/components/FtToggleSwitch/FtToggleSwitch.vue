@@ -205,12 +205,21 @@ function fitLabelToLines(text) {
 }
 
 let refitLabel = null
+let refitFrame = 0
 
 onMounted(() => {
   const text = labelText.value
   const grid = text?.closest('.switchColumnGrid')
   if (!grid) return
-  refitLabel = () => fitLabelToLines(text)
+  // Fitting resizes the observed label, so it runs in the next frame instead
+  // of during the observer's delivery, once for any number of requests.
+  refitLabel = () => {
+    if (refitFrame) return
+    refitFrame = requestAnimationFrame(() => {
+      refitFrame = 0
+      fitLabelToLines(text)
+    })
+  }
   // The grid follows the available width, the label its own text. A font
   // that finishes loading can narrow the text without resizing either.
   labelResizeObserver = new ResizeObserver(refitLabel)
@@ -219,8 +228,12 @@ onMounted(() => {
   document.fonts.addEventListener('loadingdone', refitLabel)
 })
 
+// New text can wrap differently at the same size, such as after a language change.
+watch(() => props.label, () => refitLabel?.(), { flush: 'post' })
+
 onBeforeUnmount(() => {
   labelResizeObserver?.disconnect()
+  cancelAnimationFrame(refitFrame)
   if (refitLabel) document.fonts.removeEventListener('loadingdone', refitLabel)
 })
 </script>

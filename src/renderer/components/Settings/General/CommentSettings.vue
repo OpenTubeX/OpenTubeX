@@ -5,10 +5,7 @@
   >
     <div class="commentSettings">
       <!-- Side by side when there is room, like the general switches. -->
-      <div
-        class="commentSwitches"
-        :class="{ switchColumnGrid: canNotifyReplies }"
-      >
+      <div class="commentSwitches switchColumnGrid">
         <div class="switchColumn">
           <FtToggleSwitch
             :label="t('Settings.General Settings.Auto Load Comments.Label')"
