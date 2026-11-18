@@ -270,7 +270,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     hideUploader: false,
     unsubscriptionPopupStatus: false,
     hideLabelsSideBar: false,
-    hideSettingsCategoryDescriptions: false,
+    uiDensity: 'default',
     alwaysShowNavigationBar: false,
     navigationBarLabels: 'all',
     hideChapters: false,

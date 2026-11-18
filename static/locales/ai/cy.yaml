@@ -683,7 +683,11 @@ Settings:
       Tab Loading Indicator: Dangosydd llwytho tab
       Bar: Bar
       Dot: Dot (clasurol)
-    Compact Settings Categories: "Categorïau Gosodiadau Cryno"
+    UI Density:
+      UI Density: "Dwysedd y rhyngwyneb"
+      Compact: "Cryno"
+      Default: "Rhagosodedig"
+      Comfortable: "Cyfforddus"
     Playlist Thumbnail Size: "Maint mân-luniau’r rhestr chwarae"
     Compact Mobile Mini Player: "Chwaraewr bach cryno ar ffôn symudol"
     Always Show Mobile Search Bar: "Dangos y bar chwilio symudol bob amser"
@@ -2485,7 +2489,7 @@ Tooltips:
     Visible Search Suggestions: "Yn gosod faint o gofnodion hanes chwilio ac awgrymiadau y mae’r bar chwilio’n eu dangos cyn i’w restr sgrolio. Nid yw’r rhestr byth yn ymestyn heibio gwaelod y ffenestr."
     Thumbnail Size: "Yn newid maint mân-luniau fideos mewn gridiau a rhestrau. Mae gridiau gyda nifer sefydlog o golofnau neu'r math gwedd Lled Llawn yn llenwi pob rhes yn lle hynny, felly yno dim ond mân-luniau rhestrau a Shorts y mae'n eu newid. Mewn ffenestri maint ffôn, mae mân-luniau'r grid wedi'u cyfyngu i 100%."
     Playlist Thumbnail Size: "Yn newid maint mân-luniau fideos ar dudalennau rhestri chwarae. Mae gridiau gyda nifer sefydlog o golofnau neu'r math gwedd Lled Llawn yn llenwi pob rhes yn lle hynny, felly yno dim ond mân-luniau rhestrau a Shorts y mae'n eu newid. Mewn ffenestri maint ffôn, mae mân-luniau'r grid wedi'u cyfyngu i 100%."
-    Compact Settings Categories: "Yn lleihau uchder categorïau gosodiadau."
+    UI Density: "Yn newid y bylchau mewn rhestrau, dewislenni, y bar ochr a’r Gosodiadau."
     Show Progress as Notification: Mae'n dangos hysbysiad parhaol â chynnydd byw ar gyfer gweithredoedd cefndir, megis adnewyddu tanysgrifiadau a lawrlwytho offer a reolir, yn lle defnyddio'r bar cynnydd byd-eang.
     Always Show Scrollbars: Mae'n cadw'r bariau sgrolio'n weladwy bob amser. Pan fydd wedi'i analluogi, maent yn pylu ychydig ar ôl i chi roi'r gorau i symud y llygoden ac yn ailymddangos cyn gynted ag y byddwch yn ei symud eto.
     Scroll Speed: Newid pa mor bell mae ystumiau olwyn llygoden ac olwyn pad cyffwrdd yn sgrolio.

@@ -682,7 +682,11 @@ Settings:
       Tab Loading Indicator: Indikátor načítání karty
       Bar: Pruh
       Dot: Tečka (klasická)
-    Compact Settings Categories: "Kompaktní kategorie nastavení"
+    UI Density:
+      UI Density: "Hustota rozhraní"
+      Compact: "Kompaktní"
+      Default: "Výchozí"
+      Comfortable: "Prostorná"
     Playlist Thumbnail Size: "Velikost miniatur playlistu"
     Compact Mobile Mini Player: "Kompaktní mobilní minipřehrávač"
     Always Show Mobile Search Bar: "Vždy zobrazovat vyhledávací panel na telefonu"
@@ -2447,7 +2451,7 @@ Tooltips:
     Visible Search Suggestions: "Určuje, kolik položek historie vyhledávání a návrhů zobrazí vyhledávací pole, než se jeho seznam začne posouvat. Seznam nikdy nepřesáhne spodní okraj okna."
     Thumbnail Size: "Mění velikost miniatur videí v mřížkách a seznamech. Mřížky s pevným počtem sloupců nebo zobrazení Plná šířka místo toho vyplní každý řádek, takže tam mění jen miniatury v seznamech a Shorts. V oknech velikosti telefonu jsou miniatury v mřížce omezeny na 100 %."
     Playlist Thumbnail Size: "Mění velikost miniatur videí na stránkách playlistů. Mřížky s pevným počtem sloupců nebo zobrazení Plná šířka místo toho vyplní každý řádek, takže tam mění jen miniatury v seznamech a Shorts. V oknech velikosti telefonu jsou miniatury v mřížce omezeny na 100 %."
-    Compact Settings Categories: "Zmenší výšku kategorií nastavení."
+    UI Density: "Mění rozestupy v seznamech, nabídkách, postranním panelu a Nastavení."
     Show Progress as Notification: Místo celkového ukazatele průběhu zobrazí trvalé oznámení s aktuálním průběhem operací na pozadí, například obnovování odběrů a stahování spravovaných nástrojů.
     Always Show Scrollbars: Ponechá posuvníky stále viditelné. Pokud je funkce vypnutá, krátce po zastavení pohybu myši zmizí a při dalším pohybu se znovu zobrazí.
     Scroll Speed: Mění vzdálenost posunu kolečkem myši a gesty kolečka touchpadu.

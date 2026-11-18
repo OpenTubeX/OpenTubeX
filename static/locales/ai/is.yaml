@@ -682,7 +682,11 @@ Settings:
       Tab Loading Indicator: Hleðsluvísir flipa
       Bar: Stika
       Dot: Punktur (hefðbundinn)
-    Compact Settings Categories: "Þéttir stillingaflokkar"
+    UI Density:
+      UI Density: "Þéttleiki viðmóts"
+      Compact: "Þétt"
+      Default: "Sjálfgefið"
+      Comfortable: "Rúmgott"
     Playlist Thumbnail Size: "Stærð smámynda spilunarlista"
     Compact Mobile Mini Player: "Þéttur smáspilari í farsíma"
     Always Show Mobile Search Bar: "Sýna alltaf leitarstikuna í síma"
@@ -2463,7 +2467,7 @@ Tooltips:
     Visible Search Suggestions: "Stillir hversu margar færslur úr leitarferli og tillögur leitarstikan sýnir áður en fletta þarf listanum. Listinn nær aldrei út fyrir neðri brún gluggans."
     Thumbnail Size: "Breytir stærð smámynda myndskeiða í hnitanetum og listum. Hnitanet með föstum dálkafjölda eða yfirlitsgerðinni Full breidd fylla þess í stað hverja röð, svo þar breytir það aðeins smámyndum í listum og Shorts. Í gluggum á stærð við síma takmarkast smámyndir hnitanets við 100%."
     Playlist Thumbnail Size: "Breytir stærð smámynda myndskeiða á síðum spilunarlista. Hnitanet með föstum dálkafjölda eða yfirlitsgerðinni Full breidd fylla þess í stað hverja röð, svo þar breytir það aðeins smámyndum í listum og Shorts. Í gluggum á stærð við síma takmarkast smámyndir hnitanets við 100%."
-    Compact Settings Categories: "Minnkar hæð stillingaflokka."
+    UI Density: "Breytir bilum í listum, valmyndum, hliðarstiku og stillingum."
     Show Progress as Notification: Sýnir tilkynningu með framvindu bakgrunnsaðgerða í rauntíma sem hverfur ekki, svo sem við endurnýjun áskriftarstreymis og niðurhal tóla sem forritið sér um, í stað almennu framvindustikunnar.
     Always Show Scrollbars: Heldur skrunstikum alltaf sýnilegum. Ef slökkt er á þessu dofna þær stuttu eftir að músin hættir að hreyfast og birtast aftur um leið og hún er hreyfð.
     Scroll Speed: Breytir hversu langt er skrunað með músarhjóli og snertifleti.

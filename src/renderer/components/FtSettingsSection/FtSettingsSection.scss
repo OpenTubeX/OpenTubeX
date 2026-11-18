@@ -22,7 +22,7 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding-block: 8px;
+  padding-block: calc(8px * var(--ui-density));
   background-color: var(--settings-section-bg-color);
   backdrop-filter: var(--card-bg-blur, none);
   border-radius: var(--shape-corner-large-increased);
@@ -30,12 +30,12 @@
   > :deep(*) {
     box-sizing: border-box;
     inline-size: 100%;
-    padding-block: 8px;
+    padding-block: calc(8px * var(--ui-density));
     padding-inline: 20px;
   }
 
   > :deep(:is(h3, h4, p)) {
-    padding-block: 8px 4px;
+    padding-block: calc(8px * var(--ui-density)) calc(4px * var(--ui-density));
   }
 }
 
@@ -48,7 +48,7 @@
 /* Group titles introduce the blocks below them, so they sit closer to those
    than to the blocks above. */
 .settingsSection > .sectionBody > :deep(:is(h3, h4):not(:first-child)) {
-  margin-block-start: 12px;
+  margin-block-start: calc(12px * var(--ui-density));
 }
 
 /* Material 3 Expressive emphasized title: larger and heavier than the
@@ -60,7 +60,7 @@
   line-height: 1.75rem;
   user-select: none;
   margin-inline: 20px;
-  margin-block: 0 12px;
+  margin-block: 0 calc(12px * var(--ui-density));
   text-align: center;
 }
 

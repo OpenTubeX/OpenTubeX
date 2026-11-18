@@ -10,7 +10,7 @@
   min-inline-size: 0;
   block-size: 100%;
   box-sizing: border-box;
-  padding: 12px;
+  padding: calc(12px * var(--ui-density));
   margin: 0;
   list-style: none;
 
@@ -21,12 +21,14 @@
 
 .titleItem {
   flex: 0 0 auto;
-  min-block-size: 48px;
+
+  /* UI Density sets the tile height: 36px compact, 48px default, 60px comfortable. */
+  min-block-size: calc(24px + 24px * var(--ui-density));
   display: flex;
 }
 
 .titleItem.groupStart:not(:first-child) {
-  margin-block-start: 10px;
+  margin-block-start: calc(10px * var(--ui-density));
 }
 
 .title {
@@ -34,7 +36,7 @@
   box-sizing: border-box;
   display: flex;
   align-items: center;
-  padding-block: 6px;
+  padding-block: calc(6px * var(--ui-density));
   padding-inline: 12px 14px;
   border: 0;
   border-radius: var(--settings-tile-inner-radius);
@@ -103,8 +105,8 @@
    same hue. Where light-dark() or relative colors are missing, the circle
    tints the text color instead. */
 .titleIcon {
-  inline-size: 36px;
-  block-size: 36px;
+  inline-size: calc(24px + 12px * var(--ui-density));
+  block-size: calc(24px + 12px * var(--ui-density));
   display: grid;
   place-items: center;
   border-radius: 50%;
@@ -147,39 +149,21 @@
 .settingsMenu.mobileSettingsMenu {
   inline-size: 100%;
   font-size: 18px;
-  padding: 12px;
-}
-
-.settingsMenu.mobileSettingsMenu .titleItem {
-  min-block-size: 48px;
-}
-
-.settingsMenu.compact .titleItem {
-  min-block-size: 36px;
-}
-
-.settingsMenu.compact .title {
-  padding-block: 6px;
-}
-
-.settingsMenu.compact .titleIcon {
-  inline-size: 32px;
-  block-size: 32px;
 }
 
 @media (any-pointer: coarse), (width <= 680px) {
-  .settingsMenu .titleItem,
-  .settingsMenu.mobileSettingsMenu .titleItem {
-    min-block-size: 56px;
+  /* Compact tiles stay large enough to tap. */
+  .settingsMenu .titleItem {
+    min-block-size: max(48px, calc(32px + 24px * var(--ui-density)));
   }
 
   .title {
-    padding-block: 8px;
+    padding-block: calc(8px * var(--ui-density));
   }
 
   .titleIcon {
-    inline-size: 40px;
-    block-size: 40px;
+    inline-size: calc(28px + 12px * var(--ui-density));
+    block-size: calc(28px + 12px * var(--ui-density));
   }
 
   .titleIcon > svg {
@@ -190,13 +174,5 @@
   .title:active {
     color: var(--side-nav-hover-text-color);
     background: var(--side-nav-hover-color);
-  }
-
-  .settingsMenu.compact .titleItem {
-    min-block-size: 48px;
-  }
-
-  .settingsMenu.compact .title {
-    padding-block: 8px;
   }
 }

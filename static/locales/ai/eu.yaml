@@ -682,7 +682,11 @@ Settings:
       Tab Loading Indicator: Fitxaren karga-adierazlea
       Bar: Barra
       Dot: Puntua (klasikoa)
-    Compact Settings Categories: "Ezarpen-kategoria trinkoak"
+    UI Density:
+      UI Density: "Interfazearen dentsitatea"
+      Compact: "Trinkoa"
+      Default: "Lehenetsia"
+      Comfortable: "Erosoa"
     Playlist Thumbnail Size: "Erreprodukzio-zerrendako miniaturen tamaina"
     Compact Mobile Mini Player: "Mugikorreko erreproduzitzaile txiki trinkoa"
     Always Show Mobile Search Bar: "Erakutsi beti mugikorreko bilaketa-barra"
@@ -2458,7 +2462,7 @@ Tooltips:
     Visible Search Suggestions: "Bilaketa-barrak bere zerrenda korritu aurretik zenbat bilaketa-historiako sarrera eta iradokizun erakusten dituen zehazten du. Zerrenda ez da inoiz leihoaren behealdetik haratago hedatzen."
     Thumbnail Size: "Bideoen miniaturen tamaina aldatzen du sareta eta zerrendetan. Zutabe kopuru finkoa edo Zabalera osoa ikuspegia duten saretek errenkada bakoitza betetzen dute horren ordez, beraz han zerrendetako miniaturak eta Shorts-ak soilik aldatzen ditu. Telefono-tamainako leihoetan saretako miniaturak % 100era mugatzen dira."
     Playlist Thumbnail Size: "Bideoen miniaturen tamaina aldatzen du erreprodukzio-zerrenden orrietan. Zutabe kopuru finkoa edo Zabalera osoa ikuspegia duten saretek errenkada bakoitza betetzen dute horren ordez, beraz han zerrendetako miniaturak eta Shorts-ak soilik aldatzen ditu. Telefono-tamainako leihoetan saretako miniaturak % 100era mugatzen dira."
-    Compact Settings Categories: "Ezarpen-kategorien altuera murrizten du."
+    UI Density: "Zerrendetako, menuetako, alboko barrako eta Ezarpenetako tartea aldatzen du."
     Show Progress as Notification: Jakinarazpen iraunkor batean erakusten du atzeko planoko eragiketen uneko aurrerapena, hala nola harpidetzen freskatzea eta kudeatutako tresnen deskargak, aurrerapen-barra globala erabili beharrean.
     Always Show Scrollbars: Korritze-barrak ikusgai mantentzen ditu beti. Desgaituta dagoenean, sagua mugitzeari utzi eta handik gutxira desagertzen dira, eta berriro mugitu bezain laster agertzen.
     Scroll Speed: Saguaren gurpileko eta ukipen-paneleko keinuek zenbat korritzen duten aldatzen du.

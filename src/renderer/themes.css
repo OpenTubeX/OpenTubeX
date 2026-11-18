@@ -56,6 +56,20 @@ body {
   --scrollbar-track-width: calc(var(--scrollbar-thumb-width) + 4px);
 }
 
+/* The UI Density setting scales the spacing of lists, cards, menus, the side
+   navigation and Settings. Default keeps the base sizes. */
+:root {
+  --ui-density: 1;
+}
+
+:root[data-ui-density='compact'] {
+  --ui-density: 0.5;
+}
+
+:root[data-ui-density='comfortable'] {
+  --ui-density: 1.5;
+}
+
 /* Color defaults that themes override or derive from. Theme previews
    (.themeScope) declare them again so derived colors follow the previewed
    theme instead of resolving once on the body; :where() keeps every theme

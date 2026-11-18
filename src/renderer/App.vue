@@ -2080,6 +2080,7 @@ onBeforeUnmount(() => {
   document.documentElement.style.removeProperty('--title-line-limit')
   delete document.documentElement.dataset.linkUnderline
   delete document.documentElement.dataset.modalBackdrop
+  delete document.documentElement.dataset.uiDensity
   removeGamepadNavigation()
   removeCustomThemeListener()
   cancelIdleStartupWork()
@@ -2703,6 +2704,10 @@ watch(() => store.getters.getLinkUnderline, value => {
 
 watch(() => store.getters.getModalBackdrop, value => {
   document.documentElement.dataset.modalBackdrop = value
+}, { flush: 'sync', immediate: true })
+
+watch(() => store.getters.getUiDensity, value => {
+  document.documentElement.dataset.uiDensity = value
 }, { flush: 'sync', immediate: true })
 
 const phoneLayout = usePhoneLayout()

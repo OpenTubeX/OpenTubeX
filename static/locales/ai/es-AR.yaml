@@ -706,7 +706,11 @@ Settings:
       Tab Loading Indicator: Indicador de carga de pestaña
       Bar: Barra
       Dot: Punto (clásico)
-    Compact Settings Categories: "Categorías de ajustes compactas"
+    UI Density:
+      UI Density: "Densidad de la interfaz"
+      Compact: "Compacta"
+      Default: "Predeterminada"
+      Comfortable: "Cómoda"
     Playlist Thumbnail Size: "Tamaño de las miniaturas de la lista de reproducción"
     Compact Mobile Mini Player: "Minirreproductor móvil compacto"
     Always Show Mobile Search Bar: "Mostrar siempre la barra de búsqueda en el móvil"
@@ -2922,7 +2926,7 @@ Tooltips:
     Visible Search Suggestions: "Define cuántas entradas del historial de búsqueda y sugerencias muestra la barra de búsqueda antes de que su lista se desplace. La lista nunca se extiende más allá de la parte inferior de la ventana."
     Thumbnail Size: "Escala las miniaturas de los videos en cuadrículas y listas. Las cuadrículas con un número fijo de columnas o el tipo de vista Ancho completo llenan cada fila, así que ahí solo cambia las miniaturas de las listas y los Shorts. En ventanas del tamaño de un teléfono, las miniaturas de la cuadrícula se limitan al 100 %."
     Playlist Thumbnail Size: "Escala las miniaturas de los videos en las páginas de listas de reproducción. Las cuadrículas con un número fijo de columnas o el tipo de vista Ancho completo llenan cada fila, así que ahí solo cambia las miniaturas de las listas y los Shorts. En ventanas del tamaño de un teléfono, las miniaturas de la cuadrícula se limitan al 100 %."
-    Compact Settings Categories: "Reduce la altura de las categorías de ajustes."
+    UI Density: "Cambia el espaciado en las listas, los menús, la barra lateral y la configuración."
     Show Progress as Notification: Muestra una notificación persistente con el progreso en tiempo real de las operaciones en segundo plano, como la actualización de suscripciones y la descarga de herramientas gestionadas, en lugar de usar la barra de progreso global.
     Always Show Scrollbars: Mantiene las barras de desplazamiento visibles en todo momento. Si se desactiva, desaparecen poco después de dejar de mover el mouse y reaparecen en cuanto vuelves a moverlo.
     Scroll Speed: Cambia la distancia de desplazamiento de los gestos de rueda del mouse y del panel táctil.

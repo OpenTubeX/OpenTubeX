@@ -207,6 +207,10 @@
     "ri": "database-2-line",
     "material": "database-outline"
   },
+  "density": {
+    "ri": "line-height",
+    "material": "density-medium-rounded"
+  },
   "display": {
     "ri": "computer-line",
     "material": "desktop-windows-outline"

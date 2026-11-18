@@ -249,8 +249,8 @@
 
 .selectOption {
   box-sizing: border-box;
-  min-block-size: 48px;
-  padding-block: 12px;
+  min-block-size: calc(24px + 24px * var(--ui-density));
+  padding-block: calc(12px * var(--ui-density));
   padding-inline: 12px;
   cursor: default;
   isolation: isolate;
@@ -258,6 +258,13 @@
   position: relative;
   user-select: none;
   white-space: normal;
+}
+
+/* Compact options stay large enough to tap. */
+@media (any-pointer: coarse) {
+  .selectOption {
+    min-block-size: max(48px, calc(24px + 24px * var(--ui-density)));
+  }
 }
 
 /* Inset state and selection layers give the options rounded shapes inside

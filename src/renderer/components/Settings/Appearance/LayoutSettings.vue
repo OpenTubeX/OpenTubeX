@@ -26,18 +26,19 @@
         :icon="['fas', 'opacity']"
         @change="store.dispatch('updateModalBackdrop', $event)"
       />
+      <FtSelect
+        size-to-content
+        :placeholder="t('Settings.Theme Settings.UI Density.UI Density')"
+        :value="uiDensity"
+        setting-key="uiDensity"
+        :select-names="uiDensityNames"
+        :select-values="UI_DENSITY_VALUES"
+        :tooltip="t('Tooltips.Theme Settings.UI Density')"
+        :icon="['fas', 'density']"
+        @change="store.dispatch('updateUiDensity', $event)"
+      />
     </FtFlexBox>
     <div class="appearanceSwitchGrid switchFlowGrid">
-      <FtToggleSwitch
-        :label="$t('Settings.Theme Settings.Compact Settings Categories')"
-        :tooltip="$t('Tooltips.Theme Settings.Compact Settings Categories')"
-        compact
-        controlled
-        :disabled="savingSettingsCategoryDescriptions"
-        :default-value="hideSettingsCategoryDescriptions"
-        setting-key="hideSettingsCategoryDescriptions"
-        @change="updateHideSettingsCategoryDescriptions"
-      />
       <FtToggleSwitch
         v-if="usingElectron"
         :label="$t('Settings.Theme Settings.Use Custom Title Bar')"
@@ -474,6 +475,15 @@ const modalBackdropNames = computed(() => [
 /** @type {import('vue').ComputedRef<'blur' | 'dim'>} */
 const modalBackdrop = computed(() => store.getters.getModalBackdrop)
 
+const UI_DENSITY_VALUES = ['compact', 'default', 'comfortable']
+const uiDensityNames = computed(() => [
+  t('Settings.Theme Settings.UI Density.Compact'),
+  t('Settings.Theme Settings.UI Density.Default'),
+  t('Settings.Theme Settings.UI Density.Comfortable')
+])
+/** @type {import('vue').ComputedRef<'compact' | 'default' | 'comfortable'>} */
+const uiDensity = computed(() => store.getters.getUiDensity)
+
 const toastPositionNames = computed(() => [
   t('Settings.Theme Settings.Toast Position.Bottom Left'),
   t('Settings.Theme Settings.Toast Position.Bottom Center'),
@@ -548,24 +558,6 @@ const hideSideBarOnWatchPages = computed(() => store.getters.getHideSideBarOnWat
  */
 function updateHideSideBarOnWatchPages(value) {
   store.dispatch('updateHideSideBarOnWatchPages', value)
-}
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const hideSettingsCategoryDescriptions = computed(() => store.getters.getHideSettingsCategoryDescriptions)
-
-const savingSettingsCategoryDescriptions = ref(false)
-
-/**
- * @param {boolean} value
- */
-async function updateHideSettingsCategoryDescriptions(value) {
-  if (savingSettingsCategoryDescriptions.value) return
-  savingSettingsCategoryDescriptions.value = true
-  try {
-    await store.dispatch('updateHideSettingsCategoryDescriptions', value)
-  } finally {
-    savingSettingsCategoryDescriptions.value = false
-  }
 }
 
 const hideLabelsSideBar = computed(() => {

@@ -682,7 +682,11 @@ Settings:
       Tab Loading Indicator: 标签页加载指示器
       Bar: 进度条
       Dot: 圆点（经典）
-    Compact Settings Categories: "紧凑设置类别"
+    UI Density:
+      UI Density: "界面密度"
+      Compact: "紧凑"
+      Default: "默认"
+      Comfortable: "宽松"
     Playlist Thumbnail Size: "播放列表缩略图大小"
     Compact Mobile Mini Player: "紧凑型移动迷你播放器"
     Always Show Mobile Search Bar: "始终显示移动端搜索栏"
@@ -2447,7 +2451,7 @@ Tooltips:
     Visible Search Suggestions: "设置搜索栏在列表需要滚动之前显示的搜索历史记录和建议数量。列表绝不会超出窗口底部。"
     Thumbnail Size: "缩放网格和列表中的视频缩略图。列数固定的网格或“全宽”视图会改为填满每一行，因此在这些情况下只会改变列表缩略图和 Shorts。在手机大小的窗口中，网格缩略图最大为 100%。"
     Playlist Thumbnail Size: "缩放播放列表页面中的视频缩略图。列数固定的网格或“全宽”视图会改为填满每一行，因此在这些情况下只会改变列表缩略图和 Shorts。在手机大小的窗口中，网格缩略图最大为 100%。"
-    Compact Settings Categories: "减小设置类别的高度。"
+    UI Density: "更改列表、菜单、侧边栏和设置中的间距。"
     Show Progress as Notification: 以持续通知实时显示后台操作的进度（例如刷新订阅动态和下载托管工具），而不使用全局进度条。
     Always Show Scrollbars: 始终显示滚动条。禁用后，停止移动鼠标不久，滚动条便会淡出；再次移动鼠标时会立即重新出现。
     Scroll Speed: 更改鼠标滚轮和触控板滚轮手势的滚动距离。

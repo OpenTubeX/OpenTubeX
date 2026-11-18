@@ -682,7 +682,11 @@ Settings:
       Tab Loading Indicator: Indicador de carregamento do separador
       Bar: Barra
       Dot: Ponto (clássico)
-    Compact Settings Categories: "Categorias de definições compactas"
+    UI Density:
+      UI Density: "Densidade da interface"
+      Compact: "Compacta"
+      Default: "Predefinida"
+      Comfortable: "Confortável"
     Playlist Thumbnail Size: "Tamanho das miniaturas da lista de reprodução"
     Compact Mobile Mini Player: "Minirreprodutor móvel compacto"
     Always Show Mobile Search Bar: "Mostrar sempre a barra de pesquisa no telemóvel"
@@ -2448,7 +2452,7 @@ Tooltips:
     Visible Search Suggestions: "Define quantas entradas do histórico de pesquisa e sugestões a barra de pesquisa mostra antes de a sua lista se deslocar. A lista nunca ultrapassa a parte inferior da janela."
     Thumbnail Size: "Ajusta o tamanho das miniaturas dos vídeos em grelhas e listas. Grelhas com um número fixo de colunas ou o tipo de vista Largura total preenchem cada linha, por isso aí só altera as miniaturas das listas e os Shorts. Em janelas do tamanho de um telemóvel, as miniaturas da grelha ficam limitadas a 100%."
     Playlist Thumbnail Size: "Ajusta o tamanho das miniaturas dos vídeos nas páginas de listas de reprodução. Grelhas com um número fixo de colunas ou o tipo de vista Largura total preenchem cada linha, por isso aí só altera as miniaturas das listas e os Shorts. Em janelas do tamanho de um telemóvel, as miniaturas da grelha ficam limitadas a 100%."
-    Compact Settings Categories: "Reduz a altura das categorias de definições."
+    UI Density: "Altera o espaçamento nas listas, nos menus, na barra lateral e nas Definições."
     Show Progress as Notification: Mostra uma notificação persistente com o progresso em tempo real das operações em segundo plano, como a atualização das subscrições e as descargas de ferramentas geridas, em vez de utilizar a barra de progresso global.
     Always Show Scrollbars: Mantém as barras de deslocamento sempre visíveis. Quando esta opção está desativada, desaparecem pouco depois de parar de mover o rato e reaparecem assim que volta a movê-lo.
     Scroll Speed: Altera a distância percorrida pelos gestos da roda do rato e do painel tátil.

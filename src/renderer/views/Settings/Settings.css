@@ -1,5 +1,5 @@
 .settingsWindow {
-  --settings-row-gap: 20px;
+  --settings-row-gap: calc(20px * var(--ui-density));
 
   position: fixed;
   z-index: 9;
@@ -323,7 +323,7 @@
 
 .settingsContent :deep(.settingsCategory) {
   display: grid;
-  gap: 20px;
+  gap: calc(20px * var(--ui-density));
 }
 
 .settingsMenu {

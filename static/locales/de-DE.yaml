@@ -942,7 +942,11 @@ Settings:
     Disable Smooth Scrolling: Gleichmäßiges Scrollen deaktivieren
     Expand Side Bar by Default: Seitenleiste standardmäßig erweitern
     Hide Side Bar Labels: Seitenleisten-Beschriftungen ausblenden
-    Compact Settings Categories: Kompakte Einstellungskategorien
+    UI Density:
+      UI Density: Dichte der Benutzeroberfläche
+      Compact: Kompakt
+      Default: Standard
+      Comfortable: Großzügig
     Modal Backdrop:
       Modal Backdrop: Dialoghintergrund
       Dim and Blur: Abdunkeln und weichzeichnen
@@ -3279,7 +3283,7 @@ Tooltips:
     Use Fixed Tab Width: Gibt jedem Tab in der horizontalen Tableiste dieselbe Breite, statt sie an den Titel anzupassen.
     Use Custom Title Bar: Ersetzt die Titelleiste des Systems durch die Tableiste oder, wenn die Tabs nicht oben sind, durch die obere Navigation, um vertikalen Platz zu sparen. Die Fenstersteuerung erscheint in der Ecke dieser Leiste.
     Use Grid Player Menu: Ordnet das Einstellungsmenü des Videoplayers als Kachelraster statt als Liste an.
-    Compact Settings Categories: Verringert die Höhe der Einstellungskategorien.
+    UI Density: Ändert die Abstände in Listen, Menüs, der Seitenleiste und den Einstellungen.
     Modal Backdrop: Legt fest, wie die App hinter Dialogen und Menüs aussieht. Das Weichzeichnen kann auf leistungsschwächeren Geräten langsam sein.
 Playing Next Video Interval: Nächstes Video wird sofort abgespielt. Zum Abbrechen klicken. | Nächstes Video wird in {nextVideoInterval} Sekunden abgespielt. Zum Abbrechen klicken. | Nächstes Video wird in {nextVideoInterval} Sekunden abgespielt. Zum Abbrechen klicken.
 More: Mehr

@@ -813,7 +813,11 @@ Settings:
       Tab Loading Indicator: Kazalnik nalaganja zavihka
       Bar: Vrstica
       Dot: Pika (klasična)
-    Compact Settings Categories: "Strnjene kategorije nastavitev"
+    UI Density:
+      UI Density: "Gostota vmesnika"
+      Compact: "Strnjena"
+      Default: "Privzeta"
+      Comfortable: "Prostorna"
     Playlist Thumbnail Size: "Velikost sličic seznama predvajanja"
     Compact Mobile Mini Player: "Kompakten mobilni mini predvajalnik"
     Always Show Mobile Search Bar: "Vedno prikaži iskalno vrstico na telefonu"
@@ -2971,7 +2975,7 @@ Tooltips:
     Visible Search Suggestions: "Določa, koliko vnosov zgodovine iskanja in predlogov prikaže iskalna vrstica, preden se njen seznam začne pomikati. Seznam nikoli ne sega čez spodnji rob okna."
     Thumbnail Size: "Spremeni velikost sličic videoposnetkov v mrežah in seznamih. Mreže s fiksnim številom stolpcev ali pogled Polna širina namesto tega zapolnijo vsako vrstico, zato tam spremeni le sličice seznamov in Shorts. V oknih velikosti telefona so sličice mreže omejene na 100 %."
     Playlist Thumbnail Size: "Spremeni velikost sličic videoposnetkov na straneh seznamov predvajanja. Mreže s fiksnim številom stolpcev ali pogled Polna širina namesto tega zapolnijo vsako vrstico, zato tam spremeni le sličice seznamov in Shorts. V oknih velikosti telefona so sličice mreže omejene na 100 %."
-    Compact Settings Categories: "Zmanjša višino kategorij nastavitev."
+    UI Density: "Spremeni razmike na seznamih, v menijih, stranski vrstici in nastavitvah."
     Show Progress as Notification: Namesto splošne vrstice napredka prikaže trajno obvestilo s sprotnim napredkom opravil v ozadju, kot sta osveževanje naročnin in prenos upravljanih orodij.
     Always Show Scrollbars: Drsniki so vedno vidni. Če je ta možnost onemogočena, izginejo kmalu po tem, ko nehate premikati miško, in se znova prikažejo, ko jo premaknete.
     Scroll Speed: Spremeni razdaljo pomikanja z gibi kolesca miške in sledilne ploščice.

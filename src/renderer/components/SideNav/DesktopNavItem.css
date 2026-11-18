@@ -11,7 +11,7 @@
     flex-direction: column;
     align-items: center;
     gap: 4px;
-    padding-block: 6px;
+    padding-block: calc(6px * var(--ui-density));
     padding-inline: 4px calc(4px + var(--side-nav-tab-gap, 0px));
     border-radius: var(--shape-corner-extra-large);
     color: var(--primary-text-color);
@@ -159,11 +159,11 @@
     gap: 12px;
     inline-size: calc(100% - 16px - var(--side-nav-tab-gap, 0px));
     block-size: auto;
-    min-block-size: 48px;
-    padding-block: 8px;
+    min-block-size: calc(32px + 16px * var(--ui-density));
+    padding-block: calc(8px * var(--ui-density));
     padding-inline: 12px;
     margin-inline: 8px calc(8px + var(--side-nav-tab-gap, 0px));
-    margin-block-end: 4px;
+    margin-block-end: calc(4px * var(--ui-density));
 
     --nav-indicator-radius: calc(24px * var(--ui-roundness));
   }
@@ -188,7 +188,7 @@
 
   .expanded .navChannel {
     gap: 8px;
-    padding-block: 6px;
+    padding-block: calc(6px * var(--ui-density));
     padding-inline: 8px;
   }
 
