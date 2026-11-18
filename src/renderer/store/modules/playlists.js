@@ -151,6 +151,8 @@ function saveScopedQuickBookmarkTarget(scope, playlistId) {
 const state = {
   /** The quick bookmark target while a separate profile is active */
   scopedQuickBookmarkTarget: null,
+  // The separate profile whose playlists the state holds, or null for the shared ones
+  playlistsScope: null,
   // Playlist loading takes time on app load (new windows)
   // This is necessary to let components to know when to start data loading
   // which depends on playlist data being ready
@@ -190,7 +192,8 @@ const getters = {
   },
   /** @returns {string | null} */
   getActiveQuickBookmarkTargetPlaylistId(state, _getters, _rootState, rootGetters) {
-    return rootGetters.getActiveDataScope === null
+    // The target of the playlists shown, also while a profile switch waits for their writes
+    return state.playlistsScope === null
       ? rootGetters.getQuickBookmarkTargetPlaylistId
       : state.scopedQuickBookmarkTarget
   },
@@ -228,8 +231,9 @@ const actions = {
   },
 
   /** Sets the quick bookmark target of the active profile's playlists */
-  async updateActiveQuickBookmarkTarget({ commit, dispatch, rootGetters }, playlistId) {
-    const scope = rootGetters.getActiveDataScope
+  async updateActiveQuickBookmarkTarget({ commit, dispatch }, playlistId) {
+    // The selected profile changes before writes in its predecessor's playlists finish.
+    const scope = getDataScope()
     if (scope === null) {
       await dispatch('updateQuickBookmarkTargetPlaylistId', playlistId)
     } else {
@@ -494,6 +498,7 @@ const actions = {
       const payload = (await DBPlaylistHandlers.find(true)).filter((e) => e != null)
       if (scope !== getDataScope()) return
       commit('setScopedQuickBookmarkTarget', scope === null ? null : readScopedQuickBookmarkTarget(scope))
+      commit('setPlaylistsScope', scope)
       if (payload.length === 0) {
         // Another profile's playlists may be shown until now.
         commit('setAllPlaylists', [])
@@ -868,6 +873,10 @@ const mutations = {
 
   setPlaylistsReady(state, payload) {
     state.playlistsReady = payload
+  },
+
+  setPlaylistsScope(state, scope) {
+    state.playlistsScope = scope
   },
 
   setScopedQuickBookmarkTarget(state, playlistId) {

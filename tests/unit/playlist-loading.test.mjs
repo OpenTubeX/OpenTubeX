@@ -20,7 +20,7 @@ function playlist(_id, playlistName, protectedValue = false) {
   }
 }
 
-async function fixture(records, { settingsDelay = false, settingsError = null, scope } = {}) {
+async function fixture(records, { settingsDelay = false, settingsError = null, scope, storage = new Map() } = {}) {
   const db = { playlists: new Datastore({ inMemoryOnly: true }) }
   await db.playlists.insertAsync(records)
   const DBPlaylistHandlers = vm.runInNewContext(
@@ -47,6 +47,7 @@ async function fixture(records, { settingsDelay = false, settingsError = null, s
       processToBeAddedPlaylistVideo: () => {},
       console: { error: error => errors.push(error) },
       getDataScope: () => scope?.current ?? null,
+      localStorage: { getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value) },
       withDataScope: (requested, operation) => {
         const previous = scope?.current ?? null
         if (scope) scope.current = requested
@@ -79,6 +80,7 @@ async function fixture(records, { settingsDelay = false, settingsError = null, s
     db,
     module,
     errors,
+    context,
     handlers: DBPlaylistHandlers,
     rootState: context.rootState,
     dispatch: context.dispatch,
@@ -243,4 +245,18 @@ test('switching to another profile while its playlists load keeps the other prof
   // profile's data nor replace its playlists.
   assert.deepEqual(scope.writes, [])
   assert.deepEqual(module.state.playlists.map(playlist => playlist._id), ['other'])
+})
+
+test('a playlist created while a profile switch waits sets the quick bookmark target of its own profile', async () => {
+  const scope = { current: null }
+  const storage = new Map()
+  const { module, rootState, context, load } = await fixture([{ _id: 'shared', playlistName: 'Shared', videos: [] }], { scope, storage })
+  await load()
+  rootState.settings.quickBookmarkTargetPlaylistId = 'deleted'
+  // The separate profile is selected, but the switch waits for this write first.
+  context.rootGetters.getActiveDataScope = 'separate'
+
+  assert.equal(await module.actions.addPlaylist(context, { _id: 'created', playlistName: 'Created', videos: [] }), true)
+  assert.equal(rootState.settings.quickBookmarkTargetPlaylistId, 'created')
+  assert.deepEqual([...storage.values()], [])
 })
