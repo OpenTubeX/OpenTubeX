@@ -270,13 +270,18 @@
   max-inline-size: none;
   max-block-size: none;
   padding-block: 0 12px;
-  padding-inline: 12px;
+  padding-inline: 0;
   background: none;
   border: 0;
   border-radius: 0;
   box-shadow: none;
   backdrop-filter: none;
   font-size: 1rem;
+}
+
+/* The scrollers carry the sheet's padding so their scrollbars sit at its edge. */
+.profileSheet > :is(.feedTypePreferences, .profileDropdownScroller) {
+  padding-inline: 12px;
 }
 
 .profileDropdownOpensAbove {
