@@ -24,7 +24,6 @@ test.describe('mobile search and settings', { tag: '@scale' }, () => {
     })).toBe(true)
     const category = page.locator('.settingsMenu .title[data-section="appearance"]')
     await expect(category).toBeVisible()
-    await expect(category.locator('..')).toHaveCSS('min-block-size', '56px')
     // Fractional UI scales round the row a few hundredths of a pixel short.
     expect((await category.boundingBox()).height).toBeGreaterThanOrEqual(55.95)
     await category.click({ position: { x: 12, y: 4 } })

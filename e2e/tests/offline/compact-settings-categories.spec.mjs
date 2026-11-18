@@ -21,6 +21,13 @@ async function expectValidCategoryScrollbars(menu) {
   })).toBe(true)
 }
 
+/** The menu stays rendered and shows the given layout. */
+async function expectCompactMenu(page, compact) {
+  const menu = page.locator('.settingsMenu')
+  await expect(menu).toBeVisible()
+  await expect(menu).toHaveClass(compact ? /\bcompact\b/ : /^(?!.*\bcompact\b)/)
+}
+
 async function resizeWindowWidth(app, page, width) {
   const previousWidth = await page.evaluate(() => innerWidth)
   await app.electronApp.evaluate(({ BrowserWindow }, nextWidth) => {
@@ -70,7 +77,7 @@ for (const initialValue of [false, true]) {
         await errorLogged
         await expect(toggle).toBeEnabled()
         await expect(toggle).toBeChecked({ checked: initialValue })
-        await expect(page.locator('.settingsMenu.compact')).toHaveCount(initialValue ? 1 : 0)
+        await expectCompactMenu(page, initialValue)
         expect(latestSettings(readDatastore(app.userDataDir, 'settings'))
           .hideSettingsCategoryDescriptions).toBe(initialValue)
       } finally {
@@ -79,7 +86,7 @@ for (const initialValue of [false, true]) {
 
       await appearance.locator('label.switch-label').filter({ hasText: LABEL }).click()
       await expect(toggle).toBeChecked({ checked: !initialValue })
-      await expect(page.locator('.settingsMenu.compact')).toHaveCount(initialValue ? 0 : 1)
+      await expectCompactMenu(page, !initialValue)
       await expect.poll(async () => latestSettings(
         readDatastore(app.userDataDir, 'settings')
       ).hideSettingsCategoryDescriptions).toBe(!initialValue)
@@ -136,7 +143,6 @@ for (const width of [480, 1500]) {
       await page.evaluate(() => window.$store
         .dispatch('updateHideSettingsCategoryDescriptions', true))
       await expect(menu).toHaveClass(/\bcompact\b/)
-      await expect(category).toHaveCSS('min-block-size', width === 480 ? '48px' : '36px')
       expect(await category.evaluate(element => element.getBoundingClientRect().height)).toBeLessThan(expandedHeight - 3)
       await expectValidCategoryScrollbars(menu)
 

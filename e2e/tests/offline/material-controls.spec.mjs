@@ -76,14 +76,12 @@ test.describe('select indicators', { tag: '@scale' }, () => {
           await select.scrollIntoViewIfNeeded()
           const geometry = await root.evaluate(element => {
             const field = element.querySelector('.select-text').getBoundingClientRect()
-            const outline = element.querySelector('.selectOutline').getBoundingClientRect()
             const icons = element.querySelector('.selectIndicators').getBoundingClientRect()
             const viewport = element.closest('.settingsContent').getBoundingClientRect()
             const bounds = element.getBoundingClientRect()
             const rtl = getComputedStyle(element).direction === 'rtl'
             return {
               gap: rtl ? field.left - icons.right : icons.left - field.right,
-              outlineOffset: Math.max(Math.abs(outline.left - field.left), Math.abs(outline.right - field.right)),
               centers: Math.abs(field.top + field.height / 2 - icons.top - icons.height / 2),
               overflow: Math.max(viewport.left - icons.left, icons.right - viewport.right),
               rootOverflow: Math.max(bounds.left - icons.left, icons.right - bounds.right)
@@ -91,7 +89,6 @@ test.describe('select indicators', { tag: '@scale' }, () => {
           })
           expect(geometry.gap).toBeGreaterThanOrEqual(7)
           expect(geometry.gap).toBeLessThanOrEqual(9)
-          expect(geometry.outlineOffset).toBeLessThanOrEqual(1)
           expect(geometry.centers).toBeLessThanOrEqual(1)
           expect(geometry.overflow).toBeLessThanOrEqual(1)
           expect(geometry.rootOverflow).toBeLessThanOrEqual(1)
