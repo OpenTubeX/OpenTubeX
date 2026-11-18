@@ -1,3 +1,4 @@
+import { AdState, CuepointList } from 'googlevideo/protos'
 import { UmpReader } from 'googlevideo/ump'
 
 // Application safety budget, not a protocol maximum. A response supplies one
@@ -6,104 +7,38 @@ import { UmpReader } from 'googlevideo/ump'
 export const MAX_SABR_RESPONSE_BYTES = 128 * 1024 * 1024
 
 /**
- * Consume complete UMP parts, retaining even a partial type/size header for
- * the next network chunk. UmpReader.read() only returns a remainder once a
- * complete header and at least one payload byte have arrived.
+ * @param {Pick<import('googlevideo/ump').UmpReaderCallbacks, 'onPart'>} callbacks
+ */
+export function createSabrUmpReader({ onPart }) {
+  return new UmpReader({
+    onPart,
+    // Rejects an oversized part once its payload starts, instead of buffering
+    // it; returning false keeps UmpReader waiting for the complete part.
+    onPartialPart(_type, _chunk, _offset, totalSize) {
+      if (totalSize > MAX_SABR_RESPONSE_BYTES) {
+        throw new Error('SABR part exceeds the response size limit')
+      }
+      return false
+    },
+  })
+}
+
+/**
+ * Reads the UMP varint that starts MEDIA and MEDIA_END parts. Header IDs can
+ * exceed one byte, so the first byte alone is not the ID.
  * @param {import('googlevideo/ump').CompositeBuffer} buffer
- * @param {(part: import('googlevideo/shared-types').Part) => void} onPart
- * @returns {import('googlevideo/ump').CompositeBuffer | null}
+ * @returns {[value: number, offset: number]}
  */
-export function readCompleteUmpParts(buffer, onPart) {
-  while (buffer.getLength() > 0) {
-    const reader = new UmpReader(buffer)
-    const [type, sizeOffset] = reader.readVarInt(0)
-    if (type < 0) return buffer
-    const [size, dataOffset] = reader.readVarInt(sizeOffset)
-    if (size < 0) return buffer
-    if (size > MAX_SABR_RESPONSE_BYTES - dataOffset) {
-      throw new Error('SABR part exceeds the response size limit')
-    }
-    if (!buffer.canReadBytes(dataOffset, size)) return buffer
-
-    const { extractedBuffer, remainingBuffer } = buffer.split(dataOffset).remainingBuffer.split(size)
-    onPart({ type, size, data: extractedBuffer })
-    buffer = remainingBuffer
+export function readUmpVarInt(buffer) {
+  const first = buffer.getUint8(0)
+  const length = first < 0x80 ? 1 : first < 0xc0 ? 2 : first < 0xe0 ? 3 : first < 0xf0 ? 4 : 5
+  let value = length === 5 ? 0 : first & (0xff >> length)
+  let shift = length === 5 ? 0 : 8 - length
+  for (let offset = 1; offset < length; offset++) {
+    value += buffer.getUint8(offset) * 2 ** shift
+    shift += 8
   }
-  return null
-}
-
-/**
- * @param {Uint8Array} bytes
- * @param {number} offset
- * @returns {[value: number, offset: number] | undefined}
- */
-function readProtobufVarint(bytes, offset) {
-  let result = 0
-  let shift = 0
-
-  while (offset < bytes.length) {
-    const byte = bytes[offset++]
-    result += (byte & 0x7f) * 2 ** shift
-    if ((byte & 0x80) === 0) {
-      return [result, offset]
-    }
-    shift += 7
-  }
-
-  return undefined
-}
-
-/**
- * Iterates the fields of a protobuf message without decoding their values,
- * stopping at malformed data.
- * @param {Uint8Array} bytes
- * @returns {Generator<{ field: number, wireType: number, data: Uint8Array }>}
- */
-function * readProtobufFields(bytes) {
-  let offset = 0
-
-  while (offset < bytes.length) {
-    const key = readProtobufVarint(bytes, offset)
-    if (key === undefined) return
-    offset = key[1]
-
-    const wireType = key[0] % 8
-    let start = offset
-    if (wireType === 2) {
-      const length = readProtobufVarint(bytes, offset)
-      if (length === undefined) return
-      start = length[1]
-      offset = start + length[0]
-    } else if (wireType === 0) {
-      const value = readProtobufVarint(bytes, offset)
-      if (value === undefined) return
-      offset = value[1]
-    } else if (wireType === 5) {
-      offset += 4
-    } else if (wireType === 1) {
-      offset += 8
-    } else {
-      return
-    }
-    if (offset > bytes.length) return
-
-    yield { field: Math.floor(key[0] / 8), wireType, data: bytes.subarray(start, offset) }
-  }
-}
-
-/**
- * Extract a protobuf field without decoding it.
- *
- * @param {Uint8Array} bytes
- * @param {number} fieldNumber
- * @param {number} expectedWireType
- * @returns {Uint8Array | undefined}
- */
-export function extractRawProtobufField(bytes, fieldNumber, expectedWireType = 2) {
-  for (const { field, wireType, data } of readProtobufFields(bytes)) {
-    if (field === fieldNumber && wireType === expectedWireType) return data
-  }
-  return undefined
+  return [value, length]
 }
 
 /**
@@ -114,11 +49,25 @@ export function parseSabrFormatId(formatId) {
   const firstSeparator = formatId.indexOf('-')
   const secondSeparator = formatId.indexOf('-', firstSeparator + 1)
 
+  const xtags = formatId.slice(secondSeparator + 1)
   return {
     itag: parseInt(formatId.slice(0, firstSeparator)),
     lastModified: formatId.slice(firstSeparator + 1, secondSeparator),
-    xtags: formatId.slice(secondSeparator + 1)
+    // googlevideo leaves absent fields undefined, also in received headers
+    xtags: xtags === '' ? undefined : xtags
   }
+}
+
+/**
+ * googlevideo leaves fields the server omits undefined, which in proto3 means
+ * zero. Live media headers omit the zero lastModified, for example.
+ * @param {import('googlevideo/protos').FormatId | undefined} received
+ * @param {import('googlevideo/protos').FormatId} requested
+ */
+export function isSameSabrFormat(received, requested) {
+  return received?.itag === requested.itag &&
+    (received.lastModified ?? '0') === (requested.lastModified ?? '0') &&
+    (received.xtags ?? '') === (requested.xtags ?? '')
 }
 
 /**
@@ -170,7 +119,7 @@ function ticksToMs(ticks, timescale) {
 }
 
 /**
- * @param {import('googlevideo/protos').LiveMetadata} liveMetadata
+ * @param {import('googlevideo/protos').SabrLiveMetadata} liveMetadata
  * @param {number} receivedAtMs
  * @returns {SabrLiveHead | null}
  */
@@ -300,12 +249,6 @@ export function getSabrLiveTargetDuration(formats) {
   return durations.length > 0 ? Math.max(...durations) : null
 }
 
-/** Not in googlevideo 4's `UMPPartId` */
-export const CUEPOINT_LIST_PART_ID = 69
-// YouTube's player reports this state when it throttles ad requests itself
-const SSAP_STATE_RATECONTROL_CLIENT = 11
-const SSAP_PLAYBACK_INFOS_FIELD = 24
-
 /**
  * @typedef SabrCuepoint
  * @property {string} identifier
@@ -313,93 +256,39 @@ const SSAP_PLAYBACK_INFOS_FIELD = 24
  * @property {number} durationMs
  */
 
-/** @param {Uint8Array} bytes */
-function readProtobufDouble(bytes) {
-  return new DataView(bytes.buffer, bytes.byteOffset, 8).getFloat64(0, true)
-}
-
 /**
- * Reads the ad breaks of a CUEPOINT_LIST part, for which googlevideo 4 has no message.
+ * Reads the ad breaks of a CUEPOINT_LIST part.
  * @param {Uint8Array} bytes
  * @returns {SabrCuepoint[]}
  */
 export function parseSabrCuepoints(bytes) {
   const cuepoints = []
-  for (const info of readProtobufFields(bytes)) {
-    if (info.field !== 1 || info.wireType !== 2) continue
-    const cuepointBytes = extractRawProtobufField(info.data, 1)
-    const timeRangeBytes = extractRawProtobufField(info.data, 4)
-    if (!cuepointBytes || !timeRangeBytes) continue
+  for (const { cuepoint, timeRange } of CuepointList.decode(bytes).ssapInfos) {
+    if (!cuepoint || !timeRange) continue
 
-    let identifier = ''
-    let totalDurationSec = 0
-    let playheadTimeSec = 0
-    for (const { field, wireType, data } of readProtobufFields(cuepointBytes)) {
-      if (field === 3 && wireType === 1) totalDurationSec = readProtobufDouble(data)
-      else if (field === 4 && wireType === 1) playheadTimeSec = readProtobufDouble(data)
-      else if (field === 6 && wireType === 2) identifier = new TextDecoder().decode(data)
-    }
-
-    let startTicks = 0
-    let timescale = 1000
-    for (const { field, wireType, data } of readProtobufFields(timeRangeBytes)) {
-      if (field === 1 && wireType === 0) startTicks = readProtobufVarint(data, 0)[0]
-      else if (field === 3 && wireType === 0) timescale = readProtobufVarint(data, 0)[0] || 1000
-    }
-
+    const timescale = timeRange.timescale || 1000
     cuepoints.push({
-      identifier,
-      startTimeMs: Math.floor((startTicks / timescale - playheadTimeSec) * 1000),
-      durationMs: Math.round(totalDurationSec * 1000),
+      identifier: cuepoint.identifier ?? '',
+      startTimeMs: Math.floor((Number(timeRange.startTicks ?? 0) / timescale - (cuepoint.playheadTimeSec ?? 0)) * 1000),
+      durationMs: Math.round((cuepoint.totalDurationSec ?? 0) * 1000),
     })
   }
   return cuepoints
 }
 
 /**
- * @param {number[]} out
- * @param {number} value
- */
-function writeProtobufVarint(out, value) {
-  let remaining = BigInt.asUintN(64, BigInt(value))
-  do {
-    const byte = Number(remaining & 0x7fn)
-    remaining >>= 7n
-    out.push(remaining > 0n ? byte | 0x80 : byte)
-  } while (remaining > 0n)
-}
-
-/**
- * @param {number[]} out
- * @param {number} field
- * @param {ArrayLike<number>} bytes
- */
-function writeProtobufBytes(out, field, bytes) {
-  writeProtobufVarint(out, field * 8 + 2)
-  writeProtobufVarint(out, bytes.length)
-  for (let i = 0; i < bytes.length; i++) out.push(bytes[i])
-}
-
-/**
  * SABR withholds the media after an ad break until the request says how the
  * client handled it. Like YouTube's player when it throttles ad requests, this
- * skips the ad. Protobuf merges repeated fields, so the bytes can be appended
- * to an encoded `VideoPlaybackAbrRequest`.
+ * skips the ad.
  * @param {Iterable<SabrCuepoint>} cuepoints
- * @returns {Uint8Array} its `ssapPlaybackInfos` field
+ * @returns {import('googlevideo/protos').SsapPlaybackInfo[]}
  */
-export function encodeSsapPlaybackInfos(cuepoints) {
-  const out = []
-  for (const cuepoint of cuepoints) {
-    const info = []
-    writeProtobufBytes(info, 7, new TextEncoder().encode(cuepoint.identifier))
-    writeProtobufVarint(info, 8 * 8)
-    writeProtobufVarint(info, SSAP_STATE_RATECONTROL_CLIENT)
-    writeProtobufVarint(info, 10 * 8)
-    writeProtobufVarint(info, cuepoint.startTimeMs)
-    writeProtobufVarint(info, 11 * 8)
-    writeProtobufVarint(info, cuepoint.durationMs)
-    writeProtobufBytes(out, SSAP_PLAYBACK_INFOS_FIELD, info)
-  }
-  return Uint8Array.from(out)
+export function createSsapPlaybackInfos(cuepoints) {
+  return Array.from(cuepoints, cuepoint => ({
+    adCpns: [],
+    cuepointId: cuepoint.identifier,
+    state: AdState.RATECONTROL_CLIENT,
+    startTimeMs: String(cuepoint.startTimeMs),
+    durationMs: String(cuepoint.durationMs),
+  }))
 }
