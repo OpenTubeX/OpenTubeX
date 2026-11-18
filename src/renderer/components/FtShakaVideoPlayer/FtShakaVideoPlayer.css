@@ -111,10 +111,15 @@
   column-gap: 8px;
 }
 
-/* Transparent center buttons must let surface taps and speed holds through. */
+/* Transparent center buttons must let surface taps and speed holds through.
+   They stay tappable for the first half of Shaka's 0.6s fade-out, while they
+   still look visible; otherwise a tap on them only reveals the controls. */
 /* stylelint-disable-next-line selector-max-compound-selectors */
 :global(.capacitorTabs .shaka-controls-container:not([shown='true'], [casting='true']) .shaka-big-buttons-container > button) {
   pointer-events: none;
+  transition:
+    opacity 0.6s cubic-bezier(0.4, 0, 0.6, 1),
+    pointer-events 0s 0.3s allow-discrete;
 }
 
 .player {

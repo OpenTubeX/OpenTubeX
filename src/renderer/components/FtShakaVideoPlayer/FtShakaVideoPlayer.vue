@@ -5922,6 +5922,19 @@ function handlePlayerTouchEnd(event) {
     return
   }
   handleMobilePlayerTouchEnd(event)
+
+  // Center buttons stay tappable while they start fading out (see
+  // FtShakaVideoPlayer.css). Shaka treats a touch that ends while its controls
+  // are hidden as a tap that only reveals them and cancels the button's click.
+  if (
+    !event.defaultPrevented &&
+    isCapacitorMobilePlayer() &&
+    event.target instanceof Element &&
+    event.target.closest('.shaka-big-buttons-container > button') &&
+    !ui?.getControls()?.isOpaque()
+  ) {
+    event.stopPropagation()
+  }
 }
 
 /** @param {MouseEvent} event */
