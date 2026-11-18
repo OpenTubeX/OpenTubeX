@@ -59,6 +59,18 @@ export function parseSabrFormatId(formatId) {
 }
 
 /**
+ * googlevideo leaves fields the server omits undefined, which in proto3 means
+ * zero. Live media headers omit the zero lastModified, for example.
+ * @param {import('googlevideo/protos').FormatId | undefined} received
+ * @param {import('googlevideo/protos').FormatId} requested
+ */
+export function isSameSabrFormat(received, requested) {
+  return received?.itag === requested.itag &&
+    (received.lastModified ?? '0') === (requested.lastModified ?? '0') &&
+    (received.xtags ?? '') === (requested.xtags ?? '')
+}
+
+/**
  * @param {string} uri
  * @param {object} request
  */

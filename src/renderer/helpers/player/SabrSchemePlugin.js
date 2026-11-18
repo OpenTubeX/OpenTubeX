@@ -20,6 +20,7 @@ import {
   createSabrUmpReader,
   createSsapPlaybackInfos,
   encodeSabrLiveHead,
+  isSameSabrFormat,
   MAX_SABR_RESPONSE_BYTES,
   parseSabrCuepoints,
   parseSabrFormatId,
@@ -645,7 +646,7 @@ async function doRequest(
 
     operationInputs.headersReceived({})
 
-    const { itag, lastModified, xtags } = parseSabrFormatId(operationInputs.formatIdString)
+    const requestedFormatId = parseSabrFormatId(operationInputs.formatIdString)
     let mediaHeaderId
 
     const umpReader = createSabrUmpReader({
@@ -689,25 +690,23 @@ async function doRequest(
             if (mediaHeaderId === undefined) {
               const mediaHeader = decodePart(data, MediaHeader)
               if (!mediaHeader) break
+              // Omitted proto3 fields are zero, but googlevideo leaves them undefined
+              const { headerId = 0, segmentNum = 0, startMs = '0' } = mediaHeader
 
-              if (
-                mediaHeader.formatId.itag === itag &&
-                mediaHeader.formatId.lastModified === lastModified &&
-                mediaHeader.formatId.xtags === xtags
-              ) {
+              if (isSameSabrFormat(mediaHeader.formatId, requestedFormatId)) {
                 if (
                   (operationInputs.isInit && mediaHeader.isInitializationSegment) ||
                   (!operationInputs.isInit && !mediaHeader.isInitializationSegment &&
-                    (operationInputs.isLiveLookup || mediaHeader.segmentNum === operationInputs.sequenceNumber))
+                    (operationInputs.isLiveLookup || segmentNum === operationInputs.sequenceNumber))
                 ) {
-                  mediaHeaderId = mediaHeader.headerId
-                  mediaSequenceNumber = mediaHeader.segmentNum
-                  mediaStartMs = Number(mediaHeader.startMs)
+                  mediaHeaderId = headerId
+                  mediaSequenceNumber = segmentNum
+                  mediaStartMs = Number(startMs)
                   if (mediaHeader.segmentLengthBytes !== undefined) {
                     expectedMediaLength = Number(mediaHeader.segmentLengthBytes)
                   }
                 } else if (operationInputs.targetDurationMs && !mediaHeader.isInitializationSegment) {
-                  neighborSegment ??= { sequenceNumber: mediaHeader.segmentNum, startMs: Number(mediaHeader.startMs) }
+                  neighborSegment ??= { sequenceNumber: segmentNum, startMs: Number(startMs) }
                 }
               }
             }

@@ -66,6 +66,21 @@ for (const headerId of [130, 256]) {
   })
 }
 
+test('matches media headers that omit zero fields, as live headers omit lastModified', async t => {
+  const buffer = new CompositeBuffer([])
+  const writer = new UmpWriter(buffer)
+  // Omitted fields decode as undefined, not as zero
+  writer.write(protos.UMPPartId.MEDIA_HEADER, protos.MediaHeader.encode({ formatId: { itag: 140 }, segmentNum: 1 }).finish())
+  writer.write(protos.UMPPartId.MEDIA, Uint8Array.of(0, 1, 2, 3))
+  writer.write(protos.UMPPartId.MEDIA_END, Uint8Array.of(0))
+  const { createSabrTransport } = load(async () => new Response(utils.concatenateChunks(buffer.chunks)))
+  const transport = createSabrTransport(sabrData, () => context)
+  t.after(() => transport.cleanup())
+  const uri = 'sabr1:audio?formatId=140-0-&sq=1'
+  const segment = await transport.request(uri, request(uri), 1).promise
+  assert.deepEqual([...segment.data], [1, 2, 3])
+})
+
 test('complete SABR media survives every network chunk boundary', async t => {
   const bytes = new Uint8Array(await response([1, 2, 3]).arrayBuffer())
   for (let split = 1; split < bytes.length; split++) {
