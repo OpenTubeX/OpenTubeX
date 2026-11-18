@@ -469,6 +469,8 @@ test('a Short left during a connection wait replays its error when presented aga
     cancelSponsorBlockSkipSchedule() {},
     clearAbRepeatBoundarySchedule() {},
     mediaSessionSource: 'player',
+    fullscreenSyncs: 0,
+    fullscreenChangeHandler() { context.fullscreenSyncs++ },
   })
   context.props.shortsPlayer = true
   vm.runInContext(source, context)
@@ -486,6 +488,7 @@ test('a Short left during a connection wait replays its error when presented aga
   assert.deepEqual(emitted.map(([name, emittedError]) => [name, emittedError]), [['error', error], ['error', error]],
     'the returning Short must report its failed stream again')
   assert.equal(context.video.value.paused, false, 'a Short that was playing resumes once its stream does')
+  assert.equal(context.fullscreenSyncs, 1, 'fullscreen may have ended while the Short was suspended')
 })
 
 test('an inactive Short defers player errors without changing current playback', () => {
@@ -524,6 +527,7 @@ test('an inactive Short defers player errors without changing current playback',
     ...context,
     musicMode: ref(false),
     handleError,
+    fullscreenChangeHandler() {},
     registerMediaSessionHandlers() {},
     onDeactivated() {},
     onActivated: callback => { activate = callback },
