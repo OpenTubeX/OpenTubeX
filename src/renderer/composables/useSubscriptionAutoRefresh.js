@@ -1013,7 +1013,8 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
    * @returns {boolean} whether the channel had no errors before
    */
   function importSubscriptionChannelFailure(result) {
-    const channel = store.getters.getSubscribedChannelsById.get(result.channelId)
+    // Background refreshes cover the channels of every profile.
+    const channel = store.getters.getAllRootSubscriptionsById.get(result.channelId)
     // Like the foreground refresh, network failures stay quiet
     if (channel === undefined || typeof result.diagnostic?.message !== 'string' || result.diagnostic.failure === 'network') {
       return false
@@ -1033,7 +1034,7 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
   async function reconcileAndroidSubscriptionRefreshChannelResult(result) {
     if (
       typeof result.channelId !== 'string' ||
-      !store.getters.getSubscribedChannelIdSet.has(result.channelId)
+      !store.getters.getAllRootSubscriptionsById.has(result.channelId)
     ) {
       return
     }
@@ -1063,7 +1064,7 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
     if (!Array.isArray(entries)) throw new AndroidSubscriptionRefreshPayloadError(new Error('Invalid saved entries'))
     entries = entries.filter(entry => !shouldHideMembersOnlyContent(entry.isMembersOnly, store.getters))
     if (feedType !== 'posts') {
-      const channel = store.getters.getSubscribedChannelsById.get(result.channelId)
+      const channel = store.getters.getAllRootSubscriptionsById.get(result.channelId)
       const cachedThumbnails = new Map((previousCache?.videos ?? []).map(video => [video.videoId, video.thumbnailUrl]))
       for (const entry of entries) {
         if (!entry.author || entry.author === 'N/A') entry.author = channel?.name

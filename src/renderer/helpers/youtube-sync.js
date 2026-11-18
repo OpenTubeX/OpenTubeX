@@ -178,7 +178,10 @@ async function syncSubscriptions(account) {
     // A removal that did not save must come again with the next sync.
     if (!await store.dispatch('removeChannelFromProfiles', {
       channelIds: removedIds,
-      profileIds: profiles.filter(profile => profile.subscriptions.some(channel => removed.has(channel.id))).map(profile => profile._id)
+      // The YouTube account syncs the shared subscriptions, not a separate profile's.
+      profileIds: profiles
+        .filter(profile => profile.separate !== true && profile.subscriptions.some(channel => removed.has(channel.id)))
+        .map(profile => profile._id)
     })) {
       throw new Error('Could not remove the channels unsubscribed from on YouTube')
     }

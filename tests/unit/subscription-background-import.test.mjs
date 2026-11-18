@@ -127,8 +127,7 @@ test('background playlist imports restore missing authors and keep explicit byli
   const cache = { UCchannel: { videos: [{ videoId: 'missing', thumbnailUrl: 'https://images.example/portrait.jpg' }] } }
   let saved
   hooks.store = createStore({
-    getSubscribedChannelIdSet: new Set(['UCchannel']),
-    getSubscribedChannelsById: new Map([['UCchannel', { id: 'UCchannel', name: 'Subscribed creator' }]]),
+    getAllRootSubscriptionsById: new Map([['UCchannel', { id: 'UCchannel', name: 'Subscribed creator' }]]),
     getShortsCache: cache,
   })
   hooks.store.onDispatch = (_action, value) => { saved = value.videos; cache.UCchannel = value; return true }
@@ -166,7 +165,7 @@ test('channels that failed in a background refresh are listed above the feed', a
   const errors = []
   const notifications = []
   hooks.store = createStore({
-    getSubscribedChannelsById: new Map(['UCgone', 'UCrefreshed', 'UCoffline'].map(id => [id, { id, name: 'Subscribed creator' }])),
+    getAllRootSubscriptionsById: new Map(['UCgone', 'UCrefreshed', 'UCoffline'].map(id => [id, { id, name: 'Subscribed creator' }])),
     getVideoCache: { UCrefreshed: { timestamp: new Date(2000) } },
   })
   hooks.setSubscriptionChannelError = (...args) => { errors.push(args); return true }
@@ -198,8 +197,7 @@ test('background Yattee Shorts are dated through the server instead of YouTube',
   let saved
   hooks.store = createStore({
     getBackendPreference: 'yattee',
-    getSubscribedChannelIdSet: new Set(['UCchannel']),
-    getSubscribedChannelsById: new Map([['UCchannel', { id: 'UCchannel', name: 'Subscribed creator' }]]),
+    getAllRootSubscriptionsById: new Map([['UCchannel', { id: 'UCchannel', name: 'Subscribed creator' }]]),
     getShortsCache: cache,
   })
   hooks.store.onDispatch = (_action, value) => { saved = value.videos; cache.UCchannel = value; return true }

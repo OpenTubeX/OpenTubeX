@@ -83,6 +83,11 @@ const getters = {
     return [...channels.values()]
   },
 
+  /** Every profile's subscriptions by channel, for feeds refreshed for all of them */
+  getAllRootSubscriptionsById: (state, getters) => {
+    return new Map(getters.getAllRootSubscriptions.map(channel => [channel.id, channel]))
+  },
+
   getSubscribedChannelIdSet: (state, getters) => {
     return getters.getSubscriptionRootProfile.subscriptions.reduce((set, channel) => set.add(channel.id), new Set())
   },
