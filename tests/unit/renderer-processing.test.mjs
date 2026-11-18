@@ -461,18 +461,20 @@ test('backup archives are created and read without blocking renderer input', asy
 test('background merge preserves data-loss errors and permits an explicit retry', async () => {
   const jobs = createJobs()
   try {
+    // Emptying a shorter history is an ordinary edit.
+    const ids = ['test-1', 'test-2', 'test-3']
     const input = {
-      localHistory: [{ videoId: 'test', title: 'A video', authorId: 'UCtest', timeWatched: 100 }],
+      localHistory: ids.map((videoId, index) => ({ videoId, title: `Video ${index}`, authorId: 'UCtest', timeWatched: 100 })),
       remoteHistory: [],
-      previous: ['test'],
+      previous: ids,
     }
     await assert.rejects(jobs.run('mergeHistory', input), error => {
       assert.ok(error instanceof SyncServerDataLossError)
       assert.equal(error.collection, 'history')
-      assert.deepEqual(error.items, [{ id: 'test', name: 'A video' }])
+      assert.deepEqual(error.items, ids.map((id, index) => ({ id, name: `Video ${index}` })))
       return true
     })
-    assert.deepEqual((await jobs.run('mergeHistory', { ...input, options: { allowDataLoss: true } })).deletions, ['test'])
+    assert.deepEqual((await jobs.run('mergeHistory', { ...input, options: { allowDataLoss: true } })).deletions, ids)
   } finally { jobs.dispose() }
 })
 

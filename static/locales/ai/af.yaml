@@ -1792,6 +1792,8 @@ Settings:
     Data Loss Warning: Sinkronisering sou {deleted} van {previous} voorheen gesinkroniseerde items in “{collection}” op alle toestelle skrap. As u hulle nie geskrap het nie, byvoorbeeld omdat die bediener teruggestel is, behou hulle om hulle oral te herstel.
     Keep Deleted Items: Behou items
     Confirm Data Loss: Skrap en gaan voort
+    Automatic Sync Paused: 'Outomatiese sinkronisering is onderbreek omdat ''n sinkronisering voorheen gesinkroniseerde items sou uitgevee het. Hersien die skrappings om dit te hervat.'
+    Review Deletions: 'Hersien skrappings'
     Server Update Required: Werk hierdie bediener by om geënkripteerde regstreekse sinkronisering te ondersteun.
     Log In with Provider: 'Meld aan met {provider}'
     Log In with Single Sign-On: 'Meld aan met enkelaanmelding'

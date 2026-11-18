@@ -1576,6 +1576,8 @@ Settings:
     Data Loss Warning: Eşitleme, “{collection}” içinde daha önce eşitlenen {previous} öğeden {deleted} tanesini tüm cihazlarda silecek. Bunları siz silmediyseniz, örneğin sunucu sıfırlandığı için, her yerde geri yüklemek üzere saklayın.
     Keep Deleted Items: Öğeleri sakla
     Confirm Data Loss: Sil ve devam et
+    Automatic Sync Paused: 'Bir eşitleme daha önce eşitlenmiş öğeleri sileceği için otomatik eşitleme duraklatıldı. Devam ettirmek için silmeleri gözden geçirin.'
+    Review Deletions: 'Silmeleri gözden geçir'
     Use Shared Tabs: 'Cihazlar arasında tek bir ortak sekme grubu kullan'
     Shared Tabs Warning: 'Bu cihazda açık olan sekmeler paylaşılan küme olur. Diğer cihazlar eşitlendiklerinde açık sekmelerini bu kümeyle değiştirir; farklı cihazların sekmeleri birleştirilmez.'
     Tabs From Other Devices: 'Diğer cihazlardaki sekmeler'

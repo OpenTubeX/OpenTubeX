@@ -15,6 +15,9 @@ function mapBy(items, getId) {
 // Lists inside a playlist or profile that exists on both sides. A server reset
 // removes the whole parent, so emptying one of these lists is an ordinary edit.
 const NESTED_COLLECTIONS = new Set(['playlistVideos', 'profileChannels'])
+// Emptying a list of fewer items, like unsubscribing from the only channel, is
+// an ordinary edit. A server reset usually loses more than that.
+const MIN_EMPTIED_DELETIONS = 3
 
 /**
  * @param {Iterable<string>} localIds
@@ -38,10 +41,15 @@ export function mergeIds(
   { allowDataLoss = false, restored = false, collection = 'data', scope = null, scopeName = null, deletions, getItemName = () => null } = {}
 ) {
   const decision = deletions?.[syncDeletionKey(collection, scope)]
-  const confirmed = new Set(decision?.confirmed)
   const kept = new Set(decision?.kept)
   const local = new Set(localIds)
   const remote = new Set(remoteIds)
+  // Another device's deletion only covers items the server no longer has. A
+  // restored list keeps them, because its other side was removed as a whole.
+  const confirmed = new Set([
+    ...(decision?.confirmed ?? []),
+    ...(restored ? [] : decision?.remote ?? []).filter(id => !remote.has(id)),
+  ])
   const previous = new Set(restored ? Array.from(previousIds).filter(id => confirmed.has(id)) : previousIds)
   const allIds = new Set([...local, ...remote, ...previous])
 
@@ -57,7 +65,7 @@ export function mergeIds(
   const deletedIds = Array.from(previous).filter(id => !merged.has(id) && (local.has(id) || remote.has(id)) &&
     !confirmed.has(id))
   const deleted = deletedIds.length
-  const oneSideWasEmptied = previous.size > 0 && !NESTED_COLLECTIONS.has(collection) && (
+  const oneSideWasEmptied = deleted >= MIN_EMPTIED_DELETIONS && !NESTED_COLLECTIONS.has(collection) && (
     (local.size === 0 && remote.size > 0) ||
     (remote.size === 0 && local.size > 0)
   )

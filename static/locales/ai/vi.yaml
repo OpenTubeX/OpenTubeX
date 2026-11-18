@@ -1581,6 +1581,8 @@ Settings:
     Data Loss Warning: Đồng bộ sẽ xóa {deleted} trong số {previous} mục đã đồng bộ trước đó trong “{collection}” trên tất cả thiết bị. Nếu bạn không xóa chúng, chẳng hạn vì máy chủ đã bị đặt lại, hãy giữ chúng để khôi phục ở mọi nơi.
     Keep Deleted Items: Giữ các mục
     Confirm Data Loss: Xóa và tiếp tục
+    Automatic Sync Paused: 'Đồng bộ tự động đã tạm dừng vì một lần đồng bộ sẽ xóa các mục đã được đồng bộ trước đó. Hãy xem lại các mục bị xóa để tiếp tục.'
+    Review Deletions: 'Xem lại các mục bị xóa'
     Use Shared Tabs: 'Dùng một bộ thẻ chung trên các thiết bị'
     Shared Tabs Warning: 'Các thẻ đang mở trên thiết bị này sẽ trở thành bộ thẻ dùng chung. Khi đồng bộ hóa, các thiết bị khác sẽ thay thế thẻ đang mở bằng bộ thẻ này; thẻ từ các thiết bị khác nhau không được gộp lại.'
     Tabs From Other Devices: 'Thẻ từ thiết bị khác'

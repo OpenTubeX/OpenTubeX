@@ -1576,6 +1576,8 @@ Settings:
     Data Loss Warning: Synkroniseringen vil slette {deleted} av {previous} tidligere synkroniserte elementer i «{collection}» på alle enheter. Hvis du ikke slettet dem selv, for eksempel fordi serveren ble tilbakestilt, beholder du dem for å gjenopprette dem overalt.
     Keep Deleted Items: Behold elementer
     Confirm Data Loss: Slett og fortsett
+    Automatic Sync Paused: 'Automatisk synkronisering er satt på pause fordi en synkronisering ville ha slettet elementer som var synkronisert før. Gå gjennom slettingene for å gjenoppta den.'
+    Review Deletions: 'Gå gjennom slettinger'
     Use Shared Tabs: 'Bruk ett delt fanesett på tvers av enheter'
     Shared Tabs Warning: 'De åpne fanene på denne enheten blir det delte fanesettet. Andre enheter erstatter sine åpne faner med dette settet når de synkroniserer; faner fra ulike enheter slås ikke sammen.'
     Tabs From Other Devices: 'Faner fra andre enheter'

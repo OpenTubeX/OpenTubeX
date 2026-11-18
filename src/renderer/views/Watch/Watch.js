@@ -470,6 +470,8 @@ export default defineComponent({
       playbackSourceKey: 0,
       localPlaybackDownloadId: null,
       localPlaybackFilePath: null,
+      // Whether the user switched this video to its online stream.
+      onlinePlaybackChosen: false,
       sabrPlaybackLoaded: false,
       /** @type {{
        *   manifestSrc: string | null,
@@ -705,6 +707,25 @@ export default defineComponent({
     isDownloaded: function () {
       return this.$store.getters.getLocalPlaybackDownloadIds.has(this.videoId)
     },
+    /**
+     * The download this video plays from: the route's, when it has the video,
+     * or else this device's own download of it. Synced tabs, links and other
+     * devices' videos open without a download, or with another device's ID.
+     * @returns {{ id: number, filePath: string | null } | null}
+     */
+    preferredDownload: function () {
+      const routeId = Number(this.tabRoute.query.downloadId)
+      const filePath = this.tabRoute.query.downloadFilePath
+      if (Number.isInteger(routeId) &&
+        this.$store.getters.getYtDlpDownloads[routeId]?.files?.some(file => file.videoId === this.videoId &&
+          (typeof filePath === 'string' || file.available !== false))) {
+        return { id: routeId, filePath: typeof filePath === 'string' ? filePath : null }
+      }
+      // iOS plays downloads natively from the card click instead of on the watch page.
+      if (this.onlinePlaybackChosen || process.env.IS_IOS || !this.$store.getters.getEnableDownloads) return null
+      const id = this.$store.getters.getLocalPlaybackDownloadIds.get(this.videoId)
+      return id === undefined ? null : { id, filePath: null }
+    },
     localPlaybackDownloads: function () {
       const downloads = Object.values(this.$store.getters.getYtDlpDownloads)
         .filter(download => download.status === 'completed' && ['video', 'audio'].includes(download.mode))
@@ -712,7 +733,7 @@ export default defineComponent({
           file.videoId === this.videoId && file.available !== false
         )))
         .toSorted((a, b) => b.id - a.id)
-      const activeDownloadId = Number(this.tabRoute.query.downloadId)
+      const activeDownloadId = this.localFilePlayback ? this.localPlaybackDownloadId : null
 
       return ['video', 'audio'].flatMap(mode => {
         const download = downloads.find(download => (
@@ -1554,6 +1575,7 @@ export default defineComponent({
     },
     videoId() {
       this.showDownloadPrompt = false
+      this.onlinePlaybackChosen = false
       this.shortsNavigation.resetSwipe()
     },
     '$store.getters.getUseDataSaverThumbnails'() {
@@ -1650,11 +1672,12 @@ export default defineComponent({
         this.playbackSourceRouteBase(fullPath) ===
         this.playbackSourceRouteBase(previousFullPath)
       ) {
-        const downloadId = Number(this.tabRoute.query.downloadId)
-        if (Number.isInteger(downloadId)) {
-          const filePath = this.tabRoute.query.downloadFilePath ?? null
-          if ((downloadId !== this.localPlaybackDownloadId || filePath !== this.localPlaybackFilePath) &&
-            !this.applyDownloadedPlaybackSource(downloadId)) {
+        // A synced tab can drop the download from the route, which keeps
+        // playing this device's download.
+        const download = this.preferredDownload
+        if (download) {
+          if ((download.id !== this.localPlaybackDownloadId || download.filePath !== this.localPlaybackFilePath) &&
+            !this.applyDownloadedPlaybackSource()) {
             await this.reloadView()
           }
         } else if (this.localFilePlayback && !this.restoreOnlinePlaybackSource()) {
@@ -2872,7 +2895,7 @@ export default defineComponent({
      * Keeps the normal online metadata while replacing its streaming formats
      * with a completed file selected from the Downloads page.
      */
-    applyDownloadedPlaybackSource: function (downloadId = Number(this.tabRoute.query.downloadId), filePath = this.tabRoute.query.downloadFilePath ?? null) {
+    applyDownloadedPlaybackSource: function (downloadId = this.preferredDownload?.id, filePath = this.preferredDownload?.filePath ?? null) {
       if (!Number.isInteger(downloadId) || (filePath !== null && typeof filePath !== 'string')) return false
 
       const download = this.$store.getters.getYtDlpDownloads[downloadId]
@@ -3026,6 +3049,10 @@ export default defineComponent({
     },
 
     finishDownloadedPlaybackWithoutMetadata: function () {
+      // Without metadata it's unknown whether the video is family friendly, so
+      // only a download opened from the downloads plays.
+      if (this.showFamilyFriendlyOnly &&
+        this.preferredDownload?.id !== Number(this.tabRoute.query.downloadId)) return false
       const file = this.applyDownloadedPlaybackSource()
       if (!file) return false
 
@@ -3052,7 +3079,10 @@ export default defineComponent({
     scheduleDownloadedPlaybackFallback: function (loadGeneration, videoId) {
       clearTimeout(this.downloadedPlaybackFallbackTimer)
       // Without metadata it's unknown whether the video is family friendly.
-      if (this.showFamilyFriendlyOnly || !Number.isInteger(Number(this.tabRoute.query.downloadId))) return
+      if (this.showFamilyFriendlyOnly) return
+      // Download records load at startup, so the timer looks for the download again.
+      if (this.preferredDownload === null &&
+        !(this.$store.getters.getEnableDownloads && !this.$store.state.downloads.ytDlpDownloadsLoaded)) return
       this.downloadedPlaybackFallbackTimer = setTimeout(() => {
         if (this.isCurrentVideoLoad(loadGeneration, videoId) && this.isLoading && !this.localFilePlayback && !this.showFamilyFriendlyOnly) {
           this.finishDownloadedPlaybackWithoutMetadata()
@@ -4284,9 +4314,9 @@ export default defineComponent({
         }
 
         if (!metadataOnly && !this.isUpcoming && this.restrictedPlaybackError === null) {
+          // A download caches the online source, which the user can switch back to.
+          this.alignActiveFormatWithAvailableSources()
           if (!this.applyDownloadedPlaybackSource()) {
-            this.alignActiveFormatWithAvailableSources()
-
             // Deliberately not awaited, so that the metadata (title, description,
             // comments, recommendations, ...) is shown while yt-dlp is still extracting.
             this.applyYtDlpPlaybackSource(loadGeneration, videoId)
@@ -4683,9 +4713,9 @@ export default defineComponent({
           }
 
           if (!metadataOnly && !this.isUpcoming) {
+            // A download caches the online source, which the user can switch back to.
+            this.alignActiveFormatWithAvailableSources()
             if (!this.applyDownloadedPlaybackSource()) {
-              this.alignActiveFormatWithAvailableSources()
-
               // Deliberately not awaited, so that the metadata (title, description,
               // comments, recommendations, ...) is shown while yt-dlp is still extracting.
               this.applyYtDlpPlaybackSource(loadGeneration, videoId)
@@ -5628,7 +5658,7 @@ export default defineComponent({
       if (
         Number.isFinite(mediaMetadata?.duration) &&
         mediaMetadata.duration > 0 &&
-        (this.tabRoute.query.downloadId || !Number.isFinite(this.videoLengthSeconds) || this.videoLengthSeconds <= 0)
+        (this.localFilePlayback || !Number.isFinite(this.videoLengthSeconds) || this.videoLengthSeconds <= 0)
       ) {
         this.videoLengthSeconds = mediaMetadata.duration
       }
@@ -5741,8 +5771,9 @@ export default defineComponent({
     },
 
     useOnlinePlaybackSource: async function () {
-      if (!this.localFilePlayback || typeof this.tabRoute.query.downloadId !== 'string') return
+      if (!this.localFilePlayback) return
 
+      this.onlinePlaybackChosen = true
       const playbackPosition = this.getTimestamp()
       if (this.restoreOnlinePlaybackSource()) {
         await this.replacePlaybackSourceRoute()
@@ -5753,7 +5784,13 @@ export default defineComponent({
       delete query.downloadId
       delete query.downloadFilePath
       if (playbackPosition > 0) query.oneTimeTimestamp = playbackPosition
-      await this.tabRouter.replace({ path: this.tabRoute.path, query })
+      const location = { path: this.tabRoute.path, query }
+      // The download may come from this device rather than the route.
+      if (this.tabRouter.resolve(location).fullPath === this.tabRoute.fullPath) {
+        await this.reloadView()
+        return
+      }
+      await this.tabRouter.replace(location)
     },
 
     useLocalPlaybackSource: async function (downloadId) {
@@ -5762,6 +5799,7 @@ export default defineComponent({
 
       if (!this.applyDownloadedPlaybackSource(downloadId, null)) return
 
+      this.onlinePlaybackChosen = false
       await this.replacePlaybackSourceRoute(downloadId)
     },
 

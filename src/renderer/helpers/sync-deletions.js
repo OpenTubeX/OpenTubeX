@@ -6,6 +6,8 @@ import { toRaw } from 'vue'
  * @typedef {object} SyncDeletionDecision
  * @property {string[]} [confirmed] Deletions to apply without asking
  * @property {string[]} [kept] Deletions to undo by restoring the items on both sides
+ * @property {string[]} [remote] Deletions other devices confirmed. They apply
+ *   without asking to items missing on the server.
  */
 
 /**
@@ -18,14 +20,57 @@ export function syncDeletionKey(collection, scope = null) {
 }
 
 /**
+ * @typedef {Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>} SyncDeletionStorage
+ */
+
+const STORAGE_KEY = 'opentubex.sync-deletion-decisions'
+
+/**
  * Deletions sync applies or undoes without asking again. The user confirms
  * deletions by making them in the app or by choosing an option in the review
- * prompt. Each window keeps its own decisions until a sync that used them
- * succeeds; the review prompt covers deletions this window does not know about.
+ * prompt. Decisions stay until a sync that used them succeeds. With a storage,
+ * they survive restarts and every window shares them, so a deletion made
+ * offline, or in another window, does not need a review either.
+ * @param {SyncDeletionStorage | null} [storage]
  */
-export function createSyncDeletionDecisions() {
+export function createSyncDeletionDecisions(storage = null) {
   /** @type {Map<string, { confirmed: Set<string>, kept: Set<string> }>} */
-  const decisions = new Map()
+  let decisions = new Map()
+  // Changes a failed save left out of the storage. Each read applies them
+  // again, so the changes other windows saved meanwhile stay.
+  /** @type {(() => void)[]} */
+  let unsaved = []
+
+  // Read before each change, because another window may have changed them.
+  function load() {
+    if (!storage) return
+    try {
+      const saved = JSON.parse(storage.getItem(STORAGE_KEY) ?? '{}')
+      decisions = new Map(Object.entries(saved).map(([key, value]) => [key, {
+        confirmed: new Set(Array.isArray(value?.confirmed) ? value.confirmed : []),
+        kept: new Set(Array.isArray(value?.kept) ? value.kept : []),
+      }]))
+      for (const change of unsaved) change()
+    } catch (error) {
+      console.error('Failed to read the sync deletion decisions', error)
+    }
+  }
+
+  /** @param {() => void} change */
+  function update(change) {
+    load()
+    change()
+    if (!storage) return
+    try {
+      if (decisions.size === 0) storage.removeItem(STORAGE_KEY)
+      else storage.setItem(STORAGE_KEY, JSON.stringify(snapshotOf(decisions)))
+      unsaved = []
+    } catch (error) {
+      // They still apply to syncs in this window.
+      unsaved.push(change)
+      console.error('Failed to save the sync deletion decisions', error)
+    }
+  }
 
   /** @param {string} key */
   function entry(key) {
@@ -43,11 +88,14 @@ export function createSyncDeletionDecisions() {
      * @param {Iterable<string>} ids
      */
     confirm(key, ids) {
-      const value = entry(key)
-      for (const id of ids) {
-        value.kept.delete(id)
-        value.confirmed.add(id)
-      }
+      const list = Array.from(ids)
+      update(() => {
+        const value = entry(key)
+        for (const id of list) {
+          value.kept.delete(id)
+          value.confirmed.add(id)
+        }
+      })
     },
 
     /**
@@ -55,19 +103,20 @@ export function createSyncDeletionDecisions() {
      * @param {Iterable<string>} ids
      */
     keep(key, ids) {
-      const value = entry(key)
-      for (const id of ids) {
-        value.confirmed.delete(id)
-        value.kept.add(id)
-      }
+      const list = Array.from(ids)
+      update(() => {
+        const value = entry(key)
+        for (const id of list) {
+          value.confirmed.delete(id)
+          value.kept.add(id)
+        }
+      })
     },
 
     /** @returns {Record<string, SyncDeletionDecision>} A copy for one sync */
     snapshot() {
-      return Object.fromEntries(Array.from(decisions, ([key, { confirmed, kept }]) => [
-        key,
-        { confirmed: Array.from(confirmed), kept: Array.from(kept) },
-      ]))
+      load()
+      return snapshotOf(decisions)
     },
 
     /**
@@ -76,22 +125,35 @@ export function createSyncDeletionDecisions() {
      * @param {Record<string, SyncDeletionDecision>} applied A {@link snapshot}
      */
     release(applied) {
-      for (const [key, { confirmed = [], kept = [] }] of Object.entries(applied)) {
-        const value = decisions.get(key)
-        if (!value) continue
-        for (const id of confirmed) value.confirmed.delete(id)
-        for (const id of kept) value.kept.delete(id)
-        if (value.confirmed.size === 0 && value.kept.size === 0) decisions.delete(key)
-      }
+      update(() => {
+        for (const [key, { confirmed = [], kept = [] }] of Object.entries(applied)) {
+          const value = decisions.get(key)
+          if (!value) continue
+          for (const id of confirmed) value.confirmed.delete(id)
+          for (const id of kept) value.kept.delete(id)
+          if (value.confirmed.size === 0 && value.kept.size === 0) decisions.delete(key)
+        }
+      })
     },
 
     clear() {
-      decisions.clear()
+      update(() => decisions.clear())
     },
   }
 }
 
-export const syncDeletions = createSyncDeletionDecisions()
+/**
+ * @param {Map<string, { confirmed: Set<string>, kept: Set<string> }>} decisions
+ * @returns {Record<string, SyncDeletionDecision>}
+ */
+function snapshotOf(decisions) {
+  return Object.fromEntries(Array.from(decisions, ([key, { confirmed, kept }]) => [
+    key,
+    { confirmed: Array.from(confirmed), kept: Array.from(kept) },
+  ]))
+}
+
+export const syncDeletions = createSyncDeletionDecisions(typeof localStorage === 'undefined' ? null : localStorage)
 
 /**
  * User actions that can delete synced items, by the lists they can shrink.
@@ -208,4 +270,224 @@ export function trackLocalSyncDeletions({ isRemoteDispatch, mainProfileId, decis
       },
     })
   }
+}
+
+/**
+ * The encrypted collection in which devices share the deletions they confirmed.
+ * Without it, a device cannot tell another device's deletion from a server
+ * that lost the data, and asks before applying either.
+ */
+export const SYNC_DELETION_MARKS_COLLECTION = 'syncDeletions'
+
+// Every device that syncs within this time sees a deletion without asking.
+const SYNC_DELETION_MARK_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000
+
+/**
+ * @typedef {object} SyncDeletionMark
+ * @property {string} key The list, by {@link syncDeletionKey}
+ * @property {number} at When the deletions were uploaded
+ * @property {string[]} ids
+ */
+
+/**
+ * @param {unknown} data The decrypted collection
+ * @param {number} [now]
+ * @returns {SyncDeletionMark[]} The valid marks that have not expired
+ */
+export function readSyncDeletionMarks(data, now = Date.now()) {
+  if (!Array.isArray(data)) return []
+  return data.filter(mark => mark && typeof mark.key === 'string' && Number.isFinite(mark.at) &&
+    now - mark.at < SYNC_DELETION_MARK_MAX_AGE_MS && Array.isArray(mark.ids) &&
+    mark.ids.every(id => typeof id === 'string'))
+}
+
+/**
+ * Adds the deletions other devices confirmed to the decisions of one sync.
+ * @param {Record<string, SyncDeletionDecision>} decisions
+ * @param {SyncDeletionMark[]} marks
+ * @returns {Record<string, SyncDeletionDecision>}
+ */
+export function withRemoteSyncDeletions(decisions, marks) {
+  /** @type {Map<string, Set<string>>} */
+  const remote = new Map()
+  for (const { key, ids } of marks) {
+    const value = remote.get(key) ?? new Set()
+    for (const id of ids) value.add(id)
+    remote.set(key, value)
+  }
+  const result = { ...decisions }
+  for (const [key, ids] of remote) result[key] = { ...result[key], remote: Array.from(ids) }
+  return result
+}
+
+/**
+ * Adds this device's confirmed deletions to the shared marks.
+ * @param {SyncDeletionMark[]} marks
+ * @param {Record<string, SyncDeletionDecision>} decisions
+ * @param {object} [options]
+ * @param {(key: string) => boolean} [options.includeKey] Whether the sync uploads the list
+ * @param {number} [options.now]
+ * @returns {SyncDeletionMark[] | null} null when there is nothing to add
+ */
+export function addSyncDeletionMarks(marks, decisions, { includeKey = () => true, now = Date.now() } = {}) {
+  const added = Object.entries(decisions)
+    .filter(([key, { confirmed }]) => includeKey(key) && confirmed && confirmed.length > 0)
+    .map(([key, { confirmed = [] }]) => ({ key, at: now, ids: Array.from(new Set(confirmed)) }))
+  if (added.length === 0) return null
+  // The new mark replaces older ones of the same items, so they expire later.
+  const addedIds = new Map(added.map(mark => [mark.key, new Set(mark.ids)]))
+  const kept = marks
+    .map(mark => ({ ...mark, ids: mark.ids.filter(id => !addedIds.get(mark.key)?.has(id)) }))
+    .filter(mark => mark.ids.length > 0)
+  return [...kept, ...added]
+}
+
+const UNSENT_MARKS_STORAGE_KEY = 'opentubex.sync-deletion-marks-unsent'
+
+/**
+ * @typedef {object} UnsentSyncDeletionMarks
+ * @property {string} account The sync account the marks belong to
+ * @property {SyncDeletionMark[]} marks
+ */
+
+/**
+ * Confirmed deletions a sync failed to share. Their decisions go once the sync
+ * succeeds, so the next syncs of the same account share these until they would
+ * have expired.
+ * @param {SyncDeletionStorage | null} [storage]
+ */
+export function createUnsentSyncDeletionMarks(storage = null) {
+  /** @type {UnsentSyncDeletionMarks} */
+  let queue = { account: '', marks: [] }
+  // Changes a failed save left out of the storage, as for the decisions.
+  /** @type {((queue: UnsentSyncDeletionMarks) => UnsentSyncDeletionMarks)[]} */
+  let unsaved = []
+
+  function load() {
+    if (!storage) return
+    try {
+      const saved = JSON.parse(storage.getItem(UNSENT_MARKS_STORAGE_KEY) ?? 'null')
+      queue = {
+        account: typeof saved?.account === 'string' ? saved.account : '',
+        marks: readSyncDeletionMarks(saved?.marks),
+      }
+      for (const change of unsaved) queue = change(queue)
+    } catch (error) {
+      console.error('Failed to read the unsent sync deletions', error)
+    }
+  }
+
+  /** @param {(queue: UnsentSyncDeletionMarks) => UnsentSyncDeletionMarks} change */
+  function update(change) {
+    load()
+    queue = change(queue)
+    if (!storage) return
+    try {
+      if (queue.marks.length === 0) storage.removeItem(UNSENT_MARKS_STORAGE_KEY)
+      else storage.setItem(UNSENT_MARKS_STORAGE_KEY, JSON.stringify(queue))
+      unsaved = []
+    } catch (error) {
+      // They are still shared from this window.
+      unsaved.push(change)
+      console.error('Failed to save the unsent sync deletions', error)
+    }
+  }
+
+  return {
+    /** @param {string} account */
+    read(account) {
+      load()
+      return queue.account === account ? readSyncDeletionMarks(queue.marks) : []
+    },
+
+    /**
+     * @param {string} account
+     * @param {Record<string, SyncDeletionDecision>} decisions
+     * @param {(key: string) => boolean} includeKey
+     */
+    add(account, decisions, includeKey) {
+      const now = Date.now()
+      update(({ account: saved, marks }) => {
+        // Another account's marks would hide its own deletion reviews.
+        const known = saved === account ? marks : []
+        return { account, marks: addSyncDeletionMarks(known, decisions, { includeKey, now }) ?? known }
+      })
+    },
+
+    /**
+     * @param {string} account
+     * @param {SyncDeletionMark[]} shared Marks from {@link read} that a sync shared
+     */
+    remove(account, shared) {
+      if (shared.length === 0) return
+      update(saved => saved.account !== account
+        ? saved
+        : {
+            account,
+            marks: saved.marks.filter(mark => !shared.some(({ key, at }) => key === mark.key && at === mark.at)),
+          })
+    },
+
+    clear() {
+      update(() => ({ account: '', marks: [] }))
+    },
+  }
+}
+
+export const unsentSyncDeletionMarks = createUnsentSyncDeletionMarks(
+  typeof localStorage === 'undefined' ? null : localStorage
+)
+
+// The lists whose items, or the lists nested in them, have IDs a legacy sync
+// server assigned. Devices that synced through it can know them by other IDs.
+/** @type {Record<string, string>} */
+const SERVER_ID_LISTS = {
+  playlists: 'playlists',
+  playlistVideos: 'playlists',
+  profiles: 'profiles',
+  profileChannels: 'profiles',
+}
+
+/**
+ * Translates the IDs of playlists and profiles in deletion marks between this
+ * device's and the server's, so devices that know them by other IDs share them.
+ * @template {Pick<SyncDeletionMark, 'key' | 'ids'>} T
+ * @param {T[]} marks
+ * @param {Record<string, unknown>} snapshot The saved sync baselines
+ * @param {boolean} toServer
+ * @returns {T[]}
+ */
+export function translateSyncDeletionMarks(marks, snapshot, toServer) {
+  /** @type {Map<string, Map<string, string>>} */
+  const maps = new Map()
+  /** @param {string} list */
+  function idMap(list) {
+    let map = maps.get(list)
+    if (!map) {
+      const baselines = snapshot[list]
+      map = new Map()
+      if (baselines && typeof baselines === 'object') {
+        for (const [localId, baseline] of Object.entries(baselines)) {
+          const remoteId = /** @type {{ remoteId?: unknown } | null} */ (baseline)?.remoteId
+          if (typeof remoteId === 'string' && remoteId !== localId) {
+            if (toServer) map.set(localId, remoteId)
+            else map.set(remoteId, localId)
+          }
+        }
+      }
+      maps.set(list, map)
+    }
+    return map
+  }
+
+  return marks.map(mark => {
+    const separator = mark.key.indexOf(':')
+    const collection = separator === -1 ? mark.key : mark.key.slice(0, separator)
+    const list = SERVER_ID_LISTS[collection]
+    if (!list) return mark
+    const ids = idMap(list)
+    if (separator === -1) return { ...mark, ids: mark.ids.map(id => ids.get(id) ?? id) }
+    const scope = mark.key.slice(separator + 1)
+    return { ...mark, key: syncDeletionKey(collection, ids.get(scope) ?? scope) }
+  })
 }

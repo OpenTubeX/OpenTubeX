@@ -1580,6 +1580,8 @@ Settings:
     Data Loss Warning: Samstillingin myndi eyða {deleted} af {previous} áður samstilltum atriðum í „{collection}“ á öllum tækjum. Ef þú eyddir þeim ekki, til dæmis vegna þess að þjónninn var endurstilltur, skaltu halda þeim til að endurheimta þau alls staðar.
     Keep Deleted Items: Halda atriðum
     Confirm Data Loss: Eyða og halda áfram
+    Automatic Sync Paused: 'Sjálfvirk samstilling er í bið vegna þess að samstilling hefði eytt atriðum sem voru samstillt áður. Farðu yfir eyðingarnar til að halda henni áfram.'
+    Review Deletions: 'Fara yfir eyðingar'
     Use Shared Tabs: 'Nota eitt sameiginlegt flipasafn í öllum tækjum'
     Shared Tabs Warning: 'Opnir flipar á þessu tæki verða sameiginlega flipasafnið. Önnur tæki skipta út opnum flipum sínum fyrir þetta safn þegar þau samstillast; flipum frá mismunandi tækjum er ekki slegið saman.'
     Tabs From Other Devices: 'Flipar úr öðrum tækjum'

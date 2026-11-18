@@ -9,6 +9,7 @@ import { decryptSyncDocument } from '../../../src/renderer/helpers/sync-server-p
 const syncServerUrl = process.env.OPENTUBEX_SYNC_SERVER_URL
 const channelId = 'UCuAXFkgsw1L7xaCfnd5JJOw'
 const secondChannelId = 'UC-lHJZR3Gqxm24_Vd_AJ5Yw'
+const thirdChannelId = 'UCbbbbbbbbbbbbbbbbbbbbbb'
 const remoteChannelId = 'UC_x5XG1OV2P6uZZ5FSM9Ttw'
 
 async function getSyncCapabilities() {
@@ -1189,72 +1190,92 @@ test.describe('OpenTubeX sync server', () => {
     })
   }
 
-  test('requires confirmation before an empty remote deletes local data', async ({ app, page }, testInfo) => {
-    const username = `opentubex-reset-guard-${Date.now()}-${Math.random().toString(16).slice(2)}`
-
-    await page.route('**/health', route => route.fulfill({
-      contentType: 'application/json',
-      body: JSON.stringify({
-        status: 'ok',
-        capabilities: { encrypted_sync: 0, bulk_sync: 1, history_page_size: 1000 }
-      })
-    }))
-    await page.route('**/v1/subscriptions/', route => {
-      if (route.request().method() === 'GET') {
-        return route.fulfill({ contentType: 'application/json', body: '[]' })
+  test.describe('with three subscriptions', () => {
+    // Emptying a list of fewer items is an ordinary edit, not a reset.
+    test.use({
+      seed: {
+        settings: { baseTheme: 'dark', syncServerEnabled: true },
+        profiles: [{
+          _id: 'allChannels',
+          name: 'All Channels',
+          bgColor: '#000000',
+          textColor: '#FFFFFF',
+          subscriptions: [
+            { id: channelId, name: 'Rick Astley', thumbnail: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg' },
+            { id: secondChannelId, name: 'PewDiePie', thumbnail: 'https://yt3.googleusercontent.com/ytc/default' },
+            { id: thirdChannelId, name: 'Third Channel', thumbnail: 'https://yt3.googleusercontent.com/ytc/default' }
+          ]
+        }]
       }
-      return route.continue()
     })
 
-    const syncSection = await goToSettingsSection(page, 'sync')
-    await syncSection.getByLabel('Sync server URL').fill(syncServerUrl)
-    await syncSection.getByLabel('Username').fill(username)
-    await syncSection.getByLabel('Password', { exact: true }).fill('local-test-password')
-    await syncSection.getByRole('button', { name: 'Register' }).click()
-    await expect(syncSection.getByText(/Last synced:/)).toBeVisible()
+    test('requires confirmation before an empty remote deletes local data', async ({ app, page }, testInfo) => {
+      const username = `opentubex-reset-guard-${randomUUID()}`
 
-    await syncSection.getByRole('button', { name: 'Sync now' }).click()
-    const warning = page.getByRole('dialog', { name: 'Confirm destructive sync?' })
-    await expect(warning).toBeVisible()
-    await expect(warning).toContainText('2 of 2 previously synced items in Subscriptions')
+      await page.route('**/health', route => route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({
+          status: 'ok',
+          capabilities: { encrypted_sync: 0, bulk_sync: 1, history_page_size: 1000 }
+        })
+      }))
+      await page.route('**/v1/subscriptions/', route => {
+        if (route.request().method() === 'GET') {
+          return route.fulfill({ contentType: 'application/json', body: '[]' })
+        }
+        return route.continue()
+      })
 
-    const profiles = readDatastore(app.userDataDir, 'profiles')
-    expect(profiles).toContain(channelId)
-    expect(profiles).toContain(secondChannelId)
-    await warning.getByRole('button', { name: 'Cancel' }).click()
+      const syncSection = await goToSettingsSection(page, 'sync')
+      await syncSection.getByLabel('Sync server URL').fill(syncServerUrl)
+      await syncSection.getByLabel('Username').fill(username)
+      await syncSection.getByLabel('Password', { exact: true }).fill('local-test-password')
+      await syncSection.getByRole('button', { name: 'Register' }).click()
+      await expect(syncSection.getByText(/Last synced:/)).toBeVisible()
 
-    await expect.poll(async () => {
-      const currentSettings = latestSettings(
+      await syncSection.getByRole('button', { name: 'Sync now' }).click()
+      const warning = page.getByRole('dialog', { name: 'Confirm destructive sync?' })
+      await expect(warning).toBeVisible()
+      await expect(warning).toContainText('3 of 3 previously synced items in Subscriptions')
+
+      const profiles = readDatastore(app.userDataDir, 'profiles')
+      expect(profiles).toContain(channelId)
+      expect(profiles).toContain(secondChannelId)
+      await warning.getByRole('button', { name: 'Cancel' }).click()
+
+      await expect.poll(async () => {
+        const currentSettings = latestSettings(
+          readDatastore(app.userDataDir, 'settings')
+        )
+        return currentSettings.syncServerAutoSync
+      }).toBe(false)
+
+      await syncSection.getByRole('button', { name: 'Sync now' }).click()
+      await expect(warning).toBeVisible()
+      await warning.getByRole('button', { name: 'Delete and continue' }).click()
+      await expect.poll(async () => {
+        const contents = readDatastore(app.userDataDir, 'profiles')
+        const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
+        return records
+          .filter(record => record._id === 'allChannels' && !record.$$deleted)
+          .at(-1)
+          ?.subscriptions.length
+      }).toBe(0)
+
+      const settings = latestSettings(
         readDatastore(app.userDataDir, 'settings')
       )
-      return currentSettings.syncServerAutoSync
-    }).toBe(false)
-
-    await syncSection.getByRole('button', { name: 'Sync now' }).click()
-    await expect(warning).toBeVisible()
-    await warning.getByRole('button', { name: 'Delete and continue' }).click()
-    await expect.poll(async () => {
-      const contents = readDatastore(app.userDataDir, 'profiles')
-      const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
-      return records
-        .filter(record => record._id === 'allChannels' && !record.$$deleted)
-        .at(-1)
-        ?.subscriptions.length
-    }).toBe(0)
-
-    const settings = latestSettings(
-      readDatastore(app.userDataDir, 'settings')
-    )
-    const cleanupResponse = await fetch(`${syncServerUrl}/v1/account/delete`, {
-      method: 'DELETE',
-      headers: {
-        Authorization: settings.syncServerToken,
-        'Content-Type': 'application/json',
-        'X-Forwarded-For': rateLimitClient(testInfo)
-      },
-      body: JSON.stringify({ password: 'local-test-password' })
+      const cleanupResponse = await fetch(`${syncServerUrl}/v1/account/delete`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: settings.syncServerToken,
+          'Content-Type': 'application/json',
+          'X-Forwarded-For': rateLimitClient(testInfo)
+        },
+        body: JSON.stringify({ password: 'local-test-password' })
+      })
+      expect(cleanupResponse.ok).toBe(true)
     })
-    expect(cleanupResponse.ok).toBe(true)
   })
 
   test('supports legacy servers without a capabilities endpoint', async ({ app, page }) => {

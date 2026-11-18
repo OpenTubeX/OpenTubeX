@@ -39,7 +39,6 @@ vm.runInContext(source
 
 const video = { videoId: 'video-1', title: 'A video', authorId: 'channel-1' }
 const channel = { id: 'channel-1', name: 'A channel' }
-const bookmark = bookmarks.createPlaylistBookmark({ id: 'playlist-1', title: 'A saved playlist', uploaderId: 'channel-1', uploaderName: 'A channel' })
 const profile = { _id: 'profile-1', name: 'A profile', bgColor: '#000000', textColor: '#FFFFFF', subscriptions: [channel] }
 const playlist = { _id: 'playlist-1', playlistName: 'A playlist', videos: [video] }
 const largePlaylist = {
@@ -54,38 +53,46 @@ const largeProfile = {
   textColor: '#FFFFFF',
   subscriptions: Array.from({ length: 10 }, (_, index) => ({ id: `channel-${index}`, name: `Channel ${index}` })),
 }
+// Emptying a list of fewer items is an ordinary edit.
+const threeOf = create => [1, 2, 3].map(create)
+const channels = threeOf(index => ({ id: `channel-${index}`, name: `Channel ${index}` }))
+const savedPlaylists = threeOf(index => bookmarks.createPlaylistBookmark({
+  id: `saved-${index}`, title: `Saved playlist ${index}`, uploaderId: 'channel-1', uploaderName: 'A channel',
+}))
+const playlists = threeOf(index => ({ ...playlist, _id: `playlist-${index}`, playlistName: `Playlist ${index}` }))
+const videos = threeOf(index => ({ ...video, videoId: `video-${index}`, title: `Video ${index}` }))
 const cases = [
   {
     collection: 'subscriptions',
     method: 'syncSubscriptions',
-    state: { profiles: { profileList: [{ _id: MAIN_PROFILE_ID, subscriptions: [channel] }] } },
+    state: { profiles: { profileList: [{ _id: MAIN_PROFILE_ID, subscriptions: channels }] } },
     client: { getSubscriptions: async () => [] },
-    previous: [channel.id],
-    item: { id: channel.id, name: channel.name },
+    previous: channels.map(item => item.id),
+    items: channels.map(({ id, name }) => ({ id, name })),
   },
   {
     collection: 'playlistBookmarks',
     method: 'syncPlaylistBookmarks',
-    state: { settings: { playlistBookmarks: [bookmark] } },
+    state: { settings: { playlistBookmarks: savedPlaylists } },
     client: { getPlaylistBookmarks: async () => [] },
-    previous: [bookmark.playlist.id],
-    item: { id: bookmark.playlist.id, name: bookmark.playlist.title },
+    previous: savedPlaylists.map(item => item.playlist.id),
+    items: savedPlaylists.map(item => ({ id: item.playlist.id, name: item.playlist.title })),
   },
   {
     collection: 'playlists',
     method: 'syncPlaylists',
-    state: { playlists: { playlists: [playlist] } },
+    state: { playlists: { playlists } },
     client: { getPlaylists: async () => [] },
-    previous: { [playlist._id]: { metadata: { title: 'Old title' } } },
-    item: { id: playlist._id, name: playlist.playlistName },
+    previous: Object.fromEntries(playlists.map(item => [item._id, { metadata: { title: 'Old title' } }])),
+    items: playlists.map(item => ({ id: item._id, name: item.playlistName })),
   },
   {
     collection: 'history',
     method: 'syncHistory',
-    state: { history: { historyCacheSorted: [video] } },
+    state: { history: { historyCacheSorted: videos } },
     client: { getWatchHistory: async () => [] },
-    previous: [video.videoId],
-    item: { id: video.videoId, name: video.title },
+    previous: videos.map(item => item.videoId),
+    items: videos.map(item => ({ id: item.videoId, name: item.title })),
   },
   {
     collection: 'playlistVideos',

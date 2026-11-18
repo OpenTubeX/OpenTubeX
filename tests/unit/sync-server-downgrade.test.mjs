@@ -1,7 +1,16 @@
 import { toRaw } from 'vue'
 import { DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, mergeIds as mergeSyncIds, videoToRemote as syncVideoToRemote, selectChangedHistory, mergeChangedHistoryBaseline } from '../../src/renderer/helpers/sync-history-merge.js'
 import { createHistoryChangeTracker } from '../../src/renderer/helpers/sync-history-changes.js'
-import { createSyncDeletionDecisions, syncDeletionKey } from '../../src/renderer/helpers/sync-deletions.js'
+import {
+  SYNC_DELETION_MARKS_COLLECTION,
+  addSyncDeletionMarks,
+  createSyncDeletionDecisions,
+  createUnsentSyncDeletionMarks,
+  readSyncDeletionMarks,
+  syncDeletionKey,
+  translateSyncDeletionMarks,
+  withRemoteSyncDeletions,
+} from '../../src/renderer/helpers/sync-deletions.js'
 import { executeBackgroundJob as runBackgroundJob } from '../../src/renderer/helpers/background-job-operations.js'
 import * as releasedClient from '../helpers/released-sync-sessions.mjs'
 import * as sessions from '../../src/renderer/helpers/sync-sessions.js'
@@ -45,7 +54,7 @@ const helperSource = await readFile(new URL('../../src/renderer/helpers/sync-ser
 const storeSource = await readFile(new URL('../../src/renderer/store/modules/sync-server.js', import.meta.url), 'utf8')
 const schedulerSource = await readFile(new URL('../../src/renderer/helpers/sync-server-scheduler.js', import.meta.url), 'utf8')
 
-function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false, syncableSettingKeys = ['channelPlaybackSpeeds'], reminderService, connected = false, timer, locks, desktopTabs, connectionChanges, capacitor = false, backgroundJob = runBackgroundJob, settingsReader, receiptStorage, openExternalLink = async () => {}, notificationDismissals = normalizeNotificationDismissals(null), hiddenRenderer = false } = {}) {
+function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false, syncableSettingKeys = ['channelPlaybackSpeeds'], reminderService, connected = false, timer, locks, desktopTabs, connectionChanges, capacitor = false, backgroundJob = runBackgroundJob, settingsReader, receiptStorage, openExternalLink = async () => {}, notificationDismissals = normalizeNotificationDismissals(null), hiddenRenderer = false, deletions = createSyncDeletionDecisions(), unsentMarks = createUnsentSyncDeletionMarks() } = {}) {
   const connectionEvents = new EventTarget()
   const network = { state: connectionState, online }
   const requests = []
@@ -166,8 +175,14 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     MAIN_PROFILE_ID: 'main',
     // Without recorded mutations, every sync merges the whole history.
     historyChanges: createHistoryChangeTracker(),
-    syncDeletions: createSyncDeletionDecisions(),
+    syncDeletions: deletions,
+    unsentSyncDeletionMarks: unsentMarks,
     syncDeletionKey,
+    SYNC_DELETION_MARKS_COLLECTION,
+    addSyncDeletionMarks,
+    readSyncDeletionMarks,
+    translateSyncDeletionMarks,
+    withRemoteSyncDeletions,
     deepCopy: structuredClone,
     createSyncServerRequestHeaders,
     CUSTOM_THEMES_SYNC_KEY,
@@ -859,12 +874,26 @@ for (const overrides of [
   })
 }
 
-test('blocked background sync notifies the user and links to sync settings', async () => {
+// The server lost all three subscriptions this device synced before.
+const LOST_CHANNELS = [
+  { id: 'private-channel', name: 'Private subscription' },
+  { id: 'second-channel', name: 'Second subscription' },
+  { id: 'third-channel', name: 'Third subscription' },
+]
+
+function serverLostFixture (overrides = {}, options) {
   const f = fixture({
     syncServerPrivacyMode: 'legacy',
     syncServerPrivacyKey: '',
-    syncServerSnapshot: JSON.stringify({ subscriptions: ['private-channel'] }),
-  })
+    syncServerSnapshot: JSON.stringify({ subscriptions: LOST_CHANNELS.map(channel => channel.id) }),
+    ...overrides,
+  }, options)
+  f.context.rootState.profiles.profileList[0].subscriptions = structuredClone(LOST_CHANNELS)
+  return f
+}
+
+test('blocked background sync notifies the user and links to sync settings', async () => {
+  const f = serverLostFixture()
 
   await assert.rejects(f.actions.syncWithSyncServer(f.context), errors.SyncServerDataLossError)
 
@@ -879,29 +908,26 @@ test('blocked background sync notifies the user and links to sync settings', asy
 
 for (const choice of ['keep', 'delete']) {
   test(`reviewing blocked deletions with ${choice} applies the choice once and resumes automatic sync`, async () => {
-    const f = fixture({
-      syncServerPrivacyMode: 'legacy',
-      syncServerPrivacyKey: '',
-      syncServerSnapshot: JSON.stringify({ subscriptions: ['private-channel'] }),
-    })
+    const f = serverLostFixture()
     await assert.rejects(f.actions.syncWithSyncServer(f.context), errors.SyncServerDataLossError)
     // Sync settings reviews the deletions of a background sync when it opens.
     assert.deepEqual(structuredClone(f.context.state.syncServerPendingDeletion), {
       collection: 'subscriptions',
       scope: null,
       scopeName: null,
-      deleted: 1,
-      previous: 1,
-      items: [{ id: 'private-channel', name: 'Private subscription' }],
+      deleted: 3,
+      previous: 3,
+      items: LOST_CHANNELS,
     })
 
     await f.actions.resolveSyncServerDeletion(f.context, choice)
     assert.equal(f.context.state.syncServerPendingDeletion, null)
     assert.equal(f.settings.syncServerAutoSync, true)
     const subscriptions = Array.from(f.context.rootState.profiles.profileList[0].subscriptions, channel => channel.id)
-    assert.deepEqual(subscriptions, choice === 'keep' ? ['private-channel'] : [])
+    const lostIds = LOST_CHANNELS.map(channel => channel.id)
+    assert.deepEqual(subscriptions, choice === 'keep' ? lostIds : [])
     assert.equal(f.requests.some(({ method, url }) => method === 'PUT' && url.includes('/subscriptions/')), choice === 'keep')
-    assert.deepEqual(JSON.parse(f.settings.syncServerSnapshot).subscriptions, choice === 'keep' ? ['private-channel'] : [])
+    assert.deepEqual(JSON.parse(f.settings.syncServerSnapshot).subscriptions, choice === 'keep' ? lostIds : [])
 
     // The choice covered only that sync. The mock server lost the channel
     // again, which needs a new review.
@@ -913,28 +939,136 @@ for (const choice of ['keep', 'delete']) {
   })
 }
 
+test('startup checks a paused sync again and shows its review only in the new window', async () => {
+  const f = serverLostFixture({ syncServerAutoSync: false, syncServerResumeAutoSync: true })
+  await f.actions.initializeSyncServer(f.context)
+  assert.equal(f.context.state.syncServerPendingDeletion?.deleted, LOST_CHANNELS.length)
+  assert.deepEqual(f.notifications.map(({ message, broadcast }) => [message, broadcast]), [
+    ['Settings.Sync Settings.Destructive Sync Blocked', undefined],
+  ])
+  assert.equal(f.settings.syncServerAutoSync, false)
+  assert.equal(f.settings.syncServerResumeAutoSync, true)
+})
+
+test('other devices apply shared deletions without asking, while a server that lost data still asks', async () => {
+  const ids = LOST_CHANNELS.map(channel => channel.id)
+  const settings = { syncServerSnapshot: JSON.stringify({ subscriptions: ids }) }
+  const collections = new Map()
+  const puts = []
+  const key = Buffer.alloc(32, 1).toString('base64')
+  const salt = Buffer.alloc(16, 2).toString('base64')
+  collections.set('subscriptions', { revision: 1, payload: await privacy.encryptSyncDocument(LOST_CHANNELS, key, salt) })
+  const respond = async (url, options) => {
+    const path = new URL(url).pathname
+    if (path === '/health') return { capabilities: { encrypted_sync: 1, live_sync: 1, sync_deletions: 1 } }
+    if (path === '/v1/encrypted_sync') {
+      return {
+        collections: Array.from(collections, ([collection, { revision }]) => ({ collection, revision })),
+        legacy_data: false,
+      }
+    }
+    const collection = path.match(/^\/v1\/encrypted_sync\/(subscriptions|syncDeletions)$/)?.[1]
+    if (!collection) return
+    const saved = collections.get(collection) ?? { revision: 0, payload: null }
+    if (options.method !== 'PUT') return saved
+    const body = JSON.parse(options.body)
+    if (body.revision !== saved.revision) return new Response('{}', { status: 409 })
+    puts.push(collection)
+    collections.set(collection, { revision: saved.revision + 1, payload: body.payload })
+    return { revision: saved.revision + 1 }
+  }
+
+  // The user unsubscribed from all channels on one device.
+  const deletions = createSyncDeletionDecisions()
+  deletions.confirm('subscriptions', ids)
+  const deleting = fixture(settings, { encrypted: true, respond, deletions })
+  deleting.context.rootState.profiles.profileList[0].subscriptions = []
+  await deleting.actions.syncWithSyncServer(deleting.context)
+  assert.equal(deleting.context.state.syncServerStatus, 'success')
+  // Shared before the deletion, so no device sees one without the other.
+  assert.deepEqual(puts, ['syncDeletions', 'subscriptions'])
+
+  const other = fixture(settings, { encrypted: true, respond })
+  other.context.rootState.profiles.profileList[0].subscriptions = structuredClone(LOST_CHANNELS)
+  await other.actions.syncWithSyncServer(other.context)
+  assert.equal(other.context.state.syncServerPendingDeletion, null)
+  assert.equal(other.context.rootState.profiles.profileList[0].subscriptions.length, 0)
+  assert.equal(other.settings.syncServerAutoSync, true)
+
+  // Without the marks, the same deletions look like a server that lost data.
+  collections.delete('syncDeletions')
+  const unaware = fixture(settings, { encrypted: true, respond })
+  unaware.context.rootState.profiles.profileList[0].subscriptions = structuredClone(LOST_CHANNELS)
+  await assert.rejects(unaware.actions.syncWithSyncServer(unaware.context), errors.SyncServerDataLossError)
+})
+
+test('a failed transfer of the shared deletions does not stop the sync, and a later sync shares them', async () => {
+  const ids = LOST_CHANNELS.map(channel => channel.id)
+  const settings = { syncServerSnapshot: JSON.stringify({ subscriptions: ids }) }
+  const key = Buffer.alloc(32, 1).toString('base64')
+  const salt = Buffer.alloc(16, 2).toString('base64')
+  const collections = new Map([
+    ['subscriptions', { revision: 1, payload: await privacy.encryptSyncDocument(LOST_CHANNELS, key, salt) }],
+  ])
+  let marksAvailable = false
+  const respond = async (url, options) => {
+    const path = new URL(url).pathname
+    if (path === '/health') return { capabilities: { encrypted_sync: 1, live_sync: 1, sync_deletions: 1 } }
+    if (path === '/v1/encrypted_sync') {
+      return {
+        collections: Array.from(collections, ([collection, { revision }]) => ({ collection, revision })),
+        legacy_data: false,
+      }
+    }
+    const collection = path.match(/^\/v1\/encrypted_sync\/(subscriptions|syncDeletions)$/)?.[1]
+    if (!collection) return
+    if (collection === 'syncDeletions' && !marksAvailable) return new Response('{}', { status: 500 })
+    const saved = collections.get(collection) ?? { revision: 0, payload: null }
+    if (options.method !== 'PUT') return saved
+    collections.set(collection, { revision: saved.revision + 1, payload: JSON.parse(options.body).payload })
+    return { revision: saved.revision + 1 }
+  }
+
+  const deletions = createSyncDeletionDecisions()
+  const unsentMarks = createUnsentSyncDeletionMarks()
+  deletions.confirm('subscriptions', ids)
+  const deleting = fixture(settings, { encrypted: true, respond, deletions, unsentMarks })
+  deleting.context.rootState.profiles.profileList[0].subscriptions = []
+  await deleting.actions.syncWithSyncServer(deleting.context)
+  assert.equal(deleting.context.state.syncServerStatus, 'success')
+  assert.equal(collections.get('subscriptions').revision, 2)
+  assert.equal(collections.has('syncDeletions'), false)
+  assert.equal(deleting.context.state.syncServerDeletionMarksPending, true)
+
+  // The server recovers before the next sync of the deleting device. A check
+  // for remote changes, which live sync runs, shares them too.
+  marksAvailable = true
+  await deleting.actions.syncWithSyncServer(deleting.context, { automatic: true, remoteOnly: true })
+  assert.equal(collections.has('syncDeletions'), true)
+  assert.equal(deleting.context.state.syncServerDeletionMarksPending, false)
+
+  // A device that still had the channels did not see the deletions as data loss.
+  collections.set('subscriptions', { revision: 3, payload: await privacy.encryptSyncDocument([], key, salt) })
+  const other = fixture(settings, { encrypted: true, respond })
+  other.context.rootState.profiles.profileList[0].subscriptions = structuredClone(LOST_CHANNELS)
+  await other.actions.syncWithSyncServer(other.context)
+  assert.equal(other.context.state.syncServerPendingDeletion, null)
+  assert.equal(other.context.rootState.profiles.profileList[0].subscriptions.length, 0)
+})
+
 test('dismissing the deletion review keeps sync paused', async () => {
-  const f = fixture({
-    syncServerPrivacyMode: 'legacy',
-    syncServerPrivacyKey: '',
-    syncServerSnapshot: JSON.stringify({ subscriptions: ['private-channel'] }),
-  })
+  const f = serverLostFixture()
   await assert.rejects(f.actions.syncWithSyncServer(f.context), errors.SyncServerDataLossError)
   await f.actions.dismissSyncServerDeletion(f.context)
   assert.equal(f.context.state.syncServerPendingDeletion, null)
   assert.equal(f.settings.syncServerAutoSync, false)
   assert.equal(await f.actions.resolveSyncServerDeletion(f.context, 'delete'), null)
-  assert.equal(f.context.rootState.profiles.profileList[0].subscriptions.length, 1)
+  assert.equal(f.context.rootState.profiles.profileList[0].subscriptions.length, LOST_CHANNELS.length)
 })
 
 for (const previouslyEnabled of [true, false]) {
   test(`successful confirmation restores automatic sync only when previously enabled: ${previouslyEnabled}`, async () => {
-    const f = fixture({
-      syncServerPrivacyMode: 'legacy',
-      syncServerPrivacyKey: '',
-      syncServerAutoSync: previouslyEnabled,
-      syncServerSnapshot: JSON.stringify({ subscriptions: ['private-channel'] }),
-    })
+    const f = serverLostFixture({ syncServerAutoSync: previouslyEnabled })
     // Cancel and retry must not overwrite the remembered preference with false.
     for (let attempt = 0; attempt < 2; attempt++) {
       await assert.rejects(f.actions.syncWithSyncServer(f.context), errors.SyncServerDataLossError)
@@ -947,11 +1081,7 @@ for (const previouslyEnabled of [true, false]) {
 }
 
 test('remembers paused automatic sync across restart and resumes only after success', async () => {
-  const f = fixture({
-    syncServerPrivacyMode: 'legacy',
-    syncServerPrivacyKey: '',
-    syncServerSnapshot: JSON.stringify({ subscriptions: ['private-channel'] }),
-  })
+  const f = serverLostFixture()
   await assert.rejects(f.actions.syncWithSyncServer(f.context), errors.SyncServerDataLossError)
   let fail = true
   const restarted = fixture(structuredClone(f.settings), {
@@ -979,11 +1109,7 @@ test('an explicit automatic-sync choice clears a pending resume', async () => {
 })
 
 test('disabling sync clears recovery before a later manual sync succeeds', async () => {
-  const f = fixture({
-    syncServerPrivacyMode: 'legacy',
-    syncServerPrivacyKey: '',
-    syncServerSnapshot: JSON.stringify({ subscriptions: ['private-channel'] }),
-  })
+  const f = serverLostFixture()
   await assert.rejects(f.actions.syncWithSyncServer(f.context), errors.SyncServerDataLossError)
   assert.equal(f.settings.syncServerResumeAutoSync, true)
   await f.actions.setSyncServerEnabled(f.context, false)

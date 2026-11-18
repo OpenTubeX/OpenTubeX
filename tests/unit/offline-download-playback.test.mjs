@@ -7,6 +7,10 @@ const source = await readFile(new URL('../../src/renderer/views/Watch/Watch.js',
 function method(name, next) {
   return source.slice(source.indexOf(`    ${name}:`), source.indexOf(`    ${next}`))
 }
+// The computed download that applyDownloadedPlaybackSource plays by default.
+const { preferredDownload } = runInNewContext(`({ ${method('preferredDownload', 'localPlaybackDownloads')} })`, {
+  process: { env: {} },
+})
 
 for (const [android, backend, mode] of [[false, 'Local', 'video'], [true, 'Invidious', 'audio']]) {
   test(`${android ? 'Android' : 'Electron'} ${backend} plays downloaded ${mode} without waiting for metadata`, async () => {
@@ -48,6 +52,7 @@ for (const [android, backend, mode] of [[false, 'Local', 'video'], [true, 'Invid
         }
       },
       playbackSourceKey: 0,
+      get preferredDownload() { return preferredDownload.call(this) },
       isCurrentVideoLoad(generation) { return generation === this.videoLoadGeneration },
       cacheOnlinePlaybackSource() {},
       updateTitle() {},
@@ -186,6 +191,43 @@ test('a download waits for its metadata while only family friendly videos are al
   assert.equal(timers.length, 1, 'only the unrestricted page plays the download before its metadata')
 })
 
+test('a download waits for its metadata while the download records are still loading', () => {
+  const timers = []
+  const methods = runInNewContext(`({ ${method('scheduleDownloadedPlaybackFallback', 'onMountedDependOnLocalStateLoading()')} })`, {
+    DOWNLOADED_PLAYBACK_METADATA_TIMEOUT_MS: 3000,
+    setTimeout: callback => timers.push(callback),
+    clearTimeout() {},
+  })
+  for (const ytDlpDownloadsLoaded of [false, true]) {
+    const watch = {
+      ...methods,
+      showFamilyFriendlyOnly: false,
+      // A tab restored at startup, before the records name its download.
+      preferredDownload: null,
+      $store: { getters: { getEnableDownloads: true }, state: { downloads: { ytDlpDownloadsLoaded } } },
+    }
+    watch.scheduleDownloadedPlaybackFallback(1, 'downloaded1')
+  }
+  assert.equal(timers.length, 1, 'only a page whose downloads are still loading waits for one')
+})
+
+test('only a download opened from the downloads plays without metadata while only family friendly videos are allowed', () => {
+  const { finishDownloadedPlaybackWithoutMetadata } = runInNewContext(
+    `({ ${method('finishDownloadedPlaybackWithoutMetadata', 'scheduleDownloadedPlaybackFallback')} })`
+  )
+  const applied = []
+  const play = query => finishDownloadedPlaybackWithoutMetadata.call({
+    showFamilyFriendlyOnly: true,
+    tabRoute: { query },
+    // A link or synced tab opens the video without a download, which this device has.
+    preferredDownload: { id: 1, filePath: null },
+    applyDownloadedPlaybackSource: () => { applied.push(query) },
+  })
+  play({})
+  play({ downloadId: '1' })
+  assert.deepEqual(applied.map(query => query.downloadId), ['1'])
+})
+
 test('a download keeps waiting when family friendly mode is turned on during the timeout', () => {
   let fallback
   let played = false
@@ -264,6 +306,7 @@ for (const android of [false]) {
       updateTitle() {},
       cacheOnlinePlaybackSource() {},
       playbackSourceKey: 0,
+      get preferredDownload() { return preferredDownload.call(this) },
       t: key => key,
     }
     assert.equal(watch.applyDownloadedPlaybackSource(), files[1])
@@ -305,4 +348,32 @@ test('Electron protocol lookup accepts only the requested file recorded in the d
   assert.equal(await lookup(43, 'dupevideo01', '/private/unrecorded.webm'), null)
   existing.delete(files[1].path)
   assert.equal(await lookup(43, 'dupevideo01', files[1].path), null, 'A deleted selected file must not fall back to the first copy')
+})
+
+test('a video opened without this device\'s download plays it until the online video is chosen', () => {
+  const view = (query, onlinePlaybackChosen = false) => ({
+    videoId: 'video1',
+    tabRoute: { query },
+    onlinePlaybackChosen,
+    $store: {
+      getters: {
+        getYtDlpDownloads: {
+          7: { files: [{ videoId: 'other' }] },
+          8: { files: [{ videoId: 'video1', available: false }] },
+          9: { files: [{ videoId: 'video1' }] },
+        },
+        getEnableDownloads: true,
+        getLocalPlaybackDownloadIds: new Map([['video1', 9]]),
+      },
+    },
+  })
+  const pick = (...args) => ({ ...preferredDownload.call(view(...args)) })
+  assert.deepEqual(pick({ downloadId: '9', downloadFilePath: '/downloads/a.webm' }), { id: 9, filePath: '/downloads/a.webm' })
+  // A tab synced from another device carries that device's download ID.
+  assert.deepEqual(pick({ downloadId: '7' }), { id: 9, filePath: null })
+  assert.deepEqual(pick({}), { id: 9, filePath: null })
+  // A route whose file is gone plays another copy, unless it names that file.
+  assert.deepEqual(pick({ downloadId: '8' }), { id: 9, filePath: null })
+  assert.deepEqual(pick({ downloadId: '8', downloadFilePath: '/downloads/b.webm' }), { id: 8, filePath: '/downloads/b.webm' })
+  assert.equal(preferredDownload.call(view({}, true)), null)
 })

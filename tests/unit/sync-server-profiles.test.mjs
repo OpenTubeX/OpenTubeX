@@ -75,14 +75,15 @@ for (const colors of [
 }
 
 for (const deletedFrom of ['server', 'device']) {
-  test(`destructive profile sync identifies the profile deleted from the ${deletedFrom}`, async () => {
-    const profile = { _id: 'profile-1', name: 'Music', subscriptions: [] }
+  test(`destructive profile sync identifies the profiles deleted from the ${deletedFrom}`, async () => {
+    // Emptying a list of fewer items is an ordinary edit.
+    const profiles = ['Music', 'News', 'Sports'].map((name, index) => ({ _id: `profile-${index}`, name, subscriptions: [] }))
     const store = {
       state: {
         profiles: {
           profileList: [
             { _id: MAIN_PROFILE_ID, subscriptions: [] },
-            ...(deletedFrom === 'server' ? [profile] : []),
+            ...(deletedFrom === 'server' ? profiles : []),
           ]
         }
       },
@@ -91,16 +92,16 @@ for (const deletedFrom of ['server', 'device']) {
     const client = {
       getSubscriptionGroups: async () => deletedFrom === 'server'
         ? []
-        : [{
-            group: { id: 'remote-1', local_id: profile._id, title: profile.name }, channels: [],
-          }],
+        : profiles.map(profile => ({
+            group: { id: `remote-${profile._id}`, local_id: profile._id, title: profile.name }, channels: [],
+          })),
     }
-    await assert.rejects(context.syncProfiles(client, store, {
-      'profile-1': { remoteId: 'remote-1', metadata: { title: 'Old name' }, channels: [] },
-    }), error => {
+    await assert.rejects(context.syncProfiles(client, store, Object.fromEntries(profiles.map(profile => [
+      profile._id, { remoteId: `remote-${profile._id}`, metadata: { title: 'Old name' }, channels: [] },
+    ]))), error => {
       assert.ok(error instanceof SyncServerDataLossError)
-      assert.equal(error.deleted, 1)
-      assert.deepEqual(structuredClone(error.items), [{ id: 'profile-1', name: 'Music' }])
+      assert.equal(error.deleted, profiles.length)
+      assert.deepEqual(structuredClone(error.items), profiles.map(profile => ({ id: profile._id, name: profile.name })))
       return true
     })
   })

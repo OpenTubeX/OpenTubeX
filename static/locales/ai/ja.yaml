@@ -1576,6 +1576,8 @@ Settings:
     Data Loss Warning: 同期すると、以前に同期した「{collection}」の{previous}件中{deleted}件がすべてのデバイスで削除されます。サーバーがリセットされたなど、自分で削除していない場合は、項目を保持してすべてのデバイスに復元してください。
     Keep Deleted Items: 項目を保持
     Confirm Data Loss: 削除して続行
+    Automatic Sync Paused: '同期によって以前に同期したアイテムが削除されるところだったため、自動同期を一時停止しています。再開するには削除内容を確認してください。'
+    Review Deletions: '削除内容を確認'
     Use Shared Tabs: 'すべてのデバイスで1つのタブセットを共有する'
     Shared Tabs Warning: 'このデバイスで開いているタブが共有タブセットになります。他のデバイスは同期時に開いているタブをこのセットで置き換えます。異なるデバイスのタブは統合されません。'
     Tabs From Other Devices: '他のデバイスのタブ'

@@ -229,6 +229,20 @@ test.describe('destructive sync', () => {
   })
 })
 
+const recoveryProfiles = ['Music', 'News', 'Sports'].map(name => ({
+  _id: name.toLowerCase(), name, bgColor: '#000000', textColor: '#FFFFFF', subscriptions: []
+}))
+
+/** A server that lost every synced profile. */
+async function routeServerWithoutProfiles(target) {
+  await target.route('https://sync.example/**', route => route.fulfill({
+    contentType: 'application/json',
+    body: JSON.stringify(route.request().url().endsWith('/health')
+      ? { capabilities: { encrypted_sync: 0 } }
+      : [])
+  }))
+}
+
 test.describe('automatic sync recovery', () => {
   test.use({
     seed: {
@@ -246,28 +260,23 @@ test.describe('automatic sync recovery', () => {
         syncServerSyncPlaylists: false,
         syncServerSyncHistory: false,
         syncServerSyncProfiles: true,
+        // Losing fewer synced profiles is an ordinary edit.
         syncServerSnapshot: JSON.stringify({
-          profiles: {
-            music: { remoteId: 'music', metadata: { title: 'Music' }, channels: [] }
-          }
+          profiles: Object.fromEntries(recoveryProfiles.map(profile => [profile._id, {
+            remoteId: profile._id,
+            metadata: { title: profile.name },
+            channels: []
+          }]))
         })
       },
-      profiles: [
-        { _id: 'allChannels', name: 'All Channels', subscriptions: [] },
-        { _id: 'music', name: 'Music', bgColor: '#000000', textColor: '#FFFFFF', subscriptions: [] }
-      ]
+      profiles: [{ _id: 'allChannels', name: 'All Channels', subscriptions: [] }, ...recoveryProfiles]
     }
   })
 
   test('shows a background window sync failure and its shortcut in the active window', async ({ app, page }) => {
     const activeWindow = await openNewWindowFromTabBar(app, page)
     await waitForAppReady(activeWindow)
-    await page.route('https://sync.example/**', route => route.fulfill({
-      contentType: 'application/json',
-      body: JSON.stringify(route.request().url().endsWith('/health')
-        ? { capabilities: { encrypted_sync: 0 } }
-        : [])
-    }))
+    await routeServerWithoutProfiles(page)
     // Only the originating window makes a sync request. The other window must
     // receive the notification through IPC, without retrying the failed sync.
     const sourceWindow = await app.electronApp.browserWindow(page)
@@ -296,48 +305,57 @@ test.describe('automatic sync recovery', () => {
     await expect(activeWindow.getByRole('dialog', { name: 'Confirm destructive sync?' })).toBeHidden()
   })
 
-  test('resumes previously enabled automatic sync after confirmation across an app restart', async ({ app, page }, testInfo) => {
-    async function mockServer(targetPage) {
-      await targetPage.route('https://sync.example/**', route => route.fulfill({
-        contentType: 'application/json',
-        body: JSON.stringify(route.request().url().endsWith('/health')
-          ? { capabilities: { encrypted_sync: 0 } }
-          : [])
-      }))
-    }
-    await mockServer(page)
-    const sync = await goToSettingsSection(page, 'sync')
-    const enabled = sync.getByRole('checkbox', { name: 'Enable Sync', exact: true })
-    await enabled.press('Space')
-    const initialized = page.waitForResponse('https://sync.example/health')
-    await enabled.press('Space')
-    await initialized
-    await sync.getByRole('checkbox', { name: 'Sync automatically' }).press('Space')
-    await page.keyboard.press('Escape')
-    await expect(page.locator('.settingsWindow')).toBeHidden()
-    await reconnect(page)
-    const notification = page.locator('.toast', { hasText: 'Sync stopped to prevent data loss.' })
-    await expect(notification).toBeVisible()
-    await notification.screenshot({ path: testInfo.outputPath('sync-notification.png') })
+  test.describe('after an app restart', () => {
+    test.use({
+      // The restarted app checks the paused sync while it starts, before the
+      // test can route its page.
+      // eslint-disable-next-line no-empty-pattern -- Playwright requires a fixture object
+      onPhase: async ({}, use) => use(async (phase, _page, electronApp) => {
+        if (phase === 'electronConnected') await routeServerWithoutProfiles(electronApp.context())
+      })
+    })
 
-    await expect.poll(async () => latestSettings(readDatastore(app.userDataDir, 'settings')).syncServerResumeAutoSync).toBe(true)
-    await app.relaunch()
-    const restarted = app.page
-    await mockServer(restarted)
-    const restartedSync = await goToSettingsSection(restarted, 'sync')
-    const autoSync = restartedSync.getByRole('checkbox', { name: 'Sync automatically' })
-    await expect(autoSync).not.toBeChecked()
-    await restartedSync.getByRole('button', { name: 'Sync now', exact: true }).click()
-    const warning = restarted.getByRole('dialog', { name: 'Confirm destructive sync?' })
-    await expect(warning).toBeVisible()
-    await expect(warning.locator('.dataLossItems')).toContainText('Music')
-    await expect(warning).toHaveCSS('transform', 'none')
-    await warning.screenshot({ path: testInfo.outputPath('sync-confirmation.png') })
-    await warning.getByRole('button', { name: 'Cancel', exact: true }).click()
-    await expect(autoSync).not.toBeChecked()
-    await restartedSync.getByRole('button', { name: 'Sync now', exact: true }).click()
-    await warning.getByRole('button', { name: 'Delete and continue' }).click()
-    await expect(autoSync).toBeChecked()
-    await expect.poll(async () => latestSettings(readDatastore(app.userDataDir, 'settings')).syncServerResumeAutoSync).toBe(false)
+    test('shows the review again and resumes previously enabled automatic sync after confirmation', async ({ app, page }, testInfo) => {
+      const sync = await goToSettingsSection(page, 'sync')
+      const enabled = sync.getByRole('checkbox', { name: 'Enable Sync', exact: true })
+      await enabled.press('Space')
+      const initialized = page.waitForResponse('https://sync.example/health')
+      await enabled.press('Space')
+      await initialized
+      await sync.getByRole('checkbox', { name: 'Sync automatically' }).press('Space')
+      await page.keyboard.press('Escape')
+      await expect(page.locator('.settingsWindow')).toBeHidden()
+      await reconnect(page)
+      const notification = page.locator('.toast', { hasText: 'Sync stopped to prevent data loss.' })
+      await expect(notification).toBeVisible()
+      await notification.screenshot({ path: testInfo.outputPath('sync-notification.png') })
+
+      await expect.poll(async () => latestSettings(readDatastore(app.userDataDir, 'settings')).syncServerResumeAutoSync).toBe(true)
+      await app.relaunch()
+      const restarted = app.page
+      // The paused sync is checked again, so the notification and the review return.
+      const restartedNotification = restarted.locator('.toast', { hasText: 'Sync stopped to prevent data loss.' })
+      await expect(restartedNotification).toBeVisible()
+      await restartedNotification.getByRole('button', { name: 'Sync', exact: true }).click()
+      const restartedSync = restarted.locator('[data-section="sync"]')
+      const warning = restarted.getByRole('dialog', { name: 'Confirm destructive sync?' })
+      await expect(warning).toBeVisible()
+      await expect(warning.locator('.dataLossItems')).toContainText('Music')
+      await expect(warning).toHaveCSS('transform', 'none')
+      await warning.screenshot({ path: testInfo.outputPath('sync-confirmation.png') })
+      await warning.getByRole('button', { name: 'Cancel', exact: true }).click()
+
+      // Sync settings explains the pause until the deletions are reviewed.
+      const autoSync = restartedSync.getByRole('checkbox', { name: 'Sync automatically' })
+      await expect(autoSync).not.toBeChecked()
+      const paused = restartedSync.getByRole('status').filter({ hasText: 'Automatic sync is paused' })
+      await expect(paused).toBeVisible()
+      await paused.screenshot({ path: testInfo.outputPath('sync-paused.png') })
+      await paused.getByRole('button', { name: 'Review deletions', exact: true }).click()
+      await warning.getByRole('button', { name: 'Delete and continue' }).click()
+      await expect(autoSync).toBeChecked()
+      await expect(paused).toBeHidden()
+      await expect.poll(async () => latestSettings(readDatastore(app.userDataDir, 'settings')).syncServerResumeAutoSync).toBe(false)
+    })
   })
 })

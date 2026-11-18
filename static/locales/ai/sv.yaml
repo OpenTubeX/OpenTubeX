@@ -1576,6 +1576,8 @@ Settings:
     Data Loss Warning: Synkroniseringen skulle ta bort {deleted} av {previous} tidigare synkroniserade objekt i ”{collection}” på alla enheter. Om du inte har tagit bort dem själv, till exempel för att servern återställdes, behåll dem för att återställa dem överallt.
     Keep Deleted Items: Behåll objekt
     Confirm Data Loss: Ta bort och fortsätt
+    Automatic Sync Paused: 'Automatisk synkronisering är pausad eftersom en synkronisering skulle ha raderat objekt som synkroniserats tidigare. Granska raderingarna för att återuppta den.'
+    Review Deletions: 'Granska raderingar'
     Use Shared Tabs: 'Använd en gemensam uppsättning flikar på alla enheter'
     Shared Tabs Warning: 'De öppna flikarna på den här enheten blir den delade uppsättningen. Andra enheter ersätter sina öppna flikar med den när de synkroniseras; flikar från olika enheter slås inte ihop.'
     Tabs From Other Devices: 'Flikar från andra enheter'

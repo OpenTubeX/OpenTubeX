@@ -1558,6 +1558,8 @@ Settings:
     Data Loss Warning: Sync would delete {deleted} of {previous} previously synced items in {collection} on all devices. If you did not delete them, for example because the server was reset, keep them to restore them everywhere.
     Keep Deleted Items: Keep items
     Confirm Data Loss: Delete and continue
+    Automatic Sync Paused: 'Automatic sync is paused because a sync would have deleted items that were synced before. Review the deletions to resume it.'
+    Review Deletions: 'Review deletions'
     Use Shared Tabs: 'Use one shared tab set across devices'
     Shared Tabs Warning: 'The open tabs on this device become the shared set. Other devices replace their open tabs with this set when they sync; tabs from different devices are not combined.'
     Tabs From Other Devices: 'Tabs from other devices'

@@ -1576,6 +1576,8 @@ Settings:
     Data Loss Warning: La sincronizzazione eliminerebbe {deleted} dei {previous} elementi sincronizzati in precedenza in «{collection}» su tutti i dispositivi. Se non li hai eliminati tu, ad esempio perché il server è stato reimpostato, conservali per ripristinarli ovunque.
     Keep Deleted Items: Conserva elementi
     Confirm Data Loss: Elimina e continua
+    Automatic Sync Paused: 'La sincronizzazione automatica è in pausa perché una sincronizzazione avrebbe eliminato elementi sincronizzati in precedenza. Controlla le eliminazioni per riprenderla.'
+    Review Deletions: 'Controlla eliminazioni'
     Use Shared Tabs: 'Usa un unico gruppo di schede condiviso tra i dispositivi'
     Shared Tabs Warning: 'Le schede aperte su questo dispositivo diventano il gruppo condiviso. Quando si sincronizzano, gli altri dispositivi sostituiscono le proprie schede aperte con questo gruppo; le schede di dispositivi diversi non vengono unite.'
     Tabs From Other Devices: 'Schede da altri dispositivi'
