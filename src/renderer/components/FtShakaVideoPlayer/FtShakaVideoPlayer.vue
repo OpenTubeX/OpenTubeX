@@ -548,7 +548,11 @@
           aria-hidden="true"
         />
       </div>
-      <Transition name="fade">
+      <Transition
+        name="fade"
+        @enter="finishTransition"
+        @leave="finishTransition"
+      >
         <div
           v-if="autoplayCountdown"
           v-overlay-scrollbars
@@ -827,7 +831,11 @@
           @keydown="handleFullscreenDockWidthKeydown"
           @dblclick.stop.prevent="resetFullscreenDockWidth"
         />
-        <Transition name="chapter-slide">
+        <Transition
+          name="chapter-slide"
+          @enter="finishTransition"
+          @leave="finishTransition"
+        >
           <aside
             v-if="showChaptersOverlay && (isFullscreen || fullWindowEnabled) && chapters.length > 0"
             ref="chapterOverlay"
@@ -1254,21 +1262,26 @@
         <span class="videoFillZoomEdge videoFillZoomEdgeBottom" />
         <span class="videoFillZoomEdge videoFillZoomEdgeLeft" />
       </div>
-      <Transition name="fade">
+      <Transition
+        name="valueChangePopup"
+        @enter="finishTransition"
+        @leave="finishTransition"
+      >
         <div
           v-if="!mobileSeekPreview && (videoZoomPinching || showTemporaryPlaybackRateIndicator || showValueChangePopup)"
           class="valueChangePopup"
           :class="{
-            'invert-content-order':
-              showTemporaryPlaybackRateIndicator || invertValueChangeContentOrder
+            'invert-content-order': valueChangeOsd.invertContentOrder,
+            hasValueChangeLevel: valueChangeOsd.level !== null
           }"
         >
           <span
-            v-if="videoZoomPinching || showTemporaryPlaybackRateIndicator || valueChangeIcons.length > 0"
+            v-if="valueChangeOsd.icons.length > 0"
+            :key="valueChangeIconsKey"
             class="valueChangeIcons"
           >
             <template
-              v-for="icon in videoZoomPinching ? ['search'] : showTemporaryPlaybackRateIndicator ? ['forward'] : valueChangeIcons"
+              v-for="icon in valueChangeOsd.icons"
               :key="typeof icon === 'string' ? icon : icon.path"
             >
               <svg
@@ -1286,13 +1299,16 @@
               />
             </template>
           </span>
-          <span class="valueChangeText">{{
-            videoZoomPinching
-              ? formatVideoZoom(videoZoomGestureZoom)
-              : showTemporaryPlaybackRateIndicator
-              ? temporaryPlaybackRateIndicatorMessage
-              : valueChangeMessage
-          }}</span>
+          <span
+            v-if="valueChangeOsd.level !== null"
+            class="valueChangeLevel"
+            :style="{ '--value-change-level': valueChangeOsd.level }"
+            aria-hidden="true"
+          >
+            <span class="valueChangeLevelActive" />
+            <span class="valueChangeLevelTrack" />
+          </span>
+          <span class="valueChangeText">{{ valueChangeOsd.text }}</span>
         </div>
       </Transition>
       <div
@@ -1316,7 +1332,11 @@
           </span>
         </p>
       </div>
-      <Transition name="fade">
+      <Transition
+        name="fade"
+        @enter="finishTransition"
+        @leave="finishTransition"
+      >
         <div
           v-if="showCountdownOverlay"
           class="countdownOverlay"
@@ -2248,7 +2268,7 @@ import {
   copyToClipboard,
 } from '../../helpers/utils'
 import { isHexColor } from '../../helpers/colors'
-import { applyAnimationSpeed, getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
+import { applyAnimationSpeed, finishTransition, getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
 import {
   addOverlayScrollbars,
   clampOverlayScrollTop,
@@ -5073,7 +5093,7 @@ function stepSeekHistory(direction) {
     showValueChange(
       back ? t('Video.Player.Seek History.Nothing to undo') : t('Video.Player.Seek History.Nothing to redo'),
       icon,
-      !back
+      { invertContentOrder: !back }
     )
     return
   }
@@ -5083,7 +5103,7 @@ function stepSeekHistory(direction) {
   setCurrentTime(step.target)
   // Unlike its other seeks, undoing or redoing is not recorded again, but the viewer chose it
   emit('viewer-seek', step.target)
-  showValueChange(formatDurationAsTimestamp(step.target), icon, !back)
+  showValueChange(formatDurationAsTimestamp(step.target), icon, { invertContentOrder: !back })
 }
 
 /** @param {CustomEvent<number>} event */
@@ -5729,7 +5749,7 @@ const mobileAdjustments = createMobilePlayerAdjustments({
     // applyPlaybackRate already shows the multiplier OSD. Like it, the
     // brightness and volume OSDs show only their icon and value.
     if (action === 'speed') return
-    showValueChange(`${Math.round(value * 100)}%`, action === 'brightness' ? 'sun' : 'volume-high', false, 0, false)
+    showValueChange(`${Math.round(value * 100)}%`, action === 'brightness' ? 'sun' : 'volume-high', { revealControls: false, level: value })
   },
   onError(error) {
     console.error('Mobile player adjustment failed', error)
@@ -10700,7 +10720,7 @@ function changeVolume(step) {
   } else if (newValue > 0 && newValue > oldValue) {
     messageIcon = 'volume-high'
   }
-  showValueChange(`${Math.round(video.value.volume * 100)}%`, messageIcon)
+  showValueChange(`${Math.round(video.value.volume * 100)}%`, messageIcon, { level: video.value.volume })
 }
 
 const {
@@ -10809,7 +10829,7 @@ function seekBySeconds(seconds, canSeekResult = false, showPopUp = false, reveal
       : { icon: 'arrow-left', invertContentOrder: false }
     // `+value` converts string back to float
     const formattedSeconds = +Math.abs(totalSeconds).toFixed(2)
-    showValueChange(`${formattedSeconds}s`, popUpLayout.icon, popUpLayout.invertContentOrder, totalSeconds)
+    showValueChange(`${formattedSeconds}s`, popUpLayout.icon, { invertContentOrder: popUpLayout.invertContentOrder, seekSeconds: totalSeconds })
   } else {
     accumulatedSeekSeconds = 0
   }
@@ -11164,7 +11184,7 @@ async function keyboardShortcutHandler(event) {
 
       const messageIcon = isMuted ? 'volume-mute' : 'volume-high'
       const message = isMuted ? '0%' : `${Math.round(video_.volume * 100)}%`
-      showValueChange(message, messageIcon)
+      showValueChange(message, messageIcon, { level: isMuted ? 0 : video_.volume })
       blurTooltipButtons()
       break
     }
@@ -11181,7 +11201,7 @@ async function keyboardShortcutHandler(event) {
 
       const localization = ui.getControls().getLocalization()
       const message = localization.resolve(enabled ? 'ON' : 'OFF')
-      showValueChange(message, ['step-forward', 'volume-xmark'], true)
+      showValueChange(message, ['step-forward', 'volume-xmark'], { invertContentOrder: true })
       blurTooltipButtons()
       break
     }
@@ -13534,8 +13554,32 @@ const showValueChangePopup = ref(false)
 const valueChangeMessage = ref('')
 const valueChangeIcons = ref([])
 const invertValueChangeContentOrder = ref(false)
+/** @type {import('vue').Ref<number | null>} */
+const valueChangeLevel = ref(null)
 let valueChangeTimeout = null
 let accumulatedSeekSeconds = 0
+
+// Gestures with live feedback take over the OSD while they run.
+const valueChangeOsd = computed(() => {
+  if (videoZoomPinching.value) {
+    return { icons: ['search'], text: formatVideoZoom(videoZoomGestureZoom.value), level: null, invertContentOrder: false }
+  }
+  if (showTemporaryPlaybackRateIndicator.value) {
+    return { icons: ['forward'], text: temporaryPlaybackRateIndicatorMessage.value, level: null, invertContentOrder: true }
+  }
+  return {
+    icons: valueChangeIcons.value,
+    text: valueChangeMessage.value,
+    level: valueChangeLevel.value,
+    invertContentOrder: invertValueChangeContentOrder.value,
+  }
+})
+
+// Pop the badge when its icon changes, not on every value of a drag or pinch.
+const valueChangeIconsKey = computed(() => {
+  return valueChangeOsd.value.icons.map(icon => typeof icon === 'string' ? icon : icon.path).join(' ')
+})
+
 function setShowUiOnPaused(value) {
   const config = ui?.getControls().getConfig()
   if (config) config.showUIOnPaused = value
@@ -13550,14 +13594,17 @@ function showOverlayControls() {
  * Shows a popup with a message and an icon on top of the video player.
  * @param {string} message - The message to display.
  * @param {ValueChangeIcon | ValueChangeIcon[]} icons - The icons to display.
- * @param {boolean} invertContentOrder - Whether to invert the order of the icon and message.
- * @param {number} seekSeconds - Accumulated seek offset, reset by other messages.
- * @param {boolean} revealControls - Whether to also show the player controls.
+ * @param {object} [options]
+ * @param {boolean} [options.invertContentOrder] - Whether to invert the order of the icon and message.
+ * @param {number} [options.seekSeconds] - Accumulated seek offset, reset by other messages.
+ * @param {boolean} [options.revealControls] - Whether to also show the player controls.
+ * @param {number | null} [options.level] - Fraction from 0 to 1 shown as a level indicator, e.g. for the volume.
  */
-function showValueChange(message, icons = [], invertContentOrder = false, seekSeconds = 0, revealControls = true) {
+function showValueChange(message, icons = [], { invertContentOrder = false, seekSeconds = 0, revealControls = true, level = null } = {}) {
   accumulatedSeekSeconds = seekSeconds
   valueChangeMessage.value = message
   valueChangeIcons.value = Array.isArray(icons) ? icons : [icons]
+  valueChangeLevel.value = level === null ? null : Math.min(Math.max(level, 0), 1)
   showValueChangePopup.value = true
   invertValueChangeContentOrder.value = invertContentOrder
 
