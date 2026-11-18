@@ -1102,6 +1102,7 @@ Settings:
       Legacy Formats: پرانے فارمیٹس
       Modern Formats: جدید فارمیٹس
     Ignore System Rotation Lock for Fullscreen: فل اسکرین کے لیے سسٹم روٹیشن لاک کو نظر انداز کریں
+    Keep Status Bar Hidden in Fullscreen: "فل اسکرین میں اسٹیٹس بار کو چھپا رکھیں"
     Swipe Left or Right to Seek in Fullscreen: فل اسکرین میں سیک کرنے کے لیے بائیں یا دائیں سوائپ کریں
     Show Swipe to Seek Preview: سوائپ سے سیک کا پیش نظارہ دکھائیں
     Enable Google Cast: Google Cast فعال کریں
@@ -2513,6 +2514,7 @@ Tooltips:
     Upcoming Videos to Preload: آنے والی ویڈیوز کی زیادہ سے زیادہ تعداد جن کے yt-dlp اسٹریم URLs پس منظر میں حاصل کیے جاتے ہیں۔
     Concurrent Preloads: ایک ساتھ ویڈیوز پہلے سے لوڈ کرنے کے لیے استعمال ہونے والے yt-dlp پروسیسز کی زیادہ سے زیادہ تعداد۔ زیادہ قدریں زیادہ CPU، میموری اور نیٹ ورک بینڈوڈتھ استعمال کرتی ہیں۔
     Ignore System Rotation Lock for Fullscreen: Android کی خودکار گردش بند ہونے پر بھی فل اسکرین میں جانے اور نکلنے کے لیے ڈیوائس کی جسمانی گردش استعمال کریں۔
+    Keep Status Bar Hidden in Fullscreen: "اسٹیٹس بار صرف اس وقت دکھائیں جب آپ اسکرین کے کنارے سے سوائپ کریں، اور کچھ دیر بعد اسے دوبارہ چھپا دیں۔ پلیئر کو تھپتھپانے سے اب یہ ظاہر نہیں ہوتا۔"
     Ask Before Preloading Large Playlists: "{count} سے زیادہ ویڈیوز والی پلے لسٹ کی تمام ویڈیوز پہلے سے لوڈ کرنے سے پہلے تصدیق مانگتا ہے۔"
     Enable Timestamp Notes: "پلیئر میں ایک بٹن اور N شارٹ کٹ شامل کرتا ہے جو ویڈیو روک کر موجودہ لمحے کے لنک والا نوٹ کھولتے ہیں۔ نوٹس کو Markdown کے طور پر کاپی کیا جا سکتا ہے یا ڈیسک ٹاپ پر Obsidian میں شامل کیا جا سکتا ہے۔"
     Obsidian Vault: ٹائم اسٹیمپ نوٹس کے لیے Obsidian والٹ کا نام۔ سیٹ ہونے پر نوٹس Obsidian میں شامل کیے جا سکتے ہیں۔ ہر ویڈیو کے نوٹس والٹ میں نئے نوٹس کے فولڈر کے اندر ویڈیو کے نام والے ایک نوٹ میں جمع کیے جاتے ہیں۔

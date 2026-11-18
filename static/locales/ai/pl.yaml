@@ -618,6 +618,7 @@ Settings:
     Upcoming Videos to Preload: "Liczba filmów do wstępnego wczytania"
     Concurrent Preloads: "Jednoczesne wstępne ładowanie"
     Ignore System Rotation Lock for Fullscreen: Ignoruj systemową blokadę obrotu dla pełnego ekranu
+    Keep Status Bar Hidden in Fullscreen: "Ukrywaj pasek stanu na pełnym ekranie"
     Swipe Left or Right to Seek in Fullscreen: Przesuń w lewo lub w prawo, aby przewijać na pełnym ekranie
     Show Swipe to Seek Preview: Pokazuj podgląd podczas przewijania przesunięciem
     Enable Google Cast: "Włącz Google Cast"
@@ -1626,6 +1627,7 @@ Tooltips:
     Upcoming Videos to Preload: "Maksymalna liczba następnych filmów, których adresy yt-dlp są pobierane w tle."
     Concurrent Preloads: "Maksymalna liczba procesów yt-dlp używanych do jednoczesnego wstępnego ładowania filmów. Wyższe wartości zużywają więcej procesora, pamięci i przepustowości sieci."
     Ignore System Rotation Lock for Fullscreen: Obróć fizycznie urządzenie, aby włączyć lub wyłączyć pełny ekran, nawet gdy automatyczne obracanie w Androidzie jest wyłączone.
+    Keep Status Bar Hidden in Fullscreen: "Pokazuj pasek stanu tylko po przesunięciu palcem od krawędzi ekranu i po chwili ukrywaj go ponownie. Dotknięcie odtwarzacza już go nie pokazuje."
     Ask Before Preloading Large Playlists: "Prosi o potwierdzenie przed wstępnym wczytaniem wszystkich filmów z playlisty zawierającej więcej niż {count} filmów."
     Enable Timestamp Notes: "Dodaje do odtwarzacza przycisk i skrót N, które wstrzymują film i otwierają notatkę z linkiem do bieżącego momentu. Notatki można skopiować jako Markdown lub na komputerze dodać do Obsidiana."
     Obsidian Vault: Nazwa sejfu Obsidiana dla notatek ze znacznikami czasu. Po jej ustawieniu notatki można dodawać do Obsidiana. Notatki z każdego filmu są zbierane w notatce nazwanej tak jak film, w folderze sejfu na nowe notatki.

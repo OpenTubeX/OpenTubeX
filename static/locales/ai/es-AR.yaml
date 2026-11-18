@@ -1115,6 +1115,7 @@ Settings:
     Upcoming Videos to Preload: "Vídeos próximos para precargar"
     Concurrent Preloads: "Precargas simultáneas"
     Ignore System Rotation Lock for Fullscreen: Ignorar el bloqueo de rotación del sistema para pantalla completa
+    Keep Status Bar Hidden in Fullscreen: "Mantener oculta la barra de estado en pantalla completa"
     Swipe Left or Right to Seek in Fullscreen: Deslizar a izquierda o derecha para avanzar o retroceder en pantalla completa
     Show Swipe to Seek Preview: Mostrar vista previa al deslizar para avanzar o retroceder
     Enable Google Cast: "Activar Google Cast"
@@ -2858,6 +2859,7 @@ Tooltips:
     Upcoming Videos to Preload: "Número máximo de próximos vídeos cuyas URL de yt-dlp se obtienen en segundo plano."
     Concurrent Preloads: "La cantidad máxima de procesos de yt-dlp usados para precargar videos al mismo tiempo. Los valores más altos usan más CPU, memoria y ancho de banda de red."
     Ignore System Rotation Lock for Fullscreen: Girá físicamente el dispositivo para entrar y salir de pantalla completa aunque la rotación automática de Android esté desactivada.
+    Keep Status Bar Hidden in Fullscreen: "Mostrá la barra de estado solo cuando deslizás desde el borde de la pantalla, y ocultala de nuevo después de un momento. Tocar el reproductor ya no la muestra."
     Ask Before Preloading Large Playlists: "Pide confirmación antes de precargar todos los videos de una lista de reproducción con más de {count} videos."
     Enable Timestamp Notes: "Agrega un botón al reproductor y el atajo N, que pausan el video y abren una nota que enlaza al momento actual. Las notas se pueden copiar como Markdown o, en la computadora, agregar a Obsidian."
     Obsidian Vault: Nombre de la bóveda de Obsidian para las notas con marca de tiempo. Si se define, las notas se pueden agregar a Obsidian. Las notas de cada video se juntan en una nota con el nombre del video, en la carpeta de la bóveda para notas nuevas.

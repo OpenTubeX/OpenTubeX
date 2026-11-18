@@ -1025,6 +1025,7 @@ Settings:
     Upcoming Videos to Preload: "Antal videor att förinläsa"
     Concurrent Preloads: "Samtidiga förinläsningar"
     Ignore System Rotation Lock for Fullscreen: Ignorera systemets rotationslås för helskärm
+    Keep Status Bar Hidden in Fullscreen: "Håll statusfältet dolt i helskärm"
     Swipe Left or Right to Seek in Fullscreen: Svep åt vänster eller höger för att spola i helskärm
     Show Swipe to Seek Preview: Visa förhandsvisning vid spolning med svep
     Enable Google Cast: "Aktivera Google Cast"
@@ -2395,6 +2396,7 @@ Tooltips:
     Upcoming Videos to Preload: "Det högsta antalet kommande videor vars yt-dlp-adresser hämtas i bakgrunden."
     Concurrent Preloads: "Det högsta antalet yt-dlp-processer som används för att förinläsa videor samtidigt. Högre värden använder mer processor, minne och nätverksbandbredd."
     Ignore System Rotation Lock for Fullscreen: Rotera enheten fysiskt för att öppna och avsluta helskärm, även när automatisk rotation är avstängd i Android.
+    Keep Status Bar Hidden in Fullscreen: "Visa statusfältet bara när du sveper från skärmkanten och dölj det igen efter en stund. Att trycka på spelaren visar det inte längre."
     Ask Before Preloading Large Playlists: "Ber om bekräftelse innan alla videor i en spellista med fler än {count} videor förinläses."
     Enable Timestamp Notes: "Lägger till en spelarknapp och kortkommandot N som pausar videon och öppnar en anteckning som länkar till det aktuella ögonblicket. Anteckningar kan kopieras som Markdown eller, på datorn, läggas till i Obsidian."
     Obsidian Vault: Namnet på Obsidian-valvet för tidsstämpelanteckningar. När det är angivet kan anteckningar läggas till i Obsidian. Anteckningarna för varje video samlas i en anteckning med videons namn, i valvets mapp för nya anteckningar.

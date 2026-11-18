@@ -1036,6 +1036,7 @@ Settings:
     Upcoming Videos to Preload: "عدد الفيديوهات المراد تحميلها مسبقًا"
     Concurrent Preloads: "عمليات التحميل المسبق المتزامنة"
     Ignore System Rotation Lock for Fullscreen: تجاهل قفل دوران النظام لملء الشاشة
+    Keep Status Bar Hidden in Fullscreen: "إبقاء شريط الحالة مخفيًا في وضع ملء الشاشة"
     Swipe Left or Right to Seek in Fullscreen: اسحب إلى اليسار أو اليمين للتقديم أو الترجيع في وضع ملء الشاشة
     Show Swipe to Seek Preview: إظهار معاينة السحب للتقديم أو الترجيع
     Enable Google Cast: "تفعيل Google Cast"
@@ -2432,6 +2433,7 @@ Tooltips:
     Upcoming Videos to Preload: "الحد الأقصى لعدد الفيديوهات القادمة التي تُجلب روابط بثها في الخلفية."
     Concurrent Preloads: "الحد الأقصى لعدد عمليات yt-dlp المستخدمة لتحميل مقاطع الفيديو مسبقًا في الوقت نفسه. تستخدم القيم الأعلى مزيدًا من وحدة المعالجة المركزية والذاكرة وعرض النطاق الترددي للشبكة."
     Ignore System Rotation Lock for Fullscreen: استخدم دوران الجهاز الفعلي للدخول إلى ملء الشاشة والخروج منه حتى عند إيقاف التدوير التلقائي في أندرويد.
+    Keep Status Bar Hidden in Fullscreen: "إظهار شريط الحالة فقط عند السحب من حافة الشاشة، ثم إخفاؤه مجددًا بعد لحظة. لم يعد النقر على المشغّل يُظهره."
     Ask Before Preloading Large Playlists: "يطلب التأكيد قبل التحميل المسبق لكل فيديوهات قائمة تشغيل تحتوي على أكثر من {count} فيديو."
     Enable Timestamp Notes: "يضيف زرًا إلى المشغل واختصار N لإيقاف الفيديو مؤقتًا وفتح ملاحظة ترتبط باللحظة الحالية. يمكن نسخ الملاحظات بتنسيق Markdown أو إضافتها إلى Obsidian على سطح المكتب."
     Obsidian Vault: اسم خزنة Obsidian لملاحظات الطوابع الزمنية. عند تعيينه، يمكن إضافة الملاحظات إلى Obsidian. تُجمع ملاحظات كل فيديو في ملاحظة تحمل اسم الفيديو، داخل مجلد الملاحظات الجديدة في الخزنة.

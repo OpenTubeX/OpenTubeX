@@ -1027,6 +1027,7 @@ Settings:
     Upcoming Videos to Preload: "Fjöldi myndskeiða til að forhlaða"
     Concurrent Preloads: "Samtímis forhleðslur"
     Ignore System Rotation Lock for Fullscreen: Hunsa snúningslæsingu kerfisins fyrir allan skjáinn
+    Keep Status Bar Hidden in Fullscreen: "Halda stöðustikunni falinni á öllum skjánum"
     Swipe Left or Right to Seek in Fullscreen: Strjúktu til vinstri eða hægri til að spóla á öllum skjánum
     Show Swipe to Seek Preview: Sýna forskoðun þegar strokið er til að spóla
     Enable Google Cast: "Virkja Google Cast"
@@ -2410,6 +2411,7 @@ Tooltips:
     Upcoming Videos to Preload: "Hámarksfjöldi næstu myndskeiða sem yt-dlp-slóðir eru sóttar fyrir í bakgrunni."
     Concurrent Preloads: "Hámarksfjöldi yt-dlp-ferla sem eru notaðir til að forhlaða myndskeiðum samtímis. Hærri gildi nota meira örgjörvaafl, minni og netbandvídd."
     Ignore System Rotation Lock for Fullscreen: Snúðu tækinu til að opna og loka öllum skjánum, jafnvel þótt slökkt sé á sjálfvirkum snúningi í Android.
+    Keep Status Bar Hidden in Fullscreen: "Sýna stöðustikuna aðeins þegar þú strýkur frá skjábrúninni og fela hana aftur eftir smástund. Að ýta á spilarann sýnir hana ekki lengur."
     Ask Before Preloading Large Playlists: "Biður um staðfestingu áður en öll myndskeið spilunarlista með fleiri en {count} myndskeið eru forhlaðin."
     Enable Timestamp Notes: "Bætir við hnappi í spilarann og flýtilyklinum N sem gera hlé á myndskeiðinu og opna glósu sem tengir á núverandi augnablik. Hægt er að afrita glósur sem Markdown eða, á tölvu, bæta þeim við Obsidian."
     Obsidian Vault: Heiti Obsidian-hvelfingarinnar fyrir tímamerktar glósur. Þegar það er stillt er hægt að bæta glósum við Obsidian. Glósur hvers myndskeiðs eru teknar saman í glósu sem nefnd er eftir myndskeiðinu, í möppu hvelfingarinnar fyrir nýjar glósur.

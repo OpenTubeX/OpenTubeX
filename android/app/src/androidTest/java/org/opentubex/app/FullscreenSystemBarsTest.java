@@ -56,13 +56,26 @@ public class FullscreenSystemBarsTest {
     }
 
     @Test
-    public void systemBarsUseDefaultSwipeBehavior() {
+    public void systemBarsUseDefaultSwipeBehaviorUnlessPlayerRequestsTransientBars() {
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
-            scenario.onActivity(activity -> assertEquals(
-                WindowInsetsControllerCompat.BEHAVIOR_DEFAULT,
-                WindowCompat.getInsetsController(activity.getWindow(), activity.getWindow().getDecorView())
-                    .getSystemBarsBehavior()
-            ));
+            scenario.onActivity(activity -> {
+                WindowInsetsControllerCompat controller =
+                    WindowCompat.getInsetsController(activity.getWindow(), activity.getWindow().getDecorView());
+                AndroidUiPlugin plugin = (AndroidUiPlugin) activity.getBridge().getPlugin("AndroidUi").getInstance();
+                assertEquals(WindowInsetsControllerCompat.BEHAVIOR_DEFAULT, controller.getSystemBarsBehavior());
+                setTransientSystemBars(plugin, true);
+                assertEquals(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE,
+                    controller.getSystemBarsBehavior());
+                setTransientSystemBars(plugin, false);
+                assertEquals(WindowInsetsControllerCompat.BEHAVIOR_DEFAULT, controller.getSystemBarsBehavior());
+            });
         }
+    }
+
+    private static void setTransientSystemBars(AndroidUiPlugin plugin, boolean enabled) {
+        plugin.setTransientSystemBars(new PluginCall(null, "AndroidUi", "test", "setTransientSystemBars",
+            new JSObject().put("enabled", enabled)) {
+            @Override public void resolve() { }
+        });
     }
 }

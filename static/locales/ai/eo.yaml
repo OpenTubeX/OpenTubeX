@@ -1078,6 +1078,7 @@ Settings:
       Legacy Formats: Heredaĵaj formoj
       Modern Formats: Modernaj formoj
     Ignore System Rotation Lock for Fullscreen: Ignori sisteman rotacian ŝloson por plenekrana reĝimo
+    Keep Status Bar Hidden in Fullscreen: "Teni la statobreton kaŝita en plenekrana reĝimo"
     Swipe Left or Right to Seek in Fullscreen: Ŝovi maldekstren aŭ dekstren por salti en plenekrana reĝimo
     Show Swipe to Seek Preview: Montri antaŭrigardon de saltado per ŝovo
     Enable Google Cast: Ŝalti Google Cast
@@ -2447,6 +2448,7 @@ Tooltips:
     Upcoming Videos to Preload: La maksimuma nombro de venontaj videaĵoj, kies URL-oj de yt-dlp-fluoj estas venigataj fone.
     Concurrent Preloads: La maksimuma nombro de yt-dlp-procezoj uzataj por samtempe antaŭŝargi videaĵojn. Pli altaj valoroj uzas pli da CPU, memoro kaj reta kapacito.
     Ignore System Rotation Lock for Fullscreen: Uzi fizikan rotacion de la aparato por eniri kaj eliri el plenekrana reĝimo eĉ kiam la aŭtomata rotacio de Android estas malŝaltita.
+    Keep Status Bar Hidden in Fullscreen: "Montri la statobreton nur kiam vi ŝovas de la ekranrando, kaj kaŝi ĝin denove post momento. Tuŝeti la ludilon ne plu montras ĝin."
     Ask Before Preloading Large Playlists: "Petas konfirmon antaŭ antaŭŝargi ĉiujn videaĵojn de ludlisto kun pli ol {count} videaĵoj."
     Enable Timestamp Notes: "Aldonas ludilan butonon kaj la klavkombinon N, kiuj paŭzigas la videon kaj malfermas noton, kiu ligas al la nuna momento. Notojn eblas kopii kiel Markdown aŭ, ĉe labortablo, aldoni al Obsidian."
     Obsidian Vault: Nomo de la Obsidian-trezorejo por tempomarkaj notoj. Se ĝi estas agordita, notoj aldoneblas al Obsidian. La notoj de ĉiu video estas kolektataj en noto nomita laŭ la video, en la dosierujo de la trezorejo por novaj notoj.

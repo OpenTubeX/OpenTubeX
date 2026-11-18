@@ -1025,6 +1025,7 @@ Settings:
     Upcoming Videos to Preload: "先読みする動画数"
     Concurrent Preloads: "同時先読み数"
     Ignore System Rotation Lock for Fullscreen: 全画面表示ではシステムの回転ロックを無視する
+    Keep Status Bar Hidden in Fullscreen: "全画面表示でステータスバーを非表示のままにする"
     Swipe Left or Right to Seek in Fullscreen: 全画面で左右にスワイプしてシーク
     Show Swipe to Seek Preview: スワイプでシークするときにプレビューを表示
     Enable Google Cast: "Google Castを有効にする"
@@ -2394,6 +2395,7 @@ Tooltips:
     Upcoming Videos to Preload: "バックグラウンドで yt-dlp URL を取得する次の動画の最大数です。"
     Concurrent Preloads: "動画の先読みに同時使用する yt-dlp プロセスの最大数です。値を大きくすると、CPU、メモリ、ネットワーク帯域をより多く使用します。"
     Ignore System Rotation Lock for Fullscreen: Androidの自動回転がオフでも、端末を実際に回転させることで全画面表示の開始と終了を切り替えます。
+    Keep Status Bar Hidden in Fullscreen: "画面の端からスワイプしたときだけステータスバーを表示し、少し経つと再び非表示にします。プレーヤーをタップしても表示されなくなります。"
     Ask Before Preloading Large Playlists: "{count} 本を超える動画を含む再生リストのすべての動画を先読みする前に確認します。"
     Enable Timestamp Notes: "動画を一時停止し、現在の位置へのリンクを含むメモを開くプレーヤーボタンと N ショートカットを追加します。メモは Markdown としてコピーするか、デスクトップでは Obsidian に追加できます。"
     Obsidian Vault: タイムスタンプメモに使用する Obsidian の保管庫の名前。設定すると、メモを Obsidian に追加できます。各動画のメモは、保管庫の新規ノート用フォルダー内にある、動画名を付けたノートにまとめられます。

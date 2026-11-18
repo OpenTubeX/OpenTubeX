@@ -1030,6 +1030,7 @@ Settings:
     Upcoming Videos to Preload: "Broj videozapisa za predučitavanje"
     Concurrent Preloads: "Istodobna predučitavanja"
     Ignore System Rotation Lock for Fullscreen: Zanemari zaključavanje rotacije sustava za cijeli zaslon
+    Keep Status Bar Hidden in Fullscreen: "Zadrži traku stanja skrivenom na cijelom zaslonu"
     Swipe Left or Right to Seek in Fullscreen: Povucite ulijevo ili udesno za premotavanje na cijelom zaslonu
     Show Swipe to Seek Preview: Prikaži pretpregled pri premotavanju povlačenjem
     Enable Google Cast: "Omogući Google Cast"
@@ -2432,6 +2433,7 @@ Tooltips:
     Upcoming Videos to Preload: "Najveći broj sljedećih videozapisa čije se yt-dlp adrese dohvaćaju u pozadini."
     Concurrent Preloads: "Najveći broj yt-dlp procesa koji se koriste za istodobno predučitavanje videozapisa. Veće vrijednosti koriste više procesora, memorije i mrežne propusnosti."
     Ignore System Rotation Lock for Fullscreen: Fizički okrenite uređaj za ulazak i izlazak iz cijelog zaslona, čak i kada je automatska rotacija u Androidu isključena.
+    Keep Status Bar Hidden in Fullscreen: "Prikaži traku stanja samo kada povučeš od ruba zaslona i ponovno je sakrij nakon trenutka. Dodir playera je više ne prikazuje."
     Ask Before Preloading Large Playlists: "Traži potvrdu prije predučitavanja svih videozapisa s popisa za reprodukciju s više od {count} videozapisa."
     Enable Timestamp Notes: "Dodaje gumb u player i prečac N koji pauziraju videozapis i otvaraju bilješku s poveznicom na trenutačni trenutak. Bilješke se mogu kopirati kao Markdown ili ih na računalu dodati u Obsidian."
     Obsidian Vault: Naziv Obsidian trezora za bilješke s vremenskim oznakama. Kada je postavljen, bilješke se mogu dodati u Obsidian. Bilješke svakog videa skupljaju se u bilješci nazvanoj po videu, u mapi trezora za nove bilješke.

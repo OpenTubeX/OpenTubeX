@@ -127,6 +127,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     enableSubtitlesByDefault: false,
     enterFullscreenOnDisplayRotate: true,
     fullscreenRotationIgnoresSystemLock: false,
+    keepStatusBarHiddenInFullscreen: false,
     rotateFullscreenToLandscape: true,
     enableMobileFullscreenSwipe: true,
     enableMobileFullscreenSeek: true,

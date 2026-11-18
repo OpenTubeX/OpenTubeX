@@ -1025,6 +1025,7 @@ Settings:
     Upcoming Videos to Preload: "Số video cần tải trước"
     Concurrent Preloads: "Số lượt tải trước đồng thời"
     Ignore System Rotation Lock for Fullscreen: Bỏ qua khóa xoay của hệ thống cho toàn màn hình
+    Keep Status Bar Hidden in Fullscreen: "Giữ thanh trạng thái ẩn khi toàn màn hình"
     Swipe Left or Right to Seek in Fullscreen: Vuốt sang trái hoặc phải để tua khi toàn màn hình
     Show Swipe to Seek Preview: Hiển thị bản xem trước khi vuốt để tua
     Enable Google Cast: "Bật Google Cast"
@@ -2411,6 +2412,7 @@ Tooltips:
     Upcoming Videos to Preload: "Số video tiếp theo tối đa có URL yt-dlp được lấy trong nền."
     Concurrent Preloads: "Số tiến trình yt-dlp tối đa được dùng để tải trước nhiều video cùng lúc. Giá trị cao hơn sử dụng nhiều CPU, bộ nhớ và băng thông mạng hơn."
     Ignore System Rotation Lock for Fullscreen: Xoay thiết bị để vào và thoát toàn màn hình ngay cả khi tính năng tự động xoay của Android đang tắt.
+    Keep Status Bar Hidden in Fullscreen: "Chỉ hiển thị thanh trạng thái khi bạn vuốt từ cạnh màn hình, rồi ẩn lại sau một lát. Chạm vào trình phát sẽ không còn hiển thị nó nữa."
     Ask Before Preloading Large Playlists: "Yêu cầu xác nhận trước khi tải trước tất cả video của danh sách phát có hơn {count} video."
     Enable Timestamp Notes: "Thêm một nút trình phát và phím tắt N để tạm dừng video và mở một ghi chú liên kết đến thời điểm hiện tại. Có thể sao chép ghi chú dưới dạng Markdown hoặc, trên máy tính, thêm vào Obsidian."
     Obsidian Vault: Tên kho Obsidian dùng cho ghi chú theo mốc thời gian. Khi được đặt, ghi chú có thể được thêm vào Obsidian. Ghi chú của mỗi video được gom vào một ghi chú mang tên video, trong thư mục ghi chú mới của kho.

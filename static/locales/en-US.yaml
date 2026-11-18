@@ -1556,6 +1556,7 @@ Settings:
         Forbidden Characters: Forbidden Characters
         Empty File Name: Empty File Name
     Ignore System Rotation Lock for Fullscreen: Ignore system rotation lock for fullscreen
+    Keep Status Bar Hidden in Fullscreen: Keep status bar hidden in fullscreen
     Swipe Left or Right to Seek in Fullscreen: Swipe left or right to seek in fullscreen
     Show Swipe to Seek Preview: Show swipe-to-seek preview
     Enable Google Cast: "Enable Google Cast"
@@ -3509,6 +3510,7 @@ Tooltips:
     Concurrent Preloads: The maximum number of yt-dlp processes used to preload videos at once. Higher values use more CPU, memory, and network bandwidth.
     Ask Before Preloading Large Playlists: Asks for confirmation before preloading all videos of a playlist with more than {count} videos.
     Ignore System Rotation Lock for Fullscreen: Use physical device rotation to enter and exit fullscreen even when Android's auto-rotate is off.
+    Keep Status Bar Hidden in Fullscreen: Show the status bar only when you swipe from the screen edge, and hide it again after a moment. Tapping the player no longer shows it.
   External Player Settings:
     External Player: Choosing an external player will display an icon, for opening the
       video (playlist if supported) in the external player, on the thumbnail. Warning, Invidious settings do not affect external players.

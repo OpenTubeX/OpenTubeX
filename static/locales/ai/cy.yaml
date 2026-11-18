@@ -1028,6 +1028,7 @@ Settings:
     Upcoming Videos to Preload: "Nifer y fideos i’w rhaglwytho"
     Concurrent Preloads: "Rhaglwythiadau cydamserol"
     Ignore System Rotation Lock for Fullscreen: Anwybyddu clo cylchdroi’r system ar gyfer sgrin lawn
+    Keep Status Bar Hidden in Fullscreen: "Cadw'r bar statws yn gudd ar sgrin lawn"
     Swipe Left or Right to Seek in Fullscreen: Sychwch i’r chwith neu’r dde i symud drwy’r fideo ar sgrin lawn
     Show Swipe to Seek Preview: Dangos rhagolwg wrth lithro i symud drwy’r fideo
     Enable Google Cast: "Galluogi Google Cast"
@@ -2432,6 +2433,7 @@ Tooltips:
     Upcoming Videos to Preload: "Uchafswm y fideos nesaf y nôlir eu URLau yt-dlp yn y cefndir."
     Concurrent Preloads: "Uchafswm nifer y prosesau yt-dlp a ddefnyddir i raglwytho fideos ar yr un pryd. Mae gwerthoedd uwch yn defnyddio mwy o CPU, cof a lled band rhwydwaith."
     Ignore System Rotation Lock for Fullscreen: Cylchdrowch y ddyfais yn gorfforol i agor a chau sgrin lawn hyd yn oed pan fydd cylchdroi awtomatig Android wedi’i ddiffodd.
+    Keep Status Bar Hidden in Fullscreen: "Dangos y bar statws dim ond pan fyddwch yn llusgo o ymyl y sgrin, a'i guddio eto ar ôl ennyd. Nid yw tapio'r chwaraewr yn ei ddangos mwyach."
     Ask Before Preloading Large Playlists: "Yn gofyn am gadarnhad cyn rhaglwytho pob fideo mewn rhestr chwarae gyda mwy na {count} fideo."
     Enable Timestamp Notes: "Yn ychwanegu botwm chwaraewr a'r llwybr byr N sy'n oedi'r fideo ac yn agor nodyn sy'n cysylltu â'r eiliad bresennol. Gellir copïo nodiadau fel Markdown neu, ar y bwrdd gwaith, eu hychwanegu at Obsidian."
     Obsidian Vault: Enw'r gladdgell Obsidian ar gyfer nodiadau stamp amser. Pan gaiff ei gosod, gellir ychwanegu nodiadau at Obsidian. Caiff nodiadau pob fideo eu casglu mewn nodyn wedi'i enwi ar ôl y fideo, yn ffolder y gladdgell ar gyfer nodiadau newydd.
