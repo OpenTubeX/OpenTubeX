@@ -5,9 +5,14 @@
     :class="{ filtered, compact: hideSettingsCategoryDescriptions }"
   >
     <li
-      v-for="settingsSection in settingsSections"
+      v-for="(settingsSection, index) in settingsSections"
       :key="settingsSection.type"
       class="titleItem"
+      :class="{
+        groupStart: settingsSection.group !== settingsSections[index - 1]?.group,
+        groupEnd: settingsSection.group !== settingsSections[index + 1]?.group
+      }"
+      :style="{ '--settings-icon-hue': settingsSection.hue }"
     >
       <button
         ref="linkRefs"
@@ -19,10 +24,12 @@
       >
         <div class="titleContent">
           <div class="iconAndTitleText">
-            <FtIcon
-              :icon="settingsSection.icon"
+            <span
               class="titleIcon"
-            />
+              aria-hidden="true"
+            >
+              <FtIcon :icon="settingsSection.icon" />
+            </span>
             <span class="titleText">{{ settingsSection.title }}</span>
             <small
               v-if="settingsSection.description && !hideSettingsCategoryDescriptions"
@@ -31,7 +38,6 @@
               {{ settingsSection.description }}
             </small>
           </div>
-          <div class="titleUnderline" />
         </div>
       </button>
     </li>

@@ -928,7 +928,7 @@ test.describe('font size', { tag: '@scale' }, () => {
     await goToSettingsSection(page, 'theme')
     const sectionTitle = page.locator('.sectionTitle').first()
     await expect(sectionTitle).toHaveCSS('font-size', '22px')
-    const spacing = await page.locator('.sectionBody').first().evaluate(element => getComputedStyle(element).padding)
+    const spacing = await page.locator('.sectionBody > :not(h3, h4, p)').first().evaluate(element => getComputedStyle(element).padding)
 
     await page.getByRole('slider', { name: /Font Size/ }).fill('150')
     await expect(page.locator('body')).toHaveCSS('--font-scale', '1.5')
@@ -936,7 +936,7 @@ test.describe('font size', { tag: '@scale' }, () => {
     await expect(sectionTitle).toHaveCSS('font-size', '33px')
     await expect(navLabel).toHaveCSS('font-size', '18px')
     await expect(navIcon).toHaveCSS('font-size', '24px')
-    await expect(page.locator('.sectionBody').first()).toHaveCSS('padding', spacing)
+    await expect(page.locator('.sectionBody > :not(h3, h4, p)').first()).toHaveCSS('padding', spacing)
     await expect.poll(() => latestSettings(readDatastore(app.userDataDir, 'settings')).fontSize).toBe(150)
     await attachScreenshot('settings at 150% font size')
   })

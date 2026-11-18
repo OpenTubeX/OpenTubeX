@@ -142,6 +142,11 @@ body,
   --selected-container-color: color-mix(in srgb, oklch(from var(--primary-color) var(--tint-lightness) c h) 24%, var(--card-bg-color));
   --selected-container-hover-color: color-mix(in srgb, oklch(from var(--primary-color) var(--tint-lightness) c h) 20%, var(--card-bg-color));
   --on-selected-container-color: var(--primary-text-color);
+
+  /* Settings tiles keep the card color the controls are made for, on a
+     window tinted towards the text color so they stand out in every theme. */
+  --settings-window-bg-color: color-mix(in srgb, var(--primary-text-color) 5%, var(--card-bg-color));
+  --settings-section-bg-color: var(--card-bg-color);
 }
 
 /* Chromium truncates zoomed border widths to whole device pixels, so a 2px
@@ -342,6 +347,10 @@ the link underline setting instead, which underlines them on hover by default. *
   --native-color-scheme: dark;
   --primary-shadow-color: rgb(0 0 0 / 75%);
   --members-only-color: #55c86b;
+
+  /* Dark surfaces lighten as they rise, so the tiles are tinted instead. */
+  --settings-window-bg-color: var(--card-bg-color);
+  --settings-section-bg-color: color-mix(in srgb, var(--primary-text-color) 6%, var(--card-bg-color));
 
   .invidiousLogo {
     background-image: url('./assets/img/invidious-logo-dark.svg');
@@ -2689,8 +2698,8 @@ a:visited {
   --fixed-background-display: block;
   --fixed-background-host-clip: border-area;
 
-  /* Settings sections share the window's field instead of repeating it. */
-  --settings-section-bg-color: transparent;
+  /* Settings tiles let the window's field show through instead of repeating it. */
+  --settings-section-bg-color: rgb(from var(--card-bg-color) r g b / 80%);
   --settings-changed-color: var(--accent-color);
 
   /* Keep thumbs distinct from their tracks and the surrounding gradient. */
@@ -2781,6 +2790,7 @@ a:visited {
   --bg-glow-ink: rgb(from var(--signal-accent-color) r g b / 5%);
   --bg-gradient-start: color-mix(in srgb, var(--signal-accent-color) 4%, #151515);
   --bg-gradient-end: #0c0c0c;
+  --settings-section-bg-color: rgb(255 255 255 / 6%);
   --primary-text-color: #f2f2f2;
   --secondary-text-color: #a3a3a3;
   --tertiary-text-color: #a3a3a3;
@@ -3271,21 +3281,6 @@ a:visited {
 
   .settingsMenu {
     background-color: var(--bg-color);
-  }
-
-  .settingsMenu .title {
-    border-radius: calc(28px * var(--ui-roundness));
-    padding-inline: 16px;
-  }
-
-  .settingsSection .sectionBody {
-    border-radius: calc(24px * var(--ui-roundness));
-    padding-inline: 20px;
-    padding-block: 16px;
-  }
-
-  .settingsSection + .settingsSection {
-    margin-block-start: 16px;
   }
 
   .btn.variant-tonal:not(.destructive, .selected),
