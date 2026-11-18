@@ -85,11 +85,10 @@ export function getWebContextMenuItems(target, { ignoreLinks = false } = {}) {
   const linkText = link?.textContent?.trim() ?? ''
   const [linkBase, linkRoute] = linkUrl.split('#')
   const isInAppUrl = linkUrl !== '' && linkBase === appUrl && linkRoute?.startsWith('/') === true
-  const selectionText = getSelectionText(editable)
+  // Like browsers, never copy or search a password
+  const selectionText = editable instanceof HTMLInputElement && editable.type === 'password' ? '' : getSelectionText(editable)
   const trimmedSelection = selectionText.trim()
   const hasSelection = selectionText.length > 0
-  // Browsers don't copy from password fields either
-  const canCopy = hasSelection && !(editable instanceof HTMLInputElement && editable.type === 'password')
   const searchable = trimmedSelection.length <= SEARCH_CHAR_LIMIT
   const selectionLabel = truncateSelectionForLabel(trimmedSelection)
 
@@ -108,8 +107,8 @@ export function getWebContextMenuItems(target, { ignoreLinks = false } = {}) {
         // Unlike changing the value, this keeps the undo history and fires input events
         document.execCommand('delete')
       }
-    }, { enabled: canCopy }),
-    (isEditable || hasSelection) && menuItem('Copy', 'Copy', () => copyToClipboard(selectionText), { enabled: canCopy }),
+    }, { enabled: hasSelection }),
+    (isEditable || hasSelection) && menuItem('Copy', 'Copy', () => copyToClipboard(selectionText), { enabled: hasSelection }),
     isEditable && menuItem('Paste', 'Paste', async () => {
       try {
         const text = await navigator.clipboard.readText()
