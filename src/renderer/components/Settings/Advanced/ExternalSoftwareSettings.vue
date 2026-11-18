@@ -796,9 +796,8 @@ async function createYouTubeSession() {
   display: grid;
   gap: 18px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin-block: 8px 18px;
-  margin-inline: auto;
-  max-inline-size: 860px;
+  padding-block: 8px 18px;
+  padding-inline: max(20px, calc((100% - 820px) / 2));
 }
 
 .externalSoftwareTool {
@@ -996,7 +995,7 @@ async function createYouTubeSession() {
 @container settings-content (width <= 800px) {
   .externalSoftwareTools {
     grid-template-columns: minmax(0, 1fr);
-    max-inline-size: 520px;
+    padding-inline: max(20px, calc((100% - 480px) / 2));
   }
 }
 

@@ -12,22 +12,57 @@
   padding: 1px;
 }
 
+/* Material 3 Expressive segmented list: every block of controls is its own
+   tile, 2px apart. A run of tiles shares large outer corners and small inner
+   ones; group titles and notes between runs end and start a run. */
 .sectionBody {
   /* Each regular control contributes half of the shared 20px row gap. */
   --settings-control-margin: calc(var(--settings-row-gap, 20px) / 2);
   --input-bottom-spacing: 0;
+  --settings-tile-outer-radius: var(--shape-corner-large-increased);
+  --settings-tile-inner-radius: var(--shape-corner-extra-small);
 
-  background-color: var(--settings-section-bg-color, var(--card-bg-color));
-  backdrop-filter: var(--card-bg-blur, none);
-  border-radius: var(--shape-corner-large-increased);
-  padding-block: calc(var(--settings-row-gap, 20px) / 2);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 
-  > :deep(div) {
+  > :deep(*) {
     box-sizing: border-box;
-    padding-block: 0;
-    padding-inline: 20px;
     inline-size: 100%;
+    padding-block: 8px;
+    padding-inline: 20px;
+    background-color: var(--settings-section-bg-color);
+    backdrop-filter: var(--card-bg-blur, none);
+    border-radius: var(--settings-tile-inner-radius);
   }
+
+  > :deep(:is(h3, h4, p)) {
+    padding-block: 8px 4px;
+    background: none;
+    backdrop-filter: none;
+  }
+
+  > :deep(:not(h3, h4, p):is(:first-child, :is(h3, h4, p) + *)) {
+    border-start-start-radius: var(--settings-tile-outer-radius);
+    border-start-end-radius: var(--settings-tile-outer-radius);
+  }
+
+  > :deep(:not(h3, h4, p):is(:last-child, :has(+ :is(h3, h4, p)))) {
+    border-end-start-radius: var(--settings-tile-outer-radius);
+    border-end-end-radius: var(--settings-tile-outer-radius);
+  }
+}
+
+/* The gaps space the tiles, so margins that used to separate the blocks would
+   only shrink or misalign them. Narrow layouts pad their tile instead. */
+.settingsSection > .sectionBody > :deep(*) {
+  margin: 0;
+}
+
+/* Group titles introduce the tiles below them, so they sit closer to those
+   than to the run above. */
+.settingsSection > .sectionBody > :deep(:is(h3, h4):not(:first-child)) {
+  margin-block-start: 12px;
 }
 
 /* Material 3 Expressive emphasized title: larger and heavier than the
@@ -38,13 +73,17 @@
   letter-spacing: -0.01em;
   line-height: 1.75rem;
   user-select: none;
-  margin-inline-start: 20px;
-  margin-block: 0.5em;
+  margin-inline: 20px;
+  margin-block: 0 12px;
+  text-align: center;
 }
 
-:deep(.groupTitle) {
+.sectionBody > :deep(:is(h3, h4)) {
+  color: var(--secondary-text-color);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   text-align: center;
-  margin-block: 0.5em;
 }
 
 %switch-grid {

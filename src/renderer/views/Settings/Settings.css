@@ -15,7 +15,7 @@
   display: flex;
   flex-direction: column;
   color: var(--primary-text-color);
-  background: var(--card-bg-color);
+  background: var(--settings-window-bg-color);
   background-image: var(--card-bg-image);
   background-attachment: fixed;
   backdrop-filter: var(--card-bg-blur, none);
@@ -287,6 +287,8 @@
 }
 
 .settingsSectionTabs {
+  /* The tab colors are made for cards, not the window's tint. */
+  background-color: var(--card-bg-color);
   display: grid;
   gap: 8px;
   grid-template-columns: repeat(var(--settings-section-tab-count), minmax(0, 1fr));
@@ -317,11 +319,6 @@
   min-inline-size: 0;
   max-inline-size: 100%;
   inline-size: 100%;
-}
-
-.settingsContent :deep(.sectionBody) {
-  box-sizing: border-box;
-  padding-block-start: 5px;
 }
 
 .settingsContent :deep(.settingsCategory) {
