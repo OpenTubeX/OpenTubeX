@@ -545,9 +545,10 @@
 }
 
 /* Downward drags still dock the player when fullscreen swipes are disabled.
-   Leave upward gestures to page scrolling unless another player gesture owns them. */
-.app.capacitorTabs :deep(.ftVideoPlayer:not(.scrollMiniPlayer, .mobileFullscreenSwipeEnabled, .videoZoomTouchEnabled)),
-.app.capacitorTabs :deep(.ftVideoPlayer:not(.scrollMiniPlayer, .mobileFullscreenSwipeEnabled, .videoZoomTouchEnabled) .ft-quick-playback-rate-bar) {
+   Leave upward gestures to page scrolling unless another player gesture owns
+   them. A pinned player stays put, so the page must not scroll beneath it. */
+.app.capacitorTabs :deep(.ftVideoPlayer:not(.scrollMiniPlayer, .scrollPinnedPlayer, .mobileFullscreenSwipeEnabled, .videoZoomTouchEnabled)),
+.app.capacitorTabs :deep(.ftVideoPlayer:not(.scrollMiniPlayer, .scrollPinnedPlayer, .mobileFullscreenSwipeEnabled, .videoZoomTouchEnabled) .ft-quick-playback-rate-bar) {
   touch-action: pan-x pan-down;
 }
 

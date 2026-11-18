@@ -5,7 +5,6 @@
       ambientWideLayout: theatrePossible && !useTheatreMode,
       theatreUnavailable: !theatrePossible,
       shortsPlayer,
-      scrollPinnedPlayer,
       downloadedPlayer: downloaded
     }"
   >
@@ -84,6 +83,7 @@
           !fullWindowEnabled && !scrollMiniPlayerActive,
         musicAudioPlayer: audioPlayerMode,
         scrollMiniPlayer: scrollMiniPlayerActive,
+        scrollPinnedPlayer,
         mobileMiniBar: mobileMiniBar && (scrollMiniPlayerActive || scrollMiniPlayerAnimating),
         mobileMiniBarCollapsed,
         mobileMiniBarCompact: compactMobileMiniPlayer,
@@ -5726,12 +5726,10 @@ const mobileAdjustments = createMobilePlayerAdjustments({
     }
   },
   onChange(action, value) {
-    // applyPlaybackRate already shows the multiplier OSD.
+    // applyPlaybackRate already shows the multiplier OSD. Like it, the
+    // brightness and volume OSDs show only their icon and value.
     if (action === 'speed') return
-    const label = action === 'brightness'
-      ? t('Settings.Player Settings.Swipe Gestures.Brightness')
-      : t('Settings.Player Settings.Swipe Gestures.Volume')
-    showValueChange(`${label}: ${Math.round(value * 100)}%`, action === 'brightness' ? 'sun' : 'volume-high', false, 0, false)
+    showValueChange(`${Math.round(value * 100)}%`, action === 'brightness' ? 'sun' : 'volume-high', false, 0, false)
   },
   onError(error) {
     console.error('Mobile player adjustment failed', error)

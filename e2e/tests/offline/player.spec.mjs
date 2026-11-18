@@ -2298,6 +2298,41 @@ test.describe('pinned player', () => {
     const pinnedAreaBottom = await page.locator('.videoArea').evaluate(element => element.getBoundingClientRect().bottom)
     await expect.poll(scrollbarTop).toBeCloseTo(pinnedAreaBottom, 0)
 
+    // Without the fullscreen swipe, upward drags on the pinned player must not
+    // scroll the page below it. Downward drags still dock it in JavaScript.
+    await page.locator('.app').evaluate(element => element.classList.add('capacitorTabs'))
+    await page.evaluate(async () => {
+      const store = window.$store
+      await store.dispatch('updateEnableVideoZoom', false)
+      await store.dispatch('updateEnableMobileFullscreenSwipe', false)
+    })
+    await expect(player).not.toHaveClass(/mobileFullscreenSwipeEnabled/)
+    const cdp = await page.context().newCDPSession(page)
+    await cdp.send('Emulation.setTouchEmulationEnabled', { enabled: true })
+    const swipeUp = async (x, y) => {
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] })
+      for (let i = 1; i <= 10; i++) {
+        await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x, y: y - 15 * i }] })
+      }
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+      // Let the compositor commit any scroll before reading it.
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+    }
+    try {
+      const scrollY = () => page.evaluate(() => window.scrollY)
+      const bounds = await player.boundingBox()
+      const x = bounds.x + bounds.width / 2
+      const startScrollY = await scrollY()
+      await swipeUp(x, bounds.y + bounds.height * 0.8)
+      expect(await scrollY()).toBe(startScrollY)
+      // The same swipe on the content below the player still scrolls the page.
+      await swipeUp(x, bounds.y + bounds.height + 200)
+      await expect.poll(scrollY).toBeGreaterThan(startScrollY)
+    } finally {
+      await cdp.send('Emulation.setTouchEmulationEnabled', { enabled: false })
+      await cdp.detach()
+    }
+
     // Half of this window is shorter than the player, so it docks instead.
     await setWindowSize(app, page, { width: 500, height: 420 })
     await expect(player).toHaveClass(/scrollMiniPlayer/)
