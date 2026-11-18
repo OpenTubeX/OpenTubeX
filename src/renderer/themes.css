@@ -377,6 +377,7 @@ the link underline setting instead, which underlines them on hover by default. *
   --fullscreen-dock-thumbnail-badge-bg-color: var(--thumbnail-badge-bg-color);
   --fullscreen-dock-thumbnail-badge-blur: var(--thumbnail-badge-blur);
   --fullscreen-dock-dropdown-item-hover-color: var(--dropdown-item-hover-color);
+  --fullscreen-dock-dropdown-item-hover-text-color: var(--dropdown-item-hover-text-color);
 
   .invidiousLogo {
     background-image: url('./assets/img/invidious-logo-dark.svg');

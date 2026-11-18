@@ -41,6 +41,7 @@
   --thumbnail-badge-bg-color: var(--fullscreen-dock-thumbnail-badge-bg-color, color-mix(in srgb, var(--card-bg-color) 85%, transparent));
   --thumbnail-badge-blur: var(--fullscreen-dock-thumbnail-badge-blur, none);
   --dropdown-item-hover-color: var(--fullscreen-dock-dropdown-item-hover-color, var(--scrollbar-color-hover));
+  --dropdown-item-hover-text-color: var(--fullscreen-dock-dropdown-item-hover-text-color, var(--primary-text-color));
 
   /* No theme overrides these, so they need no --fullscreen-dock-* value. */
   --selected-container-color: color-mix(in srgb, oklch(from var(--primary-color) var(--tint-lightness) c h) 24%, var(--card-bg-color));
