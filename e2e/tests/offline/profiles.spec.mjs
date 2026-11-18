@@ -110,7 +110,7 @@ for (const iconPack of ['material']) {
 
     test('new profiles use the default icon until named and retain manually chosen icons', async ({ app, page }, testInfo) => {
       await openProfileList(page)
-      await page.locator('.profilePanelHeader button').last().click()
+      await page.locator('.profilePanelHeader').getByRole('button', { name: 'Profile', exact: true }).click()
       const createOption = page.locator('.profileSettingsContent .profileList').getByRole('button', { name: 'Create New Profile', exact: true })
       await expect(createOption.locator('[data-icon="user-plus"]')).toHaveAttribute('data-icon-pack', iconPack)
       await expect(createOption.locator('[data-icon="user-plus"]')).toHaveAttribute('aria-hidden', 'true')
@@ -401,7 +401,7 @@ test.describe('separate profile following a shared channel', () => {
 
   test('keeps the channel when All Channels removes it', async ({ app, page }) => {
     await openProfileList(page)
-    await page.locator('.profilePanelHeader button').last().click()
+    await page.locator('.profilePanelHeader').getByRole('button', { name: 'Profile', exact: true }).click()
     await page.locator('.profileSettingsContent .profileList').getByText('All Channels').click()
     await page.getByRole('tab', { name: 'Manage profile subscriptions', exact: true }).click()
     await page.locator('.selectionActions').getByRole('button', { name: 'Select All', exact: true }).click()
@@ -444,7 +444,7 @@ test.describe('profile manager presentation', () => {
 
   test('spaces wrapped profile buttons and stacked editor sections on narrow layouts', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
     await openProfileList(page)
-    await page.locator('.profilePanelHeader button').last().click()
+    await page.locator('.profilePanelHeader').getByRole('button', { name: 'Profile', exact: true }).click()
     await page.locator('.profileSettingsContent .profileList').getByText('Second profile').click()
     await resizeToCssWidth(app, page, 350, uiScale)
     const actions = page.locator('.profileActions')
@@ -486,7 +486,7 @@ test.describe('profile manager presentation', () => {
 
   test('switches profile tabs without losing draft customization across layouts', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
     await openProfileList(page)
-    await page.locator('.profilePanelHeader button').last().click()
+    await page.locator('.profilePanelHeader').getByRole('button', { name: 'Profile', exact: true }).click()
     await page.locator('.profileSettingsContent .profileList').getByText('Second profile').click()
     const customization = page.getByRole('tab', { name: 'Customization', exact: true })
     const subscriptions = page.getByRole('tab', { name: 'Manage profile subscriptions', exact: true })
@@ -583,7 +583,7 @@ test.describe('profile manager presentation', () => {
 
   test('keeps the profile filter scroll range valid after emptying subscriptions', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
     await openProfileList(page)
-    await page.locator('.profilePanelHeader button').last().click()
+    await page.locator('.profilePanelHeader').getByRole('button', { name: 'Profile', exact: true }).click()
     await page.locator('.profileSettingsContent .profileList').getByText('Second profile').click()
     await page.getByRole('tab', { name: 'Manage profile subscriptions', exact: true }).click()
     await setWindowSize(app, page, { width: Math.round(400 * uiScale / 100), height: Math.round(700 * uiScale / 100) })
@@ -619,7 +619,7 @@ test.describe('profile manager presentation', () => {
 
   test('disables subscription selection actions when they do not apply', async ({ page }) => {
     await openProfileList(page)
-    await page.locator('.profilePanelHeader button').last().click()
+    await page.locator('.profilePanelHeader').getByRole('button', { name: 'Profile', exact: true }).click()
     await page.locator('.profileSettingsContent .profileList').getByText('All Channels').click()
     await page.getByRole('tab', { name: 'Manage profile subscriptions', exact: true }).click()
     const actions = page.locator('.selectionActions')
@@ -676,7 +676,7 @@ test.describe('profile manager', () => {
     for (const scale of [1, 1.25]) {
       test(`resets profile tab scrolling after switching from the bottom at ${scale} scale`, async ({ app, page }) => {
         await openProfileList(page)
-        await page.locator('.profilePanelHeader button').last().click()
+        await page.locator('.profilePanelHeader').getByRole('button', { name: 'Profile', exact: true }).click()
         await page.locator('.card .profileList').getByText('Second profile').click()
         await page.evaluate(scale => window.ftElectron.setZoomFactor(scale), scale)
         await setWindowSize(app, page, { width: Math.round(375 * scale), height: Math.round(700 * scale) })
@@ -705,7 +705,7 @@ test.describe('profile manager', () => {
 
     test('clamps the scroll position after deleting an open profile', async ({ page }) => {
       await openProfileList(page)
-      await page.locator('.profilePanelHeader button').last().click()
+      await page.locator('.profilePanelHeader').getByRole('button', { name: 'Profile', exact: true }).click()
       await page.locator('.card .profileList').getByText('Second profile').click()
 
       const scroller = page.locator('.settingsSubpageScroll')
@@ -728,7 +728,7 @@ test.describe('profile manager', () => {
 
     test('clamps the scroll positions after searching and deleting from the bottom', { tag: '@scale' }, async ({ page }) => {
       await openProfileList(page)
-      await page.locator('.profilePanelHeader button').last().click()
+      await page.locator('.profilePanelHeader').getByRole('button', { name: 'Profile', exact: true }).click()
       await page.locator('.card .profileList').getByText('Second profile').click()
       await page.getByRole('tab', { name: 'Manage profile subscriptions', exact: true }).click()
 
@@ -807,7 +807,7 @@ test.describe('profile manager', () => {
 
     test('pages channel lists and still selects and adds every channel', async ({ app, page }) => {
       await openProfileList(page)
-      await page.locator('.profilePanelHeader button').last().click()
+      await page.locator('.profilePanelHeader').getByRole('button', { name: 'Profile', exact: true }).click()
       await page.locator('.card .profileList').getByText('Second profile').click()
       await page.getByRole('tab', { name: 'Manage profile subscriptions', exact: true }).click()
 
@@ -855,7 +855,7 @@ test.describe('profile manager', () => {
 
   test('a profile can be created through the UI and persists', async ({ app, page }) => {
     await openProfileList(page)
-    await page.locator('.profilePanelHeader button').last().click()
+    await page.locator('.profilePanelHeader').getByRole('button', { name: 'Profile', exact: true }).click()
     await expect(page.locator('.settingsWindow')).toBeVisible()
     await expect(page.locator('.settingsBreadcrumb')).toContainText('Profile Manager')
 
@@ -892,7 +892,7 @@ test.describe('profile manager', () => {
 
     test('keeps a keyboard-selected swatch when the custom picker was open', async ({ app, page }) => {
       await openProfileList(page)
-      await page.locator('.profilePanelHeader button').last().click()
+      await page.locator('.profilePanelHeader').getByRole('button', { name: 'Profile', exact: true }).click()
       await page.locator('.card .profileList').getByText('All Channels').click()
       await page.locator('.themeColorOption').click()
       await page.locator('.profileColorPicker .colorFieldTrigger').click()
@@ -914,7 +914,7 @@ test.describe('profile manager', () => {
 
     test('follows the theme color when the theme color option is picked', async ({ app, page }) => {
       await openProfileList(page)
-      await page.locator('.profilePanelHeader button').last().click()
+      await page.locator('.profilePanelHeader').getByRole('button', { name: 'Profile', exact: true }).click()
       await page.locator('.card .profileList').getByText('All Channels').click()
 
       await page.locator('.themeColorOption').click()
@@ -976,7 +976,7 @@ test.describe('profile manager', () => {
 
     test('preserves the theme color when cancelling picker changes', async ({ app, page }) => {
       await openProfileList(page)
-      await page.locator('.profilePanelHeader button').last().click()
+      await page.locator('.profilePanelHeader').getByRole('button', { name: 'Profile', exact: true }).click()
       await page.locator('.card .profileList').getByText('All Channels').click()
       await page.locator('.themeColorOption').click()
 
@@ -1001,7 +1001,7 @@ test.describe('profile manager', () => {
 
   test('applies opaque black to an image profile that was transparent', async ({ app, page }) => {
     await openProfileList(page)
-    await page.locator('.profilePanelHeader button').last().click()
+    await page.locator('.profilePanelHeader').getByRole('button', { name: 'Profile', exact: true }).click()
     await page.locator('.card .profileList').getByText('All Channels').click()
 
     await page.locator('.imageInput').setInputFiles({
@@ -1028,7 +1028,7 @@ test.describe('profile manager', () => {
 
   test('customizes a profile icon with a cropped SVG or emoji', async ({ app, page }) => {
     await openProfileList(page)
-    await page.locator('.profilePanelHeader button').last().click()
+    await page.locator('.profilePanelHeader').getByRole('button', { name: 'Profile', exact: true }).click()
     await page.locator('.card .profileList').getByText('All Channels').click()
 
     const makeDefaultButton = page.getByRole('button', { name: 'Make Default Profile' })
