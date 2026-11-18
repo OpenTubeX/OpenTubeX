@@ -818,6 +818,7 @@ async function removeSubscriptionsAndProfiles() {
     return
   }
   await store.dispatch('updateActiveProfile', MAIN_PROFILE_ID)
+  const sharedChannelIds = profileList.value[0].subscriptions.map(channel => channel.id)
   const cleanupResults = await Promise.all(profileList.value.filter(profile => profile.separate !== true).map(profile => {
     if (profile._id === MAIN_PROFILE_ID) {
       return store.dispatch('updateProfile', { ...profile, subscriptions: [] })
@@ -825,7 +826,13 @@ async function removeSubscriptionsAndProfiles() {
     return store.dispatch('removeProfile', profile._id)
   }))
   await requireCleanupSuccess(cleanupResults.every(Boolean))
-  await requireCleanupSuccess(store.dispatch('clearSubscriptionsCache'))
+  if (!profileList.value.some(profile => profile.separate === true)) {
+    await requireCleanupSuccess(store.dispatch('clearSubscriptionsCache'))
+    return
+  }
+  // Separate profiles keep the cached feeds of channels they follow too.
+  const followedElsewhere = new Set(store.getters.getAllRootSubscriptions.map(channel => channel.id))
+  await store.dispatch('clearSubscriptionsCacheForManyChannels', sharedChannelIds.filter(id => !followedElsewhere.has(id)))
 }
 
 function updateEnableVideoMetadataCache(value) {
