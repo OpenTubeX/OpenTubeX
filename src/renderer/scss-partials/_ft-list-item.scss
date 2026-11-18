@@ -56,15 +56,20 @@ $grid-mode-grab-bar-padding: 1em;
   }
 }
 
-// Video cards from YouTube and other platforms outline their thumbnail on hover
-// and keep the channel on its own line above the views and date.
-@mixin video-card {
+// Video, playlist, and channel cards outline their thumbnail on hover.
+@mixin thumbnail-hover-outline($selector: '.thumbnailLink:hover') {
   // Touch screens would keep it on the last tapped thumbnail
   @media (hover: hover) {
-    .thumbnailLink:hover {
+    #{$selector} {
       outline: 3px solid var(--side-nav-hover-color);
     }
   }
+}
+
+// Video cards from YouTube and other platforms also keep the channel on its own
+// line above the views and date.
+@mixin video-card {
+  @include thumbnail-hover-outline;
 
   .ft-list-video .info .infoLine {
     align-items: flex-start;

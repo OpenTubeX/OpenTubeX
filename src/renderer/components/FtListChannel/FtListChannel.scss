@@ -1,5 +1,8 @@
 @use '../../scss-partials/ft-list-item';
 
+// The link spans the card's width, so outline the image itself.
+@include ft-list-item.thumbnail-hover-outline('.channelThumbnailLink:hover :is(.channelImage, .gameImage)');
+
 .infoAndSubscribe {
   display: flex;
   flex-flow: row wrap;
