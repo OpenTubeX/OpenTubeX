@@ -186,3 +186,23 @@ test('a profile switch waits for running writes, so their later requests stay in
     setDataScope(null)
   }
 })
+
+test('other devices apply a separate profile’s shared deletions only to that profile’s lists', async () => {
+  const { toSharedSyncDeletionMarks, fromSharedSyncDeletionMarks } = await import('../../src/renderer/helpers/sync-data-scope.js')
+  const made = [{ key: 'history', at: 1, ids: ['a'] }, { key: 'separateProfiles', at: 1, ids: ['old'] }]
+  const shared = [
+    ...toSharedSyncDeletionMarks(made, 'separate'),
+    { key: 'history', at: 1, ids: ['b'] },
+    { key: '["other","history"]', at: 1, ids: ['c'] },
+    { key: '[broken', at: 1, ids: ['d'] },
+  ]
+
+  assert.deepEqual(fromSharedSyncDeletionMarks(shared, 'separate'), [
+    { key: 'history', at: 1, ids: ['a'] },
+    { key: 'separateProfiles', at: 1, ids: ['old'] },
+  ])
+  assert.deepEqual(fromSharedSyncDeletionMarks(shared, null), [
+    { key: 'separateProfiles', at: 1, ids: ['old'] },
+    { key: 'history', at: 1, ids: ['b'] },
+  ])
+})
