@@ -31,12 +31,6 @@
               <FtIcon :icon="settingsSection.icon" />
             </span>
             <span class="titleText">{{ settingsSection.title }}</span>
-            <small
-              v-if="settingsSection.description && !hideSettingsCategoryDescriptions"
-              class="titleDescription"
-            >
-              {{ settingsSection.description }}
-            </small>
           </div>
         </div>
       </button>

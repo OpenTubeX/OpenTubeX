@@ -181,7 +181,7 @@ test.describe('selected tab label contrast', () => {
     expect(failures).toEqual([])
   })
 
-  test('selected settings categories keep their title and description readable in every theme and accent', async ({ page }) => {
+  test('selected settings categories keep their title readable in every theme and accent', async ({ page }) => {
     test.slow()
     const combos = tintedSelectionCombos()
     await goToSettingsSection(page, 'theme')
@@ -212,9 +212,7 @@ test.describe('selected tab label contrast', () => {
           await new Promise(resolve => setTimeout(resolve))
           document.getAnimations().forEach(animation => animation.effect?.getComputedTiming().endTime !== Infinity && animation.finish())
           const background = paint(layers.map(node => getComputedStyle(node).backgroundColor))
-          for (const part of ['titleText', 'titleDescription']) {
-            results.push({ theme, color, part, foreground: paint([getComputedStyle(category.querySelector(`.${part}`)).color]), background })
-          }
+          results.push({ theme, color, part: 'titleText', foreground: paint([getComputedStyle(category.querySelector('.titleText')).color]), background })
         }
         return results
       }, combos)

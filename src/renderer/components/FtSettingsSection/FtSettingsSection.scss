@@ -12,55 +12,41 @@
   padding: 1px;
 }
 
-/* Material 3 Expressive segmented list: every block of controls is its own
-   tile, 2px apart. A run of tiles shares large outer corners and small inner
-   ones; group titles and notes between runs end and start a run. */
+/* Each section is one card. Its blocks of controls share the card and are
+   spaced by gaps; group titles and notes sit between them. */
 .sectionBody {
   /* Each regular control contributes half of the shared 20px row gap. */
   --settings-control-margin: calc(var(--settings-row-gap, 20px) / 2);
   --input-bottom-spacing: 0;
-  --settings-tile-outer-radius: var(--shape-corner-large-increased);
-  --settings-tile-inner-radius: var(--shape-corner-extra-small);
 
   display: flex;
   flex-direction: column;
   gap: 2px;
+  padding-block: 8px;
+  background-color: var(--settings-section-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
+  border-radius: var(--shape-corner-large-increased);
 
   > :deep(*) {
     box-sizing: border-box;
     inline-size: 100%;
     padding-block: 8px;
     padding-inline: 20px;
-    background-color: var(--settings-section-bg-color);
-    backdrop-filter: var(--card-bg-blur, none);
-    border-radius: var(--settings-tile-inner-radius);
   }
 
   > :deep(:is(h3, h4, p)) {
     padding-block: 8px 4px;
-    background: none;
-    backdrop-filter: none;
-  }
-
-  > :deep(:not(h3, h4, p):is(:first-child, :is(h3, h4, p) + *)) {
-    border-start-start-radius: var(--settings-tile-outer-radius);
-    border-start-end-radius: var(--settings-tile-outer-radius);
-  }
-
-  > :deep(:not(h3, h4, p):is(:last-child, :has(+ :is(h3, h4, p)))) {
-    border-end-start-radius: var(--settings-tile-outer-radius);
-    border-end-end-radius: var(--settings-tile-outer-radius);
   }
 }
 
-/* The gaps space the tiles, so margins that used to separate the blocks would
-   only shrink or misalign them. Narrow layouts pad their tile instead. */
+/* The gaps space the blocks, so margins that used to separate them would
+   only shrink or misalign them. Narrow layouts pad their block instead. */
 .settingsSection > .sectionBody > :deep(*) {
   margin: 0;
 }
 
-/* Group titles introduce the tiles below them, so they sit closer to those
-   than to the run above. */
+/* Group titles introduce the blocks below them, so they sit closer to those
+   than to the blocks above. */
 .settingsSection > .sectionBody > :deep(:is(h3, h4):not(:first-child)) {
   margin-block-start: 12px;
 }
@@ -108,6 +94,20 @@
 
   @container settings-content (width <= 680px) {
     justify-items: center;
+  }
+}
+
+/* Switches stack in two independent columns, so a label that wraps only
+   lengthens its own column instead of leaving a gap beside it. */
+@container settings-content (width > 680px) {
+  :deep(.switchColumnGrid.switchFlowGrid) {
+    display: block;
+    columns: 2;
+    column-gap: 0;
+  }
+
+  :deep(.switchColumnGrid.switchFlowGrid > *) {
+    break-inside: avoid;
   }
 }
 
