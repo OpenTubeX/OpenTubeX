@@ -29,6 +29,8 @@ import { historyChanges } from '../helpers/sync-history-changes.js'
 import { trackLocalSyncDeletions } from '../helpers/sync-deletions.js'
 import { MAIN_PROFILE_ID } from '../../constants'
 import { scopedActions } from '../helpers/dataScopeActions'
+import { getDataScope } from '../../datastores/handlers/dataScope.js'
+import { dataScopeLoading } from '../helpers/sync-data-scope.js'
 
 function syncOnLocalChanges(store) {
   const revisions = new Map()
@@ -113,6 +115,7 @@ function reloadRecommendationEvidenceAfterHistoryRemoval(store) {
 const confirmLocalSyncDeletions = trackLocalSyncDeletions({
   isRemoteDispatch: isRemoteSyncDispatch,
   mainProfileId: MAIN_PROFILE_ID,
+  dataScope: () => dataScopeLoading() ? undefined : getDataScope(),
 })
 
 // These show the data of the active data scope, see `scopedActions`.

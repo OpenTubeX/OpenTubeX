@@ -217,16 +217,14 @@ export const SYNC_DELETION_ACTIONS = new Map([
  * @param {any} state The root store state
  * @param {'history' | 'playlists' | 'playlistBookmarks' | 'profiles'} family
  * @param {string} mainProfileId
+ * @param {string | null} [dataScope] The separate profile whose history and playlists the store holds, or null for the shared ones
  * @returns {Map<string, Set<string>>} IDs by {@link syncDeletionListKey}
  */
-export function syncedIdLists(state, family, mainProfileId) {
+export function syncedIdLists(state, family, mainProfileId, dataScope = null) {
   // Scanning through reactive proxies costs several times more on large libraries.
   state = toRaw(state)
   /** @type {Map<string, Set<string>>} */
   const lists = new Map()
-  // The store holds the history and playlists of the active profile's data.
-  const activeProfile = state.profiles?.profileList?.find(profile => profile._id === state.profiles.activeProfile)
-  const dataScope = activeProfile?.separate === true ? activeProfile._id : null
   switch (family) {
     case 'history':
       lists.set(
@@ -298,11 +296,13 @@ export function confirmRemovedSyncIds(before, after, decisions = syncDeletions) 
  * @param {object} options
  * @param {() => boolean} options.isRemoteDispatch Whether the action comes from sync
  * @param {string} options.mainProfileId
+ * @param {() => string | null | undefined} [options.dataScope] The separate profile whose history and
+ *   playlists the store holds, null for the shared ones, or undefined while a profile switch loads them
  * @param {ReturnType<typeof createSyncDeletionDecisions>} [options.decisions]
  */
-export function trackLocalSyncDeletions({ isRemoteDispatch, mainProfileId, decisions = syncDeletions }) {
+export function trackLocalSyncDeletions({ isRemoteDispatch, mainProfileId, dataScope = () => null, decisions = syncDeletions }) {
   return store => {
-    /** @type {WeakMap<object, { family: Parameters<typeof syncedIdLists>[1], lists: Map<string, Set<string>> }>} */
+    /** @type {WeakMap<object, { family: Parameters<typeof syncedIdLists>[1], scope: string | null, lists: Map<string, Set<string>> }>} */
     const before = new WeakMap()
     store.subscribeAction({
       before: action => {
@@ -310,13 +310,20 @@ export function trackLocalSyncDeletions({ isRemoteDispatch, mainProfileId, decis
         // Comparing the lists costs a scan of them, which only sync needs.
         const settings = store.state.settings
         if (family && settings?.syncServerEnabled && settings.syncServerToken && !isRemoteDispatch()) {
-          before.set(action, { family, lists: syncedIdLists(store.state, family, mainProfileId) })
+          const scope = dataScope()
+          // While a profile switch loads, the store may hold either profile's data.
+          if (scope === undefined) return
+          before.set(action, { family, scope, lists: syncedIdLists(store.state, family, mainProfileId, scope) })
         }
       },
       after: action => {
         const pending = before.get(action)
         if (!pending) return
-        confirmRemovedSyncIds(pending.lists, syncedIdLists(store.state, pending.family, mainProfileId), decisions)
+        // After a profile switch, the store holds another profile's data. Its
+        // lists would look like the removal of everything the action started
+        // with, so sync asks about this action's deletions instead.
+        if (dataScope() !== pending.scope) return
+        confirmRemovedSyncIds(pending.lists, syncedIdLists(store.state, pending.family, mainProfileId, pending.scope), decisions)
       },
     })
   }
