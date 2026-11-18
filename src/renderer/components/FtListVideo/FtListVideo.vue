@@ -76,7 +76,7 @@
           @click.capture="handleWatchPageLinkClick"
           @auxclick="handleWatchPageLinkClick"
           @pointerenter="startThumbnailPreview"
-          @pointerleave="stopThumbnailPreview"
+          @pointerleave="stopThumbnailPreviewOnLeave"
         >
           <FtRetryImage
             :src="thumbnail"
@@ -141,24 +141,41 @@
           />
           {{ displayDurationLabel === '0:00' ? '' : displayDurationLabel }}
         </div>
-        <!-- Watch playlist and queue thumbnails only fit the icon, so it opens the -->
-        <!-- category in a prompt for touch and keyboard users. -->
-        <!-- Watch page shortcuts must not take Space and Enter from it. A middle -->
-        <!-- mousedown would start autoscroll, which swallows the next key press. -->
-        <component
-          :is="sponsorBlockLabelOpensPrompt ? 'button' : 'div'"
-          v-if="useSponsorBlock && sponsorBlockFullVideoCategory"
-          class="sponsorBlockVideoLabel"
-          :type="sponsorBlockLabelOpensPrompt ? 'button' : null"
-          :aria-haspopup="sponsorBlockLabelOpensPrompt ? 'dialog' : null"
-          :title="sponsorBlockFullVideoTitle"
-          @click="sponsorBlockLabelOpensPrompt && (sponsorBlockPromptOpen = true)"
-          @keydown.space.enter.stop
-          @mousedown.middle.prevent
-        >
-          <FtIcon :icon="sponsorBlockFullVideoIcon" />
-          <span>{{ sponsorBlockFullVideoLabel }}</span>
-        </component>
+        <template v-if="useSponsorBlock && sponsorBlockFullVideoCategory">
+          <!-- Watch playlist and queue thumbnails only fit the icon, so it opens the -->
+          <!-- category in a prompt for touch and keyboard users. -->
+          <!-- Watch page shortcuts must not take Space and Enter from it. A middle -->
+          <!-- mousedown would start autoscroll, which swallows the next key press. -->
+          <button
+            v-if="sponsorBlockLabelOpensPrompt"
+            class="sponsorBlockVideoLabel"
+            type="button"
+            aria-haspopup="dialog"
+            :title="sponsorBlockFullVideoTitle"
+            @click="sponsorBlockPromptOpen = true"
+            @keydown.space.enter.stop
+            @mousedown.middle.prevent
+          >
+            <FtIcon :icon="sponsorBlockFullVideoIcon" />
+            <span>{{ sponsorBlockFullVideoLabel }}</span>
+          </button>
+          <!-- Elsewhere the label can be truncated, so it takes the pointer to -->
+          <!-- show the full category in its tooltip and acts as part of the thumbnail. -->
+          <RouterLink
+            v-else
+            class="sponsorBlockVideoLabel"
+            tabindex="-1"
+            :to="watchVideoRouterLink"
+            :title="sponsorBlockFullVideoTitle"
+            @click.capture="handleWatchPageLinkClick"
+            @auxclick="handleWatchPageLinkClick"
+            @pointerenter="startThumbnailPreview"
+            @pointerleave="stopThumbnailPreviewOnLeave"
+          >
+            <FtIcon :icon="sponsorBlockFullVideoIcon" />
+            <span>{{ sponsorBlockFullVideoLabel }}</span>
+          </RouterLink>
+        </template>
         <FtIconButton
           v-if="externalPlayer !== '' && !externalPlayerIsDefaultViewingMode"
           :title="t('Video.External Player.OpenInTemplate', { externalPlayer })"
@@ -986,6 +1003,21 @@ function startThumbnailPreview() {
 function stopThumbnailPreview() {
   clearThumbnailPreviewTimer()
   thumbnailPreviewActive.value = false
+}
+
+/**
+ * Keeps the preview running while the pointer moves between the thumbnail and
+ * the SponsorBlock label on top of it, which links to the same video.
+ * @param {PointerEvent} event
+ */
+function stopThumbnailPreviewOnLeave(event) {
+  const target = event.relatedTarget instanceof Element
+    ? event.relatedTarget.closest('.thumbnailLink, .sponsorBlockVideoLabel')
+    : null
+  if (target !== null && target !== event.currentTarget && target.parentElement === event.currentTarget.parentElement) {
+    return
+  }
+  stopThumbnailPreview()
 }
 
 function resetThumbnailPreview() {
