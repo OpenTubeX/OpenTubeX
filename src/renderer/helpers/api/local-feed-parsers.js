@@ -278,7 +278,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
    */
   function parseLocalChannelCollaborations(videos, channelId) {
     const videoIds = new Set()
-    return parseLocalChannelVideos(videos.filter(video => video.is(YTNodes.LockupView)), channelId, undefined)
+    return parseLocalChannelVideos(videos.filter(video => video.is(YTNodes.Video, YTNodes.LockupView)), channelId, undefined)
       .flatMap(video => {
         // The uploader comes first in the collaborator list
         const uploaderId = video.collaborators?.[0]?.id

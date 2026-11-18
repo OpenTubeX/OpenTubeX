@@ -578,9 +578,9 @@ function getChannelUploads(channelId) {
 }
 
 /**
- * With Faster Subscription Refresh, returns the cached entries when they can
- * be kept because the channel's upload feed lists nothing new for them,
- * otherwise null. A failed check
+ * With Faster Subscription Refresh, returns the cache entry (entries and
+ * timestamp) when it can be kept because the channel's upload feed lists
+ * nothing new for it, otherwise null. A failed check
  * falls through to the full fetch, which handles the errors.
  * @param {'videos' | 'shorts' | 'live'} feed
  * @param {string} channelId
@@ -606,7 +606,7 @@ async function getUnchangedSubscriptionFeed(feed, channelId, backend) {
     .map(video => video.videoId))
   return canKeepSubscriptionFeedWithoutNewUploads(cacheEntry, Date.now()) &&
     hasNoNewSubscriptionUploads(feed, cacheEntry, uploads, knownVideoIds)
-    ? cacheEntry.videos
+    ? cacheEntry
     : null
 }
 
@@ -646,8 +646,8 @@ async function getSubscriptionCollaborations(channelId) {
  * @returns {Promise<boolean>} Whether the cached feed was kept
  */
 async function keepUnchangedSubscriptionFeed(feed, channel, backend, t) {
-  const videos = await getUnchangedSubscriptionFeed(feed, channel.id, backend)
-  if (videos === null) return false
+  const videos = (await getUnchangedSubscriptionFeed(feed, channel.id, backend))?.videos
+  if (videos == null) return false
   await startAutomaticDownloadsForChannel(channel, videos, feed, t, electronRefreshOwnerTabId)
   reportSubscriptionUploads(channel.id, feed, videos)
   return true
@@ -1172,7 +1172,7 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
     const fetchChannel = async (channel, backend = store.getters.getBackendPreference) => {
       const loadCollaborations = includesSubscriptionCollaborations(backend)
       // Collaborations are not in the channel's upload feed, so they still need loading
-      const unchangedVideos = loadCollaborations ? await getUnchangedSubscriptionFeed('videos', channel.id, backend) : null
+      const unchangedCache = loadCollaborations ? await getUnchangedSubscriptionFeed('videos', channel.id, backend) : null
       if (!loadCollaborations && await keepUnchangedSubscriptionFeed('videos', channel, backend, t)) {
         channelCount++
         setSubscriptionRefreshProgress((channelCount / subscriptionList.length) * 100)
@@ -1181,8 +1181,8 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
 
       let videos, name, thumbnailUrl, handle
 
-      if (unchangedVideos !== null) {
-        videos = unchangedVideos.filter(video => video.isCollaboration !== true)
+      if (unchangedCache !== null) {
+        videos = unchangedCache.videos.filter(video => video.isCollaboration !== true)
       } else if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backend)) {
         if (useRss && hasInvidiousRssFeeds()) {
           ({ videos, name, thumbnailUrl, handle } = await getChannelVideosInvidiousRSS(channel, t))
@@ -1225,8 +1225,9 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
           channelId: channel.id,
           videos,
           collaborationsFetched: collaborations !== null,
-          // Unchanged feeds still need their full fetch once they are old enough
-          ...(unchangedVideos !== null && previousCache ? { timestamp: previousCache.timestamp } : {})
+          // Unchanged feeds still need their full fetch once they are old enough.
+          // The snapshot's timestamp makes the write lose to any newer one.
+          ...(unchangedCache !== null ? { timestamp: unchangedCache.timestamp } : {})
         })
         await startAutomaticDownloadsForChannel(channel, videos, 'videos', t, electronRefreshOwnerTabId)
         reportSubscriptionUploads(channel.id, 'videos', videos)

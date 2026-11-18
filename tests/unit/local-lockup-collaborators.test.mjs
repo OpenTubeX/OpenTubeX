@@ -37,3 +37,20 @@ test('a channel\'s Home tab lists the collaborations another channel uploaded', 
   assert.deepEqual(parseLocalChannelCollaborations([lockup()], 'UC-sample-channel-one'), [])
   assert.deepEqual(parseLocalChannelCollaborations([lockup()], 'UC-unrelated-channel'), [])
 })
+
+test('classic video results on the Home tab also count as collaborations', () => {
+  const dialogCommand = fixture.metadata.lockupMetadataViewModel.image.avatarStackViewModel.rendererContext.commandContext
+    .onTap.innertubeCommand
+  const video = new YTNodes.Video({
+    videoId: 'sample-video',
+    title: { runs: [{ text: 'Sample video' }] },
+    ownerText: { runs: [{ text: 'Channel One and Channel Two', navigationEndpoint: dialogCommand }] },
+    publishedTimeText: { simpleText: '1 day ago' },
+    lengthText: { simpleText: '1:00' },
+    viewCountText: { simpleText: '5 views' }
+  })
+
+  const [collaboration] = parseLocalChannelCollaborations([video], 'UC-sample-channel-two')
+  assert.equal(collaboration?.authorId, 'UC-sample-channel-one')
+  assert.equal(collaboration.isCollaboration, true)
+})
