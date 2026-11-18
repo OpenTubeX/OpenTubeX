@@ -382,3 +382,22 @@ export function applyRssPremiereVerdict(video, upcomingInfo) {
 
   return enrichedVideo
 }
+
+/**
+ * Collaborations come from an extra request that only foreground video
+ * refreshes make, so other cache writes keep the cached ones. Without the
+ * setting, they are dropped.
+ * @param {object[]} videos
+ * @param {object[] | null | undefined} previousVideos
+ * @param {boolean} includeCollaborations
+ */
+export function keepCachedSubscriptionCollaborations(videos, previousVideos, includeCollaborations) {
+  const hasCollaborations = videos.some(video => video.isCollaboration === true)
+  if (!includeCollaborations) {
+    return hasCollaborations ? videos.filter(video => video.isCollaboration !== true) : videos
+  }
+  if (hasCollaborations || !previousVideos?.some(video => video.isCollaboration === true)) return videos
+
+  const videoIds = new Set(videos.map(video => video.videoId))
+  return videos.concat(previousVideos.filter(video => video.isCollaboration === true && !videoIds.has(video.videoId)))
+}

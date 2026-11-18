@@ -1302,6 +1302,7 @@ Settings:
     Notify About New Uploads: Tilkynna um nýtt efni
     RSS Feeds Auto Refresh Interval: Bil milli sjálfvirkra uppfærslna RSS-strauma
     Faster Subscription Refresh: "Hraðari uppfærsla áskrifta"
+    Show Collaborations From Other Channels: "Taka með samstarf sem aðrar rásir hlóðu upp"
     Platforms:
       Other Platforms: Aðrir vettvangar
       Manage Channels: Sýsla með rásir sem þú fylgir
@@ -2455,6 +2456,7 @@ Tooltips:
     Notify About New Uploads: Birtir kerfistilkynningar á þessu tæki fyrir rásir sem þú hefur kveikt á tilkynningum fyrir í áskriftarstillingum þeirra. OpenTubeX athugar hvort nýtt efni sé komið þegar áskriftir eru uppfærðar, svo veldu bil milli sjálfvirkra uppfærslna. Til að fá tilkynningar þegar forritið er lokað skaltu einnig virkja uppfærslu þegar forritið er lokað.
     RSS Feeds Auto Refresh Interval: Hversu oft OpenTubeX uppfærir RSS-straumana þína sjálfvirkt á meðan forritið er opið.
     Faster Subscription Refresh: "Athugar fyrst RSS-straum hverrar rásar og hleður aðeins myndskeiðum, Shorts og beinum útsendingum frá rásum með nýjum upphleðslum. Sjálfvirkar uppfærslur sleppa einnig rásum sem hlaðið var á síðustu 10 mínútum. Fyrir rásir án nýrra upphleðslna uppfærast áhorfstölur, fjarlægð myndskeið og breyttir titlar aðeins á nokkurra klukkustunda fresti, og nýjar upphleðslur geta birst síðar þegar RSS-straumurinn er á eftir. Ekki í boði með Invidious API."
+    Show Collaborations From Other Channels: "Sýnir einnig myndskeið sem rásir sem þú ert áskrifandi að gerðu ásamt annarri rás sem hlóð þeim upp. YouTube sýnir þau aðeins á Heim-flipa rásar, svo hver uppfærsla myndskeiða hleður einni síðu meira fyrir hverja rás. Aðeins nýjasta samstarfið sem sýnt er þar finnst, sumar rásir sýna ekkert og útgáfudagsetningar eru áætlaðar. Ekki í boði með Invidious API."
     Platforms Auto Refresh Interval: Hversu oft OpenTubeX uppfærir rásirnar sem þú fylgir á öðrum vettvöngum sjálfvirkt á meðan forritið er opið.
     Twitch Notify When Live: Lætur þig vita þegar ein af Twitch-rásunum sem þú fylgir hefur útsendingu. OpenTubeX athugar á nokkurra mínútna fresti á meðan það er opið, og líka á meðan það er lokað ef það uppfærir áskriftir þá.
   Theme Settings:

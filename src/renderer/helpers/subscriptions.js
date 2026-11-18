@@ -24,6 +24,7 @@ import {
   getLocalChannel,
   getLocalChannelCommunity,
   getLocalChannelLiveStreams,
+  getLocalChannelCollaborations,
   getLocalChannelVideos,
   getLocalPlaylist,
   localApiFetch,
@@ -610,6 +611,34 @@ async function getUnchangedSubscriptionFeed(feed, channelId, backend) {
 }
 
 /**
+ * Whether video refreshes also load the collaborations that other channels
+ * uploaded, which needs an extra request for each channel's Home tab.
+ * @param {string} backend
+ */
+function includesSubscriptionCollaborations(backend) {
+  return store.getters.getIncludeSubscriptionCollaborations === true &&
+    !!process.env.SUPPORTS_LOCAL_API && !usesInvidiousApi(backend)
+}
+
+/**
+ * Adds the collaborations listed on the channel's Home tab. Without them, the
+ * cache write keeps the previously loaded ones.
+ * @param {string} channelId
+ * @param {Record<string, any>[]} videos
+ */
+async function addSubscriptionCollaborations(channelId, videos) {
+  let collaborations
+  try {
+    collaborations = await getLocalChannelCollaborations(channelId, activeRefresh?.controller.signal)
+  } catch (error) {
+    if (!activeRefresh?.controller.signal.aborted) console.warn(`Failed to load the collaborations of ${channelId}:`, error)
+    return videos
+  }
+  const videoIds = new Set(videos.map(video => video.videoId))
+  return videos.concat(collaborations.filter(video => !videoIds.has(video.videoId)))
+}
+
+/**
  * Keeps the cached feed of a channel without new uploads. Automatic downloads
  * and upload notifications still see it, so failed downloads are retried and
  * newly enabled notifications get their baseline as after a full fetch.
@@ -1144,7 +1173,10 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
 
   try {
     const fetchChannel = async (channel, backend = store.getters.getBackendPreference) => {
-      if (await keepUnchangedSubscriptionFeed('videos', channel, backend, t)) {
+      const loadCollaborations = includesSubscriptionCollaborations(backend)
+      // Collaborations are not in the channel's upload feed, so they still need loading
+      const unchangedVideos = loadCollaborations ? await getUnchangedSubscriptionFeed('videos', channel.id, backend) : null
+      if (!loadCollaborations && await keepUnchangedSubscriptionFeed('videos', channel, backend, t)) {
         channelCount++
         setSubscriptionRefreshProgress((channelCount / subscriptionList.length) * 100)
         return false
@@ -1152,7 +1184,9 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
 
       let videos, name, thumbnailUrl, handle
 
-      if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backend)) {
+      if (unchangedVideos !== null) {
+        videos = unchangedVideos.filter(video => video.isCollaboration !== true)
+      } else if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backend)) {
         if (useRss && hasInvidiousRssFeeds()) {
           ({ videos, name, thumbnailUrl, handle } = await getChannelVideosInvidiousRSS(channel, t))
         } else {
@@ -1164,6 +1198,10 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
         } else {
           ({ videos, name, thumbnailUrl, handle } = await getChannelVideosLocalScraper(channel, t))
         }
+      }
+
+      if (videos != null && loadCollaborations) {
+        videos = await addSubscriptionCollaborations(channel.id, videos)
       }
 
       channelCount++
@@ -1181,7 +1219,9 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
         )
         await store.dispatch('updateSubscriptionVideosCacheByChannel', {
           channelId: channel.id,
-          videos
+          videos,
+          // Unchanged feeds still need their full fetch once they are old enough
+          ...(unchangedVideos !== null && previousCache ? { timestamp: previousCache.timestamp } : {})
         })
         await startAutomaticDownloadsForChannel(channel, videos, 'videos', t, electronRefreshOwnerTabId)
         reportSubscriptionUploads(channel.id, 'videos', videos)

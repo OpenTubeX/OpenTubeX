@@ -115,6 +115,15 @@
           @change="updateUseRssFeeds"
         />
         <FtToggleSwitch
+          v-if="SUPPORTS_LOCAL_API"
+          :label="$t('Settings.Subscription Settings.Show Collaborations From Other Channels')"
+          :default-value="includeSubscriptionCollaborations"
+          setting-key="includeSubscriptionCollaborations"
+          :tooltip="$t('Tooltips.Subscription Settings.Show Collaborations From Other Channels')"
+          compact
+          @change="updateIncludeSubscriptionCollaborations"
+        />
+        <FtToggleSwitch
           :label="$t('Settings.Subscription Settings.Show New Content Feed')"
           :default-value="showNewSubscriptionFeed"
           setting-key="showNewSubscriptionFeed"
@@ -263,6 +272,16 @@ function updateUseRssFeeds(value) {
   if (onlyShowLatestFromChannelNumber.value > max) {
     updateOnlyShowLatestFromChannelNumber(max)
   }
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const includeSubscriptionCollaborations = computed(() => store.getters.getIncludeSubscriptionCollaborations)
+
+/**
+ * @param {boolean} value
+ */
+function updateIncludeSubscriptionCollaborations(value) {
+  store.dispatch('updateIncludeSubscriptionCollaborations', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

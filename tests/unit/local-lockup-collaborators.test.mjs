@@ -5,7 +5,7 @@ import { YTNodes } from 'youtubei.js'
 import { createLocalFeedParsers } from '../../src/renderer/helpers/api/local-feed-parsers.js'
 
 const fixture = JSON.parse(await readFile(new URL('../../e2e/fixtures/innertube/watch/collaboration-lockup.json', import.meta.url), 'utf8'))
-const { parseLockupView } = createLocalFeedParsers(() => false)
+const { parseLockupView, parseLocalChannelCollaborations } = createLocalFeedParsers(() => false)
 
 test('recommendation collaborations show every collaborator in the byline', () => {
   const video = parseLockupView(new YTNodes.LockupView(structuredClone(fixture)))
@@ -25,4 +25,15 @@ test('single-channel lockups do not merge other byline parts into the channel na
   const video = parseLockupView(new YTNodes.LockupView(raw))
 
   assert.equal(video.author, 'Channel One')
+})
+
+test('a channel\'s Home tab lists the collaborations another channel uploaded', () => {
+  const lockup = () => new YTNodes.LockupView(structuredClone(fixture))
+
+  const [video, ...rest] = parseLocalChannelCollaborations([lockup(), lockup()], 'UC-sample-channel-two')
+  assert.equal(rest.length, 0)
+  assert.equal(video.authorId, 'UC-sample-channel-one')
+  assert.equal(video.isCollaboration, true)
+  assert.deepEqual(parseLocalChannelCollaborations([lockup()], 'UC-sample-channel-one'), [])
+  assert.deepEqual(parseLocalChannelCollaborations([lockup()], 'UC-unrelated-channel'), [])
 })

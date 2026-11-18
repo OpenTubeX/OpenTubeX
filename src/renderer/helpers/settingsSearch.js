@@ -117,8 +117,8 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     return usingElectron || (isCapacitor && !isIos)
   }
 
-  // Uses the local API's channel feeds
-  if (sectionType === 'subscription' && group === 'Faster Subscription Refresh') {
+  // Uses the local API's channel pages
+  if (sectionType === 'subscription' && ['Faster Subscription Refresh', 'Show Collaborations From Other Channels'].includes(group)) {
     return supportsLocalApi
   }
 

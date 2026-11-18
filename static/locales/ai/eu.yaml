@@ -1300,6 +1300,7 @@ Settings:
     Notify About New Uploads: Jakinarazi igoera berriak
     RSS Feeds Auto Refresh Interval: RSS jarioen freskatze automatikoaren tartea
     Faster Subscription Refresh: "Harpidetzen freskatze azkarragoa"
+    Show Collaborations From Other Channels: "Sartu beste kanal batzuek igotako lankidetzak"
     Platforms:
       Other Platforms: Beste plataformak
       Manage Channels: Kudeatu jarraitutako kanalak
@@ -2450,6 +2451,7 @@ Tooltips:
     Notify About New Uploads: Gailu honetan sistemaren jakinarazpenak erakusten ditu harpidetza-ezarpenetan jakinarazpenak aktibatu dituzun kanaletarako. OpenTubeX-ek eduki berria bilatzen du harpidetzak freskatzean; beraz, aukeratu freskatze automatikoaren tarte bat. Aplikazioa itxita dagoenean jakinarazpenak jasotzeko, gaitu ere freskatzea aplikazioa itxita dagoenean.
     RSS Feeds Auto Refresh Interval: Aplikazioa irekita dagoen bitartean OpenTubeX-ek zure RSS jarioak zenbatero freskatzen dituen automatikoki.
     Faster Subscription Refresh: "Lehenik kanal bakoitzaren RSS jarioa egiaztatzen du, eta igoera berriak dituzten kanalen bideoak, Shorts-ak eta zuzeneko emanaldiak soilik kargatzen ditu. Freskatze automatikoek azken 10 minutuetan kargatutako kanalak ere saltatzen dituzte. Igoera berririk ez duten kanaletan, ikustaldi kopuruak, kendutako bideoak eta aldatutako izenburuak ordu batzuetan behin bakarrik eguneratzen dira, eta igoera berriak beranduago ager daitezke RSS jarioa atzeratuta dagoenean. Ez dago erabilgarri Invidious APIarekin."
+    Show Collaborations From Other Channels: "Harpidetuta zauden kanalek igo dituen beste kanal batekin batera egindako bideoak ere erakusten ditu. YouTubek kanal baten Hasiera fitxan bakarrik zerrendatzen ditu, beraz, bideoen freskatze bakoitzak orri bat gehiago kargatzen du kanal bakoitzeko. Han erakutsitako lankidetza berrienak bakarrik aurkitzen dira, kanal batzuek ez dute bat ere erakusten, eta argitaratze-datak gutxi gorabeherakoak dira. Ez dago erabilgarri Invidious APIarekin."
     Platforms Auto Refresh Interval: Aplikazioa irekita dagoen bitartean OpenTubeX-ek beste plataformetan jarraitzen dituzun kanalak zenbatero freskatzen dituen automatikoki.
     Twitch Notify When Live: Jakinarazi egiten dizu jarraitzen dituzun Twitch kanaletako batek emanaldia hasten duenean. OpenTubeX-ek minutu gutxitik behin egiaztatzen du irekita dagoen bitartean, baita itxita dagoenean ere, orduan harpidetzak freskatzen baditu.
   Theme Settings:

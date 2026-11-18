@@ -270,6 +270,31 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
   }
 
   /**
+   * Videos another channel uploaded with this channel as a collaborator.
+   * YouTube lists them on the channel's Home tab, usually in a Collaborations
+   * shelf, but not on its Videos tab or in its feeds.
+   * @param {(import('youtubei.js').YTNodes.Video | import('youtubei.js').YTNodes.LockupView)[]} videos the Home tab's videos
+   * @param {string} channelId
+   */
+  function parseLocalChannelCollaborations(videos, channelId) {
+    const videoIds = new Set()
+    return parseLocalChannelVideos(videos.filter(video => video.is(YTNodes.LockupView)), channelId, undefined)
+      .flatMap(video => {
+        // The uploader comes first in the collaborator list
+        const uploaderId = video.collaborators?.[0]?.id
+        if (
+          video.type !== 'video' || video.isShort || videoIds.has(video.videoId) ||
+          !uploaderId || uploaderId === channelId ||
+          !video.collaborators.some(collaborator => collaborator.id === channelId)
+        ) {
+          return []
+        }
+        videoIds.add(video.videoId)
+        return [{ ...video, authorId: uploaderId, isCollaboration: true }]
+      })
+  }
+
+  /**
    * @param {YTNodes.ReelItem | YTNodes.ShortsLockupView} short
    * @param {string} [channelId]
    * @param {string} [channelName]
@@ -1392,6 +1417,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
     parseLocalListVideo,
     parseLocalListPlaylist,
     parseLocalListPlaylists,
-    parseLocalChannelVideos
+    parseLocalChannelVideos,
+    parseLocalChannelCollaborations
   }
 }

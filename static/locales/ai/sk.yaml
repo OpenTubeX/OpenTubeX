@@ -1300,6 +1300,7 @@ Settings:
     Notify About New Uploads: Oznamovať nový obsah
     RSS Feeds Auto Refresh Interval: Interval automatického obnovenia RSS kanálov
     Faster Subscription Refresh: "Rýchlejšie obnovenie odberov"
+    Show Collaborations From Other Channels: "Zahrnúť spolupráce nahrané inými kanálmi"
     Platforms:
       Other Platforms: Iné platformy
       Manage Channels: Spravovať sledované kanály
@@ -2447,6 +2448,7 @@ Tooltips:
     Notify About New Uploads: Zobrazuje na tomto zariadení systémové oznámenia pre kanály, pri ktorých ste v nastaveniach odberu zapli oznámenia. OpenTubeX kontroluje nový obsah pri obnovení odberov, preto zvoľte interval automatického obnovenia. Ak chcete dostávať oznámenia aj pri zatvorenej aplikácii, zapnite aj obnovovanie pri zatvorenej aplikácii.
     RSS Feeds Auto Refresh Interval: Ako často OpenTubeX automaticky obnovuje vaše RSS kanály, kým je aplikácia otvorená.
     Faster Subscription Refresh: "Najprv skontroluje RSS kanál každého kanála a videá, Shorts a živé prenosy načíta len z kanálov s novými nahratými videami. Automatické obnovenia navyše preskočia kanály načítané za posledných 10 minút. Pri kanáloch bez nových videí sa počty zhliadnutí, odstránené videá a zmenené názvy aktualizujú len raz za niekoľko hodín a nové videá sa môžu zobraziť neskôr, keď RSS kanál zaostáva. Nie je k dispozícii s Invidious API."
+    Show Collaborations From Other Channels: "Zobrazuje aj videá, ktoré odoberané kanály natočili spolu s iným kanálom, ktorý ich nahral. YouTube ich uvádza iba na karte Domov kanála, takže každá aktualizácia videí načíta pre každý kanál o jednu stránku viac. Nájdu sa iba najnovšie spolupráce, ktoré sa tam zobrazujú, niektoré kanály žiadne nezobrazujú a ich dátumy zverejnenia sú približné. Nie je k dispozícii s rozhraním Invidious API."
     Platforms Auto Refresh Interval: Ako často OpenTubeX automaticky obnovuje kanály, ktoré sledujete na iných platformách, kým je aplikácia otvorená.
     Twitch Notify When Live: Upozorní vás, keď niektorý z vašich sledovaných kanálov na Twitchi začne vysielať. OpenTubeX kontroluje každých pár minút, keď je otvorený, a tiež keď je zatvorený, ak vtedy aktualizuje odbery.
   Theme Settings:

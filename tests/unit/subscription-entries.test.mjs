@@ -8,6 +8,7 @@ import {
   ensureSubscriptionFeedEntryState,
   getSubscriptionVideoSortTimestamp,
   getUpcomingPremiereTimestamp,
+  keepCachedSubscriptionCollaborations,
   mergeSubscriptionShortThumbnails,
   mergeUpcomingSubscriptionFeedPublished,
   reconcileFetchedSubscriptionEntries,
@@ -468,4 +469,15 @@ test('an upcoming premiere without a scheduled time keeps its original date', ()
   assert.equal(result.isUpcoming, true)
   assert.equal(result.published, 1234)
   assert.equal('premiereDate' in result, false)
+})
+
+test('cache writes without collaborations keep the cached ones, and drop them once the setting is off', () => {
+  const upload = { videoId: 'upload' }
+  const collaboration = { videoId: 'collaboration', isCollaboration: true }
+  const fresh = { videoId: 'fresh-collaboration', isCollaboration: true }
+
+  assert.deepEqual(keepCachedSubscriptionCollaborations([upload], [upload, collaboration], true), [upload, collaboration])
+  assert.deepEqual(keepCachedSubscriptionCollaborations([upload, fresh], [upload, collaboration], true), [upload, fresh])
+  assert.deepEqual(keepCachedSubscriptionCollaborations([{ videoId: 'collaboration' }], [collaboration], true), [{ videoId: 'collaboration' }])
+  assert.deepEqual(keepCachedSubscriptionCollaborations([upload, fresh], [upload, collaboration], false), [upload])
 })

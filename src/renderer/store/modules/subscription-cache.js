@@ -4,7 +4,7 @@ import {
 } from '../../../datastores/handlers/index'
 import { MAIN_PROFILE_ID } from '../../../constants'
 import { toRaw } from 'vue'
-import { ensureSubscriptionFeedEntryState, ensureUpcomingSubscriptionFeedPublished, getUpcomingPremiereTimestamp } from '../../helpers/subscription-entries'
+import { ensureSubscriptionFeedEntryState, ensureUpcomingSubscriptionFeedPublished, getUpcomingPremiereTimestamp, keepCachedSubscriptionCollaborations } from '../../helpers/subscription-entries'
 import { applySubscriptionSeenVideosToCache, applySubscriptionSeenPostsToCache } from '../../helpers/subscription-seen-videos'
 import { preserveSubscriptionSeenEntries } from '../../../subscriptionFeedState'
 import { getSubscriptionsForFeed } from '../../helpers/subscription-channels'
@@ -73,12 +73,27 @@ const getters = {
     const now = Date.now()
     let nextPremiereTimestamp = null
     const cache = getters.getVideoCache
-    const videos = getSubscriptionsForFeed(getters.getActiveGroupSubscriptions, 'videos').flatMap(channel => {
+    const includeCollaborations = getters.getIncludeSubscriptionCollaborations === true
+    const channels = getSubscriptionsForFeed(getters.getActiveGroupSubscriptions, 'videos')
+    // Collaborations can also be cached as uploads or collaborations of other channels
+    const videoIds = new Set()
+    if (includeCollaborations) {
+      for (const channel of channels) {
+        for (const video of toRaw(cache[channel.id]?.videos) ?? []) {
+          if (video.isCollaboration !== true) videoIds.add(video.videoId)
+        }
+      }
+    }
+    const videos = channels.flatMap(channel => {
       const entry = cache[channel.id]
       if (entry == null) return []
       const entries = entry.videos ?? []
       const timestamp = toDate(entry.timestamp).getTime()
-      return toRaw(entries).map((video, index) => {
+      return toRaw(entries).flatMap((video, index) => {
+        if (video.isCollaboration === true) {
+          if (!includeCollaborations || videoIds.has(video.videoId)) return []
+          videoIds.add(video.videoId)
+        }
         const premiereTimestamp = getUpcomingPremiereTimestamp(video)
         if (premiereTimestamp > now && (nextPremiereTimestamp === null || premiereTimestamp < nextPremiereTimestamp)) {
           nextPremiereTimestamp = premiereTimestamp
@@ -88,7 +103,7 @@ const getters = {
         const source = premiereTimestamp > 0 || video.isUpcoming === true || video.premiere === true
           ? entries[index]
           : video
-        return ensureUpcomingSubscriptionFeedPublished(source, timestamp, now)
+        return [ensureUpcomingSubscriptionFeedPublished(source, timestamp, now)]
       })
     })
     return { videos: updateVideoListAfterProcessing(videos, now), nextPremiereTimestamp, processedAt: now }
@@ -188,7 +203,7 @@ const actions = {
   async updateSubscriptionVideosCacheByChannel({ commit, state, rootGetters }, { channelId, videos, timestamp = new Date() }) {
     const previousCache = state.videoCache[channelId]
     videos = ensureSubscriptionFeedEntryState(
-      videos,
+      keepCachedSubscriptionCollaborations(videos, previousCache?.videos, rootGetters.getIncludeSubscriptionCollaborations === true),
       previousCache?.videos,
       'videoId',
       previousCache?.timestamp,
