@@ -1,11 +1,13 @@
 .prompt {
+  --prompt-backdrop-color: rgb(0 0 0 / 70%);
+
   animation: prompt-backdrop-enter var(--motion-default-effects);
   position: fixed;
   inset-block-start: 0;
   inset-inline-start: 0;
   inline-size: 100%;
   block-size: 100%;
-  background-color: rgb(0 0 0 / 70%);
+  background-color: var(--prompt-backdrop-color);
   backdrop-filter: var(--modal-backdrop-blur);
 
   /* Higher than components like playlist info */
@@ -76,8 +78,16 @@
 }
 
 /* Fading the backdrop's opacity would crossfade a sharp and a blurred copy of
-   the page, which flickers on Android. Animate the dim and blur instead. */
+   the page, which flickers on Android. Animate the dim and blur instead. Spell
+   out both keyframes: Chromium only runs a background-color animation on the
+   compositor when no keyframe falls back to the element's own style, and
+   otherwise keeps the blur on the main thread too. */
 @keyframes prompt-backdrop-leave {
+  from {
+    background-color: var(--prompt-backdrop-color);
+    backdrop-filter: var(--modal-backdrop-blur);
+  }
+
   to {
     background-color: transparent;
     backdrop-filter: blur(0);
@@ -95,6 +105,11 @@
   from {
     background-color: var(--modal-backdrop-enter-color, transparent);
     backdrop-filter: var(--modal-backdrop-enter-filter, blur(0));
+  }
+
+  to {
+    background-color: var(--prompt-backdrop-color);
+    backdrop-filter: var(--modal-backdrop-blur);
   }
 }
 

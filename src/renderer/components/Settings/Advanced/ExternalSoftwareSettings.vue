@@ -228,7 +228,7 @@
         <div
           class="binaryProgressBarFill"
           :class="{ indeterminate: binaryDownloadProgress.percent === null }"
-          :style="{ inlineSize: `${binaryDownloadProgress.percent ?? 100}%` }"
+          :style="{ '--progress-fraction': (binaryDownloadProgress.percent ?? 100) / 100 }"
         />
       </div>
     </div>
@@ -969,11 +969,18 @@ async function createYouTubeSession() {
   overflow: hidden;
 }
 
+/* The fill spans the track and clip-path cuts it to the progress, which runs
+   on the compositor instead of laying out the settings page on every frame. */
 .binaryProgressBarFill {
   background-color: var(--accent-color);
   block-size: 100%;
   border-radius: var(--shape-corner-extra-small);
-  transition: inline-size var(--motion-slow-effects);
+  clip-path: inset(0 calc((1 - var(--progress-fraction)) * 100%) 0 0 round var(--shape-corner-extra-small));
+  transition: clip-path var(--motion-slow-effects);
+}
+
+.binaryProgressBarFill:dir(rtl) {
+  clip-path: inset(0 0 0 calc((1 - var(--progress-fraction)) * 100%) round var(--shape-corner-extra-small));
 }
 
 .binaryProgressBarFill.indeterminate {

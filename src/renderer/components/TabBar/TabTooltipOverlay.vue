@@ -160,25 +160,23 @@ function updateTooltipPosition() {
     // allowed width. Capping it at the rendered width would keep the previous
     // tab's smaller width and cut off a longer title.
     const constrainedWidth = Math.min(maxTooltipWidth, Math.max(120, availableWidth))
-    const horizontalPosition = content.value.tabBarPosition === 'right'
+    const y = Math.round(top)
+    tooltipStyle.value = content.value.tabBarPosition === 'right'
       ? {
           left: 'auto',
           // Anchor the outer tooltip edge directly to the rail. Calculating a
           // left position from its width drifts when preview content changes
           // the tooltip's final box size after the first render.
-          right: `${Math.round(window.innerWidth - adjacentEdge + TOOLTIP_OFFSET_PX)}px`,
-          transformOrigin: 'right top'
+          right: '0px',
+          translate: `${-Math.round(window.innerWidth - adjacentEdge + TOOLTIP_OFFSET_PX)}px ${y}px`,
+          transformOrigin: 'right top',
+          maxInlineSize: `${Math.round(constrainedWidth)}px`
         }
       : {
-          left: `${Math.round(adjacentEdge + TOOLTIP_OFFSET_PX)}px`,
-          right: 'auto',
-          transformOrigin: 'left top'
+          translate: `${Math.round(adjacentEdge + TOOLTIP_OFFSET_PX)}px ${y}px`,
+          transformOrigin: 'left top',
+          maxInlineSize: `${Math.round(constrainedWidth)}px`
         }
-    tooltipStyle.value = {
-      ...horizontalPosition,
-      maxInlineSize: `${Math.round(constrainedWidth)}px`,
-      top: `${Math.round(top)}px`
-    }
     return
   }
 
@@ -200,19 +198,23 @@ function updateTooltipPosition() {
   const top = content.value.tabBarPosition === 'bottom'
     ? anchorEdge - height - TOOLTIP_OFFSET_PX
     : anchorEdge + TOOLTIP_OFFSET_PX
+  const y = Math.round(Math.max(TOOLTIP_MARGIN_PX, Math.min(top, window.innerHeight - height - TOOLTIP_MARGIN_PX)))
   tooltipStyle.value = {
-    left: `${Math.round(left)}px`,
-    maxBlockSize: content.value.isGroup ? `${availableHeight}px` : undefined,
-    top: `${Math.round(Math.max(TOOLTIP_MARGIN_PX, Math.min(top, window.innerHeight - height - TOOLTIP_MARGIN_PX)))}px`
+    translate: `${Math.round(left)}px ${y}px`,
+    maxBlockSize: content.value.isGroup ? `${availableHeight}px` : undefined
   }
 }
 
 </script>
 
 <style scoped>
+/* Positioned with translate from the viewport's top left, so moving between
+   tabs runs on the compositor instead of laying out and painting the card on
+   every frame. */
 .tabTooltip {
   box-sizing: border-box;
   position: fixed;
+  inset: 0 auto auto 0;
   z-index: 10000;
   inline-size: max-content;
   max-inline-size: min(340px, calc(100vw - 16px));
@@ -228,7 +230,7 @@ function updateTooltipPosition() {
   letter-spacing: 0;
   pointer-events: none;
   -webkit-app-region: no-drag;
-  transition: top var(--motion-fast-effects), left var(--motion-fast-effects);
+  transition: translate var(--motion-fast-effects);
 }
 
 .tabTooltip.withPreview {
@@ -259,8 +261,7 @@ function updateTooltipPosition() {
   transition:
     opacity var(--motion-fast-effects),
     transform var(--motion-fast-effects),
-    top var(--motion-fast-effects),
-    left var(--motion-fast-effects);
+    translate var(--motion-fast-effects);
 }
 
 .tab-tooltip-enter-from,
