@@ -60,6 +60,7 @@
 
 .title:hover,
 .title:focus-visible {
+  color: var(--side-nav-hover-text-color);
   background: var(--side-nav-hover-color);
 }
 
@@ -72,6 +73,7 @@
 }
 
 .title.active {
+  color: var(--primary-text-color);
   background: var(--selected-container-color);
   font-weight: 600;
 }
@@ -116,6 +118,13 @@
     color: light-dark(oklch(46% 0.15 var(--settings-icon-hue, 0)), oklch(88% 0.09 var(--settings-icon-hue, 0)));
     background: light-dark(oklch(91% 0.06 var(--settings-icon-hue, 0)), oklch(36% 0.07 var(--settings-icon-hue, 0)));
   }
+}
+
+/* The selected tile is tinted with the accent, which can match a category's
+   hue, so its circle takes the solid accent instead. */
+.title.active .titleIcon {
+  color: var(--text-with-main-color);
+  background: var(--primary-color);
 }
 
 .titleIcon > svg {
@@ -192,6 +201,7 @@
   }
 
   .title:active {
+    color: var(--side-nav-hover-text-color);
     background: var(--side-nav-hover-color);
   }
 
@@ -209,7 +219,14 @@
   }
 }
 
-/* Selected descriptions share the title's color, readable on the tint. */
-.title.active .titleDescription {
+/* Selected and hovered descriptions share the title's color, which is readable
+   on the tint and on the hover color of every theme. */
+.title:is(.active, :hover, :focus-visible) .titleDescription {
   color: inherit;
+}
+
+@media (any-pointer: coarse), (width <= 680px) {
+  .title:active .titleDescription {
+    color: inherit;
+  }
 }
