@@ -9438,6 +9438,47 @@ function registerChapterOverlayButton() {
   registerOwnElement(shakaOverflowMenu, 'ft_chapters', new ChapterOverlayButtonFactory())
 }
 
+/** @type {Map<string, { change: object, cancelled: boolean }>} */
+const pendingDockPanelCloses = new Map()
+
+/**
+ * Reports a dock change to the page, which teleports the dock's content. A
+ * closing dock reports only after it has slid out, so its content leaves with
+ * it instead of emptying the panel at the start of the slide.
+ * @param {{ panel: string, open: boolean, target: HTMLElement | null, presentationActive?: boolean }} change
+ */
+async function emitDockPanelChange(change) {
+  const pending = pendingDockPanelCloses.get(change.panel)
+  if (pending) {
+    pending.cancelled = true
+    pendingDockPanelCloses.delete(change.panel)
+  }
+
+  if (change.open || !change.target || presentationModeChanging.value ||
+    (!isNativeFullscreenActive() && !fullWindowEnabled.value)) {
+    emit('dock-panel-change', change)
+    return
+  }
+
+  const close = { change, cancelled: false }
+  pendingDockPanelCloses.set(change.panel, close)
+  await nextTick()
+  const slides = change.target.closest('aside')?.getAnimations()
+    .filter(animation => animation instanceof CSSTransition && animation.transitionProperty === 'transform') ?? []
+  await Promise.allSettled(slides.map(animation => animation.finished))
+  if (close.cancelled) return
+  pendingDockPanelCloses.delete(change.panel)
+  emit('dock-panel-change', change)
+}
+
+onBeforeUnmount(() => {
+  for (const close of pendingDockPanelCloses.values()) {
+    close.cancelled = true
+    emit('dock-panel-change', close.change)
+  }
+  pendingDockPanelCloses.clear()
+})
+
 function setFullscreenComments(shouldOpen) {
   const open = Boolean(
     shouldOpen && props.commentsAvailable &&
@@ -9445,7 +9486,7 @@ function setFullscreenComments(shouldOpen) {
   )
   showFullscreenComments.value = open
   events.dispatchEvent(new CustomEvent('setFullscreenComments', { detail: open }))
-  emit('dock-panel-change', {
+  emitDockPanelChange({
     panel: 'comments',
     open,
     target: fullscreenCommentsOverlay.value
@@ -9464,7 +9505,7 @@ function setFullscreenLiveChat(shouldOpen) {
     (isNativeFullscreenActive() || fullWindowEnabled.value)
   )
   showFullscreenLiveChat.value = open
-  emit('dock-panel-change', {
+  emitDockPanelChange({
     panel: 'liveChat',
     open,
     target: fullscreenLiveChatTarget.value
@@ -9488,7 +9529,7 @@ function setFullscreenMetadata(shouldOpen) {
   if (fullscreenTitleOverlay) {
     fullscreenTitleOverlay.ariaExpanded = String(open)
   }
-  emit('dock-panel-change', {
+  emitDockPanelChange({
     panel: 'metadata',
     open,
     target: fullscreenMetadataTarget.value,
@@ -9506,7 +9547,7 @@ function setFullscreenTranscript(shouldOpen) {
     (isNativeFullscreenActive() || fullWindowEnabled.value)
   )
   showFullscreenTranscript.value = open
-  emit('dock-panel-change', {
+  emitDockPanelChange({
     panel: 'transcript',
     open,
     target: fullscreenTranscriptTarget.value
@@ -9540,7 +9581,7 @@ function setFullscreenSponsorBlock(shouldOpen) {
     shouldOpen && (isNativeFullscreenActive() || fullWindowEnabled.value)
   )
   showFullscreenSponsorBlock.value = open
-  emit('dock-panel-change', {
+  emitDockPanelChange({
     panel: 'sponsorBlock',
     open,
     target: fullscreenSponsorBlockTarget.value
@@ -9570,7 +9611,7 @@ function setFullscreenPlaylist(shouldOpen) {
     (isNativeFullscreenActive() || fullWindowEnabled.value)
   )
   showFullscreenPlaylist.value = open
-  emit('dock-panel-change', {
+  emitDockPanelChange({
     panel: 'playlist',
     open,
     target: fullscreenPlaylistTarget.value
@@ -9585,7 +9626,7 @@ function setFullscreenQueue(shouldOpen) {
   const open = Boolean(shouldOpen && props.queueAvailable &&
     (isNativeFullscreenActive() || fullWindowEnabled.value))
   showFullscreenQueue.value = open
-  emit('dock-panel-change', { panel: 'queue', open, target: fullscreenQueueTarget.value })
+  emitDockPanelChange({ panel: 'queue', open, target: fullscreenQueueTarget.value })
 }
 
 function closeFullscreenQueue() {
@@ -9596,7 +9637,7 @@ function setFullscreenRecommendations(shouldOpen) {
   const open = Boolean(shouldOpen && props.recommendationsAvailable &&
     (isNativeFullscreenActive() || fullWindowEnabled.value))
   showFullscreenRecommendations.value = open
-  emit('dock-panel-change', { panel: 'recommendations', open, target: fullscreenRecommendationsTarget.value })
+  emitDockPanelChange({ panel: 'recommendations', open, target: fullscreenRecommendationsTarget.value })
 }
 
 function closeFullscreenRecommendations() {
@@ -9619,6 +9660,19 @@ const dockedPanels = {
   queue: { shown: showFullscreenQueue, set: setFullscreenQueue },
   recommendations: { shown: showFullscreenRecommendations, set: setFullscreenRecommendations },
   playlist: { shown: showFullscreenPlaylist, set: setFullscreenPlaylist },
+}
+
+/**
+ * Reopens a dock that is still sliding out, which the page still reports as
+ * open, so a toggle on the page reopens it instead of closing it again.
+ * @param {Exclude<import('./opentubex/dockedPanels').DockedPanel, 'chapters'>} panel
+ * @returns {boolean} whether the dock was closing
+ */
+function reopenClosingDockPanel(panel) {
+  if (!pendingDockPanelCloses.has(panel)) return false
+  expandCollapsedFullscreenDock(panel)
+  dockedPanels[panel].set(true)
+  return true
 }
 
 function rememberAndCloseDockedPanels() {
@@ -13575,6 +13629,7 @@ defineExpose({
   retryStreaming,
   setFullscreenMetadata,
   closeFullscreenMetadata,
+  reopenClosingDockPanel,
   setFullscreenTranscript,
   closeFullscreenTranscript,
   dismissFullscreenTranscript,

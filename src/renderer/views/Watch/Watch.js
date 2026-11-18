@@ -2461,7 +2461,7 @@ export default defineComponent({
         else this.openShortsPhonePanel('metadata')
         return
       }
-      const shouldOpen = !this.shortsMetadataOpen
+      const shouldOpen = this.$refs.player?.reopenClosingDockPanel('metadata') || !this.shortsMetadataOpen
       if (shouldOpen) {
         this.resetShortsAuxPanelScroll()
       }

@@ -265,14 +265,31 @@
   border: 1px solid var(--side-nav-hover-color);
   border-radius: calc(12px * var(--ui-roundness));
   box-shadow: 0 8px 30px rgb(0 0 0 / 45%);
-  opacity: 0;
   visibility: hidden;
   pointer-events: none;
 
   /* Isolate dock content from the player and neighbouring panels. */
   contain: layout paint;
+
+  /*
+    Slide only, like the chapters dock. Fading the panel would make it the
+    backdrop root of its glass layer below while the opacity transition runs,
+    so the blur would sample the panel's own background instead of the video
+    and the panel would flash lighter until the transition ends.
+  */
   transform: translateX(calc(100% + 24px));
-  transition: transform 250ms ease, opacity 200ms ease, visibility 0s 250ms;
+  transition: transform 250ms ease, visibility 0s 250ms;
+}
+
+.fullscreenMetadataOverlay:dir(rtl),
+.fullscreenTranscriptOverlay:dir(rtl),
+.fullscreenSponsorBlockOverlay:dir(rtl),
+.fullscreenLiveChatOverlay:dir(rtl),
+.fullscreenCommentsOverlay:dir(rtl),
+.fullscreenPlaylistOverlay:dir(rtl),
+.fullscreenQueueOverlay:dir(rtl),
+.fullscreenRecommendationsOverlay:dir(rtl) {
+  transform: translateX(calc(-100% - 24px));
 }
 
 /*
@@ -320,7 +337,6 @@
 .fullscreenPlaylistOverlay.open,
 .fullscreenQueueOverlay.open,
 .fullscreenRecommendationsOverlay.open {
-  opacity: 1;
   visibility: visible;
   pointer-events: auto;
   transform: translateX(0);
