@@ -564,8 +564,11 @@ final class UploadNotifications {
                 ? OpenTubeXNotificationChannels.COMMENT_REPLIES_ID
                 : OpenTubeXNotificationChannels.NEW_UPLOADS_ID)
             : new Notification.Builder(context);
-        // MainActivity forwards YouTube links to the renderer, including on cold start.
-        Intent open = new Intent(Intent.ACTION_VIEW, Uri.parse(url), context, MainActivity.class);
+        // MainActivity forwards links to the renderer, including on cold start. The
+        // wrapper makes it open them in a new tab, mirrored by getNotificationOpenUrl.
+        Uri openUri = new Uri.Builder().scheme("opentubex").authority("notification")
+            .appendQueryParameter("url", url).build();
+        Intent open = new Intent(Intent.ACTION_VIEW, openUri, context, MainActivity.class);
         if (history) putUpload(open, feedType, id, live);
         PendingIntent contentIntent = PendingIntent.getActivity(
             context,

@@ -154,6 +154,19 @@ export function getUploadTarget(feedType, id, live = false) {
 }
 
 /**
+ * The web link an Android notification opens. Notifications wrap it as
+ * `opentubex://notification?url=…` so the app opens it in a new tab, like
+ * the ones in its notification list. Mirrored by UploadNotifications.java.
+ * @param {string} url
+ * @returns {string | null}
+ */
+export function getNotificationOpenUrl(url) {
+  if (!/^opentubex(?:-nightly)?:\/\/notification\?/.test(url)) return null
+  const target = new URL(url).searchParams.get('url')
+  return target?.startsWith('https://') ? target : null
+}
+
+/**
  * @param {'started' | 'completed' | 'failed'} phase
  * @param {unknown} videoId
  * @param {number | null} downloadId
