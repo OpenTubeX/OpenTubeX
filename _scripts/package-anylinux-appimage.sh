@@ -27,6 +27,10 @@ pacman_retry() {
 	return 1
 }
 
+# The image empties the package cache after every transaction. Keep the
+# downloads, so CI can cache them between runs.
+rm -f /etc/pacman.d/hooks/package-cleanup.hook
+
 # Install packaging tools (mirrors anylinux-setup-action)
 pacman-key --init
 pacman_retry -Syy --noconfirm archlinux-keyring
