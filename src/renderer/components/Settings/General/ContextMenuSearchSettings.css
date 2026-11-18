@@ -7,6 +7,9 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+
+  /* As wide as the custom engine row below, so both line up. */
+  max-inline-size: 840px;
 }
 
 .engineRow {
@@ -82,10 +85,33 @@ h3 {
 }
 
 @container settings-content (width <= 800px) {
-  .engineRow,
-  .engineRow:has(.removeEngine),
   .addEngine {
     grid-template-columns: 1fr;
+  }
+
+  /* Stacked, the engines' icons and switches line up in a middle column as
+     wide as the widest of them, and their addresses center below them. */
+  .engineList {
+    display: grid;
+    grid-template-columns: [row-start] minmax(0, 1fr) [toggle-start] minmax(0, max-content) [toggle-end] minmax(0, 1fr) [row-end];
+  }
+
+  .engineRow,
+  .engineRow:has(.removeEngine) {
+    grid-column: row;
+    grid-template-columns: subgrid;
+    row-gap: 4px;
+  }
+
+  .engineRow > * {
+    grid-column: row;
+    justify-self: center;
+    text-align: center;
+  }
+
+  .engineRow > .engineToggle {
+    grid-column: toggle;
+    justify-self: start;
   }
 
   .engineRow :deep(.ft-input-component),

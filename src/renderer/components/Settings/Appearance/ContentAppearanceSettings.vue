@@ -3,31 +3,35 @@
     :title="t('Settings.Categories.Content appearance')"
     :icon="['fas', 'photo-film']"
   >
-    <div class="appearanceSwitchGrid switchFlowGrid">
-      <FtToggleSwitch
-        :label="t('Settings.General Settings.Show Video Menu Button')"
-        :default-value="showVideoMenuButton"
-        setting-key="showVideoMenuButton"
-        :compact="true"
-        @change="store.dispatch('updateShowVideoMenuButton', $event)"
-      />
-      <FtToggleSwitch
-        :label="t('Settings.General Settings.Show Thumbnail Previews')"
-        :default-value="showThumbnailPreviews"
-        setting-key="showThumbnailPreviews"
-        :compact="true"
-        :tooltip="t('Tooltips.General Settings.Show Thumbnail Previews')"
-        @change="updateShowThumbnailPreviews"
-      />
-      <FtToggleSwitch
-        v-if="!SUPPORTS_METERED_NETWORK_DETECTION"
-        :label="t('Settings.General Settings.Data Saver Thumbnails')"
-        :default-value="thumbnailDataSaverMode === 'always'"
-        setting-key="thumbnailDataSaverMode"
-        compact
-        :tooltip="t('Tooltips.General Settings.Data Saver Thumbnails')"
-        @change="store.dispatch('updateThumbnailDataSaverMode', $event ? 'always' : 'off')"
-      />
+    <div class="switchColumnGrid">
+      <div class="switchColumn">
+        <FtToggleSwitch
+          :label="t('Settings.General Settings.Show Video Menu Button')"
+          :default-value="showVideoMenuButton"
+          setting-key="showVideoMenuButton"
+          :compact="true"
+          @change="store.dispatch('updateShowVideoMenuButton', $event)"
+        />
+        <FtToggleSwitch
+          v-if="!SUPPORTS_METERED_NETWORK_DETECTION"
+          :label="t('Settings.General Settings.Data Saver Thumbnails')"
+          :default-value="thumbnailDataSaverMode === 'always'"
+          setting-key="thumbnailDataSaverMode"
+          compact
+          :tooltip="t('Tooltips.General Settings.Data Saver Thumbnails')"
+          @change="store.dispatch('updateThumbnailDataSaverMode', $event ? 'always' : 'off')"
+        />
+      </div>
+      <div class="switchColumn">
+        <FtToggleSwitch
+          :label="t('Settings.General Settings.Show Thumbnail Previews')"
+          :default-value="showThumbnailPreviews"
+          setting-key="showThumbnailPreviews"
+          :compact="true"
+          :tooltip="t('Tooltips.General Settings.Show Thumbnail Previews')"
+          @change="updateShowThumbnailPreviews"
+        />
+      </div>
     </div>
     <div class="switchGrid generalSelectGrid">
       <FtSelect
@@ -334,4 +338,3 @@ function resetThumbnailPreference() {
 </script>
 
 <style scoped src="../generalSelectGrid.css" />
-<style scoped src="./appearanceSwitchGrid.css" />

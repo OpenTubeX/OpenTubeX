@@ -2,30 +2,11 @@
   margin-block: 1rem;
 }
 
-/* Each group sizes its two columns to its own labels and centers them. */
-.playerSwitchGrid {
-  align-items: center;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, max-content));
-  justify-content: center;
-  column-gap: 48px;
-}
-
 .screenshotFormatRow {
   align-items: center;
 }
 
 @container settings-content (width <= 680px) {
-  .playerSwitchGrid {
-    grid-template-columns: minmax(0, 1fr);
-    justify-items: center;
-  }
-
-  .playerSwitchGrid :deep(.switch-ctn) {
-    inline-size: min(100%, 294px);
-    margin-inline: auto;
-  }
-
   /* Stacked selects share one width so their edges line up across groups. */
   .playerSelectGrid {
     align-items: center;
@@ -47,10 +28,6 @@
 
 @media only screen and (width <= 680px) {
   @container settings-content (width <= 680px) {
-    .playerSwitchGrid :deep(.switch-ctn) {
-      inline-size: 100%;
-    }
-
     .quickPlaybackSpeedCustomizeButton :deep(.btn) {
       max-inline-size: 380px;
       gap: 8px;

@@ -475,6 +475,10 @@
    controls that cannot be reset. Otherwise those controls sit further towards
    the edge than their resettable neighbours. The low-specificity :where keeps
    the colored marker rule below in control when a setting has changed. */
+.settingsContent.highlightChangedSettings {
+  --settings-marker-gutter: 12px;
+}
+
 .settingsContent.highlightChangedSettings :deep(:where(
   .switch-ctn,
   .select,
