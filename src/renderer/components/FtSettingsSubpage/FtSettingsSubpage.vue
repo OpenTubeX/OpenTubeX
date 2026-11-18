@@ -13,7 +13,7 @@
     <div
       v-show="isCurrent"
       class="settingsSubpageContent"
-      :class="{ growWithContent }"
+      :class="{ growWithContent, spansPadding: !flush }"
     >
       <slot />
     </div>
@@ -80,6 +80,13 @@ onBeforeUnmount(() => settingsWindow.close(close))
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+}
+
+/* Spans the page's padding, keeping its content in place, so scrollers inside
+   can reach the window's edge without overflowing it. */
+.settingsSubpageContent.spansPadding {
+  margin-inline: calc(-1 * var(--settings-subpage-padding));
+  padding-inline: var(--settings-subpage-padding);
 }
 
 .settingsSubpageContent.growWithContent {
