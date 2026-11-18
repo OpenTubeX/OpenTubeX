@@ -116,7 +116,7 @@ test.describe('destructive sync', () => {
     }
   })
 
-  test('background sync warns outside Settings and opens sync settings from the notification', async ({ page }) => {
+  test('background sync warns outside Settings and opens sync settings from the bell', async ({ page }) => {
     await page.route('https://sync.example/**', route => route.fulfill({
       contentType: 'application/json',
       body: JSON.stringify(route.request().url().endsWith('/health')
@@ -143,7 +143,10 @@ test.describe('destructive sync', () => {
     const notification = page.locator('.toast', { hasText: 'Sync stopped to prevent data loss.' })
     await expect(notification).toBeVisible()
     await expect(page.getByRole('dialog', { name: 'Confirm destructive sync?' })).toBeHidden()
-    await notification.getByRole('button', { name: 'Sync', exact: true }).click()
+    // The bell keeps the warning after the notification is gone, and opens sync settings like it.
+    // Other tests open them from the notification.
+    await page.getByRole('button', { name: 'Notifications (1 unread)', exact: true }).click()
+    await page.locator('.notificationCenterDropdown .notificationEntry', { hasText: 'Sync stopped to prevent data loss.' }).click()
     await expect(sync).toBeVisible()
     await expect(autoSync).not.toBeChecked()
     // Sync settings opens the review of the blocked deletions without another sync.
@@ -159,6 +162,8 @@ test.describe('destructive sync', () => {
     await warning.getByRole('button', { name: 'Keep items', exact: true }).click()
     await expect(warning).toBeHidden()
     await expect(page.locator('.toast', { hasText: 'Sync completed' })).toBeVisible()
+    // Nothing is left to review, so the warning in the bell is read.
+    await expect(page.locator('.notificationCenter')).not.toHaveAttribute('data-unread-count')
     expect(uploads).toHaveLength(profiles.length)
     await expect(autoSync).toBeChecked()
     expect(await page.evaluate(() => window.$store.getters.getProfileList.length)).toBe(profiles.length + 1)

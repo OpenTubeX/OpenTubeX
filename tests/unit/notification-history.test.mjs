@@ -14,9 +14,10 @@ import {
   mergeNotificationDismissals,
   normalizeNotificationDismissals,
   recordNotificationDismissals,
-  getAutomaticDownloadTarget,
+  getDownloadTarget,
   getNotificationOpenUrl,
   getUploadTarget,
+  parseRecordedNotification,
   isThumbnailUrl,
   markNotificationHistoryRead,
   normalizeNotificationHistory,
@@ -77,10 +78,49 @@ test('entries lead to the uploaded item or the download', () => {
   assert.equal(getUploadTarget('videos', '../settings'), null)
   assert.equal(getUploadTarget('videos', undefined), null)
 
-  assert.deepEqual(getAutomaticDownloadTarget('completed', 'abc', 4), { kind: 'download-completed', path: '/watch/abc', query: { downloadId: '4' } })
-  assert.deepEqual(getAutomaticDownloadTarget('completed', undefined, 4), { kind: 'download-started', path: '/downloads' })
-  assert.deepEqual(getAutomaticDownloadTarget('started', 'abc', null), { kind: 'download-started', path: '/downloads' })
-  assert.deepEqual(getAutomaticDownloadTarget('failed', 'abc', null), { kind: 'download-failed', path: '/downloads' })
+  assert.deepEqual(getDownloadTarget('completed', 'abc', 4), { kind: 'download-completed', path: '/watch/abc', query: { downloadId: '4' } })
+  assert.deepEqual(getDownloadTarget('completed', undefined, 4), { kind: 'download-completed', path: '/downloads' })
+  assert.deepEqual(getDownloadTarget('started', 'abc', null), { kind: 'download-started', path: '/downloads' })
+  assert.deepEqual(getDownloadTarget('failed', 'abc', null), { kind: 'download-failed', path: '/downloads' })
+})
+
+test('the app records only its own kinds of news, with paths inside the app', () => {
+  const notification = { kind: 'sync-blocked', title: 'Sync', body: 'Stopped', path: '/settings', query: { section: 'sync' } }
+  assert.deepEqual(parseRecordedNotification(notification), notification)
+  assert.equal(parseRecordedNotification({ ...notification, kind: 'video' }), null)
+  assert.equal(parseRecordedNotification({ ...notification, path: 'https://example.com' }), null)
+  assert.equal(parseRecordedNotification({ ...notification, query: { section: 1 } }), null)
+  assert.equal(parseRecordedNotification({ ...notification, body: undefined }), null)
+  assert.equal(parseRecordedNotification(null), null)
+  assert.equal(parseRecordedNotification({ ...notification, body: 'x'.repeat(600) }).body.length, 500)
+})
+
+test('the desktop history keeps news several tabs report once, until it was read', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'notification-history-'))
+  try {
+    const history = createNotificationHistory({ file: path.join(directory, 'history.json'), dismissalsFile: path.join(directory, 'dismissals.json'), onChange: () => {} })
+    const signedOut = { kind: 'youtube-signed-out', title: 'Signed out', body: 'Sign in again', path: '/settings', query: { section: 'youtube-account' } }
+    await Promise.all([history.record(signedOut), history.record(signedOut)])
+    assert.equal((await history.list()).length, 1)
+    await history.markRead()
+    await history.record(signedOut)
+    assert.deepEqual((await history.list()).map(entry => entry.read), [false, true])
+
+    // An update stays the same news, even after it was read.
+    const update = { kind: 'app-update', title: 'Update to v2', body: 'Version 2 is now available.', path: '/update', query: { version: 'v2' } }
+    await history.record(update)
+    await history.markRead()
+    await history.record(update)
+    await history.record({ ...update, query: { version: 'v3' } })
+    assert.deepEqual((await history.list()).map(entry => [entry.kind, entry.query?.version, entry.read]), [
+      ['app-update', 'v3', false],
+      ['app-update', 'v2', true],
+      ['youtube-signed-out', undefined, true],
+      ['youtube-signed-out', undefined, true]
+    ])
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
 })
 
 test('Android notification links open their web link', () => {
@@ -311,7 +351,7 @@ test('a slow first read of the desktop history cannot undo a notification added 
 
 const none = normalizeNotificationDismissals(null)
 
-test('dismissals match notifications about the same item on every device, except downloads', () => {
+test('dismissals match notifications about the same item on every device, except news about one device', () => {
   assert.equal(getNotificationKey({ kind: 'video', path: '/watch/abc' }), 'video:/watch/abc')
   assert.equal(getNotificationKey({ kind: 'short', path: '/watch/abc', query: { short: 'true' } }), 'short:/watch/abc?short=true')
   assert.equal(getNotificationKey({ kind: 'live', path: '/watch/abc', query: { b: '2', a: '1' } }),
@@ -320,6 +360,7 @@ test('dismissals match notifications about the same item on every device, except
   assert.notEqual(getNotificationKey({ kind: 'live-reminder', path: '/watch/abc' }), getNotificationKey({ kind: 'live', path: '/watch/abc' }))
   assert.equal(getNotificationKey({ kind: 'download-completed', path: '/watch/abc', query: { downloadId: '1' } }), null)
   assert.equal(getNotificationKey({ kind: 'download-failed', path: '/downloads' }), null)
+  assert.equal(getNotificationKey({ kind: 'sync-blocked', path: '/settings', query: { section: 'sync' } }), null)
 })
 
 test('merged dismissals agree on every device, keep removals, and drop the oldest', () => {

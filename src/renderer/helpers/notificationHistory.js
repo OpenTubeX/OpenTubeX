@@ -1,4 +1,5 @@
 import { getUploadTarget } from '../../notificationHistory'
+import { isAndroidBackgroundRenderer } from './androidBackgroundSync'
 import { takeAndroidUploadNotifications } from './androidSubscriptionRefresh'
 import { capacitorNotificationHistory } from './capacitorNotificationHistory'
 import { collectFiredCapacitorReminders } from './liveReminders'
@@ -23,7 +24,12 @@ export const NOTIFICATION_KIND_ICONS = {
   'comment-heart': ['fas', 'heart'],
   'download-started': ['fas', 'download'],
   'download-completed': ['fas', 'download'],
-  'download-failed': ['fas', 'circle-exclamation']
+  'download-failed': ['fas', 'circle-exclamation'],
+  'app-update': ['fas', 'sync'],
+  'sync-blocked': ['fas', 'triangle-exclamation'],
+  'youtube-signed-out': ['fas', 'circle-user'],
+  'youtube-subscriptions': ['fas', 'subscriptions'],
+  'tool-update-failed': ['fas', 'circle-exclamation']
 }
 
 /**
@@ -70,13 +76,63 @@ export function getNotificationTabTitle(entry) {
 }
 
 /**
- * Opens the entry in a new tab, so it does not replace the page in use.
+ * Keeps news the app shows only as a toast in the bell, without a system
+ * notification. The bell already holding it, for example because several
+ * tabs report the same news, keeps it once.
+ * @param {import('../../notificationHistory').NotificationHistoryInput} notification
+ */
+export function recordNotification(notification) {
+  // Android's hidden renderer cannot update the app's bell.
+  if (!supportsNotificationHistory || isAndroidBackgroundRenderer || store.getters.getNotificationMode !== 'both') return
+  Promise.resolve(notificationHistory.record(notification))
+    .catch(error => console.error('Failed to record a notification', error))
+}
+
+/**
+ * Marks the unread entries about news that is over read.
+ * @param {(entry: import('../../notificationHistory').NotificationHistoryEntry) => boolean} isOver
+ */
+export async function markOverNotificationsRead(isOver) {
+  if (!supportsNotificationHistory || isAndroidBackgroundRenderer) return
+  try {
+    const entries = await notificationHistory.list()
+    await Promise.all(entries.filter(entry => !entry.read && isOver(entry)).map(entry => notificationHistory.markRead(entry.id)))
+  } catch (error) {
+    console.error('Failed to update the notification history', error)
+  }
+}
+
+/**
+ * The settings section a notification leads to.
+ * @param {string} section
+ * @returns {{ path: string, query: Record<string, string> }}
+ */
+export function getSettingsNotificationTarget(section) {
+  return { path: '/settings', query: { section } }
+}
+
+/** @type {((tagName: string | undefined) => void) | null} */
+let showUpdate = null
+
+/** @param {typeof showUpdate} handler shows the update an entry announces */
+export function setUpdateNotificationHandler(handler) {
+  showUpdate = handler
+}
+
+/**
+ * Opens the entry's view, or its page in a new tab, so it does not replace
+ * the page in use.
  * @param {import('../../notificationHistory').NotificationHistoryEntry} entry
  */
 export function openNotificationEntry(entry) {
   if (!entry.read) notificationHistory.markRead(entry.id)
   if (entry.path === '/downloads') {
     store.dispatch('showSettingsWindow', 'downloads')
+  } else if (entry.path === '/settings') {
+    store.commit('setSettingsWindowSection', entry.query?.section ?? null)
+    store.dispatch('showSettingsWindow')
+  } else if (entry.path === '/update') {
+    showUpdate?.(entry.query?.version)
   } else {
     // A toast can be opened while settings cover the page it navigates.
     store.dispatch('hideSettingsWindow')

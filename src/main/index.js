@@ -48,7 +48,7 @@ import { FcastManager } from './fcast'
 import { handleTwitchAdFreeLivePlaylist, handleTwitchChatReplayPage, handleTwitchLiveVod, handleTwitchSubOnlyVod } from './twitchChat'
 import { applyTwitchPlaylistOrigin } from '../twitchPlaylistOrigin'
 import { createTwitchLiveNotifier } from './twitchLiveNotifications'
-import { isYtDlpStoryboardUrl, getYtDlpExternalStreamCookieHeader, getYtDlpExternalStreamHeaders, refreshYtDlpDownloadQueue, restoreYtDlpDownloadQueue, shutdownYtDlpDownloads } from './ytDlp'
+import { isYtDlpStoryboardUrl, getYtDlpExternalStreamCookieHeader, getYtDlpExternalStreamHeaders, refreshYtDlpDownloadQueue, restoreYtDlpDownloadQueue, setFinishedDownloadListener, shutdownYtDlpDownloads } from './ytDlp'
 import { applyYtDlpPlaybackCacheSettings } from './ytDlpPlaybackCache'
 import { generatePoToken, mintPoTokenFromAttestation } from './poTokenGenerator'
 import { disableSpellChecker } from './spellChecker'
@@ -88,7 +88,7 @@ import { createUploadNotifier } from './uploadNotifications'
 import { createNotificationHistory, createNotifier, createSystemNotificationLinks } from './notificationHistory'
 import { loadNotificationImage, setNotificationImagesAllowed } from './notificationImage'
 import { setAutomaticDownloadNotifier } from './ytDlpAutomaticDownloads'
-import { getLiveReminderTarget } from '../notificationHistory'
+import { getDownloadTarget, getLiveReminderTarget, parseRecordedNotification } from '../notificationHistory'
 import { getCommentNotificationTarget } from '../commentReplyTracking'
 import { supportsNativeNotifications } from './nativeNotifications'
 import { getTrayMenuIcon } from './trayMenuIcons'
@@ -710,6 +710,23 @@ function runApp() {
     link: systemNotificationLinks.link
   })
   setAutomaticDownloadNotifier(notify)
+  // The bell keeps the downloads the user started, which only the renderers' toasts announce.
+  setFinishedDownloadListener(async download => {
+    if (notificationMode !== 'both') return
+    const t = await getMainTranslator()
+    const completed = download.status === 'completed'
+    const notification = parseRecordedNotification({
+      ...getDownloadTarget(completed ? 'completed' : 'failed', download.videoId, download.id),
+      title: completed ? t('Downloads.Download Complete') : t('Downloads.Download Failed'),
+      body: completed
+        ? t('Downloads.Download Complete Template', { title: download.title })
+        : download.errorMessage === 'ENOENT'
+          ? t('Downloads.yt-dlp Not Found')
+          : t('Downloads.Download Failed Template', { title: download.title }),
+      thumbnail: thumbnailPreference !== 'hidden' && !blurThumbnails ? download.thumbnail : undefined
+    })
+    if (notification) await notificationHistory.record(notification)
+  })
   handleTrusted(IpcChannels.NOTIFICATION_HISTORY_LIST, () => notificationHistory.list(), [])
   handleTrusted(IpcChannels.NOTIFICATION_HISTORY_MARK_READ, (_event, id) => (
     id === undefined || typeof id === 'string' ? notificationHistory.markRead(id) : undefined))
@@ -718,6 +735,11 @@ function runApp() {
   handleTrusted(IpcChannels.NOTIFICATION_HISTORY_CLEAR, () => notificationHistory.clear())
   handleTrusted(IpcChannels.NOTIFICATION_DISMISSALS_GET, () => notificationHistory.getDismissals())
   handleTrusted(IpcChannels.NOTIFICATION_DISMISSALS_MERGE, (_event, dismissals) => notificationHistory.mergeDismissals(dismissals))
+  handleTrusted(IpcChannels.NOTIFICATION_RECORD, (_event, value) => {
+    const notification = parseRecordedNotification(value)
+    // Like system notifications, the bell only keeps them while it shows.
+    if (notification && notificationMode === 'both') return notificationHistory.record(notification)
+  })
   handleTrusted(IpcChannels.NOTIFICATION_COMMENT, (_event, notification) => {
     const target = getCommentNotificationTarget(notification?.kind, notification?.videoId, notification?.commentId)
     if (!target || typeof notification.title !== 'string' || typeof notification.body !== 'string') return

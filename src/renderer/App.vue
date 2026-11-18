@@ -741,7 +741,14 @@ import { fetchReleasePages, findUpdateReleases, formatReleaseChangelog, schedule
 import { copyToClipboard, isUnloadedBackgroundTabClick, openExternalLink, openInExternalPlayer, openInternalPath, shareLink, showToast } from './helpers/utils'
 import { getChannelLinkDetails, getChannelLinkMenuItems } from './helpers/channel-context-menu'
 import { initializeCapacitorLiveReminderActions } from './helpers/liveReminders'
-import { showInAppNotification, supportsNotificationHistory } from './helpers/notificationHistory'
+import {
+  getSettingsNotificationTarget,
+  markOverNotificationsRead,
+  recordNotification,
+  setUpdateNotificationHandler,
+  showInAppNotification,
+  supportsNotificationHistory
+} from './helpers/notificationHistory'
 import { getNotificationOpenUrl } from '../notificationHistory'
 import {
   addAndroidMediaSessionActionListener,
@@ -1655,9 +1662,13 @@ async function initializeManagedExternalSoftware(requestedUpdates = null) {
     } else {
       if (failures.length > 0) {
         const errors = failures.map(({ binary, result }) => `${binary}: ${managedToolErrorMessage(result, t)}`).join('; ')
-        showToast({
-          message: t('Settings.Download Settings.Managed Tools Download Error Template', { errors }),
-          icon: ['fas', 'circle-exclamation'],
+        const message = t('Settings.Download Settings.Managed Tools Download Error Template', { errors })
+        showToast({ message, icon: ['fas', 'circle-exclamation'] })
+        recordNotification({
+          kind: 'tool-update-failed',
+          ...getSettingsNotificationTarget('external-software'),
+          title: t('Settings.External Software Settings.External Software Settings'),
+          body: message
         })
       }
     }
@@ -2538,14 +2549,31 @@ function showAvailableUpdateToast() {
         label: t('See changes and update'),
         icon: ['fas', 'file-lines'],
         primary: true,
-        action: () => {
-          updateChangelog.value = renderUpdateChangelog()
-          showReleaseNotes.value = true
-        }
+        action: openAvailableUpdate
       }
     ]
   })
 }
+
+function openAvailableUpdate() {
+  updateChangelog.value = renderUpdateChangelog()
+  showReleaseNotes.value = true
+}
+
+/**
+ * Opens the update a notification announces. A tab that has not found it, for
+ * example because it is installed now, shows the release on GitHub instead.
+ * @param {string | undefined} tagName
+ */
+function openUpdateNotification(tagName) {
+  if (availableUpdate !== null) {
+    store.dispatch('hideSettingsWindow')
+    openAvailableUpdate()
+  } else if (typeof tagName === 'string' && /^v[\w.-]+$/.test(tagName)) {
+    openExternalLink(`https://github.com/OpenTubeX/OpenTubeX/releases/tag/${tagName}`)
+  }
+}
+setUpdateNotificationHandler(openUpdateNotification)
 
 async function checkForNewUpdates() {
   // Self-hosted servers are updated by their admin
@@ -2560,6 +2588,8 @@ async function checkForNewUpdates() {
     const availableReleases = await fetchReleasePages(releasesUrl, fetch, packageDetails.version)
     const releases = findUpdateReleases(availableReleases, packageDetails.version)
     if (releases.length === 0) {
+      // The announced update is installed.
+      markOverNotificationsRead(entry => entry.kind === 'app-update')
       return
     }
 
@@ -2599,6 +2629,15 @@ async function checkForNewUpdates() {
     changeLogTitle.value = t('Update to {version}', { version: release.name ?? tagName })
     availableUpdate = { tagName, versionNumber }
     showAvailableUpdateToast()
+    // A newer release replaces the one announced before.
+    markOverNotificationsRead(entry => entry.kind === 'app-update' && entry.query?.version !== tagName)
+    recordNotification({
+      kind: 'app-update',
+      path: '/update',
+      query: { version: tagName },
+      title: changeLogTitle.value,
+      body: t('Version {versionNumber} is now available.', { versionNumber })
+    })
   } catch (error) {
     console.error('errored while checking for updates', releasesUrl, error)
   }

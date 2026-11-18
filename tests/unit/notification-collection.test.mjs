@@ -12,9 +12,11 @@ const readElsewhere = new Set()
 const toasts = []
 const dispatched = []
 const opened = []
+const committed = []
 const getters = { getNotificationMode: 'both' }
 let gate = null
 const [{ collectNotificationHistory, openNotificationEntry }] = await importWithStubs([sourceUrl('src/renderer/helpers/notificationHistory.js')], {
+  [sourceUrl('src/renderer/helpers/androidBackgroundSync.js')]: { isAndroidBackgroundRenderer: false },
   [sourceUrl('src/renderer/helpers/androidSubscriptionRefresh.js')]: {
     takeAndroidUploadNotifications: async () => {
       const notifications = queues.shift() ?? []
@@ -36,7 +38,7 @@ const [{ collectNotificationHistory, openNotificationEntry }] = await importWith
   [sourceUrl('src/renderer/helpers/liveReminders.js')]: { collectFiredCapacitorReminders: () => {} },
   [sourceUrl('src/renderer/helpers/utils.js')]: { getVideoThumbnailUrl: () => null, openInternalPath: options => { opened.push(options.path) }, showToast: (...args) => { toasts.push(args) } },
   [sourceUrl('src/renderer/i18n/index.js')]: { default: { global: { t: key => key } } },
-  [sourceUrl('src/renderer/store/index.js')]: { default: { getters, dispatch: action => { dispatched.push(action) } } }
+  [sourceUrl('src/renderer/store/index.js')]: { default: { getters, commit: (...args) => { committed.push(args) }, dispatch: action => { dispatched.push(action) } } }
 })
 
 const upload = id => ({ feedType: 'videos', id, live: false, title: 'New video', body: id, createdAt: 1, inApp: true })
@@ -68,13 +70,18 @@ test('uploads Android left to the app show no toast once notifications are off',
   getters.getNotificationMode = 'both'
 })
 
-test('opening a notification from settings closes them, unless it leads to the downloads there', () => {
+test('opening a notification from settings closes them, unless it leads to the downloads or a section there', () => {
   openNotificationEntry({ id: '1', read: true, path: '/watch/abc' })
   assert.deepEqual(dispatched, ['hideSettingsWindow'])
   assert.deepEqual(opened, ['/watch/abc'])
 
   dispatched.length = 0
   openNotificationEntry({ id: '2', read: true, path: '/downloads' })
+  assert.deepEqual(dispatched, ['showSettingsWindow'])
+
+  dispatched.length = 0
+  openNotificationEntry({ id: '3', read: true, path: '/settings', query: { section: 'sync' } })
+  assert.deepEqual(committed, [['setSettingsWindowSection', 'sync']])
   assert.deepEqual(dispatched, ['showSettingsWindow'])
 })
 

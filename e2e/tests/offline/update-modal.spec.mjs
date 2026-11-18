@@ -194,6 +194,16 @@ test('periodic update checks keep one notification for the newest release', asyn
   await expect(page.locator('.toast', { hasText: `Version ${newestUpdateVersion} is now available` })).toBeVisible()
   // A duplicate from the first recheck or the older toast would remain here
   await expect(page.locator('.toast', { hasText: 'is now available' })).toHaveCount(1)
+
+  // The bell keeps one entry for each release, and only the newest one unread.
+  await expect.poll(() => page.evaluate(async () => (await window.ftElectron.notificationHistory.list())
+    .map(entry => [entry.body, entry.read]))).toStrictEqual([
+    [`Version ${newestUpdateVersion} is now available.`, false],
+    [`Version ${olderUpdateVersion} is now available.`, true]
+  ])
+  await page.getByRole('button', { name: 'Notifications (1 unread)', exact: true }).click()
+  await page.locator('.notificationCenterDropdown .notificationEntry', { hasText: newestUpdateVersion }).click()
+  await expect(page.locator('.changeLogTitle')).toContainText(newestUpdateVersion)
 })
 
 test('a periodic check that finishes behind open release notes leaves them unchanged', async ({ page }) => {

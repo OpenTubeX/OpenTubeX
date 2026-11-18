@@ -1,5 +1,6 @@
 import {
   addNotificationHistoryEntries,
+  addRecordedNotification,
   applyNotificationDismissals,
   areNotificationDismissalsEqual,
   getDismissedNotificationEntries,
@@ -91,6 +92,17 @@ export const capacitorNotificationHistory = {
     if (added.length > 0) write(withAdditions, next)
     else closeStale(withAdditions, next)
     return added
+  },
+
+  /**
+   * Adds news the app showed itself, unless the history already holds it.
+   * @param {import('../../notificationHistory').NotificationHistoryInput} notification
+   */
+  async record(notification) {
+    const current = read()
+    const next = addRecordedNotification(current, notification)
+    // Entries that made room for the new one were not dismissed.
+    if (next !== current) write(next, next)
   },
 
   /**

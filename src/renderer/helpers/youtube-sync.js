@@ -4,6 +4,7 @@ import store from '../store/index'
 import i18n from '../i18n/index'
 import { MAIN_PROFILE_ID } from '../../constants'
 import { deepCopy, ERROR_TOAST_ICON, showToast } from './utils'
+import { recordNotification } from './notificationHistory'
 import { generateRandomUniqueId, SORT_BY_VALUES } from './playlists'
 import { getYouTubeChannelKey, getYouTubeSyncKey } from './youtube-account-state'
 import { setYouTubePlaylistChangeListener } from './youtube-playlist-changes'
@@ -186,9 +187,13 @@ async function syncSubscriptions(account) {
   await updateSyncState(key, { subscriptions: nextIds, subscriptionsSyncedAt: Date.now() })
 
   if (added.length > 0 || removedIds.length > 0) {
-    showToast({
-      message: i18n.global.t('YouTube Account.Subscriptions Synced', { added: added.length, removed: removedIds.length }),
-      icon: ['fas', 'subscriptions']
+    const message = i18n.global.t('YouTube Account.Subscriptions Synced', { added: added.length, removed: removedIds.length })
+    showToast({ message, icon: ['fas', 'subscriptions'] })
+    recordNotification({
+      kind: 'youtube-subscriptions',
+      path: '/subscribedchannels',
+      title: i18n.global.t('Settings.YouTube Account Settings.YouTube Account Settings'),
+      body: message
     })
   }
 }
