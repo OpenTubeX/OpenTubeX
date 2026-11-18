@@ -383,18 +383,31 @@ public class AppIconTest {
             cover = topWindowAt(point[0], point[1]);
         }
         assertNull("Another window covers the tap target " + selector, cover);
-        // Queue the release right behind the press. Waiting for the press to be
-        // handled first can outlast the long-press timeout on a slow emulator,
-        // and a long press does not click.
-        long down = SystemClock.uptimeMillis();
+        // While the system applies a component change, it can briefly route
+        // touches to the activity's input sink instead of its window, which
+        // drops them. Tap again only when the page never saw the press.
+        evaluate(scenario, "window.__tapReceived = false; document.addEventListener('pointerdown'," +
+            " () => { window.__tapReceived = true }, { capture: true, once: true })");
         android.app.UiAutomation automation = InstrumentationRegistry.getInstrumentation().getUiAutomation();
-        for (int action : new int[] {MotionEvent.ACTION_DOWN, MotionEvent.ACTION_UP}) {
-            MotionEvent event = MotionEvent.obtain(down, action == MotionEvent.ACTION_DOWN ? down : down + 50,
-                action, point[0], point[1], 0);
-            event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
-            assertTrue("The tap is injected", automation.injectInputEvent(event, action == MotionEvent.ACTION_UP));
-            event.recycle();
+        for (int attempt = 0; attempt < 3; attempt++) {
+            // Queue the release right behind the press. Waiting for the press to be
+            // handled first can outlast the long-press timeout on a slow emulator,
+            // and a long press does not click.
+            long down = SystemClock.uptimeMillis();
+            for (int action : new int[] {MotionEvent.ACTION_DOWN, MotionEvent.ACTION_UP}) {
+                MotionEvent event = MotionEvent.obtain(down, action == MotionEvent.ACTION_DOWN ? down : down + 50,
+                    action, point[0], point[1], 0);
+                event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
+                assertTrue("The tap is injected", automation.injectInputEvent(event, action == MotionEvent.ACTION_UP));
+                event.recycle();
+            }
+            long receivedDeadline = SystemClock.uptimeMillis() + 5000;
+            while (SystemClock.uptimeMillis() < receivedDeadline) {
+                if ("true".equals(evaluate(scenario, "window.__tapReceived"))) return;
+                Thread.sleep(100);
+            }
         }
+        fail("The page receives the tap on " + selector);
     }
 
     /** Returns the title of the topmost window at a screen point unless it belongs to this app. */
