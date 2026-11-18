@@ -156,6 +156,7 @@
         <FtElementList
           v-if="!hideChannelShorts && currentTab === 'shorts'"
           id="shortPanel"
+          appear
           :data="filteredShorts"
           :use-channels-hidden-preference="false"
           :youtube-style-shorts="useCustomShortsPlayer"
@@ -195,6 +196,7 @@
         <FtElementList
           v-if="!hideChannelPodcasts && currentTab === 'podcasts'"
           id="podcastPanel"
+          appear
           :data="latestPodcasts"
           :use-channels-hidden-preference="false"
           role="tabpanel"
@@ -210,6 +212,7 @@
         <FtElementList
           v-if="!hideChannelReleases && currentTab === 'releases'"
           id="releasePanel"
+          appear
           :data="latestReleases"
           :use-channels-hidden-preference="false"
           role="tabpanel"
@@ -225,6 +228,7 @@
         <FtElementList
           v-if="!hideChannelCourses && currentTab === 'courses'"
           id="coursesPanel"
+          appear
           :data="latestCourses"
           :use-channels-hidden-preference="false"
           role="tabpanel"
@@ -240,6 +244,7 @@
         <FtElementList
           v-if="!hideChannelShows && currentTab === 'shows'"
           id="showsPanel"
+          appear
           :data="latestShows"
           :use-channels-hidden-preference="false"
           role="tabpanel"
@@ -255,6 +260,7 @@
         <FtElementList
           v-if="!hideChannelPlaylists && currentTab === 'playlists'"
           id="playlistPanel"
+          appear
           :data="latestPlaylists"
           :use-channels-hidden-preference="false"
           role="tabpanel"
@@ -270,6 +276,7 @@
         <FtElementList
           v-if="!hideChannelCommunity && currentTab === 'community'"
           id="communityPanel"
+          appear
           class="communityPanel"
           :data="latestCommunityPosts"
           :use-channels-hidden-preference="false"
