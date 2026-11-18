@@ -195,11 +195,15 @@ function handleTitleMutation() {
   anchor.setAttribute('title', '')
   observer.takeRecords()
   mirrorTitle()
-  if (!title.trim()) {
-    hide()
+  if (!title.trim() || !needsTooltip(anchor)) {
+    // Keep a pending delay, so a title that changes back still waits for it
+    if (tooltip.matches(':popover-open')) hide()
   } else if (tooltip.matches(':popover-open')) {
     tooltip.textContent = title
     position()
+  } else if (showTimer === 0 && !suppressed) {
+    // The delay passed while the title was empty or its text fit
+    show()
   }
 }
 
