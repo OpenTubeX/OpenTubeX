@@ -28,6 +28,7 @@ import {
 import { historyChanges } from '../helpers/sync-history-changes.js'
 import { trackLocalSyncDeletions } from '../helpers/sync-deletions.js'
 import { MAIN_PROFILE_ID } from '../../constants'
+import { scopedActions } from '../helpers/dataScopeActions'
 
 function syncOnLocalChanges(store) {
   const revisions = new Map()
@@ -114,23 +115,28 @@ const confirmLocalSyncDeletions = trackLocalSyncDeletions({
   mainProfileId: MAIN_PROFILE_ID,
 })
 
+// These show the data of the active data scope, see `scopedActions`.
+function withScopedActions(module) {
+  return { ...module, actions: scopedActions(module.actions) }
+}
+
 export default createStore({
   modules: {
     aiSlopList,
     downloads,
-    history,
-    recommendations,
+    history: withScopedActions(history),
+    recommendations: withScopedActions(recommendations),
     invidious,
-    playlists,
+    playlists: withScopedActions(playlists),
     profiles,
     settings,
-    searchHistory,
+    searchHistory: withScopedActions(searchHistory),
     subscriptionCache,
     subscriptionGroups,
     utils,
     player,
     tabs,
-    watchStats,
+    watchStats: withScopedActions(watchStats),
     wellbeing,
     watchQueue,
     syncServer,

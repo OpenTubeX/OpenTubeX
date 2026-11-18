@@ -15,6 +15,7 @@ import { getProfileSyncSignature } from '../../src/renderer/helpers/profile-sync
 import watchQueue, { persistWatchQueue } from '../../src/renderer/store/modules/watch-queue.js'
 import { createHistoryChangeTracker } from '../../src/renderer/helpers/sync-history-changes.js'
 import { trackLocalSyncDeletions } from '../../src/renderer/helpers/sync-deletions.js'
+import { scopedActions } from '../../src/renderer/helpers/dataScopeActions.js'
 
 const sources = await Promise.all([
   'src/datastores/handlers/base.js',
@@ -44,6 +45,7 @@ function fixture () {
     recommendations,
     watchQueue,
     persistWatchQueue: store => persistWatchQueue(store, { getItem: () => null, setItem() {} }),
+    scopedActions,
     shareWellbeingAcrossWindows: () => {},
     createStore,
     getProfileSyncSignature,

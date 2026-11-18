@@ -131,3 +131,30 @@ test('separate profiles get valid, distinct datastore names on every platform', 
   for (const name of names) assert.match(`${name}-search-history`, /^[a-z0-9-]+$/)
   for (const invalid of ['', 'x'.repeat(65), null]) assert.throws(() => profileDatastorePrefix(invalid), TypeError)
 })
+
+test('a write that finishes after a switch to another profile leaves that profile’s shown data alone', async () => {
+  const { scopedActions } = await import('../../src/renderer/helpers/dataScopeActions.js')
+  const { setDataScope } = await import('../../src/datastores/handlers/dataScope.js')
+  let finishWrite
+  const commits = []
+  const actions = scopedActions({
+    async updateHistory({ commit }, record) {
+      await new Promise(resolve => { finishWrite = resolve })
+      commit('upsertToHistoryCache', record)
+    },
+  })
+  const context = { commit: (type, payload) => commits.push([type, payload.videoId]) }
+  try {
+    setDataScope(null)
+    const shared = actions.updateHistory(context, { videoId: 'shared' })
+    setDataScope('separate')
+    finishWrite()
+    await shared
+    const separate = actions.updateHistory(context, { videoId: 'separate' })
+    finishWrite()
+    await separate
+    assert.deepEqual(commits, [['upsertToHistoryCache', 'separate']])
+  } finally {
+    setDataScope(null)
+  }
+})
