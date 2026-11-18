@@ -8,6 +8,7 @@ import { DEFAULT_PROFILE_ICON } from '../../helpers/profileIcons'
 import { profileSyncSnapshot } from '../../helpers/profileSyncSnapshot'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 import { forgetWatchQueueScope } from './watch-queue'
+import { settleScopedActions } from '../../helpers/dataScopeActions'
 import { trackDataScopeLoad } from '../../helpers/sync-data-scope.js'
 
 const state = {
@@ -400,20 +401,27 @@ const actions = {
    * to or from a separate profile.
    */
   async loadDataScope({ dispatch, commit, getters, rootGetters }) {
-    const scope = getters.getActiveDataScope
-    if (scope === getDataScope()) return
-    setDataScope(scope)
-    const hadRecommendations = rootGetters.getRecommendationEpoch !== null
-    commit('clearRecommendationState')
+    if (getters.getActiveDataScope === getDataScope()) return
     // Sync waits until the store shows this profile's data.
-    await trackDataScopeLoad(Promise.all([
-      dispatch('grabHistory'),
-      dispatch('grabAllPlaylists'),
-      dispatch('grabSearchHistoryEntries', { replace: true }),
-      dispatch('loadWatchQueueScope', scope),
-      rootGetters.getEnableWatchStats ? dispatch('grabWatchStats') : null,
-      hadRecommendations ? dispatch('loadRecommendations') : null,
-    ]))
+    const scope = await trackDataScopeLoad((async () => {
+      // Writes that already started finish in the data they started in, as
+      // their later requests would otherwise reach this profile's data.
+      await settleScopedActions()
+      const scope = getters.getActiveDataScope
+      if (scope === getDataScope()) return scope
+      setDataScope(scope)
+      const hadRecommendations = rootGetters.getRecommendationEpoch !== null
+      commit('clearRecommendationState')
+      await Promise.all([
+        dispatch('grabHistory'),
+        dispatch('grabAllPlaylists'),
+        dispatch('grabSearchHistoryEntries', { replace: true }),
+        dispatch('loadWatchQueueScope', scope),
+        rootGetters.getEnableWatchStats ? dispatch('grabWatchStats') : null,
+        hadRecommendations ? dispatch('loadRecommendations') : null,
+      ])
+      return scope
+    })())
     if (scope === getDataScope()) await dispatch('applySyncServerDataScope')
   },
 }

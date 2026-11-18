@@ -158,3 +158,31 @@ test('a write that finishes after a switch to another profile leaves that profil
     setDataScope(null)
   }
 })
+
+test('a profile switch waits for running writes, so their later requests stay in the profile they started in', async () => {
+  const { scopedActions, settleScopedActions } = await import('../../src/renderer/helpers/dataScopeActions.js')
+  const { getDataScope, setDataScope } = await import('../../src/datastores/handlers/dataScope.js')
+  let finishFirstStep
+  const requests = []
+  const actions = scopedActions({
+    async removeAllVideos() {
+      requests.push(getDataScope())
+      await new Promise(resolve => { finishFirstStep = resolve })
+      requests.push(getDataScope())
+    },
+  })
+  try {
+    setDataScope(null)
+    const removal = actions.removeAllVideos({ commit() {} })
+    // Like `loadDataScope`
+    const switched = settleScopedActions().then(() => setDataScope('separate'))
+    await new Promise(resolve => setImmediate(resolve))
+    assert.equal(getDataScope(), null, 'the switch waits for the running write')
+    finishFirstStep()
+    await Promise.all([removal, switched])
+    assert.deepEqual(requests, [null, null])
+    assert.equal(getDataScope(), 'separate')
+  } finally {
+    setDataScope(null)
+  }
+})
