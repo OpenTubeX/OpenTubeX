@@ -267,7 +267,7 @@ Subscriptions:
     Followed Channels: Canles seguidas noutras plataformas
     Description: Segue canles de Twitch, SoundCloud, PeerTube, Rumble, Odysee e media.ccc.de para ver as súas publicacións na lapela Plataformas das túas subscricións. Atopa canles coa busca ou engádeas co enderezo da súa páxina. O seu contido reprodúcese con yt-dlp.
     Add Channel: Engadir canle
-    Channel URL: Enderezo da canle
+    Search Or Paste Channel: Busca ou pega o enderezo dunha canle
     Invalid Channel: Introduce o enderezo da páxina dunha canle de Twitch, SoundCloud, PeerTube, Rumble, Odysee ou media.ccc.de.
     Channel Not Found: Non hai ningunha canle neste enderezo.
     Channel Already Followed: Xa segues esta canle.

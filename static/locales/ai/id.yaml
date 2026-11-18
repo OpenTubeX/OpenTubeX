@@ -265,7 +265,7 @@ Subscriptions:
     Followed Channels: Kanal yang diikuti di platform lain
     Description: Ikuti kanal di Twitch, SoundCloud, PeerTube, Rumble, Odysee, dan media.ccc.de untuk melihat unggahan mereka di tab Platform pada langganan Anda. Temukan kanal melalui pencarian, atau tambahkan menggunakan alamat halamannya. Media mereka diputar dengan yt-dlp.
     Add Channel: Tambah Kanal
-    Channel URL: Alamat kanal
+    Search Or Paste Channel: Cari atau tempel alamat kanal
     Invalid Channel: Masukkan alamat halaman kanal di Twitch, SoundCloud, PeerTube, Rumble, Odysee, atau media.ccc.de.
     Channel Not Found: Tidak ada kanal di alamat ini.
     Channel Already Followed: Anda sudah mengikuti kanal ini.

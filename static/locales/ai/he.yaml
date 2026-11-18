@@ -267,7 +267,7 @@ Subscriptions:
     Followed Channels: ערוצים במעקב בפלטפורמות אחרות
     Description: אפשר לעקוב אחר ערוצים ב־Twitch, ב־SoundCloud, ב־PeerTube, ב־Rumble, ב־Odysee וב־media.ccc.de כדי לראות את ההעלאות שלהם בלשונית פלטפורמות שבמינויים. אפשר למצוא ערוצים בחיפוש, או להוסיף אותם לפי כתובת הדף שלהם. המדיה שלהם מתנגנת באמצעות yt-dlp.
     Add Channel: הוספת ערוץ
-    Channel URL: כתובת הערוץ
+    Search Or Paste Channel: חפשו או הדביקו כתובת של ערוץ
     Invalid Channel: יש להזין כתובת של דף ערוץ ב־Twitch, ב־SoundCloud, ב־PeerTube, ב־Rumble, ב־Odysee או ב־media.ccc.de.
     Channel Not Found: אין ערוץ בכתובת הזאת.
     Channel Already Followed: כבר עוקבים אחר הערוץ הזה.

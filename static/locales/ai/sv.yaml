@@ -265,7 +265,7 @@ Subscriptions:
     Followed Channels: Följda kanaler på andra plattformar
     Description: Följ kanaler på Twitch, SoundCloud, PeerTube, Rumble, Odysee och media.ccc.de för att se deras uppladdningar på fliken Plattformar i dina prenumerationer. Hitta kanaler med sökningen eller lägg till dem med adressen till deras sida. Deras media spelas upp med yt-dlp.
     Add Channel: Lägg till kanal
-    Channel URL: Kanaladress
+    Search Or Paste Channel: Sök eller klistra in en kanaladress
     Invalid Channel: Ange adressen till en kanalsida på Twitch, SoundCloud, PeerTube, Rumble, Odysee eller media.ccc.de.
     Channel Not Found: Det finns ingen kanal på den här adressen.
     Channel Already Followed: Du följer redan den här kanalen.
