@@ -673,6 +673,8 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .customThemeEditor {
+  --theme-editor-padding-inline: 24px;
+
   min-block-size: 0;
   block-size: 100%;
   box-sizing: border-box;
@@ -681,7 +683,7 @@ onBeforeUnmount(() => {
   gap: 12px;
   overflow: hidden;
   padding-block: 12px;
-  padding-inline: 24px;
+  padding-inline: var(--theme-editor-padding-inline);
 }
 
 .editorFooter,
@@ -751,11 +753,17 @@ onBeforeUnmount(() => {
   gap: 10px;
   overflow: auto;
   overscroll-behavior: contain;
+
+  /* Reach through the editor's padding so the scrollbar sits at its edge. */
+  margin-inline: calc(-1 * var(--theme-editor-padding-inline));
+  padding-inline: var(--theme-editor-padding-inline);
 }
 
 @container (width < 560px) {
   .customThemeEditor {
-    padding: 16px;
+    --theme-editor-padding-inline: 16px;
+
+    padding-block: 16px;
   }
 
   .themeSources {
