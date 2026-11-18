@@ -388,7 +388,9 @@ test('Android tracks landscape requests including metadata changes during fullsc
     video: { value: {} },
     rotateFullscreenToLandscape: { value: false },
     fullscreenAspectRatio: { value: 16 / 9 },
-    setFullscreenOrientation: async () => {},
+    touchControlsLocked: { value: false },
+    orientationRequests: 0,
+    setFullscreenOrientation: async () => { context.orientationRequests++ },
   }
   const request = vm.runInNewContext(`${predicate}\n${source.slice(start, end)}
     fullscreen => { requestFullscreenOrientation(fullscreen); return androidFullscreenRotationRequested }`, context)
@@ -403,6 +405,13 @@ test('Android tracks landscape requests including metadata changes during fullsc
   assert.equal(request(false), true, 'Exit must preserve the request until retention finishes')
   activeChanged(false)
   assert.equal(request(true), false, 'Reactivating a retained tab must not reuse its old rotation request')
+  // A video resize must not replace the orientation that locked touch controls hold.
+  context.touchControlsLocked.value = true
+  const requests = context.orientationRequests
+  request(true)
+  assert.equal(context.orientationRequests, requests)
+  request(false)
+  assert.equal(context.orientationRequests, requests + 1, 'Leaving fullscreen still releases the orientation')
 })
 
 test('Android rechecks fullscreen orientation when metadata aspect ratio arrives', async () => {

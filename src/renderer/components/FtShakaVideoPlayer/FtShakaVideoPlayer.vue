@@ -3714,6 +3714,7 @@ const {
   unlockButtonShown: touchControlsUnlockButtonShown,
   unlockHolding: touchControlsUnlockHolding,
   lockTouchControls,
+  unlockTouchControls,
 } = useTouchControlsLock({
   isAvailable: () => isActiveTab.value && (isFullscreen.value || fullWindowEnabled.value || androidFullscreenHostActive.value),
   getUnlockButton: () => touchControlsUnlockButton.value,
@@ -3725,6 +3726,7 @@ const {
     lockCurrentOrientation(() => touchControlsLocked.value).catch(() => {})
   },
   onUnlock() {
+    // The lock is already off here, so the fullscreen orientation request applies.
     if (androidRotationFullscreen) setLandscapeOrientation(androidRotationOrientationLocked).catch(() => {})
     else if (isNativeFullscreenActive()) requestFullscreenOrientation(true)
     else setLandscapeOrientation(false).catch(() => {})
@@ -3732,6 +3734,9 @@ const {
     syncAndroidStatusBarVisibility()
   },
 })
+// Runs before the rotation fullscreen handoff, so the next player inherits
+// the orientation policy instead of this lock.
+onBeforeUnmount(unlockTouchControls)
 
 // Capture the replacement player's initial state. The parent clears its
 // pending SABR state after this player loads, but that must not add autoplay
@@ -12006,6 +12011,8 @@ function offlineHandler() {
 
 let androidFullscreenRotationRequested = false
 function requestFullscreenOrientation(fullscreen) {
+  // Locked touch controls keep the orientation they locked, even when the video resizes.
+  if (fullscreen && touchControlsLocked.value) return
   // Keep this until exit finishes: unlocking after a preference/metadata
   // change can still have a rotation in flight when fullscreen closes.
   androidFullscreenRotationRequested ||= shouldRotateFullscreenToLandscape(fullscreen, video.value, rotateFullscreenToLandscape.value, fullscreenAspectRatio.value)
