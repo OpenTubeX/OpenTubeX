@@ -1990,7 +1990,7 @@
           type="button"
           :tabindex="scrollMiniPlayerDetached ? 0 : -1"
           class="scrollMiniPlayPause"
-          :class="{ isHidden: !scrollMiniPlayPauseVisible }"
+          :class="{ isHidden: !scrollMiniPlayPauseVisible, isPaused: scrollMiniIsPaused || playbackEnded }"
           :title="playbackEnded ? replayLabel : scrollMiniIsPaused ? $t('Video.Player.Scroll Mini Player.Play') : $t('Video.Player.Scroll Mini Player.Pause')"
           @click.stop.prevent="scrollMiniTogglePlayPause"
           @mouseenter="handleScrollMiniPlayPauseMouseEnter"
