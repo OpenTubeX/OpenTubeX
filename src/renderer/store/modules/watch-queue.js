@@ -94,6 +94,8 @@ export function persistWatchQueue(store, storage, sharedQueue) {
   restore()
 
   switchScope = async (nextScope) => {
+    // Snapshots of the shared queue carry a null scope.
+    nextScope ??= null
     if (nextScope === scope) return
     scope = nextScope
     latest = { revision: -1, items: [] }
