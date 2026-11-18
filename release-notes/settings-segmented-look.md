@@ -2,10 +2,10 @@
 category: improvement
 ---
 
-Settings has a new look, with colored category icons and a shorter category list without descriptions.
+Settings has a new look, with colored icons for categories and sections and a shorter category list without descriptions.
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/597c8788-aa89-4d10-b37d-6f1402d512c0">
-  <source media="(prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/c4f35667-1723-46c3-abf6-abb5fc263ca8">
-  <img alt="Playback settings with colored category icons" src="https://github.com/user-attachments/assets/597c8788-aa89-4d10-b37d-6f1402d512c0">
+  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/91e6327a-9d24-4c05-98d7-b0a8b7a22b33">
+  <source media="(prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/2475e942-ba92-490a-96af-c9d35cd2905c">
+  <img alt="Playback settings with colored category and section icons" src="https://github.com/user-attachments/assets/91e6327a-9d24-4c05-98d7-b0a8b7a22b33">
 </picture>
