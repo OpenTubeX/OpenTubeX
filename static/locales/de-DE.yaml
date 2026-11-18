@@ -1358,10 +1358,10 @@ Settings:
     'Limit the number of videos displayed for each channel': Anzahl der für jeden Kanal angezeigten Videos begrenzen
     To: Limitieren auf
     Auto Refresh Interval: Automatisches Aktualisierungsintervall
-    Videos Auto Refresh Interval: Automatisches Aktualisierungsinterval für Videos
-    Shorts Auto Refresh Interval: Automatisches Aktualisierungsinterval für Shorts
-    Live Auto Refresh Interval: Automatisches Aktualisierungsinterval für Livestreams
-    Posts Auto Refresh Interval: Automatisches Aktualisierungsinterval für Beiträge
+    Videos Auto Refresh Interval: Automatisches Aktualisierungsintervall für Videos
+    Shorts Auto Refresh Interval: Automatisches Aktualisierungsintervall für Shorts
+    Live Auto Refresh Interval: Automatisches Aktualisierungsintervall für Livestreams
+    Posts Auto Refresh Interval: Automatisches Aktualisierungsintervall für Beiträge
     RSS Feeds Auto Refresh Interval: Automatisches Aktualisierungsintervall für RSS-Feeds
     Refresh Subscriptions While App Is Closed: Abos bei geschlossener App aktualisieren
     Notify About New Uploads: Über neue Uploads benachrichtigen
