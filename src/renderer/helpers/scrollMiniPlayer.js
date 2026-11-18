@@ -371,10 +371,6 @@ export function getDockFromRect(rect, insets) {
  * @returns {Record<string, string>}
  */
 export function scrollMiniPlayerRectToStyle(rect) {
-  // Overlays (e.g. the SponsorBlock skip notice) are sized for a full-size
-  // player, so scale them to the available width, including on portrait videos.
-  const scale = Math.max(0.6, Math.min(1, rect.width / DEFAULT_SIZE))
-
   return {
     position: 'fixed',
     left: `${rect.left}px`,
@@ -382,7 +378,6 @@ export function scrollMiniPlayerRectToStyle(rect) {
     width: `${rect.width}px`,
     height: `${rect.height}px`,
     zIndex: '150',
-    '--scroll-mini-scale': `${scale}`,
   }
 }
 

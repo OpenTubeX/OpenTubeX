@@ -152,6 +152,12 @@
   pointer-events: none !important;
 }
 
+/* The mini player's pointer layer covers these panels, so their buttons and
+   links cannot be reached. They return when the player goes back inline. */
+.ftVideoPlayer.scrollMiniPlayer > :is(.skippedSegmentsWrapper, .sponsorBlockSubmissionWrapper, .endedScreen, .stats) {
+  display: none;
+}
+
 .ftVideoPlayer.scrollMiniPlayer .player {
   width: 100%;
   height: 100%;
