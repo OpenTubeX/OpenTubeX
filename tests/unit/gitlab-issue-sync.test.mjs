@@ -165,7 +165,7 @@ test('omits missing, confidential, and ambiguous counterparts without leaking pr
   assert.doesNotMatch(state.targets[2].body, /Secret|GitHub #50/)
 })
 
-test('GitLab requests retry transient failures except for note creation', async t => {
+test('GitLab requests retry transient failures, and note creation only when rate-limited', async t => {
   const requests = []
   const failures = [new TypeError('fetch failed', { cause: { code: 'ECONNRESET' } }), { ok: false, status: 502 }]
   t.mock.method(globalThis, 'fetch', async (url, options) => {
@@ -183,6 +183,11 @@ test('GitLab requests retry transient failures except for note creation', async 
   requests.length = 0
   await assert.rejects(client.gl('notes', 'POST', { body: 'Reply' }), { message: 'GitLab POST notes: TimeoutError' })
   assert.deepEqual(requests, ['POST'])
+  // A rate-limited note was rejected, so it waits for the reset and posts again.
+  failures.push({ ok: false, status: 429, headers: new Headers({ 'Retry-After': '0' }) })
+  requests.length = 0
+  assert.deepEqual(await client.gl('notes', 'POST', { body: 'Reply' }), [])
+  assert.deepEqual(requests, ['POST', 'POST'])
   failures.push(...Array(3).fill({ ok: false, status: 503 }))
   await assert.rejects(client.gl('user'), { message: 'GitLab GET user: HTTP 503' })
 })
