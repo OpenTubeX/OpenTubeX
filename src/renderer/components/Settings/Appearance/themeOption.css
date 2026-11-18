@@ -1,0 +1,54 @@
+/* Theme preview radios, shared by the theme gallery and the new-user tutorial */
+.themeOption {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-inline-size: 0;
+  cursor: pointer;
+}
+
+/* The preview is the control; the radio stays for keyboard and screen readers. */
+.themeOption input {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.optionPreview {
+  position: relative;
+  display: block;
+  border-radius: var(--shape-corner-medium);
+  outline: 1px solid var(--divider-color);
+  transition: outline-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+}
+
+.themeOption:hover .optionPreview {
+  outline: 2px solid var(--tertiary-text-color);
+}
+
+.themeOption:has(:checked) .optionPreview {
+  outline: 3px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+.themeOption:has(:focus-visible) .optionPreview {
+  outline: 3px solid var(--primary-color);
+  outline-offset: 4px;
+}
+
+.themeOption:active .optionPreview {
+  border-radius: var(--shape-corner-small);
+}
+
+.optionName {
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+
+.themeOption:has(:checked) .optionName {
+  font-weight: 600;
+}

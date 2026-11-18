@@ -1,0 +1,237 @@
+import assert from 'node:assert/strict'
+import fs from 'node:fs'
+import os from 'node:os'
+import path from 'node:path'
+import test from 'node:test'
+
+import {
+  cleanReleaseNotes,
+  prepareManifest,
+} from '../../_scripts/prepareWingetManifest.mjs'
+
+const VERSION = '1.2.3'
+const PRODUCT_CODE = 'a38f022d-fec2-5f80-a7fe-620ccf1a2767'
+
+function asset (architecture, digestCharacter) {
+  const name = `opentubex-${VERSION}-beta-setup-${architecture}.exe`
+
+  return {
+    browser_download_url: `https://github.com/OpenTubeX/OpenTubeX/releases/download/v${VERSION}-beta/${name}`,
+    digest: `sha256:${digestCharacter.repeat(64)}`,
+    name,
+  }
+}
+
+function installerManifest () {
+  return `PackageIdentifier: OpenTubeX.OpenTubeX
+PackageVersion: ${VERSION}
+InstallerType: nullsoft
+Protocols:
+- opentubex
+ProductCode: ${PRODUCT_CODE}
+ReleaseDate: 2000-01-01
+AppsAndFeaturesEntries:
+- DisplayName: Old name
+  ProductCode: ${PRODUCT_CODE}
+Installers:
+- Architecture: x64
+  InstallerUrl: ${asset('x64', 'a').browser_download_url}
+  InstallerSha256: ${'a'.repeat(64)}
+- Architecture: arm64
+  InstallerUrl: ${asset('arm64', 'b').browser_download_url}
+  InstallerSha256: ${'b'.repeat(64)}
+ManifestType: installer
+ManifestVersion: 1.28.0
+`
+}
+
+function scopedInstallers () {
+  return [
+    ['x64', 'user', '/CURRENTUSER', 'a'],
+    ['x64', 'machine', '/ALLUSERS', 'a'],
+    ['arm64', 'user', '/CURRENTUSER', 'b'],
+    ['arm64', 'machine', '/ALLUSERS', 'b'],
+  ].map(([architecture, scope, installerSwitch, digestCharacter]) => `- Architecture: ${architecture}
+  Scope: ${scope}
+  InstallerUrl: ${asset(architecture, digestCharacter).browser_download_url}
+  InstallerSha256: ${digestCharacter.repeat(64)}
+  InstallerSwitches:
+    Custom: ${installerSwitch}`).join('\n')
+}
+
+function localeManifest () {
+  return `PackageIdentifier: OpenTubeX.OpenTubeX
+PackageVersion: ${VERSION}
+PackageLocale: en-US
+PackageName: OpenTubeX
+Tags:
+- old-tag
+ReleaseNotes: |-
+  Old notes
+ReleaseNotesUrl: https://example.com/old
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
+`
+}
+
+test('release note cleanup removes promotional and image content', () => {
+  const markdown = `> [!NOTE]
+> OpenTubeX is now on ProductHunt
+> <a href="https://example.com"><img alt="badge" src="badge.svg"></a>
+
+## Highlights
+
+- Use the <kbd>Ctrl</kbd> key. ![Screenshot](screenshot.png)
+  <img alt="image" src="image.webp">
+
+## Improvements
+
+- Read [the guide](https://example.com).
+  image
+`
+
+  assert.equal(cleanReleaseNotes(markdown), `Highlights
+
+- Use the Ctrl key.
+
+Improvements
+
+- Read the guide.`)
+})
+
+test('release note cleanup stays within the WinGet schema limit', () => {
+  const bullet = '- A complete release note.\n'
+  const notes = cleanReleaseNotes(`## Highlights\n\n${bullet.repeat(500)}`)
+
+  assert(notes.length <= 10_000)
+  assert.match(notes, /- A complete release note\.$/)
+  assert(!notes.includes(bullet.repeat(500).trimEnd()))
+})
+
+test('release note cleanup keeps long single lines well formed', () => {
+  const notes = cleanReleaseNotes(`## Highlights\n\na${'🙂'.repeat(6_000)}`)
+
+  assert(notes.length <= 10_000)
+  assert(notes.length > 9_000)
+  assert(notes.isWellFormed())
+})
+
+test('manifest preparation applies release metadata and validates installers', (context) => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'winget-manifest-test-'))
+  context.after(() => fs.rmSync(directory, { recursive: true }))
+
+  fs.writeFileSync(path.join(directory, 'OpenTubeX.OpenTubeX.installer.yaml'), installerManifest())
+  fs.writeFileSync(path.join(directory, 'OpenTubeX.OpenTubeX.locale.en-US.yaml'), localeManifest())
+  fs.writeFileSync(path.join(directory, 'OpenTubeX.OpenTubeX.yaml'), `PackageIdentifier: OpenTubeX.OpenTubeX
+PackageVersion: ${VERSION}
+ManifestType: version
+ManifestVersion: 1.28.0
+`)
+
+  const result = prepareManifest({
+    manifestDirectory: directory,
+    release: {
+      assets: [asset('x64', 'a'), asset('arm64', 'b')],
+      body: `## Fixed bugs\n\n- Fixed a bug.\n\n<img alt="image" src="bug.png">\n\n${'- Additional release note.\n'.repeat(700)}`,
+      html_url: `https://github.com/OpenTubeX/OpenTubeX/releases/tag/v${VERSION}-beta`,
+      published_at: '2026-08-27T10:00:00Z',
+      tag_name: `v${VERSION}-beta`,
+    },
+    topics: {
+      names: ['youtube', 'privacy', 'electron'],
+    },
+  })
+
+  assert.deepEqual(result.tags, ['electron', 'privacy', 'youtube'])
+  assert(result.releaseNotes.length <= 10_000)
+  assert(result.releaseNotes.length > 9_000)
+  assert.match(result.releaseNotes, /^Fixed bugs\n\n- Fixed a bug\./)
+  assert.match(result.releaseNotes, /- Additional release note\.$/)
+  assert(!result.releaseNotes.includes('<img'))
+
+  const installer = fs.readFileSync(path.join(directory, 'OpenTubeX.OpenTubeX.installer.yaml'), 'utf8')
+  const locale = fs.readFileSync(path.join(directory, 'OpenTubeX.OpenTubeX.locale.en-US.yaml'), 'utf8')
+
+  assert.match(installer, /^ReleaseDate: 2026-08-27$/m)
+  assert.match(installer, /^- DisplayName: OpenTubeX 1\.2\.3$/m)
+  assert(installer.includes(`\nInstallers:\n${scopedInstallers()}\nManifestType: installer\n`))
+  assert.match(locale, /Tags:\n- electron\n- privacy\n- youtube/)
+  assert.match(locale, /ReleaseNotes: \|-\n {2}Fixed bugs\n\n {2}- Fixed a bug\./)
+  assert.match(locale, new RegExp(`ReleaseNotesUrl: https://github.com/OpenTubeX/OpenTubeX/releases/tag/v${VERSION}-beta`))
+})
+
+test('manifest preparation limits repository topics to sixteen unique tags', (context) => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'winget-manifest-test-'))
+  context.after(() => fs.rmSync(directory, { recursive: true }))
+
+  fs.writeFileSync(path.join(directory, 'OpenTubeX.OpenTubeX.installer.yaml'), installerManifest())
+  fs.writeFileSync(path.join(directory, 'OpenTubeX.OpenTubeX.locale.en-US.yaml'), localeManifest())
+  fs.writeFileSync(path.join(directory, 'OpenTubeX.OpenTubeX.yaml'), `PackageIdentifier: OpenTubeX.OpenTubeX
+PackageVersion: ${VERSION}
+`)
+
+  const topics = ['privacy', 'privacy', 'subscriptions', 'video', 'videos', 'youtube',
+    'electron', 'private-youtube', 'sponsorblock', 'tabbed-browsing', 'tabs',
+    'youtube-client', 'cross-platform', 'youtube-player', 'ad-free', 'android',
+    'capacitor', 'ios', 'yt-dlp']
+  const result = prepareManifest({
+    manifestDirectory: directory,
+    release: {
+      assets: [asset('x64', 'a'), asset('arm64', 'b')],
+      body: '## Fixed bugs\n\n- Fixed a bug.',
+      html_url: `https://github.com/OpenTubeX/OpenTubeX/releases/tag/v${VERSION}-beta`,
+      published_at: '2026-08-27T10:00:00Z',
+      tag_name: `v${VERSION}-beta`,
+    },
+    topics: { names: topics },
+  })
+
+  assert.equal(result.tags.length, 16)
+  assert(result.tags.includes('privacy'))
+  assert(result.tags.includes('capacitor'))
+  assert(!result.tags.includes('ios'))
+  assert(!result.tags.includes('yt-dlp'))
+  const locale = fs.readFileSync(path.join(directory, 'OpenTubeX.OpenTubeX.locale.en-US.yaml'), 'utf8')
+  const tagBlock = locale.split('Tags:\n')[1].split('\nReleaseNotes:')[0]
+  assert.equal(tagBlock.split('\n').length, 16)
+})
+
+function prepareInstallerManifest (installer) {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'winget-manifest-test-'))
+
+  try {
+    fs.writeFileSync(path.join(directory, 'OpenTubeX.OpenTubeX.installer.yaml'), installer)
+    fs.writeFileSync(path.join(directory, 'OpenTubeX.OpenTubeX.locale.en-US.yaml'), localeManifest())
+    fs.writeFileSync(path.join(directory, 'OpenTubeX.OpenTubeX.yaml'), `PackageIdentifier: OpenTubeX.OpenTubeX
+PackageVersion: ${VERSION}
+`)
+
+    return prepareManifest({
+      manifestDirectory: directory,
+      release: {
+        assets: [asset('x64', 'a'), asset('arm64', 'b')],
+        body: '## Fixed bugs\n\n- Fixed a bug.',
+        html_url: `https://github.com/OpenTubeX/OpenTubeX/releases/tag/v${VERSION}-beta`,
+        published_at: '2026-08-27T10:00:00Z',
+        tag_name: `v${VERSION}-beta`,
+      },
+      topics: { names: ['privacy'] },
+    })
+  } finally {
+    fs.rmSync(directory, { recursive: true })
+  }
+}
+
+test('manifest preparation rejects a missing installer architecture', () => {
+  assert.throws(
+    () => prepareInstallerManifest(installerManifest().replace(/- Architecture: arm64\n[^]*?(?=\nManifestType:)/, '')),
+    /Expected four installer entries/
+  )
+})
+
+test('manifest preparation rejects installers that already have scopes', () => {
+  assert.throws(
+    () => prepareInstallerManifest(installerManifest().replace(/(?<=\nInstallers:\n)[^]*?(?=\nManifestType:)/, scopedInstallers())),
+    /already have a scope or installer switches/
+  )
+})

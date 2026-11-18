@@ -3,7 +3,7 @@
     class="ft-list-hashtag ft-list-item"
     :class="{
       list: listType === 'list',
-      grid: listType === 'grid',
+      grid: listType !== 'list',
       [appearance]: true
     }"
   >
@@ -14,7 +14,7 @@
         aria-hidden="true"
         :to="url"
       >
-        <FontAwesomeIcon
+        <FtIcon
           class="hashtagImage"
           :icon="['fas', 'hashtag']"
         />
@@ -52,12 +52,13 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed } from 'vue'
 
 import store from '../../store/index'
 
-import { formatNumber, isNumberRounded } from '../../helpers/utils'
+import { formatNumber } from '../../helpers/utils'
+import { isRoundedNumber } from '../../helpers/viewCounts'
 
 const props = defineProps({
   data: {
@@ -85,11 +86,11 @@ const videoCount = props.data.videoCount
 const url = `/hashtag/${encodeURIComponent(title.substring(1))}`
 
 const formattedChannelCount = computed(() => {
-  return formatNumber(channelCount, channelCount != null && isNumberRounded(channelCount) ? { notation: 'compact' } : undefined)
+  return formatNumber(channelCount, channelCount != null && isRoundedNumber(channelCount) ? { notation: 'compact' } : undefined)
 })
 
 const formattedVideosCount = computed(() => {
-  return formatNumber(videoCount, videoCount != null && isNumberRounded(videoCount) ? { notation: 'compact' } : undefined)
+  return formatNumber(videoCount, videoCount != null && isRoundedNumber(videoCount) ? { notation: 'compact' } : undefined)
 })
 </script>
 

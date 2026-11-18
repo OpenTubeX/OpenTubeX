@@ -1,0 +1,30 @@
+/* phonePanelCard.css styles the surface; the page's card rules add the margins. */
+.phoneQueueButton {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-block-size: var(--phone-touch-target, 48px);
+  padding-block: 12px;
+  padding-inline: 16px;
+  border: 0;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.phoneQueueLabel {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.phoneQueuePreview {
+  display: block;
+  margin-block-start: 4px;
+  font-size: 0.875em;
+  color: var(--secondary-text-color);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

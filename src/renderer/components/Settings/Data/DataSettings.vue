@@ -1,0 +1,2364 @@
+<template>
+  <FtSettingsSection
+    :title="$t('Settings.Data Settings.Data Settings')"
+    hide-title
+  >
+    <h4 class="groupTitle">
+      {{ t('Settings.Data Settings.Complete backup') }}
+    </h4>
+    <FtFlexBox class="box">
+      <FtButton
+        :label="t('Settings.Data Settings.Import backup')"
+        :icon="['fas', 'folder-open']"
+        :disabled="backupBusy"
+        @click="selectUnifiedBackup"
+      />
+      <FtButton
+        v-if="!importOnly"
+        :label="t('Settings.Data Settings.Export backup')"
+        :icon="['fas', 'file-download']"
+        :disabled="backupBusy"
+        @click="openBackupExport"
+      />
+    </FtFlexBox>
+    <p class="importFormatsHint">
+      {{ t('Settings.Data Settings.Backup description') }}
+    </p>
+    <h4 class="groupTitle">
+      {{ t('Settings.Data Settings.Import YouTube Takeout ZIP') }}
+    </h4>
+    <FtFlexBox class="box">
+      <FtButton
+        :label="t('Settings.Data Settings.Import YouTube Takeout ZIP')"
+        :icon="['fas', 'folder-open']"
+        :disabled="takeoutBusy"
+        @click="selectTakeoutZip"
+      />
+    </FtFlexBox>
+    <h4 class="groupTitle">
+      {{ $t('Subscriptions.Subscriptions') }}
+      <FtTooltip
+        class="selectTooltip"
+        position="top"
+        :tooltip="t('Settings.Data Settings.Import subscription groups hint')"
+      />
+    </h4>
+    <FtFlexBox class="box">
+      <FtButton
+        :label="$t('Settings.Data Settings.Import Subscriptions')"
+        :icon="['fas', 'folder-open']"
+        @click="importSubscriptions"
+      />
+      <FtButton
+        v-if="!importOnly"
+        :label="$t('Settings.Data Settings.Manage Subscriptions')"
+        :icon="['fas', 'users']"
+        @click="openProfileSettings"
+      />
+      <FtButton
+        v-if="!importOnly"
+        :label="$t('Settings.Data Settings.Export Subscriptions')"
+        :icon="['fas', 'file-download']"
+        @click="showExportSubscriptionsPrompt = true"
+      />
+    </FtFlexBox>
+    <p class="importFormatsHint">
+      {{ t('Settings.Data Settings.Import subscriptions formats') }}
+    </p>
+    <FtFlexBox>
+      <p>
+        <a
+          class="importHelpLink"
+          href="https://opentubex.org/docs/importing/"
+        >
+          {{ $t("Settings.Data Settings.How do I import my subscriptions?") }}
+        </a>
+      </p>
+    </FtFlexBox>
+    <h4 class="groupTitle">
+      {{ $t('History.History') }}
+    </h4>
+    <FtFlexBox class="box">
+      <FtButton
+        :label="$t('Settings.Data Settings.Import History')"
+        :icon="['fas', 'folder-open']"
+        @click="importWatchHistory"
+      />
+      <FtButton
+        v-if="!importOnly"
+        :label="$t('Settings.Data Settings.Export History')"
+        :icon="['fas', 'file-download']"
+        @click="showExportWatchHistoryPrompt = true"
+      />
+    </FtFlexBox>
+    <p class="importFormatsHint">
+      {{ t('Settings.Data Settings.Import history formats') }}
+    </p>
+    <h4 class="groupTitle">
+      {{ $t('Playlists') }}
+    </h4>
+    <FtFlexBox class="box">
+      <FtButton
+        :label="$t('Settings.Data Settings.Import Playlists')"
+        :icon="['fas', 'folder-open']"
+        @click="importPlaylists"
+      />
+      <FtButton
+        v-if="!importOnly"
+        :label="$t('Settings.Data Settings.Export Playlists')"
+        :icon="['fas', 'file-download']"
+        @click="exportPlaylists"
+      />
+    </FtFlexBox>
+    <p class="importFormatsHint">
+      {{ t('Settings.Data Settings.Import playlists formats') }}
+    </p>
+    <h4 class="groupTitle">
+      {{ t('Settings.Data Settings.Search history') }}
+    </h4>
+    <FtFlexBox class="box">
+      <FtButton
+        :label="t('Settings.Data Settings.Import search history')"
+        :icon="['fas', 'folder-open']"
+        @click="importSearchHistory"
+      />
+      <FtButton
+        v-if="!importOnly"
+        :label="t('Settings.Data Settings.Export search history')"
+        :icon="['fas', 'file-download']"
+        @click="showExportSearchHistoryPrompt = true"
+      />
+    </FtFlexBox>
+    <p class="importFormatsHint">
+      {{ t('Settings.Data Settings.Import search history formats') }}
+    </p>
+    <h4 class="groupTitle">
+      {{ t('Settings.Settings') }}
+      <FtTooltip
+        class="selectTooltip"
+        position="top"
+        :tooltip="t('Settings.Data Settings.Settings Tooltip')"
+      />
+    </h4>
+    <FtFlexBox class="box">
+      <FtButton
+        :label="t('Settings.Data Settings.Import Settings')"
+        :icon="['fas', 'folder-open']"
+        @click="importSettings"
+      />
+      <FtButton
+        v-if="!importOnly"
+        :label="t('Settings.Data Settings.Export Settings')"
+        :icon="['fas', 'file-download']"
+        @click="exportSettings"
+      />
+    </FtFlexBox>
+    <FtSettingsSubpage
+      :open="showBackupExport"
+      :title="t('Settings.Data Settings.Export backup')"
+      :icon="['fas', 'file-download']"
+      @close="showBackupExport = false"
+    >
+      <div
+        class="takeoutSelection takeoutSelectionCentered"
+        :aria-busy="backupBusy"
+      >
+        <p>{{ t('Settings.Data Settings.Select export data') }}</p>
+        <FtCheckboxList
+          v-model="selectedExportSections"
+          :labels="backupLabels"
+          :values="BACKUP_SECTIONS"
+        />
+        <FtButton
+          :label="t('Settings.Data Settings.Export selected data')"
+          :icon="['fas', 'file-download']"
+          :disabled="backupBusy || selectedExportSections.length === 0"
+          @click="exportUnifiedBackup"
+        />
+      </div>
+    </FtSettingsSubpage>
+    <FtSettingsSubpage
+      :open="showBackupImport"
+      grow-with-content
+      :title="t('Settings.Data Settings.Import backup')"
+      :icon="['fas', 'folder-open']"
+      @close="closeBackupImport"
+    >
+      <div
+        ref="backupImportContent"
+        class="takeoutSelection takeoutSelectionCentered takeoutSelectionImport"
+        :aria-busy="backupBusy"
+      >
+        <p>{{ backupFilename }}</p>
+        <p>{{ t('Settings.Data Settings.Select backup data') }}</p>
+        <FtCheckboxList
+          v-model="selectedBackupSections"
+          :labels="backupImportLabels"
+          :values="backupImportSections"
+          :disabled="backupBusy"
+        />
+        <FtImportPreview
+          :rows="backupPreview.filter(row => selectedBackupSections.includes(row.category))"
+          :labels="Object.fromEntries(backupImportSections.map((value, index) => [value, backupImportLabels[index]]))"
+        />
+        <FtButton
+          v-if="selectedBackupSections.length > 0"
+          :label="t('Settings.Data Settings.Import selected data')"
+          :icon="['fas', 'folder-open']"
+          :disabled="backupBusy"
+          @click="importUnifiedBackup"
+        />
+      </div>
+    </FtSettingsSubpage>
+    <FtSettingsSubpage
+      :open="showTakeoutImport"
+      grow-with-content
+      :title="t('Settings.Data Settings.Import YouTube Takeout ZIP')"
+      :icon="['fas', 'folder-open']"
+      @close="closeTakeoutImport"
+    >
+      <div
+        ref="takeoutImportContent"
+        class="takeoutSelection takeoutSelectionCentered takeoutSelectionImport"
+        :aria-busy="takeoutBusy"
+      >
+        <p>{{ takeoutFilename }}</p>
+        <p>{{ t('Settings.Data Settings.Select Takeout data') }}</p>
+        <FtCheckboxList
+          v-model="selectedTakeoutTypes"
+          :labels="takeoutLabels"
+          :values="takeoutTypes"
+          :disabled="takeoutBusy"
+        />
+        <FtImportPreview
+          :rows="takeoutPreview.filter(row => selectedTakeoutTypes.includes(row.category))"
+          :labels="Object.fromEntries(takeoutTypes.map((value, index) => [value, takeoutLabels[index]]))"
+        />
+        <FtLoader
+          v-if="takeoutBusy"
+          :tab-loading-indicator="false"
+        />
+        <FtButton
+          v-if="selectedTakeoutTypes.length > 0 && !takeoutPreviewReady"
+          :label="t('Settings.Data Settings.Import Preview.Title')"
+          :icon="['fas', 'eye']"
+          :disabled="takeoutBusy"
+          @click="previewSelectedTakeoutData"
+        />
+        <FtButton
+          v-if="takeoutPreviewReady"
+          :label="t('Settings.Data Settings.Import selected data')"
+          :icon="['fas', 'folder-open']"
+          :disabled="takeoutBusy"
+          @click="importSelectedTakeoutData"
+        />
+      </div>
+    </FtSettingsSubpage>
+    <ExportTypePrompt
+      v-if="showExportSubscriptionsPrompt"
+      :options="subscriptionsExportOptions"
+      @select="exportSubscriptions"
+    />
+    <ExportTypePrompt
+      v-if="showExportWatchHistoryPrompt"
+      :options="historyExportOptions"
+      @select="exportWatchHistory"
+    />
+    <ExportTypePrompt
+      v-if="showExportSearchHistoryPrompt"
+      :options="historyExportOptions"
+      @select="exportSearchHistory"
+    />
+  </FtSettingsSection>
+  <ScheduledBackupSettings v-if="USING_ELECTRON && !importOnly" />
+  <FtSettingsSection
+    v-if="!importOnly"
+    class="advancedDataSettings"
+    :title="t('Settings.Categories.Advanced')"
+  >
+    <h4 class="groupTitle">
+      {{ t('Settings.Data Settings.Channel playback speeds') }}
+    </h4>
+    <FtFlexBox class="box">
+      <FtButton
+        :label="t('Settings.Data Settings.Import channel playback speeds')"
+        :icon="['fas', 'folder-open']"
+        :disabled="channelPlaybackSpeedsBusy"
+        @click="importChannelPlaybackSpeeds"
+      />
+    </FtFlexBox>
+    <Translation
+      keypath="Settings.Data Settings.Import channel playback speeds formats"
+      tag="p"
+      class="importFormatsHint"
+    >
+      <template #script>
+        <a
+          class="importHelpLink"
+          :href="SPEED_BY_CHANNEL_URL"
+        >{{ SPEED_BY_CHANNEL_NAME }}</a>
+      </template>
+    </Translation>
+  </FtSettingsSection>
+</template>
+
+<script setup>
+import { computed, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { Translation, useI18n } from 'vue-i18n'
+
+import FtButton from '../../FtButton/FtButton.vue'
+import FtCheckboxList from '../../FtCheckboxList/FtCheckboxList.vue'
+import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
+import FtSettingsSubpage from '../../FtSettingsSubpage/FtSettingsSubpage.vue'
+import ExportTypePrompt from '../../ExportTypePrompt/ExportTypePrompt.vue'
+import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
+import FtTooltip from '../../FtTooltip/FtTooltip.vue'
+import ScheduledBackupSettings from './ScheduledBackupSettings.vue'
+
+import store from '../../../store/index'
+import { defaultUpdaterId, NON_TRANSFERABLE_SETTINGS } from '../../../store/modules/settings'
+import { migrateLegacySettings } from '../../../helpers/settings-migrations'
+import { clampOverlayScrollTop } from '../../../helpers/overlayScrollbars'
+import { startProgressBarOperation } from '../../../helpers/progressBar'
+
+import { MAIN_PROFILE_ID } from '../../../../constants'
+import { calculateColorLuminance, getRandomColor } from '../../../helpers/colors'
+import {
+  deepCopy,
+  getTodayDateStrLocalTimezone,
+  pickFilesWithPicker,
+  pickFileWithPicker,
+  readFileWithPicker,
+  showToast,
+  writeFileWithPicker,
+} from '../../../helpers/utils'
+import { isPlaylistSortOrder, processToBeAddedPlaylistVideo } from '../../../helpers/playlists'
+import { normalizeRemoveWatchedVideosThreshold, stampPlaylistPreferenceEdits } from '../../../helpers/playlist-preferences-sync'
+import { normalizePlaylistThumbnail } from '../../../helpers/playlist-thumbnails'
+import {
+  convertLibreTubeSubscriptions,
+  convertLibreTubeWatchHistoryToOpenTubeX,
+  detectSubscriptionJsonFormat,
+  extractChannelIdFromUploaderUrl,
+  getLibreTubeSubscriptions,
+  isLibreTubeWatchHistoryBackup,
+} from '../../../helpers/libretube'
+import { parseLineDelimitedJson } from '../../../helpers/line-delimited-json'
+import { buildOpml, getOpmlYouTubeChannelId, parseOpmlFeeds } from '../../../helpers/opml'
+import { addChannelsToNamedGroups, normalizeSubscriptionGroups } from '../../../helpers/subscription-groups'
+import { updateChannelPreferences } from '../../../helpers/channel-preferences'
+import { checkYoutubeChannelId, resolveChannelId } from '../../../helpers/channels'
+import { parseSpeedByChannelValues, resolveSpeedByChannelValues } from '../../../helpers/speed-by-channel-import'
+import { previewBackupImport, previewTakeoutImport, parseTakeoutSubscriptions, parseTakeoutWatchHistory, parseTakeoutSearchHistory } from '../../../helpers/import-preview'
+import FtImportPreview from '../../FtImportPreview/FtImportPreview.vue'
+import FtLoader from '../../FtLoader/FtLoader.vue'
+import { BACKUP_SECTIONS } from '../../../helpers/unifiedBackup'
+import { runBackgroundJob } from '../../../helpers/background-jobs'
+import { isExternalMediaHistoryId } from '../../../helpers/externalMediaHistory'
+import { compactAllDatastores, DBHistoryHandlers, DBPlaylistHandlers, DBProfileHandlers, DBSearchHistoryHandlers, DBWatchStatsHandlers } from '../../../../datastores/handlers/index'
+import { forEachTakeoutImportEntry, forEachTakeoutPlaylistFile, listYouTubeTakeoutZipEntries } from '../../../helpers/youtube-takeout-zip'
+import {
+  normalizeSearchHistoryEntry,
+  normalizeSearchSettings,
+} from '../../../../search-history'
+
+defineProps({
+  /** Leaves out exports, scheduled backups, and advanced imports, for onboarding */
+  importOnly: {
+    type: Boolean,
+    default: false
+  }
+})
+
+const IMPORT_DIRECTORY_ID = 'data-settings-import'
+const START_IN_DIRECTORY = 'downloads'
+const USING_ELECTRON = process.env.IS_ELECTRON
+const { t } = useI18n()
+const backupImportContent = useTemplateRef('backupImportContent')
+const takeoutImportContent = useTemplateRef('takeoutImportContent')
+let importContentObserver
+watch([backupImportContent, takeoutImportContent], ([backup, takeout]) => {
+  importContentObserver?.disconnect()
+  const content = (backup ?? takeout)?.closest('.settingsSubpageContent')
+  const viewport = content?.closest('.settingsSubpageScroll')
+  if (!content || !viewport) return
+  const clampScroll = () => clampOverlayScrollTop(viewport, content)
+  importContentObserver = new ResizeObserver(clampScroll)
+  importContentObserver.observe(content)
+  importContentObserver.observe(viewport)
+  clampScroll()
+}, { flush: 'post' })
+onBeforeUnmount(() => importContentObserver?.disconnect())
+
+const backupBusy = ref(false)
+const showBackupImport = ref(false)
+const showBackupExport = ref(false)
+const selectedExportSections = ref([...BACKUP_SECTIONS])
+const backupFilename = ref('')
+const backupData = shallowRef(null)
+const backupPreview = shallowRef([])
+const selectedBackupSections = ref([...BACKUP_SECTIONS])
+const backupLabels = computed(() => [
+  t('Settings.Settings'),
+  t('Settings.Data Settings.Profiles and subscriptions'),
+  t('Playlists'),
+  t('History.History'),
+  t('Settings.Data Settings.Search history'),
+  t('Home Page.Watch statistics'),
+])
+
+const backupImportSections = computed(() => BACKUP_SECTIONS.filter(section => Object.hasOwn(backupData.value ?? {}, section)))
+const backupImportLabels = computed(() => backupImportSections.value.map(section => backupLabels.value[BACKUP_SECTIONS.indexOf(section)]))
+
+async function readImportState(sections) {
+  const readers = {
+    settings: () => deepCopy(transferableSettings.value),
+    profiles: () => DBProfileHandlers.find(),
+    playlists: () => DBPlaylistHandlers.find(),
+    history: () => DBHistoryHandlers.find(),
+    searchHistory: () => DBSearchHistoryHandlers.find(),
+    watchStats: () => DBWatchStatsHandlers.find(),
+  }
+  return Object.fromEntries(await Promise.all(sections.map(async section => [section, await readers[section]()])))
+}
+
+function openBackupExport() {
+  selectedExportSections.value = [...BACKUP_SECTIONS]
+  showBackupExport.value = true
+}
+
+function closeBackupImport() {
+  showBackupImport.value = false
+  backupData.value = null
+  backupPreview.value = []
+}
+
+async function exportUnifiedBackup() {
+  backupBusy.value = true
+  try {
+    const selected = [...selectedExportSections.value]
+    const exported = await promptAndWriteToFile(
+      `opentubex-backup-${getTodayDateStrLocalTimezone()}.zip`, async () => {
+        if (process.env.IS_ELECTRON) {
+          // The main process reads and compresses the library in a worker
+          // instead of copying it into this window. Writes still being
+          // prepared here are sent first, so the archive includes them.
+          const settings = selected.includes('settings') ? deepCopy(transferableSettings.value) : undefined
+          await Promise.all([DBHistoryHandlers.sent(), DBPlaylistHandlers.sent()])
+          return new Blob([await window.ftElectron.createBackupArchive(selected, settings)], { type: 'application/zip' })
+        }
+        const readers = {
+          settings: () => deepCopy(transferableSettings.value),
+          profiles: () => DBProfileHandlers.find(),
+          // Playlists synced from YouTube stay on YouTube.
+          playlists: async () => (await DBPlaylistHandlers.find()).filter(playlist => !playlist.youTube),
+          history: () => DBHistoryHandlers.find(),
+          searchHistory: () => DBSearchHistoryHandlers.find(),
+          watchStats: async () => {
+            const [records, adjustment] = await Promise.all([DBWatchStatsHandlers.find(), DBWatchStatsHandlers.getHistoricalAdjustment()])
+            return { records, adjustment }
+          },
+        }
+        const entries = await Promise.all(selected.map(async section => [section, await readers[section]()]))
+        return runBackgroundJob('createUnifiedBackup', Object.fromEntries(entries))
+      },
+      t('Settings.Data Settings.Complete backup'), 'application/zip', '.zip',
+      t('Settings.Data Settings.Backup exported')
+    )
+    if (exported) showBackupExport.value = false
+  } catch (error) {
+    showToast({ message: `${t('Settings.Data Settings.Unable to write file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
+  } finally {
+    backupBusy.value = false
+  }
+}
+
+async function selectUnifiedBackup() {
+  if (backupBusy.value) return
+  backupBusy.value = true
+  try {
+    const file = await pickFileWithPicker(t('Settings.Data Settings.Complete backup'), { 'application/zip': '.zip' }, IMPORT_DIRECTORY_ID, START_IN_DIRECTORY)
+    if (file === null) return
+    const { data } = await runBackgroundJob('readUnifiedBackup', file)
+    const current = await readImportState(Object.keys(data))
+    backupPreview.value = previewBackupImport(data, current)
+    backupFilename.value = file.name
+    backupData.value = data
+    selectedBackupSections.value = [...backupImportSections.value]
+    showBackupImport.value = true
+  } catch (error) {
+    showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
+  } finally {
+    backupBusy.value = false
+  }
+}
+
+async function importUnifiedBackup() {
+  if (backupBusy.value || !backupData.value) return
+  const authorizedRulesWrite = authorizeAutomaticDownloadRulesWrite()
+  backupBusy.value = true
+  const selected = new Set(selectedBackupSections.value)
+  const data = backupData.value
+  try {
+    // The datastore merges each record with the one stored when it is
+    // written, so edits other windows save during the restore are kept.
+    if (selected.has('profiles')) {
+      for (const profile of data.profiles) await DBProfileHandlers.mergeBackup(profile)
+      await store.dispatch('grabAllProfiles')
+    }
+    if (selected.has('playlists')) {
+      for (const playlist of data.playlists) await normalizeImportedPlaylistThumbnail(playlist)
+      if (await store.dispatch('mergePlaylistBackup', data.playlists) !== true) throw new Error('Could not restore playlists')
+    }
+    if (selected.has('history') && await store.dispatch('mergeHistoryBackup', data.history) !== true) {
+      throw new Error('Could not restore history')
+    }
+    if (selected.has('searchHistory')) {
+      if (await store.dispatch('importSearchHistory', data.searchHistory) !== true) throw new Error('Could not restore search history')
+    }
+    if (selected.has('watchStats')) {
+      await DBWatchStatsHandlers.mergeBackup(data.watchStats)
+      await store.dispatch('grabWatchStats')
+    }
+    if (selected.has('settings')) {
+      const failure = settingsImportFailureMessage(await applyImportedSettings(data.settings, authorizedRulesWrite))
+      if (failure) {
+        showToast({ message: failure, icon: ['fas', 'circle-exclamation'] })
+        return
+      }
+    }
+    const compaction = await compactAllDatastores().catch(() => false)
+    closeBackupImport()
+    showToast({ message: t('Settings.Data Settings.Backup imported'), icon: ['fas', 'check'] })
+    if (compaction !== true && (!Array.isArray(compaction) || compaction.some(result => result.status === 'rejected'))) {
+      showToast({ message: t('Settings.Storage Settings.Cleanup Failed'), icon: ['fas', 'circle-exclamation'] })
+    }
+  } catch (error) {
+    showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
+  } finally {
+    backupBusy.value = false
+  }
+}
+
+const showTakeoutImport = ref(false)
+const takeoutBusy = ref(false)
+const takeoutFilename = ref('')
+const takeoutFile = shallowRef(null)
+const takeoutEntries = shallowRef([])
+const takeoutPreview = shallowRef([])
+const selectedTakeoutTypes = ref([])
+const takeoutPreviewReady = computed(() => selectedTakeoutTypes.value.length > 0 && selectedTakeoutTypes.value.every(type => takeoutPreview.value.some(row => row.category === type)))
+const takeoutTypes = computed(() => [...new Set(takeoutEntries.value.map(entry => entry.type))])
+const takeoutLabels = computed(() => takeoutTypes.value.map(type => {
+  return {
+    subscriptions: t('Subscriptions.Subscriptions'),
+    history: t('History.History'),
+    searchHistory: t('Settings.Data Settings.Search history'),
+    playlists: t('Playlists'),
+  }[type]
+}))
+
+function closeTakeoutImport() {
+  showTakeoutImport.value = false
+  takeoutFile.value = null
+  takeoutEntries.value = []
+  takeoutPreview.value = []
+  selectedTakeoutTypes.value = []
+}
+
+async function selectTakeoutZip() {
+  if (takeoutBusy.value) return
+  takeoutBusy.value = true
+  try {
+    const file = await pickFileWithPicker(
+      t('Settings.Data Settings.Import YouTube Takeout ZIP'),
+      { 'application/zip': '.zip' },
+      IMPORT_DIRECTORY_ID,
+      START_IN_DIRECTORY
+    )
+    if (file === null) { return }
+    const entries = await listYouTubeTakeoutZipEntries(file)
+    if (entries.length === 0) {
+      showToast({ message: t('Settings.Data Settings.No supported Takeout data'), icon: ['fas', 'circle-exclamation'] })
+      return
+    }
+    takeoutFilename.value = file.name
+    takeoutFile.value = file
+    takeoutEntries.value = entries
+    selectedTakeoutTypes.value = [...new Set(entries.map(entry => entry.type))]
+    showTakeoutImport.value = true
+  } catch (error) {
+    showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
+  } finally {
+    takeoutBusy.value = false
+  }
+}
+
+/** Decode only the categories chosen after lightweight archive discovery. */
+async function previewSelectedTakeoutData() {
+  const file = takeoutFile.value
+  if (takeoutBusy.value || !file || selectedTakeoutTypes.value.length === 0) return
+  takeoutBusy.value = true
+  const selected = new Set(selectedTakeoutTypes.value)
+  const entries = takeoutEntries.value.filter(entry => selected.has(entry.type))
+  try {
+    const current = await readImportState([...selected].filter(type => type !== 'subscriptions'))
+    const preview = await previewTakeoutImport(file, entries, { ...current, subscriptions: primaryProfile.value.subscriptions })
+    if (takeoutFile.value === file) takeoutPreview.value = preview
+  } catch (error) {
+    showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
+  } finally {
+    takeoutBusy.value = false
+  }
+}
+
+async function importSelectedTakeoutData() {
+  if (takeoutBusy.value || !takeoutFile.value || !takeoutPreviewReady.value) return
+  takeoutBusy.value = true
+  const selected = new Set(selectedTakeoutTypes.value)
+  let importedPlaylistCount = 0
+  let failedPlaylists = false
+  try {
+    await forEachTakeoutImportEntry(takeoutFile.value, selected, takeoutEntries.value, async entry => {
+      if (entry.type === 'subscriptions') {
+        await addSubscriptionsToPrimaryProfile(parseTakeoutSubscriptions(entry))
+      } else if (entry.type === 'history') {
+        await importYouTubeWatchHistory(JSON.parse(entry.content))
+      } else if (entry.type === 'searchHistory') {
+        await importYouTubeSearchHistory(JSON.parse(entry.content))
+      } else if (entry.type === 'playlists') {
+        await importTakeoutPlaylist(entry.playlist)
+        importedPlaylistCount++
+      }
+    }, (error, type, path) => {
+      if (type === 'playlists') failedPlaylists = true
+      console.error('Unable to import Takeout entry', path, error)
+      showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${path ?? error}`, icon: ['fas', 'circle-exclamation'] })
+    })
+    if (importedPlaylistCount > 0 && !failedPlaylists) {
+      showPlaylistsImportedToast(importedPlaylistCount, importedPlaylistCount)
+    }
+    closeTakeoutImport()
+  } catch (error) {
+    showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
+  } finally {
+    takeoutBusy.value = false
+  }
+}
+
+function openProfileSettings() {
+  store.dispatch('showSettingsWindow', 'profile')
+}
+
+/**
+ * @param {string} fileName
+ * @param {string | Blob | (() => Promise<Blob>)} content
+ * @param {string} fileTypeDescription
+ * @param {string} mimeType
+ * @param {string} fileExtension
+ * @param {string} successMessage
+ */
+async function promptAndWriteToFile(
+  fileName,
+  content,
+  fileTypeDescription,
+  mimeType,
+  fileExtension,
+  successMessage
+) {
+  try {
+    const response = await writeFileWithPicker(
+      fileName,
+      content,
+      fileTypeDescription,
+      mimeType,
+      fileExtension,
+      'data-settings-export',
+      START_IN_DIRECTORY
+    )
+
+    if (response) {
+      showToast({ message: successMessage, icon: ['fas', 'check'] })
+    }
+    return response
+  } catch (error) {
+    const message = t('Settings.Data Settings.Unable to write file')
+    showToast({ message: `${message}: ${error}`, icon: ['fas', 'circle-exclamation'] })
+  }
+}
+
+/**
+ * @param {string} content
+ * @param {string} invalidMessage
+ */
+function parseImportedJson(content, invalidMessage) {
+  try {
+    return JSON.parse(content)
+  } catch (error) {
+    console.error('Unable to parse imported JSON file', error)
+    showToast({ message: invalidMessage, icon: ['fas', 'circle-exclamation'] })
+    return null
+  }
+}
+
+/**
+ * @param {string} content
+ * @returns {unknown[] | null}
+ */
+function parseImportedLineDelimitedJson(content) {
+  const { records, errors } = parseLineDelimitedJson(content)
+
+  errors.forEach(error => console.error('Unable to parse imported JSON row', error))
+  // Only the first row is named, so a file that is not JSON at all cannot raise a toast per line
+  if (errors.length > 0) {
+    showToast({
+      message: t('Settings.Data Settings.Invalid JSON row, skipping item', { row: errors[0].rowNumber }),
+      icon: ['fas', 'circle-exclamation'],
+    })
+  }
+
+  return records.length === 0 ? null : records
+}
+
+/**
+ * Shows each warning of one import once. A file of the wrong kind can have
+ * thousands of rows, and a toast for each of them freezes the app.
+ */
+function createImportWarnings() {
+  const shown = new Set()
+  /** @param {string} message */
+  return (message) => {
+    if (shown.has(message)) return
+    shown.add(message)
+    showToast({ message, icon: ['fas', 'circle-exclamation'] })
+  }
+}
+
+/**
+ * @param {unknown} value
+ * @returns {value is Record<string, unknown>}
+ */
+function isJsonObject(value) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value)
+}
+
+const subscriptionsExportOptions = computed(() => {
+  const exportFreeTube = t('Settings.Data Settings.Export OpenTubeX')
+  const exportYouTube = t('Settings.Data Settings.Export YouTube')
+
+  return [
+    { label: `${exportFreeTube} (.db)`, value: 'freetube', icon: ['fas', 'database'] },
+    { label: `${exportYouTube} (.csv)`, value: 'youtubenew', icon: ['fab', 'youtube'] },
+    { label: `${exportYouTube} (.json)`, value: 'youtube', icon: ['fab', 'youtube'] },
+    { label: `${exportYouTube} (.opml)`, value: 'youtubeold', icon: ['fab', 'youtube'] },
+    { label: `${t('Settings.Data Settings.Export NewPipe')} (.json)`, value: 'newpipe', icon: ['fas', 'file-export'] }
+  ]
+})
+
+const profileList = computed(() => store.getters.getProfileList)
+const primaryProfile = computed(() => deepCopy(profileList.value[0]))
+
+// #region subscriptions import
+
+async function importSubscriptions() {
+  let response
+  try {
+    response = await readFileWithPicker(
+      t('Settings.Data Settings.Subscription File'),
+      {
+        'application/x-freetube-db': '.db',
+        'text/csv': '.csv',
+        'application/json': '.json',
+        'application/xml': ['.xml', '.opml']
+      },
+      IMPORT_DIRECTORY_ID,
+      START_IN_DIRECTORY
+    )
+  } catch (err) {
+    const message = t('Settings.Data Settings.Unable to read file')
+    showToast({ message: `${message}: ${err}`, icon: ['fas', 'circle-exclamation'] })
+    return
+  }
+
+  if (response === null) {
+    return
+  }
+
+  const { filename, content } = response
+
+  try {
+    if (filename.endsWith('.csv')) {
+      await importYouTubeSubscriptions(filename, content)
+    } else if (filename.endsWith('.db')) {
+      const records = parseImportedLineDelimitedJson(content)
+      if (records !== null) {
+        await importFreeTubeSubscriptions(records)
+      }
+    } else if (filename.endsWith('.opml') || filename.endsWith('.xml')) {
+      await importOpmlYouTubeSubscriptions(content)
+    } else if (filename.endsWith('.json')) {
+      const jsonContent = parseImportedJson(content, t('Settings.Data Settings.Invalid subscriptions file'))
+      if (jsonContent === null) {
+        return
+      }
+
+      const subscriptionFormat = detectSubscriptionJsonFormat(jsonContent)
+
+      switch (subscriptionFormat) {
+        case 'libretube-backup':
+          await importLibreTubeSubscriptions(getLibreTubeSubscriptions(jsonContent))
+          break
+        case 'libretube-freetube':
+          await importLibreTubeSubscriptions(jsonContent.subscriptions)
+          break
+        case 'newpipe':
+          await importNewPipeSubscriptions(jsonContent)
+          break
+        case 'youtube':
+          await importYouTubeSubscriptions(filename, content)
+          break
+        default:
+          showToast({
+            message: t('Settings.Data Settings.Invalid subscriptions file'),
+            icon: ['fas', 'circle-exclamation'],
+          })
+      }
+    }
+  } catch (error) {
+    showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
+  }
+}
+
+/**
+ * @param {(progressOperation: ReturnType<typeof startProgressBarOperation>) => Promise<void> | void} importSubscriptions
+ */
+function runWithDataImportProgress(importSubscriptions) {
+  const progressOperation = startProgressBarOperation(store, {
+    icon: ['fas', 'sync'],
+    message: '',
+    percentage: 0,
+  })
+  try {
+    const result = importSubscriptions(progressOperation)
+    if (result instanceof Promise) {
+      return result.finally(() => progressOperation.finish())
+    }
+    progressOperation.finish()
+  } catch (error) {
+    progressOperation.finish()
+    throw error
+  }
+}
+
+/**
+ * @param {any[]} oldData
+ */
+function convertOldFreeTubeFormatToNew(oldData) {
+  const convertedData = []
+  for (const channel of oldData) {
+    const listOfProfilesAlreadyAdded = []
+    for (const profile of channel.profile) {
+      let index = convertedData.findIndex(p => p.name === profile.value)
+      if (index === -1) { // profile doesn't exist yet
+        const randomBgColor = getRandomColor().value
+        const contrastyTextColor = calculateColorLuminance(randomBgColor)
+        convertedData.push({
+          name: profile.value,
+          bgColor: randomBgColor,
+          textColor: contrastyTextColor,
+          subscriptions: [],
+          _id: channel._id
+        })
+        index = convertedData.length - 1
+      } else if (listOfProfilesAlreadyAdded.includes(index)) {
+        continue
+      }
+      listOfProfilesAlreadyAdded.push(index)
+      convertedData[index].subscriptions.push({
+        id: channel.channelId,
+        name: channel.channelName,
+        thumbnail: channel.channelThumbnail
+      })
+    }
+  }
+  return convertedData
+}
+
+/**
+ * FreeTube's subscription-cache.db sits next to profiles.db and only holds
+ * the cached feeds of each channel, not the subscriptions themselves.
+ * @param {unknown[]} records
+ */
+function isSubscriptionCacheFile(records) {
+  const feedKeys = ['videosTimestamp', 'liveStreamsTimestamp', 'shortsTimestamp', 'communityPostsTimestamp']
+  return records.some(record => isJsonObject(record) && feedKeys.some(key => Object.hasOwn(record, key))) &&
+    !records.some(record => isJsonObject(record) && Object.hasOwn(record, 'subscriptions'))
+}
+
+/**
+ * The channels of an imported profile, or null when it has none to read
+ * @param {unknown} subscriptions
+ */
+function importedProfileChannels(subscriptions) {
+  if (!Array.isArray(subscriptions)) return null
+  return subscriptions.filter(channel => isJsonObject(channel) && typeof channel.id === 'string' && channel.id !== '')
+}
+
+/**
+ * @param {unknown[]} profileRecords
+ */
+async function importFreeTubeSubscriptions(profileRecords) {
+  if (isSubscriptionCacheFile(profileRecords)) {
+    showToast({
+      message: t('Settings.Data Settings.Subscription cache file'),
+      icon: ['fas', 'circle-exclamation'],
+      time: 15000,
+    })
+    return
+  }
+
+  const warn = createImportWarnings()
+  const firstEntry = profileRecords[0]
+  if (
+    isJsonObject(firstEntry) &&
+    firstEntry.channelId &&
+    firstEntry.channelName &&
+    firstEntry.channelThumbnail &&
+    firstEntry._id &&
+    firstEntry.profile
+  ) {
+    // Old FreeTube subscriptions format detected, so convert it to the new one:
+    profileRecords = convertOldFreeTubeFormatToNew(profileRecords)
+  }
+
+  const requiredKeys = [
+    '_id',
+    'name',
+    'bgColor',
+    'textColor',
+    'subscriptions'
+  ]
+  const optionalKeys = [
+    'icon'
+  ]
+  const knownKeys = [...requiredKeys, ...optionalKeys]
+  // Each write merges with the saved profile, so changes made meanwhile stay.
+  // Every profile is checked before the first write, so a bad one cannot leave the import half done.
+  const importedPrimaryProfile = { _id: MAIN_PROFILE_ID, subscriptions: [] }
+  let shouldUpdatePrimaryProfile = false
+  /** @type {(() => Promise<boolean>)[]} */
+  const profileWrites = []
+
+  profileRecords.forEach((profileData) => {
+    // We would technically already be done by the time the data is parsed,
+    // however we want to limit the possibility of malicious data being sent
+    // to the app, so we'll only grab the data we need here.
+
+    if (!isJsonObject(profileData)) {
+      warn(t('Settings.Data Settings.Profile object has insufficient data, skipping item'))
+      return
+    }
+
+    const profileObject = {}
+    Object.keys(profileData).forEach((key) => {
+      if (!knownKeys.includes(key)) {
+        warn(`${t('Settings.Data Settings.Unknown data key')}: ${key}`)
+      } else {
+        profileObject[key] = profileData[key]
+      }
+    })
+
+    const hasAllRequiredKeys = requiredKeys.every(key => Object.hasOwn(profileObject, key))
+    const channels = hasAllRequiredKeys ? importedProfileChannels(profileObject.subscriptions) : null
+    if (channels === null || typeof profileObject._id !== 'string' || typeof profileObject.name !== 'string') {
+      warn(t('Settings.Data Settings.Profile object has insufficient data, skipping item'))
+    } else {
+      profileObject.subscriptions = channels
+      const icon = Object.hasOwn(profileObject, 'icon') ? { icon: profileObject.icon } : {}
+      if (profileObject._id === MAIN_PROFILE_ID) {
+        Object.assign(importedPrimaryProfile, icon)
+      } else {
+        const existingProfile = profileList.value.find((profile) => {
+          return profile._id !== MAIN_PROFILE_ID && profile.name === profileObject.name
+        })
+
+        if (existingProfile !== undefined) {
+          // Recreated in full if another window deletes it meanwhile
+          profileWrites.push(() => store.dispatch('mergeImportedProfile', { ...profileObject, _id: existingProfile._id }))
+        } else {
+          const hasProfileIdCollision = profileList.value.some((profile) => {
+            return profile._id === profileObject._id
+          })
+
+          if (hasProfileIdCollision) {
+            const newProfile = { ...profileObject }
+            delete newProfile._id
+            profileWrites.push(() => store.dispatch('createProfile', newProfile))
+          } else {
+            profileWrites.push(() => store.dispatch('mergeImportedProfile', profileObject))
+          }
+        }
+      }
+
+      importedPrimaryProfile.subscriptions.push(...channels)
+      shouldUpdatePrimaryProfile = true
+    }
+  })
+
+  if (!shouldUpdatePrimaryProfile) {
+    return
+  }
+
+  profileWrites.push(() => store.dispatch('mergeImportedProfile', importedPrimaryProfile))
+  const results = await Promise.all(profileWrites.map(write => write()))
+  if (results.some(result => result !== true)) {
+    throw new Error('Could not import profiles')
+  }
+
+  showToast({
+    message: t('Settings.Data Settings.All subscriptions and profiles have been successfully imported'),
+    icon: ['fas', 'subscriptions'],
+  })
+}
+
+/**
+ * Imports a YouTube subscriptions CSV or JSON export, which Takeout archives also contain.
+ * @param {string} filename
+ * @param {string} content
+ */
+function importYouTubeSubscriptions(filename, content) {
+  let subscriptions
+  try {
+    subscriptions = parseTakeoutSubscriptions({ path: filename, content })
+  } catch (error) {
+    console.error(error)
+    showToast({ message: t('Settings.Data Settings.Invalid subscriptions file'), icon: ['fas', 'circle-exclamation'] })
+    return
+  }
+
+  return runWithDataImportProgress(() => addSubscriptionsToPrimaryProfile(subscriptions))
+}
+
+/**
+ * @param {string} data
+ */
+function importOpmlYouTubeSubscriptions(data) {
+  const subscriptions = parseOpmlFeeds(data).flatMap(({ xmlUrl, title, folders }) => {
+    const id = getOpmlYouTubeChannelId(xmlUrl)
+    if (id === null) {
+      console.error(`Unknown xmlUrl format: ${xmlUrl}`)
+      return []
+    }
+    return [{ id, name: title, thumbnail: null, groups: folders }]
+  })
+  if (subscriptions.length === 0) {
+    showToast({ message: t('Settings.Data Settings.Invalid subscriptions file'), icon: ['fas', 'circle-exclamation'] })
+    return
+  }
+
+  return runWithDataImportProgress(() => addSubscriptionsToPrimaryProfile(subscriptions))
+}
+
+/**
+ * @param {object[]} libreTubeSubscriptions
+ */
+function importLibreTubeSubscriptions(libreTubeSubscriptions) {
+  const subscriptions = convertLibreTubeSubscriptions(libreTubeSubscriptions)
+
+  if (subscriptions.length === 0) {
+    showToast({ message: t('Settings.Data Settings.Invalid subscriptions file'), icon: ['fas', 'circle-exclamation'] })
+    return
+  }
+
+  return runWithDataImportProgress(() => addSubscriptionsToPrimaryProfile(subscriptions))
+}
+
+/**
+ * Adds the channels that are not subscribed yet to the primary profile, and
+ * to the groups they name.
+ * @param {{ id: string | null | undefined, name: string, thumbnail: string | null, groups?: string[] }[]} subscriptions
+ */
+async function addSubscriptionsToPrimaryProfile(subscriptions) {
+  // Every caller imports YouTube channels, so anything else is a malformed entry
+  const channels = subscriptions.filter(channel => typeof channel.id === 'string' && checkYoutubeChannelId(channel.id))
+  // Merged with the saved subscriptions, which another window may change meanwhile
+  const profile = {
+    _id: MAIN_PROFILE_ID,
+    subscriptions: channels.map(({ id, name, thumbnail }) => ({ id, name, thumbnail })),
+  }
+  if (await store.dispatch('mergeImportedProfile', profile) !== true) {
+    throw new Error('Could not import subscriptions')
+  }
+  if (channels.some(channel => channel.groups?.length > 0) &&
+    !await store.dispatch('updateSubscriptionGroups', groups => addChannelsToNamedGroups(normalizeSubscriptionGroups(groups), channels))) {
+    throw new Error('Could not import subscription groups')
+  }
+  showToast({
+    message: t('Settings.Data Settings.All subscriptions have been successfully imported'),
+    icon: ['fas', 'subscriptions'],
+  })
+}
+
+/**
+ * @param {object} newPipeData
+ */
+function importNewPipeSubscriptions(newPipeData) {
+  if (typeof newPipeData.subscriptions === 'undefined') {
+    showToast({ message: t('Settings.Data Settings.Invalid subscriptions file'), icon: ['fas', 'circle-exclamation'] })
+
+    return
+  }
+
+  const subscriptions = newPipeData.subscriptions
+    .map((channel) => {
+      const channelId = extractChannelIdFromUploaderUrl(channel.url)
+
+      if (!channelId) {
+        return null
+      }
+
+      return {
+        id: channelId,
+        name: channel.name,
+        thumbnail: null,
+      }
+    })
+    .filter(subscription => subscription !== null)
+
+  return runWithDataImportProgress(() => addSubscriptionsToPrimaryProfile(subscriptions))
+}
+
+// #endregion subscriptions import
+
+// #region subscriptions export
+
+const showExportSubscriptionsPrompt = ref(false)
+
+/**
+ * @param {'freetube' | 'youtubenew' | 'youtube' | 'youtubeold' | 'newpipe' | null} option
+ */
+function exportSubscriptions(option) {
+  showExportSubscriptionsPrompt.value = false
+
+  if (option === null) {
+    return
+  }
+
+  switch (option) {
+    case 'freetube':
+      exportFreeTubeSubscriptions()
+      break
+    case 'youtubenew':
+      exportCsvYouTubeSubscriptions()
+      break
+    case 'youtube':
+      exportYouTubeSubscriptions()
+      break
+    case 'youtubeold':
+      exportOpmlYouTubeSubscriptions()
+      break
+    case 'newpipe':
+      exportNewPipeSubscriptions()
+      break
+  }
+}
+
+async function exportFreeTubeSubscriptions() {
+  const subscriptionsDb = profileList.value.map((profile) => {
+    return JSON.stringify(profile)
+  }).join('\n') + '\n'
+  const dateStr = getTodayDateStrLocalTimezone()
+  const exportFileName = 'opentubex-subscriptions-' + dateStr + '.db'
+
+  await promptAndWriteToFile(
+    exportFileName,
+    subscriptionsDb,
+    t('Settings.Data Settings.Subscription File'),
+    'application/x-freetube-db',
+    '.db',
+    t('Settings.Data Settings.Subscriptions have been successfully exported')
+  )
+}
+
+async function exportYouTubeSubscriptions() {
+  const dateStr = getTodayDateStrLocalTimezone()
+  const exportFileName = 'youtube-subscriptions-' + dateStr + '.json'
+
+  const subscriptionsObject = profileList.value[0].subscriptions.map((channel) => {
+    const object = {
+      contentDetails: {
+        activityType: 'all',
+        newItemCount: 0,
+        totalItemCount: 0
+      },
+      etag: '',
+      id: '',
+      kind: 'youtube#subscription',
+      snippet: {
+        channelId: channel.id,
+        description: '',
+        publishedAt: new Date(),
+        resourceId: {
+          channelId: channel.id,
+          kind: 'youtube#channel'
+        },
+        thumbnails: {
+          default: {
+            url: channel.thumbnail
+          },
+          high: {
+            url: channel.thumbnail
+          },
+          medium: {
+            url: channel.thumbnail
+          }
+        },
+        title: channel.name
+      }
+    }
+
+    return object
+  })
+
+  await promptAndWriteToFile(
+    exportFileName,
+    JSON.stringify(subscriptionsObject),
+    t('Settings.Data Settings.Subscription File'),
+    'application/json',
+    '.json',
+    t('Settings.Data Settings.Subscriptions have been successfully exported')
+  )
+}
+
+async function exportOpmlYouTubeSubscriptions() {
+  const dateStr = getTodayDateStrLocalTimezone()
+  const exportFileName = 'youtube-subscriptions-' + dateStr + '.opml'
+  const feeds = profileList.value[0].subscriptions.map(channel => ({
+    xmlUrl: `https://www.youtube.com/feeds/videos.xml?channel_id=${channel.id}`,
+    title: channel.name,
+  }))
+
+  await promptAndWriteToFile(
+    exportFileName,
+    buildOpml('YouTube Subscriptions', feeds),
+    t('Settings.Data Settings.Subscription File'),
+    'application/xml',
+    '.opml',
+    t('Settings.Data Settings.Subscriptions have been successfully exported')
+  )
+}
+
+async function exportCsvYouTubeSubscriptions() {
+  const dateStr = getTodayDateStrLocalTimezone()
+  const exportFileName = 'youtube-subscriptions-' + dateStr + '.csv'
+
+  let exportText = 'Channel ID,Channel URL,Channel title\n'
+  profileList.value[0].subscriptions.forEach((channel) => {
+    const channelUrl = `https://www.youtube.com/channel/${channel.id}`
+
+    // always have channel name quoted to simplify things
+    const channelName = `"${channel.name.replaceAll('"', '""')}"`
+    exportText += `${channel.id},${channelUrl},${channelName}\n`
+  })
+  exportText += '\n'
+
+  await promptAndWriteToFile(
+    exportFileName,
+    exportText,
+    t('Settings.Data Settings.Subscription File'),
+    'text/csv',
+    '.csv',
+    t('Settings.Data Settings.Subscriptions have been successfully exported')
+  )
+}
+
+async function exportNewPipeSubscriptions() {
+  const dateStr = getTodayDateStrLocalTimezone()
+  const exportFileName = 'newpipe-subscriptions-' + dateStr + '.json'
+
+  const newPipeObject = {
+    app_version: '0.19.8',
+    app_version_int: 953,
+    subscriptions: []
+  }
+
+  profileList.value[0].subscriptions.forEach((channel) => {
+    const channelUrl = `https://www.youtube.com/channel/${channel.id}`
+    const subscription = {
+      service_id: 0,
+      url: channelUrl,
+      name: channel.name
+    }
+
+    newPipeObject.subscriptions.push(subscription)
+  })
+
+  await promptAndWriteToFile(
+    exportFileName,
+    JSON.stringify(newPipeObject),
+    t('Settings.Data Settings.Subscription File'),
+    'application/json',
+    '.json',
+    t('Settings.Data Settings.Subscriptions have been successfully exported')
+  )
+}
+
+// #endregion subscriptions export
+
+const historyExportOptions = computed(() => [
+  { label: `${t('Settings.Data Settings.Export OpenTubeX')} (.db)`, value: 'freetube', icon: ['fas', 'database'] },
+  { label: `${t('Settings.Data Settings.Export YouTube')} (.json)`, value: 'youtube', icon: ['fab', 'youtube'] }
+])
+
+// #region watch history
+
+const historyCacheSorted = computed(() => {
+  return store.getters.getHistoryCacheSorted
+})
+
+async function importWatchHistory() {
+  let response
+  try {
+    response = await readFileWithPicker(
+      t('Settings.Data Settings.History File'),
+      {
+        'application/x-freetube-db': '.db',
+        'application/json': '.json'
+      },
+      IMPORT_DIRECTORY_ID,
+      START_IN_DIRECTORY
+    )
+  } catch (err) {
+    const message = t('Settings.Data Settings.Unable to read file')
+    showToast({ message: `${message}: ${err}`, icon: ['fas', 'circle-exclamation'] })
+    return
+  }
+
+  if (response === null) {
+    return
+  }
+
+  const { filename, content } = response
+
+  try {
+    if (filename.endsWith('.db')) {
+      const records = parseImportedLineDelimitedJson(content)
+      if (records !== null) {
+        await importFreeTubeWatchHistory(records)
+      }
+    } else if (filename.endsWith('.json')) {
+      const jsonContent = parseImportedJson(content, t('Settings.Data Settings.Invalid history file'))
+      if (jsonContent === null) {
+        return
+      }
+
+      if (isLibreTubeWatchHistoryBackup(jsonContent)) {
+        await importLibreTubeWatchHistory(jsonContent)
+      } else if (Array.isArray(jsonContent)) {
+        await importYouTubeWatchHistory(jsonContent)
+      } else {
+        showToast({ message: t('Settings.Data Settings.Invalid history file'), icon: ['fas', 'circle-exclamation'] })
+      }
+    }
+  } catch (error) {
+    showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
+  }
+}
+
+/**
+ * @param {unknown[]} historyRecords
+ */
+async function importFreeTubeWatchHistory(historyRecords) {
+  const requiredKeys = [
+    'author',
+    'authorId',
+    'isLive',
+    'lengthSeconds',
+    'published',
+    'timeWatched',
+    'title',
+    'type',
+    'videoId',
+    'watchProgress',
+  ]
+
+  const optionalKeys = [
+    // `_id` absent if marked as watched manually
+    '_id',
+    'lastViewedPlaylistId',
+    'lastViewedPlaylistItemId',
+    'lastViewedPlaylistType',
+    'isMembersOnly',
+    'isWatched',
+    'viewCount',
+    'description',
+  ]
+
+  const ignoredKeys = [
+    'paid',
+  ]
+
+  // Only the imported records are sent; the datastore merges them with the
+  // saved history, which another window may change meanwhile.
+  const historyItems = new Map()
+  let importedCount = 0
+  const warn = createImportWarnings()
+
+  historyRecords.forEach((historyData) => {
+    // We would technically already be done by the time the data is parsed,
+    // however we want to limit the possibility of malicious data being sent
+    // to the app, so we'll only grab the data we need here.
+
+    if (!isJsonObject(historyData)) {
+      warn(t('Settings.Data Settings.History object has insufficient data, skipping item'))
+      console.error('Invalid history record:', historyData)
+      return
+    }
+
+    const historyObject = {}
+
+    Object.keys(historyData).forEach((key) => {
+      if (requiredKeys.includes(key) || optionalKeys.includes(key)) {
+        historyObject[key] = historyData[key]
+      } else if (!ignoredKeys.includes(key)) {
+        warn(`${t('Settings.Data Settings.Unknown data key')}: ${key}`)
+      }
+      // Else do not import the key
+    })
+
+    const historyObjectKeysSet = new Set(Object.keys(historyObject))
+    const missingKeys = requiredKeys.filter(x => !historyObjectKeysSet.has(x))
+    if (missingKeys.length > 0) {
+      warn(t('Settings.Data Settings.History object has insufficient data, skipping item'))
+      console.error('Missing Keys: ', missingKeys, historyData)
+    } else {
+      // FreeTube history export does not have this data if the video was marked as watched manually, setting default value
+      historyObject.description = historyObject.description ?? ''
+
+      historyItems.set(historyObject.videoId, historyObject)
+      importedCount++
+    }
+  })
+
+  if (importedCount === 0) {
+    return
+  }
+
+  if (await store.dispatch('importHistory', { records: [...historyItems.values()], rule: 'replace' }) !== true) {
+    throw new Error('Could not import history')
+  }
+
+  showToast({
+    message: t('Settings.Data Settings.All watched history has been successfully imported'),
+    icon: ['fas', 'history'],
+  })
+}
+
+/**
+ * @param {object} backupData
+ */
+async function importLibreTubeWatchHistory(backupData) {
+  if (backupData.watchHistory.length === 0) {
+    showToast({ message: t('Settings.Data Settings.Invalid history file'), icon: ['fas', 'circle-exclamation'] })
+    return
+  }
+
+  const {
+    historyItems: convertedHistoryItems,
+    importedCount,
+    skippedCount,
+  } = convertLibreTubeWatchHistoryToOpenTubeX(backupData)
+
+  if (importedCount === 0) {
+    showToast({ message: t('Settings.Data Settings.Invalid history file'), icon: ['fas', 'circle-exclamation'] })
+    return
+  }
+
+  if (skippedCount > 0) {
+    showToast({
+      message: t('Settings.Data Settings.History object has insufficient data, skipping item'),
+      icon: ['fas', 'circle-exclamation'],
+    })
+  }
+
+  if (await store.dispatch('importHistory', { records: [...convertedHistoryItems.values()], rule: 'libretube' }) !== true) {
+    throw new Error('Could not import history')
+  }
+
+  showToast({
+    message: t('Settings.Data Settings.All watched history has been successfully imported'),
+    icon: ['fas', 'history'],
+  })
+}
+
+/**
+ * @param {any[]} historyData
+ */
+async function importYouTubeWatchHistory(historyData) {
+  const { entries, skipped, unknownKeys } = parseTakeoutWatchHistory(historyData)
+  for (const key of unknownKeys) {
+    showToast({ message: `${t('Settings.Data Settings.Unknown data key')}: ${key}`, icon: ['fas', 'circle-exclamation'] })
+  }
+  if (skipped > 0) {
+    showToast({ message: t('Settings.Data Settings.History object has insufficient data, skipping item'), icon: ['fas', 'circle-exclamation'] })
+  }
+  // The datastore fills the saved records, which another window may change meanwhile
+  if (await store.dispatch('importHistory', { records: entries, rule: 'takeout' }) !== true) {
+    throw new Error('Could not import history')
+  }
+
+  showToast({
+    message: t('Settings.Data Settings.All watched history has been successfully imported'),
+    icon: ['fas', 'history'],
+  })
+}
+
+const showExportWatchHistoryPrompt = ref(false)
+
+/**
+ * @param {'freetube' | 'youtube' | null} option
+ */
+async function exportWatchHistory(option) {
+  showExportWatchHistoryPrompt.value = false
+
+  switch (option) {
+    case 'freetube':
+      exportFreeTubeWatchHistory()
+      break
+    case 'youtube':
+      exportYouTubeWatchHistory()
+      break
+  }
+}
+
+async function exportFreeTubeWatchHistory() {
+  const historyDb = historyCacheSorted.value.map((historyEntry) => {
+    return JSON.stringify(historyEntry)
+  }).join('\n') + '\n'
+  const dateStr = getTodayDateStrLocalTimezone()
+  const exportFileName = 'opentubex-watch-history-' + dateStr + '.db'
+
+  await promptAndWriteToFile(
+    exportFileName,
+    historyDb,
+    t('Settings.Data Settings.History File'),
+    'application/x-freetube-db',
+    '.db',
+    t('Settings.Data Settings.All watched history has been successfully exported')
+  )
+}
+
+async function exportYouTubeWatchHistory() {
+  // Takeout only lists YouTube videos
+  const historyData = historyCacheSorted.value.filter(entry => !isExternalMediaHistoryId(entry.videoId)).map((entry) => {
+    return {
+      header: 'YouTube',
+      title: `Watched ${entry.title}`,
+      titleUrl: `https://www.youtube.com/watch?v=${entry.videoId}`,
+      subtitles: [{
+        name: entry.author,
+        url: `https://www.youtube.com/channel/${entry.authorId}`
+      }],
+      time: new Date(entry.timeWatched).toISOString(),
+      products: [
+        'YouTube'
+      ],
+      activityControls: [
+        'YouTube watch history'
+      ]
+    }
+  })
+
+  const dateStr = getTodayDateStrLocalTimezone()
+  const exportFileName = 'youtube-watch-history-' + dateStr + '.json'
+
+  await promptAndWriteToFile(
+    exportFileName,
+    JSON.stringify(historyData),
+    t('Settings.Data Settings.History File'),
+    'application/json',
+    '.json',
+    t('Settings.Data Settings.All watched history has been successfully exported')
+  )
+}
+
+// #endregion watch history
+
+// #region playlists
+
+const allPlaylists = computed(() => store.getters.getAllPlaylists)
+
+async function importTakeoutPlaylist(playlist) {
+  const existing = allPlaylists.value.find(item => item.playlistName === playlist.playlistName)
+  if (existing === undefined) {
+    if (await store.dispatch('addPlaylist', playlist) !== true) {
+      throw new Error('Unable to save playlist')
+    }
+  } else {
+    const videos = deepCopy(existing.videos)
+    const known = new Set(videos.map(video => `${video.videoId}:${video.timeAdded}`))
+    for (const video of playlist.videos) {
+      const key = `${video.videoId}:${video.timeAdded}`
+      if (!known.has(key)) {
+        processToBeAddedPlaylistVideo(video)
+        videos.push(video)
+        known.add(key)
+      }
+    }
+    const orderedVideos = existing.addVideosToTop === true
+      ? videos.slice(existing.videos.length).concat(videos.slice(0, existing.videos.length))
+      : videos
+    await store.dispatch('importPlaylist', { createdAt: existing.createdAt, lastUpdatedAt: Date.now(), ...playlist, _id: existing._id, videos: orderedVideos })
+  }
+}
+
+async function normalizeImportedPlaylistThumbnail(playlist) {
+  if (!isJsonObject(playlist) || !Object.hasOwn(playlist, 'customThumbnail') || playlist.customThumbnail === '') return
+  try {
+    playlist.customThumbnail = await normalizePlaylistThumbnail(playlist.customThumbnail)
+  } catch (error) {
+    delete playlist.customThumbnail
+    console.error('Unable to import playlist thumbnail:', error)
+    showToast({ message: t('Profile.The selected image could not be loaded'), icon: ['fas', 'circle-exclamation'] })
+  }
+}
+
+async function importPlaylists() {
+  let files
+  try {
+    files = await pickFilesWithPicker(
+      t('Settings.Data Settings.Playlist File'),
+      {
+        'application/x-freetube-db': '.db',
+        'text/csv': '.csv',
+      },
+      IMPORT_DIRECTORY_ID,
+      START_IN_DIRECTORY
+    )
+  } catch (err) {
+    const message = t('Settings.Data Settings.Unable to read file')
+    showToast({ message: `${message}: ${err}`, icon: ['fas', 'circle-exclamation'] })
+    return
+  }
+
+  // Playlist CSVs from one Takeout are imported together, so their names stay unique and
+  // a picked playlists.csv can supply their original titles.
+  const takeoutFiles = files.filter(file => file.name.toLowerCase().endsWith('.csv'))
+  if (takeoutFiles.length > 0) {
+    await importTakeoutPlaylistFiles(takeoutFiles)
+  }
+
+  for (const file of files) {
+    if (takeoutFiles.includes(file)) { continue }
+    try {
+      await importPlaylistDatabase(await file.text())
+    } catch (err) {
+      console.error('Unable to import playlist file', file.name, err)
+      showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${file.name}`, icon: ['fas', 'circle-exclamation'] })
+    }
+  }
+}
+
+async function importTakeoutPlaylistFiles(files) {
+  let importedCount = 0
+  let failed = false
+  const reportError = (error, filename) => {
+    failed = true
+    console.error('Unable to import Takeout playlist', filename, error)
+    showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${filename}`, icon: ['fas', 'circle-exclamation'] })
+  }
+  try {
+    await forEachTakeoutPlaylistFile(files, async playlist => {
+      await importTakeoutPlaylist(playlist)
+      importedCount++
+    }, reportError)
+  } catch (error) {
+    reportError(error, files.map(file => file.name).join(', '))
+  }
+  if (importedCount > 0 && !failed) {
+    showPlaylistsImportedToast(importedCount, importedCount)
+  }
+}
+
+/**
+ * @param {number} count
+ * @param {number} total
+ */
+function showPlaylistsImportedToast(count, total) {
+  showToast({
+    message: t('Settings.Data Settings.Playlists have been successfully imported', { count, total }, count),
+    icon: ['far', 'bookmark'],
+  })
+}
+
+async function importPlaylistDatabase(data) {
+  let playlists
+
+  // for the sake of backwards compatibility,
+  // check if this is the old JSON array export (used until version 0.19.1),
+  // that didn't match the actual database format
+  const trimmedData = data.trim()
+
+  if (trimmedData[0] === '[' && trimmedData[trimmedData.length - 1] === ']') {
+    playlists = JSON.parse(trimmedData)
+  } else {
+    // otherwise assume this is the correct database format,
+    // which is also what we export now (used in 0.20.0 and later versions)
+    playlists = parseImportedLineDelimitedJson(data)
+    if (playlists === null) {
+      return
+    }
+  }
+
+  const requiredKeys = [
+    'playlistName',
+    'videos',
+  ]
+
+  const optionalKeys = [
+    '_id',
+    'description',
+    'createdAt',
+    'customThumbnail',
+    'addVideosToTop',
+    'shuffleByDefault',
+    'removeWatchedVideos',
+    'removeWatchedVideosThreshold',
+    'sortOrder',
+    'sourcePlaylistId',
+  ]
+
+  const BOOLEAN_PLAYLIST_KEYS = ['addVideosToTop', 'shuffleByDefault', 'removeWatchedVideos']
+
+  const ignoredKeys = [
+    'title',
+    'type',
+    'protected',
+    'lastUpdatedAt',
+    'lastPlayedAt',
+    'preferencesUpdatedAt',
+    'watchedThresholdUpdatedAt',
+    'removeOnWatched',
+
+    'thumbnail',
+    'channelName',
+    'channelId',
+    'playlistId',
+    'videoCount',
+  ]
+
+  const knownKeys = [...requiredKeys, ...optionalKeys, ...ignoredKeys]
+
+  const requiredVideoKeys = [
+    'videoId',
+    'title',
+    'lengthSeconds',
+    'timeAdded',
+
+    // These two properties will be missing for shorts added to a playlist from anywhere but the watch page
+    // 'author',
+    // 'authorId',
+
+    // `playlistItemId` should be optional for backward compatibility
+    // 'playlistItemId',
+  ]
+
+  const newPlaylists = []
+  // Later picked files must see these writes. One update per existing
+  // playlist, so records merged into the same playlist build on each other.
+  /** @type {Map<string, object>} */
+  const updates = new Map()
+  let importedCount = 0
+  const warn = createImportWarnings()
+
+  for (const playlistData of playlists) {
+    await normalizeImportedPlaylistThumbnail(playlistData)
+  }
+
+  playlists.forEach((playlistData) => {
+    // We would technically already be done by the time the data is parsed,
+    // however we want to limit the possibility of malicious data being sent
+    // to the app, so we'll only grab the data we need here.
+
+    if (!isJsonObject(playlistData) || !Array.isArray(playlistData.videos)) {
+      warn(t('Settings.Data Settings.Playlist insufficient data', { playlist: '' }))
+      return
+    }
+
+    const playlistObject = {}
+    const videoIdToBeAddedSet = new Set()
+    let countRequiredKeysPresent = 0
+
+    Object.keys(playlistData).forEach((key) => {
+      if (!knownKeys.includes(key)) {
+        warn(`${t('Settings.Data Settings.Unknown data key')}: ${key}`)
+      } else if (key === 'videos') {
+        const videoArray = []
+        playlistData.videos.forEach((video) => {
+          if (!isJsonObject(video)) {
+            return
+          }
+
+          const videoPropertyKeys = Object.keys(video)
+          const videoObjectHasAllRequiredKeys = requiredVideoKeys.every((k) => videoPropertyKeys.includes(k))
+
+          if (videoObjectHasAllRequiredKeys) {
+            videoArray.push(video)
+            videoIdToBeAddedSet.add(video.videoId)
+          }
+        })
+
+        playlistObject.videos = videoArray
+
+        if (requiredKeys.includes(key)) {
+          countRequiredKeysPresent++
+        }
+      } else if (key === 'sortOrder') {
+        if (isPlaylistSortOrder(playlistData.sortOrder)) {
+          playlistObject.sortOrder = playlistData.sortOrder
+        }
+      } else if (key === 'removeWatchedVideosThreshold') {
+        playlistObject.removeWatchedVideosThreshold = normalizeRemoveWatchedVideosThreshold(playlistData.removeWatchedVideosThreshold)
+      } else if (key === 'sourcePlaylistId') {
+        if (typeof playlistData.sourcePlaylistId === 'string' && playlistData.sourcePlaylistId !== '') {
+          playlistObject.sourcePlaylistId = playlistData.sourcePlaylistId
+        }
+      } else if (!ignoredKeys.includes(key)) {
+        // Do nothing for keys to be ignored
+        playlistObject[key] = BOOLEAN_PLAYLIST_KEYS.includes(key) ? playlistData[key] === true : playlistData[key]
+
+        if (requiredKeys.includes(key)) {
+          countRequiredKeysPresent++
+        }
+      }
+    })
+
+    const allVideosSkipped = playlistData.videos.length > 0 && playlistObject.videos.length === 0
+    if (countRequiredKeysPresent !== requiredKeys.length || allVideosSkipped) {
+      warn(t('Settings.Data Settings.Playlist insufficient data', { playlist: playlistData.playlistName }))
+      return
+    }
+
+    importedCount++
+
+    // An exact ID match wins over an earlier playlist with the same name
+    const targetPlaylist = (playlistObject._id != null &&
+      allPlaylists.value.find(playlist => playlist._id === playlistObject._id)) ||
+      allPlaylists.value.find(playlist => playlist.playlistName === playlistObject.playlistName)
+
+    if (targetPlaylist === undefined) {
+      // Saved options are a local edit, so sync keeps them over the server's copy of the playlist
+      stampPlaylistPreferenceEdits(playlistObject)
+      newPlaylists.push(playlistObject)
+      return
+    }
+
+    const existingPlaylist = { ...targetPlaylist, ...updates.get(targetPlaylist._id) }
+
+    /** @type {Set<string> | undefined} */
+    let existingVideoIdSet
+
+    let shouldAddDuplicateVideos = playlistObject.videos.length > videoIdToBeAddedSet.size
+
+    if (!shouldAddDuplicateVideos) {
+      existingVideoIdSet = existingPlaylist.videos.reduce((set, video) => set.add(video.videoId), new Set())
+      shouldAddDuplicateVideos = existingPlaylist.videos.length > existingVideoIdSet.size
+    }
+
+    const playlistVideos = deepCopy(existingPlaylist.videos)
+
+    playlistObject.videos.forEach((video) => {
+      let videoExists = false
+      if (shouldAddDuplicateVideos) {
+        if (video.playlistItemId != null) {
+          // Find by `playlistItemId` if present
+          videoExists = playlistVideos.some((x) => {
+            // Allow duplicate (by videoId) videos to be added
+            return x.videoId === video.videoId && x.playlistItemId === video.playlistItemId
+          })
+        } else {
+          // Older playlist exports have no `playlistItemId` but have `timeAdded`
+          // Which might be duplicate for copied playlists with duplicate `videoId`
+          videoExists = playlistVideos.some((x) => {
+            // Allow duplicate (by videoId) videos to be added
+            return x.videoId === video.videoId && x.timeAdded === video.timeAdded
+          })
+        }
+      } else if (existingVideoIdSet !== undefined) {
+        // Disallow duplicate (by videoId) videos to be added
+
+        if (existingVideoIdSet.has(video.videoId)) {
+          videoExists = true
+        } else {
+          existingVideoIdSet.add(video.videoId)
+        }
+      } else {
+        videoExists = playlistVideos.some((x) => {
+          // Disallow duplicate (by videoId) videos to be added
+          return x.videoId === video.videoId
+        })
+      }
+
+      if (!videoExists) {
+        // Keep original `timeAdded` value
+        processToBeAddedPlaylistVideo(video)
+        playlistVideos.push(video)
+      }
+    })
+    const addVideosToTop = Object.hasOwn(playlistObject, 'addVideosToTop')
+      ? playlistObject.addVideosToTop
+      : existingPlaylist.addVideosToTop === true
+    const orderedVideos = addVideosToTop
+      ? playlistVideos.slice(existingPlaylist.videos.length).concat(playlistVideos.slice(0, existingPlaylist.videos.length))
+      : playlistVideos
+    // Update playlist's `lastUpdatedAt` & other attributes
+    updates.set(existingPlaylist._id, {
+      ...updates.get(existingPlaylist._id),
+      _id: existingPlaylist._id,
+      // Only these attributes would be updated (besides videos)
+      playlistName: playlistObject.playlistName,
+      description: playlistObject.description,
+      ...(Object.hasOwn(playlistObject, 'customThumbnail') ? { customThumbnail: playlistObject.customThumbnail } : {}),
+      ...(Object.hasOwn(playlistObject, 'addVideosToTop') ? { addVideosToTop: playlistObject.addVideosToTop } : {}),
+      ...(Object.hasOwn(playlistObject, 'shuffleByDefault') ? { shuffleByDefault: playlistObject.shuffleByDefault } : {}),
+      ...(Object.hasOwn(playlistObject, 'removeWatchedVideos') ? { removeWatchedVideos: playlistObject.removeWatchedVideos } : {}),
+      ...(Object.hasOwn(playlistObject, 'removeWatchedVideosThreshold') ? { removeWatchedVideosThreshold: playlistObject.removeWatchedVideosThreshold } : {}),
+      ...(Object.hasOwn(playlistObject, 'sortOrder') ? { sortOrder: playlistObject.sortOrder } : {}),
+      ...(Object.hasOwn(playlistObject, 'sourcePlaylistId') ? { sourcePlaylistId: playlistObject.sourcePlaylistId } : {}),
+      videos: orderedVideos
+    })
+  })
+
+  const saved = await Promise.all(Array.from(updates.values(), playlist => store.dispatch('updatePlaylist', playlist)))
+
+  const added = importedCount === 0 || newPlaylists.length === 0 || await store.dispatch('addPlaylists', newPlaylists)
+  // A playlist deleted in another window meanwhile isn't recreated, so report
+  // that part of the import failed after saving the rest
+  if (!added || saved.some(result => result !== true)) throw new Error('Could not import playlists')
+
+  if (importedCount === 0) {
+    return
+  }
+
+  showPlaylistsImportedToast(importedCount, playlists.length)
+}
+
+async function exportPlaylists() {
+  const dateStr = getTodayDateStrLocalTimezone()
+  const exportFileName = 'opentubex-playlists-' + dateStr + '.db'
+
+  // Playlists synced from YouTube stay on YouTube.
+  const playlistsDb = allPlaylists.value.filter(playlist => !playlist.youTube).map(playlist => {
+    return JSON.stringify(playlist)
+  }).join('\n') + '\n'
+
+  await promptAndWriteToFile(
+    exportFileName,
+    playlistsDb,
+    t('Settings.Data Settings.Playlist File'),
+    'application/x-freetube-db',
+    '.db',
+    t('Settings.Data Settings.All playlists has been successfully exported')
+  )
+}
+
+// #endregion playlists
+
+// #region search history
+
+/** @type {import('vue').ComputedRef<{ _id: string, lastUpdatedAt: number }[]>} */
+const searchHistoryEntries = computed(() => {
+  return store.getters.getSearchHistoryEntries
+})
+
+async function importSearchHistory() {
+  let response
+  try {
+    response = await readFileWithPicker(
+      t('Settings.Data Settings.Search history file'),
+      {
+        'application/x-freetube-db': '.db',
+        'application/json': '.json'
+      },
+      IMPORT_DIRECTORY_ID,
+      START_IN_DIRECTORY
+    )
+  } catch (err) {
+    const message = t('Settings.Data Settings.Unable to read file')
+    showToast({ message: `${message}: ${err}`, icon: ['fas', 'circle-exclamation'] })
+    return
+  }
+
+  if (response === null) {
+    return
+  }
+
+  const { filename, content } = response
+
+  try {
+    if (filename.endsWith('.db')) {
+      const records = parseImportedLineDelimitedJson(content)
+      if (records !== null) {
+        await importFreeTubeSearchHistory(records)
+      }
+    } else if (filename.endsWith('.json')) {
+      await importYouTubeSearchHistory(JSON.parse(content))
+    }
+  } catch (error) {
+    showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
+  }
+}
+
+/**
+ * @param {unknown[]} searchHistoryRecords
+ */
+async function importFreeTubeSearchHistory(searchHistoryRecords) {
+  const importedEntries = []
+  const warn = createImportWarnings()
+
+  searchHistoryRecords.forEach((entry) => {
+    if (!isJsonObject(entry) || typeof entry._id !== 'string' || typeof entry.lastUpdatedAt !== 'number') {
+      warn(t('Settings.Data Settings.History object has insufficient data, skipping item'))
+      console.error('Missing keys:', entry)
+    } else {
+      importedEntries.push(normalizeSearchHistoryEntry({
+        _id: entry._id,
+        query: typeof entry.query === 'string' ? entry.query : entry._id,
+        lastUpdatedAt: entry.lastUpdatedAt,
+        searchSettings: isJsonObject(entry.searchSettings) ? entry.searchSettings : undefined,
+      }))
+    }
+  })
+
+  if (importedEntries.length === 0) {
+    return
+  }
+
+  if (await store.dispatch('importSearchHistory', importedEntries) !== true) {
+    throw new Error('Could not import search history')
+  }
+
+  showToast({
+    message: t('Settings.Data Settings.All search history has been successfully imported'),
+    icon: ['fas', 'history'],
+  })
+}
+
+/**
+ * @param {any[]} historyData
+ */
+async function importYouTubeSearchHistory(historyData) {
+  const { entries: importedEntries, skipped } = parseTakeoutSearchHistory(historyData)
+  if (skipped > 0) {
+    showToast({ message: t('Settings.Data Settings.History object has insufficient data, skipping item'), icon: ['fas', 'circle-exclamation'] })
+  }
+
+  if (await store.dispatch('importSearchHistory', importedEntries) !== true) {
+    throw new Error('Could not import search history')
+  }
+
+  showToast({
+    message: t('Settings.Data Settings.All search history has been successfully imported'),
+    icon: ['fas', 'history'],
+  })
+}
+
+const showExportSearchHistoryPrompt = ref(false)
+
+/**
+ * @param {'freetube' | 'youtube' | null} option
+ */
+async function exportSearchHistory(option) {
+  showExportSearchHistoryPrompt.value = false
+
+  switch (option) {
+    case 'freetube':
+      exportFreeTubeSearchHistory()
+      break
+    case 'youtube':
+      exportYouTubeSearchHistory()
+      break
+  }
+}
+
+async function exportFreeTubeSearchHistory() {
+  const historyDb = searchHistoryEntries.value.map((entry) => {
+    return JSON.stringify(entry)
+  }).join('\n') + '\n'
+  const dateStr = getTodayDateStrLocalTimezone()
+  const exportFileName = 'opentubex-search-history-' + dateStr + '.db'
+
+  await promptAndWriteToFile(
+    exportFileName,
+    historyDb,
+    t('Settings.Data Settings.Search history file'),
+    'application/x-freetube-db',
+    '.db',
+    t('Settings.Data Settings.All search history has been successfully exported')
+  )
+}
+
+async function exportYouTubeSearchHistory() {
+  const historyData = searchHistoryEntries.value.map((entry) => {
+    return {
+      header: 'YouTube',
+      title: `Searched for ${entry.query}`,
+      titleUrl: `https://www.youtube.com/results?search_query=${encodeURIComponent(entry.query)}`,
+      time: new Date(entry.lastUpdatedAt).toISOString(),
+      searchSettings: normalizeSearchSettings(entry.searchSettings),
+      products: [
+        'YouTube'
+      ],
+      activityControls: [
+        'YouTube search history'
+      ]
+    }
+  })
+
+  const dateStr = getTodayDateStrLocalTimezone()
+  const exportFileName = 'youtube-search-history-' + dateStr + '.json'
+
+  await promptAndWriteToFile(
+    exportFileName,
+    JSON.stringify(historyData),
+    t('Settings.Data Settings.Search history file'),
+    'application/json',
+    '.json',
+    t('Settings.Data Settings.All search history has been successfully exported')
+  )
+}
+
+// #endregion search history
+
+// #region channel playback speeds
+
+const SPEED_BY_CHANNEL_NAME = 'Youtube Speed By Channel'
+const SPEED_BY_CHANNEL_URL = 'https://greasyfork.org/scripts/397614-youtube-speed-by-channel'
+const channelPlaybackSpeedsBusy = ref(false)
+
+async function importChannelPlaybackSpeeds() {
+  let response
+  try {
+    response = await readFileWithPicker(
+      t('Settings.Data Settings.Channel playback speeds file'),
+      { 'application/json': '.json' },
+      IMPORT_DIRECTORY_ID,
+      START_IN_DIRECTORY
+    )
+  } catch (err) {
+    const message = t('Settings.Data Settings.Unable to read file')
+    showToast({ message: `${message}: ${err}`, icon: ['fas', 'circle-exclamation'] })
+    return
+  }
+
+  if (response === null) {
+    return
+  }
+
+  const invalidMessage = t('Settings.Data Settings.Invalid channel playback speeds file')
+  const json = parseImportedJson(response.content, invalidMessage)
+  if (json === null) {
+    return
+  }
+
+  const entries = parseSpeedByChannelValues(json)
+  if (entries.length === 0) {
+    showToast({ message: invalidMessage, icon: ['fas', 'circle-exclamation'] })
+    return
+  }
+
+  channelPlaybackSpeedsBusy.value = true
+  try {
+    await runWithDataImportProgress(async progressOperation => {
+      const { speeds, notFound } = await resolveSpeedByChannelValues(entries, {
+        subscriptions: primaryProfile.value.subscriptions,
+        resolveHandle: handle => resolveChannelId(`https://www.youtube.com/${handle}`, store.getters.getBackendPreference),
+        onProgress: (resolved, total) => progressOperation.update({ percentage: (resolved / total) * 100 })
+      })
+
+      const count = Object.keys(speeds).length
+      if (count > 0) {
+        const saved = await updateChannelPreferences(store, 'playbackSpeed', (values) => {
+          Object.assign(values, speeds)
+          return true
+        })
+        if (saved) {
+          showToast({
+            message: t('Settings.Data Settings.Channel playback speeds imported', { count }, count),
+            icon: ['fas', 'gauge'],
+          })
+        } else {
+          showToast({ message: t('Channel.Failed to save subscription settings'), icon: ['fas', 'circle-exclamation'] })
+        }
+      }
+
+      if (notFound.length > 0) {
+        console.warn('Channels not found while importing playback speeds:', notFound)
+        showToast({
+          message: t('Settings.Data Settings.Channels not found', { count: notFound.length }, notFound.length),
+          icon: ['fas', 'circle-exclamation'],
+        })
+      }
+    })
+  } finally {
+    channelPlaybackSpeedsBusy.value = false
+  }
+}
+
+// #endregion channel playback speeds
+
+// #region settings
+
+/** @type {import('vue').ComputedRef<object>} */
+const transferableSettings = computed(() => {
+  return store.getters.getTransferableSettings
+})
+
+/**
+ * Imports save automatic download rules after the click's user activation has
+ * expired, so authorize that write while the click is still active.
+ */
+function authorizeAutomaticDownloadRulesWrite() {
+  return process.env.IS_ELECTRON ? window.ftElectron.prepareAutomaticDownloadRulesWrite() : null
+}
+
+async function importSettings() {
+  const authorizedRulesWrite = authorizeAutomaticDownloadRulesWrite()
+  let response
+  try {
+    response = await readFileWithPicker(
+      t('Settings.Data Settings.Settings File'),
+      {
+        'application/x-freetube-db': '.db',
+        'application/json': '.json'
+      },
+      IMPORT_DIRECTORY_ID,
+      START_IN_DIRECTORY
+    )
+  } catch (err) {
+    const message = t('Settings.Data Settings.Unable to read file')
+    showToast({ message: `${message}: ${err}`, icon: ['fas', 'circle-exclamation'] })
+    return
+  }
+
+  if (response === null) {
+    return
+  }
+
+  const content = response.content
+  let importedSettings
+  let rows
+  try {
+    importedSettings = JSON.parse(content.trim())
+  } catch {
+    rows = parseImportedLineDelimitedJson(content)
+  }
+
+  // A database containing one row is also valid JSON. Treat it like the
+  // rows of a multi-setting export, not a settings object with _id/value keys.
+  if (isJsonObject(importedSettings) && Object.hasOwn(importedSettings, '_id')) {
+    rows = [importedSettings]
+  }
+  if (rows) {
+    const warn = createImportWarnings()
+    importedSettings = Object.fromEntries(rows.filter((entry) => {
+      if (isJsonObject(entry) && typeof entry._id === 'string' && Object.hasOwn(entry, 'value')) {
+        return true
+      }
+      warn(t('Settings.Data Settings.Setting object has insufficient data, skipping item'))
+      return false
+    }).map(entry => [entry._id, entry.value]))
+  }
+  if (!isJsonObject(importedSettings) || Object.keys(importedSettings).length === 0) {
+    showToast({
+      message: t('Settings.Data Settings.Unable to read file'),
+      icon: ['fas', 'circle-exclamation'],
+    })
+    return
+  }
+
+  const result = await applyImportedSettings(importedSettings, authorizedRulesWrite)
+  if (result.total === 0) return
+
+  const failure = settingsImportFailureMessage(result)
+  showToast(failure
+    ? { message: failure, icon: ['fas', 'circle-exclamation'] }
+    : { message: t('Settings.Data Settings.All settings have been successfully imported'), icon: ['fas', 'sliders-h'] })
+}
+
+/**
+ * @param {{ total: number, failed: number }} result
+ * @returns {string | null}
+ */
+function settingsImportFailureMessage({ total, failed }) {
+  if (failed === 0) return null
+  return failed === total
+    ? t('Settings.Data Settings.Settings could not be imported')
+    : t('Settings.Data Settings.Some settings could not be imported', { failed, total })
+}
+
+async function applyImportedSettings(importedSettings, authorizedRulesWrite) {
+  importedSettings = migrateLegacySettings(importedSettings)
+
+  const currentTransferableSettings = transferableSettings.value
+  const currentSettings = store.state.settings
+  let total = 0
+  let failed = 0
+
+  for (const [importedKey, importedValue] of Object.entries(importedSettings)) {
+    if (!Object.hasOwn(currentSettings, importedKey)) {
+      const message = t('Settings.Data Settings.Unknown setting key', { key: importedKey })
+      showToast({ message: message, icon: ['fas', 'circle-exclamation'] })
+      continue
+    }
+
+    if (NON_TRANSFERABLE_SETTINGS.has(importedKey)) {
+      const message = t('Settings.Data Settings.Non-transferable setting key', { key: importedKey })
+      showToast({ message: message, icon: ['fas', 'circle-exclamation'] })
+      continue
+    }
+
+    total++
+    const currentValue = currentTransferableSettings[importedKey]
+    const areValuesEqual = currentValue === importedValue ||
+      (typeof importedValue === 'object' && JSON.stringify(currentValue) === JSON.stringify(importedValue))
+    if (areValuesEqual) {
+      continue
+    }
+
+    const updaterId = defaultUpdaterId(importedKey)
+    const update = importedKey === 'ytDlpAutomaticDownloadRules' && authorizedRulesWrite
+      ? { value: importedValue, authorizedWrite: authorizedRulesWrite }
+      : importedValue
+    try {
+      if (await store.dispatch(updaterId, update) === false) failed++
+    } catch (error) {
+      console.error(error)
+      failed++
+    }
+  }
+  return { total, failed }
+}
+
+async function exportSettings() {
+  const settingDb = Object.entries(transferableSettings.value)
+    .map(([_id, value]) => JSON.stringify({ _id, value }))
+    .join('\n') + '\n'
+  const dateStr = getTodayDateStrLocalTimezone()
+  const exportFileName = `opentubex-settings-${dateStr}.db`
+
+  await promptAndWriteToFile(
+    exportFileName,
+    settingDb,
+    t('Settings.Data Settings.Settings File'),
+    'application/x-freetube-db',
+    '.db',
+    t('Settings.Data Settings.All settings have been successfully exported')
+  )
+}
+
+// #endregion settings
+
+</script>
+
+<style scoped src="./DataSettings.css" />

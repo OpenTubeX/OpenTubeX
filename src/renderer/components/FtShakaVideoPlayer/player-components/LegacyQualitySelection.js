@@ -4,13 +4,13 @@ import { PlayerIcons } from '../../../../constants'
 
 export class LegacyQualitySelection extends shaka.ui.SettingsMenu {
   /**
-   * @param {object} activeLegacyFormat
+   * @param {() => object | null} getActiveLegacyFormat
    * @param {object[]} legacyFormats
    * @param {EventTarget} events
    * @param {!HTMLElement} parent
    * @param {!shaka.ui.Controls} controls
    */
-  constructor(activeLegacyFormat, legacyFormats, events, parent, controls) {
+  constructor(getActiveLegacyFormat, legacyFormats, events, parent, controls) {
     super(parent, controls, PlayerIcons.TUNE_FILLED)
 
     this.button.classList.add('legacy-quality-button', 'shaka-tooltip-status')
@@ -26,15 +26,18 @@ export class LegacyQualitySelection extends shaka.ui.SettingsMenu {
 
     /** @private */
     this.events_ = events
-    /** @private */
-    this.activeLegacyFormat_ = activeLegacyFormat
+    /**
+     * Read live so the button reflects the current format regardless of when
+     * shaka (re)creates this element relative to the `setLegacyFormat` event.
+     * @private
+     */
+    this.getActiveLegacyFormat_ = getActiveLegacyFormat
 
     const sortedLegacyFormats = [...legacyFormats]
 
-    if (legacyFormats.length > 0) {
-      const isPortrait = legacyFormats[0].height > legacyFormats[0].width
-      sortedLegacyFormats.sort((a, b) => isPortrait ? b.width - a.width : b.height - a.height)
-    }
+    const firstFormat = legacyFormats[0]
+    const isPortrait = firstFormat ? firstFormat.height > firstFormat.width : false
+    sortedLegacyFormats.sort((a, b) => isPortrait ? b.width - a.width : b.height - a.height)
 
     /** @private */
     this.legacyFormats_ = sortedLegacyFormats
@@ -62,15 +65,25 @@ export class LegacyQualitySelection extends shaka.ui.SettingsMenu {
       this.updateLocalisedStrings_()
     })
 
-    this.eventManager.listen(events, 'setLegacyFormat', (/** @type {CustomEvent} */ event) => {
-      this.activeLegacyFormat_ = event.detail.format
+    this.eventManager.listen(events, 'setLegacyFormat', () => {
+      this.updateResolutionSelection_()
+    })
+
+    this.eventManager.listen(events, 'legacyFormatMetadataChanged', () => {
+      this.updateFormatLabels_()
+      this.updateResolutionSelection_()
+    })
+
+    // Re-sync after every (re)load, which covers the format-fallback case where
+    // this element is recreated before the active format is known.
+    this.eventManager.listen(this.player, 'loaded', () => {
       this.updateResolutionSelection_()
     })
 
     this.updateResolutionSelection_()
   }
 
-  /** @overide */
+  /** @override */
   checkAvailability() {
     if (this.isSubMenuOpened) {
       this.button.classList.add('shaka-hidden')
@@ -80,8 +93,23 @@ export class LegacyQualitySelection extends shaka.ui.SettingsMenu {
   }
 
   /** @private */
+  updateFormatLabels_() {
+    const buttons = this.menu.querySelectorAll('.legacy-resolution')
+    this.legacyFormats_.forEach((format, index) => {
+      const span = buttons[index]?.querySelector('span')
+      if (span) span.textContent = format.qualityLabel
+    })
+  }
+
+  /** @private */
   updateResolutionSelection_() {
-    if (!this.activeLegacyFormat_) {
+    // Always keep the name/aria labels populated, even before a format is active
+    // (e.g. when shaka recreates the controls on a format fallback before
+    // `setLegacyFormat` fires), so the button never renders as an icon without a label.
+    this.updateLocalisedStrings_()
+
+    const activeLegacyFormat = this.getActiveLegacyFormat_()
+    if (!activeLegacyFormat) {
       return
     }
 
@@ -91,36 +119,39 @@ export class LegacyQualitySelection extends shaka.ui.SettingsMenu {
     if (previousSpan) {
       previousSpan.classList.remove('shaka-chosen-item')
 
-      const button = previousSpan.parentElement
-      button.ariaChecked = 'false'
+      const previousButton = previousSpan.parentElement
+      previousButton.ariaChecked = 'false'
       this._checkmarkIcon.remove()
     }
 
     // current selection
 
-    const index = this.legacyFormats_.indexOf(this.activeLegacyFormat_)
-
+    const index = this.legacyFormats_.indexOf(activeLegacyFormat)
     const button = this.menu.querySelectorAll('.legacy-resolution')[index]
-    const span = button.querySelector('span')
 
-    button.ariaChecked = 'true'
+    if (button) {
+      const span = button.querySelector('span')
 
-    span.classList.add('shaka-chosen-item')
+      button.ariaChecked = 'true'
+      span.classList.add('shaka-chosen-item')
+      button.appendChild(this._checkmarkIcon)
 
-    button.appendChild(this._checkmarkIcon)
+      // only move focus when the menu is actually visible, otherwise this
+      // steals focus into a hidden submenu on programmatic updates
+      if (button.offsetParent !== null) {
+        button.focus()
+      }
+    }
 
-    this.currentSelection.textContent = span.textContent
-
-    this.button.setAttribute('shaka-status', span.textContent)
-
-    button.focus()
-
-    this.updateLocalisedStrings_()
+    // Derive the status text from the active format directly so it stays correct
+    // even if the format isn't found in the rendered list.
+    this.currentSelection.textContent = activeLegacyFormat.qualityLabel
+    this.button.setAttribute('shaka-status', activeLegacyFormat.qualityLabel)
   }
 
   /** @private */
   async onFormatSelected_(format) {
-    if (format === this.activeLegacyFormat_) {
+    if (format === this.getActiveLegacyFormat_()) {
       return
     }
 
@@ -134,14 +165,15 @@ export class LegacyQualitySelection extends shaka.ui.SettingsMenu {
 
       // hide captions before switching as shaka/the browser doesn't clean up the displayed captions
       // when switching away from the legacy formats
-      this.player.selectTextTrack(null)
+      this.player.selectTextTrack(null, false)
     }
 
     this.events_.dispatchEvent(new CustomEvent('setLegacyFormat', {
       detail: {
         format,
         playbackPosition,
-        restoreCaptionIndex
+        restoreCaptionIndex,
+        userSelected: true
       }
     }))
   }

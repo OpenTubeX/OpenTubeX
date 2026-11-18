@@ -1,49 +1,109 @@
 .card {
+  --playlist-control-gap: 20px;
+
+  /*
+    As far below the heading as its content is from the top of the card (its
+    padding and the title offset), so the actions have the same space above and
+    below them.
+  */
+  --playlist-heading-gap: calc(3px + var(--page-title-offset));
+  --playlist-field-label-outset: 7px;
+
   position: relative;
-  inline-size: 85%;
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: 92dvw;
   margin-block: 0 60px;
   margin-inline: auto;
 }
 
+.headingRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-block-start: var(--page-title-offset);
+}
+
 .headingText {
-  display: inline-block;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
 }
 
-.newPlaylistButton {
-  margin-inline-start: 0.5em;
-  display: inline-block;
-  vertical-align: middle;
+.heading:not(:has(.controlsRow)) + .playlistList {
+  margin-block-start: var(--playlist-control-gap);
 }
 
-.searchInputsRow {
-  display: grid;
-
-  /* 2 columns */
-  grid-template-columns: 1fr auto;
-  column-gap: 16px;
+/* Playlist tiles need no reserved space for video metadata. */
+.playlistList :deep(.grid) {
+  min-block-size: 0;
 }
 
-@media only screen and (width <= 800px) {
-  .searchInputsRow {
-    /* Switch to 2 rows from 2 columns */
-    grid-template-columns: auto;
-    grid-template-rows: auto auto;
-  }
+.playlistList :deep(.ft-list-item.grid) {
+  min-block-size: 0;
+  padding-block: 6px;
+}
+
+.headingIconButton {
+  flex: 0 0 auto;
+}
+
+/* The options sit beside the search when they fit and wrap below it otherwise */
+.controlsRow {
+  --input-bottom-spacing: 0;
+  --settings-control-margin: 0;
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--playlist-control-gap);
+  margin-block: var(--playlist-heading-gap) var(--playlist-control-gap);
+}
+
+.playlistSearch {
+  /* Take the free space, but let the options move below before it gets too narrow */
+  flex: 1000 1 320px;
+  min-inline-size: 0;
+}
+
+.playlistSearch.outlined {
+  margin-block-start: var(--playlist-field-label-outset);
 }
 
 .optionsRow {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: 1fr;
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: space-between;
+  gap: var(--playlist-control-gap);
+  min-inline-size: 0;
 }
 
-@media only screen and (width <= 800px) {
-  .optionsRow {
-    /* Switch to 2 rows from 2 columns */
-    grid-template-columns: auto;
-    grid-template-rows: auto auto;
-    align-items: stretch;
+.matchingVideosToggle {
+  --playlist-switch-hit-height: var(--switch-touch-height);
+  --playlist-switch-padding: calc((var(--playlist-switch-hit-height) - var(--switch-track-height)) / 2);
+}
+
+/* Space the visible track while retaining the switch's full touch target. */
+.matchingVideosToggle :deep(.switch-label) {
+  padding-block: var(--playlist-switch-padding);
+  margin-block: calc(-1 * var(--playlist-switch-padding));
+}
+
+.matchingVideosToggle :deep(.switch-label-text) {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--switch-track-height);
+}
+
+@media (any-pointer: coarse), (width <= 680px) {
+  .card {
+    --playlist-field-label-outset: 9px;
+  }
+
+  .matchingVideosToggle {
+    --playlist-switch-hit-height: max(48px, var(--switch-touch-height));
   }
 }
 
@@ -52,8 +112,15 @@
   margin-inline-start: auto;
 }
 
+.sortSelect.outlined {
+  margin-block-start: var(--playlist-field-label-outset);
+}
+
 .message {
   color: var(--tertiary-text-color);
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .headingIcon {
@@ -62,6 +129,49 @@
 
 @media only screen and (width <= 680px) {
   .card {
-    inline-size: 90%;
+    inline-size: 100%;
   }
+}
+
+.headingActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-inline-start: auto;
+}
+
+.headingActions > .btn {
+  min-block-size: 44px;
+  margin: 0;
+}
+
+/* Like the history actions, they take their own row on narrow screens */
+@media only screen and (width <= 800px) {
+  .headingRow {
+    flex-wrap: wrap;
+  }
+
+  .headingActions {
+    flex-basis: 100%;
+    justify-content: flex-start;
+    gap: 6px;
+    margin-inline-start: 0;
+  }
+
+  .headingActions > .btn {
+    flex: 1 0 auto;
+    min-block-size: var(--phone-touch-target, 48px);
+  }
+
+  .headingIconButton :deep(.iconButton) {
+    inline-size: var(--phone-touch-target, 48px);
+    block-size: var(--phone-touch-target, 48px);
+  }
+}
+
+:global(.promptCard.fixedLayout.playlistRepairPrompt) {
+  inline-size: min(520px, 100%);
+  block-size: auto;
 }

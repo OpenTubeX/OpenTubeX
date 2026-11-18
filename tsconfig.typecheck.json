@@ -1,0 +1,16 @@
+{
+  "extends": "./jsconfig.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": false,
+    "noEmit": true,
+    "strict": true,
+    "noImplicitAny": false,
+    "useUnknownInCatchVariables": false,
+    "skipLibCheck": true,
+    "target": "es2024",
+    "lib": ["es2024", "dom", "dom.iterable"],
+    "resolveJsonModule": true
+  },
+  "include": ["src/**/*.js", "src/preload/preload-interface.d.ts"]
+}

@@ -1,0 +1,45 @@
+{
+	admin off
+}
+
+:80 {
+	encode zstd gzip
+
+	root * /srv
+
+	# Serve the web build, and pass every other path (API, thumbnails, video
+	# streams) to Invidious, so both share one origin and need no CORS.
+	@app file {path} {path}index.html
+	handle @app {
+		# The page's own policy can't keep other sites from framing it
+		header Content-Security-Policy "frame-ancestors 'none'"
+		header X-Content-Type-Options nosniff
+		file_server
+	}
+
+	# Tells the app whether this server runs its own Invidious server. Set
+	# OPENTUBEX_INVIDIOUS=false when it doesn't.
+	handle /self-hosted.js {
+		header Content-Type "text/javascript; charset=utf-8"
+		header Cache-Control no-cache
+		respond `globalThis.opentubexSelfHosted = Object.freeze({ invidious: '{$OPENTUBEX_INVIDIOUS:true}' !== 'false' })`
+	}
+
+	# Stream video straight from Invidious companion instead of through Invidious
+	handle /companion/* {
+		reverse_proxy companion:8282
+	}
+
+	# Invidious fails to proxy channel avatars that aren't under /ggpht/ytc/, so
+	# fetch them directly, without any client headers, from the server's IP.
+	handle_path /ggpht/* {
+		reverse_proxy https://yt3.ggpht.com {
+			header_up -*
+			header_up Host {upstream_hostport}
+		}
+	}
+
+	handle {
+		reverse_proxy invidious:3000
+	}
+}

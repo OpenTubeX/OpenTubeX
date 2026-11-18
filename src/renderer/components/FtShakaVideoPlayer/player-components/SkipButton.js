@@ -18,7 +18,10 @@ export class SkipButton extends shaka.ui.Element {
 
     /** @private */
     this.button_ = document.createElement('button')
-    this.button_.classList.add(`skip-${type}-button`, 'shaka-tooltip', 'ft-shaka-skip-button')
+    // Like Shaka's play button, keep taps from reaching the controls container.
+    // Its touchend handler would cancel the click and hide the controls when the
+    // phone layout places this button among the big buttons.
+    this.button_.classList.add(`skip-${type}-button`, 'shaka-tooltip', 'shaka-no-propagation', 'ft-shaka-skip-button')
 
     const icon = type === 'next' ? PlayerIcons.SKIP_NEXT_FILLED : PlayerIcons.SKIP_PREVIOUS_FILLED
     // eslint-disable-next-line no-new

@@ -195,7 +195,7 @@ Settings:
     Fallback to Non-Preferred Backend on Failure: 'غیر ترجیحی بیک اینڈ پر فال بیک ناکامی پر'
     Enable Search Suggestions: 'تلاش کی تجاویز کو فعال کریں'
     Default Landing Page: 'ڈیفالٹ لینڈنگ پیج'
-    Open Deep Links In New Window: فری ٹیوب کو دیے گئے یو آر ایل کو نئی ونڈو میں کھولیں
+    Open Deep Links In New Window: OpenTubeX کو دیے گئے یو آر ایل کو نئی ونڈو میں کھولیں
     Minimize to system tray: سسٹم ٹرے میں چھوٹا کریں
     Auto Load Next Page:
       Label: اگلا صفحہ خود بخود لوڈ کریں
@@ -238,7 +238,7 @@ Settings:
     Disable Smooth Scrolling: اسموتھ اسکرولنگ غیر فعال کریں
     UI Scale: انٹرفیس (UI) کا اسکیل
     Hide Side Bar Labels: سائیڈ بار کے لیبلز چھپائیں
-    Hide FreeTube Header Logo: فری ٹیوب ہیڈر لوگو چھپائیں
+    Hide OpenTubeX Header Logo: OpenTubeX ہیڈر لوگو چھپائیں
     Base Theme:
       Base Theme: بنیادی تھیم
       Black: کالا
@@ -432,7 +432,7 @@ Settings:
     Playlist File: پلے لسٹ فائل
     Search history file: سرچ ہسٹری فائل
     Export Subscriptions: سبسکرپشنز ایکسپورٹ کریں
-    Export FreeTube: فری ٹیوب ایکسپورٹ کریں
+    Export OpenTubeX: OpenTubeX ایکسپورٹ کریں
     Export YouTube: یوٹیوب ایکسپورٹ کریں
     Export NewPipe: نیو پائپ ایکسپورٹ کریں
     Import History: ہسٹری امپورٹ کریں
@@ -495,7 +495,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: سبسکرپشن
     Fetch Feeds from RSS: RSS سے فیڈز حاصل کریں
-    Fetch Automatically: فیڈز خود بخود حاصل کریں
     'Limit the number of videos displayed for each channel': ہر چینل کے لیے ویڈیوز کی تعداد محدود کریں
     To: تک
     Confirm Before Unsubscribing: ان سبسکرائب کرنے سے پہلے تصدیق کریں
@@ -549,7 +548,7 @@ Settings:
     Show Added Items: شامل کردہ آئٹمز دکھائیں
   Proxy Settings:
     Proxy Settings: پراکسی
-    Proxy Warning: FreeTube میں پہلے سے موجود پراکسی نہیں ہے لیکن یہ کسی بیرونی پراکسی سے منسلک ہو سکتا ہے، جیسے کہ آپ کی مشین پر چلنے والا Tor یا SOCKS5 پراکسی جو کچھ VPNs فراہم کرتے ہیں۔ اگر فعال ہو، تو یقینی بنائیں کہ آپ کی پراکسی/Tor درست طریقے سے کنفیگر ہے، ورنہ FreeTube کوئی ڈیٹا حاصل نہیں کر سکے گا۔
+    Proxy Warning: OpenTubeX میں پہلے سے موجود پراکسی نہیں ہے لیکن یہ کسی بیرونی پراکسی سے منسلک ہو سکتا ہے، جیسے کہ آپ کی مشین پر چلنے والا Tor یا SOCKS5 پراکسی جو کچھ VPNs فراہم کرتے ہیں۔ اگر فعال ہو، تو یقینی بنائیں کہ آپ کی پراکسی/Tor درست طریقے سے کنفیگر ہے، ورنہ OpenTubeX کوئی ڈیٹا حاصل نہیں کر سکے گا۔
     Enable Tor / Proxy: ٹور / پراکسی فعال کریں
     Proxy Protocol: پراکسی پروٹوکول
     Proxy Host: پراکسی ہوسٹ
@@ -593,7 +592,7 @@ About:
   Downloads / Changelog: ڈاؤن لوڈز / تبدیلیوں کا ریکارڈ
   GitHub releases: گِٹ ہب ریلیز
   Help: مدد
-  FreeTube Wiki: فری ٹیوب وکی
+  OpenTubeX Wiki: OpenTubeX وکی
   FAQ: اکثر پوچھے گئے سوالات
   Discussions: بات چیت
   Report a problem: مسئلہ رپورٹ کریں
@@ -605,7 +604,7 @@ About:
   room rules: کمرے کے اصول
   Translate: ترجمہ کریں
   Credits: کریڈٹس
-  FreeTube is made possible by: 'فری ٹیوب ان لوگوں کی بدولت ممکن ہوا ہے'
+  OpenTubeX is made possible by: 'OpenTubeX ان لوگوں کی بدولت ممکن ہوا ہے'
   these people and projects: یہ لوگ اور پروجیکٹس
   Donate: عطیہ دیں
 Profile:
@@ -657,6 +656,7 @@ Channel:
       Newest: جدید ترین
       Oldest: قدیم ترین
       Most Popular: سب سے زیادہ مقبول
+    This channel does not currently have any videos: اس چینل پر فی الحال کوئی ویڈیوز نہیں ہیں
   Subscribe: سبسکرائب
   Unsubscribe: ان سبسکرائب
   Channel has been removed from your subscriptions: چینل کو آپ کی سبسکرپشنز سے ہٹا دیا گیا ہے
@@ -666,7 +666,7 @@ Channel:
   Your search results have returned 0 results: آپ کی تلاش کے کوئی نتائج نہیں ملے
   This channel does not exist: یہ چینل موجود نہیں ہے
   This channel does not allow searching: یہ چینل تلاش کی اجازت نہیں دیتا
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: یہ چینل عمر کی حد کی وجہ سے محدود ہے اور فی الحال FreeTube میں نہیں دیکھا جا سکتا۔
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: یہ چینل عمر کی حد کی وجہ سے محدود ہے اور فی الحال OpenTubeX میں نہیں دیکھا جا سکتا۔
   Channel Tabs: چینل ٹیبز
   Shorts:
     This channel does not currently have any shorts: اس چینل پر فی الحال کوئی شارٹس نہیں ہیں
@@ -708,12 +708,12 @@ Channel:
     View Full Post: مکمل پوسٹ دیکھیں
     Reveal Answers: جوابات ظاہر کریں
     Hide Answers: جوابات چھپائیں
-    Video hidden by FreeTube: ویڈیو کو FreeTube نے چھپا دیا ہے
+    Video hidden by OpenTubeX: ویڈیو کو OpenTubeX نے چھپا دیا ہے
 Video:
   IP block: یو ٹیوب نے آپ کے آئی پی ایڈریس کو ویڈیوز دیکھنے سے بلاک کر دیا ہے۔ براہ کرم کوئی دوسرا VPN یا پراکسی استعمال کریں۔
-  MembersOnly: صرف ممبرز کے لیے مخصوص ویڈیوز FreeTube پر نہیں دیکھی جا سکتیں کیونکہ ان کے لیے گوگل لاگ ان اور اپ لوڈر کے چینل کی پیڈ ممبرشپ درکار ہے۔
-  AgeRestricted: عمر کی حد والی ویڈیوز FreeTube پر نہیں دیکھی جا سکتیں کیونکہ ان کے لیے گوگل لاگ ان اور عمر کی تصدیق شدہ اکاؤنٹ درکار ہے۔
-  DRMProtected: DRM سے محفوظ ویڈیوز FreeTube پر نہیں چلائی جا سکتیں کیونکہ ان کے لیے کلوزڈ سورس اجزاء درکار ہیں۔ اگر آپ یہ ویڈیو دیکھنا چاہتے ہیں تو براہ کرم اسے آفیشل یوٹیوب ویب سائٹ پر دیکھیں۔
+  MembersOnly: صرف ممبرز کے لیے مخصوص ویڈیوز OpenTubeX پر نہیں دیکھی جا سکتیں کیونکہ ان کے لیے گوگل لاگ ان اور اپ لوڈر کے چینل کی پیڈ ممبرشپ درکار ہے۔
+  AgeRestricted: عمر کی حد والی ویڈیوز OpenTubeX پر نہیں دیکھی جا سکتیں کیونکہ ان کے لیے گوگل لاگ ان اور عمر کی تصدیق شدہ اکاؤنٹ درکار ہے۔
+  DRMProtected: DRM سے محفوظ ویڈیوز OpenTubeX پر نہیں چلائی جا سکتیں کیونکہ ان کے لیے کلوزڈ سورس اجزاء درکار ہیں۔ اگر آپ یہ ویڈیو دیکھنا چاہتے ہیں تو براہ کرم اسے آفیشل یوٹیوب ویب سائٹ پر دیکھیں۔
   More Options: مزید آپشنز
   Mark As Watched: دیکھا ہوا قرار دیں
   Remove From History: ہسٹری سے ہٹائیں
@@ -824,15 +824,15 @@ Video:
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'بقیہ SABR بیک آف وقت: {remindingTimeSeconds}s'
 Tooltips:
   General Settings:
-    Preferred API Backend: 'اس بیک اینڈ کا انتخاب کریں جسے FreeTube ڈیٹا حاصل کرنے کے لیے استعمال کرتا ہے۔ دی لوکل API ایک بلٹ ان ایکسٹریکٹر ہے۔ ۔Invidious API کو ۔Invidious سرور کی ضرورت ہے۔ سے منسلک کرنے کے لئے.'
-    Fallback to Non-Preferred Backend on Failure: 'جب آپ کے پسندیدہ API میں کوئی مسئلہ ہو، FreeTube خود بخود آپ کے غیر ترجیحی API کو فال بیک کے طور پر استعمال کرنے کی کوشش کرے گا۔ فعال ہونے پر طریقہ۔'
-    Thumbnail Preference: 'FreeTube کے تمام تھمب نیلز کو اس سے بدل دیا جائے گا۔ پہلے سے طے شدہ تھمب نیل کے بجائے ویڈیو کا ایک فریم۔'
-    Invidious Instance: '۔Invidious Instance جس سے فری ٹیوب API کالز کے لیے جڑے گا۔'
+    Preferred API Backend: 'اس بیک اینڈ کا انتخاب کریں جسے OpenTubeX ڈیٹا حاصل کرنے کے لیے استعمال کرتا ہے۔ دی لوکل API ایک بلٹ ان ایکسٹریکٹر ہے۔ ۔Invidious API کو ۔Invidious سرور کی ضرورت ہے۔ سے منسلک کرنے کے لئے.'
+    Fallback to Non-Preferred Backend on Failure: 'جب آپ کے پسندیدہ API میں کوئی مسئلہ ہو، OpenTubeX خود بخود آپ کے غیر ترجیحی API کو فال بیک کے طور پر استعمال کرنے کی کوشش کرے گا۔ فعال ہونے پر طریقہ۔'
+    Thumbnail Preference: 'OpenTubeX کے تمام تھمب نیلز کو اس سے بدل دیا جائے گا۔ پہلے سے طے شدہ تھمب نیل کے بجائے ویڈیو کا ایک فریم۔'
+    Invidious Instance: '۔Invidious Instance جس سے OpenTubeX API کالز کے لیے جڑے گا۔'
     External Link Handling: |
-      'جب کوئی لنک، جسے FreeTube میں نہیں کھولا جا سکتا، پر کلک کیا جاتا ہے تو پہلے سے طے شدہ طرز عمل کا انتخاب کریں۔
-       بطور ڈیفالٹ FreeTube آپ کے ڈیفالٹ براؤزر میں کلک کردہ لنک کو کھول دے گا۔'
+      'جب کوئی لنک، جسے OpenTubeX میں نہیں کھولا جا سکتا، پر کلک کیا جاتا ہے تو پہلے سے طے شدہ طرز عمل کا انتخاب کریں۔
+       بطور ڈیفالٹ OpenTubeX آپ کے ڈیفالٹ براؤزر میں کلک کردہ لنک کو کھول دے گا۔'
     Region for Trending: ٹرینڈز کا خطہ آپ کو یہ انتخاب کرنے دیتا ہے کہ آپ کس ملک کی ٹرینڈنگ ویڈیوز دیکھنا چاہتے ہیں۔
-    Open Deep Links In New Window: FreeTube کو بھیجے گئے لنکس (URLs)، جیسے کہ براؤزر ایکسٹینشنز یا کمانڈ لائن کے ذریعے، نئی ونڈو میں کھولے جاتے ہیں۔
+    Open Deep Links In New Window: OpenTubeX کو بھیجے گئے لنکس (URLs)، جیسے کہ براؤزر ایکسٹینشنز یا کمانڈ لائن کے ذریعے، نئی ونڈو میں کھولے جاتے ہیں۔
   Player Settings:
     Proxy Videos Through Invidious: 'یوٹیوب سے براہ راست کنکشن بنانے کے بجائے ویڈیوز پیش کرنے کے لیے ۔Invidious سے جڑے گا۔'
     Default Media Format: 'ویڈیو چلتے وقت استعمال ہونے والے فارمیٹس کو سیٹ کریں۔ DASH فارمیٹس کر سکتے ہیں۔ اعلی خصوصیات کو کھیلیں. لیگیسی فارمیٹس زیادہ سے زیادہ 720p تک محدود ہیں لیکن کم استعمال کرتے ہیں۔ بینڈوڈتھ. آڈیو فارمیٹس صرف آڈیو سلسلے ہیں۔'
@@ -840,16 +840,15 @@ Tooltips:
     Skip by Scrolling Over Video Player: ویڈیو کو اسکیپ کرنے کے لیے اسکرول وہیل کا استعمال کریں، MPV اسٹائل میں۔
   External Player Settings:
     External Player: 'ایک بیرونی کھلاڑی کا انتخاب ایک آئیکن ظاہر کرے گا، کھولنے کے لیے تھمب نیل پر، بیرونی پلیئر میں ویڈیو (اگر سپورٹ ہو تو پلے لسٹ)۔ انتباہ، ناگوار ترتیبات بیرونی کھلاڑیوں کو متاثر نہیں کرتی ہیں۔'
-    Custom External Player Executable: 'پہلے سے طے شدہ طور پر، FreeTube یہ فرض کرے گا کہ منتخب کردہ بیرونی پلیئر کو PATH ماحولیاتی متغیر کے ذریعے پایا جا سکتا ہے۔ اگر ضرورت ہو تو، ایک اپنی مرضی کے مطابق راستہ کر سکتے ہیں یہاں مقرر کیا جائے.'
+    Custom External Player Executable: 'پہلے سے طے شدہ طور پر، OpenTubeX یہ فرض کرے گا کہ منتخب کردہ بیرونی پلیئر کو PATH ماحولیاتی متغیر کے ذریعے پایا جا سکتا ہے۔ اگر ضرورت ہو تو، ایک اپنی مرضی کے مطابق راستہ کر سکتے ہیں یہاں مقرر کیا جائے.'
     Ignore Warnings: 'انتباہات کو دبائیں جب موجودہ بیرونی کھلاڑی تعاون نہیں کرتا ہے۔ موجودہ کارروائی (مثلاً پلے لسٹ کو تبدیل کرنا، وغیرہ)۔'
     Custom External Player Arguments: کوئی بھی حسب ضرورت کمانڈ لائن آرگومنٹس، جو سیمیکولنز (';') سے الگ کیے گئے ہیں، آپ بیرونی کھلاڑی کو منتقل کرنا چاہتے ہیں۔
     DefaultCustomArgumentsTemplate: '(پہلے سے طے شدہ: ''{defaultCustomArguments}'')'
     Ignore Default Arguments: ویڈیو لنک کے علاوہ بیرونی پلیئر کو کوئی ڈیفالٹ آرگیومینٹس نہ بھیجیں (جیسے پلے بیک رفتار، پلے لسٹ لنک وغیرہ)۔ کسٹم آرگیومینٹس اب بھی بھیجے جائیں گے۔
   Subscription Settings:
-    Fetch Feeds from RSS: 'فعال ہونے پر، FreeTube آپ کے سبسکرپشن فیڈ کو حاصل کرنے کے لیے اپنے پہلے سے طے شدہ طریقہ کے بجائے RSS کا استعمال کرے گا۔ RSS تیز ہے اور آئی پی کو بلاک کرنے سے روکتا ہے، لیکن کچھ معلومات فراہم نہیں کرتا ہے جیسے ویڈیو کا دورانیہ، لائیو اسٹیٹس یا کمیونٹی پوسٹس'
+    Fetch Feeds from RSS: 'فعال ہونے پر، OpenTubeX آپ کے سبسکرپشن فیڈ کو حاصل کرنے کے لیے اپنے پہلے سے طے شدہ طریقہ کے بجائے RSS کا استعمال کرے گا۔ RSS تیز ہے اور آئی پی کو بلاک کرنے سے روکتا ہے، لیکن کچھ معلومات فراہم نہیں کرتا ہے جیسے ویڈیو کا دورانیہ، لائیو اسٹیٹس یا کمیونٹی پوسٹس'
 
 # Toast Messages
-    Fetch Automatically: فعال ہونے پر، FreeTube ایپ شروع ہوتے ہی اور نئی ونڈو کھلنے پر آپ کی سبسکرپشن فیڈ خود بخود حاصل کر لے گا۔
   Distraction Free Settings:
     Hide Channels: تلاش، ٹرینڈنگ، مقبول اور تجویز کردہ فہرستوں سے ویڈیوز، پلے لسٹس اور چینل کو چھپانے کے لیے چینل آئی ڈی درج کریں۔ آئی ڈی کا مکمل طور پر درست ہونا ضروری ہے۔
     Hide Subscriptions Live: یہ سیٹنگ ایپ بھر کی ”{appWideSetting}“ سیٹنگ کے ذریعے تبدیل کر دی گئی ہے، جو کہ ”{settingsSection}“ کے ”{subsection}“ سیکشن میں ہے

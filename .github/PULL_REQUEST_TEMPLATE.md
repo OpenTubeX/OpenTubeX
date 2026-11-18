@@ -1,6 +1,6 @@
 <!-- Thanks for sending a pull request! Make sure to follow the contributing guidelines. -->
 <!-- Important note, we may remove your pull request if you do not use this provided PR template correctly. -->
-<!-- Do not create PR's with AI! (PRs created mainly with AI will be closed. They waste our team's time. We ban repeat offenders.) -->
+<!-- Agent instructions: Read and follow `.github/PULL_REQUEST_AGENT_INSTRUCTIONS.md` before preparing or updating this pull request. -->
 
 ## Pull Request Type
 <!-- Please select what type of pull request this is: [x] -->
@@ -17,18 +17,17 @@
 ## Description
 <!-- Please write a clear and concise description of what the pull request does. -->
 
-## Screenshots <!-- If appropriate -->
-<!-- Please add before and after screenshots if there is a visible change. -->
+## Release note
+<!-- Changes most users will notice need a release note file. See release-notes/README.md for when to add one. -->
+<!-- Check the box if the change needs no note, for example because it is minor polish, a fix for a rare case, or it only changes behavior that hasn't been released yet. -->
+- [ ] No release note needed
+
+## Screenshots
+<!-- Optional. Paste images or recordings that show the change. To use one in the release note, copy its URL into the release note file. -->
 
 ## Testing
 <!-- How can reviewers verify that the PR produces correct results? -->
 <!-- Please provide instructions so that others can ensure that your pull request would produce correct results. For examples see, https://github.com/FreeTubeApp/FreeTube/pull/5743, https://github.com/FreeTubeApp/FreeTube/pull/7349, https://github.com/FreeTubeApp/FreeTube/pull/5125, https://github.com/FreeTubeApp/FreeTube/pull/7338 -->
-
-## Desktop
-<!-- Please complete the following information-->
-- **OS:**
-- **OS Version:**
-- **FreeTube version:**
 
 ## Additional context
 <!-- Add any other context about the pull request here. -->

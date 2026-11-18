@@ -10,9 +10,19 @@ pre-commit:
       run: pnpm exec eslint --no-color {staged_files}
       skip:
         - rebase
+    typecheck:
+      glob: "*.js"
+      run: pnpm run typecheck
+      skip:
+        - rebase
     stylelint:
       glob: "*.{css,scss}"
       run: pnpm exec stylelint --no-color --allow-empty-input {staged_files}
+      skip:
+        - rebase
+    release-notes:
+      glob: "release-notes/*.md"
+      run: pnpm run lint-release-notes
       skip:
         - rebase
 

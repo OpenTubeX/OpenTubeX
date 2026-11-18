@@ -1,0 +1,158 @@
+.startupSplash {
+  /* Keep the initial palette throughout startup: the renderer applies its
+     default theme before the saved settings have finished loading. Until the
+     first launch caches the saved appearance, use the default Tally theme's
+     colors with its default Red accent. */
+  --splash-default-background: #111;
+  --splash-default-foreground: #eee;
+  --splash-default-primary: #ff6e5b;
+  --splash-background: var(--startup-background, var(--splash-default-background));
+  --splash-foreground: var(--startup-foreground, var(--splash-default-foreground));
+  --splash-primary: var(--startup-primary, var(--splash-default-primary));
+  --splash-container: color-mix(in srgb, var(--splash-primary) 24%, var(--splash-background));
+  --splash-on-container: color-mix(in srgb, var(--splash-primary) 40%, var(--splash-foreground));
+  --splash-shape-size: 160px;
+
+  /* _scripts/startupSplash.js defines --splash-cookie and --splash-cookie-mask
+     from the app's 9-sided cookie shape. */
+
+  position: fixed;
+  z-index: 2147483647;
+  inset: 0;
+  overflow: clip;
+  background-color: var(--splash-background);
+  color: var(--splash-foreground);
+  font-family: system-ui, sans-serif;
+  direction: ltr;
+}
+
+@media (prefers-color-scheme: light) {
+  .startupSplash {
+    --splash-default-background: #f6f5f4;
+    --splash-default-foreground: #212121;
+    --splash-default-primary: #ba0c06;
+  }
+}
+
+/* The boot script removes the hidden splash once the page has been parsed. */
+:root[data-hide-startup-splash] .startupSplash {
+  display: none;
+}
+
+/* The logo stays upright on a slowly turning tonal cookie. */
+.startupShape {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  display: grid;
+  place-items: center;
+  inline-size: var(--splash-shape-size);
+  block-size: var(--splash-shape-size);
+  color: var(--splash-on-container);
+  translate: -50% -50%;
+}
+
+.startupShape::before {
+  position: absolute;
+  inset: 0;
+  background-color: var(--splash-container);
+  clip-path: var(--splash-cookie);
+  animation: startup-turn 12s linear infinite;
+  content: '';
+}
+
+.startupShape svg {
+  position: relative;
+  inline-size: 60%;
+  block-size: 60%;
+}
+
+/* Material 3 indeterminate wavy linear indicator. The active wave carries the
+   splash background around it as the gap to the flat track, and only
+   transforms move, so the compositor can run it without the main thread. */
+.startupProgress {
+  position: absolute;
+  inset-block-start: calc(50% + var(--splash-shape-size) / 2 + 28px);
+  inset-inline-start: 50%;
+  inline-size: var(--splash-shape-size);
+  block-size: 12px;
+  overflow: clip;
+  translate: -50% 0;
+}
+
+.startupProgress::before {
+  position: absolute;
+  inset-block: 4px;
+  inset-inline: 0;
+  border-radius: 2px;
+  background-color: var(--splash-container);
+  content: '';
+}
+
+.startupIndicator {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  inline-size: 45%;
+  padding-inline: 4px;
+  background-color: var(--splash-background);
+
+  /* Where it rests when animations are off. */
+  transform: translateX(60%);
+  animation: startup-indicator 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.startupIndicator > span {
+  display: block;
+  block-size: 100%;
+  overflow: clip;
+}
+
+/* Wide enough for the indicator plus one wavelength of travel. */
+.startupWave {
+  display: block;
+  fill: none;
+  stroke: var(--splash-primary);
+  stroke-linecap: round;
+  stroke-width: 4px;
+  animation: startup-wave 0.5s linear infinite;
+}
+
+@keyframes startup-turn {
+  to { transform: rotate(360deg); }
+}
+
+/* Turns around partly inside the track, so the slow start and end keep some
+   of the wave in view. */
+@keyframes startup-indicator {
+  from { transform: translateX(-60%); }
+  to { transform: translateX(190%); }
+}
+
+@keyframes startup-wave {
+  from { transform: translateX(-24px); }
+  to { transform: translateX(0); }
+}
+
+/* The reveal grows a cookie-shaped hole from the logo until the app fills
+   the window; revealStartupSplash() animates its size. */
+@supports (mask-composite: exclude) {
+  .startupSplash[data-revealing] {
+    mask: var(--splash-cookie-mask) 50% 50% / 0 0 no-repeat, linear-gradient(#000 0 0);
+    mask-composite: exclude;
+  }
+}
+
+/* The Reduced Motion setting resolves once the renderer bundle loads.
+   Until then, follow the system preference. */
+:root[data-reduced-motion='reduce'] .startupSplash *,
+:root[data-reduced-motion='reduce'] .startupSplash *::before {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-reduced-motion]) .startupSplash *,
+  :root:not([data-reduced-motion]) .startupSplash *::before {
+    animation: none;
+  }
+}

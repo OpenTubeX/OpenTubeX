@@ -1,0 +1,154 @@
+import { test, expect, expectScrollAtRenderedEnd, setPlayerFullscreen, setWindowSize } from '../../helpers/app.mjs'
+import { findWatchComponent, openMockedVideo } from '../../helpers/player.mjs'
+import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
+
+test.use({
+  seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true } }
+})
+
+test('portrait fullscreen docks use bottom panels and return to side docks in landscape', { tag: '@scale' }, async ({ app, page }, testInfo) => {
+  await mockPlayableWatchPage(app, page)
+  // A slow run must not reach the end of the demo video, which advances the
+  // queue and reopens its dock collapsed.
+  await (await openMockedVideo(page)).evaluate(element => element.pause())
+  await setWindowSize(app, page, { width: 420, height: 800 })
+  await setPlayerFullscreen(page, true)
+  const watch = await page.evaluateHandle(findWatchComponent)
+  const player = page.locator('.ftVideoPlayer')
+  const screenshot = async () => Buffer.from(await app.electronApp.evaluate(async ({ BrowserWindow }) =>
+    (await BrowserWindow.getAllWindows()[0].webContents.capturePage()).toPNG().toString('base64')), 'base64')
+  try {
+    await watch.evaluate(component => component.proxy.$refs.player.setFullscreenMetadata(true))
+    const sheet = player.locator('.fullscreenDockSheet[open]')
+    await expect(sheet).toBeVisible()
+    await expect.poll(() => sheet.evaluate(element => {
+      const bounds = element.getBoundingClientRect()
+      return bounds.width / window.innerWidth
+    })).toBeCloseTo(1, 2)
+    await expect(sheet.locator('.fullscreenMetadataOverlay.open')).toBeVisible()
+    await testInfo.attach('portrait-metadata', { body: await screenshot(), contentType: 'image/png' })
+    await watch.evaluate(component => {
+      for (let index = 0; index < 30; index++) {
+        component.proxy.$store.commit('addVideoToWatchQueue', {
+          video: { videoId: `queued${String(index).padStart(5, '0')}`, title: `Queued video ${index + 1}`, author: 'Queue channel' }
+        })
+      }
+    })
+    await watch.evaluate(component => component.proxy.$refs.player.setFullscreenQueue(true))
+    const queue = sheet.locator('.fullscreenQueueOverlay.open')
+    await expect(queue).toBeVisible()
+    await expect(player.locator('.fullscreenMetadataOverlay.open')).toHaveCount(0)
+    await player.hover({ position: { x: 20, y: 20 } })
+    await expect.poll(() => player.locator('.fullscreenActions').evaluate(element => {
+      const bounds = element.getBoundingClientRect()
+      const sheet = element.parentElement.querySelector('.fullscreenDockSheet')
+      return matchMedia('(height <= 700px)').matches
+        ? bounds.top >= sheet.querySelector('.fullscreenQueueOverlay').getBoundingClientRect().bottom && bounds.bottom <= innerHeight
+        : bounds.top >= 0 && bounds.bottom <= sheet.getBoundingClientRect().top
+    })).toBe(true)
+    const scroller = queue.locator('.queueItems')
+    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    await testInfo.attach('portrait-queue', { body: await screenshot(), contentType: 'image/png' })
+    const header = queue.locator('.fullscreenDockHeader')
+    const bounds = await header.boundingBox()
+    await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + 20)
+    await page.mouse.down()
+    await page.mouse.move(bounds.x + bounds.width / 2, bounds.y - 100, { steps: 8 })
+    await page.mouse.up()
+    await expect.poll(() => sheet.evaluate(element => element.getBoundingClientRect().top)).toBeLessThan(5)
+    await expectScrollAtRenderedEnd(scroller)
+    await expect(scroller.locator(':scope > .os-scrollbar-vertical')).toHaveClass(/os-scrollbar-visible/)
+    await watch.evaluate(component => {
+      const store = component.proxy.$store
+      for (const item of store.getters.getWatchQueue.slice(3)) {
+        store.commit('removeVideoFromWatchQueue', item.queueItemId)
+      }
+    })
+    await expectScrollAtRenderedEnd(scroller)
+    await expect.poll(() => scroller.evaluate(element => {
+      const overflowing = element.scrollHeight > element.clientHeight + 1
+      return element.querySelector(':scope > .os-scrollbar-vertical').classList.contains('os-scrollbar-visible') === overflowing
+    })).toBe(true)
+    await setWindowSize(app, page, { width: 1000, height: 600 })
+    await expect(sheet).toHaveCount(0)
+    await expect(player.locator('.fullscreenQueueOverlay.open')).toBeVisible()
+    await setWindowSize(app, page, { width: 420, height: 800 })
+    await expect(sheet).toBeVisible()
+    await sheet.getByRole('button', { name: 'Close', exact: true }).click()
+    await expect(sheet).toHaveCount(0)
+    await expect.poll(() => page.evaluate(() => !!document.fullscreenElement)).toBe(true)
+  } finally {
+    await watch.dispose()
+  }
+})
+
+test('short portrait fullscreen keeps panel actions reachable', { tag: '@scale' }, async ({ app, page }, testInfo) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  await setWindowSize(app, page, { width: 340, height: 380 })
+  await setPlayerFullscreen(page, true)
+  const player = page.locator('.ftVideoPlayer')
+  await player.evaluate(element => element.style.setProperty('--safe-area-inset-bottom', '24px'))
+  await player.locator('video').evaluate(element => element.pause())
+  await player.hover({ position: { x: 20, y: 20 } })
+  const actions = player.locator('.fullscreenActions')
+  await actions.getByRole('button', { name: 'Comments', exact: true }).click()
+  await expect(player.locator('.fullscreenDockSheet[open]')).toBeVisible()
+  await expect.poll(() => actions.evaluate(element => {
+    const bounds = element.getBoundingClientRect()
+    return bounds.top >= 0 && bounds.bottom <= innerHeight && bounds.left >= 0 && bounds.right <= innerWidth
+  })).toBe(true)
+  await actions.getByRole('button', { name: 'Comments', exact: true }).click()
+  await expect(player.locator('.fullscreenDockSheet[open]')).toHaveCount(0)
+  const watch = await page.evaluateHandle(findWatchComponent)
+  await watch.evaluate(component => {
+    for (let index = 0; index < 30; index++) {
+      component.proxy.$store.commit('addVideoToWatchQueue', {
+        video: { videoId: `queued${String(index).padStart(5, '0')}`, title: `Queued video ${index + 1}`, author: 'Queue channel' }
+      })
+    }
+  })
+  await actions.getByRole('button', { name: 'Queue', exact: true }).click()
+  await watch.dispose()
+  const queue = player.locator('.fullscreenQueueOverlay.open')
+  const scroller = queue.locator('.queueItems')
+  await expect(queue).toBeVisible()
+  await expect(player.locator('.fullscreenDockSheet[open]')).toHaveCSS('background-color', await queue.evaluate(element => getComputedStyle(element).backgroundColor))
+  // Wrapped rows mount taller than the estimate of rows that never mounted,
+  // yet one scroll to the end must reach the end.
+  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+  const lastRow = scroller.locator('.queueItem').last()
+  await expect(lastRow).not.toHaveClass(/windowedListShell/)
+  await expectScrollAtRenderedEnd(scroller)
+  // The short dock can be shorter than one row, so check where the last row ends.
+  await expect.poll(() => scroller.evaluate(element => {
+    const row = element.querySelector('.queueItem:last-child').getBoundingClientRect()
+    return Math.abs(row.bottom - element.getBoundingClientRect().bottom)
+  })).toBeLessThanOrEqual(1)
+  await expect.poll(async () => {
+    const content = await queue.boundingBox()
+    const dock = await actions.boundingBox()
+    return content.y + content.height <= dock.y
+  }).toBe(true)
+  await testInfo.attach('short-portrait-footer', {
+    body: Buffer.from(await app.electronApp.evaluate(async ({ BrowserWindow }) =>
+      (await BrowserWindow.getAllWindows()[0].webContents.capturePage()).toPNG().toString('base64')), 'base64'),
+    contentType: 'image/png'
+  })
+  await setWindowSize(app, page, { width: 420, height: 1000 })
+  await expectScrollAtRenderedEnd(scroller)
+  // Scrolling away from the end as a row is added keeps the new offset
+  const awayFromEnd = await scroller.evaluate(element => {
+    element.scrollTop -= 40
+    window.$store.commit('addVideoToWatchQueue', { video: { videoId: 'queued00030', title: 'Queued video 31', author: 'Queue channel' } })
+    return element.scrollTop
+  })
+  await expect(scroller.locator('.queueItem')).toHaveCount(31)
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+  expect(Math.abs(await scroller.evaluate(element => element.scrollTop) - awayFromEnd)).toBeLessThanOrEqual(1)
+  await player.hover({ position: { x: 20, y: 20 } })
+  await expect(player).toHaveAttribute('data-action-dock-visible', 'true')
+  await actions.getByRole('button', { name: 'Queue', exact: true }).click()
+  await expect(player.locator('.fullscreenDockSheet[open]')).toHaveCount(0)
+})

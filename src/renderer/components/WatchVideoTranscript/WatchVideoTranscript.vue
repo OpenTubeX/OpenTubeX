@@ -1,0 +1,623 @@
+<template>
+  <FtCard
+    class="transcriptCard"
+    :class="{ transcriptCardFullscreen: fullscreenOverlay }"
+  >
+    <Teleport
+      :to="phonePanelHeader || 'body'"
+      :disabled="!phonePanelHeader"
+    >
+      <div class="transcriptHeader">
+        <h3 class="transcriptTitle">
+          <FtIcon
+            v-if="fullscreenOverlay"
+            :icon="['fas', 'file-lines']"
+          />
+          {{ t('Video.Transcript.Title') }}
+        </h3>
+        <div
+          class="transcriptHeaderActions"
+          @focusout="handleHeaderActionsFocusout"
+          @keydown.esc="closeLanguageMenu"
+        >
+          <button
+            type="button"
+            class="transcriptHeaderAction"
+            :class="{ active: searchOpen }"
+            :title="t('Video.Transcript.Search')"
+            :aria-label="t('Video.Transcript.Search')"
+            :aria-expanded="String(searchOpen)"
+            @click="toggleTranscriptSearch"
+          >
+            <FtIcon :icon="['fas', 'magnifying-glass']" />
+          </button>
+          <button
+            v-if="captions.length > 1"
+            type="button"
+            class="transcriptHeaderAction"
+            :class="{ active: languageMenuOpen }"
+            :disabled="offline"
+            :title="t('Video.Transcript.Language')"
+            :aria-label="t('Video.Transcript.Language')"
+            :aria-expanded="String(languageMenuOpen)"
+            @click="languageMenuOpen = !languageMenuOpen"
+          >
+            <FtIcon :icon="['fas', 'language']" />
+          </button>
+          <div
+            v-if="captions.length > 0"
+            class="transcriptActions"
+          >
+            <FtIconButton
+              :title="t('Copy')"
+              :icon="['fas', 'copy']"
+              :disabled="isLoading || segments.length === 0"
+              theme="base-no-default"
+              @click="copyTranscript"
+            />
+            <FtIconButton
+              :title="t('Video.Transcript.Save')"
+              :icon="['fas', 'download']"
+              :disabled="isLoading || segments.length === 0"
+              theme="base-no-default"
+              @click="saveTranscript"
+            />
+          </div>
+          <FtIconButton
+            v-if="!phonePanelHeader"
+            :title="t('Video.Transcript.Close')"
+            :icon="['fas', 'xmark']"
+            theme="base-no-default"
+            @click="emit('close')"
+          />
+          <div
+            v-if="languageMenuOpen"
+            ref="languageMenu"
+            v-overlay-scrollbars
+            class="transcriptLanguageMenu"
+          >
+            <div
+              ref="languageList"
+              class="transcriptLanguages"
+            >
+              <button
+                v-for="(caption, index) in captions"
+                :key="index"
+                type="button"
+                :class="{ selected: selectedCaptionIndex === String(index) }"
+                @click="selectCaptionLanguage(index)"
+              >
+                <span>{{ caption.label }}</span>
+                <FtIcon
+                  v-if="selectedCaptionIndex === String(index)"
+                  :icon="['fas', 'check']"
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
+    <div
+      v-if="captions.length > 0 && searchOpen"
+      class="transcriptControls"
+    >
+      <FtInput
+        ref="searchInput"
+        input-type="search"
+        :value="searchQuery"
+        :label="t('Video.Transcript.Search')"
+        :icon="['fas', 'search']"
+        :placeholder="t('Form Inputs.Search Text Hint')"
+        :show-action-button="false"
+        @input="searchQuery = $event"
+      />
+    </div>
+
+    <FtLoader v-if="isLoading" />
+    <p
+      v-else-if="statusMessage"
+      class="transcriptMessage"
+    >
+      {{ statusMessage }}
+    </p>
+    <div
+      v-else
+      ref="segmentList"
+      v-overlay-scrollbars
+      class="transcriptSegments"
+      :class="{ transcriptFadeTop, transcriptFadeBottom }"
+      role="list"
+      :aria-label="t('Video.Transcript.Title')"
+      @scroll="updateTranscriptFadeState"
+    >
+      <div
+        ref="segmentContent"
+        role="none"
+      >
+        <FtWindowedListItem
+          v-for="({ chunk, active, keepMounted }, chunkIndex) in segmentChunkStates"
+          :key="`${segmentChunks.generation}-${chunkIndex}`"
+          v-memo="[chunk, active, keepMounted]"
+          class="transcriptChunk"
+          role="none"
+          :style="{ '--transcript-chunk-rows': chunk.length }"
+          :initially-visible="chunkIndex === 0"
+          :keep-mounted="keepMounted"
+        >
+          <div
+            v-for="segment in chunk"
+            :key="`${segment.start}-${segment.index}`"
+            role="listitem"
+          >
+            <button
+              :data-segment-index="segment.index"
+              class="transcriptSegment"
+              :class="{ active: segment.index === active }"
+              :aria-current="segment.index === active ? 'true' : null"
+              @click="emit('timestamp-event', segment.start)"
+            >
+              <span class="transcriptTimestamp">{{ segment.timestamp }}</span>
+              <span class="transcriptText">{{ segment.text }}</span>
+            </button>
+          </div>
+        </FtWindowedListItem>
+      </div>
+    </div>
+  </FtCard>
+</template>
+
+<script setup>
+import { FtIcon } from '@opentubex/icons'
+import { inject, computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import store from '../../store/index'
+import { getSubtitleRequestUrl } from '../../helpers/player/subtitleCookies'
+
+import FtCard from '../ft-card/ft-card.vue'
+import FtIconButton from '../FtIconButton/FtIconButton.vue'
+import FtInput from '../FtInput/FtInput.vue'
+import FtLoader from '../FtLoader/FtLoader.vue'
+import FtWindowedListItem from '../FtWindowedListItem/FtWindowedListItem.vue'
+import { useScrollClamp } from '../../composables/useScrollClamp'
+import { getTranscriptPreScrollTop } from './transcriptScroll.js'
+import { filterTranscriptSegments } from './transcriptSearch.js'
+import { findActiveTranscriptSegmentIndex } from './activeTranscriptSegment.js'
+
+import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import {
+  copyToClipboard,
+  formatDurationAsTimestamp,
+  showToast,
+  writeFileWithPicker
+} from '../../helpers/utils'
+
+const phonePanelHeader = inject('phonePanelHeader', null)
+const props = defineProps({
+  offline: {
+    type: Boolean,
+    default: false
+  },
+  captions: {
+    type: Array,
+    default: () => []
+  },
+  currentTime: {
+    type: Number,
+    default: 0
+  },
+  preferredCaptionIndex: {
+    type: Number,
+    default: 0
+  },
+  videoTitle: {
+    type: String,
+    default: ''
+  },
+  fullscreenOverlay: {
+    type: Boolean,
+    default: false
+  }
+})
+
+const emit = defineEmits(['close', 'timestamp-event', 'loaded'])
+const { t } = useI18n()
+
+const selectedCaptionIndex = ref(String(props.preferredCaptionIndex))
+const languageMenuOpen = ref(false)
+
+/**
+ * Escape closes an open language menu without also closing the sheet or
+ * leaving fullscreen. Otherwise it keeps its usual meaning.
+ * @param {KeyboardEvent} event
+ */
+function closeLanguageMenu(event) {
+  if (!languageMenuOpen.value) return
+  event.stopPropagation()
+  event.preventDefault()
+  languageMenuOpen.value = false
+}
+const languageMenu = useTemplateRef('languageMenu')
+const languageList = useTemplateRef('languageList')
+const searchOpen = ref(false)
+const searchQuery = ref('')
+const segments = ref([])
+const isLoading = ref(false)
+const loadFailed = ref(false)
+const segmentList = useTemplateRef('segmentList')
+const segmentContent = useTemplateRef('segmentContent')
+// Mounting chunks changes the content height without resizing the list.
+useScrollClamp(segmentList, segmentContent)
+const searchInput = useTemplateRef('searchInput')
+const transcriptFadeTop = ref(false)
+const transcriptFadeBottom = ref(false)
+
+/** @type {AbortController|null} */
+let loadController = null
+let hasAlignedActiveSegment = false
+let segmentResizeObserver = null
+
+const normalizedSearchQuery = computed(() => searchQuery.value.trim().toLocaleLowerCase())
+const filteredSegments = computed(() => {
+  return filterTranscriptSegments(segments.value, normalizedSearchQuery.value)
+})
+// Long videos have thousands of segments, so only the chunks near the viewport
+// mount their rows. The chunk with the active segment always stays mounted, so
+// the list can scroll to it. New segments replace every chunk and its height.
+const SEGMENT_CHUNK_SIZE = 25
+let segmentChunksGeneration = 0
+const segmentChunks = computed(() => {
+  const chunks = []
+  for (let start = 0; start < filteredSegments.value.length; start += SEGMENT_CHUNK_SIZE) {
+    chunks.push(filteredSegments.value.slice(start, start + SEGMENT_CHUNK_SIZE))
+  }
+  return { generation: ++segmentChunksGeneration, chunks }
+})
+const activeSegmentIndex = computed(() => {
+  return findActiveTranscriptSegmentIndex(segments.value, props.currentTime)
+})
+// Rows read the active index of their chunk instead of the shared one, so a
+// new active segment only rerenders the chunks it leaves and enters. The
+// chunks around it stay mounted too, so the rows that share the viewport with
+// it have their real heights when the list centers it.
+const segmentChunkStates = computed(() => {
+  const activeIndex = activeSegmentIndex.value
+  const { chunks } = segmentChunks.value
+  const activeChunk = chunks.findIndex(chunk => chunk[0].index <= activeIndex && chunk.at(-1).index >= activeIndex)
+  return chunks.map((chunk, index) => ({
+    chunk,
+    active: index === activeChunk ? activeIndex : -1,
+    keepMounted: activeChunk !== -1 && Math.abs(index - activeChunk) <= 1,
+  }))
+})
+const statusMessage = computed(() => {
+  if (props.captions.length === 0) {
+    return t('Video.Transcript.Unavailable')
+  }
+  if (loadFailed.value) {
+    return t('Video.Transcript.Load Error')
+  }
+  if (segments.value.length === 0) {
+    return t('Video.Transcript.Empty')
+  }
+  if (filteredSegments.value.length === 0) {
+    return t('Video.Transcript.No Results')
+  }
+
+  return ''
+})
+
+watch(
+  [() => props.captions, selectedCaptionIndex],
+  async ([captions]) => {
+    if (props.offline) return
+    loadController?.abort()
+    loadController = null
+    hasAlignedActiveSegment = false
+    emit('loaded', false)
+    segments.value = []
+    isLoading.value = false
+    loadFailed.value = false
+
+    const caption = captions[Number(selectedCaptionIndex.value)]
+    if (!caption) {
+      return
+    }
+
+    const controller = new AbortController()
+    loadController = controller
+    isLoading.value = true
+
+    try {
+      const url = await getSubtitleRequestUrl(caption.url, store.getters)
+      const response = await fetch(url, { signal: controller.signal })
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`)
+      }
+
+      segments.value = parseTranscript(await response.text())
+      emit('loaded', segments.value.length > 0)
+    } catch (error) {
+      if (error.name !== 'AbortError') {
+        console.error('Unable to load transcript', error)
+        loadFailed.value = true
+      }
+    } finally {
+      if (loadController === controller) {
+        loadController = null
+        isLoading.value = false
+      }
+    }
+  },
+  { immediate: true, deep: true }
+)
+
+watch(() => props.offline, offline => {
+  if (offline) languageMenuOpen.value = false
+})
+
+watch(() => props.captions, async (captions) => {
+  if (Number(selectedCaptionIndex.value) >= captions.length) {
+    selectedCaptionIndex.value = '0'
+  }
+  await nextTick()
+  if (languageMenu.value) {
+    clampOverlayScrollTop(languageMenu.value, languageList.value)
+  }
+}, { deep: true })
+
+let appliedPreferredCaptionIndex = props.preferredCaptionIndex
+watch([() => props.preferredCaptionIndex, () => props.offline], ([index]) => {
+  if (props.offline || index === appliedPreferredCaptionIndex) return
+  appliedPreferredCaptionIndex = index
+  selectedCaptionIndex.value = String(index)
+})
+
+watch(() => props.fullscreenOverlay, () => {
+  searchOpen.value = false
+  searchQuery.value = ''
+  languageMenuOpen.value = false
+})
+
+watch(normalizedSearchQuery, () => {
+  // Search resets the viewport, so resume playback with the same bounded
+  // alignment as opening the transcript instead of animating from the top.
+  hasAlignedActiveSegment = false
+  if (segmentList.value != null) {
+    restoreOverlayScrollTop(segmentList.value, 0)
+  }
+})
+
+watch(segmentList, (list) => {
+  segmentResizeObserver?.disconnect()
+  segmentResizeObserver = null
+
+  if (list) {
+    segmentResizeObserver = new ResizeObserver(updateTranscriptFadeState)
+    segmentResizeObserver.observe(list)
+    segmentResizeObserver.observe(segmentContent.value)
+    nextTick(updateTranscriptFadeState)
+  }
+}, { flush: 'post' })
+
+watch(filteredSegments, () => nextTick(updateTranscriptFadeState))
+
+watch(activeSegmentIndex, async (index) => {
+  if (index < 0 || normalizedSearchQuery.value !== '') {
+    return
+  }
+
+  await nextTick()
+  const list = segmentList.value
+  const activeSegment = list?.querySelector(`[data-segment-index="${index}"]`)
+  if (!list || !activeSegment) {
+    return
+  }
+
+  const top = activeSegment.offsetTop - list.clientHeight / 2 + activeSegment.clientHeight / 2
+  if (!hasAlignedActiveSegment) {
+    list.scrollTop = getTranscriptPreScrollTop(list.scrollTop, top, list.clientHeight)
+  }
+
+  list.scrollTo({ top, behavior: 'smooth' })
+  hasAlignedActiveSegment = true
+})
+
+onBeforeUnmount(() => {
+  emit('loaded', false)
+  loadController?.abort()
+  segmentResizeObserver?.disconnect()
+})
+
+function formatTimestamp(seconds) {
+  return formatDurationAsTimestamp(Math.floor(seconds))
+}
+
+async function toggleTranscriptSearch() {
+  searchOpen.value = !searchOpen.value
+  if (!searchOpen.value) {
+    searchQuery.value = ''
+  } else {
+    await nextTick()
+    searchInput.value?.focus()
+  }
+}
+
+function updateTranscriptFadeState() {
+  const list = segmentList.value
+  if (!list) {
+    transcriptFadeTop.value = false
+    transcriptFadeBottom.value = false
+    return
+  }
+
+  transcriptFadeTop.value = list.scrollTop > 1
+  transcriptFadeBottom.value = list.scrollTop + list.clientHeight < list.scrollHeight - 1
+}
+
+function selectCaptionLanguage(index) {
+  if (props.offline) return
+  selectedCaptionIndex.value = String(index)
+  languageMenuOpen.value = false
+}
+
+function handleHeaderActionsFocusout(event) {
+  if (!event.currentTarget.contains(event.relatedTarget)) {
+    languageMenuOpen.value = false
+  }
+}
+
+function transcriptText() {
+  return segments.value
+    .map(segment => `${segment.timestamp} ${segment.text}`)
+    .join('\n')
+}
+
+async function copyTranscript() {
+  await copyToClipboard(transcriptText(), {
+    messageOnSuccess: t('Video.Transcript.Copied')
+  })
+}
+
+async function saveTranscript() {
+  const safeTitle = (props.videoTitle || t('Video.Transcript.Title'))
+    .replaceAll(/[\\/:*?"<>|]/g, '_')
+
+  try {
+    const saved = await writeFileWithPicker(
+      `${safeTitle} - transcript.txt`,
+      transcriptText(),
+      t('Video.Transcript.Text File'),
+      'text/plain',
+      '.txt',
+      'video-transcript-export',
+      'downloads'
+    )
+
+    if (saved) {
+      showToast({ message: t('Video.Transcript.Saved'), icon: ['fas', 'save'] })
+    }
+  } catch (error) {
+    console.error('Unable to save transcript', error)
+    showToast({
+      message: `${t('Video.Transcript.Save Error')}: ${error}`,
+      time: 5000,
+      icon: ['fas', 'circle-exclamation'],
+    })
+  }
+}
+
+/**
+ * @param {string} transcript
+ * @returns {{ index: number, start: number, end: number, text: string, activeUntil: number, timestamp: string }[]}
+ */
+function parseTranscript(transcript) {
+  const blocks = transcript.replaceAll('\r', '').replace(/^\uFEFF/, '').split(/\n{2,}/)
+  const parsedSegments = []
+
+  for (const block of blocks) {
+    const lines = block.split('\n')
+    const timingIndex = lines.findIndex(line => line.includes('-->'))
+    if (timingIndex === -1) {
+      continue
+    }
+
+    const timestamps = lines[timingIndex].match(
+      /((?:\d+:)?\d{2}:\d{2}[.,]\d{3})\s+-->\s+((?:\d+:)?\d{2}:\d{2}[.,]\d{3})/
+    )
+    if (!timestamps) {
+      continue
+    }
+
+    const cueText = lines.slice(timingIndex + 1).join('\n')
+
+    parsedSegments.push({
+      start: parseTimestamp(timestamps[1]),
+      end: parseTimestamp(timestamps[2]),
+      text: cleanCaptionText(cueText),
+      hasInlineTimestamps: /<(?:\d+:)?\d{2}:\d{2}[.,]\d{3}>/.test(cueText)
+    })
+  }
+
+  parsedSegments.sort((a, b) => a.start - b.start)
+  const segments = parsedSegments.some(segment => segment.hasInlineTimestamps)
+    ? normalizeRollingCaptions(parsedSegments)
+    : parsedSegments.filter(segment => segment.text !== '')
+
+  let activeUntil = Number.NEGATIVE_INFINITY
+  return segments.map(({ start, end, text }, index) => {
+    activeUntil = Math.max(activeUntil, end)
+    // Formatted once here instead of on every render of every row.
+    return { index, start, end, text, activeUntil, timestamp: formatTimestamp(start) }
+  })
+}
+
+/**
+ * YouTube's auto-generated VTT alternates rolling karaoke cues with short
+ * committed cues. Keep only the text added by each cue to avoid duplicates.
+ * @param {{ start: number, end: number, text: string }[]} segments
+ * @returns {{ start: number, end: number, text: string }[]}
+ */
+function normalizeRollingCaptions(segments) {
+  const normalized = []
+  let previousText = ''
+
+  for (const segment of segments) {
+    const text = removeOverlappingPrefix(previousText, segment.text)
+    previousText = segment.text
+
+    if (text !== '') {
+      normalized.push({ ...segment, text })
+    }
+  }
+
+  return normalized.map((segment, index) => ({
+    ...segment,
+    end: normalized[index + 1]?.start ?? segment.end
+  }))
+}
+
+function removeOverlappingPrefix(previousText, text) {
+  if (previousText === '' || text === '') {
+    return text
+  }
+
+  const previousWords = previousText.split(' ')
+  const words = text.split(' ')
+  const maxOverlap = Math.min(previousWords.length, words.length)
+
+  for (let length = maxOverlap; length > 0; length--) {
+    const previousStart = previousWords.length - length
+    const matches = words.slice(0, length).every((word, index) => (
+      word === previousWords[previousStart + index]
+    ))
+
+    if (matches) {
+      return words.slice(length).join(' ')
+    }
+  }
+
+  return text
+}
+
+function parseTimestamp(timestamp) {
+  const parts = timestamp.replace(',', '.').split(':').map(Number)
+  const seconds = parts.pop()
+  const minutes = parts.pop() ?? 0
+  const hours = parts.pop() ?? 0
+
+  return hours * 3600 + minutes * 60 + seconds
+}
+
+function cleanCaptionText(text) {
+  // Captions can come from any site. An inert document neither loads images
+  // nor runs handlers from markup in the cue text.
+  const element = new DOMParser().parseFromString(text
+    .replaceAll(/<(?:\d+:)?\d{2}:\d{2}[.,]\d{3}>/g, '')
+    .replaceAll(/<br\s*\/?>/gi, '\n'), 'text/html').body
+  return element.textContent.replaceAll(/\s*\n\s*/g, ' ').replaceAll(/\s+/g, ' ').trim()
+}
+</script>
+
+<style scoped src="./WatchVideoTranscript.css" />

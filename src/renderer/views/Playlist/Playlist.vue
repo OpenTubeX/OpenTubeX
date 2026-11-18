@@ -1,7 +1,8 @@
 <template>
   <div
+    ref="playlistPage"
     :class="{
-      [listType]: true,
+      [pageLayout]: true,
       playlistInEditMode,
       hasNoPlaylistDescription: !playlistDescription,
       oneOrFewer: shownVideoCount < 2
@@ -12,200 +13,231 @@
       v-if="isLoading"
       :fullscreen="true"
     />
-    <template
-      v-else
+    <FtFlexBox
+      v-else-if="playlistError"
+      class="playlistErrorState"
     >
-      <div
-        class="playlistInfoContainer"
-        :class="{
-          promptOpen,
-        }"
-      >
-        <PlaylistInfo
-          :id="playlistId"
-          :first-video-id="firstVideoId"
-          :first-video-playlist-item-id="firstVideoPlaylistItemId"
-          :playlist-thumbnail="playlistThumbnail"
-          :title="playlistTitle"
-          :channel-name="channelName"
-          :channel-thumbnail="channelThumbnail"
-          :channel-id="channelId"
-          :last-updated="lastUpdated"
-          :description="playlistDescription"
-          :video-count="shownVideoCount"
-          :videos="shownPlaylistItems"
-          :sorted-videos="sortedPlaylistItems"
-          :view-count="viewCount"
-          :total-playlist-duration="totalPlaylistDuration"
-          :is-duration-approximate="isDurationApproximate"
-          :info-source="infoSource"
-          :is-unviewable="isUnviewable"
-          :more-video-data-available="moreVideoDataAvailable"
-          :search-video-mode-allowed="isUserPlaylistRequested && shownVideoCount > 1"
-          :search-query-text="searchQueryTextRequested"
-          :theme="listType === 'list' ? 'base' : 'top-bar'"
-          class="playlistInfo"
-          @dragstart.prevent
-          @enter-edit-mode="playlistInEditMode = true"
-          @exit-edit-mode="playlistInEditMode = false"
-          @search-video-query-change="handleVideoSearchQueryChange"
-          @prompt-open="promptOpen = true"
-          @prompt-close="promptOpen = false"
+      <div class="errorStateContent">
+        <p class="message">
+          {{ playlistError }}
+        </p>
+        <FtButton
+          v-if="playlistErrorRetryable"
+          :label="t('User Playlists.SinglePlaylistView.Retry')"
+          :icon="['fas', 'sync']"
+          background-color="var(--primary-color)"
+          text-color="var(--text-with-main-color)"
+          @click="getPlaylistInfo"
         />
       </div>
+    </FtFlexBox>
+    <div
+      v-if="!isLoading && !playlistError"
+      class="playlistInfoContainer"
+      :class="{
+        promptOpen,
+      }"
+    >
+      <PlaylistInfo
+        :id="playlistId"
+        :first-video-id="startVideoId"
+        :first-video-playlist-item-id="firstVideoPlaylistItemId"
+        :playlist-thumbnail="playlistThumbnail"
+        :title="playlistTitle"
+        :channel-name="channelName"
+        :channel-thumbnail="channelThumbnail"
+        :channel-id="channelId"
+        :last-updated="lastUpdated"
+        :description="playlistDescription"
+        :video-count="shownVideoCount"
+        :videos="shownPlaylistItems"
+        :sorted-videos="sortedPlaylistItems"
+        :view-count="viewCount"
+        :total-playlist-duration="totalPlaylistDuration"
+        :is-duration-approximate="isDurationApproximate"
+        :info-source="infoSource"
+        :more-video-data-available="moreVideoDataAvailable"
+        :is-playlist-bookmarked="isPlaylistBookmarked"
+        :playlist-bookmark-pending="playlistBookmarkPending"
+        :preload-available="playlistPreloadAvailable"
+        :preload-pending="playlistPreloadPending"
+        :preload-requires-confirmation="playlistPreloadRequiresConfirmation"
+        :preload-complete="playlistPreloadComplete"
+        :search-video-mode-allowed="shownVideoCount > 1 || playlistInVideoSearchMode"
+        :search-query-text="searchQueryTextRequested"
+        :theme="pageLayout === 'list' ? 'base' : 'top-bar'"
+        class="playlistInfo"
+        @dragstart.prevent
+        @enter-edit-mode="playlistInEditMode = true"
+        @exit-edit-mode="playlistInEditMode = false"
+        @search-video-query-change="handleVideoSearchQueryChange"
+        @prompt-open="promptOpen = true"
+        @prompt-close="promptOpen = false"
+        @toggle-playlist-bookmark="togglePlaylistBookmark"
+        @preload-playlist="preloadPlaylist"
+      />
+    </div>
 
-      <FtCard
-        class="playlistItemsCard"
+    <FtCard
+      v-if="!isLoading && !playlistError"
+      class="playlistItemsCard"
+    >
+      <FtFlexBox
+        v-if="showUnavailableVideosAlert"
+        class="alertBox"
       >
-        <FtFlexBox
-          v-if="showUnavailableVideosAlert"
-          class="alertBox"
+        <p class="alertLabel">
+          {{ t("Playlist.Unavailable videos are hidden") }}
+        </p>
+        <button
+          class="alertButton"
+          :aria-label="t('Close')"
+          :title="t('Close')"
+          @click="handleCloseAlert"
         >
-          <p class="alertLabel">
-            {{ t("Playlist.Unavailable videos are hidden") }}
-          </p>
-          <button
-            class="alertButton"
-            :aria-label="t('Close')"
-            :title="t('Close')"
-            @click="handleCloseAlert"
-          >
-            <FontAwesomeIcon
-              :icon="['fas', 'times']"
-            />
-          </button>
-        </FtFlexBox>
-        <template
-          v-if="shownPlaylistItems.length > 0"
-        >
-          <FtSelect
-            v-if="isUserPlaylistRequested && shownPlaylistItems.length > 1"
-            class="sortSelect"
-            :value="sortOrder"
-            :select-names="sortBySelectNames"
-            :select-values="SORT_BY_SELECT_VALUES"
-            :placeholder="t('Global.Sort By')"
-            :icon="sortOrderIcon"
-            @change="updateUserPlaylistSortOrder"
+          <FtIcon
+            :icon="['fas', 'xmark']"
+            aria-hidden="true"
           />
-          <AutoScrollWrapper
-            v-if="visiblePlaylistItems.length > 0"
-            :hot-zone-enabled="isSortOrderCustom && isVideoDragging"
-            :is-grid-mode="listType === 'grid'"
+        </button>
+      </FtFlexBox>
+      <template
+        v-if="availablePlaylistItems.length > 0 || moreVideoDataAvailable"
+      >
+        <FtSelect
+          v-if="isUserPlaylistRequested && shownPlaylistItems.length > 1"
+          class="sortSelect"
+          :value="sortOrder"
+          :select-names="sortBySelectNames"
+          :select-values="SORT_BY_SELECT_VALUES"
+          :placeholder="t('Global.Sort By')"
+          :icon="sortOrderIcon"
+          @change="updatePlaylistSortOrder"
+        />
+        <template v-if="visiblePlaylistItems.length > 0">
+          <FtElementList
+            v-if="playlistViewType !== 'list'"
+            :data="visiblePlaylistItems"
+            data-type="video"
+            display="grid"
+            :playlist-id="playlistId"
+            :playlist-type="infoSource"
+            :show-video-with-last-viewed-playlist="true"
+            :use-channels-hidden-preference="false"
+            :use-hide-upcoming-premieres-preference="false"
+            :hide-forbidden-titles="false"
+            :hide-members-only="false"
+            :always-show-add-to-playlist-button="true"
+            :quick-bookmark-button-enabled="quickBookmarkButtonEnabled"
+            :can-move-video-up="canMoveVideos"
+            :can-move-video-down="canMoveVideos"
+            :playlist-items-length="shownPlaylistItems.length"
+            :can-remove-from-playlist="true"
+            :is-video-dragging="isVideoDragging"
+            :disable-move-transition="isVideoDragging"
+            :video-dragging-possible="videoDraggingPossible"
+            @pointerdown.capture="startVideoDrag"
+            @move-video-up="moveVideoUp"
+            @move-video-down="moveVideoDown"
+            @move-video-to-the-top="moveVideoToTheTop"
+            @move-video-to-the-bottom="moveVideoToTheBottom"
+            @remove-from-playlist="removeVideoFromPlaylist"
+          />
+          <TransitionGroup
+            v-else
+            name="playlistItem"
+            tag="span"
+            class="playlistItems"
+            :data-skip-move="isVideoDragging ? '' : null"
+            @pointerdown.capture="startVideoDrag"
           >
-            <FtElementList
-              v-if="listType === 'grid'"
-              :data="visiblePlaylistItems"
-              display="grid"
+            <FtListVideoNumbered
+              v-for="(item, index) in visiblePlaylistItems"
+              :key="`${item.videoId}-${item.playlistItemId || index}`"
+              class="playlistItem"
+              :data="item"
               :playlist-id="playlistId"
               :playlist-type="infoSource"
-              :show-video-with-last-viewed-playlist="true"
-              :use-channels-hidden-preference="false"
-              :use-hide-upcoming-premieres-preference="false"
-              :hide-forbidden-titles="false"
+              :playlist-index="playlistItemPositions.get(item) ?? index"
+              :playlist-item-id="item.playlistItemId"
+              appearance="result"
               :always-show-add-to-playlist-button="true"
               :quick-bookmark-button-enabled="quickBookmarkButtonEnabled"
-              :can-move-video-up="canMoveVideos"
-              :can-move-video-down="canMoveVideos"
-              :playlist-items-length="shownPlaylistItems.length"
+              :can-move-video-up="index > 0 && canMoveVideos"
+              :can-move-video-down="index < shownPlaylistItems.length - 1 && canMoveVideos"
               :can-remove-from-playlist="true"
-              :dragged-video="draggedVideo"
+              :video-index="playlistInVideoSearchMode ? shownPlaylistItemIndex(item) : index"
+              :initial-visible-state="index < 10"
+              :is-sort-order-custom="isSortOrderCustom"
               :is-video-dragging="isVideoDragging"
-              :video-dragging-possible="videoDraggingPossible"
-              @drag-video="setDraggedVideo"
-              @drag-video-end="onDragVideoEnd"
-              @move-dragged-video="moveDraggedVideoTemporarilyThrottled"
               @move-video-up="moveVideoUp"
               @move-video-down="moveVideoDown"
               @move-video-to-the-top="moveVideoToTheTop"
               @move-video-to-the-bottom="moveVideoToTheBottom"
               @remove-from-playlist="removeVideoFromPlaylist"
             />
-            <TransitionGroup
-              v-else
-              name="playlistItem"
-              tag="span"
-              class="playlistItems"
-            >
-              <FtListVideoNumbered
-                v-for="(item, index) in visiblePlaylistItems"
-                :key="`${item.videoId}-${item.playlistItemId || index}`"
-                class="playlistItem"
-                :data="item"
-                :playlist-id="playlistId"
-                :playlist-type="infoSource"
-                :playlist-index="playlistInVideoSearchMode ? shownPlaylistItems.findIndex(i => i === item) : index"
-                :playlist-item-id="item.playlistItemId"
-                appearance="result"
-                :always-show-add-to-playlist-button="true"
-                :quick-bookmark-button-enabled="quickBookmarkButtonEnabled"
-                :can-move-video-up="index > 0 && canMoveVideos"
-                :can-move-video-down="index < shownPlaylistItems.length - 1 && canMoveVideos"
-                :can-remove-from-playlist="true"
-                :video-index="playlistInVideoSearchMode ? shownPlaylistItems.findIndex(i => i === item) : index"
-                :initial-visible-state="index < 10"
-                :dragged-video="draggedVideo"
-                :is-sort-order-custom="isSortOrderCustom"
-                :is-video-dragging="isVideoDragging"
-                @drag-video="setDraggedVideo"
-                @drag-video-end="onDragVideoEnd"
-                @move-dragged-video="moveDraggedVideoTemporarilyThrottled"
-                @move-video-up="moveVideoUp"
-                @move-video-down="moveVideoDown"
-                @move-video-to-the-top="moveVideoToTheTop"
-                @move-video-to-the-bottom="moveVideoToTheBottom"
-                @remove-from-playlist="removeVideoFromPlaylist"
-              />
-            </TransitionGroup>
-            <FtAutoLoadNextPageWrapper
-              v-if="moreVideoDataAvailable && !isLoadingMore"
-              @load-next-page="getNextPage"
-            >
-              <FtFlexBox>
-                <FtButton
-                  :label="t('Subscriptions.Load More Videos')"
-                  background-color="var(--primary-color)"
-                  text-color="var(--text-with-main-color)"
-                  @click="getNextPage"
-                />
-              </FtFlexBox>
-            </FtAutoLoadNextPageWrapper>
-            <div
-              v-if="isLoadingMore"
-              class="loadNextPageWrapper"
-            >
-              <FtLoader />
-            </div>
-          </AutoScrollWrapper>
-          <FtFlexBox
-            v-else
-          >
-            <p class="message">
-              {{ t("User Playlists['Empty Search Message']") }}
-            </p>
-          </FtFlexBox>
+          </TransitionGroup>
         </template>
         <FtFlexBox
-          v-else-if="isUnviewable"
+          v-else-if="playlistInVideoSearchMode && !moreVideoDataAvailable"
         >
           <p class="message">
-            {{ t("User Playlists['This playlist is private or does not exist.']") }}
+            {{ t("User Playlists['Empty Search Message']") }}
           </p>
         </FtFlexBox>
         <FtFlexBox
-          v-else
+          v-if="nextPageError && moreVideoDataAvailable && !isLoadingMore"
+          class="paginationErrorState"
         >
-          <p class="message">
-            {{ t("User Playlists['This playlist currently has no videos.']") }}
-          </p>
+          <div class="errorStateContent">
+            <p class="message">
+              {{ nextPageError }}
+            </p>
+            <FtButton
+              :label="t('User Playlists.SinglePlaylistView.Retry')"
+              :icon="['fas', 'sync']"
+              background-color="var(--primary-color)"
+              text-color="var(--text-with-main-color)"
+              @click="getNextPage"
+            />
+          </div>
         </FtFlexBox>
-      </FtCard>
-    </template>
+        <FtAutoLoadNextPageWrapper
+          v-else-if="moreVideoDataAvailable && !isLoadingMore && !loadingPagesForSearch"
+          @load-next-page="getNextPage"
+        >
+          <FtFlexBox>
+            <FtButton
+              :label="t('Subscriptions.Load More Videos')"
+              :icon="['fas', 'arrow-down']"
+              background-color="var(--primary-color)"
+              text-color="var(--text-with-main-color)"
+              @click="getNextPage"
+            />
+          </FtFlexBox>
+        </FtAutoLoadNextPageWrapper>
+        <div
+          v-if="isLoadingMore || loadingPagesForSearch"
+          class="loadNextPageWrapper"
+        >
+          <FtLoader />
+        </div>
+      </template>
+      <FtFlexBox
+        v-else
+      >
+        <p class="message">
+          {{ t("User Playlists['This playlist currently has no videos.']") }}
+        </p>
+      </FtFlexBox>
+    </FtCard>
   </div>
 </template>
 
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
+import { FtIcon } from '@opentubex/icons'
+import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
+import { computed, nextTick, onBeforeUnmount, onMounted, provide, ref, shallowRef, toRaw, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { isNavigationFailure, NavigationFailureType, onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
 
@@ -218,13 +250,18 @@ import FtButton from '../../components/FtButton/FtButton.vue'
 import FtElementList from '../../components/FtElementList/FtElementList.vue'
 import FtSelect from '../../components/FtSelect/FtSelect.vue'
 import FtAutoLoadNextPageWrapper from '../../components/FtAutoLoadNextPageWrapper.vue'
-import AutoScrollWrapper from '../../components/AutoScrollWrapper/AutoScrollWrapper.vue'
 
 import store from '../../store/index'
+import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
+import { refreshYouTubePlaylist } from '../../helpers/youtube-sync'
+import { usesInvidiousApi } from '../../../apiBackends'
+import { getThumbnailListStyles } from '../../constants/thumbnailSize'
+import { thumbnailSizeSettingKey } from '../../composables/useThumbnailSizeSlider'
 
 import {
   extractLocalCacheablePlaylistContinuation,
   getLocalPlaylist,
+  getLocalPlaylistChannelName,
   getLocalPlaylistContinuation,
   parseLocalPlaylistVideos,
 } from '../../helpers/api/local'
@@ -232,76 +269,212 @@ import {
   debounce,
   extractNumberFromString,
   getIconForSortPreference,
+  getVideoThumbnailUrl,
   showToast,
-  deepCopy,
-  throttle,
+  showInvidiousFallbackToast,
 } from '../../helpers/utils'
 import { invidiousGetPlaylistInfo, youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
-import { getSortedPlaylistItems, videoDurationPresent, videoDurationWithFallback, SORT_BY_VALUES } from '../../helpers/playlists'
-import { MOBILE_WIDTH_THRESHOLD, PLAYLIST_HEIGHT_FORCE_LIST_THRESHOLD } from '../../../constants'
+import { hasMoreInvidiousPlaylistPages, mergeInvidiousPlaylistVideos } from '../../helpers/api/invidious-playlists'
+import { runRetryablePlaylistRequest } from '../../helpers/playlist-pagination'
+import { formatDate } from '../../helpers/dateFormat'
+import {
+  createPlaylistBookmark,
+  parseLocalPlaylistLastUpdated,
+  updatePlaylistBookmarkMetadata,
+} from '../../helpers/playlist-bookmarks'
+import { fillMissingPlaylistVideoDurations, getSortedPlaylistItems, isPlaylistSortOrder, SORT_BY_VALUES } from '../../helpers/playlists'
+import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
+import {
+  getYtDlpPlaybackSource,
+  getYtDlpPlaybackSourcesUsableUntil,
+  onYtDlpPlaybackSourceCacheChange,
+  reserveYtDlpPlaybackSourceCache,
+} from '../../helpers/player/ytDlpPlayback'
+import { buildYtDlpPlaybackCacheKey, preloadYtDlpPlaybackSources } from '../../helpers/player/ytDlpPlaybackPreload'
+import { startProgressBarOperation } from '../../helpers/progressBar'
+import { MOBILE_WIDTH_THRESHOLD, PLAYLIST_HEIGHT_COMPACT_THRESHOLD, PLAYLIST_PRELOAD_CONFIRM_THRESHOLD } from '../../../constants'
+import { useTabContext, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
+import { keepTabLoaded } from '../../tabs/TabResidency'
+import { useTabToast } from '../../composables/useTabToast'
+import { droppedIndex, useGridReorder } from '../../composables/useGridReorder'
+
+provide(thumbnailSizeSettingKey, 'playlistThumbnailSize')
+const playlistPage = useTemplateRef('playlistPage')
+// Update CSS directly so dragging the slider does not re-render every row.
+watch([playlistPage, () => store.getters.getPlaylistThumbnailSize], ([element, size]) => {
+  if (!element) return
+  for (const [property, value] of Object.entries(getThumbnailListStyles(size))) {
+    element.style.setProperty(property, value)
+  }
+})
 
 const { locale, t } = useI18n()
 const route = useRoute()
 const router = useRouter()
+const { tabId } = useTabContext()
+const playlistCacheTabId = tabId ?? 'web'
+const setTabTitle = useTabTitle()
+const showTabToast = useTabToast()
 
 const isLoading = ref(true)
+const playlistError = ref('')
+const playlistErrorRetryable = ref(false)
 const playlistTitle = ref('')
 const playlistDescription = ref('')
 const firstVideoId = ref('')
 const firstVideoPlaylistItemId = ref('')
+// YouTube playlists start at their first video that the members-only settings show
+const startVideoId = computed(() => {
+  if (isUserPlaylistRequested.value) return firstVideoId.value
+  const membersOnlyChannelIds = store.getters.getMembersOnlyChannelIdSet
+  return shownPlaylistItems.value.find(video => !isVideoHiddenByPreferences(video, { membersOnlyChannelIds }))?.videoId ?? ''
+})
 const playlistThumbnail = ref('')
 const viewCount = ref(0)
 const videoCount = ref(0)
 /** @type {import('vue').Ref<string | undefined>} */
 const lastUpdated = ref(undefined)
+const lastUpdatedDate = ref(null)
+const dateFormat = computed(() => store.getters.getDateFormat)
+
+function updateLastUpdatedDate() {
+  if (lastUpdatedDate.value === null) return
+
+  lastUpdated.value = formatDate(lastUpdatedDate.value, locale.value, dateFormat.value, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
+}
+
+watch([locale, dateFormat], updateLastUpdatedDate)
 const channelName = ref('')
 const channelThumbnail = ref('')
 const channelId = ref('')
 const infoSource = ref('local')
 const showUnavailableVideosAlert = ref(false)
-const isUnviewable = ref(false)
 const playlistItems = ref([])
 /** @type {import('vue').ComputedRef<any[] | null>} */
 const tempShownPlaylistItems = ref(null)
-/** @import { VideoData } from '../../helpers/dragAndDrop' */
-/** @import { Ref } from 'vue' */
-/** @type {Ref<VideoData>} draggedVideo */
-const draggedVideo = ref({ videoId: null, playlistItemId: null })
 const userPlaylistVisibleLimit = ref(100)
 /** @type {import('vue').ShallowRef<import('youtubei.js').YT.Playlist | null>} */
 const continuationData = shallowRef(null)
-const nextIndex = ref(-1)
+/** @type {import('vue').Ref<number | null>} */
+const nextInvidiousPlaylistPage = ref(null)
 const isLoadingMore = ref(false)
+const nextPageError = ref('')
 const playlistInEditMode = ref(false)
-const forceListView = ref(false)
+// Unloading the tab under memory pressure would discard unsaved edits.
+watch(playlistInEditMode, editing => keepTabLoaded(tabId, 'unsavedEdits', editing))
+onBeforeUnmount(() => keepTabLoaded(tabId, 'unsavedEdits', false))
+const compactLayout = ref(false)
 let alreadyShownNotice = false
+let fetchedLocalPlaylistItemCount = 0
+let playlistRequestGeneration = 0
 const videoSearchQuery = ref('')
 const promptOpen = ref(false)
 /** @type {import('vue').Ref<string[]>} */
 const toBeDeletedPlaylistItemIds = ref([])
 /** @type {import('vue').Ref<string[]>} */
 const videosWithPlaylistToUnset = ref([])
+const pendingDeletionRemovalInProgress = ref(false)
+const playlistBookmarkPending = ref(false)
+const playlistPreloadPending = ref(false)
+const playlistPreloadComplete = ref(false)
+let playlistPreloadExpiryTimer = null
+let playlistPreloadRun = null
 /** @type {AbortController | null} */
 let undoToastAbortController = null
+let removePendingVideosAfterDrag = false
 
-/** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
+/** @type {import('vue').ComputedRef<'local' | 'invidious' | 'yattee'>} */
 const backendPreference = computed(() => store.getters.getBackendPreference)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const backendFallback = computed(() => store.getters.getBackendFallback)
 
+const playlistPreloadAvailable = computed(() => {
+  return supportsYtDlp && store.getters.getVideoPlaybackEngine === 'yt-dlp'
+})
+
+const playlistPreloadVideoIds = computed(() => [...new Set(toRaw(playlistItems.value)
+  .map(video => video.videoId)
+  .filter(videoId => typeof videoId === 'string' && videoId !== ''))])
+// Remote playlists only load their first page before preloading, so also use their reported total
+const playlistPreloadRequiresConfirmation = computed(() => {
+  return store.getters.getConfirmLargePlaylistPreload && Math.max(videoCount.value, playlistPreloadVideoIds.value.length) > PLAYLIST_PRELOAD_CONFIRM_THRESHOLD
+})
+const playlistPreloadVideoIdsKey = computed(() => playlistPreloadVideoIds.value.join('\0'))
+const ytDlpPlaybackCacheKey = computed(() => buildYtDlpPlaybackCacheKey(store.getters))
+const ytDlpPlaybackUseAuthentication = computed(() =>
+  store.getters.getYtDlpPlaybackAlwaysUseCookies &&
+  hasConfiguredRestrictedPlaybackAuthentication(store.getters)
+)
+
+function clearPlaylistPreloadComplete() {
+  clearTimeout(playlistPreloadExpiryTimer)
+  playlistPreloadExpiryTimer = null
+  playlistPreloadComplete.value = false
+}
+
+function refreshPlaylistPreloadComplete() {
+  clearTimeout(playlistPreloadExpiryTimer)
+  playlistPreloadExpiryTimer = null
+
+  if (isLoading.value || playlistPreloadHasUnknownVideos.value) {
+    playlistPreloadComplete.value = false
+    return
+  }
+
+  const usableUntil = getYtDlpPlaybackSourcesUsableUntil(
+    playlistPreloadVideoIds.value,
+    ytDlpPlaybackCacheKey.value,
+    ytDlpPlaybackUseAuthentication.value
+  )
+  playlistPreloadComplete.value = usableUntil !== null
+  if (usableUntil === null) return
+
+  const delay = Math.min(
+    Math.max(usableUntil - Date.now() + 1, 0),
+    2_147_483_647
+  )
+  playlistPreloadExpiryTimer = setTimeout(refreshPlaylistPreloadComplete, delay)
+}
+
+const removePlaybackSourceCacheChangeListener = onYtDlpPlaybackSourceCacheChange(() => {
+  refreshPlaylistPreloadComplete()
+})
+
 /** @type {import('vue').ComputedRef<string>} */
 const currentInvidiousInstanceUrl = computed(() => store.getters.getCurrentInvidiousInstanceUrl)
+
+const thumbnailPreference = computed(() => store.getters.getThumbnailPreference)
 
 /** @type {import('vue').ComputedRef<string>} */
 const userPlaylistSortOrder = computed(() => store.getters.getUserPlaylistSortOrder)
 
-const sortOrder = computed(() => isUserPlaylistRequested.value ? userPlaylistSortOrder.value : SORT_BY_VALUES.Custom)
+// Playlists without their own sort order follow the setting
+const sortOrder = computed(() => {
+  if (!isUserPlaylistRequested.value) { return SORT_BY_VALUES.Custom }
+  const playlistSortOrder = selectedUserPlaylist.value?.sortOrder
+  return isPlaylistSortOrder(playlistSortOrder) ? playlistSortOrder : userPlaylistSortOrder.value
+})
 
 const playlistId = computed(() => route.params.id)
 
+const linkedPlaylistThumbnail = computed(() => {
+  return typeof route.query.playlistThumbnail === 'string'
+    ? route.query.playlistThumbnail
+    : ''
+})
+
+/** @type {import('vue').ComputedRef<'grid' | 'fullWidth' | 'list'>} */
+const playlistViewType = computed(() => store.getters.getPlaylistViewType)
+
+// A sticky top bar would cover too much of small windows, so they show the
+// playlist info like list view does. This never changes the item layout.
 /** @type {import('vue').ComputedRef<'grid' | 'list'>} */
-const listType = computed(() => isUserPlaylistRequested.value && !forceListView.value ? store.getters.getListType : 'list')
+const pageLayout = computed(() => compactLayout.value || playlistViewType.value === 'list' ? 'list' : 'grid')
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const userPlaylistsReady = computed(() => store.getters.getPlaylistsReady)
@@ -330,13 +503,11 @@ const selectedUserPlaylistVideoCount = computed(() => selectedUserPlaylistVideos
 
 const moreVideoDataAvailable = computed(() => {
   if (isUserPlaylistRequested.value) {
-    return userPlaylistVisibleLimit.value < sometimesFilteredUserPlaylistItems.value.length
+    return userPlaylistVisibleLimit.value < filteredPlaylistItems.value.length
   }
-
   if (infoSource.value === 'invidious') {
-    return nextIndex.value !== -1
+    return nextInvidiousPlaylistPage.value !== null
   }
-
   return continuationData.value !== null
 })
 
@@ -353,6 +524,188 @@ const searchQueryTextPresent = computed(() => {
 
 const isUserPlaylistRequested = computed(() => route.query.playlistType === 'user')
 
+const playlistPreloadHasUnknownVideos = computed(() =>
+  !isUserPlaylistRequested.value && (
+    infoSource.value === 'invidious'
+      ? nextInvidiousPlaylistPage.value !== null
+      : continuationData.value !== null
+  )
+)
+
+watch(
+  [
+    playlistPreloadVideoIdsKey,
+    ytDlpPlaybackCacheKey,
+    ytDlpPlaybackUseAuthentication,
+    isLoading,
+    playlistPreloadHasUnknownVideos,
+  ],
+  refreshPlaylistPreloadComplete
+)
+
+const isPlaylistBookmarked = computed(() => {
+  return !isUserPlaylistRequested.value && store.getters.getPlaylistBookmark(playlistId.value) != null
+})
+
+// Invidious sends a timestamp, the local API the text shown in the header
+function remotePlaylistUpdatedAt() {
+  return lastUpdatedDate.value?.getTime() ?? parseLocalPlaylistLastUpdated(lastUpdated.value)
+}
+
+async function refreshPlaylistBookmarkMetadata() {
+  const bookmark = store.getters.getPlaylistBookmark(playlistId.value)
+  if (bookmark == null) return
+
+  const updated = updatePlaylistBookmarkMetadata(bookmark, {
+    title: playlistTitle.value,
+    description: playlistDescription.value,
+    thumbnailUrl: playlistThumbnail.value || (firstVideoId.value
+      ? `https://i.ytimg.com/vi/${firstVideoId.value}/mqdefault.jpg`
+      : null),
+    videoCount: videoCount.value,
+    uploaderId: channelId.value || playlistId.value,
+    uploaderName: channelName.value || playlistTitle.value,
+    uploaderAvatar: channelThumbnail.value,
+    updatedAt: remotePlaylistUpdatedAt(),
+  })
+  if (updated === bookmark) return
+
+  await store.dispatch('savePlaylistBookmark', updated)
+}
+
+async function togglePlaylistBookmark() {
+  if (playlistBookmarkPending.value || isUserPlaylistRequested.value) return
+
+  playlistBookmarkPending.value = true
+  try {
+    const saved = isPlaylistBookmarked.value
+      ? await store.dispatch('removePlaylistBookmark', playlistId.value)
+      : await store.dispatch('savePlaylistBookmark', createPlaylistBookmark({
+          id: playlistId.value,
+          title: playlistTitle.value,
+          description: playlistDescription.value,
+          thumbnailUrl: linkedPlaylistThumbnail.value || playlistThumbnail.value || (firstVideoId.value
+            ? `https://i.ytimg.com/vi/${firstVideoId.value}/mqdefault.jpg`
+            : null),
+          videoCount: videoCount.value,
+          uploaderId: channelId.value || playlistId.value,
+          uploaderName: channelName.value || playlistTitle.value,
+          uploaderAvatar: channelThumbnail.value,
+          updatedAt: remotePlaylistUpdatedAt(),
+        }))
+
+    if (!saved) {
+      showTabToast({
+        message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
+        icon: ['fas', 'circle-exclamation'],
+      })
+    }
+  } finally {
+    playlistBookmarkPending.value = false
+  }
+}
+
+async function preloadPlaylist() {
+  if (!playlistPreloadAvailable.value || playlistPreloadPending.value || playlistPreloadComplete.value) return
+
+  const requestGeneration = playlistRequestGeneration
+  playlistPreloadPending.value = true
+  const progressOperation = startProgressBarOperation(store, {
+    icon: ['fas', 'forward'],
+    message: t('Playlist.Preloading Playlist'),
+    percentage: 0,
+  })
+  const preloadRun = { progressOperation }
+  playlistPreloadRun = preloadRun
+  try {
+    while (!isUserPlaylistRequested.value && moreVideoDataAvailable.value && nextPageError.value === '') {
+      if (isLoadingMore.value) {
+        await new Promise(resolve => {
+          const stop = watch(isLoadingMore, loading => {
+            if (!loading) {
+              stop()
+              resolve()
+            }
+          })
+        })
+        if (requestGeneration !== playlistRequestGeneration) return
+        if (!moreVideoDataAvailable.value || nextPageError.value !== '') break
+      }
+
+      await getNextPage()
+      if (requestGeneration !== playlistRequestGeneration) return
+    }
+
+    if (!isUserPlaylistRequested.value && moreVideoDataAvailable.value) {
+      showTabToast({
+        message: t('Playlist.Playlist Preload Pagination Failed'),
+        icon: ['fas', 'circle-exclamation'],
+      })
+      return
+    }
+
+    const videoIds = playlistPreloadVideoIds.value
+    progressOperation.update({
+      message: t('Playlist.Playlist Preload Progress', {
+        completed: 0,
+        requested: videoIds.length,
+      }),
+    })
+    reserveYtDlpPlaybackSourceCache(videoIds.length)
+
+    const cacheKey = ytDlpPlaybackCacheKey.value
+    const result = await preloadYtDlpPlaybackSources(videoIds, {
+      concurrency: store.getters.getYtDlpPreloadConcurrency,
+      loadSource: videoId => getYtDlpPlaybackSource(
+        videoId,
+        cacheKey,
+        undefined,
+        ytDlpPlaybackUseAuthentication.value,
+        false,
+        true
+      ),
+      onProgress: preloadProgress => {
+        if (requestGeneration !== playlistRequestGeneration) return
+
+        progressOperation.update({
+          message: t('Playlist.Playlist Preload Progress', preloadProgress),
+          percentage: preloadProgress.requested === 0
+            ? 0
+            : preloadProgress.completed / preloadProgress.requested * 100,
+        })
+      },
+    })
+    if (requestGeneration !== playlistRequestGeneration) return
+
+    if (result.requested > 0 && result.failed === 0) {
+      refreshPlaylistPreloadComplete()
+    } else {
+      clearPlaylistPreloadComplete()
+    }
+
+    showTabToast({
+      message: result.failed === 0
+        ? t('Playlist.Playlist Preload Complete', { count: result.preloaded })
+        : t('Playlist.Playlist Preload Partial', result),
+      icon: result.failed === 0 ? ['fas', 'check'] : ['fas', 'circle-exclamation'],
+    })
+  } finally {
+    progressOperation.finish()
+    if (playlistPreloadRun === preloadRun) {
+      playlistPreloadRun = null
+      playlistPreloadPending.value = false
+    }
+  }
+}
+
+function releasePlaylistPreloadUi() {
+  if (playlistPreloadRun === null) return
+
+  playlistPreloadRun.progressOperation.finish()
+  playlistPreloadRun = null
+  playlistPreloadPending.value = false
+}
+
 /** @type {import('vue').ComputedRef<string | undefined>} */
 const quickBookmarkPlaylistId = computed(() => store.getters.getQuickBookmarkTargetPlaylistId)
 
@@ -362,14 +715,19 @@ const quickBookmarkButtonEnabled = computed(() => {
   return selectedUserPlaylist.value?._id !== quickBookmarkPlaylistId.value
 })
 
-const sometimesFilteredUserPlaylistItems = computed(() => {
-  if (!isUserPlaylistRequested.value || processedVideoSearchQuery.value === '') {
-    return sortedPlaylistItems.value
-  }
+// User playlists keep their members-only videos, YouTube playlists follow the channel settings
+const availablePlaylistItems = computed(() => {
+  if (isUserPlaylistRequested.value) return sortedPlaylistItems.value
 
+  const membersOnlyChannelIds = store.getters.getMembersOnlyChannelIdSet
+  return sortedPlaylistItems.value.filter(video => !isVideoHiddenByPreferences(video, { membersOnlyChannelIds }))
+})
+
+const filteredPlaylistItems = computed(() => {
   const processedVideoSearchQuery_ = processedVideoSearchQuery.value
+  if (processedVideoSearchQuery_ === '') return availablePlaylistItems.value
 
-  return sortedPlaylistItems.value.filter((v) => {
+  return availablePlaylistItems.value.filter((v) => {
     return (typeof v.title === 'string' && v.title.toLowerCase().includes(processedVideoSearchQuery_)) ||
       (typeof v.author === 'string' && v.author.toLowerCase().includes(processedVideoSearchQuery_))
   })
@@ -389,16 +747,19 @@ const sortedPlaylistItems = computed(() => {
 })
 
 const visiblePlaylistItems = computed(() => {
-  if (!isUserPlaylistRequested.value) {
-    // No filtering for non user playlists yet
-    return sortedPlaylistItems.value
+  if (isUserPlaylistRequested.value && userPlaylistVisibleLimit.value < filteredPlaylistItems.value.length) {
+    return filteredPlaylistItems.value.slice(0, userPlaylistVisibleLimit.value)
   }
+  return filteredPlaylistItems.value
+})
 
-  if (userPlaylistVisibleLimit.value < sometimesFilteredUserPlaylistItems.value.length) {
-    return sometimesFilteredUserPlaylistItems.value.slice(0, userPlaylistVisibleLimit.value)
-  } else {
-    return sometimesFilteredUserPlaylistItems.value
-  }
+// The search only sees loaded videos, so YouTube playlists load their remaining pages while searching
+const loadingPagesForSearch = computed(() =>
+  playlistInVideoSearchMode.value && !isUserPlaylistRequested.value && moreVideoDataAvailable.value && nextPageError.value === ''
+)
+
+watch([loadingPagesForSearch, isLoadingMore, isLoading], () => {
+  if (loadingPagesForSearch.value && !isLoadingMore.value && !isLoading.value) getNextPage()
 })
 
 const sortOrderIcon = computed(() => getIconForSortPreference(sortOrder.value))
@@ -440,8 +801,8 @@ const sortBySelectNames = computed(() => {
 /**
  * @param {string} value
  */
-function updateUserPlaylistSortOrder(value) {
-  store.dispatch('updateUserPlaylistSortOrder', value)
+function updatePlaylistSortOrder(value) {
+  store.dispatch('updatePlaylistSortOrder', { _id: playlistId.value, sortOrder: value })
 }
 
 /** @type {import('vue').ComputedRef<number>} */
@@ -467,12 +828,32 @@ const shownPlaylistItems = computed(() => {
   return playlistItems.value.filter((v) => !toBeDeletedPlaylistItemIds_.includes(v.playlistItemId))
 })
 
+// User playlist search results keep their playlist position. YouTube ones keep the number they
+// have without a search, which skips hidden videos. Duration sorting copies user playlist items,
+// so those are matched by their unique playlistItemId
+const shownPlaylistItemIndexes = computed(() => {
+  const items = isUserPlaylistRequested.value ? shownPlaylistItems.value : availablePlaylistItems.value
+  return new Map(items.map((item, index) => [item.playlistItemId ?? item, index]))
+})
+
+// Items without a position show no thumbnail number.
+function shownPlaylistItemIndex(item) {
+  return shownPlaylistItemIndexes.value.get(item.playlistItemId ?? item) ?? null
+}
+
+// The external player loads the whole YouTube playlist, so its start counts hidden videos too.
+// User playlists open single videos, and their copied duration-sorted items fall back to the row
+const playlistItemPositions = computed(() => new Map(shownPlaylistItems.value.map((item, index) => [item, index])))
+
 const shownPlaylistItemCount = computed(() => shownPlaylistItems.value)
 
 const shownVideoCount = computed(() => isUserPlaylistRequested.value ? shownPlaylistItemCount.value.length : videoCount.value)
 
 function getPlaylistInfo() {
   isLoading.value = true
+  playlistError.value = ''
+  playlistErrorRetryable.value = false
+  nextPageError.value = ''
 
   if (isUserPlaylistRequested.value) {
     if (!userPlaylistsReady.value) { return }
@@ -480,13 +861,18 @@ function getPlaylistInfo() {
     if (selectedUserPlaylist.value != null) {
       parseUserPlaylist(selectedUserPlaylist.value)
     } else {
-      showToast(t('User Playlists.SinglePlaylistView.Toast.This playlist does not exist'))
+      isLoading.value = false
+      playlistError.value = t('User Playlists.SinglePlaylistView.Toast.This playlist does not exist')
+      showTabToast({
+        message: t('User Playlists.SinglePlaylistView.Toast.This playlist does not exist'),
+        icon: ['fas', 'circle-exclamation'],
+      })
     }
   } else {
-    if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
-      getPlaylistInvidious()
+    if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backendPreference.value)) {
+      return getPlaylistInvidious()
     } else {
-      getPlaylistLocal()
+      return getPlaylistLocal()
     }
   }
 }
@@ -494,6 +880,9 @@ function getPlaylistInfo() {
 const getPlaylistInfoDebounce = debounce(getPlaylistInfo, 100)
 
 function resetState() {
+  playlistRequestGeneration++
+  releasePlaylistPreloadUi()
+  clearPlaylistPreloadComplete()
   isLoading.value = true
   playlistTitle.value = ''
   playlistDescription.value = ''
@@ -502,44 +891,44 @@ function resetState() {
   viewCount.value = 0
   videoCount.value = 0
   lastUpdated.value = undefined
+  lastUpdatedDate.value = null
   channelName.value = ''
   channelThumbnail.value = ''
   channelId.value = ''
   infoSource.value = 'local'
   showUnavailableVideosAlert.value = false
-  isUnviewable.value = false
   playlistItems.value = []
   continuationData.value = null
-  updatePageTitle()
+  nextInvidiousPlaylistPage.value = null
+  isLoadingMore.value = false
+  nextPageError.value = ''
+  playlistError.value = ''
+  playlistErrorRetryable.value = false
+  fetchedLocalPlaylistItemCount = 0
 }
 
 async function getPlaylistLocal() {
+  const requestGeneration = playlistRequestGeneration
+  const requestedPlaylistId = playlistId.value
+  const requestIsCurrent = () => requestGeneration === playlistRequestGeneration && requestedPlaylistId === playlistId.value
+
   try {
-    const result = await getLocalPlaylist(playlistId.value)
+    const result = await getLocalPlaylist(requestedPlaylistId)
+    if (!requestIsCurrent()) return
 
-    let channelName_
-
-    if (result.info.author) {
-      channelName_ = result.info.author.name
-    } else {
-      const subtitle = result.info.subtitle?.toString()
-      if (subtitle) {
-        const index = subtitle.lastIndexOf('•')
-        channelName_ = subtitle.substring(0, index).trim()
-      } else {
-        channelName_ = ''
-      }
-    }
+    const channelName_ = getLocalPlaylistChannelName(result.info)
 
     const playlistItems_ = parseLocalPlaylistVideos(result.items)
+    fetchedLocalPlaylistItemCount = result.items.length
 
     playlistTitle.value = result.info.title
     playlistDescription.value = result.info.description ?? ''
-    firstVideoId.value = playlistItems_[0].videoId
+    firstVideoId.value = playlistItems_[0]?.videoId ?? ''
     playlistThumbnail.value = result.info.thumbnails[0].url
     viewCount.value = result.info.views.toLowerCase() === 'no views' ? 0 : extractNumberFromString(result.info.views)
     videoCount.value = extractNumberFromString(result.info.total_items)
     lastUpdated.value = result.info.last_updated ?? ''
+    lastUpdatedDate.value = null
     channelName.value = channelName_ ?? ''
     channelThumbnail.value = result.info.author?.best_thumbnail?.url ?? ''
     channelId.value = result.info.author?.id
@@ -554,13 +943,16 @@ async function getPlaylistLocal() {
 
     playlistItems.value = playlistItems_
 
+    await refreshPlaylistBookmarkMetadata()
+    if (!requestIsCurrent()) return
+
     let shouldGetNextPage = false
     if (result.has_continuation) {
       continuationData.value = result
-      shouldGetNextPage = playlistItems.value.length < 100
+      shouldGetNextPage = playlistItems.value.length < 100 && fetchedLocalPlaylistItemCount < videoCount.value
     }
-    // To workaround the effect of useless continuation data
-    // auto load next page again when no. of parsed items < page size
+    // Fill the first page when unplayable entries were filtered out. The raw
+    // item count bounds automatic continuation loading to the playlist size.
     if (shouldGetNextPage) {
       getNextPageLocal()
     }
@@ -569,10 +961,11 @@ async function getPlaylistLocal() {
 
     isLoading.value = false
   } catch (err) {
-    if (err.message.includes('This playlist type is unviewable') ||
-        err.message.includes('The playlist does not exist')) {
-      isUnviewable.value = true
-      isLoading.value = false
+    if (!requestIsCurrent()) return
+
+    if (err?.message?.includes('This playlist type is unviewable') ||
+        err?.message?.includes('The playlist does not exist')) {
+      showUnviewablePlaylistError()
       return
     }
 
@@ -580,59 +973,85 @@ async function getPlaylistLocal() {
 
     if (backendPreference.value === 'local' && backendFallback.value) {
       console.warn('Falling back to Invidious API')
-      getPlaylistInvidious()
+      return getPlaylistInvidious()
     } else {
       updatePageTitle()
       isLoading.value = false
+      playlistError.value = t("User Playlists.SinglePlaylistView['This playlist could not be loaded.']")
+      playlistErrorRetryable.value = true
     }
   }
 }
 
+function showUnviewablePlaylistError() {
+  updatePageTitle()
+  isLoading.value = false
+  playlistError.value = t("User Playlists['This playlist is private or does not exist.']")
+}
+
 async function getPlaylistInvidious() {
+  const requestGeneration = playlistRequestGeneration
+  const requestedPlaylistId = playlistId.value
+  const requestIsCurrent = () => requestGeneration === playlistRequestGeneration && requestedPlaylistId === playlistId.value
+
   try {
-    const { playlist: result, nextIndex: nextIndexValue } = await invidiousGetPlaylistInfo(playlistId.value)
+    const result = await invidiousGetPlaylistInfo(requestedPlaylistId)
+    if (!requestIsCurrent()) return
 
     playlistTitle.value = result.title
     playlistDescription.value = result.description
-    firstVideoId.value = result.videos[0]?.videoId || ''
+    firstVideoId.value = result.videos[0]?.videoId ?? ''
     viewCount.value = result.viewCount
     videoCount.value = result.videoCount
     channelName.value = result.author
-    channelThumbnail.value = youtubeImageUrlToInvidious(result.authorThumbnails[2].url, currentInvidiousInstanceUrl.value)
+    const authorThumbnail = result.authorThumbnails.at(-1)?.url ?? null
+    channelThumbnail.value = youtubeImageUrlToInvidious(authorThumbnail)
     channelId.value = result.authorId
     infoSource.value = 'invidious'
 
     store.dispatch('updateSubscriptionDetails', {
-      channelThumbnailUrl: result.authorThumbnails[2].url,
+      channelThumbnailUrl: authorThumbnail,
       channelName: channelName.value,
       channelId: channelId.value
     })
 
-    const dateString = new Date(result.updated * 1000)
-    lastUpdated.value = dateString.toLocaleDateString(locale.value, { year: 'numeric', month: 'short', day: 'numeric' })
+    lastUpdatedDate.value = result.updated == null ? null : new Date(result.updated * 1000)
+    updateLastUpdatedDate()
 
     playlistItems.value = result.videos
-    nextIndex.value = nextIndexValue
+    await refreshPlaylistBookmarkMetadata()
+    if (!requestIsCurrent()) return
+    const hasMorePages = hasMoreInvidiousPlaylistPages(
+      result.videoCount,
+      1,
+      result.videos.length,
+      result.pageVideoCount
+    )
+    nextInvidiousPlaylistPage.value = hasMorePages
+      ? 2
+      : null
 
     updatePageTitle()
 
     isLoading.value = false
   } catch (err) {
+    if (!requestIsCurrent()) return
+
     console.error(err)
 
-    if (err.message.includes('Could not extract playlistSidebarRenderer')) {
-      isUnviewable.value = true
-      isLoading.value = false
+    if (err?.message?.includes('Could not extract playlistSidebarRenderer')) {
+      showUnviewablePlaylistError()
       return
     }
 
-    if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      console.warn('Error getting data with Invidious, falling back to local backend')
-      getPlaylistLocal()
+    if (process.env.SUPPORTS_LOCAL_API && usesInvidiousApi(backendPreference.value) && backendFallback.value) {
+      showInvidiousFallbackToast(backendPreference.value)
+      return getPlaylistLocal()
     } else {
       updatePageTitle()
       isLoading.value = false
-      // TODO: Show toast with error message
+      playlistError.value = t("User Playlists.SinglePlaylistView['This playlist could not be loaded.']")
+      playlistErrorRetryable.value = true
     }
   }
 }
@@ -649,8 +1068,8 @@ function parseUserPlaylist(playlist) {
     firstVideoPlaylistItemId.value = ''
   }
 
-  const dateString = new Date(playlist.lastUpdatedAt)
-  lastUpdated.value = dateString.toLocaleDateString(locale.value, { year: 'numeric', month: 'short', day: 'numeric' })
+  lastUpdatedDate.value = new Date(playlist.lastUpdatedAt)
+  updateLastUpdatedDate()
   viewCount.value = 0
   channelName.value = ''
   channelThumbnail.value = ''
@@ -667,6 +1086,9 @@ function parseUserPlaylist(playlist) {
 // react to route changes...
 watch(playlistId, () => {
   resetState()
+  // The search box and edit mode start fresh for the next playlist, so their state must too.
+  videoSearchQuery.value = searchQueryTextPresent.value ? searchQueryTextRequested.value : ''
+  playlistInEditMode.value = false
   getPlaylistInfoDebounce()
 })
 
@@ -677,22 +1099,29 @@ watch(userPlaylistsReady, () => {
   getPlaylistInfoDebounce()
 })
 
+// Opening a synced playlist brings in changes on YouTube, also moved videos,
+// which the sync does not see.
+watch([playlistId, userPlaylistsReady], () => {
+  if (isUserPlaylistRequested.value && selectedUserPlaylist.value?.youTube) refreshYouTubePlaylist(selectedUserPlaylist.value._id)
+}, { immediate: true })
+
 // Fetch from local store when current user playlist changed
 watch(selectedUserPlaylist, () => {
-  if (!isUserPlaylistRequested.value) { return }
+  // A queued move or drag would be undone; the last save reloads the playlist
+  if (!isUserPlaylistRequested.value || draggedOrderSave) { return }
 
   getPlaylistInfoDebounce()
 })
 
 // Re-fetch from local store when current user playlist updated
 watch(selectedUserPlaylistLastUpdatedAt, () => {
-  if (!isUserPlaylistRequested.value) { return }
+  if (!isUserPlaylistRequested.value || draggedOrderSave) { return }
 
   getPlaylistInfoDebounce()
 })
 
 watch(selectedUserPlaylistVideoCount, async () => {
-  if (!isUserPlaylistRequested.value) { return }
+  if (!isUserPlaylistRequested.value || draggedOrderSave) { return }
 
   // Monitoring `selectedUserPlaylistVideos` makes this function called
   // Even when the same array object is returned
@@ -708,42 +1137,29 @@ watch(selectedUserPlaylistVideoCount, async () => {
 const historyCacheById = computed(() => store.getters.getHistoryCacheById)
 
 function getPlaylistItemsWithDuration() {
-  const modifiedPlaylistItems = deepCopy(shownPlaylistItems.value)
-  let anyVideoMissingDuration = false
-
-  modifiedPlaylistItems.forEach(video => {
-    if (videoDurationPresent(video)) { return }
-
-    const videoHistory = historyCacheById[video.videoId]
-
-    if (typeof videoHistory !== 'undefined') {
-      const fetchedLengthSeconds = videoDurationWithFallback(videoHistory)
-      video.lengthSeconds = fetchedLengthSeconds
-
-      // if the video duration is 0, it will be the fallback value, so mark it as missing a duration
-      if (fetchedLengthSeconds === 0) {
-        anyVideoMissingDuration = true
-      }
-    } else {
-      // Mark at least one video have no duration, show notice later
-      // Also assign fallback duration here
-      anyVideoMissingDuration = true
-      video.lengthSeconds = 0
-    }
-  })
+  const { items, anyVideoMissingDuration } = fillMissingPlaylistVideoDurations(
+    shownPlaylistItems.value,
+    historyCacheById.value
+  )
 
   // Show notice if not already shown before returning playlist items
   if (anyVideoMissingDuration && !alreadyShownNotice) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast.This playlist has a video with a duration error'), 5000)
+    showTabToast({
+      message: t('User Playlists.SinglePlaylistView.Toast.This playlist has a video with a duration error'),
+      time: 5000,
+      icon: ['fas', 'circle-exclamation'],
+    })
     alreadyShownNotice = true
   }
 
-  return modifiedPlaylistItems
+  return items
 }
 
-function getNextPage() {
+async function getNextPage() {
+  if (isLoadingMore.value) return
+
   if (process.env.SUPPORTS_LOCAL_API && infoSource.value === 'local') {
-    getNextPageLocal()
+    return await getNextPageLocal()
   } else if (infoSource.value === 'user') {
     // Stop users from spamming the load more button, by replacing it with a loading symbol until the newly added items are renderered
     isLoadingMore.value = true
@@ -758,57 +1174,116 @@ function getNextPage() {
       isLoadingMore.value = false
     })
   } else if (infoSource.value === 'invidious') {
-    getNextPageInvidious()
+    return await getNextPageInvidious()
   }
 }
 
 async function getNextPageLocal() {
-  isLoadingMore.value = true
+  if (isLoadingMore.value || continuationData.value == null) return
 
-  const result = await getLocalPlaylistContinuation(continuationData.value)
+  const requestGeneration = playlistRequestGeneration
+  const requestedPlaylistId = playlistId.value
+  const requestIsCurrent = () => requestGeneration === playlistRequestGeneration && requestedPlaylistId === playlistId.value
 
-  let shouldGetNextPage = false
+  await runRetryablePlaylistRequest({
+    request: async () => {
+      let shouldGetNextPage
+      do {
+        shouldGetNextPage = false
+        const result = await getLocalPlaylistContinuation(continuationData.value)
+        if (!requestIsCurrent()) return
 
-  if (result) {
-    const parsedVideos = parseLocalPlaylistVideos(result.items)
-    playlistItems.value = playlistItems.value.concat(parsedVideos)
+        if (result) {
+          const parsedVideos = parseLocalPlaylistVideos(result.items)
+          fetchedLocalPlaylistItemCount += result.items.length
+          playlistItems.value = playlistItems.value.concat(parsedVideos)
 
-    if (result.has_continuation) {
-      continuationData.value = result
+          if (result.has_continuation) {
+            continuationData.value = result
 
-      // To workaround the effect of useless continuation data
-      // auto load next page again when no. of parsed items < page size
-      shouldGetNextPage = parsedVideos.length < 100
-    } else {
-      continuationData.value = null
-    }
-  } else {
-    continuationData.value = null
-  }
+            // Keep crossing pages that contain filtered entries until this page is
+            // full or every advertised playlist item has been fetched.
+            shouldGetNextPage = parsedVideos.length < 100 && fetchedLocalPlaylistItemCount < videoCount.value
+          } else {
+            continuationData.value = null
+          }
+        } else {
+          continuationData.value = null
+        }
+      } while (shouldGetNextPage)
+    },
+    setLoading: (loading) => {
+      if (requestIsCurrent()) {
+        isLoadingMore.value = loading
+      }
+    },
+    setError: (error) => {
+      if (!requestIsCurrent()) return
 
-  isLoadingMore.value = false
-
-  if (shouldGetNextPage) {
-    getNextPageLocal()
-  }
+      if (error == null) {
+        nextPageError.value = ''
+      } else {
+        console.error(error)
+        nextPageError.value = t("User Playlists.SinglePlaylistView['More videos could not be loaded.']")
+      }
+    },
+  })
 }
 
 async function getNextPageInvidious() {
-  isLoadingMore.value = true
+  if (isLoadingMore.value || nextInvidiousPlaylistPage.value == null) return
 
-  const { playlist: result, nextIndex: nextIndexValue } = await invidiousGetPlaylistInfo(playlistId.value, nextIndex.value)
-  playlistItems.value.push(...result.videos)
-  nextIndex.value = nextIndexValue
+  const requestGeneration = playlistRequestGeneration
+  const requestedPlaylistId = playlistId.value
+  const requestedPage = nextInvidiousPlaylistPage.value
+  const requestIsCurrent = () => requestGeneration === playlistRequestGeneration && requestedPlaylistId === playlistId.value
 
-  isLoadingMore.value = false
+  await runRetryablePlaylistRequest({
+    request: async () => {
+      const result = await invidiousGetPlaylistInfo(requestedPlaylistId, requestedPage)
+      if (!requestIsCurrent()) return
+
+      const mergedVideos = mergeInvidiousPlaylistVideos(playlistItems.value, result.videos)
+      playlistItems.value = mergedVideos
+      firstVideoId.value ||= mergedVideos[0]?.videoId ?? ''
+      const hasMorePages = hasMoreInvidiousPlaylistPages(
+        videoCount.value,
+        requestedPage,
+        mergedVideos.length,
+        result.pageVideoCount
+      )
+      nextInvidiousPlaylistPage.value = hasMorePages
+        ? requestedPage + 1
+        : null
+    },
+    setLoading: (loading) => {
+      if (requestIsCurrent()) {
+        isLoadingMore.value = loading
+      }
+    },
+    setError: (error) => {
+      if (!requestIsCurrent()) return
+
+      if (error == null) {
+        nextPageError.value = ''
+      } else {
+        console.error(error)
+        nextPageError.value = t("User Playlists.SinglePlaylistView['More videos could not be loaded.']")
+      }
+    },
+  })
 }
 
+// YouTube orders Liked videos by when they were liked.
+const isYouTubeLikedVideos = computed(() => selectedUserPlaylist.value?.youTube?.playlistId === 'LL')
+
 const canMoveVideos = computed(() => {
-  return isUserPlaylistRequested.value && !playlistInVideoSearchMode.value && isSortOrderCustom.value && noPlaylistItemsPendingDeletion.value
+  return isUserPlaylistRequested.value && !playlistInVideoSearchMode.value && isSortOrderCustom.value &&
+    !pendingDeletionRemovalInProgress.value && !isYouTubeLikedVideos.value
 })
 
 const videoDraggingPossible = computed(() => {
-  return isUserPlaylistRequested.value && isSortOrderCustom.value && shownPlaylistItems.value.length >= 2
+  return canMoveVideos.value && shownPlaylistItems.value.length >= 2
 })
 
 /**
@@ -817,37 +1292,31 @@ const videoDraggingPossible = computed(() => {
  */
 function moveVideoUp(videoId, playlistItemId) {
   const playlistItems_ = playlistItems.value.slice()
-
-  const index = playlistItems_.findIndex((video) => {
+  const shownIndex = shownPlaylistItems.value.findIndex((video) => {
     return video.videoId === videoId && video.playlistItemId === playlistItemId
   })
 
-  if (index === -1) {
+  if (shownIndex === -1) {
     return
   }
 
-  if (index === 0) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast["This video cannot be moved up."]'))
+  if (shownIndex === 0) {
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast["This video cannot be moved up."]'),
+      icon: ['fas', 'circle-exclamation'],
+    })
     return
   }
 
-  [playlistItems_[index], playlistItems_[index - 1]] = [playlistItems_[index - 1], playlistItems_[index]]
+  const previousPlaylistItemId = shownPlaylistItems.value[shownIndex - 1].playlistItemId
+  const index = playlistItems_.findIndex(video => video.playlistItemId === playlistItemId)
+  const previousIndex = playlistItems_.findIndex(video => video.playlistItemId === previousPlaylistItemId)
+  const video = playlistItems_[index]
 
-  const playlist = {
-    playlistName: playlistTitle.value,
-    protected: selectedUserPlaylist.value.protected,
-    description: playlistDescription.value,
-    videos: deepCopy(playlistItems_),
-    _id: playlistId.value
-  }
+  playlistItems_[index] = playlistItems_[previousIndex]
+  playlistItems_[previousIndex] = video
 
-  try {
-    store.dispatch('updatePlaylist', playlist)
-    playlistItems.value = playlistItems_
-  } catch (e) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'))
-    console.error(e)
-  }
+  saveMovedVideos(playlistItems_)
 }
 
 /**
@@ -856,37 +1325,31 @@ function moveVideoUp(videoId, playlistItemId) {
  */
 function moveVideoDown(videoId, playlistItemId) {
   const playlistItems_ = playlistItems.value.slice()
-
-  const index = playlistItems_.findIndex((video) => {
+  const shownIndex = shownPlaylistItems.value.findIndex((video) => {
     return video.videoId === videoId && video.playlistItemId === playlistItemId
   })
 
-  if (index === -1) {
+  if (shownIndex === -1) {
     return
   }
 
-  if (index + 1 >= playlistItems_.length) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast["This video cannot be moved down."]'))
+  if (shownIndex + 1 >= shownPlaylistItems.value.length) {
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast["This video cannot be moved down."]'),
+      icon: ['fas', 'circle-exclamation'],
+    })
     return
   }
 
-  [playlistItems_[index], playlistItems_[index + 1]] = [playlistItems_[index + 1], playlistItems_[index]]
+  const nextPlaylistItemId = shownPlaylistItems.value[shownIndex + 1].playlistItemId
+  const index = playlistItems_.findIndex(video => video.playlistItemId === playlistItemId)
+  const nextIndex = playlistItems_.findIndex(video => video.playlistItemId === nextPlaylistItemId)
+  const video = playlistItems_[index]
 
-  const playlist = {
-    playlistName: playlistTitle.value,
-    protected: selectedUserPlaylist.value.protected,
-    description: playlistDescription.value,
-    videos: deepCopy(playlistItems_),
-    _id: playlistId.value
-  }
+  playlistItems_[index] = playlistItems_[nextIndex]
+  playlistItems_[nextIndex] = video
 
-  try {
-    store.dispatch('updatePlaylist', playlist)
-    playlistItems.value = playlistItems_
-  } catch (e) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'))
-    console.error(e)
-  }
+  saveMovedVideos(playlistItems_)
 }
 
 /**
@@ -905,7 +1368,10 @@ function moveVideoToTheTop(videoId, playlistItemId) {
   }
 
   if (index === 0) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast["This video cannot be moved up."]'))
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast["This video cannot be moved up."]'),
+      icon: ['fas', 'circle-exclamation'],
+    })
     return
   }
 
@@ -913,21 +1379,7 @@ function moveVideoToTheTop(videoId, playlistItemId) {
   playlistItems_.splice(index, 1)
   playlistItems_.unshift(videoObject)
 
-  const playlist = {
-    playlistName: playlistTitle.value,
-    protected: selectedUserPlaylist.value.protected,
-    description: playlistDescription.value,
-    videos: deepCopy(playlistItems_),
-    _id: playlistId.value
-  }
-
-  try {
-    store.dispatch('updatePlaylist', playlist)
-    playlistItems.value = playlistItems_
-  } catch (e) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'))
-    console.error(e)
-  }
+  saveMovedVideos(playlistItems_)
 }
 
 /**
@@ -946,7 +1398,10 @@ function moveVideoToTheBottom(videoId, playlistItemId) {
   }
 
   if (index === playlistItems_.length - 1) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast["This video cannot be moved down."]'))
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast["This video cannot be moved down."]'),
+      icon: ['fas', 'circle-exclamation'],
+    })
     return
   }
 
@@ -954,89 +1409,99 @@ function moveVideoToTheBottom(videoId, playlistItemId) {
   playlistItems_.splice(index, 1)
   playlistItems_.push(videoObject)
 
-  const playlist = {
-    playlistName: playlistTitle.value,
-    protected: selectedUserPlaylist.value.protected,
-    description: playlistDescription.value,
-    videos: deepCopy(playlistItems_),
-    _id: playlistId.value
-  }
+  saveMovedVideos(playlistItems_)
+}
 
-  try {
-    store.dispatch('updatePlaylist', playlist)
-    playlistItems.value = playlistItems_
-  } catch (e) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'))
-    console.error(e)
-  }
+const { draggedId: draggedPlaylistItemId, onPointerDown: startVideoDrag } = useGridReorder({
+  itemSelector: '[data-playlist-drag-item]',
+  handleSelector: '.grabBar:not(.grabBarDisabled), .videoIndexArea',
+  getId: item => item.dataset.playlistItemId,
+  commit: moveDraggedVideo
+})
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const isVideoDragging = computed(() => draggedPlaylistItemId.value != null)
+
+/** @type {Promise<void> | null} */
+let draggedOrderSave = null
+
+/**
+ * @param {string} playlistItemId
+ * @param {string[]} order
+ */
+function moveDraggedVideo(playlistItemId, order) {
+  const items = shownPlaylistItems.value.slice()
+  const from = items.findIndex(video => video.playlistItemId === playlistItemId)
+  // The grid leaves out videos hidden by preferences, which keep their places.
+  const index = droppedIndex(items.map(video => video.playlistItemId), playlistItemId, order)
+  if (from === -1 || index === -1 || from === index) return
+  items.splice(index, 0, ...items.splice(from, 1))
+  // Show the new order right away, while the saved one is updated.
+  tempShownPlaylistItems.value = items
+  // A later drag can start before this save finishes, so save in order.
+  queueOrderSave(items)
 }
 
 /**
- * @param {VideoData} video
+ * Shows the order from a move button right away and saves it after earlier moves and drags.
+ * @param {any[]} items
  */
-function setDraggedVideo(video) {
-  draggedVideo.value = video
+function saveMovedVideos(items) {
+  playlistItems.value = items
+  queueOrderSave(items)
 }
 
-function onDragVideoEnd() {
-  if (tempShownPlaylistItems.value != null) {
-    // Save on drag end ONLY
-    const playlist = {
-      playlistName: playlistTitle.value,
-      protected: selectedUserPlaylist.value.protected,
-      description: playlistDescription.value,
-      // Save whatever is shown
-      videos: deepCopy(tempShownPlaylistItems.value),
-      _id: playlistId.value
-    }
+/**
+ * Saves an order after the earlier moves and drags, in the playlist open now.
+ * @param {any[]} items
+ */
+function queueOrderSave(items) {
+  const id = playlistId.value
+  const save = (draggedOrderSave ?? Promise.resolve()).then(() => saveDraggedOrder(id, items, () => draggedOrderSave === save)).finally(() => {
+    if (draggedOrderSave === save) draggedOrderSave = null
+  })
+  draggedOrderSave = save
+}
 
-    try {
-      store.dispatch('updatePlaylist', playlist)
-      playlistItems.value = tempShownPlaylistItems.value
-    } catch (e) {
-      showToast(t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'))
-      console.error(e)
-    }
+/**
+ * @param {string} id The playlist the drag or move happened in, which may no longer be the open one
+ * @param {any[]} items
+ * @param {() => boolean} isLatest whether no later move or drag waits to be saved
+ */
+async function saveDraggedOrder(id, items, isLatest) {
+  try {
+    // Apply the shown order to the saved entries, so videos another window
+    // added or removed in the meantime stay that way.
+    const saved = await store.dispatch('reorderPlaylistVideos', {
+      _id: id,
+      playlistItemIds: items.map(video => video.playlistItemId),
+    })
+    if (!saved) throw new Error('Could not update playlist')
+  } catch (e) {
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
+      icon: ['fas', 'circle-exclamation'],
+    })
+    console.error(e)
+  } finally {
+    // Show the saved playlist, which drops an order that failed to save and
+    // brings in changes from other windows. Until then, a later move builds on
+    // the order shown now.
+    if (playlistId.value === id && isLatest()) getPlaylistInfo()
+    // The ref holds a reactive copy, so compare the original array.
+    if (toRaw(tempShownPlaylistItems.value) === items) tempShownPlaylistItems.value = null
   }
-
-  // Cleanup
-  tempShownPlaylistItems.value = null
-
-  // Unset dragged video
-  setDraggedVideo({
-    videoId: null,
-    playlistItemId: null,
-  })
 }
 
-/** @type {import('vue').ComputedRef<boolean>} */
-const isVideoDragging = computed(() => {
-  const { videoId, playlistItemId } = draggedVideo.value
-
-  return videoId != null && playlistItemId != null
+// Videos removed during a drag wait until it ends and every order it saves is saved.
+watch(isVideoDragging, async dragging => {
+  if (dragging || !removePendingVideosAfterDrag) return
+  for (let save = draggedOrderSave; save; save = draggedOrderSave) await save
+  // A later drag can start meanwhile and handle the removal once it ends.
+  if (isVideoDragging.value || !removePendingVideosAfterDrag) return
+  removePendingVideosAfterDrag = false
+  await removeToBeDeletedVideosSometimes()
 })
-
-function moveDraggedVideoTemporarily({ videoId, playlistItemId }, { videoId: droppedVideoId, playlistItemId: droppedPlaylistItemId }) {
-  // To ensure we can drag an item back to its original position in a single drag (i.e. no change), the temp items should be used
-  const playlistItems_ = tempShownPlaylistItems.value != null ? tempShownPlaylistItems.value.slice() : playlistItems.value.slice()
-
-  const draggedOverIndex = playlistItems_.findIndex((video) => {
-    return video.videoId === videoId && video.playlistItemId === playlistItemId
-  })
-
-  const droppedVideoOriginalIndex = playlistItems_.findIndex((video) => {
-    return video.videoId === droppedVideoId && video.playlistItemId === droppedPlaylistItemId
-  })
-
-  const playlistItemToBeMoved = playlistItems_.splice(droppedVideoOriginalIndex, 1)[0]
-  playlistItems_.splice(draggedOverIndex, 0, playlistItemToBeMoved)
-
-  tempShownPlaylistItems.value = playlistItems_
-}
-
-// Only fire once per 100ms to prevent items moving up and down repeatedly during transition
-// 100ms is manually tested value (50ms won't work)
-const moveDraggedVideoTemporarilyThrottled = throttle(moveDraggedVideoTemporarily, 100)
 
 /**
  * @param {string} videoId
@@ -1061,40 +1526,60 @@ function removeVideoFromPlaylist(videoId, playlistItemId) {
           removeToBeDeletedVideosSometimes()
         }, timeoutMs)
 
-        showToast(
-          t('User Playlists.SinglePlaylistView.Toast["Video has been removed. Click here to undo."]'),
-          timeoutMs,
-          () => {
+        showToast({
+          message: t('User Playlists.SinglePlaylistView.Toast["Video has been removed. Click here to undo."]'),
+          time: timeoutMs,
+          action: () => {
             clearTimeout(actualRemoveVideosTimeout)
             toBeDeletedPlaylistItemIds.value = []
             videosWithPlaylistToUnset.value = []
             undoToastAbortController = null
           },
-          undoToastAbortController.signal,
-        )
+          abortSignal: undoToastAbortController.signal,
+          image: getVideoThumbnailUrl(videoId, backendPreference.value, currentInvidiousInstanceUrl.value, thumbnailPreference.value),
+          icon: ['fas', 'trash'],
+        })
       }
     }
   } catch (e) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast.There was a problem with removing this video'))
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast.There was a problem with removing this video'),
+      icon: ['fas', 'circle-exclamation'],
+    })
     console.error(e)
   }
 }
 
 async function removeToBeDeletedVideosSometimes() {
   if (isLoading.value) { return }
+  if (isVideoDragging.value) {
+    removePendingVideosAfterDrag = true
+    return
+  }
 
   if (toBeDeletedPlaylistItemIds.value.length > 0) {
-    await store.dispatch('removeVideos', {
-      _id: playlistId.value,
-      // Create new non-reactive arrays to avoid Electron erroring about Proxy objects not being clonable
-      playlistItemIds: [...toBeDeletedPlaylistItemIds.value],
-      videoIds: [...videosWithPlaylistToUnset.value],
-    })
+    pendingDeletionRemovalInProgress.value = true
 
-    toBeDeletedPlaylistItemIds.value = []
-    videosWithPlaylistToUnset.value = []
-    undoToastAbortController?.abort()
-    undoToastAbortController = null
+    try {
+      await store.dispatch('removeVideos', {
+        _id: playlistId.value,
+        // Create a new non-reactive array to avoid Electron erroring about Proxy objects not being clonable
+        playlistItemIds: [...toBeDeletedPlaylistItemIds.value],
+        videoIds: [...videosWithPlaylistToUnset.value],
+      })
+    } catch (e) {
+      showToast({
+        message: t('User Playlists.SinglePlaylistView.Toast.There was a problem with removing this video'),
+        icon: ['fas', 'circle-exclamation'],
+      })
+      console.error(e)
+    } finally {
+      pendingDeletionRemovalInProgress.value = false
+      toBeDeletedPlaylistItemIds.value = []
+      videosWithPlaylistToUnset.value = []
+      undoToastAbortController?.abort()
+      undoToastAbortController = null
+    }
   }
 }
 
@@ -1116,7 +1601,7 @@ function updatePageTitle() {
     }
   }
 
-  store.commit('setAppTitle', titleText)
+  setTabTitle(titleText)
 }
 
 /**
@@ -1132,18 +1617,20 @@ function handleVideoSearchQueryChange(value) {
  * @param {string} query
  */
 async function saveStateInRouter(query) {
-  const routeQuery = {
-    playlistType: route.query.playlistType,
-  }
+  // Keep the other parameters, such as the linked thumbnail of YouTube playlists
+  const routeQuery = { ...route.query }
+  delete routeQuery.searchQueryText
 
   if (query !== '') {
     routeQuery.searchQueryText = query
   }
 
   try {
+    // Searching keeps the scroll position like other filters instead of jumping to the top
     await router.replace({
       path: `/playlist/${playlistId.value}`,
       query: routeQuery,
+      state: { preserveScroll: true },
     })
   } catch (failure) {
     if (isNavigationFailure(failure, NavigationFailureType.duplicated)) {
@@ -1154,12 +1641,12 @@ async function saveStateInRouter(query) {
   }
 }
 
-if (isUserPlaylistRequested.value && searchQueryTextPresent.value) {
+if (searchQueryTextPresent.value) {
   handleVideoSearchQueryChange(searchQueryTextRequested.value)
 }
 
 function handleResize() {
-  forceListView.value = window.innerWidth <= MOBILE_WIDTH_THRESHOLD || window.innerHeight <= PLAYLIST_HEIGHT_FORCE_LIST_THRESHOLD
+  compactLayout.value = window.innerWidth <= MOBILE_WIDTH_THRESHOLD || window.innerHeight <= PLAYLIST_HEIGHT_COMPACT_THRESHOLD
 }
 
 function handleCloseAlert() {
@@ -1173,27 +1660,65 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  playlistRequestGeneration++
+  // A load scheduled just before leaving would otherwise fetch the playlist,
+  // update subscription details and set the tab title for a disposed view.
+  getPlaylistInfoDebounce.cancel()
+  releasePlaylistPreloadUi()
+  clearPlaylistPreloadComplete()
+  removePlaybackSourceCacheChangeListener()
   window.removeEventListener('resize', handleResize)
 })
 
-onBeforeRouteLeave((to) => {
+// Cache the playlist only when transitioning to one of its videos, so returning
+// from the watch page can reuse it without a refetch.
+function cachePlaylistForWatchTransition(to) {
   if (!isLoading.value && to.path.startsWith('/watch') && to.query.playlistId === playlistId.value) {
     store.commit('setCachedPlaylist', {
-      id: playlistId.value,
-      title: playlistTitle.value,
-      totalVideoCount: videoCount.value,
-      channelName: channelName.value,
-      channelId: channelId.value,
-      items: sortedPlaylistItems.value,
-      continuationData: continuationData.value
-        ? extractLocalCacheablePlaylistContinuation(continuationData.value)
-        : null,
-      nextIndex: nextIndex.value,
+      tabId: playlistCacheTabId,
+      value: {
+        id: playlistId.value,
+        title: playlistTitle.value,
+        totalVideoCount: videoCount.value,
+        channelName: channelName.value,
+        channelId: channelId.value,
+        items: availablePlaylistItems.value,
+        continuationData: continuationData.value
+          ? extractLocalCacheablePlaylistContinuation(continuationData.value)
+          : null,
+        nextInvidiousPage: nextInvidiousPlaylistPage.value,
+      }
     })
   }
+}
 
-  removeToBeDeletedVideosSometimes()
+// A query-only router.replace (e.g. updating the search query) keeps us on this
+// same playlist route and must not flush pending deletions before the undo
+// window elapses.
+function isDepartureFromThisPlaylist(to) {
+  return to.path !== `/playlist/${playlistId.value}`
+}
+
+useTabLifecycle({
+  beforeNavigate: ({ to }) => {
+    cachePlaylistForWatchTransition(to)
+
+    if (isDepartureFromThisPlaylist(to)) {
+      removeToBeDeletedVideosSometimes()
+    }
+  },
+  beforeDispose: removeToBeDeletedVideosSometimes
 })
+
+// Fallback for browser navigation (web build) where no logical tab context
+// exists, so useTabLifecycle is a no-op. vue-router only runs leave guards on
+// actual route-record departures, so query-only replaces are already excluded.
+if (!tabId) {
+  onBeforeRouteLeave((to) => {
+    cachePlaylistForWatchTransition(to)
+    removeToBeDeletedVideosSometimes()
+  })
+}
 </script>
 
 <style scoped src="./Playlist.scss" lang="scss" />

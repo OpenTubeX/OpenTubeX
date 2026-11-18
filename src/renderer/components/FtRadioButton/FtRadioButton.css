@@ -1,4 +1,13 @@
-.radio {
+/* stylelint-disable no-descending-specificity */
+.pure-radiobutton {
+  --radio-dot-offset: -50%;
+}
+
+.pure-radiobutton:dir(rtl) {
+  --radio-dot-offset: 50%;
+}
+
+.pure-radiobutton input[type='radio'] {
   border: 0;
   clip-path: circle(0);
   block-size: 1px;
@@ -9,92 +18,93 @@
   inline-size: 1px;
 }
 
-.label {
+.pure-radiobutton input + label {
   position: relative;
-  padding-inline-start: 2em;
+  box-sizing: border-box;
+  padding-block: 8px;
+  padding-inline-start: 32px;
+  min-block-size: 40px;
+  line-height: 24px;
   user-select: none;
   cursor: pointer;
   display: block;
-  margin-block-start: 10px;
 }
 
-.label::before,
-.label::after {
-  border-radius: 50%;
-  box-sizing: content-box;
+.pure-radiobutton input + label::before,
+.pure-radiobutton input + label::after {
+  box-sizing: border-box;
   content: '';
   position: absolute;
   inset-block-start: 50%;
+  border-radius: 50%;
 }
 
-.label::before {
-  color: var(--primary-text-color);
+.pure-radiobutton input + label::before {
   inset-inline-start: 0;
-  inline-size: 14px;
-  block-size: 14px;
-  margin-block-start: -9px;
-  border: 2px solid var(--primary-text-color);
-  text-align: center;
-  transition: all 0.4s ease;
+  inline-size: 20px;
+  block-size: 20px;
+  border: 2px solid var(--secondary-text-color);
+
+  /* Separate translates keep the press scale centered on the ring. */
+  translate: 0 -50%;
+  transition:
+    border-color var(--motion-fast-effects),
+    box-shadow var(--motion-fast-effects),
+    scale var(--motion-fast-spatial);
 }
 
-.label::after {
-  background-color: var(--primary-text-color);
-  inset-inline-start: 4px;
+.pure-radiobutton input + label::after {
+  background-color: var(--accent-color);
+  inset-inline-start: 10px;
   inline-size: 10px;
   block-size: 10px;
-  margin-block-start: -5px;
+  translate: var(--radio-dot-offset) -50%;
   transform: scale(0);
-  transform-origin: 50%;
-  transition: transform 200ms ease-out;
+  transition: transform var(--motion-fast-spatial), scale var(--motion-fast-spatial);
 }
 
-.radio:focus + .label::before,
-.radio:hover + .label::before {
-  border: 2px solid var(--primary-color);
+.pure-radiobutton input:checked + label::before {
+  border-color: var(--accent-color);
 }
 
-.radio:active + .label::before {
-  transition-duration: 0s;
-}
-
-.radio:disabled + .label::before {
-  border-color: #ccc;
-}
-
-.radio:checked + .label::before {
-  animation: borderscale 300ms ease-in;
-}
-
-.radio:disabled:focus + .label::before,
-.radio:disabled:hover + .label::before {
-  background-color: inherit;
-}
-
-.radio:disabled:checked + .label::before {
-  background-color: #ccc;
-}
-
-.radio:focus + .label::after {
-  background-color: var(--primary-color);
-}
-
-.radio:checked + .label::after {
+.pure-radiobutton input:checked + label::after {
   transform: scale(1);
 }
 
-@keyframes borderscale {
-  50% {
-    box-shadow: 0 0 0 2px var(--primary-text-color);
-  }
+.pure-radiobutton input:not(:disabled) + label:hover::before,
+.pure-radiobutton input:focus-visible + label::before {
+  box-shadow: 0 0 0 8px var(--accent-color-opacity2);
+}
+
+/* Pressing shrinks the ring and its dot together under a stronger state layer,
+   whose spread grows so its outer size stays the same. */
+.pure-radiobutton input:not(:disabled) + label:active::before,
+.pure-radiobutton input:not(:disabled) + label:active::after {
+  scale: 0.85;
+}
+
+.pure-radiobutton input:not(:disabled) + label:active::before {
+  box-shadow: 0 0 0 11px color-mix(in srgb, var(--accent-color) 20%, transparent);
+}
+
+.pure-radiobutton input:focus-visible + label {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -2px;
+  border-radius: var(--shape-corner-extra-small);
+}
+
+.pure-radiobutton input:disabled + label {
+  opacity: 0.38;
+  cursor: not-allowed;
 }
 
 .radioTitle {
   margin-block: 0;
 }
 
-@media only screen and (width <= 680px) {
-  .label {
-    margin-block-start: 3px;
+@media (any-pointer: coarse), (width <= 680px) {
+  .pure-radiobutton input + label {
+    min-block-size: 48px;
+    padding-block: 12px;
   }
 }

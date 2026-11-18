@@ -1,0 +1,44 @@
+.skeletonCard {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 6px;
+}
+
+.skeletonCard.listCard {
+  flex-direction: row;
+  gap: 12px;
+}
+
+.skeletonThumbnail {
+  aspect-ratio: 16 / 9;
+  inline-size: 100%;
+  border-radius: var(--shape-corner-medium);
+}
+
+.youtubeStyleShorts .skeletonThumbnail {
+  aspect-ratio: 2 / 3;
+}
+
+.listCard .skeletonThumbnail {
+  inline-size: 262px;
+  flex-shrink: 0;
+}
+
+.skeletonDetails {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skeletonLine {
+  block-size: 14px;
+  border-radius: var(--shape-corner-full);
+  inline-size: 90%;
+}
+
+.skeletonLine.short {
+  inline-size: 60%;
+}

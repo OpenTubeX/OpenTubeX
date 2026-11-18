@@ -1,15 +1,36 @@
 .sponsorBlockCategory {
-  margin-block-start: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  box-sizing: border-box;
+  min-inline-size: 0;
   padding-block: 0;
   padding-inline: 10px;
 }
 
 .sponsorTitle {
   font-size: x-large;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  min-block-size: 2lh;
+  overflow-wrap: anywhere;
 }
 
-@media only screen and (width <= 680px) {
-  .sponsorBlockCategory {
-    inline-size: 100%;
-  }
+.sponsorBlockCategory :deep(.select) {
+  box-sizing: border-box;
+  inline-size: 100%;
+}
+
+.sponsorBlockCategory :deep(.select-text) {
+  block-size: auto;
+  min-block-size: var(--form-control-height);
+}
+
+.sponsorBlockCategory :deep(.selectedValue) {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.sponsorBlockColorPicker {
+  margin-block: var(--settings-control-margin, 10px);
 }

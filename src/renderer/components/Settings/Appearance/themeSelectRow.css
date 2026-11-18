@@ -1,0 +1,33 @@
+.themeSelectRow {
+  align-items: center;
+  flex-flow: row wrap;
+  justify-content: center;
+  column-gap: 12px;
+}
+
+.themeSelectRow :deep(.select) {
+  flex: 0 1 auto;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+@container settings-content (width <= 760px) {
+  .themeSelectRow :deep(.select) {
+    flex: 0 0 auto;
+  }
+}
+
+@container settings-content (width <= 460px) {
+  /* Stack the selects at the width of the widest caption so they share edges. */
+  .themeSelectRow {
+    display: grid;
+    grid-template-columns: minmax(0, max-content);
+    justify-content: center;
+  }
+
+  .themeSelectRow :deep(.select) {
+    box-sizing: border-box;
+    inline-size: auto;
+    justify-self: stretch;
+  }
+}

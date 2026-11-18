@@ -10,42 +10,77 @@
       >
         {{ selectedText }}
       </p>
-      <FtFlexBox>
-        <FtChannelBubble
-          v-for="channel in subscriptions"
-          :key="channel.id"
-          :channel-id="channel.id"
-          :channel-name="channel.name"
-          :channel-thumbnail="channel.thumbnail"
-          :selectable="showUnsubscribeButton"
-          :selected="selected.has(channel.id)"
-          @change="handleChannelToggle(channel.id)"
-        />
-      </FtFlexBox>
       <FtFlexBox
         v-if="showUnsubscribeButton"
+        class="selectionActions"
       >
         <FtButton
           :label="$t('Profile.Select All')"
+          :icon="['fas', 'check']"
+          :disabled="allVisibleSelected"
           @click="selectAll"
         />
         <FtButton
           :label="$t('Profile.Select None')"
+          :icon="['fas', 'xmark']"
+          :disabled="selected.size === 0"
           @click="selectNone"
         />
         <FtButton
           :label="$t('Profile.Delete Selected')"
-          text-color="var(--destructive-text-color)"
-          background-color="var(--destructive-color)"
+          :icon="['fas', 'trash']"
+          theme="destructive"
+          :disabled="selected.size === 0"
           @click="displayDeletePrompt"
         />
       </FtFlexBox>
+      <p
+        v-if="visibleSubscriptions.length === 0 && subscriptions.length > 0"
+        class="noResults"
+      >
+        {{ $t('Settings.Channel Settings.No Matching Channels') }}
+      </p>
+      <div
+        ref="channelScroller"
+        v-overlay-scrollbars
+        class="channelScroller"
+      >
+        <FtFlexBox ref="channelGrid">
+          <FtChannelBubble
+            v-for="channel in displayedSubscriptions"
+            :key="channel.id"
+            :channel-id="channel.id"
+            :channel-name="channel.name"
+            :channel-thumbnail="channel.thumbnail"
+            :selectable="showUnsubscribeButton"
+            :selected="selected.has(channel.id)"
+            @change="handleChannelToggle(channel.id)"
+          />
+        </FtFlexBox>
+        <!-- Mounting every subscription at once takes seconds on slower devices -->
+        <FtAutoLoadNextPageWrapper
+          v-if="hasMoreSubscriptions"
+          :key="subscriptionPage"
+          class="loadMore"
+          @load-next-page="subscriptionPage++"
+        >
+          <FtFlexBox>
+            <FtButton
+              :label="$t('Channels.Load More Channels')"
+              :icon="['fas', 'arrow-down']"
+              @click="loadMoreSubscriptions"
+            />
+          </FtFlexBox>
+        </FtAutoLoadNextPageWrapper>
+      </div>
     </FtCard>
     <FtPrompt
       v-if="showDeletePrompt"
+      autosize
       :label="deletePromptMessage"
       :option-names="deletePromptNames"
       :option-values="DELTE_PROMPT_VALUES"
+      :option-icons="[['fas', 'trash'], ['fas', 'xmark']]"
       :is-first-option-destructive="true"
       @click="handleDeletePromptClick"
     />
@@ -53,7 +88,7 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, shallowRef, watch } from 'vue'
+import { computed, reactive, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtCard from '../ft-card/ft-card.vue'
@@ -61,11 +96,15 @@ import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtChannelBubble from '../FtChannelBubble/FtChannelBubble.vue'
 import FtButton from '../FtButton/FtButton.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
+import FtAutoLoadNextPageWrapper from '../FtAutoLoadNextPageWrapper.vue'
 
 import store from '../../store/index'
 
+import { useListPagination } from '../../composables/useListPagination'
 import { deepCopy, showToast } from '../../helpers/utils'
+import { matchesChannelQuery } from '../../helpers/subscription-channels'
 import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
+import { mirrorYouTubeSubscription } from '../../helpers/youtube-sync'
 
 /**
  * @typedef {object} Profile
@@ -90,6 +129,10 @@ const props = defineProps({
   isMainProfile: {
     type: Boolean,
     required: true
+  },
+  query: {
+    type: String,
+    default: ''
   }
 })
 
@@ -137,10 +180,37 @@ if (typeof props.profile.subscriptions !== 'undefined') {
   loadSubscriptions()
 }
 
-watch(() => props.profile, () => {
+const visibleSubscriptions = computed(() => {
+  const query = props.query.trim().toLowerCase()
+  if (query === '') return subscriptions.value
+  return subscriptions.value.filter(channel => matchesChannelQuery(channel, query))
+})
+
+const allVisibleSelected = computed(() => {
+  return visibleSubscriptions.value.every(channel => selected.has(channel.id))
+})
+
+const channelGrid = useTemplateRef('channelGrid')
+const { page: subscriptionPage, displayedItems: displayedSubscriptions, hasMore: hasMoreSubscriptions, loadMore: loadMoreSubscriptions } = useListPagination(visibleSubscriptions, {
+  pageSize: 100,
+  append: true,
+  resetOn: () => props.query,
+  scrollTarget: useTemplateRef('channelScroller'),
+  focusItem: index => channelGrid.value?.$el.querySelectorAll('.bubblePadding')[index]?.focus()
+})
+
+watch(() => props.profile, (profile, oldProfile) => {
   loadSubscriptions()
-  selectNone()
-}, { deep: true })
+  if (profile._id !== oldProfile._id) {
+    selectNone()
+    return
+  }
+  // Feed refreshes update channel names and thumbnails, so only drop channels that are gone
+  const channelIds = new Set(subscriptions.value.map(channel => channel.id))
+  selected.forEach(channelId => {
+    if (!channelIds.has(channelId)) selected.delete(channelId)
+  })
+}, { deep: 2 })
 
 /** @type {import('vue').Reactive<Set<string>>} */
 const selected = reactive(new Set())
@@ -149,8 +219,9 @@ const selectedText = computed(() => {
   return t('Profile.{number} selected', { number: selected.size })
 })
 
+// Selections outside the search results stay, so channels can be gathered across searches
 function selectAll() {
-  subscriptions.value.forEach(channel => {
+  visibleSubscriptions.value.forEach(channel => {
     return selected.add(channel.id)
   })
 }
@@ -194,7 +265,7 @@ const deletePromptMessage = computed(() => {
 
 function displayDeletePrompt() {
   if (selected.size === 0) {
-    showToast(t('Profile.No channel(s) have been selected'))
+    showToast({ message: t('Profile.No channel(s) have been selected'), icon: ['fas', 'circle-exclamation'] })
   } else {
     showDeletePrompt.value = true
   }
@@ -205,38 +276,25 @@ function displayDeletePrompt() {
  */
 function handleDeletePromptClick(value) {
   if (value === 'delete') {
+    const channelIds = [...selected]
     subscriptions.value = subscriptions.value.filter((channel) => {
       return !selected.has(channel.id)
     })
 
+    // Removing channels from the primary profile unsubscribes from them in every profile
+    const profiles = props.isMainProfile
+      ? profileList.value.filter(profile => profile.subscriptions.some(channel => selected.has(channel.id)))
+      : [props.profile]
+    const profileIds = profiles.map(profile => profile._id)
+
+    // Pull only the selected channels, like unsubscribing, so channels added elsewhere stay
+    store.dispatch('removeChannelFromProfiles', { channelIds, profileIds })
     if (props.isMainProfile) {
-      profileList.value.forEach((x) => {
-        const profile = deepCopy(x)
-
-        profile.subscriptions = profile.subscriptions.filter((channel) => {
-          return !selected.has(channel.id)
-        })
-
-        // Only update changed profiles
-        if (x.subscriptions.length !== profile.subscriptions.length) {
-          store.dispatch('updateProfile', profile)
-        }
-      })
-
-      showToast(t('Profile.Profile has been updated'))
-      selectNone()
-    } else {
-      /** @type {Profile} */
-      const profile = {
-        ...props.profile,
-        subscriptions: deepCopy(subscriptions.value)
-      }
-
-      store.dispatch('updateProfile', profile)
-
-      showToast(t('Profile.Profile has been updated'))
-      selectNone()
+      mirrorYouTubeSubscription(channelIds, false)
     }
+
+    showToast({ message: t('Profile.Profile has been updated'), icon: ['fas', 'user-check'] })
+    selectNone()
   }
 
   showDeletePrompt.value = false

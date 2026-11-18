@@ -2,10 +2,13 @@
   <div
     class="settingsSection"
   >
+    <h3
+      v-if="!hideTitle"
+      class="sectionTitle"
+    >
+      {{ title }}
+    </h3>
     <div class="sectionBody">
-      <h3 class="sectionTitle">
-        {{ title }}
-      </h3>
       <slot />
     </div>
   </div>
@@ -16,6 +19,10 @@ defineProps({
   title: {
     type: String,
     required: true
+  },
+  hideTitle: {
+    type: Boolean,
+    default: false
   }
 })
 </script>

@@ -2,6 +2,7 @@
  * @typedef {object} VideoData
  * @prop {string | null} videoId
  * @prop {string | null} playlistItemId
+ * @prop {boolean} [pointerDragging]
  */
 
 /**
@@ -40,7 +41,7 @@ export const handleDragAndDrop = (emit) => {
     // Use correct drag cursor.
     event.dataTransfer.effectAllowed = 'move'
 
-    // Allows drag and drop to work with touch devices.
+    // Provide a payload for browsers that require drag data.
     event.dataTransfer.setData('text/plain', '_')
 
     emit('drag-video', { videoId, playlistItemId })

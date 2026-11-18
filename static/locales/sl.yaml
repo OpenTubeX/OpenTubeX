@@ -27,7 +27,6 @@ Forward: 'Naprej'
 # Anything shared among components / views should be put here
 Global:
   Videos: 'Videoposnetki'
-
   Sort By: 'Razvrstitev'
 
   Live: V živo
@@ -199,7 +198,7 @@ Settings:
     UI Scale: Merilo uporabniškega vmesnika
     Disable Smooth Scrolling: Izklopi gladko drsenje
     Expand Side Bar by Default: Prevzeto razširi stransko vrstico
-    Hide FreeTube Header Logo: Skrij logotip v glavi FreeTube
+    Hide OpenTubeX Header Logo: Skrij logotip v glavi OpenTubeX
     Hide Side Bar Labels: Skrij oznake na stranski vrstici
   Player Settings:
     Player Settings: 'Nastavitve predvajalnika'
@@ -264,7 +263,7 @@ Settings:
     Select Export Type: 'Izberi izvozno obliko'
     Import Subscriptions: 'Uvozi naročnine'
     Export Subscriptions: 'Izvozi naročnine'
-    Export FreeTube: 'Izvozi za FreeTube'
+    Export OpenTubeX: 'Izvozi za OpenTubeX'
     Export YouTube: 'Izvozi za YouTube'
     Export NewPipe: 'Izvozi za NewPipe'
     Import History: 'Uvozi zgodovino'
@@ -342,7 +341,7 @@ About:
   GitHub issues: GitHub težave
   Report a problem: Prijavi napako
   FAQ: Pogosto zastavljena vprašanja
-  FreeTube Wiki: FreeTube wiki
+  OpenTubeX Wiki: OpenTubeX wiki
   Help: Pomoč
   GitHub releases: Github izdaje
   Downloads / Changelog: Prenosi in dnevnik sprememb
@@ -398,6 +397,7 @@ Channel:
       Newest: 'Najnovejši'
       Oldest: 'Najstarejši'
       Most Popular: 'Najbolj popularni'
+    This channel does not currently have any videos: 'Ta kanal trenutno nima nobenih videoposnetkov'
   Playlists:
     Playlists: 'Seznami predvajanja'
     This channel does not currently have any playlists: 'Ta kanal trenutno nima nobenih seznamov predvajanja'
@@ -498,7 +498,6 @@ Comments:
   Top comments: Najbolje ocenjeni komentarji
   Show More Replies: Pokaži več odgovorov
   Member: Član
-  Hide Replies: Skrij odgovor | Skrij odgovore
 Up Next: 'Naslednje na sporedu'
 
 # Toast Messages
@@ -522,9 +521,9 @@ No: 'Ne'
 More: Več
 Tooltips:
   General Settings:
-    Preferred API Backend: Izberite zaledje, ki ga FreeTube uporablja za pridobivanje podatkov. Lokalni APV je vgrajeni . Invidious APV za delovanje potrebuje Invidious strežnik.
+    Preferred API Backend: Izberite zaledje, ki ga OpenTubeX uporablja za pridobivanje podatkov. Lokalni APV je vgrajeni . Invidious APV za delovanje potrebuje Invidious strežnik.
   Subscription Settings:
-    Fetch Feeds from RSS: Ko je omogočeno, bo FreeTube namesto privzete metode uporabljal RSS za pridobivanje vašega vira naročnin. RSS je hitrejši in preprečuje blokiranje IP-ja, vendar ne zagotavlja določenih informacij, kot je trajanje videa ali status stanja v živo
+    Fetch Feeds from RSS: Ko je omogočeno, bo OpenTubeX namesto privzete metode uporabljal RSS za pridobivanje vašega vira naročnin. RSS je hitrejši in preprečuje blokiranje IP-ja, vendar ne zagotavlja določenih informacij, kot je trajanje videa ali status stanja v živo
   Player Settings:
     Skip by Scrolling Over Video Player: Uporabite kolesce za pomikanje po videoposnetku v slogu MPV.
 New Window: Novo okno
@@ -551,3 +550,4 @@ KeyboardShortcutPrompt:
   Zoom In: Povečaj
   Zoom Out: Zmanjšaj
   Fullscreen: Preklopi celoten zaslon
+New Tab: Nov zavihek
