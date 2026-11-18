@@ -46,8 +46,8 @@ export function findLegacyFormatForQuality(legacyFormats, preferredQuality) {
   const lowerQualityMatches = candidates.filter(format => resolutionOf(format) < preferredQuality)
 
   if (lowerQualityMatches.length > 0) {
-    // highest quality below the preferred one
-    return lowerQualityMatches.toSorted(ascending).at(-1)
+    // highest quality below the preferred one, the first listed of equal ones
+    return lowerQualityMatches.toSorted((a, b) => ascending(b, a))[0]
   }
 
   // everything is above the preferred quality, so use the lowest quality one
