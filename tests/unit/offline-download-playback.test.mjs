@@ -211,6 +211,23 @@ test('a download waits for its metadata while the download records are still loa
   assert.equal(timers.length, 1, 'only a page whose downloads are still loading waits for one')
 })
 
+test('only a download opened from the downloads plays without metadata while only family friendly videos are allowed', () => {
+  const { finishDownloadedPlaybackWithoutMetadata } = runInNewContext(
+    `({ ${method('finishDownloadedPlaybackWithoutMetadata', 'scheduleDownloadedPlaybackFallback')} })`
+  )
+  const applied = []
+  const play = query => finishDownloadedPlaybackWithoutMetadata.call({
+    showFamilyFriendlyOnly: true,
+    tabRoute: { query },
+    // A link or synced tab opens the video without a download, which this device has.
+    preferredDownload: { id: 1, filePath: null },
+    applyDownloadedPlaybackSource: () => { applied.push(query) },
+  })
+  play({})
+  play({ downloadId: '1' })
+  assert.deepEqual(applied.map(query => query.downloadId), ['1'])
+})
+
 test('a download keeps waiting when family friendly mode is turned on during the timeout', () => {
   let fallback
   let played = false
@@ -340,7 +357,11 @@ test('a video opened without this device\'s download plays it until the online v
     onlinePlaybackChosen,
     $store: {
       getters: {
-        getYtDlpDownloads: { 7: { files: [{ videoId: 'other' }] }, 9: { files: [{ videoId: 'video1' }] } },
+        getYtDlpDownloads: {
+          7: { files: [{ videoId: 'other' }] },
+          8: { files: [{ videoId: 'video1', available: false }] },
+          9: { files: [{ videoId: 'video1' }] },
+        },
         getEnableDownloads: true,
         getLocalPlaybackDownloadIds: new Map([['video1', 9]]),
       },
@@ -351,5 +372,8 @@ test('a video opened without this device\'s download plays it until the online v
   // A tab synced from another device carries that device's download ID.
   assert.deepEqual(pick({ downloadId: '7' }), { id: 9, filePath: null })
   assert.deepEqual(pick({}), { id: 9, filePath: null })
+  // A route whose file is gone plays another copy, unless it names that file.
+  assert.deepEqual(pick({ downloadId: '8' }), { id: 9, filePath: null })
+  assert.deepEqual(pick({ downloadId: '8', downloadFilePath: '/downloads/b.webm' }), { id: 8, filePath: '/downloads/b.webm' })
   assert.equal(preferredDownload.call(view({}, true)), null)
 })

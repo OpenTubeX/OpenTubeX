@@ -713,7 +713,8 @@ export default defineComponent({
       const routeId = Number(this.tabRoute.query.downloadId)
       const filePath = this.tabRoute.query.downloadFilePath
       if (Number.isInteger(routeId) &&
-        this.$store.getters.getYtDlpDownloads[routeId]?.files?.some(file => file.videoId === this.videoId)) {
+        this.$store.getters.getYtDlpDownloads[routeId]?.files?.some(file => file.videoId === this.videoId &&
+          (typeof filePath === 'string' || file.available !== false))) {
         return { id: routeId, filePath: typeof filePath === 'string' ? filePath : null }
       }
       // iOS plays downloads natively from the card click instead of on the watch page.
@@ -3043,6 +3044,10 @@ export default defineComponent({
     },
 
     finishDownloadedPlaybackWithoutMetadata: function () {
+      // Without metadata it's unknown whether the video is family friendly, so
+      // only a download opened from the downloads plays.
+      if (this.showFamilyFriendlyOnly &&
+        this.preferredDownload?.id !== Number(this.tabRoute.query.downloadId)) return false
       const file = this.applyDownloadedPlaybackSource()
       if (!file) return false
 
