@@ -13176,6 +13176,8 @@ onActivated(() => {
     emit('player-reload-requested', { ...getSabrReloadState(), ...reloadContext, wasPlaying: resume })
     return
   }
+  // Fullscreen may have ended while suspended, so restore the bars and docks first.
+  fullscreenChangeHandler()
   if (suspendedShortsError) {
     const { error, context, details, resumePlayback } = suspendedShortsError
     suspendedShortsError = null
@@ -13188,7 +13190,6 @@ onActivated(() => {
     }
     return
   }
-  fullscreenChangeHandler()
   emit('loaded', {
     duration: video.value.duration,
     width: video.value.videoWidth,

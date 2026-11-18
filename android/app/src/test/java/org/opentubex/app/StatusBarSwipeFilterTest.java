@@ -36,6 +36,15 @@ public class StatusBarSwipeFilterTest {
     }
 
     @Test
+    public void stopsTrackingWhenAnotherFingerJoins() {
+        filter.onTouch(MotionEvent.ACTION_DOWN, 100, 1, true);
+        assertEquals(Decision.FORWARD, filter.onTouch(MotionEvent.ACTION_POINTER_DOWN, 100, 1, false));
+        assertEquals(Decision.FORWARD, filter.onTouch(MotionEvent.ACTION_POINTER_UP, 100, 1, false));
+        // The remaining finger now supplies the coordinates.
+        assertEquals(Decision.FORWARD, filter.onTouch(MotionEvent.ACTION_MOVE, 120, 400, false));
+    }
+
+    @Test
     public void leavesTouchesElsewhereAlone() {
         filter.onTouch(MotionEvent.ACTION_DOWN, 100, 400, false);
         assertEquals(Decision.FORWARD, filter.onTouch(MotionEvent.ACTION_MOVE, 100, 402, false));

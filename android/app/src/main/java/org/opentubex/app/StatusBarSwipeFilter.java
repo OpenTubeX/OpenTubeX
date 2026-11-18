@@ -36,7 +36,8 @@ final class StatusBarSwipeFilter {
             return Decision.DROP;
         }
         if (!tracking || action != MotionEvent.ACTION_MOVE) {
-            if (ended) tracking = false;
+            // Coordinates follow the first pointer index, which another finger can take over.
+            if (ended || action == MotionEvent.ACTION_POINTER_DOWN) tracking = false;
             return Decision.FORWARD;
         }
         float deltaX = Math.abs(x - startX);
