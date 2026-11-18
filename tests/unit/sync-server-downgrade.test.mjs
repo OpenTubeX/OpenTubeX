@@ -1275,9 +1275,9 @@ test('a failed reconnect makes the next background sync merge the offline edits'
   await f.periodicTasks[0]()
   assert.ok(f.context.state.syncServerError)
   serverDown = false
-  f.settings.syncServerLastSyncAt = 0
   f.requests.length = 0
-  // The next job only checks the server for changes, which it has none of.
+  // The next job only checks the server for changes, which it has none of, and
+  // the last successful sync was recent.
   await f.periodicTasks[0]()
   const saved = await privacy.decryptSyncDocument(collections.get('settings').payload, f.settings.syncServerPrivacyKey)
   assert.deepEqual(JSON.parse(saved.find(entry => entry.key === 'channelPlaybackSpeeds').value), { channel: 1.5 },

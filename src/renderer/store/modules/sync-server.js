@@ -2071,7 +2071,7 @@ const actions = {
     commit('setSyncServerPendingDeletion', null)
   },
 
-  async initializeSyncServer({ commit, dispatch, rootState }, { skipIfRecent = true } = {}) {
+  async initializeSyncServer({ commit, dispatch, rootState, state }, { skipIfRecent = true } = {}) {
     if (!reminderSyncListenerStarted && (process.env.IS_ELECTRON || process.env.IS_CAPACITOR)) {
       reminderSyncListenerStarted = true
       liveReminder.onUpdated(() => dispatch('scheduleSyncServer', 'liveReminders'))
@@ -2087,8 +2087,12 @@ const actions = {
           cancelActiveSyncClients()
           dispatch('stopSyncServerLive')
         } else if (detail === 'restored') {
+          const settings = rootState.settings
           // Android freezes a hidden app, which could leave the offline edits unsent.
-          const releaseHold = holdAndroidBackgroundWork()
+          const releaseHold = settings.syncServerEnabled && settings.syncServerToken && settings.syncServerAutoSync &&
+            isSyncReasonEnabled(settings, 'automatic')
+            ? holdAndroidBackgroundWork()
+            : () => {}
           const sync = (async () => {
             try {
               // A reconnect must start a fresh sync after cancellation finishes.
@@ -2119,7 +2123,9 @@ const actions = {
         // full sync uploads the edits made offline; the job waits for it.
         if (isSyncServerOffline() && (!await checkConnection() || isSyncServerOffline())) return
         if (reconnectSync) return reconnectSync
-        return dispatch('syncWithSyncServer', { skipIfRecent: true, automatic: true, remoteOnly: true })
+        // A recent success does not cover a sync that failed since, which may
+        // have left offline edits unsent.
+        return dispatch('syncWithSyncServer', { skipIfRecent: state.syncServerStatus !== 'error', automatic: true, remoteOnly: true })
       })
       // Swiping the app away stops syncing until it opens again, so pending
       // edits sync as soon as the user may be leaving it.
