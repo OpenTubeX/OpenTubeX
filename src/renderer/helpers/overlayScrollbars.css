@@ -65,10 +65,12 @@ html[data-overlayscrollbars-initialize]::-webkit-scrollbar,
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
+  /* stylelint-disable opentubex/no-layout-animation-properties -- a bar grows into the corner the other bar leaves, and the page bar clears a pinned player */
   transition:
     opacity var(--motion-fast-effects),
     visibility var(--motion-fast-effects),
     inset var(--motion-fast-effects);
+  /* stylelint-enable opentubex/no-layout-animation-properties */
 }
 
 /* The padding is part of the bar's size, also inside the player, whose
