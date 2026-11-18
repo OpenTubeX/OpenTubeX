@@ -411,7 +411,7 @@ const actions = {
       if (separate) {
         await forgetWatchQueueScope(profileId).catch(error => console.error(error))
         if (rootState.settings?.syncServerScopedWatchStatsResets?.[profileId]) {
-          await dispatch('updateWatchStatsReset', { scope: profileId, reset: null })
+          await dispatch('updateWatchStatsReset', { scope: profileId, reset: null }).catch(error => console.error(error))
         }
       }
       return true
