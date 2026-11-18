@@ -274,7 +274,7 @@
   block-size: 36px;
   margin-inline-start: auto;
   padding: 0;
-  color: #fff;
+  color: inherit;
   background-color: transparent;
   border: 0;
   border-radius: 50%;
@@ -308,11 +308,6 @@
   overflow: hidden auto;
   overscroll-behavior: contain;
   resize: none;
-}
-
-.fullscreenPlaylist :is(.fullscreenPlaylistContent, .playlistItemsWrapper) {
-  --scrollbar-color: rgb(255 255 255 / 45%);
-  --scrollbar-color-hover: rgb(255 255 255 / 65%);
 }
 
 .phonePlaylist,

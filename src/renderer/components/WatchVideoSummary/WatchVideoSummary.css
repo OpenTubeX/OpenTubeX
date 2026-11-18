@@ -7,8 +7,9 @@
 }
 
 /* Matches FtCard, like the description and comments; phonePanelCard.css styles
-   the phone card's surface. */
-.videoSummary:not(.phonePanelCard) {
+   the phone card's surface. Keep the base specificity so panels that flatten
+   their cards, such as the fullscreen video information dock, can override it. */
+.videoSummary:where(:not(.phonePanelCard)) {
   position: relative;
   border-radius: var(--shape-corner-medium);
   background-color: var(--card-bg-color);

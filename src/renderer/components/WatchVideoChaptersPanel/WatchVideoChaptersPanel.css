@@ -26,11 +26,6 @@
   min-block-size: 90px;
   max-block-size: var(--chapters-max-block-size, 480px);
   resize: vertical;
-
-  /* In the sidebar the chapters sit on a card rather than above the video,
-     so drop the light handle and take the theme's color again */
-  --scrollbar-color: inherit;
-  --scrollbar-color-hover: inherit;
 }
 
 /* Matches the playlist panel's resize handle. */
@@ -91,11 +86,6 @@
 .watchVideoChaptersPanel :deep(.chapter.current:hover),
 .watchVideoChaptersPanel :deep(.chapter.current:focus-within) {
   background-color: color-mix(in srgb, var(--primary-color) 32%, transparent);
-}
-
-.watchVideoChaptersPanel :deep(.chapterSeek),
-.watchVideoChaptersPanel :deep(.chapterAction) {
-  color: inherit;
 }
 
 .watchVideoChaptersPanel :deep(.loopChapter.active) {

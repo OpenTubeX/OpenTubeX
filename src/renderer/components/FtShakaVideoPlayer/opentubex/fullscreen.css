@@ -260,8 +260,8 @@
   inline-size: calc(var(--side-panel-width) - 24px);
   overflow: hidden;
   user-select: text;
-  color: #fff;
-  background-color: rgb(12 12 12 / 62%);
+  color: var(--primary-text-color);
+  background-color: var(--fullscreen-dock-bg);
   border: 1px solid var(--side-nav-hover-color);
   border-radius: calc(12px * var(--ui-roundness));
   box-shadow: 0 8px 30px rgb(0 0 0 / 45%);
@@ -390,7 +390,7 @@
   inline-size: 36px;
   block-size: 36px;
   padding: 0;
-  color: #fff;
+  color: inherit;
   background-color: transparent;
   border: 0;
   border-radius: 50%;
@@ -413,9 +413,6 @@
   min-block-size: 0;
   max-inline-size: 100%;
   overflow: hidden auto;
-
-  --scrollbar-color: rgb(255 255 255 / 45%);
-  --scrollbar-color-hover: rgb(255 255 255 / 65%);
 }
 
 .fullscreenMetadataTarget > :deep(.os-scrollbar-vertical) {
@@ -428,7 +425,7 @@
   box-sizing: border-box;
   max-inline-size: 100%;
   margin: 0;
-  color: #fff;
+  color: inherit;
   background: transparent;
   backdrop-filter: none;
   border-radius: 0;
@@ -441,6 +438,11 @@
    way the normal layout raises .infoArea. */
 .fullscreenMetadataTarget :deep(.watchVideo:has(.iconDropdown)) {
   z-index: 1;
+}
+
+/* Cards are flattened into the dock, so they have no background to fix. */
+.fullscreenMetadataTarget :deep(.watchVideo .fixedBackgroundLayer) {
+  display: none;
 }
 
 /* The dock scrolls vertically, which means it also clips the inline axis, and
@@ -539,7 +541,7 @@
   max-block-size: none;
   margin: 0;
   overflow: hidden;
-  color: #fff;
+  color: inherit;
   background: transparent;
   backdrop-filter: none;
   border-radius: 0;
@@ -566,7 +568,7 @@
   inline-size: 36px;
   block-size: 36px;
   padding: 0 !important;
-  color: #fff;
+  color: inherit;
   background-color: transparent;
   border-radius: 50%;
   font-size: 18px !important;
@@ -578,12 +580,10 @@
 .fullscreenTranscriptTarget :deep(.transcriptHeaderActions .iconButton:focus-visible),
 .fullscreenSponsorBlockTarget :deep(.sponsorBlockHeaderActions button:hover:not(:disabled)),
 .fullscreenSponsorBlockTarget :deep(.sponsorBlockHeaderActions button:focus-visible:not(:disabled)) {
-  color: #fff;
   background-color: rgb(255 255 255 / 20%);
 }
 
 .fullscreenTranscriptTarget :deep(.transcriptHeaderAction.active) {
-  color: #fff;
   background-color: rgb(255 255 255 / 34%);
 }
 
@@ -610,7 +610,7 @@
 }
 
 .fullscreenTranscriptTarget :deep(.transcriptLanguageMenu) {
-  background-color: rgb(12 12 12 / 62%);
+  background-color: var(--fullscreen-dock-bg);
   border: 1px solid rgb(255 255 255 / 10%);
   backdrop-filter: blur(14px) saturate(1.05);
 }
@@ -619,14 +619,6 @@
   flex: 1 1 auto;
   max-block-size: none;
   padding-inline: 8px;
-
-  --scrollbar-color: rgb(255 255 255 / 45%);
-  --scrollbar-color-hover: rgb(255 255 255 / 65%);
-}
-
-.fullscreenSponsorBlockTarget :deep(.sponsorBlockContent) {
-  --scrollbar-color: rgb(255 255 255 / 45%);
-  --scrollbar-color-hover: rgb(255 255 255 / 65%);
 }
 
 :is(
@@ -664,16 +656,11 @@
   block-size: 100%;
   margin: 0;
   padding: 0;
-  color: #fff;
+  color: inherit;
   background: transparent;
   backdrop-filter: none;
   border-radius: 0;
   box-shadow: none;
-
-  --primary-text-color: #fff;
-  --secondary-text-color: rgb(255 255 255 / 70%);
-  --scrollbar-color: rgb(255 255 255 / 45%);
-  --scrollbar-color-hover: rgb(255 255 255 / 65%);
 }
 
 :is(.fullscreenQueueTarget, .fullscreenRecommendationsTarget) :deep(.os-scrollbar-vertical) {
@@ -703,7 +690,7 @@
   margin: 0;
   padding-block-start: 0;
   overflow: hidden;
-  color: #fff;
+  color: inherit;
   background-color: transparent;
   border-radius: 0;
   box-shadow: none;
