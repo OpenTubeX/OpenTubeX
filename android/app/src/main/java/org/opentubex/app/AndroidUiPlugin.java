@@ -228,6 +228,15 @@ public class AndroidUiPlugin extends Plugin {
     }
 
     @PluginMethod
+    public void setTransientSystemBars(PluginCall call) {
+        boolean enabled = Boolean.TRUE.equals(call.getBoolean("enabled", false));
+        getActivity().runOnUiThread(() -> {
+            ((MainActivity) getActivity()).setTransientSystemBars(enabled);
+            call.resolve();
+        });
+    }
+
+    @PluginMethod
     public void setPageScrollbarsHidden(PluginCall call) {
         boolean hidden = Boolean.TRUE.equals(call.getBoolean("hidden", false));
         getActivity().runOnUiThread(() -> {

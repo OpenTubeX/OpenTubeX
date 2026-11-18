@@ -266,10 +266,8 @@ test.describe('playlist sync while another window edits the library', () => {
             try { await store.dispatch('syncWithSyncServer', { notifyDataLoss: false }) } catch (error) { return error.message }
             return null
           })
-          expect(nextError).toContain('would delete')
-          expect(remoteExists).toBe(true)
-          expect(await page.evaluate(() => window.$store.getters.getAllPlaylists.length)).toBe(0)
-          await page.evaluate(() => window.$store.dispatch('syncWithSyncServer', { allowDataLoss: true }))
+          // The other window deleted it, so the next sync applies the deletion without asking.
+          expect(nextError).toBeNull()
           expect(remoteExists).toBe(false)
           expect(await page.evaluate(() => window.$store.getters.getAllPlaylists.length)).toBe(0)
         }

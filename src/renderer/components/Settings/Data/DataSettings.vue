@@ -26,7 +26,7 @@
     </p>
     <FtDataScopeNotice />
     <h4 class="groupTitle">
-      {{ t('Settings.Data Settings.Import YouTube Takeout ZIP') }}
+      {{ t('Settings.Data Settings.YouTube Google Takeout') }}
     </h4>
     <FtFlexBox class="box">
       <FtButton

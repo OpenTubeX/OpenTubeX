@@ -1025,6 +1025,7 @@ Settings:
     Upcoming Videos to Preload: "Eellaaditavate videote arv"
     Concurrent Preloads: "Samaaegsed eellaadimised"
     Ignore System Rotation Lock for Fullscreen: Eira täisekraani jaoks süsteemi pööramislukku
+    Keep Status Bar Hidden in Fullscreen: "Hoia olekuriba täisekraanil peidus"
     Swipe Left or Right to Seek in Fullscreen: Täisekraanil kerimiseks pühkige vasakule või paremale
     Show Swipe to Seek Preview: Näita pühkimisega kerimise eelvaadet
     Enable Google Cast: "Luba Google Cast"
@@ -1402,6 +1403,7 @@ Settings:
     Profiles and subscriptions: "Profiilid ja tellimused"
     Backup exported: "Varunduse eksportimine õnnestus"
     Backup imported: "Varunduse importimine õnnestus"
+    YouTube Google Takeout: "YouTube/Google Takeout"
     Import YouTube Takeout ZIP: "Impordi YouTube Takeouti ZIP"
     Select Takeout data: "Vali imporditavad andmed"
     Import selected data: "Impordi valitud andmed"
@@ -2405,6 +2407,7 @@ Tooltips:
     Upcoming Videos to Preload: "Taustal hangitavate yt-dlp aadressidega järgmiste videote suurim arv."
     Concurrent Preloads: "Suurim arv yt-dlp protsesse, mida kasutatakse videote samaaegseks eellaadimiseks. Suuremad väärtused kasutavad rohkem protsessorit, mälu ja võrgu läbilaskevõimet."
     Ignore System Rotation Lock for Fullscreen: Pööra seadet füüsiliselt täisekraani avamiseks ja sulgemiseks ka siis, kui Androidi automaatne pööramine on välja lülitatud.
+    Keep Status Bar Hidden in Fullscreen: "Näita olekuriba ainult siis, kui pühid ekraani servast, ja peida see hetke pärast uuesti. Mängijale toksamine seda enam ei näita."
     Ask Before Preloading Large Playlists: "Küsib kinnitust enne, kui eellaaditakse kõik videod esitusloendist, milles on üle {count} video."
     Enable Timestamp Notes: "Lisab mängijasse nupu ja otsetee N, mis peatavad video ja avavad märkme, mis viitab praegusele hetkele. Märkmeid saab kopeerida Markdownina või arvutis lisada Obsidiani."
     Obsidian Vault: Ajatempliga märkmete jaoks kasutatava Obsidiani hoidla nimi. Kui see on määratud, saab märkmeid Obsidiani lisada. Iga video märkmed kogutakse video järgi nimetatud märkmesse hoidla uute märkmete kaustas.

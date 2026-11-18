@@ -9,11 +9,10 @@
 
 /* Legend rows carry their own 8px inset for the highlight, so the figure
    leaves 12px and the total and bar add the remaining 8px. */
-.storageBreakdown {
+.storageSettings .storageBreakdown {
   display: grid;
   gap: 16px;
-  margin-block: 0;
-  margin-inline: 12px;
+  padding-inline: 12px;
 }
 
 .storageTotal {
@@ -154,10 +153,6 @@
   font-size: 0.875rem;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
-}
-
-.storageSettings :deep(.settingsSection > .sectionBody) {
-  padding-block: 20px;
 }
 
 .storageSettings :deep(.sectionTitle) {

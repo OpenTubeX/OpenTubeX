@@ -21,6 +21,7 @@ export const DEVICE_LOCAL_SETTING_KEYS = new Set([
   'hiddenPlayerMenuControls',
   'hideToTrayOnClose',
   'hideToTrayOnMinimize',
+  'keepStatusBarHiddenInFullscreen',
   'useTrayIcon',
   'keepPlayingOnNavigation',
   'mobileFullscreenBrightness',

@@ -416,6 +416,7 @@ test('fullscreen gesture completion restarts controls while the real post-hold t
   const handler = vm.runInNewContext(`${source.slice(start, end)}\nhandlePlayerTouchEnd`, {
     suppressTemporaryPlaybackRateClick: true,
     handleMobilePlayerTouchEnd: () => calls.push('restart-idle'),
+    isCapacitorMobilePlayer: () => false,
   })
   const event = trusted => ({
     isTrusted: trusted,

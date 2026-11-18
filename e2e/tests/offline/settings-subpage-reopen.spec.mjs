@@ -827,8 +827,13 @@ test.describe('settings subpage reopening', () => {
       await toggleSettingsFromPreferences(app)
       await expect(category).toBeVisible()
       await expect.poll(() => content.evaluate((element, saved) => {
-        const maximum = Math.max(0, element.scrollHeight - element.clientHeight)
-        return Math.abs(element.scrollTop - Math.min(saved, maximum))
+        // At fractional UI Scale, scrollHeight and clientHeight round separately and
+        // can overstate the range by more than a pixel; read the browser's clamp instead.
+        const scrollTop = element.scrollTop
+        element.scrollTop = element.scrollHeight
+        const maximum = element.scrollTop
+        element.scrollTop = scrollTop
+        return Math.abs(scrollTop - Math.min(saved, maximum))
       }, scrollTop)).toBeLessThanOrEqual(1)
       await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
       await expect.poll(() => content.evaluate(element => {

@@ -1025,6 +1025,7 @@ Settings:
     Upcoming Videos to Preload: "Počet videí k přednačtení"
     Concurrent Preloads: "Souběžná přednačtení"
     Ignore System Rotation Lock for Fullscreen: Ignorovat systémový zámek otáčení pro celou obrazovku
+    Keep Status Bar Hidden in Fullscreen: "Ponechat stavový řádek skrytý na celé obrazovce"
     Swipe Left or Right to Seek in Fullscreen: Přejetím doleva nebo doprava posouvat přehrávání na celé obrazovce
     Show Swipe to Seek Preview: Zobrazit náhled při přetáčení přejetím
     Enable Google Cast: "Povolit Google Cast"
@@ -1402,6 +1403,7 @@ Settings:
     Profiles and subscriptions: "Profily a odběry"
     Backup exported: "Zálohování úspěšně exportováno"
     Backup imported: "Záloha úspěšně importována"
+    YouTube Google Takeout: "YouTube/Google Takeout"
     Import YouTube Takeout ZIP: "Importovat ZIP z YouTube Takeout"
     Select Takeout data: "Vyberte data k importu"
     Import selected data: "Importovat vybraná data"
@@ -2404,6 +2406,7 @@ Tooltips:
     Upcoming Videos to Preload: "Nejvyšší počet následujících videí, jejichž adresy yt-dlp se načtou na pozadí."
     Concurrent Preloads: "Maximální počet procesů yt-dlp použitých k současnému přednačítání videí. Vyšší hodnoty využívají více výkonu procesoru, paměti a šířky pásma sítě."
     Ignore System Rotation Lock for Fullscreen: Fyzickým otočením zařízení zapnete a vypnete celou obrazovku, i když je automatické otáčení v Androidu vypnuté.
+    Keep Status Bar Hidden in Fullscreen: "Zobrazit stavový řádek jen při přejetí od okraje obrazovky a po chvíli jej znovu skrýt. Klepnutí na přehrávač jej už nezobrazí."
     Ask Before Preloading Large Playlists: "Před přednačtením všech videí playlistu s více než {count} videi požádá o potvrzení."
     Enable Timestamp Notes: "Přidá do přehrávače tlačítko a zkratku N, které pozastaví video a otevřou poznámku s odkazem na aktuální okamžik. Poznámky lze zkopírovat jako Markdown nebo je na počítači přidat do Obsidianu."
     Obsidian Vault: Název trezoru Obsidian pro poznámky s časovými značkami. Pokud je nastaven, lze poznámky přidávat do Obsidianu. Poznámky ke každému videu se shromažďují v poznámce pojmenované podle videa, ve složce trezoru pro nové poznámky.

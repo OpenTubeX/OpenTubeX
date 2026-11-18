@@ -699,6 +699,8 @@ const settingsComponentsData = computed(() => [
     title: t('Settings.Categories.Appearance'),
     description: t('Settings.Categories.Appearance Description'),
     icon: ['fas', 'display'],
+    hue: 300,
+    group: 1,
     component: AppearanceSection
   },
   {
@@ -706,6 +708,8 @@ const settingsComponentsData = computed(() => [
     title: t('Settings.Quick Settings.Playback'),
     description: t('Settings.Categories.Playback Description'),
     icon: ['fas', 'circle-play'],
+    hue: 25,
+    group: 1,
     component: PlaybackSection
   },
   {
@@ -714,6 +718,8 @@ const settingsComponentsData = computed(() => [
     title: t('Settings.Categories.Add-ons'),
     description: t('Settings.Categories.Add-ons Description'),
     icon: ['fas', 'puzzle-piece'],
+    hue: 145,
+    group: 1,
     component: AddOnsSection
   },
   {
@@ -721,6 +727,8 @@ const settingsComponentsData = computed(() => [
     title: t('Subscriptions.Subscriptions'),
     description: t('Settings.Categories.Subscriptions Description'),
     icon: ['fas', 'users'],
+    hue: 60,
+    group: 2,
     component: SubscriptionsSection
   },
   ...(supportsYtDlp
@@ -729,6 +737,8 @@ const settingsComponentsData = computed(() => [
         title: t('Settings.Download Settings.Download Settings'),
         description: t('Settings.Categories.Downloads Description'),
         icon: ['fas', 'download'],
+        hue: 195,
+        group: 2,
         component: DownloadSettings
       }]
     : []),
@@ -737,6 +747,8 @@ const settingsComponentsData = computed(() => [
     title: t('Settings.Categories.Focus'),
     description: t('Settings.Categories.Focus Description'),
     icon: ['fas', 'bullseye'],
+    hue: 275,
+    group: 2,
     component: FocusSection,
     tabs: [
       {
@@ -762,6 +774,8 @@ const settingsComponentsData = computed(() => [
     title: t('Settings.Privacy Settings.Privacy Settings'),
     description: t('Settings.Categories.Privacy Description'),
     icon: ['fas', 'lock'],
+    hue: 95,
+    group: 3,
     component: PrivacySection
   },
   {
@@ -769,6 +783,8 @@ const settingsComponentsData = computed(() => [
     title: t('Settings.Data Settings.Data And Storage'),
     description: t('Settings.Categories.Data And Storage Description'),
     icon: ['fas', 'box-archive'],
+    hue: 220,
+    group: 3,
     component: DataSection,
     tabs: [
       {
@@ -792,6 +808,8 @@ const settingsComponentsData = computed(() => [
       ? t('Settings.Categories.Accounts and Sync Description')
       : t('Settings.Categories.Sync Description'),
     icon: ['fas', 'sync'],
+    hue: 170,
+    group: 3,
     component: AccountsSection,
     ...(supportsYouTubeAccount && {
       tabs: [
@@ -813,6 +831,8 @@ const settingsComponentsData = computed(() => [
     title: t('Settings.Categories.Advanced'),
     description: t('Settings.Categories.Advanced Description'),
     icon: ['fas', 'flask'],
+    hue: 345,
+    group: 3,
     component: AdvancedSection
   }
 ])
@@ -823,6 +843,8 @@ const settingsSectionComponents = computed(() => [{
   title: t('Settings.General Settings.General Settings'),
   description: t('Settings.Categories.General Description'),
   icon: ['fas', 'border-all'],
+  hue: 250,
+  group: 1,
   component: GeneralSection
 }, ...settingsComponentsData.value])
 const settingsSearchableValues = computed(() => createSettingsSearchIndex({

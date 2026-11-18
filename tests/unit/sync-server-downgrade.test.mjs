@@ -57,13 +57,14 @@ const helperSource = await readFile(new URL('../../src/renderer/helpers/sync-ser
 const storeSource = await readFile(new URL('../../src/renderer/store/modules/sync-server.js', import.meta.url), 'utf8')
 const schedulerSource = await readFile(new URL('../../src/renderer/helpers/sync-server-scheduler.js', import.meta.url), 'utf8')
 
-function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false, syncableSettingKeys = ['channelPlaybackSpeeds'], reminderService, connected = false, timer, locks, desktopTabs, connectionChanges, capacitor = false, backgroundJob = runBackgroundJob, settingsReader, receiptStorage, openExternalLink = async () => {}, notificationDismissals = normalizeNotificationDismissals(null), hiddenRenderer = false, deletions = createSyncDeletionDecisions(), unsentMarks = createUnsentSyncDeletionMarks(), dataScope = null } = {}) {
+function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false, syncableSettingKeys = ['channelPlaybackSpeeds'], reminderService, connected = false, timer, locks, desktopTabs, connectionChanges, capacitor = false, backgroundJob = runBackgroundJob, settingsReader, receiptStorage, openExternalLink = async () => {}, notificationDismissals = normalizeNotificationDismissals(null), hiddenRenderer = false, deletions = createSyncDeletionDecisions(), unsentMarks = createUnsentSyncDeletionMarks(), checkConnection, dataScope = null } = {}) {
   const connectionEvents = new EventTarget()
   const network = { state: connectionState, online }
   const requests = []
   const commits = []
   const notifications = []
   const dispatched = []
+  const periodicTasks = []
   const settings = {
     syncServerEnabled: true,
     syncServerUrl: 'https://sync.example',
@@ -146,6 +147,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     isSyncReasonEnabled,
     AUTO_SYNC_INTERVAL_MS: 5 * 60 * 1000,
     getConnectionState: () => network.state,
+    checkConnection: async () => checkConnection ? checkConnection() : network.state !== 'offline' && network.online,
     navigator: {
       get onLine() { return network.online },
       ...(locks ? { locks } : deferLock ? { locks: { request: (name, options, callback) => Promise.resolve().then(() => (callback ?? options)({ name })) } } : {})
@@ -167,7 +169,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     },
     holdAndroidBackgroundWork: () => () => {},
     setPeriodicBackgroundTask: () => {},
-    onPeriodicBackgroundTask: () => {},
+    onPeriodicBackgroundTask: task => { periodicTasks.push(task) },
     onAndroidWindowBlur: () => {},
     isAndroidBackgroundRenderer: hiddenRenderer,
     structuredClone,
@@ -283,7 +285,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
       if (action === 'syncWithSyncServer') return store.exports.actions.syncWithSyncServer(context, value)
     },
   }
-  return { network, connectionEvents, settings, requests, commits, notifications, dispatched, context, local, actions: store.exports.actions, Client: helper.exports.SyncServerClient }
+  return { network, connectionEvents, periodicTasks, settings, requests, commits, notifications, dispatched, context, local, actions: store.exports.actions, Client: helper.exports.SyncServerClient }
 }
 
 test('unsupported watch-stat initialization preserves another window’s newer sync baseline', async () => {
@@ -1292,6 +1294,86 @@ test('reconnect sync includes offline changes even when the last sync was recent
   f.connectionEvents.dispatchEvent(new CustomEvent('change', { detail: 'restored' }))
   for (let i = 0; i < 100 && !options; i++) await Promise.resolve()
   assert.equal(options?.skipIfRecent, false)
+})
+
+for (const restored of ['by its check', 'just before it ran']) {
+  test(`the Android background job waits for the reconnect sync that uploads offline edits when the connection returned ${restored}`, async () => {
+    const restore = () => {
+      f.network.state = 'restored'
+      f.connectionEvents.dispatchEvent(new CustomEvent('change', { detail: 'restored' }))
+    }
+    let uploaded
+    const f = fixture({}, {
+      encrypted: true,
+      connectionState: 'offline',
+      browser: true,
+      respond: async (url, options) => {
+        if (options.method === 'PUT' && url.endsWith('/encrypted_sync/subscriptions')) {
+          uploaded = await privacy.decryptSyncDocument(JSON.parse(options.body).payload, f.settings.syncServerPrivacyKey)
+        }
+      },
+      // Android blocked the hidden app's check when the connection returned; the job has network access.
+      checkConnection: async () => {
+        restore()
+        return true
+      },
+    })
+    await f.actions.initializeSyncServer(f.context)
+    f.context.rootState.profiles.profileList[0].subscriptions.push({ id: 'offline-channel', name: 'Offline subscription' })
+    if (restored === 'just before it ran') restore()
+    assert.equal(f.periodicTasks.length, 1)
+    await f.periodicTasks[0]()
+    // The job waited for the reconnect's sync instead of starting another one.
+    const syncs = f.dispatched.filter(([action]) => action === 'syncWithSyncServer').map(([, options]) => options)
+    assert.equal(syncs.length, 1)
+    assert.notEqual(syncs[0].remoteOnly, true, 'a remote-only check would skip the edits made offline')
+    assert.deepEqual(uploaded?.map(channel => channel.id), ['private-channel', 'offline-channel'])
+  })
+}
+
+test('a failed reconnect makes the next background sync merge the offline edits', async () => {
+  const collections = new Map()
+  let serverDown = false
+  const f = fixture({ syncServerSyncSettings: true, channelPlaybackSpeeds: '{}' }, {
+    encrypted: true,
+    browser: true,
+    deferLock: true,
+    respond: (url, options) => {
+      const path = new URL(url).pathname
+      if (serverDown && path === '/health') return new Response('Unavailable', { status: 503 })
+      if (path === '/v1/encrypted_sync') {
+        return { collections: [...collections].map(([collection, entry]) => ({ collection, revision: entry.revision })), legacy_data: false }
+      }
+      if (path.startsWith('/v1/encrypted_sync/') && path !== '/v1/encrypted_sync/events') {
+        const collection = path.split('/').at(-1)
+        if (options.method === 'PUT') {
+          const body = JSON.parse(options.body)
+          collections.set(collection, { revision: body.revision + 1, payload: body.payload })
+        }
+        return collections.get(collection) ?? { revision: 0, payload: null }
+      }
+    },
+    checkConnection: async () => {
+      f.network.state = 'restored'
+      f.connectionEvents.dispatchEvent(new CustomEvent('change', { detail: 'restored' }))
+      return true
+    },
+  })
+  await f.actions.initializeSyncServer(f.context)
+  f.network.state = 'offline'
+  f.connectionEvents.dispatchEvent(new CustomEvent('change', { detail: 'offline' }))
+  f.settings.channelPlaybackSpeeds = JSON.stringify({ channel: 1.5 })
+  serverDown = true
+  await f.periodicTasks[0]()
+  assert.ok(f.context.state.syncServerError)
+  serverDown = false
+  f.requests.length = 0
+  // The next job only checks the server for changes, which it has none of, and
+  // the last successful sync was recent.
+  await f.periodicTasks[0]()
+  const saved = await privacy.decryptSyncDocument(collections.get('settings').payload, f.settings.syncServerPrivacyKey)
+  assert.deepEqual(JSON.parse(saved.find(entry => entry.key === 'channelPlaybackSpeeds').value), { channel: 1.5 },
+    'the offline edit is uploaded')
 })
 
 test('disconnect cancels an active sync and reconnect waits for it to settle', async () => {

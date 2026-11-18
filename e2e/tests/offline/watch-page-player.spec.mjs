@@ -1244,6 +1244,55 @@ test('mobile skip buttons switch videos when tapped', async ({ app, page }) => {
   await session.detach()
 })
 
+test('mobile center play button pauses when tapped as the controls start to fade out', async ({ app, page }) => {
+  const session = await page.context().newCDPSession(page)
+  await session.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 })
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  await setWindowSize(app, page, { width: 450, height: 850 })
+  await mockCapacitorPhoneLayout(page)
+
+  // Shaka builds the center buttons only for the phone layout.
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  const previousPlayer = await player.elementHandle()
+  const view = await watchViewHandle(page)
+  await view.evaluate(component => component.tabRouter.push({ path: '/watch/9bZkp7q19f0' }))
+  await view.dispose()
+  await expect(page).toHaveURL(/#\/watch\/9bZkp7q19f0/)
+  await expect.poll(() => previousPlayer.evaluate(element => element.isConnected)).toBe(false)
+  await previousPlayer.dispose()
+
+  const video = player.locator('video')
+  const button = player.locator('.shaka-big-buttons-container > .shaka-play-button')
+  await waitForPlayback(page)
+  await video.evaluate(video => video.pause())
+  await expect(player.locator('.shaka-controls-container')).toHaveAttribute('shown', 'true')
+
+  // Resuming hides the controls. Freeze their fade-out where it starts, so the
+  // tap lands while the button still looks fully visible.
+  await button.evaluate(button => {
+    const controls = button.closest('.shaka-controls-container')
+    new MutationObserver((_, observer) => {
+      if (controls.getAttribute('shown') === 'true') return
+      observer.disconnect()
+      // Reading the style starts the fade before it is paused.
+      getComputedStyle(button).getPropertyValue('opacity')
+      for (const animation of button.getAnimations()) animation.pause()
+      button.dataset.fadeFrozen = ''
+    }).observe(controls, { attributes: true, attributeFilter: ['shown'] })
+  })
+  await video.evaluate(video => video.play())
+  await expect(button).toHaveAttribute('data-fade-frozen')
+
+  const bounds = await button.boundingBox()
+  const point = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2, id: 0 }
+  await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point] })
+  await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+  await expect.poll(() => video.evaluate(video => video.paused)).toBe(true)
+
+  await session.detach()
+})
+
 test('skip controls follow recommended videos outside a playlist while autoplay is on', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await page.evaluate(() => {

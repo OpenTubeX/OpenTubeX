@@ -1065,6 +1065,7 @@ Settings:
     Upcoming Videos to Preload: "تعداد ویدیوها برای پیش‌بارگیری"
     Concurrent Preloads: "پیش‌بارگذاری‌های هم‌زمان"
     Ignore System Rotation Lock for Fullscreen: نادیده گرفتن قفل چرخش سیستم برای تمام‌صفحه
+    Keep Status Bar Hidden in Fullscreen: "پنهان نگه داشتن نوار وضعیت در حالت تمام‌صفحه"
     Swipe Left or Right to Seek in Fullscreen: برای جلو یا عقب بردن در حالت تمام‌صفحه، به چپ یا راست بکشید
     Show Swipe to Seek Preview: نمایش پیش‌نمایش هنگام جلو و عقب بردن با کشیدن
     Enable Google Cast: "فعال کردن Google Cast"
@@ -1442,6 +1443,7 @@ Settings:
     Profiles and subscriptions: "پروفایل‌ها و اشتراک‌ها"
     Backup exported: "پشتیبان با موفقیت صادر شد"
     Backup imported: "پشتیبان با موفقیت وارد شد"
+    YouTube Google Takeout: "YouTube/Google Takeout"
     Import YouTube Takeout ZIP: "درون‌ریزی فایل ZIP ‏YouTube Takeout"
     Select Takeout data: "داده‌های مورد نظر برای درون‌ریزی را انتخاب کنید"
     Import selected data: "درون‌ریزی داده‌های انتخاب‌شده"
@@ -2504,6 +2506,7 @@ Tooltips:
     Upcoming Videos to Preload: "بیشترین تعداد ویدیوهای بعدی که نشانی yt-dlp آن‌ها در پس‌زمینه دریافت می‌شود."
     Concurrent Preloads: "بیشترین تعداد فرایندهای yt-dlp که برای پیش‌بارگذاری هم‌زمان ویدیوها استفاده می‌شوند. مقادیر بالاتر از پردازنده، حافظه و پهنای باند شبکه بیشتری استفاده می‌کنند."
     Ignore System Rotation Lock for Fullscreen: با چرخاندن فیزیکی دستگاه وارد حالت تمام‌صفحه شوید یا از آن خارج شوید، حتی وقتی چرخش خودکار اندروید خاموش است.
+    Keep Status Bar Hidden in Fullscreen: "نوار وضعیت فقط هنگام کشیدن انگشت از لبهٔ صفحه نمایش داده شود و پس از لحظه‌ای دوباره پنهان شود. ضربه زدن روی پخش‌کننده دیگر آن را نشان نمی‌دهد."
     Ask Before Preloading Large Playlists: "پیش از پیش‌بارگیری همهٔ ویدیوهای فهرست پخشی با بیش از {count} ویدیو، تأیید می‌خواهد."
     Enable Timestamp Notes: "یک دکمه در پخش‌کننده و میان‌بر N اضافه می‌کند که ویدیو را متوقف کرده و یادداشتی با پیوند به لحظهٔ کنونی باز می‌کنند. یادداشت‌ها را می‌توان به‌صورت Markdown کپی کرد یا در دسکتاپ به Obsidian افزود."
     Obsidian Vault: نام گاوصندوق Obsidian برای یادداشت‌های مهر زمانی. در صورت تنظیم، می‌توان یادداشت‌ها را به Obsidian افزود. یادداشت‌های هر ویدیو در یادداشتی به نام همان ویدیو، در پوشهٔ یادداشت‌های جدید گاوصندوق جمع‌آوری می‌شوند.

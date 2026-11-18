@@ -1051,6 +1051,7 @@ Settings:
     Upcoming Videos to Preload: "Број снимака за учитавање унапред"
     Concurrent Preloads: "Истовремена предучитавања"
     Ignore System Rotation Lock for Fullscreen: Занемари системско закључавање ротације за цео екран
+    Keep Status Bar Hidden in Fullscreen: "Задржи траку статуса скривеном на целом екрану"
     Swipe Left or Right to Seek in Fullscreen: Превуците налево или надесно за премотавање преко целог екрана
     Show Swipe to Seek Preview: Прикажи преглед при премотавању превлачењем
     Enable Google Cast: "Омогући Google Cast"
@@ -1428,6 +1429,7 @@ Settings:
     Profiles and subscriptions: "Профили и претплате"
     Backup exported: "Резервна копија је успешно извезена"
     Backup imported: "Резервна копија је успешно увезена"
+    YouTube Google Takeout: "YouTube/Google Takeout"
     Import YouTube Takeout ZIP: "Увези ZIP YouTube Takeout"
     Select Takeout data: "Изаберите податке за увоз"
     Import selected data: "Увези изабране податке"
@@ -2486,6 +2488,7 @@ Tooltips:
     Upcoming Videos to Preload: "Највећи број следећих снимака чије се yt-dlp адресе преузимају у позадини."
     Concurrent Preloads: "Највећи број yt-dlp процеса који се користе за истовремено предучитавање видео-снимака. Веће вредности користе више процесора, меморије и мрежног протока."
     Ignore System Rotation Lock for Fullscreen: Физички окрените уређај за улазак и излазак из целог екрана, чак и када је аутоматска ротација у Андроиду искључена.
+    Keep Status Bar Hidden in Fullscreen: "Прикажи траку статуса само када превучеш од ивице екрана и поново је сакриј након тренутка. Додир плејера је више не приказује."
     Ask Before Preloading Large Playlists: "Тражи потврду пре учитавања унапред свих снимака са плејлисте која има више од {count} снимака."
     Enable Timestamp Notes: "Додаје дугме у плејер и пречицу N, који паузирају видео и отварају белешку са везом ка тренутном тренутку. Белешке се могу копирати као Markdown или, на рачунару, додати у Obsidian."
     Obsidian Vault: Назив Obsidian трезора за белешке са временским ознакама. Када је подешен, белешке се могу додати у Obsidian. Белешке сваког видео снимка прикупљају се у белешци названој по видео снимку, у фасцикли трезора за нове белешке.

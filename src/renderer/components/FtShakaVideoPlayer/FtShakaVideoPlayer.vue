@@ -2286,6 +2286,7 @@ import {
   getAndroidDisplayOrientation,
   setAndroidNavigationBarVisible,
   setAndroidStatusBarVisible,
+  setAndroidTransientSystemBars,
   shouldShowAndroidStatusBar,
 } from '../../helpers/androidUi'
 import { appendTimestamp, getInvidiousVideoUrl, getYoutubeVideoShareUrl } from '../../helpers/share'
@@ -3960,6 +3961,9 @@ const rotateFullscreenToLandscape = computed(() => {
 })
 
 const fullscreenRotationIgnoresSystemLock = computed(() => store.getters.getFullscreenRotationIgnoresSystemLock)
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const keepStatusBarHiddenInFullscreen = computed(() => store.getters.getKeepStatusBarHiddenInFullscreen)
 
 const fullscreenAspectRatio = computed(() => {
   if (audioOnlyMedia.value) return null
@@ -5918,6 +5922,19 @@ function handlePlayerTouchEnd(event) {
     return
   }
   handleMobilePlayerTouchEnd(event)
+
+  // Center buttons stay tappable while they start fading out (see
+  // FtShakaVideoPlayer.css). Shaka treats a touch that ends while its controls
+  // are hidden as a tap that only reveals them and cancels the button's click.
+  if (
+    !event.defaultPrevented &&
+    isCapacitorMobilePlayer() &&
+    event.target instanceof Element &&
+    event.target.closest('.shaka-big-buttons-container > button') &&
+    !ui?.getControls()?.isOpaque()
+  ) {
+    event.stopPropagation()
+  }
 }
 
 /** @param {MouseEvent} event */
@@ -6795,6 +6812,7 @@ let cleanupControlStates = null
 /** @type {MutationObserver|null} */
 let fullscreenControlsVisibilityObserver = null
 let androidStatusBarVisible = true
+let androidTransientSystemBars = false
 let androidNavigationBarHiddenForFullscreen = false
 
 function handleSubMenuOpen() {
@@ -6816,10 +6834,15 @@ function syncAndroidStatusBarVisibility() {
   }
   shakaControlsShown.value = controlsContainer?.hasAttribute('shown') === true
   syncAndroidNavigationBarVisibility()
+  const active = isActiveTab.value
+  const fullscreen = isNativeFullscreenActive() || androidRotationFullscreen
+  const keepHidden = !process.env.IS_IOS && keepStatusBarHiddenInFullscreen.value
+  syncAndroidTransientSystemBars(active && fullscreen && keepHidden)
   const visible = shouldShowAndroidStatusBar({
-    active: isActiveTab.value,
-    fullscreen: isNativeFullscreenActive() || androidRotationFullscreen,
+    active,
+    fullscreen,
     controlsShown: !process.env.IS_IOS && controlsContainer?.hasAttribute('shown') === true,
+    keepHidden,
   })
   if (visible === androidStatusBarVisible) return
 
@@ -6831,6 +6854,18 @@ function syncAndroidStatusBarVisibility() {
     console.error('Failed to update Android status bar visibility:', error)
   })
 }
+
+// The bar behavior belongs to the window, so only the fullscreen player sets it.
+function syncAndroidTransientSystemBars(enabled) {
+  if (enabled === androidTransientSystemBars) return
+  androidTransientSystemBars = enabled
+  setAndroidTransientSystemBars(enabled).catch(error => {
+    androidTransientSystemBars = !enabled
+    console.error('Failed to update Android system bar behavior:', error)
+  })
+}
+
+watch(keepStatusBarHiddenInFullscreen, () => syncAndroidStatusBarVisibility())
 
 // Native fullscreen covers the WebView only, so hide the navigation bar
 // like rotation fullscreen does.
@@ -13172,6 +13207,10 @@ onBeforeUnmount(() => {
     androidStatusBarVisible = true
     setAndroidStatusBarVisible(true).catch(() => {})
   }
+  if (androidTransientSystemBars) {
+    androidTransientSystemBars = false
+    setAndroidTransientSystemBars(false).catch(() => {})
+  }
   if (androidNavigationBarHiddenForFullscreen) {
     androidNavigationBarHiddenForFullscreen = false
     setAndroidNavigationBarVisible(true).catch(() => {})
@@ -13256,6 +13295,8 @@ onActivated(() => {
     emit('player-reload-requested', { ...getSabrReloadState(), ...reloadContext, wasPlaying: resume })
     return
   }
+  // Fullscreen may have ended while suspended, so restore the bars and docks first.
+  fullscreenChangeHandler()
   if (suspendedShortsError) {
     const { error, context, details, resumePlayback } = suspendedShortsError
     suspendedShortsError = null
@@ -13268,7 +13309,6 @@ onActivated(() => {
     }
     return
   }
-  fullscreenChangeHandler()
   emit('loaded', {
     duration: video.value.duration,
     width: video.value.videoWidth,

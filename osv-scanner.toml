@@ -15,3 +15,7 @@ reason = "sprintf-js: no fixed release; used for logging by global-agent in elec
 [[IgnoredVulns]]
 id = "GHSA-g3hv-75wg-m249"
 reason = "minimatch: only fixed in 11, a breaking major that electron-builder, ESLint and their dependencies do not support yet. The bug needs optimizationLevel >= 2, which only glob sets, and glob now uses minimatch 11."
+
+[[IgnoredVulns]]
+id = "GHSA-fc5q-39xc-vjpf"
+reason = "picomatch: no fixed release; used by Sass, ESLint plugins, electron-builder and vue-router's build-time unplugin, which OpenTubeX does not use. vue-router's runtime bundles do not include it, and all callers use repository-controlled globs."

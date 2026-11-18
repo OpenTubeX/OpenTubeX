@@ -28,6 +28,7 @@ body {
 
   /* Expressive shapes for decorative clip-path layers. */
   --shape-cookie-9: polygon(50% 0%, 54.3% 1.4%, 58% 4.7%, 61.2% 8.3%, 64.4% 10.5%, 68.2% 10.9%, 73% 10.2%, 78% 10%, 82.1% 11.7%, 84.5% 15.5%, 85.2% 20.4%, 85.4% 25.2%, 86.4% 29%, 89.1% 31.8%, 93.2% 34.3%, 97.2% 37.4%, 99.2% 41.3%, 98.6% 45.7%, 96% 50%, 93% 53.8%, 91.4% 57.3%, 91.7% 61.2%, 93.2% 65.7%, 94.3% 70.6%, 93.3% 75%, 90% 78%, 85.2% 79.6%, 80.5% 80.5%, 77% 82.2%, 74.8% 85.4%, 73% 89.8%, 70.6% 94.3%, 67.1% 97%, 62.6% 97.2%, 58% 95.3%, 53.8% 93%, 50% 92%, 46.2% 93%, 42% 95.3%, 37.4% 97.2%, 32.9% 97%, 29.4% 94.3%, 27% 89.8%, 25.2% 85.4%, 23% 82.2%, 19.5% 80.5%, 14.8% 79.6%, 10% 78%, 6.7% 75%, 5.7% 70.6%, 6.8% 65.7%, 8.3% 61.2%, 8.6% 57.3%, 7% 53.8%, 4% 50%, 1.4% 45.7%, 0.8% 41.3%, 2.8% 37.4%, 6.8% 34.3%, 10.9% 31.8%, 13.6% 29%, 14.6% 25.2%, 14.8% 20.4%, 15.5% 15.5%, 17.9% 11.7%, 22% 10%, 27% 10.2%, 31.8% 10.9%, 35.6% 10.5%, 38.8% 8.3%, 42% 4.7%, 45.7% 1.4%);
+  --shape-cookie-6: polygon(50% 0%, 52.6% 0.2%, 55.2% 0.9%, 57.6% 2%, 59.9% 3.6%, 61.9% 5.5%, 63.9% 7.3%, 65.7% 9.1%, 67.5% 10.7%, 69.3% 12%, 71.2% 13.2%, 73.2% 14.3%, 75.3% 15.2%, 77.6% 15.9%, 80% 16.7%, 82.6% 17.4%, 85.2% 18.3%, 87.7% 19.4%, 89.9% 21%, 91.8% 22.9%, 93.3% 25%, 94.4% 27.4%, 95.1% 29.9%, 95.3% 32.6%, 95.1% 35.3%, 94.5% 38.1%, 93.9% 40.7%, 93.3% 43.1%, 92.8% 45.5%, 92.6% 47.8%, 92.5% 50%, 92.6% 52.2%, 92.8% 54.5%, 93.3% 56.9%, 93.9% 59.3%, 94.5% 61.9%, 95.1% 64.7%, 95.3% 67.4%, 95.1% 70.1%, 94.4% 72.6%, 93.3% 75%, 91.8% 77.1%, 89.9% 79%, 87.7% 80.6%, 85.2% 81.7%, 82.6% 82.6%, 80% 83.3%, 77.6% 84.1%, 75.3% 84.8%, 73.2% 85.7%, 71.2% 86.8%, 69.3% 88%, 67.5% 89.3%, 65.7% 90.9%, 63.9% 92.7%, 61.9% 94.5%, 59.9% 96.4%, 57.6% 98%, 55.2% 99.1%, 52.6% 99.8%, 50% 100%, 47.4% 99.8%, 44.8% 99.1%, 42.4% 98%, 40.1% 96.4%, 38.1% 94.5%, 36.1% 92.7%, 34.3% 90.9%, 32.5% 89.3%, 30.7% 88%, 28.8% 86.8%, 26.8% 85.7%, 24.7% 84.8%, 22.4% 84.1%, 20% 83.3%, 17.4% 82.6%, 14.8% 81.7%, 12.3% 80.6%, 10.1% 79%, 8.2% 77.1%, 6.7% 75%, 5.6% 72.6%, 4.9% 70.1%, 4.7% 67.4%, 4.9% 64.7%, 5.5% 61.9%, 6.1% 59.3%, 6.7% 56.9%, 7.2% 54.5%, 7.4% 52.2%, 7.5% 50%, 7.4% 47.8%, 7.2% 45.5%, 6.7% 43.1%, 6.1% 40.7%, 5.5% 38.1%, 4.9% 35.3%, 4.7% 32.6%, 4.9% 29.9%, 5.6% 27.4%, 6.7% 25%, 8.2% 22.9%, 10.1% 21%, 12.3% 19.4%, 14.8% 18.3%, 17.4% 17.4%, 20% 16.7%, 22.4% 15.9%, 24.7% 15.2%, 26.8% 14.3%, 28.8% 13.2%, 30.7% 12%, 32.5% 10.7%, 34.3% 9.1%, 36.1% 7.3%, 38.1% 5.5%, 40.1% 3.6%, 42.4% 2%, 44.8% 0.9%, 47.4% 0.2%);
 
   /* Material 3 Expressive springs (damping, stiffness) sampled into
      duration + easing pairs: `transition: transform var(--motion-fast-spatial)`.
@@ -142,6 +143,11 @@ body,
   --selected-container-color: color-mix(in srgb, oklch(from var(--primary-color) var(--tint-lightness) c h) 24%, var(--card-bg-color));
   --selected-container-hover-color: color-mix(in srgb, oklch(from var(--primary-color) var(--tint-lightness) c h) 20%, var(--card-bg-color));
   --on-selected-container-color: var(--primary-text-color);
+
+  /* Settings tiles keep the card color the controls are made for, on a
+     window tinted towards the text color so they stand out in every theme. */
+  --settings-window-bg-color: color-mix(in srgb, var(--primary-text-color) 5%, var(--card-bg-color));
+  --settings-section-bg-color: var(--card-bg-color);
 }
 
 /* Chromium truncates zoomed border widths to whole device pixels, so a 2px
@@ -342,6 +348,10 @@ the link underline setting instead, which underlines them on hover by default. *
   --native-color-scheme: dark;
   --primary-shadow-color: rgb(0 0 0 / 75%);
   --members-only-color: #55c86b;
+
+  /* Dark surfaces lighten as they rise, so the tiles are tinted instead. */
+  --settings-window-bg-color: var(--card-bg-color);
+  --settings-section-bg-color: color-mix(in srgb, var(--primary-text-color) 6%, var(--card-bg-color));
 
   .invidiousLogo {
     background-image: url('./assets/img/invidious-logo-dark.svg');
@@ -2689,8 +2699,8 @@ a:visited {
   --fixed-background-display: block;
   --fixed-background-host-clip: border-area;
 
-  /* Settings sections share the window's field instead of repeating it. */
-  --settings-section-bg-color: transparent;
+  /* Settings tiles let the window's field show through instead of repeating it. */
+  --settings-section-bg-color: rgb(from var(--card-bg-color) r g b / 80%);
   --settings-changed-color: var(--accent-color);
 
   /* Keep thumbs distinct from their tracks and the surrounding gradient. */
@@ -2781,6 +2791,7 @@ a:visited {
   --bg-glow-ink: rgb(from var(--signal-accent-color) r g b / 5%);
   --bg-gradient-start: color-mix(in srgb, var(--signal-accent-color) 4%, #151515);
   --bg-gradient-end: #0c0c0c;
+  --settings-section-bg-color: rgb(255 255 255 / 6%);
   --primary-text-color: #f2f2f2;
   --secondary-text-color: #a3a3a3;
   --tertiary-text-color: #a3a3a3;
@@ -3271,21 +3282,6 @@ a:visited {
 
   .settingsMenu {
     background-color: var(--bg-color);
-  }
-
-  .settingsMenu .title {
-    border-radius: calc(28px * var(--ui-roundness));
-    padding-inline: 16px;
-  }
-
-  .settingsSection .sectionBody {
-    border-radius: calc(24px * var(--ui-roundness));
-    padding-inline: 20px;
-    padding-block: 16px;
-  }
-
-  .settingsSection + .settingsSection {
-    margin-block-start: 16px;
   }
 
   .btn.variant-tonal:not(.destructive, .selected),

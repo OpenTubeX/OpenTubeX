@@ -231,6 +231,8 @@ export function createNetworkRecovery({ eventTarget, isOnline, visibilityTarget,
 let appRecovery
 export const connectionEvents = new EventTarget()
 export function getConnectionState() { return appRecovery?.state ?? 'online' }
+/** Checks reachability again, publishing a change. Resolves to whether the internet is reachable. */
+export function checkConnection() { return appRecovery?.checkConnection() ?? Promise.resolve(true) }
 export function getWaitingOrigins() { return appRecovery?.waitingOrigins ?? [] }
 export function retryWaitingRequests() { appRecovery?.retryNow() }
 

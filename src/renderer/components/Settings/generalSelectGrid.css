@@ -2,8 +2,9 @@
   grid-template-columns: repeat(2, minmax(0, max-content) max-content);
   justify-content: center;
   column-gap: 0;
-  inline-size: min(100%, 1000px);
-  margin-inline: auto;
+
+  /* Keeps the columns within 1000px while the tile spans the section. */
+  padding-inline: max(20px, calc((100% - 960px) / 2));
 }
 
 .generalSelectGrid :deep(.select:nth-child(odd)) {
@@ -85,7 +86,7 @@
   .generalSelectGrid.generalSelectGrid {
     grid-template-columns: minmax(0, max-content) max-content;
     justify-content: center;
-    inline-size: min(100%, 500px);
+    padding-inline: max(20px, calc((100% - 460px) / 2));
   }
 
   .generalSelectGrid :deep(.select:nth-child(odd)) {

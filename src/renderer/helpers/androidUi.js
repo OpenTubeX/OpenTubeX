@@ -251,11 +251,19 @@ export async function isAndroidLauncherReturnInProgress() {
 }
 
 /**
- * @param {{active: boolean, fullscreen: boolean, controlsShown: boolean}} state
+ * @param {{active: boolean, fullscreen: boolean, controlsShown: boolean, keepHidden?: boolean}} state
  * @returns {boolean}
  */
-export function shouldShowAndroidStatusBar({ active, fullscreen, controlsShown }) {
-  return !active || !fullscreen || controlsShown
+export function shouldShowAndroidStatusBar({ active, fullscreen, controlsShown, keepHidden = false }) {
+  return !active || !fullscreen || (controlsShown && !keepHidden)
+}
+
+/**
+ * Transient bars hide again on their own after an edge swipe reveals them.
+ * @param {boolean} enabled
+ */
+export function setAndroidTransientSystemBars(enabled) {
+  return AndroidUi?.setTransientSystemBars({ enabled }) ?? Promise.resolve()
 }
 
 function setAndroidSystemBarVisible(bar, visible) {

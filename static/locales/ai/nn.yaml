@@ -1126,6 +1126,7 @@ Settings:
     Upcoming Videos to Preload: "Talet på videoar som skal førehandslastast"
     Concurrent Preloads: "Samstundes førehandslasting"
     Ignore System Rotation Lock for Fullscreen: Ignorer rotasjonslåsen i systemet for fullskjerm
+    Keep Status Bar Hidden in Fullscreen: "Hald statuslinja gøymd i fullskjerm"
     Swipe Left or Right to Seek in Fullscreen: Sveip til venstre eller høgre for å spole i fullskjerm
     Show Swipe to Seek Preview: Vis førehandsvising ved spoling med sveip
     Enable Google Cast: "Aktiver Google Cast"
@@ -1547,6 +1548,7 @@ Settings:
     Profiles and subscriptions: "Profilar og abonnement"
     Backup exported: "Tryggleikskopien vart eksportert"
     Backup imported: "Tryggleikskopien vart importert"
+    YouTube Google Takeout: "YouTube/Google Takeout"
     Import YouTube Takeout ZIP: "Importer YouTube Takeout-ZIP"
     Select Takeout data: "Vel dataa som skal importerast"
     Import selected data: "Importer valde data"
@@ -2715,6 +2717,7 @@ Tooltips:
     Upcoming Videos to Preload: "Det høgaste talet på komande videoar som får yt-dlp-adressene henta i bakgrunnen."
     Concurrent Preloads: "Det høgaste talet på yt-dlp-prosessar som blir brukte til å førehandslaste videoar samstundes. Høgare verdiar bruker meir prosessorkraft, minne og nettverksbandbreidd."
     Ignore System Rotation Lock for Fullscreen: Roter eininga fysisk for å opne og avslutte fullskjerm, sjølv når automatisk rotasjon er slått av i Android.
+    Keep Status Bar Hidden in Fullscreen: "Vis statuslinja berre når du sveipar frå skjermkanten, og gøym ho igjen etter ei lita stund. Å trykkja på avspelaren viser ho ikkje lenger."
     Ask Before Preloading Large Playlists: "Ber om stadfesting før alle videoane i ei speleliste med meir enn {count} videoar vert førehandslasta."
     Enable Timestamp Notes: "Legg til ein avspelarknapp og snarvegen N som set videoen på pause og opnar eit notat som lenkjer til det noverande augeblinken. Notat kan kopierast som Markdown eller, på datamaskina, leggjast til i Obsidian."
     Obsidian Vault: Namnet på Obsidian-kvelven for tidsstempelnotat. Når det er sett, kan notat leggjast til i Obsidian. Notata for kvar video vert samla i eit notat kalla opp etter videoen, i mappa til kvelven for nye notat.

@@ -1334,6 +1334,7 @@ Settings:
       Kazakh: Kasachisch
     Parallel Segment Loading: Paralleles Laden von Segmenten
     Ignore System Rotation Lock for Fullscreen: System-Drehsperre für Vollbild ignorieren
+    Keep Status Bar Hidden in Fullscreen: Statusleiste im Vollbild ausgeblendet lassen
     Swipe Left or Right to Seek in Fullscreen: Zum Spulen im Vollbild nach links oder rechts wischen
     Show Swipe to Seek Preview: Vorschau beim Wischen zum Spulen anzeigen
     Enable Google Cast: "Google Cast aktivieren"
@@ -1534,6 +1535,7 @@ Settings:
     Profiles and subscriptions: Profile und Abonnements
     Backup exported: Sicherung erfolgreich exportiert
     Backup imported: Sicherung erfolgreich importiert
+    YouTube Google Takeout: "YouTube/Google Takeout"
     Import YouTube Takeout ZIP: YouTube-Takeout-ZIP importieren
     Select Takeout data: Zu importierende Daten auswählen
     Import selected data: Ausgewählte Daten importieren
@@ -3212,6 +3214,7 @@ Tooltips:
     Concurrent Preloads: Die maximale Anzahl von yt-dlp-Prozessen, die gleichzeitig Videos vorladen. Höhere Werte benötigen mehr Prozessorleistung, Arbeitsspeicher und Netzwerkbandbreite.
     Ask Before Preloading Large Playlists: Fragt nach einer Bestätigung, bevor alle Videos einer Playlist mit mehr als {count} Videos vorgeladen werden.
     Ignore System Rotation Lock for Fullscreen: Durch Drehen des Geräts zum Vollbild wechseln und es verlassen, auch wenn die automatische Drehung in Android ausgeschaltet ist.
+    Keep Status Bar Hidden in Fullscreen: Die Statusleiste nur beim Wischen vom Bildschirmrand einblenden und nach kurzer Zeit wieder ausblenden. Tippen auf den Player blendet sie nicht mehr ein.
   External Player Settings:
     Custom External Player Arguments: Alle benutzerdefinierten Befehlszeilenargumente, die an den externen Video-Player übergeben werden sollen.
     Ignore Warnings: Warnungen unterdrücken, wenn der aktuelle externe Video-Player die aktuelle Aktion nicht unterstützt (z. B. das Umkehren von Playlists usw.).

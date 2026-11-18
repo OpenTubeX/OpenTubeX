@@ -971,6 +971,7 @@ Settings:
     Upcoming Videos to Preload: "Vídeos próximos para precargar"
     Concurrent Preloads: "Precargas simultáneas"
     Ignore System Rotation Lock for Fullscreen: Ignorar el bloqueo de rotación del sistema para pantalla completa
+    Keep Status Bar Hidden in Fullscreen: "Mantener oculta la barra de estado en pantalla completa"
     Swipe Left or Right to Seek in Fullscreen: Deslizar a izquierda o derecha para avanzar o retroceder en pantalla completa
     Show Swipe to Seek Preview: Mostrar vista previa al deslizar para avanzar o retroceder
     Enable Google Cast: "Activar Google Cast"
@@ -1349,6 +1350,7 @@ Settings:
     Profiles and subscriptions: "Perfiles y suscripciones"
     Backup exported: "Copia de seguridad exportada con éxito"
     Backup imported: "Copia de seguridad importada con éxito"
+    YouTube Google Takeout: "YouTube/Google Takeout"
     Import YouTube Takeout ZIP: "Importar ZIP de YouTube Takeout"
     Select Takeout data: "Selecciona los datos que quieres importar"
     Import selected data: "Importar datos seleccionados"
@@ -2363,6 +2365,7 @@ Tooltips:
     Upcoming Videos to Preload: "Número máximo de próximos vídeos cuyas URL de yt-dlp se obtienen en segundo plano."
     Concurrent Preloads: "El número máximo de procesos de yt-dlp utilizados para precargar vídeos al mismo tiempo. Los valores más altos usan más CPU, memoria y ancho de banda de red."
     Ignore System Rotation Lock for Fullscreen: Gira físicamente el dispositivo para entrar y salir de pantalla completa aunque la rotación automática de Android esté desactivada.
+    Keep Status Bar Hidden in Fullscreen: "Muestra la barra de estado solo cuando deslizas desde el borde de la pantalla y vuelve a ocultarla tras un momento. Tocar el reproductor ya no la muestra."
     Ask Before Preloading Large Playlists: "Pide confirmación antes de precargar todos los vídeos de una lista de reproducción con más de {count} vídeos."
     Enable Timestamp Notes: "Añade un botón al reproductor y el atajo N, que pausan el vídeo y abren una nota que enlaza al momento actual. Las notas se pueden copiar como Markdown o, en el ordenador, añadir a Obsidian."
     Obsidian Vault: Nombre de la bóveda de Obsidian para las notas con marca de tiempo. Si se establece, las notas se pueden añadir a Obsidian. Las notas de cada vídeo se reúnen en una nota con el nombre del vídeo, en la carpeta de la bóveda para notas nuevas.

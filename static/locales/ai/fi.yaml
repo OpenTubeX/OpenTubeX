@@ -1028,6 +1028,7 @@ Settings:
     Upcoming Videos to Preload: "Esiladattavien videoiden määrä"
     Concurrent Preloads: "Samanaikaiset esilataukset"
     Ignore System Rotation Lock for Fullscreen: Ohita järjestelmän kiertolukitus koko näytössä
+    Keep Status Bar Hidden in Fullscreen: "Pidä tilarivi piilossa koko näytön tilassa"
     Swipe Left or Right to Seek in Fullscreen: Kelaa koko näytössä pyyhkäisemällä vasemmalle tai oikealle
     Show Swipe to Seek Preview: Näytä esikatselu pyyhkäisemällä kelattaessa
     Enable Google Cast: "Ota Google Cast käyttöön"
@@ -1403,6 +1404,7 @@ Settings:
     Profiles and subscriptions: "Profiilit ja tilaukset"
     Backup exported: "Varmuuskopion vienti onnistui"
     Backup imported: "Varmuuskopion tuonti onnistui"
+    YouTube Google Takeout: "YouTube/Google Takeout"
     Import YouTube Takeout ZIP: "Tuo YouTube Takeout ZIP"
     Select Takeout data: "Valitse tuotavat tiedot"
     Import selected data: "Tuo valitut tiedot"
@@ -2411,6 +2413,7 @@ Tooltips:
     Upcoming Videos to Preload: "Enimmäismäärä seuraavia videoita, joiden yt-dlp-osoitteet noudetaan taustalla."
     Concurrent Preloads: "Videoiden samanaikaiseen esilataukseen käytettävien yt-dlp-prosessien enimmäismäärä. Suuremmat arvot käyttävät enemmän suoritinta, muistia ja verkon kaistanleveyttä."
     Ignore System Rotation Lock for Fullscreen: Käännä laitetta siirtyäksesi koko näyttöön ja poistuaksesi siitä, vaikka Androidin automaattinen kierto olisi pois käytöstä.
+    Keep Status Bar Hidden in Fullscreen: "Näytä tilarivi vain, kun pyyhkäiset näytön reunasta, ja piilota se taas hetken kuluttua. Soittimen napauttaminen ei enää näytä sitä."
     Ask Before Preloading Large Playlists: "Pyytää vahvistusta ennen kuin kaikki videot esiladataan soittolistalta, jossa on yli {count} videota."
     Enable Timestamp Notes: "Lisää soittimeen painikkeen ja pikanäppäimen N, jotka keskeyttävät videon ja avaavat muistiinpanon, joka linkittää nykyiseen kohtaan. Muistiinpanot voi kopioida Markdownina tai työpöydällä lisätä Obsidianiin."
     Obsidian Vault: Aikaleimamuistiinpanoihin käytettävän Obsidian-holvin nimi. Kun se on asetettu, muistiinpanoja voi lisätä Obsidianiin. Kunkin videon muistiinpanot kootaan videon mukaan nimettyyn muistiinpanoon holvin uusien muistiinpanojen kansiossa.
