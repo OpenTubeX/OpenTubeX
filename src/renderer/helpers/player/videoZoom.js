@@ -5,6 +5,9 @@
 export const VIDEO_ZOOM_LEVELS = Object.freeze([1, 1.25, 1.5, 1.75, 2, 2.5, 3])
 
 export const DEFAULT_VIDEO_ZOOM = VIDEO_ZOOM_LEVELS[0]
+
+/** The step of the zoom slider, between the levels */
+export const VIDEO_ZOOM_STEP = 0.05
 export const MAX_VIDEO_GESTURE_ZOOM = 8
 
 /**

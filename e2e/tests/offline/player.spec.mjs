@@ -904,17 +904,26 @@ test('volume boost amplifies the audio within its tab', async ({ app, page, atta
 
   await boostButton.click()
   const boostMenu = player.locator('.volume-boost-menu')
-  await expect(boostMenu.getByRole('button')).toHaveText(['Volume Boost', 'Off', '125%', '150%', '175%', '200%'])
+  await expect(boostMenu.getByRole('menuitemradio')).toHaveText(['Off', '125%', '150%', '175%', '200%'])
   await attachScreenshot('volume boost menu')
-  await boostMenu.getByRole('button', { name: '150%' }).click()
+  await boostMenu.getByRole('menuitemradio', { name: '150%' }).click()
   await expect.poll(outputGain).toBe(1.5)
   expect(await sourceCount()).toBe(1)
 
   // Choosing a level returns to the overflow menu, which shows it.
   await expect(boostButton).toContainText('150%')
   await boostButton.click()
-  await expect(boostMenu.getByRole('button', { name: '150%' })).toHaveAttribute('aria-selected', 'true')
-  await boostMenu.getByRole('button', { name: '200%' }).click()
+  await expect(boostMenu.getByRole('menuitemradio', { name: '150%' })).toHaveAttribute('aria-checked', 'true')
+
+  // The slider and its step buttons set the levels between the presets.
+  const boostSlider = boostMenu.getByRole('slider', { name: 'Volume Boost' })
+  await boostSlider.press('ArrowRight')
+  await expect.poll(outputGain).toBe(1.55)
+  await expect(boostMenu.locator('.shaka-playback-rate-value')).toHaveText('155%')
+  await expect(boostMenu.getByRole('menuitemradio', { name: '150%' })).toHaveAttribute('aria-checked', 'false')
+  await boostMenu.getByRole('button', { name: '−' }).click()
+  await expect.poll(outputGain).toBe(1.5)
+  await boostMenu.getByRole('menuitemradio', { name: '200%' }).click()
   await expect.poll(outputGain).toBe(2)
 
   // The output stops rendering while the video is paused and runs again when it plays.
@@ -1062,7 +1071,7 @@ test.describe('mobile player menus', { tag: '@scale' }, () => {
     await menu.getByRole('button', { name: 'Zoom' }).click()
     const submenu = player.locator('.video-zoom-menu')
     await expectOverlayAbovePlayer(centerButton, submenu)
-    await submenu.getByRole('button', { name: 'Off', exact: true }).click()
+    await submenu.getByRole('menuitemradio', { name: 'Off', exact: true }).click()
     await expect(submenu).toBeHidden()
     await expect(menu).toBeVisible()
     await player.locator('.phonePlayerOptions[open]').press('Escape')
