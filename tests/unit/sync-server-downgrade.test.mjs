@@ -998,6 +998,35 @@ test('other devices apply shared deletions without asking, while a server that l
   await assert.rejects(unaware.actions.syncWithSyncServer(unaware.context), errors.SyncServerDataLossError)
 })
 
+test('a failed transfer of the shared deletions does not stop the sync', async () => {
+  const ids = LOST_CHANNELS.map(channel => channel.id)
+  const settings = { syncServerSnapshot: JSON.stringify({ subscriptions: ids }) }
+  const key = Buffer.alloc(32, 1).toString('base64')
+  const salt = Buffer.alloc(16, 2).toString('base64')
+  let subscriptions = { revision: 1, payload: await privacy.encryptSyncDocument(LOST_CHANNELS, key, salt) }
+  const respond = async (url, options) => {
+    const path = new URL(url).pathname
+    if (path === '/health') return { capabilities: { encrypted_sync: 1, live_sync: 1, sync_deletions: 1 } }
+    if (path === '/v1/encrypted_sync') {
+      return { collections: [{ collection: 'subscriptions', revision: subscriptions.revision }], legacy_data: false }
+    }
+    if (path === '/v1/encrypted_sync/syncDeletions') return new Response('{}', { status: 500 })
+    if (path !== '/v1/encrypted_sync/subscriptions') return
+    if (options.method !== 'PUT') return subscriptions
+    subscriptions = { revision: subscriptions.revision + 1, payload: JSON.parse(options.body).payload }
+    return { revision: subscriptions.revision }
+  }
+
+  const deletions = createSyncDeletionDecisions()
+  deletions.confirm('subscriptions', ids)
+  const f = fixture(settings, { encrypted: true, respond, deletions })
+  f.context.rootState.profiles.profileList[0].subscriptions = []
+  await f.actions.syncWithSyncServer(f.context)
+  assert.equal(f.context.state.syncServerStatus, 'success')
+  assert.equal(subscriptions.revision, 2)
+  assert.equal((await privacy.decryptSyncDocument(subscriptions.payload, key)).length, 0)
+})
+
 test('dismissing the deletion review keeps sync paused', async () => {
   const f = serverLostFixture()
   await assert.rejects(f.actions.syncWithSyncServer(f.context), errors.SyncServerDataLossError)

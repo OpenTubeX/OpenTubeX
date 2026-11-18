@@ -184,6 +184,23 @@ function refreshSyncServerAccount({ dispatch }) {
   }
 }
 
+/**
+ * Without the shared deletion marks, the sync asks the user to review the deletions
+ * instead, so failing to transfer them must not stop it.
+ * @template T
+ * @param {() => Promise<T>} transfer
+ * @returns {Promise<T | null>}
+ */
+async function tryDeletionMarks(transfer) {
+  try {
+    return await transfer()
+  } catch (error) {
+    if (error instanceof SyncServerCancelledError || isSessionExpiredError(error)) throw error
+    console.warn('Failed to transfer the shared sync deletions:', error)
+    return null
+  }
+}
+
 async function tryLoadSyncServerDevices(client, privacyKey) {
   try {
     return await loadSyncServerDevices(client, privacyKey)
@@ -951,8 +968,8 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           uploadCollections,
           migratedPlaybackSpeeds,
           deletionMarks: capabilities.sync_deletions === 1
-            ? await downloadDeletionMarks(manifest.collections
-                .find(entry => entry.collection === SYNC_DELETION_MARKS_COLLECTION)?.revision ?? 0)
+            ? await tryDeletionMarks(() => downloadDeletionMarks(manifest.collections
+                .find(entry => entry.collection === SYNC_DELETION_MARKS_COLLECTION)?.revision ?? 0))
             : null,
         }
       })
@@ -998,7 +1015,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     if (encryptedCollections) {
       await runStage('upload', async () => {
         if (encryptedCollections.deletionMarks) {
-          await uploadDeletionMarks(encryptedCollections.deletionMarks, encryptedCollections.enabled)
+          await tryDeletionMarks(() => uploadDeletionMarks(encryptedCollections.deletionMarks, encryptedCollections.enabled))
         }
         for (const collection of encryptedCollections.upload) {
           if (skippedCollections.has(collection)) continue
