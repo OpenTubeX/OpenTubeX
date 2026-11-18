@@ -3,7 +3,7 @@ import { toRaw } from 'vue'
 import { MAIN_PROFILE_ID, THEME_BG_COLOR, THEME_TEXT_COLOR } from '../../../constants'
 import { DBProfileHandlers, getDataScope, setDataScope } from '../../../datastores/handlers/index'
 import { getProfileWithUpdatedSubscriptionDetails } from '../../helpers/subscription-profile-details'
-import { copySubscriptionChannelSettings, getChannelWithUpdatedSettings, getNextSubscriptionSettingsTimestamp, isValidSubscriptionSettingsTimestamp } from '../../helpers/subscription-channels'
+import { copySubscriptionChannelSettings, getChannelWithUpdatedSettings, getNextSubscriptionSettingsTimestamp, isValidSubscriptionSettingsTimestamp, normalizeSubscriptionChannelSettings } from '../../helpers/subscription-channels'
 import { DEFAULT_PROFILE_ICON } from '../../helpers/profileIcons'
 import { profileSyncSnapshot } from '../../helpers/profileSyncSnapshot'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
@@ -22,6 +22,24 @@ const state = {
   }],
   profilesLoaded: false,
   activeProfile: MAIN_PROFILE_ID
+}
+
+/**
+ * Combines the settings of a channel that several profiles with their own
+ * subscriptions follow, so that background refreshes fetch every feed type
+ * one of them shows and notify about every upload one of them asks for.
+ */
+function mergeRootChannelSettings(channel, other) {
+  const a = normalizeSubscriptionChannelSettings(channel)
+  const b = normalizeSubscriptionChannelSettings(other)
+  // Hidden feed types never notify, so each profile only adds the types it shows.
+  const notifies = settings => settings.notificationFeedTypes.filter(type => settings.feedTypes.includes(type))
+  return {
+    ...channel,
+    feedTypes: [...new Set([...a.feedTypes, ...b.feedTypes])],
+    notificationFeedTypes: [...new Set([...notifies(a), ...notifies(b)])],
+    showMembersOnly: a.showMembersOnly || b.showMembersOnly
+  }
 }
 
 const getters = {
@@ -77,7 +95,8 @@ const getters = {
     const channels = new Map()
     for (const profile of roots) {
       for (const channel of profile.subscriptions) {
-        if (!channels.has(channel.id)) channels.set(channel.id, channel)
+        const known = channels.get(channel.id)
+        channels.set(channel.id, known === undefined ? channel : mergeRootChannelSettings(known, channel))
       }
     }
     return [...channels.values()]
