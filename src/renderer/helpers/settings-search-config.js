@@ -346,6 +346,21 @@ export const SETTINGS_SEARCH_SOURCES = {
   }]
 }
 
+// Search labels, by source type, whose control shows a shorter label, mapped to the control's
+// setting key so a result can still highlight it.
+export const SETTINGS_SEARCH_SETTING_KEYS = {
+  subscription: {
+    'Settings.Subscription Settings.Platforms.Auto Refresh Interval': 'platformFeedAutoRefreshInterval',
+    'Settings.Subscription Settings.RSS Feeds Auto Refresh Interval': 'rssFeedsAutoRefreshInterval'
+  },
+  channel: {
+    'Settings.Channel Settings.Auto Save Playback Speed': 'autoUpdateChannelPlaybackSpeeds',
+    'Settings.Channel Settings.Auto Save Video Quality': 'autoUpdateChannelVideoQualities',
+    'Settings.Channel Settings.Auto Save Subtitles State': 'autoUpdateChannelSubtitlesStates',
+    'Settings.Channel Settings.Auto Save Volume': 'autoUpdateChannelVolumes'
+  }
+}
+
 export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
   // Leaves out select options such as Off and Always.
   'digital-wellbeing': {
@@ -429,6 +444,7 @@ export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
     '': [
       'Channel Settings',
       'Enable Channel Playback Settings',
+      'Auto Save Changes',
       'Auto Save Playback Speed',
       'Auto Save Video Quality',
       'Auto Save Subtitles State',

@@ -104,9 +104,8 @@
         />
       </FtFlexBox>
     </div>
-    <div class="privacyExternalLinkHandling">
+    <div class="settingsSelectGrid privacySelects">
       <FtSelect
-        class="privacyExternalLinkSelect"
         :placeholder="$t('Settings.General Settings.External Link Handling.External Link Handling')"
         :value="externalLinkHandling"
         :select-names="externalLinkHandlingNames"
@@ -115,8 +114,6 @@
         :tooltip="$t('Tooltips.General Settings.External Link Handling')"
         @change="updateExternalLinkHandling"
       />
-    </div>
-    <FtFlexBox>
       <FtSelect
         class="privacyWatchedProgressSelect"
         :placeholder="$t('Settings.Privacy Settings.Save Watched Progress')"
@@ -130,7 +127,7 @@
         size-to-content
         @change="updateWatchedProgressSavingMode"
       />
-    </FtFlexBox>
+    </div>
     <FtFlexBox>
       <FtSlider
         :label="$t('Settings.Privacy Settings.Watched Percentage Threshold')"
@@ -359,42 +356,19 @@ function updateWatchedPercentageThreshold(value) {
   }
 }
 
-.privacyExternalLinkHandling {
-  display: flex;
+.privacySelects {
+  --settings-select-grid-columns: 1;
+}
+
+/* Day counts need little room. The gap leaves room for each field's icons. */
+.privacyRetention > .ft-flex-box {
   justify-content: center;
+  gap: 0 72px;
 }
 
-.privacyExternalLinkSelect.containsTooltip {
-  --privacy-select-indicator-space: 40px;
-
-  box-sizing: border-box;
-  inline-size: min(100%, 330px);
-  margin-inline-end: 0;
-}
-
-.privacyExternalLinkSelect:has(
-  :deep(.syncedSettingIndicator),
-  :deep(.changedSettingIndicator)
-) {
-  --privacy-select-indicator-space: 70px;
-}
-
-.privacyExternalLinkSelect :deep(.select-text),
-.privacyExternalLinkSelect :deep(.nativeSelect),
-.privacyExternalLinkSelect :deep(.select-bar) {
-  inline-size: calc(100% - var(--privacy-select-indicator-space));
-}
-
-.privacyExternalLinkSelect :deep(.iconSelect) {
-  inset-inline-end: calc(var(--privacy-select-indicator-space) + 10px);
-}
-
-.privacyExternalLinkSelect :deep(.selectIndicators) {
-  inset-inline: auto 8px;
-}
-
-.privacyExternalLinkSelect :deep(.changedSettingIndicatorPlaceholder) {
-  display: none;
+.privacyRetention :deep(.ft-input-component) {
+  inline-size: 240px;
+  min-inline-size: 0;
 }
 
 </style>
