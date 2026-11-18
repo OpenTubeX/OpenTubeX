@@ -1227,12 +1227,27 @@ test('the Android background job rechecks a connection regained while hidden and
 })
 
 test('a failed reconnect makes the next background sync merge the offline edits', async () => {
+  const collections = new Map()
   let serverDown = false
-  const f = fixture({}, {
+  const f = fixture({ syncServerSyncSettings: true, channelPlaybackSpeeds: '{}' }, {
     encrypted: true,
-    connectionState: 'offline',
     browser: true,
-    respond: url => serverDown && url.endsWith('/health') ? new Response('Unavailable', { status: 503 }) : undefined,
+    deferLock: true,
+    respond: (url, options) => {
+      const path = new URL(url).pathname
+      if (serverDown && path === '/health') return new Response('Unavailable', { status: 503 })
+      if (path === '/v1/encrypted_sync') {
+        return { collections: [...collections].map(([collection, entry]) => ({ collection, revision: entry.revision })), legacy_data: false }
+      }
+      if (path.startsWith('/v1/encrypted_sync/') && path !== '/v1/encrypted_sync/events') {
+        const collection = path.split('/').at(-1)
+        if (options.method === 'PUT') {
+          const body = JSON.parse(options.body)
+          collections.set(collection, { revision: body.revision + 1, payload: body.payload })
+        }
+        return collections.get(collection) ?? { revision: 0, payload: null }
+      }
+    },
     checkConnection: async () => {
       f.network.state = 'restored'
       f.connectionEvents.dispatchEvent(new CustomEvent('change', { detail: 'restored' }))
@@ -1240,11 +1255,19 @@ test('a failed reconnect makes the next background sync merge the offline edits'
     },
   })
   await f.actions.initializeSyncServer(f.context)
+  f.network.state = 'offline'
+  f.connectionEvents.dispatchEvent(new CustomEvent('change', { detail: 'offline' }))
+  f.settings.channelPlaybackSpeeds = JSON.stringify({ channel: 1.5 })
   serverDown = true
   await f.periodicTasks[0]()
   assert.ok(f.context.state.syncServerError)
-  // Remote-only syncs merge again only after a failed sync.
-  assert.equal(f.context.state.syncServerStatus, 'error')
+  serverDown = false
+  f.settings.syncServerLastSyncAt = 0
+  f.requests.length = 0
+  // The next job only checks the server for changes, which it has none of.
+  await f.periodicTasks[0]()
+  assert.ok(f.requests.some(request => request.method === 'PUT' && request.url.endsWith('/encrypted_sync/settings')),
+    'the offline edit is uploaded')
 })
 
 test('disconnect cancels an active sync and reconnect waits for it to settle', async () => {
