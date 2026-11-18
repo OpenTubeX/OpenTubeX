@@ -58,6 +58,12 @@
           :key="summary.label"
           class="summaryCard"
         >
+          <span
+            class="summaryIcon"
+            aria-hidden="true"
+          >
+            <FtIcon :icon="summary.icon" />
+          </span>
           <span class="summaryLabel">{{ summary.label }}</span>
           <strong>{{ formatDuration(summary.seconds) }}</strong>
           <span class="summaryHint">{{ summary.hint }}</span>
@@ -123,8 +129,8 @@
                   :d="dailyChart.area"
                   class="chartArea"
                 />
-                <polyline
-                  :points="dailyChart.points"
+                <path
+                  :d="dailyChart.line"
                   class="chartLine"
                 />
               </svg>
@@ -134,11 +140,13 @@
                 type="button"
                 class="chartPoint"
                 :class="{
+                  current: index === dailyChart.data.length - 1,
                   tooltipStart: index < 2,
                   tooltipEnd: index > dailyChart.data.length - 3,
                   tooltipBelow: point.y < 70,
                 }"
                 :style="{
+                  '--point-index': index,
                   insetInlineStart: `${(point.x / 700) * 100}%`,
                   insetBlockStart: `${(point.y / 220) * 100}%`,
                 }"
@@ -160,7 +168,10 @@
               <span
                 v-for="(day, index) in dailyData"
                 :key="day.date"
-                :class="{ hiddenLabel: index % 2 !== 0 }"
+                :class="{
+                  currentLabel: index === dailyData.length - 1,
+                  hiddenLabel: (dailyData.length - 1 - index) % 2 !== 0,
+                }"
               >
                 {{ day.label }}
               </span>
@@ -196,6 +207,7 @@
               v-for="(week, index) in weeklyData"
               :key="week.date"
               class="barColumn"
+              :class="{ current: index === weeklyData.length - 1 }"
             >
               <button
                 type="button"
@@ -622,16 +634,32 @@ const todayHint = computed(() => {
 })
 
 const summaries = computed(() => [
-  { label: t('Stats.Today'), seconds: todaySeconds.value, hint: todayHint.value },
+  {
+    label: t('Stats.Today'),
+    seconds: todaySeconds.value,
+    hint: todayHint.value,
+    icon: ['fas', 'calendar-day'],
+  },
   {
     label: t('Stats.This week'),
     seconds: currentWeekSeconds.value,
     hint: t('Stats.Since', {
       day: new Intl.DateTimeFormat(locale.value, { weekday: 'long' }).format(startOfWeek(new Date())),
     }),
+    icon: ['fas', 'calendar-days'],
   },
-  { label: t('Stats.Total watch time'), seconds: totalSeconds.value, hint: t('Stats.All recorded time') },
-  { label: t('Stats.Daily average'), seconds: dailyAverageSeconds.value, hint: t('Stats.Per calendar day') },
+  {
+    label: t('Stats.Total watch time'),
+    seconds: totalSeconds.value,
+    hint: t('Stats.All recorded time'),
+    icon: ['fas', 'clock'],
+  },
+  {
+    label: t('Stats.Daily average'),
+    seconds: dailyAverageSeconds.value,
+    hint: t('Stats.Per calendar day'),
+    icon: ['fas', 'gauge'],
+  },
 ])
 
 const dailyData = computed(() => {
@@ -661,11 +689,49 @@ const dailyChart = computed(() => {
     x: 10 + index * (680 / 13),
     y: 190 - (day.seconds / maximum) * 160,
   }))
-  const points = data.map(point => `${point.x},${point.y}`).join(' ')
-  const area = `M 10 190 L ${points.replaceAll(' ', ' L ')} L 690 190 Z`
+  const line = smoothPath(data)
 
-  return { area, data, points }
+  return { area: `${line} L 690 190 L 10 190 Z`, data, line }
 })
+
+/**
+ * Draws a monotone cubic curve through evenly spaced points, so the line
+ * stays smooth without overshooting a value or dipping below zero.
+ * @param {{ x: number, y: number }[]} points
+ */
+function smoothPath(points) {
+  const step = points[1].x - points[0].x
+  const slopes = points.slice(1).map((point, index) => (point.y - points[index].y) / step)
+  const tangents = points.map((_, index) => {
+    if (index === 0) { return slopes[0] }
+    if (index === points.length - 1) { return slopes[index - 1] }
+    return slopes[index - 1] * slopes[index] <= 0 ? 0 : (slopes[index - 1] + slopes[index]) / 2
+  })
+
+  // Fritsch-Carlson: limit the tangents so each segment stays monotone.
+  slopes.forEach((slope, index) => {
+    if (slope === 0) {
+      tangents[index] = 0
+      tangents[index + 1] = 0
+      return
+    }
+    const before = tangents[index] / slope
+    const after = tangents[index + 1] / slope
+    const magnitude = before ** 2 + after ** 2
+    if (magnitude > 9) {
+      const scale = 3 / Math.sqrt(magnitude)
+      tangents[index] = scale * before * slope
+      tangents[index + 1] = scale * after * slope
+    }
+  })
+
+  return points.reduce((path, point, index) => {
+    if (index === 0) { return `M ${point.x} ${point.y}` }
+    const previous = points[index - 1]
+    const third = step / 3
+    return `${path} C ${previous.x + third} ${previous.y + tangents[index - 1] * third}, ${point.x - third} ${point.y - tangents[index] * third}, ${point.x} ${point.y}`
+  }, '')
+}
 
 const weeklyTotals = computed(() => {
   const labelFormatter = new Intl.DateTimeFormat(locale.value, { month: 'short', day: 'numeric' })
