@@ -27,6 +27,7 @@
     <div class="shortcutToolbar">
       <p class="editHint">
         {{ $t('KeyboardShortcutPrompt.Edit Hint') }}
+        <FtSyncedSettingIndicator :setting-keys="['keyboardShortcuts']" />
       </p>
       <FtButton
         :label="$t('KeyboardShortcutPrompt.Reset to Defaults')"
@@ -167,6 +168,7 @@ import {
   keyboardShortcutsOverlap,
 } from '../../helpers/keyboardShortcuts'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
+import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
 import store from '../../store/index'
 import { useI18n } from 'vue-i18n'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'

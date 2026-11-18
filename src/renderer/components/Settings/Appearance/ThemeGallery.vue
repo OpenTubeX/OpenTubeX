@@ -67,7 +67,10 @@
       class="themeGallery"
     >
       <div class="themeHeader">
-        <ThemeModePicker data-setting-key="baseTheme" />
+        <div class="themeModeRow">
+          <ThemeModePicker data-setting-key="baseTheme" />
+          <FtSyncedSettingIndicator setting-key="baseTheme" />
+        </div>
 
         <!-- Every color control stays rendered in one cell and only the edited
              theme's is shown, so choosing a theme never moves the gallery. -->
@@ -591,6 +594,18 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
   display: flex;
   flex-direction: column;
   gap: 24px;
+  min-inline-size: 0;
+}
+
+.themeModeRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-inline-size: 0;
+}
+
+.themeModeRow > .themeModes {
+  flex: 1;
   min-inline-size: 0;
 }
 

@@ -108,6 +108,7 @@
       <FtSelect
         :placeholder="$t('Settings.General Settings.External Link Handling.External Link Handling')"
         :value="externalLinkHandling"
+        setting-key="externalLinkHandling"
         :select-names="externalLinkHandlingNames"
         :select-values="EXTERNAL_LINK_HANDLING_VALUES"
         :icon="['fas', 'external-link-alt']"

@@ -5,7 +5,12 @@
       class="checkboxTitle"
     >
       {{ title }}
-      <FtSyncedSettingIndicator :setting-key="settingKey" />
+      <FtSyncedSettingIndicator
+        :setting-key="settingKey"
+        :setting-keys="syncSettingKeys"
+        :is-changed="isChanged"
+        @reset="emit('reset')"
+      />
     </h3>
     <template
       v-for="(label, index) in labels"
@@ -81,7 +86,18 @@ const props = defineProps({
     type: String,
     default: ''
   },
+  // Synced setting keys for a list whose options are separate settings, which has no `settingKey`
+  syncSettingKeys: {
+    type: Array,
+    default: () => []
+  },
+  isChanged: {
+    type: Boolean,
+    default: null
+  },
 })
+
+const emit = defineEmits(['reset'])
 
 const modelValue = defineModel({ type: Array, required: true })
 

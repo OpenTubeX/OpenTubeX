@@ -758,6 +758,7 @@
           :icon="['fas', 'file-lines']"
           placeholder="%Y-%M-%D_%H-%N-%S"
           :value="screenshotFilenamePattern"
+          setting-key="screenshotFilenamePattern"
           :show-action-button="false"
           @input="handleScreenshotFilenamePatternChanged"
         />
