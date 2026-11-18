@@ -115,6 +115,7 @@ import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../../../store/index'
+import { resolveSearchEngineFavicon } from '../../../helpers/searchEngineFavicon'
 import { showToast } from '../../../helpers/utils'
 import {
   isValidSearchUrlTemplate,
@@ -157,7 +158,7 @@ watch(configuredSearchEngines, (engines) => {
   for (const engine of engines) {
     if (!engine.enabled || resolvedFavicons.value.has(engine.url)) continue
 
-    window.ftElectron.resolveFavicon(engine.url).then(icon => {
+    resolveSearchEngineFavicon(engine.url).then(icon => {
       resolvedFavicons.value = new Map([...resolvedFavicons.value, [engine.url, icon]])
     }).catch(() => {})
   }

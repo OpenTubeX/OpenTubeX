@@ -62,6 +62,7 @@ export function findSettingsSearchTab(match) {
 
 function getSettingsSearchSourceValues(source, options) {
   if (options.isIos && ['external-software', 'proxy', 'tab-unloading'].includes(source.type)) return []
+  if (options.isCapacitor && source.type === 'context-menu-search') return []
   if (isLiteBuild && ['external-software', 'download', 'yt-dlp-streaming'].includes(source.type)) return []
   if (source.subpage === 'quick-playback-speed' && !options.store.getters.getUseQuickPlaybackSpeedBar) return []
   if (source.electronOnly && !options.usingElectron && !(options.isCapacitor && (source.capacitorSupported || ['external-software', 'download', 'yt-dlp-streaming'].includes(source.type)))) return []

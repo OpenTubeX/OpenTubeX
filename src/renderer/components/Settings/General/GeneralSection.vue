@@ -2,7 +2,7 @@
   <div class="settingsCategory hideFirstSectionTitle">
     <GeneralSettings />
     <CommentSettings />
-    <ContextMenuSearchSettings v-if="USING_ELECTRON" />
+    <ContextMenuSearchSettings v-if="!IS_CAPACITOR" />
   </div>
 </template>
 
@@ -11,5 +11,5 @@ import ContextMenuSearchSettings from './ContextMenuSearchSettings.vue'
 import CommentSettings from './CommentSettings.vue'
 import GeneralSettings from './GeneralSettings.vue'
 
-const USING_ELECTRON = !!process.env.IS_ELECTRON
+const IS_CAPACITOR = !!process.env.IS_CAPACITOR
 </script>

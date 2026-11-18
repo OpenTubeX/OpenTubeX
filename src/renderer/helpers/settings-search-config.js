@@ -136,8 +136,7 @@ export const SETTINGS_SEARCH_SOURCES = {
     include: WATCH_STATISTICS_KEYS
   }, {
     type: 'context-menu-search',
-    key: 'Settings.Context Menu Search Settings',
-    electronOnly: true
+    key: 'Settings.Context Menu Search Settings'
   }],
   appearance: [{
     type: 'theme',

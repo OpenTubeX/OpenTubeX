@@ -2495,7 +2495,7 @@ let renderUpdateChangelog = () => ''
 // Release notes can be labeled for some platforms, so the prompt hides notes for others.
 const releaseNotePlatform = process.env.IS_ELECTRON
   ? { darwin: 'macos', linux: 'linux', win32: 'windows' }[process.platform] ?? null
-  : process.env.IS_CAPACITOR ? (process.env.IS_IOS ? 'ios' : 'android') : null
+  : process.env.IS_CAPACITOR ? (process.env.IS_IOS ? 'ios' : 'android') : 'web'
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const checkForUpdates = computed(() => store.getters.getCheckForUpdates)

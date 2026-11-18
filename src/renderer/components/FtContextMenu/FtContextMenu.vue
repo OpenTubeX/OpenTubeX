@@ -204,6 +204,8 @@ import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/ov
 import FtContextMenuItemIcon from './FtContextMenuItemIcon.vue'
 import { getTabDeviceMenuItem } from '../../helpers/tab-device-menu'
 import { collapseSeparators } from '../../helpers/menuSeparators'
+import { getWebContextMenuItems } from '../../helpers/webContextMenu'
+import { resolveSearchEngineFavicon } from '../../helpers/searchEngineFavicon'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -375,7 +377,7 @@ function resolveItemFavicons(menuItems) {
   for (const item of menuItems) {
     if (typeof item.faviconSource === 'string') {
       const source = item.faviconSource
-      window.ftElectron.resolveFavicon(source).then(icon => {
+      resolveSearchEngineFavicon(source).then(icon => {
         if (item.faviconSource === source && icon) item.icon = icon
       }).catch(() => {})
     }
@@ -421,7 +423,11 @@ function getContextParameters(event) {
 }
 
 async function open(event) {
-  if (event.defaultPrevented || !process.env.IS_ELECTRON) return
+  if (event.defaultPrevented) return
+  if (!process.env.IS_ELECTRON) {
+    if (!process.env.IS_CAPACITOR) openWebMenu(event)
+    return
+  }
 
   event.preventDefault()
   const request = ++openRequest
@@ -444,6 +450,27 @@ async function open(event) {
   localItems.value = channel ? ref(getChannelLinkMenuItems(channel, t)) : null
   // Chromium reports no button for menus opened with Shift+F10 or the Menu key
   await showMenu(result.items, result.sessionId, event.clientX, event.clientY, request, event.button === -1)
+}
+
+/**
+ * Replaces the browser's menu in the web version. Media, touch holds and
+ * Shift+right-click keep it, as do places without any of our commands.
+ * @param {MouseEvent} event
+ */
+function openWebMenu(event) {
+  const target = event.target
+  if (!(target instanceof Element) || event.shiftKey || (event instanceof PointerEvent && event.pointerType === 'touch') ||
+    target.closest('img, video')) return
+
+  const link = target.closest('a[href]')
+  const channel = link ? getChannelLinkDetails(link) : null
+  const menuItems = getWebContextMenuItems(target)
+  if (menuItems.length === 0 && !channel) return
+
+  event.preventDefault()
+  touchFriendly.value = false
+  localItems.value = channel ? ref(getChannelLinkMenuItems(channel, t)) : null
+  showMenu(menuItems, null, event.clientX, event.clientY, ++openRequest, event.button === -1)
 }
 
 /**
@@ -479,6 +506,8 @@ async function openLocalMenu(event) {
       window.ftElectron.tabs.setContextMenuTab({ tabId: null, surface: 'content' })
       contextualMenu = await window.ftElectron.contextMenu.open({ ...parameters, linkURL: '', linkText: '' })
     }
+  } else if (!process.env.IS_CAPACITOR && contextEvent?.target instanceof Element) {
+    contextualMenu.items = getWebContextMenuItems(contextEvent.target, { ignoreLinks: true })
   }
   if (request !== openRequest) return
   await showMenu(contextualMenu.items, contextualMenu.sessionId, x, y, request)
