@@ -291,8 +291,7 @@ test.describe('Shorts transcript navigation', () => {
       }
     })).toEqual({ atScrollEnd: true, renderedEndVisible: true })
 
-    // Tall enough for the next Short's information to fit without scrolling,
-    // so navigating to it must clamp the position to the top.
+    // Shrinks the scroll range, which must clamp the position to the rendered end.
     await setWindowSize(app, page, { width: 1326, height: 1040 })
     await expect.poll(() => scroller.evaluate(element => {
       const contentEnd = element.querySelector('.shortsAuxPanelContentEnd')
@@ -333,10 +332,11 @@ test.describe('Shorts transcript navigation', () => {
       )
       const hasVerticalOverflow = element.scrollHeight > element.clientHeight + 1
       return {
-        atRenderedEnd: contentBounds != null &&
+        // The next Short's information starts at the top, and may overflow the panel
+        noEmptySpace: contentBounds != null &&
           (maximumScrollTop === 0
             ? element.scrollTop <= 1
-            : Math.abs(contentBounds.bottom - viewportBounds.bottom) <= 1),
+            : contentBounds.bottom >= viewportBounds.bottom - 1),
         horizontalOverflowHidden: getComputedStyle(element).overflowX === 'hidden' &&
           element.scrollWidth <= element.clientWidth + 1,
         scrollbarMatchesOverflow:
@@ -344,8 +344,8 @@ test.describe('Shorts transcript navigation', () => {
         withinRenderedRange: element.scrollTop <= maximumScrollTop + 1
       }
     })).toEqual({
-      atRenderedEnd: true,
       horizontalOverflowHidden: true,
+      noEmptySpace: true,
       scrollbarMatchesOverflow: true,
       withinRenderedRange: true
     })
