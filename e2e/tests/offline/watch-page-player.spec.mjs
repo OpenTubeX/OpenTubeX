@@ -1253,12 +1253,15 @@ test('mobile center play button pauses when tapped as the controls start to fade
   await mockCapacitorPhoneLayout(page)
 
   // Shaka builds the center buttons only for the phone layout.
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  const previousPlayer = await player.elementHandle()
   const view = await watchViewHandle(page)
   await view.evaluate(component => component.tabRouter.push({ path: '/watch/9bZkp7q19f0' }))
   await view.dispose()
   await expect(page).toHaveURL(/#\/watch\/9bZkp7q19f0/)
+  await expect.poll(() => previousPlayer.evaluate(element => element.isConnected)).toBe(false)
+  await previousPlayer.dispose()
 
-  const player = page.locator(`${activeTab} .ftVideoPlayer`)
   const video = player.locator('video')
   const button = player.locator('.shaka-big-buttons-container > .shaka-play-button')
   await waitForPlayback(page)
