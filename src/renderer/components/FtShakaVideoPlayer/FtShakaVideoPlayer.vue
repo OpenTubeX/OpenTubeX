@@ -548,7 +548,11 @@
           aria-hidden="true"
         />
       </div>
-      <Transition name="fade">
+      <Transition
+        name="fade"
+        @enter="finishTransition"
+        @leave="finishTransition"
+      >
         <div
           v-if="autoplayCountdown"
           v-overlay-scrollbars
@@ -827,7 +831,11 @@
           @keydown="handleFullscreenDockWidthKeydown"
           @dblclick.stop.prevent="resetFullscreenDockWidth"
         />
-        <Transition name="chapter-slide">
+        <Transition
+          name="chapter-slide"
+          @enter="finishTransition"
+          @leave="finishTransition"
+        >
           <aside
             v-if="showChaptersOverlay && (isFullscreen || fullWindowEnabled) && chapters.length > 0"
             ref="chapterOverlay"
@@ -1254,7 +1262,11 @@
         <span class="videoFillZoomEdge videoFillZoomEdgeBottom" />
         <span class="videoFillZoomEdge videoFillZoomEdgeLeft" />
       </div>
-      <Transition name="valueChangePopup">
+      <Transition
+        name="valueChangePopup"
+        @enter="finishTransition"
+        @leave="finishTransition"
+      >
         <div
           v-if="!mobileSeekPreview && (videoZoomPinching || showTemporaryPlaybackRateIndicator || showValueChangePopup)"
           class="valueChangePopup"
@@ -1320,7 +1332,11 @@
           </span>
         </p>
       </div>
-      <Transition name="fade">
+      <Transition
+        name="fade"
+        @enter="finishTransition"
+        @leave="finishTransition"
+      >
         <div
           v-if="showCountdownOverlay"
           class="countdownOverlay"
@@ -2252,7 +2268,7 @@ import {
   copyToClipboard,
 } from '../../helpers/utils'
 import { isHexColor } from '../../helpers/colors'
-import { applyAnimationSpeed, getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
+import { applyAnimationSpeed, finishTransition, getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
 import {
   addOverlayScrollbars,
   clampOverlayScrollTop,
