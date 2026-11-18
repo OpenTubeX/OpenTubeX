@@ -30,7 +30,7 @@ const EVENT_SYNC_DELAYS = {
  * edits that came due while iOS had the app hidden.
  * @param {object} options
  * @param {() => any} options.getSettings The current settings
- * @param {() => { syncServerStatus: string, syncServerLiveRemindersPending: boolean }} options.getSyncState
+ * @param {() => { syncServerStatus: string, syncServerLiveRemindersPending: boolean, syncServerDeletionMarksPending: boolean }} options.getSyncState
  * @param {(options: SyncRequestOptions & Record<string, unknown>) => Promise<unknown>} options.runSync Syncs once
  * @param {(options: SyncRequestOptions) => Promise<unknown>} options.requestSync
  *   Starts a scheduled sync. The store passes it through its actions, which stay the
@@ -162,10 +162,11 @@ export function createSyncScheduler({
         // visibility handler syncs once it is shown again instead of polling
         // in the background.
         if (process.env.IS_CAPACITOR && isAppHidden()) return
-        // Live notifications replace periodic downloads, but failed uploads
-        // and reminders awaiting permission still need a retry.
+        // Live notifications replace periodic downloads, but failed uploads,
+        // unshared deletions and reminders awaiting permission still need a retry.
         const syncState = getSyncState()
         const retryPending = syncState.syncServerStatus === 'error' ||
+          syncState.syncServerDeletionMarksPending ||
           (syncState.syncServerLiveRemindersPending &&
             isSyncReasonEnabled(settings, 'liveReminders'))
         if (!connected || retryPending) {

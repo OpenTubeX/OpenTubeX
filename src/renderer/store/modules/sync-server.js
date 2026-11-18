@@ -223,6 +223,8 @@ const state = {
   syncServerWatchStatsSupported: null,
   syncServerLiveRemindersSupported: null,
   syncServerLiveRemindersPending: false,
+  /** Whether this device has deletions it failed to share with other devices */
+  syncServerDeletionMarksPending: false,
   syncServerNotificationDismissalsSupported: null,
   syncServerSessionExpired: false,
   syncServerOtherDeviceSessions: [],
@@ -920,6 +922,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         // A cursor also changes for our own uploads and device messages. Avoid
         // merging every collection again when its revision is already cached.
         if (remoteOnly && context.state.syncServerStatus !== 'error' && !manifest.legacy_data && !legacyEncrypted?.payload &&
+            !(capabilities.sync_deletions === 1 && unsentSyncDeletionMarks.read().length > 0) &&
             downloadCollections.every(collection => collectionCache.isSynced(
               collection, manifest.collections.find(entry => entry.collection === collection)?.revision ?? 0
             ))) return { unchanged: true }
@@ -1026,6 +1029,8 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           // The decisions go once this sync succeeds, so the next ones share the marks.
           if (shared) unsentSyncDeletionMarks.remove(unsent)
           else unsentSyncDeletionMarks.add(deletions, includeKey)
+          // Live sync replaces periodic syncs, which then still retry these.
+          commit('setSyncServerDeletionMarksPending', unsentSyncDeletionMarks.read().length > 0)
         }
         for (const collection of encryptedCollections.upload) {
           if (skippedCollections.has(collection)) continue
@@ -1325,6 +1330,7 @@ const actions = {
     commit('setSyncServerWatchStatsSupported', null)
     commit('setSyncServerLiveRemindersSupported', null)
     commit('setSyncServerLiveRemindersPending', false)
+    commit('setSyncServerDeletionMarksPending', false)
     commit('setSyncServerNotificationDismissalsSupported', null)
     commit('setSyncedWatchStats', [])
     clearSyncServerDevices(commit)
@@ -2227,6 +2233,7 @@ const actions = {
     commit('setSyncServerWatchStatsSupported', null)
     commit('setSyncServerLiveRemindersSupported', null)
     commit('setSyncServerLiveRemindersPending', false)
+    commit('setSyncServerDeletionMarksPending', false)
     commit('setSyncServerNotificationDismissalsSupported', null)
     commit('setSyncedWatchStats', [])
     clearSyncServerDevices(commit)
@@ -2329,6 +2336,9 @@ const mutations = {
   },
   setSyncServerLiveRemindersPending(state, pending) {
     state.syncServerLiveRemindersPending = pending
+  },
+  setSyncServerDeletionMarksPending(state, pending) {
+    state.syncServerDeletionMarksPending = pending
   },
   setSyncServerOidcPending(state, kind) {
     state.syncServerOidcPending = kind

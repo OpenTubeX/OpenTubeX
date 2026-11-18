@@ -551,7 +551,7 @@ test('periodic fallback resumes after a live disconnect', async t => {
   assert.equal(f.calls.length, 1)
 })
 
-test('periodic fallback retries failed uploads despite a healthy live connection and recent sync', async t => {
+test('periodic fallback retries failed uploads and unshared deletions despite a healthy live connection and recent sync', async t => {
   const f = await schedulingFixture(t)
   f.liveConnection.setConnected(true)
   f.context.rootState.syncServer.syncServerStatus = 'error'
@@ -561,6 +561,12 @@ test('periodic fallback retries failed uploads despite a healthy live connection
   f.context.rootState.settings.syncServerLastSyncAt = Date.now()
   await f.tick(1000)
   assert.equal(f.calls.length, 1)
+
+  // Deletions the last sync failed to share retry the same way.
+  f.context.rootState.syncServer.syncServerStatus = 'success'
+  f.context.rootState.syncServer.syncServerDeletionMarksPending = true
+  await f.tick(AUTO_SYNC_INTERVAL_MS)
+  assert.equal(f.calls.length, 2)
 })
 
 test('a due edit waits for session deletion to release the sync lock', async t => {

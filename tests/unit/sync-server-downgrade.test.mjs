@@ -1036,12 +1036,15 @@ test('a failed transfer of the shared deletions does not stop the sync, and a la
   assert.equal(deleting.context.state.syncServerStatus, 'success')
   assert.equal(collections.get('subscriptions').revision, 2)
   assert.equal(collections.has('syncDeletions'), false)
+  assert.equal(deleting.context.state.syncServerDeletionMarksPending, true)
 
-  // The server recovers before the next sync of the deleting device.
+  // The server recovers before the next sync of the deleting device. A check
+  // for remote changes, which live sync runs, shares them too.
   marksAvailable = true
-  await deleting.actions.syncWithSyncServer(deleting.context)
+  await deleting.actions.syncWithSyncServer(deleting.context, { automatic: true, remoteOnly: true })
   assert.equal(collections.has('syncDeletions'), true)
   assert.equal(unsentMarks.read().length, 0)
+  assert.equal(deleting.context.state.syncServerDeletionMarksPending, false)
 
   // A device that still had the channels did not see the deletions as data loss.
   collections.set('subscriptions', { revision: 3, payload: await privacy.encryptSyncDocument([], key, salt) })

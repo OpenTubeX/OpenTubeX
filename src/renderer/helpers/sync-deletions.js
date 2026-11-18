@@ -36,10 +36,12 @@ const STORAGE_KEY = 'opentubex.sync-deletion-decisions'
 export function createSyncDeletionDecisions(storage = null) {
   /** @type {Map<string, { confirmed: Set<string>, kept: Set<string> }>} */
   let decisions = new Map()
+  // After a failed save, the storage misses the latest decisions.
+  let unsaved = false
 
   // Read before each change, because another window may have changed them.
   function load() {
-    if (!storage) return
+    if (!storage || unsaved) return
     try {
       const saved = JSON.parse(storage.getItem(STORAGE_KEY) ?? '{}')
       decisions = new Map(Object.entries(saved).map(([key, value]) => [key, {
@@ -56,8 +58,10 @@ export function createSyncDeletionDecisions(storage = null) {
     try {
       if (decisions.size === 0) storage.removeItem(STORAGE_KEY)
       else storage.setItem(STORAGE_KEY, JSON.stringify(snapshotOf(decisions)))
+      unsaved = false
     } catch (error) {
       // They still apply to syncs in this window.
+      unsaved = true
       console.error('Failed to save the sync deletion decisions', error)
     }
   }
@@ -341,9 +345,11 @@ const UNSENT_MARKS_STORAGE_KEY = 'opentubex.sync-deletion-marks-unsent'
 export function createUnsentSyncDeletionMarks(storage = null) {
   /** @type {SyncDeletionMark[]} */
   let memory = []
+  // After a failed save, the storage misses the latest marks.
+  let unsaved = false
 
   function read() {
-    if (!storage) return readSyncDeletionMarks(memory)
+    if (!storage || unsaved) return readSyncDeletionMarks(memory)
     try {
       return readSyncDeletionMarks(JSON.parse(storage.getItem(UNSENT_MARKS_STORAGE_KEY) ?? '[]'))
     } catch (error) {
@@ -359,7 +365,10 @@ export function createUnsentSyncDeletionMarks(storage = null) {
     try {
       if (marks.length === 0) storage.removeItem(UNSENT_MARKS_STORAGE_KEY)
       else storage.setItem(UNSENT_MARKS_STORAGE_KEY, JSON.stringify(marks))
+      unsaved = false
     } catch (error) {
+      // They are still shared from this window.
+      unsaved = true
       console.error('Failed to save the unsent sync deletions', error)
     }
   }

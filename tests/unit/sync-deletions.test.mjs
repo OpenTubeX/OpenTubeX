@@ -4,6 +4,7 @@ import test from 'node:test'
 import {
   addSyncDeletionMarks,
   createSyncDeletionDecisions,
+  createUnsentSyncDeletionMarks,
   readSyncDeletionMarks,
   syncDeletionKey,
   trackLocalSyncDeletions,
@@ -67,6 +68,26 @@ test('decisions survive a restart and are shared by every window', () => {
   otherWindow.release(used)
   assert.deepEqual(createSyncDeletionDecisions(storage).snapshot(), {})
   assert.equal(values.size, 0)
+})
+
+test('decisions and unsent marks stay in memory when the storage is full', () => {
+  // Older values the window can still read, but not replace.
+  const values = new Map([
+    ['opentubex.sync-deletion-decisions', '{}'],
+    ['opentubex.sync-deletion-marks-unsent', '[]'],
+  ])
+  const storage = {
+    getItem: key => values.get(key) ?? null,
+    setItem: () => { throw new Error('QuotaExceededError') },
+    removeItem: key => values.delete(key),
+  }
+  const decisions = createSyncDeletionDecisions(storage)
+  decisions.confirm('history', ['a'])
+  assert.deepEqual(decisions.snapshot(), { history: { confirmed: ['a'], kept: [] } })
+
+  const unsent = createUnsentSyncDeletionMarks(storage)
+  unsent.add(decisions.snapshot(), () => true)
+  assert.deepEqual(unsent.read().map(mark => mark.ids), [['a']])
 })
 
 test('another device\'s deletions apply without asking only to items the server lost', () => {
