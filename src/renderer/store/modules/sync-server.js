@@ -70,6 +70,7 @@ import {
   readSyncDeletionMarks,
   syncDeletionKey,
   syncDeletions,
+  unsentSyncDeletionMarks,
   withRemoteSyncDeletions,
 } from '../../helpers/sync-deletions.js'
 import {
@@ -607,16 +608,15 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
    * Shares this device's confirmed deletions before uploading them, so other
    * devices apply them without asking.
    * @param {{ revision: number, data: unknown }} marks
-   * @param {string[]} enabledCollections
+   * @param {import('../../helpers/sync-deletions.js').SyncDeletionMark[]} unsent
+   * @param {(key: string) => boolean} includeKey
+   * @returns {Promise<true>}
    */
-  async function uploadDeletionMarks({ revision, data }, enabledCollections) {
-    const includeKey = key => {
-      const collection = key.split(':', 1)[0]
-      return enabledCollections.includes(DELETION_MARK_STAGES[collection] ?? collection)
-    }
+  async function uploadDeletionMarks({ revision, data }, unsent, includeKey) {
     for (let attempt = 0; ; attempt++) {
-      const marks = addSyncDeletionMarks(readSyncDeletionMarks(data), deletions, { includeKey })
-      if (!marks) return
+      const known = [...readSyncDeletionMarks(data), ...unsent]
+      const marks = addSyncDeletionMarks(known, deletions, { includeKey }) ?? (unsent.length > 0 ? known : null)
+      if (!marks) return true
       assertSyncStillActive()
       startProgress('upload')
       try {
@@ -626,7 +626,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           await encryptSyncDocument(marks, settings.syncServerPrivacyKey, settings.syncServerPrivacySalt)
         )
         collectionCache.put(SYNC_DELETION_MARKS_COLLECTION, saved.revision, marks, cacheIdentity)
-        return
+        return true
       } catch (error) {
         if (error.status !== 409 || attempt === ENCRYPTED_SYNC_RETRIES - 1) throw error
         ;({ revision, data } = await readSyncCollection(
@@ -989,6 +989,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         remote,
         enabled: enabledCollections,
         upload: uploadCollections,
+        shareDeletions: capabilities.sync_deletions === 1,
         deletionMarks,
       }
     }
@@ -1014,8 +1015,17 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
 
     if (encryptedCollections) {
       await runStage('upload', async () => {
-        if (encryptedCollections.deletionMarks) {
-          await tryDeletionMarks(() => uploadDeletionMarks(encryptedCollections.deletionMarks, encryptedCollections.enabled))
+        if (encryptedCollections.shareDeletions) {
+          const includeKey = key => {
+            const collection = key.split(':', 1)[0]
+            return encryptedCollections.enabled.includes(DELETION_MARK_STAGES[collection] ?? collection)
+          }
+          const unsent = unsentSyncDeletionMarks.read()
+          const { deletionMarks } = encryptedCollections
+          const shared = deletionMarks && await tryDeletionMarks(() => uploadDeletionMarks(deletionMarks, unsent, includeKey))
+          // The decisions go once this sync succeeds, so the next ones share the marks.
+          if (shared) unsentSyncDeletionMarks.remove(unsent)
+          else unsentSyncDeletionMarks.add(deletions, includeKey)
         }
         for (const collection of encryptedCollections.upload) {
           if (skippedCollections.has(collection)) continue
@@ -1933,6 +1943,7 @@ const actions = {
     commit('setSyncServerOtherDeviceSessions', [])
     commit('setSyncServerPendingDeletion', null)
     syncDeletions.clear()
+    unsentSyncDeletionMarks.clear()
   },
 
   async deleteSyncServerAccount({ commit, dispatch, rootState }, password) {

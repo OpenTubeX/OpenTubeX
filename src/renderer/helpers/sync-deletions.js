@@ -330,3 +330,64 @@ export function addSyncDeletionMarks(marks, decisions, { includeKey = () => true
     .filter(mark => mark.ids.length > 0)
   return [...kept, ...added]
 }
+
+const UNSENT_MARKS_STORAGE_KEY = 'opentubex.sync-deletion-marks-unsent'
+
+/**
+ * Confirmed deletions a sync failed to share. Their decisions go once the sync
+ * succeeds, so the next syncs share these until they would have expired.
+ * @param {SyncDeletionStorage | null} [storage]
+ */
+export function createUnsentSyncDeletionMarks(storage = null) {
+  /** @type {SyncDeletionMark[]} */
+  let memory = []
+
+  function read() {
+    if (!storage) return readSyncDeletionMarks(memory)
+    try {
+      return readSyncDeletionMarks(JSON.parse(storage.getItem(UNSENT_MARKS_STORAGE_KEY) ?? '[]'))
+    } catch (error) {
+      console.error('Failed to read the unsent sync deletions', error)
+      return []
+    }
+  }
+
+  /** @param {SyncDeletionMark[]} marks */
+  function write(marks) {
+    memory = marks
+    if (!storage) return
+    try {
+      if (marks.length === 0) storage.removeItem(UNSENT_MARKS_STORAGE_KEY)
+      else storage.setItem(UNSENT_MARKS_STORAGE_KEY, JSON.stringify(marks))
+    } catch (error) {
+      console.error('Failed to save the unsent sync deletions', error)
+    }
+  }
+
+  return {
+    read,
+
+    /**
+     * @param {Record<string, SyncDeletionDecision>} decisions
+     * @param {(key: string) => boolean} includeKey
+     */
+    add(decisions, includeKey) {
+      const marks = addSyncDeletionMarks(read(), decisions, { includeKey })
+      if (marks) write(marks)
+    },
+
+    /** @param {SyncDeletionMark[]} shared Marks from {@link read} that another sync shared */
+    remove(shared) {
+      if (shared.length === 0) return
+      write(read().filter(mark => !shared.some(({ key, at }) => key === mark.key && at === mark.at)))
+    },
+
+    clear() {
+      write([])
+    },
+  }
+}
+
+export const unsentSyncDeletionMarks = createUnsentSyncDeletionMarks(
+  typeof localStorage === 'undefined' ? null : localStorage
+)
