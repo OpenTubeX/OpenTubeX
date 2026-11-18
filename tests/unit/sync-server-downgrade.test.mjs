@@ -1204,27 +1204,40 @@ test('reconnect sync includes offline changes even when the last sync was recent
   assert.equal(options?.skipIfRecent, false)
 })
 
-test('the Android background job rechecks a connection regained while hidden and uploads offline edits', async () => {
-  const f = fixture({}, {
-    encrypted: true,
-    connectionState: 'offline',
-    browser: true,
-    // Android blocked the hidden app's check when the connection returned; the job has network access.
-    checkConnection: async () => {
+for (const restored of ['by its check', 'just before it ran']) {
+  test(`the Android background job waits for the reconnect sync that uploads offline edits when the connection returned ${restored}`, async () => {
+    const restore = () => {
       f.network.state = 'restored'
       f.connectionEvents.dispatchEvent(new CustomEvent('change', { detail: 'restored' }))
-      return true
-    },
+    }
+    let uploaded
+    const f = fixture({}, {
+      encrypted: true,
+      connectionState: 'offline',
+      browser: true,
+      respond: async (url, options) => {
+        if (options.method === 'PUT' && url.endsWith('/encrypted_sync/subscriptions')) {
+          uploaded = await privacy.decryptSyncDocument(JSON.parse(options.body).payload, f.settings.syncServerPrivacyKey)
+        }
+      },
+      // Android blocked the hidden app's check when the connection returned; the job has network access.
+      checkConnection: async () => {
+        restore()
+        return true
+      },
+    })
+    await f.actions.initializeSyncServer(f.context)
+    f.context.rootState.profiles.profileList[0].subscriptions.push({ id: 'offline-channel', name: 'Offline subscription' })
+    if (restored === 'just before it ran') restore()
+    assert.equal(f.periodicTasks.length, 1)
+    await f.periodicTasks[0]()
+    // The job waited for the reconnect's sync instead of starting another one.
+    const syncs = f.dispatched.filter(([action]) => action === 'syncWithSyncServer').map(([, options]) => options)
+    assert.equal(syncs.length, 1)
+    assert.notEqual(syncs[0].remoteOnly, true, 'a remote-only check would skip the edits made offline')
+    assert.deepEqual(uploaded?.map(channel => channel.id), ['private-channel', 'offline-channel'])
   })
-  await f.actions.initializeSyncServer(f.context)
-  assert.equal(f.periodicTasks.length, 1)
-  await f.periodicTasks[0]()
-  // The job waited for the reconnect's sync instead of starting another one.
-  const syncs = f.dispatched.filter(([action]) => action === 'syncWithSyncServer').map(([, options]) => options)
-  assert.equal(syncs.length, 1)
-  assert.equal(syncs[0].remoteOnly, undefined, 'a remote-only check would skip the edits made offline')
-  assert.ok(f.requests.length > 0)
-})
+}
 
 test('a failed reconnect makes the next background sync merge the offline edits', async () => {
   const collections = new Map()
@@ -1266,7 +1279,8 @@ test('a failed reconnect makes the next background sync merge the offline edits'
   f.requests.length = 0
   // The next job only checks the server for changes, which it has none of.
   await f.periodicTasks[0]()
-  assert.ok(f.requests.some(request => request.method === 'PUT' && request.url.endsWith('/encrypted_sync/settings')),
+  const saved = await privacy.decryptSyncDocument(collections.get('settings').payload, f.settings.syncServerPrivacyKey)
+  assert.deepEqual(JSON.parse(saved.find(entry => entry.key === 'channelPlaybackSpeeds').value), { channel: 1.5 },
     'the offline edit is uploaded')
 })
 

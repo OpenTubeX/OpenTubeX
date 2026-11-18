@@ -3,7 +3,7 @@ import { SyncLiveConnectionState, SyncCollectionCache, createSyncActivity, valid
 import i18n from '../../i18n/index'
 import { openExternalLink, showToast, showToastOnAllTabs } from '../../helpers/utils'
 import { isAppHidden } from '../../helpers/appVisibility.js'
-import { isAndroidBackgroundRenderer, onAndroidWindowBlur, onPeriodicBackgroundTask } from '../../helpers/androidBackgroundSync.js'
+import { holdAndroidBackgroundWork, isAndroidBackgroundRenderer, onAndroidWindowBlur, onPeriodicBackgroundTask } from '../../helpers/androidBackgroundSync.js'
 import { checkConnection, connectionEvents, getConnectionState } from '../../helpers/networkRecovery.js'
 import {
   SyncServerClient,
@@ -106,7 +106,7 @@ let eventsSince = ''
 let eventsRefresh = null
 const activeSyncClients = new Set()
 let lifecycleSyncStarted = false
-/** The full sync that the latest reconnect started. */
+/** The full sync that a reconnect started, while it runs. */
 let reconnectSync = null
 let reminderSyncListenerStarted = false
 let notificationSyncListenerStarted = false
@@ -2087,7 +2087,9 @@ const actions = {
           cancelActiveSyncClients()
           dispatch('stopSyncServerLive')
         } else if (detail === 'restored') {
-          reconnectSync = (async () => {
+          // Android freezes a hidden app, which could leave the offline edits unsent.
+          const releaseHold = holdAndroidBackgroundWork()
+          const sync = (async () => {
             try {
               // A reconnect must start a fresh sync after cancellation finishes.
               await scheduler?.waitForActiveSync()
@@ -2098,8 +2100,12 @@ const actions = {
               }
             } catch (error) {
               console.error('Sync server reconnect sync failed', error)
+            } finally {
+              releaseHold()
+              if (reconnectSync === sync) reconnectSync = null
             }
           })()
+          reconnectSync = sync
         }
       })
       // Live notifications stop while the app is hidden; check periodically instead.
@@ -2111,10 +2117,8 @@ const actions = {
         // while hidden still counts as lost until the app is shown. This job runs
         // with network access. A regained connection publishes 'restored', whose
         // full sync uploads the edits made offline; the job waits for it.
-        if (isSyncServerOffline()) {
-          if (await checkConnection() && !isSyncServerOffline()) await reconnectSync
-          return
-        }
+        if (isSyncServerOffline() && (!await checkConnection() || isSyncServerOffline())) return
+        if (reconnectSync) return reconnectSync
         return dispatch('syncWithSyncServer', { skipIfRecent: true, automatic: true, remoteOnly: true })
       })
       // Swiping the app away stops syncing until it opens again, so pending
