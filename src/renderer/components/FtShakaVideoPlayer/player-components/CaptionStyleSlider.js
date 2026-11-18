@@ -9,6 +9,7 @@ import {
   MAX_CAPTION_FONT_SCALE_FACTOR,
   MIN_CAPTION_FONT_SCALE_FACTOR,
 } from '../../../helpers/player/caption-settings'
+import { addSliderMenu, choosePreset, fillSlider } from './sliderMenu'
 
 /**
  * @typedef {{
@@ -45,57 +46,36 @@ export class CaptionStyleSlider extends shaka.ui.TextStyleMenu {
     this.options_ = options
 
     this.button.classList.add(options.buttonClass, 'shaka-tooltip')
-    this.menu.classList.add('ft-caption-style-slider-menu', options.menuClass)
+    this.menu.classList.add(options.menuClass)
 
-    // Shaka's playback speed classes, which style the slider and the presets
-    const sliderSection = document.createElement('div')
-    sliderSection.classList.add('shaka-playback-rate-slider-section')
+    const { value, slider, decreaseButton, increaseButton, presetButtons } = addSliderMenu(this, {
+      step: options.step,
+      presets: options.presets,
+      onStep: delta => this.applyValue_(this.normalize_(this.getSliderValue_() + delta)),
+      onPreset: preset => this.applyValue_(preset),
+    })
     /** @private */
-    this.value_ = document.createElement('div')
-    this.value_.classList.add('shaka-playback-rate-value')
-    const sliderRow = document.createElement('div')
-    sliderRow.classList.add('shaka-playback-rate-slider-row')
-    sliderSection.append(this.value_, sliderRow)
+    this.value_ = value
+    /** @private */
+    this.slider_ = slider
+    /** @private */
+    this.decreaseButton_ = decreaseButton
+    /** @private */
+    this.increaseButton_ = increaseButton
+    /** @private */
+    this.presetButtons_ = presetButtons
 
-    /** @private */
-    this.decreaseButton_ = this.createStepButton_(sliderRow, '−', -options.step)
-    /** @private */
-    this.slider_ = new shaka.ui.RangeElement(
-      sliderRow,
-      controls,
-      ['shaka-playback-rate-slider-container', 'shaka-no-propagation'],
-      ['shaka-playback-rate-slider', 'ft-caption-style-slider']
-    )
-    this.slider_.setRange(options.min, options.max)
-    this.slider_.setStep(options.step)
-    this.slider_.onChange = () => this.updateSlider_(this.slider_.getValue(), this.slider_.getValue())
-    this.slider_.onChangeEnd = () => this.applyValue_(this.slider_.getValue())
+    slider.setRange(options.min, options.max)
+    slider.onChange = () => this.updateSlider_(slider.getValue(), slider.getValue())
+    slider.onChangeEnd = () => this.applyValue_(slider.getValue())
     // The arrow keys change the range natively, which only ends with a change event
-    this.eventManager.listen(this.slider_.bar, 'change', () => this.applyValue_(this.slider_.getValue()))
+    this.eventManager.listen(slider.bar, 'change', () => this.applyValue_(slider.getValue()))
     // Shaka's wheel handling has no end, so it goes through `changeTo` instead, which ends on its own
-    this.eventManager.listen(this.slider_.container, 'wheel', (event) => {
+    this.eventManager.listen(slider.container, 'wheel', (event) => {
       if (event.ctrlKey || event.metaKey) return
       event.preventDefault()
-      this.slider_.changeTo(this.normalize_(this.slider_.getValue() + (event.deltaY > 0 ? -options.step : options.step)))
+      slider.changeTo(this.normalize_(slider.getValue() + (event.deltaY > 0 ? -options.step : options.step)))
     })
-    /** @private */
-    this.increaseButton_ = this.createStepButton_(sliderRow, '+', options.step)
-
-    const presets = document.createElement('div')
-    presets.classList.add('shaka-playback-rate-presets')
-    /** @private @type {HTMLButtonElement[]} */
-    this.presetButtons_ = options.presets.map((value) => {
-      const button = document.createElement('button')
-      button.type = 'button'
-      button.classList.add('shaka-playback-rate-preset-btn')
-      button.setAttribute('role', 'menuitemradio')
-      button.dataset.value = String(value)
-      this.eventManager.listen(button, 'click', () => this.applyValue_(value))
-      presets.appendChild(button)
-      return button
-    })
-
-    this.menu.append(sliderSection, presets)
 
     // After Shaka's listeners, which clear the current value, as its label method is private in Shaka's build
     this.eventManager.listenMulti(
@@ -130,26 +110,6 @@ export class CaptionStyleSlider extends shaka.ui.TextStyleMenu {
       button.textContent = this.format_(Number(button.dataset.value))
     }
     this.updateSelection_()
-  }
-
-  /**
-   * @param {HTMLElement} parent
-   * @param {string} label
-   * @param {number} delta
-   * @returns {HTMLButtonElement}
-   * @private
-   */
-  createStepButton_(parent, label, delta) {
-    const button = document.createElement('button')
-    button.type = 'button'
-    button.classList.add('shaka-playback-rate-step-btn', 'shaka-no-propagation')
-    button.ariaLabel = label
-    button.textContent = label
-    this.eventManager.listen(button, 'click', () => {
-      this.applyValue_(this.normalize_(this.getSliderValue_() + delta))
-    })
-    parent.appendChild(button)
-    return button
   }
 
   /**
@@ -199,11 +159,8 @@ export class CaptionStyleSlider extends shaka.ui.TextStyleMenu {
    * @private
    */
   updateSlider_(value, sliderValue) {
-    const { min, max } = this.options_
     this.value_.textContent = this.format_(value)
-    const percent = (sliderValue - min) / (max - min) * 100
-    const { base, level } = this.controls.getConfig().playbackRateBarColors
-    this.slider_.setBackground(`linear-gradient(to right, ${level} 0%, ${level} ${percent}%, ${base} ${percent}%, ${base} 100%)`)
+    fillSlider(this.slider_, this.controls, sliderValue)
   }
 
   /**
@@ -227,11 +184,7 @@ export class CaptionStyleSlider extends shaka.ui.TextStyleMenu {
     this.currentSelection.textContent = this.format_(value)
     this.decreaseButton_.disabled = sliderValue <= this.options_.min
     this.increaseButton_.disabled = sliderValue >= this.options_.max
-    for (const button of this.presetButtons_) {
-      const chosen = Object.is(Number(button.dataset.value), value)
-      button.ariaChecked = String(chosen)
-      button.classList.toggle('shaka-chosen-item', chosen)
-    }
+    choosePreset(this.presetButtons_, value)
   }
 }
 
