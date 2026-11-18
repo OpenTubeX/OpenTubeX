@@ -78,7 +78,8 @@ test('landscape Shorts options use the space beside the narrow player', async ({
   const resumedBounds = await dialog.boundingBox()
   expect(resumedBounds.width).toBeGreaterThanOrEqual(250)
   expect(resumedBounds.x).toBeGreaterThanOrEqual(playerBounds.x + playerBounds.width + 8)
-  await player.dispatchEvent('mouseleave')
+  // Move the pointer off the top controls it clicked, which keep the controls up while hovered.
+  await page.mouse.move(playerBounds.x + playerBounds.width + 4, playerBounds.y + playerBounds.height / 2)
   await expect(player.locator('.shaka-controls-container')).not.toHaveAttribute('shown')
   await page.evaluate(() => window.$store.dispatch('updateUseQuickPlaybackSpeedBar', false))
   await expect(dialog.locator('.shaka-overflow-menu')).toBeVisible()

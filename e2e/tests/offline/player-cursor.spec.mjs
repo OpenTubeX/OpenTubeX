@@ -35,6 +35,25 @@ test('hides the idle mouse cursor during fullscreen playback', async ({ app, pag
     await expect.poll(cursorAtPointer).toBe('none')
   }
 
+  // A pointer resting on Shaka's seek bar or on our fullscreen actions keeps
+  // the controls and the cursor up past the idle timeout.
+  await page.evaluate(() => window.$store.dispatch('updatePlayingInterfaceHideDelay', 0.5))
+  await expect(player).toHaveAttribute('data-playing-interface-hide-delay', '0.5')
+  for (const target of [player.locator('.shaka-seek-bar-container'), player.locator('.fullscreenCommentsToggle')]) {
+    point.x += 10
+    await page.mouse.move(point.x, point.y)
+    await expect(controls).toHaveAttribute('shown', 'true')
+    const box = await target.boundingBox()
+    const rest = { x: box.x + box.width / 2, y: box.y + box.height / 2 }
+    await page.mouse.move(rest.x, rest.y)
+    await page.waitForTimeout(1500)
+    await expect(controls).toHaveAttribute('shown', 'true')
+    expect(await page.evaluate(({ x, y }) => getComputedStyle(document.elementFromPoint(x, y)).cursor, rest))
+      .not.toBe('none')
+  }
+  await page.mouse.move(point.x, point.y)
+  await expect(controls).not.toHaveAttribute('shown')
+
   await page.keyboard.press('Tab')
   const fullscreenButton = player.locator('.shaka-fullscreen-button')
   await fullscreenButton.focus()
