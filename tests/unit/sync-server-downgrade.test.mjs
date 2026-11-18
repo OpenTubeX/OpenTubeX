@@ -1226,6 +1226,27 @@ test('the Android background job rechecks a connection regained while hidden and
   assert.ok(f.requests.length > 0)
 })
 
+test('a failed reconnect makes the next background sync merge the offline edits', async () => {
+  let serverDown = false
+  const f = fixture({}, {
+    encrypted: true,
+    connectionState: 'offline',
+    browser: true,
+    respond: url => serverDown && url.endsWith('/health') ? new Response('Unavailable', { status: 503 }) : undefined,
+    checkConnection: async () => {
+      f.network.state = 'restored'
+      f.connectionEvents.dispatchEvent(new CustomEvent('change', { detail: 'restored' }))
+      return true
+    },
+  })
+  await f.actions.initializeSyncServer(f.context)
+  serverDown = true
+  await f.periodicTasks[0]()
+  assert.ok(f.context.state.syncServerError)
+  // Remote-only syncs merge again only after a failed sync.
+  assert.equal(f.context.state.syncServerStatus, 'error')
+})
+
 test('disconnect cancels an active sync and reconnect waits for it to settle', async () => {
   let releaseRequest
   let signal

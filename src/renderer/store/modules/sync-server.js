@@ -2190,6 +2190,9 @@ const actions = {
     } catch (error) {
       if (error instanceof SyncServerCancelledError) return
       commit('setSyncServerError', error.message)
+      // Remote-only syncs skip unchanged collections unless the last sync failed,
+      // so this keeps the next background sync from skipping offline edits.
+      commit('setSyncServerStatus', 'error')
       return
     }
 
