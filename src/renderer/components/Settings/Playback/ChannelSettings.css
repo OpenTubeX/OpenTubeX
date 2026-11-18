@@ -10,19 +10,6 @@
   margin-block-end: 1em;
 }
 
-.preferenceToggles {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
-  gap: 1em 2em;
-  margin-block-end: 1em;
-}
-
-@container settings-content (width <= 680px) {
-  .preferenceToggles {
-    justify-items: center;
-  }
-}
-
 .manageButton {
   display: inline-flex;
   align-items: center;

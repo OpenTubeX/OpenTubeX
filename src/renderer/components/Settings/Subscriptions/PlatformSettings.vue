@@ -16,7 +16,7 @@
     <FtFlexBox>
       <div class="autoRefreshInterval">
         <FtSelect
-          :placeholder="t('Settings.Subscription Settings.Platforms.Auto Refresh Interval')"
+          :placeholder="t('Settings.Subscription Settings.Auto Refresh Interval')"
           :value="autoRefreshInterval"
           setting-key="platformFeedAutoRefreshInterval"
           :select-names="autoRefreshIntervalNames"

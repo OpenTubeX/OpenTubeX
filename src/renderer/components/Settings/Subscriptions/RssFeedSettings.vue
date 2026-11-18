@@ -38,7 +38,7 @@
     <FtFlexBox v-if="enableRssFeeds">
       <div class="autoRefreshInterval">
         <FtSelect
-          :placeholder="t('Settings.Subscription Settings.RSS Feeds Auto Refresh Interval')"
+          :placeholder="t('Settings.Subscription Settings.Auto Refresh Interval')"
           :value="autoRefreshInterval"
           setting-key="rssFeedsAutoRefreshInterval"
           :select-names="autoRefreshIntervalNames"

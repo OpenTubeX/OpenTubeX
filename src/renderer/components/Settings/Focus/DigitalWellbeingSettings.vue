@@ -3,7 +3,7 @@
     :title="t('Settings.Distraction Free Settings.Sections.Digital Wellbeing')"
     hide-title
   >
-    <FtFlexBox>
+    <div class="settingsSelectGrid wellbeingSelects">
       <FtSelect
         size-to-content
         :placeholder="t('Settings.Distraction Free Settings.Digital Wellbeing.Grayscale')"
@@ -95,7 +95,7 @@
         :icon="['fas', 'pause']"
         @change="store.dispatch('updateBreakReminderAction', $event)"
       />
-    </FtFlexBox>
+    </div>
     <div class="switchColumnGrid">
       <div class="switchColumn">
         <FtToggleSwitch
@@ -133,7 +133,7 @@
         />
       </div>
     </div>
-    <FtFlexBox>
+    <div class="settingsSelectGrid">
       <FtSelect
         size-to-content
         :placeholder="t('Settings.Distraction Free Settings.Digital Wellbeing.Bedtime Start')"
@@ -154,7 +154,7 @@
         :icon="['fas', 'moon']"
         @change="store.dispatch('updateBedtimeEnd', $event)"
       />
-    </FtFlexBox>
+    </div>
   </FtSettingsSection>
 </template>
 
@@ -165,7 +165,6 @@ import { useI18n } from 'vue-i18n'
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
 import FtSelect from '../../FtSelect/FtSelect.vue'
-import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
 
 import store from '../../../store/index'
 
@@ -225,3 +224,11 @@ function formatIntervalOption(minutes) {
     : t('Settings.Distraction Free Settings.Digital Wellbeing.Every', { duration: formatWholeMinutes(t, minutes) })
 }
 </script>
+
+<style scoped>
+@container settings-content (width > 1100px) {
+  .wellbeingSelects {
+    --settings-select-grid-columns: 4;
+  }
+}
+</style>

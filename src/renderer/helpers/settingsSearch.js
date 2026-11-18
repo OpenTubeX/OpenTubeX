@@ -4,6 +4,7 @@ import { usesInvidiousInstance } from '../../apiBackends.js'
 import {
   SETTINGS_SEARCH_EXCLUDED_MESSAGE_PATHS,
   SETTINGS_SEARCH_SELECT_GROUP_LABELS,
+  SETTINGS_SEARCH_SETTING_KEYS,
   SETTINGS_SEARCH_SOURCES,
 } from './settings-search-config.js'
 import { isLiteBuild } from './ytDlpCapabilities.js'
@@ -42,12 +43,16 @@ export function createSettingsSearchIndex(options) {
     const matches = [
       { label: section.title },
       { label: section.description },
-      ...sources.flatMap(source => getSettingsSearchSourceValues(source, options).map(label => ({
-        label,
-        ...(source.tab === undefined ? {} : { tab: source.tab }),
-        ...(source.subpage === undefined ? {} : { subpage: source.subpage }),
-        ...(source.subpageTab === undefined ? {} : { subpageTab: source.subpageTab })
-      }))),
+      ...sources.flatMap((source) => {
+        const settingKeys = getSettingsSearchSettingKeys(source, tm)
+        return getSettingsSearchSourceValues(source, options).map(label => ({
+          label,
+          ...(source.tab === undefined ? {} : { tab: source.tab }),
+          ...(source.subpage === undefined ? {} : { subpage: source.subpage }),
+          ...(source.subpageTab === undefined ? {} : { subpageTab: source.subpageTab }),
+          ...(settingKeys.has(label) ? { settingKey: settingKeys.get(label) } : {})
+        }))
+      }),
       ...(extraValues[section.type] ?? []).map(label => ({ label }))
     ]
     return [section.type, matches.filter((match, index) => (
@@ -58,6 +63,11 @@ export function createSettingsSearchIndex(options) {
 
 export function findSettingsSearchTab(match) {
   return match.tab
+}
+
+function getSettingsSearchSettingKeys(source, tm) {
+  return new Map(Object.entries(SETTINGS_SEARCH_SETTING_KEYS[source.type] ?? {})
+    .flatMap(([key, settingKey]) => flattenSettingsSearchMessageValues(tm(key)).map(label => [label, settingKey])))
 }
 
 function getSettingsSearchSourceValues(source, options) {
@@ -335,6 +345,7 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
       return true
     }
     return store.getters.getEnableChannelSettings && [
+      'Auto Save Changes',
       'Auto Save Playback Speed',
       'Auto Save Video Quality',
       'Auto Save Subtitles State',

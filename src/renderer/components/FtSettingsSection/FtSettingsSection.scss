@@ -100,7 +100,7 @@
 
 .sectionBody > :deep(:is(h3, h4)),
 .sectionBody :deep(.groupTitle) {
-  color: var(--secondary-text-color);
+  color: var(--primary-text-color);
   font-weight: 600;
   text-align: center;
 }
@@ -217,8 +217,34 @@
   max-inline-size: calc(100% - max(0px, var(--select-fitted-balance-space)));
 }
 
+/* Selects in shared columns, each column as wide as its widest select, so
+   their fields line up across rows. Set --settings-select-grid-columns for
+   more than two columns. */
+:deep(.settingsSelectGrid) {
+  display: grid;
+  grid-template-columns: repeat(var(--settings-select-grid-columns, 2), minmax(0, max-content));
+  justify-content: center;
+  column-gap: 16px;
+
+  @container settings-content (width <= 680px) {
+    grid-template-columns: minmax(0, max-content);
+  }
+}
+
+/* Every select keeps room for all of its possible icons, which start right
+   after the field, so the fields in a column end at the same edge. */
+:deep(.settingsSelectGrid > .select) {
+  --select-indicator-space: calc(8px + 32px + 22px + 22px);
+
+  box-sizing: border-box;
+  inline-size: auto;
+  max-inline-size: 100%;
+  margin-inline: 0;
+}
+
 /* Layouts that line their selects up with other fields place them themselves. */
 .sectionBody :deep(:is(.select:only-child, .commentSettings > .select):not(
+  .settingsSelectGrid > *,
   .generalSelectGrid > *,
   .switchColumn > *,
   .externalSoftwareToolControls > *,
