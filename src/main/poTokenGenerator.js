@@ -1,4 +1,4 @@
-import { session, WebContentsView } from 'electron'
+import { app, BaseWindow, BrowserWindow, session, WebContentsView } from 'electron'
 import { readFile } from 'fs/promises'
 import { join } from 'path'
 
@@ -102,6 +102,9 @@ let cachedScript
 
 async function sharedInit() {
   // setup session
+
+  BrowserWindow.getAllWindows().forEach(closeViewsWithLastWindow)
+  app.on('browser-window-created', (_event, window) => closeViewsWithLastWindow(window))
 
   theSession = session.fromPartition('potoken', { cache: false })
   disableSpellChecker(theSession)
@@ -209,7 +212,11 @@ async function mintPoToken(videoId, context, initialAttestationData, ytConfig, p
  * @returns {Promise<string|null>} `null` when there is no usable attestation
  */
 async function mintFromAttestation(videoId, proxyUrl) {
-  if (attestation && (attestation.proxyUrl !== proxyUrl || Date.now() >= attestation.expiresAt)) {
+  if (attestation && (
+    attestation.proxyUrl !== proxyUrl ||
+    Date.now() >= attestation.expiresAt ||
+    !isOpen(attestation.view)
+  )) {
     await discardAttestation()
   }
   if (!attestation) return null
@@ -230,9 +237,7 @@ async function mintFromAttestation(videoId, proxyUrl) {
 async function discardAttestation() {
   if (!attestation) return
   clearTimeout(attestation.expiryTimer)
-  if (!attestation.view.webContents.isDestroyed()) {
-    attestation.view.webContents.close({ waitForBeforeUnload: false })
-  }
+  closeView(attestation.view)
   attestation = null
   await cleanupSession()
 }
@@ -254,6 +259,11 @@ async function attest(videoId, context, initialAttestationData, ytConfig, proxyU
     // system route this session starts with.
     await theSession.setProxy(proxyUrl ? { proxyRules: proxyUrl } : { mode: 'system' })
 
+    // Nothing would close the view after the last app window closed
+    if (BrowserWindow.getAllWindows().length === 0) {
+      throw new Error('No app window needs a PO token')
+    }
+
     webContentsView = new WebContentsView({
       webPreferences: {
         backgroundThrottling: false,
@@ -267,10 +277,7 @@ async function attest(videoId, context, initialAttestationData, ytConfig, proxyU
       }
     })
 
-    // Electron's isFocused() dereferences the native view, which an offscreen
-    // view outside a window lacks, so the main process segfaults. Every menu
-    // accelerator asks all web contents whether they're focused.
-    webContentsView.webContents.isFocused = () => false
+    hostOffscreenView(webContentsView)
 
     webContentsView.webContents.setWindowOpenHandler(() => ({ action: 'deny' }))
 
@@ -332,10 +339,57 @@ async function attest(videoId, context, initialAttestationData, ytConfig, proxyU
     return token
   } finally {
     if (webContentsView && !keepView) {
-      webContentsView.webContents.close({ waitForBeforeUnload: false })
+      closeView(webContentsView)
       await cleanupSession()
     }
   }
+}
+
+/** The BotGuard views that are still open */
+const openViews = new Set()
+
+/**
+ * Electron asks every web contents whether it's focused when a native menu
+ * item or shortcut activates, and dereferences the native view to answer.
+ * Offscreen views only have the one of their window, so the main process
+ * crashed without one. A hidden window gives the view one.
+ * @param {WebContentsView} view
+ */
+function hostOffscreenView(view) {
+  const host = new BaseWindow({ show: false, width: 1920, height: 1080 })
+  host.contentView.addChildView(view)
+  openViews.add(view)
+  view.webContents.once('destroyed', () => {
+    openViews.delete(view)
+    if (!host.isDestroyed()) host.destroy()
+  })
+  // Quitting closes every window, even if the quit is then cancelled
+  host.once('closed', () => closeView(view))
+}
+
+/**
+ * Electron drops the web contents of a view once they're destroyed.
+ * @param {WebContentsView} view
+ */
+function isOpen(view) {
+  return view.webContents?.isDestroyed() === false
+}
+
+/** @param {WebContentsView} view */
+function closeView(view) {
+  if (isOpen(view)) view.webContents.close({ waitForBeforeUnload: false })
+}
+
+/**
+ * The hidden windows would keep window-all-closed from firing, so the views
+ * close with the last app window.
+ * @param {BrowserWindow} window
+ */
+function closeViewsWithLastWindow(window) {
+  window.once('closed', () => {
+    if (BrowserWindow.getAllWindows().some(other => other !== window && !other.isDestroyed())) return
+    openViews.forEach(closeView)
+  })
 }
 
 async function cleanupSession() {

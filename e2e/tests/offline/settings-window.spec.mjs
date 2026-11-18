@@ -175,6 +175,33 @@ test.describe('settings', () => {
     await expect(settingsWindow).toBeHidden()
   })
 
+  test('opens with Ctrl+, while BotGuard runs', async ({ app, page }) => {
+    // Hold the BotGuard script's requests, so its offscreen view stays open
+    await app.electronApp.evaluate(({ session }) => {
+      session.fromPartition('potoken', { cache: false }).protocol.handle('https', () => new Promise(() => {}))
+    })
+    const attestationData = JSON.stringify({
+      R: { bgChallenge: { interpreterUrl: { privateDoNotAccessOrElseTrustedResourceUrlWrappedValue: 'https://www.youtube.com/s/e2e/botguard.js' } } }
+    })
+    await page.evaluate(data => {
+      window.ftElectron.generatePoToken('jNQXAC9IVRw', '{}', data, '{}').catch(() => {})
+    }, attestationData)
+    await expect.poll(() => app.electronApp.evaluate(({ webContents }) => webContents.getAllWebContents().some(contents => (
+      contents.getURL().startsWith('data:text/html') && !contents.isLoading()
+    )))).toBe(true)
+
+    // A real key press runs Electron's native menu accelerator, unlike a menu item click
+    await app.electronApp.evaluate(({ webContents }, url) => {
+      const contents = webContents.getAllWebContents().find(contents => contents.getURL() === url)
+      const modifiers = [process.platform === 'darwin' ? 'meta' : 'control']
+      contents.focus()
+      contents.sendInputEvent({ type: 'keyDown', keyCode: ',', modifiers })
+      contents.sendInputEvent({ type: 'keyUp', keyCode: ',', modifiers })
+    }, page.url())
+
+    await expect(page.locator('.settingsWindow')).toBeVisible()
+  })
+
   test('preserves category scroll when Settings is toggled but resets it when switching categories', async ({ app, page }) => {
     await page.evaluate(() => {
       const store = window.$store
