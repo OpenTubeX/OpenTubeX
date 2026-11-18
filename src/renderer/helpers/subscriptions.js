@@ -621,21 +621,18 @@ function includesSubscriptionCollaborations(backend) {
 }
 
 /**
- * Adds the collaborations listed on the channel's Home tab. Without them, the
- * cache write keeps the previously loaded ones.
+ * Loads the collaborations listed on the channel's Home tab, or null when that
+ * fails, so the cache write keeps the previously loaded ones.
  * @param {string} channelId
- * @param {Record<string, any>[]} videos
+ * @returns {Promise<Record<string, any>[] | null>}
  */
-async function addSubscriptionCollaborations(channelId, videos) {
-  let collaborations
+async function getSubscriptionCollaborations(channelId) {
   try {
-    collaborations = await getLocalChannelCollaborations(channelId, activeRefresh?.controller.signal)
+    return await getLocalChannelCollaborations(channelId, activeRefresh?.controller.signal)
   } catch (error) {
     if (!activeRefresh?.controller.signal.aborted) console.warn(`Failed to load the collaborations of ${channelId}:`, error)
-    return videos
+    return null
   }
-  const videoIds = new Set(videos.map(video => video.videoId))
-  return videos.concat(collaborations.filter(video => !videoIds.has(video.videoId)))
 }
 
 /**
@@ -1200,9 +1197,9 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
         }
       }
 
-      if (videos != null && loadCollaborations) {
-        videos = await addSubscriptionCollaborations(channel.id, videos)
-      }
+      const collaborations = videos != null && loadCollaborations
+        ? await getSubscriptionCollaborations(channel.id)
+        : null
 
       channelCount++
       setSubscriptionRefreshProgress((channelCount / subscriptionList.length) * 100)
@@ -1210,16 +1207,24 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
       if (videos != null) {
         activeRefresh.errors.delete(channel.id)
         const previousCache = store.getters.getVideoCache[channel.id]
-        videos = reconcileFetchedSubscriptionEntries(
-          videos,
-          previousCache?.videos,
+        // New entries are recognized by their position before cached ones,
+        // so uploads and collaborations are reconciled as separate lists
+        const reconcile = (entries, isCollaboration) => reconcileFetchedSubscriptionEntries(
+          entries,
+          previousCache?.videos?.filter(video => (video.isCollaboration === true) === isCollaboration),
           'videoId',
           previousCache?.timestamp,
           store.getters.getHistoryCacheById
         )
+        videos = reconcile(videos, false)
+        if (collaborations !== null) {
+          const videoIds = new Set(videos.map(video => video.videoId))
+          videos = videos.concat(reconcile(collaborations.filter(video => !videoIds.has(video.videoId)), true))
+        }
         await store.dispatch('updateSubscriptionVideosCacheByChannel', {
           channelId: channel.id,
           videos,
+          collaborationsFetched: collaborations !== null,
           // Unchanged feeds still need their full fetch once they are old enough
           ...(unchangedVideos !== null && previousCache ? { timestamp: previousCache.timestamp } : {})
         })

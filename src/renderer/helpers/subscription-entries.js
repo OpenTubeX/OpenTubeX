@@ -385,18 +385,17 @@ export function applyRssPremiereVerdict(video, upcomingInfo) {
 
 /**
  * Collaborations come from an extra request that only foreground video
- * refreshes make, so other cache writes keep the cached ones. Without the
- * setting, they are dropped.
+ * refreshes make, so cache writes without them keep the cached ones. Without
+ * the setting, they are dropped.
  * @param {object[]} videos
  * @param {object[] | null | undefined} previousVideos
- * @param {boolean} includeCollaborations
+ * @param {{ include: boolean, fetched: boolean }} collaborations whether the setting is on, and whether `videos` has the current ones
  */
-export function keepCachedSubscriptionCollaborations(videos, previousVideos, includeCollaborations) {
-  const hasCollaborations = videos.some(video => video.isCollaboration === true)
-  if (!includeCollaborations) {
-    return hasCollaborations ? videos.filter(video => video.isCollaboration !== true) : videos
+export function keepCachedSubscriptionCollaborations(videos, previousVideos, { include, fetched }) {
+  if (!include) {
+    return videos.some(video => video.isCollaboration === true) ? videos.filter(video => video.isCollaboration !== true) : videos
   }
-  if (hasCollaborations || !previousVideos?.some(video => video.isCollaboration === true)) return videos
+  if (fetched || !previousVideos?.some(video => video.isCollaboration === true)) return videos
 
   const videoIds = new Set(videos.map(video => video.videoId))
   return videos.concat(previousVideos.filter(video => video.isCollaboration === true && !videoIds.has(video.videoId)))

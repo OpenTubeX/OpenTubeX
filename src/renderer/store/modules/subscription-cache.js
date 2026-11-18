@@ -200,10 +200,13 @@ const actions = {
     }
   },
 
-  async updateSubscriptionVideosCacheByChannel({ commit, state, rootGetters }, { channelId, videos, timestamp = new Date() }) {
+  async updateSubscriptionVideosCacheByChannel({ commit, state, rootGetters }, { channelId, videos, collaborationsFetched = false, timestamp = new Date() }) {
     const previousCache = state.videoCache[channelId]
     videos = ensureSubscriptionFeedEntryState(
-      keepCachedSubscriptionCollaborations(videos, previousCache?.videos, rootGetters.getIncludeSubscriptionCollaborations === true),
+      keepCachedSubscriptionCollaborations(videos, previousCache?.videos, {
+        include: rootGetters.getIncludeSubscriptionCollaborations === true,
+        fetched: collaborationsFetched
+      }),
       previousCache?.videos,
       'videoId',
       previousCache?.timestamp,

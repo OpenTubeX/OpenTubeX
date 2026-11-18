@@ -475,9 +475,11 @@ test('cache writes without collaborations keep the cached ones, and drop them on
   const upload = { videoId: 'upload' }
   const collaboration = { videoId: 'collaboration', isCollaboration: true }
   const fresh = { videoId: 'fresh-collaboration', isCollaboration: true }
+  const on = { include: true, fetched: false }
 
-  assert.deepEqual(keepCachedSubscriptionCollaborations([upload], [upload, collaboration], true), [upload, collaboration])
-  assert.deepEqual(keepCachedSubscriptionCollaborations([upload, fresh], [upload, collaboration], true), [upload, fresh])
-  assert.deepEqual(keepCachedSubscriptionCollaborations([{ videoId: 'collaboration' }], [collaboration], true), [{ videoId: 'collaboration' }])
-  assert.deepEqual(keepCachedSubscriptionCollaborations([upload, fresh], [upload, collaboration], false), [upload])
+  assert.deepEqual(keepCachedSubscriptionCollaborations([upload], [upload, collaboration], on), [upload, collaboration])
+  assert.deepEqual(keepCachedSubscriptionCollaborations([{ videoId: 'collaboration' }], [collaboration], on), [{ videoId: 'collaboration' }])
+  assert.deepEqual(keepCachedSubscriptionCollaborations([upload, fresh], [upload, collaboration], { include: true, fetched: true }), [upload, fresh])
+  assert.deepEqual(keepCachedSubscriptionCollaborations([upload], [upload, collaboration], { include: true, fetched: true }), [upload], 'a fetch without collaborations clears them')
+  assert.deepEqual(keepCachedSubscriptionCollaborations([upload, fresh], [upload, collaboration], { include: false, fetched: true }), [upload])
 })

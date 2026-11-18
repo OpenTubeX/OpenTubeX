@@ -152,7 +152,10 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
     getLocalChannelVideos: async url => { if (scraperError) throw scraperError; return fetchLocal(url) },
     getLocalChannelCollaborations: async id => {
       requests.push(`collaborations:${id}`)
-      return [{ videoId: `collaboration-${id}`, authorId: 'UC-uploader', isCollaboration: true }]
+      return [
+        { videoId: `collaboration-${id}`, authorId: 'UC-uploader', isCollaboration: true, published: Date.now() - 60_000 },
+        { videoId: 'old-collaboration', authorId: 'UC-uploader', isCollaboration: true, published: Date.now() - 86_400_000 }
+      ]
     },
     getLocalChannelLiveStreams: async url => { if (scraperError) throw scraperError; return fetchLocal(url) },
     getInvidiousChannelVideos: async url => { if (scraperError) throw scraperError; return fetchInvidious(url) },
@@ -303,7 +306,10 @@ test('with collaborations included, unchanged feeds still load them and keep the
   assert.equal(app.requests.includes('collaborations:UC0'), true)
   assert.equal(app.requests.includes('collaborations:UC1'), true)
   const write = app.writes.find(write => write.value?.channelId === 'UC0').value
-  assert.deepEqual(write.videos.map(video => video.videoId), ['known0', 'collaboration-UC0'])
+  assert.deepEqual(write.videos.map(video => video.videoId), ['known0', 'collaboration-UC0', 'old-collaboration'])
+  assert.equal(write.videos[1].isNewInSubscriptionFeed, true, 'a collaboration published since the last fetch is new')
+  assert.equal(write.videos[2].isNewInSubscriptionFeed, false)
+  assert.equal(write.collaborationsFetched, true)
   assert.equal(write.timestamp, timestamp)
 })
 
