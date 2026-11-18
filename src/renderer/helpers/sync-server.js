@@ -1567,7 +1567,17 @@ function separateProfileMetadata(entry) {
  * too, so a deletion from another device always asks first.
  * @returns {Promise<Record<string, ReturnType<typeof separateProfileMetadata>>>} The baseline
  */
+// A separate profile edited or added in another window while the server
+// responds would be overwritten, so merge again.
 export async function syncSeparateProfiles(client, store, previous = {}, options = {}) {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const result = await mergeSeparateProfiles(client, store, previous, options)
+    if (result !== PROFILES_CHANGED) return result
+  }
+  throw new Error('Profiles changed during sync. Try again.')
+}
+
+async function mergeSeparateProfiles(client, store, previous, options) {
   const profiles = store.state.profiles.profileList
   const local = profiles.filter(profile => profile.separate === true)
   const localById = mapBy(local, profile => profile._id)
@@ -1624,14 +1634,11 @@ export async function syncSeparateProfiles(client, store, previous = {}, options
         subscriptions: [],
         separate: true,
       }
-      if (!await store.dispatch('saveSyncedProfile', { profile, previous: null })) {
-        throw new Error('Profiles changed during sync. Try again.')
-      }
+      if (!await store.dispatch('saveSyncedProfile', { profile, previous: null })) return PROFILES_CHANGED
     } else if (!metadataEquals(separateProfileMetadata(synced), separateProfileMetadata(localEntry))) {
-      const details = { name: synced.name, bgColor: synced.bgColor, textColor: synced.textColor, icon: icon ?? localProfile.icon }
-      if (!await store.dispatch('updateProfileDetails', { profileId: id, details })) {
-        throw new Error('Could not save synced profile')
-      }
+      const savedIcon = icon ?? localProfile.icon
+      const profile = { ...localProfile, name: synced.name, bgColor: synced.bgColor, textColor: synced.textColor, ...(savedIcon ? { icon: savedIcon } : {}) }
+      if (!await store.dispatch('saveSyncedProfile', { profile, previous: localProfile })) return PROFILES_CHANGED
     }
     entries.push(synced)
     next[id] = separateProfileMetadata(synced)

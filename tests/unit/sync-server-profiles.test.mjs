@@ -317,9 +317,10 @@ test('separate profiles sync creates and updates them locally and uploads local 
     state: { profiles: { profileList } },
     dispatch: async (action, value) => {
       dispatched.push(action)
-      if (action === 'saveSyncedProfile') profileList.push(value.profile)
-      else if (action === 'updateProfileDetails') Object.assign(profileList.find(profile => profile._id === value.profileId), value.details)
-      else assert.fail(`Unexpected ${action}`)
+      if (action !== 'saveSyncedProfile') assert.fail(`Unexpected ${action}`)
+      const index = profileList.findIndex(profile => profile._id === value.profile._id)
+      if (index === -1) profileList.push(value.profile)
+      else profileList[index] = value.profile
       return true
     },
   }
@@ -330,7 +331,7 @@ test('separate profiles sync creates and updates them locally and uploads local 
     'edited-there': separateMetadata('edited-there'),
   })
 
-  assert.deepEqual(dispatched.sort(), ['saveSyncedProfile', 'updateProfileDetails'])
+  assert.deepEqual(dispatched, ['saveSyncedProfile', 'saveSyncedProfile'])
   assert.deepEqual(structuredClone(profileList.find(profile => profile._id === 'new-there')), separateProfile('new-there'))
   assert.equal(profileList.find(profile => profile._id === 'edited-there').name, 'Renamed there')
   assert.deepEqual(structuredClone(profileList.find(profile => profile._id === 'edited-there').icon), { type: 'emoji', value: '🎵' })
@@ -339,6 +340,32 @@ test('separate profiles sync creates and updates them locally and uploads local 
     [MAIN_PROFILE_ID, 'edited-here', 'edited-there', 'new-here', 'new-there', 'x'.repeat(65)].sort())
   assert.equal(uploaded.find(entry => entry.id === 'edited-here').name, 'Renamed here')
   assert.deepEqual(Array.from(Object.keys(next)).sort(), ['edited-here', 'edited-there', 'new-here', 'new-there'])
+})
+
+test('a separate profile edited in another window during sync keeps that edit', async () => {
+  const profileList = [{ _id: MAIN_PROFILE_ID, subscriptions: [] }, separateProfile('edited')]
+  let uploaded
+  const client = {
+    getSeparateProfiles: async () => [separateEntry('edited', { name: 'Renamed there' })],
+    putSeparateProfiles: async value => { uploaded = value },
+  }
+  let saves = 0
+  const store = {
+    state: { profiles: { profileList } },
+    dispatch: async action => {
+      assert.equal(action, 'saveSyncedProfile')
+      saves++
+      // Another window renamed the profile while the server responded.
+      profileList[1] = { ...profileList[1], name: 'Renamed in another window' }
+      return false
+    },
+  }
+
+  await context.syncSeparateProfiles(client, store, { edited: separateMetadata('edited') })
+  // The merge runs again and keeps the edit, like one made in this window.
+  assert.equal(saves, 1)
+  assert.equal(profileList[1].name, 'Renamed in another window')
+  assert.equal(uploaded[0].name, 'Renamed in another window')
 })
 
 test('a separate profile deleted on another device is deleted here only after confirmation', async () => {

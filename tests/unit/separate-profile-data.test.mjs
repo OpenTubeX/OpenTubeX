@@ -11,6 +11,7 @@ import { createRecommendationStore } from '../../src/datastores/recommendations.
 import { profileDatastorePrefix } from '../../src/datastores/profileDatastoreNames.js'
 import { MAIN_PROFILE_ID } from '../../src/constants.js'
 import { mergeBackupProfile, mergeImportedProfile, withProfileSeparation } from '../../src/renderer/helpers/unifiedBackup.js'
+import { profileSyncSnapshot } from '../../src/renderer/helpers/profileSyncSnapshot.js'
 
 const source = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
 const handlerSource = source.slice(source.indexOf('class Settings {'), source.indexOf('\nclass SubscriptionCache {')) +
@@ -52,6 +53,7 @@ function fixture() {
     mergeBackupProfile,
     mergeImportedProfile,
     withProfileSeparation,
+    profileSyncSnapshot,
     recommendations: createRecommendationStore(db.recommendations),
     loadProfilesDatastore: async () => {},
     DEFAULT_PROFILE_ICON: {},
@@ -205,4 +207,19 @@ test('other devices apply a separate profile’s shared deletions only to that p
     { key: 'separateProfiles', at: 1, ids: ['old'] },
     { key: 'history', at: 1, ids: ['b'] },
   ])
+})
+
+test('sync saves a separate profile’s details only while nobody changed them, icon included', async () => {
+  const { Profiles } = fixture()
+  const read = { _id: 'separate', name: 'Kids', bgColor: '#000', textColor: '#fff', icon: { type: 'emoji', value: '🎵' }, separate: true, subscriptions: [] }
+  await Profiles.create(read)
+  // Another window changed the icon after sync read the profile.
+  await Profiles.updateDetails('separate', { ...read, icon: { type: 'emoji', value: '🎨' } })
+  assert.equal(await Profiles.saveFromSyncIfUnchanged({ ...read, name: 'Synced', icon: { type: 'emoji', value: '🚀' } }, read), null)
+
+  const current = { ...read, icon: { type: 'emoji', value: '🎨' } }
+  const saved = await Profiles.saveFromSyncIfUnchanged({ ...current, name: 'Synced', icon: { type: 'emoji', value: '🚀' } }, current)
+  assert.equal(saved.name, 'Synced')
+  assert.deepEqual(saved.icon, { type: 'emoji', value: '🚀' })
+  assert.equal(saved.separate, true)
 })

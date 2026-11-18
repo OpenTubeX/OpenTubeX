@@ -975,9 +975,15 @@ class Profiles {
     }
     const snapshot = profileSyncSnapshot(previous)
     const { name, bgColor, textColor, subscriptions } = profile
+    // Sync saves the icon of a profile that has one.
+    const syncsIcon = Object.hasOwn(profile, 'icon')
+    const icon = JSON.stringify(previous.icon ?? null)
     const { affectedDocuments } = await db.profiles.updateAsync(
-      { _id: profile._id, $where() { return profileSyncSnapshot(this) === snapshot } },
-      { $set: { name, bgColor, textColor, subscriptions } },
+      {
+        _id: profile._id,
+        $where() { return profileSyncSnapshot(this) === snapshot && (!syncsIcon || JSON.stringify(this.icon ?? null) === icon) }
+      },
+      { $set: { name, bgColor, textColor, subscriptions, ...(syncsIcon ? { icon: profile.icon } : {}) } },
       { returnUpdatedDocs: true }
     )
     return affectedDocuments ?? null
