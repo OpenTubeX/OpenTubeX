@@ -4,12 +4,16 @@ import test from 'node:test'
 import vm from 'node:vm'
 
 import { createAppShortcuts, getAppShortcutPath } from '../../src/renderer/helpers/appShortcuts.js'
+import {
+  requestSubscriptionFeedRefresh,
+  takeSubscriptionFeedRefreshRequest,
+} from '../../src/renderer/helpers/subscriptionFeedRefreshRequest.js'
 import { getHomeWidgetPage } from '../../src/renderer/helpers/homeWidgetData.js'
 import { shouldOpenExternalMediaUrl } from '../../src/renderer/helpers/externalMediaUrl.js'
 import { isSyncServerOidcCallbackUrl } from '../../src/renderer/helpers/sync-server-oidc.js'
 import { resolveMobileContextLinkCopyUrl } from '../../src/renderer/helpers/mobileLinkActions.js'
 
-const pages = ['subscriptions', 'userplaylists', 'history', 'downloads']
+const pages = ['subscriptions', 'refreshSubscriptions', 'userplaylists', 'history', 'downloads']
 
 async function loadKeyboardShortcutHandler(context) {
   const source = await readFile(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
@@ -41,6 +45,7 @@ test('retained startup clicks and running-app clicks navigate and update localiz
   let searchFocusRequests = 0
   appWindow.addEventListener('opentubex:focus-search', () => { searchFocusRequests++ })
   const locale = { value: 'en-US' }
+  const refreshRequests = []
   const enable = vm.runInNewContext(`${integration}\nenableCapacitorIntegrations`, {
     window: appWindow,
     document: { getElementById: () => null },
@@ -107,6 +112,7 @@ test('retained startup clicks and running-app clicks navigate and update localiz
     t: key => `${locale.value}:${key}`,
     createAppShortcuts,
     getAppShortcutPath,
+    requestSubscriptionFeedRefresh: () => { refreshRequests.push(paths.length) },
     openInternalPath: ({ path, query }) => {
       assert.equal(settingsOpen, false, 'settings must not cover the destination')
       paths.push(query ? `${path}?${new URLSearchParams(query)}` : path)
@@ -121,7 +127,8 @@ test('retained startup clicks and running-app clicks navigate and update localiz
     await listeners.get('click')({ shortcutId: page })
   }
   await listeners.get('click')({ shortcutId: 'settings' })
-  assert.deepEqual(paths, ['/subscriptions', '/userplaylists', '/history', 'settings:downloads'])
+  assert.deepEqual(paths, ['/subscriptions', '/subscriptions', '/userplaylists', '/history', 'settings:downloads'])
+  assert.deepEqual(refreshRequests, [1], 'only the refresh shortcut requests a refresh, before opening the page')
   listeners.get('appUrlOpen')({ url: 'https://youtu.be/123' })
   listeners.get('appUrlOpen')({ url: 'opentubex://https://www.youtube.com/watch?v=jNQXAC9IVRw' })
   listeners.get('appUrlOpen')({ url: 'opentubex://https//www.youtube.com/feed/subscriptions' })
@@ -134,7 +141,9 @@ test('retained startup clicks and running-app clicks navigate and update localiz
   assert.deepEqual(paths.slice(pages.length), ['/subscriptions', '/playlist/watchLater?playlistType=user', '/stats', 'settings:downloads', 'download:7'])
   assert.equal(searchFocusRequests, 1)
   assert.equal(youtubeLinks.length, 4, 'widget pages must not be treated as YouTube links')
+  assert.equal(updates[0].length, 4, 'iOS and Pixel launchers show four shortcuts')
   assert.equal(updates[0][2].title, 'en-US:History.History')
+  assert.equal(updates[0][0].path, undefined, 'paths stay out of the native shortcut list')
   locale.value = 'de-DE'
   updateLocale()
   assert.equal(updates[1][2].title, 'de-DE:History.History')
@@ -143,6 +152,31 @@ test('retained startup clicks and running-app clicks navigate and update localiz
   assert.equal(stopped, true)
   assert.equal(widgetSyncStopped, true)
   assert.equal(listeners.size, 0)
+})
+
+test('a feed refresh request runs once, after the page has loaded', () => {
+  const state = { presented: false, hasTab: true, refreshing: false, ready: false }
+  const take = () => takeSubscriptionFeedRefreshRequest(() => state)
+  assert.equal(take(), false, 'nothing was requested')
+  requestSubscriptionFeedRefresh()
+  assert.equal(take(), false, 'a page in a background tab leaves the request')
+  state.presented = true
+  assert.equal(take(), false, 'the feed is still loading')
+  state.ready = true
+  assert.equal(take(), true)
+  assert.equal(take(), false, 'the request must not repeat')
+
+  requestSubscriptionFeedRefresh()
+  state.refreshing = true
+  assert.equal(take(), false, 'a running refresh fulfills the request')
+  state.refreshing = false
+  assert.equal(take(), false)
+
+  requestSubscriptionFeedRefresh()
+  state.hasTab = false
+  assert.equal(take(), false, 'a page without feed tabs drops the request')
+  state.hasTab = true
+  assert.equal(take(), false)
 })
 
 test('tab organizer shortcut opens and closes it again with its search focused', async () => {

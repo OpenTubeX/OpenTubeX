@@ -540,7 +540,10 @@ Settings:
     Blur Thumbnails: Lausotu koadro txikiak
     Navigation:
       Always Show Navigation Bar: Erakutsi beti nabigazio-barra behealdean dagoenean
-      Compact Tab Labels: Nabigazio-barra trinkoa behealdean dagoenean
+      Navigation Bar Labels: Nabigazio-barraren etiketak behealdean dagoenean
+      All Labels: Erakutsi guztiak
+      Current Page Label: Uneko orria soilik
+      No Labels: Ezkutatu (barra trinkoa)
       Show Active Subscriptions: Erakutsi harpidetza aktiboak alboko barran
       Navigation: Nabigazioa
       Customize Navigation: Pertsonalizatu nabigazioa
@@ -1302,6 +1305,7 @@ Settings:
       Notify When Live: Jakinarazi jarraitutako Twitch kanalak zuzenean hasten direnean
       Auto Refresh Interval: Beste plataformen freskatze automatikoaren tartea
   Distraction Free Settings:
+    Hide Full Screen Video Title: Ezkutatu bideoaren izenburua leiho osoan edo pantaila osoan
     Digital Wellbeing:
       Count Watch Time From: "Ikusteko denbora zenbatzeko iturria"
       Break Reminder Action: "Atsedenaldia hartzeko ordua denean"

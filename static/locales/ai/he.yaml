@@ -545,7 +545,10 @@ Settings:
     Blur Thumbnails: טשטוש תמונות ממוזערות
     Navigation:
       Always Show Navigation Bar: הצגת סרגל הניווט תמיד כשהוא בתחתית
-      Compact Tab Labels: סרגל ניווט קומפקטי כשהוא בתחתית
+      Navigation Bar Labels: תוויות סרגל הניווט כשהוא בתחתית
+      All Labels: הצגת הכול
+      Current Page Label: הדף הנוכחי בלבד
+      No Labels: הסתרה (סרגל קומפקטי)
       Show Active Subscriptions: הצגת מינויים פעילים בסרגל הצד
       Navigation: ניווט
       Customize Navigation: התאמה אישית של הניווט
@@ -1317,6 +1320,7 @@ Settings:
       Notify When Live: להודיע כשערוצי Twitch במעקב מתחילים שידור חי
       Auto Refresh Interval: מרווח ריענון אוטומטי של פלטפורמות אחרות
   Distraction Free Settings:
+    Hide Full Screen Video Title: הסתרת כותרת הסרטון בחלון מלא או במסך מלא
     Digital Wellbeing:
       Count Watch Time From: "מקור ספירת זמן הצפייה"
       Break Reminder Action: "כשמגיע הזמן להפסקה"

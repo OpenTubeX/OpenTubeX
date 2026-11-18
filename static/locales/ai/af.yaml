@@ -703,7 +703,10 @@ Settings:
     General Settings: Algemeen
     Navigation:
       Always Show Navigation Bar: Wys altyd die navigasiebalk wanneer dit onderaan is
-      Compact Tab Labels: Kompakte navigasiebalk wanneer dit onderaan is
+      Navigation Bar Labels: Navigasiebalk-etikette wanneer dit onderaan is
+      All Labels: Wys almal
+      Current Page Label: Slegs huidige bladsy
+      No Labels: Versteek (kompakte balk)
       Show Active Subscriptions: Wys aktiewe intekeninge in systaaf
       Navigation: Navigasie
       Customize Navigation: Pas navigasie aan
@@ -1489,6 +1492,7 @@ Settings:
       Notify When Live: Stel in kennis wanneer gevolgde Twitch-kanale regstreeks gaan
       Auto Refresh Interval: Interval vir outomatiese verfrissing van ander platforms
   Distraction Free Settings:
+    Hide Full Screen Video Title: Versteek videotitel in volle venster / volskerm
     Digital Wellbeing:
       Count Watch Time From: Tel kyktyd vanaf
       Break Reminder Action: Wanneer dit tyd vir ’n pouse is

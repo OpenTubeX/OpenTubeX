@@ -540,7 +540,10 @@ Settings:
     Blur Thumbnails: サムネイルをぼかす
     Navigation:
       Always Show Navigation Bar: ナビゲーションバーが下部にあるときは常に表示
-      Compact Tab Labels: ナビゲーションバーが下部にあるときはコンパクトに表示
+      Navigation Bar Labels: ナビゲーションバーが下部にあるときのラベル
+      All Labels: すべて表示
+      Current Page Label: 現在のページのみ
+      No Labels: 非表示（コンパクト表示）
       Show Active Subscriptions: サイドバーにアクティブな登録チャンネルを表示
       Navigation: ナビゲーション
       Customize Navigation: ナビゲーションをカスタマイズ
@@ -1302,6 +1305,7 @@ Settings:
       Notify When Live: フォロー中の Twitch チャンネルが配信を開始したら通知
       Auto Refresh Interval: 他のプラットフォームの自動更新間隔
   Distraction Free Settings:
+    Hide Full Screen Video Title: 全ウィンドウ表示・全画面表示で動画タイトルを非表示
     Digital Wellbeing:
       Count Watch Time From: "視聴時間のカウント対象"
       Break Reminder Action: "休憩の時間になったとき"

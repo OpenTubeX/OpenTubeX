@@ -540,7 +540,10 @@ Settings:
     Blur Thumbnails: Rozmazat miniatury
     Navigation:
       Always Show Navigation Bar: Vždy zobrazovat navigační lištu, když je dole
-      Compact Tab Labels: Kompaktní navigační lišta, když je dole
+      Navigation Bar Labels: Popisky navigační lišty, když je dole
+      All Labels: Zobrazit všechny
+      Current Page Label: Pouze aktuální stránka
+      No Labels: Skrýt (kompaktní lišta)
       Show Active Subscriptions: Zobrazit aktivní odběry v postranním panelu
       Navigation: Navigace
       Customize Navigation: Přizpůsobit navigaci
@@ -1302,6 +1305,7 @@ Settings:
       Notify When Live: Upozornit, když sledované kanály na Twitchi začnou vysílat
       Auto Refresh Interval: Interval automatického obnovení jiných platforem
   Distraction Free Settings:
+    Hide Full Screen Video Title: Skrýt název videa v režimu celého okna nebo celé obrazovky
     Digital Wellbeing:
       Count Watch Time From: "Počítat dobu sledování z"
       Break Reminder Action: "Když je čas na přestávku"

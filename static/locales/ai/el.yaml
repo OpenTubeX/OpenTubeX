@@ -540,7 +540,10 @@ Settings:
     Blur Thumbnails: Θόλωση μικρογραφιών
     Navigation:
       Always Show Navigation Bar: Να εμφανίζεται πάντα η γραμμή πλοήγησης όταν βρίσκεται στο κάτω μέρος
-      Compact Tab Labels: Συμπαγής γραμμή πλοήγησης όταν βρίσκεται στο κάτω μέρος
+      Navigation Bar Labels: Ετικέτες γραμμής πλοήγησης όταν βρίσκεται στο κάτω μέρος
+      All Labels: Εμφάνιση όλων
+      Current Page Label: Μόνο η τρέχουσα σελίδα
+      No Labels: Απόκρυψη (συμπαγής γραμμή)
       Show Active Subscriptions: Εμφάνιση ενεργών συνδρομών στην πλαϊνή γραμμή
       Navigation: Πλοήγηση
       Customize Navigation: Προσαρμογή πλοήγησης
@@ -1302,6 +1305,7 @@ Settings:
       Notify When Live: Ειδοποίηση όταν τα κανάλια Twitch που ακολουθείτε ξεκινούν ζωντανή μετάδοση
       Auto Refresh Interval: Διάστημα αυτόματης ανανέωσης άλλων πλατφορμών
   Distraction Free Settings:
+    Hide Full Screen Video Title: Απόκρυψη τίτλου βίντεο σε πλήρες παράθυρο / πλήρη οθόνη
     Digital Wellbeing:
       Count Watch Time From: "Μέτρηση χρόνου παρακολούθησης από"
       Break Reminder Action: "Όταν είναι ώρα για διάλειμμα"

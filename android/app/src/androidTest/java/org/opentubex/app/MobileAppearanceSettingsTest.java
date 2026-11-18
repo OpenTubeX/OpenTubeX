@@ -510,9 +510,9 @@ public class MobileAppearanceSettingsTest {
                 evaluate(view, """
                     (() => {
                         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
-                        for (const key of ['AlwaysShowNavigationBar', 'CompactNavigationLabels', 'HideLabelsSideBar']) {
+                        for (const [key, value] of Object.entries({ AlwaysShowNavigationBar: false, NavigationBarLabels: 'all', HideLabelsSideBar: false })) {
                             window.__mobileAppearanceSaved[key] = store.getters['get' + key];
-                            store.commit('set' + key, false);
+                            store.commit('set' + key, value);
                         }
                         const content = document.createElement('div');
                         content.id = 'mobile-navigation-options-fixture';
@@ -537,7 +537,7 @@ public class MobileAppearanceSettingsTest {
                     awaitCondition(view, "document.querySelector('.sideNav').classList.contains('scrollHidden')");
                     evaluate(view, "window.scrollTo(0, 0)");
                     awaitCondition(view, "!document.querySelector('.sideNav').classList.contains('scrollHidden')");
-                    evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setCompactNavigationLabels', true)");
+                    evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setNavigationBarLabels', 'none')");
                     awaitCondition(view, """
                         (() => {
                             const labels = [...document.querySelectorAll('.sideNav .inner > .navOption:not(.mobileHidden) .navLabel')];
@@ -569,7 +569,7 @@ public class MobileAppearanceSettingsTest {
                     awaitCondition(view, "document.querySelector('.moreOptionNav').classList.contains('router-link-active') && getComputedStyle(document.querySelector('.moreOptionNav .navLabel')).display === 'none'");
                     evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$router.push('/history')");
                     awaitCondition(view, "!!document.querySelector('.sideNav .inner > .navOption.router-link-active[href=\"#/history\"]')");
-                    evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setCompactNavigationLabels', false)");
+                    evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setNavigationBarLabels', 'all')");
                     awaitCondition(view, """
                         (() => {
                             const labels = [...document.querySelectorAll('.sideNav .inner > .navOption:not(.mobileHidden) .navLabel, .moreOptionNav .navLabel')];

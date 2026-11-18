@@ -540,7 +540,10 @@ Settings:
     Blur Thumbnails: 模糊縮圖
     Navigation:
       Always Show Navigation Bar: 導覽列位於底部時一律顯示
-      Compact Tab Labels: 導覽列位於底部時使用精簡配置
+      Navigation Bar Labels: 導覽列位於底部時的標籤
+      All Labels: 全部顯示
+      Current Page Label: 僅目前頁面
+      No Labels: 隱藏（精簡配置）
       Show Active Subscriptions: 在側邊欄顯示活躍訂閱
       Navigation: 導覽
       Customize Navigation: 自訂導覽
@@ -1302,6 +1305,7 @@ Settings:
       Notify When Live: 追隨的 Twitch 頻道開始直播時通知
       Auto Refresh Interval: 其他平台自動重新整理間隔
   Distraction Free Settings:
+    Hide Full Screen Video Title: 在全視窗／全螢幕模式隱藏影片標題
     Digital Wellbeing:
       Count Watch Time From: "觀看時間統計範圍"
       Break Reminder Action: "到了休息時間時"

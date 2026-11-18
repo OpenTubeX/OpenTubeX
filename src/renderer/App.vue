@@ -751,6 +751,7 @@ import { classifyRequestFailure } from './helpers/api/requestDiagnostics'
 import { useSubscriptionAutoRefresh } from './composables/useSubscriptionAutoRefresh'
 import { useRssFeedAutoRefresh } from './composables/useRssFeedAutoRefresh'
 import { usePlatformFeedAutoRefresh } from './composables/usePlatformFeedAutoRefresh'
+import { requestSubscriptionFeedRefresh } from './helpers/subscriptionFeedRefreshRequest'
 import { startTwitchLiveNotifications } from './helpers/platformFeed'
 import { findPlatformChannel, getPlatformChannelRoute } from '../platforms/index'
 import { startCommentReplyNotifications } from './helpers/commentReplyNotifications'
@@ -1021,7 +1022,7 @@ const isSideNavOpen = computed(() => store.getters.getIsSideNavOpen)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideLabelsSideBar = computed(() => store.getters.getHideLabelsSideBar)
-const compactNavigationLabels = computed(() => store.getters.getCompactNavigationLabels)
+const compactNavigationLabels = computed(() => store.getters.getNavigationBarLabels === 'none')
 
 const tabBarPosition = computed(() => isElectron
   ? normalizeTabBarPosition(store.getters.getTabBarPosition)
@@ -4628,12 +4629,13 @@ async function enableCapacitorIntegrations() {
     }
     const path = getAppShortcutPath(shortcutId)
     if (!path) return
+    if (shortcutId === 'refreshSubscriptions') requestSubscriptionFeedRefresh()
     await store.dispatch('hideSettingsWindow')
     await openInternalPath({ path })
   })
   const stopShortcutUpdates = watch(locale, () => {
     const shortcuts = createAppShortcuts({
-      subscriptions: t('Subscriptions.Subscriptions'),
+      refreshSubscriptions: t('Feed.Refresh Feed', { subscriptionName: t('Subscriptions.Subscriptions') }),
       userplaylists: t('Playlists'),
       history: t('History.History'),
       downloads: t('Settings.Download Settings.Download Settings'),

@@ -299,6 +299,7 @@
   white-space: nowrap;
 }
 
-.compactLabels .previewBottomBar .previewNavLabel {
+.compactLabels .previewBottomBar .previewNavLabel,
+.activeLabelOnly.mobile .previewNavItem:not(.active) .previewNavLabel {
   display: none;
 }

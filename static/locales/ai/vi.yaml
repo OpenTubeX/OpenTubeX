@@ -540,7 +540,10 @@ Settings:
     Blur Thumbnails: Làm mờ hình thu nhỏ
     Navigation:
       Always Show Navigation Bar: Luôn hiển thị thanh điều hướng khi nó ở phía dưới
-      Compact Tab Labels: Thanh điều hướng thu gọn khi nó ở phía dưới
+      Navigation Bar Labels: Nhãn của thanh điều hướng khi nó ở phía dưới
+      All Labels: Hiện tất cả
+      Current Page Label: Chỉ trang hiện tại
+      No Labels: Ẩn (thanh thu gọn)
       Show Active Subscriptions: Hiển thị các kênh đăng ký đang hoạt động trong thanh bên
       Navigation: Điều hướng
       Customize Navigation: Tùy chỉnh điều hướng
@@ -1302,6 +1305,7 @@ Settings:
       Notify When Live: Thông báo khi các kênh Twitch đang theo dõi bắt đầu phát trực tiếp
       Auto Refresh Interval: Khoảng tự động làm mới nền tảng khác
   Distraction Free Settings:
+    Hide Full Screen Video Title: Ẩn tiêu đề video ở chế độ toàn cửa sổ / toàn màn hình
     Digital Wellbeing:
       Count Watch Time From: "Tính thời gian xem từ"
       Break Reminder Action: "Khi đến lúc nghỉ giải lao"

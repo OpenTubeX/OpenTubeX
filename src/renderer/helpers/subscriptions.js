@@ -76,6 +76,7 @@ export const SUBSCRIPTION_REFRESH_FINISHED_EVENT = 'opentubex-subscription-refre
 export const SUBSCRIPTION_REFRESH_LOCK_NAME = 'opentubex-subscription-refresh'
 export const SUBSCRIPTION_REFRESH_PROGRESS_EVENT = 'opentubex-subscription-refresh-progress'
 export const SUBSCRIPTION_REFRESH_STARTED_EVENT = 'opentubex-subscription-refresh-started'
+export const SUBSCRIPTION_REFRESH_RESERVED_EVENT = 'opentubex-subscription-refresh-reserved'
 export const SUBSCRIPTION_REFRESH_CANCEL_STORAGE_KEY = 'opentubex.subscriptionAutoRefresh.cancel'
 
 // The tab id the Electron refresh lock was acquired with. Progress reports to the
@@ -90,6 +91,13 @@ let electronRefreshOwnerTabId = null
 let activeRefresh = null
 let nextRefreshId = 0
 let rendererRefreshReserved = false
+
+// Announced, so that requests to refresh can wait for a refresh that may turn
+// out to fetch nothing, such as an automatic one when the app resumes.
+function setRendererRefreshReserved(reserved) {
+  rendererRefreshReserved = reserved
+  window.dispatchEvent(new CustomEvent(SUBSCRIPTION_REFRESH_RESERVED_EVENT, { detail: reserved }))
+}
 
 // Incremented on every cancellation request, so that a cancellation is not
 // missed when it arrives between two feed refreshes.
@@ -272,11 +280,11 @@ async function withSubscriptionRefreshLock(tab, profileId, refresh, options) {
     return null
   }
 
-  rendererRefreshReserved = true
+  setRendererRefreshReserved(true)
   try {
     return await runWithSubscriptionRefreshLock(tab, profileId, refresh, options)
   } finally {
-    rendererRefreshReserved = false
+    setRendererRefreshReserved(false)
   }
 }
 

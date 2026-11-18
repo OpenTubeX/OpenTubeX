@@ -545,7 +545,10 @@ Settings:
     Blur Thumbnails: Розмивати мініатюри
     Navigation:
       Always Show Navigation Bar: Завжди показувати панель навігації, коли вона внизу
-      Compact Tab Labels: Компактна панель навігації, коли вона внизу
+      Navigation Bar Labels: Підписи панелі навігації, коли вона внизу
+      All Labels: Показувати всі
+      Current Page Label: Лише поточна сторінка
+      No Labels: Приховувати (компактна панель)
       Show Active Subscriptions: Показувати активні підписки на бічній панелі
       Navigation: Навігація
       Customize Navigation: Налаштувати навігацію
@@ -1313,6 +1316,7 @@ Settings:
       Notify When Live: Сповіщати, коли відстежувані канали Twitch починають трансляцію
       Auto Refresh Interval: Інтервал автоматичного оновлення інших платформ
   Distraction Free Settings:
+    Hide Full Screen Video Title: Приховувати назву відео в режимі на все вікно або на весь екран
     Digital Wellbeing:
       Count Watch Time From: "Враховувати час перегляду"
       Break Reminder Action: "Коли час зробити перерву"

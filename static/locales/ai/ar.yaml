@@ -545,7 +545,10 @@ Settings:
     Blur Thumbnails: تمويه الصور المصغرة
     Navigation:
       Always Show Navigation Bar: إظهار شريط التنقل دائمًا عندما يكون في الأسفل
-      Compact Tab Labels: شريط تنقل مضغوط عندما يكون في الأسفل
+      Navigation Bar Labels: تسميات شريط التنقل عندما يكون في الأسفل
+      All Labels: إظهار الكل
+      Current Page Label: الصفحة الحالية فقط
+      No Labels: إخفاء (شريط مضغوط)
       Show Active Subscriptions: إظهار الاشتراكات النشطة في الشريط الجانبي
       Navigation: التنقل
       Customize Navigation: تخصيص التنقل
@@ -1313,6 +1316,7 @@ Settings:
       Notify When Live: الإشعار عند بدء بث قنوات Twitch المتابَعة
       Auto Refresh Interval: الفاصل الزمني للتحديث التلقائي للمنصات الأخرى
   Distraction Free Settings:
+    Hide Full Screen Video Title: إخفاء عنوان الفيديو في نافذة كاملة/شاشة كاملة
     Digital Wellbeing:
       Count Watch Time From: "احتساب وقت المشاهدة من"
       Break Reminder Action: "عندما يحين وقت الاستراحة"

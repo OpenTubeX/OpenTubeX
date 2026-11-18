@@ -5,6 +5,7 @@ import {
   hasReplacedSettingId,
   holdPlaybackRateMultiplierFromSwitch,
   migrateSettingIds,
+  navigationBarLabelsFromCompactSwitch,
   scrollPlayerModeFromMiniPlayerSwitch,
   thumbnailDataSaverModeFromSwitch,
   titleLineLimitFromSwitch,
@@ -69,6 +70,12 @@ export function migrateLegacySyncedSettings(remote) {
   if (thumbnailDataSaver && !remote.thumbnailDataSaverMode) {
     migrated.thumbnailDataSaverMode = {
       ...thumbnailDataSaver, key: 'thumbnailDataSaverMode', value: thumbnailDataSaverModeFromSwitch(thumbnailDataSaver.value),
+    }
+  }
+  const compactNavigationLabels = remote.compactNavigationLabels
+  if (compactNavigationLabels && !remote.navigationBarLabels) {
+    migrated.navigationBarLabels = {
+      ...compactNavigationLabels, key: 'navigationBarLabels', value: navigationBarLabelsFromCompactSwitch(compactNavigationLabels.value),
     }
   }
   // Auto Load Next Page used to control comments too.

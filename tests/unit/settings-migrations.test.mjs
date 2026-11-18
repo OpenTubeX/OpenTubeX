@@ -12,6 +12,7 @@ import {
   migrateStoredAiVideoSummarySetting,
   migrateSyncServerUrl,
 } from '../../src/renderer/helpers/settings-migrations.js'
+import { migrateLegacySyncedSettings } from '../../src/renderer/helpers/sync-settings-conflict.js'
 
 test('migrates an enabled legacy subscription progress notification preference', () => {
   assert.deepEqual(migrateLegacySettings({ showSubscriptionRefreshToast: true }), {
@@ -522,6 +523,44 @@ test('migrates the Data Saver Thumbnails switch to its mode select', async () =>
 
   assert.deepEqual(migrateLegacySettings({ thumbnailDataSaver: true }), { thumbnailDataSaverMode: 'always' })
   assert.deepEqual(migrateLegacySettings({ thumbnailDataSaver: false }), { thumbnailDataSaverMode: 'off' })
+})
+
+test('migrates the Compact Tab Labels switch to the Navigation Bar Labels select', async () => {
+  for (const [initial, expected] of [
+    [
+      [
+        { _id: 'compactNavigationLabels', value: true },
+        { _id: 'syncServerSettingUpdatedAt', value: { compactNavigationLabels: 10 } },
+      ],
+      { navigationBarLabels: 'none', syncServerSettingUpdatedAt: { compactNavigationLabels: 10, navigationBarLabels: 10 } },
+    ],
+    // Showing every label was the default, which the select's default keeps.
+    [[{ _id: 'compactNavigationLabels', value: false }], {}],
+    [
+      [{ _id: 'compactNavigationLabels', value: true }, { _id: 'navigationBarLabels', value: 'active' }],
+      { navigationBarLabels: 'active' },
+    ],
+  ]) {
+    const settings = new Datastore()
+    await settings.insertAsync(initial)
+
+    await migrateStoredSettings(settings)
+    await migrateStoredSettings(settings)
+
+    const stored = Object.fromEntries((await settings.findAsync({})).map(({ _id, value }) => [_id, value]))
+    assert.deepEqual(stored, expected)
+  }
+
+  assert.deepEqual(migrateLegacySettings({ compactNavigationLabels: true }), { navigationBarLabels: 'none' })
+  assert.deepEqual(migrateLegacySettings({ compactNavigationLabels: false }), { navigationBarLabels: 'all' })
+  assert.deepEqual(migrateLegacySettings({ compactNavigationLabels: true, navigationBarLabels: 'active' }), { navigationBarLabels: 'active' })
+
+  // Devices on older versions keep syncing the switch.
+  const legacy = { key: 'compactNavigationLabels', value: true, updatedAt: 10 }
+  assert.deepEqual(migrateLegacySyncedSettings({ compactNavigationLabels: legacy }).navigationBarLabels,
+    { key: 'navigationBarLabels', value: 'none', updatedAt: 10 })
+  const current = { key: 'navigationBarLabels', value: 'active', updatedAt: 5 }
+  assert.equal(migrateLegacySyncedSettings({ compactNavigationLabels: legacy, navigationBarLabels: current }).navigationBarLabels, current)
 })
 
 test('migrates the mini player switches to the scroll player select', async () => {

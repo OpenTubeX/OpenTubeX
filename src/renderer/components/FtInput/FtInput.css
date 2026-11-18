@@ -400,6 +400,24 @@
   margin-block-end: 0;
 }
 
+/* A filled field shaped like the main search, for search and filter fields.
+   Its corners follow the UI roundness. */
+.ft-input-component.rounded .ft-input {
+  border-block-end: 0;
+  border-radius: var(--shape-corner-extra-large);
+  background-color: var(--search-bar-color);
+  box-shadow: inset 0 0 0 1px var(--input-border-color, transparent);
+}
+
+.ft-input-component.rounded .ft-input:not(:disabled):hover {
+  background-color: color-mix(in srgb, var(--primary-text-color) 8%, var(--search-bar-color));
+}
+
+.ft-input-component.rounded .ft-input:focus {
+  border-radius: var(--shape-corner-extra-large);
+  box-shadow: inset 0 0 0 2px var(--primary-color);
+}
+
 @media (forced-colors: active) {
   .ft-input-component:not(.search) .ft-input:focus {
     outline: 3px solid Highlight;

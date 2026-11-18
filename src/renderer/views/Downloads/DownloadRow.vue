@@ -23,6 +23,7 @@
       :class="{
         thumbnailSwipeReady: thumbnailSwipe.progress === 1,
         thumbnailSwipeLeft: thumbnailSwipe.direction === 'left',
+        thumbnailSwipeUndo: thumbnailSwipe.action.undo === true,
       }"
       :title="thumbnailSwipe.action.label"
       aria-hidden="true"
@@ -467,6 +468,7 @@ function getThumbnailSwipeAction(direction) {
   return {
     label: watched ? t('Video.Unmark As Watched') : fully ? t('Video.Mark As Fully Watched') : t('Video.Mark As Watched'),
     icon: ['fas', watched ? 'eye-slash' : fully ? 'flag-checkered' : 'eye'],
+    undo: watched,
     run: async () => {
       for (const video of entries) {
         if (watched && store.getters.getWatchedPercentageThreshold === 0) {

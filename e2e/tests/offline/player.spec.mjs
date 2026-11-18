@@ -345,6 +345,31 @@ test('hides configured paused interface elements until pointer activity', async 
   await watchComponent.dispose()
 })
 
+test('a hidden full window title leaves the video information in the player menu', async ({ app, page }) => {
+  const video = await openDemoVideo({ app, page })
+  await page.evaluate(() => window.$store.dispatch('updateHideFullscreenVideoTitle', true))
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  const title = player.locator('.playerFullscreenTitleOverlay')
+  const menuItem = player.locator('.shaka-overflow-menu').getByRole('button', { name: 'Video information' })
+
+  // The watch page shows the information below the player.
+  await player.hover()
+  await openPlayerOptions(player)
+  await expect(menuItem).toBeHidden()
+  await page.keyboard.press('Escape')
+
+  await page.locator('body').press('s')
+  await expect(player).toHaveClass(/fullWindow/)
+  await video.evaluate(element => element.pause())
+  await player.hover()
+  await expect(player).toHaveClass(/playerPaused/)
+  await expect(title).toBeHidden()
+
+  await openPlayerOptions(player)
+  await menuItem.click()
+  await expect(player.locator('.fullscreenMetadataOverlay.open')).toBeVisible()
+})
+
 // Regression: playback speed controls stopped working (1c958d468)
 test('keyboard shortcuts change the playback rate', async ({ app, page, attachScreenshot }) => {
   const video = await openDemoVideo({ app, page })

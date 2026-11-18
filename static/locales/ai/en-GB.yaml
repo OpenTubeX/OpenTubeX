@@ -537,7 +537,10 @@ Settings:
     Blur Thumbnails: Blur thumbnails
     Navigation:
       Always Show Navigation Bar: Always show navigation bar when it's at the bottom
-      Compact Tab Labels: Compact navigation bar when it's at the bottom
+      Navigation Bar Labels: Bottom navigation bar labels
+      All Labels: Show all
+      Current Page Label: Current page only
+      No Labels: Hide (compact bar)
       Show Active Subscriptions: Show active subscriptions in sidebar
       Navigation: Navigation
       Customize Navigation: Customise navigation
@@ -1286,6 +1289,7 @@ Settings:
       Notify When Live: Notify when followed Twitch channels go live
       Auto Refresh Interval: Other platforms auto refresh interval
   Distraction Free Settings:
+    Hide Full Screen Video Title: Hide Video Title in Full Window / Full Screen
     Digital Wellbeing:
       Count Watch Time From: "Count Watch Time From"
       Break Reminder Action: "When It's Time for a Break"

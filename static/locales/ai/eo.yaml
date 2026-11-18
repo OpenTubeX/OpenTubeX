@@ -577,7 +577,10 @@ Settings:
     Blur Thumbnails: Nebuligi bildetojn
     Navigation:
       Always Show Navigation Bar: Ĉiam montri la navigobreton kiam ĝi estas malsupre
-      Compact Tab Labels: Kompakta navigobreto kiam ĝi estas malsupre
+      Navigation Bar Labels: Etikedoj de la navigobreto kiam ĝi estas malsupre
+      All Labels: Montri ĉiujn
+      Current Page Label: Nur la nuna paĝo
+      No Labels: Kaŝi (kompakta breto)
       Show Active Subscriptions: Montri aktivajn abonojn en la flankobreto
       Navigation: Navigado
       Customize Navigation: Personecigi navigadon
@@ -1342,6 +1345,7 @@ Settings:
       Notify When Live: Sciigi kiam sekvataj Twitch-kanaloj komencas rektan elsendon
       Auto Refresh Interval: Intervalo de aŭtomata aktualigo de aliaj platformoj
   Distraction Free Settings:
+    Hide Full Screen Video Title: Kaŝi titolon de videaĵo en plena fenestro / plena ekrano
     Digital Wellbeing:
       Count Watch Time From: Kalkuli spekttempon de
       Break Reminder Action: Kiam estas tempo por paŭzo

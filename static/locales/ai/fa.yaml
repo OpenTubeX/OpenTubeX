@@ -564,7 +564,10 @@ Settings:
     Blur Thumbnails: تار کردن تصاویر بندانگشتی
     Navigation:
       Always Show Navigation Bar: همیشه نوار پیمایش را وقتی در پایین است نمایش بده
-      Compact Tab Labels: نوار پیمایش فشرده وقتی در پایین است
+      Navigation Bar Labels: برچسب‌های نوار پیمایش وقتی در پایین است
+      All Labels: نمایش همه
+      Current Page Label: فقط صفحهٔ فعلی
+      No Labels: پنهان (نوار فشرده)
       Show Active Subscriptions: نمایش اشتراک‌های فعال در نوار کناری
       Navigation: پیمایش
       Customize Navigation: سفارشی‌سازی پیمایش
@@ -1339,6 +1342,7 @@ Settings:
       Notify When Live: اعلان هنگام شروع پخش زندهٔ کانال‌های دنبال‌شدهٔ Twitch
       Auto Refresh Interval: فاصلهٔ تازه‌سازی خودکار پلتفرم‌های دیگر
   Distraction Free Settings:
+    Hide Full Screen Video Title: پنهان کردن عنوان ویدیو در پنجرهٔ کامل / تمام‌صفحه
     Digital Wellbeing:
       Count Watch Time From: "شمارش زمان تماشا از"
       Break Reminder Action: "وقتی زمان استراحت است"

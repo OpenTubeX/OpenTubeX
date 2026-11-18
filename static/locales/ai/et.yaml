@@ -540,7 +540,10 @@ Settings:
     Blur Thumbnails: Hägusta pisipildid
     Navigation:
       Always Show Navigation Bar: Kuva navigeerimisriba alati, kui see on allosas
-      Compact Tab Labels: Kompaktne navigeerimisriba, kui see on allosas
+      Navigation Bar Labels: Navigeerimisriba sildid, kui see on allosas
+      All Labels: Kuva kõik
+      Current Page Label: Ainult praegune leht
+      No Labels: Peida (kompaktne riba)
       Show Active Subscriptions: Näita aktiivseid tellimusi külgribal
       Navigation: Navigeerimine
       Customize Navigation: Kohanda navigeerimist
@@ -1302,6 +1305,7 @@ Settings:
       Notify When Live: Teavita, kui jälgitavad Twitchi kanalid alustavad otseülekannet
       Auto Refresh Interval: Teiste platvormide automaatse värskendamise intervall
   Distraction Free Settings:
+    Hide Full Screen Video Title: Peida video pealkiri täisaknas või täisekraanil
     Digital Wellbeing:
       Count Watch Time From: "Vaatamisaja arvestamise allikas"
       Break Reminder Action: "Kui on pausi aeg"

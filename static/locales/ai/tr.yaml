@@ -540,7 +540,10 @@ Settings:
     Blur Thumbnails: Küçük resimleri bulanıklaştır
     Navigation:
       Always Show Navigation Bar: Gezinme çubuğu alttayken her zaman göster
-      Compact Tab Labels: Gezinme çubuğu alttayken kompakt göster
+      Navigation Bar Labels: Gezinme çubuğu alttayken etiketler
+      All Labels: Tümünü göster
+      Current Page Label: Yalnızca geçerli sayfa
+      No Labels: Gizle (kompakt çubuk)
       Show Active Subscriptions: Etkin abonelikleri kenar çubuğunda göster
       Navigation: Gezinme
       Customize Navigation: Gezinmeyi özelleştir
@@ -1302,6 +1305,7 @@ Settings:
       Notify When Live: Takip Edilen Twitch Kanalları Canlı Yayına Başladığında Bildir
       Auto Refresh Interval: Diğer Platformların Otomatik Yenileme Aralığı
   Distraction Free Settings:
+    Hide Full Screen Video Title: Tam Pencere / Tam Ekranda Video Başlığını Gizle
     Digital Wellbeing:
       Count Watch Time From: "İzleme Süresi Kaynağı"
       Break Reminder Action: "Mola Zamanı Geldiğinde"

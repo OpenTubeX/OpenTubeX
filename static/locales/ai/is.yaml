@@ -540,7 +540,10 @@ Settings:
     Blur Thumbnails: Þoka smámyndir
     Navigation:
       Always Show Navigation Bar: Sýna alltaf leiðsögustikuna þegar hún er neðst
-      Compact Tab Labels: Þétt leiðsögustika þegar hún er neðst
+      Navigation Bar Labels: Merkingar leiðsögustiku þegar hún er neðst
+      All Labels: Sýna allar
+      Current Page Label: Aðeins núverandi síða
+      No Labels: Fela (þétt stika)
       Show Active Subscriptions: Sýna virkar áskriftir í hliðarstikunni
       Navigation: Leiðsögn
       Customize Navigation: Sérsníða leiðsögn
@@ -1304,6 +1307,7 @@ Settings:
       Notify When Live: Láta vita þegar Twitch-rásir sem þú fylgir fara í beina útsendingu
       Auto Refresh Interval: Bil milli sjálfvirkra uppfærslna annarra vettvanga
   Distraction Free Settings:
+    Hide Full Screen Video Title: Fela heiti myndbands í heilum glugga eða á öllum skjánum
     Digital Wellbeing:
       Count Watch Time From: "Telja áhorfstíma"
       Break Reminder Action: "Þegar kominn er tími á hlé"

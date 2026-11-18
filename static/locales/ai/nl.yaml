@@ -545,7 +545,10 @@ Settings:
     Blur Thumbnails: Miniaturen vervagen
     Navigation:
       Always Show Navigation Bar: Navigatiebalk altijd tonen wanneer deze onderaan staat
-      Compact Tab Labels: Compacte navigatiebalk wanneer deze onderaan staat
+      Navigation Bar Labels: Labels van de navigatiebalk wanneer deze onderaan staat
+      All Labels: Alle tonen
+      Current Page Label: Alleen huidige pagina
+      No Labels: Verbergen (compacte balk)
       Show Active Subscriptions: Actieve abonnementen in de zijbalk tonen
       Navigation: Navigatie
       Customize Navigation: Navigatie aanpassen
@@ -1317,6 +1320,7 @@ Settings:
       Notify When Live: Melden wanneer gevolgde Twitch-kanalen live gaan
       Auto Refresh Interval: Interval voor automatisch vernieuwen van andere platforms
   Distraction Free Settings:
+    Hide Full Screen Video Title: Videotitel verbergen in volledig venster of volledig scherm
     Digital Wellbeing:
       Count Watch Time From: "Kijktijd tellen van"
       Break Reminder Action: "Als het tijd is voor een pauze"

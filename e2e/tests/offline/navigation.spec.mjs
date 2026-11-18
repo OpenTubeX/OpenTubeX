@@ -89,20 +89,21 @@ test.describe('navigation options outline', { tag: '@scale' }, () => {
     await expectShorter(germanHeight, germanThumb)
   })
 
-  test('encloses all three switches at desktop and narrow widths', async ({ app, page }, testInfo) => {
+  test('encloses all options at desktop and narrow widths', async ({ app, page }, testInfo) => {
     await setWindowSize(app, page, { width: 900, height: 650 })
     await openInterfaceCustomizer(page, 'navigation')
     const group = page.locator('.fixedNavigationOptions')
-    await expect(group.getByRole('checkbox')).toHaveCount(3)
+    await expect(group.getByRole('checkbox')).toHaveCount(2)
+    await expect(group.getByRole('combobox')).toHaveCount(1)
     for (const narrow of [false, true]) {
       if (narrow) await setWindowSize(app, page, { width: 500, height: 600 })
       await expect.poll(() => group.evaluate(element => {
         const outline = element.getBoundingClientRect()
-        return [...element.querySelectorAll('.switch-label')].every(label => {
+        return [...element.querySelectorAll('.switch-label, .select')].every(label => {
           const bounds = label.getBoundingClientRect()
           return bounds.top >= outline.top + 7 && bounds.bottom <= outline.bottom - 7
         })
-      }), { message: 'the outline leaves space above and below every switch label' }).toBe(true)
+      }), { message: 'the outline leaves space above and below every option' }).toBe(true)
       await group.scrollIntoViewIfNeeded()
       const scroller = page.locator('.customizerEditorScroll:visible')
       await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
@@ -138,23 +139,26 @@ test.describe('navigation options outline', { tag: '@scale' }, () => {
   })
 })
 
-test('navigation visibility and compact labels are saved through their settings controls', async ({ app, page }) => {
+test('navigation visibility and bar labels are saved through their settings controls', async ({ app, page }) => {
+  const name = "Always show navigation bar when it's at the bottom"
   await openInterfaceCustomizer(page, 'navigation')
-  for (const name of ["Always show navigation bar when it's at the bottom", "Compact navigation bar when it's at the bottom"]) {
-    const toggle = page.getByRole('checkbox', { name: new RegExp(`^${name}`) })
-    await expect(toggle).not.toBeChecked()
-    await page.locator('label.switch-label').filter({ hasText: name }).click()
-    await expect(toggle).toBeChecked()
-  }
+  const toggle = page.getByRole('checkbox', { name: new RegExp(`^${name}`) })
+  await expect(toggle).not.toBeChecked()
+  await page.locator('label.switch-label').filter({ hasText: name }).click()
+  await expect(toggle).toBeChecked()
+  const labels = page.getByRole('combobox', { name: /^Bottom navigation bar labels/ })
+  await expect(labels).toHaveText('Show all')
+  await labels.click()
+  await page.getByRole('option', { name: 'Current page only' }).click()
+  await expect(labels).toHaveText('Current page only')
   ;({ page } = await app.relaunch())
   await openInterfaceCustomizer(page, 'navigation')
-  for (const name of ["Always show navigation bar when it's at the bottom", "Compact navigation bar when it's at the bottom"]) {
-    await expect(page.getByRole('checkbox', { name: new RegExp(`^${name}`) })).toBeChecked()
-  }
+  await expect(page.getByRole('checkbox', { name: new RegExp(`^${name}`) })).toBeChecked()
+  await expect(page.getByRole('combobox', { name: /^Bottom navigation bar labels/ })).toHaveText('Current page only')
 })
 
 test.describe('compact navigation labels', () => {
-  test.use({ seed: { settings: { compactNavigationLabels: true, showProgressBarToast: false } } })
+  test.use({ seed: { settings: { navigationBarLabels: 'none', showProgressBarToast: false } } })
 
   test('shows More only when destinations are hidden from the compact bar', async ({ app, page, uiScale }) => {
     await goTo(page, 'subscriptions')
@@ -260,7 +264,7 @@ test.describe('compact navigation labels', () => {
       const previousHeight = await page.evaluate(() => document.scrollingElement.scrollHeight)
       await page.evaluate(async ({ compact, hideLabels }) => {
         const store = window.$store
-        store.commit('setCompactNavigationLabels', compact)
+        store.commit('setNavigationBarLabels', compact ? 'none' : 'all')
         store.commit('setHideLabelsSideBar', hideLabels)
         // Restore the phone fixture after Vue updates the root class, before layout.
         await Promise.resolve()

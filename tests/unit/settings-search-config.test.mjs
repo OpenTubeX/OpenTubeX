@@ -224,7 +224,7 @@ test('settings search retains the subpage containing each control', () => {
   for (const [section, label, subpage, subpageTab] of [
     ['appearance', 'Show active subscriptions in sidebar', 'customize-interface', 'navigation'],
     ['appearance', "Always show navigation bar when it's at the bottom", 'customize-interface', 'navigation'],
-    ['appearance', "Compact navigation bar when it's at the bottom", 'customize-interface', 'navigation'],
+    ['appearance', 'Bottom navigation bar labels', 'customize-interface', 'navigation'],
     ['appearance', 'Add item', 'customize-interface', 'navigation'],
     ['appearance', 'Customize navigation', 'customize-interface', 'navigation'],
     ['appearance', 'Add setting', 'customize-interface', 'quickSettings'],

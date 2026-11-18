@@ -832,7 +832,10 @@ Settings:
     General Settings: General
     Navigation:
       Always Show Navigation Bar: Always show navigation bar when it's at the bottom
-      Compact Tab Labels: Compact navigation bar when it's at the bottom
+      Navigation Bar Labels: Bottom navigation bar labels
+      All Labels: Show all
+      Current Page Label: Current page only
+      No Labels: Hide (compact bar)
       Show Active Subscriptions: Show active subscriptions in sidebar
       Navigation: Navigation
       Customize Navigation: Customize navigation
@@ -1933,6 +1936,7 @@ Settings:
     Hide End-Screen Annotations: Hide End-Screen Annotations
     Hide End-Screen Recommendations: Hide End-Screen Recommendations
     Hide Paid Promotion Badge: Hide Paid Promotion Badge
+    Hide Full Screen Video Title: Hide Video Title in Full Window / Full Screen
     Hide Channels: Hide Videos From Channels
     Enable Block Lists: Enable block lists
     Blur Blocked Items: Blur blocked items instead of hiding them

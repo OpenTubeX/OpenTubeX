@@ -571,7 +571,10 @@ Settings:
     Blur Thumbnails: Desenfocar miniaturas
     Navigation:
       Always Show Navigation Bar: Mostrar siempre la barra de navegación cuando está en la parte inferior
-      Compact Tab Labels: Barra de navegación compacta cuando está en la parte inferior
+      Navigation Bar Labels: Etiquetas de la barra de navegación cuando está en la parte inferior
+      All Labels: Mostrar todas
+      Current Page Label: Solo la página actual
+      No Labels: Ocultar (barra compacta)
       Show Active Subscriptions: Mostrar suscripciones activas en la barra lateral
       Navigation: Navegación
       Customize Navigation: Personalizar navegación
@@ -1433,6 +1436,7 @@ Settings:
       Notify When Live: Notificar cuando los canales de Twitch seguidos comiencen a transmitir en vivo
       Auto Refresh Interval: Intervalo de actualización automática de otras plataformas
   Distraction Free Settings:
+    Hide Full Screen Video Title: Ocultar el título del video en ventana completa o pantalla completa
     Digital Wellbeing:
       Count Watch Time From: "Contar el tiempo de visualización de"
       Break Reminder Action: "Cuando sea hora de un descanso"

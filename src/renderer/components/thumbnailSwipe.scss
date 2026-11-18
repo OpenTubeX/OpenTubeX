@@ -68,6 +68,17 @@
   inset-inline: auto 8px;
 }
 
+// A repeated swipe reverses the first one, such as unmarking a watched video.
+// Like other destructive actions, it shows in red.
+.thumbnailSwipeUndo {
+  color: var(--destructive-icon-color, color-mix(in oklch, oklch(from var(--destructive-color) l 0.18 29deg) 40%, oklch(from var(--primary-text-color) l 0.18 29deg)));
+}
+
+// Custom themes show the destructive color they chose.
+:global(body.custom .thumbnailSwipeUndo) {
+  color: var(--destructive-color);
+}
+
 .videoSwipeDragging {
   > .ft-list-video,
   > .downloadRow,

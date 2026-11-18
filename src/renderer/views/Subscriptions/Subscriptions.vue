@@ -383,12 +383,7 @@
               <FtRefreshWidget
                 embedded
                 class="headerRefreshWidget subscriptionsHeaderRefreshWidget"
-                :disable-refresh="currentPlatformsView
-                  ? currentTabPanel.isLoading || followedChannels.length === 0
-                  : currentTab === 'feeds' || currentNewFeedRssTab
-                    ? currentTabPanel.isLoading || followedRssFeeds.length === 0
-                    : subscriptionFeedRefreshInProgress || currentTabPanel.isLoading ||
-                      (activeSubscriptionList.length === 0 && !newFeedRefreshesRssFeeds && !newFeedRefreshesPlatforms)"
+                :disable-refresh="refreshDisabled"
                 :last-refresh-timestamp="currentTabPanel.lastRefreshTimestamp"
                 :next-auto-refresh-timestamp="currentTabPanel.nextAutoRefreshTimestamp"
                 :next-auto-refresh-tooltip="currentTabPanel.nextAutoRefreshTooltip"
@@ -579,7 +574,7 @@
 <script setup>
 import FtTabs from '../../components/FtTabs/FtTabs.vue'
 import { FtIcon } from '@opentubex/icons'
-import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -610,6 +605,7 @@ import store from '../../store/index'
 import { useTabContext, useTabLifecycle } from '../../tabs/TabContext'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { useRefreshAllSubscriptionFeeds } from '../../composables/useRefreshAllSubscriptionFeeds'
+import { isSubscriptionRefreshReserved, takeSubscriptionFeedRefreshRequest } from '../../helpers/subscriptionFeedRefreshRequest'
 import { useSubscriptionPremiereUpdates } from '../../composables/useSubscriptionPremiereUpdates'
 import {
   requestSubscriptionRefreshCancellation,
@@ -1712,6 +1708,30 @@ function handlePanelTabNavigation(event) {
 function refreshCurrentTab() {
   currentTabPanel.value?.refresh()
 }
+
+const refreshDisabled = computed(() => {
+  const panel = currentTabPanel.value
+  if (panel === null) return true
+  if (currentPlatformsView.value) return panel.isLoading || followedChannels.value.length === 0
+  if (currentTab.value === 'feeds' || currentNewFeedRssTab.value) return panel.isLoading || followedRssFeeds.value.length === 0
+  return subscriptionFeedRefreshInProgress.value || panel.isLoading ||
+    (activeSubscriptionList.value.length === 0 && !newFeedRefreshesRssFeeds.value && !newFeedRefreshesPlatforms.value)
+})
+
+// Refresh requests from outside the page, such as the launcher shortcut, wait
+// until the current tab has loaded and no other refresh is running. A refresh
+// of another feed, or an automatic one that turns out to fetch nothing when the
+// app resumes, leaves the shown feed as it was.
+watchEffect(() => {
+  const start = takeSubscriptionFeedRefreshRequest(() => ({
+    presented: isTabPresented?.value !== false,
+    hasTab: currentTab.value !== null,
+    refreshing: currentTabRefreshing.value,
+    ready: currentTabPanel.value?.isLoading === false && !currentTabRefreshInProgress.value &&
+      !isSubscriptionRefreshReserved(),
+  }))
+  if (start && !refreshDisabled.value) refreshCurrentTab()
+})
 
 function cancelRefresh() {
   const rssTab = currentTab.value === 'feeds' || currentNewFeedRssTab.value

@@ -5,7 +5,7 @@
       fullscreen,
       paused,
       hideControls: paused && !showPlayerControlsWhenPaused,
-      hideTitle: paused && !showVideoTitleWhenPaused,
+      hideTitle: hideFullscreenVideoTitle || (paused && !showVideoTitleWhenPaused),
       hideActions: paused && !showFullscreenActionsWhenPaused,
     }"
   >
@@ -194,6 +194,7 @@ const menuOpen = computed(() => props.state === 'menu' || (props.menu && props.s
 const usePlayerMenuGrid = computed(() => store.getters.getUsePlayerMenuGrid)
 const showPlayerControlsWhenPaused = computed(() => store.getters.getShowPlayerControlsWhenPaused)
 const showVideoTitleWhenPaused = computed(() => store.getters.getShowVideoTitleWhenPaused)
+const hideFullscreenVideoTitle = computed(() => store.getters.getHideFullscreenVideoTitle)
 const showFullscreenActionsWhenPaused = computed(() => store.getters.getShowFullscreenActionsWhenPaused)
 // The mobile player always shows its center button.
 const displayVideoPlayButton = computed(() => IS_CAPACITOR || store.getters.getDisplayVideoPlayButton)

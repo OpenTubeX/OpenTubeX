@@ -604,7 +604,10 @@ Settings:
     General Settings: Allgemein
     Navigation:
       Always Show Navigation Bar: Navigationsleiste immer anzeigen, wenn sie unten ist
-      Compact Tab Labels: Kompakte Navigationsleiste, wenn sie unten ist
+      Navigation Bar Labels: Beschriftungen der unteren Navigationsleiste
+      All Labels: Alle anzeigen
+      Current Page Label: Nur aktuelle Seite
+      No Labels: Ausblenden (kompakte Leiste)
       Show Active Subscriptions: Aktive Abos in der Seitenleiste anzeigen
       Navigation: Navigation
       Customize Navigation: Navigation anpassen
@@ -1701,6 +1704,7 @@ Settings:
     Hide End-Screen Annotations: Anmerkungen auf dem Abspann ausblenden
     Hide End-Screen Recommendations: Empfehlungen auf dem Abspann ausblenden
     Hide Paid Promotion Badge: Hinweis auf bezahlte Werbung ausblenden
+    Hide Full Screen Video Title: Videotitel im Vollfenster/Vollbild ausblenden
     Show Player Controls: Wiedergabesteuerung anzeigen
     Show Video Title: Videotitel anzeigen
     Show Bottom Right Actions Dock: Aktionsleiste unten rechts anzeigen

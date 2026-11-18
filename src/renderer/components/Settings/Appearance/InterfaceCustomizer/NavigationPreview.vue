@@ -1,7 +1,7 @@
 <template>
   <div
     class="navigationPreview"
-    :class="[layout, { compactLabels: compactNavigationLabels, hiddenLabels: layout === 'desktop' && hideLabelsSideBar }]"
+    :class="[layout, { compactLabels: navigationBarLabels === 'none', activeLabelOnly: navigationBarLabels === 'active', hiddenLabels: layout === 'desktop' && hideLabelsSideBar }]"
   >
     <div class="previewWindow">
       <header class="previewTopBar">
@@ -150,7 +150,7 @@ const activeProfile = computed(() => store.getters.getActiveProfile)
 const profileInitial = computed(() => activeProfile.value?.name
   ? getFirstCharacter(translateProfileName(activeProfile.value, t), locale.value)
   : '')
-const compactNavigationLabels = computed(() => store.getters.getCompactNavigationLabels)
+const navigationBarLabels = computed(() => store.getters.getNavigationBarLabels)
 const hideActiveSubscriptions = computed(() => store.getters.getHideActiveSubscriptions)
 const hideLabelsSideBar = computed(() => store.getters.getHideLabelsSideBar)
 
