@@ -2562,11 +2562,12 @@ function openAvailableUpdate() {
 
 /**
  * Opens the update a notification announces. A tab that has not found it, for
- * example because it is installed now, shows the release on GitHub instead.
+ * example because it is installed now or another tab found it, shows the
+ * release on GitHub instead. A newer update's notes include older ones.
  * @param {string | undefined} tagName
  */
 function openUpdateNotification(tagName) {
-  if (availableUpdate !== null) {
+  if (availableUpdate !== null && !isOlderRelease(availableUpdate.tagName, tagName ?? '')) {
     store.dispatch('hideSettingsWindow')
     openAvailableUpdate()
   } else if (typeof tagName === 'string' && /^v[\w.-]+$/.test(tagName)) {
@@ -2588,14 +2589,19 @@ async function checkForNewUpdates() {
     const availableReleases = await fetchReleasePages(releasesUrl, fetch, packageDetails.version)
     const releases = findUpdateReleases(availableReleases, packageDetails.version)
     if (releases.length === 0) {
-      // The announced update is installed.
-      markOverNotificationsRead(entry => entry.kind === 'app-update')
+      // The announced update is installed. A check that finished late in
+      // another window must not dismiss a newer one it did not see.
+      markOverNotificationsRead(entry => entry.kind === 'app-update' &&
+        !isOlderRelease(packageDetails.version, entry.query?.version ?? ''))
       return
     }
 
     const release = releases[0]
     const tagName = release.tag_name
     const versionNumber = tagName.replace('v', '').replace('-beta', '')
+    // A newer release replaces the one announced before, also when this
+    // window announced it already and an older entry arrived late.
+    markOverNotificationsRead(entry => entry.kind === 'app-update' && isOlderRelease(entry.query?.version ?? '', tagName))
     // The toast for this release is open, was dismissed, or was answered already
     if (
       availableUpdate?.tagName === tagName ||
@@ -2629,9 +2635,6 @@ async function checkForNewUpdates() {
     changeLogTitle.value = t('Update to {version}', { version: release.name ?? tagName })
     availableUpdate = { tagName, versionNumber }
     showAvailableUpdateToast()
-    // A newer release replaces the one announced before. A check that finished
-    // late in another window must not dismiss a newer one it did not see.
-    markOverNotificationsRead(entry => entry.kind === 'app-update' && isOlderRelease(entry.query?.version ?? '', tagName))
     recordNotification({
       kind: 'app-update',
       path: '/update',

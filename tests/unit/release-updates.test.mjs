@@ -264,5 +264,6 @@ test('update notifications dismiss only older releases', () => {
   assert.equal(isOlderRelease('v0.40.0-beta', 'v0.39.0-beta'), false)
   assert.equal(isOlderRelease('v0.39.0-beta', 'v0.39.0-beta'), false)
   assert.equal(isOlderRelease('v0.39.0-nightly-5', 'v0.39.0-nightly-12'), true)
+  assert.equal(isOlderRelease('0.38.1', 'v0.39.0-beta'), true)
   assert.equal(isOlderRelease('', 'v0.39.0-beta'), false)
 })
