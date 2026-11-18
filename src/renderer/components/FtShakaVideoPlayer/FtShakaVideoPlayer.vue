@@ -1265,7 +1265,7 @@
         >
           <span
             v-if="valueChangeOsd.icons.length > 0"
-            :key="valueChangeOsd.text"
+            :key="valueChangeIconsKey"
             class="valueChangeIcons"
           >
             <template
@@ -13557,6 +13557,11 @@ const valueChangeOsd = computed(() => {
     level: valueChangeLevel.value,
     invertContentOrder: invertValueChangeContentOrder.value,
   }
+})
+
+// Pop the badge when its icon changes, not on every value of a drag or pinch.
+const valueChangeIconsKey = computed(() => {
+  return valueChangeOsd.value.icons.map(icon => typeof icon === 'string' ? icon : icon.path).join(' ')
 })
 
 function setShowUiOnPaused(value) {
