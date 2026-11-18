@@ -35,7 +35,7 @@ export class LegacyQualitySelection extends shaka.ui.SettingsMenu {
     this.getActiveLegacyFormat_ = getActiveLegacyFormat
 
     const resolutionOf = getLegacyFormatResolution(legacyFormats)
-    const sortedLegacyFormats = legacyFormats.toSorted((a, b) => resolutionOf(b) - resolutionOf(a))
+    const sortedLegacyFormats = legacyFormats.toSorted((a, b) => (resolutionOf(b) ?? 0) - (resolutionOf(a) ?? 0))
 
     /** @private */
     this.legacyFormats_ = sortedLegacyFormats

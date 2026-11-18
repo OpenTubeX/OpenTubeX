@@ -42,4 +42,6 @@ test('formats without a width or bitrate are matched on their height', () => {
   assert.equal(findLegacyFormatForQuality(formats, 1080).height, 1080)
   assert.equal(findLegacyFormatForQuality(formats, 900).height, 720)
   assert.equal(findLegacyFormatForQuality(formats, 240).height, 360)
+  // a format without dimensions is no match below the preferred quality
+  assert.equal(findLegacyFormatForQuality([...formats, { width: null, height: null, bitrate: null }], 240).height, 360)
 })

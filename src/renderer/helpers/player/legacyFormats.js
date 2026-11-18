@@ -8,13 +8,13 @@
  * yt-dlp's Twitch clips, only report a height, so a missing width never makes
  * a video portrait.
  * @param {LegacyFormat[]} legacyFormats
- * @returns {(format: LegacyFormat) => number}
+ * @returns {(format: LegacyFormat) => number | null} null when the format has no dimensions
  */
 export function getLegacyFormatResolution(legacyFormats) {
   const first = legacyFormats[0]
   const isPortrait = first?.width != null && first.height != null && first.height > first.width
 
-  return (format) => (isPortrait ? format.width ?? format.height : format.height ?? format.width) ?? 0
+  return (format) => (isPortrait ? format.width ?? format.height : format.height ?? format.width) ?? null
 }
 
 /**
@@ -27,18 +27,23 @@ export function getLegacyFormatResolution(legacyFormats) {
  * @returns {LegacyFormat}
  */
 export function findLegacyFormatForQuality(legacyFormats, preferredQuality) {
-  const resolutionOf = getLegacyFormatResolution(legacyFormats)
+  const readResolution = getLegacyFormatResolution(legacyFormats)
+  /** @param {LegacyFormat} format */
+  const resolutionOf = (format) => readResolution(format) ?? 0
+  // A format without dimensions only counts when no format has them
+  const knownFormats = legacyFormats.filter(format => readResolution(format) !== null)
+  const candidates = knownFormats.length > 0 ? knownFormats : legacyFormats
 
   /** @type {(a: LegacyFormat, b: LegacyFormat) => number} */
   const ascending = (a, b) => resolutionOf(a) - resolutionOf(b) || (a.bitrate ?? 0) - (b.bitrate ?? 0)
 
-  const exactMatches = legacyFormats.filter(format => resolutionOf(format) === preferredQuality)
+  const exactMatches = candidates.filter(format => resolutionOf(format) === preferredQuality)
 
   if (exactMatches.length > 0) {
     return exactMatches[0]
   }
 
-  const lowerQualityMatches = legacyFormats.filter(format => resolutionOf(format) < preferredQuality)
+  const lowerQualityMatches = candidates.filter(format => resolutionOf(format) < preferredQuality)
 
   if (lowerQualityMatches.length > 0) {
     // highest quality below the preferred one
@@ -46,5 +51,5 @@ export function findLegacyFormatForQuality(legacyFormats, preferredQuality) {
   }
 
   // everything is above the preferred quality, so use the lowest quality one
-  return legacyFormats.toSorted(ascending)[0]
+  return candidates.toSorted(ascending)[0]
 }
