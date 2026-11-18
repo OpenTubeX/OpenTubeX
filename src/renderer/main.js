@@ -150,7 +150,7 @@ if (supportsYtDlp && !isAndroidBackgroundRenderer) {
       // The desktop app's main process keeps these in the bell, once for every tab.
       if (process.env.IS_CAPACITOR) {
         recordNotification({
-          ...getDownloadTarget(completed ? 'completed' : 'failed', download.videoId, download.id),
+          ...getDownloadTarget(completed ? 'completed' : 'failed', download.videoId, download.id, download.mode),
           title: completed ? i18n.global.t('Downloads.Download Complete') : i18n.global.t('Downloads.Download Failed'),
           body: message,
           ...(typeof download.videoId === 'string' && download.videoId ? withThumbnail(download.videoId) : {})

@@ -192,14 +192,16 @@ export function getNotificationOpenUrl(url) {
 }
 
 /**
- * Where a download notification leads: the downloaded video, or the downloads.
+ * Where a download notification leads: the downloaded video, or the downloads
+ * for other files, which the player cannot play.
  * @param {'started' | 'completed' | 'failed'} phase
  * @param {unknown} videoId
  * @param {number | null} downloadId
+ * @param {unknown} [mode] automatic downloads are always videos or audio
  * @returns {NotificationHistoryTarget}
  */
-export function getDownloadTarget(phase, videoId, downloadId) {
-  if (phase === 'completed' && typeof videoId === 'string' && ID_PATTERN.test(videoId) && Number.isInteger(downloadId)) {
+export function getDownloadTarget(phase, videoId, downloadId, mode = 'video') {
+  if (phase === 'completed' && (mode === 'video' || mode === 'audio') && typeof videoId === 'string' && ID_PATTERN.test(videoId) && Number.isInteger(downloadId)) {
     return { kind: 'download-completed', path: `/watch/${videoId}`, query: { downloadId: String(downloadId) } }
   }
   return { kind: /** @type {const} */ (`download-${phase}`), path: '/downloads' }

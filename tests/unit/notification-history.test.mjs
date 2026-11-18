@@ -79,6 +79,9 @@ test('entries lead to the uploaded item or the download', () => {
   assert.equal(getUploadTarget('videos', undefined), null)
 
   assert.deepEqual(getDownloadTarget('completed', 'abc', 4), { kind: 'download-completed', path: '/watch/abc', query: { downloadId: '4' } })
+  assert.deepEqual(getDownloadTarget('completed', 'abc', 4, 'audio'), { kind: 'download-completed', path: '/watch/abc', query: { downloadId: '4' } })
+  // The player plays only downloaded videos and audio.
+  assert.deepEqual(getDownloadTarget('completed', 'abc', 4, 'subtitles'), { kind: 'download-completed', path: '/downloads' })
   assert.deepEqual(getDownloadTarget('completed', undefined, 4), { kind: 'download-completed', path: '/downloads' })
   assert.deepEqual(getDownloadTarget('started', 'abc', null), { kind: 'download-started', path: '/downloads' })
   assert.deepEqual(getDownloadTarget('failed', 'abc', null), { kind: 'download-failed', path: '/downloads' })

@@ -717,7 +717,7 @@ function runApp() {
     if (notificationMode !== 'both') return
     const completed = download.status === 'completed'
     const notification = parseRecordedNotification({
-      ...getDownloadTarget(completed ? 'completed' : 'failed', download.videoId, download.id),
+      ...getDownloadTarget(completed ? 'completed' : 'failed', download.videoId, download.id, download.mode),
       title: completed ? t('Downloads.Download Complete') : t('Downloads.Download Failed'),
       body: completed
         ? t('Downloads.Download Complete Template', { title: download.title })
