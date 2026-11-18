@@ -54,3 +54,28 @@ jobs:
       uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
       with:
         category: "/language:${{matrix.language}}"
+
+  # The CodeQL Action saves a new overlay-base database of about 500 MB on
+  # every push and never deletes the old ones, which pushes the other caches
+  # out of the repository's 10 GB limit. Only the newest one of each is used.
+  prune-overlay-databases:
+    name: Delete old CodeQL databases
+    needs: analyze
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    permissions:
+      actions: write
+
+    steps:
+    - name: Delete all but the newest overlay-base database
+      env:
+        GH_TOKEN: ${{ github.token }}
+        GH_REPO: ${{ github.repository }}
+        REF: ${{ github.ref }}
+      run: |
+        set -euo pipefail
+        gh cache list --ref "$REF" --key codeql-overlay-base-database- --sort created_at --order desc --limit 100 \
+          --json id,key --jq '.[] | "\(.id) \(.key | sub("-[0-9a-f]{40}-[0-9]+-[0-9]+$"; ""))"' |
+          awk 'seen[$2]++ { print $1 }' |
+          xargs --no-run-if-empty -n 1 gh cache delete

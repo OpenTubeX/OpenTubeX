@@ -59,6 +59,9 @@ wget --retry-connrefused --tries=30 \
 	"$TOOLS_SOURCE"/get-debloated-pkgs.sh -O /usr/local/bin/get-debloated-pkgs
 chmod +x /usr/local/bin/quick-sharun /usr/local/bin/get-debloated-pkgs
 GITHUB_TOKEN=$github_token get-debloated-pkgs --add-common --prefer-nano
+# Drop superseded package versions, so CI's cached package directory keeps
+# only what this run installed.
+pacman -Sc --noconfirm >/dev/null
 
 mkdir -p ./AppDir/bin
 extracted_deb=$(mktemp -d)
