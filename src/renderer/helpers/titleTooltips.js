@@ -13,6 +13,8 @@ const CURSOR_GAP_PX = 18
 const VIEWPORT_MARGIN_PX = 8
 // Inside these, such as the video player, tooltips open above like the player's control tooltips
 const ABOVE_SELECTOR = '[data-title-tooltips-above]'
+// Elements with this attribute only show their title while their text is cut off
+const TRUNCATED_ATTRIBUTE = 'data-title-tooltip-truncated'
 
 /** @type {HTMLDivElement} */
 let tooltip
@@ -193,11 +195,15 @@ function handleTitleMutation() {
   anchor.setAttribute('title', '')
   observer.takeRecords()
   mirrorTitle()
-  if (!title.trim()) {
-    hide()
+  if (!title.trim() || !needsTooltip(anchor)) {
+    // Keep a pending delay, so a title that changes back still waits for it
+    if (tooltip.matches(':popover-open')) hide()
   } else if (tooltip.matches(':popover-open')) {
     tooltip.textContent = title
     position()
+  } else if (showTimer === 0 && !suppressed) {
+    // The delay passed while the title was empty or its text fit
+    show()
   }
 }
 
@@ -211,7 +217,7 @@ function suppress() {
 
 function show() {
   showTimer = 0
-  if (!anchor?.isConnected || !stripped || !title.trim()) return
+  if (!anchor?.isConnected || !stripped || !title.trim() || !needsTooltip(anchor)) return
 
   tooltip.textContent = title
   origin.x = pointer.x
@@ -220,6 +226,15 @@ function show() {
   if (tooltip.matches(':popover-open')) tooltip.hidePopover()
   tooltip.showPopover()
   position()
+}
+
+/**
+ * @param {Element} element
+ */
+function needsTooltip(element) {
+  if (!element.hasAttribute(TRUNCATED_ATTRIBUTE)) return true
+  // The tolerance absorbs fractional UI Scale rounding.
+  return element.scrollHeight > element.clientHeight + 1 || element.scrollWidth > element.clientWidth + 1
 }
 
 function hide() {

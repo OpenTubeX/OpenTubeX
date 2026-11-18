@@ -58,6 +58,8 @@
             <span
               class="notificationBody"
               dir="auto"
+              :title="entry.body"
+              data-title-tooltip-truncated
             >{{ entry.body }}</span>
             <time
               :datetime="new Date(entry.createdAt).toISOString()"
