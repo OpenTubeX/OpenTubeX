@@ -254,7 +254,9 @@ test('cancels folder selection without enabling backups and keeps controls usabl
     await expect.poll(() => controls.locator('.select').evaluateAll(selects => Math.max(...selects.map(select => {
       const label = select.querySelector('.select-label')
       const button = select.querySelector('.select-text')
-      return Math.abs(label.getBoundingClientRect().left - button.getBoundingClientRect().left - 13)
+      // Outlined labels sit in the outline's gap, rounded ones at the value's start.
+      const offset = select.classList.contains('outlined') ? 13 : Number.parseFloat(getComputedStyle(button).paddingInlineStart)
+      return Math.abs(label.getBoundingClientRect().left - button.getBoundingClientRect().left - offset)
     })))).toBeLessThanOrEqual(1)
     for (const name of ['Backup frequency', 'Backups to keep']) {
       const select = controls.getByRole('combobox', { name })

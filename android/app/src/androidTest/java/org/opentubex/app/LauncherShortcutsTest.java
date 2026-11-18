@@ -102,16 +102,16 @@ public class LauncherShortcutsTest {
             String store = "document.querySelector('#app').__vue_app__.config.globalProperties.$store";
             try {
                 evaluate(scenario, "void " + store + ".dispatch('updateCurrentLocale', 'de-DE')");
-                awaitShortcutLabels(context, manager, new String[]{"Abos", "Playlists", "Verlauf", "Downloads"});
+                awaitShortcutLabels(context, manager, new String[]{"Abos neu laden", "Playlists", "Verlauf", "Downloads"});
             } finally {
                 evaluate(scenario, "void " + store + ".dispatch('updateCurrentLocale', 'en-US')");
-                awaitShortcutLabels(context, manager, new String[]{"Subscriptions", "Playlists", "History", "Downloads"});
+                awaitShortcutLabels(context, manager, new String[]{"Refresh Subscriptions", "Playlists", "History", "Downloads"});
             }
         }
     }
 
     private static void awaitShortcutLabels(Context context, ShortcutManager manager, String[] labels) throws Exception {
-        String[] pages = {"subscriptions", "userplaylists", "history", "downloads"};
+        String[] pages = {"refreshSubscriptions", "userplaylists", "history", "downloads"};
         long deadline = System.currentTimeMillis() + 15000;
         while (System.currentTimeMillis() < deadline) {
             List<ShortcutInfo> shortcuts = manager.getDynamicShortcuts();
