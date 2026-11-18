@@ -4636,13 +4636,16 @@ async function enableCapacitorIntegrations() {
     : null
   // The listener also receives the launch URL, which it retains until the app
   // subscribes. Open it once, since notification links open a new tab each time.
-  const launchUrl = (await CapacitorApp.getLaunchUrl())?.url
+  let launchUrl = (await CapacitorApp.getLaunchUrl())?.url
   let retainedLaunchUrl = launchUrl
   const urlHandle = await CapacitorApp.addListener('appUrlOpen', ({ url }) => {
     if (retainedLaunchUrl && url === retainedLaunchUrl) {
       retainedLaunchUrl = null
       return
     }
+    // A link tapped during the setup below replaces the launch URL it opens at its end.
+    launchUrl = null
+    retainedLaunchUrl = null
     openUrl(url)
   })
   const shortcutHandle = await AppShortcuts.addListener('click', async ({ shortcutId }) => {

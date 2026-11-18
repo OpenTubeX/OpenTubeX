@@ -47,7 +47,9 @@ test('retained startup clicks and running-app clicks navigate and update localiz
   appWindow.addEventListener('opentubex:focus-search', () => { searchFocusRequests++ })
   const locale = { value: 'en-US' }
   const refreshRequests = []
-  const enable = vm.runInNewContext(`${integration}\nenableCapacitorIntegrations`, {
+  // A link tapped while the app is still starting, after the launch URL.
+  let newerStartupTap = null
+  const context = {
     window: appWindow,
     document: { getElementById: () => null },
     CustomEvent,
@@ -72,7 +74,10 @@ test('retained startup clicks and running-app clicks navigate and update localiz
         if (name === 'appUrlOpen') callback({ url: 'opentubex://https//www.youtube.com/feed/history' })
         return { remove: () => listeners.delete(name) }
       },
-      getState: async () => ({ isActive: true }),
+      getState: async () => {
+        if (newerStartupTap) listeners.get('appUrlOpen')({ url: newerStartupTap })
+        return { isActive: true }
+      },
       getLaunchUrl: async () => ({ url: 'opentubex://https//www.youtube.com/feed/history' }),
     },
     AppShortcuts: {
@@ -122,7 +127,8 @@ test('retained startup clicks and running-app clicks navigate and update localiz
       paths.push(query ? `${path}?${new URLSearchParams(query)}` : path)
     },
     handleYoutubeLink: url => { youtubeLinks.push(url) },
-  })
+  }
+  const enable = vm.runInNewContext(`${integration}\nenableCapacitorIntegrations`, context)
   const cleanup = await enable()
   assert.deepEqual(wakeStates, [true])
   assert.deepEqual(paths, ['/subscriptions'])
@@ -156,6 +162,12 @@ test('retained startup clicks and running-app clicks navigate and update localiz
   assert.equal(stopped, true)
   assert.equal(widgetSyncStopped, true)
   assert.equal(listeners.size, 0)
+
+  // A newer link tapped during startup stays the destination instead of the launch URL.
+  newerStartupTap = 'https://youtu.be/456'
+  const openedBefore = youtubeLinks.length
+  ;(await enable())()
+  assert.deepEqual(youtubeLinks.slice(openedBefore), ['https://youtu.be/456'])
 })
 
 test('a feed refresh request runs once, after the page has loaded', () => {
