@@ -179,6 +179,17 @@ test('stale secrets are encrypted again with the current key', async t => {
   assert.deepEqual(await saved(), { proxyPassword: 'proxy-secret' })
 })
 
+test('secrets the cipher cannot decrypt for now are left out and kept', async t => {
+  t.mock.method(settings, 'cipher', () => Promise.resolve(cipher('device')))
+  await settings.upsert('proxyPassword', 'proxy-secret')
+  await settings.upsert('proxyUsername', 'user')
+  settings.migrationPromise = null
+  t.mock.method(settings, 'cipher', () => Promise.resolve({ ...cipher('device'), decrypt: async texts => texts.map(() => undefined) }))
+
+  assert.deepEqual(await saved(), { proxyUsername: 'user' })
+  assert.equal(typeof (await stored('proxyPassword')).encryptedValue, 'string')
+})
+
 test('encrypted secrets are kept while the keyring is unavailable', async t => {
   t.mock.method(settings, 'cipher', () => Promise.resolve(cipher('device')))
   await settings.upsert('proxyPassword', 'proxy-secret')
@@ -218,6 +229,10 @@ test('safeStorage deletes only values its key cannot decrypt, and keeps them whi
       if (!text.startsWith('v11')) throw new Error('Error while decrypting the ciphertext provided to safeStorage.decryptStringAsync.')
       return { shouldReEncrypt: false, result: text.slice('v11'.length) }
     },
+    isEncryptionAvailable: () => true,
+    decryptString: () => {
+      throw new Error('Error while decrypting the ciphertext provided to safeStorage.decryptString.')
+    },
   }
   const cipher = await createSafeStorageCipher({ app: { whenReady: async () => {} }, safeStorage })
   const [encrypted] = await cipher.encrypt(['secret'])
@@ -251,6 +266,9 @@ test('safeStorage reads values the async API cannot decrypt with the sync API, a
   assert.deepEqual(await cipher.decrypt([synced, foreign]), [{ text: 'secret', stale: true }, null])
   syncAvailable = false
   await assert.rejects(cipher.decrypt([synced]))
+  // Once Electron removes the sync API, Linux keeps such values.
+  delete safeStorage.decryptString
+  assert.deepEqual(await cipher.decrypt([synced]), [process.platform === 'linux' ? undefined : null])
 })
 
 test('safeStorage is not used on Linux when it would fall back to the hardcoded key', { skip: process.platform !== 'linux' }, async () => {

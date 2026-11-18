@@ -3,12 +3,13 @@ import { SECRET_SETTINGS } from '../nonTransferableSettings.js'
 
 /**
  * Encrypts and decrypts with a key the system keeps, such as the OS keychain.
- * `decrypt` returns null for a value this key cannot decrypt, and rejects
- * only when the system could not be asked. A `stale` value decrypts, but
- * should be encrypted again, such as after the key changed.
+ * `decrypt` returns null for a value this key cannot decrypt, undefined for
+ * one it cannot decrypt for now, and rejects only when the system could not
+ * be asked. A `stale` value decrypts, but should be encrypted again, such as
+ * after the key changed.
  * @typedef {object} SecretCipher
  * @property {(texts: string[]) => Promise<string[]>} encrypt
- * @property {(texts: string[]) => Promise<({ text: string, stale?: boolean } | null)[]>} decrypt
+ * @property {(texts: string[]) => Promise<({ text: string, stale?: boolean } | null | undefined)[]>} decrypt
  */
 
 /**
@@ -78,6 +79,10 @@ export async function decodeSettings(docs, datastore, cipherPromise) {
   const stale = []
   for (const [index, doc] of encrypted.entries()) {
     const result = decrypted[index]
+    if (result === undefined) {
+      console.warn(`Leaving out the saved ${doc._id} setting, which cannot be decrypted for now`)
+      continue
+    }
     let value
     try {
       value = result === null ? undefined : JSON.parse(result.text)

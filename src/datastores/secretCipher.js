@@ -36,8 +36,9 @@ export async function createSafeStorageCipher({ app, safeStorage }) {
       }
       // With KWallet, the async API cannot read values the sync API encrypted
       // (electron/electron#55760), so those are read with the sync API while
-      // Electron still has it, and encrypted again.
-      if (typeof safeStorage.decryptString !== 'function') return null
+      // Electron still has it, and encrypted again. Without it, such a value
+      // is kept, in case a later Electron version can read it.
+      if (typeof safeStorage.decryptString !== 'function') return process.platform === 'linux' ? undefined : null
       if (!safeStorage.isEncryptionAvailable()) throw new Error('The system keyring is unavailable')
       try {
         return { text: safeStorage.decryptString(encrypted), stale: true }
