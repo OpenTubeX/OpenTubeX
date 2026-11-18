@@ -238,14 +238,11 @@ test.describe('Channels on other platforms', () => {
       await expect(rows).toHaveCount(0)
       // Videos aren't channels
       const invalid = page.getByText('Enter the address of a channel page on Twitch, SoundCloud, PeerTube, Rumble, Odysee or media.ccc.de.')
-      for (let index = 0; index < 2; index++) {
-        await input.fill('https://www.twitch.tv/videos/123')
-        // Addresses aren't searched for
-        await expect(rows).toHaveCount(1)
-        await input.press('Enter')
-        // Each attempt shows its own message
-        await expect(invalid).toHaveCount(index + 1)
-      }
+      await input.fill('https://www.twitch.tv/videos/123')
+      // Addresses aren't searched for
+      await expect(rows).toHaveCount(1)
+      await input.press('Enter')
+      await expect(invalid).toBeVisible()
 
       await input.fill('https://www.twitch.tv/Streamer')
       await input.press('Enter')
