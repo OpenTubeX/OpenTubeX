@@ -1,5 +1,8 @@
 <template>
-  <FtSettingsSection :title="t('Settings.Player Settings.yt-dlp Streaming')">
+  <FtSettingsSection
+    :title="t('Settings.Player Settings.yt-dlp Streaming')"
+    :icon="['fas', 'terminal']"
+  >
     <FtFlexBox>
       <FtToggleSwitch
         :label="t('Settings.Player Settings.Preload Upcoming Videos')"

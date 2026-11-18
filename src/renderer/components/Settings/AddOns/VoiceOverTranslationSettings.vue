@@ -1,6 +1,7 @@
 <template>
   <FtSettingsSection
     :title="`${t('Settings.Player Settings.Voice-over Translation.Title')} ${t('Settings.Player Settings.Voice-over Translation.Attribution')}`"
+    :icon="['fas', 'headphones']"
   >
     <div class="switchGrid">
       <FtToggleSwitch

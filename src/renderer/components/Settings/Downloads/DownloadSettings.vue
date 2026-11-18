@@ -1,6 +1,7 @@
 <template>
   <FtSettingsSection
     :title="t('Settings.Download Settings.Download Settings')"
+    :icon="['fas', 'download']"
   >
     <FtFlexBox class="downloadEnable">
       <FtToggleSwitch

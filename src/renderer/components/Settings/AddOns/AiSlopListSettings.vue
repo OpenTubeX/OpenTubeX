@@ -1,6 +1,7 @@
 <template>
   <FtSettingsSection
     :title="t('Settings.AiSList Settings.AiSList Settings')"
+    :icon="['fac', 'robot-slash']"
   >
     <FtFlexBox class="settingsFlexStart500px">
       <FtToggleSwitch

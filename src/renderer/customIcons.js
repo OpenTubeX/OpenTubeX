@@ -94,3 +94,39 @@ export const facMatrix = {
     'M.632.55v22.9H2.28V24H0V0h2.28v.55zm7.043 7.26v1.157h.033a3.3 3.3 0 0 1 1.117-1.024c.433-.245.936-.365 1.5-.365q.81.002 1.481.314c.448.208.785.582 1.02 1.108q.382-.562 1.034-.992q.651-.43 1.546-.43q.679 0 1.26.167c.388.11.716.286.993.53c.276.245.489.559.646.951q.229.587.23 1.417v5.728h-2.349V11.52q0-.43-.032-.812a1.8 1.8 0 0 0-.18-.66a1.1 1.1 0 0 0-.438-.448q-.292-.165-.785-.166q-.498 0-.803.189a1.4 1.4 0 0 0-.48.499a2 2 0 0 0-.231.696a6 6 0 0 0-.06.785v4.768h-2.35v-4.8q.002-.38-.018-.752a2.1 2.1 0 0 0-.143-.688a1.05 1.05 0 0 0-.415-.503c-.194-.125-.476-.19-.854-.19q-.168 0-.439.074c-.18.051-.36.143-.53.282a1.64 1.64 0 0 0-.439.595q-.18.39-.18 1.02v4.966H5.46V7.81zm15.693 15.64V.55H21.72V0H24v24h-2.28v-.55z'
   ]
 }
+
+// The following marks have no glyph in either icon pack. Each is a full SVG
+// body in one color, so it matches the pack icons around it.
+
+// DeArrow's logo: three nested circles, the middle one lighter (24x24 grid)
+export const facDeArrow = {
+  prefix: 'fac',
+  iconName: 'dearrow',
+  width: 24,
+  height: 24,
+  body: '<path fill="currentColor" fill-rule="evenodd" d="M12 2a10 10 0 1 0 0 20a10 10 0 1 0 0-20m0 3.1a6.9 6.9 0 1 0 0 13.8a6.9 6.9 0 1 0 0-13.8"/>' +
+    '<path fill="currentColor" fill-opacity=".45" fill-rule="evenodd" d="M12 5.1a6.9 6.9 0 1 0 0 13.8a6.9 6.9 0 1 0 0-13.8m0 3.7a3.2 3.2 0 1 0 0 6.4a3.2 3.2 0 1 0 0-6.4"/>' +
+    '<circle cx="12" cy="12" r="3.2" fill="currentColor"/>'
+}
+
+// SponsorBlock's logo: a shield with a play triangle (the player's 565x565 grid)
+export const facSponsorBlock = {
+  prefix: 'fac',
+  iconName: 'sponsorblock',
+  width: 565,
+  height: 565,
+  body: '<path fill="currentColor" fill-rule="evenodd" d="M 284.70508 42.693359 A 479.9 479.9 0 0 0 54.369141 100.41992 A 22.53 22.53 0 0 0 42.669922 120.41992 C 45.069922 290.25992 135.67008 438.63977 270.83008 522.00977 A 22.48 22.48 0 0 0 294.32031 522.00977 C 429.48031 438.63977 520.08047 290.25992 522.48047 120.41992 A 22.53 22.53 0 0 0 510.7793 100.41992 A 479.9 479.9 0 0 0 284.70508 42.693359 z M 220.41016 145.74023 L 411.2793 255.93945 L 220.41016 366.14062 L 220.41016 145.74023 z"/>'
+}
+
+// Material's robot (as the robot mapping uses) crossed out like Material's
+// "off" icons, for AiSList's filtering of AI-generated videos (24x24 grid)
+export const facRobotSlash = {
+  prefix: 'fac',
+  iconName: 'robot-slash',
+  width: 24,
+  height: 24,
+  body: '<mask id="robot-slash-gap"><rect width="24" height="24" fill="#fff"/>' +
+    '<path d="M2.5 2.5L21.5 21.5" stroke="#000" stroke-width="5" stroke-linecap="round"/></mask>' +
+    '<path fill="currentColor" mask="url(#robot-slash-gap)" d="M5 21q-.425 0-.712-.288T4 20v-4q0-.825.588-1.412T6 14h12q.825 0 1.413.588T20 16v4q0 .425-.288.713T19 21zm4-8q-2.075 0-3.537-1.463T4 8t1.463-3.537T9 3h6q2.075 0 3.538 1.463T20 8t-1.463 3.538T15 13zm-3 6h12v-3H6zm3-8h6q1.25 0 2.125-.875T18 8t-.875-2.125T15 5H9q-1.25 0-2.125.875T6 8t.875 2.125T9 11m.713-2.287Q10 8.425 10 8t-.288-.712T9 7t-.712.288T8 8t.288.713T9 9t.713-.288m6 0Q16 8.426 16 8t-.288-.712T15 7t-.712.288T14 8t.288.713T15 9t.713-.288M12 8"/>' +
+    '<path d="M3 3L21 21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'
+}

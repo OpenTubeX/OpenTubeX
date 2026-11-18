@@ -1,6 +1,7 @@
 <template>
   <FtSettingsSection
     :title="$t('Settings.SponsorBlock Settings.DeArrow Settings')"
+    :icon="['fac', 'dearrow']"
   >
     <div class="switchColumnGrid">
       <div class="switchColumn">

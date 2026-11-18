@@ -1,6 +1,7 @@
 <template>
   <FtSettingsSection
     :title="$t('Settings.Subscription Settings.Subscription Settings')"
+    :icon="['fas', 'subscriptions']"
   >
     <div class="switchColumnGrid">
       <div class="switchColumn">

@@ -1,6 +1,7 @@
 <template>
   <FtSettingsSection
     :title="$t('Settings.Proxy Settings.Proxy Settings')"
+    :icon="['fas', 'network-wired']"
   >
     <FtFlexBox class="settingsFlexStart500px">
       <p

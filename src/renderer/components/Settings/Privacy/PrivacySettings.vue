@@ -1,6 +1,7 @@
 <template>
   <FtSettingsSection
     :title="$t('Settings.Privacy Settings.Privacy Settings')"
+    :icon="['fas', 'user-lock']"
   >
     <div class="switchColumnGrid">
       <div class="switchColumn">

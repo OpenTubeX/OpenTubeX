@@ -275,6 +275,7 @@
     v-if="!importOnly"
     class="advancedDataSettings"
     :title="t('Settings.Categories.Advanced')"
+    :icon="['fas', 'sliders-h']"
   >
     <h4 class="groupTitle">
       {{ t('Settings.Data Settings.Channel playback speeds') }}

@@ -2,6 +2,7 @@
   <FtSettingsSection
     class="scheduledBackups"
     :title="t('Settings.Data Settings.Scheduled backups')"
+    :icon="['fas', 'clock-rotate-left']"
   >
     <p>{{ t('Settings.Data Settings.Scheduled backup description') }}</p>
     <FtFlexBox class="backupFolderChoice">

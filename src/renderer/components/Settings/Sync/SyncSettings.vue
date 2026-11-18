@@ -2,6 +2,7 @@
   <FtSettingsSection
     class="syncSettings"
     :title="t('Settings.Sync Settings.Sync Settings')"
+    :icon="['fas', 'sync']"
   >
     <p class="description">
       {{ t('Settings.Sync Settings.Description') }}

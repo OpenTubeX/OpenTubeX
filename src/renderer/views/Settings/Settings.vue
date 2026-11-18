@@ -345,6 +345,7 @@
                 :key="activeSettingsSection.renderKey ?? activeSettingsSection.type"
                 :active-tab="activeSectionTab"
                 class="section"
+                :style="{ '--settings-icon-hue': activeSettingsSection.hue }"
                 :data-section="activeSettingsSection.type"
                 :role="activeSettingsSection.tabs ? 'tabpanel' : undefined"
                 :aria-labelledby="activeSettingsSection.tabs ? `${sectionTabIdPrefix}-${activeSectionTab}` : undefined"
