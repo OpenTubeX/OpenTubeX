@@ -235,7 +235,7 @@ const actions = {
     // The selected profile changes before writes in its predecessor's playlists finish.
     const scope = getDataScope()
     if (scope === null) {
-      await dispatch('updateQuickBookmarkTargetPlaylistId', playlistId)
+      await dispatch('updateQuickBookmarkTargetPlaylistId', playlistId, { root: true })
     } else {
       saveScopedQuickBookmarkTarget(scope, playlistId)
       commit('setScopedQuickBookmarkTarget', playlistId)
