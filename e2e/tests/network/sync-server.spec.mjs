@@ -406,7 +406,14 @@ test.describe('OpenTubeX sync server', () => {
       expect(newPasswordResponse.ok).toBe(true)
     }
 
+    const previousSyncAt = await page.evaluate(() => window.$store.getters.getSyncServerLastSyncAt)
     await syncSection.getByRole('button', { name: 'Sync now' }).click()
+    // The sync starts after a lock and disables the account actions until it
+    // ends, so a click right away can land on a disabled Delete button.
+    await expect.poll(() => page.evaluate(() => {
+      const getters = window.$store.getters
+      return getters.getSyncServerStatus !== 'syncing' && getters.getSyncServerLastSyncAt
+    })).toBeGreaterThan(previousSyncAt)
     if (!enhancedPrivacy) {
       await expect.poll(async () => {
         const contents = readDatastore(app.userDataDir, 'profiles')
