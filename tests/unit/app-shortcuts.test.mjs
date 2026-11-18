@@ -68,6 +68,8 @@ test('retained startup clicks and running-app clicks navigate and update localiz
     CapacitorApp: {
       addListener: async (name, callback) => {
         listeners.set(name, callback)
+        // Native plugins also retain the launch URL until the renderer subscribes.
+        if (name === 'appUrlOpen') callback({ url: 'opentubex://https//www.youtube.com/feed/history' })
         return { remove: () => listeners.delete(name) }
       },
       getState: async () => ({ isActive: true }),

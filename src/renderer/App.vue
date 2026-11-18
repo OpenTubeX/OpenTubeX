@@ -4612,7 +4612,12 @@ async function enableCapacitorIntegrations() {
         return handleExternalLink(target)
       }
       await store.dispatch('hideSettingsWindow')
-      return openExternalMedia(target, doCreateNewTab)
+      const opening = openExternalMedia(target, doCreateNewTab)
+      if (!doCreateNewTab) return opening
+      // A new tab is presented once it mounts, and on a cold start tabs mount
+      // only after this setup returns. Like YouTube links, do not wait for it.
+      opening.catch(error => console.error('Failed to open a notification link', error))
+      return
     }
     return handleYoutubeLink(target, { doCreateNewTab })
   }
@@ -4629,7 +4634,15 @@ async function enableCapacitorIntegrations() {
         return null
       })
     : null
+  // The listener also receives the launch URL, which it retains until the app
+  // subscribes. Open it once, since notification links open a new tab each time.
+  const launchUrl = (await CapacitorApp.getLaunchUrl())?.url
+  let retainedLaunchUrl = launchUrl
   const urlHandle = await CapacitorApp.addListener('appUrlOpen', ({ url }) => {
+    if (retainedLaunchUrl && url === retainedLaunchUrl) {
+      retainedLaunchUrl = null
+      return
+    }
     openUrl(url)
   })
   const shortcutHandle = await AppShortcuts.addListener('click', async ({ shortcutId }) => {
@@ -4709,8 +4722,8 @@ async function enableCapacitorIntegrations() {
     playbackScreenWake?.setAppActive(appState.isActive)
     setAndroidAppVisible(appState.isActive)
   }
-  const launch = await CapacitorApp.getLaunchUrl()
-  await openUrl(launch?.url)
+  retainedLaunchUrl = null
+  await openUrl(launchUrl)
 
   return () => {
     clearTimeout(backgroundStateTimeout)

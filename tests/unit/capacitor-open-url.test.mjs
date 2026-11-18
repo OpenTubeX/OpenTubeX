@@ -28,9 +28,12 @@ function urlOpener(supportsYtDlp = true, platform = 'android') {
       youtube.push(url)
       if (doCreateNewTab) newTabs.push(url)
     },
-    openExternalMedia: (url, doCreateNewTab) => {
+    openExternalMedia: async (url, doCreateNewTab) => {
       externalMedia.push(url)
-      if (doCreateNewTab) newTabs.push(url)
+      if (!doCreateNewTab) return
+      newTabs.push(url)
+      // On a cold start, a new tab is presented only after the app's setup, which awaits this.
+      await new Promise(() => {})
     },
     handleExternalLink: url => externalLinks.push(url),
     shouldOpenExternalMediaUrl,
@@ -69,7 +72,11 @@ for (const [input, expected] of [
 test('Android notification links open in a new tab, and other links in the current one', async () => {
   const { openUrl, youtube, externalMedia, newTabs } = urlOpener()
   await openUrl('opentubex://notification?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3Dabcdefghijk')
-  await openUrl('opentubex://notification?url=https%3A%2F%2Fwww.twitch.tv%2Fstreamer')
+  // Settles without waiting for the new tab, which a cold start presents only after setup.
+  let settled = false
+  openUrl('opentubex://notification?url=https%3A%2F%2Fwww.twitch.tv%2Fstreamer').then(() => { settled = true })
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(settled, true)
   await openUrl('https://www.youtube.com/watch?v=bcdefghijkl')
   assert.deepEqual(youtube, ['https://www.youtube.com/watch?v=abcdefghijk', 'https://www.youtube.com/watch?v=bcdefghijkl'])
   assert.deepEqual(externalMedia, ['https://www.twitch.tv/streamer'])
