@@ -8,6 +8,7 @@ import {
   createUnsentSyncDeletionMarks,
   readSyncDeletionMarks,
   syncDeletionKey,
+  translateSyncDeletionMarks,
   withRemoteSyncDeletions,
 } from '../../src/renderer/helpers/sync-deletions.js'
 import { executeBackgroundJob as runBackgroundJob } from '../../src/renderer/helpers/background-job-operations.js'
@@ -180,6 +181,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     SYNC_DELETION_MARKS_COLLECTION,
     addSyncDeletionMarks,
     readSyncDeletionMarks,
+    translateSyncDeletionMarks,
     withRemoteSyncDeletions,
     deepCopy: structuredClone,
     createSyncServerRequestHeaders,

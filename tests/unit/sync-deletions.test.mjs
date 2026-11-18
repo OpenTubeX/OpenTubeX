@@ -8,6 +8,7 @@ import {
   readSyncDeletionMarks,
   syncDeletionKey,
   trackLocalSyncDeletions,
+  translateSyncDeletionMarks,
   withRemoteSyncDeletions,
 } from '../../src/renderer/helpers/sync-deletions.js'
 import { mergeIds } from '../../src/renderer/helpers/sync-history-merge.js'
@@ -103,6 +104,34 @@ test('another device\'s deletions apply without asking only to items the server 
   assert.deepEqual(Array.from(mergeIds(previous, [], previous, {
     collection: 'playlistVideos', scope: 'list', restored: true, deletions: videos,
   })), previous)
+})
+
+test('shared deletion marks name playlists and profiles by the IDs every device knows', () => {
+  // A legacy sync server assigned server IDs, which each device maps to its own.
+  const deleting = { playlists: { a1: { remoteId: 'p1' } }, profiles: { a2: { remoteId: 'g1' } } }
+  const receiving = { playlists: { b1: { remoteId: 'p1' } }, profiles: { b2: { remoteId: 'g1' } } }
+  const marks = [
+    { key: 'playlists', at: 1, ids: ['a1', 'new'] },
+    { key: syncDeletionKey('playlistVideos', 'a1'), at: 1, ids: ['video'] },
+    { key: 'profiles', at: 1, ids: ['a2'] },
+    { key: syncDeletionKey('profileChannels', 'a2'), at: 1, ids: ['channel'] },
+    { key: 'subscriptions', at: 1, ids: ['a1'] },
+  ]
+  const shared = translateSyncDeletionMarks(marks, deleting, true)
+  assert.deepEqual(shared.map(({ key, ids }) => [key, ...ids]), [
+    ['playlists', 'p1', 'new'],
+    ['playlistVideos:p1', 'video'],
+    ['profiles', 'g1'],
+    ['profileChannels:g1', 'channel'],
+    ['subscriptions', 'a1'],
+  ])
+  assert.deepEqual(translateSyncDeletionMarks(shared, receiving, false).map(({ key, ids }) => [key, ...ids]), [
+    ['playlists', 'b1', 'new'],
+    ['playlistVideos:b1', 'video'],
+    ['profiles', 'b2'],
+    ['profileChannels:b2', 'channel'],
+    ['subscriptions', 'a1'],
+  ])
 })
 
 test('shared deletion marks expire, and new ones replace older marks of the same items', () => {

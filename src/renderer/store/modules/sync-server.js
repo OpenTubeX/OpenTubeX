@@ -70,6 +70,7 @@ import {
   readSyncDeletionMarks,
   syncDeletionKey,
   syncDeletions,
+  translateSyncDeletionMarks,
   unsentSyncDeletionMarks,
   withRemoteSyncDeletions,
 } from '../../helpers/sync-deletions.js'
@@ -443,6 +444,12 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
   const deletions = syncDeletions.snapshot()
   // Merges also apply the deletions other devices confirmed.
   let mergeDeletions = deletions
+  // The confirmed deletions as other devices know the lists, by their server IDs
+  const sharedDeletions = Object.fromEntries(translateSyncDeletionMarks(
+    Object.entries(deletions).map(([key, { confirmed = [] }]) => ({ key, ids: confirmed })),
+    previous,
+    true
+  ).map(({ key, ids }) => [key, { confirmed: ids }]))
   const result = {}
   const skippedCollections = new Set()
   // Collections this sync merged into the local data, and in enhanced privacy
@@ -617,7 +624,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
   async function uploadDeletionMarks({ revision, data }, unsent, includeKey) {
     for (let attempt = 0; ; attempt++) {
       const known = [...readSyncDeletionMarks(data), ...unsent]
-      const marks = addSyncDeletionMarks(known, deletions, { includeKey }) ?? (unsent.length > 0 ? known : null)
+      const marks = addSyncDeletionMarks(known, sharedDeletions, { includeKey }) ?? (unsent.length > 0 ? known : null)
       if (!marks) return true
       assertSyncStillActive()
       startProgress('upload')
@@ -986,7 +993,12 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         client.touched.add('settings')
         migratedPlaybackSpeedsEntry = true
       }
-      if (deletionMarks) mergeDeletions = withRemoteSyncDeletions(deletions, readSyncDeletionMarks(deletionMarks.data))
+      if (deletionMarks) {
+        mergeDeletions = withRemoteSyncDeletions(
+          deletions,
+          translateSyncDeletionMarks(readSyncDeletionMarks(deletionMarks.data), previous, false)
+        )
+      }
       encryptedCollections = {
         original,
         remote,
@@ -1028,7 +1040,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           const shared = deletionMarks && await tryDeletionMarks(() => uploadDeletionMarks(deletionMarks, unsent, includeKey))
           // The decisions go once this sync succeeds, so the next ones share the marks.
           if (shared) unsentSyncDeletionMarks.remove(unsent)
-          else unsentSyncDeletionMarks.add(deletions, includeKey)
+          else unsentSyncDeletionMarks.add(sharedDeletions, includeKey)
           // Live sync replaces periodic syncs, which then still retry these.
           commit('setSyncServerDeletionMarksPending', unsentSyncDeletionMarks.read().length > 0)
         }

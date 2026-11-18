@@ -400,3 +400,57 @@ export function createUnsentSyncDeletionMarks(storage = null) {
 export const unsentSyncDeletionMarks = createUnsentSyncDeletionMarks(
   typeof localStorage === 'undefined' ? null : localStorage
 )
+
+// The lists whose items, or the lists nested in them, have IDs a legacy sync
+// server assigned. Devices that synced through it can know them by other IDs.
+/** @type {Record<string, string>} */
+const SERVER_ID_LISTS = {
+  playlists: 'playlists',
+  playlistVideos: 'playlists',
+  profiles: 'profiles',
+  profileChannels: 'profiles',
+}
+
+/**
+ * Translates the IDs of playlists and profiles in deletion marks between this
+ * device's and the server's, so devices that know them by other IDs share them.
+ * @template {Pick<SyncDeletionMark, 'key' | 'ids'>} T
+ * @param {T[]} marks
+ * @param {Record<string, unknown>} snapshot The saved sync baselines
+ * @param {boolean} toServer
+ * @returns {T[]}
+ */
+export function translateSyncDeletionMarks(marks, snapshot, toServer) {
+  /** @type {Map<string, Map<string, string>>} */
+  const maps = new Map()
+  /** @param {string} list */
+  function idMap(list) {
+    let map = maps.get(list)
+    if (!map) {
+      const baselines = snapshot[list]
+      map = new Map()
+      if (baselines && typeof baselines === 'object') {
+        for (const [localId, baseline] of Object.entries(baselines)) {
+          const remoteId = /** @type {{ remoteId?: unknown } | null} */ (baseline)?.remoteId
+          if (typeof remoteId === 'string' && remoteId !== localId) {
+            if (toServer) map.set(localId, remoteId)
+            else map.set(remoteId, localId)
+          }
+        }
+      }
+      maps.set(list, map)
+    }
+    return map
+  }
+
+  return marks.map(mark => {
+    const separator = mark.key.indexOf(':')
+    const collection = separator === -1 ? mark.key : mark.key.slice(0, separator)
+    const list = SERVER_ID_LISTS[collection]
+    if (!list) return mark
+    const ids = idMap(list)
+    if (separator === -1) return { ...mark, ids: mark.ids.map(id => ids.get(id) ?? id) }
+    const scope = mark.key.slice(separator + 1)
+    return { ...mark, key: syncDeletionKey(collection, ids.get(scope) ?? scope) }
+  })
+}
