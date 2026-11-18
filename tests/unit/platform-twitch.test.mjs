@@ -39,7 +39,7 @@ function stream(id, broadcaster = { id: '1001', login: 'Streamer', displayName: 
   }
 }
 
-test('searches categories page by page and skips categories without a valid address', async () => {
+test('searches categories page by page, skips categories without a valid address, and fails without results', async () => {
   const items = [game(), game({ slug: '../directory', displayName: 'Broken' }), ...Array.from({ length: 18 }, (_, index) => game({ slug: `game-${index}`, viewersCount: null }))]
   const { fetcher, requests } = answer(() => ({ data: { searchFor: { games: { cursor: 'MjA=', items } } } }))
 
@@ -62,6 +62,10 @@ test('searches categories page by page and skips categories without a valid addr
   assert.equal('viewerCount' in page.results[1].category, false)
   // The request held a full page, so there can be more
   assert.equal(page.continuation, 'MjA=')
+
+  // A failed field must not look like a search without matches
+  const failed = answer(() => ({ errors: [{ message: 'service error', path: ['searchFor', 'games'] }], data: { searchFor: { games: null } } }))
+  await assert.rejects(twitch.search(failed.fetcher, 'chess', 'categories', null))
 })
 
 test('loads a category with its live streams, nothing for unknown ones, and fails without its streams', async () => {

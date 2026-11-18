@@ -219,7 +219,9 @@ const twitch = {
       `query($query: String!, $cursor: String) { searchFor(userQuery: $query, platform: "web", target: { index: ${index}, cursor: $cursor, limit: ${PAGE_SIZE} }) { ${section} { cursor items { ${fields} } } } }`,
       { query: query.trim(), cursor: continuation }, signal)
     const found = data.searchFor?.[section]
-    const items = Array.isArray(found?.items) ? found.items : []
+    // Twitch sends an empty list when nothing matches, and none when the field failed
+    if (!Array.isArray(found?.items)) throw new Error('Twitch returned no search results')
+    const items = found.items
     /** @type {import('./types.js').PlatformResult[]} */
     const results = items.flatMap(entry => {
       if (type === 'channels') {
