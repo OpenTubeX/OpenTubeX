@@ -219,7 +219,7 @@
 
 /* Selects in shared columns, each column as wide as its widest select, so
    their fields line up across rows. Set --settings-select-grid-columns for
-   more than two columns. */
+   another column count. */
 :deep(.settingsSelectGrid) {
   display: grid;
   grid-template-columns: repeat(var(--settings-select-grid-columns, 2), minmax(0, max-content));

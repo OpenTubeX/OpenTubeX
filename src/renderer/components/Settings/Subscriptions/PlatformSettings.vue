@@ -1,6 +1,7 @@
 <template>
   <FtSettingsSection
     :title="t('Settings.Subscription Settings.Platforms.Other Platforms')"
+    :title-id="titleId"
     :icon="['fas', 'globe']"
   >
     <FtFlexBox>
@@ -17,6 +18,7 @@
       <div class="autoRefreshInterval">
         <FtSelect
           :placeholder="t('Settings.Subscription Settings.Auto Refresh Interval')"
+          :describe-by-id="titleId"
           :value="autoRefreshInterval"
           setting-key="platformFeedAutoRefreshInterval"
           :select-names="autoRefreshIntervalNames"
@@ -31,7 +33,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
@@ -44,6 +46,9 @@ import { AUTO_REFRESH_INTERVAL_VALUES, getAutoRefreshIntervalNames } from '../..
 import { getFollowedChannels, requestCapacitorNotificationPermission } from '../../../helpers/platformFeed'
 
 const { t } = useI18n()
+
+// The refresh select repeats another section's label, so it names its section.
+const titleId = useId()
 
 const liveNotifications = computed(() => store.getters.getTwitchLiveNotifications)
 

@@ -1,6 +1,7 @@
 <template>
   <FtSettingsSection
     :title="t('Settings.Subscription Settings.RSS Feeds')"
+    :title-id="titleId"
     :icon="['fas', 'rss']"
   >
     <FtFlexBox>
@@ -39,6 +40,7 @@
       <div class="autoRefreshInterval">
         <FtSelect
           :placeholder="t('Settings.Subscription Settings.Auto Refresh Interval')"
+          :describe-by-id="titleId"
           :value="autoRefreshInterval"
           setting-key="rssFeedsAutoRefreshInterval"
           :select-names="autoRefreshIntervalNames"
@@ -191,7 +193,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useId, useTemplateRef, watch } from 'vue'
 import { Translation, useI18n } from 'vue-i18n'
 import { FtIcon } from '@opentubex/icons'
 
@@ -230,6 +232,9 @@ const RSSHUB_NAME = 'RSSHub'
 const RSSHUB_URL = 'https://github.com/DIYgod/RSSHub'
 
 const { t } = useI18n()
+
+// The refresh select repeats another section's label, so it names its section.
+const titleId = useId()
 
 const enableRssFeeds = computed(() => store.getters.getEnableRssFeeds)
 

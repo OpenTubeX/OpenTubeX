@@ -3,7 +3,7 @@
     :title="t('Settings.Distraction Free Settings.Sections.Digital Wellbeing')"
     hide-title
   >
-    <div class="settingsSelectGrid wellbeingSelects">
+    <div class="settingsSelectGrid">
       <FtSelect
         size-to-content
         :placeholder="t('Settings.Distraction Free Settings.Digital Wellbeing.Grayscale')"
@@ -224,11 +224,3 @@ function formatIntervalOption(minutes) {
     : t('Settings.Distraction Free Settings.Digital Wellbeing.Every', { duration: formatWholeMinutes(t, minutes) })
 }
 </script>
-
-<style scoped>
-@container settings-content (width > 1100px) {
-  .wellbeingSelects {
-    --settings-select-grid-columns: 4;
-  }
-}
-</style>
