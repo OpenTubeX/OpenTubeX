@@ -1,6 +1,7 @@
 <template>
   <FtSettingsSection
     :title="$t('Settings.External Player Settings.External Player Settings')"
+    :icon="['fas', 'external-link-alt']"
   >
     <FtFlexBox>
       <FtSelect

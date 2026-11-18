@@ -1,5 +1,8 @@
 <template>
-  <FtSettingsSection :title="t('Settings.Subscription Settings.Platforms.Other Platforms')">
+  <FtSettingsSection
+    :title="t('Settings.Subscription Settings.Platforms.Other Platforms')"
+    :icon="['fas', 'globe']"
+  >
     <FtFlexBox>
       <FtToggleSwitch
         :label="t('Settings.Subscription Settings.Platforms.Notify When Live')"

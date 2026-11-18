@@ -1,6 +1,7 @@
 <template>
   <FtSettingsSection
     :title="t('Settings.Categories.Alternative providers')"
+    :icon="['fas', 'server']"
   >
     <div class="switchColumnGrid switchFlowGrid">
       <FtToggleSwitch

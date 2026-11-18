@@ -1,6 +1,7 @@
 <template>
   <FtSettingsSection
     :title="$t('Settings.Experimental Settings.Experimental Settings')"
+    :icon="['fas', 'flask']"
   >
     <p class="experimental-warning">
       {{ $t('Settings.Experimental Settings.Warning') }}

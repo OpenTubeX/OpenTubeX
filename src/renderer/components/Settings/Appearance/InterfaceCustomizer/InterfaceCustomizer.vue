@@ -1,5 +1,8 @@
 <template>
-  <FtSettingsSection :title="t('Settings.Navigation and Controls')">
+  <FtSettingsSection
+    :title="t('Settings.Navigation and Controls')"
+    :icon="['fas', 'control-bar']"
+  >
     <div class="customizerLauncher">
       <FtButton
         data-settings-subpage="customize-interface"

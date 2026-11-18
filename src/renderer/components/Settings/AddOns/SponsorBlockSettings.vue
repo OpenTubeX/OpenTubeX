@@ -1,6 +1,7 @@
 <template>
   <FtSettingsSection
     :title="$t('Settings.SponsorBlock Settings.SponsorBlock Settings')"
+    :icon="['fac', 'sponsorblock']"
   >
     <FtFlexBox class="settingsFlexStart500px">
       <FtToggleSwitch

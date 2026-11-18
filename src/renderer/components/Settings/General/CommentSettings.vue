@@ -1,6 +1,7 @@
 <template>
   <FtSettingsSection
     :title="t('Comments.Comments')"
+    :icon="['fas', 'comment']"
   >
     <div class="commentSettings">
       <!-- Side by side when there is room, like the general switches. -->

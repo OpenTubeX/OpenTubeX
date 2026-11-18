@@ -1,6 +1,7 @@
 <template>
   <FtSettingsSection
     :title="$t('Settings.Return YouTube Dislike Settings.Return YouTube Dislike Settings')"
+    :icon="['fas', 'thumbs-down']"
   >
     <FtFlexBox class="settingsFlexStart500px">
       <FtToggleSwitch

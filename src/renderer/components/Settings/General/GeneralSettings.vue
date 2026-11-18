@@ -1,6 +1,7 @@
 <template>
   <FtSettingsSection
     :title="t('Settings.General Settings.General Settings')"
+    :icon="['fas', 'gear']"
   >
     <div class="switchColumnGrid switchFlowGrid">
       <FtToggleSwitch

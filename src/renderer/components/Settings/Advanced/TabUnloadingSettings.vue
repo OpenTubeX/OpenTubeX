@@ -1,5 +1,8 @@
 <template>
-  <FtSettingsSection :title="t('Settings.Tab Unloading.Automatically unload tabs')">
+  <FtSettingsSection
+    :title="t('Settings.Tab Unloading.Automatically unload tabs')"
+    :icon="['fas', 'memory']"
+  >
     <FtFlexBox>
       <FtToggleSwitch
         :label="t('Settings.Tab Unloading.Automatically unload tabs')"

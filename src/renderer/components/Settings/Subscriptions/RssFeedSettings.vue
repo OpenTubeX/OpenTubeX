@@ -1,5 +1,8 @@
 <template>
-  <FtSettingsSection :title="t('Settings.Subscription Settings.RSS Feeds')">
+  <FtSettingsSection
+    :title="t('Settings.Subscription Settings.RSS Feeds')"
+    :icon="['fas', 'rss']"
+  >
     <FtFlexBox>
       <FtToggleSwitch
         :label="t('Settings.Subscription Settings.Enable RSS Feeds')"

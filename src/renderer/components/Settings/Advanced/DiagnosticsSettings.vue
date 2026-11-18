@@ -1,5 +1,8 @@
 <template>
-  <FtSettingsSection :title="t('Settings.Diagnostics.Diagnostics')">
+  <FtSettingsSection
+    :title="t('Settings.Diagnostics.Diagnostics')"
+    :icon="['fas', 'wrench']"
+  >
     <p class="diagnosticsDescription">
       {{ t('Settings.Diagnostics.Description') }}
     </p>

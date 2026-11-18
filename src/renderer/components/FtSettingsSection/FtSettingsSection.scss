@@ -64,6 +64,33 @@
   text-align: center;
 }
 
+/* Like the category icons beside it: a pastel shape with a stronger icon in
+   the category's hue. Where light-dark() or relative colors are missing, it
+   tints the text color instead. */
+.sectionTitleIcon {
+  display: inline-grid;
+  place-items: center;
+  vertical-align: middle;
+  margin-inline-end: 12px;
+  inline-size: 36px;
+  block-size: 36px;
+  border-radius: var(--shape-corner-medium);
+  background: color-mix(in srgb, currentcolor 12%, transparent);
+  color-scheme: var(--native-color-scheme);
+
+  > :deep(svg) {
+    inline-size: 20px;
+    block-size: 20px;
+  }
+}
+
+@supports (color: light-dark(oklch(50% 0.1 0), red)) {
+  .sectionTitleIcon {
+    color: light-dark(oklch(46% 0.15 var(--settings-icon-hue, 0)), oklch(88% 0.09 var(--settings-icon-hue, 0)));
+    background: light-dark(oklch(91% 0.06 var(--settings-icon-hue, 0)), oklch(36% 0.07 var(--settings-icon-hue, 0)));
+  }
+}
+
 .sectionBody > :deep(:is(h3, h4)) {
   color: var(--secondary-text-color);
   font-size: 0.875rem;
