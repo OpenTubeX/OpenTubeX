@@ -265,7 +265,7 @@ Subscriptions:
     Followed Channels: Kanal yang diikuti di platform lain
     Description: Ikuti kanal di Twitch, SoundCloud, PeerTube, Rumble, Odysee, dan media.ccc.de untuk melihat unggahan mereka di tab Platform pada langganan Anda. Temukan kanal melalui pencarian, atau tambahkan menggunakan alamat halamannya. Media mereka diputar dengan yt-dlp.
     Add Channel: Tambah Kanal
-    Channel URL: Alamat kanal
+    Search Or Paste Channel: Cari atau tempel alamat kanal
     Invalid Channel: Masukkan alamat halaman kanal di Twitch, SoundCloud, PeerTube, Rumble, Odysee, atau media.ccc.de.
     Channel Not Found: Tidak ada kanal di alamat ini.
     Channel Already Followed: Anda sudah mengikuti kanal ini.
@@ -436,7 +436,6 @@ Settings:
     Failed to Save Password: "Gagal menyimpan kata sandi."
     Confirm Password: "Konfirmasi kata sandi"
     Passwords Do Not Match: "Kata sandi tidak cocok."
-  Navigation and Controls: "Navigasi dan kontrol"
   Control Bar:
     Title: "Bilah kontrol"
     Customize: "Sesuaikan bilah kontrol"
@@ -1058,6 +1057,7 @@ Settings:
     Channel Settings: Pengaturan Saluran
     Channel Settings Description: Ingat pengaturan yang Anda pilih saat menonton untuk setiap saluran, lalu terapkan lagi saat Anda menonton video saluran tersebut berikutnya.
     Enable Channel Playback Settings: Aktifkan pengaturan pemutaran saluran
+    Auto Save Changes: Simpan perubahan secara otomatis
     Auto Save Playback Speed: Simpan perubahan kecepatan pemutaran secara otomatis
     Auto Save Video Quality: Simpan perubahan kualitas video secara otomatis
     Auto Save Subtitles State: Simpan perubahan status takarir secara otomatis
@@ -1307,6 +1307,7 @@ Settings:
     Notify About New Uploads: Beri Notifikasi Unggahan Baru
     RSS Feeds Auto Refresh Interval: Interval Pembaruan Otomatis Umpan RSS
     Faster Subscription Refresh: "Penyegaran langganan lebih cepat"
+    Show Collaborations From Other Channels: "Sertakan kolaborasi yang diunggah oleh saluran lain"
     Platforms:
       Other Platforms: Platform Lain
       Manage Channels: Kelola Kanal yang Diikuti
@@ -2471,6 +2472,7 @@ Tooltips:
     Notify About New Uploads: Menampilkan notifikasi sistem di perangkat ini untuk channel yang notifikasinya Anda aktifkan di pengaturan langganannya. OpenTubeX memeriksa konten baru saat langganan diperbarui, jadi pilih interval pembaruan otomatis. Agar tetap mendapat notifikasi saat aplikasi ditutup, aktifkan juga pembaruan saat aplikasi ditutup.
     RSS Feeds Auto Refresh Interval: Seberapa sering OpenTubeX memperbarui umpan RSS Anda secara otomatis saat aplikasi terbuka.
     Faster Subscription Refresh: "Memeriksa umpan RSS setiap saluran terlebih dahulu dan hanya memuat video, Shorts, dan siaran langsung dari saluran yang memiliki unggahan baru. Penyegaran otomatis juga melewati saluran yang dimuat dalam 10 menit terakhir. Untuk saluran tanpa unggahan baru, jumlah penayangan, video yang dihapus, dan judul yang diubah hanya diperbarui setiap beberapa jam, dan unggahan baru mungkin muncul lebih lambat saat umpan RSS tertinggal. Tidak tersedia dengan API Invidious."
+    Show Collaborations From Other Channels: "Juga menampilkan video yang dibuat oleh saluran yang Anda langgani bersama saluran lain yang mengunggahnya. YouTube hanya mencantumkannya di tab Beranda saluran, jadi setiap penyegaran video memuat satu halaman lagi per saluran. Hanya kolaborasi terbaru yang ditampilkan di sana yang ditemukan, beberapa saluran tidak menampilkannya sama sekali, dan tanggal publikasinya merupakan perkiraan. Tidak tersedia dengan API Invidious."
     Platforms Auto Refresh Interval: Seberapa sering OpenTubeX memperbarui kanal yang Anda ikuti di platform lain secara otomatis saat aplikasi terbuka.
     Twitch Notify When Live: Memberi tahu Anda saat salah satu kanal Twitch yang Anda ikuti mulai bersiaran. OpenTubeX memeriksa setiap beberapa menit saat terbuka, dan juga saat ditutup jika saat itu memperbarui langganan.
   Theme Settings:

@@ -24,6 +24,7 @@ import {
   getLocalChannel,
   getLocalChannelCommunity,
   getLocalChannelLiveStreams,
+  getLocalChannelCollaborations,
   getLocalChannelVideos,
   getLocalPlaylist,
   localApiFetch,
@@ -577,9 +578,9 @@ function getChannelUploads(channelId) {
 }
 
 /**
- * With Faster Subscription Refresh, returns the cached entries when they can
- * be kept because the channel's upload feed lists nothing new for them,
- * otherwise null. A failed check
+ * With Faster Subscription Refresh, returns the cache entry (entries and
+ * timestamp) when it can be kept because the channel's upload feed lists
+ * nothing new for it, otherwise null. A failed check
  * falls through to the full fetch, which handles the errors.
  * @param {'videos' | 'shorts' | 'live'} feed
  * @param {string} channelId
@@ -605,8 +606,33 @@ async function getUnchangedSubscriptionFeed(feed, channelId, backend) {
     .map(video => video.videoId))
   return canKeepSubscriptionFeedWithoutNewUploads(cacheEntry, Date.now()) &&
     hasNoNewSubscriptionUploads(feed, cacheEntry, uploads, knownVideoIds)
-    ? cacheEntry.videos
+    ? cacheEntry
     : null
+}
+
+/**
+ * Whether video refreshes also load the collaborations that other channels
+ * uploaded, which needs an extra request for each channel's Home tab.
+ * @param {string} backend
+ */
+function includesSubscriptionCollaborations(backend) {
+  return store.getters.getIncludeSubscriptionCollaborations === true &&
+    !!process.env.SUPPORTS_LOCAL_API && !usesInvidiousApi(backend)
+}
+
+/**
+ * Loads the collaborations listed on the channel's Home tab, or null when that
+ * fails, so the cache write keeps the previously loaded ones.
+ * @param {string} channelId
+ * @returns {Promise<Record<string, any>[] | null>}
+ */
+async function getSubscriptionCollaborations(channelId) {
+  try {
+    return await getLocalChannelCollaborations(channelId, activeRefresh?.controller.signal)
+  } catch (error) {
+    if (!activeRefresh?.controller.signal.aborted) console.warn(`Failed to load the collaborations of ${channelId}:`, error)
+    return null
+  }
 }
 
 /**
@@ -620,8 +646,8 @@ async function getUnchangedSubscriptionFeed(feed, channelId, backend) {
  * @returns {Promise<boolean>} Whether the cached feed was kept
  */
 async function keepUnchangedSubscriptionFeed(feed, channel, backend, t) {
-  const videos = await getUnchangedSubscriptionFeed(feed, channel.id, backend)
-  if (videos === null) return false
+  const videos = (await getUnchangedSubscriptionFeed(feed, channel.id, backend))?.videos
+  if (videos == null) return false
   await startAutomaticDownloadsForChannel(channel, videos, feed, t, electronRefreshOwnerTabId)
   reportSubscriptionUploads(channel.id, feed, videos)
   return true
@@ -1144,7 +1170,10 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
 
   try {
     const fetchChannel = async (channel, backend = store.getters.getBackendPreference) => {
-      if (await keepUnchangedSubscriptionFeed('videos', channel, backend, t)) {
+      const loadCollaborations = includesSubscriptionCollaborations(backend)
+      // Collaborations are not in the channel's upload feed, so they still need loading
+      const unchangedCache = loadCollaborations ? await getUnchangedSubscriptionFeed('videos', channel.id, backend) : null
+      if (!loadCollaborations && await keepUnchangedSubscriptionFeed('videos', channel, backend, t)) {
         channelCount++
         setSubscriptionRefreshProgress((channelCount / subscriptionList.length) * 100)
         return false
@@ -1152,7 +1181,9 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
 
       let videos, name, thumbnailUrl, handle
 
-      if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backend)) {
+      if (unchangedCache !== null) {
+        videos = unchangedCache.videos.filter(video => video.isCollaboration !== true)
+      } else if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backend)) {
         if (useRss && hasInvidiousRssFeeds()) {
           ({ videos, name, thumbnailUrl, handle } = await getChannelVideosInvidiousRSS(channel, t))
         } else {
@@ -1166,22 +1197,37 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
         }
       }
 
+      const collaborations = videos != null && loadCollaborations
+        ? await getSubscriptionCollaborations(channel.id)
+        : null
+
       channelCount++
       setSubscriptionRefreshProgress((channelCount / subscriptionList.length) * 100)
 
       if (videos != null) {
         activeRefresh.errors.delete(channel.id)
         const previousCache = store.getters.getVideoCache[channel.id]
-        videos = reconcileFetchedSubscriptionEntries(
-          videos,
-          previousCache?.videos,
+        // New entries are recognized by their position before cached ones,
+        // so uploads and collaborations are reconciled as separate lists
+        const reconcile = (entries, isCollaboration) => reconcileFetchedSubscriptionEntries(
+          entries,
+          previousCache?.videos?.filter(video => (video.isCollaboration === true) === isCollaboration),
           'videoId',
           previousCache?.timestamp,
           store.getters.getHistoryCacheById
         )
+        videos = reconcile(videos, false)
+        if (collaborations !== null) {
+          const videoIds = new Set(videos.map(video => video.videoId))
+          videos = videos.concat(reconcile(collaborations.filter(video => !videoIds.has(video.videoId)), true))
+        }
         await store.dispatch('updateSubscriptionVideosCacheByChannel', {
           channelId: channel.id,
-          videos
+          videos,
+          collaborationsFetched: collaborations !== null,
+          // Unchanged feeds still need their full fetch once they are old enough.
+          // The snapshot's timestamp makes the write lose to any newer one.
+          ...(unchangedCache !== null ? { timestamp: unchangedCache.timestamp } : {})
         })
         await startAutomaticDownloadsForChannel(channel, videos, 'videos', t, electronRefreshOwnerTabId)
         reportSubscriptionUploads(channel.id, 'videos', videos)

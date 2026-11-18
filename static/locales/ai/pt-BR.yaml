@@ -218,7 +218,7 @@ Subscriptions:
     Followed Channels: Canais seguidos em outras plataformas
     Description: Siga canais da Twitch, SoundCloud, PeerTube, Rumble, Odysee e media.ccc.de para ver as publicações deles na aba Plataformas das suas inscrições. Encontre canais pela pesquisa ou adicione-os pelo endereço da página deles. A mídia deles é reproduzida com yt-dlp.
     Add Channel: Adicionar canal
-    Channel URL: Endereço do canal
+    Search Or Paste Channel: Pesquise ou cole o endereço de um canal
     Invalid Channel: Digite o endereço da página de um canal da Twitch, SoundCloud, PeerTube, Rumble, Odysee ou media.ccc.de.
     Channel Not Found: Não há nenhum canal neste endereço.
     Channel Already Followed: Você já segue este canal.
@@ -388,7 +388,6 @@ Settings:
     Failed to Save Password: "Não foi possível salvar a senha."
     Confirm Password: "Confirmar senha"
     Passwords Do Not Match: "As senhas não coincidem."
-  Navigation and Controls: "Navegação e controles"
   Control Bar:
     Title: "Barra de controles"
     Customize: "Personalizar barra de controles"
@@ -1008,6 +1007,7 @@ Settings:
     Channel Settings: Configurações dos canais
     Channel Settings Description: Memorizar individualmente para cada canal as configurações escolhidas durante a visualização, para que sejam aplicadas quando voltar a ver um dos seus vídeos.
     Enable Channel Playback Settings: Ativar configurações de reprodução por canal
+    Auto Save Changes: Salvar alterações automaticamente
     Auto Save Playback Speed: Salvar automaticamente as alterações de velocidade de reprodução
     Auto Save Video Quality: Salvar automaticamente as alterações de qualidade do vídeo
     Auto Save Subtitles State: Salvar automaticamente as alterações do estado das legendas
@@ -1257,6 +1257,7 @@ Settings:
     Notify About New Uploads: Notificar novos envios
     RSS Feeds Auto Refresh Interval: Intervalo de atualização automática dos feeds RSS
     Faster Subscription Refresh: "Atualização mais rápida das inscrições"
+    Show Collaborations From Other Channels: "Incluir colaborações enviadas por outros canais"
     Platforms:
       Other Platforms: Outras plataformas
       Manage Channels: Gerenciar canais seguidos
@@ -2398,6 +2399,7 @@ Tooltips:
     Notify About New Uploads: Mostra notificações do sistema neste dispositivo para os canais cujas notificações você ativou nas configurações de inscrição deles. O OpenTubeX verifica se há conteúdo novo quando as inscrições são atualizadas, então escolha um intervalo de atualização automática. Para receber notificações com o aplicativo fechado, ative também a atualização com o aplicativo fechado.
     RSS Feeds Auto Refresh Interval: Com que frequência o OpenTubeX atualiza automaticamente seus feeds RSS enquanto o aplicativo está aberto.
     Faster Subscription Refresh: "Primeiro verifica o feed RSS de cada canal e só carrega os vídeos, Shorts e transmissões ao vivo dos canais com novos envios. As atualizações automáticas também ignoram canais carregados nos últimos 10 minutos. Em canais sem novos envios, visualizações, vídeos removidos e títulos alterados só são atualizados a cada poucas horas, e novos envios podem aparecer mais tarde quando o feed RSS está atrasado. Indisponível com a API do Invidious."
+    Show Collaborations From Other Channels: "Também mostra vídeos que os canais em que você está inscrito fizeram junto com outro canal que os enviou. O YouTube só os lista na guia Início de um canal, então cada atualização de vídeos carrega mais uma página por canal. Só são encontradas as colaborações mais recentes mostradas ali, alguns canais não mostram nenhuma e as datas de publicação são aproximadas. Não disponível com a API do Invidious."
     Platforms Auto Refresh Interval: Com que frequência o OpenTubeX atualiza automaticamente os canais que você segue em outras plataformas enquanto o aplicativo está aberto.
     Twitch Notify When Live: Avisa quando um dos canais da Twitch que você segue começa a transmitir. O OpenTubeX verifica a cada poucos minutos enquanto está aberto, e também enquanto está fechado se nesse momento atualizar as inscrições.
   Theme Settings:

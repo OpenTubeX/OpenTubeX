@@ -24,9 +24,9 @@
       <DownloadTemplateSettings />
       <AutomaticDownloadSettings v-if="!isIos" />
     </FtFlexBox>
-    <FtFlexBox
+    <div
       v-if="enableDownloads"
-      class="downloadPathInputs settingsFlexStart460px"
+      class="downloadFieldGrid"
     >
       <FtPathPicker
         :label="t('Settings.Download Settings.Download Folder')"
@@ -47,11 +47,6 @@
         :tooltip="t('Tooltips.Download Settings.Global Additional yt-dlp Arguments')"
         @input="updateYtDlpDownloadCustomArgs"
       />
-    </FtFlexBox>
-    <FtFlexBox
-      v-if="enableDownloads"
-      class="downloadQueueInputs settingsFlexStart460px"
-    >
       <FtSelect
         :placeholder="t('Settings.Download Settings.Concurrent Downloads')"
         :value="ytDlpMaxConcurrentDownloads"
@@ -73,7 +68,7 @@
         :tooltip="t('Tooltips.Download Settings.Bandwidth Limit')"
         @input="updateYtDlpDownloadBandwidthLimit"
       />
-    </FtFlexBox>
+    </div>
   </FtSettingsSection>
 </template>
 
@@ -168,25 +163,30 @@ function updateYtDlpDownloadBandwidthLimit(value) {
   white-space: normal;
 }
 
-.downloadPathInputs {
-  column-gap: 12px;
+/* The fields line up in two columns. Each column leaves room after its field
+   for the field's icons, which inputs and selects place differently. */
+.downloadFieldGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 410px));
+  justify-content: center;
+  align-items: end;
+  gap: 16px 12px;
 }
 
-.downloadPathInputs :deep(.ft-input-component),
-.downloadQueueInputs > * {
+.downloadFieldGrid > :deep(.ft-input-component) {
   inline-size: 340px;
-  min-inline-size: 0;
+  max-inline-size: calc(100% - var(--input-indicator-space, 0px));
+}
+
+.downloadFieldGrid > :deep(.select) {
+  inline-size: calc(340px + var(--select-indicator-space));
   max-inline-size: 100%;
 }
 
-.downloadQueueInputs {
-  align-items: flex-end;
-  column-gap: 12px;
-}
-
-.downloadQueueInputs :deep(.select) {
-  inline-size: calc(340px + var(--select-indicator-space));
-  margin-inline-end: calc(70px - var(--select-indicator-space));
+@container settings-content (width <= 860px) {
+  .downloadFieldGrid {
+    grid-template-columns: minmax(0, 410px);
+  }
 }
 
 </style>

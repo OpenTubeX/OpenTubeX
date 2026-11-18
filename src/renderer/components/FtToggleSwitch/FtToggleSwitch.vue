@@ -179,17 +179,17 @@ let labelResizeObserver = null
  * space beside its longest line. In a settings switch grid, where columns
  * meet in the middle, that space would push the column away from the center,
  * so the box is narrowed to its longest line.
- * @param {HTMLElement} text
+ * @param {HTMLElement} text with its maximum width cleared
+ * @returns {string} the maximum width to set, empty when none is needed
  */
-function fitLabelToLines(text) {
-  text.style.maxInlineSize = ''
+function measureFittedLabelWidth(text) {
   const names = text.querySelectorAll('.switch-label-name')
   const range = document.createRange()
   range.setStartBefore(names[0])
   range.setEndAfter(names[names.length - 1])
   const textRects = [...range.getClientRects()].filter(rect => rect.width > 0)
   const lineCount = new Set(textRects.map(rect => Math.round(rect.top))).size
-  if (lineCount < 2) return
+  if (lineCount < 2) return ''
   const icons = text.querySelector('.switch-label-icons').getBoundingClientRect()
   const rects = icons.width > 0 ? [...textRects, icons] : textRects
   const box = text.getBoundingClientRect()
@@ -199,9 +199,24 @@ function fitLabelToLines(text) {
   // Client rects include transforms, such as the settings window's opening
   // scale, while the maximum width is in layout pixels.
   const scale = box.width / text.offsetWidth
-  if (scale > 0 && width < box.width - scale) {
-    text.style.maxInlineSize = `${Math.ceil(width / scale)}px`
-  }
+  return scale > 0 && width < box.width - scale ? `${Math.ceil(width / scale)}px` : ''
+}
+
+/** Labels waiting to be fitted together, so they share one layout. */
+const pendingLabels = new Set()
+
+/** @param {HTMLElement} text */
+function fitLabelToLines(text) {
+  if (pendingLabels.size === 0) queueMicrotask(fitPendingLabels)
+  pendingLabels.add(text)
+}
+
+function fitPendingLabels() {
+  const texts = [...pendingLabels].filter(text => text.isConnected)
+  pendingLabels.clear()
+  for (const text of texts) text.style.maxInlineSize = ''
+  const widths = texts.map(measureFittedLabelWidth)
+  texts.forEach((text, index) => { text.style.maxInlineSize = widths[index] })
 }
 
 let refitLabel = null
@@ -220,6 +235,9 @@ onMounted(() => {
       fitLabelToLines(text)
     })
   }
+  // Fit before the first paint, so a newly shown settings page doesn't
+  // shift its columns a frame later.
+  fitLabelToLines(text)
   // The grid follows the available width, the label its own text. A font
   // that finishes loading can narrow the text without resizing either.
   labelResizeObserver = new ResizeObserver(refitLabel)

@@ -121,11 +121,19 @@
   }
 }
 
-/* The selected tile is tinted with the accent, which can match a category's
-   hue, so its circle takes the solid accent instead. */
+/* The selected tile's circle keeps its category's hue, filled more strongly
+   so it stands out from the accent-tinted tile. Without light-dark(), it takes
+   the solid accent. */
 .title.active .titleIcon {
   color: var(--text-with-main-color);
   background: var(--primary-color);
+}
+
+@supports (color: light-dark(oklch(50% 0.1 0), red)) {
+  .title.active .titleIcon {
+    color: light-dark(oklch(98% 0.02 var(--settings-icon-hue, 0)), oklch(24% 0.08 var(--settings-icon-hue, 0)));
+    background: light-dark(oklch(52% 0.17 var(--settings-icon-hue, 0)), oklch(80% 0.13 var(--settings-icon-hue, 0)));
+  }
 }
 
 .titleIcon > svg {

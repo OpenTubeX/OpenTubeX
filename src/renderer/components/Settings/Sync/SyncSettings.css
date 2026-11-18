@@ -137,13 +137,18 @@
   place-items: center;
 }
 
+/* Rows share one height, so a row of wrapped labels doesn't space its
+   switches further apart than the others. */
 .syncOptions {
+  grid-auto-rows: 1fr;
   justify-items: start;
 }
 
-/* Not a collection, and a column is too narrow for its performance badge */
+/* Not a collection, and a column is too narrow for its performance badge,
+   so it sits centered above them. */
 .autoSync {
   grid-column: 1 / -1;
+  justify-self: center;
 }
 
 .fields :deep(.ft-input-component) {

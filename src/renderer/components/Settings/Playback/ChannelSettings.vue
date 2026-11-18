@@ -15,20 +15,28 @@
         @change="value => updateSetting('enableChannelSettings', value)"
       />
     </div>
-    <div
-      v-if="settings.enableChannelSettings"
-      class="preferenceToggles"
-    >
-      <FtToggleSwitch
-        v-for="preference in PREFERENCES"
-        :key="preference.type"
-        :label="autoUpdateLabels[preference.type]"
-        :compact="true"
-        :default-value="settings[preference.autoUpdateKey]"
-        :setting-key="preference.autoUpdateKey"
-        @change="value => updateSetting(preference.autoUpdateKey, value)"
-      />
-    </div>
+    <template v-if="settings.enableChannelSettings">
+      <h4 class="groupTitle">
+        {{ t('Settings.Channel Settings.Auto Save Changes') }}
+      </h4>
+      <div class="switchColumnGrid">
+        <div
+          v-for="(column, index) in PREFERENCE_COLUMNS"
+          :key="index"
+          class="switchColumn"
+        >
+          <FtToggleSwitch
+            v-for="preference in column"
+            :key="preference.type"
+            :label="preferenceLabels[preference.type]"
+            :compact="true"
+            :default-value="settings[preference.autoUpdateKey]"
+            :setting-key="preference.autoUpdateKey"
+            @change="value => updateSetting(preference.autoUpdateKey, value)"
+          />
+        </div>
+      </div>
+    </template>
     <FtFlexBox>
       <div class="manageButton">
         <FtButton
@@ -405,6 +413,8 @@ const IS_CAPACITOR = Boolean(process.env.IS_CAPACITOR)
 const PREFERENCES = CHANNEL_PREFERENCE_TYPES.filter(preference => (
   !IS_CAPACITOR || preference.type !== 'volume'
 ))
+// Read row by row, the switches keep the order of PREFERENCES.
+const PREFERENCE_COLUMNS = [0, 1].map(column => PREFERENCES.filter((_, index) => index % 2 === column))
 const channelPreferenceSettingKeys = PREFERENCES.map(preference => preference.valuesKey)
 const disableChannelLinks = computed(() => store.getters.getDisableChannelLinks)
 
@@ -437,13 +447,6 @@ const qualityNames = computed(() => [
 ])
 
 const qualityNamesWithAuto = computed(() => [...qualityNames.value, t('Settings.Player Settings.Default Quality.Auto')])
-
-const autoUpdateLabels = computed(() => ({
-  playbackSpeed: t('Settings.Channel Settings.Auto Save Playback Speed'),
-  videoQuality: t('Settings.Channel Settings.Auto Save Video Quality'),
-  subtitlesState: t('Settings.Channel Settings.Auto Save Subtitles State'),
-  volume: t('Settings.Channel Settings.Auto Save Volume')
-}))
 
 /** Shared between the rows in a channel's card and the menu for adding one */
 const PREFERENCE_ICONS = Object.freeze({

@@ -134,7 +134,7 @@ Subscriptions:
     Followed Channels: Obserwowane kanały na innych platformach
     Description: Obserwuj kanały na platformach Twitch, SoundCloud, PeerTube, Rumble, Odysee i media.ccc.de, aby widzieć ich nowe materiały na karcie Platformy w swoich subskrypcjach. Znajduj kanały za pomocą wyszukiwania lub dodawaj je po adresie ich strony. Ich multimedia są odtwarzane za pomocą yt-dlp.
     Add Channel: Dodaj kanał
-    Channel URL: Adres kanału
+    Search Or Paste Channel: Wyszukaj lub wklej adres kanału
     Invalid Channel: Wpisz adres strony kanału na platformie Twitch, SoundCloud, PeerTube, Rumble, Odysee lub media.ccc.de.
     Channel Not Found: Pod tym adresem nie ma kanału.
     Channel Already Followed: Już obserwujesz ten kanał.
@@ -258,7 +258,6 @@ Settings:
     Failed to Save Password: "Nie udało się zapisać hasła."
     Confirm Password: "Potwierdź hasło"
     Passwords Do Not Match: "Hasła nie są zgodne."
-  Navigation and Controls: "Nawigacja i elementy sterujące"
   Control Bar:
     Title: "Pasek sterowania"
     Customize: "Dostosuj pasek sterowania"
@@ -671,6 +670,7 @@ Settings:
       Obsidian Vault: Sejf Obsidiana
   Channel Settings:
     Enable Channel Playback Settings: Włącz ustawienia odtwarzania dla kanałów
+    Auto Save Changes: Automatycznie zapisuj zmiany
     Auto Save Playback Speed: Automatycznie zapisuj zmiany prędkości odtwarzania
     Auto Save Video Quality: Automatycznie zapisuj zmiany rozdzielczości wideo
     Auto Save Subtitles State: Automatycznie zapisuj zmiany stanu napisów
@@ -828,6 +828,7 @@ Settings:
     Manage RSS Feeds: Zarządzaj kanałami RSS
     RSS Feeds Auto Refresh Interval: Interwał odświeżania kanałów RSS
     Faster Subscription Refresh: "Szybsze odświeżanie subskrypcji"
+    Show Collaborations From Other Channels: "Uwzględniaj współprace przesłane przez inne kanały"
     Platforms:
       Other Platforms: Inne platformy
       Manage Channels: Zarządzaj obserwowanymi kanałami
@@ -1666,6 +1667,7 @@ Tooltips:
     Enable RSS Feeds: Pokazuje zakładkę RSS na stronie Subskrypcje z elementami kanałów RSS lub Atom, aby można było obserwować twórców z innych platform. Jej elementy otwierają się za pomocą yt-dlp.
     RSS Feeds Auto Refresh Interval: Jak często OpenTubeX automatycznie odświeża Twoje kanały RSS, gdy aplikacja jest otwarta.
     Faster Subscription Refresh: "Najpierw sprawdza kanał RSS każdego kanału i wczytuje filmy, Shorts i transmisje na żywo tylko z kanałów z nowymi przesłanymi filmami. Automatyczne odświeżanie pomija też kanały wczytane w ciągu ostatnich 10 minut. W kanałach bez nowych filmów liczba wyświetleń, usunięte filmy i zmienione tytuły aktualizują się tylko co kilka godzin, a nowe filmy mogą pojawić się później, gdy kanał RSS jest opóźniony. Niedostępne z API Invidious."
+    Show Collaborations From Other Channels: "Pokazuje także filmy, które subskrybowane kanały nagrały razem z innym kanałem, który je przesłał. YouTube wyświetla je tylko na karcie Główna kanału, więc każde odświeżenie filmów wczytuje o jedną stronę więcej na kanał. Znajdowane są tylko najnowsze współprace widoczne w tym miejscu, niektóre kanały nie pokazują żadnych, a daty publikacji są przybliżone. Niedostępne z API Invidious."
     Platforms Auto Refresh Interval: Jak często OpenTubeX automatycznie odświeża kanały, które obserwujesz na innych platformach, gdy aplikacja jest otwarta.
     Twitch Notify When Live: Powiadamia, gdy któryś z obserwowanych kanałów Twitch rozpocznie transmisję. OpenTubeX sprawdza co kilka minut, gdy jest otwarty, a także gdy jest zamknięty, jeśli wtedy odświeża subskrypcje.
   Theme Settings:

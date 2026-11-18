@@ -417,7 +417,7 @@ Subscriptions:
     Followed Channels: Followed channels on other platforms
     Description: Follow channels on Twitch, SoundCloud, PeerTube, Rumble, Odysee and media.ccc.de to see their uploads in the Platforms tab of your subscriptions. Find channels with the search, or add them by the address of their page. Their media plays with yt-dlp.
     Add Channel: Add Channel
-    Channel URL: Channel address
+    Search Or Paste Channel: Search or paste a channel address
     Invalid Channel: Enter the address of a channel page on Twitch, SoundCloud, PeerTube, Rumble, Odysee or media.ccc.de.
     Channel Not Found: There is no channel at this address.
     Channel Already Followed: You already follow this channel.
@@ -712,7 +712,6 @@ Settings:
     Tabs to unload: "Tabs to unload"
     Automatic unloading help: "Unload the oldest background tabs to free memory. Active and playing tabs stay loaded."
     Memory threshold help: "Percentage of the renderer's memory limit, not total system RAM."
-  Navigation and Controls: "Navigation & controls"
   Interface Customizer:
     Customize Interface: Customize interface
     Preview: Preview
@@ -1569,6 +1568,7 @@ Settings:
     Channel Settings: Channel Settings
     Channel Settings Description: Remember the settings you pick while watching for each channel individually, so they are applied again the next time you watch one of its videos.
     Enable Channel Playback Settings: Enable channel playback settings
+    Auto Save Changes: Automatically Save Changes
     Auto Save Playback Speed: Automatically save playback speed changes
     Auto Save Video Quality: Automatically save video quality changes
     Auto Save Subtitles State: Automatically save subtitle state changes
@@ -1862,6 +1862,7 @@ Settings:
     Refresh Subscriptions While App Is Closed: Refresh Subscriptions While App Is Closed
     Notify About New Uploads: Notify About New Uploads
     Faster Subscription Refresh: Faster Subscription Refresh
+    Show Collaborations From Other Channels: Show Collaborations From Other Channels
     'Limit the number of videos displayed for each channel': 'Limit the number of videos displayed for each channel'
     To: To
     Confirm Before Unsubscribing: Confirm Before Unsubscribing
@@ -3586,6 +3587,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Refreshes feeds using your selected settings. On desktop, OpenTubeX stays in the system tray until you quit. Android controls when background refreshes run."
     Notify About New Uploads: "Shows system notifications on this device for channels whose notifications you turned on in their subscription settings. OpenTubeX checks for new content when subscriptions refresh, so choose an auto refresh interval. To be notified while the app is closed, also enable refreshing while the app is closed."
     Faster Subscription Refresh: Checks each channel's RSS feed first and only loads the videos, Shorts and live streams of channels with new uploads. Automatic refreshes also skip channels loaded in the last 10 minutes. For channels without new uploads, view counts, removed videos and changed titles only update every few hours, and new uploads may appear later when the RSS feed lags behind. Not available with the Invidious API.
+    Show Collaborations From Other Channels: Also shows videos that channels you subscribe to made together with another channel that uploaded them. YouTube only lists these on a channel's Home tab, so each video refresh loads one more page per channel. Only the latest collaborations shown there are found, some channels don't show any, and their publication dates are approximate. Not available with the Invidious API.
   Theme Settings:
     Thumbnail Size: Scales video thumbnails in grids and lists. Grids with a fixed column count or the Full Width view type fill each row instead, so there it only changes list thumbnails and Shorts. Phone-sized windows limit grid thumbnails to 100%.
     Playlist Thumbnail Size: Scales video thumbnails on playlist pages. Grids with a fixed column count or the Full Width view type fill each row instead, so there it only changes list thumbnails and Shorts. Phone-sized windows limit grid thumbnails to 100%.

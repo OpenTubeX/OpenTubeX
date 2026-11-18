@@ -4,6 +4,7 @@
   >
     <h3
       v-if="!hideTitle"
+      :id="titleId"
       class="sectionTitle"
     >
       <span
@@ -36,6 +37,11 @@ defineProps({
   hideTitle: {
     type: Boolean,
     default: false
+  },
+  /** Lets controls that repeat another section's label refer to this title. */
+  titleId: {
+    type: String,
+    default: undefined
   }
 })
 </script>

@@ -265,7 +265,7 @@ Subscriptions:
     Followed Channels: Jälgitavad kanalid teistel platvormidel
     Description: Jälgi kanaleid platvormidel Twitch, SoundCloud, PeerTube, Rumble, Odysee ja media.ccc.de, et näha nende üleslaadimisi oma tellimuste vahekaardil Platvormid. Leia kanaleid otsingu abil või lisa need nende lehe aadressi järgi. Nende meediat esitatakse yt-dlp abil.
     Add Channel: Lisa kanal
-    Channel URL: Kanali aadress
+    Search Or Paste Channel: Otsi või kleebi kanali aadress
     Invalid Channel: Sisesta kanalilehe aadress platvormil Twitch, SoundCloud, PeerTube, Rumble, Odysee või media.ccc.de.
     Channel Not Found: Sellel aadressil pole kanalit.
     Channel Already Followed: Sa juba jälgid seda kanalit.
@@ -435,7 +435,6 @@ Settings:
     Failed to Save Password: "Parooli salvestamine ebaõnnestus."
     Confirm Password: "Kinnita parool"
     Passwords Do Not Match: "Paroolid ei ühti."
-  Navigation and Controls: "Navigeerimine ja juhtelemendid"
   Control Bar:
     Title: "Juhtriba"
     Customize: "Kohanda juhtriba"
@@ -1055,6 +1054,7 @@ Settings:
     Channel Settings: Kanali seaded
     Channel Settings Description: Jäta iga kanali jaoks eraldi meelde vaatamise ajal valitud seaded, et need rakenduksid uuesti, kui vaatad järgmisel korral selle kanali videot.
     Enable Channel Playback Settings: Luba kanalipõhised esitusseaded
+    Auto Save Changes: Salvesta muudatused automaatselt
     Auto Save Playback Speed: Salvesta esituskiiruse muudatused automaatselt
     Auto Save Video Quality: Salvesta videokvaliteedi muudatused automaatselt
     Auto Save Subtitles State: Salvesta subtiitrite oleku muudatused automaatselt
@@ -1304,6 +1304,7 @@ Settings:
     Notify About New Uploads: Teavita uutest üleslaadimistest
     RSS Feeds Auto Refresh Interval: RSS-voogude automaatse värskendamise intervall
     Faster Subscription Refresh: "Kiirem tellimuste värskendamine"
+    Show Collaborations From Other Channels: "Kaasa teiste kanalite üles laaditud koostööd"
     Platforms:
       Other Platforms: Teised platvormid
       Manage Channels: Halda jälgitavaid kanaleid
@@ -2447,6 +2448,7 @@ Tooltips:
     Notify About New Uploads: Kuvab selles seadmes süsteemiteavitusi kanalite kohta, mille teavitused oled nende tellimuse seadetes sisse lülitanud. OpenTubeX kontrollib uut sisu tellimuste värskendamisel, seega vali automaatse värskendamise intervall. Et saada teavitusi ka siis, kui rakendus on suletud, luba ka värskendamine suletud rakenduse korral.
     RSS Feeds Auto Refresh Interval: Kui sageli OpenTubeX sinu RSS-voogusid automaatselt värskendab, kui rakendus on avatud.
     Faster Subscription Refresh: "Kontrollib esmalt iga kanali RSS-voogu ja laadib videod, Shorts'id ja otseülekanded ainult uute üleslaadimistega kanalitest. Automaatsed värskendused jätavad vahele ka kanalid, mis laaditi viimase 10 minuti jooksul. Uute üleslaadimisteta kanalite puhul uuenevad vaatamiste arvud, eemaldatud videod ja muudetud pealkirjad vaid iga mõne tunni tagant ning uued üleslaadimised võivad ilmuda hiljem, kui RSS-voog jääb maha. Invidiouse API-ga pole saadaval."
+    Show Collaborations From Other Channels: "Näitab ka videoid, mille tellitud kanalid tegid koos teise kanaliga, kes need üles laadis. YouTube näitab neid ainult kanali avalehe vahekaardil, seega laadib iga videote värskendus iga kanali kohta ühe lehe rohkem. Leitakse ainult seal näidatud uusimad koostööd, mõned kanalid ei näita ühtegi ja nende avaldamiskuupäevad on ligikaudsed. Pole Invidiouse API-ga saadaval."
     Platforms Auto Refresh Interval: Kui sageli OpenTubeX kanaleid, mida sa teistel platvormidel jälgid, automaatselt värskendab, kui rakendus on avatud.
     Twitch Notify When Live: Teavitab sind, kui mõni sinu jälgitavatest Twitchi kanalitest alustab ülekannet. OpenTubeX kontrollib iga paari minuti järel, kui see on avatud, ja ka siis, kui see on suletud, kui see siis tellimusi värskendab.
   Theme Settings:

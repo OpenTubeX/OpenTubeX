@@ -5,17 +5,6 @@
   max-height: calc(100% - var(--sponsorblock-notice-bottom) - 8px);
 }
 
-/* Scale the SponsorBlock skip notice down with the mini player so it stays
-   inside it instead of overflowing at small sizes. */
-.ftVideoPlayer.scrollMiniPlayer .skippedSegmentsWrapper {
-  transform: scale(var(--scroll-mini-scale, 1));
-  transform-origin: bottom right;
-}
-
-.ftVideoPlayer.scrollMiniPlayer .skippedSegmentsWrapper:where(:dir(rtl)) {
-  transform-origin: bottom left;
-}
-
 .skippedSegment.editing {
   --skipped-segment-background: var(--card-bg-color);
 

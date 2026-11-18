@@ -742,6 +742,7 @@ import { copyToClipboard, isUnloadedBackgroundTabClick, openExternalLink, openIn
 import { getChannelLinkDetails, getChannelLinkMenuItems } from './helpers/channel-context-menu'
 import { initializeCapacitorLiveReminderActions } from './helpers/liveReminders'
 import { showInAppNotification, supportsNotificationHistory } from './helpers/notificationHistory'
+import { getNotificationOpenUrl } from '../notificationHistory'
 import {
   addAndroidMediaSessionActionListener,
   setAndroidMediaButtonsIgnored,
@@ -4520,8 +4521,12 @@ function enableOpenUrl() {
   }
 }
 
-function openExternalMedia(url) {
-  return openInternalPath(getExternalUrlRoute(url))
+/**
+ * @param {string} url
+ * @param {boolean} [doCreateNewTab]
+ */
+function openExternalMedia(url, doCreateNewTab = false) {
+  return openInternalPath({ ...getExternalUrlRoute(url), doCreateNewTab })
 }
 
 async function handleAndroidSharedText(text) {
@@ -4558,6 +4563,10 @@ function openSharedYoutubeLink() {
 async function enableCapacitorIntegrations() {
   const openUrl = async url => {
     if (!url) return
+    // Android notifications wrap their link, so it opens in a new tab like the notification list's.
+    const notificationUrl = getNotificationOpenUrl(url)
+    const doCreateNewTab = notificationUrl != null
+    if (doCreateNewTab) url = notificationUrl
     if (isSyncServerOidcCallbackUrl(url)) {
       // The browser stays open over the app on iOS.
       if (Capacitor.getPlatform() === 'ios') Browser.close().catch(() => {})
@@ -4609,9 +4618,14 @@ async function enableCapacitorIntegrations() {
         return handleExternalLink(target)
       }
       await store.dispatch('hideSettingsWindow')
-      return openExternalMedia(target)
+      const opening = openExternalMedia(target, doCreateNewTab)
+      if (!doCreateNewTab) return opening
+      // A new tab is presented once it mounts, and on a cold start tabs mount
+      // only after this setup returns. Like YouTube links, do not wait for it.
+      opening.catch(error => console.error('Failed to open a notification link', error))
+      return
     }
-    return handleYoutubeLink(target)
+    return handleYoutubeLink(target, { doCreateNewTab })
   }
   const backButtonHandle = Capacitor.getPlatform() === 'android'
     ? await CapacitorApp.addListener('backButton', handleAndroidBack)
@@ -4626,7 +4640,20 @@ async function enableCapacitorIntegrations() {
         return null
       })
     : null
+  // The listener also receives the launch URL, which it retains until the app
+  // subscribes. Open it once, since notification links open a new tab each time.
+  let launchUrl = (await CapacitorApp.getLaunchUrl())?.url
+  let retainedLaunchUrl = launchUrl
   const urlHandle = await CapacitorApp.addListener('appUrlOpen', ({ url }) => {
+    if (retainedLaunchUrl && url === retainedLaunchUrl) {
+      retainedLaunchUrl = null
+      return
+    }
+    // A link tapped during the setup below replaces the launch URL it opens at
+    // its end. Sign-in callbacks are not destinations, so they neither replace
+    // the launch URL nor get replaced.
+    if (!isSyncServerOidcCallbackUrl(url) && !isSyncServerOidcCallbackUrl(launchUrl)) launchUrl = null
+    retainedLaunchUrl = null
     openUrl(url)
   })
   const shortcutHandle = await AppShortcuts.addListener('click', async ({ shortcutId }) => {
@@ -4651,7 +4678,7 @@ async function enableCapacitorIntegrations() {
   }, { immediate: true })
   const stopHomeWidgetUpdates = syncHomeWidgets(store, watch)
   const removeReminderActions = await initializeCapacitorLiveReminderActions((videoId) => {
-    handleYoutubeLink(`https://www.youtube.com/watch?v=${videoId}`)
+    handleYoutubeLink(`https://www.youtube.com/watch?v=${videoId}`, { doCreateNewTab: true })
   }, showInAppNotification)
   const removeMediaActions = await addAndroidMediaSessionActionListener(({ action, ...details }) => {
     tabMediaCoordinator.dispatchAction(action, details)
@@ -4706,8 +4733,8 @@ async function enableCapacitorIntegrations() {
     playbackScreenWake?.setAppActive(appState.isActive)
     setAndroidAppVisible(appState.isActive)
   }
-  const launch = await CapacitorApp.getLaunchUrl()
-  await openUrl(launch?.url)
+  retainedLaunchUrl = null
+  await openUrl(launchUrl)
 
   return () => {
     clearTimeout(backgroundStateTimeout)

@@ -132,8 +132,10 @@ test('the bell lists system notifications and opens them', async ({ app, page })
   // Looking at the list leaves its entries unread.
   await expect(markRead).toHaveCount(2)
 
-  // Opening an entry marks it read.
+  // Opening an entry marks it read, and uploads open in a new tab.
   await entries.nth(1).click()
+  await expect(page.locator(sel.tabs)).toHaveCount(2)
+  await expect(page.locator(sel.tabs).nth(1)).toHaveClass(/active/)
   await expect(page).toHaveURL(new RegExp(`#/watch/${first}$`))
   await expect(dropdown).toHaveCount(0)
   await expect(bell).toHaveAttribute('data-unread-count', '1')
@@ -228,6 +230,8 @@ test('notifications appear in the app instead of the system while it is in use',
   await expect(toast).toBeVisible()
   await expect(page.locator('.notificationCenter')).toHaveAttribute('data-unread-count', '1')
   await toast.click()
+  await expect(page.locator(sel.tabs)).toHaveCount(2)
+  await expect(page.locator(sel.tabs).nth(1)).toHaveClass(/active/)
   await expect(page).toHaveURL(new RegExp(`#/watch/${upload}$`))
   await expect(page.locator('.notificationCenter')).not.toHaveAttribute('data-unread-count')
 })

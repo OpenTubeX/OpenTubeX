@@ -265,7 +265,7 @@ Subscriptions:
     Followed Channels: Följda kanaler på andra plattformar
     Description: Följ kanaler på Twitch, SoundCloud, PeerTube, Rumble, Odysee och media.ccc.de för att se deras uppladdningar på fliken Plattformar i dina prenumerationer. Hitta kanaler med sökningen eller lägg till dem med adressen till deras sida. Deras media spelas upp med yt-dlp.
     Add Channel: Lägg till kanal
-    Channel URL: Kanaladress
+    Search Or Paste Channel: Sök eller klistra in en kanaladress
     Invalid Channel: Ange adressen till en kanalsida på Twitch, SoundCloud, PeerTube, Rumble, Odysee eller media.ccc.de.
     Channel Not Found: Det finns ingen kanal på den här adressen.
     Channel Already Followed: Du följer redan den här kanalen.
@@ -435,7 +435,6 @@ Settings:
     Failed to Save Password: "Det gick inte att spara lösenordet."
     Confirm Password: "Bekräfta lösenord"
     Passwords Do Not Match: "Lösenorden matchar inte."
-  Navigation and Controls: "Navigering och kontroller"
   Control Bar:
     Title: "Kontrollfält"
     Customize: "Anpassa kontrollfältet"
@@ -1055,6 +1054,7 @@ Settings:
     Channel Settings: Kanalinställningar
     Channel Settings Description: Kom ihåg inställningarna du väljer när du tittar för varje enskild kanal och använd dem nästa gång du tittar på en av kanalens videor.
     Enable Channel Playback Settings: Aktivera uppspelningsinställningar per kanal
+    Auto Save Changes: Spara ändringar automatiskt
     Auto Save Playback Speed: Spara ändringar av uppspelningshastigheten automatiskt
     Auto Save Video Quality: Spara ändringar av videokvaliteten automatiskt
     Auto Save Subtitles State: Spara ändringar av undertextläget automatiskt
@@ -1304,6 +1304,7 @@ Settings:
     Notify About New Uploads: Avisera om nya uppladdningar
     RSS Feeds Auto Refresh Interval: Intervall för automatisk uppdatering av RSS-flöden
     Faster Subscription Refresh: "Snabbare uppdatering av prenumerationer"
+    Show Collaborations From Other Channels: "Inkludera samarbeten uppladdade av andra kanaler"
     Platforms:
       Other Platforms: Andra plattformar
       Manage Channels: Hantera följda kanaler
@@ -2445,6 +2446,7 @@ Tooltips:
     Notify About New Uploads: Visar systemaviseringar på den här enheten för kanaler vars aviseringar du har aktiverat i deras prenumerationsinställningar. OpenTubeX söker efter nytt innehåll när prenumerationer uppdateras, så välj ett intervall för automatisk uppdatering. Om du vill få aviseringar medan appen är stängd aktiverar du även uppdatering medan appen är stängd.
     RSS Feeds Auto Refresh Interval: Hur ofta OpenTubeX automatiskt uppdaterar dina RSS-flöden medan appen är öppen.
     Faster Subscription Refresh: "Kontrollerar först varje kanals RSS-flöde och läser bara in videor, Shorts och livesändningar från kanaler med nya uppladdningar. Automatiska uppdateringar hoppar också över kanaler som lästs in de senaste 10 minuterna. För kanaler utan nya uppladdningar uppdateras visningar, borttagna videor och ändrade titlar bara med några timmars mellanrum, och nya uppladdningar kan dyka upp senare när RSS-flödet släpar efter. Inte tillgängligt med Invidious-API:t."
+    Show Collaborations From Other Channels: "Visar även videor som kanaler du prenumererar på har gjort tillsammans med en annan kanal som laddade upp dem. YouTube visar dem bara på en kanals Hem-flik, så varje uppdatering av videor läser in en sida till per kanal. Bara de senaste samarbetena som visas där hittas, vissa kanaler visar inga, och deras publiceringsdatum är ungefärliga. Inte tillgängligt med Invidious-API:et."
     Platforms Auto Refresh Interval: Hur ofta OpenTubeX automatiskt uppdaterar kanalerna du följer på andra plattformar medan appen är öppen.
     Twitch Notify When Live: Meddelar dig när en av dina följda Twitch-kanaler börjar streama. OpenTubeX kontrollerar med några minuters mellanrum medan det är öppet, och även medan det är stängt om det då uppdaterar prenumerationer.
   Theme Settings:

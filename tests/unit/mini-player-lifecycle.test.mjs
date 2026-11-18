@@ -108,7 +108,7 @@ test('a suspended Short cannot own the mini player even when its watch view is m
   isPlayerSuspended.value = true
   isActiveTab.value = false
   player.updateScrollMiniPlayer()
-  assert.equal(coordinator.hasCrossTabMiniPlayerOwner(), false)
+  assert.equal(coordinator.hasVisibleCrossTabMiniPlayer(), false)
   assert.equal(player.scrollMiniPlayerActive.value, false)
 })
 
@@ -118,7 +118,7 @@ test('a paused Watch tab does not acquire the cross-tab mini player before navig
   player.scrollMiniPlayerActive.value = false
   isActiveTab.value = false
   player.updateScrollMiniPlayer()
-  assert.equal(coordinator.hasCrossTabMiniPlayerOwner(), false)
+  assert.equal(coordinator.hasVisibleCrossTabMiniPlayer(), false)
   assert.equal(player.scrollMiniPlayerActive.value, false)
 })
 
@@ -250,7 +250,7 @@ test('Android restoration returns a visible mini-player inline without its slide
 test('downloaded audio keeps a visible mobile mini player after leaving Watch', t => {
   const { player } = mountMiniPlayer(t, { detached: true, android: true, format: 'audio' })
   player.updateScrollMiniPlayer()
-  assert.equal(coordinator.hasCrossTabMiniPlayerOwner(), true)
+  assert.equal(coordinator.hasVisibleCrossTabMiniPlayer(), true)
   assert.equal(player.scrollMiniPlayerActive.value, true)
   assert.equal(player.scrollMiniPlayerDetached.value, true)
 })

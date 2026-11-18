@@ -267,7 +267,7 @@ Subscriptions:
     Followed Channels: Canles seguidas noutras plataformas
     Description: Segue canles de Twitch, SoundCloud, PeerTube, Rumble, Odysee e media.ccc.de para ver as súas publicacións na lapela Plataformas das túas subscricións. Atopa canles coa busca ou engádeas co enderezo da súa páxina. O seu contido reprodúcese con yt-dlp.
     Add Channel: Engadir canle
-    Channel URL: Enderezo da canle
+    Search Or Paste Channel: Busca ou pega o enderezo dunha canle
     Invalid Channel: Introduce o enderezo da páxina dunha canle de Twitch, SoundCloud, PeerTube, Rumble, Odysee ou media.ccc.de.
     Channel Not Found: Non hai ningunha canle neste enderezo.
     Channel Already Followed: Xa segues esta canle.
@@ -440,7 +440,6 @@ Settings:
     Failed to Save Password: "Non se puido gardar o contrasinal."
     Confirm Password: "Confirmar contrasinal"
     Passwords Do Not Match: "Os contrasinais non coinciden."
-  Navigation and Controls: "Navegación e controis"
   Control Bar:
     Title: "Barra de controis"
     Customize: "Personalizar a barra de controis"
@@ -1066,6 +1065,7 @@ Settings:
     Channel Settings: Configuración das canles
     Channel Settings Description: Lembrar por separado os axustes escollidos mentres ves vídeos de cada canle para aplicalos de novo a próxima vez que vexas un dos seus vídeos.
     Enable Channel Playback Settings: Activar a configuración de reprodución por canle
+    Auto Save Changes: Gardar os cambios automaticamente
     Auto Save Playback Speed: Gardar automaticamente os cambios de velocidade de reprodución
     Auto Save Video Quality: Gardar automaticamente os cambios de calidade do vídeo
     Auto Save Subtitles State: Gardar automaticamente os cambios de estado dos subtítulos
@@ -1315,6 +1315,7 @@ Settings:
     Notify About New Uploads: Notificar novas subidas
     RSS Feeds Auto Refresh Interval: Intervalo de actualización automática das fontes RSS
     Faster Subscription Refresh: "Actualización máis rápida das subscricións"
+    Show Collaborations From Other Channels: "Incluír colaboracións subidas por outras canles"
     Platforms:
       Other Platforms: Outras plataformas
       Manage Channels: Xestionar canles seguidas
@@ -2506,6 +2507,7 @@ Tooltips:
     Notify About New Uploads: Amosa notificacións do sistema neste dispositivo para as canles cuxas notificacións activaches na súa configuración de subscrición. OpenTubeX busca contido novo ao actualizar as subscricións, así que escolle un intervalo de actualización automática. Para recibir notificacións coa aplicación pechada, activa tamén a actualización coa aplicación pechada.
     RSS Feeds Auto Refresh Interval: Con que frecuencia OpenTubeX actualiza automaticamente as túas fontes RSS mentres a aplicación está aberta.
     Faster Subscription Refresh: "Primeiro comproba a fonte RSS de cada canle e só carga os vídeos, Shorts e emisións en directo das canles con novas subidas. As actualizacións automáticas tamén omiten as canles cargadas nos últimos 10 minutos. Nas canles sen novas subidas, as visualizacións, os vídeos eliminados e os títulos cambiados só se actualizan cada poucas horas, e as novas subidas poden aparecer máis tarde cando a fonte RSS vai atrasada. Non dispoñible coa API de Invidious."
+    Show Collaborations From Other Channels: "Tamén mostra os vídeos que as canles ás que estás subscrito fixeron xunto con outra canle que os subiu. YouTube só os mostra na lapela Inicio dunha canle, así que cada actualización de vídeos carga unha páxina máis por canle. Só se atopan as colaboracións máis recentes que se mostran alí, algunhas canles non mostran ningunha e as súas datas de publicación son aproximadas. Non dispoñible coa API de Invidious."
     Platforms Auto Refresh Interval: Con que frecuencia OpenTubeX actualiza automaticamente as canles que segues noutras plataformas mentres a aplicación está aberta.
     Twitch Notify When Live: Avísate cando unha das canles de Twitch que segues comeza a emitir. OpenTubeX compróbao cada poucos minutos mentres está aberto, e tamén mentres está pechado se entón actualiza as subscricións.
   Theme Settings:

@@ -380,6 +380,40 @@ test('the renderer reports only feeds with notifications turned on', async () =>
   assert.deepEqual(reported, ['UCa/videos'])
 })
 
+test('collaborations listed after known uploads still notify', async () => {
+  const source = await readFile(new URL('../../src/renderer/helpers/uploadNotifications.js', import.meta.url), 'utf8')
+  const state = createUploadNotificationState()
+  const notified = []
+  const getters = { getEnableUploadNotifications: true, getIncludeSubscriptionCollaborations: true }
+  const context = vm.createContext({
+    process: { env: { IS_ELECTRON: true } },
+    store: { getters },
+    normalizeUploadEntries,
+    window: {
+      ftElectron: {
+        subscriptionAutoRefresh: {
+          configureUploadNotifications: async () => {},
+          observeUploads: async ({ channelId, feedType, entries }) => {
+            notified.push(...takeNewUploads(state, channelId, feedType, entries).map(upload => upload.id))
+          }
+        }
+      }
+    },
+    console
+  })
+  vm.runInContext(source.replace(/^import .*\n/gm, '').replace(/^export /gm, ''), context)
+  await context.configureUploadNotifications({ enabled: true, channels: { UCa: { feedTypes: ['videos'] } } })
+  const video = (videoId, extra) => ({ videoId, title: videoId, published: Date.now() - HOUR, ...extra })
+  const knownCollaboration = video('known-collaboration', { isCollaboration: true })
+
+  context.reportSubscriptionUploads('UCa', 'videos', [video('known-upload'), knownCollaboration])
+  context.reportSubscriptionUploads('UCa', 'videos', [video('known-upload'), video('new-collaboration', { isCollaboration: true }), knownCollaboration])
+  getters.getIncludeSubscriptionCollaborations = false
+  context.reportSubscriptionUploads('UCa', 'videos', [video('known-upload'), video('hidden-collaboration', { isCollaboration: true }), knownCollaboration])
+  await new Promise(resolve => setImmediate(resolve))
+  assert.deepEqual(notified, ['new-collaboration'])
+})
+
 test('refreshes of another profile also fetch channels with notifications turned on', async () => {
   const source = await readFile(new URL('../../src/renderer/helpers/uploadNotifications.js', import.meta.url), 'utf8')
   const alpha = { id: 'UCa' }

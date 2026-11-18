@@ -13,6 +13,14 @@
   min-block-size: 0;
   overflow: hidden;
   container-type: inline-size;
+
+  /* Reach through the settings subpage's padding so the scrollbar sits at the
+     window's edge; the children pad themselves instead. */
+  margin-inline: calc(-1 * var(--settings-subpage-padding));
+}
+
+.keyboardShortcutPromptEmbedded > :is(.shortcutToolbar, .shortcutColumns) {
+  padding-inline: var(--settings-subpage-padding);
 }
 
 .titleAndCloseButton {

@@ -267,7 +267,7 @@ Subscriptions:
     Followed Channels: Gevolgde kanalen op andere platforms
     Description: Volg kanalen op Twitch, SoundCloud, PeerTube, Rumble, Odysee en media.ccc.de om hun uploads te zien op het tabblad Platforms van je abonnementen. Zoek kanalen met de zoekfunctie, of voeg ze toe via het adres van hun pagina. Hun media worden afgespeeld met yt-dlp.
     Add Channel: Kanaal toevoegen
-    Channel URL: Kanaaladres
+    Search Or Paste Channel: Zoek of plak een kanaaladres
     Invalid Channel: Voer het adres in van een kanaalpagina op Twitch, SoundCloud, PeerTube, Rumble, Odysee of media.ccc.de.
     Channel Not Found: Er is geen kanaal op dit adres.
     Channel Already Followed: Je volgt dit kanaal al.
@@ -440,7 +440,6 @@ Settings:
     Failed to Save Password: "Wachtwoord opslaan mislukt."
     Confirm Password: "Wachtwoord bevestigen"
     Passwords Do Not Match: "De wachtwoorden komen niet overeen."
-  Navigation and Controls: "Navigatie en bediening"
   Control Bar:
     Title: "Bedieningsbalk"
     Customize: "Bedieningsbalk aanpassen"
@@ -1070,6 +1069,7 @@ Settings:
     Channel Settings: Kanaalinstellingen
     Channel Settings Description: Onthoud de instellingen die je tijdens het kijken kiest afzonderlijk voor elk kanaal, zodat ze weer worden toegepast wanneer je een andere video van dat kanaal bekijkt.
     Enable Channel Playback Settings: Afspeelinstellingen per kanaal inschakelen
+    Auto Save Changes: Wijzigingen automatisch opslaan
     Auto Save Playback Speed: Wijzigingen in afspeelsnelheid automatisch opslaan
     Auto Save Video Quality: Wijzigingen in videokwaliteit automatisch opslaan
     Auto Save Subtitles State: Wijzigingen in ondertitelingsstatus automatisch opslaan
@@ -1319,6 +1319,7 @@ Settings:
     Notify About New Uploads: Melden bij nieuwe uploads
     RSS Feeds Auto Refresh Interval: Interval voor automatisch vernieuwen van RSS-feeds
     Faster Subscription Refresh: "Snellere vernieuwing van abonnementen"
+    Show Collaborations From Other Channels: "Samenwerkingen opnemen die door andere kanalen zijn geüpload"
     Platforms:
       Other Platforms: Andere platforms
       Manage Channels: Gevolgde kanalen beheren
@@ -2512,6 +2513,7 @@ Tooltips:
     Notify About New Uploads: Toont systeemmeldingen op dit apparaat voor kanalen waarvan je de meldingen hebt ingeschakeld in hun abonnementsinstellingen. OpenTubeX controleert op nieuwe inhoud wanneer abonnementen worden vernieuwd, dus kies een interval voor automatisch vernieuwen. Om ook meldingen te krijgen terwijl de app gesloten is, schakel je ook vernieuwen terwijl de app gesloten is in.
     RSS Feeds Auto Refresh Interval: Hoe vaak OpenTubeX je RSS-feeds automatisch vernieuwt terwijl de app geopend is.
     Faster Subscription Refresh: "Controleert eerst de RSS-feed van elk kanaal en laadt alleen de video's, Shorts en livestreams van kanalen met nieuwe uploads. Automatische vernieuwingen slaan ook kanalen over die in de afgelopen 10 minuten zijn geladen. Bij kanalen zonder nieuwe uploads worden weergaven, verwijderde video's en gewijzigde titels maar om de paar uur bijgewerkt, en nieuwe uploads kunnen later verschijnen als de RSS-feed achterloopt. Niet beschikbaar met de Invidious-API."
+    Show Collaborations From Other Channels: "Toont ook video's die kanalen waarop je bent geabonneerd hebben gemaakt samen met een ander kanaal dat ze heeft geüpload. YouTube toont deze alleen op het tabblad Home van een kanaal, dus elke vernieuwing van video's laadt één pagina meer per kanaal. Alleen de nieuwste samenwerkingen die daar worden getoond, worden gevonden, sommige kanalen tonen er geen en hun publicatiedatums zijn bij benadering. Niet beschikbaar met de Invidious-API."
     Platforms Auto Refresh Interval: Hoe vaak OpenTubeX de kanalen die je op andere platforms volgt automatisch vernieuwt terwijl de app geopend is.
     Twitch Notify When Live: Geeft een melding wanneer een van je gevolgde Twitch-kanalen begint met streamen. OpenTubeX controleert om de paar minuten zolang het geopend is, en ook wanneer het gesloten is als het dan abonnementen vernieuwt.
   Theme Settings:

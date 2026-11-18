@@ -1990,7 +1990,7 @@
           type="button"
           :tabindex="scrollMiniPlayerDetached ? 0 : -1"
           class="scrollMiniPlayPause"
-          :class="{ isHidden: !scrollMiniPlayPauseVisible }"
+          :class="{ isHidden: !scrollMiniPlayPauseVisible, isPaused: scrollMiniIsPaused || playbackEnded }"
           :title="playbackEnded ? replayLabel : scrollMiniIsPaused ? $t('Video.Player.Scroll Mini Player.Play') : $t('Video.Player.Scroll Mini Player.Pause')"
           @click.stop.prevent="scrollMiniTogglePlayPause"
           @mouseenter="handleScrollMiniPlayPauseMouseEnter"
@@ -2311,8 +2311,8 @@ import { parseChannelPreferences, removeChannelPreference } from '../../helpers/
 import { findLegacyFormatForQuality } from '../../helpers/player/legacyFormats'
 import { waitForYtDlpFormatAvailability } from '../../helpers/player/ytDlpFormatAvailability'
 import { getDashQualityFromDimensions } from '../../helpers/player/videoQuality'
-import { DEFAULT_VIDEO_ZOOM, formatVideoZoom, VIDEO_ZOOM_LEVELS } from '../../helpers/player/videoZoom'
-import { DEFAULT_VOLUME_BOOST, sanitizeVolumeBoost, VOLUME_BOOST_LEVELS } from '../../helpers/player/volumeBoost'
+import { DEFAULT_VIDEO_ZOOM, formatVideoZoom, VIDEO_ZOOM_LEVELS, VIDEO_ZOOM_STEP } from '../../helpers/player/videoZoom'
+import { DEFAULT_VOLUME_BOOST, sanitizeVolumeBoost, VOLUME_BOOST_LEVELS, VOLUME_BOOST_STEP } from '../../helpers/player/volumeBoost'
 import { getActiveAudioLoudnessDb, getLoudnessNormalizationGain } from '../../helpers/player/loudnessNormalization'
 import { shouldStartPaidPromotionTimer } from '../../helpers/player/paidPromotion'
 import { updateSponsorBlockSeekBarState } from '../../helpers/player/sponsorBlockSeekBar'
@@ -10158,6 +10158,7 @@ function registerVideoZoomSelection() {
           value: videoZoom,
           updateValue: updateVideoZoom,
           levels: VIDEO_ZOOM_LEVELS,
+          step: VIDEO_ZOOM_STEP,
           defaultLevel: DEFAULT_VIDEO_ZOOM,
           formatLevel: zoom => zoom === DEFAULT_VIDEO_ZOOM ? t('Video.Player.Zoom.Off') : formatVideoZoom(zoom),
           getLabel: () => t('Video.Player.Zoom.Zoom'),
@@ -10183,6 +10184,7 @@ function registerVolumeBoostSelection() {
           value: volumeBoost,
           updateValue: updateVolumeBoost,
           levels: VOLUME_BOOST_LEVELS,
+          step: VOLUME_BOOST_STEP,
           defaultLevel: DEFAULT_VOLUME_BOOST,
           formatLevel: boost => boost === DEFAULT_VOLUME_BOOST
             ? t('Video.Player.Volume Boost.Off')

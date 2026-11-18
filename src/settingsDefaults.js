@@ -447,6 +447,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     userPlaylistSortOrder: 'date_added_descending',
     useRssFeeds: false,
     fastSubscriptionRefresh: false,
+    includeSubscriptionCollaborations: false,
     useReturnYouTubeDislikes: false,
     returnYouTubeDislikesUrl: 'https://ryd-proxy.kavin.rocks',
     useAiSlopList: false,

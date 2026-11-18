@@ -280,7 +280,7 @@ Subscriptions:
     Followed Channels: Canales seguidos en otras plataformas
     Description: Sigue canales de Twitch, SoundCloud, PeerTube, Rumble, Odysee y media.ccc.de para ver sus publicaciones en la pestaña Plataformas de tus suscripciones. Busca canales con la búsqueda o agrégalos con la dirección de su página. Su contenido se reproduce con yt-dlp.
     Add Channel: Agregar canal
-    Channel URL: Dirección del canal
+    Search Or Paste Channel: Busca o pega la dirección de un canal
     Invalid Channel: Ingresa la dirección de la página de un canal de Twitch, SoundCloud, PeerTube, Rumble, Odysee o media.ccc.de.
     Channel Not Found: No hay ningún canal en esta dirección.
     Channel Already Followed: Ya sigues este canal.
@@ -466,7 +466,6 @@ Settings:
     Tabs to unload: "Pestañas que descargar"
     Automatic unloading help: "Descarga las pestañas en segundo plano más antiguas para liberar memoria. Las pestañas activas y en reproducción permanecen cargadas."
     Memory threshold help: "Porcentaje del límite de memoria del renderizador, no de la RAM total del sistema."
-  Navigation and Controls: "Navegación y controles"
   Control Bar:
     Title: "Barra de controles"
     Customize: "Personalizar la barra de controles"
@@ -1176,6 +1175,7 @@ Settings:
     Channel Settings: Ajustes de canales
     Channel Settings Description: Recuerda por separado los ajustes que elijas al ver cada canal para volver a aplicarlos la próxima vez que veas uno de sus videos.
     Enable Channel Playback Settings: Activar los ajustes de reproducción por canal
+    Auto Save Changes: Guardar cambios automáticamente
     Auto Save Playback Speed: Guardar automáticamente los cambios de velocidad de reproducción
     Auto Save Video Quality: Guardar automáticamente los cambios de calidad de video
     Auto Save Subtitles State: Guardar automáticamente los cambios en el estado de los subtítulos
@@ -1435,6 +1435,7 @@ Settings:
     Confirm Before Unsubscribing: Evitar bajas accidentales
     RSS Feeds Auto Refresh Interval: Intervalo de actualización automática de fuentes RSS
     Faster Subscription Refresh: "Actualización más rápida de suscripciones"
+    Show Collaborations From Other Channels: "Incluir colaboraciones subidas por otros canales"
     Platforms:
       Other Platforms: Otras plataformas
       Manage Channels: Administrar canales seguidos
@@ -2811,6 +2812,7 @@ Tooltips:
     Notify About New Uploads: Muestra notificaciones del sistema en este dispositivo para los canales cuyas notificaciones activaste en su configuración de suscripción. OpenTubeX busca contenido nuevo al actualizar las suscripciones, así que elige un intervalo de actualización automática. Para recibir notificaciones con la aplicación cerrada, activa también la actualización con la aplicación cerrada.
     RSS Feeds Auto Refresh Interval: Con qué frecuencia OpenTubeX actualiza automáticamente tus fuentes RSS mientras la aplicación está abierta.
     Faster Subscription Refresh: "Primero revisa el feed RSS de cada canal y solo carga los videos, Shorts y transmisiones en vivo de los canales con subidas nuevas. Las actualizaciones automáticas también omiten los canales cargados en los últimos 10 minutos. En los canales sin subidas nuevas, las vistas, los videos eliminados y los títulos cambiados solo se actualizan cada pocas horas, y las subidas nuevas pueden aparecer más tarde cuando el feed RSS se retrasa. No disponible con la API de Invidious."
+    Show Collaborations From Other Channels: "También muestra los videos que los canales a los que estás suscrito hicieron junto con otro canal que los subió. YouTube solo los muestra en la pestaña Inicio de un canal, así que cada actualización de videos carga una página más por canal. Solo se encuentran las colaboraciones más recientes que se muestran ahí, algunos canales no muestran ninguna y sus fechas de publicación son aproximadas. No disponible con la API de Invidious."
     Platforms Auto Refresh Interval: Con qué frecuencia OpenTubeX actualiza automáticamente los canales que sigues en otras plataformas mientras la aplicación está abierta.
     Twitch Notify When Live: Te avisa cuando uno de los canales de Twitch que sigues comienza a transmitir. OpenTubeX revisa cada pocos minutos mientras está abierto, y también mientras está cerrado si en ese momento actualiza las suscripciones.
   Theme Settings:

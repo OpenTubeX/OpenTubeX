@@ -265,7 +265,7 @@ Subscriptions:
     Followed Channels: Kênh đang theo dõi trên các nền tảng khác
     Description: Theo dõi các kênh trên Twitch, SoundCloud, PeerTube, Rumble, Odysee và media.ccc.de để xem nội dung họ tải lên trong thẻ Nền tảng của mục đăng ký. Tìm kênh bằng tính năng tìm kiếm hoặc thêm kênh bằng địa chỉ trang của kênh. Nội dung của các kênh được phát bằng yt-dlp.
     Add Channel: Thêm kênh
-    Channel URL: Địa chỉ kênh
+    Search Or Paste Channel: Tìm kiếm hoặc dán địa chỉ kênh
     Invalid Channel: Nhập địa chỉ trang của một kênh trên Twitch, SoundCloud, PeerTube, Rumble, Odysee hoặc media.ccc.de.
     Channel Not Found: Không có kênh nào ở địa chỉ này.
     Channel Already Followed: Bạn đã theo dõi kênh này rồi.
@@ -435,7 +435,6 @@ Settings:
     Failed to Save Password: "Không thể lưu mật khẩu."
     Confirm Password: "Xác nhận mật khẩu"
     Passwords Do Not Match: "Mật khẩu không khớp."
-  Navigation and Controls: "Điều hướng và điều khiển"
   Control Bar:
     Title: "Thanh điều khiển"
     Customize: "Tùy chỉnh thanh điều khiển"
@@ -1055,6 +1054,7 @@ Settings:
     Channel Settings: Cài đặt kênh
     Channel Settings Description: Ghi nhớ riêng các cài đặt bạn chọn khi xem từng kênh để áp dụng lại vào lần sau khi bạn xem video của kênh đó.
     Enable Channel Playback Settings: Bật cài đặt phát theo kênh
+    Auto Save Changes: Tự động lưu thay đổi
     Auto Save Playback Speed: Tự động lưu thay đổi tốc độ phát
     Auto Save Video Quality: Tự động lưu thay đổi chất lượng video
     Auto Save Subtitles State: Tự động lưu thay đổi trạng thái phụ đề
@@ -1304,6 +1304,7 @@ Settings:
     Notify About New Uploads: Thông báo nội dung mới tải lên
     RSS Feeds Auto Refresh Interval: Khoảng tự động làm mới nguồn cấp RSS
     Faster Subscription Refresh: "Làm mới kênh đăng ký nhanh hơn"
+    Show Collaborations From Other Channels: "Bao gồm nội dung cộng tác do kênh khác tải lên"
     Platforms:
       Other Platforms: Nền tảng khác
       Manage Channels: Quản lý kênh đang theo dõi
@@ -2461,6 +2462,7 @@ Tooltips:
     Notify About New Uploads: Hiện thông báo hệ thống trên thiết bị này cho các kênh mà bạn đã bật thông báo trong cài đặt đăng ký của kênh. OpenTubeX kiểm tra nội dung mới khi làm mới đăng ký, vì vậy hãy chọn khoảng thời gian tự động làm mới. Để nhận thông báo khi ứng dụng đã đóng, hãy bật thêm tùy chọn làm mới khi ứng dụng đã đóng.
     RSS Feeds Auto Refresh Interval: Tần suất OpenTubeX tự động làm mới các nguồn cấp RSS của bạn khi ứng dụng đang mở.
     Faster Subscription Refresh: "Trước tiên kiểm tra nguồn cấp RSS của từng kênh và chỉ tải video, Shorts và sự kiện trực tiếp từ các kênh có nội dung tải lên mới. Làm mới tự động cũng bỏ qua các kênh đã tải trong 10 phút qua. Với các kênh không có nội dung mới, lượt xem, video đã xóa và tiêu đề đã thay đổi chỉ được cập nhật vài giờ một lần, và nội dung mới có thể xuất hiện muộn hơn khi nguồn cấp RSS bị chậm. Không khả dụng với API Invidious."
+    Show Collaborations From Other Channels: "Cũng hiển thị các video mà kênh bạn đăng ký đã thực hiện cùng một kênh khác đã tải chúng lên. YouTube chỉ liệt kê chúng trên thẻ Trang chủ của kênh, nên mỗi lần làm mới video sẽ tải thêm một trang cho mỗi kênh. Chỉ tìm thấy các nội dung cộng tác mới nhất hiển thị ở đó, một số kênh không hiển thị nội dung nào và ngày đăng của chúng chỉ là ước tính. Không khả dụng với API Invidious."
     Platforms Auto Refresh Interval: Tần suất OpenTubeX tự động làm mới các kênh bạn theo dõi trên các nền tảng khác khi ứng dụng đang mở.
     Twitch Notify When Live: Thông báo cho bạn khi một trong các kênh Twitch bạn theo dõi bắt đầu phát. OpenTubeX kiểm tra vài phút một lần khi đang mở, và cả khi đã đóng nếu lúc đó ứng dụng làm mới mục đăng ký.
   Theme Settings:

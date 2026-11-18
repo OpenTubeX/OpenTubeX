@@ -375,7 +375,7 @@ test.describe('live sync', () => {
     await sync.locator('.activityList').getByRole('button', {
       name: 'Automatically save playback speed changes', exact: true
     }).click()
-    await expect(page.locator('.switch-ctn.settingsSearchTarget')).toContainText('Automatically save playback speed changes')
+    await expect(page.locator('.switch-ctn.settingsSearchTarget')).toHaveAttribute('data-setting-key', 'autoUpdateChannelPlaybackSpeeds')
 
     await page.getByRole('dialog', { name: 'Settings', exact: true }).getByRole('button', { name: 'Close', exact: true }).click()
     await goTo(page, 'history')

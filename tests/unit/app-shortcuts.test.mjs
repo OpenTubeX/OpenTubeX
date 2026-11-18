@@ -9,6 +9,7 @@ import {
   takeSubscriptionFeedRefreshRequest,
 } from '../../src/renderer/helpers/subscriptionFeedRefreshRequest.js'
 import { getHomeWidgetPage } from '../../src/renderer/helpers/homeWidgetData.js'
+import { getNotificationOpenUrl } from '../../src/notificationHistory.js'
 import { shouldOpenExternalMediaUrl } from '../../src/renderer/helpers/externalMediaUrl.js'
 import { isSyncServerOidcCallbackUrl } from '../../src/renderer/helpers/sync-server-oidc.js'
 import { resolveMobileContextLinkCopyUrl } from '../../src/renderer/helpers/mobileLinkActions.js'
@@ -46,13 +47,18 @@ test('retained startup clicks and running-app clicks navigate and update localiz
   appWindow.addEventListener('opentubex:focus-search', () => { searchFocusRequests++ })
   const locale = { value: 'en-US' }
   const refreshRequests = []
-  const enable = vm.runInNewContext(`${integration}\nenableCapacitorIntegrations`, {
+  let startupLaunchUrl = 'opentubex://https//www.youtube.com/feed/history'
+  // A link tapped while the app is still starting, after the launch URL.
+  let newerStartupTap = null
+  const oidcCallbacks = []
+  const context = {
     window: appWindow,
     document: { getElementById: () => null },
     CustomEvent,
     dataReady: { value: true },
     isAnyPromptOpen: { value: false },
     getHomeWidgetPage,
+    getNotificationOpenUrl,
     shouldOpenExternalMediaUrl,
     isSyncServerOidcCallbackUrl,
     syncHomeWidgets: () => () => { widgetSyncStopped = true },
@@ -66,10 +72,15 @@ test('retained startup clicks and running-app clicks navigate and update localiz
     CapacitorApp: {
       addListener: async (name, callback) => {
         listeners.set(name, callback)
+        // Native plugins also retain the launch URL until the renderer subscribes.
+        if (name === 'appUrlOpen') callback({ url: startupLaunchUrl })
         return { remove: () => listeners.delete(name) }
       },
-      getState: async () => ({ isActive: true }),
-      getLaunchUrl: async () => ({ url: 'opentubex://https//www.youtube.com/feed/history' }),
+      getState: async () => {
+        if (newerStartupTap) listeners.get('appUrlOpen')({ url: newerStartupTap })
+        return { isActive: true }
+      },
+      getLaunchUrl: async () => ({ url: startupLaunchUrl }),
     },
     AppShortcuts: {
       addListener: async (name, callback) => {
@@ -96,6 +107,10 @@ test('retained startup clicks and running-app clicks navigate and update localiz
           paths.push(`settings:${view}`)
           return
         }
+        if (action === 'receiveSyncServerOidcCallback') {
+          oidcCallbacks.push(view)
+          return
+        }
         assert.equal(action, 'hideSettingsWindow')
         settingsOpen = false
       },
@@ -118,7 +133,8 @@ test('retained startup clicks and running-app clicks navigate and update localiz
       paths.push(query ? `${path}?${new URLSearchParams(query)}` : path)
     },
     handleYoutubeLink: url => { youtubeLinks.push(url) },
-  })
+  }
+  const enable = vm.runInNewContext(`${integration}\nenableCapacitorIntegrations`, context)
   const cleanup = await enable()
   assert.deepEqual(wakeStates, [true])
   assert.deepEqual(paths, ['/subscriptions'])
@@ -152,6 +168,25 @@ test('retained startup clicks and running-app clicks navigate and update localiz
   assert.equal(stopped, true)
   assert.equal(widgetSyncStopped, true)
   assert.equal(listeners.size, 0)
+
+  // A newer link tapped during startup stays the destination instead of the launch URL.
+  newerStartupTap = 'https://youtu.be/456'
+  const openedBefore = youtubeLinks.length
+  ;(await enable())()
+  assert.deepEqual(youtubeLinks.slice(openedBefore), ['https://youtu.be/456'])
+
+  // A sign-in callback is not a destination, so a newer tap does not replace it.
+  startupLaunchUrl = 'opentubex://oidc?token=a.b.c'
+  ;(await enable())()
+  assert.deepEqual(oidcCallbacks, ['opentubex://oidc?token=a.b.c'])
+
+  // Nor does a sign-in callback that arrives during startup replace the launch URL.
+  startupLaunchUrl = 'https://youtu.be/789'
+  newerStartupTap = 'opentubex://oidc?token=d.e.f'
+  const openedBeforeCallback = youtubeLinks.length
+  ;(await enable())()
+  assert.deepEqual(youtubeLinks.slice(openedBeforeCallback), ['https://youtu.be/789'])
+  assert.deepEqual(oidcCallbacks, ['opentubex://oidc?token=a.b.c', 'opentubex://oidc?token=d.e.f'])
 })
 
 test('a feed refresh request runs once, after the page has loaded', () => {
