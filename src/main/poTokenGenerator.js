@@ -259,6 +259,11 @@ async function attest(videoId, context, initialAttestationData, ytConfig, proxyU
     // system route this session starts with.
     await theSession.setProxy(proxyUrl ? { proxyRules: proxyUrl } : { mode: 'system' })
 
+    // Nothing would close the view after the last app window closed
+    if (BrowserWindow.getAllWindows().length === 0) {
+      throw new Error('No app window needs a PO token')
+    }
+
     webContentsView = new WebContentsView({
       webPreferences: {
         backgroundThrottling: false,

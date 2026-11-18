@@ -26,6 +26,7 @@ test('PO token generation preserves replacement sequences in YouTube JSON argume
       contentView = { addChildView() {} }
       once() {}
     },
+    BrowserWindow: { getAllWindows: () => [{}] },
     WebContentsView: class {
       webContents = {
         once() {},
@@ -293,13 +294,16 @@ test('the BotGuard view and its hidden window close with the last app window', a
   assert.equal(views[0].closed, true)
   assert.equal(hosts[0].destroyed, true)
   assert.equal(await mintOnly(), null)
+  // A run after the last window closed would keep a hidden window nothing closes
+  await assert.rejects(generate())
+  assert.equal(hosts.length, 1)
 })
 
 test('closing the hidden window closes its BotGuard view', async () => {
   // Quitting closes every window, and the view must not outlive its native view
   const { generate, views, hosts } = load({ attest: () => attested })
   await generate()
-  hosts[0].emit('closed')
+  hosts[0].destroy()
   assert.equal(views[0].closed, true)
   assert.equal(await generate(), attested)
   assert.equal(views.length, 2)

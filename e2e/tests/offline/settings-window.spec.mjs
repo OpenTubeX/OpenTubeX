@@ -193,9 +193,10 @@ test.describe('settings', () => {
     // A real key press runs Electron's native menu accelerator, unlike a menu item click
     await app.electronApp.evaluate(({ webContents }, url) => {
       const contents = webContents.getAllWebContents().find(contents => contents.getURL() === url)
+      const modifiers = [process.platform === 'darwin' ? 'meta' : 'control']
       contents.focus()
-      contents.sendInputEvent({ type: 'keyDown', keyCode: ',', modifiers: ['control'] })
-      contents.sendInputEvent({ type: 'keyUp', keyCode: ',', modifiers: ['control'] })
+      contents.sendInputEvent({ type: 'keyDown', keyCode: ',', modifiers })
+      contents.sendInputEvent({ type: 'keyUp', keyCode: ',', modifiers })
     }, page.url())
 
     await expect(page.locator('.settingsWindow')).toBeVisible()
