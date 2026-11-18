@@ -156,6 +156,7 @@
             <FtInput
               ref="searchInput"
               variant="rounded"
+              :icon="['fas', 'search']"
               :value="search"
               input-type="search"
               :label="$t('Search Bar.Search')"

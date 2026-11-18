@@ -12,7 +12,8 @@
       hasHighlights: highlightSegments !== null,
       hasSupportingText: supportingText !== '',
       outlined: variant === 'outlined' && !isSearch,
-      rounded: variant === 'rounded' && !isSearch
+      rounded: variant === 'rounded' && !isSearch,
+      hasLeadingIcon: showLeadingIcon
     }"
     @focusout="handleFocusOut"
   >
@@ -46,6 +47,14 @@
         @blur="handleInputBlur"
         @keydown="handleKeyDown"
         @scroll="highlightsRef && (highlightsRef.scrollTop = $event.target.scrollTop)"
+      />
+      <!-- Rounded fields without a visible label show their icon where the
+           label's icon would be. -->
+      <FtIcon
+        v-if="showLeadingIcon"
+        :icon="icon"
+        class="leadingIcon"
+        aria-hidden="true"
       />
       <!-- Draws the text with its highlights, as the textarea cannot color
            parts of it. Its text is transparent instead. Only for multiline. -->
@@ -387,6 +396,7 @@ const props = defineProps({
 const emit = defineEmits(['blur', 'change', 'clear', 'click', 'focus', 'input', 'keydown', 'remove'])
 
 const id = useId()
+const showLeadingIcon = computed(() => props.icon !== null && !props.showLabel && props.variant === 'rounded' && !props.isSearch)
 
 const inputRef = useTemplateRef('inputRef')
 const passwordVisible = ref(false)
