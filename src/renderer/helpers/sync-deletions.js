@@ -36,32 +36,38 @@ const STORAGE_KEY = 'opentubex.sync-deletion-decisions'
 export function createSyncDeletionDecisions(storage = null) {
   /** @type {Map<string, { confirmed: Set<string>, kept: Set<string> }>} */
   let decisions = new Map()
-  // After a failed save, the storage misses the latest decisions.
-  let unsaved = false
+  // Changes a failed save left out of the storage. Each read applies them
+  // again, so the changes other windows saved meanwhile stay.
+  /** @type {(() => void)[]} */
+  let unsaved = []
 
   // Read before each change, because another window may have changed them.
   function load() {
-    if (!storage || unsaved) return
+    if (!storage) return
     try {
       const saved = JSON.parse(storage.getItem(STORAGE_KEY) ?? '{}')
       decisions = new Map(Object.entries(saved).map(([key, value]) => [key, {
         confirmed: new Set(Array.isArray(value?.confirmed) ? value.confirmed : []),
         kept: new Set(Array.isArray(value?.kept) ? value.kept : []),
       }]))
+      for (const change of unsaved) change()
     } catch (error) {
       console.error('Failed to read the sync deletion decisions', error)
     }
   }
 
-  function save() {
+  /** @param {() => void} change */
+  function update(change) {
+    load()
+    change()
     if (!storage) return
     try {
       if (decisions.size === 0) storage.removeItem(STORAGE_KEY)
       else storage.setItem(STORAGE_KEY, JSON.stringify(snapshotOf(decisions)))
-      unsaved = false
+      unsaved = []
     } catch (error) {
       // They still apply to syncs in this window.
-      unsaved = true
+      unsaved.push(change)
       console.error('Failed to save the sync deletion decisions', error)
     }
   }
@@ -82,13 +88,14 @@ export function createSyncDeletionDecisions(storage = null) {
      * @param {Iterable<string>} ids
      */
     confirm(key, ids) {
-      load()
-      const value = entry(key)
-      for (const id of ids) {
-        value.kept.delete(id)
-        value.confirmed.add(id)
-      }
-      save()
+      const list = Array.from(ids)
+      update(() => {
+        const value = entry(key)
+        for (const id of list) {
+          value.kept.delete(id)
+          value.confirmed.add(id)
+        }
+      })
     },
 
     /**
@@ -96,13 +103,14 @@ export function createSyncDeletionDecisions(storage = null) {
      * @param {Iterable<string>} ids
      */
     keep(key, ids) {
-      load()
-      const value = entry(key)
-      for (const id of ids) {
-        value.confirmed.delete(id)
-        value.kept.add(id)
-      }
-      save()
+      const list = Array.from(ids)
+      update(() => {
+        const value = entry(key)
+        for (const id of list) {
+          value.confirmed.delete(id)
+          value.kept.add(id)
+        }
+      })
     },
 
     /** @returns {Record<string, SyncDeletionDecision>} A copy for one sync */
@@ -117,20 +125,19 @@ export function createSyncDeletionDecisions(storage = null) {
      * @param {Record<string, SyncDeletionDecision>} applied A {@link snapshot}
      */
     release(applied) {
-      load()
-      for (const [key, { confirmed = [], kept = [] }] of Object.entries(applied)) {
-        const value = decisions.get(key)
-        if (!value) continue
-        for (const id of confirmed) value.confirmed.delete(id)
-        for (const id of kept) value.kept.delete(id)
-        if (value.confirmed.size === 0 && value.kept.size === 0) decisions.delete(key)
-      }
-      save()
+      update(() => {
+        for (const [key, { confirmed = [], kept = [] }] of Object.entries(applied)) {
+          const value = decisions.get(key)
+          if (!value) continue
+          for (const id of confirmed) value.confirmed.delete(id)
+          for (const id of kept) value.kept.delete(id)
+          if (value.confirmed.size === 0 && value.kept.size === 0) decisions.delete(key)
+        }
+      })
     },
 
     clear() {
-      decisions.clear()
-      save()
+      update(() => decisions.clear())
     },
   }
 }
@@ -338,61 +345,91 @@ export function addSyncDeletionMarks(marks, decisions, { includeKey = () => true
 const UNSENT_MARKS_STORAGE_KEY = 'opentubex.sync-deletion-marks-unsent'
 
 /**
+ * @typedef {object} UnsentSyncDeletionMarks
+ * @property {string} account The sync account the marks belong to
+ * @property {SyncDeletionMark[]} marks
+ */
+
+/**
  * Confirmed deletions a sync failed to share. Their decisions go once the sync
- * succeeds, so the next syncs share these until they would have expired.
+ * succeeds, so the next syncs of the same account share these until they would
+ * have expired.
  * @param {SyncDeletionStorage | null} [storage]
  */
 export function createUnsentSyncDeletionMarks(storage = null) {
-  /** @type {SyncDeletionMark[]} */
-  let memory = []
-  // After a failed save, the storage misses the latest marks.
-  let unsaved = false
+  /** @type {UnsentSyncDeletionMarks} */
+  let queue = { account: '', marks: [] }
+  // Changes a failed save left out of the storage, as for the decisions.
+  /** @type {((queue: UnsentSyncDeletionMarks) => UnsentSyncDeletionMarks)[]} */
+  let unsaved = []
 
-  function read() {
-    if (!storage || unsaved) return readSyncDeletionMarks(memory)
+  function load() {
+    if (!storage) return
     try {
-      return readSyncDeletionMarks(JSON.parse(storage.getItem(UNSENT_MARKS_STORAGE_KEY) ?? '[]'))
+      const saved = JSON.parse(storage.getItem(UNSENT_MARKS_STORAGE_KEY) ?? 'null')
+      queue = {
+        account: typeof saved?.account === 'string' ? saved.account : '',
+        marks: readSyncDeletionMarks(saved?.marks),
+      }
+      for (const change of unsaved) queue = change(queue)
     } catch (error) {
       console.error('Failed to read the unsent sync deletions', error)
-      return []
     }
   }
 
-  /** @param {SyncDeletionMark[]} marks */
-  function write(marks) {
-    memory = marks
+  /** @param {(queue: UnsentSyncDeletionMarks) => UnsentSyncDeletionMarks} change */
+  function update(change) {
+    load()
+    queue = change(queue)
     if (!storage) return
     try {
-      if (marks.length === 0) storage.removeItem(UNSENT_MARKS_STORAGE_KEY)
-      else storage.setItem(UNSENT_MARKS_STORAGE_KEY, JSON.stringify(marks))
-      unsaved = false
+      if (queue.marks.length === 0) storage.removeItem(UNSENT_MARKS_STORAGE_KEY)
+      else storage.setItem(UNSENT_MARKS_STORAGE_KEY, JSON.stringify(queue))
+      unsaved = []
     } catch (error) {
       // They are still shared from this window.
-      unsaved = true
+      unsaved.push(change)
       console.error('Failed to save the unsent sync deletions', error)
     }
   }
 
   return {
-    read,
+    /** @param {string} account */
+    read(account) {
+      load()
+      return queue.account === account ? readSyncDeletionMarks(queue.marks) : []
+    },
 
     /**
+     * @param {string} account
      * @param {Record<string, SyncDeletionDecision>} decisions
      * @param {(key: string) => boolean} includeKey
      */
-    add(decisions, includeKey) {
-      const marks = addSyncDeletionMarks(read(), decisions, { includeKey })
-      if (marks) write(marks)
+    add(account, decisions, includeKey) {
+      const now = Date.now()
+      update(({ account: saved, marks }) => {
+        // Another account's marks would hide its own deletion reviews.
+        const known = saved === account ? marks : []
+        return { account, marks: addSyncDeletionMarks(known, decisions, { includeKey, now }) ?? known }
+      })
     },
 
-    /** @param {SyncDeletionMark[]} shared Marks from {@link read} that another sync shared */
-    remove(shared) {
+    /**
+     * @param {string} account
+     * @param {SyncDeletionMark[]} shared Marks from {@link read} that a sync shared
+     */
+    remove(account, shared) {
       if (shared.length === 0) return
-      write(read().filter(mark => !shared.some(({ key, at }) => key === mark.key && at === mark.at)))
+      update(saved => saved.account !== account
+        ? saved
+        : {
+            account,
+            marks: saved.marks.filter(mark => !shared.some(({ key, at }) => key === mark.key && at === mark.at)),
+          })
     },
 
     clear() {
-      write([])
+      update(() => ({ account: '', marks: [] }))
     },
   }
 }

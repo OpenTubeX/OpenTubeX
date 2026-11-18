@@ -1045,7 +1045,6 @@ test('a failed transfer of the shared deletions does not stop the sync, and a la
   marksAvailable = true
   await deleting.actions.syncWithSyncServer(deleting.context, { automatic: true, remoteOnly: true })
   assert.equal(collections.has('syncDeletions'), true)
-  assert.equal(unsentMarks.read().length, 0)
   assert.equal(deleting.context.state.syncServerDeletionMarksPending, false)
 
   // A device that still had the channels did not see the deletions as data loss.

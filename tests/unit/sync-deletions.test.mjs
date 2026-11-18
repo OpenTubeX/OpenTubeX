@@ -71,24 +71,41 @@ test('decisions survive a restart and are shared by every window', () => {
   assert.equal(values.size, 0)
 })
 
-test('decisions and unsent marks stay in memory when the storage is full', () => {
-  // Older values the window can still read, but not replace.
-  const values = new Map([
-    ['opentubex.sync-deletion-decisions', '{}'],
-    ['opentubex.sync-deletion-marks-unsent', '[]'],
-  ])
+test('decisions and unsent marks stay in memory when the storage is full, without dropping other windows\' changes', () => {
+  const values = new Map()
+  let full = true
   const storage = {
     getItem: key => values.get(key) ?? null,
-    setItem: () => { throw new Error('QuotaExceededError') },
+    setItem: (key, value) => {
+      if (full) throw new Error('QuotaExceededError')
+      values.set(key, value)
+    },
     removeItem: key => values.delete(key),
   }
   const decisions = createSyncDeletionDecisions(storage)
   decisions.confirm('history', ['a'])
   assert.deepEqual(decisions.snapshot(), { history: { confirmed: ['a'], kept: [] } })
-
   const unsent = createUnsentSyncDeletionMarks(storage)
-  unsent.add(decisions.snapshot(), () => true)
-  assert.deepEqual(unsent.read().map(mark => mark.ids), [['a']])
+  unsent.add('account', decisions.snapshot(), () => true)
+  assert.deepEqual(unsent.read('account').map(mark => mark.ids), [['a']])
+
+  // Space frees up, and another window saves its own changes.
+  full = false
+  createSyncDeletionDecisions(storage).keep('subscriptions', ['b'])
+  createUnsentSyncDeletionMarks(storage).add('account', { subscriptions: { confirmed: ['c'] } }, () => true)
+  decisions.release({ history: { confirmed: ['a'], kept: [] } })
+  assert.deepEqual(createSyncDeletionDecisions(storage).snapshot(), { subscriptions: { confirmed: [], kept: ['b'] } })
+  unsent.remove('account', unsent.read('account').filter(mark => mark.key === 'history'))
+  assert.deepEqual(createUnsentSyncDeletionMarks(storage).read('account').map(mark => [mark.key, ...mark.ids]), [['subscriptions', 'c']])
+})
+
+test('unsent deletion marks belong to the account that made them', () => {
+  const unsent = createUnsentSyncDeletionMarks()
+  unsent.add('first', { subscriptions: { confirmed: ['a'] } }, () => true)
+  assert.equal(unsent.read('second').length, 0)
+  unsent.add('second', { subscriptions: { confirmed: ['b'] } }, () => true)
+  assert.deepEqual(unsent.read('second').map(mark => mark.ids), [['b']])
+  assert.equal(unsent.read('first').length, 0)
 })
 
 test('another device\'s deletions apply without asking only to items the server lost', () => {
