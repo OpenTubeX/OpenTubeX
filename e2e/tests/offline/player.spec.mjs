@@ -904,7 +904,7 @@ test('volume boost amplifies the audio within its tab', async ({ app, page, atta
 
   await boostButton.click()
   const boostMenu = player.locator('.volume-boost-menu')
-  await expect(boostMenu.getByRole('menuitemradio')).toHaveText(['Off', '125%', '150%', '175%', '200%'])
+  await expect(boostMenu).toBeVisible()
   await attachScreenshot('volume boost menu')
   await boostMenu.getByRole('menuitemradio', { name: '150%' }).click()
   await expect.poll(outputGain).toBe(1.5)

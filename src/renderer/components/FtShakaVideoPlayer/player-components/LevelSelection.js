@@ -87,8 +87,9 @@ export class LevelSelection extends shaka.ui.SettingsMenu {
     this.presetButtons_ = presetButtons
 
     // Levels are only kept for the session, so they apply while the slider moves.
+    // Releasing the mouse can move the slider once more and only ends the change.
     // The wheel can leave a level past the largest one as it is, which would clamp it.
-    slider.onChange = () => {
+    slider.onChange = slider.onChangeEnd = () => {
       if (slider.getValue() !== this.level_.value) updateValue(this.normalize_(slider.getValue()))
     }
 
