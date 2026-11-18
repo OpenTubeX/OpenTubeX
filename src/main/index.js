@@ -712,8 +712,9 @@ function runApp() {
   setAutomaticDownloadNotifier(notify)
   // The bell keeps the downloads the user started, which only the renderers' toasts announce.
   setFinishedDownloadListener(async download => {
-    if (notificationMode !== 'both') return
     const t = await getMainTranslator()
+    // The mode can change while the translations load.
+    if (notificationMode !== 'both') return
     const completed = download.status === 'completed'
     const notification = parseRecordedNotification({
       ...getDownloadTarget(completed ? 'completed' : 'failed', download.videoId, download.id),

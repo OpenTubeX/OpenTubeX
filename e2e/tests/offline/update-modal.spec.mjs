@@ -197,11 +197,13 @@ test('periodic update checks keep one notification for the newest release', asyn
 
   // The bell keeps one entry for each release, and only the newest one unread.
   await expect.poll(() => page.evaluate(async () => (await window.ftElectron.notificationHistory.list())
-    .map(entry => [entry.body, entry.read]))).toStrictEqual([
-    [`Version ${newestUpdateVersion} is now available.`, false],
-    [`Version ${olderUpdateVersion} is now available.`, true]
+    .map(entry => [entry.query?.version, entry.read]))).toStrictEqual([
+    [`v${newestUpdateVersion}-beta`, false],
+    [`v${olderUpdateVersion}-beta`, true]
   ])
-  await page.getByRole('button', { name: 'Notifications (1 unread)', exact: true }).click()
+  const bell = page.locator('.notificationCenter')
+  await expect(bell).toHaveAttribute('data-unread-count', '1')
+  await bell.locator('.iconButton').click()
   await page.locator('.notificationCenterDropdown .notificationEntry', { hasText: newestUpdateVersion }).click()
   await expect(page.locator('.changeLogTitle')).toContainText(newestUpdateVersion)
 })

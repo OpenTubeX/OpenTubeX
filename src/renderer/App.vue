@@ -737,7 +737,7 @@ import {
   shouldShowProgressStartToast,
   shouldUseProgressToast,
 } from './helpers/progressPresentation'
-import { fetchReleasePages, findUpdateReleases, formatReleaseChangelog, scheduleUpdateChecks } from './helpers/releaseUpdates'
+import { fetchReleasePages, findUpdateReleases, formatReleaseChangelog, isOlderRelease, scheduleUpdateChecks } from './helpers/releaseUpdates'
 import { copyToClipboard, isUnloadedBackgroundTabClick, openExternalLink, openInExternalPlayer, openInternalPath, shareLink, showToast } from './helpers/utils'
 import { getChannelLinkDetails, getChannelLinkMenuItems } from './helpers/channel-context-menu'
 import { initializeCapacitorLiveReminderActions } from './helpers/liveReminders'
@@ -2570,7 +2570,7 @@ function openUpdateNotification(tagName) {
     store.dispatch('hideSettingsWindow')
     openAvailableUpdate()
   } else if (typeof tagName === 'string' && /^v[\w.-]+$/.test(tagName)) {
-    openExternalLink(`https://github.com/OpenTubeX/OpenTubeX/releases/tag/${tagName}`)
+    handleExternalLink(`https://github.com/OpenTubeX/OpenTubeX/releases/tag/${tagName}`)
   }
 }
 setUpdateNotificationHandler(openUpdateNotification)
@@ -2629,8 +2629,9 @@ async function checkForNewUpdates() {
     changeLogTitle.value = t('Update to {version}', { version: release.name ?? tagName })
     availableUpdate = { tagName, versionNumber }
     showAvailableUpdateToast()
-    // A newer release replaces the one announced before.
-    markOverNotificationsRead(entry => entry.kind === 'app-update' && entry.query?.version !== tagName)
+    // A newer release replaces the one announced before. A check that finished
+    // late in another window must not dismiss a newer one it did not see.
+    markOverNotificationsRead(entry => entry.kind === 'app-update' && isOlderRelease(entry.query?.version ?? '', tagName))
     recordNotification({
       kind: 'app-update',
       path: '/update',
