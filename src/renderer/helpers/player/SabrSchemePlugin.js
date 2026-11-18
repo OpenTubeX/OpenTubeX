@@ -132,6 +132,11 @@ const BACKOFF_STALL_BUFFER_MS = 500
 /** Checks the buffer at most this often while playback outlasts a backoff. */
 const BACKOFF_BUFFER_POLL_MS = 250
 /**
+ * SABR answers a live segment that is not out yet with a policy to retry
+ * without a backoff. Ask again at this pace instead of flooding the server.
+ */
+const LIVE_SEGMENT_POLL_MS = 500
+/**
  * Ad breaks are minutes apart, so this keeps the ones around the playhead.
  * SABR sends an evicted break's cue point again when playback returns to it.
  */
@@ -1042,6 +1047,20 @@ async function doRequest(
     currentState.abortStatus.timedOut = false
 
     currentState.abortStatus.finished = false
+    if (
+      shouldRetryDueToNextRequestPolicy && !nextRequestBackoffTimeMs && operationInputs.targetDurationMs &&
+      !neighborSegment && !contextUpdateNeedsRetry
+    ) {
+      try {
+        await waitUnlessAborted(LIVE_SEGMENT_POLL_MS, currentState.abortController.signal)
+      } catch {
+        if (currentState.abortStatus.timedOut) {
+          warnFailure('timed out')
+          throw createRecoverableNetworkError(ShakaError.Code.TIMEOUT, operationInputs.uri, operationInputs.requestType)
+        }
+        throw createRecoverableNetworkError(ShakaError.Code.OPERATION_ABORTED, operationInputs.uri, operationInputs.requestType)
+      }
+    }
     return doRequest(operationInputs, currentState)
   } else {
     warnFailure('empty response')

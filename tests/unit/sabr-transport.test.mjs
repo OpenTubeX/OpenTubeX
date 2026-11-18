@@ -504,6 +504,35 @@ test('server pacing after delivered media does not reload a healthy stream', asy
   assert.equal(reloads, 0)
 })
 
+test('a live segment that is not out yet is polled instead of requested in a loop', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 0 })
+  let calls = 0
+  let reloads = 0
+  const { createSabrTransport } = load(async () => {
+    calls++
+    if (Date.now() >= 2000) return response([1])
+    // Until the segment is out, SABR asks to retry without a backoff
+    const buffer = new CompositeBuffer([])
+    new UmpWriter(buffer).write(protos.UMPPartId.NEXT_REQUEST_POLICY,
+      protos.NextRequestPolicy.encode({ targetAudioReadaheadMs: 15000 }).finish())
+    return new Response(utils.concatenateChunks(buffer.chunks))
+  }, { Date })
+  const transport = createSabrTransport(sabrData, () => context)
+  t.after(() => transport.cleanup())
+  transport.onReloadOnce(() => reloads++)
+  const uri = 'sabr1:audio?formatId=140-123-&targetDurationMs=5000&startTimeMs=7500&sq=1'
+  // The player's segment timeout
+  const pending = transport.request(uri, { uris: [uri], retryParameters: { timeout: 30000 } }, 1).promise
+  pending.catch(() => {})
+  for (let index = 0; index < 4; index++) {
+    await flushRequests()
+    t.mock.timers.tick(500)
+  }
+  assert.deepEqual([...(await pending).data], [1])
+  assert.equal(calls, 5)
+  assert.equal(reloads, 0)
+})
+
 test('withheld media pending attestation reloads after bounded backoffs despite delivered media', async t => {
   // YouTube serves about a minute of an unattested session, then only backoffs
   t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 0 })

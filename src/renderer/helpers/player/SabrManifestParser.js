@@ -985,10 +985,13 @@ class SabrLiveWindow {
     const seekableSegments = Math.floor((head.timeMs - head.minSeekableTimeMs) / 1000 / targetDuration)
     this._appendSegments(Math.max(1, head.sequenceNumber - seekableSegments), head.sequenceNumber)
 
-    // Start where YouTube's player does: at the maximum seekable time, a few
-    // segments behind the head, so the next segments are already available.
+    // Start a few segments behind the head, at or before the maximum seekable
+    // time. SABR delivers no segment that starts after it, which can be as
+    // close as two segments behind the head. Playing from there leaves no time
+    // to fetch the next segment before playback reaches it, so stay at least
+    // a segment further behind.
     const end = this._segments.at(-1).endTime
-    const delay = Math.max(end - head.maxSeekableTimeMs / 1000, 3 * targetDuration)
+    const delay = Math.max(end - head.maxSeekableTimeMs / 1000, 4 * targetDuration)
 
     this.presentationTimeline = new shaka.media.PresentationTimeline(0, delay)
     this.presentationTimeline.setStatic(false)

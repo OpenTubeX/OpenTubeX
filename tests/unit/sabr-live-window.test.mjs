@@ -22,13 +22,13 @@ function head(sequenceNumber, receivedAtMs = Date.now(), segmentDurationMs = 500
   }
 }
 
-function load(t) {
+function load(t, initialHead) {
   t.mock.timers.enable({ apis: ['Date', 'setInterval'], now: 1_800_000_000_000 })
   const SabrLiveWindow = vm.runInNewContext(`${source}\nSabrLiveWindow`, {
     shaka, ...protocol, process: { env: {} }, Date, setInterval, clearInterval,
   })
   const scheme = `sabr-live-test-${Math.random()}`
-  const liveWindow = new SabrLiveWindow(head(1000), 5)
+  const liveWindow = new SabrLiveWindow(initialHead ?? head(1000), 5)
   const headRefreshes = []
   liveWindow.start(scheme, async () => { headRefreshes.push(Date.now()) })
   t.after(() => liveWindow.stop())
@@ -62,6 +62,15 @@ test('a live SABR window spans the seekable segments and starts where YouTube do
   const reference = stream.segmentIndex.get(stream.segmentIndex.find(4997))
   assert.equal(reference.startTime, 4995)
   assert.match(reference.getUris()[0], /&startTimeMs=4997500&sq=999$/)
+})
+
+test('a live SABR window stays a segment behind the newest one SABR delivers', t => {
+  // Without rewinding, SABR delivers segments up to the one starting at the
+  // maximum seekable time, two behind the head. Playing that one runs out of
+  // media just as the next one becomes available.
+  const { liveWindow } = load(t, { ...head(1000, 1_800_000_000_000), maxSeekableTimeMs: 4_990_000, minSeekableTimeMs: 4_990_000 })
+
+  assert.equal(liveWindow.presentationTimeline.getSeekRangeEnd(), 4985)
 })
 
 test('a live SABR window follows reported heads and expects few segments without them', t => {
