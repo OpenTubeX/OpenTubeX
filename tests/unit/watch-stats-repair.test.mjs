@@ -93,6 +93,7 @@ async function fixture({ sourceChanged = false, localChanged = false, conflict =
     scopedSyncCollection,
     readScopedSnapshot,
     writeScopedSnapshot,
+    savedWatchStatsReset: helpers.savedWatchStatsReset,
   }
   const actions = compileFunction(`return ({${actionSource}})`, Object.keys(bindings))(...Object.values(bindings))
   const context = {

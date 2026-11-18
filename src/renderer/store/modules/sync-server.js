@@ -56,7 +56,7 @@ import { createSyncScheduler } from '../../helpers/sync-server-scheduler'
 import { isSettingSyncEnabled } from './settings'
 import { syncSubscriptionSeenVideos, syncSubscriptionSeenPosts } from '../../helpers/subscription-seen-videos'
 import { syncRssFeedSeenItems } from '../../helpers/rssFeedSeenItems'
-import { containsWatchStatsDevice, mergeWatchStats, replaceWatchStatsDevice, persistUploadedWatchStatsReset, syncWatchStats, watchStatsDeviceDays } from '../../helpers/sync-watch-stats'
+import { containsWatchStatsDevice, mergeWatchStats, replaceWatchStatsDevice, persistUploadedWatchStatsReset, savedWatchStatsReset, syncWatchStats, watchStatsDeviceDays } from '../../helpers/sync-watch-stats'
 import { areJsonValuesEqual } from '../../helpers/jsonValues'
 import { DBSettingHandlers, DBWatchStatsHandlers, getDataScope } from '../../../datastores/handlers/index'
 import { syncLiveReminders } from '../../helpers/sync-live-reminders'
@@ -854,7 +854,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         break
       }
       case 'watchStats':
-        next.watchStats = await syncWatchStats(targetClient, store, { shared: dataScope === null })
+        next.watchStats = await syncWatchStats(targetClient, store, { dataScope })
         result.watchStats = next.watchStats.length
         break
       case 'liveReminders':
@@ -1174,9 +1174,8 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           assertSyncStillActive()
           let revision = encryptedCollections.remote[collection].revision
           let data = client.document[collection]
-          // The saved watch statistics reset belongs to the shared statistics.
           const persistUploaded = async () => {
-            if (collection === 'watchStats' && dataScope === null) await persistUploadedWatchStatsReset(data, store)
+            if (collection === 'watchStats') await persistUploadedWatchStatsReset(data, store, dataScope)
             if (collection === 'history') await persistUploadedHistoryRepairs(data, store)
           }
           // Untouched collections are still the downloaded value, and history
@@ -1788,13 +1787,12 @@ const actions = {
         !settings.syncServerSyncWatchStats) {
       throw new Error('Connect to the sync server first')
     }
-    // The statistics of the data the store shows, which for a separate profile
-    // sync without the shared reset.
+    // The statistics of the data the store shows, with their own reset.
     const dataScope = shownDataScope(rootGetters)
     if (dataScope === undefined) throw new SyncServerCancelledError()
     const scopeKey = syncScopeKey(dataScope)
     const collection = scopedSyncCollection('watchStats', scopeKey)
-    const savedReset = dataScope === null ? settings.syncServerWatchStatsReset : null
+    const savedReset = savedWatchStatsReset(settings, dataScope)
     const assertCurrentAccount = client => {
       assertSyncEnabled(rootState, client)
       if (activityAccountKey(rootState.settings) !== activityAccountKey(settings) ||
@@ -1818,7 +1816,7 @@ const actions = {
           assertCurrentAccount(client)
           if (!areJsonValuesEqual(previous, source) || !areJsonValuesEqual(days, localDays) ||
               !areJsonValuesEqual(current?.replacedDevices ?? [], replacedDevices) ||
-              !areJsonValuesEqual(rootState.settings.syncServerWatchStatsReset, localReset) ||
+              !areJsonValuesEqual(savedWatchStatsReset(rootState.settings, dataScope), localReset) ||
               !areJsonValuesEqual(current ? watchStatsDeviceDays(current, settings.syncServerDeviceId, days, localReset) : days, currentDays)) {
             commit('setSyncedWatchStats', devices)
             throw new Error(i18n.global.t('Stats.Replacement changed'))

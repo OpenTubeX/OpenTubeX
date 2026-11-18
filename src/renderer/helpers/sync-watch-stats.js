@@ -152,16 +152,27 @@ export function replaceWatchStatsDevice(devices, currentDeviceId, sourceDeviceId
     : device)
 }
 
-// The saved reset belongs to the shared statistics. A separate profile's
-// statistics (`shared` false) sync without one.
-export async function syncWatchStats(client, store, { shared = true } = {}) {
-  const { syncServerDeviceId, syncServerDeviceName, syncServerWatchStatsReset } = store.state.settings
+/**
+ * The saved reset of the statistics of a data scope.
+ * @param {Record<string, any>} settings
+ * @param {string | null} dataScope The separate profile, or null for the shared statistics
+ */
+export function savedWatchStatsReset(settings, dataScope) {
+  return dataScope === null
+    ? settings.syncServerWatchStatsReset
+    : settings.syncServerScopedWatchStatsResets?.[dataScope] ?? null
+}
+
+// A separate profile's statistics sync with its own reset.
+export async function syncWatchStats(client, store, { dataScope = null } = {}) {
+  const { syncServerDeviceId, syncServerDeviceName } = store.state.settings
+  const savedReset = savedWatchStatsReset(store.state.settings, dataScope)
   const [remote, localRecords, deviceInfo] = await Promise.all([
     client.getWatchStats(),
     DBWatchStatsHandlers.find(),
     getCurrentSyncServerDeviceInfo(),
   ])
-  const reset = resolveWatchStatsReset(remote, syncServerDeviceId, shared ? syncServerWatchStatsReset : null)
+  const reset = resolveWatchStatsReset(remote, syncServerDeviceId, savedReset)
   const merged = mergeWatchStats(remote, localRecords, syncServerDeviceId, syncServerDeviceName,
     deviceInfo.platform, reset)
   if (JSON.stringify(remote) !== JSON.stringify(merged)) {
@@ -174,11 +185,12 @@ export async function syncWatchStats(client, store, { shared = true } = {}) {
 // EncryptedSyncAdapter.putWatchStats only stages data. Persist completion after
 // the server accepts the collection, so failed uploads and revision retries
 // keep the offline reset pending against the refreshed remote history.
-export async function persistUploadedWatchStatsReset(devices, store) {
-  const { syncServerDeviceId, syncServerWatchStatsReset } = store.state.settings
-  if (!syncServerWatchStatsReset?.pending) return
+export async function persistUploadedWatchStatsReset(devices, store, dataScope = null) {
+  const { syncServerDeviceId } = store.state.settings
+  const saved = savedWatchStatsReset(store.state.settings, dataScope)
+  if (!saved?.pending) return
   const uploaded = devices.map(device => findWatchStatsDevice(device, syncServerDeviceId)).find(Boolean)?.reset
-  if (uploaded?.id === syncServerWatchStatsReset.id && !uploaded.pending) {
-    await store.dispatch('updateSyncServerWatchStatsReset', uploaded)
+  if (uploaded?.id === saved.id && !uploaded.pending) {
+    await store.dispatch('updateWatchStatsReset', { scope: dataScope, reset: uploaded })
   }
 }

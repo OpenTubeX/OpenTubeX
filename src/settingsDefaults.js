@@ -418,6 +418,8 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     syncServerDeviceId: '',
     syncServerDeviceName: '',
     syncServerWatchStatsReset: null,
+    // The resets of separate profiles' statistics, by profile ID
+    syncServerScopedWatchStatsResets: {},
     syncServerPrivacyMode: 'unknown',
     syncServerPrivacyKey: '',
     syncServerPrivacySalt: '',

@@ -191,8 +191,9 @@ test('staging an offline reset keeps it pending until the encrypted upload is ac
     state: { settings },
     commit: () => {},
     dispatch: async (name, value) => {
-      assert.equal(name, 'updateSyncServerWatchStatsReset')
-      settings.syncServerWatchStatsReset = value
+      assert.equal(name, 'updateWatchStatsReset')
+      assert.equal(value.scope, null)
+      settings.syncServerWatchStatsReset = value.reset
       saves++
     }
   }
