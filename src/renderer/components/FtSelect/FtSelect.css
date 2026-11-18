@@ -433,13 +433,6 @@
   padding-block: 2px;
 }
 
-/* A filled field shaped like the main search. Its corners follow the UI
-   roundness. */
-.select.rounded .select-text {
-  border-block-end: 0;
-  border-radius: var(--shape-corner-extra-large);
-}
-
 /* A native legend cuts a real gap in the outline, so labels need no
    background patch that assumes the color of the surrounding surface. */
 .selectOutline,
@@ -524,23 +517,10 @@
   box-shadow: inset calc(var(--focus-border-width) / 2) 0 var(--primary-color), inset calc(var(--focus-border-width) / -2) 0 var(--primary-color);
 }
 
-.select.rounded .select-text:where(:not(:disabled)):hover {
-  background-color: color-mix(in srgb, var(--primary-text-color) 8%, var(--search-bar-color));
-}
-
-.select.rounded .select-text:focus {
-  box-shadow: inset 0 0 0 2px var(--primary-color);
-}
-
 @media (forced-colors: active) {
   .select.outlined .select-text:focus ~ .selectOutline {
     outline: 2px solid Highlight;
     outline-offset: 2px;
-  }
-
-  .select.rounded .select-text:focus {
-    outline: 3px solid Highlight;
-    outline-offset: -3px;
   }
 }
 
@@ -591,7 +571,7 @@
   transform: scaleX(1);
 }
 
-.select:is(.outlined, .rounded) .select-bar {
+.select.outlined .select-bar {
   display: none;
 }
 

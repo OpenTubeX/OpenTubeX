@@ -76,10 +76,7 @@ test.describe('select indicators', { tag: '@scale' }, () => {
           await select.scrollIntoViewIfNeeded()
           const geometry = await root.evaluate(element => {
             const field = element.querySelector('.select-text').getBoundingClientRect()
-            // Only outlined selects draw their outline as a box.
-            const outline = element.classList.contains('outlined')
-              ? element.querySelector('.selectOutline').getBoundingClientRect()
-              : field
+            const outline = element.querySelector('.selectOutline').getBoundingClientRect()
             const icons = element.querySelector('.selectIndicators').getBoundingClientRect()
             const viewport = element.closest('.settingsContent').getBoundingClientRect()
             const bounds = element.getBoundingClientRect()

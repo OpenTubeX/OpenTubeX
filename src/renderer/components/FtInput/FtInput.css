@@ -409,6 +409,11 @@
   box-shadow: inset 0 0 0 1px var(--input-border-color, transparent);
 }
 
+/* The label shows inside the field, so hovering it must reach the input. */
+.ft-input-component.rounded .selectLabel {
+  pointer-events: none;
+}
+
 .ft-input-component.rounded .ft-input:not(:disabled):hover {
   background-color: color-mix(in srgb, var(--primary-text-color) 8%, var(--search-bar-color));
 }

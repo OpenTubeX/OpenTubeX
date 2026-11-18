@@ -147,6 +147,7 @@
         v-if="unlocked && !isProfileManagerOpen && !isKeyboardShortcutPromptOpen && !isStandaloneViewOpen && !subpageTitle"
         ref="settingsSearchInputRef"
         class="settingsSearch"
+        variant="rounded"
         input-type="search"
         :value="settingsSearchQuery"
         :placeholder="t('Settings.Search Settings')"

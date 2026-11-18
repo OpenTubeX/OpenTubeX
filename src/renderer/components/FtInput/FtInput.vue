@@ -11,8 +11,8 @@
       hasValue: inputDataPresent,
       hasHighlights: highlightSegments !== null,
       hasSupportingText: supportingText !== '',
-      outlined: fieldVariant === 'outlined' && !isSearch,
-      rounded: fieldVariant === 'rounded' && !isSearch
+      outlined: variant === 'outlined' && !isSearch,
+      rounded: variant === 'rounded' && !isSearch
     }"
     @focusout="handleFocusOut"
   >
@@ -270,10 +270,9 @@ const props = defineProps({
   changeFilter: { type: Function, default: null },
   min: { type: [String, Number], default: null },
   step: { type: [String, Number], default: null },
-  // Search fields default to the rounded variant, which matches the main search.
   variant: {
     type: String,
-    default: null,
+    default: 'outlined',
     validator: value => ['filled', 'outlined', 'rounded'].includes(value)
   },
   inputType: {
@@ -391,7 +390,6 @@ const id = useId()
 
 const inputRef = useTemplateRef('inputRef')
 const passwordVisible = ref(false)
-const fieldVariant = computed(() => props.variant ?? (props.inputType === 'search' ? 'rounded' : 'outlined'))
 const passwordVisibilityLabel = computed(() => passwordVisible.value
   ? t('Form Inputs.Hide Password')
   : t('Form Inputs.Show Password'))
