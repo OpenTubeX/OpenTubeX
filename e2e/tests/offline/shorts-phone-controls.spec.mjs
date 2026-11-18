@@ -187,6 +187,22 @@ test('phone Shorts controls clear navigation and show quick speeds', async ({ ap
   await expect(player.locator('.ft-quick-playback-rate-bar')).toBeVisible()
   await expect.poll(() => player.locator('.ft-quick-playback-rate-bar').evaluate(el => getComputedStyle(el.parentElement).opacity)).toBe('1')
   await expect(player.locator('.shortsVolumeControl')).toBeHidden()
+  // The action rail overlays the player's end edge, so neither the quick
+  // speeds nor the seek bar may run under its last action.
+  const [speedsBounds, railBounds, channelBounds] = await Promise.all([
+    player.locator('.shaka-controls-button-panel:has(> .ft-quick-playback-rate-bar)').boundingBox(),
+    page.locator('.shortsActionRail').boundingBox(),
+    page.locator('.shortsSoundThumbnail').boundingBox(),
+  ])
+  expect(speedsBounds.x + speedsBounds.width).toBeLessThanOrEqual(railBounds.x)
+  expect(channelBounds.y + channelBounds.height).toBeLessThanOrEqual(seekBounds.y)
+  // Touch has no hover to reveal them again.
+  await player.evaluate(element => { element.dataset.shakaControlsShown = 'false' })
+  // Hidden controls keep their visibility while they fade, but drop the fade at once.
+  await expect.poll(() => player.locator('.shortsTopControls').evaluate(element => {
+    const style = getComputedStyle(element)
+    return `${style.visibility} ${style.getPropertyValue('--ft-controls-fade')}`
+  })).toBe('visible 1')
 
   await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
   await page.setViewportSize({ width: 411, height: 842 })

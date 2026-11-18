@@ -90,6 +90,14 @@
   /* stylelint-enable plugin/no-low-performance-animation-properties */
 }
 
+/* Touch has no hover to bring the controls back, so keep them in view. */
+:global(.capacitorTabs .ftVideoPlayer.shortsPlayer > .shortsTopControls) {
+  --ft-controls-fade: 1;
+
+  visibility: visible;
+  opacity: 1;
+}
+
 .shortsTopControlsGroup {
   display: flex;
   align-items: center;
@@ -262,6 +270,15 @@
 /* stylelint-disable-next-line selector-max-compound-selectors */
 :global(.capacitorPhoneLayout .ftVideoPlayer.shortsPlayer .shaka-controls-button-panel:has(> .ft-quick-playback-rate-bar)) {
   opacity: 1;
+}
+
+/* The Watch page's action rail overlays the player's end edge here; landscape
+   phones move it beside the player. */
+@media not ((orientation: landscape) and (height <= 600px)) {
+  /* stylelint-disable-next-line selector-max-compound-selectors */
+  :global(.capacitorPhoneLayout .ftVideoPlayer.shortsPlayer:not(:fullscreen, .fullWindow) .shaka-controls-button-panel:has(> .ft-quick-playback-rate-bar)) {
+    inset-inline-end: 58px;
+  }
 }
 
 .ftVideoPlayer.shortsPlayer :deep(
