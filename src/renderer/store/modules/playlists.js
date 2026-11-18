@@ -274,7 +274,10 @@ const actions = {
     payload.forEach(processNewPlayist)
 
     try {
+      const scope = getDataScope()
       await DBPlaylistHandlers.create(payload)
+      // Saved in a profile whose playlists are no longer shown
+      if (scope !== getDataScope()) return true
 
       const noQuickBookmarkSet = !getters.getActiveQuickBookmarkTargetPlaylistId || !state.playlists.some((playlist) => playlist._id === getters.getActiveQuickBookmarkTargetPlaylistId)
       if (noQuickBookmarkSet) {
