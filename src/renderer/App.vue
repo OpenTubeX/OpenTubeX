@@ -765,6 +765,7 @@ import { usesCapacitorTabletLayout } from './helpers/capacitorLayout'
 import { findSwipeTab, shouldFinishPageSwipe } from './helpers/capacitorPageSwipe'
 import { getTabAccentColor } from './constants/tabColors'
 import { getThumbnailListStyles } from './constants/thumbnailSize'
+import { getUiDensityScale } from './constants/uiDensity'
 import {
   getNextTabBarPosition,
   isVerticalTabBarPosition,
@@ -2080,7 +2081,7 @@ onBeforeUnmount(() => {
   document.documentElement.style.removeProperty('--title-line-limit')
   delete document.documentElement.dataset.linkUnderline
   delete document.documentElement.dataset.modalBackdrop
-  delete document.documentElement.dataset.uiDensity
+  document.documentElement.style.removeProperty('--ui-density')
   removeGamepadNavigation()
   removeCustomThemeListener()
   cancelIdleStartupWork()
@@ -2707,7 +2708,7 @@ watch(() => store.getters.getModalBackdrop, value => {
 }, { flush: 'sync', immediate: true })
 
 watch(() => store.getters.getUiDensity, value => {
-  document.documentElement.dataset.uiDensity = value
+  document.documentElement.style.setProperty('--ui-density', String(getUiDensityScale(value)))
 }, { flush: 'sync', immediate: true })
 
 const phoneLayout = usePhoneLayout()

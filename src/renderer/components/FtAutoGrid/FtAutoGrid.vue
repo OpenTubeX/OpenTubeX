@@ -29,6 +29,7 @@ import { computed, inject, nextTick, onActivated, onBeforeUnmount, onBeforeUpdat
 import store from '../../store/index'
 
 import { getThumbnailGridSizes, getThumbnailGridStyles, getThumbnailListSizes, PHONE_THUMBNAIL_VIEWPORT_WIDTH } from '../../constants/thumbnailSize'
+import { getUiDensityScale } from '../../constants/uiDensity'
 import { thumbnailSizesKey } from '../../helpers/videoThumbnail.js'
 import { GRID_COLUMNS_SETTINGS, setThumbnailGridVisible, thumbnailSizeSettingKey, VIEW_TYPE_SETTINGS } from '../../composables/useThumbnailSizeSlider'
 import { applyAnimationSpeed, getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
@@ -160,7 +161,14 @@ function applyThumbnailSizeStyles() {
     return
   }
 
-  const styles = getThumbnailGridStyles(store.state.settings[thumbnailSizeSetting], gridWidth, window.innerWidth, renderedGridWidth, getGridColumns())
+  const styles = getThumbnailGridStyles(
+    store.state.settings[thumbnailSizeSetting],
+    gridWidth,
+    window.innerWidth,
+    renderedGridWidth,
+    getGridColumns(),
+    getUiDensityScale(store.state.settings.uiDensity)
+  )
 
   for (const [property, value] of Object.entries(styles)) {
     element.style.setProperty(property, value)
@@ -171,7 +179,8 @@ function applyThumbnailSizeStyles() {
 watch(() => [
   store.state.settings[thumbnailSizeSetting],
   store.state.settings[VIEW_TYPE_SETTINGS[thumbnailSizeSetting]],
-  store.state.settings[GRID_COLUMNS_SETTINGS[thumbnailSizeSetting]]
+  store.state.settings[GRID_COLUMNS_SETTINGS[thumbnailSizeSetting]],
+  store.state.settings.uiDensity
 ], applyThumbnailSizeStyles)
 
 // Items that fill an empty grid all fade in at once, so the grid fades in

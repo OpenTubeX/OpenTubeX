@@ -40,3 +40,11 @@ test('stretches cards with the rendered grid width from the same size', () => {
   }
   assert.equal(getThumbnailGridStyles(100)['--thumbnail-grid-stretch'], '0px')
 })
+
+test('denser and more spacious grids keep the default column count', () => {
+  for (const [density, gap] of [[0.5, 4], [1.5, 12]]) {
+    const width = 3 * 262 + 2 * gap
+    const size = Number.parseFloat(getThumbnailGridStyles(100, width, 1280, width, 0, density)['--thumbnail-grid-size'])
+    assert.equal(size * 3 + 2 * gap, width)
+  }
+})
