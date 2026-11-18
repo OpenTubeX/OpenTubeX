@@ -2,15 +2,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-block-end: 12px !important;
 }
 
 .commentSwitches.switchColumnGrid {
   align-self: stretch;
-}
-
-.commentSettings + .commentSettings {
-  margin-block-start: 12px;
 }
 
 .commentTranslationDescription {
@@ -32,7 +27,7 @@
   /* Rows stay 48px apart so the remove buttons' touch targets never overlap. */
   gap: 16px 8px;
   list-style: none;
-  margin-block: 18px 0;
+  margin-block: 18px var(--settings-control-margin);
   padding: 0;
   max-inline-size: 700px;
 }

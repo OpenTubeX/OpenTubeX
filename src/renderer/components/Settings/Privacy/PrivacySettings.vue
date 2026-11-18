@@ -112,6 +112,7 @@
         :select-values="EXTERNAL_LINK_HANDLING_VALUES"
         :icon="['fas', 'external-link-alt']"
         :tooltip="$t('Tooltips.General Settings.External Link Handling')"
+        size-to-content
         @change="updateExternalLinkHandling"
       />
       <FtSelect

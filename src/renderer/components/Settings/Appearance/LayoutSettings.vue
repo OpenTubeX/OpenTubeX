@@ -103,6 +103,7 @@
         @change="updateAnimationSpeed"
       />
     </FtSliderGrid>
+    <InterfaceCustomizer />
     <h4 class="groupTitle">
       {{ t('Settings.Theme Settings.Sections.Side Bar and Header') }}
     </h4>
@@ -447,6 +448,7 @@ import FtSliderGrid from '../../FtSliderGrid/FtSliderGrid.vue'
 import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
 import FtButton from '../../FtButton/FtButton.vue'
 import FtPrompt from '../../FtPrompt/FtPrompt.vue'
+import InterfaceCustomizer from './InterfaceCustomizer/InterfaceCustomizer.vue'
 
 import store from '../../../store/index'
 import {

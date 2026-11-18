@@ -86,11 +86,14 @@
 .checkboxStateLayer {
   position: absolute;
   inset-inline-start: 9px;
-  inset-block-start: 50%;
+
+  /* Centered by its position rather than a transform, so its layout box
+     stays inside the label and doesn't make multi-column lists taller. */
+  inset-block-start: calc(50% - 20px);
   inline-size: 40px;
   block-size: 40px;
   border-radius: 50%;
-  transform: translate(var(--checkbox-mark-offset), -50%);
+  transform: translateX(var(--checkbox-mark-offset));
   background-color: transparent;
   pointer-events: none;
   transition: background-color var(--motion-fast-effects);
