@@ -179,6 +179,14 @@ test('retained startup clicks and running-app clicks navigate and update localiz
   startupLaunchUrl = 'opentubex://oidc?token=a.b.c'
   ;(await enable())()
   assert.deepEqual(oidcCallbacks, ['opentubex://oidc?token=a.b.c'])
+
+  // Nor does a sign-in callback that arrives during startup replace the launch URL.
+  startupLaunchUrl = 'https://youtu.be/789'
+  newerStartupTap = 'opentubex://oidc?token=d.e.f'
+  const openedBeforeCallback = youtubeLinks.length
+  ;(await enable())()
+  assert.deepEqual(youtubeLinks.slice(openedBeforeCallback), ['https://youtu.be/789'])
+  assert.deepEqual(oidcCallbacks, ['opentubex://oidc?token=a.b.c', 'opentubex://oidc?token=d.e.f'])
 })
 
 test('a feed refresh request runs once, after the page has loaded', () => {
