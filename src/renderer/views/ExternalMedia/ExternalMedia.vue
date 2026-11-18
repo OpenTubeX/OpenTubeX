@@ -389,7 +389,7 @@
           </FtCard>
           <PhoneDescriptionButton
             v-if="phonePanelsEnabled && hasDescription"
-            :description="info.description"
+            :description="descriptionHtml"
             :tags="metadata.tags"
             :license="metadata.license"
             :panel-open="mobilePanel === 'description'"
@@ -412,7 +412,7 @@
             <WatchVideoDescription
               v-if="hasDescription"
               class="watchVideo externalMediaDescription"
-              :description="info.description"
+              :description="descriptionHtml"
               :tags="metadata.tags"
               :license="metadata.license"
               :always-expanded="phonePanelsEnabled"
@@ -564,6 +564,7 @@ import {
 } from '../../helpers/channel-preferences'
 import { limitQualityOnMeteredNetwork } from '../../helpers/player/meteredNetworkQuality'
 import { formatDate } from '../../helpers/dateFormat'
+import { escapeHTML } from '../../helpers/feed-metadata'
 import { useMediaSessionMetadata } from '../../composables/useMediaSessionMetadata'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import { isExternalMediaUrl } from '../../helpers/externalMediaUrl'
@@ -781,6 +782,8 @@ function playTranscriptSegment(seconds) {
 const mobilePanel = ref(null)
 const chatShown = computed(() => phonePanelsEnabled.value ? mobilePanel.value === 'chat' : chatOpen.value)
 const transcriptShown = computed(() => phonePanelsEnabled.value ? mobilePanel.value === 'transcript' : showTranscript.value)
+// The description components take HTML, while yt-dlp returns plain text
+const descriptionHtml = computed(() => escapeHTML(info.value?.description ?? ''))
 const hasDescription = computed(() => Boolean(info.value?.description || metadata.value.tags?.length || metadata.value.license))
 
 // The order in which actions move to the More menu

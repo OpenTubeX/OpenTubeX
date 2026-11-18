@@ -66,6 +66,8 @@ const props = defineProps({
   tags: { type: Array, default: () => [] },
   license: { type: String, default: null },
   games: { type: Array, default: () => [] },
+  /** @type {import('vue').PropType<import('../../helpers/video-description-sections').VideoDescriptionSection[]>} */
+  sections: { type: Array, default: () => [] },
   musicTracks: { type: Array, default: () => [] },
   contentDisclosures: { type: Array, default: () => [] },
   panelOpen: { type: Boolean, default: false }
@@ -101,6 +103,10 @@ const chips = computed(() => [
     .map(label => ({ key: `disclosure-${label}`, icon: 'circle-info', label })),
   props.musicTracks.length > 0 && { key: 'music', icon: 'music', label: t('Description.Music'), count: props.musicTracks.length },
   props.games.length > 0 && { key: 'games', icon: 'gamepad', label: t('Description.Games'), count: props.games.length },
+  // A podcast or course section lists only the one that the video is part of
+  ...props.sections.map((section, index) => section.items.some(item => item.playlistId)
+    ? { key: `section-${index}`, icon: 'podcast', label: section.title }
+    : { key: `section-${index}`, icon: 'users', label: section.title, count: section.items.length }),
   props.tags.length > 0 && { key: 'tags', icon: 'hashtag', label: t('Description.Video Tags'), count: props.tags.length },
 ].filter(Boolean))
 

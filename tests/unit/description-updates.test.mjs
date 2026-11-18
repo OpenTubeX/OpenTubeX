@@ -20,7 +20,7 @@ async function flushDescriptionUpdates() {
 }
 
 function descriptionComponent({ laidOut = false } = {}) {
-  const props = reactive({ description: '', descriptionHtml: '', tags: [], games: [], musicTracks: [], license: null, contentDisclosures: [], previewOnly: false, expanded: false, alwaysExpanded: false })
+  const props = reactive({ description: '', descriptionHtml: '', tags: [], games: [], musicTracks: [], sections: [], license: null, contentDisclosures: [], previewOnly: false, expanded: false, alwaysExpanded: false })
   const htmlTextFixtures = new Map([
     ['', ''],
     ['<p>Restored HTML description</p>', 'Restored HTML description'],
@@ -50,14 +50,16 @@ function descriptionComponent({ laidOut = false } = {}) {
     copyToClipboard: async text => { copied = text },
     clampOverlayScrollTop() {},
     restoreOverlayScrollTop() {},
+    getDescriptionLinkIconHtml: () => '',
     document: {
       createElement: tag => {
         assert.equal(tag, 'template')
         return {
           innerHTML: '',
           get content() {
-            assert.ok(htmlTextFixtures.has(this.innerHTML), 'provide a text fixture for this HTML')
-            return { textContent: htmlTextFixtures.get(this.innerHTML) }
+            const isText = !this.innerHTML.includes('<')
+            assert.ok(isText || htmlTextFixtures.has(this.innerHTML), 'provide a text fixture for this HTML')
+            return { textContent: isText ? this.innerHTML : htmlTextFixtures.get(this.innerHTML), querySelectorAll: () => [] }
           },
         }
       },
@@ -122,7 +124,7 @@ for (const metadata of [{ tags: ['video tag'] }, { contentDisclosures: [{ label:
     assert.equal(component.expanded(), false)
 
     // Removing auto-collapsed metadata restores the original short-text card.
-    Object.assign(component.props, { tags: [], games: [], musicTracks: [], license: null, contentDisclosures: [] })
+    Object.assign(component.props, { tags: [], games: [], musicTracks: [], sections: [], license: null, contentDisclosures: [] })
     await flushDescriptionUpdates()
     assert.equal(component.controls(), false)
     assert.equal(component.expanded(), true)
@@ -134,7 +136,7 @@ for (const metadata of [{ tags: ['video tag'] }, { contentDisclosures: [{ label:
 
     component.expand()
     // Later metadata updates must preserve the user's explicit expansion.
-    Object.assign(component.props, { tags: [], games: [], musicTracks: [], license: null, contentDisclosures: [] })
+    Object.assign(component.props, { tags: [], games: [], musicTracks: [], sections: [], license: null, contentDisclosures: [] })
     await flushDescriptionUpdates()
     assert.equal(component.controls(), false)
     assert.equal(component.expanded(), true)

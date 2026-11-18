@@ -1,4 +1,5 @@
 import { addIcon } from '@iconify/vue/offline'
+import { ref } from 'vue'
 
 import {
   facFluxer,
@@ -22,6 +23,8 @@ const PACK_LOADERS = {
 const packPromises = new Map()
 /** @type {Map<string, { body: string, width?: number, height?: number }>} */
 const loadedIcons = new Map()
+/** Changes whenever a pack finishes loading, so that `getLoadedIconData` callers rerun */
+const loadedPackCount = ref(0)
 let customIconsRegistered = false
 
 function registerCustomIcons() {
@@ -52,6 +55,7 @@ async function loadAndRegisterPack(pack) {
     addIcon(id, data)
     loadedIcons.set(id, data)
   }
+  loadedPackCount.value++
 
   registerCustomIcons()
 }
@@ -77,10 +81,14 @@ export function registerMappedIcons(pack) {
 
 /**
  * The glyph of a loaded pack, for images drawn outside of `FtIcon`.
- * The selected pack is always loaded, as it only becomes selected once loaded.
+ * The app mounts before the default pack loads, so reactive callers rerun once it does.
  * @param {string | null} id an Iconify id
  * @returns {{ body: string, width?: number, height?: number } | null}
  */
 export function getLoadedIconData(id) {
-  return (id && loadedIcons.get(id)) ?? null
+  // Reading the count makes reactive callers depend on it
+  if (loadedPackCount.value === 0 || !id) {
+    return null
+  }
+  return loadedIcons.get(id) ?? null
 }

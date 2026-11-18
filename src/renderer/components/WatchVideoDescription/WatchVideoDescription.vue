@@ -147,6 +147,44 @@
           </li>
         </ul>
       </template>
+      <template
+        v-for="(section, sectionIndex) in sections"
+        :key="sectionIndex"
+      >
+        <h3 class="descriptionSectionHeading">
+          {{ section.title }}
+        </h3>
+        <ul class="descriptionSectionList">
+          <li
+            v-for="(item, index) in section.items"
+            :key="index"
+            class="descriptionSectionItem"
+          >
+            <FtRetryImage
+              v-if="item.thumbnail"
+              :fallback-icon="['fas', item.playlistId ? 'podcast' : 'circle-user']"
+              :src="item.thumbnail"
+              class="descriptionSectionImage"
+              alt=""
+              loading="lazy"
+            />
+            <span class="descriptionSectionText">
+              <component
+                :is="item.playlistId ? 'RouterLink' : 'bdi'"
+                :to="item.playlistId && `/playlist/${item.playlistId}`"
+                :data-tab-title="item.title"
+                :tabindex="item.playlistId ? linkTabIndex : null"
+                class="descriptionSectionTitle"
+              >{{ item.title }}</component>
+              <bdi
+                v-for="detail in item.details"
+                :key="detail"
+                class="descriptionSectionDetail"
+              >{{ detail }}</bdi>
+            </span>
+          </li>
+        </ul>
+      </template>
       <div
         v-if="tags.length > 0"
         class="videoTags"
@@ -216,11 +254,13 @@ import FtTimestampCatcher from '../FtTimestampCatcher.vue'
 import { linkifyDescription, linkifyHashtagsAndHandles } from '../../helpers/descriptionLinks'
 import { copyToClipboard } from '../../helpers/utils'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { getDescriptionLinkIconHtml } from '../../helpers/descriptionLinkIcons'
 import { useTabContext } from '../../tabs/TabContext'
 
 import store from '../../store/index'
 
 const props = defineProps({
+  /** HTML, e.g. parsed text runs from the local API. Plain text has to be escaped. */
   description: {
     type: String,
     default: ''
@@ -243,6 +283,11 @@ const props = defineProps({
     default: () => [],
   },
   /** @type {import('vue').PropType<import('../../helpers/video-music').VideoMusicTrack[]>} */
+  /** @type {import('vue').PropType<import('../../helpers/video-description-sections').VideoDescriptionSection[]>} */
+  sections: {
+    type: Array,
+    default: () => [],
+  },
   musicTracks: {
     type: Array,
     default: () => [],
@@ -291,6 +336,7 @@ const descriptionContent = computed(() => {
     }
   } else if (!/^\s*$/.test(props.description)) {
     shownDescription = linkifyDescription(props.description)
+    descriptionText = getDescriptionText(props.description)
   }
   return { html: shownDescription, text: descriptionText }
 })
@@ -372,7 +418,7 @@ const searchSettings = computed(() => store.getters.getSearchSettings(tabId))
 
 let hasMeasured = false
 
-const hasMetadata = computed(() => props.tags.length > 0 || props.games.length > 0 || props.musicTracks.length > 0 || Boolean(props.license) || (props.contentDisclosures?.length ?? 0) > 0)
+const hasMetadata = computed(() => props.tags.length > 0 || props.games.length > 0 || props.musicTracks.length > 0 || props.sections.length > 0 || Boolean(props.license) || (props.contentDisclosures?.length ?? 0) > 0)
 
 /**
  * Returns true when description content does not overflow description container
@@ -485,7 +531,7 @@ onBeforeUnmount(() => {
 })
 
 watch(isExpanded, () => nextTick(updateDescriptionLayout))
-watch([shownDescription, () => props.tags, () => props.games, () => props.musicTracks, () => props.license, () => props.contentDisclosures], async () => {
+watch([shownDescription, () => props.tags, () => props.games, () => props.musicTracks, () => props.sections, () => props.license, () => props.contentDisclosures], async () => {
   // Metadata can arrive or disappear after the card has mounted.
   // Control visibility follows the content, independently of the user's expansion choice.
   hasMeasured = false
@@ -557,6 +603,25 @@ function parseDescriptionHtml(descriptionText) {
 function processDescriptionHtml(descriptionText, tabIndex) {
   return descriptionText
     .replaceAll('<a', `<a tabindex="${tabIndex}"`)
+    // Reruns when the icon pack changes, as the icons come from it
+    // `FtTimestampCatcher` needs the marker to leave times in their label alone
+    .replaceAll(/ data-link-icon="([a-z\d]+)">/g, (marker, name) => `${marker}${getDescriptionLinkIconHtml(name)}`)
+}
+
+/**
+ * The text of an HTML description, e.g. formatted text runs from the local API.
+ * @param {string} description
+ * @returns {string}
+ */
+function getDescriptionText(description) {
+  // Template contents stay inert while extracting text from remote HTML.
+  const template = document.createElement('template')
+  template.innerHTML = description
+  // Links shown as an icon and a label copy as their URL, as YouTube may shorten the label.
+  for (const link of template.content.querySelectorAll('a[data-link-icon]')) {
+    link.replaceWith(link.getAttribute('href') ?? link.textContent ?? '')
+  }
+  return template.content.textContent ?? ''
 }
 </script>
 

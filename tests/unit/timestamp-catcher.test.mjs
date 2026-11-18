@@ -47,3 +47,8 @@ test('leaves times in tag attributes unchanged', () => {
   const linked = '<a href="http://192.168.0.1:8080/?t=12:34">website</a>'
   assert.equal(displayText(`${linked} from 0:05`), `${linked} from ${link(5, '0:05')}`)
 })
+
+test('leaves times in the label of links that show one instead of their URL', () => {
+  const linked = '<a tabindex="0" href="https://www.youtube.com/watch?v=AAAAAAAAAAA" data-link-icon="youtube"><img src="data:image/svg+xml;charset=utf-8,%3Csvg%3E" alt="" width="18" height="18">A 10:00 timer</a>'
+  assert.equal(displayText(`${linked} from 0:05`), `${linked} from ${link(5, '0:05')}`)
+})

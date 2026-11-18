@@ -977,6 +977,42 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
   }
 
   /**
+   * YouTube shows some links in descriptions as an icon followed by a short label instead of their URL:
+   * videos and playlists as `• Title`, channels and social media profiles as `/ name`.
+   * The run holds the icon as an attachment, e.g. `   • Title  `.
+   * @param {Misc.TextRun} run
+   * @param {string} text the run's escaped text
+   * @param {string} url
+   * @param {'•' | '/'} separator
+   * @returns {string | null} a link marked with the icon's name in `data-link-icon`,
+   * which the description draws locally, or null if the run doesn't have that shape
+   */
+  function parseLocalIconLink(run, text, url, separator) {
+    if (!run.attachment) {
+      return null
+    }
+
+    const label = (separator === '•' ? /^\s*•(.*)$/su : /^\s*\/(.*)$/su).exec(text)?.[1].trim()
+    if (!label) {
+      return null
+    }
+
+    const imageUrl = run.attachment.element?.type?.imageType?.image?.sources?.[0]?.url ?? ''
+    const icon = /\/social_media\/([a-z\d]+)_/.exec(imageUrl)?.[1] ?? (imageUrl.includes('/yt_favicon') ? 'youtube' : 'link')
+    return `<a href="${escapeHTML(url)}" data-link-icon="${icon}">${label}</a>`
+  }
+
+  /**
+   * @param {Misc.TextRun} run
+   * @param {string} text the run's escaped text
+   * @returns {string}
+   */
+  function parseLocalYouTubeLink(run, text) {
+    const url = `https://www.youtube.com${run.endpoint.metadata.url}`
+    return parseLocalIconLink(run, text, url, '•') ?? url
+  }
+
+  /**
    * @param {(Misc.TextRun|Misc.EmojiRun)[]} runs
    * @param {number} emojiSize
    * @param {{looseChannelNameDetection: boolean}} options
@@ -1030,10 +1066,16 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
               if (timestampRegex.test(text)) {
                 parsedRuns.push(text)
               } else {
-                parsedRuns.push(`https://www.youtube.com${endpoint.metadata.url}`)
+                parsedRuns.push(parseLocalYouTubeLink(run, text))
               }
               break
             case 'WEB_PAGE_TYPE_CHANNEL': {
+              const mention = parseLocalIconLink(run, text, `https://www.youtube.com/channel/${endpoint.payload.browseId}`, '/')
+              if (mention) {
+                parsedRuns.push(mention)
+                break
+              }
+
               const trimmedText = text.trim()
               // In comments, mention can be `@Channel Name` (not handle, but name)
               if (CHANNEL_HANDLE_REGEX.test(trimmedText) || options.looseChannelNameDetection) {
@@ -1048,7 +1090,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
             }
             case 'WEB_PAGE_TYPE_PLAYLIST':
             case 'WEB_PAGE_TYPE_SHORTS':
-              parsedRuns.push(`https://www.youtube.com${endpoint.metadata.url}`)
+              parsedRuns.push(parseLocalYouTubeLink(run, text))
               break
             case 'WEB_PAGE_TYPE_BROWSE':
               parsedRuns.push(`<a href="https://www.youtube.com${endpoint.metadata.url}">${text}</a>`)
@@ -1071,10 +1113,11 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
 
                 // `searchParams.delete` changes query string unnecessarily
                 // Using original unless there is any change
-                parsedRuns.push(urlChanged ? realURL.toString() : realURLStr)
+                const cleanedUrl = urlChanged ? realURL.toString() : realURLStr
+                parsedRuns.push(parseLocalIconLink(run, text, cleanedUrl, '/') ?? cleanedUrl)
               } else {
                 // this is probably a special YouTube URL like http://www.youtube.com/approachingnirvana
-                parsedRuns.push(endpoint.payload.url)
+                parsedRuns.push(parseLocalIconLink(run, text, endpoint.payload.url, '/') ?? endpoint.payload.url)
               }
               break
             }

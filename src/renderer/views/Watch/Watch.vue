@@ -808,6 +808,7 @@
               :license="license"
               :content-disclosures="contentDisclosures"
               :games="videoGames"
+              :sections="videoDescriptionSections"
               :music-tracks="videoMusicTracks"
               always-expanded
               class="watchVideo"
@@ -1033,6 +1034,7 @@
           :license="license"
           :content-disclosures="contentDisclosures"
           :games="videoGames"
+          :sections="videoDescriptionSections"
           :music-tracks="videoMusicTracks"
           :panel-open="mobilePanel === 'description'"
           class="watchVideo phoneDescriptionPreview"
@@ -1053,6 +1055,7 @@
             :license="license"
             :content-disclosures="contentDisclosures"
             :games="videoGames"
+            :sections="videoDescriptionSections"
             :music-tracks="videoMusicTracks"
             :always-expanded="fullscreenMetadataOpen || phonePanelsEnabled"
             :expanded="videoDescriptionMode === 'expanded'"
