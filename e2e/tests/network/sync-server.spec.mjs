@@ -1276,6 +1276,76 @@ test.describe('OpenTubeX sync server', () => {
       })
       expect(cleanupResponse.ok).toBe(true)
     })
+
+    test('applies subscriptions removed on another device without pausing sync', async ({ page }, testInfo) => {
+      const capabilities = await getSyncCapabilities()
+      test.skip(capabilities.sync_deletions !== 1, 'Server with shared sync deletions required')
+      const username = `opentubex-shared-deletions-${randomUUID()}`
+      const password = 'local-test-password'
+      const otherUserData = await createUserDataDir({ settings: { baseTheme: 'dark', syncServerEnabled: true } })
+      let other
+
+      async function connect(clientPage, mode) {
+        await clientPage.route('**/account/**', route => route.continue({
+          headers: { ...route.request().headers(), 'X-Forwarded-For': rateLimitClient(testInfo) }
+        }))
+        const section = await goToSettingsSection(clientPage, 'sync')
+        await section.getByLabel('Sync server URL').fill(syncServerUrl)
+        await section.getByLabel('Username').fill(username)
+        await section.getByLabel('Password', { exact: true }).fill(password)
+        await section.getByLabel(/Privacy passphrase/).fill('local-test-privacy-passphrase')
+        await section.getByRole('button', { name: mode === 'register' ? 'Register' : /^Log in$/i }).click()
+        await expect(section.getByText(`Connected as ${username}`)).toBeVisible()
+        await expect(section.getByText(/Last synced:/)).toBeVisible()
+        await expect(section.locator('.syncProgress')).toBeHidden()
+      }
+
+      /** Syncs once and returns the error message, if any. */
+      function sync(clientPage) {
+        return clientPage.evaluate(async () => {
+          try {
+            await window.$store.dispatch('syncWithSyncServer', { notifyDataLoss: false })
+            return null
+          } catch (error) {
+            return error.message
+          }
+        })
+      }
+
+      function subscriptionCount(clientPage) {
+        return clientPage.evaluate(() => window.$store.getters.getProfileList[0].subscriptions.length)
+      }
+
+      try {
+        other = await launchApp(otherUserData)
+        await connect(page, 'register')
+        await connect(other.page, 'login')
+        expect(await subscriptionCount(other.page)).toBe(3)
+
+        await page.evaluate(() => window.$store.dispatch('removeChannelFromProfiles', {
+          channelIds: window.$store.getters.getProfileList[0].subscriptions.map(channel => channel.id),
+          profileIds: ['allChannels']
+        }))
+        expect(await sync(page)).toBeNull()
+
+        // Without the first device's deletion marks, emptying the list would
+        // look like a server that lost the data and pause sync.
+        expect(await sync(other.page)).toBeNull()
+        expect(await subscriptionCount(other.page)).toBe(0)
+        expect(await other.page.evaluate(() => window.$store.state.settings.syncServerAutoSync)).toBe(true)
+      } finally {
+        const token = await page.evaluate(() => window.$store.getters.getSyncServerToken)
+        if (token) {
+          await fetch(`${syncServerUrl}/v1/account/delete`, {
+            method: 'DELETE',
+            headers: { Authorization: token, 'Content-Type': 'application/json', 'X-Forwarded-For': rateLimitClient(testInfo) },
+            body: JSON.stringify({ password })
+          })
+        }
+        await other?.electronApp.close()
+        await rm(otherUserData, { recursive: true, force: true })
+      }
+    })
   })
 
   test('supports legacy servers without a capabilities endpoint', async ({ app, page }) => {
