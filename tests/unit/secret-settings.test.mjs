@@ -32,11 +32,20 @@ test.after(() => datastore.driver.close())
 
 const ACCOUNT = { pageId: 'page', credentials: { access_token: 'access-secret', refresh_token: 'refresh-secret' } }
 
-/** A cipher whose key is `key`. Values encrypted with another key do not decrypt. */
-function cipher(key) {
+/**
+ * A cipher whose key is `key`. Values encrypted with another key do not
+ * decrypt, except with a `staleKey`, which decrypt as stale.
+ */
+function cipher(key, staleKey) {
+  const decrypt = (text, prefix) => text.startsWith(`${prefix}:`) ? Buffer.from(text.slice(prefix.length + 1), 'base64').toString() : null
   return {
     encrypt: async texts => texts.map(text => `${key}:${Buffer.from(text).toString('base64')}`),
-    decrypt: async texts => texts.map(text => text.startsWith(`${key}:`) ? Buffer.from(text.slice(key.length + 1), 'base64').toString() : null),
+    decrypt: async texts => texts.map(text => {
+      const current = decrypt(text, key)
+      if (current !== null) return { text: current }
+      const stale = staleKey ? decrypt(text, staleKey) : null
+      return stale === null ? null : { text: stale, stale: true }
+    }),
   }
 }
 
@@ -158,6 +167,18 @@ test('secrets this device cannot decrypt are deleted once, and others are kept',
   assert.equal((await settings._findOne('syncServerToken')).value, 'new-secret')
 })
 
+test('stale secrets are encrypted again with the current key', async t => {
+  t.mock.method(settings, 'cipher', () => Promise.resolve(cipher('old-key')))
+  await settings.upsert('proxyPassword', 'proxy-secret')
+  settings.migrationPromise = null
+  t.mock.method(settings, 'cipher', () => Promise.resolve(cipher('device', 'old-key')))
+
+  assert.deepEqual(await saved(), { proxyPassword: 'proxy-secret' })
+  assert.match((await stored('proxyPassword')).encryptedValue, /^device:/)
+  t.mock.method(settings, 'cipher', () => Promise.resolve(cipher('device')))
+  assert.deepEqual(await saved(), { proxyPassword: 'proxy-secret' })
+})
+
 test('encrypted secrets are kept while the keyring is unavailable', async t => {
   t.mock.method(settings, 'cipher', () => Promise.resolve(cipher('device')))
   await settings.upsert('proxyPassword', 'proxy-secret')
@@ -200,11 +221,36 @@ test('safeStorage deletes only values its key cannot decrypt, and keeps them whi
   }
   const cipher = await createSafeStorageCipher({ app: { whenReady: async () => {} }, safeStorage })
   const [encrypted] = await cipher.encrypt(['secret'])
+  assert.equal(typeof encrypted, 'string')
   const foreign = Buffer.from('v10other-key').toString('base64')
 
-  assert.deepEqual(await cipher.decrypt([encrypted, foreign]), ['secret', null])
+  assert.deepEqual(await cipher.decrypt([encrypted, foreign]), [{ text: 'secret', stale: false }, null])
   unavailable = true
   await assert.rejects(cipher.decrypt([encrypted]))
+})
+
+test('safeStorage reads values the async API cannot decrypt with the sync API, and marks them stale', async () => {
+  let syncAvailable = true
+  const safeStorage = {
+    isAsyncEncryptionAvailable: async () => true,
+    encryptStringAsync: async text => Buffer.from(`v11${text}`),
+    decryptStringAsync: async () => {
+      throw new Error('Error while decrypting the ciphertext provided to safeStorage.decryptStringAsync.')
+    },
+    isEncryptionAvailable: () => syncAvailable,
+    decryptString: buffer => {
+      const text = buffer.toString()
+      if (!text.startsWith('v11sync:')) throw new Error('Error while decrypting the ciphertext provided to safeStorage.decryptString.')
+      return text.slice('v11sync:'.length)
+    },
+  }
+  const cipher = await createSafeStorageCipher({ app: { whenReady: async () => {} }, safeStorage })
+  const synced = Buffer.from('v11sync:secret').toString('base64')
+  const foreign = Buffer.from('v11other-key').toString('base64')
+
+  assert.deepEqual(await cipher.decrypt([synced, foreign]), [{ text: 'secret', stale: true }, null])
+  syncAvailable = false
+  await assert.rejects(cipher.decrypt([synced]))
 })
 
 test('safeStorage is not used on Linux when it would fall back to the hardcoded key', { skip: process.platform !== 'linux' }, async () => {

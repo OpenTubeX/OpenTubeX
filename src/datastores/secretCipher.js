@@ -25,14 +25,25 @@ export async function createSafeStorageCipher({ app, safeStorage }) {
   return {
     encrypt: texts => Promise.all(texts.map(async text => (await safeStorage.encryptStringAsync(text)).toString('base64'))),
     decrypt: texts => Promise.all(texts.map(async text => {
+      const encrypted = Buffer.from(text, 'base64')
       try {
-        return (await safeStorage.decryptStringAsync(Buffer.from(text, 'base64'))).result
+        const { result, shouldReEncrypt } = await safeStorage.decryptStringAsync(encrypted)
+        return { text: result, stale: shouldReEncrypt }
       } catch (error) {
-        // Only a value this keyring's key cannot decrypt is deleted. Other
-        // errors, such as a keyring that is temporarily unavailable, reject,
-        // which keeps the secrets until it is available again.
-        if (error instanceof Error && error.message.startsWith('Error while decrypting')) return null
-        throw error
+        // Other errors, such as a keyring that is temporarily unavailable,
+        // reject, which keeps the secrets until it is available again.
+        if (!(error instanceof Error && error.message.startsWith('Error while decrypting'))) throw error
+      }
+      // With KWallet, the async API cannot read values the sync API encrypted
+      // (electron/electron#55760), so those are read with the sync API while
+      // Electron still has it, and encrypted again.
+      if (typeof safeStorage.decryptString !== 'function') return null
+      if (!safeStorage.isEncryptionAvailable()) throw new Error('The system keyring is unavailable')
+      try {
+        return { text: safeStorage.decryptString(encrypted), stale: true }
+      } catch {
+        // Only a value this keyring's key cannot decrypt is deleted.
+        return null
       }
     })),
   }
@@ -46,7 +57,7 @@ export async function createSafeStorageCipher({ app, safeStorage }) {
 function createNativeCipher(plugin) {
   return {
     encrypt: async values => (await plugin.encrypt({ values })).values,
-    decrypt: async values => (await plugin.decrypt({ values })).values,
+    decrypt: async values => (await plugin.decrypt({ values })).values.map(text => text === null ? null : { text }),
   }
 }
 
