@@ -2458,7 +2458,7 @@ Tooltips:
     Visible Search Suggestions: "Määrab, mitu otsinguajaloo kirjet ja soovitust otsinguriba näitab, enne kui selle loendit tuleb kerida. Loend ei ulatu kunagi akna alumisest servast kaugemale."
     Thumbnail Size: "Muudab videote pisipiltide suurust ruudustikes ja loendites. Fikseeritud veergude arvuga või täislaiuse vaatega ruudustikud täidavad selle asemel iga rea, seega muudab see seal ainult loendite pisipilte ja Shortse. Telefonisuurustes akendes on ruudustiku pisipildid piiratud 100%-ga."
     Playlist Thumbnail Size: "Muudab videote pisipiltide suurust esitusloendite lehtedel. Fikseeritud veergude arvuga või täislaiuse vaatega ruudustikud täidavad selle asemel iga rea, seega muudab see seal ainult loendite pisipilte ja Shortse. Telefonisuurustes akendes on ruudustiku pisipildid piiratud 100%-ga."
-    Compact Settings Categories: "Peidab kirjeldused ja vähendab seadete kategooriate kõrgust."
+    Compact Settings Categories: "Vähendab seadete kategooriate kõrgust."
     Show Progress as Notification: Kuvab üldise edenemisriba asemel taustatoimingute, näiteks tellimuste värskendamise ja hallatavate tööriistade allalaadimise, reaalajas edenemisega püsiva teavituse.
     Always Show Scrollbars: Hoiab kerimisribad alati nähtaval. Kui see on välja lülitatud, kaovad need veidi pärast hiire liigutamise lõpetamist ja ilmuvad uuesti kohe, kui hiirt taas liigutad.
     Scroll Speed: Muudab hiireratta ja puuteplaadi kerimisliigutuste vahemaad.

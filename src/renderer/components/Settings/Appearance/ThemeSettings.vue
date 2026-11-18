@@ -1,6 +1,7 @@
 <template>
   <FtSettingsSection
     :title="$t('Settings.Theme Settings.Theme Settings')"
+    :icon="['fas', 'palette']"
   >
     <div class="themeGalleryEntry">
       <ThemeGallery />

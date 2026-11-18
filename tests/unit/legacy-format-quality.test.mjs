@@ -34,3 +34,14 @@ test('portrait videos are matched on their width', () => {
   assert.equal(findLegacyFormatForQuality(PORTRAIT_FORMATS, 240).width, 240)
   assert.equal(findLegacyFormatForQuality(PORTRAIT_FORMATS, 1080).width, 360)
 })
+
+test('formats without a width or bitrate are matched on their height', () => {
+  // Twitch clips list progressive formats from lowest to highest with only a height
+  const formats = [360, 480, 720, 1080].map(height => ({ width: null, height, bitrate: null }))
+
+  assert.equal(findLegacyFormatForQuality(formats, 1080).height, 1080)
+  assert.equal(findLegacyFormatForQuality(formats, 900).height, 720)
+  assert.equal(findLegacyFormatForQuality(formats, 240).height, 360)
+  // a format without dimensions is no match below the preferred quality
+  assert.equal(findLegacyFormatForQuality([...formats, { width: null, height: null, bitrate: null }], 240).height, 360)
+})

@@ -2,7 +2,7 @@ import { chmod, readFile, rm, writeFile } from 'node:fs/promises'
 import { createServer } from 'node:http'
 import path from 'node:path'
 
-import { defaultThemeClass, choosePickerPaths, expect, goTo, repoRoot, sel, setWindowSize, test } from '../../helpers/app.mjs'
+import { defaultThemeClass, choosePickerPaths, dropInlineHandlerViolations, expect, goTo, repoRoot, sel, setWindowSize, test } from '../../helpers/app.mjs'
 import { activeTab, openMockedVideo, waitForPlayback, openPlayerOptions, seekAsViewer } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { DEMO_MEDIA_PATH, DEMO_MEDIA_URL, routeDemoMedia } from '../../helpers/media.mjs'
@@ -916,6 +916,8 @@ test('external media captions open a transcript in the sidebar and the full wind
   await dockedTranscript.getByRole('button', { name: 'Close transcript' }).click()
   await expect(externalMedia.locator('.transcriptCard')).toHaveCount(0)
   await expect(actions.getByRole('button', { name: 'Show transcript' })).toHaveAttribute('aria-pressed', 'false')
+  // Every parse of the cue reports its handler.
+  dropInlineHandlerViolations(app)
 })
 
 test('an open phone transcript sheet moves into the full window dock', async ({ app, page }) => {

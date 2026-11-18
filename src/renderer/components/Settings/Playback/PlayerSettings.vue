@@ -2,6 +2,7 @@
   <FtSettingsSection
     v-bind="$attrs"
     :title="t('Settings.Player Settings.Player Settings')"
+    :icon="['fas', 'play']"
   >
     <h4 class="groupTitle">
       {{ t('Settings.Player Settings.Sections.Playback') }}

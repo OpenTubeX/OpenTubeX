@@ -1,6 +1,7 @@
 <template>
   <FtSettingsSection
     :title="$t('Settings.Password Settings.Password Settings')"
+    :icon="['fas', 'lock']"
   >
     <FtFlexBox
       v-if="hasStoredPassword"

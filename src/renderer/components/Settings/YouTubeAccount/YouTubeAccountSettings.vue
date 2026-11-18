@@ -1,6 +1,7 @@
 <template>
   <FtSettingsSection
     :title="t('Settings.YouTube Account Settings.YouTube Account Settings')"
+    :icon="['fas', 'circle-user']"
   >
     <p class="accountWarning">
       <FtIcon

@@ -1,6 +1,7 @@
 <template>
   <FtSettingsSection
     :title="t('Settings.Player Settings.Caption Appearance.Captions')"
+    :icon="['fas', 'closed-captioning']"
   >
     <div class="captionSettings">
       <div

@@ -38,6 +38,7 @@
       />
       <FtInput
         class="shortcutSearch"
+        variant="rounded"
         input-type="search"
         :value="searchQuery"
         :label="$t('Search Bar.Search')"

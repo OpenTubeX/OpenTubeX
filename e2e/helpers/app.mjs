@@ -814,6 +814,18 @@ function recordAppDiagnostics(testInfo, recordTrace) {
 const UNPOSITIONED_VIEWPORT_ERROR = 'Overlay scrollbars need a positioned scroll container'
 // Chromium logs every script and eval() it blocks.
 const CSP_VIOLATION = /Content Security Policy/
+const INLINE_HANDLER_VIOLATION = 'Executing inline event handler'
+
+/**
+ * Chromium reports an inline handler as a violation even when the renderer only
+ * parses it into an inert document, so tests that feed handler markup on purpose
+ * drop those reports and check directly that the handler stays inert.
+ * @param {{ cspViolations: string[] }} app
+ */
+export function dropInlineHandlerViolations(app) {
+  const others = app.cspViolations.filter(message => !message.startsWith(INLINE_HANDLER_VIOLATION))
+  app.cspViolations.splice(0, Infinity, ...others)
+}
 
 export const test = base.extend({
   // Each worker's private X server picks a free display.

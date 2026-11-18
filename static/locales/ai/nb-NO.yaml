@@ -2460,7 +2460,7 @@ Tooltips:
     Visible Search Suggestions: "Angir hvor mange oppføringer fra søkeloggen og forslag søkefeltet viser før listen må rulles. Listen går aldri forbi nederkanten av vinduet."
     Thumbnail Size: "Skalerer videominiatyrbilder i rutenett og lister. Rutenett med et fast antall kolonner eller visningstypen Full bredde fyller i stedet hver rad, så der endrer den bare listeminiatyrbilder og Shorts. I vinduer på størrelse med en telefon er rutenettminiatyrbilder begrenset til 100 %."
     Playlist Thumbnail Size: "Skalerer videominiatyrbilder på spillelistesider. Rutenett med et fast antall kolonner eller visningstypen Full bredde fyller i stedet hver rad, så der endrer den bare listeminiatyrbilder og Shorts. I vinduer på størrelse med en telefon er rutenettminiatyrbilder begrenset til 100 %."
-    Compact Settings Categories: "Skjuler beskrivelser og reduserer høyden på innstillingskategorier."
+    Compact Settings Categories: "Reduserer høyden på innstillingskategorier."
     Show Progress as Notification: Viser et varig varsel med løpende fremdrift for bakgrunnsoperasjoner, for eksempel oppdatering av abonnementer og nedlasting av administrerte verktøy, i stedet for den globale fremdriftslinjen.
     Always Show Scrollbars: Holder rullefeltene synlige hele tiden. Når dette er slått av, tones de ut kort tid etter at du slutter å bevege musen, og vises igjen så snart du beveger den.
     Scroll Speed: Endrer hvor langt musehjul- og styreflatebevegelser ruller.

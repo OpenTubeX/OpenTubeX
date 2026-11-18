@@ -1,5 +1,8 @@
 <template>
-  <FtSettingsSection :title="t('Settings.Categories.Layout')">
+  <FtSettingsSection
+    :title="t('Settings.Categories.Layout')"
+    :icon="['fas', 'table-columns']"
+  >
     <h4 class="groupTitle">
       {{ t('Settings.Theme Settings.Sections.Interface') }}
     </h4>

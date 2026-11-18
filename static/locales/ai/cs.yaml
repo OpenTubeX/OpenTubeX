@@ -1423,7 +1423,6 @@ Settings:
     Invalid channel playback speeds file: "V tomto souboru nebyly nalezeny žádné rychlosti přehrávání kanálů"
     Channel playback speeds imported: "Importována rychlost přehrávání {count} kanálu | Importovány rychlosti přehrávání {count} kanálů | Importovány rychlosti přehrávání {count} kanálů"
     Channels not found: "{count} kanál nebyl nalezen | {count} kanály nebyly nalezeny | {count} kanálů nebylo nalezeno"
-    Playlists have been successfully imported: "Úspěšně importován 1/{total} playlist | Úspěšně importovány {count}/{total} playlisty | Úspěšně importováno {count}/{total} playlistů"
     Import subscription groups hint: Chcete-li kanály roztřídit do skupin, přidejte v souboru .csv za název kanálu sloupec s názvy skupin oddělenými středníky, nebo importujte soubor .opml se složkami. Chybějící skupiny se vytvoří.
   Sync Settings:
     Signed Out After Restore: 'Synchronizace byla odhlášena, protože tato data aplikace byla obnovena ze zálohy nebo z jiného zařízení. Přihlaste se znovu, abyste toto zařízení synchronizovali.'
@@ -1623,7 +1622,6 @@ Settings:
     Incorrect Password: Nesprávné heslo
     Unlock: Odemknout
     Unlocking: Odemykání…
-  Search Settings: Hledat v nastavení
   No Settings Found: Nebyla nalezena žádná nastavení
   Interface Customizer:
     Customize Interface: "Přizpůsobit rozhraní"
@@ -2457,7 +2455,7 @@ Tooltips:
     Visible Search Suggestions: "Určuje, kolik položek historie vyhledávání a návrhů zobrazí vyhledávací pole, než se jeho seznam začne posouvat. Seznam nikdy nepřesáhne spodní okraj okna."
     Thumbnail Size: "Mění velikost miniatur videí v mřížkách a seznamech. Mřížky s pevným počtem sloupců nebo zobrazení Plná šířka místo toho vyplní každý řádek, takže tam mění jen miniatury v seznamech a Shorts. V oknech velikosti telefonu jsou miniatury v mřížce omezeny na 100 %."
     Playlist Thumbnail Size: "Mění velikost miniatur videí na stránkách playlistů. Mřížky s pevným počtem sloupců nebo zobrazení Plná šířka místo toho vyplní každý řádek, takže tam mění jen miniatury v seznamech a Shorts. V oknech velikosti telefonu jsou miniatury v mřížce omezeny na 100 %."
-    Compact Settings Categories: "Skryje popisy a zmenší výšku kategorií nastavení."
+    Compact Settings Categories: "Zmenší výšku kategorií nastavení."
     Show Progress as Notification: Místo celkového ukazatele průběhu zobrazí trvalé oznámení s aktuálním průběhem operací na pozadí, například obnovování odběrů a stahování spravovaných nástrojů.
     Always Show Scrollbars: Ponechá posuvníky stále viditelné. Pokud je funkce vypnutá, krátce po zastavení pohybu myši zmizí a při dalším pohybu se znovu zobrazí.
     Scroll Speed: Mění vzdálenost posunu kolečkem myši a gesty kolečka touchpadu.

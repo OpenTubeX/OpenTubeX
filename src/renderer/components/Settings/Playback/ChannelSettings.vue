@@ -1,6 +1,7 @@
 <template>
   <FtSettingsSection
     :title="t('Settings.Channel Settings.Channel Settings')"
+    :icon="['fas', 'users']"
   >
     <p class="sectionDescription">
       {{ t('Settings.Channel Settings.Channel Settings Description') }}

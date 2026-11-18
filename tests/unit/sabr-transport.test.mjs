@@ -47,7 +47,7 @@ function response(data, isInit = false, formatId = audioFormatId, contentLength 
   const buffer = new CompositeBuffer([])
   const writer = new UmpWriter(buffer)
   writer.write(protos.UMPPartId.MEDIA_HEADER, protos.MediaHeader.encode({
-    headerId, formatId, isInitSeg: isInit, sequenceNumber: 1, contentLength: contentLength ?? undefined,
+    headerId, formatId, isInitializationSegment: isInit, segmentNum: 1, segmentLengthBytes: contentLength ?? undefined,
   }).finish())
   const idBytes = headerId < 128 ? [headerId] : [0x80 | (headerId & 0x3f), headerId >> 6]
   writer.write(protos.UMPPartId.MEDIA, Uint8Array.of(...idBytes, ...data))
@@ -65,6 +65,21 @@ for (const headerId of [130, 256]) {
     transport.cleanup()
   })
 }
+
+test('matches media headers that omit zero fields, as live headers omit lastModified', async t => {
+  const buffer = new CompositeBuffer([])
+  const writer = new UmpWriter(buffer)
+  // Omitted fields decode as undefined, not as zero
+  writer.write(protos.UMPPartId.MEDIA_HEADER, protos.MediaHeader.encode({ formatId: { itag: 140 }, segmentNum: 1 }).finish())
+  writer.write(protos.UMPPartId.MEDIA, Uint8Array.of(0, 1, 2, 3))
+  writer.write(protos.UMPPartId.MEDIA_END, Uint8Array.of(0))
+  const { createSabrTransport } = load(async () => new Response(utils.concatenateChunks(buffer.chunks)))
+  const transport = createSabrTransport(sabrData, () => context)
+  t.after(() => transport.cleanup())
+  const uri = 'sabr1:audio?formatId=140-0-&sq=1'
+  const segment = await transport.request(uri, request(uri), 1).promise
+  assert.deepEqual([...segment.data], [1, 2, 3])
+})
 
 test('complete SABR media survives every network chunk boundary', async t => {
   const bytes = new Uint8Array(await response([1, 2, 3]).arrayBuffer())
@@ -90,7 +105,7 @@ test('split MEDIA headers retain all media bytes across retries', async t => {
   const buffer = new CompositeBuffer([])
   const writer = new UmpWriter(buffer)
   writer.write(protos.UMPPartId.MEDIA_HEADER, protos.MediaHeader.encode({
-    headerId: 1, formatId: videoFormatId, sequenceNumber: 745, contentLength: 6,
+    headerId: 1, formatId: videoFormatId, segmentNum: 745, segmentLengthBytes: 6,
   }).finish())
   writer.write(protos.UMPPartId.MEDIA, Uint8Array.of(1, 1, 2, 3, 4))
   const boundary = buffer.getLength() + 1
@@ -142,7 +157,8 @@ test('oversized SABR declarations abort the fetch and allow a fresh retry', asyn
   const { createSabrTransport } = load(async (_url, options) => {
     if (++calls > 1) return response([1, 2])
     signal = options.signal
-    return new Response(utils.concatenateChunks(header.chunks))
+    // The reader checks the declared size once the payload starts
+    return new Response(utils.concatenateChunks([...header.chunks, Uint8Array.of(1)]))
   })
   const transport = createSabrTransport(sabrData, () => context)
   t.after(() => transport.cleanup())
@@ -162,7 +178,7 @@ for (const media of [false, true]) {
     new UmpWriter(buffer).write(media ? protos.UMPPartId.MEDIA : 300, payload)
     const header = new CompositeBuffer([])
     new UmpWriter(header).write(protos.UMPPartId.MEDIA_HEADER, protos.MediaHeader.encode({
-      headerId: 1, formatId: audioFormatId, sequenceNumber: 1,
+      headerId: 1, formatId: audioFormatId, segmentNum: 1,
     }).finish())
     const chunk = utils.concatenateChunks(buffer.chunks)
     let reads = 0
@@ -228,9 +244,9 @@ test('accepts a complete SABR segment when the media header omits content length
 test('selects a media segment after an init header with the same sequence number', async () => {
   const buffer = new CompositeBuffer([])
   const writer = new UmpWriter(buffer)
-  for (const [headerId, isInitSeg, data] of [[1, true, [9]], [2, false, [1, 2]]]) {
+  for (const [headerId, isInitializationSegment, data] of [[1, true, [9]], [2, false, [1, 2]]]) {
     writer.write(protos.UMPPartId.MEDIA_HEADER, protos.MediaHeader.encode({
-      headerId, formatId: audioFormatId, isInitSeg, sequenceNumber: 1, contentLength: data.length,
+      headerId, formatId: audioFormatId, isInitializationSegment, segmentNum: 1, segmentLengthBytes: data.length,
     }).finish())
     writer.write(protos.UMPPartId.MEDIA, Uint8Array.of(headerId, ...data))
     writer.write(protos.UMPPartId.MEDIA_END, Uint8Array.of(headerId))
@@ -818,7 +834,7 @@ test('incomplete media fails before applying a retry policy', async t => {
     const buffer = new CompositeBuffer([])
     const writer = new UmpWriter(buffer)
     writer.write(protos.UMPPartId.MEDIA_HEADER, protos.MediaHeader.encode({
-      headerId: 1, formatId: audioFormatId, sequenceNumber: 1, contentLength: 2,
+      headerId: 1, formatId: audioFormatId, segmentNum: 1, segmentLengthBytes: 2,
     }).finish())
     writer.write(protos.UMPPartId.MEDIA, Uint8Array.of(1, 9))
     writer.write(protos.UMPPartId.NEXT_REQUEST_POLICY,
@@ -1024,8 +1040,8 @@ test('native SABR transport encodes decoder state and returns only the requested
   assert.deepEqual([...result.data], [5, 6, 7])
   assert.equal(requests[0].body.clientAbrState.playbackRate, 1.5)
   assert.equal(requests[0].body.clientAbrState.playerTimeMs, '10000')
-  assert.equal(requests[0].body.preferredAudioFormatIds[0].itag, 140)
-  assert.equal(requests[0].body.preferredVideoFormatIds[0].itag, 137)
+  assert.equal(requests[0].body.selectedAudioFormatIds[0].itag, 140)
+  assert.equal(requests[0].body.selectedVideoFormatIds[0].itag, 137)
   assert.equal(new URL(requests[0].uri).searchParams.get('rn'), '0')
   transport.cleanup()
 })
@@ -1073,7 +1089,7 @@ test('the Shaka adapter retains format selection, registration and teardown beha
   await schemes.get('sabr1')(uri, request(uri), 1).promise
   assert.equal(body.clientAbrState.playbackRate, 2)
   assert.equal(body.clientAbrState.clientViewportWidth, 1920)
-  assert.equal(body.preferredVideoFormatIds[0].itag, 137)
+  assert.equal(body.selectedVideoFormatIds[0].itag, 137)
   transport.cleanup()
   assert.equal(schemes.size, 0)
 })
@@ -1099,7 +1115,7 @@ test('a live caption request asks SABR for only the caption format', async () =>
   assert.deepEqual([...segment.data], [7, 8])
   // SABR sends captions only with audio and video enabled, which are reported as buffered
   assert.equal(body.clientAbrState.enabledTrackTypesBitfield, 7)
-  assert.deepEqual(body.preferredSubtitleFormatIds, [captionFormatId])
+  assert.deepEqual(body.selectedCaptionFormatIds, [captionFormatId])
   assert.deepEqual(body.bufferedRanges.map(range => [range.formatId.itag, range.endSegmentIndex]), [[140, 2147483647], [137, 2147483647]])
 })
 
@@ -1110,7 +1126,7 @@ test('a live caption request asks SABR for only the caption format', async () =>
 function liveResponse(headSequenceNumber, segmentData) {
   const buffer = new CompositeBuffer([])
   const writer = new UmpWriter(buffer)
-  writer.write(protos.UMPPartId.LIVE_METADATA, protos.LiveMetadata.encode({
+  writer.write(protos.UMPPartId.LIVE_METADATA, protos.SabrLiveMetadata.encode({
     headSequenceNumber: String(headSequenceNumber),
     headTimeMs: String(headSequenceNumber * 5000),
     minSeekableTimeTicks: String((headSequenceNumber - 100) * 5000 * 1000),
@@ -1120,7 +1136,7 @@ function liveResponse(headSequenceNumber, segmentData) {
   }).finish())
   if (segmentData) {
     writer.write(protos.UMPPartId.MEDIA_HEADER, protos.MediaHeader.encode({
-      headerId: 1, formatId: audioFormatId, sequenceNumber: headSequenceNumber - 4,
+      headerId: 1, formatId: audioFormatId, segmentNum: headSequenceNumber - 4,
     }).finish())
     writer.write(protos.UMPPartId.MEDIA, Uint8Array.of(1, ...segmentData))
     writer.write(protos.UMPPartId.MEDIA_END, Uint8Array.of(1))
@@ -1191,10 +1207,10 @@ test('requests at the end of an ad break carry its cue point so SABR resumes the
   const bodies = []
   const { createSabrTransport } = load(async (_uri, options) => {
     bodies.push(options.body)
-    if (protocol.extractRawProtobufField(options.body, 24)) return response([1, 2])
+    if (protos.VideoPlaybackAbrRequest.decode(options.body).ssapPlaybackInfos.length) return response([1, 2])
     const buffer = new CompositeBuffer([])
     const writer = new UmpWriter(buffer)
-    writer.write(protocol.CUEPOINT_LIST_PART_ID, Uint8Array.from(cuepointList))
+    writer.write(protos.UMPPartId.CUEPOINT_LIST, Uint8Array.from(cuepointList))
     writer.write(protos.UMPPartId.NEXT_REQUEST_POLICY, protos.NextRequestPolicy.encode({ targetAudioReadaheadMs: 15000 }).finish())
     return new Response(utils.concatenateChunks(buffer.chunks))
   })
@@ -1205,15 +1221,10 @@ test('requests at the end of an ad break carry its cue point so SABR resumes the
 
   assert.deepEqual([...segment.data], [1, 2])
   assert.equal(bodies.length, 2)
-  assert.equal(protocol.extractRawProtobufField(bodies[0], 24), undefined)
-  const ssapPlaybackInfo = protocol.extractRawProtobufField(bodies[1], 24)
-  assert.deepEqual([...ssapPlaybackInfo], [
-    ...lengthDelimited(7, [...new TextEncoder().encode('ad-1')]),
-    ...varint(8 << 3, 11, 10 << 3, 7_170_000, 11 << 3, 60_000),
-  ])
-  // The request stays valid for decoders that do not know the field
-  assert.deepEqual(protos.VideoPlaybackAbrRequest.decode(bodies[1]).selectedFormatIds,
-    protos.VideoPlaybackAbrRequest.decode(bodies[0]).selectedFormatIds)
+  assert.deepEqual(protos.VideoPlaybackAbrRequest.decode(bodies[0]).ssapPlaybackInfos, [])
+  const { cuepointId, state, startTimeMs, durationMs } = protos.VideoPlaybackAbrRequest.decode(bodies[1]).ssapPlaybackInfos[0]
+  assert.deepEqual({ cuepointId, state, startTimeMs, durationMs },
+    { cuepointId: 'ad-1', state: protos.AdState.RATECONTROL_CLIENT, startTimeMs: '7170000', durationMs: '60000' })
 })
 
 test('a live request that SABR answers with a neighboring segment asks again within the requested one', async t => {
@@ -1233,7 +1244,7 @@ test('a live request that SABR answers with a neighboring segment asks again wit
     const writer = new UmpWriter(buffer)
     writer.write(protos.UMPPartId.NEXT_REQUEST_POLICY, protos.NextRequestPolicy.encode({ targetAudioReadaheadMs: 15000 }).finish())
     writer.write(protos.UMPPartId.MEDIA_HEADER, protos.MediaHeader.encode({
-      headerId: 1, formatId: audioFormatId, sequenceNumber, startMs: String(startMs),
+      headerId: 1, formatId: audioFormatId, segmentNum: sequenceNumber, startMs: String(startMs),
     }).finish())
     writer.write(protos.UMPPartId.MEDIA, Uint8Array.of(1, sequenceNumber))
     writer.write(protos.UMPPartId.MEDIA_END, Uint8Array.of(1))
@@ -1265,7 +1276,7 @@ test('older live footage starts at the segment SABR has for the requested time',
     writer.write(protos.UMPPartId.MEDIA_HEADER, protos.MediaHeader.encode({
       headerId: 1,
       formatId: body.clientAbrState.enabledTrackTypesBitfield === 7 ? captionFormatId : audioFormatId,
-      sequenceNumber,
+      segmentNum: sequenceNumber,
       startMs: String(realStartMs(sequenceNumber)),
     }).finish())
     writer.write(protos.UMPPartId.MEDIA, Uint8Array.of(1, sequenceNumber - 800))

@@ -1,6 +1,7 @@
 <template>
   <FtSettingsSection
     :title="t('Settings.Categories.Content appearance')"
+    :icon="['fas', 'photo-film']"
   >
     <div class="appearanceSwitchGrid switchFlowGrid">
       <FtToggleSwitch

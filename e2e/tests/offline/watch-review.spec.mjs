@@ -1,5 +1,5 @@
 import path from 'node:path'
-import { test, expect, repoRoot, setWindowSize } from '../../helpers/app.mjs'
+import { dropInlineHandlerViolations, test, expect, repoRoot, setWindowSize } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { expectVideoAction, mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
@@ -144,11 +144,13 @@ test('HTML description text extraction stays inert when metadata arrives', async
   })
   const description = page.locator('.videoDescription .description')
   await expect(description).toContainText('Recovered HTML description')
+  await expect(description.locator('img[onerror]')).toHaveCount(0)
   await description.locator('img[src="https://description.test/broken.png"]').evaluate(image => new Promise(resolve => {
     if (image.complete) resolve()
     else image.addEventListener('error', () => resolve(), { once: true })
   }))
   expect(await page.evaluate(() => window.descriptionTextExtractionExecuted)).toBe(false)
+  dropInlineHandlerViolations(app)
 })
 
 test.describe('download opened without a connection', () => {

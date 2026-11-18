@@ -74,6 +74,7 @@
     <FtSettingsSection
       v-if="USING_ELECTRON"
       :title="t('Settings.Download Settings.Download Settings')"
+      :icon="['fas', 'download']"
     >
       <StorageItem
         :icon="['fas', 'download']"
@@ -109,7 +110,10 @@
       </StorageItem>
     </FtSettingsSection>
 
-    <FtSettingsSection :title="t('Settings.Storage Settings.Replaceable Caches')">
+    <FtSettingsSection
+      :title="t('Settings.Storage Settings.Replaceable Caches')"
+      :icon="['fas', 'box-archive']"
+    >
       <StorageItem
         :icon="['fas', 'rss']"
         :title="t('Settings.Storage Settings.Subscription Feed Cache')"
@@ -228,7 +232,10 @@
       </template>
     </FtSettingsSection>
 
-    <FtSettingsSection :title="t('Settings.Storage Settings.History Data')">
+    <FtSettingsSection
+      :title="t('Settings.Storage Settings.History Data')"
+      :icon="['fas', 'history']"
+    >
       <FtDataScopeNotice storage />
       <StorageItem
         v-if="USING_ELECTRON"
@@ -296,7 +303,10 @@
       </StorageItem>
     </FtSettingsSection>
 
-    <FtSettingsSection :title="t('Settings.Storage Settings.Other User Data')">
+    <FtSettingsSection
+      :title="t('Settings.Storage Settings.Other User Data')"
+      :icon="['fas', 'folder-open']"
+    >
       <StorageItem
         :icon="['fas', 'users']"
         :title="t('Settings.Storage Settings.Subscriptions And Profiles')"

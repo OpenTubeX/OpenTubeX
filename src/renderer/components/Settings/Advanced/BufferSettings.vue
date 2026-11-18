@@ -1,5 +1,8 @@
 <template>
-  <FtSettingsSection :title="t('Settings.Player Settings.Buffering.Buffering')">
+  <FtSettingsSection
+    :title="t('Settings.Player Settings.Buffering.Buffering')"
+    :icon="['fas', 'bars-progress']"
+  >
     <div class="bufferNotes">
       <p>{{ t('Settings.Player Settings.Buffering.Description') }}</p>
       <ul>

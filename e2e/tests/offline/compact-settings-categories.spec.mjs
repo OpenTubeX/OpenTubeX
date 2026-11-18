@@ -21,6 +21,13 @@ async function expectValidCategoryScrollbars(menu) {
   })).toBe(true)
 }
 
+/** The menu stays rendered and shows the given layout. */
+async function expectCompactMenu(page, compact) {
+  const menu = page.locator('.settingsMenu')
+  await expect(menu).toBeVisible()
+  await expect(menu).toHaveClass(compact ? /\bcompact\b/ : /^(?!.*\bcompact\b)/)
+}
+
 async function resizeWindowWidth(app, page, width) {
   const previousWidth = await page.evaluate(() => innerWidth)
   await app.electronApp.evaluate(({ BrowserWindow }, nextWidth) => {
@@ -70,7 +77,7 @@ for (const initialValue of [false, true]) {
         await errorLogged
         await expect(toggle).toBeEnabled()
         await expect(toggle).toBeChecked({ checked: initialValue })
-        await expect(page.locator('.settingsMenu .titleDescription')).toHaveCount(initialValue ? 0 : 11)
+        await expectCompactMenu(page, initialValue)
         expect(latestSettings(readDatastore(app.userDataDir, 'settings'))
           .hideSettingsCategoryDescriptions).toBe(initialValue)
       } finally {
@@ -79,7 +86,7 @@ for (const initialValue of [false, true]) {
 
       await appearance.locator('label.switch-label').filter({ hasText: LABEL }).click()
       await expect(toggle).toBeChecked({ checked: !initialValue })
-      await expect(page.locator('.settingsMenu .titleDescription')).toHaveCount(initialValue ? 11 : 0)
+      await expectCompactMenu(page, !initialValue)
       await expect.poll(async () => latestSettings(
         readDatastore(app.userDataDir, 'settings')
       ).hideSettingsCategoryDescriptions).toBe(!initialValue)
@@ -101,7 +108,7 @@ for (const reveal of ['back', 'resize']) {
       await expect(menu).toBeHidden()
       await appearance.locator('label.switch-label').filter({ hasText: LABEL }).click()
       await expect(appearance.getByRole('checkbox', { name: LABEL })).toBeChecked()
-      await expect(menu.locator('.titleDescription')).toHaveCount(0)
+      await expect(menu).toHaveClass(/\bcompact\b/)
       if (reveal === 'back') {
         await page.locator('.settingsBackButton').click()
       } else {
@@ -114,17 +121,17 @@ for (const reveal of ['back', 'resize']) {
 }
 
 for (const width of [480, 1500]) {
-  test.describe(`settings category descriptions at ${width}px`, { tag: '@scale' }, () => {
+  test.describe(`compact settings categories at ${width}px`, { tag: '@scale' }, () => {
     test.use({ seed: { settings: { currentLocale: 'en-US' } } })
 
-    test('preserves category navigation and valid scrollbars after hiding descriptions at the bottom', async ({ app, page }) => {
+    test('preserves category navigation and valid scrollbars after compacting categories at the bottom', async ({ app, page }) => {
       await setWindowSize(app, page, { width, height: 650 })
       // Slow the opening transition to exercise measurement during animation.
       await page.addStyleTag({ content: '.settingsWindow.settings-window-enter-active { transition-duration: 2s !important; }' })
       await goTo(page, 'settings')
       const menu = page.locator('.settingsMenu')
       await expect(menu).toBeVisible()
-      await expect(menu.locator('.titleDescription')).toHaveCount(11)
+      await expect(menu).not.toHaveClass(/\bcompact\b/)
       await expect(page.locator('.settingsWindow')).toHaveCSS('transform', 'none')
       const category = menu.locator('.titleItem').first()
       const expandedHeight = await category.evaluate(element => element.getBoundingClientRect().height)
@@ -135,9 +142,8 @@ for (const width of [480, 1500]) {
       // preference directly to exercise shortening the currently visible menu.
       await page.evaluate(() => window.$store
         .dispatch('updateHideSettingsCategoryDescriptions', true))
-      await expect(menu.locator('.titleDescription')).toHaveCount(0)
-      await expect(category).toHaveCSS('min-block-size', width === 480 ? '48px' : '36px')
-      expect(await category.evaluate(element => element.getBoundingClientRect().height)).toBeLessThan(expandedHeight - 10)
+      await expect(menu).toHaveClass(/\bcompact\b/)
+      expect(await category.evaluate(element => element.getBoundingClientRect().height)).toBeLessThan(expandedHeight - 3)
       await expectValidCategoryScrollbars(menu)
 
       await goToSettingsSection(page, 'appearance')
@@ -145,7 +151,7 @@ for (const width of [480, 1500]) {
       await page.locator('label.switch-label').filter({ hasText: LABEL }).click()
       if (width === 480) await page.locator('.settingsBackButton').click()
       await expect(menu).toBeVisible()
-      await expect(menu.locator('.titleDescription')).toHaveCount(11)
+      await expect(menu).not.toHaveClass(/\bcompact\b/)
       await expect.poll(() => category.evaluate(element => element.getBoundingClientRect().height)).toBeCloseTo(expandedHeight, 0)
     })
   })

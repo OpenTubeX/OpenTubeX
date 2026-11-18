@@ -27,9 +27,9 @@ function umpResponse(data, format, isInit, sequenceNumber = 1) {
     writer.write(UMPPartId.MEDIA_HEADER, MediaHeader.encode({
       headerId: 1,
       formatId: { itag: format.itag, lastModified: '0' },
-      isInitSeg: isInit,
-      sequenceNumber,
-      contentLength: data.length,
+      isInitializationSegment: isInit,
+      segmentNum: sequenceNumber,
+      segmentLengthBytes: data.length,
     }).finish())
     writer.write(UMPPartId.MEDIA, Uint8Array.from([1, ...data]))
     writer.write(UMPPartId.MEDIA_END, Uint8Array.of(1))
@@ -110,8 +110,8 @@ for (const { continuePlayback, seekBeforeBackoff, backoffWhileHidden = false, lo
         for await (const chunk of request) chunks.push(chunk)
         const body = VideoPlaybackAbrRequest.decode(Buffer.from(Buffer.concat(chunks).toString(), 'base64'))
         const fixture = fixtures[body.clientAbrState.enabledTrackTypesBitfield === 1 ? 0 : 1]
-        const media = { ...fixture, format: { ...fixture.format, itag: (body.clientAbrState.enabledTrackTypesBitfield === 1 ? body.preferredAudioFormatIds : body.preferredVideoFormatIds)[0].itag } }
-        const isInit = body.selectedFormatIds.length === 0
+        const media = { ...fixture, format: { ...fixture.format, itag: (body.clientAbrState.enabledTrackTypesBitfield === 1 ? body.selectedAudioFormatIds : body.selectedVideoFormatIds)[0].itag } }
+        const isInit = body.initializationFormatIds.length === 0
         requests.push({ isInit, itag: media.format.itag })
         let data
         if (isInit && !delayed.has(media.format.itag)) {

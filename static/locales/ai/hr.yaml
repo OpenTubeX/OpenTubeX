@@ -2493,7 +2493,7 @@ Tooltips:
     Visible Search Suggestions: "Određuje koliko unosa povijesti pretraživanja i prijedloga traka za pretraživanje prikazuje prije nego što se njezin popis počne pomicati. Popis se nikada ne proteže ispod donjeg ruba prozora."
     Thumbnail Size: "Mijenja veličinu sličica videozapisa u rešetkama i popisima. Rešetke s fiksnim brojem stupaca ili prikaz Puna širina umjesto toga popunjavaju svaki redak, pa tamo mijenja samo sličice popisa i Shorts. U prozorima veličine telefona sličice rešetke ograničene su na 100 %."
     Playlist Thumbnail Size: "Mijenja veličinu sličica videozapisa na stranicama popisa za reprodukciju. Rešetke s fiksnim brojem stupaca ili prikaz Puna širina umjesto toga popunjavaju svaki redak, pa tamo mijenja samo sličice popisa i Shorts. U prozorima veličine telefona sličice rešetke ograničene su na 100 %."
-    Compact Settings Categories: "Skriva opise i smanjuje visinu kategorija postavki."
+    Compact Settings Categories: "Smanjuje visinu kategorija postavki."
     Show Progress as Notification: Umjesto opće trake napretka prikazuje trajnu obavijest s trenutačnim napretkom pozadinskih postupaka, poput osvježavanja pretplata i preuzimanja alata kojima se upravlja.
     Always Show Scrollbars: Drži klizne trake uvijek vidljivima. Kada je isključeno, nestaju ubrzo nakon što prestanete pomicati miš i ponovno se pojavljuju čim ga pomaknete.
     Scroll Speed: Mijenja udaljenost pomicanja gestama kotačića miša i dodirne pločice.

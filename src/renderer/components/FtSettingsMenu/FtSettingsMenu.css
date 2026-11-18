@@ -21,7 +21,7 @@
 
 .titleItem {
   flex: 0 0 auto;
-  min-block-size: 58px;
+  min-block-size: 48px;
   display: flex;
 }
 
@@ -34,7 +34,7 @@
   box-sizing: border-box;
   display: flex;
   align-items: center;
-  padding-block: 10px;
+  padding-block: 6px;
   padding-inline: 12px 14px;
   border: 0;
   border-radius: var(--settings-tile-inner-radius);
@@ -66,7 +66,7 @@
 
 /* The selected and pressed tiles round off fully, setting them apart from
    their group. A tint at a fixed lightness, like other selected states, keeps
-   the title and description readable with every main color. */
+   the title readable with every main color. */
 .title.active,
 .title:active {
   border-radius: var(--settings-tile-outer-radius);
@@ -103,9 +103,8 @@
    same hue. Where light-dark() or relative colors are missing, the circle
    tints the text color instead. */
 .titleIcon {
-  grid-row: 1 / 3;
-  inline-size: 38px;
-  block-size: 38px;
+  inline-size: 36px;
+  block-size: 36px;
   display: grid;
   place-items: center;
   border-radius: 50%;
@@ -132,22 +131,11 @@
   block-size: 18px;
 }
 
-.titleText,
-.titleDescription {
+.titleText {
   overflow-wrap: anywhere;
   white-space: normal;
   line-height: 1.25;
-}
-
-.titleText {
   font-size: 1rem;
-}
-
-.titleDescription {
-  margin-block-start: 2px;
-  color: var(--secondary-text-color);
-  font-size: 11px;
-  font-weight: 400;
 }
 
 .emptyMessage {
@@ -175,7 +163,6 @@
 }
 
 .settingsMenu.compact .titleIcon {
-  grid-row: 1;
   inline-size: 32px;
   block-size: 32px;
 }
@@ -183,16 +170,16 @@
 @media (any-pointer: coarse), (width <= 680px) {
   .settingsMenu .titleItem,
   .settingsMenu.mobileSettingsMenu .titleItem {
-    min-block-size: 64px;
+    min-block-size: 56px;
   }
 
   .title {
-    padding-block: 12px;
+    padding-block: 8px;
   }
 
   .titleIcon {
-    inline-size: 42px;
-    block-size: 42px;
+    inline-size: 40px;
+    block-size: 40px;
   }
 
   .titleIcon > svg {
@@ -211,22 +198,5 @@
 
   .settingsMenu.compact .title {
     padding-block: 8px;
-  }
-
-  .titleDescription {
-    font-size: 13px;
-    margin-block-start: 4px;
-  }
-}
-
-/* Selected and hovered descriptions share the title's color, which is readable
-   on the tint and on the hover color of every theme. */
-.title:is(.active, :hover, :focus-visible) .titleDescription {
-  color: inherit;
-}
-
-@media (any-pointer: coarse), (width <= 680px) {
-  .title:active .titleDescription {
-    color: inherit;
   }
 }

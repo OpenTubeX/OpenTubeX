@@ -24,12 +24,6 @@ h2 {
   margin-block: 18px 0;
 }
 
-/* Without an outline label above the field, less space keeps the filter
-   centered between the actions and the selection count. */
-.card :deep(.select.rounded) {
-  margin-block-start: 10px;
-}
-
 /* Flex items don't collapse their margins. */
 .selected + .noResults {
   margin-block-start: 0;
