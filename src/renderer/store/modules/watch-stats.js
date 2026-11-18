@@ -13,6 +13,11 @@ const state = {
 }
 
 const getters = {
+  // The synced reset belongs to the shared statistics, not a separate profile's.
+  getActiveWatchStatsReset(_state, _getters, _rootState, rootGetters) {
+    return rootGetters.getActiveDataScope === null ? rootGetters.getSyncServerWatchStatsReset : null
+  },
+
   getWatchSecondsByDate(state) {
     return state.watchSecondsByDate
   },

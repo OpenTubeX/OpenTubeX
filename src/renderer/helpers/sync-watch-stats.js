@@ -123,7 +123,7 @@ export function limitWatchSecondsByDate(getters, devices) {
   const localDays = getters.getWatchSecondsByDate
   if (!syncedWatchStatsAvailable(getters)) return localDays
   return watchSecondsForDevice(localDays, getters.getSyncedWatchStats, getters.getSyncServerDeviceId,
-    devices, getters.getSyncServerWatchStatsReset)
+    devices, getters.getActiveWatchStatsReset)
 }
 
 export function mergeWatchStats(remote, localRecords, deviceId, deviceName, platform, reset = null) {

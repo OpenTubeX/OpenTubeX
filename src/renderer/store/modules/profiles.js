@@ -382,8 +382,9 @@ const actions = {
       const separate = getters.profileById(profileId)?.separate === true
       await DBProfileHandlers.delete(profileId)
       commit('removeProfileFromList', profileId)
-      // The datastores delete the rest of its data.
-      if (separate) await forgetWatchQueueScope(profileId)
+      // The datastores delete the rest of its data. The profile is gone even
+      // if its queue can't be deleted.
+      if (separate) await forgetWatchQueueScope(profileId).catch(error => console.error(error))
       return true
     } catch (errMessage) {
       console.error(errMessage)
