@@ -537,9 +537,7 @@ test.describe('profile manager presentation', () => {
         const before = document.querySelector('.selectionActions').getBoundingClientRect()
         const label = element.querySelector('.select-label').getBoundingClientRect()
         const count = element.parentElement.nextElementSibling.getBoundingClientRect()
-        // A rounded field's label sits inside it, an outlined one on its edge.
-        const top = element.classList.contains('rounded') ? element.querySelector('.select-text').getBoundingClientRect().top : label.top
-        const above = top - before.bottom
+        const above = label.top - before.bottom
         const below = count.top - element.getBoundingClientRect().bottom
         return Math.abs(above - below)
       }), { timeout: 2000, message: `profile filter has balanced spacing at ${width}px` }).toBeLessThanOrEqual(1.05)
