@@ -24,6 +24,13 @@ test('the highest legacy format below the preferred quality is used', () => {
   assert.equal(findLegacyFormatForQuality(LANDSCAPE_FORMATS, 200).height, 144)
 })
 
+test('the first of equal legacy formats is used', () => {
+  // Invidious lists a WebM and an MP4 360p format with the same bitrate
+  const formats = [{ width: 640, height: 360, bitrate: 200_000, itag: 43 }, { width: 640, height: 360, bitrate: 200_000, itag: 18 }]
+
+  assert.equal(findLegacyFormatForQuality(formats, 1080).itag, 43)
+})
+
 test('the lowest legacy format is used when they are all above the preferred quality', () => {
   const format = findLegacyFormatForQuality(LANDSCAPE_FORMATS, 100)
 
