@@ -1,53 +1,5 @@
 # Optional AI-generated translations for keys missing from ../pt-PT.yaml.
-Color Picker:
-  Hue: Matiz
-  Opacity: Opacidade
-  Backdrop Blur: Desfocagem do fundo
-  Hex Color: Cor hexadecimal
-  Apply Color: Aplicar
-  Reset Color: Repor
-  Copy Color: Copiar
-  Copy From Another Color: Copiar de outra cor
-  Color Copied: Cor copiada
-  Invalid Color: Introduza uma cor hexadecimal válida
-  Clipboard Unavailable: Área de transferência indisponível
-  Saturation and Brightness: Saturação e luminosidade
-New Tab: Novo separador
-Maximize: Maximizar
-Restore: Restaurar
-Close Tab: Fechar separador
-App Menu:
-  About App: Acerca do {appName}
-  Services: Serviços
-  Hide App: Ocultar {appName}
-  Hide Others: Ocultar outros
-  Show All: Mostrar tudo
-  Quit App: Sair do {appName}
-  Reopen Closed Window: Reabrir janela fechada
-  Paste and Match Style: Colar e ajustar estilo
-  View: Ver
-  Enter Inspect Element Mode: Entrar no modo de inspeção de elementos
-  GPU Internals: Informações internas da GPU (chrome://gpu)
-  Navigate: Navegar
-  Next Tab: Separador seguinte
-  Previous Tab: Separador anterior
-  Help: Ajuda
-Close Confirmation:
-  Background Sync Warning: Sair irá interromper a atualização de subscrições em segundo plano.
-  Hide Window: Ocultar janela
-  Title: Sair do OpenTubeX?
-  Message: Tem a certeza de que pretende sair do OpenTubeX?
-  Quit: Sair
-  Never Ask Again: Não voltar a perguntar
-Close Window Confirmation:
-  Title: Fechar a janela?
-  Message: Esta janela contém {count} separador. Tem a certeza de que pretende fechá-la? | Esta janela contém {count} separadores. Tem a certeza de que pretende fechá-la?
-  Close Window: Fechar janela
-Confirmations:
-  Never Ask Again: Não voltar a perguntar
-  Settings Hint: Pode reativar esta confirmação em Definições → Geral → Confirmar antes de…
 Close Multiple Tabs Confirmation:
-  Title: Fechar vários separadores?
   Message: Esta ação fechará {count} separador. | Esta ação fechará {count} separadores.
   Close Tabs: Fechar {count} separador | Fechar {count} separadores
 Load Multiple Tabs Confirmation:
@@ -2773,8 +2725,6 @@ Search Filters:
   Showing results for: "A mostrar resultados para {query}"
   Search instead for: "Em alternativa, pesquisar {query}"
   Including results for: "Inclui resultados para {query}"
-  Search only for: "Pesquisar apenas {query}"
-  Did you mean: "Quis dizer {query}?"
 
 Storage Startup Error:
   Title: "Não foi possível carregar os dados da aplicação"
@@ -2801,14 +2751,6 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Criar um atalho no ambiente de trabalho
-Older Version Changes:
-  Title: "Alterações de uma versão anterior"
-  Message: "As alterações que fez numa versão anterior do OpenTubeX foram aplicadas à sua biblioteca."
-  Detail: "Se um item foi alterado nas duas versões, foi mantida a alteração da versão anterior. Existe uma cópia de segurança da sua biblioteca anterior na pasta do perfil."
-Library Format Changed:
-  Title: "Biblioteca transferida para um novo formato"
-  Message: "A sua biblioteca usa agora um novo formato de armazenamento."
-  Detail: "As versões anteriores do OpenTubeX ainda podem abrir a sua biblioteca, mas mostram-na como estava antes desta atualização. As alterações que fizer numa versão anterior são adicionadas quando voltar a esta versão."
 Invidious Fallback Warning: "Este pedido ignora a instância Invidious configurada e liga-se diretamente ao YouTube, expondo o teu endereço IP."
 Automatically unloaded to free memory: "Descarregado automaticamente para libertar memória"
 Home Widgets:
