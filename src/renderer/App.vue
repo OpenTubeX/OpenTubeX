@@ -1783,6 +1783,13 @@ let removeInternetConnectivitySettingsListener = null
 let removeIosContextMenu = null
 let removeShimmerVisibility = null
 
+// Profile switches load the data of the profile switched to, once startup
+// applied the default profile's.
+let dataScopeApplied = false
+watch(() => store.getters.getActiveDataScope, () => {
+  if (dataScopeApplied) store.dispatch('loadDataScope')
+})
+
 onMounted(async () => {
   removeShimmerVisibility = initializeShimmerVisibility()
   let tabsReady = Promise.resolve()
@@ -1850,9 +1857,7 @@ onMounted(async () => {
     // Watch stats load with the settings, before the profiles.
     if (store.getters.getEnableWatchStats) store.dispatch('grabWatchStats')
   })
-  dataScopeReady.then(() => {
-    watch(() => store.getters.getActiveDataScope, () => store.dispatch('loadDataScope'))
-  })
+  dataScopeReady.then(() => { dataScopeApplied = true })
   // The library needs only settings (history retention) and profiles
   // (subscriptions). Load it during the remaining startup work instead of after.
   const libraryReady = Promise.all([
