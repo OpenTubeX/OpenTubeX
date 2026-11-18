@@ -1363,7 +1363,6 @@ Settings:
     Show Video Title: Zobraziť názov videa
     Show Bottom Right Actions Dock: Zobraziť panel akcií vpravo dole
     Paused Interface Hide Delay: Oneskorenie skrytia rozhrania pri pozastavení
-    Hide Channel Shows: Skryť kartu kanálov "Relácie"
     Blur Blocked Items: Rozmazať blokované položky namiesto ich skrytia
   Data Settings:
     Subscription cache file: "Tento súbor obsahuje iba vyrovnávaciu pamäť videí z vašich odberov, nie samotné kanály. Namiesto neho vyberte profiles.db alebo export odberov."
@@ -1423,7 +1422,6 @@ Settings:
     Invalid channel playback speeds file: "V tomto súbore sa nenašli žiadne rýchlosti prehrávania kanálov"
     Channel playback speeds imported: "Importovala sa rýchlosť prehrávania {count} kanála | Importovali sa rýchlosti prehrávania {count} kanálov | Importovali sa rýchlosti prehrávania {count} kanálov"
     Channels not found: "{count} kanál sa nepodarilo nájsť | {count} kanály sa nepodarilo nájsť | {count} kanálov sa nepodarilo nájsť"
-    Playlists have been successfully imported: "Úspešne importovaný 1/{total} playlist | Úspešne importované {count}/{total} playlisty | Úspešne importovaných {count}/{total} playlistov"
     Import subscription groups hint: Ak chcete kanály roztriediť do skupín, pridajte v súbore .csv za názov kanála stĺpec s názvami skupín oddelenými bodkočiarkami alebo importujte súbor .opml s priečinkami. Chýbajúce skupiny sa vytvoria.
   Sync Settings:
     Signed Out After Restore: 'Synchronizácia bola odhlásená, pretože tieto údaje aplikácie boli obnovené zo zálohy alebo z iného zariadenia. Prihláste sa znova, aby ste toto zariadenie synchronizovali.'
@@ -1623,7 +1621,6 @@ Settings:
     Incorrect Password: Nesprávne heslo
     Unlock: Odomknúť
     Unlocking: Odomyká sa…
-  Search Settings: Hľadať v nastaveniach
   No Settings Found: Nenašli sa žiadne nastavenia
   Interface Customizer:
     Customize Interface: "Prispôsobiť rozhranie"
@@ -1721,8 +1718,6 @@ Channel:
   More videos per day: "Viac videí za deň"
   Verified: Overené
   Official Artist Channel: Oficiálny kanál interpreta
-  About:
-    Links: Odkazy
   Subscription settings: Nastavenia odberu
   Failed to save subscription settings: Nastavenia kanála sa nepodarilo uložiť
   Videos per day: Videá za deň
@@ -1743,9 +1738,6 @@ Channel:
     Original post unavailable: "Pôvodný príspevok nie je k dispozícii"
     Members-only video hidden by OpenTubeX: "OpenTubeX skryl video iba pre členov"
     Video hidden by OpenTubeX because of its title: "OpenTubeX skryl video, pretože jeho názov obsahuje skrytý text"
-  Shows:
-    Shows: Relácie
-    This channel does not currently have any shows: Tento kanál momentálne nemá žiadne relácie
 Video:
   Play in Background: "Prehrať na pozadí"
   Info panel source: 'Zdroj: {source}'
