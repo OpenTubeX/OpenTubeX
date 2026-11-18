@@ -1402,6 +1402,7 @@ Settings:
     Profiles and subscriptions: "Profiilid ja tellimused"
     Backup exported: "Varunduse eksportimine õnnestus"
     Backup imported: "Varunduse importimine õnnestus"
+    YouTube Google Takeout: "YouTube/Google Takeout"
     Import YouTube Takeout ZIP: "Impordi YouTube Takeouti ZIP"
     Select Takeout data: "Vali imporditavad andmed"
     Import selected data: "Impordi valitud andmed"

@@ -353,6 +353,33 @@ the link underline setting instead, which underlines them on hover by default. *
   --settings-window-bg-color: var(--card-bg-color);
   --settings-section-bg-color: color-mix(in srgb, var(--primary-text-color) 6%, var(--card-bg-color));
 
+  /* Fullscreen docks keep the theme's colors; light themes fall back to a
+     dark glass, see chapters.css. */
+  --fullscreen-dock-card-bg-image: var(--card-bg-image);
+  --fullscreen-dock-primary-text-color: var(--primary-text-color);
+  --fullscreen-dock-secondary-text-color: var(--secondary-text-color);
+  --fullscreen-dock-tertiary-text-color: var(--tertiary-text-color);
+  --fullscreen-dock-title-color: var(--title-color);
+  --fullscreen-dock-bg-color: var(--bg-color);
+  --fullscreen-dock-card-bg-color: var(--card-bg-color);
+  --fullscreen-dock-secondary-card-bg-color: var(--secondary-card-bg-color);
+  --fullscreen-dock-scrollbar-color: var(--scrollbar-color);
+  --fullscreen-dock-scrollbar-color-hover: var(--scrollbar-color-hover);
+  --fullscreen-dock-side-nav-color: var(--side-nav-color);
+  --fullscreen-dock-side-nav-hover-color: var(--side-nav-hover-color);
+  --fullscreen-dock-side-nav-hover-text-color: var(--side-nav-hover-text-color);
+  --fullscreen-dock-side-nav-active-color: var(--side-nav-active-color);
+  --fullscreen-dock-side-nav-active-text-color: var(--side-nav-active-text-color);
+  --fullscreen-dock-card-bg-blur: var(--card-bg-blur);
+  --fullscreen-dock-border-color: var(--border-color);
+  --fullscreen-dock-divider-color: var(--divider-color);
+  --fullscreen-dock-subtle-surface-color: var(--subtle-surface-color);
+  --fullscreen-dock-watched-thumbnail-overlay-color: var(--watched-thumbnail-overlay-color);
+  --fullscreen-dock-thumbnail-badge-bg-color: var(--thumbnail-badge-bg-color);
+  --fullscreen-dock-thumbnail-badge-blur: var(--thumbnail-badge-blur);
+  --fullscreen-dock-dropdown-item-hover-color: var(--dropdown-item-hover-color);
+  --fullscreen-dock-dropdown-item-hover-text-color: var(--dropdown-item-hover-text-color);
+
   .invidiousLogo {
     background-image: url('./assets/img/invidious-logo-dark.svg');
   }

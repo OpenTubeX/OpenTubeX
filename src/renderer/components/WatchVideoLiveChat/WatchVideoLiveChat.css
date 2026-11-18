@@ -121,7 +121,6 @@
   gap: 10px;
   font-size: 18px;
   font-weight: bold;
-  color: #fff;
 }
 
 .liveChatDockTitleIcon {
@@ -129,7 +128,6 @@
   flex: 0 0 18px;
   inline-size: 18px;
   block-size: 18px;
-  color: #fff;
 }
 
 .liveChatDockActions {
@@ -146,7 +144,7 @@
   inline-size: 36px;
   block-size: 36px;
   padding: 0;
-  color: #fff;
+  color: inherit;
   background: transparent;
   border: 0;
   border-radius: 50%;

@@ -14,11 +14,6 @@
   min-block-size: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-
-  /* Light handle for the chapter overlay above the video. Watch.scss puts the
-     theme's colour back for the regular sidebar. */
-  --scrollbar-color: rgb(255 255 255 / 45%);
-  --scrollbar-color-hover: rgb(255 255 255 / 65%);
 }
 
 .chaptersContent {
@@ -63,7 +58,7 @@
   padding-inline: 14px 8px;
   border: 0;
   background: transparent;
-  color: #fff;
+  color: inherit;
   cursor: pointer;
   font: inherit;
   text-align: start;
@@ -125,7 +120,7 @@
   border: 0;
   border-radius: var(--shape-corner-full);
   background: transparent;
-  color: #fff;
+  color: inherit;
   cursor: pointer;
   font-size: 20px;
   opacity: 0.9;

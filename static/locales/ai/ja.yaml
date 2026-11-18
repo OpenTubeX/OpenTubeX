@@ -1402,6 +1402,7 @@ Settings:
     Profiles and subscriptions: "プロフィールとサブスクリプション"
     Backup exported: "バックアップが正常にエクスポートされました"
     Backup imported: "バックアップが正常にインポートされました"
+    YouTube Google Takeout: "YouTube/Google Takeout"
     Import YouTube Takeout ZIP: "YouTube Takeout の ZIP をインポート"
     Select Takeout data: "インポートするデータを選択"
     Import selected data: "選択したデータをインポート"
