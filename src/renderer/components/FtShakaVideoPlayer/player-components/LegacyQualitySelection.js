@@ -1,6 +1,7 @@
 import shaka from 'shaka-player'
 
 import { PlayerIcons } from '../../../../constants'
+import { getLegacyFormatResolution } from '../../../helpers/player/legacyFormats'
 
 export class LegacyQualitySelection extends shaka.ui.SettingsMenu {
   /**
@@ -33,11 +34,8 @@ export class LegacyQualitySelection extends shaka.ui.SettingsMenu {
      */
     this.getActiveLegacyFormat_ = getActiveLegacyFormat
 
-    const sortedLegacyFormats = [...legacyFormats]
-
-    const firstFormat = legacyFormats[0]
-    const isPortrait = firstFormat ? firstFormat.height > firstFormat.width : false
-    sortedLegacyFormats.sort((a, b) => isPortrait ? b.width - a.width : b.height - a.height)
+    const resolutionOf = getLegacyFormatResolution(legacyFormats)
+    const sortedLegacyFormats = legacyFormats.toSorted((a, b) => (resolutionOf(b) ?? 0) - (resolutionOf(a) ?? 0))
 
     /** @private */
     this.legacyFormats_ = sortedLegacyFormats

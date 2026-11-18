@@ -1,6 +1,21 @@
 /**
- * @typedef {{ width: number, height: number, bitrate: number }} LegacyFormat
+ * @typedef {{ width: number | null, height: number | null, bitrate: number | null }} LegacyFormat
  */
+
+/**
+ * Returns a function that reads the quality of a legacy format: the width of
+ * portrait videos and the height of everything else. Some extractors, such as
+ * yt-dlp's Twitch clips, only report a height, so a missing width never makes
+ * a video portrait.
+ * @param {LegacyFormat[]} legacyFormats
+ * @returns {(format: LegacyFormat) => number | null} null when the format has no dimensions
+ */
+export function getLegacyFormatResolution(legacyFormats) {
+  const first = legacyFormats[0]
+  const isPortrait = first?.width != null && first.height != null && first.height > first.width
+
+  return (format) => (isPortrait ? format.width ?? format.height : format.height ?? format.width) ?? null
+}
 
 /**
  * Picks the legacy format that matches the preferred quality the closest.
@@ -12,24 +27,29 @@
  * @returns {LegacyFormat}
  */
 export function findLegacyFormatForQuality(legacyFormats, preferredQuality) {
-  const isPortrait = legacyFormats[0].height > legacyFormats[0].width
-
+  const readResolution = getLegacyFormatResolution(legacyFormats)
   /** @param {LegacyFormat} format */
-  const resolutionOf = (format) => isPortrait ? format.width : format.height
+  const resolutionOf = (format) => readResolution(format) ?? 0
+  // A format without dimensions only counts when no format has them
+  const knownFormats = legacyFormats.filter(format => readResolution(format) !== null)
+  const candidates = knownFormats.length > 0 ? knownFormats : legacyFormats
 
-  const exactMatches = legacyFormats.filter(format => resolutionOf(format) === preferredQuality)
+  /** @type {(a: LegacyFormat, b: LegacyFormat) => number} */
+  const ascending = (a, b) => resolutionOf(a) - resolutionOf(b) || (a.bitrate ?? 0) - (b.bitrate ?? 0)
+
+  const exactMatches = candidates.filter(format => resolutionOf(format) === preferredQuality)
 
   if (exactMatches.length > 0) {
     return exactMatches[0]
   }
 
-  const lowerQualityMatches = legacyFormats.filter(format => resolutionOf(format) < preferredQuality)
+  const lowerQualityMatches = candidates.filter(format => resolutionOf(format) < preferredQuality)
 
   if (lowerQualityMatches.length > 0) {
     // highest quality below the preferred one
-    return lowerQualityMatches.sort((a, b) => b.bitrate - a.bitrate)[0]
+    return lowerQualityMatches.toSorted(ascending).at(-1)
   }
 
   // everything is above the preferred quality, so use the lowest quality one
-  return legacyFormats.toSorted((a, b) => a.bitrate - b.bitrate)[0]
+  return candidates.toSorted(ascending)[0]
 }
