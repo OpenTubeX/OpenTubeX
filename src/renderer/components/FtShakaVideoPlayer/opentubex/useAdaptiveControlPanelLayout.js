@@ -33,6 +33,14 @@ export function useAdaptiveControlPanelLayout({
   /** @type {number|null} */
   let controlPanelLayoutFrame = null
 
+  // Whether the scheduled layout must measure again, rather than only check
+  // that the panel's new size still fits the current compact modes.
+  let controlPanelMeasurementPending = false
+
+  // The panel's width at the last measurement, where every less compact
+  // layout overflowed.
+  let measuredControlPanelWidth = 0
+
   const controlPanelCompactClasses = [
     'ft-controls-hide-highlight-label',
     'ft-controls-compact-chapters',
@@ -81,13 +89,50 @@ export function useAdaptiveControlPanelLayout({
   }
 
   /**
-   * Apply space-saving modes in priority order, only when the next mode is needed.
+   * Whether a resized panel keeps its compact modes: they still fit, and none
+   * can be dropped, either because none is applied or because the panel is no
+   * wider than when the less compact layouts last overflowed. Dragging the
+   * fullscreen dock's edge resizes the panel every frame, and measuring a copy
+   * each time restyles the whole control bar.
    * @param {HTMLElement} controlPanel
    */
-  function updateControlPanelLayout(controlPanel) {
+  function controlPanelLayoutStillFits(controlPanel) {
+    const compact = controlPanelCompactClasses.some(compactClass => controlPanel.classList.contains(compactClass))
+    return (!compact || controlPanel.clientWidth <= measuredControlPanelWidth) &&
+      !controlPanelOverflows(controlPanel)
+  }
+
+  /**
+   * Apply space-saving modes in priority order, only when the next mode is needed.
+   * @param {HTMLElement} controlPanel
+   * @param {boolean} [measure] whether to measure even if the current modes still fit
+   */
+  function updateControlPanelLayout(controlPanel, measure = true) {
     if (!controlPanel.isConnected) {
       return
     }
+
+    if (measure || !controlPanelLayoutStillFits(controlPanel)) {
+      measureControlPanelLayout(controlPanel)
+    }
+
+    const quickRateBar = controlPanel.querySelector('.ft-quick-playback-rate-bar')
+    if (quickRateBar) {
+      clampOverlayScrollLeft(quickRateBar)
+    }
+
+    // Pill ends must follow the visible controls, including buttons hidden
+    // by the adaptive layout rather than by Shaka's own visibility class.
+    for (const button of controlPanel.querySelectorAll(':scope > .shaka-spacer ~ button')) {
+      button.toggleAttribute('data-ft-control-hidden', window.getComputedStyle(button).display === 'none')
+    }
+
+    updateRightControlGlass(controlPanel)
+  }
+
+  /** @param {HTMLElement} controlPanel */
+  function measureControlPanelLayout(controlPanel) {
+    measuredControlPanelWidth = controlPanel.clientWidth
 
     // Measure a hidden copy so intermediate compact states do not interrupt
     // chapter transitions or change the preset strip's scroll position.
@@ -120,19 +165,6 @@ export function useAdaptiveControlPanelLayout({
       controlPanel.classList.toggle(compactClass, measurementPanel.classList.contains(compactClass))
     }
     measurementPanel.remove()
-
-    const quickRateBar = controlPanel.querySelector('.ft-quick-playback-rate-bar')
-    if (quickRateBar) {
-      clampOverlayScrollLeft(quickRateBar)
-    }
-
-    // Pill ends must follow the visible controls, including buttons hidden
-    // by the adaptive layout rather than by Shaka's own visibility class.
-    for (const button of controlPanel.querySelectorAll(':scope > .shaka-spacer ~ button')) {
-      button.toggleAttribute('data-ft-control-hidden', window.getComputedStyle(button).display === 'none')
-    }
-
-    updateRightControlGlass(controlPanel)
   }
 
   /** @param {HTMLElement} controlPanel */
@@ -154,13 +186,20 @@ export function useAdaptiveControlPanelLayout({
     }
   }
 
-  /** @param {HTMLElement} controlPanel */
-  function scheduleControlPanelLayout(controlPanel) {
+  /**
+   * @param {HTMLElement} controlPanel
+   * @param {boolean} [panelResized] whether only the panel's own size changed
+   */
+  function scheduleControlPanelLayout(controlPanel, panelResized = false) {
     // Background tabs remain mounted but are hidden with display:none. Do not
     // let their zero-size control bars enter a resize/mutation feedback loop.
     // The active-tab watcher schedules a fresh measurement when presented.
     if (!isActiveTab.value || scrollMiniPlayerActive.value || scrollMiniPlayerAnimating.value || scrollMiniPlayerDragStyle.value) {
       return
+    }
+
+    if (!panelResized) {
+      controlPanelMeasurementPending = true
     }
 
     if (controlPanelLayoutFrame !== null) {
@@ -170,7 +209,9 @@ export function useAdaptiveControlPanelLayout({
     controlPanelLayoutFrame = requestAnimationFrame(() => {
       controlPanelLayoutFrame = null
       if (!scrollMiniPlayerActive.value && !scrollMiniPlayerAnimating.value && !scrollMiniPlayerDragStyle.value) {
-        updateControlPanelLayout(controlPanel)
+        const measure = controlPanelMeasurementPending
+        controlPanelMeasurementPending = false
+        updateControlPanelLayout(controlPanel, measure)
       }
     })
   }
@@ -267,8 +308,10 @@ export function useAdaptiveControlPanelLayout({
 
     const timeDisplayGroup = controlPanel.querySelector('.ft-time-display-group')
     controlPanelResizeObserver = new ResizeObserver(entries => {
-      if (entries.some(entry => entry.target === controlPanel || entry.target === timeDisplayGroup)) {
+      if (entries.some(entry => entry.target === timeDisplayGroup)) {
         scheduleControlPanelLayout(controlPanel)
+      } else if (entries.some(entry => entry.target === controlPanel)) {
+        scheduleControlPanelLayout(controlPanel, true)
       }
       // Button visibility and volume/preset sizes can move the right controls
       // without resizing the panel. Keep their glass aligned with the buttons.
