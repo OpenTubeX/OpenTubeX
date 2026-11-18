@@ -456,7 +456,7 @@ const menuItems = computed(() => {
       run: () => openElsewhere({ newWindow: true })
     })
   }
-  if (store.getters.getTabsEnabled) {
+  if (store.getters.getIncognitoTabsEnabled) {
     items.push({
       label: t('Context Menu.Open in an Incognito Tab'),
       icon: ['fas', 'user-secret'],

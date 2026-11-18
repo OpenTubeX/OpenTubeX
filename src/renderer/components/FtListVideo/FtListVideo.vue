@@ -1181,7 +1181,7 @@ const videoMenuOptions = computed(() => {
           icon: ['fas', 'external-link-alt']
         }]
       : []),
-    ...(store.getters.getTabsEnabled
+    ...(store.getters.getIncognitoTabsEnabled
       ? [{
           label: t('Context Menu.Open in an Incognito Tab'),
           value: 'openIncognitoTab',

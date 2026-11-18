@@ -34,6 +34,8 @@ const state = {
 
 const getters = {
   getTabsEnabled: (_state, getters) => !process.env.IS_CAPACITOR || getters.getEnableMobileTabs !== false,
+  // The web build opens links in browser tabs, which cannot keep the history out
+  getIncognitoTabsEnabled: (_state, getters) => (process.env.IS_ELECTRON || process.env.IS_CAPACITOR) && getters.getTabsEnabled,
   getTabLightsOff: (state) => (tabId) => state.lightsOffByTabId[tabId] ?? false,
   getTabMusicMode: (state) => (tabId) => state.musicModeByTabId[tabId] ?? false,
   getTabs: (state) => state.tabs,

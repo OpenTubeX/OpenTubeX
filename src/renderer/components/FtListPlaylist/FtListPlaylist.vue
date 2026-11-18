@@ -215,7 +215,7 @@ const playlistMenuItems = computed(() => {
       run: () => openInternalPath({ ...playlistPageLinkTo.value, title: titleForDisplay.value, doCreateNewWindow: true, makeActive: true })
     })
   }
-  if (store.getters.getTabsEnabled) {
+  if (store.getters.getIncognitoTabsEnabled) {
     items.push({
       label: t('Context Menu.Open in an Incognito Tab'),
       icon: ['fas', 'user-secret'],
