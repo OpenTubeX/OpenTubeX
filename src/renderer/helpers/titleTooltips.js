@@ -249,6 +249,10 @@ function hide() {
  * the space above flip below instead.
  */
 function position() {
+  // A fixed box shrinks to the space right of its left edge, so text measured
+  // at the previous tooltip's spot near the right edge would wrap
+  tooltip.style.left = '0px'
+  tooltip.style.top = '0px'
   const rect = getAnchorRect()
   const width = tooltip.offsetWidth
   const height = tooltip.offsetHeight
