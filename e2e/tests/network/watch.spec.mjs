@@ -1410,6 +1410,10 @@ test.describe('watch page', () => {
   })
 })
 
+// YouTube's bot check sends the live Shorts page through the WEB streams and
+// BotGuard, which can take over 30 seconds on CI, as in openVideoOrSkip.
+const SHORT_PAGE_TIMEOUT = 60_000
+
 test.describe('custom Shorts player', () => {
   const SHORTS_CHANNEL = 'UCshortsfeed000000000000'
   const FIRST_SHORT_THUMBNAIL = 'https://i.ytimg.com/vi/w1WKmSqwM8I/frame0.jpg?selected=1'
@@ -1476,7 +1480,7 @@ test.describe('custom Shorts player', () => {
 
     const firstPlayer = page.locator('.ftVideoPlayer.shortsPlayer')
     const errorMessage = page.locator('.errorMessage')
-    await expect(firstPlayer.or(errorMessage)).toBeVisible({ timeout: 30_000 })
+    await expect(firstPlayer.or(errorMessage)).toBeVisible({ timeout: SHORT_PAGE_TIMEOUT })
     if (await errorMessage.isVisible()) {
       test.skip(true, `First Short unavailable: ${await errorMessage.textContent()}`)
     }
@@ -1494,7 +1498,7 @@ test.describe('custom Shorts player', () => {
 
     await page.locator('.shortsNavigationButton').last().click()
     await expect(page).toHaveURL(/#\/watch\/xSuIqigPUfg/)
-    await expect(firstPlayer.or(errorMessage)).toBeVisible({ timeout: 30_000 })
+    await expect(firstPlayer.or(errorMessage)).toBeVisible({ timeout: SHORT_PAGE_TIMEOUT })
     if (await errorMessage.isVisible()) {
       test.skip(true, `Second Short unavailable: ${await errorMessage.textContent()}`)
     }
@@ -1532,7 +1536,7 @@ test.describe('custom Shorts player', () => {
 
     const player = page.locator('.ftVideoPlayer.shortsPlayer')
     const errorMessage = page.locator('.errorMessage')
-    await expect(player.or(errorMessage)).toBeVisible({ timeout: 30_000 })
+    await expect(player.or(errorMessage)).toBeVisible({ timeout: SHORT_PAGE_TIMEOUT })
     if (await errorMessage.isVisible()) {
       test.skip(true, `Shorts watch page unavailable from the live API: ${await errorMessage.textContent()}`)
     }
@@ -1553,7 +1557,7 @@ test.describe('custom Shorts player', () => {
 
     const player = page.locator('.ftVideoPlayer.shortsPlayer')
     const errorMessage = page.locator('.errorMessage')
-    await expect(player.or(errorMessage)).toBeVisible({ timeout: 30_000 })
+    await expect(player.or(errorMessage)).toBeVisible({ timeout: SHORT_PAGE_TIMEOUT })
     if (await errorMessage.isVisible()) {
       test.skip(true, `Shorts watch page unavailable from the live API: ${await errorMessage.textContent()}`)
     }
@@ -1727,7 +1731,7 @@ test.describe('custom Shorts player', () => {
 
     const player = page.locator('.ftVideoPlayer.shortsPlayer')
     const errorMessage = page.locator('.errorMessage')
-    await expect(player.or(errorMessage)).toBeVisible({ timeout: 30_000 })
+    await expect(player.or(errorMessage)).toBeVisible({ timeout: SHORT_PAGE_TIMEOUT })
 
     if (await errorMessage.isVisible()) {
       test.skip(true, `Shorts watch page unavailable from the live API: ${await errorMessage.textContent()}`)
@@ -1905,7 +1909,7 @@ test.describe('custom Shorts player', () => {
 
     const player = page.locator('.ftVideoPlayer.shortsPlayer')
     const errorMessage = page.locator('.errorMessage')
-    await expect(player.or(errorMessage)).toBeVisible({ timeout: 30_000 })
+    await expect(player.or(errorMessage)).toBeVisible({ timeout: SHORT_PAGE_TIMEOUT })
 
     if (await errorMessage.isVisible()) {
       test.skip(true, `Shorts watch page unavailable from the live API: ${await errorMessage.textContent()}`)
