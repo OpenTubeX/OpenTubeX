@@ -174,10 +174,38 @@
   }
 }
 
-.switch-label-main > .selectTooltip {
-  flex-shrink: 0;
+/* One box, so the last word and the icons after it never split across lines. */
+.switch-label-end {
+  display: inline-flex;
+  align-items: center;
+  max-inline-size: 100%;
+
+  > .switch-label-name {
+    min-inline-size: 0;
+  }
+}
+
+/* One line tall, so the icons don't make a label's line taller than the
+   lines of labels without them. */
+.switch-label-icons {
+  display: inline-flex;
+  align-items: center;
+  block-size: 1lh;
+  vertical-align: top;
+
+  &:empty {
+    display: none;
+  }
+}
+
+.switch-label-icons > .selectTooltip {
   margin-inline-start: 5px;
-  vertical-align: middle;
+}
+
+/* A label without spaces can wrap inside the last box, so the icons follow
+   its last line. */
+.switch-label-end > .switch-label-icons {
+  align-self: flex-end;
 }
 
 .disabled {
@@ -185,7 +213,7 @@
     cursor: not-allowed;
   }
 
-  .switch-label-text {
+  .switch-label-name {
     color: color-mix(in srgb, currentcolor 40%, transparent);
   }
 

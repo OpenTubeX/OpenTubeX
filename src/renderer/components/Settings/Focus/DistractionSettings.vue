@@ -109,21 +109,27 @@
         />
       </div>
     </div>
-    <FtFlexBox>
-      <FtToggleSwitch
-        :label="t('Settings.Distraction Free Settings.Enable Block Lists')"
-        :default-value="enableBlockLists"
-        setting-key="enableBlockLists"
-        @change="updateEnableBlockLists"
-      />
-      <FtToggleSwitch
-        :label="t('Settings.Distraction Free Settings.Blur Blocked Items')"
-        :disabled="!enableBlockLists"
-        :default-value="blurBlockedItems"
-        setting-key="blurBlockedItems"
-        @change="store.dispatch('updateBlurBlockedItems', $event)"
-      />
-    </FtFlexBox>
+    <div class="switchColumnGrid">
+      <div class="switchColumn">
+        <FtToggleSwitch
+          :label="t('Settings.Distraction Free Settings.Enable Block Lists')"
+          :default-value="enableBlockLists"
+          setting-key="enableBlockLists"
+          compact
+          @change="updateEnableBlockLists"
+        />
+      </div>
+      <div class="switchColumn">
+        <FtToggleSwitch
+          :label="t('Settings.Distraction Free Settings.Blur Blocked Items')"
+          :disabled="!enableBlockLists"
+          :default-value="blurBlockedItems"
+          setting-key="blurBlockedItems"
+          compact
+          @change="store.dispatch('updateBlurBlockedItems', $event)"
+        />
+      </div>
+    </div>
     <FtFlexBox>
       <FtInputTags
         :disabled="channelHiderDisabled"
