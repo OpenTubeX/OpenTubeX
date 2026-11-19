@@ -82,8 +82,13 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, reactive, ref, useTemplateRef, watch } from 'vue'
-import { observeWindowedListItem, WINDOWED_LIST_OVERSCAN_PX } from '../../helpers/windowedList.js'
+import { computed, onBeforeUnmount, reactive, ref, useAttrs, useTemplateRef, watch } from 'vue'
+import {
+  getRememberedListItemHeight,
+  observeWindowedListItem,
+  rememberListItemHeight,
+  WINDOWED_LIST_OVERSCAN_PX
+} from '../../helpers/windowedList.js'
 import { vFirstVisible } from '../../helpers/firstVisible'
 
 import { usePlaylistDrag } from '../../composables/usePlaylistDrag'
@@ -371,7 +376,16 @@ const externalMediaItem = computed(() => finalDataType.value === 'video' && isEx
 const windowed = (process.env.IS_CAPACITOR || process.env.IS_ELECTRON) && finalDataType.value !== 'community'
 const deferWindowing = process.env.IS_ELECTRON
 const shell = useTemplateRef('shell')
-const shellHeight = ref(0)
+// Lists key their rows so a row rendered on an earlier visit keeps its height.
+const itemKey = useAttrs()['data-feed-item-key']
+const heightKey = () => itemKey == null ? null : `${props.layout}:${props.appearance}:${itemKey}`
+const shellHeight = ref(heightKey() === null ? 0 : getRememberedListItemHeight(heightKey()))
+onBeforeUnmount(() => {
+  // Skip rows that never rendered, whose shell only has its minimum height.
+  if (heightKey() === null || (!visible.value && !shellHeight.value)) return
+  const height = shell.value?.getBoundingClientRect().height
+  if (height > 0) rememberListItemHeight(heightKey(), height)
+})
 const windowItemObserved = ref(false)
 let windowItem
 if (windowed) {

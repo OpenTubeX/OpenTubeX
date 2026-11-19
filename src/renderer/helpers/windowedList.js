@@ -205,3 +205,30 @@ export function observeNestedWindowedListItem(element, options) {
   nestedWindow ??= createListWindow(globalThis, { nested: true })
   return nestedWindow.observe(element, options)
 }
+
+// A page that mounts again, such as on Back, would start rows it has not
+// rendered yet at their minimum height and restore its scroll offset into a
+// shorter list. Rows keep the height they last had so the offset lands on the
+// same content. Least recently measured heights go first.
+const MAX_REMEMBERED_HEIGHTS = 5000
+const rememberedHeights = new Map()
+
+/**
+ * @param {string} key
+ * @returns {number}
+ */
+export function getRememberedListItemHeight(key) {
+  return rememberedHeights.get(key) ?? 0
+}
+
+/**
+ * @param {string} key
+ * @param {number} height
+ */
+export function rememberListItemHeight(key, height) {
+  rememberedHeights.delete(key)
+  rememberedHeights.set(key, height)
+  if (rememberedHeights.size > MAX_REMEMBERED_HEIGHTS) {
+    rememberedHeights.delete(rememberedHeights.keys().next().value)
+  }
+}
