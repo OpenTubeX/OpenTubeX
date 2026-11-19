@@ -62,7 +62,17 @@ jobs:
     - &pnpm-install
       run: pnpm install --frozen-lockfile
       shell: bash
-    - run: pnpm run lint
+    # The eslint-lint script's automatic concurrency uses half the cores,
+    # which is slower on the 4-core runners than one worker per core.
+    - run: pnpm run eslint-lint --concurrency=4
+      shell: bash
+    - run: pnpm run lint-style
+      shell: bash
+    - run: pnpm run lint-release-notes
+      shell: bash
+    - run: pnpm run lint-json
+      shell: bash
+    - run: pnpm run lint-yml
       shell: bash
     - run: pnpm run typecheck
       shell: bash
