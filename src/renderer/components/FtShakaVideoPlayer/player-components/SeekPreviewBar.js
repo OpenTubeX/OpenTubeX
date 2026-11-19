@@ -1,6 +1,7 @@
 import shaka from 'shaka-player'
 import i18n from '../../../i18n/index'
 import store from '../../../store/index'
+import { keepControlsShown } from '../../../helpers/player/keepControlsShown'
 import { updateSponsorBlockSeekBarState } from '../../../helpers/player/sponsorBlockSeekBar'
 import { isReducedMotionEnabled } from '../../../helpers/reducedMotion'
 import { SeekFilmstrip, THUMB_SIZE } from './SeekFilmstrip'
@@ -20,10 +21,10 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
     /** @private */
     this.mousePressed = false
     /**
-     * The controls' own setting while a mouse drag keeps them shown.
-     * @private @type {boolean | null}
+     * Whether a mouse drag keeps the controls shown.
+     * @private
      */
-    this.showUIAlways = null
+    this.keepingControlsShown = false
     /** @private */
     this.filmstripShown = false
     /** @private */
@@ -132,9 +133,8 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
     this.lastDragValue = this.getValue()
     if (this.mousePressed) {
       // Keep the controls up while dragging, even when the pointer leaves the player or rests.
-      const config = this.controls.getConfig()
-      this.showUIAlways = config.showUIAlways
-      config.showUIAlways = true
+      this.keepingControlsShown = true
+      keepControlsShown(this.controls, 'seekDrag', true)
     }
     this.mousePressed = false
   }
@@ -239,7 +239,7 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
     super.onChangeEnd()
     this.dragStartValue = null
     this.hideSeekPreview()
-    if (this.restoreShowUIAlways()) {
+    if (this.stopKeepingControlsShown()) {
       // Shaka hides the time when the pointer leaves the bar, which the drag may already have done.
       if (!this.container.matches(':hover')) this.hidePreviewTime()
       // Hide as if the pointer had just left when the drag ends outside the player.
@@ -260,7 +260,7 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
     // even when Vue has already removed the whole player from the page.
     if (this.dragStartValue !== null && !this.controls.getControlsContainer()?.contains(this.bar)) this.onChangeEnd()
     // The new config copies the old one.
-    this.restoreShowUIAlways()
+    this.stopKeepingControlsShown()
     // The strip leaves with this bar, along with its mark on the player.
     this.filmstrip.hide()
     super.release()
@@ -270,10 +270,10 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
    * @private
    * @returns {boolean} whether a mouse drag was keeping the controls shown
    */
-  restoreShowUIAlways() {
-    if (this.showUIAlways === null) return false
-    this.controls.getConfig().showUIAlways = this.showUIAlways
-    this.showUIAlways = null
+  stopKeepingControlsShown() {
+    if (!this.keepingControlsShown) return false
+    keepControlsShown(this.controls, 'seekDrag', false)
+    this.keepingControlsShown = false
     return true
   }
 

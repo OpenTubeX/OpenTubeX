@@ -2172,6 +2172,7 @@ import { setupPhoneOptionsMenu } from '../../helpers/player/phoneOptionsMenu'
 import { CONTROL_BAR_MENUS, setupSubmenuScrolling } from '../../helpers/player/submenuScrolling'
 import { setupMenuTransitions } from '../../helpers/player/menuTransitions'
 import { mirrorControlStates } from '../../helpers/player/controlStateAttributes'
+import { keepControlsShown } from '../../helpers/player/keepControlsShown'
 import { setupCaptionCueLayout } from '../../helpers/player/captionCueLayout'
 import { chooseAndroidDirectory } from '../../helpers/androidStorage'
 import { isAppHidden, getAndroidAppActive, waitForAndroidAppState } from '../../helpers/appVisibility.js'
@@ -8181,6 +8182,16 @@ function handleLeavePictureInPicture() {
   updateScrollMiniPlayer()
 }
 
+// The inline player only shows a poster during Picture-in-Picture, so keep its
+// controls up instead of fading them as over a playing video. showUI()
+// restarts the fade once Picture-in-Picture ends.
+watch(pictureInPictureActive, active => {
+  const controls = ui?.getControls()
+  if (!controls) return
+  keepControlsShown(controls, 'pictureInPicture', active)
+  controls.showUI()
+})
+
 function handlePictureInPictureResize() {
   const devicePixelRatio = window.devicePixelRatio > 1 ? window.devicePixelRatio : 1
 
@@ -9300,7 +9311,7 @@ function handlePlayerMouseLeave(event) {
   container.value?.style.removeProperty('--shorts-quick-playback-rate-bar-opacity')
 
   // Dragging the seek bar keeps the controls up until the drag ends.
-  if (props.shortsPlayer && !video.value.paused && !ui?.getControls().isSeeking()) {
+  if (props.shortsPlayer && !video.value.paused && !pictureInPictureActive.value && !ui?.getControls().isSeeking()) {
     ui?.getControls().getControlsContainer().removeAttribute('shown')
   }
 }
