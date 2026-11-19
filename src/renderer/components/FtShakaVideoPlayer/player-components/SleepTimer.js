@@ -72,6 +72,11 @@ export class SleepTimer extends shaka.ui.SettingsMenu {
 
     // Setting a duration starts the timer, so the slider only sets it once the drag ends, like the caption size slider
     slider.setRange(MIN_SLEEP_TIMER_MINUTES, MAX_SLEEP_TIMER_MINUTES)
+    // A drag takes over from a wheel duration that hasn't started yet, and starts its own when it ends
+    slider.onChangeStart = () => {
+      window.clearTimeout(this.wheelCommit_)
+      this.wheelCommit_ = null
+    }
     slider.onChange = () => this.showSliderMinutes_(normalizeMinutes(slider.getValue()))
     slider.onChangeEnd = () => this.applySlider_()
     // The arrow keys change the range natively, which only ends with a change event
