@@ -11,11 +11,13 @@ import {
 configurePortableEnvironment()
 configureApplicationDataPaths(app)
 
-// E2E tests keep minidumps of crashed processes in their profile, so a rare
-// renderer crash on CI can be traced to its cause. They are never uploaded.
-// Processes started before this call are not covered, so it runs first.
+// E2E tests keep minidumps of crashed processes, in the test's output
+// directory when it sets one, so a rare renderer crash on CI can be traced to
+// its cause. They are never uploaded. Processes started before this call are
+// not covered, so it runs first.
 if (process.env.OPENTUBEX_E2E_USER_DATA_DIR) {
-  const crashDumpsPath = path.join(app.getPath('userData'), 'Crashpad')
+  const crashDumpsPath = process.env.OPENTUBEX_E2E_CRASH_DUMPS_DIR ??
+    path.join(app.getPath('userData'), 'Crashpad')
   // app.setPath throws for a directory that does not exist yet.
   mkdirSync(crashDumpsPath, { recursive: true })
   app.setPath('crashDumps', crashDumpsPath)

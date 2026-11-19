@@ -396,13 +396,13 @@ export async function createUserDataDir(seed = {}) {
  * @param {number} [windowRetry] internal first-window retry count
  */
 export async function launchApp(userDataDir, extraArgs = [], options = {}, windowRetry = 0) {
-  launchedUserDataDirs.add(userDataDir)
   const appRoot = options.appRoot ?? repoRoot
   // Force X11 so the app renders on the xvfb display instead of escaping
   // to the user's real Wayland session.
   const env = {
     ...process.env,
     OPENTUBEX_E2E_USER_DATA_DIR: userDataDir,
+    ...(crashDumpsDir() ? { OPENTUBEX_E2E_CRASH_DUMPS_DIR: crashDumpsDir() } : {}),
     ELECTRON_OZONE_PLATFORM_HINT: 'x11',
     // Tests expect en-GB strings, which CI's bare "en" system locale resolves
     // to. Pin it so the default locale setting does not follow the host.
@@ -841,31 +841,37 @@ function recordAppDiagnostics(testInfo, recordTrace) {
 }
 
 /**
- * Profiles of every app the current test launched, including apps it launches
- * itself with their own profile, so their crash dumps are attached too.
- * @type {Set<string>}
+ * Where every app the current test launches keeps the minidumps of its crashed
+ * processes, including apps a test launches with a profile it deletes itself.
+ * The test's output directory is uploaded with the results, so the dumps of a
+ * test without the `app` fixture are kept too.
  */
-const launchedUserDataDirs = new Set()
+function crashDumpsDir() {
+  try {
+    return base.info().outputPath('crash-dumps')
+  } catch {
+    // Called outside a test, such as by the performance comparison scripts.
+    return undefined
+  }
+}
 
 /**
  * Attaches the minidumps of processes that crashed during a failed test, such
- * as a renderer that exited with code 133. The E2E app keeps them in its
- * profile without uploading them. Symbolize one with the symbols of the
- * Electron version in its name, for example with `minidump_stackwalk`.
+ * as a renderer that exited with code 133. The E2E app never uploads them.
+ * Symbolize one with the symbols of the Electron version in its name, for
+ * example with `minidump_stackwalk`.
  * @param {import('@playwright/test').TestInfo} testInfo
- * @param {Iterable<string>} userDataDirs
  */
-async function attachCrashDumps(testInfo, userDataDirs) {
+async function attachCrashDumps(testInfo) {
+  const directory = testInfo.outputPath('crash-dumps')
+  const dumps = (await readdir(directory, { recursive: true }).catch(() => [])).filter(entry => entry.endsWith('.dmp'))
+  if (dumps.length === 0) return
   const { version } = JSON.parse(readFileSync(path.join(repoRoot, 'node_modules', 'electron', 'package.json'), 'utf8'))
-  for (const userDataDir of userDataDirs) {
-    const crashpad = path.join(userDataDir, 'Crashpad')
-    const entries = await readdir(crashpad, { recursive: true }).catch(() => [])
-    for (const dump of entries.filter(entry => entry.endsWith('.dmp'))) {
-      await testInfo.attach(`crash dump (Electron ${version}) ${path.basename(dump)}`, {
-        path: path.join(crashpad, dump),
-        contentType: 'application/octet-stream'
-      })
-    }
+  for (const dump of dumps) {
+    await testInfo.attach(`crash dump (Electron ${version}) ${path.basename(dump)}`, {
+      path: path.join(directory, dump),
+      contentType: 'application/octet-stream'
+    })
   }
 }
 
@@ -985,7 +991,6 @@ export const test = base.extend({
 
       // Drops requests from an earlier test's app that was still closing.
       takeBlockedRequests()
-      launchedUserDataDirs.clear()
       const { electronApp, page } = await launchApp(userDataDir, launchArgs, launchOptions)
 
       /** Runs an optional checkpoint with the exited process before launching again. */
@@ -1030,7 +1035,7 @@ export const test = base.extend({
       if (appHandle) {
         await appHandle.electronApp.close().catch(() => {})
       }
-      if (failed) await attachCrashDumps(testInfo, launchedUserDataDirs)
+      if (failed) await attachCrashDumps(testInfo)
       const blockedRequests = [...new Set(takeBlockedRequests())]
       // Requests from the main process and its child processes, which
       // Playwright cannot mock. They fail instead of reaching real hosts.
