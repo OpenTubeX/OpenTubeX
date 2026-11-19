@@ -489,6 +489,14 @@ function checkSearchCache(payload) {
   }
 }
 
+/**
+ * Regular tabs reuse cached searches, so incognito ones stay out. Their pages keep paginating from their own state.
+ * @param {object} payload
+ */
+function cacheSearch(payload) {
+  if (!isIncognitoTab.value) store.commit('addToSessionSearchHistory', payload)
+}
+
 // Cancels the local search that a newer one or leaving the page replaced.
 let searchAbortController = null
 
@@ -538,7 +546,7 @@ async function performSearchLocal(payload) {
       apiUsed: apiUsed.value
     }
 
-    store.commit('addToSessionSearchHistory', historyPayload)
+    cacheSearch(historyPayload)
 
     updateSubscriptionDetails(results)
     fillPublicationDates(payload.query, results)
@@ -565,7 +573,7 @@ async function fillPublicationDates(query, results) {
   if (dates.size === 0 || requestId !== searchRequestId || apiUsed.value !== 'local') return
 
   shownResults.value = applyPublicationDates(shownResults.value, dates)
-  store.commit('addToSessionSearchHistory', {
+  cacheSearch({
     query,
     data: shownResults.value,
     searchSettings: searchSettings.value,
@@ -632,7 +640,7 @@ async function getNextpageLocal(payload) {
       apiUsed: apiUsed.value
     }
 
-    store.commit('addToSessionSearchHistory', historyPayload)
+    cacheSearch(historyPayload)
 
     updateSubscriptionDetails(results)
     fillPublicationDates(payload.query, results)
@@ -694,7 +702,7 @@ async function performSearchInvidious(payload, options = { resetSearchPage: fals
       apiUsed: apiUsed.value
     }
 
-    store.commit('addToSessionSearchHistory', historyPayload)
+    cacheSearch(historyPayload)
 
     updateSubscriptionDetails(results)
   } catch (err) {

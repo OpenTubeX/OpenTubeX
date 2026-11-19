@@ -725,7 +725,7 @@ export function setupContextMenu(contextMenuOptions, { createWindow, confirmClos
         label: contextMenuLabel('New Window'),
         visible: isTabBarContextMenu && contextMenuTab == null,
         click: () => {
-          createWindow({ replaceMainWindow: false }).catch(error => {
+          createWindow({ replaceMainWindow: false, incognito: manager?.isPresentingIncognito() === true }).catch(error => {
             console.error('Failed to create a new window from the tab bar context menu:', error)
           })
         }

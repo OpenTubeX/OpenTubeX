@@ -2316,7 +2316,7 @@ function runApp() {
         if (windowStartupUrl != null) {
           tabManager.createTab({ url: windowStartupUrl, makeActive: true, isIncognito: incognito })
         } else {
-          await tabManager.createTabWithPreference({ makeActive: true })
+          await tabManager.createTabWithPreference({ makeActive: true, ...(incognito && { isIncognito: true }) })
         }
       }
 
@@ -2698,7 +2698,7 @@ function runApp() {
     reopenClosedWindow()
   })
 
-  onTrusted(IpcChannels.CREATE_NEW_WINDOW, (event, path, query, searchQueryText) => {
+  onTrusted(IpcChannels.CREATE_NEW_WINDOW, (event, path, query, searchQueryText, incognito) => {
     if (
       typeof path !== 'string' ||
       (query != null && typeof query !== 'object') ||
@@ -2726,13 +2726,13 @@ function runApp() {
     const search = searchParams.toString()
     const windowStartupUrl = `${ROOT_APP_URL}#${path}${search.length > 0 ? `?${search}` : ''}`
 
-    // A window opened from an incognito tab starts with an incognito tab
-    const manager = TabManager.getFromWebContents(event.sender)
+    // A window opened from an incognito tab starts with an incognito tab. The renderer names the tab a
+    // link came from, since another tab may be shown by the time it opens.
     createWindow({
       replaceMainWindow: false,
       windowStartupUrl,
       searchQueryText,
-      incognito: manager?.tabs.get(manager.presentedTabId ?? manager.activeTabId)?.isIncognito === true
+      incognito: incognito === true || TabManager.getFromWebContents(event.sender)?.isPresentingIncognito() === true
     })
   })
 
@@ -3339,7 +3339,8 @@ function runApp() {
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.NEW_WINDOW),
             click: (_menuItem, browserWindow, _event) => {
               if (browserWindow && appShortcutBlockedWindows.has(browserWindow)) { return }
-              createWindow({ replaceMainWindow: false })
+              const incognito = browserWindow ? TabManager.getForWindow(browserWindow.id)?.isPresentingIncognito() === true : false
+              createWindow({ replaceMainWindow: false, incognito })
             },
             type: 'normal'
           },

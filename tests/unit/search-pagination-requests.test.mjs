@@ -27,7 +27,7 @@ function deferred () {
   return { promise, resolve, reject }
 }
 
-function createSearch (backend, { searchResults = [], missingPublicationDates = async () => new Map() } = {}) {
+function createSearch (backend, { searchResults = [], missingPublicationDates = async () => new Map(), incognito = false } = {}) {
   const previous = deferred()
   const current = deferred()
   const requests = []
@@ -81,6 +81,7 @@ function createSearch (backend, { searchResults = [], missingPublicationDates = 
     backendPreference: { value: backend },
     backendFallback: { value: true },
     rememberSearchHistory: { value: false },
+    isIncognitoTab: { value: incognito },
     showFamilyFriendlyOnly: { value: false },
     searchFiltersMatch: () => true,
     SEARCH_CHAR_LIMIT: 1000,
@@ -203,6 +204,15 @@ test('caches searches with and without spelling correction separately', async ()
   search.select('speling')
   assert.deepEqual(search.state.searchCorrection.value, correction)
   assert.equal(search.localSearches.length, 2)
+})
+
+test('incognito searches stay out of the cache that regular tabs reuse', async () => {
+  const search = createSearch('local', { incognito: true })
+  search.select('private search')
+  await new Promise(setImmediate)
+  assert.ok(!search.history.some(entry => entry.query === 'private search'))
+  // The tab still shows what it found
+  assert.equal(search.state.localSearchCompleted.value, true)
 })
 
 test('fills publication dates that Local search results omit', async () => {

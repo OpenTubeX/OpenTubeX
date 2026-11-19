@@ -511,7 +511,7 @@ export function openInternalPath({ path, query = undefined, doCreateNewWindow = 
       return creation
     } else if (doCreateNewWindow) {
       // Open in new window
-      window.ftElectron.openInNewWindow(path, query, searchQueryText)
+      window.ftElectron.openInNewWindow(path, query, searchQueryText, incognito)
     } else {
       // Navigate in the presented logical tab.
       getTabNavigationService().pushPresented({

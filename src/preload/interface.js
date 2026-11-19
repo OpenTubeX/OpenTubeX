@@ -477,9 +477,10 @@ export default {
    * @param {string} path
    * @param {Record<string, string> | null | undefined} query
    * @param {string | null | undefined} searchQueryText
+   * @param {boolean} [incognito] whether the window starts with an incognito tab
    */
-  openInNewWindow: (path, query, searchQueryText) => {
-    ipcRenderer.send(IpcChannels.CREATE_NEW_WINDOW, path, query, searchQueryText)
+  openInNewWindow: (path, query, searchQueryText, incognito = false) => {
+    ipcRenderer.send(IpcChannels.CREATE_NEW_WINDOW, path, query, searchQueryText, incognito === true)
   },
 
   /**

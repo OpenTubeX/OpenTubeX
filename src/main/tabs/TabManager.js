@@ -794,6 +794,11 @@ export class TabManager {
    * @param {string | undefined | null} [openerTabId=this.activeTabId]
    * @returns {Promise<TabInfo>}
    */
+  /** Whether the shown tab is incognito, so a window opened from it starts with an incognito tab */
+  isPresentingIncognito() {
+    return this.tabs.get(this.presentedTabId ?? this.activeTabId)?.isIncognito === true
+  }
+
   async createTabWithPreferenceFromOpener(options = {}, openerTabId = this.activeTabId) {
     return this.createTabWithPreference(this._withOpenerTab(options, openerTabId))
   }
@@ -2618,8 +2623,8 @@ export class TabManager {
       this.tabs = syncedTabs
       restoreTabPlacementOpeners(this.tabs, sessionData.tabs)
 
-      // Incognito tabs are never synced, so the remote session cannot close them
-      const incognitoTabs = [...removedTabs].filter(tab => tab.isIncognito)
+      // Incognito tabs are never synced, so the remote session cannot close them. Ones already closing still close.
+      const incognitoTabs = [...removedTabs].filter(tab => tab.isIncognito && !this._deferredCloseTabIds.has(tab.id))
       if (incognitoTabs.length > 0) {
         const keptTabIds = new Set([...syncedTabs.keys(), ...incognitoTabs.map(tab => tab.id)])
         for (const tab of incognitoTabs) {
