@@ -2289,6 +2289,7 @@ Context Menu:
   Search With Multiple: Претражи помоћу…
   Selection Too Long: Избор је предугачак за претрагу (> {count} знакова)
   Background Tab: Картица у позадини
+  Open in an Incognito Tab: Отвори у картици без архивирања
 Tab Organizer:
   Tab History: "Историја картице"
   Current Page: "Тренутна страница"
@@ -2591,6 +2592,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Мењач картица
   Undo Seek: Опозови последње премотавање
   Redo Seek: Понови опозвано премотавање
+  New Incognito Tab: Направи нову картицу без архивирања
 CommandPalette:
   Title: Палета команди
   Open: Отвори палету команди
@@ -2979,3 +2981,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Претражи Twitch"
+New Incognito Tab: Нова картица без архивирања
+Incognito Tab: Картица без архивирања

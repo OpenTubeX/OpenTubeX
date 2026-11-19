@@ -2588,6 +2588,7 @@ Context Menu:
   Search With Multiple: 검색 엔진 선택...
   Selection Too Long: 선택한 텍스트가 너무 길어 검색할 수 없습니다. {count}자 이하여야 합니다
   Background Tab: 백그라운드 탭
+  Open in an Incognito Tab: 시크릿 탭에서 열기
 Tab Organizer:
   Tab History: "탭 기록"
   Current Page: "현재 페이지"
@@ -2969,6 +2970,7 @@ KeyboardShortcutPrompt:
   Skip to Previous Video: 재생목록의 이전 동영상으로 건너뛰기
   Undo Seek: 마지막 탐색 실행 취소
   Redo Seek: 실행 취소한 탐색 다시 실행
+  New Incognito Tab: 새 시크릿 탭 만들기
 CommandPalette:
   Title: 명령 팔레트
   Open: 명령 팔레트 열기
@@ -3348,3 +3350,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Twitch 검색"
+New Incognito Tab: 새 시크릿 탭
+Incognito Tab: 시크릿 탭

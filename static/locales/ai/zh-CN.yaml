@@ -2209,6 +2209,7 @@ Context Menu:
   Search With Multiple: 搜索方式…
   Selection Too Long: 所选内容过长，无法搜索（超过 {count} 个字符）
   Background Tab: 后台标签页
+  Open in an Incognito Tab: 在无痕标签页中打开
 Tab Organizer:
   Tab History: "标签页历史记录"
   Current Page: "当前页面"
@@ -2503,6 +2504,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: 标签页切换器
   Undo Seek: 撤销上一次跳转
   Redo Seek: 重做已撤销的跳转
+  New Incognito Tab: 新建无痕标签页
 CommandPalette:
   Title: 命令面板
   Open: 打开命令面板
@@ -2890,3 +2892,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "搜索 Twitch"
+New Incognito Tab: 新建无痕标签页
+Incognito Tab: 无痕标签页

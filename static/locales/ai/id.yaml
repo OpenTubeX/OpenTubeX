@@ -2236,6 +2236,7 @@ Context Menu:
   Search With Multiple: Cari dengan...
   Selection Too Long: Pilihan terlalu panjang untuk dicari (> {count} karakter)
   Background Tab: Tab latar belakang
+  Open in an Incognito Tab: Buka di Tab Penyamaran
 Tab Organizer:
   Tab History: "Riwayat tab"
   Current Page: "Halaman saat ini"
@@ -2530,6 +2531,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Pengalih tab
   Undo Seek: Urungkan lompatan terakhir
   Redo Seek: Ulangi lompatan yang diurungkan
+  New Incognito Tab: Buat tab penyamaran baru
 CommandPalette:
   Title: Palet perintah
   Open: Buka palet perintah
@@ -2917,3 +2919,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Cari di Twitch"
+New Incognito Tab: Tab Penyamaran Baru
+Incognito Tab: Tab penyamaran

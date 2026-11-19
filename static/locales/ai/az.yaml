@@ -2221,6 +2221,7 @@ Context Menu:
   Search With Multiple: Bununla axtar...
   Selection Too Long: Seçim axtarış üçün çox uzundur (> {count} simvol)
   Background Tab: Arxa plan tabı
+  Open in an Incognito Tab: Gizli vərəqdə aç
 Tab Organizer:
   Tab History: "Vərəqçə tarixçəsi"
   Current Page: "Cari səhifə"
@@ -2516,6 +2517,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Vərəq dəyişdiricisi
   Undo Seek: Son keçidi geri qaytar
   Redo Seek: Geri qaytarılmış keçidi təkrarla
+  New Incognito Tab: Yeni gizli vərəq yarat
 CommandPalette:
   Title: Əmr palitrası
   Open: Əmr palitrasını aç
@@ -2900,3 +2902,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Twitch-də axtar"
+New Incognito Tab: Yeni gizli vərəq
+Incognito Tab: Gizli vərəq

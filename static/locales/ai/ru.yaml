@@ -2177,6 +2177,7 @@ Context Menu:
   Search With Multiple: Искать с помощью...
   Selection Too Long: Выделенный текст слишком длинный для поиска (> {count} символов)
   Background Tab: Фоновая вкладка
+  Open in an Incognito Tab: Открыть во вкладке инкогнито
 Tab Organizer:
   Tab History: "История вкладки"
   Current Page: "Текущая страница"
@@ -2471,6 +2472,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Переключатель вкладок
   Undo Seek: Отменить последнюю перемотку
   Redo Seek: Повторить отменённую перемотку
+  New Incognito Tab: Создать вкладку инкогнито
 CommandPalette:
   Title: Палитра команд
   Open: Открыть палитру команд
@@ -2874,3 +2876,5 @@ App Menu:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Поиск в Twitch"
+New Incognito Tab: Новая вкладка инкогнито
+Incognito Tab: Вкладка инкогнито

@@ -2163,6 +2163,7 @@ Context Menu:
   Search With Multiple: Pesquisar com...
   Selection Too Long: A seleção é demasiado longa para pesquisar (> {count} caracteres)
   Background Tab: Aba em segundo plano
+  Open in an Incognito Tab: Abrir numa guia anônima
 Tab Organizer:
   Tab History: "Histórico da aba"
   Current Page: "Página atual"
@@ -2457,6 +2458,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Seletor de guias
   Undo Seek: Desfazer o último salto
   Redo Seek: Refazer um salto desfeito
+  New Incognito Tab: Criar uma nova guia anônima
 CommandPalette:
   Title: Paleta de comandos
   Open: Abrir paleta de comandos
@@ -2852,3 +2854,5 @@ App Menu:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Pesquisar na Twitch"
+New Incognito Tab: Nova guia anônima
+Incognito Tab: Guia anônima

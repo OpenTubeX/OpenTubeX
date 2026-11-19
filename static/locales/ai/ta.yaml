@@ -2277,6 +2277,7 @@ Context Menu:
   Search With Multiple: இதன் மூலம் தேடு...
   Selection Too Long: தேடுவதற்குத் தேர்வு மிக நீளமாக உள்ளது (> {count} எழுத்துகள்)
   Background Tab: பின்னணித் தாவல்
+  Open in an Incognito Tab: மறைநிலைத் தாவலில் திற
 Tab Organizer:
   Tab History: "தாவல் வரலாறு"
   Current Page: "தற்போதைய பக்கம்"
@@ -2576,6 +2577,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: தாவல் மாற்றி
   Undo Seek: கடைசி நகர்வைச் செயல்தவிர்
   Redo Seek: செயல்தவிர்த்த நகர்வை மீண்டும் செய்
+  New Incognito Tab: புதிய மறைநிலைத் தாவலை உருவாக்கு
 CommandPalette:
   Title: கட்டளைத் தட்டு
   Open: கட்டளைத் தட்டைத் திற
@@ -2955,3 +2957,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Twitch இல் தேடு"
+New Incognito Tab: புதிய மறைநிலைத் தாவல்
+Incognito Tab: மறைநிலைத் தாவல்

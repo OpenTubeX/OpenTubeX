@@ -2209,6 +2209,7 @@ Context Menu:
   Search With Multiple: Keresés ezzel...
   Selection Too Long: A kijelölt szöveg túl hosszú a kereséshez (> {count} karakter)
   Background Tab: Háttérlap
+  Open in an Incognito Tab: Megnyitás inkognitólapon
 Tab Organizer:
   Tab History: "Lap előzményei"
   Current Page: "Jelenlegi oldal"
@@ -2504,6 +2505,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Lapváltó
   Undo Seek: Az utolsó ugrás visszavonása
   Redo Seek: Egy visszavont ugrás újbóli végrehajtása
+  New Incognito Tab: Új inkognitólap létrehozása
 CommandPalette:
   Title: Parancspaletta
   Open: Parancspaletta megnyitása
@@ -2891,3 +2893,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Keresés a Twitchen"
+New Incognito Tab: Új inkognitólap
+Incognito Tab: Inkognitólap

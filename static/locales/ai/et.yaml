@@ -2211,6 +2211,7 @@ Context Menu:
   Search With Multiple: Otsi otsingumootoriga...
   Selection Too Long: Valik on otsimiseks liiga pikk (> {count} märki)
   Background Tab: Taustal vaheleht
+  Open in an Incognito Tab: Ava inkognito vahekaardil
 Tab Organizer:
   Tab History: "Vahekaardi ajalugu"
   Current Page: "Praegune leht"
@@ -2506,6 +2507,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Vahelehtede vahetaja
   Undo Seek: Võta viimane kerimine tagasi
   Redo Seek: Tee tagasi võetud kerimine uuesti
+  New Incognito Tab: Loo uus inkognito vahekaart
 CommandPalette:
   Title: Käsupalett
   Open: Ava käsupalett
@@ -2893,3 +2895,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Otsi Twitchist"
+New Incognito Tab: Uus inkognito vahekaart
+Incognito Tab: Inkognito vahekaart

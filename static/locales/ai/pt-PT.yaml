@@ -2210,6 +2210,7 @@ Context Menu:
   Search With Multiple: Pesquisar com...
   Selection Too Long: A seleção é demasiado longa para pesquisar (> {count} caracteres)
   Background Tab: Separador em segundo plano
+  Open in an Incognito Tab: Abrir num separador de navegação anónima
 Tab Organizer:
   Tab History: "Histórico do separador"
   Current Page: "Página atual"
@@ -2506,6 +2507,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Seletor de separadores
   Undo Seek: Anular o último salto
   Redo Seek: Refazer um salto anulado
+  New Incognito Tab: Criar um novo separador de navegação anónima
 CommandPalette:
   Title: Paleta de comandos
   Open: Abrir paleta de comandos
@@ -2884,3 +2886,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Pesquisar no Twitch"
+New Incognito Tab: Novo separador de navegação anónima
+Incognito Tab: Separador de navegação anónima

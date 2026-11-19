@@ -2261,6 +2261,7 @@ Context Menu:
   Search With Multiple: Шукати через...
   Selection Too Long: Вибраний текст задовгий для пошуку (> {count} символів)
   Background Tab: Фонова вкладка
+  Open in an Incognito Tab: Відкрити у вкладці в режимі анонімного перегляду
 Tab Organizer:
   Tab History: "Історія вкладки"
   Current Page: "Поточна сторінка"
@@ -2558,6 +2559,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Перемикач вкладок
   Undo Seek: Скасувати останнє перемотування
   Redo Seek: Повторити скасоване перемотування
+  New Incognito Tab: Створити нову вкладку в режимі анонімного перегляду
 CommandPalette:
   Title: Палітра команд
   Open: Відкрити палітру команд
@@ -2946,3 +2948,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Пошук у Twitch"
+New Incognito Tab: Нова вкладка в режимі анонімного перегляду
+Incognito Tab: Вкладка в режимі анонімного перегляду

@@ -2309,6 +2309,7 @@ Context Menu:
   Search With Multiple: Шукаць праз...
   Selection Too Long: Вылучаны тэкст задоўгі для пошуку (> {count} знакаў)
   Background Tab: Фонавая ўкладка
+  Open in an Incognito Tab: Адкрыць ва ўкладцы інкогніта
 Tab Organizer:
   Tab History: "Гісторыя ўкладкі"
   Current Page: "Бягучая старонка"
@@ -2614,6 +2615,7 @@ KeyboardShortcutPrompt:
   Skip to Previous Video: Перайсці да папярэдняга відэа ў спісе прайгравання
   Undo Seek: Адмяніць апошнюю перамотку
   Redo Seek: Паўтарыць адмененую перамотку
+  New Incognito Tab: Стварыць новую ўкладку інкогніта
 CommandPalette:
   Title: Палітра каманд
   Open: Адкрыць палітру каманд
@@ -2993,3 +2995,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Пошук у Twitch"
+New Incognito Tab: Новая ўкладка інкогніта
+Incognito Tab: Укладка інкогніта

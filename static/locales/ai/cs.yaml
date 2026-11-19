@@ -2209,6 +2209,7 @@ Context Menu:
   Search With Multiple: Hledat pomocí…
   Selection Too Long: Výběr je pro vyhledávání příliš dlouhý (> {count} znaků)
   Background Tab: Karta na pozadí
+  Open in an Incognito Tab: Otevřít na anonymní kartě
 Tab Organizer:
   Tab History: "Historie karty"
   Current Page: "Aktuální stránka"
@@ -2503,6 +2504,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Přepínač karet
   Undo Seek: Vrátit poslední přeskok zpět
   Redo Seek: Znovu provést vrácený přeskok
+  New Incognito Tab: Vytvořit novou anonymní kartu
 CommandPalette:
   Title: Paleta příkazů
   Open: Otevřít paletu příkazů
@@ -2890,3 +2892,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Hledat na Twitchi"
+New Incognito Tab: Nová anonymní karta
+Incognito Tab: Anonymní karta

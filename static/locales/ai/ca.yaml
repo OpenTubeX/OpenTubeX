@@ -2724,6 +2724,7 @@ Context Menu:
   Search With Multiple: Cerca amb…
   Selection Too Long: La selecció és massa llarga per cercar-la (> {count} caràcters)
   Background Tab: Pestanya en segon pla
+  Open in an Incognito Tab: Obre en una pestanya d’incògnit
 Tab Organizer:
   Tab History: "Historial de la pestanya"
   Current Page: "Pàgina actual"
@@ -3165,6 +3166,7 @@ KeyboardShortcutPrompt:
   Skip to Previous Video: Salta al vídeo anterior d'una llista de reproducció
   Undo Seek: Desfés l'últim salt
   Redo Seek: Refés un salt desfet
+  New Incognito Tab: Crea una pestanya d’incògnit nova
 CommandPalette:
   Title: Paleta d'ordres
   Open: Obre la paleta d'ordres
@@ -3538,3 +3540,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Cerca a Twitch"
+New Incognito Tab: Pestanya d’incògnit nova
+Incognito Tab: Pestanya d’incògnit

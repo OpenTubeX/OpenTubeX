@@ -2699,6 +2699,7 @@ Context Menu:
   Search With Multiple: Poišči z …
   Selection Too Long: Izbrano besedilo je predolgo za iskanje (> {count} znakov)
   Background Tab: Zavihek v ozadju
+  Open in an Incognito Tab: Odpri v zavihku brez beleženja zgodovine
 Tab Organizer:
   Tab History: "Zgodovina zavihka"
   Current Page: "Trenutna stran"
@@ -3113,6 +3114,7 @@ KeyboardShortcutPrompt:
   Skip to Previous Video: Skoči na prejšnji videoposnetek na seznamu predvajanja
   Undo Seek: Razveljavi zadnji skok
   Redo Seek: Znova uveljavi razveljavljeni skok
+  New Incognito Tab: Ustvari nov zavihek brez beleženja zgodovine
 CommandPalette:
   Title: Paleta ukazov
   Open: Odpri paleto ukazov
@@ -3488,3 +3490,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Iskanje po Twitchu"
+New Incognito Tab: Nov zavihek brez beleženja zgodovine
+Incognito Tab: Zavihek brez beleženja zgodovine

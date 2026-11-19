@@ -2262,6 +2262,7 @@ Context Menu:
   Search With Multiple: Serĉi per...
   Selection Too Long: La elekto estas tro longa por serĉi (> {count} signoj)
   Background Tab: Fona langeto
+  Open in an Incognito Tab: Malfermi en inkognita langeto
 Tab Organizer:
   Tab History: Langeta historio
   Current Page: Aktuala paĝo
@@ -2567,6 +2568,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Langeta ŝanĝilo
   Undo Seek: Malfari la lastan salton
   Redo Seek: Refari malfaritan salton
+  New Incognito Tab: Krei novan inkognitan langeton
 CommandPalette:
   Title: Komanda paletro
   Open: Malfermi komandan paletron
@@ -2891,3 +2893,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Serĉi en Twitch"
+New Incognito Tab: Nova inkognita langeto
+Incognito Tab: Inkognita langeto

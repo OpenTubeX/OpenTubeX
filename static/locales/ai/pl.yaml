@@ -1475,6 +1475,7 @@ Context Menu:
   Search With Multiple: Wyszukaj za pomocą...
   Unload Tabs Failed: "Nie udało się zwolnić wybranych kart z pamięci."
   Background Tab: Karta w tle
+  Open in an Incognito Tab: Otwórz w karcie incognito
 Tab Organizer:
   Tab History: "Historia karty"
   Current Page: "Bieżąca strona"
@@ -1695,6 +1696,7 @@ KeyboardShortcutPrompt:
   Video Zoom Out: Pomniejsz film
   Undo Seek: Cofnij ostatnie przewinięcie
   Redo Seek: Ponów cofnięte przewinięcie
+  New Incognito Tab: Utwórz nową kartę incognito
 CommandPalette:
   Title: Paleta poleceń
   Open: Otwórz paletę poleceń
@@ -2149,3 +2151,5 @@ App Menu:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Szukaj na Twitchu"
+New Incognito Tab: Nowa karta incognito
+Incognito Tab: Karta incognito

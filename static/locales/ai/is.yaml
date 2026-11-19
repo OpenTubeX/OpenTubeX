@@ -2225,6 +2225,7 @@ Context Menu:
   Search With Multiple: Leita með...
   Selection Too Long: Valið er of langt fyrir leit (> {count} stafir)
   Background Tab: Bakgrunnsflipi
+  Open in an Incognito Tab: Opna í huliðsflipa
 Tab Organizer:
   Tab History: "Ferill flipa"
   Current Page: "Núverandi síða"
@@ -2519,6 +2520,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Flipaskiptir
   Undo Seek: Afturkalla síðasta stökk
   Redo Seek: Endurtaka afturkallað stökk
+  New Incognito Tab: Stofna nýjan huliðsflipa
 CommandPalette:
   Title: Skipanaspjald
   Open: Opna skipanaspjald
@@ -2906,3 +2908,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Leita á Twitch"
+New Incognito Tab: Nýr huliðsflipi
+Incognito Tab: Huliðsflipi

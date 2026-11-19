@@ -2209,6 +2209,7 @@ Context Menu:
   Search With Multiple: 検索サービスを選択…
   Selection Too Long: 選択範囲が検索には長すぎます（{count}文字超）
   Background Tab: バックグラウンドタブ
+  Open in an Incognito Tab: シークレット タブで開く
 Tab Organizer:
   Tab History: "タブの履歴"
   Current Page: "現在のページ"
@@ -2503,6 +2504,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: タブ切り替え
   Undo Seek: 最後のシークを元に戻す
   Redo Seek: 元に戻したシークをやり直す
+  New Incognito Tab: 新しいシークレット タブを作成
 CommandPalette:
   Title: コマンドパレット
   Open: コマンドパレットを開く
@@ -2890,3 +2892,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Twitch を検索"
+New Incognito Tab: 新しいシークレット タブ
+Incognito Tab: シークレット タブ

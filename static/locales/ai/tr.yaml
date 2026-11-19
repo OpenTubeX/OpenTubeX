@@ -2209,6 +2209,7 @@ Context Menu:
   Search With Multiple: Şununla ara...
   Selection Too Long: Seçim arama için çok uzun (> {count} karakter)
   Background Tab: Arka plan sekmesi
+  Open in an Incognito Tab: Gizli Sekmede Aç
 Tab Organizer:
   Tab History: "Sekme geçmişi"
   Current Page: "Geçerli sayfa"
@@ -2504,6 +2505,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Sekme değiştirici
   Undo Seek: Son atlamayı geri al
   Redo Seek: Geri alınan atlamayı yinele
+  New Incognito Tab: Yeni bir gizli sekme oluştur
 CommandPalette:
   Title: Komut paleti
   Open: Komut paletini aç
@@ -2891,3 +2893,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Twitch'te ara"
+New Incognito Tab: Yeni Gizli Sekme
+Incognito Tab: Gizli sekme

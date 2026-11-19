@@ -2267,6 +2267,7 @@ Context Menu:
   Search With Multiple: חיפוש באמצעות...
   Selection Too Long: הטקסט שנבחר ארוך מדי לחיפוש (מעל {count} תווים)
   Background Tab: לשונית ברקע
+  Open in an Incognito Tab: פתיחה בכרטיסיית גלישה בסתר
 Tab Organizer:
   Tab History: "היסטוריית הלשונית"
   Current Page: "העמוד הנוכחי"
@@ -2566,6 +2567,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: בורר לשוניות
   Undo Seek: ביטול הקפיצה האחרונה
   Redo Seek: ביצוע מחדש של קפיצה שבוטלה
+  New Incognito Tab: יצירת כרטיסיית גלישה בסתר חדשה
 CommandPalette:
   Title: לוח הפקודות
   Open: פתיחת לוח הפקודות
@@ -2954,3 +2956,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "חיפוש ב-Twitch"
+New Incognito Tab: כרטיסיית גלישה בסתר חדשה
+Incognito Tab: כרטיסיית גלישה בסתר

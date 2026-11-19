@@ -2220,6 +2220,7 @@ Context Menu:
   Search With Multiple: Bilatu honekin...
   Selection Too Long: Hautapena luzeegia da bilatzeko (> {count} karaktere)
   Background Tab: Atzeko planoko fitxa
+  Open in an Incognito Tab: Ireki ezkutuko fitxa batean
 Tab Organizer:
   Tab History: "Fitxaren historia"
   Current Page: "Uneko orria"
@@ -2514,6 +2515,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Fitxa-aldatzailea
   Undo Seek: Desegin azken jauzia
   Redo Seek: Berregin desegindako jauzia
+  New Incognito Tab: Sortu ezkutuko fitxa berria
 CommandPalette:
   Title: Komando-paleta
   Open: Ireki komando-paleta
@@ -2901,3 +2903,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Bilatu Twitch-en"
+New Incognito Tab: Ezkutuko fitxa berria
+Incognito Tab: Ezkutuko fitxa

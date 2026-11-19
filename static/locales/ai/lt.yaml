@@ -2622,6 +2622,7 @@ Context Menu:
   Search With Multiple: Ieškoti naudojant...
   Selection Too Long: Pažymėtas tekstas per ilgas paieškai (> {count} simbolių)
   Background Tab: Fono kortelė
+  Open in an Incognito Tab: Atverti inkognito kortelėje
 Tab Organizer:
   Tab History: "Kortelės istorija"
   Current Page: "Dabartinis puslapis"
@@ -3015,6 +3016,7 @@ KeyboardShortcutPrompt:
   Skip to Previous Video: Pereiti prie ankstesnio vaizdo įrašo grojaraštyje
   Undo Seek: Atšaukti paskutinį peršokimą
   Redo Seek: Pakartoti atšauktą peršokimą
+  New Incognito Tab: Sukurti naują inkognito kortelę
 CommandPalette:
   Title: Komandų paletė
   Open: Atverti komandų paletę
@@ -3394,3 +3396,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Ieškoti Twitch"
+New Incognito Tab: Nauja inkognito kortelė
+Incognito Tab: Inkognito kortelė

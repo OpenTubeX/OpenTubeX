@@ -2218,6 +2218,7 @@ Context Menu:
   Search With Multiple: Hae hakukoneella...
   Selection Too Long: Valinta on liian pitkä haettavaksi (> {count} merkkiä)
   Background Tab: Taustavälilehti
+  Open in an Incognito Tab: Avaa incognito-välilehdessä
 Tab Organizer:
   Tab History: "Välilehden historia"
   Current Page: "Nykyinen sivu"
@@ -2512,6 +2513,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Välilehtivalitsin
   Undo Seek: Kumoa viimeisin siirtymä
   Redo Seek: Tee kumottu siirtymä uudelleen
+  New Incognito Tab: Luo uusi incognito-välilehti
 CommandPalette:
   Title: Komentopaletti
   Open: Avaa komentopaletti
@@ -2899,3 +2901,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Hae Twitchistä"
+New Incognito Tab: Uusi incognito-välilehti
+Incognito Tab: Incognito-välilehti

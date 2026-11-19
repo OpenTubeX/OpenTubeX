@@ -2204,6 +2204,7 @@ Context Menu:
   Search With Multiple: Search with...
   Selection Too Long: Selection is too long for search (> {count} characters)
   Background Tab: Background tab
+  Open in an Incognito Tab: Open in an Incognito Tab
 Tab Organizer:
   Tab History: "Tab history"
   Current Page: "Current page"
@@ -2500,6 +2501,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Tab switcher
   Undo Seek: Undo the last seek
   Redo Seek: Redo an undone seek
+  New Incognito Tab: Create a new incognito tab
 CommandPalette:
   Title: Command palette
   Open: Open command palette
@@ -2884,3 +2886,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Search Twitch"
+New Incognito Tab: New Incognito Tab
+Incognito Tab: Incognito tab
