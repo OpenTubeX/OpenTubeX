@@ -25,15 +25,15 @@
   justify-content: center;
 
   /* Rows stay 48px apart so the remove buttons' touch targets never overlap. */
-  gap: 16px 8px;
+  gap: 8px;
   list-style: none;
   margin-block: 18px var(--settings-control-margin);
   padding: 0;
   max-inline-size: 700px;
 }
 
-/* Material 3 input chips: outlined, 32px tall, with a trailing remove icon
-   whose touch target extends past the chip to 48px. */
+/* Outlined input chips, 40px tall to match the settings text size, with a
+   trailing remove icon whose touch target extends past the chip to 48px. */
 .commentTranslationLanguage {
   align-items: center;
   border: 1px solid var(--divider-color);
@@ -41,12 +41,12 @@
   box-sizing: border-box;
   color: var(--primary-text-color);
   display: flex;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
-  gap: 4px;
-  line-height: 20px;
-  min-block-size: 32px;
-  padding-inline: 12px 4px;
+  gap: 6px;
+  line-height: 24px;
+  min-block-size: 40px;
+  padding-inline: 16px 6px;
   transition: opacity var(--motion-fast-effects);
 }
 
@@ -59,13 +59,13 @@
   background: transparent;
   border: 0;
   border-radius: var(--shape-corner-full);
-  block-size: 24px;
+  block-size: 28px;
   color: var(--secondary-text-color);
   cursor: pointer;
   display: flex;
   flex: none;
-  font-size: 18px;
-  inline-size: 24px;
+  font-size: 20px;
+  inline-size: 28px;
   justify-content: center;
   padding: 0;
   position: relative;
@@ -74,7 +74,7 @@
 
 .commentTranslationLanguageRemove::after {
   content: '';
-  inset: -12px;
+  inset: -10px;
   position: absolute;
 }
 

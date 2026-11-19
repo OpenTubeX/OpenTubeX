@@ -1,13 +1,14 @@
-.autoRefreshIntervals {
-  display: flex;
-  flex-direction: column;
-  inline-size: 100%;
-  max-inline-size: 380px;
+/* The heading holds the tooltip, so the selects only keep room for their
+   sync and reset icons. */
+.autoRefreshIntervalSelects.settingsSelectGrid > .select {
+  --select-indicator-space: calc(8px + 22px + 22px);
 }
 
-.autoRefreshIntervals > :deep(.select) {
-  box-sizing: border-box;
-  inline-size: 100%;
+/* The four short selects share a row when it has room for them. */
+@container settings-content (width > 1160px) {
+  .autoRefreshIntervalSelects {
+    --settings-select-grid-columns: 4;
+  }
 }
 
 .onlyShowLatestFromChannelNumber {

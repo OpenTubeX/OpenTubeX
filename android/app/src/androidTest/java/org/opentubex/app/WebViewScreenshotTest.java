@@ -47,7 +47,7 @@ public class WebViewScreenshotTest {
                 """);
             awaitCondition(webView, "!!document.querySelector('.settingsMenu [data-section=\"download\"]')");
             evaluate(webView, "document.querySelector('.settingsMenu [data-section=\"download\"]').click()");
-            awaitCondition(webView, "!!document.querySelector('.downloadPathInputs input') && !document.querySelector('.settings-window-enter-active')");
+            awaitCondition(webView, "!!document.querySelector('.downloadFieldGrid input') && !document.querySelector('.settings-window-enter-active')");
             for (String layout : new String[] {"phone", "tablet"}) {
                 for (int scale : new int[] {100, 95}) {
                     evaluate(webView, String.format("""
@@ -62,8 +62,8 @@ public class WebViewScreenshotTest {
                     awaitCondition(webView, "window.__materialSizingReady");
                     JSONObject geometry = new JSONObject((String) new JSONTokener(evaluate(webView, """
                         JSON.stringify((() => {
-                            const input = document.querySelector('.downloadPathInputs input');
-                            const select = document.querySelector('.downloadQueueInputs .select-text');
+                            const input = document.querySelector('.downloadFieldGrid input');
+                            const select = document.querySelector('.downloadFieldGrid .select-text');
                             const label = document.querySelector('[data-setting-key="enableDownloads"] .switch-label');
                             const track = getComputedStyle(label.querySelector('.switch-label-text'), '::before');
                             const thumb = getComputedStyle(label.querySelector('.switch-thumb'));

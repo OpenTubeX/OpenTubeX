@@ -153,7 +153,9 @@ jobs:
 
     - run: pnpm install --frozen-lockfile
       shell: bash
+    # The same on every platform, so lint once.
     - run: pnpm run lint
+      if: matrix.runtime == 'linux-x64'
       shell: bash
     - name: Set version number
       id: versionNumber
@@ -212,6 +214,22 @@ jobs:
       shell: pwsh
       run: ./_scripts/testWindowsPortable.ps1
 
+    # The pinned Arch image upgrades about 240 MB of packages on every run, and
+    # its mirrors sometimes stall, so reuse this week's downloads.
+    - name: Get pacman cache week
+      id: pacman_week
+      if: startsWith(matrix.os, 'ubuntu')
+      shell: bash
+      run: printf 'week=%s\n' "$(date -u +%G-%V)" >> "$GITHUB_OUTPUT"
+
+    - name: Cache pacman packages
+      if: startsWith(matrix.os, 'ubuntu')
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        key: ${{ format('pacman-{0}-{1}-{2}', runner.os, runner.arch, steps.pacman_week.outputs.week) }}
+        restore-keys: ${{ format('pacman-{0}-{1}-', runner.os, runner.arch) }}
+        path: ${{ runner.temp }}/pacman-pkg
+
     - name: Convert x64 AppImage to Anylinux AppImage
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-x64')
       shell: bash
@@ -219,7 +237,8 @@ jobs:
         VERSION: ${{ steps.versionNumber.outputs.version }}
         GITHUB_TOKEN: ${{ github.token }}
       run: |
-        docker run --rm -v "$PWD":/work -w /work -e GITHUB_TOKEN ghcr.io/pkgforge-dev/archlinux:latest@sha256:3bac892a0e7c584a9bbe3affd5113a7918324ce5e01e802474dc034f03a15bba \
+        mkdir -p "$RUNNER_TEMP/pacman-pkg"
+        docker run --rm -v "$PWD":/work -v "$RUNNER_TEMP/pacman-pkg":/var/cache/pacman/pkg -w /work -e GITHUB_TOKEN ghcr.io/pkgforge-dev/archlinux:latest@sha256:3bac892a0e7c584a9bbe3affd5113a7918324ce5e01e802474dc034f03a15bba \
           sh _scripts/package-anylinux-appimage.sh "build/opentubex_${VERSION}_amd64.deb"
 
     - name: Convert ARM64 AppImage to Anylinux AppImage
@@ -229,7 +248,8 @@ jobs:
         VERSION: ${{ steps.versionNumber.outputs.version }}
         GITHUB_TOKEN: ${{ github.token }}
       run: |
-        docker run --rm -v "$PWD":/work -w /work -e GITHUB_TOKEN ghcr.io/pkgforge-dev/archlinux:latest@sha256:3bac892a0e7c584a9bbe3affd5113a7918324ce5e01e802474dc034f03a15bba \
+        mkdir -p "$RUNNER_TEMP/pacman-pkg"
+        docker run --rm -v "$PWD":/work -v "$RUNNER_TEMP/pacman-pkg":/var/cache/pacman/pkg -w /work -e GITHUB_TOKEN ghcr.io/pkgforge-dev/archlinux:latest@sha256:3bac892a0e7c584a9bbe3affd5113a7918324ce5e01e802474dc034f03a15bba \
           sh _scripts/package-anylinux-appimage.sh "build/opentubex_${VERSION}_arm64.deb"
 
     - name: Upload Linux .zip x64 Artifact
@@ -431,6 +451,7 @@ jobs:
     if: github.repository == 'OpenTubeX/OpenTubeX' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
 
+    cache-mode: write
     permissions:
       actions: write
       contents: read
@@ -451,7 +472,10 @@ jobs:
       uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
       with:
         go-version-file: _scripts/cast-sender/go.mod
-        cache: false
+        # Gradle cross-compiles both Go modules for every Android ABI.
+        cache-dependency-path: |
+          _scripts/cast-sender/go.sum
+          _scripts/yt-dlp-http/go.sum
 
     - name: Install pnpm
       uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
@@ -463,6 +487,16 @@ jobs:
       with:
         distribution: temurin
         java-version: 21
+
+    # Shares its key with the Android Tests workflow.
+    - name: Cache Gradle dependencies
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        key: ${{ format('gradle-{0}-{1}-{2}', runner.os, runner.arch, hashFiles('android/**/*.gradle', 'android/gradle/wrapper/gradle-wrapper.properties', 'pnpm-lock.yaml')) }}
+        restore-keys: ${{ format('gradle-{0}-{1}-', runner.os, runner.arch) }}
+        path: |
+          ~/.gradle/caches/modules-2
+          ~/.gradle/wrapper
 
     - name: Set up Android SDK
       uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
@@ -478,9 +512,29 @@ jobs:
     - name: Test Android APK packaging
       run: python3 -m unittest discover -s tests/android
 
+    # The script pins the sources, Emscripten and flags, and its build is
+    # reproducible, so its output only changes with the script. Debian can still
+    # update the rest of the toolchain, so rebuild monthly to notice that.
+    # Releases always build from source.
+    - name: Get WebAssembly cache month
+      id: wasm_month
+      run: printf 'month=%s\n' "$(date -u +%Y-%m)" >> "$GITHUB_OUTPUT"
+
+    - name: Restore WebAssembly modules
+      id: wasm_cache
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        key: ${{ format('android-wasm-{0}-{1}', steps.wasm_month.outputs.month, hashFiles('_scripts/androidWasm.mjs')) }}
+        path: build/android-wasm/out
+
     - name: Build WebAssembly modules from source
       # F-Droid rebuilds the APKs the same way and rejects prebuilt WebAssembly.
+      if: steps.wasm_cache.outputs.cache-hit != 'true'
       run: node _scripts/androidWasm.mjs docker
+
+    - name: Check the WebAssembly pins against node_modules
+      if: steps.wasm_cache.outputs.cache-hit == 'true'
+      run: node _scripts/androidWasm.mjs check
 
     - name: Build Android APKs
       id: apk

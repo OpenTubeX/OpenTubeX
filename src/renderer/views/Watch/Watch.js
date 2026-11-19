@@ -2176,6 +2176,11 @@ export default defineComponent({
     },
     /** @param {{ panel: import('../../components/FtShakaVideoPlayer/opentubex/dockedPanels').DockedPanel, open: boolean, target: HTMLElement | null, presentationActive?: boolean }} change */
     handleDockPanelChange({ panel, ...change }) {
+      // A dock reports its close once it has slid out, which can be after a
+      // retained Short was swiped away and the next one opened the same dock.
+      const currentTarget = this[`fullscreen${panel[0].toUpperCase()}${panel.slice(1)}Target`]
+      if (!change.open && change.target && currentTarget && change.target !== currentTarget) return
+
       const handlers = {
         metadata: this.handleFullscreenMetadataChange,
         transcript: this.handleFullscreenTranscriptChange,
@@ -2461,7 +2466,7 @@ export default defineComponent({
         else this.openShortsPhonePanel('metadata')
         return
       }
-      const shouldOpen = !this.shortsMetadataOpen
+      const shouldOpen = this.$refs.player?.reopenClosingDockPanel('metadata') || !this.shortsMetadataOpen
       if (shouldOpen) {
         this.resetShortsAuxPanelScroll()
       }

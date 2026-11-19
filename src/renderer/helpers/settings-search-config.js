@@ -351,7 +351,11 @@ export const SETTINGS_SEARCH_SOURCES = {
 export const SETTINGS_SEARCH_SETTING_KEYS = {
   subscription: {
     'Settings.Subscription Settings.Platforms.Auto Refresh Interval': 'platformFeedAutoRefreshInterval',
-    'Settings.Subscription Settings.RSS Feeds Auto Refresh Interval': 'rssFeedsAutoRefreshInterval'
+    'Settings.Subscription Settings.RSS Feeds Auto Refresh Interval': 'rssFeedsAutoRefreshInterval',
+    'Settings.Subscription Settings.Videos Auto Refresh Interval': 'subscriptionFeedAutoRefreshInterval',
+    'Settings.Subscription Settings.Shorts Auto Refresh Interval': 'subscriptionShortsAutoRefreshInterval',
+    'Settings.Subscription Settings.Live Auto Refresh Interval': 'subscriptionLiveAutoRefreshInterval',
+    'Settings.Subscription Settings.Posts Auto Refresh Interval': 'subscriptionPostsAutoRefreshInterval'
   },
   channel: {
     'Settings.Channel Settings.Auto Save Playback Speed': 'autoUpdateChannelPlaybackSpeeds',

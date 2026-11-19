@@ -105,6 +105,12 @@
   margin-block-start: calc(20px * var(--ui-density));
 }
 
+/* A nested card that ends the section keeps the same 20px from its bottom
+   edge, which already pads the content by 8px. */
+.settingsSection > .sectionBody > :deep(.settingsCard:last-child) {
+  margin-block-end: calc(12px * var(--ui-density));
+}
+
 /* Group titles introduce the blocks below them, so they sit closer to those
    than to the blocks above. */
 .settingsSection > .sectionBody > :deep(:is(h3, h4):not(:first-child)) {
@@ -120,7 +126,7 @@
   line-height: 1.75rem;
   user-select: none;
   margin-inline: 20px;
-  margin-block: 0 calc(12px * var(--ui-density));
+  margin-block: 0 calc(20px * var(--ui-density));
   text-align: center;
 }
 
