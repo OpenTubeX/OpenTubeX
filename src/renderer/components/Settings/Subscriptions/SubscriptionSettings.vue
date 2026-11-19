@@ -173,15 +173,17 @@
         />
       </div>
     </div>
-    <FtCheckboxList
-      v-model="subscriptionFeedsRefreshedTogether"
-      :title="$t('Settings.Subscription Settings.Refresh These Feeds Together')"
-      :tooltip="$t('Tooltips.Subscription Settings.Refresh These Feeds Together')"
-      :labels="feedNames"
-      :values="FEED_VALUES"
-      :disabled-values="hiddenFeeds"
-      setting-key="subscriptionFeedsRefreshedTogether"
-    />
+    <FtFlexBox>
+      <FtCheckboxList
+        v-model="subscriptionFeedsRefreshedTogether"
+        :title="$t('Settings.Subscription Settings.Refresh These Feeds Together')"
+        :tooltip="$t('Tooltips.Subscription Settings.Refresh These Feeds Together')"
+        :labels="feedNames"
+        :values="FEED_VALUES"
+        :disabled-values="hiddenFeeds"
+        setting-key="subscriptionFeedsRefreshedTogether"
+      />
+    </FtFlexBox>
   </FtSettingsSection>
 </template>
 
@@ -195,6 +197,7 @@ import FtSlider from '../../FtSlider/FtSlider.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
 import FtTooltip from '../../FtTooltip/FtTooltip.vue'
 import FtCheckboxList from '../../FtCheckboxList/FtCheckboxList.vue'
+import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
 import SubscriptionChannelSettings from './SubscriptionChannelSettings.vue'
 
 import store from '../../../store/index'
