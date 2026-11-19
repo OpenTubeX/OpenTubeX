@@ -210,6 +210,10 @@ also attaches the app's trace, with DOM snapshots, console messages and
 network requests, and the main process output, also when the app fails to
 start. A failed live network attempt also attaches YouTube's API and watch page
 responses as `youtube-responses.json.gz`, since the trace doesn't keep their bodies.
+When an app process crashed, such as a renderer that exited with code 133,
+the failed test also attaches its minidump, named after the Electron version.
+The E2E app keeps them locally and never uploads them. Symbolize one with
+`minidump_stackwalk` and that version's `electron-*-symbols.zip` release asset.
 The performance project disables tracing to avoid distorting measurements.
 On CI, Playwright retries each failed test once. A test that passes only on
 retry does not fail the run: it gets a warning annotation and an entry in the

@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process'
 import { once } from 'node:events'
 import { existsSync, readFileSync } from 'node:fs'
-import { cp, mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { cp, mkdtemp, readdir, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
@@ -839,6 +839,27 @@ function recordAppDiagnostics(testInfo, recordTrace) {
   }
 }
 
+/**
+ * Attaches the minidumps of processes that crashed during a failed test, such
+ * as a renderer that exited with code 133. The E2E app keeps them in its
+ * profile without uploading them. Symbolize one with the symbols of the
+ * Electron version in its name, for example with `minidump_stackwalk`.
+ * @param {import('@playwright/test').TestInfo} testInfo
+ * @param {string} userDataDir
+ */
+async function attachCrashDumps(testInfo, userDataDir) {
+  const entries = await readdir(path.join(userDataDir, 'Crashpad'), { recursive: true }).catch(() => [])
+  const dumps = entries.filter(entry => entry.endsWith('.dmp'))
+  if (dumps.length === 0) return
+  const { version } = JSON.parse(readFileSync(path.join(repoRoot, 'node_modules', 'electron', 'package.json'), 'utf8'))
+  for (const dump of dumps) {
+    await testInfo.attach(`crash dump (Electron ${version}) ${path.basename(dump)}`, {
+      path: path.join(userDataDir, 'Crashpad', dump),
+      contentType: 'application/octet-stream'
+    })
+  }
+}
+
 const UNPOSITIONED_VIEWPORT_ERROR = 'Overlay scrollbars need a positioned scroll container'
 // Chromium logs every script and eval() it blocks.
 const CSP_VIOLATION = /Content Security Policy/
@@ -999,6 +1020,7 @@ export const test = base.extend({
       if (appHandle) {
         await appHandle.electronApp.close().catch(() => {})
       }
+      if (failed) await attachCrashDumps(testInfo, userDataDir)
       const blockedRequests = [...new Set(takeBlockedRequests())]
       // Requests from the main process and its child processes, which
       // Playwright cannot mock. They fail instead of reaching real hosts.
