@@ -13,6 +13,9 @@ import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.getcapacitor.JSObject;
+import com.getcapacitor.PluginCall;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -20,6 +23,7 @@ import org.junit.runner.RunWith;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -84,6 +88,19 @@ public class HomeWidgetsTest {
         assertEquals("jNQXAC9IVRw", parsed.get(0).id());
         assertEquals("Thumbnails require HTTPS", "", parsed.get(0).thumbnail());
         assertEquals("Thumbnails must not target the device's network", "", parsed.get(1).thumbnail());
+    }
+
+    @Test
+    public void callsAfterDestroyAreRejected() throws Exception {
+        HomeWidgetsPlugin plugin = new HomeWidgetsPlugin();
+        // Capacitor can still deliver a call the renderer sent while the activity was being destroyed.
+        plugin.handleOnDestroy();
+        CompletableFuture<String> rejection = new CompletableFuture<>();
+        plugin.setWatchTime(new PluginCall(null, "HomeWidgets", "test", "setWatchTime", new JSObject()) {
+            @Override public void resolve() { rejection.completeExceptionally(new AssertionError("resolved")); }
+            @Override public void reject(String message) { rejection.complete(message); }
+        });
+        assertEquals("The app is closing", rejection.get(5, TimeUnit.SECONDS));
     }
 
     @Test

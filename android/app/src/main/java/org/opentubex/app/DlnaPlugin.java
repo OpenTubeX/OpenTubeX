@@ -52,7 +52,7 @@ public final class DlnaPlugin extends Plugin {
 
     @PluginMethod public void discover(PluginCall call) {
         if (destroyed) { call.reject("DLNA plugin closed"); return; }
-        discoveryWorker.execute(() -> {
+        PluginWork.execute(discoveryWorker, call, () -> {
             WifiManager wifi = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
             WifiManager.MulticastLock lock = wifi.createMulticastLock("OpenTubeX DLNA discovery");
             lock.setReferenceCounted(false);
@@ -96,7 +96,7 @@ public final class DlnaPlugin extends Plugin {
             call.reject("Invalid DLNA request");
             return;
         }
-        requestWorker.execute(() -> {
+        PluginWork.execute(requestWorker, call, () -> {
             // LAN control stays on Wi-Fi even when an Internet proxy or VPN is enabled.
             OkHttpClient.Builder builder = new OkHttpClient.Builder().proxy(Proxy.NO_PROXY)
                 .followRedirects(false).followSslRedirects(false)
@@ -124,7 +124,7 @@ public final class DlnaPlugin extends Plugin {
     }
 
     @PluginMethod public void startMediaServer(PluginCall call) {
-        worker.execute(() -> {
+        PluginWork.execute(worker, call, () -> {
             HttpUrl url = HttpUrl.parse(call.getString("mediaUrl", ""));
             String audioRaw = call.getString("audioUrl");
             HttpUrl audio = audioRaw == null ? null : HttpUrl.parse(audioRaw);
@@ -152,7 +152,7 @@ public final class DlnaPlugin extends Plugin {
     }
 
     @PluginMethod public void hasFailed(PluginCall call) {
-        worker.execute(() -> {
+        PluginWork.execute(worker, call, () -> {
             boolean matches = relay != null && relay.castId.equals(call.getString("castId"));
             call.resolve(new JSObject().put("failed", matches && relay.muxFailed && !relay.stoppedByUser)
                 .put("stopped", matches && relay.stoppedByUser));
@@ -160,7 +160,7 @@ public final class DlnaPlugin extends Plugin {
     }
 
     @PluginMethod public void stopMediaServer(PluginCall call) {
-        worker.execute(() -> {
+        PluginWork.execute(worker, call, () -> {
             if (relay != null && relay.castId.equals(call.getString("castId"))) {
                 DlnaCastService.stop(getContext(), relay);
                 relay.close();
