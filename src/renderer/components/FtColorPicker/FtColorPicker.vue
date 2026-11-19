@@ -23,7 +23,7 @@
         <span class="colorFieldLabel">
           <slot name="label">{{ label }}</slot>
         </span>
-        <code>{{ modelValue }}</code>
+        <code dir="ltr">{{ modelValue }}</code>
       </slot>
     </button>
 
@@ -145,6 +145,7 @@
             <span class="hexInputControl">
               <input
                 v-model="hexInput"
+                dir="ltr"
                 :placeholder="allowAlpha ? '#336699ff' : '#336699'"
                 type="text"
                 :maxlength="allowAlpha ? 9 : 7"
@@ -201,7 +202,7 @@
                   <span :style="{ backgroundColor: color.value }" />
                 </span>
                 <span>{{ color.label }}</span>
-                <code>{{ color.value }}</code>
+                <code dir="ltr">{{ color.value }}</code>
               </button>
             </div>
           </div>

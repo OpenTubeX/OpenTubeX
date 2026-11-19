@@ -6,7 +6,7 @@
   >
     <div class="accentColorHeader">
       <span>{{ label }}</span>
-      <code>{{ systemSelected ? systemLabel : modelValue }}</code>
+      <code :dir="systemSelected ? null : 'ltr'">{{ systemSelected ? systemLabel : modelValue }}</code>
     </div>
     <div class="accentColorSwatches">
       <button
