@@ -2594,15 +2594,15 @@ export default defineComponent({
     /**
      * Plays audio formats while the app is in the background or the screen
      * is off, where nobody can see the video, if the user enabled it.
-     * Picture-in-Picture keeps the video.
+     * Android Picture-in-Picture keeps the app visible, so it keeps the video.
      */
     switchToAudioInBackground() {
-      if (!process.env.IS_CAPACITOR || !isAppHidden() || this.formatBeforeBackground !== null ||
+      if (!process.env.IS_CAPACITOR || process.env.IS_IOS || !isAppHidden() || this.formatBeforeBackground !== null ||
         !this.$store.getters.getSwitchToAudioInBackground ||
         // Playback pauses in the background without it.
         !this.$store.getters.getContinuePlaybackWhenScreenIsLocked ||
         this.activeFormat === 'audio' || !this.audioFormatAvailable || this.castingActive ||
-        !this.videoPlaying || !this.isPlaybackPresented() || this.$refs.player?.isPictureInPictureActive()) return
+        !this.videoPlaying || !this.isPlaybackPresented()) return
       this.formatBeforeBackground = this.activeFormat
       this.activeFormat = 'audio'
     },

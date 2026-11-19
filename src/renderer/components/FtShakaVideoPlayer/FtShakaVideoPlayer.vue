@@ -8275,11 +8275,6 @@ function handleEnterPictureInPicture(event) {
   syncPipToggleState(true)
 }
 
-/** iOS reports Picture-in-Picture through WebKit's presentation mode first. */
-function isPictureInPictureActive() {
-  return pictureInPictureActive.value || video.value?.webkitPresentationMode === 'picture-in-picture'
-}
-
 function handleLeavePictureInPicture() {
   pictureInPictureActive.value = false
   tabMediaCoordinator.setPictureInPicture(mediaTabId, false)
@@ -13827,7 +13822,6 @@ defineExpose({
   hasPlaybackPosition,
   scrollMiniPlayerActive,
   presentedOutsideTab,
-  isPictureInPictureActive,
   getMiniPlayerHandoffHeight,
   exitPresentationModes,
 
