@@ -91,8 +91,9 @@ export async function deliverAndroidNotification(notification) {
 /**
  * Leaves out the notifications the user already read, removed or watched,
  * also on another device, and removes the shown ones. Each list replaces the
- * one sent before; an omitted list stays.
- * @param {{ dismissed?: { feedType: string, id: string }[], watched?: string[] }} suppressed
+ * one sent before; an omitted list stays. `dismissedThrough` comes with the
+ * dismissals: every notification shown until then was read or removed.
+ * @param {{ dismissed?: { feedType: string, id: string }[], dismissedThrough?: number, watched?: string[] }} suppressed
  */
 export async function suppressAndroidNotifications(suppressed) {
   try {

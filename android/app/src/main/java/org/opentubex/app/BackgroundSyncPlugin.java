@@ -79,7 +79,8 @@ public class BackgroundSyncPlugin extends Plugin {
      */
     @PluginMethod
     public void suppressNotifications(PluginCall call) {
-        UploadNotifications.suppress(getContext(), call.getArray("dismissed", null), call.getArray("watched", null));
+        UploadNotifications.suppress(getContext(), call.getArray("dismissed", null),
+            call.getLong("dismissedThrough", 0L), call.getArray("watched", null));
         call.resolve();
     }
 

@@ -203,12 +203,14 @@ final class UploadNotifications {
      * Replaces what to leave out and removes the matching shown notifications:
      * `dismissed` holds the notifications read or removed in the app's history,
      * also on other devices, as `{ feedType, id }`, and `watched` the IDs of the
-     * videos in the watch history. A null list keeps its last value.
+     * videos in the watch history. A null list keeps its last value. With the
+     * dismissals, `dismissedThrough` tells until when every notification was
+     * read or removed, as when the history was cleared on another device.
      */
-    static synchronized void suppress(Context context, JSONArray dismissed, JSONArray watched) {
+    static synchronized void suppress(Context context, JSONArray dismissed, long dismissedThrough, JSONArray watched) {
         try {
             JSONObject suppressed = readSuppressed(context);
-            if (dismissed != null) suppressed.put("dismissed", dismissed);
+            if (dismissed != null) suppressed.put("dismissed", dismissed).put("dismissedThrough", dismissedThrough);
             if (watched != null) suppressed.put("watched", watched);
             writeAtomically(suppressedFile(context), suppressed.toString());
             Set<Integer> ids = new HashSet<>();
@@ -221,7 +223,10 @@ final class UploadNotifications {
             for (int i = 0; watchedIds != null && i < watchedIds.length(); i++) addNotificationIds(ids, "videos", watchedIds.optString(i));
             NotificationManager manager = context.getSystemService(NotificationManager.class);
             for (StatusBarNotification notification : manager.getActiveNotifications()) {
-                if (TAG.equals(notification.getTag()) && ids.contains(notification.getId())) manager.cancel(TAG, notification.getId());
+                if (TAG.equals(notification.getTag()) && (ids.contains(notification.getId()) ||
+                    notification.getPostTime() <= suppressed.optLong("dismissedThrough"))) {
+                    manager.cancel(TAG, notification.getId());
+                }
             }
         } catch (Exception error) {
             android.util.Log.w("OpenTubeXUploads", "Unable to update the suppressed notifications", error);

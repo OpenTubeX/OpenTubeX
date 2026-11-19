@@ -76,13 +76,14 @@ function getAndroidNotification({ kind, path, query }) {
  * device, so it leaves them out and removes the shown ones, also while the app is closed.
  * @param {import('../../notificationHistory').NotificationDismissals} dismissals
  */
-export function suppressDismissedAndroidNotifications({ dismissals }) {
+export function suppressDismissedAndroidNotifications({ readThrough, clearedThrough, dismissals }) {
   if (!process.env.IS_CAPACITOR || process.env.IS_IOS) return
   const dismissed = dismissals.flatMap(({ key }) => {
     const target = parseNotificationKey(key)
     return (target && getAndroidNotification(target)) ?? []
   })
-  suppressAndroidNotifications({ dismissed })
+  // Marking all read or clearing records no key for each notification.
+  suppressAndroidNotifications({ dismissed, dismissedThrough: Math.max(readThrough, clearedThrough) })
 }
 
 /**
