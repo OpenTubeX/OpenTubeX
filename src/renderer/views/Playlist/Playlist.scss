@@ -393,7 +393,9 @@
 .playlistItem-enter-from,
 .playlistItem-leave-to {
   opacity: 0;
-  transform: translate(calc(10% * var(--horizontal-directionality-coefficient)));
+  // Slide from the inline start: overflow on that side is not scrollable, while
+  // sliding from the end would let the page scroll sideways during the transition.
+  transform: translate(calc(-10% * var(--horizontal-directionality-coefficient)));
 }
 
 .loadNextPageWrapper {
