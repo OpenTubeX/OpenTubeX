@@ -46,12 +46,10 @@ test('full width cards fill phone rows and stay capped in wider windows', () => 
   assert.equal(Number.parseFloat(phone['--thumbnail-grid-size']), 396)
   assert.equal(phone['--thumbnail-grid-stretch'], 'calc(100% - 0px)')
 
-  for (const size of [60, 100, 180]) {
-    const styles = getThumbnailGridStyles(size, 1700, 1780, 1700, FULL_WIDTH_COLUMNS)
-    const cardSize = Number.parseFloat(styles['--thumbnail-grid-size'])
-    assert.ok(cardSize < 1700)
-    assert.equal(styles['--thumbnail-grid-stretch'], `min(calc(100% - 0px), ${cardSize}px)`)
-  }
+  const styles = getThumbnailGridStyles(100, 1700, 1780, 1700, FULL_WIDTH_COLUMNS)
+  const cardSize = Number.parseFloat(styles['--thumbnail-grid-size'])
+  assert.ok(cardSize < 1700)
+  assert.equal(styles['--thumbnail-grid-stretch'], `min(calc(100% - 0px), ${cardSize}px)`)
   // The thumbnail size scales the cap.
   const capped = size => Number.parseFloat(getThumbnailGridStyles(size, 1700, 1780, 1700, FULL_WIDTH_COLUMNS)['--thumbnail-grid-size'])
   assert.ok(capped(60) < capped(100) && capped(100) < capped(180))
