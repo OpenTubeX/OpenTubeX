@@ -9,6 +9,7 @@ import {
   findCommentsToLink,
   findNewReplies,
   getCommentNotificationTarget,
+  getCommentWebUrl,
   getWatchedCommentTarget,
   isOwnWatchedComment,
   markThreadOpened,
@@ -18,6 +19,8 @@ import {
 } from '../../src/commentReplyTracking.js'
 
 const own = { videoId: 'video1', channelId: 'UCme', handle: '@Me', text: 'First', videoTitle: 'Title' }
+// Made up, in the shape of post IDs
+const POST_ID = 'UgkxExamplePostIdentifier0123456789'
 const reply = (id, authorId, text = 'Nice') => ({ id: `thread1.${id}`, authorId, author: authorId, text })
 
 test('announces each reply to an own comment once, but not own replies', () => {
@@ -109,6 +112,12 @@ test('reply targets accept only reply IDs of a video, and heart targets comment 
   })
   assert.equal(getCommentNotificationTarget('comment-heart', 'video1', 'thread1.a.b'), null)
   assert.equal(getCommentNotificationTarget('video', 'video1', 'thread1'), null)
+  // Comments on posts lead to the post.
+  assert.deepEqual(getCommentNotificationTarget('comment-reply', POST_ID, 'thread1.a'), {
+    kind: 'comment-reply', path: `/post/${POST_ID}`, query: { commentId: 'thread1.a' }
+  })
+  assert.equal(getCommentWebUrl(POST_ID, 'thread1.a'), `https://www.youtube.com/post/${POST_ID}?lc=thread1.a`)
+  assert.equal(getCommentWebUrl('abcdefghijk', 'thread1.a'), 'https://www.youtube.com/watch?v=abcdefghijk&lc=thread1.a')
 })
 
 test('reads whether a linked comment or reply is hearted, and by whom, from the response', () => {
@@ -199,6 +208,16 @@ test('watched comments open with the account\'s comment highlighted', () => {
   assert.deepEqual(target('thread1', 'thread1'), { path: '/watch/video1', query: { commentId: 'thread1' } })
   assert.deepEqual(target('thread1', 'thread1.mine').query, { commentId: 'thread1.mine' })
   assert.deepEqual(target('thread1', 'mine').query, { commentId: 'thread1.mine' })
+
+  // Comments on a post keep the post's channel, which opening the post needs.
+  const onPost = trackComment([], {
+    ...own, videoId: POST_ID, postAuthorId: 'UCcreator', threadId: 'thread1', commentId: 'thread1', accountId: 'UCme'
+  }, 1000)[0]
+  assert.equal(normalizeTrackedCommentThreads([onPost], 2000).length, 1)
+  assert.deepEqual(getWatchedCommentTarget(onPost), {
+    path: `/post/${POST_ID}`, query: { authorId: 'UCcreator', commentId: 'thread1' }
+  })
+  assert.equal(normalizeTrackedCommentThreads([{ ...onPost, postAuthorId: '../x' }], 2000).length, 0)
 })
 
 test('watches others\' comments from now on and apart from own ones', () => {

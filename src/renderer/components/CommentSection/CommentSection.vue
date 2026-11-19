@@ -543,7 +543,6 @@
               v-for="node in replyNodes"
               :key="node.reply.id"
               :node="node"
-              :thread-index="index ?? -1"
               root-level
               :enable-channel-links="enableChannelLinks"
               :hide-comment-likes="hideCommentLikes"
@@ -860,14 +859,21 @@ const deletedCommentIds = new Set()
 /** @type {Map<string, { text: string, mentions: import('./youTubeComments').CommentMention[] }>} */
 const editedCommentTexts = new Map()
 
-// The signed-in YouTube account can rate, write and delete video comments.
+/** @type {import('vue').ComputedRef<import('../../helpers/api/youtube-account-parsers').YouTubeCommentTarget | null>} */
+const youTubeCommentTarget = computed(() => {
+  if (!props.isPostComments) return { videoId: props.id }
+  // YouTube identifies posts with their channel.
+  return props.postAuthorId ? { postId: props.id, channelId: props.postAuthorId } : null
+})
+
+// The signed-in YouTube account can rate, write and delete comments.
 const youTubeComments = {
-  enabled: computed(() => !props.isPostComments && !props.offline && !props.commentsDisabled &&
+  enabled: computed(() => youTubeCommentTarget.value !== null && !props.offline && !props.commentsDisabled &&
     !areCommentsDisabled.value && isSignedInToYouTube(store.getters)),
-  videoId: computed(() => props.id),
+  target: youTubeCommentTarget,
   videoTitle: computed(() => props.videoTitle),
-  // Comments on posts and saved comments cannot be watched for replies.
-  watchable: computed(() => !props.isPostComments && !props.offline),
+  // Saved comments cannot be watched for replies.
+  watchable: computed(() => youTubeCommentTarget.value !== null && !props.offline),
   channelId: computed(() => store.getters.getYouTubeAccount?.channelId ?? null),
   replyingTo: ref(null),
   // The comment open for editing, one at a time like replies.
@@ -896,16 +902,12 @@ const youTubeComments = {
       return
     }
 
-    const thread = commentData.value.find(entry => entry.id === parentId)
+    const thread = commentData.value.find(entry => entry.id === getRootCommentId(parentId))
     if (!thread) {
       addReplyToPinnedSnapshot(parentId, comment)
       return
     }
-    if (thread.replies.some(reply => reply.id === comment.id)) return
-    // A new list, so the cached reply tree is rebuilt.
-    thread.replies = [...thread.replies, comment]
-    thread.numReplies++
-    thread.showReplies = true
+    addReply(thread, parentId, comment)
   },
   updateComment(commentId, text, mentions) {
     editedCommentTexts.set(commentId, { text, mentions })
@@ -962,18 +964,35 @@ watch([() => props.id, () => getYouTubeChannelKey(store.getters.getYouTubeAccoun
 })
 
 /**
+ * Adds a posted reply to a thread. YouTube nests a reply to a reply under
+ * it, like its loaded replies; replies from other sources are flat and nest
+ * by their mentions instead.
+ * @param {Comment} thread
+ * @param {string} parentId the comment or reply it replies to
+ * @param {Comment} reply
+ */
+function addReply(thread, parentId, reply) {
+  const parent = (thread.dataType === 'local' && findComment(thread, parentId)) || thread
+  if (parent.replies.some(entry => entry.id === reply.id)) return
+  // A new list, so the cached reply tree is rebuilt.
+  parent.replies = [...parent.replies, reply]
+  parent.numReplies = (parent.numReplies ?? 0) + 1
+  if (parent !== thread) thread.numReplies = (thread.numReplies ?? 0) + 1
+  thread.showReplies = true
+}
+
+/**
  * A personally pinned thread can show from its saved snapshot when it is not
  * on the loaded pages, so a reply to it goes into the snapshot.
- * @param {string} parentId
+ * @param {string} parentId the comment or reply it replies to
  * @param {Comment} reply
  */
 function addReplyToPinnedSnapshot(parentId, reply) {
-  updatePinnedSnapshot(parentId, snapshot => ({
-    ...snapshot,
-    replies: [...snapshot.replies, reply],
-    numReplies: (snapshot.numReplies ?? 0) + 1,
-    showReplies: true
-  }))
+  updatePinnedSnapshot(getRootCommentId(parentId), snapshot => {
+    const thread = structuredClone(toRaw(snapshot))
+    addReply(thread, parentId, reply)
+    return thread
+  })
 }
 
 /**
@@ -2473,7 +2492,7 @@ async function getCommentDataLocal(more = false) {
     } else {
       const sortBy = sortNewest.value ? 'NEWEST_FIRST' : undefined
       if (props.isPostComments) {
-        comments = await getLocalCommunityPostComments(props.id, props.postAuthorId, sortBy)
+        comments = await getLocalCommunityPostComments(props.id, props.postAuthorId, sortBy, getHighlightedRootCommentId() ?? undefined)
       } else {
         comments = await getLocalComments(props.id, sortBy, getHighlightedRootCommentId() ?? undefined)
       }

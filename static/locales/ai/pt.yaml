@@ -409,7 +409,7 @@ Settings:
     Sync Subscriptions: "Sincronizar subscrições com o YouTube"
     Sync Playlists: "Sincronizar playlists com o YouTube"
     Add to YouTube Watch History: "Adicionar vídeos vistos ao histórico do YouTube"
-    Rate Videos: "Gostar e não gostar de vídeos"
+    Rate Videos: "Gostar e não gostar de vídeos e publicações"
     Sync Now: "Sincronizar agora"
     Synced: "Sincronizado com o YouTube"
     Sync Failed: "Não foi possível sincronizar com o YouTube: {error}"
@@ -1743,6 +1743,8 @@ Channel:
     Original post unavailable: "Publicação original indisponível"
     Members-only video hidden by OpenTubeX: "Vídeo só para membros ocultado pelo OpenTubeX"
     Video hidden by OpenTubeX because of its title: "Vídeo ocultado pelo OpenTubeX porque o título contém texto oculto"
+    Correct: "Correto"
+    Incorrect: "Incorreto"
 Video:
   Play in Background: "Reproduzir em segundo plano"
   Info panel source: 'Fonte: {source}'
@@ -2329,7 +2331,7 @@ Tooltips:
     Sync Subscriptions: "Os canais que subscreve no YouTube são adicionados a Todos os canais, e os canais cuja subscrição cancela lá são removidos de todos os perfis. Subscrever ou cancelar a subscrição em Todos os canais aqui faz o mesmo no YouTube."
     Sync Playlists: "As suas playlists do YouTube, Ver mais tarde e Vídeos de que gostei aparecem em Suas playlists, e as alterações que lhes fizer aqui também são feitas no YouTube. Não são sincronizadas com os seus outros dispositivos nem incluídas quando exporta todas as playlists ou faz uma cópia de segurança dos seus dados. Desativar esta opção remove-as deste dispositivo, mas não do YouTube."
     Add to YouTube Watch History: "Os vídeos que reproduz são adicionados ao seu histórico de visualizações do YouTube, para que as recomendações do YouTube aprendam com eles. Nada é adicionado enquanto o histórico estiver em pausa no YouTube."
-    Rate Videos: "Mostra os botões gosto e não gosto nos vídeos. Para mostrar a sua classificação, cada vídeo que abre é consultado no YouTube com a sua conta, por isso o YouTube fica a saber que vídeos abre, mesmo quando não são adicionados ao seu histórico de visualizações."
+    Rate Videos: "Mostra os botões gosto e não gosto nos vídeos e nas publicações. Para mostrar a sua classificação, cada vídeo que abre é consultado no YouTube com a sua conta, por isso o YouTube fica a saber que vídeos abre, mesmo quando não são adicionados ao seu histórico de visualizações. As classificações das publicações não são consultadas, por isso só aparecem as que fizer aqui."
   General Settings:
     Invidious Instance Credentials: 'Só é necessário se a instância pedir um nome de utilizador e uma palavra-passe. São guardados apenas neste dispositivo e enviados apenas para esta instância.'
     Reply Notifications: "O OpenTubeX verifica se os comentários que acompanha receberam novas respostas. Também o avisa quando um criador dá um coração a um dos seus comentários. Um comentário continua a ser acompanhado até passarem 30 dias sem novas respostas, corações ou sem que o abra. Podem ser acompanhados até 50 comentários em simultâneo, pelo que acompanhar mais faz deixar de acompanhar os que estão inativos há mais tempo. Acompanhe qualquer comentário com o botão do sino ao lado."
@@ -2868,6 +2870,7 @@ YouTube Account:
   Like: "Gosto"
   Dislike: "Não gosto"
   Rating Failed: "Não foi possível avaliar no YouTube: {error}"
+  Vote Failed: "Não foi possível votar no YouTube: {error}"
   Subscribe Failed: "Não foi possível subscrever no YouTube: {error}"
   Unsubscribe Failed: "Não foi possível cancelar a subscrição no YouTube: {error}"
   Subscriptions Synced: "Subscrições sincronizadas do YouTube: {added} adicionadas, {removed} removidas"

@@ -411,7 +411,7 @@ Settings:
     Sync Subscriptions: "Abunəlikləri YouTube ilə sinxronlaşdır"
     Sync Playlists: "Pleylistləri YouTube ilə sinxronlaşdır"
     Add to YouTube Watch History: "Baxılan videoları YouTube tarixçəsinə əlavə et"
-    Rate Videos: "Videoları bəyənmək və bəyənməmək"
+    Rate Videos: "Videoları və paylaşımları bəyənmək və bəyənməmək"
     Sync Now: "İndi sinxronlaşdır"
     Synced: "YouTube ilə sinxronlaşdırıldı"
     Sync Failed: "YouTube ilə sinxronlaşdırmaq mümkün olmadı: {error}"
@@ -1746,6 +1746,8 @@ Channel:
     Original post unavailable: "Orijinal paylaşım əlçatan deyil"
     Members-only video hidden by OpenTubeX: "Yalnız üzvlər üçün video OpenTubeX tərəfindən gizlədildi"
     Video hidden by OpenTubeX because of its title: "Başlığında gizlədilmiş mətn olduğu üçün video OpenTubeX tərəfindən gizlədildi"
+    Correct: "Düzgün"
+    Incorrect: "Səhv"
 Video:
   Play in Background: "Arxa planda oynat"
   Info panel source: 'Mənbə: {source}'
@@ -2341,7 +2343,7 @@ Tooltips:
     Sync Subscriptions: "YouTube-da abunə olduğunuz kanallar “Bütün Kanallar” bölməsinə əlavə olunur, orada abunəlikdən çıxdığınız kanallar isə bütün profillərdən silinir. Burada “Bütün Kanallar” bölməsində abunə olmaq və ya abunəlikdən çıxmaq YouTube-da da eyni şeyi edir."
     Sync Playlists: "YouTube pleylistləriniz, “Sonra baxın” və “Bəyənilən videolar” “Pleylistləriniz” bölməsində görünür və burada onlara etdiyiniz dəyişikliklər YouTube-da da edilir. Onlar digər cihazlarınızla sinxronlaşdırılmır və bütün pleylistləri ixrac etdikdə və ya məlumatlarınızın ehtiyat nüsxəsini çıxardıqda daxil edilmir. Bunu söndürmək onları bu cihazdan silir, lakin YouTube-dan silmir."
     Add to YouTube Watch History: "Oxutduğunuz videolar YouTube baxış tarixçənizə əlavə olunur, beləliklə YouTube tövsiyələri onlardan öyrənir. YouTube-da tarixçə dayandırılıbsa, heç nə əlavə olunmur."
-    Rate Videos: "Videolarda bəyən və bəyənmə düymələrini göstərir. Qiymətləndirmənizi göstərmək üçün açdığınız hər video hesabınızla YouTube-da yoxlanılır, buna görə YouTube hansı videoları açdığınızı öyrənir, hətta onlar baxış tarixçənizə əlavə edilməsə belə."
+    Rate Videos: "Videolarda və paylaşımlarda bəyən və bəyənmə düymələrini göstərir. Qiymətləndirmənizi göstərmək üçün açdığınız hər video hesabınızla YouTube-da yoxlanılır, buna görə YouTube hansı videoları açdığınızı öyrənir, hətta onlar baxış tarixçənizə əlavə edilməsə belə. Paylaşımların qiymətləndirmələri yoxlanılmır, ona görə yalnız burada verdikləriniz göstərilir."
   General Settings:
     Invidious Instance Credentials: 'Yalnız nümunə istifadəçi adı və parol tələb etdikdə lazımdır. Onlar yalnız bu cihazda saxlanılır və yalnız bu nümunəyə göndərilir.'
     Reply Notifications: "OpenTubeX izlədiyiniz şərhləri yeni cavablar üçün yoxlayır. Müəllif şərhlərinizdən birinə ürək verdikdə də sizə bildirir. Şərh, yeni cavab, ürək olmadan və ya siz onu açmadan 30 gün keçənə qədər izlənilməyə davam edir. Eyni anda ən çoxu 50 şərh izlənilə bilər, ona görə də daha çoxunu izləsəniz, ən uzun müddət aktiv olmayanların izlənməsi dayandırılır. İstənilən şərhi yanındakı zəng düyməsi ilə izləyin."
@@ -2878,6 +2880,7 @@ YouTube Account:
   Like: "Bəyən"
   Dislike: "Bəyənmə"
   Rating Failed: "YouTube-da qiymətləndirmək mümkün olmadı: {error}"
+  Vote Failed: "YouTube-da səs vermək mümkün olmadı: {error}"
   Subscribe Failed: "YouTube-da abunə olmaq mümkün olmadı: {error}"
   Unsubscribe Failed: "YouTube-da abunəlikdən çıxmaq mümkün olmadı: {error}"
   Subscriptions Synced: "Abunəliklər YouTube-dan sinxronlaşdırıldı: {added} əlavə edildi, {removed} silindi"

@@ -872,8 +872,12 @@ test.describe('manual comment loading', () => {
       channelId: 'UCcommenterchannel0000000'
     }))
     const replyTexts = []
+    const replyToIds = []
     await page.route(/\/youtubei\/v1\/comment\/create_comment_reply/, (route, request) => {
-      replyTexts.push(JSON.parse(request.postData()).commentText)
+      const { commentText, createReplyParams } = JSON.parse(request.postData())
+      replyTexts.push(commentText)
+      // The replied-to reply's ID is the last field of the parameters.
+      replyToIds.push(/\x72[\s\S]([\w-]+\.[\w-]+)$/.exec(atob(decodeURIComponent(createReplyParams)))?.[1] ?? null)
       return route.fulfill({
         contentType: 'application/json',
         body: JSON.stringify({
@@ -904,6 +908,9 @@ test.describe('manual comment loading', () => {
     await expect(composer).toHaveCount(0)
     // Like YouTube's web client, it mentions by channel ID, which YouTube links.
     expect(replyTexts).toEqual([`@${channelId} Example reply`])
+    // Like on YouTube, the reply goes under the reply it answers.
+    expect(replyToIds).toEqual([expect.stringMatching(/\./)])
+    await expect(target.locator(':scope > .commentReplyChildren .commentText', { hasText: 'Example reply' })).toBeVisible()
     // The posted reply links the mention like loaded replies do.
     const posted = thread.locator('.commentText').filter({ hasText: 'Example reply' })
     await expect(posted.getByRole('link', { name: handle })).toHaveAttribute('href', `https://www.youtube.com/channel/${channelId}`)
@@ -915,7 +922,8 @@ test.describe('manual comment loading', () => {
       return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ actionResult: { status: 'STATUS_SUCCEEDED' } }) })
     })
     const postedBranchId = await thread.locator('.commentReplyBranch').filter({ has: page.locator('.commentText', { hasText: 'Example reply' }) }).last().getAttribute('id')
-    const postedReply = page.locator(`#${postedBranchId} > .commentReplyContent`)
+    // Reply IDs contain a period, which an ID selector would read as a class.
+    const postedReply = page.locator(`[id="${postedBranchId}"] > .commentReplyContent`)
     await postedReply.getByRole('button', { name: 'Edit comment' }).click()
     const editor = postedReply.locator('.editComposer')
     await expect(editor.locator('textarea')).toHaveValue(`${handle} Example reply`)

@@ -444,7 +444,7 @@ Settings:
     Sync Subscriptions: "Sincronizar suscripciones con YouTube"
     Sync Playlists: "Sincronizar listas de reproducción con YouTube"
     Add to YouTube Watch History: "Agregar videos vistos al historial de YouTube"
-    Rate Videos: "Indicar si te gustan o no los videos"
+    Rate Videos: "Indicar si te gustan o no los videos y las publicaciones"
     Sync Now: "Sincronizar ahora"
     Synced: "Sincronizado con YouTube"
     Sync Failed: "No se pudo sincronizar con YouTube: {error}"
@@ -2005,6 +2005,8 @@ Channel:
     Original post unavailable: "La publicación original no está disponible"
     Members-only video hidden by OpenTubeX: "Video solo para miembros oculto por OpenTubeX"
     Video hidden by OpenTubeX because of its title: "Video oculto por OpenTubeX porque su título contiene texto oculto"
+    Correct: "Correcto"
+    Incorrect: "Incorrecto"
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Este canal tiene videos, pero no se pudo mostrar ninguno. Intenta cargar más"
   Shows:
@@ -2688,7 +2690,7 @@ Tooltips:
     Sync Subscriptions: "Los canales a los que te suscribes en YouTube se agregan a “Todos Los Canales”, y los canales cuya suscripción cancelas allí se quitan de todos los perfiles. Suscribirte o cancelar la suscripción en “Todos Los Canales” aquí hace lo mismo en YouTube."
     Sync Playlists: "Tus listas de reproducción de YouTube, “Ver más tarde” y “Videos que me gustan” aparecen en “Tus Listas de Reproducción”, y los cambios que les hagas aquí también se hacen en YouTube. No se sincronizan con tus otros dispositivos ni se incluyen cuando exportas todas las listas de reproducción o haces una copia de seguridad de tus datos. Si desactivas esta opción, se quitan de este dispositivo, pero no de YouTube."
     Add to YouTube Watch History: "Los videos que reproduces se agregan a tu historial de reproducciones de YouTube, para que las recomendaciones de YouTube aprendan de ellos. No se agrega nada mientras el historial esté en pausa en YouTube."
-    Rate Videos: "Muestra los botones de me gusta y no me gusta en los videos. Para mostrar tu calificación, cada video que abres se consulta en YouTube con tu cuenta, así que YouTube sabe qué videos abres, aunque no se agreguen a tu historial de reproducciones."
+    Rate Videos: "Muestra los botones de me gusta y no me gusta en los videos y las publicaciones. Para mostrar tu calificación, cada video que abres se consulta en YouTube con tu cuenta, así que YouTube sabe qué videos abres, aunque no se agreguen a tu historial de reproducciones. Las calificaciones de las publicaciones no se consultan, así que solo se muestran las que haces aquí."
   General Settings:
     Invidious Instance Credentials: 'Solo es necesario si la instancia pide un nombre de usuario y una contraseña. Solo se guardan en este dispositivo y solo se envían a esta instancia.'
     Reply Notifications: "OpenTubeX revisa si los comentarios que sigues tienen respuestas nuevas. También te avisa cuando un creador le da un corazón a uno de tus comentarios. Un comentario se sigue hasta que pasan 30 días sin respuestas nuevas, corazones ni que lo abras. Se pueden seguir hasta 50 comentarios a la vez, así que, si sigues más, dejas de seguir los que llevan más tiempo inactivos. Sigue cualquier comentario con el botón de campana que tiene al lado."
@@ -3310,6 +3312,7 @@ YouTube Account:
   Like: "Me gusta"
   Dislike: "No me gusta"
   Rating Failed: "No se pudo calificar en YouTube: {error}"
+  Vote Failed: "No se pudo votar en YouTube: {error}"
   Subscribe Failed: "No se pudo suscribir en YouTube: {error}"
   Unsubscribe Failed: "No se pudo desuscribir en YouTube: {error}"
   Subscriptions Synced: "Suscripciones sincronizadas desde YouTube: {added} agregadas, {removed} quitadas"

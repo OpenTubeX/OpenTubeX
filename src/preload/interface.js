@@ -1198,7 +1198,7 @@ export default {
     /**
      * Announces a reply to a watched comment, or a heart on the account's.
      * @param {{ kind: 'comment-reply' | 'comment-heart', videoId: string, commentId: string, title: string, body: string, thumbnail?: string }} notification
-     *   `commentId` is the reply's, or the hearted comment's
+     *   `videoId` is the video's or the post's ID, and `commentId` the reply's, or the hearted comment's
      */
     notifyComment: (notification) => ipcRenderer.invoke(IpcChannels.NOTIFICATION_COMMENT, notification),
 

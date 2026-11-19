@@ -16,6 +16,9 @@ export const COMMENT_TEXT_LIMIT = 500
 export const HEART_COMMENT_LIMIT = 10
 
 const ID_PATTERN = /^[\w-]+$/
+// Post IDs, like comment IDs, start with Ug and are longer than the 11
+// characters of video IDs, which tells the pages that comments are on apart.
+const POST_ID_PATTERN = /^Ug[\w-]{20,}$/
 
 const HANDLE_CHARACTERS = String.raw`\p{L}\p{M}\p{N}_\-·`
 
@@ -35,6 +38,9 @@ const HANDLE_CHARACTERS = String.raw`\p{L}\p{M}\p{N}_\-·`
  * without its heart lacks `hearted` until its first check, and entries watched
  * before hearts were checked lack the list, which then holds the watched comment.
  *
+ * Comments on a post have the post's ID as `videoId` and its channel as
+ * `postAuthorId`, which loading them needs.
+ *
  * Comments watched before others' comments could be watched are the account's
  * own and lack `accountId`, which is `channelId` then. Those watched before
  * the list of watched comments existed also lack `text` and `videoTitle`.
@@ -51,7 +57,8 @@ const HANDLE_CHARACTERS = String.raw`\p{L}\p{M}\p{N}_\-·`
  *   seen: string[],
  *   comments?: WatchedComment[],
  *   text?: string,
- *   videoTitle?: string
+ *   videoTitle?: string,
+ *   postAuthorId?: string
  * }} TrackedCommentThread
  */
 
@@ -83,7 +90,8 @@ function isTrackedCommentThread(value) {
     (value.comments === undefined || (Array.isArray(value.comments) && value.comments.every(comment =>
       typeof comment?.id === 'string' && (comment.hearted === undefined || typeof comment.hearted === 'boolean')))) &&
     (value.text === undefined || typeof value.text === 'string') &&
-    (value.videoTitle === undefined || typeof value.videoTitle === 'string')
+    (value.videoTitle === undefined || typeof value.videoTitle === 'string') &&
+    (value.postAuthorId === undefined || (typeof value.postAuthorId === 'string' && ID_PATTERN.test(value.postAuthorId)))
 }
 
 /**
@@ -142,6 +150,7 @@ export function isSameWatchedComment(left, right) {
  *   accountId: string,
  *   text: string,
  *   videoTitle: string,
+ *   postAuthorId?: string,
  *   replyCount?: number,
  *   seen?: string[],
  *   hearted?: boolean
@@ -152,7 +161,7 @@ export function isSameWatchedComment(left, right) {
 export function trackComment(threads, comment, now = Date.now()) {
   const existing = threads.find(thread => isSameWatchedComment(thread, comment))
   const others = threads.filter(thread => thread !== existing)
-  const { videoId, threadId, commentId, channelId, handle, accountId, text, videoTitle } = comment
+  const { videoId, threadId, commentId, channelId, handle, accountId, text, videoTitle, postAuthorId } = comment
   /** @type {TrackedCommentThread} */
   const tracked = existing
     ? {
@@ -179,7 +188,8 @@ export function trackComment(threads, comment, now = Date.now()) {
         replyCount: comment.replyCount ?? -1,
         seen: (comment.seen ?? []).slice(-SEEN_REPLY_LIMIT),
         text,
-        videoTitle
+        videoTitle,
+        ...(postAuthorId ? { postAuthorId } : {})
       }
   tracked.comments = addWatchedComment(existing ? getHeartComments(existing) : [], getWatchedCommentId(tracked),
     { id: getWatchedCommentId(comment), ...(comment.hearted === undefined ? {} : { hearted: comment.hearted }) })
@@ -357,10 +367,31 @@ export function cleanCommentText(text) {
 }
 
 /**
- * Where a reply or heart notification leads: the video, with the reply or
- * the hearted comment highlighted.
+ * The page a comment is on: the video's, or the post's.
+ * @param {string} id the video's or the post's ID
+ */
+function getCommentPagePath(id) {
+  return POST_ID_PATTERN.test(id) ? `/post/${id}` : `/watch/${id}`
+}
+
+/**
+ * The comment's link on YouTube.
+ * @param {string} id the video's or the post's ID
+ * @param {string} commentId
+ */
+export function getCommentWebUrl(id, commentId) {
+  const url = POST_ID_PATTERN.test(id)
+    ? new URL(`https://www.youtube.com/post/${encodeURIComponent(id)}`)
+    : new URL(`https://www.youtube.com/watch?v=${encodeURIComponent(id)}`)
+  url.searchParams.set('lc', commentId)
+  return url.toString()
+}
+
+/**
+ * Where a reply or heart notification leads: the video or post, with the
+ * reply or the hearted comment highlighted.
  * @param {unknown} kind `comment-reply` or `comment-heart`
- * @param {unknown} videoId
+ * @param {unknown} videoId the video's or the post's ID
  * @param {unknown} commentId a reply's ID is `threadId.replyId`
  * @returns {import('./notificationHistory.js').NotificationHistoryTarget | null}
  */
@@ -369,14 +400,25 @@ export function getCommentNotificationTarget(kind, videoId, commentId) {
   if ((kind !== 'comment-reply' && kind !== 'comment-heart') || typeof videoId !== 'string' || !ID_PATTERN.test(videoId) ||
     !threadId || !ID_PATTERN.test(threadId) || rest.length > 1 || (rest.length === 0 && kind === 'comment-reply') ||
     !rest.every(id => ID_PATTERN.test(id))) return null
-  return { kind, path: `/watch/${videoId}`, query: { commentId: /** @type {string} */ (commentId) } }
+  return { kind, path: getCommentPagePath(videoId), query: { commentId: /** @type {string} */ (commentId) } }
 }
 
 /**
- * Where an entry in the list of watched comments leads: the video, with the
- * watched comment highlighted.
+ * Where an entry in the list of watched comments leads: the video or post,
+ * with the watched comment highlighted.
  * @param {TrackedCommentThread} thread
  */
 export function getWatchedCommentTarget(thread) {
-  return { path: `/watch/${thread.videoId}`, query: { commentId: getWatchedCommentId(thread) } }
+  return {
+    path: getCommentPagePath(thread.videoId),
+    query: { ...(thread.postAuthorId ? { authorId: thread.postAuthorId } : {}), commentId: getWatchedCommentId(thread) }
+  }
+}
+
+/**
+ * Whether a watched comment is on a post rather than a video.
+ * @param {Pick<TrackedCommentThread, 'postAuthorId'>} thread
+ */
+export function isPostWatchedComment(thread) {
+  return thread.postAuthorId !== undefined
 }

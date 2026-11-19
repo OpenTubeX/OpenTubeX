@@ -409,7 +409,7 @@ Settings:
     Sync Subscriptions: "Synchronizovat odběry s YouTube"
     Sync Playlists: "Synchronizovat playlisty s YouTube"
     Add to YouTube Watch History: "Přidávat zhlédnutá videa do historie YouTube"
-    Rate Videos: "Označovat videa jako líbí a nelíbí"
+    Rate Videos: "Označovat videa a příspěvky jako líbí a nelíbí"
     Sync Now: "Synchronizovat nyní"
     Synced: "Synchronizováno s YouTube"
     Sync Failed: "Synchronizace s YouTube se nezdařila: {error}"
@@ -1743,6 +1743,8 @@ Channel:
     Original post unavailable: "Původní příspěvek není k dispozici"
     Members-only video hidden by OpenTubeX: "OpenTubeX skryl video pouze pro členy"
     Video hidden by OpenTubeX because of its title: "OpenTubeX skryl video, protože jeho název obsahuje skrytý text"
+    Correct: "Správně"
+    Incorrect: "Špatně"
 Video:
   Play in Background: "Přehrát na pozadí"
   Info panel source: 'Zdroj: {source}'
@@ -2328,7 +2330,7 @@ Tooltips:
     Sync Subscriptions: "Kanály, které začnete odebírat na YouTube, se přidají do profilu „Všechny kanály“ a kanály, jejichž odběr tam zrušíte, se odeberou ze všech profilů. Když zde v profilu „Všechny kanály“ odběr přidáte nebo zrušíte, stane se totéž na YouTube."
     Sync Playlists: "Vaše playlisty z YouTube, „Na později“ a „Video s označením Líbí se mi“ se zobrazí v sekci „Vaše playlisty“ a změny, které v nich zde provedete, se provedou i na YouTube. Nesynchronizují se do vašich dalších zařízení a nejsou zahrnuty, když exportujete všechny playlisty nebo zálohujete svá data. Vypnutím této volby je odeberete z tohoto zařízení, ale ne z YouTube."
     Add to YouTube Watch History: "Videa, která přehrajete, se přidají do vaší historie sledování na YouTube, takže se z nich učí doporučení YouTube. Když je historie na YouTube pozastavená, nic se nepřidá."
-    Rate Videos: "Zobrazuje u videí tlačítka Líbí se a Nelíbí se. Aby se zobrazilo vaše hodnocení, každé otevřené video se vyhledá na YouTube s vaším účtem, takže YouTube zjistí, která videa otevíráte, i když se nepřidají do historie sledování."
+    Rate Videos: "Zobrazuje u videí a příspěvků tlačítka Líbí se a Nelíbí se. Aby se zobrazilo vaše hodnocení, každé otevřené video se vyhledá na YouTube s vaším účtem, takže YouTube zjistí, která videa otevíráte, i když se nepřidají do historie sledování. Hodnocení příspěvků se nevyhledává, takže se zobrazí jen to, které zadáte zde."
   General Settings:
     Invidious Instance Credentials: 'Potřeba jen tehdy, když instance vyžaduje uživatelské jméno a heslo. Ukládají se jen v tomto zařízení a posílají se jen této instanci.'
     Reply Notifications: "OpenTubeX kontroluje, zda na komentáře, které sledujete, přibyly nové odpovědi. Také vás upozorní, když autor dá srdíčko některému z vašich komentářů. Komentář zůstává sledovaný, dokud neuplyne 30 dní bez nových odpovědí, srdíček nebo jeho otevření. Sledovat lze najednou nejvýše 50 komentářů, takže když začnete sledovat další, přestanou se sledovat ty, které byly nejdéle neaktivní. Libovolný komentář můžete sledovat pomocí tlačítka se zvonečkem vedle něj."
@@ -2868,6 +2870,7 @@ YouTube Account:
   Like: "Líbí se mi"
   Dislike: "Nelíbí se mi"
   Rating Failed: "Nepodařilo se ohodnotit na YouTube: {error}"
+  Vote Failed: "Nepodařilo se hlasovat na YouTube: {error}"
   Subscribe Failed: "Nepodařilo se přihlásit k odběru na YouTube: {error}"
   Unsubscribe Failed: "Nepodařilo se zrušit odběr na YouTube: {error}"
   Subscriptions Synced: "Odběry synchronizovány z YouTube: přidáno {added}, odebráno {removed}"

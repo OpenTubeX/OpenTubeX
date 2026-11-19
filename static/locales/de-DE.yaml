@@ -504,7 +504,7 @@ Settings:
     Sync Subscriptions: "Abos mit YouTube synchronisieren"
     Sync Playlists: "Playlists mit YouTube synchronisieren"
     Add to YouTube Watch History: "Angesehene Videos zum YouTube-Verlauf hinzufügen"
-    Rate Videos: "Videos mit „Mag ich“ oder „Mag ich nicht“ bewerten"
+    Rate Videos: "Videos und Beiträge mit „Mag ich“ oder „Mag ich nicht“ bewerten"
     Sync Now: "Jetzt synchronisieren"
     Synced: "Mit YouTube synchronisiert"
     Sync Failed: "Synchronisierung mit YouTube fehlgeschlagen: {error}"
@@ -2312,6 +2312,8 @@ Channel:
     Original post unavailable: Ursprünglicher Beitrag nicht verfügbar
     View Full Post: Vollständigen Beitrag anzeigen
     Viewing Posts Only Supported By Invidious: Das Anzeigen von Beiträgen wird nur von Invidious unterstützt. Gehe zum Tab „Beiträge“ eines Kanals, um dort Inhalte ohne Invidious anzuzeigen.
+    Correct: "Richtig"
+    Incorrect: "Falsch"
   Live:
     Live: Live
     This channel does not currently have any live streams: Dieser Kanal hat derzeit keine Livestreams
@@ -3092,7 +3094,7 @@ Tooltips:
     Sync Subscriptions: "Kanäle, die du auf YouTube abonnierst, kommen zu „Alle Kanäle“ hinzu, und Kanäle, deren Abo du dort beendest, werden aus jedem Profil entfernt. Wenn du hier in „Alle Kanäle“ abonnierst oder ein Abo beendest, passiert das auch auf YouTube."
     Sync Playlists: "Deine YouTube-Playlists, „Später ansehen“ und „Videos mit ‚Mag ich‘-Bewertung“ erscheinen unter „Deine Playlists“, und deine Änderungen daran werden auch auf YouTube übernommen. Sie werden nicht mit deinen anderen Geräten synchronisiert und nicht einbezogen, wenn du alle Playlists exportierst oder deine Daten sicherst. Wenn du das ausschaltest, werden sie von diesem Gerät entfernt, aber nicht von YouTube."
     Add to YouTube Watch History: "Videos, die du abspielst, werden zu deinem YouTube-Verlauf hinzugefügt, damit die Empfehlungen von YouTube daraus lernen. Solange der Verlauf auf YouTube pausiert ist, wird nichts hinzugefügt."
-    Rate Videos: "Zeigt bei Videos die Schaltflächen „Mag ich“ und „Mag ich nicht“. Um deine Bewertung anzuzeigen, wird jedes Video, das du öffnest, mit deinem Konto bei YouTube abgefragt. So erfährt YouTube, welche Videos du öffnest, auch wenn sie nicht zu deinem Verlauf hinzugefügt werden."
+    Rate Videos: "Zeigt bei Videos und Beiträgen die Schaltflächen „Mag ich“ und „Mag ich nicht“. Um deine Bewertung anzuzeigen, wird jedes Video, das du öffnest, mit deinem Konto bei YouTube abgefragt. So erfährt YouTube, welche Videos du öffnest, auch wenn sie nicht zu deinem Verlauf hinzugefügt werden. Bewertungen von Beiträgen werden nicht abgefragt, daher siehst du nur die, die du hier abgibst."
   General Settings:
     Reply Notifications: "OpenTubeX prüft beobachtete Kommentare auf neue Antworten und meldet, wenn ein Kanal einem deiner Kommentare ein Herz gibt. Ein Kommentar bleibt beobachtet, bis er 30 Tage lang keine neuen Antworten oder Herzen bekommt und du ihn nicht öffnest. Es bleiben höchstens 50 Kommentare beobachtet. Beobachtest du mehr, endet die Beobachtung der am längsten inaktiven. Beobachte einen Kommentar mit der Glocke daneben."
     Preferred Video Codec: |
@@ -4076,6 +4078,7 @@ YouTube Account:
   Like: "Mag ich"
   Dislike: "Mag ich nicht"
   Rating Failed: "Bewertung auf YouTube fehlgeschlagen: {error}"
+  Vote Failed: "Abstimmen auf YouTube fehlgeschlagen: {error}"
   Subscribe Failed: "Abonnieren auf YouTube fehlgeschlagen: {error}"
   Unsubscribe Failed: "Abo auf YouTube konnte nicht beendet werden: {error}"
   Subscriptions Synced: "Abos von YouTube synchronisiert: {added} hinzugefügt, {removed} entfernt"

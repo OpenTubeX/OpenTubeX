@@ -408,7 +408,7 @@ Settings:
     Sync Subscriptions: "Sync subscriptions with YouTube"
     Sync Playlists: "Sync playlists with YouTube"
     Add to YouTube Watch History: "Add watched videos to YouTube history"
-    Rate Videos: "Like and dislike videos"
+    Rate Videos: "Like and dislike videos and posts"
     Sync Now: "Sync now"
     Synced: "Synced with YouTube"
     Sync Failed: "Could not sync with YouTube: {error}"
@@ -1734,6 +1734,8 @@ Channel:
     Original post unavailable: "Original post unavailable"
     Members-only video hidden by OpenTubeX: "Members-only video hidden by OpenTubeX"
     Video hidden by OpenTubeX because of its title: "Video hidden by OpenTubeX because its title contains hidden text"
+    Correct: "Correct"
+    Incorrect: "Incorrect"
   Shows:
     Shows: Shows
     This channel does not currently have any shows: This channel does not currently have any shows
@@ -2324,7 +2326,7 @@ Tooltips:
     Sync Subscriptions: "Channels you subscribe to on YouTube are added to All Channels, and channels you unsubscribe from there are removed from every profile. Subscribing or unsubscribing in All Channels here does the same on YouTube."
     Sync Playlists: "Your YouTube playlists, Watch later and Liked videos appear in Your playlists, and changes you make to them here are made on YouTube too. They are not synced to your other devices or included when you export all playlists or back up your data. Turning this off removes them from this device but not from YouTube."
     Add to YouTube Watch History: "Videos you play are added to your YouTube watch history, so YouTube's recommendations learn from them. Nothing is added while the history is paused on YouTube."
-    Rate Videos: "Shows like and dislike buttons on videos. To show your rating, each video you open is looked up on YouTube with your account, so YouTube learns which videos you open, even when they are not added to your watch history."
+    Rate Videos: "Shows like and dislike buttons on videos and posts. To show your rating, each video you open is looked up on YouTube with your account, so YouTube learns which videos you open, even when they are not added to your watch history. Ratings of posts are not looked up, so only the ones you make here show."
   General Settings:
     Invidious Instance Credentials: 'Only needed if the instance asks for a username and password. They are only stored on this device and only sent to this instance.'
     Reply Notifications: "OpenTubeX checks the comments you watch for new replies, and tells you when a creator hearts one of yours. A comment stays watched until 30 days pass without new replies, hearts, or you opening it. Up to 50 comments stay watched, so watching more stops watching the ones inactive the longest. Watch any comment with the bell button next to it."
@@ -2862,6 +2864,7 @@ YouTube Account:
   Like: "Like"
   Dislike: "Dislike"
   Rating Failed: "Could not rate on YouTube: {error}"
+  Vote Failed: "Could not vote on YouTube: {error}"
   Subscribe Failed: "Could not subscribe on YouTube: {error}"
   Unsubscribe Failed: "Could not unsubscribe on YouTube: {error}"
   Subscriptions Synced: "Subscriptions synced from YouTube: {added} added, {removed} removed"

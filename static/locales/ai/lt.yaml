@@ -525,7 +525,7 @@ Settings:
     Revoke Failed: "Atsijungta nuo YouTube, bet Google nepatvirtino, kad prisijungimas baigtas. Jį galite pašalinti savo Google paskyros trečiųjų šalių ryšiuose."
     Signed out by YouTube: "YouTube nutraukė prisijungimą. Prisijunkite iš naujo nustatymuose, kad galėtumėte toliau naudoti savo paskyrą."
     Add to YouTube Watch History: "Įtraukti žiūrėtus vaizdo įrašus į YouTube istoriją"
-    Rate Videos: "Pažymėti vaizdo įrašus kaip patinkančius ir nepatinkančius"
+    Rate Videos: "Pažymėti vaizdo įrašus ir įrašus kaip patinkančius ir nepatinkančius"
     Sync Subscriptions: "Sinchronizuoti prenumeratas su YouTube"
     Sync Playlists: "Sinchronizuoti grojaraščius su YouTube"
     Sync Now: "Sinchronizuoti dabar"
@@ -2068,6 +2068,8 @@ Channel:
     Original post unavailable: "Originalus įrašas nepasiekiamas"
     Members-only video hidden by OpenTubeX: "OpenTubeX paslėpė tik nariams skirtą vaizdo įrašą"
     Video hidden by OpenTubeX because of its title: "OpenTubeX paslėpė vaizdo įrašą, nes jo pavadinime yra paslėpto teksto"
+    Correct: "Teisingai"
+    Incorrect: "Neteisingai"
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Šiame kanale yra vaizdo įrašų, bet nė vieno nepavyko parodyti. Pabandykite įkelti daugiau"
   Shows:
@@ -2750,7 +2752,7 @@ Tooltips:
   YouTube Account Settings:
     Watch Posted Comments: "Čia paskelbti jūsų komentarai automatiškai stebimi dėl atsakymų, jei komentarų nustatymuose įjungti pranešimai apie atsakymus."
     Add to YouTube Watch History: "Jūsų paleisti vaizdo įrašai įtraukiami į jūsų YouTube žiūrėjimo istoriją, kad YouTube rekomendacijos iš jų mokytųsi. Kol istorija YouTube pristabdyta, niekas neįtraukiama."
-    Rate Videos: "Rodo vaizdo įrašuose mygtukus „Patinka“ ir „Nepatinka“. Kad būtų parodytas jūsų įvertinimas, kiekvienas atidarytas vaizdo įrašas patikrinamas „YouTube“ naudojant jūsų paskyrą, todėl „YouTube“ sužino, kokius vaizdo įrašus atidarote, net jei jie nepridedami prie žiūrėjimo istorijos."
+    Rate Videos: "Rodo vaizdo įrašuose ir įrašuose mygtukus „Patinka“ ir „Nepatinka“. Kad būtų parodytas jūsų įvertinimas, kiekvienas atidarytas vaizdo įrašas patikrinamas „YouTube“ naudojant jūsų paskyrą, todėl „YouTube“ sužino, kokius vaizdo įrašus atidarote, net jei jie nepridedami prie žiūrėjimo istorijos. Įrašų įvertinimai netikrinami, todėl rodomi tik čia suteikti įvertinimai."
     Sync Subscriptions: "Kanalai, kuriuos užsiprenumeruojate YouTube, įtraukiami į „Visi kanalai“, o kanalai, kurių prenumeratą ten atšaukiate, pašalinami iš visų profilių. Užsiprenumeravus ar atšaukus prenumeratą čia, „Visi kanalai“, tas pats atliekama ir YouTube."
     Sync Playlists: "Jūsų YouTube grojaraščiai, „Žiūrėti vėliau“ ir „Patikę vaizdo įrašai“ rodomi skiltyje „Tavo grojaraščiai“, o čia juose atlikti pakeitimai atliekami ir YouTube. Jie nesinchronizuojami su kitais jūsų įrenginiais ir neįtraukiami, kai eksportuojate visus grojaraščius ar kuriate atsarginę duomenų kopiją. Tai išjungus, jie pašalinami iš šio įrenginio, bet ne iš YouTube."
   General Settings:
@@ -3372,6 +3374,7 @@ YouTube Account:
   Like: "Patinka"
   Dislike: "Nepatinka"
   Rating Failed: "Nepavyko įvertinti YouTube: {error}"
+  Vote Failed: "Nepavyko balsuoti YouTube: {error}"
   Subscribe Failed: "Nepavyko užsiprenumeruoti YouTube: {error}"
   Unsubscribe Failed: "Nepavyko atšaukti prenumeratos YouTube: {error}"
   Add a comment: "Pridėti komentarą"

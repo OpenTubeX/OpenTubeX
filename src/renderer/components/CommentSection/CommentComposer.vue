@@ -140,7 +140,7 @@ import { trackCommentReplies } from '../../helpers/commentReplyNotifications'
 import { MENTION_START, findCommentMentions, getCommentEditDraft, getCommentSubmitText, getRootCommentId, youTubeCommentsKey } from './youTubeComments'
 
 const props = defineProps({
-  // Posts a reply to this top-level comment instead of a new comment.
+  // Posts a reply to this comment or reply instead of a new comment.
   parentId: { type: String, default: null },
   // Starts a reply to a reply with a mention of its author.
   /** @type {import('vue').PropType<import('./youTubeComments').CommentMention | null>} */
@@ -162,7 +162,8 @@ const mentionRanges = computed(() => findCommentMentions(text.value, mentions.va
 const submitText = computed(() => getCommentSubmitText(text.value.trim(), mentions.value))
 const originalSubmitText = getCommentSubmitText(draft.text.trim(), draft.mentions)
 const posting = ref(false)
-const canSubmit = computed(() => !posting.value && text.value.trim() !== '' && (!props.editComment || submitText.value !== originalSubmitText))
+const canSubmit = computed(() => !posting.value && comments.target.value !== null && text.value.trim() !== '' &&
+  (!props.editComment || submitText.value !== originalSubmitText))
 const input = useTemplateRef('input')
 const profile = computed(() => getSelectedYouTubeProfile(store.getters.getYouTubeAccount))
 const isTopLevel = !props.parentId && !props.editComment
@@ -205,7 +206,7 @@ const focused = ref(false)
 const caret = ref(text.value.length)
 const dismissedQueryStart = ref(-1)
 const activeSuggestion = ref(0)
-const threadId = props.parentId ?? (props.editComment ? getRootCommentId(props.editComment.id) : null)
+const threadId = props.parentId ? getRootCommentId(props.parentId) : props.editComment ? getRootCommentId(props.editComment.id) : null
 
 const mentionQuery = computed(() => {
   const match = /@([^\s@]{0,30})$/u.exec(text.value.slice(0, caret.value))
@@ -387,12 +388,13 @@ async function submit() {
   posting.value = true
   // The comment belongs to the channel in use now, even after a switch while it posts.
   const account = store.getters.getYouTubeAccount
+  const target = comments.target.value
   try {
-    const created = await postYouTubeComment(comments.videoId.value, getCommentSubmitText(commentText, usedMentions), props.parentId ?? undefined, account)
+    const created = await postYouTubeComment(target, getCommentSubmitText(commentText, usedMentions), props.parentId ?? undefined, account)
     // Loaded replies are `parentId.replyId`, which a posted reply's ID may lack.
-    const posted = props.parentId && !created.id.includes('.') ? { ...created, id: `${props.parentId}.${created.id}` } : created
+    const posted = threadId && !created.id.includes('.') ? { ...created, id: `${threadId}.${created.id}` } : created
     comments.addComment(posted, commentText, usedMentions, props.parentId, account)
-    trackCommentReplies(comments.videoId.value, props.parentId ?? posted.id, posted.id, account, commentText, comments.videoTitle.value)
+    trackCommentReplies(target, threadId ?? posted.id, posted.id, account, commentText, comments.videoTitle.value)
     clearDraft()
     if (!props.parentId) expanded.value = false
     showToast({
@@ -430,7 +432,7 @@ async function saveEdit(commentText) {
   const commentId = props.editComment.id
   try {
     const usedMentions = getUsedMentions(commentText)
-    await editYouTubeComment(comments.videoId.value, commentId, getCommentSubmitText(commentText, usedMentions), store.getters.getYouTubeAccount)
+    await editYouTubeComment(comments.target.value, commentId, getCommentSubmitText(commentText, usedMentions), store.getters.getYouTubeAccount)
     comments.updateComment(commentId, commentText, usedMentions)
     showToast({ message: t('YouTube Account.Comment Edited'), icon: ['fas', 'edit'] })
     emit('done')

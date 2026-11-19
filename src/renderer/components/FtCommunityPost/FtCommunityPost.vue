@@ -143,7 +143,11 @@
     <div
       v-else-if="postType === 'poll' || postType === 'quiz'"
     >
-      <FtCommunityPoll :data="postContent" />
+      <FtCommunityPoll
+        :data="postContent"
+        :post-id="postId"
+        :author-id="authorId ?? ''"
+      />
     </div>
     <div
       v-else-if="postType === 'playlist'"
@@ -174,8 +178,40 @@
     <div
       class="bottomSection"
     >
+      <template v-if="canRate">
+        <button
+          type="button"
+          class="likeCount postRatingButton"
+          :aria-pressed="rating === 'LIKE'"
+          :aria-label="voteCount == null
+            ? $t('YouTube Account.Like')
+            : $t('Display Label', { label: $t('YouTube Account.Like'), value: formattedVoteCount })"
+          :title="$t('YouTube Account.Like')"
+          @click="ratePost(postId, authorId, 'LIKE')"
+        >
+          <FtIcon
+            class="thumbs-up-icon"
+            :icon="['fas', rating === 'LIKE' ? 'thumbs-up-filled' : 'thumbs-up']"
+            aria-hidden="true"
+          />
+          <span v-if="voteCount != null">{{ formattedVoteCount }}</span>
+        </button>
+        <button
+          type="button"
+          class="postRatingButton"
+          :aria-pressed="rating === 'DISLIKE'"
+          :aria-label="$t('YouTube Account.Dislike')"
+          :title="$t('YouTube Account.Dislike')"
+          @click="ratePost(postId, authorId, 'DISLIKE')"
+        >
+          <FtIcon
+            :icon="['fas', rating === 'DISLIKE' ? 'thumbs-down-filled' : 'thumbs-down']"
+            aria-hidden="true"
+          />
+        </button>
+      </template>
       <span
-        v-if="voteCount != null"
+        v-else-if="voteCount != null"
         class="likeCount"
         :title="$t('Global.Counts.Like Count', {count: formattedVoteCount}, voteCount)"
         :aria-label="$t('Global.Counts.Like Count', {count: formattedVoteCount}, voteCount)"
@@ -256,6 +292,8 @@ import {
   getRelativeTimeFromDate,
 } from '../../helpers/utils'
 import { getPostTabTitle } from '../../helpers/tabTitles'
+import { getPostRating, ratePost } from '../../helpers/postInteractions'
+import { isSignedInToYouTube } from '../../helpers/youtube-account-state'
 import { isRoundedNumber } from '../../helpers/viewCounts'
 import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
@@ -421,8 +459,15 @@ const commentCountLabel = computed(() => commentCount == null
   ? t('Channel.Posts.View Full Post')
   : t('Global.Counts.Comment Count', { count: formattedCommentCount.value }, commentCount))
 
+// Rating posts shares the opt-in of rating videos.
+const canRate = computed(() => !!postId && !!authorId && isSignedInToYouTube(store.getters) &&
+  store.getters.getYouTubeAccountVideoRatings)
+const rating = computed(() => canRate.value ? getPostRating(postId) : null)
+
 const formattedVoteCount = computed(() => {
-  return formatNumber(voteCount, voteCount != null && isRoundedNumber(voteCount) ? { notation: 'compact' } : undefined)
+  // The like count lacks a rating made here.
+  const count = voteCount == null ? null : voteCount + (rating.value === 'LIKE' ? 1 : 0)
+  return formatNumber(count, voteCount != null && isRoundedNumber(voteCount) ? { notation: 'compact' } : undefined)
 })
 
 const publishedText = computed(() => {
