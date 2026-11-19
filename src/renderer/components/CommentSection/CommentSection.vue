@@ -1026,7 +1026,8 @@ function getMentionCandidates(threadId) {
     comment.replies?.forEach(add)
   }
   if (threadId) {
-    const thread = commentData.value.find(comment => comment.id === threadId)
+    // Includes the saved snapshot of a personally pinned thread that isn't loaded.
+    const thread = commentEntries.value.find(({ comment }) => comment.id === threadId)?.comment
     if (thread) add(thread)
   } else {
     commentData.value.forEach(add)
