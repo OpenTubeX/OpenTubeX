@@ -146,6 +146,7 @@
           />
           <TransitionGroup
             v-else
+            appear
             name="playlistItem"
             tag="span"
             class="playlistItems"
