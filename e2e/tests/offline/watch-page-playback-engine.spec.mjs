@@ -3,7 +3,7 @@ import path from 'node:path'
 
 import { readDatastore, repoRoot, sel, test, expect } from '../../helpers/app.mjs'
 import { activeTab, openMockedVideo, waitForPlayback, openCaptionLanguages, openPlayerOptions } from '../../helpers/player.mjs'
-import { mockPlayableWatchPage, reloadWatchView, watchViewHandle } from '../../helpers/watch.mjs'
+import { mockPlayableWatchPage, reloadWatchView, watchHistoryEntry, watchViewHandle } from '../../helpers/watch.mjs'
 import {
   DEMO_MEDIA_URL,
   POST_LIVE_AUDIO_URL,
@@ -1356,6 +1356,27 @@ test.describe('watch page', () => {
     await expect(page.locator(`${activeTab} .videoTitle`)).toBeVisible()
     await expect(page.locator(activeTab).getByText('This video is unavailable because of missing formats')).toBeVisible()
     expect(await app.electronApp.evaluate(() => globalThis.__ytDlpPostLiveCalls)).toBe(0)
+  })
+
+  test('resumes a recently ended live stream from its watch history progress', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await routePostLivePlayer(page, { dashManifestUrl: 'https://example.invalid/post-live.mpd' })
+    await page.route('https://example.invalid/post-live.mpd', route => route.fulfill({ status: 403 }))
+    await page.evaluate(async (entry) => {
+      await window.$store.dispatch('updateVideoPlaybackEngine', 'built-in')
+      await window.$store.dispatch('updatePlaybackEngineFallback', false)
+      await window.$store.dispatch('updateHistory', entry)
+    }, { ...watchHistoryEntry, watchProgress: 10 })
+
+    await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page.locator(`${activeTab} .videoTitle`)).toBeVisible()
+    const watchView = await watchViewHandle(page)
+    // The player only reads its start time when it loads the stream
+    await expect.poll(() => watchView.evaluate(view => ({
+      postLive: view.isPostLiveDvr,
+      startTime: view.isLoading ? undefined : view.startTimeSeconds
+    }))).toEqual({ postLive: true, startTime: 10 })
   })
 
   test('does not override a manual built-in selection when its live source is unavailable', async ({ app, page }) => {

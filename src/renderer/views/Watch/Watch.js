@@ -4110,7 +4110,10 @@ export default defineComponent({
           }
         }
 
-        if ((!this.isUpcoming && !this.isLive && !this.isPostLiveDvr) || (this.isUpcoming && this.playabilityStatus === 'OK')) {
+        if (this.isPostLiveDvr) {
+          // Resuming from the history needs the length before the player loads
+          this.videoLengthSeconds = result.basic_info.duration
+        } else if ((!this.isUpcoming && !this.isLive) || (this.isUpcoming && this.playabilityStatus === 'OK')) {
           this.videoLengthSeconds = result.basic_info.duration
           if (result.streaming_data) {
             if (!metadataOnly) this.streamingDataExpiryDate = result.streaming_data.expires
@@ -4599,6 +4602,11 @@ export default defineComponent({
 
           if (isYattee && !metadataOnly && process.env.IS_CAPACITOR && !process.env.IS_IOS && !isYatteeServerPlayableOnAndroid(this.apiServerUrl)) {
             throw new Error(this.t('Yattee Server.Errors.HTTPS required'))
+          }
+
+          if (this.isPostLiveDvr) {
+            // Resuming from the history needs the length before the player loads
+            this.videoLengthSeconds = result.lengthSeconds
           }
 
           if (!metadataOnly && (this.isLive || this.isPostLiveDvr)) {
@@ -5666,7 +5674,8 @@ export default defineComponent({
       if (
         Number.isFinite(mediaMetadata?.duration) &&
         mediaMetadata.duration > 0 &&
-        (this.localFilePlayback || !Number.isFinite(this.videoLengthSeconds) || this.videoLengthSeconds <= 0)
+        // A recently ended stream may only keep its last hours available
+        (this.localFilePlayback || this.isPostLiveDvr || !Number.isFinite(this.videoLengthSeconds) || this.videoLengthSeconds <= 0)
       ) {
         this.videoLengthSeconds = mediaMetadata.duration
       }
