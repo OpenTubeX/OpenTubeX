@@ -1115,7 +1115,9 @@ async function goToSearch(queryText, { event, dataListProperty }) {
   const lazyLoad = isUnloadedBackgroundTabClick(event)
   if (link && store.getters.getRememberSearchHistory) {
     const preview = loadedLinkPreview?.queryText === destination.searchQueryText ? loadedLinkPreview : null
-    saveLinkToSearchHistory(destination.searchQueryText, link, preview?.title, !doCreateNewWindow && !lazyLoad).catch(error => {
+    // Outside Electron, a new tab can be another browser tab, whose page cannot report its title here.
+    const loadsHere = !doCreateNewWindow && !lazyLoad && (!doCreateNewTab || !!process.env.IS_ELECTRON)
+    saveLinkToSearchHistory(destination.searchQueryText, link, preview?.title, loadsHere).catch(error => {
       console.error('Unable to save the link to the search history', error)
     })
   }

@@ -9,12 +9,28 @@
 const waiting = new Map()
 
 /**
+ * Recently reported titles, because opening a page that is already open does
+ * not load it again.
+ * @type {Map<string, string>}
+ */
+const recentTitles = new Map()
+const MAX_RECENT_TITLES = 50
+
+/**
  * @param {string} key `video:<id>` or `channel:<url>`
  * @param {string} title
  */
 export function reportLoadedPageTitle(key, title) {
+  if (typeof title !== 'string' || title.trim() === '') return
+  recentTitles.delete(key)
+  recentTitles.set(key, title)
+  if (recentTitles.size > MAX_RECENT_TITLES) {
+    const [oldestKey] = recentTitles.keys()
+    recentTitles.delete(oldestKey)
+  }
+
   const resolvers = waiting.get(key)
-  if (resolvers == null || typeof title !== 'string' || title.trim() === '') return
+  if (resolvers == null) return
   waiting.delete(key)
   resolvers.forEach(resolve => resolve(title))
 }
@@ -25,6 +41,9 @@ export function reportLoadedPageTitle(key, title) {
  * @returns {Promise<string | undefined>} the title, or undefined when the signal aborts first
  */
 export function waitForLoadedPageTitle(key, signal) {
+  const recentTitle = recentTitles.get(key)
+  if (recentTitle !== undefined) return Promise.resolve(recentTitle)
+
   return new Promise(resolve => {
     if (signal.aborted) {
       resolve(undefined)
