@@ -1,4 +1,5 @@
 import { normalizeCommentFetchResponse, parseLocalCommentImageAttachment } from './local-comment-response'
+import { createPostCommentsContinuation, createPostPageParams, parsePollResults } from './youtube-account-parsers.js'
 import { createLocalFeedParsers, getAuthorVerification, getChannelHandleFromEndpoint, getLocalMusicChartPlaylistId } from './local-feed-parsers'
 import { createOriginalChannelNameResolver } from './original-channel-name'
 import { fetchMissingPublicationDates } from './missing-publication.js'
@@ -2575,14 +2576,35 @@ export async function getLocalCommunityPost(postId, channelId) {
 }
 
 /**
+ * Loads a post's comments like youtubei.js does, but can put a linked comment's thread first.
  * @param {string} postId
  * @param {string} channelId
  * @param {'TOP_COMMENTS' | 'NEWEST_FIRST'} [sortBy]
+ * @param {string} [commentId] its thread comes first, and a linked reply after it
+ * @param {Innertube} [innertube] a session from `createLocalCommentsClient`
  */
-export async function getLocalCommunityPostComments(postId, channelId, sortBy) {
-  const innertube = await createInnertube({ generateSessionLocally: false })
+export async function getLocalCommunityPostComments(postId, channelId, sortBy, commentId = undefined, innertube = undefined) {
+  innertube ??= await createLocalCommentsClient()
+  const continuation = createPostCommentsContinuation(postId, channelId, sortBy === 'NEWEST_FIRST', commentId)
+  const response = await innertube.actions.execute('/browse', { continuation })
+  return new YT.Comments(innertube.actions, response.data)
+}
 
-  return await innertube.getPostComments(postId, channelId, sortBy)
+/**
+ * The share of the votes of each choice of a post's poll, which YouTube's
+ * website only shows to viewers who voted. The Android client shows them to
+ * everyone, but sends its layout templates with them.
+ * @param {string} postId
+ * @param {string} channelId
+ */
+export async function getLocalPollResults(postId, channelId) {
+  const innertube = await createInnertube()
+  const response = await innertube.actions.execute('/browse', {
+    browseId: 'FEpost_detail',
+    params: createPostPageParams(postId, channelId),
+    client: 'ANDROID'
+  })
+  return parsePollResults(response.data)
 }
 
 /** Fetch public history metadata without player setup or stream extraction. */

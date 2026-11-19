@@ -204,6 +204,32 @@ index 4caa06faf68c1a2c4a3a3421901a274177674650..085496a5085b8dd13ed032b83bd8d42a
          // XXX: linkAlternatives?
      }
  }
+diff --git a/dist/src/parser/classes/Quiz.d.ts b/dist/src/parser/classes/Quiz.d.ts
+index b21ec73fd4308fb6bcefb457a41f969a4b71209b..5028a9670865874aa1e7bf2ae16d88e2faa195e8 100644
+--- a/dist/src/parser/classes/Quiz.d.ts
++++ b/dist/src/parser/classes/Quiz.d.ts
+@@ -6,6 +6,7 @@ export default class Quiz extends YTNode {
+     choices: {
+         text: Text;
+         is_correct: boolean;
++        explanation: Text | null;
+     }[];
+     total_votes: Text;
+     constructor(data: RawNode);
+diff --git a/dist/src/parser/classes/Quiz.js b/dist/src/parser/classes/Quiz.js
+index 799817648a56ae8b509bf77cf205b1728897f808..e94d352b7a5c2e6cc1834038b02e1acebed382f6 100644
+--- a/dist/src/parser/classes/Quiz.js
++++ b/dist/src/parser/classes/Quiz.js
+@@ -8,7 +8,8 @@ export default class Quiz extends YTNode {
+         super();
+         this.choices = data.choices.map((choice) => ({
+             text: new Text(choice.text),
+-            is_correct: choice.isCorrect
++            is_correct: choice.isCorrect,
++            explanation: choice.explanation ? new Text(choice.explanation) : null
+         }));
+         this.total_votes = new Text(data.totalVotes);
+     }
 diff --git a/dist/src/parser/classes/RecognitionShelf.js b/dist/src/parser/classes/RecognitionShelf.js
 index 1c3582365177b9703a0eefa7d099ec24bf5728a1..44cfd978478531eb1975ba6c54b6033056668767 100644
 --- a/dist/src/parser/classes/RecognitionShelf.js

@@ -26,7 +26,14 @@
             v-if="showThumbnails"
             class="watchedCommentThumbnail"
           >
+            <FtIcon
+              v-if="isPostWatchedComment(thread)"
+              class="watchedCommentPostIcon"
+              :icon="NOTIFICATION_KIND_ICONS.post"
+              aria-hidden="true"
+            />
             <FtRetryImage
+              v-else
               :src="thumbnailUrl(thread.videoId)"
               :class="{ blur: blurThumbnails }"
               loading="lazy"
@@ -103,8 +110,9 @@ import FtRetryImage from '../../FtRetryImage.vue'
 
 import store from '../../../store/index'
 import { getWatchedComments, unwatchComment, watchedComments } from '../../../helpers/commentReplyNotifications'
+import { NOTIFICATION_KIND_ICONS } from '../../../helpers/notificationHistory'
 import { getRelativeTimeFromDate, getVideoThumbnailUrl, openInternalPath } from '../../../helpers/utils'
-import { getWatchedCommentTarget, isOwnWatchedComment } from '../../../../commentReplyTracking.js'
+import { getWatchedCommentTarget, isOwnWatchedComment, isPostWatchedComment } from '../../../../commentReplyTracking.js'
 
 const emit = defineEmits(['close'])
 const { locale, t } = useI18n()
@@ -223,6 +231,16 @@ function open(thread, event) {
   overflow: hidden;
   border-radius: var(--shape-corner-small);
   background-color: var(--side-nav-color);
+}
+
+.watchedCommentThumbnail:has(.watchedCommentPostIcon) {
+  display: grid;
+  place-items: center;
+}
+
+.watchedCommentPostIcon {
+  font-size: 1.5em;
+  opacity: 0.7;
 }
 
 .watchedCommentThumbnail :deep(img) {

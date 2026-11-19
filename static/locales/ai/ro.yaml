@@ -409,7 +409,7 @@ Settings:
     Sync Subscriptions: "Sincronizați abonamentele cu YouTube"
     Sync Playlists: "Sincronizați listele de redare cu YouTube"
     Add to YouTube Watch History: "Adăugați videoclipurile vizionate în istoricul YouTube"
-    Rate Videos: "Apreciază și nu aprecia videoclipuri"
+    Rate Videos: "Apreciază și nu aprecia videoclipuri și postări"
     Sync Now: "Sincronizați acum"
     Synced: "Sincronizat cu YouTube"
     Sync Failed: "Sincronizarea cu YouTube nu a reușit: {error}"
@@ -1783,6 +1783,8 @@ Channel:
     Original post unavailable: "Postarea originală nu este disponibilă"
     Members-only video hidden by OpenTubeX: "Videoclip doar pentru membri ascuns de OpenTubeX"
     Video hidden by OpenTubeX because of its title: "Videoclip ascuns de OpenTubeX deoarece titlul conține text ascuns"
+    Correct: "Corect"
+    Incorrect: "Greșit"
   Shows:
     Shows: Emisiuni
     This channel does not currently have any shows: Acest canal nu are momentan emisiuni
@@ -2391,7 +2393,7 @@ Tooltips:
     Sync Subscriptions: "Canalele la care vă abonați pe YouTube sunt adăugate în „Toate canalele”, iar canalele de la care vă dezabonați acolo sunt eliminate din toate profilurile. Abonarea sau dezabonarea în „Toate canalele” de aici face același lucru pe YouTube."
     Sync Playlists: "Listele dvs. de redare de pe YouTube, „Vizionează mai târziu” și „Videoclipuri apreciate” apar în „Listele tale de redare”, iar modificările pe care le faceți aici în ele se fac și pe YouTube. Acestea nu sunt sincronizate cu celelalte dispozitive ale dvs. și nu sunt incluse când exportați toate listele de redare sau faceți o copie de rezervă a datelor. Dezactivarea acestei opțiuni le elimină de pe acest dispozitiv, dar nu și de pe YouTube."
     Add to YouTube Watch History: "Videoclipurile pe care le redați sunt adăugate în istoricul vizionărilor YouTube, astfel încât recomandările YouTube să învețe din ele. Nu se adaugă nimic cât timp istoricul este întrerupt pe YouTube."
-    Rate Videos: "Afișează butoanele de apreciere și neapreciere pe videoclipuri. Pentru a-ți afișa evaluarea, fiecare videoclip pe care îl deschizi este căutat pe YouTube cu contul tău, așa că YouTube află ce videoclipuri deschizi, chiar și atunci când nu sunt adăugate în istoricul de vizionare."
+    Rate Videos: "Afișează butoanele de apreciere și neapreciere pe videoclipuri și postări. Pentru a-ți afișa evaluarea, fiecare videoclip pe care îl deschizi este căutat pe YouTube cu contul tău, așa că YouTube află ce videoclipuri deschizi, chiar și atunci când nu sunt adăugate în istoricul de vizionare. Evaluările postărilor nu sunt căutate, așa că apar doar cele pe care le dai aici."
   General Settings:
     Invidious Instance Credentials: 'Necesar doar dacă instanța cere un nume de utilizator și o parolă. Sunt salvate doar pe acest dispozitiv și trimise doar acestei instanțe.'
     Reply Notifications: "OpenTubeX verifică dacă există răspunsuri noi la comentariile pe care le urmărești. Te anunță și când un creator dă o inimă unuia dintre comentariile tale. Un comentariu rămâne urmărit până când trec 30 de zile fără răspunsuri noi, inimi sau fără să îl deschizi. Poți urmări cel mult 50 de comentarii simultan, așa că, dacă urmărești mai multe, nu vei mai urmări comentariile inactive de cel mai mult timp. Urmărește orice comentariu cu butonul clopoțel de lângă el."
@@ -2731,6 +2733,8 @@ Channels:
   Load More Channels: "Încarcă mai multe canale"
 Search Bar:
   Use Suggestion: Folosește sugestia
+  Video Link: "Videoclip: {title}"
+  Channel Link: "Canal: {title}"
 Theme Discovery:
   Discover Themes: "Descoperă teme"
   Refresh: "Reîncarcă"
@@ -2934,6 +2938,7 @@ YouTube Account:
   Like: "Îmi place"
   Dislike: "Nu îmi place"
   Rating Failed: "Evaluarea pe YouTube nu a reușit: {error}"
+  Vote Failed: "Votarea pe YouTube nu a reușit: {error}"
   Subscribe Failed: "Abonarea pe YouTube nu a reușit: {error}"
   Unsubscribe Failed: "Dezabonarea pe YouTube nu a reușit: {error}"
   Subscriptions Synced: "Abonamente sincronizate de pe YouTube: {added} adăugate, {removed} eliminate"

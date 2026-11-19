@@ -24,6 +24,8 @@ const PAGE_SIZE = 20
 /** Minimum image widths. PeerTube 8 lists several sizes, up to 1920 pixels for previews and 1500 for avatars. */
 const THUMBNAIL_WIDTH = 480
 const AVATAR_WIDTH = 300
+/** The small avatars beside the channel names of videos and playlists */
+const AUTHOR_AVATAR_WIDTH = 96
 const BANNER_WIDTH = 1200
 /** PeerTube's privacy ID of public videos and playlists */
 const PUBLIC = 1
@@ -196,6 +198,15 @@ function thumbnail(media, host) {
 }
 
 /**
+ * The avatar of the channel that a video or playlist names, where it has one.
+ * @param {any} channel
+ * @param {string} host the instance that answered
+ */
+function channelAvatar(channel, host) {
+  return apiChannelId(channel) ? pickImage(imageList(channel.avatars, channel.avatar), AUTHOR_AVATAR_WIDTH, host) : ''
+}
+
+/**
  * @param {any} data
  * @param {string} host the instance that answered
  * @param {string | null} id
@@ -244,6 +255,8 @@ function parseVideo(video, host) {
     thumbnail: thumbnail(video, host),
     published: timestamp(video.originallyPublishedAt) ?? timestamp(video.publishedAt)
   }
+  const authorAvatar = channelAvatar(video.channel, host)
+  if (authorAvatar) item.authorAvatar = authorAvatar
   const duration = count(video.duration)
   const viewCount = count(video.views)
   if (video.isLive === true) {
@@ -275,6 +288,8 @@ function parsePlaylist(data, host) {
     channelId: apiChannelId(data.videoChannel) ?? '',
     thumbnail: thumbnail(data, host)
   }
+  const authorAvatar = channelAvatar(data.videoChannel, host)
+  if (authorAvatar) playlist.authorAvatar = authorAvatar
   const itemCount = count(data.videosLength)
   if (itemCount !== undefined) playlist.itemCount = itemCount
   return playlist

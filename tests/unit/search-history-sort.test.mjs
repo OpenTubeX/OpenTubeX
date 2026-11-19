@@ -5,7 +5,10 @@ import {
   getSearchHistoryEntryKeyFromEntry,
   mergeSearchHistoryEntries,
   normalizeSearchHistoryEntry,
+  normalizeSearchSettings,
+  parseExportedSearchHistoryEntry,
   resolveSearchHistoryEntry,
+  searchHistoryEntryMatches,
 } from '../../src/search-history.js'
 
 test('normalizes legacy search history to a static default filter set', () => {
@@ -112,4 +115,42 @@ test('preserves a matching legacy id when history has not loaded into the store 
       features: ['4k', 'hd'],
     },
   })
+})
+
+test('keeps valid link titles, and reads them back from an export that older clients and FreeTube can also read', () => {
+  const link = {
+    _id: 'link',
+    query: 'https://www.youtube.com/@ExampleChannel',
+    lastUpdatedAt: 300,
+    linkType: 'channel',
+    title: 'Example Channel',
+  }
+  assert.deepEqual(normalizeSearchHistoryEntry(link), { ...link, searchSettings: normalizeSearchSettings() })
+
+  // Imports can contain anything, and only links have titles.
+  assert.equal('title' in normalizeSearchHistoryEntry({ ...link, linkType: undefined }), false)
+  assert.equal('linkType' in normalizeSearchHistoryEntry({ ...link, linkType: 'playlist' }), false)
+  assert.equal('title' in normalizeSearchHistoryEntry({ ...link, title: ' ' }), false)
+  assert.equal('title' in normalizeSearchHistoryEntry({ ...link, title: 42 }), false)
+
+  // The export writes one JSON record per line.
+  const plain = normalizeSearchHistoryEntry({ _id: 'plain', query: 'daily news', lastUpdatedAt: 200, searchSettings: { time: 'today' } })
+  const exported = [normalizeSearchHistoryEntry(link), plain].map(entry => JSON.stringify(entry)).join('\n')
+  assert.deepEqual(exported.split('\n').map(line => parseExportedSearchHistoryEntry(JSON.parse(line))), [normalizeSearchHistoryEntry(link), plain])
+
+  // A FreeTube record has no filters, link type, or title.
+  assert.deepEqual(parseExportedSearchHistoryEntry({ _id: 'legacy query', lastUpdatedAt: 100 }), normalizeSearchHistoryEntry({ _id: 'legacy query', lastUpdatedAt: 100 }))
+  assert.equal(parseExportedSearchHistoryEntry({ _id: 'no date' }), null)
+  assert.equal(parseExportedSearchHistoryEntry(['not', 'a', 'record']), null)
+})
+
+test('suggests links by any part of their title as well as by the start of their link', () => {
+  const link = { _id: 'link', query: 'https://youtu.be/abcdefghijk', linkType: 'video', title: 'Example Video' }
+  const matches = text => searchHistoryEntryMatches(link, text, text.toLowerCase())
+
+  assert.equal(matches('https://youtu'), true)
+  assert.equal(matches('example vi'), true)
+  assert.equal(matches('Video'), true)
+  assert.equal(matches('youtu'), false)
+  assert.equal(searchHistoryEntryMatches({ _id: 'daily news', query: 'Daily news' }, 'daily', 'daily'), false)
 })

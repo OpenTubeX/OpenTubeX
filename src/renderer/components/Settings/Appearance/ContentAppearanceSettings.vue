@@ -92,6 +92,7 @@
         :placeholder="t('Settings.General Settings.Thumbnail Preference.Thumbnail Preference')"
         :value="thumbnailPreference"
         setting-key="thumbnailPreference"
+        :sync-setting-keys="['thumbnailPreference', 'blurThumbnails']"
         :is-changed="thumbnailPreferenceChanged"
         :select-names="thumbnailTypeNames"
         :select-values="THUMBNAIL_TYPE_VALUES"

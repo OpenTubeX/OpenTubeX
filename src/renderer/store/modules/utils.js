@@ -19,6 +19,7 @@ import {
 } from '../../helpers/channelThumbnailStorage'
 import { getSettingsWindowIconButton, morphUtilityWindow } from '../../helpers/utilityWindowMorph'
 import { getSearchFilterTabId } from '../../../search-history'
+import { isYouTubeHostname } from '../../../youTubeHostname.js'
 import {
   mergeYouTubeCaptionLanguageCodes,
   YOUTUBE_CAPTION_LANGUAGE_CODES,
@@ -28,6 +29,16 @@ const CHANNEL_THUMBNAIL_CACHE_LIMIT = 200
 const VIDEO_AVATAR_CACHE_LIMIT = 200
 
 let settingsWindowMorph = Promise.resolve()
+
+/**
+ * The comment a post link highlights, as the post page's query.
+ * @param {URL} url
+ * @returns {{ commentId?: string }}
+ */
+function getLinkedCommentQuery(url) {
+  const commentId = url.searchParams.get('lc')
+  return commentId && /^[\w.-]+$/.test(commentId) ? { commentId } : {}
+}
 
 /**
  * Throws if the videos lack the details the add to playlist prompt needs.
@@ -625,7 +636,7 @@ const actions = {
     let urlType = 'unknown'
 
     const channelPattern =
-      /^\/(?:(?:channel|user|c)\/)?(?<channelId>[^/]+)(?:\/(?<tab>join|featured|videos|shorts|live|streams|podcasts|releases|courses|shows|playlists|about|community|channels))?\/?$/
+      /^\/(?:(?<prefix>channel|user|c)\/)?(?<channelId>[^/]+)(?:\/(?<tab>join|featured|videos|shorts|live|streams|podcasts|releases|courses|shows|playlists|about|community|channels))?\/?$/
 
     const hashtagPattern = /^\/hashtag\/(?<tag>[^#&/?]+)$/
     const postPattern = /^\/post\/(?<postId>.+)/
@@ -730,7 +741,7 @@ const actions = {
       case 'post': {
         const match = url.pathname.match(postPattern)
         const postId = match.groups.postId
-        const query = { authorId: url.searchParams.get('ucid') }
+        const query = { authorId: url.searchParams.get('ucid'), ...getLinkedCommentQuery(url) }
         return {
           urlType: 'post',
           postId,
@@ -767,6 +778,11 @@ const actions = {
       case 'channel': {
         const match = url.pathname.match(channelPattern)
         const rawChannelId = match.groups.channelId
+        // Only YouTube has channel links without a prefix, like youtube.com/name.
+        // On other sites, such as Invidious instances, that path is something else.
+        if (match.groups.prefix == null && !rawChannelId.startsWith('@') && !isYouTubeHostname(url.hostname)) {
+          return { urlType: 'unknown' }
+        }
         let channelId = rawChannelId
         if (rawChannelId.startsWith('@') && checkYoutubeChannelId(rawChannelId.slice(1))) {
           channelId = rawChannelId.slice(1)
@@ -812,7 +828,7 @@ const actions = {
             if (url.searchParams.has('lb')) {
               // if it has the lb search parameter then it is linking a specific community post
               const postId = url.searchParams.get('lb')
-              const query = { authorId: channelId }
+              const query = { authorId: channelId, ...getLinkedCommentQuery(url) }
               return {
                 urlType: 'post',
                 postId,

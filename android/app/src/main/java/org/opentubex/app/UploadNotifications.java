@@ -163,7 +163,7 @@ final class UploadNotifications {
      * is queued until the app adds it to its notification history. Also used for
      * Twitch streams, whose `feedType` is `twitch` and whose ID is `login/streamId`,
      * and for comment replies and hearts, whose `feedType` is `comment-reply` or
-     * `comment-heart` and whose ID is `videoId/commentId`.
+     * `comment-heart` and whose ID is `videoId/commentId`, or `postId/commentId`.
      */
     static synchronized void deliver(Context context, String feedType, String id, boolean live, String title,
         String body, String thumbnail, boolean history, boolean silent) {
@@ -628,11 +628,16 @@ final class UploadNotifications {
     static String url(String feedType, String id) {
         // Twitch notifications lead to the live stream of the channel
         if (feedType.equals("twitch")) return "https://www.twitch.tv/" + Uri.encode(id.substring(0, Math.max(0, id.indexOf('/'))));
-        // Replies and hearts lead to their video with the comment highlighted, and their ID is `videoId/commentId`.
+        // Replies and hearts lead to their video or post with the comment highlighted, and their ID is
+        // `videoId/commentId`, or `postId/commentId`. Post IDs start with Ug and are longer than the
+        // 11 characters of video IDs, like getCommentNotificationTarget tells them apart.
         if (isCommentFeedType(feedType)) {
             int separator = Math.max(0, id.indexOf('/'));
-            return "https://www.youtube.com/watch?v=" + Uri.encode(id.substring(0, separator)) +
-                "&lc=" + Uri.encode(id.substring(Math.min(id.length(), separator + 1)));
+            String pageId = id.substring(0, separator);
+            String commentId = Uri.encode(id.substring(Math.min(id.length(), separator + 1)));
+            return pageId.startsWith("Ug") && pageId.length() >= 22
+                ? "https://www.youtube.com/post/" + Uri.encode(pageId) + "?lc=" + commentId
+                : "https://www.youtube.com/watch?v=" + Uri.encode(pageId) + "&lc=" + commentId;
         }
         String encoded = Uri.encode(id);
         if (feedType.equals("posts")) return "https://www.youtube.com/post/" + encoded;

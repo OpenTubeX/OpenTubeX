@@ -166,13 +166,25 @@
 
   // Match the player control's viewport breakpoint so theater mode never has
   // a visible button while the responsive layout already forces the same grid.
+  // The theater grid's player and info cards reach the page edge, so sidebar
+  // cards drop their outer margin to keep both side gaps equal.
   @media (width <= 1350px) {
     @include theatre-mode-template;
+
+    @container route (width >= 1051px) {
+      .watchVideoSideBar {
+        margin-inline-end: 0;
+      }
+    }
   }
 
   @container route (width >= 1051px) {
     &.useTheatreMode {
       @include theatre-mode-template;
+
+      .watchVideoSideBar {
+        margin-inline-end: 0;
+      }
     }
   }
 

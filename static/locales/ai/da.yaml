@@ -420,7 +420,7 @@ Settings:
     Sync Subscriptions: "Synkroniser abonnementer med YouTube"
     Sync Playlists: "Synkroniser playlister med YouTube"
     Add to YouTube Watch History: "Føj sete videoer til YouTube-historikken"
-    Rate Videos: "Synes godt om og synes ikke om videoer"
+    Rate Videos: "Synes godt om og synes ikke om videoer og opslag"
     Sync Now: "Synkroniser nu"
     Synced: "Synkroniseret med YouTube"
     Sync Failed: "Kunne ikke synkronisere med YouTube: {error}"
@@ -1816,6 +1816,8 @@ Channel:
     Original post unavailable: "Det oprindelige opslag er ikke tilgængeligt"
     Members-only video hidden by OpenTubeX: "Video kun for medlemmer skjult af OpenTubeX"
     Video hidden by OpenTubeX because of its title: "Video skjult af OpenTubeX, fordi titlen indeholder skjult tekst"
+    Correct: "Korrekt"
+    Incorrect: "Forkert"
   Shows:
     Shows: Serier
     This channel does not currently have any shows: Denne kanal har i øjeblikket ingen serier
@@ -2426,7 +2428,7 @@ Tooltips:
     Sync Subscriptions: "Når du abonnerer på en kanal på YouTube, føjes den til “Alle kanaler”, og når du afmelder abonnementet på en kanal der, fjernes den fra alle profiler. Når du abonnerer eller afmelder abonnementer i “Alle kanaler” her, sker det samme på YouTube."
     Sync Playlists: "Dine YouTube-playlister, “Se senere” og “Videoer, jeg synes godt om” vises i “Dine playlister”, og ændringer, du foretager i dem her, foretages også på YouTube. De synkroniseres ikke til dine andre enheder og medtages ikke, når du eksporterer alle playlister eller sikkerhedskopierer dine data. Hvis du slår dette fra, fjernes de fra denne enhed, men ikke fra YouTube."
     Add to YouTube Watch History: "Videoer, du afspiller, føjes til din YouTube-visningshistorik, så YouTubes anbefalinger lærer af dem. Der føjes intet til, mens historikken er sat på pause på YouTube."
-    Rate Videos: "Viser knapperne Synes godt om og Synes ikke om på videoer. For at vise din bedømmelse slås hver video, du åbner, op på YouTube med din konto, så YouTube får at vide, hvilke videoer du åbner, også når de ikke føjes til din visningshistorik."
+    Rate Videos: "Viser knapperne Synes godt om og Synes ikke om på videoer og opslag. For at vise din bedømmelse slås hver video, du åbner, op på YouTube med din konto, så YouTube får at vide, hvilke videoer du åbner, også når de ikke føjes til din visningshistorik. Bedømmelser af opslag slås ikke op, så kun dem, du giver her, vises."
   General Settings:
     Invidious Instance Credentials: 'Kun nødvendigt, hvis instansen beder om et brugernavn og en adgangskode. De gemmes kun på denne enhed og sendes kun til denne instans.'
     Reply Notifications: "OpenTubeX tjekker de kommentarer, du overvåger, for nye svar. Den giver dig også besked, når en skaber giver en af dine kommentarer et hjerte. En kommentar forbliver overvåget, indtil der er gået 30 dage uden nye svar, hjerter eller at du åbner den. Op til 50 kommentarer forbliver overvåget, så hvis du overvåger flere, stopper overvågningen af dem, der har været inaktive længst. Overvåg en kommentar med klokkeknappen ved siden af den."
@@ -2771,6 +2773,8 @@ Search Bar:
   Use Suggestion: Brug forslag
   Open Search Container: Åbn søgefelt
   Search: Søg
+  Video Link: "Video: {title}"
+  Channel Link: "Kanal: {title}"
 Theme Discovery:
   Discover Themes: "Find temaer"
   Refresh: "Opdater"
@@ -2974,6 +2978,7 @@ YouTube Account:
   Like: "Synes godt om"
   Dislike: "Synes ikke om"
   Rating Failed: "Kunne ikke bedømme på YouTube: {error}"
+  Vote Failed: "Kunne ikke stemme på YouTube: {error}"
   Subscribe Failed: "Kunne ikke abonnere på YouTube: {error}"
   Unsubscribe Failed: "Kunne ikke afmelde abonnementet på YouTube: {error}"
   Subscriptions Synced: "Abonnementer synkroniseret fra YouTube: {added} tilføjet, {removed} fjernet"

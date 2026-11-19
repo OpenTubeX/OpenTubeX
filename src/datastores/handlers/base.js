@@ -1406,6 +1406,10 @@ class Playlists {
 class SearchHistory {
   static db = db
   static writes = Promise.resolve()
+  /** When the history was last cleared, so a search made before it, such as a link that waited for its title, is not saved. */
+  static clearedAt = -Infinity
+  /** When each query was last removed, for the same reason. */
+  static removedAt = new Map()
 
   /**
    * Writes read the saved searches first, so they run one at a time and an
@@ -1428,7 +1432,11 @@ class SearchHistory {
     return this.runWrite(() => this._upsert(searchHistoryEntry))
   }
 
+  /** @returns {Promise<object | null>} the saved entry, or null when the history was cleared or the entry removed after the search */
   static async _upsert(searchHistoryEntry) {
+    const removedAt = Math.max(this.clearedAt, this.removedAt.get(searchHistoryEntry.query) ?? -Infinity)
+    if (searchHistoryEntry.lastUpdatedAt < removedAt) return null
+
     const matchingCandidates = await this.db.searchHistory.findAsync({
       $or: [
         { _id: searchHistoryEntry._id },
@@ -1457,7 +1465,12 @@ class SearchHistory {
   }
 
   static delete(_id) {
-    return this.runWrite(() => this.db.searchHistory.removeAsync({ _id: _id }))
+    const removedAt = Date.now()
+    return this.runWrite(async () => {
+      const [entry] = await this.db.searchHistory.findAsync({ _id })
+      if (entry != null) this.removedAt.set(entry.query ?? entry._id, removedAt)
+      return this.db.searchHistory.removeAsync({ _id: _id })
+    })
   }
 
   /**
@@ -1472,6 +1485,8 @@ class SearchHistory {
   }
 
   static deleteAll() {
+    this.clearedAt = Date.now()
+    this.removedAt.clear()
     return this.runWrite(() => this.db.searchHistory.removeAsync({}, { multi: true }))
   }
 }
@@ -1752,6 +1767,8 @@ function createScopedHandlers(scope) {
     searchHistory: class extends SearchHistory {
       static db = scopedDb
       static writes = Promise.resolve()
+      static clearedAt = -Infinity
+      static removedAt = new Map()
     },
   }
 }

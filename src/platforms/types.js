@@ -27,6 +27,7 @@
  *   title: string,
  *   author: string,
  *   channelId: string,
+ *   authorAvatar?: string,
  *   thumbnail: string,
  *   published: number | null,
  *   duration?: number,
@@ -38,7 +39,8 @@
  *   isNew?: boolean
  * }} PlatformItem A video, track, clip or live stream. `url` is the page that
  * yt-dlp plays. `channelId` is the `id` of its PlatformChannel, or empty when
- * unknown. `published` is in milliseconds, `duration` in seconds.
+ * unknown. `authorAvatar` is the channel's avatar, where the response that
+ * lists the item includes it. `published` is in milliseconds, `duration` in seconds.
  *
  * @typedef {{
  *   platform: string,
@@ -47,9 +49,10 @@
  *   title: string,
  *   author: string,
  *   channelId: string,
+ *   authorAvatar?: string,
  *   thumbnail: string,
  *   itemCount?: number
- * }} PlatformPlaylist
+ * }} PlatformPlaylist `authorAvatar` as for PlatformItem
  *
  * @typedef {{
  *   platform: string,
@@ -74,6 +77,7 @@
  *   channelTabs: PlatformChannelTab[],
  *   searchTypes: PlatformSearchType[],
  *   liveStreams: boolean,
+ *   heavyChannels?: true,
  *   parseChannelUrl: (url: string) => string | null,
  *   getChannel: (fetch: PlatformFetch, id: string, signal?: AbortSignal) => Promise<PlatformChannel | null>,
  *   getChannelPage: (fetch: PlatformFetch, channel: PlatformChannel, tab: PlatformChannelTab, continuation: string | null, signal?: AbortSignal) => Promise<PlatformPage>,
@@ -86,6 +90,8 @@
  *   getBrowse?: (fetch: PlatformFetch, signal?: AbortSignal) => Promise<{ categories: PlatformCategory[], items: PlatformItem[] }>
  * }} Platform
  * - `liveStreams` tells whether its channels stream live.
+ * - `heavyChannels` marks platforms whose channels load as whole web pages,
+ *   which lists don't load just for the avatars of their items' channels.
  * - `parseChannelUrl` returns the ID of the channel a page belongs to, for
  *   pages of the channel itself, not for its videos, or null.
  * - `getChannel` takes an ID from `parseChannelUrl` or from an earlier

@@ -196,9 +196,11 @@ export function applyMinimizedState(state, minimized) {
  *
  * @param {AutoPictureInPictureState} state
  * @param {boolean} inPip
+ * @param {{ triggerActive?: boolean }} [options] whether an automatic trigger
+ *   applies at the time of the transition
  * @returns {boolean} whether the triggers should be re-evaluated
  */
-export function applyPictureInPictureState(state, inPip) {
+export function applyPictureInPictureState(state, inPip, { triggerActive = false } = {}) {
   const wasRequested = state.pendingPipTarget === inPip
   state.pendingPipTarget = null
 
@@ -206,8 +208,11 @@ export function applyPictureInPictureState(state, inPip) {
     state.autoPipActive = false
     // A PiP window closed by the user must not be reopened by a trigger that is
     // still active, so remember the dismissal until that trigger stops applying
-    // and let only a requested close settle the state right away.
-    state.pictureInPictureDismissed = !wasRequested
+    // and let only a requested close settle the state right away. Without an
+    // active trigger there is nothing to dismiss: "Back to tab" focuses the
+    // window before the close is reported, and a dismissal recorded then would
+    // swallow the next blur.
+    state.pictureInPictureDismissed = !wasRequested && triggerActive
 
     return wasRequested
   }

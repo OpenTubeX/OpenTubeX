@@ -1364,6 +1364,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
           return {
             text: choice.text.text,
             isCorrect: choice.is_correct,
+            explanation: choice.explanation?.text || null,
             image: choice.image
           }
         })

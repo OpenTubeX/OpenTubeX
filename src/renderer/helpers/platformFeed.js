@@ -535,7 +535,10 @@ export async function refreshPlatformFeed() {
     const stillFollowed = new Set(getFollowedChannels().map(getPlatformChannelKey))
     const loadedKeys = followed.map(getPlatformChannelKey).filter(key => !failed.has(key) && stillFollowed.has(key))
     const loaded = new Set(loadedKeys)
-    const ofLoadedChannels = (/** @type {PlatformItem[]} */ list) => list.filter(item => loaded.has(itemChannelKey(item)))
+    // The feed shows the avatars of the followed channels, so the cache doesn't keep them for each item
+    const ofLoadedChannels = (/** @type {PlatformItem[]} */ list) => list
+      .filter(item => loaded.has(itemChannelKey(item)))
+      .map(({ authorAvatar, ...item }) => item)
     const { live, videos } = splitLoadedItems(ofLoadedChannels(items), loadedKeys)
     // Uploads can be marked on another device before they load here
     unwatchItemsMarkedUnseen(videos, parseRssFeedSeenItems(store.getters.getRssFeedSeenItems))

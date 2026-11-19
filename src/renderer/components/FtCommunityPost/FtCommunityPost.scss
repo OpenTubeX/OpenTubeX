@@ -144,7 +144,48 @@
     opacity: 1;
   }
 
+  .postRatingButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-block-size: 36px;
+    border: 0;
+    border-radius: var(--shape-corner-full);
+    background: none;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+
+    &:not(.likeCount) {
+      padding-inline: 10px;
+    }
+
+    &:hover,
+    &:focus-visible {
+      background-color: var(--side-nav-hover-color);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--primary-color);
+      outline-offset: 2px;
+    }
+
+    &[aria-pressed='true'] {
+      color: var(--primary-color);
+    }
+  }
+
   @media (pointer: coarse), (width <= 680px) {
+    .postRatingButton {
+      min-block-size: 48px;
+    }
+
+    .postRatingButton:not(.likeCount) {
+      padding-inline: 14px;
+    }
+
     .likeCount,
     .commentsLink {
       // Match the space around a 20px icon in a 48px touch target.

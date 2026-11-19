@@ -407,7 +407,7 @@ Settings:
     Revoke Failed: "Kirjauduit ulos YouTubesta, mutta Google ei vahvistanut kirjautumisen päättymistä. Voit poistaa sen Google-tilisi kolmannen osapuolen yhteyksistä."
     Signed out by YouTube: "YouTube päätti kirjautumisen. Kirjaudu uudelleen asetuksissa, jotta voit jatkaa tilisi käyttöä."
     Add to YouTube Watch History: "Lisää katsotut videot YouTube-historiaan"
-    Rate Videos: "Tykkää ja en tykkää -arviot videoille"
+    Rate Videos: "Tykkää ja en tykkää -arviot videoille ja julkaisuille"
     Sync Subscriptions: "Synkronoi tilaukset YouTuben kanssa"
     Sync Playlists: "Synkronoi soittolistat YouTuben kanssa"
     Sync Now: "Synkronoi nyt"
@@ -1754,6 +1754,8 @@ Channel:
     Original post unavailable: "Alkuperäinen julkaisu ei ole saatavilla"
     Members-only video hidden by OpenTubeX: "OpenTubeX piilotti vain jäsenille tarkoitetun videon"
     Video hidden by OpenTubeX because of its title: "OpenTubeX piilotti videon, koska sen otsikko sisältää piilotettua tekstiä"
+    Correct: "Oikein"
+    Incorrect: "Väärin"
   Shows:
     Shows: Ohjelmat
     This channel does not currently have any shows: Tällä kanavalla ei ole tällä hetkellä ohjelmia
@@ -2343,7 +2345,7 @@ Tooltips:
   YouTube Account Settings:
     Watch Posted Comments: "Täällä julkaisemiesi kommenttien vastauksia seurataan automaattisesti, kun vastausilmoitukset ovat käytössä kommenttiasetuksissa."
     Add to YouTube Watch History: "Toistamasi videot lisätään YouTube-katseluhistoriaasi, jotta YouTuben suositukset oppivat niistä. Mitään ei lisätä, kun historia on keskeytetty YouTubessa."
-    Rate Videos: "Näyttää videoissa tykkää- ja en tykkää -painikkeet. Arviosi näyttämiseksi jokainen avaamasi video haetaan YouTubesta tililläsi, joten YouTube saa tietää, mitä videoita avaat, vaikka niitä ei lisättäisi katseluhistoriaasi."
+    Rate Videos: "Näyttää videoissa ja julkaisuissa tykkää- ja en tykkää -painikkeet. Arviosi näyttämiseksi jokainen avaamasi video haetaan YouTubesta tililläsi, joten YouTube saa tietää, mitä videoita avaat, vaikka niitä ei lisättäisi katseluhistoriaasi. Julkaisujen arvioita ei haeta, joten vain täällä antamasi arviot näkyvät."
     Sync Subscriptions: "YouTubessa tilaamasi kanavat lisätään profiiliin ”Kaikki kanavat”, ja kanavat, joiden tilauksen perut siellä, poistetaan kaikista profiileista. Kun tilaat kanavan tai perut tilauksen täällä profiilissa ”Kaikki kanavat”, sama tehdään myös YouTubessa."
     Sync Playlists: "YouTube-soittolistasi, ”Katso myöhemmin” ja ”Tykätyt videot” näkyvät kohdassa ”Omat soittolistat”, ja niihin täällä tekemäsi muutokset tehdään myös YouTubessa. Niitä ei synkronoida muille laitteillesi, eikä niitä sisällytetä, kun viet kaikki soittolistat tai varmuuskopioit tietosi. Tämän poistaminen käytöstä poistaa ne tältä laitteelta mutta ei YouTubesta."
   General Settings:
@@ -2682,6 +2684,8 @@ Channels:
 Search Bar:
   Use Suggestion: Käytä ehdotusta
   Open Search Container: Avaa hakukenttä
+  Video Link: "Video: {title}"
+  Channel Link: "Kanava: {title}"
 Theme Discovery:
   Discover Themes: "Löydä teemoja"
   Refresh: "Päivitä"
@@ -2885,6 +2889,7 @@ YouTube Account:
   Like: "Tykkää"
   Dislike: "En tykkää"
   Rating Failed: "Arviointi YouTubessa epäonnistui: {error}"
+  Vote Failed: "Äänestäminen YouTubessa epäonnistui: {error}"
   Subscribe Failed: "Tilaaminen YouTubessa epäonnistui: {error}"
   Unsubscribe Failed: "Tilauksen peruminen YouTubessa epäonnistui: {error}"
   Add a comment: "Lisää kommentti"

@@ -4,6 +4,7 @@ import test from 'node:test'
 import vm from 'node:vm'
 
 import { getSearchFilterTabId } from '../../src/search-history.js'
+import { isYouTubeHostname } from '../../src/youTubeHostname.js'
 
 const source = readFileSync(new URL('../../src/renderer/store/modules/utils.js', import.meta.url), 'utf8')
 const start = source.indexOf('  async getYoutubeUrlInfo(')
@@ -20,6 +21,7 @@ const getYoutubeUrlInfo = vm.runInNewContext(`({
   getVideoParamsFromUrl: () => ({}),
   checkYoutubeChannelId: () => false,
   getSearchFilterTabId,
+  isYouTubeHostname,
 })
 
 function createContext(searchSettingsByTabId, presentedTabId) {
@@ -104,4 +106,13 @@ test('watch URLs without a video ID open their playlist instead of a channel', a
     query: {},
   })
   assert.equal((await getYoutubeUrlInfo(context, 'https://www.youtube.com/watch')).urlType, 'unknown')
+})
+
+test('paths without a channel prefix are channels only on YouTube', async () => {
+  const context = createContext({}, 'tab-1')
+
+  assert.equal((await getYoutubeUrlInfo(context, 'https://www.youtube.com/SomeName/videos')).urlType, 'channel')
+  assert.equal((await getYoutubeUrlInfo(context, 'https://example.com/account')).urlType, 'unknown')
+  assert.equal((await getYoutubeUrlInfo(context, 'https://invidious.example/channel/UCaaaaaaaaaaaaaaaaaaaaaa')).urlType, 'channel')
+  assert.equal((await getYoutubeUrlInfo(context, 'https://invidious.example/@handle')).urlType, 'channel')
 })

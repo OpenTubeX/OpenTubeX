@@ -148,7 +148,7 @@
       @touchmove.capture="handleMobilePlayerTouchMove"
       @touchend.capture="handlePlayerTouchEnd"
       @focusin="handlePlayerFocusIn"
-      @focusout="handleScrollMiniPlayerLeave"
+      @focusout="handlePlayerFocusOut"
       @contextmenu="positionShortsContextMenu"
       @contextmenu.capture="handlePlayerContextMenu"
       @dblclick.capture="handlePlayerControlDoubleClick"
@@ -813,6 +813,7 @@
       >
         <span :style="{ backgroundColor: captionStyle.background }">{{ secondaryCaptionText }}</span>
       </div>
+      <!-- Scrolling the docks by touch must not reveal the player controls either. -->
       <FtMobileSheet
         class="fullscreenDockSheet"
         :enabled="portraitFullscreenDocks"
@@ -820,6 +821,8 @@
         :title="fullscreenDockTitle"
         :header-selector="fullscreenDockHeaderSelector"
         fullscreen
+        @mousemove="handleFullscreenDockMouseMove"
+        @touchmove.passive.stop
         @close="closePortraitFullscreenDock"
       >
         <button
@@ -2169,6 +2172,7 @@ import { setupPhoneOptionsMenu } from '../../helpers/player/phoneOptionsMenu'
 import { CONTROL_BAR_MENUS, setupSubmenuScrolling } from '../../helpers/player/submenuScrolling'
 import { setupMenuTransitions } from '../../helpers/player/menuTransitions'
 import { mirrorControlStates } from '../../helpers/player/controlStateAttributes'
+import { keepControlsShown } from '../../helpers/player/keepControlsShown'
 import { setupCaptionCueLayout } from '../../helpers/player/captionCueLayout'
 import { chooseAndroidDirectory } from '../../helpers/androidStorage'
 import { isAppHidden, getAndroidAppActive, waitForAndroidAppState } from '../../helpers/appVisibility.js'
@@ -8178,6 +8182,16 @@ function handleLeavePictureInPicture() {
   updateScrollMiniPlayer()
 }
 
+// The inline player only shows a poster during Picture-in-Picture, so keep its
+// controls up instead of fading them as over a playing video. showUI()
+// restarts the fade once Picture-in-Picture ends.
+watch(pictureInPictureActive, active => {
+  const controls = ui?.getControls()
+  if (!controls) return
+  keepControlsShown(controls, 'pictureInPicture', active)
+  controls.showUI()
+})
+
 function handlePictureInPictureResize() {
   const devicePixelRatio = window.devicePixelRatio > 1 ? window.devicePixelRatio : 1
 
@@ -9297,7 +9311,7 @@ function handlePlayerMouseLeave(event) {
   container.value?.style.removeProperty('--shorts-quick-playback-rate-bar-opacity')
 
   // Dragging the seek bar keeps the controls up until the drag ends.
-  if (props.shortsPlayer && !video.value.paused && !ui?.getControls().isSeeking()) {
+  if (props.shortsPlayer && !video.value.paused && !pictureInPictureActive.value && !ui?.getControls().isSeeking()) {
     ui?.getControls().getControlsContainer().removeAttribute('shown')
   }
 }
@@ -9368,7 +9382,7 @@ function handlePlayerMouseMove(event) {
   updateShortsQuickPlaybackRateBarProximity(event)
 
   const videoElement = video.value
-  revealPausedInterface()
+  if (!isFullscreenDockTarget(event.target)) revealPausedInterface()
 
   if (!props.shortsPlayer || !isFullscreen.value || videoElement.paused) {
     return
@@ -9390,7 +9404,39 @@ function handlePlayerMouseMove(event) {
 
 function handlePlayerFocusIn(event) {
   handleScrollMiniPlayerEnter(event)
-  revealPausedInterface()
+  if (!fullscreenDockFocusLost && !isFullscreenDockTarget(event.target)) revealPausedInterface()
+}
+
+// Closing a dock hides its focused element, so Shaka and FtMobileSheet move the
+// focus back into the player. Only the viewer's next input may reveal the
+// paused interface again.
+let fullscreenDockFocusLost = false
+
+/** @param {FocusEvent} event */
+function handlePlayerFocusOut(event) {
+  handleScrollMiniPlayerLeave(event)
+  if (event.relatedTarget === null && isFullscreenDockTarget(event.target)) fullscreenDockFocusLost = true
+}
+
+function clearFullscreenDockFocusLost() {
+  fullscreenDockFocusLost = false
+}
+
+/** @param {EventTarget | null} target */
+function isFullscreenDockTarget(target) {
+  return target instanceof Element && target.closest('.fullscreenDockSheet') !== null
+}
+
+/**
+ * Reading, scrolling or rearranging the side docks leaves the player controls
+ * hidden: only activity over the video reveals them, so keep the movement from
+ * Shaka. Shaka hides the cursor in its whole container while the pointer
+ * rests, so show it again here.
+ * @param {MouseEvent} event
+ */
+function handleFullscreenDockMouseMove(event) {
+  event.stopPropagation()
+  container.value?.classList.remove('no-cursor')
 }
 
 function toggleShortsFullscreen() {
@@ -12412,6 +12458,8 @@ onMounted(async () => {
   container.value?.addEventListener('click', handleVideoZoomClickCapture, true)
   // Release the hold before mobile gestures consume pointerup on window.
   window.addEventListener('pointerup', handleTemporaryPlaybackRatePointerUp, true)
+  window.addEventListener('keydown', clearFullscreenDockFocusLost, { capture: true, passive: true })
+  window.addEventListener('pointerdown', clearFullscreenDockFocusLost, { capture: true, passive: true })
   window.addEventListener('pointercancel', handleTemporaryPlaybackRatePointerCancel, true)
   document.addEventListener('visibilitychange', handleTemporaryPlaybackRateVisibilityChange)
   document.addEventListener('fullscreenchange', fullscreenChangeHandler)
@@ -13224,6 +13272,8 @@ onBeforeUnmount(() => {
   document.removeEventListener('keyup', handleVideoZoomModifierKey)
   container.value?.removeEventListener('click', handleVideoZoomClickCapture, true)
   window.removeEventListener('pointerup', handleTemporaryPlaybackRatePointerUp, true)
+  window.removeEventListener('keydown', clearFullscreenDockFocusLost, true)
+  window.removeEventListener('pointerdown', clearFullscreenDockFocusLost, true)
   window.removeEventListener('pointercancel', handleTemporaryPlaybackRatePointerCancel, true)
   document.removeEventListener('visibilitychange', handleTemporaryPlaybackRateVisibilityChange)
   document.removeEventListener('fullscreenchange', fullscreenChangeHandler)

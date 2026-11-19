@@ -36,7 +36,7 @@ public final class ChromecastPlugin extends Plugin {
     private static boolean fcast(PluginCall call) { return "fcast".equals(call.getString("protocol")); }
 
     @PluginMethod public void discover(PluginCall call) {
-        discoveryWorker.execute(() -> {
+        PluginWork.execute(discoveryWorker, call, () -> {
             try {
                 if (destroyed) throw new IllegalStateException("Cast plugin closed");
                 JSArray found = CastDiscovery.discover(getContext(), fcast(call));
@@ -50,7 +50,7 @@ public final class ChromecastPlugin extends Plugin {
     }
 
     @PluginMethod public void connect(PluginCall call) {
-        worker.execute(() -> {
+        PluginWork.execute(worker, call, () -> {
             JSObject device = (fcast(call) ? fcastDevices : devices).get(call.getString("deviceId", ""));
             String id = call.getString("castId", "");
             if (destroyed || transport != null || device == null || !id.matches("[a-fA-F0-9-]{36}")) {
@@ -92,7 +92,7 @@ public final class ChromecastPlugin extends Plugin {
     }
 
     @PluginMethod public void send(PluginCall call) {
-        worker.execute(() -> {
+        PluginWork.execute(worker, call, () -> {
             String namespace = call.getString("namespace", "");
             String destination = call.getString("destination", "");
             JSObject payload = call.getObject("payload");
@@ -108,7 +108,7 @@ public final class ChromecastPlugin extends Plugin {
     }
 
     @PluginMethod public void sendPacket(PluginCall call) {
-        worker.execute(() -> {
+        PluginWork.execute(worker, call, () -> {
             Integer opcode = call.getInt("opcode");
             if (!owns(call) || !(transport instanceof FcastTransport receiver) || opcode == null || !FCAST_SENDER_OPCODES.contains(opcode)) {
                 call.reject("Invalid FCast packet"); return;
@@ -119,7 +119,7 @@ public final class ChromecastPlugin extends Plugin {
     }
 
     @PluginMethod public void openMedia(PluginCall call) {
-        worker.execute(() -> {
+        PluginWork.execute(worker, call, () -> {
             if (!owns(call) || media != null) { call.reject("Cast session unavailable"); return; }
             try {
                 // The peer is retained at connection time, independent of later discovery.
@@ -135,7 +135,7 @@ public final class ChromecastPlugin extends Plugin {
     private String peerAddress;
 
     @PluginMethod public void registerResources(PluginCall call) {
-        mediaWorker.execute(() -> {
+        PluginWork.execute(mediaWorker, call, () -> {
             try {
                 CastMediaServer server = media;
                 if (!owns(call) || server == null) throw new IllegalStateException("Cast relay closed");
@@ -146,7 +146,7 @@ public final class ChromecastPlugin extends Plugin {
     }
 
     @PluginMethod public void completeManifest(PluginCall call) {
-        mediaWorker.execute(() -> {
+        PluginWork.execute(mediaWorker, call, () -> {
             CastMediaServer server = media;
             if (owns(call) && server != null) server.complete(call.getString("requestId"),
                 call.getBoolean("error", false) ? null : call.getString("body"), call.getInt("hlsReadTimeout"));
@@ -155,7 +155,7 @@ public final class ChromecastPlugin extends Plugin {
     }
 
     @PluginMethod public void disconnect(PluginCall call) {
-        worker.execute(() -> { if (owns(call)) cleanup(); call.resolve(); });
+        PluginWork.execute(worker, call, () -> { if (owns(call)) cleanup(); call.resolve(); });
     }
 
     private void stopFromService(String id) {

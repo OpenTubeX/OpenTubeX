@@ -4,6 +4,8 @@ import test from 'node:test'
 import {
   commentActionParams,
   createCommentParams,
+  createPostCommentsContinuation,
+  createPostPageParams,
   createReplyParams,
   isCommentActionSuccessful,
   parseAccountProfiles,
@@ -12,9 +14,12 @@ import {
   parseOwnedPlaylistIds,
   parsePlaylistLibrary,
   parsePlaylistPage,
+  parsePollResults,
   parseSubscribedChannels,
   parseVideoRating,
   parseWatchHistoryUrl,
+  pollVoteParams,
+  postRatingParams,
   updateCommentParams
 } from '../../src/renderer/helpers/api/youtube-account-parsers.js'
 import { applyYouTubeUserAgent, YOUTUBE_USER_AGENTS } from '../../src/youTubeUserAgent.js'
@@ -398,21 +403,115 @@ test('reads the account rating of a video from the TV watch page', () => {
 
 test('encodes comment parameters in the layouts YouTube accepts', () => {
   const videoId = 'abcdefghijk'
-  assert.deepEqual(decodeParams(createCommentParams(videoId)), [0x12, 11, ...bytes(videoId), 0x2a, 0x00, 0x50, 0x07])
-  assert.deepEqual(decodeParams(createReplyParams(videoId, 'Ugparent')), [
+  const video = { videoId }
+  assert.deepEqual(decodeParams(createCommentParams(video)), [0x12, 11, ...bytes(videoId), 0x2a, 0x00, 0x50, 0x07])
+  assert.deepEqual(decodeParams(createReplyParams(video, 'Ugparent')), [
     0x12, 11, ...bytes(videoId), 0x22, 8, ...bytes('Ugparent'), 0x2a, 0x02, 0x08, 0x00, 0x50, 0x07
+  ])
+  // A reply to a reply names its thread and the reply, so it nests under the reply.
+  assert.deepEqual(decodeParams(createReplyParams(video, 'Ugparent.Ugreply')), [
+    0x12, 11, ...bytes(videoId), 0x22, 8, ...bytes('Ugparent'), 0x2a, 0x02, 0x08, 0x00, 0x50, 0x07,
+    0x72, 16, ...bytes('Ugparent.Ugreply')
   ])
 
   const action = (type, undo = []) => [0x08, type, 0x10, 0x02, 0x1a, 16, ...bytes('Ugparent.Ugreply'), 0x2a, 11, ...bytes(videoId), ...undo]
-  assert.deepEqual(decodeParams(commentActionParams('like', 'Ugparent.Ugreply', videoId)), action(5))
-  assert.deepEqual(decodeParams(commentActionParams('unlike', 'Ugparent.Ugreply', videoId)), action(5, [0x38, 0x01]))
-  assert.deepEqual(decodeParams(commentActionParams('dislike', 'Ugparent.Ugreply', videoId)), action(4))
-  assert.deepEqual(decodeParams(commentActionParams('undislike', 'Ugparent.Ugreply', videoId)), action(4, [0x38, 0x01]))
-  assert.deepEqual(decodeParams(commentActionParams('delete', 'Ugparent.Ugreply', videoId)), action(6))
+  assert.deepEqual(decodeParams(commentActionParams('like', 'Ugparent.Ugreply', video)), action(5))
+  assert.deepEqual(decodeParams(commentActionParams('unlike', 'Ugparent.Ugreply', video)), action(5, [0x38, 0x01]))
+  assert.deepEqual(decodeParams(commentActionParams('dislike', 'Ugparent.Ugreply', video)), action(4))
+  assert.deepEqual(decodeParams(commentActionParams('undislike', 'Ugparent.Ugreply', video)), action(4, [0x38, 0x01]))
+  assert.deepEqual(decodeParams(commentActionParams('delete', 'Ugparent.Ugreply', video)), action(6))
 
   // Replies take the same layout with their full ID.
-  assert.deepEqual(decodeParams(updateCommentParams(videoId, 'Ugparent.Ugreply')), [
+  assert.deepEqual(decodeParams(updateCommentParams(video, 'Ugparent.Ugreply')), [
     0x0a, 16, ...bytes('Ugparent.Ugreply'), 0x22, 11, ...bytes(videoId), 0x2a, 0x02, 0x08, 0x00, 0x40, 0x0c, 0x92, 0x01, 0x00
+  ])
+})
+
+test('encodes the parameters of comments on posts in the website\'s layouts', () => {
+  const postId = 'Ugkxpost'
+  const channelId = 'UCchannel'
+  const post = { postId, channelId }
+  // The post and its channel, as fields 20 and 21 (0xa2 0x01, 0xaa 0x01)
+  const postFields = [0xa2, 0x01, 8, ...bytes(postId), 0xaa, 0x01, 9, ...bytes(channelId)]
+  assert.deepEqual(decodeParams(createCommentParams(post)), [0x2a, 0x02, 0x08, 0x00, 0x50, 0x01, ...postFields])
+  assert.deepEqual(decodeParams(createReplyParams(post, 'Ugparent')), [
+    0x22, 8, ...bytes('Ugparent'), 0x2a, 0x02, 0x08, 0x00, 0x50, 0x01, ...postFields
+  ])
+  // Like the website, a reply to a reply names the reply before the post.
+  assert.deepEqual(decodeParams(createReplyParams(post, 'Ugparent.Ugreply')), [
+    0x22, 8, ...bytes('Ugparent'), 0x2a, 0x02, 0x08, 0x00, 0x50, 0x01, 0x72, 16, ...bytes('Ugparent.Ugreply'), ...postFields
+  ])
+  // Fields 10 and 11
+  assert.deepEqual(decodeParams(updateCommentParams(post, 'Ugparent.Ugreply')), [
+    0x0a, 16, ...bytes('Ugparent.Ugreply'), 0x2a, 0x02, 0x08, 0x00, 0x40, 0x01,
+    0x52, 8, ...bytes(postId), 0x5a, 9, ...bytes(channelId), 0x92, 0x01, 0x00
+  ])
+  // Fields 22 and 23
+  const action = (type, undo = []) => [
+    0x08, type, 0x10, 0x07, 0x1a, 8, ...bytes('Ugparent'), 0xb2, 0x01, 8, ...bytes(postId), 0xba, 0x01, 9, ...bytes(channelId), ...undo
+  ]
+  assert.deepEqual(decodeParams(commentActionParams('like', 'Ugparent', post)), action(5))
+  assert.deepEqual(decodeParams(commentActionParams('undislike', 'Ugparent', post)), action(4, [0x38, 0x01]))
+  assert.deepEqual(decodeParams(commentActionParams('delete', 'Ugparent', post)), action(6))
+})
+
+test('encodes poll votes, quiz answers and post ratings like the website', () => {
+  const post = [0x1a, 8, ...bytes('Ugkxpost')]
+  const channel = [0x5a, 9, ...bytes('UCchannel')]
+  const vote = (type, index, quiz = []) => [0x08, type, ...post, ...channel, 0x60, index, ...quiz]
+  // The first choice is index 0, which is still sent.
+  assert.deepEqual(decodeParams(pollVoteParams('Ugkxpost', 'UCchannel', 0, true)), vote(9, 0))
+  assert.deepEqual(decodeParams(pollVoteParams('Ugkxpost', 'UCchannel', 2, false)), vote(10, 2))
+  // Quiz answers add fields 40 and 41: a quiz, and whether the answer is correct.
+  assert.deepEqual(decodeParams(pollVoteParams('Ugkxpost', 'UCchannel', 1, true, true)), vote(9, 1, [0xc0, 0x02, 1, 0xc8, 0x02, 1]))
+  assert.deepEqual(decodeParams(pollVoteParams('Ugkxpost', 'UCchannel', 0, true, false)), vote(9, 0, [0xc0, 0x02, 1, 0xc8, 0x02, 0]))
+
+  // Field 7 takes the rating back, and field 56 is 2 (0xc0 0x03).
+  const rating = (type, undo) => [0x08, type, ...post, 0x38, undo, ...channel, 0xc0, 0x03, 2]
+  assert.deepEqual(decodeParams(postRatingParams('like', 'Ugkxpost', 'UCchannel')), rating(5, 0))
+  assert.deepEqual(decodeParams(postRatingParams('unlike', 'Ugkxpost', 'UCchannel')), rating(5, 1))
+  assert.deepEqual(decodeParams(postRatingParams('dislike', 'Ugkxpost', 'UCchannel')), rating(4, 0))
+  assert.deepEqual(decodeParams(postRatingParams('undislike', 'Ugkxpost', 'UCchannel')), rating(4, 1))
+
+  // The post's page is field 56 with the channel, the post, and the channel again.
+  assert.deepEqual([...Buffer.from(createPostPageParams('Ugkxpost', 'UCchannel'), 'base64')], [
+    0xc2, 0x03, 32, 0x12, 9, ...bytes('UCchannel'), 0x1a, 8, ...bytes('Ugkxpost'), 0x5a, 9, ...bytes('UCchannel')
+  ])
+})
+
+test('reads the share of each poll choice with and without the viewer\'s vote', () => {
+  const choice = (count, ratio) => ({
+    pollChoiceViewModel: {
+      text: 'Choice',
+      unselectedStateData: { voteCount: count, votePercentage: '', progressBarWidth: ratio },
+      selectedStateData: { voteCount: count + 1, votePercentage: '', progressBarWidth: ratio + 0.01 }
+    }
+  })
+  const page = choices => ({ contents: { singleColumnBrowseResultsRenderer: { tabs: [{ tabRenderer: { content: { attachment: { pollViewModel: { choices } } } } }] } } })
+
+  assert.deepEqual(parsePollResults(page([choice(30, 0.3), choice(70, 0.7)])), [
+    { selected: { count: 31, ratio: 0.31 }, unselected: { count: 30, ratio: 0.3 } },
+    { selected: { count: 71, ratio: 0.71 }, unselected: { count: 70, ratio: 0.7 } }
+  ])
+  // Pages without results, like quizzes or the message older app versions get, have none.
+  assert.equal(parsePollResults(page([{ pollChoiceViewModel: { text: 'Choice' } }])), null)
+  assert.equal(parsePollResults({ contents: { messageRenderer: {} } }), null)
+})
+
+test('loads post comments with a linked comment first, sorted as asked', () => {
+  const decode = token => [...Buffer.from(token, 'base64')]
+  const outer = Buffer.from(createPostCommentsContinuation('Ugkxpost', 'UCchannel', true, 'Ugthread.Ugreply'), 'base64')
+  const location = Buffer.from('FEcomment_post_detail_page_web_top_level')
+  // Field 3 follows the location: its tag, a one-byte length, and the inner
+  // parameters, which are URL-encoded, URL-safe base64.
+  const start = outer.indexOf(location) + location.length
+  assert.equal(outer[start], 0x1a)
+  const params = outer.subarray(start + 2, start + 2 + outer[start + 1]).toString()
+  const inner = decode(decodeURIComponent(params).replaceAll('-', '+').replaceAll('_', '/'))
+  const options = [0x30, 0x01, 0x78, 0x02, 0x82, 0x01, 16, ...bytes('Ugthread.Ugreply'), 0xea, 0x01, 8, ...bytes('Ugkxpost'), 0xf2, 0x01, 9, ...bytes('UCchannel')]
+  assert.deepEqual(inner, [
+    0x12, 5, ...bytes('posts'), 0xaa, 0x03, options.length + 20,
+    0x22, options.length, ...options, 0x42, 16, ...bytes('comments-section')
   ])
 })
 

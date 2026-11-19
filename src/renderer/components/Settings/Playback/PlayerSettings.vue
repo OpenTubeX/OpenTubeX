@@ -758,6 +758,7 @@
           :icon="['fas', 'file-lines']"
           placeholder="%Y-%M-%D_%H-%N-%S"
           :value="screenshotFilenamePattern"
+          setting-key="screenshotFilenamePattern"
           :show-action-button="false"
           @input="handleScreenshotFilenamePatternChanged"
         />
@@ -928,7 +929,7 @@
 import FtIconButton from '../../FtIconButton/FtIconButton.vue'
 import { displayAndroidPath, chooseAndroidDirectory } from '../../../helpers/androidStorage'
 import { FtIcon } from '@opentubex/icons'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
@@ -2143,10 +2144,6 @@ const screenshotFilenamePattern = computed(() => store.getters.getScreenshotFile
 const enableTimestampNotes = computed(() => store.getters.getEnableTimestampNotes)
 const obsidianVault = computed(() => store.getters.getObsidianVault)
 
-onMounted(() => {
-  getScreenshotFilenameExample(screenshotFilenamePattern.value)
-})
-
 const SCREENSHOT_DEFAULT_PATTERN = '%Y%M%D-%H%N%S'
 
 /**
@@ -2163,6 +2160,11 @@ async function handleScreenshotFilenamePatternChanged(input) {
 }
 
 const screenshotFilenameExample = ref('')
+
+// Also covers store-side changes, such as a reset or a synced pattern.
+watch(screenshotFilenamePattern, (pattern) => {
+  getScreenshotFilenameExample(pattern)
+}, { immediate: true })
 
 /**
  * @param {string} pattern

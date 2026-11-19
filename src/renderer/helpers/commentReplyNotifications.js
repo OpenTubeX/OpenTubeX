@@ -3,7 +3,7 @@ import { ref } from 'vue'
 
 import store from '../store/index'
 import i18n from '../i18n/index'
-import { createLocalCommentsClient } from './api/local'
+import { createLocalCommentsClient, getLocalCommunityPostComments } from './api/local'
 import {
   deliverAndroidNotification,
   isAndroidBackgroundRenderer,
@@ -44,6 +44,16 @@ const CHANNEL_ID = 'comment-replies'
 const isAndroid = !!process.env.IS_CAPACITOR && !process.env.IS_IOS
 
 /** @typedef {import('../../commentReplyTracking.js').TrackedCommentThread} TrackedCommentThread */
+/** @typedef {import('./api/youtube-account-parsers.js').YouTubeCommentTarget} YouTubeCommentTarget */
+
+/**
+ * How watched comments identify what they are on.
+ * @param {YouTubeCommentTarget} target
+ * @returns {{ videoId: string, postAuthorId?: string }}
+ */
+function getWatchedCommentPage(target) {
+  return 'postId' in target ? { videoId: target.postId, postAuthorId: target.channelId } : { videoId: target.videoId }
+}
 
 /**
  * The watched comments as last loaded, for the watch buttons on comments.
@@ -75,18 +85,18 @@ export function isCommentWatchingEnabled() {
 
 /**
  * Watches the thread of a comment the account just posted for replies.
- * @param {string} videoId
+ * @param {YouTubeCommentTarget} target
  * @param {string} threadId the top-level comment
  * @param {string} commentId the posted comment, the same as `threadId` unless it is a reply
  * @param {import('./api/youtube-account').YouTubeAccount | null} account the channel that posted it
  * @param {string} text the posted text, shown in the list of watched comments
- * @param {string} videoTitle
+ * @param {string} videoTitle the video's title, or what shows for a post
  */
-export function trackCommentReplies(videoId, threadId, commentId, account, text, videoTitle) {
+export function trackCommentReplies(target, threadId, commentId, account, text, videoTitle) {
   // Without its channel, the account's own replies would be announced too.
   if (!isCommentWatchingEnabled() || !store.getters.getYouTubeAccountReplyNotifications || !account?.channelId) return
   const comment = {
-    videoId,
+    ...getWatchedCommentPage(target),
     threadId,
     commentId,
     channelId: account.channelId,
@@ -103,16 +113,16 @@ export function trackCommentReplies(videoId, threadId, commentId, account, text,
 
 /**
  * Watches a loaded comment for replies, from the replies it has now.
- * @param {string} videoId
- * @param {string} videoTitle
+ * @param {YouTubeCommentTarget} target
+ * @param {string} videoTitle the video's title, or what shows for a post
  * @param {{ id: string, authorId: string, author: string, text: string }} comment `text` is HTML
  * @returns {Promise<boolean>} false when the comment is gone
  */
-export async function watchComment(videoId, videoTitle, { id, authorId, author, text }) {
+export async function watchComment(target, videoTitle, { id, authorId, author, text }) {
   const account = isSignedInToYouTube(store.getters) ? store.getters.getYouTubeAccount : null
   const threadId = id.split('.')[0]
   const watched = {
-    videoId,
+    ...getWatchedCommentPage(target),
     threadId,
     commentId: id,
     channelId: authorId,
@@ -157,11 +167,11 @@ export async function markWatchedThreadOpened(videoId, commentId) {
 
 /**
  * The watched comment that covers a loaded comment, if any.
- * @param {string} videoId
+ * @param {YouTubeCommentTarget} target
  * @param {{ id: string, authorId: string }} comment
  */
-export function findWatchedComment(videoId, { id, authorId }) {
-  const key = { videoId, threadId: id.split('.')[0], channelId: authorId }
+export function findWatchedComment(target, { id, authorId }) {
+  const key = { videoId: getWatchedCommentPage(target).videoId, threadId: id.split('.')[0], channelId: authorId }
   // Watching only the author's replies does not cover their top-level comment's whole thread.
   return watchedComments.value.find(thread => isSameWatchedComment(thread, key) &&
     (id !== key.threadId || thread.commentId === key.threadId)) ?? null
@@ -250,15 +260,19 @@ async function fetchThread(thread) {
       if (heart) hearts.set(id, heart)
     }
   })
+  /** @param {string} commentId */
+  const getLinkedComments = commentId => thread.postAuthorId
+    ? getLocalCommunityPostComments(thread.videoId, thread.postAuthorId, undefined, commentId, innertube)
+    : innertube.getComments(thread.videoId, undefined, commentId)
   // The thread of the linked comment comes first.
-  const comments = await innertube.getComments(thread.videoId, undefined, getWatchedCommentId(thread))
+  const comments = await getLinkedComments(getWatchedCommentId(thread))
   const commentThread = comments.contents.find(item => item.comment?.comment_id === thread.threadId)
   if (!commentThread) return null
   const replyCount = Number.parseInt(String(commentThread.comment.reply_count ?? '0').replaceAll(/\D/g, '') || '0')
   const replies = replyCount === thread.replyCount || !commentThread.has_replies ? [] : await fetchReplies(commentThread)
   // Own comments not found so far each need a request that links them.
   for (const { id } of findCommentsToLink(thread, hearts)) {
-    await innertube.getComments(thread.videoId, undefined, id)
+    await getLinkedComments(id)
       .catch(error => console.warn('Could not check a comment for a heart', error))
   }
   return { replyCount, replies, hearts }
@@ -297,15 +311,17 @@ async function fetchReplies(commentThread) {
 /**
  * Shows a notification about a reply or a heart, and adds it to the history.
  * @param {'comment-reply' | 'comment-heart'} kind
- * @param {string} videoId
+ * @param {TrackedCommentThread} thread
  * @param {string} commentId the reply's, or the hearted comment's
  * @param {string} title
  * @param {string} body
  */
-async function announce(kind, videoId, commentId, title, body) {
+async function announce(kind, thread, commentId, title, body) {
+  const { videoId } = thread
   const target = getCommentNotificationTarget(kind, videoId, commentId)
   if (!target) return
-  const thumbnail = withThumbnail(videoId).thumbnail
+  // Posts have no thumbnail of their own.
+  const thumbnail = thread.postAuthorId ? undefined : withThumbnail(videoId).thumbnail
 
   if (isAndroid) {
     const mode = store.getters.getNotificationMode
@@ -391,14 +407,14 @@ async function checkThreads() {
       if (disabled) break
       if (announced.has(`${thread.videoId}/${reply.id}`)) continue
       announced.add(`${thread.videoId}/${reply.id}`)
-      await announce('comment-reply', thread.videoId, reply.id, getReplyTitle(thread, reply.author || '?'), reply.text)
+      await announce('comment-reply', thread, reply.id, getReplyTitle(thread, reply.author || '?'), reply.text)
         .catch(error => console.error('Failed to announce a comment reply', error))
     }
     for (const { id, heart } of hearts.announce) {
       disabled ||= !isCommentWatchingEnabled()
       if (disabled) break
       const title = i18n.global.t('YouTube Account.{author} hearted your comment', { author: heart.author || '?' })
-      await announce('comment-heart', current.videoId, id, title, heart.text)
+      await announce('comment-heart', current, id, title, heart.text)
         .catch(error => console.error('Failed to announce a comment heart', error))
     }
     const threads = loadThreads(startedAt)

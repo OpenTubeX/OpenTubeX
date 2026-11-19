@@ -409,7 +409,7 @@ Settings:
     Sync Subscriptions: "Synkronisera prenumerationer med YouTube"
     Sync Playlists: "Synkronisera spellistor med YouTube"
     Add to YouTube Watch History: "Lägg till sedda videor i YouTube-historiken"
-    Rate Videos: "Gilla och ogilla videor"
+    Rate Videos: "Gilla och ogilla videor och inlägg"
     Sync Now: "Synkronisera nu"
     Synced: "Synkroniserat med YouTube"
     Sync Failed: "Det gick inte att synkronisera med YouTube: {error}"
@@ -1751,6 +1751,8 @@ Channel:
     Original post unavailable: "Det ursprungliga inlägget är inte tillgängligt"
     Members-only video hidden by OpenTubeX: "Video endast för medlemmar dold av OpenTubeX"
     Video hidden by OpenTubeX because of its title: "Video dold av OpenTubeX eftersom titeln innehåller dold text"
+    Correct: "Rätt"
+    Incorrect: "Fel"
 Video:
   Play in Background: "Spela upp i bakgrunden"
   Info panel source: 'Källa: {source}'
@@ -2337,7 +2339,7 @@ Tooltips:
     Sync Subscriptions: "Kanaler som du prenumererar på via YouTube läggs till i Alla kanaler, och kanaler som du slutar prenumerera på där tas bort från alla profiler. Att prenumerera eller avsluta en prenumeration i Alla kanaler här gör samma sak på YouTube."
     Sync Playlists: "Dina YouTube-spellistor, Titta senare och Gillade videor visas i Dina spellistor, och ändringar som du gör i dem här görs även på YouTube. De synkroniseras inte till dina andra enheter och tas inte med när du exporterar alla spellistor eller säkerhetskopierar dina data. Om du stänger av detta tas de bort från den här enheten men inte från YouTube."
     Add to YouTube Watch History: "Videor du spelar upp läggs till i din visningshistorik på YouTube, så att rekommendationerna på YouTube lär sig av dem. Inget läggs till medan historiken är pausad på YouTube."
-    Rate Videos: "Visar knappar för att gilla och ogilla videor. För att visa ditt betyg slås varje video du öppnar upp på YouTube med ditt konto, så YouTube får veta vilka videor du öppnar, även när de inte läggs till i din visningshistorik."
+    Rate Videos: "Visar knappar för att gilla och ogilla videor och inlägg. För att visa ditt betyg slås varje video du öppnar upp på YouTube med ditt konto, så YouTube får veta vilka videor du öppnar, även när de inte läggs till i din visningshistorik. Betyg på inlägg slås inte upp, så bara de du ger här visas."
   General Settings:
     Invidious Instance Credentials: 'Behövs bara om instansen ber om ett användarnamn och lösenord. De sparas bara på den här enheten och skickas bara till den här instansen.'
     Reply Notifications: "OpenTubeX kontrollerar kommentarerna du bevakar efter nya svar. Den meddelar dig också när en kreatör ger en av dina kommentarer ett hjärta. En kommentar förblir bevakad tills 30 dagar har gått utan nya svar, hjärtan eller att du öppnar den. Upp till 50 kommentarer förblir bevakade, så om du bevakar fler slutar de som har varit inaktiva längst att bevakas. Bevaka valfri kommentar med klockknappen bredvid den."
@@ -2673,6 +2675,8 @@ Channels:
   Load More Channels: "Läs in fler kanaler"
 Search Bar:
   Use Suggestion: Använd förslag
+  Video Link: "Video: {title}"
+  Channel Link: "Kanal: {title}"
 Theme Discovery:
   Discover Themes: "Upptäck teman"
   Refresh: "Läs in igen"
@@ -2876,6 +2880,7 @@ YouTube Account:
   Like: "Gilla"
   Dislike: "Ogilla"
   Rating Failed: "Det gick inte att betygsätta på YouTube: {error}"
+  Vote Failed: "Det gick inte att rösta på YouTube: {error}"
   Subscribe Failed: "Det gick inte att prenumerera på YouTube: {error}"
   Unsubscribe Failed: "Det gick inte att avsluta prenumerationen på YouTube: {error}"
   Subscriptions Synced: "Prenumerationer synkroniserade från YouTube: {added} tillagda, {removed} borttagna"

@@ -83,6 +83,8 @@ Search Bar:
   Remove: Suprimeix
   Open Search Container: Obre el camp de cerca
   Search: Cerca
+  Video Link: "Vídeo: {title}"
+  Channel Link: "Canal: {title}"
 Search character limit: La consulta supera el límit de {searchCharacterLimit} caràcters
 Search Listing:
   Label:
@@ -545,7 +547,7 @@ Settings:
     Sync Subscriptions: "Sincronitza les subscripcions amb YouTube"
     Sync Playlists: "Sincronitza les llistes de reproducció amb YouTube"
     Add to YouTube Watch History: "Afegeix els vídeos vistos a l'historial de YouTube"
-    Rate Videos: "Indicar que t'agraden o no els vídeos"
+    Rate Videos: "Indicar que t'agraden o no els vídeos i les publicacions"
     Sync Now: "Sincronitza ara"
     Synced: "S'ha sincronitzat amb YouTube"
     Sync Failed: "No s'ha pogut sincronitzar amb YouTube: {error}"
@@ -2161,6 +2163,8 @@ Channel:
     Original post unavailable: "La publicació original no està disponible"
     Members-only video hidden by OpenTubeX: "Vídeo només per a membres ocult per l'OpenTubeX"
     Video hidden by OpenTubeX because of its title: "Vídeo ocult per l'OpenTubeX perquè el títol conté text ocult"
+    Correct: "Correcte"
+    Incorrect: "Incorrecte"
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Aquest canal té vídeos, però no se n'ha pogut mostrar cap. Prova de carregar-ne més"
   Shows:
@@ -2876,7 +2880,7 @@ Tooltips:
     Sync Subscriptions: "Els canals als quals et subscrius a YouTube s'afegeixen a «Tots els canals», i els canals dels quals et dones de baixa allà se suprimeixen de tots els perfils. Subscriure't o donar-te de baixa a «Tots els canals» aquí fa el mateix a YouTube."
     Sync Playlists: "Les teves llistes de reproducció de YouTube, «Mira més tard» i «Vídeos que m'agraden» apareixen a «Les teves llistes de reproducció», i els canvis que hi facis aquí també es fan a YouTube. No se sincronitzen amb els teus altres dispositius ni s'inclouen quan exportes totes les llistes de reproducció o fas una còpia de seguretat de les teves dades. Si desactives aquesta opció, se suprimeixen d'aquest dispositiu, però no de YouTube."
     Add to YouTube Watch History: "Els vídeos que reprodueixes s'afegeixen al teu historial de visualitzacions de YouTube, perquè les recomanacions de YouTube n'aprenguin. No s'hi afegeix res mentre l'historial està en pausa a YouTube."
-    Rate Videos: "Mostra els botons de m'agrada i no m'agrada als vídeos. Per mostrar la teva valoració, cada vídeo que obres es consulta a YouTube amb el teu compte, de manera que YouTube sap quins vídeos obres, encara que no s'afegeixin a l'historial de visualitzacions."
+    Rate Videos: "Mostra els botons de m'agrada i no m'agrada als vídeos i a les publicacions. Per mostrar la teva valoració, cada vídeo que obres es consulta a YouTube amb el teu compte, de manera que YouTube sap quins vídeos obres, encara que no s'afegeixin a l'historial de visualitzacions. Les valoracions de les publicacions no es consulten, així que només es mostren les que fas aquí."
   General Settings:
     Invidious Instance Credentials: 'Només cal si la instància demana un nom d''usuari i una contrasenya. Només es desen en aquest dispositiu i només s''envien a aquesta instància.'
     Reply Notifications: "OpenTubeX comprova si els comentaris que segueixes tenen respostes noves. També t'avisa quan un creador posa un cor a un dels teus comentaris. Un comentari es continua seguint fins que passen 30 dies sense respostes noves, cors ni que l'obris. Es poden seguir fins a 50 comentaris alhora, de manera que, si en segueixes més, deixes de seguir els que fa més temps que estan inactius. Segueix qualsevol comentari amb el botó de la campana que hi ha al costat."
@@ -3524,6 +3528,7 @@ YouTube Account:
   Like: "M'agrada"
   Dislike: "No m'agrada"
   Rating Failed: "No s'ha pogut valorar a YouTube: {error}"
+  Vote Failed: "No s'ha pogut votar a YouTube: {error}"
   Subscribe Failed: "No s'ha pogut fer la subscripció a YouTube: {error}"
   Unsubscribe Failed: "No s'ha pogut cancel·lar la subscripció a YouTube: {error}"
   Subscriptions Synced: "Subscripcions sincronitzades des de YouTube: {added} afegides, {removed} suprimides"

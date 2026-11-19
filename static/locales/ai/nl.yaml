@@ -412,7 +412,7 @@ Settings:
     Revoke Failed: "Afgemeld bij YouTube, maar Google heeft niet bevestigd dat de aanmelding is beëindigd. U kunt deze verwijderen bij de verbindingen met derden in uw Google-account."
     Signed out by YouTube: "YouTube heeft de aanmelding beëindigd. Log opnieuw in via Instellingen om uw account te blijven gebruiken."
     Add to YouTube Watch History: "Bekeken video's toevoegen aan de YouTube-geschiedenis"
-    Rate Videos: "Video's leuk en niet leuk vinden"
+    Rate Videos: "Video's en posts leuk en niet leuk vinden"
     Sync Subscriptions: "Abonnementen synchroniseren met YouTube"
     Sync Playlists: "Afspeellijsten synchroniseren met YouTube"
     Sync Now: "Nu synchroniseren"
@@ -1796,6 +1796,8 @@ Channel:
     Original post unavailable: "Oorspronkelijk bericht niet beschikbaar"
     Members-only video hidden by OpenTubeX: "Video alleen voor leden verborgen door OpenTubeX"
     Video hidden by OpenTubeX because of its title: "Video verborgen door OpenTubeX omdat de titel verborgen tekst bevat"
+    Correct: "Goed"
+    Incorrect: "Fout"
   Shows:
     Shows: Programma's
     This channel does not currently have any shows: Dit kanaal heeft momenteel geen programma's
@@ -2402,7 +2404,7 @@ Tooltips:
   YouTube Account Settings:
     Watch Posted Comments: "Reacties die je hier plaatst, worden automatisch gevolgd op antwoorden, zolang meldingen over antwoorden aanstaan in de instellingen bij Opmerkingen."
     Add to YouTube Watch History: "Video's die u afspeelt, worden toegevoegd aan uw YouTube-kijkgeschiedenis, zodat de aanbevelingen van YouTube ervan leren. Er wordt niets toegevoegd zolang de geschiedenis op YouTube is onderbroken."
-    Rate Videos: "Toont knoppen om video's leuk of niet leuk te vinden. Om je beoordeling te tonen, wordt elke video die je opent met je account op YouTube opgezocht, zodat YouTube weet welke video's je opent, ook als ze niet aan je kijkgeschiedenis worden toegevoegd."
+    Rate Videos: "Toont knoppen om video's en posts leuk of niet leuk te vinden. Om je beoordeling te tonen, wordt elke video die je opent met je account op YouTube opgezocht, zodat YouTube weet welke video's je opent, ook als ze niet aan je kijkgeschiedenis worden toegevoegd. Beoordelingen van posts worden niet opgezocht, dus alleen de beoordelingen die je hier geeft worden getoond."
     Sync Subscriptions: "Kanalen waarop u zich op YouTube abonneert, worden toegevoegd aan ‘Alle kanalen’, en kanalen waarvan u daar het abonnement opzegt, worden uit elk profiel verwijderd. Abonneren of deabonneren hier in ‘Alle kanalen’ doet hetzelfde op YouTube."
     Sync Playlists: "Uw YouTube-afspeellijsten, ‘Later bekijken’ en ‘Video's die ik leuk vind’ verschijnen in ‘Jouw afspeellijsten’, en wijzigingen die u er hier in aanbrengt, worden ook op YouTube doorgevoerd. Ze worden niet gesynchroniseerd met uw andere apparaten en niet meegenomen wanneer u alle afspeellijsten exporteert of een back-up van uw gegevens maakt. Als u dit uitschakelt, worden ze van dit apparaat verwijderd, maar niet van YouTube."
   General Settings:
@@ -2746,6 +2748,8 @@ Search Bar:
   Use Suggestion: Suggestie gebruiken
   Open Search Container: Zoekveld openen
   Search: Zoeken
+  Video Link: "Video: {title}"
+  Channel Link: "Kanaal: {title}"
 Theme Discovery:
   Discover Themes: "Thema's ontdekken"
   Refresh: "Vernieuwen"
@@ -2949,6 +2953,7 @@ YouTube Account:
   Like: "Vind ik leuk"
   Dislike: "Vind ik niet leuk"
   Rating Failed: "Kan niet beoordelen op YouTube: {error}"
+  Vote Failed: "Kan niet stemmen op YouTube: {error}"
   Subscribe Failed: "Kan niet abonneren op YouTube: {error}"
   Unsubscribe Failed: "Kan niet deabonneren op YouTube: {error}"
   Add a comment: "Opmerking toevoegen"

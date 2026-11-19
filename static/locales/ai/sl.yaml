@@ -93,6 +93,8 @@ Search Bar:
   Remove: Odstrani
   Open Search Container: Odpri iskalno polje
   Search: Iskanje
+  Video Link: "Videoposnetek: {title}"
+  Channel Link: "Kanal: {title}"
 Search character limit: Iskalna poizvedba presega omejitev {searchCharacterLimit} znakov
 Search Listing:
   Label:
@@ -537,7 +539,7 @@ Settings:
     Sync Subscriptions: "Sinhroniziraj naročnine s storitvijo YouTube"
     Sync Playlists: "Sinhroniziraj sezname predvajanja s storitvijo YouTube"
     Add to YouTube Watch History: "Dodaj ogledane videoposnetke v zgodovino storitve YouTube"
-    Rate Videos: "Všečkanje in nevšečkanje videoposnetkov"
+    Rate Videos: "Všečkanje in nevšečkanje videoposnetkov in objav"
     Sync Now: "Sinhroniziraj zdaj"
     Synced: "Sinhronizirano s storitvijo YouTube"
     Sync Failed: "Sinhronizacija s storitvijo YouTube ni uspela: {error}"
@@ -2128,6 +2130,8 @@ Channel:
     Original post unavailable: "Izvirna objava ni na voljo"
     Members-only video hidden by OpenTubeX: "OpenTubeX je skril videoposnetek samo za člane"
     Video hidden by OpenTubeX because of its title: "OpenTubeX je skril videoposnetek, ker njegov naslov vsebuje skrito besedilo"
+    Correct: "Pravilno"
+    Incorrect: "Napačno"
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Ta kanal ima videoposnetke, vendar nobenega ni bilo mogoče prikazati. Poskusite naložiti več"
   Shows:
@@ -2838,7 +2842,7 @@ Tooltips:
     Sync Subscriptions: "Kanali, na katere se naročite v storitvi YouTube, se dodajo v profil Vsi kanali, kanali, katerih naročnino tam prekličete, pa se odstranijo iz vseh profilov. Naročanje ali preklic naročnine tukaj v profilu Vsi kanali naredi enako v storitvi YouTube."
     Sync Playlists: "Vaši seznami predvajanja iz storitve YouTube, Za poznejši ogled in Všečkani videoposnetki so prikazani v razdelku Vaši seznami predvajanja, spremembe, ki jih tukaj naredite v njih, pa se izvedejo tudi v storitvi YouTube. Ne sinhronizirajo se z vašimi drugimi napravami in niso vključeni, ko izvozite vse sezname predvajanja ali naredite varnostno kopijo podatkov. Če to možnost izklopite, se odstranijo iz te naprave, ne pa iz storitve YouTube."
     Add to YouTube Watch History: "Videoposnetki, ki jih predvajate, se dodajo v vašo zgodovino predvajanj v storitvi YouTube, zato se priporočila YouTube učijo iz njih. Ko je zgodovina v storitvi YouTube začasno zaustavljena, se ne doda nič."
-    Rate Videos: "Prikaže gumba Všeč mi je in Ni mi všeč na videoposnetkih. Za prikaz vaše ocene se vsak odprt videoposnetek z vašim računom poišče v YouTubu, zato YouTube izve, katere videoposnetke odpirate, tudi ko niso dodani v zgodovino ogledov."
+    Rate Videos: "Prikaže gumba Všeč mi je in Ni mi všeč na videoposnetkih in objavah. Za prikaz vaše ocene se vsak odprt videoposnetek z vašim računom poišče v YouTubu, zato YouTube izve, katere videoposnetke odpirate, tudi ko niso dodani v zgodovino ogledov. Ocene objav se ne iščejo, zato se prikažejo le tiste, ki jih podate tukaj."
   General Settings:
     Invidious Instance Credentials: 'Potrebno le, če primerek zahteva uporabniško ime in geslo. Shranjena sta samo v tej napravi in poslana samo temu primerku.'
     Reply Notifications: "OpenTubeX preverja, ali so na komentarje, ki jih spremljate, prispeli novi odgovori. Obvesti vas tudi, ko ustvarjalec da srček kateremu od vaših komentarjev. Komentar ostane spremljan, dokler ne mine 30 dni brez novih odgovorov, srčkov ali vašega odpiranja. Hkrati lahko spremljate do 50 komentarjev, zato se ob spremljanju novih preneha spremljanje tistih, ki so najdlje neaktivni. Kateri koli komentar spremljajte z gumbom z zvoncem poleg njega."
@@ -3474,6 +3478,7 @@ YouTube Account:
   Like: "Všeč mi je"
   Dislike: "Ni mi všeč"
   Rating Failed: "Ocenjevanje v storitvi YouTube ni uspelo: {error}"
+  Vote Failed: "Glasovanje v storitvi YouTube ni uspelo: {error}"
   Subscribe Failed: "Naročanje v storitvi YouTube ni uspelo: {error}"
   Unsubscribe Failed: "Preklic naročnine v storitvi YouTube ni uspel: {error}"
   Subscriptions Synced: "Naročnine iz storitve YouTube so sinhronizirane (dodano: {added}, odstranjeno: {removed})"

@@ -409,7 +409,7 @@ Settings:
     Sync Subscriptions: "Abonelikleri YouTube ile eşitle"
     Sync Playlists: "Oynatma listelerini YouTube ile eşitle"
     Add to YouTube Watch History: "İzlenen videoları YouTube geçmişine ekle"
-    Rate Videos: "Videoları beğen ve beğenme"
+    Rate Videos: "Videoları ve gönderileri beğen ve beğenme"
     Sync Now: "Şimdi eşitle"
     Synced: "YouTube ile eşitlendi"
     Sync Failed: "YouTube ile eşitlenemedi: {error}"
@@ -1751,6 +1751,8 @@ Channel:
     Original post unavailable: "Orijinal gönderi kullanılamıyor"
     Members-only video hidden by OpenTubeX: "Yalnızca üyelere özel video OpenTubeX tarafından gizlendi"
     Video hidden by OpenTubeX because of its title: "Başlığında gizlenen metin bulunduğu için video OpenTubeX tarafından gizlendi"
+    Correct: "Doğru"
+    Incorrect: "Yanlış"
 Video:
   Play in Background: "Arka Planda Oynat"
   Info panel source: 'Kaynak: {source}'
@@ -2337,7 +2339,7 @@ Tooltips:
     Sync Subscriptions: "YouTube'da abone olduğunuz kanallar Tüm Kanallar'a eklenir, orada abonelikten çıktığınız kanallar ise tüm profillerden kaldırılır. Burada Tüm Kanallar'da abone olmak veya abonelikten çıkmak YouTube'da da aynısını yapar."
     Sync Playlists: "YouTube oynatma listeleriniz, Daha sonra izle ve Beğenilen videolar, Oynatma Listelerin bölümünde görünür ve burada bunlarda yaptığınız değişiklikler YouTube'da da yapılır. Diğer cihazlarınızla eşitlenmez ve tüm oynatma listelerini dışa aktardığınızda veya verilerinizi yedeklediğinizde dahil edilmez. Bunu kapatmak onları bu cihazdan kaldırır ancak YouTube'dan kaldırmaz."
     Add to YouTube Watch History: "Oynattığınız videolar YouTube izleme geçmişinize eklenir, böylece YouTube önerileri bunlardan öğrenir. Geçmiş YouTube'da duraklatılmışken hiçbir şey eklenmez."
-    Rate Videos: "Videolarda beğen ve beğenme düğmelerini gösterir. Puanınızı göstermek için açtığınız her video hesabınızla YouTube'da sorgulanır; bu nedenle YouTube, izleme geçmişinize eklenmeseler bile hangi videoları açtığınızı öğrenir."
+    Rate Videos: "Videolarda ve gönderilerde beğen ve beğenme düğmelerini gösterir. Puanınızı göstermek için açtığınız her video hesabınızla YouTube'da sorgulanır; bu nedenle YouTube, izleme geçmişinize eklenmeseler bile hangi videoları açtığınızı öğrenir. Gönderi puanları sorgulanmaz, bu yüzden yalnızca burada verdikleriniz gösterilir."
   General Settings:
     Invidious Instance Credentials: 'Yalnızca örnek bir kullanıcı adı ve parola isterse gerekir. Yalnızca bu cihazda saklanır ve yalnızca bu örneğe gönderilir.'
     Reply Notifications: "OpenTubeX, izlediğiniz yorumlara gelen yeni yanıtları denetler. Bir içerik üreticisi yorumlarınızdan birine kalp bıraktığında da sizi bilgilendirir. Bir yorum, yeni yanıt, kalp veya sizin açmanız olmadan 30 gün geçene kadar izlenmeye devam eder. En fazla 50 yorum izlenmeye devam eder; bu nedenle daha fazlasını izlerseniz en uzun süredir etkin olmayan yorumların izlenmesi durdurulur. Herhangi bir yorumu yanındaki zil düğmesiyle izleyin."
@@ -2752,6 +2754,8 @@ Storage Startup Error:
   Retry: "Tekrar dene"
 Search Bar:
   Use Suggestion: Öneriyi kullan
+  Video Link: "Video: {title}"
+  Channel Link: "Kanal: {title}"
 
 Native Permissions:
   Local Network Denied: "Yakındaki cihazlar izni reddedildi."
@@ -2877,6 +2881,7 @@ YouTube Account:
   Like: "Beğen"
   Dislike: "Beğenme"
   Rating Failed: "YouTube'da oy verilemedi: {error}"
+  Vote Failed: "YouTube'da oy kullanılamadı: {error}"
   Subscribe Failed: "YouTube'da abone olunamadı: {error}"
   Unsubscribe Failed: "YouTube'da abonelikten çıkılamadı: {error}"
   Subscriptions Synced: "Abonelikler YouTube'dan eşitlendi: {added} eklendi, {removed} kaldırıldı"

@@ -419,7 +419,7 @@ Settings:
     Revoke Failed: "Logga ut av YouTube, men Google stadfesta ikkje at innlogginga vart avslutta. Du kan fjerne ho under tredjepartstilkoplingar i Google-kontoen din."
     Signed out by YouTube: "YouTube avslutta innlogginga. Logg inn att i innstillingane for å halde fram med å bruke kontoen din."
     Add to YouTube Watch History: "Legg sette videoar til i YouTube-historikken"
-    Rate Videos: "Lik og mislik videoar"
+    Rate Videos: "Lik og mislik videoar og innlegg"
     Sync Subscriptions: "Synkroniser abonnement med YouTube"
     Sync Playlists: "Synkroniser spelelister med YouTube"
     Sync Now: "Synkroniser no"
@@ -1974,6 +1974,8 @@ Channel:
     Original post unavailable: "Det opphavlege innlegget er ikkje tilgjengeleg"
     Members-only video hidden by OpenTubeX: "Video berre for medlemmer er gøymd av OpenTubeX"
     Video hidden by OpenTubeX because of its title: "Videoen er gøymd av OpenTubeX fordi tittelen inneheld gøymd tekst"
+    Correct: "Rett"
+    Incorrect: "Feil"
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Denne kanalen har videoar, men ingen kunne visast. Prøv å hente fleire"
   Shows:
@@ -2646,7 +2648,7 @@ Tooltips:
   YouTube Account Settings:
     Watch Posted Comments: "Kommentarar du legg ut her, vert automatisk overvaka for svar så lenge svarvarsel er slått på i kommentarinnstillingane."
     Add to YouTube Watch History: "Videoar du spelar av, blir lagde til i visingshistorikken din på YouTube, slik at tilrådingane til YouTube lærer av dei. Ingenting blir lagt til medan historikken er sett på pause på YouTube."
-    Rate Videos: "Viser knappar for å like og mislike videoar. For å vise vurderinga di blir kvar video du opnar, slått opp på YouTube med kontoen din, så YouTube får vite kva videoar du opnar, også når dei ikkje blir lagde til i sjåarloggen din."
+    Rate Videos: "Viser knappar for å like og mislike videoar og innlegg. For å vise vurderinga di blir kvar video du opnar, slått opp på YouTube med kontoen din, så YouTube får vite kva videoar du opnar, også når dei ikkje blir lagde til i sjåarloggen din. Vurderingar av innlegg blir ikkje slått opp, så berre dei du gjev her, blir viste."
     Sync Subscriptions: "Når du abonnerer på ein kanal på YouTube, blir han lagd til i «Alle kanalar», og når du avsluttar abonnementet der, blir han fjerna frå alle profilar. Å abonnere eller avslutte abonnementet her i «Alle kanalar» gjer det same på YouTube."
     Sync Playlists: "YouTube-spelelistene dine, «Sjå seinare» og «Lika videoar» blir viste i «Dine spelelistar», og endringar du gjer i dei her, blir òg gjorde på YouTube. Dei blir ikkje synkroniserte til dei andre einingane dine og blir ikkje tekne med når du eksporterer alle spelelistene eller tek sikkerheitskopi av dataa dine. Om du slår av dette, blir dei fjerna frå denne eininga, men ikkje frå YouTube."
   General Settings:
@@ -3148,6 +3150,8 @@ Storage Startup Error:
   Retry: "Prøv igjen"
 Search Bar:
   Use Suggestion: Bruk framlegg
+  Video Link: "Video: {title}"
+  Channel Link: "Kanal: {title}"
 
 Native Permissions:
   Local Network Denied: "Løyve til einingar i nærleiken vart avvist."
@@ -3273,6 +3277,7 @@ YouTube Account:
   Like: "Lik"
   Dislike: "Mislik"
   Rating Failed: "Klarte ikkje å vurdere på YouTube: {error}"
+  Vote Failed: "Klarte ikkje å røyste på YouTube: {error}"
   Subscribe Failed: "Klarte ikkje å abonnere på YouTube: {error}"
   Unsubscribe Failed: "Klarte ikkje å avslutte abonnementet på YouTube: {error}"
   Add a comment: "Legg til ein kommentar"

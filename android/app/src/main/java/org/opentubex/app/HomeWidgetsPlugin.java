@@ -14,7 +14,7 @@ public class HomeWidgetsPlugin extends Plugin {
 
     @PluginMethod
     public void setContinueWatching(PluginCall call) {
-        executor.execute(() -> {
+        PluginWork.execute(executor, call, () -> {
             try {
                 HomeWidgets.setContinueWatching(getContext(), HomeWidgets.parse(call.getArray("videos")),
                     HomeWidgets.Authorization.fromJson(call.getObject("authorization")));
@@ -27,7 +27,7 @@ public class HomeWidgetsPlugin extends Plugin {
 
     @PluginMethod
     public void setDownloads(PluginCall call) {
-        executor.execute(() -> {
+        PluginWork.execute(executor, call, () -> {
             try {
                 HomeWidgets.setDownloads(getContext(), HomeWidgets.parseDownloads(call.getArray("downloads")),
                     HomeWidgets.Authorization.fromJson(call.getObject("authorization")));
@@ -40,7 +40,7 @@ public class HomeWidgetsPlugin extends Plugin {
 
     @PluginMethod
     public void setWatchTime(PluginCall call) {
-        executor.execute(() -> {
+        PluginWork.execute(executor, call, () -> {
             try {
                 HomeWidgets.setWatchTime(getContext(), HomeWidgets.parseWatchTime(call.getObject("days")));
                 call.resolve();

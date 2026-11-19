@@ -412,7 +412,7 @@ Settings:
     Revoke Failed: "היציאה מ-YouTube בוצעה, אך Google לא אישרה שהכניסה הסתיימה. אפשר להסיר אותה בחיבורים לצד שלישי בחשבון Google."
     Signed out by YouTube: "YouTube סיים את הכניסה לחשבון. יש להיכנס שוב בהגדרות כדי להמשיך להשתמש בחשבון."
     Add to YouTube Watch History: "הוספת סרטונים שנצפו להיסטוריה ב־YouTube"
-    Rate Videos: "סימון אהבתי ולא אהבתי בסרטונים"
+    Rate Videos: "סימון אהבתי ולא אהבתי בסרטונים ובפוסטים"
     Sync Subscriptions: "סנכרון מינויים עם YouTube"
     Sync Playlists: "סנכרון רשימות נגינה עם YouTube"
     Sync Now: "סנכרון עכשיו"
@@ -1793,6 +1793,8 @@ Channel:
     Original post unavailable: "הפוסט המקורי אינו זמין"
     Members-only video hidden by OpenTubeX: "OpenTubeX הסתיר סרטון לחברי ערוץ בלבד"
     Video hidden by OpenTubeX because of its title: "OpenTubeX הסתיר את הסרטון כי הכותרת שלו מכילה טקסט מוסתר"
+    Correct: "נכון"
+    Incorrect: "לא נכון"
   Shows:
     Shows: תוכניות
     This channel does not currently have any shows: ערוץ זה אינו כולל כרגע תוכניות
@@ -2393,7 +2395,7 @@ Tooltips:
   YouTube Account Settings:
     Watch Posted Comments: "תגובות שאתה מפרסם כאן נכנסות אוטומטית למעקב אחר תשובות, כל עוד התראות על תשובות מופעלות בהגדרות התגובות."
     Add to YouTube Watch History: "סרטונים שמופעלים נוספים להיסטוריית הצפייה שלך ב־YouTube, כך שההמלצות של YouTube לומדות מהם. כשההיסטוריה מושהית ב־YouTube, שום דבר לא נוסף."
-    Rate Videos: "מציג כפתורי אהבתי ולא אהבתי בסרטונים. כדי להציג את הדירוג שלך, כל סרטון שנפתח נבדק ב-YouTube עם החשבון שלך, כך ש-YouTube יודע אילו סרטונים פתחת, גם כשהם לא נוספים להיסטוריית הצפייה שלך."
+    Rate Videos: "מציג כפתורי אהבתי ולא אהבתי בסרטונים ובפוסטים. כדי להציג את הדירוג שלך, כל סרטון שנפתח נבדק ב-YouTube עם החשבון שלך, כך ש-YouTube יודע אילו סרטונים פתחת, גם כשהם לא נוספים להיסטוריית הצפייה שלך. דירוגים של פוסטים לא נבדקים, ולכן מוצגים רק הדירוגים שנתת כאן."
     Sync Subscriptions: "ערוצים שנרשמת אליהם למינוי ב־YouTube נוספים אל „כל הערוצים”, וערוצים שביטלת את המינוי אליהם שם מוסרים מכל הפרופילים. הרשמה למינוי או ביטול מינוי כאן ב„כל הערוצים” עושים את אותו הדבר ב־YouTube."
     Sync Playlists: "רשימות הנגינה שלך ב־YouTube, „לצפייה בהמשך” ו„סרטונים שאהבתי” מופיעים ב„רשימות הנגינה שלך”, ושינויים שנעשים בהם כאן מתבצעים גם ב־YouTube. הם לא מסונכרנים למכשירים האחרים שלך ולא נכללים כשמייצאים את כל רשימות הנגינה או מגבים את הנתונים שלך. כיבוי האפשרות מסיר אותם מהמכשיר הזה, אך לא מ־YouTube."
   General Settings:
@@ -2737,6 +2739,8 @@ Search Bar:
   Use Suggestion: שימוש בהצעה
   Open Search Container: פתיחת שדה החיפוש
   Search: חיפוש
+  Video Link: "סרטון: {title}"
+  Channel Link: "ערוץ: {title}"
 Theme Discovery:
   Discover Themes: "גילוי ערכות נושא"
   Refresh: "רענון"
@@ -2940,6 +2944,7 @@ YouTube Account:
   Like: "לייק"
   Dislike: "דיסלייק"
   Rating Failed: "לא ניתן לדרג ב־YouTube: {error}"
+  Vote Failed: "לא ניתן להצביע ב־YouTube: {error}"
   Subscribe Failed: "לא ניתן להירשם למינוי ב־YouTube: {error}"
   Unsubscribe Failed: "לא ניתן לבטל את המינוי ב־YouTube: {error}"
   Add a comment: "הוספת תגובה"

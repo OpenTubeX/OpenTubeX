@@ -63,6 +63,7 @@
         <FtInputTags
           :label="t('Settings.SponsorBlock Settings.Excluded Channels.Excluded Channels')"
           :tag-name-placeholder="t('Settings.Distraction Free Settings.Hide Channels Placeholder')"
+          setting-key="sponsorBlockChannelWhitelist"
           :tag-list="sponsorBlockChannelTags"
           :tooltip="t('Settings.SponsorBlock Settings.Excluded Channels.Tooltip')"
           :validate-tag-name="checkYoutubeChannelId"

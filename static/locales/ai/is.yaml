@@ -407,7 +407,7 @@ Settings:
     Revoke Failed: "Útskráning af YouTube tókst, en Google staðfesti ekki að innskráningunni væri lokið. Þú getur fjarlægt hana undir tengingum þriðju aðila á Google-reikningnum þínum."
     Signed out by YouTube: "YouTube batt enda á innskráninguna. Skráðu þig aftur inn í stillingum til að halda áfram að nota reikninginn þinn."
     Add to YouTube Watch History: "Bæta áhorfðum myndskeiðum við YouTube-feril"
-    Rate Videos: "Líka við og líka ekki við myndskeið"
+    Rate Videos: "Líka við og líka ekki við myndskeið og færslur"
     Sync Subscriptions: "Samstilla áskriftir við YouTube"
     Sync Playlists: "Samstilla spilunarlista við YouTube"
     Sync Now: "Samstilla núna"
@@ -1757,6 +1757,8 @@ Channel:
     Original post unavailable: "Upprunalega færslan er ekki tiltæk"
     Members-only video hidden by OpenTubeX: "OpenTubeX faldi myndskeið eingöngu fyrir meðlimi"
     Video hidden by OpenTubeX because of its title: "OpenTubeX faldi myndskeiðið því titill þess inniheldur falinn texta"
+    Correct: "Rétt"
+    Incorrect: "Rangt"
 Video:
   Play in Background: "Spila í bakgrunni"
   Info panel source: 'Heimild: {source}'
@@ -2350,7 +2352,7 @@ Tooltips:
   YouTube Account Settings:
     Watch Posted Comments: "Athugasemdir sem þú birtir hér eru vaktaðar sjálfkrafa fyrir svör, svo lengi sem kveikt er á tilkynningum um svör í stillingum athugasemda."
     Add to YouTube Watch History: "Myndskeið sem þú spilar bætast við áhorfsferilinn þinn á YouTube, svo meðmæli YouTube læri af þeim. Engu er bætt við á meðan ferillinn er í bið á YouTube."
-    Rate Videos: "Sýnir hnappa til að líka við og líka ekki við myndskeið. Til að sýna einkunnina þína er hvert myndskeið sem þú opnar flett upp á YouTube með reikningnum þínum, svo YouTube veit hvaða myndskeið þú opnar, jafnvel þegar þeim er ekki bætt við áhorfsferilinn þinn."
+    Rate Videos: "Sýnir hnappa til að líka við og líka ekki við myndskeið og færslur. Til að sýna einkunnina þína er hvert myndskeið sem þú opnar flett upp á YouTube með reikningnum þínum, svo YouTube veit hvaða myndskeið þú opnar, jafnvel þegar þeim er ekki bætt við áhorfsferilinn þinn. Einkunnum færslna er ekki flett upp, svo aðeins þær sem þú gefur hér birtast."
     Sync Subscriptions: "Rásum sem þú gerist áskrifandi að á YouTube er bætt við „Allar rásir“, og rásir sem þú segir upp áskrift að þar eru fjarlægðar úr öllum notkunarsniðum. Að gerast áskrifandi eða segja upp áskrift hér í „Allar rásir“ gerir það sama á YouTube."
     Sync Playlists: "YouTube-spilunarlistarnir þínir, „Horfa síðar“ og „Myndskeið sem mér líkar“ birtast í „Spilunarlistarnir þínir“, og breytingar sem þú gerir á þeim hér eru einnig gerðar á YouTube. Þeir eru ekki samstilltir við önnur tæki þín og eru ekki teknir með þegar þú flytur út alla spilunarlista eða tekur afrit af gögnunum þínum. Ef slökkt er á þessu eru þeir fjarlægðir úr þessu tæki en ekki af YouTube."
   General Settings:
@@ -2767,6 +2769,8 @@ Storage Startup Error:
   Retry: "Reyna aftur"
 Search Bar:
   Use Suggestion: Nota tillögu
+  Video Link: "Myndskeið: {title}"
+  Channel Link: "Rás: {title}"
 
 Native Permissions:
   Local Network Denied: "Leyfi fyrir nálæg tæki var hafnað."
@@ -2892,6 +2896,7 @@ YouTube Account:
   Like: "Líkar við"
   Dislike: "Líkar ekki við"
   Rating Failed: "Ekki tókst að gefa einkunn á YouTube: {error}"
+  Vote Failed: "Ekki tókst að kjósa á YouTube: {error}"
   Subscribe Failed: "Ekki tókst að gerast áskrifandi á YouTube: {error}"
   Unsubscribe Failed: "Ekki tókst að segja upp áskrift á YouTube: {error}"
   Add a comment: "Bæta við athugasemd"

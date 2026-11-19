@@ -15,6 +15,10 @@
         <FtIcon :icon="icon" />
       </span>
       {{ title }}
+      <FtSyncedSettingIndicator
+        v-if="syncSettingKey"
+        :setting-keys="[syncSettingKey]"
+      />
     </h3>
     <div class="sectionBody">
       <slot />
@@ -24,6 +28,8 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
+
+import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
 
 defineProps({
   title: {
@@ -42,6 +48,11 @@ defineProps({
   titleId: {
     type: String,
     default: undefined
+  },
+  /** Offers a sync toggle in the title for a section that edits a single setting. */
+  syncSettingKey: {
+    type: String,
+    default: ''
   }
 })
 </script>

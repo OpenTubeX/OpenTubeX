@@ -2,6 +2,7 @@
   <FtSettingsSection
     :title="t('Settings.Context Menu Search Settings.Context Menu Search Settings')"
     :icon="['fas', 'magnifying-glass']"
+    sync-setting-key="contextMenuSearchEngines"
   >
     <p class="description">
       {{ t('Settings.Context Menu Search Settings.Description') }}

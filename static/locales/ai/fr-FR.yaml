@@ -407,7 +407,7 @@ Settings:
     Revoke Failed: "Déconnexion de YouTube effectuée, mais Google n'a pas confirmé la fin de la connexion. Vous pouvez la supprimer dans les connexions tierces de votre compte Google."
     Signed out by YouTube: "YouTube a mis fin à la connexion. Reconnectez-vous dans les paramètres pour continuer à utiliser votre compte."
     Add to YouTube Watch History: "Ajouter les vidéos regardées à l’historique YouTube"
-    Rate Videos: "Aimer et ne pas aimer les vidéos"
+    Rate Videos: "Aimer et ne pas aimer les vidéos et les posts"
     Sync Subscriptions: "Synchroniser les abonnements avec YouTube"
     Sync Playlists: "Synchroniser les playlists avec YouTube"
     Sync Now: "Synchroniser maintenant"
@@ -1750,6 +1750,8 @@ Channel:
     Original post unavailable: "Publication d’origine indisponible"
     Members-only video hidden by OpenTubeX: "Vidéo réservée aux membres masquée par OpenTubeX"
     Video hidden by OpenTubeX because of its title: "Vidéo masquée par OpenTubeX, car son titre contient du texte masqué"
+    Correct: Correct
+    Incorrect: Incorrect
 Video:
   Play in Background: "Lire en arrière-plan"
   Info panel source: 'Source : {source}'
@@ -2333,7 +2335,7 @@ Tooltips:
   YouTube Account Settings:
     Watch Posted Comments: "Les commentaires que vous publiez ici sont suivis automatiquement pour détecter les réponses, tant que les notifications de réponses sont activées dans les paramètres des commentaires."
     Add to YouTube Watch History: "Les vidéos que vous lisez sont ajoutées à votre historique de visionnage YouTube, afin que les recommandations de YouTube en tiennent compte. Rien n’est ajouté tant que l’historique est suspendu sur YouTube."
-    Rate Videos: "Affiche les boutons J’aime et Je n’aime pas sur les vidéos. Pour afficher votre note, chaque vidéo que vous ouvrez est consultée sur YouTube avec votre compte : YouTube sait donc quelles vidéos vous ouvrez, même lorsqu’elles ne sont pas ajoutées à votre historique de visionnage."
+    Rate Videos: "Affiche les boutons J’aime et Je n’aime pas sur les vidéos et les posts. Pour afficher votre note, chaque vidéo que vous ouvrez est consultée sur YouTube avec votre compte : YouTube sait donc quelles vidéos vous ouvrez, même lorsqu’elles ne sont pas ajoutées à votre historique de visionnage. Les notes des posts ne sont pas consultées : seules celles que vous donnez ici s’affichent."
     Sync Subscriptions: "Les chaînes auxquelles vous vous abonnez sur YouTube sont ajoutées à « Toutes les chaînes », et celles dont vous vous désabonnez là-bas sont retirées de tous les profils. S’abonner ou se désabonner ici dans « Toutes les chaînes » fait de même sur YouTube."
     Sync Playlists: "Vos playlists YouTube, « À regarder plus tard » et « Vidéos J’aime » apparaissent dans « Vos playlists », et les modifications que vous y apportez ici sont aussi effectuées sur YouTube. Elles ne sont pas synchronisées avec vos autres appareils, ni incluses lorsque vous exportez toutes les playlists ou sauvegardez vos données. Désactiver cette option les retire de cet appareil, mais pas de YouTube."
   General Settings:
@@ -2750,6 +2752,8 @@ Storage Startup Error:
   Retry: "Réessayer"
 Search Bar:
   Use Suggestion: Utiliser la suggestion
+  Video Link: "Vidéo: {title}"
+  Channel Link: "Chaîne: {title}"
 
 Native Permissions:
   Local Network Denied: "L’autorisation d’accès aux appareils à proximité a été refusée."
@@ -2875,6 +2879,7 @@ YouTube Account:
   Like: "J’aime"
   Dislike: "Je n’aime pas"
   Rating Failed: "Impossible de noter sur YouTube : {error}"
+  Vote Failed: "Impossible de voter sur YouTube : {error}"
   Subscribe Failed: "Impossible de s’abonner sur YouTube : {error}"
   Unsubscribe Failed: "Impossible de se désabonner sur YouTube : {error}"
   Add a comment: "Ajouter un commentaire"

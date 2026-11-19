@@ -1,6 +1,6 @@
 <template>
   <div
-    :id="`comment${threadIndex}-${node.index}`"
+    :id="`comment-${node.reply.id}`"
     class="commentReplyBranch"
     :class="{
       commentReplyBranchRoot: rootLevel,
@@ -219,12 +219,13 @@
           />
         </span>
       </p>
-      <!-- Replies to replies go to the thread, mentioning the author, as on YouTube. -->
+      <!-- Replies to replies nest under them, mentioning the author, as on YouTube. -->
       <CommentComposer
         v-if="youTubeComments?.enabled.value && youTubeComments.replyingTo.value === reply.id"
         class="replyComposer"
-        :parent-id="getRootCommentId(reply.id)"
+        :parent-id="reply.id"
         :initial-mention="reply.author.startsWith('@') && reply.authorId ? { handle: reply.author, channelId: reply.authorId } : null"
+        @posted="childrenCollapsed = false"
         @done="youTubeComments.closeReply(reply.id)"
       />
     </div>
@@ -237,7 +238,6 @@
           v-for="child in node.children"
           :key="child.reply.id"
           :node="child"
-          :thread-index="threadIndex"
           :enable-channel-links="enableChannelLinks"
           :hide-comment-likes="hideCommentLikes"
           :hide-comment-photos="hideCommentPhotos"
@@ -328,7 +328,7 @@ import FtVerifiedBadge from '../FtVerifiedBadge/FtVerifiedBadge.vue'
 import FtLoader from '../FtLoader/FtLoader.vue'
 import CommentAccountActions from './CommentAccountActions.vue'
 import CommentComposer from './CommentComposer.vue'
-import { getRootCommentId, youTubeCommentsKey } from './youTubeComments'
+import { youTubeCommentsKey } from './youTubeComments'
 import { useCommentWatching } from './commentWatching'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import { formatViewCount, getRelativeTimeFromDate } from '../../helpers/utils'
@@ -341,10 +341,6 @@ const youTubeComments = inject(youTubeCommentsKey, null)
 const props = defineProps({
   node: {
     type: Object,
-    required: true
-  },
-  threadIndex: {
-    type: Number,
     required: true
   },
   rootLevel: {

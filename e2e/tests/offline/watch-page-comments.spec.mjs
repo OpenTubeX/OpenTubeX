@@ -872,8 +872,12 @@ test.describe('manual comment loading', () => {
       channelId: 'UCcommenterchannel0000000'
     }))
     const replyTexts = []
+    const replyToIds = []
     await page.route(/\/youtubei\/v1\/comment\/create_comment_reply/, (route, request) => {
-      replyTexts.push(JSON.parse(request.postData()).commentText)
+      const { commentText, createReplyParams } = JSON.parse(request.postData())
+      replyTexts.push(commentText)
+      // The replied-to reply's ID is the last field of the parameters.
+      replyToIds.push(/\x72[\s\S]([\w-]+\.[\w-]+)$/.exec(atob(decodeURIComponent(createReplyParams)))?.[1] ?? null)
       return route.fulfill({
         contentType: 'application/json',
         body: JSON.stringify({
@@ -904,6 +908,9 @@ test.describe('manual comment loading', () => {
     await expect(composer).toHaveCount(0)
     // Like YouTube's web client, it mentions by channel ID, which YouTube links.
     expect(replyTexts).toEqual([`@${channelId} Example reply`])
+    // Like on YouTube, the reply goes under the reply it answers.
+    expect(replyToIds).toEqual([expect.stringMatching(/\./)])
+    await expect(target.locator(':scope > .commentReplyChildren .commentText', { hasText: 'Example reply' })).toBeVisible()
     // The posted reply links the mention like loaded replies do.
     const posted = thread.locator('.commentText').filter({ hasText: 'Example reply' })
     await expect(posted.getByRole('link', { name: handle })).toHaveAttribute('href', `https://www.youtube.com/channel/${channelId}`)
@@ -915,7 +922,8 @@ test.describe('manual comment loading', () => {
       return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ actionResult: { status: 'STATUS_SUCCEEDED' } }) })
     })
     const postedBranchId = await thread.locator('.commentReplyBranch').filter({ has: page.locator('.commentText', { hasText: 'Example reply' }) }).last().getAttribute('id')
-    const postedReply = page.locator(`#${postedBranchId} > .commentReplyContent`)
+    // Reply IDs contain a period, which an ID selector would read as a class.
+    const postedReply = page.locator(`[id="${postedBranchId}"] > .commentReplyContent`)
     await postedReply.getByRole('button', { name: 'Edit comment' }).click()
     const editor = postedReply.locator('.editComposer')
     await expect(editor.locator('textarea')).toHaveValue(`${handle} Example reply`)
@@ -963,9 +971,13 @@ test.describe('manual comment loading', () => {
     // Punctuation around a mention keeps it.
     await replyInput.press('Backspace')
     await replyInput.pressSequentially('...) there')
+    // A reply posted under collapsed replies shows.
+    await target.locator(':scope > .commentReplyLineToggle').click()
+    await expect(postedReply).toHaveCount(0)
     // Ctrl+Enter sends like the button.
     await replyInput.press('ControlOrMeta+Enter')
     await expect.poll(() => replyTexts.at(-1)).toBe(`Hi (@${channelId}...) there`)
+    await expect(target.locator(':scope > .commentReplyChildren .commentText', { hasText: 'there' })).toBeVisible()
   })
 
   test.describe('comment filtering at 125% UI scale', () => {
@@ -1238,8 +1250,9 @@ test.describe('manual comment loading', () => {
       getComputedStyle(element, '::before').borderInlineStartWidth
     ))).toBe('1px')
     // Offscreen threads are not laid out (content-visibility), so measure it where it is seen.
+    // Until the next frame after it scrolls into view, it keeps its estimated size.
     await comment.scrollIntoViewIfNeeded()
-    expect(await comment.evaluate((element) => {
+    await expect.poll(() => comment.evaluate((element) => {
       const toggle = element.querySelector('.commentReplyRootToggle')
       const stemStyle = getComputedStyle(element, '::before')
       const connectorStyle = getComputedStyle(toggle, '::before')
@@ -1266,6 +1279,44 @@ test.describe('manual comment loading', () => {
     await expect(comment.locator('.commentReplyRootToggle')).toHaveCount(0)
     await expect(comment).not.toHaveClass(/commentThreadCollapsed/)
     await expect(comment.locator('.commentReplyBranch')).toHaveCount(0)
+  })
+
+  test.describe('with the backend fallback', () => {
+    test.use({ seed: { settings: { ...WATCH_PAGE_SEED, autoLoadComments: false, backendFallback: true } } })
+
+    test('a failed reply page falls back to Invidious for those replies only', async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page)
+      await openMockedVideo(page)
+      await page.locator('.getCommentsTitle').click()
+      await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
+      const threads = page.locator('.commentThread')
+      const threadCount = await threads.count()
+      const comments = page.locator('.comment')
+      const comment = comments.nth(await comments.evaluateAll(elements => (
+        elements.findIndex(element => element.querySelector('.commentReplyRootToggle'))
+      )))
+
+      await page.route(/\/youtubei\/v1\/next/, route => route.fulfill({ status: 500, contentType: 'application/json', body: '{}' }), { times: 1 })
+      await page.route('**/api/v1/comments/**', route => route.fulfill({
+        json: {
+          comments: [{
+            commentId: 'UgInvidiousReply',
+            author: '@replier',
+            authorId: 'UCreplier0000000000000000',
+            authorThumbnails: [],
+            contentHtml: 'Reply from Invidious',
+            content: 'Reply from Invidious',
+            likeCount: 0,
+            published: 1_700_000_000
+          }]
+        }
+      }))
+      await comment.locator('.commentReplyRootToggle .commentReplyContinuationButton').click()
+
+      await expect(comment.locator('.commentText', { hasText: 'Reply from Invidious' })).toBeVisible()
+      // The loaded comments stay as they were, without a second first page.
+      await expect(threads).toHaveCount(threadCount)
+    })
   })
 
   test('reloading fullscreen comments scrolls back to the first comment', async ({ app, page }) => {

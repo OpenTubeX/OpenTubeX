@@ -365,8 +365,8 @@ import { isExternalMediaHistoryId } from '../../../helpers/externalMediaHistory'
 import { compactAllDatastores, DBHistoryHandlers, DBPlaylistHandlers, DBProfileHandlers, DBSearchHistoryHandlers, DBWatchStatsHandlers, withDataScope } from '../../../../datastores/handlers/index'
 import { forEachTakeoutImportEntry, forEachTakeoutPlaylistFile, listYouTubeTakeoutZipEntries } from '../../../helpers/youtube-takeout-zip'
 import {
-  normalizeSearchHistoryEntry,
   normalizeSearchSettings,
+  parseExportedSearchHistoryEntry,
 } from '../../../../search-history'
 
 defineProps({
@@ -2106,17 +2106,13 @@ async function importFreeTubeSearchHistory(searchHistoryRecords) {
   const importedEntries = []
   const warn = createImportWarnings()
 
-  searchHistoryRecords.forEach((entry) => {
-    if (!isJsonObject(entry) || typeof entry._id !== 'string' || typeof entry.lastUpdatedAt !== 'number') {
+  searchHistoryRecords.forEach((record) => {
+    const entry = parseExportedSearchHistoryEntry(record)
+    if (entry === null) {
       warn(t('Settings.Data Settings.History object has insufficient data, skipping item'))
-      console.error('Missing keys:', entry)
+      console.error('Missing keys:', record)
     } else {
-      importedEntries.push(normalizeSearchHistoryEntry({
-        _id: entry._id,
-        query: typeof entry.query === 'string' ? entry.query : entry._id,
-        lastUpdatedAt: entry.lastUpdatedAt,
-        searchSettings: isJsonObject(entry.searchSettings) ? entry.searchSettings : undefined,
-      }))
+      importedEntries.push(entry)
     }
   })
 

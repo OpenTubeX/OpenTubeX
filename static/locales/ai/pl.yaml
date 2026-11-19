@@ -232,7 +232,7 @@ Settings:
     Sync Subscriptions: "Synchronizuj subskrypcje z YouTube"
     Sync Playlists: "Synchronizuj playlisty z YouTube"
     Add to YouTube Watch History: "Dodawaj obejrzane filmy do historii YouTube"
-    Rate Videos: "Oceniaj filmy łapką w górę i w dół"
+    Rate Videos: "Oceniaj filmy i posty łapką w górę i w dół"
     Sync Now: "Zsynchronizuj teraz"
     Synced: "Zsynchronizowano z YouTube"
     Sync Failed: "Nie udało się zsynchronizować z YouTube: {error}"
@@ -1209,6 +1209,8 @@ Channel:
     Original post unavailable: "Oryginalny post jest niedostępny"
     Members-only video hidden by OpenTubeX: "OpenTubeX ukrył film tylko dla członków"
     Video hidden by OpenTubeX because of its title: "OpenTubeX ukrył film, ponieważ jego tytuł zawiera ukryty tekst"
+    Correct: "Poprawnie"
+    Incorrect: "Niepoprawnie"
 Video:
   Play in Background: "Odtwarzaj w tle"
   Info panel source: 'Źródło: {source}'
@@ -1589,7 +1591,7 @@ Tooltips:
     Sync Subscriptions: "Kanały, które subskrybujesz na YouTube, są dodawane do profilu „Wszystkie kanały”, a kanały, których subskrypcję tam anulujesz, są usuwane ze wszystkich profili. Zasubskrybowanie kanału lub anulowanie jego subskrypcji tutaj w profilu „Wszystkie kanały” robi to samo na YouTube."
     Sync Playlists: "Twoje playlisty z YouTube oraz „Do obejrzenia” i „Filmy, które mi się podobają” pojawiają się w sekcji „Twoje playlisty”, a zmiany, które w nich tutaj wprowadzasz, są wprowadzane także na YouTube. Nie są synchronizowane z innymi twoimi urządzeniami ani uwzględniane, gdy eksportujesz wszystkie playlisty lub tworzysz kopię zapasową danych. Wyłączenie tej opcji usuwa je z tego urządzenia, ale nie z YouTube."
     Add to YouTube Watch History: "Odtwarzane filmy są dodawane do twojej historii oglądania na YouTube, więc rekomendacje YouTube uczą się na ich podstawie. Gdy historia jest wstrzymana na YouTube, nic nie jest dodawane."
-    Rate Videos: "Pokazuje przy filmach przyciski Podoba mi się i Nie podoba mi się. Aby pokazać Twoją ocenę, każdy otwarty film jest sprawdzany w YouTube przy użyciu Twojego konta, więc YouTube wie, które filmy otwierasz, nawet jeśli nie są dodawane do historii oglądania."
+    Rate Videos: "Pokazuje przy filmach i postach przyciski Podoba mi się i Nie podoba mi się. Aby pokazać Twoją ocenę, każdy otwarty film jest sprawdzany w YouTube przy użyciu Twojego konta, więc YouTube wie, które filmy otwierasz, nawet jeśli nie są dodawane do historii oglądania. Oceny postów nie są sprawdzane, więc widać tylko te, które wystawisz tutaj."
   General Settings:
     Invidious Instance Credentials: 'Potrzebne tylko wtedy, gdy instancja wymaga nazwy użytkownika i hasła. Są przechowywane tylko na tym urządzeniu i wysyłane tylko do tej instancji.'
     Reply Notifications: "OpenTubeX sprawdza, czy pod obserwowanymi komentarzami pojawiły się nowe odpowiedzi. Powiadamia też, gdy twórca da serduszko jednemu z Twoich komentarzy. Komentarz pozostaje obserwowany, dopóki nie minie 30 dni bez nowych odpowiedzi, serduszek ani otwarcia go przez Ciebie. Obserwować można jednocześnie do 50 komentarzy, więc obserwowanie kolejnych kończy obserwowanie tych, które były nieaktywne najdłużej. Obserwuj dowolny komentarz za pomocą przycisku z dzwonkiem obok niego."
@@ -1988,6 +1990,8 @@ Storage Startup Error:
   Retry: "Spróbuj ponownie"
 Search Bar:
   Use Suggestion: Użyj sugestii
+  Video Link: "Film: {title}"
+  Channel Link: "Kanał: {title}"
 
 Native Permissions:
   Local Network Denied: "Odmówiono uprawnienia do urządzeń w pobliżu."
@@ -2119,6 +2123,7 @@ YouTube Account:
   Like: "Podoba mi się"
   Dislike: "Nie podoba mi się"
   Rating Failed: "Nie udało się ocenić na YouTube: {error}"
+  Vote Failed: "Nie udało się zagłosować na YouTube: {error}"
   Subscribe Failed: "Nie udało się zasubskrybować na YouTube: {error}"
   Unsubscribe Failed: "Nie udało się anulować subskrypcji na YouTube: {error}"
   Subscriptions Synced: "Zsynchronizowano subskrypcje z YouTube: dodano {added}, usunięto {removed}"

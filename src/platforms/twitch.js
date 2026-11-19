@@ -82,6 +82,17 @@ function itemResult(item) {
 }
 
 /**
+ * Lists of many channels' items show the avatar of each item's channel.
+ * The feed and channel pages have their channels' avatars already.
+ * @param {PlatformItem[]} items
+ * @param {{ avatar?: string }} channel
+ * @returns {PlatformItem[]}
+ */
+function withAuthorAvatar(items, { avatar }) {
+  return avatar ? items.map(item => ({ ...item, authorAvatar: avatar })) : items
+}
+
+/**
  * @param {any} game
  * @returns {PlatformCategory | null}
  */
@@ -107,8 +118,8 @@ function toPlatformCategory(game) {
 function streamItems(connection) {
   const edges = Array.isArray(connection?.edges) ? connection.edges : []
   return edges.flatMap(edge => {
-    const stream = edge?.node
-    return stream ? parseTwitchUser({ ...stream.broadcaster, stream })?.feed.live ?? [] : []
+    const parsed = edge?.node ? parseTwitchUser({ ...edge.node.broadcaster, stream: edge.node }) : null
+    return parsed ? withAuthorAvatar(parsed.feed.live, parsed.channel) : []
   })
 }
 
@@ -233,7 +244,7 @@ const twitch = {
         return category ? [{ kind: /** @type {const} */ ('category'), category }] : []
       }
       const owner = parseChannel(entry?.owner)
-      return owner ? parseTwitchVideo(entry, owner).map(itemResult) : []
+      return owner ? withAuthorAvatar(parseTwitchVideo(entry, owner), owner).map(itemResult) : []
     })
     // The cursor keeps coming at the end, so a short page is the last one
     const cursor = typeof found?.cursor === 'string' && items.length >= PAGE_SIZE ? found.cursor : null

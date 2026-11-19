@@ -12,7 +12,10 @@
   let cached
   try {
     const stored = JSON.parse(localStorage.getItem('opentubex-startup-appearance'))
-    const mode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+    // On Linux, Electron's color scheme can still be light while the system's
+    // is dark, so prefer the main process's reading.
+    const dark = appearance ? appearance.dark : window.matchMedia('(prefers-color-scheme: dark)').matches
+    const mode = dark ? 'dark' : 'light'
     cached = stored && { ...stored[mode], hideSplash: stored.hideSplash }
   } catch {
     // Storage can be unavailable or corrupt; keep the default splash.

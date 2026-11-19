@@ -190,6 +190,7 @@ function parseTrack(value) {
   if (track.kind !== 'track' || !id || !url || isPrivate(track)) return null
   const user = object(track.user)
   const author = text(user.username)
+  const avatar = image(user.avatar_url)
   const duration = count(track.duration)
   const viewCount = count(track.playback_count)
   return {
@@ -199,7 +200,8 @@ function parseTrack(value) {
     title: text(track.title) || author,
     author,
     channelId: idString(user.id) || idString(track.user_id),
-    thumbnail: image(track.artwork_url) || image(user.avatar_url),
+    ...(avatar ? { authorAvatar: avatar } : {}),
+    thumbnail: image(track.artwork_url) || avatar,
     published: timestamp(track.display_date) ?? timestamp(track.created_at),
     ...(duration === undefined ? {} : { duration: Math.round(duration / 1000) }),
     ...(viewCount === undefined ? {} : { viewCount }),
@@ -220,6 +222,7 @@ function parsePlaylist(value) {
   const tracks = Array.isArray(playlist.tracks) ? playlist.tracks : []
   // Like SoundCloud, sets without artwork show the artwork of their first track
   const trackArtwork = tracks.map(track => image(object(track).artwork_url)).find(Boolean)
+  const avatar = image(user.avatar_url)
   const itemCount = count(playlist.track_count)
   return {
     platform: PLATFORM,
@@ -228,7 +231,8 @@ function parsePlaylist(value) {
     title: text(playlist.title) || text(playlist.permalink) || id,
     author: text(user.username),
     channelId: idString(user.id) || idString(playlist.user_id),
-    thumbnail: image(playlist.artwork_url) || trackArtwork || image(user.avatar_url),
+    ...(avatar ? { authorAvatar: avatar } : {}),
+    thumbnail: image(playlist.artwork_url) || trackArtwork || avatar,
     ...(itemCount === undefined ? {} : { itemCount })
   }
 }

@@ -9,7 +9,7 @@
     <template
       v-else
     >
-      <FtCard>
+      <FtCard class="postCard">
         <FtCommunityPost
           :data="post"
           :single-post="true"
@@ -26,6 +26,8 @@
         :channel-thumbnail="post.authorThumbnails[0].url"
         :show-sort-by="backendPreference == 'local'"
         :initial-comment-count="post.commentCount"
+        :highlighted-comment-id="highlightedCommentId"
+        :video-title="getPostTabTitle(post.author)"
       />
     </template>
   </div>
@@ -48,6 +50,7 @@ import { getInvidiousCommunityPost } from '../helpers/api/invidious'
 import { YatteeUnsupportedError } from '../helpers/api/yattee'
 import { getLocalCommunityPost } from '../helpers/api/local'
 import { getInvidiousApiErrorMessage, showInvidiousFallbackToast, showApiErrorToast, showToast } from '../helpers/utils'
+import { markWatchedThreadOpened } from '../helpers/commentReplyNotifications'
 import { getPostTabTitle } from '../helpers/tabTitles'
 import { useIncognitoTab, useTabTitle } from '../tabs/TabContext'
 
@@ -77,6 +80,9 @@ const backendFallback = computed(() => {
 const hideComments = computed(() => {
   return store.getters.getHideComments
 })
+
+/** @type {import('vue').ComputedRef<string | null>} */
+const highlightedCommentId = computed(() => typeof route.query.commentId === 'string' ? route.query.commentId : null)
 
 const subscriptionCacheReady = computed(() => {
   return store.getters.getSubscriptionCacheReady
@@ -110,6 +116,7 @@ function updateTitleAndRoute() {
     router.replace({
       path: `/post/${id.value}`,
       query: {
+        ...route.query,
         authorId: authorId.value
       }
     })
@@ -166,6 +173,13 @@ async function loadDataInvidiousAsync(generation) {
 // loadPost resets the route-derived state (id, authorId, post, isLoading)
 // before loading either backend.
 watch(() => route.params.id, loadPost, { immediate: true })
+// Opening a link to a comment, as from a notification or the list of
+// watched comments, keeps the comments watched in its thread watched longer.
+watch([() => route.params.id, highlightedCommentId], ([postId, commentId]) => {
+  if (typeof postId !== 'string' || commentId === null) return
+  markWatchedThreadOpened(postId, commentId)
+    .catch(error => console.error('Failed to count opening a watched comment', error))
+}, { immediate: true })
 const isIncognitoTab = useIncognitoTab()
 watch([() => route.params.id, subscriptionCacheReady], ([postId, cacheReady]) => {
   if (cacheReady && !isIncognitoTab.value) {
@@ -173,3 +187,11 @@ watch([() => route.params.id, subscriptionCacheReady], ([postId, cacheReady]) =>
   }
 }, { immediate: true })
 </script>
+
+<style scoped>
+/* The card's 3px top padding suits headings with their own margin; the post
+   starts at the card's edge, so pad it like the bottom. */
+.ft-card.postCard {
+  padding-block-start: calc(16px * var(--ui-density));
+}
+</style>

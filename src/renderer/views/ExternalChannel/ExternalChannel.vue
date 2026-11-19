@@ -138,7 +138,7 @@
             :key="currentTab"
             appear
             :results="page.results"
-            :avatar="channel.avatar ?? null"
+            :channel="channel"
           />
           <!-- After a failed page, the button tries again -->
           <FtAutoLoadNextPageWrapper

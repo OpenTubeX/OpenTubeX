@@ -30,6 +30,17 @@ test.use({
   }
 })
 
+/**
+ * Waits for the profile dropdown's opening transition, which scales and moves it.
+ * Placing the popover above its toggle retargets that transition, which rejects
+ * `finished`, so wait for Vue's enter classes and the running transitions to end.
+ * @param {import('@playwright/test').Locator} dropdown
+ */
+async function expectProfileDropdownSettled(dropdown) {
+  await expect.poll(() => dropdown.evaluate(element =>
+    !/\bprofile-dropdown-enter/.test(element.className) && element.getAnimations().length === 0)).toBe(true)
+}
+
 test.describe('subscribed channels', () => {
   test('hides channels from both sidebar and subscribed-channel links', async ({ page }) => {
     await goTo(page, 'subscribedchannels')
@@ -63,7 +74,7 @@ test.describe('subscribed channels', () => {
     // In this short window the popover fits neither above nor below. It shrinks
     // to the roomier side instead of covering its toggle, which still closes it.
     await expect(dropdown).toHaveClass(/profileDropdownPositioned/)
-    await dropdown.evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
+    await expectProfileDropdownSettled(dropdown)
     const [toggleBox, shrunkDropdownBox, viewportHeight] = await Promise.all([
       alpha.locator('.buttonList').boundingBox(),
       dropdown.boundingBox(),
@@ -80,7 +91,7 @@ test.describe('subscribed channels', () => {
       await alpha.locator('.profileDropdownToggle').click()
       // The opening transition scales the popover, which moves its edge until it ends.
       await expect(dropdown).toHaveClass(/profileDropdownPositioned/)
-      await dropdown.evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
+      await expectProfileDropdownSettled(dropdown)
 
       const [triggerBox, dropdownBox] = await Promise.all([
         alpha.locator('.buttonList').boundingBox(),

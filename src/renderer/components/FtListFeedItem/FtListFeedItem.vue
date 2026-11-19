@@ -117,8 +117,8 @@
             :data-tab-title="data.author"
           >
             <FtChannelAvatar
-              v-if="avatar && !hideChannelAvatars"
-              :thumbnail="avatar"
+              v-if="showChannelAvatar"
+              :thumbnail="channelAvatar"
             />
             <span class="channelNameText">{{ data.author }}</span>
             <FtIcon
@@ -191,6 +191,7 @@ import FtRetryImage from '../FtRetryImage.vue'
 import store from '../../store/index'
 import { useCardContextMenu } from '../../composables/useCardContextMenu'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
+import { usePlatformChannelAvatar } from '../../composables/usePlatformChannelAvatar'
 import { useThumbnailSwipe } from '../../composables/useThumbnailSwipe'
 import { getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
 import { formatDate } from '../../helpers/dateFormat.js'
@@ -218,8 +219,8 @@ import { getPlatform, getPlatformChannelRoute, PLATFORM_ICONS } from '../../../p
 const props = defineProps({
   /**
    * Items from other platforms can also say how long they are, how often they
-   * were viewed, and whether they are live.
-   * @type {import('vue').PropType<import('../../helpers/rssFeeds').RssFeedItem & { duration?: number, viewCount?: number, isLive?: boolean }>}
+   * were viewed, whether they are live, and what their channel's avatar is.
+   * @type {import('vue').PropType<import('../../helpers/rssFeeds').RssFeedItem & { duration?: number, viewCount?: number, isLive?: boolean, authorAvatar?: string }>}
    */
   data: {
     type: Object,
@@ -298,6 +299,12 @@ const platformIcon = computed(() => platform.value ? PLATFORM_ICONS[platform.val
 const channelRoute = computed(() => platform.value && props.data.channelId
   ? getPlatformChannelRoute(platform.value.id, props.data.channelId)
   : null)
+const channelAvatar = usePlatformChannelAvatar(
+  () => ({ platform: props.data.platform, channelId: props.data.channelId, avatar: props.avatar || props.data.authorAvatar }),
+  { enabled: () => !hideChannelAvatars.value }
+)
+// Like YouTube results, items of channels on other platforms keep the avatar's space while it loads
+const showChannelAvatar = computed(() => !hideChannelAvatars.value && Boolean(channelAvatar.value || channelRoute.value))
 // Live streams show their viewers instead of their start
 const publishedText = computed(() => {
   if (props.data.published === null || props.data.isLive) return ''
@@ -359,7 +366,7 @@ function setWatched(watched, fully = false) {
       title: props.data.title,
       author: props.data.author,
       authorId: getExternalMediaAuthorId(props.data.platform, props.data.channelId),
-      ...(props.avatar ? { authorThumbnail: props.avatar } : {}),
+      ...(channelAvatar.value ? { authorThumbnail: channelAvatar.value } : {}),
       thumbnail: props.data.thumbnail,
       published: props.data.published ?? 0,
       description: '',
