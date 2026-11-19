@@ -1982,6 +1982,8 @@ Storage Startup Error:
   Retry: "Spróbuj ponownie"
 Search Bar:
   Use Suggestion: Użyj sugestii
+  Video Link: "Film: {title}"
+  Channel Link: "Kanał: {title}"
 
 Native Permissions:
   Local Network Denied: "Odmówiono uprawnienia do urządzeń w pobliżu."

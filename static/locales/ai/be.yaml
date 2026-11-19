@@ -2779,6 +2779,8 @@ Search Bar:
   Use Suggestion: Выкарыстаць падказку
   Open Search Container: Адкрыць поле пошуку
   Search: Пошук
+  Video Link: "Відэа: {title}"
+  Channel Link: "Канал: {title}"
 Theme Discovery:
   Discover Themes: "Знайсці тэмы"
   Refresh: "Абнавіць"

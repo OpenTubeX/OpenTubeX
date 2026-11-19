@@ -3180,6 +3180,8 @@ Search Bar:
   Use Suggestion: Naudoti pasiūlymą
   Open Search Container: Atverti paieškos lauką
   Search: Ieškoti
+  Video Link: "Vaizdo įrašas: {title}"
+  Channel Link: "Kanalas: {title}"
 Theme Discovery:
   Discover Themes: "Atrasti apipavidalinimus"
   Refresh: "Įkelti iš naujo"

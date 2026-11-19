@@ -2748,6 +2748,8 @@ Storage Startup Error:
   Retry: "重試"
 Search Bar:
   Use Suggestion: 使用建議
+  Video Link: "影片：{title}"
+  Channel Link: "頻道：{title}"
 
 Native Permissions:
   Local Network Denied: "附近裝置權限已遭拒絕。"

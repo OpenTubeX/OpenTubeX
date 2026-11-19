@@ -2708,6 +2708,8 @@ Search Bar:
   Use Suggestion: استخدام الاقتراح
   Open Search Container: فتح مربع البحث
   Search: بحث
+  Video Link: "فيديو: {title}"
+  Channel Link: "قناة: {title}"
 Theme Discovery:
   Discover Themes: "استكشاف السمات"
   Refresh: "تحديث"

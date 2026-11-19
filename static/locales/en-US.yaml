@@ -150,6 +150,8 @@ Search Bar:
   Remove: Remove
   Open Search Container: Open Search Container
   Search: Search
+  Video Link: "Video: {title}"
+  Channel Link: "Channel: {title}"
 Search character limit: Search query is over the {searchCharacterLimit} character limit
 Search Listing:
   Label:

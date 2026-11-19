@@ -73,7 +73,8 @@ export function getSearchHistoryEntryId(query, searchSettings) {
 }
 
 /**
- * Preserve an existing ID for a matching query and filter preset.
+ * Preserve an existing ID for a matching query and filter preset. A matching
+ * entry saved later keeps its newer date and title.
  * @param {{ _id?: string, query: string, lastUpdatedAt: number, searchSettings?: object }} entry
  * @param {{ _id: string, query?: string, lastUpdatedAt: number, searchSettings?: object }[]} existingEntries
  * @returns {ReturnType<typeof normalizeSearchHistoryEntry>}
@@ -88,25 +89,84 @@ export function resolveSearchHistoryEntry(entry, existingEntries) {
       getSearchHistoryEntryKeyFromEntry(candidate) === entryKey
   })
 
-  return {
+  const resolvedEntry = {
     ...normalizedEntry,
     _id: existingEntry?._id ?? normalizedEntry._id ?? getSearchHistoryEntryId(
       normalizedEntry.query,
       normalizedEntry.searchSettings
     ),
   }
+  if (existingEntry == null) return resolvedEntry
+
+  // A link save that waited for its title can finish after a newer save of the same link.
+  const isNewer = existingEntry.lastUpdatedAt > resolvedEntry.lastUpdatedAt
+  if (isNewer) resolvedEntry.lastUpdatedAt = existingEntry.lastUpdatedAt
+  const existingTitle = resolvedEntry.linkType != null && existingEntry.linkType === resolvedEntry.linkType
+    ? normalizeSearchHistoryEntry(existingEntry).title
+    : undefined
+  if (existingTitle !== undefined && (isNewer || resolvedEntry.title === undefined)) resolvedEntry.title = existingTitle
+  return resolvedEntry
 }
 
+/** Link entries open a video or channel instead of searching for their query, the pasted link. */
+export const SEARCH_HISTORY_LINK_TYPES = Object.freeze(['video', 'channel'])
+
 /**
- * @param {{ _id: string, query?: string, lastUpdatedAt: number, searchSettings?: object }} entry
- * @returns {{ _id: string, query: string, lastUpdatedAt: number, searchSettings: ReturnType<typeof normalizeSearchSettings> }}
+ * Keeps `linkType` and `title` only when they are valid, as imports can
+ * contain anything. Clients that predate them ignore both and show the link.
+ * @param {{ _id: string, query?: string, lastUpdatedAt: number, searchSettings?: object, linkType?: unknown, title?: unknown }} entry
+ * @returns {{ _id: string, query: string, lastUpdatedAt: number, searchSettings: ReturnType<typeof normalizeSearchSettings>, linkType?: 'video' | 'channel', title?: string }}
  */
 export function normalizeSearchHistoryEntry(entry) {
-  return {
-    ...entry,
+  const { linkType, title, ...rest } = entry
+  const normalizedEntry = {
+    ...rest,
     query: getSearchHistoryEntryQuery(entry),
     searchSettings: normalizeSearchSettings(entry.searchSettings),
   }
+
+  if (SEARCH_HISTORY_LINK_TYPES.includes(linkType)) {
+    normalizedEntry.linkType = linkType
+    if (typeof title === 'string' && title.trim() !== '') normalizedEntry.title = title
+  }
+
+  return normalizedEntry
+}
+
+/**
+ * Reads a record of an OpenTubeX or FreeTube search history export.
+ * @param {unknown} record
+ * @returns {ReturnType<typeof normalizeSearchHistoryEntry> | null} null for a record without the required fields
+ */
+export function parseExportedSearchHistoryEntry(record) {
+  if (record === null || typeof record !== 'object' || Array.isArray(record) ||
+    typeof record._id !== 'string' || typeof record.lastUpdatedAt !== 'number') {
+    return null
+  }
+
+  const { searchSettings } = record
+  return normalizeSearchHistoryEntry({
+    _id: record._id,
+    query: typeof record.query === 'string' ? record.query : record._id,
+    lastUpdatedAt: record.lastUpdatedAt,
+    searchSettings: searchSettings !== null && typeof searchSettings === 'object' && !Array.isArray(searchSettings)
+      ? searchSettings
+      : undefined,
+    linkType: record.linkType,
+    title: record.title,
+  })
+}
+
+/**
+ * Whether a search history entry is suggested for the text typed so far.
+ * Links also match by any part of their title, ignoring case.
+ * @param {{ _id: string, query?: string, title?: string }} entry
+ * @param {string} text
+ * @param {string} lowerCaseText `text` in lower case
+ */
+export function searchHistoryEntryMatches(entry, text, lowerCaseText) {
+  return getSearchHistoryEntryQuery(entry).startsWith(text) ||
+    (typeof entry.title === 'string' && entry.title.toLowerCase().includes(lowerCaseText))
 }
 
 /**

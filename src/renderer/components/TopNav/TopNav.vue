@@ -650,10 +650,12 @@ const searchFilterLabels = computed(() => ({
 }))
 
 /**
- * @param {{ query: string, searchSettings: object }} entry
+ * @param {{ query: string, searchSettings: object, linkType?: 'video' | 'channel', title?: string }} entry
  * @returns {string}
  */
 function getSearchHistoryEntryDisplayText(entry) {
+  if (entry.linkType != null) return entry.title ?? entry.query
+
   const settings = entry.searchSettings
   const filterLabels = ['prioritize', 'time', 'type', 'duration']
     .map(group => searchFilterLabels.value[group][settings[group]])
@@ -666,6 +668,24 @@ function getSearchHistoryEntryDisplayText(entry) {
   return filterLabels.length === 0
     ? entry.query
     : `${entry.query} (${filterLabels.join(', ')})`
+}
+
+const SEARCH_HISTORY_LINK_ICONS = { video: 'circle-play', channel: 'circle-user' }
+
+/**
+ * @param {{ query: string, searchSettings: object, linkType?: 'video' | 'channel', title?: string }} entry
+ * @returns {string}
+ */
+function getSearchHistoryEntryAriaLabel(entry) {
+  const text = getSearchHistoryEntryDisplayText(entry)
+  switch (entry.linkType) {
+    case 'video':
+      return t('Search Bar.Video Link', { title: text })
+    case 'channel':
+      return t('Search Bar.Channel Link', { title: text })
+    default:
+      return text
+  }
 }
 
 /** @type {import('vue').ComputedRef<string>} */
@@ -716,10 +736,11 @@ const activeDataListProperties = computed(() => {
           isLink: true,
           isRemoveable: true,
           isSearchHistory: true,
-          iconName: 'clock-rotate-left',
+          searchHistoryEntry,
+          iconName: SEARCH_HISTORY_LINK_ICONS[searchHistoryEntry.linkType] ?? 'clock-rotate-left',
           get href() { return getSearchResultHref(queryText, searchHistoryEntry.searchSettings) },
           get displayText() { return getSearchHistoryEntryDisplayText(searchHistoryEntry) },
-          get ariaLabel() { return getSearchHistoryEntryDisplayText(searchHistoryEntry) },
+          get ariaLabel() { return getSearchHistoryEntryAriaLabel(searchHistoryEntry) },
         }
       : {
           isLink: true,
@@ -871,9 +892,13 @@ watch(searchFilterTabId, (tabId, previousTabId) => {
 })
 
 /**
+ * @typedef {{ linkType: 'video', videoId: string } | { linkType: 'channel', channelId: string, url: string }} SearchHistoryLink
+ */
+
+/**
  * @param {string} rawQueryText
  * @param {object | null} selectedSearchSettings
- * @returns {Promise<{ path: string, query?: object, searchQueryText: string }>}
+ * @returns {Promise<{ path: string, query?: object, searchQueryText: string, link?: SearchHistoryLink }>}
  */
 async function getSearchDestination(rawQueryText, selectedSearchSettings = null) {
   const queryText = rawQueryText.trim()
@@ -895,7 +920,7 @@ async function getSearchDestination(rawQueryText, selectedSearchSettings = null)
       if (playlistId?.length > 0) query.playlistId = playlistId
       if (commentId) query.commentId = commentId
 
-      return { path: `/watch/${videoId}`, query, searchQueryText: queryText }
+      return { path: `/watch/${videoId}`, query, searchQueryText: queryText, link: { linkType: 'video', videoId } }
     }
 
     case 'playlist':
@@ -929,7 +954,8 @@ async function getSearchDestination(rawQueryText, selectedSearchSettings = null)
       return {
         path: `/channel/${result.channelId}/${result.subPath}`,
         query: { url: result.url },
-        searchQueryText: queryText
+        searchQueryText: queryText,
+        link: { linkType: 'channel', channelId: result.channelId, url: result.url }
       }
 
     case 'trending':
@@ -1040,9 +1066,9 @@ function getSearchResultHref(rawQueryText, selectedSearchSettings = null) {
  * @param {string} queryText
  * @param {object} options
  * @param {MouseEvent | KeyboardEvent} options.event
- * @param {number} [options.dataListIndex]
+ * @param {{ isSearchHistory?: boolean, searchHistoryEntry?: object }} [options.dataListProperty] the selected row
  */
-async function goToSearch(queryText, { event, dataListIndex }) {
+async function goToSearch(queryText, { event, dataListProperty }) {
   const doCreateNewWindow = event && event.shiftKey
   const ctrlOrCmdPressed = event && ((process.platform !== 'darwin' && event.ctrlKey) ||
     (process.platform === 'darwin' && event.metaKey))
@@ -1059,15 +1085,15 @@ async function goToSearch(queryText, { event, dataListIndex }) {
     }
   }
 
+  const loadedLinkPreview = linkPreview.value
   cancelSearchSuggestions()
   cancelLinkPreview()
 
-  const selectedSearchHistoryEntry = activeDataListProperties.value[dataListIndex]?.isSearchHistory
-    ? activeSearchHistoryEntries.value[dataListIndex]
-    : null
+  const selectedSearchHistoryEntry = dataListProperty?.isSearchHistory ? dataListProperty.searchHistoryEntry : null
   const selectedSearchSettings = selectedSearchHistoryEntry?.searchSettings
 
-  if (selectedSearchSettings != null && !doCreateNewTab && !doCreateNewWindow) {
+  // A link opens the same page with any filters, so it keeps the current ones.
+  if (selectedSearchSettings != null && selectedSearchHistoryEntry.linkType == null && !doCreateNewTab && !doCreateNewWindow) {
     const tabId = searchFilterTabId.value
     store.commit('setSearchPrioritize', { tabId, value: selectedSearchSettings.prioritize })
     store.commit('setSearchTime', { tabId, value: selectedSearchSettings.time })
@@ -1084,7 +1110,13 @@ async function goToSearch(queryText, { event, dataListIndex }) {
     })
   }
 
-  const destination = await getSearchDestination(queryText, selectedSearchSettings)
+  const { link, ...destination } = await getSearchDestination(queryText, selectedSearchSettings)
+  if (link && store.getters.getRememberSearchHistory) {
+    const preview = loadedLinkPreview?.queryText === destination.searchQueryText ? loadedLinkPreview : null
+    saveLinkToSearchHistory(destination.searchQueryText, link, preview?.title).catch(error => {
+      console.error('Unable to save the link to the search history', error)
+    })
+  }
   openInternalPath({
     ...destination,
     doCreateNewWindow,
@@ -1312,11 +1344,8 @@ function getChannelPreviewDetails(handle, subscriberCount) {
  * @param {AbortSignal} signal
  */
 async function loadChannelLinkPreview(queryText, { channelId, url }, signal) {
-  const urlHandle = getChannelHandleFromUrl(url)?.toLowerCase()
-  const subscriptions = store.getters.getSubscribedChannelsById
-  const subscribedChannel = subscriptions.get(channelId) ??
-    (urlHandle ? [...subscriptions.values()].find(channel => channel.handle?.toLowerCase() === urlHandle) : undefined)
-  if (subscribedChannel && typeof subscribedChannel.name === 'string' && subscribedChannel.name.trim()) {
+  const subscribedChannel = findSubscribedChannel(channelId, url)
+  if (subscribedChannel) {
     linkPreview.value = {
       queryText,
       avatar: getChannelPreviewAvatar(subscribedChannel.thumbnail, true),
@@ -1346,6 +1375,71 @@ async function loadChannelLinkPreview(queryText, { channelId, url }, signal) {
     title: channel.name,
     details: getChannelPreviewDetails(channel.handle ?? getChannelHandleFromUrl(url), channel.subscriberCount)
   }
+}
+
+/**
+ * @param {string} channelId
+ * @param {string} url
+ * @returns {{ name: string, thumbnail?: string, handle?: string } | undefined} a subscribed channel with a name
+ */
+function findSubscribedChannel(channelId, url) {
+  const urlHandle = getChannelHandleFromUrl(url)?.toLowerCase()
+  const subscriptions = store.getters.getSubscribedChannelsById
+  const channel = subscriptions.get(channelId) ??
+    (urlHandle ? [...subscriptions.values()].find(channel => channel.handle?.toLowerCase() === urlHandle) : undefined)
+  return typeof channel?.name === 'string' && channel.name.trim() ? channel : undefined
+}
+
+/**
+ * Saves a pasted video or channel link to the search history with the title
+ * of what it links to, so the entry can be found again by that title.
+ * @param {string} queryText the trimmed link
+ * @param {SearchHistoryLink} link
+ * @param {string | undefined} previewTitle the title the link preview loaded
+ */
+async function saveLinkToSearchHistory(queryText, link, previewTitle) {
+  const lastUpdatedAt = Date.now()
+  const savedTitle = store.getters.getSearchHistoryEntries
+    .find(entry => entry.linkType === link.linkType && entry.query === queryText && entry.title)?.title
+  let title = getNonBlankTitle(previewTitle) ?? savedTitle
+
+  if (title === undefined) {
+    try {
+      title = await loadSearchHistoryLinkTitle(link)
+    } catch (error) {
+      // The entry still opens the link, which it shows instead.
+      console.error('Unable to load the title of a link in the search history', error)
+    }
+    // Turning off the history meanwhile drops this save. The datastore drops it when the history was cleared.
+    if (!store.getters.getRememberSearchHistory) return
+  }
+
+  await store.dispatch('updateSearchHistoryEntry', { query: queryText, lastUpdatedAt, linkType: link.linkType, title })
+}
+
+/**
+ * @param {SearchHistoryLink} link
+ * @returns {Promise<string | undefined>}
+ */
+async function loadSearchHistoryLinkTitle(link) {
+  const signal = AbortSignal.timeout(30_000)
+  if (link.linkType === 'video') {
+    return getNonBlankTitle(store.getters.getHistoryCacheById[link.videoId]?.title) ??
+      getNonBlankTitle((await loadVideoMetadata(link.videoId, signal)).title)
+  }
+
+  const channel = findSubscribedChannel(link.channelId, link.url) ??
+    await loadChannelSummary(link.channelId, link.url, { preference: backendPreference.value, fallback: backendFallback.value }, signal)
+  return getNonBlankTitle(channel?.name)
+}
+
+/**
+ * Blank titles, which imported watch history can contain, fall through to the next source.
+ * @param {unknown} title
+ * @returns {string | undefined}
+ */
+function getNonBlankTitle(title) {
+  return typeof title === 'string' && title.trim() !== '' ? title : undefined
 }
 
 /**

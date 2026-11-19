@@ -2740,6 +2740,8 @@ Search Bar:
   Use Suggestion: Suggestie gebruiken
   Open Search Container: Zoekveld openen
   Search: Zoeken
+  Video Link: "Video: {title}"
+  Channel Link: "Kanaal: {title}"
 Theme Discovery:
   Discover Themes: "Thema's ontdekken"
   Refresh: "Vernieuwen"

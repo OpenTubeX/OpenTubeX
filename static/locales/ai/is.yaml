@@ -2761,6 +2761,8 @@ Storage Startup Error:
   Retry: "Reyna aftur"
 Search Bar:
   Use Suggestion: Nota tillögu
+  Video Link: "Myndskeið: {title}"
+  Channel Link: "Rás: {title}"
 
 Native Permissions:
   Local Network Denied: "Leyfi fyrir nálæg tæki var hafnað."

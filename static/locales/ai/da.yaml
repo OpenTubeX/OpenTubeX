@@ -2765,6 +2765,8 @@ Search Bar:
   Use Suggestion: Brug forslag
   Open Search Container: Åbn søgefelt
   Search: Søg
+  Video Link: "Video: {title}"
+  Channel Link: "Kanal: {title}"
 Theme Discovery:
   Discover Themes: "Find temaer"
   Refresh: "Opdater"

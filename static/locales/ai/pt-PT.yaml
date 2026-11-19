@@ -2671,6 +2671,8 @@ Search Bar:
   Use Suggestion: Usar sugestão
   Open Search Container: Abrir o campo de pesquisa
   Search: Pesquisar
+  Video Link: "Vídeo: {title}"
+  Channel Link: "Canal: {title}"
 Theme Discovery:
   Discover Themes: "Descobrir temas"
   Refresh: "Recarregar"

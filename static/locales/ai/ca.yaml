@@ -83,6 +83,8 @@ Search Bar:
   Remove: Suprimeix
   Open Search Container: Obre el camp de cerca
   Search: Cerca
+  Video Link: "Vídeo: {title}"
+  Channel Link: "Canal: {title}"
 Search character limit: La consulta supera el límit de {searchCharacterLimit} caràcters
 Search Listing:
   Label:

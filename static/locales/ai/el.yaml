@@ -2682,6 +2682,8 @@ Channels:
   Load More Channels: "Φόρτωση περισσότερων καναλιών"
 Search Bar:
   Use Suggestion: Χρήση πρότασης
+  Video Link: "Βίντεο: {title}"
+  Channel Link: "Κανάλι: {title}"
 Theme Discovery:
   Discover Themes: "Ανακάλυψη θεμάτων"
   Refresh: "Ανανέωση"

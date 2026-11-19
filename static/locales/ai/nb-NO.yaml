@@ -2671,6 +2671,8 @@ Channels:
   Load More Channels: "Last inn flere kanaler"
 Search Bar:
   Use Suggestion: Bruk forslag
+  Video Link: "Video: {title}"
+  Channel Link: "Kanal: {title}"
 Theme Discovery:
   Discover Themes: "Finn temaer"
   Refresh: "Last inn på nytt"

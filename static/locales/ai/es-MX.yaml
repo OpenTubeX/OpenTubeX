@@ -3118,6 +3118,8 @@ Search Bar:
   Use Suggestion: Usar sugerencia
   Open Search Container: Abrir el campo de búsqueda
   Search: Buscar
+  Video Link: "Video: {title}"
+  Channel Link: "Canal: {title}"
 Theme Discovery:
   Discover Themes: "Descubrir temas"
   Refresh: "Actualizar"

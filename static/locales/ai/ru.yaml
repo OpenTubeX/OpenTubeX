@@ -2632,6 +2632,8 @@ Channels:
   Load More Channels: "Загрузить больше каналов"
 Search Bar:
   Use Suggestion: Использовать подсказку
+  Video Link: "Видео: {title}"
+  Channel Link: "Канал: {title}"
 Theme Discovery:
   Discover Themes: "Найти темы"
   Refresh: "Обновить"

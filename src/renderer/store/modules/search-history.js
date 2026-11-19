@@ -6,6 +6,7 @@ import {
   mergeSearchHistoryEntries,
   normalizeSearchHistoryEntry,
   resolveSearchHistoryEntry,
+  searchHistoryEntryMatches,
   sortSearchHistoryByLastUpdatedAt,
 } from '../../../search-history'
 
@@ -24,9 +25,10 @@ const getters = {
 
   getLatestMatchingSearchHistoryEntries: (state) => (query) => {
     const matches = []
+    const lowerCaseQuery = query.toLowerCase()
 
     for (const entry of state.searchHistoryEntries) {
-      if (getSearchHistoryEntryQuery(entry).startsWith(query)) {
+      if (searchHistoryEntryMatches(entry, query, lowerCaseQuery)) {
         matches.push(entry)
 
         if (matches.length === MIXED_SEARCH_HISTORY_ENTRIES_DISPLAY_LIMIT) {
@@ -69,6 +71,8 @@ const actions = {
     try {
       const updatedEntry = resolveSearchHistoryEntry(searchHistoryEntry, state.searchHistoryEntries)
       const persistedEntry = await DBSearchHistoryHandlers.upsert(updatedEntry)
+      // The history was cleared or the entry removed after this search was made.
+      if (persistedEntry === null) return
       commit('upsertSearchHistoryEntryToList', persistedEntry ?? updatedEntry)
     } catch (errMessage) {
       console.error(errMessage)
@@ -127,7 +131,9 @@ const mutations = {
       return p._id !== updatedSearchHistoryEntry._id
     })
 
-    state.searchHistoryEntries.unshift(updatedSearchHistoryEntry)
+    // A link save that waited for its title can finish after newer searches.
+    const index = state.searchHistoryEntries.findIndex(entry => entry.lastUpdatedAt <= updatedSearchHistoryEntry.lastUpdatedAt)
+    state.searchHistoryEntries.splice(index === -1 ? state.searchHistoryEntries.length : index, 0, updatedSearchHistoryEntry)
   },
 
   removeSearchHistoryEntryFromList(state, _id) {

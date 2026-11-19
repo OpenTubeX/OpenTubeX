@@ -1,6 +1,7 @@
 import { invidiousGetChannelId, invidiousGetChannelInfo, youtubeImageUrlToInvidious } from './api/invidious'
 import { getLocalChannel, getLocalChannelId, parseLocalChannelHeader, parseLocalSubscriberCount } from './api/local'
 import { requestWithFallback } from './api/fallback'
+import { waitUnlessAborted } from './abortable'
 import { usesInvidiousApi } from '../../apiBackends'
 
 export const isMissingChannelError = err => err?.message === 'This channel does not exist.'
@@ -109,7 +110,8 @@ export function resolveChannelId(url, backendPreference) {
  */
 export async function loadChannelSummary(channelId, url, backendOptions, signal) {
   const resolveId = async getChannelId => {
-    const id = checkYoutubeChannelId(channelId) ? channelId : await getChannelId(url)
+    // Resolving a handle takes no signal, so its deadline stops the wait instead.
+    const id = checkYoutubeChannelId(channelId) ? channelId : await waitUnlessAborted(getChannelId(url), signal)
     signal.throwIfAborted()
     return id
   }

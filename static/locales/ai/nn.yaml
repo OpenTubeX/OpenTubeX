@@ -3142,6 +3142,8 @@ Storage Startup Error:
   Retry: "Prøv igjen"
 Search Bar:
   Use Suggestion: Bruk framlegg
+  Video Link: "Video: {title}"
+  Channel Link: "Kanal: {title}"
 
 Native Permissions:
   Local Network Denied: "Løyve til einingar i nærleiken vart avvist."

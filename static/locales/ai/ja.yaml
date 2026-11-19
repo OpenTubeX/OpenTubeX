@@ -2745,6 +2745,8 @@ Storage Startup Error:
   Retry: "再試行"
 Search Bar:
   Use Suggestion: 候補を入力
+  Video Link: "動画：{title}"
+  Channel Link: "チャンネル：{title}"
 
 Native Permissions:
   Local Network Denied: "付近のデバイスへのアクセス権限が拒否されました。"
