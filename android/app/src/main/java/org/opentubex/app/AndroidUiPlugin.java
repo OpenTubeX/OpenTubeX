@@ -228,6 +228,19 @@ public class AndroidUiPlugin extends Plugin {
     }
 
     @PluginMethod
+    public void coverFullscreenEntry(PluginCall call) {
+        getActivity().runOnUiThread(() -> ((MainActivity) getActivity()).coverFullscreenEntry(call::resolve));
+    }
+
+    @PluginMethod
+    public void uncoverFullscreenEntry(PluginCall call) {
+        getActivity().runOnUiThread(() -> {
+            ((MainActivity) getActivity()).uncoverFullscreenEntry();
+            call.resolve();
+        });
+    }
+
+    @PluginMethod
     public void setTransientSystemBars(PluginCall call) {
         boolean enabled = Boolean.TRUE.equals(call.getBoolean("enabled", false));
         getActivity().runOnUiThread(() -> {

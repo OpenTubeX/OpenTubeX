@@ -7,9 +7,14 @@ import android.hardware.input.InputManager;
 import android.os.Bundle;
 import android.os.Build;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowInsetsAnimation;
+import android.webkit.WebView;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
@@ -29,6 +34,7 @@ public class MainActivity extends BridgeActivity {
     private InputManager inputManager;
     private int lastOrientation;
     private WebViewRotationFrame rotationFrame;
+    private ImageView fullscreenCover;
     private boolean transientSystemBars;
     private StatusBarSwipeFilter statusBarSwipeFilter;
     private final InputManager.InputDeviceListener inputDeviceListener =
@@ -297,6 +303,56 @@ public class MainActivity extends BridgeActivity {
             || isInPictureInPictureMode()) return;
         if (rotationFrame != null) rotationFrame.run();
         rotationFrame = new WebViewRotationFrame(getBridge().getWebView(), true);
+    }
+
+    // Chromium hands fullscreen to a custom view, which Capacitor returns at
+    // once. Recreating the WebView's renderer surface draws an empty page and
+    // then the inline page before the fullscreen layout, so cover the WebView
+    // with its current pixels until the fullscreen layout is ready to draw.
+    void coverFullscreenEntry(Runnable done) {
+        removeFullscreenCover(fullscreenCover);
+        WebView webView = getBridge().getWebView();
+        if (isInPictureInPictureMode()) {
+            done.run();
+            return;
+        }
+        WebViewScreenshot.copyVisible(this, webView, bitmap -> {
+            ViewGroup content = findViewById(android.R.id.content);
+            if (webView.isAttachedToWindow() && content != null) {
+                ImageView cover = new ImageView(this);
+                cover.setImageBitmap(bitmap);
+                cover.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+                int[] webViewLocation = new int[2];
+                int[] contentLocation = new int[2];
+                webView.getLocationInWindow(webViewLocation);
+                content.getLocationInWindow(contentLocation);
+                cover.setTranslationX(webViewLocation[0] - contentLocation[0]);
+                cover.setTranslationY(webViewLocation[1] - contentLocation[1]);
+                content.addView(cover, new FrameLayout.LayoutParams(bitmap.getWidth(), bitmap.getHeight()));
+                fullscreenCover = cover;
+                // Never hide the page for long when fullscreen does not finish.
+                cover.postDelayed(() -> removeFullscreenCover(cover), 2000);
+            }
+            done.run();
+        }, error -> done.run());
+    }
+
+    void uncoverFullscreenEntry() {
+        ImageView cover = fullscreenCover;
+        if (cover == null) return;
+        // The next draw after this callback includes the fullscreen layout.
+        getBridge().getWebView().postVisualStateCallback(0, new WebView.VisualStateCallback() {
+            @Override
+            public void onComplete(long requestId) {
+                removeFullscreenCover(cover);
+            }
+        });
+    }
+
+    private void removeFullscreenCover(ImageView cover) {
+        if (cover == null || fullscreenCover != cover) return;
+        fullscreenCover = null;
+        ((ViewGroup) cover.getParent()).removeView(cover);
     }
 
     @Override

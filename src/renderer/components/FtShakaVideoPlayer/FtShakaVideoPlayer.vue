@@ -2282,7 +2282,9 @@ import {
   enterAndroidPictureInPicture,
   observeAndroidDisplayRotation,
   observeAndroidDeviceRotation,
+  coverAndroidFullscreenEntry,
   prepareAndroidFullscreenRotation,
+  uncoverAndroidFullscreenEntry,
   getAndroidDisplayOrientation,
   setAndroidNavigationBarVisible,
   setAndroidStatusBarVisible,
@@ -2999,6 +3001,7 @@ const hidePopularityGraph = computed(() => store.getters.getHidePopularityGraph)
 let iosFullscreenCleanup = null
 let androidFullscreenCleanup = null
 let androidFullscreenEntering = false
+let androidFullscreenEntryCovered = false
 let iosCaptionsCleanup = null
 let captionCueLayoutCleanup = null
 let nativeCaptionTiming = null
@@ -11906,6 +11909,16 @@ function retainAndroidFullscreenDuringRotation() {
   window.addEventListener('resize', resized)
 }
 
+async function uncoverAndroidFullscreenEntryAfterUpdate(entered) {
+  // Chromium can resolve the request before it dispatches fullscreenchange,
+  // which applies the fullscreen layout. The cover times out if it never comes.
+  if (entered && !isFullscreen.value) {
+    await new Promise(resolve => document.addEventListener('fullscreenchange', resolve, { once: true }))
+  }
+  await nextTick()
+  uncoverAndroidFullscreenEntry().catch(() => {})
+}
+
 function fullscreenChangeHandler() {
   const fullscreen = isNativeFullscreenActive()
   const wasFullscreen = isFullscreen.value
@@ -12206,13 +12219,18 @@ onMounted(async () => {
         finishAndroidFullscreenExit(true)
         // The orientation event must not start a competing popover entry.
         androidFullscreenEntering = true
-        if (shouldRotateFullscreenToLandscape(true, video.value, rotateFullscreenToLandscape.value, fullscreenAspectRatio.value)) {
-          await prepareAndroidFullscreenRotation().catch(() => {})
-        }
+        // The rotation hides the entry. Without one, cover it until finishEnter.
+        androidFullscreenEntryCovered = window.innerHeight <= window.innerWidth ||
+          !shouldRotateFullscreenToLandscape(true, video.value, rotateFullscreenToLandscape.value, fullscreenAspectRatio.value)
+        await (androidFullscreenEntryCovered ? coverAndroidFullscreenEntry() : prepareAndroidFullscreenRotation()).catch(() => {})
         requestFullscreenOrientation(true)
       },
       finishEnter: entered => {
         androidFullscreenEntering = false
+        if (androidFullscreenEntryCovered) {
+          androidFullscreenEntryCovered = false
+          uncoverAndroidFullscreenEntryAfterUpdate(entered)
+        }
         if (!entered) {
           androidFullscreenRotationRequested = false
           setLandscapeOrientation(false).catch(() => {})

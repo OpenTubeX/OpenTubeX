@@ -58,6 +58,14 @@ export function prepareAndroidFullscreenRotation() {
   return AndroidUi?.prepareFullscreenRotation() ?? Promise.resolve()
 }
 
+export function coverAndroidFullscreenEntry() {
+  return AndroidUi?.coverFullscreenEntry() ?? Promise.resolve()
+}
+
+export function uncoverAndroidFullscreenEntry() {
+  return AndroidUi?.uncoverFullscreenEntry() ?? Promise.resolve()
+}
+
 export async function getAndroidDisplayOrientation() {
   const { type } = await ScreenOrientation.getCurrentOrientation()
   return type
