@@ -219,7 +219,8 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   let scrollMiniDragHandleContrastLastUpdate = 0
 
   /**
-   * A drag measures the view's insets once and keeps the rect it moved to.
+   * A drag measures the view's insets once, keeps the player's aspect ratio
+   * until it ends, and keeps the rect it moved to.
    * @type {{
    *   type: 'drag' | 'resize' | 'volume',
    *   corner?: string,
@@ -227,6 +228,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
    *   startY: number,
    *   startRect: import('../../../helpers/scrollMiniPlayer').ScrollMiniPlayerRect,
    *   insets?: { top: number, left: number, right: number, bottom: number },
+   *   aspectRatio?: number,
    *   rect?: import('../../../helpers/scrollMiniPlayer').ScrollMiniPlayerRect,
    * } | null}
    */
@@ -1540,7 +1542,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     if (session?.type !== 'drag') return
     session.insets = getViewportInsets()
     if (!session.rect) return
-    session.rect = clampScrollMiniPlayerRect(session.rect, scrollMiniVideoAspectRatio.value, session.insets)
+    session.rect = clampScrollMiniPlayerRect(session.rect, session.aspectRatio, session.insets)
     scrollMiniDragFrame ??= requestAnimationFrame(renderScrollMiniPlayerMove)
   }
 
@@ -1571,15 +1573,17 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     if (!scrollMiniPointerSession || !scrollMiniPlayerActive.value) return
 
     if (scrollMiniPointerSession.type === 'drag') {
-      const { startRect, insets } = scrollMiniPointerSession
+      const { startRect, insets, aspectRatio } = scrollMiniPointerSession
       const dx = event.clientX - scrollMiniPointerSession.startX
       const dy = event.clientY - scrollMiniPointerSession.startY
 
+      // The drawn player keeps its size until the drag ends, so clamp with the
+      // aspect ratio it had when the drag started.
       scrollMiniPointerSession.rect = clampScrollMiniPlayerRect({
         ...startRect,
         left: startRect.left + dx,
         top: startRect.top + dy,
-      }, scrollMiniVideoAspectRatio.value, insets)
+      }, aspectRatio, insets)
       scrollMiniDragFrame ??= requestAnimationFrame(renderScrollMiniPlayerMove)
       // The handles move with the player, so the video below them stays the same.
       return
@@ -1733,6 +1737,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
       startY: event.clientY,
       startRect: { ...scrollMiniPlayerRect.value },
       insets: getViewportInsets(),
+      aspectRatio: scrollMiniVideoAspectRatio.value,
     }
 
     captureScrollMiniPointer(event)
