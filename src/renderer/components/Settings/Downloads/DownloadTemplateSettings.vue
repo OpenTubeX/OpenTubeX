@@ -500,7 +500,8 @@ function deleteTemplate() {
   align-items: start;
   grid-template-columns: minmax(240px, 1fr) minmax(280px, 2fr);
   gap: 16px;
-  padding: 8px 20px 16px;
+  padding-block: 8px 16px;
+  padding-inline: 20px;
 }
 
 .templateOptions {
@@ -599,7 +600,8 @@ function deleteTemplate() {
 
 .templateManagerFooter {
   flex: none;
-  padding: 10px 20px;
+  padding-block: 10px;
+  padding-inline: 20px;
 }
 
 @container (width <= 600px) {

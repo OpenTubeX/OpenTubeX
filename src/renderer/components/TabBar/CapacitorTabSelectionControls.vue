@@ -200,11 +200,6 @@ async function run(action) {
   box-shadow: 0 4px 16px var(--primary-shadow-color);
 }
 
-.capacitorTabSelectionMenu button {
-  justify-content: flex-start;
-  flex: 0 0 auto;
-}
-
 button {
   display: inline-flex;
   align-items: center;
@@ -221,13 +216,18 @@ button {
   transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 }
 
-button:not(:disabled):is(:hover, :active, :focus-visible) {
-  background-color: var(--side-nav-hover-color);
+.capacitorTabSelectionMenu button {
+  justify-content: flex-start;
+  flex: 0 0 auto;
 }
 
 button:disabled {
   opacity: 0.45;
   cursor: default;
+}
+
+button:not(:disabled):is(:hover, :active, :focus-visible) {
+  background-color: var(--side-nav-hover-color);
 }
 
 button:not(:disabled):active {

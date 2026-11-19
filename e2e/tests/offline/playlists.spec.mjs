@@ -1552,6 +1552,8 @@ test.describe('custom playlist order', () => {
     await page.getByText('Large custom playlist').click()
     const titles = page.locator('.playlistItemsCard [data-playlist-drag-item] .h3Title')
     await expect(titles.first()).toHaveText('Custom playlist video 1')
+    // The rows slide in, so measure them once they are in place.
+    await expect(page.locator('.playlistItem-enter-active')).toHaveCount(0)
 
     const rows = page.locator('.playlistItemsCard [data-playlist-drag-item]')
     const handle = await rows.first().locator('.videoIndexArea').boundingBox()

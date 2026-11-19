@@ -179,14 +179,20 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 }
 
 .shelf-next-enter-from,
-.shelf-previous-leave-to,
+.shelf-previous-leave-to {
+  transform: translateX(100%);
+}
+
+.shelf-next-leave-to,
+.shelf-previous-enter-from {
+  transform: translateX(-100%);
+}
+
 .homeShelf:dir(rtl) .shelf-next-leave-to,
 .homeShelf:dir(rtl) .shelf-previous-enter-from {
   transform: translateX(100%);
 }
 
-.shelf-next-leave-to,
-.shelf-previous-enter-from,
 .homeShelf:dir(rtl) .shelf-next-enter-from,
 .homeShelf:dir(rtl) .shelf-previous-leave-to {
   transform: translateX(-100%);

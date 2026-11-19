@@ -21,7 +21,7 @@
         :icon="locationIsDirectory ? ['fas', 'folder-open'] : ['fas', 'file-lines']"
         aria-hidden="true"
       />
-      <code>{{ location }}</code>
+      <code dir="ltr">{{ location }}</code>
     </p>
     <strong class="storageSize">{{ size }}</strong>
     <div class="storageControls">

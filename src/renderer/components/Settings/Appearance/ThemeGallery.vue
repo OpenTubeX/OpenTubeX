@@ -605,8 +605,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
    whichever is shown. */
 .themeColors {
   display: grid;
-  align-items: center;
-  justify-items: center;
+  place-items: center;
   min-inline-size: 0;
 }
 
@@ -709,6 +708,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 
 .themeOptions {
   display: grid;
+
   /* At least two columns, so phones still compare themes side by side. */
   grid-template-columns: repeat(auto-fill, minmax(min(calc(50% - 6px), 176px), 1fr));
   gap: 16px 12px;

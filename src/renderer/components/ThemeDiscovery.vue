@@ -376,11 +376,8 @@ async function install(entry) {
 
 .discoveryToolbar {
   display: flex;
-  justify-content: flex-end;
-}
-
-.discoveryToolbar {
   flex-shrink: 0;
+  justify-content: flex-end;
   padding: 16px;
 }
 
@@ -393,7 +390,8 @@ async function install(entry) {
   flex: 1;
   min-block-size: 0;
   overflow-y: auto;
-  padding: 0 16px 16px;
+  padding-block: 0 16px;
+  padding-inline: 16px;
 }
 
 .themeGallery {

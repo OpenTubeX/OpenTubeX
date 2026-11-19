@@ -23,6 +23,7 @@ defineProps({
 .channelAvatars {
   display: inline-flex;
   flex-shrink: 0;
+
   /* Keep the avatar outlines inside horizontally clipped metadata rows. */
   padding-inline: 2px;
 

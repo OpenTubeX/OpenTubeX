@@ -88,7 +88,10 @@
         >
           {{ t('Platforms.Empty Tab') }}
         </p>
-        <PlatformResultList :results="browseResults" />
+        <PlatformResultList
+          appear
+          :results="browseResults"
+        />
       </template>
     </FtCard>
   </div>

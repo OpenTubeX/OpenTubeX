@@ -490,16 +490,17 @@ onBeforeUnmount(() => resizeObserver.disconnect())
   color: inherit;
 }
 
-button.commentComposerAvatar {
+/* Only the button form can be enabled, disabled, or focused. */
+.commentComposerAvatar:enabled {
   cursor: pointer;
 }
 
-button.commentComposerAvatar:disabled {
+.commentComposerAvatar:disabled {
   cursor: default;
   opacity: 0.6;
 }
 
-button.commentComposerAvatar:focus-visible {
+.commentComposerAvatar:focus-visible {
   outline: 2px solid var(--primary-color);
   outline-offset: 2px;
 }

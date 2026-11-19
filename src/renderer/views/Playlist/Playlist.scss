@@ -390,7 +390,7 @@
   }
 }
 
-.playlistItem-enter,
+.playlistItem-enter-from,
 .playlistItem-leave-to {
   opacity: 0;
   transform: translate(calc(10% * var(--horizontal-directionality-coefficient)));

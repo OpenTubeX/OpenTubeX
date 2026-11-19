@@ -16,7 +16,7 @@ pre-commit:
       skip:
         - rebase
     stylelint:
-      glob: "*.{css,scss}"
+      glob: "*.{css,scss,vue}"
       run: pnpm exec stylelint --no-color --allow-empty-input {staged_files}
       skip:
         - rebase

@@ -94,3 +94,23 @@ test('changing videos clears a selected chapter timer', async t => {
   assert.equal(player.timer.mode.value, null)
   assert.equal(player.entries.size, 0)
 })
+
+test('accepts durations between the presets in five minute steps', t => {
+  const player = createTimer(t)
+  player.timer.startDuration(7)
+  player.timer.startDuration(125)
+  assert.equal(player.timer.mode.value, null)
+
+  player.timer.startDuration(90)
+  assert.deepEqual(JSON.parse(player.entries.get('OpenTubeX/sleepTimer')), {
+    mode: 'duration',
+    durationMinutes: 90,
+    remainingMs: 90 * 60_000,
+  })
+})
+
+test('restores a duration between the presets', t => {
+  const player = createTimer(t, { mode: 'duration', durationMinutes: 25, remainingMs: 60_000 })
+  assert.equal(player.timer.mode.value, 'duration')
+  assert.equal(player.timer.durationMinutes.value, 25)
+})

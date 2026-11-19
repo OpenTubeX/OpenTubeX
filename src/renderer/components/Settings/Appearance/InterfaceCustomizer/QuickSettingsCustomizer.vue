@@ -125,7 +125,7 @@
             :icon="setting.icon"
             aria-hidden="true"
           />
-          <span>{{ setting.label }}</span>
+          <span class="selectedSettingLabel">{{ setting.label }}</span>
           <div class="settingActions">
             <FtIconButton
               class="settingAction"
@@ -433,7 +433,7 @@ function resetQuickSettings() {
   position: relative;
 }
 
-.settingPicker :deep(.list:has(> .os-scrollbar-vertical:not(.os-scrollbar-unusable)) > li) {
+.settingPicker :deep(.list:has(.os-scrollbar-vertical:not(.os-scrollbar-unusable)) > li) {
   margin-inline-end: var(--scrollbar-track-width);
 }
 
@@ -480,6 +480,7 @@ function resetQuickSettings() {
   display: grid;
   grid-template-columns: 44px 24px minmax(0, 1fr) auto;
   min-block-size: 56px;
+  padding-inline-end: 8px;
   transition: border-radius var(--motion-fast-spatial);
 }
 
@@ -490,6 +491,10 @@ function resetQuickSettings() {
   border-start-end-radius: var(--shape-corner-large-increased);
 }
 
+.selectedSetting {
+  user-select: none;
+}
+
 .selectedSection:not(:has(.selectedSetting)) .sectionHeader,
 .selectedSetting:last-child {
   border-end-start-radius: var(--shape-corner-large-increased);
@@ -498,10 +503,6 @@ function resetQuickSettings() {
 
 .selectedSetting.dragging {
   border-radius: var(--shape-corner-large-increased);
-}
-
-.sectionHeader {
-  padding-inline-end: 8px;
 }
 
 .sectionHeader h3 {
@@ -518,12 +519,7 @@ function resetQuickSettings() {
   padding: 0;
 }
 
-.selectedSetting {
-  padding-inline-end: 8px;
-  user-select: none;
-}
-
-.selectedSetting > span:not(.dragHandle) {
+.selectedSetting > :is(.selectedSettingIcon, .selectedSettingLabel) {
   overflow-wrap: anywhere;
   padding-inline: 8px;
 }

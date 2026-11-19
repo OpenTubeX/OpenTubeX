@@ -13832,15 +13832,14 @@ if (process.env.IS_IOS) {
 <style>
 /* Unscoped: pseudo-elements on range inputs do not work reliably with Vue scoped CSS. */
 .ftVideoPlayer.scrollMiniPlayer .scrollMiniVolumeBar {
-  -webkit-appearance: none;
   appearance: none;
   background: transparent;
   cursor: pointer;
 }
 
 .ftVideoPlayer.scrollMiniPlayer .scrollMiniVolumeBar::-webkit-slider-runnable-track {
-  width: 100%;
-  height: 4px;
+  inline-size: 100%;
+  block-size: 4px;
   background: transparent;
   border: 0;
   color: transparent;
@@ -13848,20 +13847,19 @@ if (process.env.IS_IOS) {
 }
 
 .ftVideoPlayer.scrollMiniPlayer .scrollMiniVolumeBar::-webkit-slider-thumb {
-  -webkit-appearance: none;
   appearance: none;
   border: 0;
   border-radius: 50%;
-  width: 12px;
-  height: 12px;
+  inline-size: 12px;
+  block-size: 12px;
   background: #fff;
-  margin-top: -4px;
+  margin-block-start: -4px;
   cursor: pointer;
 }
 
 .ftVideoPlayer.scrollMiniPlayer .scrollMiniVolumeBar::-moz-range-track {
-  width: 100%;
-  height: 4px;
+  inline-size: 100%;
+  block-size: 4px;
   background: transparent;
   border: 0;
   color: transparent;
@@ -13872,8 +13870,8 @@ if (process.env.IS_IOS) {
   appearance: none;
   border: 0;
   border-radius: 50%;
-  width: 12px;
-  height: 12px;
+  inline-size: 12px;
+  block-size: 12px;
   background: #fff;
   cursor: pointer;
 }

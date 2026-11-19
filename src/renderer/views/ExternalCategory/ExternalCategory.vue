@@ -69,6 +69,7 @@
       </p>
       <PlatformResultList
         class="streams"
+        appear
         :results="results"
       />
     </FtCard>
