@@ -133,7 +133,10 @@
               @retry="page.loaded ? loadMore() : loadPage(currentTab)"
             />
           </FtFlexBox>
+          <!-- Remounts per tab, so each tab's results fade in like YouTube channel tabs -->
           <PlatformResultList
+            :key="currentTab"
+            appear
             :results="page.results"
             :avatar="channel.avatar ?? null"
           />
