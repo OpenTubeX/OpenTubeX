@@ -538,11 +538,12 @@ export async function setupTabsIPC(options = {}) {
     }
   })
 
-  ipcMain.handle(IpcChannels.TABS_REQUEST_PICTURE_IN_PICTURE, async (event, tabId) => {
+  ipcMain.handle(IpcChannels.TABS_REQUEST_PICTURE_IN_PICTURE, async (event, tabId, enabled) => {
     const manager = getManager(event)
     if (
       !manager ||
       typeof tabId !== 'string' ||
+      typeof enabled !== 'boolean' ||
       !manager.tabs.has(tabId) ||
       manager._deferredCloseTabIds.has(tabId) ||
       manager._deferredUnloadTabIds.has(tabId)
@@ -559,7 +560,13 @@ export async function setupTabsIPC(options = {}) {
         const target = root?.querySelector('video.player') ?? detachedPlayer?.querySelector('video.player')
         if (!target?.ui?.getControls) return false
 
-        if (document.pictureInPictureElement && document.pictureInPictureElement !== target) {
+        // The request may arrive after the user changed the PiP state, e.g. a
+        // close requested on focus after "Back to tab" already closed it.
+        // Toggling then would reopen the window.
+        const enabled = ${JSON.stringify(enabled)}
+        if ((document.pictureInPictureElement === target) === enabled) return true
+
+        if (enabled && document.pictureInPictureElement) {
           try { await document.exitPictureInPicture() } catch {}
         }
 

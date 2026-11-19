@@ -547,11 +547,15 @@ export default {
     ipcRenderer.send(IpcChannels.TOGGLE_DISABLE_HARDWARE_ACCELERATION)
   },
 
-  // Allows programmatic toggling of picture-in-picture mode without accompanying user interaction.
+  // Allows programmatic entering and leaving of picture-in-picture mode without accompanying user interaction.
   // See: https://developer.mozilla.org/en-US/docs/Web/Security/User_activation#transient_activation
-  requestPiP: (tabId) => {
+  /**
+   * @param {string} tabId
+   * @param {boolean} enabled
+   */
+  requestPiP: (tabId, enabled) => {
     // Fire-and-forget: swallow rejection so it never surfaces as an unhandled rejection.
-    ipcRenderer.invoke(IpcChannels.TABS_REQUEST_PICTURE_IN_PICTURE, tabId).catch(() => {})
+    ipcRenderer.invoke(IpcChannels.TABS_REQUEST_PICTURE_IN_PICTURE, tabId, enabled).catch(() => {})
   },
 
   // Allows programmatic toggling of fullscreen without accompanying user interaction.

@@ -100,9 +100,12 @@ export function useAutoPictureInPicture({
     })
   }
 
-  function triggerPipToggle() {
+  /**
+   * @param {boolean} enabled
+   */
+  function requestPictureInPicture(enabled) {
     if (process.env.IS_ELECTRON && window.ftElectron?.requestPiP) {
-      window.ftElectron.requestPiP(tabId)
+      window.ftElectron.requestPiP(tabId, enabled)
       return true
     }
 
@@ -110,7 +113,10 @@ export function useAutoPictureInPicture({
     if (!ui) return false
 
     try {
-      ui.getControls().togglePiP()
+      const controls = ui.getControls()
+      if (controls.isPiPEnabled() !== enabled) {
+        controls.togglePiP()
+      }
       return true
     } catch (error) {
       console.warn('Auto Picture-in-Picture: togglePiP failed', error)
@@ -157,12 +163,12 @@ export function useAutoPictureInPicture({
       if (!controls.isPiPAllowed()) return
 
       markPictureInPictureRequested(state, true)
-      if (!triggerPipToggle()) {
+      if (!requestPictureInPicture(true)) {
         markPictureInPictureRequestFailed(state)
       }
     } else if (action === 'exit') {
       markPictureInPictureRequested(state, false)
-      if (!triggerPipToggle()) {
+      if (!requestPictureInPicture(false)) {
         markPictureInPictureRequestFailed(state)
       }
     }
@@ -294,7 +300,7 @@ export function useAutoPictureInPicture({
    * @param {boolean} inPip
    */
   function notifyPictureInPictureState(inPip) {
-    if (applyPictureInPictureState(state, inPip)) {
+    if (applyPictureInPictureState(state, inPip, { triggerActive: shouldAutoPipNow() })) {
       updateAutoPip()
     }
   }
@@ -307,7 +313,7 @@ export function useAutoPictureInPicture({
    */
   function restorePictureInPicture(automatic) {
     markPictureInPictureRequested(state, true, { automatic })
-    if (!triggerPipToggle()) {
+    if (!requestPictureInPicture(true)) {
       markPictureInPictureRequestFailed(state)
     }
   }
