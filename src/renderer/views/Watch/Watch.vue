@@ -697,6 +697,7 @@
         :enabled="shortsPhonePanelsEnabled"
         :open="mobilePanel === 'metadata'"
         :title="$t('Video.Metadata')"
+        :icon="['fas', 'circle-info']"
         @close="closeShortsPhonePanel"
       >
         <div
@@ -1045,6 +1046,7 @@
           :open="mobilePanel === 'description'"
           class="phoneDescriptionPanel"
           :title="$t('Description.Title')"
+          :icon="['fas', 'align-left']"
           @close="mobilePanel = null"
         >
           <watch-video-description
@@ -1130,6 +1132,7 @@
         :phone-enabled="phonePanelsEnabled || shortsPhonePanelsEnabled"
         :phone-open="mobilePanel === 'chapters'"
         :title="videoChaptersKind === 'keyMoments' ? $t('Chapters.Key Moments') : $t('Chapters.Chapters')"
+        :icon="['fas', 'list-ol']"
         transition="chapters-panel"
         @close="closeSidebarChapters"
         @leaving="sidebarPanelLeaving = $event"

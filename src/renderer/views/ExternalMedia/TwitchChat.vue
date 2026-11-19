@@ -61,7 +61,12 @@
       >
         <header class="titleContainer">
           <h4 class="title">
-            {{ title }}
+            <FtIcon
+              v-if="phonePanelHeader"
+              class="phonePanelTitleIcon"
+              :icon="['fas', 'message']"
+              aria-hidden="true"
+            />{{ title }}
           </h4>
           <div
             class="liveChatActions"
