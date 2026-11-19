@@ -255,13 +255,15 @@ export class CapacitorTabService {
     // The synced session cannot close incognito tabs, nor pull the user out of one
     const incognitoTabs = previous.tabs.filter(tab => tab.isIncognito)
     const activeIncognitoTabId = incognitoTabs.find(tab => tab.id === previous.activeTabId)?.id
-    const session = restoreCapacitorTabSession({
-      tabs: [...tabs, ...incognitoTabs].sort((a, b) => Number(b.isPinned === true) - Number(a.isPinned === true)),
-      activeTabId: activeIncognitoTabId ?? (tabs.some(tab => tab.id === synced.activeTabId)
-        ? synced.activeTabId
-        : tabs[0].id),
-      closedTabs: [],
-    }, this.router.currentRoute.value)
+    const restored = restoreCapacitorTabSession({ tabs, activeTabId: synced.activeTabId, closedTabs: [] }, this.router.currentRoute.value)
+    // Incognito tabs keep their runtime state, since their pages stay mounted
+    const restoredIds = new Set(restored.tabs.map(tab => tab.id))
+    const keptIncognitoTabs = incognitoTabs.filter(tab => !restoredIds.has(tab.id))
+    const session = {
+      ...restored,
+      tabs: [...restored.tabs, ...keptIncognitoTabs].sort((a, b) => Number(b.isPinned === true) - Number(a.isPinned === true)),
+      activeTabId: keptIncognitoTabs.some(tab => tab.id === activeIncognitoTabId) ? activeIncognitoTabId : restored.activeTabId,
+    }
     if (!await this.commitAndPresent(previous, session)) return false
 
     this.sessionUpdatedAt = Number.isFinite(synced.updatedAt) ? synced.updatedAt : Date.now()

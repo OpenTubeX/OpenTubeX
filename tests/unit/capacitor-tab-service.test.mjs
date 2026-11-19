@@ -236,7 +236,10 @@ test('mobile incognito tabs stay out of saved, synced and closed tabs', async t 
   assert.deepEqual(synced.tabs.map(tab => tab.id), ['tab-a'])
   assert.equal(synced.activeTabId, 'tab-a')
 
-  // Another device's session neither closes the incognito tab nor leaves it
+  // Another device's session neither closes the incognito tab, leaves it, nor remounts its page
+  const { mountRevision } = store.getters.getTabById(incognitoId)
+  service.markTabMounted(incognitoId, mountRevision)
+  assert.equal(store.getters.getTabById(incognitoId).loadState, 'loaded')
   assert.equal(await service.applySyncSessions([{
     activeTabId: 'tab-b',
     tabs: [{ id: 'tab-b', title: 'Synced', url: 'https://localhost/home', isPinned: false }]
@@ -244,6 +247,8 @@ test('mobile incognito tabs stay out of saved, synced and closed tabs', async t 
   assert.deepEqual(store.getters.getTabs.map(tab => tab.id), ['tab-b', incognitoId])
   assert.equal(store.getters.getActiveTabId, incognitoId)
   assert.equal(store.getters.getTabById(incognitoId).isIncognito, true)
+  assert.equal(store.getters.getTabById(incognitoId).loadState, 'loaded')
+  assert.equal(store.getters.getTabById(incognitoId).mountRevision, mountRevision)
 
   assert.equal(await service.closeTab(incognitoId), true)
   assert.deepEqual(store.getters.getClosedTabs, [])
