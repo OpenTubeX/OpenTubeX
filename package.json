@@ -138,7 +138,7 @@
     "@capacitor/cli": "^8.6.2",
     "@double-great/stylelint-a11y": "^3.8.3",
     "@eslint/js": "^10.0.1",
-    "@iconify-json/material-symbols": "^1.2.99",
+    "@iconify-json/material-symbols": "^1.2.100",
     "@iconify-json/ri": "^1.2.10",
     "@iconify-json/simple-icons": "^1.2.102",
     "@iconify/utils": "^3.1.5",
