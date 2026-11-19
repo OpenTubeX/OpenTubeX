@@ -1580,7 +1580,7 @@ const customActions = {
             break
 
           case SyncEvents.GENERAL.DELETE_ALL:
-            commit('clearSearchHistoryEntries')
+            commit('setSearchHistoryEntries', [])
             break
 
           default:

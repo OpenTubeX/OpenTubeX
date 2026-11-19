@@ -766,6 +766,7 @@ class WatchStats {
   }
 
   static deleteAll() {
+    this.clearedAt = Date.now()
     return this.runWrite(() => this._deleteAll())
   }
 
@@ -1362,6 +1363,8 @@ class Playlists {
 
 class SearchHistory {
   static writes = Promise.resolve()
+  /** When the history was last cleared, so a search made before it, such as a link that waited for its title, is not saved. */
+  static clearedAt = -Infinity
 
   /**
    * Writes read the saved searches first, so they run one at a time and an
@@ -1384,7 +1387,10 @@ class SearchHistory {
     return this.runWrite(() => this._upsert(searchHistoryEntry))
   }
 
+  /** @returns {Promise<object | null>} the saved entry, or null when the history was cleared after the search */
   static async _upsert(searchHistoryEntry) {
+    if (searchHistoryEntry.lastUpdatedAt < this.clearedAt) return null
+
     const matchingCandidates = await db.searchHistory.findAsync({
       $or: [
         { _id: searchHistoryEntry._id },
@@ -1428,6 +1434,7 @@ class SearchHistory {
   }
 
   static deleteAll() {
+    this.clearedAt = Date.now()
     return this.runWrite(() => db.searchHistory.removeAsync({}, { multi: true }))
   }
 }

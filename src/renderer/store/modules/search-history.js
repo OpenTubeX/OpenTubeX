@@ -11,18 +11,12 @@ import {
 } from '../../../search-history'
 
 const state = {
-  searchHistoryEntries: [],
-  /** Lets saves that waited for a title skip writing after the history was cleared. */
-  searchHistoryClearCount: 0,
+  searchHistoryEntries: []
 }
 
 const getters = {
   getSearchHistoryEntries: (state) => {
     return state.searchHistoryEntries
-  },
-
-  getSearchHistoryClearCount: (state) => {
-    return state.searchHistoryClearCount
   },
 
   getLatestSearchHistoryEntries: (state) => {
@@ -77,6 +71,8 @@ const actions = {
     try {
       const updatedEntry = resolveSearchHistoryEntry(searchHistoryEntry, state.searchHistoryEntries)
       const persistedEntry = await DBSearchHistoryHandlers.upsert(updatedEntry)
+      // The history was cleared after this search was made.
+      if (persistedEntry === null) return
       commit('upsertSearchHistoryEntryToList', persistedEntry ?? updatedEntry)
     } catch (errMessage) {
       console.error(errMessage)
@@ -108,11 +104,9 @@ const actions = {
   },
 
   async removeAllSearchHistoryEntries({ commit }) {
-    // A save queued behind the delete would bring the cleared entry back, so pending saves stop here.
-    commit('startSearchHistoryClear')
     try {
       await DBSearchHistoryHandlers.deleteAll()
-      commit('clearSearchHistoryEntries')
+      commit('setSearchHistoryEntries', [])
       return true
     } catch (errMessage) {
       console.error(errMessage)
@@ -125,15 +119,6 @@ const mutations = {
   mergeLoadedSearchHistoryEntries(state, searchHistoryEntries) {
     state.searchHistoryEntries = mergeSearchHistoryEntries(searchHistoryEntries, state.searchHistoryEntries)
     sortSearchHistoryByLastUpdatedAt(state.searchHistoryEntries)
-  },
-
-  startSearchHistoryClear(state) {
-    state.searchHistoryClearCount++
-  },
-
-  clearSearchHistoryEntries(state) {
-    state.searchHistoryEntries = []
-    state.searchHistoryClearCount++
   },
 
   setSearchHistoryEntries(state, searchHistoryEntries) {

@@ -76,7 +76,7 @@ test('a link keeps its title when it is saved again and when a backup restores i
 
   const backup = await readUnifiedBackup(createUnifiedBackup({ searchHistory: await SearchHistory.find() }))
   await SearchHistory.deleteAll()
-  await SearchHistory.upsert({ query: 'daily news', lastUpdatedAt: 3 })
+  await SearchHistory.upsert({ query: 'daily news', lastUpdatedAt: Date.now() })
   await SearchHistory.mergeImported(backup.data.searchHistory)
   assert.deepEqual((await SearchHistory.find()).map(({ query, linkType, title }) => ({ query, linkType, title })), [
     { query: 'daily news', linkType: undefined, title: undefined },
@@ -88,12 +88,8 @@ const storeSource = (await readFile(new URL('../../src/renderer/store/modules/se
   .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
   .replace('export default ', 'return ')
 
-test('a delayed link save stays in date order, and clearing stops pending saves before the delete finishes', async () => {
-  let finishDelete
-  const DBSearchHistoryHandlers = {
-    upsert: async entry => entry,
-    deleteAll: () => new Promise(resolve => { finishDelete = resolve }),
-  }
+test('a delayed link save stays in date order, and one the datastore drops after a clear stays out of the list', async () => {
+  const DBSearchHistoryHandlers = { upsert: async entry => entry.query === 'dropped' ? null : entry }
   const dependencies = {
     MIXED_SEARCH_HISTORY_ENTRIES_DISPLAY_LIMIT: 10, DBSearchHistoryHandlers, getRetentionCutoff: () => null, getSearchHistoryEntryQuery, mergeSearchHistoryEntries, normalizeSearchHistoryEntry, resolveSearchHistoryEntry, searchHistoryEntryMatches, sortSearchHistoryByLastUpdatedAt,
   }
@@ -102,12 +98,27 @@ test('a delayed link save stays in date order, and clearing stops pending saves 
 
   await store.dispatch('updateSearchHistoryEntry', { query: 'newer search', lastUpdatedAt: 2 })
   await store.dispatch('updateSearchHistoryEntry', { query: 'https://youtu.be/older', lastUpdatedAt: 1, linkType: 'video', title: 'Older' })
+  await store.dispatch('updateSearchHistoryEntry', { query: 'dropped', lastUpdatedAt: 3 })
   assert.deepEqual(store.getters.getSearchHistoryEntries.map(entry => entry.query), ['newer search', 'https://youtu.be/older'])
+})
 
-  const clearCount = store.getters.getSearchHistoryClearCount
-  const cleared = store.dispatch('removeAllSearchHistoryEntries')
-  assert.notEqual(store.getters.getSearchHistoryClearCount, clearCount)
-  finishDelete()
-  assert.equal(await cleared, true)
-  assert.deepEqual(store.getters.getSearchHistoryEntries, [])
+test('a link save that finishes late neither outlives a clear nor rolls back a newer save', async (t) => {
+  const db = { searchHistory: createDesktopDatastore(':memory:') }
+  t.after(() => db.searchHistory.driver.close())
+  const SearchHistory = createSearchHistory(db)
+  const link = { query: 'https://youtu.be/abc', linkType: 'video' }
+
+  // A second paste of the link loaded its title; the first one's title request failed and finished last.
+  await SearchHistory.upsert({ ...link, lastUpdatedAt: 2, title: 'Title' })
+  await SearchHistory.upsert({ ...link, lastUpdatedAt: 1 })
+  assert.deepEqual((await SearchHistory.find()).map(({ lastUpdatedAt, title }) => ({ lastUpdatedAt, title })), [{ lastUpdatedAt: 2, title: 'Title' }])
+
+  // Clearing in any window drops a save of a search made before the clear, even one queued behind the delete.
+  const madeBeforeClear = Date.now() - 1
+  const cleared = SearchHistory.deleteAll()
+  assert.equal(await SearchHistory.upsert({ ...link, lastUpdatedAt: madeBeforeClear, title: 'Title' }), null)
+  await cleared
+  assert.deepEqual(await SearchHistory.find(), [])
+  assert.notEqual(await SearchHistory.upsert({ ...link, lastUpdatedAt: Date.now() + 1, title: 'Title' }), null)
+  assert.equal((await SearchHistory.find()).length, 1)
 })

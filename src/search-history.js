@@ -73,7 +73,8 @@ export function getSearchHistoryEntryId(query, searchSettings) {
 }
 
 /**
- * Preserve an existing ID for a matching query and filter preset.
+ * Preserve an existing ID for a matching query and filter preset. A matching
+ * entry saved later keeps its newer date and title.
  * @param {{ _id?: string, query: string, lastUpdatedAt: number, searchSettings?: object }} entry
  * @param {{ _id: string, query?: string, lastUpdatedAt: number, searchSettings?: object }[]} existingEntries
  * @returns {ReturnType<typeof normalizeSearchHistoryEntry>}
@@ -88,13 +89,23 @@ export function resolveSearchHistoryEntry(entry, existingEntries) {
       getSearchHistoryEntryKeyFromEntry(candidate) === entryKey
   })
 
-  return {
+  const resolvedEntry = {
     ...normalizedEntry,
     _id: existingEntry?._id ?? normalizedEntry._id ?? getSearchHistoryEntryId(
       normalizedEntry.query,
       normalizedEntry.searchSettings
     ),
   }
+  if (existingEntry == null) return resolvedEntry
+
+  // A link save that waited for its title can finish after a newer save of the same link.
+  const isNewer = existingEntry.lastUpdatedAt > resolvedEntry.lastUpdatedAt
+  if (isNewer) resolvedEntry.lastUpdatedAt = existingEntry.lastUpdatedAt
+  const existingTitle = resolvedEntry.linkType != null && existingEntry.linkType === resolvedEntry.linkType
+    ? normalizeSearchHistoryEntry(existingEntry).title
+    : undefined
+  if (existingTitle !== undefined && (isNewer || resolvedEntry.title === undefined)) resolvedEntry.title = existingTitle
+  return resolvedEntry
 }
 
 /** Link entries open a video or channel instead of searching for their query, the pasted link. */

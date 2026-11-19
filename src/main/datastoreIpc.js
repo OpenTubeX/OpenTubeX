@@ -698,11 +698,14 @@ export function setupDatastoreIpc({ datastoreRequests, onSettingUpserted, onSett
 
         case DBActions.GENERAL.UPSERT: {
           const updatedEntry = await baseHandlers.searchHistory.upsert(data)
-          syncOtherWindows(
-            IpcChannels.SYNC_SEARCH_HISTORY,
-            event,
-            { event: SyncEvents.GENERAL.UPSERT, data: updatedEntry }
-          )
+          // null means the history was cleared after the search, so nothing was saved.
+          if (updatedEntry !== null) {
+            syncOtherWindows(
+              IpcChannels.SYNC_SEARCH_HISTORY,
+              event,
+              { event: SyncEvents.GENERAL.UPSERT, data: updatedEntry }
+            )
+          }
           return updatedEntry
         }
 
