@@ -396,6 +396,7 @@ export async function createUserDataDir(seed = {}) {
  * @param {number} [windowRetry] internal first-window retry count
  */
 export async function launchApp(userDataDir, extraArgs = [], options = {}, windowRetry = 0) {
+  launchedUserDataDirs.add(userDataDir)
   const appRoot = options.appRoot ?? repoRoot
   // Force X11 so the app renders on the xvfb display instead of escaping
   // to the user's real Wayland session.
@@ -840,23 +841,31 @@ function recordAppDiagnostics(testInfo, recordTrace) {
 }
 
 /**
+ * Profiles of every app the current test launched, including apps it launches
+ * itself with their own profile, so their crash dumps are attached too.
+ * @type {Set<string>}
+ */
+const launchedUserDataDirs = new Set()
+
+/**
  * Attaches the minidumps of processes that crashed during a failed test, such
  * as a renderer that exited with code 133. The E2E app keeps them in its
  * profile without uploading them. Symbolize one with the symbols of the
  * Electron version in its name, for example with `minidump_stackwalk`.
  * @param {import('@playwright/test').TestInfo} testInfo
- * @param {string} userDataDir
+ * @param {Iterable<string>} userDataDirs
  */
-async function attachCrashDumps(testInfo, userDataDir) {
-  const entries = await readdir(path.join(userDataDir, 'Crashpad'), { recursive: true }).catch(() => [])
-  const dumps = entries.filter(entry => entry.endsWith('.dmp'))
-  if (dumps.length === 0) return
+async function attachCrashDumps(testInfo, userDataDirs) {
   const { version } = JSON.parse(readFileSync(path.join(repoRoot, 'node_modules', 'electron', 'package.json'), 'utf8'))
-  for (const dump of dumps) {
-    await testInfo.attach(`crash dump (Electron ${version}) ${path.basename(dump)}`, {
-      path: path.join(userDataDir, 'Crashpad', dump),
-      contentType: 'application/octet-stream'
-    })
+  for (const userDataDir of userDataDirs) {
+    const crashpad = path.join(userDataDir, 'Crashpad')
+    const entries = await readdir(crashpad, { recursive: true }).catch(() => [])
+    for (const dump of entries.filter(entry => entry.endsWith('.dmp'))) {
+      await testInfo.attach(`crash dump (Electron ${version}) ${path.basename(dump)}`, {
+        path: path.join(crashpad, dump),
+        contentType: 'application/octet-stream'
+      })
+    }
   }
 }
 
@@ -976,6 +985,7 @@ export const test = base.extend({
 
       // Drops requests from an earlier test's app that was still closing.
       takeBlockedRequests()
+      launchedUserDataDirs.clear()
       const { electronApp, page } = await launchApp(userDataDir, launchArgs, launchOptions)
 
       /** Runs an optional checkpoint with the exited process before launching again. */
@@ -1020,7 +1030,7 @@ export const test = base.extend({
       if (appHandle) {
         await appHandle.electronApp.close().catch(() => {})
       }
-      if (failed) await attachCrashDumps(testInfo, userDataDir)
+      if (failed) await attachCrashDumps(testInfo, launchedUserDataDirs)
       const blockedRequests = [...new Set(takeBlockedRequests())]
       // Requests from the main process and its child processes, which
       // Playwright cannot mock. They fail instead of reaching real hosts.
