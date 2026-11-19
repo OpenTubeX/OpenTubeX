@@ -395,17 +395,23 @@ test.describe('search history suggestions', () => {
       })
       answeredRequests++
     })
+    // The save that waited for the title has to finish before nothing being saved proves anything.
+    await page.evaluate(query => {
+      window.__linkSaveFinished = false
+      window.__stopWatchingLinkSave = window.$store.subscribeAction({
+        after: action => {
+          if (action.type === 'updateSearchHistoryEntry' && action.payload.query === query) window.__linkSaveFinished = true
+        },
+      })
+    }, `https://youtu.be/${otherVideoId}`)
     await input.fill(`https://youtu.be/${otherVideoId}`)
     await input.press('Enter')
     await expect.poll(() => heldRequests).toBeGreaterThan(0)
     expect(await page.evaluate(() => window.$store.dispatch('removeAllSearchHistoryEntries'))).toBe(true)
     releaseTitle()
     await expect(page).toHaveURL(new RegExp(`#/watch/${otherVideoId}`))
-    await expect.poll(() => answeredRequests).toBe(heldRequests)
-    // Saves are written in order, so once a later search is saved, a dropped link save would have been too.
-    await input.fill('after clearing')
-    await input.press('Enter')
-    await expect.poll(() => readDatastore(app.userDataDir, 'search-history')).toContain('"query":"after clearing"')
+    await expect.poll(() => page.evaluate(() => window.__linkSaveFinished)).toBe(true)
+    await page.evaluate(() => window.__stopWatchingLinkSave())
     expect(await linkEntries()).toEqual([])
     expect(await readDatastore(app.userDataDir, 'search-history')).not.toContain('Cleared Video Title')
 

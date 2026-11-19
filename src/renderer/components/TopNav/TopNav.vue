@@ -1402,7 +1402,7 @@ async function saveLinkToSearchHistory(queryText, link, previewTitle) {
   const lastUpdatedAt = Date.now()
   const savedTitle = store.getters.getSearchHistoryEntries
     .find(entry => entry.linkType === link.linkType && entry.query === queryText && entry.title)?.title
-  let title = previewTitle ?? savedTitle
+  let title = getNonBlankTitle(previewTitle) ?? savedTitle
 
   if (title === undefined) {
     try {
@@ -1425,12 +1425,22 @@ async function saveLinkToSearchHistory(queryText, link, previewTitle) {
 async function loadSearchHistoryLinkTitle(link) {
   const signal = AbortSignal.timeout(30_000)
   if (link.linkType === 'video') {
-    return store.getters.getHistoryCacheById[link.videoId]?.title ?? (await loadVideoMetadata(link.videoId, signal)).title
+    return getNonBlankTitle(store.getters.getHistoryCacheById[link.videoId]?.title) ??
+      getNonBlankTitle((await loadVideoMetadata(link.videoId, signal)).title)
   }
 
   const channel = findSubscribedChannel(link.channelId, link.url) ??
     await loadChannelSummary(link.channelId, link.url, { preference: backendPreference.value, fallback: backendFallback.value }, signal)
-  return channel?.name ?? undefined
+  return getNonBlankTitle(channel?.name)
+}
+
+/**
+ * Blank titles, which imported watch history can contain, fall through to the next source.
+ * @param {unknown} title
+ * @returns {string | undefined}
+ */
+function getNonBlankTitle(title) {
+  return typeof title === 'string' && title.trim() !== '' ? title : undefined
 }
 
 /**
