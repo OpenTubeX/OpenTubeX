@@ -1081,6 +1081,12 @@ const sideNavOpenBeforeWatchOverlay = ref(null)
 const watchSideNavTransitionDisabled = ref(false)
 let watchSideNavTransitionFrame = null
 
+if (isCapacitor) {
+  watch(() => store.getters.getTabIncognito(presentedTabId.value), incognito => {
+    setAndroidIncognitoKeyboard(incognito).catch(error => console.warn('Could not update the incognito keyboard', error))
+  }, { immediate: true })
+}
+
 watch(useWatchSideNavOverlay, (enabled) => {
   if (enabled) {
     disableWatchSideNavTransitionForNextFrame()
@@ -2027,9 +2033,6 @@ onMounted(async () => {
     scheduleIdleStartupWork()
     if (isCapacitor) {
       initializeHapticFeedback(store)
-      watch(() => store.getters.getTabIncognito(presentedTabId.value), incognito => {
-        setAndroidIncognitoKeyboard(incognito).catch(error => console.warn('Could not update the incognito keyboard', error))
-      }, { immediate: true })
       capacitorPullToRefreshSetup = initializeCapacitorPullToRefresh()
         .catch(error => console.error('Failed to initialize pull to refresh', error))
     }
