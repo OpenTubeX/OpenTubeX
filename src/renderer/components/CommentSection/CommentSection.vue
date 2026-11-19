@@ -2721,11 +2721,12 @@ async function getCommentRepliesLocal(index, commentId = null) {
         return
       }
 
-      if (comment && replyTokens.get(comment.id) === continuation) {
-        replyTokens.delete(comment.id)
-        comment.hasReplyToken = false
-        comment.numReplies = comment.replies.length
-        comment.showReplies = comment.replies.length > 0
+      const shown = comment && findShownComment(rootComment.id, comment.id)
+      if (shown && replyTokens.get(shown.id) === continuation) {
+        replyTokens.delete(shown.id)
+        shown.hasReplyToken = false
+        shown.numReplies = shown.replies.length
+        shown.showReplies = shown.replies.length > 0
       }
 
       showToast({
