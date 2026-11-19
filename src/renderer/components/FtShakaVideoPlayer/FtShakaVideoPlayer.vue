@@ -8181,6 +8181,18 @@ function handleLeavePictureInPicture() {
   updateScrollMiniPlayer()
 }
 
+// The inline player only shows a poster during Picture-in-Picture, so keep its
+// controls up instead of fading them as over a playing video. Shaka's
+// configure() starts from a copy of this config, so the flag survives
+// reconfiguring. showUI() restarts the fade once Picture-in-Picture ends.
+watch(pictureInPictureActive, active => {
+  const controls = ui?.getControls()
+  const config = controls?.getConfig()
+  if (!config) return
+  config.showUIAlways = active
+  controls.showUI()
+})
+
 function handlePictureInPictureResize() {
   const devicePixelRatio = window.devicePixelRatio > 1 ? window.devicePixelRatio : 1
 
@@ -9300,7 +9312,7 @@ function handlePlayerMouseLeave(event) {
   container.value?.style.removeProperty('--shorts-quick-playback-rate-bar-opacity')
 
   // Dragging the seek bar keeps the controls up until the drag ends.
-  if (props.shortsPlayer && !video.value.paused && !ui?.getControls().isSeeking()) {
+  if (props.shortsPlayer && !video.value.paused && !pictureInPictureActive.value && !ui?.getControls().isSeeking()) {
     ui?.getControls().getControlsContainer().removeAttribute('shown')
   }
 }
