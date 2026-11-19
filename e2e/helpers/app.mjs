@@ -953,6 +953,8 @@ export const test = base.extend({
         }
       }
 
+      // Drops requests from an earlier test's app that was still closing.
+      takeBlockedRequests()
       const { electronApp, page } = await launchApp(userDataDir, launchArgs, launchOptions)
 
       /** Runs an optional checkpoint with the exited process before launching again. */
@@ -983,15 +985,7 @@ export const test = base.extend({
       }
 
       settingUp = false
-      // Drops requests from an earlier test's app that was still closing.
-      takeBlockedRequests()
       await use(appHandle)
-      const blockedRequests = [...new Set(takeBlockedRequests())]
-      // Requests from the main process and its child processes, which
-      // Playwright cannot mock. They fail instead of reaching real hosts.
-      if (blockedRequests.length > 0) {
-        testInfo.annotations.push({ type: 'warning', description: `Blocked unmocked requests: ${blockedRequests.join(', ')}` })
-      }
       expect.soft(scrollbarErrors, 'Overlay scrollbar containers must not be static').toEqual([])
       expect.soft(cspViolations, 'The renderer must not violate its Content-Security-Policy').toEqual([])
     } finally {
@@ -1004,6 +998,12 @@ export const test = base.extend({
       await diagnostics.finish(failed)
       if (appHandle) {
         await appHandle.electronApp.close().catch(() => {})
+      }
+      const blockedRequests = [...new Set(takeBlockedRequests())]
+      // Requests from the main process and its child processes, which
+      // Playwright cannot mock. They fail instead of reaching real hosts.
+      if (blockedRequests.length > 0) {
+        testInfo.annotations.push({ type: 'warning', description: `Blocked unmocked requests: ${blockedRequests.join(', ')}` })
       }
       await rm(userDataDir, { recursive: true, force: true })
       if (hasLocaleOverrides && appRoot) {

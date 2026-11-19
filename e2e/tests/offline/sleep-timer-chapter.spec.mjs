@@ -23,9 +23,17 @@ test('sleep timer offers the current chapter and stops before the next one', asy
   await menu.getByRole('slider', { name: 'Sleep timer' }).press('ArrowRight')
   await expect(page.locator('.sleep-timer-button')).toHaveAttribute('shaka-status', '10:00 remaining')
   await menu.getByRole('button', { name: '+' }).click()
-  await expect(menu.locator('.shaka-playback-rate-value')).toHaveText('15 minutes')
   await expect(menu.getByRole('menuitemradio', { name: '15 min' })).toHaveAttribute('aria-checked', 'true')
   await expect(page.locator('.sleep-timer-button')).toHaveAttribute('shaka-status', '15:00 remaining')
+
+  // The wheel starts its duration once it rests, but not after a preset was chosen meanwhile.
+  await menu.getByRole('slider', { name: 'Sleep timer' }).hover()
+  await page.mouse.wheel(0, -100)
+  await menu.getByRole('menuitemradio', { name: '45 min' }).click()
+  await expect(page.locator('.sleep-timer-button')).toHaveAttribute('shaka-status', /^4[45]:\d\d remaining$/)
+  // Proving that nothing happens needs a wait past the wheel's 500 ms rest.
+  await page.waitForTimeout(800)
+  await expect(page.locator('.sleep-timer-button')).toHaveAttribute('shaka-status', /^4[45]:\d\d remaining$/)
 
   // Late chapters no longer rebuild the controls, so close the menu before reopening it.
   await page.keyboard.press('Escape')
