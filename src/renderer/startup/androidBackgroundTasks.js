@@ -1,6 +1,7 @@
 import { waitForDatastores } from '../../datastores/index'
 import i18n from '../i18n/index'
 import { finishAndroidBackgroundTasks, setPeriodicBackgroundTask } from '../helpers/androidBackgroundSync.js'
+import { suppressWatchedAndroidNotifications } from '../helpers/androidNotificationSuppressions.js'
 import { handleRestoredAndroidAppData } from '../helpers/androidStorage.js'
 import { checkCommentRepliesInBackground } from '../helpers/commentReplyNotifications.js'
 import { loadCustomThemes } from '../helpers/customTheme.js'
@@ -55,7 +56,13 @@ async function sync(store) {
   if (profilesLoaded === null || !historyLoaded || !store.state.playlists.playlistsReady) {
     throw new Error('Unable to load the library')
   }
-  // Open tabs, live reminders and notifications belong to the app's
-  // renderer, so they sync when the app opens.
-  await store.dispatch('initializeSyncServer')
+  // Open tabs and live reminders belong to the app's renderer, so they sync
+  // when the app opens.
+  try {
+    await store.dispatch('initializeSyncServer')
+  } finally {
+    // Uploads watched on another device need no notification here, also
+    // when a later stage failed after the history synced.
+    await suppressWatchedAndroidNotifications()
+  }
 }

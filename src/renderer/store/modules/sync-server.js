@@ -405,10 +405,11 @@ function isSameSyncAccount(settings, account) {
   return getSyncAccount(settings).every((value, index) => value === account[index])
 }
 
+const syncsNotifications = process.env.IS_ELECTRON || process.env.IS_CAPACITOR
 // The renderer that syncs while the Android app is closed leaves out live
-// reminders and notification dismissals, because the notification plugin
-// belongs to the app's renderer.
-const syncsNotifications = (process.env.IS_ELECTRON || process.env.IS_CAPACITOR) && !isAndroidBackgroundRenderer
+// reminders, because the notification plugin that schedules them belongs to
+// the app's renderer.
+const syncsLiveReminders = syncsNotifications && !isAndroidBackgroundRenderer
 
 /** @param {boolean} allTabs false for a window that learns of a sync other windows announced */
 function showDataLossToast(allTabs) {
@@ -542,7 +543,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     ...(settings.syncServerSyncPlaylists ? ['playlistBookmarks'] : []),
     ...(settings.syncServerSyncHistory ? ['history'] : []),
     ...(encrypted && settings.syncServerSyncWatchStats ? ['watchStats'] : []),
-    ...(syncsNotifications && encrypted &&
+    ...(syncsLiveReminders && encrypted &&
       settings.syncServerSyncLiveReminders
       ? ['liveReminders']
       : []),

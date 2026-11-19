@@ -89,6 +89,21 @@ export async function deliverAndroidNotification(notification) {
 }
 
 /**
+ * Leaves out the notifications the user already read, removed or watched,
+ * also on another device, and removes the shown ones. Each list replaces the
+ * one sent before; an omitted list stays. `dismissedThrough` comes with the
+ * dismissals: every notification shown until then was read or removed.
+ * @param {{ dismissed?: { feedType: string, id: string }[], dismissedThrough?: number, watched?: string[] }} suppressed
+ */
+export async function suppressAndroidNotifications(suppressed) {
+  try {
+    await BackgroundSync?.suppressNotifications(suppressed)
+  } catch (error) {
+    console.error('Failed to update the suppressed Android notifications', error)
+  }
+}
+
+/**
  * @param {() => void} callback Runs when the app window loses focus, for example
  * when the user opens recents, where they can swipe the app away.
  */

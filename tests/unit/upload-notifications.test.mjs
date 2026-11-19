@@ -105,7 +105,8 @@ test('the desktop notifier persists state and shows localized notifications', as
     await notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('a')] })
     await notifier.observe({ channelId: 'UC1', feedType: 'posts', entries: [entry('p')] })
 
-    const restarted = createUploadNotifier({ file, show: notification => shown.push(notification) })
+    // Uploads already in the watch history, for example from another device, need no notification.
+    const restarted = createUploadNotifier({ file, show: notification => shown.push(notification), isWatched: async id => id === 'w' })
     await restarted.configure({
       enabled: true,
       thumbnailUrl: 'https://i.ytimg.com/vi/{id}/mqdefault.jpg',
@@ -115,7 +116,7 @@ test('the desktop notifier persists state and shows localized notifications', as
     await restarted.observe({
       channelId: 'UC1',
       feedType: 'videos',
-      entries: [entry('m', NOW, { membersOnly: true }), entry('l', Date.now(), { live: true }), entry('b', Date.now()), entry('a')]
+      entries: [entry('m', NOW, { membersOnly: true }), entry('l', Date.now(), { live: true }), entry('w', Date.now()), entry('b', Date.now()), entry('a')]
     })
     assert.deepEqual(shown, [
       { title: 'One is live', body: 'Title l', url: 'https://www.youtube.com/watch?v=l', silent: false, target: { kind: 'live', path: '/watch/l' }, thumbnail: 'https://i.ytimg.com/vi/l/mqdefault.jpg' },

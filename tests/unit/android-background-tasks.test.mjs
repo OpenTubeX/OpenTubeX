@@ -16,6 +16,9 @@ const [{ runAndroidBackgroundTasks }] = await importWithStubs([sourceUrl('src/re
   [sourceUrl('src/renderer/helpers/commentReplyNotifications.js')]: { checkCommentRepliesInBackground: () => checkReplies() },
   [sourceUrl('src/renderer/helpers/platformFeed.js')]: { checkTwitchLiveInBackground: async () => calls.push('twitch') },
   [sourceUrl('src/renderer/helpers/androidStorage.js')]: { handleRestoredAndroidAppData: async () => calls.push('restore check') },
+  [sourceUrl('src/renderer/helpers/androidNotificationSuppressions.js')]: {
+    suppressWatchedAndroidNotifications: async () => calls.push('suppress watched'),
+  },
   [sourceUrl('src/renderer/helpers/customTheme.js')]: { loadCustomThemes: () => loadThemes() },
 })
 
@@ -66,6 +69,8 @@ test('the hidden renderer loads everything the sync compares before syncing', as
     const index = calls.indexOf(step)
     assert.ok(index !== -1 && index < sync, `${step} before the sync`)
   }
+  // Android leaves out uploads the sync brought in as watched.
+  assert.ok(calls.indexOf('suppress watched') > sync)
   assert.equal(calls.at(-1), 'finish')
 })
 

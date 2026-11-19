@@ -43,6 +43,9 @@ final class UploadNotifications {
     private static final String STATE_FILE = "upload-notifications.json";
     private static final String SHOWN_FILE = "shown-upload-notifications.json";
     private static final String DISMISSED_FILE = "dismissed-upload-notifications.json";
+    private static final String SUPPRESSED_FILE = "suppressed-notifications.json";
+    // Videos, streams and shorts can move between these feeds, so their notifications match by ID alone.
+    private static final Set<String> VIDEO_FEED_TYPES = Set.of("videos", "shorts", "live");
     static final String EXTRA_FEED_TYPE = "org.opentubex.app.extra.UPLOAD_FEED_TYPE";
     static final String EXTRA_ID = "org.opentubex.app.extra.UPLOAD_ID";
     static final String EXTRA_LIVE = "org.opentubex.app.extra.UPLOAD_LIVE";
@@ -164,6 +167,7 @@ final class UploadNotifications {
      */
     static synchronized void deliver(Context context, String feedType, String id, boolean live, String title,
         String body, String thumbnail, boolean history, boolean silent) {
+        if (isSuppressed(context, feedType, id)) return;
         boolean inApp = history && AppVisibility.isVisible();
         if (history) {
             try {
@@ -193,6 +197,89 @@ final class UploadNotifications {
             // One failed notification must not skip the others.
             android.util.Log.w("OpenTubeXUploads", "Unable to show an upload notification", error);
         }
+    }
+
+    /**
+     * Replaces what to leave out and removes the matching shown notifications:
+     * `dismissed` holds the notifications read or removed in the app's history,
+     * also on other devices, as `{ feedType, id }`, and `watched` the IDs of the
+     * videos in the watch history. A null list keeps its last value. With the
+     * dismissals, `dismissedThrough` tells until when every notification was
+     * read or removed, as when the history was cleared on another device.
+     */
+    static synchronized void suppress(Context context, JSONArray dismissed, long dismissedThrough, JSONArray watched) {
+        try {
+            JSONObject suppressed = readSuppressed(context);
+            if (dismissed != null) suppressed.put("dismissed", dismissed).put("dismissedThrough", dismissedThrough);
+            if (watched != null) suppressed.put("watched", watched);
+            writeAtomically(suppressedFile(context), suppressed.toString());
+            Set<Integer> ids = new HashSet<>();
+            JSONArray dismissedNotifications = suppressed.optJSONArray("dismissed");
+            for (int i = 0; dismissedNotifications != null && i < dismissedNotifications.length(); i++) {
+                JSONObject notification = dismissedNotifications.optJSONObject(i);
+                if (notification != null) addNotificationIds(ids, notification.optString("feedType"), notification.optString("id"));
+            }
+            JSONArray watchedIds = suppressed.optJSONArray("watched");
+            for (int i = 0; watchedIds != null && i < watchedIds.length(); i++) addNotificationIds(ids, "videos", watchedIds.optString(i));
+            NotificationManager manager = context.getSystemService(NotificationManager.class);
+            for (StatusBarNotification notification : manager.getActiveNotifications()) {
+                // `when` stays the first delivery's time when a thumbnail is added later.
+                if (TAG.equals(notification.getTag()) && (ids.contains(notification.getId()) ||
+                    notification.getNotification().when <= suppressed.optLong("dismissedThrough"))) {
+                    manager.cancel(TAG, notification.getId());
+                }
+            }
+        } catch (Exception error) {
+            android.util.Log.w("OpenTubeXUploads", "Unable to update the suppressed notifications", error);
+        }
+    }
+
+    private static boolean isSuppressed(Context context, String feedType, String id) {
+        try {
+            return isSuppressed(readSuppressed(context), feedType, id);
+        } catch (java.io.IOException error) {
+            return false;
+        }
+    }
+
+    /** Whether the user already read, removed or watched what a notification is about. */
+    static boolean isSuppressed(JSONObject suppressed, String feedType, String id) {
+        JSONArray dismissed = suppressed.optJSONArray("dismissed");
+        for (int i = 0; dismissed != null && i < dismissed.length(); i++) {
+            JSONObject notification = dismissed.optJSONObject(i);
+            if (notification != null && id.equals(notification.optString("id")) &&
+                isSameFeed(feedType, notification.optString("feedType"))) return true;
+        }
+        return VIDEO_FEED_TYPES.contains(feedType) && contains(suppressed.optJSONArray("watched"), id);
+    }
+
+    private static boolean isSameFeed(String feedType, String other) {
+        return feedType.equals(other) || VIDEO_FEED_TYPES.contains(feedType) && VIDEO_FEED_TYPES.contains(other);
+    }
+
+    private static void addNotificationIds(Set<Integer> ids, String feedType, String id) {
+        if (feedType.isEmpty() || id.isEmpty()) return;
+        if (!VIDEO_FEED_TYPES.contains(feedType)) {
+            ids.add(notificationId(feedType, id));
+            return;
+        }
+        // Videos and streams share their link, and so their notification ID.
+        ids.add(notificationId("videos", id));
+        ids.add(notificationId("shorts", id));
+    }
+
+    private static JSONObject readSuppressed(Context context) throws java.io.IOException {
+        File file = suppressedFile(context);
+        if (!file.exists()) return new JSONObject();
+        try {
+            return new JSONObject(new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8));
+        } catch (org.json.JSONException invalid) {
+            return new JSONObject();
+        }
+    }
+
+    private static File suppressedFile(Context context) {
+        return new File(context.getFilesDir(), SUPPRESSED_FILE);
     }
 
     /** Queues notifications until the app adds them to its notification history. */
@@ -609,14 +696,18 @@ final class UploadNotifications {
                 }
                 image = AndroidMediaArtwork.loadBlocking(thumbnail);
             }
-            if (image == null || !isActive(manager, notificationId)) return;
+            if (image == null) return;
             builder.setLargeIcon(image)
                 .setStyle(new Notification.BigPictureStyle().bigPicture(image).bigLargeIcon((Icon) null).setSummaryText(body))
                 .setOnlyAlertOnce(true);
-            try {
-                manager.notify(TAG, notificationId, builder.build());
-            } catch (RuntimeException error) {
-                android.util.Log.w("OpenTubeXUploads", "Unable to add a thumbnail to an upload notification", error);
+            // Shares the monitor of suppress, so a notification it removes meanwhile stays removed.
+            synchronized (UploadNotifications.class) {
+                if (!isActive(manager, notificationId)) return;
+                try {
+                    manager.notify(TAG, notificationId, builder.build());
+                } catch (RuntimeException error) {
+                    android.util.Log.w("OpenTubeXUploads", "Unable to add a thumbnail to an upload notification", error);
+                }
             }
         });
     }
