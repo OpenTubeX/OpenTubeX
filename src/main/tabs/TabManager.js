@@ -92,6 +92,7 @@ const TAB_LOADING_SOURCE_RENDERER = 'renderer'
  * @property {ReturnType<typeof setTimeout> | null} previewCaptureTimeoutId
  * @property {Promise<string | null> | null} previewCapturePromise
  * @property {boolean} skipSilence
+ * @property {boolean} isIncognito
  * @property {boolean} automaticallyUnloaded
  * @property {TabLoadState} loadState
  * @property {boolean} preloadInBackground
@@ -624,6 +625,7 @@ export class TabManager {
       historyIndex = null,
       persistHistory = history != null,
       skipSilence = getNewTabSkipSilence(),
+      isIncognito = false,
       groupId = null,
       openerTabId = this.activeTabId,
       _preferredIndex = null,
@@ -672,6 +674,7 @@ export class TabManager {
       previewCaptureTimeoutId: null,
       previewCapturePromise: null,
       skipSilence: skipSilence === true,
+      isIncognito: isIncognito === true,
       loadState: startsUnloaded ? 'unloaded' : 'mounting',
       automaticallyUnloaded: startsUnloaded && automaticallyUnloaded === true,
       mountDeferred: shouldMount && !makeActive && _deferMount,
@@ -786,6 +789,11 @@ export class TabManager {
     return batch.promise
   }
 
+  /** Whether the shown tab is incognito, so a window opened from it starts with an incognito tab */
+  isPresentingIncognito() {
+    return this.tabs.get(this.presentedTabId ?? this.activeTabId)?.isIncognito === true
+  }
+
   /**
    * @param {object} [options]
    * @param {string | undefined | null} [openerTabId=this.activeTabId]
@@ -801,15 +809,19 @@ export class TabManager {
    * @returns {object}
    */
   _withOpenerTab(options, openerTabId) {
+    const opener = this.tabs.get(openerTabId)
+    // Links opened from an incognito tab stay incognito
+    const incognito = opener?.isIncognito === true && { isIncognito: true }
     if (Object.hasOwn(options, 'color')) {
-      return { ...options, openerTabId }
+      return { ...options, openerTabId, ...incognito }
     }
 
-    const openerColor = TabManager.normalizeTabColor(this.tabs.get(openerTabId)?.color)
+    const openerColor = TabManager.normalizeTabColor(opener?.color)
     return {
       ...options,
       openerTabId,
-      ...(openerColor != null && { color: openerColor })
+      ...(openerColor != null && { color: openerColor }),
+      ...incognito
     }
   }
 
@@ -1194,17 +1206,20 @@ export class TabManager {
     }
 
     this.previews.clearRefresh(tab)
-    this.closedTabs.push({
-      id: randomUUID(),
-      url: tab.url,
-      title: tab.title,
-      isPinned: tab.isPinned,
-      color: tab.color,
-      groupId: tab.groupId,
-      history: tab.navigationHistory,
-      historyIndex: tab.navigationHistoryIndex,
-      tabIndex: this._getClosedTabIndex(tabId)
-    })
+    // Closed incognito tabs cannot be reopened
+    if (!tab.isIncognito) {
+      this.closedTabs.push({
+        id: randomUUID(),
+        url: tab.url,
+        title: tab.title,
+        isPinned: tab.isPinned,
+        color: tab.color,
+        groupId: tab.groupId,
+        history: tab.navigationHistory,
+        historyIndex: tab.navigationHistoryIndex,
+        tabIndex: this._getClosedTabIndex(tabId)
+      })
+    }
     if (this.closedTabs.length > 10) {
       const removedClosedTab = this.closedTabs.shift()
       for (const closedTab of this.closedTabs) {
@@ -1407,6 +1422,7 @@ export class TabManager {
       isPinned: tab.isPinned,
       color: tab.color,
       groupId: tab.groupId,
+      isIncognito: tab.isIncognito,
       makeActive: true
     })
   }
@@ -1930,6 +1946,7 @@ export class TabManager {
       previewCapturedAt: tab.previewCapturedAt,
       previewFileName: tab.previewFileName,
       skipSilence: tab.skipSilence === true,
+      isIncognito: tab.isIncognito === true,
       syncedNavigationRevision: tab.syncedNavigationRevision
     }
   }
@@ -2023,6 +2040,7 @@ export class TabManager {
       previewCaptureTimeoutId: null,
       previewCapturePromise: null,
       skipSilence: snapshot.skipSilence === true,
+      isIncognito: snapshot.isIncognito === true,
       loadState: 'mounting',
       preloadInBackground: true,
       mountRevision: 1,
@@ -2242,6 +2260,7 @@ export class TabManager {
         isLoading: this._getTabLoadingState(tab),
         isPlaying: tab.isPlaying || false,
         skipSilence: tab.skipSilence === true,
+        isIncognito: tab.isIncognito === true,
         isPinned: tab.isPinned || false,
         color: TabManager.normalizeTabColor(tab.color),
         groupId: tab.groupId,
@@ -2416,6 +2435,7 @@ export class TabManager {
       // shutdown during that handoff must not resurrect the already-closed tab.
       .filter(tab => (
         tab.isTransferStaged !== true &&
+        !tab.isIncognito &&
         !this._deferredCloseTabIds.has(tab.id)
       ))
       .map(tab => {
@@ -2473,7 +2493,7 @@ export class TabManager {
    */
   getSyncSession() {
     const tabs = Array.from(this.tabs.values())
-      .filter(tab => !this._deferredCloseTabIds.has(tab.id))
+      .filter(tab => !tab.isIncognito && !this._deferredCloseTabIds.has(tab.id))
       .map(tab => ({
         id: tab.id,
         url: stripOneTimeTimestampFromUrl(tab.url),
@@ -2603,6 +2623,20 @@ export class TabManager {
       this.tabs = syncedTabs
       restoreTabPlacementOpeners(this.tabs, sessionData.tabs)
 
+      // Incognito tabs are never synced, so the remote session cannot close them. Ones already closing still close.
+      const incognitoTabs = [...removedTabs].filter(tab => tab.isIncognito && !this._deferredCloseTabIds.has(tab.id))
+      if (incognitoTabs.length > 0) {
+        const keptTabIds = new Set([...syncedTabs.keys(), ...incognitoTabs.map(tab => tab.id)])
+        for (const tab of incognitoTabs) {
+          removedTabs.delete(tab)
+          if (!keptTabIds.has(tab.placementOpenerTabId)) tab.placementOpenerTabId = null
+        }
+        // Stable sort, so pinned tabs stay first without reordering the rest
+        const orderedTabs = [...syncedTabs.values(), ...incognitoTabs]
+          .sort((a, b) => Number(b.isPinned === true) - Number(a.isPinned === true))
+        this.tabs = new Map(orderedTabs.map(tab => [tab.id, tab]))
+      }
+
       for (const tab of removedTabs) {
         this.previews.clearRefresh(tab)
         this._resolveTabMountWaiters(tab.id, Number.MAX_SAFE_INTEGER, false)
@@ -2638,9 +2672,12 @@ export class TabManager {
         ? sessionData.updatedAt
         : Date.now()
 
-      const nextActiveTabId = this.tabs.has(sessionData.activeTabId)
-        ? sessionData.activeTabId
-        : this.tabs.keys().next().value
+      // Another device's selection does not pull the user out of an incognito tab
+      const nextActiveTabId = this.tabs.get(this.activeTabId)?.isIncognito
+        ? this.activeTabId
+        : this.tabs.has(sessionData.activeTabId)
+          ? sessionData.activeTabId
+          : this.tabs.keys().next().value
       if (nextActiveTabId !== this.activeTabId || this.tabs.get(nextActiveTabId)?.loadState === 'unloaded') {
         this.activateTab(nextActiveTabId)
       } else {

@@ -405,6 +405,12 @@ function runApp() {
     }
   }
 
+  /** Whether a link or selection menu belongs to an incognito tab, so what it opens stays incognito */
+  function isContextMenuTabIncognito(webContents) {
+    const manager = TabManager.getFromWebContents(webContents)
+    return manager?.tabs.get(manager.contextMenuTabId ?? manager.presentedTabId ?? manager.activeTabId)?.isIncognito === true
+  }
+
   // Registered per-webContents in 'web-contents-created' so the shared
   // BrowserWindow renderer can resolve native menu targets through TabManager.
   /** @type {Record<string, Function | boolean>} */
@@ -442,11 +448,28 @@ function runApp() {
           }
         },
         {
+          label: contextMenuLabel('Open in an Incognito Tab'),
+          visible: isInAppUrl,
+          click: () => {
+            TabManager.getFromWebContents(webContents)?.createTabWithPreference({
+              url: parameters.linkURL,
+              makeActive: true,
+              isIncognito: true
+            }).catch(error => {
+              console.error('Failed to open link in an incognito tab:', error)
+            })
+          }
+        },
+        {
           label: contextMenuLabel('Open in a New Window'),
           // Only show the option for in-app URLs and not external ones
           visible: isInAppUrl,
           click: () => {
-            createWindow({ replaceMainWindow: false, windowStartupUrl: parameters.linkURL })
+            createWindow({
+              replaceMainWindow: false,
+              windowStartupUrl: parameters.linkURL,
+              incognito: isContextMenuTabIncognito(webContents)
+            })
           }
         },
         // Only show select all in text fields
@@ -576,6 +599,7 @@ function runApp() {
               replaceMainWindow: false,
               windowStartupUrl: `${ROOT_APP_URL}#/search/${encodeURIComponent(selectionText)}`,
               searchQueryText: selectionText,
+              incognito: isContextMenuTabIncognito(webContents)
             })
           }
         },
@@ -1873,6 +1897,7 @@ function runApp() {
       replaceMainWindow = true,
       windowStartupUrl = null,
       searchQueryText = null,
+      incognito = false,
       sessionData = null,
       loadInactiveTabsOnRestore = false,
       restoreTabLoadStateOnRestore = false,
@@ -2289,9 +2314,9 @@ function runApp() {
       if (!sessionRestored) {
         // Create initial tab
         if (windowStartupUrl != null) {
-          tabManager.createTab({ url: windowStartupUrl, makeActive: true })
+          tabManager.createTab({ url: windowStartupUrl, makeActive: true, isIncognito: incognito })
         } else {
-          await tabManager.createTabWithPreference({ makeActive: true })
+          await tabManager.createTabWithPreference({ makeActive: true, ...(incognito && { isIncognito: true }) })
         }
       }
 
@@ -2673,7 +2698,7 @@ function runApp() {
     reopenClosedWindow()
   })
 
-  onTrusted(IpcChannels.CREATE_NEW_WINDOW, (event, path, query, searchQueryText) => {
+  onTrusted(IpcChannels.CREATE_NEW_WINDOW, (event, path, query, searchQueryText, incognito) => {
     if (
       typeof path !== 'string' ||
       (query != null && typeof query !== 'object') ||
@@ -2701,10 +2726,13 @@ function runApp() {
     const search = searchParams.toString()
     const windowStartupUrl = `${ROOT_APP_URL}#${path}${search.length > 0 ? `?${search}` : ''}`
 
+    // A window opened from an incognito tab starts with an incognito tab. The renderer names the tab a
+    // link came from, since another tab may be shown by the time it opens.
     createWindow({
       replaceMainWindow: false,
       windowStartupUrl,
-      searchQueryText
+      searchQueryText,
+      incognito: incognito === true || TabManager.getFromWebContents(event.sender)?.isPresentingIncognito() === true
     })
   })
 
@@ -3311,7 +3339,8 @@ function runApp() {
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.NEW_WINDOW),
             click: (_menuItem, browserWindow, _event) => {
               if (browserWindow && appShortcutBlockedWindows.has(browserWindow)) { return }
-              createWindow({ replaceMainWindow: false })
+              const incognito = browserWindow ? TabManager.getForWindow(browserWindow.id)?.isPresentingIncognito() === true : false
+              createWindow({ replaceMainWindow: false, incognito })
             },
             type: 'normal'
           },
@@ -3562,6 +3591,17 @@ function runApp() {
                     console.error('Failed to create a new tab from the app menu:', error)
                   })
                 }
+              }
+            }
+          },
+          {
+            label: t('New Incognito Tab'),
+            accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.NEW_INCOGNITO_TAB),
+            click: (_menuItem, browserWindow) => {
+              if (browserWindow && !appShortcutBlockedWindows.has(browserWindow)) {
+                TabManager.getForWindow(browserWindow.id)?.createTabWithPreference({ makeActive: true, isIncognito: true }).catch(error => {
+                  console.error('Failed to create an incognito tab from the app menu:', error)
+                })
               }
             }
           },

@@ -103,7 +103,10 @@ export function initializeCapacitorTabAvatars(store, tabsReady, fetchAvatar = fe
       const entry = { source, image: await shrinkAvatar(dataUrl) }
       if (!current()) return
       avatars.set(key, entry)
-      writeStoredTabImage(AVATAR_PREFIX + key, entry)
+      // Avatars only incognito tabs show stay in memory
+      if (store.getters.getTabs.some(tab => !tab.isIncognito && getAvatarKey(tab.route?.path) === key)) {
+        writeStoredTabImage(AVATAR_PREFIX + key, entry)
+      }
     } catch (error) {
       if (current()) failed.add(key)
       console.warn('Failed to cache mobile tab avatar:', error)

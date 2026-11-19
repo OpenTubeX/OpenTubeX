@@ -325,6 +325,11 @@ export function performAndroidHapticFeedback(ignoreSystemSetting) {
   return AndroidUi?.performHapticFeedback({ ignoreSystemSetting }) ?? Promise.resolve()
 }
 
+/** Asks the keyboard not to learn from text typed while an incognito tab is shown. */
+export function setAndroidIncognitoKeyboard(enabled) {
+  return AndroidUi?.setIncognitoKeyboard({ enabled }) ?? Promise.resolve()
+}
+
 export function setAndroidHapticFeedbackEnabled(enabled) {
   return AndroidUi?.setHapticFeedbackEnabled({ enabled }) ?? Promise.resolve()
 }

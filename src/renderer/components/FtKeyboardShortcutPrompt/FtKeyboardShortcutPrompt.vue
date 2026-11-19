@@ -292,6 +292,7 @@ const tabAppShortcuts = computed(() => getLocalizedShortcutNamesAndValues(
   ['APP', 'GENERAL'],
   [
     'NEW_TAB',
+    'NEW_INCOGNITO_TAB',
     'CLOSE_TAB',
     'RELOAD_TAB',
     'RELOAD_TAB_ALT',

@@ -759,6 +759,10 @@
     "ri": "user-add-line",
     "material": "person-add-outline"
   },
+  "user-secret": {
+    "ri": "spy-line",
+    "material": "domino-mask-outline-rounded"
+  },
   "users": {
     "ri": "group-line",
     "material": "group-outline"
