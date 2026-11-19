@@ -23,6 +23,9 @@ function startProxy() {
   })
   server.on('connect', (request, socket) => {
     blockedRequests.push(`CONNECT ${request.url}`)
+    // The HTTP server no longer handles errors on a CONNECT socket. Without a
+    // listener, an app that resets it while exiting crashes the test worker.
+    socket.on('error', () => socket.destroy())
     socket.end('HTTP/1.1 403 Forbidden\r\n\r\n')
   })
   server.on('clientError', (_error, socket) => socket.destroy())
