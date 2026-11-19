@@ -36,11 +36,15 @@
             fullscreen
             :channel-thumbnail="channelThumbnail"
             :creator-comments-only="creatorCommentsOnly"
+            :can-filter-own-comments="canFilterOwnComments"
+            :account-thumbnail="accountThumbnail"
+            :own-comments-only="ownCommentsOnly"
             :timestamp-comments-only="timestampCommentsOnly"
             :search-open="commentSearchOpen"
             @update:open="setCommentFilterMenuOpen"
             @toggle-search="toggleCommentSearch"
             @toggle-creator="toggleCreatorCommentsFilter"
+            @toggle-own="toggleOwnCommentsFilter"
             @toggle-timestamps="toggleTimestampCommentsFilter"
           />
           <button
@@ -143,11 +147,15 @@
           :open="commentFilterMenuOpen"
           :channel-thumbnail="channelThumbnail"
           :creator-comments-only="creatorCommentsOnly"
+          :can-filter-own-comments="canFilterOwnComments"
+          :account-thumbnail="accountThumbnail"
+          :own-comments-only="ownCommentsOnly"
           :timestamp-comments-only="timestampCommentsOnly"
           :search-open="commentSearchOpen"
           @update:open="setCommentFilterMenuOpen"
           @toggle-search="toggleCommentSearch"
           @toggle-creator="toggleCreatorCommentsFilter"
+          @toggle-own="toggleOwnCommentsFilter"
           @toggle-timestamps="toggleTimestampCommentsFilter"
         />
         <FtIconButton
@@ -723,7 +731,7 @@ import CommentImageAttachment from './CommentImageAttachment.vue'
 
 import store from '../../store/index'
 import { usesInvidiousApi } from '../../../apiBackends'
-import { getYouTubeChannelKey, isSignedInToYouTube } from '../../helpers/youtube-account-state'
+import { getSelectedYouTubeProfile, getYouTubeChannelKey, isSignedInToYouTube } from '../../helpers/youtube-account-state'
 import { createPostedComment, getEditedCommentFields, getRootCommentId, youTubeCommentsKey } from './youTubeComments'
 import { useCommentWatching } from './commentWatching'
 import { getWatchedComments } from '../../helpers/commentReplyNotifications'
@@ -1099,6 +1107,7 @@ const commentSearchQuery = ref('')
 const appliedCommentSearchQuery = ref('')
 const commentFilterMenuOpen = ref(false)
 const creatorCommentsOnly = ref(false)
+const ownCommentsOnly = ref(false)
 const timestampCommentsOnly = ref(false)
 const activeProfileId = computed(() => store.getters.getActiveProfile._id)
 const commentPinStorageKey = computed(() => {
@@ -1274,11 +1283,45 @@ const vFilteredCommentThreadLine = {
 const hasActiveCommentFilters = computed(() => {
   return normalizedCommentSearchQuery.value !== '' ||
     creatorCommentsOnly.value ||
+    ownCommentsOnly.value ||
     timestampCommentsOnly.value
 })
 
+const canFilterOwnComments = computed(() => isSignedInToYouTube(store.getters))
+const accountThumbnail = computed(() => getSelectedYouTubeProfile(store.getters.getYouTubeAccount)?.thumbnail ?? '')
+
+// The signed-in account's channels: the one in use by its ID, the others by
+// their handles, as only the ID of the one in use is known. Comments posted
+// here match by the channel they were posted from.
+const ownAccountChannels = computed(() => {
+  const account = store.getters.getYouTubeAccount
+  if (!canFilterOwnComments.value) return null
+
+  const profiles = account.profiles ?? []
+  return {
+    channelId: account.channelId ?? null,
+    handles: new Set(profiles.filter(profile => profile.handle).map(profile => normalizeCommentHandle(profile.handle))),
+    postedByKeys: new Set([account, ...profiles.map(profile => ({ ...account, pageId: profile.pageId }))].map(getYouTubeChannelKey))
+  }
+})
+
+/** @param {Comment} comment */
+function isOwnAccountComment(comment) {
+  const channels = ownAccountChannels.value
+  if (channels === null) return false
+
+  return (channels.channelId !== null && comment.authorId === channels.channelId) ||
+    // A display name that reads like one of the handles belongs to someone else.
+    channels.handles.has(normalizeCommentHandle(comment.author)) ||
+    channels.postedByKeys.has(youTubeComments.postedBy.get(comment.id))
+}
+
 function commentMatchesActiveFilters(comment) {
   if (creatorCommentsOnly.value && !comment.isOwner && !comment.hasOwnerReplied) {
+    return false
+  }
+
+  if (ownCommentsOnly.value && !isOwnAccountComment(comment)) {
     return false
   }
 
@@ -1523,6 +1566,16 @@ function toggleCreatorCommentsFilter() {
   clampCommentsScrollAfterRender()
 }
 
+// Signing out leaves nothing to match.
+watch(canFilterOwnComments, (enabled) => {
+  if (!enabled) ownCommentsOnly.value = false
+})
+
+function toggleOwnCommentsFilter() {
+  ownCommentsOnly.value = !ownCommentsOnly.value
+  clampCommentsScrollAfterRender()
+}
+
 function toggleTimestampCommentsFilter() {
   timestampCommentsOnly.value = !timestampCommentsOnly.value
   clampCommentsScrollAfterRender()
@@ -1550,6 +1603,7 @@ watch(commentPinStorageKey, (contentKey) => {
   personalPinnedCommentSnapshots.value = pinState.commentSnapshots
   commentFilterMenuOpen.value = false
   creatorCommentsOnly.value = false
+  ownCommentsOnly.value = false
   timestampCommentsOnly.value = false
   commentSearchOpen.value = false
   commentSearchQuery.value = ''
@@ -1558,12 +1612,16 @@ watch(commentPinStorageKey, (contentKey) => {
   clampCommentsScrollAfterRender()
 })
 
-function normalizeCommentAuthor(author) {
+/** Keeps the leading @, which tells handles apart from display names. */
+function normalizeCommentHandle(author) {
   return String(author)
     .replaceAll(/[\u200b-\u200f\u202a-\u202e\u2060-\u2069\ufeff]/g, '')
     .trim()
-    .replace(/^@/, '')
     .toLowerCase()
+}
+
+function normalizeCommentAuthor(author) {
+  return normalizeCommentHandle(author).replace(/^@/, '')
 }
 
 /**

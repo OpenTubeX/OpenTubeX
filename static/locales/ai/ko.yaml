@@ -2678,6 +2678,7 @@ Comments:
   Filter loaded comments: 불러온 댓글 필터링
   Comment filters: 댓글 필터
   From creator: 크리에이터 작성
+  From you: 내 댓글
   Contains timestamps: 타임스탬프 포함
   Pin comment by author: '{author}의 댓글 고정'
   Unpin comment by author: '{author}의 댓글 고정 해제'
