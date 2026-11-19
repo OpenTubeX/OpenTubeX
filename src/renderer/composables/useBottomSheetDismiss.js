@@ -3,13 +3,9 @@ import { applyAnimationSpeed } from '../helpers/animationSpeed'
 import { combineAndroidBackPreviews, registerAndroidBackSheet, settleAndroidBackAnimation } from '../helpers/androidBackGesture'
 import { createAndroidBackSlidePreview } from '../helpers/androidBackSlide'
 import { isReducedMotionEnabled } from '../helpers/reducedMotion'
-import { takeOverLeavingModalBackdrop, trackLeavingModalBackdrop } from '../helpers/modalBackdropHandoff'
+import { HIDDEN_MODAL_BACKDROP, getModalBackdropStyle, takeOverLeavingModalBackdrop, trackLeavingModalBackdrop } from '../helpers/modalBackdropHandoff'
 
 const BACK_PREVIEW_DURATION = 180
-// Fading the backdrop's opacity would crossfade a sharp and a blurred copy of
-// the page, which flickers on Android. Animate the dim and blur instead; the
-// keyframes it omits resolve to the backdrop's own style.
-const HIDDEN_BACKDROP = { backgroundColor: 'transparent', backdropFilter: 'blur(0)' }
 
 // Shared by navigation and context sheets. Native upward scrolling remains
 // available; downward pulls only take over at the top of the touched scrollport.
@@ -47,7 +43,7 @@ export function useBottomSheetDismiss(sheet, dismiss, { canDismissOnBack = () =>
           const timing = { duration: BACK_PREVIEW_DURATION, fill: 'both' }
           backPreview = [
             element.animate([{ transform }, { transform: 'translateY(100%)' }], timing),
-            element.parentElement.animate([HIDDEN_BACKDROP], timing)
+            element.parentElement.animate([getModalBackdropStyle(element.parentElement), HIDDEN_MODAL_BACKDROP], timing)
           ].map(animation => {
             applyAnimationSpeed(animation)
             animation.pause()
@@ -211,11 +207,12 @@ export function useBottomSheetDismiss(sheet, dismiss, { canDismissOnBack = () =>
       ? [{ transform }, { transform: 'translateY(100%)' }]
       : [{ transform: 'translateY(100%)' }, { transform: 'translateY(0)' }], leaving ? 140 : 220)
     if (leaving) {
-      animate(backdrop, [{ ...HIDDEN_BACKDROP, offset: 1 }], 140)
+      animate(backdrop, [getModalBackdropStyle(backdrop), HIDDEN_MODAL_BACKDROP], 140)
       const release = trackLeavingModalBackdrop(backdrop)
       animation.finished.finally(release).then(done, done)
     } else {
-      animate(backdrop, [{ ...(takeOverLeavingModalBackdrop(backdrop) ?? HIDDEN_BACKDROP), offset: 0 }], 220)
+      const shown = getModalBackdropStyle(backdrop)
+      animate(backdrop, [takeOverLeavingModalBackdrop(backdrop) ?? HIDDEN_MODAL_BACKDROP, shown], 220)
       animation.finished.then(done, done)
     }
   }

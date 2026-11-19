@@ -4,6 +4,7 @@ import test from 'node:test'
 import vm from 'node:vm'
 import { nextTick, ref, watch } from 'vue'
 import { combineAndroidBackPreviews, settleAndroidBackAnimation } from '../../src/renderer/helpers/androidBackGesture.js'
+import { HIDDEN_MODAL_BACKDROP } from '../../src/renderer/helpers/modalBackdropHandoff.js'
 
 const appSource = readFileSync(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
 const sheetSource = readFileSync(new URL('../../src/renderer/composables/useBottomSheetDismiss.js', import.meta.url), 'utf8')
@@ -82,6 +83,8 @@ function bottomSheet({ canDismissOnBack, onDismiss = () => {} } = {}) {
     isReducedMotionEnabled: () => false,
     registerAndroidBackSheet: (_element, preview) => { previews.push(preview); return () => {} },
     getComputedStyle: () => ({ transform: 'none' }),
+    getModalBackdropStyle: () => ({ backgroundColor: 'rgb(0 0 0 / 48%)', backdropFilter: 'none' }),
+    HIDDEN_MODAL_BACKDROP,
     window: { removeEventListener() {} },
   })
   const sheetApi = useBottomSheetDismiss(sheet, () => { dismissed++; onDismiss() }, { canDismissOnBack })

@@ -16,6 +16,7 @@
   color: #fff !important;
   opacity: 1;
   text-shadow: 0 1px 2px rgb(0 0 0 / 85%);
+  /* stylelint-disable-next-line opentubex/no-layout-animation-properties -- the label makes room in the control bar */
   transition: gap 200ms ease;
 }
 
@@ -31,6 +32,7 @@
 }
 
 :deep(.ft-shaka-highlight-button-label) {
+  /* stylelint-disable-next-line opentubex/no-layout-animation-properties -- the label makes room in the control bar */
   --ft-control-content-transition: max-width 200ms ease, opacity 150ms ease, transform 200ms ease;
 
   max-width: 220px;

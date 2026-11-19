@@ -601,6 +601,7 @@ function cancelLoaderSettle() {
 }
 
 .pageSwipeSettling {
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- a translated page would become the containing block of its fixed-position children */
   transition: left 200ms cubic-bezier(0.2, 0, 0, 1);
 }
 

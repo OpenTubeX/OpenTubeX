@@ -1,9 +1,26 @@
 import logicalSpec from 'stylelint-use-logical-spec'
 import a11y from '@double-great/stylelint-a11y'
 import highPerformanceAnimation from 'stylelint-high-performance-animation'
+import noLayoutAnimation from './_scripts/stylelintNoLayoutAnimation.mjs'
+
+// Sizes and positions animate on the main thread, which lays out and renders
+// the page on every frame. Animate transform, opacity, clip-path or filter
+// instead, or explain why the layout itself has to move.
+export const animationPerformanceRules = {
+  'plugin/no-low-performance-animation-properties': [true, {
+    ignore: 'paint-properties',
+    ignoreProperties: ['display', 'visibility', 'content-visibility', 'overlay']
+  }],
+  // Logical shorthands, flex and grid tracks, and transitions in variables,
+  // which the rule above misses.
+  'opentubex/no-layout-animation-properties': [true, {
+    ignoreProperties: ['display', 'visibility', 'content-visibility', 'overlay']
+  }]
+}
+
 /** @type {import('stylelint').Config} */
 export default {
-  plugins: [logicalSpec, ...a11y, highPerformanceAnimation],
+  plugins: [logicalSpec, ...a11y, highPerformanceAnimation, noLayoutAnimation],
   extends: ['stylelint-config-standard', 'stylelint-config-sass-guidelines'],
   overrides: [
     {
@@ -49,13 +66,7 @@ export default {
       { message: 'Mix relative colors instead of taking a relative color of a color-mix(); Chromium 119 can crash on it' }
     ],
     'a11y/no-outline-none': true,
-    // Sizes and positions animate on the main thread, which lays out and
-    // renders the page on every frame. Animate transform, opacity, clip-path
-    // or filter instead, or explain why the layout itself has to move.
-    'plugin/no-low-performance-animation-properties': [true, {
-      ignore: 'paint-properties',
-      ignoreProperties: ['display', 'visibility', 'content-visibility', 'overlay']
-    }],
+    ...animationPerformanceRules,
     'liberty/use-logical-spec': ['always']
   }
 }

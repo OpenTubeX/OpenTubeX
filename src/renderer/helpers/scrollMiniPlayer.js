@@ -221,10 +221,13 @@ export function getViewportWidth() {
 }
 
 /**
+ * The view's edges the player keeps clear of, and the view's width, which
+ * gestures reuse instead of measuring the view again on every move.
  * @param {{ includeSideNav?: boolean, revealSideNav?: boolean }} [options]
- * @returns {{ top: number, left: number, right: number, bottom: number }}
+ * @returns {{ top: number, left: number, right: number, bottom: number, viewportWidth: number }}
  */
 export function getViewportInsets({ includeSideNav = false, revealSideNav = false } = {}) {
+  const viewportWidth = getViewportWidth()
   let topInset = MARGIN
   let leftInset = MARGIN
   let rightInset = MARGIN
@@ -265,7 +268,6 @@ export function getViewportInsets({ includeSideNav = false, revealSideNav = fals
       // In narrow Electron windows this bar sits above any bottom tabs.
       bottomInset += rect.height
     } else if (includeSideNav) {
-      const viewportWidth = getViewportWidth()
       if (revealSideNav && sideNav.hasAttribute('data-watch-return-expanded')) {
         // Watch forces an expanded, translated sidebar. Measure its browsing
         // width outside that overlay before the swipe chooses its destination.
@@ -293,7 +295,6 @@ export function getViewportInsets({ includeSideNav = false, revealSideNav = fals
   // physical edge, so derive that edge from the measured bounds.
   if (verticalTabBar) {
     const rect = verticalTabBar.getBoundingClientRect()
-    const viewportWidth = getViewportWidth()
     if (rect.left <= viewportWidth - rect.right) {
       leftInset = Math.max(leftInset, rect.right + MARGIN)
     } else {
@@ -306,6 +307,7 @@ export function getViewportInsets({ includeSideNav = false, revealSideNav = fals
     left: leftInset,
     right: rightInset,
     bottom: bottomInset,
+    viewportWidth,
   }
 }
 
@@ -330,13 +332,15 @@ export function getDefaultScrollMiniPlayerRect(aspectRatio = DEFAULT_ASPECT_RATI
 /**
  * @param {ScrollMiniPlayerRect} rect
  * @param {number} [aspectRatio]
+ * @param {{ top: number, left: number, right: number, bottom: number, viewportWidth?: number }} [insets]
+ *   measured once for a gesture, since measuring them forces a layout
  * @returns {ScrollMiniPlayerRect}
  */
-export function clampScrollMiniPlayerRect(rect, aspectRatio = DEFAULT_ASPECT_RATIO) {
-  const insets = getViewportInsets()
+export function clampScrollMiniPlayerRect(rect, aspectRatio = DEFAULT_ASPECT_RATIO, insets = getViewportInsets()) {
+  const viewportWidth = insets.viewportWidth ?? getViewportWidth()
   const normalizedAspectRatio = normalizeAspectRatio(aspectRatio)
   const widthFactor = Math.min(1, normalizedAspectRatio)
-  const maxWidth = Math.min(MAX_SIZE * widthFactor, getViewportWidth() - insets.left - insets.right)
+  const maxWidth = Math.min(MAX_SIZE * widthFactor, viewportWidth - insets.left - insets.right)
   const maxHeight = window.innerHeight - insets.top - insets.bottom
 
   let width = Math.min(Math.max(rect.width, MIN_SIZE * widthFactor), maxWidth)
@@ -346,7 +350,7 @@ export function clampScrollMiniPlayerRect(rect, aspectRatio = DEFAULT_ASPECT_RAT
     width = getWidthForAspectRatio(height, normalizedAspectRatio)
   }
 
-  const maxLeft = getViewportWidth() - insets.right - width
+  const maxLeft = viewportWidth - insets.right - width
   const maxTop = window.innerHeight - insets.bottom - height
   const left = Math.min(Math.max(rect.left, insets.left), maxLeft)
   const top = Math.min(Math.max(rect.top, insets.top), maxTop)
@@ -357,12 +361,12 @@ export function clampScrollMiniPlayerRect(rect, aspectRatio = DEFAULT_ASPECT_RAT
 
 /**
  * @param {Pick<ScrollMiniPlayerRect, 'left' | 'width'>} rect
- * @param {{ left: number, right: number }} insets
+ * @param {{ left: number, right: number, viewportWidth?: number }} insets
  * @returns {'left' | 'right'}
  */
 export function getDockFromRect(rect, insets) {
   const leftDist = rect.left - insets.left
-  const rightDist = getViewportWidth() - insets.right - (rect.left + rect.width)
+  const rightDist = (insets.viewportWidth ?? getViewportWidth()) - insets.right - (rect.left + rect.width)
   return leftDist <= rightDist ? 'left' : 'right'
 }
 
