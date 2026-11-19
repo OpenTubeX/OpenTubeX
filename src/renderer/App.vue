@@ -4427,14 +4427,20 @@ async function handleYoutubeLink(href, {
   channelTitle = undefined,
   tabId = null
 } = {}) {
-  // The viewer can switch tabs while the link resolves
-  const incognito = store.getters.getTabIncognito(tabId ?? presentedTabId.value)
+  // The viewer can switch tabs while the link resolves, so the link stays with the tab it came from
+  const sourceTabId = tabId ?? (navigation ? navigation.getPresentedTabId() : null)
+  const incognito = store.getters.getTabIncognito(sourceTabId)
   const result = await store.dispatch('getYoutubeUrlInfo', tabId ? { url: href, tabId } : href)
   // Middle clicks should open tabs in background (not make them active)
   const makeActive = !isMiddleClick
   const openPath = (options) => {
-    if (isElectron && tabId && !options.doCreateNewWindow && !options.doCreateNewTab) {
-      return navigation.push(tabId, { path: options.path, query: options.query })
+    if (navigation && sourceTabId && !options.doCreateNewWindow && !options.doCreateNewTab) {
+      // A closed source tab opens nothing
+      return navigation.push(sourceTabId, {
+        path: options.path,
+        query: options.query,
+        state: options.title ? { tabTitle: options.title } : undefined
+      })
     }
     return openInternalPath({ ...options, lazyLoad, incognito })
   }
