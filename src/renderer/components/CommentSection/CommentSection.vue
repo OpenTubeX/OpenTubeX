@@ -2659,7 +2659,7 @@ async function getCommentRepliesLocal(index, commentId = null) {
     if (targetGeneration !== commentListGeneration) {
       return
     }
-    const shown = findShownComment(rootComment.id, comment.id)
+    const shown = findShownComment(getRootCommentId(comment.id), comment.id)
     if (!shown) return
 
     const parsedReplies = replyThreads
@@ -2721,7 +2721,7 @@ async function getCommentRepliesLocal(index, commentId = null) {
         return
       }
 
-      const shown = comment && findShownComment(rootComment.id, comment.id)
+      const shown = comment && findShownComment(getRootCommentId(comment.id), comment.id)
       if (shown && replyTokens.get(shown.id) === continuation) {
         replyTokens.delete(shown.id)
         shown.hasReplyToken = false
@@ -2855,7 +2855,7 @@ async function getCommentRepliesInvidious(
     ) {
       return
     }
-    const shown = rootComment ? findShownComment(rootComment.id, comment.id) : null
+    const shown = findShownComment(getRootCommentId(comment.id), comment.id)
     if (!shown) return
 
     shown.replies = mergeReplies(shown.replies, commentData)
