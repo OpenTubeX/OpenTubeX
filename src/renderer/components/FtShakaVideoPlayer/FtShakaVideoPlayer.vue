@@ -2038,7 +2038,7 @@
             :title="$t('KeyboardShortcutPrompt.Mute')"
             :aria-label="$t('KeyboardShortcutPrompt.Mute')"
             :aria-pressed="scrollMiniVolume === 0 ? 'true' : 'false'"
-            @click.stop.prevent="toggleScrollMiniMuted"
+            @click.stop.prevent="isScrollMiniVideoDoubleClick($event) || toggleScrollMiniMuted()"
             @pointerdown.stop
             @mousedown.stop.prevent
           >
