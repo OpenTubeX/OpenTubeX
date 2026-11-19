@@ -19,6 +19,7 @@ import {
 } from '../../helpers/channelThumbnailStorage'
 import { getSettingsWindowIconButton, morphUtilityWindow } from '../../helpers/utilityWindowMorph'
 import { getSearchFilterTabId } from '../../../search-history'
+import { isYouTubeHostname } from '../../../youTubeHostname.js'
 import {
   mergeYouTubeCaptionLanguageCodes,
   YOUTUBE_CAPTION_LANGUAGE_CODES,
@@ -625,7 +626,7 @@ const actions = {
     let urlType = 'unknown'
 
     const channelPattern =
-      /^\/(?:(?:channel|user|c)\/)?(?<channelId>[^/]+)(?:\/(?<tab>join|featured|videos|shorts|live|streams|podcasts|releases|courses|shows|playlists|about|community|channels))?\/?$/
+      /^\/(?:(?<prefix>channel|user|c)\/)?(?<channelId>[^/]+)(?:\/(?<tab>join|featured|videos|shorts|live|streams|podcasts|releases|courses|shows|playlists|about|community|channels))?\/?$/
 
     const hashtagPattern = /^\/hashtag\/(?<tag>[^#&/?]+)$/
     const postPattern = /^\/post\/(?<postId>.+)/
@@ -767,6 +768,11 @@ const actions = {
       case 'channel': {
         const match = url.pathname.match(channelPattern)
         const rawChannelId = match.groups.channelId
+        // Only YouTube has channel links without a prefix, like youtube.com/name.
+        // On other sites, such as Invidious instances, that path is something else.
+        if (match.groups.prefix == null && !rawChannelId.startsWith('@') && !isYouTubeHostname(url.hostname)) {
+          return { urlType: 'unknown' }
+        }
         let channelId = rawChannelId
         if (rawChannelId.startsWith('@') && checkYoutubeChannelId(rawChannelId.slice(1))) {
           channelId = rawChannelId.slice(1)
