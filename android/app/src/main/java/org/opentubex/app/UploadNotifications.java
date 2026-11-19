@@ -223,8 +223,9 @@ final class UploadNotifications {
             for (int i = 0; watchedIds != null && i < watchedIds.length(); i++) addNotificationIds(ids, "videos", watchedIds.optString(i));
             NotificationManager manager = context.getSystemService(NotificationManager.class);
             for (StatusBarNotification notification : manager.getActiveNotifications()) {
+                // `when` stays the first delivery's time when a thumbnail is added later.
                 if (TAG.equals(notification.getTag()) && (ids.contains(notification.getId()) ||
-                    notification.getPostTime() <= suppressed.optLong("dismissedThrough"))) {
+                    notification.getNotification().when <= suppressed.optLong("dismissedThrough"))) {
                     manager.cancel(TAG, notification.getId());
                 }
             }

@@ -109,25 +109,28 @@ function deferReminderCloses(entries) {
 }
 
 /** Removes the reminders that were read or removed while the app was closed. */
-export function closeDeferredReminders() {
+export async function closeDeferredReminders() {
   const reminders = readDeferredReminders()
-  if (reminders.length === 0) return
-  localStorage.removeItem(DEFERRED_REMINDERS_KEY)
-  return closeCapacitorSystemNotifications(reminders)
+  // Kept for the next opening when the plugin fails.
+  if (reminders.length === 0 || !await closeCapacitorSystemNotifications(reminders)) return
+  const remaining = readDeferredReminders().slice(reminders.length)
+  if (remaining.length > 0) localStorage.setItem(DEFERRED_REMINDERS_KEY, JSON.stringify(remaining))
+  else localStorage.removeItem(DEFERRED_REMINDERS_KEY)
 }
 
 /**
  * Removes the system notifications of entries that were read or removed.
  * @param {import('../../notificationHistory').NotificationHistoryEntry[]} entries
+ * @returns {Promise<boolean>} false when removing them failed
  */
 export async function closeCapacitorSystemNotifications(entries) {
-  if (!process.env.IS_CAPACITOR) return
+  if (!process.env.IS_CAPACITOR) return true
   if (isAndroidBackgroundRenderer) {
     // This renderer lacks the notification plugins. Android removes the
     // notifications it showed once told of the dismissals, and the app removes
     // the reminders when it opens.
     deferReminderCloses(entries)
-    return
+    return true
   }
   /** @type {Map<string, number>} */
   const reminders = new Map()
@@ -152,7 +155,9 @@ export async function closeCapacitorSystemNotifications(entries) {
       uploads.length > 0 && cancelAndroidUploadNotifications(uploads),
       localIds.length > 0 && LocalNotifications.removeDeliveredNotificationsById({ ids: localIds })
     ])
+    return true
   } catch (error) {
     console.error('Failed to remove system notifications', error)
+    return false
   }
 }
