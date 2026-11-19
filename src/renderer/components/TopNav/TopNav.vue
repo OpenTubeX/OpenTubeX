@@ -736,6 +736,7 @@ const activeDataListProperties = computed(() => {
           isLink: true,
           isRemoveable: true,
           isSearchHistory: true,
+          searchHistoryEntry,
           iconName: SEARCH_HISTORY_LINK_ICONS[searchHistoryEntry.linkType] ?? 'clock-rotate-left',
           get href() { return getSearchResultHref(queryText, searchHistoryEntry.searchSettings) },
           get displayText() { return getSearchHistoryEntryDisplayText(searchHistoryEntry) },
@@ -1065,9 +1066,9 @@ function getSearchResultHref(rawQueryText, selectedSearchSettings = null) {
  * @param {string} queryText
  * @param {object} options
  * @param {MouseEvent | KeyboardEvent} options.event
- * @param {number} [options.dataListIndex]
+ * @param {{ isSearchHistory?: boolean, searchHistoryEntry?: object }} [options.dataListProperty] the selected row
  */
-async function goToSearch(queryText, { event, dataListIndex }) {
+async function goToSearch(queryText, { event, dataListProperty }) {
   const doCreateNewWindow = event && event.shiftKey
   const ctrlOrCmdPressed = event && ((process.platform !== 'darwin' && event.ctrlKey) ||
     (process.platform === 'darwin' && event.metaKey))
@@ -1088,9 +1089,7 @@ async function goToSearch(queryText, { event, dataListIndex }) {
   cancelSearchSuggestions()
   cancelLinkPreview()
 
-  const selectedSearchHistoryEntry = activeDataListProperties.value[dataListIndex]?.isSearchHistory
-    ? activeSearchHistoryEntries.value[dataListIndex]
-    : null
+  const selectedSearchHistoryEntry = dataListProperty?.isSearchHistory ? dataListProperty.searchHistoryEntry : null
   const selectedSearchSettings = selectedSearchHistoryEntry?.searchSettings
 
   // A link opens the same page with any filters, so it keeps the current ones.

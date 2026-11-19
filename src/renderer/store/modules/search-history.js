@@ -71,7 +71,7 @@ const actions = {
     try {
       const updatedEntry = resolveSearchHistoryEntry(searchHistoryEntry, state.searchHistoryEntries)
       const persistedEntry = await DBSearchHistoryHandlers.upsert(updatedEntry)
-      // The history was cleared after this search was made.
+      // The history was cleared or the entry removed after this search was made.
       if (persistedEntry === null) return
       commit('upsertSearchHistoryEntryToList', persistedEntry ?? updatedEntry)
     } catch (errMessage) {

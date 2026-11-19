@@ -1,6 +1,5 @@
 import { test, expect, goTo, goToSettingsSection, sel, readDatastore } from '../../helpers/app.mjs'
 import { demoPlayerResponse } from '../../helpers/media.mjs'
-import { activeTab } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 // A closing filters prompt stays in the page while it fades out.
@@ -65,17 +64,21 @@ test.describe('search history suggestions', () => {
 
   for (const selection of ['click', 'keyboard']) {
     test(`selecting filtered history by ${selection} preserves the selected entry's filters`, async ({ page }) => {
+      // Selecting a row puts its text in the input, which filters the list
+      // again, so the selected row has to survive moving to another position.
+      await page.evaluate(() => window.$store.dispatch('updateSearchHistoryEntry', { query: 'android', lastUpdatedAt: Date.now() }))
       const input = page.locator(sel.searchInput)
-      await input.fill('bak')
-      await expect(suggestions(page)).toHaveCount(1)
-      await expect(suggestions(page).first()).toContainText('baking bread')
+      await input.fill('andr')
+      await expect(suggestions(page)).toHaveCount(2)
+      await expect(suggestions(page).nth(1)).toContainText('android tutorial')
       if (selection === 'keyboard') {
+        await input.press('ArrowDown')
         await input.press('ArrowDown')
         await input.press('Enter')
       } else {
-        await suggestions(page).first().locator('.optionWrapper').click()
+        await suggestions(page).nth(1).locator('.optionWrapper').click()
       }
-      await expect(page).toHaveURL(/#\/search\/baking%20bread/)
+      await expect(page).toHaveURL(/#\/search\/android%20tutorial/)
       await expect.poll(() => page.evaluate(() => {
         const params = new URLSearchParams(location.hash.split('?')[1])
         return {
@@ -85,7 +88,13 @@ test.describe('search history suggestions', () => {
           duration: params.get('duration'),
           features: params.getAll('features')
         }
-      })).toEqual({ prioritize: 'relevance', time: '', type: 'all', duration: '', features: [] })
+      })).toEqual({
+        prioritize: 'popularity',
+        time: 'today',
+        type: 'video',
+        duration: 'three_to_twenty_mins',
+        features: ['hd', 'subtitles']
+      })
     })
   }
 
@@ -339,7 +348,7 @@ test.describe('search history suggestions', () => {
     expect(pageErrors).toEqual([])
   })
 
-  test('a pasted video link is saved with its title, found by it, and opens the video again, unless history is cleared or off', async ({ app, page }) => {
+  test('a pasted video link is saved with its title, found by it, and opens the video again, unless history is off or cleared', async ({ app, page }) => {
     const videoId = 'jNQXAC9IVRw'
     await mockPlayableWatchPage(app, page)
     const player = demoPlayerResponse(videoId)
@@ -380,21 +389,40 @@ test.describe('search history suggestions', () => {
     // A link entry leaves the search filters alone.
     expect(await searchType()).toBe('video')
 
+    // With the history off, nothing is saved. This link has a saved title, so
+    // its save would be dispatched before the page opens.
+    await page.locator(sel.backButton).click()
+    await expect(page).not.toHaveURL(/#\/watch\//)
+    await page.evaluate(() => {
+      window.__searchHistorySaves = []
+      window.__stopWatchingSaves = window.$store.subscribeAction(action => {
+        if (action.type === 'updateSearchHistoryEntry') window.__searchHistorySaves.push(action.payload.query)
+      })
+      return window.$store.dispatch('updateRememberSearchHistory', false)
+    })
+    await input.fill(`https://youtu.be/${videoId}`)
+    await input.press('Enter')
+    await expect(page).toHaveURL(new RegExp(`#/watch/${videoId}`))
+    expect(await page.evaluate(() => window.__searchHistorySaves)).toEqual([])
+    await page.evaluate(() => {
+      window.__stopWatchingSaves()
+      return window.$store.dispatch('updateRememberSearchHistory', true)
+    })
+
     // Clearing the history while a title loads drops the save.
     const otherVideoId = 'dQw4w9WgXcQ'
     let releaseTitle
     const titleHeld = new Promise(resolve => { releaseTitle = resolve })
     let heldRequests = 0
-    let answeredRequests = 0
-    await page.route('**/youtubei/v1/player**', async route => {
+    const holdPlayer = async route => {
       heldRequests++
       await titleHeld
       await route.fulfill({
         contentType: 'application/json',
         body: JSON.stringify({ ...player, videoDetails: { ...player.videoDetails, videoId: otherVideoId, title: 'Cleared Video Title' } }),
       })
-      answeredRequests++
-    })
+    }
+    await page.route('**/youtubei/v1/player**', holdPlayer)
     // The save that waited for the title has to finish before nothing being saved proves anything.
     await page.evaluate(query => {
       window.__linkSaveFinished = false
@@ -412,16 +440,8 @@ test.describe('search history suggestions', () => {
     await expect(page).toHaveURL(new RegExp(`#/watch/${otherVideoId}`))
     await expect.poll(() => page.evaluate(() => window.__linkSaveFinished)).toBe(true)
     await page.evaluate(() => window.__stopWatchingLinkSave())
+    await page.unroute('**/youtubei/v1/player**', holdPlayer)
     expect(await linkEntries()).toEqual([])
     expect(await readDatastore(app.userDataDir, 'search-history')).not.toContain('Cleared Video Title')
-
-    await page.evaluate(() => window.$store.dispatch('updateRememberSearchHistory', false))
-    await input.fill(`https://www.youtube.com/watch?v=${videoId}`)
-    await input.press('Enter')
-    await expect(page).toHaveURL(new RegExp(`#/watch/${videoId}`))
-    // The setting is checked before the page opens.
-    await expect(page.locator(`${activeTab} .videoTitle`)).toBeVisible()
-    await expect.poll(() => answeredRequests).toBe(heldRequests)
-    expect(await linkEntries()).toEqual([])
   })
 })

@@ -617,7 +617,9 @@ updateVisibleDataList()
  * @param {KeyboardEvent | MouseEvent} [event]
  * @param {number} [dataListIndex]
  */
-function handleClick(event, dataListIndex = searchState.keyboardSelectedOptionIndex) {
+function handleClick(event, dataListIndex = getDataListIndex(searchState.keyboardSelectedOptionIndex) ?? -1) {
+  // Emitting the value can make the parent filter its list again, which moves the row.
+  const dataListProperty = props.dataListProperties[dataListIndex]
   const selectedValue = searchStateKeyboardSelectedOptionValue.value
   const query = (selectedValue != null && selectedValue !== '') ? selectedValue : inputData.value
   inputData.value = query
@@ -633,7 +635,7 @@ function handleClick(event, dataListIndex = searchState.keyboardSelectedOptionIn
   removeButtonSelectedIndex.value = -1
 
   emit('input', query)
-  emit('click', query, { event, dataListIndex })
+  emit('click', query, { event, dataListIndex, dataListProperty })
 }
 
 function handleNativeClick() {
@@ -814,7 +816,8 @@ function handleOptionAuxClick(index, event) {
   inputRef.value.focus()
   emit('click', visibleDataList.value[index], {
     event,
-    dataListIndex: getDataListIndex(index)
+    dataListIndex: getDataListIndex(index),
+    dataListProperty: getDataListProperty(index)
   })
 }
 

@@ -102,7 +102,7 @@ test('a delayed link save stays in date order, and one the datastore drops after
   assert.deepEqual(store.getters.getSearchHistoryEntries.map(entry => entry.query), ['newer search', 'https://youtu.be/older'])
 })
 
-test('a link save that finishes late neither outlives a clear nor rolls back a newer save', async (t) => {
+test('a link save that finishes late neither outlives a clear or removal nor rolls back a newer save', async (t) => {
   const db = { searchHistory: createDesktopDatastore(':memory:') }
   t.after(() => db.searchHistory.driver.close())
   const SearchHistory = createSearchHistory(db)
@@ -111,12 +111,22 @@ test('a link save that finishes late neither outlives a clear nor rolls back a n
   // A second paste of the link loaded its title; the first one's title request failed and finished last.
   await SearchHistory.upsert({ ...link, lastUpdatedAt: 2, title: 'Title' })
   await SearchHistory.upsert({ ...link, lastUpdatedAt: 1 })
-  assert.deepEqual((await SearchHistory.find()).map(({ lastUpdatedAt, title }) => ({ lastUpdatedAt, title })), [{ lastUpdatedAt: 2, title: 'Title' }])
+  const [saved] = await SearchHistory.find()
+  assert.deepEqual({ lastUpdatedAt: saved.lastUpdatedAt, title: saved.title }, { lastUpdatedAt: 2, title: 'Title' })
 
-  // Clearing in any window drops a save of a search made before the clear, even one queued behind the delete.
+  // Removing the entry drops a save of it made before the removal, even one queued behind the delete, but no other search.
+  const madeBeforeRemoval = Date.now() - 1
+  const removed = SearchHistory.delete(saved._id)
+  assert.equal(await SearchHistory.upsert({ ...link, lastUpdatedAt: madeBeforeRemoval }), null)
+  assert.notEqual(await SearchHistory.upsert({ query: 'other search', lastUpdatedAt: madeBeforeRemoval }), null)
+  await removed
+  assert.deepEqual((await SearchHistory.find()).map(({ query }) => query), ['other search'])
+
+  // Clearing in any window drops every save made before the clear.
   const madeBeforeClear = Date.now() - 1
   const cleared = SearchHistory.deleteAll()
   assert.equal(await SearchHistory.upsert({ ...link, lastUpdatedAt: madeBeforeClear, title: 'Title' }), null)
+  assert.equal(await SearchHistory.upsert({ query: 'other search', lastUpdatedAt: madeBeforeClear }), null)
   await cleared
   assert.deepEqual(await SearchHistory.find(), [])
   assert.notEqual(await SearchHistory.upsert({ ...link, lastUpdatedAt: Date.now() + 1, title: 'Title' }), null)
