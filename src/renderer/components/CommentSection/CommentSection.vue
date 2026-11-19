@@ -1018,16 +1018,35 @@ function updatePinnedSnapshot(rootId, update) {
  * under it, as its own replies load separately.
  * @param {Comment[]} replies
  * @param {Comment[]} loadedReplies
+ * @param {Set<string>} [incomingIds] every comment ID in the response
  * @returns {Comment[]}
  */
-function mergeReplies(replies, loadedReplies) {
+function mergeReplies(replies, loadedReplies, incomingIds = getCommentIds(loadedReplies)) {
   const loadedIds = new Set(loadedReplies.map(reply => reply.id))
   const existing = new Map(replies.map(reply => [reply.id, reply]))
   const merged = withLocalCommentChanges(loadedReplies).map(reply => {
-    const previous = existing.get(reply.id)
-    return previous?.replies?.length > 0 ? { ...reply, replies: mergeReplies(previous.replies, reply.replies ?? []) } : reply
+    // Flat replies, as from Invidious, can bring them elsewhere in the response.
+    const kept = (existing.get(reply.id)?.replies ?? []).filter(child => !incomingIds.has(child.id) ||
+      (reply.replies ?? []).some(loaded => loaded.id === child.id))
+    return kept.length > 0 ? { ...reply, replies: mergeReplies(kept, reply.replies ?? [], incomingIds) } : reply
   })
   return replies.filter(reply => !loadedIds.has(reply.id)).concat(merged)
+}
+
+/**
+ * The IDs of comments and all their replies.
+ * @param {Comment[]} comments
+ * @returns {Set<string>}
+ */
+function getCommentIds(comments) {
+  const ids = new Set()
+  /** @param {Comment[]} list */
+  const add = list => list.forEach(comment => {
+    ids.add(comment.id)
+    add(comment.replies ?? [])
+  })
+  add(comments)
+  return ids
 }
 
 /**

@@ -37,6 +37,11 @@ function createPostState() {
     /** @param {string} key */
     get: key => values.get(key) ?? null,
     /**
+     * The value YouTube last confirmed, which changes still going out lack.
+     * @param {string} key
+     */
+    confirmed: key => queues.has(key) ? queues.get(key).confirmed : values.get(key) ?? null,
+    /**
      * @param {string} key
      * @param {any} value
      * @param {(confirmed: any) => Promise<void>} send changes YouTube's value, as last confirmed, to `value`
@@ -88,7 +93,7 @@ const shownCounts = reactive(new Map())
  * earlier change includes that.
  * @param {string} key
  * @param {number | null} count
- * @param {boolean} hadOwn whether the account had its vote or like before the change
+ * @param {boolean} hadOwn whether YouTube had the account's vote or like before the change, as last confirmed
  */
 function rememberCount(key, count, hadOwn) {
   const known = shownCounts.get(key)
@@ -140,7 +145,7 @@ export function togglePollVote(postId, channelId, choiceIndex, totalVotes) {
   const account = store.getters.getYouTubeAccount
   const key = getKey(account, postId)
   const previous = votes.get(key)
-  rememberCount(`votes\n${key}`, totalVotes, previous !== null)
+  rememberCount(`votes\n${key}`, totalVotes, votes.confirmed(key) !== null)
   const next = previous === choiceIndex ? null : choiceIndex
   // Voting for another choice moves the vote, and taking it back names the choice.
   votes.change(key, next, confirmed => next === null
@@ -226,7 +231,7 @@ export function ratePost(postId, channelId, type, likeCount) {
   const account = store.getters.getYouTubeAccount
   const key = getKey(account, postId)
   const previous = ratings.get(key)
-  rememberCount(`likes\n${key}`, likeCount, previous === 'LIKE')
+  rememberCount(`likes\n${key}`, likeCount, ratings.confirmed(key) === 'LIKE')
   const next = previous === type ? null : type
   ratings.change(key, next, confirmed => {
     // Liking replaces a dislike and the reverse, like on YouTube.
