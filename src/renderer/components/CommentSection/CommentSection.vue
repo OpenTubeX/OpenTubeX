@@ -2452,6 +2452,17 @@ function findComment(comment, commentId) {
   return null
 }
 
+/**
+ * A comment as it shows now. Loads that finish later update this one, as
+ * merging other loaded replies can replace the objects of a thread meanwhile.
+ * @param {string} rootId
+ * @param {string} commentId
+ */
+function findShownComment(rootId, commentId) {
+  const root = commentData.value.find(entry => entry.id === rootId)
+  return root ? findComment(root, commentId) : null
+}
+
 function getHighlightedRootCommentId() {
   return props.highlightedCommentId?.split('.')[0] ?? null
 }
@@ -2648,16 +2659,18 @@ async function getCommentRepliesLocal(index, commentId = null) {
     if (targetGeneration !== commentListGeneration) {
       return
     }
+    const shown = findShownComment(rootComment.id, comment.id)
+    if (!shown) return
 
     const parsedReplies = replyThreads
       .map(reply => parseLocalCommentThread(reply))
       .filter(Boolean)
 
     if (isEmptyReplyContinuation(parsedReplies.length, nextContinuation !== null)) {
-      replyTokens.delete(comment.id)
-      comment.hasReplyToken = false
-      comment.numReplies = comment.replies.length
-      comment.showReplies = comment.replies.length > 0
+      replyTokens.delete(shown.id)
+      shown.hasReplyToken = false
+      shown.numReplies = shown.replies.length
+      shown.showReplies = shown.replies.length > 0
       showToast({
         message: t('Comments.YouTube did not provide advertised replies'),
         time: 10000,
@@ -2666,27 +2679,27 @@ async function getCommentRepliesLocal(index, commentId = null) {
       return
     }
 
-    comment.replies = mergeReplies(comment.replies, parsedReplies)
+    shown.replies = mergeReplies(shown.replies, parsedReplies)
 
     const replyLoadState = getReplyLoadState(
-      comment.replies.length,
-      comment.numReplies,
+      shown.replies.length,
+      shown.numReplies,
       nextContinuation !== null
     )
 
     if (replyLoadState.hasMore) {
-      replyTokens.set(comment.id, nextContinuation ?? continuation)
-      comment.hasReplyToken = true
+      replyTokens.set(shown.id, nextContinuation ?? continuation)
+      shown.hasReplyToken = true
     } else {
-      replyTokens.delete(comment.id)
-      comment.hasReplyToken = false
+      replyTokens.delete(shown.id)
+      shown.hasReplyToken = false
     }
 
     if (replyLoadState.hasMissingReplies) {
-      comment.numReplies = comment.replies.length
+      shown.numReplies = shown.replies.length
     }
 
-    comment.showReplies = replyLoadState.showReplies
+    shown.showReplies = replyLoadState.showReplies
   } catch (err) {
     if (targetGeneration !== commentListGeneration) {
       return
@@ -2841,25 +2854,27 @@ async function getCommentRepliesInvidious(
     ) {
       return
     }
+    const shown = rootComment ? findShownComment(rootComment.id, comment.id) : null
+    if (!shown) return
 
-    comment.replies = mergeReplies(comment.replies, commentData)
+    shown.replies = mergeReplies(shown.replies, commentData)
     const replyLoadState = getReplyLoadState(
-      comment.replies.length,
-      comment.numReplies,
+      shown.replies.length,
+      shown.numReplies,
       continuation !== null
     )
-    comment.showReplies = replyLoadState.showReplies
+    shown.showReplies = replyLoadState.showReplies
 
     if (replyLoadState.hasMore) {
-      replyTokens.set(comment.id, continuation ?? replyToken)
-      comment.hasReplyToken = true
+      replyTokens.set(shown.id, continuation ?? replyToken)
+      shown.hasReplyToken = true
     } else {
-      replyTokens.delete(comment.id)
-      comment.hasReplyToken = false
+      replyTokens.delete(shown.id)
+      shown.hasReplyToken = false
     }
 
     if (replyLoadState.hasMissingReplies) {
-      comment.numReplies = comment.replies.length
+      shown.numReplies = shown.replies.length
     }
 
     isLoading.value = false
