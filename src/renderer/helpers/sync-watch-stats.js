@@ -178,6 +178,8 @@ export async function syncWatchStats(client, store, { dataScope = null } = {}) {
   if (JSON.stringify(remote) !== JSON.stringify(merged)) {
     await client.putWatchStats(merged)
   }
+  // After a profile switch, these are no longer the statistics the app shows.
+  store.assertActive?.()
   store.commit('setSyncedWatchStats', merged)
   return merged
 }

@@ -56,6 +56,22 @@ test('sync uploads local resets without removing other devices or rewriting unch
   assert.deepEqual(applied, remote)
 })
 
+test('statistics synced for a profile switched away from are not shown', async () => {
+  let active = true
+  let applied = null
+  const { syncWatchStats } = createHelpers({ find: async () => [{ date: '2026-09-22', seconds: 60 }] }, async () => {
+    active = false
+    return { platform: 'linux' }
+  })
+  const store = {
+    state: { settings: { syncServerDeviceId: 'local', syncServerDeviceName: 'Desktop' } },
+    commit: (_, value) => { applied = value },
+    assertActive: () => { if (!active) throw new Error('cancelled') },
+  }
+  await assert.rejects(syncWatchStats({ getWatchStats: async () => [], putWatchStats: async () => {} }, store), /cancelled/)
+  assert.equal(applied, null)
+})
+
 test('a replaced device stays in the combined history without reappearing after sync', () => {
   const { mergeWatchStats, watchSecondsForDevice } = createHelpers({}, async () => ({ platform: 'android' }))
   const old = { deviceId: 'old', deviceName: 'Pixel', days: { '2026-10-01': 60, '2026-10-02': 120 }, overlap: 'max', replacedAt: 100 }
