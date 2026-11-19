@@ -194,6 +194,37 @@ test('periodic update checks keep one notification for the newest release', asyn
   await expect(page.locator('.toast', { hasText: `Version ${newestUpdateVersion} is now available` })).toBeVisible()
   // A duplicate from the first recheck or the older toast would remain here
   await expect(page.locator('.toast', { hasText: 'is now available' })).toHaveCount(1)
+
+  // The bell keeps one entry for each release, and only the newest one unread.
+  await expect.poll(() => page.evaluate(async () => (await window.ftElectron.notificationHistory.list())
+    .map(entry => [entry.query?.version, entry.read]))).toStrictEqual([
+    [`v${newestUpdateVersion}-beta`, false],
+    [`v${olderUpdateVersion}-beta`, true]
+  ])
+  const bell = page.locator('.notificationCenter')
+  await expect(bell).toHaveAttribute('data-unread-count', '1')
+  await bell.locator('.iconButton').click()
+  await page.locator('.notificationCenterDropdown .notificationEntry', { hasText: newestUpdateVersion }).click()
+  await expect(page.locator('.changeLogTitle')).toContainText(newestUpdateVersion)
+
+  // Other windows can record entries after this one's checks. Checks dismiss
+  // the older ones, but never a newer release they did not see.
+  const recordUpdate = (version) => page.evaluate(version => window.ftElectron.notificationHistory.record({
+    kind: 'app-update', path: '/update', query: { version }, title: version, body: version
+  }), version)
+  const readStates = () => page.evaluate(async () => Object.fromEntries((await window.ftElectron.notificationHistory.list())
+    .map(entry => [entry.query?.version, entry.read])))
+  const installedTag = `v${installedVersion}-beta`
+  const futureTag = `v${majorVersion + 1}.0.0-beta`
+  await recordUpdate(installedTag)
+  await recheck()
+  await expect.poll(readStates).toMatchObject({ [installedTag]: true })
+
+  await recordUpdate(futureTag)
+  await recordUpdate('v0.0.1-beta')
+  releases.length = 0
+  await recheck()
+  await expect.poll(readStates).toMatchObject({ 'v0.0.1-beta': true, [futureTag]: false })
 })
 
 test('a periodic check that finishes behind open release notes leaves them unchanged', async ({ page }) => {

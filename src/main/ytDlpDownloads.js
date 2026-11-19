@@ -236,8 +236,23 @@ function getDownloadRecordsPath() {
   return join(app.getPath('userData'), 'downloads.json')
 }
 
+/** @type {((download: YtDlpDownloadStatus) => void) | null} */
+let finishedDownloadListener = null
+
+/**
+ * @param {typeof finishedDownloadListener} listener called when a download the
+ * user started completes or fails, as often as the renderers announce it
+ */
+export function setFinishedDownloadListener(listener) {
+  finishedDownloadListener = listener
+}
+
 function broadcastDownloadStatus(record) {
   broadcastToRenderers(IpcChannels.YT_DLP_DOWNLOAD_STATUS, { ...record })
+  // Automatic downloads have notifications of their own.
+  if (record.automatic !== true && (record.status === 'completed' || record.status === 'failed')) {
+    finishedDownloadListener?.({ ...record })
+  }
 }
 
 function setPendingDownloadStatus(status) {

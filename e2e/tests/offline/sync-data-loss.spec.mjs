@@ -116,7 +116,7 @@ test.describe('destructive sync', () => {
     }
   })
 
-  test('background sync warns outside Settings and opens sync settings from the notification', async ({ page }) => {
+  test('background sync warns outside Settings and keeps the warning in the bell until the review', async ({ page }) => {
     await page.route('https://sync.example/**', route => route.fulfill({
       contentType: 'application/json',
       body: JSON.stringify(route.request().url().endsWith('/health')
@@ -143,6 +143,8 @@ test.describe('destructive sync', () => {
     const notification = page.locator('.toast', { hasText: 'Sync stopped to prevent data loss.' })
     await expect(notification).toBeVisible()
     await expect(page.getByRole('dialog', { name: 'Confirm destructive sync?' })).toBeHidden()
+    // The bell keeps the warning, unread until the deletions are reviewed.
+    await expect(page.locator('.notificationCenter')).toHaveAttribute('data-unread-count', '1')
     await notification.getByRole('button', { name: 'Sync', exact: true }).click()
     await expect(sync).toBeVisible()
     await expect(autoSync).not.toBeChecked()
@@ -150,6 +152,7 @@ test.describe('destructive sync', () => {
     const warning = page.getByRole('dialog', { name: 'Confirm destructive sync?' })
     await expect(warning.locator('.dataLossItems li')).toHaveCount(profiles.length)
     await expect(warning).toContainText('previously synced items in Profiles')
+    await expect(page.locator('.notificationCenter')).toHaveAttribute('data-unread-count', '1')
 
     // Keeping the profiles uploads them again instead of deleting them here.
     const uploads = []
@@ -159,6 +162,8 @@ test.describe('destructive sync', () => {
     await warning.getByRole('button', { name: 'Keep items', exact: true }).click()
     await expect(warning).toBeHidden()
     await expect(page.locator('.toast', { hasText: 'Sync completed' })).toBeVisible()
+    // Nothing is left to review, so the warning in the bell is read.
+    await expect(page.locator('.notificationCenter')).not.toHaveAttribute('data-unread-count')
     expect(uploads).toHaveLength(profiles.length)
     await expect(autoSync).toBeChecked()
     expect(await page.evaluate(() => window.$store.getters.getProfileList.length)).toBe(profiles.length + 1)

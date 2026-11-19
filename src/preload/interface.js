@@ -1198,6 +1198,12 @@ export default {
     notifyComment: (notification) => ipcRenderer.invoke(IpcChannels.NOTIFICATION_COMMENT, notification),
 
     /**
+     * Keeps news the app showed only as a toast, without a system notification.
+     * @param {import('../notificationHistory').NotificationHistoryInput} notification
+     */
+    record: (notification) => ipcRenderer.invoke(IpcChannels.NOTIFICATION_RECORD, notification),
+
+    /**
      * Notifications read or removed on this device, for other devices.
      * @param {() => void} handler
      * @returns {() => void}

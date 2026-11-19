@@ -3,6 +3,7 @@ import { ClientType, Innertube } from 'youtubei.js'
 import store from '../../store/index'
 import i18n from '../../i18n/index'
 import { ERROR_TOAST_ICON, showToast } from '../utils'
+import { getSettingsNotificationTarget, recordNotification } from '../notificationHistory'
 import { getLocalSignatureTimestamp, localApiFetch } from './local'
 import { YOUTUBE_USER_AGENT_HEADER, YOUTUBE_USER_AGENTS } from '../../../youTubeUserAgent.js'
 import { getSelectedYouTubeProfile, isSignedInToYouTube } from '../youtube-account-state.js'
@@ -225,9 +226,13 @@ async function refreshCredentials(credentials) {
   if (data.error === 'invalid_grant' || response.status === 401) {
     if (getAccount()?.credentials.refresh_token === credentials.refresh_token) {
       await store.dispatch('updateYouTubeAccount', null)
-      showToast({
-        message: i18n.global.t('Settings.YouTube Account Settings.Signed out by YouTube'),
-        icon: ERROR_TOAST_ICON
+      const message = i18n.global.t('Settings.YouTube Account Settings.Signed out by YouTube')
+      showToast({ message, icon: ERROR_TOAST_ICON })
+      recordNotification({
+        kind: 'youtube-signed-out',
+        ...getSettingsNotificationTarget('youtube-account'),
+        title: i18n.global.t('Settings.YouTube Account Settings.Signed Out'),
+        body: message
       })
     }
     throw new Error('The YouTube account sign-in is no longer valid')

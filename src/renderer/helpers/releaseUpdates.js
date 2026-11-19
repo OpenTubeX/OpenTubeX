@@ -85,6 +85,18 @@ function compareVersionParts(left, right) {
 }
 
 /**
+ * Whether a release tag names an older version than another one.
+ * @param {string} tagName
+ * @param {string} otherTagName
+ * @returns {boolean}
+ */
+export function isOlderRelease(tagName, otherTagName) {
+  const version = parseVersion(tagName)
+  const other = parseVersion(otherTagName)
+  return version !== null && other !== null && compareVersionParts(version.parts, other.parts) < 0
+}
+
+/**
  * Finds all updates available to the installed build, newest first.
  * Stable builds stay on stable releases, while nightly builds can update to a
  * newer nightly or fall back to a newer stable version.

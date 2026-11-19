@@ -13,6 +13,8 @@ import { installViewTransitions } from './helpers/viewTransitions'
 import { installTitleTooltips } from './helpers/titleTooltips'
 import { initializeAppScrollbars, overlayScrollbarsDirective } from './helpers/overlayScrollbars'
 import { releaseAutomaticDownloadSchedule } from './helpers/automaticDownloads'
+import { recordNotification, withThumbnail } from './helpers/notificationHistory'
+import { getDownloadTarget } from '../notificationHistory'
 import { initializeAndroidDynamicColors } from './helpers/dynamicColors'
 import { observeAndroidNetworkMetered } from './helpers/androidUi'
 import './helpers/reducedTransparency'
@@ -137,18 +139,23 @@ if (supportsYtDlp && !isAndroidBackgroundRenderer) {
     store.commit('upsertYtDlpDownload', download)
     releaseAutomaticDownloadSchedule(download)
 
-    if (download.status === 'completed' && download.automatic !== true) {
-      showToast({
-        message: i18n.global.t('Downloads.Download Complete Template', { title: download.title }),
-        icon: ['fas', 'download'],
-      })
-    } else if (download.status === 'failed' && download.automatic !== true) {
-      showToast({
-        message: download.errorMessage === 'ENOENT'
+    if ((download.status === 'completed' || download.status === 'failed') && download.automatic !== true) {
+      const completed = download.status === 'completed'
+      const message = completed
+        ? i18n.global.t('Downloads.Download Complete Template', { title: download.title })
+        : download.errorMessage === 'ENOENT'
           ? i18n.global.t('Downloads.yt-dlp Not Found')
-          : i18n.global.t('Downloads.Download Failed Template', { title: download.title }),
-        icon: ['fas', 'circle-exclamation'],
-      })
+          : i18n.global.t('Downloads.Download Failed Template', { title: download.title })
+      showToast({ message, icon: completed ? ['fas', 'download'] : ['fas', 'circle-exclamation'] })
+      // The desktop app's main process keeps these in the bell, once for every tab.
+      if (process.env.IS_CAPACITOR) {
+        recordNotification({
+          ...getDownloadTarget(completed ? 'completed' : 'failed', download.videoId, download.id, download.mode),
+          title: completed ? i18n.global.t('Downloads.Download Complete') : i18n.global.t('Downloads.Download Failed'),
+          body: message,
+          ...(typeof download.videoId === 'string' && download.videoId ? withThumbnail(download.videoId) : {})
+        })
+      }
     }
   })
 
