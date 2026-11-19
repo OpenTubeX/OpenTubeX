@@ -99,6 +99,7 @@ import { setupDatastoreIpc } from './datastoreIpc'
 import { settingSyncMessage, writeSynced } from './datastoreSync'
 import { getWindowButtonLayout, onWindowButtonLayoutChanged } from './windowButtonLayout'
 import { watchTrayColorScheme } from './trayColorScheme'
+import { readStartupColorScheme, systemPrefersDark } from './startupColorScheme'
 import { setDiagnosticLogging, setupDiagnosticLogIpc } from './diagnosticLog'
 import { createMainTranslator } from './mainTranslator'
 import { pointsToLocalNetwork } from './localNetworkLink'
@@ -155,6 +156,7 @@ Options:
 }
 
 function runApp() {
+  readStartupColorScheme()
   let deferredDatastoresStarted = false
 
   // Electron otherwise builds its default menu before the app is ready, only
@@ -1921,13 +1923,14 @@ function runApp() {
       waitForInitialization = false
     } = { }) {
     await backgroundSubscriptions.setBackground(false)
+    const systemDark = await systemPrefersDark()
     // Syncing new window background to theme choice.
     const defaultBackground = () =>
-      BASE_THEME_BACKGROUND_COLORS[DEFAULT_SYSTEM_THEMES[nativeTheme.shouldUseDarkColors ? 'dark' : 'light']]
+      BASE_THEME_BACKGROUND_COLORS[DEFAULT_SYSTEM_THEMES[systemDark ? 'dark' : 'light']]
     const windowBackground = await baseHandlers.settings._findOne('baseTheme').then(async (setting) => {
       let theme = setting?.value ?? 'system'
       if (theme === 'system') {
-        const classification = nativeTheme.shouldUseDarkColors ? 'dark' : 'light'
+        const classification = systemDark ? 'dark' : 'light'
         const selected = await baseHandlers.settings._findOne(
           classification === 'dark' ? 'systemDarkTheme' : 'systemLightTheme'
         )
@@ -1941,7 +1944,7 @@ function runApp() {
         return (await getSelectedCustomTheme(theme))?.colors.background ?? defaultBackground()
       }
       if (MATERIAL_THEME_VALUES.includes(theme)) {
-        const mode = materialThemeMode(theme, nativeTheme.shouldUseDarkColors)
+        const mode = materialThemeMode(theme, systemDark)
         if (mode === 'black') return '#000000'
         const seed = await baseHandlers.settings._findOne('materialSeedColor')
         const color = theme === 'dynamic' || seed?.value === MATERIAL_SYSTEM_SEED ? getSystemAccentColor() ?? seed?.value : seed?.value
@@ -2015,7 +2018,7 @@ function runApp() {
                     ? true
                     : {
                         color: windowBackground,
-                        symbolColor: nativeTheme.shouldUseDarkColors ? '#ffffff' : '#000000',
+                        symbolColor: systemDark ? '#ffffff' : '#000000',
                         height: 32
                       }
                 }
@@ -2026,7 +2029,7 @@ function runApp() {
         backgroundThrottling: false,
         additionalArguments: [
           `--startup-background=${windowBackground}`,
-          `--startup-dark=${nativeTheme.shouldUseDarkColors}`,
+          `--startup-dark=${systemDark}`,
           `--system-accent-color=${getSystemAccentColor() ?? ''}`,
           `--hide-startup-splash=${hideStartupSplash}`,
           `--custom-title-bar=${customTitleBar}`,
