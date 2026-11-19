@@ -229,6 +229,8 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
    *   startRect: import('../../../helpers/scrollMiniPlayer').ScrollMiniPlayerRect,
    *   insets?: { top: number, left: number, right: number, bottom: number },
    *   aspectRatio?: number,
+   *   pointerX?: number,
+   *   pointerY?: number,
    *   rect?: import('../../../helpers/scrollMiniPlayer').ScrollMiniPlayerRect,
    * } | null}
    */
@@ -1536,14 +1538,25 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     container.value.style.translate = `${session.rect.left - session.startRect.left}px ${session.rect.top - session.startRect.top}px`
   }
 
-  /** Keeps a drag inside the view when the usable area changes during it. */
+  /**
+   * Keeps a drag inside the view when the usable area changes during it. The
+   * player takes the clamped position and size at once, including a size the
+   * smaller view forces, and the drag continues from there.
+   */
   function refreshScrollMiniDragBounds() {
     const session = scrollMiniPointerSession
     if (session?.type !== 'drag') return
     session.insets = getViewportInsets()
-    if (!session.rect) return
-    session.rect = clampScrollMiniPlayerRect(session.rect, session.aspectRatio, session.insets)
-    scrollMiniDragFrame ??= requestAnimationFrame(renderScrollMiniPlayerMove)
+    const rect = clampScrollMiniPlayerRect(session.rect ?? session.startRect, session.aspectRatio, session.insets)
+    clearScrollMiniPlayerDragOffset()
+    applyScrollMiniPlayerRect(rect)
+    // That also applied any aspect ratio the drag was holding back.
+    scrollMiniDragAspectRatioChanged = false
+    session.aspectRatio = scrollMiniVideoAspectRatio.value
+    session.startRect = { ...scrollMiniPlayerRect.value }
+    session.startX = session.pointerX ?? session.startX
+    session.startY = session.pointerY ?? session.startY
+    session.rect = undefined
   }
 
   function clearScrollMiniPlayerDragOffset() {
@@ -1576,6 +1589,8 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
       const { startRect, insets, aspectRatio } = scrollMiniPointerSession
       const dx = event.clientX - scrollMiniPointerSession.startX
       const dy = event.clientY - scrollMiniPointerSession.startY
+      scrollMiniPointerSession.pointerX = event.clientX
+      scrollMiniPointerSession.pointerY = event.clientY
 
       // The drawn player keeps its size until the drag ends, so clamp with the
       // aspect ratio it had when the drag started.
