@@ -39,7 +39,7 @@ function createPostState() {
     /**
      * @param {string} key
      * @param {any} value
-     * @param {() => Promise<void>} send
+     * @param {(confirmed: any) => Promise<void>} send changes YouTube's value, as last confirmed, to `value`
      * @param {(error: string) => string} failedMessage the toast for a failed change
      * @param {() => void} [onSent]
      */
@@ -53,7 +53,8 @@ function createPostState() {
       queue.pending++
       queue.promise = queue.promise.then(async () => {
         try {
-          await send()
+          // From what YouTube has, as an earlier change in the queue can fail.
+          if (queue.confirmed !== value) await send(queue.confirmed)
           queue.confirmed = value
           onSent?.()
         } catch (error) {
@@ -75,23 +76,38 @@ const votes = createPostState()
 const ratings = createPostState()
 
 /**
- * The public counts loaded before a vote or like made here, which lack it.
- * A count loaded later can include it already.
- * @type {Map<string, number | null>}
+ * The public count shown when the account last changed its vote or like here,
+ * and whether it includes the account's earlier one.
+ * @type {Map<string, { count: number | null, includesOwn: boolean }>}
  */
-const baseCounts = reactive(new Map())
+const shownCounts = reactive(new Map())
 
 /**
- * The count shown with the account's vote or like made here, which it adds to
- * the count it was made with, and not to counts loaded since.
+ * Remembers the count a change is made with. Counts load without the account,
+ * so one loaded before any change here lacks it, and one loaded after an
+ * earlier change includes that.
  * @param {string} key
  * @param {number | null} count
- * @param {boolean} counted whether the account has its vote or like
+ * @param {boolean} hadOwn whether the account had its vote or like before the change
  */
-function countWithOwn(key, count, counted) {
-  if (count == null) return count
-  return count + (counted && baseCounts.get(key) === count ? 1 : 0)
+function rememberCount(key, count, hadOwn) {
+  const known = shownCounts.get(key)
+  shownCounts.set(key, { count, includesOwn: known ? (known.count === count ? known.includesOwn : hadOwn) : false })
 }
+
+/**
+ * The count shown with the account's vote or like made here. A count loaded
+ * since the last change includes it already.
+ * @param {string} key
+ * @param {number | null} count
+ * @param {boolean} hasOwn whether the account has its vote or like
+ */
+function countWithOwn(key, count, hasOwn) {
+  const known = shownCounts.get(key)
+  if (count == null || known?.count !== count) return count
+  return count + (hasOwn ? 1 : 0) - (known.includesOwn ? 1 : 0)
+}
+
 /** @param {string} error */
 const voteFailed = error => i18n.global.t('YouTube Account.Vote Failed', { error })
 /**
@@ -117,16 +133,20 @@ export function getPollVote(postId) {
  * @param {string} postId
  * @param {string} channelId the post's channel
  * @param {number} choiceIndex
- * @param {number | null} totalVotes the vote count shown, without the vote
+ * @param {number | null} totalVotes the vote count as loaded
  */
 export function togglePollVote(postId, channelId, choiceIndex, totalVotes) {
   // Votes as the channel that clicked, even after a switch while they go out.
   const account = store.getters.getYouTubeAccount
   const key = getKey(account, postId)
-  if (votes.get(key) === null) baseCounts.set(`votes\n${key}`, totalVotes)
-  const vote = votes.get(key) !== choiceIndex
-  votes.change(key, vote ? choiceIndex : null, () => voteInYouTubePoll(postId, channelId, choiceIndex, vote, account),
-    voteFailed, () => { if (vote) loadPollResults(postId, channelId) })
+  const previous = votes.get(key)
+  rememberCount(`votes\n${key}`, totalVotes, previous !== null)
+  const next = previous === choiceIndex ? null : choiceIndex
+  // Voting for another choice moves the vote, and taking it back names the choice.
+  votes.change(key, next, confirmed => next === null
+    ? voteInYouTubePoll(postId, channelId, confirmed, false, account)
+    : voteInYouTubePoll(postId, channelId, next, true, account),
+  voteFailed, () => { if (next !== null) loadPollResults(postId, channelId) })
 }
 
 /**
@@ -135,13 +155,13 @@ export function togglePollVote(postId, channelId, choiceIndex, totalVotes) {
  * @param {string} channelId the post's channel
  * @param {number} choiceIndex
  * @param {boolean} isCorrect
- * @param {number | null} totalVotes the answer count shown, without the answer
+ * @param {number | null} totalVotes the answer count as loaded
  */
 export function answerQuiz(postId, channelId, choiceIndex, isCorrect, totalVotes) {
   const account = store.getters.getYouTubeAccount
   const key = getKey(account, postId)
   if (votes.get(key) !== null) return
-  baseCounts.set(`votes\n${key}`, totalVotes)
+  rememberCount(`votes\n${key}`, totalVotes, false)
   votes.change(key, choiceIndex, () => voteInYouTubePoll(postId, channelId, choiceIndex, true, account, isCorrect), voteFailed)
 }
 
@@ -200,18 +220,19 @@ export function getPostRating(postId) {
  * @param {string} postId
  * @param {string} channelId the post's channel
  * @param {'LIKE' | 'DISLIKE'} type
- * @param {number | null} likeCount the like count shown, without the rating
+ * @param {number | null} likeCount the like count as loaded
  */
 export function ratePost(postId, channelId, type, likeCount) {
   const account = store.getters.getYouTubeAccount
   const key = getKey(account, postId)
   const previous = ratings.get(key)
-  if (previous === null) baseCounts.set(`likes\n${key}`, likeCount)
+  rememberCount(`likes\n${key}`, likeCount, previous === 'LIKE')
   const next = previous === type ? null : type
-  // Liking replaces a dislike and the reverse, like on YouTube.
-  const action = next === 'LIKE' ? 'like' : next === 'DISLIKE' ? 'dislike' : previous === 'LIKE' ? 'unlike' : 'undislike'
-  ratings.change(key, next, () => rateYouTubePost(postId, channelId, action, account),
-    error => i18n.global.t('YouTube Account.Rating Failed', { error }))
+  ratings.change(key, next, confirmed => {
+    // Liking replaces a dislike and the reverse, like on YouTube.
+    const action = next === 'LIKE' ? 'like' : next === 'DISLIKE' ? 'dislike' : confirmed === 'LIKE' ? 'unlike' : 'undislike'
+    return rateYouTubePost(postId, channelId, action, account)
+  }, error => i18n.global.t('YouTube Account.Rating Failed', { error }))
 }
 
 /**
