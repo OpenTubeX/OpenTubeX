@@ -1030,7 +1030,24 @@ function mergeReplies(replies, loadedReplies, incomingIds = new Set(indexComment
       (reply.replies ?? []).some(loaded => loaded.id === child.id))
     return kept.length > 0 ? { ...reply, replies: mergeReplies(kept, reply.replies ?? [], incomingIds, previous) } : reply
   })
-  return replies.filter(reply => !incomingIds.has(reply.id)).concat(merged)
+  return withoutComments(replies, incomingIds).concat(merged)
+}
+
+/**
+ * Comments without the ones with these IDs, also among their replies.
+ * Unchanged comments stay the same objects.
+ * @param {Comment[]} comments
+ * @param {Set<string>} ids
+ * @returns {Comment[]}
+ */
+function withoutComments(comments, ids) {
+  return comments.filter(comment => !ids.has(comment.id)).map(comment => {
+    if (!comment.replies?.length) return comment
+    const replies = withoutComments(comment.replies, ids)
+    return replies.length === comment.replies.length && replies.every((reply, index) => reply === comment.replies[index])
+      ? comment
+      : { ...comment, replies }
+  })
 }
 
 /**
