@@ -71,6 +71,7 @@ function fixture() {
     emit: noop,
     player: { addEventListener: noop, removeEventListener: noop, configure: noop, load: async () => {} },
     pendingMetadataSeek: null,
+    pendingFormatSwitchState: null,
     progressivePlayback: { value: false },
     bufferingConfig: { value: {} },
   }
@@ -122,6 +123,20 @@ test('Android loads the next SABR video while hidden when the ended video still 
   f.video.value.autoplay = true
   await f.loadPlaybackSource('fixture', null, 'sabr')
   assert.equal(loads, 1)
+})
+
+test('Android switches the format of SABR playback while hidden without waiting for the app', async () => {
+  const f = fixture()
+  f.context.process.env.IS_CAPACITOR = true
+  f.context.isAppHidden = () => true
+  f.context.pendingFormatSwitchState = { wasPaused: false, awaitingAutoplay: false }
+  f.context.waitForAndroidAppState = () => assert.fail('playback that keeps its service must not wait for the app')
+  let loads = 0
+  f.context.player.load = async () => { loads++ }
+  f.video.value.autoplay = true
+  await f.loadPlaybackSource('fixture', null, 'sabr')
+  assert.equal(loads, 1)
+  assert.equal(f.video.value.autoplay, true)
 })
 
 test('Android defers SABR autoplay during the visibility grace period', async () => {

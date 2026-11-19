@@ -1002,6 +1002,7 @@ Settings:
     Enable Seek History: Keçid tarixçəsini aktivləşdir
     Show Seek Bar Filmstrip: "İrəliləmə zolağı kadr lentini göstər"
     Continue Playback When Screen Is Locked: Ekran kilidləndikdə oynatmağa davam et
+    Switch to Audio in Background: 'Arxa fonda audio formatlarına keç'
     Ignore Headphone Controls: 'Qulaqlıq idarəetmələrinə məhəl qoyma'
     Voice-over Translation:
       Title: Səsli tərcümə
@@ -2410,6 +2411,7 @@ Tooltips:
     Enable Seek History: Tətbiq bağlanana qədər hər videoda haradan keçid etdiyinizi yadda saxlayır. Pleyerin parametrlər menyusunda keçid tarixçəsi siyahısını göstərir və onun klaviatura qısayollarını aktivləşdirir.
     Show Seek Bar Filmstrip: "İrəliləmə zolağının düyməsini sürüşdürdükdə keçəcəyiniz yerin ətrafındakı kadrlardan ibarət lent göstərilir, onun üzərinə yuxarı çəkmək isə dəqiq keçid edir. Deaktiv edildikdə, sürüşdürmə üzərinə gəldikdə olduğu kimi tək miniatür göstərir."
     Continue Playback When Screen Is Locked: Səsi arxa planda oynatmağa davam edir və Android media idarələrini təmin edir. Tətbiq artıq görünmədikdə oynatmanı dayandırmaq üçün bunu bağlayın.
+    Switch to Audio in Background: 'Tətbiq arxa fonda işlədikdə və ya ekran sönülü olduqda audio formatlarını oxudur, bu da məlumat və batareyaya qənaət edir. Şəkil içində şəkil rejimi videonu saxlayır. Tətbiqi yenidən açdıqda video qayıdır. Ekran kilidli olduqda oxutmanın davam etməsini tələb edir.'
     Ignore Headphone Controls: 'Bluetooth cihazlarından, simli qulaqlıqlardan və klaviaturaların media düymələrindən gələn oynatma, fasilə və keçmə əmrlərini nəzərə almır ki, qulaqcıqlara təsadüfi toxunuşlar oxutmanı dayandırmasın. Tətbiqdəki və media bildirişindəki idarəetmə vasitələri işləməyə davam edir.'
     Voice-over Translation: Tərcümə istədiyinizdə videonun ID-sini, müddətini və seçilmiş dili qeyri-rəsmi Yandex səsli tərcümə xidmətinə göndərir. İlkin olaraq bağlıdır.
     Hold to Speed Up: Cari oynatma sürətini müvəqqəti olaraq seçilmiş dəyərə vurmaq üçün oynadıcı üzərində Boşluq düyməsini və ya siçanın sol düyməsini basıb saxlayın.

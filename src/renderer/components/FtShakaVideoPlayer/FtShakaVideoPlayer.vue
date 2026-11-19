@@ -8275,6 +8275,11 @@ function handleEnterPictureInPicture(event) {
   syncPipToggleState(true)
 }
 
+/** iOS reports Picture-in-Picture through WebKit's presentation mode first. */
+function isPictureInPictureActive() {
+  return pictureInPictureActive.value || video.value?.webkitPresentationMode === 'picture-in-picture'
+}
+
 function handleLeavePictureInPicture() {
   pictureInPictureActive.value = false
   tabMediaCoordinator.setPictureInPicture(mediaTabId, false)
@@ -12695,7 +12700,9 @@ async function loadPlaybackSource(url, startTime, mimeType) {
   if (process.env.IS_CAPACITOR && !process.env.IS_IOS &&
     !props.localFilePlayback && mimeType === MANIFEST_TYPE_SABR &&
     mediaElement.autoplay && !initialAutoplayCanceled &&
-    mediaElement.played.length === 0 && isActiveTab.value) {
+    mediaElement.played.length === 0 && isActiveTab.value &&
+    // A format switch that resumes playback keeps its running service.
+    (pendingFormatSwitchState === null || pendingFormatSwitchState.wasPaused || pendingFormatSwitchState.awaitingAutoplay)) {
     // Android cannot start a fresh playback service from a hidden activity.
     // Metadata can finish after the app-state pause sweep, so defer this
     // initial load until foreground protection can be established, unless
@@ -13820,6 +13827,7 @@ defineExpose({
   hasPlaybackPosition,
   scrollMiniPlayerActive,
   presentedOutsideTab,
+  isPictureInPictureActive,
   getMiniPlayerHandoffHeight,
   exitPresentationModes,
 

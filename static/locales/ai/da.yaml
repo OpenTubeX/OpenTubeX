@@ -935,6 +935,7 @@ Settings:
       Unavailable: Kunne ikke justere afspilningskontrollerne.
     yt-dlp Streaming: "yt-dlp-streaming"
     Continue Playback When Screen Is Locked: 'Fortsæt afspilning, når skærmen er låst'
+    Switch to Audio in Background: 'Skift til lydformater i baggrunden'
     Ignore Headphone Controls: 'Ignorer hovedtelefonbetjening'
     Music Visualizer: Musikvisualisering
     Automatically Open Chapters: Åbn kapitler automatisk
@@ -2476,6 +2477,7 @@ Tooltips:
     Normalize Loudness: 'Skruer ned for videoer, der er højere end de fleste, så lydstyrken ikke springer mellem videoer. Stille videoer beholder deres lydstyrke. Virker kun for videoer, der er indlæst med den lokale API.'
     Pause on Stream Recovery: "Når videostreamen fejler, og afspilleren genindlæser den eller skifter til et andet format eller en anden motor, sættes afspilningen på pause, og fejlen vises øverst i afspilleren, indtil du afviser den. Når den er slået fra, fortsætter afspilningen, og fejlen vises kortvarigt som en notifikation."
     Continue Playback When Screen Is Locked: 'Fortsætter lydafspilning i baggrunden og viser Android-mediekontroller. Slå dette fra for at sætte på pause, når appen ikke længere er synlig.'
+    Switch to Audio in Background: 'Afspiller lydformater, mens appen kører i baggrunden, eller skærmen er slukket, hvilket sparer data og batteri. Billede-i-billede beholder videoen. Videoen vender tilbage, når du åbner appen igen. Kræver, at afspilningen fortsætter, når skærmen er låst.'
     Ignore Headphone Controls: 'Ignorerer afspilnings-, pause- og spring over-kommandoer fra Bluetooth-enheder, kablede hovedtelefoner og medietaster på tastaturer, så utilsigtede tryk på earbuds ikke afbryder afspilningen. Betjeningen i appen og i medienotifikationen virker stadig.'
     Enable Caption Translations: Når funktionen er slået til, vælger undertekstknappen og genvejen C automatisk et oversat spor på det foretrukne undertekstsprog, hvis videoen ikke har et tilsvarende originalspor.
     Use Quick Playback Speed Bar: Viser en linje til hurtig valg af afspilningshastighed blandt afspillerknapperne til højre. Hvis manuel lagring af afspilningshastighed for hver kanal er slået til, indeholder linjen også en knap til at gemme hastigheden for den aktuelle kanal.

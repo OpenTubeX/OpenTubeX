@@ -918,6 +918,7 @@ Settings:
       Unavailable: Nepodařilo se upravit ovládání přehrávání.
     yt-dlp Streaming: "Streamování přes yt-dlp"
     Continue Playback When Screen Is Locked: 'Pokračovat v přehrávání při zamčené obrazovce'
+    Switch to Audio in Background: 'Na pozadí přepnout na zvukové formáty'
     Ignore Headphone Controls: 'Ignorovat ovládání ze sluchátek'
     Music Visualizer: Hudební vizualizér
     Automatically Open Chapters: Automaticky otevírat kapitoly
@@ -2386,6 +2387,7 @@ Tooltips:
     Normalize Loudness: 'Ztiší videa, která jsou hlasitější než většina, aby hlasitost mezi videi neskákala. Tichá videa si zachovají svou hlasitost. Funguje jen u videí načtených přes lokální API.'
     Pause on Stream Recovery: "Když video stream selže a přehrávač ho znovu načte nebo přepne na jiný formát či engine, přehrávání se pozastaví a chyba zůstane v horní části přehrávače, dokud ji nezavřete. Když je vypnuto, přehrávání pokračuje a chyba se krátce zobrazí jako oznámení."
     Continue Playback When Screen Is Locked: 'Ponechá zvuk přehrávaný na pozadí a zpřístupní ovládání médií systému Android. Vypnutím se přehrávání pozastaví, jakmile aplikace přestane být viditelná.'
+    Switch to Audio in Background: 'Přehrává zvukové formáty, když aplikace běží na pozadí nebo je obrazovka vypnutá, což šetří data i baterii. Obraz v obraze video zachová. Video se vrátí, jakmile aplikaci znovu otevřete. Vyžaduje pokračování přehrávání při zamčené obrazovce.'
     Ignore Headphone Controls: 'Ignoruje příkazy k přehrávání, pozastavení a přeskočení z Bluetooth zařízení, kabelových sluchátek a multimediálních kláves na klávesnicích, aby náhodná klepnutí na sluchátka nepřerušila přehrávání. Ovládání v aplikaci a v oznámení médií funguje dál.'
     Enable Caption Translations: Pokud video neposkytuje odpovídající původní stopu, tlačítko titulků a klávesová zkratka C při zapnutí upřednostní automaticky přeloženou stopu v preferovaném jazyce titulků.
     Use Quick Playback Speed Bar: Zobrazí na pravé straně ovládacích prvků přehrávače panel rychlé volby rychlosti. Pokud je zapnuté ruční ukládání rychlosti přehrávání pro jednotlivé kanály, panel obsahuje také tlačítko pro uložení rychlosti aktuálního kanálu.

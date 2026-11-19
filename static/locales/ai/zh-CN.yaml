@@ -918,6 +918,7 @@ Settings:
       Unavailable: 无法调整播放控件。
     yt-dlp Streaming: "yt-dlp 流媒体"
     Continue Playback When Screen Is Locked: '屏幕锁定时继续播放'
+    Switch to Audio in Background: '在后台时切换到音频格式'
     Ignore Headphone Controls: '忽略耳机控制'
     Music Visualizer: 音乐可视化
     Automatically Open Chapters: 自动展开章节
@@ -2386,6 +2387,7 @@ Tooltips:
     Normalize Loudness: '降低比大多数视频更响的视频的音量，避免切换视频时音量忽高忽低。较安静的视频保持原有音量。仅适用于通过本地API加载的视频。'
     Pause on Stream Recovery: "当视频流失败且播放器重新加载它或切换到其他格式或引擎时，暂停播放，并在播放器顶部保留错误信息，直到你将其关闭。关闭此选项后，播放会继续，错误会以通知形式短暂显示。"
     Continue Playback When Screen Is Locked: '在后台继续播放音频并提供 Android 媒体控件。关闭此选项后，应用不再可见时将暂停播放。'
+    Switch to Audio in Background: '在应用于后台运行或屏幕关闭时播放音频格式，以节省流量和电量。画中画会保留视频。重新打开应用后会恢复视频。需要开启“屏幕锁定时继续播放”。'
     Ignore Headphone Controls: '忽略来自蓝牙设备、有线耳机和键盘媒体键的播放、暂停和跳过命令，避免误触耳机打断播放。应用内和媒体通知中的控件仍可正常使用。'
     Enable Caption Translations: 启用后，如果视频没有与首选字幕语言匹配的原始字幕轨道，字幕按钮和 C 快捷键将优先使用自动翻译的字幕轨道。
     Use Quick Playback Speed Bar: 在播放器控件右侧显示快速播放速度栏。如果启用了手动保存每个频道的播放速度，该栏还会显示用于保存当前频道播放速度的按钮。

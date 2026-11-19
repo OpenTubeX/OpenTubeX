@@ -925,6 +925,7 @@ Settings:
       Unavailable: Non se puideron axustar os controis de reprodución.
     yt-dlp Streaming: "Transmisión con yt-dlp"
     Continue Playback When Screen Is Locked: 'Continuar a reprodución coa pantalla bloqueada'
+    Switch to Audio in Background: 'Cambiar a formatos de audio en segundo plano'
     Ignore Headphone Controls: 'Ignorar os controis dos auriculares'
     Music Visualizer: Visualizador de música
     Automatically Open Chapters: Abrir os capítulos automaticamente
@@ -2448,6 +2449,7 @@ Tooltips:
     Normalize Loudness: 'Baixa o volume dos vídeos que soan máis forte ca maioría para que o volume non salte entre vídeos. Os vídeos baixos manteñen o seu volume. Só funciona cos vídeos cargados coa API local.'
     Pause on Stream Recovery: "Cando a emisión de vídeo falla e o reprodutor a volve cargar ou cambia a outro formato ou motor, a reprodución ponse en pausa e o erro queda na parte superior do reprodutor ata que o descartes. Se está desactivado, a reprodución continúa e o erro aparece brevemente como notificación."
     Continue Playback When Screen Is Locked: 'Mantén o audio reproducíndose en segundo plano e fornece controis multimedia de Android. Desactívao para pausar cando a aplicación deixe de estar visible.'
+    Switch to Audio in Background: 'Reproduce formatos de audio mentres a aplicación está en segundo plano ou a pantalla está apagada, o que aforra datos e batería. A imaxe en imaxe mantén o vídeo. O vídeo volve cando abres de novo a aplicación. Require continuar a reprodución coa pantalla bloqueada.'
     Ignore Headphone Controls: 'Ignora as ordes de reprodución, pausa e salto dos dispositivos Bluetooth, os auriculares con cable e as teclas multimedia dos teclados, para que os toques accidentais nos auriculares non interrompan a reprodución. Os controis da aplicación e da notificación multimedia seguen funcionando.'
     Enable Caption Translations: Cando está activado e o vídeo non ofrece unha pista orixinal no idioma preferido dos subtítulos, o botón de subtítulos e o atallo C dan prioridade a unha pista traducida automaticamente a ese idioma.
     Use Quick Playback Speed Bar: Amosa unha barra rápida de velocidade de reprodución nos controis da dereita do reprodutor. Se está activado o gardado manual da velocidade por canle, a barra tamén inclúe o botón para gardar a velocidade da canle actual.

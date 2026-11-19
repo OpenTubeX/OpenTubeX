@@ -37,6 +37,7 @@ export const DEVICE_LOCAL_SETTING_KEYS = new Set([
   'showMobileSeekPreview',
   'showProgressBarToast',
   'showTabPreviews',
+  'switchToAudioInBackground',
   'tabBarPosition',
   'tabLoadingIndicator',
   'twitchLiveNotifications',

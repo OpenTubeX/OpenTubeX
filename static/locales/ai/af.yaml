@@ -1165,6 +1165,7 @@ Settings:
     Show Seek Bar Filmstrip: "Wys soekbalk-filmstrook"
     Pause on Stream Recovery: Pouseer by stroomherstel
     Continue Playback When Screen Is Locked: Speel voort wanneer die skerm gesluit is
+    Switch to Audio in Background: 'Skakel in die agtergrond oor na klankformate'
     Ignore Headphone Controls: 'Ignoreer oorfoonkontroles'
     Voice-over Translation:
       Title: Stemoorvertaling
@@ -2657,6 +2658,7 @@ Tooltips:
     Show Seek Bar Filmstrip: "As jy die soekbalk se knop sleep, wys dit 'n strook rame rondom waar jy gaan land, en as jy daarop optrek, spoel jy presies. Wanneer gedeaktiveer, wys sleep 'n enkele duimnael, soos wanneer jy daaroor beweeg."
     Pause on Stream Recovery: Wanneer die videostroom misluk en die speler dit herlaai of na ’n ander formaat of enjin oorskakel, pouseer afspeel en hou die fout bo-aan die speler totdat u dit toemaak. Wanneer gedeaktiveer, gaan afspeel voort en verskyn die fout kortliks as ’n kennisgewing.
     Continue Playback When Screen Is Locked: Hou oudio in die agtergrond aan die speel en verskaf Android-mediakontroles. Skakel dit af om te pouseer wanneer die toep nie meer sigbaar is nie.
+    Switch to Audio in Background: 'Speel klankformate terwyl die app in die agtergrond loop of die skerm af is, wat data en battery spaar. Prent-in-prent behou die video. Die video keer terug wanneer jy die app weer oopmaak. Vereis dat afspeel voortgaan wanneer die skerm gesluit is.'
     Ignore Headphone Controls: 'Ignoreer speel-, pouse- en oorslaanopdragte van Bluetooth-toestelle, bedrade oorfone en mediasleutels op sleutelborde, sodat onbedoelde tikke op oordopjies nie die afspeel onderbreek nie. Kontroles in die toepassing en in die mediakennisgewing werk steeds.'
     Voice-over Translation: Stuur die video-ID, duur en gekose taal na die nie-amptelike Yandex-stemoorvertaaldiens wanneer u ’n vertaling versoek. By verstek gedeaktiveer.
     Hold to Speed Up: Hou die spasiebalk of linkermuisknoppie oor die speler in om die huidige afspeelspoed tydelik met die gekose waarde te vermenigvuldig.

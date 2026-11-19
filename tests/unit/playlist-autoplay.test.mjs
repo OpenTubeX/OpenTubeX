@@ -109,6 +109,7 @@ function harness({ laterPageError = null, backend = 'local' } = {}) {
     },
     defaultInterval: 5,
     addToYouTubeWatchHistory() {},
+    switchToAudioInBackground() {},
     $store: { getters: { getAvoidTranslation: 'never', getWellbeingPlaybackBlock: () => null }, commit() {} },
   }
   const tabMediaCoordinator = { releaseEndedPlayback() {} }

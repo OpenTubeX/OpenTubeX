@@ -138,6 +138,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     mobileRightSwipeAction: 'disabled',
     mobileFullscreenBrightness: false,
     continuePlaybackWhenScreenIsLocked: true,
+    switchToAudioInBackground: false,
     ignoreHeadphoneControls: false,
     externalLinkHandling: '',
     externalPlayer: '',

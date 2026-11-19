@@ -918,6 +918,7 @@ Settings:
       Unavailable: 再生コントロールを調整できませんでした。
     yt-dlp Streaming: "yt-dlp ストリーミング"
     Continue Playback When Screen Is Locked: '画面ロック中も再生を続ける'
+    Switch to Audio in Background: 'バックグラウンドで音声形式に切り替える'
     Ignore Headphone Controls: 'ヘッドホンの操作を無視'
     Music Visualizer: 音楽ビジュアライザー
     Automatically Open Chapters: チャプターを自動的に開く
@@ -2386,6 +2387,7 @@ Tooltips:
     Normalize Loudness: 'ほとんどの動画より音が大きい動画の音量を下げ、動画間で音量が急に変わらないようにします。音が小さい動画の音量はそのままです。内部 API で読み込んだ動画でのみ機能します。'
     Pause on Stream Recovery: "動画ストリームが失敗し、プレーヤーが再読み込みするか別の形式やエンジンに切り替えたとき、再生を一時停止し、閉じるまでエラーをプレーヤー上部に表示します。オフにすると再生は続行され、エラーは通知として短時間表示されます。"
     Continue Playback When Screen Is Locked: 'バックグラウンドで音声の再生を続け、Android のメディアコントロールを提供します。アプリが表示されなくなったときに一時停止するには無効にしてください。'
+    Switch to Audio in Background: 'アプリがバックグラウンドにあるときや画面がオフのときに音声形式で再生し、データ通信量とバッテリーを節約します。ピクチャー・イン・ピクチャーでは動画のままです。アプリを再び開くと動画に戻ります。画面ロック中も再生を続ける設定が必要です。'
     Ignore Headphone Controls: 'Bluetooth デバイス、有線ヘッドホン、キーボードのメディアキーからの再生、一時停止、スキップのコマンドを無視し、イヤホンへの誤タップで再生が中断されないようにします。アプリ内とメディア通知のコントロールは引き続き使用できます。'
     Enable Caption Translations: 有効にすると、指定した字幕言語の原文トラックが動画にない場合、字幕ボタンとCキーのショートカットで自動翻訳トラックを優先します。
     Use Quick Playback Speed Bar: プレーヤー右側の操作欄にクイック再生速度バーを表示します。チャンネルごとの再生速度を手動保存する設定が有効な場合は、現在のチャンネルに速度を保存するボタンも表示されます。

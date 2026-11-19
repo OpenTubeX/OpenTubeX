@@ -918,6 +918,7 @@ Settings:
       Unavailable: Taasesituse juhtelementide kohandamine ebaõnnestus.
     yt-dlp Streaming: "yt-dlp voogedastus"
     Continue Playback When Screen Is Locked: 'Jätka esitamist lukustatud ekraaniga'
+    Switch to Audio in Background: 'Lülitu taustal helivormingutele'
     Ignore Headphone Controls: 'Eira kõrvaklappide juhtnuppe'
     Music Visualizer: Muusika visualiseerija
     Automatically Open Chapters: Ava peatükid automaatselt
@@ -2389,6 +2390,7 @@ Tooltips:
     Normalize Loudness: 'Vaigistab videoid, mis on valjemad kui enamik, et helitugevus videote vahel ei hüppaks. Vaiksed videod säilitavad oma helitugevuse. Töötab ainult kohaliku API kaudu laaditud videotega.'
     Pause on Stream Recovery: "Kui videovoog ebaõnnestub ja mängija laadib selle uuesti või lülitub teisele vormingule või mootorile, peatatakse taasesitus ja viga jääb mängija ülaossa, kuni selle sulged. Kui see on välja lülitatud, jätkub taasesitus ja viga kuvatakse lühidalt teavitusena."
     Continue Playback When Screen Is Locked: 'Jätab heli taustal mängima ja pakub Androidi meediajuhtelemente. Lülita see välja, et esitus peatataks, kui rakendus pole enam nähtav.'
+    Switch to Audio in Background: 'Esitab helivorminguid, kui rakendus töötab taustal või ekraan on välja lülitatud, mis säästab andmesidet ja akut. Pilt pildis režiim säilitab video. Video naaseb, kui rakenduse uuesti avad. Eeldab, et esitus jätkub lukustatud ekraaniga.'
     Ignore Headphone Controls: 'Eirab Bluetooth-seadmetest, juhtmega kõrvaklappidest ja klaviatuuride meediaklahvidest tulevaid esitamise, pausi ja vahelejätmise käske, et kogemata kõrvaklappide puudutamine taasesitust ei katkestaks. Rakenduse ja meediateavituse juhtnupud töötavad edasi.'
     Enable Caption Translations: Kui see on lubatud ja videol pole eelistatud subtiitrikeeles sobivat originaalrada, eelistavad subtiitrinupp ja kiirklahv C automaatselt tõlgitud rada.
     Use Quick Playback Speed Bar: Kuvab paremal asuvates pleieri juhtelementides esituskiiruse kiirvalikuriba. Kui esituskiiruse kanalipõhine käsitsi salvestamine on lubatud, sisaldab riba ka praeguse kanali kiiruse salvestamise nuppu.
