@@ -1,8 +1,7 @@
-import { parseNotificationKey } from '../../notificationHistory.js'
 import store from '../store/index'
 import { suppressAndroidNotifications } from './androidBackgroundSync.js'
 import { capacitorNotificationHistory } from './capacitorNotificationHistory.js'
-import { closeCapacitorSystemNotifications, suppressDismissedAndroidNotifications } from './capacitorSystemNotifications.js'
+import { closeDeferredReminders, suppressDismissedAndroidNotifications } from './capacitorSystemNotifications.js'
 
 // Android announces uploads up to a week old, so older watches cannot match one.
 const WATCHED_WINDOW_MS = 8 * 24 * 60 * 60 * 1000
@@ -35,15 +34,8 @@ export function suppressWatchedAndroidNotifications() {
  */
 export function startAndroidNotificationSuppressions() {
   if (!process.env.IS_CAPACITOR || process.env.IS_IOS) return () => {}
-  capacitorNotificationHistory.getDismissals().then(dismissals => {
-    suppressDismissedAndroidNotifications(dismissals)
-    // That renderer cannot remove the reminders its sync marked read or removed,
-    // whose entries may be gone. Each was due before it was dismissed.
-    closeCapacitorSystemNotifications(dismissals.dismissals.flatMap(({ key, at }) => {
-      const target = parseNotificationKey(key)
-      return target?.kind === 'live-reminder' ? [{ ...target, createdAt: at }] : []
-    }))
-  })
+  capacitorNotificationHistory.getDismissals().then(suppressDismissedAndroidNotifications)
+  closeDeferredReminders()
   return store.watch(
     state => getRecentlyWatchedIds(state.history.historyCacheSorted).join('\n'),
     ids => suppressAndroidNotifications({ watched: ids ? ids.split('\n') : [] }),

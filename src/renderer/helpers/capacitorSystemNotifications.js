@@ -86,15 +86,49 @@ export function suppressDismissedAndroidNotifications({ readThrough, clearedThro
   suppressAndroidNotifications({ dismissed, dismissedThrough: Math.max(readThrough, clearedThrough) })
 }
 
+const DEFERRED_REMINDERS_KEY = 'opentubex-deferred-reminder-closes'
+const DEFERRED_REMINDER_LIMIT = 200
+
+/** @returns {{ kind: string, path: string, createdAt: number }[]} */
+function readDeferredReminders() {
+  try {
+    const value = JSON.parse(localStorage.getItem(DEFERRED_REMINDERS_KEY) ?? '[]')
+    return Array.isArray(value) ? value : []
+  } catch {
+    return []
+  }
+}
+
+/** @param {import('../../notificationHistory').NotificationHistoryEntry[]} entries */
+function deferReminderCloses(entries) {
+  const reminders = entries.filter(entry => entry.kind === 'live-reminder')
+    .map(({ kind, path, createdAt }) => ({ kind, path, createdAt }))
+  if (reminders.length === 0) return
+  localStorage.setItem(DEFERRED_REMINDERS_KEY,
+    JSON.stringify([...readDeferredReminders(), ...reminders].slice(-DEFERRED_REMINDER_LIMIT)))
+}
+
+/** Removes the reminders that were read or removed while the app was closed. */
+export function closeDeferredReminders() {
+  const reminders = readDeferredReminders()
+  if (reminders.length === 0) return
+  localStorage.removeItem(DEFERRED_REMINDERS_KEY)
+  return closeCapacitorSystemNotifications(reminders)
+}
+
 /**
  * Removes the system notifications of entries that were read or removed.
  * @param {import('../../notificationHistory').NotificationHistoryEntry[]} entries
  */
 export async function closeCapacitorSystemNotifications(entries) {
-  // The hidden renderer lacks the notification plugins. Android removes the
-  // notifications it showed once told of the dismissals, and the app removes
-  // reminders when it opens.
-  if (!process.env.IS_CAPACITOR || isAndroidBackgroundRenderer) return
+  if (!process.env.IS_CAPACITOR) return
+  if (isAndroidBackgroundRenderer) {
+    // This renderer lacks the notification plugins. Android removes the
+    // notifications it showed once told of the dismissals, and the app removes
+    // the reminders when it opens.
+    deferReminderCloses(entries)
+    return
+  }
   /** @type {Map<string, number>} */
   const reminders = new Map()
   const uploads = []
