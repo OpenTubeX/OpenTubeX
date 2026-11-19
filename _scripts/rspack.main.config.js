@@ -3,6 +3,7 @@ const fs = require('fs/promises')
 const { rspack } = require('@rspack/core')
 const getMinimizers = require('./minimizers')
 const ProcessBoundaryPlugin = require('./ProcessBoundaryPlugin')
+const getPersistentCache = require('./persistentCache')
 
 const isDevMode = process.env.NODE_ENV === 'development'
 
@@ -11,6 +12,7 @@ const config = {
   name: 'main',
   mode: process.env.NODE_ENV,
   devtool: isDevMode ? 'eval-cheap-module-source-map' : false,
+  ...getPersistentCache(isDevMode),
   entry: {
     main: path.join(__dirname, '../src/main/index.js'),
     subscriptionBackgroundWorker: path.join(__dirname, '../src/main/subscriptionBackgroundWorker.js'),
