@@ -81,11 +81,11 @@ test.describe('channel settings', () => {
     await expect(breadcrumbSync).toBeVisible()
     await breadcrumbSync.click()
 
+    // Channel volumes stay on each device, so they never join the sync exclusions.
     const channelSettingKeys = [
       'channelPlaybackSpeeds',
       'channelVideoQualities',
-      'channelSubtitlesStates',
-      'channelVolumes'
+      'channelSubtitlesStates'
     ]
     await expect.poll(() => page.evaluate(() => {
       const store = window.$store
