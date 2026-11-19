@@ -1465,6 +1465,23 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     updateScrollMiniVolumeBarFill()
   }
 
+  function toggleScrollMiniMuted() {
+    const videoElement = video.value
+    if (!videoElement) return
+
+    showScrollMiniVolume()
+
+    if (videoElement.muted || videoElement.volume === 0) {
+      // Dragging the slider to 0 also mutes, so unmuting needs an audible volume.
+      if (videoElement.volume === 0) videoElement.volume = 1
+      videoElement.muted = false
+    } else {
+      videoElement.muted = true
+    }
+
+    syncScrollMiniPlayerState()
+  }
+
   function handleScrollMiniVolumeMouseEnter() {
     if (!scrollMiniPlayerActive.value) return
 
@@ -2064,6 +2081,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     updateScrollMiniDragHandleContrast,
     updateScrollMiniPlayer,
     updateScrollMiniVideoAspectRatio,
+    toggleScrollMiniMuted,
     updateScrollMiniVolume,
   }
 }
