@@ -880,8 +880,10 @@ function schedulePremiereStartInvalidation() {
   }, Math.min(timestamp - now + 1, MAX_TIMEOUT_DELAY))
 }
 
+// Like FtListFeedItem, a saved position within the last 2 seconds already counts as the end
 const canMarkAsFullySeen = computed(() => canMarkAsWatched.value &&
-  Number.isFinite(lengthSeconds.value) && lengthSeconds.value > 0)
+  Number.isFinite(lengthSeconds.value) && lengthSeconds.value > 0 &&
+  !(isWatched.value && historyEntry.value.watchProgress >= lengthSeconds.value - 2))
 
 const watchProgress = computed(() => {
   if (!historyEntryExists.value || !watchedProgressSavingEnabled.value) {
