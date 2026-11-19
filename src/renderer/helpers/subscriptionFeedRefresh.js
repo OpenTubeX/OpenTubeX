@@ -66,8 +66,20 @@ export function refreshSubscriptionFeed(category, options) {
   }
 
   return new Promise((resolve, reject) => {
+    let resolved = false
     refreshSubscriptionFeeds([category, ...otherFeeds], options, (feed, result) => {
-      if (feed === category) resolve(result)
-    }).then(() => resolve(null), reject)
+      if (feed === category) {
+        resolved = true
+        resolve(result)
+      }
+    }).then(() => resolve(null), (error) => {
+      // The caller only waits for its own feed, so nothing else would see a
+      // later feed's error
+      if (resolved) {
+        console.error(error)
+      } else {
+        reject(error)
+      }
+    })
   })
 }
