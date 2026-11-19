@@ -1014,39 +1014,39 @@ function updatePinnedSnapshot(rootId, update) {
 /**
  * Replies posted here before the thread's replies loaded come back from
  * YouTube, so their loaded versions replace them. Replies deleted or edited
- * while loading stay that way. A loaded reply keeps the replies posted here
- * under it, as its own replies load separately.
+ * while loading stay that way. A loaded reply keeps the replies posted under
+ * it here, as its own replies load separately, also when flat replies, as
+ * from Invidious, move it.
  * @param {Comment[]} replies
  * @param {Comment[]} loadedReplies
  * @param {Set<string>} [incomingIds] every comment ID in the response
+ * @param {Map<string, Comment>} [previous] every comment before the response, by ID
  * @returns {Comment[]}
  */
-function mergeReplies(replies, loadedReplies, incomingIds = getCommentIds(loadedReplies)) {
-  const loadedIds = new Set(loadedReplies.map(reply => reply.id))
-  const existing = new Map(replies.map(reply => [reply.id, reply]))
+function mergeReplies(replies, loadedReplies, incomingIds = new Set(indexComments(loadedReplies).keys()), previous = indexComments(replies)) {
   const merged = withLocalCommentChanges(loadedReplies).map(reply => {
-    // Flat replies, as from Invidious, can bring them elsewhere in the response.
-    const kept = (existing.get(reply.id)?.replies ?? []).filter(child => !incomingIds.has(child.id) ||
+    // Replies the response has elsewhere show there instead.
+    const kept = (previous.get(reply.id)?.replies ?? []).filter(child => !incomingIds.has(child.id) ||
       (reply.replies ?? []).some(loaded => loaded.id === child.id))
-    return kept.length > 0 ? { ...reply, replies: mergeReplies(kept, reply.replies ?? [], incomingIds) } : reply
+    return kept.length > 0 ? { ...reply, replies: mergeReplies(kept, reply.replies ?? [], incomingIds, previous) } : reply
   })
-  return replies.filter(reply => !loadedIds.has(reply.id)).concat(merged)
+  return replies.filter(reply => !incomingIds.has(reply.id)).concat(merged)
 }
 
 /**
- * The IDs of comments and all their replies.
+ * Comments and all their replies, by ID.
  * @param {Comment[]} comments
- * @returns {Set<string>}
+ * @returns {Map<string, Comment>}
  */
-function getCommentIds(comments) {
-  const ids = new Set()
+function indexComments(comments) {
+  const index = new Map()
   /** @param {Comment[]} list */
   const add = list => list.forEach(comment => {
-    ids.add(comment.id)
+    index.set(comment.id, comment)
     add(comment.replies ?? [])
   })
   add(comments)
-  return ids
+  return index
 }
 
 /**
