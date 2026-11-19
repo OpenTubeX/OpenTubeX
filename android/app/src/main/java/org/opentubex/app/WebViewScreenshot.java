@@ -112,6 +112,11 @@ final class WebViewScreenshot {
         webView.postInvalidateOnAnimation();
     }
 
+    /** Copies the WebView's pixels as they are on screen now. */
+    static void copyVisible(Activity activity, WebView webView, Consumer<Bitmap> success, Consumer<Exception> failure) {
+        copyRendered(activity, webView, 0, 1, webView.getWidth(), webView.getHeight(), success, failure);
+    }
+
     private static void copyRendered(Activity activity, WebView webView, double top, double height,
                                      int width, int targetHeight, Consumer<Bitmap> success, Consumer<Exception> failure) {
         if (!webView.isAttachedToWindow() || webView.getWidth() <= 0 || webView.getHeight() <= 0) {
