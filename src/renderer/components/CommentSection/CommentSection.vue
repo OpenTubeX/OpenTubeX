@@ -1005,8 +1005,8 @@ function mergeReplies(replies, loadedReplies) {
 }
 
 /**
- * The people in the loaded comments, which the comment box suggests for
- * mentions: those in the thread first, as on YouTube.
+ * The people the comment box suggests for mentions: those in the thread for
+ * a reply, as on YouTube, and those in the loaded comments otherwise.
  * @param {string | null} threadId
  * @returns {import('./youTubeComments').MentionCandidate[]}
  */
@@ -1025,9 +1025,13 @@ function getMentionCandidates(threadId) {
     }
     comment.replies?.forEach(add)
   }
-  const thread = threadId ? commentData.value.find(comment => comment.id === threadId) : undefined
-  if (thread) add(thread)
-  commentData.value.forEach(add)
+  if (threadId) {
+    // Includes the saved snapshot of a personally pinned thread that isn't loaded.
+    const thread = commentEntries.value.find(({ comment }) => comment.id === threadId)?.comment
+    if (thread) add(thread)
+  } else {
+    commentData.value.forEach(add)
+  }
   return [...candidates.values()]
 }
 
