@@ -128,6 +128,7 @@
           {{ t('Search Filters.Cookie Search Failed') }}
         </p>
         <FtElementList
+          appear
           :data="shownResults"
         />
         <!-- Recheck visibility when results are appended or replaced. -->

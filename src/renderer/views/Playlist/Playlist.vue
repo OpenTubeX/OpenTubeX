@@ -117,6 +117,7 @@
         <template v-if="visiblePlaylistItems.length > 0">
           <FtElementList
             v-if="playlistViewType !== 'list'"
+            appear
             :data="visiblePlaylistItems"
             data-type="video"
             display="grid"
