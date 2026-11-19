@@ -1301,7 +1301,8 @@
   box-sizing: border-box;
   align-items: center;
   gap: 8px;
-  padding-block-end: 0;
+  // Line the last action up with the quick speeds and keep it off the seek bar.
+  padding-block-end: 14px;
   overflow: hidden auto;
   overscroll-behavior: contain;
 }
@@ -1341,6 +1342,25 @@
 
 :global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsExternalMetadata) {
   padding-block: 0;
+}
+
+// Center the linked video in the 40px band the player leaves above the
+// navigation (its 48px reserve minus the route's top gap), lined up with the
+// seek bar. Landscape phones place the metadata beside the player instead.
+@media not ((orientation: landscape) and (height <= 600px)) {
+  :global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsExternalMetadata) {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 6px;
+    min-block-size: 40px;
+    padding-inline: 12px;
+  }
+
+  :global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsLinkedVideo) {
+    margin-block-start: 0;
+  }
 }
 
 :global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsMetadataAction) {

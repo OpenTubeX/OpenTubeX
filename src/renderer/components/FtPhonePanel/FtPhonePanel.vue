@@ -7,6 +7,7 @@
       :enabled="enabled"
       :open="open"
       :title="title"
+      :icon="icon"
       below-player
       @close="emit('close')"
       @closed="handleClosed"
@@ -50,7 +51,8 @@ const props = defineProps({
   open: { type: Boolean, default: false },
   customHeader: { type: Boolean, default: false },
   fill: { type: Boolean, default: false },
-  title: { type: String, required: true }
+  title: { type: String, required: true },
+  icon: { type: Array, default: null }
 })
 const emit = defineEmits(['close'])
 const panelRendered = ref(props.open)

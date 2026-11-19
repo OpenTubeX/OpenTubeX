@@ -81,7 +81,12 @@
         class="titleContainer"
       >
         <h4 class="title">
-          {{ isReplay ? t('Video.Live Chat Replay') : t('Video.Live Chat') }}
+          <FtIcon
+            v-if="phonePanelHeader"
+            class="phonePanelTitleIcon"
+            :icon="['fas', 'message']"
+            aria-hidden="true"
+          />{{ isReplay ? t('Video.Live Chat Replay') : t('Video.Live Chat') }}
           <span
             v-if="!hideVideoViews && watchingCount !== null"
             class="watchingCount"

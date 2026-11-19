@@ -1294,9 +1294,10 @@
   z-index: 100;
 }
 
-.app.capacitorTabs :deep(.ftVideoPlayer[data-inline-mini-drag] .shaka-controls-container) {
+.app.capacitorTabs :deep(.ftVideoPlayer[data-inline-mini-drag] :is(.shaka-controls-container, .shortsTopControls)) {
   opacity: 0;
   pointer-events: none;
+  transition: none;
 }
 
 

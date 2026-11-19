@@ -61,7 +61,7 @@ import { DBSettingHandlers, DBWatchStatsHandlers } from '../../../datastores/han
 import { syncLiveReminders } from '../../helpers/sync-live-reminders'
 import { liveReminder } from '../../helpers/liveReminders'
 import { syncNotificationDismissals } from '../../helpers/sync-notification-dismissals'
-import { notificationHistory } from '../../helpers/notificationHistory'
+import { getSettingsNotificationTarget, markOverNotificationsRead, notificationHistory, recordNotification } from '../../helpers/notificationHistory'
 import { MAIN_PROFILE_ID } from '../../../constants'
 import { historyChanges } from '../../helpers/sync-history-changes.js'
 import {
@@ -410,12 +410,26 @@ function isSameSyncAccount(settings, account) {
 // belongs to the app's renderer.
 const syncsNotifications = (process.env.IS_ELECTRON || process.env.IS_CAPACITOR) && !isAndroidBackgroundRenderer
 
-/** @param {boolean} allTabs */
+/** @param {boolean} allTabs false for a window that learns of a sync other windows announced */
 function showDataLossToast(allTabs) {
   const message = i18n.global.t('Settings.Sync Settings.Destructive Sync Blocked')
   const icon = ['fas', 'triangle-exclamation']
-  if (allTabs) showToastOnAllTabs(message, 15000, icon, 'open-sync-settings')
-  else showToast({ message, time: 15000, icon, buttonAction: 'open-sync-settings' })
+  if (allTabs) {
+    showToastOnAllTabs(message, 15000, icon, 'open-sync-settings')
+    recordNotification({
+      kind: 'sync-blocked',
+      ...getSettingsNotificationTarget('sync'),
+      title: i18n.global.t('Settings.Sync Settings.Sync Settings'),
+      body: message
+    })
+  } else {
+    showToast({ message, time: 15000, icon, buttonAction: 'open-sync-settings' })
+  }
+}
+
+/** A sync that finished, or signing out, leaves no deletions to review. */
+function markDataLossNotificationsRead() {
+  markOverNotificationsRead(entry => entry.kind === 'sync-blocked')
 }
 
 async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, automatic = false, remoteOnly = false } = {}) {
@@ -1215,6 +1229,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     }
     syncDeletions.release(deletions)
     commit('setSyncServerPendingDeletion', null)
+    markDataLossNotificationsRead()
     if (progressStarted) commit('setSyncServerLastResult', result)
     if (tabRevocationError) throw tabRevocationError
     finishProgress()
@@ -1964,6 +1979,7 @@ const actions = {
     commit('setSyncServerSessionExpired', false)
     commit('setSyncServerOtherDeviceSessions', [])
     commit('setSyncServerPendingDeletion', null)
+    markDataLossNotificationsRead()
     syncDeletions.clear()
     unsentSyncDeletionMarks.clear()
   },

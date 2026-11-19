@@ -1,6 +1,7 @@
 <template>
   <!-- Categories have portrait box art, so they get portrait columns -->
   <FtAutoGrid
+    :appear="appear"
     :grid="categories || layout === 'grid'"
     :youtube-style-shorts="categories"
     :item-count="results.length"
@@ -47,6 +48,11 @@ import FtListPlatformPlaylist from '../FtListPlatformPlaylist/FtListPlatformPlay
 import store from '../../store/index'
 
 const props = defineProps({
+  /** Animate the items the list mounts with, for lists that remount per tab or page */
+  appear: {
+    type: Boolean,
+    default: false
+  },
   /** @type {import('vue').PropType<import('../../../platforms/types').PlatformResult[]>} */
   results: {
     type: Array,

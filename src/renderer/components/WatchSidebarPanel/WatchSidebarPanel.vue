@@ -7,6 +7,7 @@
       :enabled="phoneEnabled"
       :open="phoneOpen"
       :title="title"
+      :icon="icon"
       :custom-header="customHeader"
       fill
       @close="emit('close', $event)"
@@ -29,6 +30,7 @@ import FtPhonePanel from '../FtPhonePanel/FtPhonePanel.vue'
 
 defineProps({
   title: { type: String, required: true },
+  icon: { type: Array, default: null },
   /** Docks the panel into the fullscreen player while set. */
   dockTarget: { type: Object, default: null },
   phoneEnabled: { type: Boolean, default: false },

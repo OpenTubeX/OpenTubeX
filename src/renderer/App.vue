@@ -737,11 +737,18 @@ import {
   shouldShowProgressStartToast,
   shouldUseProgressToast,
 } from './helpers/progressPresentation'
-import { fetchReleasePages, findUpdateReleases, formatReleaseChangelog, scheduleUpdateChecks } from './helpers/releaseUpdates'
+import { fetchReleasePages, findUpdateReleases, formatReleaseChangelog, isOlderRelease, scheduleUpdateChecks } from './helpers/releaseUpdates'
 import { copyToClipboard, isUnloadedBackgroundTabClick, openExternalLink, openInExternalPlayer, openInternalPath, shareLink, showToast } from './helpers/utils'
 import { getChannelLinkDetails, getChannelLinkMenuItems } from './helpers/channel-context-menu'
 import { initializeCapacitorLiveReminderActions } from './helpers/liveReminders'
-import { showInAppNotification, supportsNotificationHistory } from './helpers/notificationHistory'
+import {
+  getSettingsNotificationTarget,
+  markOverNotificationsRead,
+  recordNotification,
+  setUpdateNotificationHandler,
+  showInAppNotification,
+  supportsNotificationHistory
+} from './helpers/notificationHistory'
 import { getNotificationOpenUrl } from '../notificationHistory'
 import {
   addAndroidMediaSessionActionListener,
@@ -1656,9 +1663,13 @@ async function initializeManagedExternalSoftware(requestedUpdates = null) {
     } else {
       if (failures.length > 0) {
         const errors = failures.map(({ binary, result }) => `${binary}: ${managedToolErrorMessage(result, t)}`).join('; ')
-        showToast({
-          message: t('Settings.Download Settings.Managed Tools Download Error Template', { errors }),
-          icon: ['fas', 'circle-exclamation'],
+        const message = t('Settings.Download Settings.Managed Tools Download Error Template', { errors })
+        showToast({ message, icon: ['fas', 'circle-exclamation'] })
+        recordNotification({
+          kind: 'tool-update-failed',
+          ...getSettingsNotificationTarget('external-software'),
+          title: t('Settings.External Software Settings.External Software Settings'),
+          body: message
         })
       }
     }
@@ -2540,14 +2551,32 @@ function showAvailableUpdateToast() {
         label: t('See changes and update'),
         icon: ['fas', 'file-lines'],
         primary: true,
-        action: () => {
-          updateChangelog.value = renderUpdateChangelog()
-          showReleaseNotes.value = true
-        }
+        action: openAvailableUpdate
       }
     ]
   })
 }
+
+function openAvailableUpdate() {
+  updateChangelog.value = renderUpdateChangelog()
+  showReleaseNotes.value = true
+}
+
+/**
+ * Opens the update a notification announces. A tab that has not found it, for
+ * example because it is installed now or another tab found it, shows the
+ * release on GitHub instead. A newer update's notes include older ones.
+ * @param {string | undefined} tagName
+ */
+function openUpdateNotification(tagName) {
+  if (availableUpdate !== null && !isOlderRelease(availableUpdate.tagName, tagName ?? '')) {
+    store.dispatch('hideSettingsWindow')
+    openAvailableUpdate()
+  } else if (typeof tagName === 'string' && /^v[\w.-]+$/.test(tagName)) {
+    handleExternalLink(`https://github.com/OpenTubeX/OpenTubeX/releases/tag/${tagName}`)
+  }
+}
+setUpdateNotificationHandler(openUpdateNotification)
 
 async function checkForNewUpdates() {
   // Self-hosted servers are updated by their admin
@@ -2562,12 +2591,19 @@ async function checkForNewUpdates() {
     const availableReleases = await fetchReleasePages(releasesUrl, fetch, packageDetails.version)
     const releases = findUpdateReleases(availableReleases, packageDetails.version)
     if (releases.length === 0) {
+      // The announced update is installed. A check that finished late in
+      // another window must not dismiss a newer one it did not see.
+      markOverNotificationsRead(entry => entry.kind === 'app-update' &&
+        !isOlderRelease(packageDetails.version, entry.query?.version ?? ''))
       return
     }
 
     const release = releases[0]
     const tagName = release.tag_name
     const versionNumber = tagName.replace('v', '').replace('-beta', '')
+    // A newer release replaces the one announced before, also when this
+    // window announced it already and an older entry arrived late.
+    markOverNotificationsRead(entry => entry.kind === 'app-update' && isOlderRelease(entry.query?.version ?? '', tagName))
     // The toast for this release is open, was dismissed, or was answered already
     if (
       availableUpdate?.tagName === tagName ||
@@ -2601,6 +2637,13 @@ async function checkForNewUpdates() {
     changeLogTitle.value = t('Update to {version}', { version: release.name ?? tagName })
     availableUpdate = { tagName, versionNumber }
     showAvailableUpdateToast()
+    recordNotification({
+      kind: 'app-update',
+      path: '/update',
+      query: { version: tagName },
+      title: changeLogTitle.value,
+      body: t('Version {versionNumber} is now available.', { versionNumber })
+    })
   } catch (error) {
     console.error('errored while checking for updates', releasesUrl, error)
   }

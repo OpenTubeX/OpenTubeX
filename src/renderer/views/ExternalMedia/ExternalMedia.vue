@@ -407,6 +407,7 @@
             :open="mobilePanel === 'description'"
             class="phoneDescriptionPanel"
             :title="t('Description.Title')"
+            :icon="['fas', 'align-left']"
             @close="mobilePanel = null"
           >
             <WatchVideoDescription
@@ -425,6 +426,7 @@
             :phone-enabled="phonePanelsEnabled"
             :phone-open="chaptersSheetOpen"
             :title="t('Chapters.Chapters')"
+            :icon="['fas', 'list-ol']"
             transition="chapters-panel"
             @close="showChapters = false"
             @leaving="setSidebarPanelLeaving"

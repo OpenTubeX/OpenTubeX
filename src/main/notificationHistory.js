@@ -1,6 +1,7 @@
 // @ts-check
 import {
   addNotificationHistoryEntries,
+  addRecordedNotification,
   applyNotificationDismissals,
   areNotificationDismissalsEqual,
   getDismissedNotificationEntries,
@@ -121,6 +122,15 @@ export function createNotificationHistory({ file, dismissalsFile, onChange, onDi
         return added ? { ...current, entries, since: withEntry } : current
       }).then(() => added)
     },
+    /**
+     * Adds news the app showed itself, unless the history already holds it.
+     * @param {import('../notificationHistory.js').NotificationHistoryInput} notification
+     */
+    record: notification => change(current => {
+      const entries = addRecordedNotification(current.entries, notification)
+      // Entries that made room for the new one were not dismissed.
+      return { ...current, entries, since: entries }
+    }),
     /** @param {string} [id] Omit to mark every entry read. */
     markRead: id => change(current => {
       const entries = markNotificationHistoryRead(current.entries, id)

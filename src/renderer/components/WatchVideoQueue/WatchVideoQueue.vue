@@ -15,8 +15,8 @@
         <div class="queueHeading">
           <h3 class="queueTitle">
             <FtIcon
-              v-if="fullscreenOverlay"
-              class="queueTitleIcon"
+              v-if="fullscreenOverlay || phonePanelHeader"
+              class="queueTitleIcon phonePanelTitleIcon"
               :icon="['fas', 'queue']"
               aria-hidden="true"
             />

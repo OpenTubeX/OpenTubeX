@@ -431,6 +431,10 @@
     "ri": "list-unordered",
     "material": "list-rounded"
   },
+  "list-ol": {
+    "ri": "list-ordered",
+    "material": "format-list-numbered-rounded"
+  },
   "location-dot": {
     "ri": "map-pin-line",
     "material": "location-on-outline"

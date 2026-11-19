@@ -176,6 +176,9 @@ test('controls queue order, running jobs, bandwidth, and retry-all', async ({ ap
   ))).toBe('completed')
   const completed = page.locator('.downloadRow').filter({ hasText: 'Retry-all download' })
   await expect(completed).not.toContainText('Download complete')
+  // The bell keeps what became of downloads the user started, once for every tab.
+  await expect.poll(() => page.evaluate(async () => (await window.ftElectron.notificationHistory.list())
+    .filter(entry => entry.body.includes('Retry-all download')).map(entry => entry.kind))).toStrictEqual(['download-completed', 'download-failed'])
 })
 
 test('clears pause-all after every download is individually resumed', async ({ app, page }) => {
