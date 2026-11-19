@@ -53,12 +53,23 @@ test('ordinary watched action preserves playback progress', () => {
 test('fully seen requires a watchable video with a finite positive duration', () => {
   for (const allowed of [true, false]) {
     for (const length of [undefined, '', 0, -1, Infinity, NaN, 120]) {
-      const actual = vm.runInNewContext(eligibility + '\ncanMarkAsFullySeen.value', {
-        computed: fn => ({ value: fn() }),
-        canMarkAsWatched: { value: allowed },
-        lengthSeconds: { value: length }
-      })
-      assert.equal(actual, allowed && length === 120)
+      assert.equal(canMarkAsFullySeen({ allowed, length, entry: undefined }), allowed && length === 120)
     }
   }
+  // A position within the last 2 seconds already counts as fully watched.
+  assert.equal(canMarkAsFullySeen({ entry: { isWatched: true, watchProgress: 118 } }), false)
+  assert.equal(canMarkAsFullySeen({ entry: { isWatched: true, watchProgress: 60 } }), true)
+  assert.equal(canMarkAsFullySeen({ entry: { isWatched: false, watchProgress: 120 } }), true)
 })
+
+function canMarkAsFullySeen({ allowed = true, entry, ...rest }) {
+  // An undefined length is one of the cases.
+  const length = 'length' in rest ? rest.length : 120
+  return vm.runInNewContext(eligibility + '\ncanMarkAsFullySeen.value', {
+    computed: fn => ({ value: fn() }),
+    canMarkAsWatched: { value: allowed },
+    lengthSeconds: { value: length },
+    isWatched: { value: entry?.isWatched === true },
+    historyEntry: { value: entry }
+  })
+}
