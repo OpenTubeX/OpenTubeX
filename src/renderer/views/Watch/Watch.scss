@@ -157,6 +157,9 @@
 }
 
 .videoLayout {
+  // The watch page keeps its own spacing at every UI Density.
+  --ui-density: 1;
+
   @include watch-layout-areas;
 
   .videoPlayerPlaceholder {

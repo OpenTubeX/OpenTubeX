@@ -45,7 +45,7 @@ for (const reveal of ['back', 'resize']) {
       await resizeWindowWidth(app, page, 480)
       await expect(menu).toBeHidden()
       await chooseSelectOption(densitySelect(appearance), 'compact')
-      await expect.poll(() => page.evaluate(() => document.documentElement.style.getPropertyValue('--ui-density'))).toBe('0.5')
+      await expect.poll(() => page.evaluate(() => window.$store.getters.getUiDensity)).toBe('compact')
       if (reveal === 'back') {
         await page.locator('.settingsBackButton').click()
       } else {

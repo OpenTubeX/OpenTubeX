@@ -16,12 +16,12 @@ export const FULL_WIDTH_COLUMNS = -1
 // Matches the FtAutoGrid gap at the Default UI Density.
 const GRID_GAP = 8
 
-function getDefaultGridColumnCount(gridWidth, viewportWidth, gap) {
+function getDefaultGridColumnCount(gridWidth, viewportWidth) {
   // Start with two columns on phones, then scale the resulting card width
   // directly so every thumbnail slider step visibly changes its size.
   return Math.max(
     viewportWidth <= PHONE_THUMBNAIL_VIEWPORT_WIDTH ? 2 : 1,
-    Math.floor((gridWidth + gap) / (DEFAULT_GRID_ITEM_SIZE + gap))
+    Math.floor((gridWidth + GRID_GAP) / (DEFAULT_GRID_ITEM_SIZE + GRID_GAP))
   )
 }
 
@@ -68,7 +68,8 @@ export function getThumbnailGridStyles(thumbnailSize, gridWidth = 0, viewportWid
     size = (gridWidth - gaps) / columns
     stretch = `calc((100% - ${widthAdjustment + gaps}px) / ${columns})`
   } else if (gridWidth > 0) {
-    const columnCount = getDefaultGridColumnCount(gridWidth, viewportWidth, gap)
+    // Every UI Density shows as many columns as Default, sized with its own gap.
+    const columnCount = getDefaultGridColumnCount(gridWidth, viewportWidth)
     const gaps = (columnCount - 1) * gap
     size = (gridWidth - gaps) / columnCount * scale
     stretch = `calc((100% - ${widthAdjustment + gaps}px) * ${scale / columnCount})`
