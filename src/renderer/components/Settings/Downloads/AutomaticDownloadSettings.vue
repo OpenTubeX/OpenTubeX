@@ -67,7 +67,7 @@
           class="channelRules"
         >
           <li
-            v-for="channel in visibleChannels"
+            v-for="channel in displayedChannels"
             :key="channel.id"
             class="channelRule"
           >
@@ -216,6 +216,21 @@
             </div>
           </li>
         </ul>
+        <FtAutoLoadNextPageWrapper
+          v-if="hasMoreChannels"
+          :key="channelPage"
+          @load-next-page="channelPage++"
+        >
+          <FtFlexBox>
+            <FtButton
+              :label="t('Channels.Load More Channels')"
+              :icon="['fas', 'arrow-down']"
+              background-color="var(--primary-color)"
+              text-color="var(--text-with-main-color)"
+              @click="loadMoreChannels"
+            />
+          </FtFlexBox>
+        </FtAutoLoadNextPageWrapper>
       </div>
     </div>
   </FtSettingsSubpage>
@@ -227,7 +242,9 @@ import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import FtAutoLoadNextPageWrapper from '../../FtAutoLoadNextPageWrapper.vue'
 import FtButton from '../../FtButton/FtButton.vue'
+import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
 import FtInput from '../../FtInput/FtInput.vue'
 import FtSelect from '../../FtSelect/FtSelect.vue'
 import FtSettingsSubpage from '../../FtSettingsSubpage/FtSettingsSubpage.vue'
@@ -241,6 +258,7 @@ import {
 } from '../../../helpers/automaticDownloadRules'
 import { DEFAULT_DOWNLOAD_TEMPLATES } from '../../../helpers/downloadTemplates'
 import { clampOverlayScrollTop } from '../../../helpers/overlayScrollbars'
+import { useListPagination } from '../../../composables/useListPagination'
 
 const { locale, t } = useI18n()
 // Electron cannot detect metered connections; Android exposes both states.
@@ -249,6 +267,8 @@ const requireUnmetered = computed(() => store.getters.getYtDlpAutomaticDownloads
 const requireCharging = computed(() => store.getters.getYtDlpAutomaticDownloadsRequireCharging)
 const showManager = ref(false)
 const searchQuery = ref('')
+// Mount rule editors in batches so large subscription lists open quickly.
+const channelsPerPage = 24
 const automaticDownloadsScroller = useTemplateRef('automaticDownloadsScroller')
 const automaticDownloadsContent = useTemplateRef('automaticDownloadsContent')
 
@@ -259,6 +279,7 @@ watch(showManager, async (open) => {
   const generation = ++observationGeneration
   stopObservingContent()
   if (!open) return
+  resetChannelPage()
 
   await nextTick()
   if (generation !== observationGeneration || !showManager.value) return
@@ -299,6 +320,14 @@ const visibleChannels = computed(() => {
   return channels.value.filter(channel => (
     (channel.name || '').toLocaleLowerCase().includes(query) || channel.id.toLocaleLowerCase().includes(query)
   ))
+})
+
+const { page: channelPage, hasMore: hasMoreChannels, displayedItems: displayedChannels, reset: resetChannelPage, loadMore: loadMoreChannels } = useListPagination(visibleChannels, {
+  pageSize: channelsPerPage,
+  append: true,
+  resetOn: searchQuery,
+  scrollTarget: automaticDownloadsScroller,
+  focusItem: index => automaticDownloadsContent.value?.querySelectorAll('.channelToggle .switch-input')[index]?.focus()
 })
 
 const customTemplates = computed(() => {

@@ -21,7 +21,8 @@ test.describe('channel settings automatic loading', { tag: '@scale' }, () => {
 
   for (const list of [
     { section: 'subscription', button: 'Subscription settings', scroller: '.channelSettingsScroller', entry: '.channelSettings' },
-    { section: 'playback', button: 'Manage Saved Channels (50)', scroller: '.channelListContainer', entry: '.channelEntry' }
+    { section: 'playback', button: 'Manage Saved Channels (50)', scroller: '.channelListContainer', entry: '.channelEntry' },
+    { section: 'download', button: 'Manage Automatic Downloads (0)', scroller: '.automaticDownloadsScroller', entry: '.channelRule' }
   ]) {
     test(`${list.section} settings append channels when the bottom spinner enters view`, async ({ app, page, attachScreenshot }) => {
       await goToSettingsSection(page, list.section)
