@@ -2708,15 +2708,16 @@ async function getCommentRepliesLocal(index, commentId = null) {
 
     console.error(err)
 
+    // Invidious can load a video comment's replies from the same token.
+    const canFallBack = !props.isPostComments &&
+      backendFallback.value &&
+      backendPreference.value === 'local' &&
+      invidiousReplyToken &&
+      comment &&
+      replyTokens.get(comment.id) === continuation
+
     if (isMissingReplyResponseError(err)) {
-      if (
-        !props.isPostComments &&
-        backendFallback.value &&
-        backendPreference.value === 'local' &&
-        invidiousReplyToken &&
-        comment &&
-        replyTokens.get(comment.id) === continuation
-      ) {
+      if (canFallBack) {
         showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
         await getCommentRepliesInvidious(index, commentId, invidiousReplyToken, comment, continuation)
         return
@@ -2740,14 +2741,11 @@ async function getCommentRepliesLocal(index, commentId = null) {
 
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
-    if (backendFallback.value && backendPreference.value === 'local') {
+    if (canFallBack) {
       showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
-      if (props.isPostComments) {
-        getPostCommentsInvidious()
-      } else {
-        getCommentDataInvidious()
-      }
+      await getCommentRepliesInvidious(index, commentId, invidiousReplyToken, comment, continuation)
     } else {
+      // The comments stay, as another backend could only load them again from the first page.
       isLoading.value = false
     }
   }

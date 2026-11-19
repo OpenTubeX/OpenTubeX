@@ -1281,6 +1281,44 @@ test.describe('manual comment loading', () => {
     await expect(comment.locator('.commentReplyBranch')).toHaveCount(0)
   })
 
+  test.describe('with the backend fallback', () => {
+    test.use({ seed: { settings: { ...WATCH_PAGE_SEED, autoLoadComments: false, backendFallback: true } } })
+
+    test('a failed reply page falls back to Invidious for those replies only', async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page)
+      await openMockedVideo(page)
+      await page.locator('.getCommentsTitle').click()
+      await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
+      const threads = page.locator('.commentThread')
+      const threadCount = await threads.count()
+      const comments = page.locator('.comment')
+      const comment = comments.nth(await comments.evaluateAll(elements => (
+        elements.findIndex(element => element.querySelector('.commentReplyRootToggle'))
+      )))
+
+      await page.route(/\/youtubei\/v1\/next/, route => route.fulfill({ status: 500, contentType: 'application/json', body: '{}' }), { times: 1 })
+      await page.route('**/api/v1/comments/**', route => route.fulfill({
+        json: {
+          comments: [{
+            commentId: 'UgInvidiousReply',
+            author: '@replier',
+            authorId: 'UCreplier0000000000000000',
+            authorThumbnails: [],
+            contentHtml: 'Reply from Invidious',
+            content: 'Reply from Invidious',
+            likeCount: 0,
+            published: 1_700_000_000
+          }]
+        }
+      }))
+      await comment.locator('.commentReplyRootToggle .commentReplyContinuationButton').click()
+
+      await expect(comment.locator('.commentText', { hasText: 'Reply from Invidious' })).toBeVisible()
+      // The loaded comments stay as they were, without a second first page.
+      await expect(threads).toHaveCount(threadCount)
+    })
+  })
+
   test('reloading fullscreen comments scrolls back to the first comment', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
