@@ -50,7 +50,8 @@ const EXTRA_LAYOUT_PROPERTIES = new Set([
   'shape-outside', 'shape-margin'
 ])
 
-const ALL_LAYOUT_PROPERTIES = new Set([...UPSTREAM_LAYOUT_PROPERTIES, ...EXTRA_LAYOUT_PROPERTIES])
+// The upstream rule rejects `all` in transitions, but never sees variables.
+const VARIABLE_LAYOUT_PROPERTIES = new Set([...UPSTREAM_LAYOUT_PROPERTIES, ...EXTRA_LAYOUT_PROPERTIES, 'all'])
 
 // Keywords of the transition shorthand that are not property names.
 const TRANSITION_KEYWORDS = new Set([
@@ -95,6 +96,14 @@ function transitionedProperties(value, shorthand) {
   })
 }
 
+/** @param {import('postcss').Declaration} decl */
+function hasLaterTransitionProperty(decl) {
+  for (let next = decl.next(); next; next = next.next()) {
+    if (next.type === 'decl' && next.prop.toLowerCase() === 'transition-property') return true
+  }
+  return false
+}
+
 /** @type {import('stylelint').Rule} */
 const rule = (primary, secondary) => (root, result) => {
   const valid = stylelint.utils.validateOptions(result, ruleName,
@@ -128,7 +137,7 @@ const rule = (primary, secondary) => (root, result) => {
     const property = decl.prop.toLowerCase()
     if (property.startsWith('--')) {
       // The upstream rule never sees transitions declared through a variable.
-      if (property.includes('transition')) check(decl, 'a transition variable', ALL_LAYOUT_PROPERTIES, true)
+      if (property.includes('transition')) check(decl, 'a transition variable', VARIABLE_LAYOUT_PROPERTIES, true)
       return
     }
     if (decl.parent?.type === 'rule' && decl.parent.parent?.type === 'atrule' && /keyframes$/i.test(decl.parent.parent.name)) {
@@ -138,7 +147,9 @@ const rule = (primary, secondary) => (root, result) => {
       }
       return
     }
-    if (property === 'transition') check(decl, 'a transition', EXTRA_LAYOUT_PROPERTIES, true)
+    // Like the upstream rule, leave a shorthand to a later transition-property,
+    // which replaces its property list.
+    if (property === 'transition' && !hasLaterTransitionProperty(decl)) check(decl, 'a transition', EXTRA_LAYOUT_PROPERTIES, true)
     else if (property === 'transition-property') check(decl, 'a transition', EXTRA_LAYOUT_PROPERTIES, false)
   })
 }
