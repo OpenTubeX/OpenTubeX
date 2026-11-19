@@ -789,16 +789,16 @@ export class TabManager {
     return batch.promise
   }
 
-  /**
-   * @param {object} [options]
-   * @param {string | undefined | null} [openerTabId=this.activeTabId]
-   * @returns {Promise<TabInfo>}
-   */
   /** Whether the shown tab is incognito, so a window opened from it starts with an incognito tab */
   isPresentingIncognito() {
     return this.tabs.get(this.presentedTabId ?? this.activeTabId)?.isIncognito === true
   }
 
+  /**
+   * @param {object} [options]
+   * @param {string | undefined | null} [openerTabId=this.activeTabId]
+   * @returns {Promise<TabInfo>}
+   */
   async createTabWithPreferenceFromOpener(options = {}, openerTabId = this.activeTabId) {
     return this.createTabWithPreference(this._withOpenerTab(options, openerTabId))
   }
