@@ -9,7 +9,7 @@
     <template
       v-else
     >
-      <FtCard>
+      <FtCard class="postCard">
         <FtCommunityPost
           :data="post"
           :single-post="true"
@@ -173,3 +173,11 @@ watch([() => route.params.id, subscriptionCacheReady], ([postId, cacheReady]) =>
   }
 }, { immediate: true })
 </script>
+
+<style scoped>
+/* The card's 3px top padding suits headings with their own margin; the post
+   starts at the card's edge, so pad it like the bottom. */
+.ft-card.postCard {
+  padding-block-start: calc(16px * var(--ui-density));
+}
+</style>
