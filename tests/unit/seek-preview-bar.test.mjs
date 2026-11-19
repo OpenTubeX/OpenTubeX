@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
 import vm from 'node:vm'
+import { keepControlsShown } from '../../src/renderer/helpers/player/keepControlsShown.js'
 import { updateSponsorBlockSeekBarState } from '../../src/renderer/helpers/player/sponsorBlockSeekBar.js'
 
 const source = readFileSync(new URL('../../src/renderer/components/FtShakaVideoPlayer/player-components/SeekPreviewBar.js', import.meta.url), 'utf8')
@@ -74,6 +75,7 @@ function fixture() {
   }
   vm.runInNewContext(source.replace(/^import .*\n/gm, '').replace('export class', 'class'), {
     updateSponsorBlockSeekBarState,
+    keepControlsShown,
     SeekFilmstrip,
     store,
     isReducedMotionEnabled: () => false,
@@ -247,6 +249,17 @@ test('a mouse drag from anywhere on the track shows the filmstrip and keeps the 
   assert.equal(controls.config.showUIAlways, false)
   bar.onChangeEnd()
   assert.deepEqual([controls.shown, controls.hidden], [1, 2])
+
+  // Picture-in-Picture also keeps the controls up and can start or end during a drag.
+  press()
+  keepControlsShown(controls, 'pictureInPicture', true)
+  bar.onChangeEnd()
+  assert.equal(controls.config.showUIAlways, true, 'Ending the drag must not hide the Picture-in-Picture controls')
+  press()
+  keepControlsShown(controls, 'pictureInPicture', false)
+  assert.equal(controls.config.showUIAlways, true, 'Ending Picture-in-Picture must not hide the dragged controls')
+  bar.onChangeEnd()
+  assert.equal(controls.config.showUIAlways, false, 'Both ended, so the controls fade again')
 })
 
 test('pulling up starts precise seeking from the last dragged time, not a pending strip render', () => {

@@ -2172,6 +2172,7 @@ import { setupPhoneOptionsMenu } from '../../helpers/player/phoneOptionsMenu'
 import { CONTROL_BAR_MENUS, setupSubmenuScrolling } from '../../helpers/player/submenuScrolling'
 import { setupMenuTransitions } from '../../helpers/player/menuTransitions'
 import { mirrorControlStates } from '../../helpers/player/controlStateAttributes'
+import { keepControlsShown } from '../../helpers/player/keepControlsShown'
 import { setupCaptionCueLayout } from '../../helpers/player/captionCueLayout'
 import { chooseAndroidDirectory } from '../../helpers/androidStorage'
 import { isAppHidden, getAndroidAppActive, waitForAndroidAppState } from '../../helpers/appVisibility.js'
@@ -8182,14 +8183,12 @@ function handleLeavePictureInPicture() {
 }
 
 // The inline player only shows a poster during Picture-in-Picture, so keep its
-// controls up instead of fading them as over a playing video. Shaka's
-// configure() starts from a copy of this config, so the flag survives
-// reconfiguring. showUI() restarts the fade once Picture-in-Picture ends.
+// controls up instead of fading them as over a playing video. showUI()
+// restarts the fade once Picture-in-Picture ends.
 watch(pictureInPictureActive, active => {
   const controls = ui?.getControls()
-  const config = controls?.getConfig()
-  if (!config) return
-  config.showUIAlways = active
+  if (!controls) return
+  keepControlsShown(controls, 'pictureInPicture', active)
   controls.showUI()
 })
 
