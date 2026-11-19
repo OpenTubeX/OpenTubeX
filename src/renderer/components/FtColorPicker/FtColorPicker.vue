@@ -693,7 +693,8 @@ onBeforeUnmount(() => {
   min-block-size: 46px;
   border: 0;
   border-radius: var(--shape-corner-small);
-  padding: 6px 10px;
+  padding-block: 6px;
+  padding-inline: 10px;
   color: var(--primary-text-color);
   background: var(--card-bg-color);
   backdrop-filter: var(--card-bg-blur, none);
@@ -810,14 +811,14 @@ onBeforeUnmount(() => {
   cursor: pointer;
 }
 
-.pickerHeaderAction:not(:disabled):hover,
-.pickerHeaderAction:not(:disabled):focus-visible {
-  background: var(--side-nav-hover-color);
-}
-
 .pickerHeaderAction:disabled {
   opacity: 0.5;
   cursor: default;
+}
+
+.pickerHeaderAction:not(:disabled):hover,
+.pickerHeaderAction:not(:disabled):focus-visible {
+  background: var(--side-nav-hover-color);
 }
 
 .saturationValue {
@@ -915,7 +916,8 @@ onBeforeUnmount(() => {
 .alphaSlider {
   position: absolute;
   z-index: 1;
-  inset: 50% 0 auto;
+  inset-block: 50% auto;
+  inset-inline: 0;
   transform: translateY(-50%);
   appearance: none;
   background: transparent;
@@ -990,20 +992,11 @@ onBeforeUnmount(() => {
   border-start-start-radius: 0;
   border-end-start-radius: 0;
   padding: 0;
-}
-
-.valueRow button {
-  padding-inline: 9px;
   cursor: pointer;
 }
 
-.valueRow button:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-
-.valueRow button:not(:disabled):hover,
-.valueRow button:not(:disabled):focus-visible {
+.hexInputControl .copyColorButton:hover,
+.hexInputControl .copyColorButton:focus-visible {
   background: var(--side-nav-hover-color);
 }
 
@@ -1053,8 +1046,23 @@ onBeforeUnmount(() => {
 }
 
 .colorSourceList.above {
-  inset-block-start: auto;
-  inset-block-end: calc(100% + 4px);
+  inset-block: auto calc(100% + 4px);
+}
+
+.sourceSwatch {
+  position: relative;
+  display: block;
+  inline-size: 22px;
+  block-size: 22px;
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--shape-corner-extra-small);
+}
+
+.sourceSwatch > span {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
 }
 
 .colorSourceList button {
@@ -1086,22 +1094,6 @@ onBeforeUnmount(() => {
 .colorSourceList code {
   color: var(--tertiary-text-color);
   font-size: 0.72rem;
-}
-
-.sourceSwatch {
-  position: relative;
-  display: block;
-  inline-size: 22px;
-  block-size: 22px;
-  overflow: hidden;
-  border: 0;
-  border-radius: var(--shape-corner-extra-small);
-}
-
-.sourceSwatch > span {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
 }
 
 .pickerStatus {

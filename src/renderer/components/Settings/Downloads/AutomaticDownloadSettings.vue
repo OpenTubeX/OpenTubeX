@@ -412,7 +412,8 @@ function displayNumber(value) {
 .channelRules {
   display: grid;
   gap: 16px;
-  padding: 0 0 24px;
+  padding-block: 0 24px;
+  padding-inline: 0;
   margin: 0;
   list-style: none;
 }

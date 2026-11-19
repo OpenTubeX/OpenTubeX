@@ -517,6 +517,7 @@ function cancelLoaderSettle() {
   inset-inline: 0;
   content-visibility: hidden;
   pointer-events: none;
+
   /* Positioned overlays inside it, such as thumbnail badges, must not paint over the current page. */
   isolation: isolate;
 }
@@ -525,6 +526,7 @@ function cancelLoaderSettle() {
 .retainedPage.retainedPagePreview {
   inset-block-start: var(--retained-page-top, 0);
   content-visibility: visible;
+
   /* It slides in behind the current page. */
   will-change: transform;
 }
@@ -547,6 +549,7 @@ function cancelLoaderSettle() {
   position: absolute;
   inset: 0;
   z-index: 0;
+
   /* Keep neighbors laid out for swiping without painting through short pages
      or allowing their fixed-position children to show over the active tab. */
   opacity: 0;
@@ -601,7 +604,7 @@ function cancelLoaderSettle() {
 }
 
 .pageSwipeSettling {
-  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- a translated page would become the containing block of its fixed-position children */
+  /* stylelint-disable-next-line liberty/use-logical-spec, plugin/no-low-performance-animation-properties -- the swipe sets a physical left offset, and a translated page would become the containing block of its fixed-position children */
   transition: left 200ms cubic-bezier(0.2, 0, 0, 1);
 }
 

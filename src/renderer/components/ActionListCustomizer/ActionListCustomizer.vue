@@ -477,7 +477,11 @@ function resetItems() {
   align-items: center;
   background: var(--reorder-row-color);
   border-radius: var(--shape-corner-extra-small);
+  display: grid;
+  grid-template-columns: 44px 24px minmax(0, 1fr) auto;
   min-block-size: 56px;
+  padding-inline-end: 8px;
+  position: relative;
   transition: border-radius var(--motion-fast-spatial);
   user-select: none;
 }
@@ -494,13 +498,6 @@ function resetItems() {
 
 .selectedAction.dragging {
   border-radius: var(--shape-corner-large-increased);
-}
-
-.selectedAction {
-  display: grid;
-  grid-template-columns: 44px 24px minmax(0, 1fr) auto;
-  padding-inline-end: 8px;
-  position: relative;
 }
 
 .dragHandle {

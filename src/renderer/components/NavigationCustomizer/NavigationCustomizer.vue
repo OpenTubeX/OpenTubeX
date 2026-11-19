@@ -521,8 +521,7 @@ function resetItems() {
   flex-direction: column;
   flex-shrink: 0;
   inline-size: 100%;
-  margin-block-end: 20px;
-  margin-block-start: 8px;
+  margin-block: 8px 20px;
   margin-inline: auto;
   max-inline-size: 720px;
   padding-block: 8px;

@@ -543,11 +543,12 @@ defineExpose({
 
 .newFeed :deep(.feed-leave-active) {
   position: absolute;
-  top: var(--feed-leave-top);
+  inset-block-start: var(--feed-leave-top);
+  /* stylelint-disable-next-line liberty/use-logical-spec -- measured from getBoundingClientRect(), a physical offset */
   left: var(--feed-leave-left);
   z-index: 1;
-  width: var(--feed-leave-width);
-  height: var(--feed-leave-height);
+  inline-size: var(--feed-leave-width);
+  block-size: var(--feed-leave-height);
   pointer-events: none;
   transition: opacity 200ms ease;
 }

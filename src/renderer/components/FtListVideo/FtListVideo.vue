@@ -2854,8 +2854,8 @@ watch([useSponsorBlock, id], ([enabled, videoId]) => {
 <style scoped src="./FtListVideo.scss" lang="scss" />
 
 <style>
-body.collaboratorsLoading,
-body.collaboratorsLoading * {
+.collaboratorsLoading,
+.collaboratorsLoading * {
   cursor: wait !important;
 }
 </style>

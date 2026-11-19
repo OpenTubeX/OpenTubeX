@@ -258,11 +258,6 @@ function swatchStyle(scheme) {
   outline-offset: 2px;
 }
 
-.accentColorSwatch:hover .accentSwatchPalette,
-.accentCustomSwatch :deep(.colorFieldTrigger:hover) .accentCustomColor {
-  box-shadow: 0 0 0 2px var(--md-sys-color-on-primary-container, var(--primary-text-color));
-}
-
 .accentSwatchPalette {
   display: grid;
   place-items: center;
@@ -321,6 +316,11 @@ function swatchStyle(scheme) {
 
 .accentCustomSwatch :deep(.colorFieldTrigger:active) .accentCustomColor {
   border-radius: var(--shape-corner-extra-small);
+}
+
+.accentColorSwatch:hover .accentSwatchPalette,
+.accentCustomSwatch :deep(.colorFieldTrigger:hover) .accentCustomColor {
+  box-shadow: 0 0 0 2px var(--md-sys-color-on-primary-container, var(--primary-text-color));
 }
 
 .accentSwatchEdit {

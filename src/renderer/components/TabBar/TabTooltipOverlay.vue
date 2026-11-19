@@ -214,6 +214,7 @@ function updateTooltipPosition() {
 .tabTooltip {
   box-sizing: border-box;
   position: fixed;
+  /* stylelint-disable-next-line liberty/use-logical-spec -- the translate is measured from the physical top left */
   inset: 0 auto auto 0;
   z-index: 10000;
   inline-size: max-content;
@@ -279,13 +280,13 @@ function updateTooltipPosition() {
   line-height: 1.35;
 }
 
+.tabTooltipTitle:only-child {
+  margin-block-end: 0;
+}
+
 .tabTooltip:not(.withPreview) .tabTooltipTitle {
   overflow-wrap: anywhere;
   white-space: normal;
-}
-
-.tabTooltipTitle:only-child {
-  margin-block-end: 0;
 }
 
 .tabTooltip.tabGroupTooltip.withPreview {

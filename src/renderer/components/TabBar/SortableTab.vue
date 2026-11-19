@@ -281,14 +281,16 @@ watch(tabAvatarUrl, (avatarUrl) => {
 
 <style scoped>
 .tab {
+  --tab-background-color: var(--tab-surface-color, var(--inactive-tab-color));
+  --tab-accent-mix: 18%;
+  --tab-accent-border-mix: 55%;
+
   box-sizing: border-box;
   display: flex;
   align-items: center;
   gap: 6px;
   padding-inline: 10px;
   padding-block: 6px;
-  --tab-background-color: var(--tab-surface-color, var(--inactive-tab-color));
-
   background-color: var(--tab-background-color);
   border-radius: var(--shape-corner-large);
   cursor: pointer;
@@ -305,8 +307,6 @@ watch(tabAvatarUrl, (avatarUrl) => {
   user-select: none;
   touch-action: none;
   will-change: transform;
-  --tab-accent-mix: 18%;
-  --tab-accent-border-mix: 55%;
 }
 
 .tab.noTransition {
@@ -373,17 +373,6 @@ watch(tabAvatarUrl, (avatarUrl) => {
   gap: 4px;
 }
 
-.tab.unloaded .tabTitle {
-  color: var(--secondary-text-color);
-  opacity: 0.72;
-}
-
-.tab.unloaded:hover .tabTitle,
-.tab.unloaded.active .tabTitle,
-.tab.unloaded.loading .tabTitle {
-  opacity: 1;
-}
-
 .tab.dragging {
   z-index: 10;
   cursor: grabbing;
@@ -406,6 +395,17 @@ watch(tabAvatarUrl, (avatarUrl) => {
   font-size: 12px;
   line-height: 16px;
   color: var(--primary-text-color);
+}
+
+.tab.unloaded .tabTitle {
+  color: var(--secondary-text-color);
+  opacity: 0.72;
+}
+
+.tab.unloaded:hover .tabTitle,
+.tab.unloaded.active .tabTitle,
+.tab.unloaded.loading .tabTitle {
+  opacity: 1;
 }
 
 .groupBadge {
@@ -482,8 +482,7 @@ watch(tabAvatarUrl, (avatarUrl) => {
 }
 
 .tab.pinned .playingBadge {
-  inset-inline-end: auto;
-  inset-inline-start: -3px;
+  inset-inline: -3px auto;
 }
 
 .closeButton {
@@ -499,6 +498,16 @@ watch(tabAvatarUrl, (avatarUrl) => {
   opacity: 0;
   transition: opacity var(--motion-fast-effects), background-color var(--motion-fast-effects), color var(--motion-fast-effects);
   flex-shrink: 0;
+}
+
+.closeButton:hover {
+  background-color: var(--destructive-color);
+  color: var(--destructive-text-color);
+}
+
+.tab:hover .closeButton,
+.tab.active .closeButton {
+  opacity: 1;
 }
 
 .tab.pinned .closeButton {
@@ -517,19 +526,9 @@ watch(tabAvatarUrl, (avatarUrl) => {
   padding-inline-end: 12px;
 }
 
-.closeButton:hover {
-  background-color: var(--destructive-color);
-  color: var(--destructive-text-color);
-}
-
 .tab.pinned .closeButton:hover {
   background-color: var(--destructive-color);
   color: var(--destructive-text-color);
-}
-
-.tab:hover .closeButton,
-.tab.active .closeButton {
-  opacity: 1;
 }
 
 .tab.pinned.active:not(:hover) .closeButton {
