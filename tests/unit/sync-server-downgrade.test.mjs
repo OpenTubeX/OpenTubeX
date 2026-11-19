@@ -708,6 +708,7 @@ test('a separate profile syncs its library only in its own collections and never
   const salt = Buffer.alloc(16, 2).toString('base64')
   const entry = id => ({ id, name: id, bgColor: '#123456', textColor: '#FFFFFF' })
   const metadata = id => ({ name: id, bgColor: '#123456', textColor: '#FFFFFF', icon: null })
+  const newer = { ...entry('newer-1'), bgColor: 'color(display-p3 0 0 1)' }
   const sharedHistory = { 'shared-video': { added_date: 1, watched_state: 'watching', position_millis: 1000 } }
   const uploads = {}
   const f = fixture({
@@ -726,8 +727,9 @@ test('a separate profile syncs its library only in its own collections and never
       if (path === '/health') return { capabilities: { encrypted_sync: 1, live_sync: 1, separate_profiles: 1 } }
       if (path === '/v1/encrypted_sync') return { collections: [{ collection: 'separateProfiles', revision: 1 }], legacy_data: false }
       if (path === '/v1/encrypted_sync/separateProfiles' && !options.method) {
-        // Another device deleted the profile `gone-1`.
-        return { revision: 1, payload: await privacy.encryptSyncDocument([entry('separate-1'), entry('gone-1')], key, salt) }
+        // Another device deleted the profile `gone-1`, and a newer version added
+        // one this version can't read.
+        return { revision: 1, payload: await privacy.encryptSyncDocument([entry('separate-1'), entry('gone-1'), newer], key, salt) }
       }
       if (options.method === 'PUT') {
         const body = JSON.parse(options.body)
@@ -758,9 +760,10 @@ test('a separate profile syncs its library only in its own collections and never
   assert.equal(uploads[`subscriptions.${scope}`].activity, undefined)
   // Only shared profiles go to `profiles`.
   assert.ok(!JSON.stringify(uploads.profiles?.data ?? []).includes('separate-1'))
-  assert.deepEqual(uploads.separateProfiles.data, [entry('separate-1')])
+  assert.deepEqual(uploads.separateProfiles.data, [newer, entry('separate-1')])
   assert.equal(uploads.separateProfiles.activity, undefined)
-  // The deleted profile's data is deleted once no profile lists it.
+  // The deleted profile's data is deleted once no profile lists it, and the
+  // data of the one this version can't read stays.
   assert.deepEqual(f.requests.filter(request => request.method === 'DELETE').map(request => new URL(request.url).pathname).sort(),
     ['history', 'playlists', 'subscriptions', 'watchStats'].map(base => `/v1/encrypted_sync/${base}.${Buffer.from('gone-1').toString('hex')}`).sort())
 

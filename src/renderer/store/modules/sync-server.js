@@ -790,9 +790,11 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
   }
 
   /** @param {unknown[]} ids Separate profiles the server may still keep data for */
-  async function deleteRemovedProfileData(ids) {
+  async function deleteRemovedProfileData(ids, listed) {
     const remaining = new Set(Object.keys(next.separateProfiles ?? {}))
     for (const profile of rootState.profiles.profileList) remaining.add(profile._id)
+    // The uploaded list also keeps the profiles this version can't read.
+    for (const entry of listed) remaining.add(entry?.id)
     for (const id of new Set(ids)) {
       if (typeof id !== 'string' || id.length === 0 || id.length > 64 || remaining.has(id)) continue
       for (const collection of SCOPED_SYNC_COLLECTIONS) {
@@ -1186,12 +1188,14 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           // Live sync replaces periodic syncs, which then still retry these.
           commit('setSyncServerDeletionMarksPending', unsentSyncDeletionMarks.read(deletionMarksAccount).length > 0)
         }
+        let uploadedSeparateProfiles = []
         for (const collection of encryptedCollections.upload) {
           if (skippedCollections.has(collection)) continue
           assertSyncStillActive()
           let revision = encryptedCollections.remote[collection].revision
           let data = client.document[collection]
           const persistUploaded = async () => {
+            if (collection === 'separateProfiles') uploadedSeparateProfiles = data
             if (collection === 'watchStats') await persistUploadedWatchStatsReset(data, store, dataScope)
             if (collection === 'history') await persistUploadedHistoryRepairs(data, store)
           }
@@ -1339,7 +1343,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           await deleteRemovedProfileData([
             ...Object.keys(previous.separateProfiles ?? {}),
             ...(encryptedCollections.original.separateProfiles ?? []).map(entry => entry?.id),
-          ])
+          ], Array.isArray(uploadedSeparateProfiles) ? uploadedSeparateProfiles : [])
         }
       })
     }
