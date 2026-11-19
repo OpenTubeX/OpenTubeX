@@ -107,7 +107,7 @@ import { computed, ref } from 'vue'
 import { FtIcon } from '@opentubex/icons'
 
 import store from '../../store/index'
-import { answerQuiz, getPollResults, getPollVote, togglePollVote } from '../../helpers/postInteractions'
+import { answerQuiz, getPollResults, getPollVote, getShownVoteCount, togglePollVote } from '../../helpers/postInteractions'
 import { formatNumber } from '../../helpers/utils'
 import { isRoundedNumber } from '../../helpers/viewCounts'
 import { isSignedInToYouTube } from '../../helpers/youtube-account-state'
@@ -136,7 +136,8 @@ const vote = computed(() => canVote.value ? getPollVote(props.postId) : null)
 // Votes can move, but answers are final, like on YouTube.
 const isChoosable = computed(() => canVote.value && (!isQuiz.value || vote.value === null))
 
-const totalVotes = computed(() => (props.data.totalVotes ?? 0) + (vote.value === null ? 0 : 1))
+// The count lacks a vote made here, unless it loaded since.
+const totalVotes = computed(() => canVote.value ? getShownVoteCount(props.postId, props.data.totalVotes ?? 0) : props.data.totalVotes ?? 0)
 
 const formattedVotes = computed(() => {
   const votes = totalVotes.value
@@ -170,9 +171,9 @@ const explanation = computed(() => (answeredChoice.value ?? props.data.content.f
 function choose(index) {
   if (!isChoosable.value) return
   if (isQuiz.value) {
-    answerQuiz(props.postId, props.authorId, index, !!props.data.content[index].isCorrect)
+    answerQuiz(props.postId, props.authorId, index, !!props.data.content[index].isCorrect, props.data.totalVotes ?? 0)
   } else {
-    togglePollVote(props.postId, props.authorId, index)
+    togglePollVote(props.postId, props.authorId, index, props.data.totalVotes ?? 0)
   }
 }
 

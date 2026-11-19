@@ -187,7 +187,7 @@
             ? $t('YouTube Account.Like')
             : $t('Display Label', { label: $t('YouTube Account.Like'), value: formattedVoteCount })"
           :title="$t('YouTube Account.Like')"
-          @click="ratePost(postId, authorId, 'LIKE')"
+          @click="ratePost(postId, authorId, 'LIKE', voteCount)"
         >
           <FtIcon
             class="thumbs-up-icon"
@@ -202,7 +202,7 @@
           :aria-pressed="rating === 'DISLIKE'"
           :aria-label="$t('YouTube Account.Dislike')"
           :title="$t('YouTube Account.Dislike')"
-          @click="ratePost(postId, authorId, 'DISLIKE')"
+          @click="ratePost(postId, authorId, 'DISLIKE', voteCount)"
         >
           <FtIcon
             :icon="['fas', rating === 'DISLIKE' ? 'thumbs-down-filled' : 'thumbs-down']"
@@ -292,7 +292,7 @@ import {
   getRelativeTimeFromDate,
 } from '../../helpers/utils'
 import { getPostTabTitle } from '../../helpers/tabTitles'
-import { getPostRating, ratePost } from '../../helpers/postInteractions'
+import { getPostRating, getShownLikeCount, ratePost } from '../../helpers/postInteractions'
 import { isSignedInToYouTube } from '../../helpers/youtube-account-state'
 import { isRoundedNumber } from '../../helpers/viewCounts'
 import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
@@ -465,8 +465,8 @@ const canRate = computed(() => !!postId && !!authorId && isSignedInToYouTube(sto
 const rating = computed(() => canRate.value ? getPostRating(postId) : null)
 
 const formattedVoteCount = computed(() => {
-  // The like count lacks a rating made here.
-  const count = voteCount == null ? null : voteCount + (rating.value === 'LIKE' ? 1 : 0)
+  // The like count lacks a rating made here, unless it loaded since.
+  const count = canRate.value ? getShownLikeCount(postId, voteCount) : voteCount
   return formatNumber(count, voteCount != null && isRoundedNumber(voteCount) ? { notation: 'compact' } : undefined)
 })
 

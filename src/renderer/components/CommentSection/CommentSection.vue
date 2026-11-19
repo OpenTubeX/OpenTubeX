@@ -1014,13 +1014,20 @@ function updatePinnedSnapshot(rootId, update) {
 /**
  * Replies posted here before the thread's replies loaded come back from
  * YouTube, so their loaded versions replace them. Replies deleted or edited
- * while loading stay that way.
+ * while loading stay that way. A loaded reply keeps the replies posted here
+ * under it, as its own replies load separately.
  * @param {Comment[]} replies
  * @param {Comment[]} loadedReplies
+ * @returns {Comment[]}
  */
 function mergeReplies(replies, loadedReplies) {
   const loadedIds = new Set(loadedReplies.map(reply => reply.id))
-  return replies.filter(reply => !loadedIds.has(reply.id)).concat(withLocalCommentChanges(loadedReplies))
+  const existing = new Map(replies.map(reply => [reply.id, reply]))
+  const merged = withLocalCommentChanges(loadedReplies).map(reply => {
+    const previous = existing.get(reply.id)
+    return previous?.replies?.length > 0 ? { ...reply, replies: mergeReplies(previous.replies, reply.replies ?? []) } : reply
+  })
+  return replies.filter(reply => !loadedIds.has(reply.id)).concat(merged)
 }
 
 /**

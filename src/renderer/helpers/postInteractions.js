@@ -72,10 +72,28 @@ function createPostState() {
 }
 
 const votes = createPostState()
-/** @param {string} error */
-const voteFailed = error => i18n.global.t('YouTube Account.Vote Failed', { error })
 const ratings = createPostState()
 
+/**
+ * The public counts loaded before a vote or like made here, which lack it.
+ * A count loaded later can include it already.
+ * @type {Map<string, number | null>}
+ */
+const baseCounts = reactive(new Map())
+
+/**
+ * The count shown with the account's vote or like made here, which it adds to
+ * the count it was made with, and not to counts loaded since.
+ * @param {string} key
+ * @param {number | null} count
+ * @param {boolean} counted whether the account has its vote or like
+ */
+function countWithOwn(key, count, counted) {
+  if (count == null) return count
+  return count + (counted && baseCounts.get(key) === count ? 1 : 0)
+}
+/** @param {string} error */
+const voteFailed = error => i18n.global.t('YouTube Account.Vote Failed', { error })
 /**
  * @param {import('./api/youtube-account').YouTubeAccount | null} account
  * @param {string} postId
@@ -99,11 +117,13 @@ export function getPollVote(postId) {
  * @param {string} postId
  * @param {string} channelId the post's channel
  * @param {number} choiceIndex
+ * @param {number | null} totalVotes the vote count shown, without the vote
  */
-export function togglePollVote(postId, channelId, choiceIndex) {
+export function togglePollVote(postId, channelId, choiceIndex, totalVotes) {
   // Votes as the channel that clicked, even after a switch while they go out.
   const account = store.getters.getYouTubeAccount
   const key = getKey(account, postId)
+  if (votes.get(key) === null) baseCounts.set(`votes\n${key}`, totalVotes)
   const vote = votes.get(key) !== choiceIndex
   votes.change(key, vote ? choiceIndex : null, () => voteInYouTubePoll(postId, channelId, choiceIndex, vote, account),
     voteFailed, () => { if (vote) loadPollResults(postId, channelId) })
@@ -115,12 +135,24 @@ export function togglePollVote(postId, channelId, choiceIndex) {
  * @param {string} channelId the post's channel
  * @param {number} choiceIndex
  * @param {boolean} isCorrect
+ * @param {number | null} totalVotes the answer count shown, without the answer
  */
-export function answerQuiz(postId, channelId, choiceIndex, isCorrect) {
+export function answerQuiz(postId, channelId, choiceIndex, isCorrect, totalVotes) {
   const account = store.getters.getYouTubeAccount
   const key = getKey(account, postId)
   if (votes.get(key) !== null) return
+  baseCounts.set(`votes\n${key}`, totalVotes)
   votes.change(key, choiceIndex, () => voteInYouTubePoll(postId, channelId, choiceIndex, true, account, isCorrect), voteFailed)
+}
+
+/**
+ * The vote or answer count with the account's vote or answer made here.
+ * @param {string} postId
+ * @param {number | null} totalVotes as loaded
+ */
+export function getShownVoteCount(postId, totalVotes) {
+  const key = getKey(store.getters.getYouTubeAccount, postId)
+  return countWithOwn(`votes\n${key}`, totalVotes, votes.get(key) !== null)
 }
 
 /** @type {Map<string, import('./api/youtube-account-parsers').PollChoiceResult[]>} */
@@ -168,14 +200,26 @@ export function getPostRating(postId) {
  * @param {string} postId
  * @param {string} channelId the post's channel
  * @param {'LIKE' | 'DISLIKE'} type
+ * @param {number | null} likeCount the like count shown, without the rating
  */
-export function ratePost(postId, channelId, type) {
+export function ratePost(postId, channelId, type, likeCount) {
   const account = store.getters.getYouTubeAccount
   const key = getKey(account, postId)
   const previous = ratings.get(key)
+  if (previous === null) baseCounts.set(`likes\n${key}`, likeCount)
   const next = previous === type ? null : type
   // Liking replaces a dislike and the reverse, like on YouTube.
   const action = next === 'LIKE' ? 'like' : next === 'DISLIKE' ? 'dislike' : previous === 'LIKE' ? 'unlike' : 'undislike'
   ratings.change(key, next, () => rateYouTubePost(postId, channelId, action, account),
     error => i18n.global.t('YouTube Account.Rating Failed', { error }))
+}
+
+/**
+ * The like count with the account's like made here.
+ * @param {string} postId
+ * @param {number | null} likeCount as loaded
+ */
+export function getShownLikeCount(postId, likeCount) {
+  const key = getKey(store.getters.getYouTubeAccount, postId)
+  return countWithOwn(`likes\n${key}`, likeCount, ratings.get(key) === 'LIKE')
 }
