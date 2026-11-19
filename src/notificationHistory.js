@@ -281,6 +281,18 @@ export function getNotificationKey({ kind, path, query }) {
   return `${kind}:${path}${search ? `?${search}` : ''}`
 }
 
+/**
+ * The target a key from `getNotificationKey` names.
+ * @param {string} key
+ * @returns {{ kind: string, path: string, query?: Record<string, string> } | null}
+ */
+export function parseNotificationKey(key) {
+  const match = /^([^:/?]+):(\/[^?]*)(?:\?(.*))?$/.exec(key)
+  if (!match) return null
+  const [, kind, path, search] = match
+  return { kind, path, ...(search ? { query: Object.fromEntries(new URLSearchParams(search)) } : {}) }
+}
+
 /** @param {unknown} value */
 const timestamp = value => typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : 0
 

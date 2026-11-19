@@ -764,6 +764,7 @@ import { requestSubscriptionFeedRefresh } from './helpers/subscriptionFeedRefres
 import { startTwitchLiveNotifications } from './helpers/platformFeed'
 import { findPlatformChannel, getPlatformChannelRoute } from '../platforms/index'
 import { startCommentReplyNotifications } from './helpers/commentReplyNotifications'
+import { startAndroidNotificationSuppressions } from './helpers/androidNotificationSuppressions'
 import { translateWindowTitle } from './helpers/strings'
 import { normalizeScrollbarThumbWidth } from './constants/scrollbar'
 import { getAppFontFamily } from './helpers/appFont'
@@ -2116,6 +2117,7 @@ onBeforeUnmount(() => {
   platformFeedAutoRefresh.stop()
   stopTwitchLiveNotifications?.()
   stopCommentReplyNotifications?.()
+  stopAndroidNotificationSuppressions?.()
   clearInterval(historyCleanupTimer)
   clearInterval(searchHistoryCleanupTimer)
   stopUpdateChecks?.()
@@ -2254,8 +2256,12 @@ const platformFeedAutoRefresh = usePlatformFeedAutoRefresh(dataReady)
 // Starts once the followed channels and the notification settings have loaded
 let stopTwitchLiveNotifications = null
 let stopCommentReplyNotifications = null
+let stopAndroidNotificationSuppressions = null
 watch(dataReady, (ready) => {
   if (ready && stopTwitchLiveNotifications === null) stopTwitchLiveNotifications = startTwitchLiveNotifications()
+  if (ready && stopAndroidNotificationSuppressions === null) {
+    stopAndroidNotificationSuppressions = startAndroidNotificationSuppressions()
+  }
   if (ready && supportsNotificationHistory && stopCommentReplyNotifications === null) {
     stopCommentReplyNotifications = startCommentReplyNotifications()
   }

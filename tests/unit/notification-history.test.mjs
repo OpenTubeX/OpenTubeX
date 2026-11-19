@@ -11,6 +11,7 @@ import {
   applyNotificationDismissals,
   getDismissedNotificationEntries,
   getNotificationKey,
+  parseNotificationKey,
   mergeNotificationDismissals,
   normalizeNotificationDismissals,
   recordNotificationDismissals,
@@ -364,6 +365,10 @@ test('dismissals match notifications about the same item on every device, except
   assert.equal(getNotificationKey({ kind: 'download-completed', path: '/watch/abc', query: { downloadId: '1' } }), null)
   assert.equal(getNotificationKey({ kind: 'download-failed', path: '/downloads' }), null)
   assert.equal(getNotificationKey({ kind: 'sync-blocked', path: '/settings', query: { section: 'sync' } }), null)
+  // Android leaves out notifications by the targets that synced dismissals name.
+  for (const target of [getUploadTarget('comment-reply', 'abcdefghijk/Ugxthread.reply'), getUploadTarget('twitch', 'some_login/123')]) {
+    assert.deepEqual(parseNotificationKey(getNotificationKey(target)), target)
+  }
 })
 
 test('merged dismissals agree on every device, keep removals, and drop the oldest', () => {

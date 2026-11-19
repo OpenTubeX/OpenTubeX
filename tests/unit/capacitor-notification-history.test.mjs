@@ -9,9 +9,11 @@ globalThis.localStorage = {
   setItem: (key, value) => storage.set(key, value)
 }
 const closed = []
+let suppressed = null
 const [{ capacitorNotificationHistory: history }] = await importWithStubs([sourceUrl('src/renderer/helpers/capacitorNotificationHistory.js')], {
   [sourceUrl('src/renderer/helpers/capacitorSystemNotifications.js')]: {
-    closeCapacitorSystemNotifications: targets => { closed.push(...targets.map(({ path }) => path)) }
+    closeCapacitorSystemNotifications: targets => { closed.push(...targets.map(({ path }) => path)) },
+    suppressDismissedAndroidNotifications: dismissals => { suppressed = dismissals }
   }
 })
 
@@ -48,6 +50,8 @@ test('dismissals from other devices apply to existing and later entries without 
   })
   assert.deepEqual(closed, ['/watch/d'])
   assert.equal(dismissed, 3)
+  // Android leaves them out, also when the renderer syncing while the app is closed merged them.
+  assert.deepEqual(suppressed, await history.getDismissals())
 
   // Collected later, such as an upload Android showed while the app was closed.
   const added = history.add([video('d', 5), video('f', 5), video('g', 5)])

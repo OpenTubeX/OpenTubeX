@@ -73,6 +73,16 @@ public class BackgroundSyncPlugin extends Plugin {
         call.resolve();
     }
 
+    /**
+     * Leaves out notifications the user already read, removed or watched, also on
+     * another device, and removes the shown ones. Each list replaces the last one sent.
+     */
+    @PluginMethod
+    public void suppressNotifications(PluginCall call) {
+        UploadNotifications.suppress(getContext(), call.getArray("dismissed", null), call.getArray("watched", null));
+        call.resolve();
+    }
+
     @PluginMethod
     public void begin(PluginCall call) {
         JSObject result = new JSObject();
