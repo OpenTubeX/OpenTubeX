@@ -128,6 +128,7 @@
         <ChannelHome
           v-show="currentTab === 'home'"
           id="homePanel"
+          class="homePanel"
           :shelves="homeData"
           role="tabpanel"
           aria-labelledby="homeTab"
