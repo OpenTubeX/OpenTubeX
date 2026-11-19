@@ -81,16 +81,19 @@ function createPlayer (state, options = ALL_TRIGGERS) {
     // Applies a previously requested toggle, as the async PiP transition would.
     settle () {
       inPip = !inPip
-      if (applyPictureInPictureState(state, inPip)) {
+      if (applyPictureInPictureState(state, inPip, this.transitionOptions())) {
         this.update()
       }
       return inPip
     },
     closedByUser () {
       inPip = false
-      if (applyPictureInPictureState(state, false)) {
+      if (applyPictureInPictureState(state, false, this.transitionOptions())) {
         this.update()
       }
+    },
+    transitionOptions () {
+      return { triggerActive: shouldAutoPictureInPicture(state, options) }
     }
   }
 }
@@ -209,6 +212,32 @@ test('PiP closed by the user is not reopened by an active trigger', () => {
   player.settle()
   assert.equal(player.inPip, true)
   assert.deepEqual(player.toggles, ['enter', 'enter'])
+})
+
+// Regression: "Back to tab" focuses the window before the PiP close is
+// reported, so the close counted as a dismissal of the blur trigger and the
+// next window switch did not open PiP.
+test('closing PiP after the window regained focus does not block the next blur', () => {
+  const state = createAutoPictureInPictureState()
+  const player = createPlayer(state)
+
+  // The user opens PiP and clicks into its window.
+  player.settle()
+  applyFocusState(state, false)
+  player.update()
+  assert.deepEqual(player.toggles, [])
+
+  // "Back to tab" focuses the main window, then closes PiP.
+  applyFocusState(state, true)
+  player.update()
+  player.closedByUser()
+  assert.equal(player.inPip, false)
+
+  applyFocusState(state, false)
+  player.update()
+  player.settle()
+  assert.equal(player.inPip, true)
+  assert.deepEqual(player.toggles, ['enter'])
 })
 
 test('PiP opened by the user is not closed on restore', () => {

@@ -2239,7 +2239,7 @@ test.describe('tab bar', () => {
 
     // Verify the synthetic player exercises the same privileged PiP request
     // path used by automatic PiP.
-    await page.evaluate((tabId) => window.ftElectron.requestPiP(tabId), sourceTabId)
+    await page.evaluate((tabId) => window.ftElectron.requestPiP(tabId, true), sourceTabId)
     await expect.poll(() => page.evaluate(() => document.pictureInPictureElement !== null)).toBe(true)
     await page.evaluate(() => document.exitPictureInPicture())
 
@@ -2248,7 +2248,7 @@ test.describe('tab bar', () => {
 
     await page.evaluate((tabId) => {
       window.ftElectron.tabs.close(tabId)
-      window.ftElectron.requestPiP(tabId)
+      window.ftElectron.requestPiP(tabId, true)
     }, sourceTabId)
 
     await expect(page.locator(sel.tabs)).toHaveCount(1)
