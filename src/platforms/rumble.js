@@ -603,6 +603,7 @@ const rumble = {
   channelTabs: ['videos'],
   searchTypes: ['videos', 'channels'],
   liveStreams: true,
+  heavyChannels: true,
   parseChannelUrl,
   // Rumble's playlists aren't supported
   getChannel,

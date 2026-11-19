@@ -144,6 +144,7 @@ test('lists the playable videos of a channel page by page', async () => {
       title: 'Video 01',
       author: 'The Creator',
       channelId: CHANNEL_ID,
+      authorAvatar: 'https://thumbs.example.test/avatar.webp',
       thumbnail: 'https://thumbs.example.test/video.webp',
       published: 1700000000000,
       duration: 60
@@ -191,6 +192,7 @@ test('loads playlist items in the order of the playlist', async () => {
     title: 'Favorites',
     author: 'The Creator',
     channelId: CHANNEL_ID,
+    authorAvatar: 'https://thumbs.example.test/avatar.webp',
     thumbnail: 'https://thumbs.example.test/list.webp',
     itemCount: 25
   })

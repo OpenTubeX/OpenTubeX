@@ -279,7 +279,22 @@ test('searches videos, channels and playlists on SepiaSearch', async () => {
     'https://sepiasearch.org/api/v1/search/videos': {
       total: 1,
       data: [
-        video({ thumbnailPath: '/small.jpg', thumbnailUrl: 'https://video.example.org/small.jpg', previewUrl: 'https://video.example.org/preview.jpg' }),
+        video({
+          thumbnailPath: '/small.jpg',
+          thumbnailUrl: 'https://video.example.org/small.jpg',
+          previewUrl: 'https://video.example.org/preview.jpg',
+          // Each result shows its channel's avatar, in a size that fits beside the name
+          channel: {
+            name: 'my_channel',
+            host: 'video.example.org',
+            displayName: 'My Channel',
+            avatars: [
+              { width: 600, path: '/lazy-static/avatars/600.png' },
+              { width: 48, path: '/lazy-static/avatars/48.png' },
+              { width: 120, path: '/lazy-static/avatars/120.png' }
+            ]
+          }
+        }),
         // Results from instances that can't be reached are left out
         video({ channel: { name: 'lan', host: '10.0.0.2', displayName: 'LAN' }, account: null })
       ]
@@ -305,7 +320,7 @@ test('searches videos, channels and playlists on SepiaSearch', async () => {
         videosLength: 4,
         thumbnailUrl: 'https://tube.example.net/playlist.jpg',
         ownerAccount: { name: 'owner', host: 'tube.example.net', displayName: 'Owner' },
-        videoChannel: { name: 'remote', host: 'tube.example.net', displayName: 'Remote' }
+        videoChannel: { name: 'remote', host: 'tube.example.net', displayName: 'Remote', avatar: { width: 120, path: '/avatars/120.png' } }
       }]
     }
   })
@@ -314,8 +329,8 @@ test('searches videos, channels and playlists on SepiaSearch', async () => {
   const channels = await peertube.search(fetcher, 'open movie', 'channels', '0')
   const playlists = await peertube.search(fetcher, 'open movie', 'playlists', null)
 
-  assert.deepEqual(videos.results.map(result => result.kind === 'item' && [result.item.url, result.item.thumbnail]), [
-    [`https://video.example.org/videos/watch/${UUID}`, 'https://video.example.org/preview.jpg']
+  assert.deepEqual(videos.results.map(result => result.kind === 'item' && [result.item.url, result.item.thumbnail, result.item.authorAvatar]), [
+    [`https://video.example.org/videos/watch/${UUID}`, 'https://video.example.org/preview.jpg', 'https://video.example.org/lazy-static/avatars/120.png']
   ])
   assert.equal(videos.continuation, null)
   assert.deepEqual(channels, {
@@ -341,6 +356,7 @@ test('searches videos, channels and playlists on SepiaSearch', async () => {
       title: 'Found playlist',
       author: 'Remote',
       channelId: 'remote@tube.example.net',
+      authorAvatar: 'https://tube.example.net/avatars/120.png',
       thumbnail: 'https://tube.example.net/playlist.jpg',
       itemCount: 4
     }

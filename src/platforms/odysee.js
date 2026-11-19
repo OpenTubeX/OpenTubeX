@@ -138,12 +138,13 @@ function webUrl(claim) {
 
 /**
  * @param {any} channel the signing channel of a claim
- * @returns {{ author: string, channelId: string }}
+ * @returns {{ author: string, channelId: string, authorAvatar?: string }}
  */
 function author(channel) {
   if (!isClaimId(channel?.claim_id)) return { author: '', channelId: '' }
   const name = typeof channel.name === 'string' ? channel.name.replace(/^@/, '') : ''
-  return { author: text(channel.value?.title) || name, channelId: channel.claim_id }
+  const avatar = httpsUrl(channel.value?.thumbnail?.url)
+  return { author: text(channel.value?.title) || name, channelId: channel.claim_id, ...(avatar ? { authorAvatar: avatar } : {}) }
 }
 
 /**

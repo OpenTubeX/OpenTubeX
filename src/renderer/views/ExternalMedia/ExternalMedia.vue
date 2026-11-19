@@ -568,6 +568,7 @@ import { limitQualityOnMeteredNetwork } from '../../helpers/player/meteredNetwor
 import { formatDate } from '../../helpers/dateFormat'
 import { escapeHTML } from '../../helpers/feed-metadata'
 import { useMediaSessionMetadata } from '../../composables/useMediaSessionMetadata'
+import { usePlatformChannelAvatar } from '../../composables/usePlatformChannelAvatar'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import { isExternalMediaUrl } from '../../helpers/externalMediaUrl'
 import { getExternalMediaAuthorId, getExternalMediaHistoryId } from '../../helpers/externalMediaHistory'
@@ -935,9 +936,14 @@ useMediaSessionMetadata(() => source.value && !errorMessage.value
   ? { title: info.value.title ?? '', artist: musicPlayerArtist.value, artworkSrc: thumbnail.value }
   : null)
 const creatorUrl = computed(() => safeWebUrl(info.value?.channel ? info.value.channelUrl : info.value?.uploaderUrl))
-const creatorAvatarUrl = computed(() => safeWebUrl(info.value?.channel ? info.value.channelThumbnail : info.value?.uploaderThumbnail))
 // Only the creator's profile names the channel; the media URL can be a clip or VOD
 const creatorChannel = computed(() => findPlatformChannel(creatorUrl.value))
+// yt-dlp only finds the avatars of some sites, so the channels of supported platforms load theirs
+const creatorAvatarUrl = usePlatformChannelAvatar(() => ({
+  platform: creatorChannel.value?.platform,
+  channelId: creatorChannel.value?.id,
+  avatar: safeWebUrl(info.value?.channel ? info.value.channelThumbnail : info.value?.uploaderThumbnail)
+}), { inList: false })
 // Like YouTube channels, the creator's channel remembers the playback settings picked for its media
 const channelPreferenceKey = computed(() => creatorChannel.value ? getPlatformChannelPreferenceKey(creatorChannel.value) : '')
 /** @type {import('vue').ComputedRef<('playbackSpeed' | 'videoQuality' | 'subtitlesState' | 'volume')[]>} */
@@ -1653,6 +1659,13 @@ watch(() => route.query.url, url => {
 // afterwards the player applies it once it has loaded.
 watch(() => route.query.timestamp, applyQueryTimestamp)
 watch(downloadAvailable, available => { if (!available) showDownloadPrompt.value = false })
+// The avatar of a channel that yt-dlp didn't name loads after the media
+watch(creatorAvatarUrl, url => {
+  if (!url || loading.value || !source.value) return
+  setTabAvatar(url)
+  const entry = historyEntry.value
+  if (historyAdded && entry && entry.authorThumbnail !== url) store.dispatch('updateHistory', { ...entry, authorThumbnail: url })
+})
 useTabLifecycle({
   beforeNavigate: savePositionOnExit,
   deactivate: savePositionOnExit,
