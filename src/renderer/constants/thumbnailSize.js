@@ -13,6 +13,7 @@ const DEFAULT_SHORTS_GRID_ITEM_MIN_SIZE = 190
 const DEFAULT_FULL_WIDTH_ITEM_MAX_SIZE = 720
 /** The `columns` value of {@link getThumbnailGridStyles} for the full width view type. */
 export const FULL_WIDTH_COLUMNS = -1
+// Matches the FtAutoGrid gap at the Default UI Density.
 const GRID_GAP = 8
 
 function getDefaultGridColumnCount(gridWidth, viewportWidth) {
@@ -40,8 +41,10 @@ function getDefaultGridColumnCount(gridWidth, viewportWidth) {
  * from the grid width and thumbnail size, or {@link FULL_WIDTH_COLUMNS}. Shorts
  * keep their sized grid in wider windows, where a few portrait cards per row
  * would not fit.
+ * @param {number} [densityScale] the UI Density factor that scales the grid gap
  */
-export function getThumbnailGridStyles(thumbnailSize, gridWidth = 0, viewportWidth = gridWidth, renderedWidth = gridWidth, columns = 0) {
+export function getThumbnailGridStyles(thumbnailSize, gridWidth = 0, viewportWidth = gridWidth, renderedWidth = gridWidth, columns = 0, densityScale = 1) {
+  const gap = GRID_GAP * densityScale
   // Larger cards cannot fit two per row on a phone, so a size saved in a wider
   // window shows at the phone slider's endpoint.
   const phone = gridWidth > 0 && viewportWidth <= PHONE_THUMBNAIL_VIEWPORT_WIDTH
@@ -61,12 +64,13 @@ export function getThumbnailGridStyles(thumbnailSize, gridWidth = 0, viewportWid
       stretch = `min(${fill}, ${maxSize}px)`
     }
   } else if (columns > 0 && gridWidth > 0) {
-    const gaps = (columns - 1) * GRID_GAP
+    const gaps = (columns - 1) * gap
     size = (gridWidth - gaps) / columns
     stretch = `calc((100% - ${widthAdjustment + gaps}px) / ${columns})`
   } else if (gridWidth > 0) {
+    // Every UI Density shows as many columns as Default, sized with its own gap.
     const columnCount = getDefaultGridColumnCount(gridWidth, viewportWidth)
-    const gaps = (columnCount - 1) * GRID_GAP
+    const gaps = (columnCount - 1) * gap
     size = (gridWidth - gaps) / columnCount * scale
     stretch = `calc((100% - ${widthAdjustment + gaps}px) * ${scale / columnCount})`
   }

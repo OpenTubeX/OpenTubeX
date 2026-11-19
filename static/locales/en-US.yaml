@@ -1077,7 +1077,11 @@ Settings:
     Always Show Scrollbars: Always Show Scrollbars
     Click Scrollbar Track to Scroll: Click Scrollbar Track to Scroll
     Hide Side Bar Labels: Hide Side Bar Labels
-    Compact Settings Categories: Compact Settings Categories
+    UI Density:
+      UI Density: UI Density
+      Compact: Compact
+      Default: Default
+      Comfortable: Comfortable
     Modal Backdrop:
       Modal Backdrop: Dialog Background
       Dim and Blur: Dim and blur
@@ -3597,7 +3601,7 @@ Tooltips:
     Use Fixed Tab Width: Gives every tab in the horizontal tab bar the same width instead of sizing them to their title.
     Use Custom Title Bar: Replaces the system title bar with the tab bar, or with the top navigation when tabs are not at the top, to save vertical space. The window controls appear in the corner of that bar.
     Use Grid Player Menu: Arranges the video player's settings menu as a grid of tiles instead of a list of rows.
-    Compact Settings Categories: Reduces the height of settings categories.
+    UI Density: Changes the spacing in lists, menus, the side bar, and Settings.
     Modal Backdrop: Sets how the app looks behind dialogs and menus. Blurring it can be slow on less powerful devices.
   Experimental Settings:
     Replace HTTP Cache: Disables Electron's disk based HTTP cache and enables a custom in-memory image cache. Will lead to increased RAM usage.

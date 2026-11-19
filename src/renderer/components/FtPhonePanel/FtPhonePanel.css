@@ -160,3 +160,9 @@
 .phonePanelContent :deep(.watchVideoChaptersPanel .chaptersWrapper) {
   resize: none;
 }
+
+/* Phone panels belong to the watch page, which keeps its spacing at every UI
+   Density. A docked sheet moves out of the page, so reset it here. */
+.panelContent {
+  --ui-density: 1;
+}

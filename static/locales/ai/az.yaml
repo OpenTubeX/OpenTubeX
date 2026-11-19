@@ -683,7 +683,11 @@ Settings:
       Tab Loading Indicator: Vərəqin yüklənmə göstəricisi
       Bar: Zolaq
       Dot: Nöqtə (klassik)
-    Compact Settings Categories: "Yığcam ayar kateqoriyaları"
+    UI Density:
+      UI Density: "İnterfeys sıxlığı"
+      Compact: "Yığcam"
+      Default: "Standart"
+      Comfortable: "Rahat"
     Playlist Thumbnail Size: "Pleylist miniatürlərinin ölçüsü"
     Compact Mobile Mini Player: "Yığcam mobil mini pleyer"
     Always Show Mobile Search Bar: "Mobil axtarış çubuğunu həmişə göstər"
@@ -2463,7 +2467,7 @@ Tooltips:
     Visible Search Suggestions: "Axtarış panelinin siyahısı sürüşdürülməzdən əvvəl neçə axtarış tarixçəsi qeydi və təklif göstərdiyini müəyyən edir. Siyahı heç vaxt pəncərənin aşağı kənarından kənara çıxmır."
     Thumbnail Size: "Şəbəkələrdə və siyahılarda video miniatürlərinin ölçüsünü dəyişir. Sabit sütun sayı və ya Tam en görünüşü olan şəbəkələr əvəzində hər sətri doldurur, ona görə orada yalnız siyahı miniatürlərini və Shorts-u dəyişir. Telefon ölçülü pəncərələrdə şəbəkə miniatürləri 100% ilə məhdudlaşır."
     Playlist Thumbnail Size: "Pleylist səhifələrində video miniatürlərinin ölçüsünü dəyişir. Sabit sütun sayı və ya Tam en görünüşü olan şəbəkələr əvəzində hər sətri doldurur, ona görə orada yalnız siyahı miniatürlərini və Shorts-u dəyişir. Telefon ölçülü pəncərələrdə şəbəkə miniatürləri 100% ilə məhdudlaşır."
-    Compact Settings Categories: "Ayar kateqoriyalarının hündürlüyünü azaldır."
+    UI Density: "Siyahılarda, menyularda, yan paneldə və Parametrlərdə boşluqları dəyişir."
     Show Progress as Notification: Ümumi gedişat zolağı əvəzinə abunəlik yeniləmələri və idarə olunan vasitələrin endirilməsi kimi arxa plan əməliyyatlarının cari gedişatını daimi bildirişdə göstərir.
     Always Show Scrollbars: Sürüşdürmə zolaqlarını həmişə görünən saxlayır. Bağlandıqda, siçanı hərəkət etdirməyi dayandırdıqdan az sonra solub yox olur və onu yenidən hərəkət etdirən kimi görünürlər.
     Scroll Speed: Siçan çarxı və toxunma paneli jestlərinin səhifəni nə qədər sürüşdürdüyünü dəyişir.

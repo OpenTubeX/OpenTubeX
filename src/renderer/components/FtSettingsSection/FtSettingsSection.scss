@@ -25,7 +25,7 @@
 
   /* Text that starts a card sits as far below its top edge as the card's
      content ends above its bottom edge, which includes a control's margin. */
-  padding-block: calc(8px + var(--settings-control-margin)) 8px;
+  padding-block: calc(8px * var(--ui-density) + var(--settings-control-margin)) calc(8px * var(--ui-density));
   background-color: var(--settings-section-bg-color);
   backdrop-filter: var(--card-bg-blur, none);
   border-radius: var(--shape-corner-large-increased);
@@ -33,27 +33,27 @@
   > :deep(*) {
     box-sizing: border-box;
     inline-size: 100%;
-    padding-block: 8px;
+    padding-block: calc(8px * var(--ui-density));
     padding-inline: 20px;
   }
 
   > :deep(:is(h3, h4, p)) {
-    padding-block: 8px 4px;
+    padding-block: calc(8px * var(--ui-density)) calc(4px * var(--ui-density));
   }
 
   /* Text that ends a card leaves as much space below it as a control does. */
   > :deep(p:last-child) {
-    padding-block-end: calc(8px + var(--settings-control-margin));
+    padding-block-end: calc(8px * var(--ui-density) + var(--settings-control-margin));
   }
 
   /* Buttons keep smaller margins than other controls (none in a button
      group), so a row of them that ends a card makes up the difference. */
   > :deep(:last-child:not(.buttonGroup):has(> .btn:last-child, > :last-child > .btn:last-child)) {
-    padding-block-end: calc(8px + var(--settings-control-margin) - 5px);
+    padding-block-end: calc(8px * var(--ui-density) + var(--settings-control-margin) - 5px);
   }
 
   > :deep(.buttonGroup:last-child) {
-    padding-block-end: calc(8px + var(--settings-control-margin));
+    padding-block-end: calc(8px * var(--ui-density) + var(--settings-control-margin));
   }
 
   /* A switch's label padding already adds space below it. Compact switches
@@ -63,7 +63,7 @@
   }
 
   > :deep(:last-child:has(> .switch-ctn.compact:last-child, > .switchColumn:last-child > .switch-ctn.compact:last-child)) {
-    padding-block-end: calc(8px + var(--settings-control-margin) - 6px);
+    padding-block-end: calc(8px * var(--ui-density) + var(--settings-control-margin) - 6px);
   }
 
   /* A slider's box extends below its handle. */
@@ -102,19 +102,19 @@
 
 /* Cards nested in a section set themselves apart from the blocks around them. */
 .settingsSection > .sectionBody > :deep(.settingsCard) {
-  margin-block-start: 20px;
+  margin-block-start: calc(20px * var(--ui-density));
 }
 
 /* A nested card that ends the section keeps the same 20px from its bottom
    edge, which already pads the content by 8px. */
 .settingsSection > .sectionBody > :deep(.settingsCard:last-child) {
-  margin-block-end: 12px;
+  margin-block-end: calc(12px * var(--ui-density));
 }
 
 /* Group titles introduce the blocks below them, so they sit closer to those
    than to the blocks above. */
 .settingsSection > .sectionBody > :deep(:is(h3, h4):not(:first-child)) {
-  margin-block-start: 12px;
+  margin-block-start: calc(12px * var(--ui-density));
 }
 
 /* Material 3 Expressive emphasized title: larger and heavier than the
@@ -126,7 +126,7 @@
   line-height: 1.75rem;
   user-select: none;
   margin-inline: 20px;
-  margin-block: 0 20px;
+  margin-block: 0 calc(20px * var(--ui-density));
   text-align: center;
 }
 

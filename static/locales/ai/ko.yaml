@@ -781,7 +781,11 @@ Settings:
       Tab Loading Indicator: 탭 로딩 표시
       Bar: 막대
       Dot: 점 (클래식)
-    Compact Settings Categories: "설정 카테고리 간결하게 표시"
+    UI Density:
+      UI Density: "UI 밀도"
+      Compact: "좁게"
+      Default: "기본"
+      Comfortable: "넓게"
     Playlist Thumbnail Size: "재생목록 썸네일 크기"
     Compact Mobile Mini Player: "간결한 모바일 미니 플레이어"
     Always Show Mobile Search Bar: "모바일 검색창 항상 표시"
@@ -2844,7 +2848,7 @@ Tooltips:
     Visible Search Suggestions: "검색창 목록이 스크롤되기 전에 표시할 검색 기록 항목과 추천 검색어의 수를 설정합니다. 목록은 창 아래쪽 가장자리를 넘어가지 않습니다."
     Thumbnail Size: "그리드와 목록에서 동영상 썸네일 크기를 조정합니다. 열 수가 고정된 그리드나 전체 너비 보기 유형은 대신 각 행을 채우므로, 여기서는 목록 썸네일과 Shorts만 변경됩니다. 휴대전화 크기의 창에서는 그리드 썸네일이 100%로 제한됩니다."
     Playlist Thumbnail Size: "재생목록 페이지에서 동영상 썸네일 크기를 조정합니다. 열 수가 고정된 그리드나 전체 너비 보기 유형은 대신 각 행을 채우므로, 여기서는 목록 썸네일과 Shorts만 변경됩니다. 휴대전화 크기의 창에서는 그리드 썸네일이 100%로 제한됩니다."
-    Compact Settings Categories: "설정 카테고리의 높이를 줄입니다."
+    UI Density: "목록, 메뉴, 사이드바, 설정의 간격을 변경합니다."
     Show Progress as Notification: 전체 진행률 표시줄 대신 구독 새로 고침 및 관리되는 도구 다운로드 같은 백그라운드 작업의 실시간 진행률을 지속 알림으로 표시합니다.
     Always Show Scrollbars: 스크롤바를 항상 표시합니다. 비활성화하면 마우스 움직임을 멈춘 직후 서서히 사라지고 다시 움직이면 즉시 나타납니다.
     Scroll Speed: 마우스 휠 및 터치패드 휠 동작의 스크롤 거리를 변경합니다.

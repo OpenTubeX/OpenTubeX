@@ -41,6 +41,12 @@ test('stretches cards with the rendered grid width from the same size', () => {
   assert.equal(getThumbnailGridStyles(100)['--thumbnail-grid-stretch'], '0px')
 })
 
+test('a more spacious grid keeps the default column count', () => {
+  // Default fits three 262px cards in 804px; Comfortable's wider gaps must not drop one.
+  const size = Number.parseFloat(getThumbnailGridStyles(100, 804, 1280, 804, 0, 1.5)['--thumbnail-grid-size'])
+  assert.equal(size * 3 + 2 * 12, 804)
+})
+
 test('full width cards fill phone rows and stay capped in wider windows', () => {
   const phone = getThumbnailGridStyles(100, 396, 412, 396, FULL_WIDTH_COLUMNS)
   assert.equal(Number.parseFloat(phone['--thumbnail-grid-size']), 396)

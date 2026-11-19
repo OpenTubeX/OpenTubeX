@@ -681,7 +681,11 @@ Settings:
       Tab Loading Indicator: Sekme yükleme göstergesi
       Bar: Çubuk
       Dot: Nokta (klasik)
-    Compact Settings Categories: "Kompakt Ayar Kategorileri"
+    UI Density:
+      UI Density: "Arayüz yoğunluğu"
+      Compact: "Sıkışık"
+      Default: "Varsayılan"
+      Comfortable: "Ferah"
     Playlist Thumbnail Size: "Oynatma listesi küçük resim boyutu"
     Compact Mobile Mini Player: "Kompakt mobil mini oynatıcı"
     Always Show Mobile Search Bar: "Mobil arama çubuğunu her zaman göster"
@@ -2451,7 +2455,7 @@ Tooltips:
     Visible Search Suggestions: "Arama çubuğunun listesi kaydırılmadan önce kaç arama geçmişi girdisi ve öneri göstereceğini belirler. Liste hiçbir zaman pencerenin alt kenarını aşmaz."
     Thumbnail Size: "Izgaralarda ve listelerde video küçük resimlerini ölçeklendirir. Sabit sütun sayısına sahip ızgaralar veya Tam Genişlik görünüm türü bunun yerine her satırı doldurur, bu yüzden orada yalnızca liste küçük resimlerini ve Shorts'u değiştirir. Telefon boyutundaki pencerelerde ızgara küçük resimleri %100 ile sınırlıdır."
     Playlist Thumbnail Size: "Oynatma listesi sayfalarında video küçük resimlerini ölçeklendirir. Sabit sütun sayısına sahip ızgaralar veya Tam Genişlik görünüm türü bunun yerine her satırı doldurur, bu yüzden orada yalnızca liste küçük resimlerini ve Shorts'u değiştirir. Telefon boyutundaki pencerelerde ızgara küçük resimleri %100 ile sınırlıdır."
-    Compact Settings Categories: "Ayar kategorilerinin yüksekliğini azaltır."
+    UI Density: "Listelerdeki, menülerdeki, kenar çubuğundaki ve Ayarlar’daki boşlukları değiştirir."
     Show Progress as Notification: Abonelik yenilemeleri ve yönetilen araç indirmeleri gibi arka plan işlemlerinin anlık ilerlemesini genel ilerleme çubuğu yerine kalıcı bir bildirimde gösterir.
     Always Show Scrollbars: Kaydırma çubuklarını her zaman görünür tutar. Devre dışı bırakıldığında fareyi hareket ettirmeyi bıraktıktan kısa süre sonra kaybolur ve yeniden hareket ettirdiğinizde görünür.
     Scroll Speed: Fare tekerleği ve dokunmatik yüzey kaydırma hareketlerinin ne kadar uzağa kaydıracağını değiştirir.

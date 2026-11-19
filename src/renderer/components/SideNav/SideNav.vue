@@ -565,9 +565,10 @@ watch([
   activeSubscriptionLimit.value = activeSubscriptionsPerPage
 })
 
-// Reconcile the real content end when rail labels or destinations disappear.
+// Reconcile the real content end when rail labels or destinations disappear
+// or a denser UI Density shortens the rows.
 // Hidden subscriptions must not be sorted just to be watched.
-watch([isOpen, () => props.forceExpanded, hideText, visibleNavigationItems, pinnedPlaylists, pinnedChannels, hideActiveSubscriptions, () => hideActiveSubscriptions.value ? null : displayedActiveSubscriptions.value], () => {
+watch([isOpen, () => props.forceExpanded, hideText, () => store.getters.getUiDensity, visibleNavigationItems, pinnedPlaylists, pinnedChannels, hideActiveSubscriptions, () => hideActiveSubscriptions.value ? null : displayedActiveSubscriptions.value], () => {
   const inner = innerRef.value
   if (inner == null || window.matchMedia('(max-width: 680px)').matches) return
   const contentEnd = [...inner.querySelectorAll(':scope > div.mobileHidden')].at(-1) ?? inner.querySelector('hr')

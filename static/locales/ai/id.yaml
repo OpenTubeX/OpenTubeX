@@ -682,7 +682,11 @@ Settings:
       Tab Loading Indicator: Indikator pemuatan tab
       Bar: Bilah
       Dot: Titik (klasik)
-    Compact Settings Categories: "Kategori Pengaturan Ringkas"
+    UI Density:
+      UI Density: "Kepadatan antarmuka"
+      Compact: "Ringkas"
+      Default: "Bawaan"
+      Comfortable: "Lega"
     Playlist Thumbnail Size: "Ukuran thumbnail playlist"
     Compact Mobile Mini Player: "Pemutar mini seluler ringkas"
     Always Show Mobile Search Bar: "Selalu tampilkan bilah pencarian di ponsel"
@@ -2477,7 +2481,7 @@ Tooltips:
     Visible Search Suggestions: "Menentukan berapa banyak entri riwayat pencarian dan saran yang ditampilkan bilah pencarian sebelum daftarnya perlu digulir. Daftar tidak pernah melewati bagian bawah jendela."
     Thumbnail Size: "Mengubah ukuran gambar mini video di kisi dan daftar. Kisi dengan jumlah kolom tetap atau jenis tampilan Lebar Penuh akan mengisi setiap baris, jadi di sana penggeser hanya mengubah gambar mini daftar dan Shorts. Di jendela seukuran ponsel, gambar mini kisi dibatasi hingga 100%."
     Playlist Thumbnail Size: "Mengubah ukuran gambar mini video di halaman daftar putar. Kisi dengan jumlah kolom tetap atau jenis tampilan Lebar Penuh akan mengisi setiap baris, jadi di sana penggeser hanya mengubah gambar mini daftar dan Shorts. Di jendela seukuran ponsel, gambar mini kisi dibatasi hingga 100%."
-    Compact Settings Categories: "Mengurangi tinggi kategori pengaturan."
+    UI Density: "Mengubah jarak di daftar, menu, bilah samping, dan Pengaturan."
     Show Progress as Notification: Menampilkan notifikasi tetap dengan progres langsung untuk operasi latar belakang, seperti pembaruan langganan dan unduhan alat terkelola, sebagai pengganti bilah progres global.
     Always Show Scrollbars: Mempertahankan bilah gulir agar selalu terlihat. Jika dinonaktifkan, bilah memudar sesaat setelah Anda berhenti menggerakkan tetikus dan muncul kembali begitu tetikus digerakkan.
     Scroll Speed: Mengubah jarak gulir gestur roda tetikus dan panel sentuh.

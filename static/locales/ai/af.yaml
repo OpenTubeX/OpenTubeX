@@ -902,7 +902,11 @@ Settings:
       Bundled Fonts: Ingeslote lettertipes
       System Fonts: Stelsellettertipes
     Always Show Scrollbars: Wys altyd rolstawe
-    Compact Settings Categories: Kompakte instellingskategorieë
+    UI Density:
+      UI Density: "UI-digtheid"
+      Compact: "Kompak"
+      Default: "Verstek"
+      Comfortable: "Ruim"
     Base Theme:
       Material Light: Material Lig
       Material Dark: Material Donker
@@ -2716,7 +2720,7 @@ Tooltips:
     Use Fixed Tab Width: Gee elke oortjie in die horisontale oortjiebalk dieselfde breedte in plaas daarvan om hulle volgens hul titel te grootte te maak.
     Use Custom Title Bar: Vervang die stelsel se titelbalk met die oortjiebalk, of met die boonste navigasie wanneer oortjies nie bo is nie, om vertikale spasie te bespaar. Die vensterkontroles verskyn in die hoek van daardie balk.
     Use Grid Player Menu: Rangskik die videospeler se instellingskieslys as ’n rooster van teëls in plaas van ’n lys rye.
-    Compact Settings Categories: "Verminder die hoogte van instellingskategorieë."
+    UI Density: "Verander die spasiëring in lyste, kieslyste, die kantbalk en Instellings."
     Modal Backdrop: "Bepaal hoe die toep agter dialoë en kieslyste lyk. Vervaging kan op minder kragtige toestelle stadig wees."
     Click Scrollbar Track to Scroll: "Klik op 'n skuifbalk buite sy handvatsel blaai omtrent een bladsy in die rigting van die klik. Terwyl dit aan is, vang 'n sigbare skuifbalk klieke op items daaronder. Die oortjiebalk se skuifbalk werk altyd so."
   Experimental Settings:

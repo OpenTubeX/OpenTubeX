@@ -3,9 +3,9 @@
   background-image: var(--card-bg-image);
   backdrop-filter: var(--card-bg-blur, none);
   border-radius: var(--shape-corner-medium);
-  margin: 8px;
-  padding-block: 3px 16px;
-  padding-inline: 16px;
+  margin: calc(8px * var(--ui-density));
+  padding-block: 3px calc(16px * var(--ui-density));
+  padding-inline: calc(16px * var(--ui-density));
   box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
 }
 

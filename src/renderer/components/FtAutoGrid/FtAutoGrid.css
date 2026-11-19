@@ -18,7 +18,7 @@
 
 .grid {
   display: grid;
-  gap: 8px;
+  gap: calc(8px * var(--ui-density));
   grid-template-columns: repeat(auto-fill, minmax(262px, 1fr));
   justify-content: space-evenly;
 }
@@ -57,5 +57,5 @@
 
 .list {
   display: grid;
-  gap: 4px;
+  gap: calc(4px * var(--ui-density));
 }

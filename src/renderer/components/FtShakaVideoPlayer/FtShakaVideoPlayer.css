@@ -8,6 +8,10 @@
 
 /* stylelint-disable liberty/use-logical-spec */
 .ftVideoPlayer {
+  /* Like the watch page, the player and the panels docked in it keep their
+     spacing at every UI Density, also in the mini player. */
+  --ui-density: 1;
+
   /* Width reserved for a docked side panel (chapters / fullscreen comments). */
   --side-panel-width: min(clamp(260px, 40%, 440px), 100%);
 

@@ -681,7 +681,11 @@ Settings:
       Tab Loading Indicator: 分頁載入指示器
       Bar: 進度條
       Dot: 圓點（經典）
-    Compact Settings Categories: "精簡設定類別"
+    UI Density:
+      UI Density: "介面密度"
+      Compact: "緊湊"
+      Default: "預設"
+      Comfortable: "寬鬆"
     Playlist Thumbnail Size: "播放清單縮圖大小"
     Compact Mobile Mini Player: "精簡行動迷你播放器"
     Always Show Mobile Search Bar: "一律顯示行動版搜尋列"
@@ -2453,7 +2457,7 @@ Tooltips:
     Visible Search Suggestions: "設定搜尋列在清單需要捲動之前顯示的搜尋紀錄和建議數量。清單絕不會超出視窗底部。"
     Thumbnail Size: "縮放網格和清單中的影片縮圖。欄數固定的網格或「全寬」檢視會改為填滿每一列，因此在這些情況下只會改變清單縮圖和 Shorts。在手機大小的視窗中，網格縮圖最大為 100%。"
     Playlist Thumbnail Size: "縮放播放清單頁面中的影片縮圖。欄數固定的網格或「全寬」檢視會改為填滿每一列，因此在這些情況下只會改變清單縮圖和 Shorts。在手機大小的視窗中，網格縮圖最大為 100%。"
-    Compact Settings Categories: "縮小設定類別的高度。"
+    UI Density: "變更清單、選單、側邊欄和設定中的間距。"
     Show Progress as Notification: 以持續顯示的通知呈現背景作業的即時進度（例如重新整理訂閱與下載受管理工具），而不使用全域進度列。
     Always Show Scrollbars: 讓捲動軸隨時保持顯示。停用後，停止移動滑鼠不久便會淡出，再次移動滑鼠時則會立即顯示。
     Scroll Speed: 變更滑鼠滾輪和觸控板滾輪手勢的捲動距離。
