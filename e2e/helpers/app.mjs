@@ -10,6 +10,8 @@ import { brotliCompressSync } from 'node:zlib'
 
 import { test as base, expect, _electron as electron } from '@playwright/test'
 
+import { egressBlockerEnv, takeBlockedRequests } from './egressBlocker.mjs'
+
 // Shared fixtures also run from the base checkout against candidate builds.
 export const INTERNET_CHECK_URL = 'https://connectivitycheck.grapheneos.network/generate_204'
 
@@ -46,16 +48,25 @@ export function abortUnmockedRequest(route) {
 const LOOPBACK_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]'])
 
 /**
+ * Host patterns that `--host-resolver-rules` maps to local test servers.
+ * @param {string[]} launchArgs
+ */
+function loopbackMappedHosts(launchArgs) {
+  return launchArgs
+    .flatMap(arg => arg.startsWith('--host-resolver-rules=') ? arg.split('=')[1].split(',') : [])
+    .map(rule => rule.trim().split(/\s+/))
+    .filter(([type, , target]) => type === 'MAP' && LOOPBACK_HOSTS.has(target))
+    .map(([, pattern]) => pattern)
+}
+
+/**
  * Lets local test servers through, including hosts that `--host-resolver-rules`
  * maps to them, and blocks every other unmocked host.
  * @param {string[]} launchArgs
  */
 function unmockedHostBlocker(launchArgs) {
-  const mappedHosts = launchArgs
-    .flatMap(arg => arg.startsWith('--host-resolver-rules=') ? arg.split('=')[1].split(',') : [])
-    .map(rule => rule.trim().split(/\s+/))
-    .filter(([type, , target]) => type === 'MAP' && LOOPBACK_HOSTS.has(target))
-    .map(([, pattern]) => new RegExp(`^${pattern.replaceAll('.', '\\.').replaceAll('*', '.*')}$`))
+  const mappedHosts = loopbackMappedHosts(launchArgs)
+    .map(pattern => new RegExp(`^${pattern.replaceAll('.', '\\.').replaceAll('*', '.*')}$`))
   return async route => {
     const { hostname } = new URL(route.request().url())
     if (LOOPBACK_HOSTS.has(hostname) || hostname.endsWith('.localhost') || mappedHosts.some(host => host.test(hostname))) {
@@ -73,6 +84,21 @@ function unmockedHostBlocker(launchArgs) {
       // settled when it falls through, e.g. after a test's page.unrouteAll().
     }
   }
+}
+
+const NO_URL = /^opentubex-e2e-no-url:/
+const fallBack = route => route.fallback()
+
+/**
+ * Playwright only applies a new context route to pages that have finished
+ * initializing. A window that opens while one is being added, such as the
+ * first window of a quick launch, sends its requests past every context
+ * route. Adding a page route makes Playwright apply them again.
+ * @param {import('@playwright/test').Page} page
+ */
+async function applyContextRoutes(page) {
+  await page.route(NO_URL, fallBack)
+  await page.unroute(NO_URL, fallBack)
 }
 
 /** Offline projects set `blockUnmockedHosts`, so that also covers apps a test launches itself. */
@@ -382,6 +408,7 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}, windo
     LANG: 'en_GB.UTF-8',
     LANGUAGE: 'en_GB',
     LC_ALL: 'en_GB.UTF-8',
+    ...(projectBlocksUnmockedHosts() ? await egressBlockerEnv(loopbackMappedHosts(extraArgs)) : {}),
     ...options.env,
   }
   delete env.WAYLAND_DISPLAY
@@ -456,6 +483,7 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}, windo
   // Tests control WAN reachability independently of the host running them.
   // Page routes can override these replies to exercise real offline recovery.
   await context.route(INTERNET_CHECK_URL, route => route.fulfill({ status: 204 }))
+  context.on('page', page => applyContextRoutes(page).catch(() => {}))
   // Covers reloads and later windows. The first document may already exist.
   await context.addInitScript(installRendererAccessors)
   await notifyPhase('electronConnected')
@@ -955,7 +983,15 @@ export const test = base.extend({
       }
 
       settingUp = false
+      // Drops requests from an earlier test's app that was still closing.
+      takeBlockedRequests()
       await use(appHandle)
+      const blockedRequests = [...new Set(takeBlockedRequests())]
+      // Requests from the main process and its child processes, which
+      // Playwright cannot mock. They fail instead of reaching real hosts.
+      if (blockedRequests.length > 0) {
+        testInfo.annotations.push({ type: 'warning', description: `Blocked unmocked requests: ${blockedRequests.join(', ')}` })
+      }
       expect.soft(scrollbarErrors, 'Overlay scrollbar containers must not be static').toEqual([])
       expect.soft(cspViolations, 'The renderer must not violate its Content-Security-Policy').toEqual([])
     } finally {
