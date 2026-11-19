@@ -17,6 +17,16 @@ test('sleep timer offers the current chapter and stops before the next one', asy
   await openPlayerOptions(page)
   await page.locator('.sleep-timer-button').click()
   await expect(chapterOption).toHaveClass(/shaka-hidden/)
+
+  // The slider and its step buttons set durations between the presets and keep the menu open.
+  const menu = page.locator('.sleep-timer-menu')
+  await menu.getByRole('slider', { name: 'Sleep timer' }).press('ArrowRight')
+  await expect(page.locator('.sleep-timer-button')).toHaveAttribute('shaka-status', '10:00 remaining')
+  await menu.getByRole('button', { name: '+' }).click()
+  await expect(menu.locator('.shaka-playback-rate-value')).toHaveText('15 minutes')
+  await expect(menu.getByRole('menuitemradio', { name: '15 min' })).toHaveAttribute('aria-checked', 'true')
+  await expect(page.locator('.sleep-timer-button')).toHaveAttribute('shaka-status', '15:00 remaining')
+
   // Late chapters no longer rebuild the controls, so close the menu before reopening it.
   await page.keyboard.press('Escape')
   await expect(page.locator('.sleep-timer-button')).toBeHidden()
@@ -56,6 +66,9 @@ test('sleep timer clamps its scrolled menu when the chapter option disappears', 
   const menu = page.locator('.ftVideoPlayer .shaka-overflow-menu')
   const chapterOption = menu.locator('.sleep-timer-menu button').filter({ hasText: 'End of current chapter' })
   await expect(chapterOption).toBeVisible()
+  // A running timer shows Cancel timer, so that the chapter option is alone in its row and hiding it shortens the menu.
+  await menu.locator('.sleep-timer-menu').getByRole('button', { name: '+' }).click()
+  await expect(menu.locator('.sleep-timer-cancel')).toBeVisible()
   await menu.evaluate(element => {
     element.style.inlineSize = '200px'
     element.style.maxBlockSize = '130px'

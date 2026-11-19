@@ -5,9 +5,23 @@ import i18n from '../../../i18n/index'
 import { PlayerIcons } from '../../../../constants'
 import {
   formatSleepTimerRemaining,
-  SLEEP_TIMER_DURATIONS_MINUTES,
+  MAX_SLEEP_TIMER_MINUTES,
+  MIN_SLEEP_TIMER_MINUTES,
+  SLEEP_TIMER_PRESET_MINUTES,
+  SLEEP_TIMER_STEP_MINUTES,
 } from '../opentubex/useSleepTimer'
 import { scheduleOverflowMenuScrollClamp } from './overflowMenu'
+import { addSliderMenu, choosePreset, fillSlider } from './sliderMenu'
+
+/**
+ * Keeps a duration within the range of the slider and snaps it to its step.
+ * @param {number} minutes
+ * @returns {number}
+ */
+function normalizeMinutes(minutes) {
+  const stepped = Math.round(minutes / SLEEP_TIMER_STEP_MINUTES) * SLEEP_TIMER_STEP_MINUTES
+  return Math.min(MAX_SLEEP_TIMER_MINUTES, Math.max(MIN_SLEEP_TIMER_MINUTES, stepped))
+}
 
 export class SleepTimer extends shaka.ui.SettingsMenu {
   /**
@@ -38,15 +52,37 @@ export class SleepTimer extends shaka.ui.SettingsMenu {
 
     /** @private */
     this.checkmarkIcon_ = checkmarkIcon
-    /** @private */
-    this.durationButtons_ = new Map()
 
-    for (const minutes of SLEEP_TIMER_DURATIONS_MINUTES) {
-      const button = this.createOption_(() => i18n.global.t('Video.Player.Sleep Timer.Minutes', { minutes }), () => {
-        this.events_.dispatchEvent(new CustomEvent('setSleepTimerDuration', { detail: minutes }))
-      })
-      this.durationButtons_.set(minutes, button)
-    }
+    const { value, slider, decreaseButton, increaseButton, presetButtons } = addSliderMenu(this, {
+      step: SLEEP_TIMER_STEP_MINUTES,
+      presets: SLEEP_TIMER_PRESET_MINUTES,
+      onStep: delta => this.startDuration_(normalizeMinutes(this.getSliderMinutes_() + delta)),
+      onPreset: minutes => this.startDuration_(minutes),
+    })
+    /** @private */
+    this.value_ = value
+    /** @private */
+    this.slider_ = slider
+    /** @private */
+    this.decreaseButton_ = decreaseButton
+    /** @private */
+    this.increaseButton_ = increaseButton
+    /** @private */
+    this.presetButtons_ = presetButtons
+
+    // Setting a duration starts the timer, so the slider only sets it once the drag ends, like the caption size slider
+    slider.setRange(MIN_SLEEP_TIMER_MINUTES, MAX_SLEEP_TIMER_MINUTES)
+    slider.onChange = () => this.showSliderMinutes_(normalizeMinutes(slider.getValue()))
+    slider.onChangeEnd = () => this.applySlider_()
+    // The arrow keys change the range natively, which only ends with a change event
+    this.eventManager.listen(slider.bar, 'change', () => this.applySlider_())
+    // Shaka's wheel handling has no end, so it goes through `changeTo` instead, which ends on its own
+    this.eventManager.listen(slider.container, 'wheel', (event) => {
+      if (event.ctrlKey || event.metaKey) return
+      event.preventDefault()
+      const delta = event.deltaY > 0 ? -SLEEP_TIMER_STEP_MINUTES : SLEEP_TIMER_STEP_MINUTES
+      slider.changeTo(normalizeMinutes(slider.getValue() + delta))
+    })
 
     /** @private */
     this.endOfVideoButton_ = this.createOption_(() => i18n.global.t('Video.Player.Sleep Timer.End of video'), () => {
@@ -76,14 +112,74 @@ export class SleepTimer extends shaka.ui.SettingsMenu {
       [timer.mode, timer.durationMinutes, timer.remainingMs, chapterEndSeconds],
       () => this.updateState_()
     )
+    // Not on every second the timer counts down, which would move the slider while it is dragged
+    /** @private */
+    this.stopSliderWatch_ = watch([timer.mode, timer.durationMinutes], () => this.updateSlider_())
 
     this.updateLocalisedStrings_()
-    this.updateState_()
   }
 
   release() {
     this.stopTimerWatch_()
+    this.stopSliderWatch_()
+    this.slider_.release()
     super.release()
+  }
+
+  /**
+   * @param {number} minutes
+   * @private
+   */
+  startDuration_(minutes) {
+    this.events_.dispatchEvent(new CustomEvent('setSleepTimerDuration', { detail: minutes }))
+  }
+
+  /**
+   * Starts the slider's duration, unless the timer already runs for it. A drag ends with both
+   * `onChangeEnd` and a change event, and clicking the thumb shouldn't restart the timer.
+   * @private
+   */
+  applySlider_() {
+    const minutes = normalizeMinutes(this.slider_.getValue())
+    if (minutes === this.getSliderMinutes_() && this.timer_.mode.value === 'duration') {
+      this.updateSlider_()
+    } else {
+      this.startDuration_(minutes)
+    }
+  }
+
+  /**
+   * Where the slider shows the duration of the running timer, or its start without one.
+   * @returns {number}
+   * @private
+   */
+  getSliderMinutes_() {
+    const { durationMinutes, mode } = this.timer_
+    return mode.value === 'duration' ? durationMinutes.value : MIN_SLEEP_TIMER_MINUTES
+  }
+
+  /**
+   * Shows a duration above the slider, while it is dragged or set.
+   * @param {number} minutes
+   * @private
+   */
+  showSliderMinutes_(minutes) {
+    const label = i18n.global.t('Video.Player.Sleep Timer.Minutes', { minutes })
+    this.value_.textContent = label
+    this.slider_.bar.ariaValueText = label
+    fillSlider(this.slider_, this.controls, minutes)
+  }
+
+  /** @private */
+  updateSlider_() {
+    const { durationMinutes, mode } = this.timer_
+    const minutes = this.getSliderMinutes_()
+    this.slider_.setValue(minutes)
+    this.showSliderMinutes_(minutes)
+    // Without a timer, the slider starts at the shortest duration, which − starts too
+    this.decreaseButton_.disabled = mode.value === 'duration' && minutes <= MIN_SLEEP_TIMER_MINUTES
+    this.increaseButton_.disabled = minutes >= MAX_SLEEP_TIMER_MINUTES
+    choosePreset(this.presetButtons_, mode.value === 'duration' ? durationMinutes.value : Number.NaN)
   }
 
   /**
@@ -110,22 +206,29 @@ export class SleepTimer extends shaka.ui.SettingsMenu {
     this.nameSpan.textContent = label
     this.backSpan.textContent = label
     this.backButton.ariaLabel = this.localization.resolve('BACK')
+    this.slider_.bar.ariaLabel = label
 
-    for (const button of this.menu.querySelectorAll('button:not(.shaka-back-to-overflow-button)')) {
+    // The presets are short, so that more of them fit on a row
+    const format = new Intl.NumberFormat(i18n.global.locale.value, { style: 'unit', unit: 'minute', unitDisplay: 'short' })
+    for (const button of this.presetButtons_) {
+      button.textContent = format.format(Number(button.dataset.value))
+    }
+
+    for (const button of [this.endOfVideoButton_, this.endOfChapterButton_, this.cancelButton_]) {
       button.querySelector('span').textContent = button.getSleepTimerLabel()
     }
 
+    this.updateSlider_()
     this.updateState_()
   }
 
   /** @private */
   updateState_() {
-    const { durationMinutes, mode, remainingMs } = this.timer_
+    const { mode, remainingMs } = this.timer_
     let selectedButton = null
     let status = i18n.global.t('Video.Player.Sleep Timer.Off')
 
     if (mode.value === 'duration') {
-      selectedButton = this.durationButtons_.get(durationMinutes.value)
       status = i18n.global.t('Video.Player.Sleep Timer.Remaining', {
         time: formatSleepTimerRemaining(remainingMs.value),
       })
@@ -146,7 +249,7 @@ export class SleepTimer extends shaka.ui.SettingsMenu {
       scheduleOverflowMenuScrollClamp(this.parent, visibleButtons.at(-1) ?? null)
     }
 
-    for (const button of [...this.durationButtons_.values(), this.endOfVideoButton_, this.endOfChapterButton_]) {
+    for (const button of [this.endOfVideoButton_, this.endOfChapterButton_]) {
       const isSelected = button === selectedButton
       const label = button.querySelector('span')
       label.classList.toggle('shaka-chosen-item', isSelected)
