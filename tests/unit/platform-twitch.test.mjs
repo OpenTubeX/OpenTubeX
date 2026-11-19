@@ -70,16 +70,16 @@ test('searches categories page by page, skips categories without a valid address
 
 test('loads a category with its live streams, nothing for unknown ones, and fails without its streams', async () => {
   const { fetcher, requests } = answer(({ variables }) => variables.slug === 'chess'
-    ? { data: { game: { ...game(), streams: { edges: [{ node: stream('11') }, { node: stream('12', null) }, null] } } } }
+    ? { data: { game: { ...game(), streams: { edges: [{ node: stream('11', { id: '1001', login: 'Streamer', displayName: 'Streamer', profileImageURL: 'https://cdn.example.test/streamer-70x70.png' }) }, { node: stream('12', null) }, null] } } } }
     : variables.slug === 'refused'
       ? { errors: [{ message: 'failed integrity check', path: ['game', 'streams'] }], data: { game: { ...game(), streams: null } } }
       : { data: { game: null } })
 
   const result = await twitch.getCategory(fetcher, 'chess')
   assert.equal(result.category.name, 'Chess')
-  // The stream without a channel is left out
-  assert.deepEqual(result.items.map(item => [item.id, item.channelId, item.url, item.isLive]), [
-    ['11', '1001', 'https://www.twitch.tv/streamer', true]
+  // The stream without a channel is left out, and each stream shows its channel's avatar
+  assert.deepEqual(result.items.map(item => [item.id, item.channelId, item.url, item.isLive, item.authorAvatar]), [
+    ['11', '1001', 'https://www.twitch.tv/streamer', true, 'https://cdn.example.test/streamer-70x70.png']
   ])
 
   assert.equal(await twitch.getCategory(fetcher, 'unknown'), null)

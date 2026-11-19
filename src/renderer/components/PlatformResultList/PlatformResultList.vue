@@ -15,7 +15,7 @@
         v-if="result.kind === 'item'"
         :data="result.item"
         :layout="layout"
-        :avatar="avatar"
+        :avatar="channel && (!result.item.channelId || result.item.channelId === channel.id) ? channel.avatar ?? null : null"
         :seen-actions="false"
       />
       <FtListPlatformChannel
@@ -58,9 +58,13 @@ const props = defineProps({
     type: Array,
     required: true
   },
-  /** The avatar of the channel all items belong to */
-  avatar: {
-    type: String,
+  /**
+   * The channel whose page lists the items. Its avatar shows beside its own
+   * items, while reposts of other channels show theirs.
+   * @type {import('vue').PropType<import('../../../platforms/types').PlatformChannel | null>}
+   */
+  channel: {
+    type: Object,
     default: null
   }
 })

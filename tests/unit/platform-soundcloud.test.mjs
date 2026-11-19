@@ -169,6 +169,7 @@ test('pages through the tracks of a channel, newest first for the feed', async (
       title: 'Track 1',
       author: 'Artist',
       channelId: '183',
+      authorAvatar: 'https://i1.sndcdn.com/avatars-183-t500x500.jpg',
       thumbnail: 'https://i1.sndcdn.com/avatars-183-t500x500.jpg',
       published: Date.parse('2026-01-01T10:00:00Z'),
       duration: 185,

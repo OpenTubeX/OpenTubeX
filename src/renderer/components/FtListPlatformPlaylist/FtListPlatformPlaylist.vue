@@ -64,7 +64,11 @@
           :to="channelRoute ?? undefined"
           :data-tab-title="playlist.author"
         >
-          {{ playlist.author }}
+          <FtChannelAvatar
+            v-if="showChannelAvatar"
+            :thumbnail="channelAvatar"
+          />
+          <span class="channelNameText">{{ playlist.author }}</span>
         </component>
         <FtIcon
           v-if="platform"
@@ -94,11 +98,13 @@ import { computed, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { FtIcon } from '@opentubex/icons'
 
+import FtChannelAvatar from '../FtChannelAvatar/FtChannelAvatar.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtRetryImage from '../FtRetryImage.vue'
 
 import store from '../../store/index'
 import { useCardContextMenu } from '../../composables/useCardContextMenu'
+import { usePlatformChannelAvatar } from '../../composables/usePlatformChannelAvatar'
 import { copyToClipboard, openExternalLink, openInternalPath, shareLink } from '../../helpers/utils'
 import { getPlatform, getPlatformChannelRoute, getPlatformPlaylistRoute, PLATFORM_ICONS } from '../../../platforms/index'
 
@@ -122,6 +128,12 @@ const route = computed(() => getPlatformPlaylistRoute(props.playlist.platform, p
 const channelRoute = computed(() => props.playlist.channelId
   ? getPlatformChannelRoute(props.playlist.platform, props.playlist.channelId)
   : null)
+const hideChannelAvatars = computed(() => store.getters.getHideChannelAvatars)
+const channelAvatar = usePlatformChannelAvatar(
+  () => ({ platform: props.playlist.platform, channelId: props.playlist.channelId, avatar: props.playlist.authorAvatar }),
+  { enabled: () => !hideChannelAvatars.value }
+)
+const showChannelAvatar = computed(() => !hideChannelAvatars.value && Boolean(channelAvatar.value || channelRoute.value))
 
 const { t } = useI18n()
 
