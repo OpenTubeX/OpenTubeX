@@ -311,6 +311,7 @@ import { usesInvidiousApi } from '../../../apiBackends'
 
 import { getConfiguredKeyboardShortcuts, SEARCH_RESULTS_DISPLAY_LIMIT } from '../../../constants'
 import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
+import { getDataScope } from '../../../datastores/handlers/index'
 import { getSearchFilterTabId, getSearchHistoryEntryQuery, getSearchSettingsFromRouteQuery } from '../../../search-history'
 import { CHANNEL_HANDLE_REGEX, formatDurationAsTimestamp, formatSubscriberCount, isUnloadedBackgroundTabClick, localizeAndAddKeyboardShortcutToActionTitle, openInternalPath, searchFiltersMatch, showInvidiousFallbackToast } from '../../helpers/utils'
 import { translateWindowTitle } from '../../helpers/strings'
@@ -1399,6 +1400,7 @@ function findSubscribedChannel(channelId, url) {
  */
 async function saveLinkToSearchHistory(queryText, link, previewTitle) {
   const lastUpdatedAt = Date.now()
+  const dataScope = getDataScope()
   const savedTitle = store.getters.getSearchHistoryEntries
     .find(entry => entry.linkType === link.linkType && entry.query === queryText && entry.title)?.title
   let title = getNonBlankTitle(previewTitle) ?? savedTitle
@@ -1410,8 +1412,9 @@ async function saveLinkToSearchHistory(queryText, link, previewTitle) {
       // The entry still opens the link, which it shows instead.
       console.error('Unable to load the title of a link in the search history', error)
     }
-    // Turning off the history meanwhile drops this save. The datastore drops it when the history was cleared.
-    if (!store.getters.getRememberSearchHistory) return
+    // Turning off the history or switching to a profile with separate data
+    // meanwhile drops this save. The datastore drops it when the history was cleared.
+    if (!store.getters.getRememberSearchHistory || getDataScope() !== dataScope) return
   }
 
   await store.dispatch('updateSearchHistoryEntry', { query: queryText, lastUpdatedAt, linkType: link.linkType, title })
