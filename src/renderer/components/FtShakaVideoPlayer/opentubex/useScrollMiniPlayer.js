@@ -218,8 +218,26 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   let scrollMiniLayoutAnimationSequence = 0
   let scrollMiniDragHandleContrastLastUpdate = 0
 
-  /** @type {{ type: 'drag' | 'resize' | 'volume', corner?: string, startX: number, startY: number, startRect: import('../../../helpers/scrollMiniPlayer').ScrollMiniPlayerRect } | null} */
+  /**
+   * A drag measures the view's insets once, keeps the player's aspect ratio
+   * until it ends, and keeps the rect it moved to.
+   * @type {{
+   *   type: 'drag' | 'resize' | 'volume',
+   *   corner?: string,
+   *   startX: number,
+   *   startY: number,
+   *   startRect: import('../../../helpers/scrollMiniPlayer').ScrollMiniPlayerRect,
+   *   insets?: { top: number, left: number, right: number, bottom: number },
+   *   aspectRatio?: number,
+   *   pointerX?: number,
+   *   pointerY?: number,
+   *   rect?: import('../../../helpers/scrollMiniPlayer').ScrollMiniPlayerRect,
+   * } | null}
+   */
   let scrollMiniPointerSession = null
+  /** @type {number | null} */
+  let scrollMiniDragFrame = null
+  let scrollMiniDragAspectRatioChanged = false
   let scrollMiniPlayerRestoreRect = null
   // The first click of a double-click on the video can reveal controls under
   // the pointer, so the second click lands on one of them.
@@ -514,6 +532,13 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
 
     scrollMiniVideoAspectRatio.value = videoElement.videoWidth / videoElement.videoHeight
 
+    // A drag translates the player from where it started. Moving that start
+    // would make it jump, so the drag's end applies the new aspect ratio.
+    if (scrollMiniPointerSession?.type === 'drag') {
+      scrollMiniDragAspectRatioChanged = true
+      return
+    }
+
     if (scrollMiniPlayerActive.value && !process.env.IS_CAPACITOR) {
       // Resizing to the video's aspect ratio is not the user moving the player,
       // so it must not turn a temporarily clamped position into its anchor.
@@ -705,7 +730,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
    */
   function applyScrollMiniPlayerRect(rect, persist = false, keepAnchor = false) {
     const insets = getViewportInsets()
-    const clamped = clampScrollMiniPlayerRect(rect, scrollMiniVideoAspectRatio.value)
+    const clamped = clampScrollMiniPlayerRect(rect, scrollMiniVideoAspectRatio.value, insets)
     // Remember the edge the player is parked at, so a later resize can put it
     // back against that edge instead of leaving it where the old viewport was.
     // Dragging makes the geometry authoritative, but a re-anchored rect brings
@@ -1256,7 +1281,11 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     }
     // Only a drag/resize is positioning the player; a volume session must not
     // block re-docking, since its pointer-up path never snaps.
-    if (scrollMiniPointerSession?.type === 'drag' || scrollMiniPointerSession?.type === 'resize') return
+    if (scrollMiniPointerSession?.type === 'drag') {
+      refreshScrollMiniDragBounds()
+      return
+    }
+    if (scrollMiniPointerSession?.type === 'resize') return
 
     if (scrollMiniPlayerStashed.value) {
       handleScrollMiniWindowResize()
@@ -1477,7 +1506,12 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
 
   function endScrollMiniPointerSession() {
     if (scrollMiniPointerSession?.type === 'volume') scheduleScrollMiniVolumeHide()
+    if (scrollMiniPointerSession?.type === 'drag') clearScrollMiniPlayerDragOffset()
     scrollMiniPointerSession = null
+    if (scrollMiniDragAspectRatioChanged) {
+      scrollMiniDragAspectRatioChanged = false
+      updateScrollMiniVideoAspectRatio()
+    }
     document.body.classList.remove('scroll-mini-player-grabbing')
     window.removeEventListener('pointerup', handleScrollMiniVolumePointerUpWindow)
     window.removeEventListener('pointercancel', handleScrollMiniVolumePointerUpWindow)
@@ -1486,23 +1520,93 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     window.removeEventListener('pointercancel', handleScrollMiniPointerUpWindow)
   }
 
+  /**
+   * Moves the player by the drag with `translate` once per frame. Its `left`
+   * and `top` stay where the drag started until it ends: updating them
+   * re-rendered the whole player and laid it out, and measuring the view's
+   * insets forced another layout, on every pointer move.
+   */
+  function renderScrollMiniPlayerMove() {
+    scrollMiniDragFrame = null
+    const session = scrollMiniPointerSession
+    if (session?.type !== 'drag' || !session.rect || !container.value) return
+
+    // The resize handle sits in the corner facing the middle of the view. The
+    // insets carry the view's width, so this reads no layout.
+    const corner = getResizeHandleCorner(session.rect, session.insets)
+    if (corner !== scrollMiniResizeCorner.value) scrollMiniResizeCorner.value = corner
+    container.value.style.translate = `${session.rect.left - session.startRect.left}px ${session.rect.top - session.startRect.top}px`
+  }
+
+  /**
+   * Keeps a drag inside the view when the usable area changes during it. The
+   * player takes the clamped position and size at once, including a size the
+   * smaller view forces, and the drag continues from there.
+   */
+  function refreshScrollMiniDragBounds() {
+    const session = scrollMiniPointerSession
+    if (session?.type !== 'drag') return
+    session.insets = getViewportInsets()
+    const rect = clampScrollMiniPlayerRect(session.rect ?? session.startRect, session.aspectRatio, session.insets)
+    clearScrollMiniPlayerDragOffset()
+    applyScrollMiniPlayerRect(rect)
+    // That also applied any aspect ratio the drag was holding back.
+    scrollMiniDragAspectRatioChanged = false
+    session.aspectRatio = scrollMiniVideoAspectRatio.value
+    session.startRect = { ...scrollMiniPlayerRect.value }
+    session.startX = session.pointerX ?? session.startX
+    session.startY = session.pointerY ?? session.startY
+    session.rect = undefined
+  }
+
+  function clearScrollMiniPlayerDragOffset() {
+    if (scrollMiniDragFrame !== null) cancelAnimationFrame(scrollMiniDragFrame)
+    scrollMiniDragFrame = null
+    container.value?.style.removeProperty('translate')
+  }
+
+  /** Gives the player the position it was dragged to. */
+  function commitScrollMiniPlayerDrag() {
+    const session = scrollMiniPointerSession
+    if (session?.type !== 'drag') return
+    clearScrollMiniPlayerDragOffset()
+    if (!session.rect) return
+    applyScrollMiniPlayerRect(session.rect)
+    // Vue applies the new position on its next update. Write it now as well, so
+    // the snap below measures the player where it is drawn.
+    const element = container.value
+    if (element) {
+      element.style.left = `${scrollMiniPlayerRect.value.left}px`
+      element.style.top = `${scrollMiniPlayerRect.value.top}px`
+    }
+  }
+
   /** @param {PointerEvent} event */
   function handleScrollMiniPointerMoveWindow(event) {
     if (!scrollMiniPointerSession || !scrollMiniPlayerActive.value) return
 
-    const insets = getViewportInsets()
-
     if (scrollMiniPointerSession.type === 'drag') {
-      const startRect = scrollMiniPointerSession.startRect
+      const { startRect, insets, aspectRatio } = scrollMiniPointerSession
       const dx = event.clientX - scrollMiniPointerSession.startX
       const dy = event.clientY - scrollMiniPointerSession.startY
+      scrollMiniPointerSession.pointerX = event.clientX
+      scrollMiniPointerSession.pointerY = event.clientY
 
-      applyScrollMiniPlayerRect(clampScrollMiniPlayerRect({
+      // The drawn player keeps its size until the drag ends, so clamp with the
+      // aspect ratio it had when the drag started.
+      scrollMiniPointerSession.rect = clampScrollMiniPlayerRect({
         ...startRect,
         left: startRect.left + dx,
         top: startRect.top + dy,
-      }, scrollMiniVideoAspectRatio.value))
-    } else if (scrollMiniPointerSession.type === 'resize' && scrollMiniPointerSession.corner) {
+      }, aspectRatio, insets)
+      scrollMiniDragFrame ??= requestAnimationFrame(renderScrollMiniPlayerMove)
+      // The handles move with the player, so the video below them stays the same.
+      return
+    }
+
+    const insets = getViewportInsets()
+
+    if (scrollMiniPointerSession.type === 'resize' && scrollMiniPointerSession.corner) {
       const { startRect, startX, corner } = scrollMiniPointerSession
       const edgeX = startRect.left + (corner.endsWith('right') ? startRect.width : 0)
       // Preserve the grab offset, including presses inside the larger touch target.
@@ -1524,6 +1628,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     if (!scrollMiniPointerSession) return
 
     if (scrollMiniPointerSession.type === 'drag') {
+      commitScrollMiniPlayerDrag()
       const insets = getViewportInsets()
       const currentRect = scrollMiniPlayerRect.value
       const stashSide = window.matchMedia('(max-width: 767px)').matches
@@ -1619,6 +1724,20 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     showScrollMiniPlayPause(true)
   }
 
+  /**
+   * Keeps the handle's cursor and stops hover effects below the pointer while
+   * it leaves the handle, without restyling the whole page, as a cursor rule
+   * for every element would at the start and end of each gesture.
+   * @param {PointerEvent} event
+   */
+  function captureScrollMiniPointer(event) {
+    try {
+      /** @type {Element} */ (event.currentTarget).setPointerCapture(event.pointerId)
+    } catch {
+      // A pointer that is no longer active cannot be captured.
+    }
+  }
+
   /** @param {PointerEvent} event */
   function handleScrollMiniDragPointerDown(event) {
     if (!scrollMiniPlayerActive.value) return
@@ -1632,8 +1751,11 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
       startX: event.clientX,
       startY: event.clientY,
       startRect: { ...scrollMiniPlayerRect.value },
+      insets: getViewportInsets(),
+      aspectRatio: scrollMiniVideoAspectRatio.value,
     }
 
+    captureScrollMiniPointer(event)
     document.body.classList.add('scroll-mini-player-grabbing')
     window.addEventListener('pointermove', handleScrollMiniPointerMoveWindow)
     window.addEventListener('pointerup', handleScrollMiniPointerUpWindow)
@@ -1656,6 +1778,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
       startRect: { ...scrollMiniPlayerRect.value },
     }
 
+    captureScrollMiniPointer(event)
     document.body.classList.add('scroll-mini-player-grabbing')
     window.addEventListener('pointermove', handleScrollMiniPointerMoveWindow)
     window.addEventListener('pointerup', handleScrollMiniPointerUpWindow)

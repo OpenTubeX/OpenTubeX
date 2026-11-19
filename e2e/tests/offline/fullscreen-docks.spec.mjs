@@ -98,6 +98,94 @@ test.use({
   }
 })
 
+test('stacked docks move without laying out their content every frame', { tag: '@performance' }, async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  await setPlayerFullscreen(page, true)
+  const player = page.locator('.ftVideoPlayer')
+  await expect(player).not.toHaveClass(/presentationModeChanging/)
+  const watch = await page.evaluateHandle(findWatchComponent)
+  try {
+    await watch.evaluate(component => {
+      component.proxy.$refs.player.setFullscreenMetadata(true)
+      component.proxy.$refs.player.setFullscreenRecommendations(true)
+    })
+    const metadata = player.locator('.fullscreenMetadataOverlay.open')
+    await expect(player.locator('.fullscreenRecommendationsOverlay.open')).toBeVisible()
+    await expect.poll(() => metadata.evaluate(element => element.getAnimations().length)).toBe(0)
+
+    // The remaining dock grows into the closing one's slot with a compositor
+    // animation, so its layout changes once and its header keeps its size.
+    const closing = await watch.evaluate(async component => {
+      const dock = document.querySelector('.fullscreenMetadataOverlay')
+      const header = dock.querySelector('.fullscreenMetadataHeader')
+      const heights = [dock.offsetHeight]
+      const headerHeights = [header.getBoundingClientRect().height]
+      let keyframes = []
+      const animate = dock.animate
+      dock.animate = (...args) => {
+        const animation = animate.apply(dock, args)
+        keyframes = animation.effect.getKeyframes()
+        return animation
+      }
+      try {
+        component.proxy.$refs.player.setFullscreenRecommendations(false)
+        const start = performance.now()
+        await new Promise(resolve => {
+          const sample = now => {
+            heights.push(dock.offsetHeight)
+            headerHeights.push(header.getBoundingClientRect().height)
+            if (now - start < 300 || dock.getAnimations().length > 0) requestAnimationFrame(sample)
+            else resolve()
+          }
+          requestAnimationFrame(sample)
+        })
+      } finally {
+        dock.animate = animate
+      }
+      return { heights: [...new Set(heights)], headerHeights: [...new Set(headerHeights.map(Math.round))], keyframes }
+    })
+    expect(closing.heights).toHaveLength(2)
+    expect(closing.heights[1]).toBeGreaterThan(closing.heights[0])
+    // It starts at its previous height.
+    const scaleY = frame => parseFloat(frame.scale.split(' ').at(-1))
+    expect(scaleY(closing.keyframes[0])).toBeCloseTo(closing.heights[0] / closing.heights[1], 2)
+    expect(scaleY(closing.keyframes.at(-1))).toBe(1)
+    expect(closing.headerHeights).toHaveLength(1)
+
+    // Narrowing the control bar by widening the dock keeps its compact modes
+    // valid, so it must not measure a copy of the bar on every step. Playback
+    // resizes the time display and the pointer reveals the controls, which
+    // measure the bar for their own reasons, so settle both before counting.
+    await player.locator('video').evaluate(element => element.pause())
+    const width = await metadata.evaluate(element => element.getBoundingClientRect().width)
+    const handle = await player.locator('.fullscreenDockWidthHandle').boundingBox()
+    await page.mouse.move(handle.x + 3, handle.y + handle.height / 2)
+    await player.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+    await player.evaluate(element => {
+      window.controlBarMeasurements = 0
+      window.controlBarObserver = new MutationObserver(mutations => {
+        window.controlBarMeasurements += mutations.flatMap(mutation => [...mutation.addedNodes])
+          .filter(node => node.classList?.contains('ft-controls-measuring')).length
+      })
+      window.controlBarObserver.observe(element.querySelector('.shaka-controls-container'), { childList: true, subtree: true })
+    })
+    await page.mouse.down()
+    for (let step = 1; step <= 10; step++) {
+      await page.mouse.move(handle.x + 3 - step * 20, handle.y + handle.height / 2)
+    }
+    await page.mouse.up()
+    await expect.poll(() => metadata.evaluate(element => element.getBoundingClientRect().width)).toBeCloseTo(width + 200, 0)
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getFullscreenDockWidth)).toBeGreaterThan(0)
+    expect(await page.evaluate(() => {
+      window.controlBarObserver.disconnect()
+      return window.controlBarMeasurements
+    })).toBe(0)
+  } finally {
+    await watch.dispose()
+  }
+})
+
 test('full-window docks preserve zoom, stacked panel controls and rapid toggles', { tag: '@scale' }, async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)

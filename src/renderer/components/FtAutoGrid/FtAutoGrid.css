@@ -27,6 +27,15 @@
   grid-template-columns: repeat(auto-fill, min(max(var(--thumbnail-grid-size), var(--thumbnail-grid-stretch)), 100%));
 }
 
+/* One centered card per row, capped in wider windows (see getThumbnailGridStyles). */
+.grid.fullWidth {
+  grid-template-columns: 100%;
+}
+
+.grid.fullWidth.thumbnailSizeReady {
+  grid-template-columns: min(max(var(--thumbnail-grid-size), var(--thumbnail-grid-stretch)), 100%);
+}
+
 .grid.youtubeStyleShorts,
 .grid.youtubeStyleShorts.thumbnailSizeReady {
   grid-template-columns: repeat(

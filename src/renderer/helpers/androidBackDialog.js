@@ -2,6 +2,7 @@ import { nextTick } from 'vue'
 import { applyAnimationSpeed } from './animationSpeed'
 import { isReducedMotionEnabled } from './reducedMotion'
 import { settleAndroidBackAnimation } from './androidBackGesture'
+import { HIDDEN_MODAL_BACKDROP, getModalBackdropStyle } from './modalBackdropHandoff'
 
 /** @param {HTMLElement} element */
 function getDialogExitKeyframes(element) {
@@ -16,10 +17,9 @@ function getDialogExitKeyframes(element) {
 function getDialogExitAnimations(element) {
   const card = element.matches('.prompt') ? element.querySelector(':scope > .promptCard') : null
   if (!card) return [[element, getDialogExitKeyframes(element)]]
-  // Fading the backdrop's opacity would crossfade a sharp and a blurred copy of
-  // the page, which flickers. Clear its dim and blur and fade the card instead.
+  // Clear the backdrop's dim and blur and fade the card instead.
   return [
-    [element, [{ backgroundColor: 'transparent', backdropFilter: 'blur(0)' }]],
+    [element, [getModalBackdropStyle(element), HIDDEN_MODAL_BACKDROP]],
     [card, getDialogExitKeyframes(card)]
   ]
 }

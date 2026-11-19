@@ -25,12 +25,14 @@
   justify-content: center;
   text-align: center;
   text-decoration: none;
+  /* stylelint-disable opentubex/no-layout-animation-properties -- a button eases into the padding of another size */
   transition:
     background-color var(--motion-default-effects),
     border-color var(--motion-default-effects),
     box-shadow var(--motion-default-effects),
     border-radius var(--motion-fast-spatial),
     padding-inline var(--motion-fast-spatial);
+  /* stylelint-enable opentubex/no-layout-animation-properties */
   border-radius: var(--button-radius);
   white-space: nowrap;
   font-weight: 500;

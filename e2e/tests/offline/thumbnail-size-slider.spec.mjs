@@ -126,6 +126,19 @@ test.describe('thumbnail size slider', () => {
       const resize = width => app.electronApp.evaluate(({ BrowserWindow }, width) => {
         BrowserWindow.getAllWindows()[0].setContentSize(width, 900)
       }, width)
+      // A wider window keeps full width cards in one centered column instead
+      // of one card the size of the window.
+      await resize(1400)
+      await page.evaluate(() => window.$store.dispatch('updateListType', 'fullWidth'))
+      await expect.poll(columns).toBe(1)
+      const layout = () => grid.evaluate(element => {
+        const gridRect = element.getBoundingClientRect()
+        const card = element.firstElementChild.getBoundingClientRect()
+        return { gridWidth: gridRect.width, cardWidth: card.width, offset: (card.left - gridRect.left) - (gridRect.right - card.right) }
+      })
+      await expect.poll(async () => (await layout()).cardWidth).toBeLessThan((await layout()).gridWidth - 100)
+      expect(Math.abs((await layout()).offset)).toBeLessThanOrEqual(1)
+      await page.evaluate(() => window.$store.dispatch('updateListType', 'grid'))
       await resize(1000)
       await expect(page.locator('.profileTrigger')).toHaveAttribute('aria-expanded', 'false')
       await page.locator('.profileTrigger').click()

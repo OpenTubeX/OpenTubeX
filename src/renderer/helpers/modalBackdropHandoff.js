@@ -4,6 +4,25 @@
 const leavingBackdrops = new Set()
 
 /**
+ * Fading a backdrop's opacity would crossfade a sharp and a blurred copy of the
+ * page, which flickers on Android. Backdrops clear their dim and blur instead.
+ */
+export const HIDDEN_MODAL_BACKDROP = Object.freeze({ backgroundColor: 'transparent', backdropFilter: 'blur(0)' })
+
+/**
+ * The backdrop's current dim and blur, for the other end of a scripted backdrop
+ * animation. Chromium only runs a background-color animation on the compositor
+ * when no keyframe falls back to the element's own style, and otherwise keeps
+ * the blur on the main thread too.
+ * @param {Element} backdrop
+ * @returns {{ backgroundColor: string, backdropFilter: string }}
+ */
+export function getModalBackdropStyle(backdrop) {
+  const { backgroundColor, backdropFilter } = getComputedStyle(backdrop)
+  return { backgroundColor, backdropFilter }
+}
+
+/**
  * Lets a modal that opens while this backdrop animates out take it over.
  * @param {HTMLElement} backdrop
  * @returns {() => void} Call once the backdrop is removed.

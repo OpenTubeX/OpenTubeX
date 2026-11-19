@@ -794,6 +794,10 @@
   scale: 0.8;
 }
 
+.scrollMiniDragHandle:active {
+  cursor: grabbing;
+}
+
 /* Auto-hide must not leave a keyboard-focused control invisible. */
 .scrollMiniPlayPause.isHidden:focus-visible,
 .scrollMiniSkip.isHidden:focus-visible {
@@ -1015,8 +1019,9 @@
   }
 }
 
-:global(body.scroll-mini-player-grabbing),
-:global(body.scroll-mini-player-grabbing *) {
-  cursor: grabbing !important;
-  user-select: none !important;
+/* While it is dragged or resized, the player moves on its own layer, so only the
+   compositor redraws it. The handle captures the pointer, which keeps its cursor
+   without a rule that restyles every element at the start and end of a gesture. */
+:global(body.scroll-mini-player-grabbing .ftVideoPlayer.scrollMiniPlayer) {
+  will-change: translate;
 }

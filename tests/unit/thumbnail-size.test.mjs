@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { getThumbnailGridStyles } from '../../src/renderer/constants/thumbnailSize.js'
+import { FULL_WIDTH_COLUMNS, getThumbnailGridStyles } from '../../src/renderer/constants/thumbnailSize.js'
 
 test('phone grids fit two columns at the default thumbnail size', () => {
   for (const width of [240, 313, 343, 380, 428.8]) {
@@ -47,4 +47,20 @@ test('denser and more spacious grids keep the default column count', () => {
     const size = Number.parseFloat(getThumbnailGridStyles(100, width, 1280, width, 0, density)['--thumbnail-grid-size'])
     assert.equal(size * 3 + 2 * gap, width)
   }
+})
+
+test('full width cards fill phone rows and stay capped in wider windows', () => {
+  const phone = getThumbnailGridStyles(100, 396, 412, 396, FULL_WIDTH_COLUMNS)
+  assert.equal(Number.parseFloat(phone['--thumbnail-grid-size']), 396)
+  assert.equal(phone['--thumbnail-grid-stretch'], 'calc(100% - 0px)')
+
+  const styles = getThumbnailGridStyles(100, 1700, 1780, 1700, FULL_WIDTH_COLUMNS)
+  const cardSize = Number.parseFloat(styles['--thumbnail-grid-size'])
+  assert.ok(cardSize < 1700)
+  assert.equal(styles['--thumbnail-grid-stretch'], `min(calc(100% - 0px), ${cardSize}px)`)
+  // The thumbnail size scales the cap.
+  const capped = size => Number.parseFloat(getThumbnailGridStyles(size, 1700, 1780, 1700, FULL_WIDTH_COLUMNS)['--thumbnail-grid-size'])
+  assert.ok(capped(60) < capped(100) && capped(100) < capped(180))
+  // A desktop grid narrower than the cap still fills its row.
+  assert.equal(Number.parseFloat(getThumbnailGridStyles(100, 500, 800, 500, FULL_WIDTH_COLUMNS)['--thumbnail-grid-size']), 500)
 })

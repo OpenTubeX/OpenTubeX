@@ -47,7 +47,7 @@
   border-radius: var(--shape-corner-full);
   overflow: visible;
   position: relative;
-  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- a small progress bar grows on hover and with progress */
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties, opentubex/no-layout-animation-properties -- a small progress bar grows on hover and with progress */
   transition: block-size var(--motion-fast-effects), margin-block var(--motion-fast-effects);
 }
 
