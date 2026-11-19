@@ -5,7 +5,6 @@ import { RspackCLI } from '@rspack/cli'
 
 process.env.NODE_ENV = 'production'
 const args = process.argv.filter(arg => arg !== '--persistent-cache')
-if (args.length !== process.argv.length) {
-  process.env.OTX_PERSISTENT_CACHE = 'true'
-}
+// Set it either way, so that an inherited value cannot cache a release build.
+process.env.OTX_PERSISTENT_CACHE = String(args.length !== process.argv.length)
 await new RspackCLI().run(args)
