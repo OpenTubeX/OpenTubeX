@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process'
-import { cpSync, existsSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 /**
@@ -75,6 +75,35 @@ function location({ className, name }) {
   return { file: `${SOURCES}/${className.replaceAll('.', '/')}.java`, line: 1 }
 }
 
+function adb(...args) {
+  return spawnSync('adb', args, { encoding: 'utf8' })
+}
+
+/** Runs `adb root` or `adb unroot` and waits until the shell has that user. */
+function switchAdbUser(command, uid) {
+  for (let attempt = 0; attempt < 30 && adb(command).status !== 0; attempt++) spawnSync('sleep', ['2'])
+  adb('wait-for-device')
+  for (let attempt = 0; attempt < 30 && !adb('shell', 'id').stdout?.includes(`uid=${uid}(`); attempt++) spawnSync('sleep', ['1'])
+}
+
+/**
+ * Keeps why Android ended the app's processes during the first attempt. A
+ * test whose process is killed, for example after an ANR that the hidden error
+ * dialogs turn into a silent kill, otherwise only reports that the
+ * instrumentation process crashed. The ANR traces hold every thread's stack.
+ */
+function saveExitDiagnostics() {
+  const metadata = 'android/app/build/outputs/apk/debug/output-metadata.json'
+  const { applicationId } = JSON.parse(readFileSync(metadata, 'utf8'))
+  writeFileSync(join(FIRST_ATTEMPT, 'exit-info.txt'), adb('shell', 'dumpsys', 'activity', 'exit-info', applicationId).stdout ?? '')
+  // The traces are only readable as root, and the tests run without it.
+  switchAdbUser('root', 0)
+  const traces = adb('shell', 'ls /data/system/procexitstore/ | grep ^anr_').stdout?.split('\n').map(name => name.trim()).filter(Boolean) ?? []
+  mkdirSync(join(FIRST_ATTEMPT, 'anr'), { recursive: true })
+  for (const trace of traces) adb('pull', `/data/system/procexitstore/${trace}`, join(FIRST_ATTEMPT, 'anr', trace))
+  switchAdbUser('unroot', 2000)
+}
+
 // Gradle can report success after the emulator has crashed and skipped the
 // remaining tests, or after test discovery crashed before any test ran, so
 // also require the emulator to still run and the shard to report tests.
@@ -90,6 +119,11 @@ if (failed.length === 0 || !emulatorRunning()) process.exit(1)
 rmSync(FIRST_ATTEMPT, { recursive: true, force: true })
 cpSync(RESULTS, join(FIRST_ATTEMPT, 'results'), { recursive: true })
 if (existsSync(REPORT)) cpSync(REPORT, join(FIRST_ATTEMPT, 'report'), { recursive: true })
+try {
+  saveExitDiagnostics()
+} catch (error) {
+  console.log(`Could not save the app's exit diagnostics: ${error}`)
+}
 
 const ids = failed.map(test => `${test.className}#${test.name}`)
 console.log(`Retrying ${ids.length} failed tests once:\n  ${ids.join('\n  ')}`)
