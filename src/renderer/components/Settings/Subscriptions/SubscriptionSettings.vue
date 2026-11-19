@@ -138,7 +138,7 @@
           setting-key="subscriptionFeedAutoRefreshInterval"
           :select-names="subscriptionFeedAutoRefreshIntervalNames"
           :select-values="AUTO_REFRESH_INTERVAL_VALUES"
-          :icon="['fas', 'clock']"
+          :icon="['fas', 'video']"
           @change="updateSubscriptionFeedAutoRefreshInterval"
         />
         <FtSelect
@@ -148,7 +148,7 @@
           setting-key="subscriptionShortsAutoRefreshInterval"
           :select-names="subscriptionFeedAutoRefreshIntervalNames"
           :select-values="AUTO_REFRESH_INTERVAL_VALUES"
-          :icon="['fas', 'clock']"
+          :icon="['fas', 'clapperboard']"
           @change="updateSubscriptionShortsAutoRefreshInterval"
         />
         <FtSelect
@@ -158,7 +158,7 @@
           setting-key="subscriptionLiveAutoRefreshInterval"
           :select-names="subscriptionFeedAutoRefreshIntervalNames"
           :select-values="AUTO_REFRESH_INTERVAL_VALUES"
-          :icon="['fas', 'clock']"
+          :icon="['fas', 'tower-broadcast']"
           @change="updateSubscriptionLiveAutoRefreshInterval"
         />
         <FtSelect
@@ -168,7 +168,7 @@
           setting-key="subscriptionPostsAutoRefreshInterval"
           :select-names="subscriptionFeedAutoRefreshIntervalNames"
           :select-values="AUTO_REFRESH_INTERVAL_VALUES"
-          :icon="['fas', 'clock']"
+          :icon="['fas', 'message']"
           @change="updateSubscriptionPostsAutoRefreshInterval"
         />
       </div>
