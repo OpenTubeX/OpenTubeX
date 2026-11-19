@@ -1080,6 +1080,21 @@ function runApp() {
     }
   }
 
+  // Electron patches the live caption button out of Chromium's video
+  // Picture-in-Picture window, and with it the code that positions the mute
+  // button next to it, so the mute button sits on top of the site icon.
+  const pictureInPictureMuteControlFeature = 'PictureInPictureMuteControl'
+  const disabledFeatures = app.commandLine.getSwitchValue('disable-features')
+    .split(',')
+    .filter(Boolean)
+
+  if (!disabledFeatures.includes(pictureInPictureMuteControlFeature)) {
+    app.commandLine.appendSwitch('disable-features', [
+      ...disabledFeatures,
+      pictureInPictureMuteControlFeature
+    ].join(','))
+  }
+
   const DISABLE_HARDWARE_ACCELERATION_PATH = `${userDataPath}/experiment-disable-hardware-acceleration`
   const disableHardwareAcceleration = existsSync(DISABLE_HARDWARE_ACCELERATION_PATH)
   if (disableHardwareAcceleration) {

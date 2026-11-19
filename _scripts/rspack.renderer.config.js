@@ -45,6 +45,10 @@ const config = createRendererConfig({
   },
   copyPatterns: [
     getStartupSplash.copyPattern,
+    {
+      from: path.join(__dirname, '../_icons/icon.svg'),
+      to: 'icon.svg'
+    },
     // Don't need to copy them in dev mode,
     // as we configure the dev server to serve them
     ...(isDevMode
