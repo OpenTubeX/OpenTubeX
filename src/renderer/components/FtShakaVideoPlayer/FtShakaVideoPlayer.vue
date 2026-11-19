@@ -813,6 +813,7 @@
       >
         <span :style="{ backgroundColor: captionStyle.background }">{{ secondaryCaptionText }}</span>
       </div>
+      <!-- Scrolling the docks by touch must not reveal the player controls either. -->
       <FtMobileSheet
         class="fullscreenDockSheet"
         :enabled="portraitFullscreenDocks"
@@ -820,6 +821,8 @@
         :title="fullscreenDockTitle"
         :header-selector="fullscreenDockHeaderSelector"
         fullscreen
+        @mousemove="handleFullscreenDockMouseMove"
+        @touchmove.passive.stop
         @close="closePortraitFullscreenDock"
       >
         <button
@@ -9368,7 +9371,7 @@ function handlePlayerMouseMove(event) {
   updateShortsQuickPlaybackRateBarProximity(event)
 
   const videoElement = video.value
-  revealPausedInterface()
+  if (!isFullscreenDockTarget(event.target)) revealPausedInterface()
 
   if (!props.shortsPlayer || !isFullscreen.value || videoElement.paused) {
     return
@@ -9390,7 +9393,24 @@ function handlePlayerMouseMove(event) {
 
 function handlePlayerFocusIn(event) {
   handleScrollMiniPlayerEnter(event)
-  revealPausedInterface()
+  if (!isFullscreenDockTarget(event.target)) revealPausedInterface()
+}
+
+/** @param {EventTarget | null} target */
+function isFullscreenDockTarget(target) {
+  return target instanceof Element && target.closest('.fullscreenDockSheet') !== null
+}
+
+/**
+ * Reading, scrolling or rearranging the side docks leaves the player controls
+ * hidden: only activity over the video reveals them, so keep the movement from
+ * Shaka. Shaka hides the cursor in its whole container while the pointer
+ * rests, so show it again here.
+ * @param {MouseEvent} event
+ */
+function handleFullscreenDockMouseMove(event) {
+  event.stopPropagation()
+  container.value?.classList.remove('no-cursor')
 }
 
 function toggleShortsFullscreen() {
