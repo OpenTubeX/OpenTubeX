@@ -58,7 +58,11 @@ async function sync(store) {
   }
   // Open tabs and live reminders belong to the app's renderer, so they sync
   // when the app opens.
-  await store.dispatch('initializeSyncServer')
-  // Uploads watched on another device need no notification here.
-  await suppressWatchedAndroidNotifications()
+  try {
+    await store.dispatch('initializeSyncServer')
+  } finally {
+    // Uploads watched on another device need no notification here, also
+    // when a later stage failed after the history synced.
+    await suppressWatchedAndroidNotifications()
+  }
 }

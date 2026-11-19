@@ -104,7 +104,13 @@ export function createUploadNotifier({ file, show, fetch: fetchUrl = fetch, isWa
         await save()
         return uploads
       }).then(async found => {
-        // Videos in the watch history, also ones watched on another device, need no notification.
+        if (found.length === 0) return
+        // Looked up outside the queue, so slow requests do not hold up other feeds.
+        const titles = configuration?.originalTitles === true && feedType !== 'posts'
+          ? await Promise.all(found.map(async upload => await fetchOriginalTitle(fetchUrl, upload.id) ?? upload.title))
+          : found.map(upload => upload.title)
+        // Videos in the watch history, also ones watched on another device during
+        // the lookup, need no notification.
         const watched = feedType === 'posts'
           ? []
           : await Promise.all(found.map(upload => isWatched(upload.id).catch(error => {
@@ -112,11 +118,8 @@ export function createUploadNotifier({ file, show, fetch: fetchUrl = fetch, isWa
               return false
             })))
         const uploads = found.filter((_, index) => !watched[index])
+        const bodies = titles.filter((_, index) => !watched[index])
         if (uploads.length === 0) return
-        // Looked up outside the queue, so slow requests do not hold up other feeds.
-        const bodies = configuration?.originalTitles === true && feedType !== 'posts'
-          ? await Promise.all(uploads.map(async upload => await fetchOriginalTitle(fetchUrl, upload.id) ?? upload.title))
-          : uploads.map(upload => upload.title)
         // Notifications may have been turned off during the lookup.
         const channel = configuredChannel()
         if (!channel) return

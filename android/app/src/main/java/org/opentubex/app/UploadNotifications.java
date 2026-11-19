@@ -690,14 +690,18 @@ final class UploadNotifications {
                 }
                 image = AndroidMediaArtwork.loadBlocking(thumbnail);
             }
-            if (image == null || !isActive(manager, notificationId)) return;
+            if (image == null) return;
             builder.setLargeIcon(image)
                 .setStyle(new Notification.BigPictureStyle().bigPicture(image).bigLargeIcon((Icon) null).setSummaryText(body))
                 .setOnlyAlertOnce(true);
-            try {
-                manager.notify(TAG, notificationId, builder.build());
-            } catch (RuntimeException error) {
-                android.util.Log.w("OpenTubeXUploads", "Unable to add a thumbnail to an upload notification", error);
+            // Shares the monitor of suppress, so a notification it removes meanwhile stays removed.
+            synchronized (UploadNotifications.class) {
+                if (!isActive(manager, notificationId)) return;
+                try {
+                    manager.notify(TAG, notificationId, builder.build());
+                } catch (RuntimeException error) {
+                    android.util.Log.w("OpenTubeXUploads", "Unable to add a thumbnail to an upload notification", error);
+                }
             }
         });
     }
