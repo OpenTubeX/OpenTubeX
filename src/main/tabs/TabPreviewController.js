@@ -349,8 +349,11 @@ export class TabPreviewController {
         const dataUrl = tabPreviewBufferToDataUrl(previewBuffer)
         tab.previewDataUrl = dataUrl
         tab.previewCapturedAt = Date.now()
-        tab.previewFileName = await tabPreviewStorage.writePreview(previewBuffer, tab.previewFileName)
-        this.manager._scheduleSessionSave()
+        // Incognito tabs keep their previews in memory only
+        if (!tab.isIncognito) {
+          tab.previewFileName = await tabPreviewStorage.writePreview(previewBuffer, tab.previewFileName)
+          this.manager._scheduleSessionSave()
+        }
         return dataUrl
       } catch (error) {
         console.error('Failed to capture tab preview:', error)
@@ -468,7 +471,7 @@ export class TabPreviewController {
       }
 
       const previousFileName = tab.avatarFileName
-      tab.avatarFileName = await tabPreviewStorage.writeAvatar(buffer)
+      tab.avatarFileName = tab.isIncognito ? null : await tabPreviewStorage.writeAvatar(buffer)
       if (previousFileName !== tab.avatarFileName) {
         await this.releaseAvatarFile(previousFileName)
       }

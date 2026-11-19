@@ -576,7 +576,7 @@ import { findRssFeedMediaItem } from '../../helpers/rssFeeds'
 import { HISTORY_MIN_PLAYBACK_SECONDS, hasReachedWatchedThreshold, isHistoryEntryWatched } from '../../helpers/history'
 import { findPlatformChannel, getPlatformChannelRoute } from '../../../platforms/index'
 import { createWatchTimeTracker } from '../../helpers/watchTimeTracker'
-import { useTabAvatar, useTabContext, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
+import { useIncognitoTab, useTabAvatar, useTabContext, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
 import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
 import { watchRouteForVideo } from '../../helpers/downloadPlayback'
 import { requestQueuedPlayback, takeQueuedPlayback } from '../../helpers/queuedPlayback'
@@ -589,6 +589,9 @@ const relativeTimeNow = useRelativeTimeClock()
 const setTabTitle = useTabTitle()
 const setTabAvatar = useTabAvatar()
 const { tabId, isTabPresented } = useTabContext()
+const isIncognitoTab = useIncognitoTab()
+// Incognito tabs still resume from saved progress, but save nothing
+const savesHistory = computed(() => store.getters.getRememberHistory && !isIncognitoTab.value)
 
 const loading = ref(true)
 const errorMessage = ref('')
@@ -683,11 +686,11 @@ let seekTimer = null
 // Digital wellbeing limits count playback even when watch statistics are off.
 const watchTimeTracker = createWatchTimeTracker(
   () => !loading.value && player.value?.isPaused() === false,
-  (date, seconds, retry) => store.dispatch('recordPlaybackTime', { date, seconds, isShort: false, retry })
+  (date, seconds, retry) => store.dispatch('recordPlaybackTime', { date, seconds, isShort: false, incognito: isIncognitoTab.value, retry })
 )
 watch(() => store.getters.getWatchStatsResetAt, () => watchTimeTracker.clear())
 // Buffered time follows the recording policy it was watched under.
-watch(() => [store.getters.getRememberHistory, store.getters.getEnableWatchStats], () => watchTimeTracker.clear())
+watch(() => [savesHistory.value, store.getters.getEnableWatchStats], () => watchTimeTracker.clear())
 watch(() => store.getters.getWellbeingPauseRequest, request => {
   if (request && !request.shortsOnly && player.value?.isPaused() === false) player.value.pause()
 })
@@ -1198,7 +1201,7 @@ function addToHistoryOnce(chosenSeconds) {
   // The write can wait for companion metadata, which must not lose the chosen position.
   if (historyEngaged && chosenSeconds !== undefined) historyChosenSeconds = chosenSeconds
   if (historyAdded || !historyEngaged || !hasBeenPresented ||
-    !store.getters.getRememberHistory || historyId.value === null ||
+    !savesHistory.value || historyId.value === null ||
     loading.value || !info.value || !source.value || !player.value?.hasLoaded ||
     // Only both tracks' lengths tell how long the media is.
     (source.value.separateAudioUrl && !hasCompanionMetadata())) return false
@@ -1216,7 +1219,7 @@ function addToHistoryOnce(chosenSeconds) {
 function markAsWatchedIfFinished(seconds, isFinished = false) {
   // Media that ends within the first seconds of playback still counts as played
   if (isFinished && historyPlaybackSeconds > 0) engageHistory()
-  if (!hasBeenPresented || !store.getters.getRememberHistory || source.value?.isLive ||
+  if (!hasBeenPresented || !savesHistory.value || source.value?.isLive ||
     isHistoryEntryWatched(historyEntry.value) || watchedMarkPending) return
   if (!historyEngaged) return
   if (!isFinished && player.value?.isPaused()) return
@@ -1403,7 +1406,7 @@ function updateCurrentTime(seconds) {
 
 function savePosition() {
   // Until the first history write, which can wait for companion metadata, it would store an older position.
-  if (!historyAdded || !store.getters.getRememberHistory || store.getters.getWatchedProgressSavingMode === 'never' ||
+  if (!historyAdded || !savesHistory.value || store.getters.getWatchedProgressSavingMode === 'never' ||
     loading.value || !source.value || source.value.isLive || !player.value?.hasPlaybackPosition ||
     !hasBeenPresented || (source.value.separateAudioUrl && startTime.value !== null)) return
   const seconds = getPositionMedia()?.currentTime ?? player.value.getCurrentTime()

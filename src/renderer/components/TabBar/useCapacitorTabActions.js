@@ -65,12 +65,20 @@ export function useCapacitorTabActions({
   }
 
   function tabAriaLabel(tab) {
-    const title = tabTitle(tab)
-    return tab.isUnloaded ? `${title}, ${t('Tab Organizer.Unloaded')}` : title
+    return [
+      tabTitle(tab),
+      ...(tab.isIncognito ? [t('Incognito Tab')] : []),
+      ...(tab.isUnloaded ? [t('Tab Organizer.Unloaded')] : [])
+    ].join(', ')
   }
 
   async function createTab() {
     await getCapacitorTabService().createTab()
+    await afterCreate()
+  }
+
+  async function createIncognitoTab() {
+    await getCapacitorTabService().createTab(undefined, '', true, { incognito: true })
     await afterCreate()
   }
 
@@ -309,6 +317,7 @@ export function useCapacitorTabActions({
     closeTab,
     closeTabActions,
     createTab,
+    createIncognitoTab,
     copyActionTabYoutubeLink,
     duplicateActionTab,
     handleTabTargetKeydown,

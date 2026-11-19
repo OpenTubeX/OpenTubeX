@@ -370,6 +370,13 @@ function addTabCommands(commands, context) {
       disabledReason: desktopReason,
       run: createTab,
     }),
+    command('tabs.newIncognito', t('KeyboardShortcutPrompt.New Incognito Tab'), groups.tabs, {
+      aliases: ['private tab'],
+      icon: ['fas', 'user-secret'],
+      shortcut: appShortcuts.NEW_INCOGNITO_TAB,
+      disabledReason: desktopReason,
+      run: () => store.dispatch('createTab', { makeActive: true, isIncognito: true }),
+    }),
     command('tabs.close', t('KeyboardShortcutPrompt.Close Tab'), groups.tabs, {
       aliases: ['remove tab'],
       icon: ['fas', 'xmark'],

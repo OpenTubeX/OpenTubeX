@@ -23,7 +23,7 @@ const source = (await readFile(new URL('../../src/renderer/composables/useHomeRe
   .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
   .replace('export function ', 'function ')
 
-function createFeed({ records = [], candidates = [], playlists = [], settings = {}, buildProfile = async () => ({ channels: [], channelWeights: new Map(), evidence: new Map() }) } = {}) {
+function createFeed({ incognito = false, records = [], candidates = [], playlists = [], settings = {}, buildProfile = async () => ({ channels: [], channelWeights: new Map(), evidence: new Map() }) } = {}) {
   const state = reactive({ recommendations: { recommendationRecords: Object.fromEntries(records.map(record => [record.videoId, record])) } })
   const getters = reactive({
     getEnableHomeRecommendations: true,
@@ -43,8 +43,10 @@ function createFeed({ records = [], candidates = [], playlists = [], settings = 
   const store = {
     state,
     getters,
-    async dispatch(type, { video }) {
+    events: [],
+    async dispatch(type, { video, type: event }) {
       assert.equal(type, 'recordRecommendationEvent')
+      store.events.push(event)
       state.recommendations.recommendationRecords[video.videoId] = { ...video, impressions: [Date.now()] }
     },
   }
@@ -60,6 +62,7 @@ function createFeed({ records = [], candidates = [], playlists = [], settings = 
     runCooperatively,
     onBeforeUnmount: callback => cleanups.push(callback),
     useTabContext: () => ({}),
+    useIncognitoTab: () => ({ value: incognito }),
     getRecommendationLearningEntries,
     recommendationSubscriptionIds,
     mergeRecommendationCandidates,
@@ -84,6 +87,7 @@ function createFeed({ records = [], candidates = [], playlists = [], settings = 
       feed,
       state,
       getters,
+      store,
       work,
       mount,
       stop() { unmountCallbacks.forEach(callback => callback()); scope.stop() },
@@ -355,6 +359,21 @@ test('impressions preserve the feed and check channel feedback once per record r
     }
     assert.equal(feed.recommendations.value.length, 23)
     assert.ok(!feed.recommendations.value.some(video => video.authorId === candidates[0].authorId))
+  } finally {
+    stop()
+  }
+})
+
+test('incognito tabs record only the feedback a viewer chooses', async () => {
+  const candidates = [{ videoId: 'candidate', authorId: 'channel' }]
+  const { feed, store, stop } = createFeed({ incognito: true, candidates })
+  try {
+    await waitForFeed(feed)
+    const [video] = feed.recommendations.value
+    feed.recordImpression(video, true, { target: { closest: () => null } })
+    assert.equal(await feed.feedback(video, 'click'), true)
+    assert.equal(await feed.feedback(video, 'positive'), true)
+    assert.deepEqual(store.events, ['positive'])
   } finally {
     stop()
   }

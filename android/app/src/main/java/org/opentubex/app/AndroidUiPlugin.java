@@ -490,6 +490,17 @@ public class AndroidUiPlugin extends Plugin {
     }
 
     @PluginMethod
+    public void setIncognitoKeyboard(PluginCall call) {
+        boolean enabled = Boolean.TRUE.equals(call.getBoolean("enabled", false));
+        getActivity().runOnUiThread(() -> {
+            if (getBridge().getWebView() instanceof SubscriptionRefreshWebView) {
+                ((SubscriptionRefreshWebView) getBridge().getWebView()).setIncognitoKeyboard(enabled);
+            }
+            call.resolve();
+        });
+    }
+
+    @PluginMethod
     public void getHardwareKeyboardState(PluginCall call) {
         JSObject result = new JSObject();
         result.put("attached", hasHardwareKeyboard());

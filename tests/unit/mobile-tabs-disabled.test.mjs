@@ -138,6 +138,31 @@ for (const mobile of [true, false]) {
   }
 }
 
+test('sessions with only incognito tabs stay unpublished', async () => {
+  const store = { state: { settings: { enableMobileTabs: true, syncServerSharedTabs: false } }, dispatch: () => {} }
+  let localSessions = [{ sessionId: 'private', tabs: [] }]
+  const merges = []
+  const context = vm.createContext({
+    process: { env: { IS_CAPACITOR: false } },
+    getTabSyncAdapter: () => ({ getSyncSessions: () => localSessions, applySyncSessions: () => true }),
+    getTabSessionDeviceIdentity: () => ({ deviceId: 'local', legacyDeviceIds: [] }),
+    getRevokedSyncSessionLogins,
+    mergeSyncSessions: ({ localSessions }) => {
+      merges.push(localSessions)
+      return { sessionsToApply: localSessions, document: { mode: 'separate' }, mode: 'separate' }
+    },
+    metadataEquals: (a, b) => JSON.stringify(a) === JSON.stringify(b)
+  })
+  vm.runInContext(syncFunction, context)
+  const client = { getSessions: () => assert.fail('Synced a device with only incognito tabs'), putSessions: () => {} }
+  assert.equal(await context.syncSessions(client, store), null)
+
+  localSessions = [{ sessionId: 'private', tabs: [] }, { sessionId: 'regular', tabs: [{ id: 'tab' }] }]
+  client.getSessions = () => []
+  await context.syncSessions(client, store)
+  assert.deepEqual(merges.map(sessions => sessions.map(session => session.sessionId)), [['regular']])
+})
+
 test('incoming video requests wait while mobile tabs are disabled', async () => {
   const source = await readFile(new URL('../../src/renderer/store/modules/sync-server.js', import.meta.url), 'utf8')
   const condition = source.match(/else if \((event.recipient === settings.syncServerDeviceId[\s\S]*?)\) \{/)[1]

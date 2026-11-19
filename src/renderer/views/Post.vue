@@ -49,7 +49,7 @@ import { YatteeUnsupportedError } from '../helpers/api/yattee'
 import { getLocalCommunityPost } from '../helpers/api/local'
 import { getInvidiousApiErrorMessage, showInvidiousFallbackToast, showApiErrorToast, showToast } from '../helpers/utils'
 import { getPostTabTitle } from '../helpers/tabTitles'
-import { useTabTitle } from '../tabs/TabContext'
+import { useIncognitoTab, useTabTitle } from '../tabs/TabContext'
 
 const { t } = useI18n()
 
@@ -166,8 +166,9 @@ async function loadDataInvidiousAsync(generation) {
 // loadPost resets the route-derived state (id, authorId, post, isLoading)
 // before loading either backend.
 watch(() => route.params.id, loadPost, { immediate: true })
+const isIncognitoTab = useIncognitoTab()
 watch([() => route.params.id, subscriptionCacheReady], ([postId, cacheReady]) => {
-  if (cacheReady) {
+  if (cacheReady && !isIncognitoTab.value) {
     store.dispatch('markSubscriptionPostAsSeen', postId)
   }
 }, { immediate: true })

@@ -72,6 +72,12 @@
                 aria-hidden="true"
               />
             </span>
+            <FtIcon
+              v-if="tab.isIncognito"
+              :icon="['fas', 'user-secret']"
+              class="capacitorTabletTabIncognitoIcon"
+              aria-hidden="true"
+            />
             <span
               class="capacitorTabletTabTitle"
               dir="auto"
@@ -127,6 +133,19 @@
     >
       <FtIcon
         :icon="['fas', 'plus']"
+        aria-hidden="true"
+      />
+    </button>
+    <button
+      v-if="!selecting"
+      type="button"
+      class="capacitorTabletNewTab capacitorTabletNewIncognitoTab"
+      :aria-label="t('New Incognito Tab')"
+      :title="t('New Incognito Tab')"
+      @click="createIncognitoTab"
+    >
+      <FtIcon
+        :icon="['fas', 'user-secret']"
         aria-hidden="true"
       />
     </button>
@@ -207,6 +226,7 @@ const {
   closeTab,
   closeTabActions,
   createTab,
+  createIncognitoTab,
   copyActionTabYoutubeLink,
   duplicateActionTab,
   handleTabTargetKeydown,

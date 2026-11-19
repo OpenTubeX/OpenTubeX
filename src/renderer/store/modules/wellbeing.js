@@ -266,13 +266,14 @@ const getters = {
 const actions = {
   /**
    * Counts played time for the limits and records it in the watch statistics when they are enabled.
+   * Incognito tabs count towards the limits without adding to the statistics.
    * Resolves to `false` when the statistics failed to save, so the caller can retry with `retry` set.
-   * @param {{ date: string, seconds: number, isShort: boolean, retry?: boolean }} payload
+   * @param {{ date: string, seconds: number, isShort: boolean, incognito?: boolean, retry?: boolean }} payload
    */
-  recordPlaybackTime({ commit, dispatch, state, rootGetters }, { date, seconds, isShort, retry = false }) {
+  recordPlaybackTime({ commit, dispatch, state, rootGetters }, { date, seconds, isShort, incognito = false, retry = false }) {
     if (!Number.isFinite(seconds) || seconds <= 0) return
 
-    const recorded = recordsWatchStats(rootGetters)
+    const recorded = !incognito && recordsWatchStats(rootGetters)
     // A retry only writes the statistics again; the limits counted this time when it was played.
     if (!retry) {
       commit('addWellbeingPlayback', { date, seconds, isShort, recorded, now: Date.now() })

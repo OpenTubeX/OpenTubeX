@@ -50,14 +50,15 @@ export function createCapacitorPreviewCache(capture, entries = new Map(), limit 
         return
       }
       pendingGeneration = revision
-      const { id, route: { fullPath: route } } = tab
+      const { id, route: { fullPath: route }, isIncognito } = tab
       pending = (async () => {
         try {
           const image = await capture()
           if (!image || revision !== generation) return
           entries.delete(id)
           entries.set(id, { route, image })
-          storage?.write(id, { route, image, capturedAt: Date.now() })
+          // Incognito tabs keep their previews in memory only
+          if (!isIncognito) storage?.write(id, { route, image, capturedAt: Date.now() })
           evict()
         } catch (error) {
           console.warn('Failed to capture mobile tab preview:', error)

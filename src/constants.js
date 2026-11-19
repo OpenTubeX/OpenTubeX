@@ -446,6 +446,7 @@ const DefaultKeyboardShortcuts = {
       ZOOM_OUT: 'ctrl+-',
       // Tab shortcuts
       NEW_TAB: 'ctrl+T',
+      NEW_INCOGNITO_TAB: 'ctrl+shift+P',
       CLOSE_TAB: 'ctrl+W',
       RELOAD_TAB: 'ctrl+R',
       RELOAD_TAB_ALT: 'f5',
