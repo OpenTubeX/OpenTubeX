@@ -2516,6 +2516,7 @@ Context Menu:
   Search With Multiple: Søk med …
   Selection Too Long: Utvalet er for langt til å søkje etter (> {count} teikn)
   Background Tab: Bakgrunnsfane
+  Open in an Incognito Tab: Opna i ei inkognitofane
 Tab Organizer:
   Tab History: "Fanelogg"
   Current Page: "Gjeldande side"
@@ -2904,6 +2905,7 @@ KeyboardShortcutPrompt:
   Skip to Previous Video: Hopp til førre video i ei speleliste
   Undo Seek: Angre siste hopp
   Redo Seek: Gjer om eit angra hopp
+  New Incognito Tab: Opprett ei ny inkognitofane
 CommandPalette:
   Title: Kommandopalett
   Open: Opne kommandopaletten
@@ -3291,3 +3293,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Søk på Twitch"
+New Incognito Tab: Ny inkognitofane
+Incognito Tab: Inkognitofane

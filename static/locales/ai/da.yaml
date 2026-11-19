@@ -2299,6 +2299,7 @@ Context Menu:
   Search With Multiple: Søg med…
   Selection Too Long: Markeringen er for lang til en søgning (> {count} tegn)
   Background Tab: Baggrundsfane
+  Open in an Incognito Tab: Åbn i en inkognitofane
 Tab Organizer:
   Tab History: "Fanens historik"
   Current Page: "Aktuel side"
@@ -2604,6 +2605,7 @@ KeyboardShortcutPrompt:
   Skip to Previous Video: Spring til den forrige video i en playliste
   Undo Seek: Fortryd det seneste spring
   Redo Seek: Gentag et fortrudt spring
+  New Incognito Tab: Opret en ny inkognitofane
 CommandPalette:
   Title: Kommandopalet
   Open: Åbn kommandopalet
@@ -2992,3 +2994,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Søg på Twitch"
+New Incognito Tab: Ny inkognitofane
+Incognito Tab: Inkognitofane

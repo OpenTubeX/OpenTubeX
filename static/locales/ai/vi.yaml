@@ -2229,6 +2229,7 @@ Context Menu:
   Search With Multiple: Tìm bằng...
   Selection Too Long: Phần đã chọn quá dài để tìm kiếm (> {count} ký tự)
   Background Tab: Thẻ nền
+  Open in an Incognito Tab: Mở trong thẻ ẩn danh
 Tab Organizer:
   Tab History: "Lịch sử thẻ"
   Current Page: "Trang hiện tại"
@@ -2526,6 +2527,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Trình chuyển thẻ
   Undo Seek: Hoàn tác lần tua gần nhất
   Redo Seek: Làm lại lần tua đã hoàn tác
+  New Incognito Tab: Tạo thẻ ẩn danh mới
 CommandPalette:
   Title: Bảng lệnh
   Open: Mở bảng lệnh
@@ -2912,3 +2914,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Tìm kiếm trên Twitch"
+New Incognito Tab: Thẻ ẩn danh mới
+Incognito Tab: Thẻ ẩn danh

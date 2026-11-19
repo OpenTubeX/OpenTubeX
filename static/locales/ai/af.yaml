@@ -2473,6 +2473,7 @@ Context Menu:
   Search With Multiple: Soek met...
   Selection Too Long: Seleksie is te lank vir soektog (> {count} karakters)
   Background Tab: Agtergrondoortjie
+  Open in an Incognito Tab: Maak oop in ’n incognito-oortjie
 Tab Organizer:
   Tab History: Oortjiegeskiedenis
   Current Page: Huidige blad
@@ -2782,6 +2783,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Oortjiewisselaar
   Undo Seek: Ontdoen die laaste spoel
   Redo Seek: Doen ’n ontdane spoel oor
+  New Incognito Tab: Skep ’n nuwe incognito-oortjie
 CommandPalette:
   Title: Opdragpalet
   Open: Maak opdragpalet oop
@@ -3106,3 +3108,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Deursoek Twitch"
+New Incognito Tab: Nuwe incognito-oortjie
+Incognito Tab: Incognito-oortjie

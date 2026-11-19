@@ -2216,6 +2216,7 @@ Context Menu:
   Search With Multiple: 搜尋工具...
   Selection Too Long: 選取內容過長，無法搜尋（> {count} 個字元）
   Background Tab: 背景分頁
+  Open in an Incognito Tab: 在無痕分頁開啟
 Tab Organizer:
   Tab History: "分頁歷史紀錄"
   Current Page: "目前頁面"
@@ -2510,6 +2511,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: 分頁切換器
   Undo Seek: 復原上一次跳轉
   Redo Seek: 重做已復原的跳轉
+  New Incognito Tab: 建立新的無痕分頁
 CommandPalette:
   Title: 命令選擇區
   Open: 開啟命令選擇區
@@ -2897,3 +2899,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "搜尋 Twitch"
+New Incognito Tab: 新增無痕分頁
+Incognito Tab: 無痕分頁

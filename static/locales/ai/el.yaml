@@ -2229,6 +2229,7 @@ Context Menu:
   Search With Multiple: Αναζήτηση με...
   Selection Too Long: Η επιλογή είναι πολύ μεγάλη για αναζήτηση (> {count} χαρακτήρες)
   Background Tab: Καρτέλα παρασκηνίου
+  Open in an Incognito Tab: Άνοιγμα σε καρτέλα ανώνυμης περιήγησης
 Tab Organizer:
   Tab History: "Ιστορικό καρτέλας"
   Current Page: "Τρέχουσα σελίδα"
@@ -2523,6 +2524,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Εναλλαγή καρτελών
   Undo Seek: Αναίρεση της τελευταίας μετάβασης
   Redo Seek: Επανάληψη μιας μετάβασης που αναιρέθηκε
+  New Incognito Tab: Δημιουργία νέας καρτέλας ανώνυμης περιήγησης
 CommandPalette:
   Title: Παλέτα εντολών
   Open: Άνοιγμα παλέτας εντολών
@@ -2909,3 +2911,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Αναζήτηση στο Twitch"
+New Incognito Tab: Νέα καρτέλα ανώνυμης περιήγησης
+Incognito Tab: Καρτέλα ανώνυμης περιήγησης

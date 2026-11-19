@@ -2214,6 +2214,7 @@ Context Menu:
   Search With Multiple: Sök med…
   Selection Too Long: Markeringen är för lång för en sökning (> {count} tecken)
   Background Tab: Bakgrundsflik
+  Open in an Incognito Tab: Öppna i inkognitoflik
 Tab Organizer:
   Tab History: "Flikhistorik"
   Current Page: "Aktuell sida"
@@ -2508,6 +2509,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Flikväxlare
   Undo Seek: Ångra det senaste hoppet
   Redo Seek: Gör om ett ångrat hopp
+  New Incognito Tab: Skapa en ny inkognitoflik
 CommandPalette:
   Title: Kommandopalett
   Open: Öppna kommandopaletten
@@ -2894,3 +2896,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Sök på Twitch"
+New Incognito Tab: Ny inkognitoflik
+Incognito Tab: Inkognitoflik

@@ -2246,6 +2246,7 @@ Context Menu:
   Search With Multiple: Търсене с...
   Selection Too Long: Избраният текст е твърде дълъг за търсене (> {count} знака)
   Background Tab: Фонов раздел
+  Open in an Incognito Tab: Отваряне в раздел „инкогнито“
 Tab Organizer:
   Tab History: "История на раздела"
   Current Page: "Текуща страница"
@@ -2543,6 +2544,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Превключвател на разделите
   Undo Seek: Отмяна на последното превъртане
   Redo Seek: Повторение на отмененото превъртане
+  New Incognito Tab: Създаване на нов раздел „инкогнито“
 CommandPalette:
   Title: Палитра с команди
   Open: Отваряне на палитрата с команди
@@ -2931,3 +2933,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Търсене в Twitch"
+New Incognito Tab: Нов раздел „инкогнито“
+Incognito Tab: Раздел „инкогнито“

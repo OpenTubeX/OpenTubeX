@@ -2311,6 +2311,7 @@ Context Menu:
   Search With Multiple: جست‌وجو با...
   Selection Too Long: متن انتخاب‌شده برای جست‌وجو بیش از حد بلند است (> {count} نویسه)
   Background Tab: زبانه پس‌زمینه
+  Open in an Incognito Tab: باز کردن در زبانهٔ ناشناس
 Tab Organizer:
   Tab History: "تاریخچهٔ زبانه"
   Current Page: "صفحهٔ کنونی"
@@ -2613,6 +2614,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: تعویض‌کننده زبانه
   Undo Seek: واگرد آخرین پرش
   Redo Seek: ازنو انجام دادن پرش واگردشده
+  New Incognito Tab: ایجاد زبانه ناشناس جدید
 CommandPalette:
   Title: پالت فرمان
   Open: بازکردن پالت فرمان
@@ -2992,3 +2994,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "جستجو در Twitch"
+New Incognito Tab: زبانه ناشناس جدید
+Incognito Tab: زبانه ناشناس

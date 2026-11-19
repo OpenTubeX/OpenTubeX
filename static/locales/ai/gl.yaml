@@ -2274,6 +2274,7 @@ Context Menu:
   Search With Multiple: Buscar con…
   Selection Too Long: A selección é demasiado longa para a busca (> {count} caracteres)
   Background Tab: Lapela en segundo plano
+  Open in an Incognito Tab: Abrir nunha lapela de incógnito
 Tab Organizer:
   Tab History: "Historial da lapela"
   Current Page: "Páxina actual"
@@ -2571,6 +2572,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Selector de lapelas
   Undo Seek: Desfacer o último salto
   Redo Seek: Refacer un salto desfeito
+  New Incognito Tab: Crear unha lapela de incógnito nova
 CommandPalette:
   Title: Paleta de ordes
   Open: Abrir a paleta de ordes
@@ -2959,3 +2961,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Buscar en Twitch"
+New Incognito Tab: Nova lapela de incógnito
+Incognito Tab: Lapela de incógnito

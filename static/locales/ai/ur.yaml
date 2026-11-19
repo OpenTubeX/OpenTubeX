@@ -2331,6 +2331,7 @@ Context Menu:
   Search With Multiple: اس کے ساتھ تلاش کریں...
   Selection Too Long: انتخاب تلاش کے لیے بہت طویل ہے (> {count} حروف)
   Background Tab: پس منظر ٹیب
+  Open in an Incognito Tab: پوشیدگی ٹیب میں کھولیں
 Tab Organizer:
   Tab History: ٹیب ہسٹری
   Current Page: موجودہ صفحہ
@@ -2641,6 +2642,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: ٹیب سوئچر
   Undo Seek: آخری سیک واپس لیں
   Redo Seek: واپس لیا گیا سیک دوبارہ کریں
+  New Incognito Tab: نیا پوشیدگی ٹیب بنائیں
 CommandPalette:
   Title: کمانڈ پیلیٹ
   Open: کمانڈ پیلیٹ کھولیں
@@ -2965,3 +2967,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Twitch پر تلاش کریں"
+New Incognito Tab: نیا پوشیدگی ٹیب
+Incognito Tab: پوشیدگی ٹیب

@@ -2213,6 +2213,7 @@ Context Menu:
   Search With Multiple: Vyhľadať cez…
   Selection Too Long: Označený text je príliš dlhý na vyhľadanie (> {count} znakov)
   Background Tab: Karta na pozadí
+  Open in an Incognito Tab: Otvoriť na karte inkognito
 Tab Organizer:
   Tab History: "História karty"
   Current Page: "Aktuálna stránka"
@@ -2507,6 +2508,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Prepínač kariet
   Undo Seek: Vrátiť späť posledný posun
   Redo Seek: Zopakovať vrátený posun
+  New Incognito Tab: Vytvoriť novú kartu inkognito
 CommandPalette:
   Title: Paleta príkazov
   Open: Otvoriť paletu príkazov
@@ -2894,3 +2896,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Hľadať na Twitchi"
+New Incognito Tab: Nová karta inkognito
+Incognito Tab: Karta inkognito

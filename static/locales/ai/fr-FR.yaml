@@ -2212,6 +2212,7 @@ Context Menu:
   Search With Multiple: Rechercher avec...
   Selection Too Long: La sélection est trop longue pour la recherche (> {count} caractères)
   Background Tab: Onglet en arrière-plan
+  Open in an Incognito Tab: Ouvrir dans un onglet de navigation privée
 Tab Organizer:
   Tab History: "Historique de l’onglet"
   Current Page: "Page actuelle"
@@ -2506,6 +2507,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Sélecteur d’onglets
   Undo Seek: Annuler le dernier saut
   Redo Seek: Rétablir un saut annulé
+  New Incognito Tab: Créer un nouvel onglet de navigation privée
 CommandPalette:
   Title: Palette de commandes
   Open: Ouvrir la palette de commandes
@@ -2893,3 +2895,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Rechercher sur Twitch"
+New Incognito Tab: Nouvel onglet de navigation privée
+Incognito Tab: Onglet de navigation privée

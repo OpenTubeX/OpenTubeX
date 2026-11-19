@@ -2213,6 +2213,7 @@ Context Menu:
   Search With Multiple: Cerca con...
   Selection Too Long: La selezione è troppo lunga per la ricerca (> {count} caratteri)
   Background Tab: Scheda in secondo piano
+  Open in an Incognito Tab: Apri in una scheda in incognito
 Tab Organizer:
   Tab History: "Cronologia della scheda"
   Current Page: "Pagina attuale"
@@ -2507,6 +2508,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Selettore delle schede
   Undo Seek: Annulla l'ultimo salto
   Redo Seek: Ripeti un salto annullato
+  New Incognito Tab: Crea una nuova scheda in incognito
 CommandPalette:
   Title: Tavolozza dei comandi
   Open: Apri tavolozza dei comandi
@@ -2894,3 +2896,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Cerca su Twitch"
+New Incognito Tab: Nuova scheda in incognito
+Incognito Tab: Scheda in incognito

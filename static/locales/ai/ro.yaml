@@ -2264,6 +2264,7 @@ Context Menu:
   Search With Multiple: Caută cu...
   Selection Too Long: Selecția este prea lungă pentru căutare (> {count} caractere)
   Background Tab: Filă în fundal
+  Open in an Incognito Tab: Deschide într-o filă incognito
 Tab Organizer:
   Tab History: "Istoricul filei"
   Current Page: "Pagina curentă"
@@ -2566,6 +2567,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Comutator de file
   Undo Seek: Anulați ultimul salt
   Redo Seek: Refaceți un salt anulat
+  New Incognito Tab: Creează o filă incognito nouă
 CommandPalette:
   Title: Paletă de comenzi
   Open: Deschide paleta de comenzi
@@ -2952,3 +2954,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Caută pe Twitch"
+New Incognito Tab: Filă incognito nouă
+Incognito Tab: Filă incognito

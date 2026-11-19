@@ -1,6 +1,8 @@
 # Webkit Menu Bar
 File: Datei
 New Tab: Neuer Tab
+New Incognito Tab: Neuer Inkognito-Tab
+Incognito Tab: Inkognito-Tab
 Quit: Beenden
 Edit: Bearbeiten
 Undo: Rückgängig
@@ -3490,6 +3492,7 @@ KeyboardShortcutPrompt:
   Toggle Normal Playback Speed: Zwischen 1x Wiedergabegeschwindigkeit und der vorherigen Geschwindigkeit wechseln
   Tab Switcher: Tab-Wechsler
   New Tab: Einen neuen Tab erstellen
+  New Incognito Tab: Einen neuen Inkognito-Tab erstellen
   Close Tab: Den aktuellen Tab schließen
   Reload Tab: Den aktuellen Tab neu laden
   Reopen Closed Tab: Den zuletzt geschlossenen Tab wieder öffnen
@@ -3587,6 +3590,7 @@ Context Menu:
   Move Tabs to Window: Tabs in Fenster verschieben
   Open in a New Tab: In neuem Tab öffnen
   Open in a New Window: In neuem Fenster öffnen
+  Open in an Incognito Tab: In Inkognito-Tab öffnen
   Copy Link: Link kopieren
   Copy Invidious Link: Invidious-Link kopieren
   Search Selection in New Tab: '"{selection}" in einem neuen Tab suchen'

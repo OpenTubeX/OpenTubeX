@@ -19,6 +19,8 @@ Color Picker:
 File: File
 New Window: New Window
 New Tab: New Tab
+New Incognito Tab: New Incognito Tab
+Incognito Tab: Incognito tab
 Preferences: Preferences
 Quit: Quit
 Edit: Edit
@@ -3253,6 +3255,7 @@ Context Menu:
   Move Tabs to Window: Move Tabs to Window
   Open in a New Tab: Open in a New Tab
   Open in a New Window: Open in a New Window
+  Open in an Incognito Tab: Open in an Incognito Tab
   Copy Link: Copy Link
   Copy Invidious Link: Copy Invidious Link
   Search Selection in New Tab: 'Search "{selection}" in a New Tab'
@@ -3724,6 +3727,7 @@ KeyboardShortcutPrompt:
   History Forward: Go forward one page
   New Window: Create a new window
   New Tab: Create a new tab
+  New Incognito Tab: Create a new incognito tab
   Close Tab: Close the current tab
   Reload Tab: Reload the current tab
   Reopen Closed Tab: Reopen the last closed tab

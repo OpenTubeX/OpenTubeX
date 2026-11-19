@@ -2250,6 +2250,7 @@ Context Menu:
   Search With Multiple: Pretraži s pomoću…
   Selection Too Long: Odabir je predug za pretraživanje (> {count} znakova)
   Background Tab: Kartica u pozadini
+  Open in an Incognito Tab: Otvori u anonimnoj kartici
 Tab Organizer:
   Tab History: "Povijest kartice"
   Current Page: "Trenutna stranica"
@@ -2547,6 +2548,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Prebacivanje kartica
   Undo Seek: Poništi posljednje premotavanje
   Redo Seek: Ponovi poništeno premotavanje
+  New Incognito Tab: Stvori novu anonimnu karticu
 CommandPalette:
   Title: Paleta naredbi
   Open: Otvori paletu naredbi
@@ -2935,3 +2937,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Pretraži Twitch"
+New Incognito Tab: Nova anonimna kartica
+Incognito Tab: Anonimna kartica

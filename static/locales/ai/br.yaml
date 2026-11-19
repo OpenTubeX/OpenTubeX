@@ -2224,6 +2224,7 @@ Context Menu:
   Search With Multiple: "Klask gant…"
   Selection Too Long: "Re hir eo an diuzadenn evit klask (> {count} arouezenn)"
   Background Tab: Ivinell en drekleur
+  Open in an Incognito Tab: Digeriñ en un ivinell kuzh
 Tab Organizer:
   Tab History: "Istor an ivinell"
   Current Page: "Pajenn vremanel"
@@ -2518,6 +2519,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: "Cheñcher ivinelloù"
   Undo Seek: Dizober al lamm diwezhañ
   Redo Seek: Adober ul lamm dizobereet
+  New Incognito Tab: Krouiñ un ivinell kuzh nevez
 CommandPalette:
   Title: "Paled arc'hadoù"
   Open: "Digeriñ ar baled arc'hadoù"
@@ -2905,3 +2907,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Klask war Twitch"
+New Incognito Tab: Ivinell kuzh nevez
+Incognito Tab: Ivinell kuzh

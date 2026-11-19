@@ -2265,6 +2265,7 @@ Context Menu:
   Search With Multiple: ابحث مع...
   Selection Too Long: التحديد طويل جدًا للبحث (> {count} حرفًا)
   Background Tab: علامة تبويب في الخلفية
+  Open in an Incognito Tab: افتح في علامة تبويب للتصفح المتخفي
 Tab Organizer:
   Tab History: "سجل علامة التبويب"
   Current Page: "الصفحة الحالية"
@@ -2547,6 +2548,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: مبدل علامات التبويب
   Undo Seek: التراجع عن آخر انتقال
   Redo Seek: إعادة الانتقال الذي تم التراجع عنه
+  New Incognito Tab: أنشئ علامة تبويب جديدة للتصفح المتخفي
 CommandPalette:
   Title: لوحة الأوامر
   Open: افتح لوحة الأوامر
@@ -2935,3 +2937,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "البحث في Twitch"
+New Incognito Tab: علامة تبويب جديدة للتصفح المتخفي
+Incognito Tab: علامة تبويب للتصفح المتخفي

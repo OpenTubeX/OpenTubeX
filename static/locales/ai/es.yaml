@@ -2174,6 +2174,7 @@ Context Menu:
   Search With Multiple: Buscar con...
   Selection Too Long: La selección es demasiado larga para buscarla (> {count} caracteres)
   Background Tab: Pestaña en segundo plano
+  Open in an Incognito Tab: Abrir en una pestaña de incógnito
 Tab Organizer:
   Tab History: "Historial de la pestaña"
   Current Page: "Página actual"
@@ -2468,6 +2469,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Selector de pestañas
   Undo Seek: Deshacer el último salto
   Redo Seek: Rehacer un salto deshecho
+  New Incognito Tab: Crear una pestaña de incógnito nueva
 CommandPalette:
   Title: Paleta de comandos
   Open: Abrir paleta de comandos
@@ -2863,3 +2865,5 @@ App Menu:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Buscar en Twitch"
+New Incognito Tab: Nueva pestaña de incógnito
+Incognito Tab: Pestaña de incógnito

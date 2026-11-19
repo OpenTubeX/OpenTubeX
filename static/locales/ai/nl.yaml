@@ -2280,6 +2280,7 @@ Context Menu:
   Search With Multiple: Zoeken met...
   Selection Too Long: Selectie is te lang om te zoeken (> {count} tekens)
   Background Tab: Achtergrondtabblad
+  Open in an Incognito Tab: Openen in incognitotabblad
 Tab Organizer:
   Tab History: "Tabgeschiedenis"
   Current Page: "Huidige pagina"
@@ -2579,6 +2580,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Tabbladwisselaar
   Undo Seek: Laatste sprong ongedaan maken
   Redo Seek: Ongedaan gemaakte sprong opnieuw uitvoeren
+  New Incognito Tab: Nieuw incognitotabblad maken
 CommandPalette:
   Title: Opdrachtpalet
   Open: Opdrachtpalet openen
@@ -2967,3 +2969,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Zoeken op Twitch"
+New Incognito Tab: Nieuw incognitotabblad
+Incognito Tab: Incognitotabblad
