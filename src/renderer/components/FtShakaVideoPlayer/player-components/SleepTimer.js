@@ -90,7 +90,7 @@ export class SleepTimer extends shaka.ui.SettingsMenu {
       const minutes = normalizeMinutes(slider.getValue() + delta)
       slider.setValue(minutes)
       this.showSliderMinutes_(minutes)
-      this.cancelWheelCommit_()
+      window.clearTimeout(this.wheelCommit_)
       this.wheelCommit_ = window.setTimeout(() => {
         this.wheelCommit_ = null
         this.applySlider_()
@@ -133,7 +133,7 @@ export class SleepTimer extends shaka.ui.SettingsMenu {
   }
 
   release() {
-    this.cancelWheelCommit_()
+    window.clearTimeout(this.wheelCommit_)
     this.stopTimerWatch_()
     this.stopSliderWatch_()
     this.slider_.release()
@@ -149,11 +149,16 @@ export class SleepTimer extends shaka.ui.SettingsMenu {
     this.events_.dispatchEvent(new CustomEvent('setSleepTimerDuration', { detail: minutes }))
   }
 
-  /** @private */
+  /**
+   * Drops a wheel duration that hasn't started yet. The slider then shows the timer's own
+   * duration again, which another action may not change.
+   * @private
+   */
   cancelWheelCommit_() {
     if (this.wheelCommit_ === null) return
     window.clearTimeout(this.wheelCommit_)
     this.wheelCommit_ = null
+    this.updateSlider_()
   }
 
   /**
@@ -195,7 +200,8 @@ export class SleepTimer extends shaka.ui.SettingsMenu {
   /** @private */
   updateSlider_() {
     // Another action changed the timer, so a pending wheel duration is stale
-    this.cancelWheelCommit_()
+    window.clearTimeout(this.wheelCommit_)
+    this.wheelCommit_ = null
     const { durationMinutes, mode } = this.timer_
     const minutes = this.getSliderMinutes_()
     this.slider_.setValue(minutes)
