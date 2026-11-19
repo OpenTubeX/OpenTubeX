@@ -2897,7 +2897,7 @@ async function getPostCommentRepliesInvidious(index) {
       return
     }
 
-    comment.replies = comment.replies.concat(comments)
+    comment.replies = mergeReplies(comment.replies, comments)
     const replyLoadState = getReplyLoadState(
       comment.replies.length,
       comment.numReplies,
