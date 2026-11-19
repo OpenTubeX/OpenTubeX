@@ -13,6 +13,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
+
+import android.app.UiAutomation;
 
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -38,15 +41,15 @@ public class AndroidClipboardTest {
         File unrelated = File.createTempFile("other-cache-", ".png", context.getCacheDir());
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
             awaitValue(scenario, "typeof window.Capacitor === 'object' && document.readyState === 'complete'", "true");
-            ClipData original = clipboard.getPrimaryClip();
+            ClipData original = primaryClip(clipboard);
             try {
                 for (int i = 0; i < 15; i++) {
                     copyCanvas(scenario, "red");
                     assertTrue("Repeated copies retain at most ten image files", clipboardFiles(context).length <= 10);
-                    Uri active = clipboard.getPrimaryClip().getItemAt(0).getUri();
+                    Uri active = primaryClip(clipboard).getItemAt(0).getUri();
                     assertImage(context, active, Color.RED);
                 }
-                Uri active = clipboard.getPrimaryClip().getItemAt(0).getUri();
+                Uri active = primaryClip(clipboard).getItemAt(0).getUri();
                 File activeFile = new File(context.getCacheDir(), active.getLastPathSegment());
                 assertTrue(activeFile.setLastModified(1));
                 for (int i = 0; i < 12; i++) File.createTempFile("capawesome-clipboard-", ".png", context.getCacheDir());
@@ -67,6 +70,22 @@ public class AndroidClipboardTest {
         }
     }
 
+    /**
+     * Android only lets the focused app read the clipboard. A busy device can
+     * leave the activity without focus, for example while another app's "isn't
+     * responding" dialog shows, so read it with the shell's background access.
+     */
+    private static ClipData primaryClip(ClipboardManager clipboard) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return clipboard.getPrimaryClip();
+        UiAutomation automation = InstrumentationRegistry.getInstrumentation().getUiAutomation();
+        automation.adoptShellPermissionIdentity("android.permission.READ_CLIPBOARD_IN_BACKGROUND");
+        try {
+            return clipboard.getPrimaryClip();
+        } finally {
+            automation.dropShellPermissionIdentity();
+        }
+    }
+
     private static File[] clipboardFiles(Context context) {
         File[] files = context.getCacheDir().listFiles(file -> file.getName().startsWith("capawesome-clipboard-") && file.getName().endsWith(".png"));
         assertNotNull(files);
@@ -80,13 +99,13 @@ public class AndroidClipboardTest {
         List<Uri> images = new ArrayList<>();
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
             awaitValue(scenario, "typeof window.Capacitor === 'object' && document.readyState === 'complete'", "true");
-            ClipData original = clipboard.getPrimaryClip();
+            ClipData original = primaryClip(clipboard);
             try {
                 for (String color : new String[]{"red", "blue"}) {
                     // Exercise canvas -> PNG Blob -> FileReader -> Capacitor bridge,
                     // with no dependency on WebView clipboard support or a network video.
                     copyCanvas(scenario, color);
-                    ClipData clip = clipboard.getPrimaryClip();
+                    ClipData clip = primaryClip(clipboard);
                     assertNotNull(clip);
                     assertTrue(clip.getDescription().hasMimeType("image/png"));
                     assertNull("An image must not be copied as base64 text", clip.getItemAt(0).getText());
@@ -109,7 +128,7 @@ public class AndroidClipboardTest {
                 );
                 awaitValue(scenario, "window.clipboardTestResult", "\"WRITE_FAILED\"");
                 assertEquals("A failed copy preserves the previous image", images.get(1),
-                    clipboard.getPrimaryClip().getItemAt(0).getUri());
+                    primaryClip(clipboard).getItemAt(0).getUri());
             } finally {
                 clipboard.setPrimaryClip(original != null ? original : ClipData.newPlainText("", ""));
                 for (Uri uri : images) context.getContentResolver().delete(uri, null, null);
