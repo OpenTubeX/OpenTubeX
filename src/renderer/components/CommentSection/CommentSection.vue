@@ -936,6 +936,7 @@ const youTubeComments = {
       const parent = thread && findCommentParent(thread, commentId)
       if (parent) {
         parent.replies = parent.replies.filter(reply => reply.id !== commentId)
+        if (parent !== thread) parent.numReplies = Math.max(0, (parent.numReplies ?? 0) - 1)
         thread.numReplies = Math.max(0, thread.numReplies - 1)
       }
     }
@@ -2741,7 +2742,11 @@ async function getCommentRepliesLocal(index, commentId = null) {
     showApiErrorToast(errorMessage, err)
     if (backendFallback.value && backendPreference.value === 'local') {
       showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
-      getCommentDataInvidious()
+      if (props.isPostComments) {
+        getPostCommentsInvidious()
+      } else {
+        getCommentDataInvidious()
+      }
     } else {
       isLoading.value = false
     }

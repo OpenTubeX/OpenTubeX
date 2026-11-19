@@ -225,6 +225,7 @@
         class="replyComposer"
         :parent-id="reply.id"
         :initial-mention="reply.author.startsWith('@') && reply.authorId ? { handle: reply.author, channelId: reply.authorId } : null"
+        @posted="childrenCollapsed = false"
         @done="youTubeComments.closeReply(reply.id)"
       />
     </div>

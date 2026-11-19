@@ -971,9 +971,13 @@ test.describe('manual comment loading', () => {
     // Punctuation around a mention keeps it.
     await replyInput.press('Backspace')
     await replyInput.pressSequentially('...) there')
+    // A reply posted under collapsed replies shows.
+    await target.locator(':scope > .commentReplyLineToggle').click()
+    await expect(postedReply).toHaveCount(0)
     // Ctrl+Enter sends like the button.
     await replyInput.press('ControlOrMeta+Enter')
     await expect.poll(() => replyTexts.at(-1)).toBe(`Hi (@${channelId}...) there`)
+    await expect(target.locator(':scope > .commentReplyChildren .commentText', { hasText: 'there' })).toBeVisible()
   })
 
   test.describe('comment filtering at 125% UI scale', () => {

@@ -148,7 +148,7 @@ const props = defineProps({
   // Edits this comment or reply of the account instead of posting a new one.
   editComment: { type: Object, default: null }
 })
-const emit = defineEmits(['done'])
+const emit = defineEmits(['done', 'posted'])
 const { t } = useI18n()
 const comments = inject(youTubeCommentsKey)
 
@@ -401,6 +401,7 @@ async function submit() {
       message: props.parentId ? t('YouTube Account.Reply Posted') : t('YouTube Account.Comment Posted'),
       icon: ['fas', 'comment']
     })
+    emit('posted')
     emit('done')
   } catch (error) {
     console.error(error)
