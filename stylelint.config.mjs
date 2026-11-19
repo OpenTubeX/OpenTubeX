@@ -3,25 +3,19 @@ import a11y from '@double-great/stylelint-a11y'
 import highPerformanceAnimation from 'stylelint-high-performance-animation'
 import noLayoutAnimation from './_scripts/stylelintNoLayoutAnimation.mjs'
 
-// Sizes and positions animate on the main thread, which lays out and renders
-// the page on every frame. Animate transform, opacity, clip-path or filter
-// instead, or explain why the layout itself has to move.
-export const animationPerformanceRules = {
-  'plugin/no-low-performance-animation-properties': [true, {
-    ignore: 'paint-properties',
-    ignoreProperties: ['display', 'visibility', 'content-visibility', 'overlay']
-  }],
-  // Logical shorthands, flex and grid tracks, and transitions in variables,
-  // which the rule above misses.
-  'opentubex/no-layout-animation-properties': [true, {
-    ignoreProperties: ['display', 'visibility', 'content-visibility', 'overlay']
-  }]
-}
-
 /** @type {import('stylelint').Config} */
 export default {
   plugins: [logicalSpec, ...a11y, highPerformanceAnimation, noLayoutAnimation],
   extends: ['stylelint-config-standard', 'stylelint-config-sass-guidelines'],
+  languageOptions: {
+    syntax: {
+      properties: {
+        // @csstools/css-syntax-patches-for-csstree still spells these keywords
+        // `anchor-valid` and `anchor-visible`; the spec and Chromium use `anchors-`.
+        'position-visibility': 'always | [ anchors-valid || anchors-visible || no-overflow ]'
+      }
+    }
+  },
   overrides: [
     {
       files: '**/*.scss',
@@ -38,6 +32,18 @@ export default {
     {
       files: '**/*.css',
       rules: { }
+    },
+    {
+      files: '**/*.vue',
+      customSyntax: 'postcss-html',
+      rules: {
+        // Vue compiles v-bind() in <style> blocks to a custom property.
+        'declaration-property-value-no-unknown': [
+          true,
+          { ignoreProperties: { '/.+/': '/^v-bind\\(/' } }
+        ],
+        'value-keyword-case': ['lower', { ignoreFunctions: ['v-bind'] }]
+      }
     }
   ],
   rules: {
@@ -66,7 +72,18 @@ export default {
       { message: 'Mix relative colors instead of taking a relative color of a color-mix(); Chromium 119 can crash on it' }
     ],
     'a11y/no-outline-none': true,
-    ...animationPerformanceRules,
+    // Sizes and positions animate on the main thread, which lays out and renders
+    // the page on every frame. Animate transform, opacity, clip-path or filter
+    // instead, or explain why the layout itself has to move.
+    'plugin/no-low-performance-animation-properties': [true, {
+      ignore: 'paint-properties',
+      ignoreProperties: ['display', 'visibility', 'content-visibility', 'overlay']
+    }],
+    // Logical shorthands, flex and grid tracks, and transitions in variables,
+    // which the rule above misses.
+    'opentubex/no-layout-animation-properties': [true, {
+      ignoreProperties: ['display', 'visibility', 'content-visibility', 'overlay']
+    }],
     'liberty/use-logical-spec': ['always']
   }
 }
