@@ -407,6 +407,7 @@ import {
 import { resolveChannelId } from '../../helpers/channels'
 import { isHistoryEntryWatched } from '../../helpers/history'
 import { useTabAvatar, useTabContext, useTabTitle } from '../../tabs/TabContext'
+import { reportLoadedPageTitle } from '../../helpers/loadedPageTitles'
 import { setChannelShortsNavigationContext } from '../../helpers/player/shorts'
 import {
   CHANNEL_SEARCH_FILTERS,
@@ -516,6 +517,7 @@ const isFamilyFriendly = ref(false)
 watch([channelName, isLoading, locale], ([name, loading]) => {
   if (!loading) {
     setTabTitle(name || t('Channel.Channel Name Unavailable'))
+    if (name && resolvedChannelUrl?.id === id.value) reportLoadedPageTitle(`channel:${resolvedChannelUrl.url}`, name)
   }
 })
 
@@ -890,6 +892,9 @@ onBeforeUnmount(() => {
  * @param {string} url
  * @param {string|undefined} tab
  */
+/** The pasted link that opened this channel, whose search history entry waits for the channel name. */
+let resolvedChannelUrl = null
+
 async function resolveChannelUrl(url, tab = undefined) {
   const expectedRouteGeneration = channelRouteGeneration
   let id = await resolveChannelId(url, backendPreference.value)
@@ -902,6 +907,7 @@ async function resolveChannelUrl(url, tab = undefined) {
     // the channel page shows an error about the channel not existing when the id is @@@
     id = '@@@'
   }
+  resolvedChannelUrl = { url, id }
 
   // use router.replace to replace the current history entry
   // with the one with the resolved channel id
