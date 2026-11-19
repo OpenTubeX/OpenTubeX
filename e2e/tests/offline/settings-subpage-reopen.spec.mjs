@@ -829,12 +829,14 @@ test.describe('settings subpage reopening', () => {
       await expect.poll(() => content.evaluate((element, saved) => {
         // At fractional UI Scale, scrollHeight and clientHeight round separately and
         // can overstate the range by more than a pixel; read the browser's clamp instead.
+        // The app clamps to the rendered content end, which Chromium snaps to a
+        // physical pixel, so compare in physical pixels.
         const scrollTop = element.scrollTop
         element.scrollTop = element.scrollHeight
         const maximum = element.scrollTop
         element.scrollTop = scrollTop
-        return Math.abs(scrollTop - Math.min(saved, maximum))
-      }, scrollTop)).toBeLessThanOrEqual(1)
+        return Math.abs(scrollTop - Math.min(saved, maximum)) * devicePixelRatio
+      }, scrollTop)).toBeLessThanOrEqual(2)
       await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
       await expect.poll(() => content.evaluate(element => {
         const section = element.querySelector(':scope > [data-section="appearance"]')

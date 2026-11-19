@@ -338,14 +338,18 @@ test.describe('subscription settings horizontal layout', { tag: '@scale' }, () =
       await expect(content).toHaveJSProperty('scrollLeft', 0)
       await expect.poll(() => content.evaluate(element => {
         const section = element.querySelector('.section')
-        const contentEnd = section.getBoundingClientRect().bottom - element.getBoundingClientRect().top +
-            element.scrollTop + Number.parseFloat(getComputedStyle(element).paddingBottom)
-        const maximum = Math.max(0, contentEnd - element.clientHeight)
+        const style = getComputedStyle(element)
+        const bounds = element.getBoundingClientRect()
+        // Keep the range fractional at non-100% UI scales: clientHeight rounds,
+        // and Chromium snaps the scroll offset to a physical pixel, so the
+        // content and viewport edges can each be a pixel off.
+        const maximum = Math.max(0, section.getBoundingClientRect().bottom + Number.parseFloat(style.paddingBottom) -
+            (bounds.bottom - Number.parseFloat(style.borderBottomWidth)) + element.scrollTop)
         const scrollbar = element.querySelector('.os-scrollbar-vertical')
         if (maximum <= 1) return element.scrollTop <= 1 && scrollbar.classList.contains('os-scrollbar-unusable')
         const track = scrollbar.querySelector('.os-scrollbar-track').getBoundingClientRect()
         const thumb = scrollbar.querySelector('.os-scrollbar-handle').getBoundingClientRect()
-        return element.scrollTop <= maximum + 1 &&
+        return (element.scrollTop - maximum) * devicePixelRatio <= 2 &&
             Math.abs(thumb.height / track.height - element.clientHeight / element.scrollHeight) < 0.02
       })).toBe(true)
       const controls = content.locator('.switch-ctn, .select, .pure-material-slider, .manageButton')
