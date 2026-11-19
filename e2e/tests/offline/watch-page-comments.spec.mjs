@@ -1250,8 +1250,9 @@ test.describe('manual comment loading', () => {
       getComputedStyle(element, '::before').borderInlineStartWidth
     ))).toBe('1px')
     // Offscreen threads are not laid out (content-visibility), so measure it where it is seen.
+    // Until the next frame after it scrolls into view, it keeps its estimated size.
     await comment.scrollIntoViewIfNeeded()
-    expect(await comment.evaluate((element) => {
+    await expect.poll(() => comment.evaluate((element) => {
       const toggle = element.querySelector('.commentReplyRootToggle')
       const stemStyle = getComputedStyle(element, '::before')
       const connectorStyle = getComputedStyle(toggle, '::before')
