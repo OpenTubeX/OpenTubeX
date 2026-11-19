@@ -35,6 +35,7 @@ public class MainActivity extends BridgeActivity {
     private int lastOrientation;
     private WebViewRotationFrame rotationFrame;
     private ImageView fullscreenCover;
+    private int fullscreenCoverRequest;
     private boolean transientSystemBars;
     private StatusBarSwipeFilter statusBarSwipeFilter;
     private final InputManager.InputDeviceListener inputDeviceListener =
@@ -311,6 +312,8 @@ public class MainActivity extends BridgeActivity {
     // with its current pixels until the fullscreen layout is ready to draw.
     void coverFullscreenEntry(Runnable done) {
         removeFullscreenCover(fullscreenCover);
+        // A newer request replaces a copy that is still pending.
+        int request = ++fullscreenCoverRequest;
         WebView webView = getBridge().getWebView();
         if (isInPictureInPictureMode()) {
             done.run();
@@ -318,7 +321,7 @@ public class MainActivity extends BridgeActivity {
         }
         WebViewScreenshot.copyVisible(this, webView, bitmap -> {
             ViewGroup content = findViewById(android.R.id.content);
-            if (webView.isAttachedToWindow() && content != null) {
+            if (request == fullscreenCoverRequest && webView.isAttachedToWindow() && content != null) {
                 ImageView cover = new ImageView(this);
                 cover.setImageBitmap(bitmap);
                 cover.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
