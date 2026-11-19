@@ -158,6 +158,7 @@
       :label="t('Settings.General Settings.Navigation.Show Active Subscriptions')"
       :compact="true"
       :default-value="!hideActiveSubscriptions"
+      setting-key="hideActiveSubscriptions"
       @change="store.dispatch('updateHideActiveSubscriptions', !$event)"
     />
   </div>

@@ -309,6 +309,9 @@
         :title="t('Settings.General Settings.Confirm Before')"
         :labels="confirmationLabels"
         :values="confirmationValues"
+        :sync-setting-keys="confirmationSettingKeys"
+        :is-changed="confirmationsChanged"
+        @reset="resetConfirmations"
       />
     </FtFlexBox>
   </FtSettingsSection>
@@ -326,6 +329,7 @@ import FtCheckboxList from '../../FtCheckboxList/FtCheckboxList.vue'
 import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
 
 import store from '../../../store/index'
+import { DEFAULT_SETTINGS, defaultUpdaterId } from '../../../store/modules/settings'
 import { localeTranslationPercentages } from '../../../i18n/index'
 
 import allLocales from '../../../../../static/locales/activeLocales.json'
@@ -404,60 +408,61 @@ const CONFIRMATION_OPTIONS = [
     value: 'closeApp',
     visible: USING_ELECTRON || IS_CAPACITOR,
     label: () => t('Settings.General Settings.Confirmation Options.Closing App'),
-    enabled: () => store.getters.getConfirmCloseApp,
-    action: 'updateConfirmCloseApp'
+    settingKey: 'confirmCloseApp'
   },
   {
     value: 'closeWindow',
     visible: USING_ELECTRON,
     label: () => t('Settings.General Settings.Confirmation Options.Closing Window'),
-    enabled: () => store.getters.getConfirmCloseWindowWithMultipleTabs,
-    action: 'updateConfirmCloseWindowWithMultipleTabs'
+    settingKey: 'confirmCloseWindowWithMultipleTabs'
   },
   {
     value: 'closeTabs',
     visible: USING_ELECTRON,
     label: () => t('Settings.General Settings.Confirmation Options.Closing Tabs'),
-    enabled: () => store.getters.getConfirmCloseMultipleTabs,
-    action: 'updateConfirmCloseMultipleTabs'
+    settingKey: 'confirmCloseMultipleTabs'
   },
   {
     value: 'loadTabs',
     visible: USING_ELECTRON,
     label: () => t('Settings.General Settings.Confirmation Options.Loading Tabs'),
-    enabled: () => store.getters.getConfirmLoadMultipleTabs,
-    action: 'updateConfirmLoadMultipleTabs'
+    settingKey: 'confirmLoadMultipleTabs'
   },
   {
     value: 'unloadTabs',
     visible: USING_ELECTRON,
     label: () => t('Settings.General Settings.Confirmation Options.Unloading Tabs'),
-    enabled: () => store.getters.getConfirmUnloadMultipleTabs,
-    action: 'updateConfirmUnloadMultipleTabs'
+    settingKey: 'confirmUnloadMultipleTabs'
   },
   {
     value: 'refreshAllFeeds',
     visible: true,
     label: () => t('Settings.General Settings.Confirmation Options.Refreshing All Feeds'),
-    enabled: () => store.getters.getConfirmRefreshAllFeeds,
-    action: 'updateConfirmRefreshAllFeeds'
+    settingKey: 'confirmRefreshAllFeeds'
   }
 ]
 const VISIBLE_CONFIRMATION_OPTIONS = CONFIRMATION_OPTIONS.filter(option => option.visible)
 const confirmationValues = VISIBLE_CONFIRMATION_OPTIONS.map(option => option.value)
+const confirmationSettingKeys = VISIBLE_CONFIRMATION_OPTIONS.map(option => option.settingKey)
 const confirmationLabels = computed(() => VISIBLE_CONFIRMATION_OPTIONS.map(option => option.label()))
 const enabledConfirmations = computed({
-  get: () => VISIBLE_CONFIRMATION_OPTIONS.filter(option => option.enabled()).map(option => option.value),
+  get: () => VISIBLE_CONFIRMATION_OPTIONS.filter(option => store.state.settings[option.settingKey]).map(option => option.value),
   set: values => {
     const enabled = new Set(values)
     for (const option of VISIBLE_CONFIRMATION_OPTIONS) {
       const next = enabled.has(option.value)
-      if (option.enabled() !== next) {
-        store.dispatch(option.action, next)
+      if (store.state.settings[option.settingKey] !== next) {
+        store.dispatch(defaultUpdaterId(option.settingKey), next)
       }
     }
   }
 })
+const confirmationsChanged = computed(() => confirmationSettingKeys.some(key => store.state.settings[key] !== DEFAULT_SETTINGS[key]))
+function resetConfirmations() {
+  for (const key of confirmationSettingKeys) {
+    if (store.state.settings[key] !== DEFAULT_SETTINGS[key]) store.dispatch('resetSettingToDefault', key)
+  }
+}
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const backendFallback = computed(() => store.getters.getBackendFallback)

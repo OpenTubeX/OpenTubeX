@@ -115,6 +115,7 @@
       />
       <FtSyncedSettingIndicator
         :setting-key="settingKey"
+        :setting-keys="syncSettingKeys"
         :is-changed="isChanged"
         :disabled="disabled"
         @reset="emit('reset')"
@@ -392,6 +393,11 @@ const props = defineProps({
   settingKey: {
     type: String,
     default: ''
+  },
+  // Synced setting keys for a select that edits several settings
+  syncSettingKeys: {
+    type: Array,
+    default: () => []
   },
   isChanged: {
     type: Boolean,

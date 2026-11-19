@@ -5,7 +5,10 @@
     :aria-label="label"
   >
     <div class="accentColorHeader">
-      <span>{{ label }}</span>
+      <span>
+        {{ label }}
+        <FtSyncedSettingIndicator :setting-key="settingKey" />
+      </span>
       <code :dir="systemSelected ? null : 'ltr'">{{ systemSelected ? systemLabel : modelValue }}</code>
     </div>
     <div class="accentColorSwatches">
@@ -87,6 +90,7 @@ import { useI18n } from 'vue-i18n'
 import { computed, onBeforeUnmount, ref } from 'vue'
 import FtColorPicker from '../../FtColorPicker/FtColorPicker.vue'
 import FtIcon from '../../FtIcon/FtIcon.vue'
+import FtSyncedSettingIndicator from '../../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
 import { DEFAULT_MATERIAL_SEED_COLOR, MATERIAL_SEED_PRESETS, MATERIAL_SYSTEM_SEED, materialColorScheme, materialSeedPalette } from '../../../../materialTheme.js'
 import { DEFAULT_SIGNAL_ACCENT_COLOR, SIGNAL_ACCENT_PRESETS } from '../../../../signalTheme.js'
 import { androidDynamicColors, desktopSystemAccentColor, getMaterialPalette, getSystemAccentColor } from '../../../helpers/dynamicColors.js'

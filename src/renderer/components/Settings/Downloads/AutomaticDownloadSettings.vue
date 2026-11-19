@@ -1,15 +1,21 @@
 <template>
-  <FtButton
-    :label="t('Settings.Download Settings.Manage Automatic Downloads', { channelCount: enabledRuleCount })"
-    :icon="['fas', 'download']"
-    @click="showManager = true"
-  />
+  <div class="manageButton">
+    <FtButton
+      :label="t('Settings.Download Settings.Manage Automatic Downloads', { channelCount: enabledRuleCount })"
+      :icon="['fas', 'download']"
+      @click="showManager = true"
+    />
+    <FtSyncedSettingIndicator :setting-keys="['ytDlpAutomaticDownloadRules']" />
+  </div>
   <FtSettingsSubpage
     :open="showManager"
     :title="t('Settings.Download Settings.Automatic Downloads')"
     :icon="['fas', 'download']"
     @close="showManager = false"
   >
+    <template #breadcrumb-action>
+      <FtSyncedSettingIndicator :setting-keys="['ytDlpAutomaticDownloadRules']" />
+    </template>
     <div class="automaticDownloadsHeader">
       <div class="automaticDownloadsDescription">
         <p>{{ t('Settings.Download Settings.Automatic Downloads Description') }}</p>
@@ -248,6 +254,7 @@ import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
 import FtInput from '../../FtInput/FtInput.vue'
 import FtSelect from '../../FtSelect/FtSelect.vue'
 import FtSettingsSubpage from '../../FtSettingsSubpage/FtSettingsSubpage.vue'
+import FtSyncedSettingIndicator from '../../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../../../store/index'
@@ -398,6 +405,23 @@ function displayNumber(value) {
 </script>
 
 <style scoped>
+.manageButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  max-inline-size: 100%;
+}
+
+.manageButton :deep(.btn) {
+  min-inline-size: 0;
+  white-space: normal;
+}
+
+.manageButton :deep(.syncedSettingIndicator) {
+  font-size: 0.8em;
+  margin-inline-start: 0;
+}
+
 .automaticDownloadsHeader {
   --input-bottom-spacing: 0;
 

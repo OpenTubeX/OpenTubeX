@@ -65,6 +65,7 @@
         :show-action-button="false"
         :show-label="true"
         :value="ytDlpDownloadBandwidthLimit"
+        setting-key="ytDlpDownloadBandwidthLimit"
         :tooltip="t('Tooltips.Download Settings.Bandwidth Limit')"
         @input="updateYtDlpDownloadBandwidthLimit"
       />

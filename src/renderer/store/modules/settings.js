@@ -427,7 +427,8 @@ export function isSettingSyncable(settingKey) {
   return settingKey === SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY ||
     PLAYLIST_PREFERENCES_SYNC_KEYS.includes(settingKey) ||
     (Object.prototype.hasOwnProperty.call(state, settingKey) &&
-      !NON_SYNCABLE_SETTINGS.has(settingKey))
+      !NON_SYNCABLE_SETTINGS.has(settingKey) &&
+      isSettingSyncableOnPlatform(settingKey))
 }
 
 export function isSettingSyncEnabled(settings, settingKey) {
@@ -442,8 +443,7 @@ export function getSyncableSettingKeys(settings) {
     isSettingSyncEnabled(settings, settingKey) &&
     !(settingKey === 'defaultProfile' && !settings.syncServerSyncProfiles) &&
     // Pins name playlist IDs that only exist on peers when playlists sync too.
-    !((settingKey === 'pinnedPlaylistIds' || settingKey === 'userPlaylistsPinnedIds') && !settings.syncServerSyncPlaylists) &&
-    isSettingSyncableOnPlatform(settingKey)
+    !((settingKey === 'pinnedPlaylistIds' || settingKey === 'userPlaylistsPinnedIds') && !settings.syncServerSyncPlaylists)
   ))
 }
 
