@@ -326,7 +326,7 @@
 
   /* Matches the space below each section title, so titles sit as far from
      the card above as from their own card. */
-  gap: 12px;
+  gap: 20px;
 }
 
 .settingsMenu {
