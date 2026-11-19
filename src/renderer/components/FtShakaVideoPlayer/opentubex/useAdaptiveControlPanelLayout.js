@@ -313,6 +313,14 @@ export function useAdaptiveControlPanelLayout({
       } else if (entries.some(entry => entry.target === controlPanel)) {
         scheduleControlPanelLayout(controlPanel, true)
       }
+      // A control that resized on its own, such as the volume slider closing
+      // after hover, changes what fits, so the panel's next resize measures
+      // again instead of keeping its compact modes. The preset strip only
+      // shrinks along with the panel.
+      if (entries.some(({ target }) => target !== controlPanel && target !== timeDisplayGroup &&
+        !target.classList.contains('ft-quick-playback-rate-bar'))) {
+        measuredControlPanelWidth = 0
+      }
       // Button visibility and volume/preset sizes can move the right controls
       // without resizing the panel. Keep their glass aligned with the buttons.
       updateRightControlGlass(controlPanel)
