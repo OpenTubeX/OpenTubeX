@@ -4111,8 +4111,9 @@ export default defineComponent({
         }
 
         if (this.isPostLiveDvr) {
-          // Resuming from the history needs the length before the player loads
-          this.videoLengthSeconds = result.basic_info.duration
+          // Resuming from the history needs the length before the player loads,
+          // which then replaces it with the duration it can play
+          if (!this.videoPlayerLoaded) this.videoLengthSeconds = result.basic_info.duration
         } else if ((!this.isUpcoming && !this.isLive) || (this.isUpcoming && this.playabilityStatus === 'OK')) {
           this.videoLengthSeconds = result.basic_info.duration
           if (result.streaming_data) {
@@ -4604,8 +4605,9 @@ export default defineComponent({
             throw new Error(this.t('Yattee Server.Errors.HTTPS required'))
           }
 
-          if (this.isPostLiveDvr) {
-            // Resuming from the history needs the length before the player loads
+          if (this.isPostLiveDvr && !this.videoPlayerLoaded) {
+            // Resuming from the history needs the length before the player loads,
+            // which then replaces it with the duration it can play
             this.videoLengthSeconds = result.lengthSeconds
           }
 
