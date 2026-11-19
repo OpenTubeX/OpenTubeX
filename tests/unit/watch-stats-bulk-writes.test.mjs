@@ -67,3 +67,10 @@ for (const [name, createDatastore] of Object.entries(backends)) {
     assert.equal((await WatchStats.getHistoricalAdjustment()).defaultSpeed, 2)
   })
 }
+
+test('resetting watch statistics removes every day', async t => {
+  const { db, WatchStats } = fixture(t, backends.SQLite)
+  await db.watchStats.insertAsync({ date: '2026-01-01', seconds: 10 })
+  await WatchStats.deleteAll()
+  assert.deepEqual(await WatchStats.find(), [])
+})

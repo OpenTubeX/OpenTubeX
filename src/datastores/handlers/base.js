@@ -766,8 +766,6 @@ class WatchStats {
   }
 
   static deleteAll() {
-    this.clearedAt = Date.now()
-    this.removedAt.clear()
     return this.runWrite(() => this._deleteAll())
   }
 
@@ -1444,6 +1442,7 @@ class SearchHistory {
 
   static deleteAll() {
     this.clearedAt = Date.now()
+    this.removedAt.clear()
     return this.runWrite(() => db.searchHistory.removeAsync({}, { multi: true }))
   }
 }
