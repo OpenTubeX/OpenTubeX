@@ -89,6 +89,10 @@ test('a separate profile’s history, playlists, searches and watch time never r
   // Clearing a separate profile's history keeps the shared one.
   await separate.history.deleteAll()
   assert.deepEqual((await shared.history.find()).map(record => record.videoId), ['sharedVideo'])
+
+  // Removing a separate profile's search keeps saving the same search made earlier in the shared profile.
+  await separate.searchHistory.delete('query')
+  assert.notEqual(await shared.searchHistory.upsert({ _id: 'query', query: 'query', lastUpdatedAt: 1 }), null)
 })
 
 test('deleting a separate profile deletes its data, and deleting another profile keeps it', async () => {
