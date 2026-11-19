@@ -1291,7 +1291,8 @@ const canFilterOwnComments = computed(() => isSignedInToYouTube(store.getters))
 const accountThumbnail = computed(() => getSelectedYouTubeProfile(store.getters.getYouTubeAccount)?.thumbnail ?? '')
 
 // The signed-in account's channels: the one in use by its ID, the others by
-// their handles, as only the ID of the one in use is known.
+// their handles, as only the ID of the one in use is known. Comments posted
+// here match by the channel they were posted from.
 const ownAccountChannels = computed(() => {
   const account = store.getters.getYouTubeAccount
   if (!canFilterOwnComments.value) return null
@@ -1299,8 +1300,8 @@ const ownAccountChannels = computed(() => {
   const profiles = account.profiles ?? []
   return {
     channelId: account.channelId ?? null,
-    handles: new Set(profiles.filter(profile => profile.handle).map(profile => normalizeCommentAuthor(profile.handle))),
-    postedByKeys: new Set(profiles.map(profile => getYouTubeChannelKey({ ...account, pageId: profile.pageId })))
+    handles: new Set(profiles.filter(profile => profile.handle).map(profile => normalizeCommentHandle(profile.handle))),
+    postedByKeys: new Set([account, ...profiles.map(profile => ({ ...account, pageId: profile.pageId }))].map(getYouTubeChannelKey))
   }
 })
 
@@ -1310,7 +1311,8 @@ function isOwnAccountComment(comment) {
   if (channels === null) return false
 
   return (channels.channelId !== null && comment.authorId === channels.channelId) ||
-    channels.handles.has(normalizeCommentAuthor(comment.author)) ||
+    // A display name that reads like one of the handles belongs to someone else.
+    channels.handles.has(normalizeCommentHandle(comment.author)) ||
     channels.postedByKeys.has(youTubeComments.postedBy.get(comment.id))
 }
 
@@ -1610,12 +1612,16 @@ watch(commentPinStorageKey, (contentKey) => {
   clampCommentsScrollAfterRender()
 })
 
-function normalizeCommentAuthor(author) {
+/** Keeps the leading @, which tells handles apart from display names. */
+function normalizeCommentHandle(author) {
   return String(author)
     .replaceAll(/[\u200b-\u200f\u202a-\u202e\u2060-\u2069\ufeff]/g, '')
     .trim()
-    .replace(/^@/, '')
     .toLowerCase()
+}
+
+function normalizeCommentAuthor(author) {
+  return normalizeCommentHandle(author).replace(/^@/, '')
 }
 
 /**

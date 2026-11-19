@@ -2,7 +2,7 @@
 category: feature
 ---
 
-When you're signed in to YouTube, the comment filters can show only the loaded comments and replies written by your channels.
+When you're signed in to YouTube, the comment filters can show only the loaded comments and replies written by your channels, along with the comments your replies answer.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/dbffb51d-fab4-405b-948d-21f14224872e">
