@@ -5,7 +5,7 @@ import vm from 'node:vm'
 import { importWithStubs, sourceUrl } from '../helpers/module-stubs.mjs'
 
 const systemNotifications = { calls: [], all: [] }
-const [{ closeCapacitorSystemNotifications, getCommentLocalNotificationId, getTwitchLocalNotificationId }] = await importWithStubs([sourceUrl('src/renderer/helpers/capacitorSystemNotifications.js')], {
+const [{ closeCapacitorSystemNotifications, closeDeferredReminders, getCommentLocalNotificationId, getTwitchLocalNotificationId }] = await importWithStubs([sourceUrl('src/renderer/helpers/capacitorSystemNotifications.js')], {
   '@capacitor/local-notifications': {
     LocalNotifications: {
       getAll: async () => ({ notifications: systemNotifications.all }),
@@ -52,7 +52,8 @@ test('reminders read or removed while the app was closed close once it opens', a
     setItem: (key, value) => storage.set(key, value),
     removeItem: key => storage.delete(key)
   }
-  const [hidden] = await importWithStubs([sourceUrl('src/renderer/helpers/capacitorSystemNotifications.js')], {
+  // A second copy, since modules are cached
+  const [hidden] = await importWithStubs([`${sourceUrl('src/renderer/helpers/capacitorSystemNotifications.js')}?hidden`], {
     '@capacitor/local-notifications': { LocalNotifications: {} },
     [sourceUrl('src/renderer/helpers/androidBackgroundSync.js')]: { isAndroidBackgroundRenderer: true, suppressAndroidNotifications: async () => {} },
     [sourceUrl('src/renderer/helpers/androidSubscriptionRefresh.js')]: { cancelAndroidUploadNotifications: async () => {} }
@@ -63,17 +64,7 @@ test('reminders read or removed while the app was closed close once it opens', a
   try {
     // The renderer syncing while the app is closed lacks the notification plugin.
     await hidden.closeCapacitorSystemNotifications([{ kind: 'live-reminder', path: '/watch/premiere00e', createdAt: Date.now() - 60_000 }])
-    const { closeDeferredReminders } = (await importWithStubs([sourceUrl('src/renderer/helpers/capacitorSystemNotifications.js')], {
-      '@capacitor/local-notifications': {
-        LocalNotifications: {
-          getAll: async () => ({ notifications: systemNotifications.all }),
-          cancel: async () => {},
-          removeDeliveredNotificationsById: async ({ ids }) => { systemNotifications.calls.push(['removeDelivered', ids]) },
-        }
-      },
-      [sourceUrl('src/renderer/helpers/androidBackgroundSync.js')]: { isAndroidBackgroundRenderer: false, suppressAndroidNotifications: async () => {} },
-      [sourceUrl('src/renderer/helpers/androidSubscriptionRefresh.js')]: { cancelAndroidUploadNotifications: async () => {} }
-    }))[0]
+    assert.deepEqual(systemNotifications.calls, [])
     await closeDeferredReminders()
     assert.deepEqual(systemNotifications.calls, [['removeDelivered', [12]]])
     await closeDeferredReminders()
