@@ -1,5 +1,6 @@
 import { test, expect, goTo, goToSettingsSection, sel, readDatastore } from '../../helpers/app.mjs'
 import { demoPlayerResponse } from '../../helpers/media.mjs'
+import { activeTab } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 // A closing filters prompt stays in the page while it fades out.
@@ -348,7 +349,7 @@ test.describe('search history suggestions', () => {
     }))
     const linkEntries = () => page.evaluate(() => window.$store.getters.getSearchHistoryEntries
       .filter(entry => entry.linkType != null)
-      .map(({ query, linkType, title, searchSettings }) => ({ query, linkType, title, filterType: searchSettings.type })))
+      .map(({ query, linkType, title }) => ({ query, linkType, title })))
     const input = page.locator(sel.searchInput)
 
     // Without search suggestions no preview loads, so the title is loaded after submitting.
@@ -356,14 +357,14 @@ test.describe('search history suggestions', () => {
     await input.press('Enter')
     await expect(page).toHaveURL(new RegExp(`#/watch/${videoId}`))
     await expect.poll(linkEntries).toEqual([
-      { query: `https://youtu.be/${videoId}`, linkType: 'video', title: 'Linked Video Title', filterType: 'all' },
+      { query: `https://youtu.be/${videoId}`, linkType: 'video', title: 'Linked Video Title' },
     ])
     await expect.poll(() => readDatastore(app.userDataDir, 'search-history')).toContain('"title":"Linked Video Title"')
 
     await page.locator(sel.backButton).click()
     await expect(page).not.toHaveURL(/#\/watch\//)
     await input.fill('linked vi')
-    const link = suggestions(page).getByRole('link', { name: 'Video: Linked Video Title', exact: true })
+    const link = suggestions(page).getByRole('link', { name: /Linked Video Title/ })
     await expect(link).toHaveText('Linked Video Title')
     await expect(suggestions(page)).toHaveCount(1)
     const searchType = () => page.evaluate(() => {
@@ -384,6 +385,7 @@ test.describe('search history suggestions', () => {
     let releaseTitle
     const titleHeld = new Promise(resolve => { releaseTitle = resolve })
     let heldRequests = 0
+    let answeredRequests = 0
     await page.route('**/youtubei/v1/player**', async route => {
       heldRequests++
       await titleHeld
@@ -391,6 +393,7 @@ test.describe('search history suggestions', () => {
         contentType: 'application/json',
         body: JSON.stringify({ ...player, videoDetails: { ...player.videoDetails, videoId: otherVideoId, title: 'Cleared Video Title' } }),
       })
+      answeredRequests++
     })
     await input.fill(`https://youtu.be/${otherVideoId}`)
     await input.press('Enter')
@@ -398,16 +401,21 @@ test.describe('search history suggestions', () => {
     expect(await page.evaluate(() => window.$store.dispatch('removeAllSearchHistoryEntries'))).toBe(true)
     releaseTitle()
     await expect(page).toHaveURL(new RegExp(`#/watch/${otherVideoId}`))
-    // This wait proves that nothing is saved.
-    await page.waitForTimeout(500)
+    await expect.poll(() => answeredRequests).toBe(heldRequests)
+    // Saves are written in order, so once a later search is saved, a dropped link save would have been too.
+    await input.fill('after clearing')
+    await input.press('Enter')
+    await expect.poll(() => readDatastore(app.userDataDir, 'search-history')).toContain('"query":"after clearing"')
     expect(await linkEntries()).toEqual([])
+    expect(await readDatastore(app.userDataDir, 'search-history')).not.toContain('Cleared Video Title')
 
     await page.evaluate(() => window.$store.dispatch('updateRememberSearchHistory', false))
     await input.fill(`https://www.youtube.com/watch?v=${videoId}`)
     await input.press('Enter')
     await expect(page).toHaveURL(new RegExp(`#/watch/${videoId}`))
-    // This wait proves that nothing is saved.
-    await page.waitForTimeout(500)
+    // The setting is checked before the page opens.
+    await expect(page.locator(`${activeTab} .videoTitle`)).toBeVisible()
+    await expect.poll(() => answeredRequests).toBe(heldRequests)
     expect(await linkEntries()).toEqual([])
   })
 })

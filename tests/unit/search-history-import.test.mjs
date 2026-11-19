@@ -2,8 +2,16 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
+import { createStore } from 'vuex'
 import { createDesktopDatastore } from '../../src/datastores/sqliteNode.js'
-import { mergeSearchHistoryEntries, resolveSearchHistoryEntry, sortSearchHistoryByLastUpdatedAt } from '../../src/search-history.js'
+import {
+  getSearchHistoryEntryQuery,
+  mergeSearchHistoryEntries,
+  normalizeSearchHistoryEntry,
+  resolveSearchHistoryEntry,
+  searchHistoryEntryMatches,
+  sortSearchHistoryByLastUpdatedAt,
+} from '../../src/search-history.js'
 import { createUnifiedBackup, readUnifiedBackup } from '../../src/renderer/helpers/unifiedBackup.js'
 
 const source = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
@@ -74,4 +82,32 @@ test('a link keeps its title when it is saved again and when a backup restores i
     { query: 'daily news', linkType: undefined, title: undefined },
     { query: link.query, linkType: 'video', title: 'New Title' },
   ])
+})
+
+const storeSource = (await readFile(new URL('../../src/renderer/store/modules/search-history.js', import.meta.url), 'utf8'))
+  .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
+  .replace('export default ', 'return ')
+
+test('a delayed link save stays in date order, and clearing stops pending saves before the delete finishes', async () => {
+  let finishDelete
+  const DBSearchHistoryHandlers = {
+    upsert: async entry => entry,
+    deleteAll: () => new Promise(resolve => { finishDelete = resolve }),
+  }
+  const dependencies = {
+    MIXED_SEARCH_HISTORY_ENTRIES_DISPLAY_LIMIT: 10, DBSearchHistoryHandlers, getRetentionCutoff: () => null, getSearchHistoryEntryQuery, mergeSearchHistoryEntries, normalizeSearchHistoryEntry, resolveSearchHistoryEntry, searchHistoryEntryMatches, sortSearchHistoryByLastUpdatedAt,
+  }
+  const searchHistory = vm.compileFunction(storeSource, Object.keys(dependencies))(...Object.values(dependencies))
+  const store = createStore({ modules: { searchHistory } })
+
+  await store.dispatch('updateSearchHistoryEntry', { query: 'newer search', lastUpdatedAt: 2 })
+  await store.dispatch('updateSearchHistoryEntry', { query: 'https://youtu.be/older', lastUpdatedAt: 1, linkType: 'video', title: 'Older' })
+  assert.deepEqual(store.getters.getSearchHistoryEntries.map(entry => entry.query), ['newer search', 'https://youtu.be/older'])
+
+  const clearCount = store.getters.getSearchHistoryClearCount
+  const cleared = store.dispatch('removeAllSearchHistoryEntries')
+  assert.notEqual(store.getters.getSearchHistoryClearCount, clearCount)
+  finishDelete()
+  assert.equal(await cleared, true)
+  assert.deepEqual(store.getters.getSearchHistoryEntries, [])
 })

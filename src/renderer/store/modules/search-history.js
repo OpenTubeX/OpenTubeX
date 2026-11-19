@@ -108,6 +108,8 @@ const actions = {
   },
 
   async removeAllSearchHistoryEntries({ commit }) {
+    // A save queued behind the delete would bring the cleared entry back, so pending saves stop here.
+    commit('startSearchHistoryClear')
     try {
       await DBSearchHistoryHandlers.deleteAll()
       commit('clearSearchHistoryEntries')
@@ -125,6 +127,10 @@ const mutations = {
     sortSearchHistoryByLastUpdatedAt(state.searchHistoryEntries)
   },
 
+  startSearchHistoryClear(state) {
+    state.searchHistoryClearCount++
+  },
+
   clearSearchHistoryEntries(state) {
     state.searchHistoryEntries = []
     state.searchHistoryClearCount++
@@ -140,7 +146,9 @@ const mutations = {
       return p._id !== updatedSearchHistoryEntry._id
     })
 
-    state.searchHistoryEntries.unshift(updatedSearchHistoryEntry)
+    // A link save that waited for its title can finish after newer searches.
+    const index = state.searchHistoryEntries.findIndex(entry => entry.lastUpdatedAt <= updatedSearchHistoryEntry.lastUpdatedAt)
+    state.searchHistoryEntries.splice(index === -1 ? state.searchHistoryEntries.length : index, 0, updatedSearchHistoryEntry)
   },
 
   removeSearchHistoryEntryFromList(state, _id) {
