@@ -16,7 +16,11 @@ const pending = reactive(new Set())
 
 /**
  * The bell button on comments, which watches them for replies.
- * @param {{ videoId: import('vue').ComputedRef<string>, videoTitle: import('vue').ComputedRef<string>, watchable: import('vue').ComputedRef<boolean> }} [comments]
+ * @param {{
+ *   target: import('vue').ComputedRef<import('../../helpers/api/youtube-account-parsers').YouTubeCommentTarget | null>,
+ *   videoTitle: import('vue').ComputedRef<string>,
+ *   watchable: import('vue').ComputedRef<boolean>
+ * }} [comments]
  *   the comment section's comment state, injected unless the comment section itself calls this
  */
 export function useCommentWatching(comments = inject(youTubeCommentsKey)) {
@@ -26,7 +30,7 @@ export function useCommentWatching(comments = inject(youTubeCommentsKey)) {
 
   /** @param {{ id: string, authorId: string }} comment */
   function isCommentWatched(comment) {
-    return findWatchedComment(comments.videoId.value, comment) !== null
+    return comments.target.value !== null && findWatchedComment(comments.target.value, comment) !== null
   }
 
   /** @param {{ id: string, authorId: string }} comment */
@@ -36,14 +40,15 @@ export function useCommentWatching(comments = inject(youTubeCommentsKey)) {
 
   /** @param {{ id: string, authorId: string, author: string, text: string }} comment */
   async function toggleCommentWatch(comment) {
-    if (pending.has(comment.id)) return
+    const target = comments.target.value
+    if (pending.has(comment.id) || target === null) return
     pending.add(comment.id)
-    const watched = findWatchedComment(comments.videoId.value, comment)
+    const watched = findWatchedComment(target, comment)
     try {
       if (watched) {
         // Saved on this device, so this fails only when storage does.
         await unwatchComment(watched)
-      } else if (!await watchComment(comments.videoId.value, comments.videoTitle.value, comment)) {
+      } else if (!await watchComment(target, comments.videoTitle.value, comment)) {
         throw new Error('The comment is gone')
       }
     } catch (error) {

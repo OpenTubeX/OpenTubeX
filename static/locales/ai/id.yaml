@@ -408,7 +408,7 @@ Settings:
     Revoke Failed: "Anda telah keluar dari YouTube, tetapi Google tidak mengonfirmasi bahwa sesi masuk telah berakhir. Anda dapat menghapusnya di koneksi pihak ketiga pada Akun Google Anda."
     Signed out by YouTube: "YouTube mengakhiri sesi masuk. Masuk lagi di Pengaturan untuk terus menggunakan akun Anda."
     Add to YouTube Watch History: "Tambahkan video yang ditonton ke riwayat YouTube"
-    Rate Videos: "Menyukai dan tidak menyukai video"
+    Rate Videos: "Menyukai dan tidak menyukai video dan postingan"
     Sync Subscriptions: "Selaraskan langganan dengan YouTube"
     Sync Playlists: "Selaraskan daftar putar dengan YouTube"
     Sync Now: "Selaraskan sekarang"
@@ -1756,6 +1756,8 @@ Channel:
     Original post unavailable: "Postingan asli tidak tersedia"
     Members-only video hidden by OpenTubeX: "Video khusus anggota disembunyikan oleh OpenTubeX"
     Video hidden by OpenTubeX because of its title: "Video disembunyikan oleh OpenTubeX karena judulnya berisi teks yang disembunyikan"
+    Correct: "Benar"
+    Incorrect: "Salah"
   Shows:
     Shows: Acara
     This channel does not currently have any shows: Saluran ini saat ini tidak memiliki acara apa pun
@@ -2353,7 +2355,7 @@ Tooltips:
   YouTube Account Settings:
     Watch Posted Comments: "Komentar yang Anda posting di sini otomatis dipantau untuk balasan, selama notifikasi balasan diaktifkan di pengaturan komentar."
     Add to YouTube Watch History: "Video yang Anda putar ditambahkan ke riwayat tontonan YouTube Anda, sehingga rekomendasi YouTube belajar darinya. Tidak ada yang ditambahkan selama riwayat dijeda di YouTube."
-    Rate Videos: "Menampilkan tombol suka dan tidak suka pada video. Untuk menampilkan rating Anda, setiap video yang Anda buka dicari di YouTube dengan akun Anda, sehingga YouTube mengetahui video mana yang Anda buka, meskipun video tersebut tidak ditambahkan ke histori tontonan Anda."
+    Rate Videos: "Menampilkan tombol suka dan tidak suka pada video dan postingan. Untuk menampilkan rating Anda, setiap video yang Anda buka dicari di YouTube dengan akun Anda, sehingga YouTube mengetahui video mana yang Anda buka, meskipun video tersebut tidak ditambahkan ke histori tontonan Anda. Rating postingan tidak dicari, jadi hanya rating yang Anda berikan di sini yang ditampilkan."
     Sync Subscriptions: "Kanal yang Anda langgani di YouTube ditambahkan ke “Semua Kanal”, dan kanal yang langganannya Anda hentikan di sana dihapus dari setiap profil. Berlangganan atau berhenti berlangganan di “Semua Kanal” di sini juga melakukan hal yang sama di YouTube."
     Sync Playlists: "Daftar putar YouTube Anda, “Tonton Nanti”, dan “Video yang disukai” muncul di “Daftar Putar Anda”, dan perubahan yang Anda buat padanya di sini juga diterapkan di YouTube. Semuanya tidak diselaraskan ke perangkat Anda yang lain dan tidak disertakan saat Anda mengekspor semua daftar putar atau mencadangkan data Anda. Menonaktifkan ini akan menghapusnya dari perangkat ini, tetapi tidak dari YouTube."
   General Settings:
@@ -2895,6 +2897,7 @@ YouTube Account:
   Like: "Suka"
   Dislike: "Tidak suka"
   Rating Failed: "Tidak dapat memberi penilaian di YouTube: {error}"
+  Vote Failed: "Tidak dapat memberikan suara di YouTube: {error}"
   Subscribe Failed: "Tidak dapat berlangganan di YouTube: {error}"
   Unsubscribe Failed: "Tidak dapat berhenti berlangganan di YouTube: {error}"
   Add a comment: "Tambahkan komentar"

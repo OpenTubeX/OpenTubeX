@@ -89,7 +89,7 @@ import { createNotificationHistory, createNotifier, createSystemNotificationLink
 import { loadNotificationImage, setNotificationImagesAllowed } from './notificationImage'
 import { setAutomaticDownloadNotifier } from './ytDlpAutomaticDownloads'
 import { getDownloadTarget, getLiveReminderTarget, parseRecordedNotification } from '../notificationHistory'
-import { getCommentNotificationTarget } from '../commentReplyTracking'
+import { getCommentNotificationTarget, getCommentWebUrl } from '../commentReplyTracking'
 import { supportsNativeNotifications } from './nativeNotifications'
 import { getTrayMenuIcon } from './trayMenuIcons'
 import { createScheduledBackups } from './scheduledBackups'
@@ -775,7 +775,7 @@ function runApp() {
       title: notification.title.slice(0, 200),
       body: notification.body.slice(0, 500),
       thumbnail: typeof notification.thumbnail === 'string' ? notification.thumbnail : undefined,
-      url: `https://www.youtube.com/watch?v=${notification.videoId}&lc=${notification.commentId}`,
+      url: getCommentWebUrl(notification.videoId, notification.commentId),
       target
     })
   })

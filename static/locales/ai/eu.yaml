@@ -407,7 +407,7 @@ Settings:
     Revoke Failed: "YouTube-ko saioa amaitu da, baina Google-k ez du berretsi saioa amaitu denik. Zure Google kontuko hirugarrenen konexioetan ken dezakezu."
     Signed out by YouTube: "YouTube-k saioa amaitu du. Hasi saioa berriro Ezarpenetan zure kontua erabiltzen jarraitzeko."
     Add to YouTube Watch History: "Gehitu ikusitako bideoak YouTube-ko historikora"
-    Rate Videos: "Bideoak gustuko edo ez gustuko markatu"
+    Rate Videos: "Bideoak eta argitalpenak gustuko edo ez gustuko markatu"
     Sync Subscriptions: "Sinkronizatu harpidetzak YouTube-rekin"
     Sync Playlists: "Sinkronizatu erreprodukzio-zerrendak YouTube-rekin"
     Sync Now: "Sinkronizatu orain"
@@ -1744,6 +1744,8 @@ Channel:
     Original post unavailable: "Jatorrizko argitalpena ez dago erabilgarri"
     Members-only video hidden by OpenTubeX: "OpenTubeX-ek kideentzako soilik den bideoa ezkutatu du"
     Video hidden by OpenTubeX because of its title: "OpenTubeX-ek bideoa ezkutatu du, izenburuak testu ezkutatua duelako"
+    Correct: "Zuzena"
+    Incorrect: "Okerra"
 Video:
   Play in Background: "Erreproduzitu atzeko planoan"
   Info panel source: 'Iturria: {source}'
@@ -2337,7 +2339,7 @@ Tooltips:
   YouTube Account Settings:
     Watch Posted Comments: "Hemen argitaratzen dituzun iruzkinen erantzunak automatikoki jarraitzen dira, iruzkinen ezarpenetan erantzunen jakinarazpenak aktibatuta dauden bitartean."
     Add to YouTube Watch History: "Erreproduzitzen dituzun bideoak zure YouTube-ko ikustaldi-historikora gehitzen dira, YouTube-ren gomendioek haietatik ikas dezaten. Historikoa YouTube-n pausatuta dagoen bitartean, ez da ezer gehitzen."
-    Rate Videos: "Bideoetan gustuko dut eta ez dut gustuko botoiak erakusten ditu. Zure balorazioa erakusteko, irekitzen duzun bideo bakoitza zure kontuarekin bilatzen da YouTuben, beraz YouTubek badaki zein bideo irekitzen dituzun, ikusitakoen historian gehitzen ez badira ere."
+    Rate Videos: "Bideoetan eta argitalpenetan gustuko dut eta ez dut gustuko botoiak erakusten ditu. Zure balorazioa erakusteko, irekitzen duzun bideo bakoitza zure kontuarekin bilatzen da YouTuben, beraz YouTubek badaki zein bideo irekitzen dituzun, ikusitakoen historian gehitzen ez badira ere. Argitalpenen balorazioak ez dira bilatzen, beraz hemen ematen dituzunak bakarrik erakusten dira."
     Sync Subscriptions: "YouTube-n harpidetzen zaren kanalak «Kanal guztiak» profilera gehitzen dira, eta han harpidetza kentzen diezun kanalak profil guztietatik kentzen dira. Hemen «Kanal guztiak» profilean harpidetzeak edo harpidetza kentzeak gauza bera egiten du YouTube-n."
     Sync Playlists: "Zure YouTube-ko erreprodukzio-zerrendak, «Ikusi geroago» eta «Gustuko bideoak» «Zure erreprodukzio-zerrendak» atalean agertzen dira, eta hemen haietan egiten dituzun aldaketak YouTube-n ere egiten dira. Ez dira zure beste gailuekin sinkronizatzen, eta ez dira sartzen erreprodukzio-zerrenda guztiak esportatzen dituzunean edo zure datuen babeskopia egiten duzunean. Hau desaktibatzean gailu honetatik kentzen dira, baina ez YouTube-tik."
   General Settings:
@@ -2879,6 +2881,7 @@ YouTube Account:
   Like: "Atsegin dut"
   Dislike: "Ez dut atsegin"
   Rating Failed: "Ezin izan da YouTube-n balorazioa eman: {error}"
+  Vote Failed: "Ezin izan da YouTube-n bozkatu: {error}"
   Subscribe Failed: "Ezin izan da YouTube-n harpidetu: {error}"
   Unsubscribe Failed: "Ezin izan da YouTube-ko harpidetza kendu: {error}"
   Add a comment: "Gehitu iruzkin bat"

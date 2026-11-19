@@ -409,7 +409,7 @@ Settings:
     Sync Subscriptions: "Đồng bộ kênh đăng ký với YouTube"
     Sync Playlists: "Đồng bộ danh sách phát với YouTube"
     Add to YouTube Watch History: "Thêm video đã xem vào lịch sử YouTube"
-    Rate Videos: "Thích và không thích video"
+    Rate Videos: "Thích và không thích video và bài đăng"
     Sync Now: "Đồng bộ ngay"
     Synced: "Đã đồng bộ với YouTube"
     Sync Failed: "Không thể đồng bộ với YouTube: {error}"
@@ -1749,6 +1749,8 @@ Channel:
     Original post unavailable: "Bài đăng gốc không khả dụng"
     Members-only video hidden by OpenTubeX: "Video chỉ dành cho hội viên đã bị OpenTubeX ẩn"
     Video hidden by OpenTubeX because of its title: "Video đã bị OpenTubeX ẩn vì tiêu đề chứa văn bản bị ẩn"
+    Correct: "Đúng"
+    Incorrect: "Sai"
   Shows:
     Shows: Chương trình
     This channel does not currently have any shows: Kênh này hiện không có chương trình nào
@@ -2345,7 +2347,7 @@ Tooltips:
     Sync Subscriptions: "Các kênh bạn đăng ký trên YouTube sẽ được thêm vào Tất cả kênh, còn các kênh bạn hủy đăng ký ở đó sẽ bị xóa khỏi mọi hồ sơ. Đăng ký hoặc hủy đăng ký trong Tất cả kênh tại đây cũng sẽ thực hiện tương tự trên YouTube."
     Sync Playlists: "Danh sách phát YouTube, Xem sau và Video đã thích của bạn sẽ xuất hiện trong Danh sách phát của bạn, và những thay đổi bạn thực hiện với chúng tại đây cũng được áp dụng trên YouTube. Chúng không được đồng bộ sang các thiết bị khác của bạn và không được bao gồm khi bạn xuất tất cả danh sách phát hoặc sao lưu dữ liệu. Tắt tùy chọn này sẽ xóa chúng khỏi thiết bị này nhưng không xóa khỏi YouTube."
     Add to YouTube Watch History: "Video bạn phát sẽ được thêm vào lịch sử xem YouTube của bạn để đề xuất của YouTube học hỏi từ đó. Không có gì được thêm khi lịch sử đang bị tạm dừng trên YouTube."
-    Rate Videos: "Hiển thị nút thích và không thích trên video. Để hiển thị đánh giá của bạn, mỗi video bạn mở sẽ được tra cứu trên YouTube bằng tài khoản của bạn, vì vậy YouTube biết bạn mở những video nào, kể cả khi chúng không được thêm vào nhật ký xem."
+    Rate Videos: "Hiển thị nút thích và không thích trên video và bài đăng. Để hiển thị đánh giá của bạn, mỗi video bạn mở sẽ được tra cứu trên YouTube bằng tài khoản của bạn, vì vậy YouTube biết bạn mở những video nào, kể cả khi chúng không được thêm vào nhật ký xem. Đánh giá bài đăng không được tra cứu, nên chỉ những đánh giá bạn thực hiện ở đây mới hiển thị."
   General Settings:
     Invidious Instance Credentials: 'Chỉ cần khi máy chủ yêu cầu tên người dùng và mật khẩu. Chúng chỉ được lưu trên thiết bị này và chỉ được gửi đến máy chủ này.'
     Reply Notifications: "OpenTubeX kiểm tra phản hồi mới cho các bình luận bạn theo dõi. Ứng dụng cũng thông báo khi nhà sáng tạo thả tim một bình luận của bạn. Một bình luận vẫn được theo dõi cho đến khi qua 30 ngày mà không có phản hồi mới, lượt thả tim mới hoặc bạn không mở nó. Tối đa 50 bình luận được theo dõi cùng lúc, vì vậy khi theo dõi thêm, các bình luận không hoạt động lâu nhất sẽ ngừng được theo dõi. Theo dõi bất kỳ bình luận nào bằng nút chuông bên cạnh."
@@ -2886,6 +2888,7 @@ YouTube Account:
   Like: "Thích"
   Dislike: "Không thích"
   Rating Failed: "Không thể đánh giá trên YouTube: {error}"
+  Vote Failed: "Không thể bình chọn trên YouTube: {error}"
   Subscribe Failed: "Không thể đăng ký trên YouTube: {error}"
   Unsubscribe Failed: "Không thể hủy đăng ký trên YouTube: {error}"
   Subscriptions Synced: "Đã đồng bộ kênh đăng ký từ YouTube: thêm {added}, xóa {removed}"

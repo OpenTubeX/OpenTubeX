@@ -122,7 +122,7 @@ let confirmed = { channelKey: null, rating: 'INDIFFERENT' }
 /** @param {'LIKE' | 'DISLIKE'} type */
 function rate(type) {
   const commentId = props.comment.id
-  const videoId = comments.videoId.value
+  const target = comments.target.value
   const previous = rating.value
   const next = previous === type ? 'INDIFFERENT' : type
   const channelKey = getYouTubeChannelKey(store.getters.getYouTubeAccount)
@@ -139,7 +139,7 @@ function rate(type) {
       // Switching channels or accounts before an earlier rating finished
       // drops this one, so it cannot rate as the other channel.
       if (!sameChannel()) return
-      await performYouTubeCommentAction(action, commentId, videoId)
+      await performYouTubeCommentAction(action, commentId, target)
       if (sameChannel()) confirmed = { channelKey, rating: next }
     } catch (error) {
       console.error(error)
@@ -182,7 +182,7 @@ async function handleDeletePrompt(value) {
 
   deleting.value = true
   try {
-    await performYouTubeCommentAction('delete', props.comment.id, comments.videoId.value)
+    await performYouTubeCommentAction('delete', props.comment.id, comments.target.value)
     comments.removeComment(props.comment.id)
     showToast({ message: t('YouTube Account.Comment Deleted'), icon: ['fas', 'trash'] })
   } catch (error) {

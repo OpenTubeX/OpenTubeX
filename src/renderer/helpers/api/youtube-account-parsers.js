@@ -90,28 +90,65 @@ export function createLinkedCommentsContinuation(videoId, threadId) {
   return encodeParams([[2, [[2, videoId]]], [3, 6], [6, [[4, [[4, videoId], [15, 2], [16, threadId]]], [8, 'comments-section']]]])
 }
 
-/** @param {string} videoId */
-export function createCommentParams(videoId) {
-  return encodeParams([[2, videoId], [5, []], [10, 7]])
+/**
+ * What comments are on: a video, or a post, which YouTube identifies with its
+ * channel.
+ * @typedef {{ videoId: string } | { postId: string, channelId: string }} YouTubeCommentTarget
+ */
+
+/**
+ * The continuation that loads a post's comments, optionally with a linked
+ * comment's thread first, like the website links a comment on a post.
+ * @param {string} postId
+ * @param {string} channelId
+ * @param {boolean} [newestFirst]
+ * @param {string} [commentId] a linked reply comes after its thread's comment
+ */
+export function createPostCommentsContinuation(postId, channelId, newestFirst = false, commentId = undefined) {
+  /** @type {ProtoField[]} */
+  const options = [[15, 2], [29, postId], [30, channelId]]
+  if (commentId) options.splice(1, 0, [16, commentId])
+  if (newestFirst) options.unshift([6, 1])
+  // The inner parameters are URL-safe base64 inside the standard base64 token.
+  const params = decodeURIComponent(encodeParams([[2, 'posts'], [53, [[4, options], [8, 'comments-section']]]]))
+    .replaceAll('+', '-').replaceAll('/', '_')
+  return decodeURIComponent(encodeParams([[80226972, [[2, 'FEcomment_post_detail_page_web_top_level'], [3, encodeURIComponent(params)]]]]))
+}
+
+/** @param {YouTubeCommentTarget} target */
+export function createCommentParams(target) {
+  if ('postId' in target) return encodeParams([[5, [[1, 0]]], [10, 1], [20, target.postId], [21, target.channelId]])
+  return encodeParams([[2, target.videoId], [5, []], [10, 7]])
 }
 
 /**
  * Parent fields in `createCommentParams` would post a top-level comment.
- * @param {string} videoId
- * @param {string} parentCommentId the top-level comment's ID
+ * @param {YouTubeCommentTarget} target
+ * @param {string} commentId the comment to reply to; a reply's ID is `parentId.replyId`
  */
-export function createReplyParams(videoId, parentCommentId) {
-  return encodeParams([[2, videoId], [4, parentCommentId], [5, [[1, 0]]], [10, 7]])
+export function createReplyParams(target, commentId) {
+  const threadId = commentId.split('.')[0]
+  /** @type {ProtoField[]} */
+  const fields = 'postId' in target
+    ? [[4, threadId], [5, [[1, 0]]], [10, 1]]
+    : [[2, target.videoId], [4, threadId], [5, [[1, 0]]], [10, 7]]
+  // The replied-to reply, which nests the new reply under it like on YouTube's website.
+  if (threadId !== commentId) fields.push([14, commentId])
+  if ('postId' in target) fields.push([20, target.postId], [21, target.channelId])
+  return encodeParams(fields)
 }
 
 /**
  * Comments and replies take the same parameters, in the layout of YouTube's
  * website, the only client that offers editing.
- * @param {string} videoId
+ * @param {YouTubeCommentTarget} target
  * @param {string} commentId a reply's ID is `parentId.replyId`
  */
-export function updateCommentParams(videoId, commentId) {
-  return encodeParams([[1, commentId], [4, videoId], [5, [[1, 0]]], [8, 12], [18, []]])
+export function updateCommentParams(target, commentId) {
+  if ('postId' in target) {
+    return encodeParams([[1, commentId], [5, [[1, 0]]], [8, 1], [10, target.postId], [11, target.channelId], [18, []]])
+  }
+  return encodeParams([[1, commentId], [4, target.videoId], [5, [[1, 0]]], [8, 12], [18, []]])
 }
 
 const COMMENT_ACTION_TYPES = { like: 5, unlike: 5, dislike: 4, undislike: 4, delete: 6 }
@@ -121,13 +158,90 @@ const COMMENT_ACTION_TYPES = { like: 5, unlike: 5, dislike: 4, undislike: 4, del
  * comment, so they are built here for comments from any client.
  * @param {YouTubeCommentAction} action
  * @param {string} commentId a reply's ID is `parentId.replyId`
- * @param {string} videoId
+ * @param {YouTubeCommentTarget} target
  */
-export function commentActionParams(action, commentId, videoId) {
+export function commentActionParams(action, commentId, target) {
   /** @type {ProtoField[]} */
-  const fields = [[1, COMMENT_ACTION_TYPES[action]], [2, 2], [3, commentId], [5, videoId]]
+  const fields = 'postId' in target
+    ? [[1, COMMENT_ACTION_TYPES[action]], [2, 7], [3, commentId], [22, target.postId], [23, target.channelId]]
+    : [[1, COMMENT_ACTION_TYPES[action]], [2, 2], [3, commentId], [5, target.videoId]]
   if (action === 'unlike' || action === 'undislike') fields.push([7, 1])
   return encodeParams(fields)
+}
+
+/**
+ * Votes for a choice of a post's poll, or takes the vote back. Voting for
+ * another choice moves the vote. Quizzes take votes as answers, and the
+ * website also tells whether the answer is correct.
+ * @param {string} postId
+ * @param {string} channelId
+ * @param {number} choiceIndex
+ * @param {boolean} vote
+ * @param {boolean} [isCorrectAnswer] whether the choice is a quiz's correct answer, unset for polls
+ */
+export function pollVoteParams(postId, channelId, choiceIndex, vote, isCorrectAnswer = undefined) {
+  /** @type {ProtoField[]} */
+  const fields = [[1, vote ? 9 : 10], [3, postId], [11, channelId], [12, choiceIndex]]
+  if (isCorrectAnswer !== undefined) fields.push([40, 1], [41, isCorrectAnswer ? 1 : 0])
+  return encodeParams(fields)
+}
+
+/**
+ * Likes or dislikes a post, or takes the rating back. Liking replaces a
+ * dislike and the reverse.
+ * @param {'like' | 'unlike' | 'dislike' | 'undislike'} action
+ * @param {string} postId
+ * @param {string} channelId
+ */
+export function postRatingParams(action, postId, channelId) {
+  const undo = action === 'unlike' || action === 'undislike'
+  return encodeParams([[1, COMMENT_ACTION_TYPES[action]], [3, postId], [7, undo ? 1 : 0], [11, channelId], [56, 2]])
+}
+
+/**
+ * The parameters of a post's page, as youtubei.js builds them.
+ * @param {string} postId
+ * @param {string} channelId
+ */
+export function createPostPageParams(postId, channelId) {
+  return decodeURIComponent(encodeParams([[56, [[2, channelId], [3, postId], [11, channelId]]]]))
+}
+
+/**
+ * @typedef {{ count: number, ratio: number }} PollChoiceShare
+ * @typedef {{ selected: PollChoiceShare, unselected: PollChoiceShare }} PollChoiceResult
+ *   `selected` counts the viewer's vote for the choice, and `unselected` leaves it out
+ */
+
+/**
+ * The share of the votes of each choice of a post's poll. Only the Android
+ * client's post page has them for viewers who did not vote.
+ * @param {any} data Android `browse` response for the post's page
+ * @returns {PollChoiceResult[] | null}
+ */
+export function parsePollResults(data) {
+  /** @type {any[] | null} */
+  let choices = null
+  /** @param {any} value */
+  const find = value => {
+    if (choices || !value || typeof value !== 'object') return
+    if (Array.isArray(value.choices) && value.choices.some(choice => choice?.pollChoiceViewModel)) {
+      choices = value.choices
+      return
+    }
+    for (const child of Object.values(value)) find(child)
+  }
+  find(data?.contents)
+  if (!choices) return null
+
+  /** @param {any} state */
+  const share = state => ({
+    count: Number.isFinite(state?.voteCount) ? state.voteCount : 0,
+    ratio: Number.isFinite(state?.progressBarWidth) ? Math.min(1, Math.max(0, state.progressBarWidth)) : 0
+  })
+  const results = choices.map(choice => choice?.pollChoiceViewModel)
+  if (results.some(choice => !choice?.selectedStateData || !choice.unselectedStateData)) return null
+  return results.map(choice => ({ selected: share(choice.selectedStateData), unselected: share(choice.unselectedStateData) }))
 }
 
 /**

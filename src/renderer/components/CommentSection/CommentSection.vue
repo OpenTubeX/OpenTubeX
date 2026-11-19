@@ -543,7 +543,6 @@
               v-for="node in replyNodes"
               :key="node.reply.id"
               :node="node"
-              :thread-index="index ?? -1"
               root-level
               :enable-channel-links="enableChannelLinks"
               :hide-comment-likes="hideCommentLikes"
@@ -860,14 +859,21 @@ const deletedCommentIds = new Set()
 /** @type {Map<string, { text: string, mentions: import('./youTubeComments').CommentMention[] }>} */
 const editedCommentTexts = new Map()
 
-// The signed-in YouTube account can rate, write and delete video comments.
+/** @type {import('vue').ComputedRef<import('../../helpers/api/youtube-account-parsers').YouTubeCommentTarget | null>} */
+const youTubeCommentTarget = computed(() => {
+  if (!props.isPostComments) return { videoId: props.id }
+  // YouTube identifies posts with their channel.
+  return props.postAuthorId ? { postId: props.id, channelId: props.postAuthorId } : null
+})
+
+// The signed-in YouTube account can rate, write and delete comments.
 const youTubeComments = {
-  enabled: computed(() => !props.isPostComments && !props.offline && !props.commentsDisabled &&
+  enabled: computed(() => youTubeCommentTarget.value !== null && !props.offline && !props.commentsDisabled &&
     !areCommentsDisabled.value && isSignedInToYouTube(store.getters)),
-  videoId: computed(() => props.id),
+  target: youTubeCommentTarget,
   videoTitle: computed(() => props.videoTitle),
-  // Comments on posts and saved comments cannot be watched for replies.
-  watchable: computed(() => !props.isPostComments && !props.offline),
+  // Saved comments cannot be watched for replies.
+  watchable: computed(() => youTubeCommentTarget.value !== null && !props.offline),
   channelId: computed(() => store.getters.getYouTubeAccount?.channelId ?? null),
   replyingTo: ref(null),
   // The comment open for editing, one at a time like replies.
@@ -896,16 +902,12 @@ const youTubeComments = {
       return
     }
 
-    const thread = commentData.value.find(entry => entry.id === parentId)
+    const thread = commentData.value.find(entry => entry.id === getRootCommentId(parentId))
     if (!thread) {
       addReplyToPinnedSnapshot(parentId, comment)
       return
     }
-    if (thread.replies.some(reply => reply.id === comment.id)) return
-    // A new list, so the cached reply tree is rebuilt.
-    thread.replies = [...thread.replies, comment]
-    thread.numReplies++
-    thread.showReplies = true
+    addReply(thread, parentId, comment)
   },
   updateComment(commentId, text, mentions) {
     editedCommentTexts.set(commentId, { text, mentions })
@@ -934,6 +936,7 @@ const youTubeComments = {
       const parent = thread && findCommentParent(thread, commentId)
       if (parent) {
         parent.replies = parent.replies.filter(reply => reply.id !== commentId)
+        if (parent !== thread) parent.numReplies = Math.max(0, (parent.numReplies ?? 0) - 1)
         thread.numReplies = Math.max(0, thread.numReplies - 1)
       }
     }
@@ -962,18 +965,35 @@ watch([() => props.id, () => getYouTubeChannelKey(store.getters.getYouTubeAccoun
 })
 
 /**
+ * Adds a posted reply to a thread. YouTube nests a reply to a reply under
+ * it, like its loaded replies; replies from other sources are flat and nest
+ * by their mentions instead.
+ * @param {Comment} thread
+ * @param {string} parentId the comment or reply it replies to
+ * @param {Comment} reply
+ */
+function addReply(thread, parentId, reply) {
+  const parent = (thread.dataType === 'local' && findComment(thread, parentId)) || thread
+  if (parent.replies.some(entry => entry.id === reply.id)) return
+  // A new list, so the cached reply tree is rebuilt.
+  parent.replies = [...parent.replies, reply]
+  parent.numReplies = (parent.numReplies ?? 0) + 1
+  if (parent !== thread) thread.numReplies = (thread.numReplies ?? 0) + 1
+  thread.showReplies = true
+}
+
+/**
  * A personally pinned thread can show from its saved snapshot when it is not
  * on the loaded pages, so a reply to it goes into the snapshot.
- * @param {string} parentId
+ * @param {string} parentId the comment or reply it replies to
  * @param {Comment} reply
  */
 function addReplyToPinnedSnapshot(parentId, reply) {
-  updatePinnedSnapshot(parentId, snapshot => ({
-    ...snapshot,
-    replies: [...snapshot.replies, reply],
-    numReplies: (snapshot.numReplies ?? 0) + 1,
-    showReplies: true
-  }))
+  updatePinnedSnapshot(getRootCommentId(parentId), snapshot => {
+    const thread = structuredClone(toRaw(snapshot))
+    addReply(thread, parentId, reply)
+    return thread
+  })
 }
 
 /**
@@ -995,13 +1015,56 @@ function updatePinnedSnapshot(rootId, update) {
 /**
  * Replies posted here before the thread's replies loaded come back from
  * YouTube, so their loaded versions replace them. Replies deleted or edited
- * while loading stay that way.
+ * while loading stay that way. A loaded reply keeps the replies posted under
+ * it here, as its own replies load separately, also when flat replies, as
+ * from Invidious, move it.
  * @param {Comment[]} replies
  * @param {Comment[]} loadedReplies
+ * @param {Set<string>} [incomingIds] every comment ID in the response
+ * @param {Map<string, Comment>} [previous] every comment before the response, by ID
+ * @returns {Comment[]}
  */
-function mergeReplies(replies, loadedReplies) {
-  const loadedIds = new Set(loadedReplies.map(reply => reply.id))
-  return replies.filter(reply => !loadedIds.has(reply.id)).concat(withLocalCommentChanges(loadedReplies))
+function mergeReplies(replies, loadedReplies, incomingIds = new Set(indexComments(loadedReplies).keys()), previous = indexComments(replies)) {
+  const merged = withLocalCommentChanges(loadedReplies).map(reply => {
+    // Replies the response has elsewhere show there instead.
+    const kept = (previous.get(reply.id)?.replies ?? []).filter(child => !incomingIds.has(child.id) ||
+      (reply.replies ?? []).some(loaded => loaded.id === child.id))
+    return kept.length > 0 ? { ...reply, replies: mergeReplies(kept, reply.replies ?? [], incomingIds, previous) } : reply
+  })
+  return withoutComments(replies, incomingIds).concat(merged)
+}
+
+/**
+ * Comments without the ones with these IDs, also among their replies.
+ * Unchanged comments stay the same objects.
+ * @param {Comment[]} comments
+ * @param {Set<string>} ids
+ * @returns {Comment[]}
+ */
+function withoutComments(comments, ids) {
+  return comments.filter(comment => !ids.has(comment.id)).map(comment => {
+    if (!comment.replies?.length) return comment
+    const replies = withoutComments(comment.replies, ids)
+    return replies.length === comment.replies.length && replies.every((reply, index) => reply === comment.replies[index])
+      ? comment
+      : { ...comment, replies }
+  })
+}
+
+/**
+ * Comments and all their replies, by ID.
+ * @param {Comment[]} comments
+ * @returns {Map<string, Comment>}
+ */
+function indexComments(comments) {
+  const index = new Map()
+  /** @param {Comment[]} list */
+  const add = list => list.forEach(comment => {
+    index.set(comment.id, comment)
+    add(comment.replies ?? [])
+  })
+  add(comments)
+  return index
 }
 
 /**
@@ -2390,6 +2453,17 @@ function findComment(comment, commentId) {
   return null
 }
 
+/**
+ * A comment as it shows now. Loads that finish later update this one, as
+ * merging other loaded replies can replace the objects of a thread meanwhile.
+ * @param {string} rootId
+ * @param {string} commentId
+ */
+function findShownComment(rootId, commentId) {
+  const root = commentData.value.find(entry => entry.id === rootId)
+  return root ? findComment(root, commentId) : null
+}
+
 function getHighlightedRootCommentId() {
   return props.highlightedCommentId?.split('.')[0] ?? null
 }
@@ -2473,7 +2547,7 @@ async function getCommentDataLocal(more = false) {
     } else {
       const sortBy = sortNewest.value ? 'NEWEST_FIRST' : undefined
       if (props.isPostComments) {
-        comments = await getLocalCommunityPostComments(props.id, props.postAuthorId, sortBy)
+        comments = await getLocalCommunityPostComments(props.id, props.postAuthorId, sortBy, getHighlightedRootCommentId() ?? undefined)
       } else {
         comments = await getLocalComments(props.id, sortBy, getHighlightedRootCommentId() ?? undefined)
       }
@@ -2586,16 +2660,18 @@ async function getCommentRepliesLocal(index, commentId = null) {
     if (targetGeneration !== commentListGeneration) {
       return
     }
+    const shown = findShownComment(getRootCommentId(comment.id), comment.id)
+    if (!shown) return
 
     const parsedReplies = replyThreads
       .map(reply => parseLocalCommentThread(reply))
       .filter(Boolean)
 
     if (isEmptyReplyContinuation(parsedReplies.length, nextContinuation !== null)) {
-      replyTokens.delete(comment.id)
-      comment.hasReplyToken = false
-      comment.numReplies = comment.replies.length
-      comment.showReplies = comment.replies.length > 0
+      replyTokens.delete(shown.id)
+      shown.hasReplyToken = false
+      shown.numReplies = shown.replies.length
+      shown.showReplies = shown.replies.length > 0
       showToast({
         message: t('Comments.YouTube did not provide advertised replies'),
         time: 10000,
@@ -2604,27 +2680,27 @@ async function getCommentRepliesLocal(index, commentId = null) {
       return
     }
 
-    comment.replies = mergeReplies(comment.replies, parsedReplies)
+    shown.replies = mergeReplies(shown.replies, parsedReplies)
 
     const replyLoadState = getReplyLoadState(
-      comment.replies.length,
-      comment.numReplies,
+      shown.replies.length,
+      shown.numReplies,
       nextContinuation !== null
     )
 
     if (replyLoadState.hasMore) {
-      replyTokens.set(comment.id, nextContinuation ?? continuation)
-      comment.hasReplyToken = true
+      replyTokens.set(shown.id, nextContinuation ?? continuation)
+      shown.hasReplyToken = true
     } else {
-      replyTokens.delete(comment.id)
-      comment.hasReplyToken = false
+      replyTokens.delete(shown.id)
+      shown.hasReplyToken = false
     }
 
     if (replyLoadState.hasMissingReplies) {
-      comment.numReplies = comment.replies.length
+      shown.numReplies = shown.replies.length
     }
 
-    comment.showReplies = replyLoadState.showReplies
+    shown.showReplies = replyLoadState.showReplies
   } catch (err) {
     if (targetGeneration !== commentListGeneration) {
       return
@@ -2632,25 +2708,27 @@ async function getCommentRepliesLocal(index, commentId = null) {
 
     console.error(err)
 
+    // Invidious can load a video comment's replies from the same token.
+    const canFallBack = !props.isPostComments &&
+      backendFallback.value &&
+      backendPreference.value === 'local' &&
+      invidiousReplyToken &&
+      comment &&
+      replyTokens.get(comment.id) === continuation
+
     if (isMissingReplyResponseError(err)) {
-      if (
-        !props.isPostComments &&
-        backendFallback.value &&
-        backendPreference.value === 'local' &&
-        invidiousReplyToken &&
-        comment &&
-        replyTokens.get(comment.id) === continuation
-      ) {
+      if (canFallBack) {
         showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
         await getCommentRepliesInvidious(index, commentId, invidiousReplyToken, comment, continuation)
         return
       }
 
-      if (comment && replyTokens.get(comment.id) === continuation) {
-        replyTokens.delete(comment.id)
-        comment.hasReplyToken = false
-        comment.numReplies = comment.replies.length
-        comment.showReplies = comment.replies.length > 0
+      const shown = comment && findShownComment(getRootCommentId(comment.id), comment.id)
+      if (shown && replyTokens.get(shown.id) === continuation) {
+        replyTokens.delete(shown.id)
+        shown.hasReplyToken = false
+        shown.numReplies = shown.replies.length
+        shown.showReplies = shown.replies.length > 0
       }
 
       showToast({
@@ -2663,10 +2741,11 @@ async function getCommentRepliesLocal(index, commentId = null) {
 
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
-    if (backendFallback.value && backendPreference.value === 'local') {
+    if (canFallBack) {
       showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
-      getCommentDataInvidious()
+      await getCommentRepliesInvidious(index, commentId, invidiousReplyToken, comment, continuation)
     } else {
+      // The comments stay, as another backend could only load them again from the first page.
       isLoading.value = false
     }
   }
@@ -2779,25 +2858,27 @@ async function getCommentRepliesInvidious(
     ) {
       return
     }
+    const shown = findShownComment(getRootCommentId(comment.id), comment.id)
+    if (!shown) return
 
-    comment.replies = mergeReplies(comment.replies, commentData)
+    shown.replies = mergeReplies(shown.replies, commentData)
     const replyLoadState = getReplyLoadState(
-      comment.replies.length,
-      comment.numReplies,
+      shown.replies.length,
+      shown.numReplies,
       continuation !== null
     )
-    comment.showReplies = replyLoadState.showReplies
+    shown.showReplies = replyLoadState.showReplies
 
     if (replyLoadState.hasMore) {
-      replyTokens.set(comment.id, continuation ?? replyToken)
-      comment.hasReplyToken = true
+      replyTokens.set(shown.id, continuation ?? replyToken)
+      shown.hasReplyToken = true
     } else {
-      replyTokens.delete(comment.id)
-      comment.hasReplyToken = false
+      replyTokens.delete(shown.id)
+      shown.hasReplyToken = false
     }
 
     if (replyLoadState.hasMissingReplies) {
-      comment.numReplies = comment.replies.length
+      shown.numReplies = shown.replies.length
     }
 
     isLoading.value = false
@@ -2871,7 +2952,7 @@ async function getPostCommentRepliesInvidious(index) {
       return
     }
 
-    comment.replies = comment.replies.concat(comments)
+    comment.replies = mergeReplies(comment.replies, comments)
     const replyLoadState = getReplyLoadState(
       comment.replies.length,
       comment.numReplies,

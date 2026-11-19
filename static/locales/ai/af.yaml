@@ -573,7 +573,7 @@ Settings:
     Sync Subscriptions: "Sinkroniseer intekeninge met YouTube"
     Sync Playlists: "Sinkroniseer afspeellyste met YouTube"
     Add to YouTube Watch History: "Voeg gekykte video’s by YouTube-geskiedenis"
-    Rate Videos: "Hou van en hou nie van video's nie"
+    Rate Videos: "Hou van en hou nie van video's en plasings nie"
     Sync Now: "Sinkroniseer nou"
     Synced: "Met YouTube gesinkroniseer"
     Sync Failed: "Kon nie met YouTube sinkroniseer nie: {error}"
@@ -1975,6 +1975,8 @@ Channel:
     Original post unavailable: Oorspronklike plasing nie beskikbaar nie
     Members-only video hidden by OpenTubeX: "Video slegs vir lede deur OpenTubeX versteek"
     Video hidden by OpenTubeX because of its title: "Video deur OpenTubeX versteek omdat die titel versteekte teks bevat"
+    Correct: "Korrek"
+    Incorrect: "Verkeerd"
   Shows:
     Shows: Programme
     This channel does not currently have any shows: Hierdie kanaal het tans geen programme nie
@@ -2588,7 +2590,7 @@ Tooltips:
     Sync Subscriptions: "Kanale waarop u op YouTube inteken, word by “Alle kanale” gevoeg, en kanale waarop u daar uitteken, word uit elke profiel verwyder. As u hier in “Alle kanale” inteken of uitteken, gebeur dieselfde op YouTube."
     Sync Playlists: "U YouTube-afspeellyste, “Kyk later” en “Video’s waarvan gehou is” verskyn in “U afspeellyste”, en veranderinge wat u hier daaraan aanbring, word ook op YouTube aangebring. Hulle word nie na u ander toestelle gesinkroniseer of ingesluit wanneer u alle afspeellyste uitvoer of u data rugsteun nie. As u dit afskakel, word hulle van hierdie toestel verwyder, maar nie van YouTube nie."
     Add to YouTube Watch History: "Video’s wat u speel, word by u YouTube-kykgeskiedenis gevoeg, sodat YouTube se aanbevelings daaruit leer. Niks word bygevoeg terwyl die geskiedenis op YouTube onderbreek is nie."
-    Rate Videos: "Wys knoppies om van video's te hou of nie te hou nie. Om jou gradering te wys, word elke video wat jy oopmaak met jou rekening op YouTube opgesoek, sodat YouTube leer watter video's jy oopmaak, selfs wanneer hulle nie by jou kykgeskiedenis gevoeg word nie."
+    Rate Videos: "Wys knoppies om van video's en plasings te hou of nie te hou nie. Om jou gradering te wys, word elke video wat jy oopmaak met jou rekening op YouTube opgesoek, sodat YouTube leer watter video's jy oopmaak, selfs wanneer hulle nie by jou kykgeskiedenis gevoeg word nie. Graderings van plasings word nie opgesoek nie, so net dié wat jy hier gee, word gewys."
   General Settings:
     Invidious Instance Credentials: 'Slegs nodig as die instansie ''n gebruikersnaam en wagwoord vra. Hulle word slegs op hierdie toestel gestoor en slegs na hierdie instansie gestuur.'
     Reply Notifications: "OpenTubeX kyk die kommentaar wat jy volg na vir nuwe antwoorde. Dit laat jou ook weet wanneer ’n skepper een van jou kommentare ’n hartjie gee. ’n Kommentaar bly gevolg totdat 30 dae verbygaan sonder nuwe antwoorde, hartjies of dat jy dit oopmaak. Tot 50 kommentare bly gevolg, so as jy meer volg, hou jy op om dié te volg wat die langste onaktief was. Volg enige kommentaar met die klokknoppie langsaan."
@@ -3080,6 +3082,7 @@ YouTube Account:
   Like: "Hou van"
   Dislike: "Hou nie van nie"
   Rating Failed: "Kon nie op YouTube gradeer nie: {error}"
+  Vote Failed: "Kon nie op YouTube stem nie: {error}"
   Subscribe Failed: "Kon nie op YouTube inteken nie: {error}"
   Unsubscribe Failed: "Kon nie op YouTube uitteken nie: {error}"
   Subscriptions Synced: "Intekeninge vanaf YouTube gesinkroniseer: {added} bygevoeg, {removed} verwyder"

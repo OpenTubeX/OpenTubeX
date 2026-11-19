@@ -98,3 +98,66 @@ test('Hide Comments controls post comments without hiding the post', async ({ pa
   await expect(page.locator('.noComments')).toHaveCount(0)
   await expect(page.getByText('Post with optional comments', { exact: true })).toBeVisible()
 })
+
+test.describe('with a YouTube account', () => {
+  const ACCOUNT_POST_CHANNEL_ID = 'UCbbbbbbbbbbbbbbbbbbbbbb'
+  const POST_ID = 'UgkxExamplePostIdentifier0123456789'
+  const comment = (commentId, text, replies) => ({
+    commentId,
+    contentHtml: text,
+    author: '@someone',
+    authorId: 'UCsomeone000000000000000',
+    authorThumbnails: [],
+    publishedText: '1 day ago',
+    likeCount: 1,
+    ...(replies ? { replies } : {})
+  })
+
+  test.use({
+    seed: {
+      settings: {
+        backendPreference: 'invidious',
+        youTubeAccount: {
+          credentials: { access_token: 't', refresh_token: 'r', expiry_date: '2999-01-01T00:00:00.000Z', client: { client_id: 'c', client_secret: 's' } },
+          profiles: [{ name: 'Test Channel', handle: '@testchannel', thumbnail: null, pageId: null }],
+          pageId: null,
+          channelId: 'UCtestchannel000000000000',
+          signInId: 'x'
+        }
+      }
+    }
+  })
+
+  test('a posted reply shows once after the thread replies load', async ({ page }) => {
+    await page.route(/\/youtubei\/v1\/comment\/create_comment_reply/, route => route.fulfill({
+      json: {
+        actionResult: { status: 'STATUS_SUCCEEDED' },
+        actions: [{ commentRenderer: { commentId: 'Ugthread.Ugnewreply', authorText: { simpleText: '@testchannel' } } }]
+      }
+    }))
+    await page.route('**/api/v1/post/**', route => {
+      const url = new URL(route.request().url())
+      if (!url.pathname.endsWith('/comments')) {
+        return route.fulfill({ json: { comments: [{ ...comment(POST_ID, 'A post', null), author: 'Example Channel', authorId: ACCOUNT_POST_CHANNEL_ID, replyCount: 1, authorThumbnails: [{ url: 'https://example.com/avatar.png', width: 48, height: 48 }] }] } })
+      }
+      if (url.searchParams.get('continuation') === 'replies1') {
+        return route.fulfill({ json: { comments: [comment('Ugthread.Ugolder', 'Older reply'), comment('Ugthread.Ugnewreply', 'My reply')] } })
+      }
+      return route.fulfill({ json: { commentCount: 1, comments: [comment('Ugthread', 'Top comment', { replyCount: 1, continuation: 'replies1' })] } })
+    })
+    await page.evaluate(({ postId, authorId }) => window.ftElectron.tabs.create({ route: `/post/${postId}`, query: { authorId } }),
+      { postId: POST_ID, authorId: ACCOUNT_POST_CHANNEL_ID })
+    const thread = page.locator('.commentThread').filter({ hasText: 'Top comment' })
+    await expect(thread).toBeVisible({ timeout: 30_000 })
+    await thread.getByRole('button', { name: 'Reply', exact: true }).first().click()
+    await page.getByRole('textbox', { name: 'Add a reply' }).fill('My reply')
+    await thread.locator('.replyComposer').getByRole('button', { name: 'Reply', exact: true }).click()
+    await expect(page.locator('.toast', { hasText: 'Reply posted' })).toBeVisible()
+    await expect(thread.locator('.commentText', { hasText: 'My reply' })).toHaveCount(1)
+    // Loads the thread's replies, which include the posted one.
+    const more = thread.getByRole('button', { name: 'Show more replies' })
+    await more.click()
+    await expect(thread.locator('.commentText', { hasText: 'Older reply' })).toBeVisible()
+    await expect(thread.locator('.commentText', { hasText: 'My reply' })).toHaveCount(1)
+  })
+})

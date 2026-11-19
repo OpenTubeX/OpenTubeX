@@ -407,7 +407,7 @@ Settings:
     Revoke Failed: "YouTube からログアウトしましたが、Google はログインの終了を確認しませんでした。Google アカウントのサードパーティとの接続から削除できます。"
     Signed out by YouTube: "YouTube によってログインが終了されました。アカウントを引き続き使用するには、設定から再度ログインしてください。"
     Add to YouTube Watch History: "視聴した動画を YouTube の履歴に追加する"
-    Rate Videos: "動画を高く評価・低く評価する"
+    Rate Videos: "動画と投稿を高く評価・低く評価する"
     Sync Subscriptions: "登録チャンネルを YouTube と同期する"
     Sync Playlists: "再生リストを YouTube と同期する"
     Sync Now: "今すぐ同期"
@@ -1743,6 +1743,8 @@ Channel:
     Original post unavailable: "元の投稿は利用できません"
     Members-only video hidden by OpenTubeX: "OpenTubeX がメンバー限定動画を非表示にしました"
     Video hidden by OpenTubeX because of its title: "タイトルに非表示のテキストが含まれているため、OpenTubeX が動画を非表示にしました"
+    Correct: "正解"
+    Incorrect: "不正解"
 Video:
   Play in Background: "バックグラウンドで再生"
   Info panel source: '出典: {source}'
@@ -2326,7 +2328,7 @@ Tooltips:
   YouTube Account Settings:
     Watch Posted Comments: "ここで投稿したコメントは、コメント設定で返信通知がオンになっている間、自動的に返信が監視されます。"
     Add to YouTube Watch History: "再生した動画は YouTube の視聴履歴に追加され、YouTube のおすすめに反映されます。YouTube で履歴が一時停止されている間は何も追加されません。"
-    Rate Videos: "動画に高評価と低評価のボタンを表示します。評価を表示するため、開いた動画はすべてアカウントを使って YouTube で照会されます。そのため、再生履歴に追加されない場合でも、どの動画を開いたかが YouTube に伝わります。"
+    Rate Videos: "動画と投稿に高評価と低評価のボタンを表示します。評価を表示するため、開いた動画はすべてアカウントを使って YouTube で照会されます。そのため、再生履歴に追加されない場合でも、どの動画を開いたかが YouTube に伝わります。投稿の評価は照会されないため、ここで付けた評価だけが表示されます。"
     Sync Subscriptions: "YouTube で登録したチャンネルは「すべてのチャンネル」に追加され、YouTube で登録解除したチャンネルはすべてのプロファイルから削除されます。ここで「すべてのチャンネル」でチャンネル登録または登録解除すると、YouTube でも同じ操作が行われます。"
     Sync Playlists: "YouTube の再生リスト、「後で見る」、「高く評価した動画」が「あなたの再生リスト」に表示され、ここで加えた変更は YouTube にも反映されます。これらは他のデバイスに同期されず、すべての再生リストのエクスポートやデータのバックアップにも含まれません。この設定をオフにすると、このデバイスからは削除されますが、YouTube からは削除されません。"
   General Settings:
@@ -2868,6 +2870,7 @@ YouTube Account:
   Like: "高く評価"
   Dislike: "低く評価"
   Rating Failed: "YouTube で評価できませんでした: {error}"
+  Vote Failed: "YouTube で投票できませんでした: {error}"
   Subscribe Failed: "YouTube でチャンネル登録できませんでした: {error}"
   Unsubscribe Failed: "YouTube で登録解除できませんでした: {error}"
   Add a comment: "コメントを追加"

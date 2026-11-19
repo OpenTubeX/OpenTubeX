@@ -8,7 +8,7 @@ import { getSelectedYouTubeProfile } from '../../helpers/youtube-account-state.j
  * signed-in account's comment actions instead of passing them down.
  * @type {import('vue').InjectionKey<{
  *   enabled: import('vue').ComputedRef<boolean>,
- *   videoId: import('vue').ComputedRef<string>,
+ *   target: import('vue').ComputedRef<import('../../helpers/api/youtube-account-parsers.js').YouTubeCommentTarget | null>,
  *   videoTitle: import('vue').ComputedRef<string>,
  *   watchable: import('vue').ComputedRef<boolean>,
  *   channelId: import('vue').ComputedRef<string | null>,

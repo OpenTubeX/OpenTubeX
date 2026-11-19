@@ -21,7 +21,9 @@ import {
   parsePlaylistPage,
   parseSubscribedChannels,
   parseVideoRating,
-  parseWatchHistoryUrl
+  parseWatchHistoryUrl,
+  pollVoteParams,
+  postRatingParams
 } from './youtube-account-parsers.js'
 
 // The account signs in like a YouTube TV app does: the user approves a code
@@ -693,21 +695,23 @@ export async function getYouTubeAccountRecommendations(continuation = null) {
   })
 }
 
+/** @typedef {import('./youtube-account-parsers.js').YouTubeCommentTarget} YouTubeCommentTarget */
+
 /**
- * @param {string} videoId
+ * @param {YouTubeCommentTarget} target
  * @param {string} text
- * @param {string} [parentCommentId] posts a reply to this top-level comment
+ * @param {string} [replyToId] posts a reply to this comment or reply
  * @param {YouTubeAccount | null} [account] posts as this sign-in and channel instead of the ones in use
  */
-export async function postYouTubeComment(videoId, text, parentCommentId, account) {
+export async function postYouTubeComment(target, text, replyToId, account) {
   return await withAccount(async innertube => {
-    const response = parentCommentId
+    const response = replyToId
       ? await innertube.actions.execute('/comment/create_comment_reply', {
-          createReplyParams: createReplyParams(videoId, parentCommentId),
+          createReplyParams: createReplyParams(target, replyToId),
           commentText: text
         })
       : await innertube.actions.execute('/comment/create_comment', {
-          createCommentParams: createCommentParams(videoId),
+          createCommentParams: createCommentParams(target),
           commentText: text
         })
     return parseCreatedComment(response.data)
@@ -716,14 +720,14 @@ export async function postYouTubeComment(videoId, text, parentCommentId, account
 
 /**
  * Replaces the text of a comment or reply the account posted.
- * @param {string} videoId
+ * @param {YouTubeCommentTarget} target
  * @param {string} commentId a reply's ID is `parentId.replyId`
  * @param {string} text
  * @param {YouTubeAccount | null} [account] edits as this sign-in and channel instead of the ones in use
  */
-export async function editYouTubeComment(videoId, commentId, text, account) {
+export async function editYouTubeComment(target, commentId, text, account) {
   await withAccount(async innertube => {
-    const params = updateCommentParams(videoId, commentId)
+    const params = updateCommentParams(target, commentId)
     const response = commentId.includes('.')
       ? await innertube.actions.execute('/comment/update_comment_reply', { updateReplyParams: params, replyText: text })
       : await innertube.actions.execute('/comment/update_comment', { updateCommentParams: params, commentText: text })
@@ -736,17 +740,55 @@ export async function editYouTubeComment(videoId, commentId, text, account) {
 /**
  * @param {import('./youtube-account-parsers.js').YouTubeCommentAction} action
  * @param {string} commentId
- * @param {string} videoId
+ * @param {YouTubeCommentTarget} target
  */
-export async function performYouTubeCommentAction(action, commentId, videoId) {
+export async function performYouTubeCommentAction(action, commentId, target) {
   await withAccount(async innertube => {
     const response = await innertube.actions.execute('/comment/perform_comment_action', {
-      actions: [commentActionParams(action, commentId, videoId)]
+      actions: [commentActionParams(action, commentId, target)]
     })
     if (!isCommentActionSuccessful(response.data, action, commentId)) {
       throw new Error(`YouTube did not ${action} the comment`)
     }
   })
+}
+
+/**
+ * @param {Innertube} innertube
+ * @param {string} params
+ * @param {string} failure what failed, for the error
+ */
+async function performPostAction(innertube, params, failure) {
+  const response = await innertube.actions.execute('/comment/perform_comment_action', { actions: [params] })
+  // YouTube answers the same for posts that do not exist.
+  if (!(response.data?.actionResults ?? []).some(result => result?.status === 'STATUS_SUCCEEDED')) {
+    throw new Error(`YouTube did not ${failure}`)
+  }
+}
+
+/**
+ * Votes for a choice of a post's poll, which moves an earlier vote, or takes
+ * the vote for it back. Answers quizzes too.
+ * @param {string} postId
+ * @param {string} channelId the post's channel
+ * @param {number} choiceIndex
+ * @param {boolean} vote
+ * @param {YouTubeAccount | null} [account] votes as this sign-in and channel instead of the ones in use
+ * @param {boolean} [isCorrectAnswer] whether the choice is a quiz's correct answer, unset for polls
+ */
+export async function voteInYouTubePoll(postId, channelId, choiceIndex, vote, account, isCorrectAnswer = undefined) {
+  await withAccount(innertube => performPostAction(innertube, pollVoteParams(postId, channelId, choiceIndex, vote, isCorrectAnswer),
+    vote ? 'count the vote' : 'remove the vote'), { account })
+}
+
+/**
+ * @param {string} postId
+ * @param {string} channelId the post's channel
+ * @param {'like' | 'unlike' | 'dislike' | 'undislike'} action
+ * @param {YouTubeAccount | null} [account] rates as this sign-in and channel instead of the ones in use
+ */
+export async function rateYouTubePost(postId, channelId, action, account) {
+  await withAccount(innertube => performPostAction(innertube, postRatingParams(action, postId, channelId), `${action} the post`), { account })
 }
 
 /** @type {Promise<number | undefined> | null} */

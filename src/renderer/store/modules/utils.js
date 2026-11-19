@@ -30,6 +30,16 @@ const VIDEO_AVATAR_CACHE_LIMIT = 200
 let settingsWindowMorph = Promise.resolve()
 
 /**
+ * The comment a post link highlights, as the post page's query.
+ * @param {URL} url
+ * @returns {{ commentId?: string }}
+ */
+function getLinkedCommentQuery(url) {
+  const commentId = url.searchParams.get('lc')
+  return commentId && /^[\w.-]+$/.test(commentId) ? { commentId } : {}
+}
+
+/**
  * Throws if the videos lack the details the add to playlist prompt needs.
  * @param {unknown} videos
  */
@@ -730,7 +740,7 @@ const actions = {
       case 'post': {
         const match = url.pathname.match(postPattern)
         const postId = match.groups.postId
-        const query = { authorId: url.searchParams.get('ucid') }
+        const query = { authorId: url.searchParams.get('ucid'), ...getLinkedCommentQuery(url) }
         return {
           urlType: 'post',
           postId,
@@ -812,7 +822,7 @@ const actions = {
             if (url.searchParams.has('lb')) {
               // if it has the lb search parameter then it is linking a specific community post
               const postId = url.searchParams.get('lb')
-              const query = { authorId: channelId }
+              const query = { authorId: channelId, ...getLinkedCommentQuery(url) }
               return {
                 urlType: 'post',
                 postId,
