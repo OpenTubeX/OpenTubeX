@@ -155,10 +155,6 @@
   white-space: nowrap;
 }
 
-.storageSettings :deep(.sectionTitle) {
-  margin-block: 0 4px;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .storageBarSegment,
   .storageBreakdownDetails li {

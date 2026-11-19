@@ -556,6 +556,24 @@ for (const { label, settings, live, timestamp } of [
   })
 }
 
+test('external media in an incognito tab saves no position, even when the tab closes', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+  await prepareTwitchYtDlp(app, page, mediaUrl, false)
+  await page.evaluate(() => window.$store.dispatch('updateWatchedProgressSavingMode', 'auto'))
+  await page.evaluate(url => window.ftElectron.tabs.create({ route: '/external-media', query: { url }, makeActive: true, isIncognito: true }), mediaUrl)
+  const video = await waitForPlayback(page)
+  await video.evaluate(element => { element.currentTime = 12 })
+  await expect.poll(() => video.evaluate(element => element.seeking)).toBe(false)
+  await page.evaluate(() => window.$store.dispatch('closeActiveTab'))
+  await expect(page.locator('.tab .incognitoIcon')).toHaveCount(0)
+  // A regular tab saves the same media, so the closed tab's save would have landed before it
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  const regular = await waitForPlayback(page)
+  expect(await regular.evaluate(element => element.currentTime)).toBeLessThan(2)
+})
+
 test('external media keeps a watched mark that is still saving when the length changes', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
   const mediaUrl = 'https://www.twitch.tv/videos/123456789'

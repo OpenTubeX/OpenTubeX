@@ -56,9 +56,10 @@
   position: relative;
 }
 
-/* Gives the theme preview names one line and the selects their usual width side by side */
+/* Gives the theme preview names one line and the selects their usual width
+   side by side, with room for their sync and reset indicators on both sides. */
 .tutorialWideCard {
-  inline-size: min(580px, calc(100vw - 24px));
+  inline-size: min(680px, calc(100vw - 24px));
 }
 
 /* The theme gallery, also under the pages it opens, gets about the width it has

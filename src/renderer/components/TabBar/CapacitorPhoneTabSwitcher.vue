@@ -194,6 +194,12 @@
                         class="tabLoadingDot"
                         aria-hidden="true"
                       />
+                      <FtIcon
+                        v-if="tab.isIncognito"
+                        :icon="['fas', 'user-secret']"
+                        class="capacitorPhoneTabIncognitoIcon"
+                        aria-hidden="true"
+                      />
                       <span dir="auto">{{ tabTitle(tab) }}</span>
                     </span>
                   </button>
@@ -385,9 +391,21 @@
               class="capacitorPhoneTabBottomActions"
             >
               <button
+                type="button"
+                class="capacitorPhoneTabSecondaryAction capacitorPhoneTabNewIncognito"
+                :aria-label="t('New Incognito Tab')"
+                :title="t('New Incognito Tab')"
+                @click="createIncognitoTab"
+              >
+                <FtIcon
+                  :icon="['fas', 'user-secret']"
+                  aria-hidden="true"
+                />
+              </button>
+              <button
                 v-if="closedTabs.length > 0"
                 type="button"
-                class="capacitorPhoneTabReopen"
+                class="capacitorPhoneTabSecondaryAction capacitorPhoneTabReopen"
                 :aria-label="t('KeyboardShortcutPrompt.Reopen Closed Tab')"
                 :title="t('KeyboardShortcutPrompt.Reopen Closed Tab')"
                 @click="restoreClosedTab"
@@ -659,6 +677,7 @@ const {
   closeTab,
   closeTabActions,
   createTab,
+  createIncognitoTab,
   copyActionTabYoutubeLink,
   duplicateActionTab,
   handleTabTargetKeydown,

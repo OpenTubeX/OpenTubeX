@@ -8,7 +8,8 @@ import {
   parseAutomaticDownloadRules
 } from './automaticDownloadRules'
 import { showToastOnAllTabs } from './utils'
-import { withThumbnail } from './notificationHistory'
+import { recordNotification, withThumbnail } from './notificationHistory'
+import { getDownloadTarget } from '../../notificationHistory'
 
 // Feed refreshes can overlap across profiles and views. Keep a session-level
 // guard in addition to the persistent download history in the main process.
@@ -146,7 +147,14 @@ export async function startAutomaticDownloadsForChannel(channel, videos, source,
 
     if (result == null || 'error' in result) {
       scheduledVideoIds.delete(video.videoId)
-      showToastOnAllTabs(t('Downloads.Automatic Download Could Not Start', { title }), 5000, ['fas', 'circle-exclamation'])
+      const message = t('Downloads.Automatic Download Could Not Start', { title })
+      showToastOnAllTabs(message, 5000, ['fas', 'circle-exclamation'])
+      recordNotification({
+        ...getDownloadTarget('failed', video.videoId, null),
+        title: t('Downloads.Automatic Download Failed'),
+        body: message,
+        ...withThumbnail(video.videoId)
+      })
     }
   }
 }

@@ -218,6 +218,8 @@ Ask questions in [Discussions](https://github.com/OpenTubeX/OpenTubeX/discussion
 OpenTubeX is developed extensively with AI-assisted tools. This allows our small
 maintainer team to develop features, fix bugs, and iterate much more rapidly.
 The source code remains open for anyone to inspect, review, modify, or fork.
+[AI-DECLARATION.md](AI-DECLARATION.md) lists how much AI is involved in each
+part of development.
 
 This disclosure refers to how OpenTubeX is developed. It does not mean the app
 sends your viewing data to an AI service. If AI-assisted development does not

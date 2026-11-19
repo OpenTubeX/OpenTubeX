@@ -500,13 +500,17 @@ function deleteTemplate() {
   align-items: start;
   grid-template-columns: minmax(240px, 1fr) minmax(280px, 2fr);
   gap: 16px;
-  padding: 8px 20px 16px;
+  padding-block: 8px 16px;
+  padding-inline: 20px;
 }
 
 .templateOptions {
   min-block-size: 0;
   flex: 1;
-  padding-inline: 20px;
+
+  /* Reach through the subpage's padding so the scrollbar sits at the window's edge. */
+  margin-inline: calc(-1 * var(--settings-subpage-padding));
+  padding-inline: calc(20px + var(--settings-subpage-padding));
 }
 
 .optionSection {
@@ -596,7 +600,8 @@ function deleteTemplate() {
 
 .templateManagerFooter {
   flex: none;
-  padding: 10px 20px;
+  padding-block: 10px;
+  padding-inline: 20px;
 }
 
 @container (width <= 600px) {

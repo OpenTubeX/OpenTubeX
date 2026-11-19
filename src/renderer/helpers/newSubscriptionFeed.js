@@ -19,7 +19,7 @@ export function getEnabledSubscriptionFeedSources(getters) {
   const feeds = []
 
   if (!getters.getHideSubscriptionsVideos) {
-    feeds.push({ category: 'videos', cache: getters.getVideoCache, entriesKey: 'videos' })
+    feeds.push({ category: 'videos', cache: getters.getVideoCache, entriesKey: 'videos', includeCollaborations: getters.getIncludeSubscriptionCollaborations === true })
   }
   if (!getters.getHideSubscriptionsShorts) {
     feeds.push({ category: 'shorts', cache: getters.getShortsCache, entriesKey: 'videos' })
@@ -39,7 +39,7 @@ export function getEnabledSubscriptionFeedSources(getters) {
  * and sorting rules to cached subscription entries.
  *
  * @param {object} options
- * @param {{ category: string, cache: object, entriesKey: string }[]} options.feeds
+ * @param {{ category: string, cache: object, entriesKey: string, includeCollaborations?: boolean }[]} options.feeds
  * @param {unknown} options.activeSubscriptions
  * @param {Record<string, object>} options.historyCacheById
  * @param {boolean} options.hideLiveStreams
@@ -76,7 +76,7 @@ export function getNewSubscriptionFeedEntries({
     getValidSubscriptionChannels(activeSubscriptions).map(channel => [channel.id, channel])
   )
 
-  feeds.forEach(({ category, cache, entriesKey }) => {
+  feeds.forEach(({ category, cache, entriesKey, includeCollaborations = false }) => {
     Object.entries(cache).forEach(([channelId, cacheEntry]) => {
       const subscription = subscriptionsById.get(channelId)
       if (subscription == null || !isSubscriptionFeedTypeEnabled(subscription, category)) {
@@ -86,6 +86,10 @@ export function getNewSubscriptionFeedEntries({
       const source = cacheEntry?.[entriesKey] ?? []
       const newEntries = getNewSubscriptionEntriesSnapshot(source)
       newEntries.forEach(entry => {
+        if (entry.isCollaboration === true && !includeCollaborations) {
+          return
+        }
+
         if (!isMembersOnlySubscriptionVideoVisible(
           entry,
           subscription,

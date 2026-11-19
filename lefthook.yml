@@ -6,8 +6,17 @@ pre-commit:
     eslint:
       # Only runs when any file with filename
       # matching the glob is being committed
-      glob: "*.{js,vue}"
-      run: pnpm exec eslint --no-color {staged_files}
+      glob: "*.{js,mjs,vue}"
+      run: pnpm exec eslint --no-color --no-warn-ignored {staged_files}
+      skip:
+        - rebase
+    # The same JSON and YAML files as lint-json and lint-yml
+    eslint-data:
+      glob:
+        - "static/*.json"
+        - "browser-extension/*.json"
+        - "*.{yml,yaml}"
+      run: pnpm exec eslint --no-color --no-warn-ignored {staged_files}
       skip:
         - rebase
     typecheck:
@@ -16,7 +25,7 @@ pre-commit:
       skip:
         - rebase
     stylelint:
-      glob: "*.{css,scss}"
+      glob: "*.{css,scss,vue}"
       run: pnpm exec stylelint --no-color --allow-empty-input {staged_files}
       skip:
         - rebase

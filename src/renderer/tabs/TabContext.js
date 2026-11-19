@@ -21,6 +21,14 @@ export function useTabContext() {
   }
 }
 
+/** @returns {import('vue').ComputedRef<boolean>} whether this page belongs to an incognito tab */
+export function useIncognitoTab() {
+  const { tabId } = useTabContext()
+  // A closing tab leaves the store before its pages save on unmount, so remember it
+  let incognito = false
+  return computed(() => (incognito ||= store.getters.getTabIncognito(tabId)))
+}
+
 export function useTabTitle() {
   const { tabId } = useTabContext()
   const watchNavigation = inject(watchNavigationKey, null)

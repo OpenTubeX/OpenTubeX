@@ -372,8 +372,8 @@ importers:
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.14.0)
       '@iconify-json/material-symbols':
-        specifier: ^1.2.99
-        version: 1.2.99
+        specifier: ^1.2.100
+        version: 1.2.100
       '@iconify-json/ri':
         specifier: ^1.2.10
         version: 1.2.10
@@ -396,8 +396,8 @@ importers:
         specifier: 1.2.3
         version: 1.2.3
       '@playwright/test':
-        specifier: ^1.65.0
-        version: 1.65.0
+        specifier: ^1.65.1
+        version: 1.65.1
       '@rspack/cli':
         specifier: ^2.3.2
         version: 2.3.2(@rspack/core@2.3.2)(@rspack/dev-server@2.2.2)
@@ -491,6 +491,9 @@ importers:
       postcss:
         specifier: ^8.5.32
         version: 8.5.32
+      postcss-html:
+        specifier: ^2.0.1
+        version: 2.0.1(postcss@8.5.32)
       postcss-loader:
         specifier: 8.2.1
         version: 8.2.1(@rspack/core@2.3.2)(postcss@8.5.32)(typescript@7.0.2)
@@ -926,8 +929,8 @@ packages:
     resolution: {integrity: sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ==}
     engines: {node: '>=18.18'}
 
-  '@iconify-json/material-symbols@1.2.99':
-    resolution: {integrity: sha512-c7CBI249CmvZDeT7sml1iwKEjsbiB8NUG2Bg1KPd7jnvLQ/8iQv7TQWnqq9a2357SkPjnyVTxxTgkWO2rlUtCw==}
+  '@iconify-json/material-symbols@1.2.100':
+    resolution: {integrity: sha512-lo3JulvaCnCCYVZHfld4kQ2YNkN55xCtLGplVgETx0n6nRR8IknMphknSqIpFhT/4J3upZJmLBTQT6cyQn8ThQ==}
 
   '@iconify-json/ri@1.2.10':
     resolution: {integrity: sha512-WWMhoncVVM+Xmu9T5fgu2lhYRrKTEWhKk3Com0KiM111EeEsRLiASjpsFKnC/SrB6covhUp95r2mH8tGxhgd5Q==}
@@ -1239,8 +1242,8 @@ packages:
     resolution: {integrity: sha512-SEeaJLb3qBNF/OaXnaR1NmmBbFYk1zC0ZH/52fATcRPLFg/p791YrcyFFy44Bo9sLaGuSuLp5Q6axbb/O+v/RA==}
     engines: {node: ^14.18.0 || >=16.0.0}
 
-  '@playwright/test@1.65.0':
-    resolution: {integrity: sha512-iGURLGuKDLakSEl7Pgfv8h7f+XLT+V861Wfhz0zlEl5nyFuKUopdkFBPKqTllTUp06aOwPuH8iuUEb3yp3MpbQ==}
+  '@playwright/test@1.65.1':
+    resolution: {integrity: sha512-y+NCIRm2LvY4slUVWvGh1nujJ8RF/hEisIsq2mtUPgdQC4L701bq5hZGMhrpeXjACvwvO9tj5dJqhvM6TP9lbw==}
     engines: {node: '>=20'}
     hasBin: true
 
@@ -2280,6 +2283,9 @@ packages:
   dom-serializer@1.4.1:
     resolution: {integrity: sha512-VHwB3KfrcOOkelEG2ZOfxqLZdfkil8PtJi4P8N2MMXucZq2yLp75ClViUlOVwyoHEDjYU433Aq+5zWP61+RGag==}
 
+  dom-serializer@2.0.0:
+    resolution: {integrity: sha512-wIkAryiqt/nV5EQKqQpo3SToSOV9J0DnbJqwK7Wv/Trc92zIAYZ4FlMu+JPFW1DfGFt81ZTCGgDEabffXeLyJg==}
+
   domelementtype@2.3.0:
     resolution: {integrity: sha512-OLETBj6w0OsagBwdXnPdN0cnMfF9opN69co+7ZrbfPGrdpPVNBUj02spi6B1N7wChLQiPn4CSH/zJvXw56gmHw==}
 
@@ -2287,11 +2293,18 @@ packages:
     resolution: {integrity: sha512-GrwoxYN+uWlzO8uhUXRl0P+kHE4GtVPfYzVLcUxPL7KNdHKj66vvlhiweIHqYYXWlw+T8iLMp42Lm67ghw4WMQ==}
     engines: {node: '>= 4'}
 
+  domhandler@5.0.3:
+    resolution: {integrity: sha512-cgwlv/1iFQiFnU96XXgROh8xTeetsnJiDsTc7TYCLFd9+/WNkIqPTxiM/8pSd8VIrhXGTf1Ny1q1hquVqDJB5w==}
+    engines: {node: '>= 4'}
+
   dompurify@3.4.17:
     resolution: {integrity: sha512-B/pSlYVHQ58kqISD/yDjuJ1yfzI34m1gF4lAod2bwSRhiN4K5Cl3H8Af7hqB2PmTL911tdEudnnXn5FnhRoz0w==}
 
   domutils@2.8.0:
     resolution: {integrity: sha512-w96Cjofp72M5IIhpjgobBimYEfoPjx1Vx0BSX9P30WBdZW2WIKU0T1Bd0kz2eNZ9ikjKgHbEyKx8BB6H1L3h3A==}
+
+  domutils@3.2.2:
+    resolution: {integrity: sha512-6kZKyUajlDuqlHKVX1w7gyslj9MPIXzIFiz/rGu35uC1wMi+kMhQwGhl4lt9unC9Vb9INnY9Z3/ZA3+FhASLaw==}
 
   dot-case@3.0.4:
     resolution: {integrity: sha512-Kv5nKlh6yRrdrGvxeJ2e5y2eRUpkUosIW4A2AS38zwSz27zu7ufDwQPi5Jhs3XAlGNetl3bmnGhQsMtkKJnj3w==}
@@ -2359,6 +2372,10 @@ packages:
 
   entities@2.2.0:
     resolution: {integrity: sha512-p92if5Nz619I0w+akJrLZH0MX0Pb5DX39XOwQTtXSdQQOaYH03S1uIQp4mhOZtAXrxq4ViO67YTiLBo2638o9A==}
+
+  entities@4.5.0:
+    resolution: {integrity: sha512-V0hjH4dGPh9Ao5p0MoRY6BVqtwCjhz6vI5LT8AJ55H+4g9/4vbHx1I54fS0XuclLhDHArPQCiMjDxjaL8fPxhw==}
+    engines: {node: '>=0.12'}
 
   entities@6.0.1:
     resolution: {integrity: sha512-aN97NXWF6AWBTahfVOIrB/NShkzi5H7F9r1s9mD3cDj4Ko5f2qhhVoYMibXF7GlLveb/D2ioWay8lxI97Ven3g==}
@@ -2901,6 +2918,9 @@ packages:
   htmlparser2@6.1.0:
     resolution: {integrity: sha512-gyyPk6rgonLFEDGoeRgQNaEUvdJ4ktTmmUh/h2t7s+M8oPpIPxgNACWa+6ESR57kXstwqPiCut0V8NRpcwgU7A==}
 
+  htmlparser2@9.1.0:
+    resolution: {integrity: sha512-5zfg6mHUoaer/97TxnGpxmbR7zJtPwIYFMZ/H5ucTlPZhKvtum05yiPK3Mgai3a0DyVxv7qYqoweaEd2nrYQzQ==}
+
   http-cache-semantics@4.3.0:
     resolution: {integrity: sha512-M5t5LlJpS1UHMjvwRQVdFHvPISGeLAxNcrWuJkeGh0KxsqCHZ1O3NXZU/8x7cD0BDcGW8kapxMKTvwlqrNkHkA==}
 
@@ -3065,6 +3085,9 @@ packages:
 
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
+
+  js-tokens@9.0.1:
+    resolution: {integrity: sha512-mxa9E9ITFOt0ban3j6L5MpjwegGz6lBQmM1IJkWeBZGcMxto50+eWdjC/52xDbS2vy0k7vIMK0Fe2wfL9OQSpQ==}
 
   js-yaml@4.3.2:
     resolution: {integrity: sha512-SFNOvSJ+Dgf/9An904Yx+CgSlIPCkIpao4qo51lpee25TIRejdH3rhR4EZMGoNx3/TP3O+wzWuiTFl4sqbltzA==}
@@ -3682,13 +3705,13 @@ packages:
     resolution: {integrity: sha512-emEcLuomt2j03vxD54giVB4SxTjnsqkU692xZOZXHDVoYyypEm+b3jpiTcc+Cf+myooc+/Ly0z01jqeNHVgJGw==}
     engines: {node: '>=16.0.0'}
 
-  playwright-core@1.65.0:
-    resolution: {integrity: sha512-vNSKgH6YqtN7cdT/L334zo0a+YwkrpicyrHJlWWPIm/Q+Nn2SWInil01oT0mbu96U4GgoRtCYQD9CzJQgju+lA==}
+  playwright-core@1.65.1:
+    resolution: {integrity: sha512-hqPpz7blSMPxWVdoeE1yiBSzXsKiVOd2k+kjCvmUywD2GPO2Dd9HfcWnq9NN0GHbNZDFgZ9JfBFr+X5/BLo0qw==}
     engines: {node: '>=20'}
     hasBin: true
 
-  playwright@1.65.0:
-    resolution: {integrity: sha512-F3AMWcR44qMBt4kq+6Kb6mX7bjGXshktKFOPULd7reED6ZJWevjbNRqysP7q+AATE9kdPEZBibex1BYsvpVoeA==}
+  playwright@1.65.1:
+    resolution: {integrity: sha512-vJ1FuoOrNwOKHUIVEvSt3jT1L+wjjDpwhwIstKtfvTh8XIG4FG4bIFuvNdMxi81LGfAhUgUZleVFaOLY4RIUUw==}
     engines: {node: '>=20'}
     hasBin: true
 
@@ -3707,6 +3730,12 @@ packages:
   possible-typed-array-names@1.0.0:
     resolution: {integrity: sha512-d7Uw+eZoloe0EHDIYoe+bQ5WXnGMOpmiZFTuMWCwpjzzkL2nTjcKiAk4hh8TjnGye2TwWOk3UXucZ+3rbmBa8Q==}
     engines: {node: '>= 0.4'}
+
+  postcss-html@2.0.1:
+    resolution: {integrity: sha512-FqutI3u6D7j28ZgviEFjGCbId174THaVxFAMe/yd6Y/+BSQidYYh2nRCxFk8btwEV64f3TvfNz7ureGnkzqtmA==}
+    engines: {node: ^22.12 || >=24}
+    peerDependencies:
+      postcss: ^8.5.0
 
   postcss-loader@8.2.1:
     resolution: {integrity: sha512-k98jtRzthjj3f76MYTs9JTpRqV1RaaMhEU0Lpw9OTmQZQdppg4B30VZ74BojuBHt3F4KyubHJoXCMUeM8Bqeow==}
@@ -5081,7 +5110,7 @@ snapshots:
 
   '@humanwhocodes/retry@0.4.3': {}
 
-  '@iconify-json/material-symbols@1.2.99':
+  '@iconify-json/material-symbols@1.2.100':
     dependencies:
       '@iconify/types': 2.0.0
 
@@ -5517,9 +5546,9 @@ snapshots:
 
   '@pkgr/core@0.3.6': {}
 
-  '@playwright/test@1.65.0':
+  '@playwright/test@1.65.1':
     dependencies:
-      playwright: 1.65.0
+      playwright: 1.65.1
 
   '@rspack/binding-darwin-arm64@2.3.2':
     optional: true
@@ -6482,9 +6511,19 @@ snapshots:
       domhandler: 4.3.1
       entities: 2.2.0
 
+  dom-serializer@2.0.0:
+    dependencies:
+      domelementtype: 2.3.0
+      domhandler: 5.0.3
+      entities: 4.5.0
+
   domelementtype@2.3.0: {}
 
   domhandler@4.3.1:
+    dependencies:
+      domelementtype: 2.3.0
+
+  domhandler@5.0.3:
     dependencies:
       domelementtype: 2.3.0
 
@@ -6497,6 +6536,12 @@ snapshots:
       dom-serializer: 1.4.1
       domelementtype: 2.3.0
       domhandler: 4.3.1
+
+  domutils@3.2.2:
+    dependencies:
+      dom-serializer: 2.0.0
+      domelementtype: 2.3.0
+      domhandler: 5.0.3
 
   dot-case@3.0.4:
     dependencies:
@@ -6602,6 +6647,8 @@ snapshots:
       tapable: 2.3.3
 
   entities@2.2.0: {}
+
+  entities@4.5.0: {}
 
   entities@6.0.1: {}
 
@@ -7260,6 +7307,13 @@ snapshots:
       domutils: 2.8.0
       entities: 2.2.0
 
+  htmlparser2@9.1.0:
+    dependencies:
+      domelementtype: 2.3.0
+      domhandler: 5.0.3
+      domutils: 3.2.2
+      entities: 4.5.0
+
   http-cache-semantics@4.3.0: {}
 
   http-proxy-agent@7.0.2(supports-color@10.2.2):
@@ -7387,6 +7441,8 @@ snapshots:
   jiti@2.7.0: {}
 
   js-tokens@4.0.0: {}
+
+  js-tokens@9.0.1: {}
 
   js-yaml@4.3.2:
     dependencies:
@@ -8169,11 +8225,11 @@ snapshots:
       pvutils: 1.1.5
       tslib: 2.8.1
 
-  playwright-core@1.65.0: {}
+  playwright-core@1.65.1: {}
 
-  playwright@1.65.0:
+  playwright@1.65.1:
     dependencies:
-      playwright-core: 1.65.0
+      playwright-core: 1.65.1
 
   plist@3.1.0:
     dependencies:
@@ -8186,6 +8242,13 @@ snapshots:
   pngjs@5.0.0: {}
 
   possible-typed-array-names@1.0.0: {}
+
+  postcss-html@2.0.1(postcss@8.5.32):
+    dependencies:
+      htmlparser2: 9.1.0
+      js-tokens: 9.0.1
+      postcss: 8.5.32
+      postcss-safe-parser: 7.1.0(postcss@8.5.32)
 
   postcss-loader@8.2.1(@rspack/core@2.3.2)(postcss@8.5.32)(typescript@7.0.2):
     dependencies:

@@ -267,7 +267,7 @@ Subscriptions:
     Followed Channels: ערוצים במעקב בפלטפורמות אחרות
     Description: אפשר לעקוב אחר ערוצים ב־Twitch, ב־SoundCloud, ב־PeerTube, ב־Rumble, ב־Odysee וב־media.ccc.de כדי לראות את ההעלאות שלהם בלשונית פלטפורמות שבמינויים. אפשר למצוא ערוצים בחיפוש, או להוסיף אותם לפי כתובת הדף שלהם. המדיה שלהם מתנגנת באמצעות yt-dlp.
     Add Channel: הוספת ערוץ
-    Channel URL: כתובת הערוץ
+    Search Or Paste Channel: חפשו או הדביקו כתובת של ערוץ
     Invalid Channel: יש להזין כתובת של דף ערוץ ב־Twitch, ב־SoundCloud, ב־PeerTube, ב־Rumble, ב־Odysee או ב־media.ccc.de.
     Channel Not Found: אין ערוץ בכתובת הזאת.
     Channel Already Followed: כבר עוקבים אחר הערוץ הזה.
@@ -440,7 +440,6 @@ Settings:
     Failed to Save Password: "שמירת הסיסמה נכשלה."
     Confirm Password: "אישור הסיסמה"
     Passwords Do Not Match: "הסיסמאות אינן תואמות."
-  Navigation and Controls: "ניווט ופקדים"
   Control Bar:
     Title: "סרגל הבקרה"
     Customize: "התאמה אישית של סרגל הבקרה"
@@ -687,7 +686,11 @@ Settings:
       Tab Loading Indicator: מחוון טעינת לשונית
       Bar: פס
       Dot: נקודה (קלאסי)
-    Compact Settings Categories: "קטגוריות הגדרות קומפקטיות"
+    UI Density:
+      UI Density: "צפיפות הממשק"
+      Compact: "דחוסה"
+      Default: "ברירת מחדל"
+      Comfortable: "מרווחת"
     Playlist Thumbnail Size: "גודל התמונות הממוזערות ברשימת ההשמעה"
     Compact Mobile Mini Player: "נגן קטן קומפקטי לנייד"
     Always Show Mobile Search Bar: "הצגת סרגל החיפוש בנייד תמיד"
@@ -1066,6 +1069,7 @@ Settings:
     Channel Settings: הגדרות ערוץ
     Channel Settings Description: שמירת ההגדרות שנבחרו בזמן צפייה לכל ערוץ בנפרד, כדי שיוחלו שוב בצפייה הבאה באחד מסרטוניו.
     Enable Channel Playback Settings: הפעלת הגדרות הפעלה לפי ערוץ
+    Auto Save Changes: שמירה אוטומטית של שינויים
     Auto Save Playback Speed: שמירה אוטומטית של שינויים במהירות ההפעלה
     Auto Save Video Quality: שמירה אוטומטית של שינויים באיכות הווידאו
     Auto Save Subtitles State: שמירה אוטומטית של שינויים במצב הכתוביות
@@ -1315,6 +1319,7 @@ Settings:
     Notify About New Uploads: התראה על העלאות חדשות
     RSS Feeds Auto Refresh Interval: מרווח ריענון אוטומטי של פידי RSS
     Faster Subscription Refresh: "רענון מהיר יותר של מינויים"
+    Show Collaborations From Other Channels: "לכלול שיתופי פעולה שהועלו על ידי ערוצים אחרים"
     Platforms:
       Other Platforms: פלטפורמות אחרות
       Manage Channels: ניהול ערוצים במעקב
@@ -2274,6 +2279,7 @@ Context Menu:
   Search With Multiple: חיפוש באמצעות...
   Selection Too Long: הטקסט שנבחר ארוך מדי לחיפוש (מעל {count} תווים)
   Background Tab: לשונית ברקע
+  Open in an Incognito Tab: פתיחה בכרטיסיית גלישה בסתר
 Tab Organizer:
   Tab History: "היסטוריית הלשונית"
   Current Page: "העמוד הנוכחי"
@@ -2359,6 +2365,7 @@ Comments:
   Filter loaded comments: סינון התגובות שנטענו
   Comment filters: מסנני תגובות
   From creator: מאת היוצר
+  From you: ממך
   Contains timestamps: כוללות חותמות זמן
   Pin comment by author: הצמדת התגובה של {author}
   Unpin comment by author: ביטול הצמדת התגובה של {author}
@@ -2507,6 +2514,7 @@ Tooltips:
     Notify About New Uploads: מציג התראות מערכת במכשיר זה עבור ערוצים שהפעלת את ההתראות שלהם בהגדרות המינוי שלהם. OpenTubeX בודק אם יש תוכן חדש בעת רענון המינויים, לכן יש לבחור מרווח ריענון אוטומטי. כדי לקבל התראות כשהיישום סגור, יש להפעיל גם ריענון כשהיישום סגור.
     RSS Feeds Auto Refresh Interval: באיזו תדירות OpenTubeX מרענן אוטומטית את פידי ה-RSS שלך כשהיישום פתוח.
     Faster Subscription Refresh: "בודק תחילה את הזנת ה־RSS של כל ערוץ וטוען סרטונים, Shorts ושידורים חיים רק מערוצים עם העלאות חדשות. רענונים אוטומטיים גם מדלגים על ערוצים שנטענו ב־10 הדקות האחרונות. בערוצים ללא העלאות חדשות, מספר הצפיות, סרטונים שהוסרו וכותרות ששונו מתעדכנים רק כל כמה שעות, והעלאות חדשות עשויות להופיע מאוחר יותר כשהזנת ה־RSS מפגרת. לא זמין עם ה־API של Invidious."
+    Show Collaborations From Other Channels: "מציג גם סרטונים שערוצים שאתם רשומים אליהם יצרו יחד עם ערוץ אחר שהעלה אותם. YouTube מציג אותם רק בכרטיסיית דף הבית של הערוץ, ולכן כל רענון סרטונים טוען עמוד נוסף לכל ערוץ. נמצאים רק שיתופי הפעולה האחרונים שמוצגים שם, חלק מהערוצים לא מציגים אף אחד, ותאריכי הפרסום שלהם משוערים. לא זמין עם ה־API של Invidious."
     Platforms Auto Refresh Interval: באיזו תדירות OpenTubeX מרענן אוטומטית את הערוצים שבמעקב בפלטפורמות אחרות כשהיישום פתוח.
     Twitch Notify When Live: מודיע כשאחד מערוצי ה־Twitch שבמעקב מתחיל לשדר. OpenTubeX בודק כל כמה דקות כל עוד הוא פתוח, וגם כשהוא סגור אם הוא מרענן אז את המינויים.
   Theme Settings:
@@ -2514,7 +2522,7 @@ Tooltips:
     Visible Search Suggestions: "קובע כמה רשומות מהיסטוריית החיפוש והצעות סרגל החיפוש מציג לפני שיש לגלול את הרשימה שלו. הרשימה לעולם אינה חורגת מתחתית החלון."
     Thumbnail Size: "משנה את גודל התמונות הממוזערות של סרטונים ברשתות וברשימות. רשתות עם מספר עמודות קבוע או סוג התצוגה „רוחב מלא” ממלאות במקום זאת כל שורה, ולכן שם הוא משנה רק תמונות ממוזערות ברשימות ו־Shorts. בחלונות בגודל טלפון התמונות הממוזערות ברשת מוגבלות ל־100%."
     Playlist Thumbnail Size: "משנה את גודל התמונות הממוזערות של סרטונים בדפי רשימות השמעה. רשתות עם מספר עמודות קבוע או סוג התצוגה „רוחב מלא” ממלאות במקום זאת כל שורה, ולכן שם הוא משנה רק תמונות ממוזערות ברשימות ו־Shorts. בחלונות בגודל טלפון התמונות הממוזערות ברשת מוגבלות ל־100%."
-    Compact Settings Categories: "מקטין את גובה קטגוריות ההגדרות."
+    UI Density: "משנה את הריווח ברשימות, בתפריטים, בסרגל הצד ובהגדרות."
     Show Progress as Notification: מציג התראה קבועה עם התקדמות בזמן אמת של פעולות רקע, כגון רענון מינויים והורדת כלים מנוהלים, במקום סרגל ההתקדמות הכללי.
     Always Show Scrollbars: משאיר את פסי הגלילה גלויים תמיד. כשהאפשרות מושבתת, הם נעלמים זמן קצר לאחר הפסקת תנועת העכבר ומופיעים שוב מיד כשמזיזים אותו.
     Scroll Speed: שינוי מרחק הגלילה של מחוות גלגלת העכבר ומשטח המגע.
@@ -2571,6 +2579,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: בורר לשוניות
   Undo Seek: ביטול הקפיצה האחרונה
   Redo Seek: ביצוע מחדש של קפיצה שבוטלה
+  New Incognito Tab: יצירת כרטיסיית גלישה בסתר חדשה
 CommandPalette:
   Title: לוח הפקודות
   Open: פתיחת לוח הפקודות
@@ -2959,3 +2968,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "חיפוש ב-Twitch"
+New Incognito Tab: כרטיסיית גלישה בסתר חדשה
+Incognito Tab: כרטיסיית גלישה בסתר

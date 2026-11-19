@@ -68,7 +68,10 @@
             @click="removeEngine(engine.id)"
           />
         </template>
-        <code v-else>{{ engine.url }}</code>
+        <code
+          v-else
+          dir="ltr"
+        >{{ engine.url }}</code>
       </div>
     </div>
 

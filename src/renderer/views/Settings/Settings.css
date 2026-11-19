@@ -1,5 +1,5 @@
 .settingsWindow {
-  --settings-row-gap: 20px;
+  --settings-row-gap: calc(20px * var(--ui-density));
 
   position: fixed;
   z-index: 9;
@@ -323,7 +323,10 @@
 
 .settingsContent :deep(.settingsCategory) {
   display: grid;
-  gap: 20px;
+
+  /* Matches the space below each section title, so titles sit as far from
+     the card above as from their own card. */
+  gap: calc(20px * var(--ui-density));
 }
 
 .settingsMenu {
@@ -475,6 +478,10 @@
    controls that cannot be reset. Otherwise those controls sit further towards
    the edge than their resettable neighbours. The low-specificity :where keeps
    the colored marker rule below in control when a setting has changed. */
+.settingsContent.highlightChangedSettings {
+  --settings-marker-gutter: 12px;
+}
+
 .settingsContent.highlightChangedSettings :deep(:where(
   .switch-ctn,
   .select,

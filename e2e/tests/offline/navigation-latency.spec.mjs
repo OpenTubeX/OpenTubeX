@@ -78,7 +78,7 @@ test.describe('phone settings scroll ranges', { tag: '@scale' }, () => {
     const previousHeight = await content.evaluate(element => element.scrollHeight)
     // Toggle without Playwright scrolling the control into view first.
     await section.getByRole('checkbox', { name: 'Enable Downloads' }).evaluate(element => element.click())
-    await expect(section.locator('.downloadPathInputs')).toHaveCount(0)
+    await expect(section.locator('.downloadFieldGrid')).toHaveCount(0)
     await expectCurrentScrollRange(content)
     expect(await content.evaluate(element => element.scrollHeight)).toBeLessThan(previousHeight)
 

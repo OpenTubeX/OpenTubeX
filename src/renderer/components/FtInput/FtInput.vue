@@ -32,6 +32,7 @@
         :min="min"
         :step="step"
         :type="inputType === 'password' && passwordVisible ? 'text' : inputType"
+        :dir="inputType === 'url' ? 'ltr' : null"
         :placeholder="placeholder"
         :disabled="disabled"
         :readonly="readonly"

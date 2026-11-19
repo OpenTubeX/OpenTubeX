@@ -311,7 +311,7 @@ Subscriptions:
     Followed Channels: Canals seguits en altres plataformes
     Description: Seguiu canals de Twitch, SoundCloud, PeerTube, Rumble, Odysee i media.ccc.de per veure'n les publicacions a la pestanya Plataformes de les vostres subscripcions. Cerqueu canals amb el cercador o afegiu-los amb l'adreça de la seva pàgina. El seu contingut es reprodueix amb yt-dlp.
     Add Channel: Afegeix un canal
-    Channel URL: Adreça del canal
+    Search Or Paste Channel: Cerqueu o enganxeu l'adreça d'un canal
     Invalid Channel: Introduïu l'adreça de la pàgina d'un canal de Twitch, SoundCloud, PeerTube, Rumble, Odysee o media.ccc.de.
     Channel Not Found: No hi ha cap canal en aquesta adreça.
     Channel Already Followed: Ja seguiu aquest canal.
@@ -567,7 +567,6 @@ Settings:
     Tabs to unload: "Pestanyes per descarregar"
     Automatic unloading help: "Descarrega les pestanyes en segon pla més antigues per alliberar memòria. Les pestanyes actives i en reproducció es mantenen carregades."
     Memory threshold help: "Percentatge del límit de memòria del renderitzador, no de la RAM total del sistema."
-  Navigation and Controls: "Navegació i controls"
   Control Bar:
     Title: "Barra de control"
     Customize: "Personalitza la barra de control"
@@ -821,7 +820,11 @@ Settings:
       Tab Loading Indicator: Indicador de càrrega de la pestanya
       Bar: Barra
       Dot: Punt (clàssic)
-    Compact Settings Categories: "Categories de configuració compactes"
+    UI Density:
+      UI Density: "Densitat de la interfície"
+      Compact: "Compacta"
+      Default: "Predeterminada"
+      Comfortable: "Còmoda"
     Playlist Thumbnail Size: "Mida de les miniatures de la llista de reproducció"
     Compact Mobile Mini Player: "Minireproductor mòbil compacte"
     Always Show Mobile Search Bar: "Mostra sempre la barra de cerca al mòbil"
@@ -1298,6 +1301,7 @@ Settings:
     Channel Settings: Configuració dels canals
     Channel Settings Description: Recorda per separat la configuració que trieu mentre mireu cada canal, per tornar-la a aplicar la propera vegada que mireu un dels seus vídeos.
     Enable Channel Playback Settings: Activa la configuració de reproducció per canal
+    Auto Save Changes: Desa els canvis automàticament
     Auto Save Playback Speed: Desa automàticament els canvis de velocitat de reproducció
     Auto Save Video Quality: Desa automàticament els canvis de qualitat del vídeo
     Auto Save Subtitles State: "Desa automàticament els canvis d'estat dels subtítols"
@@ -1569,6 +1573,7 @@ Settings:
     Confirm Before Unsubscribing: Confirma abans de donar-se de baixa
     RSS Feeds Auto Refresh Interval: Interval d'actualització automàtica dels canals RSS
     Faster Subscription Refresh: "Actualització més ràpida de les subscripcions"
+    Show Collaborations From Other Channels: "Inclou col·laboracions penjades per altres canals"
     Platforms:
       Other Platforms: Altres plataformes
       Manage Channels: Gestiona els canals seguits
@@ -2731,6 +2736,7 @@ Context Menu:
   Search With Multiple: Cerca amb…
   Selection Too Long: La selecció és massa llarga per cercar-la (> {count} caràcters)
   Background Tab: Pestanya en segon pla
+  Open in an Incognito Tab: Obre en una pestanya d’incògnit
 Tab Organizer:
   Tab History: "Historial de la pestanya"
   Current Page: "Pàgina actual"
@@ -2834,6 +2840,7 @@ Comments:
   Filter loaded comments: Filtra els comentaris carregats
   Comment filters: Filtres de comentaris
   From creator: Del creador
+  From you: Vostres
   Contains timestamps: Conté marques de temps
   Pin comment by author: Fixa el comentari de {author}
   Unpin comment by author: Deixa de fixar el comentari de {author}
@@ -3013,6 +3020,7 @@ Tooltips:
     Notify About New Uploads: Mostra notificacions del sistema en aquest dispositiu per als canals dels quals heu activat les notificacions a la seva configuració de subscripció. OpenTubeX cerca contingut nou quan s'actualitzen les subscripcions, així que trieu un interval d'actualització automàtica. Per rebre notificacions amb l'aplicació tancada, activeu també l'actualització amb l'aplicació tancada.
     RSS Feeds Auto Refresh Interval: Amb quina freqüència OpenTubeX actualitza automàticament els vostres canals RSS mentre l'aplicació és oberta.
     Faster Subscription Refresh: "Primer comprova el canal RSS de cada canal i només carrega els vídeos, els Shorts i les emissions en directe dels canals amb pujades noves. Les actualitzacions automàtiques també ometen els canals carregats en els últims 10 minuts. Als canals sense pujades noves, el nombre de visualitzacions, els vídeos eliminats i els títols canviats només s'actualitzen cada poques hores, i les pujades noves poden aparèixer més tard quan el canal RSS va endarrerit. No disponible amb l'API d'Invidious."
+    Show Collaborations From Other Channels: "També mostra els vídeos que els canals als quals esteu subscrit han fet juntament amb un altre canal que els ha penjat. YouTube només els mostra a la pestanya Inici d'un canal, de manera que cada actualització de vídeos carrega una pàgina més per canal. Només es troben les col·laboracions més recents que s'hi mostren, alguns canals no en mostren cap i les dates de publicació són aproximades. No disponible amb l'API d'Invidious."
     Platforms Auto Refresh Interval: Amb quina freqüència OpenTubeX actualitza automàticament els canals que seguiu en altres plataformes mentre l'aplicació és oberta.
     Twitch Notify When Live: Et notifica quan un dels canals de Twitch que segueixes comença a emetre. OpenTubeX ho comprova cada pocs minuts mentre és obert, i també mentre és tancat si llavors actualitza les subscripcions.
   Theme Settings:
@@ -3020,7 +3028,7 @@ Tooltips:
     Visible Search Suggestions: "Defineix quantes entrades de l’historial de cerca i suggeriments mostra la barra de cerca abans que la seva llista es desplaci. La llista mai no s’estén més enllà de la part inferior de la finestra."
     Thumbnail Size: "Canvia la mida de les miniatures dels vídeos a les quadrícules i llistes. Les quadrícules amb un nombre fix de columnes o el tipus de vista Amplada completa omplen cada fila, de manera que allà només canvia les miniatures de les llistes i els Shorts. A les finestres de mida de telèfon, les miniatures de la quadrícula es limiten al 100%."
     Playlist Thumbnail Size: "Canvia la mida de les miniatures dels vídeos a les pàgines de llistes de reproducció. Les quadrícules amb un nombre fix de columnes o el tipus de vista Amplada completa omplen cada fila, de manera que allà només canvia les miniatures de les llistes i els Shorts. A les finestres de mida de telèfon, les miniatures de la quadrícula es limiten al 100%."
-    Compact Settings Categories: "Redueix l’alçada de les categories de configuració."
+    UI Density: "Canvia l’espaiat a les llistes, els menús, la barra lateral i la configuració."
     Show Progress as Notification: Mostra una notificació persistent amb el progrés en directe de les operacions en segon pla, com ara actualitzar les subscripcions i baixar eines gestionades, en lloc d'utilitzar la barra de progrés general.
     Always Show Scrollbars: Manté les barres de desplaçament sempre visibles. Si es desactiva, s'esvaeixen poc després que deixeu de moure el ratolí i reapareixen quan el torneu a moure.
     Scroll Speed: Canvia la distància de desplaçament dels gestos de roda del ratolí i del ratolí tàctil.
@@ -3170,6 +3178,7 @@ KeyboardShortcutPrompt:
   Skip to Previous Video: Salta al vídeo anterior d'una llista de reproducció
   Undo Seek: Desfés l'últim salt
   Redo Seek: Refés un salt desfet
+  New Incognito Tab: Crea una pestanya d’incògnit nova
 CommandPalette:
   Title: Paleta d'ordres
   Open: Obre la paleta d'ordres
@@ -3543,3 +3552,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Cerca a Twitch"
+New Incognito Tab: Pestanya d’incògnit nova
+Incognito Tab: Pestanya d’incògnit

@@ -48,7 +48,7 @@ import { FcastManager } from './fcast'
 import { handleTwitchAdFreeLivePlaylist, handleTwitchChatReplayPage, handleTwitchLiveVod, handleTwitchSubOnlyVod } from './twitchChat'
 import { applyTwitchPlaylistOrigin } from '../twitchPlaylistOrigin'
 import { createTwitchLiveNotifier } from './twitchLiveNotifications'
-import { isYtDlpStoryboardUrl, getYtDlpExternalStreamCookieHeader, getYtDlpExternalStreamHeaders, refreshYtDlpDownloadQueue, restoreYtDlpDownloadQueue, shutdownYtDlpDownloads } from './ytDlp'
+import { isYtDlpStoryboardUrl, getYtDlpExternalStreamCookieHeader, getYtDlpExternalStreamHeaders, refreshYtDlpDownloadQueue, restoreYtDlpDownloadQueue, setFinishedDownloadListener, shutdownYtDlpDownloads } from './ytDlp'
 import { applyYtDlpPlaybackCacheSettings } from './ytDlpPlaybackCache'
 import { generatePoToken, mintPoTokenFromAttestation } from './poTokenGenerator'
 import { disableSpellChecker } from './spellChecker'
@@ -88,7 +88,7 @@ import { createUploadNotifier } from './uploadNotifications'
 import { createNotificationHistory, createNotifier, createSystemNotificationLinks } from './notificationHistory'
 import { loadNotificationImage, setNotificationImagesAllowed } from './notificationImage'
 import { setAutomaticDownloadNotifier } from './ytDlpAutomaticDownloads'
-import { getLiveReminderTarget } from '../notificationHistory'
+import { getDownloadTarget, getLiveReminderTarget, parseRecordedNotification } from '../notificationHistory'
 import { getCommentNotificationTarget } from '../commentReplyTracking'
 import { supportsNativeNotifications } from './nativeNotifications'
 import { getTrayMenuIcon } from './trayMenuIcons'
@@ -405,6 +405,12 @@ function runApp() {
     }
   }
 
+  /** Whether a link or selection menu belongs to an incognito tab, so what it opens stays incognito */
+  function isContextMenuTabIncognito(webContents) {
+    const manager = TabManager.getFromWebContents(webContents)
+    return manager?.tabs.get(manager.contextMenuTabId ?? manager.presentedTabId ?? manager.activeTabId)?.isIncognito === true
+  }
+
   // Registered per-webContents in 'web-contents-created' so the shared
   // BrowserWindow renderer can resolve native menu targets through TabManager.
   /** @type {Record<string, Function | boolean>} */
@@ -442,11 +448,28 @@ function runApp() {
           }
         },
         {
+          label: contextMenuLabel('Open in an Incognito Tab'),
+          visible: isInAppUrl,
+          click: () => {
+            TabManager.getFromWebContents(webContents)?.createTabWithPreference({
+              url: parameters.linkURL,
+              makeActive: true,
+              isIncognito: true
+            }).catch(error => {
+              console.error('Failed to open link in an incognito tab:', error)
+            })
+          }
+        },
+        {
           label: contextMenuLabel('Open in a New Window'),
           // Only show the option for in-app URLs and not external ones
           visible: isInAppUrl,
           click: () => {
-            createWindow({ replaceMainWindow: false, windowStartupUrl: parameters.linkURL })
+            createWindow({
+              replaceMainWindow: false,
+              windowStartupUrl: parameters.linkURL,
+              incognito: isContextMenuTabIncognito(webContents)
+            })
           }
         },
         // Only show select all in text fields
@@ -576,6 +599,7 @@ function runApp() {
               replaceMainWindow: false,
               windowStartupUrl: `${ROOT_APP_URL}#/search/${encodeURIComponent(selectionText)}`,
               searchQueryText: selectionText,
+              incognito: isContextMenuTabIncognito(webContents)
             })
           }
         },
@@ -711,6 +735,24 @@ function runApp() {
     link: systemNotificationLinks.link
   })
   setAutomaticDownloadNotifier(notify)
+  // The bell keeps the downloads the user started, which only the renderers' toasts announce.
+  setFinishedDownloadListener(async download => {
+    const t = await getMainTranslator()
+    // The mode can change while the translations load.
+    if (notificationMode !== 'both') return
+    const completed = download.status === 'completed'
+    const notification = parseRecordedNotification({
+      ...getDownloadTarget(completed ? 'completed' : 'failed', download.videoId, download.id, download.mode),
+      title: completed ? t('Downloads.Download Complete') : t('Downloads.Download Failed'),
+      body: completed
+        ? t('Downloads.Download Complete Template', { title: download.title })
+        : download.errorMessage === 'ENOENT'
+          ? t('Downloads.yt-dlp Not Found')
+          : t('Downloads.Download Failed Template', { title: download.title }),
+      thumbnail: thumbnailPreference !== 'hidden' && !blurThumbnails ? download.thumbnail : undefined
+    })
+    if (notification) await notificationHistory.record(notification)
+  })
   handleTrusted(IpcChannels.NOTIFICATION_HISTORY_LIST, () => notificationHistory.list(), [])
   handleTrusted(IpcChannels.NOTIFICATION_HISTORY_MARK_READ, (_event, id) => (
     id === undefined || typeof id === 'string' ? notificationHistory.markRead(id) : undefined))
@@ -719,6 +761,11 @@ function runApp() {
   handleTrusted(IpcChannels.NOTIFICATION_HISTORY_CLEAR, () => notificationHistory.clear())
   handleTrusted(IpcChannels.NOTIFICATION_DISMISSALS_GET, () => notificationHistory.getDismissals())
   handleTrusted(IpcChannels.NOTIFICATION_DISMISSALS_MERGE, (_event, dismissals) => notificationHistory.mergeDismissals(dismissals))
+  handleTrusted(IpcChannels.NOTIFICATION_RECORD, (_event, value) => {
+    const notification = parseRecordedNotification(value)
+    // Like system notifications, the bell only keeps them while it shows.
+    if (notification && notificationMode === 'both') return notificationHistory.record(notification)
+  })
   handleTrusted(IpcChannels.NOTIFICATION_COMMENT, (_event, notification) => {
     const target = getCommentNotificationTarget(notification?.kind, notification?.videoId, notification?.commentId)
     if (!target || typeof notification.title !== 'string' || typeof notification.body !== 'string') return
@@ -749,7 +796,8 @@ function runApp() {
     file: path.join(userDataPath, 'upload-notifications.json'),
     show: showUrlNotification,
     // Uses the session's proxy settings, like the background refresh requests.
-    fetch: (input, init) => net.fetch(input, init)
+    fetch: (input, init) => net.fetch(input, init),
+    isWatched: videoId => baseHandlers.history._includes(videoId)
   })
   const backgroundSubscriptions = createSubscriptionBackgroundService(userDataPath, {
     onUploads: value => uploadNotifier.observe(value).catch(() => {})
@@ -1851,6 +1899,7 @@ function runApp() {
       replaceMainWindow = true,
       windowStartupUrl = null,
       searchQueryText = null,
+      incognito = false,
       sessionData = null,
       loadInactiveTabsOnRestore = false,
       restoreTabLoadStateOnRestore = false,
@@ -2267,9 +2316,9 @@ function runApp() {
       if (!sessionRestored) {
         // Create initial tab
         if (windowStartupUrl != null) {
-          tabManager.createTab({ url: windowStartupUrl, makeActive: true })
+          tabManager.createTab({ url: windowStartupUrl, makeActive: true, isIncognito: incognito })
         } else {
-          await tabManager.createTabWithPreference({ makeActive: true })
+          await tabManager.createTabWithPreference({ makeActive: true, ...(incognito && { isIncognito: true }) })
         }
       }
 
@@ -2651,7 +2700,7 @@ function runApp() {
     reopenClosedWindow()
   })
 
-  onTrusted(IpcChannels.CREATE_NEW_WINDOW, (event, path, query, searchQueryText) => {
+  onTrusted(IpcChannels.CREATE_NEW_WINDOW, (event, path, query, searchQueryText, incognito) => {
     if (
       typeof path !== 'string' ||
       (query != null && typeof query !== 'object') ||
@@ -2679,10 +2728,13 @@ function runApp() {
     const search = searchParams.toString()
     const windowStartupUrl = `${ROOT_APP_URL}#${path}${search.length > 0 ? `?${search}` : ''}`
 
+    // A window opened from an incognito tab starts with an incognito tab. The renderer names the tab a
+    // link came from, since another tab may be shown by the time it opens.
     createWindow({
       replaceMainWindow: false,
       windowStartupUrl,
-      searchQueryText
+      searchQueryText,
+      incognito: incognito === true || TabManager.getFromWebContents(event.sender)?.isPresentingIncognito() === true
     })
   })
 
@@ -3288,7 +3340,8 @@ function runApp() {
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.NEW_WINDOW),
             click: (_menuItem, browserWindow, _event) => {
               if (browserWindow && appShortcutBlockedWindows.has(browserWindow)) { return }
-              createWindow({ replaceMainWindow: false })
+              const incognito = browserWindow ? TabManager.getForWindow(browserWindow.id)?.isPresentingIncognito() === true : false
+              createWindow({ replaceMainWindow: false, incognito })
             },
             type: 'normal'
           },
@@ -3539,6 +3592,17 @@ function runApp() {
                     console.error('Failed to create a new tab from the app menu:', error)
                   })
                 }
+              }
+            }
+          },
+          {
+            label: t('New Incognito Tab'),
+            accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.NEW_INCOGNITO_TAB),
+            click: (_menuItem, browserWindow) => {
+              if (browserWindow && !appShortcutBlockedWindows.has(browserWindow)) {
+                TabManager.getForWindow(browserWindow.id)?.createTabWithPreference({ makeActive: true, isIncognito: true }).catch(error => {
+                  console.error('Failed to create an incognito tab from the app menu:', error)
+                })
               }
             }
           },

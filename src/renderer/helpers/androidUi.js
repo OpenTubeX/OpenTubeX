@@ -58,6 +58,14 @@ export function prepareAndroidFullscreenRotation() {
   return AndroidUi?.prepareFullscreenRotation() ?? Promise.resolve()
 }
 
+export function coverAndroidFullscreenEntry() {
+  return AndroidUi?.coverFullscreenEntry() ?? Promise.resolve()
+}
+
+export function uncoverAndroidFullscreenEntry() {
+  return AndroidUi?.uncoverFullscreenEntry() ?? Promise.resolve()
+}
+
 export async function getAndroidDisplayOrientation() {
   const { type } = await ScreenOrientation.getCurrentOrientation()
   return type
@@ -315,6 +323,11 @@ export async function observeIosReduceTransparency(callback) {
 
 export function performAndroidHapticFeedback(ignoreSystemSetting) {
   return AndroidUi?.performHapticFeedback({ ignoreSystemSetting }) ?? Promise.resolve()
+}
+
+/** Asks the keyboard not to learn from text typed while an incognito tab is shown. */
+export function setAndroidIncognitoKeyboard(enabled) {
+  return AndroidUi?.setIncognitoKeyboard({ enabled }) ?? Promise.resolve()
 }
 
 export function setAndroidHapticFeedbackEnabled(enabled) {

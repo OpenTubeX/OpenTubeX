@@ -16,7 +16,10 @@
           @retry="search(error.more)"
         />
       </FtFlexBox>
-      <PlatformResultList :results="results" />
+      <PlatformResultList
+        appear
+        :results="results"
+      />
       <!-- After a failed page, the button tries again -->
       <FtAutoLoadNextPageWrapper
         v-if="continuation !== null"

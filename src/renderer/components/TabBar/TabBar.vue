@@ -1560,14 +1560,14 @@ watch(tabs, (nextTabs) => {
 <style scoped src="./TabBar.css" />
 
 <style>
-body.tab-bar-grabbing,
-body.tab-bar-grabbing * {
+.tab-bar-grabbing,
+.tab-bar-grabbing * {
   cursor: grabbing !important;
   user-select: none !important;
 }
 
-body.tab-bar-resizing,
-body.tab-bar-resizing * {
+.tab-bar-resizing,
+.tab-bar-resizing * {
   cursor: col-resize !important;
   user-select: none !important;
 }

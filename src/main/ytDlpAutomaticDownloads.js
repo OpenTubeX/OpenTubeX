@@ -10,7 +10,7 @@ import { settings } from '../datastores/handlers/base'
 import { TabManager } from './tabs/TabManager'
 import { IpcChannels } from '../constants'
 import { supportsNativeNotifications } from './nativeNotifications'
-import { getAutomaticDownloadTarget, isThumbnailUrl } from '../notificationHistory'
+import { getDownloadTarget, isThumbnailUrl } from '../notificationHistory'
 import { loadNotificationImage } from './notificationImage'
 import { downloadManagedYtDlp, pushProxyArgument, resolveExecutable } from './ytDlpBinaries'
 
@@ -67,7 +67,7 @@ export function showAutomaticDownloadNotification(payload, phase, downloadId = n
   const thumbnail = isThumbnailUrl(payload.notification?.thumbnail) ? payload.notification.thumbnail : undefined
   const showSystemNotification = () => showSystemNotificationForDownload(payload, phase, downloadId, title, body, thumbnail)
   if (notify) {
-    notify({ title, body, thumbnail, target: getAutomaticDownloadTarget(phase, payload.videoId, downloadId), showSystemNotification })
+    notify({ title, body, thumbnail, target: getDownloadTarget(phase, payload.videoId, downloadId), showSystemNotification })
       .catch(error => console.error('Failed to show an automatic download notification', error))
   } else {
     showSystemNotification().catch(error => console.error('Failed to show an automatic download notification', error))

@@ -2,7 +2,7 @@
   <menu
     ref="menuElement"
     class="settingsMenu"
-    :class="{ filtered, compact: hideSettingsCategoryDescriptions }"
+    :class="{ filtered }"
   >
     <li
       v-for="(settingsSection, index) in settingsSections"
@@ -51,7 +51,7 @@ import { computed, useTemplateRef, watch } from 'vue'
 import store from '../../store/index'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 
-const hideSettingsCategoryDescriptions = computed(() => store.getters.getHideSettingsCategoryDescriptions)
+const uiDensity = computed(() => store.getters.getUiDensity)
 
 defineProps({
   settingsSections: {
@@ -84,7 +84,7 @@ function goToSettingsSection(event) {
 const linkRefs = useTemplateRef('linkRefs')
 const menuElement = useTemplateRef('menuElement')
 
-watch(hideSettingsCategoryDescriptions, () => {
+watch(uiDensity, () => {
   const menu = menuElement.value
   if (menu?.offsetHeight) {
     clampOverlayScrollTop(menu, menu.querySelector('.titleItem:last-of-type'))

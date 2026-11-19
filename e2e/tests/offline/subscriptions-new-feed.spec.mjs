@@ -624,6 +624,23 @@ test.describe('new subscriptions feed', () => {
     await expect(video).toBeVisible()
   })
 
+  test('opening a new video in or from an incognito tab keeps it new', async ({ page }) => {
+    const seenMarks = () => page.evaluate(() => JSON.parse(window.$store.getters.getSubscriptionSeenVideos)
+      .filter(entry => entry.videoId === 'new-video-1').length)
+    await page.evaluate(() => window.$store.dispatch('createTab', { route: '/subscriptions', makeActive: true, isIncognito: true }))
+    await expect(page.locator('.tab.active .incognitoIcon')).toBeVisible()
+    await page.locator('.tabContent[aria-hidden="false"] [data-subscription-feed-tab="all"]').click()
+    const video = page.locator('.tabContent[aria-hidden="false"] .ft-list-video').filter({
+      has: page.getByRole('heading', { name: 'New video', exact: true })
+    })
+    // A middle click opens it in a new tab, which stays incognito
+    await video.locator('.title').click({ button: 'middle' })
+    await expect(page.locator('.tab .incognitoIcon')).toHaveCount(2)
+    await video.locator('.title').click()
+    await expect(page).toHaveURL(/#\/watch\/new-video-1/)
+    expect(await seenMarks()).toBe(0)
+  })
+
   test('keeps display metadata reactive in New and Shorts without copying the full cache', async ({ page }) => {
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="all"]').click()

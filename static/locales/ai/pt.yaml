@@ -265,7 +265,7 @@ Subscriptions:
     Followed Channels: Canais seguidos noutras plataformas
     Description: Siga canais da Twitch, SoundCloud, PeerTube, Rumble, Odysee e media.ccc.de para ver as respetivas publicações no separador Plataformas das suas subscrições. Encontre canais através da pesquisa ou adicione-os pelo endereço da respetiva página. O conteúdo multimédia é reproduzido com o yt-dlp.
     Add Channel: Adicionar canal
-    Channel URL: Endereço do canal
+    Search Or Paste Channel: Pesquise ou cole o endereço de um canal
     Invalid Channel: Introduza o endereço da página de um canal da Twitch, SoundCloud, PeerTube, Rumble, Odysee ou media.ccc.de.
     Channel Not Found: Não existe nenhum canal neste endereço.
     Channel Already Followed: Já segue este canal.
@@ -435,7 +435,6 @@ Settings:
     Failed to Save Password: "Não foi possível guardar a palavra-passe."
     Confirm Password: "Confirmar palavra-passe"
     Passwords Do Not Match: "As palavras-passe não coincidem."
-  Navigation and Controls: "Navegação e controlos"
   Control Bar:
     Title: "Barra de controlos"
     Customize: "Personalizar barra de controlos"
@@ -682,7 +681,11 @@ Settings:
       Tab Loading Indicator: Indicador de carregamento do separador
       Bar: Barra
       Dot: Ponto (clássico)
-    Compact Settings Categories: "Categorias de definições compactas"
+    UI Density:
+      UI Density: "Densidade da interface"
+      Compact: "Compacta"
+      Default: "Predefinida"
+      Comfortable: "Confortável"
     Playlist Thumbnail Size: "Tamanho das miniaturas da lista de reprodução"
     Compact Mobile Mini Player: "Minirreprodutor móvel compacto"
     Always Show Mobile Search Bar: "Mostrar sempre a barra de pesquisa no telemóvel"
@@ -1051,6 +1054,7 @@ Settings:
     Channel Settings: Definições dos canais
     Channel Settings Description: Memorizar individualmente para cada canal as definições escolhidas durante a visualização, para que sejam aplicadas quando voltar a ver um dos seus vídeos.
     Enable Channel Playback Settings: Ativar definições de reprodução por canal
+    Auto Save Changes: Guardar alterações automaticamente
     Auto Save Playback Speed: Guardar automaticamente as alterações da velocidade de reprodução
     Auto Save Video Quality: Guardar automaticamente as alterações da qualidade do vídeo
     Auto Save Subtitles State: Guardar automaticamente as alterações do estado das legendas
@@ -1300,6 +1304,7 @@ Settings:
     Notify About New Uploads: Notificar novos carregamentos
     RSS Feeds Auto Refresh Interval: Intervalo de atualização automática dos feeds RSS
     Faster Subscription Refresh: "Atualização mais rápida das subscrições"
+    Show Collaborations From Other Channels: "Incluir colaborações carregadas por outros canais"
     Platforms:
       Other Platforms: Outras plataformas
       Manage Channels: Gerir canais seguidos
@@ -2217,6 +2222,7 @@ Context Menu:
   Search With Multiple: Pesquisar com...
   Selection Too Long: A seleção é demasiado longa para pesquisar (> {count} caracteres)
   Background Tab: Separador em segundo plano
+  Open in an Incognito Tab: Abrir num separador de navegação anónima
 Tab Organizer:
   Tab History: "Histórico do separador"
   Current Page: "Página atual"
@@ -2301,6 +2307,7 @@ Comments:
   Filter loaded comments: Filtrar comentários carregados
   Comment filters: Filtros de comentários
   From creator: Do autor
+  From you: Seus
   Contains timestamps: Contém marcas temporais
   Pin comment by author: Afixar comentário de {author}
   Unpin comment by author: Desafixar comentário de {author}
@@ -2449,6 +2456,7 @@ Tooltips:
     Notify About New Uploads: Mostra notificações do sistema neste dispositivo para os canais cujas notificações ativou nas respetivas definições de subscrição. O OpenTubeX procura conteúdo novo quando as subscrições são atualizadas, por isso escolha um intervalo de atualização automática. Para receber notificações com a aplicação fechada, ative também a atualização com a aplicação fechada.
     RSS Feeds Auto Refresh Interval: Com que frequência o OpenTubeX atualiza automaticamente os seus feeds RSS enquanto a aplicação está aberta.
     Faster Subscription Refresh: "Verifica primeiro o feed RSS de cada canal e só carrega os vídeos, Shorts e emissões em direto dos canais com novos carregamentos. As atualizações automáticas também ignoram canais carregados nos últimos 10 minutos. Nos canais sem novos carregamentos, as visualizações, os vídeos removidos e os títulos alterados só são atualizados a cada poucas horas, e os novos carregamentos podem aparecer mais tarde quando o feed RSS está atrasado. Indisponível com a API do Invidious."
+    Show Collaborations From Other Channels: "Mostra também os vídeos que os canais que subscreve fizeram juntamente com outro canal que os carregou. O YouTube só os lista no separador Página inicial de um canal, por isso cada atualização de vídeos carrega mais uma página por canal. Só são encontradas as colaborações mais recentes ali mostradas, alguns canais não mostram nenhuma e as datas de publicação são aproximadas. Não disponível com a API do Invidious."
     Platforms Auto Refresh Interval: Com que frequência o OpenTubeX atualiza automaticamente os canais que segue noutras plataformas enquanto a aplicação está aberta.
     Twitch Notify When Live: Avisa-o quando um dos canais da Twitch que segue começa a transmitir. O OpenTubeX verifica a cada poucos minutos enquanto está aberto, e também enquanto está fechado se nessa altura atualizar as subscrições.
   Theme Settings:
@@ -2456,7 +2464,7 @@ Tooltips:
     Visible Search Suggestions: "Define quantas entradas do histórico de pesquisa e sugestões a barra de pesquisa mostra antes de a sua lista se deslocar. A lista nunca ultrapassa a parte inferior da janela."
     Thumbnail Size: "Ajusta o tamanho das miniaturas dos vídeos em grelhas e listas. Grelhas com um número fixo de colunas ou o tipo de vista Largura total preenchem cada linha, por isso aí só altera as miniaturas das listas e os Shorts. Em janelas do tamanho de um telemóvel, as miniaturas da grelha ficam limitadas a 100%."
     Playlist Thumbnail Size: "Ajusta o tamanho das miniaturas dos vídeos nas páginas de listas de reprodução. Grelhas com um número fixo de colunas ou o tipo de vista Largura total preenchem cada linha, por isso aí só altera as miniaturas das listas e os Shorts. Em janelas do tamanho de um telemóvel, as miniaturas da grelha ficam limitadas a 100%."
-    Compact Settings Categories: "Reduz a altura das categorias de definições."
+    UI Density: "Altera o espaçamento nas listas, nos menus, na barra lateral e nas Definições."
     Show Progress as Notification: Mostra uma notificação persistente com o progresso em tempo real das operações em segundo plano, como a atualização das subscrições e as descargas de ferramentas geridas, em vez de utilizar a barra de progresso global.
     Always Show Scrollbars: Mantém as barras de deslocamento sempre visíveis. Quando esta opção está desativada, desaparecem pouco depois de parar de mover o rato e reaparecem assim que volta a movê-lo.
     Scroll Speed: Altera a distância percorrida pelos gestos da roda do rato e do painel tátil.
@@ -2509,6 +2517,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Seletor de separadores
   Undo Seek: Desfazer o último salto
   Redo Seek: Refazer um salto desfeito
+  New Incognito Tab: Criar um novo separador de navegação anónima
 CommandPalette:
   Title: Paleta de comandos
   Open: Abrir paleta de comandos
@@ -2895,3 +2904,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Pesquisar no Twitch"
+New Incognito Tab: Novo separador de navegação anónima
+Incognito Tab: Separador de navegação anónima

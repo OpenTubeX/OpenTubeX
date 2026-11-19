@@ -74,7 +74,10 @@
       >
         {{ t('Platforms.Empty Tab') }}
       </p>
-      <PlatformResultList :results="results" />
+      <PlatformResultList
+        appear
+        :results="results"
+      />
       <!-- After a failed page, the button tries again -->
       <FtAutoLoadNextPageWrapper
         v-if="continuation !== null"

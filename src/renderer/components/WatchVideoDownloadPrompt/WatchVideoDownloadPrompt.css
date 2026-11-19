@@ -48,7 +48,7 @@
   min-block-size: 0;
   overflow-y: auto;
   padding-block: 2px 10px;
-  padding-inline: 12px;
+  padding-inline: calc(12px + var(--prompt-padding-inline));
   scrollbar-gutter: stable;
 }
 
@@ -175,7 +175,7 @@
   flex: 1 1 auto;
   overflow-y: auto;
   padding-block: 30px;
-  padding-inline: 20px;
+  padding-inline: calc(20px + var(--prompt-padding-inline));
 }
 
 /* Keeps the last message's margin inside the rendered end the scroll clamp measures. */

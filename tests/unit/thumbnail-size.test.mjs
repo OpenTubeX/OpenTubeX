@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { getThumbnailGridStyles } from '../../src/renderer/constants/thumbnailSize.js'
+import { FULL_WIDTH_COLUMNS, getThumbnailGridStyles } from '../../src/renderer/constants/thumbnailSize.js'
 
 test('phone grids fit two columns at the default thumbnail size', () => {
   for (const width of [240, 313, 343, 380, 428.8]) {
@@ -39,4 +39,26 @@ test('stretches cards with the rendered grid width from the same size', () => {
     assert.ok(resolveStretch(styles['--thumbnail-grid-stretch'], renderedWidth + 100) > stretch)
   }
   assert.equal(getThumbnailGridStyles(100)['--thumbnail-grid-stretch'], '0px')
+})
+
+test('a more spacious grid keeps the default column count', () => {
+  // Default fits three 262px cards in 804px; Comfortable's wider gaps must not drop one.
+  const size = Number.parseFloat(getThumbnailGridStyles(100, 804, 1280, 804, 0, 1.5)['--thumbnail-grid-size'])
+  assert.equal(size * 3 + 2 * 12, 804)
+})
+
+test('full width cards fill phone rows and stay capped in wider windows', () => {
+  const phone = getThumbnailGridStyles(100, 396, 412, 396, FULL_WIDTH_COLUMNS)
+  assert.equal(Number.parseFloat(phone['--thumbnail-grid-size']), 396)
+  assert.equal(phone['--thumbnail-grid-stretch'], 'calc(100% - 0px)')
+
+  const styles = getThumbnailGridStyles(100, 1700, 1780, 1700, FULL_WIDTH_COLUMNS)
+  const cardSize = Number.parseFloat(styles['--thumbnail-grid-size'])
+  assert.ok(cardSize < 1700)
+  assert.equal(styles['--thumbnail-grid-stretch'], `min(calc(100% - 0px), ${cardSize}px)`)
+  // The thumbnail size scales the cap.
+  const capped = size => Number.parseFloat(getThumbnailGridStyles(size, 1700, 1780, 1700, FULL_WIDTH_COLUMNS)['--thumbnail-grid-size'])
+  assert.ok(capped(60) < capped(100) && capped(100) < capped(180))
+  // A desktop grid narrower than the cap still fills its row.
+  assert.equal(Number.parseFloat(getThumbnailGridStyles(100, 500, 800, 500, FULL_WIDTH_COLUMNS)['--thumbnail-grid-size']), 500)
 })

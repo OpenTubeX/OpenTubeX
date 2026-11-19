@@ -265,7 +265,7 @@ Subscriptions:
     Followed Channels: Chaînes suivies sur d’autres plateformes
     Description: Suivez des chaînes sur Twitch, SoundCloud, PeerTube, Rumble, Odysee et media.ccc.de pour voir leurs mises en ligne dans l’onglet Plateformes de vos abonnements. Trouvez des chaînes avec la recherche ou ajoutez-les par l’adresse de leur page. Leurs médias sont lus avec yt-dlp.
     Add Channel: Ajouter une chaîne
-    Channel URL: Adresse de la chaîne
+    Search Or Paste Channel: Recherchez ou collez l'adresse d'une chaîne
     Invalid Channel: Saisissez l’adresse de la page d’une chaîne sur Twitch, SoundCloud, PeerTube, Rumble, Odysee ou media.ccc.de.
     Channel Not Found: Il n’y a aucune chaîne à cette adresse.
     Channel Already Followed: Vous suivez déjà cette chaîne.
@@ -435,7 +435,6 @@ Settings:
     Failed to Save Password: "Impossible d’enregistrer le mot de passe."
     Confirm Password: "Confirmer le mot de passe"
     Passwords Do Not Match: "Les mots de passe ne correspondent pas."
-  Navigation and Controls: "Navigation et commandes"
   Control Bar:
     Title: "Barre de commandes"
     Customize: "Personnaliser la barre de commandes"
@@ -682,7 +681,11 @@ Settings:
       Tab Loading Indicator: Indicateur de chargement des onglets
       Bar: Barre
       Dot: Point (classique)
-    Compact Settings Categories: "Catégories de paramètres compactes"
+    UI Density:
+      UI Density: "Densité de l’interface"
+      Compact: "Compacte"
+      Default: "Par défaut"
+      Comfortable: "Confortable"
     Playlist Thumbnail Size: "Taille des miniatures de la liste de lecture"
     Compact Mobile Mini Player: "Mini-lecteur mobile compact"
     Always Show Mobile Search Bar: "Toujours afficher la barre de recherche sur mobile"
@@ -1051,6 +1054,7 @@ Settings:
     Channel Settings: Paramètres des chaînes
     Channel Settings Description: Mémorisez séparément pour chaque chaîne les paramètres choisis pendant le visionnage afin de les appliquer de nouveau à la prochaine vidéo de cette chaîne.
     Enable Channel Playback Settings: Activer les paramètres de lecture par chaîne
+    Auto Save Changes: Enregistrer automatiquement les changements
     Auto Save Playback Speed: Enregistrer automatiquement les changements de vitesse de lecture
     Auto Save Video Quality: Enregistrer automatiquement les changements de qualité vidéo
     Auto Save Subtitles State: Enregistrer automatiquement les changements d’état des sous-titres
@@ -1300,6 +1304,7 @@ Settings:
     Notify About New Uploads: Notifier les nouvelles mises en ligne
     RSS Feeds Auto Refresh Interval: Intervalle d’actualisation automatique des flux RSS
     Faster Subscription Refresh: "Actualisation plus rapide des abonnements"
+    Show Collaborations From Other Channels: "Inclure les collaborations mises en ligne par d'autres chaînes"
     Platforms:
       Other Platforms: Autres plateformes
       Manage Channels: Gérer les chaînes suivies
@@ -2215,6 +2220,7 @@ Context Menu:
   Search With Multiple: Rechercher avec...
   Selection Too Long: La sélection est trop longue pour la recherche (> {count} caractères)
   Background Tab: Onglet en arrière-plan
+  Open in an Incognito Tab: Ouvrir dans un onglet de navigation privée
 Tab Organizer:
   Tab History: "Historique de l’onglet"
   Current Page: "Page actuelle"
@@ -2299,6 +2305,7 @@ Comments:
   Filter loaded comments: Filtrer les commentaires chargés
   Comment filters: Filtres des commentaires
   From creator: De l’auteur de la vidéo
+  From you: De vous
   Contains timestamps: Contient des horodatages
   Pin comment by author: Épingler le commentaire de {author}
   Unpin comment by author: Désépingler le commentaire de {author}
@@ -2447,6 +2454,7 @@ Tooltips:
     Notify About New Uploads: Affiche des notifications système sur cet appareil pour les chaînes dont vous avez activé les notifications dans leurs paramètres d’abonnement. OpenTubeX recherche du nouveau contenu lors de l’actualisation des abonnements ; choisissez donc un intervalle d’actualisation automatique. Pour être notifié lorsque l’application est fermée, activez aussi l’actualisation quand l’application est fermée.
     RSS Feeds Auto Refresh Interval: Fréquence à laquelle OpenTubeX actualise automatiquement vos flux RSS lorsque l’application est ouverte.
     Faster Subscription Refresh: "Vérifie d'abord le flux RSS de chaque chaîne et ne charge les vidéos, Shorts et diffusions en direct que des chaînes ayant de nouvelles mises en ligne. Les actualisations automatiques ignorent aussi les chaînes chargées au cours des 10 dernières minutes. Pour les chaînes sans nouvelles mises en ligne, le nombre de vues, les vidéos supprimées et les titres modifiés ne sont mis à jour que toutes les quelques heures, et les nouvelles mises en ligne peuvent apparaître plus tard lorsque le flux RSS est en retard. Non disponible avec l'API Invidious."
+    Show Collaborations From Other Channels: "Affiche aussi les vidéos que les chaînes auxquelles vous êtes abonné ont réalisées avec une autre chaîne qui les a mises en ligne. YouTube ne les liste que dans l'onglet Accueil d'une chaîne, donc chaque actualisation des vidéos charge une page de plus par chaîne. Seules les collaborations les plus récentes qui y sont affichées sont trouvées, certaines chaînes n'en affichent aucune et leurs dates de publication sont approximatives. Non disponible avec l'API Invidious."
     Platforms Auto Refresh Interval: Fréquence à laquelle OpenTubeX actualise automatiquement les chaînes que vous suivez sur d’autres plateformes lorsque l’application est ouverte.
     Twitch Notify When Live: Vous avertit lorsqu’une de vos chaînes Twitch suivies commence un stream. OpenTubeX vérifie toutes les quelques minutes tant qu’il est ouvert, et aussi lorsqu’il est fermé s’il actualise alors les abonnements.
   Theme Settings:
@@ -2454,7 +2462,7 @@ Tooltips:
     Visible Search Suggestions: "Définit le nombre d’entrées de l’historique de recherche et de suggestions affichées par la barre de recherche avant que sa liste ne défile. La liste ne dépasse jamais le bas de la fenêtre."
     Thumbnail Size: "Redimensionne les miniatures des vidéos dans les grilles et les listes. Les grilles avec un nombre de colonnes fixe ou le type d’affichage Pleine largeur remplissent plutôt chaque ligne ; le curseur n’y modifie donc que les miniatures des listes et les Shorts. Dans les fenêtres de la taille d’un téléphone, les miniatures de la grille sont limitées à 100 %."
     Playlist Thumbnail Size: "Redimensionne les miniatures des vidéos sur les pages de playlists. Les grilles avec un nombre de colonnes fixe ou le type d’affichage Pleine largeur remplissent plutôt chaque ligne ; le curseur n’y modifie donc que les miniatures des listes et les Shorts. Dans les fenêtres de la taille d’un téléphone, les miniatures de la grille sont limitées à 100 %."
-    Compact Settings Categories: "Réduit la hauteur des catégories de paramètres."
+    UI Density: "Modifie l’espacement des listes, des menus, de la barre latérale et des paramètres."
     Show Progress as Notification: Affiche une notification persistante indiquant en temps réel la progression des opérations en arrière-plan, comme l’actualisation des abonnements et le téléchargement des outils gérés, au lieu d’utiliser la barre de progression globale.
     Always Show Scrollbars: Maintient les barres de défilement visibles en permanence. Lorsque cette option est désactivée, elles disparaissent peu après l’arrêt du mouvement de la souris et réapparaissent dès que vous la déplacez.
     Scroll Speed: Modifie la distance de défilement des gestes de la molette de la souris et du pavé tactile.
@@ -2507,6 +2515,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Sélecteur d’onglets
   Undo Seek: Annuler le dernier saut
   Redo Seek: Rétablir un saut annulé
+  New Incognito Tab: Créer un nouvel onglet de navigation privée
 CommandPalette:
   Title: Palette de commandes
   Open: Ouvrir la palette de commandes
@@ -2894,3 +2903,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Rechercher sur Twitch"
+New Incognito Tab: Nouvel onglet de navigation privée
+Incognito Tab: Onglet de navigation privée

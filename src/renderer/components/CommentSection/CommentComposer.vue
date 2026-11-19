@@ -39,56 +39,67 @@
       class="commentComposerForm"
       @submit.prevent="submit"
     >
-      <FtInput
-        ref="input"
-        :label="editComment ? t('YouTube Account.Edit Comment') : parentId ? t('YouTube Account.Add a reply') : t('YouTube Account.Add a comment')"
-        :icon="['fas', editComment ? 'edit' : parentId ? 'reply' : 'comment']"
-        :value="text"
-        :maxlength="10000"
-        :disabled="posting"
-        :show-action-button="false"
-        :highlights="mentionRanges"
-        :input-attributes="{
-          'aria-autocomplete': 'list',
-          'aria-controls': suggestions.length > 0 ? suggestionsId : null,
-          'aria-activedescendant': suggestions.length > 0 ? `${suggestionsId}-${activeSuggestion}` : null
-        }"
-        multiline
-        @input="handleInput"
-        @keydown="handleKeydown"
-        @keyup="updateCaret"
-        @pointerup="updateCaret"
-      />
-      <!-- The text box keeps the focus, so the options are picked with its keys. -->
-      <ul
-        v-if="suggestions.length > 0"
-        :id="suggestionsId"
-        class="commentComposerSuggestions"
-        role="listbox"
-        :aria-label="t('YouTube Account.Mention Suggestions')"
+      <!-- The suggestions open below the text box, or above it without room. -->
+      <div
+        class="commentComposerField"
+        :style="{ anchorName: suggestions.length > 0 ? suggestionsAnchor : null }"
+        @focusin="focused = true"
+        @focusout="focused = false"
       >
-        <!-- eslint-disable-next-line vuejs-accessibility/click-events-have-key-events -->
-        <li
-          v-for="(suggestion, index) in suggestions"
-          :id="`${suggestionsId}-${index}`"
-          :key="suggestion.channelId"
-          class="commentComposerSuggestion"
-          :class="{ active: index === activeSuggestion }"
-          role="option"
-          tabindex="-1"
-          :aria-selected="index === activeSuggestion"
+        <FtInput
+          ref="input"
+          :label="editComment ? t('YouTube Account.Edit Comment') : parentId ? t('YouTube Account.Add a reply') : t('YouTube Account.Add a comment')"
+          :icon="['fas', editComment ? 'edit' : parentId ? 'reply' : 'comment']"
+          :value="text"
+          :maxlength="10000"
+          :disabled="posting"
+          :show-action-button="false"
+          :highlights="mentionRanges"
+          :input-attributes="{
+            'aria-autocomplete': 'list',
+            'aria-controls': suggestions.length > 0 ? suggestionsId : null,
+            'aria-activedescendant': suggestions.length > 0 ? `${suggestionsId}-${activeSuggestion}` : null
+          }"
+          multiline
+          @input="handleInput"
+          @keydown="handleKeydown"
+          @keyup="updateCaret"
+          @pointerup="updateCaret"
+        />
+        <!-- The text box keeps the focus, so the options are picked with its keys. -->
+        <ul
+          v-if="suggestions.length > 0"
+          :id="suggestionsId"
+          ref="suggestionList"
+          :popover="supportsAnchorPositioning ? 'manual' : null"
+          :style="{ positionAnchor: supportsAnchorPositioning ? suggestionsAnchor : null }"
+          class="commentComposerSuggestions"
+          role="listbox"
+          :aria-label="t('YouTube Account.Mention Suggestions')"
           @pointerdown.prevent
-          @click="insertMention(suggestion)"
         >
-          <FtRetryImage
-            :src="suggestion.thumbnail"
-            :fallback-icon="['fas', 'circle-user']"
-            class="commentComposerSuggestionImage"
-            alt=""
-          />
-          <span class="commentComposerSuggestionHandle">{{ suggestion.handle }}</span>
-        </li>
-      </ul>
+          <!-- eslint-disable-next-line vuejs-accessibility/click-events-have-key-events -->
+          <li
+            v-for="(suggestion, index) in suggestions"
+            :id="`${suggestionsId}-${index}`"
+            :key="suggestion.channelId"
+            class="commentComposerSuggestion"
+            :class="{ active: index === activeSuggestion }"
+            role="option"
+            tabindex="-1"
+            :aria-selected="index === activeSuggestion"
+            @click="insertMention(suggestion)"
+          >
+            <FtRetryImage
+              :src="suggestion.thumbnail"
+              :fallback-icon="['fas', 'circle-user']"
+              class="commentComposerSuggestionImage"
+              alt=""
+            />
+            <span class="commentComposerSuggestionHandle">{{ suggestion.handle }}</span>
+          </li>
+        </ul>
+      </div>
       <div class="commentComposerActions">
         <FtButton
           type="button"
@@ -120,6 +131,7 @@ import FtRetryImage from '../FtRetryImage.vue'
 import store from '../../store/index'
 import { getSelectedYouTubeProfile } from '../../helpers/youtube-account-state'
 import { openButtonMenu } from '../../helpers/buttonMenu'
+import { supportsAnchorPositioning } from '../../helpers/anchoredPosition'
 import { useYouTubeProfileSwitch } from '../../composables/useYouTubeProfileSwitch'
 
 import { ERROR_TOAST_ICON, showToast } from '../../helpers/utils'
@@ -187,6 +199,9 @@ async function expand() {
 // Like on YouTube, typing @ suggests people from the comments, and a picked
 // mention is a link that the caret skips and Backspace removes whole.
 const suggestionsId = useId()
+const suggestionsAnchor = `--mention-suggestions-${suggestionsId}`
+const suggestionList = useTemplateRef('suggestionList')
+const focused = ref(false)
 const caret = ref(text.value.length)
 const dismissedQueryStart = ref(-1)
 const activeSuggestion = ref(0)
@@ -203,7 +218,7 @@ const mentionQuery = computed(() => {
 
 const suggestions = computed(() => {
   const query = mentionQuery.value?.query
-  if (query === undefined) return []
+  if (query === undefined || !focused.value) return []
   const matches = comments.getMentionCandidates(threadId)
     .filter(candidate => candidate.handle.slice(1).toLowerCase().includes(query))
   return matches
@@ -212,6 +227,10 @@ const suggestions = computed(() => {
     .slice(0, 6)
 })
 watch(suggestions, () => { activeSuggestion.value = 0 })
+// The suggestions float over what follows instead of pushing it down.
+watch(suggestionList, (list) => {
+  if (list?.popover && !list.matches(':popover-open')) list.showPopover()
+}, { flush: 'post' })
 
 function getTextarea() {
   return root.value?.querySelector('textarea') ?? null
@@ -471,16 +490,17 @@ onBeforeUnmount(() => resizeObserver.disconnect())
   color: inherit;
 }
 
-button.commentComposerAvatar {
+/* Only the button form can be enabled, disabled, or focused. */
+.commentComposerAvatar:enabled {
   cursor: pointer;
 }
 
-button.commentComposerAvatar:disabled {
+.commentComposerAvatar:disabled {
   cursor: default;
   opacity: 0.6;
 }
 
-button.commentComposerAvatar:focus-visible {
+.commentComposerAvatar:focus-visible {
   outline: 2px solid var(--primary-color);
   outline-offset: 2px;
 }
@@ -535,19 +555,44 @@ button.commentComposerAvatar:focus-visible {
   min-block-size: 5rem;
 }
 
+/* Without anchor positioning, the suggestions overlay the content below. */
+.commentComposerField {
+  position: relative;
+}
+
 .commentComposerSuggestions {
+  position: absolute;
+  z-index: 10;
+  inset-block-start: 100%;
+  inset-inline-start: 0;
   display: flex;
   flex-direction: column;
-  max-inline-size: 320px;
+  box-sizing: border-box;
+  inline-size: max-content;
+  max-inline-size: min(320px, 100%);
   margin: 0;
+  margin-block-start: 4px;
   padding-block: 4px;
   padding-inline: 4px;
+  border: 0;
   border-radius: var(--shape-corner-large);
+  color: inherit;
   list-style: none;
 
   /* Matches the select menus. */
   box-shadow: 0 2px 6px 2px rgb(0 0 0 / 15%), 0 1px 2px rgb(0 0 0 / 30%);
   background-color: color-mix(in srgb, var(--primary-color) 4%, var(--card-bg-color));
+}
+
+/* The top layer keeps the suggestions above the comments and out of their
+   scroll container's clipping. */
+.commentComposerSuggestions[popover] {
+  position: fixed;
+  inset: auto;
+  max-inline-size: min(320px, anchor-size(inline));
+  position-area: block-end span-inline-end;
+  position-try-fallbacks: flip-block;
+  position-visibility: anchors-visible;
 }
 
 .commentComposerSuggestion {

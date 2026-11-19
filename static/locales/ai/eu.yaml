@@ -265,7 +265,7 @@ Subscriptions:
     Followed Channels: Beste plataformetan jarraitutako kanalak
     Description: Jarraitu Twitch, SoundCloud, PeerTube, Rumble, Odysee eta media.ccc.de plataformetako kanalei, haien igoerak zure harpidetzetako Plataformak fitxan ikusteko. Bilatu kanalak bilaketarekin, edo gehitu haien orriaren helbidearekin. Haien multimedia yt-dlp bidez erreproduzitzen da.
     Add Channel: Gehitu kanala
-    Channel URL: Kanalaren helbidea
+    Search Or Paste Channel: Bilatu edo itsatsi kanal baten helbidea
     Invalid Channel: Idatzi Twitch, SoundCloud, PeerTube, Rumble, Odysee edo media.ccc.de plataformako kanal-orri baten helbidea.
     Channel Not Found: Ez dago kanalik helbide honetan.
     Channel Already Followed: Dagoeneko jarraitzen diozu kanal honi.
@@ -435,7 +435,6 @@ Settings:
     Failed to Save Password: "Ezin izan da pasahitza gorde."
     Confirm Password: "Berretsi pasahitza"
     Passwords Do Not Match: "Pasahitzak ez datoz bat."
-  Navigation and Controls: "Nabigazioa eta kontrolak"
   Control Bar:
     Title: "Kontrol-barra"
     Customize: "Pertsonalizatu kontrol-barra"
@@ -682,7 +681,11 @@ Settings:
       Tab Loading Indicator: Fitxaren karga-adierazlea
       Bar: Barra
       Dot: Puntua (klasikoa)
-    Compact Settings Categories: "Ezarpen-kategoria trinkoak"
+    UI Density:
+      UI Density: "Interfazearen dentsitatea"
+      Compact: "Trinkoa"
+      Default: "Lehenetsia"
+      Comfortable: "Erosoa"
     Playlist Thumbnail Size: "Erreprodukzio-zerrendako miniaturen tamaina"
     Compact Mobile Mini Player: "Mugikorreko erreproduzitzaile txiki trinkoa"
     Always Show Mobile Search Bar: "Erakutsi beti mugikorreko bilaketa-barra"
@@ -1051,6 +1054,7 @@ Settings:
     Channel Settings: Kanalen ezarpenak
     Channel Settings Description: Gogoratu kanal bakoitzerako bideoak ikustean aukeratutako ezarpenak, kanal horretako beste bideo bat ikusten duzunean berriro aplikatzeko.
     Enable Channel Playback Settings: Gaitu kanalen erreprodukzio-ezarpenak
+    Auto Save Changes: Gorde aldaketak automatikoki
     Auto Save Playback Speed: Gorde automatikoki erreprodukzio-abiaduraren aldaketak
     Auto Save Video Quality: Gorde automatikoki bideo-kalitatearen aldaketak
     Auto Save Subtitles State: Gorde automatikoki azpitituluen egoeraren aldaketak
@@ -1300,6 +1304,7 @@ Settings:
     Notify About New Uploads: Jakinarazi igoera berriak
     RSS Feeds Auto Refresh Interval: RSS jarioen freskatze automatikoaren tartea
     Faster Subscription Refresh: "Harpidetzen freskatze azkarragoa"
+    Show Collaborations From Other Channels: "Sartu beste kanal batzuek igotako lankidetzak"
     Platforms:
       Other Platforms: Beste plataformak
       Manage Channels: Kudeatu jarraitutako kanalak
@@ -2227,6 +2232,7 @@ Context Menu:
   Search With Multiple: Bilatu honekin...
   Selection Too Long: Hautapena luzeegia da bilatzeko (> {count} karaktere)
   Background Tab: Atzeko planoko fitxa
+  Open in an Incognito Tab: Ireki ezkutuko fitxa batean
 Tab Organizer:
   Tab History: "Fitxaren historia"
   Current Page: "Uneko orria"
@@ -2311,6 +2317,7 @@ Comments:
   Filter loaded comments: Iragazi kargatutako iruzkinak
   Comment filters: Iruzkinen iragazkiak
   From creator: Sortzailearena
+  From you: Zureak
   Contains timestamps: Denbora-markak ditu
   Pin comment by author: Ainguratu {author} erabiltzailearen iruzkina
   Unpin comment by author: Desainguratu {author} erabiltzailearen iruzkina
@@ -2459,6 +2466,7 @@ Tooltips:
     Notify About New Uploads: Gailu honetan sistemaren jakinarazpenak erakusten ditu harpidetza-ezarpenetan jakinarazpenak aktibatu dituzun kanaletarako. OpenTubeX-ek eduki berria bilatzen du harpidetzak freskatzean; beraz, aukeratu freskatze automatikoaren tarte bat. Aplikazioa itxita dagoenean jakinarazpenak jasotzeko, gaitu ere freskatzea aplikazioa itxita dagoenean.
     RSS Feeds Auto Refresh Interval: Aplikazioa irekita dagoen bitartean OpenTubeX-ek zure RSS jarioak zenbatero freskatzen dituen automatikoki.
     Faster Subscription Refresh: "Lehenik kanal bakoitzaren RSS jarioa egiaztatzen du, eta igoera berriak dituzten kanalen bideoak, Shorts-ak eta zuzeneko emanaldiak soilik kargatzen ditu. Freskatze automatikoek azken 10 minutuetan kargatutako kanalak ere saltatzen dituzte. Igoera berririk ez duten kanaletan, ikustaldi kopuruak, kendutako bideoak eta aldatutako izenburuak ordu batzuetan behin bakarrik eguneratzen dira, eta igoera berriak beranduago ager daitezke RSS jarioa atzeratuta dagoenean. Ez dago erabilgarri Invidious APIarekin."
+    Show Collaborations From Other Channels: "Harpidetuta zauden kanalek igo dituen beste kanal batekin batera egindako bideoak ere erakusten ditu. YouTubek kanal baten Hasiera fitxan bakarrik zerrendatzen ditu, beraz, bideoen freskatze bakoitzak orri bat gehiago kargatzen du kanal bakoitzeko. Han erakutsitako lankidetza berrienak bakarrik aurkitzen dira, kanal batzuek ez dute bat ere erakusten, eta argitaratze-datak gutxi gorabeherakoak dira. Ez dago erabilgarri Invidious APIarekin."
     Platforms Auto Refresh Interval: Aplikazioa irekita dagoen bitartean OpenTubeX-ek beste plataformetan jarraitzen dituzun kanalak zenbatero freskatzen dituen automatikoki.
     Twitch Notify When Live: Jakinarazi egiten dizu jarraitzen dituzun Twitch kanaletako batek emanaldia hasten duenean. OpenTubeX-ek minutu gutxitik behin egiaztatzen du irekita dagoen bitartean, baita itxita dagoenean ere, orduan harpidetzak freskatzen baditu.
   Theme Settings:
@@ -2466,7 +2474,7 @@ Tooltips:
     Visible Search Suggestions: "Bilaketa-barrak bere zerrenda korritu aurretik zenbat bilaketa-historiako sarrera eta iradokizun erakusten dituen zehazten du. Zerrenda ez da inoiz leihoaren behealdetik haratago hedatzen."
     Thumbnail Size: "Bideoen miniaturen tamaina aldatzen du sareta eta zerrendetan. Zutabe kopuru finkoa edo Zabalera osoa ikuspegia duten saretek errenkada bakoitza betetzen dute horren ordez, beraz han zerrendetako miniaturak eta Shorts-ak soilik aldatzen ditu. Telefono-tamainako leihoetan saretako miniaturak % 100era mugatzen dira."
     Playlist Thumbnail Size: "Bideoen miniaturen tamaina aldatzen du erreprodukzio-zerrenden orrietan. Zutabe kopuru finkoa edo Zabalera osoa ikuspegia duten saretek errenkada bakoitza betetzen dute horren ordez, beraz han zerrendetako miniaturak eta Shorts-ak soilik aldatzen ditu. Telefono-tamainako leihoetan saretako miniaturak % 100era mugatzen dira."
-    Compact Settings Categories: "Ezarpen-kategorien altuera murrizten du."
+    UI Density: "Zerrendetako, menuetako, alboko barrako eta Ezarpenetako tartea aldatzen du."
     Show Progress as Notification: Jakinarazpen iraunkor batean erakusten du atzeko planoko eragiketen uneko aurrerapena, hala nola harpidetzen freskatzea eta kudeatutako tresnen deskargak, aurrerapen-barra globala erabili beharrean.
     Always Show Scrollbars: Korritze-barrak ikusgai mantentzen ditu beti. Desgaituta dagoenean, sagua mugitzeari utzi eta handik gutxira desagertzen dira, eta berriro mugitu bezain laster agertzen.
     Scroll Speed: Saguaren gurpileko eta ukipen-paneleko keinuek zenbat korritzen duten aldatzen du.
@@ -2519,6 +2527,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Fitxa-aldatzailea
   Undo Seek: Desegin azken jauzia
   Redo Seek: Berregin desegindako jauzia
+  New Incognito Tab: Sortu ezkutuko fitxa berria
 CommandPalette:
   Title: Komando-paleta
   Open: Ireki komando-paleta
@@ -2906,3 +2915,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Bilatu Twitch-en"
+New Incognito Tab: Ezkutuko fitxa berria
+Incognito Tab: Ezkutuko fitxa

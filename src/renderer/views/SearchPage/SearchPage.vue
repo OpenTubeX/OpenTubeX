@@ -128,6 +128,7 @@
           {{ t('Search Filters.Cookie Search Failed') }}
         </p>
         <FtElementList
+          appear
           :data="shownResults"
         />
         <!-- Recheck visibility when results are appended or replaced. -->
@@ -212,7 +213,7 @@ import { applyPublicationDates } from '../../helpers/api/missing-publication'
 import { getInvidiousSearchResults } from '../../helpers/api/invidious'
 import { SEARCH_CHAR_LIMIT } from '../../../constants'
 import { getSearchSettingsFromRouteQuery } from '../../../search-history'
-import { useTabContext, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
+import { useIncognitoTab, useTabContext, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
 import { ytDlp } from '../../helpers/ytDlp'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
@@ -317,7 +318,8 @@ const showCookieRetryWithoutNotice = computed(() => supportsCookieSearch &&
   (cookieSearchFailed.value || isEmptyLocalSearch.value))
 
 /** @type {import('vue').ComputedRef<boolean>} */
-const rememberSearchHistory = computed(() => store.getters.getRememberSearchHistory)
+const isIncognitoTab = useIncognitoTab()
+const rememberSearchHistory = computed(() => store.getters.getRememberSearchHistory && !isIncognitoTab.value)
 
 function restoreActiveSearchFilters(settings) {
   store.commit('setSearchPrioritize', { tabId, value: settings.prioritize })
@@ -488,6 +490,14 @@ function checkSearchCache(payload) {
   }
 }
 
+/**
+ * Regular tabs reuse cached searches, so incognito ones stay out. Their pages keep paginating from their own state.
+ * @param {object} payload
+ */
+function cacheSearch(payload) {
+  if (!isIncognitoTab.value) store.commit('addToSessionSearchHistory', payload)
+}
+
 // Cancels the local search that a newer one or leaving the page replaced.
 let searchAbortController = null
 
@@ -537,7 +547,7 @@ async function performSearchLocal(payload) {
       apiUsed: apiUsed.value
     }
 
-    store.commit('addToSessionSearchHistory', historyPayload)
+    cacheSearch(historyPayload)
 
     updateSubscriptionDetails(results)
     fillPublicationDates(payload.query, results)
@@ -564,7 +574,7 @@ async function fillPublicationDates(query, results) {
   if (dates.size === 0 || requestId !== searchRequestId || apiUsed.value !== 'local') return
 
   shownResults.value = applyPublicationDates(shownResults.value, dates)
-  store.commit('addToSessionSearchHistory', {
+  cacheSearch({
     query,
     data: shownResults.value,
     searchSettings: searchSettings.value,
@@ -631,7 +641,7 @@ async function getNextpageLocal(payload) {
       apiUsed: apiUsed.value
     }
 
-    store.commit('addToSessionSearchHistory', historyPayload)
+    cacheSearch(historyPayload)
 
     updateSubscriptionDetails(results)
     fillPublicationDates(payload.query, results)
@@ -693,7 +703,7 @@ async function performSearchInvidious(payload, options = { resetSearchPage: fals
       apiUsed: apiUsed.value
     }
 
-    store.commit('addToSessionSearchHistory', historyPayload)
+    cacheSearch(historyPayload)
 
     updateSubscriptionDetails(results)
   } catch (err) {

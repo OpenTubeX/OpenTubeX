@@ -210,7 +210,7 @@ async function syncNow() {
 
 <style scoped>
 .accountWarning {
-  --warning-color: oklch(0.78 0.16 75);
+  --warning-color: oklch(78% 0.16 75deg);
 
   display: flex;
   align-items: flex-start;
@@ -233,7 +233,7 @@ async function syncNow() {
   margin-block-start: 0.15em;
 
   /* Follows the text's lightness, so the icon stays readable on light and dark cards. */
-  color: oklch(from var(--primary-text-color) clamp(0.5, l, 0.82) 0.15 75);
+  color: oklch(from var(--primary-text-color) clamp(0.5, l, 0.82) 0.15 75deg);
 }
 
 /* Lines up with the section's controls, which are padded divs. */
@@ -270,26 +270,27 @@ async function syncNow() {
   text-align: start;
 }
 
-button.profileOption {
+/* Only the button form can be enabled, disabled, or focused. */
+.profileOption:enabled {
   cursor: pointer;
 }
 
-button.profileOption:disabled {
+.profileOption:disabled {
   cursor: default;
   opacity: 0.6;
 }
 
-button.profileOption:focus-visible {
+.profileOption:focus-visible {
   outline: 2px solid var(--primary-color);
   outline-offset: 2px;
 }
 
-button.profileOption:hover:not(:disabled) {
+.profileOption:enabled:hover {
   background-color: var(--side-nav-hover-color);
 }
 
 .selectedProfile,
-button.selectedProfile:hover:not(:disabled) {
+.selectedProfile:enabled:hover {
   background-color: color-mix(in srgb, var(--primary-color) 14%, transparent);
 }
 

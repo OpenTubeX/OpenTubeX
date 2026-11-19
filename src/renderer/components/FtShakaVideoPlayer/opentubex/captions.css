@@ -6,19 +6,21 @@
   /* Shaka's font sizes scale this size, which shrinks along with small players. */
   font-size: var(--caption-font-size, 20px) !important;
 
-  /* Keep shaka's caption raise animation alongside the panel push. */
-  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- captions make room for the controls and docks */
-  transition: inset-inline-end 250ms ease, bottom cubic-bezier(0.4, 0, 0.6, 1) 0.1s;
+  /* Keep shaka's caption raise animation. Docks only push captions in fullscreen
+     and full window, where they move in one step (videoLayout.css). */
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- captions make room for the controls */
+  transition: bottom cubic-bezier(0.4, 0, 0.6, 1) 0.1s;
 }
 
 /*
   Unless a font family is picked in the captions style, which Shaka applies to every cue,
-  also while it previews the font families of its menu.
+  also while it previews the font families of its menu. Captions inherit the app font from
+  the player, so only the families that cues set inline need replacing. Match only an
+  element's own inline style: a selector for its ancestors' inline styles makes every inline
+  style change anywhere in the app restyle that element's whole subtree.
 */
-/* stylelint-disable-next-line selector-max-compound-selectors -- Shaka's font families only show in inline styles. */
-.captionsUseAppFont :deep(:is(.shaka-text-container, .shaka-speech-to-text-container) :not(
-  :is([style*='Courier New'], [style*='Times New Roman'], [style*='Deja Vu Sans Mono'], [style*='PT Sans Caption']),
-  :is([style*='Courier New'], [style*='Times New Roman'], [style*='Deja Vu Sans Mono'], [style*='PT Sans Caption']) *
+.captionsUseAppFont :deep(:is(.shaka-text-container, .shaka-speech-to-text-container, :is(.shaka-text-container, .shaka-speech-to-text-container) *)[style*='font-family']:not(
+  [style*='Courier New'], [style*='Times New Roman'], [style*='Deja Vu Sans Mono'], [style*='PT Sans Caption']
 )) {
   font-family: var(--app-font-family) !important;
 }

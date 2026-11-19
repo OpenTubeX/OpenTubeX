@@ -171,10 +171,13 @@ export function closeCapacitorTab(session, tabId, fallbackRoute) {
   }
 
   const tabs = session.tabs.filter(tab => tab.id !== tabId)
-  const closedTabs = [
-    ...(session.closedTabs ?? []),
-    normalizePersistedTab(session.tabs[closedIndex])
-  ].slice(-MAX_CLOSED_CAPACITOR_TABS)
+  // Closed incognito tabs cannot be reopened
+  const closedTabs = session.tabs[closedIndex].isIncognito
+    ? session.closedTabs ?? []
+    : [
+        ...(session.closedTabs ?? []),
+        normalizePersistedTab(session.tabs[closedIndex])
+      ].slice(-MAX_CLOSED_CAPACITOR_TABS)
   const activeTabId = session.activeTabId === tabId
     ? tabs[Math.min(closedIndex, tabs.length - 1)].id
     : session.activeTabId
@@ -320,6 +323,7 @@ function normalizePersistedTab(tab, rememberHistory = true) {
     id: tab.id,
     title,
     isPinned: tab.isPinned === true,
+    isIncognito: tab.isIncognito === true,
     placementOpenerTabId: typeof tab.placementOpenerTabId === 'string' ? tab.placementOpenerTabId : null,
     route,
     history,

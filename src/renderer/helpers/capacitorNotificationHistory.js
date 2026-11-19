@@ -1,5 +1,6 @@
 import {
   addNotificationHistoryEntries,
+  addRecordedNotification,
   applyNotificationDismissals,
   areNotificationDismissalsEqual,
   getDismissedNotificationEntries,
@@ -11,7 +12,7 @@ import {
   recordNotificationDismissals,
   removeNotificationHistoryEntry
 } from '../../notificationHistory.js'
-import { closeCapacitorSystemNotifications } from './capacitorSystemNotifications.js'
+import { closeCapacitorSystemNotifications, suppressDismissedAndroidNotifications } from './capacitorSystemNotifications.js'
 
 const STORAGE_KEY = 'opentubex-notification-history'
 const DISMISSALS_STORAGE_KEY = 'opentubex-notification-dismissals'
@@ -32,6 +33,12 @@ function readDismissals() {
   } catch {
     return normalizeNotificationDismissals(null)
   }
+}
+
+/** @param {import('../../notificationHistory').NotificationDismissals} dismissals */
+function writeDismissals(dismissals) {
+  localStorage.setItem(DISMISSALS_STORAGE_KEY, JSON.stringify(dismissals))
+  suppressDismissedAndroidNotifications(dismissals)
 }
 
 /**
@@ -61,7 +68,7 @@ function closeStale(previous, entries) {
  * @param {import('../../notificationHistory').NotificationDismissals} nextDismissals
  */
 function dismiss(previous, entries, dismissals, nextDismissals) {
-  if (nextDismissals !== dismissals) localStorage.setItem(DISMISSALS_STORAGE_KEY, JSON.stringify(nextDismissals))
+  if (nextDismissals !== dismissals) writeDismissals(nextDismissals)
   if (entries !== previous) write(previous, entries)
   if (nextDismissals !== dismissals) {
     for (const listener of dismissalListeners) listener()
@@ -91,6 +98,17 @@ export const capacitorNotificationHistory = {
     if (added.length > 0) write(withAdditions, next)
     else closeStale(withAdditions, next)
     return added
+  },
+
+  /**
+   * Adds news the app showed itself, unless the history already holds it.
+   * @param {import('../../notificationHistory').NotificationHistoryInput} notification
+   */
+  async record(notification) {
+    const current = read()
+    const next = addRecordedNotification(current, notification)
+    // Entries that made room for the new one were not dismissed.
+    if (next !== current) write(next, next)
   },
 
   /**
@@ -148,7 +166,7 @@ export const capacitorNotificationHistory = {
   async mergeDismissals(remote) {
     const current = readDismissals()
     const merged = mergeNotificationDismissals(current, normalizeNotificationDismissals(remote))
-    if (!areNotificationDismissalsEqual(merged, current)) localStorage.setItem(DISMISSALS_STORAGE_KEY, JSON.stringify(merged))
+    if (!areNotificationDismissalsEqual(merged, current)) writeDismissals(merged)
     const entries = read()
     const next = applyNotificationDismissals(entries, merged)
     if (next !== entries) write(entries, next)

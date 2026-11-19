@@ -51,7 +51,8 @@ const {
   parseLocalListVideo,
   parseLocalListPlaylist,
   parseLocalListPlaylists,
-  parseLocalChannelVideos
+  parseLocalChannelVideos,
+  parseLocalChannelCollaborations
 } = createLocalFeedParsers(isMembersOnly => shouldHideMembersOnlyContent(isMembersOnly, store.getters))
 export { normalizeLocalSubscriptionFeed, parseLocalPlaylistVideos, parseLocalPlaylistVideo, parseLocalSubscriberCount, parseLocalHashtagHeader, parseLocalChannelHeader, parseLocalChannelShorts, parseShort, parseLocalCommunityPosts, parseLocalTextRuns, parseLocalListVideo, parseLocalListPlaylist, parseLocalListPlaylists, parseLocalChannelVideos }
 
@@ -1754,6 +1755,23 @@ async function processForegroundSubscriptionResponse(input) {
     console.warn('Background feed processing failed; parsing in the renderer:', error)
     return undefined
   }
+}
+
+/**
+ * Loads the channel's Home tab for collaborations other channels uploaded.
+ * @param {string} id
+ * @param {AbortSignal} [signal]
+ */
+export async function getLocalChannelCollaborations(id, signal) {
+  const innertube = await createInnertube({ signal })
+  const response = await innertube.actions.execute('/browse', { browseId: id })
+
+  if (process.env.IS_ELECTRON) {
+    const result = await processForegroundSubscriptionResponse({ format: 'local', data: response.data, feedType: 'collaborations', channelId: id })
+    if (result) return result.videos
+  }
+
+  return parseLocalChannelCollaborations(new YT.Channel(null, response).videos, id)
 }
 
 /**

@@ -111,8 +111,8 @@
   align-items: center;
   gap: 7px;
   inline-size: 100%;
-  min-block-size: 28px;
-  padding-block: 4px;
+  min-block-size: calc(20px + 8px * var(--ui-density));
+  padding-block: calc(4px * var(--ui-density));
   padding-inline: 7px;
   color: inherit;
   background: transparent;
@@ -171,8 +171,8 @@
   }
 
   .touchFriendly .menuItem {
-    min-block-size: 48px;
-    padding-block: 12px;
+    min-block-size: max(48px, calc(32px + 16px * var(--ui-density)));
+    padding-block: calc(12px * var(--ui-density));
     padding-inline: 12px;
   }
 }

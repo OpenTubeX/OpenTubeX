@@ -5,7 +5,7 @@ import vm from 'node:vm'
 import { importWithStubs, sourceUrl } from '../helpers/module-stubs.mjs'
 
 const systemNotifications = { calls: [], all: [] }
-const [{ closeCapacitorSystemNotifications, getCommentLocalNotificationId, getTwitchLocalNotificationId }] = await importWithStubs([sourceUrl('src/renderer/helpers/capacitorSystemNotifications.js')], {
+const [{ closeCapacitorSystemNotifications, closeDeferredReminders, getCommentLocalNotificationId, getTwitchLocalNotificationId }] = await importWithStubs([sourceUrl('src/renderer/helpers/capacitorSystemNotifications.js')], {
   '@capacitor/local-notifications': {
     LocalNotifications: {
       getAll: async () => ({ notifications: systemNotifications.all }),
@@ -43,6 +43,41 @@ test('closing reminder entries removes their notifications and overdue alarms by
   }
   assert.deepEqual(systemNotifications.calls.find(([name]) => name === 'cancel'), ['cancel', [7, 8]])
   assert.deepEqual(systemNotifications.calls.find(([name]) => name === 'removeDelivered'), ['removeDelivered', [7, 8, 11]])
+})
+
+test('reminders read or removed while the app was closed close once it opens', async t => {
+  const storage = new Map()
+  globalThis.localStorage = {
+    getItem: key => storage.get(key) ?? null,
+    setItem: (key, value) => storage.set(key, value),
+    removeItem: key => storage.delete(key)
+  }
+  // A second copy, since modules are cached
+  const [hidden] = await importWithStubs([`${sourceUrl('src/renderer/helpers/capacitorSystemNotifications.js')}?hidden`], {
+    '@capacitor/local-notifications': { LocalNotifications: {} },
+    [sourceUrl('src/renderer/helpers/androidBackgroundSync.js')]: { isAndroidBackgroundRenderer: true, suppressAndroidNotifications: async () => {} },
+    [sourceUrl('src/renderer/helpers/androidSubscriptionRefresh.js')]: { cancelAndroidUploadNotifications: async () => {} }
+  })
+  process.env.IS_CAPACITOR = 'true'
+  systemNotifications.calls = []
+  systemNotifications.all = [{ id: 12, extra: { videoId: 'premiere00e' } }]
+  try {
+    // The renderer syncing while the app is closed lacks the notification plugin.
+    await hidden.closeCapacitorSystemNotifications([{ kind: 'live-reminder', path: '/watch/premiere00e', createdAt: Date.now() - 60_000 }])
+    assert.deepEqual(systemNotifications.calls, [])
+    // A failing plugin keeps them for the next opening.
+    systemNotifications.all = null
+    t.mock.method(console, 'error', () => {})
+    await closeDeferredReminders()
+    systemNotifications.all = [{ id: 12, extra: { videoId: 'premiere00e' } }]
+    await closeDeferredReminders()
+    assert.deepEqual(systemNotifications.calls, [['removeDelivered', [12]]])
+    await closeDeferredReminders()
+    assert.equal(systemNotifications.calls.length, 1)
+  } finally {
+    delete process.env.IS_CAPACITOR
+    delete globalThis.localStorage
+  }
 })
 
 test('closing Twitch live entries on iOS and comment reply entries removes the notifications the app showed', async () => {

@@ -250,6 +250,15 @@ test('seeks and skips from the desktop mini player', async ({ app, page, attachS
   await page.keyboard.press('k')
   await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
   await video.evaluate(element => element.pause())
+
+  const mute = player.locator('.scrollMiniVolumeIcon')
+  await mute.click()
+  await expect.poll(() => video.evaluate(element => element.muted)).toBe(true)
+  await expect(mute).toHaveAttribute('aria-pressed', 'true')
+  await expect(player).toHaveClass(/scrollMiniPlayer/)
+  await mute.click()
+  await expect.poll(() => video.evaluate(element => element.muted)).toBe(false)
+  await expect(mute).toHaveAttribute('aria-pressed', 'false')
   await attachScreenshot('desktop mini player controls')
 
   await expect(player.getByRole('button', { name: 'Previous', exact: true })).toBeVisible()

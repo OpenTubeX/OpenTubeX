@@ -53,7 +53,7 @@ const server = createServer(async (request, response) => {
 })
 
 test.use({
-  launchArgs: ['--host-resolver-rules=MAP *.otx-test.invalid 127.0.0.1', '--no-proxy-server'],
+  launchArgs: ['--host-resolver-rules=MAP *.otx-test.invalid 127.0.0.1'],
   // beforeEach removes the fixture's connectivity check route, so a check
   // would reach the internet.
   seed: { settings: { internetConnectivityChecks: false } }

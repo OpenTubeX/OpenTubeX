@@ -483,9 +483,10 @@ export default {
    * @param {string} path
    * @param {Record<string, string> | null | undefined} query
    * @param {string | null | undefined} searchQueryText
+   * @param {boolean} [incognito] whether the window starts with an incognito tab
    */
-  openInNewWindow: (path, query, searchQueryText) => {
-    ipcRenderer.send(IpcChannels.CREATE_NEW_WINDOW, path, query, searchQueryText)
+  openInNewWindow: (path, query, searchQueryText, incognito = false) => {
+    ipcRenderer.send(IpcChannels.CREATE_NEW_WINDOW, path, query, searchQueryText, incognito === true)
   },
 
   /**
@@ -1211,6 +1212,12 @@ export default {
      *   `commentId` is the reply's, or the hearted comment's
      */
     notifyComment: (notification) => ipcRenderer.invoke(IpcChannels.NOTIFICATION_COMMENT, notification),
+
+    /**
+     * Keeps news the app showed only as a toast, without a system notification.
+     * @param {import('../notificationHistory').NotificationHistoryInput} notification
+     */
+    record: (notification) => ipcRenderer.invoke(IpcChannels.NOTIFICATION_RECORD, notification),
 
     /**
      * Notifications read or removed on this device, for other devices.

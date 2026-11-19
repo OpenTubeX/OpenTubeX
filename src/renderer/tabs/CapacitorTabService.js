@@ -141,9 +141,16 @@ export class CapacitorTabService {
     this.persist()
   }
 
-  async createTab(location = `/${this.store.getters.getLandingPage}`, title = '', makeActive = true) {
+  /**
+   * @param {string | object} [location]
+   * @param {string} [title]
+   * @param {boolean} [makeActive]
+   * @param {{ incognito?: boolean, fromLink?: boolean }} [options] links opened from an incognito tab stay incognito
+   */
+  async createTab(location = `/${this.store.getters.getLandingPage}`, title = '', makeActive = true, { incognito = false, fromLink = false } = {}) {
     if (!this.tabsEnabled) return null
     const tab = createCapacitorTab(this.router.resolve(location), title)
+    tab.isIncognito = incognito || (fromLink && this.store.getters.getTabIncognito(this.store.getters.getPresentedTabId))
     const previous = this.currentSession()
     const session = addCapacitorTab(previous, tab, makeActive, this.store.getters.getNewTabPosition ?? 'afterCurrentInOrder')
     if (!makeActive) {
@@ -169,6 +176,7 @@ export class CapacitorTabService {
 
     const tab = createCapacitorTab(source.route)
     tab.title = source.contentTitle || source.title || source.route.fullPath
+    tab.isIncognito = source.isIncognito === true
     const previous = this.currentSession()
     const session = addCapacitorTab(previous, tab, true, this.store.getters.getNewTabPosition ?? 'afterCurrentInOrder')
     return await this.commitAndPresent(previous, session) ? tab.id : null
@@ -215,11 +223,13 @@ export class CapacitorTabService {
   getSyncSessions() {
     this.flushPersistence()
     const session = this.currentSession()
+    // Incognito tabs never leave this device
+    const tabs = session.tabs.filter(tab => !tab.isIncognito)
     return [{
       sessionId: 'mobile',
       updatedAt: this.sessionUpdatedAt,
-      activeTabId: session.activeTabId,
-      tabs: session.tabs.map(tab => ({
+      activeTabId: tabs.some(tab => tab.id === session.activeTabId) ? session.activeTabId : tabs[0]?.id ?? null,
+      tabs: tabs.map(tab => ({
         id: tab.id,
         url: new URL(tab.route.fullPath, window.location.origin).toString(),
         title: tab.title,
@@ -242,13 +252,18 @@ export class CapacitorTabService {
       ...tab,
       isPinned: synced.tabs[index].isPinned === true,
     }))
-    const session = restoreCapacitorTabSession({
-      tabs,
-      activeTabId: tabs.some(tab => tab.id === synced.activeTabId)
-        ? synced.activeTabId
-        : tabs[0].id,
-      closedTabs: [],
-    }, this.router.currentRoute.value)
+    // The synced session cannot close incognito tabs, nor pull the user out of one
+    const incognitoTabs = previous.tabs.filter(tab => tab.isIncognito)
+    const activeIncognitoTabId = incognitoTabs.find(tab => tab.id === previous.activeTabId)?.id
+    const restored = restoreCapacitorTabSession({ tabs, activeTabId: synced.activeTabId, closedTabs: [] }, this.router.currentRoute.value)
+    // Incognito tabs keep their runtime state, since their pages stay mounted
+    const restoredIds = new Set(restored.tabs.map(tab => tab.id))
+    const keptIncognitoTabs = incognitoTabs.filter(tab => !restoredIds.has(tab.id))
+    const session = {
+      ...restored,
+      tabs: [...restored.tabs, ...keptIncognitoTabs].sort((a, b) => Number(b.isPinned === true) - Number(a.isPinned === true)),
+      activeTabId: keptIncognitoTabs.some(tab => tab.id === activeIncognitoTabId) ? activeIncognitoTabId : restored.activeTabId,
+    }
     if (!await this.commitAndPresent(previous, session)) return false
 
     this.sessionUpdatedAt = Number.isFinite(synced.updatedAt) ? synced.updatedAt : Date.now()
@@ -389,6 +404,7 @@ export class CapacitorTabService {
         id: tab.id,
         title: tab.contentTitle || tab.title || tab.route.fullPath,
         isPinned: tab.isPinned === true,
+        isIncognito: tab.isIncognito === true,
         placementOpenerTabId: tab.placementOpenerTabId,
         route: tab.route,
         history: tab.history,
@@ -608,10 +624,12 @@ function toPersistedSession(session, rememberHistory) {
     ...(includeLoadState && { isUnloaded: tab.loadState === 'unloaded' })
   })
 
+  // Incognito tabs are not restored
+  const tabs = session.tabs.filter(tab => !tab.isIncognito)
   return {
-    tabs: session.tabs.map(tab => serializeTab(tab, true)),
+    tabs: tabs.map(tab => serializeTab(tab, true)),
     closedTabs: session.closedTabs.map(tab => serializeTab(tab, false)),
-    activeTabId: session.activeTabId,
+    activeTabId: tabs.some(tab => tab.id === session.activeTabId) ? session.activeTabId : tabs[0]?.id ?? null,
     selectionRevision: session.selectionRevision,
     updatedAt: session.updatedAt
   }

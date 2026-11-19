@@ -265,7 +265,7 @@ Subscriptions:
     Followed Channels: Chadennoù heuliet war savennoù all
     Description: Heuliit chadennoù war Twitch, SoundCloud, PeerTube, Rumble, Odysee ha media.ccc.de evit gwelet ar pezh a embannont en ivinell Savennoù ho koumanantoù. Kavit chadennoù gant an enklask, pe ouzhpennit anezho gant chomlec'h o fajenn. Lennet e vez o mediaoù gant yt-dlp.
     Add Channel: Ouzhpennañ ur chadenn
-    Channel URL: Chomlec'h ar chadenn
+    Search Or Paste Channel: Klaskit pe pegit chomlec'h ur chadenn
     Invalid Channel: Skrivit chomlec'h pajenn ur chadenn war Twitch, SoundCloud, PeerTube, Rumble, Odysee pe media.ccc.de.
     Channel Not Found: N'eus chadenn ebet er chomlec'h-mañ.
     Channel Already Followed: Heuliañ a rit ar chadenn-mañ dija.
@@ -435,7 +435,6 @@ Settings:
     Failed to Save Password: "N'eus ket bet gallet enrollañ ar ger-tremen."
     Confirm Password: "Kadarnaat ar ger-tremen"
     Passwords Do Not Match: "Ne glot ket ar gerioù-tremen."
-  Navigation and Controls: "Merdeiñ ha reolerezhioù"
   Control Bar:
     Title: "Barrenn reoliñ"
     Customize: "Personelaat ar varrenn reoliñ"
@@ -682,7 +681,11 @@ Settings:
       Tab Loading Indicator: Merker kargañ an ivinell
       Bar: Barrenn
       Dot: Pik (klasel)
-    Compact Settings Categories: "Rummadoù arventennoù stank"
+    UI Density:
+      UI Density: "Stankter an etrefas"
+      Compact: "Stank"
+      Default: "Dre ziouer"
+      Comfortable: "Aes"
     Playlist Thumbnail Size: "Ment skeudennoù bihan ar roll-lenn"
     Compact Mobile Mini Player: "Lenner bihan hezoug stank"
     Always Show Mobile Search Bar: "Diskouez barrenn enklask ar pellgomzer atav"
@@ -1051,6 +1054,7 @@ Settings:
     Channel Settings: "Arventennoù ar chadennoù"
     Channel Settings Description: "Derc'hel soñj, evit pep chadenn, eus an arventennoù a zibabit pa sellit. Arloet e vint en-dro ar wech da-heul ma sellot ouzh unan eus he videoioù."
     Enable Channel Playback Settings: "Gweredekaat arventennoù al lenn evit ar chadennoù"
+    Auto Save Changes: Enrollañ ar c’hemmoù ent emgefre
     Auto Save Playback Speed: "Enrollañ ent emgefreek ar c'hemmoù d'an tizh lenn"
     Auto Save Video Quality: "Enrollañ ent emgefreek ar c'hemmoù d'ar perzhded video"
     Auto Save Subtitles State: "Enrollañ ent emgefreek ar c'hemmoù da stad an istitloù"
@@ -1300,6 +1304,7 @@ Settings:
     Notify About New Uploads: Rebuadiñ diwar-benn an endalc'had nevez
     RSS Feeds Auto Refresh Interval: Etrevez adkargañ emgefreek ar gwazhioù RSS
     Faster Subscription Refresh: "Freskaat ar c'houmanantoù buanoc'h"
+    Show Collaborations From Other Channels: "Enlakaat ar c'henlabouradennoù pellgaset gant chadennoù all"
     Platforms:
       Other Platforms: Savennoù all
       Manage Channels: Merañ ar chadennoù heuliet
@@ -2227,6 +2232,7 @@ Context Menu:
   Search With Multiple: "Klask gant…"
   Selection Too Long: "Re hir eo an diuzadenn evit klask (> {count} arouezenn)"
   Background Tab: Ivinell en drekleur
+  Open in an Incognito Tab: Digeriñ en un ivinell kuzh
 Tab Organizer:
   Tab History: "Istor an ivinell"
   Current Page: "Pajenn vremanel"
@@ -2311,6 +2317,7 @@ Comments:
   Filter loaded comments: "Silañ an evezhiadennoù karget"
   Comment filters: "Siloù an evezhiadennoù"
   From creator: "Eus ar c'hrouer"
+  From you: "Ganeoc'h"
   Contains timestamps: "Enderc'hel a ra mareoù"
   Pin comment by author: "Spilhennañ evezhiadenn {author}"
   Unpin comment by author: "Dispilhennañ evezhiadenn {author}"
@@ -2459,6 +2466,7 @@ Tooltips:
     Notify About New Uploads: Diskouez a ra rebuadoù reizhiad war an trevnad-mañ evit ar chadennoù ho peus gweredekaet o rebuadoù en o arventennoù koumanant. OpenTubeX a wir ha bez ez eus endalc'had nevez pa vez freskaet ar c'houmanantoù, setu dibabit un etrevez adkargañ emgefreek. Evit bezañ kelaouet pa vez serret an arload, gweredekait ivez ar freskañ pa vez serret an arload.
     RSS Feeds Auto Refresh Interval: Pegen alies e vez adkarget ho kwazhioù RSS ent emgefreek gant OpenTubeX e-pad ma vez digor an arload.
     Faster Subscription Refresh: "Gwiriañ a ra lanv RSS pep chadenn da gentañ ha ne garg nemet videoioù, Shorts ha skignadennoù war-eeun ar chadennoù o deus pellgasadennoù nevez. Ar freskadurioù emgefre a lez a-gostez ivez ar chadennoù karget e-pad an 10 munutenn diwezhañ. Evit ar chadennoù hep pellgasadennoù nevez, ne vez hizivaet an niver a selloù, ar videoioù dilamet hag an titloù kemmet nemet bep un nebeud eurioù, ha gallout a ra ar pellgasadennoù nevez dont war wel diwezhatoc'h pa vez dale gant al lanv RSS. N'eo ket hegerz gant API Invidious."
+    Show Collaborations From Other Channels: "Diskouez a ra ivez ar videoioù graet gant ar chadennoù m'emaoc'h koumanantet dezho asambles gant ur chadenn all he deus o fellgaset. YouTube ne ziskouez anezho nemet war ivinell Degemer ur chadenn, setu e karg pep freskadenn videoioù ur bajenn ouzhpenn evit pep chadenn. N'eus kavet nemet ar c'henlabouradennoù nevesañ diskouezet eno, chadennoù zo ne ziskouezont hini ebet, ha brasjedet eo o deiziadoù embann. N'eo ket hegerz gant API Invidious."
     Platforms Auto Refresh Interval: Pegen alies e vez adkarget ar chadennoù a heuliit war savennoù all ent emgefreek gant OpenTubeX e-pad ma vez digor an arload.
     Twitch Notify When Live: Ho kemenn a ra pa grog unan eus ar chadennoù Twitch a heuliit da skignañ. Gwiriañ a ra OpenTubeX bep un nebeud munutennoù keit ha ma vez digor, hag ivez keit ha ma vez serret ma nevesa ar c'houmanantoù neuze.
   Theme Settings:
@@ -2466,7 +2474,7 @@ Tooltips:
     Visible Search Suggestions: "Termeniñ a ra pet enmont eus ar roll-istor klask ha pet kinnig a ziskouez ar varrenn glask a-raok ma ranker dibunañ he roll. Ne ya morse ar roll en tu all da draoñ ar prenestr."
     Thumbnail Size: "Cheñch a ra ment ar skeudennigoù videoioù er gaelioù hag el listennoù. Ar gaelioù gant un niver a vannoù start pe gant ar gwel Led klok a leugn pep renk e-lec'h, neuze ne cheñch nemet skeudennigoù al listennoù hag ar Shorts eno. War ar prenestroù ment ur pellgomzer eo bevennet skeudennigoù ar gael da 100%."
     Playlist Thumbnail Size: "Cheñch a ra ment ar skeudennigoù videoioù war pajennoù ar rolloù-lenn. Ar gaelioù gant un niver a vannoù start pe gant ar gwel Led klok a leugn pep renk e-lec'h, neuze ne cheñch nemet skeudennigoù al listennoù hag ar Shorts eno. War ar prenestroù ment ur pellgomzer eo bevennet skeudennigoù ar gael da 100%."
-    Compact Settings Categories: "Bihanaat a ra uhelder rummadoù an arventennoù."
+    UI Density: "Kemmañ a ra an esaouennoù er rolloù, el lañserioù, er varrenn gostez hag en Arventennoù."
     Show Progress as Notification: "Diskouez ur rebuad padus gant araokadur diouzhtu evit an oberoù en drekleur, evel adkargañ ar c'houmanantoù ha pellgargañ ostilhoù meret, e-lec'h implijout ar varrenn araokadur hollek."
     Always Show Scrollbars: "Derc'hel ar barrennoù dibunañ gwelus bepred. Pa vez diweredekaet e steuziont nebeut goude ma paouezit da zilec'hiañ al logodenn hag e tistroont kerkent ha ma tilec'hiit anezhi en-dro."
     Scroll Speed: "Kemmañ ar pellder dibunañ gant rod al logodenn ha jestroù rod ar c'horreenn-stok."
@@ -2519,6 +2527,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: "Cheñcher ivinelloù"
   Undo Seek: Dizober al lamm diwezhañ
   Redo Seek: Adober ul lamm dizobereet
+  New Incognito Tab: Krouiñ un ivinell kuzh nevez
 CommandPalette:
   Title: "Paled arc'hadoù"
   Open: "Digeriñ ar baled arc'hadoù"
@@ -2906,3 +2915,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Klask war Twitch"
+New Incognito Tab: Ivinell kuzh nevez
+Incognito Tab: Ivinell kuzh

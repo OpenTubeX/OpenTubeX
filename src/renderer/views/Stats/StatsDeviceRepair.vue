@@ -182,7 +182,8 @@ async function apply() {
   gap: 12px;
   border: 0;
   padding: 0;
-  margin: 20px 0;
+  margin-block: 20px;
+  margin-inline: 0;
 }
 
 .overlapChoices legend {

@@ -2,6 +2,9 @@ package org.opentubex.app;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.InputMethodManager;
 
 import com.getcapacitor.CapacitorWebView;
 
@@ -14,6 +17,7 @@ public final class SubscriptionRefreshWebView extends CapacitorWebView {
     private static boolean syncActive;
 
     private boolean refreshActive;
+    private boolean incognitoKeyboard;
     private int actualWindowVisibility = VISIBLE;
 
     public SubscriptionRefreshWebView(Context context, AttributeSet attributes) {
@@ -28,6 +32,22 @@ public final class SubscriptionRefreshWebView extends CapacitorWebView {
     protected void onWindowVisibilityChanged(int visibility) {
         actualWindowVisibility = visibility;
         super.onWindowVisibilityChanged(keepRunning() ? VISIBLE : visibility);
+    }
+
+    @Override
+    public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
+        InputConnection connection = super.onCreateInputConnection(outAttrs);
+        // Like a browser's incognito tab, ask the keyboard not to learn from what is typed
+        if (incognitoKeyboard) outAttrs.imeOptions |= EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING;
+        return connection;
+    }
+
+    void setIncognitoKeyboard(boolean enabled) {
+        if (incognitoKeyboard == enabled) return;
+        incognitoKeyboard = enabled;
+        // A connected keyboard only reads the options when its input starts again
+        InputMethodManager inputMethodManager = getContext().getSystemService(InputMethodManager.class);
+        if (inputMethodManager != null && inputMethodManager.isActive(this)) inputMethodManager.restartInput(this);
     }
 
     void setRefreshActive(boolean active) {

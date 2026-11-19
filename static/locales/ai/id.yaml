@@ -265,7 +265,7 @@ Subscriptions:
     Followed Channels: Kanal yang diikuti di platform lain
     Description: Ikuti kanal di Twitch, SoundCloud, PeerTube, Rumble, Odysee, dan media.ccc.de untuk melihat unggahan mereka di tab Platform pada langganan Anda. Temukan kanal melalui pencarian, atau tambahkan menggunakan alamat halamannya. Media mereka diputar dengan yt-dlp.
     Add Channel: Tambah Kanal
-    Channel URL: Alamat kanal
+    Search Or Paste Channel: Cari atau tempel alamat kanal
     Invalid Channel: Masukkan alamat halaman kanal di Twitch, SoundCloud, PeerTube, Rumble, Odysee, atau media.ccc.de.
     Channel Not Found: Tidak ada kanal di alamat ini.
     Channel Already Followed: Anda sudah mengikuti kanal ini.
@@ -436,7 +436,6 @@ Settings:
     Failed to Save Password: "Gagal menyimpan kata sandi."
     Confirm Password: "Konfirmasi kata sandi"
     Passwords Do Not Match: "Kata sandi tidak cocok."
-  Navigation and Controls: "Navigasi dan kontrol"
   Control Bar:
     Title: "Bilah kontrol"
     Customize: "Sesuaikan bilah kontrol"
@@ -683,7 +682,11 @@ Settings:
       Tab Loading Indicator: Indikator pemuatan tab
       Bar: Bilah
       Dot: Titik (klasik)
-    Compact Settings Categories: "Kategori Pengaturan Ringkas"
+    UI Density:
+      UI Density: "Kepadatan antarmuka"
+      Compact: "Ringkas"
+      Default: "Bawaan"
+      Comfortable: "Lega"
     Playlist Thumbnail Size: "Ukuran thumbnail playlist"
     Compact Mobile Mini Player: "Pemutar mini seluler ringkas"
     Always Show Mobile Search Bar: "Selalu tampilkan bilah pencarian di ponsel"
@@ -1054,6 +1057,7 @@ Settings:
     Channel Settings: Pengaturan Saluran
     Channel Settings Description: Ingat pengaturan yang Anda pilih saat menonton untuk setiap saluran, lalu terapkan lagi saat Anda menonton video saluran tersebut berikutnya.
     Enable Channel Playback Settings: Aktifkan pengaturan pemutaran saluran
+    Auto Save Changes: Simpan perubahan secara otomatis
     Auto Save Playback Speed: Simpan perubahan kecepatan pemutaran secara otomatis
     Auto Save Video Quality: Simpan perubahan kualitas video secara otomatis
     Auto Save Subtitles State: Simpan perubahan status takarir secara otomatis
@@ -1303,6 +1307,7 @@ Settings:
     Notify About New Uploads: Beri Notifikasi Unggahan Baru
     RSS Feeds Auto Refresh Interval: Interval Pembaruan Otomatis Umpan RSS
     Faster Subscription Refresh: "Penyegaran langganan lebih cepat"
+    Show Collaborations From Other Channels: "Sertakan kolaborasi yang diunggah oleh saluran lain"
     Platforms:
       Other Platforms: Platform Lain
       Manage Channels: Kelola Kanal yang Diikuti
@@ -2243,6 +2248,7 @@ Context Menu:
   Search With Multiple: Cari dengan...
   Selection Too Long: Pilihan terlalu panjang untuk dicari (> {count} karakter)
   Background Tab: Tab latar belakang
+  Open in an Incognito Tab: Buka di Tab Penyamaran
 Tab Organizer:
   Tab History: "Riwayat tab"
   Current Page: "Halaman saat ini"
@@ -2327,6 +2333,7 @@ Comments:
   Filter loaded comments: Filter komentar yang telah dimuat
   Comment filters: Filter komentar
   From creator: Dari kreator
+  From you: Dari Anda
   Contains timestamps: Memuat stempel waktu
   Pin comment by author: Sematkan komentar dari {author}
   Unpin comment by author: Lepaskan sematan komentar dari {author}
@@ -2475,6 +2482,7 @@ Tooltips:
     Notify About New Uploads: Menampilkan notifikasi sistem di perangkat ini untuk channel yang notifikasinya Anda aktifkan di pengaturan langganannya. OpenTubeX memeriksa konten baru saat langganan diperbarui, jadi pilih interval pembaruan otomatis. Agar tetap mendapat notifikasi saat aplikasi ditutup, aktifkan juga pembaruan saat aplikasi ditutup.
     RSS Feeds Auto Refresh Interval: Seberapa sering OpenTubeX memperbarui umpan RSS Anda secara otomatis saat aplikasi terbuka.
     Faster Subscription Refresh: "Memeriksa umpan RSS setiap saluran terlebih dahulu dan hanya memuat video, Shorts, dan siaran langsung dari saluran yang memiliki unggahan baru. Penyegaran otomatis juga melewati saluran yang dimuat dalam 10 menit terakhir. Untuk saluran tanpa unggahan baru, jumlah penayangan, video yang dihapus, dan judul yang diubah hanya diperbarui setiap beberapa jam, dan unggahan baru mungkin muncul lebih lambat saat umpan RSS tertinggal. Tidak tersedia dengan API Invidious."
+    Show Collaborations From Other Channels: "Juga menampilkan video yang dibuat oleh saluran yang Anda langgani bersama saluran lain yang mengunggahnya. YouTube hanya mencantumkannya di tab Beranda saluran, jadi setiap penyegaran video memuat satu halaman lagi per saluran. Hanya kolaborasi terbaru yang ditampilkan di sana yang ditemukan, beberapa saluran tidak menampilkannya sama sekali, dan tanggal publikasinya merupakan perkiraan. Tidak tersedia dengan API Invidious."
     Platforms Auto Refresh Interval: Seberapa sering OpenTubeX memperbarui kanal yang Anda ikuti di platform lain secara otomatis saat aplikasi terbuka.
     Twitch Notify When Live: Memberi tahu Anda saat salah satu kanal Twitch yang Anda ikuti mulai bersiaran. OpenTubeX memeriksa setiap beberapa menit saat terbuka, dan juga saat ditutup jika saat itu memperbarui langganan.
   Theme Settings:
@@ -2482,7 +2490,7 @@ Tooltips:
     Visible Search Suggestions: "Menentukan berapa banyak entri riwayat pencarian dan saran yang ditampilkan bilah pencarian sebelum daftarnya perlu digulir. Daftar tidak pernah melewati bagian bawah jendela."
     Thumbnail Size: "Mengubah ukuran gambar mini video di kisi dan daftar. Kisi dengan jumlah kolom tetap atau jenis tampilan Lebar Penuh akan mengisi setiap baris, jadi di sana penggeser hanya mengubah gambar mini daftar dan Shorts. Di jendela seukuran ponsel, gambar mini kisi dibatasi hingga 100%."
     Playlist Thumbnail Size: "Mengubah ukuran gambar mini video di halaman daftar putar. Kisi dengan jumlah kolom tetap atau jenis tampilan Lebar Penuh akan mengisi setiap baris, jadi di sana penggeser hanya mengubah gambar mini daftar dan Shorts. Di jendela seukuran ponsel, gambar mini kisi dibatasi hingga 100%."
-    Compact Settings Categories: "Mengurangi tinggi kategori pengaturan."
+    UI Density: "Mengubah jarak di daftar, menu, bilah samping, dan Pengaturan."
     Show Progress as Notification: Menampilkan notifikasi tetap dengan progres langsung untuk operasi latar belakang, seperti pembaruan langganan dan unduhan alat terkelola, sebagai pengganti bilah progres global.
     Always Show Scrollbars: Mempertahankan bilah gulir agar selalu terlihat. Jika dinonaktifkan, bilah memudar sesaat setelah Anda berhenti menggerakkan tetikus dan muncul kembali begitu tetikus digerakkan.
     Scroll Speed: Mengubah jarak gulir gestur roda tetikus dan panel sentuh.
@@ -2535,6 +2543,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Pengalih tab
   Undo Seek: Urungkan lompatan terakhir
   Redo Seek: Ulangi lompatan yang diurungkan
+  New Incognito Tab: Buat tab penyamaran baru
 CommandPalette:
   Title: Palet perintah
   Open: Buka palet perintah
@@ -2922,3 +2931,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Cari di Twitch"
+New Incognito Tab: Tab Penyamaran Baru
+Incognito Tab: Tab penyamaran

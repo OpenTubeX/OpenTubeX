@@ -5,27 +5,30 @@
   >
     <div class="commentSettings">
       <!-- Side by side when there is room, like the general switches. -->
-      <div
-        class="commentSwitches"
-        :class="{ 'switchColumnGrid switchFlowGrid': canNotifyReplies }"
-      >
-        <FtToggleSwitch
-          :label="t('Settings.General Settings.Auto Load Comments.Label')"
-          :default-value="store.getters.getAutoLoadComments"
-          setting-key="autoLoadComments"
-          :compact="true"
-          :tooltip="t('Settings.General Settings.Auto Load Comments.Tooltip')"
-          @change="store.dispatch('updateAutoLoadComments', $event)"
-        />
-        <FtToggleSwitch
+      <div class="commentSwitches switchColumnGrid">
+        <div class="switchColumn">
+          <FtToggleSwitch
+            :label="t('Settings.General Settings.Auto Load Comments.Label')"
+            :default-value="store.getters.getAutoLoadComments"
+            setting-key="autoLoadComments"
+            :compact="true"
+            :tooltip="t('Settings.General Settings.Auto Load Comments.Tooltip')"
+            @change="store.dispatch('updateAutoLoadComments', $event)"
+          />
+        </div>
+        <div
           v-if="canNotifyReplies"
-          :label="t('Settings.General Settings.Reply Notifications')"
-          :default-value="store.getters.getCommentReplyNotifications"
-          setting-key="commentReplyNotifications"
-          :compact="true"
-          :tooltip="t('Tooltips.General Settings.Reply Notifications')"
-          @change="updateReplyNotifications"
-        />
+          class="switchColumn"
+        >
+          <FtToggleSwitch
+            :label="t('Settings.General Settings.Reply Notifications')"
+            :default-value="store.getters.getCommentReplyNotifications"
+            setting-key="commentReplyNotifications"
+            :compact="true"
+            :tooltip="t('Tooltips.General Settings.Reply Notifications')"
+            @change="updateReplyNotifications"
+          />
+        </div>
       </div>
       <FtButton
         v-if="canNotifyReplies && store.getters.getCommentReplyNotifications"

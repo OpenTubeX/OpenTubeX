@@ -265,7 +265,7 @@ Subscriptions:
     Followed Channels: Sianeli rydych chi'n eu dilyn ar lwyfannau eraill
     Description: Dilynwch sianeli ar Twitch, SoundCloud, PeerTube, Rumble, Odysee a media.ccc.de i weld eu huwchlwythiadau yn y tab Llwyfannau yn eich tanysgrifiadau. Dewch o hyd i sianeli gyda'r chwiliad, neu ychwanegwch nhw drwy gyfeiriad eu tudalen. Mae eu cyfryngau'n chwarae gyda yt-dlp.
     Add Channel: Ychwanegu Sianel
-    Channel URL: Cyfeiriad y sianel
+    Search Or Paste Channel: Chwiliwch neu gludwch gyfeiriad sianel
     Invalid Channel: Rhowch gyfeiriad tudalen sianel ar Twitch, SoundCloud, PeerTube, Rumble, Odysee neu media.ccc.de.
     Channel Not Found: Does dim sianel yn y cyfeiriad hwn.
     Channel Already Followed: Rydych eisoes yn dilyn y sianel hon.
@@ -436,7 +436,6 @@ Settings:
     Failed to Save Password: "Methu cadw’r cyfrinair."
     Confirm Password: "Cadarnhau cyfrinair"
     Passwords Do Not Match: "Nid yw’r cyfrineiriau’n cyfateb."
-  Navigation and Controls: "Llywio a rheolyddion"
   Control Bar:
     Title: "Bar rheoli"
     Customize: "Addasu'r bar rheoli"
@@ -683,7 +682,11 @@ Settings:
       Tab Loading Indicator: Dangosydd llwytho tab
       Bar: Bar
       Dot: Dot (clasurol)
-    Compact Settings Categories: "Categorïau Gosodiadau Cryno"
+    UI Density:
+      UI Density: "Dwysedd y rhyngwyneb"
+      Compact: "Cryno"
+      Default: "Rhagosodedig"
+      Comfortable: "Cyfforddus"
     Playlist Thumbnail Size: "Maint mân-luniau’r rhestr chwarae"
     Compact Mobile Mini Player: "Chwaraewr bach cryno ar ffôn symudol"
     Always Show Mobile Search Bar: "Dangos y bar chwilio symudol bob amser"
@@ -1054,6 +1057,7 @@ Settings:
     Channel Settings: Gosodiadau sianeli
     Channel Settings Description: Cofiwch y gosodiadau a ddewiswch wrth wylio ar gyfer pob sianel ar wahân, fel eu bod yn cael eu gosod eto y tro nesaf y byddwch yn gwylio un o'i fideos.
     Enable Channel Playback Settings: Galluogi gosodiadau chwarae sianeli
+    Auto Save Changes: Cadw newidiadau’n awtomatig
     Auto Save Playback Speed: "Cadw newidiadau i'r cyflymder chwarae'n awtomatig"
     Auto Save Video Quality: "Cadw newidiadau i ansawdd y fideo'n awtomatig"
     Auto Save Subtitles State: "Cadw newidiadau i gyflwr yr isdeitlau'n awtomatig"
@@ -1303,6 +1307,7 @@ Settings:
     Notify About New Uploads: Hysbysu am gynnwys newydd
     RSS Feeds Auto Refresh Interval: Cyfwng adnewyddu ffrydiau RSS yn awtomatig
     Faster Subscription Refresh: "Adnewyddu tanysgrifiadau'n gyflymach"
+    Show Collaborations From Other Channels: "Cynnwys cydweithrediadau a uwchlwythwyd gan sianeli eraill"
     Platforms:
       Other Platforms: Llwyfannau Eraill
       Manage Channels: Rheoli Sianeli a Ddilynir
@@ -2253,6 +2258,7 @@ Context Menu:
   Search With Multiple: Chwilio gyda...
   Selection Too Long: Mae'r dewis yn rhy hir i'w chwilio (> {count} nod)
   Background Tab: Tab cefndir
+  Open in an Incognito Tab: Agor mewn tab incognito
 Tab Organizer:
   Tab History: "Hanes y tab"
   Current Page: "Tudalen gyfredol"
@@ -2338,6 +2344,7 @@ Comments:
   Filter loaded comments: Hidlo sylwadau wedi'u llwytho
   Comment filters: Hidlyddion sylwadau
   From creator: Gan y crëwr
+  From you: Gennych chi
   Contains timestamps: Yn cynnwys stampiau amser
   Pin comment by author: Pinio sylw gan {author}
   Unpin comment by author: Dadbinio sylw gan {author}
@@ -2486,6 +2493,7 @@ Tooltips:
     Notify About New Uploads: Yn dangos hysbysiadau system ar y ddyfais hon ar gyfer sianeli rydych wedi troi eu hysbysiadau ymlaen yn eu gosodiadau tanysgrifio. Mae OpenTubeX yn gwirio am gynnwys newydd pan fydd tanysgrifiadau'n cael eu hadnewyddu, felly dewiswch gyfwng adnewyddu awtomatig. I gael hysbysiadau pan fydd yr ap ar gau, galluogwch adnewyddu pan fydd yr ap ar gau hefyd.
     RSS Feeds Auto Refresh Interval: Pa mor aml mae OpenTubeX yn adnewyddu eich ffrydiau RSS yn awtomatig tra bod yr ap ar agor.
     Faster Subscription Refresh: "Yn gwirio ffrwd RSS pob sianel yn gyntaf a dim ond yn llwytho fideos, Shorts a ffrydiau byw sianeli sydd ag uwchlwythiadau newydd. Mae adnewyddiadau awtomatig hefyd yn hepgor sianeli a lwythwyd yn ystod y 10 munud diwethaf. Ar gyfer sianeli heb uwchlwythiadau newydd, dim ond bob ychydig oriau y caiff nifer y gwyliadau, fideos a dynnwyd a theitlau a newidiwyd eu diweddaru, a gall uwchlwythiadau newydd ymddangos yn hwyrach pan fydd y ffrwd RSS ar ei hôl hi. Ddim ar gael gydag API Invidious."
+    Show Collaborations From Other Channels: "Mae hefyd yn dangos fideos a wnaeth sianeli rydych wedi tanysgrifio iddynt ar y cyd â sianel arall a'u huwchlwythodd. Dim ond ar dab Cartref sianel y mae YouTube yn eu rhestru, felly mae pob adnewyddiad fideos yn llwytho un dudalen arall i bob sianel. Dim ond y cydweithrediadau diweddaraf a ddangosir yno a geir, nid yw rhai sianeli yn dangos unrhyw rai, ac mae eu dyddiadau cyhoeddi yn fras. Ddim ar gael gydag API Invidious."
     Platforms Auto Refresh Interval: Pa mor aml mae OpenTubeX yn adnewyddu'r sianeli rydych chi'n eu dilyn ar lwyfannau eraill yn awtomatig tra bod yr ap ar agor.
     Twitch Notify When Live: Yn eich hysbysu pan fydd un o'r sianeli Twitch rydych yn eu dilyn yn dechrau ffrydio. Mae OpenTubeX yn gwirio bob ychydig funudau tra bo ar agor, a hefyd tra bo ar gau os yw'n adnewyddu tanysgrifiadau bryd hynny.
   Theme Settings:
@@ -2493,7 +2501,7 @@ Tooltips:
     Visible Search Suggestions: "Yn gosod faint o gofnodion hanes chwilio ac awgrymiadau y mae’r bar chwilio’n eu dangos cyn i’w restr sgrolio. Nid yw’r rhestr byth yn ymestyn heibio gwaelod y ffenestr."
     Thumbnail Size: "Yn newid maint mân-luniau fideos mewn gridiau a rhestrau. Mae gridiau gyda nifer sefydlog o golofnau neu'r math gwedd Lled Llawn yn llenwi pob rhes yn lle hynny, felly yno dim ond mân-luniau rhestrau a Shorts y mae'n eu newid. Mewn ffenestri maint ffôn, mae mân-luniau'r grid wedi'u cyfyngu i 100%."
     Playlist Thumbnail Size: "Yn newid maint mân-luniau fideos ar dudalennau rhestri chwarae. Mae gridiau gyda nifer sefydlog o golofnau neu'r math gwedd Lled Llawn yn llenwi pob rhes yn lle hynny, felly yno dim ond mân-luniau rhestrau a Shorts y mae'n eu newid. Mewn ffenestri maint ffôn, mae mân-luniau'r grid wedi'u cyfyngu i 100%."
-    Compact Settings Categories: "Yn lleihau uchder categorïau gosodiadau."
+    UI Density: "Yn newid y bylchau mewn rhestrau, dewislenni, y bar ochr a’r Gosodiadau."
     Show Progress as Notification: Mae'n dangos hysbysiad parhaol â chynnydd byw ar gyfer gweithredoedd cefndir, megis adnewyddu tanysgrifiadau a lawrlwytho offer a reolir, yn lle defnyddio'r bar cynnydd byd-eang.
     Always Show Scrollbars: Mae'n cadw'r bariau sgrolio'n weladwy bob amser. Pan fydd wedi'i analluogi, maent yn pylu ychydig ar ôl i chi roi'r gorau i symud y llygoden ac yn ailymddangos cyn gynted ag y byddwch yn ei symud eto.
     Scroll Speed: Newid pa mor bell mae ystumiau olwyn llygoden ac olwyn pad cyffwrdd yn sgrolio.
@@ -2548,6 +2556,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Newidiwr tabiau
   Undo Seek: Dadwneud y naid olaf
   Redo Seek: Ail-wneud naid a ddadwnaed
+  New Incognito Tab: Creu tab incognito newydd
 CommandPalette:
   Title: Palet gorchmynion
   Open: Agor y palet gorchmynion
@@ -2934,3 +2943,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Chwilio Twitch"
+New Incognito Tab: Tab incognito newydd
+Incognito Tab: Tab incognito

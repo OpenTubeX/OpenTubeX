@@ -265,7 +265,7 @@ Subscriptions:
     Followed Channels: Digər platformalarda izlənilən kanallar
     Description: Abunəliklərinizin Platformalar tabında yükləmələrini görmək üçün Twitch, SoundCloud, PeerTube, Rumble, Odysee və media.ccc.de platformalarındakı kanalları izləyin. Kanalları axtarışla tapın və ya səhifələrinin ünvanı ilə əlavə edin. Onların mediası yt-dlp ilə oynadılır.
     Add Channel: Kanal əlavə et
-    Channel URL: Kanal ünvanı
+    Search Or Paste Channel: Axtarın və ya kanal ünvanını yapışdırın
     Invalid Channel: Twitch, SoundCloud, PeerTube, Rumble, Odysee və ya media.ccc.de platformasında kanal səhifəsinin ünvanını daxil edin.
     Channel Not Found: Bu ünvanda kanal yoxdur.
     Channel Already Followed: Bu kanalı artıq izləyirsiniz.
@@ -437,7 +437,6 @@ Settings:
     Failed to Save Password: "Parolu yadda saxlamaq mümkün olmadı."
     Confirm Password: "Şifrəni təsdiqləyin"
     Passwords Do Not Match: "Şifrələr uyğun gəlmir."
-  Navigation and Controls: "Naviqasiya və idarəetmə elementləri"
   Control Bar:
     Title: "İdarəetmə paneli"
     Customize: "İdarəetmə panelini fərdiləşdir"
@@ -684,7 +683,11 @@ Settings:
       Tab Loading Indicator: Vərəqin yüklənmə göstəricisi
       Bar: Zolaq
       Dot: Nöqtə (klassik)
-    Compact Settings Categories: "Yığcam ayar kateqoriyaları"
+    UI Density:
+      UI Density: "İnterfeys sıxlığı"
+      Compact: "Yığcam"
+      Default: "Standart"
+      Comfortable: "Rahat"
     Playlist Thumbnail Size: "Pleylist miniatürlərinin ölçüsü"
     Compact Mobile Mini Player: "Yığcam mobil mini pleyer"
     Always Show Mobile Search Bar: "Mobil axtarış çubuğunu həmişə göstər"
@@ -1053,6 +1056,7 @@ Settings:
     Channel Settings: Kanal tənzimləmələri
     Channel Settings Description: Baxış zamanı seçdiyiniz tənzimləmələri hər kanal üçün ayrıca yadda saxlayın ki, həmin kanalın növbəti videosuna baxanda yenidən tətbiq edilsin.
     Enable Channel Playback Settings: Kanal oynatma tənzimləmələrini aktivləşdir
+    Auto Save Changes: Dəyişiklikləri avtomatik saxla
     Auto Save Playback Speed: Oynatma sürəti dəyişikliklərini avtomatik yadda saxla
     Auto Save Video Quality: Video keyfiyyəti dəyişikliklərini avtomatik yadda saxla
     Auto Save Subtitles State: Titr vəziyyəti dəyişikliklərini avtomatik yadda saxla
@@ -1302,6 +1306,7 @@ Settings:
     Notify About New Uploads: Yeni yükləmələr barədə bildiriş göndər
     RSS Feeds Auto Refresh Interval: RSS axınlarının avtomatik yenilənmə aralığı
     Faster Subscription Refresh: "Abunəliklərin daha sürətli yenilənməsi"
+    Show Collaborations From Other Channels: "Digər kanalların yüklədiyi əməkdaşlıqları daxil et"
     Platforms:
       Other Platforms: Digər platformalar
       Manage Channels: İzlənilən kanalları idarə et
@@ -2228,6 +2233,7 @@ Context Menu:
   Search With Multiple: Bununla axtar...
   Selection Too Long: Seçim axtarış üçün çox uzundur (> {count} simvol)
   Background Tab: Arxa plan tabı
+  Open in an Incognito Tab: Gizli vərəqdə aç
 Tab Organizer:
   Tab History: "Vərəqçə tarixçəsi"
   Current Page: "Cari səhifə"
@@ -2313,6 +2319,7 @@ Comments:
   Filter loaded comments: Yüklənmiş şərhləri filtrlə
   Comment filters: Şərh filtrləri
   From creator: Yaradıcıdan
+  From you: Sizdən
   Contains timestamps: Vaxt göstəriciləri var
   Pin comment by author: "{author} müəllifinin şərhini sabitlə"
   Unpin comment by author: "{author} müəllifinin şərhinin sabitlənməsini ləğv et"
@@ -2461,6 +2468,7 @@ Tooltips:
     Notify About New Uploads: Abunəlik ayarlarında bildirişlərini aktiv etdiyiniz kanallar üçün bu cihazda sistem bildirişləri göstərir. OpenTubeX yeni məzmunu abunəliklər yeniləndikdə yoxlayır, buna görə avtomatik yeniləmə aralığı seçin. Tətbiq bağlı olarkən bildiriş almaq üçün tətbiq bağlı olarkən yeniləməni də aktiv edin.
     RSS Feeds Auto Refresh Interval: Tətbiq açıq olarkən OpenTubeX-in RSS axınlarınızı nə qədər tez-tez avtomatik yenilədiyi.
     Faster Subscription Refresh: "Əvvəlcə hər kanalın RSS lentini yoxlayır və yalnız yeni yükləmələri olan kanalların videolarını, Shorts-larını və canlı yayımlarını yükləyir. Avtomatik yeniləmələr son 10 dəqiqədə yüklənmiş kanalları da ötürür. Yeni yükləməsi olmayan kanallarda baxış sayları, silinmiş videolar və dəyişdirilmiş başlıqlar yalnız bir neçə saatdan bir yenilənir və RSS lenti geri qaldıqda yeni yükləmələr daha gec görünə bilər. Invidious API ilə əlçatan deyil."
+    Show Collaborations From Other Channels: "Abunə olduğunuz kanalların onları yükləyən başqa kanalla birlikdə hazırladığı videoları da göstərir. YouTube bunları yalnız kanalın Əsas səhifə tabında göstərir, buna görə hər video yeniləməsi hər kanal üçün bir əlavə səhifə yükləyir. Yalnız orada göstərilən ən son əməkdaşlıqlar tapılır, bəzi kanallar heç birini göstərmir və onların dərc tarixləri təxminidir. Invidious API ilə mövcud deyil."
     Platforms Auto Refresh Interval: Tətbiq açıq olarkən OpenTubeX-in digər platformalarda izlədiyiniz kanalları nə qədər tez-tez avtomatik yenilədiyi.
     Twitch Notify When Live: İzlədiyiniz Twitch kanallarından biri yayına başlayanda sizə bildiriş göndərir. OpenTubeX açıq olarkən hər bir neçə dəqiqədən bir yoxlayır, bağlı olarkən isə abunəlikləri yeniləyirsə, onda da yoxlayır.
   Theme Settings:
@@ -2468,7 +2476,7 @@ Tooltips:
     Visible Search Suggestions: "Axtarış panelinin siyahısı sürüşdürülməzdən əvvəl neçə axtarış tarixçəsi qeydi və təklif göstərdiyini müəyyən edir. Siyahı heç vaxt pəncərənin aşağı kənarından kənara çıxmır."
     Thumbnail Size: "Şəbəkələrdə və siyahılarda video miniatürlərinin ölçüsünü dəyişir. Sabit sütun sayı və ya Tam en görünüşü olan şəbəkələr əvəzində hər sətri doldurur, ona görə orada yalnız siyahı miniatürlərini və Shorts-u dəyişir. Telefon ölçülü pəncərələrdə şəbəkə miniatürləri 100% ilə məhdudlaşır."
     Playlist Thumbnail Size: "Pleylist səhifələrində video miniatürlərinin ölçüsünü dəyişir. Sabit sütun sayı və ya Tam en görünüşü olan şəbəkələr əvəzində hər sətri doldurur, ona görə orada yalnız siyahı miniatürlərini və Shorts-u dəyişir. Telefon ölçülü pəncərələrdə şəbəkə miniatürləri 100% ilə məhdudlaşır."
-    Compact Settings Categories: "Ayar kateqoriyalarının hündürlüyünü azaldır."
+    UI Density: "Siyahılarda, menyularda, yan paneldə və Parametrlərdə boşluqları dəyişir."
     Show Progress as Notification: Ümumi gedişat zolağı əvəzinə abunəlik yeniləmələri və idarə olunan vasitələrin endirilməsi kimi arxa plan əməliyyatlarının cari gedişatını daimi bildirişdə göstərir.
     Always Show Scrollbars: Sürüşdürmə zolaqlarını həmişə görünən saxlayır. Bağlandıqda, siçanı hərəkət etdirməyi dayandırdıqdan az sonra solub yox olur və onu yenidən hərəkət etdirən kimi görünürlər.
     Scroll Speed: Siçan çarxı və toxunma paneli jestlərinin səhifəni nə qədər sürüşdürdüyünü dəyişir.
@@ -2521,6 +2529,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Vərəq dəyişdiricisi
   Undo Seek: Son keçidi geri qaytar
   Redo Seek: Geri qaytarılmış keçidi təkrarla
+  New Incognito Tab: Yeni gizli vərəq yarat
 CommandPalette:
   Title: Əmr palitrası
   Open: Əmr palitrasını aç
@@ -2905,3 +2914,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Twitch-də axtar"
+New Incognito Tab: Yeni gizli vərəq
+Incognito Tab: Gizli vərəq

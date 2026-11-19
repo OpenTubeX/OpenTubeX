@@ -62,7 +62,10 @@ jobs:
       uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
       with:
         go-version-file: _scripts/cast-sender/go.mod
-        cache: false
+        # Gradle cross-compiles both Go modules for Android.
+        cache-dependency-path: |
+          _scripts/cast-sender/go.sum
+          _scripts/yt-dlp-http/go.sum
 
     - name: Install pnpm
       uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
@@ -70,7 +73,7 @@ jobs:
         cache: false
 
     - name: Use Java 21
-      uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
+      uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
       with:
         distribution: temurin
         java-version: 21

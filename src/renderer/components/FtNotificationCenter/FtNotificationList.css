@@ -23,28 +23,36 @@
   border-radius: var(--shape-corner-medium);
 }
 
-/* A dismissed row slides out, then closes its gap so the rows below move up. */
+/* A dismissed row slides out, then closes its gap so the rows below move up.
+   The slide is its own animation: sharing keyframes with the layout properties
+   would keep it on the main thread too. */
 .notificationRow-leave-active {
   min-block-size: 0;
   overflow: clip;
   interpolate-size: allow-keywords;
-  animation: notification-dismiss var(--motion-slow-effects) both;
+  animation:
+    notification-dismiss-slide var(--motion-slow-effects) both,
+    notification-dismiss-collapse var(--motion-slow-effects) both;
+}
+
+@keyframes notification-dismiss-slide {
+  50%,
+  100% {
+    opacity: 0;
+    translate: calc(100% * var(--dismiss-direction)) 0;
+  }
 }
 
 /* stylelint-disable plugin/no-low-performance-animation-properties -- a dismissed notification closes its gap in the list */
-@keyframes notification-dismiss {
+@keyframes notification-dismiss-collapse {
   50% {
     block-size: auto;
     margin-block-end: 0;
-    opacity: 0;
-    translate: calc(100% * var(--dismiss-direction)) 0;
   }
 
   100% {
     block-size: 0;
     margin-block-end: calc(-1 * var(--notification-gap));
-    opacity: 0;
-    translate: calc(100% * var(--dismiss-direction)) 0;
   }
 }
 /* stylelint-enable plugin/no-low-performance-animation-properties */

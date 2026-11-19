@@ -1990,7 +1990,7 @@
           type="button"
           :tabindex="scrollMiniPlayerDetached ? 0 : -1"
           class="scrollMiniPlayPause"
-          :class="{ isHidden: !scrollMiniPlayPauseVisible }"
+          :class="{ isHidden: !scrollMiniPlayPauseVisible, isPaused: scrollMiniIsPaused || playbackEnded }"
           :title="playbackEnded ? replayLabel : scrollMiniIsPaused ? $t('Video.Player.Scroll Mini Player.Play') : $t('Video.Player.Scroll Mini Player.Pause')"
           @click.stop.prevent="scrollMiniTogglePlayPause"
           @mouseenter="handleScrollMiniPlayPauseMouseEnter"
@@ -2031,10 +2031,22 @@
           @focusin="handleScrollMiniVolumeMouseEnter"
           @focusout="handleScrollMiniVolumeMouseLeave"
         >
-          <ft-icon
+          <button
+            type="button"
+            :tabindex="scrollMiniPlayerDetached ? 0 : -1"
             class="scrollMiniVolumeIcon"
-            :icon="scrollMiniVolumeIcon"
-          />
+            :title="$t('KeyboardShortcutPrompt.Mute')"
+            :aria-label="$t('KeyboardShortcutPrompt.Mute')"
+            :aria-pressed="scrollMiniVolume === 0 ? 'true' : 'false'"
+            @click.stop.prevent="isScrollMiniVideoDoubleClick($event) || toggleScrollMiniMuted()"
+            @pointerdown.stop
+            @mousedown.stop.prevent
+          >
+            <ft-icon
+              :icon="scrollMiniVolumeIcon"
+              aria-hidden="true"
+            />
+          </button>
           <div
             ref="scrollMiniVolumeTrack"
             class="shaka-range-container scrollMiniVolumeTrack"
@@ -2282,7 +2294,9 @@ import {
   enterAndroidPictureInPicture,
   observeAndroidDisplayRotation,
   observeAndroidDeviceRotation,
+  coverAndroidFullscreenEntry,
   prepareAndroidFullscreenRotation,
+  uncoverAndroidFullscreenEntry,
   getAndroidDisplayOrientation,
   setAndroidNavigationBarVisible,
   setAndroidStatusBarVisible,
@@ -2311,8 +2325,8 @@ import { parseChannelPreferences, removeChannelPreference } from '../../helpers/
 import { findLegacyFormatForQuality } from '../../helpers/player/legacyFormats'
 import { waitForYtDlpFormatAvailability } from '../../helpers/player/ytDlpFormatAvailability'
 import { getDashQualityFromDimensions } from '../../helpers/player/videoQuality'
-import { DEFAULT_VIDEO_ZOOM, formatVideoZoom, VIDEO_ZOOM_LEVELS } from '../../helpers/player/videoZoom'
-import { DEFAULT_VOLUME_BOOST, sanitizeVolumeBoost, VOLUME_BOOST_LEVELS } from '../../helpers/player/volumeBoost'
+import { DEFAULT_VIDEO_ZOOM, formatVideoZoom, VIDEO_ZOOM_LEVELS, VIDEO_ZOOM_STEP } from '../../helpers/player/videoZoom'
+import { DEFAULT_VOLUME_BOOST, sanitizeVolumeBoost, VOLUME_BOOST_LEVELS, VOLUME_BOOST_STEP } from '../../helpers/player/volumeBoost'
 import { getActiveAudioLoudnessDb, getLoudnessNormalizationGain } from '../../helpers/player/loudnessNormalization'
 import { shouldStartPaidPromotionTimer } from '../../helpers/player/paidPromotion'
 import { updateSponsorBlockSeekBarState } from '../../helpers/player/sponsorBlockSeekBar'
@@ -2999,6 +3013,7 @@ const hidePopularityGraph = computed(() => store.getters.getHidePopularityGraph)
 let iosFullscreenCleanup = null
 let androidFullscreenCleanup = null
 let androidFullscreenEntering = false
+let androidFullscreenEntryCovered = false
 let iosCaptionsCleanup = null
 let captionCueLayoutCleanup = null
 let nativeCaptionTiming = null
@@ -7764,6 +7779,7 @@ const {
   updateScrollMiniDragHandleContrast,
   updateScrollMiniPlayer,
   updateScrollMiniVideoAspectRatio,
+  toggleScrollMiniMuted,
   updateScrollMiniVolume,
 } = useScrollMiniPlayer({
   container,
@@ -9438,6 +9454,51 @@ function registerChapterOverlayButton() {
   registerOwnElement(shakaOverflowMenu, 'ft_chapters', new ChapterOverlayButtonFactory())
 }
 
+/** @type {Map<string, { change: object, cancelled: boolean }>} */
+const pendingDockPanelCloses = new Map()
+let unmountingDockPanels = false
+
+/**
+ * Reports a dock change to the page, which teleports the dock's content. A
+ * closing dock reports only after it has slid out, so its content leaves with
+ * it instead of emptying the panel at the start of the slide.
+ * @param {{ panel: string, open: boolean, target: HTMLElement | null, presentationActive?: boolean }} change
+ */
+async function emitDockPanelChange(change) {
+  const pending = pendingDockPanelCloses.get(change.panel)
+  if (pending) {
+    pending.cancelled = true
+    pendingDockPanelCloses.delete(change.panel)
+  }
+
+  if (change.open || !change.target || presentationModeChanging.value || unmountingDockPanels ||
+    (!isNativeFullscreenActive() && !fullWindowEnabled.value)) {
+    emit('dock-panel-change', change)
+    return
+  }
+
+  const close = { change, cancelled: false }
+  pendingDockPanelCloses.set(change.panel, close)
+  await nextTick()
+  const slides = change.target.closest('aside')?.getAnimations()
+    .filter(animation => animation instanceof CSSTransition && animation.transitionProperty === 'transform') ?? []
+  await Promise.allSettled(slides.map(animation => animation.finished))
+  if (close.cancelled) return
+  pendingDockPanelCloses.delete(change.panel)
+  emit('dock-panel-change', change)
+}
+
+// Registered before the teardown below, so the docks it closes report at once
+// instead of after a slide that outlives the player.
+onBeforeUnmount(() => {
+  unmountingDockPanels = true
+  for (const close of pendingDockPanelCloses.values()) {
+    close.cancelled = true
+    emit('dock-panel-change', close.change)
+  }
+  pendingDockPanelCloses.clear()
+})
+
 function setFullscreenComments(shouldOpen) {
   const open = Boolean(
     shouldOpen && props.commentsAvailable &&
@@ -9445,7 +9506,7 @@ function setFullscreenComments(shouldOpen) {
   )
   showFullscreenComments.value = open
   events.dispatchEvent(new CustomEvent('setFullscreenComments', { detail: open }))
-  emit('dock-panel-change', {
+  emitDockPanelChange({
     panel: 'comments',
     open,
     target: fullscreenCommentsOverlay.value
@@ -9464,7 +9525,7 @@ function setFullscreenLiveChat(shouldOpen) {
     (isNativeFullscreenActive() || fullWindowEnabled.value)
   )
   showFullscreenLiveChat.value = open
-  emit('dock-panel-change', {
+  emitDockPanelChange({
     panel: 'liveChat',
     open,
     target: fullscreenLiveChatTarget.value
@@ -9488,7 +9549,7 @@ function setFullscreenMetadata(shouldOpen) {
   if (fullscreenTitleOverlay) {
     fullscreenTitleOverlay.ariaExpanded = String(open)
   }
-  emit('dock-panel-change', {
+  emitDockPanelChange({
     panel: 'metadata',
     open,
     target: fullscreenMetadataTarget.value,
@@ -9506,7 +9567,7 @@ function setFullscreenTranscript(shouldOpen) {
     (isNativeFullscreenActive() || fullWindowEnabled.value)
   )
   showFullscreenTranscript.value = open
-  emit('dock-panel-change', {
+  emitDockPanelChange({
     panel: 'transcript',
     open,
     target: fullscreenTranscriptTarget.value
@@ -9540,7 +9601,7 @@ function setFullscreenSponsorBlock(shouldOpen) {
     shouldOpen && (isNativeFullscreenActive() || fullWindowEnabled.value)
   )
   showFullscreenSponsorBlock.value = open
-  emit('dock-panel-change', {
+  emitDockPanelChange({
     panel: 'sponsorBlock',
     open,
     target: fullscreenSponsorBlockTarget.value
@@ -9570,7 +9631,7 @@ function setFullscreenPlaylist(shouldOpen) {
     (isNativeFullscreenActive() || fullWindowEnabled.value)
   )
   showFullscreenPlaylist.value = open
-  emit('dock-panel-change', {
+  emitDockPanelChange({
     panel: 'playlist',
     open,
     target: fullscreenPlaylistTarget.value
@@ -9585,7 +9646,7 @@ function setFullscreenQueue(shouldOpen) {
   const open = Boolean(shouldOpen && props.queueAvailable &&
     (isNativeFullscreenActive() || fullWindowEnabled.value))
   showFullscreenQueue.value = open
-  emit('dock-panel-change', { panel: 'queue', open, target: fullscreenQueueTarget.value })
+  emitDockPanelChange({ panel: 'queue', open, target: fullscreenQueueTarget.value })
 }
 
 function closeFullscreenQueue() {
@@ -9596,7 +9657,7 @@ function setFullscreenRecommendations(shouldOpen) {
   const open = Boolean(shouldOpen && props.recommendationsAvailable &&
     (isNativeFullscreenActive() || fullWindowEnabled.value))
   showFullscreenRecommendations.value = open
-  emit('dock-panel-change', { panel: 'recommendations', open, target: fullscreenRecommendationsTarget.value })
+  emitDockPanelChange({ panel: 'recommendations', open, target: fullscreenRecommendationsTarget.value })
 }
 
 function closeFullscreenRecommendations() {
@@ -9619,6 +9680,19 @@ const dockedPanels = {
   queue: { shown: showFullscreenQueue, set: setFullscreenQueue },
   recommendations: { shown: showFullscreenRecommendations, set: setFullscreenRecommendations },
   playlist: { shown: showFullscreenPlaylist, set: setFullscreenPlaylist },
+}
+
+/**
+ * Reopens a dock that is still sliding out, which the page still reports as
+ * open, so a toggle on the page reopens it instead of closing it again.
+ * @param {Exclude<import('./opentubex/dockedPanels').DockedPanel, 'chapters'>} panel
+ * @returns {boolean} whether the dock was closing
+ */
+function reopenClosingDockPanel(panel) {
+  if (!pendingDockPanelCloses.has(panel)) return false
+  expandCollapsedFullscreenDock(panel)
+  dockedPanels[panel].set(true)
+  return true
 }
 
 function rememberAndCloseDockedPanels() {
@@ -10158,6 +10232,7 @@ function registerVideoZoomSelection() {
           value: videoZoom,
           updateValue: updateVideoZoom,
           levels: VIDEO_ZOOM_LEVELS,
+          step: VIDEO_ZOOM_STEP,
           defaultLevel: DEFAULT_VIDEO_ZOOM,
           formatLevel: zoom => zoom === DEFAULT_VIDEO_ZOOM ? t('Video.Player.Zoom.Off') : formatVideoZoom(zoom),
           getLabel: () => t('Video.Player.Zoom.Zoom'),
@@ -10183,6 +10258,7 @@ function registerVolumeBoostSelection() {
           value: volumeBoost,
           updateValue: updateVolumeBoost,
           levels: VOLUME_BOOST_LEVELS,
+          step: VOLUME_BOOST_STEP,
           defaultLevel: DEFAULT_VOLUME_BOOST,
           formatLevel: boost => boost === DEFAULT_VOLUME_BOOST
             ? t('Video.Player.Volume Boost.Off')
@@ -11846,6 +11922,16 @@ function retainAndroidFullscreenDuringRotation() {
   window.addEventListener('resize', resized)
 }
 
+async function uncoverAndroidFullscreenEntryAfterUpdate(entered) {
+  // Chromium can resolve the request before it dispatches fullscreenchange,
+  // which applies the fullscreen layout. The cover times out if it never comes.
+  if (entered && !isFullscreen.value) {
+    await new Promise(resolve => document.addEventListener('fullscreenchange', resolve, { once: true }))
+  }
+  await nextTick()
+  uncoverAndroidFullscreenEntry().catch(() => {})
+}
+
 function fullscreenChangeHandler() {
   const fullscreen = isNativeFullscreenActive()
   const wasFullscreen = isFullscreen.value
@@ -12146,13 +12232,18 @@ onMounted(async () => {
         finishAndroidFullscreenExit(true)
         // The orientation event must not start a competing popover entry.
         androidFullscreenEntering = true
-        if (shouldRotateFullscreenToLandscape(true, video.value, rotateFullscreenToLandscape.value, fullscreenAspectRatio.value)) {
-          await prepareAndroidFullscreenRotation().catch(() => {})
-        }
+        // The rotation hides the entry. Without one, cover it until finishEnter.
+        androidFullscreenEntryCovered = window.innerHeight <= window.innerWidth ||
+          !shouldRotateFullscreenToLandscape(true, video.value, rotateFullscreenToLandscape.value, fullscreenAspectRatio.value)
+        await (androidFullscreenEntryCovered ? coverAndroidFullscreenEntry() : prepareAndroidFullscreenRotation()).catch(() => {})
         requestFullscreenOrientation(true)
       },
       finishEnter: entered => {
         androidFullscreenEntering = false
+        if (androidFullscreenEntryCovered) {
+          androidFullscreenEntryCovered = false
+          uncoverAndroidFullscreenEntryAfterUpdate(entered)
+        }
         if (!entered) {
           androidFullscreenRotationRequested = false
           setLandscapeOrientation(false).catch(() => {})
@@ -13573,6 +13664,7 @@ defineExpose({
   retryStreaming,
   setFullscreenMetadata,
   closeFullscreenMetadata,
+  reopenClosingDockPanel,
   setFullscreenTranscript,
   closeFullscreenTranscript,
   dismissFullscreenTranscript,
@@ -13740,15 +13832,14 @@ if (process.env.IS_IOS) {
 <style>
 /* Unscoped: pseudo-elements on range inputs do not work reliably with Vue scoped CSS. */
 .ftVideoPlayer.scrollMiniPlayer .scrollMiniVolumeBar {
-  -webkit-appearance: none;
   appearance: none;
   background: transparent;
   cursor: pointer;
 }
 
 .ftVideoPlayer.scrollMiniPlayer .scrollMiniVolumeBar::-webkit-slider-runnable-track {
-  width: 100%;
-  height: 4px;
+  inline-size: 100%;
+  block-size: 4px;
   background: transparent;
   border: 0;
   color: transparent;
@@ -13756,20 +13847,19 @@ if (process.env.IS_IOS) {
 }
 
 .ftVideoPlayer.scrollMiniPlayer .scrollMiniVolumeBar::-webkit-slider-thumb {
-  -webkit-appearance: none;
   appearance: none;
   border: 0;
   border-radius: 50%;
-  width: 12px;
-  height: 12px;
+  inline-size: 12px;
+  block-size: 12px;
   background: #fff;
-  margin-top: -4px;
+  margin-block-start: -4px;
   cursor: pointer;
 }
 
 .ftVideoPlayer.scrollMiniPlayer .scrollMiniVolumeBar::-moz-range-track {
-  width: 100%;
-  height: 4px;
+  inline-size: 100%;
+  block-size: 4px;
   background: transparent;
   border: 0;
   color: transparent;
@@ -13780,8 +13870,8 @@ if (process.env.IS_IOS) {
   appearance: none;
   border: 0;
   border-radius: 50%;
-  width: 12px;
-  height: 12px;
+  inline-size: 12px;
+  block-size: 12px;
   background: #fff;
   cursor: pointer;
 }

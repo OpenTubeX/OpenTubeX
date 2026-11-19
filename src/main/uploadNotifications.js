@@ -46,10 +46,11 @@ async function fetchOriginalTitle(fetchUrl, videoId) {
  * @param {{
  *   file: string,
  *   show: (notification: { title: string, body: string, url: string, silent: boolean, target: import('../notificationHistory.js').NotificationHistoryTarget | null, thumbnail: string | undefined }) => void | Promise<void>,
- *   fetch?: typeof fetch
+ *   fetch?: typeof fetch,
+ *   isWatched?: (videoId: string) => Promise<boolean>
  * }} options
  */
-export function createUploadNotifier({ file, show, fetch: fetchUrl = fetch }) {
+export function createUploadNotifier({ file, show, fetch: fetchUrl = fetch, isWatched = async () => false }) {
   let configuration = null
   let state = null
   const run = createSerialQueue(error => console.error('Upload notification state failed', error))
@@ -102,12 +103,23 @@ export function createUploadNotifier({ file, show, fetch: fetchUrl = fetch }) {
         const uploads = takeVisibleUploads(await load(), channelId, feedType, entries, channel.membersOnly === true)
         await save()
         return uploads
-      }).then(async uploads => {
-        if (uploads.length === 0) return
+      }).then(async found => {
+        if (found.length === 0) return
         // Looked up outside the queue, so slow requests do not hold up other feeds.
-        const bodies = configuration?.originalTitles === true && feedType !== 'posts'
-          ? await Promise.all(uploads.map(async upload => await fetchOriginalTitle(fetchUrl, upload.id) ?? upload.title))
-          : uploads.map(upload => upload.title)
+        const titles = configuration?.originalTitles === true && feedType !== 'posts'
+          ? await Promise.all(found.map(async upload => await fetchOriginalTitle(fetchUrl, upload.id) ?? upload.title))
+          : found.map(upload => upload.title)
+        // Videos in the watch history, also ones watched on another device during
+        // the lookup, need no notification.
+        const watched = feedType === 'posts'
+          ? []
+          : await Promise.all(found.map(upload => isWatched(upload.id).catch(error => {
+              console.error('Failed to check the watch history for an upload', error)
+              return false
+            })))
+        const uploads = found.filter((_, index) => !watched[index])
+        const bodies = titles.filter((_, index) => !watched[index])
+        if (uploads.length === 0) return
         // Notifications may have been turned off during the lookup.
         const channel = configuredChannel()
         if (!channel) return

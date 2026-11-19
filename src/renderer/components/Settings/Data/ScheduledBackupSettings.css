@@ -1,11 +1,11 @@
-.scheduledBackups {
-  margin-block-start: 24px;
-}
-
 .scheduledBackups p {
   color: var(--secondary-text-color);
   font-size: 0.9em;
   text-align: center;
+}
+
+.scheduledBackups [role='status'] p:last-child {
+  margin-block-end: var(--settings-control-margin);
 }
 
 .backupFolderChoice {

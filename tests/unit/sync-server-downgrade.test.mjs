@@ -142,6 +142,9 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
       },
       onDismissed: () => () => {},
     },
+    recordNotification: () => {},
+    markOverNotificationsRead: () => {},
+    getSettingsNotificationTarget: section => ({ path: '/settings', query: { section } }),
     dispatchRemoteSyncAction,
     isRecentSync,
     isSyncReasonEnabled,
@@ -3248,7 +3251,7 @@ for (const supported of [true, false]) {
   })
 }
 
-test('the renderer syncing while the Android app is closed leaves live reminders and notification dismissals to the app', async () => {
+test('the renderer syncing while the Android app is closed leaves live reminders to the app, but syncs notification dismissals', async () => {
   const requests = []
   const f = fixture({ syncServerSyncSubscriptions: false, syncServerSyncLiveReminders: true, syncServerSyncNotifications: true }, {
     encrypted: true,
@@ -3268,5 +3271,6 @@ test('the renderer syncing while the Android app is closed leaves live reminders
   await f.actions.syncWithSyncServer(f.context)
   assert.equal(f.context.state.syncServerStatus, 'success')
   assert.equal(requests.some(url => url.endsWith('/encrypted_sync/liveReminders')), false)
-  assert.equal(requests.some(url => url.endsWith('/encrypted_sync/notificationDismissals')), false)
+  // Android leaves out notifications that another device dismissed.
+  assert.equal(requests.some(url => url.endsWith('/encrypted_sync/notificationDismissals')), true)
 })

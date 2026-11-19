@@ -1,11 +1,13 @@
 .prompt {
+  --prompt-backdrop-color: rgb(0 0 0 / 70%);
+
   animation: prompt-backdrop-enter var(--motion-default-effects);
   position: fixed;
   inset-block-start: 0;
   inset-inline-start: 0;
   inline-size: 100%;
   block-size: 100%;
-  background-color: rgb(0 0 0 / 70%);
+  background-color: var(--prompt-backdrop-color);
   backdrop-filter: var(--modal-backdrop-blur);
 
   /* Higher than components like playlist info */
@@ -22,6 +24,10 @@
 }
 
 .promptCard {
+  /* Scrollers inside the card reach into this padding so their scrollbar sits
+     at the card's edge. */
+  --prompt-padding-inline: 16px;
+
   animation: prompt-card-enter var(--motion-default-spatial);
 
   /* Keep the card on its own compositor layer while it is open. Otherwise the
@@ -31,6 +37,7 @@
   will-change: transform;
   overflow-y: auto;
   max-block-size: 95%;
+  padding-inline: var(--prompt-padding-inline);
   box-shadow: 0 12px 40px rgb(0 0 0 / 38%);
 }
 
@@ -52,6 +59,8 @@
 .promptContentScroller {
   min-block-size: 0;
   overflow-y: auto;
+  margin-inline: calc(-1 * var(--prompt-padding-inline));
+  padding-inline: var(--prompt-padding-inline);
 }
 
 .promptFixedFooter {
@@ -69,8 +78,16 @@
 }
 
 /* Fading the backdrop's opacity would crossfade a sharp and a blurred copy of
-   the page, which flickers on Android. Animate the dim and blur instead. */
+   the page, which flickers on Android. Animate the dim and blur instead. Spell
+   out both keyframes: Chromium only runs a background-color animation on the
+   compositor when no keyframe falls back to the element's own style, and
+   otherwise keeps the blur on the main thread too. */
 @keyframes prompt-backdrop-leave {
+  from {
+    background-color: var(--prompt-backdrop-color);
+    backdrop-filter: var(--modal-backdrop-blur);
+  }
+
   to {
     background-color: transparent;
     backdrop-filter: blur(0);
@@ -88,6 +105,11 @@
   from {
     background-color: var(--modal-backdrop-enter-color, transparent);
     backdrop-filter: var(--modal-backdrop-enter-filter, blur(0));
+  }
+
+  to {
+    background-color: var(--prompt-backdrop-color);
+    backdrop-filter: var(--modal-backdrop-blur);
   }
 }
 
@@ -179,13 +201,16 @@
   .promptCard:not(.autosize),
   .promptCard.slim,
   .promptCard:not(.autosize).slim {
+    --prompt-padding-inline: 12px;
+
     position: relative;
     inset: auto;
     inline-size: 100%;
     max-inline-size: 100%;
     max-block-size: 100%;
     margin: 0;
-    padding: 12px;
+    padding-block: 12px;
+    padding-inline: var(--prompt-padding-inline);
   }
 
   .promptContentScroller {
@@ -200,6 +225,11 @@
   flex: 1;
   min-block-size: 0;
   overflow: hidden;
+}
+
+/* Content that scrolls itself pads its scroller by --prompt-padding-inline. */
+.promptManagedContent {
+  margin-inline: calc(-1 * var(--prompt-padding-inline));
 }
 
 .promptCard.autosize.content-width {

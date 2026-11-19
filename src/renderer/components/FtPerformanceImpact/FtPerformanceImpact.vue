@@ -102,6 +102,7 @@ const title = computed(() => props.compact ? fullText.value : description.value)
   font-size: 0.7em;
   font-weight: 600;
   gap: 4px;
+
   /* The parent spaces the badge with a gap, so it lines up with the label once it wraps */
   max-inline-size: 100%;
   padding-block: 1px;
@@ -116,6 +117,7 @@ const title = computed(() => props.compact ? fullText.value : description.value)
 
 .performanceImpactLabel {
   min-inline-size: 0;
+
   /* Breaks between words before splitting one */
   overflow-wrap: break-word;
 }

@@ -8,6 +8,10 @@
 
 /* stylelint-disable liberty/use-logical-spec */
 .ftVideoPlayer {
+  /* Like the watch page, the player and the panels docked in it keep their
+     spacing at every UI Density, also in the mini player. */
+  --ui-density: 1;
+
   /* Width reserved for a docked side panel (chapters / fullscreen comments). */
   --side-panel-width: min(clamp(260px, 40%, 440px), 100%);
 
@@ -128,8 +132,10 @@
   /* Follows the inline player's height cap, and none in other modes. */
   max-block-size: inherit;
 
-  /* Animates dock pushes and user-selected video zoom levels. */
-  /* stylelint-disable plugin/no-low-performance-animation-properties -- docks push the player, and scaling it instead would stretch the video */
+  /* Animates user-selected video zoom levels and the phone mini bar's thumbnail
+     as the bar expands. Dock pushes move the video with a compositor animation
+     instead (useFullscreenDocks.js). */
+  /* stylelint-disable plugin/no-low-performance-animation-properties -- the mini bar's small thumbnail resizes as the bar expands */
   transition:
     inline-size 250ms ease,
     transform 200ms ease-out;
@@ -184,11 +190,6 @@
   /* Keep the badge clear of the single-line fullscreen title overlay. */
   inset-block-start: 65px;
   transition-delay: 0s, 0s;
-}
-
-.ftVideoPlayer :deep(.videoAnnotations) {
-  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- docks push the player, and scaling it instead would stretch the video */
-  transition: inset-inline-end 250ms ease;
 }
 
 .vrCanvas {
@@ -283,8 +284,6 @@
   align-items: flex-end;
   pointer-events: none;
   z-index: 3;
-  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- docks push the player, and scaling it instead would stretch the video */
-  transition: inset-inline-end 250ms ease;
 }
 
 .skippedSegment {
@@ -315,8 +314,6 @@
   min-width: min(420px, calc(100% - 16px));
   max-width: calc(100% - 16px);
   pointer-events: auto;
-  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- docks push the player, and scaling it instead would stretch the video */
-  transition: inset-inline-end 250ms ease;
 }
 
 :deep(.markerContainer) {

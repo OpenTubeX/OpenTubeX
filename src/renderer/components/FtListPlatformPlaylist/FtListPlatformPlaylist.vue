@@ -145,6 +145,13 @@ const menuItems = computed(() => {
       run: () => openInternalPath({ ...route.value, title: props.playlist.title, doCreateNewWindow: true })
     })
   }
+  if (store.getters.getIncognitoTabsEnabled) {
+    items.push({
+      label: t('Context Menu.Open in an Incognito Tab'),
+      icon: ['fas', 'user-secret'],
+      run: () => openInternalPath({ ...route.value, title: props.playlist.title, doCreateNewTab: true, incognito: true })
+    })
+  }
   if (items.length > 0) items.push({ type: 'separator' })
   items.push({
     label: t('Share.Copy Link'),

@@ -36,7 +36,7 @@ const source = (await readFile(new URL('../../src/renderer/helpers/subscriptions
 
 // Exercise the real refresh, fallback, cache, and notification paths with fake
 // platform APIs. Bundler-only imports are supplied in the isolated context.
-function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('Failed to fetch'), webCors = false, backend = 'local', fallbackWorks = false, rssStatus = 200, channelInfo = { has_shorts: true, getShorts: async () => ({ videos: [] }) }, playlistError = null, playlistItems = [], stallChannelProbe = false, channelStatus = rssStatus, scraperError = null, shortPublishDate = '2026-09-06T12:00:00Z', beforeShortMetadata = async () => {}, beforeWrite = async () => {}, finishNative = async () => {}, useRssFeeds = true, channelFeeds = {} } = {}) {
+function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('Failed to fetch'), webCors = false, backend = 'local', fallbackWorks = false, rssStatus = 200, channelInfo = { has_shorts: true, getShorts: async () => ({ videos: [] }) }, playlistError = null, playlistItems = [], stallChannelProbe = false, channelStatus = rssStatus, scraperError = null, shortPublishDate = '2026-09-06T12:00:00Z', beforeShortMetadata = async () => {}, beforeWrite = async () => {}, finishNative = async () => {}, useRssFeeds = true, channelFeeds = {}, beforeCollaborations = async () => {} } = {}) {
   const window = new EventTarget()
   const navigator = { onLine: online }
   const toasts = []
@@ -150,6 +150,14 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
     fetch: webCors ? async () => { throw new TypeError('Failed to fetch') } : fetchChannel,
     invidiousFetch: fetchInvidious,
     getLocalChannelVideos: async url => { if (scraperError) throw scraperError; return fetchLocal(url) },
+    getLocalChannelCollaborations: async id => {
+      requests.push(`collaborations:${id}`)
+      await beforeCollaborations(id)
+      return [
+        { videoId: `collaboration-${id}`, authorId: 'UC-uploader', isCollaboration: true, published: Date.now() - 60_000 },
+        { videoId: 'old-collaboration', authorId: 'UC-uploader', isCollaboration: true, published: Date.now() - 86_400_000 }
+      ]
+    },
     getLocalChannelLiveStreams: async url => { if (scraperError) throw scraperError; return fetchLocal(url) },
     getInvidiousChannelVideos: async url => { if (scraperError) throw scraperError; return fetchInvidious(url) },
     getInvidiousChannelLive: async url => { if (scraperError) throw scraperError; return fetchInvidious(url) },
@@ -277,6 +285,37 @@ test('with Faster Subscription Refresh, a scraper refresh keeps cached feeds who
   assert.equal(app.writes.some(write => write.value?.channelId === 'UC0'), false)
   assert.ok(app.reports.includes('UC0:videos'), 'kept feeds still give upload notifications their baseline')
   assert.deepEqual(app.events, ['completed', 'finished'])
+})
+
+test('with collaborations included, unchanged feeds still load them and keep their timestamp for the next full fetch', async () => {
+  const now = Date.now()
+  const app = createRefresh({
+    feed: 'Videos',
+    useRssFeeds: false,
+    // Another window writes a newer cache while the Home tab loads
+    beforeCollaborations: async id => {
+      if (id === 'UC0') app.getters.getVideoCache = { UC0: { timestamp: new Date(now), videos: [{ videoId: 'newer0' }, { videoId: 'known0' }, { videoId: 'old-collaboration', isCollaboration: true }] } }
+    },
+    channelFeeds: { UC0: `<feed xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://www.youtube.com/xml/schemas/2015"><author><name>Channel</name></author><entry><yt:videoId>known0</yt:videoId><title>Upload</title><link rel="alternate" href="https://www.youtube.com/watch?v=known0"/><published>${new Date(now - 3_600_000).toISOString()}</published></entry></feed>` }
+  })
+  const timestamp = new Date(now - 1_800_000)
+  app.getters.getVideoCache = { UC0: { timestamp, videos: [{ videoId: 'known0' }, { videoId: 'old-collaboration', isCollaboration: true }] } }
+  app.getters.getFastSubscriptionRefresh = true
+  app.getters.getIncludeSubscriptionCollaborations = true
+  app.reconnect()
+
+  await app.refresh({ t: key => key })
+
+  assert.equal(app.requests.includes('UC0'), false, 'the Videos tab is not loaded')
+  assert.equal(app.requests.includes('UC1'), true)
+  assert.equal(app.requests.includes('collaborations:UC0'), true)
+  assert.equal(app.requests.includes('collaborations:UC1'), true)
+  const write = app.writes.find(write => write.value?.channelId === 'UC0').value
+  assert.deepEqual(write.videos.map(video => video.videoId), ['known0', 'collaboration-UC0', 'old-collaboration'])
+  assert.equal(write.videos[1].isNewInSubscriptionFeed, true, 'a collaboration published since the last fetch is new')
+  assert.equal(write.videos[2].isNewInSubscriptionFeed, false)
+  assert.equal(write.collaborationsFetched, true)
+  assert.equal(write.timestamp, timestamp, 'the snapshot\'s timestamp, so the write loses to the newer cache')
 })
 
 test('with Faster Subscription Refresh, automatic refreshes leave out channels fetched moments ago, manual ones load them', async () => {

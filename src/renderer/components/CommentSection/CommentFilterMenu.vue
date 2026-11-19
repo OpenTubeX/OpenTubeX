@@ -90,6 +90,35 @@
             />
           </button>
           <button
+            v-if="canFilterOwnComments"
+            type="button"
+            role="checkbox"
+            :aria-checked="ownCommentsOnly"
+            @click="emit('toggle-own')"
+          >
+            <span
+              class="commentFilterMenuIcon"
+              aria-hidden="true"
+            >
+              <FtRetryImage
+                v-if="accountThumbnail"
+                :fallback-icon="['fas', 'circle-user']"
+                :src="accountThumbnail"
+                class="commentCreatorFilterAvatar"
+              />
+              <FtIcon
+                v-else
+                :icon="['fas', 'circle-user']"
+              />
+            </span>
+            <span>{{ $t('Comments.From you') }}</span>
+            <FtIcon
+              v-if="ownCommentsOnly"
+              :icon="['fas', 'check']"
+              aria-hidden="true"
+            />
+          </button>
+          <button
             type="button"
             role="checkbox"
             :aria-checked="timestampCommentsOnly"
@@ -140,6 +169,19 @@ const props = defineProps({
     type: Boolean,
     required: true
   },
+  // Shown when signed in to YouTube.
+  canFilterOwnComments: {
+    type: Boolean,
+    default: false
+  },
+  accountThumbnail: {
+    type: String,
+    default: ''
+  },
+  ownCommentsOnly: {
+    type: Boolean,
+    default: false
+  },
   timestampCommentsOnly: {
     type: Boolean,
     required: true
@@ -155,12 +197,13 @@ const trigger = useTemplateRef('trigger')
 const menu = useTemplateRef('menu')
 const menuContent = useTemplateRef('menuContent')
 const hasActiveFilters = computed(() => {
-  return props.searchOpen || props.creatorCommentsOnly || props.timestampCommentsOnly
+  return props.searchOpen || props.creatorCommentsOnly || props.ownCommentsOnly || props.timestampCommentsOnly
 })
 const emit = defineEmits([
   'update:open',
   'toggle-search',
   'toggle-creator',
+  'toggle-own',
   'toggle-timestamps'
 ])
 

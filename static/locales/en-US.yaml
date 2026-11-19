@@ -19,6 +19,8 @@ Color Picker:
 File: File
 New Window: New Window
 New Tab: New Tab
+New Incognito Tab: New Incognito Tab
+Incognito Tab: Incognito tab
 Preferences: Preferences
 Quit: Quit
 Edit: Edit
@@ -417,7 +419,7 @@ Subscriptions:
     Followed Channels: Followed channels on other platforms
     Description: Follow channels on Twitch, SoundCloud, PeerTube, Rumble, Odysee and media.ccc.de to see their uploads in the Platforms tab of your subscriptions. Find channels with the search, or add them by the address of their page. Their media plays with yt-dlp.
     Add Channel: Add Channel
-    Channel URL: Channel address
+    Search Or Paste Channel: Search or paste a channel address
     Invalid Channel: Enter the address of a channel page on Twitch, SoundCloud, PeerTube, Rumble, Odysee or media.ccc.de.
     Channel Not Found: There is no channel at this address.
     Channel Already Followed: You already follow this channel.
@@ -712,7 +714,6 @@ Settings:
     Tabs to unload: "Tabs to unload"
     Automatic unloading help: "Unload the oldest background tabs to free memory. Active and playing tabs stay loaded."
     Memory threshold help: "Percentage of the renderer's memory limit, not total system RAM."
-  Navigation and Controls: "Navigation & controls"
   Interface Customizer:
     Customize Interface: Customize interface
     Preview: Preview
@@ -1078,7 +1079,11 @@ Settings:
     Always Show Scrollbars: Always Show Scrollbars
     Click Scrollbar Track to Scroll: Click Scrollbar Track to Scroll
     Hide Side Bar Labels: Hide Side Bar Labels
-    Compact Settings Categories: Compact Settings Categories
+    UI Density:
+      UI Density: UI Density
+      Compact: Compact
+      Default: Default
+      Comfortable: Comfortable
     Modal Backdrop:
       Modal Backdrop: Dialog Background
       Dim and Blur: Dim and blur
@@ -1565,6 +1570,7 @@ Settings:
     Channel Settings: Channel Settings
     Channel Settings Description: Remember the settings you pick while watching for each channel individually, so they are applied again the next time you watch one of its videos.
     Enable Channel Playback Settings: Enable channel playback settings
+    Auto Save Changes: Automatically Save Changes
     Auto Save Playback Speed: Automatically save playback speed changes
     Auto Save Video Quality: Automatically save video quality changes
     Auto Save Subtitles State: Automatically save subtitle state changes
@@ -1858,6 +1864,7 @@ Settings:
     Refresh Subscriptions While App Is Closed: Refresh Subscriptions While App Is Closed
     Notify About New Uploads: Notify About New Uploads
     Faster Subscription Refresh: Faster Subscription Refresh
+    Show Collaborations From Other Channels: Show Collaborations From Other Channels
     'Limit the number of videos displayed for each channel': 'Limit the number of videos displayed for each channel'
     To: To
     Confirm Before Unsubscribing: Confirm Before Unsubscribing
@@ -3256,6 +3263,7 @@ Context Menu:
   Move Tabs to Window: Move Tabs to Window
   Open in a New Tab: Open in a New Tab
   Open in a New Window: Open in a New Window
+  Open in an Incognito Tab: Open in an Incognito Tab
   Copy Link: Copy Link
   Copy Invidious Link: Copy Invidious Link
   Search Selection in New Tab: 'Search "{selection}" in a New Tab'
@@ -3370,6 +3378,7 @@ Comments:
   Filter loaded comments: Filter loaded comments
   Comment filters: Comment filters
   From creator: From creator
+  From you: From you
   Contains timestamps: Contains timestamps
   Pin comment by author: Pin comment by {author}
   Unpin comment by author: Unpin comment by {author}
@@ -3590,6 +3599,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Refreshes feeds using your selected settings. On desktop, OpenTubeX stays in the system tray until you quit. Android controls when background refreshes run."
     Notify About New Uploads: "Shows system notifications on this device for channels whose notifications you turned on in their subscription settings. OpenTubeX checks for new content when subscriptions refresh, so choose an auto refresh interval. To be notified while the app is closed, also enable refreshing while the app is closed."
     Faster Subscription Refresh: Checks each channel's RSS feed first and only loads the videos, Shorts and live streams of channels with new uploads. Automatic refreshes also skip channels loaded in the last 10 minutes. For channels without new uploads, view counts, removed videos and changed titles only update every few hours, and new uploads may appear later when the RSS feed lags behind. Not available with the Invidious API.
+    Show Collaborations From Other Channels: Also shows videos that channels you subscribe to made together with another channel that uploaded them. YouTube only lists these on a channel's Home tab, so each video refresh loads one more page per channel. Only the latest collaborations shown there are found, some channels don't show any, and their publication dates are approximate. Not available with the Invidious API.
   Theme Settings:
     Thumbnail Size: Scales video thumbnails in grids and lists. Grids with a fixed column count or the Full Width view type fill each row instead, so there it only changes list thumbnails and Shorts. Phone-sized windows limit grid thumbnails to 100%.
     Playlist Thumbnail Size: Scales video thumbnails on playlist pages. Grids with a fixed column count or the Full Width view type fill each row instead, so there it only changes list thumbnails and Shorts. Phone-sized windows limit grid thumbnails to 100%.
@@ -3602,7 +3612,7 @@ Tooltips:
     Use Fixed Tab Width: Gives every tab in the horizontal tab bar the same width instead of sizing them to their title.
     Use Custom Title Bar: Replaces the system title bar with the tab bar, or with the top navigation when tabs are not at the top, to save vertical space. The window controls appear in the corner of that bar.
     Use Grid Player Menu: Arranges the video player's settings menu as a grid of tiles instead of a list of rows.
-    Compact Settings Categories: Reduces the height of settings categories.
+    UI Density: Changes the spacing in lists, menus, the side bar, and Settings.
     Modal Backdrop: Sets how the app looks behind dialogs and menus. Blurring it can be slow on less powerful devices.
   Experimental Settings:
     Replace HTTP Cache: Disables Electron's disk based HTTP cache and enables a custom in-memory image cache. Will lead to increased RAM usage.
@@ -3725,6 +3735,7 @@ KeyboardShortcutPrompt:
   History Forward: Go forward one page
   New Window: Create a new window
   New Tab: Create a new tab
+  New Incognito Tab: Create a new incognito tab
   Close Tab: Close the current tab
   Reload Tab: Reload the current tab
   Reopen Closed Tab: Reopen the last closed tab

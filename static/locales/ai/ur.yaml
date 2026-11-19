@@ -300,7 +300,7 @@ Subscriptions:
     Followed Channels: دیگر پلیٹ فارمز پر فالو کیے گئے چینلز
     Description: Twitch، SoundCloud، PeerTube، Rumble، Odysee اور media.ccc.de پر چینلز کو فالو کریں تاکہ ان کے اپ لوڈز اپنی سبسکرپشنز کے پلیٹ فارمز ٹیب میں دیکھ سکیں۔ تلاش کے ذریعے چینلز ڈھونڈیں، یا ان کے صفحے کے پتے سے انہیں شامل کریں۔ ان کا میڈیا yt-dlp کے ساتھ چلتا ہے۔
     Add Channel: چینل شامل کریں
-    Channel URL: چینل کا پتا
+    Search Or Paste Channel: تلاش کریں یا کسی چینل کا پتا چسپاں کریں
     Invalid Channel: Twitch، SoundCloud، PeerTube، Rumble، Odysee یا media.ccc.de پر کسی چینل صفحے کا پتا درج کریں۔
     Channel Not Found: اس پتے پر کوئی چینل نہیں ہے۔
     Channel Already Followed: آپ پہلے ہی اس چینل کو فالو کر رہے ہیں۔
@@ -474,7 +474,6 @@ Settings:
     Tabs to unload: ان لوڈ کرنے کے لیے ٹیبز
     Automatic unloading help: میموری خالی کرنے کے لیے سب سے پرانے پس منظر کے ٹیبز ان لوڈ کریں۔ فعال اور چلنے والے ٹیبز لوڈ رہتے ہیں۔
     Memory threshold help: رینڈرر کی میموری حد کا فیصد، نہ کہ سسٹم کی کل RAM کا۔
-  Navigation and Controls: نیویگیشن اور کنٹرولز
   Interface Customizer:
     Customize Interface: انٹرفیس کو حسب ضرورت بنائیں
     Preview: پیش نظارہ
@@ -789,7 +788,11 @@ Settings:
       Bundled Fonts: شامل کردہ فونٹس
       System Fonts: سسٹم فونٹس
     Always Show Scrollbars: اسکرول بارز ہمیشہ دکھائیں
-    Compact Settings Categories: مختصر سیٹنگز کیٹیگریز
+    UI Density:
+      UI Density: "انٹرفیس کی کثافت"
+      Compact: "گنجان"
+      Default: "طے شدہ"
+      Comfortable: "کشادہ"
     Base Theme:
       Material Light: Material لائٹ
       Material Dark: Material ڈارک
@@ -1115,6 +1118,7 @@ Settings:
     Channel Settings: چینل سیٹنگز
     Channel Settings Description: دیکھتے وقت منتخب کردہ سیٹنگز کو ہر چینل کے لیے الگ الگ یاد رکھیں، تاکہ اگلی بار اس کی کوئی ویڈیو دیکھنے پر وہ دوبارہ لاگو ہو جائیں۔
     Enable Channel Playback Settings: چینل پلے بیک سیٹنگز فعال کریں
+    Auto Save Changes: تبدیلیاں خودکار طور پر محفوظ کریں
     Auto Save Playback Speed: پلے بیک اسپیڈ کی تبدیلیاں خود بخود محفوظ کریں
     Auto Save Video Quality: ویڈیو کوالٹی کی تبدیلیاں خود بخود محفوظ کریں
     Auto Save Subtitles State: سب ٹائٹلز کی حالت کی تبدیلیاں خود بخود محفوظ کریں
@@ -1364,6 +1368,7 @@ Settings:
     Notify About New Uploads: نئی اپ لوڈز کی اطلاع دیں
     RSS Feeds Auto Refresh Interval: RSS فیڈز کی خودکار ریفریش کا وقفہ
     Faster Subscription Refresh: "سبسکرپشنز کی تیز تر تازہ کاری"
+    Show Collaborations From Other Channels: "دوسرے چینلز کے اپ لوڈ کردہ اشتراکات شامل کریں"
     Platforms:
       Other Platforms: دیگر پلیٹ فارمز
       Manage Channels: فالو کیے گئے چینلز کا نظم کریں
@@ -2334,6 +2339,7 @@ Context Menu:
   Search With Multiple: اس کے ساتھ تلاش کریں...
   Selection Too Long: انتخاب تلاش کے لیے بہت طویل ہے (> {count} حروف)
   Background Tab: پس منظر ٹیب
+  Open in an Incognito Tab: پوشیدگی ٹیب میں کھولیں
 Tab Organizer:
   Tab History: ٹیب ہسٹری
   Current Page: موجودہ صفحہ
@@ -2419,6 +2425,7 @@ Comments:
   Filter loaded comments: لوڈ شدہ کمنٹس فلٹر کریں
   Comment filters: کمنٹ فلٹرز
   From creator: تخلیق کار کی طرف سے
+  From you: آپ کی طرف سے
   Contains timestamps: ٹائم اسٹیمپس پر مشتمل
   Pin comment by author: '{author} کا کمنٹ پن کریں'
   Unpin comment by author: '{author} کا کمنٹ ان پن کریں'
@@ -2567,6 +2574,7 @@ Tooltips:
     Notify About New Uploads: ان چینلز کے لیے اس ڈیوائس پر سسٹم نوٹیفکیشنز دکھاتا ہے جن کی اطلاعات آپ نے ان کی سبسکرپشن سیٹنگز میں آن کی ہیں۔ OpenTubeX سبسکرپشنز ریفریش ہونے پر نیا مواد چیک کرتا ہے، اس لیے خودکار ریفریش کا وقفہ منتخب کریں۔ ایپ بند ہونے پر اطلاع پانے کے لیے ایپ بند ہونے پر ریفریش کرنا بھی فعال کریں۔
     RSS Feeds Auto Refresh Interval: ایپ کھلی ہونے کے دوران OpenTubeX آپ کی RSS فیڈز کو کتنی بار خودکار طور پر ریفریش کرتا ہے۔
     Faster Subscription Refresh: "پہلے ہر چینل کی RSS فیڈ چیک کرتا ہے اور صرف نئے اپ لوڈز والے چینلز کی ویڈیوز، Shorts اور لائیو اسٹریمز لوڈ کرتا ہے۔ خودکار تازہ کاریاں پچھلے 10 منٹ میں لوڈ کیے گئے چینلز کو بھی چھوڑ دیتی ہیں۔ نئے اپ لوڈز کے بغیر چینلز کے لیے، ویوز کی تعداد، ہٹائی گئی ویڈیوز اور تبدیل شدہ عنوانات صرف ہر چند گھنٹوں بعد اپ ڈیٹ ہوتے ہیں، اور RSS فیڈ پیچھے رہنے پر نئے اپ لوڈز بعد میں ظاہر ہو سکتے ہیں۔ Invidious API کے ساتھ دستیاب نہیں۔"
+    Show Collaborations From Other Channels: "وہ ویڈیوز بھی دکھاتا ہے جو آپ کے سبسکرائب کردہ چینلز نے کسی دوسرے چینل کے ساتھ مل کر بنائیں جس نے انہیں اپ لوڈ کیا۔ YouTube انہیں صرف چینل کے ہوم ٹیب پر دکھاتا ہے، اس لیے ہر ویڈیو ریفریش ہر چینل کے لیے ایک اضافی صفحہ لوڈ کرتا ہے۔ وہاں دکھائے گئے صرف تازہ ترین اشتراکات ملتے ہیں، کچھ چینلز کوئی نہیں دکھاتے، اور ان کی اشاعت کی تاریخیں تخمینی ہیں۔ Invidious API کے ساتھ دستیاب نہیں۔"
     Platforms Auto Refresh Interval: ایپ کھلی ہونے کے دوران OpenTubeX دیگر پلیٹ فارمز پر آپ کے فالو کیے گئے چینلز کو کتنی بار خودکار طور پر ریفریش کرتا ہے۔
     Twitch Notify When Live: جب آپ کے فالو کیے گئے Twitch چینلز میں سے کوئی اسٹریمنگ شروع کرے تو آپ کو مطلع کرتا ہے۔ OpenTubeX کھلا ہونے کے دوران ہر چند منٹ بعد چیک کرتا ہے، اور بند ہونے کے دوران بھی اگر اس وقت سبسکرپشنز ریفریش کرتا ہو۔
   Theme Settings:
@@ -2580,7 +2588,7 @@ Tooltips:
     Use Fixed Tab Width: افقی ٹیب بار کے ہر ٹیب کو ان کے عنوان کے مطابق سائز دینے کے بجائے یکساں چوڑائی دیتا ہے۔
     Use Custom Title Bar: عمودی جگہ بچانے کے لیے سسٹم ٹائٹل بار کو ٹیب بار سے، یا ٹیبز اوپر نہ ہونے پر اوپری نیویگیشن سے بدل دیتا ہے۔ ونڈو کنٹرولز اس بار کے کونے میں ظاہر ہوتے ہیں۔
     Use Grid Player Menu: ویڈیو پلیئر کے سیٹنگز مینو کو قطاروں کی فہرست کے بجائے ٹائلز کے گرڈ کی صورت میں ترتیب دیتا ہے۔
-    Compact Settings Categories: "سیٹنگز کیٹیگریز کی اونچائی کم کرتا ہے۔"
+    UI Density: "فہرستوں، مینیو، سائیڈ بار اور ترتیبات میں فاصلہ تبدیل کرتا ہے۔"
     Modal Backdrop: "طے کرتا ہے کہ ڈائیلاگز اور مینیوز کے پیچھے ایپ کیسی دکھائی دے۔ دھندلا کرنا کم طاقتور آلات پر سست ہو سکتا ہے۔"
     Click Scrollbar Track to Scroll: "اسکرول بار پر اس کے ہینڈل کے باہر کلک کرنے سے کلک کی سمت میں تقریباً ایک صفحہ اسکرول ہوتا ہے۔ جب تک یہ آن ہے، نظر آنے والی اسکرول بار اپنے نیچے موجود آئٹمز کے لیے کیے گئے کلکس لے لیتی ہے۔ ٹیب بار کی اسکرول بار ہمیشہ اسی طرح کام کرتی ہے۔"
   Experimental Settings:
@@ -2642,6 +2650,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: ٹیب سوئچر
   Undo Seek: آخری سیک واپس لیں
   Redo Seek: واپس لیا گیا سیک دوبارہ کریں
+  New Incognito Tab: نیا پوشیدگی ٹیب بنائیں
 CommandPalette:
   Title: کمانڈ پیلیٹ
   Open: کمانڈ پیلیٹ کھولیں
@@ -2966,3 +2975,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Twitch پر تلاش کریں"
+New Incognito Tab: نیا پوشیدگی ٹیب
+Incognito Tab: پوشیدگی ٹیب

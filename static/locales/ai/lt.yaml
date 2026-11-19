@@ -299,7 +299,7 @@ Subscriptions:
     Followed Channels: Sekami kanalai kitose platformose
     Description: Sekite kanalus Twitch, SoundCloud, PeerTube, Rumble, Odysee ir media.ccc.de platformose, kad jų įkeltą turinį matytumėte savo prenumeratų skirtuke „Platformos“. Raskite kanalus paieška arba pridėkite juos pagal jų puslapio adresą. Jų medija atkuriama naudojant yt-dlp.
     Add Channel: Pridėti kanalą
-    Channel URL: Kanalo adresas
+    Search Or Paste Channel: Ieškokite arba įklijuokite kanalo adresą
     Invalid Channel: Įveskite kanalo puslapio adresą Twitch, SoundCloud, PeerTube, Rumble, Odysee arba media.ccc.de platformoje.
     Channel Not Found: Šiuo adresu kanalo nėra.
     Channel Already Followed: Jūs jau sekate šį kanalą.
@@ -549,7 +549,6 @@ Settings:
     Tabs to unload: "Iškraunamos kortelės"
     Automatic unloading help: "Iškrauti seniausias fonines korteles, kad būtų atlaisvinta atmintis. Aktyvios ir turinį leidžiančios kortelės lieka įkeltos."
     Memory threshold help: "Atvaizdavimo proceso atminties ribos procentas, o ne visos sistemos RAM."
-  Navigation and Controls: "Naršymas ir valdikliai"
   Control Bar:
     Title: "Valdymo juosta"
     Customize: "Tinkinti valdymo juostą"
@@ -803,7 +802,11 @@ Settings:
       Tab Loading Indicator: Kortelės įkėlimo indikatorius
       Bar: Juosta
       Dot: Taškas (klasikinis)
-    Compact Settings Categories: "Kompaktiškos nustatymų kategorijos"
+    UI Density:
+      UI Density: "Sąsajos tankis"
+      Compact: "Kompaktiškas"
+      Default: "Numatytasis"
+      Comfortable: "Erdvus"
     Playlist Thumbnail Size: "Grojaraščio miniatiūrų dydis"
     Compact Mobile Mini Player: "Kompaktiškas mobilusis mini leistuvas"
     Always Show Mobile Search Bar: "Visada rodyti paieškos juostą telefone"
@@ -1251,6 +1254,7 @@ Settings:
     Channel Settings: Kanalo nustatymai
     Channel Settings Description: Atskirai įsiminti kiekvienam kanalui žiūrint pasirinktus nustatymus, kad jie vėl būtų pritaikyti kitą kartą žiūrint vieną iš jo vaizdo įrašų.
     Enable Channel Playback Settings: Įjungti kanalų atkūrimo nustatymus
+    Auto Save Changes: Automatiškai išsaugoti pakeitimus
     Auto Save Playback Speed: Automatiškai išsaugoti atkūrimo greičio pakeitimus
     Auto Save Video Quality: Automatiškai išsaugoti vaizdo kokybės pakeitimus
     Auto Save Subtitles State: Automatiškai išsaugoti subtitrų būsenos pakeitimus
@@ -1518,6 +1522,7 @@ Settings:
     Confirm Before Unsubscribing: Klausti prieš atsisakant prenumeratos
     RSS Feeds Auto Refresh Interval: RSS sklaidos kanalų automatinio atnaujinimo intervalas
     Faster Subscription Refresh: "Greitesnis prenumeratų atnaujinimas"
+    Show Collaborations From Other Channels: "Įtraukti kitų kanalų įkeltus bendradarbiavimus"
     Platforms:
       Other Platforms: Kitos platformos
       Manage Channels: Tvarkyti sekamus kanalus
@@ -2629,6 +2634,7 @@ Context Menu:
   Search With Multiple: Ieškoti naudojant...
   Selection Too Long: Pažymėtas tekstas per ilgas paieškai (> {count} simbolių)
   Background Tab: Fono kortelė
+  Open in an Incognito Tab: Atverti inkognito kortelėje
 Tab Organizer:
   Tab History: "Kortelės istorija"
   Current Page: "Dabartinis puslapis"
@@ -2720,6 +2726,7 @@ Comments:
   Filter loaded comments: Filtruoti įkeltus komentarus
   Comment filters: Komentarų filtrai
   From creator: Nuo kūrėjo
+  From you: Jūsų
   Contains timestamps: Su laiko žymomis
   Pin comment by author: Prisegti {author} komentarą
   Unpin comment by author: Atsegti {author} komentarą
@@ -2880,6 +2887,7 @@ Tooltips:
     Notify About New Uploads: Šiame įrenginyje rodo sistemos pranešimus apie kanalus, kurių pranešimus įjungėte jų prenumeratos nustatymuose. OpenTubeX naujo turinio ieško atnaujindama prenumeratas, todėl pasirinkite automatinio atnaujinimo intervalą. Kad gautumėte pranešimus, kai programa uždaryta, taip pat įjunkite atnaujinimą, kai programa uždaryta.
     RSS Feeds Auto Refresh Interval: Kaip dažnai OpenTubeX automatiškai atnaujina jūsų RSS sklaidos kanalus, kol programa atidaryta.
     Faster Subscription Refresh: "Pirmiausia patikrina kiekvieno kanalo RSS sklaidos kanalą ir įkelia vaizdo įrašus, Shorts ir tiesiogines transliacijas tik iš kanalų su naujais įkėlimais. Automatiniai atnaujinimai taip pat praleidžia kanalus, įkeltus per pastarąsias 10 minučių. Kanaluose be naujų įkėlimų peržiūrų skaičiai, pašalinti vaizdo įrašai ir pakeisti pavadinimai atnaujinami tik kas kelias valandas, o nauji įkėlimai gali pasirodyti vėliau, kai RSS sklaidos kanalas vėluoja. Nepasiekiama naudojant Invidious API."
+    Show Collaborations From Other Channels: "Taip pat rodo vaizdo įrašus, kuriuos prenumeruojami kanalai sukūrė kartu su kitu juos įkėlusiu kanalu. „YouTube“ juos rodo tik kanalo skirtuke „Pagrindinis“, todėl kiekvienas vaizdo įrašų atnaujinimas kiekvienam kanalui įkelia vienu puslapiu daugiau. Randami tik ten rodomi naujausi bendradarbiavimai, kai kurie kanalai jų visai nerodo, o jų paskelbimo datos yra apytikslės. Nepasiekiama su „Invidious“ API."
     Platforms Auto Refresh Interval: Kaip dažnai OpenTubeX automatiškai atnaujina kanalus, kuriuos sekate kitose platformose, kol programa atidaryta.
     Twitch Notify When Live: Praneša, kai vienas iš jūsų sekamų Twitch kanalų pradeda transliaciją. OpenTubeX tikrina kas kelias minutes, kol yra atidaryta, ir taip pat, kai yra uždaryta, jei tuo metu atnaujina prenumeratas.
   Theme Settings:
@@ -2887,7 +2895,7 @@ Tooltips:
     Visible Search Suggestions: "Nustato, kiek paieškos istorijos įrašų ir pasiūlymų paieškos juosta rodo, kol jos sąrašą reikia slinkti. Sąrašas niekada nesiekia toliau už lango apačią."
     Thumbnail Size: "Keičia vaizdo įrašų miniatiūrų dydį tinkleliuose ir sąrašuose. Tinkleliai su fiksuotu stulpelių skaičiumi arba Viso pločio rodiniu vietoj to užpildo kiekvieną eilutę, todėl ten keičiamos tik sąrašų miniatiūros ir Shorts. Telefono dydžio languose tinklelio miniatiūros ribojamos iki 100 %."
     Playlist Thumbnail Size: "Keičia vaizdo įrašų miniatiūrų dydį grojaraščių puslapiuose. Tinkleliai su fiksuotu stulpelių skaičiumi arba Viso pločio rodiniu vietoj to užpildo kiekvieną eilutę, todėl ten keičiamos tik sąrašų miniatiūros ir Shorts. Telefono dydžio languose tinklelio miniatiūros ribojamos iki 100 %."
-    Compact Settings Categories: "Sumažina nustatymų kategorijų aukštį."
+    UI Density: "Keičia tarpus sąrašuose, meniu, šoninėje juostoje ir nustatymuose."
     Show Progress as Notification: Vietoje bendros eigos juostos rodo nuolatinį pranešimą su tikralaike foninių operacijų, pvz., prenumeratų atnaujinimo ir tvarkomų įrankių atsisiuntimo, eiga.
     Always Show Scrollbars: Slinkties juostos visada lieka matomos. Išjungus jos netrukus išblėsta nustojus judinti pelę ir vėl pasirodo vos ją pajudinus.
     Scroll Speed: Keičia, kiek paslenka pelės ratuko ir jutiklinio kilimėlio slinkimo gestai.
@@ -3020,6 +3028,7 @@ KeyboardShortcutPrompt:
   Skip to Previous Video: Pereiti prie ankstesnio vaizdo įrašo grojaraštyje
   Undo Seek: Atšaukti paskutinį peršokimą
   Redo Seek: Pakartoti atšauktą peršokimą
+  New Incognito Tab: Sukurti naują inkognito kortelę
 CommandPalette:
   Title: Komandų paletė
   Open: Atverti komandų paletę
@@ -3399,3 +3408,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Ieškoti Twitch"
+New Incognito Tab: Nauja inkognito kortelė
+Incognito Tab: Inkognito kortelė

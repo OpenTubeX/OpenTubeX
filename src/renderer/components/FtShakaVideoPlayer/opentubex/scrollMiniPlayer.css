@@ -152,6 +152,12 @@
   pointer-events: none !important;
 }
 
+/* The mini player's pointer layer covers these panels, so their buttons and
+   links cannot be reached. They return when the player goes back inline. */
+.ftVideoPlayer.scrollMiniPlayer > :is(.skippedSegmentsWrapper, .sponsorBlockSubmissionWrapper, .endedScreen, .stats) {
+  display: none;
+}
+
 .ftVideoPlayer.scrollMiniPlayer .player {
   width: 100%;
   height: 100%;
@@ -549,6 +555,10 @@
 }
 
 .scrollMiniPlayerControls {
+  --scroll-mini-surface: rgb(0 0 0 / 55%);
+  --scroll-mini-surface-hover: rgb(0 0 0 / 70%);
+  --scroll-mini-surface-pressed: rgb(0 0 0 / 78%);
+
   position: absolute;
   inset: 0;
   container-type: size;
@@ -615,7 +625,7 @@
   top: 6px;
   left: 50%;
   transform: translateX(-50%);
-  width: 36px;
+  width: 32px;
   height: 4px;
   border-radius: calc(999px * var(--ui-roundness));
   background: rgb(255 255 255 / 70%);
@@ -627,22 +637,47 @@
   box-shadow: 0 0 3px rgb(255 255 255 / 50%);
 }
 
+/* Material 3 Expressive controls: icon buttons on a translucent surface that
+   keeps the video visible, a play/pause toggle that is round while paused and
+   a rounded square while playing, and buttons that morph their shape when
+   pressed and spring back in when the controls reappear. */
 .scrollMiniScrollTop,
-.scrollMiniDismiss {
+.scrollMiniDismiss,
+.scrollMiniPlayPause,
+.scrollMiniSkip,
+.scrollMiniVolume {
+  color: #fff;
+  background-color: var(--scroll-mini-surface);
+}
+
+.scrollMiniScrollTop,
+.scrollMiniDismiss,
+.scrollMiniPlayPause,
+.scrollMiniSkip {
+  display: flex;
   position: absolute;
-  top: 8px;
-  width: 28px;
-  height: 28px;
+  align-items: center;
+  justify-content: center;
   padding: 0;
   border: 0;
   border-radius: 50%;
-  background: rgb(0 0 0 / 55%);
-  color: #fff;
   cursor: pointer;
+  transition:
+    background-color var(--motion-fast-effects),
+    border-radius var(--motion-fast-spatial),
+    opacity var(--motion-fast-effects),
+    scale var(--motion-fast-spatial);
+}
+
+/* Return and hide form a connected button group. Like the media controls,
+   it keeps its physical side in RTL. */
+.scrollMiniScrollTop,
+.scrollMiniDismiss {
+  top: 8px;
+  width: 32px;
+  height: 32px;
+  font-size: 14px;
   z-index: 4;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .scrollMiniScrollTop {
@@ -650,44 +685,97 @@
 }
 
 .scrollMiniScrollTop-detached {
-  right: 44px;
+  right: 42px;
+  border-top-right-radius: var(--shape-corner-extra-small);
+  border-bottom-right-radius: var(--shape-corner-extra-small);
 }
 
 .scrollMiniDismiss {
   right: 8px;
-}
-
-.scrollMiniScrollTop:hover,
-.scrollMiniDismiss:hover {
-  background: rgb(0 0 0 / 75%);
+  border-top-left-radius: var(--shape-corner-extra-small);
+  border-bottom-left-radius: var(--shape-corner-extra-small);
 }
 
 .scrollMiniPlayPause,
-.scrollMiniSkip,
-.scrollMiniDragHandle,
-.scrollMiniResizeHandle {
-  opacity: 1;
-  transition: opacity 0.15s ease;
+.scrollMiniSkip {
+  --scroll-mini-play-size: 56px;
+  --scroll-mini-skip-size: 40px;
+  --scroll-mini-skip-gap: 8px;
+
+  top: 50%;
+  z-index: 5;
 }
 
 .scrollMiniPlayPause {
-  position: absolute;
-  top: 50%;
   left: 50%;
+  width: var(--scroll-mini-play-size);
+  height: var(--scroll-mini-play-size);
+  border-radius: var(--shape-corner-large);
+  font-size: 22px;
   transform: translate(-50%, -50%);
-  width: 52px;
-  height: 52px;
-  padding: 0;
-  border: 0;
+}
+
+.scrollMiniPlayPause.isPaused {
   border-radius: 50%;
-  background: rgb(0 0 0 / 55%);
-  color: #fff;
-  font-size: 20px;
-  cursor: pointer;
-  z-index: 5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+}
+
+.scrollMiniSkip {
+  width: var(--scroll-mini-skip-size);
+  height: var(--scroll-mini-skip-size);
+  font-size: 15px;
+  transform: translateY(-50%);
+}
+
+/* Flank the play/pause button. Like the seek bar, media controls keep their direction in RTL. */
+.scrollMiniSkipPrevious {
+  left: calc(50% - var(--scroll-mini-play-size) / 2 - var(--scroll-mini-skip-gap) - var(--scroll-mini-skip-size));
+}
+
+.scrollMiniSkipNext {
+  left: calc(50% + var(--scroll-mini-play-size) / 2 + var(--scroll-mini-skip-gap));
+}
+
+@media (hover: hover) {
+  .scrollMiniScrollTop:hover,
+  .scrollMiniDismiss:hover,
+  .scrollMiniPlayPause:hover,
+  .scrollMiniSkip:hover,
+  .scrollMiniVolume:hover {
+    background-color: var(--scroll-mini-surface-hover);
+  }
+}
+
+.scrollMiniScrollTop:active,
+.scrollMiniDismiss:active,
+.scrollMiniPlayPause:active,
+.scrollMiniSkip:active {
+  /* Pressing squares off the shape. */
+  border-radius: var(--shape-corner-medium);
+  background-color: var(--scroll-mini-surface-pressed);
+}
+
+/* Portrait videos shrink the player to about 135px wide. */
+@container (inline-size < 200px) {
+  .scrollMiniPlayPause,
+  .scrollMiniSkip {
+    --scroll-mini-play-size: 48px;
+    --scroll-mini-skip-size: 32px;
+    --scroll-mini-skip-gap: 4px;
+  }
+
+  .scrollMiniPlayPause {
+    font-size: 20px;
+  }
+
+  .scrollMiniSkip {
+    font-size: 13px;
+  }
+}
+
+.scrollMiniDragHandle,
+.scrollMiniResizeHandle {
+  opacity: 1;
+  transition: opacity var(--motion-fast-effects);
 }
 
 .scrollMiniPlayPause.isHidden,
@@ -696,11 +784,18 @@
 .scrollMiniResizeHandle.isHidden {
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.25s ease 0.35s;
+  transition:
+    opacity var(--motion-default-effects) 0.35s,
+    scale var(--motion-default-effects) 0.35s;
 }
 
-.scrollMiniPlayPause:hover {
-  background: rgb(0 0 0 / 75%);
+.scrollMiniPlayPause.isHidden,
+.scrollMiniSkip.isHidden {
+  scale: 0.8;
+}
+
+.scrollMiniDragHandle:active {
+  cursor: grabbing;
 }
 
 /* Auto-hide must not leave a keyboard-focused control invisible. */
@@ -708,52 +803,10 @@
 .scrollMiniSkip.isHidden:focus-visible {
   opacity: 1;
   pointer-events: auto;
-  transition: opacity 0.15s ease;
-}
-
-.scrollMiniSkip {
-  --scroll-mini-skip-size: 36px;
-  --scroll-mini-skip-gap: 12px;
-
-  position: absolute;
-  top: 50%;
-  width: var(--scroll-mini-skip-size);
-  height: var(--scroll-mini-skip-size);
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: rgb(0 0 0 / 55%);
-  color: #fff;
-  font-size: 14px;
-  cursor: pointer;
-  transform: translateY(-50%);
-  z-index: 5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Flank the 52px play/pause button. Like the seek bar, media controls keep their direction in RTL. */
-.scrollMiniSkipPrevious {
-  left: calc(50% - 26px - var(--scroll-mini-skip-gap) - var(--scroll-mini-skip-size));
-}
-
-.scrollMiniSkipNext {
-  left: calc(50% + 26px + var(--scroll-mini-skip-gap));
-}
-
-.scrollMiniSkip:hover {
-  background: rgb(0 0 0 / 75%);
-}
-
-/* Portrait videos shrink the player to about 135px wide. */
-@container (inline-size < 200px) {
-  .scrollMiniSkip {
-    --scroll-mini-skip-size: 30px;
-    --scroll-mini-skip-gap: 6px;
-
-    font-size: 12px;
-  }
+  scale: 1;
+  transition:
+    opacity var(--motion-fast-effects),
+    scale var(--motion-fast-spatial);
 }
 
 /* Above the volume slider's tall hit area, below the later resize grip. */
@@ -835,23 +888,29 @@
 
 .scrollMiniVolume {
   position: absolute;
-  left: 10px;
+  left: 8px;
   bottom: 14px;
   display: flex;
   align-items: center;
   gap: 0;
-  padding: 4px 6px;
-  border-radius: calc(999px * var(--ui-roundness));
-  background: rgb(0 0 0 / 55%);
-  color: #fff;
+  box-sizing: border-box;
+  min-block-size: 32px;
+  padding-inline: 8px;
+  border-radius: var(--shape-corner-full);
+  transition: background-color var(--motion-fast-effects);
   z-index: 3;
 }
 
 .scrollMiniVolumeIcon {
   width: 16px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
   font-size: 14px;
   text-align: center;
   flex-shrink: 0;
+  cursor: pointer;
 }
 
 .scrollMiniVolumeTrack {
@@ -863,7 +922,7 @@
   margin-inline: 0;
   overflow: visible;
   /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- the phone mini bar expands and its controls rearrange */
-  transition: width 0.18s ease, opacity 0.18s ease, margin 0.18s ease;
+  transition: width var(--motion-fast-spatial), opacity var(--motion-fast-effects), margin var(--motion-fast-spatial);
 }
 
 .scrollMiniVolume.isExpanded .scrollMiniVolumeTrack {
@@ -965,8 +1024,9 @@
   }
 }
 
-:global(body.scroll-mini-player-grabbing),
-:global(body.scroll-mini-player-grabbing *) {
-  cursor: grabbing !important;
-  user-select: none !important;
+/* While it is dragged or resized, the player moves on its own layer, so only the
+   compositor redraws it. The handle captures the pointer, which keeps its cursor
+   without a rule that restyles every element at the start and end of a gesture. */
+:global(body.scroll-mini-player-grabbing .ftVideoPlayer.scrollMiniPlayer) {
+  will-change: translate;
 }

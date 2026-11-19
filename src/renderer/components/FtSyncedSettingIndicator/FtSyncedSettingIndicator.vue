@@ -184,21 +184,36 @@ async function toggleSync() {
   border-radius: 50%;
 }
 
+.changedSettingIndicator {
+  --indicator-state-color: var(--settings-changed-color, var(--primary-color));
+
+  color: var(--settings-changed-color, var(--primary-color));
+}
+
 /* Material state layer: a circle around the glyph that extends past the
    button box, so the indicators keep their inline size next to the label. */
 .syncedSettingIndicator::before,
 .changedSettingIndicator::before {
   position: absolute;
   z-index: -1;
-  top: 50%;
+  inset-block-start: 50%;
+  /* stylelint-disable-next-line liberty/use-logical-spec -- centered with the physical translate below */
   left: 50%;
-  width: 1.8em;
-  height: 1.8em;
+  inline-size: 1.8em;
+  block-size: 1.8em;
   border-radius: 50%;
   background-color: color-mix(in srgb, var(--indicator-state-color) var(--indicator-state-layer), transparent);
   content: '';
   transition: background-color var(--motion-fast-effects);
   translate: -50% -50%;
+}
+
+/* Draw the focus ring around the state layer instead of the small glyph box. */
+/* stylelint-disable-next-line a11y/no-outline-none */
+.syncedSettingIndicator:focus-visible,
+.changedSettingIndicator:focus-visible {
+  outline: none;
+  box-shadow: none;
 }
 
 .syncedSettingIndicator:not(:disabled):hover,
@@ -213,23 +228,10 @@ async function toggleSync() {
   --indicator-state-layer: 10%;
 }
 
-/* Draw the focus ring around the state layer instead of the small glyph box. */
-.syncedSettingIndicator:focus-visible,
-.changedSettingIndicator:focus-visible {
-  outline: none;
-  box-shadow: none;
-}
-
 :root:not(.hideOutlines) .syncedSettingIndicator:focus-visible:not(:disabled)::before,
 :root:not(.hideOutlines) .changedSettingIndicator:focus-visible:not(:disabled)::before {
   outline: 2px solid var(--primary-color);
   outline-offset: 0;
-}
-
-.changedSettingIndicator {
-  --indicator-state-color: var(--settings-changed-color, var(--primary-color));
-
-  color: var(--settings-changed-color, var(--primary-color));
 }
 
 .changedSettingIndicatorPlaceholder {

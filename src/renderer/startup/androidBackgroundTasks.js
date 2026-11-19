@@ -2,6 +2,7 @@ import { MAIN_PROFILE_ID } from '../../constants'
 import { waitForDatastores } from '../../datastores/index'
 import i18n from '../i18n/index'
 import { finishAndroidBackgroundTasks, setPeriodicBackgroundTask } from '../helpers/androidBackgroundSync.js'
+import { suppressWatchedAndroidNotifications } from '../helpers/androidNotificationSuppressions.js'
 import { handleRestoredAndroidAppData } from '../helpers/androidStorage.js'
 import { checkCommentRepliesInBackground } from '../helpers/commentReplyNotifications.js'
 import { loadCustomThemes } from '../helpers/customTheme.js'
@@ -59,7 +60,13 @@ async function sync(store) {
   // These are the shared libraries. A separate default profile syncs its own
   // while it is active in the app.
   store.commit('setActiveProfile', MAIN_PROFILE_ID)
-  // Open tabs, live reminders and notifications belong to the app's
-  // renderer, so they sync when the app opens.
-  await store.dispatch('initializeSyncServer')
+  // Open tabs and live reminders belong to the app's renderer, so they sync
+  // when the app opens.
+  try {
+    await store.dispatch('initializeSyncServer')
+  } finally {
+    // Uploads watched on another device need no notification here, also
+    // when a later stage failed after the history synced.
+    await suppressWatchedAndroidNotifications()
+  }
 }

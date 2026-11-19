@@ -1,5 +1,6 @@
 import { LocalNotifications } from '@capacitor/local-notifications'
-import { REMINDER_EARLY_MS } from '../../notificationHistory.js'
+import { REMINDER_EARLY_MS, parseNotificationKey } from '../../notificationHistory.js'
+import { isAndroidBackgroundRenderer, suppressAndroidNotifications } from './androidBackgroundSync.js'
 import { cancelAndroidUploadNotifications } from './androidSubscriptionRefresh.js'
 import { getTwitchNotificationId, parseTwitchChannelLogin } from '../../twitchFollows.js'
 
@@ -56,27 +57,97 @@ async function closeReminders(dueTimes) {
 }
 
 /**
+ * The notification Android shows for a target, which announces uploads,
+ * Twitch broadcasts, replies and hearts alike, or null for other news.
+ * @param {{ kind: string, path: string, query?: Record<string, string> }} target
+ * @returns {{ feedType: string, id: string } | null}
+ */
+function getAndroidNotification({ kind, path, query }) {
+  const id = path.split('/').at(-1)
+  const commentId = kind === 'comment-reply' || kind === 'comment-heart' ? query?.commentId : undefined
+  if (commentId) return { feedType: kind, id: `${id}/${commentId}` }
+  const twitchLogin = path === '/external-media' ? parseTwitchChannelLogin(query?.url) : null
+  if (twitchLogin && query?.stream) return { feedType: 'twitch', id: getTwitchNotificationId(twitchLogin, query.stream) }
+  return kind in UPLOAD_FEED_TYPES ? { feedType: UPLOAD_FEED_TYPES[kind], id } : null
+}
+
+/**
+ * Tells Android which notifications were read or removed, here or on another
+ * device, so it leaves them out and removes the shown ones, also while the app is closed.
+ * @param {import('../../notificationHistory').NotificationDismissals} dismissals
+ */
+export function suppressDismissedAndroidNotifications({ readThrough, clearedThrough, dismissals }) {
+  if (!process.env.IS_CAPACITOR || process.env.IS_IOS) return
+  const dismissed = dismissals.flatMap(({ key }) => {
+    const target = parseNotificationKey(key)
+    return (target && getAndroidNotification(target)) ?? []
+  })
+  // Marking all read or clearing records no key for each notification.
+  suppressAndroidNotifications({ dismissed, dismissedThrough: Math.max(readThrough, clearedThrough) })
+}
+
+const DEFERRED_REMINDERS_KEY = 'opentubex-deferred-reminder-closes'
+const DEFERRED_REMINDER_LIMIT = 200
+
+/** @returns {{ kind: string, path: string, createdAt: number }[]} */
+function readDeferredReminders() {
+  try {
+    const value = JSON.parse(localStorage.getItem(DEFERRED_REMINDERS_KEY) ?? '[]')
+    return Array.isArray(value) ? value : []
+  } catch {
+    return []
+  }
+}
+
+/** @param {import('../../notificationHistory').NotificationHistoryEntry[]} entries */
+function deferReminderCloses(entries) {
+  const reminders = entries.filter(entry => entry.kind === 'live-reminder')
+    .map(({ kind, path, createdAt }) => ({ kind, path, createdAt }))
+  if (reminders.length === 0) return
+  localStorage.setItem(DEFERRED_REMINDERS_KEY,
+    JSON.stringify([...readDeferredReminders(), ...reminders].slice(-DEFERRED_REMINDER_LIMIT)))
+}
+
+/** Removes the reminders that were read or removed while the app was closed. */
+export async function closeDeferredReminders() {
+  const reminders = readDeferredReminders()
+  // Kept for the next opening when the plugin fails.
+  if (reminders.length === 0 || !await closeCapacitorSystemNotifications(reminders)) return
+  const remaining = readDeferredReminders().slice(reminders.length)
+  if (remaining.length > 0) localStorage.setItem(DEFERRED_REMINDERS_KEY, JSON.stringify(remaining))
+  else localStorage.removeItem(DEFERRED_REMINDERS_KEY)
+}
+
+/**
  * Removes the system notifications of entries that were read or removed.
  * @param {import('../../notificationHistory').NotificationHistoryEntry[]} entries
+ * @returns {Promise<boolean>} false when removing them failed
  */
 export async function closeCapacitorSystemNotifications(entries) {
-  if (!process.env.IS_CAPACITOR) return
+  if (!process.env.IS_CAPACITOR) return true
+  if (isAndroidBackgroundRenderer) {
+    // This renderer lacks the notification plugins. Android removes the
+    // notifications it showed once told of the dismissals, and the app removes
+    // the reminders when it opens.
+    deferReminderCloses(entries)
+    return true
+  }
   /** @type {Map<string, number>} */
   const reminders = new Map()
   const uploads = []
   /** @type {number[]} replies, hearts, and Twitch broadcasts that iOS announced itself */
   const localIds = []
-  for (const { kind, path, query, createdAt } of entries) {
-    const id = path.split('/').at(-1)
-    const twitchLogin = path === '/external-media' ? parseTwitchChannelLogin(query?.url) : null
+  for (const entry of entries) {
+    const { kind, path, query, createdAt } = entry
     const commentId = kind === 'comment-reply' || kind === 'comment-heart' ? query?.commentId : undefined
-    if (kind === 'live-reminder') reminders.set(id, createdAt)
+    const twitchLogin = path === '/external-media' ? parseTwitchChannelLogin(query?.url) : null
+    if (kind === 'live-reminder') reminders.set(path.split('/').at(-1), createdAt)
     else if (commentId && process.env.IS_IOS) localIds.push(getCommentLocalNotificationId(kind, commentId))
-    // Android announces replies and hearts like uploads
-    else if (commentId) uploads.push({ feedType: kind, id: `${id}/${commentId}` })
     else if (twitchLogin && query?.stream && process.env.IS_IOS) localIds.push(getTwitchLocalNotificationId(query.stream))
-    else if (twitchLogin && query?.stream) uploads.push({ feedType: 'twitch', id: getTwitchNotificationId(twitchLogin, query.stream) })
-    else if (kind in UPLOAD_FEED_TYPES) uploads.push({ feedType: UPLOAD_FEED_TYPES[kind], id })
+    else {
+      const notification = getAndroidNotification(entry)
+      if (notification) uploads.push(notification)
+    }
   }
   try {
     await Promise.all([
@@ -84,7 +155,9 @@ export async function closeCapacitorSystemNotifications(entries) {
       uploads.length > 0 && cancelAndroidUploadNotifications(uploads),
       localIds.length > 0 && LocalNotifications.removeDeliveredNotificationsById({ ids: localIds })
     ])
+    return true
   } catch (error) {
     console.error('Failed to remove system notifications', error)
+    return false
   }
 }

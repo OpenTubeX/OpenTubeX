@@ -663,9 +663,11 @@ test.describe('expressive desktop navigation', () => {
     }
   })
 
-  test('clamps the sidebar after layout and content shorten at the scroll end', { tag: '@scale' }, async ({ app, page }) => {
+  test('clamps the sidebar after layout, density and content shorten at the scroll end', { tag: '@scale' }, async ({ app, page }) => {
     await setWindowSize(app, page, { width: 1100, height: 500 })
     const changes = [
+      async () => page.evaluate(() => window.$store.dispatch('updateUiDensity', 'comfortable')),
+      async () => page.evaluate(() => window.$store.dispatch('updateUiDensity', 'compact')),
       async () => page.evaluate(() => window.$store.commit('toggleSideNav')),
       async () => page.evaluate(() => window.$store.dispatch('updateCurrentLocale', 'de-DE')),
       async () => page.evaluate(() => window.$store.dispatch('updateCurrentLocale', 'en-US')),

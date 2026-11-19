@@ -8,7 +8,7 @@ import { getLocalChannelVideos, getLocalSearchResults, getLocalRelatedVideos } f
 import { getInvidiousChannelVideos, getInvidiousSearchResults, getInvidiousRelatedVideos } from '../helpers/api/invidious'
 import { isVideoHiddenByPreferences } from '../helpers/subscriptions'
 import { getUpcomingPremiereTimestamp } from '../helpers/subscription-entries'
-import { useTabContext } from '../tabs/TabContext'
+import { useIncognitoTab, useTabContext } from '../tabs/TabContext'
 
 let cachedCandidates = null
 const CACHE_LIFETIME = 15 * 60 * 1000
@@ -30,6 +30,7 @@ export function useHomeRecommendations(visible) {
   const feedVersion = ref(0)
   const hasError = ref(false)
   const { isTabPresented } = useTabContext()
+  const isIncognitoTab = useIncognitoTab()
   const presented = computed(() => isTabPresented?.value ?? true)
   const enabled = computed(() => store.getters.getEnableHomeRecommendations)
   const history = computed(() => store.getters.getHistoryCacheSorted)
@@ -282,6 +283,8 @@ export function useHomeRecommendations(visible) {
     }
   }
   async function feedback(video, type) {
+    // Clicks are recorded automatically, unlike the feedback a viewer chooses
+    if (type === 'click' && isIncognitoTab.value) return true
     try {
       await store.dispatch('recordRecommendationEvent', { video, type })
       return true
@@ -291,7 +294,7 @@ export function useHomeRecommendations(visible) {
     }
   }
   function recordImpression(video, visible, entry) {
-    if (!visible || !presented.value || !enabled.value || entry?.target.closest('[aria-hidden="true"]')) return
+    if (!visible || !presented.value || !enabled.value || isIncognitoTab.value || entry?.target.closest('[aria-hidden="true"]')) return
     store.dispatch('recordRecommendationEvent', { type: 'impression', video, feedId }).catch(() => { hasError.value = true })
   }
   function cancelRequest() {

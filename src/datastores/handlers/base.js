@@ -276,6 +276,11 @@ class History {
     await this.prepareVideoIdIndex()
     return records
   }
+
+  /** Whether the history holds the video, for leaving out its upload notification. */
+  static async _includes(videoId) {
+    return (await db.history.countAsync({ videoId })) > 0
+  }
   // ******************** //
 
   static updateSubscriptionState({ records = [], unseenVideo, metadata, acknowledgedRepairs }) {

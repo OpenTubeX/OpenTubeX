@@ -158,7 +158,7 @@ import { isAttestedPoToken } from '../../../main/attestedPoToken'
 import { getAutoQualityFallback, playbackEngineSupportsAutoQuality } from '../../helpers/player/autoQuality'
 import { limitQualityOnMeteredNetwork } from '../../helpers/player/meteredNetworkQuality'
 import { useI18n } from 'vue-i18n'
-import { useTabAvatar, useTabContext, useTabTitle, watchNavigationKey } from '../../tabs/TabContext'
+import { useIncognitoTab, useTabAvatar, useTabContext, useTabTitle, watchNavigationKey } from '../../tabs/TabContext'
 import { SCROLL_MINI_MIN_INLINE_LAYOUT_HEIGHT } from '../../helpers/scrollMiniPlayer'
 import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
 import { isPlayerRoutePath } from '../../tabs/playerDockDestination'
@@ -276,6 +276,7 @@ export default defineComponent({
     const tabRoute = useRoute()
     const tabRouter = useRouter()
     const { tabId, isTabPresented, lifecycle: tabLifecycle } = useTabContext()
+    const isIncognitoTab = useIncognitoTab()
     const watchNavigation = inject(watchNavigationKey, null)
     const setTabTitle = useTabTitle()
     const setTabAvatar = useTabAvatar()
@@ -292,6 +293,7 @@ export default defineComponent({
       portraitLayout: usePhoneLayout('(orientation: portrait)'),
       currentLocale: locale,
       tabId,
+      isIncognitoTab,
       isTabPresented,
       tabLifecycle,
       watchNavigation,
@@ -850,14 +852,14 @@ export default defineComponent({
         : this.$t('User Playlists.Add to Favorites', translationProperties)
     },
     rememberHistory: function () {
-      return this.$store.getters.getRememberHistory
+      return this.$store.getters.getRememberHistory && !this.isIncognitoTab
     },
     historyRetentionEnabled: function () {
       const days = Number(this.$store.getters.getHistoryRetentionDays)
       return Number.isInteger(days) && days > 0
     },
     enableVideoMetadataCache: function () {
-      return process.env.IS_ELECTRON && this.$store.getters.getEnableVideoMetadataCache
+      return process.env.IS_ELECTRON && this.$store.getters.getEnableVideoMetadataCache && !this.isIncognitoTab
     },
     wellbeingPauseRequest: function () {
       return this.$store.getters.getWellbeingPauseRequest
@@ -1739,7 +1741,7 @@ export default defineComponent({
     this.watchTimeIsShort = false
     this.watchTimeTracker = createWatchTimeTracker(
       () => !this.isPlaybackPaused() && !this.chromecastStatus?.buffering,
-      (date, seconds, retry) => this.$store.dispatch('recordPlaybackTime', { date, seconds, isShort: this.watchTimeIsShort, retry })
+      (date, seconds, retry) => this.$store.dispatch('recordPlaybackTime', { date, seconds, isShort: this.watchTimeIsShort, incognito: this.isIncognitoTab, retry })
     )
     retainIosMediaSources(() => this.legacyFormats.map(format => format.url))
     this.theatreModeAnimator = createTheatreModeAnimator()
@@ -2176,6 +2178,11 @@ export default defineComponent({
     },
     /** @param {{ panel: import('../../components/FtShakaVideoPlayer/opentubex/dockedPanels').DockedPanel, open: boolean, target: HTMLElement | null, presentationActive?: boolean }} change */
     handleDockPanelChange({ panel, ...change }) {
+      // A dock reports its close once it has slid out, which can be after a
+      // retained Short was swiped away and the next one opened the same dock.
+      const currentTarget = this[`fullscreen${panel[0].toUpperCase()}${panel.slice(1)}Target`]
+      if (!change.open && change.target && currentTarget && change.target !== currentTarget) return
+
       const handlers = {
         metadata: this.handleFullscreenMetadataChange,
         transcript: this.handleFullscreenTranscriptChange,
@@ -2461,7 +2468,7 @@ export default defineComponent({
         else this.openShortsPhonePanel('metadata')
         return
       }
-      const shouldOpen = !this.shortsMetadataOpen
+      const shouldOpen = this.$refs.player?.reopenClosingDockPanel('metadata') || !this.shortsMetadataOpen
       if (shouldOpen) {
         this.resetShortsAuxPanelScroll()
       }
@@ -5283,6 +5290,7 @@ export default defineComponent({
       const playlist = this.selectedUserPlaylist
       if (
         playlist?.removeWatchedVideos !== true ||
+        this.isIncognitoTab ||
         this.isUpcoming ||
         this.isLive ||
         this.isRemovedPlaylistEntry()
@@ -5422,7 +5430,7 @@ export default defineComponent({
     addToYouTubeWatchHistory() {
       // Each channel and sign-in has its own history.
       const key = `${this.videoId}\n${getYouTubeChannelKey(this.$store.getters.getYouTubeAccount)}`
-      if (this.youTubeHistoryKey === key || this.localFilePlayback || this.isOffline ||
+      if (this.youTubeHistoryKey === key || this.localFilePlayback || this.isOffline || this.isIncognitoTab ||
         !isSignedInToYouTube(this.$store.getters) || !this.$store.getters.getYouTubeAccountWatchHistory) {
         return
       }
@@ -7570,7 +7578,7 @@ export default defineComponent({
     },
 
     updateLocalPlaylistLastPlayedAtSometimes() {
-      if (this.selectedUserPlaylist == null) { return }
+      if (this.selectedUserPlaylist == null || this.isIncognitoTab) { return }
 
       const playlist = this.selectedUserPlaylist
       this.updatePlaylistLastPlayedAt({ _id: playlist._id })

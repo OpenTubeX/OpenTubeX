@@ -183,6 +183,7 @@ export const SYNC_SETTING_LABELS = {
   holdPlaybackRateMultiplier: 'Settings.Player Settings.Hold to Speed Up.Hold to Speed Up',
   homeSectionLayout: 'Home Page.Customize',
   iconPack: 'Settings.Theme Settings.Icon Pack.Icon Pack',
+  includeSubscriptionCollaborations: 'Settings.Subscription Settings.Show Collaborations From Other Channels',
   internetConnectivityChecks: 'Settings.Privacy Settings.Internet Connectivity Checks',
   keepPlayingOnNavigation: 'Settings.Player Settings.Scroll Mini Player.Leaving Video',
   keyboardShortcuts: 'KeyboardShortcutPrompt.Keyboard Shortcuts',
@@ -391,6 +392,7 @@ export const SYNC_SETTING_LABELS = {
   titleLineLimit: 'Settings.General Settings.Title Lines.Title Lines',
   toastPosition: 'Settings.Theme Settings.Toast Position.Toast Position',
   twitchLiveNotifications: 'Settings.Subscription Settings.Platforms.Notify When Live',
+  uiDensity: 'Settings.Theme Settings.UI Density.UI Density',
   uiRoundness: 'Settings.Theme Settings.UI Roundness',
   unsubscriptionPopupStatus: 'Settings.Subscription Settings.Confirm Before Unsubscribing',
   updateRelativeTimestamps: 'Settings.General Settings.Update Relative Timestamps',
@@ -546,6 +548,7 @@ export const SYNC_SETTING_VALUE_LABELS = {
   titleLineLimit: { 0: `${general}Title Lines.Unlimited` },
   toastPosition: Object.fromEntries(['bottom-left', 'bottom-center', 'bottom-right', 'top-left', 'top-center', 'top-right'].map(value =>
     [value, `${theme}Toast Position.${value.split('-').map(part => part[0].toUpperCase() + part.slice(1)).join(' ')}`])),
+  uiDensity: { compact: `${theme}UI Density.Compact`, default: `${theme}UI Density.Default`, comfortable: `${theme}UI Density.Comfortable` },
   userHistorySortBy: { latest_played_first: 'History.DateNewestHistory', earliest_played_first: 'History.DateOldestHistory' },
   userPlaylistsSortBy: {
     name_ascending: 'User Playlists.Sort By.NameAscending',

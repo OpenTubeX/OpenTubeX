@@ -61,11 +61,13 @@
   }
 }
 
-/* Keep SponsorBlock notices inside the video area when a dock is open. */
-.ftVideoPlayer:fullscreen:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .fullscreenQueueOpen, .fullscreenRecommendationsOpen, .chaptersOverlayOpen) .skippedSegmentsWrapper,
-.ftVideoPlayer.fullWindow:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .fullscreenQueueOpen, .fullscreenRecommendationsOpen, .chaptersOverlayOpen) .skippedSegmentsWrapper,
-.ftVideoPlayer:fullscreen:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .fullscreenQueueOpen, .fullscreenRecommendationsOpen, .chaptersOverlayOpen) .sponsorBlockSubmissionWrapper,
-.ftVideoPlayer.fullWindow:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .fullscreenQueueOpen, .fullscreenRecommendationsOpen, .chaptersOverlayOpen) .sponsorBlockSubmissionWrapper {
+/*
+  Keep SponsorBlock notices and the submission menu inside the video area when a
+  dock is open. Like the action dock, they follow the layout class, so they move
+  in the same frame as the video and useFullscreenDocks.js can slide them on the
+  compositor.
+*/
+.ftVideoPlayer:is(:fullscreen, .fullWindow).fullscreenDockLayoutOpen .sponsorBlockSubmissionWrapper {
   inset-inline-end: calc(var(--side-panel-width) + 2%);
 }
 

@@ -127,7 +127,8 @@ test('the desktop notifier persists state and shows localized notifications', as
     await notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('a')] })
     await notifier.observe({ channelId: 'UC1', feedType: 'posts', entries: [entry('p')] })
 
-    const restarted = createUploadNotifier({ file, show: notification => shown.push(notification) })
+    // Uploads already in the watch history, for example from another device, need no notification.
+    const restarted = createUploadNotifier({ file, show: notification => shown.push(notification), isWatched: async id => id === 'w' })
     await restarted.configure({
       enabled: true,
       thumbnailUrl: 'https://i.ytimg.com/vi/{id}/mqdefault.jpg',
@@ -137,7 +138,7 @@ test('the desktop notifier persists state and shows localized notifications', as
     await restarted.observe({
       channelId: 'UC1',
       feedType: 'videos',
-      entries: [entry('m', NOW, { membersOnly: true }), entry('l', Date.now(), { live: true }), entry('b', Date.now()), entry('a')]
+      entries: [entry('m', NOW, { membersOnly: true }), entry('l', Date.now(), { live: true }), entry('w', Date.now()), entry('b', Date.now()), entry('a')]
     })
     assert.deepEqual(shown, [
       { title: 'One is live', body: 'Title l', url: 'https://www.youtube.com/watch?v=l', silent: false, target: { kind: 'live', path: '/watch/l' }, thumbnail: 'https://i.ytimg.com/vi/l/mqdefault.jpg' },
@@ -400,6 +401,40 @@ test('the renderer reports only feeds with notifications turned on', async () =>
   await context.configureUploadNotifications({ enabled: false })
   context.reportSubscriptionUploads('UCa', 'videos', [])
   assert.deepEqual(reported, ['UCa/videos'])
+})
+
+test('collaborations listed after known uploads still notify', async () => {
+  const source = await readFile(new URL('../../src/renderer/helpers/uploadNotifications.js', import.meta.url), 'utf8')
+  const state = createUploadNotificationState()
+  const notified = []
+  const getters = { getEnableUploadNotifications: true, getIncludeSubscriptionCollaborations: true }
+  const context = vm.createContext({
+    process: { env: { IS_ELECTRON: true } },
+    store: { getters },
+    normalizeUploadEntries,
+    window: {
+      ftElectron: {
+        subscriptionAutoRefresh: {
+          configureUploadNotifications: async () => {},
+          observeUploads: async ({ channelId, feedType, entries }) => {
+            notified.push(...takeNewUploads(state, channelId, feedType, entries).map(upload => upload.id))
+          }
+        }
+      }
+    },
+    console
+  })
+  vm.runInContext(source.replace(/^import .*\n/gm, '').replace(/^export /gm, ''), context)
+  await context.configureUploadNotifications({ enabled: true, channels: { UCa: { feedTypes: ['videos'] } } })
+  const video = (videoId, extra) => ({ videoId, title: videoId, published: Date.now() - HOUR, ...extra })
+  const knownCollaboration = video('known-collaboration', { isCollaboration: true })
+
+  context.reportSubscriptionUploads('UCa', 'videos', [video('known-upload'), knownCollaboration])
+  context.reportSubscriptionUploads('UCa', 'videos', [video('known-upload'), video('new-collaboration', { isCollaboration: true }), knownCollaboration])
+  getters.getIncludeSubscriptionCollaborations = false
+  context.reportSubscriptionUploads('UCa', 'videos', [video('known-upload'), video('hidden-collaboration', { isCollaboration: true }), knownCollaboration])
+  await new Promise(resolve => setImmediate(resolve))
+  assert.deepEqual(notified, ['new-collaboration'])
 })
 
 test('refreshes of another profile also fetch channels with notifications turned on', async () => {

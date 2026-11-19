@@ -289,7 +289,7 @@ Subscriptions:
     Followed Channels: Sekvataj kanaloj en aliaj platformoj
     Description: Sekvu kanalojn en Twitch, SoundCloud, PeerTube, Rumble, Odysee kaj media.ccc.de por vidi iliajn alŝutaĵojn en la langeto Platformoj de viaj abonoj. Trovu kanalojn per la serĉo, aŭ aldonu ilin per la adreso de ilia paĝo. Iliaj aŭdvidaĵoj ludiĝas per yt-dlp.
     Add Channel: Aldoni kanalon
-    Channel URL: Adreso de kanalo
+    Search Or Paste Channel: Serĉu aŭ algluu adreson de kanalo
     Invalid Channel: Enigu la adreson de kanala paĝo en Twitch, SoundCloud, PeerTube, Rumble, Odysee aŭ media.ccc.de.
     Channel Not Found: Ne estas kanalo ĉe ĉi tiu adreso.
     Channel Already Followed: Vi jam sekvas ĉi tiun kanalon.
@@ -460,7 +460,6 @@ Settings:
     Tabs to unload: Langetoj malŝargotaj
     Automatic unloading help: Malŝargi la plej malnovajn fonajn langetojn por liberigi memoron. Aktivaj kaj ludantaj langetoj restas ŝargitaj.
     Memory threshold help: Procento de la memorlimo de la bildigilo, ne de la tuta sistema RAM.
-  Navigation and Controls: Navigado kaj regiloj
   Interface Customizer:
     Customize Interface: Personecigi interfacon
     Preview: Antaŭrigardo
@@ -775,7 +774,11 @@ Settings:
       Bundled Fonts: Kunpakitaj tiparoj
       System Fonts: Sistemaj tiparoj
     Always Show Scrollbars: Ĉiam montri rulumbretojn
-    Compact Settings Categories: Kompaktaj agordaj kategorioj
+    UI Density:
+      UI Density: "Denseco de la interfaco"
+      Compact: "Kompakta"
+      Default: "Defaŭlta"
+      Comfortable: "Komforta"
     Base Theme:
       Material Light: Material luma
       Material Dark: Material malluma
@@ -1091,6 +1094,7 @@ Settings:
     Channel Settings: Kanalaj agordoj
     Channel Settings Description: Memori la agordojn, kiujn vi elektas dum spektado, aparte por ĉiu kanalo, por ke ili estu reaplikitaj la venontan fojon, kiam vi spektos unu el ĝiaj videaĵoj.
     Enable Channel Playback Settings: Ŝalti kanalajn ludagordojn
+    Auto Save Changes: Aŭtomate konservi ŝanĝojn
     Auto Save Playback Speed: Aŭtomate konservi ŝanĝojn de ludrapido
     Auto Save Video Quality: Aŭtomate konservi ŝanĝojn de videokvalito
     Auto Save Subtitles State: Aŭtomate konservi ŝanĝojn de subteksta stato
@@ -1340,6 +1344,7 @@ Settings:
     Notify About New Uploads: Sciigi pri novaj alŝutoj
     RSS Feeds Auto Refresh Interval: Intervalo de aŭtomata aktualigo de RSS-fluoj
     Faster Subscription Refresh: "Pli rapida aktualigo de abonoj"
+    Show Collaborations From Other Channels: "Inkluzivi kunlaboraĵojn alŝutitajn de aliaj kanaloj"
     Platforms:
       Other Platforms: Aliaj platformoj
       Manage Channels: Administri sekvatajn kanalojn
@@ -2269,6 +2274,7 @@ Context Menu:
   Search With Multiple: Serĉi per...
   Selection Too Long: La elekto estas tro longa por serĉi (> {count} signoj)
   Background Tab: Fona langeto
+  Open in an Incognito Tab: Malfermi en inkognita langeto
 Tab Organizer:
   Tab History: Langeta historio
   Current Page: Aktuala paĝo
@@ -2353,6 +2359,7 @@ Comments:
   Filter loaded comments: Filtri ŝargitajn komentojn
   Comment filters: Komentaj filtriloj
   From creator: De la kreinto
+  From you: De vi
   Contains timestamps: Enhavas tempindikojn
   Pin comment by author: Alpingli komenton de {author}
   Unpin comment by author: Malalpingli komenton de {author}
@@ -2501,6 +2508,7 @@ Tooltips:
     Notify About New Uploads: Montras sistemajn sciigojn en ĉi tiu aparato por kanaloj, kies sciigojn vi ŝaltis en iliaj abonaj agordoj. OpenTubeX kontrolas novan enhavon kiam abonoj aktualiĝas, do elektu intervalon de aŭtomata aktualigo. Por esti sciigita dum la aplikaĵo estas fermita, ankaŭ ŝaltu aktualigadon dum la aplikaĵo estas fermita.
     RSS Feeds Auto Refresh Interval: Kiom ofte OpenTubeX aŭtomate aktualigas viajn RSS-fluojn dum la aplikaĵo estas malfermita.
     Faster Subscription Refresh: "Unue kontrolas la RSS-fluon de ĉiu kanalo kaj ŝargas videojn, Shorts kaj rektajn elsendojn nur de kanaloj kun novaj alŝutoj. Aŭtomataj aktualigoj ankaŭ preterlasas kanalojn ŝargitajn en la lastaj 10 minutoj. Por kanaloj sen novaj alŝutoj, spektokvantoj, forigitaj videoj kaj ŝanĝitaj titoloj ĝisdatiĝas nur ĉiujn kelkajn horojn, kaj novaj alŝutoj eble aperos poste, kiam la RSS-fluo malfruas. Ne disponebla kun la Invidious-API."
+    Show Collaborations From Other Channels: "Ankaŭ montras videojn, kiujn kanaloj abonitaj de vi faris kune kun alia kanalo, kiu alŝutis ilin. YouTube listigas ilin nur en la langeto Hejmo de kanalo, do ĉiu aktualigo de videoj ŝargas unu plian paĝon por ĉiu kanalo. Troviĝas nur la plej novaj kunlaboraĵoj montritaj tie, kelkaj kanaloj montras neniun, kaj iliaj publikigaj datoj estas proksimumaj. Ne disponebla kun la API de Invidious."
     Platforms Auto Refresh Interval: Kiom ofte OpenTubeX aŭtomate aktualigas la kanalojn, kiujn vi sekvas en aliaj platformoj, dum la aplikaĵo estas malfermita.
     Twitch Notify When Live: Sciigas vin kiam unu el viaj sekvataj Twitch-kanaloj komencas elsendi. OpenTubeX kontrolas ĉiujn kelkajn minutojn dum ĝi estas malfermita, kaj ankaŭ dum ĝi estas fermita, se ĝi tiam aktualigas abonojn.
   Theme Settings:
@@ -2514,7 +2522,7 @@ Tooltips:
     Use Fixed Tab Width: Donas al ĉiu langeto en la horizontala langetobreto la saman larĝon anstataŭ grandigi ilin laŭ ilia titolo.
     Use Custom Title Bar: Anstataŭigas la sisteman titolbreton per la langetobreto, aŭ per la supra navigado kiam langetoj ne estas supre, por ŝpari vertikalan spacon. La fenestraj regiloj aperas en la angulo de tiu breto.
     Use Grid Player Menu: Aranĝas la agordan menuon de la videaĵa ludilo kiel kradon de kaheloj anstataŭ listo de vicoj.
-    Compact Settings Categories: "Malpliigas la altecon de agordaj kategorioj."
+    UI Density: "Ŝanĝas la interspacojn en listoj, menuoj, la flanka breto kaj Agordoj."
     Modal Backdrop: "Agordas, kiel la aplikaĵo aspektas malantaŭ dialogoj kaj menuoj. Malklarigo povas esti malrapida en malpli potencaj aparatoj."
     Click Scrollbar Track to Scroll: "Klako sur rulumskalo ekster ĝia tenilo rulumas proksimume unu paĝon al la direkto de la klako. Dum ĉi tio estas ŝaltita, videbla rulumskalo kaptas klakojn celitajn al eroj sub ĝi. La rulumskalo de la langeta breto ĉiam funkcias tiel."
   SponsorBlock Settings:
@@ -2572,6 +2580,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Langeta ŝanĝilo
   Undo Seek: Malfari la lastan salton
   Redo Seek: Refari malfaritan salton
+  New Incognito Tab: Krei novan inkognitan langeton
 CommandPalette:
   Title: Komanda paletro
   Open: Malfermi komandan paletron
@@ -2896,3 +2905,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Serĉi en Twitch"
+New Incognito Tab: Nova inkognita langeto
+Incognito Tab: Inkognita langeto

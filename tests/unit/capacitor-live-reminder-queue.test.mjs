@@ -27,7 +27,10 @@ const LocalNotifications = {
 process.env.IS_CAPACITOR = 'true'
 const [{ liveReminder }] = await importWithStubs(
   [sourceUrl('src/renderer/helpers/liveReminders.js')],
-  { '@capacitor/local-notifications': { LocalNotifications } }
+  {
+    '@capacitor/local-notifications': { LocalNotifications },
+    [sourceUrl('src/renderer/helpers/androidBackgroundSync.js')]: { isAndroidBackgroundRenderer: false, suppressAndroidNotifications: async () => {} },
+  }
 )
 
 const reminder = (videoId, startTimestamp = Date.now() + 60_000) => ({

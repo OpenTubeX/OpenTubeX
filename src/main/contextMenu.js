@@ -30,6 +30,7 @@ const sharedContextMenuLabelKeys = {
   Cut: 'Cut',
   Green: 'Settings.Theme Settings.Main Color Theme.Green',
   'Mark All as Seen': 'Subscriptions.Mark All as Seen',
+  'New Incognito Tab': 'New Incognito Tab',
   'New Tab': 'New Tab',
   'New Window': 'New Window',
   Orange: 'Settings.Theme Settings.Main Color Theme.Orange',
@@ -712,10 +713,19 @@ export function setupContextMenu(contextMenuOptions, { createWindow, confirmClos
         }
       },
       {
+        label: contextMenuLabel('New Incognito Tab'),
+        visible: isTabBarContextMenu && contextMenuTab == null,
+        click: () => {
+          manager?.createTabWithPreference({ makeActive: true, isIncognito: true }).catch(error => {
+            console.error('Failed to create an incognito tab from the tab bar context menu:', error)
+          })
+        }
+      },
+      {
         label: contextMenuLabel('New Window'),
         visible: isTabBarContextMenu && contextMenuTab == null,
         click: () => {
-          createWindow({ replaceMainWindow: false }).catch(error => {
+          createWindow({ replaceMainWindow: false, incognito: manager?.isPresentingIncognito() === true }).catch(error => {
             console.error('Failed to create a new window from the tab bar context menu:', error)
           })
         }

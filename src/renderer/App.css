@@ -222,6 +222,8 @@
 
 .mobileLinkActionsScroll {
   min-block-size: 0;
+  margin-inline: -16px;
+  padding-inline: 16px;
   overflow-y: auto;
   overscroll-behavior: contain;
 }
@@ -692,6 +694,8 @@
   block-size: 40vh;
   display: block;
   margin-block-end: 16px;
+  margin-inline: calc(-1 * var(--prompt-padding-inline));
+  padding-inline: var(--prompt-padding-inline);
   overflow-wrap: break-word;
 }
 
@@ -1290,9 +1294,10 @@
   z-index: 100;
 }
 
-.app.capacitorTabs :deep(.ftVideoPlayer[data-inline-mini-drag] .shaka-controls-container) {
+.app.capacitorTabs :deep(.ftVideoPlayer[data-inline-mini-drag] :is(.shaka-controls-container, .shortsTopControls)) {
   opacity: 0;
   pointer-events: none;
+  transition: none;
 }
 
 

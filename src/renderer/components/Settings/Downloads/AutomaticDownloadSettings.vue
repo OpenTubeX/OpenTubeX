@@ -402,13 +402,17 @@ function displayNumber(value) {
 .automaticDownloadsScroller {
   min-block-size: 0;
   flex: 1;
-  padding-inline: 20px;
+
+  /* Reach through the subpage's padding so the scrollbar sits at the window's edge. */
+  margin-inline: calc(-1 * var(--settings-subpage-padding));
+  padding-inline: calc(20px + var(--settings-subpage-padding));
 }
 
 .channelRules {
   display: grid;
   gap: 16px;
-  padding: 0 0 24px;
+  padding-block: 0 24px;
+  padding-inline: 0;
   margin: 0;
   list-style: none;
 }

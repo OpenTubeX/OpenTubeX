@@ -21,10 +21,10 @@
         :class="{ unread: !entry.read }"
       >
         <component
-          :is="opensTabs ? RouterLink : 'button'"
-          :type="opensTabs ? null : 'button'"
-          :to="opensTabs ? { path: entry.path, query: entry.query } : null"
-          :data-tab-title="opensTabs ? getTabTitle(entry) : null"
+          :is="opensTab(entry) ? RouterLink : 'button'"
+          :type="opensTab(entry) ? null : 'button'"
+          :to="opensTab(entry) ? { path: entry.path, query: entry.query } : null"
+          :data-tab-title="opensTab(entry) ? getNotificationTabTitle(entry) : null"
           class="notificationEntry"
           @click.capture="handleClick(entry, $event)"
           @auxclick="handleAuxClick(entry, $event)"
@@ -58,6 +58,8 @@
             <span
               class="notificationBody"
               dir="auto"
+              :title="entry.body"
+              data-title-tooltip-truncated
             >{{ entry.body }}</span>
             <time
               :datetime="new Date(entry.createdAt).toISOString()"
@@ -118,7 +120,8 @@ import store from '../../store/index'
 
 import { finishTransition } from '../../helpers/animationSpeed'
 import { getRelativeTimeFromDate, openInternalPath } from '../../helpers/utils'
-import { NOTIFICATION_KIND_ICONS } from '../../helpers/notificationHistory'
+import { getNotificationTabTitle, NOTIFICATION_KIND_ICONS } from '../../helpers/notificationHistory'
+import { VIEW_NOTIFICATION_PATHS } from '../../../notificationHistory'
 
 defineProps({
   /** @type {import('vue').PropType<import('../../../notificationHistory').NotificationHistoryEntry[]>} */
@@ -131,8 +134,14 @@ const { locale, t } = useI18n()
 const showThumbnails = computed(() => store.getters.getThumbnailPreference !== 'hidden')
 const blurThumbnails = computed(() => store.getters.getBlurThumbnails)
 
-// The desktop app opens middle clicks on internal links in background tabs.
-const opensTabs = !!process.env.IS_ELECTRON
+/**
+ * The desktop app opens middle clicks on internal links in background tabs.
+ * Entries that lead to a view of the app, like the downloads, have no page to open.
+ * @param {import('../../../notificationHistory').NotificationHistoryEntry} entry
+ */
+function opensTab(entry) {
+  return !!process.env.IS_ELECTRON && !VIEW_NOTIFICATION_PATHS.includes(entry.path)
+}
 
 /**
  * Keeps dismissed notifications out of reach while they animate away.
@@ -140,18 +149,6 @@ const opensTabs = !!process.env.IS_ELECTRON
  */
 function makeInert(element) {
   element.inert = true
-}
-
-// These notifications show the title of what they lead to as their body.
-const BODY_IS_TITLE_KINDS = new Set(['video', 'short', 'live'])
-
-/**
- * The title for a tab opened from the entry, which keeps it while unloaded.
- * @param {import('../../../notificationHistory').NotificationHistoryEntry} entry
- * @returns {string | undefined}
- */
-function getTabTitle(entry) {
-  return BODY_IS_TITLE_KINDS.has(entry.kind) ? entry.body || undefined : undefined
 }
 
 /**
@@ -162,11 +159,11 @@ function getTabTitle(entry) {
  */
 function handleClick(entry, event) {
   const ctrlOrCmdPressed = process.platform === 'darwin' ? event.metaKey : event.ctrlKey
-  if (opensTabs && ctrlOrCmdPressed && !event.altKey) {
+  if (opensTab(entry) && ctrlOrCmdPressed && !event.altKey) {
     event.preventDefault()
     // Like plain clicks, but a new window leaves this one's settings open.
     if (!event.shiftKey) store.dispatch('hideSettingsWindow')
-    openInternalPath({ path: entry.path, query: entry.query, title: getTabTitle(entry), doCreateNewWindow: event.shiftKey, doCreateNewTab: !event.shiftKey })
+    openInternalPath({ path: entry.path, query: entry.query, title: getNotificationTabTitle(entry), doCreateNewWindow: event.shiftKey, doCreateNewTab: !event.shiftKey })
     emit('opened-in-tab', entry, event)
     return
   }
@@ -179,7 +176,7 @@ function handleClick(entry, event) {
  * @param {MouseEvent} event
  */
 function handleAuxClick(entry, event) {
-  if (opensTabs && event.button === 1) emit('opened-in-tab', entry, event)
+  if (opensTab(entry) && event.button === 1) emit('opened-in-tab', entry, event)
 }
 </script>
 

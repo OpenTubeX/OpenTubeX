@@ -31,24 +31,26 @@
         />
       </div>
       <div
-        v-if="showSearchAndSort || selectedPlatform !== 'youtube'"
+        v-if="showSearchAndSort || canFollowByAddress"
         class="controls"
       >
-        <div
-          v-if="selectedPlatform !== 'youtube'"
-          class="channelInput"
-        >
+        <!-- Searches the list, and follows the channel at a pasted address -->
+        <div class="channelSearch">
           <ft-input
-            ref="channelInput"
-            :label="$t('Subscriptions.Platforms.Add Channel')"
-            :placeholder="$t('Subscriptions.Platforms.Channel URL')"
-            :icon="['fas', 'link']"
-            :show-label="true"
-            :show-action-button="true"
+            ref="searchBarChannels"
+            input-type="search"
+            :label="$t('Channels.Search bar placeholder')"
+            :icon="['fas', 'search']"
+            :placeholder="canFollowByAddress ? $t('Subscriptions.Platforms.Search Or Paste Channel') : $t('Form Inputs.Search Text Hint')"
+            :value="query"
+            :show-action-button="canFollowByAddress && queryIsAddress"
             :action-button-label="$t('Subscriptions.Platforms.Add Channel')"
             :force-action-button-icon-name="['fas', 'plus']"
             :disabled="isAdding"
-            @click="addChannel"
+            :maxlength="canFollowByAddress ? null : 255"
+            @input="handleQueryChange"
+            @click="submitQuery"
+            @paste="markQueryPasted"
           />
           <div
             v-if="isAdding"
@@ -57,19 +59,6 @@
             :aria-label="$t('Subscriptions.Platforms.Add Channel')"
           />
         </div>
-        <ft-input
-          v-if="showSearchAndSort"
-          ref="searchBarChannels"
-          class="channelSearch"
-          input-type="search"
-          :label="$t('Channels.Search bar placeholder')"
-          :icon="['fas', 'search']"
-          :placeholder="$t('Form Inputs.Search Text Hint')"
-          :value="query"
-          :show-action-button="false"
-          :maxlength="255"
-          @input="handleQueryChange"
-        />
         <FtSelect
           v-if="showSearchAndSort"
           class="controlSelect"
@@ -343,7 +332,12 @@ const selectedPlatform = computed(() => {
  */
 function changePlatform(platform) {
   localStorage.setItem(CHANNELS_PLATFORM_STORAGE_KEY, platform)
-  router.replace({ name: 'subscribedChannels', query: { ...route.query, platform } })
+  // From the current text, as a replace for clearing it can still be pending
+  const { searchQueryText: _, ...otherQuery } = route.query
+  router.replace({
+    name: 'subscribedChannels',
+    query: { ...otherQuery, platform, ...(query.value === '' ? {} : { searchQueryText: query.value }) }
+  })
 }
 
 const SORT_BY_VALUES = Object.values(SORT_BY_OPTIONS)
@@ -455,9 +449,14 @@ const activeChannelEntries = computed(() => {
 
 const showSearchAndSort = computed(() => activeChannelEntries.value.length > 1 || query.value !== '')
 
+// Channels on other platforms are followed by the address of their page
+const canFollowByAddress = computed(() => selectedPlatform.value !== 'youtube')
+// Channel names never start like this, so the text isn't searched for
+const queryIsAddress = computed(() => /^https?:\/\//i.test(query.value.trim()))
+
 /** @type {import('vue').ComputedRef<ChannelEntry[]>} */
 const channelList = computed(() => {
-  if (query.value === '') {
+  if (query.value === '' || (canFollowByAddress.value && queryIsAddress.value)) {
     return activeChannelEntries.value
   }
 
@@ -731,7 +730,15 @@ function updateThumbnail(channel) {
 }
 
 const isAdding = ref(false)
-const channelInput = useTemplateRef('channelInput')
+/** Set by a paste, so that the input it causes follows a pasted address */
+let queryPasted = false
+
+function markQueryPasted() {
+  queryPasted = true
+  // A paste that leaves the text unchanged causes no input
+  setTimeout(() => { queryPasted = false })
+}
+
 let isUnmounted = false
 
 /**
@@ -756,7 +763,7 @@ async function addChannel(text) {
       showError(t('Subscriptions.Platforms.Channel Already Followed'))
     } else if (!isUnmounted) {
       // The follow is saved either way, but the page must not navigate after it's left
-      channelInput.value?.clear()
+      handleQueryChange('')
       // Shows the new channel when it's on another platform than the selected one
       if (selectedPlatform.value !== 'all' && selectedPlatform.value !== result.channel.platform) {
         changePlatform(result.channel.platform)
@@ -776,6 +783,19 @@ function handleQueryChange(val) {
   query.value = val
 
   saveStateInRouter(val)
+
+  const pasted = queryPasted
+  queryPasted = false
+  if (pasted && canFollowByAddress.value && queryIsAddress.value) addChannel(val)
+}
+
+/**
+ * Enter and the action button follow the channel at an address, the list is
+ * searched while typing.
+ * @param {string} text
+ */
+function submitQuery(text) {
+  if (canFollowByAddress.value && queryIsAddress.value) addChannel(text)
 }
 
 async function saveStateInRouter(query) {

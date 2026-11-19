@@ -281,7 +281,7 @@ Subscriptions:
     Followed Channels: 다른 플랫폼에서 팔로우한 채널
     Description: Twitch, SoundCloud, PeerTube, Rumble, Odysee, media.ccc.de의 채널을 팔로우하면 구독의 플랫폼 탭에서 업로드를 볼 수 있습니다. 검색으로 채널을 찾거나 채널 페이지 주소로 추가하세요. 미디어는 yt-dlp로 재생됩니다.
     Add Channel: 채널 추가
-    Channel URL: 채널 주소
+    Search Or Paste Channel: 검색하거나 채널 주소 붙여넣기
     Invalid Channel: Twitch, SoundCloud, PeerTube, Rumble, Odysee 또는 media.ccc.de의 채널 페이지 주소를 입력하세요.
     Channel Not Found: 이 주소에 채널이 없습니다.
     Channel Already Followed: 이미 이 채널을 팔로우하고 있습니다.
@@ -528,7 +528,6 @@ Settings:
     Failed to Save Password: "비밀번호를 저장하지 못했습니다."
     Confirm Password: "비밀번호 확인"
     Passwords Do Not Match: "비밀번호가 일치하지 않습니다."
-  Navigation and Controls: "탐색 및 컨트롤"
   Control Bar:
     Title: "컨트롤 바"
     Customize: "컨트롤 바 사용자 지정"
@@ -782,7 +781,11 @@ Settings:
       Tab Loading Indicator: 탭 로딩 표시
       Bar: 막대
       Dot: 점 (클래식)
-    Compact Settings Categories: "설정 카테고리 간결하게 표시"
+    UI Density:
+      UI Density: "UI 밀도"
+      Compact: "좁게"
+      Default: "기본"
+      Comfortable: "넓게"
     Playlist Thumbnail Size: "재생목록 썸네일 크기"
     Compact Mobile Mini Player: "간결한 모바일 미니 플레이어"
     Always Show Mobile Search Bar: "모바일 검색창 항상 표시"
@@ -1230,6 +1233,7 @@ Settings:
     Channel Settings: 채널 설정
     Channel Settings Description: 채널마다 시청 중 선택한 설정을 기억하고, 다음에 해당 채널의 동영상을 시청할 때 다시 적용합니다.
     Enable Channel Playback Settings: 채널별 재생 설정 사용
+    Auto Save Changes: 변경 사항 자동 저장
     Auto Save Playback Speed: 재생 속도 변경 사항 자동 저장
     Auto Save Video Quality: 동영상 화질 변경 사항 자동 저장
     Auto Save Subtitles State: 자막 상태 변경 사항 자동 저장
@@ -1498,6 +1502,7 @@ Settings:
     Confirm Before Unsubscribing: 구독 취소 전 확인
     RSS Feeds Auto Refresh Interval: RSS 피드 자동 새로 고침 간격
     Faster Subscription Refresh: "더 빠른 구독 새로 고침"
+    Show Collaborations From Other Channels: "다른 채널이 업로드한 콜라보 포함"
     Platforms:
       Other Platforms: 다른 플랫폼
       Manage Channels: 팔로우한 채널 관리
@@ -2595,6 +2600,7 @@ Context Menu:
   Search With Multiple: 검색 엔진 선택...
   Selection Too Long: 선택한 텍스트가 너무 길어 검색할 수 없습니다. {count}자 이하여야 합니다
   Background Tab: 백그라운드 탭
+  Open in an Incognito Tab: 시크릿 탭에서 열기
 Tab Organizer:
   Tab History: "탭 기록"
   Current Page: "현재 페이지"
@@ -2685,6 +2691,7 @@ Comments:
   Filter loaded comments: 불러온 댓글 필터링
   Comment filters: 댓글 필터
   From creator: 크리에이터 작성
+  From you: 내 댓글
   Contains timestamps: 타임스탬프 포함
   Pin comment by author: '{author}의 댓글 고정'
   Unpin comment by author: '{author}의 댓글 고정 해제'
@@ -2842,6 +2849,7 @@ Tooltips:
     Notify About New Uploads: 구독 설정에서 알림을 켠 채널에 대해 이 기기에 시스템 알림을 표시합니다. OpenTubeX는 구독을 새로 고칠 때 새 콘텐츠를 확인하므로 자동 새로 고침 간격을 선택하세요. 앱이 닫혀 있을 때도 알림을 받으려면 앱이 닫혀 있을 때 새로 고침도 사용하도록 설정하세요.
     RSS Feeds Auto Refresh Interval: 앱이 열려 있는 동안 OpenTubeX가 RSS 피드를 자동으로 새로 고치는 빈도입니다.
     Faster Subscription Refresh: "먼저 각 채널의 RSS 피드를 확인하고 새 업로드가 있는 채널의 동영상, Shorts, 라이브 스트림만 불러옵니다. 자동 새로 고침은 지난 10분 이내에 불러온 채널도 건너뜁니다. 새 업로드가 없는 채널은 조회수, 삭제된 동영상, 변경된 제목이 몇 시간마다만 업데이트되며, RSS 피드가 늦어지면 새 업로드가 늦게 표시될 수 있습니다. Invidious API에서는 사용할 수 없습니다."
+    Show Collaborations From Other Channels: "구독한 채널이 해당 동영상을 업로드한 다른 채널과 함께 만든 동영상도 표시합니다. YouTube는 이러한 동영상을 채널의 홈 탭에만 표시하므로 동영상을 새로고침할 때마다 채널당 한 페이지를 더 불러옵니다. 그곳에 표시되는 최신 콜라보만 찾을 수 있고, 일부 채널은 아무것도 표시하지 않으며, 게시 날짜는 대략적입니다. Invidious API에서는 사용할 수 없습니다."
     Platforms Auto Refresh Interval: 앱이 열려 있는 동안 OpenTubeX가 다른 플랫폼에서 팔로우한 채널을 자동으로 새로 고치는 빈도입니다.
     Twitch Notify When Live: 팔로우한 Twitch 채널 중 하나가 방송을 시작하면 알려 줍니다. OpenTubeX는 열려 있는 동안 몇 분마다 확인하며, 닫혀 있는 동안에도 그때 구독을 새로 고치면 확인합니다.
   Theme Settings:
@@ -2849,7 +2857,7 @@ Tooltips:
     Visible Search Suggestions: "검색창 목록이 스크롤되기 전에 표시할 검색 기록 항목과 추천 검색어의 수를 설정합니다. 목록은 창 아래쪽 가장자리를 넘어가지 않습니다."
     Thumbnail Size: "그리드와 목록에서 동영상 썸네일 크기를 조정합니다. 열 수가 고정된 그리드나 전체 너비 보기 유형은 대신 각 행을 채우므로, 여기서는 목록 썸네일과 Shorts만 변경됩니다. 휴대전화 크기의 창에서는 그리드 썸네일이 100%로 제한됩니다."
     Playlist Thumbnail Size: "재생목록 페이지에서 동영상 썸네일 크기를 조정합니다. 열 수가 고정된 그리드나 전체 너비 보기 유형은 대신 각 행을 채우므로, 여기서는 목록 썸네일과 Shorts만 변경됩니다. 휴대전화 크기의 창에서는 그리드 썸네일이 100%로 제한됩니다."
-    Compact Settings Categories: "설정 카테고리의 높이를 줄입니다."
+    UI Density: "목록, 메뉴, 사이드바, 설정의 간격을 변경합니다."
     Show Progress as Notification: 전체 진행률 표시줄 대신 구독 새로 고침 및 관리되는 도구 다운로드 같은 백그라운드 작업의 실시간 진행률을 지속 알림으로 표시합니다.
     Always Show Scrollbars: 스크롤바를 항상 표시합니다. 비활성화하면 마우스 움직임을 멈춘 직후 서서히 사라지고 다시 움직이면 즉시 나타납니다.
     Scroll Speed: 마우스 휠 및 터치패드 휠 동작의 스크롤 거리를 변경합니다.
@@ -2974,6 +2982,7 @@ KeyboardShortcutPrompt:
   Skip to Previous Video: 재생목록의 이전 동영상으로 건너뛰기
   Undo Seek: 마지막 탐색 실행 취소
   Redo Seek: 실행 취소한 탐색 다시 실행
+  New Incognito Tab: 새 시크릿 탭 만들기
 CommandPalette:
   Title: 명령 팔레트
   Open: 명령 팔레트 열기
@@ -3353,3 +3362,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Twitch 검색"
+New Incognito Tab: 새 시크릿 탭
+Incognito Tab: 시크릿 탭

@@ -265,7 +265,7 @@ Subscriptions:
     Followed Channels: Sledované kanály na iných platformách
     Description: Sledujte kanály na platformách Twitch, SoundCloud, PeerTube, Rumble, Odysee a media.ccc.de a ich novo nahraný obsah uvidíte na karte Platformy vo svojich odberoch. Kanály nájdete pomocou vyhľadávania alebo ich pridajte podľa adresy ich stránky. Ich médiá sa prehrávajú pomocou yt-dlp.
     Add Channel: Pridať kanál
-    Channel URL: Adresa kanála
+    Search Or Paste Channel: Hľadajte alebo vložte adresu kanála
     Invalid Channel: Zadajte adresu stránky kanála na platforme Twitch, SoundCloud, PeerTube, Rumble, Odysee alebo media.ccc.de.
     Channel Not Found: Na tejto adrese nie je žiadny kanál.
     Channel Already Followed: Tento kanál už sledujete.
@@ -435,7 +435,6 @@ Settings:
     Failed to Save Password: "Heslo sa nepodarilo uložiť."
     Confirm Password: "Potvrďte heslo"
     Passwords Do Not Match: "Heslá sa nezhodujú."
-  Navigation and Controls: "Navigácia a ovládacie prvky"
   Control Bar:
     Title: "Ovládací panel"
     Customize: "Prispôsobiť ovládací panel"
@@ -682,7 +681,11 @@ Settings:
       Tab Loading Indicator: Indikátor načítavania karty
       Bar: Pruh
       Dot: Bodka (klasická)
-    Compact Settings Categories: "Kompaktné kategórie nastavení"
+    UI Density:
+      UI Density: "Hustota rozhrania"
+      Compact: "Kompaktná"
+      Default: "Predvolená"
+      Comfortable: "Priestranná"
     Playlist Thumbnail Size: "Veľkosť miniatúr zoznamu videí"
     Compact Mobile Mini Player: "Kompaktný mobilný miniprehrávač"
     Always Show Mobile Search Bar: "Vždy zobrazovať vyhľadávací panel na telefóne"
@@ -1051,6 +1054,7 @@ Settings:
     Channel Settings: Nastavenia kanálov
     Channel Settings Description: Nastavenia, ktoré vyberiete pri sledovaní, sa zapamätajú pre každý kanál samostatne a znova sa použijú pri ďalšom sledovaní jeho videa.
     Enable Channel Playback Settings: Povoliť nastavenia prehrávania pre kanály
+    Auto Save Changes: Automaticky ukladať zmeny
     Auto Save Playback Speed: Automaticky ukladať zmeny rýchlosti prehrávania
     Auto Save Video Quality: Automaticky ukladať zmeny kvality videa
     Auto Save Subtitles State: Automaticky ukladať zmeny stavu titulkov
@@ -1300,6 +1304,7 @@ Settings:
     Notify About New Uploads: Oznamovať nový obsah
     RSS Feeds Auto Refresh Interval: Interval automatického obnovenia RSS kanálov
     Faster Subscription Refresh: "Rýchlejšie obnovenie odberov"
+    Show Collaborations From Other Channels: "Zahrnúť spolupráce nahrané inými kanálmi"
     Platforms:
       Other Platforms: Iné platformy
       Manage Channels: Spravovať sledované kanály
@@ -2216,6 +2221,7 @@ Context Menu:
   Search With Multiple: Vyhľadať cez…
   Selection Too Long: Označený text je príliš dlhý na vyhľadanie (> {count} znakov)
   Background Tab: Karta na pozadí
+  Open in an Incognito Tab: Otvoriť na karte inkognito
 Tab Organizer:
   Tab History: "História karty"
   Current Page: "Aktuálna stránka"
@@ -2300,6 +2306,7 @@ Comments:
   Filter loaded comments: Filtrovať načítané komentáre
   Comment filters: Filtre komentárov
   From creator: Od autora
+  From you: Od vás
   Contains timestamps: Obsahuje časové údaje
   Pin comment by author: Pripnúť komentár od autora {author}
   Unpin comment by author: Odopnúť komentár od autora {author}
@@ -2448,6 +2455,7 @@ Tooltips:
     Notify About New Uploads: Zobrazuje na tomto zariadení systémové oznámenia pre kanály, pri ktorých ste v nastaveniach odberu zapli oznámenia. OpenTubeX kontroluje nový obsah pri obnovení odberov, preto zvoľte interval automatického obnovenia. Ak chcete dostávať oznámenia aj pri zatvorenej aplikácii, zapnite aj obnovovanie pri zatvorenej aplikácii.
     RSS Feeds Auto Refresh Interval: Ako často OpenTubeX automaticky obnovuje vaše RSS kanály, kým je aplikácia otvorená.
     Faster Subscription Refresh: "Najprv skontroluje RSS kanál každého kanála a videá, Shorts a živé prenosy načíta len z kanálov s novými nahratými videami. Automatické obnovenia navyše preskočia kanály načítané za posledných 10 minút. Pri kanáloch bez nových videí sa počty zhliadnutí, odstránené videá a zmenené názvy aktualizujú len raz za niekoľko hodín a nové videá sa môžu zobraziť neskôr, keď RSS kanál zaostáva. Nie je k dispozícii s Invidious API."
+    Show Collaborations From Other Channels: "Zobrazuje aj videá, ktoré odoberané kanály natočili spolu s iným kanálom, ktorý ich nahral. YouTube ich uvádza iba na karte Domov kanála, takže každá aktualizácia videí načíta pre každý kanál o jednu stránku viac. Nájdu sa iba najnovšie spolupráce, ktoré sa tam zobrazujú, niektoré kanály žiadne nezobrazujú a ich dátumy zverejnenia sú približné. Nie je k dispozícii s rozhraním Invidious API."
     Platforms Auto Refresh Interval: Ako často OpenTubeX automaticky obnovuje kanály, ktoré sledujete na iných platformách, kým je aplikácia otvorená.
     Twitch Notify When Live: Upozorní vás, keď niektorý z vašich sledovaných kanálov na Twitchi začne vysielať. OpenTubeX kontroluje každých pár minút, keď je otvorený, a tiež keď je zatvorený, ak vtedy aktualizuje odbery.
   Theme Settings:
@@ -2455,7 +2463,7 @@ Tooltips:
     Visible Search Suggestions: "Určuje, koľko položiek histórie vyhľadávania a návrhov zobrazí vyhľadávacie pole, kým sa jeho zoznam začne posúvať. Zoznam nikdy nepresiahne spodný okraj okna."
     Thumbnail Size: "Mení veľkosť miniatúr videí v mriežkach a zoznamoch. Mriežky s pevným počtom stĺpcov alebo zobrazenie Plná šírka namiesto toho vyplnia každý riadok, takže tam mení len miniatúry v zoznamoch a Shorts. V oknách veľkosti telefónu sú miniatúry v mriežke obmedzené na 100 %."
     Playlist Thumbnail Size: "Mení veľkosť miniatúr videí na stránkach playlistov. Mriežky s pevným počtom stĺpcov alebo zobrazenie Plná šírka namiesto toho vyplnia každý riadok, takže tam mení len miniatúry v zoznamoch a Shorts. V oknách veľkosti telefónu sú miniatúry v mriežke obmedzené na 100 %."
-    Compact Settings Categories: "Zmenší výšku kategórií nastavení."
+    UI Density: "Mení rozostupy v zoznamoch, ponukách, bočnom paneli a Nastaveniach."
     Show Progress as Notification: Namiesto globálneho ukazovateľa priebehu zobrazí trvalé oznámenie s aktuálnym priebehom operácií na pozadí, napríklad obnovovania odberov a sťahovania spravovaných nástrojov.
     Always Show Scrollbars: Posúvače zostanú stále viditeľné. Po vypnutí krátko po zastavení pohybu myši zmiznú a pri ďalšom pohybe sa znova zobrazia.
     Scroll Speed: Mení vzdialenosť posúvania gestami kolieska myši a touchpadu.
@@ -2508,6 +2516,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Prepínač kariet
   Undo Seek: Vrátiť späť posledný posun
   Redo Seek: Zopakovať vrátený posun
+  New Incognito Tab: Vytvoriť novú kartu inkognito
 CommandPalette:
   Title: Paleta príkazov
   Open: Otvoriť paletu príkazov
@@ -2895,3 +2904,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Hľadať na Twitchi"
+New Incognito Tab: Nová karta inkognito
+Incognito Tab: Karta inkognito

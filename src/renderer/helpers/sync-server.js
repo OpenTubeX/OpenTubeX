@@ -1751,7 +1751,11 @@ export async function syncSessions(client, store, previous = null, { accountClie
     return null
   }
 
-  const local = await tabs.getSyncSessions()
+  // Windows with only incognito tabs have nothing to share, and other devices cannot apply an empty session.
+  // A device with only those keeps its synced tabs as they were.
+  const allLocal = await tabs.getSyncSessions()
+  const local = allLocal.filter(session => session.tabs.length > 0)
+  if (allLocal.length > 0 && local.length === 0) return null
   const remote = await client.getSessions()
   // After a conflicting upload, merge against the downloaded document, so its
   // changes do not look like local ones. Without one, keep the previous baseline.

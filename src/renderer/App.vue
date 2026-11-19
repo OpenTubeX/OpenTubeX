@@ -693,6 +693,7 @@ import {
   exitAndroidApp,
   getAndroidHardwareKeyboardState,
   isAndroidLauncherReturnInProgress,
+  setAndroidIncognitoKeyboard,
   setAndroidPictureInPictureDocumentState,
   setAndroidSystemBarsBackground,
   whileAndroidGamepadConnected
@@ -738,11 +739,19 @@ import {
   shouldShowProgressStartToast,
   shouldUseProgressToast,
 } from './helpers/progressPresentation'
-import { fetchReleasePages, findUpdateReleases, formatReleaseChangelog, scheduleUpdateChecks } from './helpers/releaseUpdates'
+import { fetchReleasePages, findUpdateReleases, formatReleaseChangelog, isOlderRelease, scheduleUpdateChecks } from './helpers/releaseUpdates'
 import { copyToClipboard, isUnloadedBackgroundTabClick, openExternalLink, openInExternalPlayer, openInternalPath, shareLink, showToast } from './helpers/utils'
 import { getChannelLinkDetails, getChannelLinkMenuItems } from './helpers/channel-context-menu'
 import { initializeCapacitorLiveReminderActions } from './helpers/liveReminders'
-import { showInAppNotification, supportsNotificationHistory } from './helpers/notificationHistory'
+import {
+  getSettingsNotificationTarget,
+  markOverNotificationsRead,
+  recordNotification,
+  setUpdateNotificationHandler,
+  showInAppNotification,
+  supportsNotificationHistory
+} from './helpers/notificationHistory'
+import { getNotificationOpenUrl } from '../notificationHistory'
 import {
   addAndroidMediaSessionActionListener,
   setAndroidMediaButtonsIgnored,
@@ -756,6 +765,7 @@ import { requestSubscriptionFeedRefresh } from './helpers/subscriptionFeedRefres
 import { startTwitchLiveNotifications } from './helpers/platformFeed'
 import { findPlatformChannel, getPlatformChannelRoute } from '../platforms/index'
 import { startCommentReplyNotifications } from './helpers/commentReplyNotifications'
+import { startAndroidNotificationSuppressions } from './helpers/androidNotificationSuppressions'
 import { translateWindowTitle } from './helpers/strings'
 import { normalizeScrollbarThumbWidth } from './constants/scrollbar'
 import { getAppFontFamily } from './helpers/appFont'
@@ -766,6 +776,7 @@ import { usesCapacitorTabletLayout } from './helpers/capacitorLayout'
 import { findSwipeTab, shouldFinishPageSwipe } from './helpers/capacitorPageSwipe'
 import { getTabAccentColor } from './constants/tabColors'
 import { getThumbnailListStyles } from './constants/thumbnailSize'
+import { getUiDensityScale } from './constants/uiDensity'
 import {
   getNextTabBarPosition,
   isVerticalTabBarPosition,
@@ -1071,6 +1082,12 @@ const useWatchSideNavOverlay = computed(() => {
 const sideNavOpenBeforeWatchOverlay = ref(null)
 const watchSideNavTransitionDisabled = ref(false)
 let watchSideNavTransitionFrame = null
+
+if (isCapacitor) {
+  watch(() => store.getters.getTabIncognito(presentedTabId.value), incognito => {
+    setAndroidIncognitoKeyboard(incognito).catch(error => console.warn('Could not update the incognito keyboard', error))
+  }, { immediate: true })
+}
 
 watch(useWatchSideNavOverlay, (enabled) => {
   if (enabled) {
@@ -1655,9 +1672,13 @@ async function initializeManagedExternalSoftware(requestedUpdates = null) {
     } else {
       if (failures.length > 0) {
         const errors = failures.map(({ binary, result }) => `${binary}: ${managedToolErrorMessage(result, t)}`).join('; ')
-        showToast({
-          message: t('Settings.Download Settings.Managed Tools Download Error Template', { errors }),
-          icon: ['fas', 'circle-exclamation'],
+        const message = t('Settings.Download Settings.Managed Tools Download Error Template', { errors })
+        showToast({ message, icon: ['fas', 'circle-exclamation'] })
+        recordNotification({
+          kind: 'tool-update-failed',
+          ...getSettingsNotificationTarget('external-software'),
+          title: t('Settings.External Software Settings.External Software Settings'),
+          body: message
         })
       }
     }
@@ -2101,6 +2122,7 @@ onBeforeUnmount(() => {
   document.documentElement.style.removeProperty('--title-line-limit')
   delete document.documentElement.dataset.linkUnderline
   delete document.documentElement.dataset.modalBackdrop
+  document.documentElement.style.removeProperty('--ui-density')
   removeGamepadNavigation()
   removeCustomThemeListener()
   cancelIdleStartupWork()
@@ -2116,6 +2138,7 @@ onBeforeUnmount(() => {
   platformFeedAutoRefresh.stop()
   stopTwitchLiveNotifications?.()
   stopCommentReplyNotifications?.()
+  stopAndroidNotificationSuppressions?.()
   clearInterval(historyCleanupTimer)
   clearInterval(searchHistoryCleanupTimer)
   stopUpdateChecks?.()
@@ -2254,8 +2277,12 @@ const platformFeedAutoRefresh = usePlatformFeedAutoRefresh(dataReady)
 // Starts once the followed channels and the notification settings have loaded
 let stopTwitchLiveNotifications = null
 let stopCommentReplyNotifications = null
+let stopAndroidNotificationSuppressions = null
 watch(dataReady, (ready) => {
   if (ready && stopTwitchLiveNotifications === null) stopTwitchLiveNotifications = startTwitchLiveNotifications()
+  if (ready && stopAndroidNotificationSuppressions === null) {
+    stopAndroidNotificationSuppressions = startAndroidNotificationSuppressions()
+  }
   if (ready && supportsNotificationHistory && stopCommentReplyNotifications === null) {
     stopCommentReplyNotifications = startCommentReplyNotifications()
   }
@@ -2558,14 +2585,32 @@ function showAvailableUpdateToast() {
         label: t('See changes and update'),
         icon: ['fas', 'file-lines'],
         primary: true,
-        action: () => {
-          updateChangelog.value = renderUpdateChangelog()
-          showReleaseNotes.value = true
-        }
+        action: openAvailableUpdate
       }
     ]
   })
 }
+
+function openAvailableUpdate() {
+  updateChangelog.value = renderUpdateChangelog()
+  showReleaseNotes.value = true
+}
+
+/**
+ * Opens the update a notification announces. A tab that has not found it, for
+ * example because it is installed now or another tab found it, shows the
+ * release on GitHub instead. A newer update's notes include older ones.
+ * @param {string | undefined} tagName
+ */
+function openUpdateNotification(tagName) {
+  if (availableUpdate !== null && !isOlderRelease(availableUpdate.tagName, tagName ?? '')) {
+    store.dispatch('hideSettingsWindow')
+    openAvailableUpdate()
+  } else if (typeof tagName === 'string' && /^v[\w.-]+$/.test(tagName)) {
+    handleExternalLink(`https://github.com/OpenTubeX/OpenTubeX/releases/tag/${tagName}`)
+  }
+}
+setUpdateNotificationHandler(openUpdateNotification)
 
 async function checkForNewUpdates() {
   // Self-hosted servers are updated by their admin
@@ -2580,12 +2625,19 @@ async function checkForNewUpdates() {
     const availableReleases = await fetchReleasePages(releasesUrl, fetch, packageDetails.version)
     const releases = findUpdateReleases(availableReleases, packageDetails.version)
     if (releases.length === 0) {
+      // The announced update is installed. A check that finished late in
+      // another window must not dismiss a newer one it did not see.
+      markOverNotificationsRead(entry => entry.kind === 'app-update' &&
+        !isOlderRelease(packageDetails.version, entry.query?.version ?? ''))
       return
     }
 
     const release = releases[0]
     const tagName = release.tag_name
     const versionNumber = tagName.replace('v', '').replace('-beta', '')
+    // A newer release replaces the one announced before, also when this
+    // window announced it already and an older entry arrived late.
+    markOverNotificationsRead(entry => entry.kind === 'app-update' && isOlderRelease(entry.query?.version ?? '', tagName))
     // The toast for this release is open, was dismissed, or was answered already
     if (
       availableUpdate?.tagName === tagName ||
@@ -2619,6 +2671,13 @@ async function checkForNewUpdates() {
     changeLogTitle.value = t('Update to {version}', { version: release.name ?? tagName })
     availableUpdate = { tagName, versionNumber }
     showAvailableUpdateToast()
+    recordNotification({
+      kind: 'app-update',
+      path: '/update',
+      query: { version: tagName },
+      title: changeLogTitle.value,
+      body: t('Version {versionNumber} is now available.', { versionNumber })
+    })
   } catch (error) {
     console.error('errored while checking for updates', releasesUrl, error)
   }
@@ -2726,6 +2785,10 @@ watch(() => store.getters.getModalBackdrop, value => {
   document.documentElement.dataset.modalBackdrop = value
 }, { flush: 'sync', immediate: true })
 
+watch(() => store.getters.getUiDensity, value => {
+  document.documentElement.style.setProperty('--ui-density', String(getUiDensityScale(value)))
+}, { flush: 'sync', immediate: true })
+
 const phoneLayout = usePhoneLayout()
 const commandPaletteDownloads = computed(previous => {
   const downloads = Object.values(store.getters.getYtDlpDownloads).map(({ id, title, status }) => ({ id, title, status }))
@@ -2817,6 +2880,8 @@ async function playLibraryVideoFromCommandPalette(video, location) {
   }
   const history = store.getters.getHistoryCacheById[video.videoId]
   const saveProgress = ['auto', 'semi-auto'].includes(store.getters.getWatchedProgressSavingMode)
+  // The viewer can switch tabs while the player launches
+  const incognito = store.getters.getTabIncognito(presentedTabId.value)
   tabMediaCoordinator.dispatchAction('pause', {}, presentedTabId.value)
   const opened = await openInExternalPlayer({
     videoId: video.videoId,
@@ -2825,7 +2890,8 @@ async function playLibraryVideoFromCommandPalette(video, location) {
     startTime: saveProgress ? history?.watchProgress ?? 0 : 0,
     playbackRate: store.getters.getDefaultPlayback,
   })
-  if (opened && store.getters.getRememberHistory && canMarkHistoryEntryAsWatched(video)) {
+  if (opened && store.getters.getRememberHistory && !incognito &&
+    canMarkHistoryEntryAsWatched(video)) {
     store.dispatch('updateHistory', {
       ...video,
       ...history,
@@ -3289,6 +3355,12 @@ function handleKeyboardShortcuts(event) {
     if (matchesKeyboardShortcut(event, shortcuts.NEW_TAB)) {
       event.preventDefault()
       store.dispatch('createTab', { makeActive: true })
+      return
+    }
+
+    if (matchesKeyboardShortcut(event, shortcuts.NEW_INCOGNITO_TAB)) {
+      event.preventDefault()
+      store.dispatch('createTab', { makeActive: true, isIncognito: true })
       return
     }
 
@@ -4382,14 +4454,22 @@ async function handleYoutubeLink(href, {
   channelTitle = undefined,
   tabId = null
 } = {}) {
+  // The viewer can switch tabs while the link resolves, so the link stays with the tab it came from
+  const sourceTabId = tabId ?? (navigation ? navigation.getPresentedTabId() : null)
+  const incognito = store.getters.getTabIncognito(sourceTabId)
   const result = await store.dispatch('getYoutubeUrlInfo', tabId ? { url: href, tabId } : href)
   // Middle clicks should open tabs in background (not make them active)
   const makeActive = !isMiddleClick
   const openPath = (options) => {
-    if (isElectron && tabId && !options.doCreateNewWindow && !options.doCreateNewTab) {
-      return navigation.push(tabId, { path: options.path, query: options.query })
+    if (navigation && sourceTabId && !options.doCreateNewWindow && !options.doCreateNewTab) {
+      // A closed source tab opens nothing
+      return navigation.push(sourceTabId, {
+        path: options.path,
+        query: options.query,
+        state: options.title ? { tabTitle: options.title } : undefined
+      })
     }
-    return openInternalPath({ ...options, lazyLoad })
+    return openInternalPath({ ...options, lazyLoad, incognito })
   }
 
   switch (result.urlType) {
@@ -4535,8 +4615,12 @@ function enableOpenUrl() {
   }
 }
 
-function openExternalMedia(url) {
-  return openInternalPath(getExternalUrlRoute(url))
+/**
+ * @param {string} url
+ * @param {boolean} [doCreateNewTab]
+ */
+function openExternalMedia(url, doCreateNewTab = false) {
+  return openInternalPath({ ...getExternalUrlRoute(url), doCreateNewTab })
 }
 
 async function handleAndroidSharedText(text) {
@@ -4573,6 +4657,10 @@ function openSharedYoutubeLink() {
 async function enableCapacitorIntegrations() {
   const openUrl = async url => {
     if (!url) return
+    // Android notifications wrap their link, so it opens in a new tab like the notification list's.
+    const notificationUrl = getNotificationOpenUrl(url)
+    const doCreateNewTab = notificationUrl != null
+    if (doCreateNewTab) url = notificationUrl
     if (isSyncServerOidcCallbackUrl(url)) {
       // The browser stays open over the app on iOS.
       if (Capacitor.getPlatform() === 'ios') Browser.close().catch(() => {})
@@ -4624,9 +4712,14 @@ async function enableCapacitorIntegrations() {
         return handleExternalLink(target)
       }
       await store.dispatch('hideSettingsWindow')
-      return openExternalMedia(target)
+      const opening = openExternalMedia(target, doCreateNewTab)
+      if (!doCreateNewTab) return opening
+      // A new tab is presented once it mounts, and on a cold start tabs mount
+      // only after this setup returns. Like YouTube links, do not wait for it.
+      opening.catch(error => console.error('Failed to open a notification link', error))
+      return
     }
-    return handleYoutubeLink(target)
+    return handleYoutubeLink(target, { doCreateNewTab })
   }
   const backButtonHandle = Capacitor.getPlatform() === 'android'
     ? await CapacitorApp.addListener('backButton', handleAndroidBack)
@@ -4641,7 +4734,20 @@ async function enableCapacitorIntegrations() {
         return null
       })
     : null
+  // The listener also receives the launch URL, which it retains until the app
+  // subscribes. Open it once, since notification links open a new tab each time.
+  let launchUrl = (await CapacitorApp.getLaunchUrl())?.url
+  let retainedLaunchUrl = launchUrl
   const urlHandle = await CapacitorApp.addListener('appUrlOpen', ({ url }) => {
+    if (retainedLaunchUrl && url === retainedLaunchUrl) {
+      retainedLaunchUrl = null
+      return
+    }
+    // A link tapped during the setup below replaces the launch URL it opens at
+    // its end. Sign-in callbacks are not destinations, so they neither replace
+    // the launch URL nor get replaced.
+    if (!isSyncServerOidcCallbackUrl(url) && !isSyncServerOidcCallbackUrl(launchUrl)) launchUrl = null
+    retainedLaunchUrl = null
     openUrl(url)
   })
   const shortcutHandle = await AppShortcuts.addListener('click', async ({ shortcutId }) => {
@@ -4666,7 +4772,7 @@ async function enableCapacitorIntegrations() {
   }, { immediate: true })
   const stopHomeWidgetUpdates = syncHomeWidgets(store, watch)
   const removeReminderActions = await initializeCapacitorLiveReminderActions((videoId) => {
-    handleYoutubeLink(`https://www.youtube.com/watch?v=${videoId}`)
+    handleYoutubeLink(`https://www.youtube.com/watch?v=${videoId}`, { doCreateNewTab: true })
   }, showInAppNotification)
   const removeMediaActions = await addAndroidMediaSessionActionListener(({ action, ...details }) => {
     tabMediaCoordinator.dispatchAction(action, details)
@@ -4721,8 +4827,8 @@ async function enableCapacitorIntegrations() {
     playbackScreenWake?.setAppActive(appState.isActive)
     setAndroidAppVisible(appState.isActive)
   }
-  const launch = await CapacitorApp.getLaunchUrl()
-  await openUrl(launch?.url)
+  retainedLaunchUrl = null
+  await openUrl(launchUrl)
 
   return () => {
     clearTimeout(backgroundStateTimeout)

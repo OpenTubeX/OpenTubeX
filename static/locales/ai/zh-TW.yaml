@@ -265,7 +265,7 @@ Subscriptions:
     Followed Channels: 在其他平台上追隨的頻道
     Description: 追隨 Twitch、SoundCloud、PeerTube、Rumble、Odysee 和 media.ccc.de 上的頻道，即可在訂閱內容的「平台」分頁中查看其上傳內容。您可以透過搜尋尋找頻道，或以頻道頁面的網址新增。其媒體會使用 yt-dlp 播放。
     Add Channel: 新增頻道
-    Channel URL: 頻道網址
+    Search Or Paste Channel: 搜尋或貼上頻道網址
     Invalid Channel: 請輸入 Twitch、SoundCloud、PeerTube、Rumble、Odysee 或 media.ccc.de 上頻道頁面的網址。
     Channel Not Found: 這個網址沒有頻道。
     Channel Already Followed: 您已追隨這個頻道。
@@ -435,7 +435,6 @@ Settings:
     Failed to Save Password: "無法儲存密碼。"
     Confirm Password: "確認密碼"
     Passwords Do Not Match: "密碼不相符。"
-  Navigation and Controls: "導覽與控制項"
   Control Bar:
     Title: "控制列"
     Customize: "自訂控制列"
@@ -682,7 +681,11 @@ Settings:
       Tab Loading Indicator: 分頁載入指示器
       Bar: 進度條
       Dot: 圓點（經典）
-    Compact Settings Categories: "精簡設定類別"
+    UI Density:
+      UI Density: "介面密度"
+      Compact: "緊湊"
+      Default: "預設"
+      Comfortable: "寬鬆"
     Playlist Thumbnail Size: "播放清單縮圖大小"
     Compact Mobile Mini Player: "精簡行動迷你播放器"
     Always Show Mobile Search Bar: "一律顯示行動版搜尋列"
@@ -1051,6 +1054,7 @@ Settings:
     Channel Settings: 頻道設定
     Channel Settings Description: 為各頻道分別記住觀看時選擇的設定，下次觀看該頻道的影片時便會再次套用。
     Enable Channel Playback Settings: 啟用頻道播放設定
+    Auto Save Changes: 自動儲存變更
     Auto Save Playback Speed: 自動儲存播放速度變更
     Auto Save Video Quality: 自動儲存影片畫質變更
     Auto Save Subtitles State: 自動儲存字幕狀態變更
@@ -1300,6 +1304,7 @@ Settings:
     Notify About New Uploads: 新上傳通知
     RSS Feeds Auto Refresh Interval: RSS 摘要自動重新整理間隔
     Faster Subscription Refresh: "更快的訂閱重新整理"
+    Show Collaborations From Other Channels: "包含其他頻道上傳的合作影片"
     Platforms:
       Other Platforms: 其他平台
       Manage Channels: 管理追隨的頻道
@@ -2219,6 +2224,7 @@ Context Menu:
   Search With Multiple: 搜尋工具...
   Selection Too Long: 選取內容過長，無法搜尋（> {count} 個字元）
   Background Tab: 背景分頁
+  Open in an Incognito Tab: 在無痕分頁開啟
 Tab Organizer:
   Tab History: "分頁歷史紀錄"
   Current Page: "目前頁面"
@@ -2303,6 +2309,7 @@ Comments:
   Filter loaded comments: 篩選已載入的留言
   Comment filters: 留言篩選條件
   From creator: 來自創作者
+  From you: 來自您
   Contains timestamps: 包含時間戳記
   Pin comment by author: 將 {author} 的留言置頂
   Unpin comment by author: 取消置頂 {author} 的留言
@@ -2451,6 +2458,7 @@ Tooltips:
     Notify About New Uploads: 在此裝置上為你在訂閱設定中開啟了通知的頻道顯示系統通知。OpenTubeX 會在重新整理訂閱時檢查新內容，因此請選擇自動重新整理間隔。若要在應用程式關閉時也收到通知，請同時啟用應用程式關閉時重新整理訂閱。
     RSS Feeds Auto Refresh Interval: 應用程式開啟時 OpenTubeX 自動重新整理 RSS 摘要的頻率。
     Faster Subscription Refresh: "先檢查每個頻道的 RSS 資訊提供，只載入有新上傳內容的頻道的影片、Shorts 和直播。自動重新整理也會略過過去 10 分鐘內載入過的頻道。對於沒有新上傳內容的頻道，觀看次數、已移除的影片和變更的標題每隔幾小時才會更新一次，而且當 RSS 資訊提供延遲時，新上傳的內容可能會較晚出現。使用 Invidious API 時無法使用。"
+    Show Collaborations From Other Channels: "同時顯示你訂閱的頻道與上傳這些影片的其他頻道合作製作的影片。YouTube 只在頻道的首頁分頁中列出這些影片，因此每次重新整理影片都會為每個頻道多載入一個頁面。只能找到那裡顯示的最新合作影片，有些頻道不會顯示任何合作影片，且其發布日期為大略時間。使用 Invidious API 時無法使用。"
     Platforms Auto Refresh Interval: 應用程式開啟時 OpenTubeX 自動重新整理您在其他平台上追隨的頻道的頻率。
     Twitch Notify When Live: 你追隨的某個 Twitch 頻道開始直播時通知你。OpenTubeX 開啟時每隔幾分鐘檢查一次；關閉時若仍會重新整理訂閱內容，也會檢查。
   Theme Settings:
@@ -2458,7 +2466,7 @@ Tooltips:
     Visible Search Suggestions: "設定搜尋列在清單需要捲動之前顯示的搜尋紀錄和建議數量。清單絕不會超出視窗底部。"
     Thumbnail Size: "縮放網格和清單中的影片縮圖。欄數固定的網格或「全寬」檢視會改為填滿每一列，因此在這些情況下只會改變清單縮圖和 Shorts。在手機大小的視窗中，網格縮圖最大為 100%。"
     Playlist Thumbnail Size: "縮放播放清單頁面中的影片縮圖。欄數固定的網格或「全寬」檢視會改為填滿每一列，因此在這些情況下只會改變清單縮圖和 Shorts。在手機大小的視窗中，網格縮圖最大為 100%。"
-    Compact Settings Categories: "縮小設定類別的高度。"
+    UI Density: "變更清單、選單、側邊欄和設定中的間距。"
     Show Progress as Notification: 以持續顯示的通知呈現背景作業的即時進度（例如重新整理訂閱與下載受管理工具），而不使用全域進度列。
     Always Show Scrollbars: 讓捲動軸隨時保持顯示。停用後，停止移動滑鼠不久便會淡出，再次移動滑鼠時則會立即顯示。
     Scroll Speed: 變更滑鼠滾輪和觸控板滾輪手勢的捲動距離。
@@ -2511,6 +2519,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: 分頁切換器
   Undo Seek: 復原上一次跳轉
   Redo Seek: 重做已復原的跳轉
+  New Incognito Tab: 建立新的無痕分頁
 CommandPalette:
   Title: 命令選擇區
   Open: 開啟命令選擇區
@@ -2898,3 +2907,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "搜尋 Twitch"
+New Incognito Tab: 新增無痕分頁
+Incognito Tab: 無痕分頁

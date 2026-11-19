@@ -265,7 +265,7 @@ Subscriptions:
     Followed Channels: Követett csatornák más platformokon
     Description: Kövessen csatornákat a Twitch, SoundCloud, PeerTube, Rumble, Odysee és media.ccc.de platformon, hogy feltöltéseiket a feliratkozásai Platformok lapján lássa. Keressen csatornákat a keresővel, vagy adja hozzá őket az oldaluk címével. Médiatartalmaik a yt-dlp segítségével játszhatók le.
     Add Channel: Csatorna hozzáadása
-    Channel URL: Csatorna címe
+    Search Or Paste Channel: Keressen, vagy illesszen be egy csatornacímet
     Invalid Channel: Adja meg egy Twitch-, SoundCloud-, PeerTube-, Rumble-, Odysee- vagy media.ccc.de-csatornaoldal címét.
     Channel Not Found: Ezen a címen nincs csatorna.
     Channel Already Followed: Már követi ezt a csatornát.
@@ -435,7 +435,6 @@ Settings:
     Failed to Save Password: "Nem sikerült menteni a jelszót."
     Confirm Password: "Jelszó megerősítése"
     Passwords Do Not Match: "A jelszavak nem egyeznek."
-  Navigation and Controls: "Navigáció és vezérlők"
   Control Bar:
     Title: "Vezérlősáv"
     Customize: "Vezérlősáv testreszabása"
@@ -682,7 +681,11 @@ Settings:
       Tab Loading Indicator: Lapbetöltés jelzője
       Bar: Sáv
       Dot: Pont (klasszikus)
-    Compact Settings Categories: "Kompakt beállításkategóriák"
+    UI Density:
+      UI Density: "Felület sűrűsége"
+      Compact: "Tömör"
+      Default: "Alapértelmezett"
+      Comfortable: "Kényelmes"
     Playlist Thumbnail Size: "Lejátszási lista bélyegképeinek mérete"
     Compact Mobile Mini Player: "Kompakt mobil minilejátszó"
     Always Show Mobile Search Bar: "A mobilos keresősáv mindig látható"
@@ -1051,6 +1054,7 @@ Settings:
     Channel Settings: Csatornabeállítások
     Channel Settings Description: Csatornánként megjegyzi a videónézés közben kiválasztott beállításokat, és a csatorna következő videójánál újra alkalmazza őket.
     Enable Channel Playback Settings: Csatornánkénti lejátszási beállítások engedélyezése
+    Auto Save Changes: Módosítások automatikus mentése
     Auto Save Playback Speed: Lejátszási sebesség módosításainak automatikus mentése
     Auto Save Video Quality: Videóminőség módosításainak automatikus mentése
     Auto Save Subtitles State: Feliratállapot módosításainak automatikus mentése
@@ -1300,6 +1304,7 @@ Settings:
     Notify About New Uploads: Értesítés új feltöltésekről
     RSS Feeds Auto Refresh Interval: RSS-hírcsatornák automatikus frissítésének időköze
     Faster Subscription Refresh: "Gyorsabb feliratkozásfrissítés"
+    Show Collaborations From Other Channels: "Más csatornák által feltöltött közös videók belefoglalása"
     Platforms:
       Other Platforms: Más platformok
       Manage Channels: Követett csatornák kezelése
@@ -2216,6 +2221,7 @@ Context Menu:
   Search With Multiple: Keresés ezzel...
   Selection Too Long: A kijelölt szöveg túl hosszú a kereséshez (> {count} karakter)
   Background Tab: Háttérlap
+  Open in an Incognito Tab: Megnyitás inkognitólapon
 Tab Organizer:
   Tab History: "Lap előzményei"
   Current Page: "Jelenlegi oldal"
@@ -2301,6 +2307,7 @@ Comments:
   Filter loaded comments: Betöltött hozzászólások szűrése
   Comment filters: Hozzászólásszűrők
   From creator: A készítőtől
+  From you: Öntől
   Contains timestamps: Időbélyeget tartalmaz
   Pin comment by author: '{author} hozzászólásának kitűzése'
   Unpin comment by author: '{author} hozzászólásának levétele'
@@ -2449,6 +2456,7 @@ Tooltips:
     Notify About New Uploads: Rendszerértesítéseket jelenít meg ezen az eszközön azokról a csatornákról, amelyeknek a feliratkozási beállításaiban bekapcsolta az értesítéseket. Az OpenTubeX a feliratkozások frissítésekor keres új tartalmat, ezért válasszon automatikus frissítési időközt. Ha bezárt alkalmazásnál is értesítést szeretne kapni, kapcsolja be a bezárt alkalmazásnál történő frissítést is.
     RSS Feeds Auto Refresh Interval: Milyen gyakran frissíti automatikusan az OpenTubeX az RSS-hírcsatornáidat, amíg az alkalmazás nyitva van.
     Faster Subscription Refresh: "Először minden csatorna RSS-hírcsatornáját ellenőrzi, és csak az új feltöltéssel rendelkező csatornák videóit, Shorts-videóit és élő közvetítéseit tölti be. Az automatikus frissítések az elmúlt 10 percben betöltött csatornákat is kihagyják. Az új feltöltés nélküli csatornáknál a megtekintések száma, az eltávolított videók és a módosított címek csak néhány óránként frissülnek, és az új feltöltések később jelenhetnek meg, ha az RSS-hírcsatorna lemarad. Az Invidious API-val nem érhető el."
+    Show Collaborations From Other Channels: "Azokat a videókat is megjeleníti, amelyeket a feliratkozott csatornák egy másik, azokat feltöltő csatornával közösen készítettek. A YouTube ezeket csak a csatorna Kezdőlap lapján listázza, ezért minden videófrissítés csatornánként eggyel több oldalt tölt be. Csak az ott megjelenő legújabb közös videók találhatók meg, egyes csatornák egyet sem mutatnak, és a közzétételi dátumuk hozzávetőleges. Az Invidious API-val nem érhető el."
     Platforms Auto Refresh Interval: Milyen gyakran frissíti automatikusan az OpenTubeX a más platformokon követett csatornáidat, amíg az alkalmazás nyitva van.
     Twitch Notify When Live: Értesít, amikor valamelyik követett Twitch-csatornád adást indít. Az OpenTubeX néhány percenként ellenőriz, amíg nyitva van, és akkor is, amikor be van zárva, ha ilyenkor frissíti a feliratkozásokat.
   Theme Settings:
@@ -2456,7 +2464,7 @@ Tooltips:
     Visible Search Suggestions: "Megadja, hány keresési előzményt és javaslatot jelenít meg a keresősáv, mielőtt a listáját görgetni kellene. A lista soha nem nyúlik túl az ablak alsó szélén."
     Thumbnail Size: "Átméretezi a videók bélyegképeit a rácsokban és listákban. A rögzített oszlopszámú vagy Teljes szélesség nézetű rácsok ehelyett kitöltik az összes sort, így ott csak a listák bélyegképeit és a Shorts videókat módosítja. Telefonméretű ablakokban a rács bélyegképei legfeljebb 100%-osak lehetnek."
     Playlist Thumbnail Size: "Átméretezi a videók bélyegképeit a lejátszási listák oldalain. A rögzített oszlopszámú vagy Teljes szélesség nézetű rácsok ehelyett kitöltik az összes sort, így ott csak a listák bélyegképeit és a Shorts videókat módosítja. Telefonméretű ablakokban a rács bélyegképei legfeljebb 100%-osak lehetnek."
-    Compact Settings Categories: "Csökkenti a beállításkategóriák magasságát."
+    UI Density: "Módosítja a térközöket a listákban, menükben, az oldalsávon és a Beállításokban."
     Show Progress as Notification: Állandó értesítés megjelenítése a háttérműveletek, például a feliratkozások frissítése és a kezelt eszközök letöltése valós idejű állapotával a globális folyamatjelző helyett.
     Always Show Scrollbars: A görgetősávok állandó megjelenítése. Kikapcsolva röviddel az egér mozgatásának befejezése után elhalványulnak, és az egér újbóli megmozdításakor ismét megjelennek.
     Scroll Speed: Megváltoztatja, hogy az egérgörgő és az érintőpad kézmozdulatai milyen messzire görgessenek.
@@ -2509,6 +2517,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Lapváltó
   Undo Seek: Az utolsó ugrás visszavonása
   Redo Seek: Egy visszavont ugrás újbóli végrehajtása
+  New Incognito Tab: Új inkognitólap létrehozása
 CommandPalette:
   Title: Parancspaletta
   Open: Parancspaletta megnyitása
@@ -2896,3 +2905,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Keresés a Twitchen"
+New Incognito Tab: Új inkognitólap
+Incognito Tab: Inkognitólap

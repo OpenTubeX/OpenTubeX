@@ -264,7 +264,7 @@ Subscriptions:
     Followed Channels: Followed channels on other platforms
     Description: Follow channels on Twitch, SoundCloud, PeerTube, Rumble, Odysee and media.ccc.de to see their uploads in the Platforms tab of your subscriptions. Find channels with the search, or add them by the address of their page. Their media plays with yt-dlp.
     Add Channel: Add channel
-    Channel URL: Channel address
+    Search Or Paste Channel: Search or paste a channel address
     Invalid Channel: Enter the address of a channel page on Twitch, SoundCloud, PeerTube, Rumble, Odysee or media.ccc.de.
     Channel Not Found: There is no channel at this address.
     Channel Already Followed: You already follow this channel.
@@ -434,7 +434,6 @@ Settings:
     Failed to Save Password: "Failed to save password."
     Confirm Password: "Confirm password"
     Passwords Do Not Match: "Passwords do not match."
-  Navigation and Controls: "Navigation & controls"
   Control Bar:
     Title: "Control bar"
     Customize: "Customise control bar"
@@ -668,7 +667,11 @@ Settings:
       Tab Loading Indicator: Tab Loading Style
       Bar: Bar
       Dot: Dot (classic)
-    Compact Settings Categories: "Compact Settings Categories"
+    UI Density:
+      UI Density: "UI Density"
+      Compact: "Compact"
+      Default: "Default"
+      Comfortable: "Comfortable"
     Playlist Thumbnail Size: "Playlist Thumbnail Size"
     Compact Mobile Mini Player: "Compact mobile mini player"
     Always Show Mobile Search Bar: "Always show mobile search bar"
@@ -1036,6 +1039,7 @@ Settings:
     Channel Settings: Channel Settings
     Channel Settings Description: Remember the settings you pick while watching for each channel individually, so they are applied again the next time you watch one of its videos.
     Enable Channel Playback Settings: Enable channel playback settings
+    Auto Save Changes: Automatically Save Changes
     Auto Save Playback Speed: Automatically save playback speed changes
     Auto Save Video Quality: Automatically save video quality changes
     Auto Save Subtitles State: Automatically save subtitle state changes
@@ -1284,6 +1288,7 @@ Settings:
     Notify About New Uploads: Notify About New Uploads
     RSS Feeds Auto Refresh Interval: RSS Feeds Auto Refresh Interval
     Faster Subscription Refresh: "Faster Subscription Refresh"
+    Show Collaborations From Other Channels: "Show Collaborations From Other Channels"
     Platforms:
       Other Platforms: Other platforms
       Manage Channels: Manage followed channels
@@ -2211,6 +2216,7 @@ Context Menu:
   Search With Multiple: Search with...
   Selection Too Long: Selection is too long for search (> {count} characters)
   Background Tab: Background tab
+  Open in an Incognito Tab: Open in an Incognito Tab
 Tab Organizer:
   Tab History: "Tab history"
   Current Page: "Current page"
@@ -2296,6 +2302,7 @@ Comments:
   Filter loaded comments: Filter loaded comments
   Comment filters: Comment filters
   From creator: From creator
+  From you: From you
   Contains timestamps: Contains timestamps
   Pin comment by author: Pin comment by {author}
   Unpin comment by author: Unpin comment by {author}
@@ -2443,6 +2450,7 @@ Tooltips:
     Notify About New Uploads: Shows system notifications on this device for channels whose notifications you turned on in their subscription settings. OpenTubeX checks for new content when subscriptions refresh, so choose an auto refresh interval. To be notified while the app is closed, also enable refreshing while the app is closed.
     RSS Feeds Auto Refresh Interval: How often OpenTubeX automatically refreshes your RSS feeds while the app is open.
     Faster Subscription Refresh: "Checks each channel's RSS feed first and only loads the videos, Shorts and live streams of channels with new uploads. Automatic refreshes also skip channels loaded in the last 10 minutes. For channels without new uploads, view counts, removed videos and changed titles only update every few hours, and new uploads may appear later when the RSS feed lags behind. Not available with the Invidious API."
+    Show Collaborations From Other Channels: "Also shows videos that channels you subscribe to made together with another channel that uploaded them. YouTube only lists these on a channel's Home tab, so each video refresh loads one more page per channel. Only the latest collaborations shown there are found, some channels don't show any, and their publication dates are approximate. Not available with the Invidious API."
     Platforms Auto Refresh Interval: How often OpenTubeX automatically refreshes the channels you follow on other platforms while the app is open.
     Twitch Notify When Live: Notifies you when one of your followed Twitch channels starts streaming. OpenTubeX checks every few minutes while it is open, and also while it is closed if it refreshes subscriptions then.
   Theme Settings:
@@ -2450,7 +2458,7 @@ Tooltips:
     Visible Search Suggestions: "Sets how many search history entries and suggestions the search bar shows before its list scrolls. The list never extends past the bottom of the window."
     Thumbnail Size: "Scales video thumbnails in grids and lists. Grids with a fixed column count or the Full Width view type fill each row instead, so there it only changes list thumbnails and Shorts. Phone-sized windows limit grid thumbnails to 100%."
     Playlist Thumbnail Size: "Scales video thumbnails on playlist pages. Grids with a fixed column count or the Full Width view type fill each row instead, so there it only changes list thumbnails and Shorts. Phone-sized windows limit grid thumbnails to 100%."
-    Compact Settings Categories: "Reduces the height of settings categories."
+    UI Density: "Changes the spacing in lists, menus, the side bar, and Settings."
     Show Progress as Notification: Shows a persistent notification with live progress for background operations, such as subscription refreshes and managed tool downloads, instead of using the global progress bar.
     Always Show Scrollbars: Keeps the scrollbars visible at all times. When disabled, they fade out shortly after you stop moving the mouse and reappear as soon as you move it again.
     Scroll Speed: Changes how far mouse-wheel and touchpad wheel gestures scroll.
@@ -2505,6 +2513,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Tab switcher
   Undo Seek: Undo the last seek
   Redo Seek: Redo an undone seek
+  New Incognito Tab: Create a new incognito tab
 CommandPalette:
   Title: Command palette
   Open: Open command palette
@@ -2889,3 +2898,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Search Twitch"
+New Incognito Tab: New Incognito Tab
+Incognito Tab: Incognito tab

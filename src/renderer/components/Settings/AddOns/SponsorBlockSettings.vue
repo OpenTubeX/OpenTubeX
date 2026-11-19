@@ -402,11 +402,11 @@ watch([sponsorBlockChannelWhitelist, showSponsorBlockChannels, backendOptions, u
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: min(100%, 600px);
+  inline-size: min(100%, 600px);
 }
 
 .generatedUserIdContainer {
-  width: 100%;
+  inline-size: 100%;
 }
 
 .generatedUserIdContainer :deep(.btn) {
@@ -416,9 +416,10 @@ watch([sponsorBlockChannelWhitelist, showSponsorBlockChannels, backendOptions, u
 .generatedUserIdActionRow {
   display: flex;
   justify-content: center;
-  width: 100%;
+  inline-size: 100%;
   margin: 5px;
-  padding: 8px 0 0;
+  padding-block: 8px 0;
+  padding-inline: 0;
   box-sizing: border-box;
 }
 
@@ -426,7 +427,7 @@ watch([sponsorBlockChannelWhitelist, showSponsorBlockChannels, backendOptions, u
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 0;
+  min-inline-size: 0;
 }
 
 .generatedUserIdLabelRow {
@@ -434,7 +435,7 @@ watch([sponsorBlockChannelWhitelist, showSponsorBlockChannels, backendOptions, u
   align-items: center;
   justify-content: center;
   gap: 8px;
-  margin-bottom: 6px;
+  margin-block-end: 6px;
   color: var(--primary-text-color);
 }
 

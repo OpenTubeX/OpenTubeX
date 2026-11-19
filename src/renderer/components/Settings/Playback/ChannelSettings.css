@@ -2,25 +2,14 @@
   margin-block: 0 1em;
   padding-inline: 20px;
   color: var(--secondary-text-color);
+  max-inline-size: 700px;
+  text-align: center;
 }
 
 .enableChannelSettingsToggle {
   display: flex;
   justify-content: center;
   margin-block-end: 1em;
-}
-
-.preferenceToggles {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
-  gap: 1em 2em;
-  margin-block-end: 1em;
-}
-
-@container settings-content (width <= 680px) {
-  .preferenceToggles {
-    justify-items: center;
-  }
 }
 
 .manageButton {
@@ -139,8 +128,9 @@
   /* Keep the cards' focus outlines clear of the scroll container's edges */
   padding: 2px;
 
-  /* Overlay scrollbars need their own space beside the cards. */
-  padding-inline-end: calc(var(--scrollbar-track-width) + 6px);
+  /* Reach through the subpage's padding so the scrollbar sits at the window's edge. */
+  margin-inline-end: calc(-1 * var(--settings-subpage-padding));
+  padding-inline-end: calc(2px + var(--settings-subpage-padding));
 }
 
 .emptyState {

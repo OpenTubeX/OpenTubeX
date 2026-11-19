@@ -3,7 +3,7 @@ import { createServer } from 'node:http'
 import { expect, test } from '../../helpers/app.mjs'
 
 test.use({
-  launchArgs: ['--host-resolver-rules=MAP euc12.playlist.ttvnw.net 127.0.0.1', '--no-proxy-server']
+  launchArgs: ['--host-resolver-rules=MAP euc12.playlist.ttvnw.net 127.0.0.1']
 })
 
 test('sends the Twitch origin through Electron’s request hook', async ({ page }) => {

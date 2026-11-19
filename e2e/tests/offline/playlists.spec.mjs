@@ -23,6 +23,20 @@ async function allThumbnailsInclude(playlistCard, expectedUrlPart) {
  * @param {import('@playwright/test').Page} page
  * @param {'Yes' | 'No' | 'Never ask again'} answer
  */
+/**
+ * The videos slide in when they mount. Their transition starts a frame after
+ * Vue adds the enter classes and can outlast them, so wait for both.
+ * @param {import('@playwright/test').Page} page
+ */
+async function waitForPlaylistItemsToSettle(page) {
+  await expect.poll(() => page.locator('.playlistItemsCard').evaluate(card =>
+    !card.querySelector('[class*="playlistItem-enter"], [class*="playlistItem-leave"]') &&
+    // The next page's loader spins forever, so only the transitions count.
+    card.getAnimations({ subtree: true }).every(animation =>
+      !(animation instanceof CSSTransition) || (animation.playState !== 'running' && !animation.pending))
+  )).toBe(true)
+}
+
 async function answerPlaylistPreloadPrompt(page, answer) {
   const prompt = page.getByRole('dialog', { name: 'Preload all videos?' })
   await expect(prompt).toContainText('temporarily blocked by YouTube')
@@ -1552,6 +1566,7 @@ test.describe('custom playlist order', () => {
     await page.getByText('Large custom playlist').click()
     const titles = page.locator('.playlistItemsCard [data-playlist-drag-item] .h3Title')
     await expect(titles.first()).toHaveText('Custom playlist video 1')
+    await waitForPlaylistItemsToSettle(page)
 
     const rows = page.locator('.playlistItemsCard [data-playlist-drag-item]')
     const handle = await rows.first().locator('.videoIndexArea').boundingBox()
@@ -1593,6 +1608,7 @@ test.describe('custom playlist order', () => {
     await page.getByText('Large custom playlist').click()
     const rows = page.locator('.playlistItemsCard [data-playlist-drag-item]')
     await expect(rows).toHaveCount(100)
+    await waitForPlaylistItemsToSettle(page)
     const handle = await rows.first().locator('.videoIndexArea').boundingBox()
     const start = { x: handle.x + handle.width / 2, y: handle.y + handle.height / 2 }
     await page.mouse.move(start.x, start.y)
@@ -1619,6 +1635,8 @@ test.describe('custom playlist order', () => {
     await goTo(page, 'userplaylists')
     await page.getByText('Large custom playlist').click()
     const rows = page.locator('.playlistItemsCard [data-playlist-drag-item]')
+    await expect(rows.first()).toBeVisible()
+    await waitForPlaylistItemsToSettle(page)
     const from = await rows.first().locator('.grabBar').boundingBox()
     const second = await rows.nth(1).boundingBox()
     const third = await rows.nth(2).boundingBox()

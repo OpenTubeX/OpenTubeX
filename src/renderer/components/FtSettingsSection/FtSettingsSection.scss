@@ -22,7 +22,10 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding-block: 8px;
+
+  /* Text that starts a card sits as far below its top edge as the card's
+     content ends above its bottom edge, which includes a control's margin. */
+  padding-block: calc(8px * var(--ui-density) + var(--settings-control-margin)) calc(8px * var(--ui-density));
   background-color: var(--settings-section-bg-color);
   backdrop-filter: var(--card-bg-blur, none);
   border-radius: var(--shape-corner-large-increased);
@@ -30,25 +33,88 @@
   > :deep(*) {
     box-sizing: border-box;
     inline-size: 100%;
-    padding-block: 8px;
+    padding-block: calc(8px * var(--ui-density));
     padding-inline: 20px;
   }
 
   > :deep(:is(h3, h4, p)) {
-    padding-block: 8px 4px;
+    padding-block: calc(8px * var(--ui-density)) calc(4px * var(--ui-density));
+  }
+
+  /* Text that ends a card leaves as much space below it as a control does. */
+  > :deep(p:last-child) {
+    padding-block-end: calc(8px * var(--ui-density) + var(--settings-control-margin));
+  }
+
+  /* Buttons keep smaller margins than other controls (none in a button
+     group), so a row of them that ends a card makes up the difference. */
+  > :deep(:last-child:not(.buttonGroup):has(> .btn:last-child, > :last-child > .btn:last-child)) {
+    padding-block-end: calc(8px * var(--ui-density) + var(--settings-control-margin) - 5px);
+  }
+
+  > :deep(.buttonGroup:last-child) {
+    padding-block-end: calc(8px * var(--ui-density) + var(--settings-control-margin));
+  }
+
+  /* A switch's label padding already adds space below it. Compact switches
+     have no margin, so their row makes up the rest. */
+  > :deep(:last-child > .switch-ctn:not(.compact):last-child) {
+    margin-block-end: calc(var(--settings-control-margin) - 6px);
+  }
+
+  > :deep(:last-child:has(> .switch-ctn.compact:last-child, > .switchColumn:last-child > .switch-ctn.compact:last-child)) {
+    padding-block-end: calc(8px * var(--ui-density) + var(--settings-control-margin) - 6px);
+  }
+
+  /* A slider's box extends below its handle. */
+  > :deep(:has(> .pure-material-slider:last-child)) {
+    padding-block-end: 0;
+  }
+
+  > :deep(:has(> .pure-material-slider:last-child) + :has(> .btn:first-child)) {
+    padding-block-start: 0;
+  }
+
+  /* Controls that start a card bring their own space above them: a switch
+     its label padding, a select or text field its margin, minus the label
+     that rises above its outline. */
+  > :deep(:first-child:has(> .switch-ctn:first-child, > .switchColumn > .switch-ctn:first-child, > .switchColumnGrid:first-child > .switchColumn > .switch-ctn:first-child)) {
+    padding-block-start: 2px;
+  }
+
+  > :deep(:first-child > .switch-ctn:first-child),
+  > :deep(:first-child > .switchColumn > .switch-ctn:first-child) {
+    margin-block-start: 0;
+  }
+
+  > :deep(:first-child:has(> :is(.select, .ft-input-component):first-child, > :first-child > :is(.select, .ft-input-component):first-child)) {
+    padding-block-start: 6px;
   }
 }
 
 /* The gaps space the blocks, so margins that used to separate them would
-   only shrink or misalign them. Narrow layouts pad their block instead. */
+   only add uneven space or push them out of the card. Narrow layouts pad
+   their block instead, and a block with a maximum width stays centered. */
 .settingsSection > .sectionBody > :deep(*) {
-  margin: 0;
+  margin-block: 0;
+  margin-inline: auto;
+}
+
+/* Cards nested in a section set themselves apart from the blocks around them. */
+.settingsSection > .sectionBody > :deep(.settingsCard) {
+  margin-block-start: calc(20px * var(--ui-density));
+}
+
+/* A nested card that ends the section keeps the same 20px from its bottom
+   edge, which already pads the content by 8px. */
+.settingsSection > .sectionBody > :deep(.settingsCard:last-child) {
+  margin-block-end: calc(12px * var(--ui-density));
 }
 
 /* Group titles introduce the blocks below them, so they sit closer to those
    than to the blocks above. */
 .settingsSection > .sectionBody > :deep(:is(h3, h4):not(:first-child)) {
-  margin-block-start: 12px;
+  margin-block-start: calc(12px * var(--ui-density));
 }
 
 /* Material 3 Expressive emphasized title: larger and heavier than the
@@ -60,7 +126,7 @@
   line-height: 1.75rem;
   user-select: none;
   margin-inline: 20px;
-  margin-block: 0 12px;
+  margin-block: 0 calc(20px * var(--ui-density));
   text-align: center;
 }
 
@@ -91,12 +157,16 @@
   }
 }
 
-.sectionBody > :deep(:is(h3, h4)) {
-  color: var(--secondary-text-color);
-  font-size: 0.875rem;
+.sectionBody > :deep(:is(h3, h4)),
+.sectionBody :deep(.groupTitle) {
+  color: var(--primary-text-color);
   font-weight: 600;
-  letter-spacing: 0.01em;
   text-align: center;
+}
+
+/* Group titles inside a block don't get the section's gaps. */
+.sectionBody > :deep(* .groupTitle) {
+  margin-block: 0.5em;
 }
 
 %switch-grid {
@@ -119,23 +189,49 @@
 
   align-items: start;
 
+  /* Stacked, the columns form one block as wide as its widest switch,
+     centered like the other controls, with the switches lined up inside. */
   @container settings-content (width <= 680px) {
-    justify-items: center;
+    grid-template-columns: minmax(0, max-content);
+    justify-content: center;
   }
 }
 
-/* Switches stack in two independent columns, so a label that wraps only
-   lengthens its own column instead of leaving a gap beside it. */
+/* The columns meet in the middle of the card and each hugs the center line,
+   so both sit the same distance from it. Each column stacks on its own, so a
+   label that wraps only lengthens its own column. */
 @container settings-content (width > 680px) {
-  :deep(.switchColumnGrid.switchFlowGrid) {
-    display: block;
-    columns: 2;
-    column-gap: 0;
+  .sectionBody :deep(.switchColumnGrid) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 32px;
   }
 
-  :deep(.switchColumnGrid.switchFlowGrid > *) {
-    break-inside: avoid;
+  .sectionBody :deep(.switchColumnGrid > :nth-child(odd)) {
+    justify-self: end;
   }
+
+  .sectionBody :deep(.switchColumnGrid > :nth-child(even)) {
+    justify-self: start;
+  }
+
+  /* A column without a partner stays centered. */
+  .sectionBody :deep(.switchColumnGrid > :nth-child(odd):last-child) {
+    grid-column: 1 / -1;
+    justify-self: center;
+  }
+}
+
+/* Long labels wrap into balanced lines instead of making their switch much
+   wider than the ones beside or below it. FtToggleSwitch then narrows a
+   wrapped label to its longest line. */
+.sectionBody :deep(.switchColumnGrid .switch-label-text) {
+  max-inline-size: 20em;
+  text-wrap: balance;
+}
+
+/* A grid's only switch has no neighbor to match. */
+.sectionBody :deep(.switchColumnGrid:has(> :only-child):not(:has(.switch-ctn ~ .switch-ctn)) .switch-label-text) {
+  max-inline-size: none;
 }
 
 :deep(.switchColumn) {
@@ -162,6 +258,65 @@
 
 :deep(.center) {
   text-align: center;
+}
+
+/* A select's icons sit after it, so a select alone in its row reserves as
+   much space before it, keeping the field itself centered. The
+   changed-setting marker gutter already reserves part of it. When space runs
+   out, that reserve gives way before the 200px field does. */
+@mixin balanced-select {
+  --select-balance-space: calc(var(--select-indicator-space) - var(--settings-marker-gutter, 0px));
+  --select-fitted-balance-space: clamp(
+    min(0px, var(--select-balance-space)),
+    100% - 200px - var(--select-indicator-space) - var(--settings-marker-gutter, 0px),
+    var(--select-balance-space)
+  );
+
+  margin-inline-start: var(--select-fitted-balance-space);
+  max-inline-size: calc(100% - max(0px, var(--select-fitted-balance-space)));
+}
+
+/* Selects in shared columns, each column as wide as its widest select, so
+   their fields line up across rows. Set --settings-select-grid-columns for
+   another column count. */
+:deep(.settingsSelectGrid) {
+  display: grid;
+  grid-template-columns: repeat(var(--settings-select-grid-columns, 2), minmax(0, max-content));
+  justify-content: center;
+  column-gap: 16px;
+
+  @container settings-content (width <= 680px) {
+    grid-template-columns: minmax(0, max-content);
+  }
+}
+
+/* Every select keeps room for all of its possible icons, which start right
+   after the field, so the fields in a column end at the same edge. */
+:deep(.settingsSelectGrid > .select) {
+  --select-indicator-space: calc(8px + 32px + 22px + 22px);
+
+  box-sizing: border-box;
+  inline-size: auto;
+  max-inline-size: 100%;
+  margin-inline: 0;
+}
+
+/* Layouts that line their selects up with other fields place them themselves. */
+.sectionBody :deep(:is(.select:only-child, .commentSettings > .select):not(
+  .settingsSelectGrid > *,
+  .generalSelectGrid > *,
+  .switchColumn > *,
+  .externalSoftwareToolControls > *,
+  .restrictedPlaybackAuthControl > *
+)) {
+  @include balanced-select;
+}
+
+@container settings-content (width <= 680px) {
+  /* The player's select rows stack here. */
+  .sectionBody :deep(.playerSelectGrid > .select) {
+    @include balanced-select;
+  }
 }
 
 /* Balance the indicator gutter so a standalone field's outline is centered. */
@@ -239,20 +394,18 @@
       margin-inline-end: 0;
     }
 
-    :deep(.switchColumn .switch-label-main > .tooltip),
-    :deep(.switchFlowGrid .switch-label-main > .tooltip) {
+    :deep(.switchColumn .switch-label-icons > .tooltip) {
       position: static;
       inset: auto;
       vertical-align: middle;
     }
 
-    :deep(.switchColumn .switch-ctn.containsTooltip .switch-label),
-    :deep(.switchFlowGrid .switch-ctn.containsTooltip .switch-label) {
+    :deep(.switchColumn .switch-ctn.containsTooltip .switch-label) {
       align-items: center;
       display: inline-flex;
     }
 
-    :deep(:not(.select, .selectLabel, .groupTitle, .selectIndicators, .inputIndicators, .labelMain, .switch-label-main) > .tooltip) {
+    :deep(:not(.select, .selectLabel, .groupTitle, .selectIndicators, .inputIndicators, .labelMain, .switch-label-icons) > .tooltip) {
       display: inline-block;
       position: absolute;
       inset-inline-end: -25px;
@@ -274,6 +427,12 @@
 
     :deep(.switch-ctn.compact) {
       margin-block: 0;
+    }
+
+    /* Outside the grids, a switch is as wide as its label, so containers
+       that center their controls center it too. */
+    :deep(:not(.switchColumn) > .switch-ctn:not(.trailing)) {
+      inline-size: fit-content;
     }
   }
 }

@@ -53,6 +53,7 @@ const nameParts = computed(() => {
 <style scoped>
 .verifiedBadgeGlue {
   flex-shrink: 0;
+
   /* Collapses the glue's own line box to the badge when a flex container blockifies it. */
   line-height: 0;
   white-space: nowrap;
@@ -60,6 +61,7 @@ const nameParts = computed(() => {
 
 .verifiedBadge {
   margin-inline-start: 0.4em;
+
   /* The scaled glyph fills 1em, so the badge spans from the baseline to the cap height. */
   font-size: 1cap;
   vertical-align: baseline;

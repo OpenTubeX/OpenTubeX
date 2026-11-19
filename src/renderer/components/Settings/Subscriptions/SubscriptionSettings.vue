@@ -22,54 +22,11 @@
           compact
           @change="updateEnableClosedAppSubscriptionRefresh"
         />
-        <div class="autoRefreshIntervals">
-          <FtSelect
-            :placeholder="$t('Settings.Subscription Settings.Videos Auto Refresh Interval')"
-            :value="subscriptionFeedAutoRefreshInterval"
-            setting-key="subscriptionFeedAutoRefreshInterval"
-            :select-names="subscriptionFeedAutoRefreshIntervalNames"
-            :select-values="AUTO_REFRESH_INTERVAL_VALUES"
-            :tooltip="$t('Tooltips.Subscription Settings.Auto Refresh Interval')"
-            :icon="['fas', 'clock']"
-            @change="updateSubscriptionFeedAutoRefreshInterval"
-          />
-          <FtSelect
-            :placeholder="$t('Settings.Subscription Settings.Shorts Auto Refresh Interval')"
-            :value="subscriptionShortsAutoRefreshInterval"
-            setting-key="subscriptionShortsAutoRefreshInterval"
-            :select-names="subscriptionFeedAutoRefreshIntervalNames"
-            :select-values="AUTO_REFRESH_INTERVAL_VALUES"
-            :tooltip="$t('Tooltips.Subscription Settings.Auto Refresh Interval')"
-            :icon="['fas', 'clock']"
-            @change="updateSubscriptionShortsAutoRefreshInterval"
-          />
-          <FtSelect
-            :placeholder="$t('Settings.Subscription Settings.Live Auto Refresh Interval')"
-            :value="subscriptionLiveAutoRefreshInterval"
-            setting-key="subscriptionLiveAutoRefreshInterval"
-            :select-names="subscriptionFeedAutoRefreshIntervalNames"
-            :select-values="AUTO_REFRESH_INTERVAL_VALUES"
-            :tooltip="$t('Tooltips.Subscription Settings.Auto Refresh Interval')"
-            :icon="['fas', 'clock']"
-            @change="updateSubscriptionLiveAutoRefreshInterval"
-          />
-          <FtSelect
-            :placeholder="$t('Settings.Subscription Settings.Posts Auto Refresh Interval')"
-            :value="subscriptionPostsAutoRefreshInterval"
-            setting-key="subscriptionPostsAutoRefreshInterval"
-            :select-names="subscriptionFeedAutoRefreshIntervalNames"
-            :select-values="AUTO_REFRESH_INTERVAL_VALUES"
-            :tooltip="$t('Tooltips.Subscription Settings.Auto Refresh Interval')"
-            :icon="['fas', 'clock']"
-            @change="updateSubscriptionPostsAutoRefreshInterval"
-          />
-        </div>
         <FtToggleSwitch
           v-if="SUPPORTS_LOCAL_API"
           :label="$t('Settings.Subscription Settings.Faster Subscription Refresh')"
           :default-value="fastSubscriptionRefresh"
           setting-key="fastSubscriptionRefresh"
-          experimental
           :tooltip="$t('Tooltips.Subscription Settings.Faster Subscription Refresh')"
           compact
           @change="updateFastSubscriptionRefresh"
@@ -82,6 +39,23 @@
           :tooltip="$t('Tooltips.Subscription Settings.Notify About New Uploads')"
           compact
           @change="updateEnableUploadNotifications"
+        />
+        <FtToggleSwitch
+          :label="$t('Settings.Subscription Settings.Fetch Feeds from RSS')"
+          :default-value="useRssFeeds"
+          setting-key="useRssFeeds"
+          :tooltip="$t('Tooltips.Subscription Settings.Fetch Feeds from RSS')"
+          compact
+          @change="updateUseRssFeeds"
+        />
+        <FtToggleSwitch
+          v-if="SUPPORTS_LOCAL_API"
+          :label="$t('Settings.Subscription Settings.Show Collaborations From Other Channels')"
+          :default-value="includeSubscriptionCollaborations"
+          setting-key="includeSubscriptionCollaborations"
+          :tooltip="$t('Tooltips.Subscription Settings.Show Collaborations From Other Channels')"
+          compact
+          @change="updateIncludeSubscriptionCollaborations"
         />
       </div>
       <div class="switchColumn">
@@ -107,14 +81,6 @@
         <div class="subscriptionChannelSettingsManager">
           <SubscriptionChannelSettings />
         </div>
-        <FtToggleSwitch
-          :label="$t('Settings.Subscription Settings.Fetch Feeds from RSS')"
-          :default-value="useRssFeeds"
-          setting-key="useRssFeeds"
-          :tooltip="$t('Tooltips.Subscription Settings.Fetch Feeds from RSS')"
-          compact
-          @change="updateUseRssFeeds"
-        />
         <FtToggleSwitch
           :label="$t('Settings.Subscription Settings.Show New Content Feed')"
           :default-value="showNewSubscriptionFeed"
@@ -148,17 +114,77 @@
         />
       </div>
     </div>
+    <div
+      class="autoRefreshIntervals"
+      role="group"
+      :aria-labelledby="autoRefreshTitleId"
+    >
+      <h4
+        :id="autoRefreshTitleId"
+        class="groupTitle"
+      >
+        {{ $t('Settings.Subscription Settings.Auto Refresh Interval') }}
+        <FtTooltip
+          class="selectTooltip"
+          position="top"
+          :tooltip="$t('Tooltips.Subscription Settings.Auto Refresh Interval')"
+        />
+      </h4>
+      <div class="settingsSelectGrid autoRefreshIntervalSelects">
+        <FtSelect
+          size-to-content
+          :placeholder="$t('Global.Videos')"
+          :value="subscriptionFeedAutoRefreshInterval"
+          setting-key="subscriptionFeedAutoRefreshInterval"
+          :select-names="subscriptionFeedAutoRefreshIntervalNames"
+          :select-values="AUTO_REFRESH_INTERVAL_VALUES"
+          :icon="['fas', 'video']"
+          @change="updateSubscriptionFeedAutoRefreshInterval"
+        />
+        <FtSelect
+          size-to-content
+          :placeholder="$t('Global.Shorts')"
+          :value="subscriptionShortsAutoRefreshInterval"
+          setting-key="subscriptionShortsAutoRefreshInterval"
+          :select-names="subscriptionFeedAutoRefreshIntervalNames"
+          :select-values="AUTO_REFRESH_INTERVAL_VALUES"
+          :icon="['fas', 'clapperboard']"
+          @change="updateSubscriptionShortsAutoRefreshInterval"
+        />
+        <FtSelect
+          size-to-content
+          :placeholder="$t('Global.Live')"
+          :value="subscriptionLiveAutoRefreshInterval"
+          setting-key="subscriptionLiveAutoRefreshInterval"
+          :select-names="subscriptionFeedAutoRefreshIntervalNames"
+          :select-values="AUTO_REFRESH_INTERVAL_VALUES"
+          :icon="['fas', 'tower-broadcast']"
+          @change="updateSubscriptionLiveAutoRefreshInterval"
+        />
+        <FtSelect
+          size-to-content
+          :placeholder="$t('Global.Posts')"
+          :value="subscriptionPostsAutoRefreshInterval"
+          setting-key="subscriptionPostsAutoRefreshInterval"
+          :select-names="subscriptionFeedAutoRefreshIntervalNames"
+          :select-values="AUTO_REFRESH_INTERVAL_VALUES"
+          :icon="['fas', 'message']"
+          @change="updateSubscriptionPostsAutoRefreshInterval"
+        />
+      </div>
+    </div>
   </FtSettingsSection>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
 import FtSelect from '../../FtSelect/FtSelect.vue'
 import FtSlider from '../../FtSlider/FtSlider.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
+import FtTooltip from '../../FtTooltip/FtTooltip.vue'
 import SubscriptionChannelSettings from './SubscriptionChannelSettings.vue'
 
 import store from '../../../store/index'
@@ -169,6 +195,8 @@ const IS_IOS = !!process.env.IS_IOS
 const IS_CAPACITOR = !!process.env.IS_CAPACITOR
 const IS_ELECTRON = !!process.env.IS_ELECTRON
 const SUPPORTS_LOCAL_API = !!process.env.SUPPORTS_LOCAL_API
+
+const autoRefreshTitleId = useId()
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const fetchSubscriptionsAutomatically = computed(() => store.getters.getFetchSubscriptionsAutomatically)
@@ -264,6 +292,16 @@ function updateUseRssFeeds(value) {
   if (onlyShowLatestFromChannelNumber.value > max) {
     updateOnlyShowLatestFromChannelNumber(max)
   }
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const includeSubscriptionCollaborations = computed(() => store.getters.getIncludeSubscriptionCollaborations)
+
+/**
+ * @param {boolean} value
+ */
+function updateIncludeSubscriptionCollaborations(value) {
+  store.dispatch('updateIncludeSubscriptionCollaborations', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

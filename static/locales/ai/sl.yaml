@@ -308,7 +308,7 @@ Subscriptions:
     Followed Channels: Spremljani kanali na drugih platformah
     Description: Spremljajte kanale na platformah Twitch, SoundCloud, PeerTube, Rumble, Odysee in media.ccc.de, da boste njihove objave videli na zavihku Platforme med svojimi naročninami. Kanale poiščite z iskanjem ali jih dodajte z naslovom njihove strani. Njihove vsebine se predvajajo z yt-dlp.
     Add Channel: Dodaj kanal
-    Channel URL: Naslov kanala
+    Search Or Paste Channel: Poiščite ali prilepite naslov kanala
     Invalid Channel: Vnesite naslov strani kanala na platformi Twitch, SoundCloud, PeerTube, Rumble, Odysee ali media.ccc.de.
     Channel Not Found: Na tem naslovu ni kanala.
     Channel Already Followed: Ta kanal že spremljate.
@@ -559,7 +559,6 @@ Settings:
     Tabs to unload: "Zavihki za razložitev"
     Automatic unloading help: "Razloži najstarejše zavihke v ozadju, da sprosti pomnilnik. Aktivni zavihki in zavihki s predvajanjem ostanejo naloženi."
     Memory threshold help: "Odstotek omejitve pomnilnika izrisovalnika, ne celotnega sistemskega pomnilnika RAM."
-  Navigation and Controls: "Krmarjenje in kontrolniki"
   Control Bar:
     Title: "Nadzorna vrstica"
     Customize: "Prilagodi nadzorno vrstico"
@@ -813,7 +812,11 @@ Settings:
       Tab Loading Indicator: Kazalnik nalaganja zavihka
       Bar: Vrstica
       Dot: Pika (klasična)
-    Compact Settings Categories: "Strnjene kategorije nastavitev"
+    UI Density:
+      UI Density: "Gostota vmesnika"
+      Compact: "Strnjena"
+      Default: "Privzeta"
+      Comfortable: "Prostorna"
     Playlist Thumbnail Size: "Velikost sličic seznama predvajanja"
     Compact Mobile Mini Player: "Kompakten mobilni mini predvajalnik"
     Always Show Mobile Search Bar: "Vedno prikaži iskalno vrstico na telefonu"
@@ -1266,6 +1269,7 @@ Settings:
     Channel Settings: Nastavitve kanalov
     Channel Settings Description: Zapomni si nastavitve, ki jih med gledanjem izberete za vsak kanal posebej, in jih znova uporabi ob naslednjem ogledu enega od njegovih videoposnetkov.
     Enable Channel Playback Settings: Omogoči nastavitve predvajanja za kanale
+    Auto Save Changes: Samodejno shrani spremembe
     Auto Save Playback Speed: Samodejno shrani spremembe hitrosti predvajanja
     Auto Save Video Quality: Samodejno shrani spremembe kakovosti videa
     Auto Save Subtitles State: Samodejno shrani spremembe stanja podnapisov
@@ -1535,6 +1539,7 @@ Settings:
     Confirm Before Unsubscribing: Zahtevaj potrditev pred odjavo
     RSS Feeds Auto Refresh Interval: Interval samodejnega osveževanja virov RSS
     Faster Subscription Refresh: "Hitrejša osvežitev naročnin"
+    Show Collaborations From Other Channels: "Vključi sodelovanja, ki so jih naložili drugi kanali"
     Platforms:
       Other Platforms: Druge platforme
       Manage Channels: Upravljaj spremljane kanale
@@ -2706,6 +2711,7 @@ Context Menu:
   Search With Multiple: Poišči z …
   Selection Too Long: Izbrano besedilo je predolgo za iskanje (> {count} znakov)
   Background Tab: Zavihek v ozadju
+  Open in an Incognito Tab: Odpri v zavihku brez beleženja zgodovine
 Tab Organizer:
   Tab History: "Zgodovina zavihka"
   Current Page: "Trenutna stran"
@@ -2798,6 +2804,7 @@ Comments:
   Filter loaded comments: Filtriraj naložene komentarje
   Comment filters: Filtri komentarjev
   From creator: Od ustvarjalca
+  From you: Od vas
   Contains timestamps: Vsebuje časovne žige
   Pin comment by author: Pripni komentar avtorja {author}
   Unpin comment by author: Odpni komentar avtorja {author}
@@ -2972,6 +2979,7 @@ Tooltips:
     Notify About New Uploads: Prikazuje sistemska obvestila v tej napravi za kanale, ki ste jim obvestila vklopili v njihovih nastavitvah naročnine. OpenTubeX preveri novo vsebino ob osvežitvi naročnin, zato izberite interval samodejnega osveževanja. Če želite prejemati obvestila tudi, ko je aplikacija zaprta, vklopite še osveževanje, ko je aplikacija zaprta.
     RSS Feeds Auto Refresh Interval: Kako pogosto OpenTubeX samodejno osveži vaše vire RSS, ko je aplikacija odprta.
     Faster Subscription Refresh: "Najprej preveri vir RSS vsakega kanala in naloži videoposnetke, Shorts in prenose v živo samo s kanalov z novimi naloženimi vsebinami. Samodejne osvežitve preskočijo tudi kanale, naložene v zadnjih 10 minutah. Pri kanalih brez novih vsebin se število ogledov, odstranjeni videoposnetki in spremenjeni naslovi posodobijo le vsakih nekaj ur, nove vsebine pa se lahko prikažejo pozneje, ko vir RSS zaostaja. Ni na voljo z API-jem Invidious."
+    Show Collaborations From Other Channels: "Prikaže tudi videoposnetke, ki so jih naročeni kanali ustvarili skupaj z drugim kanalom, ki jih je naložil. YouTube jih navaja samo na zavihku Domov kanala, zato vsaka osvežitev videoposnetkov naloži eno stran več na kanal. Najdena so samo najnovejša sodelovanja, prikazana tam, nekateri kanali ne prikazujejo nobenega, datumi objave pa so približni. Ni na voljo z API-jem Invidious."
     Platforms Auto Refresh Interval: Kako pogosto OpenTubeX samodejno osveži kanale, ki jih spremljate na drugih platformah, ko je aplikacija odprta.
     Twitch Notify When Live: Obvesti vas, ko eden od kanalov Twitch, ki jih spremljate, začne oddajati. OpenTubeX preverja vsakih nekaj minut, ko je odprt, in tudi ko je zaprt, če takrat osvežuje naročnine.
   Theme Settings:
@@ -2979,7 +2987,7 @@ Tooltips:
     Visible Search Suggestions: "Določa, koliko vnosov zgodovine iskanja in predlogov prikaže iskalna vrstica, preden se njen seznam začne pomikati. Seznam nikoli ne sega čez spodnji rob okna."
     Thumbnail Size: "Spremeni velikost sličic videoposnetkov v mrežah in seznamih. Mreže s fiksnim številom stolpcev ali pogled Polna širina namesto tega zapolnijo vsako vrstico, zato tam spremeni le sličice seznamov in Shorts. V oknih velikosti telefona so sličice mreže omejene na 100 %."
     Playlist Thumbnail Size: "Spremeni velikost sličic videoposnetkov na straneh seznamov predvajanja. Mreže s fiksnim številom stolpcev ali pogled Polna širina namesto tega zapolnijo vsako vrstico, zato tam spremeni le sličice seznamov in Shorts. V oknih velikosti telefona so sličice mreže omejene na 100 %."
-    Compact Settings Categories: "Zmanjša višino kategorij nastavitev."
+    UI Density: "Spremeni razmike na seznamih, v menijih, stranski vrstici in nastavitvah."
     Show Progress as Notification: Namesto splošne vrstice napredka prikaže trajno obvestilo s sprotnim napredkom opravil v ozadju, kot sta osveževanje naročnin in prenos upravljanih orodij.
     Always Show Scrollbars: Drsniki so vedno vidni. Če je ta možnost onemogočena, izginejo kmalu po tem, ko nehate premikati miško, in se znova prikažejo, ko jo premaknete.
     Scroll Speed: Spremeni razdaljo pomikanja z gibi kolesca miške in sledilne ploščice.
@@ -3118,6 +3126,7 @@ KeyboardShortcutPrompt:
   Skip to Previous Video: Skoči na prejšnji videoposnetek na seznamu predvajanja
   Undo Seek: Razveljavi zadnji skok
   Redo Seek: Znova uveljavi razveljavljeni skok
+  New Incognito Tab: Ustvari nov zavihek brez beleženja zgodovine
 CommandPalette:
   Title: Paleta ukazov
   Open: Odpri paleto ukazov
@@ -3493,3 +3502,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Iskanje po Twitchu"
+New Incognito Tab: Nov zavihek brez beleženja zgodovine
+Incognito Tab: Zavihek brez beleženja zgodovine

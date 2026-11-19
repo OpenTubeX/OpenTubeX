@@ -311,7 +311,7 @@ Subscriptions:
     Followed Channels: Gevolgde kanale op ander platforms
     Description: Volg kanale op Twitch, SoundCloud, PeerTube, Rumble, Odysee en media.ccc.de om hul oplaaie in die Platforms-oortjie van u intekeninge te sien. Vind kanale met die soekfunksie, of voeg hulle by met die adres van hul bladsy. Hul media speel met yt-dlp.
     Add Channel: Voeg kanaal by
-    Channel URL: Kanaaladres
+    Search Or Paste Channel: Soek of plak ’n kanaaladres
     Invalid Channel: Voer die adres van ’n kanaalbladsy op Twitch, SoundCloud, PeerTube, Rumble, Odysee of media.ccc.de in.
     Channel Not Found: Daar is geen kanaal by hierdie adres nie.
     Channel Already Followed: U volg reeds hierdie kanaal.
@@ -583,7 +583,6 @@ Settings:
     Tabs to unload: Oortjies om te ontlaai
     Automatic unloading help: Ontlaai die oudste agtergrondoortjies om geheue vry te maak. Aktiewe en spelende oortjies bly gelaai.
     Memory threshold help: Persentasie van die weergeër se geheuelimiet, nie die totale stelsel-RAM nie.
-  Navigation and Controls: Navigasie en kontroles
   Interface Customizer:
     Customize Interface: Pas koppelvlak aan
     Preview: Voorskou
@@ -903,7 +902,11 @@ Settings:
       Bundled Fonts: Ingeslote lettertipes
       System Fonts: Stelsellettertipes
     Always Show Scrollbars: Wys altyd rolstawe
-    Compact Settings Categories: Kompakte instellingskategorieë
+    UI Density:
+      UI Density: "UI-digtheid"
+      Compact: "Kompak"
+      Default: "Verstek"
+      Comfortable: "Ruim"
     Base Theme:
       Material Light: Material Lig
       Material Dark: Material Donker
@@ -1232,6 +1235,7 @@ Settings:
     Channel Settings: Kanaalinstellings
     Channel Settings Description: Onthou die instellings wat u tydens kyk kies vir elke kanaal afsonderlik, sodat hulle weer toegepas word die volgende keer dat u een van sy video’s kyk.
     Enable Channel Playback Settings: Aktiveer afspeelinstellings per kanaal
+    Auto Save Changes: Stoor veranderinge outomaties
     Auto Save Playback Speed: Stoor veranderinge aan afspeelspoed outomaties
     Auto Save Video Quality: Stoor veranderinge aan videokwaliteit outomaties
     Auto Save Subtitles State: Stoor veranderinge aan onderskrifstatus outomaties
@@ -1487,6 +1491,7 @@ Settings:
     Notify About New Uploads: Stel in kennis oor nuwe oplaaie
     RSS Feeds Auto Refresh Interval: Interval vir outomatiese verfrissing van RSS-voere
     Faster Subscription Refresh: "Vinniger verfrissing van intekeninge"
+    Show Collaborations From Other Channels: "Sluit samewerkings in wat ander kanale opgelaai het"
     Platforms:
       Other Platforms: Ander platforms
       Manage Channels: Bestuur gevolgde kanale
@@ -2476,6 +2481,7 @@ Context Menu:
   Search With Multiple: Soek met...
   Selection Too Long: Seleksie is te lank vir soektog (> {count} karakters)
   Background Tab: Agtergrondoortjie
+  Open in an Incognito Tab: Maak oop in ’n incognito-oortjie
 Tab Organizer:
   Tab History: Oortjiegeskiedenis
   Current Page: Huidige blad
@@ -2560,6 +2566,7 @@ Comments:
   Filter loaded comments: Filtreer gelaaide kommentaar
   Comment filters: Kommentaarfilters
   From creator: Van skepper
+  From you: Van u
   Contains timestamps: Bevat tydstempels
   Pin comment by author: Speld opmerking deur {author} vas
   Unpin comment by author: Maak opmerking deur {author} los
@@ -2708,6 +2715,7 @@ Tooltips:
     Notify About New Uploads: Wys stelselkennisgewings op hierdie toestel vir kanale waarvoor u kennisgewings in hul intekeninginstellings aangeskakel het. OpenTubeX kyk vir nuwe inhoud wanneer intekeninge verfris, dus kies ’n outomatiese verfrissingsinterval. Om in kennis gestel te word terwyl die toep gesluit is, aktiveer ook verfrissing terwyl die toep gesluit is.
     RSS Feeds Auto Refresh Interval: Hoe gereeld OpenTubeX jou RSS-voere outomaties verfris terwyl die toep oop is.
     Faster Subscription Refresh: "Gaan eers elke kanaal se RSS-voer na en laai slegs die video's, Shorts en regstreekse uitsendings van kanale met nuwe oplaaisels. Outomatiese verfrissings slaan ook kanale oor wat in die afgelope 10 minute gelaai is. Vir kanale sonder nuwe oplaaisels word kyktellings, verwyderde video's en veranderde titels slegs elke paar uur bygewerk, en nuwe oplaaisels kan later verskyn wanneer die RSS-voer agterloop. Nie beskikbaar met die Invidious-API nie."
+    Show Collaborations From Other Channels: "Wys ook video's wat kanale waarop jy ingeteken is saam met 'n ander kanaal gemaak het wat dit opgelaai het. YouTube lys dit net op 'n kanaal se Tuis-oortjie, so elke video-verfrissing laai een bladsy meer per kanaal. Net die nuutste samewerkings wat daar gewys word, word gevind, sommige kanale wys geen nie, en hul publikasiedatums is benaderd. Nie beskikbaar met die Invidious-API nie."
     Platforms Auto Refresh Interval: Hoe gereeld OpenTubeX die kanale wat u op ander platforms volg, outomaties verfris terwyl die toep oop is.
     Twitch Notify When Live: Stel jou in kennis wanneer een van jou gevolgde Twitch-kanale begin uitsaai. OpenTubeX kyk elke paar minute terwyl dit oop is, en ook terwyl dit toe is as dit dan intekeninge verfris.
   Theme Settings:
@@ -2721,7 +2729,7 @@ Tooltips:
     Use Fixed Tab Width: Gee elke oortjie in die horisontale oortjiebalk dieselfde breedte in plaas daarvan om hulle volgens hul titel te grootte te maak.
     Use Custom Title Bar: Vervang die stelsel se titelbalk met die oortjiebalk, of met die boonste navigasie wanneer oortjies nie bo is nie, om vertikale spasie te bespaar. Die vensterkontroles verskyn in die hoek van daardie balk.
     Use Grid Player Menu: Rangskik die videospeler se instellingskieslys as ’n rooster van teëls in plaas van ’n lys rye.
-    Compact Settings Categories: "Verminder die hoogte van instellingskategorieë."
+    UI Density: "Verander die spasiëring in lyste, kieslyste, die kantbalk en Instellings."
     Modal Backdrop: "Bepaal hoe die toep agter dialoë en kieslyste lyk. Vervaging kan op minder kragtige toestelle stadig wees."
     Click Scrollbar Track to Scroll: "Klik op 'n skuifbalk buite sy handvatsel blaai omtrent een bladsy in die rigting van die klik. Terwyl dit aan is, vang 'n sigbare skuifbalk klieke op items daaronder. Die oortjiebalk se skuifbalk werk altyd so."
   Experimental Settings:
@@ -2783,6 +2791,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Oortjiewisselaar
   Undo Seek: Ontdoen die laaste spoel
   Redo Seek: Doen ’n ontdane spoel oor
+  New Incognito Tab: Skep ’n nuwe incognito-oortjie
 CommandPalette:
   Title: Opdragpalet
   Open: Maak opdragpalet oop
@@ -3107,3 +3116,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Deursoek Twitch"
+New Incognito Tab: Nuwe incognito-oortjie
+Incognito Tab: Incognito-oortjie

@@ -26,8 +26,29 @@
       class="switch-label"
     >
       <span class="switch-label-main">
-        <span class="switch-label-text">
-          {{ label }}
+        <!-- The icons flow inline after the text, so they follow the last
+             word when the label wraps, and never move to a line of their own. -->
+        <span
+          ref="labelText"
+          class="switch-label-text"
+        >
+          <span class="switch-label-name">{{ labelParts.start }}</span>
+          <span class="switch-label-end">
+            <span class="switch-label-name">{{ labelParts.end }}</span>
+            <span class="switch-label-icons">
+              <FtTooltip
+                v-if="tooltip !== ''"
+                class="selectTooltip"
+                :position="tooltipPosition"
+                :tooltip="tooltip"
+                :allow-newlines="tooltipAllowNewlines"
+              />
+              <FtSyncedSettingIndicator
+                :setting-key="settingKey"
+                :setting-keys="syncSettingKeys"
+              />
+            </span>
+          </span>
           <span
             class="switch-thumb"
             aria-hidden="true"
@@ -35,17 +56,6 @@
             <FtIcon :icon="['fas', currentValue && !indeterminate ? 'check' : 'minus']" />
           </span>
         </span>
-        <FtTooltip
-          v-if="tooltip !== ''"
-          class="selectTooltip"
-          :position="tooltipPosition"
-          :tooltip="tooltip"
-          :allow-newlines="tooltipAllowNewlines"
-        />
-        <FtSyncedSettingIndicator
-          :setting-key="settingKey"
-          :setting-keys="syncSettingKeys"
-        />
       </span>
       <span
         v-if="experimental"
@@ -63,7 +73,7 @@
 </template>
 
 <script setup>
-import { ref, useId, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { FtIcon } from '@opentubex/icons'
 
@@ -150,6 +160,100 @@ function change() {
   if (props.controlled) currentValue.value = props.defaultValue
   emit('change', value)
 }
+
+/**
+ * The last word stays on one line with the icons after it. A label without
+ * spaces, such as a Chinese or Japanese one, stays whole and wraps inside
+ * that box when it does not fit.
+ */
+const labelParts = computed(() => {
+  const match = props.label.match(/^(.*\s)(\S+)$/s)
+  return match ? { start: match[1], end: match[2] } : { start: '', end: props.label }
+})
+
+const labelText = useTemplateRef('labelText')
+let labelResizeObserver = null
+
+/**
+ * A wrapped label's box keeps the full width it was allowed, leaving empty
+ * space beside its longest line. In a settings switch grid, where columns
+ * meet in the middle, that space would push the column away from the center,
+ * so the box is narrowed to its longest line.
+ * @param {HTMLElement} text with its maximum width cleared
+ * @returns {string} the maximum width to set, empty when none is needed
+ */
+function measureFittedLabelWidth(text) {
+  const names = text.querySelectorAll('.switch-label-name')
+  const range = document.createRange()
+  range.setStartBefore(names[0])
+  range.setEndAfter(names[names.length - 1])
+  const textRects = [...range.getClientRects()].filter(rect => rect.width > 0)
+  const lineCount = new Set(textRects.map(rect => Math.round(rect.top))).size
+  if (lineCount < 2) return ''
+  const icons = text.querySelector('.switch-label-icons').getBoundingClientRect()
+  const rects = icons.width > 0 ? [...textRects, icons] : textRects
+  const box = text.getBoundingClientRect()
+  const width = getComputedStyle(text).direction === 'rtl'
+    ? box.right - Math.min(...rects.map(rect => rect.left))
+    : Math.max(...rects.map(rect => rect.right)) - box.left
+  // Client rects include transforms, such as the settings window's opening
+  // scale, while the maximum width is in layout pixels.
+  const scale = box.width / text.offsetWidth
+  return scale > 0 && width < box.width - scale ? `${Math.ceil(width / scale)}px` : ''
+}
+
+/** Labels waiting to be fitted together, so they share one layout. */
+const pendingLabels = new Set()
+
+/** @param {HTMLElement} text */
+function fitLabelToLines(text) {
+  if (pendingLabels.size === 0) queueMicrotask(fitPendingLabels)
+  pendingLabels.add(text)
+}
+
+function fitPendingLabels() {
+  const texts = [...pendingLabels].filter(text => text.isConnected)
+  pendingLabels.clear()
+  for (const text of texts) text.style.maxInlineSize = ''
+  const widths = texts.map(measureFittedLabelWidth)
+  texts.forEach((text, index) => { text.style.maxInlineSize = widths[index] })
+}
+
+let refitLabel = null
+let refitFrame = 0
+
+onMounted(() => {
+  const text = labelText.value
+  const grid = text?.closest('.switchColumnGrid')
+  if (!grid) return
+  // Fitting resizes the observed label, so it runs in the next frame instead
+  // of during the observer's delivery, once for any number of requests.
+  refitLabel = () => {
+    if (refitFrame) return
+    refitFrame = requestAnimationFrame(() => {
+      refitFrame = 0
+      fitLabelToLines(text)
+    })
+  }
+  // Fit before the first paint, so a newly shown settings page doesn't
+  // shift its columns a frame later.
+  fitLabelToLines(text)
+  // The grid follows the available width, the label its own text. A font
+  // that finishes loading can narrow the text without resizing either.
+  labelResizeObserver = new ResizeObserver(refitLabel)
+  labelResizeObserver.observe(grid)
+  labelResizeObserver.observe(text)
+  document.fonts.addEventListener('loadingdone', refitLabel)
+})
+
+// New text can wrap differently at the same size, such as after a language change.
+watch(() => props.label, () => refitLabel?.(), { flush: 'post' })
+
+onBeforeUnmount(() => {
+  labelResizeObserver?.disconnect()
+  cancelAnimationFrame(refitFrame)
+  if (refitLabel) document.fonts.removeEventListener('loadingdone', refitLabel)
+})
 </script>
 
 <style scoped lang="scss" src="./FtToggleSwitch.scss" />

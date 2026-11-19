@@ -534,6 +534,7 @@ const LEGACY_SETTINGS_SECTION_MAP = {
   'external-player': 'advanced',
   'external-software': 'advanced',
   sync: 'sync',
+  'youtube-account': 'sync',
   proxy: 'advanced',
   'context-menu-search': 'general',
   storage: 'data',
@@ -568,6 +569,7 @@ const activeSection = ref(
 const LEGACY_SETTINGS_SECTION_TABS = {
   storage: 'storage',
   sync: 'sync',
+  'youtube-account': 'youtube-account',
   distraction: 'distraction',
   'parental-control': 'parental'
 }

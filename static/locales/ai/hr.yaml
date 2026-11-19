@@ -267,7 +267,7 @@ Subscriptions:
     Followed Channels: Praćeni kanali na drugim platformama
     Description: Pratite kanale na platformama Twitch, SoundCloud, PeerTube, Rumble, Odysee i media.ccc.de kako biste vidjeli njihove objave na kartici Platforme u svojim pretplatama. Pronađite kanale pretraživanjem ili ih dodajte prema adresi njihove stranice. Njihovi se mediji reproduciraju pomoću yt-dlp.
     Add Channel: Dodaj kanal
-    Channel URL: Adresa kanala
+    Search Or Paste Channel: Pretražite ili zalijepite adresu kanala
     Invalid Channel: Unesite adresu stranice kanala na platformi Twitch, SoundCloud, PeerTube, Rumble, Odysee ili media.ccc.de.
     Channel Not Found: Na ovoj adresi nema kanala.
     Channel Already Followed: Već pratite ovaj kanal.
@@ -438,7 +438,6 @@ Settings:
     Failed to Save Password: "Spremanje lozinke nije uspjelo."
     Confirm Password: "Potvrdite lozinku"
     Passwords Do Not Match: "Lozinke se ne podudaraju."
-  Navigation and Controls: "Navigacija i kontrole"
   Control Bar:
     Title: "Upravljačka traka"
     Customize: "Prilagodi upravljačku traku"
@@ -685,7 +684,11 @@ Settings:
       Tab Loading Indicator: Pokazatelj učitavanja kartice
       Bar: Traka
       Dot: Točka (klasična)
-    Compact Settings Categories: "Kompaktne kategorije postavki"
+    UI Density:
+      UI Density: "Gustoća sučelja"
+      Compact: "Kompaktna"
+      Default: "Zadana"
+      Comfortable: "Prozračna"
     Playlist Thumbnail Size: "Veličina sličica popisa za reprodukciju"
     Compact Mobile Mini Player: "Kompaktni mobilni mini reproduktor"
     Always Show Mobile Search Bar: "Uvijek prikaži traku za pretraživanje na mobitelu"
@@ -1056,6 +1059,7 @@ Settings:
     Channel Settings: Postavke kanala
     Channel Settings Description: Postavke koje odaberete tijekom gledanja pamte se zasebno za svaki kanal kako bi se ponovno primijenile kada sljedeći put gledate neki njegov videozapis.
     Enable Channel Playback Settings: Omogući postavke reprodukcije po kanalu
+    Auto Save Changes: Automatski spremaj promjene
     Auto Save Playback Speed: Automatski spremi promjene brzine reprodukcije
     Auto Save Video Quality: Automatski spremi promjene kvalitete videa
     Auto Save Subtitles State: Automatski spremi promjene stanja titlova
@@ -1305,6 +1309,7 @@ Settings:
     Notify About New Uploads: Obavijesti o novom sadržaju
     RSS Feeds Auto Refresh Interval: Razmak automatskog osvježavanja RSS izvora
     Faster Subscription Refresh: "Brže osvježavanje pretplata"
+    Show Collaborations From Other Channels: "Uključi suradnje koje su prenijeli drugi kanali"
     Platforms:
       Other Platforms: Druge platforme
       Manage Channels: Upravljanje praćenim kanalima
@@ -2253,6 +2258,7 @@ Context Menu:
   Search With Multiple: Pretraži s pomoću…
   Selection Too Long: Odabir je predug za pretraživanje (> {count} znakova)
   Background Tab: Kartica u pozadini
+  Open in an Incognito Tab: Otvori u anonimnoj kartici
 Tab Organizer:
   Tab History: "Povijest kartice"
   Current Page: "Trenutna stranica"
@@ -2338,6 +2344,7 @@ Comments:
   Filter loaded comments: Filtriraj učitane komentare
   Comment filters: Filtri komentara
   From creator: Od autora
+  From you: Od vas
   Contains timestamps: Sadrži vremenske oznake
   Pin comment by author: Prikvači komentar autora {author}
   Unpin comment by author: Otkvači komentar autora {author}
@@ -2486,6 +2493,7 @@ Tooltips:
     Notify About New Uploads: Prikazuje obavijesti sustava na ovom uređaju za kanale kojima ste uključili obavijesti u njihovim postavkama pretplate. OpenTubeX provjerava novi sadržaj pri osvježavanju pretplata, stoga odaberite razmak automatskog osvježavanja. Za obavijesti dok je aplikacija zatvorena uključite i osvježavanje dok je aplikacija zatvorena.
     RSS Feeds Auto Refresh Interval: Koliko često OpenTubeX automatski osvježava vaše RSS izvore dok je aplikacija otvorena.
     Faster Subscription Refresh: "Najprije provjerava RSS feed svakog kanala i učitava videozapise, Shorts i prijenose uživo samo s kanala s novim sadržajem. Automatska osvježavanja također preskaču kanale učitane u posljednjih 10 minuta. Za kanale bez novog sadržaja broj pregleda, uklonjeni videozapisi i promijenjeni naslovi ažuriraju se samo svakih nekoliko sati, a novi sadržaj može se pojaviti kasnije kad RSS feed kasni. Nije dostupno s Invidious API-jem."
+    Show Collaborations From Other Channels: "Prikazuje i videozapise koje su kanali na koje ste pretplaćeni napravili zajedno s drugim kanalom koji ih je prenio. YouTube ih navodi samo na kartici Početna kanala, pa svako osvježavanje videozapisa učitava još jednu stranicu po kanalu. Pronalaze se samo najnovije suradnje prikazane ondje, neki kanali ne prikazuju nijednu, a datumi objave su približni. Nije dostupno s Invidious API-jem."
     Platforms Auto Refresh Interval: Koliko često OpenTubeX automatski osvježava kanale koje pratite na drugim platformama dok je aplikacija otvorena.
     Twitch Notify When Live: Obavještava vas kada neki od Twitch kanala koje pratite počne s prijenosom. OpenTubeX provjerava svakih nekoliko minuta dok je otvoren, a i dok je zatvoren ako tada osvježava pretplate.
   Theme Settings:
@@ -2493,7 +2501,7 @@ Tooltips:
     Visible Search Suggestions: "Određuje koliko unosa povijesti pretraživanja i prijedloga traka za pretraživanje prikazuje prije nego što se njezin popis počne pomicati. Popis se nikada ne proteže ispod donjeg ruba prozora."
     Thumbnail Size: "Mijenja veličinu sličica videozapisa u rešetkama i popisima. Rešetke s fiksnim brojem stupaca ili prikaz Puna širina umjesto toga popunjavaju svaki redak, pa tamo mijenja samo sličice popisa i Shorts. U prozorima veličine telefona sličice rešetke ograničene su na 100 %."
     Playlist Thumbnail Size: "Mijenja veličinu sličica videozapisa na stranicama popisa za reprodukciju. Rešetke s fiksnim brojem stupaca ili prikaz Puna širina umjesto toga popunjavaju svaki redak, pa tamo mijenja samo sličice popisa i Shorts. U prozorima veličine telefona sličice rešetke ograničene su na 100 %."
-    Compact Settings Categories: "Smanjuje visinu kategorija postavki."
+    UI Density: "Mijenja razmake u popisima, izbornicima, bočnoj traci i postavkama."
     Show Progress as Notification: Umjesto opće trake napretka prikazuje trajnu obavijest s trenutačnim napretkom pozadinskih postupaka, poput osvježavanja pretplata i preuzimanja alata kojima se upravlja.
     Always Show Scrollbars: Drži klizne trake uvijek vidljivima. Kada je isključeno, nestaju ubrzo nakon što prestanete pomicati miš i ponovno se pojavljuju čim ga pomaknete.
     Scroll Speed: Mijenja udaljenost pomicanja gestama kotačića miša i dodirne pločice.
@@ -2548,6 +2556,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Prebacivanje kartica
   Undo Seek: Poništi posljednje premotavanje
   Redo Seek: Ponovi poništeno premotavanje
+  New Incognito Tab: Stvori novu anonimnu karticu
 CommandPalette:
   Title: Paleta naredbi
   Open: Otvori paletu naredbi
@@ -2936,3 +2945,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Pretraži Twitch"
+New Incognito Tab: Nova anonimna kartica
+Incognito Tab: Anonimna kartica

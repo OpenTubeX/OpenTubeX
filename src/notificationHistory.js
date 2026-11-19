@@ -15,8 +15,33 @@ export const NOTIFICATION_HISTORY_KINDS = /** @type {const} */ ([
   'comment-heart',
   'download-started',
   'download-completed',
-  'download-failed'
+  'download-failed',
+  'app-update',
+  'sync-blocked',
+  'youtube-signed-out',
+  'youtube-subscriptions',
+  'tool-update-failed'
 ])
+
+/**
+ * What the app adds to the history itself, without a system notification,
+ * for news it otherwise shows only as a toast.
+ */
+export const RECORDED_NOTIFICATION_KINDS = /** @type {const} */ ([
+  'download-completed',
+  'download-failed',
+  'app-update',
+  'sync-blocked',
+  'youtube-signed-out',
+  'youtube-subscriptions',
+  'tool-update-failed'
+])
+
+/** News about this device alone, which other devices cannot dismiss. */
+const DEVICE_NOTIFICATION_KINDS = new Set(['download-started', ...RECORDED_NOTIFICATION_KINDS])
+
+/** Entries that lead to a view of the app instead of a page, and cannot open in a tab. */
+export const VIEW_NOTIFICATION_PATHS = ['/downloads', '/settings', '/update']
 
 /**
  * @typedef {typeof NOTIFICATION_HISTORY_KINDS[number]} NotificationHistoryKind
@@ -154,15 +179,79 @@ export function getUploadTarget(feedType, id, live = false) {
 }
 
 /**
+ * The web link an Android notification opens. Notifications wrap it as
+ * `opentubex://notification?url=…` so the app opens it in a new tab, like
+ * the ones in its notification list. Mirrored by UploadNotifications.java.
+ * @param {string} url
+ * @returns {string | null}
+ */
+export function getNotificationOpenUrl(url) {
+  if (!/^opentubex(?:-nightly)?:\/\/notification\?/.test(url)) return null
+  const target = new URL(url).searchParams.get('url')
+  return target?.startsWith('https://') ? target : null
+}
+
+/**
+ * Where a download notification leads: the downloaded video, or the downloads
+ * for other files, which the player cannot play.
  * @param {'started' | 'completed' | 'failed'} phase
  * @param {unknown} videoId
  * @param {number | null} downloadId
+ * @param {unknown} [mode] automatic downloads are always videos or audio
  * @returns {NotificationHistoryTarget}
  */
-export function getAutomaticDownloadTarget(phase, videoId, downloadId) {
-  return phase === 'completed' && typeof videoId === 'string' && ID_PATTERN.test(videoId) && Number.isInteger(downloadId)
-    ? { kind: 'download-completed', path: `/watch/${videoId}`, query: { downloadId: String(downloadId) } }
-    : { kind: phase === 'failed' ? 'download-failed' : 'download-started', path: '/downloads' }
+export function getDownloadTarget(phase, videoId, downloadId, mode = 'video') {
+  if (phase === 'completed' && (mode === 'video' || mode === 'audio') && typeof videoId === 'string' && ID_PATTERN.test(videoId) && Number.isInteger(downloadId)) {
+    return { kind: 'download-completed', path: `/watch/${videoId}`, query: { downloadId: String(downloadId) } }
+  }
+  return { kind: /** @type {const} */ (`download-${phase}`), path: '/downloads' }
+}
+
+/**
+ * A notification the app records itself, or null when it is not one.
+ * @param {any} value
+ * @returns {NotificationHistoryInput | null}
+ */
+export function parseRecordedNotification(value) {
+  if (!RECORDED_NOTIFICATION_KINDS.includes(value?.kind) ||
+    typeof value.title !== 'string' || typeof value.body !== 'string' ||
+    typeof value.path !== 'string' || !value.path.startsWith('/') || value.path.length > 2048 ||
+    !isQuery(value.query)) {
+    return null
+  }
+  return {
+    kind: value.kind,
+    title: value.title.slice(0, 200),
+    body: value.body.slice(0, 500),
+    path: value.path,
+    ...(value.query ? { query: { ...value.query } } : {}),
+    ...(isThumbnailUrl(value.thumbnail) ? { thumbnail: value.thumbnail } : {})
+  }
+}
+
+/**
+ * Whether the history already holds a recorded notification, as when several
+ * tabs report the same news. Saying it again is new once it was read, except
+ * for an update, which stays the same news until it is installed.
+ * @param {NotificationHistoryEntry[]} entries
+ * @param {NotificationHistoryInput} notification
+ */
+export function hasRecordedNotification(entries, { kind, title, body, path, query }) {
+  const search = JSON.stringify(query ?? null)
+  return entries.some(entry => entry.kind === kind && entry.path === path && JSON.stringify(entry.query ?? null) === search &&
+    (kind === 'app-update' || (!entry.read && entry.title === title && entry.body === body)))
+}
+
+/**
+ * Adds a recorded notification unless the history already holds it. Returns
+ * the same array when nothing changes.
+ * @param {NotificationHistoryEntry[]} entries
+ * @param {NotificationHistoryInput} notification
+ * @param {number} [now]
+ * @returns {NotificationHistoryEntry[]}
+ */
+export function addRecordedNotification(entries, notification, now = Date.now()) {
+  return hasRecordedNotification(entries, notification) ? entries : addNotificationHistoryEntries(entries, [notification], now)
 }
 
 /**
@@ -182,14 +271,26 @@ export const NOTIFICATION_DISMISSAL_LIMIT = 2 * NOTIFICATION_HISTORY_LIMIT
 
 /**
  * The key of the item a notification is about, the same on every device.
- * Downloads describe work on one device and have none.
+ * Downloads and other news about one device have none.
  * @param {NotificationHistoryTarget} target
  * @returns {string | null}
  */
 export function getNotificationKey({ kind, path, query }) {
-  if (kind.startsWith('download-')) return null
+  if (DEVICE_NOTIFICATION_KINDS.has(kind)) return null
   const search = query ? new URLSearchParams(Object.entries(query).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)).toString() : ''
   return `${kind}:${path}${search ? `?${search}` : ''}`
+}
+
+/**
+ * The target a key from `getNotificationKey` names.
+ * @param {string} key
+ * @returns {{ kind: string, path: string, query?: Record<string, string> } | null}
+ */
+export function parseNotificationKey(key) {
+  const match = /^([^:/?]+):(\/[^?]*)(?:\?(.*))?$/.exec(key)
+  if (!match) return null
+  const [, kind, path, search] = match
+  return { kind, path, ...(search ? { query: Object.fromEntries(new URLSearchParams(search)) } : {}) }
 }
 
 /** @param {unknown} value */

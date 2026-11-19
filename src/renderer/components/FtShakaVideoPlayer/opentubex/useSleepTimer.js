@@ -4,7 +4,21 @@ const SLEEP_TIMER_STORAGE_KEY_PREFIX = 'OpenTubeX/sleepTimer'
 const SLEEP_TIMER_UPDATE_INTERVAL_MS = 1000
 const CHAPTER_END_MARGIN_SECONDS = 0.05
 
-export const SLEEP_TIMER_DURATIONS_MINUTES = [5, 10, 15, 20, 30, 45, 60]
+export const MIN_SLEEP_TIMER_MINUTES = 5
+export const MAX_SLEEP_TIMER_MINUTES = 120
+export const SLEEP_TIMER_STEP_MINUTES = 5
+export const SLEEP_TIMER_PRESET_MINUTES = [5, 10, 15, 20, 30, 45, 60, 90]
+
+/**
+ * @param {unknown} minutes
+ * @returns {boolean} Whether the slider can set the duration.
+ */
+export function isSleepTimerDuration(minutes) {
+  return Number.isInteger(minutes) &&
+    minutes >= MIN_SLEEP_TIMER_MINUTES &&
+    minutes <= MAX_SLEEP_TIMER_MINUTES &&
+    minutes % SLEEP_TIMER_STEP_MINUTES === 0
+}
 
 /**
  * @param {number} remainingMs
@@ -143,7 +157,7 @@ export function useSleepTimer({ getVideoId, getCurrentTime, getPlaybackRate, isP
 
   /** @param {number} minutes */
   function startDuration(minutes) {
-    if (!SLEEP_TIMER_DURATIONS_MINUTES.includes(minutes)) {
+    if (!isSleepTimerDuration(minutes)) {
       return
     }
 
@@ -272,7 +286,7 @@ export function useSleepTimer({ getVideoId, getCurrentTime, getPlaybackRate, isP
 
     if (
       storedTimer?.mode === 'duration' &&
-      SLEEP_TIMER_DURATIONS_MINUTES.includes(storedTimer.durationMinutes) &&
+      isSleepTimerDuration(storedTimer.durationMinutes) &&
       (Number.isFinite(storedTimer.remainingMs) || Number.isFinite(storedTimer.endsAt))
     ) {
       const restoredRemainingMs = Number.isFinite(storedTimer.remainingMs)

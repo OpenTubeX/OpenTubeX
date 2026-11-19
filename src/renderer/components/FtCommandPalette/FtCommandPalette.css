@@ -1,7 +1,9 @@
 .commandPaletteBackdrop {
+  --command-palette-backdrop-color: rgb(0 0 0 / 68%);
+
   align-items: flex-start;
   animation: command-palette-backdrop-enter var(--motion-fast-effects);
-  background: rgb(0 0 0 / 68%);
+  background: var(--command-palette-backdrop-color);
   backdrop-filter: var(--modal-backdrop-blur);
   block-size: 100%;
   box-sizing: border-box;
@@ -271,6 +273,11 @@ kbd {
     background-color: var(--modal-backdrop-enter-color, transparent);
     backdrop-filter: var(--modal-backdrop-enter-filter, blur(0));
   }
+
+  to {
+    background-color: var(--command-palette-backdrop-color);
+    backdrop-filter: var(--modal-backdrop-blur);
+  }
 }
 
 /* Spring curves exceed 1, which only clamps opacity. */
@@ -291,6 +298,11 @@ kbd {
 }
 
 @keyframes command-palette-backdrop-leave {
+  from {
+    background-color: var(--command-palette-backdrop-color);
+    backdrop-filter: var(--modal-backdrop-blur);
+  }
+
   to {
     background-color: transparent;
     backdrop-filter: blur(0);

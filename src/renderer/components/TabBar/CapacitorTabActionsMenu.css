@@ -37,6 +37,8 @@
 
 .capacitorTabActionList {
   min-block-size: 0;
+  margin-inline: -16px;
+  padding-inline: 16px;
   overflow-y: auto;
   overscroll-behavior: contain;
 }

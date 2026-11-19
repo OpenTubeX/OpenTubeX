@@ -39,9 +39,10 @@ test.describe('sync switches', { tag: '@scale' }, () => {
       await setWindowSize(app, page, { width, height })
       await expect.poll(() => toggles.evaluate(element => {
         const columns = getComputedStyle(element).gridTemplateColumns.split(' ').length
-        // Full-width rows shift the column of later switches, so compare start positions instead of indexes
+        // Full-width rows shift the column of later switches, so compare start positions instead of indexes.
+        // Sync automatically spans every column and sits centered above them, so it is not part of a column.
         const starts = []
-        for (const label of element.querySelectorAll('.switch-label')) {
+        for (const label of element.querySelectorAll('.switch-ctn:not(.autoSync) .switch-label')) {
           const left = label.getBoundingClientRect().left
           if (!starts.some(start => Math.abs(start - left) <= 1)) {
             starts.push(left)

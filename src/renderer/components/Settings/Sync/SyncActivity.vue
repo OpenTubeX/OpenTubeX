@@ -1,5 +1,5 @@
 <template>
-  <section class="syncActivity">
+  <section class="syncActivity settingsCard">
     <div
       ref="activityHeader"
       class="activityHeader"

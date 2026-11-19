@@ -265,7 +265,7 @@ Subscriptions:
     Followed Channels: Seuratut kanavat muilla alustoilla
     Description: Seuraa kanavia palveluissa Twitch, SoundCloud, PeerTube, Rumble, Odysee ja media.ccc.de, niin näet niiden lataukset tilaustesi Alustat-välilehdellä. Etsi kanavia haulla tai lisää ne niiden sivun osoitteella. Niiden media toistetaan yt-dlp:llä.
     Add Channel: Lisää kanava
-    Channel URL: Kanavan osoite
+    Search Or Paste Channel: Hae tai liitä kanavan osoite
     Invalid Channel: Kirjoita kanavasivun osoite palvelusta Twitch, SoundCloud, PeerTube, Rumble, Odysee tai media.ccc.de.
     Channel Not Found: Tässä osoitteessa ei ole kanavaa.
     Channel Already Followed: Seuraat jo tätä kanavaa.
@@ -435,7 +435,6 @@ Settings:
     Failed to Save Password: "Salasanan tallentaminen epäonnistui."
     Confirm Password: "Vahvista salasana"
     Passwords Do Not Match: "Salasanat eivät täsmää."
-  Navigation and Controls: "Navigointi ja säätimet"
   Control Bar:
     Title: "Ohjauspalkki"
     Customize: "Mukauta ohjauspalkkia"
@@ -682,7 +681,11 @@ Settings:
       Tab Loading Indicator: Välilehden latausilmaisin
       Bar: Palkki
       Dot: Piste (perinteinen)
-    Compact Settings Categories: "Tiiviit asetuskategoriat"
+    UI Density:
+      UI Density: "Käyttöliittymän tiheys"
+      Compact: "Tiivis"
+      Default: "Oletus"
+      Comfortable: "Väljä"
     Playlist Thumbnail Size: "Soittolistan pikkukuvien koko"
     Compact Mobile Mini Player: "Kompakti mobiiliminisoitin"
     Always Show Mobile Search Bar: "Näytä mobiilin hakupalkki aina"
@@ -1051,6 +1054,7 @@ Settings:
     Channel Settings: Kanava-asetukset
     Channel Settings Description: Muista katselun aikana valitsemasi asetukset kanavakohtaisesti, jotta niitä käytetään uudelleen, kun katsot seuraavan kerran saman kanavan videota.
     Enable Channel Playback Settings: Ota kanavakohtaiset toistoasetukset käyttöön
+    Auto Save Changes: Tallenna muutokset automaattisesti
     Auto Save Playback Speed: Tallenna toistonopeuden muutokset automaattisesti
     Auto Save Video Quality: Tallenna videon laadun muutokset automaattisesti
     Auto Save Subtitles State: Tallenna tekstityksen tilan muutokset automaattisesti
@@ -1300,6 +1304,7 @@ Settings:
     Notify About New Uploads: Ilmoita uusista latauksista
     RSS Feeds Auto Refresh Interval: RSS-syötteiden automaattisen päivityksen aikaväli
     Faster Subscription Refresh: "Nopeampi tilausten päivitys"
+    Show Collaborations From Other Channels: "Sisällytä muiden kanavien lataamat yhteistyöt"
     Platforms:
       Other Platforms: Muut alustat
       Manage Channels: Hallitse seurattuja kanavia
@@ -2225,6 +2230,7 @@ Context Menu:
   Search With Multiple: Hae hakukoneella...
   Selection Too Long: Valinta on liian pitkä haettavaksi (> {count} merkkiä)
   Background Tab: Taustavälilehti
+  Open in an Incognito Tab: Avaa incognito-välilehdessä
 Tab Organizer:
   Tab History: "Välilehden historia"
   Current Page: "Nykyinen sivu"
@@ -2309,6 +2315,7 @@ Comments:
   Filter loaded comments: Suodata ladattuja kommentteja
   Comment filters: Kommenttisuodattimet
   From creator: Sisällöntuottajalta
+  From you: Sinulta
   Contains timestamps: Sisältää aikaleimoja
   Pin comment by author: Kiinnitä käyttäjän {author} kommentti
   Unpin comment by author: Irrota käyttäjän {author} kommentti
@@ -2457,6 +2464,7 @@ Tooltips:
     Notify About New Uploads: Näyttää tällä laitteella järjestelmäilmoituksia kanavista, joiden ilmoitukset olet ottanut käyttöön niiden tilausasetuksissa. OpenTubeX tarkistaa uuden sisällön tilauksia päivitettäessä, joten valitse automaattisen päivityksen aikaväli. Jos haluat ilmoituksia myös sovelluksen ollessa suljettuna, ota käyttöön myös päivitys sovelluksen ollessa suljettuna.
     RSS Feeds Auto Refresh Interval: Kuinka usein OpenTubeX päivittää RSS-syötteesi automaattisesti, kun sovellus on auki.
     Faster Subscription Refresh: "Tarkistaa ensin jokaisen kanavan RSS-syötteen ja lataa videot, Shorts-videot ja suoratoistot vain kanavilta, joilla on uusia latauksia. Automaattiset päivitykset ohittavat myös kanavat, jotka on ladattu viimeisen 10 minuutin aikana. Kanavilla, joilla ei ole uusia latauksia, katselukerrat, poistetut videot ja muuttuneet otsikot päivittyvät vain muutaman tunnin välein, ja uudet lataukset voivat näkyä myöhemmin, kun RSS-syöte on jäljessä. Ei käytettävissä Invidious-rajapinnan kanssa."
+    Show Collaborations From Other Channels: "Näyttää myös videot, jotka tilaamasi kanavat ovat tehneet yhdessä toisen, ne ladanneen kanavan kanssa. YouTube näyttää ne vain kanavan Etusivu-välilehdellä, joten jokainen videoiden päivitys lataa yhden sivun enemmän kanavaa kohden. Vain siellä näkyvät uusimmat yhteistyöt löytyvät, jotkin kanavat eivät näytä niitä lainkaan, ja niiden julkaisupäivät ovat likimääräisiä. Ei käytettävissä Invidious-rajapinnan kanssa."
     Platforms Auto Refresh Interval: Kuinka usein OpenTubeX päivittää muilla alustoilla seuraamasi kanavat automaattisesti, kun sovellus on auki.
     Twitch Notify When Live: Ilmoittaa, kun jokin seuraamistasi Twitch-kanavista aloittaa lähetyksen. OpenTubeX tarkistaa muutaman minuutin välein ollessaan auki, ja myös ollessaan suljettuna, jos se silloin päivittää tilaukset.
   Theme Settings:
@@ -2464,7 +2472,7 @@ Tooltips:
     Visible Search Suggestions: "Määrittää, montako hakuhistorian merkintää ja ehdotusta hakupalkki näyttää ennen kuin sen luetteloa täytyy vierittää. Luettelo ei koskaan ulotu ikkunan alareunan yli."
     Thumbnail Size: "Muuttaa videoiden pikkukuvien kokoa ruudukoissa ja luetteloissa. Ruudukot, joissa on kiinteä sarakemäärä tai Koko leveys -näkymä, täyttävät sen sijaan jokaisen rivin, joten siellä se muuttaa vain luetteloiden pikkukuvia ja Shortseja. Puhelimen kokoisissa ikkunoissa ruudukon pikkukuvat rajoitetaan 100 %:iin."
     Playlist Thumbnail Size: "Muuttaa videoiden pikkukuvien kokoa soittolistasivuilla. Ruudukot, joissa on kiinteä sarakemäärä tai Koko leveys -näkymä, täyttävät sen sijaan jokaisen rivin, joten siellä se muuttaa vain luetteloiden pikkukuvia ja Shortseja. Puhelimen kokoisissa ikkunoissa ruudukon pikkukuvat rajoitetaan 100 %:iin."
-    Compact Settings Categories: "Pienentää asetuskategorioiden korkeutta."
+    UI Density: "Muuttaa välistystä luetteloissa, valikoissa, sivupalkissa ja asetuksissa."
     Show Progress as Notification: Näyttää taustatoimintojen, kuten tilausten päivityksen ja ylläpidettyjen työkalujen latausten, etenemisen jatkuvassa ilmoituksessa yleisen edistymispalkin sijaan.
     Always Show Scrollbars: Pitää vierityspalkit aina näkyvissä. Kun asetus on poistettu käytöstä, ne häipyvät pian hiiren liikkeen pysähdyttyä ja tulevat uudelleen näkyviin heti, kun hiirtä liikutetaan.
     Scroll Speed: Muuttaa hiiren rullan ja kosketuslevyn vierityseleiden vieritysmatkaa.
@@ -2517,6 +2525,7 @@ KeyboardShortcutPrompt:
   Tab Switcher: Välilehtivalitsin
   Undo Seek: Kumoa viimeisin siirtymä
   Redo Seek: Tee kumottu siirtymä uudelleen
+  New Incognito Tab: Luo uusi incognito-välilehti
 CommandPalette:
   Title: Komentopaletti
   Open: Avaa komentopaletti
@@ -2904,3 +2913,5 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Hae Twitchistä"
+New Incognito Tab: Uusi incognito-välilehti
+Incognito Tab: Incognito-välilehti

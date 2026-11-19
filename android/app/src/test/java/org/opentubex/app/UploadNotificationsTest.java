@@ -32,6 +32,24 @@ public class UploadNotificationsTest {
     }
 
     @Test
+    public void suppressesNotificationsDismissedOrWatchedOnAnyDevice() throws Exception {
+        JSONObject suppressed = new JSONObject()
+            .put("dismissed", new JSONArray()
+                .put(new JSONObject().put("feedType", "live").put("id", "streamed"))
+                .put(new JSONObject().put("feedType", "comment-reply").put("id", "video/reply")))
+            .put("watched", new JSONArray().put("watched"));
+
+        // An ended stream is announced from the videos feed.
+        assertTrue(UploadNotifications.isSuppressed(suppressed, "videos", "streamed"));
+        assertTrue(UploadNotifications.isSuppressed(suppressed, "comment-reply", "video/reply"));
+        assertFalse(UploadNotifications.isSuppressed(suppressed, "comment-heart", "video/reply"));
+        assertTrue(UploadNotifications.isSuppressed(suppressed, "shorts", "watched"));
+        // Replies on a watched video are still news.
+        assertFalse(UploadNotifications.isSuppressed(suppressed, "comment-reply", "watched/reply"));
+        assertFalse(UploadNotifications.isSuppressed(suppressed, "videos", "new"));
+    }
+
+    @Test
     public void notifiesEntriesAheadOfTheNewestKnownEntryOnce() throws Exception {
         JSONObject state = new JSONObject();
         assertTrue(UploadNotifications.takeNewUploads(state, "UC1", "videos",

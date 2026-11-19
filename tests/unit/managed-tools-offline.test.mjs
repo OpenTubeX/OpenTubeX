@@ -17,6 +17,7 @@ function setup(t, online, checkInternet) {
   t.after(() => recovery.dispose())
   const calls = []
   const toasts = []
+  const recorded = []
   const context = vm.createContext({
     isElectron: false,
     isCapacitor: true,
@@ -35,10 +36,12 @@ function setup(t, online, checkInternet) {
     showProgressStartToast: { value: true },
     t: key => key,
     showToast: toast => toasts.push(toast),
+    recordNotification: notification => recorded.push(notification),
+    getSettingsNotificationTarget: section => ({ path: '/settings', query: { section } }),
     startProgressBarOperation: () => ({ update() {}, finish() {} }),
   })
   vm.runInContext(initializeSource, context)
-  return { calls, toasts, context, connect(value) { online = value; events.dispatchEvent(new Event(value ? 'online' : 'offline')) } }
+  return { calls, toasts, recorded, context, connect(value) { online = value; events.dispatchEvent(new Event(value ? 'online' : 'offline')) } }
 }
 
 test('iOS startup skips unsupported managed tools without network probes or toasts', async t => {
@@ -89,6 +92,8 @@ test('managed tool failures while connected remain visible', async t => {
   app.context.ytDlp.ytDlpDownloadBinary = async () => ({ error: 'Invalid archive' })
   await app.context.initializeManagedExternalSoftware()
   assert.equal(app.toasts.some(toast => toast.message.includes('Error')), true)
+  // The bell keeps the failure after the toast is gone.
+  assert.deepEqual(app.recorded.map(notification => notification.kind), ['tool-update-failed'])
 })
 
 for (const stage of ['info', 'download']) {

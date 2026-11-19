@@ -632,7 +632,7 @@ import { useResultChannelAvatar } from '../../composables/useResultChannelAvatar
 import { formatDate, formatDateTime } from '../../helpers/dateFormat.js'
 import { getYoutubeVideoShareUrl } from '../../helpers/share'
 import { isTileMarkShortcut, tileKeyboardShortcutsKey } from '../../helpers/tileNavigation'
-import { playInBackgroundKey, watchNavigationKey } from '../../tabs/TabContext'
+import { playInBackgroundKey, useIncognitoTab, watchNavigationKey } from '../../tabs/TabContext'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 
 // Sidebar rows have fixed thumbnail widths; lists and grids provide theirs.
@@ -880,8 +880,10 @@ function schedulePremiereStartInvalidation() {
   }, Math.min(timestamp - now + 1, MAX_TIMEOUT_DELAY))
 }
 
+// Like FtListFeedItem, a saved position within the last 2 seconds already counts as the end
 const canMarkAsFullySeen = computed(() => canMarkAsWatched.value &&
-  Number.isFinite(lengthSeconds.value) && lengthSeconds.value > 0)
+  Number.isFinite(lengthSeconds.value) && lengthSeconds.value > 0 &&
+  !(isWatched.value && historyEntry.value.watchProgress >= lengthSeconds.value - 2))
 
 const watchProgress = computed(() => {
   if (!historyEntryExists.value || !watchedProgressSavingEnabled.value) {
@@ -1179,6 +1181,13 @@ const videoMenuOptions = computed(() => {
           label: t('Context Menu.Open in a New Window'),
           value: 'openNewWindow',
           icon: ['fas', 'external-link-alt']
+        }]
+      : []),
+    ...(store.getters.getIncognitoTabsEnabled
+      ? [{
+          label: t('Context Menu.Open in an Incognito Tab'),
+          value: 'openIncognitoTab',
+          icon: ['fas', 'user-secret']
         }]
       : []),
     { type: 'divider' },
@@ -1828,6 +1837,15 @@ function handleOptionsClick(option) {
         makeActive: option === 'openNewTab' && !process.env.IS_ELECTRON
       })
       break
+    case 'openIncognitoTab':
+      openInternalPath({
+        path: `/watch/${id.value}`,
+        query: watchPageLinkQuery.value,
+        title: title.value,
+        doCreateNewTab: true,
+        incognito: true
+      })
+      break
     case 'copyYoutubeWithoutPlaylist':
       copyToClipboard(`https://youtu.be/${id.value}`, { messageOnSuccess: t('Share.YouTube URL copied to clipboard') })
       break
@@ -1841,7 +1859,7 @@ function handleOptionsClick(option) {
       hideSubscriptionFeedType()
       break
     case 'playInBackground':
-      markSubscriptionVideoAsSeen()
+      markSubscriptionVideoAsOpened()
       playInBackground({ path: `/watch/${id.value}`, query: watchPageLinkQuery.value })
       break
     case 'playNext':
@@ -2005,7 +2023,9 @@ const watchedProgressSavingEnabled = computed(() => {
 const watchedPercentageThreshold = computed(() => store.getters.getWatchedPercentageThreshold)
 
 /** @type {import('vue').ComputedRef<boolean>} */
-const rememberHistory = computed(() => store.getters.getRememberHistory)
+const isIncognitoTab = useIncognitoTab()
+// Opening the external player from an incognito tab does not mark the video as watched
+const rememberHistory = computed(() => store.getters.getRememberHistory && !isIncognitoTab.value)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const saveVideoHistoryWithLastViewedPlaylist = computed(() => store.getters.getSaveVideoHistoryWithLastViewedPlaylist)
@@ -2202,7 +2222,7 @@ async function handleWatchPageLinkClick(event) {
     return
   }
 
-  markSubscriptionVideoAsSeen()
+  markSubscriptionVideoAsOpened()
   // Lists such as the queue consume a video that a plain click plays here.
   const plainLeftClick = event?.button === 0 && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey
 
@@ -2364,8 +2384,13 @@ function markSubscriptionVideoAsSeen() {
   }
 }
 
+/** Opening a video from an incognito tab leaves it new */
+function markSubscriptionVideoAsOpened() {
+  if (!isIncognitoTab.value) markSubscriptionVideoAsSeen()
+}
+
 function handleExternalPlayer() {
-  markSubscriptionVideoAsSeen()
+  markSubscriptionVideoAsOpened()
   openInExternalPlayer()
 }
 
@@ -2854,8 +2879,8 @@ watch([useSponsorBlock, id], ([enabled, videoId]) => {
 <style scoped src="./FtListVideo.scss" lang="scss" />
 
 <style>
-body.collaboratorsLoading,
-body.collaboratorsLoading * {
+.collaboratorsLoading,
+.collaboratorsLoading * {
   cursor: wait !important;
 }
 </style>
