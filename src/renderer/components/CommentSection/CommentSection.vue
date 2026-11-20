@@ -1740,7 +1740,7 @@ function commentMatchesMention(comment, mention) {
     author === mention.author
 }
 
-/** @type {WeakMap<object, { replies: Comment[], nodes: object[] }>} */
+/** @type {WeakMap<object, { replies: Comment[], children?: object[][], nodes: object[] }>} */
 const replyTreeCache = new WeakMap()
 
 /**
@@ -1754,12 +1754,14 @@ function buildReplyTree(comment) {
 
   if (comment.dataType === 'local') {
     const children = replies.map(buildReplyTree)
-    if (cached?.replies === toRaw(replies) && cached.nodes.every((node, index) => node.children === children[index])) {
+    if (cached?.replies === toRaw(replies) && cached.children.every((nodes, index) => nodes === children[index])) {
       return cached.nodes
     }
 
-    const nodes = replies.map((reply, index) => ({ reply, index, children: children[index] }))
-    replyTreeCache.set(toRaw(comment), { replies: toRaw(replies), nodes })
+    const nodes = replies.some(reply => reply.isFlatReply)
+      ? buildMentionReplyTree(comment, children)
+      : replies.map((reply, index) => ({ reply, index, children: children[index] }))
+    replyTreeCache.set(toRaw(comment), { replies: toRaw(replies), children, nodes })
     return nodes
   }
 
@@ -1770,9 +1772,11 @@ function buildReplyTree(comment) {
 }
 
 /**
+ * Nests flat replies under the latest earlier reply by the author they mention.
  * @param {Comment} comment
+ * @param {object[][]} [childNodes] the trees of the replies' own replies
  */
-function buildMentionReplyTree(comment) {
+function buildMentionReplyTree(comment, childNodes = []) {
   const roots = []
   // The latest earlier reply for each channel ID and normalized author, which
   // is the one commentMatchesMention would find first when scanning backwards.
@@ -1780,8 +1784,9 @@ function buildMentionReplyTree(comment) {
   const latestByAuthor = new Map()
 
   comment.replies.forEach((reply, index) => {
-    const node = { reply, index, children: [] }
-    const mention = getCachedLeadingMention(reply)
+    const node = { reply, index, children: [...(childNodes[index] ?? [])] }
+    // Local replies YouTube nests itself, like ones posted here, stay where they are.
+    const mention = (comment.dataType !== 'local' || reply.isFlatReply) && getCachedLeadingMention(reply)
     let parent = null
 
     if (mention && !commentMatchesMention(comment, mention)) {

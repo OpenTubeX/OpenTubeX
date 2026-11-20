@@ -1,4 +1,4 @@
-import { normalizeCommentFetchResponse, parseLocalCommentImageAttachment } from './local-comment-response'
+import { FLAT_REPLY_RENDERING_PRIORITY, normalizeCommentFetchResponse, parseLocalCommentImageAttachment } from './local-comment-response'
 import { createPostCommentsContinuation, createPostPageParams, parsePollResults } from './youtube-account-parsers.js'
 import { createLocalFeedParsers, getAuthorVerification, getChannelHandleFromEndpoint, getLocalMusicChartPlaylistId } from './local-feed-parsers'
 import { createOriginalChannelNameResolver } from './original-channel-name'
@@ -2480,6 +2480,7 @@ export function mapLocalLegacyFormat(format) {
  * @property {CommentThread} replyToken
  * @property {boolean} showReplies
  * @property {LocalComment[]} replies
+ * @property {boolean} isFlatReply a reply YouTube served without its parent, which its leading mention names
  * @property {string} memberIconUrl
  * @property {string} time
  * @property {number} published
@@ -2528,6 +2529,7 @@ export function parseLocalComment(comment, commentThread = undefined) {
     replyToken,
     showReplies: false,
     replies: [],
+    isFlatReply: commentThread?.rendering_priority === FLAT_REPLY_RENDERING_PRIORITY,
     memberIconUrl: comment.member_badge?.url ?? '',
     time: getRelativeTimeFromDate(published, false),
     published,
