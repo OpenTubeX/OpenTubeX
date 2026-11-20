@@ -373,11 +373,12 @@ export function findCommentHeart(response, commentId) {
 
 /**
  * A comment's text without the extra spaces, zero-width spaces, and
- * bidirectional isolates that come around mentions.
+ * bidirectional isolates that come around mentions. Zero-width joiners and
+ * non-joiners stay, as emoji and some scripts need them.
  * @param {string} text
  */
 export function cleanCommentText(text) {
-  return text.replaceAll(/[\u200B-\u200D\u2066-\u2069]/g, '').replaceAll(/\s+/g, ' ').trim()
+  return text.replaceAll(/[\u200B\u2066-\u2069]/g, '').replaceAll(/\s+/g, ' ').trim()
 }
 
 /**

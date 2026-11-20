@@ -126,7 +126,7 @@ test('reads whether a linked comment or reply is hearted, and by whom, from the 
     entityKey: `entity-${commentId}`,
     payload: {
       commentEntityPayload: {
-        properties: { commentId, toolbarStateKey: stateKey, content: { content: `\u200B \u2068Text of ${commentId}\u2069 ` } },
+        properties: { commentId, toolbarStateKey: stateKey, content: { content: `\u200B \u2068Text of ${commentId}\u2069 \u{1F469}\u200D\u{1F4BB} ` } },
         toolbar: { heartActiveTooltip: tooltip }
       }
     }
@@ -144,8 +144,8 @@ test('reads whether a linked comment or reply is hearted, and by whom, from the 
       }
     }
   }
-  assert.deepEqual(findCommentHeart(response, 'thread1'), { hearted: false, author: '@Creator.Name', text: 'Text of thread1' })
-  assert.deepEqual(findCommentHeart(response, 'thread1.a'), { hearted: true, author: '@Creator.Name', text: 'Text of thread1.a' })
+  assert.deepEqual(findCommentHeart(response, 'thread1'), { hearted: false, author: '@Creator.Name', text: 'Text of thread1 \u{1F469}\u200D\u{1F4BB}' })
+  assert.deepEqual(findCommentHeart(response, 'thread1.a'), { hearted: true, author: '@Creator.Name', text: 'Text of thread1.a \u{1F469}\u200D\u{1F4BB}' })
   assert.equal(findCommentHeart(response, 'thread1.b'), null)
   assert.equal(findCommentHeart({}, 'thread1'), null)
 })
