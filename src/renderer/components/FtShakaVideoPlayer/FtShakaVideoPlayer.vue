@@ -5908,6 +5908,7 @@ const {
   handleMobilePlayerSurfaceClick,
   handleMobilePlayerTouchEnd,
   handleMobilePlayerTouchMove,
+  handleStoppedPlayerTouchEnd,
   invalidateMobileTwoFingerTap,
   isMobileTwoFingerTapCandidate,
   mobileFullscreenSwipeSettling,
@@ -6061,6 +6062,8 @@ function handlePlayerTouchEnd(event) {
   if (suppressTemporaryPlaybackRateClick && event.isTrusted) {
     event.preventDefault()
     event.stopImmediatePropagation()
+    // A drag that canceled the hold showed the controls
+    handleStoppedPlayerTouchEnd()
     return
   }
   handleMobilePlayerTouchEnd(event)

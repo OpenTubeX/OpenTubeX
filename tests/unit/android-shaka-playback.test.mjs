@@ -439,6 +439,8 @@ test('fullscreen gesture completion restarts controls while the real post-hold t
   const handler = vm.runInNewContext(`${source.slice(start, end)}\nhandlePlayerTouchEnd`, {
     suppressTemporaryPlaybackRateClick: true,
     handleMobilePlayerTouchEnd: () => calls.push('restart-idle'),
+    // A drag that canceled the hold still lets Shaka's controls hide
+    handleStoppedPlayerTouchEnd: () => calls.push('stopped-touch-end'),
     isCapacitorMobilePlayer: () => false,
   })
   const event = trusted => ({
@@ -447,7 +449,7 @@ test('fullscreen gesture completion restarts controls while the real post-hold t
     stopImmediatePropagation: () => calls.push('stop'),
   })
   handler(event(true))
-  assert.deepEqual(calls, ['prevent', 'stop'])
+  assert.deepEqual(calls, ['prevent', 'stop', 'stopped-touch-end'])
   calls.length = 0
   handler(event(false))
   assert.deepEqual(calls, ['restart-idle'])
