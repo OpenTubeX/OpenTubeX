@@ -2423,7 +2423,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Berrespena eskatzen du {count} bideo baino gehiagoko erreprodukzio-zerrenda baten bideo guztiak aurrekargatu aurretik."
     Enable Timestamp Notes: "Erreproduzigailuari botoi bat eta N lasterbidea gehitzen dizkio, bideoa pausatu eta uneko momentura estekatzen duen ohar bat irekitzen dutenak. Oharrak Markdown gisa kopia daitezke edo, mahaigainean, Obsidian-era gehitu."
     Obsidian Vault: Denbora-zigiludun oharretarako Obsidian biltegiaren izena. Ezartzen bada, oharrak Obsidian-era gehi daitezke. Bideo bakoitzaren oharrak bideoaren izena duen ohar batean biltzen dira, biltegiaren ohar berrien karpetan.
-    Double-Tap With Two Fingers to Skip Chapters: "Sakatu birritan bi hatzekin bideoaren eskuineko aldea hurrengo kapitulura joateko, edo ezkerreko aldea uneko kapituluaren hasierara itzultzeko. Errepikatu berehala ezkerrean aurreko kapitulura joateko."
+    Double-Tap With Two Fingers to Skip Chapters: "Sakatu birritan bi hatzekin bideoaren eskuineko aldea hurrengo kapitulura joateko, edo ezkerreko aldea uneko kapituluaren hasierara itzultzeko. Kapitulu baten lehen 3 segundoetan, ezkerreko aldeak aurreko kapitulura eramaten zaitu horren ordez; beraz, errepikatuz gero, kapituluetan atzera egingo duzu."
   Download Settings:
     Download Folder: Bideoak karpeta honetan gordetzen dira. Utzi hutsik sistemako Deskargak karpeta erabiltzeko.
     Global Additional yt-dlp Arguments: Deskarga bakoitzean yt-dlp-ri emandako komando-lerroko argumentu gehigarriak; adibidez, --cookies-from-browser firefox.

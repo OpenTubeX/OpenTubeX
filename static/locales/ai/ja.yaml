@@ -2412,7 +2412,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "{count} 本を超える動画を含む再生リストのすべての動画を先読みする前に確認します。"
     Enable Timestamp Notes: "動画を一時停止し、現在の位置へのリンクを含むメモを開くプレーヤーボタンと N ショートカットを追加します。メモは Markdown としてコピーするか、デスクトップでは Obsidian に追加できます。"
     Obsidian Vault: タイムスタンプメモに使用する Obsidian の保管庫の名前。設定すると、メモを Obsidian に追加できます。各動画のメモは、保管庫の新規ノート用フォルダー内にある、動画名を付けたノートにまとめられます。
-    Double-Tap With Two Fingers to Skip Chapters: "動画の右側を2本指でダブルタップすると次のチャプターへ、左側をダブルタップすると現在のチャプターの先頭へ移動します。続けて左側でもう一度行うと前のチャプターへ移動します。"
+    Double-Tap With Two Fingers to Skip Chapters: "動画の右側を2本指でダブルタップすると次のチャプターへ、左側をダブルタップすると現在のチャプターの先頭へ移動します。チャプター開始から3秒以内は、左側で代わりに前のチャプターへ移動するため、繰り返すとチャプターを順にさかのぼれます。"
   Download Settings:
     Download Folder: 動画をこのフォルダーに保存します。空欄にすると、システムのダウンロードフォルダーを使用します。
     Global Additional yt-dlp Arguments: 'すべてのダウンロードでyt-dlpに渡す追加のコマンドライン引数です。例: --cookies-from-browser firefox'

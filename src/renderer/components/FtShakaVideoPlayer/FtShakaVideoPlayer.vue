@@ -4844,7 +4844,10 @@ const {
   deferPinch: () => isMobileTwoFingerTapCandidate(),
   isNativeFullscreenActive: () => isNativeFullscreenActive(),
   mediaTabId,
-  onPinchStart: () => cancelMobileFullscreenGesture(),
+  onPinchStart: () => {
+    cancelMobileFullscreenGesture()
+    invalidateMobileTwoFingerTap()
+  },
   props,
   showValueChange,
   useVrMode,
@@ -5819,6 +5822,7 @@ const {
   handleMobilePlayerSurfaceClick,
   handleMobilePlayerTouchEnd,
   handleMobilePlayerTouchMove,
+  invalidateMobileTwoFingerTap,
   isMobileTwoFingerTapCandidate,
   mobileFullscreenSwipeSettling,
   mobileFullscreenSwipeStyle,

@@ -2413,7 +2413,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "{count} videodan fazla içeren bir oynatma listesinin tüm videolarını önceden yüklemeden önce onay ister."
     Enable Timestamp Notes: "Videoyu duraklatan ve geçerli ana bağlantı veren bir not açan bir oynatıcı düğmesi ve N kısayolu ekler. Notlar Markdown olarak kopyalanabilir veya masaüstünde Obsidian'a eklenebilir."
     Obsidian Vault: Zaman damgalı notlar için Obsidian kasasının adı. Ayarlandığında notlar Obsidian'a eklenebilir. Her videonun notları, kasanın yeni notlar klasöründe videonun adını taşıyan bir notta toplanır.
-    Double-Tap With Two Fingers to Skip Chapters: "Sonraki bölüme geçmek için videonun sağ tarafına, geçerli bölümün başına dönmek için sol tarafına iki parmakla çift dokunun. Önceki bölüme gitmek için hemen ardından sol tarafta tekrarlayın."
+    Double-Tap With Two Fingers to Skip Chapters: "Sonraki bölüme geçmek için videonun sağ tarafına, geçerli bölümün başına dönmek için sol tarafına iki parmakla çift dokunun. Bir bölümün ilk 3 saniyesinde sol taraf bunun yerine önceki bölüme gider, böylece tekrarladıkça bölümler arasında geriye doğru ilerlersiniz."
   Download Settings:
     Download Folder: Videolar bu klasöre kaydedilir. Sisteminizin İndirilenler klasörünü kullanmak için boş bırakın.
     Global Additional yt-dlp Arguments: Her indirmede yt-dlp'ye iletilen ek komut satırı argümanları, örneğin --cookies-from-browser firefox.

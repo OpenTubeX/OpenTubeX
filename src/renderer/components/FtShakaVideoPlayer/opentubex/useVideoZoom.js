@@ -142,7 +142,8 @@ export function useVideoZoom({
    * @param {boolean} fullscreen
    */
   function handleVideoZoomFullscreenChange(fullscreen) {
-    if (videoZoomPinchStart && videoZoomPinchStart.fullscreen !== fullscreen) invalidateVideoZoomPinch()
+    const pinch = videoZoomPinchStart ?? videoZoomPendingPinch
+    if (pinch && pinch.fullscreen !== fullscreen) invalidateVideoZoomPinch()
     if (!fullscreen && selectedVideoZoom.value > VIDEO_ZOOM_LEVELS.at(-1)) {
       updateVideoZoom(VIDEO_ZOOM_LEVELS.at(-1))
     }
@@ -155,9 +156,10 @@ export function useVideoZoom({
   let videoZoomPointerInside = false
   let videoZoomSuppressClick = false
   let videoZoomSuppressClickTimer = null
+  /** @type {Map<number, { x: number, y: number, startX: number, startY: number }>} */
   const videoZoomTouchPointers = new Map()
   let videoZoomPinchStart = null
-  /** @type {Map<number, { x: number, y: number }> | null} where a deferred pinch's fingers landed */
+  /** @type {{ fullscreen: boolean, invalidated: boolean } | null} a pinch deferred while its fingers may still tap */
   let videoZoomPendingPinch = null
 
   function handleVideoZoomPointerEnter(event) {
@@ -274,6 +276,13 @@ export function useVideoZoom({
     return true
   }
 
+  // Zooms from where the fingers landed, so the movement that ruled out a tap
+  // counts towards the pinch.
+  function beginPendingVideoZoomPinch() {
+    const points = [...videoZoomTouchPointers.values()].slice(0, 2).map(({ startX, startY }) => ({ x: startX, y: startY }))
+    if (beginVideoZoomPinch(points)) videoZoomPendingPinch = null
+  }
+
   /**
    * Starts a pinch once a second finger touches the video, or a pan for a shift-drag.
    * @param {PointerEvent} event
@@ -284,10 +293,12 @@ export function useVideoZoom({
       videoZoomPossible.value &&
       isVideoZoomGestureTarget(event.target)
     ) {
-      videoZoomTouchPointers.set(event.pointerId, { x: event.clientX, y: event.clientY })
+      videoZoomTouchPointers.set(event.pointerId, { x: event.clientX, y: event.clientY, startX: event.clientX, startY: event.clientY })
+      // A third finger rules out a two-finger tap.
+      if (videoZoomPendingPinch && !videoZoomPendingPinch.invalidated) beginPendingVideoZoomPinch()
       if (videoZoomTouchPointers.size === 2 && getVideoZoomGestureGeometry()) {
         if (deferPinch()) {
-          videoZoomPendingPinch = new Map(videoZoomTouchPointers)
+          videoZoomPendingPinch = { fullscreen: isNativeFullscreenActive(), invalidated: false }
         } else {
           beginVideoZoomPinch([...videoZoomTouchPointers.values()])
         }
@@ -328,16 +339,21 @@ export function useVideoZoom({
    * @returns {boolean} whether the event belongs to a pinch
    */
   function moveVideoZoomPinch(event) {
-    if (videoZoomTouchPointers.has(event.pointerId)) {
-      videoZoomTouchPointers.set(event.pointerId, { x: event.clientX, y: event.clientY })
+    const pointer = videoZoomTouchPointers.get(event.pointerId)
+    if (pointer) {
+      pointer.x = event.clientX
+      pointer.y = event.clientY
     }
 
     if (videoZoomPendingPinch) {
-      const start = videoZoomPendingPinch.get(event.pointerId)
-      // Zoom once the fingers move past the tap slop or can no longer form a
-      // tap, from where they landed and including this movement.
-      if (start && (!deferPinch() || Math.hypot(event.clientX - start.x, event.clientY - start.y) > TWO_FINGER_TAP_SLOP)) {
-        if (beginVideoZoomPinch([...videoZoomPendingPinch.values()])) videoZoomPendingPinch = null
+      // Zoom once a finger moves past the tap slop from where it landed, like
+      // the tap tracker measures it, or the fingers can no longer form a tap.
+      if (
+        pointer &&
+        !videoZoomPendingPinch.invalidated &&
+        (!deferPinch() || Math.hypot(pointer.x - pointer.startX, pointer.y - pointer.startY) > TWO_FINGER_TAP_SLOP)
+      ) {
+        beginPendingVideoZoomPinch()
       }
       if (!videoZoomPinchStart) {
         event.preventDefault()
@@ -436,6 +452,8 @@ export function useVideoZoom({
   }
 
   function invalidateVideoZoomPinch() {
+    // A deferred pinch keeps its fingers but never starts zooming.
+    if (videoZoomPendingPinch) videoZoomPendingPinch.invalidated = true
     if (!videoZoomPinchStart || videoZoomPinchStart.invalidated) return
     videoZoomPinchStart.invalidated = true
     videoZoomOffset.x = videoZoomPinchStart.offset.x

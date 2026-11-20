@@ -782,6 +782,11 @@ export function useMobileFullscreenGestures({
     lastMobileTwoFingerTap = null
   }
 
+  // A pinch that starts zooming is never a tap.
+  function invalidateMobileTwoFingerTap() {
+    if (mobileTwoFingerTap) mobileTwoFingerTap.valid = false
+  }
+
   /**
    * Follows every touch on the player, alongside the other gestures, to find
    * two-finger double taps on either side. Fingers that move past the tap
@@ -892,6 +897,7 @@ export function useMobileFullscreenGestures({
     handleMobilePlayerSurfaceClick,
     handleMobilePlayerTouchEnd,
     handleMobilePlayerTouchMove,
+    invalidateMobileTwoFingerTap,
     isMobileTwoFingerTapCandidate,
     mobileFullscreenSwipeSettling,
     mobileFullscreenSwipeStyle,

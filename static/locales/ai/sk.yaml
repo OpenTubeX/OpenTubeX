@@ -2412,7 +2412,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Pred prednačítaním všetkých videí playlistu s viac ako {count} videami požiada o potvrdenie."
     Enable Timestamp Notes: "Pridá do prehrávača tlačidlo a skratku N, ktoré pozastavia video a otvoria poznámku s odkazom na aktuálny okamih. Poznámky možno skopírovať ako Markdown alebo ich na počítači pridať do Obsidianu."
     Obsidian Vault: Názov trezoru Obsidian pre poznámky s časovými pečiatkami. Ak je nastavený, poznámky možno pridávať do Obsidianu. Poznámky ku každému videu sa zhromažďujú v poznámke pomenovanej podľa videa, v priečinku trezoru pre nové poznámky.
-    Double-Tap With Two Fingers to Skip Chapters: "Dvojitým ťuknutím dvoma prstami na pravú stranu videa prejdete na ďalšiu kapitolu, na ľavú stranu sa vrátite na začiatok aktuálnej kapitoly. Zopakujte to vľavo hneď potom a prejdete na predchádzajúcu kapitolu."
+    Double-Tap With Two Fingers to Skip Chapters: "Dvojitým ťuknutím dvoma prstami na pravú stranu videa prejdete na ďalšiu kapitolu, na ľavú stranu sa vrátite na začiatok aktuálnej kapitoly. Počas prvých 3 sekúnd kapitoly vás ľavá strana namiesto toho presunie na predchádzajúcu kapitolu, takže opakovaním postupne prechádzate kapitolami späť."
   Download Settings:
     Download Folder: Videá sa ukladajú do tohto priečinka. Ak chcete použiť systémový priečinok Stiahnuté súbory, ponechajte pole prázdne.
     Global Additional yt-dlp Arguments: Dodatočné argumenty príkazového riadka odovzdané nástroju yt-dlp pri každom sťahovaní, napríklad --cookies-from-browser firefox.

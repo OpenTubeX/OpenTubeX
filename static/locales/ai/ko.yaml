@@ -2801,7 +2801,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "동영상이 {count}개를 넘는 재생목록의 모든 동영상을 미리 불러오기 전에 확인을 요청합니다."
     Enable Timestamp Notes: "동영상을 일시 정지하고 현재 시점으로 연결되는 메모를 여는 플레이어 버튼과 N 단축키를 추가합니다. 메모는 Markdown으로 복사하거나 데스크톱에서 Obsidian에 추가할 수 있습니다."
     Obsidian Vault: 타임스탬프 메모에 사용할 Obsidian 보관함 이름입니다. 설정하면 메모를 Obsidian에 추가할 수 있습니다. 각 동영상의 메모는 보관함의 새 노트 폴더에 있는, 동영상 이름으로 된 노트에 모입니다.
-    Double-Tap With Two Fingers to Skip Chapters: "동영상 오른쪽을 두 손가락으로 두 번 탭하면 다음 챕터로, 왼쪽을 두 번 탭하면 현재 챕터의 처음으로 이동합니다. 바로 이어서 왼쪽에서 한 번 더 하면 이전 챕터로 이동합니다."
+    Double-Tap With Two Fingers to Skip Chapters: "동영상 오른쪽을 두 손가락으로 두 번 탭하면 다음 챕터로, 왼쪽을 두 번 탭하면 현재 챕터의 처음으로 이동합니다. 챕터 시작 후 3초 이내에는 왼쪽이 대신 이전 챕터로 이동하므로, 반복하면 챕터를 하나씩 거슬러 올라갈 수 있습니다."
   External Player Settings:
     Ignore Default Arguments: 동영상 URL 외의 기본 인수를 외부 플레이어에 보내지 않습니다. 예를 들어 재생 속도와 재생목록 URL이 해당됩니다. 사용자 지정 인수는 계속 전달됩니다.
   Download Settings:

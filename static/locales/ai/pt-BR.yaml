@@ -2366,7 +2366,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Pede confirmação antes de pré-carregar todos os vídeos de uma playlist com mais de {count} vídeos."
     Enable Timestamp Notes: "Adiciona um botão ao player e o atalho N, que pausam o vídeo e abrem uma nota com link para o momento atual. As notas podem ser copiadas como Markdown ou, no computador, adicionadas ao Obsidian."
     Obsidian Vault: Nome do cofre do Obsidian para as notas com marcação de tempo. Quando definido, as notas podem ser adicionadas ao Obsidian. As notas de cada vídeo são reunidas em uma nota com o nome do vídeo, na pasta do cofre para novas notas.
-    Double-Tap With Two Fingers to Skip Chapters: "Toque duas vezes com dois dedos no lado direito do vídeo para pular para o próximo capítulo, ou no lado esquerdo para voltar ao início do capítulo atual. Repita logo em seguida à esquerda para ir ao capítulo anterior."
+    Double-Tap With Two Fingers to Skip Chapters: "Toque duas vezes com dois dedos no lado direito do vídeo para pular para o próximo capítulo, ou no lado esquerdo para voltar ao início do capítulo atual. Nos primeiros 3 segundos de um capítulo, o lado esquerdo vai, em vez disso, para o capítulo anterior, então repetir o gesto volta pelos capítulos um a um."
   Download Settings:
     Download Folder: Os vídeos são salvos nesta pasta. Deixe em branco para usar a pasta Downloads do sistema.
     Global Additional yt-dlp Arguments: Argumentos adicionais da linha de comandos passados ao yt-dlp em cada download, por exemplo --cookies-from-browser firefox.

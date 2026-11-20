@@ -2927,7 +2927,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Pred prednalaganjem vseh videoposnetkov s seznama predvajanja z več kot {count} videoposnetki zahteva potrditev."
     Enable Timestamp Notes: "V predvajalnik doda gumb in bližnjico N, ki zaustavita videoposnetek in odpreta opombo s povezavo do trenutnega trenutka. Opombe lahko kopirate kot Markdown ali jih na računalniku dodate v Obsidian."
     Obsidian Vault: Ime trezorja Obsidian za opombe s časovnimi oznakami. Ko je nastavljeno, lahko opombe dodajate v Obsidian. Opombe posameznega videoposnetka se zbirajo v opombi, poimenovani po videoposnetku, v mapi trezorja za nove opombe.
-    Double-Tap With Two Fingers to Skip Chapters: "Z dvema prstoma se dvakrat dotaknite desne strani videoposnetka, da skočite na naslednje poglavje, ali leve strani, da se vrnete na začetek trenutnega poglavja. Takoj ponovite na levi, da greste na prejšnje poglavje."
+    Double-Tap With Two Fingers to Skip Chapters: "Z dvema prstoma se dvakrat dotaknite desne strani videoposnetka, da skočite na naslednje poglavje, ali leve strani, da se vrnete na začetek trenutnega poglavja. V prvih 3 sekundah poglavja vas leva stran namesto tega premakne na prejšnje poglavje, zato se s ponavljanjem pomikate nazaj po poglavjih."
   External Player Settings:
     External Player: Če izberete zunanji predvajalnik, se na sličici prikaže ikona za odpiranje videoposnetka oziroma seznama predvajanja, če je podprt, v zunanjem predvajalniku. Nastavitve Invidious ne vplivajo na zunanje predvajalnike.
     Custom External Player Executable: OpenTubeX privzeto predvideva, da je izbrani zunanji predvajalnik mogoče najti prek okoljske spremenljivke PATH. Po potrebi lahko tukaj nastavite pot po meri.

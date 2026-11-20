@@ -2423,7 +2423,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Goulenn a ra ur gadarnaat a-raok rakgargañ holl videoioù ur roll-lenn gant muioc’h eget {count} video."
     Enable Timestamp Notes: "Ouzhpennañ a ra ur bouton el lenner hag ar verradenn N a ehan ar video hag a zigor un notenn gant ul liamm d'ar mare-mañ. Gallout a reer eilañ an notennoù e Markdown pe, war an urzhiataer, o ouzhpennañ da Obsidian."
     Obsidian Vault: Anv kell Obsidian evit an notennoù gant merk-amzer. Pa vez termenet, e c'haller ouzhpennañ notennoù da Obsidian. Dastumet e vez notennoù pep video en un notenn anvet diwar ar video, e teuliad ar gell evit an notennoù nevez.
-    Double-Tap With Two Fingers to Skip Chapters: "Daou-stokit gant daou viz war tu dehou ar video evit mont d'ar chabistr da-heul, pe war an tu kleiz evit distreiñ da zeroù ar chabistr red. Adgrit diouzhtu war an tu kleiz evit mont d'ar chabistr kent."
+    Double-Tap With Two Fingers to Skip Chapters: "Daou-stokit gant daou viz war tu dehou ar video evit mont d'ar chabistr da-heul, pe war an tu kleiz evit distreiñ da zeroù ar chabistr red. E-pad an 3 eilenn gentañ eus ur chabistr e ya an tu kleiz d'ar chabistr kent kentoc'h, neuze en ur adober e kilit a chabistr da chabistr."
   Download Settings:
     Download Folder: "Enrollet e vez ar videoioù en teuliad-mañ. Laoskit goullo evit implijout teuliad Pellgargadennoù ho reizhiad."
     Global Additional yt-dlp Arguments: "Arventennoù arc'had ouzhpenn tremenet da yt-dlp evit pep pellgargadenn, da skouer --cookies-from-browser firefox."

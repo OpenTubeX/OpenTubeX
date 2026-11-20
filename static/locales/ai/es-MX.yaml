@@ -2774,7 +2774,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Pide confirmación antes de precargar todos los videos de una lista de reproducción con más de {count} videos."
     Enable Timestamp Notes: "Agrega un botón al reproductor y el atajo N, que pausan el video y abren una nota que enlaza al momento actual. Las notas se pueden copiar como Markdown o, en la computadora, agregar a Obsidian."
     Obsidian Vault: Nombre de la bóveda de Obsidian para las notas con marca de tiempo. Si se establece, las notas se pueden agregar a Obsidian. Las notas de cada video se reúnen en una nota con el nombre del video, en la carpeta de la bóveda para notas nuevas.
-    Double-Tap With Two Fingers to Skip Chapters: "Toca dos veces con dos dedos el lado derecho del video para saltar al siguiente capítulo, o el lado izquierdo para volver al inicio del capítulo actual. Repítelo enseguida a la izquierda para ir al capítulo anterior."
+    Double-Tap With Two Fingers to Skip Chapters: "Toca dos veces con dos dedos el lado derecho del video para saltar al siguiente capítulo, o el lado izquierdo para volver al inicio del capítulo actual. En los primeros 3 segundos de un capítulo, el lado izquierdo va en cambio al capítulo anterior, así que si lo repites vas retrocediendo por los capítulos."
   External Player Settings:
     Ignore Default Arguments: No envíe ningún argumento predeterminado al reproductor externo aparte de la URL del video (por ejemplo, velocidad de reproducción, URL de la lista de reproducción, etc.). Los argumentos personalizados se seguirán transmitiendo.
   Download Settings:
