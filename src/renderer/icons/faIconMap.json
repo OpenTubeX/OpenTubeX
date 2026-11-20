@@ -755,6 +755,10 @@
     "ri": "user-lock-line",
     "material": "lock-person-outline"
   },
+  "user-minus": {
+    "ri": "user-unfollow-line",
+    "material": "person-remove-outline"
+  },
   "user-plus": {
     "ri": "user-add-line",
     "material": "person-add-outline"

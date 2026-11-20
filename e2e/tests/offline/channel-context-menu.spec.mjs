@@ -81,6 +81,35 @@ test('pins an unsubscribed channel from its name context menu and unpins from na
     .toEqual([otherChannel])
 })
 
+test('subscribes from a channel name context menu and unsubscribes after confirming', async ({ app, page }) => {
+  await page.evaluate(() => window.$store.dispatch('updateUnsubscriptionPopupStatus', true))
+  await page.locator(sel.searchInput).fill('channels')
+  await page.locator(sel.searchInput).press('Enter')
+  const title = page.locator('.ft-list-channel .title')
+  await expect(title).toHaveText(channel.name)
+  const menu = page.getByRole('menu', { name: 'Context menu', exact: true })
+  const subscribedIds = () => readDatastore(app.userDataDir, 'profiles').trim().split('\n').filter(Boolean)
+    .map(line => JSON.parse(line)).findLast(profile => profile._id === 'allChannels')
+    .subscriptions.map(subscription => subscription.id)
+
+  await title.click({ button: 'right' })
+  await menu.getByRole('menuitem', { name: 'Subscribe', exact: true }).click()
+  await expect(menu).toBeHidden()
+  await expect.poll(subscribedIds).toEqual([otherChannel.id, channel.id])
+
+  await title.click({ button: 'right' })
+  await menu.getByRole('menuitem', { name: 'Unsubscribe', exact: true }).click()
+  const prompt = page.getByRole('dialog', { name: channel.name })
+  await prompt.getByRole('button', { name: 'No', exact: true }).click()
+  await expect(prompt).toBeHidden()
+  expect(subscribedIds()).toEqual([otherChannel.id, channel.id])
+
+  await title.click({ button: 'right' })
+  await menu.getByRole('menuitem', { name: 'Unsubscribe', exact: true }).click()
+  await prompt.getByRole('button', { name: 'Yes', exact: true }).click()
+  await expect.poll(subscribedIds).toEqual([otherChannel.id])
+})
+
 test('pins an uncached watch-page channel from its name with the visible avatar', async ({ app, page }) => {
   await page.evaluate(() => window.$store.dispatch('updateBackendPreference', 'local'))
   await mockWatchPage(app, page)
@@ -118,3 +147,57 @@ for (const pinned of [false, true]) {
     expect(latestSettings(readDatastore(app.userDataDir, 'settings')).pinnedChannels).toEqual(savedChannels)
   })
 }
+
+test('reports a failed unsubscribe save without claiming the channel was removed', async ({ page }) => {
+  await page.evaluate(() => {
+    window.$store._actions.removeChannelFromProfiles = [() => Promise.resolve(false)]
+  })
+  await goTo(page, 'subscribedchannels')
+  await page.locator('.channels .channelName').click({ button: 'right' })
+  const menu = page.getByRole('menu', { name: 'Context menu', exact: true })
+  await menu.getByRole('menuitem', { name: 'Unsubscribe', exact: true }).click()
+  await expect(page.getByText('Failed to save channel settings', { exact: true })).toBeVisible()
+  await expect(page.getByText('Channel has been removed from your subscriptions', { exact: true })).toHaveCount(0)
+  expect(await page.evaluate(id => window.$store.getters.getActiveSubscribedChannelIdSet.has(id), otherChannel.id)).toBe(true)
+})
+
+test('saves a quick resubscribe only after the pending unsubscribe', async ({ page }) => {
+  await page.locator(sel.searchInput).fill('channels')
+  await page.locator(sel.searchInput).press('Enter')
+  const title = page.locator('.ft-list-channel .title')
+  await expect(title).toHaveText(channel.name)
+  const menu = page.getByRole('menu', { name: 'Context menu', exact: true })
+  const isSubscribed = () => page.evaluate(id => window.$store.getters.getActiveSubscribedChannelIdSet.has(id), channel.id)
+  await title.click({ button: 'right' })
+  await menu.getByRole('menuitem', { name: 'Subscribe', exact: true }).click()
+  await expect.poll(isSubscribed).toBe(true)
+
+  // Holds the removal after it updates the store, like its slower cleanup does.
+  await page.evaluate(() => {
+    const actions = window.$store._actions
+    const [remove] = actions.removeChannelFromProfiles
+    const [add] = actions.addChannelToProfiles
+    window.e2eSaves = []
+    const gate = new Promise(resolve => { window.e2eReleaseRemoval = resolve })
+    actions.removeChannelFromProfiles = [async payload => {
+      const saved = await remove(payload)
+      await gate
+      window.e2eSaves.push('removed')
+      return saved
+    }]
+    actions.addChannelToProfiles = [payload => {
+      window.e2eSaves.push('add')
+      return add(payload)
+    }]
+  })
+  await title.click({ button: 'right' })
+  await menu.getByRole('menuitem', { name: 'Unsubscribe', exact: true }).click()
+  await expect.poll(isSubscribed).toBe(false)
+  await title.click({ button: 'right' })
+  await menu.getByRole('menuitem', { name: 'Subscribe', exact: true }).click()
+  await expect(menu).toBeHidden()
+  await page.evaluate(() => window.e2eReleaseRemoval())
+
+  await expect.poll(isSubscribed).toBe(true)
+  expect(await page.evaluate(() => window.e2eSaves)).toEqual(['removed', 'add'])
+})

@@ -231,6 +231,15 @@
       </FtFlexBox>
     </FtPrompt>
     <FtPrompt
+      v-if="channelUnsubscribeConfirmation"
+      autosize
+      :label="t('Channels.Unsubscribe Prompt', { channelName: channelUnsubscribeConfirmation.channelName })"
+      :option-names="[t('Yes'), t('No')]"
+      :option-values="['yes', 'no']"
+      :option-icons="[['fas', 'check'], ['fas', 'xmark']]"
+      @click="answerChannelUnsubscribeConfirmation"
+    />
+    <FtPrompt
       v-if="showAndroidExitPrompt"
       autosize
       is-first-option-destructive
@@ -740,7 +749,7 @@ import {
 } from './helpers/progressPresentation'
 import { fetchReleasePages, findUpdateReleases, formatReleaseChangelog, isOlderRelease, scheduleUpdateChecks } from './helpers/releaseUpdates'
 import { copyToClipboard, isUnloadedBackgroundTabClick, openExternalLink, openInExternalPlayer, openInternalPath, shareLink, showToast } from './helpers/utils'
-import { getChannelLinkDetails, getChannelLinkMenuItems } from './helpers/channel-context-menu'
+import { channelUnsubscribeConfirmation, getChannelLinkDetails, getChannelLinkMenuItems } from './helpers/channel-context-menu'
 import { initializeCapacitorLiveReminderActions } from './helpers/liveReminders'
 import {
   getSettingsNotificationTarget,
@@ -4174,6 +4183,12 @@ async function handleMobileLinkContextMenu(event) {
   mobileContextLink.value = link
   await nextTick()
   mobileLinkActionsRef.value?.focus({ preventScroll: true })
+}
+
+/** @param {'yes' | 'no' | null} answer */
+function answerChannelUnsubscribeConfirmation(answer) {
+  channelUnsubscribeConfirmation.value.resolve(answer === 'yes')
+  channelUnsubscribeConfirmation.value = null
 }
 
 function closeOwnedMobileContextMenu(event) {
