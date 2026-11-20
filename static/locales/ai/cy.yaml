@@ -663,6 +663,7 @@ Settings:
     Invalid Engine: Rhowch enw ac URL chwilio HTTP neu HTTPS dilys sy'n cynnwys %s.
     Engine Limit: Gallwch ychwanegu hyd at {count} o beiriannau chwilio personol.
   Theme Settings:
+    Toggle Playback With Tab Icon: Chwarae a seibio gydag eicon y tab
     Theme and Colors: "Thema a lliwiau"
     Font Size: Maint y ffont
     Sections:
@@ -2491,6 +2492,7 @@ Tooltips:
     Platforms Auto Refresh Interval: Pa mor aml mae OpenTubeX yn adnewyddu'r sianeli rydych chi'n eu dilyn ar lwyfannau eraill yn awtomatig tra bod yr ap ar agor.
     Twitch Notify When Live: Yn eich hysbysu pan fydd un o'r sianeli Twitch rydych yn eu dilyn yn dechrau ffrydio. Mae OpenTubeX yn gwirio bob ychydig funudau tra bo ar agor, a hefyd tra bo ar gau os yw'n adnewyddu tanysgrifiadau bryd hynny.
   Theme Settings:
+    Toggle Playback With Tab Icon: Mae clicio eicon tab sydd â fideo yn chwarae neu wedi’i seibio yn ei seibio neu’n ei ailgychwyn heb newid i’r tab hwnnw.
     Only Show Important Notifications: Yn cuddio hysbysiadau yn yr ap sydd ond yn cadarnhau gweithred neu'n adrodd statws, gan gynnwys rhai sy'n cynnig Dadwneud. Mae gwallau, rhybuddion, nodiadau atgoffa rydych wedi'u gosod, a hysbysiadau sy'n gofyn am benderfyniad, fel cynigion diweddaru, yn dal i ymddangos. Mae cynnydd yn y cefndir, fel adnewyddu tanysgrifiadau, yn cael ei ddangos yn y bar cynnydd cyffredinol yn lle hysbysiad. Nid yw hysbysiadau'r system yn cael eu heffeithio.
     Visible Search Suggestions: "Yn gosod faint o gofnodion hanes chwilio ac awgrymiadau y mae’r bar chwilio’n eu dangos cyn i’w restr sgrolio. Nid yw’r rhestr byth yn ymestyn heibio gwaelod y ffenestr."
     Thumbnail Size: "Yn newid maint mân-luniau fideos mewn gridiau a rhestrau. Mae gridiau gyda nifer sefydlog o golofnau neu'r math gwedd Lled Llawn yn llenwi pob rhes yn lle hynny, felly yno dim ond mân-luniau rhestrau a Shorts y mae'n eu newid. Mewn ffenestri maint ffôn, mae mân-luniau'r grid wedi'u cyfyngu i 100%."

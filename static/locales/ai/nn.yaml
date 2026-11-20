@@ -681,6 +681,7 @@ Settings:
     Invalid Engine: Skriv inn eit namn og ei gyldig HTTP- eller HTTPS-søkjeadresse som inneheld %s.
     Engine Limit: Du kan leggje til opptil {count} eigne søkjemotorar.
   Theme Settings:
+    Toggle Playback With Tab Icon: Spel av og set på pause med faneikonet
     Theme and Colors: "Tema og fargar"
     Font Size: Skriftstorleik
     Sections:
@@ -2771,6 +2772,7 @@ Tooltips:
     Platforms Auto Refresh Interval: Kor ofte OpenTubeX automatisk oppdaterer kanalane du følgjer på andre plattformer medan appen er open.
     Twitch Notify When Live: Varslar deg når ein av Twitch-kanalane du følgjer, byrjar å strøyma. OpenTubeX sjekkar med nokre minutts mellomrom medan det er ope, og òg medan det er lukka dersom det då oppdaterer abonnement.
   Theme Settings:
+    Toggle Playback With Tab Icon: Eit klikk på ikonet til ei fane med ein video som vert spelt av eller er sett på pause, set han på pause eller held fram utan å byte til fana.
     Only Show Important Notifications: Gøymer varsel i appen som berre stadfestar ei handling eller melder ein status, inkludert dei som tilbyr Angre. Feil, åtvaringar, påminningar du har sett opp, og varsel som ber deg ta eit val, som oppdateringsførespurnader, blir framleis viste. Framdrift for bakgrunnsoperasjonar, som oppdatering av abonnement, blir vist i den globale framdriftslinja i staden for som eit varsel. Systemvarsel blir ikkje påverka.
     Visible Search Suggestions: "Set kor mange oppføringar frå søkjeloggen og forslag søkjefeltet viser før lista må rullast. Lista går aldri forbi nedkanten av vindauget."
     Thumbnail Size: "Skalerer videominiatyrbilete i rutenett og lister. Rutenett med eit fast tal kolonnar eller visingstypen Full breidd fyller i staden kvar rad, så der endrar han berre listeminiatyrbilete og Shorts. I vindauge på storleik med ein telefon er rutenettminiatyrbilete avgrensa til 100 %."

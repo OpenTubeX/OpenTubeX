@@ -304,6 +304,7 @@ export const SYNC_SETTING_LABELS = {
   showSkipSilenceButton: 'Settings.Player Settings.Show Skip Silence Toggle',
   showTabIcons: 'Settings.Theme Settings.Show Tab Icons',
   showTabPreviews: 'Settings.Theme Settings.Show Tab Previews',
+  toggleTabPlaybackWithIcon: 'Settings.Theme Settings.Toggle Playback With Tab Icon',
   tabLoadingIndicator: 'Settings.Theme Settings.Tab Loading Indicator.Tab Loading Indicator',
   showThumbnailPreviews: 'Settings.General Settings.Show Thumbnail Previews',
   showToastTimeoutIndicator: 'Settings.Theme Settings.Show Toast Timeout Indicator',

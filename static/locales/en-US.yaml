@@ -1043,6 +1043,7 @@ Settings:
     Loaded Tab Icons: 'Missing tab icon loaded: {count} | Missing tab icons loaded: {count}'
     Loaded Tab Icons With Failures: Loaded {loaded} tab icons; {failed} could not be loaded
     Show Tab Previews: Show Tab Previews
+    Toggle Playback With Tab Icon: Play and Pause With the Tab Icon
     Use Fixed Tab Width: Use Fixed Tab Width in Horizontal Mode
     Use Custom Title Bar: Use Custom Title Bar
     Tab Width: Tab Width
@@ -3606,6 +3607,7 @@ Tooltips:
     Scroll Speed: Changes how far mouse-wheel and touchpad wheel gestures scroll.
     Visible Search Suggestions: Sets how many search history entries and suggestions the search bar shows before its list scrolls. The list never extends past the bottom of the window.
     Use Fixed Tab Width: Gives every tab in the horizontal tab bar the same width instead of sizing them to their title.
+    Toggle Playback With Tab Icon: Clicking the icon of a tab with a playing or paused video pauses or resumes it without switching to that tab.
     Use Custom Title Bar: Replaces the system title bar with the tab bar, or with the top navigation when tabs are not at the top, to save vertical space. The window controls appear in the corner of that bar.
     Use Grid Player Menu: Arranges the video player's settings menu as a grid of tiles instead of a list of rows.
     UI Density: Changes the spacing in lists, menus, the side bar, and Settings.

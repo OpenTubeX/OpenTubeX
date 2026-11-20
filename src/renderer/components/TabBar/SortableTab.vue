@@ -50,9 +50,12 @@
             class="tabLoadingDot"
             aria-hidden="true"
           />
-          <span
+          <component
+            :is="canTogglePlayback ? 'button' : 'span'"
             v-else-if="showIconContainer"
             class="tabIconContainer"
+            :class="{ tabPlaybackToggle: canTogglePlayback }"
+            v-bind="playbackToggleAttributes"
           >
             <FtRetryImage
               v-if="usableTabAvatarUrl"
@@ -70,8 +73,8 @@
               aria-hidden="true"
             />
             <FtIcon
-              v-if="tab.isPlaying"
-              :icon="['fas', 'play']"
+              v-if="playbackIndicatorIcon"
+              :icon="playbackIndicatorIcon"
               class="playingIcon playingBadge"
               aria-hidden="true"
             />
@@ -87,7 +90,18 @@
               class="pinIcon pinBadge"
               aria-hidden="true"
             />
-          </span>
+          </component>
+          <button
+            v-else-if="canTogglePlayback"
+            class="tabPlaybackToggle"
+            v-bind="playbackToggleAttributes"
+          >
+            <FtIcon
+              :icon="playbackIndicatorIcon"
+              class="playingIcon"
+              aria-hidden="true"
+            />
+          </button>
           <FtIcon
             v-else-if="tab.isPlaying"
             :icon="['fas', 'play']"
@@ -136,6 +150,7 @@ import { useI18n } from 'vue-i18n'
 import store from '../../store/index'
 import { getTabAccentColor } from '../../constants/tabColors'
 import { getTabAvatarUrl, getTabPageIcon, getTabPreviewFallbackUrl } from '../../tabs/tabPreview'
+import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
 import TabTooltip from './TabTooltip.vue'
 
 const props = defineProps({
@@ -260,6 +275,53 @@ const tabPageIcon = computed(() => getTabPageIcon(props.tab))
 const showIconContainer = computed(() => (
   !showLoadingDot.value && props.showIcon && !!(usableTabAvatarUrl.value || tabPageIcon.value)
 ))
+
+// Opt-in: clicking the icon of a tab with a playing or paused video pauses or
+// resumes it instead of switching to the tab.
+const togglePlaybackState = computed(() => {
+  if (!store.getters.getToggleTabPlaybackWithIcon) return null
+  const playbackState = tabMediaCoordinator.getPlaybackState(props.tab.id)
+  return ['playing', 'paused'].includes(playbackState) ? playbackState : null
+})
+const canTogglePlayback = computed(() => togglePlaybackState.value !== null)
+const playbackIndicatorIcon = computed(() => {
+  if (togglePlaybackState.value === 'paused') return ['fas', 'pause']
+  return togglePlaybackState.value === 'playing' || props.tab.isPlaying ? ['fas', 'play'] : null
+})
+const playbackToggleAttributes = computed(() => canTogglePlayback.value
+  ? {
+      type: 'button',
+      'aria-label': togglePlaybackState.value === 'playing' ? t('Video.Player.Scroll Mini Player.Pause') : t('Video.Player.Scroll Mini Player.Play'),
+      onClick: togglePlayback,
+      onPointerdown: stopPropagation,
+      onMousedown: stopPropagation,
+      onKeydown: stopActivationKeys
+    }
+  : {})
+
+/**
+ * @param {MouseEvent} event
+ */
+function togglePlayback(event) {
+  event.stopPropagation()
+  tabMediaCoordinator.togglePlayback(props.tab.id)
+}
+
+/**
+ * @param {Event} event
+ */
+function stopPropagation(event) {
+  event.stopPropagation()
+}
+
+/**
+ * Keeps the active tab's player shortcuts from handling the keys that press
+ * this button.
+ * @param {KeyboardEvent} event
+ */
+function stopActivationKeys(event) {
+  if (event.key === ' ' || event.key === 'Enter') event.stopPropagation()
+}
 
 function handleAvatarError() {
   failedAvatarUrl.value = usableTabAvatarUrl.value
@@ -427,6 +489,44 @@ watch(tabAvatarUrl, (avatarUrl) => {
   display: flex;
   align-items: center;
   flex-shrink: 0;
+}
+
+.tabPlaybackToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+/* Widens the click target into the gaps around the icon without moving it. */
+.tabPlaybackToggle::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+}
+
+.tabPlaybackToggle:not(.tabIconContainer) {
+  position: relative;
+  inline-size: 14px;
+  block-size: 14px;
+}
+
+.tabPlaybackToggle:hover {
+  background-color: color-mix(in srgb, var(--primary-text-color) 14%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary-text-color) 14%, transparent);
+}
+
+.tabPlaybackToggle:focus-visible {
+  outline: 2px solid var(--accent-color, var(--primary-text-color));
+  outline-offset: 1px;
 }
 
 .tabAvatar {

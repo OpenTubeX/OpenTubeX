@@ -803,6 +803,7 @@ Settings:
     Invalid Engine: Introduïu un nom i un URL de cerca HTTP o HTTPS vàlid que contingui %s.
     Engine Limit: Podeu afegir fins a {count} motors de cerca personalitzats.
   Theme Settings:
+    Toggle Playback With Tab Icon: Reprodueix i posa en pausa amb la icona de la pestanya
     Theme and Colors: "Tema i colors"
     Font Size: Mida de la lletra
     Sections:
@@ -3020,6 +3021,7 @@ Tooltips:
     Platforms Auto Refresh Interval: Amb quina freqüència OpenTubeX actualitza automàticament els canals que seguiu en altres plataformes mentre l'aplicació és oberta.
     Twitch Notify When Live: Et notifica quan un dels canals de Twitch que segueixes comença a emetre. OpenTubeX ho comprova cada pocs minuts mentre és obert, i també mentre és tancat si llavors actualitza les subscripcions.
   Theme Settings:
+    Toggle Playback With Tab Icon: En fer clic a la icona d’una pestanya amb un vídeo en reproducció o en pausa, es posa en pausa o es reprèn sense canviar a aquesta pestanya.
     Only Show Important Notifications: Amaga les notificacions de l'aplicació que només confirmen una acció o informen d'un estat, incloses les que ofereixen Desfés. Els errors, els avisos, els recordatoris que heu configurat i les notificacions que demanen una decisió, com ara les sol·licituds d'actualització, continuen apareixent. El progrés de les operacions en segon pla, com ara l'actualització de les subscripcions, es mostra a la barra de progrés global en lloc d'una notificació. Les notificacions del sistema no es veuen afectades.
     Visible Search Suggestions: "Defineix quantes entrades de l’historial de cerca i suggeriments mostra la barra de cerca abans que la seva llista es desplaci. La llista mai no s’estén més enllà de la part inferior de la finestra."
     Thumbnail Size: "Canvia la mida de les miniatures dels vídeos a les quadrícules i llistes. Les quadrícules amb un nombre fix de columnes o el tipus de vista Amplada completa omplen cada fila, de manera que allà només canvia les miniatures de les llistes i els Shorts. A les finestres de mida de telèfon, les miniatures de la quadrícula es limiten al 100%."

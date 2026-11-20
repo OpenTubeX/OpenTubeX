@@ -662,6 +662,7 @@ Settings:
     Invalid Engine: Sláðu inn heiti og gilda HTTP- eða HTTPS-leitarslóð sem inniheldur %s.
     Engine Limit: Þú getur bætt við allt að {count} sérsniðnum leitarvélum.
   Theme Settings:
+    Toggle Playback With Tab Icon: Spila og gera hlé með flipatákninu
     Theme and Colors: "Þema og litir"
     Font Size: Leturstærð
     Sections:
@@ -2469,6 +2470,7 @@ Tooltips:
     Platforms Auto Refresh Interval: Hversu oft OpenTubeX uppfærir rásirnar sem þú fylgir á öðrum vettvöngum sjálfvirkt á meðan forritið er opið.
     Twitch Notify When Live: Lætur þig vita þegar ein af Twitch-rásunum sem þú fylgir hefur útsendingu. OpenTubeX athugar á nokkurra mínútna fresti á meðan það er opið, og líka á meðan það er lokað ef það uppfærir áskriftir þá.
   Theme Settings:
+    Toggle Playback With Tab Icon: Ef smellt er á tákn flipa með myndskeiði í spilun eða í hléi er gert hlé á því eða það haldið áfram án þess að skipta yfir á þann flipa.
     Only Show Important Notifications: Felur tilkynningar í forritinu sem aðeins staðfesta aðgerð eða greina frá stöðu, þar á meðal þær sem bjóða upp á Afturkalla. Villur, viðvaranir, áminningar sem þú hefur sett upp og tilkynningar sem biðja um ákvörðun, eins og uppfærslubeiðnir, birtast áfram. Framvinda bakgrunnsaðgerða, eins og uppfærsla áskrifta, birtist á almennu framvindustikunni í stað tilkynningar. Kerfistilkynningar verða ekki fyrir áhrifum.
     Visible Search Suggestions: "Stillir hversu margar færslur úr leitarferli og tillögur leitarstikan sýnir áður en fletta þarf listanum. Listinn nær aldrei út fyrir neðri brún gluggans."
     Thumbnail Size: "Breytir stærð smámynda myndskeiða í hnitanetum og listum. Hnitanet með föstum dálkafjölda eða yfirlitsgerðinni Full breidd fylla þess í stað hverja röð, svo þar breytir það aðeins smámyndum í listum og Shorts. Í gluggum á stærð við síma takmarkast smámyndir hnitanets við 100%."

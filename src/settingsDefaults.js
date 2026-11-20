@@ -295,6 +295,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     startupBehavior: 'loadLastActiveTab',
     showTabIcons: true,
     showTabPreviews: true,
+    toggleTabPlaybackWithIcon: false,
     tabLoadingIndicator: 'bar',
     updateRelativeTimestamps: true,
     tabBarPosition: 'top',

@@ -662,6 +662,7 @@ Settings:
     Invalid Engine: Introduza um nome e um URL de pesquisa HTTP ou HTTPS válido que contenha %s.
     Engine Limit: Pode adicionar até {count} motores de pesquisa personalizados.
   Theme Settings:
+    Toggle Playback With Tab Icon: Reproduzir e pausar com o ícone do separador
     Theme and Colors: "Tema e cores"
     Font Size: Tamanho do tipo de letra
     Sections:
@@ -2454,6 +2455,7 @@ Tooltips:
     Platforms Auto Refresh Interval: Com que frequência o OpenTubeX atualiza automaticamente os canais que segue noutras plataformas enquanto a aplicação está aberta.
     Twitch Notify When Live: Avisa-o quando um dos canais da Twitch que segue começa a transmitir. O OpenTubeX verifica a cada poucos minutos enquanto está aberto, e também enquanto está fechado se nessa altura atualizar as subscrições.
   Theme Settings:
+    Toggle Playback With Tab Icon: Clicar no ícone de um separador com um vídeo em reprodução ou em pausa coloca-o em pausa ou retoma-o sem mudar para esse separador.
     Only Show Important Notifications: Oculta as notificações da aplicação que apenas confirmam uma ação ou informam um estado, incluindo as que oferecem Desfazer. Erros, avisos, lembretes que configurou e notificações que pedem uma decisão, como os pedidos de atualização, continuam a aparecer. O progresso das operações em segundo plano, como a atualização das subscrições, é mostrado na barra de progresso global em vez de numa notificação. As notificações do sistema não são afetadas.
     Visible Search Suggestions: "Define quantas entradas do histórico de pesquisa e sugestões a barra de pesquisa mostra antes de a sua lista se deslocar. A lista nunca ultrapassa a parte inferior da janela."
     Thumbnail Size: "Ajusta o tamanho das miniaturas dos vídeos em grelhas e listas. Grelhas com um número fixo de colunas ou o tipo de vista Largura total preenchem cada linha, por isso aí só altera as miniaturas das listas e os Shorts. Em janelas do tamanho de um telemóvel, as miniaturas da grelha ficam limitadas a 100%."

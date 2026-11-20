@@ -663,6 +663,7 @@ Settings:
     Invalid Engine: Masukkan nama dan URL pencarian HTTP atau HTTPS valid yang berisi %s.
     Engine Limit: Anda dapat menambahkan hingga {count} mesin pencari khusus.
   Theme Settings:
+    Toggle Playback With Tab Icon: Putar dan jeda dengan ikon tab
     Theme and Colors: "Tema dan warna"
     Font Size: Ukuran Font
     Sections:
@@ -2480,6 +2481,7 @@ Tooltips:
     Platforms Auto Refresh Interval: Seberapa sering OpenTubeX memperbarui kanal yang Anda ikuti di platform lain secara otomatis saat aplikasi terbuka.
     Twitch Notify When Live: Memberi tahu Anda saat salah satu kanal Twitch yang Anda ikuti mulai bersiaran. OpenTubeX memeriksa setiap beberapa menit saat terbuka, dan juga saat ditutup jika saat itu memperbarui langganan.
   Theme Settings:
+    Toggle Playback With Tab Icon: Mengklik ikon tab yang berisi video yang sedang diputar atau dijeda akan menjeda atau melanjutkannya tanpa beralih ke tab tersebut.
     Only Show Important Notifications: Menyembunyikan notifikasi dalam aplikasi yang hanya mengonfirmasi tindakan atau melaporkan status, termasuk yang menawarkan Urungkan. Kesalahan, peringatan, pengingat yang Anda atur, dan notifikasi yang meminta keputusan, seperti permintaan pembaruan, tetap muncul. Progres operasi latar belakang, seperti penyegaran langganan, ditampilkan di bilah progres global, bukan sebagai notifikasi. Notifikasi sistem tidak terpengaruh.
     Visible Search Suggestions: "Menentukan berapa banyak entri riwayat pencarian dan saran yang ditampilkan bilah pencarian sebelum daftarnya perlu digulir. Daftar tidak pernah melewati bagian bawah jendela."
     Thumbnail Size: "Mengubah ukuran gambar mini video di kisi dan daftar. Kisi dengan jumlah kolom tetap atau jenis tampilan Lebar Penuh akan mengisi setiap baris, jadi di sana penggeser hanya mengubah gambar mini daftar dan Shorts. Di jendela seukuran ponsel, gambar mini kisi dibatasi hingga 100%."

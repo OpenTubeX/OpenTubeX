@@ -414,6 +414,7 @@ Settings:
     Haptic Feedback: Reakcja haptyczna
     Ignore System Haptics Setting: Ignoruj systemowe ustawienie haptyki
   Theme Settings:
+    Toggle Playback With Tab Icon: Odtwarzaj i wstrzymuj ikoną karty
     Theme and Colors: "Motyw i kolory"
     Font Size: Rozmiar czcionki
     Sections:
@@ -1675,6 +1676,7 @@ Tooltips:
     Platforms Auto Refresh Interval: Jak często OpenTubeX automatycznie odświeża kanały, które obserwujesz na innych platformach, gdy aplikacja jest otwarta.
     Twitch Notify When Live: Powiadamia, gdy któryś z obserwowanych kanałów Twitch rozpocznie transmisję. OpenTubeX sprawdza co kilka minut, gdy jest otwarty, a także gdy jest zamknięty, jeśli wtedy odświeża subskrypcje.
   Theme Settings:
+    Toggle Playback With Tab Icon: Kliknięcie ikony karty z odtwarzanym lub wstrzymanym filmem wstrzymuje go lub wznawia bez przełączania na tę kartę.
     Only Show Important Notifications: Ukrywa powiadomienia w aplikacji, które jedynie potwierdzają działanie lub informują o stanie, w tym te oferujące Cofnij. Błędy, ostrzeżenia, ustawione przez Ciebie przypomnienia oraz powiadomienia wymagające decyzji, takie jak monity o aktualizację, nadal się wyświetlają. Postęp operacji w tle, takich jak odświeżanie subskrypcji, jest pokazywany na globalnym pasku postępu zamiast w powiadomieniu. Nie dotyczy to powiadomień systemowych.
     Visible Search Suggestions: "Określa, ile wpisów historii wyszukiwania i sugestii pokazuje pasek wyszukiwania, zanim jego lista zacznie się przewijać. Lista nigdy nie wychodzi poza dolną krawędź okna."
     Thumbnail Size: "Skaluje miniatury filmów w siatkach i listach. Siatki ze stałą liczbą kolumn lub widok Pełna szerokość zamiast tego wypełniają każdy wiersz, więc tam suwak zmienia tylko miniatury list i Shorts. W oknach wielkości telefonu miniatury siatki są ograniczone do 100%."

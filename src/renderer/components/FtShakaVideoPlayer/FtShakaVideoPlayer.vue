@@ -6656,6 +6656,9 @@ watch(sponsorBlockSubmissionVisibleButtons, () => {
 }, { immediate: true })
 
 let mediaSessionStopped = false
+// Set while a play the viewer requested for this hidden tab, such as from its
+// tab icon, is starting, so it may play without a mini player.
+let backgroundPlayRequested = false
 
 watch(() => props.videoId, () => {
   sponsorBlockRequestGeneration++
@@ -7029,7 +7032,16 @@ watch(() => store.getters.getKeyboardShortcuts, () => setLocale(locale.value))
 
 function registerMediaSessionHandlers() {
   tabMediaCoordinator.setActionHandlers(mediaTabId, mediaSessionSource, {
-    play: () => video.value?.play(),
+    play: (details = {}) => {
+      const videoElement = video.value
+      if (!videoElement) return
+      backgroundPlayRequested = details.allowBackground === true
+      const playPromise = videoElement.play()
+      playPromise.catch(() => {
+        backgroundPlayRequested = false
+      })
+      return playPromise
+    },
     pause,
     stop: () => {
       const videoElement = video.value
@@ -7168,6 +7180,8 @@ function handleRateChange() {
 }
 
 function handlePlay() {
+  const allowBackgroundPlay = backgroundPlayRequested
+  backgroundPlayRequested = false
   if (shortsNavigationSuspended.value) {
     video.value.pause()
     return
@@ -7184,6 +7198,7 @@ function handlePlay() {
   const isCurrentPictureInPictureVideo = document.pictureInPictureElement === video.value
   if (
     !isActiveTab.value &&
+    !allowBackgroundPlay &&
     !isCurrentPictureInPictureVideo &&
     !scrollMiniPlayerDetached.value &&
     !miniPlayerStartPending.value &&
