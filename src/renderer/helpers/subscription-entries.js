@@ -2,7 +2,7 @@ import { isHistoryEntryWatched } from '../../history.js'
 
 // Scraped relative publication dates are approximate, so allow a small amount
 // of rounding around the previous fetch without admitting genuinely old items.
-const NEW_CONTENT_PUBLICATION_TOLERANCE_MS = 60 * 60 * 1000
+export const NEW_CONTENT_PUBLICATION_TOLERANCE_MS = 60 * 60 * 1000
 
 /**
  * @param {object} video

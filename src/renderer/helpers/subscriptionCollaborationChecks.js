@@ -1,5 +1,6 @@
 // @ts-check
-import { reconcileFetchedSubscriptionEntries } from './subscription-entries.js'
+import { isHistoryEntryWatched } from '../../history.js'
+import { NEW_CONTENT_PUBLICATION_TOLERANCE_MS, reconcileFetchedSubscriptionEntries } from './subscription-entries.js'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
@@ -38,28 +39,33 @@ function getCollaborationCheckDueTime(cacheEntry, now) {
 /**
  * The channels to check for collaborations, never checked ones first, then
  * the most overdue. Channels without cached uploads wait for their uploads,
- * which the collaborations are stored with.
+ * which the collaborations are stored with. A failed check stays due, but
+ * queues behind the channels that were due before it failed, so channels
+ * that keep failing don't take every refresh's checks.
  * @template {{ id: string }} T
  * @param {T[]} channels
  * @param {Record<string, VideoCacheEntry | undefined>} videoCache
  * @param {number} now
- * @param {number} [limit]
+ * @param {Map<string, number>} [failedAt] when the last check of a channel failed
  * @returns {T[]}
  */
-export function selectSubscriptionCollaborationChecks(channels, videoCache, now, limit = COLLABORATION_CHECKS_PER_REFRESH) {
+export function selectSubscriptionCollaborationChecks(channels, videoCache, now, failedAt = new Map()) {
   return channels
     .filter(channel => Array.isArray(videoCache[channel.id]?.videos))
     .map(channel => ({ channel, due: getCollaborationCheckDueTime(videoCache[channel.id], now) }))
     .filter(({ due }) => due <= now)
-    .sort((a, b) => a.due - b.due)
-    .slice(0, limit)
+    .map(({ channel, due }) => ({ channel, order: Math.max(due, failedAt.get(channel.id) ?? -Infinity) }))
+    .sort((a, b) => a.order - b.order)
+    .slice(0, COLLABORATION_CHECKS_PER_REFRESH)
     .map(({ channel }) => channel)
 }
 
 /**
  * The channel's cached uploads followed by the collaborations a check found,
  * which replace the cached ones. New collaborations are recognized against
- * the last check, as the uploads against the last fetch.
+ * the last check, as the uploads against the last fetch. Unwatched ones that
+ * were not cached and were published since the last check are new too, even
+ * when none of the cached ones is listed, but not on the first check.
  * @param {VideoCacheEntry & { videos: Record<string, any>[] }} cacheEntry
  * @param {Record<string, any>[]} collaborations
  * @param {Record<string, any>} [historyById]
@@ -67,11 +73,19 @@ export function selectSubscriptionCollaborationChecks(channels, videoCache, now,
 export function mergeSubscriptionCollaborations(cacheEntry, collaborations, historyById) {
   const uploads = cacheEntry.videos.filter(video => video.isCollaboration !== true)
   const uploadIds = new Set(uploads.map(video => video.videoId))
+  const cached = cacheEntry.videos.filter(video => video.isCollaboration === true)
+  const cachedIds = new Set(cached.map(video => video.videoId))
+  const checkedAt = cacheEntry.collaborationsCheckedAt
+  const isPublishedSinceCheck = (/** @type {Record<string, any>} */ video) => typeof checkedAt === 'number' &&
+    !cachedIds.has(video.videoId) &&
+    Number(video.published) >= checkedAt - NEW_CONTENT_PUBLICATION_TOLERANCE_MS &&
+    !isHistoryEntryWatched(historyById?.[video.videoId])
+
   return uploads.concat(reconcileFetchedSubscriptionEntries(
     collaborations.filter(video => !uploadIds.has(video.videoId)),
-    cacheEntry.videos.filter(video => video.isCollaboration === true),
+    cached,
     'videoId',
-    cacheEntry.collaborationsCheckedAt ?? cacheEntry.timestamp,
+    checkedAt ?? cacheEntry.timestamp,
     historyById
-  ))
+  ).map(video => !video.isNewInSubscriptionFeed && isPublishedSinceCheck(video) ? { ...video, isNewInSubscriptionFeed: true } : video))
 }

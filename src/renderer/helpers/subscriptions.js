@@ -97,6 +97,8 @@ let nextRefreshId = 0
  * @type {AbortController | null}
  */
 let collaborationChecks = null
+/** When the last collaboration check of a channel failed, by channel id */
+const failedCollaborationChecks = new Map()
 let rendererRefreshReserved = false
 
 // Announced, so that requests to refresh can wait for a refresh that may turn
@@ -597,6 +599,11 @@ function getChannelUploads(channelId) {
  */
 async function getUnchangedSubscriptionFeed(feed, channelId, backend) {
   if (!store.getters.getFastSubscriptionRefresh || !process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backend)) return null
+  // Without the setting, the full fetch drops the cached collaborations and
+  // their schedule
+  const cachedVideos = store.getters.getVideoCache[channelId]
+  if (feed === 'videos' && store.getters.getIncludeSubscriptionCollaborations !== true &&
+    (cachedVideos?.collaborationsCheckedAt != null || cachedVideos?.videos?.some(video => video.isCollaboration === true))) return null
 
   const getCaches = () => ({
     videos: store.getters.getVideoCache,
@@ -639,7 +646,7 @@ function includesSubscriptionCollaborations() {
  */
 async function checkSubscriptionCollaborations(channels) {
   if (collaborationChecks !== null || !includesSubscriptionCollaborations()) return
-  const due = selectSubscriptionCollaborationChecks(channels, store.getters.getVideoCache, Date.now())
+  const due = selectSubscriptionCollaborationChecks(channels, store.getters.getVideoCache, Date.now(), failedCollaborationChecks)
   if (due.length === 0) return
 
   const controller = new AbortController()
@@ -657,10 +664,14 @@ async function checkSubscriptionCollaborations(channels) {
           AbortSignal.any([signal, AbortSignal.timeout(COLLABORATION_CHECK_TIMEOUT_MS)])
         )
       } catch (error) {
-        if (!signal.aborted) console.warn(`Failed to load the collaborations of ${channel.id}:`, error)
+        if (!signal.aborted) {
+          failedCollaborationChecks.set(channel.id, Date.now())
+          console.warn(`Failed to load the collaborations of ${channel.id}:`, error)
+        }
         return
       }
       if (signal.aborted) return
+      failedCollaborationChecks.delete(channel.id)
 
       const videos = await store.dispatch('updateSubscriptionCollaborationsByChannel', {
         channelId: channel.id,
@@ -673,6 +684,15 @@ async function checkSubscriptionCollaborations(channels) {
   } finally {
     collaborationChecks = null
   }
+}
+
+/**
+ * Starts `checkSubscriptionCollaborations` without waiting for it, so the
+ * refresh finishes without it.
+ * @param {{ id: string }[]} channels
+ */
+function startSubscriptionCollaborationChecks(channels) {
+  checkSubscriptionCollaborations(channels).catch(error => console.error(error))
 }
 
 /**
@@ -1195,6 +1215,8 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
   )
   if (subscriptionList.length === 0) {
     completeSubscriptionRefresh('videos', activeProfile._id)
+    // Channels whose uploads were fetched recently can still be due
+    startSubscriptionCollaborationChecks(requestedChannels)
     return []
   }
 
@@ -1278,8 +1300,7 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
     }
 
     completeSubscriptionRefresh('videos', activeProfile._id)
-    // Not awaited, so the refresh finishes without it
-    checkSubscriptionCollaborations(requestedChannels).catch(error => console.error(error))
+    startSubscriptionCollaborationChecks(requestedChannels)
 
     return []
   } finally {
