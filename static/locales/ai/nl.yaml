@@ -1328,6 +1328,7 @@ Settings:
     Platforms:
       Other Platforms: Andere platforms
       Manage Channels: Gevolgde kanalen beheren
+      Enable Twitch Page: Twitch-pagina inschakelen
       Notify When Live: Melden wanneer gevolgde Twitch-kanalen live gaan
       Auto Refresh Interval: Interval voor automatisch vernieuwen van andere platforms
   Distraction Free Settings:
@@ -2530,6 +2531,7 @@ Tooltips:
     Faster Subscription Refresh: "Controleert eerst de RSS-feed van elk kanaal en laadt alleen de video's, Shorts en livestreams van kanalen met nieuwe uploads. Automatische vernieuwingen slaan ook kanalen over die in de afgelopen 10 minuten zijn geladen. Bij kanalen zonder nieuwe uploads worden weergaven, verwijderde video's en gewijzigde titels maar om de paar uur bijgewerkt, en nieuwe uploads kunnen later verschijnen als de RSS-feed achterloopt. Niet beschikbaar met de Invidious-API."
     Show Collaborations From Other Channels: "Toont ook video's die kanalen waarop je bent geabonneerd hebben gemaakt samen met een ander kanaal dat ze heeft geüpload. YouTube toont deze alleen op het tabblad Home van een kanaal, dus een vernieuwing van video's controleert hooguit een paar kanalen, en nieuwe kunnen een dag of langer nodig hebben om te verschijnen. Alleen de nieuwste samenwerkingen die daar worden getoond, worden gevonden, sommige kanalen tonen er geen en hun publicatiedatums zijn bij benadering. Niet beschikbaar met de Invidious-API."
     Platforms Auto Refresh Interval: Hoe vaak OpenTubeX de kanalen die je op andere platforms volgt automatisch vernieuwt terwijl de app geopend is.
+    Enable Twitch Page: Laat je de Twitch-pagina openen vanuit de navigatie en het opdrachtpalet. Daar kun je populaire categorieën en live kanalen bekijken en op Twitch zoeken.
     Twitch Notify When Live: Geeft een melding wanneer een van je gevolgde Twitch-kanalen begint met streamen. OpenTubeX controleert om de paar minuten zolang het geopend is, en ook wanneer het gesloten is als het dan abonnementen vernieuwt.
   Theme Settings:
     Toggle Playback With Tab Icon: Klikken op het pictogram van een tabblad met een afspelende of gepauzeerde video pauzeert of hervat deze zonder naar dat tabblad te wisselen.
@@ -2954,6 +2956,32 @@ Platforms:
   Verify: "Verifiëren"
   Categories: "Categorieën"
   Category Not Found: "Deze categorie kan niet worden gevonden."
+  Category Tags: "Categorietags"
+  Stream Tags: "Streamtags"
+  Language: "Taal"
+  All Languages: "Alle talen"
+  Other Language: "Overig"
+  American Sign Language: "Amerikaanse Gebarentaal"
+  Search Tags: "Tags zoeken"
+  Add Tag: "Tag toevoegen"
+  Remove Tag: "{tag} verwijderen"
+  Sort:
+    Viewers: "Kijkers (hoog naar laag)"
+    Viewers Ascending: "Kijkers (laag naar hoog)"
+    Started: "Onlangs gestart"
+    Relevance: "Aanbevolen"
+    Published: "Onlangs gepubliceerd"
+    Views: "Weergaven (hoog naar laag)"
+    Top Day: "Top 24 uur"
+    Top Week: "Top 7 dagen"
+    Top Month: "Top 30 dagen"
+    Top All: "Top aller tijden"
+  Video Type:
+    Video Type: "Videotype"
+    All: "Alle video's"
+    Archive: "Eerdere uitzendingen"
+    Highlight: "Hoogtepunten"
+    Upload: "Uploads"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} heeft {commentAuthor} geantwoord"
   Like: "Vind ik leuk"
@@ -2988,5 +3016,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Zoeken op Twitch"
+  Search Placeholder: "Categorieën en kanalen"
 New Incognito Tab: Nieuw incognitotabblad
 Incognito Tab: Incognitotabblad

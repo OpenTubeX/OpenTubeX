@@ -1313,6 +1313,7 @@ Settings:
     Platforms:
       Other Platforms: Iné platformy
       Manage Channels: Spravovať sledované kanály
+      Enable Twitch Page: Povoliť stránku Twitch
       Notify When Live: Upozorniť, keď sledované kanály na Twitchi začnú vysielať
       Auto Refresh Interval: Interval automatického obnovenia iných platforiem
   Distraction Free Settings:
@@ -2462,6 +2463,7 @@ Tooltips:
     Faster Subscription Refresh: "Najprv skontroluje RSS kanál každého kanála a videá, Shorts a živé prenosy načíta len z kanálov s novými nahratými videami. Automatické obnovenia navyše preskočia kanály načítané za posledných 10 minút. Pri kanáloch bez nových videí sa počty zhliadnutí, odstránené videá a zmenené názvy aktualizujú len raz za niekoľko hodín a nové videá sa môžu zobraziť neskôr, keď RSS kanál zaostáva. Nie je k dispozícii s Invidious API."
     Show Collaborations From Other Channels: "Zobrazuje aj videá, ktoré odoberané kanály natočili spolu s iným kanálom, ktorý ich nahral. YouTube ich uvádza iba na karte Domov kanála, takže aktualizácia videí skontroluje najviac niekoľko kanálov a nové sa môžu objaviť až o deň alebo neskôr. Nájdu sa iba najnovšie spolupráce, ktoré sa tam zobrazujú, niektoré kanály žiadne nezobrazujú a ich dátumy zverejnenia sú približné. Nie je k dispozícii s rozhraním Invidious API."
     Platforms Auto Refresh Interval: Ako často OpenTubeX automaticky obnovuje kanály, ktoré sledujete na iných platformách, kým je aplikácia otvorená.
+    Enable Twitch Page: Umožní otvoriť stránku Twitch z navigácie a z palety príkazov. Nájdete na nej obľúbené kategórie a kanály naživo a môžete na Twitchi vyhľadávať.
     Twitch Notify When Live: Upozorní vás, keď niektorý z vašich sledovaných kanálov na Twitchi začne vysielať. OpenTubeX kontroluje každých pár minút, keď je otvorený, a tiež keď je zatvorený, ak vtedy aktualizuje odbery.
   Theme Settings:
     Toggle Playback With Tab Icon: Kliknutím na ikonu karty s prehrávaným alebo pozastaveným videom ho pozastavíte alebo obnovíte bez prepnutia na túto kartu.
@@ -2881,6 +2883,32 @@ Platforms:
   Verify: "Overiť"
   Categories: "Kategórie"
   Category Not Found: "Túto kategóriu sa nepodarilo nájsť."
+  Category Tags: "Značky kategórie"
+  Stream Tags: "Značky streamu"
+  Language: "Jazyk"
+  All Languages: "Všetky jazyky"
+  Other Language: "Iný"
+  American Sign Language: "americký posunkový jazyk"
+  Search Tags: "Hľadať značky"
+  Add Tag: "Pridať značku"
+  Remove Tag: "Odstrániť {tag}"
+  Sort:
+    Viewers: "Sledujúci (od najvyššieho po najnižší)"
+    Viewers Ascending: "Sledujúci (od najnižšieho po najvyšší)"
+    Started: "Nedávno spustené"
+    Relevance: "Odporúčané"
+    Published: "Nedávno zverejnené"
+    Views: "Zobrazenia (od najvyššieho po najnižší)"
+    Top Day: "Top za 24 hodín"
+    Top Week: "Top za 7 dní"
+    Top Month: "Top za 30 dní"
+    Top All: "Top za všetky časy"
+  Video Type:
+    Video Type: "Typ videa"
+    All: "Všetky videá"
+    Archive: "Minulé prenosy"
+    Highlight: "Najlepšie momenty"
+    Upload: "Nahrané videá"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} odpovedal(a) používateľovi {commentAuthor}"
   Like: "Páči sa mi to"
@@ -2915,5 +2943,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Hľadať na Twitchi"
+  Search Placeholder: "Kategórie a kanály"
 New Incognito Tab: Nová karta inkognito
 Incognito Tab: Karta inkognito

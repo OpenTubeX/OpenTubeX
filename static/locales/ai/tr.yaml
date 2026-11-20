@@ -1313,6 +1313,7 @@ Settings:
     Platforms:
       Other Platforms: Diğer Platformlar
       Manage Channels: Takip Edilen Kanalları Yönet
+      Enable Twitch Page: Twitch Sayfasını Etkinleştir
       Notify When Live: Takip Edilen Twitch Kanalları Canlı Yayına Başladığında Bildir
       Auto Refresh Interval: Diğer Platformların Otomatik Yenileme Aralığı
   Distraction Free Settings:
@@ -2463,6 +2464,7 @@ Tooltips:
     Faster Subscription Refresh: "Önce her kanalın RSS akışını denetler ve yalnızca yeni yüklemesi olan kanalların videolarını, Shorts'larını ve canlı yayınlarını yükler. Otomatik yenilemeler son 10 dakikada yüklenen kanalları da atlar. Yeni yüklemesi olmayan kanallarda görüntüleme sayıları, kaldırılan videolar ve değişen başlıklar yalnızca birkaç saatte bir güncellenir ve RSS akışı geride kaldığında yeni yüklemeler daha geç görünebilir. Invidious API ile kullanılamaz."
     Show Collaborations From Other Channels: "Abone olduğunuz kanalların, bunları yükleyen başka bir kanalla birlikte yaptığı videoları da gösterir. YouTube bunları yalnızca bir kanalın Ana Sayfa sekmesinde listeler, bu nedenle bir video yenilemesi en fazla birkaç kanalı kontrol eder ve yenilerinin görünmesi bir gün veya daha uzun sürebilir. Yalnızca orada gösterilen en son ortak çalışmalar bulunur, bazı kanallar hiç göstermez ve yayın tarihleri yaklaşıktır. Invidious API ile kullanılamaz."
     Platforms Auto Refresh Interval: Uygulama açıkken OpenTubeX'in diğer platformlarda takip ettiğiniz kanalları ne sıklıkla otomatik olarak yenilediği.
+    Enable Twitch Page: Twitch sayfasını gezinmeden ve komut paletinden açmanızı sağlar. Orada popüler kategorilere ve canlı kanallara göz atabilir, Twitch'te arama yapabilirsiniz.
     Twitch Notify When Live: Takip ettiğiniz Twitch kanallarından biri yayına başladığında size bildirir. OpenTubeX açıkken birkaç dakikada bir kontrol eder; kapalıyken de o sırada abonelikleri yeniliyorsa kontrol eder.
   Theme Settings:
     Toggle Playback With Tab Icon: Oynatılan veya duraklatılmış bir video içeren sekmenin simgesine tıklamak, o sekmeye geçmeden videoyu duraklatır veya devam ettirir.
@@ -2882,6 +2884,32 @@ Platforms:
   Verify: "Doğrula"
   Categories: "Kategoriler"
   Category Not Found: "Bu kategori bulunamadı."
+  Category Tags: "Kategori etiketleri"
+  Stream Tags: "Yayın etiketleri"
+  Language: "Dil"
+  All Languages: "Tüm diller"
+  Other Language: "Diğer"
+  American Sign Language: "Amerikan İşaret Dili"
+  Search Tags: "Etiket ara"
+  Add Tag: "Etiket ekle"
+  Remove Tag: "{tag} etiketini kaldır"
+  Sort:
+    Viewers: "İzleyiciler (çoktan aza)"
+    Viewers Ascending: "İzleyiciler (azdan çoğa)"
+    Started: "Yakın zamanda başlayanlar"
+    Relevance: "Önerilen"
+    Published: "Yakın zamanda yayınlananlar"
+    Views: "İzlenme (çoktan aza)"
+    Top Day: "En iyi 24 saat"
+    Top Week: "En iyi 7 gün"
+    Top Month: "En iyi 30 gün"
+    Top All: "Tüm zamanların en iyisi"
+  Video Type:
+    Video Type: "Video türü"
+    All: "Tüm videolar"
+    Archive: "Geçmiş yayınlar"
+    Highlight: "Öne çıkanlar"
+    Upload: "Yüklemeler"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author}, {commentAuthor} adlı kullanıcıyı yanıtladı"
   Like: "Beğen"
@@ -2916,5 +2944,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Twitch'te ara"
+  Search Placeholder: "Kategoriler ve kanallar"
 New Incognito Tab: Yeni Gizli Sekme
 Incognito Tab: Gizli sekme

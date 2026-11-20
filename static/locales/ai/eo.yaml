@@ -1355,6 +1355,7 @@ Settings:
     Platforms:
       Other Platforms: Aliaj platformoj
       Manage Channels: Administri sekvatajn kanalojn
+      Enable Twitch Page: Ŝalti la Twitch-paĝon
       Notify When Live: Sciigi kiam sekvataj Twitch-kanaloj komencas rektan elsendon
       Auto Refresh Interval: Intervalo de aŭtomata aktualigo de aliaj platformoj
   Distraction Free Settings:
@@ -2517,6 +2518,7 @@ Tooltips:
     Faster Subscription Refresh: "Unue kontrolas la RSS-fluon de ĉiu kanalo kaj ŝargas videojn, Shorts kaj rektajn elsendojn nur de kanaloj kun novaj alŝutoj. Aŭtomataj aktualigoj ankaŭ preterlasas kanalojn ŝargitajn en la lastaj 10 minutoj. Por kanaloj sen novaj alŝutoj, spektokvantoj, forigitaj videoj kaj ŝanĝitaj titoloj ĝisdatiĝas nur ĉiujn kelkajn horojn, kaj novaj alŝutoj eble aperos poste, kiam la RSS-fluo malfruas. Ne disponebla kun la Invidious-API."
     Show Collaborations From Other Channels: "Ankaŭ montras videojn, kiujn kanaloj abonitaj de vi faris kune kun alia kanalo, kiu alŝutis ilin. YouTube listigas ilin nur en la langeto Hejmo de kanalo, do aktualigo de videoj kontrolas maksimume kelkajn kanalojn, kaj novaj povas aperi nur post tago aŭ pli. Troviĝas nur la plej novaj kunlaboraĵoj montritaj tie, kelkaj kanaloj montras neniun, kaj iliaj publikigaj datoj estas proksimumaj. Ne disponebla kun la API de Invidious."
     Platforms Auto Refresh Interval: Kiom ofte OpenTubeX aŭtomate aktualigas la kanalojn, kiujn vi sekvas en aliaj platformoj, dum la aplikaĵo estas malfermita.
+    Enable Twitch Page: Ebligas al vi malfermi la Twitch-paĝon el la navigado kaj la komanda paletro. Tie vi povas foliumi popularajn kategoriojn kaj rektajn kanalojn kaj serĉi en Twitch.
     Twitch Notify When Live: Sciigas vin kiam unu el viaj sekvataj Twitch-kanaloj komencas elsendi. OpenTubeX kontrolas ĉiujn kelkajn minutojn dum ĝi estas malfermita, kaj ankaŭ dum ĝi estas fermita, se ĝi tiam aktualigas abonojn.
   Theme Settings:
     Toggle Playback With Tab Icon: Alklako sur la piktogramo de langeto kun ludata aŭ paŭzigita video paŭzigas aŭ daŭrigas ĝin sen ŝanĝi al tiu langeto.
@@ -2882,6 +2884,32 @@ Platforms:
   Verify: "Konfirmi"
   Categories: "Kategorioj"
   Category Not Found: "Ĉi tiu kategorio ne troviĝis."
+  Category Tags: "Etikedoj de kategorio"
+  Stream Tags: "Etikedoj de elsendo"
+  Language: "Lingvo"
+  All Languages: "Ĉiuj lingvoj"
+  Other Language: "Alia"
+  American Sign Language: "usona signolingvo"
+  Search Tags: "Serĉi etikedojn"
+  Add Tag: "Aldoni etikedon"
+  Remove Tag: "Forigi {tag}"
+  Sort:
+    Viewers: "Spektantoj (de plej multe al malplej)"
+    Viewers Ascending: "Spektantoj (de malplej al plej multe)"
+    Started: "Lastatempe komencitaj"
+    Relevance: "Rekomendita"
+    Published: "Lastatempe publikigitaj"
+    Views: "Rigardoj (de plej multe al malplej)"
+    Top Day: "Plej bonaj de 24 horoj"
+    Top Week: "Plej bonaj de 7 tagoj"
+    Top Month: "Plej bonaj de 30 tagoj"
+    Top All: "Plej bonaj de ĉiam"
+  Video Type:
+    Video Type: "Speco de video"
+    All: "Ĉiuj videaĵoj"
+    Archive: "Pasintaj elsendoj"
+    Highlight: "Elstaraĵoj"
+    Upload: "Alŝutaĵoj"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} respondis al {commentAuthor}"
   Like: "Ŝati"
@@ -2916,5 +2944,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Serĉi en Twitch"
+  Search Placeholder: "Kategorioj kaj kanaloj"
 New Incognito Tab: Nova inkognita langeto
 Incognito Tab: Inkognita langeto

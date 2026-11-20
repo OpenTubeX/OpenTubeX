@@ -4,6 +4,7 @@ import {
   getTwitchChannelUrl,
   parseChannel,
   parseTwitchChannelLogin,
+  parseTwitchClip,
   parseTwitchUser,
   parseTwitchVideo,
   requestTwitch
@@ -16,6 +17,10 @@ import {
  * @typedef {import('./types.js').PlatformPage} PlatformPage
  * @typedef {import('./types.js').PlatformFetch} PlatformFetch
  * @typedef {import('./types.js').PlatformCategory} PlatformCategory
+ * @typedef {import('./types.js').PlatformCategoryTab} PlatformCategoryTab
+ * @typedef {import('./types.js').PlatformCategorySort} PlatformCategorySort
+ * @typedef {import('./types.js').PlatformFilters} PlatformFilters
+ * @typedef {import('./types.js').PlatformFilterOptions} PlatformFilterOptions
  */
 
 const PAGE_SIZE = 20
@@ -29,7 +34,8 @@ const CURSOR_PATTERN = /^[\w|:=+/.-]{1,300}$/
 const CATEGORY_PATTERN = /^[a-z0-9][a-z0-9-]{0,99}$/
 // Later pages of streams and categories need a browser integrity token too,
 // so these lists are as long as one request allows
-const CATEGORY_STREAMS = 100
+const CATEGORY_ITEMS = 100
+const CATEGORY_ATTEMPTS = 2
 const BROWSE_CATEGORIES = 100
 const BROWSE_STREAMS = 30
 const CHANNEL_FIELDS = 'id login displayName profileImageURL(width: 300) bannerImageURL description followers { totalCount }'
@@ -37,7 +43,39 @@ const STREAM_FIELDS = 'stream { id title createdAt viewersCount previewImageURL(
 const VIDEO_FIELDS = 'id title publishedAt createdAt lengthSeconds viewCount previewThumbnailURL(width: 640, height: 360) game { displayName }'
 const CLIP_FIELDS = 'slug title createdAt durationSeconds viewCount thumbnailURL(width: 480, height: 272) game { displayName }'
 const CATEGORY_FIELDS = 'slug displayName viewersCount boxArtURL(width: 285, height: 380)'
-const STREAM_NODE_FIELDS = 'id title createdAt viewersCount previewImageURL(width: 640, height: 360) game { displayName } archiveVideo { id } broadcaster { id login displayName profileImageURL(width: 70) }'
+const CATEGORY_PAGE_FIELDS = `${CATEGORY_FIELDS} description followersCount tags(tagType: CONTENT) { localizedName }`
+/** @type {PlatformFilterOptions} */
+const STREAM_FILTERS = { sorts: ['viewers', 'viewers_ascending', 'started', 'relevance'], defaultSort: 'viewers', tags: true }
+/** @type {Record<PlatformCategoryTab, PlatformFilterOptions>} */
+const CATEGORY_TABS = {
+  live: STREAM_FILTERS,
+  videos: { sorts: ['published', 'views'], defaultSort: 'views', types: ['archive', 'highlight', 'upload'] },
+  clips: { sorts: ['top_day', 'top_week', 'top_month', 'top_all'], defaultSort: 'top_week' }
+}
+/** Twitch's stream and video orders, and the periods of its top clips */
+const TWITCH_SORTS = {
+  viewers: 'VIEWER_COUNT',
+  viewers_ascending: 'VIEWER_COUNT_ASC',
+  started: 'RECENT',
+  relevance: 'RELEVANCE',
+  published: 'TIME',
+  views: 'VIEWS',
+  top_day: 'LAST_DAY',
+  top_week: 'LAST_WEEK',
+  top_month: 'LAST_MONTH',
+  top_all: 'ALL_TIME'
+}
+/** The languages Twitch streams, videos and clips can be in, by their language codes */
+const FILTER_LANGUAGES = [
+  'en', 'id', 'ca', 'da', 'de', 'es', 'fr', 'it', 'hu', 'nl', 'no', 'pl', 'pt', 'ro', 'sk', 'fi', 'sv', 'tl', 'vi',
+  'tr', 'cs', 'el', 'bg', 'ru', 'uk', 'ar', 'ms', 'hi', 'th', 'zh', 'ja', 'yue', 'ko', 'ase', 'other'
+]
+/** Twitch's names for the languages whose codes it doesn't use */
+const TWITCH_LANGUAGES = { yue: 'ZH_HK', ase: 'ASL' }
+const MAX_TAG_LENGTH = 25
+const TAG_SUGGESTIONS = 10
+const BROADCASTER_FIELDS = 'id login displayName profileImageURL(width: 70)'
+const STREAM_NODE_FIELDS = `id title createdAt viewersCount previewImageURL(width: 640, height: 360) game { displayName } archiveVideo { id } broadcaster { ${BROADCASTER_FIELDS} }`
 
 /**
  * @param {unknown} value
@@ -111,16 +149,126 @@ function toPlatformCategory(game) {
 }
 
 /**
+ * @param {any} game
+ * @returns {PlatformCategory | null}
+ */
+function toCategoryPage(game) {
+  const category = toPlatformCategory(game)
+  if (!category) return null
+  const description = typeof game.description === 'string' ? game.description.trim() : ''
+  const followerCount = game.followersCount
+  const tags = Array.isArray(game.tags)
+    ? game.tags.flatMap(tag => typeof tag?.localizedName === 'string' && tag.localizedName.trim() ? [tag.localizedName.trim()] : [])
+    : []
+  return {
+    ...category,
+    ...(Number.isFinite(followerCount) && followerCount >= 0 ? { followerCount } : {}),
+    ...(description ? { description } : {}),
+    ...(tags.length > 0 ? { tags } : {})
+  }
+}
+
+/**
+ * Twitch's names for the languages it knows, as its streams and clips name them.
+ * @param {string[]} languages codes from FILTER_LANGUAGES
+ */
+function twitchLanguages(languages) {
+  return languages.filter(language => FILTER_LANGUAGES.includes(language))
+    .map(language => TWITCH_LANGUAGES[language] ?? language.toUpperCase())
+}
+
+/**
+ * @param {PlatformFilterOptions} options
+ * @param {PlatformFilters['sort']} sort
+ */
+function twitchSort(options, sort) {
+  return TWITCH_SORTS[sort && options.sorts.includes(sort) ? sort : options.defaultSort]
+}
+
+/**
+ * Twitch's stream options for the filters, leaving out what it doesn't know.
+ * @param {PlatformFilters} filters
+ */
+function streamOptions({ sort, languages = [], tags = [] }) {
+  const broadcasterLanguages = twitchLanguages(languages)
+  const freeformTags = tags.map(tag => tag.trim()).filter(tag => tag && tag.length <= MAX_TAG_LENGTH)
+  return {
+    sort: twitchSort(STREAM_FILTERS, sort),
+    ...(broadcasterLanguages.length > 0 ? { broadcasterLanguages } : {}),
+    ...(freeformTags.length > 0 ? { freeformTags } : {})
+  }
+}
+
+/**
+ * The list of a category's tab, as the query's field, its variables and how
+ * to read its items, leaving out filters Twitch doesn't know.
+ * @param {PlatformCategoryTab} tab
+ * @param {PlatformFilters} filters
+ */
+function categoryList(tab, filters) {
+  const options = CATEGORY_TABS[tab]
+  const sort = twitchSort(options, filters.sort)
+  const languages = twitchLanguages(filters.languages ?? [])
+  if (tab === 'videos') {
+    return {
+      field: 'videos',
+      declarations: '$sort: VideoSort, $types: [BroadcastType!], $languages: [String!]',
+      query: `videos(first: ${CATEGORY_ITEMS}, sort: $sort, types: $types, languages: $languages) { edges { node { ${VIDEO_FIELDS} owner { ${BROADCASTER_FIELDS} } } } }`,
+      variables: {
+        sort,
+        types: filters.type && options.types?.includes(filters.type) ? [filters.type.toUpperCase()] : null,
+        // Videos name their languages in lowercase, with a hyphen
+        languages: languages.length > 0 ? languages.map(language => language.toLowerCase().replace('_', '-')) : null
+      },
+      /** @param {any} node */
+      items: node => {
+        const channel = parseChannel(node.owner)
+        return channel ? withAuthorAvatar(parseTwitchVideo(node, channel), channel) : []
+      }
+    }
+  }
+  if (tab === 'clips') {
+    return {
+      field: 'clips',
+      declarations: '$criteria: GameClipsInput',
+      query: `clips(first: ${CATEGORY_ITEMS}, criteria: $criteria) { edges { node { ${CLIP_FIELDS} broadcaster { ${BROADCASTER_FIELDS} } } } }`,
+      variables: {
+        criteria: { period: sort, sort: 'VIEWS_DESC', ...(languages.length > 0 ? { languages } : {}) }
+      },
+      /** @param {any} node */
+      items: node => {
+        const channel = parseChannel(node.broadcaster)
+        return channel ? withAuthorAvatar(parseTwitchClip(node, channel), channel) : []
+      }
+    }
+  }
+  return {
+    field: 'streams',
+    declarations: '$options: GameStreamOptions',
+    query: `streams(first: ${CATEGORY_ITEMS}, options: $options) { edges { node { ${STREAM_NODE_FIELDS} } } }`,
+    variables: { options: streamOptions(filters) },
+    items: streamItem
+  }
+}
+
+/**
  * The live streams of a connection of streams, each with its channel.
  * @param {any} connection
  * @returns {PlatformItem[]}
  */
 function streamItems(connection) {
   const edges = Array.isArray(connection?.edges) ? connection.edges : []
-  return edges.flatMap(edge => {
-    const parsed = edge?.node ? parseTwitchUser({ ...edge.node.broadcaster, stream: edge.node }) : null
-    return parsed ? withAuthorAvatar(parsed.feed.live, parsed.channel) : []
-  })
+  return edges.flatMap(edge => edge?.node ? streamItem(edge.node) : [])
+}
+
+/**
+ * A live stream with its channel.
+ * @param {any} node
+ * @returns {PlatformItem[]}
+ */
+function streamItem(node) {
+  const parsed = parseTwitchUser({ ...node.broadcaster, stream: node })
+  return parsed ? withAuthorAvatar(parsed.feed.live, parsed.channel) : []
 }
 
 /**
@@ -251,29 +399,57 @@ const twitch = {
     return { results, continuation: cursor }
   },
 
-  async getCategory(fetch, id, signal) {
+  categoryTabs: CATEGORY_TABS,
+  liveStreamFilters: STREAM_FILTERS,
+  filterLanguages: FILTER_LANGUAGES,
+
+  async getCategory(fetch, id, tab, filters = {}, signal) {
+    if (!Object.hasOwn(CATEGORY_TABS, tab)) throw new Error(`Twitch categories have no ${tab} tab`)
     if (!CATEGORY_PATTERN.test(id)) return null
-    const data = await requestTwitch(fetch,
-      `query($slug: String!) { game(slug: $slug) { ${CATEGORY_FIELDS} streams(first: ${CATEGORY_STREAMS}, options: { sort: VIEWER_COUNT }) { edges { node { ${STREAM_NODE_FIELDS} } } } } }`,
-      { slug: id }, signal)
-    const category = toPlatformCategory(data.game)
-    if (!category) return null
-    // A failed streams field must not look like a category nobody streams
-    if (!Array.isArray(data.game.streams?.edges)) throw new Error('Twitch returned no streams')
-    return { category, items: streamItems(data.game.streams) }
+    const list = categoryList(tab, filters)
+    // Twitch's lists, its clips in particular, now and then fail with a
+    // service error that the next request doesn't have. Failed requests
+    // throw instead, for the page's Retry button.
+    for (let attempt = 1; ; attempt++) {
+      const data = await requestTwitch(fetch,
+        `query($slug: String!, ${list.declarations}) { game(slug: $slug) { ${CATEGORY_PAGE_FIELDS} ${list.query} } }`,
+        { slug: id, ...list.variables }, signal)
+      const category = toCategoryPage(data.game)
+      if (!category) return null
+      const edges = data.game[list.field]?.edges
+      if (Array.isArray(edges)) return { category, items: edges.flatMap(edge => edge?.node ? list.items(edge.node) : []) }
+      // A failed list must not look like a category nobody streams
+      if (attempt === CATEGORY_ATTEMPTS) throw new Error(`Twitch returned no ${list.field}`)
+    }
   },
 
-  async getBrowse(fetch, signal) {
+  async searchStreamTags(fetch, query, signal) {
+    const userQuery = query.trim()
+    if (!userQuery || userQuery.length > MAX_TAG_LENGTH) return []
     const data = await requestTwitch(fetch,
-      `query { games(first: ${BROWSE_CATEGORIES}) { edges { node { ${CATEGORY_FIELDS} } } } streams(first: ${BROWSE_STREAMS}) { edges { node { ${STREAM_NODE_FIELDS} } } } }`,
+      `query($query: String!) { searchFreeformTags(userQuery: $query, first: ${TAG_SUGGESTIONS}) { edges { node { tagName } } } }`,
+      { query: userQuery }, signal)
+    const edges = data.searchFreeformTags?.edges
+    if (!Array.isArray(edges)) throw new Error('Twitch returned no tags')
+    return edges.flatMap(edge => typeof edge?.node?.tagName === 'string' && edge.node.tagName ? [edge.node.tagName] : [])
+  },
+
+  async getTopCategories(fetch, signal) {
+    const data = await requestTwitch(fetch,
+      `query { games(first: ${BROWSE_CATEGORIES}) { edges { node { ${CATEGORY_FIELDS} } } } }`,
       {}, signal)
     // A list fails on its own and leaves its field null, which must not look
     // like an empty list that a retry can't load again
-    if (!Array.isArray(data.games?.edges) || !Array.isArray(data.streams?.edges)) {
-      throw new Error('Twitch returned no categories or streams')
-    }
-    const categories = data.games.edges.flatMap(edge => toPlatformCategory(edge?.node) ?? [])
-    return { categories, items: streamItems(data.streams) }
+    if (!Array.isArray(data.games?.edges)) throw new Error('Twitch returned no categories')
+    return data.games.edges.flatMap(edge => toPlatformCategory(edge?.node) ?? [])
+  },
+
+  async getLiveStreams(fetch, filters = {}, signal) {
+    const data = await requestTwitch(fetch,
+      `query($options: StreamOptions) { streams(first: ${BROWSE_STREAMS}, options: $options) { edges { node { ${STREAM_NODE_FIELDS} } } } }`,
+      { options: streamOptions(filters) }, signal)
+    if (!Array.isArray(data.streams?.edges)) throw new Error('Twitch returned no streams')
+    return streamItems(data.streams)
   },
 
   async getPlaylist() {

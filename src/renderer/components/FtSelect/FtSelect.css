@@ -695,6 +695,42 @@
   background: var(--primary-color);
 }
 
+/* Lists that choose several values check their options instead of
+   highlighting the chosen ones. */
+.multiple .selectOption.selected:not(:active, :focus-visible)::before {
+  background-color: transparent;
+}
+
+.multiple .selectOption.active:not(:active, :focus-visible)::before {
+  background-color: var(--dropdown-item-hover-color);
+}
+
+.optionCheckbox {
+  flex-basis: 18px;
+  inline-size: 18px;
+  block-size: 18px;
+  border-radius: calc(2px * var(--ui-roundness));
+  transition: background-color var(--motion-fast-effects), border-color var(--motion-fast-effects);
+}
+
+.selectOption.selected .optionRadio.optionCheckbox {
+  border-color: var(--primary-color);
+  background-color: var(--primary-color);
+}
+
+/* Replaces the radio's dot with a check mark. */
+.selectOption.selected .optionRadio.optionCheckbox::after {
+  content: '';
+  inline-size: 9px;
+  block-size: 4px;
+  border: solid var(--text-with-main-color);
+  border-width: 0 0 2px 2px;
+  border-radius: 0;
+  background: none;
+  translate: 0 -1px;
+  rotate: -45deg;
+}
+
 /* Match the radio's size so icons read clearly in touch-sized rows. */
 .phonePicker .optionIcon {
   flex-basis: 20px;

@@ -1313,6 +1313,7 @@ Settings:
     Platforms:
       Other Platforms: Muut alustat
       Manage Channels: Hallitse seurattuja kanavia
+      Enable Twitch Page: Ota Twitch-sivu käyttöön
       Notify When Live: Ilmoita, kun seuratut Twitch-kanavat aloittavat suoratoiston
       Auto Refresh Interval: Muiden alustojen automaattisen päivityksen aikaväli
   Distraction Free Settings:
@@ -2471,6 +2472,7 @@ Tooltips:
     Faster Subscription Refresh: "Tarkistaa ensin jokaisen kanavan RSS-syötteen ja lataa videot, Shorts-videot ja suoratoistot vain kanavilta, joilla on uusia latauksia. Automaattiset päivitykset ohittavat myös kanavat, jotka on ladattu viimeisen 10 minuutin aikana. Kanavilla, joilla ei ole uusia latauksia, katselukerrat, poistetut videot ja muuttuneet otsikot päivittyvät vain muutaman tunnin välein, ja uudet lataukset voivat näkyä myöhemmin, kun RSS-syöte on jäljessä. Ei käytettävissä Invidious-rajapinnan kanssa."
     Show Collaborations From Other Channels: "Näyttää myös videot, jotka tilaamasi kanavat ovat tehneet yhdessä toisen, ne ladanneen kanavan kanssa. YouTube näyttää ne vain kanavan Etusivu-välilehdellä, joten videoiden päivitys tarkistaa enintään muutaman kanavan, ja uusien näkyminen voi kestää päivän tai kauemmin. Vain siellä näkyvät uusimmat yhteistyöt löytyvät, jotkin kanavat eivät näytä niitä lainkaan, ja niiden julkaisupäivät ovat likimääräisiä. Ei käytettävissä Invidious-rajapinnan kanssa."
     Platforms Auto Refresh Interval: Kuinka usein OpenTubeX päivittää muilla alustoilla seuraamasi kanavat automaattisesti, kun sovellus on auki.
+    Enable Twitch Page: Voit avata Twitch-sivun navigoinnista ja komentopaletista. Siellä voit selata suosittuja luokkia ja suorassa lähetyksessä olevia kanavia sekä hakea Twitchistä.
     Twitch Notify When Live: Ilmoittaa, kun jokin seuraamistasi Twitch-kanavista aloittaa lähetyksen. OpenTubeX tarkistaa muutaman minuutin välein ollessaan auki, ja myös ollessaan suljettuna, jos se silloin päivittää tilaukset.
   Theme Settings:
     Toggle Playback With Tab Icon: Toistuvan tai keskeytetyn videon sisältävän välilehden kuvakkeen napsauttaminen keskeyttää tai jatkaa videota vaihtamatta kyseiseen välilehteen.
@@ -2890,6 +2892,32 @@ Platforms:
   Verify: "Vahvista"
   Categories: "Kategoriat"
   Category Not Found: "Tätä kategoriaa ei löytynyt."
+  Category Tags: "Kategorian tunnisteet"
+  Stream Tags: "Lähetyksen tunnisteet"
+  Language: "Kieli"
+  All Languages: "Kaikki kielet"
+  Other Language: "Muu"
+  American Sign Language: "amerikkalainen viittomakieli"
+  Search Tags: "Hae tunnisteita"
+  Add Tag: "Lisää tunniste"
+  Remove Tag: "Poista {tag}"
+  Sort:
+    Viewers: "Katsojat (suurimmasta pienimpään)"
+    Viewers Ascending: "Katsojat (pienimmästä suurimpaan)"
+    Started: "Äskettäin alkaneet"
+    Relevance: "Suositellut"
+    Published: "Äskettäin julkaistut"
+    Views: "Katsomiskerrat (suurimmasta pienimpään)"
+    Top Day: "Parhaat: 24 tuntia"
+    Top Week: "Parhaat: 7 päivää"
+    Top Month: "Parhaat: 30 päivää"
+    Top All: "Parhaat: kaikkien aikojen"
+  Video Type:
+    Video Type: "Videotyyppi"
+    All: "Kaikki videot"
+    Archive: "Aiemmat lähetykset"
+    Highlight: "Kohokohdat"
+    Upload: "Lataukset"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} vastasi käyttäjälle {commentAuthor}"
   Like: "Tykkää"
@@ -2924,5 +2952,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Hae Twitchistä"
+  Search Placeholder: "Kategoriat ja kanavat"
 New Incognito Tab: Uusi incognito-välilehti
 Incognito Tab: Incognito-välilehti

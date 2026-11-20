@@ -1379,6 +1379,7 @@ Settings:
     Platforms:
       Other Platforms: دیگر پلیٹ فارمز
       Manage Channels: فالو کیے گئے چینلز کا نظم کریں
+      Enable Twitch Page: Twitch صفحہ فعال کریں
       Notify When Live: فالو کیے گئے Twitch چینلز کے لائیو ہونے پر مطلع کریں
       Auto Refresh Interval: دیگر پلیٹ فارمز کی خودکار ریفریش کا وقفہ
   Distraction Free Settings:
@@ -2583,6 +2584,7 @@ Tooltips:
     Faster Subscription Refresh: "پہلے ہر چینل کی RSS فیڈ چیک کرتا ہے اور صرف نئے اپ لوڈز والے چینلز کی ویڈیوز، Shorts اور لائیو اسٹریمز لوڈ کرتا ہے۔ خودکار تازہ کاریاں پچھلے 10 منٹ میں لوڈ کیے گئے چینلز کو بھی چھوڑ دیتی ہیں۔ نئے اپ لوڈز کے بغیر چینلز کے لیے، ویوز کی تعداد، ہٹائی گئی ویڈیوز اور تبدیل شدہ عنوانات صرف ہر چند گھنٹوں بعد اپ ڈیٹ ہوتے ہیں، اور RSS فیڈ پیچھے رہنے پر نئے اپ لوڈز بعد میں ظاہر ہو سکتے ہیں۔ Invidious API کے ساتھ دستیاب نہیں۔"
     Show Collaborations From Other Channels: "وہ ویڈیوز بھی دکھاتا ہے جو آپ کے سبسکرائب کردہ چینلز نے کسی دوسرے چینل کے ساتھ مل کر بنائیں جس نے انہیں اپ لوڈ کیا۔ YouTube انہیں صرف چینل کے ہوم ٹیب پر دکھاتا ہے، اس لیے ایک ویڈیو ریفریش زیادہ سے زیادہ چند چینلز چیک کرتا ہے، اور نئے اشتراکات ظاہر ہونے میں ایک دن یا زیادہ لگ سکتا ہے۔ وہاں دکھائے گئے صرف تازہ ترین اشتراکات ملتے ہیں، کچھ چینلز کوئی نہیں دکھاتے، اور ان کی اشاعت کی تاریخیں تخمینی ہیں۔ Invidious API کے ساتھ دستیاب نہیں۔"
     Platforms Auto Refresh Interval: ایپ کھلی ہونے کے دوران OpenTubeX دیگر پلیٹ فارمز پر آپ کے فالو کیے گئے چینلز کو کتنی بار خودکار طور پر ریفریش کرتا ہے۔
+    Enable Twitch Page: آپ کو نیویگیشن اور کمانڈ پیلیٹ سے Twitch صفحہ کھولنے دیتا ہے۔ وہاں آپ مقبول زمروں اور لائیو چینلز کو براؤز کر سکتے ہیں اور Twitch میں تلاش کر سکتے ہیں۔
     Twitch Notify When Live: جب آپ کے فالو کیے گئے Twitch چینلز میں سے کوئی اسٹریمنگ شروع کرے تو آپ کو مطلع کرتا ہے۔ OpenTubeX کھلا ہونے کے دوران ہر چند منٹ بعد چیک کرتا ہے، اور بند ہونے کے دوران بھی اگر اس وقت سبسکرپشنز ریفریش کرتا ہو۔
   Theme Settings:
     Toggle Playback With Tab Icon: چلتی یا رکی ہوئی ویڈیو والے ٹیب کے آئیکن پر کلک کرنے سے وہ اس ٹیب پر جائے بغیر رک جاتی ہے یا دوبارہ چلنے لگتی ہے۔
@@ -2952,6 +2954,32 @@ Platforms:
   Verify: "تصدیق کریں"
   Categories: "زمرے"
   Category Not Found: "یہ زمرہ نہیں مل سکا۔"
+  Category Tags: "زمرے کے ٹیگز"
+  Stream Tags: "اسٹریم ٹیگز"
+  Language: "زبان"
+  All Languages: "تمام زبانیں"
+  Other Language: "دیگر"
+  American Sign Language: "امریکی اشاروں کی زبان"
+  Search Tags: "ٹیگز تلاش کریں"
+  Add Tag: "ٹیگ شامل کریں"
+  Remove Tag: "{tag} ہٹائیں"
+  Sort:
+    Viewers: "ناظرین (زیادہ سے کم)"
+    Viewers Ascending: "ناظرین (کم سے زیادہ)"
+    Started: "حال ہی میں شروع ہوئی"
+    Relevance: "تجویز کردہ"
+    Published: "حال ہی میں شائع شدہ"
+    Views: "ویوز (زیادہ سے کم)"
+    Top Day: "24 گھنٹوں کے ٹاپ"
+    Top Week: "7 دنوں کے ٹاپ"
+    Top Month: "30 دنوں کے ٹاپ"
+    Top All: "ہر وقت کے ٹاپ"
+  Video Type:
+    Video Type: "ویڈیو کی قسم"
+    All: "تمام ویڈیوز"
+    Archive: "گزشتہ نشریات"
+    Highlight: "نمایاں لمحات"
+    Upload: "اپ لوڈز"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} نے {commentAuthor} کو جواب دیا"
   Like: "پسند کریں"
@@ -2986,5 +3014,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Twitch پر تلاش کریں"
+  Search Placeholder: "زمرے اور چینلز"
 New Incognito Tab: نیا پوشیدگی ٹیب
 Incognito Tab: پوشیدگی ٹیب

@@ -1857,6 +1857,7 @@ Settings:
     Platforms:
       Other Platforms: Other Platforms
       Manage Channels: Manage Followed Channels
+      Enable Twitch Page: Enable Twitch Page
       Notify When Live: Notify When Followed Twitch Channels Go Live
       Auto Refresh Interval: Other Platforms Auto Refresh Interval
     Show New Content Indicators: Show New Content Indicators
@@ -3601,6 +3602,7 @@ Tooltips:
     Auto Refresh Interval: "How often OpenTubeX automatically refreshes your subscription feed while the app is open. On Android, a nonzero interval also refreshes it while the app is closed."
     RSS Feeds Auto Refresh Interval: How often OpenTubeX automatically refreshes your RSS feeds while the app is open.
     Platforms Auto Refresh Interval: How often OpenTubeX automatically refreshes the channels you follow on other platforms while the app is open.
+    Enable Twitch Page: Lets you open the Twitch page from the navigation and the command palette. There you can browse popular categories and live channels and search Twitch.
     Twitch Notify When Live: Notifies you when one of your followed Twitch channels starts streaming. OpenTubeX checks every few minutes while it is open, and also while it is closed if it refreshes subscriptions then.
     Refresh Subscriptions While App Is Closed: "Refreshes feeds using your selected settings. On desktop, OpenTubeX stays in the system tray until you quit. Android controls when background refreshes run."
     Notify About New Uploads: "Shows system notifications on this device for channels whose notifications you turned on in their subscription settings. OpenTubeX checks for new content when subscriptions refresh, so choose an auto refresh interval. To be notified while the app is closed, also enable refreshing while the app is closed."
@@ -4098,6 +4100,32 @@ Platforms:
   Verify: "Verify"
   Categories: "Categories"
   Category Not Found: "This category could not be found."
+  Category Tags: "Category tags"
+  Stream Tags: "Stream tags"
+  Language: "Language"
+  All Languages: "All languages"
+  Other Language: "Other"
+  American Sign Language: "American Sign Language"
+  Search Tags: "Search tags"
+  Add Tag: "Add tag"
+  Remove Tag: "Remove {tag}"
+  Sort:
+    Viewers: "Viewers (high to low)"
+    Viewers Ascending: "Viewers (low to high)"
+    Started: "Recently started"
+    Relevance: "Recommended"
+    Published: "Recently published"
+    Views: "Views (high to low)"
+    Top Day: "Top 24 hours"
+    Top Week: "Top 7 days"
+    Top Month: "Top 30 days"
+    Top All: "Top all time"
+  Video Type:
+    Video Type: "Video type"
+    All: "All videos"
+    Archive: "Past broadcasts"
+    Highlight: "Highlights"
+    Upload: "Uploads"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} replied to {commentAuthor}"
   Like: "Like"
@@ -4132,3 +4160,4 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Search Twitch"
+  Search Placeholder: "Categories and channels"

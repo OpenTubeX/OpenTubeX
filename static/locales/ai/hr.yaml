@@ -1318,6 +1318,7 @@ Settings:
     Platforms:
       Other Platforms: Druge platforme
       Manage Channels: Upravljanje praćenim kanalima
+      Enable Twitch Page: Omogući stranicu Twitch
       Notify When Live: Obavijesti kada praćeni Twitch kanali počnu prijenos uživo
       Auto Refresh Interval: Razmak automatskog osvježavanja drugih platformi
   Distraction Free Settings:
@@ -2500,6 +2501,7 @@ Tooltips:
     Faster Subscription Refresh: "Najprije provjerava RSS feed svakog kanala i učitava videozapise, Shorts i prijenose uživo samo s kanala s novim sadržajem. Automatska osvježavanja također preskaču kanale učitane u posljednjih 10 minuta. Za kanale bez novog sadržaja broj pregleda, uklonjeni videozapisi i promijenjeni naslovi ažuriraju se samo svakih nekoliko sati, a novi sadržaj može se pojaviti kasnije kad RSS feed kasni. Nije dostupno s Invidious API-jem."
     Show Collaborations From Other Channels: "Prikazuje i videozapise koje su kanali na koje ste pretplaćeni napravili zajedno s drugim kanalom koji ih je prenio. YouTube ih navodi samo na kartici Početna kanala, pa osvježavanje videozapisa provjerava najviše nekoliko kanala, a novim suradnjama može trebati dan ili više da se pojave. Pronalaze se samo najnovije suradnje prikazane ondje, neki kanali ne prikazuju nijednu, a datumi objave su približni. Nije dostupno s Invidious API-jem."
     Platforms Auto Refresh Interval: Koliko često OpenTubeX automatski osvježava kanale koje pratite na drugim platformama dok je aplikacija otvorena.
+    Enable Twitch Page: Omogućuje otvaranje stranice Twitch iz navigacije i palete naredbi. Ondje možete pregledavati popularne kategorije i kanale uživo te pretraživati Twitch.
     Twitch Notify When Live: Obavještava vas kada neki od Twitch kanala koje pratite počne s prijenosom. OpenTubeX provjerava svakih nekoliko minuta dok je otvoren, a i dok je zatvoren ako tada osvježava pretplate.
   Theme Settings:
     Toggle Playback With Tab Icon: Klik na ikonu kartice s videozapisom koji se reproducira ili je pauziran pauzira ga ili nastavlja bez prebacivanja na tu karticu.
@@ -2922,6 +2924,32 @@ Platforms:
   Verify: "Potvrdi"
   Categories: "Kategorije"
   Category Not Found: "Ova kategorija nije pronađena."
+  Category Tags: "Oznake kategorije"
+  Stream Tags: "Oznake prijenosa"
+  Language: "Jezik"
+  All Languages: "Svi jezici"
+  Other Language: "Ostalo"
+  American Sign Language: "američki znakovni jezik"
+  Search Tags: "Pretraži oznake"
+  Add Tag: "Dodaj oznaku"
+  Remove Tag: "Ukloni {tag}"
+  Sort:
+    Viewers: "Gledatelji (od najvećeg prema najmanjem)"
+    Viewers Ascending: "Gledatelji (od najmanjeg prema najvećem)"
+    Started: "Nedavno započeto"
+    Relevance: "Preporučeno"
+    Published: "Nedavno objavljeno"
+    Views: "Gledanja (od najvećeg prema najmanjem)"
+    Top Day: "Najbolje u 24 sata"
+    Top Week: "Najbolje u 7 dana"
+    Top Month: "Najbolje u 30 dana"
+    Top All: "Najbolje svih vremena"
+  Video Type:
+    Video Type: "Vrsta videa"
+    All: "Svi videi"
+    Archive: "Prošli prijenosi"
+    Highlight: "Istaknuto"
+    Upload: "Učitano"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} je odgovorio korisniku {commentAuthor}"
   Like: "Sviđa mi se"
@@ -2956,5 +2984,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Pretraži Twitch"
+  Search Placeholder: "Kategorije i kanali"
 New Incognito Tab: Nova anonimna kartica
 Incognito Tab: Anonimna kartica

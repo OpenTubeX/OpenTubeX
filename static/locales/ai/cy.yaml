@@ -1316,6 +1316,7 @@ Settings:
     Platforms:
       Other Platforms: Llwyfannau Eraill
       Manage Channels: Rheoli Sianeli a Ddilynir
+      Enable Twitch Page: Galluogi Tudalen Twitch
       Notify When Live: Hysbysu Pan Fydd Sianeli Twitch a Ddilynir yn Mynd yn Fyw
       Auto Refresh Interval: Cyfwng adnewyddu llwyfannau eraill yn awtomatig
   Distraction Free Settings:
@@ -2500,6 +2501,7 @@ Tooltips:
     Faster Subscription Refresh: "Yn gwirio ffrwd RSS pob sianel yn gyntaf a dim ond yn llwytho fideos, Shorts a ffrydiau byw sianeli sydd ag uwchlwythiadau newydd. Mae adnewyddiadau awtomatig hefyd yn hepgor sianeli a lwythwyd yn ystod y 10 munud diwethaf. Ar gyfer sianeli heb uwchlwythiadau newydd, dim ond bob ychydig oriau y caiff nifer y gwyliadau, fideos a dynnwyd a theitlau a newidiwyd eu diweddaru, a gall uwchlwythiadau newydd ymddangos yn hwyrach pan fydd y ffrwd RSS ar ei hôl hi. Ddim ar gael gydag API Invidious."
     Show Collaborations From Other Channels: "Mae hefyd yn dangos fideos a wnaeth sianeli rydych wedi tanysgrifio iddynt ar y cyd â sianel arall a'u huwchlwythodd. Dim ond ar dab Cartref sianel y mae YouTube yn eu rhestru, felly mae adnewyddiad fideos yn gwirio ychydig o sianeli ar y mwyaf, a gall rhai newydd gymryd diwrnod neu fwy i ymddangos. Dim ond y cydweithrediadau diweddaraf a ddangosir yno a geir, nid yw rhai sianeli yn dangos unrhyw rai, ac mae eu dyddiadau cyhoeddi yn fras. Ddim ar gael gydag API Invidious."
     Platforms Auto Refresh Interval: Pa mor aml mae OpenTubeX yn adnewyddu'r sianeli rydych chi'n eu dilyn ar lwyfannau eraill yn awtomatig tra bod yr ap ar agor.
+    Enable Twitch Page: Yn eich galluogi i agor tudalen Twitch o'r llywio a'r palet gorchmynion. Yno gallwch bori categorïau poblogaidd a sianeli byw a chwilio Twitch.
     Twitch Notify When Live: Yn eich hysbysu pan fydd un o'r sianeli Twitch rydych yn eu dilyn yn dechrau ffrydio. Mae OpenTubeX yn gwirio bob ychydig funudau tra bo ar agor, a hefyd tra bo ar gau os yw'n adnewyddu tanysgrifiadau bryd hynny.
   Theme Settings:
     Toggle Playback With Tab Icon: Mae clicio eicon tab sydd â fideo yn chwarae neu wedi’i seibio yn ei seibio neu’n ei ailgychwyn heb newid i’r tab hwnnw.
@@ -2920,6 +2922,32 @@ Platforms:
   Verify: "Gwirio"
   Categories: "Categorïau"
   Category Not Found: "Doedd dim modd dod o hyd i'r categori hwn."
+  Category Tags: "Tagiau categori"
+  Stream Tags: "Tagiau ffrwd"
+  Language: "Iaith"
+  All Languages: "Pob iaith"
+  Other Language: "Arall"
+  American Sign Language: "Iaith Arwyddion America"
+  Search Tags: "Chwilio tagiau"
+  Add Tag: "Ychwanegu tag"
+  Remove Tag: "Dileu {tag}"
+  Sort:
+    Viewers: "Gwylwyr (uchel i isel)"
+    Viewers Ascending: "Gwylwyr (isel i uchel)"
+    Started: "Wedi dechrau'n ddiweddar"
+    Relevance: "Argymhellir"
+    Published: "Cyhoeddwyd yn ddiweddar"
+    Views: "Golygon (uchel i isel)"
+    Top Day: "Gorau'r 24 awr"
+    Top Week: "Gorau'r 7 diwrnod"
+    Top Month: "Gorau'r 30 diwrnod"
+    Top All: "Gorau erioed"
+  Video Type:
+    Video Type: "Math o fideo"
+    All: "Pob fideo"
+    Archive: "Darllediadau blaenorol"
+    Highlight: "Uchafbwyntiau"
+    Upload: "Uwchlwythiadau"
 YouTube Account:
   "{author} replied to {commentAuthor}": "Atebodd {author} {commentAuthor}"
   Like: "Hoffi"
@@ -2954,5 +2982,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Chwilio Twitch"
+  Search Placeholder: "Categorïau a sianeli"
 New Incognito Tab: Tab incognito newydd
 Incognito Tab: Tab incognito

@@ -1313,6 +1313,7 @@ Settings:
     Platforms:
       Other Platforms: 其他平台
       Manage Channels: 管理追隨的頻道
+      Enable Twitch Page: 啟用 Twitch 頁面
       Notify When Live: 追隨的 Twitch 頻道開始直播時通知
       Auto Refresh Interval: 其他平台自動重新整理間隔
   Distraction Free Settings:
@@ -2465,6 +2466,7 @@ Tooltips:
     Faster Subscription Refresh: "先檢查每個頻道的 RSS 資訊提供，只載入有新上傳內容的頻道的影片、Shorts 和直播。自動重新整理也會略過過去 10 分鐘內載入過的頻道。對於沒有新上傳內容的頻道，觀看次數、已移除的影片和變更的標題每隔幾小時才會更新一次，而且當 RSS 資訊提供延遲時，新上傳的內容可能會較晚出現。使用 Invidious API 時無法使用。"
     Show Collaborations From Other Channels: "同時顯示你訂閱的頻道與上傳這些影片的其他頻道合作製作的影片。YouTube 只在頻道的首頁分頁中列出這些影片，因此每次重新整理影片最多只檢查少數幾個頻道，新的合作影片可能需要一天或更久才會出現。只能找到那裡顯示的最新合作影片，有些頻道不會顯示任何合作影片，且其發布日期為大略時間。使用 Invidious API 時無法使用。"
     Platforms Auto Refresh Interval: 應用程式開啟時 OpenTubeX 自動重新整理您在其他平台上追隨的頻道的頻率。
+    Enable Twitch Page: 讓你從導覽和命令選擇區開啟 Twitch 頁面。你可以在該頁面瀏覽熱門分類和直播頻道，並搜尋 Twitch。
     Twitch Notify When Live: 你追隨的某個 Twitch 頻道開始直播時通知你。OpenTubeX 開啟時每隔幾分鐘檢查一次；關閉時若仍會重新整理訂閱內容，也會檢查。
   Theme Settings:
     Toggle Playback With Tab Icon: 點選正在播放或已暫停影片的分頁圖示，即可暫停或繼續播放，無需切換至該分頁。
@@ -2884,6 +2886,32 @@ Platforms:
   Verify: "驗證"
   Categories: "分類"
   Category Not Found: "找不到此分類。"
+  Category Tags: "分類標籤"
+  Stream Tags: "直播標籤"
+  Language: "語言"
+  All Languages: "所有語言"
+  Other Language: "其他"
+  American Sign Language: "美國手語"
+  Search Tags: "搜尋標籤"
+  Add Tag: "新增標籤"
+  Remove Tag: "移除 {tag}"
+  Sort:
+    Viewers: "觀眾人數（由高到低）"
+    Viewers Ascending: "觀眾人數（由低到高）"
+    Started: "最近開播"
+    Relevance: "推薦"
+    Published: "最近發布"
+    Views: "觀看次數（由高到低）"
+    Top Day: "24 小時熱門"
+    Top Week: "7 天熱門"
+    Top Month: "30 天熱門"
+    Top All: "歷來熱門"
+  Video Type:
+    Video Type: "影片類型"
+    All: "所有影片"
+    Archive: "過往直播"
+    Highlight: "精彩片段"
+    Upload: "上傳"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} 回覆了 {commentAuthor}"
   Like: "喜歡"
@@ -2918,5 +2946,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "搜尋 Twitch"
+  Search Placeholder: "分類和頻道"
 New Incognito Tab: 新增無痕分頁
 Incognito Tab: 無痕分頁

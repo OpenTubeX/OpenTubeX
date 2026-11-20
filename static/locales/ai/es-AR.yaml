@@ -1400,6 +1400,7 @@ Settings:
     Platforms:
       Other Platforms: Otras plataformas
       Manage Channels: Administrar canales seguidos
+      Enable Twitch Page: Activar la página de Twitch
       Notify When Live: Notificar cuando los canales de Twitch seguidos empiecen a transmitir en vivo
       Auto Refresh Interval: Intervalo de actualización automática de otras plataformas
   Distraction Free Settings:
@@ -2937,6 +2938,7 @@ Tooltips:
     Faster Subscription Refresh: "Primero revisa el feed RSS de cada canal y solo carga los videos, Shorts y transmisiones en vivo de los canales con subidas nuevas. Las actualizaciones automáticas también omiten los canales cargados en los últimos 10 minutos. En los canales sin subidas nuevas, las vistas, los videos eliminados y los títulos cambiados solo se actualizan cada pocas horas, y las subidas nuevas pueden aparecer más tarde cuando el feed RSS se atrasa. No disponible con la API de Invidious."
     Show Collaborations From Other Channels: "También muestra los videos que los canales a los que estás suscripto hicieron junto con otro canal que los subió. YouTube solo los muestra en la pestaña Inicio de un canal, así que una actualización de videos revisa como máximo algunos canales, y las nuevas pueden tardar un día o más en aparecer. Solo se encuentran las colaboraciones más recientes que se muestran ahí, algunos canales no muestran ninguna y sus fechas de publicación son aproximadas. No disponible con la API de Invidious."
     Platforms Auto Refresh Interval: Con qué frecuencia OpenTubeX actualiza automáticamente los canales que seguís en otras plataformas mientras la aplicación está abierta.
+    Enable Twitch Page: Te permite abrir la página de Twitch desde la navegación y la paleta de comandos. Ahí podés explorar categorías populares y canales en vivo, y buscar en Twitch.
     Twitch Notify When Live: Te avisa cuando uno de los canales de Twitch que seguís empieza a transmitir. OpenTubeX revisa cada pocos minutos mientras está abierto, y también mientras está cerrado si en ese momento actualiza las suscripciones.
   Theme Settings:
     Toggle Playback With Tab Icon: Al hacer clic en el ícono de una pestaña con un video en reproducción o en pausa, se pausa o se reanuda sin cambiar a esa pestaña.
@@ -3448,6 +3450,32 @@ Platforms:
   Verify: "Verificar"
   Categories: "Categorías"
   Category Not Found: "No se pudo encontrar esta categoría."
+  Category Tags: "Etiquetas de la categoría"
+  Stream Tags: "Etiquetas de la transmisión"
+  Language: "Idioma"
+  All Languages: "Todos los idiomas"
+  Other Language: "Otro"
+  American Sign Language: "lengua de señas americana"
+  Search Tags: "Buscar etiquetas"
+  Add Tag: "Agregar etiqueta"
+  Remove Tag: "Quitar {tag}"
+  Sort:
+    Viewers: "Espectadores (de más a menos)"
+    Viewers Ascending: "Espectadores (de menos a más)"
+    Started: "Iniciadas recientemente"
+    Relevance: "Recomendado"
+    Published: "Publicados recientemente"
+    Views: "Vistas (de más a menos)"
+    Top Day: "Mejores de 24 horas"
+    Top Week: "Mejores de 7 días"
+    Top Month: "Mejores de 30 días"
+    Top All: "Mejores de todos los tiempos"
+  Video Type:
+    Video Type: "Tipo de video"
+    All: "Todos los videos"
+    Archive: "Transmisiones anteriores"
+    Highlight: "Destacados"
+    Upload: "Subidos"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} respondió a {commentAuthor}"
   Like: "Me gusta"
@@ -3482,5 +3510,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Buscar en Twitch"
+  Search Placeholder: "Categorías y canales"
 New Incognito Tab: Nueva pestaña de incógnito
 Incognito Tab: Pestaña de incógnito

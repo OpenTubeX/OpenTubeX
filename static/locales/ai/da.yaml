@@ -1339,6 +1339,7 @@ Settings:
     Platforms:
       Other Platforms: Andre platforme
       Manage Channels: Administrer fulgte kanaler
+      Enable Twitch Page: Aktivér Twitch-siden
       Notify When Live: Giv besked, når fulgte Twitch-kanaler går live
       Auto Refresh Interval: Interval for automatisk opdatering af andre platforme
   Distraction Free Settings:
@@ -2553,6 +2554,7 @@ Tooltips:
     Faster Subscription Refresh: "Tjekker først hver kanals RSS-feed og indlæser kun videoer, Shorts og livestreams fra kanaler med nye uploads. Automatiske opdateringer springer også kanaler over, der er indlæst inden for de sidste 10 minutter. For kanaler uden nye uploads opdateres visningstal, fjernede videoer og ændrede titler kun med nogle timers mellemrum, og nye uploads kan dukke op senere, når RSS-feedet halter bagefter. Ikke tilgængelig med Invidious API."
     Show Collaborations From Other Channels: "Viser også videoer, som kanaler, du abonnerer på, har lavet sammen med en anden kanal, der har uploadet dem. YouTube viser dem kun på en kanals Hjem-fane, så en opdatering af videoer tjekker højst nogle få kanaler, og nye kan tage en dag eller mere om at dukke op. Kun de nyeste samarbejder, der vises der, findes, nogle kanaler viser ingen, og deres udgivelsesdatoer er omtrentlige. Ikke tilgængelig med Invidious-API'et."
     Platforms Auto Refresh Interval: Hvor ofte OpenTubeX automatisk opdaterer de kanaler, du følger på andre platforme, mens appen er åben.
+    Enable Twitch Page: Lader dig åbne Twitch-siden fra navigationen og kommandopaletten. Her kan du gennemse populære kategorier og live kanaler og søge på Twitch.
     Twitch Notify When Live: Giver dig besked, når en af dine fulgte Twitch-kanaler begynder at streame. OpenTubeX tjekker hvert par minutter, mens den er åben, og også mens den er lukket, hvis den opdaterer abonnementer da.
   Theme Settings:
     Toggle Playback With Tab Icon: Et klik på ikonet for en fane med en video, der afspilles eller er sat på pause, sætter den på pause eller genoptager den uden at skifte til fanen.
@@ -2979,6 +2981,32 @@ Platforms:
   Verify: "Bekræft"
   Categories: "Kategorier"
   Category Not Found: "Denne kategori kunne ikke findes."
+  Category Tags: "Kategori-tags"
+  Stream Tags: "Stream-tags"
+  Language: "Sprog"
+  All Languages: "Alle sprog"
+  Other Language: "Andet"
+  American Sign Language: "amerikansk tegnsprog"
+  Search Tags: "Søg efter tags"
+  Add Tag: "Tilføj tag"
+  Remove Tag: "Fjern {tag}"
+  Sort:
+    Viewers: "Seere (flest til færrest)"
+    Viewers Ascending: "Seere (færrest til flest)"
+    Started: "Senest startet"
+    Relevance: "Anbefalet"
+    Published: "Senest udgivet"
+    Views: "Visninger (flest til færrest)"
+    Top Day: "Top 24 timer"
+    Top Week: "Top 7 dage"
+    Top Month: "Top 30 dage"
+    Top All: "Top nogensinde"
+  Video Type:
+    Video Type: "Videotype"
+    All: "Alle videoer"
+    Archive: "Tidligere udsendelser"
+    Highlight: "Højdepunkter"
+    Upload: "Uploads"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} svarede {commentAuthor}"
   Like: "Synes godt om"
@@ -3013,5 +3041,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Søg på Twitch"
+  Search Placeholder: "Kategorier og kanaler"
 New Incognito Tab: Ny inkognitofane
 Incognito Tab: Inkognitofane

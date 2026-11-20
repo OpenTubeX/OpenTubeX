@@ -1313,6 +1313,7 @@ Settings:
     Platforms:
       Other Platforms: Nền tảng khác
       Manage Channels: Quản lý kênh đang theo dõi
+      Enable Twitch Page: Bật trang Twitch
       Notify When Live: Thông báo khi các kênh Twitch đang theo dõi bắt đầu phát trực tiếp
       Auto Refresh Interval: Khoảng tự động làm mới nền tảng khác
   Distraction Free Settings:
@@ -2479,6 +2480,7 @@ Tooltips:
     Faster Subscription Refresh: "Trước tiên kiểm tra nguồn cấp RSS của từng kênh và chỉ tải video, Shorts và sự kiện trực tiếp từ các kênh có nội dung tải lên mới. Làm mới tự động cũng bỏ qua các kênh đã tải trong 10 phút qua. Với các kênh không có nội dung mới, lượt xem, video đã xóa và tiêu đề đã thay đổi chỉ được cập nhật vài giờ một lần, và nội dung mới có thể xuất hiện muộn hơn khi nguồn cấp RSS bị chậm. Không khả dụng với API Invidious."
     Show Collaborations From Other Channels: "Cũng hiển thị các video mà kênh bạn đăng ký đã thực hiện cùng một kênh khác đã tải chúng lên. YouTube chỉ liệt kê chúng trên thẻ Trang chủ của kênh, nên mỗi lần làm mới video chỉ kiểm tra tối đa một vài kênh và nội dung cộng tác mới có thể mất một ngày hoặc lâu hơn mới xuất hiện. Chỉ tìm thấy các nội dung cộng tác mới nhất hiển thị ở đó, một số kênh không hiển thị nội dung nào và ngày đăng của chúng chỉ là ước tính. Không khả dụng với API Invidious."
     Platforms Auto Refresh Interval: Tần suất OpenTubeX tự động làm mới các kênh bạn theo dõi trên các nền tảng khác khi ứng dụng đang mở.
+    Enable Twitch Page: Cho phép bạn mở trang Twitch từ thanh điều hướng và bảng lệnh. Tại đó bạn có thể duyệt các danh mục phổ biến và kênh đang phát trực tiếp, đồng thời tìm kiếm trên Twitch.
     Twitch Notify When Live: Thông báo cho bạn khi một trong các kênh Twitch bạn theo dõi bắt đầu phát. OpenTubeX kiểm tra vài phút một lần khi đang mở, và cả khi đã đóng nếu lúc đó ứng dụng làm mới mục đăng ký.
   Theme Settings:
     Toggle Playback With Tab Icon: Nhấp vào biểu tượng của thẻ có video đang phát hoặc đã tạm dừng sẽ tạm dừng hoặc tiếp tục video mà không chuyển sang thẻ đó.
@@ -2899,6 +2901,32 @@ Platforms:
   Verify: "Xác minh"
   Categories: "Danh mục"
   Category Not Found: "Không tìm thấy danh mục này."
+  Category Tags: "Thẻ danh mục"
+  Stream Tags: "Thẻ luồng phát"
+  Language: "Ngôn ngữ"
+  All Languages: "Tất cả ngôn ngữ"
+  Other Language: "Khác"
+  American Sign Language: "Ngôn ngữ Ký hiệu Mỹ"
+  Search Tags: "Tìm thẻ"
+  Add Tag: "Thêm thẻ"
+  Remove Tag: "Xóa {tag}"
+  Sort:
+    Viewers: "Người xem (cao đến thấp)"
+    Viewers Ascending: "Người xem (thấp đến cao)"
+    Started: "Mới bắt đầu"
+    Relevance: "Được đề xuất"
+    Published: "Mới đăng gần đây"
+    Views: "Lượt xem (cao đến thấp)"
+    Top Day: "Hàng đầu 24 giờ qua"
+    Top Week: "Hàng đầu 7 ngày qua"
+    Top Month: "Hàng đầu 30 ngày qua"
+    Top All: "Hàng đầu mọi thời đại"
+  Video Type:
+    Video Type: "Loại video"
+    All: "Tất cả video"
+    Archive: "Buổi phát sóng trước đây"
+    Highlight: "Nổi bật"
+    Upload: "Video tải lên"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} đã trả lời {commentAuthor}"
   Like: "Thích"
@@ -2933,5 +2961,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Tìm kiếm trên Twitch"
+  Search Placeholder: "Danh mục và kênh"
 New Incognito Tab: Thẻ ẩn danh mới
 Incognito Tab: Thẻ ẩn danh

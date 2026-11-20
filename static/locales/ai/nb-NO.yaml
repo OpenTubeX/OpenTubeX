@@ -1313,6 +1313,7 @@ Settings:
     Platforms:
       Other Platforms: Andre plattformer
       Manage Channels: Administrer fulgte kanaler
+      Enable Twitch Page: Aktiver Twitch-siden
       Notify When Live: Varsle når fulgte Twitch-kanaler starter direktesending
       Auto Refresh Interval: Intervall for automatisk oppdatering av andre plattformer
   Distraction Free Settings:
@@ -2467,6 +2468,7 @@ Tooltips:
     Faster Subscription Refresh: "Sjekker først RSS-strømmen til hver kanal og laster bare inn videoer, Shorts og direktesendinger fra kanaler med nye opplastinger. Automatiske oppdateringer hopper også over kanaler som er lastet inn de siste 10 minuttene. For kanaler uten nye opplastinger oppdateres visningstall, fjernede videoer og endrede titler bare med noen timers mellomrom, og nye opplastinger kan dukke opp senere når RSS-strømmen henger etter. Ikke tilgjengelig med Invidious-API-et."
     Show Collaborations From Other Channels: "Viser også videoer som kanaler du abonnerer på har laget sammen med en annen kanal som lastet dem opp. YouTube viser dem bare på en kanals Hjem-fane, så en oppdatering av videoer sjekker høyst noen få kanaler, og nye kan bruke en dag eller mer på å dukke opp. Bare de nyeste samarbeidene som vises der blir funnet, noen kanaler viser ingen, og publiseringsdatoene er omtrentlige. Ikke tilgjengelig med Invidious-API-et."
     Platforms Auto Refresh Interval: Hvor ofte OpenTubeX automatisk oppdaterer kanalene du følger på andre plattformer mens appen er åpen.
+    Enable Twitch Page: Lar deg åpne Twitch-siden fra navigasjonen og kommandopaletten. Der kan du bla gjennom populære kategorier og direktesendende kanaler og søke på Twitch.
     Twitch Notify When Live: Varsler deg når en av Twitch-kanalene du følger, begynner å strømme. OpenTubeX sjekker med noen minutters mellomrom mens det er åpent, og også mens det er lukket hvis det da oppdaterer abonnementer.
   Theme Settings:
     Toggle Playback With Tab Icon: Et klikk på ikonet til en fane med en video som spilles av eller er satt på pause, setter den på pause eller gjenopptar den uten å bytte til fanen.
@@ -2885,6 +2887,32 @@ Platforms:
   Verify: "Bekreft"
   Categories: "Kategorier"
   Category Not Found: "Fant ikke denne kategorien."
+  Category Tags: "Kategorietiketter"
+  Stream Tags: "Strømmeetiketter"
+  Language: "Språk"
+  All Languages: "Alle språk"
+  Other Language: "Annet"
+  American Sign Language: "amerikansk tegnspråk"
+  Search Tags: "Søk etter etiketter"
+  Add Tag: "Legg til etikett"
+  Remove Tag: "Fjern {tag}"
+  Sort:
+    Viewers: "Seere (flest til færrest)"
+    Viewers Ascending: "Seere (færrest til flest)"
+    Started: "Nylig startet"
+    Relevance: "Anbefalt"
+    Published: "Nylig publisert"
+    Views: "Visninger (flest til færrest)"
+    Top Day: "Topp 24 timer"
+    Top Week: "Topp 7 dager"
+    Top Month: "Topp 30 dager"
+    Top All: "Topp gjennom tidene"
+  Video Type:
+    Video Type: "Videotype"
+    All: "Alle videoer"
+    Archive: "Tidligere sendinger"
+    Highlight: "Høydepunkter"
+    Upload: "Opplastinger"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} svarte {commentAuthor}"
   Like: "Lik"
@@ -2919,5 +2947,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Søk på Twitch"
+  Search Placeholder: "Kategorier og kanaler"
 New Incognito Tab: Ny inkognitofane
 Incognito Tab: Inkognitofane

@@ -1359,6 +1359,7 @@ Settings:
     Platforms:
       Other Platforms: Andere Plattformen
       Manage Channels: Gefolgte Kanäle verwalten
+      Enable Twitch Page: Twitch-Seite aktivieren
       Notify When Live: Benachrichtigen, wenn gefolgte Twitch-Kanäle live gehen
       Auto Refresh Interval: Automatisches Aktualisierungsintervall für andere Plattformen
     Show New Content Indicators: Markierungen für neue Inhalte anzeigen
@@ -3164,6 +3165,7 @@ Tooltips:
     Auto Refresh Interval: "Wie oft OpenTubeX automatisch deine Abos aktualisiert während die Anwendung geöffnet ist. Unter Android wird der Feed bei einem Intervall ungleich null auch aktualisiert, während die App geschlossen ist."
     RSS Feeds Auto Refresh Interval: Wie oft OpenTubeX deine RSS-Feeds automatisch aktualisiert, während die App geöffnet ist.
     Platforms Auto Refresh Interval: Wie oft OpenTubeX die Kanäle, denen du auf anderen Plattformen folgst, automatisch aktualisiert, während die App geöffnet ist.
+    Enable Twitch Page: Lässt dich die Twitch-Seite über die Navigation und die Befehlspalette öffnen. Dort siehst du beliebte Kategorien und Live-Kanäle an und durchsuchst Twitch.
     Twitch Notify When Live: Benachrichtigt dich, wenn einer deiner gefolgten Twitch-Kanäle einen Stream startet. OpenTubeX prüft alle paar Minuten, während es geöffnet ist, und auch, während es geschlossen ist, sofern es dann Abos aktualisiert.
     Refresh Subscriptions While App Is Closed: "Aktualisiert Feeds mit deinen gewählten Einstellungen. Auf dem Desktop bleibt OpenTubeX bis zum Beenden im Infobereich aktiv. Android bestimmt, wann Aktualisierungen im Hintergrund ausgeführt werden."
     Notify About New Uploads: "Zeigt auf diesem Gerät Systembenachrichtigungen für Kanäle, deren Benachrichtigungen du in ihren Abo-Einstellungen aktiviert hast. OpenTubeX sucht beim Aktualisieren der Abos nach neuen Inhalten, wähle daher ein automatisches Aktualisierungsintervall. Um auch bei geschlossener App benachrichtigt zu werden, aktiviere zusätzlich die Aktualisierung bei geschlossener App."
@@ -4089,6 +4091,32 @@ Platforms:
   Verify: "Bestätigen"
   Categories: "Kategorien"
   Category Not Found: "Diese Kategorie wurde nicht gefunden."
+  Category Tags: "Kategorie-Tags"
+  Stream Tags: "Stream-Tags"
+  Language: "Sprache"
+  All Languages: "Alle Sprachen"
+  Other Language: "Andere"
+  American Sign Language: "Amerikanische Gebärdensprache"
+  Search Tags: "Tags suchen"
+  Add Tag: "Tag hinzufügen"
+  Remove Tag: "{tag} entfernen"
+  Sort:
+    Viewers: "Zuschauende (meiste zuerst)"
+    Viewers Ascending: "Zuschauende (wenigste zuerst)"
+    Started: "Kürzlich gestartet"
+    Relevance: "Empfohlen"
+    Published: "Kürzlich veröffentlicht"
+    Views: "Aufrufe (meiste zuerst)"
+    Top Day: "Top 24 Stunden"
+    Top Week: "Top 7 Tage"
+    Top Month: "Top 30 Tage"
+    Top All: "Top aller Zeiten"
+  Video Type:
+    Video Type: "Videotyp"
+    All: "Alle Videos"
+    Archive: "Vergangene Übertragungen"
+    Highlight: "Highlights"
+    Upload: "Uploads"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} hat {commentAuthor} geantwortet"
   Like: "Mag ich"
@@ -4123,3 +4151,4 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Twitch durchsuchen"
+  Search Placeholder: "Kategorien und Kanäle"

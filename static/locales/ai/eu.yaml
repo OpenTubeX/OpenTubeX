@@ -1313,6 +1313,7 @@ Settings:
     Platforms:
       Other Platforms: Beste plataformak
       Manage Channels: Kudeatu jarraitutako kanalak
+      Enable Twitch Page: Gaitu Twitch orria
       Notify When Live: Jakinarazi jarraitutako Twitch kanalak zuzenean hasten direnean
       Auto Refresh Interval: Beste plataformen freskatze automatikoaren tartea
   Distraction Free Settings:
@@ -2473,6 +2474,7 @@ Tooltips:
     Faster Subscription Refresh: "Lehenik kanal bakoitzaren RSS jarioa egiaztatzen du, eta igoera berriak dituzten kanalen bideoak, Shorts-ak eta zuzeneko emanaldiak soilik kargatzen ditu. Freskatze automatikoek azken 10 minutuetan kargatutako kanalak ere saltatzen dituzte. Igoera berririk ez duten kanaletan, ikustaldi kopuruak, kendutako bideoak eta aldatutako izenburuak ordu batzuetan behin bakarrik eguneratzen dira, eta igoera berriak beranduago ager daitezke RSS jarioa atzeratuta dagoenean. Ez dago erabilgarri Invidious APIarekin."
     Show Collaborations From Other Channels: "Harpidetuta zauden kanalek igo dituen beste kanal batekin batera egindako bideoak ere erakusten ditu. YouTubek kanal baten Hasiera fitxan bakarrik zerrendatzen ditu, beraz, bideoen freskatze batek gehienez kanal gutxi batzuk egiaztatzen ditu, eta berriak agertzeko egun bat edo gehiago behar izan daiteke. Han erakutsitako lankidetza berrienak bakarrik aurkitzen dira, kanal batzuek ez dute bat ere erakusten, eta argitaratze-datak gutxi gorabeherakoak dira. Ez dago erabilgarri Invidious APIarekin."
     Platforms Auto Refresh Interval: Aplikazioa irekita dagoen bitartean OpenTubeX-ek beste plataformetan jarraitzen dituzun kanalak zenbatero freskatzen dituen automatikoki.
+    Enable Twitch Page: Twitch orria nabigaziotik eta komando-paletatik irekitzeko aukera ematen dizu. Han kategoria ezagunak eta zuzeneko kanalak arakatu eta Twitch-en bilatu ditzakezu.
     Twitch Notify When Live: Jakinarazi egiten dizu jarraitzen dituzun Twitch kanaletako batek emanaldia hasten duenean. OpenTubeX-ek minutu gutxitik behin egiaztatzen du irekita dagoen bitartean, baita itxita dagoenean ere, orduan harpidetzak freskatzen baditu.
   Theme Settings:
     Toggle Playback With Tab Icon: Erreproduzitzen ari den edo pausatuta dagoen bideo bat duen fitxa baten ikonoan klik eginez gero, pausatu edo berrekin egiten da fitxa horretara aldatu gabe.
@@ -2892,6 +2894,32 @@ Platforms:
   Verify: "Egiaztatu"
   Categories: "Kategoriak"
   Category Not Found: "Ezin izan da kategoria hau aurkitu."
+  Category Tags: "Kategoriaren etiketak"
+  Stream Tags: "Streamaren etiketak"
+  Language: "Hizkuntza"
+  All Languages: "Hizkuntza guztiak"
+  Other Language: "Beste bat"
+  American Sign Language: "Amerikako zeinu-hizkuntza"
+  Search Tags: "Bilatu etiketak"
+  Add Tag: "Gehitu etiketa"
+  Remove Tag: "Kendu {tag}"
+  Sort:
+    Viewers: "Ikusleak (handienetik txikienera)"
+    Viewers Ascending: "Ikusleak (txikienetik handienera)"
+    Started: "Duela gutxi hasiak"
+    Relevance: "Gomendatua"
+    Published: "Duela gutxi argitaratuak"
+    Views: "Ikustaldiak (handienetik txikienera)"
+    Top Day: "Azken 24 orduetako onenak"
+    Top Week: "Azken 7 egunetako onenak"
+    Top Month: "Azken 30 egunetako onenak"
+    Top All: "Garai guztietako onenak"
+  Video Type:
+    Video Type: "Bideo mota"
+    All: "Bideo guztiak"
+    Archive: "Iraganeko emisioak"
+    Highlight: "Nabarmenak"
+    Upload: "Igoerak"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author}(e)k {commentAuthor}(r)i erantzun dio"
   Like: "Atsegin dut"
@@ -2926,5 +2954,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Bilatu Twitch-en"
+  Search Placeholder: "Kategoriak eta kanalak"
 New Incognito Tab: Ezkutuko fitxa berria
 Incognito Tab: Ezkutuko fitxa

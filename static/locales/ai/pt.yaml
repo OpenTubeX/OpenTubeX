@@ -1313,6 +1313,7 @@ Settings:
     Platforms:
       Other Platforms: Outras plataformas
       Manage Channels: Gerir canais seguidos
+      Enable Twitch Page: Ativar a página da Twitch
       Notify When Live: Notificar quando os canais da Twitch seguidos entrarem em direto
       Auto Refresh Interval: Intervalo de atualização automática de outras plataformas
   Distraction Free Settings:
@@ -2463,6 +2464,7 @@ Tooltips:
     Faster Subscription Refresh: "Verifica primeiro o feed RSS de cada canal e só carrega os vídeos, Shorts e emissões em direto dos canais com novos carregamentos. As atualizações automáticas também ignoram canais carregados nos últimos 10 minutos. Nos canais sem novos carregamentos, as visualizações, os vídeos removidos e os títulos alterados só são atualizados a cada poucas horas, e os novos carregamentos podem aparecer mais tarde quando o feed RSS está atrasado. Indisponível com a API do Invidious."
     Show Collaborations From Other Channels: "Mostra também os vídeos que os canais que subscreve fizeram juntamente com outro canal que os carregou. O YouTube só os lista no separador Página inicial de um canal, por isso uma atualização de vídeos verifica no máximo alguns canais e as novas podem demorar um dia ou mais a aparecer. Só são encontradas as colaborações mais recentes ali mostradas, alguns canais não mostram nenhuma e as datas de publicação são aproximadas. Não disponível com a API do Invidious."
     Platforms Auto Refresh Interval: Com que frequência o OpenTubeX atualiza automaticamente os canais que segue noutras plataformas enquanto a aplicação está aberta.
+    Enable Twitch Page: Permite-lhe abrir a página da Twitch a partir da navegação e da paleta de comandos. Aí pode explorar categorias populares e canais em direto e pesquisar na Twitch.
     Twitch Notify When Live: Avisa-o quando um dos canais da Twitch que segue começa a transmitir. O OpenTubeX verifica a cada poucos minutos enquanto está aberto, e também enquanto está fechado se nessa altura atualizar as subscrições.
   Theme Settings:
     Toggle Playback With Tab Icon: Clicar no ícone de um separador com um vídeo em reprodução ou em pausa coloca-o em pausa ou retoma-o sem mudar para esse separador.
@@ -2881,6 +2883,32 @@ Platforms:
   Verify: "Verificar"
   Categories: "Categorias"
   Category Not Found: "Não foi possível encontrar esta categoria."
+  Category Tags: "Tags da categoria"
+  Stream Tags: "Tags da transmissão"
+  Language: "Idioma"
+  All Languages: "Todos os idiomas"
+  Other Language: "Outro"
+  American Sign Language: "língua de sinais americana"
+  Search Tags: "Pesquisar tags"
+  Add Tag: "Adicionar tag"
+  Remove Tag: "Remover {tag}"
+  Sort:
+    Viewers: "Espectadores (do maior para o menor)"
+    Viewers Ascending: "Espectadores (do menor para o maior)"
+    Started: "Iniciadas recentemente"
+    Relevance: "Recomendado"
+    Published: "Publicados recentemente"
+    Views: "Visualizações (do maior para o menor)"
+    Top Day: "Top 24 horas"
+    Top Week: "Top 7 dias"
+    Top Month: "Top 30 dias"
+    Top All: "Top de sempre"
+  Video Type:
+    Video Type: "Tipo de vídeo"
+    All: "Todos os vídeos"
+    Archive: "Emissões anteriores"
+    Highlight: "Destaques"
+    Upload: "Carregamentos"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} respondeu a {commentAuthor}"
   Like: "Gosto"
@@ -2915,5 +2943,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Pesquisar no Twitch"
+  Search Placeholder: "Categorias e canais"
 New Incognito Tab: Novo separador de navegação anónima
 Incognito Tab: Separador de navegação anónima

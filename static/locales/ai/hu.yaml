@@ -1313,6 +1313,7 @@ Settings:
     Platforms:
       Other Platforms: Más platformok
       Manage Channels: Követett csatornák kezelése
+      Enable Twitch Page: Twitch-oldal engedélyezése
       Notify When Live: Értesítés, amikor a követett Twitch-csatornák élő adást indítanak
       Auto Refresh Interval: Más platformok automatikus frissítésének időköze
   Distraction Free Settings:
@@ -2463,6 +2464,7 @@ Tooltips:
     Faster Subscription Refresh: "Először minden csatorna RSS-hírcsatornáját ellenőrzi, és csak az új feltöltéssel rendelkező csatornák videóit, Shorts-videóit és élő közvetítéseit tölti be. Az automatikus frissítések az elmúlt 10 percben betöltött csatornákat is kihagyják. Az új feltöltés nélküli csatornáknál a megtekintések száma, az eltávolított videók és a módosított címek csak néhány óránként frissülnek, és az új feltöltések később jelenhetnek meg, ha az RSS-hírcsatorna lemarad. Az Invidious API-val nem érhető el."
     Show Collaborations From Other Channels: "Azokat a videókat is megjeleníti, amelyeket a feliratkozott csatornák egy másik, azokat feltöltő csatornával közösen készítettek. A YouTube ezeket csak a csatorna Kezdőlap lapján listázza, ezért egy videófrissítés legfeljebb néhány csatornát ellenőriz, és az újak megjelenése egy napig vagy tovább is tarthat. Csak az ott megjelenő legújabb közös videók találhatók meg, egyes csatornák egyet sem mutatnak, és a közzétételi dátumuk hozzávetőleges. Az Invidious API-val nem érhető el."
     Platforms Auto Refresh Interval: Milyen gyakran frissíti automatikusan az OpenTubeX a más platformokon követett csatornáidat, amíg az alkalmazás nyitva van.
+    Enable Twitch Page: Lehetővé teszi, hogy megnyisd a Twitch-oldalt a navigációból és a parancspalettáról. Ott népszerű kategóriákat és élő csatornákat böngészhetsz, valamint kereshetsz a Twitchen.
     Twitch Notify When Live: Értesít, amikor valamelyik követett Twitch-csatornád adást indít. Az OpenTubeX néhány percenként ellenőriz, amíg nyitva van, és akkor is, amikor be van zárva, ha ilyenkor frissíti a feliratkozásokat.
   Theme Settings:
     Toggle Playback With Tab Icon: Egy lejátszott vagy szüneteltetett videót tartalmazó lap ikonjára kattintva a videó szünetel vagy folytatódik anélkül, hogy arra a lapra váltana.
@@ -2882,6 +2884,32 @@ Platforms:
   Verify: "Ellenőrzés"
   Categories: "Kategóriák"
   Category Not Found: "Ez a kategória nem található."
+  Category Tags: "Kategóriacímkék"
+  Stream Tags: "Streamcímkék"
+  Language: "Nyelv"
+  All Languages: "Minden nyelv"
+  Other Language: "Egyéb"
+  American Sign Language: "amerikai jelnyelv"
+  Search Tags: "Címkék keresése"
+  Add Tag: "Címke hozzáadása"
+  Remove Tag: "{tag} eltávolítása"
+  Sort:
+    Viewers: "Nézők (csökkenő sorrend)"
+    Viewers Ascending: "Nézők (növekvő sorrend)"
+    Started: "Nemrég indult"
+    Relevance: "Ajánlott"
+    Published: "Nemrég közzétéve"
+    Views: "Megtekintések (csökkenő sorrend)"
+    Top Day: "Top 24 óra"
+    Top Week: "Top 7 nap"
+    Top Month: "Top 30 nap"
+    Top All: "Minden idők legjobbjai"
+  Video Type:
+    Video Type: "Videótípus"
+    All: "Összes videó"
+    Archive: "Korábbi adások"
+    Highlight: "Kiemelések"
+    Upload: "Feltöltések"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} válaszolt {commentAuthor} hozzászólására"
   Like: "Tetszik"
@@ -2916,5 +2944,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Keresés a Twitchen"
+  Search Placeholder: "Kategóriák és csatornák"
 New Incognito Tab: Új inkognitólap
 Incognito Tab: Inkognitólap

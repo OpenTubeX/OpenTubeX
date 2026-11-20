@@ -837,6 +837,7 @@ Settings:
     Platforms:
       Other Platforms: Inne platformy
       Manage Channels: Zarządzaj obserwowanymi kanałami
+      Enable Twitch Page: Włącz stronę Twitch
       Notify When Live: Powiadamiaj, gdy obserwowane kanały Twitch rozpoczną transmisję
       Auto Refresh Interval: Interwał odświeżania innych platform
   Distraction Free Settings:
@@ -1684,6 +1685,7 @@ Tooltips:
     Faster Subscription Refresh: "Najpierw sprawdza kanał RSS każdego kanału i wczytuje filmy, Shorts i transmisje na żywo tylko z kanałów z nowymi przesłanymi filmami. Automatyczne odświeżanie pomija też kanały wczytane w ciągu ostatnich 10 minut. W kanałach bez nowych filmów liczba wyświetleń, usunięte filmy i zmienione tytuły aktualizują się tylko co kilka godzin, a nowe filmy mogą pojawić się później, gdy kanał RSS jest opóźniony. Niedostępne z API Invidious."
     Show Collaborations From Other Channels: "Pokazuje także filmy, które subskrybowane kanały nagrały razem z innym kanałem, który je przesłał. YouTube wyświetla je tylko na karcie Główna kanału, więc odświeżenie filmów sprawdza najwyżej kilka kanałów, a nowe mogą pojawić się dopiero po dniu lub później. Znajdowane są tylko najnowsze współprace widoczne w tym miejscu, niektóre kanały nie pokazują żadnych, a daty publikacji są przybliżone. Niedostępne z API Invidious."
     Platforms Auto Refresh Interval: Jak często OpenTubeX automatycznie odświeża kanały, które obserwujesz na innych platformach, gdy aplikacja jest otwarta.
+    Enable Twitch Page: Umożliwia otwarcie strony Twitch z nawigacji i palety poleceń. Możesz tam przeglądać popularne kategorie i kanały na żywo oraz wyszukiwać na Twitchu.
     Twitch Notify When Live: Powiadamia, gdy któryś z obserwowanych kanałów Twitch rozpocznie transmisję. OpenTubeX sprawdza co kilka minut, gdy jest otwarty, a także gdy jest zamknięty, jeśli wtedy odświeża subskrypcje.
   Theme Settings:
     Toggle Playback With Tab Icon: Kliknięcie ikony karty z odtwarzanym lub wstrzymanym filmem wstrzymuje go lub wznawia bez przełączania na tę kartę.
@@ -2124,6 +2126,32 @@ Platforms:
   Verify: "Zweryfikuj"
   Categories: "Kategorie"
   Category Not Found: "Nie udało się znaleźć tej kategorii."
+  Category Tags: "Tagi kategorii"
+  Stream Tags: "Tagi transmisji"
+  Language: "Język"
+  All Languages: "Wszystkie języki"
+  Other Language: "Inny"
+  American Sign Language: "amerykański język migowy"
+  Search Tags: "Szukaj tagów"
+  Add Tag: "Dodaj tag"
+  Remove Tag: "Usuń {tag}"
+  Sort:
+    Viewers: "Oglądający (od największej do najmniejszej liczby)"
+    Viewers Ascending: "Oglądający (od najmniejszej do największej liczby)"
+    Started: "Ostatnio rozpoczęte"
+    Relevance: "Polecane"
+    Published: "Ostatnio opublikowane"
+    Views: "Wyświetlenia (od największej do najmniejszej liczby)"
+    Top Day: "Top 24 godziny"
+    Top Week: "Top 7 dni"
+    Top Month: "Top 30 dni"
+    Top All: "Top wszech czasów"
+  Video Type:
+    Video Type: "Typ filmu"
+    All: "Wszystkie filmy"
+    Archive: "Poprzednie transmisje"
+    Highlight: "Najciekawsze momenty"
+    Upload: "Przesłane"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} odpowiada użytkownikowi {commentAuthor}"
   Like: "Podoba mi się"
@@ -2174,5 +2202,6 @@ App Menu:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Szukaj na Twitchu"
+  Search Placeholder: "Kategorie i kanały"
 New Incognito Tab: Nowa karta incognito
 Incognito Tab: Karta incognito

@@ -1315,6 +1315,7 @@ Settings:
     Platforms:
       Other Platforms: Alte platforme
       Manage Channels: Gestionează canalele urmărite
+      Enable Twitch Page: Activează pagina Twitch
       Notify When Live: Notifică atunci când canalele Twitch urmărite intră live
       Auto Refresh Interval: Interval de reîmprospătare automată a altor platforme
   Distraction Free Settings:
@@ -2517,6 +2518,7 @@ Tooltips:
     Faster Subscription Refresh: "Verifică mai întâi fluxul RSS al fiecărui canal și încarcă videoclipurile, Shorts și transmisiunile live doar de la canalele cu încărcări noi. Reîmprospătările automate omit și canalele încărcate în ultimele 10 minute. Pentru canalele fără încărcări noi, numărul de vizionări, videoclipurile eliminate și titlurile modificate se actualizează doar la câteva ore, iar încărcările noi pot apărea mai târziu când fluxul RSS rămâne în urmă. Indisponibil cu API-ul Invidious."
     Show Collaborations From Other Channels: "Afișează și videoclipurile pe care canalele la care ești abonat le-au făcut împreună cu un alt canal care le-a încărcat. YouTube le afișează doar în fila Pagina principală a unui canal, așa că o reîmprospătare a videoclipurilor verifică cel mult câteva canale, iar cele noi pot apărea abia după o zi sau mai mult. Sunt găsite doar cele mai noi colaborări afișate acolo, unele canale nu afișează niciuna, iar datele lor de publicare sunt aproximative. Indisponibil cu API-ul Invidious."
     Platforms Auto Refresh Interval: Cât de des reîmprospătează OpenTubeX automat canalele pe care le urmărești pe alte platforme cât timp aplicația este deschisă.
+    Enable Twitch Page: Îți permite să deschizi pagina Twitch din navigare și din paleta de comenzi. Acolo poți răsfoi categoriile populare și canalele live și poți căuta pe Twitch.
     Twitch Notify When Live: Te anunță când unul dintre canalele Twitch pe care le urmărești începe o transmisiune. OpenTubeX verifică la fiecare câteva minute cât timp este deschis, și de asemenea cât timp este închis, dacă atunci actualizează abonamentele.
   Theme Settings:
     Toggle Playback With Tab Icon: Un clic pe pictograma unei file cu un videoclip redat sau pus pe pauză îl pune pe pauză sau îl reia fără a comuta la acea filă.
@@ -2939,6 +2941,32 @@ Platforms:
   Verify: "Verifică"
   Categories: "Categorii"
   Category Not Found: "Această categorie nu a putut fi găsită."
+  Category Tags: "Etichete categorie"
+  Stream Tags: "Etichete stream"
+  Language: "Limbă"
+  All Languages: "Toate limbile"
+  Other Language: "Altele"
+  American Sign Language: "limbajul semnelor american"
+  Search Tags: "Caută etichete"
+  Add Tag: "Adaugă etichetă"
+  Remove Tag: "Elimină {tag}"
+  Sort:
+    Viewers: "Spectatori (de la mulți la puțini)"
+    Viewers Ascending: "Spectatori (de la puțini la mulți)"
+    Started: "Începute recent"
+    Relevance: "Recomandate"
+    Published: "Publicate recent"
+    Views: "Vizionări (de la mulți la puțini)"
+    Top Day: "Top 24 de ore"
+    Top Week: "Top 7 zile"
+    Top Month: "Top 30 de zile"
+    Top All: "Top din toate timpurile"
+  Video Type:
+    Video Type: "Tip de videoclip"
+    All: "Toate videoclipurile"
+    Archive: "Transmisiuni anterioare"
+    Highlight: "Momente importante"
+    Upload: "Încărcări"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} i-a răspuns lui {commentAuthor}"
   Like: "Îmi place"
@@ -2973,5 +3001,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Caută pe Twitch"
+  Search Placeholder: "Categorii și canale"
 New Incognito Tab: Filă incognito nouă
 Incognito Tab: Filă incognito

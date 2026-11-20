@@ -575,6 +575,7 @@ const customGetters = {
       backendFallback: state.backendFallback,
       showWatchStats: state.rememberHistory && state.enableWatchStats,
       supportsYtDlp,
+      enableTwitchPage: state.enableTwitchPage,
     })
   ),
 
