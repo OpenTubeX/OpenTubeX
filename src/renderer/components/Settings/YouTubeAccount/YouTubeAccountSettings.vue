@@ -3,7 +3,7 @@
     :title="t('Settings.YouTube Account Settings.YouTube Account Settings')"
     :icon="['fas', 'circle-user']"
   >
-    <p class="accountWarning">
+    <p class="accountWarning settingsNotice">
       <FtIcon
         :icon="['fas', 'triangle-exclamation']"
         class="accountWarningIcon"

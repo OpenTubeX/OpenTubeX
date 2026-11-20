@@ -176,6 +176,7 @@
     <FtFlexBox>
       <FtCheckboxList
         v-model="subscriptionFeedsRefreshedTogether"
+        class="checkboxColumns"
         :title="$t('Settings.Subscription Settings.Refresh These Feeds Together')"
         :tooltip="$t('Tooltips.Subscription Settings.Refresh These Feeds Together')"
         :labels="feedNames"

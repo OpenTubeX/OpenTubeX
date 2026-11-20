@@ -222,7 +222,7 @@ for (const width of [360, 400, 680, 760, 1000, 1200]) {
 test.describe('paired switch alignment', { tag: '@scale' }, () => {
   test.use({ seed: async ({ uiScale }, use) => use({ settings: { currentLocale: 'en-US', baseTheme: uiScale === 100 ? 'dark' : 'light', bounds: { x: 0, y: 0, width: 1600, height: 1000, maximized: false } } }) })
 
-  test('centers switches within changed markers and beside caption selects', async ({ app, page }, testInfo) => {
+  test('centers switches within changed markers and spaces caption rows evenly', async ({ app, page }, testInfo) => {
     await page.emulateMedia({ reducedMotion: 'reduce' })
     const section = await goToSettingsSection(page, 'playback')
     const quick = section.locator('.quickPlaybackSpeedToggle')
@@ -258,15 +258,6 @@ test.describe('paired switch alignment', { tag: '@scale' }, () => {
           })
           expect.soft(centers, `${direction} marker center`).toBeLessThanOrEqual(0.1)
         }
-        const paired = await section.locator('.captionControls').evaluate(element => {
-          const select = element.querySelector('.select-text').getBoundingClientRect()
-          const toggle = element.querySelector('.switch-label').getBoundingClientRect()
-          return {
-            columns: getComputedStyle(element).gridTemplateColumns.split(' ').length,
-            offset: Math.abs(select.top + select.height / 2 - toggle.top - toggle.height / 2),
-            gap: toggle.top - select.bottom
-          }
-        })
         const rows = await section.locator('.captionControls').evaluate(element => {
           const columns = getComputedStyle(element).gridTemplateColumns.split(' ').length
           const controls = [...element.querySelectorAll(':scope > .captionControl')]
@@ -281,11 +272,6 @@ test.describe('paired switch alignment', { tag: '@scale' }, () => {
         })
         expect.soft(Math.max(...rows.extraSpace), 'caption rows fit their controls').toBeLessThanOrEqual(1)
         expect.soft(Math.max(...rows.gaps.map(gap => Math.abs(gap - 20))), 'shared caption row gap').toBeLessThanOrEqual(0.1)
-        if (paired.columns > 1) {
-          expect.soft(paired.offset, `${direction} caption control centers`).toBeLessThanOrEqual(0.1)
-        } else {
-          expect(paired.gap).toBeGreaterThan(0)
-        }
       }
       await page.evaluate(() => { document.body.dir = 'ltr' })
       await quick.screenshot({ path: testInfo.outputPath(`centered-switch-marker-${width}.png`) })

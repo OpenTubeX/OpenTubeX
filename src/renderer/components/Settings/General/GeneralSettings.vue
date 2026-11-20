@@ -306,6 +306,7 @@
     <FtFlexBox class="confirmations">
       <FtCheckboxList
         v-model="enabledConfirmations"
+        class="checkboxColumns"
         :title="t('Settings.General Settings.Confirm Before')"
         :labels="confirmationLabels"
         :values="confirmationValues"
