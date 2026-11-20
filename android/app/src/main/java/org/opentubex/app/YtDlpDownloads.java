@@ -660,11 +660,11 @@ final class YtDlpDownloads {
             List<JSONObject> parts = partProgress.get(id);
             if (parts == null) return false;
             // Interrupted, yt-dlp keeps and processes what it has recorded of a live stream.
-            // Other parts of a playlist download its other videos, which an interrupt would stop.
+            // Other parts of a playlist download or process its other videos, which an interrupt would stop.
             boolean interrupted = false;
             for (int index = 0; index < parts.size(); index++) {
                 JSONObject part = parts.get(index);
-                if (!part.optBoolean("live") || part.optBoolean("done") || part.optBoolean("stopping")) continue;
+                if (!part.optBoolean("live") || !part.optString("status").equals("downloading") || part.optBoolean("done") || part.optBoolean("stopping")) continue;
                 part.put("stopping", true).put("status", "processing");
                 if (YtDlpRuntime.interrupt(id, index)) interrupted = true;
                 else { part.remove("stopping"); part.put("status", "downloading"); }

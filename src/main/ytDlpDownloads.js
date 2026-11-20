@@ -1448,9 +1448,10 @@ export async function handleYtDlpControlDownload(event, id, action, value) {
     clearQueuePauseAfterLastIndividualResume()
   } else if (action === 'stop') {
     // Interrupted, yt-dlp keeps and processes what it has recorded of a live stream.
-    // Other parts of a playlist download its other videos, which an interrupt would stop.
+    // Other parts of a playlist download or process its other videos, which an interrupt would stop.
     const recordingParts = entry?.paused === false
-      ? entry.parts.filter(part => part.live === true && !part.done && part.stopRequestedAt === undefined && part.child)
+      ? entry.parts.filter(part => part.live === true && part.phase === 'downloading' && !part.done &&
+        part.stopRequestedAt === undefined && part.child)
       : []
     if (recordingParts.length === 0 || record.live !== true || record.status !== 'downloading') return false
     for (const part of recordingParts) {
