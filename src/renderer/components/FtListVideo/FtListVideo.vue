@@ -155,6 +155,7 @@
             @click="sponsorBlockPromptOpen = true"
             @keydown.space.enter.stop
             @mousedown.middle.prevent
+            @pointerleave="stopThumbnailPreviewOnLeave"
           >
             <FtIcon :icon="sponsorBlockFullVideoIcon" />
             <span>{{ sponsorBlockFullVideoLabel }}</span>
