@@ -47,15 +47,27 @@ function applyRemoteChange(documents, change) {
   }
 }
 
+// Whether the windows started without the stored documents
+let readFailed = false
+
 function readStoredDocuments() {
-  storedDocuments ??= DBFeedCacheHandlers.find().catch((error) => {
-    console.error('Failed to load the feed cache', error)
-    return []
-  }).then((docs) => {
-    const documents = new Map(docs.map(({ _id, ...doc }) => [_id, doc]))
+  storedDocuments ??= DBFeedCacheHandlers.find().then((docs) => {
+    /** @type {Map<string, FeedCacheDocument>} */
+    const documents = new Map()
     // Only changes after the read
     DBFeedCacheHandlers.onChange((event, change) => applyRemoteChange(documents, event === SyncEvents.GENERAL.DELETE_ALL ? null : change))
+    if (readFailed) {
+      // Windows that loaded nothing take the documents before they save over them
+      applyRemoteChange(documents, { docs, removed: [] })
+    } else {
+      for (const { _id, ...doc } of docs) documents.set(_id, doc)
+    }
     return documents
+  }, (error) => {
+    // Read again by the next save, which never writes without the documents
+    readFailed = true
+    storedDocuments = null
+    throw error
   })
   return storedDocuments
 }
@@ -76,7 +88,10 @@ export function createFeedCacheMirror(prefix, onChange) {
 
   return {
     /** @type {Promise<Map<string, FeedCacheDocument>>} the stored documents, by key */
-    loaded: readStoredDocuments().then(documents => new Map(
+    loaded: readStoredDocuments().catch((error) => {
+      console.error('Failed to load the feed cache', error)
+      return /** @type {Map<string, FeedCacheDocument>} */ (new Map())
+    }).then(documents => new Map(
       [...documents].filter(([id]) => id.startsWith(prefix)).map(([id, doc]) => [id.slice(prefix.length), doc])
     )),
 
@@ -91,9 +106,11 @@ export function createFeedCacheMirror(prefix, onChange) {
       pendingBuild = build
       if (queued) return pendingWrite
       pendingWrite = writes.then(async () => {
-        const documents = await readStoredDocuments()
-        const current = /** @type {() => Map<string, FeedCacheDocument>} */ (pendingBuild)()
+        const build = /** @type {() => Map<string, FeedCacheDocument>} */ (pendingBuild)
         pendingBuild = null
+        const documents = await readStoredDocuments()
+        // Only after the read, which can change the window's state
+        const current = build()
         const stored = new Map([...documents].filter(([id]) => id.startsWith(prefix)))
         const change = diffFeedCacheDocuments(stored, new Map([...current].map(([key, doc]) => [prefix + key, doc])))
         if (change.docs.length === 0 && change.removed.length === 0) return true
