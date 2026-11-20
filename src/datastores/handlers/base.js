@@ -11,7 +11,7 @@ import { mergeSearchHistoryEntries, resolveSearchHistoryEntry, sortSearchHistory
 import { createRecommendationStore } from '../recommendations'
 import { createIdQuery } from '../idQuery'
 import { MAX_SUBSCRIPTION_SEEN_VIDEOS, mergeSubscriptionSeenVideos, parseSubscriptionSeenVideos, nextSubscriptionSeenTimestamp } from '../../subscriptionSeenVideos'
-import { keepStoredSubscriptionCollaborations, preserveSubscriptionSeenEntries, subscriptionFeedField } from '../../subscriptionFeedState'
+import { isOlderCollaborationCheck, keepStoredSubscriptionCollaborations, preserveSubscriptionSeenEntries, subscriptionFeedField } from '../../subscriptionFeedState'
 import { mergeSubscriptionSeenPosts, parseSubscriptionSeenPosts } from '../../subscriptionSeenPosts'
 import { createRssFeedSeenMarks, mergeRssFeedSeenItems, parseRssFeedSeenItems } from '../../renderer/helpers/rssFeedSeenItems'
 import { mergeBackupHistoryRecord, mergeBackupPlaylist, mergeBackupProfile, mergeImportedProfile, mergeBackupWatchStatsAdjustment, mergeBackupWatchStatsRecord, validateBackupWatchStats } from '../../renderer/helpers/unifiedBackup'
@@ -1498,7 +1498,8 @@ class SubscriptionCache {
         const { channelId, field, timestamp, collaborationsCheckedAt } = update
         const current = documents.get(channelId)
         const timestampField = `${field}Timestamp`
-        if (new Date(current?.[timestampField]).getTime() > new Date(timestamp).getTime()) {
+        if (new Date(current?.[timestampField]).getTime() > new Date(timestamp).getTime() ||
+          isOlderCollaborationCheck(collaborationsCheckedAt, current?.collaborationsCheckedAt)) {
           applied.push(false)
           continue
         }

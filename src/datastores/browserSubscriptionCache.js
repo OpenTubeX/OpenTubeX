@@ -1,4 +1,4 @@
-import { keepStoredSubscriptionCollaborations, preserveSubscriptionSeenEntries, subscriptionFeedField } from '../subscriptionFeedState'
+import { isOlderCollaborationCheck, keepStoredSubscriptionCollaborations, preserveSubscriptionSeenEntries, subscriptionFeedField } from '../subscriptionFeedState'
 
 /**
  * Browser NeDB rewrites its entire append log for every channel update. Keep
@@ -122,7 +122,8 @@ export function createBrowserSubscriptionCache(loadLegacyRecords, name = 'opentu
     const date = new Date(timestamp)
     return updateChannel(channelId, record => {
       const timestampField = `${field}Timestamp`
-      if (new Date(record[timestampField]).getTime() > date.getTime()) return false
+      if (new Date(record[timestampField]).getTime() > date.getTime() ||
+        isOlderCollaborationCheck(collaborationsCheckedAt, record.collaborationsCheckedAt)) return false
       // Without a check time, the write keeps the stored collaborations
       if (field === 'videos' && collaborationsCheckedAt === undefined) snapshot = keepStoredSubscriptionCollaborations(snapshot, record.videos)
       record[field] = preserveSubscriptionSeenEntries(snapshot, record[field], field === 'communityPosts' ? 'postId' : 'videoId')

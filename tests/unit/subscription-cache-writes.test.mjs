@@ -315,6 +315,9 @@ test('a collaboration check is stored with its time, survives uploads writes fro
   await Cache.updateFeeds([{ ...otherWindow, entries: [...otherWindow.entries.slice(0, 2), live, { videoId: 'unknown', isCollaboration: true }] }])
   assert.deepEqual((await db.subscriptionCache.findOneAsync({ _id: 'channel' })).videos.map(video => [video.videoId, video.liveNow]),
     [['other-upload', undefined], ['upload', undefined], ['collaboration', true]])
+  // Another window's earlier check arrives late
+  assert.deepEqual(structuredClone(await Cache.updateFeeds([{ ...otherWindow, entries: [], collaborationsCheckedAt: checkedAt - 1 }])), [false])
+  assert.equal((await db.subscriptionCache.findOneAsync({ _id: 'channel' })).collaborationsCheckedAt, checkedAt)
 
   state.videoCache = {}
   await actions.grabAllSubscriptions({

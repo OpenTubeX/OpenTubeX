@@ -39,6 +39,16 @@ export function keepStoredSubscriptionCollaborations(entries, storedEntries) {
     .map(entry => written.get(entry.videoId) ?? entry))
 }
 
+/**
+ * Whether a write stores the collaborations of a check made before the
+ * stored one, which another window wrote first.
+ * @param {number | null | undefined} checkedAt
+ * @param {number | null | undefined} storedCheckedAt
+ */
+export function isOlderCollaborationCheck(checkedAt, storedCheckedAt) {
+  return typeof checkedAt === 'number' && typeof storedCheckedAt === 'number' && checkedAt < storedCheckedAt
+}
+
 export function subscriptionFeedField(tab) {
   const field = { videos: 'videos', shorts: 'shorts', live: 'liveStreams', posts: 'communityPosts' }[tab]
   if (!field) throw new Error('Invalid subscription feed')
