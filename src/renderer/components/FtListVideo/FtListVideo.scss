@@ -76,9 +76,12 @@
   padding-block: 3px;
   padding-inline: 5px;
   place-self: start start;
-  pointer-events: none;
+  text-decoration: none;
   z-index: 1;
 }
+
+// The label links to the video like the thumbnail it covers.
+@include ft-list-item.thumbnail-hover-outline('.videoThumbnail:has(> .sponsorBlockVideoLabel:hover) > .thumbnailLink');
 
 .watched .sponsorBlockVideoLabel {
   margin-block-start: 28px;
@@ -95,7 +98,6 @@
   cursor: pointer;
   font-family: inherit;
   line-height: inherit;
-  pointer-events: auto;
 }
 
 // Leave the category text to the tooltip, the prompt and screen readers.
@@ -113,6 +115,42 @@
 .watchPlaylistItem.watched .sponsorBlockVideoLabel,
 .watchPlaylistItem .videoThumbnail:has(.externalPlayerIcon) .sponsorBlockVideoLabel {
   margin-block: 4px 28px;
+}
+
+// Give the thumbnail actions their own column, so a long label truncates beside
+// them instead of covering them on small thumbnails. `:where()` keeps these
+// below the Playlist page's own thumbnail columns.
+.ft-list-item .videoThumbnail:has(> .sponsorBlockVideoLabel) {
+  grid-template-columns: minmax(0, 1fr) auto;
+
+  > * {
+    grid-column: 1 / -1;
+  }
+
+  // Out of flow, so the label does not widen content-sized thumbnails. An
+  // absolutely positioned item needs an explicit end line to stay in its column.
+  > :where(.sponsorBlockVideoLabel) {
+    grid-column: 1 / 2;
+    position: absolute;
+    inset: 0;
+    box-sizing: border-box;
+    max-inline-size: calc(100% - 8px);
+
+    > .ft-icon {
+      flex-shrink: 0;
+    }
+
+    > span:last-child {
+      min-inline-size: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  > :where(.playlistIcons) {
+    grid-column: 2;
+  }
 }
 
 .channelName.channelResolverButton {
