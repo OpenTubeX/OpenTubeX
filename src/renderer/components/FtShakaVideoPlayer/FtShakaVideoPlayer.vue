@@ -110,6 +110,7 @@
         mobileFullscreenSwipeEnabled: enableMobileFullscreenSwipe,
         mobileFullscreenSwiping,
         mobileFullscreenSwipeSettling,
+        touchControlsLocked,
         presentationModeChanging,
         videoZoomPannable: videoZoomPanReady,
         videoZoomPanning,
@@ -2123,6 +2124,21 @@
           @mousedown.stop.prevent
         />
       </div>
+      <!-- The lock handles its presses before any element sees them. -->
+      <button
+        v-if="touchControlsLocked"
+        ref="touchControlsUnlockButton"
+        type="button"
+        class="touchControlsUnlockButton"
+        :class="{ shown: touchControlsUnlockButtonShown, holding: touchControlsUnlockHolding }"
+        :style="{ '--unlock-hold-duration': `${HOLD_TO_UNLOCK_MS}ms` }"
+      >
+        <FtIcon
+          :icon="['fas', 'lock']"
+          aria-hidden="true"
+        />
+        {{ $t('Video.Player.Lock Controls.Hold to Unlock') }}
+      </button>
     </div>
     </Teleport>
     <!-- eslint-enable vue/html-indent -->
@@ -2248,6 +2264,7 @@ import { supportsVoiceOverTranslation } from '../../helpers/voiceOverTranslation
 import { SleepTimer } from './player-components/SleepTimer'
 import { SeekHistoryMenu } from './player-components/SeekHistoryMenu'
 import { VideoInfoButton } from './player-components/VideoInfoButton'
+import { LockControlsButton } from './player-components/LockControlsButton'
 import { SponsorBlockCancelButton } from './player-components/SponsorBlockCancelButton'
 import { SponsorBlockClearButton } from './player-components/SponsorBlockClearButton'
 import { SponsorBlockEndButton } from './player-components/SponsorBlockEndButton'
@@ -2293,7 +2310,7 @@ import {
   removeOverlayScrollbars,
   updateOverlayScrollbars,
 } from '../../helpers/overlayScrollbars'
-import { getFullscreenAspectRatio, setFullscreenOrientation, setLandscapeOrientation, shouldRotateFullscreenToLandscape } from '../../helpers/capacitorUi'
+import { getFullscreenAspectRatio, lockCurrentOrientation, setFullscreenOrientation, setLandscapeOrientation, shouldRotateFullscreenToLandscape } from '../../helpers/capacitorUi'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import {
   enterAndroidPictureInPicture,
@@ -2365,6 +2382,7 @@ import {
   isCapacitorMobilePlayer,
   useMobileFullscreenGestures,
 } from './opentubex/useMobileFullscreenGestures'
+import { HOLD_TO_UNLOCK_MS, useTouchControlsLock } from './opentubex/useTouchControlsLock'
 import { useMusicVisualizer } from './opentubex/useMusicVisualizer'
 import { useScrollMiniPlayer } from './opentubex/useScrollMiniPlayer'
 import { useSecondaryCaptions } from './opentubex/useSecondaryCaptions'
@@ -3684,6 +3702,41 @@ if (isActiveTab.value) {
   miniPlayerStartPending.value = false
   pictureInPictureStartPending.value = false
 }
+
+function isPlayerFullscreenOrFullWindow() {
+  return isNativeFullscreenActive() || fullWindowEnabled.value || androidFullscreenHostActive.value
+}
+
+const touchControlsUnlockButton = useTemplateRef('touchControlsUnlockButton')
+const {
+  touchControlsLocked,
+  unlockButtonShown: touchControlsUnlockButtonShown,
+  unlockHolding: touchControlsUnlockHolding,
+  lockTouchControls,
+  unlockTouchControls,
+} = useTouchControlsLock({
+  isAvailable: () => isActiveTab.value && (isFullscreen.value || fullWindowEnabled.value || androidFullscreenHostActive.value),
+  getUnlockButton: () => touchControlsUnlockButton.value,
+  onLock() {
+    cancelMobileFullscreenGesture()
+    ui?.getControls().hideUI()
+    syncAndroidStatusBarVisibility()
+    // Rotating the phone would otherwise rotate the video or end full screen.
+    lockCurrentOrientation(() => touchControlsLocked.value).catch(() => {})
+  },
+  onUnlock(restoreInterface) {
+    // The lock is already off here, so the fullscreen orientation request applies.
+    if (androidRotationFullscreen) setLandscapeOrientation(androidRotationOrientationLocked).catch(() => {})
+    else if (isNativeFullscreenActive()) requestFullscreenOrientation(true)
+    else setLandscapeOrientation(false).catch(() => {})
+    if (!restoreInterface) return
+    showOverlayControls()
+    syncAndroidStatusBarVisibility()
+  },
+})
+// Runs before the rotation fullscreen handoff, so the next player inherits
+// the orientation policy instead of this lock.
+onBeforeUnmount(() => unlockTouchControls(false))
 
 // Capture the replacement player's initial state. The parent clears its
 // pending SABR state after this player loads, but that must not add autoplay
@@ -5288,6 +5341,7 @@ const uiConfig = computed(() => {
     volumeBoost: 'ft_volume_boost',
     monoAudio: 'ft_mono_audio',
     abRepeat: 'ft_ab_repeat',
+    lockControls: 'ft_lock_controls',
   }
   // Without the full screen title, which opens the video information, the
   // menu offers it instead. It only shows in full screen and full window.
@@ -5414,6 +5468,11 @@ const uiConfig = computed(() => {
 
   if (!showLightsOffToggle.value) {
     removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_lights_off')
+  }
+
+  // Shorts swipe between videos instead of entering full screen.
+  if (!process.env.IS_CAPACITOR || process.env.IS_IOS || props.shortsPlayer) {
+    removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_lock_controls')
   }
 
   if (!showMusicModeToggle.value) {
@@ -6900,7 +6959,7 @@ function syncAndroidStatusBarVisibility() {
   const visible = shouldShowAndroidStatusBar({
     active,
     fullscreen,
-    controlsShown: !process.env.IS_IOS && controlsContainer?.hasAttribute('shown') === true,
+    controlsShown: !process.env.IS_IOS && !touchControlsLocked.value && controlsContainer?.hasAttribute('shown') === true,
     keepHidden,
   })
   if (visible === androidStatusBarVisible) return
@@ -7956,7 +8015,7 @@ function handleAndroidRotationPopoverToggle(event) {
 }
 
 function handleAndroidRotation(landscape) {
-  if (!isActiveTab.value || !ui || !fullWindowListenerReady) return
+  if (!isActiveTab.value || !ui || !fullWindowListenerReady || touchControlsLocked.value) return
   if (pictureInPictureActive.value || androidFullscreenEntering) return
   if (!landscape) {
     if (androidRotationFullscreen) exitAndroidRotationFullscreen()
@@ -10145,6 +10204,17 @@ function registerVideoInfoButton() {
   )
 }
 
+function registerLockControlsButton() {
+  if (!process.env.IS_CAPACITOR || process.env.IS_IOS) return
+
+  events.addEventListener('lockTouchControls', lockTouchControls)
+  registerOwnElement(shakaOverflowMenu, 'ft_lock_controls', {
+    create(rootElement, controls) {
+      return new LockControlsButton(events, rootElement, controls, isPlayerFullscreenOrFullWindow)
+    }
+  })
+}
+
 function registerLegacyQualitySelection() {
   let selectionGeneration = 0
   /**
@@ -11941,6 +12011,8 @@ function offlineHandler() {
 
 let androidFullscreenRotationRequested = false
 function requestFullscreenOrientation(fullscreen) {
+  // Locked touch controls keep the orientation they locked, even when the video resizes.
+  if (fullscreen && touchControlsLocked.value) return
   // Keep this until exit finishes: unlocking after a preference/metadata
   // change can still have a rotation in flight when fullscreen closes.
   androidFullscreenRotationRequested ||= shouldRotateFullscreenToLandscape(fullscreen, video.value, rotateFullscreenToLandscape.value, fullscreenAspectRatio.value)
@@ -12456,6 +12528,7 @@ onMounted(async () => {
   registerFullWindowButton()
   registerAndroidPictureInPictureButton()
   registerVideoInfoButton()
+  registerLockControlsButton()
 
   if (
     props.autoOpenChapters &&
@@ -13929,6 +14002,7 @@ if (process.env.IS_IOS) {
 <style scoped src="./opentubex/phonePlayerOptions.css" />
 <style scoped src="./opentubex/classicPlayerControls.css" />
 <style scoped src="./opentubex/portraitFullscreenDocks.css" />
+<style scoped src="./opentubex/touchControlsLock.css" />
 <style>
 /* Unscoped: pseudo-elements on range inputs do not work reliably with Vue scoped CSS. */
 .ftVideoPlayer.scrollMiniPlayer .scrollMiniVolumeBar {

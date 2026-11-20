@@ -1918,6 +1918,9 @@ Video:
     Zoom:
       Zoom: Ampliação
       'Off': 'Desativada'
+    Lock Controls:
+      Lock Controls: "Bloquear controlos"
+      Hold to Unlock: "Mantenha premido para desbloquear"
     Volume Boost:
       Volume Boost: "Amplificação do volume"
       'Off': "Desativada"

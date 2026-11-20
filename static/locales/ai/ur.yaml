@@ -2065,6 +2065,9 @@ Video:
     Zoom:
       Zoom: زوم
       'Off': 'بند'
+    Lock Controls:
+      Lock Controls: "کنٹرولز لاک کریں"
+      Hold to Unlock: "ان لاک کرنے کے لیے دبائے رکھیں"
     Volume Boost:
       Volume Boost: والیوم بوسٹ
       'Off': 'بند'

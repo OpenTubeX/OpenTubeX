@@ -1933,6 +1933,9 @@ Video:
     Zoom:
       Zoom: Aðdráttur
       'Off': 'Slökkt'
+    Lock Controls:
+      Lock Controls: "Læsa stýringum"
+      Hold to Unlock: "Haltu inni til að aflæsa"
     Volume Boost:
       Volume Boost: "Hljóðstyrksaukning"
       'Off': "Slökkt"

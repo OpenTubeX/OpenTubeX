@@ -1959,6 +1959,9 @@ Video:
     Zoom:
       Zoom: Zoom
       'Off': 'Dezactivat'
+    Lock Controls:
+      Lock Controls: "Blochează comenzile"
+      Hold to Unlock: "Țineți apăsat pentru deblocare"
     Volume Boost:
       Volume Boost: "Amplificare volum"
       'Off': "Dezactivată"

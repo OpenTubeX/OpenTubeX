@@ -1940,6 +1940,9 @@ Video:
     Zoom:
       Zoom: Zoom
       'Off': 'Nonaktif'
+    Lock Controls:
+      Lock Controls: "Kunci Kontrol"
+      Hold to Unlock: "Tahan untuk membuka kunci"
     Volume Boost:
       Volume Boost: "Penguat volume"
       'Off': "Nonaktif"

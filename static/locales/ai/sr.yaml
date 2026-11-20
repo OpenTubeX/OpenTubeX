@@ -1988,6 +1988,9 @@ Video:
     Zoom:
       Zoom: Увећање
       'Off': 'Искључено'
+    Lock Controls:
+      Lock Controls: "Закључај контроле"
+      Hold to Unlock: "Задржите за откључавање"
     Volume Boost:
       Volume Boost: "Појачање јачине звука"
       'Off': "Искључено"

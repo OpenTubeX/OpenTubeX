@@ -1920,6 +1920,9 @@ Video:
     Zoom:
       Zoom: 縮放
       'Off': '關閉'
+    Lock Controls:
+      Lock Controls: "鎖定控制項"
+      Hold to Unlock: "長按以解除鎖定"
     Volume Boost:
       Volume Boost: "音量增強"
       'Off': "關閉"

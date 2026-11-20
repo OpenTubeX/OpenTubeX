@@ -1326,6 +1326,9 @@ Video:
     Zoom:
       Zoom: Powiększenie
       'Off': 'Wyłączone'
+    Lock Controls:
+      Lock Controls: "Zablokuj sterowanie"
+      Hold to Unlock: "Przytrzymaj, aby odblokować"
     Volume Boost:
       Volume Boost: "Wzmocnienie głośności"
       'Off': "Wyłączone"

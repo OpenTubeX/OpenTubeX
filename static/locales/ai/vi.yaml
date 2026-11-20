@@ -1929,6 +1929,9 @@ Video:
     Zoom:
       Zoom: Thu phóng
       'Off': 'Tắt'
+    Lock Controls:
+      Lock Controls: "Khóa điều khiển"
+      Hold to Unlock: "Nhấn giữ để mở khóa"
     Volume Boost:
       Volume Boost: "Tăng âm lượng"
       'Off': "Tắt"

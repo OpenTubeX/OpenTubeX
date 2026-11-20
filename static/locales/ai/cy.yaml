@@ -1949,6 +1949,9 @@ Video:
     Zoom:
       Zoom: Chwyddo
       'Off': 'I ffwrdd'
+    Lock Controls:
+      Lock Controls: "Cloi rheolyddion"
+      Hold to Unlock: "Daliwch i ddatgloi"
     Volume Boost:
       Volume Boost: "Hwb i’r sain"
       'Off': "I ffwrdd"

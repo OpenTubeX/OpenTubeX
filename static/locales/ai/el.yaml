@@ -1933,6 +1933,9 @@ Video:
     Zoom:
       Zoom: Μεγέθυνση
       'Off': 'Ανενεργή'
+    Lock Controls:
+      Lock Controls: "Κλείδωμα χειριστηρίων"
+      Hold to Unlock: "Πατήστε παρατεταμένα για ξεκλείδωμα"
     Volume Boost:
       Volume Boost: "Ενίσχυση έντασης"
       'Off': "Ανενεργή"

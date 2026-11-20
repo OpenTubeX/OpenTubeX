@@ -1964,6 +1964,9 @@ Video:
     Zoom:
       Zoom: تكبير
       Off: عن
+    Lock Controls:
+      Lock Controls: "قفل عناصر التحكم"
+      Hold to Unlock: "اضغط مطولًا لإلغاء القفل"
     Volume Boost:
       Volume Boost: "تعزيز الصوت"
       'Off': "إيقاف"

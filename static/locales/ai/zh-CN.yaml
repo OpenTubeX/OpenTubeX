@@ -1917,6 +1917,9 @@ Video:
     Zoom:
       Zoom: 缩放
       'Off': '关闭'
+    Lock Controls:
+      Lock Controls: "锁定控件"
+      Hold to Unlock: "长按解锁"
     Volume Boost:
       Volume Boost: "音量增强"
       'Off': "关闭"

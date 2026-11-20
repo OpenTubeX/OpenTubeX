@@ -1919,6 +1919,9 @@ Video:
     Zoom:
       Zoom: Suurendus
       'Off': 'Väljas'
+    Lock Controls:
+      Lock Controls: "Lukusta juhtnupud"
+      Hold to Unlock: "Avamiseks hoidke all"
     Volume Boost:
       Volume Boost: "Helitugevuse võimendus"
       'Off': "Väljas"

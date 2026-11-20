@@ -2006,6 +2006,9 @@ Video:
     Zoom:
       Zoom: بزرگ‌نمایی
       'Off': 'خاموش'
+    Lock Controls:
+      Lock Controls: "قفل کنترل‌ها"
+      Hold to Unlock: "برای باز کردن قفل نگه دارید"
     Volume Boost:
       Volume Boost: "تقویت صدا"
       'Off': "خاموش"

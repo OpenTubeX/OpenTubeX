@@ -1917,6 +1917,9 @@ Video:
     Zoom:
       Zoom: Yakınlaştırma
       'Off': Kapalı
+    Lock Controls:
+      Lock Controls: "Kontrolleri kilitle"
+      Hold to Unlock: "Kilidi açmak için basılı tutun"
     Volume Boost:
       Volume Boost: "Ses yükseltme"
       'Off': "Kapalı"

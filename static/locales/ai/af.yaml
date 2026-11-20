@@ -2204,6 +2204,9 @@ Video:
     Zoom:
       Zoom: Zoem
       'Off': 'Af'
+    Lock Controls:
+      Lock Controls: "Sluit kontroles"
+      Hold to Unlock: "Hou in om te ontsluit"
     Volume Boost:
       Volume Boost: Volumeversterking
       'Off': 'Af'

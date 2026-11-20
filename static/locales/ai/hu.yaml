@@ -1917,6 +1917,9 @@ Video:
     Zoom:
       Zoom: Nagyítás
       'Off': 'Ki'
+    Lock Controls:
+      Lock Controls: "Vezérlők zárolása"
+      Hold to Unlock: "Tartsa lenyomva a feloldáshoz"
     Volume Boost:
       Volume Boost: "Hangerő-erősítés"
       'Off': "Ki"

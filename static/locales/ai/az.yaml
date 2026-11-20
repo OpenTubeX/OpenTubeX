@@ -1929,6 +1929,9 @@ Video:
     Zoom:
       Zoom: Miqyas
       'Off': 'Bağlı'
+    Lock Controls:
+      Lock Controls: "İdarəetməni kilidlə"
+      Hold to Unlock: "Kilidi açmaq üçün basıb saxlayın"
     Volume Boost:
       Volume Boost: "Səs gücləndirmə"
       'Off': "Söndürülüb"

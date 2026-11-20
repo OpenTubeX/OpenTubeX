@@ -2004,6 +2004,9 @@ Video:
     Zoom:
       Zoom: Zomo
       'Off': 'Malŝaltita'
+    Lock Controls:
+      Lock Controls: "Ŝlosi regilojn"
+      Hold to Unlock: "Tenu por malŝlosi"
     Volume Boost:
       Volume Boost: Laŭteca plifortigo
       'Off': 'Malŝaltita'

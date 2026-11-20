@@ -2695,6 +2695,9 @@ Video:
     Zoom:
       Zoom: Zoom
       'Off': Aus
+    Lock Controls:
+      Lock Controls: Steuerung sperren
+      Hold to Unlock: Zum Entsperren halten
     Volume Boost:
       Volume Boost: Lautstärkeverstärkung
       'Off': Aus

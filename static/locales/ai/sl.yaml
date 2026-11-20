@@ -2363,6 +2363,9 @@ Video:
     Zoom:
       Zoom: Povečava
       'Off': 'Izklopljeno'
+    Lock Controls:
+      Lock Controls: "Zakleni kontrolnike"
+      Hold to Unlock: "Pridržite za odklepanje"
     Volume Boost:
       Volume Boost: "Ojačitev glasnosti"
       'Off': "Izklopljeno"

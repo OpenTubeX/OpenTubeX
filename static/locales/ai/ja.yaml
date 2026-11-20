@@ -1917,6 +1917,9 @@ Video:
     Zoom:
       Zoom: ズーム
       'Off': 'オフ'
+    Lock Controls:
+      Lock Controls: "操作をロック"
+      Hold to Unlock: "長押しでロック解除"
     Volume Boost:
       Volume Boost: "音量ブースト"
       'Off': "オフ"

@@ -1976,6 +1976,9 @@ Video:
     Zoom:
       Zoom: Zoom
       'Off': Uit
+    Lock Controls:
+      Lock Controls: "Bediening vergrendelen"
+      Hold to Unlock: "Ingedrukt houden om te ontgrendelen"
     Volume Boost:
       Volume Boost: "Volumeversterking"
       'Off': "Uit"

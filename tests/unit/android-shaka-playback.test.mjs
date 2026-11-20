@@ -40,6 +40,7 @@ function androidRotationHarness(overrides = {}) {
     video: { value: { readyState: 4 } },
     ui: { getControls: () => ({}) },
     fullWindowListenerReady: true,
+    touchControlsLocked: { value: false },
     androidFullscreenHost: createPopoverHost(),
     androidRotationFullscreenHandoffs: new WeakMap(),
     observeAndroidDisplayRotation: createRotationObserver(),
@@ -90,6 +91,19 @@ test('Android can rotate to fullscreen with the system rotation lock when explic
   handlers.handleAndroidRotation(false)
   assert.equal(isPopoverOpen(), false)
   assert.ok(calls.includes('orientation:false'))
+})
+
+test('Android keeps rotation fullscreen in portrait while the touch controls are locked', () => {
+  const { context, handlers, isPopoverOpen } = androidRotationHarness({
+    fullscreenRotationIgnoresSystemLock: { value: true },
+  })
+  handlers.handleAndroidRotation(true)
+  context.touchControlsLocked.value = true
+  handlers.handleAndroidRotation(false)
+  assert.equal(isPopoverOpen(), true)
+  context.touchControlsLocked.value = false
+  handlers.handleAndroidRotation(false)
+  assert.equal(isPopoverOpen(), false)
 })
 
 test('Android restores the system orientation policy when rotation fullscreen is dismissed', () => {
@@ -374,7 +388,9 @@ test('Android tracks landscape requests including metadata changes during fullsc
     video: { value: {} },
     rotateFullscreenToLandscape: { value: false },
     fullscreenAspectRatio: { value: 16 / 9 },
-    setFullscreenOrientation: async () => {},
+    touchControlsLocked: { value: false },
+    orientationRequests: 0,
+    setFullscreenOrientation: async () => { context.orientationRequests++ },
   }
   const request = vm.runInNewContext(`${predicate}\n${source.slice(start, end)}
     fullscreen => { requestFullscreenOrientation(fullscreen); return androidFullscreenRotationRequested }`, context)
@@ -389,6 +405,13 @@ test('Android tracks landscape requests including metadata changes during fullsc
   assert.equal(request(false), true, 'Exit must preserve the request until retention finishes')
   activeChanged(false)
   assert.equal(request(true), false, 'Reactivating a retained tab must not reuse its old rotation request')
+  // A video resize must not replace the orientation that locked touch controls hold.
+  context.touchControlsLocked.value = true
+  const requests = context.orientationRequests
+  request(true)
+  assert.equal(context.orientationRequests, requests)
+  request(false)
+  assert.equal(context.orientationRequests, requests + 1, 'Leaving fullscreen still releases the orientation')
 })
 
 test('Android rechecks fullscreen orientation when metadata aspect ratio arrives', async () => {

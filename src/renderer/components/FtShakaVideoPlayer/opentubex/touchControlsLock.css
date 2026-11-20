@@ -1,0 +1,64 @@
+/* Opacity also hides descendants that make themselves visible again. */
+.ftVideoPlayer.touchControlsLocked :deep(.shaka-controls-container),
+.ftVideoPlayer.touchControlsLocked .fullscreenActions {
+  visibility: hidden;
+  opacity: 0 !important;
+}
+
+.touchControlsUnlockButton {
+  position: absolute;
+  z-index: 20;
+  inset-block-end: max(24px, calc(var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) + 12px));
+  inset-inline: 0;
+  display: flex;
+  inline-size: fit-content;
+  margin-inline: auto;
+  align-items: center;
+  gap: 8px;
+  min-block-size: 48px;
+  padding-block: 0;
+  padding-inline: 18px 22px;
+  color: #fff;
+  background-color: rgb(0 0 0 / 45%);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: calc(24px * var(--ui-roundness));
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 35%);
+  font: inherit;
+  font-size: 16px;
+  user-select: none;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 200ms ease, visibility 0s linear 200ms;
+}
+
+.touchControlsUnlockButton.shown {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 200ms ease;
+}
+
+/* Fills the button while it is held. The backdrop filter keeps it below the content. */
+.touchControlsUnlockButton::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background-color: rgb(255 255 255 / 30%);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.touchControlsUnlockButton:dir(rtl)::before {
+  transform-origin: right;
+}
+
+.touchControlsUnlockButton.holding::before {
+  transform: scaleX(1);
+  transition: transform var(--unlock-hold-duration) linear;
+}
+
+.touchControlsUnlockButton :deep(svg) {
+  font-size: 20px;
+}
