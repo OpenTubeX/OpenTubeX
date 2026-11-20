@@ -41,6 +41,11 @@ function applyRemoteChange(documents, change) {
     documents.delete(id)
     changes.set(id, null)
   }
+  notifyMirrors(changes)
+}
+
+/** @param {Map<string, FeedCacheDocument | null>} changes by ID */
+function notifyMirrors(changes) {
   for (const { prefix, onChange } of mirrors) {
     const own = new Map([...changes].filter(([id]) => id.startsWith(prefix)).map(([id, doc]) => [id.slice(prefix.length), doc]))
     if (own.size > 0) onChange(own)
@@ -52,15 +57,12 @@ let readFailed = false
 
 function readStoredDocuments() {
   storedDocuments ??= DBFeedCacheHandlers.find().then((docs) => {
-    /** @type {Map<string, FeedCacheDocument>} */
-    const documents = new Map()
-    // Only changes after the read
+    const documents = new Map(docs.map(({ _id, ...doc }) => [_id, doc]))
+    // Only changes after the read, which can arrive here at once and win
     DBFeedCacheHandlers.onChange((event, change) => applyRemoteChange(documents, event === SyncEvents.GENERAL.DELETE_ALL ? null : change))
     if (readFailed) {
       // Windows that loaded nothing take the documents before they save over them
-      applyRemoteChange(documents, { docs, removed: [] })
-    } else {
-      for (const { _id, ...doc } of docs) documents.set(_id, doc)
+      notifyMirrors(new Map(documents))
     }
     return documents
   }, (error) => {

@@ -2,7 +2,10 @@ import assert from 'node:assert/strict'
 import { registerHooks } from 'node:module'
 import test from 'node:test'
 
-const stored = [{ _id: 'rss:https://kept.example.test/feed', items: [], seen: ['old'] }]
+const stored = [
+  { _id: 'rss:https://kept.example.test/feed', items: [], seen: ['old'] },
+  { _id: 'rss:https://gone.example.test/feed', items: [] },
+]
 let finds = 0
 let failingWrites = 0
 const writes = []
@@ -21,7 +24,11 @@ globalThis.__feedCacheHandlers = {
   deleteAll: async () => {
     throw new Error('Disk full')
   },
-  onChange: () => {},
+  // Another window changed the cache after the read, before this one listened
+  onChange: listener => listener('upsert', {
+    docs: [{ _id: 'rss:https://kept.example.test/feed', items: [], seen: ['newer'] }],
+    removed: ['rss:https://gone.example.test/feed'],
+  }),
 }
 
 const hooks = registerHooks({
@@ -64,8 +71,10 @@ test('a feed cache that could not be read is read again before a save replaces i
     const window = createWindow('rss:', [['https://a.example.test/feed', { items: [{ id: 'a' }] }]])
     assert.equal((await window.mirror.loaded).size, 0)
     assert.equal(await window.save(), true)
-    // The window took the stored history instead of removing it
-    assert.deepEqual(window.state.get('https://kept.example.test/feed'), { items: [], seen: ['old'] })
+    // The window took the stored history instead of removing it, with the
+    // later changes of the other window
+    assert.deepEqual(window.state.get('https://kept.example.test/feed'), { items: [], seen: ['newer'] })
+    assert.equal(window.state.has('https://gone.example.test/feed'), false)
     assert.deepEqual(writes.map(change => [change.docs.map(doc => doc._id), change.removed]), [
       [['rss:https://a.example.test/feed'], []],
     ])
