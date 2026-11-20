@@ -372,8 +372,10 @@ const actions = {
     try {
       await DBProfileHandlers.addChannelToProfiles(channel, profileIds)
       commit('addChannelToProfiles', { channel, profileIds })
+      return true
     } catch (errMessage) {
       console.error(errMessage)
+      return false
     }
   },
 

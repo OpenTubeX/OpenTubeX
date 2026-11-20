@@ -222,10 +222,12 @@ import FtSubscriptionPreferences from '../FtSubscriptionPreferences/FtSubscripti
 import store from '../../store/index'
 import { supportsUploadNotifications } from '../../helpers/uploadNotifications'
 
-import { MAIN_PROFILE_ID } from '../../../constants'
 import { showToast } from '../../helpers/utils'
-import { mirrorYouTubeSubscription } from '../../helpers/youtube-sync'
-import { normalizeChannelHandle } from '../../helpers/feed-metadata'
+import {
+  isProfileSubscribed as isProfileSubscribedToChannel,
+  subscribeToChannel,
+  unsubscribeFromChannel
+} from '../../helpers/channel-subscriptions'
 import { getFirstCharacter } from '../../helpers/strings'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { getAnchoredPosition, supportsAnchorPositioning } from '../../helpers/anchoredPosition'
@@ -310,9 +312,6 @@ const profileList = computed(() => {
 
 /** The profile that every subscription of the other profiles in the list is also in */
 const rootProfileId = computed(() => store.getters.getSubscriptionRootProfile._id)
-
-/** Only the shared subscriptions are mirrored to the YouTube account, which syncs into All Channels */
-const mirrorsYouTubeAccount = computed(() => rootProfileId.value === MAIN_PROFILE_ID)
 
 /** @type {import('vue').ComputedRef<Profile>} */
 const activeProfile = computed(() => {
@@ -727,50 +726,12 @@ function handleSubscription(profile) {
       handleUnsubscription(profile)
     }
   } else {
-    const profileIds = [profile._id]
-
-    if (profile._id !== rootProfileId.value) {
-      const primaryProfile = profileList.value.find(prof => {
-        return prof._id === rootProfileId.value
-      })
-
-      if (!isProfileSubscribed(primaryProfile)) {
-        profileIds.push(rootProfileId.value)
-      }
-    }
-
-    const channel = {
+    subscribeToChannel(profile, {
       id: props.channelId,
       name: props.channelName,
       thumbnail: props.channelThumbnail,
-      feedTypes: [...activeChannelSettings.value.feedTypes],
-      notificationFeedTypes: [...activeChannelSettings.value.notificationFeedTypes],
-      showMembersOnly: activeChannelSettings.value.showMembersOnly
-    }
-    if (activeChannelSettings.value.dailyVideoLimit !== undefined) {
-      channel.dailyVideoLimit = activeChannelSettings.value.dailyVideoLimit
-    }
-    // A saved handle can be newer than the one from a cached result.
-    const savedHandle = store.getters.getSubscribedChannelsById.get(props.channelId)?.handle
-    const handle = savedHandle ?? normalizeChannelHandle(props.channelHandle)
-    if (handle !== null) {
-      channel.handle = handle
-    }
-
-    store.dispatch('addChannelToProfiles', {
-      channel,
-      profileIds
-    })
-    // Profiles that already had the channel saved it without a handle.
-    if (handle !== null && savedHandle === undefined && !profileIds.includes(rootProfileId.value)) {
-      store.dispatch('updateSubscriptionDetails', { channelId: props.channelId, channelHandle: handle })
-    }
-
-    showToast({ message: t('Channel.Added channel to your subscriptions'), icon: ['fas', 'subscriptions'] })
-    // Only the first profile to subscribe adds the channel to All Channels.
-    if (mirrorsYouTubeAccount.value && profileIds.includes(MAIN_PROFILE_ID)) {
-      mirrorYouTubeSubscription(props.channelId, true)
-    }
+      handle: props.channelHandle
+    }, t, activeChannelSettings.value)
     emit('subscribed')
   }
 
@@ -954,38 +915,7 @@ function handleUnsubscribeConfirmation(value) {
  * @param {Profile} profile
  */
 function handleUnsubscription(profile) {
-  const profileIds = [profile._id]
-
-  const isRootProfile = profile._id === rootProfileId.value
-  if (isRootProfile) {
-    // Check if a subscription exists in a different profile.
-    // Remove from there as well.
-
-    profileList.value.forEach((profileInList) => {
-      if (profileInList._id === rootProfileId.value) {
-        return
-      }
-
-      if (isProfileSubscribed(profileInList)) {
-        profileIds.push(profileInList._id)
-      }
-    })
-  }
-
-  store.dispatch('removeChannelFromProfiles', { channelIds: [props.channelId], profileIds })
-  // Removing a channel from All Channels unsubscribes every profile.
-  if (mirrorsYouTubeAccount.value && profile._id === MAIN_PROFILE_ID) {
-    mirrorYouTubeSubscription(props.channelId, false)
-  }
-
-  showToast({ message: t('Channel.Channel has been removed from your subscriptions'), icon: ['fas', 'trash'] })
-
-  if (isRootProfile && profileIds.length > 1) {
-    showToast({
-      message: t('Channel.Removed subscription from {count} other channel(s)', { count: profileIds.length - 1 }, profileIds.length - 1),
-      icon: ['fas', 'trash'],
-    })
-  }
+  unsubscribeFromChannel(profile, props.channelId, t)
 }
 
 /**
@@ -999,9 +929,7 @@ function isActiveProfile(profile) {
  * @param {Profile} profile
  */
 function isProfileSubscribed(profile) {
-  const channelId = props.channelId
-
-  return profile.subscriptions.some((channel) => channel.id === channelId)
+  return isProfileSubscribedToChannel(profile, props.channelId)
 }
 </script>
 
