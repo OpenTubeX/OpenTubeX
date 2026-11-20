@@ -173,6 +173,7 @@ function updateIconPack(value) {
   row-gap: calc(16px + 16px * var(--ui-density));
 
   --theme-select-indicator-space: calc(8px + 22px + 22px);
+  --theme-row-inset: calc(var(--theme-select-indicator-space) - var(--settings-marker-gutter, 0px));
 }
 
 .themeGalleryEntry {
@@ -181,25 +182,26 @@ function updateIconPack(value) {
 
 .themeControls > .themeSelectRow {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, max-content));
-  margin-inline-start: calc(var(--theme-select-indicator-space) - var(--settings-marker-gutter, 0px));
+  grid-template-columns: repeat(2, minmax(0, calc(200px + var(--theme-select-indicator-space) + var(--settings-marker-gutter, 0px))));
+  margin-inline-start: var(--theme-row-inset);
 }
 
 /* Stacked, the selects and the picker share a wider column. */
-@container settings-content (width <= 600px) {
+@container settings-content (width < 580px) {
   .themeControls > .themeSelectRow {
     grid-template-columns: minmax(0, 20rem);
   }
-
-  .themeControls > .themeSelectRow :deep(.select) {
-    box-sizing: border-box;
-    inline-size: auto;
-  }
 }
 
-/* :has() outweighs the select's own room, which depends on its icons. */
-.themeControls > .themeSelectRow :deep(.select:has(.selectIndicators)) {
+/* Every select fills its column and keeps the same room for its icons,
+   whichever it shows, so the fields line up with the picker. Outweighs the
+   select's own room and content sizing. */
+.themeControls > .themeSelectRow :deep(.select.contentSized) {
   --select-indicator-space: var(--theme-select-indicator-space);
+
+  box-sizing: border-box;
+  inline-size: auto;
+  grid-template-columns: minmax(0, 1fr) var(--select-indicator-space);
 }
 
 .appIconActions {
