@@ -398,7 +398,8 @@ export const tabMediaCoordinator = {
     if (playbackState === 'playing') {
       this.dispatchAction('pause', {}, tabId)
     } else if (playbackState === 'paused') {
-      this.dispatchAction('play', {}, tabId)
+      // The viewer asked for this tab to play, even though it is hidden.
+      this.dispatchAction('play', { allowBackground: true }, tabId)
     }
   },
 
