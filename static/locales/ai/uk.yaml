@@ -2968,6 +2968,7 @@ Platforms:
     Archive: "Минулі трансляції"
     Highlight: "Найкращі моменти"
     Upload: "Завантаження"
+  Anonymous: "Анонім"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} відповідає користувачу {commentAuthor}"
   Like: "Подобається"

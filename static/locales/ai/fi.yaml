@@ -2921,6 +2921,7 @@ Platforms:
     Archive: "Aiemmat lähetykset"
     Highlight: "Kohokohdat"
     Upload: "Lataukset"
+  Anonymous: "Anonyymi"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} vastasi käyttäjälle {commentAuthor}"
   Like: "Tykkää"

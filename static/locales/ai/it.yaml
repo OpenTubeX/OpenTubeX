@@ -2912,6 +2912,7 @@ Platforms:
     Archive: "Trasmissioni passate"
     Highlight: "Momenti salienti"
     Upload: "Caricamenti"
+  Anonymous: "Anonimo"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} ha risposto a {commentAuthor}"
   Like: "Mi piace"

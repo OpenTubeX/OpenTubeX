@@ -3370,6 +3370,7 @@ Platforms:
     Archive: "지난 방송"
     Highlight: "하이라이트"
     Upload: "업로드"
+  Anonymous: "익명"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author}님이 {commentAuthor}님에게 답글을 남겼습니다"
   Like: "좋아요"

@@ -2953,6 +2953,7 @@ Platforms:
     Archive: "Prošli prijenosi"
     Highlight: "Istaknuto"
     Upload: "Učitano"
+  Anonymous: "Anonimno"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} je odgovorio korisniku {commentAuthor}"
   Like: "Sviđa mi se"

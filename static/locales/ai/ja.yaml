@@ -2912,6 +2912,7 @@ Platforms:
     Archive: "過去の配信"
     Highlight: "ハイライト"
     Upload: "アップロード"
+  Anonymous: "匿名"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} さんが {commentAuthor} さんに返信しました"
   Like: "高く評価"

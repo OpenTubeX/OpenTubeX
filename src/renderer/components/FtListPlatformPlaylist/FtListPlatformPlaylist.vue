@@ -68,7 +68,7 @@
             v-if="showChannelAvatar"
             :thumbnail="channelAvatar"
           />
-          <span class="channelNameText">{{ playlist.author }}</span>
+          <span class="channelNameText">{{ playlist.author || t('Platforms.Anonymous') }}</span>
         </component>
         <FtIcon
           v-if="platform"

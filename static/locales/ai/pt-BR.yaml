@@ -2858,6 +2858,7 @@ Platforms:
     Archive: "Transmissões anteriores"
     Highlight: "Destaques"
     Upload: "Envios"
+  Anonymous: "Anônimo"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} respondeu a {commentAuthor}"
   Like: "Gostei"

@@ -3510,6 +3510,7 @@ Platforms:
     Archive: "Pretekli prenosi"
     Highlight: "Poudarki"
     Upload: "Naloženi videoposnetki"
+  Anonymous: "Anonimno"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} je odgovoril(-a) uporabniku {commentAuthor}"
   Like: "Všeč mi je"
