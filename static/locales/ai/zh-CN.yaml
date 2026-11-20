@@ -497,6 +497,7 @@ Settings:
       Memory: 内存
       Network: 网络
       Disk: 磁盘
+    Label: 性能
   General Settings:
     Invidious Instance Username: '实例用户名'
     Invidious Instance Password: '实例密码'
@@ -1653,6 +1654,7 @@ Settings:
     Downloading: 正在下载列表…
     Failed to Download: 无法下载列表
     Loaded Status: 已屏蔽频道：{blocked} · 已标记频道：{warned} · 更新时间：{date}
+  Highlight Changed Settings Label: 已更改
 Tutorial:
   Skip: 跳过
   Next: 下一步
@@ -2522,6 +2524,7 @@ KeyboardShortcutPrompt:
   Undo Seek: 撤销上一次跳转
   Redo Seek: 重做已撤销的跳转
   New Incognito Tab: 新建无痕标签页
+  Shortcuts Label: 快捷键
 CommandPalette:
   Title: 命令面板
   Open: 打开命令面板

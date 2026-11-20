@@ -497,6 +497,7 @@ Settings:
       Memory: memorie
       Network: rețea
       Disk: disc
+    Label: Performanță
   General Settings:
     Invidious Instance Username: 'Numele de utilizator al instanței'
     Invidious Instance Password: 'Parola instanței'
@@ -1676,6 +1677,7 @@ Settings:
     Downloading: Se descarcă listele…
     Failed to Download: Listele nu au putut fi descărcate
     Loaded Status: "Canale blocate: {blocked} · Canale semnalate: {warned} · Actualizat: {date}"
+  Highlight Changed Settings Label: Modificate
 Tutorial:
   Skip: Omite
   Next: Înainte
@@ -2581,6 +2583,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Anulați ultimul salt
   Redo Seek: Refaceți un salt anulat
   New Incognito Tab: Creează o filă incognito nouă
+  Shortcuts Label: Comenzi rapide
 CommandPalette:
   Title: Paletă de comenzi
   Open: Deschide paleta de comenzi

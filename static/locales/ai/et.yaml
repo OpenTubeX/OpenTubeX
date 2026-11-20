@@ -497,6 +497,7 @@ Settings:
       Memory: mälu
       Network: võrgu
       Disk: ketta
+    Label: Jõudlus
   General Settings:
     Invidious Instance Username: 'Instantsi kasutajanimi'
     Invidious Instance Password: 'Instantsi parool'
@@ -1653,6 +1654,7 @@ Settings:
     Downloading: Loendite allalaadimine…
     Failed to Download: Loendeid ei õnnestunud alla laadida
     Loaded Status: "Blokeeritud kanalid: {blocked} · Märgistatud kanalid: {warned} · Uuendatud: {date}"
+  Highlight Changed Settings Label: Muudetud
 Tutorial:
   Skip: Jäta vahele
   Next: Edasi
@@ -2525,6 +2527,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Võta viimane kerimine tagasi
   Redo Seek: Tee tagasi võetud kerimine uuesti
   New Incognito Tab: Loo uus inkognito vahekaart
+  Shortcuts Label: Otseteed
 CommandPalette:
   Title: Käsupalett
   Open: Ava käsupalett

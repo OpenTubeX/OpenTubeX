@@ -521,6 +521,7 @@ Settings:
       Memory: حافظه
       Network: شبکه
       Disk: دیسک
+    Label: کارایی
   General Settings:
     Invidious Instance Username: 'نام کاربری نمونه'
     Invidious Instance Password: 'گذرواژهٔ نمونه'
@@ -1717,6 +1718,7 @@ Settings:
     Downloading: در حال دانلود فهرست‌ها…
     Failed to Download: دانلود فهرست‌ها ممکن نشد
     Loaded Status: "کانال‌های مسدودشده: {blocked} · کانال‌های علامت‌گذاری‌شده: {warned} · به‌روزرسانی: {date}"
+  Highlight Changed Settings Label: تغییرکرده
 Tutorial:
   Skip: ردکردن
   Next: بعدی
@@ -2628,6 +2630,7 @@ KeyboardShortcutPrompt:
   Undo Seek: واگرد آخرین پرش
   Redo Seek: ازنو انجام دادن پرش واگردشده
   New Incognito Tab: ایجاد زبانه ناشناس جدید
+  Shortcuts Label: میان‌برها
 CommandPalette:
   Title: پالت فرمان
   Open: بازکردن پالت فرمان

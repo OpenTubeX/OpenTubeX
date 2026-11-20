@@ -157,70 +157,87 @@
         @input="handleSettingsSearch"
       />
       <div class="settingsHeaderActions">
-        <button
-          v-if="unlocked && showKeyboardShortcutAction && !isStandaloneViewOpen && !isKeyboardShortcutPromptOpen"
-          type="button"
-          class="settingsHeaderButton"
-          :aria-label="t('KeyboardShortcutPrompt.Show Keyboard Shortcuts')"
-          :title="t('KeyboardShortcutPrompt.Show Keyboard Shortcuts')"
-          @click="showKeyboardShortcutPrompt"
-        >
-          <FtIcon :icon="['fas', 'keyboard']" />
-        </button>
-        <button
+        <div
           v-if="!isStandaloneViewOpen && !isKeyboardShortcutPromptOpen"
-          type="button"
-          class="settingsHeaderButton"
-          :class="{ active: highlightChangedSettings }"
-          :aria-label="t('Settings.Highlight Changed Settings')"
-          :title="t('Settings.Highlight Changed Settings')"
-          :aria-pressed="highlightChangedSettings"
-          @click="updateHighlightChangedSettings(!highlightChangedSettings)"
+          class="settingsHeaderTools"
         >
-          <FtIcon :icon="['fas', 'pen']" />
-        </button>
-        <button
-          v-if="!isStandaloneViewOpen && !isKeyboardShortcutPromptOpen"
-          type="button"
-          class="settingsHeaderButton"
-          :class="{ active: showPerformanceImpactIndicators }"
-          :aria-label="t('Settings.Performance Impact.Show Performance Impact')"
-          :title="t('Settings.Performance Impact.Show Performance Impact')"
-          :aria-pressed="showPerformanceImpactIndicators"
-          @click="updateShowPerformanceImpactIndicators(!showPerformanceImpactIndicators)"
-        >
-          <FtIcon :icon="['fas', 'gauge-high']" />
-        </button>
-        <button
-          v-if="showMinimizeButton"
-          type="button"
-          class="settingsHeaderButton"
-          :aria-label="t('Minimize')"
-          :title="t('Minimize')"
-          @click="minimizeSettings"
-        >
-          <FtIcon :icon="['fas', 'angle-down']" />
-        </button>
-        <button
-          v-if="!isMaximizationForced"
-          type="button"
-          class="settingsHeaderButton"
-          :aria-label="maximizeButtonLabel"
-          :title="maximizeButtonLabel"
-          @click="toggleMaximized"
-        >
-          <FtIcon :icon="isMaximized ? ['fas', 'compress'] : ['fas', 'expand']" />
-        </button>
-        <button
-          ref="settingsCloseButtonRef"
-          type="button"
-          class="settingsHeaderButton settingsCloseButton"
-          :aria-label="t('Close')"
-          :title="t('Close')"
-          @click="closeSettings"
-        >
-          <FtIcon :icon="['fas', 'xmark']" />
-        </button>
+          <button
+            v-if="unlocked && showKeyboardShortcutAction"
+            type="button"
+            class="settingsHeaderButton"
+            :aria-label="t('KeyboardShortcutPrompt.Show Keyboard Shortcuts')"
+            :title="t('KeyboardShortcutPrompt.Show Keyboard Shortcuts')"
+            @click="showKeyboardShortcutPrompt"
+          >
+            <FtIcon :icon="['fas', 'keyboard']" />
+            <span
+              class="settingsHeaderToolLabel"
+              aria-hidden="true"
+            >{{ t('KeyboardShortcutPrompt.Shortcuts Label') }}</span>
+          </button>
+          <button
+            type="button"
+            class="settingsHeaderButton"
+            :class="{ active: highlightChangedSettings }"
+            :aria-label="t('Settings.Highlight Changed Settings')"
+            :title="t('Settings.Highlight Changed Settings')"
+            :aria-pressed="highlightChangedSettings"
+            @click="updateHighlightChangedSettings(!highlightChangedSettings)"
+          >
+            <FtIcon :icon="['fas', 'pen']" />
+            <span
+              class="settingsHeaderToolLabel"
+              aria-hidden="true"
+            >{{ t('Settings.Highlight Changed Settings Label') }}</span>
+          </button>
+          <button
+            type="button"
+            class="settingsHeaderButton"
+            :class="{ active: showPerformanceImpactIndicators }"
+            :aria-label="t('Settings.Performance Impact.Show Performance Impact')"
+            :title="t('Settings.Performance Impact.Show Performance Impact')"
+            :aria-pressed="showPerformanceImpactIndicators"
+            @click="updateShowPerformanceImpactIndicators(!showPerformanceImpactIndicators)"
+          >
+            <FtIcon :icon="['fas', 'gauge-high']" />
+            <span
+              class="settingsHeaderToolLabel"
+              aria-hidden="true"
+            >{{ t('Settings.Performance Impact.Label') }}</span>
+          </button>
+        </div>
+        <div class="settingsWindowControls">
+          <button
+            v-if="showMinimizeButton"
+            type="button"
+            class="settingsHeaderButton"
+            :aria-label="t('Minimize')"
+            :title="t('Minimize')"
+            @click="minimizeSettings"
+          >
+            <FtIcon :icon="['fas', 'angle-down']" />
+          </button>
+          <button
+            v-if="!isMaximizationForced"
+            type="button"
+            class="settingsHeaderButton"
+            :aria-label="maximizeButtonLabel"
+            :title="maximizeButtonLabel"
+            @click="toggleMaximized"
+          >
+            <FtIcon :icon="isMaximized ? ['fas', 'compress'] : ['fas', 'expand']" />
+          </button>
+          <button
+            ref="settingsCloseButtonRef"
+            type="button"
+            class="settingsHeaderButton settingsCloseButton"
+            :aria-label="t('Close')"
+            :title="t('Close')"
+            @click="closeSettings"
+          >
+            <FtIcon :icon="['fas', 'xmark']" />
+          </button>
+        </div>
       </div>
     </header>
 

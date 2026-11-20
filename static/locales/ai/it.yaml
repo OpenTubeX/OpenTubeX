@@ -497,6 +497,7 @@ Settings:
       Memory: memoria
       Network: rete
       Disk: disco
+    Label: Prestazioni
   General Settings:
     Invidious Instance Username: 'Nome utente dell''istanza'
     Invidious Instance Password: 'Password dell''istanza'
@@ -1653,6 +1654,7 @@ Settings:
     Downloading: Download delle liste in corso…
     Failed to Download: Impossibile scaricare le liste
     Loaded Status: "Canali bloccati: {blocked} · Canali segnalati: {warned} · Aggiornato: {date}"
+  Highlight Changed Settings Label: Modificate
 Tutorial:
   Skip: Salta
   Next: Avanti
@@ -2522,6 +2524,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Annulla l'ultimo salto
   Redo Seek: Ripeti un salto annullato
   New Incognito Tab: Crea una nuova scheda in incognito
+  Shortcuts Label: Scorciatoie
 CommandPalette:
   Title: Tavolozza dei comandi
   Open: Apri tavolozza dei comandi

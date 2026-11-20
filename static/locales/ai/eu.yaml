@@ -497,6 +497,7 @@ Settings:
       Memory: memoria
       Network: sarea
       Disk: diskoa
+    Label: Errendimendua
   General Settings:
     Invidious Instance Username: 'Instantziaren erabiltzaile-izena'
     Invidious Instance Password: 'Instantziaren pasahitza'
@@ -1654,6 +1655,7 @@ Settings:
     Downloading: Zerrendak deskargatzen…
     Failed to Download: Ezin izan dira zerrendak deskargatu
     Loaded Status: "Blokeatutako kanalak: {blocked} · Markatutako kanalak: {warned} · Eguneratua: {date}"
+  Highlight Changed Settings Label: Aldatuak
 Tutorial:
   Skip: Saltatu
   Next: Hurrengoa
@@ -2533,6 +2535,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Desegin azken jauzia
   Redo Seek: Berregin desegindako jauzia
   New Incognito Tab: Sortu ezkutuko fitxa berria
+  Shortcuts Label: Lasterbideak
 CommandPalette:
   Title: Komando-paleta
   Open: Ireki komando-paleta

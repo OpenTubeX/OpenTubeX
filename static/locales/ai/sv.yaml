@@ -497,6 +497,7 @@ Settings:
       Memory: minne
       Network: nätverk
       Disk: diskutrymme
+    Label: Prestanda
   General Settings:
     Invidious Instance Username: 'Instansens användarnamn'
     Invidious Instance Password: 'Instansens lösenord'
@@ -1653,6 +1654,7 @@ Settings:
     Downloading: Laddar ned listorna…
     Failed to Download: Det gick inte att ladda ned listorna
     Loaded Status: "Blockerade kanaler: {blocked} · Flaggade kanaler: {warned} · Uppdaterad: {date}"
+  Highlight Changed Settings Label: Ändrade
 Tutorial:
   Skip: Hoppa över
   Next: Nästa
@@ -2523,6 +2525,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Ångra det senaste hoppet
   Redo Seek: Gör om ett ångrat hopp
   New Incognito Tab: Skapa en ny inkognitoflik
+  Shortcuts Label: Kortkommandon
 CommandPalette:
   Title: Kommandopalett
   Open: Öppna kommandopaletten

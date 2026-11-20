@@ -590,6 +590,7 @@ Settings:
       Memory: 메모리
       Network: 네트워크
       Disk: 디스크
+    Label: 성능
   Return to Settings Menu: 설정 메뉴로 돌아가기
   General Settings:
     Invidious Instance Username: '인스턴스 사용자 이름'
@@ -1910,6 +1911,7 @@ Settings:
     Downloading: 목록 다운로드 중…
     Failed to Download: 목록을 다운로드할 수 없습니다
     Loaded Status: "차단된 채널: {blocked} · 표시된 채널: {warned} · 업데이트: {date}"
+  Highlight Changed Settings Label: 변경됨
 Tutorial:
   Skip: 건너뛰기
   Next: 다음
@@ -2988,6 +2990,7 @@ KeyboardShortcutPrompt:
   Undo Seek: 마지막 탐색 실행 취소
   Redo Seek: 실행 취소한 탐색 다시 실행
   New Incognito Tab: 새 시크릿 탭 만들기
+  Shortcuts Label: 단축키
 CommandPalette:
   Title: 명령 팔레트
   Open: 명령 팔레트 열기

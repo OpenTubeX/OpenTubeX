@@ -497,6 +497,7 @@ Settings:
       Memory: bộ nhớ
       Network: mạng
       Disk: ổ đĩa
+    Label: Hiệu năng
   General Settings:
     Invidious Instance Username: 'Tên người dùng của máy chủ'
     Invidious Instance Password: 'Mật khẩu của máy chủ'
@@ -1659,6 +1660,7 @@ Settings:
     Downloading: Đang tải xuống danh sách…
     Failed to Download: Không thể tải xuống danh sách
     Loaded Status: "Kênh bị chặn: {blocked} · Kênh bị gắn cờ: {warned} · Cập nhật: {date}"
+  Highlight Changed Settings Label: Đã thay đổi
 Tutorial:
   Skip: Bỏ qua
   Next: Tiếp
@@ -2541,6 +2543,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Hoàn tác lần tua gần nhất
   Redo Seek: Làm lại lần tua đã hoàn tác
   New Incognito Tab: Tạo thẻ ẩn danh mới
+  Shortcuts Label: Phím tắt
 CommandPalette:
   Title: Bảng lệnh
   Open: Mở bảng lệnh

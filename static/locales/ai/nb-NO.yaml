@@ -497,6 +497,7 @@ Settings:
       Memory: minne
       Network: nettverk
       Disk: disk
+    Label: Ytelse
   General Settings:
     Invidious Instance Username: 'Brukernavn for instansen'
     Invidious Instance Password: 'Passord for instansen'
@@ -1653,6 +1654,7 @@ Settings:
     Downloading: Laster ned listene…
     Failed to Download: Kunne ikke laste ned listene
     Loaded Status: "Blokkerte kanaler: {blocked} · Flaggede kanaler: {warned} · Oppdatert: {date}"
+  Highlight Changed Settings Label: Endret
 Tutorial:
   Skip: Hopp over
   Next: Neste
@@ -2527,6 +2529,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Angre siste hopp
   Redo Seek: Gjør om et angret hopp
   New Incognito Tab: Opprett en ny inkognitofane
+  Shortcuts Label: Snarveier
 CommandPalette:
   Title: Kommandopalett
   Open: Åpne kommandopaletten

@@ -611,6 +611,7 @@ Settings:
       Memory: atminties
       Network: tinklo
       Disk: disko
+    Label: Našumas
   Return to Settings Menu: Grįžti į nustatymų meniu
   General Settings:
     Invidious Instance Username: 'Egzemplioriaus naudotojo vardas'
@@ -1931,6 +1932,7 @@ Settings:
     Downloading: Atsisiunčiami sąrašai…
     Failed to Download: Nepavyko atsisiųsti sąrašų
     Loaded Status: "Užblokuoti kanalai: {blocked} · Pažymėti kanalai: {warned} · Atnaujinta: {date}"
+  Highlight Changed Settings Label: Pakeisti
 Tutorial:
   Skip: Praleisti
   Next: Toliau
@@ -3034,6 +3036,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Atšaukti paskutinį peršokimą
   Redo Seek: Pakartoti atšauktą peršokimą
   New Incognito Tab: Sukurti naują inkognito kortelę
+  Shortcuts Label: Spartieji klavišai
 CommandPalette:
   Title: Komandų paletė
   Open: Atverti komandų paletę

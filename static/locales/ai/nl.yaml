@@ -502,6 +502,7 @@ Settings:
       Memory: geheugen
       Network: netwerk
       Disk: schijf
+    Label: Prestaties
   General Settings:
     Invidious Instance Username: 'Gebruikersnaam van instantie'
     Invidious Instance Password: 'Wachtwoord van instantie'
@@ -1689,6 +1690,7 @@ Settings:
     Downloading: Lijsten downloaden…
     Failed to Download: Kan de lijsten niet downloaden
     Loaded Status: "Geblokkeerde kanalen: {blocked} · Gemarkeerde kanalen: {warned} · Bijgewerkt: {date}"
+  Highlight Changed Settings Label: Gewijzigd
 Tutorial:
   Skip: Overslaan
   Next: Volgende
@@ -2594,6 +2596,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Laatste sprong ongedaan maken
   Redo Seek: Ongedaan gemaakte sprong opnieuw uitvoeren
   New Incognito Tab: Nieuw incognitotabblad maken
+  Shortcuts Label: Sneltoetsen
 CommandPalette:
   Title: Opdrachtpalet
   Open: Opdrachtpalet openen

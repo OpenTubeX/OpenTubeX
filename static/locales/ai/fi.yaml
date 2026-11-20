@@ -497,6 +497,7 @@ Settings:
       Memory: muisti
       Network: verkko
       Disk: levytila
+    Label: Suorituskyky
   General Settings:
     Invidious Instance Username: 'Instanssin käyttäjänimi'
     Invidious Instance Password: 'Instanssin salasana'
@@ -1656,6 +1657,7 @@ Settings:
     Downloading: Ladataan listoja…
     Failed to Download: Listojen lataaminen epäonnistui
     Loaded Status: "Estetyt kanavat: {blocked} · Merkityt kanavat: {warned} · Päivitetty: {date}"
+  Highlight Changed Settings Label: Muutetut
 Tutorial:
   Skip: Ohita
   Next: Seuraava
@@ -2531,6 +2533,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Kumoa viimeisin siirtymä
   Redo Seek: Tee kumottu siirtymä uudelleen
   New Incognito Tab: Luo uusi incognito-välilehti
+  Shortcuts Label: Pikanäppäimet
 CommandPalette:
   Title: Komentopaletti
   Open: Avaa komentopaletti

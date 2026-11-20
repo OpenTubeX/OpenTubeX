@@ -82,12 +82,16 @@
 }
 
 .settingsWindowHeader {
+  --settings-header-button-size: 38px;
+  --settings-header-gap: 8px;
+  --settings-header-actions-gap: 2px;
+
   flex: 0 0 auto;
   min-block-size: 52px;
   box-sizing: border-box;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--settings-header-gap);
   padding-block: 6.5px;
   padding-inline: 10px;
   color: var(--primary-text-color);
@@ -179,6 +183,11 @@
   font-size: 16px;
 }
 
+/* Without a teleported action, the slot must not take a gap from the title. */
+.settingsBreadcrumbAction:empty {
+  display: none;
+}
+
 .settingsBreadcrumbRoot,
 .settingsBreadcrumbParent {
   appearance: none;
@@ -205,12 +214,20 @@
   flex: 0 0 auto;
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: var(--settings-header-actions-gap);
+}
+
+.settingsHeaderTools,
+.settingsWindowControls {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--settings-header-actions-gap);
 }
 
 .settingsHeaderButton {
-  inline-size: 38px;
-  block-size: 38px;
+  inline-size: var(--settings-header-button-size);
+  block-size: var(--settings-header-button-size);
   display: grid;
   place-items: center;
   padding: 0;
@@ -225,6 +242,11 @@
 
 .settingsHeaderButton > svg {
   display: block;
+  flex: 0 0 auto;
+}
+
+.settingsHeaderToolLabel {
+  display: none;
 }
 
 /* Touch taps leave :hover applied, which must not look like an enabled toggle. */
@@ -742,24 +764,117 @@
 }
 
 @container settings-window (width < 760px) {
+  /* The window controls stay in the corner, and the tools wrap below the
+     title, starting at the left, when they do not fit beside it. */
   .settingsWindowHeader {
+    --settings-header-gap: 3px;
+    --settings-window-control-count: 1;
+    --settings-header-tool-count: 2;
+    --settings-window-controls-size: calc(
+      var(--settings-window-control-count) * var(--settings-header-button-size) +
+      (var(--settings-window-control-count) - 1) * var(--settings-header-actions-gap)
+    );
+
+    position: relative;
     flex-wrap: wrap;
     padding-block: 5px;
     padding-inline: 10px;
-    gap: 3px;
+  }
+
+  .settingsWindowHeader:has(.settingsWindowControls > :nth-child(2)) {
+    --settings-window-control-count: 2;
+  }
+
+  .settingsWindowHeader:has(.settingsWindowControls > :nth-child(3)) {
+    --settings-window-control-count: 3;
+  }
+
+  .settingsWindowHeader:has(.settingsHeaderTools > :nth-child(3)) {
+    --settings-header-tool-count: 3;
+  }
+
+  .settingsHeaderActions {
+    display: contents;
+  }
+
+  /* The title takes its full width when the tools fit beside it, and stays
+     one button tall to line up with the window controls. */
+  .settingsHeaderNavigation {
+    flex: 9999 1 auto;
+    align-self: flex-start;
+    min-block-size: var(--settings-header-button-size);
+    max-inline-size: calc(100% - var(--settings-window-controls-size) - var(--settings-header-gap));
+  }
+
+  /* Beside the title, the title takes nearly all free space, so the tools
+     only grow wide enough for labels on a row of their own. Size containment
+     ignores the buttons' width, so the basis adds it up instead. */
+  .settingsHeaderTools {
+    container: settings-header-tools / inline-size;
+    flex: 1 0 calc(
+      var(--settings-header-tool-count) * var(--settings-header-button-size) +
+      (var(--settings-header-tool-count) - 1) * var(--settings-header-actions-gap)
+    );
+    margin-inline-end: calc(var(--settings-window-controls-size) + var(--settings-header-actions-gap));
+  }
+
+  .settingsWindowControls {
+    position: absolute;
+    inset-block-start: 5px;
+    inset-inline-end: 10px;
   }
 
   .settingsSearch {
-    order: 3;
+    order: 1;
     flex-basis: 100%;
     min-inline-size: 100%;
   }
 }
 
+/* Three unlabeled buttons are at most 160px wide beside the title. */
+@container settings-header-tools (width >= 170px) {
+  /* The buttons start at their labeled width. When the row is too narrow,
+     they all shrink below it, and each label wraps onto a second line that
+     the button clips. So either every label shows or none does, instead of
+     being cut off with an ellipsis. */
+  .settingsHeaderTools .settingsHeaderButton {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+    inline-size: auto;
+    display: flex;
+    flex-wrap: wrap;
+    place-content: flex-start center;
+    align-items: center;
+    column-gap: 8px;
+    padding-inline: 12px;
+    overflow: hidden;
+    border-radius: var(--shape-corner-full);
+  }
+
+  /* Keeps the first line as tall as the button, so the icon stays centered
+     when the label wraps away. */
+  .settingsHeaderTools .settingsHeaderButton::before {
+    content: '';
+    block-size: var(--settings-header-button-size);
+    margin-inline-end: -8px;
+  }
+
+  /* The space kept free for the window controls is empty on this row. */
+  .settingsHeaderTools .settingsHeaderButton:last-child {
+    margin-inline-end: calc(-1 * (var(--settings-window-controls-size) + var(--settings-header-actions-gap)));
+  }
+
+  .settingsHeaderToolLabel {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+}
+
 @container settings-window (width <= 560px) {
-  .settingsHeaderButton {
-    inline-size: 34px;
-    block-size: 34px;
+  .settingsWindowHeader {
+    --settings-header-button-size: 34px;
   }
 
   .settingsBreadcrumb {
@@ -768,18 +883,14 @@
 }
 
 @media (any-pointer: coarse), (width <= 680px) {
-  .settingsWindowHeader,
-  .settingsHeaderActions {
-    gap: 8px;
+  .settingsWindowHeader {
+    --settings-header-button-size: 48px;
+    --settings-header-gap: 8px;
+    --settings-header-actions-gap: 8px;
   }
 
   .settingsSearch {
     --form-control-height: 48px;
-  }
-
-  .settingsHeaderButton {
-    inline-size: 48px;
-    block-size: 48px;
   }
 
   .settingsBreadcrumbRoot,
@@ -816,5 +927,15 @@
 .app.customTitleBar .settingsWindow.maximized .settingsWindowHeader {
   padding-left: max(10px, var(--title-bar-inset-left));
   padding-right: max(10px, var(--title-bar-inset-right));
+}
+
+/* Only narrow headers position their window controls in the corner. */
+.app.customTitleBar .settingsWindow.maximized .settingsWindowControls {
+  right: max(10px, var(--title-bar-inset-right));
+}
+
+.app.customTitleBar .settingsWindow.maximized .settingsWindowControls:dir(rtl) {
+  right: auto;
+  left: max(10px, var(--title-bar-inset-left));
 }
 /* stylelint-enable liberty/use-logical-spec */

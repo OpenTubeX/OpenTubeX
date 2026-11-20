@@ -539,6 +539,7 @@ Settings:
       Memory: memoro
       Network: reto
       Disk: disko
+    Label: Rendimento
   General Settings:
     Invidious Instance Username: 'Uzantnomo de la nodo'
     Invidious Instance Password: 'Pasvorto de la nodo'
@@ -1698,6 +1699,7 @@ Settings:
     Failed to Save Password: Malsukcesis konservi la pasvorton.
     Confirm Password: Konfirmi pasvorton
     Passwords Do Not Match: La pasvortoj ne kongruas.
+  Highlight Changed Settings Label: Ŝanĝitaj
 Tutorial:
   Skip: Preterlasi
   Next: Sekva
@@ -2588,6 +2590,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Malfari la lastan salton
   Redo Seek: Refari malfaritan salton
   New Incognito Tab: Krei novan inkognitan langeton
+  Shortcuts Label: Ŝparvojoj
 CommandPalette:
   Title: Komanda paletro
   Open: Malfermi komandan paletron

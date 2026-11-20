@@ -497,6 +497,7 @@ Settings:
       Memory: memória
       Network: hálózat
       Disk: lemez
+    Label: Teljesítmény
   General Settings:
     Invidious Instance Username: 'A példány felhasználóneve'
     Invidious Instance Password: 'A példány jelszava'
@@ -1653,6 +1654,7 @@ Settings:
     Downloading: Listák letöltése…
     Failed to Download: Nem sikerült letölteni a listákat
     Loaded Status: "Letiltott csatornák: {blocked} · Megjelölt csatornák: {warned} · Frissítve: {date}"
+  Highlight Changed Settings Label: Módosított
 Tutorial:
   Skip: Kihagyás
   Next: Tovább
@@ -2523,6 +2525,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Az utolsó ugrás visszavonása
   Redo Seek: Egy visszavont ugrás újbóli végrehajtása
   New Incognito Tab: Új inkognitólap létrehozása
+  Shortcuts Label: Billentyűparancsok
 CommandPalette:
   Title: Parancspaletta
   Open: Parancspaletta megnyitása

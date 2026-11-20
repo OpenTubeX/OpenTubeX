@@ -553,6 +553,7 @@ Settings:
       Memory: میموری
       Network: نیٹ ورک
       Disk: ڈسک
+    Label: کارکردگی
   General Settings:
     Invidious Instance Username: 'انسٹینس کا صارف نام'
     Invidious Instance Password: 'انسٹینس کا پاس ورڈ'
@@ -1741,6 +1742,7 @@ Settings:
     Failed to Save Password: پاس ورڈ محفوظ نہیں ہو سکا۔
     Confirm Password: پاس ورڈ کی تصدیق کریں
     Passwords Do Not Match: پاس ورڈ مماثل نہیں ہیں۔
+  Highlight Changed Settings Label: تبدیل شدہ
 Tutorial:
   Skip: چھوڑیں
   Next: اگلا
@@ -2658,6 +2660,7 @@ KeyboardShortcutPrompt:
   Undo Seek: آخری سیک واپس لیں
   Redo Seek: واپس لیا گیا سیک دوبارہ کریں
   New Incognito Tab: نیا پوشیدگی ٹیب بنائیں
+  Shortcuts Label: شارٹ کٹس
 CommandPalette:
   Title: کمانڈ پیلیٹ
   Open: کمانڈ پیلیٹ کھولیں

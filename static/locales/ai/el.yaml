@@ -497,6 +497,7 @@ Settings:
       Memory: μνήμης
       Network: δικτύου
       Disk: δίσκου
+    Label: Επιδόσεις
   General Settings:
     Invidious Instance Username: 'Όνομα χρήστη διακομιστή'
     Invidious Instance Password: 'Κωδικός πρόσβασης διακομιστή'
@@ -1663,6 +1664,7 @@ Settings:
     Downloading: Λήψη των λιστών…
     Failed to Download: Δεν ήταν δυνατή η λήψη των λιστών
     Loaded Status: "Αποκλεισμένα κανάλια: {blocked} · Επισημασμένα κανάλια: {warned} · Ενημέρωση: {date}"
+  Highlight Changed Settings Label: Αλλαγμένες
 Tutorial:
   Skip: Παράλειψη
   Next: Επόμενο
@@ -2538,6 +2540,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Αναίρεση της τελευταίας μετάβασης
   Redo Seek: Επανάληψη μιας μετάβασης που αναιρέθηκε
   New Incognito Tab: Δημιουργία νέας καρτέλας ανώνυμης περιήγησης
+  Shortcuts Label: Συντομεύσεις
 CommandPalette:
   Title: Παλέτα εντολών
   Open: Άνοιγμα παλέτας εντολών

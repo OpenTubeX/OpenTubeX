@@ -502,6 +502,7 @@ Settings:
       Memory: זיכרון
       Network: רשת
       Disk: כונן
+    Label: ביצועים
   General Settings:
     Invidious Instance Username: 'שם המשתמש במופע'
     Invidious Instance Password: 'הסיסמה למופע'
@@ -1689,6 +1690,7 @@ Settings:
     Downloading: הרשימות בהורדה…
     Failed to Download: לא ניתן היה להוריד את הרשימות
     Loaded Status: "ערוצים חסומים: {blocked} · ערוצים מסומנים: {warned} · עודכן: {date}"
+  Highlight Changed Settings Label: שהשתנו
 Tutorial:
   Skip: דילוג
   Next: הבא
@@ -2585,6 +2587,7 @@ KeyboardShortcutPrompt:
   Undo Seek: ביטול הקפיצה האחרונה
   Redo Seek: ביצוע מחדש של קפיצה שבוטלה
   New Incognito Tab: יצירת כרטיסיית גלישה בסתר חדשה
+  Shortcuts Label: קיצורים
 CommandPalette:
   Title: לוח הפקודות
   Open: פתיחת לוח הפקודות

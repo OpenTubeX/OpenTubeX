@@ -500,6 +500,7 @@ Settings:
       Memory: паметта
       Network: мрежата
       Disk: диска
+    Label: Производителност
   General Settings:
     Invidious Instance Username: 'Потребителско име за инстанцията'
     Invidious Instance Password: 'Парола за инстанцията'
@@ -1668,6 +1669,7 @@ Settings:
     Downloading: Изтегляне на списъците…
     Failed to Download: Списъците не можаха да бъдат изтеглени
     Loaded Status: "Блокирани канали: {blocked} · Отбелязани канали: {warned} · Обновено: {date}"
+  Highlight Changed Settings Label: Променени
 Tutorial:
   Skip: Пропускане
   Next: Напред
@@ -2558,6 +2560,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Отмяна на последното превъртане
   Redo Seek: Повторение на отмененото превъртане
   New Incognito Tab: Създаване на нов раздел „инкогнито“
+  Shortcuts Label: Клавишни комбинации
 CommandPalette:
   Title: Палитра с команди
   Open: Отваряне на палитрата с команди

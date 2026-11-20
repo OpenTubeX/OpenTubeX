@@ -499,6 +499,7 @@ Settings:
       Memory: yaddaş
       Network: şəbəkə
       Disk: disk
+    Label: Performans
   General Settings:
     Invidious Instance Username: 'Nümunənin istifadəçi adı'
     Invidious Instance Password: 'Nümunənin parolu'
@@ -1656,6 +1657,7 @@ Settings:
     Downloading: Siyahılar endirilir…
     Failed to Download: Siyahılar endirilə bilmədi
     Loaded Status: "Bloklanmış kanallar: {blocked} · İşarələnmiş kanallar: {warned} · Yenilənib: {date}"
+  Highlight Changed Settings Label: Dəyişdirilmiş
 Tutorial:
   Skip: Ötür
   Next: Növbəti
@@ -2535,6 +2537,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Son keçidi geri qaytar
   Redo Seek: Geri qaytarılmış keçidi təkrarla
   New Incognito Tab: Yeni gizli vərəq yarat
+  Shortcuts Label: Qısayollar
 CommandPalette:
   Title: Əmr palitrası
   Open: Əmr palitrasını aç

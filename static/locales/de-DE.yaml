@@ -1976,10 +1976,12 @@ Settings:
     Profile Selector Hint: Du kannst auch mit der rechten Maustaste auf das Profilsymbol klicken, um das Profil zu wechseln
     Profile Selector Touch Hint: Du kannst auch lange auf das Profilsymbol tippen, um das Profil zu wechseln
   Highlight Changed Settings: Von den Standardwerten abweichende Einstellungen hervorheben
+  Highlight Changed Settings Label: Geändert
   Reset Setting to Default: Diese Einstellung auf den Standardwert zurücksetzen
   Experimental Badge: Experimentell
   Performance Impact:
     Show Performance Impact: Hinweise zu Leistungsauswirkungen anzeigen
+    Label: Leistung
     Moderate: Mittlere Auswirkung
     High: Hohe Auswirkung
     Description: Diese Einstellung kann die Nutzung von {resources} erhöhen
@@ -3479,6 +3481,7 @@ KeyboardShortcutPrompt:
   Next Chapter: Nächstes Kapitel
   Last Chapter: Letztes Kapitel
   Show Keyboard Shortcuts: Tastaturkürzel anzeigen
+  Shortcuts Label: Tastaturkürzel
   History Forward: Eine Seite nach vorne gehen
   Increase Video Speed: Erhöhen der Videogeschwindigkeit basierend auf dem Intervall der Videowiedergaberate
   Large Rewind: 10 Sekunden zurückspulen / Zurückspulen basierend auf der aktuellen Wiedergabegeschwindigkeit
