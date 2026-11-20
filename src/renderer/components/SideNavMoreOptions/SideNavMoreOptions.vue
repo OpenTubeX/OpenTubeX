@@ -91,22 +91,11 @@
                     v-for="item in pinnedItems"
                     :key="item.key"
                     class="navOption"
-                    :class="{
-                      disabledNavOption: !item.path,
-                      pinnedPlaylistOption: item.playlistId != null,
-                      pinnedChannelOption: item.channelId != null,
-                      dragging: isPinnedItemDragging(item),
-                    }"
-                    :data-pinned-playlist-id="item.playlistId ?? undefined"
-                    :data-pinned-channel-id="item.channelId ?? undefined"
-                    :style="pinnedItemRowStyle(item)"
+                    :class="{ disabledNavOption: !item.path }"
                     :title="item.label"
                     :to="item.path ? { path: item.path, query: item.query } : undefined"
                     :data-tab-title="item.label"
-                    @dragstart="(item.playlistId != null || item.channelId != null) && $event.preventDefault()"
                     @click="closeMenu"
-                    @keydown.alt.up.prevent="movePinnedItem(item, -1)"
-                    @keydown.alt.down.prevent="movePinnedItem(item, 1)"
                   >
                     <FtRetryImage
                       v-if="item.thumbnail != null"
@@ -129,32 +118,10 @@
                       class="navLabel"
                       dir="auto"
                     >{{ item.label }}</span>
-                    <span
-                      v-if="canReorderPinnedItem(item)"
-                      class="pinnedDragHandle"
-                      aria-hidden="true"
-                      @dragstart.prevent
-                      @click.prevent.stop
-                      @pointerdown.stop="startPinnedItemDrag($event, item)"
-                      @pointermove="movePinnedItemDrag($event, item)"
-                      @pointerup="endPinnedItemDrag($event, item)"
-                      @pointercancel="cancelPinnedItemDrag($event, item)"
-                      @lostpointercapture="cancelPinnedItemDrag($event, item)"
-                    >
-                      <FtIcon :icon="['fas', 'grip']" />
-                    </span>
                   </component>
                 </template>
               </div>
             </div>
-            <p
-              class="reorderStatus"
-              role="status"
-              aria-live="polite"
-              aria-atomic="true"
-            >
-              {{ pinnedReorderStatus }}
-            </p>
           </div>
         </div>
       </Transition>
@@ -165,15 +132,12 @@
 <script setup>
 import { FtIcon } from '@opentubex/icons'
 import { computed, ref, nextTick, watch, onMounted, onBeforeUnmount, useId, useTemplateRef } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
 import store from '../../store/index'
 import FtRetryImage from '../FtRetryImage.vue'
 import NavLabel from '../SideNav/NavLabel.vue'
-import { moveItemByVisibleOffset } from '../../../orderedItems'
 import { useBottomSheetDismiss } from '../../composables/useBottomSheetDismiss'
-import { useOrderedItemReorder } from '../../composables/useOrderedItemReorder'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { lockBodyScroll, unlockBodyScroll } from '../FtPrompt/scrollLock'
@@ -189,117 +153,12 @@ const props = defineProps({
   },
 })
 
-const { t } = useI18n()
 const openMoreOptions = ref(false)
 const mobileLayout = usePhoneLayout('(max-width: 680px)')
 watch(mobileLayout, (isMobile) => {
   if (!isMobile) closeMenu()
 })
 const route = useRoute()
-
-const pinnedPlaylistIds = computed(previous => {
-  const ids = props.pinnedItems.filter(item => item.playlistId != null).map(item => item.playlistId)
-  return previous?.length === ids.length && previous.every((id, index) => id === ids[index]) ? previous : ids
-})
-const pinnedChannelIds = computed(previous => {
-  const ids = props.pinnedItems.filter(item => item.channelId != null).map(item => item.channelId)
-  return previous?.length === ids.length && previous.every((id, index) => id === ids[index]) ? previous : ids
-})
-const pinnedReorderStatus = ref('')
-
-function createSheetReorder({ ids, idKey, rowSelector, itemIdAttribute, action }) {
-  function announceMoved(id) {
-    const position = ids.value.indexOf(id)
-    if (position === -1) return
-    const item = props.pinnedItems.find(entry => entry[idKey] === id)
-    pinnedReorderStatus.value = t('Home Page.Section moved', {
-      section: item?.label ?? id,
-      position: position + 1,
-      total: ids.value.length,
-    })
-  }
-
-  const reorder = useOrderedItemReorder({
-    items: ids,
-    rowSelector,
-    itemIdAttribute,
-    updateItems: orderedIds => store.dispatch(action, orderedIds),
-    announceMoved,
-  })
-
-  async function moveByKeyboard(id, offset) {
-    const currentIds = ids.value
-    if (currentIds.length < 2) return
-    const reordered = moveItemByVisibleOffset(currentIds, currentIds, id, offset)
-    if (reordered === currentIds) return
-    if (await store.dispatch(action, reordered)) {
-      announceMoved(id)
-      await nextTick()
-      contentRef.value?.querySelector(`${rowSelector}[${itemIdAttribute}="${CSS.escape(id)}"]`)?.focus()
-    }
-  }
-
-  return { ...reorder, moveByKeyboard }
-}
-
-const pinnedPlaylistReorder = createSheetReorder({
-  ids: pinnedPlaylistIds,
-  idKey: 'playlistId',
-  rowSelector: '.pinnedPlaylistOption',
-  itemIdAttribute: 'data-pinned-playlist-id',
-  action: 'reorderPinnedPlaylistIds',
-})
-
-const pinnedChannelReorder = createSheetReorder({
-  ids: pinnedChannelIds,
-  idKey: 'channelId',
-  rowSelector: '.pinnedChannelOption',
-  itemIdAttribute: 'data-pinned-channel-id',
-  action: 'reorderPinnedChannels',
-})
-
-function reorderContextFor(item) {
-  if (item.playlistId != null) return { reorder: pinnedPlaylistReorder, id: item.playlistId, count: pinnedPlaylistIds.value.length }
-  if (item.channelId != null) return { reorder: pinnedChannelReorder, id: item.channelId, count: pinnedChannelIds.value.length }
-  return null
-}
-
-function canReorderPinnedItem(item) {
-  const ctx = reorderContextFor(item)
-  return ctx != null && item.path != null && ctx.count > 1
-}
-
-function isPinnedItemDragging(item) {
-  const ctx = reorderContextFor(item)
-  return ctx != null && ctx.reorder.draggedItemId.value === ctx.id
-}
-
-function pinnedItemRowStyle(item) {
-  const ctx = reorderContextFor(item)
-  return ctx ? ctx.reorder.rowStyle(ctx.id) : undefined
-}
-
-function startPinnedItemDrag(event, item) {
-  const ctx = reorderContextFor(item)
-  ctx?.reorder.startPointerDrag(event, ctx.id)
-}
-
-function movePinnedItemDrag(event, item) {
-  reorderContextFor(item)?.reorder.movePointerDrag(event)
-}
-
-function endPinnedItemDrag(event, item) {
-  reorderContextFor(item)?.reorder.endPointerDrag(event)
-}
-
-function cancelPinnedItemDrag(event, item) {
-  reorderContextFor(item)?.reorder.cancelPointerDrag(event)
-}
-
-function movePinnedItem(item, offset) {
-  const ctx = reorderContextFor(item)
-  if (ctx && item.path != null) ctx.reorder.moveByKeyboard(ctx.id, offset)
-}
 
 const promptId = useId()
 const sheetRef = useTemplateRef('sheetRef')
