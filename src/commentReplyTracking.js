@@ -235,6 +235,20 @@ export function markThreadOpened(threads, videoId, threadId, now = Date.now()) {
 }
 
 /**
+ * Shows a watched comment's new text, as after an edit, in the list of watched comments.
+ * @param {TrackedCommentThread[]} threads
+ * @param {string} videoId the video's or the post's ID
+ * @param {string} commentId the full ID, `threadId.replyId` for a reply
+ * @param {string} text
+ * @returns {TrackedCommentThread[] | null} null when it is not the watched comment of any entry
+ */
+export function updateWatchedCommentText(threads, videoId, commentId, text) {
+  const isEdited = (/** @type {TrackedCommentThread} */ thread) => thread.videoId === videoId && getWatchedCommentId(thread) === commentId
+  if (!threads.some(isEdited)) return null
+  return threads.map(thread => isEdited(thread) ? { ...thread, text: text.slice(0, COMMENT_TEXT_LIMIT) } : thread)
+}
+
+/**
  * Stops watching a comment, with its author's other comments in the thread.
  * @param {TrackedCommentThread[]} threads
  * @param {Pick<TrackedCommentThread, 'videoId' | 'threadId' | 'channelId'>} comment
