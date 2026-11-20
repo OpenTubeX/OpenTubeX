@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process'
 import { once } from 'node:events'
 import { existsSync, readFileSync } from 'node:fs'
-import { cp, mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { cp, mkdtemp, readdir, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
@@ -402,6 +402,7 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}, windo
   const env = {
     ...process.env,
     OPENTUBEX_E2E_USER_DATA_DIR: userDataDir,
+    ...(crashDumpsDir() ? { OPENTUBEX_E2E_CRASH_DUMPS_DIR: crashDumpsDir() } : {}),
     ELECTRON_OZONE_PLATFORM_HINT: 'x11',
     // Tests expect en-GB strings, which CI's bare "en" system locale resolves
     // to. Pin it so the default locale setting does not follow the host.
@@ -839,6 +840,41 @@ function recordAppDiagnostics(testInfo, recordTrace) {
   }
 }
 
+/**
+ * Where every app the current test launches keeps the minidumps of its crashed
+ * processes, including apps a test launches with a profile it deletes itself.
+ * The test's output directory is uploaded with the results, so the dumps of a
+ * test without the `app` fixture are kept too.
+ */
+export function crashDumpsDir() {
+  try {
+    return base.info().outputPath('crash-dumps')
+  } catch {
+    // Called outside a test, such as by the performance comparison scripts.
+    return undefined
+  }
+}
+
+/**
+ * Attaches the minidumps of processes that crashed during a failed test, such
+ * as a renderer that exited with code 133. The E2E app never uploads them.
+ * Symbolize one with the symbols of the Electron version in its name, for
+ * example with `minidump_stackwalk`.
+ * @param {import('@playwright/test').TestInfo} testInfo
+ */
+async function attachCrashDumps(testInfo) {
+  const directory = testInfo.outputPath('crash-dumps')
+  const dumps = (await readdir(directory, { recursive: true }).catch(() => [])).filter(entry => entry.endsWith('.dmp'))
+  if (dumps.length === 0) return
+  const { version } = JSON.parse(readFileSync(path.join(repoRoot, 'node_modules', 'electron', 'package.json'), 'utf8'))
+  for (const dump of dumps) {
+    await testInfo.attach(`crash dump (Electron ${version}) ${path.basename(dump)}`, {
+      path: path.join(directory, dump),
+      contentType: 'application/octet-stream'
+    })
+  }
+}
+
 const UNPOSITIONED_VIEWPORT_ERROR = 'Overlay scrollbars need a positioned scroll container'
 // Chromium logs every script and eval() it blocks.
 const CSP_VIOLATION = /Content Security Policy/
@@ -999,6 +1035,7 @@ export const test = base.extend({
       if (appHandle) {
         await appHandle.electronApp.close().catch(() => {})
       }
+      if (failed) await attachCrashDumps(testInfo)
       const blockedRequests = [...new Set(takeBlockedRequests())]
       // Requests from the main process and its child processes, which
       // Playwright cannot mock. They fail instead of reaching real hosts.

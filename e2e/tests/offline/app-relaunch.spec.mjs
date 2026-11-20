@@ -2,7 +2,7 @@ import { spawn } from 'node:child_process'
 import { once } from 'node:events'
 import path from 'node:path'
 
-import { test, expect, repoRoot } from '../../helpers/app.mjs'
+import { test, expect, repoRoot, crashDumpsDir } from '../../helpers/app.mjs'
 
 for (const { format, portableExecutable = null, failures = 0, rejectWithFalse = false, restartRequested = false } of [
   { format: 'ordinary executables' },
@@ -54,7 +54,7 @@ for (const { format, portableExecutable = null, failures = 0, rejectWithFalse = 
       const successfulLaunch = failures === 2 ? 1 : 0
       const launchCount = successfulLaunch + 2
       for (let attempt = 0; attempt < launchCount; attempt++) {
-        const env = { ...process.env, OPENTUBEX_E2E_USER_DATA_DIR: app.userDataDir }
+        const env = { ...process.env, OPENTUBEX_E2E_USER_DATA_DIR: app.userDataDir, OPENTUBEX_E2E_CRASH_DUMPS_DIR: crashDumpsDir() }
         delete env.ELECTRON_RUN_AS_NODE
         delete env.WAYLAND_DISPLAY
         const child = spawn(app.electronApp.process().spawnfile, args, {
