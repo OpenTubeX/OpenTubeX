@@ -16,6 +16,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
@@ -37,7 +38,12 @@ final class YtDlpDownloads {
     private final Runnable schedule;
     private final Map<Long, JSONObject> records = new LinkedHashMap<>();
     private final Set<Long> running = new HashSet<>();
+    // A playlist takes several slots for parallel processes. Each claim keeps
+    // the number it still holds, so a late part cannot release a newer claim's.
+    private final Map<Long, int[]> slots = new HashMap<>();
+    private int usedSlots;
     private final Map<Long, Thread> threads = new HashMap<>();
+    private final Map<Long, List<JSONObject>> partProgress = new HashMap<>();
     private final List<Consumer<JSONObject>> listeners = new CopyOnWriteArrayList<>();
     private long counter;
     private boolean paused;
@@ -142,6 +148,11 @@ final class YtDlpDownloads {
     void unobserve(Consumer<JSONObject> listener) { listeners.remove(listener); }
 
     synchronized JSONObject add(JSONObject payload, JSONArray args, JSONObject config, long retryId) throws Exception {
+        return add(payload, args, config, retryId, 1);
+    }
+
+    /** @param partLimit how many yt-dlp processes can download parts of the playlist at the same time */
+    synchronized JSONObject add(JSONObject payload, JSONArray args, JSONObject config, long retryId, int partLimit) throws Exception {
         if (!config.optBoolean("enabled")) return new JSONObject().put("error", "downloads-disabled");
         String folder = config.optString("folder");
         if (!folder.startsWith("content://")) return new JSONObject().put("error", "download-folder-required");
@@ -164,7 +175,7 @@ final class YtDlpDownloads {
         JSONObject record = previous == null ? new JSONObject() : previous;
         for (String key : asList("videoId", "playlistId", "playlistKey", "title", "thumbnail", "mode", "template")) record.put(key, payload.optString(key));
         record.put("id", id).put("retryPayload", new JSONObject(payload.toString())).put("automatic", payload.optBoolean("automatic"));
-        record.put("args", args).put("folder", folder).put("status", paused ? "paused" : "queued");
+        record.put("args", args).put("partLimit", Math.max(1, Math.min(10, partLimit))).put("folder", folder).put("status", paused ? "paused" : "queued");
         // Validate at execution so missing sessions also leave a visible failed automatic download.
         boolean useCookies = !payload.has("externalUrl") && config.optBoolean("useCookies");
         record.put("useCookies", useCookies)
@@ -233,8 +244,11 @@ final class YtDlpDownloads {
             .collect(java.util.stream.Collectors.toList());
         List<Long> ids = new ArrayList<>();
         for (JSONObject record : pending) {
-            if (running.size() >= concurrency) break;
+            if (usedSlots >= concurrency) break;
             long id = record.getLong("id");
+            int granted = Math.min(Math.max(1, record.optInt("partLimit", 1)), concurrency - usedSlots);
+            usedSlots += granted;
+            slots.put(id, new int[] {granted});
             running.add(id);
             record.put("status", "preparing").put("started", true);
             ids.add(id);
@@ -245,6 +259,14 @@ final class YtDlpDownloads {
     }
 
     synchronized boolean hasRunning() { return !running.isEmpty(); }
+
+    /** Releases one slot of a claim, or with {@code all} every slot it still holds. */
+    private synchronized void releaseSlots(int[] claim, boolean all) {
+        int released = all ? claim[0] : Math.min(1, claim[0]);
+        claim[0] -= released;
+        usedSlots -= released;
+        if (released > 0) notifyAll();
+    }
     synchronized boolean hasQueued() {
         try { return refreshWaiting(); }
         catch (Exception error) { throw new IllegalStateException(error); }
@@ -261,35 +283,72 @@ final class YtDlpDownloads {
             if (!isExecuting(id)) return;
             root.mkdirs();
             List<String> args = YtDlpArguments.validate(record.getJSONArray("args"));
-            args.addAll(asList("--paths", root.getAbsolutePath(), "--paths", "temp:" + new File(root, "temp").getAbsolutePath(),
+            List<String> common = new ArrayList<>(asList("--paths", root.getAbsolutePath(), "--paths", "temp:" + new File(root, "temp").getAbsolutePath(),
                 "--newline", "--progress", "--no-simulate", "--print", "after_move:__OPENTUBEX_FILE__:%(id)s\t%(duration)s\t%(width)s\t%(height)s\t%(channel,uploader|null)j\t%(channel_id|null)j\t%(title)j\t%(filepath)s"));
+            int[] claim;
             synchronized (this) {
                 if (record.optBoolean("useCookies")) {
                     File cookies = cookieFile(record.optString("cookies"));
-                    args.addAll(asList("--cookies", cookies.getAbsolutePath()));
+                    common.addAll(asList("--cookies", cookies.getAbsolutePath()));
                 }
-                if (bandwidth > 0) args.addAll(asList("--limit-rate", Math.max(1, bandwidth / concurrency) + "K"));
+                if (bandwidth > 0) common.addAll(asList("--limit-rate", Math.max(1, bandwidth / concurrency) + "K"));
                 long estimate = record.getJSONObject("retryPayload").optLong("estimatedSizeBytes");
                 record.put("availableSpaceBytes", root.getUsableSpace());
                 if (estimate > 0 && root.getUsableSpace() < estimate) throw new IOException("INSUFFICIENT_SPACE");
+                claim = slots.computeIfAbsent(id, ignored -> new int[] {1});
             }
-            StringBuilder completedOutput = new StringBuilder();
+            List<List<String>> parts = splitArguments(args, record.getJSONObject("retryPayload"), Math.max(1, claim[0]));
+            for (List<String> part : parts) part.addAll(common);
+            // The claim keeps a slot for each part, so return those no part uses.
+            int surplus = claim[0] - parts.size();
+            for (int unused = 0; unused < surplus; unused++) releaseSlots(claim, false);
+            synchronized (this) {
+                List<JSONObject> states = new ArrayList<>();
+                for (int part = 0; part < parts.size(); part++) states.add(new JSONObject().put("status", "preparing").put("percent", 0));
+                partProgress.put(id, states);
+            }
+            StringBuffer completedOutput = new StringBuffer();
             // The runtime's error only keeps the end of the output, where progress
             // lines can hide a playlist's earlier per-video errors.
             ArrayDeque<String> errorLines = new ArrayDeque<>();
-            Exception downloadError = null;
-            try {
-                YtDlpRuntime.execute(context, args, "download-" + id, line -> {
-                    if (line.startsWith("__OPENTUBEX_FILE__:")) completedOutput.append(line).append('\n');
-                    if (line.startsWith("ERROR:")) synchronized (errorLines) {
-                        errorLines.add(line);
-                        if (errorLines.size() > 5) errorLines.removeFirst();
+            Exception[] errors = new Exception[parts.size()];
+            AtomicInteger unfinished = new AtomicInteger(parts.size());
+            List<Runnable> downloads = new ArrayList<>();
+            for (int index = 0; index < parts.size(); index++) {
+                int part = index;
+                downloads.add(() -> {
+                    try {
+                        YtDlpRuntime.execute(context, parts.get(part), part == 0 ? "download-" + id : "download-" + id + "-" + part, line -> {
+                            // One call, so parts running at the same time cannot interleave a record.
+                            if (line.startsWith("__OPENTUBEX_FILE__:")) completedOutput.append(line + '\n');
+                            if (line.startsWith("ERROR:")) synchronized (errorLines) {
+                                errorLines.add(line);
+                                if (errorLines.size() > 5) errorLines.removeFirst();
+                            }
+                            progress(id, part, line);
+                        });
+                    } catch (Exception error) {
+                        // Keep the interrupt, so joinAll also stops parts whose process has not started yet.
+                        if (error instanceof InterruptedException) Thread.currentThread().interrupt();
+                        errors[part] = error;
+                    } finally {
+                        finishPart(id, part);
+                        // Finished parts free their slot for other downloads, and the
+                        // last one keeps it until the export finishes.
+                        if (unfinished.decrementAndGet() > 0) releaseSlots(claim, false);
                     }
-                    progress(id, line);
                 });
-            } catch (Exception error) {
-                downloadError = error;
             }
+            List<Thread> helpers = new ArrayList<>();
+            for (Runnable download : downloads.subList(1, downloads.size())) {
+                Thread helper = new Thread(download, "yt-dlp-download-part");
+                helpers.add(helper);
+                helper.start();
+            }
+            downloads.get(0).run();
+            joinAll(helpers);
+            Exception downloadError = null;
+            for (Exception error : errors) if (downloadError == null) downloadError = error;
             if (!isExecuting(id) || Thread.currentThread().isInterrupted()) return;
             updateStatus(id, "processing", null);
             Map<String, JSONObject> metadata = new HashMap<>();
@@ -378,9 +437,113 @@ final class YtDlpDownloads {
             synchronized (this) {
                 threads.remove(id);
                 running.remove(id);
+                partProgress.remove(id);
+                int[] claim = slots.remove(id);
+                if (claim != null) releaseSlots(claim, true);
                 notifyAll();
             }
         }
+    }
+
+    /** Waits for every part, and stops them first when the download is interrupted. */
+    private static void joinAll(List<Thread> helpers) throws InterruptedException {
+        try {
+            for (Thread helper : helpers) helper.join();
+        } catch (InterruptedException interrupted) {
+            for (Thread helper : helpers) helper.interrupt();
+            for (Thread helper : helpers) {
+                while (helper.isAlive()) {
+                    try { helper.join(); } catch (InterruptedException ignored) { /* Keep waiting for the part to stop. */ }
+                }
+            }
+            throw interrupted;
+        }
+    }
+
+    /**
+     * Splits a download into the arguments of up to {@code count} yt-dlp processes,
+     * like splitDownloadArguments in src/ytDlpArguments.js. The renderer limits the
+     * count to the parts a playlist and its custom arguments allow.
+     */
+    static List<List<String>> splitArguments(List<String> args, JSONObject payload, int count) {
+        JSONArray videoIds = payload.optJSONArray("videoIds");
+        int videos = videoIds == null ? 0 : videoIds.length();
+        List<String> shared = args.subList(0, args.size() - Math.max(1, videos));
+        List<String> urls = args.subList(shared.size(), args.size());
+        int parts = !payload.optBoolean("isPlaylist") ? 1 : videos > 0 ? Math.min(count, videos) : count;
+        List<List<String>> result = new ArrayList<>();
+        for (int index = 0; index < parts; index++) {
+            List<String> part = new ArrayList<>(shared);
+            if (parts == 1) {
+                part.addAll(urls);
+            } else if (videos == 0) {
+                // Every part takes every `parts`th entry, so entries keep their playlist index.
+                part.addAll(asList("--playlist-items", (index + 1) + "::" + parts));
+                part.addAll(urls);
+            } else {
+                // Consecutive videos keep their autonumbers in playlist order.
+                int start = index * urls.size() / parts;
+                part.addAll(asList("--autonumber-start", String.valueOf(start + 1)));
+                part.addAll(urls.subList(start, (index + 1) * urls.size() / parts));
+            }
+            result.add(part);
+        }
+        return result;
+    }
+
+    private static final Pattern SPEED = Pattern.compile("^(\\d+(?:\\.\\d+)?)(B|KiB|MiB|GiB|TiB)/s$");
+    private static final List<String> SPEED_UNITS = asList("B", "KiB", "MiB", "GiB", "TiB");
+
+    /** Adds speeds in yt-dlp's format, such as {@code 2.50MiB/s}, or returns JSONObject.NULL when none is known. */
+    static Object combineSpeeds(List<String> speeds) {
+        double total = -1;
+        for (String speed : speeds) {
+            var match = SPEED.matcher(speed.trim());
+            if (match.matches()) total = Math.max(total, 0) + Double.parseDouble(match.group(1)) * Math.pow(1024, SPEED_UNITS.indexOf(match.group(2)));
+        }
+        if (total < 0) return JSONObject.NULL;
+        int exponent = total < 1 ? 0 : Math.min(SPEED_UNITS.size() - 1, (int) Math.floor(Math.log(total) / Math.log(1024)));
+        return String.format(Locale.ROOT, "%.2f%s/s", total / Math.pow(1024, exponent), SPEED_UNITS.get(exponent));
+    }
+
+    private static int partPosition(JSONObject part, JSONArray videoIds) {
+        int index = part.optInt("playlistIndex", 0);
+        if (index > 0) return index;
+        String videoId = part.optString("currentVideoId", "");
+        for (int i = 0; videoIds != null && !videoId.isEmpty() && i < videoIds.length(); i++) {
+            if (videoId.equals(videoIds.optString(i))) return i + 1;
+        }
+        return Integer.MAX_VALUE;
+    }
+
+    /** Shows the earliest video still in progress, with the speed of all parts. */
+    static void showProgress(JSONObject record, List<JSONObject> parts, JSONArray videoIds) throws org.json.JSONException {
+        JSONObject shown = null;
+        List<String> speeds = new ArrayList<>();
+        for (JSONObject part : parts) {
+            if (part.optBoolean("done")) continue;
+            if (!part.isNull("speed")) speeds.add(part.optString("speed"));
+            if (shown == null || partPosition(part, videoIds) < partPosition(shown, videoIds)) shown = part;
+        }
+        if (shown == null) shown = parts.get(0);
+        record.put("status", shown.optString("status", "preparing")).put("percent", shown.optDouble("percent", 0))
+            .put("eta", shown.isNull("eta") ? JSONObject.NULL : shown.get("eta"))
+            .put("speed", parts.size() > 1 ? combineSpeeds(speeds) : shown.isNull("speed") ? JSONObject.NULL : shown.get("speed"));
+        if (shown.has("currentVideoId")) {
+            for (String key : asList("currentVideoId", "currentTitle", "playlistIndex", "playlistCount")) record.put(key, shown.opt(key));
+        }
+    }
+
+    private synchronized void finishPart(long id, int part) {
+        List<JSONObject> parts = partProgress.get(id);
+        if (parts == null || parts.size() == 1) return;
+        try {
+            parts.get(part).put("done", true);
+            if (!isExecuting(id)) return;
+            JSONObject record = records.get(id);
+            showProgress(record, parts, record.getJSONObject("retryPayload").optJSONArray("videoIds"));
+            publish(record);
+        } catch (Exception error) { Log.w("OpenTubeXYtDlp", "Invalid download progress", error); }
     }
 
     private synchronized boolean isExecuting(long id) {
@@ -388,12 +551,14 @@ final class YtDlpDownloads {
         return record != null && asList("preparing", "downloading", "processing").contains(record.optString("status"));
     }
 
-    private synchronized void progress(long id, String lines) {
+    private synchronized void progress(long id, int part, String lines) {
         JSONObject record = records.get(id);
-        if (!isExecuting(id)) return;
+        List<JSONObject> parts = partProgress.get(id);
+        if (!isExecuting(id) || parts == null) return;
         try {
             String previousStatus = record.optString("status");
-            for (String line : lines.split("\n")) updateProgress(record, line);
+            for (String line : lines.split("\n")) updateProgress(parts.get(part), line);
+            showProgress(record, parts, record.getJSONObject("retryPayload").optJSONArray("videoIds"));
             long now = System.currentTimeMillis();
             if (!previousStatus.equals(record.optString("status")) || now - record.optLong("lastProgress") >= 500) {
                 record.put("lastProgress", now);
@@ -511,7 +676,11 @@ final class YtDlpDownloads {
             YtDlpRuntime.cancel(id);
             Thread thread = threads.get(id);
             if (thread != null) thread.interrupt();
-            else running.remove(id);
+            else {
+                running.remove(id);
+                int[] claim = slots.remove(id);
+                if (claim != null) releaseSlots(claim, true);
+            }
         }
     }
 
@@ -590,7 +759,7 @@ final class YtDlpDownloads {
 
     private JSONObject snapshot(JSONObject record) throws Exception {
         JSONObject copy = new JSONObject(record.toString());
-        for (String key : asList("args", "folder", "lastProgress", "exports")) copy.remove(key);
+        for (String key : asList("args", "partLimit", "folder", "lastProgress", "exports")) copy.remove(key);
         return copy;
     }
 

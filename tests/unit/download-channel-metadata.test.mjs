@@ -5,13 +5,13 @@ import vm from 'node:vm'
 import test from 'node:test'
 
 const source = await readFile(new URL('../../src/main/ytDlpDownloads.js', import.meta.url), 'utf8')
-const start = source.indexOf('  function handleStdoutLine(line)')
+const start = source.indexOf('  function handleStdoutLine(part, line)')
 const end = source.indexOf('    const subtitleMatch', start)
 const helperStart = source.indexOf('function isPathInsideFolders(')
 const helper = source.slice(helperStart, source.indexOf('\n}\n', helperStart) + 2)
 
 function createHandler(status) {
-  return vm.runInNewContext(`${helper}\n${source.slice(start, end)} }\nhandleStdoutLine`, {
+  return vm.runInNewContext(`${helper}\n${source.slice(start, end)} }\n(line => handleStdoutLine({}, line))`, {
     status,
     metadataByVideoId: new Map(),
     downloadFolders: ['/downloads', '/tmp/opentubex-download-a'],

@@ -5,7 +5,7 @@ import { normalizeYtDlpPlaybackCacheMaxEntrySize } from '../../ytDlpPlaybackCach
 import store from '../store/index'
 import { getDownloadTemplateOptions } from './downloadTemplates'
 import { normalizeAutomaticDownloadRule, parseAutomaticDownloadRules } from './automaticDownloadRules'
-import { buildYtDlpDownloadArguments, playbackSubtitleArguments } from '../../ytDlpArguments'
+import { buildYtDlpDownloadArguments, playbackSubtitleArguments, playlistDownloadPartLimit } from '../../ytDlpArguments'
 import { EXTERNAL_PLAYBACK_FORMAT_SELECTOR, PLAYBACK_INFO_OUTPUT_TEMPLATE, EXTERNAL_PLAYBACK_INFO_OUTPUT_TEMPLATE, parseYtDlpPlaybackInfo, mapPlaybackFormat, mapPlaybackCaptions, getOriginalAudioLanguage, mapExternalPlaybackMetadata, toFiniteNumber, toNonEmptyString } from '../../ytDlpMetadata'
 import { buildYtDlpStoryboardVtt } from '../../main/ytDlpStoryboard'
 import { getTwitchCreatorUrl, resolveYtDlpCreatorAvatarUrl } from '../../main/ytDlpCreatorAvatar'
@@ -87,7 +87,9 @@ const capacitor = {
         if (permission.display === 'prompt' || permission.display === 'prompt-with-rationale') await LocalNotifications.requestPermissions()
       }
       const { args } = buildYtDlpDownloadArguments(payload, store.getters.getYtDlpDownloadCustomArgs)
-      return await native.download({ payload, args, retryDownloadId, configuration: configuration() })
+      // The queue allows at most 10 concurrent downloads
+      const partLimit = Math.min(10, playlistDownloadPartLimit(payload, args))
+      return await native.download({ payload, args, partLimit, retryDownloadId, configuration: configuration() })
     } catch (error) {
       return { error: error.message }
     }

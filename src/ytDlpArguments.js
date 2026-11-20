@@ -100,16 +100,84 @@ const SHORT_ARGS_WITH_VALUES = '2INOPRSafoprtu'
 export function isDeniedCustomArgument(argument) {
   // Everything after `--` is a URL, including the options OpenTubeX adds later.
   if (argument === '--') return true
+  return matchesOption(argument, DENIED_CUSTOM_ARGS, DENIED_SHORT_ARGS, ALLOWED_PREFIXES)
+}
+function matchesOption(argument, longOptions, shortOptions, allowedPrefixes = []) {
   if (/^-[^-]/.test(argument)) {
     for (const option of argument.slice(1)) {
-      if (DENIED_SHORT_ARGS.includes(option)) return true
+      if (shortOptions.includes(option)) return true
       if (SHORT_ARGS_WITH_VALUES.includes(option)) return false
     }
     return false
   }
   const option = argument.split('=')[0]
-  return option.startsWith('--') && option.length > 2 && !ALLOWED_PREFIXES.includes(option) &&
-    DENIED_CUSTOM_ARGS.some(denied => denied.startsWith(option))
+  return option.startsWith('--') && option.length > 2 && !allowedPrefixes.includes(option) &&
+    longOptions.some(longOption => longOption.startsWith(option))
+}
+// Options that select, order, number, stop, or combine playlist entries across the
+// whole playlist, which separate processes each handling some entries cannot share.
+const PLAYLIST_ORDER_ARGS = [
+  '--abort-on-error',
+  '--autonumber-start',
+  '--break-match-filters',
+  '--break-on-existing',
+  '--break-on-reject',
+  '--break-per-input',
+  '--lazy-playlist',
+  '--max-downloads',
+  '--no-ignore-errors',
+  '--playlist-end',
+  '--playlist-items',
+  '--playlist-random',
+  '--playlist-reverse',
+  '--playlist-start',
+  '--skip-playlist-after-errors'
+]
+/**
+ * How many yt-dlp processes can download parts of a playlist at the same time.
+ * @param {{ isPlaylist?: boolean, playlistId?: string, videoIds?: string[], videoCount?: number }} payload
+ * @param {string[]} args the arguments built for the whole download
+ */
+export function playlistDownloadPartLimit(payload, args) {
+  if (payload.isPlaylist !== true || args.some(argument => matchesOption(argument, PLAYLIST_ORDER_ARGS, 'I'))) return 1
+  // Concatenation needs every entry in one process.
+  if (args.some((argument, index) => matchesOption(argument, ['--concat-playlist'], '') &&
+    (argument.includes('=') ? argument.split('=')[1] : args[index + 1]) !== 'never')) return 1
+  // Without an index in the file name, entries with the same title would write the same file.
+  const outputTemplate = args[args.lastIndexOf('--output') + 1] ?? ''
+  // `%%` is a literal percent sign, such as one in a local playlist's title.
+  if (!/(?<!%)(?:%%)*%\((?:playlist_index|autonumber)\)/.test(outputTemplate)) return 1
+  const videoIds = Array.isArray(payload.videoIds) ? payload.videoIds : []
+  if (videoIds.length > 0) return videoIds.length
+  // Without the count, extra processes could find no entry and still hold a slot.
+  return Number.isSafeInteger(payload.videoCount) && payload.videoCount > 0 ? payload.videoCount : 1
+}
+/**
+ * Splits a download into the arguments of up to `count` yt-dlp processes.
+ * Remote playlists give every process every `count`th entry, so the entries
+ * keep their playlist index. Local playlists give each process consecutive
+ * videos, so their autonumbers keep the playlist order.
+ * @param {{ isPlaylist?: boolean, playlistId?: string, videoIds?: string[], videoCount?: number }} payload
+ * @param {string[]} args the arguments built for the whole download, ending with its URLs
+ * @param {number} count
+ * @returns {{ shared: string[], parts: string[][] }} the options of every process, and the options and URLs of each one
+ */
+export function splitDownloadArguments(payload, args, count) {
+  const videoIds = Array.isArray(payload.videoIds) ? payload.videoIds : []
+  const shared = args.slice(0, args.length - Math.max(1, videoIds.length))
+  const urls = args.slice(shared.length)
+  const parts = Math.min(count, playlistDownloadPartLimit(payload, args))
+  if (!(parts > 1)) return { shared, parts: [urls] }
+  if (videoIds.length === 0) {
+    return { shared, parts: Array.from({ length: parts }, (_, index) => ['--playlist-items', `${index + 1}::${parts}`, ...urls]) }
+  }
+  return {
+    shared,
+    parts: Array.from({ length: parts }, (_, index) => {
+      const start = Math.floor(index * urls.length / parts)
+      return ['--autonumber-start', String(start + 1), ...urls.slice(start, Math.floor((index + 1) * urls.length / parts))]
+    })
+  }
 }
 const TIME_REGEX = /^(?:\d+:)?[0-5]?\d:[0-5]\d(?:\.\d+)?$/
 export const AUTOMATIC_NUMBER_LIMITS = Object.freeze({
@@ -354,10 +422,15 @@ export function buildYtDlpDownloadArguments(payload, globalArguments = '') {
   if (startTime !== '' || endTime !== '') {
     args.push('--download-sections', `*${startTime || '0'}-${endTime || 'inf'}`, '--force-keyframes-at-cuts')
   }
+  args.push(...customArgs)
+  // Parts of a split playlist show their entries' playlist index and the whole playlist's
+  // count. A playlist in one process counts the entries it selects, like --playlist-items.
+  const position = playlistDownloadPartLimit(payload, args) > 1
+    ? '%(playlist_index|)s\t%(playlist_count,n_entries|)s'
+    : '%(playlist_autonumber|)s\t%(n_entries|)s'
   args.push(
-    ...customArgs,
     '--no-simulate',
-    '--print', 'video:__OPENTUBEX_PREPARING__:%(id)s\t%(playlist_autonumber|)s\t%(n_entries|)s\t%(title)j',
+    '--print', `video:__OPENTUBEX_PREPARING__:%(id)s\t${position}\t%(title)j`,
     '--progress-template', 'download:__OPENTUBEX_DOWNLOAD__:%(progress.status)s\t%(progress._percent_str)s\t%(progress._speed_str)s\t%(progress._eta_str)s',
     '--progress-template', 'postprocess:__OPENTUBEX_PROCESSING__'
   )

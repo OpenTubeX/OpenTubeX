@@ -7,15 +7,21 @@ import { downloadErrorMessage } from '../../src/renderer/helpers/downloadErrors.
 
 const source = readFileSync(new URL('../../src/main/ytDlpDownloads.js', import.meta.url), 'utf8')
 const DOWNLOAD_STOPPED_ERROR = /^const DOWNLOAD_STOPPED_ERROR = '([^']+)'$/m.exec(source)[1]
-const handler = source.slice(source.indexOf('  function setDownloadPhase(phase) {'), source.indexOf('\n  let stdoutBuffer', source.indexOf('  function handleStdoutLine(line) {')))
+const stderrHandlerStart = source.indexOf('  /**\n   * @param {DownloadPart} part\n   * @param {string} line\n   */\n  function handleStderrLine(part, line) {')
+const stderrHandler = source.slice(stderrHandlerStart, source.indexOf('  function finishDownload() {', stderrHandlerStart))
+const handler = source.slice(source.indexOf('  /** @param {DownloadPart} part */\n  function partPosition(part) {'), stderrHandlerStart)
 
 function replay(lines, initialStatus = 'downloading', overrides = {}) {
   const status = { status: initialStatus, percent: 97.3, speed: '1MiB/s', eta: '00:00' }
+  const part = { phase: ['paused', 'pausing'].includes(initialStatus) ? 'downloading' : initialStatus, percent: 97.3, speed: '1MiB/s', eta: '00:00', done: false }
   const entry = {}
   const updates = []
   const context = vm.createContext({
     status,
     entry,
+    parts: [part],
+    videoIds: [],
+    combineDownloadSpeeds: () => null,
     sendStatus: force => updates.push({ ...status, force }),
     FINAL_METADATA_PREFIX: '__OPENTUBEX_METADATA__:',
     FINAL_PATH_PREFIX: '__OPENTUBEX_FILE__:',
@@ -29,7 +35,7 @@ function replay(lines, initialStatus = 'downloading', overrides = {}) {
     isPathInsideFolders: () => true,
     ...overrides,
   })
-  vm.runInContext(`${handler}\nglobalThis.handleLine = handleStdoutLine`, context)
+  vm.runInContext(`${handler}\nglobalThis.handleLine = line => handleStdoutLine(parts[0], line)`, context)
   for (const line of lines) context.handleLine(line)
   return { status, updates, entry }
 }
@@ -107,10 +113,11 @@ test('stderr progress is decoded across chunks and keeps diagnostic history boun
     setEncoding() {},
     on(event, callback) { listeners[`${name}:${event}`] = callback },
   })
-  const wiring = source.slice(source.indexOf("  let stdoutBuffer = ''"), source.indexOf("  child.on('error',", source.indexOf("  let stdoutBuffer = ''")))
-  vm.runInNewContext(wiring, {
+  const wiring = source.slice(source.indexOf("    let stdoutBuffer = ''"), source.indexOf("    child.on('error'", source.indexOf("    let stdoutBuffer = ''")))
+  vm.runInNewContext(`${stderrHandler}${wiring}`, {
     child: { stdout: stream('stdout'), stderr: stream('stderr') },
-    handleStdoutLine: line => lines.push(line),
+    part: {},
+    handleStdoutLine: (_, line) => lines.push(line),
     stderrLines,
     errorLines: [],
     FINAL_METADATA_PREFIX: '__OPENTUBEX_METADATA__:',
@@ -156,14 +163,13 @@ test('storage history includes only terminal downloads that the backend can clea
 })
 
 function finishDownload({ code, payload, destinations, stderr, subtitleFormat = '', existingFiles = [] }) {
-  const start = source.indexOf('  /** @param {string} line */\n  function handleStderrLine(line) {')
-  const closeStart = source.indexOf("  child.on('close', (code) => {", start)
-  const closeEnd = source.indexOf('\n  })\n', closeStart) + 5
+  const finishStart = source.indexOf('  function finishDownload() {')
+  const finish = source.slice(finishStart, source.indexOf('\n  }\n', finishStart) + 4)
   const status = { status: 'downloading', percent: 40, destinations, destination: destinations.at(-1) ?? null, errorMessage: null }
   const notifications = []
-  let close
-  vm.runInNewContext(`${source.slice(start, source.indexOf("  child.on('error',", start))}${source.slice(closeStart, closeEnd)}
-    for (const line of stderr) handleStderrLine(line)`, {
+  vm.runInNewContext(`${stderrHandler}${finish}
+    for (const line of stderr) handleStderrLine(parts[0], line)
+    finishDownload()`, {
     id: 1,
     stderr,
     stderrLines: [],
@@ -171,24 +177,22 @@ function finishDownload({ code, payload, destinations, stderr, subtitleFormat = 
     status,
     payload,
     subtitleFormat,
-    finished: false,
+    parts: [{ done: true, code, error: null }],
     subtitleDestinations: new Set(destinations),
     existsSync: file => existingFiles.includes(file),
     entry: { cancelled: false, restarting: false },
     activeDownloads: new Map(),
     handleStdoutLine() {},
-    releaseDownloadSlot() {},
-    removeTemporaryDownloadFolder() {},
+    rm: async () => {},
+    temporaryDownloadFolder: '/downloads/.opentubex-download-1',
     sendStatus() {},
     saveDownloadRecords: async () => {},
     showAutomaticDownloadNotification: (_, state) => notifications.push(state),
     FINAL_METADATA_PREFIX: '__OPENTUBEX_METADATA__:',
     FINAL_PATH_PREFIX: '__OPENTUBEX_FILE__:',
     DOWNLOAD_STOPPED_ERROR,
-    child: { on: (event, callback) => { if (event === 'close') close = callback } },
     Date,
   })
-  close(code)
   return { status, notifications }
 }
 

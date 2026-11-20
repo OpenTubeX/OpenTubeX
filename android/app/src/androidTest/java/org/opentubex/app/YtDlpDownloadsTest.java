@@ -149,6 +149,38 @@ public class YtDlpDownloadsTest {
         } finally { queue.cancelAll(); folder.delete(); YtDlpFiles.deleteTree(state); }
     }
 
+    @Test public void playlistPartsDownloadInParallelWithinTheQueueLimit() throws Exception {
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        File state = new File(context.getCacheDir(), "yt-dlp-parallel-" + UUID.randomUUID());
+        state.mkdirs();
+        DocumentFile folder = tree(context).createDirectory(UUID.randomUUID().toString());
+        assertNotNull(folder);
+        String folderUri = DocumentsContract.buildTreeDocumentUri(InstrumentationRegistry.getInstrumentation().getContext().getPackageName() + ".documents", DocumentsContract.getDocumentId(folder.getUri())).toString();
+        grant(context, Uri.parse(folderUri));
+        YtDlpDownloads queue = new YtDlpDownloads(context, state, () -> {});
+        try (FixtureServer server = new FixtureServer(InstrumentationRegistry.getInstrumentation().getContext())) {
+            JSONObject config = new JSONObject().put("enabled", true).put("folder", folderUri).put("concurrency", 2);
+            JSONObject payload = new JSONObject().put("mode", "video").put("videoId", "").put("isPlaylist", true)
+                .put("videoIds", new JSONArray(asList("aaaaaaaaaaa", "bbbbbbbbbbb")));
+            JSONArray args = new JSONArray(asList("--output", "%(autonumber)s.%(ext)s", server.url(), server.url() + "?second"));
+            long id = queue.add(payload, args, config, -1, 2).getLong("id");
+            JSONObject single = new JSONObject().put("mode", "video").put("videoId", "___________");
+            long next = queue.add(single, new JSONArray(asList("--output", "single.%(ext)s", server.url())), config, -1).getLong("id");
+            assertEquals(asList(id), queue.claim());
+            assertEquals("The playlist parts must hold both slots", asList(), queue.claim());
+            queue.run(id);
+            JSONObject completed = null;
+            for (int i = 0; i < queue.list().length(); i++) {
+                if (queue.list().getJSONObject(i).getLong("id") == id) completed = queue.list().getJSONObject(i);
+            }
+            assertNotNull(completed);
+            assertEquals(completed.toString(), "completed", completed.getString("status"));
+            assertEquals("Each part must keep its own autonumber", 2, completed.getJSONArray("files").length());
+            assertEquals(2, folder.listFiles().length);
+            assertEquals("Finished parts must free their slots", asList(next), queue.claim());
+        } finally { queue.cancelAll(); folder.delete(); YtDlpFiles.deleteTree(state); }
+    }
+
     @Test public void interruptedExportReusesItsAllocatedDocument() throws Exception {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         File root = new File(context.getCacheDir(), "yt-dlp-export-" + UUID.randomUUID());

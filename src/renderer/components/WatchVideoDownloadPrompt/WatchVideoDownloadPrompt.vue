@@ -424,6 +424,8 @@ const props = defineProps({
   playlistId: { type: String, default: '' },
   playlistKey: { type: String, default: '' },
   isPlaylist: { type: Boolean, default: false },
+  // limits how many processes download a remote playlist at the same time
+  videoCount: { type: Number, default: 0 },
   title: { type: String, required: true },
   thumbnail: { type: String, default: '' }
 })
@@ -667,6 +669,7 @@ async function startDownload() {
     playlistId: props.playlistId,
     playlistKey: props.playlistKey,
     isPlaylist: props.isPlaylist,
+    ...(props.isPlaylist && props.videoCount > 0 ? { videoCount: props.videoCount } : {}),
     title: props.title,
     thumbnail: props.thumbnail,
     // edited options no longer describe the template they started from

@@ -138,6 +138,7 @@
       :playlist-key="playlistMetadata.playlistId"
       :video-ids="isUserPlaylist ? data.videos.map(video => video.videoId) : []"
       :is-playlist="true"
+      :video-count="playlistMetadata.videoCount"
       :title="playlistMetadata.title"
       :thumbnail="isUserPlaylist && thumbnailPreference !== 'hidden' ? playlistMetadata.defaultThumbnailUrl : thumbnailForDisplay"
       @close="showDownloadPrompt = false"

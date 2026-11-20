@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { buildYtDlpDownloadArguments, isSafeDownloadFilenameTemplate, jsRuntimeArguments, playbackImpersonationArguments } from '../../src/ytDlpArguments.js'
+import { buildYtDlpDownloadArguments, isSafeDownloadFilenameTemplate, jsRuntimeArguments, playbackImpersonationArguments, splitDownloadArguments } from '../../src/ytDlpArguments.js'
 import { EXTERNAL_PLAYBACK_INFO_OUTPUT_TEMPLATE, PLAYBACK_INFO_OUTPUT_TEMPLATE, mapExternalPlaybackMetadata, mapPlaybackCaptions, mapPlaybackFormat } from '../../src/ytDlpMetadata.js'
 
 const videoId = 'jNQXAC9IVRw'
@@ -81,6 +81,48 @@ test('local playlists retain order and escape literal title placeholders', () =>
   const args = buildYtDlpDownloadArguments({ videoIds: [videoId, 'BaW_jenozKc'], mode: 'video', isPlaylist: true, title: '100% / Music' }).args
   assert.deepEqual(args.slice(-2), [`https://www.youtube.com/watch?v=${videoId}`, 'https://www.youtube.com/watch?v=BaW_jenozKc'])
   assert.match(args[args.indexOf('--output') + 1], /^100%% _ Music\/.*autonumber/)
+})
+
+test('playlists split into processes that keep playlist order and numbering', () => {
+  const remote = { playlistId: 'PL1234567890', isPlaylist: true, videoCount: 2, mode: 'video' }
+  const remoteArgs = buildYtDlpDownloadArguments(remote).args
+  const remoteSplit = splitDownloadArguments(remote, remoteArgs, 3)
+  // Parts show the playlist index and count, which their own selection would change.
+  assert.match(remoteArgs.find(arg => arg.includes('__OPENTUBEX_PREPARING__')), /playlist_index/)
+  assert.deepEqual(remoteSplit.shared, remoteArgs.slice(0, -1))
+  // The video count leaves no process without an entry.
+  assert.deepEqual(remoteSplit.parts, [
+    ['--playlist-items', '1::2', 'https://www.youtube.com/playlist?list=PL1234567890'],
+    ['--playlist-items', '2::2', 'https://www.youtube.com/playlist?list=PL1234567890']
+  ])
+
+  const local = { videoIds: [videoId, 'BaW_jenozKc', 'aaaaaaaaaaa'], isPlaylist: true, mode: 'video' }
+  assert.deepEqual(splitDownloadArguments(local, buildYtDlpDownloadArguments(local).args, 2).parts, [
+    ['--autonumber-start', '1', `https://www.youtube.com/watch?v=${videoId}`],
+    ['--autonumber-start', '2', 'https://www.youtube.com/watch?v=BaW_jenozKc', 'https://www.youtube.com/watch?v=aaaaaaaaaaa']
+  ])
+
+  // An abbreviated custom entry selection applies to the whole playlist.
+  const selected = { ...remote, videoCount: 10, customArgs: '--playlist-i 1:5' }
+  const selectedArgs = buildYtDlpDownloadArguments(selected).args
+  assert.deepEqual(splitDownloadArguments(selected, selectedArgs, 3).parts, [selectedArgs.slice(-1)])
+  // One process counts the entries it selects.
+  assert.match(selectedArgs.find(arg => arg.includes('__OPENTUBEX_PREPARING__')), /playlist_autonumber/)
+  // Without a count, extra processes could find no entry.
+  const uncounted = { ...remote, videoCount: undefined }
+  assert.equal(splitDownloadArguments(uncounted, buildYtDlpDownloadArguments(uncounted).args, 3).parts.length, 1)
+  // Concatenation and file names without an index need every entry in one process.
+  for (const options of [{ customArgs: '--concat-playlist always' }, { filenameTemplate: '{playlist}/{title}.{ext}' }]) {
+    const payload = { ...remote, ...options }
+    assert.equal(splitDownloadArguments(payload, buildYtDlpDownloadArguments(payload).args, 3).parts.length, 1)
+  }
+  // A field name in a local playlist's title is literal text.
+  const literalIndex = { ...local, title: 'Mix %(autonumber)s', filenameTemplate: '{playlist}/{title}.{ext}' }
+  assert.equal(splitDownloadArguments(literalIndex, buildYtDlpDownloadArguments(literalIndex).args, 3).parts.length, 1)
+  const neverConcatenated = { ...remote, customArgs: '--concat-playlist never' }
+  assert.equal(splitDownloadArguments(neverConcatenated, buildYtDlpDownloadArguments(neverConcatenated).args, 3).parts.length, 2)
+  const single = { videoId, mode: 'video' }
+  assert.equal(splitDownloadArguments(single, buildYtDlpDownloadArguments(single).args, 3).parts.length, 1)
 })
 
 test('local playlist titles cannot expand into home or environment paths', () => {
@@ -252,7 +294,7 @@ test('download phase hooks keep real downloads enabled and override custom progr
     videoId, mode: 'video', customArgs: '--progress-template "download:custom"'
   })
   assert.ok(args.includes('--no-simulate'))
-  assert.ok(args.includes('video:__OPENTUBEX_PREPARING__:%(id)s\t%(playlist_autonumber|)s\t%(n_entries|)s\t%(title)j'))
+  assert.ok(args.some(arg => arg.startsWith('video:__OPENTUBEX_PREPARING__:')))
   const templates = args.flatMap((arg, index) => arg === '--progress-template' ? [args[index + 1]] : [])
   assert.match(templates.at(-2), /^download:__OPENTUBEX_DOWNLOAD__:%\(progress.status\)s/)
   assert.equal(templates.at(-1), 'postprocess:__OPENTUBEX_PROCESSING__')
