@@ -136,7 +136,7 @@ import { useYouTubeProfileSwitch } from '../../composables/useYouTubeProfileSwit
 
 import { ERROR_TOAST_ICON, showToast } from '../../helpers/utils'
 import { editYouTubeComment, postYouTubeComment } from '../../helpers/api/youtube-account'
-import { trackCommentReplies } from '../../helpers/commentReplyNotifications'
+import { trackCommentReplies, updateEditedWatchedComment } from '../../helpers/commentReplyNotifications'
 import { MENTION_START, findCommentMentions, getCommentEditDraft, getCommentSubmitText, getRootCommentId, youTubeCommentsKey } from './youTubeComments'
 
 const props = defineProps({
@@ -431,10 +431,12 @@ function getUsedMentions(commentText) {
 async function saveEdit(commentText) {
   posting.value = true
   const commentId = props.editComment.id
+  const target = comments.target.value
   try {
     const usedMentions = getUsedMentions(commentText)
-    await editYouTubeComment(comments.target.value, commentId, getCommentSubmitText(commentText, usedMentions), store.getters.getYouTubeAccount)
+    await editYouTubeComment(target, commentId, getCommentSubmitText(commentText, usedMentions), store.getters.getYouTubeAccount)
     comments.updateComment(commentId, commentText, usedMentions)
+    updateEditedWatchedComment(target, commentId, commentText)
     showToast({ message: t('YouTube Account.Comment Edited'), icon: ['fas', 'edit'] })
     emit('done')
   } catch (error) {
