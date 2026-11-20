@@ -159,7 +159,7 @@ export function useVideoZoom({
   /** @type {Map<number, { x: number, y: number, startX: number, startY: number }>} */
   const videoZoomTouchPointers = new Map()
   let videoZoomPinchStart = null
-  /** @type {{ fullscreen: boolean, invalidated: boolean } | null} a pinch deferred while its fingers may still tap */
+  /** @type {{ points: { x: number, y: number }[], fullscreen: boolean, invalidated: boolean } | null} a pinch deferred while its fingers may still tap */
   let videoZoomPendingPinch = null
 
   function handleVideoZoomPointerEnter(event) {
@@ -276,11 +276,10 @@ export function useVideoZoom({
     return true
   }
 
-  // Zooms from where the fingers landed, so the movement that ruled out a tap
-  // counts towards the pinch.
+  // Zooms from where the fingers were once both were down, so the movement
+  // that ruled out a tap counts towards the pinch.
   function beginPendingVideoZoomPinch() {
-    const points = [...videoZoomTouchPointers.values()].slice(0, 2).map(({ startX, startY }) => ({ x: startX, y: startY }))
-    if (beginVideoZoomPinch(points)) videoZoomPendingPinch = null
+    if (beginVideoZoomPinch(videoZoomPendingPinch.points)) videoZoomPendingPinch = null
   }
 
   /**
@@ -298,7 +297,11 @@ export function useVideoZoom({
       if (videoZoomPendingPinch && !videoZoomPendingPinch.invalidated) beginPendingVideoZoomPinch()
       if (videoZoomTouchPointers.size === 2 && getVideoZoomGestureGeometry()) {
         if (deferPinch()) {
-          videoZoomPendingPinch = { fullscreen: isNativeFullscreenActive(), invalidated: false }
+          videoZoomPendingPinch = {
+            points: [...videoZoomTouchPointers.values()].map(({ x, y }) => ({ x, y })),
+            fullscreen: isNativeFullscreenActive(),
+            invalidated: false,
+          }
         } else {
           beginVideoZoomPinch([...videoZoomTouchPointers.values()])
         }
