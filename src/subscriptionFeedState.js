@@ -21,9 +21,10 @@ export function preserveSubscriptionSeenEntries(entries, previousEntries, idKey 
 
 /**
  * The uploads of `entries` with the collaborations of `storedEntries`. A
- * channel's collaborations are stored by their own check, so a videos write
- * that does not store them keeps the stored ones, even when another window
- * stored them after this write was prepared.
+ * channel's collaborations are found by their own check, so a videos write
+ * that does not store a check keeps the stored ones, even when another window
+ * stored them after this write was prepared. Their state, such as a premiere
+ * that went live, comes from the write when it lists them too.
  * @param {object[]} entries
  * @param {object[] | undefined} storedEntries
  */
@@ -32,7 +33,10 @@ export function keepStoredSubscriptionCollaborations(entries, storedEntries) {
   if (collaborations.length === 0 && !entries.some(entry => entry?.isCollaboration === true)) return entries
   const uploads = entries.filter(entry => entry?.isCollaboration !== true)
   const uploadIds = new Set(uploads.map(entry => entry.videoId))
-  return uploads.concat(collaborations.filter(entry => !uploadIds.has(entry.videoId)))
+  const written = new Map(entries.filter(entry => entry?.isCollaboration === true).map(entry => [entry.videoId, entry]))
+  return uploads.concat(collaborations
+    .filter(entry => !uploadIds.has(entry.videoId))
+    .map(entry => written.get(entry.videoId) ?? entry))
 }
 
 export function subscriptionFeedField(tab) {

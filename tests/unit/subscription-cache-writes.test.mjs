@@ -310,6 +310,11 @@ test('a collaboration check is stored with its time, survives uploads writes fro
   const kept = ['other-upload', 'upload', 'collaboration']
   assert.deepEqual((await db.subscriptionCache.findOneAsync({ _id: 'channel' })).videos.map(video => video.videoId), kept)
   assert.deepEqual(otherWindow.entries.map(video => video.videoId), kept, 'the other windows are sent the stored collaborations')
+  // A premiere poll updates the state of a stored collaboration
+  const live = { videoId: 'collaboration', isCollaboration: true, liveNow: true }
+  await Cache.updateFeeds([{ ...otherWindow, entries: [...otherWindow.entries.slice(0, 2), live, { videoId: 'unknown', isCollaboration: true }] }])
+  assert.deepEqual((await db.subscriptionCache.findOneAsync({ _id: 'channel' })).videos.map(video => [video.videoId, video.liveNow]),
+    [['other-upload', undefined], ['upload', undefined], ['collaboration', true]])
 
   state.videoCache = {}
   await actions.grabAllSubscriptions({
