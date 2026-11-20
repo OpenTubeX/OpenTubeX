@@ -2208,6 +2208,7 @@ import shaka from 'shaka-player'
 import { getCodecPrefixes, getVideoCodecPreferences, preferredVideoDecodingAttributes } from '../../helpers/player/videoCodecPreference'
 import { AutoQualityAbrManager, supportsSmoothCodecSwitching } from '../../helpers/player/AutoQualityAbrManager'
 import { voidWebmProjection } from '../../helpers/player/webmProjection'
+import { renameYouTubeFmp4HlsSegments } from '../../helpers/player/youtubeHlsSegments'
 import { registerPlugin } from '@capacitor/core'
 import { bindAndroidMediaErrors } from '../../helpers/player/androidMediaErrors'
 import { androidRotationFullscreenHandoffs, bindAndroidFullscreen } from '../../helpers/player/androidFullscreen'
@@ -3859,6 +3860,13 @@ function silenceSkippingResponseFilter(type, response, context) {
 /** @type {shaka.extern.ResponseFilter} */
 function webmProjectionResponseFilter(type, response) {
   if (type === RequestType.SEGMENT && response.data) voidWebmProjection(response.data)
+}
+
+/** @type {shaka.extern.ResponseFilter} */
+function youtubeHlsSegmentResponseFilter(type, response, context) {
+  if (type !== RequestType.MANIFEST || context?.type !== AdvancedRequestType.MEDIA_PLAYLIST) return
+  const renamed = renameYouTubeFmp4HlsSegments(new TextDecoder().decode(response.data))
+  if (renamed !== null) response.data = new TextEncoder().encode(renamed).buffer
 }
 
 /** @type {shaka.extern.ResponseFilter} */
@@ -12486,6 +12494,7 @@ onMounted(async () => {
       request.uris = await Promise.all(request.uris.map(url => getSubtitleRequestUrl(url, store.getters)))
     })
   }
+  player.getNetworkingEngine().registerResponseFilter(youtubeHlsSegmentResponseFilter)
   player.getNetworkingEngine().registerRequestFilter(silenceSkippingRequestFilter)
   player.getNetworkingEngine().registerResponseFilter(silenceSkippingResponseFilter)
   // Runs after the other filters so it sees the final segment data, including redirects
