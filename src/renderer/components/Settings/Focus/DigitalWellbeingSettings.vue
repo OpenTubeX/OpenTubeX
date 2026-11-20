@@ -253,6 +253,11 @@ function formatIntervalOption(minutes) {
   align-items: start;
 }
 
+/* A label that wraps splits into even lines. */
+.wellbeingColumns :deep(.switch-label-text) {
+  text-wrap: balance;
+}
+
 /* Stacked, the fields keep as much room before them as their icons take
    after them, so they are centered. */
 @container settings-content (width <= 680px) {
