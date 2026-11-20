@@ -184,7 +184,7 @@ test('reorders pinned channels by dragging them in the side navigation', async (
   await page.keyboard.press('Alt+ArrowDown')
   await expect.poll(order).toEqual(['C', 'B', 'A'])
   await expect(channelA).toBeFocused()
-  await expect(page.locator('.sideNav .reorderStatus')).toHaveText(/Channel A\D+3\D+3/)
+  await expect(page.locator('.sideNav .pinReorderStatus')).toHaveText(/Channel A\D+3\D+3/)
   // The announcement must not extend the navigation, which would scroll it with a native scrollbar.
   expect(await page.locator('.sideNav').evaluate(nav => nav.scrollHeight - nav.clientHeight)).toBe(0)
 
@@ -273,7 +273,7 @@ test('reorders pinned channels by their grips in the mobile More sheet', async (
   await page.keyboard.press('ArrowUp')
   await expect.poll(order).toEqual(['B', 'A', 'C'])
   await expect(grip('A')).toBeFocused()
-  await expect(sheet.locator('.reorderStatus')).toHaveText(/Channel A\D+2\D+3/)
+  await expect(sheet.locator('.pinReorderStatus')).toHaveText(/Channel A\D+2\D+3/)
   expect(await sheet.locator('.moreOptionScroll').evaluate(scroller => scroller.scrollHeight - scroller.clientHeight)).toBe(0)
 })
 
