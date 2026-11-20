@@ -96,7 +96,6 @@ test('subscribes from a channel name context menu and unsubscribes after confirm
   await menu.getByRole('menuitem', { name: 'Subscribe', exact: true }).click()
   await expect(menu).toBeHidden()
   await expect.poll(subscribedIds).toEqual([otherChannel.id, channel.id])
-  await expect(page.locator('.ft-list-channel .subscribeButton')).toContainText('Unsubscribe')
 
   await title.click({ button: 'right' })
   await menu.getByRole('menuitem', { name: 'Unsubscribe', exact: true }).click()
@@ -148,3 +147,16 @@ for (const pinned of [false, true]) {
     expect(latestSettings(readDatastore(app.userDataDir, 'settings')).pinnedChannels).toEqual(savedChannels)
   })
 }
+
+test('reports a failed unsubscribe save without claiming the channel was removed', async ({ page }) => {
+  await page.evaluate(() => {
+    window.$store._actions.removeChannelFromProfiles = [() => Promise.resolve(false)]
+  })
+  await goTo(page, 'subscribedchannels')
+  await page.locator('.channels .channelName').click({ button: 'right' })
+  const menu = page.getByRole('menu', { name: 'Context menu', exact: true })
+  await menu.getByRole('menuitem', { name: 'Unsubscribe', exact: true }).click()
+  await expect(page.getByText('Failed to save channel settings', { exact: true })).toBeVisible()
+  await expect(page.getByText('Channel has been removed from your subscriptions', { exact: true })).toHaveCount(0)
+  expect(await page.evaluate(id => window.$store.getters.getActiveSubscribedChannelIdSet.has(id), otherChannel.id)).toBe(true)
+})

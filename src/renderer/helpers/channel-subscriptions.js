@@ -13,14 +13,20 @@ export function isProfileSubscribed(profile, channelId) {
   return profile.subscriptions.some(channel => channel.id === channelId)
 }
 
+/** @param {(key: string, ...args: unknown[]) => string} t */
+function showSaveFailedToast(t) {
+  showToast({ message: t('Channel.Failed to save subscription settings'), icon: ['fas', 'circle-exclamation'] })
+}
+
 /**
  * Subscribes a profile, and All Channels when it lacks the channel.
  * @param {{ _id: string, subscriptions: { id: string }[] }} profile
  * @param {{ id: string, name: string, thumbnail?: string | null, handle?: string | null }} channel
  * @param {(key: string, ...args: unknown[]) => string} t
  * @param {ReturnType<typeof normalizeSubscriptionChannelSettings>} [settings]
+ * @returns {Promise<boolean>} whether the subscription was saved
  */
-export function subscribeToChannel(profile, { id, name, thumbnail = null, handle = null }, t, settings) {
+export async function subscribeToChannel(profile, { id, name, thumbnail = null, handle = null }, t, settings) {
   const profileIds = [profile._id]
   if (profile._id !== MAIN_PROFILE_ID) {
     const primaryProfile = store.getters.getProfileList.find(prof => prof._id === MAIN_PROFILE_ID)
@@ -42,7 +48,10 @@ export function subscribeToChannel(profile, { id, name, thumbnail = null, handle
   const channelHandle = saved?.handle ?? normalizeChannelHandle(handle)
   if (channelHandle !== null) channel.handle = channelHandle
 
-  store.dispatch('addChannelToProfiles', { channel, profileIds })
+  if (!await store.dispatch('addChannelToProfiles', { channel, profileIds })) {
+    showSaveFailedToast(t)
+    return false
+  }
   // Profiles that already had the channel saved it without a handle.
   if (channelHandle !== null && saved?.handle === undefined && !profileIds.includes(MAIN_PROFILE_ID)) {
     store.dispatch('updateSubscriptionDetails', { channelId: id, channelHandle })
@@ -51,6 +60,7 @@ export function subscribeToChannel(profile, { id, name, thumbnail = null, handle
   showToast({ message: t('Channel.Added channel to your subscriptions'), icon: ['fas', 'subscriptions'] })
   // Only the first profile to subscribe adds the channel to All Channels.
   if (profileIds.includes(MAIN_PROFILE_ID)) mirrorYouTubeSubscription(id, true)
+  return true
 }
 
 /**
@@ -58,13 +68,17 @@ export function subscribeToChannel(profile, { id, name, thumbnail = null, handle
  * @param {{ _id: string }} profile
  * @param {string} channelId
  * @param {(key: string, ...args: unknown[]) => string} t
+ * @returns {Promise<boolean>} whether the removal was saved
  */
-export function unsubscribeFromChannel(profile, channelId, t) {
+export async function unsubscribeFromChannel(profile, channelId, t) {
   const profileIds = profile._id === MAIN_PROFILE_ID
     ? store.getters.getProfileList.filter(prof => prof._id === MAIN_PROFILE_ID || isProfileSubscribed(prof, channelId)).map(prof => prof._id)
     : [profile._id]
 
-  store.dispatch('removeChannelFromProfiles', { channelIds: [channelId], profileIds })
+  if (!await store.dispatch('removeChannelFromProfiles', { channelIds: [channelId], profileIds })) {
+    showSaveFailedToast(t)
+    return false
+  }
   if (profile._id === MAIN_PROFILE_ID) mirrorYouTubeSubscription(channelId, false)
 
   showToast({ message: t('Channel.Channel has been removed from your subscriptions'), icon: ['fas', 'trash'] })
@@ -75,4 +89,5 @@ export function unsubscribeFromChannel(profile, channelId, t) {
       icon: ['fas', 'trash'],
     })
   }
+  return true
 }

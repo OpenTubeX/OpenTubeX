@@ -91,15 +91,20 @@ export function getChannelLinkMenuItems({ id, name, thumbnail }, t) {
   if (!/^UC[\w-]{22}$/.test(id)) return items
 
   const subscribed = store.getters.getActiveSubscribedChannelIdSet.has(id)
+  // The action applies to the profile the menu showed, even if it changes before the user confirms.
+  const profileId = store.getters.getActiveProfile._id
+  const getProfile = () => store.getters.getProfileList.find(profile => profile._id === profileId)
   return [{
     label: subscribed ? t('Channel.Unsubscribe') : t('Channel.Subscribe'),
     icon: ['fas', subscribed ? 'user-minus' : 'user-plus'],
     enabled: true,
     run: async () => {
       if (!subscribed) {
-        subscribeToChannel(store.getters.getActiveProfile, { id, name, thumbnail }, t)
+        const profile = getProfile()
+        if (profile) await subscribeToChannel(profile, { id, name, thumbnail }, t)
       } else if (await confirmUnsubscription(name)) {
-        unsubscribeFromChannel(store.getters.getActiveProfile, id, t)
+        const profile = getProfile()
+        if (profile) await unsubscribeFromChannel(profile, id, t)
       }
     }
   }, ...items]
