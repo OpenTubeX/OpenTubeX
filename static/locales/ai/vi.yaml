@@ -1289,6 +1289,7 @@ Settings:
     Cleanup Complete: Đã dọn dẹp bộ nhớ
     Cleanup Failed: Không thể dọn dẹp bộ nhớ
   Subscription Settings:
+    Refresh These Feeds Together: "Làm mới các bảng tin này cùng lúc"
     Fetch Feed on Startup: Tải bảng tin khi khởi động
     Show New Content Feed: Hiện bảng tin nội dung mới
     RSS Feeds: Nguồn cấp RSS
@@ -2457,6 +2458,7 @@ Tooltips:
     Bedtime Reminder: "Tạm dừng video và nhắc bạn ngừng xem trong khoảng giữa giờ bắt đầu và giờ kết thúc."
     Shorten View Counts: Hiện số lượt xem, bình luận và lượt thích bình luận theo dạng rút gọn mà YouTube đã làm tròn, ví dụ 14K thay vì 14.000. Số chính xác luôn được hiện đầy đủ.
   Subscription Settings:
+    Refresh These Feeds Together: "Khi bạn làm mới một trong các bảng tin đã chọn, các bảng tin đã chọn khác sẽ được làm mới ngay sau đó. Việc làm mới tự động vẫn theo khoảng thời gian riêng của từng bảng tin."
     Fetch Feed on Startup: Khi bật, OpenTubeX sẽ tự động tải bảng tin đăng ký lúc khởi động và khi mở cửa sổ mới.
     Show New Content Feed: Hiện thẻ Mới chứa các mục trong bảng tin đăng ký chưa có ở lần tải trước.
     Enable RSS Feeds: Hiện thẻ RSS trên trang Đăng ký với các mục từ nguồn cấp RSS hoặc Atom, để bạn có thể theo dõi nhà sáng tạo trên các nền tảng khác. Các mục của thẻ này được mở bằng yt-dlp.

@@ -1304,6 +1304,7 @@ Settings:
     Cleanup Complete: ניקוי האחסון הושלם
     Cleanup Failed: ניקוי האחסון נכשל
   Subscription Settings:
+    Refresh These Feeds Together: "רענון הפידים האלה יחד"
     Fetch Feed on Startup: טעינת העדכונים בעת ההפעלה
     Show New Content Feed: הצגת עדכוני תוכן חדש
     RSS Feeds: פידי RSS
@@ -2499,6 +2500,7 @@ Tooltips:
     Bedtime Reminder: "משהה את הסרטון ומזכיר להפסיק לצפות בין שעת ההתחלה לשעת הסיום."
     Shorten View Counts: מציג ספירות צפיות, תגובות ולייקים לתגובות ש-YouTube כבר עיגלה בצורה מקוצרת, למשל 14K במקום 14,000. ספירות מדויקות תמיד מוצגות במלואן.
   Subscription Settings:
+    Refresh These Feeds Together: "כשמרעננים אחד מהפידים המסומנים, שאר הפידים המסומנים מתרעננים מיד אחריו. רענונים אוטומטיים עדיין פועלים לפי המרווח של כל פיד."
     Fetch Feed on Startup: כשהאפשרות מופעלת, OpenTubeX תטען אוטומטית את פיד המינויים עם ההפעלה ובפתיחת חלון חדש.
     Show New Content Feed: מציג לשונית בשם חדש ובה פריטים מפיד המינויים שלא היו בטעינה הקודמת.
     Enable RSS Feeds: מציג לשונית RSS בעמוד המינויים עם הפריטים של פידי RSS או Atom, כדי לאפשר מעקב אחרי יוצרים בפלטפורמות אחרות. הפריטים שלה נפתחים באמצעות yt-dlp.

@@ -1289,6 +1289,7 @@ Settings:
     Cleanup Complete: 儲存空間清理完成
     Cleanup Failed: 儲存空間清理失敗
   Subscription Settings:
+    Refresh These Feeds Together: "同時重新整理這些動態消息"
     Fetch Feed on Startup: 啟動時擷取動態
     Show New Content Feed: 顯示新內容動態
     RSS Feeds: RSS 摘要
@@ -2443,6 +2444,7 @@ Tooltips:
     Bedtime Reminder: "在開始時間與結束時間之間暫停影片，並提醒你停止觀看。"
     Shorten View Counts: 將 YouTube 已四捨五入的觀看次數、留言數與留言按讚數以縮寫顯示，例如以 14K 取代 14,000。精確數字一律完整顯示。
   Subscription Settings:
+    Refresh These Feeds Together: "重新整理任一已勾選的動態消息時，其他已勾選的動態消息會緊接著重新整理。自動重新整理仍依各動態消息自己的間隔進行。"
     Fetch Feed on Startup: 啟用後，OpenTubeX 會在啟動及開啟新視窗時自動擷取您的訂閱動態消息。
     Show New Content Feed: 顯示「新增」分頁，其中包含上次擷取時尚未出現的訂閱動態消息項目。
     Enable RSS Feeds: 在訂閱頁面顯示 RSS 分頁，列出 RSS 或 Atom 摘要中的項目，讓您追蹤其他平台的創作者。其中的項目會使用 yt-dlp 開啟。

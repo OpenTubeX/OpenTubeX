@@ -1294,6 +1294,7 @@ Settings:
     Cleanup Complete: Čišćenje prostora za pohranu dovršeno
     Cleanup Failed: Čišćenje prostora za pohranu nije uspjelo
   Subscription Settings:
+    Refresh These Feeds Together: "Osvježi ove sažetke zajedno"
     Fetch Feed on Startup: Dohvati sažetak sadržaja pri pokretanju
     Show New Content Feed: Prikaži sažetak novog sadržaja
     RSS Feeds: RSS izvori
@@ -2478,6 +2479,7 @@ Tooltips:
     Bedtime Reminder: "Pauzira videozapis i podsjeća vas da prestanete gledati između vremena početka i završetka."
     Shorten View Counts: Prikazuje skraćene brojeve pregleda, komentara i oznaka sviđanja komentara koje je YouTube već zaokružio, primjerice 14 tis. umjesto 14.000. Točni brojevi uvijek se prikazuju u cijelosti.
   Subscription Settings:
+    Refresh These Feeds Together: "Kada osvježite jedan od označenih sažetaka, ostali označeni sažeci osvježavaju se odmah nakon njega. Automatska osvježavanja i dalje prate vlastiti interval svakog sažetka."
     Fetch Feed on Startup: Kada je omogućeno, OpenTubeX automatski dohvaća sažetak pretplata pri pokretanju i otvaranju novog prozora.
     Show New Content Feed: Prikazuje karticu Novo sa stavkama sažetka pretplata kojih nije bilo pri prethodnom dohvaćanju.
     Enable RSS Feeds: Prikazuje karticu RSS na stranici Pretplate sa stavkama RSS ili Atom izvora kako biste mogli pratiti autore na drugim platformama. Njezine stavke otvaraju se pomoću yt-dlp-a.

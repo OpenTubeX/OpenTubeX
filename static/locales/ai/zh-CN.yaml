@@ -1289,6 +1289,7 @@ Settings:
     Cleanup Complete: 存储空间清理完成
     Cleanup Failed: 存储空间清理失败
   Subscription Settings:
+    Refresh These Feeds Together: "同时刷新这些订阅源"
     Fetch Feed on Startup: 启动时获取动态
     Show New Content Feed: 显示新内容动态
     RSS Feeds: RSS 订阅源
@@ -2440,6 +2441,7 @@ Tooltips:
     Bedtime Reminder: "在开始时间与结束时间之间暂停视频，并提醒你停止观看。"
     Shorten View Counts: 以缩写形式显示 YouTube 已取整的观看次数、评论数和评论点赞数，例如显示 14K 而不是 14,000。精确计数始终完整显示。
   Subscription Settings:
+    Refresh These Feeds Together: "刷新任一已勾选的订阅源时，其他已勾选的订阅源会紧接着刷新。自动刷新仍按各订阅源自己的间隔进行。"
     Fetch Feed on Startup: 启用后，OpenTubeX 会在启动时和打开新窗口时自动获取订阅动态。
     Show New Content Feed: 显示“新内容”标签页，其中包含上次获取时尚未出现的订阅动态项目。
     Enable RSS Feeds: 在订阅页面显示一个包含 RSS 或 Atom 订阅源项目的 RSS 标签页，方便你关注其他平台的创作者。这些项目使用 yt-dlp 打开。

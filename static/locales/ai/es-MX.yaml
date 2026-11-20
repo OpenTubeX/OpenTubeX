@@ -1417,6 +1417,7 @@ Settings:
     Cleanup Complete: Limpieza del almacenamiento finalizada
     Cleanup Failed: No se pudo limpiar el almacenamiento
   Subscription Settings:
+    Refresh These Feeds Together: "Actualizar estas fuentes juntas"
     Fetch Feed on Startup: Obtener la fuente al iniciar
     Show New Content Feed: Mostrar la fuente de contenido nuevo
     RSS Feeds: Fuentes RSS
@@ -2807,6 +2808,7 @@ Tooltips:
     Hide Videos, Playlists and Channels Containing Text: Introduzca una palabra, fragmento de palabra o frase (sin distinguir mayúsculas de minúsculas) para ocultar todos los videos y listas de reproducción cuyos títulos originales la contengan en todo OpenTubeX, excluyendo únicamente Historial, Tus listas de reproducción y los videos dentro de las listas de reproducción.
     Hide Videos on Watch: Oculta los videos vistos de las pestañas de Videos, Shorts y En directo en las páginas de Suscripciones y Canales. Esto no afecta a la pestaña de inicio en las páginas de Canales
   Subscription Settings:
+    Refresh These Feeds Together: "Al actualizar una de las fuentes marcadas, las demás fuentes marcadas se actualizan justo después. Las actualizaciones automáticas siguen el intervalo propio de cada fuente."
     Fetch Feed on Startup: Al activarlo, OpenTubeX obtiene automáticamente la fuente de suscripciones al iniciarse y al abrir una ventana nueva.
     Show New Content Feed: Muestra una pestaña Nuevo con los elementos de la fuente de suscripciones que no estaban presentes en la obtención anterior.
     Enable RSS Feeds: Muestra una pestaña RSS en la página de Suscripciones con los elementos de fuentes RSS o Atom, para que puedas seguir a creadores de otras plataformas. Sus elementos se abren con yt-dlp.

@@ -1289,6 +1289,7 @@ Settings:
     Cleanup Complete: Čištění úložiště bylo dokončeno
     Cleanup Failed: Čištění úložiště se nezdařilo
   Subscription Settings:
+    Refresh These Feeds Together: "Obnovovat tyto kanály společně"
     Fetch Feed on Startup: Načíst kanál při spuštění
     Show New Content Feed: Zobrazovat kanál s novým obsahem
     RSS Feeds: RSS kanály
@@ -2440,6 +2441,7 @@ Tooltips:
     Bedtime Reminder: "Pozastaví video a mezi časem začátku a konce vám připomene, abyste přestali sledovat."
     Shorten View Counts: Zobrazí počty zhlédnutí, komentářů a hodnocení komentářů, které YouTube již zaokrouhlil do zkrácené podoby, například 14K místo 14,000. Přesné počty se vždy zobrazují celé.
   Subscription Settings:
+    Refresh These Feeds Together: "Když obnovíte jeden ze zaškrtnutých kanálů, ostatní zaškrtnuté kanály se obnoví hned po něm. Automatické obnovování se dál řídí vlastním intervalem každého kanálu."
     Fetch Feed on Startup: Pokud je funkce zapnutá, OpenTubeX automaticky načte kanál odběrů při spuštění a při otevření nového okna.
     Show New Content Feed: Zobrazí kartu Nové s položkami kanálu odběrů, které při předchozím načtení nebyly dostupné.
     Enable RSS Feeds: Zobrazí na stránce Odběry kartu RSS s položkami kanálů RSS nebo Atom, abyste mohli sledovat tvůrce z jiných platforem. Její položky se otevírají pomocí yt-dlp.

@@ -1314,6 +1314,7 @@ Settings:
     Cleanup Complete: Lageroprydning er færdig
     Cleanup Failed: Lageroprydning mislykkedes
   Subscription Settings:
+    Refresh These Feeds Together: "Opdater disse feeds samtidig"
     Fetch Feed on Startup: Hent feed ved opstart
     Show New Content Feed: Vis feed med nyt indhold
     RSS Feeds: RSS-feeds
@@ -2531,6 +2532,7 @@ Tooltips:
     Shorten View Counts: Viser antal visninger, kommentarer og likes på kommentarer i den forkortede form, som YouTube allerede har afrundet, f.eks. 14 t. i stedet for 14.000. Nøjagtige tal vises altid fuldt ud.
     Hide Videos on Watch: Skjuler sete videoer fra fanerne Videoer, Shorts og Live på abonnements- og kanalsiderne. Dette påvirker ikke fanen Start på kanalsider
   Subscription Settings:
+    Refresh These Feeds Together: "Når du opdaterer et af de markerede feeds, opdateres de andre markerede feeds lige efter. Automatiske opdateringer følger stadig hvert feeds eget interval."
     Fetch Feed on Startup: Når funktionen er slået til, henter OpenTubeX automatisk dit abonnementsfeed ved opstart, og når et nyt vindue åbnes.
     Show New Content Feed: Viser fanen Ny med elementer fra abonnementsfeedet, som ikke var til stede ved den forrige hentning.
     Enable RSS Feeds: Viser en RSS-fane på siden Abonnementer med elementerne fra RSS- eller Atom-feeds, så du kan følge skabere på andre platforme. Dens elementer åbnes med yt-dlp.

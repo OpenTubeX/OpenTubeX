@@ -374,6 +374,7 @@ export const SYNC_SETTING_LABELS = {
   playlistPreferences: 'Playlists',
   playlistWatchedThresholds: 'Playlists',
   subscriptionFeedAutoRefreshInterval: 'Settings.Subscription Settings.Videos Auto Refresh Interval',
+  subscriptionFeedsRefreshedTogether: 'Settings.Subscription Settings.Refresh These Feeds Together',
   subscriptionGroups: [
     'Subscriptions.Subscriptions',
     'Subscription Groups.Groups'

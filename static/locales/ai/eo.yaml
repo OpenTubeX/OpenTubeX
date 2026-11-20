@@ -1331,6 +1331,7 @@ Settings:
     Cleanup Complete: Purigado de konservejo finiĝis
     Cleanup Failed: Purigado de konservejo malsukcesis
   Subscription Settings:
+    Refresh These Feeds Together: "Refreŝigi ĉi tiujn fluojn kune"
     Fetch Feed on Startup: Venigi fluon je startigo
     Show New Content Feed: Montri fluon de nova enhavo
     RSS Feeds: RSS-fluoj
@@ -2495,6 +2496,7 @@ Tooltips:
     Bedtime Reminder: Paŭzigas la videaĵon kaj memorigas vin ĉesi spekti inter la komenca kaj fina horoj.
     Shorten View Counts: Montras nombrojn de rigardoj, komentoj kaj ŝatoj de komentoj, kiujn YouTube jam rondigis, en mallongigita formo, ekz. 14K anstataŭ 14 000. Ĝustaj nombroj ĉiam estas montrataj plene.
   Subscription Settings:
+    Refresh These Feeds Together: "Kiam vi refreŝigas unu el la markitaj fluoj, la aliaj markitaj fluoj refreŝiĝas tuj poste. Aŭtomataj refreŝigoj ankoraŭ sekvas la propran intervalon de ĉiu fluo."
     Fetch Feed on Startup: Kiam ŝaltita, OpenTubeX aŭtomate venigos vian abonfluon je startigo kaj kiam nova fenestro malfermiĝas.
     Show New Content Feed: Montras langeton "Nova" kun eroj de la abonfluo, kiuj ne ĉeestis dum la antaŭa venigo.
     Enable RSS Feeds: Montras RSS-langeton sur la paĝo de abonoj kun la eroj de RSS- aŭ Atom-fluoj, por ke vi povu sekvi kreantojn en aliaj platformoj. Ĝiaj eroj malfermiĝas per yt-dlp.

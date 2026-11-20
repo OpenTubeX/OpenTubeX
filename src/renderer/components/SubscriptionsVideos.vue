@@ -34,7 +34,7 @@ import { useSubscriptionChannelUpdates } from '../composables/useSubscriptionCha
 import { getUpcomingPremiereTimestamp } from '../helpers/subscription-entries'
 import { getCachedRelativeTimeFormat, getRelativeTimeFromDate } from '../helpers/utils'
 import { formatShortDateTime } from '../helpers/dateFormat'
-import { refreshSubscriptionVideosFromRemote } from '../helpers/subscriptions'
+import { refreshSubscriptionFeed } from '../helpers/subscriptionFeedRefresh'
 import {
   getSubscriptionsForFeed,
   MAX_INCREMENTAL_SUBSCRIPTION_FEED_ENTRIES
@@ -363,7 +363,7 @@ async function loadVideosForSubscriptionsFromRemote(automatic = false) {
 
   let refreshedVideos = null
   try {
-    refreshedVideos = await refreshSubscriptionVideosFromRemote({
+    refreshedVideos = await refreshSubscriptionFeed('videos', {
       t,
       automatic
     })

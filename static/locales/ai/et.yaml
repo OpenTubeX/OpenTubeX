@@ -1289,6 +1289,7 @@ Settings:
     Cleanup Complete: Salvestusruumi puhastamine on lõpetatud
     Cleanup Failed: Salvestusruumi puhastamine nurjus
   Subscription Settings:
+    Refresh These Feeds Together: "Värskenda neid vooge koos"
     Fetch Feed on Startup: Hangi voog käivitamisel
     Show New Content Feed: Kuva uue sisu voog
     RSS Feeds: RSS-vood
@@ -2443,6 +2444,7 @@ Tooltips:
     Bedtime Reminder: "Peatab video ja tuletab sulle algus- ja lõpuaja vahel meelde, et vaatamine lõpetada."
     Shorten View Counts: Kuvab YouTube'i juba ümardatud vaatamiste arvu, kommentaaride arvu ja kommentaaride meeldimiste arvu lühendatud kujul, näiteks 14 000 asemel 14 tuh. Täpsed arvud kuvatakse alati täielikult.
   Subscription Settings:
+    Refresh These Feeds Together: "Kui värskendad üht märgitud voogu, värskendatakse teisi märgitud vooge kohe pärast seda. Automaatsed värskendused järgivad endiselt iga voo enda intervalli."
     Fetch Feed on Startup: Kui see on lubatud, hangib OpenTubeX tellimuste voo automaatselt käivitumisel ja uue akna avamisel.
     Show New Content Feed: Kuvab vahelehe Uus, mis sisaldab tellimuste voo üksusi, mida eelmise hankimise ajal polnud.
     Enable RSS Feeds: Kuvab tellimuste lehel RSS-vahekaardi RSS- või Atom-voogude üksustega, et saaksid jälgida teiste platvormide sisuloojaid. Selle üksused avatakse yt-dlp abil.

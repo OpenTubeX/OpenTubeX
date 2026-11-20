@@ -1304,6 +1304,7 @@ Settings:
     Cleanup Complete: Opslag opgeschoond
     Cleanup Failed: Opschonen van opslag mislukt
   Subscription Settings:
+    Refresh These Feeds Together: "Deze feeds samen vernieuwen"
     Fetch Feed on Startup: Feed ophalen bij opstarten
     Show New Content Feed: Feed met nieuwe content tonen
     RSS Feeds: RSS-feeds
@@ -2508,6 +2509,7 @@ Tooltips:
     Bedtime Reminder: "Pauzeert de video en herinnert je eraan om tussen de begin- en eindtijd te stoppen met kijken."
     Shorten View Counts: Toont aantallen weergaven, reacties en vind-ik-leuks bij reacties die YouTube al verkort heeft afgerond, bijvoorbeeld 14K in plaats van 14.000. Exacte aantallen worden altijd volledig weergegeven.
   Subscription Settings:
+    Refresh These Feeds Together: "Wanneer je een van de aangevinkte feeds vernieuwt, worden de andere aangevinkte feeds direct daarna vernieuwd. Automatische vernieuwingen volgen nog steeds het eigen interval van elke feed."
     Fetch Feed on Startup: Als dit is ingeschakeld, haalt OpenTubeX je abonnementsfeed automatisch op bij het opstarten en wanneer een nieuw venster wordt geopend.
     Show New Content Feed: Toont een tabblad Nieuw met items uit de abonnementsfeed die bij de vorige ophaalactie nog niet aanwezig waren.
     Enable RSS Feeds: Toont een RSS-tabblad op de pagina Abonnementen met de items van RSS- of Atom-feeds, zodat je makers op andere platforms kunt volgen. De items worden geopend met yt-dlp.

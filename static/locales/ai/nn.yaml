@@ -1403,6 +1403,7 @@ Settings:
     Cleanup Complete: Lagringsoppryddinga er fullført
     Cleanup Failed: Lagringsoppryddinga mislykkast
   Subscription Settings:
+    Refresh These Feeds Together: "Oppdater desse straumane saman"
     Fetch Feed on Startup: Hent straumen ved oppstart
     Show New Content Feed: Vis straumen med nytt innhald
     RSS Feeds: RSS-straumar
@@ -2758,6 +2759,7 @@ Tooltips:
     Hide Videos, Playlists and Channels Containing Text: Skriv inn eit ord, ein del av eit ord eller ei setning, utan skilnad på store og små bokstavar, for å gøyme alle videoar, spelelister og kanalar med ein originaltittel som inneheld teksten. Dette gjeld i heile OpenTubeX, bortsett frå Historikk, Dine spelelister og videoar i spelelister.
     Hide Videos on Watch: Gøymer videoar du har sett, frå fanene Videoar, Shorts og Direkte på abonnements- og kanalsidene. Dette påverkar ikkje Heim-fana på kanalsider
   Subscription Settings:
+    Refresh These Feeds Together: "Når du oppdaterer ein av dei avkryssa straumane, blir dei andre avkryssa straumane oppdaterte rett etterpå. Automatiske oppdateringar følgjer framleis intervallet til kvar straum."
     Fetch Feed on Startup: Når dette er slått på, hentar OpenTubeX automatisk abonnementsstraumen ved oppstart og når eit nytt vindauge vert opna.
     Show New Content Feed: Viser fana Ny med element frå abonnementsstraumen som ikkje fanst ved førre henting.
     Enable RSS Feeds: Viser ei RSS-fane på Abonnement-sida med elementa frå RSS- eller Atom-straumar, slik at du kan følgje skaparar på andre plattformer. Elementa vert opna med yt-dlp.

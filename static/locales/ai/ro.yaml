@@ -1291,6 +1291,7 @@ Settings:
     Cleanup Complete: Curățarea spațiului de stocare s-a încheiat
     Cleanup Failed: Curățarea spațiului de stocare a eșuat
   Subscription Settings:
+    Refresh These Feeds Together: "Reîmprospătează aceste fluxuri împreună"
     Fetch Feed on Startup: Preia fluxul la pornire
     Show New Content Feed: Afișează fluxul de conținut nou
     RSS Feeds: Fluxuri RSS
@@ -2495,6 +2496,7 @@ Tooltips:
     Bedtime Reminder: "Întrerupe videoclipul și vă reamintește să nu mai vizionați între ora de început și cea de sfârșit."
     Shorten View Counts: Afișează în formă abreviată numărul de vizionări, de comentarii și de aprecieri ale comentariilor pe care YouTube le-a rotunjit deja, de exemplu 14 K în loc de 14.000. Valorile exacte sunt afișate întotdeauna integral.
   Subscription Settings:
+    Refresh These Feeds Together: "Când reîmprospătezi unul dintre fluxurile bifate, celelalte fluxuri bifate se reîmprospătează imediat după el. Reîmprospătările automate respectă în continuare intervalul fiecărui flux."
     Fetch Feed on Startup: Când opțiunea este activată, OpenTubeX preia automat fluxul de abonamente la pornire și la deschiderea unei ferestre noi.
     Show New Content Feed: Afișează o filă Nou cu elementele din fluxul de abonamente care nu existau la preluarea anterioară.
     Enable RSS Feeds: Afișează o filă RSS pe pagina Abonamente cu elementele fluxurilor RSS sau Atom, ca să poți urmări creatori de pe alte platforme. Elementele sale se deschid cu yt-dlp.

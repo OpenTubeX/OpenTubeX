@@ -821,6 +821,7 @@ Settings:
     Cleanup Complete: Czyszczenie pamięci zakończone
     Cleanup Failed: Czyszczenie pamięci nie powiodło się
   Subscription Settings:
+    Refresh These Feeds Together: "Odświeżaj te kanały razem"
     Show Scheduled Live Streams / Premieres First: Najpierw pokazuj zaplanowane transmisje na żywo i premiery
     Refresh Subscriptions While App Is Closed: "Odświeżaj subskrypcje, gdy aplikacja jest zamknięta"
     Notify About New Uploads: Powiadamiaj o nowościach
@@ -1666,6 +1667,7 @@ Tooltips:
     Bedtime Reminder: "Wstrzymuje film i przypomina o zakończeniu oglądania między godziną rozpoczęcia a godziną zakończenia."
     Shorten View Counts: Pokazuje liczbę wyświetleń, komentarzy i polubień komentarzy w skróconej postaci zaokrąglonej przez YouTube, na przykład 14 tys. zamiast 14 000. Dokładne wartości są zawsze wyświetlane w całości.
   Subscription Settings:
+    Refresh These Feeds Together: "Gdy odświeżysz jeden z zaznaczonych kanałów, pozostałe zaznaczone kanały odświeżą się zaraz po nim. Automatyczne odświeżanie nadal działa według interwału każdego kanału."
     Show Scheduled Live Streams / Premieres First: Umieszcza nadchodzące transmisje na żywo i premiery na górze kanału subskrypcji. Po wyłączeniu pozostają na pozycji zgodnej z datą ogłoszenia aż do rozpoczęcia. Po wyłączeniu odśwież kanał subskrypcji, aby pobrać daty ogłoszenia istniejących zaplanowanych pozycji.
     Refresh Subscriptions While App Is Closed: "Odświeża kanały zgodnie z wybranymi ustawieniami. Na komputerze OpenTubeX pozostaje w zasobniku systemowym do zamknięcia programu. Android określa czas odświeżania w tle."
     Notify About New Uploads: Wyświetla na tym urządzeniu powiadomienia systemowe dla kanałów, dla których włączono powiadomienia w ich ustawieniach subskrypcji. OpenTubeX sprawdza nowe treści podczas odświeżania subskrypcji, więc wybierz interwał odświeżania. Aby otrzymywać powiadomienia, gdy aplikacja jest zamknięta, włącz także odświeżanie, gdy aplikacja jest zamknięta.

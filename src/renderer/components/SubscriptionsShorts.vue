@@ -22,10 +22,8 @@ import store from '../store/index'
 import { useKeepAliveEffectScope } from '../composables/useKeepAliveEffectScope'
 import { useRelativeTimeClock } from '../composables/useRelativeTimeClock'
 import { useSubscriptionChannelUpdates } from '../composables/useSubscriptionChannelUpdates'
-import {
-  refreshSubscriptionShortsFromRemote,
-  updateVideoListAfterProcessing
-} from '../helpers/subscriptions'
+import { updateVideoListAfterProcessing } from '../helpers/subscriptions'
+import { refreshSubscriptionFeed } from '../helpers/subscriptionFeedRefresh'
 import { getSubscriptionsForFeed } from '../helpers/subscription-channels'
 import { getCachedRelativeTimeFormat, getRelativeTimeFromDate } from '../helpers/utils'
 import { formatShortDateTime } from '../helpers/dateFormat'
@@ -270,7 +268,7 @@ async function loadVideosForSubscriptionsFromRemote(automatic = false) {
 
   let refreshedVideos = null
   try {
-    refreshedVideos = await refreshSubscriptionShortsFromRemote({
+    refreshedVideos = await refreshSubscriptionFeed('shorts', {
       t,
       automatic
     })

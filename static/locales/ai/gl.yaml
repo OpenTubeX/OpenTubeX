@@ -1300,6 +1300,7 @@ Settings:
     Cleanup Complete: Rematou a limpeza do almacenamento
     Cleanup Failed: Produciuse un erro ao limpar o almacenamento
   Subscription Settings:
+    Refresh These Feeds Together: "Actualizar estas fontes xuntas"
     Fetch Feed on Startup: Obter a fonte ao iniciar
     Show New Content Feed: Amosar a fonte de contido novo
     RSS Feeds: Fontes RSS
@@ -2502,6 +2503,7 @@ Tooltips:
     Bedtime Reminder: "Pausa o vídeo e lémbrache que deixes de velo entre a hora de inicio e a de fin."
     Shorten View Counts: Amosa de forma abreviada as cifras de visualizacións, de comentarios e de valoracións positivas dos comentarios que YouTube xa redondeou, por exemplo 14 mil en lugar de 14 000. As cifras exactas sempre se amosan completas.
   Subscription Settings:
+    Refresh These Feeds Together: "Cando actualizas unha das fontes marcadas, as outras fontes marcadas actualízanse xusto despois. As actualizacións automáticas seguen o intervalo propio de cada fonte."
     Fetch Feed on Startup: Cando está activado, OpenTubeX obtén automaticamente a fonte das subscricións ao iniciarse e ao abrir unha xanela nova.
     Show New Content Feed: Amosa unha lapela «Novo» cos elementos da fonte das subscricións que non estaban presentes na obtención anterior.
     Enable RSS Feeds: Amosa unha lapela RSS na páxina de Subscricións cos elementos de fontes RSS ou Atom, para que poidas seguir creadores doutras plataformas. Os seus elementos ábrense con yt-dlp.

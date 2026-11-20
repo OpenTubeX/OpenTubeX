@@ -1274,6 +1274,7 @@ Settings:
     Cleanup Complete: Storage cleanup finished
     Cleanup Failed: Storage cleanup failed
   Subscription Settings:
+    Refresh These Feeds Together: "Refresh These Feeds Together"
     Show New Content Feed: Show New Content Feed
     RSS Feeds: RSS feeds
     Enable RSS Feeds: Enable RSS feeds for other platforms
@@ -2436,6 +2437,7 @@ Tooltips:
     Bedtime Reminder: "Pauses the video and reminds you to stop watching between the start and end time."
     Shorten View Counts: Shows view, comment and comment like counts that YouTube has already rounded in a shortened form, e.g. 14K instead of 14,000. Exact counts are always shown in full.
   Subscription Settings:
+    Refresh These Feeds Together: "When you refresh one of the ticked feeds, the other ticked feeds refresh right after it. Automatic refreshes still follow each feed's own interval."
     Show New Content Feed: Shows a New tab containing subscription feed items that were not present during the previous fetch.
     Enable RSS Feeds: Shows an RSS tab on the Subscriptions page with the items of RSS or Atom feeds, so you can follow creators on other platforms. Its items open with yt-dlp.
     Show New Content Indicators: Shows a small dot beside subscription feed items that were not present during the previous fetch.

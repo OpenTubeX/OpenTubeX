@@ -173,6 +173,17 @@
         />
       </div>
     </div>
+    <FtFlexBox>
+      <FtCheckboxList
+        v-model="subscriptionFeedsRefreshedTogether"
+        :title="$t('Settings.Subscription Settings.Refresh These Feeds Together')"
+        :tooltip="$t('Tooltips.Subscription Settings.Refresh These Feeds Together')"
+        :labels="feedNames"
+        :values="FEED_VALUES"
+        :disabled-values="hiddenFeeds"
+        setting-key="subscriptionFeedsRefreshedTogether"
+      />
+    </FtFlexBox>
   </FtSettingsSection>
 </template>
 
@@ -185,10 +196,13 @@ import FtSelect from '../../FtSelect/FtSelect.vue'
 import FtSlider from '../../FtSlider/FtSlider.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
 import FtTooltip from '../../FtTooltip/FtTooltip.vue'
+import FtCheckboxList from '../../FtCheckboxList/FtCheckboxList.vue'
+import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
 import SubscriptionChannelSettings from './SubscriptionChannelSettings.vue'
 
 import store from '../../../store/index'
 import { AUTO_REFRESH_INTERVAL_VALUES, getAutoRefreshIntervalNames } from '../../../helpers/autoRefreshIntervals'
+import { getEnabledSubscriptionFeedSources } from '../../../helpers/newSubscriptionFeed'
 
 const { t } = useI18n()
 const IS_IOS = !!process.env.IS_IOS
@@ -229,6 +243,20 @@ const enableUploadNotifications = computed(() => store.getters.getEnableUploadNo
 function updateEnableUploadNotifications(value) {
   store.dispatch('updateEnableUploadNotifications', value)
 }
+
+const FEED_VALUES = ['videos', 'shorts', 'live', 'posts']
+const feedNames = computed(() => [t('Global.Videos'), t('Global.Shorts'), t('Global.Live'), t('Global.Posts')])
+
+/** Hidden feeds don't refresh, so they can't be refreshed together with others */
+const hiddenFeeds = computed(() => {
+  const shownFeeds = new Set(getEnabledSubscriptionFeedSources(store.getters).map(feed => feed.category))
+  return FEED_VALUES.filter(feed => !shownFeeds.has(feed))
+})
+
+const subscriptionFeedsRefreshedTogether = computed({
+  get: () => store.getters.getSubscriptionFeedsRefreshedTogether,
+  set: (value) => store.dispatch('updateSubscriptionFeedsRefreshedTogether', value)
+})
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const fastSubscriptionRefresh = computed(() => store.getters.getFastSubscriptionRefresh)

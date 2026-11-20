@@ -1292,6 +1292,7 @@ Settings:
     Cleanup Complete: Wedi gorffen glanhau'r storfa
     Cleanup Failed: Methodd glanhau'r storfa
   Subscription Settings:
+    Refresh These Feeds Together: "Adnewyddu'r ffrydiau hyn gyda'i gilydd"
     Fetch Feed on Startup: Cyrchu'r ffrwd wrth gychwyn
     Show New Content Feed: Dangos y ffrwd cynnwys newydd
     RSS Feeds: Ffrydiau RSS
@@ -2478,6 +2479,7 @@ Tooltips:
     Bedtime Reminder: "Mae'n seibio'r fideo ac yn eich atgoffa i roi'r gorau i wylio rhwng yr amser dechrau a'r amser gorffen."
     Shorten View Counts: Mae'n dangos cyfrif gwylwyr, sylwadau a hoffiadau sylwadau y mae YouTube eisoes wedi'u talgrynnu ar ffurf fer, e.e. 14K yn lle 14,000. Dangosir yr union gyfrifon yn llawn bob amser.
   Subscription Settings:
+    Refresh These Feeds Together: "Pan fyddwch yn adnewyddu un o'r ffrydiau a dicwyd, mae'r ffrydiau eraill a dicwyd yn adnewyddu yn syth wedyn. Mae adnewyddiadau awtomatig yn dal i ddilyn cyfwng pob ffrwd ei hun."
     Fetch Feed on Startup: Pan fydd wedi'i alluogi, bydd OpenTubeX yn cyrchu eich ffrwd tanysgrifiadau'n awtomatig wrth gychwyn a phan agorir ffenestr newydd.
     Show New Content Feed: Mae'n dangos tab Newydd sy'n cynnwys eitemau o'r ffrwd tanysgrifiadau nad oeddent yn bresennol yn ystod y cyrchiad blaenorol.
     Enable RSS Feeds: Mae'n dangos tab RSS ar y dudalen Tanysgrifiadau gydag eitemau ffrydiau RSS neu Atom, fel y gallwch ddilyn crewyr ar lwyfannau eraill. Mae ei eitemau'n agor gyda yt-dlp.

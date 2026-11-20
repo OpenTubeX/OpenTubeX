@@ -1289,6 +1289,7 @@ Settings:
     Cleanup Complete: Tallennustilan siivous valmistui
     Cleanup Failed: Tallennustilan siivous epäonnistui
   Subscription Settings:
+    Refresh These Feeds Together: "Päivitä nämä syötteet yhdessä"
     Fetch Feed on Startup: Hae syöte käynnistettäessä
     Show New Content Feed: Näytä uuden sisällön syöte
     RSS Feeds: RSS-syötteet
@@ -2449,6 +2450,7 @@ Tooltips:
     Bedtime Reminder: "Keskeyttää videon ja muistuttaa sinua lopettamaan katselun alku- ja loppuajan välillä."
     Shorten View Counts: Näyttää katselu-, kommentti- ja kommenttien tykkäysmäärät YouTuben valmiiksi pyöristämässä lyhyessä muodossa, esimerkiksi 14 t. 14 000:n sijaan. Tarkat määrät näytetään aina kokonaisina.
   Subscription Settings:
+    Refresh These Feeds Together: "Kun päivität yhden valituista syötteistä, muut valitut syötteet päivittyvät heti sen jälkeen. Automaattiset päivitykset noudattavat edelleen kunkin syötteen omaa väliä."
     Fetch Feed on Startup: Kun asetus on käytössä, OpenTubeX hakee tilausnäkymän automaattisesti käynnistyessään ja uuden ikkunan avautuessa.
     Show New Content Feed: Näyttää Uudet-välilehden, joka sisältää tilausnäkymän kohteet, joita ei ollut edellisellä hakukerralla.
     Enable RSS Feeds: Näyttää Tilaukset-sivulla RSS-välilehden, jossa on RSS- tai Atom-syötteiden kohteet, jotta voit seurata sisällöntuottajia muilla alustoilla. Sen kohteet avataan yt-dlp:llä.

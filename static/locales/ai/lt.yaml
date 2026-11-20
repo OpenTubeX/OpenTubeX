@@ -1504,6 +1504,7 @@ Settings:
     Cleanup Complete: Saugyklos valymas baigtas
     Cleanup Failed: Saugyklos išvalyti nepavyko
   Subscription Settings:
+    Refresh These Feeds Together: "Atnaujinti šiuos kanalus kartu"
     Fetch Feed on Startup: Paleidžiant gauti sklaidos kanalo duomenis
     Show New Content Feed: Rodyti naujo turinio sklaidos kanalą
     RSS Feeds: RSS sklaidos kanalai
@@ -2872,6 +2873,7 @@ Tooltips:
     Hide Videos, Playlists and Channels Containing Text: Įveskite žodį, žodžio dalį arba frazę (didžiosios ir mažosios raidės neskiriamos), kad visoje OpenTubeX nebūtų rodomi vaizdo įrašai, grojaraščiai ir kanalai, kurių originaliuose pavadinimuose yra šis tekstas. Filtras netaikomas tik istorijai, jūsų grojaraščiams ir grojaraščiuose esantiems vaizdo įrašams.
     Hide Videos on Watch: Prenumeratų ir kanalų puslapių kortelėse Vaizdo įrašai, Shorts ir Tiesiogiai slepia peržiūrėtus vaizdo įrašus. Tai neturi įtakos kanalų puslapių kortelei Pradžia
   Subscription Settings:
+    Refresh These Feeds Together: "Kai atnaujinate vieną iš pažymėtų kanalų, kiti pažymėti kanalai atnaujinami iškart po jo. Automatiniai atnaujinimai ir toliau vyksta pagal kiekvieno kanalo intervalą."
     Fetch Feed on Startup: Įjungus OpenTubeX automatiškai gaus prenumeratų sklaidos kanalą paleidžiant programą ir atvėrus naują langą.
     Show New Content Feed: Rodo kortelę Nauja su prenumeratų sklaidos kanalo elementais, kurių nebuvo gaunant ankstesnį kartą.
     Enable RSS Feeds: Prenumeratų puslapyje rodo RSS kortelę su RSS arba Atom sklaidos kanalų elementais, kad galėtumėte stebėti kūrėjus kitose platformose. Jos elementai atidaromi naudojant yt-dlp.

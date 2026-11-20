@@ -1289,6 +1289,7 @@ Settings:
     Cleanup Complete: Depolama temizliği tamamlandı
     Cleanup Failed: Depolama temizliği başarısız oldu
   Subscription Settings:
+    Refresh These Feeds Together: "Bu akışları birlikte yenile"
     Fetch Feed on Startup: Başlangıçta Akışı Getir
     Show New Content Feed: Yeni İçerik Akışını Göster
     RSS Feeds: RSS Akışları
@@ -2441,6 +2442,7 @@ Tooltips:
     Bedtime Reminder: "Başlangıç ve bitiş saatleri arasında videoyu duraklatır ve izlemeyi bırakmanızı hatırlatır."
     Shorten View Counts: YouTube'un zaten yuvarlayarak kısalttığı izlenme, yorum ve yorum beğeni sayılarını gösterir, örneğin 14.000 yerine 14 B. Kesin sayılar her zaman tam gösterilir.
   Subscription Settings:
+    Refresh These Feeds Together: "İşaretli akışlardan birini yenilediğinizde, diğer işaretli akışlar hemen ardından yenilenir. Otomatik yenilemeler her akışın kendi aralığını izlemeye devam eder."
     Fetch Feed on Startup: Etkinleştirildiğinde OpenTubeX, başlangıçta ve yeni pencere açıldığında abonelik akışınızı otomatik olarak getirir.
     Show New Content Feed: Önceki getirme sırasında bulunmayan abonelik akışı öğelerini içeren Yeni sekmesini gösterir.
     Enable RSS Feeds: Abonelikler sayfasında RSS veya Atom akışlarının öğelerini içeren bir RSS sekmesi gösterir, böylece diğer platformlardaki içerik üreticilerini takip edebilirsiniz. Öğeleri yt-dlp ile açılır.

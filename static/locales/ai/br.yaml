@@ -1289,6 +1289,7 @@ Settings:
     Cleanup Complete: "Echu eo naetaat ar c'hadaviñ"
     Cleanup Failed: "C'hwitet eo naetaat ar c'hadaviñ"
   Subscription Settings:
+    Refresh These Feeds Together: "Freskaat ar gwazhioù-mañ asambles"
     Fetch Feed on Startup: "Adtapout ar gwazh el loc'hañ"
     Show New Content Feed: "Diskouez gwazh an endalc'had nevez"
     RSS Feeds: Gwazhioù RSS
@@ -2451,6 +2452,7 @@ Tooltips:
     Bedtime Reminder: "Ehanañ ar video ha degas da soñj deoc'h paouez da sellet etre an eur deroù hag an eur fin."
     Shorten View Counts: "Diskouez niver ar selladennoù, evezhiadennoù ha plijadennoù an evezhiadennoù er stumm berr rontaet dija gant YouTube, da skouer 14K e-lec'h 14 000. Diskouezet e vez an niver resis en e bezh bepred."
   Subscription Settings:
+    Refresh These Feeds Together: "Pa freskaez unan eus ar gwazhioù merket, e vez freskaet ar gwazhioù merket all diouzhtu war he lerc'h. Ar freskadurioù emgefre a heuilh atav etrezamzer pep gwazh."
     Fetch Feed on Startup: "Pa vez gweredekaet e adtap OpenTubeX gwazh ho koumanantoù ent emgefreek el loc'hañ ha pa vez digoret ur prenestr nevez."
     Show New Content Feed: "Diskouez un ivinell Nevez gant elfennoù eus gwazh ar c'houmanantoù na oant ket aze en adtapout kent."
     Enable RSS Feeds: Diskouez a ra un ivinell RSS war pajenn ar c'houmanantoù gant elfennoù gwazhioù RSS pe Atom, evit ma c'hallfec'h heuliañ krouerien war savennoù all. Digoret e vez e elfennoù gant yt-dlp.

@@ -1291,6 +1291,7 @@ Settings:
     Cleanup Complete: Hreinsun geymslu lokið
     Cleanup Failed: Hreinsun geymslu mistókst
   Subscription Settings:
+    Refresh These Feeds Together: "Uppfæra þessar veitur saman"
     Fetch Feed on Startup: Sækja efnisstraum við ræsingu
     Show New Content Feed: Sýna straum með nýju efni
     RSS Feeds: RSS-straumar
@@ -2456,6 +2457,7 @@ Tooltips:
     Bedtime Reminder: "Gerir hlé á myndbandinu og minnir þig á að hætta að horfa milli upphafs- og lokatíma."
     Shorten View Counts: Sýnir fjölda áhorfa, athugasemda og fjölda þeirra sem líka við athugasemdir á styttu formi ef YouTube hefur þegar námundað tölurnar, t.d. 14 þ. í stað 14.000. Nákvæmur fjöldi er alltaf sýndur fullskrifaður.
   Subscription Settings:
+    Refresh These Feeds Together: "Þegar þú uppfærir eina af merktu veitunum eru hinar merktu veiturnar uppfærðar strax á eftir. Sjálfvirkar uppfærslur fylgja áfram tímabili hverrar veitu."
     Fetch Feed on Startup: Þegar þetta er virkt sækir OpenTubeX áskriftarstreymið sjálfkrafa við ræsingu og þegar nýr gluggi er opnaður.
     Show New Content Feed: Sýnir flipann Nýtt með færslum í áskriftarstreymi sem voru ekki til staðar þegar það var síðast sótt.
     Enable RSS Feeds: Sýnir RSS-flipa á áskriftasíðunni með atriðum úr RSS- eða Atom-straumum, svo þú getir fylgst með höfundum á öðrum kerfum. Atriði hans eru opnuð með yt-dlp.

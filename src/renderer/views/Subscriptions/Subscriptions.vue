@@ -607,13 +607,8 @@ import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { useRefreshAllSubscriptionFeeds } from '../../composables/useRefreshAllSubscriptionFeeds'
 import { isSubscriptionRefreshReserved, takeSubscriptionFeedRefreshRequest } from '../../helpers/subscriptionFeedRefreshRequest'
 import { useSubscriptionPremiereUpdates } from '../../composables/useSubscriptionPremiereUpdates'
-import {
-  requestSubscriptionRefreshCancellation,
-  refreshSubscriptionLiveFromRemote,
-  refreshSubscriptionPostsFromRemote,
-  refreshSubscriptionShortsFromRemote,
-  refreshSubscriptionVideosFromRemote
-} from '../../helpers/subscriptions'
+import { requestSubscriptionRefreshCancellation } from '../../helpers/subscriptions'
+import { refreshSubscriptionFeed } from '../../helpers/subscriptionFeedRefresh'
 import { getSubscriptionsForFeed } from '../../helpers/subscription-channels'
 import { getEnabledSubscriptionFeedSources } from '../../helpers/newSubscriptionFeed'
 import {
@@ -1777,15 +1772,7 @@ async function handleFeedReloadRequest(payload) {
     return
   }
 
-  const options = { t }
-  const refreshers = {
-    videos: refreshSubscriptionVideosFromRemote,
-    shorts: refreshSubscriptionShortsFromRemote,
-    live: refreshSubscriptionLiveFromRemote,
-    posts: refreshSubscriptionPostsFromRemote
-  }
-
-  await refreshers[payload.feedTab]?.(options)
+  await refreshSubscriptionFeed(payload.feedTab, { t })
 }
 
 // ===== Single row header =====
