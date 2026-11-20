@@ -133,6 +133,57 @@
   pointer-events: none;
 }
 
+.pinnedRow {
+  display: flex;
+  align-items: center;
+  border-radius: calc(28px * var(--ui-roundness));
+}
+
+.moreOptionContainer .pinnedRow .navOption {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+/* Only the grip drags, so the rest of the sheet still scrolls and swipes away. */
+.pinnedGrip {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  inline-size: 48px;
+  block-size: 48px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--secondary-text-color);
+  font-size: 20px;
+  cursor: grab;
+  touch-action: none;
+}
+
+.pinnedGrip:active {
+  cursor: grabbing;
+}
+
+.pinnedGrip:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -2px;
+}
+
+/* Pinned to the corner, so it never adds to the sheet's scroll range. */
+.reorderStatus {
+  block-size: 1px;
+  clip-path: inset(50%);
+  inline-size: 1px;
+  margin: 0;
+  overflow: hidden;
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  white-space: nowrap;
+}
+
 .moreOptionContainer .navLabel {
   inline-size: auto;
   margin: 0;

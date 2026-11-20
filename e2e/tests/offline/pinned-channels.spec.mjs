@@ -144,6 +144,139 @@ test('removing a pin discards cached details before sync adds it again', async (
   await expect(page.locator('.sideNav .pinnedChannels .navChannel')).toHaveAttribute('title', 'New synced name')
 })
 
+test('reorders pinned channels by dragging them in the side navigation', async ({ app, page }) => {
+  const channels = ['A', 'B', 'C'].map(letter => ({ id: `UC${letter.repeat(22)}`, name: `Channel ${letter}`, thumbnail: null }))
+  await page.evaluate(channels => window.$store.dispatch('updatePinnedChannels', channels), channels)
+  const pinned = page.locator('.sideNav .pinnedChannels .navChannel')
+  // Titles turn into tooltips under the pointer.
+  const order = () => pinned.evaluateAll(links => links.map(link => link.dataset.pinnedId.at(-1)))
+  const link = letter => pinned.and(page.locator(`[data-pinned-id="UC${letter.repeat(22)}"]`))
+  await expect.poll(order).toEqual(['A', 'B', 'C'])
+  const startUrl = page.url()
+
+  async function drag(from, to, beforeRelease) {
+    const source = await link(from).boundingBox()
+    const target = await link(to).boundingBox()
+    await page.mouse.move(source.x + source.width / 2, source.y + source.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(source.x + source.width / 2, source.y + source.height / 2 + 8, { steps: 2 })
+    await page.mouse.move(target.x + target.width / 2, target.y + target.height / 2, { steps: 5 })
+    await expect(page.locator('.sideNav .reorderDragged')).toHaveAttribute('data-pinned-id', `UC${from.repeat(22)}`)
+    await beforeRelease?.()
+    await page.mouse.up()
+  }
+
+  // Escape puts the channel back.
+  await drag('C', 'A', () => page.keyboard.press('Escape'))
+  await expect(page.locator('.sideNav .reorderActive')).toHaveCount(0)
+  await expect.poll(order).toEqual(['A', 'B', 'C'])
+
+  await drag('C', 'A')
+  await expect.poll(order).toEqual(['C', 'A', 'B'])
+  // Releasing the drag does not open the channel.
+  expect(page.url()).toBe(startUrl)
+  await expect.poll(() => latestSettings(readDatastore(app.userDataDir, 'settings')).pinnedChannels)
+    .toEqual([channels[2], channels[0], channels[1]])
+
+  // The keyboard moves the focused channel and keeps it focused.
+  const channelA = link('A')
+  await channelA.focus()
+  await page.keyboard.press('Alt+ArrowDown')
+  await expect.poll(order).toEqual(['C', 'B', 'A'])
+  await expect(channelA).toBeFocused()
+  await expect(page.locator('.sideNav .reorderStatus')).toHaveText(/Channel A\D+3\D+3/)
+  // The announcement must not extend the navigation, which would scroll it with a native scrollbar.
+  expect(await page.locator('.sideNav').evaluate(nav => nav.scrollHeight - nav.clientHeight)).toBe(0)
+
+  // A press released where the window could not see it must not leave a drag pending.
+  const center = async letter => {
+    const box = await link(letter).boundingBox()
+    return [box.x + box.width / 2, box.y + box.height / 2]
+  }
+  const [px, py] = await center('B')
+  await link('B').dispatchEvent('pointerdown', { pointerId: 1, pointerType: 'mouse', isPrimary: true, button: 0, buttons: 1, clientX: px, clientY: py })
+  await page.mouse.move(px, py + 30, { steps: 4 })
+  await expect(page.locator('.sideNav .reorderDragged')).toHaveCount(0)
+
+  // Touch picks a pin up only after a still hold, so swipes keep scrolling the navigation.
+  const session = await page.context().newCDPSession(page)
+  await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
+  const touch = (type, x, y) => session.send('Input.dispatchTouchEvent', { type, touchPoints: x == null ? [] : [{ x, y, id: 0 }] })
+  const [bx, by] = await center('B')
+  await touch('touchStart', bx, by)
+  await touch('touchMove', bx, by - 20)
+  await page.waitForTimeout(600)
+  await expect(page.locator('.sideNav .reorderDragged')).toHaveCount(0)
+  await touch('touchEnd')
+  const [ax, ay] = await center('A')
+  const [, cy] = await center('C')
+  await touch('touchStart', ax, ay)
+  await expect(page.locator('.sideNav .reorderDragged')).toHaveAttribute('aria-label', 'Channel A')
+  for (const step of [0.25, 0.5, 0.75, 1]) await touch('touchMove', ax, ay + (cy - ay) * step)
+  await touch('touchEnd')
+  await expect.poll(order).toEqual(['A', 'C', 'B'])
+  expect(page.url()).toBe(startUrl)
+  await session.send('Emulation.setTouchEmulationEnabled', { enabled: false })
+
+  // A plain click still opens the channel.
+  await link('B').click()
+  await expect(page).toHaveURL(new RegExp(`#/channel/${channels[1].id}`))
+
+  // Losing focus ends a drag whose release goes elsewhere, without swallowing later keyboard clicks.
+  await drag('B', 'A', async () => {
+    await page.evaluate(() => window.dispatchEvent(new Event('blur')))
+    await expect(page.locator('.sideNav .reorderActive')).toHaveCount(0)
+    await link('C').focus()
+    await page.keyboard.press('Enter')
+    await expect(page).toHaveURL(new RegExp(`#/channel/${channels[2].id}`))
+  })
+  await expect.poll(order).toEqual(['A', 'C', 'B'])
+
+  await page.reload()
+  await waitForAppReady(page)
+  await expect.poll(order).toEqual(['A', 'C', 'B'])
+})
+
+test('reorders pinned channels by their grips in the mobile More sheet', async ({ app, page }) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  const channels = ['A', 'B', 'C'].map(letter => ({ id: `UC${letter.repeat(22)}`, name: `Channel ${letter}`, thumbnail: null }))
+  await page.evaluate(channels => window.$store.dispatch('updatePinnedChannels', channels), channels)
+  const session = await page.context().newCDPSession(page)
+  await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
+  await page.locator('.sideNav').getByRole('button', { name: 'More', exact: true }).click()
+  const sheet = page.locator('.moreOptionContainer')
+  const rows = sheet.locator('.pinnedRow')
+  const order = () => rows.evaluateAll(elements => elements.map(element => element.dataset.pinnedId.at(-1)))
+  const grip = letter => rows.and(page.locator(`[data-pinned-id="UC${letter.repeat(22)}"]`)).getByRole('button', { name: `Channel ${letter} Drag or use the arrow keys to reorder` })
+  await expect.poll(order).toEqual(['A', 'B', 'C'])
+  // Measure the grips once the sheet stops sliding in.
+  await expect.poll(() => sheet.evaluate(element => element.getAnimations().length)).toBe(0)
+
+  // A downward drag on the grip moves the row instead of swiping the sheet away.
+  const source = await grip('A').boundingBox()
+  const target = await grip('C').boundingBox()
+  const touch = (type, x, y) => session.send('Input.dispatchTouchEvent', { type, touchPoints: x == null ? [] : [{ x, y, id: 0 }] })
+  const x = source.x + source.width / 2
+  await touch('touchStart', x, source.y + source.height / 2)
+  for (const step of [0.25, 0.5, 0.75, 1]) {
+    await touch('touchMove', x, source.y + source.height / 2 + (target.y - source.y) * step)
+  }
+  await expect(sheet.locator('.reorderDragged')).toHaveAttribute('data-pinned-id', channels[0].id)
+  await touch('touchEnd')
+  await expect.poll(order).toEqual(['B', 'C', 'A'])
+  await expect(sheet).toBeVisible()
+  await expect.poll(() => latestSettings(readDatastore(app.userDataDir, 'settings')).pinnedChannels)
+    .toEqual([channels[1], channels[2], channels[0]])
+
+  // The arrow keys move the focused grip's row and keep the grip focused.
+  await grip('A').focus()
+  await page.keyboard.press('ArrowUp')
+  await expect.poll(order).toEqual(['B', 'A', 'C'])
+  await expect(grip('A')).toBeFocused()
+  await expect(sheet.locator('.reorderStatus')).toHaveText(/Channel A\D+2\D+3/)
+  expect(await sheet.locator('.moreOptionScroll').evaluate(scroller => scroller.scrollHeight - scroller.clientHeight)).toBe(0)
+})
+
 test('lists pinned playlists and channels in the mobile More sheet', { tag: '@scale' }, async ({ page }, testInfo) => {
   const id = 'UCaaaaaaaaaaaaaaaaaaaaaa'
   await page.setViewportSize({ width: 375, height: 812 })

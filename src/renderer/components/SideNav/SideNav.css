@@ -180,6 +180,31 @@
   pointer-events: none;
 }
 
+/* Dragged pins lift their indicator instead of a card, see helpers/gridReorder.css. */
+.reorderActive > .navChannel.reorderDragged {
+  background: none;
+  box-shadow: none;
+}
+
+.reorderActive > .navChannel.reorderDragged::before {
+  opacity: 1;
+  transform: none;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 25%);
+}
+
+/* Pinned to the top, as the navigation scrolls anything below its full-height content. */
+.reorderStatus {
+  block-size: 1px;
+  clip-path: inset(50%);
+  inline-size: 1px;
+  margin: 0;
+  overflow: hidden;
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  white-space: nowrap;
+}
+
 .sideNav.highlightTransitionsDisabled :is(.navOption, .navChannel):not(:hover, :focus-visible, :active)::before {
   transition: none;
 }

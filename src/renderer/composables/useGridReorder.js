@@ -1,8 +1,14 @@
 import { nextTick, onBeforeUnmount, ref } from 'vue'
 
+import { lightHaptic } from '../helpers/mobileHaptics.js'
 import { computeReorderOffsets } from '../helpers/reorderOffsets'
 
+export { droppedIndex } from '../../orderedItems'
+
 const DRAG_THRESHOLD = 4
+// Touch picks up clickable handles after a still hold, like the tablet tab strip.
+const TOUCH_HOLD_DELAY = 400
+const TOUCH_SLOP = 8
 const SCROLL_EDGE = 64
 // CSS pixels per second with the pointer at the scroller's edge.
 const SCROLL_SPEED = 900
@@ -23,8 +29,11 @@ const SCROLL_SPEED = 900
  * @param {string} options.handleSelector
  * @param {(item: HTMLElement) => string} options.getId
  * @param {(id: string, order: string[]) => void} options.commit Receives the rendered items' new order and must render it on the next tick
+ * @param {boolean} [options.clickableHandles] For handles that are links or buttons themselves: a press
+ *   still focuses and clicks them, and the pointer is only captured once it moves. Touch scrolls as usual and
+ *   picks a handle up after a still hold; bind the returned `onTouchMove` on the list so the hold can stop scrolling.
  */
-export function useGridReorder({ itemSelector, handleSelector, getId, commit }) {
+export function useGridReorder({ itemSelector, handleSelector, getId, commit, clickableHandles = false }) {
   /** @type {import('vue').Ref<string | null>} Set while a card is dragged or settles */
   const draggedId = ref(null)
   let session = null
@@ -39,9 +48,11 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit }) 
     const list = item?.parentElement
     const host = /** @type {Element} */ (event.currentTarget)
     if (!list || !host.contains(list)) return
-    // Keep the pointer from selecting text, focusing the handle or opening the card's long-press menu.
-    event.preventDefault()
-    event.stopPropagation()
+    if (!clickableHandles) {
+      // Keep the pointer from selecting text, focusing the handle or opening the card's long-press menu.
+      event.preventDefault()
+      event.stopPropagation()
+    }
     session = {
       list,
       item,
@@ -51,14 +62,36 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit }) 
       x: event.clientX,
       y: event.clientY,
       started: false,
-      dropping: false
+      dropping: false,
+      touch: clickableHandles && event.pointerType === 'touch',
+      // Until the pointer is captured, its events can reach any element.
+      events: clickableHandles ? window : list
     }
-    list.setPointerCapture(event.pointerId)
-    list.addEventListener('pointermove', onPointerMove)
-    list.addEventListener('pointerup', onPointerUp)
-    list.addEventListener('pointercancel', cancel)
-    list.addEventListener('lostpointercapture', cancel)
-    list.addEventListener('contextmenu', preventContextMenu, true)
+    if (!clickableHandles) list.setPointerCapture(event.pointerId)
+    session.events.addEventListener('pointermove', onPointerMove)
+    session.events.addEventListener('pointerup', onPointerUp)
+    session.events.addEventListener('pointercancel', onPointerCancel)
+    session.events.addEventListener('lostpointercapture', onPointerCancel)
+    // Ahead of the app's long-press link menu, which listens on the document.
+    window.addEventListener('contextmenu', preventContextMenu, true)
+    // Links and images would start a native drag instead.
+    list.addEventListener('dragstart', preventDefault)
+    // An uncaptured press can be released in another window.
+    window.addEventListener('blur', cancel)
+    if (session.touch) {
+      session.holdTimer = setTimeout(() => {
+        begin()
+        if (session?.started) lightHaptic()
+      }, TOUCH_HOLD_DELAY)
+    }
+  }
+
+  /**
+   * Once a touch holds a handle, its moves drag instead of scrolling.
+   * @param {TouchEvent} event
+   */
+  function onTouchMove(event) {
+    if (session?.touch && session.started && event.touches.length === 1 && event.cancelable) event.preventDefault()
   }
 
   function begin() {
@@ -71,6 +104,10 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit }) 
     }
     const ids = items.map(getId)
     Object.assign(session, { started: true, items, ids, indexById: new Map(ids.map((id, index) => [id, index])), sourceIndex })
+    if (clickableHandles) {
+      list.setPointerCapture(session.pointerId)
+      suppressReleaseClick(session.pointerId)
+    }
     measure()
     const origin = contentOrigin(list)
     const source = session.slots[sourceIndex]
@@ -91,7 +128,6 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit }) 
     session.mutationObserver.observe(list, { childList: true })
     document.addEventListener('scroll', update, { capture: true, passive: true })
     document.addEventListener('keydown', cancelFromKeyboard, true)
-    window.addEventListener('blur', cancel)
     list.classList.add('reorderActive')
     item.classList.add('reorderDragged')
     draggedId.value = session.ids[sourceIndex]
@@ -143,7 +179,18 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit }) 
     session.x = event.clientX
     session.y = event.clientY
     if (!session.started) {
-      if (Math.hypot(session.x - session.startX, session.y - session.startY) < DRAG_THRESHOLD) return
+      // The button was released where this window could not see it.
+      if (!session.touch && event.buttons === 0) {
+        cancel()
+        return
+      }
+      const distance = Math.hypot(session.x - session.startX, session.y - session.startY)
+      // A touch that moves before its hold scrolls instead.
+      if (session.touch) {
+        if (distance > TOUCH_SLOP) cancel()
+        return
+      }
+      if (distance < DRAG_THRESHOLD) return
       begin()
       if (!session) return
     }
@@ -255,13 +302,17 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit }) 
     applyOffsets(null)
     await Promise.allSettled(active.items.flatMap(element => element.getAnimations().map(animation => animation.finished)))
     if (session !== active) return
-    if (active.targetIndex !== active.sourceIndex) {
-      commit(active.ids[active.sourceIndex], proposedOrder())
-      await nextTick()
+    try {
+      if (active.targetIndex !== active.sourceIndex) {
+        commit(active.ids[active.sourceIndex], proposedOrder())
+        await nextTick()
+      }
+    } finally {
+      // The cards already show the new order, so clearing their offsets after
+      // the DOM update changes nothing on screen. A failed commit must not
+      // leave the drag session behind either.
+      finish()
     }
-    // The cards already show the new order, so clearing their offsets after
-    // the DOM update changes nothing on screen.
-    finish()
   }
 
   /** @param {KeyboardEvent} event */
@@ -277,18 +328,26 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit }) 
     event.stopPropagation()
   }
 
+  /** @param {PointerEvent} event */
+  function onPointerCancel(event) {
+    // Capturing on the list releases a touch or pen's implicit capture on the pressed element.
+    if (event.type === 'lostpointercapture' && event.target !== session?.list) return
+    if (event.pointerId === session?.pointerId) cancel()
+  }
+
   function cancel() {
     if (session?.dropping) return
     finish()
   }
 
   function releasePointer() {
-    const { list, pointerId } = session
-    list.removeEventListener('pointermove', onPointerMove)
-    list.removeEventListener('pointerup', onPointerUp)
-    list.removeEventListener('pointercancel', cancel)
-    list.removeEventListener('lostpointercapture', cancel)
+    const { list, pointerId, events } = session
+    events.removeEventListener('pointermove', onPointerMove)
+    events.removeEventListener('pointerup', onPointerUp)
+    events.removeEventListener('pointercancel', onPointerCancel)
+    events.removeEventListener('lostpointercapture', onPointerCancel)
     if (list.hasPointerCapture(pointerId)) list.releasePointerCapture(pointerId)
+    clearTimeout(session.holdTimer)
     cancelAnimationFrame(scrollFrame)
     scrollFrame = null
     lastScrollTime = null
@@ -300,13 +359,14 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit }) 
     releasePointer()
     session = null
     draggedId.value = null
-    active.list.removeEventListener('contextmenu', preventContextMenu, true)
+    window.removeEventListener('contextmenu', preventContextMenu, true)
+    active.list.removeEventListener('dragstart', preventDefault)
+    window.removeEventListener('blur', cancel)
     if (!active.started) return
     active.observer.disconnect()
     active.mutationObserver.disconnect()
     document.removeEventListener('scroll', update, { capture: true })
     document.removeEventListener('keydown', cancelFromKeyboard, true)
-    window.removeEventListener('blur', cancel)
     active.list.classList.remove('reorderActive', 'reorderGrid')
     active.item.classList.remove('reorderDragged', 'reorderDropping')
     active.items.forEach(element => { element.style.translate = '' })
@@ -314,23 +374,7 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit }) 
 
   onBeforeUnmount(finish)
 
-  return { draggedId, onPointerDown }
-}
-
-/**
- * Where a dropped item goes in the full list, which can hold items the list
- * does not render: right after the item rendered before it, or right before
- * the one rendered after it when it was dropped first.
- * @param {string[]} ids The full list's order
- * @param {string} id
- * @param {string[]} order The rendered items' new order
- * @returns {number} The item's new index, or -1 when its neighbors are missing
- */
-export function droppedIndex(ids, id, order) {
-  const rest = ids.filter(other => other !== id)
-  const position = order.indexOf(id)
-  const index = position > 0 ? rest.indexOf(order[position - 1]) + 1 : rest.indexOf(order[1])
-  return position > 0 && index === 0 ? -1 : index
+  return { draggedId, onPointerDown, onTouchMove }
 }
 
 /**
@@ -349,6 +393,42 @@ function currentTranslation(element) {
   // Covers a move transition that is still running from an earlier reorder.
   const matrix = style.transform === 'none' ? null : new DOMMatrixReadOnly(style.transform)
   return [x + (matrix?.m41 ?? 0), y + (matrix?.m42 ?? 0)]
+}
+
+/**
+ * Releasing a drag, even a cancelled one, would otherwise click the handle it started on.
+ * @param {number} pointerId
+ */
+function suppressReleaseClick(pointerId) {
+  const suppress = event => {
+    // Keyboard activations are never the release's click.
+    if (event.detail === 0) return
+    event.preventDefault()
+    event.stopPropagation()
+  }
+  const stop = () => {
+    window.removeEventListener('click', suppress, true)
+    window.removeEventListener('blur', stop)
+    window.removeEventListener('pointerdown', stop, true)
+    window.removeEventListener('pointerup', release, true)
+    window.removeEventListener('pointercancel', release, true)
+  }
+  const release = event => {
+    if (event.pointerId !== pointerId) return
+    // The click follows the pointerup in the same task.
+    setTimeout(stop)
+  }
+  window.addEventListener('click', suppress, true)
+  // The release can go to another window, which a later press or losing focus reveals.
+  window.addEventListener('blur', stop)
+  window.addEventListener('pointerdown', stop, true)
+  window.addEventListener('pointerup', release, true)
+  window.addEventListener('pointercancel', release, true)
+}
+
+/** @param {Event} event */
+function preventDefault(event) {
+  event.preventDefault()
 }
 
 function clamp(value, min, max) {
