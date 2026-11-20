@@ -712,6 +712,8 @@
 
 // The quick settings menu stays in the top nav's stacking context. While it is
 // open, lift the bar above a floating settings window so the window cannot cover it.
-:root:not(.appSettingsMaximized) .topNav:has(.quickSettingsMenu:not(.phoneQuickSettings)) {
+// Drop the lift once it starts closing, so the window it opened is not covered
+// by the fading menu.
+:root:not(.appSettingsMaximized) .topNav:has(.quickSettingsMenu:not(.phoneQuickSettings, .quick-settings-menu-leave-active)) {
   z-index: 10;
 }
