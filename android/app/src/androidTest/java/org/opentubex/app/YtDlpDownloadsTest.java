@@ -122,6 +122,80 @@ public class YtDlpDownloadsTest {
         } finally { queue.cancelAll(); folder.delete(); YtDlpFiles.deleteTree(state); }
     }
 
+    @Test public void retriedLocalPlaylistKeepsTheFileNamesOfEntriesAfterAFailedOne() throws Exception {
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        File state = new File(context.getCacheDir(), "yt-dlp-renumbered-" + UUID.randomUUID());
+        state.mkdirs();
+        DocumentFile folder = tree(context).createDirectory(UUID.randomUUID().toString());
+        assertNotNull(folder);
+        String folderUri = DocumentsContract.buildTreeDocumentUri(InstrumentationRegistry.getInstrumentation().getContext().getPackageName() + ".documents", DocumentsContract.getDocumentId(folder.getUri())).toString();
+        grant(context, Uri.parse(folderUri));
+        YtDlpDownloads queue = new YtDlpDownloads(context, state, () -> {});
+        try (FixtureServer server = new FixtureServer(InstrumentationRegistry.getInstrumentation().getContext())) {
+            JSONObject config = new JSONObject().put("enabled", true).put("folder", folderUri);
+            JSONObject payload = new JSONObject().put("mode", "video").put("videoId", "").put("isPlaylist", true)
+                .put("videoIds", new JSONArray(asList("aaaaaaaaaaa", "bbbbbbbbbbb")));
+            // Like a local playlist's arguments from src/ytDlpArguments.js, whose first video fails at first.
+            JSONArray args = new JSONArray(asList("--output", "%(opentubex_playlist_index)03d.%(ext)s",
+                "--parse-metadata", YtDlpArguments.LOCAL_PLAYLIST_INDEX_METADATA,
+                server.url().replace("demo.webm", "missing.webm") + "?index=1", server.url() + "?index=2"));
+            long id = queue.add(payload, args, config, -1).getLong("id");
+            assertEquals(asList(id), queue.claim());
+            queue.run(id);
+            assertEquals(1, queue.list().getJSONObject(0).getJSONArray("files").length());
+            server.missingAvailable = true;
+            assertEquals(id, queue.add(payload, args, config, id).getLong("id"));
+            assertEquals(asList(id), queue.claim());
+            queue.run(id);
+            JSONObject completed = queue.list().getJSONObject(0);
+            assertEquals(completed.toString(), "completed", completed.getString("status"));
+            assertEquals(completed.toString(), 2, completed.getJSONArray("files").length());
+            // The fixture serves the same media for both, so compare which entry each file holds.
+            java.util.Map<String, String> names = new java.util.TreeMap<>();
+            JSONArray files = completed.getJSONArray("files");
+            for (int i = 0; i < files.length(); i++) {
+                JSONObject file = files.getJSONObject(i);
+                names.put(DocumentFile.fromSingleUri(context, Uri.parse(file.getString("path"))).getName(), file.getString("videoId"));
+            }
+            assertEquals(2, folder.listFiles().length);
+            java.util.Map<String, String> expected = new java.util.TreeMap<>();
+            expected.put("001.webm", "missing");
+            expected.put("002.webm", "demo");
+            assertEquals("The first video must not take the second one's file name", expected, names);
+            assertTrue(queue.remove(id));
+        } finally { queue.cancelAll(); folder.delete(); YtDlpFiles.deleteTree(state); }
+    }
+
+    @Test public void concurrentProcessesKeepTheCookiesEachOfThemReceived() throws Exception {
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        File directory = new File(context.getCacheDir(), "yt-dlp-cookie-merge-" + UUID.randomUUID());
+        directory.mkdirs();
+        File cookies = new File(directory, "cookies.txt");
+        try (FixtureServer server = new FixtureServer(InstrumentationRegistry.getInstrumentation().getContext())) {
+            YtDlpFiles.write(cookies, ("# Netscape HTTP Cookie File\n" + server.host() + "\tFALSE\t/\tFALSE\t4102444800\tsession\tbefore\n").getBytes(StandardCharsets.UTF_8));
+            // Both processes load the cookies when they extract, before either saves them. The one
+            // that exits last used to replace the file with its own cookies, losing the other's.
+            Exception[] errors = new Exception[2];
+            List<Thread> processes = new java.util.ArrayList<>();
+            for (int index = 0; index < 2; index++) {
+                int part = index;
+                Thread process = new Thread(() -> {
+                    try {
+                        YtDlpRuntime.execute(context, asList("--paths", directory.getAbsolutePath(), "--output", part + ".%(ext)s",
+                            "--sleep-interval", part == 0 ? "1" : "5", "--cookies", cookies.getAbsolutePath(), server.url() + "?cookie=part" + part), null, null);
+                    } catch (Exception error) { errors[part] = error; }
+                });
+                processes.add(process);
+                process.start();
+            }
+            for (Thread process : processes) process.join();
+            for (Exception error : errors) if (error != null) throw error;
+            String saved = new String(YtDlpFiles.readFile(cookies), StandardCharsets.UTF_8);
+            for (String cookie : asList("\tsession\tbefore\n", "\tpart0\trotated\n", "\tpart1\trotated\n")) assertTrue(saved, saved.contains(cookie));
+            assertEquals("Private cookie copies must be removed", 0, context.getCacheDir().listFiles((dir, name) -> name.startsWith("yt-dlp-cookies-") && name.endsWith(".txt")).length);
+        } finally { YtDlpFiles.deleteTree(directory); }
+    }
+
     @Test public void playlistWithUnavailableEntriesCompletesWithTheirErrors() throws Exception {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         File state = new File(context.getCacheDir(), "yt-dlp-skipped-" + UUID.randomUUID());
@@ -386,6 +460,7 @@ public class YtDlpDownloadsTest {
         final ServerSocket server = new ServerSocket(0, 10, interfaceAddress());
         final AtomicInteger rangeRequests = new AtomicInteger();
         volatile boolean requireCookie;
+        volatile boolean missingAvailable;
         final byte[] media;
         final Thread thread;
         FixtureServer(Context context) throws Exception {
@@ -409,12 +484,14 @@ public class YtDlpDownloadsTest {
                             client.getOutputStream().write("HTTP/1.1 403 Forbidden\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".getBytes(StandardCharsets.US_ASCII));
                             continue;
                         }
-                        if (request != null && request.contains("/missing.webm ")) {
+                        if (request != null && request.contains("/missing.webm") && !missingAvailable) {
                             client.getOutputStream().write("HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".getBytes(StandardCharsets.US_ASCII));
                             continue;
                         }
                         String headers = "HTTP/1.1 " + (offset > 0 ? "206 Partial Content" : "200 OK") + "\r\nContent-Type: video/webm\r\nContent-Length: " + (media.length - offset) + "\r\nAccept-Ranges: bytes\r\nConnection: close\r\n";
                         if (offset > 0) headers += "Content-Range: bytes " + offset + "-" + (media.length - 1) + "/" + media.length + "\r\n";
+                        java.util.regex.Matcher setCookie = java.util.regex.Pattern.compile("[?&]cookie=(\\w+)").matcher(request == null ? "" : request);
+                        if (setCookie.find()) headers += "Set-Cookie: " + setCookie.group(1) + "=rotated; Path=/; Max-Age=86400\r\n";
                         client.getOutputStream().write((headers + "\r\n").getBytes(StandardCharsets.US_ASCII));
                         if (request != null && !request.startsWith("HEAD ")) client.getOutputStream().write(media, offset, media.length - offset);
                     } catch (IOException ignored) { }

@@ -146,7 +146,7 @@ export function playlistDownloadPartLimit(payload, args) {
   // Without an index in the file name, entries with the same title would write the same file.
   const outputTemplate = args[args.lastIndexOf('--output') + 1] ?? ''
   // `%%` is a literal percent sign, such as one in a local playlist's title.
-  if (!/(?<!%)(?:%%)*%\((?:playlist_index|autonumber)\)/.test(outputTemplate)) return 1
+  if (!/(?<!%)(?:%%)*%\((?:playlist_index|autonumber|opentubex_playlist_index)\)/.test(outputTemplate)) return 1
   const videoIds = Array.isArray(payload.videoIds) ? payload.videoIds : []
   if (videoIds.length > 0) return videoIds.length
   // Without the count, extra processes could find no entry and still hold a slot.
@@ -179,6 +179,13 @@ export function splitDownloadArguments(payload, args, count) {
     })
   }
 }
+/**
+ * Reads a local playlist entry's position from the `index` parameter of its URL.
+ * yt-dlp's autonumber counts only the videos that reach processing, so a video
+ * that fails would shift the numbers, and so the file names, of the ones after it.
+ * The native bridges accept `--parse-metadata` only with this value.
+ */
+export const LOCAL_PLAYLIST_INDEX_METADATA = 'original_url:[?&]index=(?P<opentubex_playlist_index>[0-9]+)(?:&|$)'
 const TIME_REGEX = /^(?:\d+:)?[0-5]?\d:[0-5]\d(?:\.\d+)?$/
 export const AUTOMATIC_NUMBER_LIMITS = Object.freeze({
   minDurationSeconds: 31_536_000,
@@ -307,7 +314,9 @@ export function buildYtDlpDownloadArguments(payload, globalArguments = '') {
     upload_date: '%(upload_date)s',
     id: '%(id)s',
     playlist: isRemotePlaylist ? '%(playlist_title)s' : localPlaylistTitle,
-    playlist_index: isRemotePlaylist ? '%(playlist_index)03d' : '%(autonumber)03d',
+    playlist_index: isRemotePlaylist
+      ? '%(playlist_index)03d'
+      : videoIds.length > 0 ? '%(opentubex_playlist_index)03d' : '%(autonumber)03d',
     ext: '%(ext)s'
   }
   for (const [field, replacement] of Object.entries(templateFields)) {
@@ -319,7 +328,7 @@ export function buildYtDlpDownloadArguments(payload, globalArguments = '') {
   if (payload.isPlaylist === true && !outputTemplate.includes('%(playlist') && !outputTemplate.startsWith(`${localPlaylistTitle}/`)) {
     outputTemplate = isRemotePlaylist
       ? `%(playlist_title)s/%(playlist_index)03d - ${outputTemplate}`
-      : `${localPlaylistTitle}/%(autonumber)03d - ${outputTemplate}`
+      : `${localPlaylistTitle}/${templateFields.playlist_index} - ${outputTemplate}`
   }
   // The playlist title is inserted literally, so check the result as well.
   if (leavesDownloadFolder(outputTemplate)) throw new Error('invalid-filename-template')
@@ -327,6 +336,7 @@ export function buildYtDlpDownloadArguments(payload, globalArguments = '') {
   const directoryFields = [...new Set([...outputTemplate.split(/[/\\]/).slice(0, -1).join('/').matchAll(/%\((\w+)/g)]
     .map(match => match[1]))].filter(field => ['title', 'uploader', 'id', 'playlist_title', 'upload_date', 'ext'].includes(field))
   args.push('--output', outputTemplate)
+  if (!isRemotePlaylist && videoIds.length > 0) args.push('--parse-metadata', LOCAL_PLAYLIST_INDEX_METADATA)
 
   switch (payload.mode) {
     case 'video': {
@@ -440,7 +450,7 @@ export function buildYtDlpDownloadArguments(payload, globalArguments = '') {
   } else if (isRemotePlaylist) {
     args.push(`https://www.youtube.com/playlist?list=${payload.playlistId}`)
   } else if (videoIds.length > 0) {
-    args.push(...videoIds.map(videoId => `https://www.youtube.com/watch?v=${videoId}`))
+    args.push(...videoIds.map((videoId, index) => `https://www.youtube.com/watch?v=${videoId}&index=${index + 1}`))
   } else {
     args.push(`https://www.youtube.com/watch?v=${payload.videoId}`)
   }

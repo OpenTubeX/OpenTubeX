@@ -36,6 +36,7 @@ import {
   ytDlpEnvironment,
 } from './ytDlpBinaries'
 import { pushYtDlpPlaybackAuthenticationArguments } from './ytDlpPlayback'
+import { checkOutYtDlpCookies } from './ytDlpCookieFile'
 import { authorizeAutomaticDownload, showAutomaticDownloadNotification } from './ytDlpAutomaticDownloads'
 
 const execFileAsync = promisify(execFile)
@@ -1093,6 +1094,8 @@ async function startYtDlpDownload(
   for (const [index, part] of parts.entries()) {
     /** @type {import('node:child_process').ChildProcess | undefined} */
     let child
+    // Parts run at the same time, so each needs its own copy of the cookie file.
+    const cookies = checkOutYtDlpCookies(args)
     /**
      * @param {number | null} code
      * @param {Error | null} error
@@ -1104,6 +1107,7 @@ async function startYtDlpDownload(
       part.done = true
       part.code = code
       part.error = error
+      cookies.release()
       if (child) entry.children.delete(child)
       releaseDownloadSlot()
       if (parts.every(other => other.done)) {
@@ -1115,7 +1119,7 @@ async function startYtDlpDownload(
     }
 
     try {
-      child = spawn(executable, [...args, ...partArgs[index]], { ...PROCESS_TREE_SPAWN_OPTIONS, windowsHide: true, env: ytDlpEnvironment() })
+      child = spawn(executable, [...cookies.args, ...partArgs[index]], { ...PROCESS_TREE_SPAWN_OPTIONS, windowsHide: true, env: ytDlpEnvironment() })
     } catch (error) {
       // Some spawn errors are thrown instead of emitted, and the other parts keep running.
       finishPart(null, error)

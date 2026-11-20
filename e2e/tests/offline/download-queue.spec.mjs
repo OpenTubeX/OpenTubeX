@@ -480,8 +480,16 @@ test('honors the download cookie preference and Always override', async ({ app, 
   const executable = path.join(app.userDataDir, 'cookie-yt-dlp.sh')
   const argumentsFile = path.join(app.userDataDir, 'cookie-arguments.txt')
   const cookies = path.join(app.userDataDir, 'session.txt')
-  await writeFile(cookies, '# Netscape HTTP Cookie File\n')
-  await writeFile(executable, `#!/bin/sh\nprintf '%s\\n' "$@" > '${argumentsFile}'\n`)
+  const passedCookies = path.join(app.userDataDir, 'passed-cookies.txt')
+  const session = '# Netscape HTTP Cookie File\n.youtube.com\tTRUE\t/\tTRUE\t4102444800\tSID\tsession\n'
+  await writeFile(cookies, session)
+  // The cookie file is a copy that is removed after yt-dlp exits.
+  await writeFile(executable, [
+    '#!/bin/sh',
+    'previous=',
+    `for argument do [ "$previous" = --cookies ] && cp "$argument" '${passedCookies}'; previous="$argument"; done`,
+    `printf '%s\\n' "$@" > '${argumentsFile}'`
+  ].join('\n'))
   await chmod(executable, 0o755)
   await configureQueue(app, page, {
     enableDownloads: true,
@@ -498,7 +506,10 @@ test('honors the download cookie preference and Always override', async ({ app, 
     await expect.poll(async () => (await readFile(argumentsFile, 'utf8')).includes('https://www.youtube.com/watch?v=iiiiiiiiiii')).toBe(true)
     const args = (await readFile(argumentsFile, 'utf8')).trim().split('\n')
     expect(args.includes('--cookies')).toBe((enabled || always) && mode === 'file')
-    if ((enabled || always) && mode === 'file') expect(args[args.indexOf('--cookies') + 1]).toBe(cookies)
+    if ((enabled || always) && mode === 'file') {
+      expect(args[args.indexOf('--cookies') + 1]).not.toBe(cookies)
+      expect(await readFile(passedCookies, 'utf8')).toBe(session)
+    }
   }
   await configureQueue(app, page, { ytDlpPlaybackAuthMode: 'file', ytDlpDownloadUseCookies: true })
   await writeFile(argumentsFile, '')

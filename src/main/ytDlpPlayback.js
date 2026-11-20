@@ -16,6 +16,7 @@ import { isYouTubeSubtitleUrl } from '../youtubeSubtitle'
 import { buildYtDlpSearchArguments, normalizeYtDlpSearchResults, completeYtDlpSearchPlaylists } from '../ytDlpSearch'
 import { downloadManagedYtDlp, getYtDlpVersion, pushProxyArgument, resolveExecutable, ytDlpEnvironment } from './ytDlpBinaries'
 import { registerExternalStreamCookies, registerExternalStreamHeaders } from './ytDlpExternalStreams'
+import { withYtDlpCookies } from './ytDlpCookieFile'
 
 const execFileAsync = promisify(execFile)
 
@@ -163,7 +164,7 @@ export async function handleYtDlpGetSubtitle(event, url) {
   const key = JSON.stringify([executable, args, url])
   let request = subtitleRequests.get(key)
   if (!request) {
-    request = downloadYtDlpSubtitle(executable, args, url, app.getPath('temp'))
+    request = withYtDlpCookies(args, cookieArgs => downloadYtDlpSubtitle(executable, cookieArgs, url, app.getPath('temp')))
     subtitleRequests.set(key, request)
   }
   try {
@@ -303,12 +304,12 @@ export async function handleYtDlpGetPlaybackInfo(
   let stderr
   let extractedCookies = ''
   try {
-    const playbackInfo = await execFileAsync(executable, args, {
+    const playbackInfo = await withYtDlpCookies(args, cookieArgs => execFileAsync(executable, cookieArgs, {
       timeout: PLAYBACK_INFO_TIMEOUT,
       maxBuffer: PLAYBACK_INFO_MAX_BUFFER,
       windowsHide: true,
       env: ytDlpEnvironment()
-    })
+    }))
     stdout = playbackInfo.stdout
     stderr = playbackInfo.stderr
     if (cookieFile !== null) extractedCookies = await readFile(cookieFile, 'utf8').catch(() => '')
@@ -408,12 +409,12 @@ export async function handleYtDlpGetHistoryMetadata(event, videoId) {
     await pushProxyArgument(args)
     args.push(`https://www.youtube.com/watch?v=${videoId}`)
     controller.signal.throwIfAborted()
-    const { stdout } = await execFileAsync(executable, args, {
+    const { stdout } = await withYtDlpCookies(args, cookieArgs => execFileAsync(executable, cookieArgs, {
       signal: controller.signal,
       timeout: PLAYBACK_INFO_TIMEOUT,
       maxBuffer: PLAYBACK_INFO_MAX_BUFFER,
       windowsHide: true
-    })
+    }))
     return JSON.parse(stdout)
   } catch (error) {
     return historyRepairYtDlpError(error.stderr)
@@ -437,11 +438,11 @@ export async function handleYtDlpSearch(event, query, params, page) {
     }
     await pushProxyArgument(args)
     args.push(...target)
-    const { stdout } = await execFileAsync(executable, args, {
+    const { stdout } = await withYtDlpCookies(args, cookieArgs => execFileAsync(executable, cookieArgs, {
       timeout: PLAYBACK_INFO_TIMEOUT,
       maxBuffer: PLAYBACK_INFO_MAX_BUFFER,
       windowsHide: true
-    })
+    }))
     const response = normalizeYtDlpSearchResults(JSON.parse(stdout), page)
     response.results = await completeYtDlpSearchPlaylists(response.results, async (playlistId, signal) => {
       // Reuse the search authentication and proxy options, fetching only one
@@ -450,12 +451,12 @@ export async function handleYtDlpSearch(event, query, params, page) {
       playlistArgs[playlistArgs.indexOf('--playlist-start') + 1] = '1'
       playlistArgs[playlistArgs.indexOf('--playlist-end') + 1] = '1'
       playlistArgs.push('--', `https://www.youtube.com/playlist?list=${playlistId}`)
-      const { stdout } = await execFileAsync(executable, playlistArgs, {
+      const { stdout } = await withYtDlpCookies(playlistArgs, cookieArgs => execFileAsync(executable, cookieArgs, {
         timeout: PLAYBACK_INFO_TIMEOUT,
         maxBuffer: PLAYBACK_INFO_MAX_BUFFER,
         windowsHide: true,
         signal
-      })
+      }))
       return JSON.parse(stdout)
     })
     return response
@@ -508,11 +509,11 @@ export async function handleYtDlpGetRecommendations(event, currentVideoId) {
 
   let stdout
   try {
-    ({ stdout } = await execFileAsync(executable, args, {
+    ({ stdout } = await withYtDlpCookies(args, cookieArgs => execFileAsync(executable, cookieArgs, {
       timeout: PLAYBACK_INFO_TIMEOUT,
       maxBuffer: PLAYBACK_INFO_MAX_BUFFER,
       windowsHide: true
-    }))
+    })))
   } catch (error) {
     if (error.code === 'ENOENT') return { error: 'ENOENT' }
 

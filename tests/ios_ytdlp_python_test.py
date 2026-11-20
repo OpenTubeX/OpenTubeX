@@ -84,6 +84,7 @@ class SelectingYoutubeDL(FakeYoutubeDL):
 
 class PartYoutubeDL(FakeYoutubeDL):
     calls = []
+    cookie_files = []
     barrier = None
 
     def download(self, urls):
@@ -92,6 +93,10 @@ class PartYoutubeDL(FakeYoutubeDL):
         PartYoutubeDL.barrier.wait(timeout=10)
         folder = Path(self.options['paths']['home'])
         name = f"{self.options.get('playlist_items') or self.options.get('autonumber_start')}.mp4".replace(':', '_')
+        # Like yt-dlp when it closes, each part saves the cookies it received.
+        cookies = Path(self.options['cookiefile'])
+        PartYoutubeDL.cookie_files.append(cookies)
+        cookies.write_text(cookies.read_text() + f'.youtube.com\tTRUE\t/\tTRUE\t0\t{name}\tvalue\n')
         folder.joinpath(name).write_bytes(b'media')
         self.options['postprocessor_hooks'][0]({
             'status': 'finished', 'postprocessor': 'MoveFiles', 'info_dict': {'filepath': str(folder / name)},
@@ -104,7 +109,8 @@ class IOSYtDlpPythonTest(unittest.TestCase):
     def test_playlist_parts_download_at_the_same_time(self):
         urls = [f'https://www.youtube.com/watch?v={video_id}' for video_id in ('aaaaaaaaaaa', 'bbbbbbbbbbb', 'ccccccccccc')]
         cases = [
-            ({'videoIds': ['aaaaaaaaaaa', 'bbbbbbbbbbb', 'ccccccccccc']}, ['--no-playlist', *urls],
+            ({'videoIds': ['aaaaaaaaaaa', 'bbbbbbbbbbb', 'ccccccccccc']},
+             ['--no-playlist', '--parse-metadata', bridge._LOCAL_PLAYLIST_INDEX_METADATA, *urls],
              [(None, 1, urls[:1]), (None, 2, urls[1:])]),
             ({'playlistId': 'PL1234567890'}, ['https://www.youtube.com/playlist?list=PL1234567890'],
              [('1::2', 1, ['https://www.youtube.com/playlist?list=PL1234567890']),
@@ -112,17 +118,24 @@ class IOSYtDlpPythonTest(unittest.TestCase):
         ]
         for payload, args, expected in cases:
             PartYoutubeDL.calls = []
+            PartYoutubeDL.cookie_files = []
             PartYoutubeDL.barrier = threading.Barrier(2)
             with tempfile.TemporaryDirectory() as temp:
                 stage = Path(temp) / 'stage'
+                cookies = Path(temp) / 'cookies.txt'
+                cookies.write_text('# Netscape HTTP Cookie File\n')
                 result = bridge._download({
                     'payload': {'mode': 'video', 'isPlaylist': True, **payload},
-                    'args': ['--output', '%(autonumber)s.%(ext)s', *args], 'parts': 2,
+                    'args': ['--output', '%(autonumber)s.%(ext)s', *args], 'parts': 2, 'cookies': str(cookies),
                     'staging': str(stage), 'progressFile': str(stage / 'progress.json'),
                     'controlFile': str(stage / 'control'),
                 })
                 self.assertEqual(sorted(PartYoutubeDL.calls, key=str), sorted(expected, key=str))
                 self.assertEqual(len(result['files']), 2)
+                # Parts save private copies, and the shared file keeps the cookies of both.
+                self.assertEqual(len({cookies, *PartYoutubeDL.cookie_files}), 3)
+                self.assertTrue(all(not copy.exists() for copy in PartYoutubeDL.cookie_files))
+                self.assertEqual(len(cookies.read_text().splitlines()), 3)
                 self.assertEqual(json.loads((stage / 'progress.json').read_text())['activeParts'], 0)
 
     @patch.object(bridge.yt_dlp, 'YoutubeDL', SelectingYoutubeDL)
@@ -260,7 +273,9 @@ print(context.cert_store_stats()['x509_ca'])
     @patch.object(bridge.yt_dlp, 'YoutubeDL', FakeYoutubeDL)
     def test_download_rejects_auxiliary_file_options(self):
         for args in [['--download-archive', 'archive.txt'], ['--cookies=cookies.txt'], ['--cache-dir', 'cache'],
-                     ['--postprocessor-args', 'ffmpeg:-y /tmp/out'], ['--forma', 'best']]:
+                     ['--postprocessor-args', 'ffmpeg:-y /tmp/out'], ['--forma', 'best'],
+                     # Metadata actions can set the fields that name output files.
+                     ['--parse-metadata', 'title:(?P<filepath>.+)'], ['--parse-metadata=title:(?P<ext>.+)']]:
             with self.subTest(args=args), tempfile.TemporaryDirectory() as temp:
                 root = Path(temp)
                 request = {

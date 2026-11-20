@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import test from 'node:test'
-import { buildYtDlpDownloadArguments, isSafeDownloadFilenameTemplate, jsRuntimeArguments, playbackImpersonationArguments, splitDownloadArguments } from '../../src/ytDlpArguments.js'
+import { LOCAL_PLAYLIST_INDEX_METADATA, buildYtDlpDownloadArguments, isSafeDownloadFilenameTemplate, jsRuntimeArguments, playbackImpersonationArguments, splitDownloadArguments } from '../../src/ytDlpArguments.js'
 import { EXTERNAL_PLAYBACK_INFO_OUTPUT_TEMPLATE, PLAYBACK_INFO_OUTPUT_TEMPLATE, mapExternalPlaybackMetadata, mapPlaybackCaptions, mapPlaybackFormat } from '../../src/ytDlpMetadata.js'
 
 const videoId = 'jNQXAC9IVRw'
@@ -77,10 +78,16 @@ test('audio and subtitle-only downloads use the selected conversion formats', ()
   assert.ok(!subtitles.includes('--embed-metadata'))
 })
 
-test('local playlists retain order and escape literal title placeholders', () => {
+test('local playlists number files by playlist position and escape literal title placeholders', () => {
   const args = buildYtDlpDownloadArguments({ videoIds: [videoId, 'BaW_jenozKc'], mode: 'video', isPlaylist: true, title: '100% / Music' }).args
-  assert.deepEqual(args.slice(-2), [`https://www.youtube.com/watch?v=${videoId}`, 'https://www.youtube.com/watch?v=BaW_jenozKc'])
-  assert.match(args[args.indexOf('--output') + 1], /^100%% _ Music\/.*autonumber/)
+  // yt-dlp's autonumber skips videos that fail, which would rename the files after them.
+  assert.deepEqual(args.slice(-2), [`https://www.youtube.com/watch?v=${videoId}&index=1`, 'https://www.youtube.com/watch?v=BaW_jenozKc&index=2'])
+  assert.equal(args[args.indexOf('--parse-metadata') + 1], LOCAL_PLAYLIST_INDEX_METADATA)
+  assert.match(args[args.indexOf('--output') + 1], /^100%% _ Music\/%\(opentubex_playlist_index\)03d - /)
+  // The native bridges accept only this metadata action, so a different one would fail playlist downloads.
+  for (const bridge of ['../../android/app/src/main/java/org/opentubex/app/YtDlpArguments.java', '../../ios/App/App/opentubex_ios_ytdlp.py']) {
+    assert.ok(readFileSync(new URL(bridge, import.meta.url), 'utf8').includes(LOCAL_PLAYLIST_INDEX_METADATA), bridge)
+  }
 })
 
 test('playlists split into processes that keep playlist order and numbering', () => {
@@ -98,8 +105,8 @@ test('playlists split into processes that keep playlist order and numbering', ()
 
   const local = { videoIds: [videoId, 'BaW_jenozKc', 'aaaaaaaaaaa'], isPlaylist: true, mode: 'video' }
   assert.deepEqual(splitDownloadArguments(local, buildYtDlpDownloadArguments(local).args, 2).parts, [
-    ['--autonumber-start', '1', `https://www.youtube.com/watch?v=${videoId}`],
-    ['--autonumber-start', '2', 'https://www.youtube.com/watch?v=BaW_jenozKc', 'https://www.youtube.com/watch?v=aaaaaaaaaaa']
+    ['--autonumber-start', '1', `https://www.youtube.com/watch?v=${videoId}&index=1`],
+    ['--autonumber-start', '2', 'https://www.youtube.com/watch?v=BaW_jenozKc&index=2', 'https://www.youtube.com/watch?v=aaaaaaaaaaa&index=3']
   ])
 
   // An abbreviated custom entry selection applies to the whole playlist.

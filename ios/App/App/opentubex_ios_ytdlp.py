@@ -1,9 +1,12 @@
 """In-process yt-dlp entry point for the iOS Capacitor bridge."""
 
+import contextlib
 import json
+import os
 from pathlib import Path
 import re
 import subprocess
+import tempfile
 import threading
 
 from opentubex_ios_ffmpeg import set_control_file
@@ -66,20 +69,118 @@ _VALUES = {
     '--fragment-retries', '--concurrent-fragments', '--limit-rate', '--sleep-interval',
     '--max-sleep-interval', '--sleep-requests', '--geo-bypass-country', '--user-agent',
     '--progress-template', '--referer', '--add-headers', '--proxy', '--trim-filenames',
-    '--concat-playlist',
+    '--concat-playlist', '--parse-metadata',
 }
+# Other metadata actions can set any field, including ones that name output files.
+# This one numbers local playlist files, like LOCAL_PLAYLIST_INDEX_METADATA in src/ytDlpArguments.js.
+_LOCAL_PLAYLIST_INDEX_METADATA = 'original_url:[?&]index=(?P<opentubex_playlist_index>[0-9]+)(?:&|$)'
 
 
 def _validate_arguments(args):
-    value = False
+    pending = None  # an option whose value is the next argument
     for arg in args:
-        option = arg.split('=', 1)[0]
-        if value:
-            value = False
-        elif option in _VALUES:
-            value = '=' not in arg
-        elif option not in _FLAGS and not re.fullmatch(r'https?://\S+', arg):
+        if pending is not None:
+            option, value, pending = pending, arg, None
+        else:
+            option, separator, value = arg.partition('=')
+            if option in _VALUES and not separator:
+                pending = option
+                continue
+            if option not in _VALUES:
+                if option not in _FLAGS and not re.fullmatch(r'https?://\S+', arg):
+                    raise ValueError('unsupported-custom-argument')
+                continue
+        if option == '--parse-metadata' and value != _LOCAL_PLAYLIST_INDEX_METADATA:
             raise ValueError('unsupported-custom-argument')
+
+
+_COOKIE_HEADER = '# Netscape HTTP Cookie File'
+_COOKIE_LOCK = threading.Lock()
+
+
+def _parse_cookies(text):
+    """Reads the cookies of a Netscape cookie file, keyed like yt-dlp's cookie jar."""
+    cookies = {}
+    for line in re.split(r'\r?\n', text):
+        if line.startswith('#') and not line.startswith('#HttpOnly_'):
+            continue
+        fields = line.removeprefix('#HttpOnly_').split('\t')
+        if len(fields) != 7:
+            continue
+        try:
+            expires = int(float(fields[4]))
+        except ValueError:
+            expires = 0
+        # yt-dlp drops the HttpOnly prefix and stores session cookies as expiring at
+        # 0 when it saves, so only compare what it keeps.
+        cookies[(fields[0], fields[2], fields[5])] = (line, (fields[3], expires, fields[6]))
+    return cookies
+
+
+def _merge_cookies(base, result, current):
+    """Applies the cookies one yt-dlp instance changed to the current file, keeping
+    those other instances changed in the meantime, or returns None when nothing changed."""
+    # yt-dlp writes the header first and ends every cookie with a newline, so
+    # an instance stopped while saving must not remove the cookies it did not write.
+    if not result.startswith(_COOKIE_HEADER) or not result.endswith('\n'):
+        return None
+    before, after, merged = _parse_cookies(base), _parse_cookies(result), _parse_cookies(current)
+
+    def state(cookies, key):
+        return cookies[key][1] if key in cookies else None
+
+    changed = False
+    for key, cookie in after.items():
+        if cookie[1] in (state(before, key), state(merged, key)):
+            continue
+        merged[key] = cookie
+        changed = True
+    for key, cookie in before.items():
+        if key in after or state(merged, key) != cookie[1]:
+            continue
+        del merged[key]
+        changed = True
+    if not changed:
+        return None
+    return _COOKIE_HEADER + '\n' + ''.join(line + '\n' for line, _ in merged.values())
+
+
+@contextlib.contextmanager
+def _private_cookies(path):
+    """yt-dlp rewrites its cookie file when it closes. Instances that shared one could
+    read another's partial write, and the last to close would discard the cookies
+    YouTube rotated for the others. Each instance gets a private copy instead, which
+    is merged back once it closes, like src/main/ytDlpCookieFile.js."""
+    if not path:
+        yield path
+        return
+    shared = Path(path)
+    with _COOKIE_LOCK:
+        try:
+            base = shared.read_text(encoding='utf-8')
+        except OSError:
+            base = None
+        if base is not None:
+            descriptor, copy = tempfile.mkstemp(prefix='yt-dlp-cookies-', suffix='.txt')
+            with os.fdopen(descriptor, 'w', encoding='utf-8') as file:
+                file.write(base)
+    if base is None:
+        # yt-dlp reports the missing file.
+        yield path
+        return
+    try:
+        yield copy
+    finally:
+        with _COOKIE_LOCK:
+            try:
+                merged = _merge_cookies(base, Path(copy).read_text(encoding='utf-8'),
+                                        shared.read_text(encoding='utf-8'))
+                if merged is not None:
+                    shared.write_text(merged, encoding='utf-8')
+            except OSError:
+                pass
+            finally:
+                Path(copy).unlink(missing_ok=True)
 
 
 def _option(args, name, default=None):
@@ -116,10 +217,11 @@ def _extract(request):
         options['extractor_args'] = yt_dlp.parse_options([
             '--extractor-args', _option(args, '--extractor-args')
         ]).ydl_opts['extractor_args']
-    if request.get('cookies'):
-        options['cookiefile'] = request['cookies']
-    with yt_dlp.YoutubeDL(options) as ydl:
-        info = ydl.sanitize_info(ydl.extract_info(url, download=False))
+    with _private_cookies(request.get('cookies')) as cookies:
+        if cookies:
+            options['cookiefile'] = cookies
+        with yt_dlp.YoutubeDL(options) as ydl:
+            info = ydl.sanitize_info(ydl.extract_info(url, download=False))
     if info is None:
         raise ValueError('yt-dlp returned no media')
     if not options['extract_flat']:
@@ -290,8 +392,10 @@ def _download(request):
         try:
             if control_file.exists():
                 raise yt_dlp.utils.DownloadError('Download interrupted')
-            with yt_dlp.YoutubeDL({**part['options'], 'progress_hooks': [report],
-                                   'postprocessor_hooks': [processed]}) as ydl:
+            # Parts run at the same time, so each needs its own copy of the cookie file.
+            with _private_cookies(part['options'].get('cookiefile')) as cookies, \
+                    yt_dlp.YoutubeDL({**part['options'], 'cookiefile': cookies, 'progress_hooks': [report],
+                                      'postprocessor_hooks': [processed]}) as ydl:
                 prepare_filename = ydl.prepare_filename
 
                 def contained_filename(*args, **kwargs):

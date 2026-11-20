@@ -2230,14 +2230,18 @@ test('retries failed external playback with configured cookies', async ({ app, p
     title: 'Cookie protected video',
     formats: [{ url: DEMO_MEDIA_URL, protocol: 'https', ext: 'webm', vcodec: 'vp9', acodec: 'opus', width: 640, height: 360 }]
   })
-  await writeFile(cookiePath, '# Netscape HTTP Cookie File\n')
+  await writeFile(cookiePath, '# Netscape HTTP Cookie File\nvideos.example.test\tFALSE\t/\tTRUE\t4102444800\tsession\tsigned-in\n')
+  // yt-dlp receives a copy of the cookie file.
   await writeFile(executable, [
     '#!/bin/sh',
     'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
-    'case " $* " in',
-    `  *' ${cookiePath} '*) printf '%s\\n' '${response}' ;;`,
-    '  *) printf "%s\\n" "ERROR: Sign in to view this video" >&2; exit 1 ;;',
-    'esac'
+    'previous=',
+    'for argument do',
+    `  if [ "$previous" = --cookies ] && grep -q signed-in "$argument"; then printf '%s\\n' '${response}'; exit; fi`,
+    '  previous="$argument"',
+    'done',
+    'printf "%s\\n" "ERROR: Sign in to view this video" >&2',
+    'exit 1'
   ].join('\n'))
   await chmod(executable, 0o755)
   await routeDemoMedia(page)
