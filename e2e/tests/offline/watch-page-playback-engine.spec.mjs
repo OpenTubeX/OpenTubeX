@@ -478,7 +478,7 @@ test.describe('watch page', () => {
         await watchView.evaluate(async view => {
           view.videoChapters = [
             { title: 'First chapter', startSeconds: 0 },
-            { title: 'Second chapter', startSeconds: 5 }
+            { title: 'Second chapter', startSeconds: 2 }
           ]
           view.videoCurrentChapterIndex = 1
           await view.$nextTick()
