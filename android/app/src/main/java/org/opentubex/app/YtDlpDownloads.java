@@ -35,6 +35,7 @@ final class YtDlpDownloads {
     private static final String LIVE_PREFIX = "__OPENTUBEX_LIVE__:";
     // The keys of FFmpeg's -progress output that a live recording shows
     private static final Pattern FFMPEG_PROGRESS = Pattern.compile("^(out_time_us|total_size|progress)=(\\S+)$");
+    static final long STOP_UNANSWERED_MS = 10_000;
     private final Context context;
     private final AtomicFile file;
     private final File staging;
@@ -595,8 +596,13 @@ final class YtDlpDownloads {
         }
         var ffmpegProgress = FFMPEG_PROGRESS.matcher(line);
         if (ffmpegProgress.matches()) {
-            // FFmpeg reports progress once more after a stop request, which already shows processing
-            if (!record.optBoolean("live") || record.optBoolean("stopping")) return;
+            if (!record.optBoolean("live")) return;
+            if (record.has("stopping")) {
+                // FFmpeg reports progress once more after a stop request, which already shows processing.
+                // One that still reports after that kept recording, so show that again.
+                if (System.currentTimeMillis() - record.optLong("stopping") < STOP_UNANSWERED_MS) return;
+                record.remove("stopping");
+            }
             String key = ffmpegProgress.group(1);
             String value = ffmpegProgress.group(2);
             if (key.equals("out_time_us") && value.matches("\\d{1,15}")) record.put("recordedSeconds", Long.parseLong(value) / 1_000_000.0);
@@ -673,8 +679,8 @@ final class YtDlpDownloads {
             boolean interrupted = false;
             for (int index = 0; index < parts.size(); index++) {
                 JSONObject part = parts.get(index);
-                if (!part.optBoolean("live") || !part.optString("status").equals("downloading") || part.optBoolean("done") || part.optBoolean("stopping")) continue;
-                part.put("stopping", true).put("status", "processing");
+                if (!part.optBoolean("live") || !part.optString("status").equals("downloading") || part.optBoolean("done") || part.has("stopping")) continue;
+                part.put("stopping", System.currentTimeMillis()).put("status", "processing");
                 if (YtDlpRuntime.interrupt(id, index)) interrupted = true;
                 else { part.remove("stopping"); part.put("status", "downloading"); }
             }

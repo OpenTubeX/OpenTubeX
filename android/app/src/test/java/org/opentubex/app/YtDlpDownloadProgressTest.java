@@ -51,9 +51,15 @@ public class YtDlpDownloadProgressTest {
         assertEquals(10485760, record.getLong("recordedBytes"));
 
         // FFmpeg reports once more while it finishes a stopped recording
-        part.put("stopping", true).put("status", "processing");
+        part.put("stopping", System.currentTimeMillis()).put("status", "processing");
         YtDlpDownloads.updateProgress(part, "progress=continue");
         assertEquals("processing", part.getString("status"));
+        // A recording that keeps going after the stop request can be stopped again
+        part.put("stopping", System.currentTimeMillis() - YtDlpDownloads.STOP_UNANSWERED_MS);
+        YtDlpDownloads.updateProgress(part, "progress=continue");
+        assertEquals("downloading", part.getString("status"));
+        assertFalse(part.has("stopping"));
+        part.put("stopping", System.currentTimeMillis()).put("status", "processing");
 
         // A live video earlier in a playlist must not mark the next one as live
         YtDlpDownloads.updateProgress(part, "__OPENTUBEX_PREPARING__:bbbbbbbbbbb\t2\t2\t\"Video\"");
