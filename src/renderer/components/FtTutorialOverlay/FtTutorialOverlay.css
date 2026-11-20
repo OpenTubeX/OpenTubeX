@@ -268,10 +268,10 @@
 }
 
 .tutorialPreferences > :deep(.themePickerEntry) {
-  /* Matches the theme mode previews, which sit inside 7px of padding, and keeps
-     the same room on the start as the 25px reset indicator takes at the end. */
+  /* Its reset indicator sits in the room at the end, and the start keeps as
+     much, so the button stays centered. */
   justify-self: stretch;
-  margin-inline: 32px 7px;
+  margin-inline: 32px;
 }
 
 .tutorialActions {

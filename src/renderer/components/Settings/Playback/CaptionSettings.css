@@ -12,6 +12,10 @@
   padding-block: 12px;
   padding-inline: 5%;
   margin-block-end: 1rem;
+
+  /* Shares its edges with the controls below, which are inset by their
+     cell's padding and start after the changed-setting marker gutter. */
+  margin-inline: calc(0.75rem + var(--settings-marker-gutter, 0px)) 0.75rem;
   border-radius: var(--shape-corner-medium);
   background: linear-gradient(135deg, #576574, #222f3e);
   line-height: 1.4;
@@ -46,6 +50,12 @@
 
 .captionColumn-right {
   align-items: flex-end;
+}
+
+.captionToggle {
+  display: flex;
+  justify-content: center;
+  margin-block-end: 1rem;
 }
 
 .captionControls {

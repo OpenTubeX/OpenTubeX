@@ -12,6 +12,16 @@
           {{ t('Video.Player.Caption Appearance.Sample') }}
         </span>
       </div>
+      <div class="captionToggle">
+        <FtToggleSwitch
+          :label="t('Settings.Player Settings.Caption Appearance.Enable Translations')"
+          :compact="true"
+          :default-value="enableCaptionTranslations"
+          setting-key="enableCaptionTranslations"
+          :tooltip="t('Tooltips.Player Settings.Enable Caption Translations')"
+          @change="updateEnableCaptionTranslations"
+        />
+      </div>
       <div class="captionControls">
         <div class="captionControl">
           <FtSelect
@@ -25,18 +35,8 @@
             @change="updatePreferredCaptionLocale"
           />
         </div>
-        <div class="captionControl">
-          <FtToggleSwitch
-            :label="t('Settings.Player Settings.Caption Appearance.Enable Translations')"
-            :compact="true"
-            :default-value="enableCaptionTranslations"
-            setting-key="enableCaptionTranslations"
-            :tooltip="t('Tooltips.Player Settings.Enable Caption Translations')"
-            @change="updateEnableCaptionTranslations"
-          />
-        </div>
         <div
-          v-for="control in styleControls"
+          v-for="control in orderedStyleControls"
           :key="control.setting"
           class="captionControl"
         >
@@ -194,6 +194,11 @@ function findOptionValue(control, selectValue) {
 }
 
 // The lists are built once per change of the settings, as a select treats new lists as new options.
+// Selects first and sliders last, so each kind lines up in its own rows.
+const orderedStyleControls = computed(() => [
+  ...styleControls.value.filter(control => !control.slider),
+  ...styleControls.value.filter(control => control.slider),
+])
 const styleControls = computed(() => [
   {
     setting: 'fontFamily',

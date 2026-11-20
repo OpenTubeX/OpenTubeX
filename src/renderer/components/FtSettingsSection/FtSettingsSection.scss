@@ -105,6 +105,12 @@
   margin-block-start: calc(20px * var(--ui-density));
 }
 
+/* Cards and notices nested in a section keep some of it around them, so
+   their edges don't run into its edges where they would fill it. */
+.settingsSection > .sectionBody > :deep(:is(.settingsCard, .settingsNotice)) {
+  inline-size: calc(100% - 24px);
+}
+
 /* A nested card that ends the section keeps the same 20px from its bottom
    edge, which already pads the content by 8px. */
 .settingsSection > .sectionBody > :deep(.settingsCard:last-child) {
@@ -234,6 +240,30 @@
   max-inline-size: none;
 }
 
+/* A checkbox list in two independent columns, so a label that wraps only
+   lengthens its own column. Both are as wide as the widest checkbox, so the
+   gap between them sits on the center line, under the centered title.
+   Stacked, the list is as wide as its widest checkbox and centered. */
+.sectionBody :deep(.checkboxColumns) {
+  columns: 2;
+  column-gap: 40px;
+  inline-size: fit-content;
+  max-inline-size: 100%;
+
+  @container settings-content (width <= 680px) {
+    columns: auto;
+  }
+}
+
+.sectionBody :deep(.checkboxColumns label) {
+  break-inside: avoid;
+}
+
+.sectionBody :deep(.checkboxColumns .checkboxTitle) {
+  column-span: all;
+  text-align: center;
+}
+
 :deep(.switchColumn) {
   display: flex;
   flex-direction: column;
@@ -306,6 +336,7 @@
   .settingsSelectGrid > *,
   .generalSelectGrid > *,
   .switchColumn > *,
+  .captionControl > *,
   .externalSoftwareToolControls > *,
   .restrictedPlaybackAuthControl > *
 )) {
@@ -405,7 +436,7 @@
       display: inline-flex;
     }
 
-    :deep(:not(.select, .selectLabel, .groupTitle, .checkboxTitle, .selectIndicators, .inputIndicators, .labelMain, .switch-label-icons) > .tooltip) {
+    :deep(:not(.select, .selectLabel, .groupTitle, .checkboxTitle, .pure-checkbox label, .selectIndicators, .inputIndicators, .labelMain, .switch-label-icons) > .tooltip) {
       display: inline-block;
       position: absolute;
       inset-inline-end: -25px;
