@@ -846,7 +846,7 @@ function recordAppDiagnostics(testInfo, recordTrace) {
  * The test's output directory is uploaded with the results, so the dumps of a
  * test without the `app` fixture are kept too.
  */
-function crashDumpsDir() {
+export function crashDumpsDir() {
   try {
     return base.info().outputPath('crash-dumps')
   } catch {
