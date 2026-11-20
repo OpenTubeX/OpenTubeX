@@ -50,6 +50,7 @@
         v-if="pinnedPlaylists.length > 0"
         class="mobileHidden pinnedPlaylists"
         @pointerdown.capture="startPlaylistDrag"
+        @touchmove="holdPlaylistDrag"
       >
         <router-link
           v-for="playlist in pinnedPlaylists"
@@ -96,6 +97,7 @@
         v-if="pinnedChannels.length > 0"
         class="mobileHidden pinnedChannels"
         @pointerdown.capture="startChannelDrag"
+        @touchmove="holdChannelDrag"
       >
         <component
           :is="enableChannelLinks ? 'router-link' : 'span'"
@@ -407,7 +409,7 @@ const pinnedChannelReorder = createPinReorder({
   update: update => store.dispatch('updatePinnedChannels', update),
 })
 
-const { onPointerDown: startPlaylistDrag } = useGridReorder({
+const { onPointerDown: startPlaylistDrag, onTouchMove: holdPlaylistDrag } = useGridReorder({
   itemSelector: '.navChannel',
   handleSelector: '.navChannel',
   getId: item => item.dataset.pinnedId,
@@ -415,7 +417,7 @@ const { onPointerDown: startPlaylistDrag } = useGridReorder({
   clickableHandles: true,
 })
 
-const { onPointerDown: startChannelDrag } = useGridReorder({
+const { onPointerDown: startChannelDrag, onTouchMove: holdChannelDrag } = useGridReorder({
   itemSelector: '.navChannel',
   handleSelector: '.navChannel',
   getId: item => item.dataset.pinnedId,

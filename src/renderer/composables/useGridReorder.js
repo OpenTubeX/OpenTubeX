@@ -1,8 +1,12 @@
 import { nextTick, onBeforeUnmount, ref } from 'vue'
 
+import { lightHaptic } from '../helpers/mobileHaptics.js'
 import { computeReorderOffsets } from '../helpers/reorderOffsets'
 
 const DRAG_THRESHOLD = 4
+// Touch picks up clickable handles after a still hold, like the tablet tab strip.
+const TOUCH_HOLD_DELAY = 400
+const TOUCH_SLOP = 8
 const SCROLL_EDGE = 64
 // CSS pixels per second with the pointer at the scroller's edge.
 const SCROLL_SPEED = 900
@@ -24,7 +28,8 @@ const SCROLL_SPEED = 900
  * @param {(item: HTMLElement) => string} options.getId
  * @param {(id: string, order: string[]) => void} options.commit Receives the rendered items' new order and must render it on the next tick
  * @param {boolean} [options.clickableHandles] For handles that are links or buttons themselves: a press
- *   still focuses and clicks them, the pointer is only captured once it moves, and touch scrolls instead of dragging.
+ *   still focuses and clicks them, and the pointer is only captured once it moves. Touch scrolls as usual and
+ *   picks a handle up after a still hold; bind the returned `onTouchMove` on the list so the hold can stop scrolling.
  */
 export function useGridReorder({ itemSelector, handleSelector, getId, commit, clickableHandles = false }) {
   /** @type {import('vue').Ref<string | null>} Set while a card is dragged or settles */
@@ -36,7 +41,6 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit, cl
   /** @param {PointerEvent} event */
   function onPointerDown(event) {
     if (session || !event.isPrimary || event.button !== 0 || !(event.target instanceof Element)) return
-    if (clickableHandles && event.pointerType === 'touch') return
     const item = event.target.closest(handleSelector)?.closest(itemSelector)
     // Overlay scrollbars can wrap the rows in their own elements inside the bound list.
     const list = item?.parentElement
@@ -57,6 +61,7 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit, cl
       y: event.clientY,
       started: false,
       dropping: false,
+      touch: clickableHandles && event.pointerType === 'touch',
       // Until the pointer is captured, its events can reach any element.
       events: clickableHandles ? window : list
     }
@@ -65,9 +70,24 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit, cl
     session.events.addEventListener('pointerup', onPointerUp)
     session.events.addEventListener('pointercancel', onPointerCancel)
     session.events.addEventListener('lostpointercapture', onPointerCancel)
-    list.addEventListener('contextmenu', preventContextMenu, true)
+    // Ahead of the app's long-press link menu, which listens on the document.
+    window.addEventListener('contextmenu', preventContextMenu, true)
     // Links and images would start a native drag instead.
     list.addEventListener('dragstart', preventDefault)
+    if (session.touch) {
+      session.holdTimer = setTimeout(() => {
+        begin()
+        if (session?.started) lightHaptic()
+      }, TOUCH_HOLD_DELAY)
+    }
+  }
+
+  /**
+   * Once a touch holds a handle, its moves drag instead of scrolling.
+   * @param {TouchEvent} event
+   */
+  function onTouchMove(event) {
+    if (session?.touch && session.started && event.touches.length === 1 && event.cancelable) event.preventDefault()
   }
 
   function begin() {
@@ -156,7 +176,13 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit, cl
     session.x = event.clientX
     session.y = event.clientY
     if (!session.started) {
-      if (Math.hypot(session.x - session.startX, session.y - session.startY) < DRAG_THRESHOLD) return
+      const distance = Math.hypot(session.x - session.startX, session.y - session.startY)
+      // A touch that moves before its hold scrolls instead.
+      if (session.touch) {
+        if (distance > TOUCH_SLOP) cancel()
+        return
+      }
+      if (distance < DRAG_THRESHOLD) return
       begin()
       if (!session) return
     }
@@ -292,6 +318,8 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit, cl
 
   /** @param {PointerEvent} event */
   function onPointerCancel(event) {
+    // Capturing on the list releases a touch or pen's implicit capture on the pressed element.
+    if (event.type === 'lostpointercapture' && event.target !== session?.list) return
     if (event.pointerId === session?.pointerId) cancel()
   }
 
@@ -307,6 +335,7 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit, cl
     events.removeEventListener('pointercancel', onPointerCancel)
     events.removeEventListener('lostpointercapture', onPointerCancel)
     if (list.hasPointerCapture(pointerId)) list.releasePointerCapture(pointerId)
+    clearTimeout(session.holdTimer)
     cancelAnimationFrame(scrollFrame)
     scrollFrame = null
     lastScrollTime = null
@@ -318,7 +347,7 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit, cl
     releasePointer()
     session = null
     draggedId.value = null
-    active.list.removeEventListener('contextmenu', preventContextMenu, true)
+    window.removeEventListener('contextmenu', preventContextMenu, true)
     active.list.removeEventListener('dragstart', preventDefault)
     if (!active.started) return
     active.observer.disconnect()
@@ -333,7 +362,7 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit, cl
 
   onBeforeUnmount(finish)
 
-  return { draggedId, onPointerDown }
+  return { draggedId, onPointerDown, onTouchMove }
 }
 
 /**
