@@ -2132,7 +2132,6 @@
         class="touchControlsUnlockButton"
         :class="{ shown: touchControlsUnlockButtonShown, holding: touchControlsUnlockHolding }"
         :style="{ '--unlock-hold-duration': `${HOLD_TO_UNLOCK_MS}ms` }"
-        :aria-hidden="touchControlsUnlockButtonShown ? undefined : 'true'"
       >
         <FtIcon
           :icon="['fas', 'lock']"
