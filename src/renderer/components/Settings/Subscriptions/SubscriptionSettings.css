@@ -25,7 +25,6 @@
 }
 
 .subscriptionChannelSettingsManager {
-  box-sizing: border-box;
-  max-inline-size: 100%;
-  padding-inline-start: 44px;
+  display: flex;
+  justify-content: center;
 }

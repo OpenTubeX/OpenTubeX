@@ -3,41 +3,43 @@
     :title="$t('Settings.Theme Settings.Theme Settings')"
     :icon="['fas', 'palette']"
   >
-    <div class="themeGalleryEntry">
-      <ThemeGallery />
+    <div class="themeControls">
+      <div class="themeGalleryEntry">
+        <ThemeGallery />
+      </div>
+      <FtFlexBox class="themeSelectRow">
+        <IconPackSelect
+          size-to-content
+          @change="updateIconPack"
+        />
+        <FtSelect
+          size-to-content
+          :placeholder="t('Settings.Theme Settings.Font.App Font')"
+          :value="appFont"
+          setting-key="appFont"
+          :select-names="fontNames"
+          :select-values="fontValues"
+          :option-groups="fontGroups"
+          :option-group-labels="{
+            bundled: t('Settings.Theme Settings.Font.Bundled Fonts'),
+            system: t('Settings.Theme Settings.Font.System Fonts')
+          }"
+          :icon="['fas', 'font']"
+          searchable
+          lazy-options
+          :loading="loadingSystemFonts"
+          @change="updateAppFont"
+          @open="loadSystemFonts"
+        >
+          <template #option="{ label, value }">
+            <span
+              class="fontPreview"
+              :style="{ fontFamily: getAppFontFamily(value) }"
+            >{{ label }}</span>
+          </template>
+        </FtSelect>
+      </FtFlexBox>
     </div>
-    <FtFlexBox class="themeSelectRow">
-      <IconPackSelect
-        size-to-content
-        @change="updateIconPack"
-      />
-      <FtSelect
-        size-to-content
-        :placeholder="t('Settings.Theme Settings.Font.App Font')"
-        :value="appFont"
-        setting-key="appFont"
-        :select-names="fontNames"
-        :select-values="fontValues"
-        :option-groups="fontGroups"
-        :option-group-labels="{
-          bundled: t('Settings.Theme Settings.Font.Bundled Fonts'),
-          system: t('Settings.Theme Settings.Font.System Fonts')
-        }"
-        :icon="['fas', 'font']"
-        searchable
-        lazy-options
-        :loading="loadingSystemFonts"
-        @change="updateAppFont"
-        @open="loadSystemFonts"
-      >
-        <template #option="{ label, value }">
-          <span
-            class="fontPreview"
-            :style="{ fontFamily: getAppFontFamily(value) }"
-          >{{ label }}</span>
-        </template>
-      </FtSelect>
-    </FtFlexBox>
     <FtFlexBox
       v-if="IS_CAPACITOR || usingElectron"
       class="appIconActions"
@@ -159,8 +161,45 @@ function updateIconPack(value) {
   font-family: inherit !important;
 }
 
+/* The theme picker is as wide as the selects below it, which set the
+   width of the column, and its button spans from the start of the first
+   field to the end of the last, with its icons after it like theirs. The
+   row keeps as much room before its fields as its icons take after them,
+   counting the changed-setting marker gutter, so the fields are centered. */
+.themeControls {
+  display: grid;
+  grid-template-columns: minmax(0, max-content);
+  justify-content: center;
+  row-gap: calc(16px + 16px * var(--ui-density));
+
+  --theme-select-indicator-space: calc(8px + 22px + 22px);
+}
+
 .themeGalleryEntry {
-  margin-block-end: 16px;
+  margin-inline: var(--theme-select-indicator-space);
+}
+
+.themeControls > .themeSelectRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, max-content));
+  margin-inline-start: calc(var(--theme-select-indicator-space) - var(--settings-marker-gutter, 0px));
+}
+
+/* Stacked, the selects and the picker share a wider column. */
+@container settings-content (width <= 600px) {
+  .themeControls > .themeSelectRow {
+    grid-template-columns: minmax(0, 20rem);
+  }
+
+  .themeControls > .themeSelectRow :deep(.select) {
+    box-sizing: border-box;
+    inline-size: auto;
+  }
+}
+
+/* :has() outweighs the select's own room, which depends on its icons. */
+.themeControls > .themeSelectRow :deep(.select:has(.selectIndicators)) {
+  --select-indicator-space: var(--theme-select-indicator-space);
 }
 
 .appIconActions {

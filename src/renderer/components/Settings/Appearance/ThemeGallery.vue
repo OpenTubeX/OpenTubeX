@@ -49,11 +49,13 @@
         :icon="['fas', 'angle-right']"
       />
     </button>
-    <FtSyncedSettingIndicator
-      :setting-keys="THEME_SETTING_KEYS"
-      :is-changed="themeSettingsChanged"
-      @reset="resetThemeSettings"
-    />
+    <span class="themePickerIndicators">
+      <FtSyncedSettingIndicator
+        :setting-keys="THEME_SETTING_KEYS"
+        :is-changed="themeSettingsChanged"
+        @reset="resetThemeSettings"
+      />
+    </span>
   </div>
   <FtSettingsSubpage
     :open="open"
@@ -477,8 +479,18 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
   container-type: inline-size;
   display: flex;
   align-items: center;
-  gap: 4px;
   min-inline-size: 0;
+  position: relative;
+}
+
+/* The sync and reset icons sit after the button, outside it, so the button
+   lines up with the fields around it. */
+.themePickerIndicators {
+  display: flex;
+  align-items: center;
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: calc(100% + 4px);
 }
 
 .themePickerButton {

@@ -57,6 +57,13 @@
           compact
           @change="updateIncludeSubscriptionCollaborations"
         />
+        <FtToggleSwitch
+          :label="$t('Settings.Subscription Settings.Confirm Before Unsubscribing')"
+          :default-value="unsubscriptionPopupStatus"
+          setting-key="unsubscriptionPopupStatus"
+          compact
+          @change="updateUnsubscriptionPopupStatus"
+        />
       </div>
       <div class="switchColumn">
         <FtToggleSwitch
@@ -77,9 +84,6 @@
             :step="1"
             @change="updateOnlyShowLatestFromChannelNumber"
           />
-        </div>
-        <div class="subscriptionChannelSettingsManager">
-          <SubscriptionChannelSettings />
         </div>
         <FtToggleSwitch
           :label="$t('Settings.Subscription Settings.Show New Content Feed')"
@@ -105,14 +109,10 @@
           compact
           @change="updateShowNewSubscriptionFeedIndicators"
         />
-        <FtToggleSwitch
-          :label="$t('Settings.Subscription Settings.Confirm Before Unsubscribing')"
-          :default-value="unsubscriptionPopupStatus"
-          setting-key="unsubscriptionPopupStatus"
-          compact
-          @change="updateUnsubscriptionPopupStatus"
-        />
       </div>
+    </div>
+    <div class="subscriptionChannelSettingsManager">
+      <SubscriptionChannelSettings />
     </div>
     <div
       class="autoRefreshIntervals"

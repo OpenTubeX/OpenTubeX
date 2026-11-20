@@ -3,11 +3,7 @@
     :title="t('Settings.Distraction Free Settings.Sections.Digital Wellbeing')"
     hide-title
   >
-    <div
-      ref="selectGrid"
-      class="settingsSelectGrid"
-      :class="{ fourColumns }"
-    >
+    <div class="wellbeingColumns">
       <FtSelect
         size-to-content
         :placeholder="t('Settings.Distraction Free Settings.Digital Wellbeing.Grayscale')"
@@ -100,7 +96,7 @@
         @change="store.dispatch('updateBreakReminderAction', $event)"
       />
     </div>
-    <div class="switchColumnGrid">
+    <div class="wellbeingColumns">
       <div class="switchColumn">
         <FtToggleSwitch
           :label="t('Settings.Distraction Free Settings.Digital Wellbeing.Bedtime Reminder')"
@@ -137,7 +133,7 @@
         />
       </div>
     </div>
-    <div class="settingsSelectGrid">
+    <div class="wellbeingColumns">
       <FtSelect
         size-to-content
         :placeholder="t('Settings.Distraction Free Settings.Digital Wellbeing.Bedtime Start')"
@@ -163,7 +159,7 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
@@ -214,39 +210,6 @@ const bedtimeTimeNames = computed(() => BEDTIME_TIMES.map(time => {
 }))
 const bedtimeReminder = computed(() => store.getters.getBedtimeReminder)
 
-// Two setting pairs share a row whenever four columns fit, which depends on
-// the translated labels and the selected values, so it is measured.
-const selectGrid = useTemplateRef('selectGrid')
-const fourColumns = ref(false)
-
-function updateColumns() {
-  const grid = selectGrid.value
-  if (grid === null) return
-  grid.style.setProperty('--settings-select-grid-columns', '4')
-  // Squeezed columns let the icons overlap the fields, clip the values, and
-  // push the labels into the outline's corners.
-  fourColumns.value = [...grid.querySelectorAll(':scope > .select')].every(select => {
-    const field = select.querySelector('.select-text').getBoundingClientRect()
-    const indicators = select.querySelector('.selectIndicators').getBoundingClientRect()
-    const label = select.querySelector('.select-label')
-    const value = select.querySelector('.selectedValue')
-    return (indicators.left >= field.right - 0.5 || indicators.right <= field.left + 0.5) &&
-      label.scrollWidth <= field.width - 24 &&
-      value.scrollWidth <= value.clientWidth
-  })
-  grid.style.removeProperty('--settings-select-grid-columns')
-}
-
-let resizeObserver = null
-onMounted(() => {
-  resizeObserver = new ResizeObserver(updateColumns)
-  resizeObserver.observe(selectGrid.value)
-  for (const select of selectGrid.value.children) {
-    resizeObserver.observe(select)
-  }
-})
-onBeforeUnmount(() => resizeObserver?.disconnect())
-
 /** @param {number} minutes */
 function formatMinutesOption(minutes) {
   return minutes === 0
@@ -263,7 +226,33 @@ function formatIntervalOption(minutes) {
 </script>
 
 <style scoped>
-.fourColumns {
-  --settings-select-grid-columns: 4;
+/* Every block shares two equal columns, so the selects, switches, and
+   bedtime selects below them start at the same edges. The selects fill
+   their column and keep room for all of their icons, so their fields end
+   at the same edge too. */
+.wellbeingColumns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 32px;
+  max-inline-size: calc(52rem + 40px);
+}
+
+.wellbeingColumns > .select.contentSized {
+  --select-indicator-space: calc(8px + 32px + 22px + 22px);
+
+  box-sizing: border-box;
+  inline-size: auto;
+  margin-inline: 0;
+}
+
+.wellbeingColumns > .switchColumn {
+  align-items: start;
+}
+
+@container settings-content (width <= 680px) {
+  .wellbeingColumns {
+    grid-template-columns: minmax(0, 1fr);
+    max-inline-size: calc(26rem + 40px);
+  }
 }
 </style>
