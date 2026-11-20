@@ -149,7 +149,8 @@ def _download(request):
     saved_files = set()
     payload = request.get('payload', {})
     video_ids = payload.get('videoIds') if isinstance(payload.get('videoIds'), list) else []
-    progress_lock = threading.Lock()
+    # Parts update their state and write the combined progress under this lock.
+    progress_lock = threading.RLock()
     parts = []
 
     def collect(info):
@@ -244,12 +245,13 @@ def _download(request):
             total = progress.get('total_bytes') or progress.get('total_bytes_estimate') or 0
             value = progress.get('downloaded_bytes') or 0
             processing = progress.get('status') == 'finished'
-            # Formatted later like the _speed_str and _eta_str fields that desktop and Android show.
-            part.update({'status': 'processing' if processing else 'downloading',
-                         'percent': 0 if processing or not total else min(100, value * 100 / total),
-                         'speed': None if processing else progress.get('speed'),
-                         'eta': None if processing else progress.get('eta')})
-            write_progress()
+            with progress_lock:
+                # Formatted later like the _speed_str and _eta_str fields that desktop and Android show.
+                part.update({'status': 'processing' if processing else 'downloading',
+                             'percent': 0 if processing or not total else min(100, value * 100 / total),
+                             'speed': None if processing else progress.get('speed'),
+                             'eta': None if processing else progress.get('eta')})
+                write_progress()
 
         def processed(progress):
             if progress['postprocessor'] == 'CurrentVideo':
@@ -270,16 +272,17 @@ def _download(request):
             # cannot deliver here. This stage runs at the same point of each video.
             def run(self, info):
                 title = info.get('title')
-                current.update({
-                    'currentVideoId': info.get('id') if re.fullmatch(r'[\w-]{11}', str(info.get('id')), re.ASCII) else '',
-                    'currentTitle': title[:255] if isinstance(title, str) else '',
-                    # Selected entries keep their playlist index, and only the playlist
-                    # count includes the entries that another part downloads.
-                    'playlistIndex': _positive(info.get('playlist_index')),
-                    'playlistCount': _positive(info.get('playlist_count')) or _positive(info.get('n_entries')),
-                })
-                part.update({'status': 'preparing', 'percent': 0, 'speed': None, 'eta': None})
-                write_progress()
+                with progress_lock:
+                    current.update({
+                        'currentVideoId': info.get('id') if re.fullmatch(r'[\w-]{11}', str(info.get('id')), re.ASCII) else '',
+                        'currentTitle': title[:255] if isinstance(title, str) else '',
+                        # Selected entries keep their playlist index, and only the playlist
+                        # count includes the entries that another part downloads.
+                        'playlistIndex': _positive(info.get('playlist_index')),
+                        'playlistCount': _positive(info.get('playlist_count')) or _positive(info.get('n_entries')),
+                    })
+                    part.update({'status': 'preparing', 'percent': 0, 'speed': None, 'eta': None})
+                    write_progress()
                 return [], info
 
         set_control_file(str(control_file))
@@ -305,9 +308,10 @@ def _download(request):
                 return ydl.download(part['urls'])
         finally:
             set_control_file('')
-            part['done'] = True
-            if len(parts) > 1:
-                write_progress()
+            with progress_lock:
+                part['done'] = True
+                if len(parts) > 1:
+                    write_progress()
 
     if len(parts) == 1:
         result = run_part(parts[0])

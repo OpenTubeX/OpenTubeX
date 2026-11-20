@@ -1075,7 +1075,36 @@ async function startYtDlpDownload(
   }
 
   for (const [index, part] of parts.entries()) {
-    const child = spawn(executable, [...args, ...partArgs[index]], { ...PROCESS_TREE_SPAWN_OPTIONS, windowsHide: true, env: ytDlpEnvironment() })
+    /** @type {import('node:child_process').ChildProcess | undefined} */
+    let child
+    /**
+     * @param {number | null} code
+     * @param {Error | null} error
+     */
+    function finishPart(code, error) {
+      if (part.done) {
+        return
+      }
+      part.done = true
+      part.code = code
+      part.error = error
+      if (child) entry.children.delete(child)
+      releaseDownloadSlot()
+      if (parts.every(other => other.done)) {
+        finishDownload()
+      } else {
+        showProgress()
+        sendStatus(true)
+      }
+    }
+
+    try {
+      child = spawn(executable, [...args, ...partArgs[index]], { ...PROCESS_TREE_SPAWN_OPTIONS, windowsHide: true, env: ytDlpEnvironment() })
+    } catch (error) {
+      // Some spawn errors are thrown instead of emitted, and the other parts keep running.
+      finishPart(null, error)
+      continue
+    }
     entry.children.add(child)
 
     let stdoutBuffer = ''
@@ -1098,27 +1127,6 @@ async function startYtDlpDownload(
     child.stderr.on('end', () => {
       if (stderrBuffer) handleStderrLine(part, stderrBuffer)
     })
-
-    /**
-     * @param {number | null} code
-     * @param {Error | null} error
-     */
-    function finishPart(code, error) {
-      if (part.done) {
-        return
-      }
-      part.done = true
-      part.code = code
-      part.error = error
-      entry.children.delete(child)
-      releaseDownloadSlot()
-      if (parts.every(other => other.done)) {
-        finishDownload()
-      } else {
-        showProgress()
-        sendStatus(true)
-      }
-    }
 
     child.on('error', error => finishPart(null, error))
     child.on('close', code => finishPart(code, null))

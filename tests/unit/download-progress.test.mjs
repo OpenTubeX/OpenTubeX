@@ -113,7 +113,7 @@ test('stderr progress is decoded across chunks and keeps diagnostic history boun
     setEncoding() {},
     on(event, callback) { listeners[`${name}:${event}`] = callback },
   })
-  const wiring = source.slice(source.indexOf("    let stdoutBuffer = ''"), source.indexOf('    /**\n     * @param {number | null} code', source.indexOf("    let stdoutBuffer = ''")))
+  const wiring = source.slice(source.indexOf("    let stdoutBuffer = ''"), source.indexOf("    child.on('error'", source.indexOf("    let stdoutBuffer = ''")))
   vm.runInNewContext(`${stderrHandler}${wiring}`, {
     child: { stdout: stream('stdout'), stderr: stream('stderr') },
     part: {},
