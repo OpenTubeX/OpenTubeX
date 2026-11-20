@@ -482,6 +482,8 @@ const renderLimit = ref(OPTION_PAGE_SIZE)
 const renderedOptions = computed(() => props.lazyOptions ? filteredOptions.value.slice(windowStart.value, renderLimit.value) : filteredOptions.value)
 const nativeOptions = computed(() => {
   if (!props.lazyOptions) return props.selectNames.map((name, index) => ({ name, index }))
+  // A native multiple select keeps every checked option
+  if (props.multiple) return selectedIndices.value.map(index => ({ name: props.selectNames[index], index }))
   return selectedIndex.value === -1 ? [] : [{ name: selectedName.value, index: selectedIndex.value }]
 })
 

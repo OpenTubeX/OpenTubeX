@@ -408,7 +408,8 @@ const twitch = {
     if (!CATEGORY_PATTERN.test(id)) return null
     const list = categoryList(tab, filters)
     // Twitch's lists, its clips in particular, now and then fail with a
-    // service error that the next request doesn't have
+    // service error that the next request doesn't have. Failed requests
+    // throw instead, for the page's Retry button.
     for (let attempt = 1; ; attempt++) {
       const data = await requestTwitch(fetch,
         `query($slug: String!, ${list.declarations}) { game(slug: $slug) { ${CATEGORY_PAGE_FIELDS} ${list.query} } }`,

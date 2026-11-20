@@ -163,6 +163,7 @@ const items = computed(() => filterAvailableNavigationItems(store.getters.getNav
   backendFallback: store.getters.getBackendFallback,
   showWatchStats: store.getters.getRememberHistory && store.getters.getEnableWatchStats,
   supportsYtDlp,
+  enableTwitchPage: store.getters.getEnableTwitchPage,
 })
   .map(id => definitions.get(id))
   .filter(item => item != null)

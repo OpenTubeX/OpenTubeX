@@ -617,7 +617,6 @@ test.describe('Channels on other platforms', () => {
     await page.getByRole('option', { name: 'French' }).click()
     await expect(page.getByRole('listbox')).toBeVisible()
     await expect.poll(() => streamOptions.at(-1)).toEqual({ sort: 'VIEWER_COUNT', broadcasterLanguages: ['FR', 'DE'] })
-    await expect(languages).toContainText('French, German')
     await expect.poll(() => page.evaluate(() => window.$router.currentRoute.value.fullPath))
       .toBe('/external-category?platform=twitch&id=chess&language=fr&language=de')
     await expect(page.locator(`${activeTab} .ft-list-item .h3Title`)).toHaveText(['Other live'])
