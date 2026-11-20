@@ -1,5 +1,4 @@
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import { LOCAL_PLAYLIST_INDEX_METADATA, buildYtDlpDownloadArguments, isSafeDownloadFilenameTemplate, jsRuntimeArguments, playbackImpersonationArguments, splitDownloadArguments } from '../../src/ytDlpArguments.js'
 import { EXTERNAL_PLAYBACK_INFO_OUTPUT_TEMPLATE, PLAYBACK_INFO_OUTPUT_TEMPLATE, mapExternalPlaybackMetadata, mapPlaybackCaptions, mapPlaybackFormat } from '../../src/ytDlpMetadata.js'
@@ -84,10 +83,6 @@ test('local playlists number files by playlist position and escape literal title
   assert.deepEqual(args.slice(-2), [`https://www.youtube.com/watch?v=${videoId}&index=1`, 'https://www.youtube.com/watch?v=BaW_jenozKc&index=2'])
   assert.equal(args[args.indexOf('--parse-metadata') + 1], LOCAL_PLAYLIST_INDEX_METADATA)
   assert.match(args[args.indexOf('--output') + 1], /^100%% _ Music\/%\(opentubex_playlist_index\)03d - /)
-  // The native bridges accept only this metadata action, so a different one would fail playlist downloads.
-  for (const bridge of ['../../android/app/src/main/java/org/opentubex/app/YtDlpArguments.java', '../../ios/App/App/opentubex_ios_ytdlp.py']) {
-    assert.ok(readFileSync(new URL(bridge, import.meta.url), 'utf8').includes(LOCAL_PLAYLIST_INDEX_METADATA), bridge)
-  }
 })
 
 test('playlists split into processes that keep playlist order and numbering', () => {

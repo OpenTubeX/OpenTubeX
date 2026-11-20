@@ -72,9 +72,18 @@ export function checkOutYtDlpCookies(args) {
     // yt-dlp reports the missing file.
     return { args, release() {} }
   }
-  const directory = mkdtempSync(join(tmpdir(), 'opentubex-cookies-'))
-  const copy = join(directory, 'cookies.txt')
-  writeFileSync(copy, base, { mode: 0o600 })
+  let directory
+  let copy
+  try {
+    directory = mkdtempSync(join(tmpdir(), 'opentubex-cookies-'))
+    copy = join(directory, 'cookies.txt')
+    writeFileSync(copy, base, { mode: 0o600 })
+  } catch (error) {
+    // Without room for a copy, share the file as before instead of failing the process.
+    console.warn('Could not copy the yt-dlp cookie file', error.code ?? error)
+    if (directory !== undefined) rmSync(directory, { recursive: true, force: true })
+    return { args, release() {} }
+  }
   let released = false
   return {
     args: args.with(index + 1, copy),
