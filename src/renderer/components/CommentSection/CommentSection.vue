@@ -1789,13 +1789,14 @@ function buildMentionReplyTree(comment, childNodes = []) {
     const mention = (comment.dataType !== 'local' || reply.isFlatReply) && getCachedLeadingMention(reply)
     let parent = null
 
-    if (mention && !commentMatchesMention(comment, mention)) {
+    // A linked channel decides alone, as another channel can have the same name.
+    if (mention && mention.channelId !== '') {
+      const linksComment = [comment.authorId, comment.authorLink].includes(mention.channelId)
+      parent = linksComment ? null : latestByChannelId.get(mention.channelId) ?? null
+    } else if (mention && !commentMatchesMention(comment, mention)) {
       const byHandle = mention.handle !== '' ? latestByAuthor.get(mention.handle) : undefined
       const byAuthor = latestByAuthor.get(mention.author)
-      // A linked channel decides, as another channel can have the same name.
-      parent = (mention.channelId !== '' && latestByChannelId.get(mention.channelId)) ||
-        (byHandle && byAuthor ? (byHandle.index > byAuthor.index ? byHandle : byAuthor) : byHandle ?? byAuthor) ||
-        null
+      parent = (byHandle && byAuthor ? (byHandle.index > byAuthor.index ? byHandle : byAuthor) : byHandle ?? byAuthor) ?? null
     }
 
     if (parent) {
