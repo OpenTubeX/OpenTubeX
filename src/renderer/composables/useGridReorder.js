@@ -23,8 +23,10 @@ const SCROLL_SPEED = 900
  * @param {string} options.handleSelector
  * @param {(item: HTMLElement) => string} options.getId
  * @param {(id: string, order: string[]) => void} options.commit Receives the rendered items' new order and must render it on the next tick
+ * @param {boolean} [options.clickableHandles] For handles that are links or buttons themselves: a press
+ *   still focuses and clicks them, the pointer is only captured once it moves, and touch scrolls instead of dragging.
  */
-export function useGridReorder({ itemSelector, handleSelector, getId, commit }) {
+export function useGridReorder({ itemSelector, handleSelector, getId, commit, clickableHandles = false }) {
   /** @type {import('vue').Ref<string | null>} Set while a card is dragged or settles */
   const draggedId = ref(null)
   let session = null
@@ -34,14 +36,17 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit }) 
   /** @param {PointerEvent} event */
   function onPointerDown(event) {
     if (session || !event.isPrimary || event.button !== 0 || !(event.target instanceof Element)) return
+    if (clickableHandles && event.pointerType === 'touch') return
     const item = event.target.closest(handleSelector)?.closest(itemSelector)
     // Overlay scrollbars can wrap the rows in their own elements inside the bound list.
     const list = item?.parentElement
     const host = /** @type {Element} */ (event.currentTarget)
     if (!list || !host.contains(list)) return
-    // Keep the pointer from selecting text, focusing the handle or opening the card's long-press menu.
-    event.preventDefault()
-    event.stopPropagation()
+    if (!clickableHandles) {
+      // Keep the pointer from selecting text, focusing the handle or opening the card's long-press menu.
+      event.preventDefault()
+      event.stopPropagation()
+    }
     session = {
       list,
       item,
@@ -51,14 +56,18 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit }) 
       x: event.clientX,
       y: event.clientY,
       started: false,
-      dropping: false
+      dropping: false,
+      // Until the pointer is captured, its events can reach any element.
+      events: clickableHandles ? window : list
     }
-    list.setPointerCapture(event.pointerId)
-    list.addEventListener('pointermove', onPointerMove)
-    list.addEventListener('pointerup', onPointerUp)
-    list.addEventListener('pointercancel', cancel)
-    list.addEventListener('lostpointercapture', cancel)
+    if (!clickableHandles) list.setPointerCapture(event.pointerId)
+    session.events.addEventListener('pointermove', onPointerMove)
+    session.events.addEventListener('pointerup', onPointerUp)
+    session.events.addEventListener('pointercancel', onPointerCancel)
+    session.events.addEventListener('lostpointercapture', onPointerCancel)
     list.addEventListener('contextmenu', preventContextMenu, true)
+    // Links and images would start a native drag instead.
+    list.addEventListener('dragstart', preventDefault)
   }
 
   function begin() {
@@ -71,6 +80,10 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit }) 
     }
     const ids = items.map(getId)
     Object.assign(session, { started: true, items, ids, indexById: new Map(ids.map((id, index) => [id, index])), sourceIndex })
+    if (clickableHandles) {
+      list.setPointerCapture(session.pointerId)
+      suppressReleaseClick(session.pointerId)
+    }
     measure()
     const origin = contentOrigin(list)
     const source = session.slots[sourceIndex]
@@ -277,17 +290,22 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit }) 
     event.stopPropagation()
   }
 
+  /** @param {PointerEvent} event */
+  function onPointerCancel(event) {
+    if (event.pointerId === session?.pointerId) cancel()
+  }
+
   function cancel() {
     if (session?.dropping) return
     finish()
   }
 
   function releasePointer() {
-    const { list, pointerId } = session
-    list.removeEventListener('pointermove', onPointerMove)
-    list.removeEventListener('pointerup', onPointerUp)
-    list.removeEventListener('pointercancel', cancel)
-    list.removeEventListener('lostpointercapture', cancel)
+    const { list, pointerId, events } = session
+    events.removeEventListener('pointermove', onPointerMove)
+    events.removeEventListener('pointerup', onPointerUp)
+    events.removeEventListener('pointercancel', onPointerCancel)
+    events.removeEventListener('lostpointercapture', onPointerCancel)
     if (list.hasPointerCapture(pointerId)) list.releasePointerCapture(pointerId)
     cancelAnimationFrame(scrollFrame)
     scrollFrame = null
@@ -301,6 +319,7 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit }) 
     session = null
     draggedId.value = null
     active.list.removeEventListener('contextmenu', preventContextMenu, true)
+    active.list.removeEventListener('dragstart', preventDefault)
     if (!active.started) return
     active.observer.disconnect()
     active.mutationObserver.disconnect()
@@ -349,6 +368,38 @@ function currentTranslation(element) {
   // Covers a move transition that is still running from an earlier reorder.
   const matrix = style.transform === 'none' ? null : new DOMMatrixReadOnly(style.transform)
   return [x + (matrix?.m41 ?? 0), y + (matrix?.m42 ?? 0)]
+}
+
+/**
+ * Releasing a drag, even a cancelled one, would otherwise click the handle it started on.
+ * @param {number} pointerId
+ */
+function suppressReleaseClick(pointerId) {
+  const suppress = event => {
+    event.preventDefault()
+    event.stopPropagation()
+  }
+  const stop = () => {
+    window.removeEventListener('click', suppress, true)
+    window.removeEventListener('pointerdown', stop, true)
+    window.removeEventListener('pointerup', release, true)
+    window.removeEventListener('pointercancel', release, true)
+  }
+  const release = event => {
+    if (event.pointerId !== pointerId) return
+    // The click follows the pointerup in the same task.
+    setTimeout(stop)
+  }
+  window.addEventListener('click', suppress, true)
+  // A press means the release went elsewhere, such as after the window lost focus.
+  window.addEventListener('pointerdown', stop, true)
+  window.addEventListener('pointerup', release, true)
+  window.addEventListener('pointercancel', release, true)
+}
+
+/** @param {Event} event */
+function preventDefault(event) {
+  event.preventDefault()
 }
 
 function clamp(value, min, max) {

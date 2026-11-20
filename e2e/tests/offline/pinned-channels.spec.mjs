@@ -144,6 +144,59 @@ test('removing a pin discards cached details before sync adds it again', async (
   await expect(page.locator('.sideNav .pinnedChannels .navChannel')).toHaveAttribute('title', 'New synced name')
 })
 
+test('reorders pinned channels by dragging them in the side navigation', async ({ app, page }) => {
+  const channels = ['A', 'B', 'C'].map(letter => ({ id: `UC${letter.repeat(22)}`, name: `Channel ${letter}`, thumbnail: null }))
+  await page.evaluate(channels => window.$store.dispatch('updatePinnedChannels', channels), channels)
+  const pinned = page.locator('.sideNav .pinnedChannels .navChannel')
+  // Titles turn into tooltips under the pointer.
+  const order = () => pinned.evaluateAll(links => links.map(link => link.dataset.pinnedId.at(-1)))
+  const link = letter => pinned.and(page.locator(`[data-pinned-id="UC${letter.repeat(22)}"]`))
+  await expect.poll(order).toEqual(['A', 'B', 'C'])
+  const startUrl = page.url()
+
+  async function drag(from, to, beforeRelease) {
+    const source = await link(from).boundingBox()
+    const target = await link(to).boundingBox()
+    await page.mouse.move(source.x + source.width / 2, source.y + source.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(source.x + source.width / 2, source.y + source.height / 2 + 8, { steps: 2 })
+    await page.mouse.move(target.x + target.width / 2, target.y + target.height / 2, { steps: 5 })
+    await expect(page.locator('.sideNav .reorderDragged')).toHaveAttribute('aria-label', `Channel ${from}`)
+    await beforeRelease?.()
+    await page.mouse.up()
+  }
+
+  // Escape puts the channel back.
+  await drag('C', 'A', () => page.keyboard.press('Escape'))
+  await expect(page.locator('.sideNav .reorderActive')).toHaveCount(0)
+  await expect.poll(order).toEqual(['A', 'B', 'C'])
+
+  await drag('C', 'A')
+  await expect.poll(order).toEqual(['C', 'A', 'B'])
+  // Releasing the drag does not open the channel.
+  expect(page.url()).toBe(startUrl)
+  await expect.poll(() => latestSettings(readDatastore(app.userDataDir, 'settings')).pinnedChannels)
+    .toEqual([channels[2], channels[0], channels[1]])
+
+  // The keyboard moves the focused channel and keeps it focused.
+  const channelA = link('A')
+  await channelA.focus()
+  await page.keyboard.press('Alt+ArrowDown')
+  await expect.poll(order).toEqual(['C', 'B', 'A'])
+  await expect(channelA).toBeFocused()
+  await expect(page.locator('.sideNav .reorderStatus')).toHaveText('Channel A moved to position 3 of 3.')
+  // The announcement must not extend the navigation, which would scroll it with a native scrollbar.
+  expect(await page.locator('.sideNav').evaluate(nav => nav.scrollHeight - nav.clientHeight)).toBe(0)
+
+  // A plain click still opens the channel.
+  await link('B').click()
+  await expect(page).toHaveURL(new RegExp(`#/channel/${channels[1].id}`))
+
+  await page.reload()
+  await waitForAppReady(page)
+  await expect.poll(order).toEqual(['C', 'B', 'A'])
+})
+
 test('lists pinned playlists and channels in the mobile More sheet', { tag: '@scale' }, async ({ page }, testInfo) => {
   const id = 'UCaaaaaaaaaaaaaaaaaaaaaa'
   await page.setViewportSize({ width: 375, height: 812 })
