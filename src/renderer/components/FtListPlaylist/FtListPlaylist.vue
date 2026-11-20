@@ -279,7 +279,7 @@ function openPlaylistOptionsMenu() {
   openButtonMenu(menuButton.value.$el.querySelector('button'), playlistMenuItems, titleForDisplay.value)
 }
 function openPlaylistContextMenu(event) {
-  if (event.target.closest('.channelName, [role="dialog"], [role="menu"], .iconDropdown')) return
+  if (event.target.closest('a.channelName, [role="dialog"], [role="menu"], .iconDropdown')) return
   if (event.pointerType !== 'touch' && !process.env.IS_ELECTRON) {
     const selection = window.getSelection()
     if (event.target.closest('img, video') || (selection && !selection.isCollapsed && selection.containsNode(event.target, true))) return

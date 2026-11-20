@@ -1793,8 +1793,9 @@ function openVideoOptionsMenu() {
 function openVideoContextMenu(event) {
   cancelThumbnailSwipe()
   const target = event.target
-  // Channel names, dialogs, and dropdowns keep their own context menus.
-  const nestedControl = target.closest('.channelName, [role="dialog"], [role="menu"], .iconDropdown')
+  // Channel links, dialogs, and dropdowns keep their own context menus. Bylines
+  // without a link (collaborations, disabled channel links) have none and use the video's.
+  const nestedControl = target.closest('a.channelName, [role="dialog"], [role="menu"], .iconDropdown')
   if (target.closest('.ft-list-video')?.contains(nestedControl)) return
 
   if (event.pointerType === 'touch') {
