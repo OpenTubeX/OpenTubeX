@@ -9,7 +9,9 @@ globalThis.__feedCacheHandlers = {
     writes.push(change)
     if (writes.length === 1) throw new Error('Disk full')
   },
-  deleteAll: async () => {},
+  deleteAll: async () => {
+    throw new Error('Disk full')
+  },
   onChange: () => {},
 }
 
@@ -25,7 +27,7 @@ const hooks = registerHooks({
     return nextResolve(specifier, context)
   }
 })
-const { createFeedCacheMirror } = await import('../../src/renderer/helpers/feedCacheStore.js')
+const { clearFeedCache, createFeedCacheMirror } = await import('../../src/renderer/helpers/feedCacheStore.js')
 hooks.deregister()
 
 test('a feed cache write that failed is retried by the next save', async () => {
@@ -36,16 +38,25 @@ test('a feed cache write that failed is retried by the next save', async () => {
     await mirror.loaded
     const item = { id: 'a' }
     const documents = () => new Map([['https://a.example.test/feed', { items: [item] }]])
-    await mirror.save(documents)
-    await mirror.save(documents)
+    // Callers keep what they would lose until a save reports it written
+    assert.equal(await mirror.save(documents), false)
+    assert.equal(await mirror.save(documents), true)
     assert.deepEqual(writes.map(change => change.docs.map(doc => doc._id)), [
       ['rss:https://a.example.test/feed'],
       ['rss:https://a.example.test/feed'],
     ])
     // Written now, so an unchanged save writes nothing
-    await mirror.save(documents)
+    assert.equal(await mirror.save(documents), true)
     assert.equal(writes.length, 2)
   } finally {
     console.error = originalError
   }
+})
+
+test('a feed cache clear that failed leaves the windows their items', async () => {
+  const changes = []
+  const mirror = createFeedCacheMirror('platform:', change => changes.push(change))
+  await mirror.loaded
+  await assert.rejects(clearFeedCache(), /Disk full/)
+  assert.deepEqual(changes, [])
 })

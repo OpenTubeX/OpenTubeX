@@ -386,13 +386,12 @@ function applyCachedFeeds(documents) {
   seenHistory = history
 }
 
-/**
- * Earlier versions kept the cache in the local storage.
- * @returns {Map<string, RssFeedCacheDocument> | null}
- */
-function takeLocalStorageCache() {
-  const itemsKey = 'rssFeedItems'
-  const historyKey = 'rssFeedSeenHistory'
+// Earlier versions kept the cache in the local storage
+const LOCAL_STORAGE_CACHE_KEYS = { itemsKey: 'rssFeedItems', historyKey: 'rssFeedSeenHistory' }
+
+/** @returns {Map<string, RssFeedCacheDocument> | null} */
+function readLocalStorageCache() {
+  const { itemsKey, historyKey } = LOCAL_STORAGE_CACHE_KEYS
   try {
     if (localStorage.getItem(itemsKey) === null && localStorage.getItem(historyKey) === null) return null
     const items = JSON.parse(localStorage.getItem(itemsKey) ?? '[]')
@@ -410,9 +409,6 @@ function takeLocalStorageCache() {
     return documents
   } catch {
     return new Map()
-  } finally {
-    localStorage.removeItem(itemsKey)
-    localStorage.removeItem(historyKey)
   }
 }
 
@@ -421,10 +417,23 @@ function takeLocalStorageCache() {
  * would take every feed for new.
  */
 export const rssFeedCacheLoaded = feedCache.loaded.then((documents) => {
-  const migrated = documents.size === 0 ? takeLocalStorageCache() : null
+  const migrated = documents.size === 0 ? readLocalStorageCache() : null
   applyCachedFeeds(/** @type {Map<string, RssFeedCacheDocument>} */ (migrated ?? documents))
-  if (migrated) saveRssFeedCache()
+  // Kept until the datastore has them, so a failed write loses nothing
+  if (migrated) {
+    saveRssFeedCache().then((saved) => { if (saved) removeLocalStorageCache() })
+  } else {
+    removeLocalStorageCache()
+  }
 })
+
+function removeLocalStorageCache() {
+  try {
+    for (const key of Object.values(LOCAL_STORAGE_CACHE_KEYS)) localStorage.removeItem(key)
+  } catch {
+    // Without access, there is nothing to remove either
+  }
+}
 
 /** Writes the documents of the feeds that changed */
 function saveRssFeedCache() {

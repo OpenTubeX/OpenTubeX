@@ -18,6 +18,7 @@ const mirrors = new Set()
  */
 let storedDocuments = null
 // Writes run one at a time, so a later write never reaches the datastore first
+/** @type {Promise<unknown>} */
 let writes = Promise.resolve()
 
 /**
@@ -70,8 +71,8 @@ export function createFeedCacheMirror(prefix, onChange) {
   mirrors.add({ prefix, onChange })
   /** @type {(() => Map<string, FeedCacheDocument>) | null} */
   let pendingBuild = null
-  /** @type {Promise<void>} */
-  let pendingWrite = Promise.resolve()
+  /** @type {Promise<boolean>} */
+  let pendingWrite = Promise.resolve(true)
 
   return {
     /** @type {Promise<Map<string, FeedCacheDocument>>} the stored documents, by key */
@@ -83,27 +84,30 @@ export function createFeedCacheMirror(prefix, onChange) {
      * Saves the documents that `build` returns, by key. Saves that are made
      * before the previous one starts write once, with the latest state.
      * @param {() => Map<string, FeedCacheDocument>} build
-     * @returns {Promise<void>} once the documents are written
+     * @returns {Promise<boolean>} whether the documents are written
      */
     save(build) {
       const queued = pendingBuild !== null
       pendingBuild = build
       if (queued) return pendingWrite
-      pendingWrite = writes = writes.then(async () => {
+      pendingWrite = writes.then(async () => {
         const documents = await readStoredDocuments()
         const current = /** @type {() => Map<string, FeedCacheDocument>} */ (pendingBuild)()
         pendingBuild = null
         const stored = new Map([...documents].filter(([id]) => id.startsWith(prefix)))
         const change = diffFeedCacheDocuments(stored, new Map([...current].map(([key, doc]) => [prefix + key, doc])))
-        if (change.docs.length === 0 && change.removed.length === 0) return
+        if (change.docs.length === 0 && change.removed.length === 0) return true
         await DBFeedCacheHandlers.write(change)
         // Only once written, so that the next save retries a failed write. The
         // window's own objects, which its next save compares with.
         for (const { _id } of change.docs) documents.set(_id, current.get(_id.slice(prefix.length)))
         for (const id of change.removed) documents.delete(id)
+        return true
       }).catch((error) => {
         console.error('Failed to save the feed cache', error)
+        return false
       })
+      writes = pendingWrite
       return pendingWrite
     }
   }
@@ -114,11 +118,13 @@ export function createFeedCacheMirror(prefix, onChange) {
  * forget theirs, and load them again on their next refresh.
  */
 export async function clearFeedCache() {
-  for (const mirror of mirrors) mirror.onChange(null)
   const cleared = writes.then(async () => {
     const documents = await readStoredDocuments()
     await DBFeedCacheHandlers.deleteAll()
     documents.clear()
+    // Only now, after the windows applied what they loaded, and only when
+    // the items are gone from the datastore too
+    for (const mirror of mirrors) mirror.onChange(null)
   })
   writes = cleared.catch(() => {})
   await cleared

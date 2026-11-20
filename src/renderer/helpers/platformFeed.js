@@ -201,13 +201,12 @@ function applyCachedChannels(documents) {
   channelHistory = nextHistory
 }
 
-/**
- * Earlier versions kept the cache in the local storage.
- * @returns {Map<string, PlatformFeedCacheDocument> | null}
- */
-function takeLocalStorageCache() {
-  const feedKey = 'platformFeed'
-  const historyKey = 'platformFeedHistory'
+// Earlier versions kept the cache in the local storage
+const LOCAL_STORAGE_CACHE_KEYS = { feedKey: 'platformFeed', historyKey: 'platformFeedHistory' }
+
+/** @returns {Map<string, PlatformFeedCacheDocument> | null} */
+function readLocalStorageCache() {
+  const { feedKey, historyKey } = LOCAL_STORAGE_CACHE_KEYS
   try {
     if (localStorage.getItem(feedKey) === null && localStorage.getItem(historyKey) === null) return null
     const feed = JSON.parse(localStorage.getItem(feedKey) ?? 'null')
@@ -219,9 +218,6 @@ function takeLocalStorageCache() {
     )
   } catch {
     return new Map()
-  } finally {
-    localStorage.removeItem(feedKey)
-    localStorage.removeItem(historyKey)
   }
 }
 
@@ -256,10 +252,23 @@ function toCacheDocuments(feed, historyByChannel) {
  * take every channel for new.
  */
 export const platformFeedCacheLoaded = feedCache.loaded.then((documents) => {
-  const migrated = documents.size === 0 ? takeLocalStorageCache() : null
+  const migrated = documents.size === 0 ? readLocalStorageCache() : null
   applyCachedChannels(/** @type {Map<string, PlatformFeedCacheDocument>} */ (migrated ?? documents))
-  if (migrated) savePlatformFeedCache()
+  // Kept until the datastore has them, so a failed write loses nothing
+  if (migrated) {
+    savePlatformFeedCache().then((saved) => { if (saved) removeLocalStorageCache() })
+  } else {
+    removeLocalStorageCache()
+  }
 })
+
+function removeLocalStorageCache() {
+  try {
+    for (const key of Object.values(LOCAL_STORAGE_CACHE_KEYS)) localStorage.removeItem(key)
+  } catch {
+    // Without access, there is nothing to remove either
+  }
+}
 
 /** Writes the documents of the channels that changed */
 function savePlatformFeedCache() {
