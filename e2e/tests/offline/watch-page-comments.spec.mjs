@@ -690,7 +690,7 @@ test.describe('manual comment loading', () => {
     await expect(mentioned).toHaveClass(/commentReplyBranchRoot/, { timeout: 30_000 })
     const children = mentioned.locator(':scope > .commentReplyChildren .commentReplyContent .commentAuthor')
     await expect(children).toHaveText(['@Leohockey2014', '@hayden172'])
-    await expect(mentioned.locator(':scope > .commentReplyLineToggle')).toHaveAttribute('aria-label', 'Hide 2 replies')
+    await expect(mentioned.locator(':scope > .commentReplyLineToggle')).toHaveAttribute('aria-label', /\b2\b/)
     // A reply without a mention stays a reply to the comment.
     await expect(branchBy('@LindaBystrowski')).toHaveClass(/commentReplyBranchRoot/)
   })

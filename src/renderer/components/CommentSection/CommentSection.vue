@@ -1790,14 +1790,12 @@ function buildMentionReplyTree(comment, childNodes = []) {
     let parent = null
 
     if (mention && !commentMatchesMention(comment, mention)) {
-      const candidates = [
-        mention.channelId !== '' ? latestByChannelId.get(mention.channelId) : undefined,
-        mention.handle !== '' ? latestByAuthor.get(mention.handle) : undefined,
-        latestByAuthor.get(mention.author)
-      ]
-      for (const candidate of candidates) {
-        if (candidate && (parent === null || candidate.index > parent.index)) parent = candidate
-      }
+      const byHandle = mention.handle !== '' ? latestByAuthor.get(mention.handle) : undefined
+      const byAuthor = latestByAuthor.get(mention.author)
+      // A linked channel decides, as another channel can have the same name.
+      parent = (mention.channelId !== '' && latestByChannelId.get(mention.channelId)) ||
+        (byHandle && byAuthor ? (byHandle.index > byAuthor.index ? byHandle : byAuthor) : byHandle ?? byAuthor) ||
+        null
     }
 
     if (parent) {
