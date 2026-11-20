@@ -53,9 +53,21 @@
           :key="playlist._id"
           :to="{ path: `/playlist/${playlist._id}`, query: { playlistType: 'user' } }"
           :data-tab-title="playlist.playlistName"
+          :data-pinned-playlist-id="playlist._id"
+          :class="{ dragging: pinnedPlaylistReorder.draggedItemId.value === playlist._id }"
+          :style="pinnedPlaylistReorder.rowStyle(playlist._id)"
           class="navChannel channelLink"
           :title="playlist.playlistName"
           role="button"
+          @dragstart.prevent
+          @click.capture="pinnedPlaylistReorder.filterClick"
+          @pointerdown="pinnedPlaylistReorder.startDrag($event, playlist._id)"
+          @pointermove="pinnedPlaylistReorder.moveDrag"
+          @pointerup="pinnedPlaylistReorder.endDrag"
+          @pointercancel="pinnedPlaylistReorder.cancelDrag"
+          @lostpointercapture="pinnedPlaylistReorder.cancelDrag"
+          @keydown.alt.up.prevent="pinnedPlaylistReorder.moveByKeyboard(playlist._id, -1)"
+          @keydown.alt.down.prevent="pinnedPlaylistReorder.moveByKeyboard(playlist._id, 1)"
         >
           <div class="thumbnailContainer">
             <FtRetryImage
@@ -96,11 +108,22 @@
           :key="channel.id"
           :to="`/channel/${channel.id}`"
           :data-tab-title="channel.name"
-          :class="enableChannelLinks ? '' : 'disabledIcon'"
+          :data-pinned-channel-id="channel.id"
+          :class="[enableChannelLinks ? '' : 'disabledIcon', { dragging: pinnedChannelReorder.draggedItemId.value === channel.id }]"
+          :style="pinnedChannelReorder.rowStyle(channel.id)"
           class="navChannel channelLink mobileHidden"
           :title="channel.name"
           :aria-label="channel.name"
           :role="enableChannelLinks ? 'button' : undefined"
+          @dragstart.prevent
+          @click.capture="pinnedChannelReorder.filterClick"
+          @pointerdown="pinnedChannelReorder.startDrag($event, channel.id)"
+          @pointermove="pinnedChannelReorder.moveDrag"
+          @pointerup="pinnedChannelReorder.endDrag"
+          @pointercancel="pinnedChannelReorder.cancelDrag"
+          @lostpointercapture="pinnedChannelReorder.cancelDrag"
+          @keydown.alt.up.prevent="pinnedChannelReorder.moveByKeyboard(channel.id, -1)"
+          @keydown.alt.down.prevent="pinnedChannelReorder.moveByKeyboard(channel.id, 1)"
         >
           <div
             class="thumbnailContainer"
@@ -184,6 +207,14 @@
         />
       </div>
     </div>
+    <p
+      class="reorderStatus"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    >
+      {{ pinnedReorderStatus }}
+    </p>
   </FtFlexBox>
 </template>
 
@@ -191,7 +222,7 @@
 import FtRetryImage from '../FtRetryImage.vue'
 import NavLabel from './NavLabel.vue'
 import { FtIcon } from '@opentubex/icons'
-import { computed, onBeforeUnmount, onMounted, onUpdated, ref, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, onUpdated, ref, useTemplateRef, watch } from 'vue'
 import { ObserveVisibility as vObserveVisibility } from 'vue-observe-visibility'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
@@ -206,12 +237,13 @@ import { filterAvailableNavigationItems } from '../../../navigationAvailability'
 import { getVideoThumbnailUrl, localizeAndAddKeyboardShortcutToActionTitle } from '../../helpers/utils'
 import { getConfiguredKeyboardShortcuts } from '../../../constants'
 import { NAVIGATION_ITEM_DEFINITIONS } from '../../../navigationItems'
+import { moveItemByVisibleOffset } from '../../../orderedItems'
+import { useOrderedItemReorder } from '../../composables/useOrderedItemReorder'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { createMobileNavigationScroll, mobileNavigationMinimizePreview } from '../../helpers/mobileNavigationScroll'
 import { softwareKeyboardOpen } from '../../helpers/phoneViewport'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
-import { sortUserPlaylists } from '../../helpers/playlists'
 import { sortSubscribedChannels } from '../../helpers/subscription-groups'
 
 const { locale, t } = useI18n()
@@ -279,6 +311,115 @@ const pinnedChannels = computed(() => store.getters.getPinnedChannels.map(channe
   return { ...channel, thumbnail }
 }))
 
+const pinnedReorderStatus = ref('')
+
+function createPinnedReorder({ ids, items, getId, getLabel, itemIdAttribute, isEnabled = () => true, containerSelector, action }) {
+  let suppressClick = false
+  let suppressTimer = null
+
+  function clearSuppressedClickLater() {
+    clearTimeout(suppressTimer)
+    suppressTimer = setTimeout(() => {
+      suppressClick = false
+    }, 0)
+  }
+
+  function announceMoved(id) {
+    const position = ids.value.indexOf(id)
+    if (position === -1) return
+    const item = items.value.find(entry => getId(entry) === id)
+    pinnedReorderStatus.value = t('Home Page.Section moved', {
+      section: (item ? getLabel(item) : null) ?? id,
+      position: position + 1,
+      total: ids.value.length,
+    })
+  }
+
+  const reorder = useOrderedItemReorder({
+    items: ids,
+    rowSelector: '.navChannel',
+    itemIdAttribute,
+    updateItems: orderedIds => store.dispatch(action, orderedIds),
+    announceMoved,
+  })
+
+  function startDrag(event, id) {
+    clearTimeout(suppressTimer)
+    suppressClick = false
+    if (items.value.length < 2 || !isEnabled()) return
+    if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return
+    reorder.startPointerDrag(event, id)
+  }
+
+  function moveDrag(event) {
+    reorder.movePointerDrag(event)
+    if (reorder.draggedItemId.value !== null) suppressClick = true
+  }
+
+  async function endDrag(event) {
+    const wasDragging = reorder.draggedItemId.value !== null
+    if (wasDragging) suppressClick = true
+    await reorder.endPointerDrag(event)
+    if (wasDragging) clearSuppressedClickLater()
+  }
+
+  function cancelDrag(event) {
+    const wasDragging = reorder.draggedItemId.value !== null
+    reorder.cancelPointerDrag(event)
+    if (wasDragging) clearSuppressedClickLater()
+  }
+
+  function filterClick(event) {
+    if ((!suppressClick && reorder.draggedItemId.value === null) || event.detail === 0) return
+    suppressClick = false
+    clearTimeout(suppressTimer)
+    event.preventDefault()
+    event.stopPropagation()
+  }
+
+  async function moveByKeyboard(id, offset) {
+    if (items.value.length < 2 || !isEnabled()) return
+    const currentIds = ids.value
+    const reordered = moveItemByVisibleOffset(currentIds, currentIds, id, offset)
+    if (reordered === currentIds) return
+    if (await store.dispatch(action, reordered)) {
+      announceMoved(id)
+      await nextTick()
+      innerRef.value?.querySelector(`${containerSelector} .navChannel[${itemIdAttribute}="${CSS.escape(id)}"]`)?.focus()
+    }
+  }
+
+  onBeforeUnmount(() => clearTimeout(suppressTimer))
+
+  return {
+    draggedItemId: reorder.draggedItemId,
+    rowStyle: reorder.rowStyle,
+    startDrag,
+    moveDrag,
+    endDrag,
+    cancelDrag,
+    filterClick,
+    moveByKeyboard,
+  }
+}
+
+// Metadata refreshes recreate the list; only a different order may cancel a drag.
+const pinnedChannelIds = computed(previous => {
+  const ids = store.getters.getPinnedChannels.map(channel => channel.id)
+  return previous?.length === ids.length && previous.every((id, index) => id === ids[index]) ? previous : ids
+})
+
+const pinnedChannelReorder = createPinnedReorder({
+  ids: pinnedChannelIds,
+  items: pinnedChannels,
+  getId: channel => channel.id,
+  getLabel: channel => channel.name,
+  itemIdAttribute: 'data-pinned-channel-id',
+  isEnabled: () => enableChannelLinks.value,
+  containerSelector: '.pinnedChannels',
+  action: 'reorderPinnedChannels',
+})
+
 const activeSubscriptions = computed(() => {
   const instanceUrl = backendPreference.value === 'invidious' ? currentInvidiousInstanceUrl.value : null
 
@@ -321,16 +462,25 @@ function onActiveSubscriptionsVisibilityChanged(isVisible) {
 }
 
 const pinnedPlaylists = computed(() => {
-  const pinnedIds = new Set(store.getters.getPinnedPlaylistIds)
-  if (pinnedIds.size === 0) return []
-  // Follow the order of the Playlists page, so it can be arranged there.
-  return sortUserPlaylists(
-    store.getters.getAllPlaylists.filter(playlist => pinnedIds.has(playlist._id)),
-    store.getters.getUserPlaylistsSortBy,
-    store.getters.getUserPlaylistsCustomOrder,
-    new Intl.Collator([locale.value, 'en'], { sensitivity: 'base' }),
-    store.getters.getUserPlaylistsPinnedIds
-  )
+  const pinnedIds = store.getters.getPinnedPlaylistIds
+  if (pinnedIds.length === 0) return []
+  const playlistById = new Map(store.getters.getAllPlaylists.map(playlist => [playlist._id, playlist]))
+  return pinnedIds.map(id => playlistById.get(id)).filter(Boolean)
+})
+
+const pinnedPlaylistIds = computed(previous => {
+  const ids = pinnedPlaylists.value.map(playlist => playlist._id)
+  return previous?.length === ids.length && previous.every((id, index) => id === ids[index]) ? previous : ids
+})
+
+const pinnedPlaylistReorder = createPinnedReorder({
+  ids: pinnedPlaylistIds,
+  items: pinnedPlaylists,
+  getId: playlist => playlist._id,
+  getLabel: playlist => playlist.playlistName,
+  itemIdAttribute: 'data-pinned-playlist-id',
+  containerSelector: '.pinnedPlaylists',
+  action: 'reorderPinnedPlaylistIds',
 })
 
 function pinnedPlaylistThumbnail(playlist) {
@@ -383,6 +533,7 @@ const visibleNavigationItems = computed(() => filterAvailableNavigationItems(
 const mobilePinnedItems = computed(() => [
   ...pinnedPlaylists.value.map(playlist => ({
     key: `playlist-${playlist._id}`,
+    playlistId: playlist._id,
     path: `/playlist/${playlist._id}`,
     query: { playlistType: 'user' },
     label: playlist.playlistName,
@@ -393,6 +544,7 @@ const mobilePinnedItems = computed(() => [
   })),
   ...pinnedChannels.value.map(channel => ({
     key: `channel-${channel.id}`,
+    channelId: channel.id,
     path: enableChannelLinks.value ? `/channel/${channel.id}` : null,
     label: channel.name,
     thumbnail: channel.thumbnail,
