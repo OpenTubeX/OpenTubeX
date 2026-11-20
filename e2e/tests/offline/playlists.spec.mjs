@@ -1175,9 +1175,9 @@ test.describe('custom playlists overview order', () => {
     await expect(page.locator('.mobileLinkActionsBackdrop')).toHaveCount(0)
   })
 
-  test('pins playlists to the side navigation and reorders them by drag and keyboard', { tag: '@scale' }, async ({ app, page }) => {
+  test('pins playlists to the side navigation in the overview order', async ({ app, page }) => {
     const pinned = page.locator('.sideNav .pinnedPlaylists .navChannel')
-    const pinnedTitles = () => pinned.evaluateAll(links => links.map(link => link.getAttribute('data-tab-title')))
+    const pinnedTitles = () => pinned.evaluateAll(links => links.map(link => link.title))
     async function togglePin(name, action) {
       await goTo(page, 'userplaylists')
       await page.getByRole('link', { name: `Overview ${name}` }).first().click()
@@ -1189,26 +1189,18 @@ test.describe('custom playlists overview order', () => {
     await expect(pinned).toHaveCount(0)
     await togglePin('A', 'Pin to Navigation')
     await togglePin('B', 'Pin to Navigation')
-    await expect.poll(pinnedTitles).toEqual(['Overview A', 'Overview B'])
-
-    // Dragging reorders pinned playlists directly without navigating.
-    await goTo(page, 'history')
-    await pinned.nth(1).scrollIntoViewIfNeeded()
-    const from = await pinned.nth(1).boundingBox()
-    const to = await pinned.nth(0).boundingBox()
-    await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2)
-    await page.mouse.down()
-    await page.mouse.move(from.x + from.width / 2, to.y + to.height / 2, { steps: 10 })
-    await page.mouse.up()
+    // Playlists without a saved position start newest first.
     await expect.poll(pinnedTitles).toEqual(['Overview B', 'Overview A'])
-    await expect(page).toHaveURL(/#\/history$/)
 
-    // Keyboard reordering with Alt+ArrowUp restores the original order.
-    await pinned.nth(1).focus()
-    await page.keyboard.press('Alt+ArrowUp')
+    await goTo(page, 'userplaylists')
+    await page.locator('.playlistList [data-playlist-drag-item]')
+      .filter({ hasText: 'Overview A' })
+      .getByRole('button', { name: 'Drag or use the arrow keys to reorder' })
+      .focus()
+    await page.keyboard.press('Home')
     await expect.poll(pinnedTitles).toEqual(['Overview A', 'Overview B'])
-    await expect(pinned.nth(0)).toBeFocused()
 
+    await goTo(page, 'history')
     await page.locator('.sideNav .pinnedPlaylists .navChannel[title="Overview B"]').click()
     await expect(page).toHaveURL(/#\/playlist\/custom-overview-b\?playlistType=user/)
     await expect(page.locator('.playlistInfo')).toContainText('Overview B')

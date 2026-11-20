@@ -78,12 +78,6 @@
     border-radius: var(--shape-corner-medium);
   }
 
-  :is(.pinnedPlaylists, .pinnedChannels) .navChannel.dragging::before {
-    opacity: 1;
-    transform: scaleX(1);
-    border-radius: var(--nav-indicator-radius);
-  }
-
   :is(.navOption, .navChannel).router-link-active {
     color: var(--primary-color);
   }
