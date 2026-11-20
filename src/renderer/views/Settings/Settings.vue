@@ -2042,7 +2042,9 @@ function clampBounds(bounds) {
 }
 
 function getCenteredBounds() {
-  const width = Math.min(DEFAULT_WIDTH, Math.max(MINIMUM_WIDTH, window.innerWidth - 48))
+  // Prefer wider margins, but not at the cost of the desktop layout when the
+  // viewport has room for it. The layout measures inside the 1px borders.
+  const width = Math.min(DEFAULT_WIDTH, Math.max(MINIMUM_WIDTH, window.innerWidth - 48, SETTINGS_DESKTOP_WIDTH_THRESHOLD + 2))
   const height = Math.min(DEFAULT_HEIGHT, Math.max(MINIMUM_HEIGHT, window.innerHeight - 80))
   return clampBounds({
     x: Math.round((window.innerWidth - width) / 2),
