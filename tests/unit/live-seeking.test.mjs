@@ -108,10 +108,8 @@ for (const props of [
     setCurrentTime(3)
     assert.equal(state.video.value.currentTime, 10)
     assert.equal(state.hasPlaybackPosition.value, false)
-    for (const fastSeek of [true, false]) {
-      state.handlers.seekto({ seekTime: 2, fastSeek })
-      assert.equal(state.video.value.currentTime, 10)
-    }
+    // Native media controls then offer no seeking at all.
+    assert.deepEqual(['seekbackward', 'seekforward', 'seekto'].filter(action => action in state.handlers), [])
     state.handlers.stop()
     assert.equal(state.video.value.currentTime, 10)
   })

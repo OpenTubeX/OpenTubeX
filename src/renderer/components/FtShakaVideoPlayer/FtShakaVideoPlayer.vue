@@ -4711,6 +4711,11 @@ const seekingIsPossible = computed(() => {
   return props.playbackEngine === 'yt-dlp' && props.manifestSrc.includes('/playlist_type/DVR/')
 })
 
+// Native media controls offer seeking only while the player can seek.
+watch(() => seekingIsPossible.value, () => {
+  if (ui && !shortsNavigationSuspended.value) registerMediaSessionHandlers()
+})
+
 /** @type {import('vue').ComputedRef<boolean>} */
 const isSabrPlayback = computed(() => {
   return !!process.env.SUPPORTS_LOCAL_API &&
@@ -7154,23 +7159,25 @@ function registerMediaSessionHandlers() {
         tabMediaCoordinator.setPlaybackState(mediaTabId, 'none')
       }
     },
-    seekbackward: (details = {}) => {
-      seekBySeconds(-(details.seekOffset ?? defaultSkipInterval.value), false, true)
-    },
-    seekforward: (details = {}) => {
-      seekBySeconds(details.seekOffset ?? defaultSkipInterval.value, false, true)
-    },
-    seekto: (details = {}) => {
-      const videoElement = video.value
-      if (!videoElement || !canSeek() || !Number.isFinite(details.seekTime)) return
-      accumulatedSeekSeconds = 0
-      rememberSeekPosition(details.seekTime, true)
-      if (details.fastSeek === true && typeof videoElement.fastSeek === 'function') {
-        videoElement.fastSeek(details.seekTime)
-      } else {
-        videoElement.currentTime = details.seekTime
+    ...(seekingIsPossible.value && {
+      seekbackward: (details = {}) => {
+        seekBySeconds(-(details.seekOffset ?? defaultSkipInterval.value), false, true)
+      },
+      seekforward: (details = {}) => {
+        seekBySeconds(details.seekOffset ?? defaultSkipInterval.value, false, true)
+      },
+      seekto: (details = {}) => {
+        const videoElement = video.value
+        if (!videoElement || !canSeek() || !Number.isFinite(details.seekTime)) return
+        accumulatedSeekSeconds = 0
+        rememberSeekPosition(details.seekTime, true)
+        if (details.fastSeek === true && typeof videoElement.fastSeek === 'function') {
+          videoElement.fastSeek(details.seekTime)
+        } else {
+          videoElement.currentTime = details.seekTime
+        }
       }
-    },
+    }),
     enterpictureinpicture: () => {
       if (!audioOnlyMedia.value && ui?.getControls?.().isPiPAllowed()) {
         ui.getControls().togglePiP()
