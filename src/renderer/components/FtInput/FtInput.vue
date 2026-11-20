@@ -7,7 +7,7 @@
       showActionButton,
       showPasswordToggle: inputType === 'password',
       numberInput: inputType === 'number',
-      floatingLabel: showLabel,
+      floatingLabel: labelVisible,
       hasValue: inputDataPresent,
       hasHighlights: highlightSegments !== null,
       hasSupportingText: supportingText !== '',
@@ -39,7 +39,7 @@
         :spellcheck="false"
         :aria-describedby="descriptionIds"
         :aria-invalid="invalid"
-        :aria-label="showLabel ? null : (label || placeholder)"
+        :aria-label="labelVisible ? null : (label || placeholder)"
         @change="handleChange"
         @mousedown="selectOnClick && $event.button === 0 && $event.preventDefault()"
         @click="handleNativeClick"
@@ -73,7 +73,7 @@
         class="inputHighlight"
       >{{ segment.text }}</mark><template v-else>{{ segment.text }}</template></template></span>
       <fieldset
-        v-if="showLabel"
+        v-if="labelVisible"
         class="inputOutline"
         role="presentation"
       >
@@ -143,7 +143,7 @@
         class="inputAction"
         :class="{
           enabled: !disabled && (inputDataPresent || allowActionButtonWhenEmpty),
-          withLabel: showLabel
+          withLabel: labelVisible
         }"
         :disabled="disabled"
         :aria-label="actionButtonLabel"
@@ -397,7 +397,10 @@ const props = defineProps({
 const emit = defineEmits(['blur', 'change', 'clear', 'click', 'focus', 'input', 'keydown', 'remove'])
 
 const id = useId()
-const showLeadingIcon = computed(() => props.icon !== null && !props.showLabel && props.variant === 'rounded' && !props.isSearch)
+// Rounded fields are compact search and filter fields, so they show their
+// label only as a placeholder, never as a floating label.
+const labelVisible = computed(() => props.showLabel && props.variant !== 'rounded')
+const showLeadingIcon = computed(() => props.icon !== null && !labelVisible.value && props.variant === 'rounded' && !props.isSearch)
 
 const inputRef = useTemplateRef('inputRef')
 const passwordVisible = ref(false)
@@ -586,8 +589,8 @@ const inputTextStyle = computed(() => {
   if (!props.isSearch) return null
 
   const offset = getInputTextAscentOffset(inputDataDisplayed.value)
-  const paddingStart = props.showLabel ? 20 : (45 - 20) / 2
-  const paddingEnd = props.showLabel ? 5 : (45 - 20) / 2
+  const paddingStart = labelVisible.value ? 20 : (45 - 20) / 2
+  const paddingEnd = labelVisible.value ? 5 : (45 - 20) / 2
 
   return {
     '--search-input-padding-block-start': `${paddingStart - offset}px`,
