@@ -881,6 +881,7 @@ Settings:
     Mono Audio: 'Sain mono'
     Normalize Loudness: 'Normaleiddio cryfder sain'
     Show Mono Audio Toggle: 'Dangos y togl sain mono'
+    Show Mirror Video Toggle: "Dangos togl drychu'r fideo"
     Default Media Format:
       Default Media Format: 'Fformat Cyfryngau Rhagosodedig'
     Pause on Stream Recovery: "Seibio wrth adfer ffrwd"
@@ -910,6 +911,7 @@ Settings:
     Enable DLNA Casting: "Galluogi castio DLNA"
     Skip Unavailable Playlist Videos: "Hepgor fideos nad ydynt ar gael mewn rhestri chwarae"
     Lights Off: Diffodd y goleuadau
+    Mirror Video: "Drychu'r fideo"
     Show Lights Off Toggle: Dangos togl diffodd y goleuadau
     Show Volume Boost Toggle: "Dangos y togl hwb i’r sain"
     Swipe Gestures:
@@ -2438,6 +2440,7 @@ Tooltips:
     Use YouTube-style Shorts: Mae'n dangos Byrion mewn grid portread ar dudalennau tanysgrifiadau a sianeli ac yn defnyddio'r chwaraewr Byrion yn arddull YouTube.
     Loop Shorts: Pan fydd wedi'i alluogi, mae Byrion yn ailgychwyn yn awtomatig. Pan fydd wedi'i analluogi, mae Byrion yn stopio ar y diwedd ac yn dangos botwm ailchwarae.
     Show Skip Silence Toggle: Mae'n dangos togl ymlaen/i ffwrdd ar gyfer hepgor distawrwydd yn newislen gosodiadau'r chwaraewr.
+    Show Mirror Video Toggle: "Mae'n dangos togl ymlaen/i ffwrdd yn newislen gosodiadau'r chwaraewr sy'n troi'r fideo'n llorweddol, fel ei bod hi'n haws dilyn tiwtorialau dawns, ymarfer corff ac offerynnau."
     Enable Skip Silence by Default: Mae'n galluogi hepgor distawrwydd ar gyfer tabiau newydd. Nid yw ei newid mewn un tab yn effeithio ar dabiau eraill.
     Enable Video Zoom: Mae'n dangos y rheolydd Chwyddo yn newislen gosodiadau'r chwaraewr ac yn galluogi ei lwybrau byr bysellfwrdd a'i reolyddion padellu.
     Enable Seek History: Yn cofio o ble y neidioch chi ym mhob fideo nes i'r ap gau. Yn dangos y rhestr hanes neidio yn newislen gosodiadau'r chwaraewr ac yn galluogi ei llwybrau byr bysellfwrdd.

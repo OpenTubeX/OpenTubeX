@@ -881,6 +881,7 @@ Settings:
     Mono Audio: 'Audio mono'
     Normalize Loudness: 'Normalkan kenyaringan'
     Show Mono Audio Toggle: 'Tampilkan sakelar audio mono'
+    Show Mirror Video Toggle: "Tampilkan tombol cerminkan video"
     Default Media Format:
       Default Media Format: 'Format Media Bawaan'
     Pause on Stream Recovery: "Jeda saat pemulihan streaming"
@@ -910,6 +911,7 @@ Settings:
     Enable DLNA Casting: "Aktifkan transmisi DLNA"
     Skip Unavailable Playlist Videos: "Lewati video yang tidak tersedia dalam daftar putar"
     Lights Off: Matikan lampu
+    Mirror Video: "Cerminkan video"
     Show Lights Off Toggle: Tampilkan tombol matikan lampu
     Show Volume Boost Toggle: "Tampilkan sakelar penguat volume"
     Swipe Gestures:
@@ -2427,6 +2429,7 @@ Tooltips:
     Use YouTube-style Shorts: Menampilkan Shorts dalam kisi potret pada halaman langganan dan saluran, serta menggunakan pemutar Shorts bergaya YouTube.
     Loop Shorts: Jika diaktifkan, Shorts dimulai ulang secara otomatis. Jika dinonaktifkan, Shorts berhenti di akhir dan menampilkan tombol putar ulang.
     Show Skip Silence Toggle: Menampilkan tombol aktif/nonaktif untuk melewati bagian hening dalam menu pengaturan pemutar.
+    Show Mirror Video Toggle: "Menampilkan tombol aktif/nonaktif dalam menu pengaturan pemutar yang membalik video secara horizontal, sehingga lebih mudah mengikuti tutorial tari, olahraga, dan alat musik."
     Enable Skip Silence by Default: Mengaktifkan fitur lewati bagian hening untuk tab baru. Mengubahnya di satu tab tidak memengaruhi tab lain.
     Enable Video Zoom: Menampilkan kontrol Zoom dalam menu pengaturan pemutar dan mengaktifkan pintasan papan ketik serta kontrol gesernya.
     Enable Seek History: Mengingat posisi tempat Anda melompat di setiap video hingga aplikasi ditutup. Menampilkan daftar riwayat lompatan di menu pengaturan pemutar dan mengaktifkan pintasan keyboard-nya.

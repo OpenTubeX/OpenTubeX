@@ -885,6 +885,7 @@ Settings:
     Mono Audio: 'صوت أحادي'
     Normalize Loudness: 'توحيد مستوى الصوت'
     Show Mono Audio Toggle: 'إظهار مفتاح الصوت الأحادي'
+    Show Mirror Video Toggle: "إظهار مفتاح عكس الفيديو"
     Default Media Format:
       Default Media Format: 'تنسيق الوسائط الافتراضي'
     Pause on Stream Recovery: "الإيقاف المؤقت عند استعادة البث"
@@ -914,6 +915,7 @@ Settings:
     Enable DLNA Casting: "تفعيل البث عبر DLNA"
     Skip Unavailable Playlist Videos: "تخطي الفيديوهات غير المتاحة في قوائم التشغيل"
     Lights Off: إطفاء الأنوار
+    Mirror Video: "عكس الفيديو"
     Show Lights Off Toggle: إظهار مفتاح إطفاء الأنوار
     Show Volume Boost Toggle: "إظهار مفتاح تعزيز الصوت"
     Swipe Gestures:
@@ -2442,6 +2444,7 @@ Tooltips:
     Use YouTube-style Shorts: يعرض فيديوهات Shorts في شبكة عمودية على صفحات الاشتراك والقناة ويستخدم مشغّل Shorts على غرار YouTube.
     Loop Shorts: عند التفعيل، تتم إعادة تشغيل Shorts تلقائيًا. عند إيقاف ميزة Shorts، تتوقف عند النهاية وتعرض زر إعادة التشغيل.
     Show Skip Silence Toggle: يعرض مفتاح تشغيل/إيقاف لتخطي الصمت في قائمة إعدادات المشغل.
+    Show Mirror Video Toggle: "يعرض مفتاح تشغيل/إيقاف في قائمة إعدادات المشغل يعكس الفيديو أفقيًا، لتسهيل متابعة دروس الرقص والتمارين الرياضية والعزف على الآلات."
     Enable Skip Silence by Default: تمكن الصمت تخطي علامات التبويب الجديدة. ولا يؤثر تغييره في علامة تبويب واحدة على علامات التبويب الأخرى.
     Enable Video Zoom: يعرض عنصر التحكم في التكبير/التصغير في قائمة إعدادات المشغل ويمكّن اختصارات لوحة المفاتيح وعناصر التحكم في التحريك.
     Enable Seek History: يتذكر المواضع التي انتقلت منها في كل فيديو حتى إغلاق التطبيق. يعرض قائمة سجل التنقل في قائمة إعدادات المشغل ويفعّل اختصارات لوحة المفاتيح الخاصة بها.

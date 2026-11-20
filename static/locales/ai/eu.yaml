@@ -880,6 +880,7 @@ Settings:
     Mono Audio: 'Audio monoa'
     Normalize Loudness: 'Normalizatu bolumena'
     Show Mono Audio Toggle: 'Erakutsi audio monoaren etengailua'
+    Show Mirror Video Toggle: "Erakutsi bideoa ispilatzeko etengailua"
     Pause on Stream Recovery: "Pausatu jarioa berreskuratzean"
     Buffering:
       Buffering: Bufferra
@@ -907,6 +908,7 @@ Settings:
     Enable DLNA Casting: "Gaitu DLNA bidezko igorpena"
     Skip Unavailable Playlist Videos: "Saltatu erabilgarri ez dauden bideoak erreprodukzio-zerrendetan"
     Lights Off: Argiak itzali
+    Mirror Video: "Bideoa ispilatu"
     Show Lights Off Toggle: Erakutsi argiak itzaltzeko etengailua
     Show Volume Boost Toggle: "Erakutsi bolumen-igoeraren etengailua"
     Swipe Gestures:
@@ -2411,6 +2413,7 @@ Tooltips:
     Use YouTube-style Shorts: Shorts bideoak sareta bertikalean erakusten ditu harpidetzen eta kanalen orrietan, eta YouTube estiloko Shorts erreproduzigailua erabiltzen du.
     Loop Shorts: Gaituta dagoenean, Shorts bideoak automatikoki hasten dira berriro. Desgaituta dagoenean, amaieran gelditzen dira eta berriro erreproduzitzeko botoia erakusten dute.
     Show Skip Silence Toggle: Isiluneak saltatzea aktibatzeko edo desaktibatzeko etengailua erakusten du erreproduzigailuaren ezarpen-menuan.
+    Show Mirror Video Toggle: "Bideoa horizontalki ispilatzen duen etengailua erakusten du erreproduzigailuaren ezarpen-menuan, dantza, ariketa fisiko eta musika-tresnen tutorialak errazago jarraitzeko."
     Enable Skip Silence by Default: Isiluneak saltatzea gaitzen du fitxa berrietarako. Fitxa batean aldatzeak ez die beste fitxei eragiten.
     Enable Video Zoom: Zoom kontrola erakusten du erreproduzigailuaren ezarpen-menuan eta teklatuko lasterbideak eta desplazamendu-kontrolak gaitzen ditu.
     Enable Seek History: Bideo bakoitzean nondik egin duzun jauzi gogoratzen du aplikazioa itxi arte. Jauzien historiaren zerrenda erakusten du erreproduzigailuaren ezarpenen menuan eta haren laster-teklak gaitzen ditu.

@@ -1105,9 +1105,11 @@ Settings:
       Screenshots: Screenshots
       Timestamp Notes: Zeitstempel-Notizen
     Lights Off: Licht aus
+    Mirror Video: Video spiegeln
     Show Lights Off Toggle: Schalter für „Licht aus“ anzeigen
     Show Volume Boost Toggle: Schalter für Lautstärkeverstärkung anzeigen
     Show Mono Audio Toggle: Schalter für Mono-Audio anzeigen
+    Show Mirror Video Toggle: Schalter für „Video spiegeln“ anzeigen
     Show Music Mode Toggle: Schalter für den Musikmodus anzeigen
     Swipe Gestures:
       Fullscreen Brightness: Volle Helligkeit im Vollbild
@@ -3186,6 +3188,7 @@ Tooltips:
     Multiply Seek Interval by Playback Rate: Wenn aktiviert, werden Sprungintervalle (Pfeiltasten und J/L) mit der aktuellen Wiedergabegeschwindigkeit multipliziert. Wenn deaktiviert, bleiben die Sprungintervalle unabhängig von der Wiedergabegeschwindigkeit konstant.
     Show Playback Rate Adjusted Timestamp: Wenn aktiviert und die Wiedergabegeschwindigkeit nicht 1x ist, zeigt der Player nach der normalen Zeitanzeige zusätzliche angepasste Zeitstempel in Klammern an.
     Show Skip Silence Toggle: Zeigt im Einstellungsmenü des Players einen Ein-/Aus-Schalter zum Überspringen von Stille an.
+    Show Mirror Video Toggle: Zeigt im Einstellungsmenü des Players einen Ein-/Aus-Schalter an, der das Video horizontal spiegelt. So kannst du Tanz-, Fitness- und Instrumenten-Tutorials leichter folgen.
     Enable Skip Silence by Default: Aktiviert „Stille überspringen“ für neue Tabs. Änderungen in einem Tab wirken sich nicht auf andere Tabs aus.
     Hold to Speed Up: Halte die Leertaste oder die linke Maustaste über dem Player gedrückt, um die aktuelle Wiedergabegeschwindigkeit vorübergehend mit dem gewählten Wert zu multiplizieren.
     Ambient Mode: Lässt die Farben des Videos in den Bereich um den Player ausstrahlen.

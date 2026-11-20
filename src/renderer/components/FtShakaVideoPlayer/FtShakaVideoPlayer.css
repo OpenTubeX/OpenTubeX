@@ -142,6 +142,12 @@
   /* stylelint-enable plugin/no-low-performance-animation-properties */
 }
 
+/* Uses `rotate`, which no layout or animation of the video sets, so mirroring
+   composes with the zoom `transform` and the dock push `scale` and `translate`. */
+.player.mirrored {
+  rotate: y 180deg;
+}
+
 /*
   Holding shift over a zoomed video turns the pointer into a handle for moving
   the visible part of the frame. shaka-player's controls cover the video, so

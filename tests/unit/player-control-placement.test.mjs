@@ -39,7 +39,7 @@ function controls({ props = {}, overflow = false, controlBarButtons = DEFAULT_CO
   for (const name of [
     'displayVideoPlayButton', 'contextMenuElements', 'hasMultipleAudioTracks', 'useVrMode',
     'enableScreenshot', 'enableTimestampNotes', 'useSponsorBlock', 'audioOnlyMedia', 'audioPlayerMode', 'videoZoomPossible',
-    'showLightsOffToggle', 'showMonoAudioToggle', 'showMusicModeToggle', 'showSkipSilenceButton',
+    'showLightsOffToggle', 'showMonoAudioToggle', 'showMusicModeToggle', 'showSkipSilenceButton', 'mirrorVideoPossible',
     'voiceOverTranslationAvailable', 'disableAbRepeat', 'seekHistoryAvailable',
   ]) state[name] = { value: false }
   state.enableScreenshot = { value: screenshot }

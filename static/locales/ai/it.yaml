@@ -880,6 +880,7 @@ Settings:
     Mono Audio: 'Audio mono'
     Normalize Loudness: 'Normalizza il volume'
     Show Mono Audio Toggle: 'Mostra l''interruttore dell''audio mono'
+    Show Mirror Video Toggle: "Mostra l'interruttore per specchiare il video"
     Pause on Stream Recovery: "Metti in pausa al ripristino dello stream"
     Buffering:
       Buffering: Buffering
@@ -907,6 +908,7 @@ Settings:
     Enable DLNA Casting: "Abilita la trasmissione DLNA"
     Skip Unavailable Playlist Videos: "Salta i video non disponibili nelle playlist"
     Lights Off: Spegni le luci
+    Mirror Video: "Specchia video"
     Show Lights Off Toggle: Mostra l'interruttore per spegnere le luci
     Show Volume Boost Toggle: "Mostra l'interruttore di amplificazione del volume"
     Swipe Gestures:
@@ -2400,6 +2402,7 @@ Tooltips:
     Use YouTube-style Shorts: Mostra gli Shorts in una griglia verticale nelle pagine delle iscrizioni e dei canali e usa il lettore di Shorts in stile YouTube.
     Loop Shorts: Se abilitato, gli Shorts ricominciano automaticamente. Se disabilitato, si fermano alla fine e mostrano un pulsante per riprodurli di nuovo.
     Show Skip Silence Toggle: Mostra nel menu delle impostazioni del lettore un interruttore per attivare o disattivare il salto dei silenzi.
+    Show Mirror Video Toggle: "Mostra nel menu delle impostazioni del lettore un interruttore che capovolge il video in orizzontale, per seguire più facilmente tutorial di danza, allenamento e strumenti musicali."
     Enable Skip Silence by Default: Abilita il salto dei silenzi nelle nuove schede. La modifica in una scheda non influisce sulle altre.
     Enable Video Zoom: Mostra il controllo Zoom nel menu delle impostazioni del lettore e abilita le relative scorciatoie da tastiera e i controlli di panoramica.
     Enable Seek History: Ricorda da dove sei saltato in ogni video fino alla chiusura dell'app. Mostra l'elenco della cronologia dei salti nel menu delle impostazioni del lettore e abilita le relative scorciatoie da tastiera.

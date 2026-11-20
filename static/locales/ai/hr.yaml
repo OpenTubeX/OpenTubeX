@@ -883,6 +883,7 @@ Settings:
     Mono Audio: 'Mono zvuk'
     Normalize Loudness: 'Normaliziraj glasnoću'
     Show Mono Audio Toggle: 'Prikaži prekidač za mono zvuk'
+    Show Mirror Video Toggle: "Prikaži prekidač za zrcaljenje videozapisa"
     Default Media Format:
       Default Media Format: 'Standardni format medija'
     Pause on Stream Recovery: "Pauziraj pri oporavku streama"
@@ -912,6 +913,7 @@ Settings:
     Enable DLNA Casting: "Omogući DLNA emitiranje"
     Skip Unavailable Playlist Videos: "Preskoči nedostupne videozapise na popisima za reprodukciju"
     Lights Off: Ugasi svjetla
+    Mirror Video: "Zrcali videozapis"
     Show Lights Off Toggle: Prikaži prekidač za gašenje svjetala
     Show Volume Boost Toggle: "Prikaži prekidač za pojačanje glasnoće"
     Swipe Gestures:
@@ -2438,6 +2440,7 @@ Tooltips:
     Use YouTube-style Shorts: Prikazuje Shorts videozapise u okomitoj mreži na stranicama pretplata i kanala te upotrebljava reproduktor za Shorts videozapise u stilu YouTubea.
     Loop Shorts: Kada je omogućeno, Shorts videozapisi automatski se ponovno pokreću. Kada je isključeno, zaustavljaju se na kraju i prikazuju gumb za ponovnu reprodukciju.
     Show Skip Silence Toggle: Prikazuje prekidač za preskakanje tišine u izborniku postavki reproduktora.
+    Show Mirror Video Toggle: "Prikazuje prekidač u izborniku postavki reproduktora koji vodoravno zrcali videozapis kako biste lakše pratili upute za ples, vježbanje i sviranje instrumenata."
     Enable Skip Silence by Default: Omogućuje preskakanje tišine za nove kartice. Promjena na jednoj kartici ne utječe na ostale.
     Enable Video Zoom: Prikazuje kontrolu Zumiranje u izborniku postavki reproduktora te omogućuje njezine tipkovne prečace i kontrole pomicanja.
     Enable Seek History: Pamti odakle ste premotali u svakom videozapisu dok se aplikacija ne zatvori. Prikazuje popis povijesti premotavanja u izborniku postavki reproduktora i omogućuje njegove tipkovničke prečace.

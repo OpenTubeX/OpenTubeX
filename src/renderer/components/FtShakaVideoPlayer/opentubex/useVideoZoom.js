@@ -20,6 +20,7 @@ import { TWO_FINGER_TAP_SLOP } from '../../../helpers/player/twoFingerTap'
  *   deferPinch?: () => boolean,
  *   isNativeFullscreenActive: () => boolean,
  *   mediaTabId: string,
+ *   mirrored: import('vue').Ref<boolean>,
  *   onPinchStart: () => void,
  *   props: { format: string, shortsPlayer: boolean, videoId: string },
  *   showValueChange: (message: string, icons: string, options?: { revealControls?: boolean }) => void,
@@ -34,6 +35,7 @@ export function useVideoZoom({
   deferPinch = () => false,
   isNativeFullscreenActive,
   mediaTabId,
+  mirrored,
   onPinchStart,
   props,
   showValueChange,
@@ -90,9 +92,12 @@ export function useVideoZoom({
     // the scale then magnifies, so the offset that reaches the edge of the
     // crop shrinks as the zoom grows.
     const limit = 50 * (videoZoom.value - 1) / videoZoom.value
+    // The offset is in screen space, but a mirrored video applies its
+    // `rotate` around the y axis after this transform, which flips x.
+    const x = videoZoomOffset.x * limit * (mirrored.value ? -1 : 1)
 
     return {
-      transform: `scale(${videoZoom.value}) translate(${videoZoomOffset.x * limit}%, ${videoZoomOffset.y * limit}%)`
+      transform: `scale(${videoZoom.value}) translate(${x}%, ${videoZoomOffset.y * limit}%)`
     }
   })
 
@@ -183,6 +188,8 @@ export function useVideoZoom({
     const transform = getComputedStyle(videoElement).transform
     const matrix = transform === 'none' ? new DOMMatrix() : new DOMMatrix(transform)
     const scale = Math.hypot(matrix.a, matrix.b)
+    // Like videoZoomStyle, in screen space.
+    const translationX = mirrored.value ? -matrix.e : matrix.e
     if (bounds.width <= 0 || bounds.height <= 0 || scale <= 0) return null
     const size = {
       width: bounds.width / scale,
@@ -196,12 +203,12 @@ export function useVideoZoom({
     return {
       zoom: scale,
       center: {
-        x: bounds.left + bounds.width / 2 - matrix.e,
+        x: bounds.left + bounds.width / 2 - translationX,
         y: bounds.top + bounds.height / 2 - matrix.f,
       },
       offset: {
         x: maximumTranslation.x > 0
-          ? clampVideoZoomOffset(matrix.e / maximumTranslation.x)
+          ? clampVideoZoomOffset(translationX / maximumTranslation.x)
           : 0,
         y: maximumTranslation.y > 0
           ? clampVideoZoomOffset(matrix.f / maximumTranslation.y)

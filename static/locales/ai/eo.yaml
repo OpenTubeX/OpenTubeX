@@ -930,9 +930,11 @@ Settings:
       Screenshots: Ekrankopioj
       Timestamp Notes: Tempomarkaj notoj
     Lights Off: Lumoj estingitaj
+    Mirror Video: "Speguli videon"
     Show Lights Off Toggle: Montri baskulon de estingitaj lumoj
     Show Volume Boost Toggle: Montri baskulon de laŭteca plifortigo
     Show Mono Audio Toggle: Montri baskulon de monofonia sono
+    Show Mirror Video Toggle: "Montri baskulon por speguli videon"
     Show Music Mode Toggle: Montri baskulon de muzika reĝimo
     Swipe Gestures:
       Fullscreen Brightness: Plena heleco en plenekrana reĝimo
@@ -2449,6 +2451,7 @@ Tooltips:
     Use YouTube-style Shorts: Montras videaĵetojn en vertikala krado sur abonaj kaj kanalaj paĝoj kaj uzas ludilon de videaĵetoj laŭ stilo de YouTube.
     Loop Shorts: Kiam ŝaltita, videaĵetoj rekomenciĝas aŭtomate. Kiam malŝaltita, videaĵetoj haltas ĉe la fino kaj montras butonon por reludi.
     Show Skip Silence Toggle: Montras ŝaltilon por salti silenton en la agorda menuo de la ludilo.
+    Show Mirror Video Toggle: "Montras ŝaltilon en la agorda menuo de la ludilo, kiu horizontale spegulas la videon, por ke estu pli facile sekvi lernilojn pri danco, ekzercado kaj muzikiloj."
     Enable Skip Silence by Default: Ŝaltas silento-saltadon por novaj langetoj. Ŝanĝi ĝin en unu langeto ne influas aliajn langetojn.
     Enable Video Zoom: Montras la zoman regilon en la agorda menuo de la ludilo kaj ŝaltas ĝiajn fulmoklavojn kaj panoramajn regilojn.
     Enable Seek History: Memoras de kie vi saltis en ĉiu videaĵo ĝis la aplikaĵo fermiĝas. Montras la liston de historio de saltoj en la agorda menuo de la ludilo kaj ŝaltas ĝiajn fulmoklavojn.

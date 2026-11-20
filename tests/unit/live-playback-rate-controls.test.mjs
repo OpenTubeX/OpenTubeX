@@ -38,7 +38,7 @@ function controls(props, overflow = false, quickBar = true, playerIsLive = props
   for (const name of [
     'displayVideoPlayButton', 'contextMenuElements', 'hasMultipleAudioTracks', 'useVrMode',
     'enableScreenshot', 'enableTimestampNotes', 'useSponsorBlock', 'audioOnlyMedia', 'audioPlayerMode', 'videoZoomPossible',
-    'showLightsOffToggle', 'showMonoAudioToggle', 'showMusicModeToggle', 'showSkipSilenceButton',
+    'showLightsOffToggle', 'showMonoAudioToggle', 'showMusicModeToggle', 'showSkipSilenceButton', 'mirrorVideoPossible',
     'voiceOverTranslationAvailable', 'disableAbRepeat', 'seekHistoryAvailable',
   ]) state[name] = { value: false }
   return vm.runInNewContext(`${computedSource('seekingIsPossible')}\n${computedSource('uiConfig')}\nuiConfig.value`, state)

@@ -165,7 +165,7 @@
       <video
         ref="video"
         class="player"
-        :class="{ audioOnly: audioOnlyMedia, musicAudioTrack }"
+        :class="{ audioOnly: audioOnlyMedia, musicAudioTrack, mirrored: mirrorVideo }"
         :style="videoZoomStyle"
         preload="auto"
         crossorigin="anonymous"
@@ -3309,6 +3309,7 @@ const {
   isFullscreenDockOpen,
   isFullscreen,
   isFullWindow: () => fullWindowEnabled.value,
+  isMirrored: () => mirrorVideo.value,
   isPortraitLayout: () => portraitFullscreenDocks.value,
   presentationModeChanging,
 })
@@ -4848,6 +4849,10 @@ const useVrMode = computed(() => {
   return props.format === 'dash' && (props.vrProjection === 'EQUIRECTANGULAR' || props.vrProjection === 'VR180')
 })
 
+// VR renders the video to its own canvas, so there is no image to mirror.
+const mirrorVideoPossible = computed(() => store.getters.getShowMirrorVideoToggle && !audioOnlyMedia.value && !useVrMode.value)
+const mirrorVideo = computed(() => mirrorVideoPossible.value && store.getters.getTabMirrorVideo(mediaTabId))
+
 // Like skip silence and voice-over translation, this needs Web Audio
 // processing, which the player does not use on iOS.
 const volumeBoostPossible = computed(() => !process.env.IS_IOS && store.getters.getShowVolumeBoostToggle)
@@ -4914,6 +4919,7 @@ const {
     cancelMobileFullscreenGesture()
     invalidateMobileTwoFingerTap()
   },
+  mirrored: mirrorVideo,
   props,
   showValueChange,
   useVrMode,
@@ -5354,6 +5360,7 @@ const uiConfig = computed(() => {
     ambientMode: 'ft_ambient_mode',
     lightsOff: 'ft_lights_off',
     videoZoom: 'ft_video_zoom',
+    mirrorVideo: 'ft_mirror_video',
     volumeBoost: 'ft_volume_boost',
     monoAudio: 'ft_mono_audio',
     abRepeat: 'ft_ab_repeat',
@@ -5484,6 +5491,10 @@ const uiConfig = computed(() => {
 
   if (!showLightsOffToggle.value) {
     removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_lights_off')
+  }
+
+  if (!mirrorVideoPossible.value) {
+    removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_mirror_video')
   }
 
   // Shorts swipe between videos instead of entering full screen.
@@ -8251,6 +8262,7 @@ const fullscreenAmbientBarsVisible = computed(() => {
 
 const { ambientCanvas, ambientFullscreenCanvas, ambientLayoutCanvas } = useAmbientMode({
   enabled: ambientModeVisible,
+  mirrored: mirrorVideo,
   video,
 })
 
@@ -10494,6 +10506,21 @@ function registerLightsOffButton() {
   })
 }
 
+function registerMirrorVideoButton() {
+  registerOwnElement(shakaOverflowMenu, 'ft_mirror_video', {
+    create(rootElement, controls) {
+      return new BooleanSettingButton({
+        value: mirrorVideo,
+        updateValue: value => store.commit('setTabMirrorVideo', { tabId: mediaTabId, value }),
+        events,
+        className: 'mirror-video-button',
+        mappedIcon: 'flip-horizontal',
+        getLabel: () => t('Settings.Player Settings.Mirror Video'),
+      }, rootElement, controls)
+    }
+  })
+}
+
 function registerMusicModeButton() {
   registerOwnElement(shakaOverflowMenu, 'ft_music_mode', {
     create(rootElement, controls) {
@@ -12538,6 +12565,7 @@ onMounted(async () => {
   registerVolumeBoostSelection()
   registerMonoAudioButton()
   registerLightsOffButton()
+  registerMirrorVideoButton()
   registerSkipSilenceButton()
   registerVoiceOverTranslationButton()
   registerSleepTimer()

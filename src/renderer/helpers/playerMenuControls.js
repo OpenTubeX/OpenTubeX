@@ -17,6 +17,7 @@ export const PLAYER_MENU_CONTROL_DEFINITIONS = Object.freeze([
   { id: 'ambientMode', labelKey: 'Global.Ambient Mode', icon: ['fas', 'sun'] },
   { id: 'lightsOff', labelKey: 'Settings.Player Settings.Lights Off', icon: ['fas', 'moon'], settingKey: 'showLightsOffToggle' },
   { id: 'videoZoom', labelKey: 'Video.Player.Zoom.Zoom', icon: ['fas', 'magnifying-glass'], settingKey: 'enableVideoZoom' },
+  { id: 'mirrorVideo', labelKey: 'Settings.Player Settings.Mirror Video', icon: ['fas', 'flip-horizontal'], settingKey: 'showMirrorVideoToggle' },
   { id: 'volumeBoost', labelKey: 'Video.Player.Volume Boost.Volume Boost', icon: ['fas', 'volume-high'], settingKey: 'showVolumeBoostToggle', unavailableOnIos: true },
   { id: 'monoAudio', labelKey: 'Settings.Player Settings.Mono Audio', icon: ['fas', 'speaker'], settingKey: 'showMonoAudioToggle', unavailableOnIos: true },
   { id: 'loop', labelKey: 'Settings.Interface Customizer.Loop', icon: ['fas', 'retweet'] },

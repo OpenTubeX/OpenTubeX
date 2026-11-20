@@ -880,6 +880,7 @@ Settings:
     Mono Audio: 'Audio mono'
     Normalize Loudness: 'Normalizează volumul'
     Show Mono Audio Toggle: 'Afișează comutatorul audio mono'
+    Show Mirror Video Toggle: "Afișează comutatorul pentru oglindirea videoclipului"
     Pause on Stream Recovery: "Pauză la recuperarea fluxului"
     Buffering:
       Buffering: Memorie tampon
@@ -907,6 +908,7 @@ Settings:
     Enable DLNA Casting: "Activează transmiterea DLNA"
     Skip Unavailable Playlist Videos: "Omite videoclipurile indisponibile din listele de redare"
     Lights Off: Stinge luminile
+    Mirror Video: "Oglindește videoclipul"
     Show Lights Off Toggle: Afișează comutatorul pentru stingerea luminilor
     Show Volume Boost Toggle: "Afișează comutatorul de amplificare a volumului"
     Swipe Gestures:
@@ -2455,6 +2457,7 @@ Tooltips:
     Use YouTube-style Shorts: Afișează videoclipurile Shorts într-o grilă portret pe paginile de abonamente și canale și folosește playerul Shorts în stil YouTube.
     Loop Shorts: Când opțiunea este activată, videoclipurile Shorts repornesc automat. Când este dezactivată, acestea se opresc la sfârșit și afișează un buton de reluare.
     Show Skip Silence Toggle: Afișează un comutator de activare și dezactivare pentru omiterea liniștii în meniul de setări al playerului.
+    Show Mirror Video Toggle: "Afișează în meniul de setări al playerului un comutator care oglindește videoclipul pe orizontală, ca să urmărești mai ușor tutorialele de dans, antrenament și instrumente muzicale."
     Enable Skip Silence by Default: Activează omiterea liniștii pentru filele noi. Modificarea într-o filă nu afectează celelalte file.
     Enable Video Zoom: Afișează comanda Zoom în meniul de setări al playerului și activează comenzile rapide de la tastatură și comenzile de panoramare.
     Enable Seek History: Reține de unde ai sărit în fiecare videoclip până la închiderea aplicației. Afișează lista istoricului salturilor în meniul de setări al playerului și activează comenzile rapide de la tastatură ale acestuia.

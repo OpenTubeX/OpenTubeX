@@ -1061,9 +1061,11 @@ Settings:
       Screenshots: Skermkiekies
       Timestamp Notes: Tydstempelnotas
     Lights Off: Ligte af
+    Mirror Video: "Spieël video"
     Show Lights Off Toggle: Wys Ligte af-wisselaar
     Show Volume Boost Toggle: Wys volumeversterking-wisselaar
     Show Mono Audio Toggle: Wys mono-oudio-wisselaar
+    Show Mirror Video Toggle: "Wys video-spieëlwisselaar"
     Show Music Mode Toggle: Wys musiekmodus-wisselaar
     Swipe Gestures:
       Fullscreen Brightness: Volle helderheid in volskerm
@@ -2656,6 +2658,7 @@ Tooltips:
     Use YouTube-style Shorts: Vertoon kortvideo’s in ’n portretrooster op intekening- en kanaalblaaie en gebruik die kortvideospeler in YouTube-styl.
     Loop Shorts: Wanneer geaktiveer, begin kortvideo’s outomaties weer. Wanneer gedeaktiveer, stop kortvideo’s aan die einde en wys ’n herspeelknoppie.
     Show Skip Silence Toggle: Wys ’n aan/af-wisselaar vir die oorslaan van stilte in die speler se instellingskieslys.
+    Show Mirror Video Toggle: "Wys ’n aan/af-wisselaar in die speler se instellingskieslys wat die video horisontaal spieël, sodat dit makliker is om dans-, oefen- en instrumenttutoriale te volg."
     Enable Skip Silence by Default: Aktiveer die oorslaan van stilte vir nuwe oortjies. As u dit in een oortjie verander, raak dit nie ander oortjies nie.
     Enable Video Zoom: Wys die zoemkontrole in die speler se instellingskieslys en aktiveer die sleutelbordkortpaaie en panneerkontroles daarvan.
     Enable Seek History: Onthou waarvandaan u in elke video gespring het totdat die toep sluit. Wys die spoelgeskiedenislys in die speler se instellingskieslys en aktiveer die sleutelbordkortpaaie daarvan.

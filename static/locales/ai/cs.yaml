@@ -880,6 +880,7 @@ Settings:
     Mono Audio: 'Mono zvuk'
     Normalize Loudness: 'Normalizovat hlasitost'
     Show Mono Audio Toggle: 'Zobrazit přepínač mono zvuku'
+    Show Mirror Video Toggle: "Zobrazit přepínač zrcadlení videa"
     Pause on Stream Recovery: "Pozastavit při obnově streamu"
     Buffering:
       Buffering: Vyrovnávací paměť
@@ -907,6 +908,7 @@ Settings:
     Enable DLNA Casting: "Povolit vysílání DLNA"
     Skip Unavailable Playlist Videos: "Přeskakovat nedostupná videa v playlistech"
     Lights Off: Zhasnout
+    Mirror Video: "Zrcadlit video"
     Show Lights Off Toggle: Zobrazit přepínač zhasnutí
     Show Volume Boost Toggle: "Zobrazit přepínač zesílení hlasitosti"
     Swipe Gestures:
@@ -2400,6 +2402,7 @@ Tooltips:
     Use YouTube-style Shorts: Zobrazí krátká videa v mřížce na výšku na stránkách odběrů a kanálů a použije pro ně přehrávač ve stylu YouTube.
     Loop Shorts: Pokud je funkce zapnutá, krátká videa se automaticky spustí znovu. Pokud je vypnutá, na konci se zastaví a zobrazí tlačítko pro opakované přehrání.
     Show Skip Silence Toggle: Zobrazí v nabídce nastavení přehrávače přepínač přeskakování ticha.
+    Show Mirror Video Toggle: "Zobrazí v nabídce nastavení přehrávače přepínač, který video vodorovně zrcadlí, aby se snáz dalo cvičit podle tanečních, cvičebních a hudebních návodů."
     Enable Skip Silence by Default: Zapne přeskakování ticha pro nové karty. Změna na jedné kartě neovlivní ostatní karty.
     Enable Video Zoom: Zobrazí v nabídce nastavení přehrávače ovládání přiblížení a zapne jeho klávesové zkratky a posouvání obrazu.
     Enable Seek History: Pamatuje si, odkud jste v každém videu přeskočili, dokud aplikaci nezavřete. Zobrazí seznam historie přeskoků v nabídce nastavení přehrávače a povolí její klávesové zkratky.

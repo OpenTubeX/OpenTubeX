@@ -880,6 +880,7 @@ Settings:
     Mono Audio: 'Âm thanh đơn kênh'
     Normalize Loudness: 'Chuẩn hóa âm lượng'
     Show Mono Audio Toggle: 'Hiển thị nút bật/tắt âm thanh đơn kênh'
+    Show Mirror Video Toggle: "Hiển thị nút bật/tắt lật video"
     Pause on Stream Recovery: "Tạm dừng khi khôi phục luồng"
     Buffering:
       Buffering: Bộ đệm
@@ -907,6 +908,7 @@ Settings:
     Enable DLNA Casting: "Bật truyền phát DLNA"
     Skip Unavailable Playlist Videos: "Bỏ qua video không khả dụng trong danh sách phát"
     Lights Off: Tắt đèn
+    Mirror Video: "Lật video"
     Show Lights Off Toggle: Hiển thị nút bật/tắt đèn
     Show Volume Boost Toggle: "Hiển thị nút bật tăng âm lượng"
     Swipe Gestures:
@@ -2417,6 +2419,7 @@ Tooltips:
     Use YouTube-style Shorts: Hiện video ngắn trong lưới dọc trên trang đăng ký và trang kênh, đồng thời dùng trình phát video ngắn kiểu YouTube.
     Loop Shorts: Khi bật, video ngắn sẽ tự động phát lại. Khi tắt, video ngắn sẽ dừng ở cuối và hiện nút phát lại.
     Show Skip Silence Toggle: Hiện nút bật/tắt bỏ qua đoạn im lặng trong menu cài đặt của trình phát.
+    Show Mirror Video Toggle: "Hiện nút bật/tắt trong menu cài đặt của trình phát để lật ngang video, giúp bạn dễ tập theo các video hướng dẫn nhảy, tập luyện và chơi nhạc cụ hơn."
     Enable Skip Silence by Default: Bật bỏ qua đoạn im lặng cho thẻ mới. Thay đổi trong một thẻ không ảnh hưởng đến thẻ khác.
     Enable Video Zoom: Hiện điều khiển Thu phóng trong menu cài đặt của trình phát và bật các phím tắt cùng điều khiển di chuyển khung hình.
     Enable Seek History: Ghi nhớ vị trí bạn đã tua đi trong mỗi video cho đến khi đóng ứng dụng. Hiển thị danh sách lịch sử tua trong menu cài đặt của trình phát và bật các phím tắt của tính năng này.

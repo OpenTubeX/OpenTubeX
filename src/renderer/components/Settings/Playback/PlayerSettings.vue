@@ -419,6 +419,14 @@
           @change="store.dispatch('updateShowLightsOffToggle', $event)"
         />
         <FtToggleSwitch
+          :label="t('Settings.Player Settings.Show Mirror Video Toggle')"
+          :compact="true"
+          :default-value="store.getters.getShowMirrorVideoToggle"
+          setting-key="showMirrorVideoToggle"
+          :tooltip="t('Tooltips.Player Settings.Show Mirror Video Toggle')"
+          @change="store.dispatch('updateShowMirrorVideoToggle', $event)"
+        />
+        <FtToggleSwitch
           v-if="!IS_CAPACITOR"
           :label="t('Settings.Player Settings.Display Play Button In Video Player')"
           :compact="true"

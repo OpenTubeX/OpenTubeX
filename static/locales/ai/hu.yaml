@@ -880,6 +880,7 @@ Settings:
     Mono Audio: 'Monó hang'
     Normalize Loudness: 'Hangerő kiegyenlítése'
     Show Mono Audio Toggle: 'Monó hang kapcsoló megjelenítése'
+    Show Mirror Video Toggle: "Videótükrözés kapcsolójának megjelenítése"
     Pause on Stream Recovery: "Szüneteltetés a stream helyreállításakor"
     Buffering:
       Buffering: Pufferelés
@@ -907,6 +908,7 @@ Settings:
     Enable DLNA Casting: "DLNA-átküldés engedélyezése"
     Skip Unavailable Playlist Videos: "Nem elérhető videók kihagyása a lejátszási listákban"
     Lights Off: Fények lekapcsolása
+    Mirror Video: "Videó tükrözése"
     Show Lights Off Toggle: Fények lekapcsolása kapcsolójának megjelenítése
     Show Volume Boost Toggle: "Hangerő-erősítés kapcsoló megjelenítése"
     Swipe Gestures:
@@ -2401,6 +2403,7 @@ Tooltips:
     Use YouTube-style Shorts: A Shorts-videók álló tájolású rácsban jelennek meg a feliratkozások és a csatornák oldalain, és a YouTube-stílusú Shorts-lejátszót használják.
     Loop Shorts: Bekapcsolva a Shorts-videók automatikusan újraindulnak. Kikapcsolva a végükön megállnak, és megjelenik az újrajátszás gomb.
     Show Skip Silence Toggle: A csend átugrására szolgáló kapcsoló megjelenítése a lejátszó beállítási menüjében.
+    Show Mirror Video Toggle: "Kapcsolót jelenít meg a lejátszó beállítási menüjében, amely vízszintesen tükrözi a videót, így könnyebb követni a tánc-, edzés- és hangszeres oktatóvideókat."
     Enable Skip Silence by Default: A csend átugrásának engedélyezése az új lapokon. Az egyik lapon végzett módosítás nincs hatással a többi lapra.
     Enable Video Zoom: A nagyítási vezérlő megjelenítése a lejátszó beállítási menüjében, valamint a hozzá tartozó billentyűparancsok és pásztázási vezérlők engedélyezése.
     Enable Seek History: Az alkalmazás bezárásáig megjegyzi, honnan ugrott el az egyes videókban. Megjeleníti az ugrási előzmények listáját a lejátszó beállítások menüjében, és engedélyezi a hozzá tartozó billentyűparancsokat.

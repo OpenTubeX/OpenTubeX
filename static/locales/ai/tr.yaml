@@ -880,6 +880,7 @@ Settings:
     Mono Audio: 'Mono ses'
     Normalize Loudness: 'Ses yüksekliğini normalleştir'
     Show Mono Audio Toggle: 'Mono ses düğmesini göster'
+    Show Mirror Video Toggle: "Video aynalama düğmesini göster"
     Pause on Stream Recovery: "Akış kurtarmada duraklat"
     Buffering:
       Buffering: Arabelleğe Alma
@@ -907,6 +908,7 @@ Settings:
     Enable DLNA Casting: "DLNA yayınını etkinleştir"
     Skip Unavailable Playlist Videos: "Oynatma listelerindeki kullanılamayan videoları atla"
     Lights Off: Işıkları kapat
+    Mirror Video: "Videoyu aynala"
     Show Lights Off Toggle: Işıkları kapatma düğmesini göster
     Show Volume Boost Toggle: "Ses yükseltme düğmesini göster"
     Swipe Gestures:
@@ -2401,6 +2403,7 @@ Tooltips:
     Use YouTube-style Shorts: Kısa Videoları abonelik ve kanal sayfalarında dikey bir ızgarada gösterir ve YouTube tarzı Kısa Video oynatıcısını kullanır.
     Loop Shorts: Etkinleştirildiğinde Kısa Videolar otomatik olarak yeniden başlar. Devre dışı bırakıldığında sonunda durur ve yeniden oynatma düğmesi gösterir.
     Show Skip Silence Toggle: Oynatıcının ayarlar menüsünde sessizliği atmak için açma ve kapatma düğmesi gösterir.
+    Show Mirror Video Toggle: "Oynatıcının ayarlar menüsünde videoyu yatay olarak aynalayan bir açma ve kapatma düğmesi gösterir; böylece dans, egzersiz ve enstrüman derslerini takip etmek kolaylaşır."
     Enable Skip Silence by Default: Yeni sekmelerde sessizliği atlamayı etkinleştirir. Bir sekmede değiştirilmesi diğer sekmeleri etkilemez.
     Enable Video Zoom: Oynatıcının ayarlar menüsünde Yakınlaştırma denetimini gösterir; klavye kısayollarını ve kaydırma denetimlerini etkinleştirir.
     Enable Seek History: Uygulama kapanana kadar her videoda nereden atladığınızı hatırlar. Oynatıcının ayarlar menüsünde atlama geçmişi listesini gösterir ve klavye kısayollarını etkinleştirir.

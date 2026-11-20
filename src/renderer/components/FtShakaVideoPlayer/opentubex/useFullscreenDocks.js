@@ -49,6 +49,7 @@ const FULLSCREEN_DOCK_SELECTORS = {
  *   isFullscreenDockOpen: (dock: string) => boolean,
  *   isFullscreen: import('vue').Ref<boolean>,
  *   isFullWindow: () => boolean,
+ *   isMirrored: () => boolean,
  *   isPortraitLayout: () => boolean,
  *   presentationModeChanging: import('vue').Ref<boolean>,
  * }} options
@@ -61,6 +62,7 @@ export function useFullscreenDocks({
   isFullscreenDockOpen,
   isFullscreen,
   isFullWindow,
+  isMirrored,
   isPortraitLayout,
   presentationModeChanging,
 }) {
@@ -142,8 +144,9 @@ export function useFullscreenDocks({
     const scale = before.width / after.width
     // Zoom/pan uses `transform`. Individual scale/translate keep that intact;
     // compensate for scaling its translation around the element's center.
+    // Mirroring rotates that translation to the other side.
     const transform = new DOMMatrix(getComputedStyle(video.value).transform)
-    const x = before.x - after.x + transform.e * (1 - scale)
+    const x = before.x - after.x + transform.e * (isMirrored() ? -1 : 1) * (1 - scale)
     const y = before.y - after.y + transform.f * (1 - scale)
     animateFullscreenDockPush(video.value, [
       { scale: String(scale), translate: `${x}px ${y}px` },
