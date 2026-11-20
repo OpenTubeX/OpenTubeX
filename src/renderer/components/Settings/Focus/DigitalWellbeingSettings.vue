@@ -243,16 +243,31 @@ function formatIntervalOption(minutes) {
   box-sizing: border-box;
   inline-size: auto;
   margin-inline: 0;
+
+  /* The column sets the width, so a narrow one shrinks the field instead
+     of pushing it under its icons. */
+  grid-template-columns: minmax(0, 1fr) var(--select-indicator-space);
 }
 
 .wellbeingColumns > .switchColumn {
   align-items: start;
 }
 
+/* Stacked, the fields keep as much room before them as their icons take
+   after them, so they are centered. */
 @container settings-content (width <= 680px) {
   .wellbeingColumns {
     grid-template-columns: minmax(0, 1fr);
-    max-inline-size: calc(26rem + 40px);
+    max-inline-size: calc(26rem + 40px + 2 * 84px);
+  }
+
+  /* The room before gives way first when the column runs out of space. */
+  .wellbeingColumns > .select.contentSized {
+    margin-inline-start: clamp(
+      0px,
+      100% - 200px - var(--select-indicator-space) - var(--settings-marker-gutter, 0px),
+      var(--select-indicator-space) - var(--settings-marker-gutter, 0px)
+    );
   }
 }
 </style>
