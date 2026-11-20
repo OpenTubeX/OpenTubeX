@@ -1313,6 +1313,7 @@ Settings:
     Platforms:
       Other Platforms: 其他平台
       Manage Channels: 管理已关注的频道
+      Enable Twitch Page: 启用 Twitch 页面
       Notify When Live: 关注的 Twitch 频道开播时通知
       Auto Refresh Interval: 其他平台自动刷新间隔
   Distraction Free Settings:
@@ -2462,6 +2463,7 @@ Tooltips:
     Faster Subscription Refresh: "先检查每个频道的 RSS 订阅源，只加载有新上传内容的频道的视频、Shorts 和直播。自动刷新还会跳过过去 10 分钟内加载过的频道。对于没有新上传内容的频道，观看次数、已移除的视频和更改的标题每隔几小时才会更新一次，而且当 RSS 订阅源滞后时，新上传的内容可能会稍后才出现。使用 Invidious API 时不可用。"
     Show Collaborations From Other Channels: "同时显示你订阅的频道与上传这些视频的其他频道合作制作的视频。YouTube 只在频道的首页标签中列出这些视频，因此每次刷新视频都会为每个频道多加载一个页面。只能找到那里显示的最新合作视频，有些频道不显示任何合作视频，且其发布日期为大致时间。使用 Invidious API 时不可用。"
     Platforms Auto Refresh Interval: 应用打开时 OpenTubeX 自动刷新你在其他平台上关注的频道的频率。
+    Enable Twitch Page: 允许你从导航和命令面板打开 Twitch 页面。你可以在该页面浏览热门分类和直播频道，并搜索 Twitch。
     Twitch Notify When Live: 你关注的某个 Twitch 频道开播时通知你。OpenTubeX 打开时每隔几分钟检查一次；关闭时如果仍会刷新订阅，也会检查。
   Theme Settings:
     Toggle Playback With Tab Icon: 点击正在播放或已暂停视频的标签页图标，即可暂停或继续播放，而无需切换到该标签页。
@@ -2879,6 +2881,32 @@ Platforms:
   Verify: "验证"
   Categories: "分类"
   Category Not Found: "找不到此分类。"
+  Category Tags: "分类标签"
+  Stream Tags: "直播标签"
+  Language: "语言"
+  All Languages: "所有语言"
+  Other Language: "其他"
+  American Sign Language: "美国手语"
+  Search Tags: "搜索标签"
+  Add Tag: "添加标签"
+  Remove Tag: "移除 {tag}"
+  Sort:
+    Viewers: "观众数（从高到低）"
+    Viewers Ascending: "观众数（从低到高）"
+    Started: "最近开播"
+    Relevance: "推荐"
+    Published: "最近发布"
+    Views: "观看次数（从高到低）"
+    Top Day: "24 小时热门"
+    Top Week: "7 天热门"
+    Top Month: "30 天热门"
+    Top All: "历史热门"
+  Video Type:
+    Video Type: "视频类型"
+    All: "所有视频"
+    Archive: "往期直播"
+    Highlight: "精彩片段"
+    Upload: "上传"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} 回复了 {commentAuthor}"
   Like: "喜欢"
@@ -2913,5 +2941,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "搜索 Twitch"
+  Search Placeholder: "分类和频道"
 New Incognito Tab: 新建无痕标签页
 Incognito Tab: 无痕标签页

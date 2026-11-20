@@ -60,9 +60,22 @@
  *   name: string,
  *   url: string,
  *   thumbnail: string,
- *   viewerCount?: number
+ *   viewerCount?: number,
+ *   followerCount?: number,
+ *   description?: string,
+ *   tags?: string[]
  * }} PlatformCategory A game or topic that live streams belong to.
  * `thumbnail` is portrait box art. `viewerCount` counts the viewers of its live streams.
+ * Lists leave out `followerCount`, `description` and `tags`, which only its own page loads.
+ *
+ * @typedef {'live' | 'videos' | 'clips'} PlatformCategoryTab
+ * @typedef {'viewers' | 'viewers_ascending' | 'started' | 'relevance' | 'published' | 'views' | 'top_day' | 'top_week' | 'top_month' | 'top_all'} PlatformCategorySort
+ * @typedef {'archive' | 'highlight' | 'upload'} PlatformVideoType
+ * @typedef {{ sort?: PlatformCategorySort, type?: PlatformVideoType, languages?: string[], tags?: string[] }} PlatformFilters
+ * `languages` holds codes from `filterLanguages`. Items match any of the
+ * languages and every tag. Without a `type`, videos of every type match.
+ * @typedef {{ sorts: PlatformCategorySort[], defaultSort: PlatformCategorySort, types?: PlatformVideoType[], tags?: true }} PlatformFilterOptions
+ * The orders and video types a list takes, and whether tags filter it.
  *
  * @typedef {'videos' | 'tracks' | 'clips' | 'playlists'} PlatformChannelTab
  * @typedef {'videos' | 'tracks' | 'channels' | 'playlists' | 'categories'} PlatformSearchType
@@ -86,8 +99,13 @@
  *   search: (fetch: PlatformFetch, query: string, type: PlatformSearchType, continuation: string | null, signal?: AbortSignal) => Promise<PlatformPage>,
  *   getPlaylist: (fetch: PlatformFetch, id: string, continuation: string | null, signal?: AbortSignal) => Promise<{ playlist: PlatformPlaylist | null, page: PlatformPage }>,
  *   getFeed?: (fetch: PlatformFetch, channels: PlatformChannel[], signal?: AbortSignal) => Promise<{ channels: PlatformChannel[], items: PlatformItem[], clips: PlatformItem[] }>,
- *   getCategory?: (fetch: PlatformFetch, id: string, signal?: AbortSignal) => Promise<{ category: PlatformCategory, items: PlatformItem[] } | null>,
- *   getBrowse?: (fetch: PlatformFetch, signal?: AbortSignal) => Promise<{ categories: PlatformCategory[], items: PlatformItem[] }>
+ *   getCategory?: (fetch: PlatformFetch, id: string, tab: PlatformCategoryTab, filters?: PlatformFilters, signal?: AbortSignal) => Promise<{ category: PlatformCategory, items: PlatformItem[] } | null>,
+ *   categoryTabs?: Partial<Record<PlatformCategoryTab, PlatformFilterOptions>>,
+ *   getTopCategories?: (fetch: PlatformFetch, signal?: AbortSignal) => Promise<PlatformCategory[]>,
+ *   getLiveStreams?: (fetch: PlatformFetch, filters?: PlatformFilters, signal?: AbortSignal) => Promise<PlatformItem[]>,
+ *   liveStreamFilters?: PlatformFilterOptions,
+ *   filterLanguages?: string[],
+ *   searchStreamTags?: (fetch: PlatformFetch, query: string, signal?: AbortSignal) => Promise<string[]>
  * }} Platform
  * - `liveStreams` tells whether its channels stream live.
  * - `heavyChannels` marks platforms whose channels load as whole web pages,
@@ -104,10 +122,15 @@
  * - `getFeed`, where a platform has it, loads the feed of many channels in a
  *   few requests, with their current details, instead of `getLatestItems`.
  * - `getCategory`, where a platform has categories, loads one by the `id` of
- *   a PlatformCategory with its live streams, most viewers first, or returns
- *   null for unknown categories.
- * - `getBrowse`, where a platform has it, loads its most watched categories
- *   and live streams for its own page.
+ *   a PlatformCategory with the items of one of its `categoryTabs`, or
+ *   returns null for unknown categories.
+ * - `getTopCategories`, where a platform has it, loads its most watched
+ *   categories, and `getLiveStreams` live streams of every category, for its
+ *   own page.
+ * - Lists come in their `defaultSort` unless `filters` name another of their
+ *   `sorts`, and only items matching `filters` come. `filterLanguages` lists
+ *   the languages they filter by, and `searchStreamTags` suggests tags for
+ *   lists with `tags`.
  */
 
 export {}

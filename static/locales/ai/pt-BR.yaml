@@ -1266,6 +1266,7 @@ Settings:
     Platforms:
       Other Platforms: Outras plataformas
       Manage Channels: Gerenciar canais seguidos
+      Enable Twitch Page: Ativar a página da Twitch
       Notify When Live: Notificar quando canais seguidos da Twitch entrarem ao vivo
       Auto Refresh Interval: Intervalo de atualização automática de outras plataformas
   Distraction Free Settings:
@@ -2416,6 +2417,7 @@ Tooltips:
     Faster Subscription Refresh: "Primeiro verifica o feed RSS de cada canal e só carrega os vídeos, Shorts e transmissões ao vivo dos canais com novos envios. As atualizações automáticas também ignoram canais carregados nos últimos 10 minutos. Em canais sem novos envios, visualizações, vídeos removidos e títulos alterados só são atualizados a cada poucas horas, e novos envios podem aparecer mais tarde quando o feed RSS está atrasado. Indisponível com a API do Invidious."
     Show Collaborations From Other Channels: "Também mostra vídeos que os canais em que você está inscrito fizeram junto com outro canal que os enviou. O YouTube só os lista na guia Início de um canal, então cada atualização de vídeos carrega mais uma página por canal. Só são encontradas as colaborações mais recentes mostradas ali, alguns canais não mostram nenhuma e as datas de publicação são aproximadas. Não disponível com a API do Invidious."
     Platforms Auto Refresh Interval: Com que frequência o OpenTubeX atualiza automaticamente os canais que você segue em outras plataformas enquanto o aplicativo está aberto.
+    Enable Twitch Page: Permite abrir a página da Twitch pela navegação e pela paleta de comandos. Lá você pode explorar categorias populares e canais ao vivo e pesquisar na Twitch.
     Twitch Notify When Live: Avisa quando um dos canais da Twitch que você segue começa a transmitir. O OpenTubeX verifica a cada poucos minutos enquanto está aberto, e também enquanto está fechado se nesse momento atualizar as inscrições.
   Theme Settings:
     Toggle Playback With Tab Icon: Clicar no ícone de uma aba com um vídeo em reprodução ou pausado pausa ou retoma o vídeo sem mudar para essa aba.
@@ -2825,6 +2827,32 @@ Platforms:
   Verify: "Verificar"
   Categories: "Categorias"
   Category Not Found: "Não foi possível encontrar esta categoria."
+  Category Tags: "Tags da categoria"
+  Stream Tags: "Tags da transmissão"
+  Language: "Idioma"
+  All Languages: "Todos os idiomas"
+  Other Language: "Outro"
+  American Sign Language: "língua de sinais americana"
+  Search Tags: "Pesquisar tags"
+  Add Tag: "Adicionar tag"
+  Remove Tag: "Remover {tag}"
+  Sort:
+    Viewers: "Espectadores (do maior para o menor)"
+    Viewers Ascending: "Espectadores (do menor para o maior)"
+    Started: "Iniciadas recentemente"
+    Relevance: "Recomendado"
+    Published: "Publicados recentemente"
+    Views: "Visualizações (do maior para o menor)"
+    Top Day: "Top 24 horas"
+    Top Week: "Top 7 dias"
+    Top Month: "Top 30 dias"
+    Top All: "Top de todos os tempos"
+  Video Type:
+    Video Type: "Tipo de vídeo"
+    All: "Todos os vídeos"
+    Archive: "Transmissões anteriores"
+    Highlight: "Destaques"
+    Upload: "Envios"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} respondeu a {commentAuthor}"
   Like: "Gostei"
@@ -2875,5 +2903,6 @@ App Menu:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Pesquisar na Twitch"
+  Search Placeholder: "Categorias e canais"
 New Incognito Tab: Nova guia anônima
 Incognito Tab: Guia anônima

@@ -394,6 +394,7 @@ export const SYNC_SETTING_LABELS = {
   titleLineLimit: 'Settings.General Settings.Title Lines.Title Lines',
   toastPosition: 'Settings.Theme Settings.Toast Position.Toast Position',
   twitchLiveNotifications: 'Settings.Subscription Settings.Platforms.Notify When Live',
+  enableTwitchPage: 'Settings.Subscription Settings.Platforms.Enable Twitch Page',
   uiDensity: 'Settings.Theme Settings.UI Density.UI Density',
   uiRoundness: 'Settings.Theme Settings.UI Roundness',
   unsubscriptionPopupStatus: 'Settings.Subscription Settings.Confirm Before Unsubscribing',

@@ -27,6 +27,6 @@ test('converts the former hide switches to navigation items', () => {
       hidePopularVideos: false,
       hideTrendingVideos: true,
     }),
-    ['subscriptions', 'history', 'subscribedchannels', 'popular', 'stats']
+    ['subscriptions', 'history', 'subscribedchannels', 'popular', 'stats', 'twitch']
   )
 })

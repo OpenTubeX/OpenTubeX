@@ -1550,6 +1550,7 @@ Settings:
     Platforms:
       Other Platforms: Druge platforme
       Manage Channels: Upravljaj spremljane kanale
+      Enable Twitch Page: Omogoči stran Twitch
       Notify When Live: Obvesti, ko spremljani kanali Twitch začnejo prenos v živo
       Auto Refresh Interval: Interval samodejnega osveževanja drugih platform
   Distraction Free Settings:
@@ -2988,6 +2989,7 @@ Tooltips:
     Faster Subscription Refresh: "Najprej preveri vir RSS vsakega kanala in naloži videoposnetke, Shorts in prenose v živo samo s kanalov z novimi naloženimi vsebinami. Samodejne osvežitve preskočijo tudi kanale, naložene v zadnjih 10 minutah. Pri kanalih brez novih vsebin se število ogledov, odstranjeni videoposnetki in spremenjeni naslovi posodobijo le vsakih nekaj ur, nove vsebine pa se lahko prikažejo pozneje, ko vir RSS zaostaja. Ni na voljo z API-jem Invidious."
     Show Collaborations From Other Channels: "Prikaže tudi videoposnetke, ki so jih naročeni kanali ustvarili skupaj z drugim kanalom, ki jih je naložil. YouTube jih navaja samo na zavihku Domov kanala, zato vsaka osvežitev videoposnetkov naloži eno stran več na kanal. Najdena so samo najnovejša sodelovanja, prikazana tam, nekateri kanali ne prikazujejo nobenega, datumi objave pa so približni. Ni na voljo z API-jem Invidious."
     Platforms Auto Refresh Interval: Kako pogosto OpenTubeX samodejno osveži kanale, ki jih spremljate na drugih platformah, ko je aplikacija odprta.
+    Enable Twitch Page: Omogoča odpiranje strani Twitch iz navigacije in palete ukazov. Tam lahko brskate po priljubljenih kategorijah in kanalih v živo ter iščete po Twitchu.
     Twitch Notify When Live: Obvesti vas, ko eden od kanalov Twitch, ki jih spremljate, začne oddajati. OpenTubeX preverja vsakih nekaj minut, ko je odprt, in tudi ko je zaprt, če takrat osvežuje naročnine.
   Theme Settings:
     Toggle Playback With Tab Icon: Klik ikone zavihka s predvajanim ali začasno ustavljenim videoposnetkom ga začasno ustavi ali nadaljuje, ne da bi preklopili na ta zavihek.
@@ -3477,6 +3479,32 @@ Platforms:
   Verify: "Preveri"
   Categories: "Kategorije"
   Category Not Found: "Te kategorije ni bilo mogoče najti."
+  Category Tags: "Oznake kategorije"
+  Stream Tags: "Oznake pretoka"
+  Language: "Jezik"
+  All Languages: "Vsi jeziki"
+  Other Language: "Drugo"
+  American Sign Language: "ameriški znakovni jezik"
+  Search Tags: "Iskanje oznak"
+  Add Tag: "Dodaj oznako"
+  Remove Tag: "Odstrani {tag}"
+  Sort:
+    Viewers: "Gledalci (od največ do najmanj)"
+    Viewers Ascending: "Gledalci (od najmanj do največ)"
+    Started: "Nedavno začeto"
+    Relevance: "Priporočeno"
+    Published: "Nedavno objavljeno"
+    Views: "Ogledi (od največ do najmanj)"
+    Top Day: "Najboljše v 24 urah"
+    Top Week: "Najboljše v 7 dneh"
+    Top Month: "Najboljše v 30 dneh"
+    Top All: "Najboljše vseh časov"
+  Video Type:
+    Video Type: "Vrsta videoposnetka"
+    All: "Vsi videoposnetki"
+    Archive: "Pretekli prenosi"
+    Highlight: "Poudarki"
+    Upload: "Naloženi videoposnetki"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} je odgovoril(-a) uporabniku {commentAuthor}"
   Like: "Všeč mi je"
@@ -3511,5 +3539,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Iskanje po Twitchu"
+  Search Placeholder: "Kategorije in kanali"
 New Incognito Tab: Nov zavihek brez beleženja zgodovine
 Incognito Tab: Zavihek brez beleženja zgodovine

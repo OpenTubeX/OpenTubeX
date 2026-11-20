@@ -1316,6 +1316,7 @@ Settings:
     Platforms:
       Other Platforms: Platform Lain
       Manage Channels: Kelola Kanal yang Diikuti
+      Enable Twitch Page: Aktifkan Halaman Twitch
       Notify When Live: Beri Tahu Saat Kanal Twitch yang Diikuti Mulai Siaran Langsung
       Auto Refresh Interval: Interval Pembaruan Otomatis Platform Lain
   Distraction Free Settings:
@@ -2489,6 +2490,7 @@ Tooltips:
     Faster Subscription Refresh: "Memeriksa umpan RSS setiap saluran terlebih dahulu dan hanya memuat video, Shorts, dan siaran langsung dari saluran yang memiliki unggahan baru. Penyegaran otomatis juga melewati saluran yang dimuat dalam 10 menit terakhir. Untuk saluran tanpa unggahan baru, jumlah penayangan, video yang dihapus, dan judul yang diubah hanya diperbarui setiap beberapa jam, dan unggahan baru mungkin muncul lebih lambat saat umpan RSS tertinggal. Tidak tersedia dengan API Invidious."
     Show Collaborations From Other Channels: "Juga menampilkan video yang dibuat oleh saluran yang Anda langgani bersama saluran lain yang mengunggahnya. YouTube hanya mencantumkannya di tab Beranda saluran, jadi setiap penyegaran video memuat satu halaman lagi per saluran. Hanya kolaborasi terbaru yang ditampilkan di sana yang ditemukan, beberapa saluran tidak menampilkannya sama sekali, dan tanggal publikasinya merupakan perkiraan. Tidak tersedia dengan API Invidious."
     Platforms Auto Refresh Interval: Seberapa sering OpenTubeX memperbarui kanal yang Anda ikuti di platform lain secara otomatis saat aplikasi terbuka.
+    Enable Twitch Page: Memungkinkan Anda membuka halaman Twitch dari navigasi dan palet perintah. Di sana Anda dapat menjelajahi kategori populer dan kanal langsung serta mencari di Twitch.
     Twitch Notify When Live: Memberi tahu Anda saat salah satu kanal Twitch yang Anda ikuti mulai bersiaran. OpenTubeX memeriksa setiap beberapa menit saat terbuka, dan juga saat ditutup jika saat itu memperbarui langganan.
   Theme Settings:
     Toggle Playback With Tab Icon: Mengklik ikon tab yang berisi video yang sedang diputar atau dijeda akan menjeda atau melanjutkannya tanpa beralih ke tab tersebut.
@@ -2906,6 +2908,32 @@ Platforms:
   Verify: "Verifikasi"
   Categories: "Kategori"
   Category Not Found: "Kategori ini tidak dapat ditemukan."
+  Category Tags: "Tag kategori"
+  Stream Tags: "Tag siaran"
+  Language: "Bahasa"
+  All Languages: "Semua bahasa"
+  Other Language: "Lainnya"
+  American Sign Language: "Bahasa Isyarat Amerika"
+  Search Tags: "Cari tag"
+  Add Tag: "Tambah tag"
+  Remove Tag: "Hapus {tag}"
+  Sort:
+    Viewers: "Penonton (tinggi ke rendah)"
+    Viewers Ascending: "Penonton (rendah ke tinggi)"
+    Started: "Baru dimulai"
+    Relevance: "Direkomendasikan"
+    Published: "Baru dipublikasikan"
+    Views: "Ditonton (tinggi ke rendah)"
+    Top Day: "Teratas 24 jam"
+    Top Week: "Teratas 7 hari"
+    Top Month: "Teratas 30 hari"
+    Top All: "Teratas sepanjang masa"
+  Video Type:
+    Video Type: "Jenis video"
+    All: "Semua video"
+    Archive: "Siaran sebelumnya"
+    Highlight: "Sorotan"
+    Upload: "Unggahan"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} membalas {commentAuthor}"
   Like: "Suka"
@@ -2940,5 +2968,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Cari di Twitch"
+  Search Placeholder: "Kategori dan kanal"
 New Incognito Tab: Tab Penyamaran Baru
 Incognito Tab: Tab penyamaran

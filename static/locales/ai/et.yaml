@@ -1313,6 +1313,7 @@ Settings:
     Platforms:
       Other Platforms: Teised platvormid
       Manage Channels: Halda jälgitavaid kanaleid
+      Enable Twitch Page: Luba Twitchi leht
       Notify When Live: Teavita, kui jälgitavad Twitchi kanalid alustavad otseülekannet
       Auto Refresh Interval: Teiste platvormide automaatse värskendamise intervall
   Distraction Free Settings:
@@ -2465,6 +2466,7 @@ Tooltips:
     Faster Subscription Refresh: "Kontrollib esmalt iga kanali RSS-voogu ja laadib videod, Shorts'id ja otseülekanded ainult uute üleslaadimistega kanalitest. Automaatsed värskendused jätavad vahele ka kanalid, mis laaditi viimase 10 minuti jooksul. Uute üleslaadimisteta kanalite puhul uuenevad vaatamiste arvud, eemaldatud videod ja muudetud pealkirjad vaid iga mõne tunni tagant ning uued üleslaadimised võivad ilmuda hiljem, kui RSS-voog jääb maha. Invidiouse API-ga pole saadaval."
     Show Collaborations From Other Channels: "Näitab ka videoid, mille tellitud kanalid tegid koos teise kanaliga, kes need üles laadis. YouTube näitab neid ainult kanali avalehe vahekaardil, seega laadib iga videote värskendus iga kanali kohta ühe lehe rohkem. Leitakse ainult seal näidatud uusimad koostööd, mõned kanalid ei näita ühtegi ja nende avaldamiskuupäevad on ligikaudsed. Pole Invidiouse API-ga saadaval."
     Platforms Auto Refresh Interval: Kui sageli OpenTubeX kanaleid, mida sa teistel platvormidel jälgid, automaatselt värskendab, kui rakendus on avatud.
+    Enable Twitch Page: Võimaldab avada Twitchi lehe navigeerimisest ja käsupaletist. Seal saad sirvida populaarseid kategooriaid ja otsekanaleid ning otsida Twitchist.
     Twitch Notify When Live: Teavitab sind, kui mõni sinu jälgitavatest Twitchi kanalitest alustab ülekannet. OpenTubeX kontrollib iga paari minuti järel, kui see on avatud, ja ka siis, kui see on suletud, kui see siis tellimusi värskendab.
   Theme Settings:
     Toggle Playback With Tab Icon: Klõps esitatava või peatatud videoga vahekaardi ikoonil peatab või jätkab video, ilma et vahekaardile lülitutaks.
@@ -2882,6 +2884,32 @@ Platforms:
   Verify: "Kinnita"
   Categories: "Kategooriad"
   Category Not Found: "Seda kategooriat ei leitud."
+  Category Tags: "Kategooria sildid"
+  Stream Tags: "Voo sildid"
+  Language: "Keel"
+  All Languages: "Kõik keeled"
+  Other Language: "Muu"
+  American Sign Language: "Ameerika viipekeel"
+  Search Tags: "Otsi silte"
+  Add Tag: "Lisa silt"
+  Remove Tag: "Eemalda {tag}"
+  Sort:
+    Viewers: "Vaatajad (suurimast väikseimani)"
+    Viewers Ascending: "Vaatajad (väikseimast suurimani)"
+    Started: "Hiljuti alustatud"
+    Relevance: "Soovitatud"
+    Published: "Hiljuti avaldatud"
+    Views: "Vaatamised (suurimast väikseimani)"
+    Top Day: "Top 24 tundi"
+    Top Week: "Top 7 päeva"
+    Top Month: "Top 30 päeva"
+    Top All: "Top kõigi aegade"
+  Video Type:
+    Video Type: "Video tüüp"
+    All: "Kõik videod"
+    Archive: "Varasemad ülekanded"
+    Highlight: "Esiletõstetud hetked"
+    Upload: "Üleslaaditud"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} vastas kasutajale {commentAuthor}"
   Like: "Meeldib"
@@ -2916,5 +2944,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Otsi Twitchist"
+  Search Placeholder: "Kategooriad ja kanalid"
 New Incognito Tab: Uus inkognito vahekaart
 Incognito Tab: Inkognito vahekaart

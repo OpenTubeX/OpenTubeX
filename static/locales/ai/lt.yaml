@@ -1531,6 +1531,7 @@ Settings:
     Platforms:
       Other Platforms: Kitos platformos
       Manage Channels: Tvarkyti sekamus kanalus
+      Enable Twitch Page: Įjungti Twitch puslapį
       Notify When Live: Pranešti, kai sekami Twitch kanalai pradeda tiesioginę transliaciją
       Auto Refresh Interval: Kitų platformų automatinio atnaujinimo intervalas
   Distraction Free Settings:
@@ -2894,6 +2895,7 @@ Tooltips:
     Faster Subscription Refresh: "Pirmiausia patikrina kiekvieno kanalo RSS sklaidos kanalą ir įkelia vaizdo įrašus, Shorts ir tiesiogines transliacijas tik iš kanalų su naujais įkėlimais. Automatiniai atnaujinimai taip pat praleidžia kanalus, įkeltus per pastarąsias 10 minučių. Kanaluose be naujų įkėlimų peržiūrų skaičiai, pašalinti vaizdo įrašai ir pakeisti pavadinimai atnaujinami tik kas kelias valandas, o nauji įkėlimai gali pasirodyti vėliau, kai RSS sklaidos kanalas vėluoja. Nepasiekiama naudojant Invidious API."
     Show Collaborations From Other Channels: "Taip pat rodo vaizdo įrašus, kuriuos prenumeruojami kanalai sukūrė kartu su kitu juos įkėlusiu kanalu. „YouTube“ juos rodo tik kanalo skirtuke „Pagrindinis“, todėl kiekvienas vaizdo įrašų atnaujinimas kiekvienam kanalui įkelia vienu puslapiu daugiau. Randami tik ten rodomi naujausi bendradarbiavimai, kai kurie kanalai jų visai nerodo, o jų paskelbimo datos yra apytikslės. Nepasiekiama su „Invidious“ API."
     Platforms Auto Refresh Interval: Kaip dažnai OpenTubeX automatiškai atnaujina kanalus, kuriuos sekate kitose platformose, kol programa atidaryta.
+    Enable Twitch Page: Leidžia atidaryti Twitch puslapį iš naršymo ir komandų paletės. Ten galite naršyti populiarias kategorijas ir tiesioginius kanalus bei ieškoti Twitch.
     Twitch Notify When Live: Praneša, kai vienas iš jūsų sekamų Twitch kanalų pradeda transliaciją. OpenTubeX tikrina kas kelias minutes, kol yra atidaryta, ir taip pat, kai yra uždaryta, jei tuo metu atnaujina prenumeratas.
   Theme Settings:
     Toggle Playback With Tab Icon: Spustelėjus kortelės su leidžiamu ar pristabdytu vaizdo įrašu piktogramą, jis pristabdomas arba tęsiamas neperjungiant į tą kortelę.
@@ -3383,6 +3385,32 @@ Platforms:
   Verify: "Patvirtinti"
   Categories: "Kategorijos"
   Category Not Found: "Šios kategorijos rasti nepavyko."
+  Category Tags: "Kategorijos žymos"
+  Stream Tags: "Transliacijos žymos"
+  Language: "Kalba"
+  All Languages: "Visos kalbos"
+  Other Language: "Kita"
+  American Sign Language: "Amerikos gestų kalba"
+  Search Tags: "Ieškoti žymų"
+  Add Tag: "Pridėti žymą"
+  Remove Tag: "Pašalinti {tag}"
+  Sort:
+    Viewers: "Žiūrovai (nuo daugiausia iki mažiausia)"
+    Viewers Ascending: "Žiūrovai (nuo mažiausia iki daugiausia)"
+    Started: "Neseniai pradėtos"
+    Relevance: "Rekomenduojama"
+    Published: "Neseniai paskelbta"
+    Views: "Peržiūros (nuo daugiausia iki mažiausia)"
+    Top Day: "Populiariausi per 24 val."
+    Top Week: "Populiariausi per 7 dienas"
+    Top Month: "Populiariausi per 30 dienų"
+    Top All: "Populiariausi per visą laiką"
+  Video Type:
+    Video Type: "Vaizdo įrašo tipas"
+    All: "Visi vaizdo įrašai"
+    Archive: "Praėjusios transliacijos"
+    Highlight: "Svarbiausi momentai"
+    Upload: "Įkėlimai"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} atsakė naudotojui {commentAuthor}"
   Like: "Patinka"
@@ -3417,5 +3445,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Ieškoti Twitch"
+  Search Placeholder: "Kategorijos ir kanalai"
 New Incognito Tab: Nauja inkognito kortelė
 Incognito Tab: Inkognito kortelė

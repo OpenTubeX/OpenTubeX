@@ -1584,6 +1584,7 @@ Settings:
     Platforms:
       Other Platforms: Altres plataformes
       Manage Channels: Gestiona els canals seguits
+      Enable Twitch Page: Activa la pàgina de Twitch
       Notify When Live: Notifica quan els canals de Twitch seguits comencin una emissió en directe
       Auto Refresh Interval: Interval d'actualització automàtica d'altres plataformes
   Distraction Free Settings:
@@ -3029,6 +3030,7 @@ Tooltips:
     Faster Subscription Refresh: "Primer comprova el canal RSS de cada canal i només carrega els vídeos, els Shorts i les emissions en directe dels canals amb pujades noves. Les actualitzacions automàtiques també ometen els canals carregats en els últims 10 minuts. Als canals sense pujades noves, el nombre de visualitzacions, els vídeos eliminats i els títols canviats només s'actualitzen cada poques hores, i les pujades noves poden aparèixer més tard quan el canal RSS va endarrerit. No disponible amb l'API d'Invidious."
     Show Collaborations From Other Channels: "També mostra els vídeos que els canals als quals esteu subscrit han fet juntament amb un altre canal que els ha penjat. YouTube només els mostra a la pestanya Inici d'un canal, de manera que cada actualització de vídeos carrega una pàgina més per canal. Només es troben les col·laboracions més recents que s'hi mostren, alguns canals no en mostren cap i les dates de publicació són aproximades. No disponible amb l'API d'Invidious."
     Platforms Auto Refresh Interval: Amb quina freqüència OpenTubeX actualitza automàticament els canals que seguiu en altres plataformes mentre l'aplicació és oberta.
+    Enable Twitch Page: Permet obrir la pàgina de Twitch des de la navegació i la paleta d'ordres. Hi podeu explorar categories populars i canals en directe i cercar a Twitch.
     Twitch Notify When Live: Et notifica quan un dels canals de Twitch que segueixes comença a emetre. OpenTubeX ho comprova cada pocs minuts mentre és obert, i també mentre és tancat si llavors actualitza les subscripcions.
   Theme Settings:
     Toggle Playback With Tab Icon: En fer clic a la icona d’una pestanya amb un vídeo en reproducció o en pausa, es posa en pausa o es reprèn sense canviar a aquesta pestanya.
@@ -3527,6 +3529,32 @@ Platforms:
   Verify: "Verifica"
   Categories: "Categories"
   Category Not Found: "No s'ha pogut trobar aquesta categoria."
+  Category Tags: "Etiquetes de la categoria"
+  Stream Tags: "Etiquetes de la retransmissió"
+  Language: "Llengua"
+  All Languages: "Totes les llengües"
+  Other Language: "Altres"
+  American Sign Language: "llengua de signes americana"
+  Search Tags: "Cerca etiquetes"
+  Add Tag: "Afegeix una etiqueta"
+  Remove Tag: "Elimina {tag}"
+  Sort:
+    Viewers: "Espectadors (de més a menys)"
+    Viewers Ascending: "Espectadors (de menys a més)"
+    Started: "Iniciades recentment"
+    Relevance: "Recomanat"
+    Published: "Publicats recentment"
+    Views: "Visualitzacions (de més a menys)"
+    Top Day: "Millors de 24 hores"
+    Top Week: "Millors de 7 dies"
+    Top Month: "Millors de 30 dies"
+    Top All: "Millors de tots els temps"
+  Video Type:
+    Video Type: "Tipus de vídeo"
+    All: "Tots els vídeos"
+    Archive: "Emissions anteriors"
+    Highlight: "Destacats"
+    Upload: "Pujades"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} ha respost a {commentAuthor}"
   Like: "M'agrada"
@@ -3561,5 +3589,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Cerca a Twitch"
+  Search Placeholder: "Categories i canals"
 New Incognito Tab: Pestanya d’incògnit nova
 Incognito Tab: Pestanya d’incògnit

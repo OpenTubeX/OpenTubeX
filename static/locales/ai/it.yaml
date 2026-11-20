@@ -1313,6 +1313,7 @@ Settings:
     Platforms:
       Other Platforms: Altre piattaforme
       Manage Channels: Gestisci i canali seguiti
+      Enable Twitch Page: Abilita la pagina Twitch
       Notify When Live: Avvisa quando i canali Twitch seguiti vanno in diretta
       Auto Refresh Interval: Intervallo di aggiornamento automatico delle altre piattaforme
   Distraction Free Settings:
@@ -2462,6 +2463,7 @@ Tooltips:
     Faster Subscription Refresh: "Controlla prima il feed RSS di ogni canale e carica video, Shorts e dirette solo dai canali con nuovi caricamenti. Gli aggiornamenti automatici saltano anche i canali caricati negli ultimi 10 minuti. Per i canali senza nuovi caricamenti, visualizzazioni, video rimossi e titoli modificati si aggiornano solo ogni poche ore, e i nuovi caricamenti potrebbero comparire più tardi quando il feed RSS è in ritardo. Non disponibile con l'API di Invidious."
     Show Collaborations From Other Channels: "Mostra anche i video che i canali a cui sei iscritto hanno realizzato insieme a un altro canale che li ha caricati. YouTube li elenca solo nella scheda Home di un canale, quindi ogni aggiornamento dei video carica una pagina in più per canale. Vengono trovate solo le collaborazioni più recenti mostrate lì, alcuni canali non ne mostrano nessuna e le loro date di pubblicazione sono approssimative. Non disponibile con l'API di Invidious."
     Platforms Auto Refresh Interval: Ogni quanto OpenTubeX aggiorna automaticamente i canali che segui su altre piattaforme mentre l'app è aperta.
+    Enable Twitch Page: Ti permette di aprire la pagina Twitch dalla navigazione e dalla tavolozza dei comandi. Lì puoi sfogliare le categorie popolari e i canali in diretta e cercare su Twitch.
     Twitch Notify When Live: Ti avvisa quando uno dei canali Twitch che segui inizia a trasmettere. OpenTubeX controlla ogni pochi minuti mentre è aperto, e anche mentre è chiuso se in quel momento aggiorna le iscrizioni.
   Theme Settings:
     Toggle Playback With Tab Icon: Facendo clic sull’icona di una scheda con un video in riproduzione o in pausa, lo si mette in pausa o lo si riprende senza passare a quella scheda.
@@ -2879,6 +2881,32 @@ Platforms:
   Verify: "Verifica"
   Categories: "Categorie"
   Category Not Found: "Impossibile trovare questa categoria."
+  Category Tags: "Tag della categoria"
+  Stream Tags: "Tag dello stream"
+  Language: "Lingua"
+  All Languages: "Tutte le lingue"
+  Other Language: "Altra"
+  American Sign Language: "lingua dei segni americana"
+  Search Tags: "Cerca tag"
+  Add Tag: "Aggiungi tag"
+  Remove Tag: "Rimuovi {tag}"
+  Sort:
+    Viewers: "Spettatori (dal più al meno)"
+    Viewers Ascending: "Spettatori (dal meno al più)"
+    Started: "Iniziati di recente"
+    Relevance: "Consigliati"
+    Published: "Pubblicati di recente"
+    Views: "Visualizzazioni (dal più al meno)"
+    Top Day: "Top 24 ore"
+    Top Week: "Top 7 giorni"
+    Top Month: "Top 30 giorni"
+    Top All: "Top di sempre"
+  Video Type:
+    Video Type: "Tipo di video"
+    All: "Tutti i video"
+    Archive: "Trasmissioni passate"
+    Highlight: "Momenti salienti"
+    Upload: "Caricamenti"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} ha risposto a {commentAuthor}"
   Like: "Mi piace"
@@ -2913,5 +2941,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Cerca su Twitch"
+  Search Placeholder: "Categorie e canali"
 New Incognito Tab: Nuova scheda in incognito
 Incognito Tab: Scheda in incognito

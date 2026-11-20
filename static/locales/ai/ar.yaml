@@ -1324,6 +1324,7 @@ Settings:
     Platforms:
       Other Platforms: منصات أخرى
       Manage Channels: إدارة القنوات المتابَعة
+      Enable Twitch Page: تفعيل صفحة Twitch
       Notify When Live: الإشعار عند بدء بث قنوات Twitch المتابَعة
       Auto Refresh Interval: الفاصل الزمني للتحديث التلقائي للمنصات الأخرى
   Distraction Free Settings:
@@ -2500,6 +2501,7 @@ Tooltips:
     Faster Subscription Refresh: "يتحقق أولاً من موجز RSS لكل قناة ولا يحمّل الفيديوهات وShorts والبث المباشر إلا من القنوات التي لديها رفعات جديدة. تتخطى التحديثات التلقائية أيضاً القنوات التي حُمّلت خلال آخر 10 دقائق. بالنسبة للقنوات التي ليس لديها رفعات جديدة، لا يتم تحديث عدد المشاهدات والفيديوهات المحذوفة والعناوين المتغيرة إلا كل بضع ساعات، وقد تظهر الرفعات الجديدة لاحقاً عندما يتأخر موجز RSS. غير متاح مع واجهة Invidious البرمجية."
     Show Collaborations From Other Channels: "يعرض أيضًا الفيديوهات التي صنعتها القنوات التي تشترك فيها مع قناة أخرى قامت برفعها. لا يعرض YouTube هذه الفيديوهات إلا في علامة التبويب الرئيسية للقناة، لذا يحمّل كل تحديث للفيديوهات صفحة إضافية لكل قناة. لا يُعثر إلا على أحدث التعاونات المعروضة هناك، وبعض القنوات لا تعرض أيًا منها، وتواريخ نشرها تقريبية. غير متاح مع واجهة Invidious البرمجية."
     Platforms Auto Refresh Interval: عدد مرات تحديث OpenTubeX للقنوات التي تتابعها على منصات أخرى تلقائيًا أثناء فتح التطبيق.
+    Enable Twitch Page: تتيح لك فتح صفحة Twitch من التنقل ولوحة الأوامر. يمكنك هناك تصفح الفئات الشائعة والقنوات المباشرة والبحث في Twitch.
     Twitch Notify When Live: يُعلمك عندما تبدأ إحدى قنوات Twitch التي تتابعها البث. يتحقق OpenTubeX كل بضع دقائق أثناء فتحه، وكذلك أثناء إغلاقه إذا كان يحدّث الاشتراكات حينها.
   Theme Settings:
     Toggle Playback With Tab Icon: يؤدي النقر على أيقونة علامة تبويب تحتوي على فيديو قيد التشغيل أو متوقف مؤقتًا إلى إيقافه مؤقتًا أو استئنافه دون الانتقال إلى علامة التبويب تلك.
@@ -2920,6 +2922,32 @@ Platforms:
   Verify: "تحقّق"
   Categories: "الفئات"
   Category Not Found: "تعذّر العثور على هذه الفئة."
+  Category Tags: "وسوم الفئة"
+  Stream Tags: "وسوم البث"
+  Language: "اللغة"
+  All Languages: "كل اللغات"
+  Other Language: "أخرى"
+  American Sign Language: "لغة الإشارة الأمريكية"
+  Search Tags: "البحث في الوسوم"
+  Add Tag: "إضافة وسم"
+  Remove Tag: "إزالة {tag}"
+  Sort:
+    Viewers: "المشاهدون (من الأعلى إلى الأدنى)"
+    Viewers Ascending: "المشاهدون (من الأدنى إلى الأعلى)"
+    Started: "بدأ مؤخرًا"
+    Relevance: "موصى به"
+    Published: "نُشر مؤخرًا"
+    Views: "المشاهدات (من الأعلى إلى الأدنى)"
+    Top Day: "الأفضل خلال 24 ساعة"
+    Top Week: "الأفضل خلال 7 أيام"
+    Top Month: "الأفضل خلال 30 يومًا"
+    Top All: "الأفضل على الإطلاق"
+  Video Type:
+    Video Type: "نوع الفيديو"
+    All: "جميع الفيديوهات"
+    Archive: "البثوث السابقة"
+    Highlight: "المقاطع البارزة"
+    Upload: "الفيديوهات المرفوعة"
 YouTube Account:
   "{author} replied to {commentAuthor}": "ردّ {author} على {commentAuthor}"
   Like: "إعجاب"
@@ -2954,5 +2982,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "البحث في Twitch"
+  Search Placeholder: "الفئات والقنوات"
 New Incognito Tab: علامة تبويب جديدة للتصفح المتخفي
 Incognito Tab: علامة تبويب للتصفح المتخفي

@@ -20,6 +20,7 @@ export function useLandingPageOptions() {
       backendFallback: store.getters.getBackendFallback,
       showWatchStats: store.getters.getRememberHistory && store.getters.getEnableWatchStats,
       supportsYtDlp,
+      enableTwitchPage: store.getters.getEnableTwitchPage,
     })
       .map(id => routeByPath.get(id))
       .filter(route => route != null)

@@ -30,6 +30,20 @@ test('filters unavailable navigation items without changing their order', () => 
       backendFallback: false,
       showWatchStats: false,
       supportsYtDlp: false,
+      enableTwitchPage: true,
     }
   ), ['history', 'home', 'trending'])
+})
+
+test('shows the Twitch page only where yt-dlp plays it and the user has it on', () => {
+  const options = {
+    supportsLocalApi: true,
+    backendPreference: 'local',
+    backendFallback: false,
+    showWatchStats: true,
+    supportsYtDlp: true,
+    enableTwitchPage: true,
+  }
+  assert.deepEqual(filterAvailableNavigationItems(['home', 'twitch'], options), ['home', 'twitch'])
+  assert.deepEqual(filterAvailableNavigationItems(['home', 'twitch'], { ...options, enableTwitchPage: false }), ['home'])
 })

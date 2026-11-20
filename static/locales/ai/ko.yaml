@@ -1511,6 +1511,7 @@ Settings:
     Platforms:
       Other Platforms: 다른 플랫폼
       Manage Channels: 팔로우한 채널 관리
+      Enable Twitch Page: Twitch 페이지 사용
       Notify When Live: 팔로우한 Twitch 채널이 방송을 시작하면 알림
       Auto Refresh Interval: 다른 플랫폼 자동 새로 고침 간격
   Distraction Free Settings:
@@ -2856,6 +2857,7 @@ Tooltips:
     Faster Subscription Refresh: "먼저 각 채널의 RSS 피드를 확인하고 새 업로드가 있는 채널의 동영상, Shorts, 라이브 스트림만 불러옵니다. 자동 새로 고침은 지난 10분 이내에 불러온 채널도 건너뜁니다. 새 업로드가 없는 채널은 조회수, 삭제된 동영상, 변경된 제목이 몇 시간마다만 업데이트되며, RSS 피드가 늦어지면 새 업로드가 늦게 표시될 수 있습니다. Invidious API에서는 사용할 수 없습니다."
     Show Collaborations From Other Channels: "구독한 채널이 해당 동영상을 업로드한 다른 채널과 함께 만든 동영상도 표시합니다. YouTube는 이러한 동영상을 채널의 홈 탭에만 표시하므로 동영상을 새로고침할 때마다 채널당 한 페이지를 더 불러옵니다. 그곳에 표시되는 최신 콜라보만 찾을 수 있고, 일부 채널은 아무것도 표시하지 않으며, 게시 날짜는 대략적입니다. Invidious API에서는 사용할 수 없습니다."
     Platforms Auto Refresh Interval: 앱이 열려 있는 동안 OpenTubeX가 다른 플랫폼에서 팔로우한 채널을 자동으로 새로 고치는 빈도입니다.
+    Enable Twitch Page: 탐색 메뉴와 명령 팔레트에서 Twitch 페이지를 열 수 있게 합니다. 이 페이지에서 인기 카테고리와 라이브 채널을 둘러보고 Twitch를 검색할 수 있습니다.
     Twitch Notify When Live: 팔로우한 Twitch 채널 중 하나가 방송을 시작하면 알려 줍니다. OpenTubeX는 열려 있는 동안 몇 분마다 확인하며, 닫혀 있는 동안에도 그때 구독을 새로 고치면 확인합니다.
   Theme Settings:
     Toggle Playback With Tab Icon: 재생 중이거나 일시정지된 동영상이 있는 탭의 아이콘을 클릭하면 해당 탭으로 전환하지 않고 일시정지하거나 다시 재생합니다.
@@ -3337,6 +3339,32 @@ Platforms:
   Verify: "확인"
   Categories: "카테고리"
   Category Not Found: "이 카테고리를 찾을 수 없습니다."
+  Category Tags: "카테고리 태그"
+  Stream Tags: "스트림 태그"
+  Language: "언어"
+  All Languages: "모든 언어"
+  Other Language: "기타"
+  American Sign Language: "미국 수어"
+  Search Tags: "태그 검색"
+  Add Tag: "태그 추가"
+  Remove Tag: "{tag} 제거"
+  Sort:
+    Viewers: "시청자 수 (많은 순)"
+    Viewers Ascending: "시청자 수 (적은 순)"
+    Started: "최근 시작순"
+    Relevance: "추천"
+    Published: "최근 게시순"
+    Views: "조회수 (많은 순)"
+    Top Day: "24시간 인기"
+    Top Week: "7일 인기"
+    Top Month: "30일 인기"
+    Top All: "전체 기간 인기"
+  Video Type:
+    Video Type: "동영상 유형"
+    All: "모든 동영상"
+    Archive: "지난 방송"
+    Highlight: "하이라이트"
+    Upload: "업로드"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author}님이 {commentAuthor}님에게 답글을 남겼습니다"
   Like: "좋아요"
@@ -3371,5 +3399,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Twitch 검색"
+  Search Placeholder: "카테고리 및 채널"
 New Incognito Tab: 새 시크릿 탭
 Incognito Tab: 시크릿 탭

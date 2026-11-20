@@ -1313,6 +1313,7 @@ Settings:
     Platforms:
       Other Platforms: Andra plattformar
       Manage Channels: Hantera följda kanaler
+      Enable Twitch Page: Aktivera Twitch-sidan
       Notify When Live: Meddela när följda Twitch-kanaler börjar sända live
       Auto Refresh Interval: Intervall för automatisk uppdatering av andra plattformar
   Distraction Free Settings:
@@ -2463,6 +2464,7 @@ Tooltips:
     Faster Subscription Refresh: "Kontrollerar först varje kanals RSS-flöde och läser bara in videor, Shorts och livesändningar från kanaler med nya uppladdningar. Automatiska uppdateringar hoppar också över kanaler som lästs in de senaste 10 minuterna. För kanaler utan nya uppladdningar uppdateras visningar, borttagna videor och ändrade titlar bara med några timmars mellanrum, och nya uppladdningar kan dyka upp senare när RSS-flödet släpar efter. Inte tillgängligt med Invidious-API:t."
     Show Collaborations From Other Channels: "Visar även videor som kanaler du prenumererar på har gjort tillsammans med en annan kanal som laddade upp dem. YouTube visar dem bara på en kanals Hem-flik, så varje uppdatering av videor läser in en sida till per kanal. Bara de senaste samarbetena som visas där hittas, vissa kanaler visar inga, och deras publiceringsdatum är ungefärliga. Inte tillgängligt med Invidious-API:et."
     Platforms Auto Refresh Interval: Hur ofta OpenTubeX automatiskt uppdaterar kanalerna du följer på andra plattformar medan appen är öppen.
+    Enable Twitch Page: Låter dig öppna Twitch-sidan från navigeringen och kommandopaletten. Där kan du bläddra bland populära kategorier och live-kanaler och söka på Twitch.
     Twitch Notify When Live: Meddelar dig när en av dina följda Twitch-kanaler börjar streama. OpenTubeX kontrollerar med några minuters mellanrum medan det är öppet, och även medan det är stängt om det då uppdaterar prenumerationer.
   Theme Settings:
     Toggle Playback With Tab Icon: Ett klick på ikonen för en flik med en video som spelas upp eller är pausad pausar eller återupptar den utan att byta till fliken.
@@ -2879,6 +2881,32 @@ Platforms:
   Verify: "Verifiera"
   Categories: "Kategorier"
   Category Not Found: "Kategorin kunde inte hittas."
+  Category Tags: "Kategoritaggar"
+  Stream Tags: "Streamtaggar"
+  Language: "Språk"
+  All Languages: "Alla språk"
+  Other Language: "Annat"
+  American Sign Language: "amerikanskt teckenspråk"
+  Search Tags: "Sök taggar"
+  Add Tag: "Lägg till tagg"
+  Remove Tag: "Ta bort {tag}"
+  Sort:
+    Viewers: "Tittare (flest till minst)"
+    Viewers Ascending: "Tittare (minst till flest)"
+    Started: "Nyligen startade"
+    Relevance: "Rekommenderade"
+    Published: "Nyligen publicerade"
+    Views: "Visningar (flest till minst)"
+    Top Day: "Topp 24 timmar"
+    Top Week: "Topp 7 dagar"
+    Top Month: "Topp 30 dagar"
+    Top All: "Topp genom tiderna"
+  Video Type:
+    Video Type: "Videotyp"
+    All: "Alla videor"
+    Archive: "Tidigare sändningar"
+    Highlight: "Höjdpunkter"
+    Upload: "Uppladdningar"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} svarade {commentAuthor}"
   Like: "Gilla"
@@ -2913,5 +2941,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Sök på Twitch"
+  Search Placeholder: "Kategorier och kanaler"
 New Incognito Tab: Ny inkognitoflik
 Incognito Tab: Inkognitoflik

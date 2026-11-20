@@ -1313,6 +1313,7 @@ Settings:
     Platforms:
       Other Platforms: Savennoù all
       Manage Channels: Merañ ar chadennoù heuliet
+      Enable Twitch Page: Gweredekaat pajenn Twitch
       Notify When Live: Kemenn pa grog ar chadennoù Twitch heuliet da skignañ war-eeun
       Auto Refresh Interval: Etrevez adkargañ emgefreek ar savennoù all
   Distraction Free Settings:
@@ -2473,6 +2474,7 @@ Tooltips:
     Faster Subscription Refresh: "Gwiriañ a ra lanv RSS pep chadenn da gentañ ha ne garg nemet videoioù, Shorts ha skignadennoù war-eeun ar chadennoù o deus pellgasadennoù nevez. Ar freskadurioù emgefre a lez a-gostez ivez ar chadennoù karget e-pad an 10 munutenn diwezhañ. Evit ar chadennoù hep pellgasadennoù nevez, ne vez hizivaet an niver a selloù, ar videoioù dilamet hag an titloù kemmet nemet bep un nebeud eurioù, ha gallout a ra ar pellgasadennoù nevez dont war wel diwezhatoc'h pa vez dale gant al lanv RSS. N'eo ket hegerz gant API Invidious."
     Show Collaborations From Other Channels: "Diskouez a ra ivez ar videoioù graet gant ar chadennoù m'emaoc'h koumanantet dezho asambles gant ur chadenn all he deus o fellgaset. YouTube ne ziskouez anezho nemet war ivinell Degemer ur chadenn, setu e karg pep freskadenn videoioù ur bajenn ouzhpenn evit pep chadenn. N'eus kavet nemet ar c'henlabouradennoù nevesañ diskouezet eno, chadennoù zo ne ziskouezont hini ebet, ha brasjedet eo o deiziadoù embann. N'eo ket hegerz gant API Invidious."
     Platforms Auto Refresh Interval: Pegen alies e vez adkarget ar chadennoù a heuliit war savennoù all ent emgefreek gant OpenTubeX e-pad ma vez digor an arload.
+    Enable Twitch Page: Ma c'hallit digeriñ pajenn Twitch dre ar merdeiñ ha paled arc'hadoù. Enni e c'hallit furchal er rummadoù brudet hag er chadennoù war-eeun ha klask war Twitch.
     Twitch Notify When Live: Ho kemenn a ra pa grog unan eus ar chadennoù Twitch a heuliit da skignañ. Gwiriañ a ra OpenTubeX bep un nebeud munutennoù keit ha ma vez digor, hag ivez keit ha ma vez serret ma nevesa ar c'houmanantoù neuze.
   Theme Settings:
     Toggle Playback With Tab Icon: Klikañ war arlun un ivinell gant ur video o vezañ lennet pe ehanet a ehan pe a adlañs anezhañ hep mont d’an ivinell-se.
@@ -2890,6 +2892,32 @@ Platforms:
   Verify: "Gwiriañ"
   Categories: "Rummadoù"
   Category Not Found: "N'eus ket bet kavet ar rummad-mañ."
+  Category Tags: "Tikedennoù ar rummad"
+  Stream Tags: "Tikedennoù ar stream"
+  Language: "Yezh"
+  All Languages: "An holl yezhoù"
+  Other Language: "All"
+  American Sign Language: "yezh sinoù Amerika"
+  Search Tags: "Klask tikedennoù"
+  Add Tag: "Ouzhpennañ un tikedenn"
+  Remove Tag: "Dilemel {tag}"
+  Sort:
+    Viewers: "Gwelerien (eus ar muiañ d'an nebeutañ)"
+    Viewers Ascending: "Gwelerien (eus an nebeutañ d'ar muiañ)"
+    Started: "Krog a-nevez zo"
+    Relevance: "Erbedet"
+    Published: "Embannet a-nevez zo"
+    Views: "Sell (eus ar muiañ d'an nebeutañ)"
+    Top Day: "Ar re wellañ en 24 eur"
+    Top Week: "Ar re wellañ en 7 devezh"
+    Top Month: "Ar re wellañ en 30 devezh"
+    Top All: "Ar re wellañ ever"
+  Video Type:
+    Video Type: "Seurt video"
+    All: "An holl videoioù"
+    Archive: "Skignadennoù tremenet"
+    Highlight: "Mareoù pouezus"
+    Upload: "Videoioù kaset"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} en deus respontet da {commentAuthor}"
   Like: "Plijout a ra din"
@@ -2924,5 +2952,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Klask war Twitch"
+  Search Placeholder: "Rummadoù ha chadennoù"
 New Incognito Tab: Ivinell kuzh nevez
 Incognito Tab: Ivinell kuzh

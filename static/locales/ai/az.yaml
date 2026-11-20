@@ -1315,6 +1315,7 @@ Settings:
     Platforms:
       Other Platforms: Digər platformalar
       Manage Channels: İzlənilən kanalları idarə et
+      Enable Twitch Page: Twitch səhifəsini aktiv et
       Notify When Live: İzlənilən Twitch kanalları canlı yayına başlayanda bildiriş göndər
       Auto Refresh Interval: Digər platformaların avtomatik yenilənmə aralığı
   Distraction Free Settings:
@@ -2475,6 +2476,7 @@ Tooltips:
     Faster Subscription Refresh: "Əvvəlcə hər kanalın RSS lentini yoxlayır və yalnız yeni yükləmələri olan kanalların videolarını, Shorts-larını və canlı yayımlarını yükləyir. Avtomatik yeniləmələr son 10 dəqiqədə yüklənmiş kanalları da ötürür. Yeni yükləməsi olmayan kanallarda baxış sayları, silinmiş videolar və dəyişdirilmiş başlıqlar yalnız bir neçə saatdan bir yenilənir və RSS lenti geri qaldıqda yeni yükləmələr daha gec görünə bilər. Invidious API ilə əlçatan deyil."
     Show Collaborations From Other Channels: "Abunə olduğunuz kanalların onları yükləyən başqa kanalla birlikdə hazırladığı videoları da göstərir. YouTube bunları yalnız kanalın Əsas səhifə tabında göstərir, buna görə hər video yeniləməsi hər kanal üçün bir əlavə səhifə yükləyir. Yalnız orada göstərilən ən son əməkdaşlıqlar tapılır, bəzi kanallar heç birini göstərmir və onların dərc tarixləri təxminidir. Invidious API ilə mövcud deyil."
     Platforms Auto Refresh Interval: Tətbiq açıq olarkən OpenTubeX-in digər platformalarda izlədiyiniz kanalları nə qədər tez-tez avtomatik yenilədiyi.
+    Enable Twitch Page: Twitch səhifəsini naviqasiyadan və əmr palitrasından açmağa imkan verir. Orada məşhur kateqoriyalara və canlı kanallara baxa, Twitch-də axtarış edə bilərsiniz.
     Twitch Notify When Live: İzlədiyiniz Twitch kanallarından biri yayına başlayanda sizə bildiriş göndərir. OpenTubeX açıq olarkən hər bir neçə dəqiqədən bir yoxlayır, bağlı olarkən isə abunəlikləri yeniləyirsə, onda da yoxlayır.
   Theme Settings:
     Toggle Playback With Tab Icon: Oxudulan və ya fasilə verilmiş videosu olan vərəqin ikonuna klikləmək, həmin vərəqə keçmədən videonu fasiləyə verir və ya davam etdirir.
@@ -2889,6 +2891,32 @@ Platforms:
   Verify: "Təsdiqlə"
   Categories: "Kateqoriyalar"
   Category Not Found: "Bu kateqoriya tapılmadı."
+  Category Tags: "Kateqoriya etiketləri"
+  Stream Tags: "Yayım etiketləri"
+  Language: "Dil"
+  All Languages: "Bütün dillər"
+  Other Language: "Digər"
+  American Sign Language: "Amerika işarət dili"
+  Search Tags: "Etiket axtar"
+  Add Tag: "Etiket əlavə et"
+  Remove Tag: "{tag} etiketini sil"
+  Sort:
+    Viewers: "İzləyicilər (çoxdan aza)"
+    Viewers Ascending: "İzləyicilər (azdan çoxa)"
+    Started: "Yaxınlarda başlayıb"
+    Relevance: "Tövsiyə olunan"
+    Published: "Yaxınlarda dərc olunub"
+    Views: "Baxışlar (çoxdan aza)"
+    Top Day: "Son 24 saatın ən yaxşıları"
+    Top Week: "Son 7 günün ən yaxşıları"
+    Top Month: "Son 30 günün ən yaxşıları"
+    Top All: "Bütün zamanların ən yaxşıları"
+  Video Type:
+    Video Type: "Video növü"
+    All: "Bütün videolar"
+    Archive: "Keçmiş yayımlar"
+    Highlight: "Önəmli anlar"
+    Upload: "Yükləmələr"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} {commentAuthor} istifadəçisinə cavab verdi"
   Like: "Bəyən"
@@ -2923,5 +2951,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Twitch-də axtar"
+  Search Placeholder: "Kateqoriyalar və kanallar"
 New Incognito Tab: Yeni gizli vərəq
 Incognito Tab: Gizli vərəq

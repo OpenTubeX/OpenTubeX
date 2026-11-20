@@ -294,6 +294,7 @@ test('migrates navigation visibility switches to an ordered list', () => {
       'subscribedchannels',
       'trending',
       'stats',
+      'twitch',
     ],
   })
 })

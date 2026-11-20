@@ -10,9 +10,10 @@
       :aria-describedby="describeById"
       aria-hidden="true"
       class="nativeSelect"
-      :value="value"
+      v-bind="multiple ? null : { value }"
       :name="id"
       :disabled="disabled"
+      :multiple="multiple"
       inert
       tabindex="-1"
       @change="change"
@@ -22,6 +23,7 @@
         :key="selectValues[index]"
         :dir="isLocaleSelector ? 'auto' : null"
         :value="selectValues[index]"
+        v-bind="multiple ? { selected: isSelectedValue(selectValues[index]) } : null"
         :lang="isLocaleSelector && selectValues[index] !== 'system' && selectValues[index] !== '' ? selectValues[index] : null"
       >
         {{ name }}
@@ -187,8 +189,9 @@
             ref="dropdown"
             v-overlay-scrollbars
             class="selectOptionList"
-            :class="[searchPanel ? null : ['selectDropdown', dropdownPlacement], { phonePicker: phoneLayout, lazyOptions }]"
+            :class="[searchPanel ? null : ['selectDropdown', dropdownPlacement], { phonePicker: phoneLayout, lazyOptions, multiple }]"
             role="listbox"
+            :aria-multiselectable="multiple || null"
             tabindex="-1"
             :autofocus="phoneLayout"
             :aria-labelledby="`${id}-label`"
@@ -225,12 +228,12 @@
                 class="selectOption"
                 :class="{
                   active: index === activeIndex,
-                  selected: selectValues[index] === value,
-                  hasOptionVisuals
+                  selected: isSelectedValue(selectValues[index]),
+                  hasOptionVisuals: hasOptionVisuals || multiple
                 }"
                 role="option"
                 :tabindex="phoneLayout ? 0 : -1"
-                :aria-selected="selectValues[index] === value"
+                :aria-selected="isSelectedValue(selectValues[index])"
                 :aria-describedby="optionGroupLabels[optionGroups[index]] ? `${id}-group-${optionGroups[index]}` : null"
                 :dir="isLocaleSelector ? 'auto' : null"
                 :lang="isLocaleSelector && selectValues[index] !== 'system' && selectValues[index] !== '' ? selectValues[index] : null"
@@ -241,8 +244,9 @@
                 @keydown.enter.space.prevent="selectOption(index)"
               >
                 <span
-                  v-if="phoneLayout"
+                  v-if="phoneLayout || multiple"
                   class="optionRadio"
+                  :class="{ optionCheckbox: multiple }"
                   aria-hidden="true"
                 />
                 <FtIcon
@@ -330,9 +334,15 @@ const props = defineProps({
     type: String,
     required: true
   },
+  // An array of the selected values with `multiple`
   value: {
-    type: [String, Number],
+    type: [String, Number, Array],
     required: true
+  },
+  // Choosing an option toggles it and keeps the list open
+  multiple: {
+    type: Boolean,
+    default: false
   },
   selectNames: {
     type: Array,
@@ -543,8 +553,14 @@ let pointerDownInDropdown = false
 // Filtering keeps the menu at least as wide as it opened, so it does not jump.
 let minimumMenuWidth = 0
 
-const selectedIndex = computed(() => props.selectValues.indexOf(props.value))
-const selectedName = computed(() => props.selectNames[selectedIndex.value] ?? '')
+/** @param {unknown} value */
+function isSelectedValue(value) {
+  return props.multiple ? Array.isArray(props.value) && props.value.includes(value) : value === props.value
+}
+
+const selectedIndices = computed(() => props.selectValues.flatMap((value, index) => isSelectedValue(value) ? [index] : []))
+const selectedIndex = computed(() => selectedIndices.value[0] ?? -1)
+const selectedName = computed(() => selectedIndices.value.map(index => props.selectNames[index]).join(', '))
 const hasOptionVisuals = computed(() =>
   props.optionColors.some(color => color === null || (typeof color === 'string' && color.length > 0)) ||
   props.optionIcons.some(icon => Array.isArray(icon))
@@ -606,7 +622,7 @@ watch([() => props.selectNames, () => props.selectValues], async (_, [, previous
   // Options that arrive while the list is open, like system fonts, must not
   // move the user back to the selected value. Follow the highlighted option
   // unless it is gone or the selected value has just appeared.
-  const selectedAppeared = selectedIndex.value >= 0 && !previousValues.includes(props.value)
+  const selectedAppeared = selectedIndex.value >= 0 && !previousValues.includes(props.selectValues[selectedIndex.value])
   const keptIndex = selectedAppeared ? -1 : props.selectValues.indexOf(previousValues[activeIndex.value])
   const nextIndex = keptIndex >= 0 ? keptIndex : Math.max(0, selectedIndex.value)
   // A search keeps the highlight on a match.
@@ -820,6 +836,8 @@ function handleButtonKeydown(event) {
     if (dropdownShown.value) {
       activeIndex.value = index
       scrollActiveOptionIntoView()
+    } else if (props.multiple) {
+      openDropdown()
     } else {
       selectOption(index)
     }
@@ -882,7 +900,7 @@ function handleTypeahead(character) {
   if (dropdownShown.value) {
     activeIndex.value = match
     scrollActiveOptionIntoView()
-  } else {
+  } else if (!props.multiple) {
     selectOption(match)
   }
 }
@@ -894,6 +912,11 @@ function handleTypeahead(character) {
  * @param {number} offset
  */
 function selectOffset(offset) {
+  // Several values have no single one to move from
+  if (props.multiple) {
+    openDropdown()
+    return
+  }
   const index = Math.max(0, Math.min(props.selectValues.length - 1, selectedIndex.value + offset))
   selectOption(index)
 }
@@ -906,6 +929,11 @@ function selectOption(index) {
   }
 
   const selectedValue = props.selectValues[index]
+  if (props.multiple) {
+    activeIndex.value = index
+    emit('change', props.selectValues.filter(value => value === selectedValue ? !isSelectedValue(value) : isSelectedValue(value)))
+    return
+  }
   if (selectedValue !== props.value) {
     emit('change', selectedValue)
   }
@@ -1015,10 +1043,19 @@ function change(event) {
   if (!settingsOverlayActive.value) return
   const select = event.target
   // Native options hold strings, so emit the matching value with its original type.
-  emit('change', props.selectValues.find(value => String(value) === select.value) ?? select.value)
+  if (props.multiple) {
+    const chosen = new Set(Array.from(select.selectedOptions, option => option.value))
+    emit('change', props.selectValues.filter(value => chosen.has(String(value))))
+  } else {
+    emit('change', props.selectValues.find(value => String(value) === select.value) ?? select.value)
+  }
   nextTick(() => {
     // Keep the native control driven by `value` when an async update is rejected.
-    select.value = props.value
+    if (props.multiple) {
+      for (const option of select.options) option.selected = props.value.some(value => String(value) === option.value)
+    } else {
+      select.value = props.value
+    }
   })
 }
 </script>

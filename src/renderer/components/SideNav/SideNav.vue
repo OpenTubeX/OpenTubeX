@@ -373,6 +373,7 @@ const visibleNavigationItems = computed(() => filterAvailableNavigationItems(
     backendFallback: backendFallback.value,
     showWatchStats: showWatchStats.value,
     supportsYtDlp,
+    enableTwitchPage: store.getters.getEnableTwitchPage,
   }
 )
   .map(id => navigationCatalog.value.get(id))

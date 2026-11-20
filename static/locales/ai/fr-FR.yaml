@@ -1313,6 +1313,7 @@ Settings:
     Platforms:
       Other Platforms: Autres plateformes
       Manage Channels: Gérer les chaînes suivies
+      Enable Twitch Page: Activer la page Twitch
       Notify When Live: Notifier quand les chaînes Twitch suivies passent en direct
       Auto Refresh Interval: Intervalle d’actualisation automatique des autres plateformes
   Distraction Free Settings:
@@ -2461,6 +2462,7 @@ Tooltips:
     Faster Subscription Refresh: "Vérifie d'abord le flux RSS de chaque chaîne et ne charge les vidéos, Shorts et diffusions en direct que des chaînes ayant de nouvelles mises en ligne. Les actualisations automatiques ignorent aussi les chaînes chargées au cours des 10 dernières minutes. Pour les chaînes sans nouvelles mises en ligne, le nombre de vues, les vidéos supprimées et les titres modifiés ne sont mis à jour que toutes les quelques heures, et les nouvelles mises en ligne peuvent apparaître plus tard lorsque le flux RSS est en retard. Non disponible avec l'API Invidious."
     Show Collaborations From Other Channels: "Affiche aussi les vidéos que les chaînes auxquelles vous êtes abonné ont réalisées avec une autre chaîne qui les a mises en ligne. YouTube ne les liste que dans l'onglet Accueil d'une chaîne, donc chaque actualisation des vidéos charge une page de plus par chaîne. Seules les collaborations les plus récentes qui y sont affichées sont trouvées, certaines chaînes n'en affichent aucune et leurs dates de publication sont approximatives. Non disponible avec l'API Invidious."
     Platforms Auto Refresh Interval: Fréquence à laquelle OpenTubeX actualise automatiquement les chaînes que vous suivez sur d’autres plateformes lorsque l’application est ouverte.
+    Enable Twitch Page: Vous permet d’ouvrir la page Twitch depuis la navigation et la palette de commandes. Vous y parcourez les catégories populaires et les chaînes en direct, et vous pouvez effectuer des recherches sur Twitch.
     Twitch Notify When Live: Vous avertit lorsqu’une de vos chaînes Twitch suivies commence un stream. OpenTubeX vérifie toutes les quelques minutes tant qu’il est ouvert, et aussi lorsqu’il est fermé s’il actualise alors les abonnements.
   Theme Settings:
     Toggle Playback With Tab Icon: Cliquer sur l’icône d’un onglet dont la vidéo est en lecture ou en pause la met en pause ou la reprend sans basculer vers cet onglet.
@@ -2878,6 +2880,32 @@ Platforms:
   Verify: "Vérifier"
   Categories: "Catégories"
   Category Not Found: "Cette catégorie est introuvable."
+  Category Tags: "Étiquettes de la catégorie"
+  Stream Tags: "Étiquettes du stream"
+  Language: "Langue"
+  All Languages: "Toutes les langues"
+  Other Language: "Autre"
+  American Sign Language: "langue des signes américaine"
+  Search Tags: "Rechercher des étiquettes"
+  Add Tag: "Ajouter une étiquette"
+  Remove Tag: "Supprimer {tag}"
+  Sort:
+    Viewers: "Spectateurs (du plus au moins)"
+    Viewers Ascending: "Spectateurs (du moins au plus)"
+    Started: "Récemment démarrés"
+    Relevance: "Recommandés"
+    Published: "Publiés récemment"
+    Views: "Vues (du plus au moins)"
+    Top Day: "Top 24 heures"
+    Top Week: "Top 7 jours"
+    Top Month: "Top 30 jours"
+    Top All: "Top de tous les temps"
+  Video Type:
+    Video Type: "Type de vidéo"
+    All: "Toutes les vidéos"
+    Archive: "Diffusions passées"
+    Highlight: "Temps forts"
+    Upload: "Mises en ligne"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} a répondu à {commentAuthor}"
   Like: "J’aime"
@@ -2912,5 +2940,6 @@ YouTube Account:
 Twitch Page:
   Twitch: "Twitch"
   Search: "Rechercher sur Twitch"
+  Search Placeholder: "Catégories et chaînes"
 New Incognito Tab: Nouvel onglet de navigation privée
 Incognito Tab: Onglet de navigation privée

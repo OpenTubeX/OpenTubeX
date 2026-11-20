@@ -507,6 +507,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     followedRssFeeds: [],
     followedChannels: [],
     twitchLiveNotifications: true,
+    enableTwitchPage: true,
     rssHubInstance: '',
     showNewSubscriptionFeedIndicators: false,
     newSubscriptionFeedView: 'combined',
