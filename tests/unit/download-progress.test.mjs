@@ -16,7 +16,7 @@ const liveConstants = ['LIVE_PREFIX', 'FFMPEG_PROGRESS_REGEX', 'STOP_UNANSWERED_
 function replay(lines, initialStatus = 'downloading', overrides = {}) {
   const status = { status: initialStatus, percent: 97.3, speed: '1MiB/s', eta: '00:00' }
   const part = { phase: ['paused', 'pausing'].includes(initialStatus) ? 'downloading' : initialStatus, percent: 97.3, speed: '1MiB/s', eta: '00:00', done: false }
-  const entry = overrides.entry ?? {}
+  const entry = {}
   const updates = []
   const context = vm.createContext({
     status,
@@ -37,9 +37,10 @@ function replay(lines, initialStatus = 'downloading', overrides = {}) {
     isPathInsideFolders: () => true,
     ...overrides,
   })
-  vm.runInContext(`${liveConstants}\n${handler}\nglobalThis.handleLine = line => handleStdoutLine(parts[0], line)`, context)
-  for (const line of lines) context.handleLine(line)
-  return { status, updates, entry }
+  vm.runInContext(`${liveConstants}\n${handler}\nglobalThis.handleLine = (index, line) => handleStdoutLine(parts[index], line)`, context)
+  // A line for another part of a split playlist is given with that part's index
+  for (const line of lines) context.handleLine(...(Array.isArray(line) ? line : [0, line]))
+  return { status: context.status, updates, entry, parts: context.parts }
 }
 
 test('preparation clears the previous playlist item progress and publishes immediately', () => {
@@ -108,8 +109,7 @@ test('unknown transfer measurements do not leak yt-dlp placeholders', () => {
 })
 
 test('live recordings show the recorded length and size that FFmpeg reports', () => {
-  const entry = {}
-  const { status, updates } = replay([
+  const { status, updates, parts: [part] } = replay([
     '__OPENTUBEX_PREPARING__:aaaaaaaaaaa\t\t\t"Live stream"',
     '__OPENTUBEX_LIVE__:True',
     'total_size=N/A',
@@ -120,7 +120,7 @@ test('live recordings show the recorded length and size that FFmpeg reports', ()
     'out_time=00:00:09.648333',
     'speed=1.01x',
     'progress=continue',
-  ], 'preparing', { entry })
+  ], 'preparing')
   assert.equal(status.status, 'downloading')
   assert.equal(status.live, true)
   assert.equal(status.recordedSeconds, 9.648333)
@@ -130,16 +130,16 @@ test('live recordings show the recorded length and size that FFmpeg reports', ()
 
   // FFmpeg reports once more while it finishes the recording
   status.status = 'processing'
-  entry.stopping = true
-  entry.stopRequestedAt = Date.now()
-  replay(['progress=continue'], 'processing', { entry, status })
+  part.phase = 'processing'
+  part.stopRequestedAt = Date.now()
+  replay(['progress=continue'], 'processing', { status, parts: [part] })
   assert.equal(status.status, 'processing')
 
   // A recording that ignored the stop request shows that it is still recording
-  entry.stopRequestedAt = Date.now() - 60_000
-  replay(['progress=continue'], 'processing', { entry, status })
+  part.stopRequestedAt = Date.now() - 60_000
+  replay(['progress=continue'], 'processing', { status, parts: [part] })
   assert.equal(status.status, 'downloading')
-  assert.equal(entry.stopping, false)
+  assert.equal(part.stopRequestedAt, undefined)
 })
 
 test('FFmpeg progress of a video that is not live leaves its status alone', () => {
@@ -152,8 +152,28 @@ test('FFmpeg progress of a video that is not live leaves its status alone', () =
     'progress=continue',
   ], 'preparing')
   assert.equal(status.status, 'preparing')
-  assert.equal(status.live, false)
+  assert.notEqual(status.live, true)
   assert.equal(status.recordedSeconds, undefined)
+})
+
+test('parts of a split playlist keep their own live state', () => {
+  const parts = [0, 1].map(() => ({ phase: 'preparing', percent: 0, speed: null, eta: null, done: false }))
+  // The live video's part reports first, then the regular video's part
+  const { status } = replay([
+    [0, '__OPENTUBEX_PREPARING__:aaaaaaaaaaa\t1\t2\t"Live stream"'],
+    [0, '__OPENTUBEX_LIVE__:True'],
+    [1, '__OPENTUBEX_PREPARING__:bbbbbbbbbbb\t2\t2\t"Video"'],
+    [1, '__OPENTUBEX_LIVE__:False'],
+    [0, 'out_time_us=5000000'],
+    [0, 'progress=continue'],
+    [1, '__OPENTUBEX_DOWNLOAD__:downloading\t40.0%\t1.00MiB/s\t00:10'],
+  ], 'preparing', { parts })
+  // The row shows the earlier playlist entry, the live stream
+  assert.equal(status.status, 'downloading')
+  assert.equal(status.live, true)
+  assert.equal(status.recordedSeconds, 5)
+  assert.equal(parts[1].live, false)
+  assert.equal(parts[1].percent, 40)
 })
 
 test('stderr progress is decoded across chunks and keeps diagnostic history bounded', () => {

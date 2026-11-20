@@ -816,8 +816,8 @@ async function startYtDlpDownload(
   const partArgs = splitDownloadArguments(payload, commandArgs, slots).parts
   // The limit only counts videos, so it cannot change between the request and the split.
   if (partArgs.length < slots) releaseDownloadSlot(slots - partArgs.length)
-  /** @type {{ children: Set<import('node:child_process').ChildProcess>, cancelled: boolean, paused: boolean, restarting: boolean, restartStatus: 'queued' | 'paused', resumeStatus?: string, stopping: boolean, stopRequestedAt: number }} */
-  const entry = { children: new Set(), cancelled: false, paused: false, restarting: false, restartStatus: 'queued', stopping: false, stopRequestedAt: 0 }
+  /** @type {{ children: Set<import('node:child_process').ChildProcess>, cancelled: boolean, paused: boolean, restarting: boolean, restartStatus: 'queued' | 'paused', resumeStatus?: string, parts: DownloadPart[] }} */
+  const entry = { children: new Set(), cancelled: false, paused: false, restarting: false, restartStatus: 'queued', parts: [] }
   activeDownloads.set(id, entry)
   showAutomaticDownloadNotification(payload, 'started')
   sendStatus(true)
@@ -842,12 +842,18 @@ async function startYtDlpDownload(
    * @property {string} [currentTitle]
    * @property {number | null} [playlistIndex]
    * @property {number | null} [playlistCount]
+   * @property {boolean} [live] whether the current video is a live stream
+   * @property {number} [recordedSeconds]
+   * @property {number} [recordedBytes]
+   * @property {number} [stopRequestedAt] when the live recording was asked to stop
+   * @property {import('node:child_process').ChildProcess} [child]
    * @property {boolean} done
    * @property {number | null} code
    * @property {Error | null} error
    */
   /** @type {DownloadPart[]} */
   const parts = partArgs.map(() => ({ phase: 'preparing', percent: 0, speed: null, eta: null, done: false, code: null, error: null }))
+  entry.parts = parts
 
   /** @param {DownloadPart} part */
   function partPosition(part) {
@@ -866,6 +872,11 @@ async function startYtDlpDownload(
     status.percent = shown.percent
     status.speed = parts.length === 1 ? shown.speed : combineDownloadSpeeds(active.map(part => part.speed))
     status.eta = shown.eta
+    status.live = shown.live === true
+    for (const key of /** @type {const} */ (['recordedSeconds', 'recordedBytes'])) {
+      if (shown[key] === undefined) delete status[key]
+      else status[key] = shown[key]
+    }
     if (shown.currentVideoId !== undefined) {
       status.currentVideoId = shown.currentVideoId
       status.currentTitle = shown.currentTitle
@@ -891,27 +902,28 @@ async function startYtDlpDownload(
       part.currentTitle = typeof title === 'string' ? title.slice(0, 255) : ''
       part.playlistIndex = index > 0 ? index : null
       part.playlistCount = count > 0 ? count : null
+      // The next line reports whether this video is live
+      part.live = false
+      delete part.recordedSeconds
+      delete part.recordedBytes
+      delete part.stopRequestedAt
     }
     if (line.startsWith(LIVE_PREFIX)) {
-      // Every video of a playlist reports whether it is live
-      status.live = line.slice(LIVE_PREFIX.length) === 'True'
-      delete status.recordedSeconds
-      delete status.recordedBytes
+      part.live = line.slice(LIVE_PREFIX.length) === 'True'
       return
     }
     const ffmpegProgress = FFMPEG_PROGRESS_REGEX.exec(line)
     if (ffmpegProgress) {
-      if (status.live !== true) return
-      if (entry.stopping) {
+      if (part.live !== true) return
+      if (part.stopRequestedAt !== undefined) {
         // FFmpeg ends its report within moments of a stop request. A process that
         // started with interrupts ignored keeps recording, so show that again.
-        if (Date.now() - entry.stopRequestedAt < STOP_UNANSWERED_MS) return
-        entry.stopping = false
-        if (status.status === 'processing') status.status = 'downloading'
+        if (Date.now() - part.stopRequestedAt < STOP_UNANSWERED_MS) return
+        delete part.stopRequestedAt
       }
       const [, key, value] = ffmpegProgress
-      if (key === 'out_time_us' && /^\d+$/.test(value)) status.recordedSeconds = Number(value) / 1_000_000
-      else if (key === 'total_size' && /^\d+$/.test(value)) status.recordedBytes = Number(value)
+      if (key === 'out_time_us' && /^\d+$/.test(value)) part.recordedSeconds = Number(value) / 1_000_000
+      else if (key === 'total_size' && /^\d+$/.test(value)) part.recordedBytes = Number(value)
       else if (key === 'progress' && value === 'continue') {
         const previousStatus = status.status
         part.phase = 'downloading'
@@ -1164,6 +1176,7 @@ async function startYtDlpDownload(
       continue
     }
     entry.children.add(child)
+    part.child = child
 
     let stdoutBuffer = ''
     child.stdout.setEncoding('utf-8')
@@ -1435,14 +1448,23 @@ export async function handleYtDlpControlDownload(event, id, action, value) {
     clearQueuePauseAfterLastIndividualResume()
   } else if (action === 'stop') {
     // Interrupted, yt-dlp keeps and processes what it has recorded of a live stream.
-    if (!entry || entry.paused || entry.stopping || record.live !== true || record.status !== 'downloading') return false
-    entry.stopping = true
-    entry.stopRequestedAt = Date.now()
+    // Other parts of a playlist download its other videos, which an interrupt would stop.
+    const recordingParts = entry?.paused === false
+      ? entry.parts.filter(part => part.live === true && !part.done && part.stopRequestedAt === undefined && part.child)
+      : []
+    if (recordingParts.length === 0 || record.live !== true || record.status !== 'downloading') return false
+    for (const part of recordingParts) {
+      part.stopRequestedAt = Date.now()
+      part.phase = 'processing'
+    }
     record.status = 'processing'
     broadcastDownloadStatus(record)
-    const interrupted = await Promise.all([...entry.children].map(interruptProcess))
+    const interrupted = await Promise.all(recordingParts.map(part => interruptProcess(part.child)))
     if (!interrupted.includes(true)) {
-      entry.stopping = false
+      for (const part of recordingParts) {
+        delete part.stopRequestedAt
+        if (part.phase === 'processing') part.phase = 'downloading'
+      }
       if (record.status === 'processing') record.status = 'downloading'
       broadcastDownloadStatus(record)
       return false

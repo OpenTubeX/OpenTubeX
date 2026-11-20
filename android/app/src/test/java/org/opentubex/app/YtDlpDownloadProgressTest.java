@@ -56,10 +56,24 @@ public class YtDlpDownloadProgressTest {
         assertEquals("processing", part.getString("status"));
 
         // A live video earlier in a playlist must not mark the next one as live
+        YtDlpDownloads.updateProgress(part, "__OPENTUBEX_PREPARING__:bbbbbbbbbbb\t2\t2\t\"Video\"");
+        assertFalse(part.getBoolean("live"));
+        assertFalse(part.has("recordedSeconds"));
+        assertFalse(part.has("stopping"));
         YtDlpDownloads.updateProgress(part, "__OPENTUBEX_LIVE__:False");
         YtDlpDownloads.updateProgress(part, "progress=continue");
-        assertEquals("processing", part.getString("status"));
-        assertFalse(part.has("recordedSeconds"));
+        assertEquals("preparing", part.getString("status"));
+
+        // Parts of a split playlist keep their own live state
+        JSONObject live = new JSONObject().put("status", "preparing").put("percent", 0);
+        YtDlpDownloads.updateProgress(live, "__OPENTUBEX_PREPARING__:aaaaaaaaaaa\t1\t2\t\"Live stream\"");
+        YtDlpDownloads.updateProgress(live, "__OPENTUBEX_LIVE__:True");
+        YtDlpDownloads.updateProgress(live, "out_time_us=5000000");
+        YtDlpDownloads.updateProgress(live, "progress=continue");
+        JSONObject combined = new JSONObject();
+        YtDlpDownloads.showProgress(combined, Arrays.asList(live, part), null);
+        assertTrue(combined.getBoolean("live"));
+        assertEquals(5, combined.getDouble("recordedSeconds"), 0);
     }
 
     @Test public void roundedPercentageDoesNotFinishTheTransfer() throws Exception {

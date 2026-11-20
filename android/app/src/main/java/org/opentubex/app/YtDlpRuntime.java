@@ -314,15 +314,10 @@ final class YtDlpRuntime {
         } finally { process.destroy(); }
     }
 
-    /** Interrupts every process of a download, as Ctrl+C would, and returns whether any got the signal. */
-    static boolean interrupt(long id) {
-        String key = "download-" + id;
-        boolean interrupted = false;
-        for (Map.Entry<String, RunningProcess> process : PROCESSES.entrySet()) {
-            String name = process.getKey();
-            if ((name.equals(key) || name.startsWith(key + "-")) && process.getValue().interrupt()) interrupted = true;
-        }
-        return interrupted;
+    /** Interrupts the process of one part of a download, as Ctrl+C would, and returns whether it got the signal. */
+    static boolean interrupt(long id, int part) {
+        RunningProcess process = PROCESSES.get(part == 0 ? "download-" + id : "download-" + id + "-" + part);
+        return process != null && process.interrupt();
     }
 
     /** Stops every process of a download, including the other parts of a split playlist. */

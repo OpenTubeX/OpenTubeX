@@ -581,10 +581,7 @@ final class YtDlpDownloads {
 
     static void updateProgress(JSONObject record, String line) throws org.json.JSONException {
         if (line.startsWith(LIVE_PREFIX)) {
-            // Every video of a playlist reports whether it is live
             record.put("live", line.substring(LIVE_PREFIX.length()).equals("True"));
-            record.remove("recordedSeconds");
-            record.remove("recordedBytes");
             return;
         }
         var ffmpegProgress = FFMPEG_PROGRESS.matcher(line);
@@ -607,6 +604,9 @@ final class YtDlpDownloads {
             record.put("currentVideoId", fields[0].matches("[\\w-]{11}") ? fields[0] : "")
                 .put("currentTitle", title instanceof String ? ((String) title).substring(0, Math.min(255, ((String) title).length())) : "")
                 .put("playlistIndex", positiveInteger(fields, 1)).put("playlistCount", positiveInteger(fields, 2));
+            // The next line reports whether this video is live
+            record.put("live", false);
+            for (String key : asList("recordedSeconds", "recordedBytes", "stopping")) record.remove(key);
         }
         if (line.startsWith("__OPENTUBEX_PREPARING__:") || line.equals("__OPENTUBEX_PROCESSING__") || line.startsWith("__OPENTUBEX_DOWNLOAD__:finished")) {
             record.put("status", line.startsWith("__OPENTUBEX_PREPARING__:") ? "preparing" : "processing")
@@ -659,12 +659,17 @@ final class YtDlpDownloads {
         if (action.equals("stop") && liveRecording && status.equals("downloading")) {
             List<JSONObject> parts = partProgress.get(id);
             if (parts == null) return false;
-            for (JSONObject part : parts) part.put("stopping", true).put("status", "processing");
             // Interrupted, yt-dlp keeps and processes what it has recorded of a live stream.
-            if (!YtDlpRuntime.interrupt(id)) {
-                for (JSONObject part : parts) { part.remove("stopping"); part.put("status", "downloading"); }
-                return false;
+            // Other parts of a playlist download its other videos, which an interrupt would stop.
+            boolean interrupted = false;
+            for (int index = 0; index < parts.size(); index++) {
+                JSONObject part = parts.get(index);
+                if (!part.optBoolean("live") || part.optBoolean("done") || part.optBoolean("stopping")) continue;
+                part.put("stopping", true).put("status", "processing");
+                if (YtDlpRuntime.interrupt(id, index)) interrupted = true;
+                else { part.remove("stopping"); part.put("status", "downloading"); }
             }
+            if (!interrupted) return false;
             record.put("status", "processing");
             publish(record);
         } else if (action.equals("pause") && liveRecording) {
