@@ -2,4 +2,4 @@
 category: fix
 ---
 
-Your replies to replies now appear under the reply they answer, on YouTube too, instead of at the end of the thread.
+Replies to replies now appear under the reply they answer instead of in one list at the end of the thread. Your replies nest there on YouTube too.

@@ -105,6 +105,28 @@ function markFirstReplyAsCreator(body) {
   }, 'Unable to mark a reply as the video creator in the comment fixture')
 }
 
+/**
+ * Serves replies in YouTube's older flat layout: one list per thread, in which
+ * replies to replies follow their parents without nesting under them.
+ */
+function flattenReplies(body) {
+  const json = JSON.parse(body)
+  const flatten = items => items.flatMap(item => {
+    const thread = item.commentThreadRenderer
+    if (!thread) return [item]
+    const replies = thread.replies?.commentRepliesRenderer?.subThreads ?? []
+    // Replies to replies have no continuations of their own in this layout.
+    return [thread.commentViewModel, ...flatten(replies.filter(reply => reply.commentThreadRenderer))]
+  })
+  for (const endpoint of json.onResponseReceivedEndpoints ?? []) {
+    const action = endpoint.appendContinuationItemsAction
+    if (action?.targetId?.startsWith('comment-replies-item-')) {
+      action.continuationItems = flatten(action.continuationItems)
+    }
+  }
+  return Buffer.from(JSON.stringify(json))
+}
+
 function addCommentTimestamp(body) {
   return mutateFirstObject(body, value => {
     const payload = value.commentEntityPayload
@@ -188,6 +210,7 @@ function addCommentImages(body, attachments) {
  * @param {boolean} [options.creatorReply] mark the first loaded reply as written by the video creator
  * @param {{languageCode: string, name: string, kind?: 'asr', isTranslatable?: boolean}[]} [options.extraCaptionTracks] add caption tracks after the English one
  * @param {boolean} [options.commentTimestamp] add a timestamp to one top-level comment
+ * @param {boolean} [options.flatReplies] serve replies in YouTube's older flat layout
  * @param {boolean} [options.blankCommentLikes] replace one comment's zero-like count with YouTube's whitespace representation
  * @param {object[]} [options.commentImages] add image attachments to comments and replies
  * @param {boolean} [options.verifiedAuthors] verify the video owner and the first top-level comment author, and mark the second as an official artist
@@ -207,6 +230,7 @@ export async function mockWatchPage(app, page, {
   ownerReply = false,
   creatorReply = false,
   commentTimestamp = false,
+  flatReplies = false,
   blankCommentLikes = false,
   commentImages = [],
   verifiedAuthors = false,
@@ -390,6 +414,9 @@ export async function mockWatchPage(app, page, {
         }
         if (creatorReply && body.includes('"replyLevel":1')) {
           body = markFirstReplyAsCreator(body)
+        }
+        if (flatReplies && body.includes('comment-replies-item-')) {
+          body = flattenReplies(body)
         }
         if (commentTimestamp && body.includes('commentEntityPayload')) {
           body = addCommentTimestamp(body)

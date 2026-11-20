@@ -17,6 +17,12 @@ export function parseLocalCommentImageAttachment(attachment) {
 }
 
 /**
+ * Marks the threads made from flat replies. Unlike nested replies, they come
+ * in one list without their parents, so they nest by their mentions instead.
+ */
+export const FLAT_REPLY_RENDERING_PRIORITY = 'RENDERING_PRIORITY_FLAT_REPLY'
+
+/**
  * YouTube serves both flat and nested comment replies. youtubei.js expects
  * nested threads, including in continuation responses, for both variants.
  * @param {object} data
@@ -42,7 +48,9 @@ export function normalizeCommentResponse(data) {
 }
 
 function asThread(item) {
-  return item.commentViewModel ? { commentThreadRenderer: { commentViewModel: item } } : item
+  return item.commentViewModel
+    ? { commentThreadRenderer: { commentViewModel: item, renderingPriority: FLAT_REPLY_RENDERING_PRIORITY } }
+    : item
 }
 
 /**
@@ -51,7 +59,16 @@ function asThread(item) {
  */
 export async function normalizeCommentFetchResponse(response, onResponse = undefined) {
   if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) return response
-  const data = await response.json()
+  const text = await response.text()
+  let data
+  try {
+    data = JSON.parse(text)
+  } catch {
+    // The session data (`/sw.js_data`) is JSON behind a `)]}'` prefix. Failing
+    // here would make youtubei.js generate the session locally, and YouTube
+    // serves such sessions their replies flat, without the replied-to reply.
+    return new Response(text, { status: response.status, statusText: response.statusText, headers: response.headers })
+  }
   onResponse?.(data)
   normalizeCommentResponse(data)
   const headers = new Headers(response.headers)

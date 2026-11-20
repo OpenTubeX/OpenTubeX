@@ -441,8 +441,14 @@ const hasReplyChildren = computed(() => {
     ))
 })
 const showReplyChildren = computed(() => hasReplyChildren.value && (!childrenCollapsed.value || props.filtering))
+/** @param {{ children: object[] }} node */
+function countReplyNodes(node) {
+  return node.children.reduce((count, child) => count + 1 + countReplyNodes(child), 0)
+}
+
 const replyToggleLabel = computed(() => {
-  const replyCount = getCommentReplyCount(reply.value)
+  // Replies nested by their mentions are only in the node's children.
+  const replyCount = Math.max(getCommentReplyCount(reply.value), countReplyNodes(props.node))
   return showReplyChildren.value
     ? t('Comments.Hide {replyCount} replies', { replyCount }, replyCount)
     : t('Comments.Reply Count', { replyCount }, replyCount)

@@ -672,6 +672,29 @@ test.describe('manual comment loading', () => {
     await expect(page.locator('.commentReplyContent .commentAuthor mark')).toHaveText(replyAuthor)
   })
 
+  test('nests replies YouTube serves flat under the replies they mention', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page, { flatReplies: true })
+    await openMockedVideo(page)
+
+    const loadComments = page.locator('.getCommentsTitle')
+    await loadComments.scrollIntoViewIfNeeded()
+    await loadComments.click()
+    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
+
+    const thread = page.locator('.commentThread').first()
+    await thread.locator('.commentReplyRootToggle button').click()
+    const branchBy = author => thread.locator('.commentReplyBranch').filter({
+      has: page.locator(':scope > .commentReplyContent .commentAuthor', { hasText: author })
+    })
+    const mentioned = branchBy('@TheGreekPianist')
+    await expect(mentioned).toHaveClass(/commentReplyBranchRoot/, { timeout: 30_000 })
+    const children = mentioned.locator(':scope > .commentReplyChildren .commentReplyContent .commentAuthor')
+    await expect(children).toHaveText(['@Leohockey2014', '@hayden172'])
+    await expect(mentioned.locator(':scope > .commentReplyLineToggle')).toHaveAttribute('aria-label', /\b2\b/)
+    // A reply without a mention stays a reply to the comment.
+    await expect(branchBy('@LindaBystrowski')).toHaveClass(/commentReplyBranchRoot/)
+  })
+
   test('filters comments with timestamps and keeps highlighted timestamps clickable', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page, { commentTimestamp: true })
     await openMockedVideo(page)
