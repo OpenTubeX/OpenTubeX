@@ -155,6 +155,31 @@ test('a tap still shows controls and does not call native adjustments', t => {
   assert.deepEqual(calls, ['show'])
 })
 
+for (const fullscreenSwipe of [true, false]) {
+  test(`a drag whose touchend the player stops still lets the controls hide (fullscreen swipe ${fullscreenSwipe})`, t => {
+    const { gestures: g, event, container } = fixture(t, { fullscreenSwipe, fullscreen: () => true })
+    let touchEnds = 0
+    container.addEventListener('touchend', () => touchEnds++)
+    // A hold without movement never showed the controls
+    g.startMobileFullscreenGesture(event(210))
+    g.handleStoppedPlayerTouchEnd()
+    assert.equal(touchEnds, 0)
+    // A short drag reaches Shaka, which shows the controls until a touchend
+    g.startMobileFullscreenGesture(event(210))
+    g.moveMobileFullscreenGesture(event(210, 190))
+    g.handleMobilePlayerTouchMove(event(210, 190))
+    g.finishMobileFullscreenGesture(event(210, 190))
+    g.handleStoppedPlayerTouchEnd()
+    assert.equal(touchEnds, 1)
+    // The synthetic touchend passes the player's own touchend handling on its way to Shaka
+    const synthetic = event(210, 190, { timeStamp: performance.now() })
+    g.handleMobilePlayerTouchEnd(synthetic)
+    assert.equal(synthetic.prevented, undefined)
+    g.handleStoppedPlayerTouchEnd()
+    assert.equal(touchEnds, 1)
+  })
+}
+
 test('a swipe exits rotation fullscreen without entering native fullscreen', async t => {
   let rotationFullscreen = true
   let nativeToggles = 0

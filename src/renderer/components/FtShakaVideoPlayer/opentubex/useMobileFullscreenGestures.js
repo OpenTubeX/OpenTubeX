@@ -94,6 +94,8 @@ export function useMobileFullscreenGestures({
   let mobileControlSuppressClickUntil = 0
   let mobileSurfaceSuppressTouchEndUntil = 0
   let mobileAdjustmentTouchEnd = false
+  // Shaka stops its idle timer for touchmoves until a touchend restarts it
+  let mobileShakaTouchMoved = false
   let mobileGestureTouchCancelled = false
   let mobileTitleSuppressClickUntil = 0
   /** @type {{ pointerId: number, startX: number, startY: number, startTime: number, blocked: boolean } | null} */
@@ -697,12 +699,15 @@ export function useMobileFullscreenGestures({
     if (!mobileFullscreenGesture || mobileFullscreenGesture.action === 'disabled' || mobileFullscreenGesture.seeking) {
       // This movement stops Shaka's idle timer, so its touch end must restart it.
       mobileAdjustmentTouchEnd = false
+      mobileShakaTouchMoved = true
       return
     }
     event.stopImmediatePropagation()
   }
 
   function handleMobilePlayerTouchEnd(event) {
+    // Shaka gets this touchend, or the synthetic one below unless it never saw the touch move
+    mobileShakaTouchMoved = false
     // Compare the input time so a busy main thread cannot let the touchend of
     // an already handled tap reach Shaka's own surface toggle.
     if (
@@ -729,6 +734,17 @@ export function useMobileFullscreenGestures({
     // Shaka's surface-tap handler is on the child controls container. Notify
     // only the player container so its touchmove-stopped idle timer resumes.
     getContainer()?.dispatchEvent(new Event('touchend'))
+  }
+
+  // For a touchend that the player stops before this composable handles it,
+  // such as after a canceled playback speed hold.
+  function handleStoppedPlayerTouchEnd() {
+    const moved = mobileShakaTouchMoved
+    mobileShakaTouchMoved = false
+    // The gesture suppressed this touchend, not the synthetic one
+    mobileSurfaceSuppressTouchEndUntil = 0
+    // Without a touchend after its touchmoves, Shaka keeps the controls shown
+    if (moved) getContainer()?.dispatchEvent(new Event('touchend'))
   }
 
   function handleMobilePlayerSurfaceClick(event) {
@@ -883,6 +899,7 @@ export function useMobileFullscreenGestures({
     mobilePlayerSuppressClickUntil = 0
     mobileSurfaceSuppressTouchEndUntil = 0
     mobileAdjustmentTouchEnd = false
+    mobileShakaTouchMoved = false
     mobileTitleSuppressClickUntil = 0
     mobileFullscreenTitleGesture = null
     lastMobileFullscreenTitleTap = null
@@ -897,6 +914,7 @@ export function useMobileFullscreenGestures({
     handleMobilePlayerSurfaceClick,
     handleMobilePlayerTouchEnd,
     handleMobilePlayerTouchMove,
+    handleStoppedPlayerTouchEnd,
     invalidateMobileTwoFingerTap,
     isMobileTwoFingerTapCandidate,
     mobileFullscreenSwipeSettling,
