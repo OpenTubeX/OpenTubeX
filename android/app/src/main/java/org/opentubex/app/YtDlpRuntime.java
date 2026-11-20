@@ -143,7 +143,6 @@ final class YtDlpRuntime {
         RunningProcess running = null;
         boolean completed = false;
         YtDlpCookies.Checkout cookies = null;
-        boolean exited = false;
         try {
             cookies = YtDlpCookies.checkOut(context.getCacheDir(), args);
             File installation = new File(context.getNoBackupFilesDir(), "youtubedl-android");
@@ -203,8 +202,6 @@ final class YtDlpRuntime {
             new Thread(stdout, "yt-dlp-output").start();
             new Thread(stderr, "yt-dlp-errors").start();
             int exit = current.process.waitFor();
-            // A stopped process was killed, possibly while it saved its cookies.
-            exited = !current.stopped;
             stderr.get();
             stdout.get();
             if (exit != 0) throw new IOException(errors.message());
@@ -215,7 +212,7 @@ final class YtDlpRuntime {
                 if (!completed) running.stop();
                 if (id != null) PROCESSES.remove(id, running);
             }
-            if (cookies != null) cookies.release(exited);
+            if (cookies != null) cookies.release();
             INSTALL_LOCK.readLock().unlock();
         }
     }

@@ -28,8 +28,8 @@ test('concurrent yt-dlp processes keep the cookies each of them rotated', (t) =>
   // with the old token and exits later, only changes a preference.
   save(firstCopy, cookie('SID', 'session', '0'), cookie('SIDTS', 'second'), cookie('PREF', 'old'))
   save(second.args[1], cookie('SID', 'session', '0'), cookie('SIDTS', 'first'), cookie('PREF', 'new'), cookie('VISITOR', 'added'))
-  first.release(true)
-  second.release(true)
+  first.release()
+  second.release()
 
   const merged = readFileSync(shared, 'utf8')
   assert.match(merged, /\tSIDTS\tsecond\n/)
@@ -42,17 +42,11 @@ test('concurrent yt-dlp processes keep the cookies each of them rotated', (t) =>
   // even when it stopped after a complete row.
   const stopped = checkOutYtDlpCookies(['--cookies', shared])
   writeFileSync(stopped.args[1], `${HEADER}${cookie('SID', 'session')}`.slice(0, -4))
-  stopped.release(true)
+  stopped.release()
   const cutAtRow = checkOutYtDlpCookies(['--cookies', shared])
   save(cutAtRow.args[1], cookie('SID', 'session', '0'))
-  cutAtRow.release(false)
+  cutAtRow.release()
   assert.equal(readFileSync(shared, 'utf8'), merged)
-
-  // A cookie the server removed is removed unless another process set it again.
-  const removing = checkOutYtDlpCookies(['--cookies', shared])
-  save(removing.args[1], cookie('SID', 'session', '0'), cookie('SIDTS', 'second'), cookie('PREF', 'new'))
-  removing.release(true)
-  assert.doesNotMatch(readFileSync(shared, 'utf8'), /VISITOR/)
 })
 
 test('a cookie merge that cannot be written keeps the previous file', { skip: process.platform === 'win32' || process.getuid?.() === 0 }, (t) => {
@@ -68,6 +62,6 @@ test('a cookie merge that cannot be written keeps the previous file', { skip: pr
   save(cookies.args[1], cookie('SID', 'session'), cookie('SIDTS', 'second'))
   // Like a full disk, the folder has no room for the replacement.
   chmodSync(directory, 0o500)
-  cookies.release(true)
+  cookies.release()
   assert.equal(readFileSync(shared, 'utf8'), before)
 })

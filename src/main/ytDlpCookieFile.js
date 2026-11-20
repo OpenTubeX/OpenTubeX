@@ -25,31 +25,24 @@ function parseCookies(text) {
 }
 
 /**
- * Applies the cookies one yt-dlp process changed to the current file, keeping
- * those other processes changed in the meantime.
+ * Applies the cookies one yt-dlp process added or changed to the current file,
+ * keeping those other processes changed in the meantime.
  * @param {string} base the file the process started with
  * @param {string} result the file the process saved
  * @param {string} current the shared file now
- * @param {boolean} finished whether the process exited on its own, so that it finished saving
  * @returns {string | null} the merged file, or null when nothing changed
  */
-export function mergeYtDlpCookies(base, result, current, finished) {
-  // yt-dlp writes the header first and ends every cookie with a newline. A
-  // process stopped while saving can still leave complete rows, so only one
-  // that finished saving can remove the cookies missing from its file.
+export function mergeYtDlpCookies(base, result, current) {
+  // yt-dlp writes the header first and ends every cookie with a newline, so this
+  // rejects a save stopped inside a row. One stopped between rows looks like a
+  // complete save without the remaining cookies, so no merge removes cookies.
   if (!result.startsWith(HEADER) || !result.endsWith('\n')) return null
   const before = parseCookies(base)
-  const after = parseCookies(result)
   const merged = parseCookies(current)
   let changed = false
-  for (const [key, cookie] of after) {
+  for (const [key, cookie] of parseCookies(result)) {
     if (before.get(key)?.state === cookie.state || merged.get(key)?.state === cookie.state) continue
     merged.set(key, cookie)
-    changed = true
-  }
-  for (const [key, cookie] of finished ? before : []) {
-    if (after.has(key) || merged.get(key)?.state !== cookie.state) continue
-    merged.delete(key)
     changed = true
   }
   return changed ? `${HEADER}\n${[...merged.values()].map(cookie => `${cookie.line}\n`).join('')}` : null
@@ -80,7 +73,7 @@ function replaceFile(path, text) {
  * instead, which `release` merges back once it exits. The file operations are
  * synchronous, so no other process's copy or merge can run between them.
  * @param {string[]} args
- * @returns {{ args: string[], release: (finished: boolean) => void }}
+ * @returns {{ args: string[], release: () => void }}
  */
 export function checkOutYtDlpCookies(args) {
   const index = args.lastIndexOf('--cookies')
@@ -108,11 +101,11 @@ export function checkOutYtDlpCookies(args) {
   let released = false
   return {
     args: args.with(index + 1, copy),
-    release(finished) {
+    release() {
       if (released) return
       released = true
       try {
-        const merged = mergeYtDlpCookies(base, readFileSync(copy, 'utf8'), readFileSync(shared, 'utf8'), finished)
+        const merged = mergeYtDlpCookies(base, readFileSync(copy, 'utf8'), readFileSync(shared, 'utf8'))
         if (merged !== null) replaceFile(shared, merged)
       } catch (error) {
         console.warn('Could not save the cookies yt-dlp updated', error.code ?? error)
@@ -132,15 +125,9 @@ export function checkOutYtDlpCookies(args) {
  */
 export async function withYtDlpCookies(args, run) {
   const cookies = checkOutYtDlpCookies(args)
-  let result
   try {
-    result = await run(cookies.args)
-  } catch (error) {
-    // execFile reports the exit code of a process that exited with an error,
-    // and none for one it stopped after a timeout or abort.
-    cookies.release(typeof error?.code === 'number' && !error.killed)
-    throw error
+    return await run(cookies.args)
+  } finally {
+    cookies.release()
   }
-  cookies.release(true)
-  return result
 }

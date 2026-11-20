@@ -34,12 +34,11 @@ final class YtDlpCookies {
             this.base = base;
         }
 
-        /** @param finished whether the process exited on its own, so that it finished saving */
-        void release(boolean finished) {
+        void release() {
             if (copy == null) return;
             synchronized (LOCK) {
                 try {
-                    String merged = merge(base, read(copy), read(shared), finished);
+                    String merged = merge(base, read(copy), read(shared));
                     if (merged != null) YtDlpFiles.write(shared, merged.getBytes(StandardCharsets.UTF_8));
                 } catch (IOException error) {
                     Log.w("YtDlpCookies", "Could not save the cookies yt-dlp updated");
@@ -101,27 +100,21 @@ final class YtDlpCookies {
     }
 
     /**
-     * Applies the cookies one yt-dlp process changed to the current file, keeping those
-     * other processes changed in the meantime, or returns null when nothing changed.
-     * Only a process that {@code finished} saving removes the cookies missing from its file.
+     * Applies the cookies one yt-dlp process added or changed to the current file, keeping
+     * those other processes changed in the meantime, or returns null when nothing changed.
      */
-    static String merge(String base, String result, String current, boolean finished) {
-        // yt-dlp writes the header first and ends every cookie with a newline. A process
-        // stopped while saving can still leave complete rows, so it removes no cookies.
+    static String merge(String base, String result, String current) {
+        // yt-dlp writes the header first and ends every cookie with a newline, so this
+        // rejects a save stopped inside a row. One stopped between rows looks like a
+        // complete save without the remaining cookies, so no merge removes cookies.
         if (!result.startsWith(HEADER) || !result.endsWith("\n")) return null;
         Map<String, Cookie> before = parse(base);
-        Map<String, Cookie> after = parse(result);
         Map<String, Cookie> merged = parse(current);
         boolean changed = false;
-        for (Map.Entry<String, Cookie> entry : after.entrySet()) {
+        for (Map.Entry<String, Cookie> entry : parse(result).entrySet()) {
             String state = entry.getValue().state;
             if (state.equals(state(before, entry.getKey())) || state.equals(state(merged, entry.getKey()))) continue;
             merged.put(entry.getKey(), entry.getValue());
-            changed = true;
-        }
-        for (Map.Entry<String, Cookie> entry : before.entrySet()) {
-            if (!finished || after.containsKey(entry.getKey()) || !entry.getValue().state.equals(state(merged, entry.getKey()))) continue;
-            merged.remove(entry.getKey());
             changed = true;
         }
         if (!changed) return null;
