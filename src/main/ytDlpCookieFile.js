@@ -57,7 +57,7 @@ export function mergeYtDlpCookies(base, result, current, finished) {
 
 /**
  * Replaces a file with a complete temporary one, so that a failed write keeps
- * the previous cookies. A folder without room for it is written in place.
+ * the previous cookies.
  * @param {string} path
  * @param {string} text
  */
@@ -66,12 +66,6 @@ function replaceFile(path, text) {
   const temporary = join(dirname(target), `.${basename(target)}.${randomUUID()}.tmp`)
   try {
     writeFileSync(temporary, text, { mode: 0o600, flag: 'wx' })
-  } catch {
-    rmSync(temporary, { force: true })
-    writeFileSync(target, text)
-    return
-  }
-  try {
     renameSync(temporary, target)
   } catch (error) {
     rmSync(temporary, { force: true })

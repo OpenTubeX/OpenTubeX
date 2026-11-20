@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { chmodSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import test from 'node:test'
@@ -53,4 +53,21 @@ test('concurrent yt-dlp processes keep the cookies each of them rotated', (t) =>
   save(removing.args[1], cookie('SID', 'session', '0'), cookie('SIDTS', 'second'), cookie('PREF', 'new'))
   removing.release(true)
   assert.doesNotMatch(readFileSync(shared, 'utf8'), /VISITOR/)
+})
+
+test('a cookie merge that cannot be written keeps the previous file', { skip: process.platform === 'win32' || process.getuid?.() === 0 }, (t) => {
+  const directory = mkdtempSync(join(tmpdir(), 'opentubex-cookie-test-'))
+  t.after(() => {
+    chmodSync(directory, 0o700)
+    rmSync(directory, { recursive: true, force: true })
+  })
+  const shared = join(directory, 'cookies.txt')
+  const before = `${HEADER}${cookie('SID', 'session')}${cookie('SIDTS', 'first')}`
+  writeFileSync(shared, before)
+  const cookies = checkOutYtDlpCookies(['--cookies', shared])
+  save(cookies.args[1], cookie('SID', 'session'), cookie('SIDTS', 'second'))
+  // Like a full disk, the folder has no room for the replacement.
+  chmodSync(directory, 0o500)
+  cookies.release(true)
+  assert.equal(readFileSync(shared, 'utf8'), before)
 })
