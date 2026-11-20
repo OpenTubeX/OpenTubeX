@@ -3,6 +3,6 @@ category: feature
 platforms: [windows]
 ---
 
-Hovering the taskbar button now shows Previous, Play/Pause, and Next buttons for the video playing in that window.
+Hovering the taskbar button now shows Previous, Rewind 10 seconds, Play/Pause, Forward 10 seconds, and Next buttons for the video playing in that window.
 
-<img alt="Taskbar thumbnail with Previous, Play, and Next buttons" src="https://github.com/user-attachments/assets/755644e5-3c99-410b-96d7-92bacf31d8ca" width="192">
+<img alt="Taskbar thumbnail with Previous, Rewind 10 seconds, Play, Forward 10 seconds, and Next buttons" src="https://github.com/user-attachments/assets/9c73979b-4a65-481e-a038-18e4c37bc415" width="192">
