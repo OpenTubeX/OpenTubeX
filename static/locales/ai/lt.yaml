@@ -3068,6 +3068,8 @@ CommandPalette:
     Download Finished: Šis atsisiuntimas nebevykdomas
     Video: Pirmiausia atverkite vaizdo įrašą
 Downloads:
+  Stop Recording: "Stabdyti įrašymą"
+  Recording: "Įrašoma"
   File Name Template Invalid: 'Naudokite santykinį kelią atsisiuntimų aplanke be "..", "~", "$", "%" ar priešdėlio, pvz., "thumbnail:".'
   Search Completed: "Ieškoti baigtų atsisiuntimų pagal pavadinimą ar kanalą"
   Format: "Formatas"

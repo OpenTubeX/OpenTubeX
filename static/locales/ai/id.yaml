@@ -2583,6 +2583,8 @@ CommandPalette:
     Download Finished: Unduhan ini tidak lagi berjalan
     Video: Buka video terlebih dahulu
 Downloads:
+  Stop Recording: "Hentikan perekaman"
+  Recording: "Merekam"
   File Name Template Invalid: 'Gunakan jalur relatif di dalam folder unduhan tanpa "..", "~", "$", "%", atau awalan seperti "thumbnail:".'
   Search Completed: "Cari unduhan selesai berdasarkan judul atau kanal"
   Format: "Format"

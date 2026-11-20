@@ -10,11 +10,13 @@ const DOWNLOAD_STOPPED_ERROR = /^const DOWNLOAD_STOPPED_ERROR = '([^']+)'$/m.exe
 const stderrHandlerStart = source.indexOf('  /**\n   * @param {DownloadPart} part\n   * @param {string} line\n   */\n  function handleStderrLine(part, line) {')
 const stderrHandler = source.slice(stderrHandlerStart, source.indexOf('  function finishDownload() {', stderrHandlerStart))
 const handler = source.slice(source.indexOf('  /** @param {DownloadPart} part */\n  function partPosition(part) {'), stderrHandlerStart)
+const liveConstants = ['LIVE_PREFIX', 'FFMPEG_PROGRESS_REGEX', 'STOP_UNANSWERED_MS']
+  .map(name => new RegExp(`^const ${name} = .+$`, 'm').exec(source)[0]).join('\n')
 
 function replay(lines, initialStatus = 'downloading', overrides = {}) {
   const status = { status: initialStatus, percent: 97.3, speed: '1MiB/s', eta: '00:00' }
   const part = { phase: ['paused', 'pausing'].includes(initialStatus) ? 'downloading' : initialStatus, percent: 97.3, speed: '1MiB/s', eta: '00:00', done: false }
-  const entry = {}
+  const entry = overrides.entry ?? {}
   const updates = []
   const context = vm.createContext({
     status,
@@ -35,7 +37,7 @@ function replay(lines, initialStatus = 'downloading', overrides = {}) {
     isPathInsideFolders: () => true,
     ...overrides,
   })
-  vm.runInContext(`${handler}\nglobalThis.handleLine = line => handleStdoutLine(parts[0], line)`, context)
+  vm.runInContext(`${liveConstants}\n${handler}\nglobalThis.handleLine = line => handleStdoutLine(parts[0], line)`, context)
   for (const line of lines) context.handleLine(line)
   return { status, updates, entry }
 }
@@ -103,6 +105,55 @@ test('unknown transfer measurements do not leak yt-dlp placeholders', () => {
   assert.equal(status.percent, 0)
   assert.equal(status.speed, null)
   assert.equal(status.eta, null)
+})
+
+test('live recordings show the recorded length and size that FFmpeg reports', () => {
+  const entry = {}
+  const { status, updates } = replay([
+    '__OPENTUBEX_PREPARING__:aaaaaaaaaaa\t\t\t"Live stream"',
+    '__OPENTUBEX_LIVE__:True',
+    'total_size=N/A',
+    'out_time_us=N/A',
+    'progress=continue',
+    'total_size=10485760',
+    'out_time_us=9648333',
+    'out_time=00:00:09.648333',
+    'speed=1.01x',
+    'progress=continue',
+  ], 'preparing', { entry })
+  assert.equal(status.status, 'downloading')
+  assert.equal(status.live, true)
+  assert.equal(status.recordedSeconds, 9.648333)
+  assert.equal(status.recordedBytes, 10485760)
+  assert.equal(status.percent, 0)
+  assert.equal(updates.find(update => update.status === 'downloading').force, true)
+
+  // FFmpeg reports once more while it finishes the recording
+  status.status = 'processing'
+  entry.stopping = true
+  entry.stopRequestedAt = Date.now()
+  replay(['progress=continue'], 'processing', { entry, status })
+  assert.equal(status.status, 'processing')
+
+  // A recording that ignored the stop request shows that it is still recording
+  entry.stopRequestedAt = Date.now() - 60_000
+  replay(['progress=continue'], 'processing', { entry, status })
+  assert.equal(status.status, 'downloading')
+  assert.equal(entry.stopping, false)
+})
+
+test('FFmpeg progress of a video that is not live leaves its status alone', () => {
+  // A live video earlier in a playlist must not mark the next one as live
+  const { status } = replay([
+    '__OPENTUBEX_LIVE__:True',
+    '__OPENTUBEX_PREPARING__:aaaaaaaaaaa\t2\t2\t"Video"',
+    '__OPENTUBEX_LIVE__:False',
+    'out_time_us=1000000',
+    'progress=continue',
+  ], 'preparing')
+  assert.equal(status.status, 'preparing')
+  assert.equal(status.live, false)
+  assert.equal(status.recordedSeconds, undefined)
 })
 
 test('stderr progress is decoded across chunks and keeps diagnostic history bounded', () => {

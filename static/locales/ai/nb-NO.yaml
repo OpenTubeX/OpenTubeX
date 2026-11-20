@@ -2561,6 +2561,8 @@ CommandPalette:
     Download Finished: Denne nedlastingen pågår ikke lenger
     Video: Åpne en video først
 Downloads:
+  Stop Recording: "Stopp opptak"
+  Recording: "Tar opp"
   File Name Template Invalid: 'Bruk en relativ sti i nedlastingsmappen uten "..", "~", "$", "%" eller et prefiks som "thumbnail:".'
   Search Completed: "Søk i fullførte nedlastinger etter tittel eller kanal"
   Format: "Format"

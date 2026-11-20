@@ -2557,6 +2557,8 @@ CommandPalette:
     Download Finished: Nedladdningen pågår inte längre
     Video: Öppna en video först
 Downloads:
+  Stop Recording: "Stoppa inspelning"
+  Recording: "Spelar in"
   File Name Template Invalid: 'Använd en relativ sökväg i nedladdningsmappen utan "..", "~", "$", "%" eller ett prefix som "thumbnail:".'
   Search Completed: "Sök bland slutförda nedladdningar efter titel eller kanal"
   Format: "Format"

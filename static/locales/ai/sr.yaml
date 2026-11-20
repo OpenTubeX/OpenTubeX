@@ -2644,6 +2644,8 @@ CommandPalette:
     Download Finished: Ово преузимање више није у току
     Video: Прво отворите видео-снимак
 Downloads:
+  Stop Recording: "Заустави снимање"
+  Recording: "Снимање"
   File Name Template Invalid: 'Користите релативну путању унутар фасцикле за преузимања без "..", "~", "$", "%" или префикса попут "thumbnail:".'
   Search Completed: "Претражи завршена преузимања по наслову или каналу"
   Format: "Формат"

@@ -2524,6 +2524,8 @@ CommandPalette:
     Download Finished: Эта загрузка больше не выполняется
     Video: Сначала откройте видео
 Downloads:
+  Stop Recording: "Остановить запись"
+  Recording: "Идёт запись"
   File Name Template Invalid: 'Используйте относительный путь внутри папки загрузок без "..", "~", "$", "%" или префикса вроде "thumbnail:".'
   Search Completed: "Поиск завершённых загрузок по названию или каналу"
   Format: "Формат"

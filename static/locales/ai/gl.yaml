@@ -2620,6 +2620,8 @@ CommandPalette:
     Download Finished: Esta descarga xa non está en curso
     Video: Abre primeiro un vídeo
 Downloads:
+  Stop Recording: "Deter a gravación"
+  Recording: "Gravando"
   File Name Template Invalid: 'Usa unha ruta relativa dentro do cartafol de descargas sen "..", "~", "$", "%" nin un prefixo como "thumbnail:".'
   Search Completed: "Buscar descargas rematadas por título ou canle"
   Format: "Formato"

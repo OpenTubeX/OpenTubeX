@@ -2833,6 +2833,8 @@ CommandPalette:
     Download Finished: Hierdie aflaai loop nie meer nie
     Video: Maak eers ’n video oop
 Downloads:
+  Stop Recording: "Stop opname"
+  Recording: "Besig om op te neem"
   File Name Template Invalid: 'Gebruik ’n relatiewe pad binne die aflaaigids sonder "..", "~", "$", "%" of ’n voorvoegsel soos "thumbnail:".'
   Add Download: Voeg aflaai by
   Search Completed: Soek voltooide aflaaie volgens titel of kanaal

@@ -32,6 +32,9 @@ final class YtDlpDownloads {
     private static YtDlpDownloads instance;
     private static final List<String> ACTIVE = asList("queued", "preparing", "downloading", "processing", "paused", "pausing");
     private static final Pattern PROGRESS = Pattern.compile("^\\[download]\\s+(\\d+(?:\\.\\d+)?)%(?:.*?\\bat\\s+(\\S+))?(?:.*?\\bETA\\s+(\\S+))?");
+    private static final String LIVE_PREFIX = "__OPENTUBEX_LIVE__:";
+    // The keys of FFmpeg's -progress output that a live recording shows
+    private static final Pattern FFMPEG_PROGRESS = Pattern.compile("^(out_time_us|total_size|progress)=(\\S+)$");
     private final Context context;
     private final AtomicFile file;
     private final File staging;
@@ -284,7 +287,11 @@ final class YtDlpDownloads {
             root.mkdirs();
             List<String> args = YtDlpArguments.validate(record.getJSONArray("args"));
             List<String> common = new ArrayList<>(asList("--paths", root.getAbsolutePath(), "--paths", "temp:" + new File(root, "temp").getAbsolutePath(),
-                "--newline", "--progress", "--no-simulate", "--print", "after_move:__OPENTUBEX_FILE__:%(id)s\t%(duration)s\t%(width)s\t%(height)s\t%(channel,uploader|null)j\t%(channel_id|null)j\t%(title)j\t%(filepath)s"));
+                "--newline", "--progress", "--no-simulate",
+                // yt-dlp records live streams with FFmpeg, which reports no progress to yt-dlp
+                // and runs silently because --print implies quiet mode.
+                "--downloader-args", "ffmpeg:-progress pipe:1",
+                "--print", "after_move:__OPENTUBEX_FILE__:%(id)s\t%(duration)s\t%(width)s\t%(height)s\t%(channel,uploader|null)j\t%(channel_id|null)j\t%(title)j\t%(filepath)s"));
             int[] claim;
             synchronized (this) {
                 if (record.optBoolean("useCookies")) {
@@ -532,6 +539,11 @@ final class YtDlpDownloads {
         if (shown.has("currentVideoId")) {
             for (String key : asList("currentVideoId", "currentTitle", "playlistIndex", "playlistCount")) record.put(key, shown.opt(key));
         }
+        record.put("live", shown.optBoolean("live"));
+        for (String key : asList("recordedSeconds", "recordedBytes")) {
+            if (shown.has(key)) record.put(key, shown.get(key));
+            else record.remove(key);
+        }
     }
 
     private synchronized void finishPart(long id, int part) {
@@ -568,6 +580,26 @@ final class YtDlpDownloads {
     }
 
     static void updateProgress(JSONObject record, String line) throws org.json.JSONException {
+        if (line.startsWith(LIVE_PREFIX)) {
+            // Every video of a playlist reports whether it is live
+            record.put("live", line.substring(LIVE_PREFIX.length()).equals("True"));
+            record.remove("recordedSeconds");
+            record.remove("recordedBytes");
+            return;
+        }
+        var ffmpegProgress = FFMPEG_PROGRESS.matcher(line);
+        if (ffmpegProgress.matches()) {
+            // FFmpeg reports progress once more after a stop request, which already shows processing
+            if (!record.optBoolean("live") || record.optBoolean("stopping")) return;
+            String key = ffmpegProgress.group(1);
+            String value = ffmpegProgress.group(2);
+            if (key.equals("out_time_us") && value.matches("\\d{1,15}")) record.put("recordedSeconds", Long.parseLong(value) / 1_000_000.0);
+            else if (key.equals("total_size") && value.matches("\\d{1,18}")) record.put("recordedBytes", Long.parseLong(value));
+            else if (key.equals("progress") && value.equals("continue")) {
+                record.put("status", "downloading").put("percent", 0).put("speed", JSONObject.NULL).put("eta", JSONObject.NULL);
+            }
+            return;
+        }
         if (line.startsWith("__OPENTUBEX_PREPARING__:")) {
             String[] fields = line.substring("__OPENTUBEX_PREPARING__:".length()).split("\t", 4);
             Object title = null;
@@ -622,7 +654,22 @@ final class YtDlpDownloads {
         JSONObject record = records.get(id);
         if (record == null) return false;
         String status = record.optString("status");
-        if ((action.equals("pause") || action.equals("cancel")) && ACTIVE.contains(status)) {
+        // A paused live recording would miss the stream in the meantime and start over when resumed
+        boolean liveRecording = record.optBoolean("live") && asList("preparing", "downloading", "processing").contains(status);
+        if (action.equals("stop") && liveRecording && status.equals("downloading")) {
+            List<JSONObject> parts = partProgress.get(id);
+            if (parts == null) return false;
+            for (JSONObject part : parts) part.put("stopping", true).put("status", "processing");
+            // Interrupted, yt-dlp keeps and processes what it has recorded of a live stream.
+            if (!YtDlpRuntime.interrupt(id)) {
+                for (JSONObject part : parts) { part.remove("stopping"); part.put("status", "downloading"); }
+                return false;
+            }
+            record.put("status", "processing");
+            publish(record);
+        } else if (action.equals("pause") && liveRecording) {
+            return false;
+        } else if ((action.equals("pause") || action.equals("cancel")) && ACTIVE.contains(status)) {
             updateStatus(id, action.equals("pause") ? "paused" : "cancelled", null);
             YtDlpRuntime.cancel(id);
             Thread thread = threads.get(id);
@@ -650,6 +697,7 @@ final class YtDlpDownloads {
         configure(config);
         if (action.equals("pause-all")) {
             paused = true;
+            // Live recordings keep running
             for (long id : records.keySet()) if (ACTIVE.contains(records.get(id).optString("status"))) control(id, "pause", 0);
         } else if (action.equals("resume-all")) {
             paused = false;

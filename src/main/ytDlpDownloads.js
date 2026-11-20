@@ -16,7 +16,7 @@ import { createSerialQueue } from './serialQueue'
 import { readJsonState } from './readJsonState'
 import { writeFileAtomic } from './writeFileAtomic'
 import { shouldUseGioTrash } from './trashPlatform'
-import { killProcessTreeSync, PROCESS_TREE_SPAWN_OPTIONS, signalProcessTree } from './processTree'
+import { interruptProcess, killProcessTreeSync, PROCESS_TREE_SPAWN_OPTIONS, signalProcessTree } from './processTree'
 import {
   combineDownloadSpeeds,
   compareQueuedDownloads,
@@ -100,6 +100,9 @@ const execFileAsync = promisify(execFile)
  * @property {'unmetered' | 'charging' | null} [waitingFor] unmet automatic download requirement
  * @property {boolean} [started]
  * @property {number} percent
+ * @property {boolean} [live] whether the current video is a live stream, which yt-dlp records until it ends or is stopped
+ * @property {number} [recordedSeconds] length of the live recording so far
+ * @property {number} [recordedBytes] size of the live recording so far
  * @property {string} [currentVideoId] video yt-dlp is working on
  * @property {string} [currentTitle]
  * @property {number | null} [playlistIndex] position of the current video in a remote playlist download
@@ -128,6 +131,10 @@ const MERGER_REGEX = /^\[Merger\] Merging formats into "(.+)"$/
 const SUBTITLE_DESTINATION_REGEX = /^\[info\] Writing video subtitles to: (.+)$/
 const FINAL_PATH_PREFIX = '__OPENTUBEX_FILE__:'
 const FINAL_METADATA_PREFIX = '__OPENTUBEX_METADATA__:'
+const LIVE_PREFIX = '__OPENTUBEX_LIVE__:'
+// The keys of FFmpeg's `-progress` output that a live recording shows
+const FFMPEG_PROGRESS_REGEX = /^(out_time_us|total_size|progress)=(\S+)$/
+const STOP_UNANSWERED_MS = 10_000
 const DOWNLOAD_STOPPED_ERROR = 'DOWNLOAD_STOPPED_UNEXPECTEDLY'
 const TEMPORARY_FOLDER_PREFIX = 'opentubex-download-'
 // Names the process whose download uses a temporary folder
@@ -588,7 +595,11 @@ async function startYtDlpDownload(
     '--print',
     `after_move:${FINAL_PATH_PREFIX}%(id)s\t%(duration)s\t%(width)s\t%(height)s\t%(filepath)s`,
     '--print',
-    `${subtitlesOnly ? 'video' : 'after_move'}:${FINAL_METADATA_PREFIX}%(id)j\t%(title)j\t%(thumbnail|null)j\t%(channel,uploader|null)j\t%(channel_id|null)j`
+    `${subtitlesOnly ? 'video' : 'after_move'}:${FINAL_METADATA_PREFIX}%(id)j\t%(title)j\t%(thumbnail|null)j\t%(channel,uploader|null)j\t%(channel_id|null)j`,
+    // yt-dlp records live streams with FFmpeg, which reports no progress to yt-dlp
+    // and runs silently because `--print` implies quiet mode.
+    '--downloader-args',
+    'ffmpeg:-progress pipe:1'
   ]
 
   await pushProxyArgument(args)
@@ -805,8 +816,8 @@ async function startYtDlpDownload(
   const partArgs = splitDownloadArguments(payload, commandArgs, slots).parts
   // The limit only counts videos, so it cannot change between the request and the split.
   if (partArgs.length < slots) releaseDownloadSlot(slots - partArgs.length)
-  /** @type {{ children: Set<import('node:child_process').ChildProcess>, cancelled: boolean, paused: boolean, restarting: boolean, restartStatus: 'queued' | 'paused', resumeStatus?: string }} */
-  const entry = { children: new Set(), cancelled: false, paused: false, restarting: false, restartStatus: 'queued' }
+  /** @type {{ children: Set<import('node:child_process').ChildProcess>, cancelled: boolean, paused: boolean, restarting: boolean, restartStatus: 'queued' | 'paused', resumeStatus?: string, stopping: boolean, stopRequestedAt: number }} */
+  const entry = { children: new Set(), cancelled: false, paused: false, restarting: false, restartStatus: 'queued', stopping: false, stopRequestedAt: 0 }
   activeDownloads.set(id, entry)
   showAutomaticDownloadNotification(payload, 'started')
   sendStatus(true)
@@ -880,6 +891,37 @@ async function startYtDlpDownload(
       part.currentTitle = typeof title === 'string' ? title.slice(0, 255) : ''
       part.playlistIndex = index > 0 ? index : null
       part.playlistCount = count > 0 ? count : null
+    }
+    if (line.startsWith(LIVE_PREFIX)) {
+      // Every video of a playlist reports whether it is live
+      status.live = line.slice(LIVE_PREFIX.length) === 'True'
+      delete status.recordedSeconds
+      delete status.recordedBytes
+      return
+    }
+    const ffmpegProgress = FFMPEG_PROGRESS_REGEX.exec(line)
+    if (ffmpegProgress) {
+      if (status.live !== true) return
+      if (entry.stopping) {
+        // FFmpeg ends its report within moments of a stop request. A process that
+        // started with interrupts ignored keeps recording, so show that again.
+        if (Date.now() - entry.stopRequestedAt < STOP_UNANSWERED_MS) return
+        entry.stopping = false
+        if (status.status === 'processing') status.status = 'downloading'
+      }
+      const [, key, value] = ffmpegProgress
+      if (key === 'out_time_us' && /^\d+$/.test(value)) status.recordedSeconds = Number(value) / 1_000_000
+      else if (key === 'total_size' && /^\d+$/.test(value)) status.recordedBytes = Number(value)
+      else if (key === 'progress' && value === 'continue') {
+        const previousStatus = status.status
+        part.phase = 'downloading'
+        part.percent = 0
+        part.speed = null
+        part.eta = null
+        showProgress()
+        sendStatus(previousStatus !== status.status)
+      }
+      return
     }
     if (line.startsWith('__OPENTUBEX_PREPARING__:') || line === '__OPENTUBEX_PROCESSING__' || line.startsWith('__OPENTUBEX_DOWNLOAD__:finished')) {
       part.phase = line.startsWith('__OPENTUBEX_PREPARING__:') ? 'preparing' : 'processing'
@@ -1338,7 +1380,7 @@ function clearQueuePauseAfterLastIndividualResume() {
 /**
  * @param {import('electron').IpcMainInvokeEvent} event
  * @param {number} id
- * @param {'pause' | 'resume' | 'move'} action
+ * @param {'pause' | 'resume' | 'stop' | 'move'} action
  * @param {number} [value]
  */
 export async function handleYtDlpControlDownload(event, id, action, value) {
@@ -1352,7 +1394,7 @@ export async function handleYtDlpControlDownload(event, id, action, value) {
     if (record.status === 'queued') {
       individuallyResumedDownloadIds.delete(id)
       record.status = 'paused'
-    } else if (entry && ['preparing', 'downloading', 'processing'].includes(record.status)) {
+    } else if (entry && ['preparing', 'downloading', 'processing'].includes(record.status) && record.live !== true) {
       entry.resumeStatus = record.status
       if (process.platform !== 'win32' && signalDownload(entry, 'SIGSTOP')) {
         entry.paused = true
@@ -1391,6 +1433,20 @@ export async function handleYtDlpControlDownload(event, id, action, value) {
       return false
     }
     clearQueuePauseAfterLastIndividualResume()
+  } else if (action === 'stop') {
+    // Interrupted, yt-dlp keeps and processes what it has recorded of a live stream.
+    if (!entry || entry.paused || entry.stopping || record.live !== true || record.status !== 'downloading') return false
+    entry.stopping = true
+    entry.stopRequestedAt = Date.now()
+    record.status = 'processing'
+    broadcastDownloadStatus(record)
+    const interrupted = await Promise.all([...entry.children].map(interruptProcess))
+    if (!interrupted.includes(true)) {
+      entry.stopping = false
+      if (record.status === 'processing') record.status = 'downloading'
+      broadcastDownloadStatus(record)
+      return false
+    }
   } else if (action === 'move' && ['queued', 'paused'].includes(record.status) && !entry && (value === -1 || value === 1)) {
     const peers = [...downloadRecords.values()]
       .filter(download => ['queued', 'paused'].includes(download.status) && !activeDownloads.has(download.id))
@@ -1430,7 +1486,9 @@ export async function handleYtDlpQueueAction(event, action) {
     setPendingDownloadStatus('paused')
     for (const [id, entry] of activeDownloads) {
       const record = downloadRecords.get(id)
-      if (!record || entry.paused) continue
+      // A paused live recording would miss the stream in the meantime, and one
+      // waiting to pause on Windows would keep recording until the stream ends.
+      if (!record || entry.paused || record.live === true) continue
       if (record.status !== 'pausing') entry.resumeStatus = record.status
       if (process.platform !== 'win32' && signalDownload(entry, 'SIGSTOP')) {
         entry.paused = true

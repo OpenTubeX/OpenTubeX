@@ -2557,6 +2557,8 @@ CommandPalette:
     Download Finished: Bu indirme artık çalışmıyor
     Video: Önce bir video açın
 Downloads:
+  Stop Recording: "Kaydı durdur"
+  Recording: "Kaydediliyor"
   File Name Template Invalid: 'İndirme klasörü içinde "..", "~", "$", "%" veya "thumbnail:" gibi bir önek içermeyen göreli bir yol kullanın.'
   Search Completed: "Tamamlanan indirmeleri başlığa veya kanala göre ara"
   Format: "Biçim"

@@ -2572,6 +2572,8 @@ CommandPalette:
     Download Finished: Αυτή η λήψη δεν εκτελείται πλέον
     Video: Ανοίξτε πρώτα ένα βίντεο
 Downloads:
+  Stop Recording: "Διακοπή εγγραφής"
+  Recording: "Εγγραφή"
   File Name Template Invalid: 'Χρησιμοποιήστε μια σχετική διαδρομή μέσα στον φάκελο λήψεων χωρίς "..", "~", "$", "%" ή πρόθεμα όπως "thumbnail:".'
   Search Completed: "Αναζήτηση ολοκληρωμένων λήψεων κατά τίτλο ή κανάλι"
   Format: "Μορφή"

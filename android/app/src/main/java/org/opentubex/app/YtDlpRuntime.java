@@ -47,6 +47,13 @@ final class YtDlpRuntime {
             }
             process.destroy();
         }
+        /** Sends SIGINT to Python alone, which then asks FFmpeg to finish its file. */
+        boolean interrupt() {
+            int pid = group.get();
+            if (stopped || pid <= 0) return false;
+            try { android.system.Os.kill(pid, android.system.OsConstants.SIGINT); return true; }
+            catch (android.system.ErrnoException ignored) { return false; }
+        }
     }
 
     static final class ErrorOutput {
@@ -147,7 +154,9 @@ final class YtDlpRuntime {
             File entryPoint = YtDlpCodeCache.prepare(new File(installation, "yt-dlp/yt-dlp"), new File(installation, "yt-dlp-code"));
             String nativeDir = context.getApplicationInfo().nativeLibraryDir;
             String marker = "__OPENTUBEX_PROCESS_" + UUID.randomUUID() + "__:";
-            String bootstrap = "import os,sys,runpy\nos.setsid()\nprint('" + marker + "'+str(os.getpid()),flush=True)\nsys.argv=sys.argv[1:]\nsys.path.insert(0,sys.argv[0])\n"
+            // Python only turns SIGINT into KeyboardInterrupt, which stops a live recording
+            // and keeps it, when the app did not start it with SIGINT ignored.
+            String bootstrap = "import os,sys,runpy,signal\nsignal.signal(signal.SIGINT,signal.default_int_handler)\nos.setsid()\nprint('" + marker + "'+str(os.getpid()),flush=True)\nsys.argv=sys.argv[1:]\nsys.path.insert(0,sys.argv[0])\n"
                 + mp3ThumbnailBootstrap + "\ninstall_mp3_thumbnail_writer()\n"
                 + rumbleHttpBootstrap + "\ninstall_rumble_http()\n"
                 + outputPathsBootstrap + "\ninstall_output_containment()\nrunpy.run_path(sys.argv[0],run_name='__main__')";
@@ -303,6 +312,17 @@ final class YtDlpRuntime {
             if (line == null || !line.startsWith(binary + " version ")) throw new IOException("Unable to read " + binary + " version: " + line);
             return line.split(" ")[2];
         } finally { process.destroy(); }
+    }
+
+    /** Interrupts every process of a download, as Ctrl+C would, and returns whether any got the signal. */
+    static boolean interrupt(long id) {
+        String key = "download-" + id;
+        boolean interrupted = false;
+        for (Map.Entry<String, RunningProcess> process : PROCESSES.entrySet()) {
+            String name = process.getKey();
+            if ((name.equals(key) || name.startsWith(key + "-")) && process.getValue().interrupt()) interrupted = true;
+        }
+        return interrupted;
     }
 
     /** Stops every process of a download, including the other parts of a split playlist. */

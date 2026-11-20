@@ -2556,6 +2556,8 @@ CommandPalette:
     Download Finished: Toto sťahovanie už neprebieha
     Video: Najprv otvorte video
 Downloads:
+  Stop Recording: "Zastaviť nahrávanie"
+  Recording: "Nahráva sa"
   File Name Template Invalid: 'Použite relatívnu cestu v priečinku na sťahovanie bez "..", "~", "$", "%" alebo predpony ako "thumbnail:".'
   Search Completed: "Hľadať dokončené sťahovania podľa názvu alebo kanála"
   Format: "Formát"

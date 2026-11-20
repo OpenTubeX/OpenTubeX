@@ -2556,6 +2556,8 @@ CommandPalette:
     Download Finished: 此下载已停止运行
     Video: 请先打开一个视频
 Downloads:
+  Stop Recording: "停止录制"
+  Recording: "正在录制"
   File Name Template Invalid: '请使用下载文件夹内的相对路径，不能包含 ".."、"~"、"$"、"%" 或 "thumbnail:" 等前缀。'
   Search Completed: "按标题或频道搜索已完成的下载"
   Format: "格式"

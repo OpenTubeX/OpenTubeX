@@ -2667,6 +2667,8 @@ CommandPalette:
     Download Finished: Гэтае спампоўванне больш не выконваецца
     Video: Спачатку адкрыйце відэа
 Downloads:
+  Stop Recording: "Спыніць запіс"
+  Recording: "Ідзе запіс"
   File Name Template Invalid: 'Выкарыстоўвайце адносны шлях унутры папкі спампоўвання без "..", "~", "$", "%" або прэфікса, напрыклад "thumbnail:".'
   Search Completed: "Пошук завершаных спампоўванняў па назве або канале"
   Format: "Фармат"

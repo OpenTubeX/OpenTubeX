@@ -35,6 +35,33 @@ public class YtDlpDownloadProgressTest {
         assertTrue(record.isNull("eta"));
     }
 
+    @Test public void liveRecordingsShowTheLengthAndSizeThatFfmpegReports() throws Exception {
+        JSONObject part = new JSONObject().put("status", "preparing").put("percent", 0);
+        YtDlpDownloads.updateProgress(part, "__OPENTUBEX_LIVE__:True");
+        for (String line : Arrays.asList("total_size=N/A", "out_time_us=N/A", "progress=continue", "total_size=10485760",
+            "out_time_us=9648333", "out_time=00:00:09.648333", "speed=1.01x", "progress=continue")) {
+            YtDlpDownloads.updateProgress(part, line);
+        }
+        assertEquals("downloading", part.getString("status"));
+        assertEquals(9.648333, part.getDouble("recordedSeconds"), 0);
+        assertEquals(10485760, part.getLong("recordedBytes"));
+        JSONObject record = new JSONObject();
+        YtDlpDownloads.showProgress(record, Arrays.asList(part), null);
+        assertTrue(record.getBoolean("live"));
+        assertEquals(10485760, record.getLong("recordedBytes"));
+
+        // FFmpeg reports once more while it finishes a stopped recording
+        part.put("stopping", true).put("status", "processing");
+        YtDlpDownloads.updateProgress(part, "progress=continue");
+        assertEquals("processing", part.getString("status"));
+
+        // A live video earlier in a playlist must not mark the next one as live
+        YtDlpDownloads.updateProgress(part, "__OPENTUBEX_LIVE__:False");
+        YtDlpDownloads.updateProgress(part, "progress=continue");
+        assertEquals("processing", part.getString("status"));
+        assertFalse(part.has("recordedSeconds"));
+    }
+
     @Test public void roundedPercentageDoesNotFinishTheTransfer() throws Exception {
         JSONObject record = new JSONObject();
         YtDlpDownloads.updateProgress(record, "__OPENTUBEX_DOWNLOAD__:downloading\t100.0%\t1MiB/s\t00:00");
