@@ -111,7 +111,7 @@ function mountSheet(t, expandPanel = null, { reducedMotion = false } = {}) {
     matchMedia: () => ({ matches: true }),
     getComputedStyle: () => ({ transform: 'none', opacity: 1, getPropertyValue: () => '' })
   }
-  scope.run(() => vm.runInNewContext(source + '\nglobalThis.state = { expanded, updatePresentation, sheetStyle, startDrag, moveDrag, endDrag, cancelDrag, handleHeaderClick };', context))
+  scope.run(() => vm.runInNewContext(source + '\nglobalThis.state = { expanded, updatePresentation, sheetStyle, startDrag, moveDrag, endDrag, cancelDrag, handleHeaderClick };\nglobalThis.RealmPromise = Promise;', context))
   const unmount = () => { cleanup.splice(0).forEach(callback => callback()); scope.stop() }
   t.after(unmount)
   return {
@@ -378,4 +378,35 @@ test('unmounting a suspended expanded sheet restores playback', async t => {
   sheet.unmount()
   assert.equal(restorations, 1, 'unmount must restore retained playback')
   assert.equal(sheet.state.expanded.value, false)
+})
+
+test('reopening a sheet as its closing animation resolves keeps it open', async t => {
+  const sheet = mountSheet(t)
+  sheet.props.open = true
+  await sheet.settle()
+  assert.equal(sheet.element.open, true)
+
+  let resolveClose
+  let closingAnimation
+  const originalAnimate = sheet.element.animate
+  sheet.element.animate = (frames, options) => {
+    const animation = originalAnimate(frames, options)
+    closingAnimation = animation
+    animation.finished = new sheet.RealmPromise(resolve => { resolveClose = resolve })
+    return animation
+  }
+
+  sheet.props.open = false
+  await sheet.settle()
+  assert.equal(sheet.element.open, true, 'closing animation holds the dialog open until it finishes')
+
+  // The closing animation finishes right as the user reopens the sheet, before
+  // the post-flush watcher has run to clear the closing state.
+  resolveClose()
+  sheet.props.open = true
+  await sheet.settle()
+
+  assert.equal(sheet.element.open, true, 'the reopened sheet must stay open')
+  assert.equal(closingAnimation.playState, 'idle', 'the finished close animation must be canceled')
+  assert.deepEqual(sheet.events, [], 'reopening must not emit a stale closed event')
 })
