@@ -444,8 +444,9 @@ async function checkThreads() {
           seen,
           // Applied to the entry as it is now, which may watch more comments meanwhile.
           comments: checkCommentHearts(threads[index], result.hearts).comments,
-          // Follows edits made elsewhere, as on YouTube.
-          text: result.hearts.get(getWatchedCommentId(threads[index]))?.text.slice(0, COMMENT_TEXT_LIMIT) || threads[index].text,
+          // Follows edits made elsewhere, as on YouTube, but not over one saved here while it loaded.
+          text: (threads[index].text === thread.text && result.hearts.get(getWatchedCommentId(threads[index]))?.text.slice(0, COMMENT_TEXT_LIMIT)) ||
+            threads[index].text,
           ...(active || hearts.active ? { activeAt: Date.now() } : {})
         }
       } else {
