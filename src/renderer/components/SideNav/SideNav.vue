@@ -377,6 +377,7 @@ function createPinReorder({ rendered, getId, update }) {
    * @param {string[]} order
    */
   async function move(id, order) {
+    const before = rendered.value.findIndex(item => item.id === id)
     const saved = await update(items => {
       const ids = items.map(getId)
       const from = ids.indexOf(id)
@@ -386,12 +387,14 @@ function createPinReorder({ rendered, getId, update }) {
       moved.splice(to, 0, items[from])
       return moved
     })
-    if (!saved) return
-    const position = order.indexOf(id)
+    // Announce the saved order, as another window's edit can move or reject the pin.
+    const items = rendered.value
+    const position = items.findIndex(item => item.id === id)
+    if (!saved || position === -1 || position === before) return
     reorderStatus.value = t('Home Page.Section moved', {
-      section: rendered.value.find(item => item.id === id)?.label ?? id,
+      section: items[position].label,
       position: position + 1,
-      total: order.length,
+      total: items.length,
     })
   }
   return { rendered, move }

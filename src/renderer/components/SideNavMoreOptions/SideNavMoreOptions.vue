@@ -135,14 +135,18 @@
                           aria-hidden="true"
                         />
                         <span
+                          :id="`${promptId}-${item.key}`"
                           class="navLabel"
                           dir="auto"
                         >{{ item.label }}</span>
                       </component>
+                      <!-- Named by the pin and its own hint, as grips are otherwise alike. -->
                       <button
                         v-if="group.items.length > 1"
+                        :id="`${promptId}-${item.key}-grip`"
                         type="button"
                         class="pinnedGrip"
+                        :aria-labelledby="`${promptId}-${item.key} ${promptId}-${item.key}-grip`"
                         :aria-label="$t('User Playlists.Reorder Hint')"
                         :title="$t('User Playlists.Reorder Hint')"
                         aria-keyshortcuts="ArrowUp ArrowDown"

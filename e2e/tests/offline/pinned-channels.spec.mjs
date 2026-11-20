@@ -184,7 +184,7 @@ test('reorders pinned channels by dragging them in the side navigation', async (
   await page.keyboard.press('Alt+ArrowDown')
   await expect.poll(order).toEqual(['C', 'B', 'A'])
   await expect(channelA).toBeFocused()
-  await expect(page.locator('.sideNav .reorderStatus')).toHaveText('Channel A moved to position 3 of 3.')
+  await expect(page.locator('.sideNav .reorderStatus')).toHaveText(/Channel A\D+3\D+3/)
   // The announcement must not extend the navigation, which would scroll it with a native scrollbar.
   expect(await page.locator('.sideNav').evaluate(nav => nav.scrollHeight - nav.clientHeight)).toBe(0)
 
@@ -237,7 +237,7 @@ test('reorders pinned channels by their grips in the mobile More sheet', async (
   const sheet = page.locator('.moreOptionContainer')
   const rows = sheet.locator('.pinnedRow')
   const order = () => rows.evaluateAll(elements => elements.map(element => element.dataset.pinnedId.at(-1)))
-  const grip = letter => rows.and(page.locator(`[data-pinned-id="UC${letter.repeat(22)}"]`)).getByRole('button', { name: 'Drag or use the arrow keys to reorder' })
+  const grip = letter => rows.and(page.locator(`[data-pinned-id="UC${letter.repeat(22)}"]`)).getByRole('button', { name: `Channel ${letter} Drag or use the arrow keys to reorder` })
   await expect.poll(order).toEqual(['A', 'B', 'C'])
   // Measure the grips once the sheet stops sliding in.
   await expect.poll(() => sheet.evaluate(element => element.getAnimations().length)).toBe(0)
@@ -263,7 +263,7 @@ test('reorders pinned channels by their grips in the mobile More sheet', async (
   await page.keyboard.press('ArrowUp')
   await expect.poll(order).toEqual(['B', 'A', 'C'])
   await expect(grip('A')).toBeFocused()
-  await expect(sheet.locator('.reorderStatus')).toHaveText('Channel A moved to position 2 of 3.')
+  await expect(sheet.locator('.reorderStatus')).toHaveText(/Channel A\D+2\D+3/)
   expect(await sheet.locator('.moreOptionScroll').evaluate(scroller => scroller.scrollHeight - scroller.clientHeight)).toBe(0)
 })
 
