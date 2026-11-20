@@ -602,10 +602,11 @@ async function startYtDlpDownload(
 
   /** @type {string} */
   const downloadFolder = (await settings._findOne('ytDlpDownloadFolderPath'))?.value || app.getPath('downloads')
-  const { args: downloadArgs, truncatesLongTitles, directoryFields } = buildYtDlpDownloadArguments(payload)
+  // The global custom arguments lead these, so they can keep a playlist in one process.
+  const { args: commandArgs, truncatesLongTitles, directoryFields } =
+    buildYtDlpDownloadArguments(payload, typeof globalCustomArgsSetting === 'string' ? globalCustomArgsSetting : '')
   // Custom arguments follow the destination, so an option missing its value
   // cannot take `--paths` as its value. Each process appends its own URLs.
-  const commandArgs = [...globalCustomArgs, ...downloadArgs]
   args.push('--paths', downloadFolder, ...splitDownloadArguments(payload, commandArgs, 1).shared)
 
   if (!isExternalMedia && ((await settings._findOne('ytDlpPlaybackAlwaysUseCookies'))?.value === true ||

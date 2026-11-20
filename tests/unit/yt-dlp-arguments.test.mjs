@@ -87,6 +87,8 @@ test('playlists split into processes that keep playlist order and numbering', ()
   const remote = { playlistId: 'PL1234567890', isPlaylist: true, videoCount: 2, mode: 'video' }
   const remoteArgs = buildYtDlpDownloadArguments(remote).args
   const remoteSplit = splitDownloadArguments(remote, remoteArgs, 3)
+  // Parts show the playlist index and count, which their own selection would change.
+  assert.ok(remoteArgs.includes('video:__OPENTUBEX_PREPARING__:%(id)s\t%(playlist_index|)s\t%(playlist_count,n_entries|)s\t%(title)j'))
   assert.deepEqual(remoteSplit.shared, remoteArgs.slice(0, -1))
   // The video count leaves no process without an entry.
   assert.deepEqual(remoteSplit.parts, [
@@ -104,6 +106,11 @@ test('playlists split into processes that keep playlist order and numbering', ()
   const selected = { ...remote, videoCount: 10, customArgs: '--playlist-i 1:5' }
   const selectedArgs = buildYtDlpDownloadArguments(selected).args
   assert.deepEqual(splitDownloadArguments(selected, selectedArgs, 3).parts, [selectedArgs.slice(-1)])
+  // One process counts the entries it selects.
+  assert.ok(selectedArgs.includes('video:__OPENTUBEX_PREPARING__:%(id)s\t%(playlist_autonumber|)s\t%(n_entries|)s\t%(title)j'))
+  // Without a count, extra processes could find no entry.
+  const uncounted = { ...remote, videoCount: undefined }
+  assert.equal(splitDownloadArguments(uncounted, buildYtDlpDownloadArguments(uncounted).args, 3).parts.length, 1)
   // Concatenation and file names without an index need every entry in one process.
   for (const options of [{ customArgs: '--concat-playlist always' }, { filenameTemplate: '{playlist}/{title}.{ext}' }]) {
     const payload = { ...remote, ...options }
@@ -287,7 +294,7 @@ test('download phase hooks keep real downloads enabled and override custom progr
     videoId, mode: 'video', customArgs: '--progress-template "download:custom"'
   })
   assert.ok(args.includes('--no-simulate'))
-  assert.ok(args.includes('video:__OPENTUBEX_PREPARING__:%(id)s\t%(playlist_index|)s\t%(playlist_count,n_entries|)s\t%(title)j'))
+  assert.ok(args.includes('video:__OPENTUBEX_PREPARING__:%(id)s\t%(playlist_autonumber|)s\t%(n_entries|)s\t%(title)j'))
   const templates = args.flatMap((arg, index) => arg === '--progress-template' ? [args[index + 1]] : [])
   assert.match(templates.at(-2), /^download:__OPENTUBEX_DOWNLOAD__:%\(progress.status\)s/)
   assert.equal(templates.at(-1), 'postprocess:__OPENTUBEX_PROCESSING__')

@@ -149,8 +149,8 @@ export function playlistDownloadPartLimit(payload, args) {
   if (!/(?<!%)(?:%%)*%\((?:playlist_index|autonumber)\)/.test(outputTemplate)) return 1
   const videoIds = Array.isArray(payload.videoIds) ? payload.videoIds : []
   if (videoIds.length > 0) return videoIds.length
-  // The count is only a hint against starting processes that would find no entry.
-  return Number.isSafeInteger(payload.videoCount) && payload.videoCount > 0 ? payload.videoCount : Infinity
+  // Without the count, extra processes could find no entry and still hold a slot.
+  return Number.isSafeInteger(payload.videoCount) && payload.videoCount > 0 ? payload.videoCount : 1
 }
 /**
  * Splits a download into the arguments of up to `count` yt-dlp processes.
@@ -422,12 +422,15 @@ export function buildYtDlpDownloadArguments(payload, globalArguments = '') {
   if (startTime !== '' || endTime !== '') {
     args.push('--download-sections', `*${startTime || '0'}-${endTime || 'inf'}`, '--force-keyframes-at-cuts')
   }
+  args.push(...customArgs)
+  // Parts of a split playlist show their entries' playlist index and the whole playlist's
+  // count. A playlist in one process counts the entries it selects, like --playlist-items.
+  const position = playlistDownloadPartLimit(payload, args) > 1
+    ? '%(playlist_index|)s\t%(playlist_count,n_entries|)s'
+    : '%(playlist_autonumber|)s\t%(n_entries|)s'
   args.push(
-    ...customArgs,
     '--no-simulate',
-    // Selected entries keep their playlist index, and only the playlist count
-    // includes the entries that another part of a split playlist downloads.
-    '--print', 'video:__OPENTUBEX_PREPARING__:%(id)s\t%(playlist_index|)s\t%(playlist_count,n_entries|)s\t%(title)j',
+    '--print', `video:__OPENTUBEX_PREPARING__:%(id)s\t${position}\t%(title)j`,
     '--progress-template', 'download:__OPENTUBEX_DOWNLOAD__:%(progress.status)s\t%(progress._percent_str)s\t%(progress._speed_str)s\t%(progress._eta_str)s',
     '--progress-template', 'postprocess:__OPENTUBEX_PROCESSING__'
   )

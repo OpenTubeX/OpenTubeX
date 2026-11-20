@@ -300,7 +300,8 @@ final class YtDlpDownloads {
             List<List<String>> parts = splitArguments(args, record.getJSONObject("retryPayload"), Math.max(1, claim[0]));
             for (List<String> part : parts) part.addAll(common);
             // The claim keeps a slot for each part, so return those no part uses.
-            for (int unused = parts.size(); unused < claim[0]; unused++) releaseSlots(claim, false);
+            int surplus = claim[0] - parts.size();
+            for (int unused = 0; unused < surplus; unused++) releaseSlots(claim, false);
             synchronized (this) {
                 List<JSONObject> states = new ArrayList<>();
                 for (int part = 0; part < parts.size(); part++) states.add(new JSONObject().put("status", "preparing").put("percent", 0));

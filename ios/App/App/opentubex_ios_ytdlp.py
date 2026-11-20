@@ -276,10 +276,11 @@ def _download(request):
                     current.update({
                         'currentVideoId': info.get('id') if re.fullmatch(r'[\w-]{11}', str(info.get('id')), re.ASCII) else '',
                         'currentTitle': title[:255] if isinstance(title, str) else '',
-                        # Selected entries keep their playlist index, and only the playlist
-                        # count includes the entries that another part downloads.
-                        'playlistIndex': _positive(info.get('playlist_index')),
-                        'playlistCount': _positive(info.get('playlist_count')) or _positive(info.get('n_entries')),
+                        # Like src/ytDlpArguments.js, parts of a split playlist show the playlist
+                        # index and count, and one process counts the entries it selects.
+                        'playlistIndex': _positive(info.get('playlist_index' if len(parts) > 1 else 'playlist_autonumber')),
+                        'playlistCount': (_positive(info.get('playlist_count')) or _positive(info.get('n_entries'))
+                                          if len(parts) > 1 else _positive(info.get('n_entries'))),
                     })
                     part.update({'status': 'preparing', 'percent': 0, 'speed': None, 'eta': None})
                     write_progress()
