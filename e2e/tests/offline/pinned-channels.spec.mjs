@@ -188,14 +188,20 @@ test('reorders pinned channels by dragging them in the side navigation', async (
   // The announcement must not extend the navigation, which would scroll it with a native scrollbar.
   expect(await page.locator('.sideNav').evaluate(nav => nav.scrollHeight - nav.clientHeight)).toBe(0)
 
-  // Touch picks a pin up only after a still hold, so swipes keep scrolling the navigation.
-  const session = await page.context().newCDPSession(page)
-  await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
-  const touch = (type, x, y) => session.send('Input.dispatchTouchEvent', { type, touchPoints: x == null ? [] : [{ x, y, id: 0 }] })
+  // A press released where the window could not see it must not leave a drag pending.
   const center = async letter => {
     const box = await link(letter).boundingBox()
     return [box.x + box.width / 2, box.y + box.height / 2]
   }
+  const [px, py] = await center('B')
+  await link('B').dispatchEvent('pointerdown', { pointerId: 1, pointerType: 'mouse', isPrimary: true, button: 0, buttons: 1, clientX: px, clientY: py })
+  await page.mouse.move(px, py + 30, { steps: 4 })
+  await expect(page.locator('.sideNav .reorderDragged')).toHaveCount(0)
+
+  // Touch picks a pin up only after a still hold, so swipes keep scrolling the navigation.
+  const session = await page.context().newCDPSession(page)
+  await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
+  const touch = (type, x, y) => session.send('Input.dispatchTouchEvent', { type, touchPoints: x == null ? [] : [{ x, y, id: 0 }] })
   const [bx, by] = await center('B')
   await touch('touchStart', bx, by)
   await touch('touchMove', bx, by - 20)

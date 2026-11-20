@@ -74,6 +74,8 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit, cl
     window.addEventListener('contextmenu', preventContextMenu, true)
     // Links and images would start a native drag instead.
     list.addEventListener('dragstart', preventDefault)
+    // An uncaptured press can be released in another window.
+    window.addEventListener('blur', cancel)
     if (session.touch) {
       session.holdTimer = setTimeout(() => {
         begin()
@@ -124,7 +126,6 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit, cl
     session.mutationObserver.observe(list, { childList: true })
     document.addEventListener('scroll', update, { capture: true, passive: true })
     document.addEventListener('keydown', cancelFromKeyboard, true)
-    window.addEventListener('blur', cancel)
     list.classList.add('reorderActive')
     item.classList.add('reorderDragged')
     draggedId.value = session.ids[sourceIndex]
@@ -176,6 +177,11 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit, cl
     session.x = event.clientX
     session.y = event.clientY
     if (!session.started) {
+      // The button was released where this window could not see it.
+      if (!session.touch && event.buttons === 0) {
+        cancel()
+        return
+      }
       const distance = Math.hypot(session.x - session.startX, session.y - session.startY)
       // A touch that moves before its hold scrolls instead.
       if (session.touch) {
@@ -349,12 +355,12 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit, cl
     draggedId.value = null
     window.removeEventListener('contextmenu', preventContextMenu, true)
     active.list.removeEventListener('dragstart', preventDefault)
+    window.removeEventListener('blur', cancel)
     if (!active.started) return
     active.observer.disconnect()
     active.mutationObserver.disconnect()
     document.removeEventListener('scroll', update, { capture: true })
     document.removeEventListener('keydown', cancelFromKeyboard, true)
-    window.removeEventListener('blur', cancel)
     active.list.classList.remove('reorderActive', 'reorderGrid')
     active.item.classList.remove('reorderDragged', 'reorderDropping')
     active.items.forEach(element => { element.style.translate = '' })
