@@ -11,7 +11,7 @@ import { connectionEvents, initializeNetworkRecovery, getConnectionState, getWai
 import { getGoogleVideoProbeUrl } from '../../helpers/player/googleVideoFallback'
 import { ytDlp } from '../../helpers/ytDlp'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
-import { probeHlsManifest } from '../../helpers/player/hlsManifest'
+import { probeHlsManifest, probeVrHlsManifest } from '../../helpers/player/hlsManifest'
 import { getAudioFormatLoudness } from '../../helpers/player/loudnessNormalization'
 import { releaseAndroidRotationFullscreenHandoff } from '../../helpers/player/androidFullscreen'
 import { sampleRecommendationPlayback } from '../../../recommendation-learning'
@@ -963,7 +963,8 @@ export default defineComponent({
     ambientModeActive: function () {
       return this.$store.getters.getAmbientMode &&
         this.activeFormat !== 'audio' &&
-        this.vrProjection !== 'EQUIRECTANGULAR'
+        this.vrProjection !== 'EQUIRECTANGULAR' &&
+        this.vrProjection !== 'VR180'
     },
     customShortsPlayerActive: function () {
       return this.useCustomShortsPlayerForCurrentVideo &&
@@ -4280,6 +4281,11 @@ export default defineComponent({
                   format.projection_type !== 'RECTANGULAR'
               })
               ?.projection_type ?? null
+            // The panoramic HLS rendition of VR180 videos is a flat view, so their
+            // mesh streams, which pack both eyes' half spheres, are shown instead
+            if (this.vrProjection === 'MESH' && videoInfo.isVr180) {
+              this.vrProjection = 'VR180'
+            }
 
             if (this.vrProjection === 'MESH' && !this.isYtDlpPlaybackRequested()) {
               this.vrStreamsPending = true
@@ -4746,11 +4752,16 @@ export default defineComponent({
                   }
                   url = instanceUrl.toString()
                 }
-                const playable = await probeHlsManifest(url)
+                // Invidious doesn't say whether a mesh video is VR180, but its HLS rendition shows it
+                const hlsKind = await probeVrHlsManifest(url)
                 if (!this.isCurrentVideoLoad(loadGeneration, videoId)) return
-                if (playable && switchGeneration === this.playbackEngineSwitchGeneration && !this.isYtDlpPlaybackRequested()) {
-                  vrHlsManifestUrl = url
-                  this.vrProjection = 'EQUIRECTANGULAR'
+                if (hlsKind !== null && switchGeneration === this.playbackEngineSwitchGeneration && !this.isYtDlpPlaybackRequested()) {
+                  if (hlsKind === 'flat') {
+                    this.vrProjection = 'VR180'
+                  } else {
+                    vrHlsManifestUrl = url
+                    this.vrProjection = 'EQUIRECTANGULAR'
+                  }
                 }
               }
               if (this.vrProjection === 'MESH' && supportsYtDlp && this.videoPlaybackEngine === 'built-in' &&
@@ -7118,9 +7129,10 @@ export default defineComponent({
       cachedOnly = false
     ) {
       let source
-      const preferVrHls = [this, this.activePlaybackEngine === 'yt-dlp' ? this.builtInPlaybackSource : null]
-        .some(source => source?.vrProjection === 'MESH' ||
-          (source?.vrProjection === 'EQUIRECTANGULAR' && source.manifestMimeType === MANIFEST_TYPE_HLS))
+      const backendSources = [this, this.activePlaybackEngine === 'yt-dlp' ? this.builtInPlaybackSource : null]
+      const preferVrHls = backendSources.some(source => source?.vrProjection === 'MESH' ||
+        (source?.vrProjection === 'EQUIRECTANGULAR' && source.manifestMimeType === MANIFEST_TYPE_HLS))
+      const vr180 = backendSources.some(source => source?.vrProjection === 'VR180')
       try {
         source = await getYtDlpPlaybackSource(videoId, this.ytDlpPlaybackCacheKey, () => {
           if (
@@ -7134,7 +7146,7 @@ export default defineComponent({
               icon: ['fas', 'exchange-alt'],
             })
           }
-        }, useAuthentication, cachedOnly, this.captions.length === 0, preferVrHls)
+        }, useAuthentication, cachedOnly, this.captions.length === 0, preferVrHls, vr180)
       } catch (error) {
         if (
           !this.isCurrentVideoLoad(loadGeneration, videoId) ||
@@ -7181,7 +7193,8 @@ export default defineComponent({
       this.manifestSrc = source.manifestSrc
       this.manifestMimeType = source.manifestMimeType
       this.legacyFormats = source.legacyFormats
-      this.vrProjection = source.vrProjection ?? this.vrProjection
+      // yt-dlp only provides VR180 videos' flat view
+      this.vrProjection = source.vrProjection ?? (vr180 ? null : this.vrProjection)
       if (source.vrProjection === 'EQUIRECTANGULAR') {
         this.activeFormat = 'dash'
       }

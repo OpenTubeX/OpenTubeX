@@ -7,10 +7,10 @@ import { isIOSNativeMediaUrl } from '../../src/renderer/helpers/player/iosMediaT
 const source = (await readFile(new URL('../../src/renderer/helpers/player/hlsManifest.js', import.meta.url), 'utf8'))
   .replace(/^import .*\n/gm, '')
   .replace("import('../api/capacitor-http')", 'loadNativeHttp()')
-  .replace('export async function ', 'async function ')
+  .replaceAll('export async function ', 'async function ')
 
-function probe(ios, fetch, nativeFetch) {
-  return compileFunction(`${source}\nreturn probeHlsManifest`, ['process', 'fetch', 'loadNativeHttp', 'isIOSNativeMediaUrl'])(
+function probe(ios, fetch, nativeFetch, name = 'probeHlsManifest') {
+  return compileFunction(`${source}\nreturn ${name}`, ['process', 'fetch', 'loadNativeHttp', 'isIOSNativeMediaUrl'])(
     { env: { IS_IOS: ios } }, fetch, async () => ({ capacitorHttpFetch: nativeFetch }), isIOSNativeMediaUrl
   )
 }
@@ -60,4 +60,12 @@ test('iOS probes a lookalike googlevideo host through the playback WebView trans
   assert.equal(await check('https://googlevideo.com.attacker.invalid/master.m3u8'), false)
   assert.equal(fetched, 1)
   assert.equal(nativeFetched, 0)
+})
+
+test('VR HLS probes tell a 360° panorama from the flat view of a VR180 video', async () => {
+  const classify = body => probe(false, async () => new Response(body), undefined, 'probeVrHlsManifest')('https://media.test/master.m3u8')
+  assert.equal(await classify('#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=1,RESOLUTION=3840x1920\nhttps://media.test/a.m3u8\n'), 'panorama')
+  assert.equal(await classify('#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=1,RESOLUTION=1918x1080\nhttps://media.test/a.m3u8\n#EXT-X-STREAM-INF:BANDWIDTH=2,RESOLUTION=2480x1396\nhttps://media.test/b.m3u8\n'), 'flat')
+  assert.equal(await classify('#EXTM3U\n'), 'panorama')
+  assert.equal(await classify('<html>Error</html>'), null)
 })

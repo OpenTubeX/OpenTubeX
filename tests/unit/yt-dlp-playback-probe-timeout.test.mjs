@@ -76,6 +76,10 @@ function playbackLoader({ audioSampleRate = 44_100, timeoutAttempts = Infinity, 
       hlsProbes.push(url)
       return hlsProbeResult(hlsProbes.length)
     },
+    probeVrHlsManifest: async url => {
+      hlsProbes.push(url)
+      return hlsProbeResult(hlsProbes.length) ? 'panorama' : null
+    },
   }
   function checkProbe(url) {
     if (url.includes(`/video000001/${timeoutFormatId}?`) && extractions.filter(id => id === 'video000001').length <= timeoutAttempts) {
@@ -302,6 +306,7 @@ test('plays ongoing streams from their sq segments and falls back to HLS', async
       toLiveDashManifest,
       hasLimitedLiveDvrWindow: () => false,
       probeYtDlpHlsManifest: async () => true,
+      probeVrHlsManifest: async () => 'panorama',
     }
     const getSource = compileFunction(`${code}\nreturn getYtDlpPlaybackSource`, Object.keys(dependencies))(...Object.values(dependencies))
     return { getSource, liveFromStartCalls }

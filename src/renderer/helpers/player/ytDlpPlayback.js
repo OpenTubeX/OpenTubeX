@@ -14,7 +14,7 @@ import { fetchTwitchLiveVod, fetchTwitchSubOnlyVod, getTwitchVodId } from '../..
 import { fetchTwitchAdFreeLivePlaylist } from '../../../twitchLiveAds'
 import { parseTwitchChannelLogin } from '../../../twitchFollows'
 import { mapExternalPlaybackMetadata } from '../../../ytDlpMetadata'
-import { probeHlsManifest as probeYtDlpHlsManifest } from './hlsManifest'
+import { probeHlsManifest as probeYtDlpHlsManifest, probeVrHlsManifest } from './hlsManifest'
 
 /** @typedef {import('../../../main/ytDlp').YtDlpPlaybackFormat} YtDlpPlaybackFormat */
 
@@ -58,10 +58,12 @@ function notifyPlaybackSourceCacheChanged() {
   for (const listener of playbackSourceCacheChangeListeners) listener()
 }
 
-function effectivePlaybackSourceCacheKey(cacheKey, useAuthentication, preferVrHls = false) {
+function effectivePlaybackSourceCacheKey(cacheKey, useAuthentication, preferVrHls = false, vr180 = false) {
   return JSON.stringify(preferVrHls
     ? [cacheKey, useAuthentication, 'vr-hls']
-    : [cacheKey, useAuthentication])
+    : vr180
+      ? [cacheKey, useAuthentication, 'vr180']
+      : [cacheKey, useAuthentication])
 }
 
 /**
@@ -468,6 +470,13 @@ export function releaseTwitchVodRegistration(source) {
  */
 function isVideoFormat(format) {
   return format.vcodec !== null && format.vcodec !== 'none'
+}
+
+/**
+ * @param {YtDlpPlaybackFormat} format
+ */
+function isMeshFormat(format) {
+  return isVideoFormat(format) && /\bmesh\b/i.test(format.formatNote ?? '')
 }
 
 /**
@@ -911,6 +920,9 @@ async function createLiveDashManifestSrc(formats) {
  * @param {boolean} [cachedOnly] prevents a cache miss from starting a new extraction
  * @param {boolean} [includeSubtitles] whether yt-dlp should request automatic subtitles
  * @param {boolean} [preferVrHls] whether the backend identified a mesh video
+ * @param {boolean} [vr180] whether the backend identified a VR180 video. yt-dlp's
+ *   mesh formats of those pack both eyes and mix with flat ones, so only the flat
+ *   view is used.
  * @returns {Promise<YtDlpPlaybackSource | null>}
  */
 export function getYtDlpPlaybackSource(
@@ -920,7 +932,8 @@ export function getYtDlpPlaybackSource(
   useAuthentication = false,
   cachedOnly = false,
   includeSubtitles = true,
-  preferVrHls = false
+  preferVrHls = false,
+  vr180 = false
 ) {
   if (cachedOnly) {
     return loadYtDlpPlaybackSource(
@@ -930,11 +943,12 @@ export function getYtDlpPlaybackSource(
       useAuthentication,
       true,
       includeSubtitles,
-      preferVrHls
+      preferVrHls,
+      vr180
     )
   }
 
-  const requestKey = JSON.stringify([videoId, cacheKey, useAuthentication, includeSubtitles, preferVrHls])
+  const requestKey = JSON.stringify([videoId, cacheKey, useAuthentication, includeSubtitles, preferVrHls, vr180])
   const pendingLoad = pendingPlaybackSourceLoads.get(requestKey)
   if (pendingLoad !== undefined) {
     if (onDefaultClientsFallback !== undefined) {
@@ -966,7 +980,8 @@ export function getYtDlpPlaybackSource(
     useAuthentication,
     false,
     includeSubtitles,
-    preferVrHls
+    preferVrHls,
+    vr180
   ).finally(() => {
     if (pendingPlaybackSourceLoads.get(requestKey) === pendingEntry) {
       pendingPlaybackSourceLoads.delete(requestKey)
@@ -983,9 +998,11 @@ async function loadYtDlpPlaybackSource(
   useAuthentication,
   cachedOnly,
   includeSubtitles,
-  preferVrHls
+  preferVrHls,
+  vr180
 ) {
-  const effectiveCacheKey = effectivePlaybackSourceCacheKey(cacheKey, useAuthentication, preferVrHls)
+  preferVrHls &&= !vr180
+  const effectiveCacheKey = effectivePlaybackSourceCacheKey(cacheKey, useAuthentication, preferVrHls, vr180)
   let cachedSource = playbackSourceCache.get(videoId, effectiveCacheKey)
 
   if (cachedSource === null) {
@@ -1013,13 +1030,16 @@ async function loadYtDlpPlaybackSource(
     }
   }
 
+  // A mesh video's HLS rendition is its best source, also when it is the flat view of a VR180 video
+  const hasPreferredVrSource = source => source?.vrProjection === 'EQUIRECTANGULAR' ||
+    (source?.manifestMimeType === MANIFEST_TYPE_HLS && !source.vrProjection)
   if (cachedSource !== null && (!includeSubtitles || cachedSource.subtitlesIncluded) &&
-    (!preferVrHls || cachedSource.vrProjection === 'EQUIRECTANGULAR')) {
+    (!preferVrHls || hasPreferredVrSource(cachedSource))) {
     return cachedSource
   }
 
   if (cachedOnly) {
-    return !preferVrHls || cachedSource?.vrProjection === 'EQUIRECTANGULAR' ? cachedSource : null
+    return !preferVrHls || hasPreferredVrSource(cachedSource) ? cachedSource : null
   }
 
   let extractionError = null
@@ -1042,7 +1062,7 @@ async function loadYtDlpPlaybackSource(
       onDefaultClientsFallback?.()
     }
 
-    const info = await ytDlp.ytDlpGetPlaybackInfo(
+    let info = await ytDlp.ytDlpGetPlaybackInfo(
       videoId,
       useDefaultClients,
       // Try authenticated default clients before using the final attempt for
@@ -1066,6 +1086,9 @@ async function loadYtDlpPlaybackSource(
       extractionError = new Error(info.error)
       continue
     }
+
+    // VR180's mesh formats pack both eyes side by side, while the others are a flat view
+    if (vr180) info = { ...info, formats: info.formats.filter(format => !isMeshFormat(format)) }
 
     // A renderer probe can omit formats even when yt-dlp's metadata is complete.
     // Keep those sources out of the cache and eligible for playlist recovery.
@@ -1166,7 +1189,7 @@ async function loadYtDlpPlaybackSource(
     }
 
     const httpFormats = info.formats.filter(format => format.protocol === 'https' && format.url !== null)
-    preferVrHls ||= info.formats.some(format => isVideoFormat(format) && /\bmesh\b/i.test(format.formatNote ?? ''))
+    preferVrHls ||= info.formats.some(isMeshFormat)
     // YouTube's direct mesh streams need their embedded projection mesh to be
     // rendered correctly. Its HLS rendition is a panorama that Shaka can show
     // with the existing equirectangular VR renderer.
@@ -1214,10 +1237,13 @@ async function loadYtDlpPlaybackSource(
       }
     }
 
-    if (
-      info.hlsManifestUrl !== null &&
-      await probeYtDlpHlsManifest(info.hlsManifestUrl)
-    ) {
+    // The HLS rendition of VR180 videos is a flat view, not a panorama
+    const hlsKind = info.hlsManifestUrl === null
+      ? null
+      : usePanoramicHls
+        ? await probeVrHlsManifest(info.hlsManifestUrl)
+        : await probeYtDlpHlsManifest(info.hlsManifestUrl) ? 'flat' : null
+    if (hlsKind !== null) {
       const source = {
         manifestSrc: info.hlsManifestUrl,
         manifestMimeType: MANIFEST_TYPE_HLS,
@@ -1228,7 +1254,7 @@ async function loadYtDlpPlaybackSource(
         incomplete: info.incomplete === true || legacyProbeTimedOut,
         title: info.title,
         isLive,
-        vrProjection: usePanoramicHls ? 'EQUIRECTANGULAR' : null,
+        vrProjection: usePanoramicHls && hlsKind === 'panorama' ? 'EQUIRECTANGULAR' : null,
         duration: info.duration,
         storyboardSrc: info.storyboardVtt === null
           ? null
