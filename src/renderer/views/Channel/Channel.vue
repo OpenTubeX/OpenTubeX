@@ -517,7 +517,7 @@ const isFamilyFriendly = ref(false)
 watch([channelName, isLoading, locale], ([name, loading]) => {
   if (!loading) {
     setTabTitle(name || t('Channel.Channel Name Unavailable'))
-    if (name && resolvedChannelUrl?.id === id.value) reportLoadedPageTitle(`channel:${resolvedChannelUrl.url}`, name)
+    if (name && hasLoadedDetails.value && resolvedChannelUrl?.id === id.value) reportLoadedPageTitle(`channel:${resolvedChannelUrl.url}`, name)
   }
 })
 
