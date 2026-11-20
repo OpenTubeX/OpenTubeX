@@ -7131,6 +7131,7 @@ function registerMediaSessionHandlers() {
     play: (details = {}) => {
       const videoElement = video.value
       if (!videoElement) return
+      setFormatSwitchPaused(false)
       backgroundPlayRequested = details.allowBackground === true
       const playPromise = videoElement.play()
       playPromise.catch(() => {
@@ -7145,7 +7146,7 @@ function registerMediaSessionHandlers() {
       const wasPaused = videoElement.paused
       mediaSessionStopped = true
       initialAutoplayCanceled = true
-      if (pendingFormatSwitchState !== null) pendingFormatSwitchState.wasPaused = true
+      setFormatSwitchPaused(true)
       if (wasPaused) videoElement.autoplay = false
       videoElement.pause()
       if (seekingIsPossible.value && Number.isFinite(videoElement.duration)) {
@@ -13219,7 +13220,6 @@ watch(
     const switchState = pendingFormatSwitchState
     const {
       oldFormat: sourceFormat,
-      awaitingAutoplay,
       playbackPosition,
       useAutoQuality,
       audioBandwidth,
@@ -13321,7 +13321,7 @@ watch(
 
     pendingFormatSwitchState = null
     // A pause during the switch updates its state.
-    if (switchState.wasPaused || (awaitingAutoplay && initialAutoplayCanceled) || props.pauseForStreamRecovery) {
+    if (switchState.wasPaused || (switchState.awaitingAutoplay && initialAutoplayCanceled) || props.pauseForStreamRecovery) {
       video_.pause()
     } else {
       video_.play()
@@ -13600,8 +13600,7 @@ function isPaused() {
 
 function pause() {
   initialAutoplayCanceled = true
-  // A format switch otherwise resumes the playback it paused itself.
-  if (pendingFormatSwitchState !== null) pendingFormatSwitchState.wasPaused = true
+  setFormatSwitchPaused(true)
   const videoElement = video.value
   if (!videoElement) return
   const wasPaused = videoElement.paused
@@ -13611,7 +13610,19 @@ function pause() {
   if (wasPaused) handlePause()
 }
 
+/**
+ * Records a play or pause request while a format switch loads, as the switch
+ * otherwise restores the state from before it started.
+ * @param {boolean} paused
+ */
+function setFormatSwitchPaused(paused) {
+  if (pendingFormatSwitchState === null) return
+  pendingFormatSwitchState.wasPaused = paused
+  if (!paused) pendingFormatSwitchState.awaitingAutoplay = false
+}
+
 function play() {
+  setFormatSwitchPaused(false)
   return video.value.play()
 }
 

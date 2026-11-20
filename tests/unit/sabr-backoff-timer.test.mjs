@@ -75,7 +75,7 @@ function fixture() {
     progressivePlayback: { value: false },
     bufferingConfig: { value: {} },
   }
-  const methods = vm.runInNewContext(playbackLoadSource + '\n' + ['clearSabrBackoffTimer', 'startSabrBackoffTimer', 'handleEnded', 'pause', 'registerMediaSessionHandlers'].map(extract).join('\n') + '\n({ loadPlaybackSource, startSabrBackoffTimer, handleEnded, pause, registerMediaSessionHandlers })', context)
+  const methods = vm.runInNewContext(playbackLoadSource + '\n' + ['clearSabrBackoffTimer', 'startSabrBackoffTimer', 'handleEnded', 'pause', 'setFormatSwitchPaused', 'registerMediaSessionHandlers'].map(extract).join('\n') + '\n({ loadPlaybackSource, startSabrBackoffTimer, handleEnded, pause, registerMediaSessionHandlers })', context)
   return { ...methods, context, playbackStates, props: context.props, video, remaining, duration, intervals }
 }
 

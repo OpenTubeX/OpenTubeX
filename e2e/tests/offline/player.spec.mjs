@@ -483,7 +483,7 @@ test('seekbar dragging preserves paused and playing states', { tag: '@scale' }, 
   }
 })
 
-test('a pause during a format switch keeps playback paused after the switch', async ({ app, page }) => {
+test('play and pause requests during a format switch decide playback after the switch', async ({ app, page }) => {
   const video = await openDemoVideo({ app, page })
   const view = await watchViewHandle(page)
   await view.evaluate((view, url) => {
@@ -495,23 +495,28 @@ test('a pause during a format switch keeps playback paused after the switch', as
   await page.locator(`${activeTab} .ftVideoPlayer`).evaluate(element => {
     const player = element.ui.getControls().getPlayer()
     const unload = player.unload.bind(player)
-    const pending = new Promise(resolve => { window.finishSwitchUnload = resolve })
     player.unload = async (...args) => {
-      await pending
+      await new Promise(resolve => { window.finishSwitchUnload = resolve })
       return unload(...args)
     }
   })
-  try {
-    await view.evaluate(view => { view.activeFormat = 'audio' })
-    await expect.poll(() => view.evaluate(view => view.$refs.player.hasLoaded)).toBe(false)
-    // The media notification pauses through the player while the switch loads.
-    await view.evaluate(view => view.$refs.player.pause())
-    await page.evaluate(() => window.finishSwitchUnload())
+  // The media notification controls playback through the player while the switch loads.
+  for (const [format, requests] of [['audio', ['pause']], ['dash', ['pause', 'play']]]) {
+    await view.evaluate((view, format) => { view.activeFormat = format }, format)
+    await expect.poll(() => page.evaluate(() => typeof window.finishSwitchUnload)).toBe('function')
+    await view.evaluate((view, requests) => {
+      for (const request of requests) view.$refs.player[request]()
+    }, requests)
+    await page.evaluate(() => {
+      const finish = window.finishSwitchUnload
+      delete window.finishSwitchUnload
+      finish()
+    })
     await expect.poll(() => view.evaluate(view => view.$refs.player.hasLoaded)).toBe(true)
+    const paused = requests.at(-1) === 'pause'
+    if (!paused) await expect.poll(() => video.evaluate(element => !element.paused && element.currentTime > 0)).toBe(true)
     await page.waitForTimeout(500)
-    expect(await video.evaluate(element => element.paused)).toBe(true)
-  } finally {
-    await page.evaluate(() => window.finishSwitchUnload())
+    expect(await video.evaluate(element => element.paused)).toBe(paused)
   }
 })
 
