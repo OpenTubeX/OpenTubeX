@@ -71,6 +71,7 @@ function absoluteSeekFixture(props) {
     seekBarMouseDown: false,
     resumeAutoplayAfterSeek: false,
     initialAutoplayCanceled: false,
+    pendingFormatSwitchState: null,
     playCalls: 0,
     videoLayoutReady: { value: true },
     applyPendingPresentationModes() {},

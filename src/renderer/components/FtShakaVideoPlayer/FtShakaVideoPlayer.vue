@@ -7145,6 +7145,7 @@ function registerMediaSessionHandlers() {
       const wasPaused = videoElement.paused
       mediaSessionStopped = true
       initialAutoplayCanceled = true
+      if (pendingFormatSwitchState !== null) pendingFormatSwitchState.wasPaused = true
       if (wasPaused) videoElement.autoplay = false
       videoElement.pause()
       if (seekingIsPossible.value && Number.isFinite(videoElement.duration)) {
@@ -13215,9 +13216,9 @@ watch(
       pendingFormatSwitchState.playbackPosition = 0
     }
 
+    const switchState = pendingFormatSwitchState
     const {
       oldFormat: sourceFormat,
-      wasPaused,
       awaitingAutoplay,
       playbackPosition,
       useAutoQuality,
@@ -13319,7 +13320,8 @@ watch(
     }
 
     pendingFormatSwitchState = null
-    if (wasPaused || (awaitingAutoplay && initialAutoplayCanceled) || props.pauseForStreamRecovery) {
+    // A pause during the switch updates its state.
+    if (switchState.wasPaused || (awaitingAutoplay && initialAutoplayCanceled) || props.pauseForStreamRecovery) {
       video_.pause()
     } else {
       video_.play()
@@ -13598,6 +13600,8 @@ function isPaused() {
 
 function pause() {
   initialAutoplayCanceled = true
+  // A format switch otherwise resumes the playback it paused itself.
+  if (pendingFormatSwitchState !== null) pendingFormatSwitchState.wasPaused = true
   const videoElement = video.value
   if (!videoElement) return
   const wasPaused = videoElement.paused

@@ -1,6 +1,7 @@
 import { goTo, sel, setPlayerFullscreen, setWindowSize, test, expect } from '../../helpers/app.mjs'
 import { activeTab, expectDockedToBottomRight, findWatchComponent, openMockedVideo, waitForPlayback, openCaptionLanguages, openPlayerOptions } from '../../helpers/player.mjs'
-import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
+import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
+import { DEMO_MEDIA_URL } from '../../helpers/media.mjs'
 
 // These used to live in the network suite, where they only ran when YouTube
 // served both the watch page and a media stream. Everything they need is the
@@ -479,6 +480,38 @@ test('seekbar dragging preserves paused and playing states', { tag: '@scale' }, 
     await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(duration * 0.58)
     expect(await video.evaluate(element => element.currentTime)).toBeLessThan(duration * 0.7)
     expect(await video.evaluate(element => element.paused)).toBe(paused)
+  }
+})
+
+test('a pause during a format switch keeps playback paused after the switch', async ({ app, page }) => {
+  const video = await openDemoVideo({ app, page })
+  const view = await watchViewHandle(page)
+  await view.evaluate((view, url) => {
+    view.manifestSrc = url
+    view.manifestMimeType = 'video/webm'
+  }, DEMO_MEDIA_URL)
+  await expect.poll(() => view.evaluate(view => view.$refs.player.hasLoaded)).toBe(true)
+  await waitForPlayback(page)
+  await page.locator(`${activeTab} .ftVideoPlayer`).evaluate(element => {
+    const player = element.ui.getControls().getPlayer()
+    const unload = player.unload.bind(player)
+    const pending = new Promise(resolve => { window.finishSwitchUnload = resolve })
+    player.unload = async (...args) => {
+      await pending
+      return unload(...args)
+    }
+  })
+  try {
+    await view.evaluate(view => { view.activeFormat = 'audio' })
+    await expect.poll(() => view.evaluate(view => view.$refs.player.hasLoaded)).toBe(false)
+    // The media notification pauses through the player while the switch loads.
+    await view.evaluate(view => view.$refs.player.pause())
+    await page.evaluate(() => window.finishSwitchUnload())
+    await expect.poll(() => view.evaluate(view => view.$refs.player.hasLoaded)).toBe(true)
+    await page.waitForTimeout(500)
+    expect(await video.evaluate(element => element.paused)).toBe(true)
+  } finally {
+    await page.evaluate(() => window.finishSwitchUnload())
   }
 })
 
