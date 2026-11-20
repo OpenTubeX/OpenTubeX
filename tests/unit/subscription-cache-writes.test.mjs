@@ -248,7 +248,7 @@ for (const delayDatabaseReply of [false, true]) {
   })
 }
 
-test('a collaboration check is stored with its time, survives an uploads write started meanwhile, and stays scheduled after a reload', async () => {
+test('a collaboration check is stored with its time, survives uploads writes from this and other windows, and stays scheduled after a reload', async () => {
   const db = { subscriptionCache: new Datastore({ inMemoryOnly: true }) }
   const Cache = vm.runInNewContext(`${cacheSource}\nSubscriptionCache`, { db, ...feedState })
   const upload = { videoId: 'upload', isNewInSubscriptionFeed: false }
@@ -303,6 +303,13 @@ test('a collaboration check is stored with its time, survives an uploads write s
   const checkedAt = state.videoCache.channel.collaborationsCheckedAt
   assert.equal(typeof checkedAt, 'number')
   assert.equal(persisted.collaborationsCheckedAt, checkedAt)
+
+  // Another window that has not received the check yet stores its uploads
+  const otherWindow = { channelId: 'channel', field: 'videos', entries: [{ videoId: 'other-upload' }, upload], timestamp: new Date(2500) }
+  await Cache.updateFeeds([otherWindow])
+  const kept = ['other-upload', 'upload', 'collaboration']
+  assert.deepEqual((await db.subscriptionCache.findOneAsync({ _id: 'channel' })).videos.map(video => video.videoId), kept)
+  assert.deepEqual(otherWindow.entries.map(video => video.videoId), kept, 'the other windows are sent the stored collaborations')
 
   state.videoCache = {}
   await actions.grabAllSubscriptions({

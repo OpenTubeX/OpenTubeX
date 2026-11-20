@@ -11,7 +11,7 @@ import { mergeSearchHistoryEntries, resolveSearchHistoryEntry, sortSearchHistory
 import { createRecommendationStore } from '../recommendations'
 import { createIdQuery } from '../idQuery'
 import { MAX_SUBSCRIPTION_SEEN_VIDEOS, mergeSubscriptionSeenVideos, parseSubscriptionSeenVideos, nextSubscriptionSeenTimestamp } from '../../subscriptionSeenVideos'
-import { preserveSubscriptionSeenEntries, subscriptionFeedField } from '../../subscriptionFeedState'
+import { keepStoredSubscriptionCollaborations, preserveSubscriptionSeenEntries, subscriptionFeedField } from '../../subscriptionFeedState'
 import { mergeSubscriptionSeenPosts, parseSubscriptionSeenPosts } from '../../subscriptionSeenPosts'
 import { createRssFeedSeenMarks, mergeRssFeedSeenItems, parseRssFeedSeenItems } from '../../renderer/helpers/rssFeedSeenItems'
 import { mergeBackupHistoryRecord, mergeBackupPlaylist, mergeBackupProfile, mergeImportedProfile, mergeBackupWatchStatsAdjustment, mergeBackupWatchStatsRecord, validateBackupWatchStats } from '../../renderer/helpers/unifiedBackup'
@@ -1494,17 +1494,23 @@ class SubscriptionCache {
       const documents = await this._loadDocuments(channelIds)
       const changed = new Set()
       const applied = []
-      for (const { channelId, field, entries, timestamp, collaborationsCheckedAt } of updates) {
+      for (const update of updates) {
+        const { channelId, field, timestamp, collaborationsCheckedAt } = update
         const current = documents.get(channelId)
         const timestampField = `${field}Timestamp`
         if (new Date(current?.[timestampField]).getTime() > new Date(timestamp).getTime()) {
           applied.push(false)
           continue
         }
+        // Without a check time, the write keeps the stored collaborations.
+        // The update is changed too, so other windows receive them.
+        if (field === 'videos' && collaborationsCheckedAt === undefined) {
+          update.entries = keepStoredSubscriptionCollaborations(update.entries, current?.videos)
+        }
         documents.set(channelId, {
           ...current,
           _id: channelId,
-          [field]: preserveSubscriptionSeenEntries(entries, current?.[field], field === 'communityPosts' ? 'postId' : 'videoId'),
+          [field]: preserveSubscriptionSeenEntries(update.entries, current?.[field], field === 'communityPosts' ? 'postId' : 'videoId'),
           [timestampField]: timestamp,
           ...(collaborationsCheckedAt !== undefined ? { collaborationsCheckedAt } : {}),
         })

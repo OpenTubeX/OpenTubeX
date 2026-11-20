@@ -1,4 +1,4 @@
-import { preserveSubscriptionSeenEntries, subscriptionFeedField } from '../subscriptionFeedState'
+import { keepStoredSubscriptionCollaborations, preserveSubscriptionSeenEntries, subscriptionFeedField } from '../subscriptionFeedState'
 
 /**
  * Browser NeDB rewrites its entire append log for every channel update. Keep
@@ -118,11 +118,13 @@ export function createBrowserSubscriptionCache(loadLegacyRecords, name = 'opentu
   function updateFeed(channelId, entries, timestamp, field, collaborationsCheckedAt) {
     // Vue proxies cannot cross IndexedDB's structured-clone boundary. Snapshot
     // only this channel, as Electron's datastore IPC does for its payloads.
-    const snapshot = JSON.parse(JSON.stringify(entries))
+    let snapshot = JSON.parse(JSON.stringify(entries))
     const date = new Date(timestamp)
     return updateChannel(channelId, record => {
       const timestampField = `${field}Timestamp`
       if (new Date(record[timestampField]).getTime() > date.getTime()) return false
+      // Without a check time, the write keeps the stored collaborations
+      if (field === 'videos' && collaborationsCheckedAt === undefined) snapshot = keepStoredSubscriptionCollaborations(snapshot, record.videos)
       record[field] = preserveSubscriptionSeenEntries(snapshot, record[field], field === 'communityPosts' ? 'postId' : 'videoId')
       record[timestampField] = date
       if (collaborationsCheckedAt !== undefined) record.collaborationsCheckedAt = collaborationsCheckedAt

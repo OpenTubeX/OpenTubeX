@@ -6,7 +6,7 @@ import { MAIN_PROFILE_ID } from '../../../constants'
 import { toRaw } from 'vue'
 import { ensureSubscriptionFeedEntryState, ensureUpcomingSubscriptionFeedPublished, getUpcomingPremiereTimestamp, keepCachedSubscriptionCollaborations } from '../../helpers/subscription-entries'
 import { applySubscriptionSeenVideosToCache, applySubscriptionSeenPostsToCache } from '../../helpers/subscription-seen-videos'
-import { preserveSubscriptionSeenEntries } from '../../../subscriptionFeedState'
+import { keepStoredSubscriptionCollaborations, preserveSubscriptionSeenEntries } from '../../../subscriptionFeedState'
 import { getSubscriptionsForFeed } from '../../helpers/subscription-channels'
 import { updateVideoListAfterProcessing } from '../../helpers/subscriptions'
 import { forgetAndroidSubscriptionRefreshFingerprints } from '../../helpers/androidSubscriptionRefresh'
@@ -158,11 +158,14 @@ async function writeVideoCache({ commit, state, rootGetters }, { channelId, vide
     rootGetters.getHistoryCacheById
   )
   // Without the setting the collaborations are dropped, so turning it on
-  // again checks the channel soon
-  if (!include && previousCache?.collaborationsCheckedAt != null) collaborationsCheckedAt = null
+  // again checks the channel soon. A write without a check time keeps the
+  // stored collaborations instead.
+  if (!include) collaborationsCheckedAt = null
 
   try {
     if (await DBSubscriptionCacheHandlers.updateVideosByChannelId(channelId, videos, timestamp, collaborationsCheckedAt) === false) return false
+    // Including those another window stored meanwhile, as the datastore did
+    if (collaborationsCheckedAt === undefined) videos = keepStoredSubscriptionCollaborations(videos, state.videoCache[channelId]?.videos)
     commit('updateVideoCacheByChannel', { channelId, entries: videos, timestamp, collaborationsCheckedAt })
   } catch (errMessage) {
     console.error(errMessage)
