@@ -888,6 +888,12 @@ const customActions = {
   ),
 
   updatePinnedPlaylistIds: ({ commit, state }, update) => updateSharedSetting(commit, state, 'pinnedPlaylistIds', update),
+  reorderPinnedPlaylistIds: ({ dispatch }, orderedIds) => dispatch('updatePinnedPlaylistIds', ids => {
+    const idSet = new Set(ids)
+    const ordered = orderedIds.filter(id => idSet.has(id))
+    const orderedSet = new Set(ordered)
+    return [...ordered, ...ids.filter(id => !orderedSet.has(id))]
+  }),
   updateUserPlaylistsPinnedIds: ({ commit, state }, update) => updateSharedSetting(commit, state, 'userPlaylistsPinnedIds', update),
   // Takes the new groups (sync, imports) or a function that derives them from
   // the saved ones. Edits read the saved groups inside a lock all windows
@@ -925,6 +931,12 @@ const customActions = {
       Object.entries(saved).filter(([id]) => !unpinnedIds.includes(id))
     ))
   },
+  reorderPinnedChannels: ({ dispatch }, orderedIds) => dispatch('updatePinnedChannels', channels => {
+    const channelById = new Map(channels.map(channel => [channel.id, channel]))
+    const ordered = orderedIds.map(id => channelById.get(id)).filter(Boolean)
+    const orderedSet = new Set(ordered.map(channel => channel.id))
+    return [...ordered, ...channels.filter(channel => !orderedSet.has(channel.id))]
+  }),
   refreshPinnedChannelMetadata: ({ commit, state }, { id, name, thumbnail }) => {
     const pin = state.pinnedChannels.find(channel => channel.id === id)
     if (!pin) return

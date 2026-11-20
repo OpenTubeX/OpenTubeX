@@ -299,6 +299,29 @@
   object-fit: cover;
 }
 
+.pinnedPlaylists,
+.pinnedChannels {
+  --reorder-row-color: var(--side-nav-color);
+}
+
+:is(.pinnedPlaylists, .pinnedChannels) .navChannel,
+:is(.pinnedPlaylists, .pinnedChannels) .navChannel img {
+  -webkit-user-drag: none;
+}
+
+:is(.pinnedPlaylists, .pinnedChannels) .navChannel.dragging {
+  cursor: grabbing;
+}
+
+.reorderStatus {
+  block-size: 1px;
+  clip-path: inset(50%);
+  inline-size: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+}
+
 .channelThumbnail.playlistThumbnail.blur {
   clip-path: inset(0 round var(--shape-corner-small));
   filter: blur(5px) var(--content-filter,);
