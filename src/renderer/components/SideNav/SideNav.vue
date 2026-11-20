@@ -232,7 +232,8 @@ import { createMobileNavigationScroll, mobileNavigationMinimizePreview } from '.
 import { softwareKeyboardOpen } from '../../helpers/phoneViewport'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { sortSubscribedChannels } from '../../helpers/subscription-groups'
-import { droppedIndex, useGridReorder } from '../../composables/useGridReorder'
+import { useGridReorder } from '../../composables/useGridReorder'
+import { moveItemToRenderedOrder } from '../../../orderedItems'
 
 const { locale, t } = useI18n()
 const appKeyboardShortcuts = computed(() => getConfiguredKeyboardShortcuts(
@@ -377,20 +378,16 @@ function createPinReorder({ rendered, getId, update }) {
    * @param {string[]} order
    */
   async function move(id, order) {
-    const before = rendered.value.findIndex(item => item.id === id)
+    // The edit runs again on the saved value, where another window's edit can reject the move.
+    let moved = false
     const saved = await update(items => {
-      const ids = items.map(getId)
-      const from = ids.indexOf(id)
-      const to = droppedIndex(ids, id, order)
-      if (from === -1 || to === -1 || to === from) return items
-      const moved = items.toSpliced(from, 1)
-      moved.splice(to, 0, items[from])
-      return moved
+      const result = moveItemToRenderedOrder(items, getId, id, order)
+      moved = result !== items
+      return result
     })
-    // Announce the saved order, as another window's edit can move or reject the pin.
     const items = rendered.value
     const position = items.findIndex(item => item.id === id)
-    if (!saved || position === -1 || position === before) return
+    if (!saved || !moved || position === -1) return
     reorderStatus.value = t('Home Page.Section moved', {
       section: items[position].label,
       position: position + 1,

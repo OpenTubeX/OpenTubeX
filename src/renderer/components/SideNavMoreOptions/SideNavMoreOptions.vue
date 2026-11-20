@@ -263,7 +263,11 @@ const { onPointerDown: startPinDrag } = useGridReorder({
   itemSelector: '.pinnedRow',
   handleSelector: '.pinnedGrip',
   getId: item => item.dataset.pinnedId,
-  commit: (id, order) => emit('move-pinned', pinnedGroups.value.find(group => group.items.some(item => item.id === id)).id, id, order),
+  commit: (id, order) => {
+    // Another window can unpin the item while it settles.
+    const group = pinnedGroups.value.find(group => group.items.some(item => item.id === id))
+    if (group) emit('move-pinned', group.id, id, order)
+  },
 })
 
 /**

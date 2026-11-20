@@ -3,6 +3,8 @@ import { nextTick, onBeforeUnmount, ref } from 'vue'
 import { lightHaptic } from '../helpers/mobileHaptics.js'
 import { computeReorderOffsets } from '../helpers/reorderOffsets'
 
+export { droppedIndex } from '../../orderedItems'
+
 const DRAG_THRESHOLD = 4
 // Touch picks up clickable handles after a still hold, like the tablet tab strip.
 const TOUCH_HOLD_DELAY = 400
@@ -300,13 +302,17 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit, cl
     applyOffsets(null)
     await Promise.allSettled(active.items.flatMap(element => element.getAnimations().map(animation => animation.finished)))
     if (session !== active) return
-    if (active.targetIndex !== active.sourceIndex) {
-      commit(active.ids[active.sourceIndex], proposedOrder())
-      await nextTick()
+    try {
+      if (active.targetIndex !== active.sourceIndex) {
+        commit(active.ids[active.sourceIndex], proposedOrder())
+        await nextTick()
+      }
+    } finally {
+      // The cards already show the new order, so clearing their offsets after
+      // the DOM update changes nothing on screen. A failed commit must not
+      // leave the drag session behind either.
+      finish()
     }
-    // The cards already show the new order, so clearing their offsets after
-    // the DOM update changes nothing on screen.
-    finish()
   }
 
   /** @param {KeyboardEvent} event */
@@ -369,22 +375,6 @@ export function useGridReorder({ itemSelector, handleSelector, getId, commit, cl
   onBeforeUnmount(finish)
 
   return { draggedId, onPointerDown, onTouchMove }
-}
-
-/**
- * Where a dropped item goes in the full list, which can hold items the list
- * does not render: right after the item rendered before it, or right before
- * the one rendered after it when it was dropped first.
- * @param {string[]} ids The full list's order
- * @param {string} id
- * @param {string[]} order The rendered items' new order
- * @returns {number} The item's new index, or -1 when its neighbors are missing
- */
-export function droppedIndex(ids, id, order) {
-  const rest = ids.filter(other => other !== id)
-  const position = order.indexOf(id)
-  const index = position > 0 ? rest.indexOf(order[position - 1]) + 1 : rest.indexOf(order[1])
-  return position > 0 && index === 0 ? -1 : index
 }
 
 /**
