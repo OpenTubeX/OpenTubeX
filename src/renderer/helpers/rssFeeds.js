@@ -12,9 +12,10 @@ import { unwatchExternalMediaMarkedUnseen } from './externalMediaHistory'
 import { resolveYtDlpCreatorAvatarUrl } from '../../main/ytDlpCreatorAvatar'
 import { holdAndroidBackgroundWork } from './androidBackgroundSync.js'
 import { parsePodcastDuration } from './podcasts.js'
+import { createFeedCacheMirror } from './feedCacheStore.js'
+import { RSS_FEED_CACHE_PREFIX } from '../../feedCache.js'
 
 const FETCH_TIMEOUT_MS = 15_000
-const MAX_ITEMS_PER_FEED = 50
 
 /**
  * @typedef {{ url: string, title: string, avatar?: string }} RssFeed
@@ -281,7 +282,7 @@ export function parseRssFeed(source, feedUrl, baseUrl = feedUrl) {
   items.sort(compareFeedItems)
   return {
     title,
-    items: items.slice(0, MAX_ITEMS_PER_FEED),
+    items,
     image,
     isRssHub: childText(channel, ['generator']).startsWith('RSSHub')
   }
@@ -325,10 +326,8 @@ export async function fetchRssFeed(url, signal) {
   return parseRssFeed(await response.text(), url, response.url || url)
 }
 
-const ITEMS_STORAGE_KEY = 'rssFeedItems'
 const NEXT_AUTO_REFRESH_STORAGE_KEY = 'rssFeedsNextAutoRefresh'
 const LAST_REFRESH_STORAGE_KEY = 'rssFeedsLastRefresh'
-const SEEN_HISTORY_STORAGE_KEY = 'rssFeedSeenHistory'
 const MAX_SEEN_HISTORY_PER_FEED = 500
 
 /**
@@ -336,20 +335,6 @@ const MAX_SEEN_HISTORY_PER_FEED = 500
  */
 function loadRssFeedSeenMarks() {
   return toRssFeedSeenMarks(store.getters.getRssFeedSeenItems)
-}
-
-/**
- * The last loaded items, so that they show right away after a restart and
- * stay when their feed fails to refresh.
- * @returns {RssFeedItem[]}
- */
-function loadStoredItems() {
-  try {
-    const items = JSON.parse(localStorage.getItem(ITEMS_STORAGE_KEY) ?? '[]')
-    return Array.isArray(items) ? applySeenMarks(items, loadRssFeedSeenMarks()) : []
-  } catch {
-    return []
-  }
 }
 
 /**
@@ -370,33 +355,97 @@ function applySeenMarks(items, marks) {
 }
 
 /**
- * @param {RssFeedItem[]} items
+ * The cache keeps a document for each feed with its last loaded items, so that
+ * they show right away after a restart and stay when their feed fails to
+ * refresh, and its seen history, see `seenHistory`.
+ * @typedef {{ items: RssFeedItem[], seen?: string[] }} RssFeedCacheDocument
  */
-function setRssFeedItems(items) {
-  rssFeedItems.value = items
+const feedCache = createFeedCacheMirror(RSS_FEED_CACHE_PREFIX, (changes) => {
+  if (changes === null) {
+    // The cache was cleared, so every feed loads again
+    rssFeedItems.value = []
+    seenHistory = new Map()
+    refreshedFeedUrls = new Set()
+  } else {
+    applyCachedFeeds(/** @type {Map<string, RssFeedCacheDocument | null>} */ (changes))
+  }
+})
+
+/**
+ * Takes over the cached feeds that loaded or that other windows changed.
+ * @param {Map<string, RssFeedCacheDocument | null>} documents by feed URL, `null` for removed feeds
+ */
+function applyCachedFeeds(documents) {
+  const items = rssFeedItems.value.filter(item => !documents.has(item.feedUrl))
+  const history = new Map([...seenHistory].filter(([url]) => !documents.has(url)))
+  for (const [url, document] of documents) {
+    if (Array.isArray(document?.items)) items.push(...document.items)
+    if (Array.isArray(document?.seen)) history.set(url, document.seen)
+  }
+  rssFeedItems.value = applySeenMarks(items.sort(compareFeedItems), loadRssFeedSeenMarks())
+  seenHistory = history
+}
+
+/**
+ * Earlier versions kept the cache in the local storage.
+ * @returns {Map<string, RssFeedCacheDocument> | null}
+ */
+function takeLocalStorageCache() {
+  const itemsKey = 'rssFeedItems'
+  const historyKey = 'rssFeedSeenHistory'
   try {
-    localStorage.setItem(ITEMS_STORAGE_KEY, JSON.stringify(items))
-  } catch (error) {
-    console.error('Failed to cache the RSS feed items', error)
+    if (localStorage.getItem(itemsKey) === null && localStorage.getItem(historyKey) === null) return null
+    const items = JSON.parse(localStorage.getItem(itemsKey) ?? '[]')
+    const history = JSON.parse(localStorage.getItem(historyKey) ?? '{}')
+    /** @type {Map<string, RssFeedCacheDocument>} */
+    const documents = new Map()
+    for (const item of Array.isArray(items) ? items : []) {
+      if (typeof item?.feedUrl !== 'string') continue
+      if (!documents.has(item.feedUrl)) documents.set(item.feedUrl, { items: [] })
+      documents.get(item.feedUrl).items.push(item)
+    }
+    for (const [url, ids] of Object.entries(history !== null && typeof history === 'object' ? history : {})) {
+      if (Array.isArray(ids)) documents.set(url, { items: documents.get(url)?.items ?? [], seen: ids })
+    }
+    return documents
+  } catch {
+    return new Map()
+  } finally {
+    localStorage.removeItem(itemsKey)
+    localStorage.removeItem(historyKey)
   }
 }
 
 /**
- * The IDs of the items that weren't new in each feed that loaded before,
- * newest first. Unlike the cached items, they outlast items that leave their
- * feed, so that the items keep their state when they come back. A feed that
- * loaded empty, such as a live stream feed, has no IDs, so that its first item
- * still becomes new.
- * @returns {Map<string, string[]>}
+ * Resolves once the cached items and seen history loaded. Before, a refresh
+ * would take every feed for new.
  */
-function loadSeenHistory() {
-  try {
-    const history = JSON.parse(localStorage.getItem(SEEN_HISTORY_STORAGE_KEY) ?? '{}')
-    if (history === null || typeof history !== 'object' || Array.isArray(history)) return new Map()
-    return new Map(Object.entries(history).filter(([, ids]) => Array.isArray(ids)))
-  } catch {
-    return new Map()
-  }
+export const rssFeedCacheLoaded = feedCache.loaded.then((documents) => {
+  const migrated = documents.size === 0 ? takeLocalStorageCache() : null
+  applyCachedFeeds(/** @type {Map<string, RssFeedCacheDocument>} */ (migrated ?? documents))
+  if (migrated) saveRssFeedCache()
+})
+
+/** Writes the documents of the feeds that changed */
+function saveRssFeedCache() {
+  return feedCache.save(() => {
+    /** @type {Map<string, RssFeedCacheDocument>} */
+    const documents = new Map()
+    for (const item of rssFeedItems.value) {
+      if (!documents.has(item.feedUrl)) documents.set(item.feedUrl, { items: [] })
+      documents.get(item.feedUrl).items.push(item)
+    }
+    for (const [url, seen] of seenHistory) documents.set(url, { items: documents.get(url)?.items ?? [], seen })
+    return documents
+  })
+}
+
+/**
+ * @param {RssFeedItem[]} items
+ */
+function setRssFeedItems(items) {
+  rssFeedItems.value = items
+  return saveRssFeedCache()
 }
 
 /**
@@ -404,11 +453,7 @@ function loadSeenHistory() {
  */
 function setSeenHistory(history) {
   seenHistory = history
-  try {
-    localStorage.setItem(SEEN_HISTORY_STORAGE_KEY, JSON.stringify(Object.fromEntries(history)))
-  } catch (error) {
-    console.error('Failed to save the seen RSS feed history', error)
-  }
+  return saveRssFeedCache()
 }
 
 /**
@@ -421,10 +466,11 @@ function recordSeenHistory(history, feedUrl, items, previousItems) {
   // Items seen since the last refresh may have left the feed already
   const seenIds = new Set([...items, ...previousItems].filter(item => item.isNew !== true).map(item => item.id))
   const ids = new Set(items.map(item => item.id))
+  // The seen items of the feed all stay, however many it has
   history.set(feedUrl, [
     ...seenIds,
     ...(history.get(feedUrl) ?? []).filter(id => !seenIds.has(id) && !ids.has(id))
-  ].slice(0, MAX_SEEN_HISTORY_PER_FEED))
+  ].slice(0, Math.max(MAX_SEEN_HISTORY_PER_FEED, seenIds.size)))
 }
 
 /**
@@ -472,7 +518,8 @@ export function getRssFeedsAutoRefreshInterval() {
   return Math.max(Number.parseInt(store.getters.getRssFeedsAutoRefreshInterval, 10) || 0, 0)
 }
 
-export const rssFeedItems = shallowRef(loadStoredItems())
+/** @type {import('vue').ShallowRef<RssFeedItem[]>} */
+export const rssFeedItems = shallowRef([])
 /** URLs of the feeds that failed in the last refresh */
 export const rssFeedErrors = shallowRef(/** @type {string[]} */ ([]))
 /** Whether the user closed the banner for the current failed feeds */
@@ -489,7 +536,15 @@ export const rssFeedsRefreshing = computed(() => refreshingHere.value || otherWi
 export const rssFeedsNextAutoRefresh = shallowRef(loadRssFeedsNextAutoRefresh())
 /** The feeds that the cached items belong to */
 let refreshedFeedUrls = new Set()
-let seenHistory = loadSeenHistory()
+/**
+ * The IDs of the items that weren't new in each feed that loaded before,
+ * newest first. Unlike the cached items, they outlast items that leave their
+ * feed, so that the items keep their state when they come back. A feed that
+ * loaded empty, such as a live stream feed, has no IDs, so that its first item
+ * still becomes new.
+ * @type {Map<string, string[]>}
+ */
+let seenHistory = new Map()
 let activeRefresh = null
 /** Names this window's running refresh to the others */
 let activeRefreshLockName = null
@@ -513,10 +568,8 @@ function trackOtherWindowRefresh(lockName) {
 }
 
 if (typeof window !== 'undefined') {
-  // Other windows refresh the feeds and mark their items as seen too
+  // Other windows refresh the feeds too
   window.addEventListener('storage', (event) => {
-    if (event.key === null || event.key === ITEMS_STORAGE_KEY) rssFeedItems.value = loadStoredItems()
-    if (event.key === null || event.key === SEEN_HISTORY_STORAGE_KEY) seenHistory = loadSeenHistory()
     if (event.key === null || event.key === NEXT_AUTO_REFRESH_STORAGE_KEY) rssFeedsNextAutoRefresh.value = loadRssFeedsNextAutoRefresh()
     if (event.key === null || event.key === LAST_REFRESH_STORAGE_KEY) rssFeedsLastRefresh.value = loadStoredTimestamp(LAST_REFRESH_STORAGE_KEY)
   })
@@ -696,17 +749,20 @@ export async function updateMissingRssFeedAvatars(results) {
  * feed doesn't reload the others.
  * @param {RssFeed} feed
  * @param {{ items: RssFeedItem[], image: string | null, isRssHub: boolean }} result
+ * @returns {Promise<void>} once the items are cached
  */
-export function addLoadedRssFeed(feed, result) {
+export async function addLoadedRssFeed(feed, result) {
+  await rssFeedCacheLoaded
   const previousItems = rssFeedItems.value.filter(item => item.feedUrl === feed.url)
   const items = reconcileNewItems(feed.url, result.items, previousItems)
   setRssFeedItems([...rssFeedItems.value.filter(item => item.feedUrl !== feed.url), ...items].sort(compareFeedItems))
   const history = new Map(seenHistory)
   recordSeenHistory(history, feed.url, items, previousItems)
-  setSeenHistory(history)
+  const saved = setSeenHistory(history)
   refreshedFeedUrls.add(feed.url)
   loadedDuringRefresh.add(feed.url)
   setRssFeedErrors(rssFeedErrors.value.filter(url => url !== feed.url))
+  await saved
 }
 
 /**
@@ -728,7 +784,7 @@ export async function retryRssFeed(feed) {
   const releaseBackgroundHold = holdAndroidBackgroundWork()
   try {
     const result = await fetchRssFeed(feed.url)
-    addLoadedRssFeed(feed, result)
+    await addLoadedRssFeed(feed, result)
     updateMissingRssFeedAvatars([[feed, result]])
   } finally {
     releaseBackgroundHold()
@@ -777,6 +833,7 @@ export async function refreshRssFeeds(feeds, { automatic = false, cachedUrls = n
     const results = await Promise.allSettled(fetchedFeeds.map(feed => fetchRssFeed(feed.url, controller.signal).finally(() => {
       if (!controller.signal.aborted) progress.update({ percentage: (++settledCount / fetchedFeeds.length) * 100 })
     })))
+    await rssFeedCacheLoaded
     if (controller.signal.aborted) return
 
     // Feeds added or retried while this refresh ran keep their own, newer result,
@@ -812,11 +869,13 @@ export async function refreshRssFeeds(feeds, { automatic = false, cachedUrls = n
     const feedUrls = new Set(feeds.map(feed => feed.url))
     const history = new Map([...seenHistory].filter(([url]) => feedUrls.has(url) || loadedUrls.has(url)))
     for (const [url, items] of refreshedItems) recordSeenHistory(history, url, items, previousItems.filter(item => item.feedUrl === url))
-    setSeenHistory(history)
+    const saved = setSeenHistory(history)
     updateMissingRssFeedAvatars(fetchedFeeds.flatMap((feed, index) => {
       const result = results[index]
       return result.status === 'fulfilled' ? [[feed, result.value]] : []
     }))
+    // A hidden Android app keeps running until the items are written
+    await saved
   } finally {
     releaseBackgroundHold()
     finish()

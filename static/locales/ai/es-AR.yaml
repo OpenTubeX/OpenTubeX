@@ -226,6 +226,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube no proporciona fuentes RSS para las publicaciones. Desactivá el ajuste "{rssSetting}" para ver las publicaciones o activá el ajuste "{hideSetting}" para ocultar esta pestaña.
   RSS Feeds:
+    Load More Items: Cargar más elementos
     Refreshing: Actualizando los feeds RSS
     Tab: RSS
     Followed Feeds: Feeds RSS seguidos

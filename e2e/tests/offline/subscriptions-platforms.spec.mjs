@@ -9,11 +9,23 @@ import { SYNC_KEY, SYNC_SALT, mockSyncServer, syncWithSyncServer } from '../../h
 import { encryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
 import { externalHistoryEntry } from '../../helpers/external-media-history.mjs'
 import { DEFAULT_NAVIGATION_ITEMS } from '../../../src/navigationItems.js'
+import { DBActions } from '../../../src/constants.js'
 
 const THUMBNAIL_PATH = fileURLToPath(new URL('../../fixtures/images/opentubex-playlist.jpg', import.meta.url))
 const AVATAR = 'https://twitch.example.test/avatar.jpg'
 const CHANNEL = { id: '1001', login: 'streamer', name: 'Streamer', avatar: AVATAR }
 const OTHER_CHANNEL = { id: '1002', login: 'other', name: 'Other', avatar: AVATAR }
+
+/**
+ * The documents of the followed channels in the feed cache
+ * @param {import('@playwright/test').Page} page
+ */
+function cachedChannels(page) {
+  return page.evaluate(async findAction => (await window.ftElectron.dbFeedCache(findAction))
+    .map(text => JSON.parse(text))
+    .filter(doc => doc._id.startsWith('platform:')), DBActions.GENERAL.FIND)
+}
+
 /**
  * @param {typeof CHANNEL} channel
  */
@@ -265,11 +277,7 @@ test.describe('Channels on other platforms', () => {
       expect(await page.evaluate(() => window.$store.getters.getFollowedChannels)).toEqual([followed(OTHER_CHANNEL)])
       // Its items and history are forgotten as soon as the setting changes, as for
       // channels unfollowed through sync, so following it again starts over
-      await expect.poll(() => page.evaluate((key) => {
-        const feed = JSON.parse(localStorage.getItem('platformFeed'))
-        const items = [...feed.live, ...feed.videos, ...feed.clips].filter(item => `${item.platform}:${item.channelId}` === key)
-        return { items: items.length, cached: feed.channelKeys.includes(key), history: key in JSON.parse(localStorage.getItem('platformFeedHistory') ?? '{}') }
-      }, `twitch:${CHANNEL.id}`)).toEqual({ items: 0, cached: false, history: false })
+      await expect.poll(async () => (await cachedChannels(page)).map(doc => doc._id)).not.toContain(`platform:twitch:${CHANNEL.id}`)
 
       await page.locator(sel.backButton).click()
       await expect(titles).toHaveText(['Other newest VOD', 'Other older VOD'])
@@ -291,6 +299,33 @@ test.describe('Channels on other platforms', () => {
         return { path, query }
       })).toEqual({ path: '/external-channel', query: { platform: 'twitch', id: OTHER_CHANNEL.id } })
       await expect(page.locator('.channelHeader .channelName')).toHaveText('Renamed')
+    })
+
+    test('takes over the items and history that earlier versions cached', async ({ page }) => {
+      const requests = await mockTwitch(page, { [CHANNEL.id]: twitchUser(CHANNEL) })
+      const key = `twitch:${CHANNEL.id}`
+      // Earlier versions kept them in the local storage
+      await page.evaluate(({ key, channelId, published }) => {
+        localStorage.setItem('platformFeed', JSON.stringify({
+          live: [],
+          videos: [{ platform: 'twitch', id: '99', url: 'https://www.twitch.tv/videos/99', title: 'Cached VOD', author: 'Streamer', channelId, thumbnail: '', published }],
+          clips: [],
+          channelKeys: [key]
+        }))
+        localStorage.setItem('platformFeedHistory', JSON.stringify({ [key]: ['99'] }))
+        localStorage.setItem('platformFeedLastRefresh', String(published))
+      }, { key, channelId: CHANNEL.id, published: now })
+      await page.reload()
+      await goTo(page, 'subscriptions')
+      await page.locator('[data-platforms-tab]').click()
+
+      // The cached items cover the followed channel, so it doesn't load
+      await expect(page.locator('#subscriptionsPanel [data-platform-section="videos"] .h3Title')).toHaveText(['Cached VOD'])
+      expect(requests).toEqual([])
+      await expect.poll(async () => (await cachedChannels(page)).map(({ _id, loaded, history }) => ({ _id, loaded, history })))
+        .toEqual([{ _id: `platform:${key}`, loaded: true, history: ['99'] }])
+      expect(await page.evaluate(() => [localStorage.getItem('platformFeed'), localStorage.getItem('platformFeedHistory')]))
+        .toEqual([null, null])
     })
 
     test('lists new videos and live streams in the New feed until they are seen', async ({ page }) => {
@@ -324,7 +359,7 @@ test.describe('Channels on other platforms', () => {
       await page.locator('[data-platforms-tab]').click()
       await page.getByRole('button', { name: /Refresh Platforms/ }).click()
       await expect(videos.first()).toHaveText('Recording of Back live')
-      expect(await page.evaluate(() => JSON.parse(localStorage.getItem('platformFeed')).videos.filter(item => item.isNew).length)).toBe(0)
+      await expect.poll(async () => (await cachedChannels(page)).flatMap(doc => doc.videos).filter(item => item.isNew)).toEqual([])
 
       // Refreshing all feeds covers other platforms too, from any tab of the tabbed New feed
       await page.evaluate(() => window.$store.dispatch('updateNewSubscriptionFeedView', 'tabbed'))
@@ -454,7 +489,7 @@ test.describe('Channels on other platforms', () => {
       const liveEntries = () => page.evaluate(async () => (await window.ftElectron.notificationHistory.list())
         .filter(entry => entry.kind === 'live')
         .map(({ title, body, path, query }) => ({ title, body, path, query })))
-      const cachedLiveStreams = () => page.evaluate(() => JSON.parse(localStorage.getItem('platformFeed') ?? 'null')?.live.map(item => item.id) ?? [])
+      const cachedLiveStreams = async () => (await cachedChannels(page)).flatMap(doc => doc.live).map(item => item.id)
       const shown = () => app.electronApp.evaluate(() => globalThis.shownNotifications)
 
       await page.evaluate(() => window.$store.dispatch('updateTwitchLiveNotifications', true))

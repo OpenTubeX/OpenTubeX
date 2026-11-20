@@ -8,7 +8,7 @@ globalThis.__datastoreStartupCalls = calls
 const datastoreNames = [
   'settings', 'history', 'watchStats', 'recommendations', 'profiles',
   'playlists', 'searchHistory', 'subscriptionCache', 'tabSession',
-  'liveReminders', 'videoMetadataCache'
+  'liveReminders', 'videoMetadataCache', 'feedCache'
 ]
 const datastoreModule = datastoreNames.map(name =>
   `export const ${name} = {

@@ -1645,6 +1645,42 @@ class SubscriptionCache {
   }
 }
 
+/**
+ * The items of the followed RSS feeds and channels on other platforms, one
+ * document per feed or channel, with the IDs that tell which items are new.
+ * Windows keep them in memory and write the documents that changed.
+ */
+class FeedCache {
+  static find() {
+    return db.feedCache.findAsync({})
+  }
+
+  // ******************** //
+  // Unique Electron main process handlers
+  /** Every document as its stored JSON text, see `SubscriptionCache._findSerialized` */
+  static _findSerialized() {
+    return db.feedCache.findSerializedAsync()
+  }
+  // ******************** //
+
+  /**
+   * @param {{ docs: object[], removed: string[] }} change documents to replace
+   * or insert, and the IDs of documents to remove
+   */
+  static async write({ docs, removed }) {
+    if (docs.length > 0) {
+      // NeDB, used by unit tests, has no bulk replace
+      if (typeof db.feedCache.replaceManyAsync === 'function') await db.feedCache.replaceManyAsync(docs)
+      else await Promise.all(docs.map(doc => db.feedCache.updateAsync({ _id: doc._id }, doc, { upsert: true })))
+    }
+    if (removed.length > 0) await db.feedCache.removeAsync({ _id: { $in: removed } }, { multi: true })
+  }
+
+  static deleteAll() {
+    return db.feedCache.removeAsync({}, { multi: true })
+  }
+}
+
 class TabSession {
   static async load(sessionId = 'session') {
     const doc = await db.tabSession.findOneAsync({ _id: sessionId })
@@ -1713,6 +1749,7 @@ function loadDeferredDatastores() {
     db.subscriptionCache.loadDatabaseAsync(),
     db.liveReminders.loadDatabaseAsync(),
     db.videoMetadataCache.loadDatabaseAsync(),
+    db.feedCache.loadDatabaseAsync(),
   ])
 }
 
@@ -1730,6 +1767,7 @@ function compactAllDatastores() {
     db.tabSession.compactDatafileAsync(),
     db.liveReminders.compactDatafileAsync(),
     db.videoMetadataCache.compactDatafileAsync(),
+    db.feedCache.compactDatafileAsync(),
   ])
 }
 
@@ -1742,6 +1780,7 @@ export {
   Playlists as playlists,
   SearchHistory as searchHistory,
   SubscriptionCache as subscriptionCache,
+  FeedCache as feedCache,
   TabSession as tabSession,
 
   loadDatastores,

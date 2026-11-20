@@ -28,6 +28,7 @@ const datastoreSyncChannels = new Map([
   [IpcChannels.DB_PLAYLISTS, IpcChannels.SYNC_PLAYLISTS],
   [IpcChannels.DB_SEARCH_HISTORY, IpcChannels.SYNC_SEARCH_HISTORY],
   [IpcChannels.DB_SUBSCRIPTION_CACHE, IpcChannels.SYNC_SUBSCRIPTION_CACHE],
+  [IpcChannels.DB_FEED_CACHE, IpcChannels.SYNC_FEED_CACHE],
 ])
 
 /**
@@ -1080,6 +1081,14 @@ export default {
   },
 
   /**
+   * @param {number} action
+   * @param {any} [data]
+   */
+  dbFeedCache: (action, data) => {
+    return requestDatastore(IpcChannels.DB_FEED_CACHE, action, data)
+  },
+
+  /**
    * @param {(route: string, tabId?: string) => void} handler
    * @returns {() => void}
    */
@@ -1495,6 +1504,13 @@ export default {
    */
   handleSyncSubscriptionCache: (handler) => {
     listenForSync(IpcChannels.SYNC_SUBSCRIPTION_CACHE, ({ event, data }) => handler(event, data))
+  },
+
+  /**
+   * @param {(event: number, data: any) => void} handler
+   */
+  handleSyncFeedCache: (handler) => {
+    listenForSync(IpcChannels.SYNC_FEED_CACHE, ({ event, data }) => handler(event, data))
   },
 
   // Tab management API

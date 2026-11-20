@@ -379,6 +379,7 @@ Subscriptions:
     Description: Add an RSS or Atom feed to follow creators from other platforms. {rssHub} instances provide feeds for many sites, such as Twitch.
     Empty Items: Your feeds currently do not have any items.
     No Feeds: You don't follow any RSS feeds yet.
+    Load More Items: Load more items
     RSSHub:
       Browse: Browse RSSHub
       Title: Add a feed from RSSHub

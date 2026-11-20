@@ -243,6 +243,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube neteikia įrašų RSS kanalų. Išjunkite nustatymą „{rssSetting}“, kad matytumėte įrašus, arba įjunkite nustatymą „{hideSetting}“, kad paslėptumėte šį skirtuką.
   RSS Feeds:
+    Load More Items: Įkelti daugiau įrašų
     Refreshing: Atnaujinami RSS sklaidos kanalai
     Tab: RSS
     Followed Feeds: Stebimi RSS sklaidos kanalai

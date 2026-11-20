@@ -225,6 +225,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube는 게시물용 RSS 피드를 제공하지 않습니다. 게시물을 보려면 "{rssSetting}" 설정을 끄거나 이 탭을 숨기려면 "{hideSetting}" 설정을 켜세요.
   RSS Feeds:
+    Load More Items: 항목 더 불러오기
     Refreshing: RSS 피드 새로고침 중
     Tab: RSS
     Followed Feeds: 팔로우 중인 RSS 피드

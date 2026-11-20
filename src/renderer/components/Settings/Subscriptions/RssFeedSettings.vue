@@ -221,6 +221,7 @@ import {
   refreshRssFeeds,
   retryRssFeed,
   RssFeedBrowserCheckError,
+  rssFeedCacheLoaded,
   rssFeedErrors,
   updateMissingRssFeedAvatars
 } from '../../../helpers/rssFeeds'
@@ -335,7 +336,7 @@ async function addFeed(text) {
     const result = await fetchRssFeed(url)
     const feed = { url, title: result.title }
     // Cached before saving, so that the RSS tab doesn't reload every feed for the new one
-    addLoadedRssFeed(feed, result)
+    await addLoadedRssFeed(feed, result)
     const added = followed => followed.some(({ url }) => url === feed.url) ? followed : [...followed, feed]
     if (await store.dispatch('updateFollowedRssFeeds', added) === false) {
       throw new Error('The feed could not be saved')
@@ -428,7 +429,10 @@ async function importOpml() {
   ]
   showToast({ message: messages.join(' '), icon: ['fas', addedCount > 0 ? 'check' : 'circle-exclamation'] })
   // Loads the new feeds, which also finds their covers
-  if (addedCount > 0) refreshRssFeeds(store.getters.getFollowedRssFeeds, { cachedUrls: getCachedRssFeedUrls() })
+  if (addedCount > 0) {
+    await rssFeedCacheLoaded
+    refreshRssFeeds(store.getters.getFollowedRssFeeds, { cachedUrls: getCachedRssFeedUrls() })
+  }
 }
 
 /** Writes the followed feeds as OPML, for example to move podcasts to a podcast app */

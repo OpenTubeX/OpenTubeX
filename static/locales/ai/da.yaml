@@ -213,6 +213,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube tilbyder ikke RSS-feeds til opslag. Deaktivér indstillingen "{rssSetting}" for at se opslag, eller aktivér indstillingen "{hideSetting}" for at skjule denne fane.
   RSS Feeds:
+    Load More Items: Indlæs flere elementer
     Refreshing: Opdaterer RSS-feeds
     Tab: RSS
     Followed Feeds: Fulgte RSS-feeds

@@ -2,7 +2,7 @@
 category: feature
 ---
 
-RSS feeds now handle podcasts. Find shows in the Apple Podcasts directory, import or export your feeds as OPML, and listen to episodes with their title and cover.
+RSS feeds now handle podcasts. Find shows in the Apple Podcasts directory, import or export your feeds as OPML, and listen to episodes with their title and cover. Feeds now show all their items, not only the latest 50.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/707a4303-bddf-4aa9-9589-f0a6213b4433">

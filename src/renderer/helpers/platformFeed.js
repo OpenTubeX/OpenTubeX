@@ -18,6 +18,8 @@ import { isRssFeedItemSeen, onRssFeedSeenItemsSynced, parseRssFeedSeenItems, toR
 import { unwatchExternalMediaMarkedUnseen } from './externalMediaHistory'
 import { supportsYtDlp } from './ytDlpCapabilities'
 import { forEachConcurrently } from './forEachConcurrently'
+import { createFeedCacheMirror } from './feedCacheStore.js'
+import { PLATFORM_FEED_CACHE_PREFIX } from '../../feedCache.js'
 import {
   findPlatformChannel,
   getPlatform,
@@ -44,12 +46,9 @@ import {
  * @typedef {{ enabled: boolean, channels: { id: string, login: string, name: string }[], title: string }} TwitchLiveConfiguration
  */
 
-const FEED_STORAGE_KEY = 'platformFeed'
 const LAST_REFRESH_STORAGE_KEY = 'platformFeedLastRefresh'
 const NEXT_AUTO_REFRESH_STORAGE_KEY = 'platformFeedNextAutoRefresh'
 const FILTER_STORAGE_KEY = 'platformFeedFilter'
-/** The items each channel had when it loaded before, so that later ones are new */
-const HISTORY_STORAGE_KEY = 'platformFeedHistory'
 const MAX_HISTORY_PER_CHANNEL = 300
 /** The streams of each channel at the last check, on mobile, where the app checks on its own */
 const KNOWN_STREAMS_STORAGE_KEY = 'twitchKnownStreams'
@@ -63,15 +62,6 @@ const LIVE_CHECK_INTERVAL_MS = 3 * 60_000
 const CHANNEL_CONCURRENCY = 4
 const PLATFORM_CONCURRENCY = 12
 const isAndroid = process.env.IS_CAPACITOR && !process.env.IS_IOS
-
-/** @returns {PlatformFeedCache} */
-function loadFeed() {
-  try {
-    const feed = JSON.parse(localStorage.getItem(FEED_STORAGE_KEY) ?? 'null')
-    if (['live', 'videos', 'clips', 'channelKeys'].every(key => Array.isArray(feed?.[key]))) return feed
-  } catch { }
-  return { live: [], videos: [], clips: [], channelKeys: [] }
-}
 
 /**
  * @param {string} key
@@ -97,7 +87,7 @@ export function loadPlatformFeedNextAutoRefresh() {
 }
 
 /** The cached items of the followed channels, so they show right away after a restart */
-export const platformFeed = shallowRef(loadFeed())
+export const platformFeed = shallowRef(/** @type {PlatformFeedCache} */ ({ live: [], videos: [], clips: [], channelKeys: [] }))
 export const platformFeedLastRefresh = shallowRef(loadLastRefresh())
 export const platformFeedRefreshing = shallowRef(false)
 /** The channels that failed in the last refresh, by key */
@@ -160,20 +150,131 @@ export function getPlatformFeedAutoRefreshInterval() {
   return Math.max(Number.parseInt(store.getters.getPlatformFeedAutoRefreshInterval, 10) || 0, 0)
 }
 
+/**
+ * The IDs of the items each channel had when it loaded before, so that later
+ * ones are new, by channel key
+ * @type {Record<string, string[]>}
+ */
+let channelHistory = {}
+
+/**
+ * The cache keeps a document for each channel with its items, whether they
+ * loaded, and its history.
+ * @typedef {{ live: PlatformItem[], videos: PlatformItem[], clips: PlatformItem[], loaded?: true, history?: string[] }} PlatformFeedCacheDocument
+ */
+const feedCache = createFeedCacheMirror(PLATFORM_FEED_CACHE_PREFIX, (changes) => {
+  if (changes === null) {
+    // The cache was cleared, so every channel loads again
+    platformFeed.value = { live: [], videos: [], clips: [], channelKeys: [] }
+    channelHistory = {}
+  } else {
+    applyCachedChannels(/** @type {Map<string, PlatformFeedCacheDocument | null>} */ (changes))
+  }
+})
+
+/**
+ * Takes over the cached channels that loaded or that other windows changed.
+ * @param {Map<string, PlatformFeedCacheDocument | null>} documents by channel key, `null` for removed channels
+ */
+function applyCachedChannels(documents) {
+  const current = platformFeed.value
+  const others = (/** @type {PlatformItem[]} */ items) => items.filter(item => !documents.has(itemChannelKey(item)))
+  const feed = {
+    live: others(current.live),
+    videos: others(current.videos),
+    clips: others(current.clips),
+    channelKeys: current.channelKeys.filter(key => !documents.has(key))
+  }
+  const nextHistory = Object.fromEntries(Object.entries(channelHistory).filter(([key]) => !documents.has(key)))
+  for (const [key, document] of documents) {
+    if (document === null) continue
+    for (const field of /** @type {const} */ (['live', 'videos', 'clips'])) {
+      if (Array.isArray(document[field])) feed[field].push(...document[field])
+    }
+    if (document.loaded === true) feed.channelKeys.push(key)
+    if (Array.isArray(document.history)) nextHistory[key] = document.history
+  }
+  sortLive(feed.live)
+  sortNewestFirst(feed.videos)
+  sortNewestFirst(feed.clips)
+  platformFeed.value = applySeenMarks(feed, toRssFeedSeenMarks(store.getters.getRssFeedSeenItems))
+  channelHistory = nextHistory
+}
+
+/**
+ * Earlier versions kept the cache in the local storage.
+ * @returns {Map<string, PlatformFeedCacheDocument> | null}
+ */
+function takeLocalStorageCache() {
+  const feedKey = 'platformFeed'
+  const historyKey = 'platformFeedHistory'
+  try {
+    if (localStorage.getItem(feedKey) === null && localStorage.getItem(historyKey) === null) return null
+    const feed = JSON.parse(localStorage.getItem(feedKey) ?? 'null')
+    const storedHistory = JSON.parse(localStorage.getItem(historyKey) ?? '{}')
+    const valid = ['live', 'videos', 'clips', 'channelKeys'].every(key => Array.isArray(feed?.[key]))
+    return toCacheDocuments(
+      valid ? feed : { live: [], videos: [], clips: [], channelKeys: [] },
+      storedHistory !== null && typeof storedHistory === 'object' && !Array.isArray(storedHistory) ? storedHistory : {}
+    )
+  } catch {
+    return new Map()
+  } finally {
+    localStorage.removeItem(feedKey)
+    localStorage.removeItem(historyKey)
+  }
+}
+
+/**
+ * @param {PlatformFeedCache} feed
+ * @param {Record<string, string[]>} historyByChannel
+ * @returns {Map<string, PlatformFeedCacheDocument>} by channel key
+ */
+function toCacheDocuments(feed, historyByChannel) {
+  /** @type {Map<string, PlatformFeedCacheDocument>} */
+  const documents = new Map()
+  const documentOf = (/** @type {string} */ key) => {
+    let document = documents.get(key)
+    if (!document) {
+      document = { live: [], videos: [], clips: [] }
+      documents.set(key, document)
+    }
+    return document
+  }
+  for (const field of /** @type {const} */ (['live', 'videos', 'clips'])) {
+    for (const item of feed[field]) documentOf(itemChannelKey(item))[field].push(item)
+  }
+  for (const key of feed.channelKeys) documentOf(key).loaded = true
+  for (const [key, ids] of Object.entries(historyByChannel)) {
+    if (Array.isArray(ids)) documentOf(key).history = ids
+  }
+  return documents
+}
+
+/**
+ * Resolves once the cached items and history loaded. Before, a refresh would
+ * take every channel for new.
+ */
+export const platformFeedCacheLoaded = feedCache.loaded.then((documents) => {
+  const migrated = documents.size === 0 ? takeLocalStorageCache() : null
+  applyCachedChannels(/** @type {Map<string, PlatformFeedCacheDocument>} */ (migrated ?? documents))
+  if (migrated) savePlatformFeedCache()
+})
+
+/** Writes the documents of the channels that changed */
+function savePlatformFeedCache() {
+  return feedCache.save(() => toCacheDocuments(platformFeed.value, channelHistory))
+}
+
 /** @param {PlatformFeedCache} feed */
 function setFeed(feed) {
   platformFeed.value = feed
-  try {
-    localStorage.setItem(FEED_STORAGE_KEY, JSON.stringify(feed))
-  } catch (error) {
-    console.error('Failed to cache the platform feed', error)
-  }
+  return savePlatformFeedCache()
 }
 
 if (typeof window !== 'undefined') {
   // Other windows refresh the feed too
   window.addEventListener('storage', (event) => {
-    if (event.key === null || event.key === FEED_STORAGE_KEY) platformFeed.value = loadFeed()
     if (event.key === null || event.key === LAST_REFRESH_STORAGE_KEY) platformFeedLastRefresh.value = loadLastRefresh()
     if (event.key === null || event.key === NEXT_AUTO_REFRESH_STORAGE_KEY) platformFeedNextAutoRefresh.value = loadPlatformFeedNextAutoRefresh()
   })
@@ -221,25 +322,6 @@ function withNew(item, isNew) {
   return copy
 }
 
-/** @returns {Record<string, string[]>} */
-function loadHistory() {
-  try {
-    const history = JSON.parse(localStorage.getItem(HISTORY_STORAGE_KEY) ?? '{}')
-    return history && typeof history === 'object' && !Array.isArray(history) ? history : {}
-  } catch {
-    return {}
-  }
-}
-
-/** @param {Record<string, string[]>} history */
-function saveHistory(history) {
-  try {
-    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history))
-  } catch (error) {
-    console.error('Failed to save the platform feed history', error)
-  }
-}
-
 /**
  * Live streams and uploads that appeared since their channel loaded before are
  * new until they are seen. The first load of a channel has nothing to compare
@@ -249,7 +331,7 @@ function saveHistory(history) {
  * @returns {PlatformItem[]}
  */
 function reconcileNewItems(items, channelKeys) {
-  const history = loadHistory()
+  const history = { ...channelHistory }
   const marks = toRssFeedSeenMarks(store.getters.getRssFeedSeenItems)
   const current = platformFeed.value
   const wasNew = new Set([...current.live, ...current.videos].filter(item => item.isNew).map(getPlatformItemKey))
@@ -266,7 +348,8 @@ function reconcileNewItems(items, channelKeys) {
       .flatMap(item => item.archiveId ? [item.id, item.archiveId] : [item.id])
     history[channelKey] = [...new Set([...ids, ...history[channelKey] ?? []])].slice(0, MAX_HISTORY_PER_CHANNEL)
   }
-  saveHistory(history)
+  // Saved with the items
+  channelHistory = history
   return reconciled
 }
 
@@ -358,11 +441,12 @@ function sortLive(items) {
  * @param {Set<string>} channelKeys
  * @param {{ live: PlatformItem[], videos: PlatformItem[], clips: PlatformItem[] }} items the new items of these channels
  * @param {boolean} [loaded] whether the items loaded, or the channels were removed
+ * @returns {Promise<void>} once the items are cached
  */
 function replaceChannelItems(channelKeys, { live, videos, clips }, loaded = true) {
   const current = platformFeed.value
   const others = (/** @type {PlatformItem[]} */ items) => items.filter(item => !channelKeys.has(itemChannelKey(item)))
-  setFeed({
+  return setFeed({
     live: sortLive([...others(current.live), ...live]),
     videos: sortNewestFirst([...others(current.videos), ...videos]),
     clips: sortNewestFirst([...others(current.clips), ...clips]),
@@ -387,17 +471,18 @@ function splitLoadedItems(items, channelKeys) {
  * than the rest.
  * @param {PlatformItem[]} live the live streams of the followed Twitch channels
  */
-export function applyTwitchLiveStreams(live) {
+export async function applyTwitchLiveStreams(live) {
+  await platformFeedCacheLoaded
   const keys = new Set(getFollowedChannels().filter(channel => channel.platform === 'twitch').map(getPlatformChannelKey))
   // Channels that never loaded start comparing when their uploads load
-  const history = loadHistory()
+  const loadedKeys = [...keys].filter(key => Array.isArray(channelHistory[key]))
   const followedLive = live.filter(stream => keys.has(itemChannelKey(stream)))
   const current = platformFeed.value
-  setFeed({
+  await setFeed({
     ...current,
     live: sortLive([
       ...current.live.filter(item => item.platform !== 'twitch'),
-      ...reconcileNewItems(followedLive, [...keys].filter(key => Array.isArray(history[key])))
+      ...reconcileNewItems(followedLive, loadedKeys)
     ])
   })
 }
@@ -421,7 +506,8 @@ export function platformFeedNeedsRefresh() {
 /**
  * Loads the feed when its cached items don't cover the followed channels.
  */
-export function refreshPlatformFeedIfNeeded() {
+export async function refreshPlatformFeedIfNeeded() {
+  await platformFeedCacheLoaded
   if (!platformFeedRefreshing.value && platformFeedNeedsRefresh()) refreshPlatformFeed()
 }
 
@@ -528,6 +614,7 @@ export async function refreshPlatformFeed() {
         }
       }, limits)
     }))
+    await platformFeedCacheLoaded
     if (controller.signal.aborted) return
 
     refreshedHere = true
@@ -542,13 +629,15 @@ export async function refreshPlatformFeed() {
     const { live, videos } = splitLoadedItems(ofLoadedChannels(items), loadedKeys)
     // Uploads can be marked on another device before they load here
     unwatchItemsMarkedUnseen(videos, parseRssFeedSeenItems(store.getters.getRssFeedSeenItems))
-    replaceChannelItems(loaded, { live, videos, clips: ofLoadedChannels(clips) })
+    const saved = replaceChannelItems(loaded, { live, videos, clips: ofLoadedChannels(clips) })
     platformFeedFailedChannels.value = [...failed].filter(key => stillFollowed.has(key))
     platformFeedLastRefresh.value = Date.now()
     localStorage.setItem(LAST_REFRESH_STORAGE_KEY, String(platformFeedLastRefresh.value))
     const interval = getPlatformFeedAutoRefreshInterval()
     setPlatformFeedNextAutoRefresh(interval > 0 ? Date.now() + interval : null)
     await updateChannelDetails(details)
+    // A hidden Android app keeps running until the items are written
+    await saved
   } finally {
     releaseBackgroundHold()
     if (activeRefresh === controller) {
@@ -590,8 +679,10 @@ export async function followPlatformChannel(platformId, id) {
     // current items are where later ones are compared to. Without them, the
     // next refresh loads them.
     try {
-      const { live, videos } = splitLoadedItems(await loadChannelItems(platform, channel), [key])
-      replaceChannelItems(new Set([key]), { live, videos, clips: [] })
+      const items = await loadChannelItems(platform, channel)
+      await platformFeedCacheLoaded
+      const { live, videos } = splitLoadedItems(items, [key])
+      await replaceChannelItems(new Set([key]), { live, videos, clips: [] })
     } catch (error) {
       console.error('Failed to load the items of the followed channel', error)
     }
@@ -606,7 +697,7 @@ export async function followPlatformChannel(platformId, id) {
         : [...followed, followedChannel]) !== false
     } finally {
       // The channel isn't followed, so it keeps neither the items cached for it nor their history
-      if (!saved) forgetChannel(key)
+      if (!saved) await forgetChannel(key)
     }
     if (!saved) throw new Error('The channel could not be saved')
   } finally {
@@ -642,11 +733,11 @@ export async function unfollowPlatformChannel(channel) {
  * it again starts over.
  * @param {string} key
  */
-function forgetChannel(key) {
-  replaceChannelItems(new Set([key]), { live: [], videos: [], clips: [] }, false)
-  const history = loadHistory()
-  delete history[key]
-  saveHistory(history)
+async function forgetChannel(key) {
+  await platformFeedCacheLoaded
+  const { [key]: _, ...history } = channelHistory
+  channelHistory = history
+  return replaceChannelItems(new Set([key]), { live: [], videos: [], clips: [] }, false)
 }
 
 // Channels also get unfollowed in other windows and on other devices, whose
@@ -751,7 +842,7 @@ async function checkLiveStreams(configuration) {
   const generation = knownStreamsGeneration
   try {
     const { feed } = await fetchTwitchChannels(getPlatformFetch('twitch'), channelIds, { liveOnly: true })
-    applyTwitchLiveStreams(feed.live)
+    await applyTwitchLiveStreams(feed.live)
     if (generation !== knownStreamsGeneration) return
     let known = {}
     try {

@@ -1,7 +1,7 @@
 import { computed, watch } from 'vue'
 
 import store from '../store/index'
-import { getCachedRssFeedUrls, refreshRssFeeds, rssFeedItems } from '../helpers/rssFeeds'
+import { getCachedRssFeedUrls, refreshRssFeeds, rssFeedCacheLoaded, rssFeedItems } from '../helpers/rssFeeds'
 
 /**
  * The cached items of the followed RSS feeds. They load on first use, unless
@@ -18,7 +18,10 @@ export function useFollowedRssFeedItems(enabled = () => true) {
   // Removed feeds disappear right away, without waiting for the next refresh
   const items = computed(() => rssFeedItems.value.filter(item => feedUrls.value.has(item.feedUrl)))
 
-  watch(feeds, (value) => {
+  watch(feeds, async (value) => {
+    await rssFeedCacheLoaded
+    // The feeds changed meanwhile, and the watcher ran again for them
+    if (value !== feeds.value) return
     const cachedUrls = getCachedRssFeedUrls()
     if (value.some(feed => !cachedUrls.has(feed.url))) {
       // Feeds that never loaded, for example because they failed, don't reload the cached ones

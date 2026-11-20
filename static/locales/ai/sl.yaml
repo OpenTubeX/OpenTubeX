@@ -254,6 +254,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube ne zagotavlja virov RSS za objave. Izklopite nastavitev »{rssSetting}«, če želite videti objave, ali vklopite nastavitev »{hideSetting}«, če želite skriti ta zavihek.
   RSS Feeds:
+    Load More Items: Naloži več elementov
     Refreshing: Osveževanje virov RSS
     Tab: RSS
     Followed Feeds: Spremljani viri RSS

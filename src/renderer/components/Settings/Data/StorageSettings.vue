@@ -388,6 +388,7 @@ import {
   normalizeYtDlpPlaybackCacheMaxEntrySize
 } from '../../../../ytDlpPlaybackCacheSettings'
 import { clearAndroidCache, getAndroidStorageUsage } from '../../../helpers/androidStorage'
+import { clearFeedCache } from '../../../helpers/feedCacheStore'
 import { clearCapacitorTabImages } from '../../../tabs/capacitorTabPreviews'
 import { getStoredTabImagesSize } from '../../../tabs/capacitorTabImageStorage'
 import { formatBytes } from '../../../helpers/fileSize'
@@ -733,7 +734,10 @@ async function performCleanup(action) {
       break
     }
     case 'subscription-cache':
-      await requireCleanupSuccess(store.dispatch('clearSubscriptionsCache'))
+      await Promise.all([
+        requireCleanupSuccess(store.dispatch('clearSubscriptionsCache')),
+        clearFeedCache()
+      ])
       break
     case 'session-search':
       await store.dispatch('clearSessionSearchHistory')
