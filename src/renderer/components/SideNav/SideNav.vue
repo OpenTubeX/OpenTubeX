@@ -324,12 +324,14 @@ function createPinnedReorder({ ids, items, getId, getLabel, itemIdAttribute, isE
     }, 0)
   }
 
-  function announceMoved(id, position) {
+  function announceMoved(id) {
+    const position = ids.value.indexOf(id)
+    if (position === -1) return
     const item = items.value.find(entry => getId(entry) === id)
     pinnedReorderStatus.value = t('Home Page.Section moved', {
       section: (item ? getLabel(item) : null) ?? id,
       position: position + 1,
-      total: items.value.length,
+      total: ids.value.length,
     })
   }
 
@@ -380,9 +382,8 @@ function createPinnedReorder({ ids, items, getId, getLabel, itemIdAttribute, isE
     const currentIds = ids.value
     const reordered = moveItemByVisibleOffset(currentIds, currentIds, id, offset)
     if (reordered === currentIds) return
-    const targetIndex = reordered.indexOf(id)
     if (await store.dispatch(action, reordered)) {
-      announceMoved(id, targetIndex)
+      announceMoved(id)
       await nextTick()
       innerRef.value?.querySelector(`${containerSelector} .navChannel[${itemIdAttribute}="${CSS.escape(id)}"]`)?.focus()
     }

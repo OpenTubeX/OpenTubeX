@@ -208,7 +208,9 @@ const pinnedChannelIds = computed(previous => {
 const pinnedReorderStatus = ref('')
 
 function createSheetReorder({ ids, idKey, rowSelector, itemIdAttribute, action }) {
-  function announceMoved(id, position) {
+  function announceMoved(id) {
+    const position = ids.value.indexOf(id)
+    if (position === -1) return
     const item = props.pinnedItems.find(entry => entry[idKey] === id)
     pinnedReorderStatus.value = t('Home Page.Section moved', {
       section: item?.label ?? id,
@@ -230,9 +232,8 @@ function createSheetReorder({ ids, idKey, rowSelector, itemIdAttribute, action }
     if (currentIds.length < 2) return
     const reordered = moveItemByVisibleOffset(currentIds, currentIds, id, offset)
     if (reordered === currentIds) return
-    const targetIndex = reordered.indexOf(id)
     if (await store.dispatch(action, reordered)) {
-      announceMoved(id, targetIndex)
+      announceMoved(id)
       await nextTick()
       contentRef.value?.querySelector(`${rowSelector}[${itemIdAttribute}="${CSS.escape(id)}"]`)?.focus()
     }
