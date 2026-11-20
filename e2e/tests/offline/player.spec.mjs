@@ -1,5 +1,5 @@
 import { goTo, sel, setPlayerFullscreen, setWindowSize, test, expect } from '../../helpers/app.mjs'
-import { activeTab, expectDockedToBottomRight, findWatchComponent, openMockedVideo, waitForPlayback, openCaptionLanguages, openPlayerOptions } from '../../helpers/player.mjs'
+import { activeTab, expectDockedToBottomRight, findWatchComponent, openMockedVideo, waitForPlayback, openCaptionLanguages, openPlayerOptions, settleMenuZoom } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 import { DEMO_MEDIA_URL } from '../../helpers/media.mjs'
 
@@ -1172,6 +1172,8 @@ test('auto-translates captions into an arbitrary language', async ({ app, page, 
   await expect(overflowMenu.locator(':scope > .os-scrollbar-vertical')).toHaveCSS('display', 'none')
   expect(await translations.evaluate(element => element.scrollHeight > element.clientHeight)).toBe(true)
 
+  // Measured once the menu has zoomed to the view, which scales each box differently until then.
+  await settleMenuZoom(player)
   const [headerBounds, translationsBounds, scrollbarBounds] = await Promise.all([
     header.boundingBox(),
     translations.boundingBox(),
@@ -1218,6 +1220,7 @@ test('auto-translates captions into an arbitrary language', async ({ app, page, 
   await expect(selectedTranslation).toHaveAttribute('aria-selected', 'true')
   await expect(selectedTranslation.locator('.shaka-chosen-item')).toHaveCount(2)
 
+  await settleMenuZoom(player)
   const [listBounds, languageBounds] = await Promise.all([
     translations.boundingBox(),
     translations.getByRole('button', { name: 'Afrikaans' }).boundingBox(),
