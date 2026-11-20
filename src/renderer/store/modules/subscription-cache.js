@@ -6,10 +6,11 @@ import { MAIN_PROFILE_ID } from '../../../constants'
 import { toRaw } from 'vue'
 import { ensureSubscriptionFeedEntryState, ensureUpcomingSubscriptionFeedPublished, getUpcomingPremiereTimestamp, keepCachedSubscriptionCollaborations } from '../../helpers/subscription-entries'
 import { applySubscriptionSeenVideosToCache, applySubscriptionSeenPostsToCache } from '../../helpers/subscription-seen-videos'
-import { preserveSubscriptionSeenEntries } from '../../../subscriptionFeedState'
+import { keepStoredSubscriptionCollaborations, preserveSubscriptionSeenEntries } from '../../../subscriptionFeedState'
 import { getSubscriptionsForFeed } from '../../helpers/subscription-channels'
 import { updateVideoListAfterProcessing } from '../../helpers/subscriptions'
 import { forgetAndroidSubscriptionRefreshFingerprints } from '../../helpers/androidSubscriptionRefresh'
+import { mergeSubscriptionCollaborations } from '../../helpers/subscriptionCollaborationChecks'
 
 /**
  * Electron datastore payloads are converted to plain JSON before crossing IPC,
@@ -125,6 +126,52 @@ async function getStoredSubscribedChannelIds() {
   }
 }
 
+// Video cache writes of a channel run one after another, each on the entries
+// the previous one stored, so that an uploads write cannot drop the
+// collaborations that a check stored while it was on its way.
+const videoCacheWrites = new Map()
+
+/**
+ * @template T
+ * @param {string} channelId
+ * @param {() => Promise<T>} write
+ * @returns {Promise<T>}
+ */
+function queueVideoCacheWrite(channelId, write) {
+  const pending = videoCacheWrites.get(channelId)
+  const queued = pending ? pending.then(write, write) : write()
+  videoCacheWrites.set(channelId, queued)
+  queued.catch(() => {}).finally(() => {
+    if (videoCacheWrites.get(channelId) === queued) videoCacheWrites.delete(channelId)
+  })
+  return queued
+}
+
+async function writeVideoCache({ commit, state, rootGetters }, { channelId, videos, collaborationsFetched = false, collaborationsCheckedAt, timestamp = new Date() }) {
+  const previousCache = state.videoCache[channelId]
+  const include = rootGetters.getIncludeSubscriptionCollaborations === true
+  videos = ensureSubscriptionFeedEntryState(
+    keepCachedSubscriptionCollaborations(videos, previousCache?.videos, { include, fetched: collaborationsFetched }),
+    previousCache?.videos,
+    'videoId',
+    previousCache?.timestamp,
+    rootGetters.getHistoryCacheById
+  )
+  // Without the setting the collaborations are dropped, so turning it on
+  // again checks the channel soon. A write without a check time keeps the
+  // stored collaborations instead.
+  if (!include) collaborationsCheckedAt = null
+
+  try {
+    if (await DBSubscriptionCacheHandlers.updateVideosByChannelId(channelId, videos, timestamp, collaborationsCheckedAt) === false) return false
+    // Including those another window stored meanwhile, as the datastore did
+    if (collaborationsCheckedAt === undefined) videos = keepStoredSubscriptionCollaborations(videos, state.videoCache[channelId]?.videos)
+    commit('updateVideoCacheByChannel', { channelId, entries: videos, timestamp, collaborationsCheckedAt })
+  } catch (errMessage) {
+    console.error(errMessage)
+  }
+}
+
 const actions = {
   async grabAllSubscriptions({ commit, dispatch, state, rootState, rootGetters }) {
     try {
@@ -167,7 +214,11 @@ const actions = {
         let hasData = false
 
         if (Array.isArray(dataEntry.videos)) {
-          videos[channelId] = { videos: withFeedState(dataEntry.videos), timestamp: toDate(dataEntry.videosTimestamp) }
+          videos[channelId] = {
+            videos: withFeedState(dataEntry.videos),
+            timestamp: toDate(dataEntry.videosTimestamp),
+            ...(typeof dataEntry.collaborationsCheckedAt === 'number' ? { collaborationsCheckedAt: dataEntry.collaborationsCheckedAt } : {})
+          }
           hasData = true
         }
         if (Array.isArray(dataEntry.liveStreams)) {
@@ -200,25 +251,26 @@ const actions = {
     }
   },
 
-  async updateSubscriptionVideosCacheByChannel({ commit, state, rootGetters }, { channelId, videos, collaborationsFetched = false, timestamp = new Date() }) {
-    const previousCache = state.videoCache[channelId]
-    videos = ensureSubscriptionFeedEntryState(
-      keepCachedSubscriptionCollaborations(videos, previousCache?.videos, {
-        include: rootGetters.getIncludeSubscriptionCollaborations === true,
-        fetched: collaborationsFetched
-      }),
-      previousCache?.videos,
-      'videoId',
-      previousCache?.timestamp,
-      rootGetters.getHistoryCacheById
-    )
+  updateSubscriptionVideosCacheByChannel(context, payload) {
+    return queueVideoCacheWrite(payload.channelId, () => writeVideoCache(context, payload))
+  },
 
-    try {
-      if (await DBSubscriptionCacheHandlers.updateVideosByChannelId(channelId, videos, timestamp) === false) return false
-      commit('updateVideoCacheByChannel', { channelId, entries: videos, timestamp })
-    } catch (errMessage) {
-      console.error(errMessage)
-    }
+  /**
+   * Stores the collaborations a check of the channel's Home tab found with
+   * the channel's uploads cached now, and when the check happened.
+   * @returns {Promise<object[] | null>} the stored entries, or null when
+   * nothing was stored
+   */
+  updateSubscriptionCollaborationsByChannel(context, { channelId, collaborations }) {
+    return queueVideoCacheWrite(channelId, async () => {
+      const cacheEntry = context.state.videoCache[channelId]
+      if (!Array.isArray(cacheEntry?.videos) || context.rootGetters.getIncludeSubscriptionCollaborations !== true) return null
+      const checkedAt = Date.now()
+      const videos = mergeSubscriptionCollaborations(cacheEntry, collaborations, context.rootGetters.getHistoryCacheById)
+      // The uploads' timestamp tells when they need their next full fetch
+      await writeVideoCache(context, { channelId, videos, collaborationsFetched: true, collaborationsCheckedAt: checkedAt, timestamp: cacheEntry.timestamp })
+      return context.state.videoCache[channelId]?.collaborationsCheckedAt === checkedAt ? videos : null
+    })
   },
 
   async updateSubscriptionShortsCacheByChannel({ commit }, { channelId, videos, timestamp = new Date() }) {
@@ -488,12 +540,13 @@ const mutations = {
     }
   },
 
-  updateVideoCacheByChannel(state, { channelId, entries, timestamp = new Date() }) {
+  updateVideoCacheByChannel(state, { channelId, entries, timestamp = new Date(), collaborationsCheckedAt }) {
     const existingObject = state.videoCache[channelId]
     if (toDate(existingObject?.timestamp).getTime() > toDate(timestamp).getTime()) return
     const newObject = existingObject ?? { videos: null }
     if (entries != null) { newObject.videos = preserveSubscriptionSeenEntries(entries, existingObject?.videos) }
     newObject.timestamp = toDate(timestamp)
+    if (collaborationsCheckedAt !== undefined) newObject.collaborationsCheckedAt = collaborationsCheckedAt
     state.videoCache[channelId] = newObject
   },
   updateShortsCacheByChannel(state, { channelId, entries, timestamp = new Date() }) {

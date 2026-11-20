@@ -475,8 +475,8 @@ class SubscriptionCache {
     return (await subscriptionCacheRequest(DBActions.GENERAL.FIND)).map(parseStoredDocument)
   }
 
-  static updateVideosByChannelId(channelId, entries, timestamp) {
-    return queueSubscriptionFeedUpdate({ channelId, field: 'videos', entries, timestamp })
+  static updateVideosByChannelId(channelId, entries, timestamp, collaborationsCheckedAt) {
+    return queueSubscriptionFeedUpdate({ channelId, field: 'videos', entries, timestamp, collaborationsCheckedAt })
   }
 
   static updateLiveStreamsByChannelId(channelId, entries, timestamp) {

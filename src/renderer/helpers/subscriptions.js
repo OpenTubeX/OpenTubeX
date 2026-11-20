@@ -68,6 +68,7 @@ import {
   hasNoNewSubscriptionUploads,
   isSubscriptionFeedRecentlyFetched
 } from './subscriptionUploadCheck'
+import { selectSubscriptionCollaborationChecks } from './subscriptionCollaborationChecks'
 
 const AUTO_REFRESH_TOAST_DURATION = 5000
 export const SUBSCRIPTION_REFRESH_CHANNEL_EVENT = 'opentubex-subscription-refresh-channel'
@@ -91,6 +92,13 @@ let electronRefreshOwnerTabId = null
  */
 let activeRefresh = null
 let nextRefreshId = 0
+/**
+ * Controls the collaboration checks that run after a video refresh, if any.
+ * @type {AbortController | null}
+ */
+let collaborationChecks = null
+/** When the last collaboration check of a channel failed, by channel id */
+const failedCollaborationChecks = new Map()
 let rendererRefreshReserved = false
 
 // Announced, so that requests to refresh can wait for a refresh that may turn
@@ -109,6 +117,8 @@ const SUBSCRIPTION_FETCH_BATCH_DELAY_MS = 2000
 const SUBSCRIPTION_FETCH_CONCURRENCY = 8
 const RSS_ENRICHMENT_CONCURRENCY = 3
 const RSS_ENRICHMENT_TIMEOUT_MS = 15_000
+const COLLABORATION_CHECK_CONCURRENCY = 2
+const COLLABORATION_CHECK_TIMEOUT_MS = 30_000
 // YouTube's RSS feeds list a channel's 15 newest uploads
 const RSS_FEED_ENTRY_COUNT = 15
 
@@ -208,6 +218,7 @@ export async function refreshSubscriptionPremieres(isActive) {
 export function cancelSubscriptionRefresh() {
   cancelCount++
   markActiveSubscriptionRefreshCancelled()
+  collaborationChecks?.abort()
   // Native notifications also use this path, without requesting cancellation
   // again. A reopened renderer still needs to postpone its automatic refresh.
   if (process.env.IS_CAPACITOR && !activeRefresh && store.getters.getSubscriptionFeedRefreshInProgress) {
@@ -578,9 +589,9 @@ function getChannelUploads(channelId) {
 }
 
 /**
- * With Faster Subscription Refresh, returns the cache entry (entries and
- * timestamp) when it can be kept because the channel's upload feed lists
- * nothing new for it, otherwise null. A failed check
+ * With Faster Subscription Refresh, returns the cached entries when they can
+ * be kept because the channel's upload feed lists nothing new for them,
+ * otherwise null. A failed check
  * falls through to the full fetch, which handles the errors.
  * @param {'videos' | 'shorts' | 'live'} feed
  * @param {string} channelId
@@ -588,6 +599,11 @@ function getChannelUploads(channelId) {
  */
 async function getUnchangedSubscriptionFeed(feed, channelId, backend) {
   if (!store.getters.getFastSubscriptionRefresh || !process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backend)) return null
+  // Without the setting, the full fetch drops the cached collaborations and
+  // their schedule
+  const cachedVideos = store.getters.getVideoCache[channelId]
+  if (feed === 'videos' && store.getters.getIncludeSubscriptionCollaborations !== true &&
+    (cachedVideos?.collaborationsCheckedAt != null || cachedVideos?.videos?.some(video => video.isCollaboration === true))) return null
 
   const getCaches = () => ({
     videos: store.getters.getVideoCache,
@@ -606,33 +622,77 @@ async function getUnchangedSubscriptionFeed(feed, channelId, backend) {
     .map(video => video.videoId))
   return canKeepSubscriptionFeedWithoutNewUploads(cacheEntry, Date.now()) &&
     hasNoNewSubscriptionUploads(feed, cacheEntry, uploads, knownVideoIds)
-    ? cacheEntry
+    ? cacheEntry.videos
     : null
 }
 
 /**
  * Whether video refreshes also load the collaborations that other channels
  * uploaded, which needs an extra request for each channel's Home tab.
- * @param {string} backend
  */
-function includesSubscriptionCollaborations(backend) {
+function includesSubscriptionCollaborations() {
   return store.getters.getIncludeSubscriptionCollaborations === true &&
-    !!process.env.SUPPORTS_LOCAL_API && !usesInvidiousApi(backend)
+    !!process.env.SUPPORTS_LOCAL_API && !usesInvidiousApi(store.getters.getBackendPreference)
 }
 
 /**
- * Loads the collaborations listed on the channel's Home tab, or null when that
- * fails, so the cache write keeps the previously loaded ones.
- * @param {string} channelId
- * @returns {Promise<Record<string, any>[] | null>}
+ * After a video refresh, loads the Home tabs of a few channels that are due
+ * for a collaboration check, see `selectSubscriptionCollaborationChecks`. The
+ * refresh does not wait for this, and cancelling a refresh stops it. A failed
+ * check is retried after the next refresh. Automatic downloads need the
+ * refresh lock on desktop, so the found collaborations are downloaded by the
+ * channel's next refresh, which passes them on with its cached entries.
+ * @param {{ id: string }[]} channels
  */
-async function getSubscriptionCollaborations(channelId) {
+async function checkSubscriptionCollaborations(channels) {
+  if (collaborationChecks !== null || !includesSubscriptionCollaborations()) return
+  const due = selectSubscriptionCollaborationChecks(channels, store.getters.getVideoCache, Date.now(), failedCollaborationChecks)
+  if (due.length === 0) return
+
+  const controller = new AbortController()
+  collaborationChecks = controller
+  const { signal } = controller
   try {
-    return await getLocalChannelCollaborations(channelId, activeRefresh?.controller.signal)
-  } catch (error) {
-    if (!activeRefresh?.controller.signal.aborted) console.warn(`Failed to load the collaborations of ${channelId}:`, error)
-    return null
+    await mapConcurrently(due, COLLABORATION_CHECK_CONCURRENCY, async channel => {
+      await waitForPlaybackStartup(signal)
+      if (signal.aborted || !includesSubscriptionCollaborations()) return
+
+      let collaborations
+      try {
+        collaborations = await getLocalChannelCollaborations(
+          channel.id,
+          AbortSignal.any([signal, AbortSignal.timeout(COLLABORATION_CHECK_TIMEOUT_MS)])
+        )
+      } catch (error) {
+        if (!signal.aborted) {
+          failedCollaborationChecks.set(channel.id, Date.now())
+          console.warn(`Failed to load the collaborations of ${channel.id}:`, error)
+        }
+        return
+      }
+      if (signal.aborted) return
+      failedCollaborationChecks.delete(channel.id)
+
+      const videos = await store.dispatch('updateSubscriptionCollaborationsByChannel', {
+        channelId: channel.id,
+        collaborations
+      })
+      if (videos == null) return
+      reportSubscriptionUploads(channel.id, 'videos', videos)
+      notifySubscriptionChannelRefreshed('videos')
+    })
+  } finally {
+    collaborationChecks = null
   }
+}
+
+/**
+ * Starts `checkSubscriptionCollaborations` without waiting for it, so the
+ * refresh finishes without it.
+ * @param {{ id: string }[]} channels
+ */
+function startSubscriptionCollaborationChecks(channels) {
+  checkSubscriptionCollaborations(channels).catch(error => console.error(error))
 }
 
 /**
@@ -646,8 +706,8 @@ async function getSubscriptionCollaborations(channelId) {
  * @returns {Promise<boolean>} Whether the cached feed was kept
  */
 async function keepUnchangedSubscriptionFeed(feed, channel, backend, t) {
-  const videos = (await getUnchangedSubscriptionFeed(feed, channel.id, backend))?.videos
-  if (videos == null) return false
+  const videos = await getUnchangedSubscriptionFeed(feed, channel.id, backend)
+  if (videos === null) return false
   await startAutomaticDownloadsForChannel(channel, videos, feed, t, electronRefreshOwnerTabId)
   reportSubscriptionUploads(channel.id, feed, videos)
   return true
@@ -1146,14 +1206,19 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
   automatic = false
 }, activeProfile) {
   const activeSubscriptionList = getSubscriptionsForFeed(activeProfile.subscriptions, 'videos')
+  const requestedChannels = onlyRequestedChannels(includeNotificationChannels(includeAutomaticDownloadChannels(activeSubscriptionList, 'videos'), 'videos'), channelIds)
   const subscriptionList = await omitRecentlyFetchedChannels(
-    onlyRequestedChannels(includeNotificationChannels(includeAutomaticDownloadChannels(activeSubscriptionList, 'videos'), 'videos'), channelIds),
+    requestedChannels,
     'videos',
     automatic,
     t
   )
   if (subscriptionList.length === 0) {
+    // Cancelled while handing on the cached feeds of the omitted channels
+    if (isRefreshCancelled()) return null
     completeSubscriptionRefresh('videos', activeProfile._id)
+    // Channels whose uploads were fetched recently can still be due
+    startSubscriptionCollaborationChecks(requestedChannels)
     return []
   }
 
@@ -1170,10 +1235,7 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
 
   try {
     const fetchChannel = async (channel, backend = store.getters.getBackendPreference) => {
-      const loadCollaborations = includesSubscriptionCollaborations(backend)
-      // Collaborations are not in the channel's upload feed, so they still need loading
-      const unchangedCache = loadCollaborations ? await getUnchangedSubscriptionFeed('videos', channel.id, backend) : null
-      if (!loadCollaborations && await keepUnchangedSubscriptionFeed('videos', channel, backend, t)) {
+      if (await keepUnchangedSubscriptionFeed('videos', channel, backend, t)) {
         channelCount++
         setSubscriptionRefreshProgress((channelCount / subscriptionList.length) * 100)
         return false
@@ -1181,9 +1243,7 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
 
       let videos, name, thumbnailUrl, handle
 
-      if (unchangedCache !== null) {
-        videos = unchangedCache.videos.filter(video => video.isCollaboration !== true)
-      } else if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backend)) {
+      if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backend)) {
         if (useRss && hasInvidiousRssFeeds()) {
           ({ videos, name, thumbnailUrl, handle } = await getChannelVideosInvidiousRSS(channel, t))
         } else {
@@ -1197,10 +1257,6 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
         }
       }
 
-      const collaborations = videos != null && loadCollaborations
-        ? await getSubscriptionCollaborations(channel.id)
-        : null
-
       channelCount++
       setSubscriptionRefreshProgress((channelCount / subscriptionList.length) * 100)
 
@@ -1208,27 +1264,20 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
         activeRefresh.errors.delete(channel.id)
         const previousCache = store.getters.getVideoCache[channel.id]
         // New entries are recognized by their position before cached ones,
-        // so uploads and collaborations are reconciled as separate lists
-        const reconcile = (entries, isCollaboration) => reconcileFetchedSubscriptionEntries(
-          entries,
-          previousCache?.videos?.filter(video => (video.isCollaboration === true) === isCollaboration),
+        // so the collaborations that follow the uploads are left out
+        videos = reconcileFetchedSubscriptionEntries(
+          videos,
+          previousCache?.videos?.filter(video => video.isCollaboration !== true),
           'videoId',
           previousCache?.timestamp,
           store.getters.getHistoryCacheById
         )
-        videos = reconcile(videos, false)
-        if (collaborations !== null) {
-          const videoIds = new Set(videos.map(video => video.videoId))
-          videos = videos.concat(reconcile(collaborations.filter(video => !videoIds.has(video.videoId)), true))
-        }
         await store.dispatch('updateSubscriptionVideosCacheByChannel', {
           channelId: channel.id,
-          videos,
-          collaborationsFetched: collaborations !== null,
-          // Unchanged feeds still need their full fetch once they are old enough.
-          // The snapshot's timestamp makes the write lose to any newer one.
-          ...(unchangedCache !== null ? { timestamp: unchangedCache.timestamp } : {})
+          videos
         })
+        // With the collaborations that the write kept
+        videos = store.getters.getVideoCache[channel.id]?.videos ?? videos
         await startAutomaticDownloadsForChannel(channel, videos, 'videos', t, electronRefreshOwnerTabId)
         reportSubscriptionUploads(channel.id, 'videos', videos)
         notifySubscriptionChannelRefreshed('videos')
@@ -1253,6 +1302,7 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
     }
 
     completeSubscriptionRefresh('videos', activeProfile._id)
+    startSubscriptionCollaborationChecks(requestedChannels)
 
     return []
   } finally {
@@ -1291,6 +1341,7 @@ async function refreshSubscriptionShortsFromRemoteUnlocked({
     t
   )
   if (subscriptionList.length === 0) {
+    if (isRefreshCancelled()) return null
     completeSubscriptionRefresh('shorts', activeProfile._id)
     return []
   }
@@ -1398,6 +1449,7 @@ async function refreshSubscriptionLiveFromRemoteUnlocked({
     t
   )
   if (subscriptionList.length === 0) {
+    if (isRefreshCancelled()) return null
     completeSubscriptionRefresh('live', activeProfile._id)
     return []
   }
@@ -1515,6 +1567,7 @@ async function refreshSubscriptionPostsFromRemoteUnlocked({
     t
   )
   if (subscriptionList.length === 0) {
+    if (isRefreshCancelled()) return null
     completeSubscriptionRefresh('posts', activeProfile._id)
     return []
   }

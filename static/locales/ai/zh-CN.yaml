@@ -2460,7 +2460,7 @@ Tooltips:
     Notify About New Uploads: 在此设备上为你在订阅设置中开启了通知的频道显示系统通知。OpenTubeX 会在刷新订阅时检查新内容，因此请选择自动刷新间隔。若要在应用关闭时也收到通知，请同时启用应用关闭时刷新订阅。
     RSS Feeds Auto Refresh Interval: 应用打开时 OpenTubeX 自动刷新 RSS 订阅源的频率。
     Faster Subscription Refresh: "先检查每个频道的 RSS 订阅源，只加载有新上传内容的频道的视频、Shorts 和直播。自动刷新还会跳过过去 10 分钟内加载过的频道。对于没有新上传内容的频道，观看次数、已移除的视频和更改的标题每隔几小时才会更新一次，而且当 RSS 订阅源滞后时，新上传的内容可能会稍后才出现。使用 Invidious API 时不可用。"
-    Show Collaborations From Other Channels: "同时显示你订阅的频道与上传这些视频的其他频道合作制作的视频。YouTube 只在频道的首页标签中列出这些视频，因此每次刷新视频都会为每个频道多加载一个页面。只能找到那里显示的最新合作视频，有些频道不显示任何合作视频，且其发布日期为大致时间。使用 Invidious API 时不可用。"
+    Show Collaborations From Other Channels: "同时显示你订阅的频道与上传这些视频的其他频道合作制作的视频。YouTube 只在频道的首页标签中列出这些视频，因此每次刷新视频最多只检查少数几个频道，新的合作视频可能需要一天或更久才会出现。只能找到那里显示的最新合作视频，有些频道不显示任何合作视频，且其发布日期为大致时间。使用 Invidious API 时不可用。"
     Platforms Auto Refresh Interval: 应用打开时 OpenTubeX 自动刷新你在其他平台上关注的频道的频率。
     Twitch Notify When Live: 你关注的某个 Twitch 频道开播时通知你。OpenTubeX 打开时每隔几分钟检查一次；关闭时如果仍会刷新订阅，也会检查。
   Theme Settings:

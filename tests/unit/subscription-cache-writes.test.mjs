@@ -5,6 +5,7 @@ import vm from 'node:vm'
 import Datastore from '@seald-io/nedb'
 import { toRaw } from 'vue'
 import { ensureSubscriptionFeedEntryState, keepCachedSubscriptionCollaborations } from '../../src/renderer/helpers/subscription-entries.js'
+import { mergeSubscriptionCollaborations, selectSubscriptionCollaborationChecks } from '../../src/renderer/helpers/subscriptionCollaborationChecks.js'
 import * as seenData from '../../src/subscriptionSeenVideos.js'
 import * as feedState from '../../src/subscriptionFeedState.js'
 import { applySubscriptionSeenVideosToCache, applySubscriptionSeenPostsToCache } from '../../src/renderer/helpers/subscription-seen-videos.js'
@@ -233,11 +234,11 @@ for (const delayDatabaseReply of [false, true]) {
       { videoId: 'premiere', viewCount: 3000, isNewInSubscriptionFeed: false },
       { videoId: 'new-video', isNewInSubscriptionFeed: true }
     ]
-    await actions.updateSubscriptionVideosCacheByChannel(actionContext, {
+    const refresh = actions.updateSubscriptionVideosCacheByChannel(actionContext, {
       channelId: 'channel', videos: refreshedVideos, timestamp: new Date(2000)
     })
     releasePremiere()
-    await premiereUpdate
+    await Promise.all([premiereUpdate, refresh])
 
     assert.equal(state.videoCache.channel.videos, refreshedVideos)
     assert.equal(state.videoCache.channel.timestamp.getTime(), 2000)
@@ -246,6 +247,95 @@ for (const delayDatabaseReply of [false, true]) {
     assert.equal(new Date(persisted.videosTimestamp).getTime(), 2000)
   })
 }
+
+test('a collaboration check is stored with its time, survives uploads writes from this and other windows, and stays scheduled after a reload', async () => {
+  const db = { subscriptionCache: new Datastore({ inMemoryOnly: true }) }
+  const Cache = vm.runInNewContext(`${cacheSource}\nSubscriptionCache`, { db, ...feedState })
+  const upload = { videoId: 'upload', isNewInSubscriptionFeed: false }
+  await Cache.updateVideosByChannelId('channel', [upload], new Date(1000))
+  const checkWrite = Promise.withResolvers()
+  let checkWriting
+  const checkWaiting = new Promise(resolve => { checkWriting = resolve })
+  const context = vm.createContext({
+    console,
+    toRaw,
+    ...feedState,
+    ensureSubscriptionFeedEntryState,
+    keepCachedSubscriptionCollaborations,
+    mergeSubscriptionCollaborations,
+    DBSubscriptionCacheHandlers: {
+      find: () => Cache.find(),
+      async updateVideosByChannelId(...args) {
+        // The check's write is slow to cross IPC
+        if (args[3] !== undefined) {
+          checkWriting()
+          await checkWrite.promise
+        }
+        return Cache.updateVideosByChannelId(...args)
+      },
+    },
+  })
+  vm.runInContext(moduleSource, context)
+  const { actions, mutations, state } = context.cacheModule
+  state.videoCache.channel = { videos: [upload], timestamp: new Date(1000) }
+  const rootGetters = { getHistoryCacheById: {}, getIncludeSubscriptionCollaborations: true }
+  const actionContext = { state, rootGetters, commit: (type, payload) => mutations[type](state, payload) }
+
+  const check = actions.updateSubscriptionCollaborationsByChannel(actionContext, {
+    channelId: 'channel',
+    collaborations: [{ videoId: 'collaboration', isCollaboration: true }],
+  })
+  await checkWaiting
+  const refresh = actions.updateSubscriptionVideosCacheByChannel(actionContext, {
+    channelId: 'channel',
+    videos: [{ videoId: 'new-upload', isNewInSubscriptionFeed: true }, upload],
+    timestamp: new Date(2000),
+  })
+  checkWrite.resolve()
+  const [stored] = await Promise.all([check, refresh])
+
+  assert.deepEqual(stored.map(video => video.videoId), ['upload', 'collaboration'])
+  const ids = ['new-upload', 'upload', 'collaboration']
+  assert.deepEqual(state.videoCache.channel.videos.map(video => video.videoId), ids)
+  const persisted = await db.subscriptionCache.findOneAsync({ _id: 'channel' })
+  assert.deepEqual(persisted.videos.map(video => video.videoId), ids)
+  assert.equal(new Date(persisted.videosTimestamp).getTime(), 2000)
+  const checkedAt = state.videoCache.channel.collaborationsCheckedAt
+  assert.equal(typeof checkedAt, 'number')
+  assert.equal(persisted.collaborationsCheckedAt, checkedAt)
+
+  // Another window that has not received the check yet stores its uploads
+  const otherWindow = { channelId: 'channel', field: 'videos', entries: [{ videoId: 'other-upload' }, upload], timestamp: new Date(2500) }
+  await Cache.updateFeeds([otherWindow])
+  const kept = ['other-upload', 'upload', 'collaboration']
+  assert.deepEqual((await db.subscriptionCache.findOneAsync({ _id: 'channel' })).videos.map(video => video.videoId), kept)
+  assert.deepEqual(otherWindow.entries.map(video => video.videoId), kept, 'the other windows are sent the stored collaborations')
+  // A premiere poll updates the state of a stored collaboration
+  const live = { videoId: 'collaboration', isCollaboration: true, liveNow: true }
+  await Cache.updateFeeds([{ ...otherWindow, entries: [...otherWindow.entries.slice(0, 2), live, { videoId: 'unknown', isCollaboration: true }] }])
+  assert.deepEqual((await db.subscriptionCache.findOneAsync({ _id: 'channel' })).videos.map(video => [video.videoId, video.liveNow]),
+    [['other-upload', undefined], ['upload', undefined], ['collaboration', true]])
+  // Another window's earlier check arrives late
+  assert.deepEqual(structuredClone(await Cache.updateFeeds([{ ...otherWindow, entries: [], collaborationsCheckedAt: checkedAt - 1 }])), [false])
+  assert.equal((await db.subscriptionCache.findOneAsync({ _id: 'channel' })).collaborationsCheckedAt, checkedAt)
+
+  state.videoCache = {}
+  await actions.grabAllSubscriptions({
+    state,
+    rootState: { profiles: { profilesLoaded: true } },
+    rootGetters: { getSubscribedChannelIdSet: new Set(['channel']) },
+    commit: (type, payload) => mutations[type](state, payload),
+  })
+  assert.equal(state.videoCache.channel.collaborationsCheckedAt, checkedAt)
+  assert.deepEqual(selectSubscriptionCollaborationChecks([{ id: 'channel' }], state.videoCache, checkedAt + 60_000), [])
+
+  // Without the setting, the collaborations are dropped and checked again once it is back on
+  rootGetters.getIncludeSubscriptionCollaborations = false
+  await actions.updateSubscriptionVideosCacheByChannel(actionContext, { channelId: 'channel', videos: [upload], timestamp: new Date(3000) })
+  assert.equal((await db.subscriptionCache.findOneAsync({ _id: 'channel' })).collaborationsCheckedAt, null)
+  assert.deepEqual(selectSubscriptionCollaborationChecks([{ id: 'channel' }], state.videoCache, checkedAt + 60_000), [{ id: 'channel' }])
+  assert.equal(await actions.updateSubscriptionCollaborationsByChannel(actionContext, { channelId: 'channel', collaborations: [] }), null)
+})
 
 test('loading persisted video caches supplies feed markers without changing known seen state or embedded videos', async () => {
   const entries = [
