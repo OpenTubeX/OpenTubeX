@@ -501,6 +501,7 @@ Settings:
       Memory: memorije
       Network: mreže
       Disk: diska
+    Label: Performanse
   General Settings:
     Invidious Instance Username: 'Korisničko ime instance'
     Invidious Instance Password: 'Lozinka instance'
@@ -1670,6 +1671,7 @@ Settings:
     Downloading: Preuzimanje popisa…
     Failed to Download: Nije moguće preuzeti popise
     Loaded Status: "Blokirani kanali: {blocked} · Označeni kanali: {warned} · Ažurirano: {date}"
+  Highlight Changed Settings Label: Promijenjene
 Tutorial:
   Skip: Preskoči
   Next: Dalje
@@ -2565,6 +2567,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Poništi posljednje premotavanje
   Redo Seek: Ponovi poništeno premotavanje
   New Incognito Tab: Stvori novu anonimnu karticu
+  Shortcuts Label: Prečaci
 CommandPalette:
   Title: Paleta naredbi
   Open: Otvori paletu naredbi

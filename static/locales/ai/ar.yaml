@@ -503,6 +503,7 @@ Settings:
       Memory: ذاكرة
       Network: شبكة
       Disk: القرص
+    Label: الأداء
   General Settings:
     Invidious Instance Username: 'اسم المستخدم للمثيل'
     Invidious Instance Password: 'كلمة مرور المثيل'
@@ -1687,6 +1688,7 @@ Settings:
     Downloading: جارٍ تنزيل القوائم…
     Failed to Download: تعذّر تنزيل القوائم
     Loaded Status: "القنوات المحظورة: {blocked} · القنوات المُعلَّمة: {warned} · آخر تحديث: {date}"
+  Highlight Changed Settings Label: المُغيَّرة
 Tutorial:
   Skip: تخطي
   Next: التالي
@@ -2565,6 +2567,7 @@ KeyboardShortcutPrompt:
   Undo Seek: التراجع عن آخر انتقال
   Redo Seek: إعادة الانتقال الذي تم التراجع عنه
   New Incognito Tab: أنشئ علامة تبويب جديدة للتصفح المتخفي
+  Shortcuts Label: الاختصارات
 CommandPalette:
   Title: لوحة الأوامر
   Open: افتح لوحة الأوامر

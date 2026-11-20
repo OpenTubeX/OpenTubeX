@@ -624,6 +624,7 @@ Settings:
       Memory: pomnilnik
       Network: omrežje
       Disk: disk
+    Label: Zmogljivost
   Return to Settings Menu: Nazaj v meni z nastavitvami
   General Settings:
     Invidious Instance Username: 'Uporabniško ime primerka'
@@ -1988,6 +1989,7 @@ Settings:
     Downloading: Prenašanje seznamov…
     Failed to Download: Seznamov ni bilo mogoče prenesti
     Loaded Status: "Blokirani kanali: {blocked} · Označeni kanali: {warned} · Posodobljeno: {date}"
+  Highlight Changed Settings Label: Spremenjene
 Tutorial:
   Skip: Preskoči
   Next: Naprej
@@ -3137,6 +3139,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Razveljavi zadnji skok
   Redo Seek: Znova uveljavi razveljavljeni skok
   New Incognito Tab: Ustvari nov zavihek brez beleženja zgodovine
+  Shortcuts Label: Bližnjice
 CommandPalette:
   Title: Paleta ukazov
   Open: Odpri paleto ukazov

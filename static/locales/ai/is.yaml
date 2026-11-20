@@ -498,6 +498,7 @@ Settings:
       Memory: minnis
       Network: nets
       Disk: disks
+    Label: Afköst
   General Settings:
     Invidious Instance Username: 'Notandanafn tilviks'
     Invidious Instance Password: 'Lykilorð tilviks'
@@ -1661,6 +1662,7 @@ Settings:
     Downloading: Sæki listana…
     Failed to Download: Ekki tókst að sækja listana
     Loaded Status: "Útilokaðar rásir: {blocked} · Merktar rásir: {warned} · Uppfært: {date}"
+  Highlight Changed Settings Label: Breytt
 Tutorial:
   Skip: Sleppa
   Next: Næsta
@@ -2541,6 +2543,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Afturkalla síðasta stökk
   Redo Seek: Endurtaka afturkallað stökk
   New Incognito Tab: Stofna nýjan huliðsflipa
+  Shortcuts Label: Flýtileiðir
 CommandPalette:
   Title: Skipanaspjald
   Open: Opna skipanaspjald

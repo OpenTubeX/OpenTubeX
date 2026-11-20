@@ -457,6 +457,7 @@ Settings:
       Memory: память
       Network: сеть
       Disk: диск
+    Label: Производительность
   General Settings:
     Invidious Instance Username: 'Имя пользователя экземпляра'
     Invidious Instance Password: 'Пароль экземпляра'
@@ -1617,6 +1618,7 @@ Settings:
     Downloading: Загрузка списков…
     Failed to Download: Не удалось загрузить списки
     Loaded Status: "Заблокированные каналы: {blocked} · Помеченные каналы: {warned} · Обновлено: {date}"
+  Highlight Changed Settings Label: Изменённые
 Tutorial:
   Skip: Пропустить
   Next: Далее
@@ -2493,6 +2495,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Отменить последнюю перемотку
   Redo Seek: Повторить отменённую перемотку
   New Incognito Tab: Создать вкладку инкогнито
+  Shortcuts Label: Сочетания клавиш
 CommandPalette:
   Title: Палитра команд
   Open: Открыть палитру команд

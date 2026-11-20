@@ -499,6 +499,7 @@ Settings:
       Memory: cof
       Network: rhwydwaith
       Disk: disg
+    Label: Perfformiad
   General Settings:
     Invidious Instance Username: 'Enw defnyddiwr yr enghraifft'
     Invidious Instance Password: 'Cyfrinair yr enghraifft'
@@ -1665,6 +1666,7 @@ Settings:
     Downloading: Yn llwytho'r rhestrau i lawr…
     Failed to Download: Methu llwytho'r rhestrau i lawr
     Loaded Status: "Sianeli wedi'u rhwystro: {blocked} · Sianeli wedi'u nodi: {warned} · Diweddarwyd: {date}"
+  Highlight Changed Settings Label: Wedi newid
 Tutorial:
   Skip: Hepgor
   Next: Nesaf
@@ -2565,6 +2567,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Dadwneud y naid olaf
   Redo Seek: Ail-wneud naid a ddadwnaed
   New Incognito Tab: Creu tab incognito newydd
+  Shortcuts Label: Llwybrau byr
 CommandPalette:
   Title: Palet gorchmynion
   Open: Agor y palet gorchmynion

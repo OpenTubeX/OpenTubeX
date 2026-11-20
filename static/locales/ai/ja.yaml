@@ -498,6 +498,7 @@ Settings:
       Memory: メモリ
       Network: ネットワーク
       Disk: ディスク
+    Label: パフォーマンス
   General Settings:
     Invidious Instance Username: 'インスタンスのユーザー名'
     Invidious Instance Password: 'インスタンスのパスワード'
@@ -1655,6 +1656,7 @@ Settings:
     Downloading: リストをダウンロードしています…
     Failed to Download: リストをダウンロードできませんでした
     Loaded Status: "ブロック済みチャンネル: {blocked} · 警告対象チャンネル: {warned} · 更新日時: {date}"
+  Highlight Changed Settings Label: 変更済み
 Tutorial:
   Skip: スキップ
   Next: 次へ
@@ -2525,6 +2527,7 @@ KeyboardShortcutPrompt:
   Undo Seek: 最後のシークを元に戻す
   Redo Seek: 元に戻したシークをやり直す
   New Incognito Tab: 新しいシークレット タブを作成
+  Shortcuts Label: ショートカット
 CommandPalette:
   Title: コマンドパレット
   Open: コマンドパレットを開く

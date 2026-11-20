@@ -503,6 +503,7 @@ Settings:
       Memory: пам’ять
       Network: мережа
       Disk: диск
+    Label: Продуктивність
   General Settings:
     Invidious Instance Username: 'Ім''я користувача екземпляра'
     Invidious Instance Password: 'Пароль екземпляра'
@@ -1687,6 +1688,7 @@ Settings:
     Downloading: Завантаження списків…
     Failed to Download: Не вдалося завантажити списки
     Loaded Status: "Заблоковані канали: {blocked} · Позначені канали: {warned} · Оновлено: {date}"
+  Highlight Changed Settings Label: Змінені
 Tutorial:
   Skip: Пропустити
   Next: Далі
@@ -2580,6 +2582,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Скасувати останнє перемотування
   Redo Seek: Повторити скасоване перемотування
   New Incognito Tab: Створити нову вкладку в режимі анонімного перегляду
+  Shortcuts Label: Комбінації клавіш
 CommandPalette:
   Title: Палітра команд
   Open: Відкрити палітру команд

@@ -498,6 +498,7 @@ Settings:
       Memory: paměti
       Network: sítě
       Disk: disku
+    Label: Výkon
   General Settings:
     Invidious Instance Username: 'Uživatelské jméno instance'
     Invidious Instance Password: 'Heslo instance'
@@ -1655,6 +1656,7 @@ Settings:
     Downloading: Stahování seznamů…
     Failed to Download: Seznamy se nepodařilo stáhnout
     Loaded Status: "Blokované kanály: {blocked} · Označené kanály: {warned} · Aktualizováno: {date}"
+  Highlight Changed Settings Label: Změněné
 Tutorial:
   Skip: Přeskočit
   Next: Další
@@ -2525,6 +2527,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Vrátit poslední přeskok zpět
   Redo Seek: Znovu provést vrácený přeskok
   New Incognito Tab: Vytvořit novou anonymní kartu
+  Shortcuts Label: Zkratky
 CommandPalette:
   Title: Paleta příkazů
   Open: Otevřít paletu příkazů

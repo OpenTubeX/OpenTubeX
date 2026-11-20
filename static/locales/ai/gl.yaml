@@ -503,6 +503,7 @@ Settings:
       Memory: memoria
       Network: rede
       Disk: disco
+    Label: Rendemento
   General Settings:
     Invidious Instance Username: 'Nome de usuario da instancia'
     Invidious Instance Password: 'Contrasinal da instancia'
@@ -1687,6 +1688,7 @@ Settings:
     Downloading: Descargando as listas…
     Failed to Download: Non se puideron descargar as listas
     Loaded Status: "Canles bloqueadas: {blocked} · Canles marcadas: {warned} · Actualizado: {date}"
+  Highlight Changed Settings Label: Modificados
 Tutorial:
   Skip: Omitir
   Next: Seguinte
@@ -2589,6 +2591,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Desfacer o último salto
   Redo Seek: Refacer un salto desfeito
   New Incognito Tab: Crear unha lapela de incógnito nova
+  Shortcuts Label: Atallos
 CommandPalette:
   Title: Paleta de ordes
   Open: Abrir a paleta de ordes

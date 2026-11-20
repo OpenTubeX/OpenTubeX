@@ -784,10 +784,12 @@ Settings:
     Advanced Description: Backends, buffering, external tools, proxy, and diagnostics
     Alternative providers: Video and metadata providers
   Highlight Changed Settings: Highlight settings changed from defaults
+  Highlight Changed Settings Label: Changed
   Reset Setting to Default: Reset this setting to its default
   Experimental Badge: Experimental
   Performance Impact:
     Show Performance Impact: Show performance impact indicators
+    Label: Performance
     Moderate: Moderate impact
     High: High impact
     Description: This setting can increase {resources} usage
@@ -3741,6 +3743,7 @@ KeyboardShortcutPrompt:
       Search and Page: App: Search & Page
       Window and View: App: Window & View
   Show Keyboard Shortcuts: Show keyboard shortcuts
+  Shortcuts Label: Shortcuts
   History Backward: Go back one page
   History Forward: Go forward one page
   New Window: Create a new window

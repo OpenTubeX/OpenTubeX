@@ -509,6 +509,7 @@ Settings:
       Memory: hukommelse
       Network: netværk
       Disk: diskplads
+    Label: Ydeevne
   General Settings:
     Invidious Instance Username: 'Instansens brugernavn'
     Invidious Instance Password: 'Instansens adgangskode'
@@ -1711,6 +1712,7 @@ Settings:
     Downloading: Downloader listerne…
     Failed to Download: Listerne kunne ikke downloades
     Loaded Status: "Blokerede kanaler: {blocked} · Markerede kanaler: {warned} · Opdateret: {date}"
+  Highlight Changed Settings Label: Ændrede
 Tutorial:
   Skip: Spring over
   Next: Næste
@@ -2622,6 +2624,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Fortryd det seneste spring
   Redo Seek: Gentag et fortrudt spring
   New Incognito Tab: Opret en ny inkognitofane
+  Shortcuts Label: Genveje
 CommandPalette:
   Title: Kommandopalet
   Open: Åbn kommandopalet

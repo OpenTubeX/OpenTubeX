@@ -499,6 +499,7 @@ Settings:
       Memory: memori
       Network: jaringan
       Disk: disk
+    Label: Performa
   General Settings:
     Invidious Instance Username: 'Nama pengguna instans'
     Invidious Instance Password: 'Kata sandi instans'
@@ -1664,6 +1665,7 @@ Settings:
     Downloading: Mengunduh daftar…
     Failed to Download: Tidak dapat mengunduh daftar
     Loaded Status: "Kanal diblokir: {blocked} · Kanal ditandai: {warned} · Diperbarui: {date}"
+  Highlight Changed Settings Label: Diubah
 Tutorial:
   Skip: Lewati
   Next: Berikutnya
@@ -2552,6 +2554,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Urungkan lompatan terakhir
   Redo Seek: Ulangi lompatan yang diurungkan
   New Incognito Tab: Buat tab penyamaran baru
+  Shortcuts Label: Pintasan
 CommandPalette:
   Title: Palet perintah
   Open: Buka palet perintah

@@ -632,6 +632,7 @@ Settings:
       Memory: memòria
       Network: xarxa
       Disk: disc
+    Label: Rendiment
   Return to Settings Menu: Torna al menú de configuració
   General Settings:
     Invidious Instance Username: 'Nom d''usuari de la instància'
@@ -2020,6 +2021,7 @@ Settings:
     Downloading: S'estan baixant les llistes…
     Failed to Download: No s'han pogut baixar les llistes
     Loaded Status: "Canals bloquejats: {blocked} · Canals marcats: {warned} · Actualitzat: {date}"
+  Highlight Changed Settings Label: Canviats
 Tutorial:
   Skip: Omet
   Next: Següent
@@ -3189,6 +3191,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Desfés l'últim salt
   Redo Seek: Refés un salt desfet
   New Incognito Tab: Crea una pestanya d’incògnit nova
+  Shortcuts Label: Dreceres
 CommandPalette:
   Title: Paleta d'ordres
   Open: Obre la paleta d'ordres

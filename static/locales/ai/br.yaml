@@ -498,6 +498,7 @@ Settings:
       Memory: "ar vemor"
       Network: "ar rouedad"
       Disk: "ar bladenn"
+    Label: Digonusted
   General Settings:
     Invidious Instance Username: 'Anv implijer an istañs'
     Invidious Instance Password: 'Ger-tremen an istañs'
@@ -1657,6 +1658,7 @@ Settings:
     Downloading: O pellgargañ ar rolloù…
     Failed to Download: N'eus ket bet gallet pellgargañ ar rolloù
     Loaded Status: "Chadennoù stanket: {blocked} · Chadennoù merket: {warned} · Hizivaet: {date}"
+  Highlight Changed Settings Label: Kemmet
 Tutorial:
   Skip: "Lammat"
   Next: "War-lerc'h"
@@ -2536,6 +2538,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Dizober al lamm diwezhañ
   Redo Seek: Adober ul lamm dizobereet
   New Incognito Tab: Krouiñ un ivinell kuzh nevez
+  Shortcuts Label: Berradennoù
 CommandPalette:
   Title: "Paled arc'hadoù"
   Open: "Digeriñ ar baled arc'hadoù"

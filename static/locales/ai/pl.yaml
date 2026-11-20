@@ -1114,6 +1114,9 @@ Settings:
     Downloading: Pobieranie list…
     Failed to Download: Nie udało się pobrać list
     Loaded Status: "Zablokowane kanały: {blocked} · Oznaczone kanały: {warned} · Zaktualizowano: {date}"
+  Highlight Changed Settings Label: Zmienione
+  Performance Impact:
+    Label: Wydajność
 Tutorial:
   Skip: Pomiń
   Next: Dalej
@@ -1717,6 +1720,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Cofnij ostatnie przewinięcie
   Redo Seek: Ponów cofnięte przewinięcie
   New Incognito Tab: Utwórz nową kartę incognito
+  Shortcuts Label: Skróty
 CommandPalette:
   Title: Paleta poleceń
   Open: Otwórz paletę poleceń

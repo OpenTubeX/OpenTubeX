@@ -498,6 +498,7 @@ Settings:
       Memory: bellek
       Network: ağ
       Disk: disk
+    Label: Performans
   General Settings:
     Invidious Instance Username: 'Örnek kullanıcı adı'
     Invidious Instance Password: 'Örnek parolası'
@@ -1655,6 +1656,7 @@ Settings:
     Downloading: Listeler indiriliyor…
     Failed to Download: Listeler indirilemedi
     Loaded Status: "Engellenen kanallar: {blocked} · İşaretlenen kanallar: {warned} · Güncellendi: {date}"
+  Highlight Changed Settings Label: Değiştirilenler
 Tutorial:
   Skip: Atla
   Next: İleri
@@ -2526,6 +2528,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Son atlamayı geri al
   Redo Seek: Geri alınan atlamayı yinele
   New Incognito Tab: Yeni bir gizli sekme oluştur
+  Shortcuts Label: Kısayollar
 CommandPalette:
   Title: Komut paleti
   Open: Komut paletini aç

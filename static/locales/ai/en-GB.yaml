@@ -495,6 +495,7 @@ Settings:
       Memory: memory
       Network: network
       Disk: disk
+    Label: Performance
   General Settings:
     Invidious Instance Username: 'Instance username'
     Invidious Instance Password: 'Instance password'
@@ -1641,6 +1642,7 @@ Settings:
     Downloading: Downloading the lists…
     Failed to Download: Couldn't download the lists
     Loaded Status: "Blocked channels: {blocked} · Flagged channels: {warned} · Updated: {date}"
+  Highlight Changed Settings Label: Changed
 Tutorial:
   Skip: Skip
   Next: Next
@@ -2522,6 +2524,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Undo the last seek
   Redo Seek: Redo an undone seek
   New Incognito Tab: Create a new incognito tab
+  Shortcuts Label: Shortcuts
 CommandPalette:
   Title: Command palette
   Open: Open command palette

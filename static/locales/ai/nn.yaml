@@ -510,6 +510,7 @@ Settings:
       Memory: minne
       Network: nettverk
       Disk: disk
+    Label: Yting
   Return to Settings Menu: Tilbake til innstillingsmenyen
   General Settings:
     Invidious Instance Username: 'Brukarnamn for instansen'
@@ -1831,6 +1832,7 @@ Settings:
     Downloading: Lastar ned listene…
     Failed to Download: Klarte ikkje å laste ned listene
     Loaded Status: "Blokkerte kanalar: {blocked} · Flagga kanalar: {warned} · Oppdatert: {date}"
+  Highlight Changed Settings Label: Endra
 Tutorial:
   Skip: Hopp over
   Next: Neste
@@ -2922,6 +2924,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Angre siste hopp
   Redo Seek: Gjer om eit angra hopp
   New Incognito Tab: Opprett ei ny inkognitofane
+  Shortcuts Label: Snarvegar
 CommandPalette:
   Title: Kommandopalett
   Open: Opne kommandopaletten

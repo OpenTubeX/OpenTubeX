@@ -521,6 +521,7 @@ Settings:
       Memory: памяць
       Network: сетка
       Disk: дыск
+    Label: Прадукцыйнасць
   General Settings:
     Invidious Instance Username: 'Імя карыстальніка экзэмпляра'
     Invidious Instance Password: 'Пароль экзэмпляра'
@@ -1720,6 +1721,7 @@ Settings:
     Downloading: Спампоўванне спісаў…
     Failed to Download: Не ўдалося спампаваць спісы
     Loaded Status: "Заблакаваныя каналы: {blocked} · Пазначаныя каналы: {warned} · Абноўлена: {date}"
+  Highlight Changed Settings Label: Змененыя
 Tutorial:
   Skip: Прапусціць
   Next: Далей
@@ -2636,6 +2638,7 @@ KeyboardShortcutPrompt:
   Undo Seek: Адмяніць апошнюю перамотку
   Redo Seek: Паўтарыць адмененую перамотку
   New Incognito Tab: Стварыць новую ўкладку інкогніта
+  Shortcuts Label: Спалучэнні
 CommandPalette:
   Title: Палітра каманд
   Open: Адкрыць палітру каманд
