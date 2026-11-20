@@ -142,7 +142,9 @@ final class YtDlpRuntime {
         INSTALL_LOCK.readLock().lockInterruptibly();
         RunningProcess running = null;
         boolean completed = false;
+        YtDlpCookies.Checkout cookies = null;
         try {
+            cookies = YtDlpCookies.checkOut(context.getCacheDir(), args);
             File installation = new File(context.getNoBackupFilesDir(), "youtubedl-android");
             File entryPoint = YtDlpCodeCache.prepare(new File(installation, "yt-dlp/yt-dlp"), new File(installation, "yt-dlp-code"));
             String nativeDir = context.getApplicationInfo().nativeLibraryDir;
@@ -155,7 +157,7 @@ final class YtDlpRuntime {
                 entryPoint.getAbsolutePath(),
                 "--ignore-config", "--no-plugin-dirs", "--no-cache-dir", "--js-runtimes", "quickjs:" + nativeDir + "/libqjs.so",
                 "--ffmpeg-location", nativeDir + "/libffmpeg.so"));
-            command.addAll(args);
+            command.addAll(cookies.args);
             // Last option wins over custom arguments; --geo-verification-proxy must
             // follow the same policy instead of escaping through a second proxy.
             command.addAll(asList("--proxy", AndroidProxy.authenticatedUrl(), "--geo-verification-proxy", AndroidProxy.authenticatedUrl()));
@@ -210,6 +212,7 @@ final class YtDlpRuntime {
                 if (!completed) running.stop();
                 if (id != null) PROCESSES.remove(id, running);
             }
+            if (cookies != null) cookies.release();
             INSTALL_LOCK.readLock().unlock();
         }
     }

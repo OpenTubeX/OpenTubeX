@@ -23,6 +23,14 @@ public class YtDlpArgumentsTest {
         }
     }
 
+    @Test public void acceptsOnlyTheLocalPlaylistIndexMetadataAction() {
+        List<String> args = List.of("--parse-metadata", YtDlpArguments.LOCAL_PLAYLIST_INDEX_METADATA);
+        assertEquals(args, YtDlpArguments.validate(new JSONArray(args)));
+        // Other actions can set the fields that name output files.
+        assertThrows(IllegalArgumentException.class, () -> YtDlpArguments.validate(new JSONArray().put("--parse-metadata").put("title:(?P<filepath>.+)")));
+        assertThrows(IllegalArgumentException.class, () -> YtDlpArguments.validate(new JSONArray().put("--parse-metadata=title:(?P<ext>.+)")));
+    }
+
     @Test public void treatsValuesAsValuesAndRejectsMalformedOptions() {
         assertEquals(List.of("--match-title", "--example"), YtDlpArguments.validate(new JSONArray().put("--match-title=--example")));
         assertThrows(IllegalArgumentException.class, () -> YtDlpArguments.validate(new JSONArray().put("--format").put(23)));

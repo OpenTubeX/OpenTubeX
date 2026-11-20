@@ -30,8 +30,11 @@ final class YtDlpArguments {
         "--playlist-end", "--playlist-start", "--playlist-items", "--socket-timeout", "--retries",
         "--fragment-retries", "--concurrent-fragments", "--limit-rate", "--sleep-interval",
         "--max-sleep-interval", "--sleep-requests", "--geo-bypass-country", "--user-agent",
-        "--progress-template", "--referer", "--add-headers", "--proxy", "--trim-filenames"
+        "--progress-template", "--referer", "--add-headers", "--proxy", "--trim-filenames", "--parse-metadata"
     );
+    // Other metadata actions can set any field, including ones that name output files.
+    // This one numbers local playlist files, like LOCAL_PLAYLIST_INDEX_METADATA in src/ytDlpArguments.js.
+    static final String LOCAL_PLAYLIST_INDEX_METADATA = "original_url:[?&]index=(?P<opentubex_playlist_index>[0-9]+)(?:&|$)";
 
     static List<String> validate(JSONArray input) {
         if (input == null || input.length() > 2000) throw new IllegalArgumentException("invalid-arguments");
@@ -62,6 +65,8 @@ final class YtDlpArguments {
                 }
                 result.add(option);
                 result.add(template);
+            } else if (option.equals("--parse-metadata") && !value.equals(LOCAL_PLAYLIST_INDEX_METADATA)) {
+                throw new IllegalArgumentException("unsupported-custom-argument");
             } else {
                 result.add(option);
                 result.add(value);

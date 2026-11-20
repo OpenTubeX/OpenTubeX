@@ -622,7 +622,7 @@ test.describe('video downloads', () => {
       mode: 'video'
     }))
 
-    await expect.poll(async () => readFile(capturedArgs, 'utf8').catch(() => '')).toContain('_CON.txt/%(autonumber)03d')
+    await expect.poll(async () => readFile(capturedArgs, 'utf8').catch(() => '')).toContain('_CON.txt/%(opentubex_playlist_index)03d')
   })
 
   test('rejects invalid and oversized local playlist video lists', async ({ page }) => {
