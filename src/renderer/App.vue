@@ -1887,7 +1887,11 @@ onMounted(async () => {
     // Watch stats load with the settings, before the profiles.
     if (store.getters.getEnableWatchStats) store.dispatch('grabWatchStats')
   })
-  dataScopeReady.then(() => { dataScopeApplied = true })
+  dataScopeReady.then(() => {
+    dataScopeApplied = true
+    // A switch during startup loads the data of the profile switched to now.
+    store.dispatch('loadDataScope')
+  })
   // The library needs only settings (history retention) and profiles
   // (subscriptions). Load it during the remaining startup work instead of after.
   const libraryReady = Promise.all([
