@@ -4126,6 +4126,7 @@ Platforms:
     Archive: "Past broadcasts"
     Highlight: "Highlights"
     Upload: "Uploads"
+  Anonymous: "Anonymous"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} replied to {commentAuthor}"
   Like: "Like"

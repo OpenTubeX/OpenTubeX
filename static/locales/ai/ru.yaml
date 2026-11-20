@@ -2877,6 +2877,7 @@ Platforms:
     Archive: "Прошедшие трансляции"
     Highlight: "Лучшие моменты"
     Upload: "Загрузки"
+  Anonymous: "Аноним"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} ответил(а) пользователю {commentAuthor}"
   Like: "Нравится"

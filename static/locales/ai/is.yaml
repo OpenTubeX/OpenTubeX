@@ -2925,6 +2925,7 @@ Platforms:
     Archive: "Fyrri útsendingar"
     Highlight: "Hápunktar"
     Upload: "Innsendingar"
+  Anonymous: "Nafnlaust"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} svaraði {commentAuthor}"
   Like: "Líkar við"

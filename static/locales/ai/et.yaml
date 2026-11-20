@@ -2912,6 +2912,7 @@ Platforms:
     Archive: "Varasemad ülekanded"
     Highlight: "Esiletõstetud hetked"
     Upload: "Üleslaaditud"
+  Anonymous: "Anonüümne"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} vastas kasutajale {commentAuthor}"
   Like: "Meeldib"

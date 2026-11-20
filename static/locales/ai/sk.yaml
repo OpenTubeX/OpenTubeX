@@ -2909,6 +2909,7 @@ Platforms:
     Archive: "Minulé prenosy"
     Highlight: "Najlepšie momenty"
     Upload: "Nahrané videá"
+  Anonymous: "Anonymné"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} odpovedal(a) používateľovi {commentAuthor}"
   Like: "Páči sa mi to"

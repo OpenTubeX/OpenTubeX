@@ -2946,6 +2946,7 @@ Platforms:
     Archive: "Минали излъчвания"
     Highlight: "Акценти"
     Upload: "Качени видеа"
+  Anonymous: "Анонимно"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} отговори на {commentAuthor}"
   Like: "Харесване"

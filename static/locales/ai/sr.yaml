@@ -2998,6 +2998,7 @@ Platforms:
     Archive: "Прошли преноси"
     Highlight: "Истакнуто"
     Upload: "Отпремања"
+  Anonymous: "Анонимно"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} је одговорио/ла кориснику {commentAuthor}"
   Like: "Свиђа ми се"

@@ -2912,6 +2912,7 @@ Platforms:
     Archive: "過往直播"
     Highlight: "精彩片段"
     Upload: "上傳"
+  Anonymous: "匿名"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} 回覆了 {commentAuthor}"
   Like: "喜歡"

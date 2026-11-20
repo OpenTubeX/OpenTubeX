@@ -3306,6 +3306,7 @@ Platforms:
     Archive: "Tidlegare sendingar"
     Highlight: "Høgdepunkt"
     Upload: "Opplastingar"
+  Anonymous: "Anonym"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} svarte {commentAuthor}"
   Like: "Lik"

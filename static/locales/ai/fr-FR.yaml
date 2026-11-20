@@ -2908,6 +2908,7 @@ Platforms:
     Archive: "Diffusions passées"
     Highlight: "Temps forts"
     Upload: "Mises en ligne"
+  Anonymous: "Anonyme"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} a répondu à {commentAuthor}"
   Like: "J’aime"

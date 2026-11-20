@@ -4117,6 +4117,7 @@ Platforms:
     Archive: "Vergangene Übertragungen"
     Highlight: "Highlights"
     Upload: "Uploads"
+  Anonymous: "Anonym"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} hat {commentAuthor} geantwortet"
   Like: "Mag ich"

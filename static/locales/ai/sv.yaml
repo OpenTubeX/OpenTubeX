@@ -2909,6 +2909,7 @@ Platforms:
     Archive: "Tidigare sändningar"
     Highlight: "Höjdpunkter"
     Upload: "Uppladdningar"
+  Anonymous: "Anonym"
 YouTube Account:
   "{author} replied to {commentAuthor}": "{author} svarade {commentAuthor}"
   Like: "Gilla"

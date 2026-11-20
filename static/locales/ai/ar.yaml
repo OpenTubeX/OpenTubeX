@@ -2950,6 +2950,7 @@ Platforms:
     Archive: "البثوث السابقة"
     Highlight: "المقاطع البارزة"
     Upload: "الفيديوهات المرفوعة"
+  Anonymous: "مجهول"
 YouTube Account:
   "{author} replied to {commentAuthor}": "ردّ {author} على {commentAuthor}"
   Like: "إعجاب"
