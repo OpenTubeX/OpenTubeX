@@ -7131,6 +7131,7 @@ function registerMediaSessionHandlers() {
     play: (details = {}) => {
       const videoElement = video.value
       if (!videoElement) return
+      setFormatSwitchPaused(false)
       backgroundPlayRequested = details.allowBackground === true
       const playPromise = videoElement.play()
       playPromise.catch(() => {
@@ -7145,6 +7146,7 @@ function registerMediaSessionHandlers() {
       const wasPaused = videoElement.paused
       mediaSessionStopped = true
       initialAutoplayCanceled = true
+      setFormatSwitchPaused(true)
       if (wasPaused) videoElement.autoplay = false
       videoElement.pause()
       if (seekingIsPossible.value && Number.isFinite(videoElement.duration)) {
@@ -12695,7 +12697,9 @@ async function loadPlaybackSource(url, startTime, mimeType) {
   if (process.env.IS_CAPACITOR && !process.env.IS_IOS &&
     !props.localFilePlayback && mimeType === MANIFEST_TYPE_SABR &&
     mediaElement.autoplay && !initialAutoplayCanceled &&
-    mediaElement.played.length === 0 && isActiveTab.value) {
+    mediaElement.played.length === 0 && isActiveTab.value &&
+    // A format switch that resumes playback keeps its running service.
+    (pendingFormatSwitchState === null || pendingFormatSwitchState.wasPaused || pendingFormatSwitchState.awaitingAutoplay)) {
     // Android cannot start a fresh playback service from a hidden activity.
     // Metadata can finish after the app-state pause sweep, so defer this
     // initial load until foreground protection can be established, unless
@@ -13213,10 +13217,9 @@ watch(
       pendingFormatSwitchState.playbackPosition = 0
     }
 
+    const switchState = pendingFormatSwitchState
     const {
       oldFormat: sourceFormat,
-      wasPaused,
-      awaitingAutoplay,
       playbackPosition,
       useAutoQuality,
       audioBandwidth,
@@ -13317,7 +13320,8 @@ watch(
     }
 
     pendingFormatSwitchState = null
-    if (wasPaused || (awaitingAutoplay && initialAutoplayCanceled) || props.pauseForStreamRecovery) {
+    // A pause during the switch updates its state.
+    if (switchState.wasPaused || (switchState.awaitingAutoplay && initialAutoplayCanceled) || props.pauseForStreamRecovery) {
       video_.pause()
     } else {
       video_.play()
@@ -13596,6 +13600,7 @@ function isPaused() {
 
 function pause() {
   initialAutoplayCanceled = true
+  setFormatSwitchPaused(true)
   const videoElement = video.value
   if (!videoElement) return
   const wasPaused = videoElement.paused
@@ -13605,7 +13610,19 @@ function pause() {
   if (wasPaused) handlePause()
 }
 
+/**
+ * Records a play or pause request while a format switch loads, as the switch
+ * otherwise restores the state from before it started.
+ * @param {boolean} paused
+ */
+function setFormatSwitchPaused(paused) {
+  if (pendingFormatSwitchState === null) return
+  pendingFormatSwitchState.wasPaused = paused
+  if (!paused) pendingFormatSwitchState.awaitingAutoplay = false
+}
+
 function play() {
+  setFormatSwitchPaused(false)
   return video.value.play()
 }
 

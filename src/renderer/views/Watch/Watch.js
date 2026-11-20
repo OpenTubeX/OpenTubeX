@@ -70,6 +70,7 @@ import { requestQueuedPlayback, takeQueuedPlayback } from '../../helpers/queuedP
 import { parseLocalVideoGames } from '../../helpers/video-games'
 import { parseLocalVideoDescriptionSections } from '../../helpers/video-description-sections'
 import { escapeHTML } from '../../helpers/feed-metadata'
+import { isAppHidden } from '../../helpers/appVisibility.js'
 import { parseLocalVideoMusicTracks, parseVideoMusicTracks } from '../../helpers/video-music'
 import { saveChannelPreference, saveChannelPreferenceWithToast } from '../../helpers/channel-preferences'
 import {
@@ -651,6 +652,8 @@ export default defineComponent({
       // Holds the phone comment preview still, since redrawing it costs power
       // on top of the video frames.
       videoPlaying: false,
+      /** @type {'dash'|'legacy'|null} the format to restore once the app is visible again, while audio plays in its place */
+      formatBeforeBackground: null,
       // The video and channel last added to the YouTube account's watch history.
       youTubeHistoryKey: null,
       recommendationWatchSession: null,
@@ -1791,6 +1794,7 @@ export default defineComponent({
     this.shortsNavigation.addListeners()
     window.addEventListener('resize', this.updateShortsViewportHeight)
     window.addEventListener('resize', this.updateTheatreLayoutAvailability)
+    document.addEventListener('visibilitychange', this.handleBackgroundAudioVisibility)
     this.removeTabLifecycle = this.tabLifecycle?.register(this.tabId, {
       activate: this.activateWatchRuntime,
       deactivate: this.deactivateWatchRuntime,
@@ -1834,6 +1838,7 @@ export default defineComponent({
     this.shortsNavigation.removeListeners()
     window.removeEventListener('resize', this.updateShortsViewportHeight)
     window.removeEventListener('resize', this.updateTheatreLayoutAvailability)
+    document.removeEventListener('visibilitychange', this.handleBackgroundAudioVisibility)
     this.theatreModeAnimator.cancel()
     this.clearLiveReminderStartTimer()
     this.removeLiveReminderUpdatedListener?.()
@@ -2572,15 +2577,51 @@ export default defineComponent({
      */
     applyBackgroundStart() {
       const backgroundStart = this.watchNavigation?.takeBackgroundStart?.(this.tabRoute.fullPath) === true
-      this.activeFormat = backgroundStart || this.watchNavigation?.audioOnlySession?.value === true
+      const format = backgroundStart || this.watchNavigation?.audioOnlySession?.value === true
         ? 'audio'
         : this.defaultVideoFormat
+      // A video that starts in the background also plays audio until the app is visible.
+      this.formatBeforeBackground = this.formatBeforeBackground !== null && format !== 'audio' && isAppHidden() ? format : null
+      this.activeFormat = this.formatBeforeBackground === null ? format : 'audio'
       if (backgroundStart) {
         this.queuedPlaybackVideoId = this.tabRoute.params.id
         // The user chose to play it in the mini player, unlike a background tab.
         this.hasBeenPresented = true
       }
       return backgroundStart
+    },
+
+    /**
+     * Plays audio formats while the app is in the background or the screen
+     * is off, where nobody can see the video, if the user enabled it.
+     * Android Picture-in-Picture keeps the app visible, so it keeps the video.
+     */
+    switchToAudioInBackground() {
+      if (!process.env.IS_CAPACITOR || process.env.IS_IOS || !isAppHidden() || this.formatBeforeBackground !== null ||
+        !this.$store.getters.getSwitchToAudioInBackground ||
+        // Playback pauses in the background without it.
+        !this.$store.getters.getContinuePlaybackWhenScreenIsLocked ||
+        this.activeFormat === 'audio' || !this.audioFormatAvailable || this.castingActive ||
+        !this.videoPlaying || !this.isPlaybackPresented()) return
+      this.formatBeforeBackground = this.activeFormat
+      this.activeFormat = 'audio'
+    },
+
+    handleBackgroundAudioVisibility() {
+      if (isAppHidden()) {
+        this.switchToAudioInBackground()
+        return
+      }
+      const format = this.formatBeforeBackground
+      if (format === null) return
+      this.formatBeforeBackground = null
+      // Keep audio that Play in Background chose, or a format chosen since.
+      if (this.activeFormat !== 'audio' || this.watchNavigation?.audioOnlySession?.value === true) return
+      if (format === 'legacy' && this.legacyFormatAvailable) {
+        this.enableLegacyFormat()
+      } else {
+        this.enableDashFormat()
+      }
     },
 
     /** Plays the current video with audio only, as Play in Background does. */
@@ -5470,6 +5511,8 @@ export default defineComponent({
       // Resuming consumes the recovery pause, so later format switches or
       // reloads keep playing while the notice stays visible.
       if (!this.isLoading) this.streamRecoveryPausesPlayback = false
+      // Playback can start from the media notification in the background.
+      this.switchToAudioInBackground()
     },
     handlePlayerSeeking() {
       this.skipNextPlaybackTick = true

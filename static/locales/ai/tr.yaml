@@ -918,6 +918,7 @@ Settings:
       Unavailable: Oynatma kontrolleri ayarlanamadı.
     yt-dlp Streaming: "yt-dlp Akışı"
     Continue Playback When Screen Is Locked: 'Ekran kilitliyken oynatmaya devam et'
+    Switch to Audio in Background: 'Arka planda ses biçimlerine geç'
     Ignore Headphone Controls: 'Kulaklık kontrollerini yok say'
     Music Visualizer: Müzik görselleştirici
     Automatically Open Chapters: Bölümleri Otomatik Olarak Aç
@@ -2387,6 +2388,7 @@ Tooltips:
     Normalize Loudness: 'Çoğundan daha yüksek sesli videoların sesini kısar, böylece ses düzeyi videolar arasında sıçramaz. Sessiz videolar ses düzeylerini korur. Yalnızca Yerel API ile yüklenen videolarda çalışır.'
     Pause on Stream Recovery: "Video akışı başarısız olduğunda ve oynatıcı onu yeniden yüklediğinde ya da başka bir biçime veya motora geçtiğinde oynatma duraklatılır ve hata siz kapatana kadar oynatıcının üstünde kalır. Devre dışı bırakıldığında oynatma devam eder ve hata kısa süreliğine bildirim olarak görünür."
     Continue Playback When Screen Is Locked: 'Sesi arka planda çalmaya devam eder ve Android medya kontrolleri sağlar. Uygulama artık görünür olmadığında duraklatmak için bunu kapatın.'
+    Switch to Audio in Background: 'Uygulama arka plandayken veya ekran kapalıyken ses biçimlerini oynatır; bu da veri ve pilden tasarruf sağlar. Resim içinde Resim videoyu korur. Uygulamayı yeniden açtığınızda video geri gelir. Ekran kilitliyken oynatmanın devam etmesini gerektirir.'
     Ignore Headphone Controls: 'Bluetooth cihazlarından, kablolu kulaklıklardan ve klavyelerdeki medya tuşlarından gelen oynatma, duraklatma ve atlama komutlarını yok sayar; böylece kulaklığa yanlışlıkla dokunmak oynatmayı kesmez. Uygulamadaki ve medya bildirimindeki kontroller çalışmaya devam eder.'
     Enable Caption Translations: Etkinleştirildiğinde ve videoda eşleşen özgün bir parça olmadığında alt yazı düğmesi ile C kısayolu, tercih edilen alt yazı diline otomatik çevrilmiş parçayı seçer.
     Use Quick Playback Speed Bar: Sağdaki oynatıcı denetimlerinde hızlı oynatma hızı çubuğunu gösterir. Kanal başına oynatma hızını elle kaydetme etkinse çubukta geçerli kanalın hızını kaydetme düğmesi de bulunur.

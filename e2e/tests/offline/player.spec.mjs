@@ -1,6 +1,7 @@
 import { goTo, sel, setPlayerFullscreen, setWindowSize, test, expect } from '../../helpers/app.mjs'
 import { activeTab, expectDockedToBottomRight, findWatchComponent, openMockedVideo, waitForPlayback, openCaptionLanguages, openPlayerOptions } from '../../helpers/player.mjs'
-import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
+import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
+import { DEMO_MEDIA_URL } from '../../helpers/media.mjs'
 
 // These used to live in the network suite, where they only ran when YouTube
 // served both the watch page and a media stream. Everything they need is the
@@ -478,6 +479,43 @@ test('seekbar dragging preserves paused and playing states', { tag: '@scale' }, 
     const duration = await video.evaluate(element => element.duration)
     await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(duration * 0.58)
     expect(await video.evaluate(element => element.currentTime)).toBeLessThan(duration * 0.7)
+    expect(await video.evaluate(element => element.paused)).toBe(paused)
+  }
+})
+
+test('play and pause requests during a format switch decide playback after the switch', async ({ app, page }) => {
+  const video = await openDemoVideo({ app, page })
+  const view = await watchViewHandle(page)
+  await view.evaluate((view, url) => {
+    view.manifestSrc = url
+    view.manifestMimeType = 'video/webm'
+  }, DEMO_MEDIA_URL)
+  await expect.poll(() => view.evaluate(view => view.$refs.player.hasLoaded)).toBe(true)
+  await waitForPlayback(page)
+  await page.locator(`${activeTab} .ftVideoPlayer`).evaluate(element => {
+    const player = element.ui.getControls().getPlayer()
+    const unload = player.unload.bind(player)
+    player.unload = async (...args) => {
+      await new Promise(resolve => { window.finishSwitchUnload = resolve })
+      return unload(...args)
+    }
+  })
+  // The media notification controls playback through the player while the switch loads.
+  for (const [format, requests] of [['audio', ['pause']], ['dash', ['pause', 'play']]]) {
+    await view.evaluate((view, format) => { view.activeFormat = format }, format)
+    await expect.poll(() => page.evaluate(() => typeof window.finishSwitchUnload)).toBe('function')
+    await view.evaluate((view, requests) => {
+      for (const request of requests) view.$refs.player[request]()
+    }, requests)
+    await page.evaluate(() => {
+      const finish = window.finishSwitchUnload
+      delete window.finishSwitchUnload
+      finish()
+    })
+    await expect.poll(() => view.evaluate(view => view.$refs.player.hasLoaded)).toBe(true)
+    const paused = requests.at(-1) === 'pause'
+    if (!paused) await expect.poll(() => video.evaluate(element => !element.paused && element.currentTime > 0)).toBe(true)
+    await page.waitForTimeout(500)
     expect(await video.evaluate(element => element.paused)).toBe(paused)
   }
 })

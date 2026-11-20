@@ -1030,6 +1030,7 @@ Settings:
     Show Seek Bar Filmstrip: "Montri filmstrion de la serĉbreto"
     Pause on Stream Recovery: Paŭzigi je restariĝo de fluo
     Continue Playback When Screen Is Locked: Daŭrigi ludadon kiam la ekrano estas ŝlosita
+    Switch to Audio in Background: 'Ŝanĝi al sonformatoj en la fono'
     Ignore Headphone Controls: 'Ignori kontrolojn de aŭdiloj'
     Voice-over Translation:
       Title: Voĉa traduko
@@ -2450,6 +2451,7 @@ Tooltips:
     Show Seek Bar Filmstrip: "Treni la tenilon de la serĉbreto montras strion de kadroj ĉirkaŭ la loko, kien vi saltos, kaj tiri supren sur ĝin ebligas precizan saltadon. Se malŝaltita, trenado montras unu bildeton, kiel dum ŝvebado."
     Pause on Stream Recovery: Kiam la videofluo malsukcesas kaj la ludilo reŝargas ĝin aŭ ŝanĝas al alia formo aŭ motoro, paŭzigi la ludadon kaj teni la eraron supre de la ludilo ĝis vi fermas ĝin. Kiam malŝaltita, la ludado daŭras kaj la eraro aperas mallonge kiel sciigo.
     Continue Playback When Screen Is Locked: Daŭrigas la sonludadon fone kaj provizas Android-aŭdvidajn regilojn. Malŝaltu ĉi tion por paŭzigi kiam la aplikaĵo ne plu estas videbla.
+    Switch to Audio in Background: 'Ludas sonformatojn dum la aplikaĵo estas en la fono aŭ la ekrano estas malŝaltita, kio ŝparas datumojn kaj baterion. Bildo-en-bildo konservas la videon. La video revenas kiam vi denove malfermas la aplikaĵon. Postulas daŭrigi la ludadon kiam la ekrano estas ŝlosita.'
     Ignore Headphone Controls: 'Ignoras komandojn por ludi, paŭzi kaj salti el Bluetooth-aparatoj, dratitaj aŭdiloj kaj aŭdvidaj klavoj de klavaroj, por ke hazardaj frapetoj sur aŭdiloj ne interrompu la ludadon. La regiloj en la aplikaĵo kaj en la aŭdvida sciigo plu funkcias.'
     Voice-over Translation: Sendas la identigilon, daŭron kaj elektitan lingvon de la videaĵo al la neoficiala voĉtraduka servo de Yandex kiam vi petas tradukon. Defaŭlte malŝaltita.
     Hold to Speed Up: Tenu premita la spacoklavon aŭ la maldekstran musbutonon super la ludilo por provizore multobligi la aktualan ludrapidon per la elektita valoro.

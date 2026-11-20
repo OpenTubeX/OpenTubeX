@@ -71,6 +71,7 @@ function absoluteSeekFixture(props) {
     seekBarMouseDown: false,
     resumeAutoplayAfterSeek: false,
     initialAutoplayCanceled: false,
+    pendingFormatSwitchState: null,
     playCalls: 0,
     videoLayoutReady: { value: true },
     applyPendingPresentationModes() {},
@@ -90,7 +91,7 @@ function absoluteSeekFixture(props) {
       setPlaybackState() {}
     },
   }
-  const functions = ['pause', 'setCurrentTime', 'rememberSeekPosition', 'registerMediaSessionHandlers', 'handleSeekBarInput', 'handleSeekBarMouseChange', 'restoreSeekAutoplay', 'handleCanPlay'].map(name => {
+  const functions = ['pause', 'setFormatSwitchPaused', 'setCurrentTime', 'rememberSeekPosition', 'registerMediaSessionHandlers', 'handleSeekBarInput', 'handleSeekBarMouseChange', 'restoreSeekAutoplay', 'handleCanPlay'].map(name => {
     const match = source.match(new RegExp(`^function ${name}\\([^]*?\\n}`, 'm'))
     assert.ok(match, `missing ${name}`)
     return match[0]

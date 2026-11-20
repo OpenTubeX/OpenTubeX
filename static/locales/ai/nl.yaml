@@ -925,6 +925,7 @@ Settings:
       Unavailable: De afspeelbediening kon niet worden aangepast.
     yt-dlp Streaming: "yt-dlp-streaming"
     Continue Playback When Screen Is Locked: 'Doorgaan met afspelen wanneer het scherm is vergrendeld'
+    Switch to Audio in Background: 'Op de achtergrond overschakelen naar audioformaten'
     Ignore Headphone Controls: 'Hoofdtelefoonbediening negeren'
     Music Visualizer: Muziekvisualisatie
     Automatically Open Chapters: Hoofdstukken automatisch openen
@@ -2454,6 +2455,7 @@ Tooltips:
     Normalize Loudness: 'Zet video''s die luider zijn dan de meeste zachter, zodat het volume niet verspringt tussen video''s. Zachte video''s behouden hun volume. Werkt alleen voor video''s die met de lokale API zijn geladen.'
     Pause on Stream Recovery: "Wanneer de videostream mislukt en de speler deze opnieuw laadt of overschakelt naar een ander formaat of een andere engine, wordt het afspelen gepauzeerd en blijft de fout bovenaan de speler staan tot je deze sluit. Indien uitgeschakeld, gaat het afspelen door en verschijnt de fout kort als melding."
     Continue Playback When Screen Is Locked: 'Blijft audio op de achtergrond afspelen en biedt Android-mediabediening. Schakel dit uit om te pauzeren wanneer de app niet meer zichtbaar is.'
+    Switch to Audio in Background: 'Speelt audioformaten af terwijl de app op de achtergrond draait of het scherm uit is, wat data en batterij bespaart. Beeld-in-beeld behoudt de video. De video komt terug als je de app weer opent. Vereist dat het afspelen doorgaat als het scherm vergrendeld is.'
     Ignore Headphone Controls: 'Negeert afspeel-, pauzeer- en overslaanopdrachten van Bluetooth-apparaten, bedrade koptelefoons en mediatoetsen op toetsenborden, zodat per ongeluk tikken op oordopjes het afspelen niet onderbreekt. Bediening in de app en in de mediamelding blijft werken.'
     Enable Caption Translations: Als dit is ingeschakeld en de video geen overeenkomend oorspronkelijk ondertitelingsspoor heeft, geven de ondertitelingsknop en sneltoets C de voorkeur aan een automatisch vertaald spoor in de voorkeurstaal voor ondertiteling.
     Use Quick Playback Speed Bar: Toont rechts in de spelerbediening een balk om snel de afspeelsnelheid te kiezen. Als het handmatig opslaan van afspeelsnelheid per kanaal is ingeschakeld, bevat de balk ook een knop om de snelheid voor het huidige kanaal op te slaan.

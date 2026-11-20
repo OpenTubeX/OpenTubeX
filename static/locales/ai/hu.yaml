@@ -918,6 +918,7 @@ Settings:
       Unavailable: Nem sikerült módosítani a lejátszás vezérlőit.
     yt-dlp Streaming: "yt-dlp streamelés"
     Continue Playback When Screen Is Locked: 'Lejátszás folytatása zárolt képernyőnél'
+    Switch to Audio in Background: 'Váltás hangformátumokra a háttérben'
     Ignore Headphone Controls: 'Fejhallgató-vezérlők figyelmen kívül hagyása'
     Music Visualizer: Zenevizualizáció
     Automatically Open Chapters: Fejezetek automatikus megnyitása
@@ -2387,6 +2388,7 @@ Tooltips:
     Normalize Loudness: 'Lehalkítja a legtöbbnél hangosabb videókat, hogy a hangerő ne ugráljon a videók között. A halk videók megtartják a hangerejüket. Csak a helyi API-val betöltött videóknál működik.'
     Pause on Stream Recovery: "Ha a videostream meghiúsul, és a lejátszó újratölti, vagy másik formátumra vagy motorra vált, a lejátszás szünetel, és a hiba a lejátszó tetején marad, amíg el nem veted. Kikapcsolva a lejátszás folytatódik, és a hiba röviden értesítésként jelenik meg."
     Continue Playback When Screen Is Locked: 'A háttérben folytatja a hang lejátszását, és Android-médiavezérlőket biztosít. Kapcsold ki, ha az alkalmazás elrejtésekor szüneteltetni szeretnéd a lejátszást.'
+    Switch to Audio in Background: 'Hangformátumokat játszik le, amíg az alkalmazás a háttérben fut, vagy a képernyő ki van kapcsolva, így adatot és akkumulátort takarít meg. A kép a képben mód megtartja a videót. A videó visszatér, amikor újra megnyitod az alkalmazást. A lejátszás folytatása szükséges zárolt képernyőnél.'
     Ignore Headphone Controls: 'Figyelmen kívül hagyja a Bluetooth-eszközök, a vezetékes fejhallgatók és a billentyűzetek médiabillentyűinek lejátszás, szünet és ugrás parancsait, hogy a fülhallgató véletlen megérintése ne szakítsa meg a lejátszást. Az alkalmazás és a médiaértesítés vezérlői továbbra is működnek.'
     Enable Caption Translations: Bekapcsolva a feliratok gomb és a C billentyűparancs az előnyben részesített feliratnyelvre automatikusan lefordított sávot választja, ha a videóhoz nincs ezen a nyelven eredeti sáv.
     Use Quick Playback Speed Bar: Gyors lejátszásisebesség-sáv megjelenítése a lejátszó jobb oldali vezérlői között. Ha engedélyezett a lejátszási sebesség csatornánkénti kézi mentése, a sávon az aktuális csatorna sebességének mentésére szolgáló gomb is megjelenik.

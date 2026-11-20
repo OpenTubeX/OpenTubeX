@@ -57,6 +57,16 @@
           :tooltip="t('Tooltips.Player Settings.Continue Playback When Screen Is Locked')"
           @change="updateContinuePlaybackWhenScreenIsLocked"
         />
+        <FtToggleSwitch
+          v-if="IS_CAPACITOR && !IS_IOS"
+          :label="t('Settings.Player Settings.Switch to Audio in Background')"
+          :compact="true"
+          :default-value="store.getters.getSwitchToAudioInBackground"
+          :disabled="!continuePlaybackWhenScreenIsLocked"
+          setting-key="switchToAudioInBackground"
+          :tooltip="t('Tooltips.Player Settings.Switch to Audio in Background')"
+          @change="store.dispatch('updateSwitchToAudioInBackground', $event)"
+        />
       </div>
       <div class="switchColumn">
         <FtToggleSwitch
