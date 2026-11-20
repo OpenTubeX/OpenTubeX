@@ -1054,6 +1054,7 @@ Settings:
     Timestamp Notes:
       Enable: "Aktifkan Catatan Stempel Waktu"
       Obsidian Vault: Brankas Obsidian
+    Double-Tap With Two Fingers to Skip Chapters: "Ketuk dua kali dengan dua jari untuk melompati bab"
   Channel Settings:
     Channel Settings: Pengaturan Saluran
     Channel Settings Description: Ingat pengaturan yang Anda pilih saat menonton untuk setiap saluran, lalu terapkan lagi saat Anda menonton video saluran tersebut berikutnya.
@@ -2438,6 +2439,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Meminta konfirmasi sebelum pramuat semua video dari daftar putar yang berisi lebih dari {count} video."
     Enable Timestamp Notes: "Menambahkan tombol pemutar dan pintasan N yang menjeda video serta membuka catatan yang menautkan ke momen saat ini. Catatan dapat disalin sebagai Markdown atau, di desktop, ditambahkan ke Obsidian."
     Obsidian Vault: Nama brankas Obsidian untuk catatan stempel waktu. Jika diatur, catatan dapat ditambahkan ke Obsidian. Catatan setiap video dikumpulkan dalam catatan yang dinamai sesuai video, di folder brankas untuk catatan baru.
+    Double-Tap With Two Fingers to Skip Chapters: "Ketuk dua kali dengan dua jari di sisi kanan video untuk melompat ke bab berikutnya, atau di sisi kiri untuk kembali ke awal bab saat ini. Dalam 3 detik pertama sebuah bab, sisi kiri justru menuju bab sebelumnya, sehingga mengulanginya akan mundur melalui bab-bab satu per satu."
   Download Settings:
     Download Folder: Video disimpan ke folder ini. Biarkan kosong untuk menggunakan folder Unduhan sistem.
     Global Additional yt-dlp Arguments: Argumen baris perintah tambahan yang diteruskan ke yt-dlp untuk setiap unduhan, misalnya --cookies-from-browser firefox.

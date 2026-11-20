@@ -1066,6 +1066,7 @@ Settings:
     Timestamp Notes:
       Enable: "הפעלת הערות עם חותמת זמן"
       Obsidian Vault: כספת Obsidian
+    Double-Tap With Two Fingers to Skip Chapters: "הקשה כפולה בשתי אצבעות לדילוג בין פרקים"
   Channel Settings:
     Channel Settings: הגדרות ערוץ
     Channel Settings Description: שמירת ההגדרות שנבחרו בזמן צפייה לכל ערוץ בנפרד, כדי שיוחלו שוב בצפייה הבאה באחד מסרטוניו.
@@ -2470,6 +2471,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "מבקש אישור לפני טעינה מראש של כל הסרטונים בפלייליסט עם יותר מ־{count} סרטונים."
     Enable Timestamp Notes: "מוסיף לנגן כפתור ואת קיצור הדרך N, שמשהים את הסרטון ופותחים הערה עם קישור לרגע הנוכחי. ניתן להעתיק הערות כ־Markdown או, במחשב, להוסיף אותן ל־Obsidian."
     Obsidian Vault: שם כספת Obsidian עבור הערות עם חותמת זמן. כשהוא מוגדר, ניתן להוסיף הערות ל־Obsidian. ההערות של כל סרטון נאספות בהערה הנקראת על שם הסרטון, בתיקיית ההערות החדשות של הכספת.
+    Double-Tap With Two Fingers to Skip Chapters: "הקישו פעמיים בשתי אצבעות על הצד הימני של הסרטון כדי לדלג לפרק הבא, או על הצד השמאלי כדי לחזור לתחילת הפרק הנוכחי. ב-3 השניות הראשונות של פרק, הצד השמאלי מעביר במקום זאת לפרק הקודם, כך שחזרה על הפעולה מחזירה אתכם אחורה פרק אחר פרק."
   Download Settings:
     Download Folder: הסרטונים נשמרים בתיקייה זו. השאירו ריק כדי להשתמש בתיקיית ההורדות של המערכת.
     Global Additional yt-dlp Arguments: ארגומנטים נוספים לשורת הפקודה שיועברו אל yt-dlp בכל הורדה, לדוגמה --cookies-from-browser firefox.

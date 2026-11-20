@@ -1051,6 +1051,7 @@ Settings:
     Timestamp Notes:
       Enable: "启用时间戳笔记"
       Obsidian Vault: Obsidian 仓库
+    Double-Tap With Two Fingers to Skip Chapters: "双指双击以跳转章节"
   Channel Settings:
     Channel Settings: 频道设置
     Channel Settings Description: 分别记住观看各频道时选择的设置，以便下次观看该频道的视频时再次应用。
@@ -2411,6 +2412,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "预加载超过 {count} 个视频的播放列表中的所有视频前请求确认。"
     Enable Timestamp Notes: "添加一个播放器按钮和 N 快捷键，用于暂停视频并打开一条链接到当前时刻的笔记。笔记可以复制为 Markdown，或在桌面版中添加到 Obsidian。"
     Obsidian Vault: 用于时间戳笔记的 Obsidian 仓库名称。设置后，可将笔记添加到 Obsidian。每个视频的笔记会汇总到一篇以该视频命名的笔记中，位于仓库的新笔记文件夹内。
+    Double-Tap With Two Fingers to Skip Chapters: "用双指双击视频右侧可跳到下一章，双击左侧可返回当前章节开头。在章节开始后的3秒内，左侧会改为跳到上一章，因此重复操作即可逐章后退。"
   Download Settings:
     Download Folder: 视频将保存到此文件夹。留空则使用系统的“下载”文件夹。
     Global Additional yt-dlp Arguments: 每次下载时传递给 yt-dlp 的额外命令行参数，例如 --cookies-from-browser firefox。

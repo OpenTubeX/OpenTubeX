@@ -1053,6 +1053,7 @@ Settings:
     Timestamp Notes:
       Enable: "Activează notele cu marcaj temporal"
       Obsidian Vault: Seif Obsidian
+    Double-Tap With Two Fingers to Skip Chapters: "Atingeți de două ori cu două degete pentru a sări între capitole"
   Channel Settings:
     Channel Settings: Setări pentru canale
     Channel Settings Description: Rețineți separat pentru fiecare canal setările alese în timpul vizionării, pentru a fi aplicate din nou când vizionați alt videoclip al canalului.
@@ -2466,6 +2467,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Cere confirmarea înainte de preîncărcarea tuturor videoclipurilor dintr-o listă de redare cu peste {count} videoclipuri."
     Enable Timestamp Notes: "Adaugă un buton în player și scurtătura N, care pun videoclipul pe pauză și deschid o notă cu link către momentul curent. Notele pot fi copiate ca Markdown sau, pe desktop, adăugate în Obsidian."
     Obsidian Vault: Numele seifului Obsidian pentru notele cu marcaj temporal. Când este setat, notele pot fi adăugate în Obsidian. Notele fiecărui videoclip sunt adunate într-o notă denumită după videoclip, în dosarul seifului pentru note noi.
+    Double-Tap With Two Fingers to Skip Chapters: "Atingeți de două ori cu două degete partea dreaptă a videoclipului pentru a trece la capitolul următor sau partea stângă pentru a reveni la începutul capitolului curent. În primele 3 secunde ale unui capitol, partea stângă duce în schimb la capitolul anterior, astfel încât, repetând gestul, vă deplasați înapoi prin capitole."
   Download Settings:
     Download Folder: Videoclipurile sunt salvate în acest folder. Lăsați necompletat pentru a folosi folderul Descărcări al sistemului.
     Global Additional yt-dlp Arguments: Argumente suplimentare de linie de comandă transmise către yt-dlp pentru fiecare descărcare, de exemplu --cookies-from-browser firefox.

@@ -669,6 +669,7 @@ Settings:
     Timestamp Notes:
       Enable: "Włącz notatki ze znacznikami czasu"
       Obsidian Vault: Sejf Obsidiana
+    Double-Tap With Two Fingers to Skip Chapters: "Dwukrotne stuknięcie dwoma palcami przełącza rozdziały"
   Channel Settings:
     Enable Channel Playback Settings: Włącz ustawienia odtwarzania dla kanałów
     Auto Save Changes: Automatycznie zapisuj zmiany
@@ -1643,6 +1644,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Prosi o potwierdzenie przed wstępnym wczytaniem wszystkich filmów z playlisty zawierającej więcej niż {count} filmów."
     Enable Timestamp Notes: "Dodaje do odtwarzacza przycisk i skrót N, które wstrzymują film i otwierają notatkę z linkiem do bieżącego momentu. Notatki można skopiować jako Markdown lub na komputerze dodać do Obsidiana."
     Obsidian Vault: Nazwa sejfu Obsidiana dla notatek ze znacznikami czasu. Po jej ustawieniu notatki można dodawać do Obsidiana. Notatki z każdego filmu są zbierane w notatce nazwanej tak jak film, w folderze sejfu na nowe notatki.
+    Double-Tap With Two Fingers to Skip Chapters: "Stuknij dwukrotnie dwoma palcami w prawą stronę filmu, aby przejść do następnego rozdziału, lub w lewą stronę, aby wrócić do początku bieżącego rozdziału. W ciągu pierwszych 3 sekund rozdziału lewa strona przenosi zamiast tego do poprzedniego rozdziału, więc powtarzając gest, cofasz się kolejno przez rozdziały."
   Download Settings:
     Global Additional yt-dlp Arguments: Dodatkowe argumenty wiersza poleceń przekazywane do yt-dlp przy każdym pobieraniu, na przykład --cookies-from-browser firefox.
     Concurrent Downloads: Maksymalna liczba zadań yt-dlp wykonywanych jednocześnie.

@@ -1054,6 +1054,7 @@ Settings:
     Timestamp Notes:
       Enable: "Galluogi Nodiadau Stamp Amser"
       Obsidian Vault: Claddgell Obsidian
+    Double-Tap With Two Fingers to Skip Chapters: "Tapio ddwywaith â dau fys i neidio rhwng penodau"
   Channel Settings:
     Channel Settings: Gosodiadau sianeli
     Channel Settings Description: Cofiwch y gosodiadau a ddewiswch wrth wylio ar gyfer pob sianel ar wahân, fel eu bod yn cael eu gosod eto y tro nesaf y byddwch yn gwylio un o'i fideos.
@@ -2449,6 +2450,7 @@ Tooltips:
     Ask Before Preloading Large Playlists: "Yn gofyn am gadarnhad cyn rhaglwytho pob fideo mewn rhestr chwarae gyda mwy na {count} fideo."
     Enable Timestamp Notes: "Yn ychwanegu botwm chwaraewr a'r llwybr byr N sy'n oedi'r fideo ac yn agor nodyn sy'n cysylltu â'r eiliad bresennol. Gellir copïo nodiadau fel Markdown neu, ar y bwrdd gwaith, eu hychwanegu at Obsidian."
     Obsidian Vault: Enw'r gladdgell Obsidian ar gyfer nodiadau stamp amser. Pan gaiff ei gosod, gellir ychwanegu nodiadau at Obsidian. Caiff nodiadau pob fideo eu casglu mewn nodyn wedi'i enwi ar ôl y fideo, yn ffolder y gladdgell ar gyfer nodiadau newydd.
+    Double-Tap With Two Fingers to Skip Chapters: "Tapiwch ochr dde'r fideo ddwywaith â dau fys i neidio i'r bennod nesaf, neu'r ochr chwith i ddychwelyd i ddechrau'r bennod gyfredol. Yn ystod 3 eiliad cyntaf pennod, mae'r ochr chwith yn mynd i'r bennod flaenorol yn lle hynny, felly mae ailadrodd yn camu'n ôl drwy'r penodau."
   Download Settings:
     Download Folder: Caiff fideos eu cadw yn y ffolder hon. Gadewch yn wag i ddefnyddio ffolder Lawrlwythiadau eich system.
     Global Additional yt-dlp Arguments: Ymresymiadau llinell orchymyn ychwanegol a drosglwyddir i yt-dlp ar gyfer pob lawrlwythiad, er enghraifft --cookies-from-browser firefox.

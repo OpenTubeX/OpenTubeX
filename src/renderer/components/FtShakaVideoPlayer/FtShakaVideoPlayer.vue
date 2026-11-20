@@ -2179,6 +2179,7 @@ import { isAppHidden, getAndroidAppActive, waitForAndroidAppState } from '../../
 import { normalizeHoldPlaybackRateMultiplier } from '../../helpers/holdPlaybackRate.js'
 import { playbackScreenWake } from '../../helpers/playbackScreenWake'
 import { createRepeatStatsTracker } from '../../helpers/player/repeatStats'
+import { getChapterNavigationTarget } from '../../helpers/player/chapterNavigation'
 import { computed, inject, nextTick, onActivated, onBeforeUnmount, onBeforeUpdate, onDeactivated, onMounted, onUnmounted, onUpdated, reactive, ref, shallowRef, useId, useTemplateRef, watch } from 'vue'
 import FtPaidPromotionBadge from '../FtPaidPromotionBadge/FtPaidPromotionBadge.vue'
 import FtRetryImage from '../FtRetryImage.vue'
@@ -3292,6 +3293,25 @@ const currentChapterTitle = computed(() => {
   return props.chapters[props.currentChapterIndex]?.title ?? t('Chapters.Chapters')
 })
 const chaptersAvailable = computed(() => props.chapters.length > 0)
+
+/**
+ * Seeks to the start of the next, previous, or current chapter.
+ * @param {'next' | 'previous' | 'restart'} action
+ * @returns {number | null} the index of the chapter it seeked to
+ */
+function navigateChapters(action) {
+  if (!canSeek() || props.chapters.length === 0) return null
+  const index = getChapterNavigationTarget(props.chapters, video.value.currentTime, action)
+  if (index === null) return null
+  setCurrentTime(props.chapters[index].startSeconds, true)
+  return index
+}
+
+// Two-finger taps belong to chapter navigation even without chapters, so
+// they never reach Shaka's per-touch tap handling and seek instead.
+function mobileChapterTapsEnabled() {
+  return isCapacitorMobilePlayer() && store.getters.getEnableMobileChapterTaps
+}
 // Chapter thumbnails download storyboard sheets, so they are only loaded
 // once a chapter list has been opened for the current video.
 let chapterThumbnailsWanted = false
@@ -4821,9 +4841,13 @@ const {
   videoZoomStyle,
 } = useVideoZoom({
   container,
+  deferPinch: () => isMobileTwoFingerTapCandidate(),
   isNativeFullscreenActive: () => isNativeFullscreenActive(),
   mediaTabId,
-  onPinchStart: () => cancelMobileFullscreenGesture(),
+  onPinchStart: () => {
+    cancelMobileFullscreenGesture()
+    invalidateMobileTwoFingerTap()
+  },
   props,
   showValueChange,
   useVrMode,
@@ -4845,6 +4869,7 @@ function trackPlayerPointer(event) {
   window.addEventListener('pointercancel', handlePlayerPointerEnd, true)
 }
 function handlePlayerPointerMove(event) {
+  if (playerPointerIds.has(event.pointerId)) trackMobileTwoFingerTap(event)
   if (event.pointerId === vrClickPointerId &&
     Math.hypot(event.clientX - vrClickStart.x, event.clientY - vrClickStart.y) > 8) {
     vrClickDragged = true
@@ -4853,6 +4878,7 @@ function handlePlayerPointerMove(event) {
 }
 function handlePlayerPointerEnd(event) {
   if (!playerPointerIds.has(event.pointerId)) return
+  trackMobileTwoFingerTap(event)
   playerPointerIds.delete(event.pointerId)
   if (event.type === 'pointercancel' && event.pointerId === vrClickPointerId) {
     vrClickPointerId = null
@@ -4873,6 +4899,7 @@ onBeforeUnmount(clearPlayerPointers)
 /** @param {PointerEvent} event */
 function handleVideoZoomPointerDown(event) {
   trackPlayerPointer(event)
+  trackMobileTwoFingerTap(event)
   if (useVrMode.value && event.button === 0 && event.isPrimary && isPlayerSurfaceTarget(event.target)) {
     vrClickPointerId = event.pointerId
     vrClickStart = { x: event.clientX, y: event.clientY }
@@ -5795,6 +5822,8 @@ const {
   handleMobilePlayerSurfaceClick,
   handleMobilePlayerTouchEnd,
   handleMobilePlayerTouchMove,
+  invalidateMobileTwoFingerTap,
+  isMobileTwoFingerTapCandidate,
   mobileFullscreenSwipeSettling,
   mobileFullscreenSwipeStyle,
   mobileFullscreenSwiping,
@@ -5803,6 +5832,7 @@ const {
   moveMobileFullscreenGesture,
   releaseMobileFullscreenSwipe,
   startMobileFullscreenGesture,
+  trackMobileTwoFingerTap,
 } = useMobileFullscreenGestures({
   getContainer: () => container.value,
   getControls: () => ui?.getControls(),
@@ -5837,6 +5867,13 @@ const {
     const startTime = video.value.currentTime
     seekBySeconds(distance, true, false, false)
     return video.value.currentTime - startTime
+  },
+  isTwoFingerTapEnabled: mobileChapterTapsEnabled,
+  onTwoFingerDoubleTap: direction => {
+    const index = navigateChapters(direction > 0 ? 'next' : 'restart')
+    if (index === null) return false
+    showValueChange(props.chapters[index].title, direction > 0 ? 'step-forward' : 'step-backward', { revealControls: false })
+    return true
   },
   getSwipeAction: side => process.env.IS_CAPACITOR
     ? store.getters[side === 'left' ? 'getMobileLeftSwipeAction' : 'getMobileRightSwipeAction']
@@ -11484,16 +11521,14 @@ async function keyboardShortcutHandler(event) {
       changeVolume(-0.05)
       break
     case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.LAST_CHAPTER):
-      if (canSeek() && props.chapters.length > 0 && props.currentChapterIndex > 0) {
+      if (navigateChapters('previous') !== null) {
         event.preventDefault()
-        setCurrentTime(props.chapters[props.currentChapterIndex - 1].startSeconds, true)
         showOverlayControls()
       }
       break
     case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.NEXT_CHAPTER):
-      if (canSeek() && props.chapters.length > 0 && props.currentChapterIndex < props.chapters.length - 1) {
+      if (navigateChapters('next') !== null) {
         event.preventDefault()
-        setCurrentTime(props.chapters[props.currentChapterIndex + 1].startSeconds, true)
         showOverlayControls()
       }
       break

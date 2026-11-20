@@ -132,6 +132,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     enableMobileFullscreenSwipe: true,
     enableMobileFullscreenSeek: true,
     showMobileSeekPreview: true,
+    enableMobileChapterTaps: true,
     showSeekBarFilmstrip: true,
     mobileLeftSwipeAction: 'disabled',
     mobileRightSwipeAction: 'disabled',

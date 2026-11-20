@@ -510,6 +510,15 @@
           setting-key="showMobileSeekPreview"
           @change="store.dispatch('updateShowMobileSeekPreview', $event)"
         />
+        <FtToggleSwitch
+          v-if="IS_CAPACITOR"
+          :label="t('Settings.Player Settings.Double-Tap With Two Fingers to Skip Chapters')"
+          :compact="true"
+          :default-value="store.getters.getEnableMobileChapterTaps"
+          setting-key="enableMobileChapterTaps"
+          :tooltip="t('Tooltips.Player Settings.Double-Tap With Two Fingers to Skip Chapters')"
+          @change="store.dispatch('updateEnableMobileChapterTaps', $event)"
+        />
       </div>
     </div>
     <FtFlexBox
