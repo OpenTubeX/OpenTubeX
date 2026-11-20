@@ -3,6 +3,7 @@ import test from 'node:test'
 
 import {
   filterCommandPaletteCommands,
+  highlightCommandText,
   keyboardEventInitFromShortcut,
 } from '../../src/renderer/helpers/commandPalette.js'
 
@@ -87,4 +88,48 @@ test('converts configured shortcuts into keyboard event data', () => {
     altKey: false,
     shiftKey: true,
   })
+})
+
+test('highlights exact, fuzzy, and compact matches in labels containing surrogate pairs', () => {
+  // Exact match at the end of a label with leading emojis (UTF-16 offset >= code point count)
+  assert.deepEqual(highlightCommandText('🎬 Trailer', 'r', 'en-US'), [
+    { text: '🎬 T', highlighted: false },
+    { text: 'r', highlighted: true },
+    { text: 'ailer', highlighted: false },
+  ])
+  assert.deepEqual(highlightCommandText('🎬 abcr', 'r', 'en-US'), [
+    { text: '🎬 abc', highlighted: false },
+    { text: 'r', highlighted: true },
+  ])
+
+  // Matching the surrogate pair itself
+  assert.deepEqual(highlightCommandText('Watch 🎬 clip', '🎬', 'en-US'), [
+    { text: 'Watch ', highlighted: false },
+    { text: '🎬', highlighted: true },
+    { text: ' clip', highlighted: false },
+  ])
+
+  // Fuzzy word subsequence and edit-distance matches after surrogate pairs
+  assert.deepEqual(highlightCommandText('🎬🎬🎬 history', 'hstry', 'en-US'), [
+    { text: '🎬🎬🎬 ', highlighted: false },
+    { text: 'h', highlighted: true },
+    { text: 'i', highlighted: false },
+    { text: 'st', highlighted: true },
+    { text: 'o', highlighted: false },
+    { text: 'ry', highlighted: true },
+  ])
+  assert.deepEqual(highlightCommandText('🎬🎬🎬 history', 'hsitory', 'en-US'), [
+    { text: '🎬🎬🎬 ', highlighted: false },
+    { text: 'history', highlighted: true },
+  ])
+
+  // Compact multi-word subsequence match after surrogate pairs
+  assert.deepEqual(highlightCommandText('🎬🎬 foo bar', 'fbr', 'en-US'), [
+    { text: '🎬🎬 ', highlighted: false },
+    { text: 'f', highlighted: true },
+    { text: 'oo ', highlighted: false },
+    { text: 'b', highlighted: true },
+    { text: 'a', highlighted: false },
+    { text: 'r', highlighted: true },
+  ])
 })
