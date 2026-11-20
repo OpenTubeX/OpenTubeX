@@ -9,6 +9,7 @@ globalThis.KeyboardEvent = class extends Event {
   }
 }
 globalThis.window = Object.assign(new EventTarget(), { setTimeout, clearTimeout })
+globalThis.Node = class {}
 
 const { HOLD_TO_UNLOCK_MS, useTouchControlsLock } = await import('../../src/renderer/components/FtShakaVideoPlayer/opentubex/useTouchControlsLock.js')
 
@@ -18,21 +19,26 @@ const OFF_BUTTON = { clientX: 400, clientY: 400 }
 
 function setup() {
   const available = ref(true)
+  const button = Object.assign(new Node(), {
+    getBoundingClientRect: () => BUTTON,
+    contains: node => node === button,
+  })
   const calls = []
   const scope = effectScope()
   const lock = scope.run(() => useTouchControlsLock({
     isAvailable: () => available.value,
-    getUnlockButton: () => ({ getBoundingClientRect: () => BUTTON }),
+    getUnlockButton: () => button,
     onLock: () => calls.push('lock'),
     onUnlock: () => calls.push('unlock'),
   }))
   // The events that would continue to the player and the page.
   const pageListener = []
   /** @param {string} type @param {object} [init] */
-  const dispatch = (type, init = {}) => {
+  const dispatch = (type, { target = new Node(), ...init } = {}) => {
     const event = type === 'keydown'
       ? new KeyboardEvent(type, { cancelable: true, ...init })
       : Object.assign(new Event(type, { cancelable: true }), { pointerId: 1, ...ON_BUTTON, ...init })
+    Object.defineProperty(event, 'target', { value: target })
     // Added last, so it runs after the lock unless the lock stops the event.
     const record = () => pageListener.push(type)
     window.addEventListener(type, record, { capture: true })
@@ -40,7 +46,7 @@ function setup() {
     window.removeEventListener(type, record, { capture: true })
     return notCancelled
   }
-  return { available, calls, dispatch, lock, pageListener, dispose: () => scope.stop() }
+  return { available, button, calls, dispatch, lock, pageListener, dispose: () => scope.stop() }
 }
 
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms))
@@ -99,5 +105,22 @@ test('touch controls unlock when the player leaves full screen', async () => {
   assert.deepEqual(pageListener, ['click'])
   lock.lockTouchControls()
   assert.equal(lock.touchControlsLocked.value, false, 'only a full screen player locks')
+  dispose()
+})
+
+test('Enter, Space, or a screen reader unlocks with a press on the unlock button', async () => {
+  const { button, calls, dispatch, dispose, lock } = setup()
+  lock.lockTouchControls()
+  await nextTick()
+  dispatch('click')
+  assert.equal(lock.touchControlsLocked.value, true, 'only a press on the unlock button unlocks')
+  dispatch('pointerdown')
+  dispatch('pointerup')
+  dispatch('click', { target: button })
+  assert.equal(lock.touchControlsLocked.value, true, 'a tap on the unlock button needs a hold')
+  // Keys and screen readers click without a pointer press.
+  dispatch('click', { target: button })
+  assert.equal(lock.touchControlsLocked.value, false)
+  assert.deepEqual(calls, ['lock', 'unlock'])
   dispose()
 })

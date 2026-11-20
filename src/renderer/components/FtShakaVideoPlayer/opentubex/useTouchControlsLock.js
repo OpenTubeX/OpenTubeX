@@ -35,6 +35,8 @@ export function useTouchControlsLock({ isAvailable, getUnlockButton, onLock, onU
   /** @type {number | null} */
   let holdPointerId = null
   let awaitingRelease = false
+  // Whether the next click comes from a pointer rather than a key or a screen reader.
+  let pointerPressed = false
   /** @type {number | undefined} */
   let hideTimer
   /** @type {number | undefined} */
@@ -55,6 +57,7 @@ export function useTouchControlsLock({ isAvailable, getUnlockButton, onLock, onU
     window.clearTimeout(releaseTimer)
     awaitingRelease = false
     holdPointerId = null
+    pointerPressed = false
     touchControlsLocked.value = true
     blockingInput.value = true
     showUnlockButton()
@@ -126,6 +129,7 @@ export function useTouchControlsLock({ isAvailable, getUnlockButton, onLock, onU
 
     switch (event.type) {
       case 'pointerdown':
+        pointerPressed = true
         if (holdPointerId === null && unlockButtonShown.value && isOverUnlockButton(pointer)) {
           startHold(pointer.pointerId)
         }
@@ -133,11 +137,25 @@ export function useTouchControlsLock({ isAvailable, getUnlockButton, onLock, onU
       case 'pointermove':
         if (pointer.pointerId === holdPointerId && !isOverUnlockButton(pointer)) cancelHold()
         break
-      case 'pointerup':
       case 'pointercancel':
+        pointerPressed = false
         if (pointer.pointerId === holdPointerId) cancelHold()
         break
-      case 'click':
+      case 'pointerup':
+        if (pointer.pointerId === holdPointerId) cancelHold()
+        break
+      case 'click': {
+        // Enter, Space, and screen readers press the button without a pointer,
+        // which a stray touch cannot do, so they unlock without a hold.
+        const fromPointer = pointerPressed
+        pointerPressed = false
+        if (!fromPointer && event.target instanceof Node && getUnlockButton()?.contains(event.target)) {
+          unlockTouchControls()
+        } else if (holdPointerId === null) {
+          showUnlockButton()
+        }
+        break
+      }
       case 'keydown':
         if (holdPointerId === null) showUnlockButton()
         break
