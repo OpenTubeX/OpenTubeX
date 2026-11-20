@@ -1,6 +1,7 @@
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { randomUUID } from 'node:crypto'
+import { mkdtempSync, readFileSync, realpathSync, renameSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { basename, dirname, join } from 'node:path'
 
 const HEADER = '# Netscape HTTP Cookie File'
 
@@ -29,11 +30,13 @@ function parseCookies(text) {
  * @param {string} base the file the process started with
  * @param {string} result the file the process saved
  * @param {string} current the shared file now
+ * @param {boolean} finished whether the process exited on its own, so that it finished saving
  * @returns {string | null} the merged file, or null when nothing changed
  */
-export function mergeYtDlpCookies(base, result, current) {
-  // yt-dlp writes the header first and ends every cookie with a newline, so
-  // a process stopped while saving must not remove the cookies it did not write.
+export function mergeYtDlpCookies(base, result, current, finished) {
+  // yt-dlp writes the header first and ends every cookie with a newline. A
+  // process stopped while saving can still leave complete rows, so only one
+  // that finished saving can remove the cookies missing from its file.
   if (!result.startsWith(HEADER) || !result.endsWith('\n')) return null
   const before = parseCookies(base)
   const after = parseCookies(result)
@@ -44,12 +47,36 @@ export function mergeYtDlpCookies(base, result, current) {
     merged.set(key, cookie)
     changed = true
   }
-  for (const [key, cookie] of before) {
+  for (const [key, cookie] of finished ? before : []) {
     if (after.has(key) || merged.get(key)?.state !== cookie.state) continue
     merged.delete(key)
     changed = true
   }
   return changed ? `${HEADER}\n${[...merged.values()].map(cookie => `${cookie.line}\n`).join('')}` : null
+}
+
+/**
+ * Replaces a file with a complete temporary one, so that a failed write keeps
+ * the previous cookies. A folder without room for it is written in place.
+ * @param {string} path
+ * @param {string} text
+ */
+function replaceFile(path, text) {
+  const target = realpathSync(path)
+  const temporary = join(dirname(target), `.${basename(target)}.${randomUUID()}.tmp`)
+  try {
+    writeFileSync(temporary, text, { mode: 0o600, flag: 'wx' })
+  } catch {
+    rmSync(temporary, { force: true })
+    writeFileSync(target, text)
+    return
+  }
+  try {
+    renameSync(temporary, target)
+  } catch (error) {
+    rmSync(temporary, { force: true })
+    throw error
+  }
 }
 
 /**
@@ -59,7 +86,7 @@ export function mergeYtDlpCookies(base, result, current) {
  * instead, which `release` merges back once it exits. The file operations are
  * synchronous, so no other process's copy or merge can run between them.
  * @param {string[]} args
- * @returns {{ args: string[], release: () => void }}
+ * @returns {{ args: string[], release: (finished: boolean) => void }}
  */
 export function checkOutYtDlpCookies(args) {
   const index = args.lastIndexOf('--cookies')
@@ -87,12 +114,12 @@ export function checkOutYtDlpCookies(args) {
   let released = false
   return {
     args: args.with(index + 1, copy),
-    release() {
+    release(finished) {
       if (released) return
       released = true
       try {
-        const merged = mergeYtDlpCookies(base, readFileSync(copy, 'utf8'), readFileSync(shared, 'utf8'))
-        if (merged !== null) writeFileSync(shared, merged)
+        const merged = mergeYtDlpCookies(base, readFileSync(copy, 'utf8'), readFileSync(shared, 'utf8'), finished)
+        if (merged !== null) replaceFile(shared, merged)
       } catch (error) {
         console.warn('Could not save the cookies yt-dlp updated', error.code ?? error)
       } finally {
@@ -111,9 +138,15 @@ export function checkOutYtDlpCookies(args) {
  */
 export async function withYtDlpCookies(args, run) {
   const cookies = checkOutYtDlpCookies(args)
+  let result
   try {
-    return await run(cookies.args)
-  } finally {
-    cookies.release()
+    result = await run(cookies.args)
+  } catch (error) {
+    // execFile reports the exit code of a process that exited with an error,
+    // and none for one it stopped after a timeout or abort.
+    cookies.release(typeof error?.code === 'number' && !error.killed)
+    throw error
   }
+  cookies.release(true)
+  return result
 }

@@ -20,17 +20,19 @@ public class YtDlpCookiesTest {
         String base = HEADER + cookie("SID", "session", "") + "#HttpOnly_" + cookie("SIDTS", "first", "4102444800") + cookie("PREF", "old", "4102444800");
         // The first process rotates the session token, and the second, which started
         // with the old token and exits later, only changes a preference.
-        String first = YtDlpCookies.merge(base, saved(cookie("SID", "session", "0"), cookie("SIDTS", "second", "4102444800"), cookie("PREF", "old", "4102444800")), base);
+        String first = YtDlpCookies.merge(base, saved(cookie("SID", "session", "0"), cookie("SIDTS", "second", "4102444800"), cookie("PREF", "old", "4102444800")), base, true);
         String merged = YtDlpCookies.merge(base, saved(cookie("SID", "session", "0"), cookie("SIDTS", "first", "4102444800"),
-            cookie("PREF", "new", "4102444800"), cookie("VISITOR", "added", "4102444800")), first);
+            cookie("PREF", "new", "4102444800"), cookie("VISITOR", "added", "4102444800")), first, true);
         assertTrue(merged.contains("\tSIDTS\tsecond\n"));
         assertTrue(merged.contains("\tPREF\tnew\n"));
         assertTrue(merged.contains("\tVISITOR\tadded\n"));
         assertTrue(merged.contains("\tSID\tsession\n"));
         // A process stopped while saving leaves a partial file, which must not remove cookies.
-        assertNull(YtDlpCookies.merge(merged, HEADER + cookie("SID", "sess", "0").substring(0, 20), merged));
+        assertNull(YtDlpCookies.merge(merged, HEADER + cookie("SID", "sess", "0").substring(0, 20), merged, true));
+        // A process stopped after a complete row still removes nothing.
+        assertNull(YtDlpCookies.merge(merged, saved(cookie("SID", "session", "0")), merged, false));
         // A cookie the server removed is removed unless another process set it again.
-        String removed = YtDlpCookies.merge(merged, saved(cookie("SID", "session", "0"), cookie("SIDTS", "second", "4102444800"), cookie("PREF", "new", "4102444800")), merged);
+        String removed = YtDlpCookies.merge(merged, saved(cookie("SID", "session", "0"), cookie("SIDTS", "second", "4102444800"), cookie("PREF", "new", "4102444800")), merged, true);
         assertFalse(removed.contains("VISITOR"));
     }
 }

@@ -13,7 +13,7 @@ import java.util.Map;
  * yt-dlp rewrites its {@code --cookies} file when it exits. Processes that shared one
  * could read another's partial write, and the last to exit would discard the cookies
  * YouTube rotated for the others. Each process gets a private copy instead, which
- * {@link Checkout#close} merges back once it exits, like src/main/ytDlpCookieFile.js.
+ * {@link Checkout#release} merges back once it exits, like src/main/ytDlpCookieFile.js.
  */
 final class YtDlpCookies {
     private static final String HEADER = "# Netscape HTTP Cookie File";
@@ -21,7 +21,7 @@ final class YtDlpCookies {
 
     private YtDlpCookies() {}
 
-    static final class Checkout implements AutoCloseable {
+    static final class Checkout {
         final List<String> args;
         private final File shared;
         private final File copy;
@@ -34,11 +34,12 @@ final class YtDlpCookies {
             this.base = base;
         }
 
-        @Override public void close() {
+        /** @param finished whether the process exited on its own, so that it finished saving */
+        void release(boolean finished) {
             if (copy == null) return;
             synchronized (LOCK) {
                 try {
-                    String merged = merge(base, read(copy), read(shared));
+                    String merged = merge(base, read(copy), read(shared), finished);
                     if (merged != null) YtDlpFiles.write(shared, merged.getBytes(StandardCharsets.UTF_8));
                 } catch (IOException error) {
                     Log.w("YtDlpCookies", "Could not save the cookies yt-dlp updated");
@@ -49,7 +50,7 @@ final class YtDlpCookies {
         }
     }
 
-    static Checkout checkOut(File temporaryDirectory, List<String> args) throws IOException {
+    static Checkout checkOut(File temporaryDirectory, List<String> args) {
         int index = args.lastIndexOf("--cookies");
         if (index == -1 || index + 1 >= args.size()) return new Checkout(args, null, null, null);
         File shared = new File(args.get(index + 1));
@@ -57,12 +58,15 @@ final class YtDlpCookies {
             String base;
             // yt-dlp reports the missing file.
             try { base = read(shared); } catch (IOException error) { return new Checkout(args, null, null, null); }
-            File copy = File.createTempFile("yt-dlp-cookies-", ".txt", temporaryDirectory);
+            File copy = null;
             try {
+                copy = File.createTempFile("yt-dlp-cookies-", ".txt", temporaryDirectory);
                 YtDlpFiles.write(copy, base.getBytes(StandardCharsets.UTF_8));
             } catch (IOException error) {
-                copy.delete();
-                throw error;
+                // Without room for a copy, share the file as before instead of failing the process.
+                Log.w("YtDlpCookies", "Could not copy the yt-dlp cookie file");
+                if (copy != null) copy.delete();
+                return new Checkout(args, null, null, null);
             }
             List<String> copied = new ArrayList<>(args);
             copied.set(index + 1, copy.getAbsolutePath());
@@ -99,10 +103,11 @@ final class YtDlpCookies {
     /**
      * Applies the cookies one yt-dlp process changed to the current file, keeping those
      * other processes changed in the meantime, or returns null when nothing changed.
+     * Only a process that {@code finished} saving removes the cookies missing from its file.
      */
-    static String merge(String base, String result, String current) {
-        // yt-dlp writes the header first and ends every cookie with a newline, so
-        // a process stopped while saving must not remove the cookies it did not write.
+    static String merge(String base, String result, String current, boolean finished) {
+        // yt-dlp writes the header first and ends every cookie with a newline. A process
+        // stopped while saving can still leave complete rows, so it removes no cookies.
         if (!result.startsWith(HEADER) || !result.endsWith("\n")) return null;
         Map<String, Cookie> before = parse(base);
         Map<String, Cookie> after = parse(result);
@@ -115,7 +120,7 @@ final class YtDlpCookies {
             changed = true;
         }
         for (Map.Entry<String, Cookie> entry : before.entrySet()) {
-            if (after.containsKey(entry.getKey()) || !entry.getValue().state.equals(state(merged, entry.getKey()))) continue;
+            if (!finished || after.containsKey(entry.getKey()) || !entry.getValue().state.equals(state(merged, entry.getKey()))) continue;
             merged.remove(entry.getKey());
             changed = true;
         }

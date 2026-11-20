@@ -117,11 +117,12 @@ def _parse_cookies(text):
     return cookies
 
 
-def _merge_cookies(base, result, current):
+def _merge_cookies(base, result, current, finished):
     """Applies the cookies one yt-dlp instance changed to the current file, keeping
-    those other instances changed in the meantime, or returns None when nothing changed."""
-    # yt-dlp writes the header first and ends every cookie with a newline, so
-    # an instance stopped while saving must not remove the cookies it did not write.
+    those other instances changed in the meantime, or returns None when nothing changed.
+    Only an instance that finished saving removes the cookies missing from its file."""
+    # yt-dlp writes the header first and ends every cookie with a newline. An instance
+    # stopped while saving can still leave complete rows, so it removes no cookies.
     if not result.startswith(_COOKIE_HEADER) or not result.endswith('\n'):
         return None
     before, after, merged = _parse_cookies(base), _parse_cookies(result), _parse_cookies(current)
@@ -135,7 +136,7 @@ def _merge_cookies(base, result, current):
             continue
         merged[key] = cookie
         changed = True
-    for key, cookie in before.items():
+    for key, cookie in before.items() if finished else ():
         if key in after or state(merged, key) != cookie[1]:
             continue
         del merged[key]
@@ -155,28 +156,43 @@ def _private_cookies(path):
         yield path
         return
     shared = Path(path)
+    copy = None
     with _COOKIE_LOCK:
         try:
             base = shared.read_text(encoding='utf-8')
-        except OSError:
-            base = None
-        if base is not None:
             descriptor, copy = tempfile.mkstemp(prefix='yt-dlp-cookies-', suffix='.txt')
             with os.fdopen(descriptor, 'w', encoding='utf-8') as file:
                 file.write(base)
-    if base is None:
-        # yt-dlp reports the missing file.
+        except OSError:
+            # yt-dlp reports a missing file, and without room for a copy,
+            # the instance shares the file as before instead of failing.
+            if copy is not None:
+                Path(copy).unlink(missing_ok=True)
+            copy = None
+    if copy is None:
         yield path
         return
+    # An exception can stop yt-dlp while it saves the copy.
+    finished = False
     try:
         yield copy
+        finished = True
     finally:
         with _COOKIE_LOCK:
             try:
                 merged = _merge_cookies(base, Path(copy).read_text(encoding='utf-8'),
-                                        shared.read_text(encoding='utf-8'))
+                                        shared.read_text(encoding='utf-8'), finished)
                 if merged is not None:
-                    shared.write_text(merged, encoding='utf-8')
+                    # A complete replacement keeps the previous cookies if writing fails.
+                    target = shared.resolve()
+                    descriptor, replacement = tempfile.mkstemp(prefix=f'.{target.name}.', dir=target.parent)
+                    try:
+                        with os.fdopen(descriptor, 'w', encoding='utf-8') as file:
+                            file.write(merged)
+                        os.replace(replacement, target)
+                    except OSError:
+                        Path(replacement).unlink(missing_ok=True)
+                        raise
             except OSError:
                 pass
             finally:

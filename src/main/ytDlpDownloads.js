@@ -1107,7 +1107,8 @@ async function startYtDlpDownload(
       part.done = true
       part.code = code
       part.error = error
-      cookies.release()
+      // Stopped processes exit with a signal and no code.
+      cookies.release(code !== null)
       if (child) entry.children.delete(child)
       releaseDownloadSlot()
       if (parts.every(other => other.done)) {
