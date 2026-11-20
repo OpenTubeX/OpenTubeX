@@ -1214,6 +1214,8 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
     t
   )
   if (subscriptionList.length === 0) {
+    // Cancelled while handing on the cached feeds of the omitted channels
+    if (isRefreshCancelled()) return null
     completeSubscriptionRefresh('videos', activeProfile._id)
     // Channels whose uploads were fetched recently can still be due
     startSubscriptionCollaborationChecks(requestedChannels)
@@ -1339,6 +1341,7 @@ async function refreshSubscriptionShortsFromRemoteUnlocked({
     t
   )
   if (subscriptionList.length === 0) {
+    if (isRefreshCancelled()) return null
     completeSubscriptionRefresh('shorts', activeProfile._id)
     return []
   }
@@ -1446,6 +1449,7 @@ async function refreshSubscriptionLiveFromRemoteUnlocked({
     t
   )
   if (subscriptionList.length === 0) {
+    if (isRefreshCancelled()) return null
     completeSubscriptionRefresh('live', activeProfile._id)
     return []
   }
@@ -1563,6 +1567,7 @@ async function refreshSubscriptionPostsFromRemoteUnlocked({
     t
   )
   if (subscriptionList.length === 0) {
+    if (isRefreshCancelled()) return null
     completeSubscriptionRefresh('posts', activeProfile._id)
     return []
   }

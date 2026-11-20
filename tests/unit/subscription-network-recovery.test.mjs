@@ -37,7 +37,7 @@ const source = (await readFile(new URL('../../src/renderer/helpers/subscriptions
 
 // Exercise the real refresh, fallback, cache, and notification paths with fake
 // platform APIs. Bundler-only imports are supplied in the isolated context.
-function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('Failed to fetch'), webCors = false, backend = 'local', fallbackWorks = false, rssStatus = 200, channelInfo = { has_shorts: true, getShorts: async () => ({ videos: [] }) }, playlistError = null, playlistItems = [], stallChannelProbe = false, channelStatus = rssStatus, scraperError = null, shortPublishDate = '2026-09-06T12:00:00Z', beforeShortMetadata = async () => {}, beforeWrite = async () => {}, finishNative = async () => {}, useRssFeeds = true, channelFeeds = {}, beforeCollaborations = async () => {} } = {}) {
+function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('Failed to fetch'), webCors = false, backend = 'local', fallbackWorks = false, rssStatus = 200, channelInfo = { has_shorts: true, getShorts: async () => ({ videos: [] }) }, playlistError = null, playlistItems = [], stallChannelProbe = false, channelStatus = rssStatus, scraperError = null, shortPublishDate = '2026-09-06T12:00:00Z', beforeShortMetadata = async () => {}, beforeWrite = async () => {}, finishNative = async () => {}, useRssFeeds = true, channelFeeds = {}, beforeCollaborations = async () => {}, beforeAutomaticDownloads = async () => {} } = {}) {
   const window = new EventTarget()
   const navigator = { onLine: online }
   const toasts = []
@@ -143,7 +143,7 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
     finishAndroidSubscriptionRefresh: finishNative,
     includeAutomaticDownloadChannels: channels => channels,
     includeNotificationChannels: channels => channels,
-    startAutomaticDownloadsForChannel: async () => {},
+    startAutomaticDownloadsForChannel: async () => beforeAutomaticDownloads(),
     reportSubscriptionUploads: (channelId, feedType) => reports.push(`${channelId}:${feedType}`),
     getChannelPlaylistId: id => id,
     showApiErrorToast: (...args) => toasts.push(args),
@@ -366,6 +366,18 @@ test('failed and cancelled collaboration checks store nothing', async () => {
   await settle()
   assert.deepEqual(cancelled.requests.filter(request => request.startsWith('collaborations:')), ['collaborations:UC0', 'collaborations:UC1'])
   assert.equal(cancelled.writes.some(write => write.key === 'updateSubscriptionCollaborationsByChannel'), false)
+
+  // Every channel was fetched moments ago, and the refresh is cancelled while
+  // their cached feeds are handed on
+  const omitted = createRefresh({ feed: 'Videos', beforeAutomaticDownloads: async () => omitted.cancelSubscriptionRefresh() })
+  omitted.getters.getVideoCache = Object.fromEntries(Array.from({ length: 20 }, (_, i) => [`UC${i}`, { timestamp: new Date(), videos: [] }]))
+  omitted.getters.getFastSubscriptionRefresh = true
+  omitted.getters.getIncludeSubscriptionCollaborations = true
+  omitted.reconnect()
+  assert.equal(await omitted.refresh({ t: key => key, automatic: true }), null)
+  await settle()
+  assert.equal(omitted.events.includes('completed'), false)
+  assert.equal(omitted.requests.some(request => request.startsWith('collaborations:')), false)
 })
 
 test('with Faster Subscription Refresh, automatic refreshes leave out channels fetched moments ago, manual ones load them', async () => {
