@@ -124,7 +124,10 @@ const SETTINGS = {
   defaultVideoFormat: 'dash',
   useSponsorBlock: false,
   useDeArrowTitles: false,
-  useDeArrowThumbnails: false
+  useDeArrowThumbnails: false,
+  // A pasted link would also load a preview of the video while the test is
+  // slower than the preview's typing delay, which the tests count as a request.
+  enableSearchSuggestions: false
 }
 
 test.use({ seed: { settings: SETTINGS } })
