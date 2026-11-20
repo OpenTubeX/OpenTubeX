@@ -3724,18 +3724,19 @@ const {
     // Rotating the phone would otherwise rotate the video or end full screen.
     lockCurrentOrientation(() => touchControlsLocked.value).catch(() => {})
   },
-  onUnlock() {
+  onUnlock(restoreInterface) {
     // The lock is already off here, so the fullscreen orientation request applies.
     if (androidRotationFullscreen) setLandscapeOrientation(androidRotationOrientationLocked).catch(() => {})
     else if (isNativeFullscreenActive()) requestFullscreenOrientation(true)
     else setLandscapeOrientation(false).catch(() => {})
+    if (!restoreInterface) return
     showOverlayControls()
     syncAndroidStatusBarVisibility()
   },
 })
 // Runs before the rotation fullscreen handoff, so the next player inherits
 // the orientation policy instead of this lock.
-onBeforeUnmount(unlockTouchControls)
+onBeforeUnmount(() => unlockTouchControls(false))
 
 // Capture the replacement player's initial state. The parent clears its
 // pending SABR state after this player loads, but that must not add autoplay

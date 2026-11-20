@@ -24,7 +24,7 @@ const RELEASE_TIMEOUT_MS = 5000
  * @param {() => boolean} options.isAvailable Reactive; the lock ends when it turns false.
  * @param {() => HTMLElement | null | undefined} options.getUnlockButton
  * @param {() => void} options.onLock
- * @param {() => void} options.onUnlock
+ * @param {(restoreInterface: boolean) => void} options.onUnlock Leaves the interface alone when its player is torn down.
  */
 export function useTouchControlsLock({ isAvailable, getUnlockButton, onLock, onUnlock }) {
   const touchControlsLocked = ref(false)
@@ -64,7 +64,7 @@ export function useTouchControlsLock({ isAvailable, getUnlockButton, onLock, onU
     onLock()
   }
 
-  function unlockTouchControls() {
+  function unlockTouchControls(restoreInterface = true) {
     if (!touchControlsLocked.value) return
     touchControlsLocked.value = false
     unlockButtonShown.value = false
@@ -72,7 +72,7 @@ export function useTouchControlsLock({ isAvailable, getUnlockButton, onLock, onU
     window.clearTimeout(hideTimer)
     window.clearTimeout(holdTimer)
     if (!awaitingRelease) endBlocking()
-    onUnlock()
+    onUnlock(restoreInterface)
   }
 
   function endBlocking() {

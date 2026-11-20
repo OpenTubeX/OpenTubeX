@@ -29,7 +29,7 @@ function setup() {
     isAvailable: () => available.value,
     getUnlockButton: () => button,
     onLock: () => calls.push('lock'),
-    onUnlock: () => calls.push('unlock'),
+    onUnlock: restoreInterface => calls.push(restoreInterface ? 'unlock' : 'teardown'),
   }))
   // The events that would continue to the player and the page.
   const pageListener = []
@@ -105,6 +105,13 @@ test('touch controls unlock when the player leaves full screen', async () => {
   assert.deepEqual(pageListener, ['click'])
   lock.lockTouchControls()
   assert.equal(lock.touchControlsLocked.value, false, 'only a full screen player locks')
+  // A player torn down while locked releases the lock without restoring its interface.
+  available.value = true
+  await nextTick()
+  lock.lockTouchControls()
+  lock.unlockTouchControls(false)
+  assert.equal(lock.touchControlsLocked.value, false)
+  assert.deepEqual(calls, ['lock', 'unlock', 'lock', 'teardown'])
   dispose()
 })
 
