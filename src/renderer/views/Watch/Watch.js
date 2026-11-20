@@ -55,6 +55,7 @@ import FtButton from '../../components/FtButton/FtButton.vue'
 import { calculateColorLuminance } from '../../helpers/colors'
 import { createTheatreModeAnimator, isTheatreLayoutAvailable } from '../../helpers/watchLayout'
 import { createShortsFeedNavigation } from './shortsFeedNavigation'
+import { reportLoadedPageTitle } from '../../helpers/loadedPageTitles'
 import { clampOverlayScrollTop, isOverlayScrollTopOutOfBounds, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { HISTORY_MIN_PLAYBACK_SECONDS, hasReachedWatchedThreshold, isHistoryEntryWatched } from '../../helpers/history'
 import { normalizeRemoveWatchedVideosThreshold } from '../../helpers/playlist-preferences-sync'
@@ -7579,6 +7580,7 @@ export default defineComponent({
     },
 
     updateTitle: function () {
+      if (this.hasResolvedVideoTitle) reportLoadedPageTitle(`video:${this.videoId}`, this.videoTitle)
       this.setTabTitle(
         this.videoTitle || this.getPendingVideoTitle(),
         { resolveHistoryEntry: this.hasResolvedVideoTitle }

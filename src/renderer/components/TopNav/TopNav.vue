@@ -325,6 +325,7 @@ import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { usesCapacitorTabletLayout } from '../../helpers/capacitorLayout'
 import { getNotificationThumbnailUrl, supportsNotificationHistory } from '../../helpers/notificationHistory'
 import { loadVideoMetadata } from '../../helpers/videoMetadata'
+import { waitForLoadedPageTitle } from '../../helpers/loadedPageTitles'
 import { loadChannelSummary } from '../../helpers/channels'
 
 const { t } = useI18n()
@@ -1111,9 +1112,12 @@ async function goToSearch(queryText, { event, dataListProperty }) {
   }
 
   const { link, ...destination } = await getSearchDestination(queryText, selectedSearchSettings)
+  const lazyLoad = isUnloadedBackgroundTabClick(event)
   if (link && store.getters.getRememberSearchHistory) {
     const preview = loadedLinkPreview?.queryText === destination.searchQueryText ? loadedLinkPreview : null
-    saveLinkToSearchHistory(destination.searchQueryText, link, preview?.title).catch(error => {
+    // Outside Electron, a new tab can be another browser tab, whose page cannot report its title here.
+    const loadsHere = !doCreateNewWindow && !lazyLoad && (!doCreateNewTab || !!process.env.IS_ELECTRON)
+    saveLinkToSearchHistory(destination.searchQueryText, link, preview?.title, loadsHere).catch(error => {
       console.error('Unable to save the link to the search history', error)
     })
   }
@@ -1122,7 +1126,7 @@ async function goToSearch(queryText, { event, dataListProperty }) {
     doCreateNewWindow,
     doCreateNewTab,
     makeActive,
-    lazyLoad: isUnloadedBackgroundTabClick(event),
+    lazyLoad,
   })
 
   if (doCreateNewWindow) {
@@ -1396,8 +1400,9 @@ function findSubscribedChannel(channelId, url) {
  * @param {string} queryText the trimmed link
  * @param {SearchHistoryLink} link
  * @param {string | undefined} previewTitle the title the link preview loaded
+ * @param {boolean} loadsHere whether the link opens a page in this window that loads right away
  */
-async function saveLinkToSearchHistory(queryText, link, previewTitle) {
+async function saveLinkToSearchHistory(queryText, link, previewTitle, loadsHere) {
   const lastUpdatedAt = Date.now()
   const savedTitle = store.getters.getSearchHistoryEntries
     .find(entry => entry.linkType === link.linkType && entry.query === queryText && entry.title)?.title
@@ -1405,7 +1410,7 @@ async function saveLinkToSearchHistory(queryText, link, previewTitle) {
 
   if (title === undefined) {
     try {
-      title = await loadSearchHistoryLinkTitle(link)
+      title = await loadSearchHistoryLinkTitle(link, loadsHere)
     } catch (error) {
       // The entry still opens the link, which it shows instead.
       console.error('Unable to load the title of a link in the search history', error)
@@ -1419,17 +1424,22 @@ async function saveLinkToSearchHistory(queryText, link, previewTitle) {
 
 /**
  * @param {SearchHistoryLink} link
+ * @param {boolean} loadsHere whether the link opens a page in this window that loads right away
  * @returns {Promise<string | undefined>}
  */
-async function loadSearchHistoryLinkTitle(link) {
-  const signal = AbortSignal.timeout(30_000)
-  if (link.linkType === 'video') {
-    return getNonBlankTitle(store.getters.getHistoryCacheById[link.videoId]?.title) ??
-      getNonBlankTitle((await loadVideoMetadata(link.videoId, signal)).title)
-  }
+async function loadSearchHistoryLinkTitle(link, loadsHere) {
+  const knownTitle = link.linkType === 'video'
+    ? getNonBlankTitle(store.getters.getHistoryCacheById[link.videoId]?.title)
+    : getNonBlankTitle(findSubscribedChannel(link.channelId, link.url)?.name)
+  if (knownTitle !== undefined) return knownTitle
 
-  const channel = findSubscribedChannel(link.channelId, link.url) ??
-    await loadChannelSummary(link.channelId, link.url, { preference: backendPreference.value, fallback: backendFallback.value }, signal)
+  const signal = AbortSignal.timeout(30_000)
+  // The opened page loads the video or channel anyway. Without its title, the entry shows the link.
+  if (loadsHere) {
+    return waitForLoadedPageTitle(link.linkType === 'video' ? `video:${link.videoId}` : `channel:${link.url}`, signal)
+  }
+  if (link.linkType === 'video') return getNonBlankTitle((await loadVideoMetadata(link.videoId, signal)).title)
+  const channel = await loadChannelSummary(link.channelId, link.url, { preference: backendPreference.value, fallback: backendFallback.value }, signal)
   return getNonBlankTitle(channel?.name)
 }
 

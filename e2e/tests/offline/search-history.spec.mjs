@@ -352,29 +352,25 @@ test.describe('search history suggestions', () => {
     const videoId = 'jNQXAC9IVRw'
     await mockPlayableWatchPage(app, page)
     const player = demoPlayerResponse(videoId)
-    await page.route('**/youtubei/v1/player**', route => route.fulfill({
-      contentType: 'application/json',
-      body: JSON.stringify({ ...player, videoDetails: { ...player.videoDetails, title: 'Linked Video Title', author: 'Linked Channel' } }),
-    }))
     const linkEntries = () => page.evaluate(() => window.$store.getters.getSearchHistoryEntries
       .filter(entry => entry.linkType != null)
       .map(({ query, linkType, title }) => ({ query, linkType, title })))
     const input = page.locator(sel.searchInput)
 
-    // Without search suggestions no preview loads, so the title is loaded after submitting.
+    // Without search suggestions no preview loads, so the entry takes the title the watch page loads.
     await input.fill(`https://youtu.be/${videoId}`)
     await input.press('Enter')
     await expect(page).toHaveURL(new RegExp(`#/watch/${videoId}`))
     await expect.poll(linkEntries).toEqual([
-      { query: `https://youtu.be/${videoId}`, linkType: 'video', title: 'Linked Video Title' },
+      { query: `https://youtu.be/${videoId}`, linkType: 'video', title: 'Me at the zoo' },
     ])
-    await expect.poll(() => readDatastore(app.userDataDir, 'search-history')).toContain('"title":"Linked Video Title"')
+    await expect.poll(() => readDatastore(app.userDataDir, 'search-history')).toContain('"title":"Me at the zoo"')
 
     await page.locator(sel.backButton).click()
     await expect(page).not.toHaveURL(/#\/watch\//)
-    await input.fill('linked vi')
-    const link = suggestions(page).getByRole('link', { name: /Linked Video Title/ })
-    await expect(link).toHaveText('Linked Video Title')
+    await input.fill('at the z')
+    const link = suggestions(page).getByRole('link', { name: /Me at the zoo/ })
+    await expect(link).toHaveText('Me at the zoo')
     await expect(suggestions(page)).toHaveCount(1)
     const searchType = () => page.evaluate(() => {
       const store = window.$store
@@ -409,7 +405,7 @@ test.describe('search history suggestions', () => {
       return window.$store.dispatch('updateRememberSearchHistory', true)
     })
 
-    // Clearing the history while a title loads drops the save.
+    // Clearing the history while the page loads the title drops the save.
     const otherVideoId = 'dQw4w9WgXcQ'
     let releaseTitle
     const titleHeld = new Promise(resolve => { releaseTitle = resolve })
