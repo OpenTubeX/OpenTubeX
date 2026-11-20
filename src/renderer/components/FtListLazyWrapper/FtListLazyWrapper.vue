@@ -378,13 +378,18 @@ const deferWindowing = process.env.IS_ELECTRON
 const shell = useTemplateRef('shell')
 // Lists key their rows so a row rendered on an earlier visit keeps its height.
 const itemKey = useAttrs()['data-feed-item-key']
-const heightKey = () => itemKey == null ? null : `${props.layout}:${props.appearance}:${itemKey}`
-const shellHeight = ref(heightKey() === null ? 0 : getRememberedListItemHeight(heightKey()))
+const heightKey = computed(() => itemKey == null ? null : `${props.layout}:${props.appearance}:${itemKey}`)
+const shellHeight = ref(heightKey.value === null ? 0 : getRememberedListItemHeight(heightKey.value))
+// A row that has not rendered yet keeps a height measured in the previous
+// layout or appearance, so it takes the one remembered for the new key.
+watch(heightKey, key => {
+  if (!visible.value) shellHeight.value = key === null ? 0 : getRememberedListItemHeight(key)
+})
 onBeforeUnmount(() => {
   // Skip rows that never rendered, whose shell only has its minimum height.
-  if (heightKey() === null || (!visible.value && !shellHeight.value)) return
+  if (heightKey.value === null || (!visible.value && !shellHeight.value)) return
   const height = shell.value?.getBoundingClientRect().height
-  if (height > 0) rememberListItemHeight(heightKey(), height)
+  if (height > 0) rememberListItemHeight(heightKey.value, height)
 })
 const windowItemObserved = ref(false)
 let windowItem
