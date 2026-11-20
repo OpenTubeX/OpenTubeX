@@ -96,10 +96,11 @@ export function createFeedCacheMirror(prefix, onChange) {
         const stored = new Map([...documents].filter(([id]) => id.startsWith(prefix)))
         const change = diffFeedCacheDocuments(stored, new Map([...current].map(([key, doc]) => [prefix + key, doc])))
         if (change.docs.length === 0 && change.removed.length === 0) return
-        // The window's own objects, which its next save compares with
+        await DBFeedCacheHandlers.write(change)
+        // Only once written, so that the next save retries a failed write. The
+        // window's own objects, which its next save compares with.
         for (const { _id } of change.docs) documents.set(_id, current.get(_id.slice(prefix.length)))
         for (const id of change.removed) documents.delete(id)
-        await DBFeedCacheHandlers.write(change)
       }).catch((error) => {
         console.error('Failed to save the feed cache', error)
       })
