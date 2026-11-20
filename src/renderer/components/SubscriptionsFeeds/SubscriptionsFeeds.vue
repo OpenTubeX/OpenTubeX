@@ -53,26 +53,42 @@
     </p>
     <FtAutoGrid
       :grid="layout === 'grid'"
-      :item-count="items.length"
+      :item-count="shownItems.length"
       :item-keys="itemKeys"
     >
       <FtListFeedItem
-        v-for="(item, index) in items"
+        v-for="(item, index) in shownItems"
         :key="itemKeys[index]"
         :data="item"
         :layout="layout"
         :avatar="feedAvatars.get(item.feedUrl)"
       />
     </FtAutoGrid>
+    <FtAutoLoadNextPageWrapper
+      v-if="items.length > dataLimit"
+      @load-next-page="loadMore"
+    >
+      <FtFlexBox>
+        <FtButton
+          :label="t('Subscriptions.RSS Feeds.Load More Items')"
+          :icon="['fas', 'arrow-down']"
+          background-color="var(--primary-color)"
+          text-color="var(--text-with-main-color)"
+          @click="loadMore"
+        />
+      </FtFlexBox>
+    </FtAutoLoadNextPageWrapper>
   </div>
 </template>
 
 <script setup>
-import { computed, useTemplateRef, watch } from 'vue'
+import { computed, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtAutoGrid from '../FtAutoGrid/FtAutoGrid.vue'
+import FtAutoLoadNextPageWrapper from '../FtAutoLoadNextPageWrapper.vue'
 import FtButton from '../FtButton/FtButton.vue'
+import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtIcon from '../FtIcon/FtIcon.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtListFeedItem from '../FtListFeedItem/FtListFeedItem.vue'
@@ -96,6 +112,7 @@ import {
   rssFeedsRefreshing
 } from '../../helpers/rssFeeds'
 import { getCachedRelativeTimeFormat, getRelativeTimeFromDate } from '../../helpers/utils'
+import { useTabContext } from '../../tabs/TabContext'
 
 const { locale, t } = useI18n()
 useKeepAliveEffectScope()
@@ -103,7 +120,21 @@ useKeepAliveEffectScope()
 const now = useRelativeTimeClock()
 
 const { feeds, feedUrls, feedAvatars, items } = useFollowedRssFeedItems()
-const itemKeys = computed(() => items.value.map(getRssFeedItemKey))
+
+// Like the other subscription tabs, the items show a page at a time, and
+// each tab keeps how many it shows while it is open
+const PAGE_SIZE = 100
+const { tabId } = useTabContext()
+const dataLimitStorageKey = tabId ? `Subscriptions/${tabId}/rss/dataLimit` : 'subscriptionLimit/rss'
+const storedDataLimit = Number.parseInt(sessionStorage.getItem(dataLimitStorageKey) ?? '', 10)
+const dataLimit = ref(storedDataLimit > 0 ? storedDataLimit : PAGE_SIZE)
+const shownItems = computed(() => items.value.length > dataLimit.value ? items.value.slice(0, dataLimit.value) : items.value)
+const itemKeys = computed(() => shownItems.value.map(getRssFeedItemKey))
+
+function loadMore() {
+  dataLimit.value += PAGE_SIZE
+  sessionStorage.setItem(dataLimitStorageKey, String(dataLimit.value))
+}
 const errorFeedUrls = computed(() => rssFeedErrors.value.filter(url => feedUrls.value.has(url)))
 const isLoading = computed(() => rssFeedsRefreshing.value)
 

@@ -225,6 +225,7 @@ Subscriptions:
     Description: Füge einen RSS- oder Atom-Feed hinzu, um Kanälen auf anderen Plattformen zu folgen. {rssHub}-Instanzen stellen Feeds für viele Websites bereit, zum Beispiel Twitch.
     Empty Items: Deine Feeds enthalten derzeit keine Einträge.
     No Feeds: Du hast noch keine RSS-Feeds abonniert.
+    Load More Items: Weitere Einträge laden
     RSSHub:
       Browse: RSSHub durchsuchen
       Title: Feed von RSSHub hinzufügen

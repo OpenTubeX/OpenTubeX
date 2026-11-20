@@ -211,6 +211,7 @@ Subscriptions:
   Posts:
     RSS Message: 'YouTube non fornece fontes RSS para as publicacións. Desactiva a opción "{rssSetting}" para ver as publicacións ou activa "{hideSetting}" para ocultar esta lapela.'
   RSS Feeds:
+    Load More Items: Cargar máis elementos
     Refreshing: Actualizando as fontes RSS
     Tab: RSS
     Followed Feeds: Fontes RSS seguidas

@@ -213,6 +213,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube не пружа RSS изворе за објаве. Искључите подешавање „{rssSetting}“ да бисте видели објаве или укључите подешавање „{hideSetting}“ да бисте сакрили ову картицу.
   RSS Feeds:
+    Load More Items: Учитај још ставки
     Refreshing: Освежавање RSS фидова
     Tab: RSS
     Followed Feeds: Праћени RSS фидови

@@ -228,6 +228,7 @@ Subscriptions:
   Posts:
     RSS Message: 'یوتیوب برای پست‌ها خوراک RSS ارائه نمی‌کند. برای دیدن پست‌ها تنظیم "{rssSetting}" را غیرفعال کنید یا برای پنهان‌کردن این زبانه تنظیم "{hideSetting}" را فعال کنید.'
   RSS Feeds:
+    Load More Items: بارگیری موارد بیشتر
     Refreshing: در حال تازه‌سازی خوراک‌های RSS
     Tab: RSS
     Followed Feeds: خوراک‌های RSS دنبال‌شده

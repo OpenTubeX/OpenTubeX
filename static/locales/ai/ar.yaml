@@ -211,6 +211,7 @@ Subscriptions:
   Posts:
     RSS Message: لا يوفّر YouTube خلاصات RSS للمنشورات. عطّل إعداد "{rssSetting}" لعرض المنشورات أو فعّل إعداد "{hideSetting}" لإخفاء علامة التبويب هذه.
   RSS Feeds:
+    Load More Items: تحميل المزيد من العناصر
     Refreshing: جارٍ تحديث موجزات RSS
     Tab: RSS
     Followed Feeds: خلاصات RSS المتابَعة

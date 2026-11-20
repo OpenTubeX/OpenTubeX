@@ -246,6 +246,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube پوسٹس کے لیے RSS فیڈز فراہم نہیں کرتا۔ پوسٹس دیکھنے کے لیے "{rssSetting}" سیٹنگ غیر فعال کریں یا یہ ٹیب چھپانے کے لیے "{hideSetting}" سیٹنگ فعال کریں۔
   RSS Feeds:
+    Load More Items: مزید آئٹمز لوڈ کریں
     Refreshing: RSS فیڈز تازہ ہو رہی ہیں
     Tab: RSS
     Followed Feeds: فالو کی گئی RSS فیڈز

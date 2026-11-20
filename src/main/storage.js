@@ -16,7 +16,8 @@ const sqliteFiles = name => [`${name}.sqlite`, `${name}.sqlite-wal`, `${name}.sq
 const USER_DATA_FILES = {
   downloadRecords: 'downloads.json',
   videoMetadata: sqliteFiles('video-metadata-cache'),
-  subscriptionCache: sqliteFiles('subscription-cache'),
+  // With the items of RSS feeds and channels on other platforms
+  subscriptionCache: [...sqliteFiles('subscription-cache'), ...sqliteFiles('feed-cache')],
   searchHistory: sqliteFiles('search-history'),
   history: sqliteFiles('history'),
   watchStats: sqliteFiles('watch-stats'),

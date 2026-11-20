@@ -257,6 +257,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube no proporciona canals RSS per a les publicacions. Desactiveu l'opció "{rssSetting}" per veure les publicacions o activeu l'opció "{hideSetting}" per ocultar aquesta pestanya.
   RSS Feeds:
+    Load More Items: Carrega més elements
     Refreshing: "S'estan actualitzant els canals RSS"
     Tab: RSS
     Followed Feeds: Canals RSS seguits

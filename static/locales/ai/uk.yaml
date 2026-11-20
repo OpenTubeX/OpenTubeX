@@ -211,6 +211,7 @@ Subscriptions:
   Posts:
     RSS Message: 'YouTube не надає RSS-каналів для дописів. Вимкніть налаштування "{rssSetting}", щоб переглядати дописи, або ввімкніть "{hideSetting}", щоб приховати цю вкладку.'
   RSS Feeds:
+    Load More Items: Завантажити більше записів
     Refreshing: Оновлення RSS-стрічок
     Tab: RSS
     Followed Feeds: Відстежувані RSS-стрічки

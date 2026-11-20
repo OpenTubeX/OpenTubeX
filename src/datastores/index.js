@@ -85,6 +85,8 @@ export function removeLegacySubscriptionCache() {
 export const tabSession = createDatastore('tab-session')
 export const liveReminders = createDatastore('live-reminders')
 export const videoMetadataCache = createDatastore('video-metadata-cache')
+// The items of followed RSS feeds and channels on other platforms
+export const feedCache = createDatastore('feed-cache')
 
 export async function waitForDatastores() {
   const results = await Promise.allSettled([

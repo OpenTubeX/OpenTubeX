@@ -17,6 +17,7 @@ import {
   waitForAppReady
 } from '../../helpers/app.mjs'
 import { encryptSyncDocument, decryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
+import { DBActions } from '../../../src/constants.js'
 import { SYNC_KEY, SYNC_SALT, mockSyncServer, syncWithSyncServer } from '../../helpers/sync-history.mjs'
 import { externalHistoryEntry, saveExternalHistoryEntry } from '../../helpers/external-media-history.mjs'
 import { activeTab, waitForPlayback } from '../../helpers/player.mjs'
@@ -34,6 +35,19 @@ function watchedRemotely(url, watchedAt) {
   }
 }
 // An RSSHub route for a Twitch channel
+/**
+ * The titles of the items that the feed cache stores as new
+ * @param {import('@playwright/test').Page} page
+ */
+function cachedNewTitles(page) {
+  return page.evaluate(async findAction => (await window.ftElectron.dbFeedCache(findAction))
+    .map(text => JSON.parse(text))
+    .filter(doc => doc._id.startsWith('rss:'))
+    .flatMap(doc => doc.items)
+    .filter(item => item.isNew)
+    .map(item => item.title), DBActions.GENERAL.FIND)
+}
+
 const RSS_URL = 'https://rss.example.test/twitch/video/Streamer'
 const ATOM_URL = 'https://rss.example.test/peertube/channel.atom'
 const BROKEN_URL = 'https://rss.example.test/broken.xml'
@@ -618,6 +632,34 @@ test.describe('with followed feeds', () => {
     expect(await titles.allTextContents()).toEqual(['Newest VOD', 'Older VOD'])
   })
 
+  test('takes over the items and seen history that earlier versions cached', async ({ page }) => {
+    await mockFeeds(page)
+    let requested = false
+    await page.route(RSS_URL, (route) => {
+      requested = true
+      return route.fulfill({ contentType: 'application/rss+xml', body: rssFeed })
+    })
+    // Earlier versions kept them in the local storage
+    await page.evaluate(({ feedUrl, published }) => {
+      localStorage.setItem('rssFeedItems', JSON.stringify([
+        { id: 'vod-9', url: 'https://www.twitch.tv/videos/9', title: 'Cached VOD', author: 'Streamer', thumbnail: '', published, feedUrl, isNew: true }
+      ]))
+      localStorage.setItem('rssFeedSeenHistory', JSON.stringify({ [feedUrl]: ['vod-8'] }))
+    }, { feedUrl: RSS_URL, published: now })
+    await page.reload()
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-rss-feeds-tab]').click()
+
+    // The feed loaded before, so only the one that never did loads
+    const panel = page.locator('#subscriptionsPanel')
+    await expect(panel.locator('.ft-list-item .h3Title')).toHaveText(['Cached VOD'])
+    await expect(panel.getByText('1 feed could not be refreshed.')).toBeVisible()
+    expect(requested).toBe(false)
+    await expect.poll(() => cachedNewTitles(page)).toEqual(['Cached VOD'])
+    expect(await page.evaluate(() => [localStorage.getItem('rssFeedItems'), localStorage.getItem('rssFeedSeenHistory')]))
+      .toEqual([null, null])
+  })
+
   test('loads only the feeds that never loaded after a restart', async ({ page }) => {
     const state = await mockFeeds(page)
     await goTo(page, 'subscriptions')
@@ -929,8 +971,7 @@ test.describe('with new items', () => {
     const panel = page.locator('#subscriptionsPanel')
     await panel.locator('.ft-list-item .h3Title', { hasText: 'Brand new VOD' }).click()
     await expect.poll(() => page.evaluate(() => window.$router.currentRoute.value.path)).toBe('/external-media')
-    expect(await page.evaluate(() => JSON.parse(localStorage.getItem('rssFeedItems'))
-      .filter(item => item.isNew).map(item => item.title))).toEqual(['Second new VOD'])
+    await expect.poll(() => cachedNewTitles(page)).toEqual(['Second new VOD'])
   })
 
   test('marks the first item of a feed that was empty as new', async ({ page }) => {
@@ -1255,8 +1296,6 @@ test.describe('with new items', () => {
     const menu = page.locator('.contextMenu')
     const item = title => panel.locator('.ft-list-item', { hasText: title })
     const tabState = () => page.evaluate(() => window.ftElectron.tabs.getState())
-    const newTitles = () => page.evaluate(() => JSON.parse(localStorage.getItem('rssFeedItems'))
-      .filter(item => item.isNew).map(item => item.title))
     const { tabs: initialTabs, activeTabId } = await tabState()
 
     await item('Brand new VOD').locator('.title').click({ button: 'right' })
@@ -1268,7 +1307,7 @@ test.describe('with new items', () => {
     expect(tabs.find(tab => !initialTabs.some(initial => initial.id === tab.id)).route.query)
       .toEqual({ url: 'https://www.twitch.tv/videos/4' })
     await expect(page).toHaveURL(/#\/subscriptions$/)
-    expect(await newTitles()).toEqual(['Second new VOD'])
+    await expect.poll(() => cachedNewTitles(page)).toEqual(['Second new VOD'])
 
     await item('Second new VOD').locator('.title').click({ button: 'right' })
     const [newWindow] = await Promise.all([
@@ -1277,7 +1316,7 @@ test.describe('with new items', () => {
     ])
     await waitForAppReady(newWindow)
     await expect(newWindow).toHaveURL(/#\/external-media\?url=https:\/\/www\.twitch\.tv\/videos\/5$/)
-    expect(await newTitles()).toEqual([])
+    await expect.poll(() => cachedNewTitles(page)).toEqual([])
   })
 
   test('brings back unseen items that another device watched earlier while they were out of their feed', async ({ page }) => {
@@ -1864,5 +1903,42 @@ test.describe('when RSS feeds are disabled', () => {
     await expect(section.getByRole('button', { name: 'Manage RSS Feeds' })).toBeVisible()
     await page.locator('.settingsCloseButton').click()
     await expect(page.locator('[data-rss-feeds-tab]')).toBeVisible()
+  })
+})
+
+test.describe('with a feed of many items', () => {
+  test.use({
+    seed: {
+      settings: {
+        fetchSubscriptionsAutomatically: false,
+        generalAutoLoadMorePaginatedItemsEnabled: false,
+        enableRssFeeds: true,
+        followedRssFeeds: [RSS_FEED]
+      }
+    }
+  })
+
+  test('shows every item of the feed, a page at a time', async ({ page }) => {
+    await mockFeeds(page)
+    const items = Array.from({ length: 120 }, (_, index) => `<item>
+      <title>Episode ${index + 1}</title>
+      <link>https://rss.example.test/episodes/${index + 1}</link>
+      <pubDate>${new Date(now - index * 3600000).toUTCString()}</pubDate>
+    </item>`).join('')
+    await page.route(RSS_URL, route => route.fulfill({
+      contentType: 'application/rss+xml',
+      body: `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Long feed</title>${items}</channel></rss>`
+    }))
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-rss-feeds-tab]').click()
+
+    const panel = page.locator('#subscriptionsPanel')
+    const titles = panel.locator('.ft-list-item .h3Title')
+    const loadMore = panel.getByRole('button', { name: 'Load more items' })
+    await expect(titles).toHaveCount(100)
+    await loadMore.click()
+    await expect(titles).toHaveCount(120)
+    await expect(titles.last()).toHaveText('Episode 120')
+    await expect(loadMore).toHaveCount(0)
   })
 })

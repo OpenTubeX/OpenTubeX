@@ -257,6 +257,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube verskaf nie RSS-voere vir plasings nie. Deaktiveer die instelling "{rssSetting}" om plasings te sien, of aktiveer die instelling "{hideSetting}" om hierdie oortjie te versteek.
   RSS Feeds:
+    Load More Items: Laai meer items
     Refreshing: RSS-feeds word herlaai
     Tab: RSS
     Followed Feeds: Gevolgde RSS-voere

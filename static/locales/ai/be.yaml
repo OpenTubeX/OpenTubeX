@@ -224,6 +224,7 @@ Subscriptions:
   Posts:
     RSS Message: YouTube не дае RSS-стужак для допісаў. Адключыце наладу "{rssSetting}", каб праглядаць допісы, або ўключыце наладу "{hideSetting}", каб схаваць гэту ўкладку.
   RSS Feeds:
+    Load More Items: Загрузіць больш запісаў
     Refreshing: Абнаўленне RSS-стужак
     Tab: RSS
     Followed Feeds: Падпісаныя RSS-стужкі

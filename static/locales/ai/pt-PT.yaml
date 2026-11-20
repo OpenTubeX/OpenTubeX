@@ -163,6 +163,7 @@ Subscriptions:
   Posts:
     RSS Message: O YouTube não fornece feeds RSS para publicações. Desative a definição "{rssSetting}" para ver publicações ou ative a definição "{hideSetting}" para ocultar este separador.
   RSS Feeds:
+    Load More Items: Carregar mais itens
     Refreshing: A atualizar feeds RSS
     Tab: RSS
     Followed Feeds: Feeds RSS seguidos

@@ -211,6 +211,7 @@ Subscriptions:
   Posts:
     RSS Message: 'YouTube ne pruža RSS izvore za objave. Isključite postavku "{rssSetting}" za prikaz objava ili uključite postavku "{hideSetting}" kako biste sakrili ovu karticu.'
   RSS Feeds:
+    Load More Items: Učitaj još stavki
     Refreshing: Osvježavanje RSS izvora
     Tab: RSS
     Followed Feeds: Praćeni RSS izvori
