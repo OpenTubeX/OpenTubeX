@@ -54,3 +54,15 @@ test('classic video results on the Home tab also count as collaborations', () =>
   assert.equal(collaboration?.authorId, 'UC-sample-channel-one')
   assert.equal(collaboration.isCollaboration, true)
 })
+
+test('a channel tab lockup without a byline keeps its channel, even when the name contains "and"', () => {
+  const raw = structuredClone(fixture)
+  const metadata = raw.metadata.lockupMetadataViewModel
+  delete metadata.image
+  metadata.metadata.contentMetadataViewModel.metadataRows.splice(0, 1)
+  const video = parseLockupView(new YTNodes.LockupView(raw), 'UC-sample-channel', 'Sample and Channel')
+
+  assert.equal(video.author, 'Sample and Channel')
+  assert.equal(video.authorId, 'UC-sample-channel')
+  assert.equal(video.hasCollaborators, false)
+})
