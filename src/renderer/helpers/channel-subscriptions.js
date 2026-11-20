@@ -13,6 +13,19 @@ export function isProfileSubscribed(profile, channelId) {
   return profile.subscriptions.some(channel => channel.id === channelId)
 }
 
+let changes = Promise.resolve(true)
+
+/**
+ * Runs subscription changes one at a time, so each one is saved and queued
+ * for YouTube before the next starts, and YouTube gets them in the same order.
+ * @param {() => Promise<boolean>} change
+ */
+function queueChange(change) {
+  const result = changes.then(change)
+  changes = result.catch(() => false)
+  return result
+}
+
 /** @param {(key: string, ...args: unknown[]) => string} t */
 function showSaveFailedToast(t) {
   showToast({ message: t('Channel.Failed to save subscription settings'), icon: ['fas', 'circle-exclamation'] })
@@ -26,7 +39,12 @@ function showSaveFailedToast(t) {
  * @param {ReturnType<typeof normalizeSubscriptionChannelSettings>} [settings]
  * @returns {Promise<boolean>} whether the subscription was saved
  */
-export async function subscribeToChannel(profile, { id, name, thumbnail = null, handle = null }, t, settings) {
+export function subscribeToChannel(profile, channel, t, settings) {
+  return queueChange(() => saveSubscription(profile, channel, t, settings))
+}
+
+/** @type {typeof subscribeToChannel} */
+async function saveSubscription(profile, { id, name, thumbnail = null, handle = null }, t, settings) {
   const profileIds = [profile._id]
   if (profile._id !== MAIN_PROFILE_ID) {
     const primaryProfile = store.getters.getProfileList.find(prof => prof._id === MAIN_PROFILE_ID)
@@ -70,7 +88,12 @@ export async function subscribeToChannel(profile, { id, name, thumbnail = null, 
  * @param {(key: string, ...args: unknown[]) => string} t
  * @returns {Promise<boolean>} whether the removal was saved
  */
-export async function unsubscribeFromChannel(profile, channelId, t) {
+export function unsubscribeFromChannel(profile, channelId, t) {
+  return queueChange(() => saveUnsubscription(profile, channelId, t))
+}
+
+/** @type {typeof unsubscribeFromChannel} */
+async function saveUnsubscription(profile, channelId, t) {
   const profileIds = profile._id === MAIN_PROFILE_ID
     ? store.getters.getProfileList.filter(prof => prof._id === MAIN_PROFILE_ID || isProfileSubscribed(prof, channelId)).map(prof => prof._id)
     : [profile._id]

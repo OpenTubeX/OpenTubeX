@@ -160,3 +160,44 @@ test('reports a failed unsubscribe save without claiming the channel was removed
   await expect(page.getByText('Channel has been removed from your subscriptions', { exact: true })).toHaveCount(0)
   expect(await page.evaluate(id => window.$store.getters.getActiveSubscribedChannelIdSet.has(id), otherChannel.id)).toBe(true)
 })
+
+test('saves a quick resubscribe only after the pending unsubscribe', async ({ page }) => {
+  await page.locator(sel.searchInput).fill('channels')
+  await page.locator(sel.searchInput).press('Enter')
+  const title = page.locator('.ft-list-channel .title')
+  await expect(title).toHaveText(channel.name)
+  const menu = page.getByRole('menu', { name: 'Context menu', exact: true })
+  const isSubscribed = () => page.evaluate(id => window.$store.getters.getActiveSubscribedChannelIdSet.has(id), channel.id)
+  await title.click({ button: 'right' })
+  await menu.getByRole('menuitem', { name: 'Subscribe', exact: true }).click()
+  await expect.poll(isSubscribed).toBe(true)
+
+  // Holds the removal after it updates the store, like its slower cleanup does.
+  await page.evaluate(() => {
+    const actions = window.$store._actions
+    const [remove] = actions.removeChannelFromProfiles
+    const [add] = actions.addChannelToProfiles
+    window.e2eSaves = []
+    const gate = new Promise(resolve => { window.e2eReleaseRemoval = resolve })
+    actions.removeChannelFromProfiles = [async payload => {
+      const saved = await remove(payload)
+      await gate
+      window.e2eSaves.push('removed')
+      return saved
+    }]
+    actions.addChannelToProfiles = [payload => {
+      window.e2eSaves.push('add')
+      return add(payload)
+    }]
+  })
+  await title.click({ button: 'right' })
+  await menu.getByRole('menuitem', { name: 'Unsubscribe', exact: true }).click()
+  await expect.poll(isSubscribed).toBe(false)
+  await title.click({ button: 'right' })
+  await menu.getByRole('menuitem', { name: 'Subscribe', exact: true }).click()
+  await expect(menu).toBeHidden()
+  await page.evaluate(() => window.e2eReleaseRemoval())
+
+  await expect.poll(isSubscribed).toBe(true)
+  expect(await page.evaluate(() => window.e2eSaves)).toEqual(['removed', 'add'])
+})
