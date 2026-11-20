@@ -255,7 +255,10 @@
                 @click.capture="recordRecommendationClick(video, $event)"
                 @auxclick.capture="recordRecommendationClick(video, $event)"
               />
-              <div class="recommendationDetails">
+              <div
+                v-if="!hideRecommendationDetails"
+                class="recommendationDetails"
+              >
                 <p class="recommendationReason">
                   {{ recommendationReason(video) }}
                 </p>
@@ -671,6 +674,8 @@ const {
   loadMore: loadMoreRecommendations,
   feedVersion: recommendationFeedVersion,
 } = useHomeRecommendations(computed(() => visibleSections.value.some(section => section.id === 'recommendations')))
+
+const hideRecommendationDetails = computed(() => store.getters.getHideRecommendationDetails)
 
 function recommendationFeedbackFor(videoId) {
   return store.state.recommendations.recommendationRecords[videoId]?.feedback

@@ -1358,6 +1358,7 @@ Settings:
     Hide Header Sync Indicator: Dölj synkroniseringsindikatorn i apphuvudet
     Hide Repeat Stats: Dölj upprepningsstatistik
     Hide Playlist Stats: Dölj spellistestatistik
+    Hide Recommendation Details: Dölj orsaker till rekommendationer och feedback
     Sections:
       Digital Wellbeing: "Digitalt välmående"
       Visible While Paused: Synligt under paus i helfönster eller helskärm

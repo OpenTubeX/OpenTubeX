@@ -1358,6 +1358,7 @@ Settings:
     Hide Header Sync Indicator: Ẩn chỉ báo đồng bộ hóa trên thanh đầu ứng dụng
     Hide Repeat Stats: Ẩn thống kê lặp lại
     Hide Playlist Stats: Ẩn thống kê danh sách phát
+    Hide Recommendation Details: Ẩn lý do đề xuất và phản hồi
     Sections:
       Digital Wellbeing: "Sức khỏe kỹ thuật số"
       Visible While Paused: Hiện khi tạm dừng ở chế độ toàn cửa sổ / toàn màn hình

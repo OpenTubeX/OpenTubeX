@@ -1358,6 +1358,7 @@ Settings:
     Hide Header Sync Indicator: Peida rakenduse päise sünkroonimisnäidik
     Hide Repeat Stats: Peida korduste statistika
     Hide Playlist Stats: Peida esitusloendi statistika
+    Hide Recommendation Details: Peida soovituste põhjused ja tagasiside
     Sections:
       Digital Wellbeing: "Digitaalne heaolu"
       Visible While Paused: Pausi ajal täisaknas või täisekraanil nähtav

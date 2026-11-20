@@ -1358,6 +1358,7 @@ Settings:
     Hide Header Sync Indicator: Piilota sovelluksen otsakepalkin synkronoinnin ilmaisin
     Hide Repeat Stats: Piilota toistotilastot
     Hide Playlist Stats: Piilota soittolistan tilastot
+    Hide Recommendation Details: Piilota suositusten syyt ja palaute
     Sections:
       Digital Wellbeing: "Digitaalinen hyvinvointi"
       Visible While Paused: Näkyvissä keskeytyksen aikana koko ikkunan tai koko näytön tilassa

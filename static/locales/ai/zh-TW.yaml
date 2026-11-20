@@ -1358,6 +1358,7 @@ Settings:
     Hide Header Sync Indicator: 隱藏應用程式標題列中的同步指示器
     Hide Repeat Stats: 隱藏循環統計
     Hide Playlist Stats: 隱藏播放清單統計資料
+    Hide Recommendation Details: 隱藏推薦原因與意見回饋
     Sections:
       Digital Wellbeing: "數位健康"
       Visible While Paused: 在全視窗／全螢幕模式暫停播放時顯示

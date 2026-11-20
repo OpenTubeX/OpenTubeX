@@ -107,6 +107,13 @@
           :tooltip="t('Tooltips.Distraction Free Settings.Hide Playlist Stats')"
           @change="store.dispatch('updateHidePlaylistStats', $event)"
         />
+        <FtToggleSwitch
+          :label="t('Settings.Distraction Free Settings.Hide Recommendation Details')"
+          :compact="true"
+          :default-value="hideRecommendationDetails"
+          setting-key="hideRecommendationDetails"
+          @change="store.dispatch('updateHideRecommendationDetails', $event)"
+        />
       </div>
     </div>
     <div class="switchColumnGrid">
@@ -617,6 +624,9 @@ function updateHidePlaylists(value) {
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hidePlaylistStats = computed(() => store.getters.getHidePlaylistStats)
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const hideRecommendationDetails = computed(() => store.getters.getHideRecommendationDetails)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideLiveChat = computed(() => store.getters.getHideLiveChat)

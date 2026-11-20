@@ -1369,6 +1369,7 @@ Settings:
     Hide Header Sync Indicator: Приховати індикатор синхронізації в заголовку застосунку
     Hide Repeat Stats: Приховати статистику повторів
     Hide Playlist Stats: Приховати статистику плейлиста
+    Hide Recommendation Details: Приховати причини рекомендацій і відгуки
     Sections:
       Digital Wellbeing: "Цифрове благополуччя"
       Visible While Paused: Видимі під час паузи в режимі на все вікно або на весь екран

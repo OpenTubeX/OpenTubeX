@@ -214,6 +214,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     hideEndScreenRecommendations: false,
     hidePaidPromotion: false,
     hidePlaylistStats: false,
+    hideRecommendationDetails: false,
     hideFeaturedChannels: false,
     channelsHidden: '[]',
     forbiddenTitles: '[]',
