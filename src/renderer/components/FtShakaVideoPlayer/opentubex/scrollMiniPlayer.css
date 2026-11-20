@@ -778,8 +778,11 @@
   transition: opacity var(--motion-fast-effects);
 }
 
+.scrollMiniScrollTop.isHidden,
+.scrollMiniDismiss.isHidden,
 .scrollMiniPlayPause.isHidden,
 .scrollMiniSkip.isHidden,
+.scrollMiniVolume.isHidden,
 .scrollMiniDragHandle.isHidden,
 .scrollMiniResizeHandle.isHidden {
   opacity: 0;
@@ -799,8 +802,11 @@
 }
 
 /* Auto-hide must not leave a keyboard-focused control invisible. */
+.scrollMiniScrollTop.isHidden:focus-visible,
+.scrollMiniDismiss.isHidden:focus-visible,
 .scrollMiniPlayPause.isHidden:focus-visible,
-.scrollMiniSkip.isHidden:focus-visible {
+.scrollMiniSkip.isHidden:focus-visible,
+.scrollMiniVolume.isHidden:has(:focus-visible) {
   opacity: 1;
   pointer-events: auto;
   scale: 1;
@@ -897,7 +903,7 @@
   min-block-size: 32px;
   padding-inline: 8px;
   border-radius: var(--shape-corner-full);
-  transition: background-color var(--motion-fast-effects);
+  transition: background-color var(--motion-fast-effects), opacity var(--motion-fast-effects);
   z-index: 3;
 }
 
