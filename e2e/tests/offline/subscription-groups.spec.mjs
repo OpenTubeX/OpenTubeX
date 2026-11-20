@@ -97,6 +97,34 @@ test.describe('creating subscription groups', () => {
     await expect(groups(page).getByRole('tab', { name: 'Music' })).toHaveAttribute('aria-selected', 'true')
     await expect(feedVideo(page, 'Beta Channel upload')).toBeHidden()
   })
+  test('creates the first group with a channel from its subscription settings', async ({ page }) => {
+    await goTo(page, 'subscribedchannels')
+    const toggle = page.locator('.channel', { hasText: 'Beta Channel' }).locator('.profileDropdownToggle')
+    await toggle.click()
+    const groupList = page.locator('.profileDropdown').getByRole('group', { name: 'Groups' })
+    await groupList.getByRole('button', { name: 'New Group' }).click()
+
+    const editor = page.getByRole('dialog', { name: 'New Group' })
+    await expect(page.locator('.profileDropdown')).toHaveCount(0)
+    await expect(editor.getByRole('checkbox', { name: 'Beta Channel' })).toHaveAttribute('aria-checked', 'true')
+    await editor.getByRole('textbox', { name: 'Group Name' }).fill('Music')
+    await editor.getByRole('button', { name: 'Create', exact: true }).click()
+    await expect(editor).toBeHidden()
+    await expect(toggle).toBeFocused()
+
+    // The list stays unfiltered, as the group was made for this channel
+    await expect(groups(page).getByRole('tab', { name: 'All' })).toHaveAttribute('aria-selected', 'true')
+    expect(await storedGroups(page)).toEqual([{ id: expect.any(String), name: 'Music', channelIds: [BETA] }])
+
+    // Phones open the editor once the bottom sheet has closed
+    await page.setViewportSize({ width: 375, height: 812 })
+    await page.locator('.channel', { hasText: 'Gamma Channel' }).locator('.profileDropdownToggle').click()
+    const sheet = page.getByRole('dialog', { name: 'Subscription settings', exact: true })
+    await sheet.getByRole('group', { name: 'Groups' }).getByRole('button', { name: 'New Group' }).click()
+    await expect(sheet).toHaveCount(0)
+    await expect(editor.getByRole('checkbox', { name: 'Gamma Channel' })).toHaveAttribute('aria-checked', 'true')
+    await expect(editor.getByRole('checkbox', { name: 'Beta Channel' })).toHaveAttribute('aria-checked', 'false')
+  })
 })
 
 test.describe('saving subscription groups', () => {
@@ -431,7 +459,7 @@ test.describe('subscription groups in the tabbed New feed', () => {
   })
 
   test('share the row of the New feed tabs while they fit beside them @scale', async ({ app, page, attachScreenshot }) => {
-    await setWindowSize(app, page, { width: 1300, height: 820 })
+    await setWindowSize(app, page, { width: 1700, height: 820 })
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="all"]').click()
     const header = page.locator('.subscriptionsHeader')

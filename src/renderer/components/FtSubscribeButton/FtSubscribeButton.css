@@ -321,3 +321,9 @@
 .feedTypePreferences + .profileDropdownScroller {
   border-block-start: 1px solid var(--divider-color);
 }
+
+/* An action among the group checkboxes */
+.newGroupChip {
+  border-style: dashed;
+  color: var(--secondary-text-color);
+}
