@@ -81,11 +81,7 @@
 }
 
 // The label links to the video like the thumbnail it covers.
-@media (hover: hover) {
-  .videoThumbnail:has(> .sponsorBlockVideoLabel:hover) > .thumbnailLink {
-    outline: 3px solid var(--side-nav-hover-color);
-  }
-}
+@include ft-list-item.thumbnail-hover-outline('.videoThumbnail:has(> .sponsorBlockVideoLabel:hover) > .thumbnailLink');
 
 .watched .sponsorBlockVideoLabel {
   margin-block-start: 28px;
