@@ -1946,11 +1946,13 @@
           type="button"
           :tabindex="scrollMiniPlayerDetached ? 0 : -1"
           class="scrollMiniScrollTop"
-          :class="{ 'scrollMiniScrollTop-detached': scrollMiniPlayerDetached }"
+          :class="{ 'scrollMiniScrollTop-detached': scrollMiniPlayerDetached, isHidden: !scrollMiniPlayPauseVisible }"
           :title="scrollMiniPlayerDetached
             ? $t('Video.Player.Scroll Mini Player.Return to Video Tab')
             : $t('Video.Player.Scroll Mini Player.Back to Top')"
           @click.stop.prevent="scrollMiniScrollToTop"
+          @mouseenter="handleScrollMiniPlayPauseMouseEnter"
+          @focusin="handleScrollMiniPlayPauseMouseEnter"
           @mousedown.stop.prevent
         >
           <ft-icon
@@ -1963,9 +1965,12 @@
           v-if="scrollMiniPlayerDetached && !scrollMiniPlayerStashed"
           type="button"
           class="scrollMiniDismiss"
+          :class="{ isHidden: !scrollMiniPlayPauseVisible }"
           :title="$t('Video.Player.Scroll Mini Player.Hide')"
           :aria-label="$t('Video.Player.Scroll Mini Player.Hide')"
           @click.stop.prevent="dismissCrossTabMiniPlayer"
+          @mouseenter="handleScrollMiniPlayPauseMouseEnter"
+          @focusin="handleScrollMiniPlayPauseMouseEnter"
           @mousedown.stop.prevent
         >
           <ft-icon :icon="['fas', 'times']" />
@@ -2029,7 +2034,7 @@
         <div
           v-if="!scrollMiniPlayerStashed"
           class="scrollMiniVolume"
-          :class="{ isExpanded: scrollMiniVolumeExpanded }"
+          :class="{ isExpanded: scrollMiniVolumeExpanded, isHidden: !scrollMiniPlayPauseVisible }"
           @mouseenter="handleScrollMiniVolumeMouseEnter"
           @mouseleave="handleScrollMiniVolumeMouseLeave"
           @focusin="handleScrollMiniVolumeMouseEnter"

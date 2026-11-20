@@ -1555,7 +1555,10 @@ test.describe('scroll mini player', () => {
     await page.mouse.move(0, 0)
     const button = player.locator('.scrollMiniPlayPause')
     await expect(button).toHaveClass(/isHidden/, { timeout: 6000 })
-    await expect(button).toHaveCSS('opacity', '0')
+    const corners = player.locator('.scrollMiniScrollTop, .scrollMiniVolume')
+    for (const control of [button, corners.first(), corners.last()]) {
+      await expect(control).toHaveCSS('opacity', '0')
+    }
     const bounds = await player.boundingBox()
     const session = await page.context().newCDPSession(page)
     const point = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }
@@ -1563,6 +1566,10 @@ test.describe('scroll mini player', () => {
     await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
     await session.detach()
     await expect(button).not.toHaveClass(/isHidden/)
+    await expect(corners).toHaveCount(2)
+    for (const control of [corners.first(), corners.last()]) {
+      await expect(control).not.toHaveClass(/isHidden/)
+    }
     await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
   })
 
