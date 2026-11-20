@@ -401,11 +401,14 @@ function currentTranslation(element) {
  */
 function suppressReleaseClick(pointerId) {
   const suppress = event => {
+    // Keyboard activations are never the release's click.
+    if (event.detail === 0) return
     event.preventDefault()
     event.stopPropagation()
   }
   const stop = () => {
     window.removeEventListener('click', suppress, true)
+    window.removeEventListener('blur', stop)
     window.removeEventListener('pointerdown', stop, true)
     window.removeEventListener('pointerup', release, true)
     window.removeEventListener('pointercancel', release, true)
@@ -416,7 +419,8 @@ function suppressReleaseClick(pointerId) {
     setTimeout(stop)
   }
   window.addEventListener('click', suppress, true)
-  // A press means the release went elsewhere, such as after the window lost focus.
+  // The release can go to another window, which a later press or losing focus reveals.
+  window.addEventListener('blur', stop)
   window.addEventListener('pointerdown', stop, true)
   window.addEventListener('pointerup', release, true)
   window.addEventListener('pointercancel', release, true)

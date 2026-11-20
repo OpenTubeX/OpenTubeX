@@ -161,7 +161,7 @@ test('reorders pinned channels by dragging them in the side navigation', async (
     await page.mouse.down()
     await page.mouse.move(source.x + source.width / 2, source.y + source.height / 2 + 8, { steps: 2 })
     await page.mouse.move(target.x + target.width / 2, target.y + target.height / 2, { steps: 5 })
-    await expect(page.locator('.sideNav .reorderDragged')).toHaveAttribute('aria-label', `Channel ${from}`)
+    await expect(page.locator('.sideNav .reorderDragged')).toHaveAttribute('data-pinned-id', `UC${from.repeat(22)}`)
     await beforeRelease?.()
     await page.mouse.up()
   }
@@ -221,6 +221,16 @@ test('reorders pinned channels by dragging them in the side navigation', async (
   // A plain click still opens the channel.
   await link('B').click()
   await expect(page).toHaveURL(new RegExp(`#/channel/${channels[1].id}`))
+
+  // Losing focus ends a drag whose release goes elsewhere, without swallowing later keyboard clicks.
+  await drag('B', 'A', async () => {
+    await page.evaluate(() => window.dispatchEvent(new Event('blur')))
+    await expect(page.locator('.sideNav .reorderActive')).toHaveCount(0)
+    await link('C').focus()
+    await page.keyboard.press('Enter')
+    await expect(page).toHaveURL(new RegExp(`#/channel/${channels[2].id}`))
+  })
+  await expect.poll(order).toEqual(['A', 'C', 'B'])
 
   await page.reload()
   await waitForAppReady(page)
