@@ -158,22 +158,22 @@ test('FFmpeg progress of a video that is not live leaves its status alone', () =
 
 test('parts of a split playlist keep their own live state', () => {
   const parts = [0, 1].map(() => ({ phase: 'preparing', percent: 0, speed: null, eta: null, done: false }))
-  // The live video's part reports first, then the regular video's part
   const { status } = replay([
-    [0, '__OPENTUBEX_PREPARING__:aaaaaaaaaaa\t1\t2\t"Live stream"'],
-    [0, '__OPENTUBEX_LIVE__:True'],
-    [1, '__OPENTUBEX_PREPARING__:bbbbbbbbbbb\t2\t2\t"Video"'],
-    [1, '__OPENTUBEX_LIVE__:False'],
-    [0, 'out_time_us=5000000'],
-    [0, 'progress=continue'],
-    [1, '__OPENTUBEX_DOWNLOAD__:downloading\t40.0%\t1.00MiB/s\t00:10'],
+    [0, '__OPENTUBEX_PREPARING__:aaaaaaaaaaa\t1\t2\t"Video"'],
+    [0, '__OPENTUBEX_LIVE__:False'],
+    [1, '__OPENTUBEX_PREPARING__:bbbbbbbbbbb\t2\t2\t"Live stream"'],
+    [1, '__OPENTUBEX_LIVE__:True'],
+    [1, 'out_time_us=5000000'],
+    [1, 'progress=continue'],
+    [0, '__OPENTUBEX_DOWNLOAD__:downloading\t40.0%\t1.00MiB/s\t00:10'],
   ], 'preparing', { parts })
-  // The row shows the earlier playlist entry, the live stream
+  // The row shows the live stream over the earlier video, so it cannot be paused
   assert.equal(status.status, 'downloading')
   assert.equal(status.live, true)
+  assert.equal(status.playlistIndex, 2)
   assert.equal(status.recordedSeconds, 5)
-  assert.equal(parts[1].live, false)
-  assert.equal(parts[1].percent, 40)
+  assert.equal(parts[0].live, false)
+  assert.equal(parts[0].percent, 40)
 })
 
 test('stderr progress is decoded across chunks and keeps diagnostic history bounded', () => {

@@ -523,14 +523,19 @@ final class YtDlpDownloads {
         return Integer.MAX_VALUE;
     }
 
-    /** Shows the earliest video still in progress, with the speed of all parts. */
+    /**
+     * Shows the earliest video still in progress, with the speed of all parts. A live recording
+     * comes first, so the row offers to stop it instead of pausing it.
+     */
     static void showProgress(JSONObject record, List<JSONObject> parts, JSONArray videoIds) throws org.json.JSONException {
         JSONObject shown = null;
         List<String> speeds = new ArrayList<>();
         for (JSONObject part : parts) {
             if (part.optBoolean("done")) continue;
             if (!part.isNull("speed")) speeds.add(part.optString("speed"));
-            if (shown == null || partPosition(part, videoIds) < partPosition(shown, videoIds)) shown = part;
+            boolean firstLive = part.optBoolean("live") && (shown == null || !shown.optBoolean("live"));
+            boolean sameKind = shown != null && part.optBoolean("live") == shown.optBoolean("live");
+            if (shown == null || firstLive || sameKind && partPosition(part, videoIds) < partPosition(shown, videoIds)) shown = part;
         }
         if (shown == null) shown = parts.get(0);
         record.put("status", shown.optString("status", "preparing")).put("percent", shown.optDouble("percent", 0))
@@ -670,7 +675,7 @@ final class YtDlpDownloads {
                 else { part.remove("stopping"); part.put("status", "downloading"); }
             }
             if (!interrupted) return false;
-            record.put("status", "processing");
+            showProgress(record, parts, record.getJSONObject("retryPayload").optJSONArray("videoIds"));
             publish(record);
         } else if (action.equals("pause") && liveRecording) {
             return false;

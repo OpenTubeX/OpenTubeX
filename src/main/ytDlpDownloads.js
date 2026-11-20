@@ -816,8 +816,8 @@ async function startYtDlpDownload(
   const partArgs = splitDownloadArguments(payload, commandArgs, slots).parts
   // The limit only counts videos, so it cannot change between the request and the split.
   if (partArgs.length < slots) releaseDownloadSlot(slots - partArgs.length)
-  /** @type {{ children: Set<import('node:child_process').ChildProcess>, cancelled: boolean, paused: boolean, restarting: boolean, restartStatus: 'queued' | 'paused', resumeStatus?: string, parts: DownloadPart[] }} */
-  const entry = { children: new Set(), cancelled: false, paused: false, restarting: false, restartStatus: 'queued', parts: [] }
+  /** @type {{ children: Set<import('node:child_process').ChildProcess>, cancelled: boolean, paused: boolean, restarting: boolean, restartStatus: 'queued' | 'paused', resumeStatus?: string, parts: DownloadPart[], showProgress: () => void }} */
+  const entry = { children: new Set(), cancelled: false, paused: false, restarting: false, restartStatus: 'queued', parts: [], showProgress: () => {} }
   activeDownloads.set(id, entry)
   showAutomaticDownloadNotification(payload, 'started')
   sendStatus(true)
@@ -854,6 +854,7 @@ async function startYtDlpDownload(
   /** @type {DownloadPart[]} */
   const parts = partArgs.map(() => ({ phase: 'preparing', percent: 0, speed: null, eta: null, done: false, code: null, error: null }))
   entry.parts = parts
+  entry.showProgress = showProgress
 
   /** @param {DownloadPart} part */
   function partPosition(part) {
@@ -861,8 +862,11 @@ async function startYtDlpDownload(
   }
 
   // The row shows the earliest video still in progress, with the speed of all processes.
+  // A live recording comes first, so the row offers to stop it instead of pausing it.
   function showProgress() {
-    const active = parts.filter(part => !part.done)
+    const unfinished = parts.filter(part => !part.done)
+    const recording = unfinished.filter(part => part.live === true)
+    const active = recording.length > 0 ? recording : unfinished
     const shown = active.reduce((earliest, part) => partPosition(part) < partPosition(earliest) ? part : earliest, active[0] ?? parts[0])
     if (status.status === 'paused' || status.status === 'pausing') {
       entry.resumeStatus = shown.phase
@@ -1453,21 +1457,26 @@ export async function handleYtDlpControlDownload(event, id, action, value) {
       ? entry.parts.filter(part => part.live === true && part.phase === 'downloading' && !part.done &&
         part.stopRequestedAt === undefined && part.child)
       : []
-    if (recordingParts.length === 0 || record.live !== true || record.status !== 'downloading') return false
+    if (recordingParts.length === 0) return false
+    const requestedAt = Date.now()
     for (const part of recordingParts) {
-      part.stopRequestedAt = Date.now()
+      part.stopRequestedAt = requestedAt
       part.phase = 'processing'
     }
-    record.status = 'processing'
+    entry.showProgress()
     broadcastDownloadStatus(record)
     const interrupted = await Promise.all(recordingParts.map(part => interruptProcess(part.child)))
     if (!interrupted.includes(true)) {
+      // A part that moved on to the next video while waiting is no longer this request's
       for (const part of recordingParts) {
+        if (part.stopRequestedAt !== requestedAt || part.done) continue
         delete part.stopRequestedAt
-        if (part.phase === 'processing') part.phase = 'downloading'
+        part.phase = 'downloading'
       }
-      if (record.status === 'processing') record.status = 'downloading'
-      broadcastDownloadStatus(record)
+      if (activeDownloads.get(id) === entry && !entry.cancelled) {
+        entry.showProgress()
+        broadcastDownloadStatus(record)
+      }
       return false
     }
   } else if (action === 'move' && ['queued', 'paused'].includes(record.status) && !entry && (value === -1 || value === 1)) {

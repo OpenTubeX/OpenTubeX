@@ -64,15 +64,17 @@ public class YtDlpDownloadProgressTest {
         YtDlpDownloads.updateProgress(part, "progress=continue");
         assertEquals("preparing", part.getString("status"));
 
-        // Parts of a split playlist keep their own live state
+        // Parts of a split playlist keep their own live state, and the row shows the recording
+        // even after an earlier video, so it cannot be paused
         JSONObject live = new JSONObject().put("status", "preparing").put("percent", 0);
-        YtDlpDownloads.updateProgress(live, "__OPENTUBEX_PREPARING__:aaaaaaaaaaa\t1\t2\t\"Live stream\"");
+        YtDlpDownloads.updateProgress(live, "__OPENTUBEX_PREPARING__:ccccccccccc\t3\t3\t\"Live stream\"");
         YtDlpDownloads.updateProgress(live, "__OPENTUBEX_LIVE__:True");
         YtDlpDownloads.updateProgress(live, "out_time_us=5000000");
         YtDlpDownloads.updateProgress(live, "progress=continue");
         JSONObject combined = new JSONObject();
         YtDlpDownloads.showProgress(combined, Arrays.asList(live, part), null);
         assertTrue(combined.getBoolean("live"));
+        assertEquals(3, combined.getInt("playlistIndex"));
         assertEquals(5, combined.getDouble("recordedSeconds"), 0);
     }
 
