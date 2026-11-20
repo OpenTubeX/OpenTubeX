@@ -160,7 +160,10 @@ for (const fullscreenSwipe of [true, false]) {
     const { gestures: g, event, container } = fixture(t, { fullscreenSwipe, fullscreen: () => true })
     let touchEnds = 0
     container.addEventListener('touchend', () => touchEnds++)
-    // A hold without movement never showed the controls
+    // A hold without movement never showed the controls, also after a canceled moving touch
+    g.startMobileFullscreenGesture(event(210))
+    g.handleMobilePlayerTouchMove(event(210, 190))
+    g.cancelMobileFullscreenGesture(event(210, 190))
     g.startMobileFullscreenGesture(event(210))
     g.handleStoppedPlayerTouchEnd()
     assert.equal(touchEnds, 0)

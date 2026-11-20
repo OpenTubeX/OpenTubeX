@@ -140,6 +140,8 @@ export function useMobileFullscreenGestures({
     }
 
     mobileGestureTouchCancelled = false
+    // A canceled touch never reached the touchend that clears this
+    mobileShakaTouchMoved = false
 
     const previousTitleTap = lastMobileFullscreenTitleTap
     const blocksPreviousTitleTap = previousTitleTap !== null &&
