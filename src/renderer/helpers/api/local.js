@@ -911,6 +911,7 @@ export function mergeLateWatchNext(info, playerResponse, nextResponse, actions) 
  *   androidLiveHlsManifestUrl: string | null,
  *   androidLiveDashManifestUrl: string | null,
  *   getVrHlsManifest: () => Promise<string | null>,
+ *   isVr180?: boolean,
  *   refreshVisionOsStreams?: (() => Promise<import('youtubei.js').YT.VideoInfo | null>) | null,
  *   loadLegacyFormats?: (() => Promise<import('youtubei.js').Misc.Format[]>) | null,
  *   contentDisclosures: { label: string, description: string, attribution: string }[] | null,
@@ -1254,7 +1255,11 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
   }
   const streamPoToken = usesVisionOsStreams ? undefined : contentPoToken
 
+  // VR180 videos' mesh streams pack both eyes' half spheres side by side
+  let isVr180 = playerResponse.data.playerConfig?.vrConfig?.partialSpherical === true
+
   if (hasTrailer && info.playability_status.status !== 'OK') {
+    isVr180 = false
     const trailerInfo = info.getTrailerInfo()
 
     // don't override the timestamp of when the video will premiere for upcoming videos
@@ -1335,6 +1340,7 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
     contentDisclosures: extractLocalContentDisclosures(info),
     infoPanels: extractLocalInfoPanels(info),
     getVrHlsManifest: () => getLocalVrHlsManifest(id, htmlExtracts.session, contentPoToken),
+    isVr180,
     // Expired visionOS streams only need a new /player response, not the watch page
     refreshVisionOsStreams: usesVisionOsStreams
       ? async () => {

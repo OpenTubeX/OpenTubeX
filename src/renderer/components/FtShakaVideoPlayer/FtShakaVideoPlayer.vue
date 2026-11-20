@@ -787,14 +787,14 @@
         </div>
       </div>
       <!--
-      VR playback is only possible for VR videos with "EQUIRECTANGULAR" projection
+      VR playback is only possible for VR videos with "EQUIRECTANGULAR" projection and VR180 videos
       This intentionally doesn't use the "useVrMode" computed prop,
       as that changes depending on the active format,
       but as we initialize the shaka-player UI once per watch page,
       the canvas has to exist even in audio-only mode, because the user may switch to DASH later.
     -->
       <canvas
-        v-if="vrProjection === 'EQUIRECTANGULAR'"
+        v-if="vrProjection === 'EQUIRECTANGULAR' || vrProjection === 'VR180'"
         ref="vrCanvas"
         class="vrCanvas"
       />
@@ -4845,7 +4845,7 @@ function getPlayerConfig(format, useAutoQuality = false) {
 // #region UI config
 
 const useVrMode = computed(() => {
-  return props.format === 'dash' && props.vrProjection === 'EQUIRECTANGULAR'
+  return props.format === 'dash' && (props.vrProjection === 'EQUIRECTANGULAR' || props.vrProjection === 'VR180')
 })
 
 // Like skip silence and voice-over translation, this needs Web Audio
@@ -5315,6 +5315,9 @@ const uiConfig = computed(() => {
       ? TrackLabelFormat.LABEL
       : TrackLabelFormat.LANGUAGE,
     displayInVrMode: useVrMode.value,
+    // VR180 streams show a half sphere, with the eyes side by side in each frame
+    defaultVrProjectionMode: props.vrProjection === 'VR180' ? 'halfequirectangular' : 'equirectangular',
+    vrSideBySide: props.vrProjection === 'VR180',
   }
 
   const pictureInPictureElement = process.env.IS_CAPACITOR && !process.env.IS_IOS
@@ -8207,6 +8210,7 @@ const ambientModeVisible = computed(() => {
     ambientMode.value &&
     !audioOnlyMedia.value &&
     props.vrProjection !== 'EQUIRECTANGULAR' &&
+    props.vrProjection !== 'VR180' &&
     !scrollMiniPlayerActive.value &&
     !scrollMiniPlayerAnimating.value &&
     !scrollMiniPlayerDragStyle.value
