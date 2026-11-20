@@ -87,20 +87,24 @@ test('Refresh All holds its native batch until every feed and its native finish 
 test('a feed refreshes the feeds chosen to refresh with it after itself, and only when started by the user', async () => {
   const liveRefresh = Promise.withResolvers()
   const calls = []
+  let batch
   const { refreshSubscriptionFeed } = await loadFeedRefresh({
     store: { getters: { getSubscriptionFeedsRefreshedTogether: ['videos', 'live', 'posts'] } },
     // Posts are hidden, Shorts aren't chosen
     getEnabledSubscriptionFeedSources: () => [{ category: 'videos' }, { category: 'shorts' }, { category: 'live' }],
-    withAndroidSubscriptionRefreshBatch: refresh => refresh(),
+    withAndroidSubscriptionRefreshBatch: refresh => (batch = refresh()),
     async refreshSubscriptionVideosFromRemote({ automatic }) { calls.push(`videos:${automatic}`); return 'videos' },
-    refreshSubscriptionShortsFromRemote() { assert.fail('Shorts must not refresh') },
+    async refreshSubscriptionShortsFromRemote() { calls.push('shorts') },
     async refreshSubscriptionLiveFromRemote() { calls.push('live'); await liveRefresh.promise },
-    refreshSubscriptionPostsFromRemote() { assert.fail('hidden posts must not refresh') },
+    async refreshSubscriptionPostsFromRemote() { calls.push('posts') },
   })
   // The feed shows its own results without waiting for the other feeds
   assert.equal(await refreshSubscriptionFeed('videos', { t: value => value }), 'videos')
   assert.deepEqual(calls, ['videos:undefined', 'live'])
   liveRefresh.resolve()
+  await batch
+  // Hidden Posts and unchosen Shorts don't follow
+  assert.deepEqual(calls, ['videos:undefined', 'live'])
 
   calls.length = 0
   assert.equal(await refreshSubscriptionFeed('videos', { t: value => value, automatic: true }), 'videos')
