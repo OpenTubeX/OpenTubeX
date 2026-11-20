@@ -313,10 +313,14 @@
   cursor: grabbing;
 }
 
+/* Anchored to the top: at its static position below the full-height .inner, it overflowed the rail. */
 .reorderStatus {
   block-size: 1px;
   clip-path: inset(50%);
   inline-size: 1px;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  margin: 0;
   overflow: hidden;
   position: absolute;
   white-space: nowrap;
