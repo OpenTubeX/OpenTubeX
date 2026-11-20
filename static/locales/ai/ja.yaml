@@ -2557,6 +2557,8 @@ CommandPalette:
     Download Finished: このダウンロードはすでに終了しています
     Video: 先に動画を開いてください
 Downloads:
+  Stop Recording: "録画を停止"
+  Recording: "録画中"
   File Name Template Invalid: 'ダウンロードフォルダー内の相対パスを使用してください。".."、"~"、"$"、"%"、"thumbnail:" のような接頭辞は使用できません。'
   Search Completed: "完了したダウンロードをタイトルまたはチャンネルで検索"
   Format: "形式"

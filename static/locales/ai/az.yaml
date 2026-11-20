@@ -2570,6 +2570,8 @@ CommandPalette:
     Download Finished: Bu endirmə artıq davam etmir
     Video: Əvvəlcə video açın
 Downloads:
+  Stop Recording: "Yazmanı dayandır"
+  Recording: "Qeydə alınır"
   File Name Template Invalid: 'Endirmə qovluğunun daxilində "..", "~", "$", "%" və ya "thumbnail:" kimi prefiks olmadan nisbi yol istifadə edin.'
   Search Completed: "Tamamlanmış endirmələri başlıq və ya kanala görə axtar"
   Format: "Format"

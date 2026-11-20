@@ -9,9 +9,11 @@ const start = source.indexOf('  function handleStdoutLine(part, line)')
 const end = source.indexOf('    const subtitleMatch', start)
 const helperStart = source.indexOf('function isPathInsideFolders(')
 const helper = source.slice(helperStart, source.indexOf('\n}\n', helperStart) + 2)
+const liveConstants = ['LIVE_PREFIX', 'FFMPEG_PROGRESS_REGEX', 'STOP_UNANSWERED_MS']
+  .map(name => new RegExp(`^const ${name} = .+$`, 'm').exec(source)[0]).join('\n')
 
 function createHandler(status) {
-  return vm.runInNewContext(`${helper}\n${source.slice(start, end)} }\n(line => handleStdoutLine({}, line))`, {
+  return vm.runInNewContext(`${liveConstants}\n${helper}\n${source.slice(start, end)} }\n(line => handleStdoutLine({}, line))`, {
     status,
     metadataByVideoId: new Map(),
     downloadFolders: ['/downloads', '/tmp/opentubex-download-a'],

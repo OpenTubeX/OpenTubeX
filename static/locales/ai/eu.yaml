@@ -2568,6 +2568,8 @@ CommandPalette:
     Download Finished: Deskarga hau ez dago martxan
     Video: Ireki bideo bat lehenik
 Downloads:
+  Stop Recording: "Gelditu grabazioa"
+  Recording: "Grabatzen"
   File Name Template Invalid: 'Erabili deskargen karpetaren barruko bide erlatibo bat, "..", "~", "$", "%" edo "thumbnail:" bezalako aurrizkirik gabe.'
   Search Completed: "Bilatu amaitutako deskargak izenburuaren edo kanalaren arabera"
   Format: "Formatua"

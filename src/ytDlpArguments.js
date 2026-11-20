@@ -441,6 +441,7 @@ export function buildYtDlpDownloadArguments(payload, globalArguments = '') {
   args.push(
     '--no-simulate',
     '--print', `video:__OPENTUBEX_PREPARING__:%(id)s\t${position}\t%(title)j`,
+    '--print', 'video:__OPENTUBEX_LIVE__:%(is_live)s',
     '--progress-template', 'download:__OPENTUBEX_DOWNLOAD__:%(progress.status)s\t%(progress._percent_str)s\t%(progress._speed_str)s\t%(progress._eta_str)s',
     '--progress-template', 'postprocess:__OPENTUBEX_PROCESSING__'
   )

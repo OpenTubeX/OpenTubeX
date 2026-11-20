@@ -738,7 +738,7 @@ export default {
 
   /**
    * @param {number} id
-   * @param {'pause' | 'resume' | 'move'} action
+   * @param {'pause' | 'resume' | 'stop' | 'move'} action
    * @param {number} [value]
    */
   ytDlpControlDownload: (id, action, value) => {

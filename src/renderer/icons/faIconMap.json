@@ -655,6 +655,10 @@
     "ri": "skip-forward-mini-line",
     "material": "skip-next-rounded"
   },
+  "stop": {
+    "ri": "stop-line",
+    "material": "stop-rounded"
+  },
   "sun": {
     "ri": "sun-line",
     "material": "light-mode-outline"
