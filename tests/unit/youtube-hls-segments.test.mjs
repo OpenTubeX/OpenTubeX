@@ -25,3 +25,8 @@ test('YouTube MPEG-TS segments keep their name', () => {
   const playlist = `#EXTM3U\n#EXTINF:5.333333,\n${base}/file/seg.ts\n#EXT-X-ENDLIST\n`
   assert.equal(renameYouTubeFmp4HlsSegments(playlist), null)
 })
+
+test('Other servers\' fMP4 segments keep their name', () => {
+  const playlist = '#EXTM3U\n#EXT-X-MAP:URI="https://cdn.example.test/init.mp4"\n#EXTINF:6,\nhttps://cdn.example.test/stream/file/seg.ts\n#EXT-X-ENDLIST\n'
+  assert.equal(renameYouTubeFmp4HlsSegments(playlist), null)
+})
