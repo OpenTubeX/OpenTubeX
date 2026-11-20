@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import android.app.NotificationManager;
 import android.content.Context;
@@ -40,6 +41,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 @RunWith(AndroidJUnit4.class)
 public class SubscriptionRefreshLifecycleTest {
@@ -96,7 +98,7 @@ public class SubscriptionRefreshLifecycleTest {
                 } finally {
                     release.countDown();
                 }
-                await("the refresh service stops", () -> !hasRefreshNotification() && !refreshServiceRunning());
+                await("the refresh service stops", () -> !hasRefreshNotification() && !refreshServiceRunning(), this::refreshStopDiagnostics);
             } finally {
                 if (token.get() != null) SubscriptionRefreshWorker.finish(context, token.get());
                 if (retained.get() != null) {
@@ -104,6 +106,29 @@ public class SubscriptionRefreshLifecycleTest {
                 }
             }
         }
+    }
+
+    /**
+     * What still ran when the refresh service did not stop. CI has hit that
+     * rarely, and its logcat looked the same as in passing runs.
+     */
+    private String refreshStopDiagnostics() {
+        StringBuilder report = new StringBuilder("refresh notification: ").append(hasRefreshNotification())
+            .append(", refresh service running: ").append(refreshServiceRunning());
+        for (android.service.notification.StatusBarNotification notification
+            : context.getSystemService(NotificationManager.class).getActiveNotifications()) {
+            report.append("\nnotification ").append(notification.getId()).append(" tag=").append(notification.getTag())
+                .append(" foreground service=")
+                .append((notification.getNotification().flags & android.app.Notification.FLAG_FOREGROUND_SERVICE) != 0);
+        }
+        report.append("\nmain thread (").append(Looper.getMainLooper().getThread().getState()).append(')');
+        for (StackTraceElement frame : Looper.getMainLooper().getThread().getStackTrace()) report.append("\n    at ").append(frame);
+        try {
+            report.append('\n').append(FailureDiagnostics.shell("dumpsys activity services " + context.getPackageName()));
+        } catch (Exception error) {
+            report.append("\nUnable to read the services: ").append(error);
+        }
+        return report.toString();
     }
 
     @SuppressWarnings("deprecation")
@@ -790,10 +815,17 @@ public class SubscriptionRefreshLifecycleTest {
     }
 
     private static void await(String message, BooleanSupplier condition) throws Exception {
+        await(message, condition, null);
+    }
+
+    /** @param diagnostics adds what it reports to the failure message */
+    private static void await(String message, BooleanSupplier condition, Supplier<String> diagnostics) throws Exception {
         long deadline = SystemClock.elapsedRealtime() + 10000;
         while (!condition.getAsBoolean() && SystemClock.elapsedRealtime() < deadline) {
             Thread.sleep(50);
         }
-        assertTrue(message, condition.getAsBoolean());
+        if (!condition.getAsBoolean()) {
+            fail(diagnostics == null ? message : message + "\n" + diagnostics.get());
+        }
     }
 }

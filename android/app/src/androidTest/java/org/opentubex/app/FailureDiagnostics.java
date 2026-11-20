@@ -109,7 +109,7 @@ public final class FailureDiagnostics extends RunListener {
         return report.toString();
     }
 
-    private static String shell(String command) throws Exception {
+    static String shell(String command) throws Exception {
         ParcelFileDescriptor descriptor = InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand(command);
         try (InputStream input = new ParcelFileDescriptor.AutoCloseInputStream(descriptor)) {
             ByteArrayOutputStream output = new ByteArrayOutputStream();
