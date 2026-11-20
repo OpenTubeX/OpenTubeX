@@ -114,20 +114,24 @@ function matchesOption(argument, longOptions, shortOptions, allowedPrefixes = []
   return option.startsWith('--') && option.length > 2 && !allowedPrefixes.includes(option) &&
     longOptions.some(longOption => longOption.startsWith(option))
 }
-// Options that select, order, number, or stop playlist entries across the whole
-// playlist, which separate processes each handling some entries cannot share.
+// Options that select, order, number, stop, or combine playlist entries across the
+// whole playlist, which separate processes each handling some entries cannot share.
 const PLAYLIST_ORDER_ARGS = [
+  '--abort-on-error',
   '--autonumber-start',
+  '--break-match-filters',
   '--break-on-existing',
   '--break-on-reject',
   '--break-per-input',
   '--lazy-playlist',
   '--max-downloads',
+  '--no-ignore-errors',
   '--playlist-end',
   '--playlist-items',
   '--playlist-random',
   '--playlist-reverse',
-  '--playlist-start'
+  '--playlist-start',
+  '--skip-playlist-after-errors'
 ]
 /**
  * How many yt-dlp processes can download parts of a playlist at the same time.
@@ -136,6 +140,12 @@ const PLAYLIST_ORDER_ARGS = [
  */
 export function playlistDownloadPartLimit(payload, args) {
   if (payload.isPlaylist !== true || args.some(argument => matchesOption(argument, PLAYLIST_ORDER_ARGS, 'I'))) return 1
+  // Concatenation needs every entry in one process.
+  if (args.some((argument, index) => matchesOption(argument, ['--concat-playlist'], '') &&
+    (argument.includes('=') ? argument.split('=')[1] : args[index + 1]) !== 'never')) return 1
+  // Without an index in the file name, entries with the same title would write the same file.
+  const outputTemplate = args[args.lastIndexOf('--output') + 1] ?? ''
+  if (!outputTemplate.includes('%(playlist_index)') && !outputTemplate.includes('%(autonumber)')) return 1
   const videoIds = Array.isArray(payload.videoIds) ? payload.videoIds : []
   if (videoIds.length > 0) return videoIds.length
   // The count is only a hint against starting processes that would find no entry.

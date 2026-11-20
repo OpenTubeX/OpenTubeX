@@ -518,7 +518,9 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
             if abs(percent - previous) < 0.1 && records[id]?["status"] as? String == "downloading"
                 && progress["status"] as? String == "downloading"
                 && records[id]?["currentVideoId"] as? String == progress["currentVideoId"] as? String
-                && records[id]?["playlistIndex"] as? Int == progress["playlistIndex"] as? Int { continue }
+                && records[id]?["playlistIndex"] as? Int == progress["playlistIndex"] as? Int
+                // A finished part lowers the combined speed of a split playlist.
+                && max(1, progress["activeParts"] as? Int ?? 1) >= (slots[id] ?? 1) { continue }
             records[id]?["status"] = progress["status"] ?? "downloading"
             records[id]?["percent"] = percent
             records[id]?["speed"] = progress["speed"] ?? NSNull()
@@ -541,6 +543,12 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
     }
 
     private func finish(_ id: Int, result: Result<[String: Any], Error>) {
+        // Every part has finished, but progress can miss that when they finish between
+        // two refreshes. Keep one slot until the export finishes.
+        if (slots[id] ?? 0) > 1 {
+            slots[id] = 1
+            startNext()
+        }
         let staging = folder(for: id)
         let reference = records[id]?["folder"] as? String ?? ""
         let videoId = records[id]?["videoId"] as? String ?? ""

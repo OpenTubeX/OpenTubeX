@@ -104,6 +104,13 @@ test('playlists split into processes that keep playlist order and numbering', ()
   const selected = { ...remote, videoCount: 10, customArgs: '--playlist-i 1:5' }
   const selectedArgs = buildYtDlpDownloadArguments(selected).args
   assert.deepEqual(splitDownloadArguments(selected, selectedArgs, 3).parts, [selectedArgs.slice(-1)])
+  // Concatenation and file names without an index need every entry in one process.
+  for (const options of [{ customArgs: '--concat-playlist always' }, { filenameTemplate: '{playlist}/{title}.{ext}' }]) {
+    const payload = { ...remote, ...options }
+    assert.equal(splitDownloadArguments(payload, buildYtDlpDownloadArguments(payload).args, 3).parts.length, 1)
+  }
+  const neverConcatenated = { ...remote, customArgs: '--concat-playlist never' }
+  assert.equal(splitDownloadArguments(neverConcatenated, buildYtDlpDownloadArguments(neverConcatenated).args, 3).parts.length, 2)
   const single = { videoId, mode: 'video' }
   assert.equal(splitDownloadArguments(single, buildYtDlpDownloadArguments(single).args, 3).parts.length, 1)
 })

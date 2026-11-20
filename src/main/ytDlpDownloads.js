@@ -235,7 +235,18 @@ process.on('exit', () => {
  * @param {NodeJS.Signals} [signal]
  */
 function signalDownload(entry, signal) {
-  return [...entry.children].map(child => signalProcessTree(child, signal)).every(Boolean)
+  const signalled = []
+  let failed = false
+  for (const child of entry.children) {
+    if (signalProcessTree(child, signal)) signalled.push(child)
+    // A part that exited before its close event needs no signal.
+    else if (child.exitCode === null && child.signalCode === null) failed = true
+  }
+  // A pause stops every part or none, so continue the parts it stopped.
+  if (failed && signal === 'SIGSTOP') {
+    for (const child of signalled) signalProcessTree(child, 'SIGCONT')
+  }
+  return !failed
 }
 /** @type {Map<number, YtDlpDownloadStatus>} */
 const downloadRecords = new Map()

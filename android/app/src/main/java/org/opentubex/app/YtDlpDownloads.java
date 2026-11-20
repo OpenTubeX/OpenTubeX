@@ -16,6 +16,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
@@ -310,6 +311,7 @@ final class YtDlpDownloads {
             // lines can hide a playlist's earlier per-video errors.
             ArrayDeque<String> errorLines = new ArrayDeque<>();
             Exception[] errors = new Exception[parts.size()];
+            AtomicInteger unfinished = new AtomicInteger(parts.size());
             List<Runnable> downloads = new ArrayList<>();
             for (int index = 0; index < parts.size(); index++) {
                 int part = index;
@@ -325,18 +327,20 @@ final class YtDlpDownloads {
                             progress(id, part, line);
                         });
                     } catch (Exception error) {
+                        // Keep the interrupt, so joinAll also stops parts whose process has not started yet.
+                        if (error instanceof InterruptedException) Thread.currentThread().interrupt();
                         errors[part] = error;
+                    } finally {
+                        finishPart(id, part);
+                        // Finished parts free their slot for other downloads, and the
+                        // last one keeps it until the export finishes.
+                        if (unfinished.decrementAndGet() > 0) releaseSlots(claim, false);
                     }
-                    finishPart(id, part);
                 });
             }
             List<Thread> helpers = new ArrayList<>();
             for (Runnable download : downloads.subList(1, downloads.size())) {
-                // Finished parts free their slot for other downloads.
-                Thread helper = new Thread(() -> {
-                    try { download.run(); }
-                    finally { releaseSlots(claim, false); }
-                }, "yt-dlp-download-part");
+                Thread helper = new Thread(download, "yt-dlp-download-part");
                 helpers.add(helper);
                 helper.start();
             }
