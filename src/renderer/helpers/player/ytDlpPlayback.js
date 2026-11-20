@@ -1341,7 +1341,7 @@ async function loadYtDlpPlaybackSource(
 
   cachedSource = playbackSourceCache.get(videoId, effectiveCacheKey)
   if (cachedSource !== null) {
-    return preferVrHls && cachedSource.vrProjection !== 'EQUIRECTANGULAR'
+    return preferVrHls && !hasPreferredVrSource(cachedSource)
       ? { ...cachedSource, vrProjection: 'MESH' }
       : cachedSource
   }

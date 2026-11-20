@@ -240,6 +240,35 @@ test('yt-dlp replaces built-in VR180 playback with its flat view', async () => {
   assert.equal(watch.builtInPlaybackSource.vrProjection, 'VR180')
 })
 
+test('yt-dlp replaces an unidentified mesh video with the flat HLS view it found', async () => {
+  const { load } = loader({ flatHls: true })
+  const extract = compileFunction(`return ({${watchCode.slice(extractionStart, extractionEnd)}}).extractYtDlpPlaybackSource`, ['getYtDlpPlaybackSource', 'MANIFEST_TYPE_HLS'])(
+    (_id, _key, _callback, _authentication, _cachedOnly, _subtitles, preferVrHls, vr180) => load(preferVrHls, false, vr180), 'application/x-mpegurl'
+  )
+  const watch = {
+    vrProjection: 'MESH',
+    manifestMimeType: 'application/dash+xml',
+    builtInPlaybackSource: null,
+    activePlaybackEngine: 'built-in',
+    playbackEngineSwitchGeneration: 1,
+    playbackEngineFallbackTarget: null,
+    captions: [],
+    videoStoryboardSrc: '',
+    hasResolvedVideoTitle: true,
+    isCurrentVideoLoad: () => true,
+    alignActiveFormatWithAvailableSources: () => {},
+  }
+  assert.equal(await extract.call(watch, 1, 'vjBrN18wiuE'), true)
+  assert.equal(watch.manifestMimeType, 'application/x-mpegurl')
+  assert.equal(watch.vrProjection, null)
+})
+
+test('failed extraction keeps a cached flat HLS view unmarked', async () => {
+  const cached = { subtitlesIncluded: false, vrProjection: null, manifestMimeType: 'application/x-mpegurl' }
+  const { load } = loader({ unavailable: true, cached })
+  assert.equal(await load(true), cached)
+})
+
 test('Invidious VR180 playback keeps the mesh streams instead of the flat panoramic HLS', async () => {
   const start = watchCode.indexOf("              if (this.vrProjection === 'MESH' && result.hlsUrl && !this.isYtDlpPlaybackRequested()) {")
   const end = watchCode.indexOf("if (this.vrProjection === 'MESH' && supportsYtDlp", start)

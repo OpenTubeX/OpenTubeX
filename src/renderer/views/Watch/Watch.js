@@ -7193,8 +7193,10 @@ export default defineComponent({
       this.manifestSrc = source.manifestSrc
       this.manifestMimeType = source.manifestMimeType
       this.legacyFormats = source.legacyFormats
-      // yt-dlp only provides VR180 videos' flat view
-      this.vrProjection = source.vrProjection ?? (vr180 ? null : this.vrProjection)
+      // yt-dlp only provides VR180 videos' flat view. A mesh video's HLS source
+      // without a projection is that flat view too.
+      const flatView = vr180 || (preferVrHls && source.manifestMimeType === MANIFEST_TYPE_HLS && !source.vrProjection)
+      this.vrProjection = source.vrProjection ?? (flatView ? null : this.vrProjection)
       if (source.vrProjection === 'EQUIRECTANGULAR') {
         this.activeFormat = 'dash'
       }

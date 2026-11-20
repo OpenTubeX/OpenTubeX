@@ -12,7 +12,7 @@ index 6aff7bc5a52c14fd685158b75ec11a1c619ee367..a0c4ac6916cc2021a7a1edb56f6ee96e
  // Generated from /home/runner/work/shaka-player/shaka-player/ui/externs/ui.js
  declare namespace shaka.extern {
 diff --git a/dist/shaka-player.ui-es2021.js b/dist/shaka-player.ui-es2021.js
-index 8a9584de095894c76a889fc1a1151921ce08784c..b3ee7e958373d89c5935b0a1bb85e63165b3dabb 100644
+index 8a9584de095894c76a889fc1a1151921ce08784c..5b75af8f0711ce27c3df41cfa0de7bb1b845dd19 100644
 --- a/dist/shaka-player.ui-es2021.js
 +++ b/dist/shaka-player.ui-es2021.js
 @@ -517,7 +517,7 @@ function to(a,b=!1){var c=f=>{if(f.fullMimeTypes&&f.fullMimeTypes.size>1&&a.i.ha
@@ -83,8 +83,9 @@ index 8a9584de095894c76a889fc1a1151921ce08784c..b3ee7e958373d89c5935b0a1bb85e631
  break;case "halfequirectangular":c="precision highp float;\n#define PI 3.141592653589793238462643383279\n#define HALF_PI 1.570796326794896619231321691639\nvarying vec2 v_TexCoordinate;\nvarying vec3 pass_position;\nuniform sampler2D uSampler;\nvoid main(void) {\n // The semi-sphere only spans 180 degrees of longitude, so the whole\n // texture width maps to half a turn of atan().\n highp float xValue =\n      (HALF_PI + atan(pass_position.z, pass_position.x)) / PI;\n highp vec4 texelColor =\n      texture2D(uSampler, vec2(xValue, v_TexCoordinate.t));\n gl_FragColor = vec4(texelColor.rgb, texelColor.a);\n}";
  break;default:c="precision highp float;\n#define PI 3.141592653589793238462643383279\nvarying vec2 v_TexCoordinate;\nvarying vec3 pass_position;\nuniform sampler2D uSampler;\nvoid main(void) {\n // Compute the longitude per fragment, instead of using the interpolated\n // texture coordinate, to avoid needing texture wrapping at the seam.\n // (REPEAT is not available for non-power-of-two video textures in WebGL1.)\n highp float xValue =\n      (PI + atan(pass_position.z, pass_position.x)) / (2.0 * PI);\n highp vec4 texelColor =\n      texture2D(uSampler, vec2(xValue, v_TexCoordinate.t));\n gl_FragColor = vec4(texelColor.rgb, texelColor.a);\n}"}break;
 -default:return null}b=a.h.createShader(b);a.h.shaderSource(b,c);a.h.compileShader(b);return b}function oP(a){a=a.i.videoWidth||a.W;return a>0?.5/a:0}function pP(a){a=a.i.videoHeight||a.V;return a>0?.5/a:0}
+-function qP(a,b,c,d){var e=Infinity,f=90*Math.PI/180;if(a.m=="halfequirectangular"||a.m=="fisheye")e=90*Math.PI/180,f/=2;var g=a.m=="cubemap"?a.M:a.G;a.H+=b;a.I+=c;if(a.H<e&&a.H>-e){e=Math.sin(b);b=Math.cos(b);var h=g[0],k=g[1],l=g[2],m=g[3],n=g[8],p=g[9],r=g[10],q=g[11];g!==g&&(g[4]=g[4],g[5]=g[5],g[6]=g[6],g[7]=g[7],g[12]=g[12],g[13]=g[13],g[14]=g[14],g[15]=g[15]);g[0]=h*b-n*e;g[1]=k*b-p*e;g[2]=l*b-r*e;g[3]=m*b-q*e;g[8]=h*e+n*b;g[9]=k*e+p*b;g[10]=l*e+r*b;g[11]=m*e+q*b}else a.H-=b;if(a.I<f&&a.I>
 +default:return null}a.ftSbs&&(c=c.replace("vec2(xValue,","vec2(xValue * 0.5,"));b=a.h.createShader(b);a.h.shaderSource(b,c);a.h.compileShader(b);return b}function oP(a){a=a.i.videoWidth||a.W;return a>0?.5/a:0}function pP(a){a=a.i.videoHeight||a.V;return a>0?.5/a:0}
- function qP(a,b,c,d){var e=Infinity,f=90*Math.PI/180;if(a.m=="halfequirectangular"||a.m=="fisheye")e=90*Math.PI/180,f/=2;var g=a.m=="cubemap"?a.M:a.G;a.H+=b;a.I+=c;if(a.H<e&&a.H>-e){e=Math.sin(b);b=Math.cos(b);var h=g[0],k=g[1],l=g[2],m=g[3],n=g[8],p=g[9],r=g[10],q=g[11];g!==g&&(g[4]=g[4],g[5]=g[5],g[6]=g[6],g[7]=g[7],g[12]=g[12],g[13]=g[13],g[14]=g[14],g[15]=g[15]);g[0]=h*b-n*e;g[1]=k*b-p*e;g[2]=l*b-r*e;g[3]=m*b-q*e;g[8]=h*e+n*b;g[9]=k*e+p*b;g[10]=l*e+r*b;g[11]=m*e+q*b}else a.H-=b;if(a.I<f&&a.I>
++function qP(a,b,c,d){var e=Infinity,f=90*Math.PI/180;if(a.m=="halfequirectangular"||a.m=="fisheye")e=90*Math.PI/180,a.m=="fisheye"&&(f/=2);var g=a.m=="cubemap"?a.M:a.G;a.H+=b;a.I+=c;if(a.H<e&&a.H>-e){e=Math.sin(b);b=Math.cos(b);var h=g[0],k=g[1],l=g[2],m=g[3],n=g[8],p=g[9],r=g[10],q=g[11];g!==g&&(g[4]=g[4],g[5]=g[5],g[6]=g[6],g[7]=g[7],g[12]=g[12],g[13]=g[13],g[14]=g[14],g[15]=g[15]);g[0]=h*b-n*e;g[1]=k*b-p*e;g[2]=l*b-r*e;g[3]=m*b-q*e;g[8]=h*e+n*b;g[9]=k*e+p*b;g[10]=l*e+r*b;g[11]=m*e+q*b}else a.H-=b;if(a.I<f&&a.I>
  -f){f=b=YO();e=YO();h=-1*c;c=Math.sin(h);h=Math.cos(h);k=e[4];l=e[5];m=e[6];n=e[7];p=e[8];r=e[9];q=e[10];let u=e[11];e!==f&&(f[0]=e[0],f[1]=e[1],f[2]=e[2],f[3]=e[3],f[12]=e[12],f[13]=e[13],f[14]=e[14],f[15]=e[15]);f[4]=k*h+p*c;f[5]=l*h+r*c;f[6]=m*h+q*c;f[7]=n*h+u*c;f[8]=p*h-k*c;f[9]=r*h-l*c;f[10]=q*h-m*c;f[11]=u*h-n*c;ZO(g,b,g)}else a.I-=c;c=YO();f=YO();e=Math.sin(d);d=Math.cos(d);b=f[0];h=f[1];k=f[2];l=f[3];m=f[4];n=f[5];p=f[6];r=f[7];f!==c&&(c[8]=f[8],c[9]=f[9],c[10]=f[10],c[11]=f[11],c[12]=f[12],
  c[13]=f[13],c[14]=f[14],c[15]=f[15]);c[0]=b*d+m*e;c[1]=h*d+n*e;c[2]=k*d+p*e;c[3]=l*d+r*e;c[4]=m*d-b*e;c[5]=n*d-h*e;c[6]=p*d-k*e;c[7]=r*d-l*e;ZO(g,c,g);lP(a,!1)}function rP(a,b){b/=50;a.u>=20&&a.u<=100&&(a.u+=b);a.u<20?a.u=20:a.u>100&&(a.u=100);lP(a,!1)}
  function sP(a,b=!0){b&&($O(a.j,a.G),a.T=0,a.A=bP(),a.A[0]=(a.j[0]-a.K[0])/20,a.A[1]=(a.j[1]-a.K[1])/20,a.A[2]=(a.j[2]-a.K[2])/20,a.A[3]=(a.j[3]-a.K[3])/20);a.j[0]-=a.A[0];a.j[1]-=a.A[1];a.j[2]-=a.A[2];a.j[3]-=a.A[3];b=YO();cP(a.j,a.j);aP(b,a.j);a.G=b;a.L&&(a.L.stop(),a.L=null);a.T<20?a.L=(new N(()=>{sP(a,!1);a.H=0;a.I=0;a.T++;lP(a,!1)})).aa(.025):(aP(b,a.K),a.G=b)}
@@ -690,7 +691,7 @@ index c4aabc0a984f6ea51be7923de1cbb1922e6abcd5..06be4c04c5acf58968f236fe9a5b9819
      }
    }
 diff --git a/ui/vr_webgl.js b/ui/vr_webgl.js
-index 3568a1ea232d7e7c3536d3e8da8e558f016b9cd4..81e64d556123bcdb0bdad33afad5646b794a6b6f 100644
+index 3568a1ea232d7e7c3536d3e8da8e558f016b9cd4..9ef03be6a61dcee5385c98a4142ccda6d6b792da 100644
 --- a/ui/vr_webgl.js
 +++ b/ui/vr_webgl.js
 @@ -32,8 +32,12 @@ shaka.ui.VRWebgl = class {
@@ -743,3 +744,15 @@ index 3568a1ea232d7e7c3536d3e8da8e558f016b9cd4..81e64d556123bcdb0bdad33afad5646b
      const shader = this.gl_.createShader(glType);
  
      this.gl_.shaderSource(shader, source);
+@@ -674,7 +693,10 @@ shaka.ui.VRWebgl = class {
+     if (this.projectionMode_ == 'halfequirectangular' ||
+         this.projectionMode_ == 'fisheye') {
+       yawBoundary = 90.0 * Math.PI / 180;
+-      pitchBoundary /= 2;
++      // A half sphere still spans the full 180 degrees of latitude.
++      if (this.projectionMode_ == 'fisheye') {
++        pitchBoundary /= 2;
++      }
+     }
+ 
+     let matrix;
