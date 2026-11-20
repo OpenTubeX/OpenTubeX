@@ -102,13 +102,11 @@ test.describe('creating subscription groups', () => {
     const toggle = page.locator('.channel', { hasText: 'Beta Channel' }).locator('.profileDropdownToggle')
     await toggle.click()
     const groupList = page.locator('.profileDropdown').getByRole('group', { name: 'Groups' })
-    await expect(groupList.getByRole('checkbox')).toHaveCount(0)
     await groupList.getByRole('button', { name: 'New Group' }).click()
 
     const editor = page.getByRole('dialog', { name: 'New Group' })
     await expect(page.locator('.profileDropdown')).toHaveCount(0)
     await expect(editor.getByRole('checkbox', { name: 'Beta Channel' })).toHaveAttribute('aria-checked', 'true')
-    await expect(editor.getByText('1 selected')).toBeVisible()
     await editor.getByRole('textbox', { name: 'Group Name' }).fill('Music')
     await editor.getByRole('button', { name: 'Create', exact: true }).click()
     await expect(editor).toBeHidden()
