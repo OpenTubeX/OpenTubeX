@@ -504,7 +504,7 @@ const SETTINGS_BOUNDS_STORAGE_KEY = 'opentubex-settings-window-bounds'
 const WINDOW_MARGIN = 12
 const MINIMUM_WIDTH = 360
 const MINIMUM_HEIGHT = 360
-const DEFAULT_WIDTH = 1280
+const DEFAULT_WIDTH = 1440
 const DEFAULT_HEIGHT = 820
 const RESIZE_DIRECTIONS = ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw']
 const props = defineProps({
@@ -650,6 +650,8 @@ let dragOffsetY = 0
 let liveBounds = null
 let maximizedDragSession = null
 let restoreBounds = null
+/** Whether the user moved or resized the window; until then it stays centered */
+let hasPlacedBounds = false
 /** @type {Array<{ element: HTMLElement, scrollTop: number }>} */
 let preservedScrollPositions = []
 
@@ -1004,6 +1006,8 @@ onMounted(() => {
 onActivated(() => {
   windowActive.value = true
   handleMounted()
+  // The viewport can change while the window is closed and not listening.
+  clampWindowToViewport()
   nextTick(() => {
     if (unlocked.value || isStandaloneViewOpen.value) restorePreservedScrollPositions()
   })
@@ -1797,7 +1801,7 @@ function cancelBoundsAnimation() {
 
 function restoreSettingsWindow() {
   if (!isMaximized.value) return
-  windowBounds.value = clampBounds(restoreBounds ?? windowBounds.value)
+  windowBounds.value = hasPlacedBounds ? clampBounds(restoreBounds ?? windowBounds.value) : getCenteredBounds()
   restoreBounds = null
   isMaximized.value = false
   scheduleBoundsSave()
@@ -1880,6 +1884,7 @@ function dragWindow(event) {
     maximizedDragSession = null
     restoreBounds = null
     isMaximized.value = false
+    hasPlacedBounds = true
     return
   }
   liveBounds = clampBounds({
@@ -1903,6 +1908,7 @@ function commitLiveBounds() {
   if (liveBounds === null) return
   windowBounds.value = liveBounds
   liveBounds = null
+  hasPlacedBounds = true
 }
 
 function stopDragging(event) {
@@ -2008,7 +2014,9 @@ function updateNarrowLayout() {
 
 function clampWindowToViewport() {
   if (isWindowMaximized.value) return
-  windowBounds.value = clampBounds(liveBounds ?? windowBounds.value)
+  windowBounds.value = hasPlacedBounds || liveBounds !== null
+    ? clampBounds(liveBounds ?? windowBounds.value)
+    : getCenteredBounds()
   if (liveBounds !== null) liveBounds = windowBounds.value
 }
 
@@ -2033,27 +2041,34 @@ function clampBounds(bounds) {
   }
 }
 
+function getCenteredBounds() {
+  const width = Math.min(DEFAULT_WIDTH, Math.max(MINIMUM_WIDTH, window.innerWidth - 48))
+  const height = Math.min(DEFAULT_HEIGHT, Math.max(MINIMUM_HEIGHT, window.innerHeight - 80))
+  return clampBounds({
+    x: Math.round((window.innerWidth - width) / 2),
+    y: Math.round((window.innerHeight - height) / 2),
+    width,
+    height
+  })
+}
+
 function getInitialBounds() {
-  const fallbackWidth = Math.min(DEFAULT_WIDTH, Math.max(MINIMUM_WIDTH, window.innerWidth - 48))
-  const fallbackHeight = Math.min(DEFAULT_HEIGHT, Math.max(MINIMUM_HEIGHT, window.innerHeight - 80))
-  const fallback = {
-    x: Math.round((window.innerWidth - fallbackWidth) / 2),
-    y: Math.max(WINDOW_MARGIN, Math.round((window.innerHeight - fallbackHeight) / 2)),
-    width: fallbackWidth,
-    height: fallbackHeight
-  }
   try {
     const saved = JSON.parse(localStorage.getItem(SETTINGS_BOUNDS_STORAGE_KEY))
     if ([saved?.x, saved?.y, saved?.width, saved?.height].every(Number.isFinite)) {
+      hasPlacedBounds = true
       return clampBounds(saved)
     }
   } catch {
     // Ignore corrupt state and use the centered default.
   }
-  return clampBounds(fallback)
+  return getCenteredBounds()
 }
 
+// Only a placement the user chose is remembered. Saving the default would pin it
+// to the viewport it was first opened in.
 function scheduleBoundsSave() {
+  if (!hasPlacedBounds) return
   if (boundsSaveTimer !== null) clearTimeout(boundsSaveTimer)
   boundsSaveTimer = setTimeout(() => {
     try {
