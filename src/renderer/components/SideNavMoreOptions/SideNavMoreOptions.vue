@@ -57,6 +57,15 @@
               class="bottomSheetHandle"
               aria-hidden="true"
             />
+            <!-- Inside the dialog, as screen readers ignore what it covers. -->
+            <p
+              class="reorderStatus"
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+            >
+              {{ reorderStatus }}
+            </p>
             <div
               ref="scrollRef"
               v-overlay-scrollbars
@@ -86,39 +95,66 @@
                     v-if="items.length > 0"
                     class="moreOptionDivider"
                   >
-                  <component
-                    :is="item.path ? 'router-link' : 'span'"
-                    v-for="item in pinnedItems"
-                    :key="item.key"
-                    class="navOption"
-                    :class="{ disabledNavOption: !item.path }"
-                    :title="item.label"
-                    :to="item.path ? { path: item.path, query: item.query } : undefined"
-                    :data-tab-title="item.label"
-                    @click="closeMenu"
+                  <!-- Each group reorders on its own, by its rows' grips. -->
+                  <div
+                    v-for="group in pinnedGroups"
+                    :key="group.id"
+                    class="pinnedGroup"
+                    @pointerdown.capture="startPinDrag"
                   >
-                    <FtRetryImage
-                      v-if="item.thumbnail != null"
-                      :fallback-icon="item.icon"
-                      class="navIcon pinnedThumbnail"
-                      :class="{ playlistThumbnail: item.playlist, blur: item.blur }"
-                      height="32"
-                      width="32"
-                      loading="lazy"
-                      :src="item.thumbnail"
-                      sizes="32px"
-                    />
-                    <FtIcon
-                      v-else
-                      :icon="item.icon"
-                      class="navIcon"
-                      aria-hidden="true"
-                    />
-                    <span
-                      class="navLabel"
-                      dir="auto"
-                    >{{ item.label }}</span>
-                  </component>
+                    <div
+                      v-for="item in group.items"
+                      :key="item.key"
+                      class="pinnedRow"
+                      :data-pinned-id="item.id"
+                    >
+                      <component
+                        :is="item.path ? 'router-link' : 'span'"
+                        class="navOption"
+                        :class="{ disabledNavOption: !item.path }"
+                        :title="item.label"
+                        :to="item.path ? { path: item.path, query: item.query } : undefined"
+                        :data-tab-title="item.label"
+                        @click="closeMenu"
+                      >
+                        <FtRetryImage
+                          v-if="item.thumbnail != null"
+                          :fallback-icon="item.icon"
+                          class="navIcon pinnedThumbnail"
+                          :class="{ playlistThumbnail: item.playlist, blur: item.blur }"
+                          height="32"
+                          width="32"
+                          loading="lazy"
+                          :src="item.thumbnail"
+                          sizes="32px"
+                        />
+                        <FtIcon
+                          v-else
+                          :icon="item.icon"
+                          class="navIcon"
+                          aria-hidden="true"
+                        />
+                        <span
+                          class="navLabel"
+                          dir="auto"
+                        >{{ item.label }}</span>
+                      </component>
+                      <button
+                        v-if="group.items.length > 1"
+                        type="button"
+                        class="pinnedGrip"
+                        :aria-label="$t('User Playlists.Reorder Hint')"
+                        :title="$t('User Playlists.Reorder Hint')"
+                        aria-keyshortcuts="ArrowUp ArrowDown"
+                        @keydown="movePinnedWithKeyboard($event, group, item.id)"
+                      >
+                        <FtIcon
+                          :icon="['fas', 'grip']"
+                          aria-hidden="true"
+                        />
+                      </button>
+                    </div>
+                  </div>
                 </template>
               </div>
             </div>
@@ -138,6 +174,7 @@ import store from '../../store/index'
 import FtRetryImage from '../FtRetryImage.vue'
 import NavLabel from '../SideNav/NavLabel.vue'
 import { useBottomSheetDismiss } from '../../composables/useBottomSheetDismiss'
+import { useGridReorder } from '../../composables/useGridReorder'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { lockBodyScroll, unlockBodyScroll } from '../FtPrompt/scrollLock'
@@ -151,7 +188,13 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  reorderStatus: {
+    type: String,
+    default: '',
+  },
 })
+
+const emit = defineEmits(['move-pinned'])
 
 const openMoreOptions = ref(false)
 const mobileLayout = usePhoneLayout('(max-width: 680px)')
@@ -207,9 +250,42 @@ const applyNavIconExpand = computed(() => {
   }
 })
 
+// Pinned playlists and channels reorder separately, like in the side navigation.
+const pinnedGroups = computed(() => ['playlist', 'channel']
+  .map(id => ({ id, items: props.pinnedItems.filter(item => item.group === id) }))
+  .filter(group => group.items.length > 0))
+
+const { onPointerDown: startPinDrag } = useGridReorder({
+  itemSelector: '.pinnedRow',
+  handleSelector: '.pinnedGrip',
+  getId: item => item.dataset.pinnedId,
+  commit: (id, order) => emit('move-pinned', pinnedGroups.value.find(group => group.items.some(item => item.id === id)).id, id, order),
+})
+
+/**
+ * @param {KeyboardEvent} event
+ * @param {{ id: string, items: { id: string }[] }} group
+ * @param {string} id
+ */
+async function movePinnedWithKeyboard(event, group, id) {
+  const offset = { ArrowUp: -1, ArrowDown: 1 }[event.key]
+  if (!offset || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return
+  event.preventDefault()
+  const order = group.items.map(item => item.id)
+  const index = order.indexOf(id)
+  if (index + offset < 0 || index + offset >= order.length) return
+  order.splice(index, 1)
+  order.splice(index + offset, 0, id)
+  const grip = /** @type {HTMLElement} */ (event.currentTarget)
+  emit('move-pinned', group.id, id, order)
+  // Moving the row in the document drops its focus.
+  await nextTick()
+  if (grip.isConnected && document.activeElement !== grip) grip.focus()
+}
+
 function moveFocus(event) {
   if (!openMoreOptions.value || !sheetRef.value) return
-  const links = [...sheetRef.value.querySelectorAll('a[href]')]
+  const links = [...sheetRef.value.querySelectorAll('a[href], .pinnedGrip')]
   const index = links.indexOf(document.activeElement)
   const next = event.shiftKey ? (index <= 0 ? links.length - 1 : index - 1) : (index + 1) % links.length
   links[next]?.focus()

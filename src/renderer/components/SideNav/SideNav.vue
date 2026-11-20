@@ -41,7 +41,9 @@
         v-if="showMobileMore"
         :items="mobileOverflowItems"
         :pinned-items="mobilePinnedItems"
+        :reorder-status="reorderStatus"
         :class="{ compactLabels: compactNavigationLabels }"
+        @move-pinned="movePinned"
       />
       <hr>
       <div
@@ -422,6 +424,16 @@ const { onPointerDown: startChannelDrag } = useGridReorder({
 })
 
 /**
+ * Moves from the phone's More sheet.
+ * @param {'playlist' | 'channel'} group
+ * @param {string} id
+ * @param {string[]} order
+ */
+function movePinned(group, id, order) {
+  (group === 'playlist' ? pinnedPlaylistReorder : pinnedChannelReorder).move(id, order)
+}
+
+/**
  * @param {KeyboardEvent} event
  * @param {ReturnType<typeof createPinReorder>} reorder
  */
@@ -482,6 +494,8 @@ const visibleNavigationItems = computed(() => filterAvailableNavigationItems(
 const mobilePinnedItems = computed(() => [
   ...pinnedPlaylists.value.map(playlist => ({
     key: `playlist-${playlist._id}`,
+    id: playlist._id,
+    group: 'playlist',
     path: `/playlist/${playlist._id}`,
     query: { playlistType: 'user' },
     label: playlist.playlistName,
@@ -492,6 +506,8 @@ const mobilePinnedItems = computed(() => [
   })),
   ...pinnedChannels.value.map(channel => ({
     key: `channel-${channel.id}`,
+    id: channel.id,
+    group: 'channel',
     path: enableChannelLinks.value ? `/channel/${channel.id}` : null,
     label: channel.name,
     thumbnail: channel.thumbnail,

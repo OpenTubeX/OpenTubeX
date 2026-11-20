@@ -197,6 +197,46 @@ test('reorders pinned channels by dragging them in the side navigation', async (
   await expect.poll(order).toEqual(['C', 'B', 'A'])
 })
 
+test('reorders pinned channels by their grips in the mobile More sheet', async ({ app, page }) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  const channels = ['A', 'B', 'C'].map(letter => ({ id: `UC${letter.repeat(22)}`, name: `Channel ${letter}`, thumbnail: null }))
+  await page.evaluate(channels => window.$store.dispatch('updatePinnedChannels', channels), channels)
+  const session = await page.context().newCDPSession(page)
+  await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
+  await page.locator('.sideNav').getByRole('button', { name: 'More', exact: true }).click()
+  const sheet = page.locator('.moreOptionContainer')
+  const rows = sheet.locator('.pinnedRow')
+  const order = () => rows.evaluateAll(elements => elements.map(element => element.dataset.pinnedId.at(-1)))
+  const grip = letter => rows.and(page.locator(`[data-pinned-id="UC${letter.repeat(22)}"]`)).getByRole('button', { name: 'Drag or use the arrow keys to reorder' })
+  await expect.poll(order).toEqual(['A', 'B', 'C'])
+  // Measure the grips once the sheet stops sliding in.
+  await expect.poll(() => sheet.evaluate(element => element.getAnimations().length)).toBe(0)
+
+  // A downward drag on the grip moves the row instead of swiping the sheet away.
+  const source = await grip('A').boundingBox()
+  const target = await grip('C').boundingBox()
+  const touch = (type, x, y) => session.send('Input.dispatchTouchEvent', { type, touchPoints: x == null ? [] : [{ x, y, id: 0 }] })
+  const x = source.x + source.width / 2
+  await touch('touchStart', x, source.y + source.height / 2)
+  for (const step of [0.25, 0.5, 0.75, 1]) {
+    await touch('touchMove', x, source.y + source.height / 2 + (target.y - source.y) * step)
+  }
+  await expect(sheet.locator('.reorderDragged')).toHaveAttribute('data-pinned-id', channels[0].id)
+  await touch('touchEnd')
+  await expect.poll(order).toEqual(['B', 'C', 'A'])
+  await expect(sheet).toBeVisible()
+  await expect.poll(() => latestSettings(readDatastore(app.userDataDir, 'settings')).pinnedChannels)
+    .toEqual([channels[1], channels[2], channels[0]])
+
+  // The arrow keys move the focused grip's row and keep the grip focused.
+  await grip('A').focus()
+  await page.keyboard.press('ArrowUp')
+  await expect.poll(order).toEqual(['B', 'A', 'C'])
+  await expect(grip('A')).toBeFocused()
+  await expect(sheet.locator('.reorderStatus')).toHaveText('Channel A moved to position 2 of 3.')
+  expect(await sheet.locator('.moreOptionScroll').evaluate(scroller => scroller.scrollHeight - scroller.clientHeight)).toBe(0)
+})
+
 test('lists pinned playlists and channels in the mobile More sheet', { tag: '@scale' }, async ({ page }, testInfo) => {
   const id = 'UCaaaaaaaaaaaaaaaaaaaaaa'
   await page.setViewportSize({ width: 375, height: 812 })
