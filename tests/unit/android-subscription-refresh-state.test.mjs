@@ -176,6 +176,7 @@ async function setupCancellation(t, { deadline = Date.now() - 1000, enabled = tr
     cancelAndroidSubscriptionRefresh: () => calls.push('cancel'),
     activeRefresh: null,
     cancelCount: 1,
+    collaborationChecks: null,
     store: { getters: { getSubscriptionFeedRefreshInProgress: true, getSubscriptionFeedRefreshTab: 'videos', getActiveProfile: { _id: 'all' } } },
     localStorage: { setItem() {} },
     SUBSCRIPTION_REFRESH_CANCELLED_EVENT: events.cancelled,

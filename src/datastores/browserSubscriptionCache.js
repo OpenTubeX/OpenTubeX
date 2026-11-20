@@ -115,7 +115,7 @@ export function createBrowserSubscriptionCache(loadLegacyRecords, name = 'opentu
     })
   }
 
-  function updateFeed(channelId, entries, timestamp, field) {
+  function updateFeed(channelId, entries, timestamp, field, collaborationsCheckedAt) {
     // Vue proxies cannot cross IndexedDB's structured-clone boundary. Snapshot
     // only this channel, as Electron's datastore IPC does for its payloads.
     const snapshot = JSON.parse(JSON.stringify(entries))
@@ -125,6 +125,7 @@ export function createBrowserSubscriptionCache(loadLegacyRecords, name = 'opentu
       if (new Date(record[timestampField]).getTime() > date.getTime()) return false
       record[field] = preserveSubscriptionSeenEntries(snapshot, record[field], field === 'communityPosts' ? 'postId' : 'videoId')
       record[timestampField] = date
+      if (collaborationsCheckedAt !== undefined) record.collaborationsCheckedAt = collaborationsCheckedAt
       return true
     })
   }
@@ -177,7 +178,7 @@ export function createBrowserSubscriptionCache(loadLegacyRecords, name = 'opentu
         request.onsuccess = () => done(request.result)
       })
     },
-    updateVideosByChannelId: (id, entries, timestamp) => updateFeed(id, entries, timestamp, 'videos'),
+    updateVideosByChannelId: (id, entries, timestamp, collaborationsCheckedAt) => updateFeed(id, entries, timestamp, 'videos', collaborationsCheckedAt),
     updateShortsByChannelId: (id, entries, timestamp) => updateFeed(id, entries, timestamp, 'shorts'),
     updateLiveStreamsByChannelId: (id, entries, timestamp) => updateFeed(id, entries, timestamp, 'liveStreams'),
     updateCommunityPostsByChannelId: (id, entries, timestamp) => updateFeed(id, entries, timestamp, 'communityPosts'),

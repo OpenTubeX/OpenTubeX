@@ -21,6 +21,7 @@ import { extractAssignedJsonObject } from '../../src/renderer/helpers/assigned-j
 import { getSubscriptionVideoSortTimestamp, updateUpcomingPremiereState, reconcileFetchedSubscriptionEntries } from '../../src/renderer/helpers/subscription-entries.js'
 import { usesInvidiousApi } from '../../src/apiBackends.js'
 import { canKeepSubscriptionFeedWithoutNewUploads, hasNoNewSubscriptionUploads, isSubscriptionFeedRecentlyFetched } from '../../src/renderer/helpers/subscriptionUploadCheck.js'
+import { selectSubscriptionCollaborationChecks } from '../../src/renderer/helpers/subscriptionCollaborationChecks.js'
 
 const { parseLocalChannelShorts, parseLocalPlaylistVideos } = createLocalFeedParsers(() => false)
 
@@ -114,7 +115,11 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
     store: {
       getters,
       commit(key, value) { if (key === 'setSubscriptionFeedRefreshInProgress') getters.getSubscriptionFeedRefreshInProgress = value },
-      async dispatch(key, value) { await beforeWrite(key, value); writes.push({ key, value }) },
+      async dispatch(key, value) {
+        const result = await beforeWrite(key, value)
+        writes.push({ key, value })
+        return result
+      },
     },
     createSubscriptionNetworkRecovery,
     SubscriptionNetworkError,
@@ -130,6 +135,7 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
     canKeepSubscriptionFeedWithoutNewUploads,
     hasNoNewSubscriptionUploads,
     isSubscriptionFeedRecentlyFetched,
+    selectSubscriptionCollaborationChecks,
     extractAssignedJsonObject,
     getSubscriptionVideoSortTimestamp,
     updateUpcomingPremiereState,
@@ -287,35 +293,79 @@ test('with Faster Subscription Refresh, a scraper refresh keeps cached feeds who
   assert.deepEqual(app.events, ['completed', 'finished'])
 })
 
-test('with collaborations included, unchanged feeds still load them and keep their timestamp for the next full fetch', async () => {
+test('with collaborations included, the refresh keeps unchanged feeds and checks due Home tabs after it finished', async () => {
   const now = Date.now()
+  const hour = 3_600_000
+  const homeTabs = Promise.withResolvers()
   const app = createRefresh({
     feed: 'Videos',
     useRssFeeds: false,
-    // Another window writes a newer cache while the Home tab loads
-    beforeCollaborations: async id => {
-      if (id === 'UC0') app.getters.getVideoCache = { UC0: { timestamp: new Date(now), videos: [{ videoId: 'newer0' }, { videoId: 'known0' }, { videoId: 'old-collaboration', isCollaboration: true }] } }
-    },
-    channelFeeds: { UC0: `<feed xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://www.youtube.com/xml/schemas/2015"><author><name>Channel</name></author><entry><yt:videoId>known0</yt:videoId><title>Upload</title><link rel="alternate" href="https://www.youtube.com/watch?v=known0"/><published>${new Date(now - 3_600_000).toISOString()}</published></entry></feed>` }
+    beforeCollaborations: () => homeTabs.promise,
+    beforeWrite: async key => key === 'updateSubscriptionCollaborationsByChannel' ? [{ videoId: 'stored' }] : undefined,
+    channelFeeds: { UC0: `<feed xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://www.youtube.com/xml/schemas/2015"><author><name>Channel</name></author><entry><yt:videoId>known0</yt:videoId><title>Upload</title><link rel="alternate" href="https://www.youtube.com/watch?v=known0"/><published>${new Date(now - hour).toISOString()}</published></entry></feed>` }
   })
   const timestamp = new Date(now - 1_800_000)
-  app.getters.getVideoCache = { UC0: { timestamp, videos: [{ videoId: 'known0' }, { videoId: 'old-collaboration', isCollaboration: true }] } }
+  const collaboration = { videoId: 'collaboration', isCollaboration: true }
+  app.getters.getVideoCache = {
+    UC0: { timestamp, videos: [{ videoId: 'known0' }, collaboration] },
+    UC1: { timestamp, videos: [collaboration], collaborationsCheckedAt: now - 23 * hour },
+    UC2: { timestamp, videos: [], collaborationsCheckedAt: now - 6 * 24 * hour },
+    UC3: { timestamp, videos: [collaboration], collaborationsCheckedAt: now - 25 * hour },
+    UC4: { timestamp, videos: [], collaborationsCheckedAt: now - 8 * 24 * hour },
+  }
   app.getters.getFastSubscriptionRefresh = true
   app.getters.getIncludeSubscriptionCollaborations = true
   app.reconnect()
 
+  // Resolves while the Home tabs are still loading
   await app.refresh({ t: key => key })
 
-  assert.equal(app.requests.includes('UC0'), false, 'the Videos tab is not loaded')
-  assert.equal(app.requests.includes('UC1'), true)
-  assert.equal(app.requests.includes('collaborations:UC0'), true)
-  assert.equal(app.requests.includes('collaborations:UC1'), true)
-  const write = app.writes.find(write => write.value?.channelId === 'UC0').value
-  assert.deepEqual(write.videos.map(video => video.videoId), ['known0', 'collaboration-UC0', 'old-collaboration'])
-  assert.equal(write.videos[1].isNewInSubscriptionFeed, true, 'a collaboration published since the last fetch is new')
-  assert.equal(write.videos[2].isNewInSubscriptionFeed, false)
-  assert.equal(write.collaborationsFetched, true)
-  assert.equal(write.timestamp, timestamp, 'the snapshot\'s timestamp, so the write loses to the newer cache')
+  assert.deepEqual(app.events, ['completed', 'finished'])
+  assert.equal(app.requests.includes('UC0'), false, 'the Videos tab of an unchanged feed is not loaded')
+  assert.equal(app.writes.some(write => write.value?.channelId === 'UC0'), false)
+  assert.deepEqual(app.requests.filter(request => request.startsWith('collaborations:')), ['collaborations:UC0', 'collaborations:UC4'],
+    'never checked channels go first, then the most overdue, with low concurrency')
+  homeTabs.resolve()
+  await settle()
+
+  const checks = app.writes.filter(write => write.key === 'updateSubscriptionCollaborationsByChannel')
+  assert.deepEqual(checks.map(write => write.value.channelId), ['UC0', 'UC4', 'UC3'],
+    'channels without cached uploads, checked today, or found without collaborations this week are not due')
+  assert.equal(checks[0].value.collaborations[0].videoId, 'collaboration-UC0')
+  assert.ok(app.reports.filter(report => report === 'UC0:videos').length >= 2, 'stored collaborations are reported for notifications')
+})
+
+test('failed and cancelled collaboration checks store nothing', async () => {
+  const homeTabs = Promise.withResolvers()
+  const app = createRefresh({
+    feed: 'Videos',
+    useRssFeeds: false,
+    beforeCollaborations: async id => {
+      await homeTabs.promise
+      if (id === 'UC0') throw new Error('Home tab failed')
+    },
+  })
+  app.getters.getVideoCache = Object.fromEntries(Array.from({ length: 6 }, (_, i) => [`UC${i}`, { timestamp: new Date(), videos: [] }]))
+  app.getters.getIncludeSubscriptionCollaborations = true
+  app.reconnect()
+
+  await app.refresh({ t: key => key })
+  assert.deepEqual(app.requests.filter(request => request.startsWith('collaborations:')), ['collaborations:UC0', 'collaborations:UC1'])
+  homeTabs.resolve()
+  await settle()
+  assert.deepEqual(app.writes.filter(write => write.key === 'updateSubscriptionCollaborationsByChannel').map(write => write.value.channelId),
+    ['UC1', 'UC2', 'UC3', 'UC4', 'UC5'], 'a failed check is not stored, so the channel stays due')
+
+  const cancelled = createRefresh({ feed: 'Videos', useRssFeeds: false, beforeCollaborations: () => settle() })
+  cancelled.getters.getVideoCache = app.getters.getVideoCache
+  cancelled.getters.getIncludeSubscriptionCollaborations = true
+  cancelled.reconnect()
+  await cancelled.refresh({ t: key => key })
+  cancelled.cancelSubscriptionRefresh()
+  await settle()
+  await settle()
+  assert.deepEqual(cancelled.requests.filter(request => request.startsWith('collaborations:')), ['collaborations:UC0', 'collaborations:UC1'])
+  assert.equal(cancelled.writes.some(write => write.key === 'updateSubscriptionCollaborationsByChannel'), false)
 })
 
 test('with Faster Subscription Refresh, automatic refreshes leave out channels fetched moments ago, manual ones load them', async () => {

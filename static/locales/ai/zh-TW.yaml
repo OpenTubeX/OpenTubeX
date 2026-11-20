@@ -2463,7 +2463,7 @@ Tooltips:
     Notify About New Uploads: 在此裝置上為你在訂閱設定中開啟了通知的頻道顯示系統通知。OpenTubeX 會在重新整理訂閱時檢查新內容，因此請選擇自動重新整理間隔。若要在應用程式關閉時也收到通知，請同時啟用應用程式關閉時重新整理訂閱。
     RSS Feeds Auto Refresh Interval: 應用程式開啟時 OpenTubeX 自動重新整理 RSS 摘要的頻率。
     Faster Subscription Refresh: "先檢查每個頻道的 RSS 資訊提供，只載入有新上傳內容的頻道的影片、Shorts 和直播。自動重新整理也會略過過去 10 分鐘內載入過的頻道。對於沒有新上傳內容的頻道，觀看次數、已移除的影片和變更的標題每隔幾小時才會更新一次，而且當 RSS 資訊提供延遲時，新上傳的內容可能會較晚出現。使用 Invidious API 時無法使用。"
-    Show Collaborations From Other Channels: "同時顯示你訂閱的頻道與上傳這些影片的其他頻道合作製作的影片。YouTube 只在頻道的首頁分頁中列出這些影片，因此每次重新整理影片都會為每個頻道多載入一個頁面。只能找到那裡顯示的最新合作影片，有些頻道不會顯示任何合作影片，且其發布日期為大略時間。使用 Invidious API 時無法使用。"
+    Show Collaborations From Other Channels: "同時顯示你訂閱的頻道與上傳這些影片的其他頻道合作製作的影片。YouTube 只在頻道的首頁分頁中列出這些影片，因此每次重新整理影片後會檢查少數幾個頻道，新的合作影片可能需要一天或更久才會出現。只能找到那裡顯示的最新合作影片，有些頻道不會顯示任何合作影片，且其發布日期為大略時間。使用 Invidious API 時無法使用。"
     Platforms Auto Refresh Interval: 應用程式開啟時 OpenTubeX 自動重新整理您在其他平台上追隨的頻道的頻率。
     Twitch Notify When Live: 你追隨的某個 Twitch 頻道開始直播時通知你。OpenTubeX 開啟時每隔幾分鐘檢查一次；關閉時若仍會重新整理訂閱內容，也會檢查。
   Theme Settings:
