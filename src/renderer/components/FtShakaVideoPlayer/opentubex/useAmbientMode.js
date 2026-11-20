@@ -11,9 +11,10 @@ const AMBIENT_FRAME_HEIGHT = 45
  * Renders low-resolution video frames for the ambient glow behind the player.
  * @param {object} options
  * @param {import('vue').ComputedRef<boolean>} options.enabled
+ * @param {import('vue').Ref<boolean>} options.mirrored
  * @param {import('vue').Ref<HTMLVideoElement | null>} options.video
  */
-export function useAmbientMode({ enabled, video }) {
+export function useAmbientMode({ enabled, mirrored, video }) {
   /** @type {import('vue').Ref<HTMLCanvasElement | null>} */
   const ambientCanvas = ref(null)
   /** @type {import('vue').Ref<HTMLCanvasElement | null>} */
@@ -67,6 +68,8 @@ export function useAmbientMode({ enabled, video }) {
     try {
       if (!enabled.value || isAppHidden() || canvas !== ambientCanvas.value || videoElement !== video.value) return
       context.globalAlpha = wasInitialized ? AMBIENT_FRAME_BLEND_ALPHA : 1
+      // Match the glow to a mirrored video.
+      context.setTransform(mirrored.value ? -1 : 1, 0, 0, 1, mirrored.value ? canvas.width : 0, 0)
       context.drawImage(videoElement, 0, 0, canvas.width, canvas.height)
       hasAmbientFrame = true
       lastVideoTime = videoElement.currentTime
@@ -87,6 +90,7 @@ export function useAmbientMode({ enabled, video }) {
     } finally {
       framePending = false
       context.globalAlpha = 1
+      context.resetTransform()
     }
   }
 
@@ -149,6 +153,14 @@ export function useAmbientMode({ enabled, video }) {
       startAmbientFrames()
     } else {
       stopAmbientFrames()
+    }
+  })
+
+  // Redraw at once, even while paused, instead of blending in the flip.
+  watch(mirrored, () => {
+    if (enabled.value) {
+      stopAmbientFrames()
+      startAmbientFrames()
     }
   })
 

@@ -1099,6 +1099,7 @@ Settings:
     Mono Audio: 'Àudio mono'
     Normalize Loudness: 'Normalitza el volum'
     Show Mono Audio Toggle: 'Mostra el commutador d''àudio mono'
+    Show Mirror Video Toggle: "Mostra el commutador per emmirallar el vídeo"
     Default Media Format:
       Default Media Format: 'Format multimèdia predeterminat'
     Pause on Stream Recovery: "Posa en pausa en recuperar el flux"
@@ -1128,6 +1129,7 @@ Settings:
     Enable DLNA Casting: "Activa la transmissió DLNA"
     Skip Unavailable Playlist Videos: "Omet els vídeos no disponibles de les llistes de reproducció"
     Lights Off: Llums apagats
+    Mirror Video: "Emmiralla el vídeo"
     Show Lights Off Toggle: Mostra el commutador per apagar els llums
     Show Volume Boost Toggle: "Mostra el commutador d'amplificació del volum"
     Swipe Gestures:
@@ -2952,6 +2954,7 @@ Tooltips:
     Use YouTube-style Shorts: Mostra els vídeos curts en una quadrícula vertical a les pàgines de subscripcions i canals i utilitza el reproductor de vídeos curts a l'estil de YouTube.
     Loop Shorts: Si s'activa, els vídeos curts es reinicien automàticament. Si es desactiva, s'aturen al final i mostren un botó per tornar-los a reproduir.
     Show Skip Silence Toggle: Mostra un commutador per ometre silencis al menú de configuració del reproductor.
+    Show Mirror Video Toggle: "Mostra un commutador al menú de configuració del reproductor que gira el vídeo horitzontalment, perquè sigui més fàcil seguir tutorials de ball, d'exercici i d'instruments."
     Enable Skip Silence by Default: Activa l'omissió de silencis a les pestanyes noves. Canviar-ho en una pestanya no afecta les altres.
     Enable Video Zoom: Mostra el control de zoom al menú de configuració del reproductor i n'activa les dreceres de teclat i els controls de panoràmica.
     Enable Seek History: Recorda des d'on has saltat en cada vídeo fins que es tanca l'aplicació. Mostra la llista de l'historial de salts al menú de configuració del reproductor i activa les seves dreceres de teclat.

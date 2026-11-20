@@ -879,6 +879,7 @@ Settings:
     Mono Audio: 'Monoheli'
     Normalize Loudness: 'Normaliseeri helitugevus'
     Show Mono Audio Toggle: 'Näita monoheli lülitit'
+    Show Mirror Video Toggle: "Näita video peegeldamise lülitit"
     Pause on Stream Recovery: "Peata voo taastamisel"
     Buffering:
       Buffering: Puhverdamine
@@ -906,6 +907,7 @@ Settings:
     Enable DLNA Casting: "Luba DLNA edastamine"
     Skip Unavailable Playlist Videos: "Jäta esitusloendis kättesaamatud videod vahele"
     Lights Off: Tuled välja
+    Mirror Video: "Peegelda videot"
     Show Lights Off Toggle: Näita tulede väljalülitamise lülitit
     Show Volume Boost Toggle: "Kuva helitugevuse võimenduse lüliti"
     Swipe Gestures:
@@ -2400,6 +2402,7 @@ Tooltips:
     Use YouTube-style Shorts: Kuvab Shortsid tellimuste ja kanalite lehtedel püstpaigutusega ruudustikus ning kasutab YouTube'i laadis Shortsi pleierit.
     Loop Shorts: Kui see on lubatud, käivituvad Shortsid automaatselt uuesti. Kui see on välja lülitatud, peatuvad Shortsid lõpus ja kuvatakse uuesti esitamise nupp.
     Show Skip Silence Toggle: Kuvab pleieri seadete menüüs vaikuse vahelejätmise lüliti.
+    Show Mirror Video Toggle: "Kuvab pleieri seadete menüüs lüliti, mis peegeldab videot horisontaalselt, et tantsu-, treening- ja pillimänguõpetustega oleks lihtsam kaasa teha."
     Enable Skip Silence by Default: Lubab uutel vahelehtedel vaikuse vahelejätmise. Selle muutmine ühel vahelehel ei mõjuta teisi vahelehti.
     Enable Video Zoom: Kuvab pleieri seadete menüüs suumi juhtelemendi ning lubab selle kiirklahvid ja panoraamimise juhtelemendid.
     Enable Seek History: Jätab meelde, kust sa igas videos edasi hüppasid, kuni rakendus suletakse. Näitab kerimisajaloo loendit pleieri seadete menüüs ja lubab selle kiirklahvid.

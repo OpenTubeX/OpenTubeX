@@ -823,6 +823,7 @@ Settings:
     Mono Audio: 'Audio mono'
     Normalize Loudness: 'Normalizar volumen'
     Show Mono Audio Toggle: 'Mostrar el interruptor de audio mono'
+    Show Mirror Video Toggle: "Mostrar interruptor para reflejar el vídeo"
     Default Media Format:
       Default Media Format: 'Formato multimedia predeterminado'
     Pause on Stream Recovery: "Pausar al recuperar la transmisión"
@@ -852,6 +853,7 @@ Settings:
     Enable DLNA Casting: "Activar la transmisión DLNA"
     Skip Unavailable Playlist Videos: "Omitir vídeos no disponibles en listas de reproducción"
     Lights Off: Luces apagadas
+    Mirror Video: "Reflejar vídeo"
     Show Lights Off Toggle: Mostrar interruptor para apagar las luces
     Show Volume Boost Toggle: "Mostrar el interruptor de amplificación de volumen"
     Swipe Gestures:
@@ -2358,6 +2360,7 @@ Tooltips:
     Use YouTube-style Shorts: Muestra los Shorts en una cuadrícula vertical en las páginas de suscripciones y canales y usa el reproductor de Shorts al estilo de YouTube.
     Loop Shorts: Al activarlo, los Shorts se reinician automáticamente. Si se desactiva, se detienen al final y muestran un botón para volver a reproducirlos.
     Show Skip Silence Toggle: Muestra un interruptor para omitir silencios en el menú de ajustes del reproductor.
+    Show Mirror Video Toggle: "Muestra un interruptor en el menú de ajustes del reproductor que voltea el vídeo horizontalmente, para que sea más fácil seguir tutoriales de baile, ejercicio e instrumentos."
     Enable Skip Silence by Default: Activa la omisión de silencios en las pestañas nuevas. Cambiarla en una pestaña no afecta a las demás.
     Enable Video Zoom: Muestra el control Zoom en el menú de ajustes del reproductor y activa sus atajos de teclado y controles de desplazamiento.
     Enable Seek History: Recuerda desde dónde has saltado en cada vídeo hasta que se cierre la aplicación. Muestra la lista del historial de saltos en el menú de ajustes del reproductor y activa sus atajos de teclado.

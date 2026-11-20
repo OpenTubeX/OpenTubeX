@@ -28,6 +28,7 @@ const state = {
   videoZoomByTabId: {},
   volumeBoostByTabId: {},
   lightsOffByTabId: {},
+  mirrorVideoByTabId: {},
   musicModeByTabId: {},
   skipSilenceByTabId: {}
 }
@@ -37,6 +38,7 @@ const getters = {
   // The web build opens links in browser tabs, which cannot keep the history out
   getIncognitoTabsEnabled: (_state, getters) => (process.env.IS_ELECTRON || process.env.IS_CAPACITOR) && getters.getTabsEnabled,
   getTabLightsOff: (state) => (tabId) => state.lightsOffByTabId[tabId] ?? false,
+  getTabMirrorVideo: (state) => (tabId) => state.mirrorVideoByTabId[tabId] ?? false,
   getTabMusicMode: (state) => (tabId) => state.musicModeByTabId[tabId] ?? false,
   getTabs: (state) => state.tabs,
   getTabGroups: (state) => state.groups,
@@ -156,6 +158,11 @@ const mutations = {
     for (const tabId of Object.keys(state.lightsOffByTabId)) {
       if (tabId !== 'web' && !incomingIds.has(tabId)) {
         delete state.lightsOffByTabId[tabId]
+      }
+    }
+    for (const tabId of Object.keys(state.mirrorVideoByTabId)) {
+      if (tabId !== 'web' && !incomingIds.has(tabId)) {
+        delete state.mirrorVideoByTabId[tabId]
       }
     }
     for (const tabId of Object.keys(state.skipSilenceByTabId)) {
@@ -297,6 +304,10 @@ const mutations = {
 
   setTabLightsOff(state, { tabId, value }) {
     state.lightsOffByTabId[tabId] = value === true
+  },
+
+  setTabMirrorVideo(state, { tabId, value }) {
+    state.mirrorVideoByTabId[tabId] = value === true
   },
 
   setTabMusicMode(state, { tabId, value }) {

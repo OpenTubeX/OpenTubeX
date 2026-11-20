@@ -879,6 +879,7 @@ Settings:
     Mono Audio: 'Monoääni'
     Normalize Loudness: 'Normalisoi äänenvoimakkuus'
     Show Mono Audio Toggle: 'Näytä monoäänen valitsin'
+    Show Mirror Video Toggle: "Näytä videon peilauskytkin"
     Pause on Stream Recovery: "Keskeytä striimin palautuksessa"
     Buffering:
       Buffering: Puskurointi
@@ -906,6 +907,7 @@ Settings:
     Enable DLNA Casting: "Ota DLNA-suoratoisto käyttöön"
     Skip Unavailable Playlist Videos: "Ohita soittolistojen videot, joita ei voi toistaa"
     Lights Off: Valot pois
+    Mirror Video: "Peilaa video"
     Show Lights Off Toggle: Näytä valojen sammutuskytkin
     Show Volume Boost Toggle: "Näytä äänenvoimakkuuden vahvistuksen valitsin"
     Swipe Gestures:
@@ -2406,6 +2408,7 @@ Tooltips:
     Use YouTube-style Shorts: Näyttää Shorts-videot pystysuuntaisessa ruudukossa tilausten ja kanavien sivuilla sekä käyttää YouTube-tyylistä Shorts-soitinta.
     Loop Shorts: Kun asetus on käytössä, Shorts-videot alkavat automaattisesti alusta. Muussa tapauksessa ne pysähtyvät lopussa ja näyttävät uudelleentoistopainikkeen.
     Show Skip Silence Toggle: Näyttää hiljaisuuden ohittamisen käyttöönottokytkimen soittimen asetusvalikossa.
+    Show Mirror Video Toggle: "Näyttää soittimen asetusvalikossa kytkimen, joka peilaa videon vaakasuunnassa, jotta tanssi-, treeni- ja soitinopetusten seuraaminen on helpompaa."
     Enable Skip Silence by Default: Ottaa hiljaisuuden ohittamisen käyttöön uusissa välilehdissä. Asetuksen muuttaminen yhdellä välilehdellä ei vaikuta muihin välilehtiin.
     Enable Video Zoom: Näyttää zoomaussäätimen soittimen asetusvalikossa ja ottaa sen pikanäppäimet sekä panorointisäätimet käyttöön.
     Enable Seek History: Muistaa, mistä kohdasta siirryit kussakin videossa, kunnes sovellus suljetaan. Näyttää siirtymähistorian luettelon soittimen asetusvalikossa ja ottaa sen pikanäppäimet käyttöön.

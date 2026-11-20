@@ -879,6 +879,7 @@ Settings:
     Mono Audio: '单声道音频'
     Normalize Loudness: '响度标准化'
     Show Mono Audio Toggle: '显示单声道音频开关'
+    Show Mirror Video Toggle: "显示镜像视频开关"
     Pause on Stream Recovery: "流恢复时暂停"
     Buffering:
       Buffering: 缓冲
@@ -906,6 +907,7 @@ Settings:
     Enable DLNA Casting: "启用 DLNA 投屏"
     Skip Unavailable Playlist Videos: "跳过播放列表中无法播放的视频"
     Lights Off: 关灯
+    Mirror Video: "镜像视频"
     Show Lights Off Toggle: 显示关灯开关
     Show Volume Boost Toggle: "显示音量增强开关"
     Swipe Gestures:
@@ -2397,6 +2399,7 @@ Tooltips:
     Use YouTube-style Shorts: 在订阅和频道页面上以纵向网格显示 Shorts，并使用 YouTube 风格的 Shorts 播放器。
     Loop Shorts: 启用后，Shorts 会自动重新播放。禁用后，Shorts 会在播放结束时停止，并显示重播按钮。
     Show Skip Silence Toggle: 在播放器的设置菜单中显示跳过静音的开关。
+    Show Mirror Video Toggle: "在播放器的设置菜单中显示一个开关，可将视频水平翻转，方便跟着舞蹈、健身和乐器教程练习。"
     Enable Skip Silence by Default: 为新标签页启用跳过静音。在一个标签页中更改此设置不会影响其他标签页。
     Enable Video Zoom: 在播放器的设置菜单中显示缩放控件，并启用其键盘快捷键和平移控件。
     Enable Seek History: 在应用关闭前记住你在每个视频中从哪里跳转。在播放器设置菜单中显示跳转历史列表，并启用其键盘快捷键。

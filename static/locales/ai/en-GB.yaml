@@ -864,6 +864,7 @@ Settings:
     Mono Audio: 'Mono Audio'
     Normalize Loudness: 'Normalise Loudness'
     Show Mono Audio Toggle: 'Show Mono Audio Toggle'
+    Show Mirror Video Toggle: "Show Mirror Video Toggle"
     Pause on Stream Recovery: "Pause on Stream Recovery"
     Buffering:
       Buffering: Buffering
@@ -891,6 +892,7 @@ Settings:
     Enable DLNA Casting: "Enable DLNA casting"
     Skip Unavailable Playlist Videos: "Skip Unavailable Playlist Videos"
     Lights Off: Lights Off
+    Mirror Video: "Mirror Video"
     Show Lights Off Toggle: Show Lights Off Toggle
     Show Volume Boost Toggle: "Show Volume Boost Toggle"
     Swipe Gestures:
@@ -2393,6 +2395,7 @@ Tooltips:
     Use YouTube-style Shorts: Displays Shorts in a portrait grid on subscription and channel pages and uses the YouTube-style Shorts player.
     Loop Shorts: When enabled, Shorts restart automatically. When disabled, Shorts stop at the end and show a replay button.
     Show Skip Silence Toggle: Shows an on/off toggle for skipping silence in the player's settings menu.
+    Show Mirror Video Toggle: "Shows an on/off toggle in the player's settings menu that flips the video horizontally, so it's easier to follow along with dance, workout, and instrument tutorials."
     Enable Skip Silence by Default: Enables silence skipping for new tabs. Changing it in one tab does not affect other tabs.
     Enable Video Zoom: Shows the Zoom control in the player's settings menu and enables its keyboard shortcuts and panning controls.
     Enable Seek History: Remembers where you jumped from in each video until the app closes. Shows the Seek history list in the player's settings menu and enables its keyboard shortcuts.

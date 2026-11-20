@@ -879,6 +879,7 @@ Settings:
     Mono Audio: 'Monolyd'
     Normalize Loudness: 'Normaliser lydstyrke'
     Show Mono Audio Toggle: 'Vis bryter for monolyd'
+    Show Mirror Video Toggle: "Vis bryteren for å speilvende video"
     Pause on Stream Recovery: "Sett på pause ved gjenoppretting av strøm"
     Buffering:
       Buffering: Bufring
@@ -906,6 +907,7 @@ Settings:
     Enable DLNA Casting: "Aktiver DLNA-casting"
     Skip Unavailable Playlist Videos: "Hopp over utilgjengelige videoer i spillelister"
     Lights Off: Slå av lyset
+    Mirror Video: "Speilvend video"
     Show Lights Off Toggle: Vis bryteren for å slå av lyset
     Show Volume Boost Toggle: "Vis bryter for volumforsterkning"
     Swipe Gestures:
@@ -2402,6 +2404,7 @@ Tooltips:
     Use YouTube-style Shorts: Viser Shorts i et stående rutenett på abonnements- og kanalsider og bruker Shorts-spilleren i YouTube-stil.
     Loop Shorts: Når dette er slått på, starter Shorts automatisk på nytt. Når det er slått av, stopper Shorts på slutten og viser en knapp for å spille av på nytt.
     Show Skip Silence Toggle: Viser en bryter for å hoppe over stillhet i innstillingsmenyen til spilleren.
+    Show Mirror Video Toggle: "Viser en av/på-bryter i innstillingsmenyen til spilleren som speilvender videoen vannrett, slik at det blir lettere å følge danse-, trenings- og instrumentveiledninger."
     Enable Skip Silence by Default: Hopper over stillhet som standard i nye faner. Endring i én fane påvirker ikke andre faner.
     Enable Video Zoom: Viser zoomkontrollen i innstillingsmenyen til spilleren og slår på hurtigtastene og panoreringskontrollene.
     Enable Seek History: Husker hvor du hoppet fra i hver video til appen lukkes. Viser hopphistorikklisten i avspillerens innstillingsmeny og slår på hurtigtastene for den.

@@ -879,6 +879,7 @@ Settings:
     Mono Audio: 'Son mono'
     Normalize Loudness: 'Reizhañ an ampled'
     Show Mono Audio Toggle: 'Diskouez an afell son mono'
+    Show Mirror Video Toggle: "Diskouez an afell evit melezourañ ar video"
     Pause on Stream Recovery: "Ehan pa vez adtapet al lanv"
     Buffering:
       Buffering: Memor c'hortoz
@@ -906,6 +907,7 @@ Settings:
     Enable DLNA Casting: "Gweredekaat skignañ DLNA"
     Skip Unavailable Playlist Videos: "Tremen ar videoioù dizimplij er rolloù lenn"
     Lights Off: Gouloù lazhet
+    Mirror Video: "Melezourañ ar video"
     Show Lights Off Toggle: Diskouez an afell evit lazhañ ar gouloù
     Show Volume Boost Toggle: "Diskouez an afell kreskiñ an ampled"
     Swipe Gestures:
@@ -2408,6 +2410,7 @@ Tooltips:
     Use YouTube-style Shorts: "Diskouez ar videoioù berr (Shorts) en ur gael a-serzh war pajennoù ar c'houmanantoù hag ar chadennoù hag implijout al lenner videoioù berr doare YouTube."
     Loop Shorts: "Pa vez gweredekaet e adkrog ar videoioù berr (Shorts) ent emgefreek. Pa vez diweredekaet e paouezont en dibenn hag e tiskouezont ur bouton adlenn."
     Show Skip Silence Toggle: "Diskouez un afell enaouiñ pe lazhañ al lamm dre ar sioulder e lañser arventennoù al lenner."
+    Show Mirror Video Toggle: "Diskouez un afell enaouiñ pe lazhañ e lañser arventennoù al lenner a dro ar video a-blaen, evit heuliañ aesoc'h ar c'hentelioù dañs, sport ha binvioù-seniñ."
     Enable Skip Silence by Default: "Gweredekaat al lamm dre ar sioulder evit an ivinelloù nevez. Kemmañ anezhañ en un ivinell ne cheñch ket an ivinelloù all."
     Enable Video Zoom: "Diskouez ar reoler Zoum e lañser arventennoù al lenner ha gweredekaat e verradennoù klavier hag e reolerezhioù zilec'hiañ."
     Enable Seek History: Derc'hel a ra soñj eus al lec'hioù ma oac'h lammet diouto e pep video betek ma vez serret an arload. Diskouez a ra roll istor al lammoù e lañser arventennoù al lenner hag e weredeka e berradennoù klavier.

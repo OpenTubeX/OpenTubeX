@@ -1063,6 +1063,7 @@ Settings:
     Mono Audio: 'Mono garsas'
     Normalize Loudness: 'Normalizuoti garsumą'
     Show Mono Audio Toggle: 'Rodyti mono garso jungiklį'
+    Show Mirror Video Toggle: "Rodyti veidrodinio vaizdo jungiklį"
     Default Media Format:
       Default Media Format: 'Numatytasis medijos formatas'
     Pause on Stream Recovery: "Pristabdyti atkuriant srautą"
@@ -1092,6 +1093,7 @@ Settings:
     Enable DLNA Casting: "Įjungti DLNA transliavimą"
     Skip Unavailable Playlist Videos: "Praleisti nepasiekiamus vaizdo įrašus grojaraščiuose"
     Lights Off: Išjungti šviesas
+    Mirror Video: "Veidrodinis vaizdo įrašas"
     Show Lights Off Toggle: Rodyti šviesų išjungimo jungiklį
     Show Volume Boost Toggle: "Rodyti garsumo stiprinimo jungiklį"
     Swipe Gestures:
@@ -2823,6 +2825,7 @@ Tooltips:
     Use YouTube-style Shorts: Prenumeratų ir kanalų puslapiuose rodo Shorts vertikaliame tinklelyje ir naudoja YouTube stiliaus Shorts leistuvą.
     Loop Shorts: Įjungus Shorts automatiškai paleidžiami iš naujo. Išjungus Shorts pabaigoje sustoja ir rodomas pakartojimo mygtukas.
     Show Skip Silence Toggle: Leistuvo nustatymų meniu rodo tylos praleidimo įjungimo ir išjungimo jungiklį.
+    Show Mirror Video Toggle: "Leistuvo nustatymų meniu rodo jungiklį, kuris horizontaliai apverčia vaizdo įrašą, kad būtų lengviau sekti šokių, treniruočių ir muzikos instrumentų pamokas."
     Enable Skip Silence by Default: Naujose kortelėse įjungia tylos praleidimą. Pakeitimas vienoje kortelėje neturi įtakos kitoms kortelėms.
     Enable Video Zoom: Leistuvo nustatymų meniu rodo mastelio valdiklį ir įjungia jo sparčiuosius klavišus bei slinkimo valdiklius.
     Enable Seek History: Iki programos uždarymo įsimena, iš kur peršokote kiekviename vaizdo įraše. Rodo peršokimų istorijos sąrašą grotuvo nustatymų meniu ir įjungia jos sparčiuosius klavišus.

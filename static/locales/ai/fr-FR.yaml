@@ -879,6 +879,7 @@ Settings:
     Mono Audio: 'Audio mono'
     Normalize Loudness: 'Normaliser le volume'
     Show Mono Audio Toggle: 'Afficher le bouton d''audio mono'
+    Show Mirror Video Toggle: "Afficher le bouton d'effet miroir"
     Pause on Stream Recovery: "Mettre en pause lors de la récupération du flux"
     Buffering:
       Buffering: Mise en mémoire tampon
@@ -906,6 +907,7 @@ Settings:
     Enable DLNA Casting: "Activer la diffusion DLNA"
     Skip Unavailable Playlist Videos: "Ignorer les vidéos indisponibles dans les playlists"
     Lights Off: Éteindre les lumières
+    Mirror Video: "Effet miroir"
     Show Lights Off Toggle: Afficher le bouton pour éteindre les lumières
     Show Volume Boost Toggle: "Afficher le bouton d'amplification du volume"
     Swipe Gestures:
@@ -2396,6 +2398,7 @@ Tooltips:
     Use YouTube-style Shorts: Affiche les Shorts dans une grille verticale sur les pages d’abonnements et de chaînes, et utilise le lecteur de Shorts de style YouTube.
     Loop Shorts: Lorsque cette option est activée, les Shorts redémarrent automatiquement. Lorsqu’elle est désactivée, ils s’arrêtent à la fin et affichent un bouton de relecture.
     Show Skip Silence Toggle: Affiche un bouton pour activer ou désactiver les silences ignorés dans le menu des paramètres du lecteur.
+    Show Mirror Video Toggle: "Affiche dans le menu des paramètres du lecteur un bouton qui retourne la vidéo horizontalement, pour suivre plus facilement les tutoriels de danse, de sport et d'instruments."
     Enable Skip Silence by Default: Active les silences ignorés pour les nouveaux onglets. Toute modification dans un onglet reste sans effet sur les autres.
     Enable Video Zoom: Affiche la commande Zoom dans le menu des paramètres du lecteur et active ses raccourcis clavier ainsi que ses commandes de déplacement.
     Enable Seek History: Mémorise les endroits d'où vous avez sauté dans chaque vidéo jusqu'à la fermeture de l'application. Affiche la liste de l'historique des sauts dans le menu des paramètres du lecteur et active ses raccourcis clavier.

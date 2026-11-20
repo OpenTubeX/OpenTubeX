@@ -1075,6 +1075,7 @@ Settings:
     Mono Audio: 'Mono zvok'
     Normalize Loudness: 'Normaliziraj glasnost'
     Show Mono Audio Toggle: 'Prikaži stikalo za mono zvok'
+    Show Mirror Video Toggle: "Prikaži stikalo za zrcaljenje videoposnetka"
     Default Media Format:
       Default Media Format: 'Prevzeta oblika predstavnosti'
     Pause on Stream Recovery: "Začasno ustavi ob obnovitvi pretoka"
@@ -1104,6 +1105,7 @@ Settings:
     Enable DLNA Casting: "Omogoči predvajanje prek DLNA"
     Skip Unavailable Playlist Videos: "Preskoči nedostopne videoposnetke na seznamih predvajanja"
     Lights Off: Ugasni luči
+    Mirror Video: "Zrcali videoposnetek"
     Show Lights Off Toggle: Prikaži stikalo za ugašanje luči
     Show Volume Boost Toggle: "Prikaži preklop za ojačitev glasnosti"
     Swipe Gestures:
@@ -2912,6 +2914,7 @@ Tooltips:
     Use YouTube-style Shorts: Videoposnetke Shorts prikaže v pokončni mreži na straneh naročnin in kanalov ter uporabi predvajalnik Shorts v slogu YouTuba.
     Loop Shorts: Ko je možnost omogočena, se videoposnetki Shorts samodejno začnejo znova. Ko je onemogočena, se na koncu ustavijo in prikažejo gumb za ponovno predvajanje.
     Show Skip Silence Toggle: V meniju nastavitev predvajalnika prikaže stikalo za vklop ali izklop preskakovanja tišine.
+    Show Mirror Video Toggle: "V meniju nastavitev predvajalnika prikaže stikalo, ki videoposnetek vodoravno zrcali, da lažje sledite vadnicam za ples, vadbo in igranje inštrumentov."
     Enable Skip Silence by Default: Omogoči preskakovanje tišine za nove zavihke. Sprememba v enem zavihku ne vpliva na druge.
     Enable Video Zoom: V meniju nastavitev predvajalnika prikaže kontrolnik za povečavo ter omogoči njegove bližnjice na tipkovnici in kontrolnike za pomikanje.
     Enable Seek History: Do zaprtja aplikacije si zapomni, od kod ste skočili v vsakem videoposnetku. Prikaže seznam zgodovine skokov v meniju nastavitev predvajalnika in omogoči njene bližnjice na tipkovnici.

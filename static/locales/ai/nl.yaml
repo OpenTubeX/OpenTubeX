@@ -884,6 +884,7 @@ Settings:
     Mono Audio: 'Mono-audio'
     Normalize Loudness: 'Volume normaliseren'
     Show Mono Audio Toggle: 'Schakelaar voor mono-audio tonen'
+    Show Mirror Video Toggle: "Schakelaar voor 'Video spiegelen' tonen"
     Default Media Format:
       Default Media Format: 'Standaardmediaformaat'
     Pause on Stream Recovery: "Pauzeren bij streamherstel"
@@ -913,6 +914,7 @@ Settings:
     Enable DLNA Casting: "DLNA-casting inschakelen"
     Skip Unavailable Playlist Videos: "Niet-beschikbare video's in afspeellijsten overslaan"
     Lights Off: Lichten uit
+    Mirror Video: "Video spiegelen"
     Show Lights Off Toggle: Schakelaar voor 'Lichten uit' tonen
     Show Volume Boost Toggle: "Schakelaar voor volumeversterking tonen"
     Swipe Gestures:
@@ -2465,6 +2467,7 @@ Tooltips:
     Use YouTube-style Shorts: Toont Shorts in een staand raster op abonnements- en kanaalpagina's en gebruikt de Shorts-speler in YouTube-stijl.
     Loop Shorts: Als dit is ingeschakeld, beginnen Shorts automatisch opnieuw. Als dit is uitgeschakeld, stoppen Shorts aan het einde en verschijnt een knop om ze opnieuw af te spelen.
     Show Skip Silence Toggle: Toont in het instellingenmenu van de speler een aan-uitschakelaar om stiltes over te slaan.
+    Show Mirror Video Toggle: "Toont in het instellingenmenu van de speler een aan-uitschakelaar die de video horizontaal spiegelt, zodat je dans-, workout- en instrumentlessen makkelijker kunt volgen."
     Enable Skip Silence by Default: Schakelt het overslaan van stiltes in voor nieuwe tabbladen. Een wijziging in één tabblad heeft geen invloed op andere tabbladen.
     Enable Video Zoom: Toont de zoombediening in het instellingenmenu van de speler en schakelt de bijbehorende sneltoetsen en bediening voor verschuiven in.
     Enable Seek History: Onthoudt vanaf waar je in elke video bent gesprongen totdat de app wordt gesloten. Toont de lijst met de spoelgeschiedenis in het instellingenmenu van de speler en schakelt de bijbehorende sneltoetsen in.

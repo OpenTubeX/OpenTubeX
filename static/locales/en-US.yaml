@@ -1342,9 +1342,11 @@ Settings:
       Screenshots: Screenshots
       Timestamp Notes: Timestamp Notes
     Lights Off: Lights Off
+    Mirror Video: Mirror Video
     Show Lights Off Toggle: Show Lights Off Toggle
     Show Volume Boost Toggle: Show Volume Boost Toggle
     Show Mono Audio Toggle: Show Mono Audio Toggle
+    Show Mirror Video Toggle: Show Mirror Video Toggle
     Show Music Mode Toggle: Show Music Mode Toggle
     Swipe Gestures:
       Fullscreen Brightness: Full brightness in fullscreen
@@ -3507,6 +3509,7 @@ Tooltips:
     Use YouTube-style Shorts: Displays Shorts in a portrait grid on subscription and channel pages and uses the YouTube-style Shorts player.
     Loop Shorts: When enabled, Shorts restart automatically. When disabled, Shorts stop at the end and show a replay button.
     Show Skip Silence Toggle: Shows an on/off toggle for skipping silence in the player's settings menu.
+    Show Mirror Video Toggle: Shows an on/off toggle in the player's settings menu that flips the video horizontally, so it's easier to follow along with dance, workout, and instrument tutorials.
     Enable Skip Silence by Default: Enables silence skipping for new tabs. Changing it in one tab does not affect other tabs.
     Enable Video Zoom: Shows the Zoom control in the player's settings menu and enables its keyboard shortcuts and panning controls.
     Double-Tap With Two Fingers to Skip Chapters: Double-tap the right side of the video with two fingers to skip to the next chapter, or the left side to return to the start of the current chapter. In the first 3 seconds of a chapter, the left side goes to the previous chapter instead, so repeating it steps back through the chapters.

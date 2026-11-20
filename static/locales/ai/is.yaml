@@ -879,6 +879,7 @@ Settings:
     Mono Audio: 'Einóma hljóð'
     Normalize Loudness: 'Jafna hljóðstyrk'
     Show Mono Audio Toggle: 'Sýna rofa fyrir einóma hljóð'
+    Show Mirror Video Toggle: "Sýna rofa til að spegla myndskeið"
     Pause on Stream Recovery: "Gera hlé við endurheimt streymis"
     Buffering:
       Buffering: Biðminni
@@ -906,6 +907,7 @@ Settings:
     Enable DLNA Casting: "Virkja DLNA-streymi"
     Skip Unavailable Playlist Videos: "Sleppa óaðgengilegum myndskeiðum í spilunarlistum"
     Lights Off: Slökkva ljósin
+    Mirror Video: "Spegla myndskeið"
     Show Lights Off Toggle: Sýna rofa til að slökkva ljósin
     Show Volume Boost Toggle: "Sýna rofa fyrir hljóðstyrksaukningu"
     Swipe Gestures:
@@ -2413,6 +2415,7 @@ Tooltips:
     Use YouTube-style Shorts: Sýnir Shorts í reitaneti með lóðréttum smámyndum á áskriftar- og rásarsíðum og notar Shorts-spilara að hætti YouTube.
     Loop Shorts: Þegar þetta er virkt hefjast Shorts sjálfkrafa aftur. Ef slökkt er á þessu stöðvast þau í lokin og hnappur til að spila aftur birtist.
     Show Skip Silence Toggle: Sýnir rofa til að sleppa þögnum í stillingavalmynd spilarans.
+    Show Mirror Video Toggle: "Sýnir rofa í stillingavalmynd spilarans sem speglar myndskeiðið lárétt, svo auðveldara sé að fylgja dans-, æfinga- og hljóðfærakennslu."
     Enable Skip Silence by Default: Sleppir þögnum sjálfgefið í nýjum flipum. Breyting í einum flipa hefur ekki áhrif á aðra flipa.
     Enable Video Zoom: Sýnir aðdráttarstillingu í stillingavalmynd spilarans og virkjar flýtilykla og hliðrunarstjórnun fyrir hana.
     Enable Seek History: Man hvaðan þú stökkst í hverju myndbandi þar til forritinu er lokað. Sýnir stökkferilinn í stillingavalmynd spilarans og virkjar flýtilykla hans.

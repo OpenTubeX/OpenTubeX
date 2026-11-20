@@ -559,6 +559,7 @@ Settings:
     Mono Audio: 'Dźwięk mono'
     Normalize Loudness: 'Normalizuj głośność'
     Show Mono Audio Toggle: 'Pokaż przełącznik dźwięku mono'
+    Show Mirror Video Toggle: "Pokaż przełącznik odbicia lustrzanego wideo"
     Pause on Stream Recovery: "Wstrzymaj przy odzyskiwaniu strumienia"
     Buffering:
       Buffering: Buforowanie
@@ -588,6 +589,7 @@ Settings:
     Enable DLNA Casting: "Włącz przesyłanie DLNA"
     Skip Unavailable Playlist Videos: "Pomijaj niedostępne filmy na playlistach"
     Lights Off: Zgaś światło
+    Mirror Video: "Odbicie lustrzane wideo"
     Show Lights Off Toggle: Pokaż przełącznik gaszenia światła
     Show Volume Boost Toggle: "Pokaż przełącznik wzmocnienia głośności"
     Swipe Gestures:
@@ -1651,6 +1653,7 @@ Tooltips:
     Enable Timestamp Notes: "Dodaje do odtwarzacza przycisk i skrót N, które wstrzymują film i otwierają notatkę z linkiem do bieżącego momentu. Notatki można skopiować jako Markdown lub na komputerze dodać do Obsidiana."
     Obsidian Vault: Nazwa sejfu Obsidiana dla notatek ze znacznikami czasu. Po jej ustawieniu notatki można dodawać do Obsidiana. Notatki z każdego filmu są zbierane w notatce nazwanej tak jak film, w folderze sejfu na nowe notatki.
     Double-Tap With Two Fingers to Skip Chapters: "Stuknij dwukrotnie dwoma palcami w prawą stronę filmu, aby przejść do następnego rozdziału, lub w lewą stronę, aby wrócić do początku bieżącego rozdziału. W ciągu pierwszych 3 sekund rozdziału lewa strona przenosi zamiast tego do poprzedniego rozdziału, więc powtarzając gest, cofasz się kolejno przez rozdziały."
+    Show Mirror Video Toggle: "Pokazuje w menu ustawień odtwarzacza przełącznik, który odbija wideo w poziomie, aby łatwiej było ćwiczyć razem z poradnikami tanecznymi, treningowymi i muzycznymi."
   Download Settings:
     Global Additional yt-dlp Arguments: Dodatkowe argumenty wiersza poleceń przekazywane do yt-dlp przy każdym pobieraniu, na przykład --cookies-from-browser firefox.
     Concurrent Downloads: Maksymalna liczba zadań yt-dlp wykonywanych jednocześnie.

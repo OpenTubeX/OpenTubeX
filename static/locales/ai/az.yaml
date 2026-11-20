@@ -881,6 +881,7 @@ Settings:
     Mono Audio: 'Mono səs'
     Normalize Loudness: 'Səs səviyyəsini normallaşdır'
     Show Mono Audio Toggle: 'Mono səs açarını göstər'
+    Show Mirror Video Toggle: "Videonu güzgüləmə keçidini göstər"
     Pause on Stream Recovery: "Yayım bərpasında fasilə ver"
     Buffering:
       Buffering: Buferləmə
@@ -908,6 +909,7 @@ Settings:
     Enable DLNA Casting: "DLNA yayımını aktivləşdir"
     Skip Unavailable Playlist Videos: "Pleylistdə əlçatan olmayan videoları keç"
     Lights Off: İşıqları söndür
+    Mirror Video: "Videonu güzgülə"
     Show Lights Off Toggle: İşıqları söndürmə keçidini göstər
     Show Volume Boost Toggle: "Səs gücləndirmə düyməsini göstər"
     Swipe Gestures:
@@ -2407,6 +2409,7 @@ Tooltips:
     Use YouTube-style Shorts: Abunəlik və kanal səhifələrində Shorts videolarını şaquli torda göstərir və YouTube üslublu Shorts oynadıcısından istifadə edir.
     Loop Shorts: Aktivləşdirildikdə, Shorts videoları avtomatik yenidən başlayır. Bağlandıqda, Shorts videoları sonda dayanır və yenidən oynatma düyməsini göstərir.
     Show Skip Silence Toggle: Oynadıcının tənzimləmələr menyusunda səssiz hissələri keçməyi açıb-bağlayan keçid göstərir.
+    Show Mirror Video Toggle: "Oynadıcının tənzimləmələr menyusunda videonu üfüqi olaraq güzgüləyən keçid göstərir ki, rəqs, idman və musiqi aləti dərslərini izləmək asan olsun."
     Enable Skip Silence by Default: Yeni vərəqlərdə səssiz hissələrin keçilməsini aktivləşdirir. Bir vərəqdə dəyişdirilməsi digər vərəqlərə təsir etmir.
     Enable Video Zoom: Oynadıcının tənzimləmələr menyusunda miqyas idarəsini göstərir və onun klaviatura qısayollarını və görüntünü sürüşdürmə idarələrini aktivləşdirir.
     Enable Seek History: Tətbiq bağlanana qədər hər videoda haradan keçid etdiyinizi yadda saxlayır. Pleyerin parametrlər menyusunda keçid tarixçəsi siyahısını göstərir və onun klaviatura qısayollarını aktivləşdirir.

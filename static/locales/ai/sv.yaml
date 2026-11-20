@@ -879,6 +879,7 @@ Settings:
     Mono Audio: 'Monoljud'
     Normalize Loudness: 'Normalisera ljudstyrka'
     Show Mono Audio Toggle: 'Visa reglage för monoljud'
+    Show Mirror Video Toggle: "Visa reglage för att spegelvända video"
     Pause on Stream Recovery: "Pausa vid återställning av ström"
     Buffering:
       Buffering: Buffring
@@ -906,6 +907,7 @@ Settings:
     Enable DLNA Casting: "Aktivera DLNA-casting"
     Skip Unavailable Playlist Videos: "Hoppa över otillgängliga videor i spellistor"
     Lights Off: Släck ljuset
+    Mirror Video: "Spegelvänd video"
     Show Lights Off Toggle: Visa reglage för att släcka ljuset
     Show Volume Boost Toggle: "Visa reglage för volymförstärkning"
     Swipe Gestures:
@@ -2398,6 +2400,7 @@ Tooltips:
     Use YouTube-style Shorts: Visar Shorts i ett stående rutnät på prenumerations- och kanalsidor och använder Shorts-spelaren i YouTube-stil.
     Loop Shorts: När funktionen är aktiverad startar Shorts om automatiskt. När den är inaktiverad stannar Shorts vid slutet och visar en knapp för att spela upp igen.
     Show Skip Silence Toggle: Visar ett på/av-reglage för att hoppa över tystnad i spelarens inställningsmeny.
+    Show Mirror Video Toggle: "Visar ett på/av-reglage i spelarens inställningsmeny som spegelvänder videon vågrätt, så att det blir lättare att följa dans-, tränings- och instrumentlektioner."
     Enable Skip Silence by Default: Aktiverar överhoppning av tystnad för nya flikar. En ändring i en flik påverkar inte andra flikar.
     Enable Video Zoom: Visar zoomkontrollen i spelarens inställningsmeny och aktiverar dess kortkommandon och panoreringskontroller.
     Enable Seek History: Kommer ihåg var du hoppade ifrån i varje video tills appen stängs. Visar hopphistoriklistan i spelarens inställningsmeny och aktiverar dess kortkommandon.
