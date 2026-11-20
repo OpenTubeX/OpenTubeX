@@ -172,7 +172,7 @@
 }
 
 /* Pinned to the corner, so it never adds to the sheet's scroll range. */
-.reorderStatus {
+.pinReorderStatus {
   block-size: 1px;
   clip-path: inset(50%);
   inline-size: 1px;

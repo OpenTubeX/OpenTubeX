@@ -57,10 +57,10 @@
               class="bottomSheetHandle"
               aria-hidden="true"
             />
-            <!-- Inside the dialog, as screen readers ignore what it covers. -->
+            <!-- Inside the dialog, as screen readers ignore what it covers. A
+              plain live region, as pages own the status role. -->
             <p
-              class="reorderStatus"
-              role="status"
+              class="pinReorderStatus"
               aria-live="polite"
               aria-atomic="true"
             >
