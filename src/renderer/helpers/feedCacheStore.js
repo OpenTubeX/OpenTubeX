@@ -20,6 +20,10 @@ let storedDocuments = null
 // Writes run one at a time, so a later write never reaches the datastore first
 /** @type {Promise<unknown>} */
 let writes = Promise.resolve()
+// The IDs of the write in flight. Changes of other windows that arrive
+// meanwhile reached the datastore before it, so it supersedes them.
+/** @type {Set<string>} */
+let writing = new Set()
 
 /**
  * @param {Map<string, FeedCacheDocument>} documents
@@ -34,10 +38,12 @@ function applyRemoteChange(documents, change) {
   /** @type {Map<string, FeedCacheDocument | null>} */
   const changes = new Map()
   for (const { _id, ...doc } of change.docs) {
+    if (writing.has(/** @type {string} */ (_id))) continue
     documents.set(/** @type {string} */ (_id), doc)
     changes.set(/** @type {string} */ (_id), doc)
   }
   for (const id of change.removed) {
+    if (writing.has(id)) continue
     documents.delete(id)
     changes.set(id, null)
   }
@@ -116,7 +122,12 @@ export function createFeedCacheMirror(prefix, onChange) {
         const stored = new Map([...documents].filter(([id]) => id.startsWith(prefix)))
         const change = diffFeedCacheDocuments(stored, new Map([...current].map(([key, doc]) => [prefix + key, doc])))
         if (change.docs.length === 0 && change.removed.length === 0) return true
-        await DBFeedCacheHandlers.write(change)
+        writing = new Set([...change.docs.map(({ _id }) => /** @type {string} */ (_id)), ...change.removed])
+        try {
+          await DBFeedCacheHandlers.write(change)
+        } finally {
+          writing = new Set()
+        }
         // Only once written, so that the next save retries a failed write. The
         // window's own objects, which its next save compares with.
         for (const { _id } of change.docs) documents.set(_id, current.get(_id.slice(prefix.length)))

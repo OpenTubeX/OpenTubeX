@@ -9,6 +9,8 @@ const stored = [
 let finds = 0
 let failingWrites = 0
 const writes = []
+let remoteListener
+let onWrite = () => {}
 globalThis.__feedCacheHandlers = {
   find: async () => {
     if (++finds === 1) throw new Error('Database busy')
@@ -16,6 +18,7 @@ globalThis.__feedCacheHandlers = {
   },
   write: async (change) => {
     writes.push(change)
+    onWrite()
     if (failingWrites > 0) {
       failingWrites--
       throw new Error('Disk full')
@@ -25,7 +28,7 @@ globalThis.__feedCacheHandlers = {
     throw new Error('Disk full')
   },
   // Another window changed the cache after the read, before this one listened
-  onChange: listener => listener('upsert', {
+  onChange: listener => (remoteListener = listener)('upsert', {
     docs: [{ _id: 'rss:https://kept.example.test/feed', items: [], seen: ['newer'] }],
     removed: ['rss:https://gone.example.test/feed'],
   }),
@@ -111,4 +114,22 @@ test('a feed cache clear that failed leaves the windows their items', async () =
   await window.mirror.loaded
   await assert.rejects(clearFeedCache(), /Disk full/)
   assert.deepEqual(window.changes, [])
+})
+
+test('a feed cache change of another window does not replace a later write of the window', async () => {
+  writes.length = 0
+  const ours = { live: [{ id: 'ours' }] }
+  const window = createWindow('platform:', [['twitch:2', ours]])
+  await window.mirror.loaded
+  // The other window's write reached the datastore before this one
+  onWrite = () => remoteListener('upsert', { docs: [{ _id: 'platform:twitch:2', live: [{ id: 'theirs' }] }], removed: [] })
+  try {
+    assert.equal(await window.save(), true)
+  } finally {
+    onWrite = () => {}
+  }
+  assert.equal(window.state.get('twitch:2'), ours)
+  // And the window's state is what it wrote
+  assert.equal(await window.save(), true)
+  assert.equal(writes.length, 1)
 })
