@@ -426,8 +426,8 @@ export const tabMediaCoordinator = {
   }
 }
 
-globalThis.window?.ftElectron?.tabs?.onMediaSessionAction?.((action) => {
-  tabMediaCoordinator.dispatchAction(action)
+globalThis.window?.ftElectron?.tabs?.onMediaSessionAction?.((action, details) => {
+  tabMediaCoordinator.dispatchAction(action, details)
 })
 
 export default tabMediaCoordinator

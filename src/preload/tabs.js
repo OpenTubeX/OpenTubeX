@@ -304,11 +304,11 @@ export const tabs = {
 
   /**
    * Listen for media actions requested by native application menus.
-   * @param {(action: string) => void} handler
+   * @param {(action: string, details?: { seekOffset?: number }) => void} handler
    * @returns {() => void}
    */
   onMediaSessionAction: (handler) => {
-    const listener = (_event, action) => handler(action)
+    const listener = (_event, action, details) => handler(action, details)
     ipcRenderer.on(IpcChannels.TABS_REQUEST_MEDIA_SESSION_ACTION, listener)
     return () => ipcRenderer.removeListener(IpcChannels.TABS_REQUEST_MEDIA_SESSION_ACTION, listener)
   },

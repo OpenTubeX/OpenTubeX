@@ -213,6 +213,8 @@ function runApp() {
     play: 'Play',
     pause: 'Pause',
     next: 'Next',
+    rewind: 'Rewind 10 seconds',
+    forward: 'Forward 10 seconds',
     newWindow: 'New Window'
   }
 
@@ -244,12 +246,12 @@ function runApp() {
     return windowId === undefined ? getDockMediaSession() : dockMediaSessions.get(windowId) ?? null
   }
 
-  function requestDockMediaAction(action, windowId) {
+  function requestDockMediaAction(action, windowId, details) {
     const session = getMediaControlSession(windowId)
     if (!session || !session.actions.has(action)) {
       return
     }
-    session.manager.bridge.send(IpcChannels.TABS_REQUEST_MEDIA_SESSION_ACTION, action)
+    session.manager.bridge.send(IpcChannels.TABS_REQUEST_MEDIA_SESSION_ACTION, action, details)
   }
 
   const thumbarSignatures = new Map()
@@ -260,9 +262,25 @@ function runApp() {
     for (const [windowId, { manager, actions }] of dockMediaSessions) {
       const window = manager.browserWindow
       if (window.isDestroyed()) continue
-      const items = actions.has('play') || actions.has('pause')
-        ? createMediaMenuItems(name => getTrayMenuIcon(name, trayMenuIconPack), windowId)
-        : []
+      const iconFor = name => getTrayMenuIcon(name, trayMenuIconPack)
+      // Like the mobile mini player, skip 10 seconds instead of the player's seek interval.
+      const seekItem = (action, label, icon) => ({
+        label,
+        icon: iconFor(icon),
+        enabled: actions.has(action),
+        click: () => requestDockMediaAction(action, windowId, { seekOffset: 10 })
+      })
+      const items = []
+      if (actions.has('play') || actions.has('pause')) {
+        const [previous, toggle, next] = createMediaMenuItems(iconFor, windowId)
+        items.push(
+          previous,
+          seekItem('seekbackward', dockMediaLabels.rewind, 'rewind-10'),
+          toggle,
+          seekItem('seekforward', dockMediaLabels.forward, 'forward-10'),
+          next
+        )
+      }
       const signature = JSON.stringify([trayMenuIconPack, items.map(({ label, enabled }) => [label, enabled])])
       if (signature === thumbarSignatures.get(windowId)) continue
       if (items.length === 0 && !thumbarSignatures.has(windowId)) continue
@@ -3297,6 +3315,8 @@ function runApp() {
       play: t('Video.Player.Scroll Mini Player.Play'),
       pause: t('Video.Player.Scroll Mini Player.Pause'),
       next: t('Video.Next'),
+      rewind: t('Video.Player.Scroll Mini Player.Rewind 10 seconds'),
+      forward: t('Video.Player.Scroll Mini Player.Forward 10 seconds'),
       newWindow: t('New Window')
     }
     updateDockMenu()
