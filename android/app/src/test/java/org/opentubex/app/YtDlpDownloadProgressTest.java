@@ -76,6 +76,15 @@ public class YtDlpDownloadProgressTest {
         assertTrue(combined.getBoolean("live"));
         assertEquals(3, combined.getInt("playlistIndex"));
         assertEquals(5, combined.getDouble("recordedSeconds"), 0);
+
+        // An ended stream that is processing doesn't hide the stop button of one still recording
+        JSONObject ended = new JSONObject().put("status", "preparing").put("percent", 0);
+        YtDlpDownloads.updateProgress(ended, "__OPENTUBEX_PREPARING__:ddddddddddd\t1\t3\t\"Ended stream\"");
+        YtDlpDownloads.updateProgress(ended, "__OPENTUBEX_LIVE__:True");
+        YtDlpDownloads.updateProgress(ended, "__OPENTUBEX_PROCESSING__");
+        YtDlpDownloads.showProgress(combined, Arrays.asList(ended, part, live), null);
+        assertEquals("downloading", combined.getString("status"));
+        assertEquals(3, combined.getInt("playlistIndex"));
     }
 
     @Test public void roundedPercentageDoesNotFinishTheTransfer() throws Exception {

@@ -157,21 +157,31 @@ test('FFmpeg progress of a video that is not live leaves its status alone', () =
 })
 
 test('parts of a split playlist keep their own live state', () => {
-  const parts = [0, 1].map(() => ({ phase: 'preparing', percent: 0, speed: null, eta: null, done: false }))
-  const { status } = replay([
-    [0, '__OPENTUBEX_PREPARING__:aaaaaaaaaaa\t1\t2\t"Video"'],
+  const parts = [0, 1, 2].map(() => ({ phase: 'preparing', percent: 0, speed: null, eta: null, done: false }))
+  const { status, updates } = replay([
+    [0, '__OPENTUBEX_PREPARING__:aaaaaaaaaaa\t1\t3\t"Video"'],
     [0, '__OPENTUBEX_LIVE__:False'],
-    [1, '__OPENTUBEX_PREPARING__:bbbbbbbbbbb\t2\t2\t"Live stream"'],
+    [1, '__OPENTUBEX_PREPARING__:bbbbbbbbbbb\t2\t3\t"Live stream"'],
     [1, '__OPENTUBEX_LIVE__:True'],
+    [2, '__OPENTUBEX_PREPARING__:ccccccccccc\t3\t3\t"Another live stream"'],
+    [2, '__OPENTUBEX_LIVE__:True'],
     [1, 'out_time_us=5000000'],
     [1, 'progress=continue'],
+    [2, 'out_time_us=7000000'],
+    [2, 'progress=continue'],
+    [1, '__OPENTUBEX_PROCESSING__'],
     [0, '__OPENTUBEX_DOWNLOAD__:downloading\t40.0%\t1.00MiB/s\t00:10'],
   ], 'preparing', { parts })
-  // The row shows the live stream over the earlier video, so it cannot be paused
+  // Pausing is refused as soon as a live video is known, before FFmpeg reports progress
+  const firstLive = updates.find(update => update.live === true)
+  assert.equal(firstLive.status, 'preparing')
+  assert.equal(firstLive.playlistIndex, 2)
+  // The row shows the stream still recording over an earlier video and an ended stream,
+  // so it offers to stop it instead of pausing
   assert.equal(status.status, 'downloading')
   assert.equal(status.live, true)
-  assert.equal(status.playlistIndex, 2)
-  assert.equal(status.recordedSeconds, 5)
+  assert.equal(status.playlistIndex, 3)
+  assert.equal(status.recordedSeconds, 7)
   assert.equal(parts[0].live, false)
   assert.equal(parts[0].percent, 40)
 })

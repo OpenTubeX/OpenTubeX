@@ -523,6 +523,11 @@ final class YtDlpDownloads {
         return Integer.MAX_VALUE;
     }
 
+    /** 2: recording a live stream, 1: processing one, 0: a regular video */
+    private static int liveRank(JSONObject part) {
+        return !part.optBoolean("live") ? 0 : part.optString("status").equals("downloading") ? 2 : 1;
+    }
+
     /**
      * Shows the earliest video still in progress, with the speed of all parts. A live recording
      * comes first, so the row offers to stop it instead of pausing it.
@@ -533,9 +538,8 @@ final class YtDlpDownloads {
         for (JSONObject part : parts) {
             if (part.optBoolean("done")) continue;
             if (!part.isNull("speed")) speeds.add(part.optString("speed"));
-            boolean firstLive = part.optBoolean("live") && (shown == null || !shown.optBoolean("live"));
-            boolean sameKind = shown != null && part.optBoolean("live") == shown.optBoolean("live");
-            if (shown == null || firstLive || sameKind && partPosition(part, videoIds) < partPosition(shown, videoIds)) shown = part;
+            if (shown == null || liveRank(part) > liveRank(shown)
+                || liveRank(part) == liveRank(shown) && partPosition(part, videoIds) < partPosition(shown, videoIds)) shown = part;
         }
         if (shown == null) shown = parts.get(0);
         record.put("status", shown.optString("status", "preparing")).put("percent", shown.optDouble("percent", 0))

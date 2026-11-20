@@ -863,10 +863,13 @@ async function startYtDlpDownload(
 
   // The row shows the earliest video still in progress, with the speed of all processes.
   // A live recording comes first, so the row offers to stop it instead of pausing it.
+  // 2: recording a live stream, 1: processing one, 0: a regular video
+  /** @param {DownloadPart} part */
+  const liveRank = part => part.live !== true ? 0 : part.phase === 'downloading' ? 2 : 1
   function showProgress() {
     const unfinished = parts.filter(part => !part.done)
-    const recording = unfinished.filter(part => part.live === true)
-    const active = recording.length > 0 ? recording : unfinished
+    const topRank = Math.max(...unfinished.map(liveRank))
+    const active = unfinished.filter(part => liveRank(part) === topRank)
     const shown = active.reduce((earliest, part) => partPosition(part) < partPosition(earliest) ? part : earliest, active[0] ?? parts[0])
     if (status.status === 'paused' || status.status === 'pausing') {
       entry.resumeStatus = shown.phase
@@ -914,6 +917,9 @@ async function startYtDlpDownload(
     }
     if (line.startsWith(LIVE_PREFIX)) {
       part.live = line.slice(LIVE_PREFIX.length) === 'True'
+      // Pausing checks the row, which has to show a live video before it reports progress
+      showProgress()
+      sendStatus(true)
       return
     }
     const ffmpegProgress = FFMPEG_PROGRESS_REGEX.exec(line)
