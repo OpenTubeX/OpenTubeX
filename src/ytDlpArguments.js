@@ -145,7 +145,8 @@ export function playlistDownloadPartLimit(payload, args) {
     (argument.includes('=') ? argument.split('=')[1] : args[index + 1]) !== 'never')) return 1
   // Without an index in the file name, entries with the same title would write the same file.
   const outputTemplate = args[args.lastIndexOf('--output') + 1] ?? ''
-  if (!outputTemplate.includes('%(playlist_index)') && !outputTemplate.includes('%(autonumber)')) return 1
+  // `%%` is a literal percent sign, such as one in a local playlist's title.
+  if (!/(?<!%)(?:%%)*%\((?:playlist_index|autonumber)\)/.test(outputTemplate)) return 1
   const videoIds = Array.isArray(payload.videoIds) ? payload.videoIds : []
   if (videoIds.length > 0) return videoIds.length
   // The count is only a hint against starting processes that would find no entry.

@@ -109,6 +109,9 @@ test('playlists split into processes that keep playlist order and numbering', ()
     const payload = { ...remote, ...options }
     assert.equal(splitDownloadArguments(payload, buildYtDlpDownloadArguments(payload).args, 3).parts.length, 1)
   }
+  // A field name in a local playlist's title is literal text.
+  const literalIndex = { ...local, title: 'Mix %(autonumber)s', filenameTemplate: '{playlist}/{title}.{ext}' }
+  assert.equal(splitDownloadArguments(literalIndex, buildYtDlpDownloadArguments(literalIndex).args, 3).parts.length, 1)
   const neverConcatenated = { ...remote, customArgs: '--concat-playlist never' }
   assert.equal(splitDownloadArguments(neverConcatenated, buildYtDlpDownloadArguments(neverConcatenated).args, 3).parts.length, 2)
   const single = { videoId, mode: 'video' }
