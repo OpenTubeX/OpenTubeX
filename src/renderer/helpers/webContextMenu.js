@@ -7,7 +7,8 @@ import { truncateSelectionForLabel } from './selectionLabel'
 import { isShareableOpenTubeXRoute, transformOpenTubeXRouteUrl } from './share'
 import { copyToClipboard } from './utils'
 
-const TEXT_INPUT_TYPES = new Set(['text', 'search', 'url', 'email', 'tel', 'password', 'number'])
+// Email and number inputs hide their selection from scripts, so they keep the browser's menu
+const TEXT_INPUT_TYPES = new Set(['text', 'search', 'url', 'tel', 'password'])
 const TIMESTAMP_PATTERN = /(\d{1,2}:)*\d{1,2}:\d{2}/
 
 /**
@@ -30,6 +31,20 @@ function getSelectionText(editable) {
   }
 
   return window.getSelection()?.toString() ?? ''
+}
+
+/**
+ * Whatever identifies the editable's selection, to tell whether it changed
+ * @param {HTMLElement} editable
+ */
+function getSelectionState(editable) {
+  if (editable instanceof HTMLInputElement || editable instanceof HTMLTextAreaElement) {
+    return [editable.value, editable.selectionStart, editable.selectionEnd]
+  }
+
+  const selection = window.getSelection()
+  const range = selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null
+  return [editable.textContent, range?.startContainer, range?.startOffset, range?.endContainer, range?.endOffset]
 }
 
 /**
@@ -91,6 +106,7 @@ export function getWebContextMenuItems(target, { ignoreLinks = false } = {}) {
   const hasSelection = selectionText.length > 0
   const searchable = trimmedSelection.length <= SEARCH_CHAR_LIMIT
   const selectionLabel = truncateSelectionForLabel(trimmedSelection)
+  const selectionState = isEditable ? getSelectionState(editable) : []
 
   const items = [
     isInAppUrl && menuItem('Context Menu.Open in a New Tab', 'Open in a New Tab', () => openInNewTab(linkUrl)),
@@ -102,8 +118,9 @@ export function getWebContextMenuItems(target, { ignoreLinks = false } = {}) {
       }
     }),
     isEditable && menuItem('Cut', 'Cut', async () => {
-      // Skip the deletion if the selection changed while copying
-      if (await copyToClipboard(selectionText) && getSelectionText(editable) === selectionText) {
+      if (!await copyToClipboard(selectionText)) return
+      // Skip the deletion if the text or selection changed while copying
+      if (getSelectionState(editable).every((value, index) => value === selectionState[index])) {
         editable.focus()
         // Unlike changing the value, this keeps the undo history and fires input events
         document.execCommand('delete')
