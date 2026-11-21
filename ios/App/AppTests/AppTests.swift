@@ -3329,6 +3329,48 @@ final class AppTests: XCTestCase {
         try await wait("iosDirectoryResult === null")
     }
 
+    func testDownloadFolderPickerFieldTapAndDismissal() async throws {
+        try await openApplication()
+        let enabled = try await evaluate("testStore.getters.getEnableDownloads") as? Bool ?? false
+        let previousFolder = try await evaluate("testStore.getters.getYtDlpDownloadFolderPath") as? String ?? ""
+        addTeardownBlock { @MainActor [weak self] in
+            _ = try? await self?.webView.callAsyncJavaScript(
+                "await testStore.dispatch('updateYtDlpDownloadFolderPath', folder); await testStore.dispatch('updateEnableDownloads', enabled); await testStore.dispatch('hideSettingsWindow')",
+                arguments: ["folder": previousFolder, "enabled": enabled], in: nil, contentWorld: .page)
+        }
+        _ = try await webView.callAsyncJavaScript(
+            "await testStore.dispatch('updateYtDlpDownloadFolderPath', ''); await testStore.dispatch('updateEnableDownloads', true); await testStore.dispatch('showSettingsWindow')",
+            arguments: [:], in: nil, contentWorld: .page)
+        try await wait("!!document.querySelector('.settingsMenu button[data-section=download]')")
+        _ = try await evaluate("document.querySelector('.settingsMenu button[data-section=download]').click(); true")
+        try await wait("!!document.querySelector('.section[data-section=download] .ftPathPicker input')")
+
+        // Tapping the read-only Download Folder field itself must open the native picker.
+        let controller = try XCTUnwrap(webView.window?.rootViewController)
+        _ = try await evaluate("document.querySelector('.section[data-section=download] .ftPathPicker input').click(); true")
+        try await waitForNative { controller.presentedViewController != nil }
+        let firstPicker = try XCTUnwrap(controller.presentedViewController as? UIDocumentPickerViewController)
+        let presentationController = try XCTUnwrap(firstPicker.presentationController)
+        XCTAssertNotNil(presentationController.delegate)
+
+        // Interactive sheet dismissal must clear the pending picker call so reopening works.
+        try await dismiss(firstPicker)
+        presentationController.delegate?.presentationControllerDidDismiss?(presentationController)
+
+        _ = try await evaluate("document.querySelector('.section[data-section=download] .ftPathPicker input').click(); true")
+        try await waitForNative { controller.presentedViewController != nil }
+        let secondPicker = try XCTUnwrap(controller.presentedViewController as? UIDocumentPickerViewController)
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent("DownloadFolder-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        secondPicker.delegate?.documentPicker?(secondPicker, didPickDocumentsAt: [folder])
+        try await dismiss(secondPicker)
+
+        try await wait("document.querySelector('.section[data-section=download] .ftPathPicker input')?.value === '\(folder.lastPathComponent)'")
+        let saved = try await evaluate("testStore.getters.getYtDlpDownloadFolderPath") as? String ?? ""
+        XCTAssertTrue(saved.contains(folder.lastPathComponent))
+    }
+
     func testSharePresentationAndCancellation() async throws {
         try await openApplication()
         _ = try await evaluate("window.iosShareResult = 'pending'; Capacitor.Plugins.Share.share({title: 'OpenTubeX test', text: 'Native share test', url: 'https://www.youtube.com/watch?v=jNQXAC9IVRw'}).then(() => iosShareResult = 'shared').catch(error => iosShareResult = error.message); true")

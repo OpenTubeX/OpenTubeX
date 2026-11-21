@@ -394,7 +394,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['blur', 'change', 'clear', 'click', 'focus', 'input', 'keydown', 'remove'])
+const emit = defineEmits(['blur', 'change', 'clear', 'click', 'focus', 'input', 'input-click', 'keydown', 'remove'])
 
 const id = useId()
 // Rounded fields are compact search and filter fields, so they show their
@@ -641,11 +641,12 @@ function handleClick(event, dataListIndex = getDataListIndex(searchState.keyboar
   emit('click', query, { event, dataListIndex, dataListProperty })
 }
 
-function handleNativeClick() {
+function handleNativeClick(event) {
   if (props.selectOnClick) {
     inputRef.value?.focus()
     inputRef.value?.select()
   }
+  emit('input-click', event)
 }
 
 /**
