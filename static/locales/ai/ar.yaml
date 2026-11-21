@@ -1373,6 +1373,7 @@ Settings:
     Hide Header Sync Indicator: إخفاء مؤشر المزامنة في ترويسة التطبيق
     Hide Repeat Stats: إخفاء إحصاءات التكرار
     Hide Playlist Stats: إخفاء إحصاءات قائمة التشغيل
+    Hide Recommendation Details: إخفاء أسباب التوصيات والملاحظات
     Sections:
       Digital Wellbeing: "الرفاهية الرقمية"
       Visible While Paused: مرئي أثناء الإيقاف المؤقت في نافذة كاملة/شاشة كاملة

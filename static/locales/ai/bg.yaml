@@ -1367,6 +1367,7 @@ Settings:
     Hide Header Sync Indicator: Скриване на индикатора за синхронизиране в заглавната лента на приложението
     Hide Repeat Stats: Скриване на статистиката на повторенията
     Hide Playlist Stats: Скриване на статистиката на плейлиста
+    Hide Recommendation Details: Скриване на причините за препоръките и обратната връзка
     Sections:
       Digital Wellbeing: "Дигитално благополучие"
       Visible While Paused: Видими при поставяне на пауза в режим на цял прозорец / цял екран

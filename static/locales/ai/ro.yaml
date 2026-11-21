@@ -1364,6 +1364,7 @@ Settings:
     Hide Header Sync Indicator: Ascunde indicatorul de sincronizare din antetul aplicației
     Hide Repeat Stats: Ascunde statisticile de repetare
     Hide Playlist Stats: Ascunde statisticile listei de redare
+    Hide Recommendation Details: Ascunde motivele recomandărilor și feedbackul
     Sections:
       Digital Wellbeing: "Bunăstare digitală"
       Visible While Paused: Vizibile în pauză în fereastră completă / pe ecran complet

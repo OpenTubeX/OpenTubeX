@@ -1560,6 +1560,7 @@ Settings:
     Hide Header Sync Indicator: 앱 헤더의 동기화 표시기 숨기기
     Hide Repeat Stats: 반복 통계 숨기기
     Hide Playlist Stats: 재생목록 통계 숨기기
+    Hide Recommendation Details: 추천 이유 및 피드백 숨기기
     Sections:
       Digital Wellbeing: "디지털 웰빙"
       Side Bar: 사이드바

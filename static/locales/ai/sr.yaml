@@ -1385,6 +1385,7 @@ Settings:
     Hide Header Sync Indicator: Сакриј показатељ синхронизације у заглављу апликације
     Hide Repeat Stats: Сакриј статистику понављања
     Hide Playlist Stats: Сакриј статистику плејлисте
+    Hide Recommendation Details: Сакриј разлоге препорука и повратне информације
     Sections:
       Digital Wellbeing: "Дигитално благостање"
       Visible While Paused: Видљиво током паузе у целом прозору / преко целог екрана

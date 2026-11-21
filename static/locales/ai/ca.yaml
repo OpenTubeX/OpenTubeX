@@ -1633,6 +1633,7 @@ Settings:
     Hide Header Sync Indicator: Amaga l’indicador de sincronització de la capçalera de l’aplicació
     Hide Repeat Stats: Amaga les estadístiques de repetició
     Hide Playlist Stats: Amaga les estadístiques de la llista de reproducció
+    Hide Recommendation Details: Amaga els motius de les recomanacions i les valoracions
     Sections:
       Digital Wellbeing: "Benestar digital"
       Side Bar: Barra lateral

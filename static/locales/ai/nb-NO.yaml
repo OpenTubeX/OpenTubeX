@@ -1362,6 +1362,7 @@ Settings:
     Hide Header Sync Indicator: Skjul synkroniseringsindikatoren i apphodet
     Hide Repeat Stats: Skjul gjentakelsesstatistikk
     Hide Playlist Stats: Skjul spillelistestatistikk
+    Hide Recommendation Details: Skjul årsaker til anbefalinger og tilbakemeldinger
     Sections:
       Digital Wellbeing: "Digital velvære"
       Visible While Paused: Synlig ved pause i fullt vindu / fullskjerm

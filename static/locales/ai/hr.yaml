@@ -1367,6 +1367,7 @@ Settings:
     Hide Header Sync Indicator: Sakrij pokazatelj sinkronizacije u zaglavlju aplikacije
     Hide Repeat Stats: Sakrij statistiku ponavljanja
     Hide Playlist Stats: Sakrij statistiku popisa za reprodukciju
+    Hide Recommendation Details: Sakrij razloge preporuka i povratne informacije
     Sections:
       Digital Wellbeing: "Digitalna dobrobit"
       Visible While Paused: Vidljivo tijekom pauze u punom prozoru / preko cijelog zaslona

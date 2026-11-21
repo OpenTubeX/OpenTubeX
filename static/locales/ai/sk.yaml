@@ -1362,6 +1362,7 @@ Settings:
     Hide Header Sync Indicator: Skryť indikátor synchronizácie v hlavičke aplikácie
     Hide Repeat Stats: Skryť štatistiky opakovania
     Hide Playlist Stats: Skryť štatistiky playlistu
+    Hide Recommendation Details: Skryť dôvody odporúčaní a spätnú väzbu
     Sections:
       Digital Wellbeing: "Digitálna pohoda"
       Visible While Paused: Viditeľné počas pozastavenia v režime celého okna alebo celej obrazovky

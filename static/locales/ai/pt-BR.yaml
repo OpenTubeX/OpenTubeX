@@ -1315,6 +1315,7 @@ Settings:
     Hide Header Sync Indicator: Ocultar indicador de sincronização no cabeçalho do aplicativo
     Hide Repeat Stats: Ocultar estatísticas de repetição
     Hide Playlist Stats: Ocultar estatísticas da playlist
+    Hide Recommendation Details: Ocultar motivos das recomendações e feedback
     Sections:
       Digital Wellbeing: "Bem-estar digital"
       Visible While Paused: Visível durante a pausa em tela cheia ou tela cheia

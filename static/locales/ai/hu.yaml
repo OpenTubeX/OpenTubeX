@@ -1362,6 +1362,7 @@ Settings:
     Hide Header Sync Indicator: Alkalmazásfejléc szinkronizálási jelzőjének elrejtése
     Hide Repeat Stats: Ismétlési statisztikák elrejtése
     Hide Playlist Stats: Lejátszási lista statisztikáinak elrejtése
+    Hide Recommendation Details: Ajánlási okok és visszajelzés elrejtése
     Sections:
       Digital Wellbeing: "Digitális jóllét"
       Visible While Paused: Szüneteltetéskor látható teljes ablakos vagy teljes képernyős módban
