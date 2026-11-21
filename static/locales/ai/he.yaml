@@ -627,6 +627,8 @@ Settings:
       Auto: אוטומטי
     Preferred API Backend:
       Yattee Server: שרת Yattee
+      Local API Extension Required: אפליקציית הרשת יכולה להשתמש ב־API המקומי רק עם תוסף הדפדפן OpenTubeX Local API.
+      Install Local API Extension: התקנת התוסף
     Yattee Server:
       Server URL: כתובת שרת Yattee
       Username: שם משתמש

@@ -622,6 +622,8 @@ Settings:
       Auto: Αυτόματα
     Preferred API Backend:
       Yattee Server: Διακομιστής Yattee
+      Local API Extension Required: Η εφαρμογή ιστού μπορεί να χρησιμοποιήσει το τοπικό API μόνο με την επέκταση προγράμματος περιήγησης OpenTubeX Local API.
+      Install Local API Extension: Εγκατάσταση της επέκτασης
     Yattee Server:
       Server URL: URL διακομιστή Yattee
       Username: Όνομα χρήστη

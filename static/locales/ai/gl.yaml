@@ -627,6 +627,8 @@ Settings:
       Auto: Automático
     Preferred API Backend:
       Yattee Server: Servidor Yattee
+      Local API Extension Required: A aplicación web só pode usar a API local coa extensión de navegador OpenTubeX Local API.
+      Install Local API Extension: Instalar a extensión
     Yattee Server:
       Server URL: URL do servidor Yattee
       Username: Nome de usuario

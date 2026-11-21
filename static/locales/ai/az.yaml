@@ -624,6 +624,8 @@ Settings:
       Auto: Avtomatik
     Preferred API Backend:
       Yattee Server: Yattee Serveri
+      Local API Extension Required: Veb tətbiqi yerli API-dən yalnız OpenTubeX Local API brauzer genişləndirməsi ilə istifadə edə bilər.
+      Install Local API Extension: Genişləndirməni quraşdır
     Yattee Server:
       Server URL: Yattee server URL-i
       Username: İstifadəçi adı

@@ -625,6 +625,8 @@ Settings:
       Auto: Automatski
     Preferred API Backend:
       Yattee Server: Yattee poslužitelj
+      Local API Extension Required: Web-aplikacija može koristiti lokalni API samo s proširenjem preglednika OpenTubeX Local API.
+      Install Local API Extension: Instaliraj proširenje
     Yattee Server:
       Server URL: URL Yattee poslužitelja
       Username: Korisničko ime

@@ -622,6 +622,8 @@ Settings:
       Auto: Automaatne
     Preferred API Backend:
       Yattee Server: Yattee server
+      Local API Extension Required: Veebirakendus saab kohalikku API-t kasutada ainult brauserilaiendiga OpenTubeX Local API.
+      Install Local API Extension: Paigalda laiendus
     Yattee Server:
       Server URL: Yattee serveri URL
       Username: Kasutajanimi

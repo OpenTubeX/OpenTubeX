@@ -622,6 +622,8 @@ Settings:
       Auto: Automatikus
     Preferred API Backend:
       Yattee Server: Yattee-kiszolgáló
+      Local API Extension Required: A webalkalmazás csak az OpenTubeX Local API böngészőbővítménnyel tudja használni a helyi API-t.
+      Install Local API Extension: Bővítmény telepítése
     Yattee Server:
       Server URL: Yattee-kiszolgáló URL-je
       Username: Felhasználónév

@@ -645,6 +645,8 @@ Settings:
       Local API: Lokale API
       Invidious API: Invidious-API
       Yattee Server: "Yattee-Server"
+      Local API Extension Required: Die Web-App kann die lokale API nur mit der Browsererweiterung „OpenTubeX Lokale API“ nutzen.
+      Install Local API Extension: Erweiterung installieren
     Video View Type:
       Video View Type: Videoübersicht
       Grid: Raster

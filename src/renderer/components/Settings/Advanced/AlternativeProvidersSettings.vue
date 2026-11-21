@@ -104,6 +104,15 @@
         @change="store.dispatch('updatePreferredVideoCodec', $event)"
       />
     </div>
+    <p
+      v-if="SHOW_LOCAL_API_EXTENSION_HINT"
+      class="center"
+    >
+      {{ t('Settings.General Settings.Preferred API Backend.Local API Extension Required') }}
+      <a href="https://github.com/OpenTubeX/OpenTubeX/tree/development/browser-extension#install">
+        {{ t('Settings.General Settings.Preferred API Backend.Install Local API Extension') }}
+      </a>
+    </p>
     <!-- Servers with their own Invidious server always use it -->
     <div v-if="!SELF_HOSTED_INVIDIOUS && usesInvidiousInstance(backendPreference, backendFallback)">
       <FtFlexBox class="settingsFlexStart460px">
@@ -260,6 +269,8 @@ const IS_IOS = !!process.env.IS_IOS
 const IS_CAPACITOR = !!process.env.IS_CAPACITOR
 const SUPPORTS_LOCAL_API = !!process.env.SUPPORTS_LOCAL_API
 const SELF_HOSTED_INVIDIOUS = !!process.env.SELF_HOSTED_INVIDIOUS
+// The web app only gets the local API from its browser extension
+const SHOW_LOCAL_API_EXTENSION_HINT = !process.env.IS_ELECTRON && !IS_CAPACITOR && !SUPPORTS_LOCAL_API
 const PLAYBACK_ENGINE_VALUES = ['built-in', 'yt-dlp']
 const BUILT_IN_STREAMS_VALUES = ['auto', 'sabr']
 

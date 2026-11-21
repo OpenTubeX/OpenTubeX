@@ -622,6 +622,8 @@ Settings:
       Auto: Automatikoa
     Preferred API Backend:
       Yattee Server: Yattee zerbitzaria
+      Local API Extension Required: Web-aplikazioak OpenTubeX Local API nabigatzailearen luzapenarekin soilik erabil dezake API lokala.
+      Install Local API Extension: Instalatu luzapena
     Yattee Server:
       Server URL: Yattee zerbitzariaren URLa
       Username: Erabiltzaile-izena

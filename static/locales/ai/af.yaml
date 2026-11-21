@@ -777,6 +777,8 @@ Settings:
       Entire App: Hele toep
     Preferred API Backend:
       Yattee Server: Yattee-bediener
+      Local API Extension Required: Die webtoep kan die plaaslike API slegs met die OpenTubeX Local API-blaaieruitbreiding gebruik.
+      Install Local API Extension: Installeer die uitbreiding
     Video View Type:
       Full Width: Volle breedte
     Playlist View Type:

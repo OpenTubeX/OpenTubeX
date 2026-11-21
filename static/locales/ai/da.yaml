@@ -634,6 +634,8 @@ Settings:
       Auto: Automatisk
     Preferred API Backend:
       Yattee Server: Yattee-server
+      Local API Extension Required: Webappen kan kun bruge den lokale API med browserudvidelsen OpenTubeX Local API.
+      Install Local API Extension: Installer udvidelsen
     Yattee Server:
       Server URL: URL til Yattee-serveren
       Username: Brugernavn

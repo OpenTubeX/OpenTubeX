@@ -646,6 +646,8 @@ Settings:
       Auto: خودکار
     Preferred API Backend:
       Yattee Server: سرور Yattee
+      Local API Extension Required: برنامه وب فقط با افزونه مرورگر OpenTubeX Local API می‌تواند از API محلی استفاده کند.
+      Install Local API Extension: نصب افزونه
     Yattee Server:
       Server URL: نشانی سرور Yattee
       Username: نام کاربری
