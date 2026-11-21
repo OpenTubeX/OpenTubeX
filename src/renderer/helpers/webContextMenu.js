@@ -92,6 +92,9 @@ function createExternalSearchItem(selection) {
  *   commands to menus that provide their own
  */
 export function getWebContextMenuItems(target, { ignoreLinks = false } = {}) {
+  // Without a secure connection, only the browser's menu can use the clipboard
+  if (!window.isSecureContext) return []
+
   const appUrl = window.location.href.split('#')[0]
   const editable = getEditable(target)
   const isEditable = editable !== null && !editable.matches(':disabled, [readonly]')
