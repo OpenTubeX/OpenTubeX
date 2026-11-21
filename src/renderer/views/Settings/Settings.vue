@@ -2056,6 +2056,12 @@ function stopResizing(event) {
   window.removeEventListener('pointerup', stopResizing)
   window.removeEventListener('pointercancel', stopResizing)
   scheduleBoundsSave()
+  if (pendingContentScrollTop !== null && protectedSettingsVisible.value && settingsContentRef.value) {
+    restoreOverlayScrollTop(settingsContentRef.value, pendingContentScrollTop)
+    if (settingsContentRef.value.scrollTop >= pendingContentScrollTop - 1) {
+      clearPendingContentScrollTop()
+    }
+  }
   clampWindowContentScroll()
   clampProfileManagerScroll()
 }
