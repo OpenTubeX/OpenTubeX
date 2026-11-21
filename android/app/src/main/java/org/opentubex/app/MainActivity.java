@@ -6,6 +6,7 @@ import android.content.res.Configuration;
 import android.hardware.input.InputManager;
 import android.os.Bundle;
 import android.os.Build;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -38,6 +39,7 @@ public class MainActivity extends BridgeActivity {
     private int fullscreenCoverRequest;
     private boolean transientSystemBars;
     private StatusBarSwipeFilter statusBarSwipeFilter;
+    private AppLock appLock;
     private final InputManager.InputDeviceListener inputDeviceListener =
         new InputManager.InputDeviceListener() {
             @Override
@@ -74,6 +76,7 @@ public class MainActivity extends BridgeActivity {
         // never comes. Tunnels that kept streaming, such as background playback, stay.
         if (hiddenAt != null) AndroidProxy.closeStaleTunnels(hiddenAt);
         super.onStart();
+        appLock.onStart();
         AppVisibility.setVisible(true);
         SubscriptionRefreshWorker.onAppVisibilityChanged(this);
         BackgroundSync.onAppVisibilityChanged(this);
@@ -82,6 +85,7 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onStop() {
         hiddenAt = AndroidProxyRelay.clock.getAsLong();
+        appLock.onStop();
         AppVisibility.setVisible(false);
         SubscriptionRefreshWorker.onAppVisibilityChanged(this);
         BackgroundSync.onAppVisibilityChanged(this);
@@ -117,6 +121,7 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(VoiceOverHttpPlugin.class);
         registerPlugin(AndroidSharePlugin.class);
         registerPlugin(HomeWidgetsPlugin.class);
+        registerPlugin(AppLockPlugin.class);
         // Android recreates an activity with the intent that first opened it, and
         // Capacitor passes that intent to onNewIntent on every create. Handle a
         // share or notification when it arrives, not again when the app comes
@@ -169,6 +174,12 @@ public class MainActivity extends BridgeActivity {
         OpenTubeXNotificationChannels.createAll(this);
         inputManager = (InputManager) getSystemService(INPUT_SERVICE);
         inputManager.registerInputDeviceListener(inputDeviceListener, null);
+        appLock = new AppLock(this);
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        return (appLock != null && appLock.interceptKeyEvent(event)) || super.dispatchKeyEvent(event);
     }
 
     @Override
@@ -222,6 +233,7 @@ public class MainActivity extends BridgeActivity {
         Configuration newConfig
     ) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
+        appLock.onPictureInPictureModeChanged(isInPictureInPictureMode);
         notifyPictureInPictureState(isInPictureInPictureMode, newConfig);
     }
 
@@ -246,6 +258,7 @@ public class MainActivity extends BridgeActivity {
         // screen. Reconcile both layers with the Activity's current state.
         notifyPictureInPictureState(isInPictureInPictureMode(), getResources().getConfiguration());
         LauncherActivity.finishReturn();
+        appLock.onResume();
     }
 
     private void notifyPictureInPictureState(boolean active, Configuration config) {

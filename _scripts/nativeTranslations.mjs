@@ -42,3 +42,10 @@ export const homeWidgetStrings = {
   widget_recent_downloads_description: 'Recent Downloads Description',
   widget_recent_downloads_empty: 'Recent Downloads Empty'
 }
+
+// Android resource names mapped to their keys under "App Lock".
+export const appLockStrings = {
+  app_lock_locked: 'Locked',
+  app_lock_unlock: 'Unlock',
+  app_lock_prompt_title: 'Prompt Title'
+}
