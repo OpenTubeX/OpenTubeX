@@ -691,7 +691,8 @@ function suppressFeedTabHoldClick(event) {
 }
 
 function handleFeedContextMenu(event) {
-  if (!process.env.IS_CAPACITOR && event.pointerType !== 'touch') return
+  // Electron opens the feed tab menu in the main process, and Shift keeps the browser's menu
+  if ((isElectron || event.shiftKey) && event.pointerType !== 'touch') return
   const tab = event.target.closest(FEED_TAB_SELECTOR)
   if (!tab) return
 
@@ -740,6 +741,12 @@ function handleFeedContextMenu(event) {
       icon: ['fas', 'check'],
       run: () => handleFeedMarkSeenRequest({ tabId, feedTab })
     })
+  }
+  if (!process.env.IS_CAPACITOR && event.pointerType !== 'touch') {
+    window.dispatchEvent(new CustomEvent('opentubex:context-menu', {
+      detail: { x: event.clientX, y: event.clientY, items: ref(actions.map(action => ({ enabled: true, ...action }))) }
+    }))
+    return
   }
   openMobileContextActions({ title: tab.textContent.trim(), actions })
 }
